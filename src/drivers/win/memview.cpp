@@ -1013,7 +1013,7 @@ void InputData(char *input){
 				break;
 			case MODE_NES_FILE:
 				// ROM
-				ApplyPatch(addr, datasize, data);
+				ApplyPatch(addr, 1, &data[i]);
 				break;
 		}
 	}

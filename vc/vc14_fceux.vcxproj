@@ -454,6 +454,7 @@
     <ClCompile Include="..\src\boards\ac-08.cpp" />
     <ClCompile Include="..\src\boards\bb.cpp" />
     <ClCompile Include="..\src\boards\BMW8544.cpp" />
+    <ClCompile Include="..\src\boards\bs4xxxr.cpp" />
     <ClCompile Include="..\src\boards\cheapocabra.cpp" />
     <ClCompile Include="..\src\boards\cityfighter.cpp" />
     <ClCompile Include="..\src\boards\coolboy.cpp" />
@@ -710,6 +711,7 @@
     <ClCompile Include="..\src\input\toprider.cpp" />
     <ClCompile Include="..\src\input\virtualboy.cpp" />
     <ClCompile Include="..\src\input\zapper.cpp" />
+    <ClCompile Include="..\src\input\lcdcompzapper.cpp" />
     <ClCompile Include="..\src\boards\emu2413.c" />
     <ClCompile Include="..\src\utils\ConvertUTF.c" />
     <ClCompile Include="..\src\utils\crc32.cpp" />

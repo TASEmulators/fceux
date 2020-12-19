@@ -7,8 +7,8 @@ uname -a
 sw_vers
 
 FCEUX_VERSION_MAJOR=2
-FCEUX_VERSION_MINOR=2
-FCEUX_VERSION_PATCH=3
+FCEUX_VERSION_MINOR=3
+FCEUX_VERSION_PATCH=0
 
 SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
 
@@ -43,7 +43,6 @@ brew  install  minizip
 
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:
 
-#QMAKE=`find /usr/local -name qmake`;
 QT_CMAKE=`find /usr/local -name Qt5Config.cmake`
 echo $QT_CMAKE;
 export Qt5_DIR=`dirname $QT_CMAKE`;
@@ -54,11 +53,11 @@ echo '***  Building Project  ***'
 echo '**************************'
 mkdir build;
 cd build;
-#$QMAKE ..
 cmake \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
 	-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+   -DCMAKE_PREFIX_PATH=`brew --prefix qt5` \
    -DCMAKE_PROJECT_VERSION_MAJOR=$FCEUX_VERSION_MAJOR \
    -DCMAKE_PROJECT_VERSION_MINOR=$FCEUX_VERSION_MINOR \
    -DCMAKE_PROJECT_VERSION_PATCH=$FCEUX_VERSION_PATCH \

@@ -15,6 +15,10 @@
 #include <QGridLayout>
 #include <QRadioButton>
 #include <QInputDialog>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
+#include <QGuiApplication>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -50,9 +54,11 @@ debuggerBookmarkManager_t dbgBmMgr;
 static std::list <ConsoleDebugger*> dbgWinList;
 
 static void DeleteBreak(int sel);
+static bool waitingAtBp = false;
+static int  lastBpIdx   = 0;
 //----------------------------------------------------------------------------
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QHBoxLayout *mainLayout;
 	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3, *vbox4;
@@ -61,9 +67,14 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QPushButton *button;
 	QFrame      *frame;
 	QLabel      *lbl;
+	QMenuBar    *menuBar;
+	QMenu       *debugMenu, *optMenu, *subMenu;
+	QActionGroup *actGroup;
+	QAction     *act;
 	float fontCharWidth;
 	QTreeWidgetItem * item;
-	int opt;
+	int opt, useNativeMenuBar;
+	fceuDecIntValidtor *validator;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -75,8 +86,147 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	setWindowTitle("6502 Debugger");
 
 	//resize( 512, 512 );
+	
+	menuBar = new QMenuBar(this);
 
+   // This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// Debug
+   debugMenu = menuBar->addMenu(tr("Debug"));
+
+	// Debug -> Run
+	act = new QAction(tr("Run"), this);
+   act->setShortcut(QKeySequence( tr("F5") ) );
+   act->setStatusTip(tr("Run"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugRunCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Step Into
+	act = new QAction(tr("Step Into"), this);
+   act->setShortcut(QKeySequence( tr("F11") ) );
+   act->setStatusTip(tr("Step Into"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Step Out
+	act = new QAction(tr("Step Out"), this);
+   act->setShortcut(QKeySequence( tr("Shift+F11") ) );
+   act->setStatusTip(tr("Step Out"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugStepOutCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Step Over
+	act = new QAction(tr("Step Over"), this);
+   act->setShortcut(QKeySequence( tr("F10") ) );
+   act->setStatusTip(tr("Step Over"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Run to Selected Line
+	act = new QAction(tr("Run to Selected Line"), this);
+   act->setShortcut(QKeySequence( tr("F1") ) );
+   act->setStatusTip(tr("Run to Selected Line"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugRunToCursorCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Run Line
+	act = new QAction(tr("Run Line"), this);
+   act->setShortcut(QKeySequence( tr("F6") ) );
+   act->setStatusTip(tr("Run Line"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Debug -> Run 128 Lines
+	act = new QAction(tr("Run 128 Lines"), this);
+   act->setShortcut(QKeySequence( tr("F7") ) );
+   act->setStatusTip(tr("Run 128 Lines"));
+   connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
+
+   debugMenu->addAction(act);
+
+	// Options
+   optMenu = menuBar->addMenu(tr("Options"));
+
+	// Options -> PC Position
+	subMenu  = optMenu->addMenu(tr("PC Line Positioning"));
+	actGroup = new QActionGroup(this);
+
+	actGroup->setExclusive(true);
+
+	g_config->getOption( "SDL.DebuggerPCPlacement", &opt );
+
+	// Options -> PC Position -> Top Line
+	act = new QAction(tr("Top Line"), this);
+   act->setStatusTip(tr("Top Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 0 );
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceTop(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// Options -> PC Position -> Upper Mid-Line
+	act = new QAction(tr("Upper Mid-Line"), this);
+   act->setStatusTip(tr("Upper Mid-Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 1 );
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceUpperMid(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// Options -> PC Position -> Center Line
+	act = new QAction(tr("Center Line"), this);
+   act->setStatusTip(tr("Center Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 2 );
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCenter(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// Options -> PC Position -> Lower Mid-Line
+	act = new QAction(tr("Lower Mid-Line"), this);
+   act->setStatusTip(tr("Lower Mid-Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 3 );
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceLowerMid(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// Options -> PC Position -> Bottom
+	act = new QAction(tr("Bottom Line"), this);
+   act->setStatusTip(tr("Bottom Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 4 );
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceBottom(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// Options -> PC Position -> Custom Line 
+	act = new QAction(tr("Custom Line Offset"), this);
+   act->setStatusTip(tr("Custom Line Offset"));
+	act->setChecked( opt == 5 );
+	act->setCheckable(true);
+   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCustom(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
 	mainLayout = new QHBoxLayout();
+
+	mainLayout->setMenuBar( menuBar );
 
 	vbox4      = new QVBoxLayout();
 	grid       = new QGridLayout();
@@ -85,6 +235,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	hbar       = new QScrollBar( Qt::Horizontal, this );
 	asmLineSelLbl = new QLabel( tr("Line Select") );
 	emuStatLbl    = new QLabel( tr("Emulator is Running") );
+
+	asmLineSelLbl->setWordWrap( true );
 
    asmView->setScrollBars( hbar, vbar );
 
@@ -203,15 +355,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox2->addLayout( hbox );
 
 	stackFrame = new QGroupBox(tr("Stack $0100"));
-	stackText  = new QPlainTextEdit(this);
+	stackText  = new DebuggerStackDisplay(this);
 	hbox       = new QHBoxLayout();
 	hbox->addWidget( stackText );
 	vbox2->addWidget( stackFrame );
 	stackFrame->setLayout( hbox );
 	stackText->setFont(font);
 	stackText->setReadOnly(true);
-	stackText->setWordWrapMode( QTextOption::WordWrap );
-	stackText->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+	stackText->setWordWrapMode( QTextOption::NoWrap );
+	//stackText->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
 	//stackText->setMaximumWidth( 16 * fontCharWidth );
 
 	bpFrame = new QGroupBox(tr("Breakpoints"));
@@ -338,18 +490,22 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	hbox->addWidget( instrExdVal, 1, Qt::AlignLeft );
 	hbox2->addLayout( vbox );
 
+	validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
 	cpuCycExdVal->setFont( font );
 	cpuCycExdVal->setMaxLength( 16 );
-	cpuCycExdVal->setInputMask( ">9000000000000000;" );
+	cpuCycExdVal->setValidator( validator );
 	cpuCycExdVal->setAlignment(Qt::AlignLeft);
 	cpuCycExdVal->setMaximumWidth( 18 * fontCharWidth );
+   cpuCycExdVal->setCursorPosition(0);
 	connect( cpuCycExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(cpuCycleThresChanged(const QString &)));
 
+	validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
 	instrExdVal->setFont( font );
 	instrExdVal->setMaxLength( 16 );
-	instrExdVal->setInputMask( ">9000000000000000;" );
+	instrExdVal->setValidator( validator );
 	instrExdVal->setAlignment(Qt::AlignLeft);
 	instrExdVal->setMaximumWidth( 18 * fontCharWidth );
+   instrExdVal->setCursorPosition(0);
 	connect( instrExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(instructionsThresChanged(const QString &)));
 
 	brkCpuCycExd->setChecked( break_on_cycles );
@@ -425,8 +581,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox->addWidget( regNamChkBox );
 
 	symDbgChkBox->setChecked(true);
-	//regNamChkBox->setChecked(true);
-	regNamChkBox->setEnabled(false); // TODO
+	regNamChkBox->setChecked(true);
 
    connect( romOfsChkBox, SIGNAL(stateChanged(int)), this, SLOT(displayROMoffsetCB(int)) );
    connect( symDbgChkBox, SIGNAL(stateChanged(int)), this, SLOT(symbolDebugEnableCB(int)) );
@@ -698,6 +853,8 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
    connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
    connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
 
+	okButton->setDefault(true);
+
 	if ( wp != NULL )
 	{
 		char stmp[256];
@@ -943,6 +1100,8 @@ void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
    connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
 
+	okButton->setDefault(true);
+
 	if ( sym != NULL )
 	{
 		nameEntry->setText( tr(sym->name.c_str()) );
@@ -955,6 +1114,7 @@ void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 
 	if ( ret == QDialog::Accepted )
 	{
+		fceuWrapperLock();
 		if ( sym == NULL )
 		{
 			sym = new debugSymbol_t();
@@ -969,7 +1129,7 @@ void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 			sym->name    = nameEntry->text().toStdString();
 			sym->comment = commentEntry->text().toStdString();
 		}
-		fceuWrapperLock();
+		sym->trimTrailingSpaces();
 		asmView->updateAssemblyView();
 		fceuWrapperUnLock();
 	}
@@ -1424,9 +1584,62 @@ void ConsoleDebugger::debFileAutoLoadCB( int value )
 //----------------------------------------------------------------------------
 void ConsoleDebugger::reloadSymbolsCB(void)
 {
+	fceuWrapperLock();
 	debugSymbolTable.loadGameSymbols();
 
 	asmView->updateAssemblyView();
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceTop(void)
+{
+	asmView->setPC_placement( 0 );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceUpperMid(void)
+{
+	asmView->setPC_placement( 1 );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceCenter(void)
+{
+	asmView->setPC_placement( 2 );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceLowerMid(void)
+{
+	asmView->setPC_placement( 3 );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceBottom(void)
+{
+	asmView->setPC_placement( 4 );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::pcSetPlaceCustom(void)
+{
+	int ret, ofs;
+	QInputDialog dialog(this);
+
+	g_config->getOption("SDL.DebuggerPCLineOffset" , &ofs );
+
+   dialog.setWindowTitle( tr("PC Line Offset") );
+   dialog.setLabelText( tr("Enter a line offset from 0 to 100.") );
+   dialog.setOkButtonText( tr("Ok") );
+   dialog.setInputMode( QInputDialog::IntInput );
+   dialog.setIntRange( 0, 100 );
+   dialog.setIntValue( ofs );
+
+   dialog.show();
+   ret = dialog.exec();
+
+   if ( QDialog::Accepted == ret )
+   {
+      ofs = dialog.intValue();
+
+		asmView->setPC_placement( 5, ofs );
+   }
+
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunCB(void)
@@ -1507,6 +1720,11 @@ void ConsoleDebugger::debugStepOverCB(void)
 	}
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::debugRunToCursorCB(void)
+{
+	asmView->setBreakpointAtSelectedLine();
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunLineCB(void)
 {
 	if (FCEUI_EmulationPaused())
@@ -1580,6 +1798,16 @@ void ConsoleDebugger::resetCountersCB (void)
 	updateRegisterView();
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::asmViewCtxMenuRunToCursor(void)
+{
+	fceuWrapperLock();
+	watchpoint[64].address = asmView->getCtxMenuAddr();
+	watchpoint[64].flags   = WP_E|WP_X;
+
+	FCEUI_SetEmulationPaused(0);
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 {
 	watchpointinfo wp;
@@ -1639,6 +1867,43 @@ void ConsoleDebugger::setBookmarkSelectedAddress( int addr )
 void ConsoleDebugger::asmViewCtxMenuAddSym(void)
 {
 	openDebugSymbolEditWindow( asmView->getCtxMenuAddr() );
+}
+//----------------------------------------------------------------------------
+void QAsmView::setPC_placement( int mode, int ofs )
+{
+	pcLinePlacement = mode;
+
+	if ( mode == 5 )
+	{
+		pcLineOffset = ofs;
+	}
+
+	g_config->setOption("SDL.DebuggerPCPlacement"  , pcLinePlacement);
+	g_config->setOption("SDL.DebuggerPCLineOffset" , pcLineOffset   );
+	g_config->save();
+}
+//----------------------------------------------------------------------------
+void QAsmView::setBreakpointAtSelectedLine(void)
+{
+	int addr = -1;
+
+	if ( (selAddrLine >= 0) && (selAddrLine < asmEntry.size()) )
+	{
+		if ( selAddrValue == asmEntry[ selAddrLine ]->addr )
+		{
+			addr = selAddrValue;
+		}
+	}
+
+	if ( addr >= 0 )
+	{
+		fceuWrapperLock();
+		watchpoint[64].address = addr;
+		watchpoint[64].flags = WP_E|WP_X;
+		
+		FCEUI_SetEmulationPaused(0);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------------------------------
 int  QAsmView::getAsmLineFromAddr(int addr)
@@ -1800,13 +2065,12 @@ static int InstructionUp(int from)
 void  QAsmView::updateAssemblyView(void)
 {
 	int starting_address, start_address_lp, addr, size;
-	int instruction_addr;
+	int instruction_addr, asmFlags = 0;
 	std::string line;
 	char chr[64];
 	uint8 opcode[3];
-	const char *disassemblyText = NULL;
+	char asmTxt[256];
 	dbg_asm_entry_t *a, *d;
-	//GtkTextIter iter, next_iter;
 	char pc_found = 0;
 
 	start_address_lp = starting_address = X.PC;
@@ -1836,13 +2100,16 @@ void  QAsmView::updateAssemblyView(void)
 	addr  = starting_address;
 	asmPC = NULL;
 
+	if ( symbolicDebugEnable )
+	{
+		asmFlags |= ASM_DEBUG_SYMS;
+
+		if ( registerNameEnable )
+		{
+			asmFlags |= ASM_DEBUG_REGS;
+		}
+	}
 	//asmText->clear();
-
-	//gtk_text_buffer_get_start_iter( textbuf, &iter );
-
-	//textview_lines_allocated = gtk_text_buffer_get_line_count( textbuf ) - 1;
-
-	//printf("Num Lines: %i\n", textview_lines_allocated );
 
 	for (int i=0; i < 0xFFFF; i++)
 	{
@@ -1927,12 +2194,9 @@ void  QAsmView::updateAssemblyView(void)
 				size++;
 			}
 
-			disassemblyText = Disassemble(addr, opcode);
+			DisassembleWithDebug(addr, opcode, asmFlags, asmTxt, &a->sym);
 
-			if ( disassemblyText )
-			{
-				line.append( disassemblyText );
-			}
+			line.append( asmTxt );
 		}
 		for (int j=0; j<size; j++)
 		{
@@ -1957,15 +2221,20 @@ void  QAsmView::updateAssemblyView(void)
 				int i,j;
 				const char *c;
 				char stmp[256];
-				printf("Debug symbol Found at $%04X \n", dbgSym->ofs );
-				d = new dbg_asm_entry_t();
+				//printf("Debug symbol Found at $%04X \n", dbgSym->ofs );
 
-				*d = *a;
-				d->type = dbg_asm_entry_t::SYMBOL_NAME;
-				d->text.assign( dbgSym->name );
-				d->line = asmEntry.size();
-				
-				asmEntry.push_back(d);
+				if ( dbgSym->name.size() > 0 )
+				{
+					d = new dbg_asm_entry_t();
+
+					*d = *a;
+					d->type = dbg_asm_entry_t::SYMBOL_NAME;
+					d->text.assign( dbgSym->name );
+					d->text.append( ":");
+					d->line = asmEntry.size();
+					
+					asmEntry.push_back(d);
+				}
 
 				i=0; j=0;
 				c = dbgSym->comment.c_str();
@@ -2026,7 +2295,7 @@ void  QAsmView::updateAssemblyView(void)
 
 	pxLineWidth = maxLineLen * pxCharWidth;
 
-	setMinimumWidth( pxLineWidth );
+	setMinimumWidth( 50 * pxCharWidth );
 
 	vbar->setMaximum( asmEntry.size() );
 }
@@ -2126,7 +2395,6 @@ void  ConsoleDebugger::updateRegisterView(void)
 	int stackPtr;
 	char stmp[64];
 	char str[32], str2[32];
-	std::string  stackLine;
 
 	sprintf( stmp, "%04X", X.PC );
 
@@ -2157,31 +2425,7 @@ void  ConsoleDebugger::updateRegisterView(void)
 
 	sprintf( stmp, "Stack: $%04X", stackPtr );
 	stackFrame->setTitle( tr(stmp) );
-
-	stackPtr++;
-
-	if ( stackPtr <= 0x01FF )
-	{
-		sprintf( stmp, "%02X", GetMem(stackPtr) );
-
-		stackLine.assign( stmp );
-
-		for (int i = 1; i < 128; i++)
-		{
-			//tmp = ((tmp+1)|0x0100)&0x01FF;  //increment and fix pointer to $0100-$01FF range
-			stackPtr++;
-			if (stackPtr > 0x1FF)
-				break;
-			if ((i & 7) == 0)
-				sprintf( stmp, ",\r\n%02X", GetMem(stackPtr) );
-			else
-				sprintf( stmp, ",%02X", GetMem(stackPtr) );
-
-			stackLine.append( stmp );
-		}
-	}
-
-	stackText->setPlainText( tr(stackLine.c_str()) );
+   stackText->updateText();
 
 	// update counters
 	int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
@@ -2302,15 +2546,33 @@ void ConsoleDebugger::updatePeriodic(void)
 		emuStatLbl->setStyleSheet("background-color: green; color: white;");
 	}
 
+	if ( waitingAtBp && (lastBpIdx == BREAK_TYPE_CYCLES_EXCEED) )
+	{
+		cpuCyclesLbl1->setStyleSheet("background-color: blue; color: white;");
+	}
+	else
+	{
+		cpuCyclesLbl1->setStyleSheet(NULL);
+	}
+
+	if ( waitingAtBp && (lastBpIdx == BREAK_TYPE_INSTRUCTIONS_EXCEED) )
+	{
+		cpuInstrsLbl1->setStyleSheet("background-color: blue; color: white;");
+	}
+	else
+	{
+		cpuInstrsLbl1->setStyleSheet(NULL);
+	}
+
 	if ( bpTree->topLevelItemCount() != numWPs )
 	{
-		printf("Breakpoint Tree Update\n");
+		//printf("Breakpoint Tree Update\n");
 		bpListUpdate( true );
 	}
 
 	if ( bmTree->topLevelItemCount() != dbgBmMgr.size() )
 	{
-		printf("Bookmark Tree Update\n");
+		//printf("Bookmark Tree Update\n");
 		bmListUpdate( true );
 	}
 }
@@ -2337,6 +2599,7 @@ void ConsoleDebugger::breakPointNotify( int bpNum )
 			if ( item != NULL )
 			{
 				item->setSelected(true);
+				bpTree->setCurrentItem( item );
 			}
 			bpTree->viewport()->update();
 		}
@@ -2345,11 +2608,11 @@ void ConsoleDebugger::breakPointNotify( int bpNum )
 	{
 		if (bpNum == BREAK_TYPE_CYCLES_EXCEED)
 		{
-			// TODO
+			// Label Coloring done in periodic update
 		}
 		else if (bpNum == BREAK_TYPE_INSTRUCTIONS_EXCEED)
 		{
-			// TODO
+			// Label Coloring done in periodic update
 		}
 	}
 
@@ -2376,6 +2639,9 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	{
 		return;
 	}
+	lastBpIdx   = bpNum;
+	waitingAtBp = true;
+
 	printf("Breakpoint Hit: %i \n", bpNum );
 
 	fceuWrapperUnLock();
@@ -2387,12 +2653,29 @@ void FCEUD_DebugBreakpoint( int bpNum )
 
 	while ( nes_shm->runEmulator && FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 	{
-		usleep(100000);
+		// HACK: break when Frame Advance is pressed
+		extern bool frameAdvanceRequested;
+		extern int frameAdvance_Delay_count, frameAdvance_Delay;
+
+		if (frameAdvanceRequested)
+		{
+			if ( (frameAdvance_Delay_count == 0) || (frameAdvance_Delay_count >= frameAdvance_Delay) )
+			{
+				FCEUI_SetEmulationPaused(EMULATIONPAUSED_FA);
+			}
+			if (frameAdvance_Delay_count < frameAdvance_Delay)
+			{
+				frameAdvance_Delay_count++;
+			}
+		}
+		usleep(16667);
 	}
 	// since we unfreezed emulation, reset delta_cycles counter
 	ResetDebugStatisticsDeltaCounters();
 
 	fceuWrapperLock();
+
+	waitingAtBp = false;
 }
 //----------------------------------------------------------------------------
 bool debuggerWindowIsOpen(void)
@@ -2466,11 +2749,14 @@ void saveGameDebugBreakpoints(void)
    debuggerBookmark_t *bm;
 
 	// If no breakpoints are loaded, skip saving
-	if ( numWPs == 0 )
+	if ( (numWPs == 0) && (dbgBmMgr.size() == 0) )
 	{
 		return;
 	}
-	getGameDebugBreakpointFileName( stmp );
+	if ( getGameDebugBreakpointFileName( stmp ) )
+	{
+		return;
+	}
 
 	//printf("Debug Save File: '%s' \n", stmp );
 
@@ -2606,7 +2892,10 @@ void loadGameDebugBreakpoints(void)
 		printf("No Debug Windows Open: Skipping loading of breakpoint data\n");
 		return;
 	}
-	getGameDebugBreakpointFileName( stmp );
+	if ( getGameDebugBreakpointFileName( stmp ) )
+	{
+		return;
+	}
 
 	//printf("Debug Load File: '%s' \n", stmp );
 
@@ -2664,7 +2953,7 @@ void loadGameDebugBreakpoints(void)
 				else if ( strcmp( id, "flags" ) == 0 )
 				{
 					type = 0;
-					//enable = (data[0] == 'E'); // Always start with breakpoints disabled.
+					enable = (data[0] == 'E');
 
 					if ( data[1] == 'P' )
 					{
@@ -2750,15 +3039,45 @@ QAsmView::QAsmView(QWidget *parent)
 {
 	QPalette pal;
 	QColor fg("black"), bg("white");
+	QColor c;
+
+	useDarkTheme = false;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
 
 	pal = this->palette();
-	pal.setColor(QPalette::Base      , bg );
-	pal.setColor(QPalette::Background, bg );
-	pal.setColor(QPalette::WindowText, fg );
+
+	//c = pal.color(QPalette::Base);
+	//printf("Base: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
+
+	//c = pal.color(QPalette::Background);
+	//printf("BackGround: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
+
+	// Figure out if we are using a light or dark theme by checking the 
+	// default window text grayscale color. If more white, then we will
+	// use white text on black background, else we do the opposite.
+	c = pal.color(QPalette::WindowText);
+
+	if ( qGray( c.red(), c.green(), c.blue() ) > 128 )
+	{
+		useDarkTheme = true;
+	}
+	//printf("WindowText: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
+
+	if ( useDarkTheme )
+	{
+		pal.setColor(QPalette::Base      , fg );
+		pal.setColor(QPalette::Background, fg );
+		pal.setColor(QPalette::WindowText, bg );
+	}
+	else 
+	{
+		pal.setColor(QPalette::Base      , bg );
+		pal.setColor(QPalette::Background, bg );
+		pal.setColor(QPalette::WindowText, fg );
+	}
 
 	this->parent = (ConsoleDebugger*)parent;
 	this->setPalette(pal);
@@ -2778,7 +3097,37 @@ QAsmView::QAsmView(QWidget *parent)
 	maxLineOffset = 0;
 	ctxMenuAddr = -1;
 
+	mouseLeftBtnDown  = false;
+	txtHlgtAnchorLine = -1;
+	txtHlgtAnchorChar = -1;
+	txtHlgtStartChar  = -1;
+	txtHlgtStartLine  = -1;
+	txtHlgtEndChar    = -1;
+	txtHlgtEndLine    = -1;
+
+	pcLinePlacement = 0;
+	pcLineOffset    = 0;
+
+	g_config->getOption( "SDL.DebuggerPCPlacement" , &pcLinePlacement );
+	g_config->getOption( "SDL.DebuggerPCLineOffset", &pcLineOffset    );
+
+	selAddrLine  = -1;
+	selAddrChar  =  0;
+	selAddrWidth =  0;
+	selAddrValue = -1;
+	memset( selAddrText, 0, sizeof(selAddrText) );
+
+	cursorLineAddr    = -1;
+	wheelPixelCounter =  0;
+
 	//setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
+	setFocusPolicy(Qt::StrongFocus);
+
+	clipboard = QGuiApplication::clipboard();
+
+	//printf("clipboard->supportsSelection() : '%i' \n", clipboard->supportsSelection() );
+	//printf("clipboard->supportsFindBuffer(): '%i' \n", clipboard->supportsFindBuffer() );
+
 }
 //----------------------------------------------------------------------------
 QAsmView::~QAsmView(void)
@@ -2816,7 +3165,52 @@ void QAsmView::scrollToPC(void)
 {
 	if ( asmPC != NULL )
 	{
-		lineOffset = asmPC->line;
+		int ofs = 0;
+		int maxOfs = (viewLines-3);
+
+		if ( maxOfs < 0 )
+		{
+			maxOfs = 0;
+		}
+
+		switch ( pcLinePlacement )
+		{
+			default:
+			case 0:
+				ofs = 0;
+			break;
+			case 1:
+				ofs = (viewLines / 4);
+			break;
+			case 2:
+				ofs = (viewLines / 2);
+			break;
+			case 3:
+				ofs = (viewLines*3) / 4;
+			break;
+			case 4:
+				ofs =  maxOfs;
+			break;
+			case 5:
+				ofs = pcLineOffset;
+
+				if ( ofs < 0 )
+				{
+					ofs = 0;
+				}
+				else if ( ofs > maxOfs )
+				{
+					ofs = maxOfs;
+				}
+			break;
+		}
+
+		lineOffset = asmPC->line - ofs;
+
+		if ( lineOffset < 0 )
+		{
+			lineOffset = 0;
+		}
 		vbar->setValue( lineOffset );
 	}
 }
@@ -2827,7 +3221,9 @@ void QAsmView::setDisplayROMoffsets( bool value )
 	{
 		displayROMoffsets = value;
 
+		fceuWrapperLock();
 		updateAssemblyView();
+		fceuWrapperUnLock();
 	}
 }
 //----------------------------------------------------------------------------
@@ -2837,7 +3233,9 @@ void QAsmView::setSymbolDebugEnable( bool value )
 	{
 		symbolicDebugEnable = value;
 
+		fceuWrapperLock();
 		updateAssemblyView();
+		fceuWrapperUnLock();
 	}
 }
 //----------------------------------------------------------------------------
@@ -2847,7 +3245,9 @@ void QAsmView::setRegisterNameEnable( bool value )
 	{
 		registerNameEnable = value;
 
+		fceuWrapperLock();
 		updateAssemblyView();
+		fceuWrapperUnLock();
 	}
 }
 //----------------------------------------------------------------------------
@@ -2897,14 +3297,81 @@ void QAsmView::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------------------------------
 void QAsmView::keyPressEvent(QKeyEvent *event)
 {
-	printf("Debug ASM Window Key Press: 0x%x \n", event->key() );
+	//printf("Debug ASM Window Key Press: 0x%x \n", event->key() );
+	if (event->matches(QKeySequence::MoveToPreviousLine))
+	{
+		lineOffset--;
 
+		if ( lineOffset < 0 )
+		{
+			lineOffset = 0;
+		}
+		vbar->setValue( lineOffset );
+		event->accept();
+	}
+	else if (event->matches(QKeySequence::MoveToNextLine))
+	{
+		lineOffset++;
+
+		if ( lineOffset > maxLineOffset )
+		{
+			lineOffset = maxLineOffset;
+		}
+		vbar->setValue( lineOffset );
+		event->accept();
+	}
+	else if (event->matches(QKeySequence::MoveToNextPage))
+   {
+      lineOffset += ( (3 * viewLines) / 4);
+
+      if ( lineOffset >= maxLineOffset )
+      {
+         lineOffset = maxLineOffset;
+      }
+      vbar->setValue( lineOffset );
+		event->accept();
+   }
+   else if (event->matches(QKeySequence::MoveToPreviousPage))
+   {
+      lineOffset -= ( (3 * viewLines) / 4);
+
+      if ( lineOffset < 0 )
+      {
+         lineOffset = 0;
+      }
+      vbar->setValue( lineOffset );
+		event->accept();
+   }
+	else if ( selAddrValue >= 0 )
+	{
+		ctxMenuAddr = selAddrValue;
+
+		if ( event->key() == Qt::Key_B )
+   	{
+			parent->asmViewCtxMenuAddBP();
+			event->accept();
+   	}
+		else if ( event->key() == Qt::Key_S )
+   	{
+			parent->asmViewCtxMenuAddSym();
+			event->accept();
+   	}
+		else if ( event->key() == Qt::Key_M )
+   	{
+			parent->asmViewCtxMenuAddBM();
+			event->accept();
+   	}
+		else if ( event->key() == Qt::Key_H )
+   	{
+			parent->asmViewCtxMenuOpenHexEdit();
+			event->accept();
+   	}
+   }
 }
 //----------------------------------------------------------------------------
 void QAsmView::keyReleaseEvent(QKeyEvent *event)
 {
-   printf("Debug ASM Window Key Release: 0x%x \n", event->key() );
-	//assignHotkey( event );
+   //printf("Debug ASM Window Key Release: 0x%x \n", event->key() );
 }
 //----------------------------------------------------------------------------
 QPoint QAsmView::convPixToCursor( QPoint p )
@@ -2944,14 +3411,77 @@ QPoint QAsmView::convPixToCursor( QPoint p )
 	return c;
 }
 //----------------------------------------------------------------------------
+bool QAsmView::textIsHighlighted(void)
+{
+	bool set = false;
+
+	if ( txtHlgtStartLine == txtHlgtEndLine )
+	{
+		set = (txtHlgtStartChar != txtHlgtEndChar);
+	}
+	else
+	{
+		set = true;
+	}
+	return set;
+}
+//----------------------------------------------------------------------------
+void QAsmView::setHighlightEndCoord( int x, int y )
+{
+
+	if ( txtHlgtAnchorLine < y )
+	{
+		txtHlgtStartLine = txtHlgtAnchorLine;
+		txtHlgtStartChar = txtHlgtAnchorChar;
+		txtHlgtEndLine   = y;
+		txtHlgtEndChar   = x;
+	}
+	else if ( txtHlgtAnchorLine > y )
+	{
+		txtHlgtStartLine = y;
+		txtHlgtStartChar = x;
+		txtHlgtEndLine   = txtHlgtAnchorLine;
+		txtHlgtEndChar   = txtHlgtAnchorChar;
+	}
+	else
+	{
+		txtHlgtStartLine = txtHlgtAnchorLine;
+		txtHlgtEndLine   = txtHlgtAnchorLine;
+
+		if ( txtHlgtAnchorChar < x )
+		{
+			txtHlgtStartChar = txtHlgtAnchorChar;
+			txtHlgtEndChar   = x;
+		}
+		else if ( txtHlgtAnchorChar > x )
+		{
+			txtHlgtStartChar = x;
+			txtHlgtEndChar   = txtHlgtAnchorChar;
+		}
+		else
+		{
+			txtHlgtStartChar = txtHlgtAnchorChar;
+			txtHlgtEndChar   = txtHlgtAnchorChar;
+		}
+	}
+	return;
+}
+//----------------------------------------------------------------------------
 void QAsmView::mouseMoveEvent(QMouseEvent * event)
 {
 	int line;
-	QPoint c = convPixToCursor( event->pos() );
 	char txt[256];
 	std::string s;
 
+	QPoint c = convPixToCursor( event->pos() );
+
 	line = lineOffset + c.y();
+
+	if ( mouseLeftBtnDown )
+	{
+		//printf("Left Button Move: (%i,%i)\n", c.x(), c.y() );
+		setHighlightEndCoord( c.x(), line );
+	}
 
 	//printf("c (%i,%i) : Line %i : %04X \n", c.x(), c.y(), line, asmEntry[line]->addr );
 
@@ -2959,7 +3489,7 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 	{
 		int addr;
 
-		addr = asmEntry[line]->addr;
+		cursorLineAddr = addr = asmEntry[line]->addr;
 
 		if (addr >= 0x8000)
 		{
@@ -2981,7 +3511,7 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 				{
 					fileName = "...";
 				}
-				sprintf( txt, ", Offset 0x%06X in File \"%s\" (NL file: %X)", romOfs, fileName, bank);
+				sprintf( txt, "\nOffset 0x%06X in File \"%s\" (NL file: %X)", romOfs, fileName, bank);
 
 				s.append( txt );
 			}
@@ -3000,21 +3530,299 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 	}
 }
 //----------------------------------------------------------------------------
+void QAsmView::loadClipboard( const char *txt )
+{
+	clipboard->setText( tr(txt), QClipboard::Clipboard );
+
+	if ( clipboard->supportsSelection() )
+	{
+		clipboard->setText( tr(txt), QClipboard::Selection );
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::loadHighlightToClipboard(void)
+{
+	if ( !textIsHighlighted() )
+	{
+		return;
+	}
+	int l, row, nrow;
+	std::string txt;
+
+	nrow = (viewHeight / pxLineSpacing) + 1;
+
+	if ( nrow < 1 ) nrow = 1;
+
+	for (row=0; row < nrow; row++)
+	{
+		l = lineOffset + row;
+
+		if ( (l >= txtHlgtStartLine) && (l <= txtHlgtEndLine) )
+		{
+			int hlgtXs, hlgtXe, hlgtXd;
+			std::string s;
+			bool addNewLine;
+
+			if ( l == txtHlgtStartLine )
+			{
+				hlgtXs = txtHlgtStartChar;
+			}
+			else
+			{
+				hlgtXs = 0;
+			}
+
+			if ( l == txtHlgtEndLine )
+			{
+				hlgtXe = txtHlgtEndChar;
+				addNewLine = false;
+			}
+			else
+			{
+				hlgtXe = (viewWidth / pxCharWidth) + 1;
+				addNewLine = true;
+			}
+			hlgtXd = (hlgtXe - hlgtXs);
+
+			if ( hlgtXs < asmEntry[l]->text.size() )
+			{
+				s = asmEntry[l]->text.substr( hlgtXs, hlgtXd );
+			}
+			txt.append(s);
+
+			if ( addNewLine )
+			{
+				txt.append("\n");
+			}
+		}
+	}
+
+	//printf("Load Text to Clipboard:\n%s\n", txt.c_str() );
+
+	loadClipboard( txt.c_str() );
+
+}
+//----------------------------------------------------------------------------
+void QAsmView::mouseReleaseEvent(QMouseEvent * event)
+{
+	int line;
+	QPoint c = convPixToCursor( event->pos() );
+
+	line = lineOffset + c.y();
+
+	if ( event->button() == Qt::LeftButton )
+	{
+		//printf("Left Button Release: (%i,%i)\n", c.x(), c.y() );
+		mouseLeftBtnDown = false;
+		setHighlightEndCoord( c.x(), line );
+
+		loadHighlightToClipboard();
+	}
+}
+//----------------------------------------------------------------------------
 void QAsmView::mousePressEvent(QMouseEvent * event)
 {
 	int line;
 	QPoint c = convPixToCursor( event->pos() );
 
 	line = lineOffset + c.y();
+
+	//printf("Mouse Button Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
 	
+	if ( event->button() == Qt::LeftButton )
+	{
+		//printf("Left Button Pressed: (%i,%i)\n", c.x(), c.y() );
+		mouseLeftBtnDown = true;
+		txtHlgtAnchorChar = c.x();
+		txtHlgtAnchorLine = line;
+
+		setHighlightEndCoord( c.x(), line );
+	}
+	
+	selAddrLine  = -1;
+	selAddrChar  =  0;
+	selAddrWidth =  0;
+	selAddrValue = -1;
+	selAddrText[0] = 0;
+
 	if ( line < asmEntry.size() )
 	{
-		int addr;
+		int i,j, addr = -1, addrTextLoc = -1, selChar;
+		int symTextStart = -1, symTextEnd = -1;
+		char addrClicked = 0;
+		char stmp[64];
 
-		addr = asmEntry[line]->addr;
+		selChar = c.x();
 
-		parent->setBookmarkSelectedAddress( addr );
+		if ( asmEntry[line]->type == dbg_asm_entry_t::ASM_TEXT )
+		{
+			if ( selChar < (int)asmEntry[line]->text.size() )
+			{
+
+				i = selChar;
+
+				if ( asmEntry[line]->sym.name.size() > 0 )
+				{
+					size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name, 22 );
+
+					if ( (subStrLoc != std::string::npos) && (subStrLoc > 22) )
+					{
+						//printf("Line:%i asmEntry DB Sym: %zi  '%s'\n", line, subStrLoc, asmEntry[line]->sym.name.c_str() );
+						symTextStart = subStrLoc;
+						symTextEnd   = subStrLoc + asmEntry[line]->sym.name.size();
+					}
+				}
+
+				if ( (i >= symTextStart) && (i < symTextEnd) )
+				{
+					selAddrLine  = line;
+					selAddrChar  = symTextStart;
+					selAddrWidth = symTextEnd - symTextStart;
+					selAddrValue = addr = asmEntry[line]->sym.ofs;
+
+					if ( selAddrWidth >= (int)sizeof(selAddrText) )
+					{
+						selAddrWidth = sizeof(selAddrText)-1;
+					}
+					strncpy( selAddrText, asmEntry[line]->sym.name.c_str(), selAddrWidth );
+					selAddrText[ selAddrWidth ] = 0;
+				}
+				else if ( isxdigit( asmEntry[line]->text[i] ) )
+				{
+					addrClicked = 1;
+					addrTextLoc = i;
+
+					while ( isxdigit( asmEntry[line]->text[i] ) )
+					{
+						addrTextLoc = i;
+						i--;
+					}
+					if ( asmEntry[line]->text[i] == '$' || asmEntry[line]->text[i] == ':' )
+					{
+						i--;
+					}
+					else
+					{
+						addrClicked = 0;
+					}
+					if ( asmEntry[line]->text[i] == '#' )
+					{
+						addrClicked = 0;
+					}
+					if ( addrClicked )
+					{
+						j=0; i = addrTextLoc;
+						
+						while ( isxdigit( asmEntry[line]->text[i] ) )
+						{
+							stmp[j] = asmEntry[line]->text[i]; i++; j++;
+						}
+						stmp[j] = 0;
+
+						//printf("Addr: '%s'\n", stmp );
+
+						addr = strtol( stmp, NULL, 16 );
+
+						selAddrLine  = line;
+						selAddrChar  = addrTextLoc;
+						selAddrWidth = j;
+						selAddrValue = addr;
+						strcpy( selAddrText, stmp );
+					}
+				}
+			}
+		}
+		else if ( asmEntry[line]->type == dbg_asm_entry_t::SYMBOL_NAME )
+		{
+			selAddrLine  = line;
+			selAddrChar  = 0;
+			selAddrValue = addr = asmEntry[line]->addr;
+
+			if ( asmEntry[line]->text.size() > 0 )
+			{
+				selAddrWidth = asmEntry[line]->text.size()-1;
+			}
+			else
+			{
+				selAddrWidth = 0;
+			}
+			if ( selAddrWidth >= (int)sizeof(selAddrText) )
+			{
+				selAddrWidth = sizeof(selAddrText)-1;
+			}
+			strncpy( selAddrText, asmEntry[line]->text.c_str(), selAddrWidth );
+			selAddrText[ selAddrWidth ] = 0;
+		}
+
+		if ( addr < 0 )
+		{
+			addr = asmEntry[line]->addr;
+			selAddrLine  = line;
+			selAddrChar  = 4;
+			selAddrWidth = 4;
+			selAddrValue = addr;
+			sprintf( selAddrText, "%04X", addr );
+		}
+		//printf("Line: '%s'\n", asmEntry[line]->text.c_str() );
+
+		if ( addr >= 0 )
+		{
+			parent->setBookmarkSelectedAddress( addr );
+		}
+
+		if ( selAddrText[0] != 0 )
+		{
+			loadClipboard( selAddrText );
+		}
 	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::wheelEvent(QWheelEvent *event)
+{
+
+	QPoint numPixels = event->pixelDelta();
+	QPoint numDegrees = event->angleDelta();
+
+	if (!numPixels.isNull()) 
+	{
+		wheelPixelCounter -= numPixels.y();
+	   //printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+	} 
+	else if (!numDegrees.isNull()) 
+	{
+		//QPoint numSteps = numDegrees / 15;
+		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
+		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
+		wheelPixelCounter -= (pxLineSpacing * numDegrees.y()) / (15*8);
+	}
+	//printf("Wheel Event: %i\n", wheelPixelCounter);
+
+	if ( wheelPixelCounter >= pxLineSpacing )
+	{
+		lineOffset += (wheelPixelCounter / pxLineSpacing);
+
+		if ( lineOffset > maxLineOffset )
+		{
+			lineOffset = maxLineOffset;
+		}
+		vbar->setValue( lineOffset );
+
+		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+	else if ( wheelPixelCounter <= -pxLineSpacing )
+	{
+		lineOffset += (wheelPixelCounter / pxLineSpacing);
+
+		if ( lineOffset < 0 )
+		{
+			lineOffset = 0;
+		}
+		vbar->setValue( lineOffset );
+
+		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+
+	 event->accept();
 }
 //----------------------------------------------------------------------------
 void QAsmView::contextMenuEvent(QContextMenuEvent *event)
@@ -3023,6 +3831,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 	QAction *act;
 	QMenu menu(this);
 	QPoint c = convPixToCursor( event->pos() );
+	bool enableRunToCursor = false;
 
 	line = lineOffset + c.y();
 
@@ -3032,25 +3841,63 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 	{
 		int addr;
 
-		ctxMenuAddr = addr = asmEntry[line]->addr;
+		if ( selAddrValue < 0 )
+		{
+			ctxMenuAddr = addr = asmEntry[line]->addr;
 
-		act = new QAction(tr("Add Breakpoint"), this);
+			enableRunToCursor = true;
+		}
+		else
+		{
+			ctxMenuAddr = addr = selAddrValue;
+
+			enableRunToCursor = (selAddrValue == asmEntry[line]->addr);
+		}
+
+		if ( enableRunToCursor )
+		{
+			act = new QAction(tr("Run To Cursor"), &menu);
+			menu.addAction(act);
+			//act->setShortcut( QKeySequence(tr("Ctrl+F10")));
+			connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuRunToCursor(void)) );
+		}
+
+		act = new QAction(tr("Add Breakpoint"), &menu);
 		menu.addAction(act);
+		act->setShortcut( QKeySequence(tr("B")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
 
-		act = new QAction(tr("Add Symbolic Debug Marker"), this);
+		act = new QAction(tr("Add Symbolic Debug Marker"), &menu);
 	 	menu.addAction(act);
+		act->setShortcut( QKeySequence(tr("S")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddSym(void)) );
 
-		act = new QAction(tr("Add Bookmark"), this);
+		act = new QAction(tr("Add Bookmark"), &menu);
 	 	menu.addAction(act);
+		act->setShortcut( QKeySequence(tr("M")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBM(void)) );
 		
-		act = new QAction(tr("Open Hex Editor"), this);
+		act = new QAction(tr("Open Hex Editor"), &menu);
 	 	menu.addAction(act);
+		act->setShortcut( QKeySequence(tr("H")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuOpenHexEdit(void)) );
 		
 		menu.exec(event->globalPos());
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::drawText( QPainter *painter, int x, int y, const char *txt )
+{
+	int i=0;
+	char c[2];
+
+	c[0] = 0; c[1] = 0;
+
+	while ( txt[i] != 0 )
+	{
+		c[0] = txt[i];
+		painter->drawText( x, y, tr(c) );
+		i++; x += pxCharWidth;
 	}
 }
 //----------------------------------------------------------------------------
@@ -3058,6 +3905,10 @@ void QAsmView::paintEvent(QPaintEvent *event)
 {
 	int x,y,l, row, nrow, selAddr;
 	QPainter painter(this);
+	QColor white("white"), black("black"), blue("blue");
+	QColor hlgtFG("white"), hlgtBG("blue");
+	bool forceDarkColor = false;
+	bool txtHlgtSet = false;
 
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
@@ -3094,17 +3945,21 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 	y = pxLineSpacing;
 
+	txtHlgtSet = textIsHighlighted();
+
 	for (row=0; row < nrow; row++)
 	{
 		x = -pxLineXScroll;
 		l = lineOffset + row;
-		painter.setPen( this->palette().color(QPalette::WindowText));
+
+		forceDarkColor = false;
 
 		if ( asmPC != NULL )
 		{
 			if ( l == asmPC->line )
 			{
 				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("pink") );
+				forceDarkColor = true;
 			}
 		}
 
@@ -3113,31 +3968,90 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			if ( asmEntry[l]->type != dbg_asm_entry_t::ASM_TEXT )
 			{
 				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
+				forceDarkColor = true;
 			}
-			painter.drawText( x, y, tr(asmEntry[l]->text.c_str()) );
 
-			if ( selAddr == asmEntry[l]->addr )
+			if ( forceDarkColor )
+			{
+				painter.setPen( black );
+			}
+			else
+			{
+				painter.setPen( this->palette().color(QPalette::WindowText));
+			}
+			drawText( &painter, x, y, asmEntry[l]->text.c_str() );
+
+			if ( (selAddrLine == l) )
 			{	// Highlight ASM line for selected address.
-				if ( !displayROMoffsets && (asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT) )
+				if ( !txtHlgtSet && (selAddr == selAddrValue) && 
+				  	    (asmEntry[l]->text.size() >= (selAddrChar + selAddrWidth) ) && 
+						    ( asmEntry[l]->text.compare( selAddrChar, selAddrWidth, selAddrText ) == 0 ) )
 				{
 					int ax;
-					char addrString[16];
 
-					ax = 4*pxCharWidth;
+					ax = x + selAddrChar*pxCharWidth;
 
-					painter.fillRect( ax, y - pxLineSpacing + pxLineLead, 4*pxCharWidth, pxLineSpacing, QColor("blue") );
+					painter.fillRect( ax, y - pxLineSpacing + pxLineLead, selAddrWidth*pxCharWidth, pxLineSpacing, blue );
 
-					sprintf( addrString, "%04X", selAddr );
+					painter.setPen( white );
 
-					painter.setPen( this->palette().color(QPalette::Background));
-
-					painter.drawText( ax, y, tr(addrString) );
+					drawText( &painter, ax, y, selAddrText );
 
 					painter.setPen( this->palette().color(QPalette::WindowText));
 				}
 			}
 		}
 		y += pxLineSpacing;
+	}
+
+	y = pxLineSpacing;
+
+	painter.setPen( hlgtFG );
+
+	if ( txtHlgtSet )
+	{
+		for (row=0; row < nrow; row++)
+		{
+			x = -pxLineXScroll;
+			l = lineOffset + row;
+
+		   if ( (l >= txtHlgtStartLine) && (l <= txtHlgtEndLine) )
+			{
+				int ax, hlgtXs, hlgtXe, hlgtXd;
+				std::string s;
+
+				if ( l == txtHlgtStartLine )
+				{
+					hlgtXs = txtHlgtStartChar;
+				}
+				else
+				{
+					hlgtXs = 0;
+				}
+
+				if ( l == txtHlgtEndLine )
+				{
+					hlgtXe = txtHlgtEndChar;
+				}
+				else
+				{
+					hlgtXe = (viewWidth / pxCharWidth) + 1;
+				}
+				hlgtXd = (hlgtXe - hlgtXs);
+
+				if ( hlgtXs < asmEntry[l]->text.size() )
+				{
+					s = asmEntry[l]->text.substr( hlgtXs, hlgtXd );
+				}
+
+				ax = x + (hlgtXs * pxCharWidth);
+
+				painter.fillRect( ax, y - pxLineSpacing + pxLineLead, hlgtXd * pxCharWidth, pxLineSpacing, hlgtBG );
+
+				drawText( &painter, ax, y, s.c_str() );
+			}
+			y += pxLineSpacing;
+		}
 	}
 }
 //----------------------------------------------------------------------------
@@ -3272,5 +4186,166 @@ debuggerBookmark_t *debuggerBookmarkManager_t::getAddr( int addr )
 		return it->second;
 	}
 	return NULL;
+}
+//----------------------------------------------------------------------------
+DebuggerStackDisplay::DebuggerStackDisplay(QWidget *parent)
+   : QPlainTextEdit(parent)
+{
+   stackBytesPerLine = 4;
+   showAddrs = true;
+}
+//----------------------------------------------------------------------------
+DebuggerStackDisplay::~DebuggerStackDisplay(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::keyPressEvent(QKeyEvent *event)
+{
+	//printf("Debug Stack Window Key Press: 0x%x \n", event->key() );
+
+   if ( (event->key() >= Qt::Key_1) && ( (event->key() < Qt::Key_9) ) )
+   {
+      stackBytesPerLine = event->key() - Qt::Key_0;
+      updateText();
+   }
+   else if ( event->key() == Qt::Key_A )
+   {
+      showAddrs = !showAddrs;
+      updateText();
+   }
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::contextMenuEvent(QContextMenuEvent *event)
+{
+	QAction *act;
+	QMenu menu(this);
+   QMenu *subMenu;
+	QActionGroup *group;
+	QAction *bytesPerLineAct[4];
+
+	act = new QAction(tr("Show Addresses"), &menu);
+	act->setCheckable(true);
+	act->setChecked(showAddrs);
+	connect( act, SIGNAL(triggered(void)), this, SLOT(toggleShowAddr(void)) );
+
+   menu.addAction( act );
+
+	subMenu = menu.addMenu(tr("Display Bytes Per Line"));
+	group   = new QActionGroup(&menu);
+
+	group->setExclusive(true);
+
+	for (int i=0; i<4; i++)
+	{
+	   char stmp[8];
+
+	   sprintf( stmp, "%i", i+1 );
+
+	   bytesPerLineAct[i] = new QAction(tr(stmp), &menu);
+	   bytesPerLineAct[i]->setCheckable(true);
+
+	   group->addAction(bytesPerLineAct[i]);
+		subMenu->addAction(bytesPerLineAct[i]);
+      
+	   bytesPerLineAct[i]->setChecked( stackBytesPerLine == (i+1) );
+	}
+
+	connect( bytesPerLineAct[0], SIGNAL(triggered(void)), this, SLOT(sel1BytePerLine(void)) );
+	connect( bytesPerLineAct[1], SIGNAL(triggered(void)), this, SLOT(sel2BytesPerLine(void)) );
+	connect( bytesPerLineAct[2], SIGNAL(triggered(void)), this, SLOT(sel3BytesPerLine(void)) );
+	connect( bytesPerLineAct[3], SIGNAL(triggered(void)), this, SLOT(sel4BytesPerLine(void)) );
+
+	menu.exec(event->globalPos());
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::toggleShowAddr(void)
+{
+   showAddrs = !showAddrs;
+
+   updateText();
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::sel1BytePerLine(void)
+{
+   stackBytesPerLine = 1;
+   updateText();
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::sel2BytesPerLine(void)
+{
+   stackBytesPerLine = 2;
+   updateText();
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::sel3BytesPerLine(void)
+{
+   stackBytesPerLine = 3;
+   updateText();
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::sel4BytesPerLine(void)
+{
+   stackBytesPerLine = 4;
+   updateText();
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::updateText(void)
+{
+   char stmp[128];
+   int stackPtr = X.S | 0x0100;
+   std::string stackLine;
+
+	stackPtr++;
+
+	if ( stackPtr <= 0x01FF )
+	{
+      if ( showAddrs || (stackBytesPerLine <= 1) )
+      {
+		   sprintf( stmp, "%03X: %02X", stackPtr, GetMem(stackPtr) );
+      }
+      else
+      {
+		   sprintf( stmp, " %02X", GetMem(stackPtr) );
+      }
+
+		stackLine.assign( stmp );
+
+		for (int i = 1; i < 128; i++)
+		{
+			//tmp = ((tmp+1)|0x0100)&0x01FF;  //increment and fix pointer to $0100-$01FF range
+			stackPtr++;
+			if (stackPtr > 0x1FF)
+				break;
+
+         if ( stackBytesPerLine > 1 )
+         {
+			   if ((i % stackBytesPerLine) == 0)
+            {
+               if ( showAddrs )
+               {
+			   	   sprintf( stmp, "\n%03X: %02X", stackPtr, GetMem(stackPtr) );
+               }
+               else
+               {
+			   	   sprintf( stmp, "\n %02X", GetMem(stackPtr) );
+               }
+            }
+			   else
+            {
+			   	sprintf( stmp, ",%02X", GetMem(stackPtr) );
+            }
+         }
+         else
+         {
+			   sprintf( stmp, "\n%03X: %02X", stackPtr, GetMem(stackPtr) );
+         }
+			stackLine.append( stmp );
+
+         //printf("Stack $%X: %s\n", stackPtr, stmp );
+		}
+	}
+
+	setPlainText( tr(stackLine.c_str()) );
 }
 //----------------------------------------------------------------------------

@@ -4,6 +4,8 @@ Priorities
    * GTK GUI was not cross-platform. A Qt5 version of the GUI has been created to meet this need. 
      I will keep the GTK GUI around for Linux users who prefer it, but when it comes to adding new features
      the Qt GUI is where I plan to add them first (if at all).
+   * The Qt GUI has by far exceeded the capabilities of the older GTK version. Below is a GUI capability 
+     matrix showing the differences between the two. I HIGHLY RECOMMEND USING THE Qt GUI.
    * Code cleanup. Lots of compiler warnings with newer GCC. Maybe I'm OCD... but these warnings bother me.
 
 Features
@@ -29,7 +31,7 @@ OpenGL graphics                                      |     YES     |     YES    
 Hot key config window                                |     YES     |     YES     |
 Palette config window                                |     YES     |     YES     |
 Multi-thread (GUI and emulation on separate threads) |     YES     |     NO      |
-Emulation speed control via menu                     |     NO      |     NO      |
+Emulation speed control via menu                     |     YES     |     NO      |
 Emulation speed control via hotkeys                  |     YES     |     YES     |
 Fullscreen functionality                             |     YES     |     YES     |
 AVI Record Functionality                             |     NO      |     NO      |
@@ -38,18 +40,18 @@ Game genie load/enable capability                    |     YES     |     YES    
 Movie record/save/play functionality                 |     YES     |     YES     |
 Cheat search window                                  |     YES     |     YES     |
 Active Cheat window                                  |     YES     |     YES     |
-RAM Search Window                                    |     NO      |     NO      |
-RAM Watch Window                                     |     NO      |     YES     |
+RAM Search Window                                    |     YES     |     NO      |
+RAM Watch Window                                     |     YES     |     YES     |
 Memory Watch Window                                  |     NO      |     NO      |
 TAS Editor                                           |     NO      |     NO      |
 6502 Debugger Window                                 |     YES     |     YES     |
-PPU Viewer                                           |     NO      |     NO      |
-Name Table Viewer                                    |     NO      |     NO      |
+PPU Viewer                                           |     YES     |     NO      |
+Name Table Viewer                                    |     YES     |     NO      |
 Memory Hex Editor                                    |     YES     |     YES     |
 Trace Logger                                         |     YES     |     NO      |
 Code/Data Logger                                     |     YES     |     NO      |
-Game Genie Encoder/Decoder                           |     NO      |     NO      |
-iNES Header Editor                                   |     NO      |     NO      |
+Game Genie Encoder/Decoder                           |     YES     |     NO      |
+iNES Header Editor                                   |     YES     |     NO      |
 Built in help pages                                  |     NO      |     NO      |
 Network play (who actually uses this???)             |     NO      |     NO      |
 -----------------------------------------------------|-------------|-------------|
@@ -59,7 +61,7 @@ Network play (who actually uses this???)             |     NO      |     NO     
 QT
 ===
    * Clean out rest of old GTK comments and #ifdefs
-	* GUI Debug Tools TODO
+	* GUI Debug Tools Pretty Much Done
    * GUI should compile in windows as well.... but testing is not a priority since the windows gui already has a totally separate backend.
 
 BUGS

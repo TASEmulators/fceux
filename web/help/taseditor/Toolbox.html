@@ -1,278 +1,465 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>2.2. Toolbox</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("Toolbox");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>2.2. Toolbox</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="2.2. Toolbox">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="2.2. Toolbox" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>2.2. Toolbox</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="BeginnersGuide.html">Beginner's Guide</a> &rsaquo;&rsaquo; <a href="ProgramInterface.html">2. Program Interface</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="ProgramInterface.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="PianoRoll.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="TASingProcess.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="Toolbox"
+		  data-hnd-context="7"
+		  data-hnd-title="2.2. Toolbox"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="BeginnersGuide.html">Beginner's Guide</a></li><li><a href="ProgramInterface.html">2. Program Interface</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="ProgramInterface.html" title="2. Program Interface" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="PianoRoll.html" title="2.1. Piano Roll" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="TASingProcess.html" title="3. TASing Process" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>2.2. Toolbox</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Toolbox</span></p>
-<p class="rvps5"><span class="rvts36"><br/></span></p>
-<p class="rvps5"><img alt="" style="padding : 1px;" src="lib/taseditor-smb.png"/></p>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The Toolbox consists of 7 sections:</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps14"><a class="rvts38" href="Toolbox.html#playback">Playback</a></li>
-<li class="rvps14"><a class="rvts38" href="Toolbox.html#recorder">Recorder</a></li>
-<li class="rvps14"><a class="rvts38" href="Toolbox.html#splicer">Splicer</a></li>
-<li class="rvps14"><a class="rvts38" href="Toolbox.html#lua">Lua</a></li>
-<li class="rvps14"><a class="rvts38" href="Toolbox.html#bookmarks">Bookmarks</a></li>
-<li class="rvps14"><a class="rvts38" href="Toolbox.html#history">History</a></li>
-<li class="rvps14"><a class="rvts38" href="Toolbox.html#selection">Selection cursor navigation buttons</a></li>
+<p class="rvps2"><span class="rvts18">Toolbox</span></p>
+<p class="rvps3"><span class="rvts20"><br/></span></p>
+<p class="rvps3"><img alt="" style="padding : 1px;" src="lib/taseditor-smb.png"></p>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The Toolbox consists of 7 sections:</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps9"><a class="rvts34" href="Toolbox.html#playback">Playback</a></li>
+ <li class="rvps9"><a class="rvts34" href="Toolbox.html#recorder">Recorder</a></li>
+ <li class="rvps9"><a class="rvts34" href="Toolbox.html#splicer">Splicer</a></li>
+ <li class="rvps9"><a class="rvts34" href="Toolbox.html#lua">Lua</a></li>
+ <li class="rvps9"><a class="rvts34" href="Toolbox.html#bookmarks">Bookmarks</a></li>
+ <li class="rvps9"><a class="rvts34" href="Toolbox.html#history">History</a></li>
+ <li class="rvps9"><a class="rvts34" href="Toolbox.html#selection">Selection cursor navigation buttons</a></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="playback"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-playback.png"/></p>
-<p class="rvps10"><span class="rvts21">The top section is allotted to the Playback controls. The </span><span class="rvts25">Playback</span><span class="rvts21"> is the component of Taseditor dedicated to handle game emulation: keep it paused, replay in any direction, rewind to desired frame and so on. It allows to treat video games as straightforwardly as if they were regular video recordings, disregarding the interactivity element inherent to them.</span></p>
-<p class="rvps10"><span class="rvts21">There are 5 buttons at the top of the window.</span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts29">||</span><span class="rvts21">" button (pause/resume) is simple graphical analog of the </span><span class="rvts26">Pause Emulation</span><span class="rvts21"> hotkey. When you click it, the game emulation either pauses or resumes. However, if your mouse has a middle button, it's easier to press it instead of clicking the "</span><span class="rvts29">||</span><span class="rvts21">" button, in this case you won't need to move the mouse cursor to the Playback section.</span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts29">&gt;</span><span class="rvts21">" button (step forward / advance 1 frame) moves the light-blue cursor 1 frame down, forcing FCEUX to emulate one frame if necessary. You can either click that button or click and hold it to make several steps forward. This button's keyboard analog is </span><span class="rvts30">Shift + Down</span><span class="rvts21">. If your mouse has a wheel, it's easier to hold the right mouse button and scroll the wheel 1 step down instead of using the "</span><span class="rvts29">&gt;</span><span class="rvts21">" button.</span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts29">&lt;</span><span class="rvts21">" button (step back / rewind 1 frame) moves the Playback cursor 1 frame up, displaying the previous frame's events in the FCEUX window. You can hold the button as well, when you wish to go several frames back. This button has its hotkey </span><span class="rvts26">Frame Rewind</span><span class="rvts21"> (mapped to </span><span class="rvts26">Backspace</span><span class="rvts21"> key by default), and has a keyboard analog: </span><span class="rvts30">Shift + Up</span><span class="rvts21">. If your mouse has a wheel, it's easier to hold the right mouse button and scroll the wheel 1 step up instead of using "</span><span class="rvts29">&lt;</span><span class="rvts21">" button.</span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts29">&lt;&lt;</span><span class="rvts21">" button (fast rewind) also moves the Playback cursor back, just not by 1 frame but by multiple frames at once. This button moves the light-blue cursor to the frame where the nearest upper Marker is located. In the above picture, if you press the "</span><span class="rvts29">&lt;&lt;</span><span class="rvts21">", the light-blue cursor will jump to frame 12 (where the Marker 1 is set). Using this button you may quickly go back to the beginning of the edited segment or to any other past moment of the movie. The keyboard analog for this button is </span><span class="rvts30">Shift + Page Up</span><span class="rvts21">. You can also hold it – the light-blue cursor will rapidly jump on Markers up in the Piano Roll, and in the meantime you can look for the desired fragment of the movie by watching FCEUX screen.</span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts29">&gt;&gt;</span><span class="rvts21">" button (fast forward) jumps on Markers forward. In the above picture, if you press the "</span><span class="rvts29">&gt;&gt;</span><span class="rvts21">", the light-blue cursor will jump to frame 22 (where the Marker 2 is located). With this button you can rapidly skip to the game events forward in the movie. But in case the next Marker is out of the Greenzone range, emulator would need some time to process the unknown frames, so such jump may take some time. This button's keyboard analog is </span><span class="rvts30">Shift + Page Down</span><span class="rvts21">. You can click and hold this button as well.</span></p>
-<p class="rvps10"><span class="rvts21">As an experiment, try to make a test movie of about 1000 frames in size and set a dozen of Markers, one per every 30-50 frames. Then hold </span><span class="rvts30">Shift</span><span class="rvts21"> and tap some </span><span class="rvts25">Page Up</span><span class="rvts21"> / </span><span class="rvts25">Page Down</span><span class="rvts21"> keys to feel the convenience of the fast scrolling. Alternatively you can roll the mouse wheel while holding the </span><span class="rvts30">Shift</span><span class="rvts21"> key.</span></p>
-<p class="rvps10"><a name="progressbar"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Below these 5 buttons you can see a progress bar and three checkboxes.</span></p>
-<p class="rvps10"><span class="rvts21">The </span><span class="rvts25">Progress bar</span><span class="rvts21"> helps to estimate the time needed for Playback seeking. Immediate jumps to any frame are only possible after FCEUX emulated the game up to the target frame by applying your movie as a game Input to get the actual game state for the frame. After the actual game state was rendered at least once, it is saved into the Greenzone, so next time the emulator can instantly jump to that frame, granted that Input above the frame didn't change. If the Input was changed, a new emulation attempt is required, because even the smallest change in buttonpresses may cause serious changes in the gameplay chronology. Thus after every such change the Greenzone is automatically truncated, removing the data of all those frames that might be affected by the new Input. These frames must be emulated again, and it takes some time.</span></p>
-<p class="rvps10"><span class="rvts21">So, when you send the Playback cursor to a frame far from the Greenzone, instead of immediate jump the light-blue cursor starts </span><span class="rvts37">seeking</span><span class="rvts21"> to that frame. A shadow of the light-blue cursor will be blinking at the target line of the Piano Roll, and the game images on the FCEUX screen will rapidly change as the Playback cursor runs to the target.</span></p>
-<p class="rvps10"><span class="rvts21">In this case you'll have to wait. The seek time depends on the distance between the target frame and the end of the Greenzone, on your computer power and a few other factors. The progress bar helps to estimate the waiting time. If you don't want to wait, left-click on the progress bar (in addition to being an indicator, it's also a button) or use the </span><span class="rvts26">Cancel Seeking</span><span class="rvts21"> hotkey (</span><span class="rvts26">Esc</span><span class="rvts21"> by default). Then the target frame will quit blinking, the light-blue cursor will stop and the emulation will be paused.</span></p>
-<p class="rvps10"><span class="rvts21">While Playback is seeking you may change the target by clicking on the desired frame row in the icons column of the Piano Roll. If you pause the emulator during seeking, the light-blue cursor will freeze and the target frame blinking will slow down, but the seeking won't be cancelled – when you unpause, the Playback cursor will continue running to the target and stop automatically after hitting it.</span></p>
-<p class="rvps10"><span class="rvts21">This Progress bar is also used when loading and saving Taseditor project files to disk.</span></p>
-<p class="rvps10"><a name="turbo-seek"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts25">Turbo seek</span><span class="rvts21">" checkbox allows to change the seeking speed. When the Turbo is on, FCEUX emulates the game on the highest speed possible, reducing the seeking time tenfold. So, if you seek to a distant frame, check that option. But during the TASing process its often necessary to see all the intermediate frames, not just the last one. In such cases you should uncheck the checkbox and maybe even slow down the emulation with the </span><span class="rvts26">-</span><span class="rvts21"> and </span><span class="rvts26">=</span><span class="rvts21"> hotkeys to ensure you're not missing any important detail of the gameplay.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts25">Follow cursor</span><span class="rvts21">" checkbox forces the Piano Roll to follow the movement of the Playback cursor and autoscroll the view so that the light-blue cursor is always visible. This allows you to observe the Input played back when the emulator is unpaused. But when you edit the movie you should uncheck this option to prevent the Piano Roll from running away from the edited spot.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts25">Auto-restore last position</span><span class="rvts21">" checkbox makes the Playback automatically start seeking when the Playback cursor was moved back by the Greenzone. Every time you change an Input, the Greenzone is truncated after the first changed frame, forgetting old events that became irrelevant after that change. The Playback cursor must always be inside the Greenzone, so it steps back along with it. With the auto-restore checkbox you can instantly see new events on these frames. When the checkbox is checked, any Input modification triggers the replaying of the changed segment, helping you to compare different scenarios of the game events.</span></p>
-<p class="rvps10"><span class="rvts21">Thanks to auto-restore, TASers can focus on Input editing and rapidly go over many approaches to playing current segment of the movie. This method of TASing will be described later.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="recorder"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-recorder.png"/></p>
-<p class="rvps10"><span class="rvts21">Below the Playback you can find the Recorder section. The </span><span class="rvts25">Recorder </span><span class="rvts21">is used to record buttons Input from keyboard (or gamepad) into the movie, just like in regular playing using any emulator.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts25">Recording</span><span class="rvts21">" checkbox turns the Recording mode on and off. Before you start recording any physical keypresses, make sure the Playback cursor is on the frame you want to record from. Then either press the "</span><span class="rvts26">Toggle Read-only</span><span class="rvts21">" hotkey (</span><span class="rvts26">Q</span><span class="rvts21"> key by default), or click the Recording checkbox. The word "Recording" will appear in the TAS Editor window caption, and the message "Movie is now Read+Write" will appear on the FCEUX screen. Now you can either unpause the emulator and play the game normally, or type the buttons frame-by-frame using the </span><span class="rvts26">Frame Advance</span><span class="rvts21"> hotkey. As the playback goes forward, the movie will fill with the data on the buttons you press.</span></p>
-<p class="rvps10"><span class="rvts21">You may rerecord the same segment of the movie multiple times, overwriting the old button log with new buttonpresses data. If you don't like how a segment was played (e.g. the character fell into a pit), put the Playback cursor before the frame where you made wrong buttonpresses (e.g. the </span><span class="rvts29">A</span><span class="rvts21"> button was pressed too late) and resume Recording, this time pressing buttons properly.</span></p>
-<p class="rvps10"><span class="rvts21">When the segment is ready, turn the Recording mode off to prevent accidental erasing of the Input when replaying the movie. Uncheck the checkbox by mouse click or via the hotkey. When TASing in Taseditor, the Recording checkbox is usually unchecked, because direct Input editing is preferred to Recording.</span></p>
-<p class="rvps10"><span class="rvts21">It's recommended to rationally combine the Recorder features with those of the Piano Roll. For long and easy segments of the game it may be convenient to record buttonpresses from the keyboard or a handy USB-gamepad, but for small dislocated edits the mouse is way better.</span></p>
-<p class="rvps10"><a name="superimpose"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts25">Superimpose</span><span class="rvts21">" checkbox in the Recorder section allows to combine the existing Input with the newly recorded data on the same segment of the movie. For example, you can draw the </span><span class="rvts29">R</span><span class="rvts21"> buttonpresses on rather long segment with a single mouse stroke, to make the character run right. Then you can enable the "Superimpose" option, turn on Recording and play the game by pressing only jump and shoot buttons, without the need to hold </span><span class="rvts29">Right</span><span class="rvts21">. The character in the game will still run right, jumping and shooting on command.</span></p>
-<p class="rvps10"><span class="rvts21">Unlike other checkboxes, the "Superimpose" option has three possible states. In addition to "enabled" and "disabled" it can also be in an interim state between these two. The third state works like this: when the player presses some gamepad buttons during Recording, these buttons are recorded in place of old Input. But if the player presses no buttons during Recording, the old Input on these frames is not overwritten.</span></p>
-<p class="rvps10"><a name="UsePattern"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts25">Use pattern</span><span class="rvts21">" checkbox applies current pattern to the process of buttons Recording. The name of the current pattern can be seen in the upper right corner of TAS Editor window (the last item of the main menu). If you click this menu item, a pop-down menu will appear, allowing you to choose another pattern from the list.</span></p>
-<p class="rvps10"><span class="rvts21">Patterns are used to speed up the process of entering monotonous buttonpresses and releases. For example, when you need to shoot at maximum rate (that is, alternate 1 frame of pressing </span><span class="rvts29">B</span><span class="rvts21"> and 1 frame when </span><span class="rvts29">B</span><span class="rvts21"> is released), you can just choose the "</span><span class="rvts37">Alternating (1010...)</span><span class="rvts21">" pattern and hold the </span><span class="rvts29">B</span><span class="rvts21"> button without caring about manual mashing. Thanks to the pattern, the </span><span class="rvts29">B</span><span class="rvts21"> buttonpresses will be recorded only for every other frame.</span></p>
-<p class="rvps10"><a name="multitracking"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Besides the checkboxes the Recorder section also contains radio buttons that implement the </span><span class="rvts25">multitracking</span><span class="rvts21"> feature.</span></p>
-<p class="rvps10"><span class="rvts25">Multitrack Recording</span><span class="rvts21"> greatly simplifies the traditional method of TASing games made for 2 or more players. Instead of pressing buttons of both gamepads at once, you can record a short segment of controlling the Player 1 and then record actions of Player 2 on the same segment of the movie.</span></p>
-<p class="rvps10"><span class="rvts21">By default the Recorder is set to recording "All" pads. You can choose a single pad by clicking the respective radio button ("1P", "2P", etc – the number of available gamepads depends on your project type). You can also use the "</span><span class="rvts26">Switch current Multitracking mode</span><span class="rvts21">" hotkey (</span><span class="rvts26">W</span><span class="rvts21"> key by default). Now during the Recording the emulator will accept only the chosen player's buttonpresses, and the Piano Roll columns for other pads won't change even if you accidentally press another player's buttons.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="splicer"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-splicer.png"/></p>
-<p class="rvps10"><span class="rvts21">The </span><span class="rvts25">Splicer</span><span class="rvts21"> section comes after the Recorder. It's dedicated to displaying the most necessary data used in non-linear editing of the movie.</span></p>
-<p class="rvps10"><span class="rvts21">Despite the similar sounding, editing TASes is totally different from using a non-linear video editing software, because Taseditor only allows you to edit Input, not the finished video footage (Output). The resulting video stream is built by the game itself.</span></p>
-<p class="rvps10"><span class="rvts21">In this section you can see the information on current Selection size: how many rows and columns are covered. With this info you can use the Selection as a measuring scale (ruler). E.g. to find the temporal distance between two in-game events, click the frame of the first event and stretch the Selection to the frame of another – all those frames will be selected, and in the Splicer section the message "Selection: </span><span class="rvts37">N</span><span class="rvts21"> rows, </span><span class="rvts37">M</span><span class="rvts21"> columns" will tell you the number of frames in question.</span></p>
-<p class="rvps10"><span class="rvts21">Also, here is the info about the Clipboard contents: whether it contains an Input that could be pasted to any place in the movie. When an Input is copied to the Clipboard, this line displays total amount of frames copied. The Clipboard data is stored independently of Taseditor, and it's kept there even after you close FCEUX, until some other application copies its own data to the Clipboard.</span></p>
-<p class="rvps10"><span class="rvts21">The "Splicer" section has no controls, because all Input splicing commands are kept in the Edit menu item and are assigned with accelerator keys. In actual TASing process it's recommended to use the keyboard combinations, because they're easy to remember and the working speed increases immensely.</span></p>
-<p class="rvps10"><a name="splicing-operations"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts22">The list of all Editing functions</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Basically, these are the standard functions of any text editor, but in Taseditor they can be applied to Input in the middle of emulation, which allows to analyze the results on the fly and flexibly tune your plans.</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts22">Copy </span><span class="rvts21">(</span><span class="rvts30">Ctrl + C</span><span class="rvts21">) – copies the Input of all selected frames to the Clipboard.</span></li>
-<li class="rvps10"><span class="rvts22">Paste </span><span class="rvts21">(</span><span class="rvts30">Ctrl + V</span><span class="rvts21">) – pastes the Clipboard contents into the movie, starting from the position of the Selection cursor. Old Input data on the frames is replaced by the new data, or combined together if the "Superimpose" option in Recorder section is checked.</span></li>
-<li class="rvps10"><span class="rvts22">Paste Insert </span><span class="rvts21">(</span><span class="rvts30">Ctrl + </span><span class="rvts30">Shift</span><span class="rvts30"> + </span><span class="rvts30">V</span><span class="rvts21">) – expands the movie and inserts the Clipboard content at the position of the Selection cursor. Old movie data is shifted down.</span></li>
-<li class="rvps10"><span class="rvts22">Clear </span><span class="rvts21">(</span><span class="rvts30">Delete</span><span class="rvts21">) – clears selected frames, removing all buttonpresses from them.</span></li>
-<li class="rvps10"><span class="rvts22">Cut </span><span class="rvts21">(</span><span class="rvts30">Ctrl + X</span><span class="rvts21">) = </span><span class="rvts22">Copy</span><span class="rvts21"> + </span><span class="rvts22">Clear</span><span class="rvts21"> – copies Input from the selected movie segment and clears the segment.</span></li>
-<li class="rvps10"><span class="rvts22">Delete </span><span class="rvts21">(</span><span class="rvts30">Ctrl + Delete</span><span class="rvts21">) – removes selected frames from the movie, shifting all the following frames up in their place. A handy way to move Input up.</span></li>
-<li class="rvps10"><span class="rvts22">Insert </span><span class="rvts21">(</span><span class="rvts30">Ctrl + Shift + Insert</span><span class="rvts21">) – inserts blank frame into the movie before every selected frame, shifting </span><span class="rvts21">existing</span><span class="rvts21"> Input down. A handy way to move Input down.</span></li>
-<li class="rvps10"><span class="rvts22">Clone </span><span class="rvts21">(</span><span class="rvts30">Ctrl + Insert</span><span class="rvts21">) – similar to </span><span class="rvts22">Insert</span><span class="rvts21">, but instead of blank frames it inserts a copy of selected frames. Usually this is the preferred way of </span><span class="rvts21">moving Input down.</span></li>
-<li class="rvps10"><span class="rvts22">Insert number of frames </span><span class="rvts21">(</span><span class="rvts30">Insert</span><span class="rvts21">) – allows to insert any number of frames at the position of the Selection cursor. When you press the </span><span class="rvts30">Insert</span><span class="rvts21"> key, a small window pops up and prompts you to enter the number of frames to insert. Type the number and click OK. If you change your mind, press Cancel (Esc) to hide the window.</span></li>
-<li class="rvps10"><span class="rvts22">Truncate</span><span class="rvts21"> – removes all frames of the movie, starting from the frame next to the Selection cursor. It's a rarely used function, so it has no hotkey, it's only available through the main menu or by the right-click.</span></li>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="playback"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-playback.png"></p>
+<p class="rvps7"><span class="rvts20">The top section is allotted to the Playback controls. The </span><span class="rvts22">Playback</span><span class="rvts20"> is the component of Taseditor dedicated to handle game emulation: keep it paused, replay in any direction, rewind to desired frame and so on. It allows to treat video games as straightforwardly as if they were regular video recordings, disregarding the interactivity element inherent to them.</span></p>
+<p class="rvps7"><span class="rvts20">There are 5 buttons at the top of the window.</span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts26">||</span><span class="rvts20">" button (pause/resume) is simple graphical analog of the </span><span class="rvts23">Pause Emulation</span><span class="rvts20"> hotkey. When you click it, the game emulation either pauses or resumes. However, if your mouse has a middle button, it's easier to press it instead of clicking the "</span><span class="rvts26">||</span><span class="rvts20">" button, in this case you won't need to move the mouse cursor to the Playback section.</span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts26">&gt;</span><span class="rvts20">" button (step forward / advance 1 frame) moves the light-blue cursor 1 frame down, forcing FCEUX to emulate one frame if necessary. You can either click that button or click and hold it to make several steps forward. This button's keyboard analog is </span><span class="rvts27">Shift + Down</span><span class="rvts20">. If your mouse has a wheel, it's easier to hold the right mouse button and scroll the wheel 1 step down instead of using the "</span><span class="rvts26">&gt;</span><span class="rvts20">" button.</span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts26">&lt;</span><span class="rvts20">" button (step back / rewind 1 frame) moves the Playback cursor 1 frame up, displaying the previous frame's events in the FCEUX window. You can hold the button as well, when you wish to go several frames back. This button has its hotkey </span><span class="rvts23">Frame Rewind</span><span class="rvts20"> (mapped to </span><span class="rvts23">Backspace</span><span class="rvts20"> key by default), and has a keyboard analog: </span><span class="rvts27">Shift + Up</span><span class="rvts20">. If your mouse has a wheel, it's easier to hold the right mouse button and scroll the wheel 1 step up instead of using "</span><span class="rvts26">&lt;</span><span class="rvts20">" button.</span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts26">&lt;&lt;</span><span class="rvts20">" button (fast rewind) also moves the Playback cursor back, just not by 1 frame but by multiple frames at once. This button moves the light-blue cursor to the frame where the nearest upper Marker is located. In the above picture, if you press the "</span><span class="rvts26">&lt;&lt;</span><span class="rvts20">", the light-blue cursor will jump to frame 12 (where the Marker 1 is set). Using this button you may quickly go back to the beginning of the edited segment or to any other past moment of the movie. The keyboard analog for this button is </span><span class="rvts27">Shift + Page Up</span><span class="rvts20">. You can also hold it – the light-blue cursor will rapidly jump on Markers up in the Piano Roll, and in the meantime you can look for the desired fragment of the movie by watching FCEUX screen.</span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts26">&gt;&gt;</span><span class="rvts20">" button (fast forward) jumps on Markers forward. In the above picture, if you press the "</span><span class="rvts26">&gt;&gt;</span><span class="rvts20">", the light-blue cursor will jump to frame 22 (where the Marker 2 is located). With this button you can rapidly skip to the game events forward in the movie. But in case the next Marker is out of the Greenzone range, emulator would need some time to process the unknown frames, so such jump may take some time. This button's keyboard analog is </span><span class="rvts27">Shift + Page Down</span><span class="rvts20">. You can click and hold this button as well.</span></p>
+<p class="rvps7"><span class="rvts20">As an experiment, try to make a test movie of about 1000 frames in size and set a dozen of Markers, one per every 30-50 frames. Then hold </span><span class="rvts27">Shift</span><span class="rvts20"> and tap some </span><span class="rvts22">Page Up</span><span class="rvts20"> / </span><span class="rvts22">Page Down</span><span class="rvts20"> keys to feel the convenience of the fast scrolling. Alternatively you can roll the mouse wheel while holding the </span><span class="rvts27">Shift</span><span class="rvts20"> key.</span></p>
+<p class="rvps7"><a name="progressbar"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Below these 5 buttons you can see a progress bar and three checkboxes.</span></p>
+<p class="rvps7"><span class="rvts20">The </span><span class="rvts22">Progress bar</span><span class="rvts20"> helps to estimate the time needed for Playback seeking. Immediate jumps to any frame are only possible after FCEUX emulated the game up to the target frame by applying your movie as a game Input to get the actual game state for the frame. After the actual game state was rendered at least once, it is saved into the Greenzone, so next time the emulator can instantly jump to that frame, granted that Input above the frame didn't change. If the Input was changed, a new emulation attempt is required, because even the smallest change in buttonpresses may cause serious changes in the gameplay chronology. Thus after every such change the Greenzone is automatically truncated, removing the data of all those frames that might be affected by the new Input. These frames must be emulated again, and it takes some time.</span></p>
+<p class="rvps7"><span class="rvts20">So, when you send the Playback cursor to a frame far from the Greenzone, instead of immediate jump the light-blue cursor starts </span><span class="rvts33">seeking</span><span class="rvts20"> to that frame. A shadow of the light-blue cursor will be blinking at the target line of the Piano Roll, and the game images on the FCEUX screen will rapidly change as the Playback cursor runs to the target.</span></p>
+<p class="rvps7"><span class="rvts20">In this case you'll have to wait. The seek time depends on the distance between the target frame and the end of the Greenzone, on your computer power and a few other factors. The progress bar helps to estimate the waiting time. If you don't want to wait, left-click on the progress bar (in addition to being an indicator, it's also a button) or use the </span><span class="rvts23">Cancel Seeking</span><span class="rvts20"> hotkey (</span><span class="rvts23">Esc</span><span class="rvts20"> by default). Then the target frame will quit blinking, the light-blue cursor will stop and the emulation will be paused.</span></p>
+<p class="rvps7"><span class="rvts20">While Playback is seeking you may change the target by clicking on the desired frame row in the icons column of the Piano Roll. If you pause the emulator during seeking, the light-blue cursor will freeze and the target frame blinking will slow down, but the seeking won't be cancelled – when you unpause, the Playback cursor will continue running to the target and stop automatically after hitting it.</span></p>
+<p class="rvps7"><span class="rvts20">This Progress bar is also used when loading and saving Taseditor project files to disk.</span></p>
+<p class="rvps7"><a name="turbo-seek"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts22">Turbo seek</span><span class="rvts20">" checkbox allows to change the seeking speed. When the Turbo is on, FCEUX emulates the game on the highest speed possible, reducing the seeking time tenfold. So, if you seek to a distant frame, check that option. But during the TASing process its often necessary to see all the intermediate frames, not just the last one. In such cases you should uncheck the checkbox and maybe even slow down the emulation with the </span><span class="rvts23">-</span><span class="rvts20"> and </span><span class="rvts23">=</span><span class="rvts20"> hotkeys to ensure you're not missing any important detail of the gameplay.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts22">Follow cursor</span><span class="rvts20">" checkbox forces the Piano Roll to follow the movement of the Playback cursor and autoscroll the view so that the light-blue cursor is always visible. This allows you to observe the Input played back when the emulator is unpaused. But when you edit the movie you should uncheck this option to prevent the Piano Roll from running away from the edited spot.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts22">Auto-restore last position</span><span class="rvts20">" checkbox makes the Playback automatically start seeking when the Playback cursor was moved back by the Greenzone. Every time you change an Input, the Greenzone is truncated after the first changed frame, forgetting old events that became irrelevant after that change. The Playback cursor must always be inside the Greenzone, so it steps back along with it. With the auto-restore checkbox you can instantly see new events on these frames. When the checkbox is checked, any Input modification triggers the replaying of the changed segment, helping you to compare different scenarios of the game events.</span></p>
+<p class="rvps7"><span class="rvts20">Thanks to auto-restore, TASers can focus on Input editing and rapidly go over many approaches to playing current segment of the movie. This method of TASing will be described later.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="recorder"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-recorder.png"></p>
+<p class="rvps7"><span class="rvts20">Below the Playback you can find the Recorder section. The </span><span class="rvts22">Recorder </span><span class="rvts20">is used to record buttons Input from keyboard (or gamepad) into the movie, just like in regular playing using any emulator.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts22">Recording</span><span class="rvts20">" checkbox turns the Recording mode on and off. Before you start recording any physical keypresses, make sure the Playback cursor is on the frame you want to record from. Then either press the "</span><span class="rvts23">Toggle Read-only</span><span class="rvts20">" hotkey (</span><span class="rvts23">Q</span><span class="rvts20"> key by default), or click the Recording checkbox. The word "Recording" will appear in the TAS Editor window caption, and the message "Movie is now Read+Write" will appear on the FCEUX screen. Now you can either unpause the emulator and play the game normally, or type the buttons frame-by-frame using the </span><span class="rvts23">Frame Advance</span><span class="rvts20"> hotkey. As the playback goes forward, the movie will fill with the data on the buttons you press.</span></p>
+<p class="rvps7"><span class="rvts20">You may rerecord the same segment of the movie multiple times, overwriting the old button log with new buttonpresses data. If you don't like how a segment was played (e.g. the character fell into a pit), put the Playback cursor before the frame where you made wrong buttonpresses (e.g. the </span><span class="rvts26">A</span><span class="rvts20"> button was pressed too late) and resume Recording, this time pressing buttons properly.</span></p>
+<p class="rvps7"><span class="rvts20">When the segment is ready, turn the Recording mode off to prevent accidental erasing of the Input when replaying the movie. Uncheck the checkbox by mouse click or via the hotkey. When TASing in Taseditor, the Recording checkbox is usually unchecked, because direct Input editing is preferred to Recording.</span></p>
+<p class="rvps7"><span class="rvts20">It's recommended to rationally combine the Recorder features with those of the Piano Roll. For long and easy segments of the game it may be convenient to record buttonpresses from the keyboard or a handy USB-gamepad, but for small dislocated edits the mouse is way better.</span></p>
+<p class="rvps7"><a name="superimpose"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts22">Superimpose</span><span class="rvts20">" checkbox in the Recorder section allows to combine the existing Input with the newly recorded data on the same segment of the movie. For example, you can draw the </span><span class="rvts26">R</span><span class="rvts20"> buttonpresses on rather long segment with a single mouse stroke, to make the character run right. Then you can enable the "Superimpose" option, turn on Recording and play the game by pressing only jump and shoot buttons, without the need to hold </span><span class="rvts26">Right</span><span class="rvts20">. The character in the game will still run right, jumping and shooting on command.</span></p>
+<p class="rvps7"><span class="rvts20">Unlike other checkboxes, the "Superimpose" option has three possible states. In addition to "enabled" and "disabled" it can also be in an interim state between these two. The third state works like this: when the player presses some gamepad buttons during Recording, these buttons are recorded in place of old Input. But if the player presses no buttons during Recording, the old Input on these frames is not overwritten.</span></p>
+<p class="rvps7"><a name="UsePattern"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts22">Use pattern</span><span class="rvts20">" checkbox applies current pattern to the process of buttons Recording. The name of the current pattern can be seen in the upper right corner of TAS Editor window (the last item of the main menu). If you click this menu item, a pop-down menu will appear, allowing you to choose another pattern from the list.</span></p>
+<p class="rvps7"><span class="rvts20">Patterns are used to speed up the process of entering monotonous buttonpresses and releases. For example, when you need to shoot at maximum rate (that is, alternate 1 frame of pressing </span><span class="rvts26">B</span><span class="rvts20"> and 1 frame when </span><span class="rvts26">B</span><span class="rvts20"> is released), you can just choose the "</span><span class="rvts33">Alternating (1010...)</span><span class="rvts20">" pattern and hold the </span><span class="rvts26">B</span><span class="rvts20"> button without caring about manual mashing. Thanks to the pattern, the </span><span class="rvts26">B</span><span class="rvts20"> buttonpresses will be recorded only for every other frame.</span></p>
+<p class="rvps7"><a name="multitracking"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Besides the checkboxes the Recorder section also contains radio buttons that implement the </span><span class="rvts22">multitracking</span><span class="rvts20"> feature.</span></p>
+<p class="rvps7"><span class="rvts22">Multitrack Recording</span><span class="rvts20"> greatly simplifies the traditional method of TASing games made for 2 or more players. Instead of pressing buttons of both gamepads at once, you can record a short segment of controlling the Player 1 and then record actions of Player 2 on the same segment of the movie.</span></p>
+<p class="rvps7"><span class="rvts20">By default the Recorder is set to recording "All" pads. You can choose a single pad by clicking the respective radio button ("1P", "2P", etc – the number of available gamepads depends on your project type). You can also use the "</span><span class="rvts23">Switch current Multitracking mode</span><span class="rvts20">" hotkey (</span><span class="rvts23">W</span><span class="rvts20"> key by default). Now during the Recording the emulator will accept only the chosen player's buttonpresses, and the Piano Roll columns for other pads won't change even if you accidentally press another player's buttons.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="splicer"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-splicer.png"></p>
+<p class="rvps7"><span class="rvts20">The </span><span class="rvts22">Splicer</span><span class="rvts20"> section comes after the Recorder. It's dedicated to displaying the most necessary data used in non-linear editing of the movie.</span></p>
+<p class="rvps7"><span class="rvts20">Despite the similar sounding, editing TASes is totally different from using a non-linear video editing software, because Taseditor only allows you to edit Input, not the finished video footage (Output). The resulting video stream is built by the game itself.</span></p>
+<p class="rvps7"><span class="rvts20">In this section you can see the information on current Selection size: how many rows and columns are covered. With this info you can use the Selection as a measuring scale (ruler). E.g. to find the temporal distance between two in-game events, click the frame of the first event and stretch the Selection to the frame of another – all those frames will be selected, and in the Splicer section the message "Selection: </span><span class="rvts33">N</span><span class="rvts20"> rows, </span><span class="rvts33">M</span><span class="rvts20"> columns" will tell you the number of frames in question.</span></p>
+<p class="rvps7"><span class="rvts20">Also, here is the info about the Clipboard contents: whether it contains an Input that could be pasted to any place in the movie. When an Input is copied to the Clipboard, this line displays total amount of frames copied. The Clipboard data is stored independently of Taseditor, and it's kept there even after you close FCEUX, until some other application copies its own data to the Clipboard.</span></p>
+<p class="rvps7"><span class="rvts20">The "Splicer" section has no controls, because all Input splicing commands are kept in the Edit menu item and are assigned with accelerator keys. In actual TASing process it's recommended to use the keyboard combinations, because they're easy to remember and the working speed increases immensely.</span></p>
+<p class="rvps7"><a name="splicing-operations"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts21">The list of all Editing functions</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Basically, these are the standard functions of any text editor, but in Taseditor they can be applied to Input in the middle of emulation, which allows to analyze the results on the fly and flexibly tune your plans.</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts21">Copy </span><span class="rvts20">(</span><span class="rvts27">Ctrl + C</span><span class="rvts20">) – copies the Input of all selected frames to the Clipboard.</span></li>
+ <li class="rvps7"><span class="rvts21">Paste </span><span class="rvts20">(</span><span class="rvts27">Ctrl + V</span><span class="rvts20">) – pastes the Clipboard contents into the movie, starting from the position of the Selection cursor. Old Input data on the frames is replaced by the new data, or combined together if the "Superimpose" option in Recorder section is checked.</span></li>
+ <li class="rvps7"><span class="rvts21">Paste Insert </span><span class="rvts20">(</span><span class="rvts27">Ctrl + </span><span class="rvts27">Shift</span><span class="rvts27"> + </span><span class="rvts27">V</span><span class="rvts20">) – expands the movie and inserts the Clipboard content at the position of the Selection cursor. Old movie data is shifted down.</span></li>
+ <li class="rvps7"><span class="rvts21">Clear </span><span class="rvts20">(</span><span class="rvts27">Delete</span><span class="rvts20">) – clears selected frames, removing all buttonpresses from them.</span></li>
+ <li class="rvps7"><span class="rvts21">Cut </span><span class="rvts20">(</span><span class="rvts27">Ctrl + X</span><span class="rvts20">) = </span><span class="rvts21">Copy</span><span class="rvts20"> + </span><span class="rvts21">Clear</span><span class="rvts20"> – copies Input from the selected movie segment and clears the segment.</span></li>
+ <li class="rvps7"><span class="rvts21">Delete </span><span class="rvts20">(</span><span class="rvts27">Ctrl + Delete</span><span class="rvts20">) – removes selected frames from the movie, shifting all the following frames up in their place. A handy way to move Input up.</span></li>
+ <li class="rvps7"><span class="rvts21">Insert </span><span class="rvts20">(</span><span class="rvts27">Ctrl + Shift + Insert</span><span class="rvts20">) – inserts blank frame into the movie before every selected frame, shifting </span><span class="rvts20">existing</span><span class="rvts20"> Input down. A handy way to move Input down.</span></li>
+ <li class="rvps7"><span class="rvts21">Clone </span><span class="rvts20">(</span><span class="rvts27">Ctrl + Insert</span><span class="rvts20">) – similar to </span><span class="rvts21">Insert</span><span class="rvts20">, but instead of blank frames it inserts a copy of selected frames. Usually this is the preferred way of </span><span class="rvts20">moving Input down.</span></li>
+ <li class="rvps7"><span class="rvts21">Insert number of frames </span><span class="rvts20">(</span><span class="rvts27">Insert</span><span class="rvts20">) – allows to insert any number of frames at the position of the Selection cursor. When you press the </span><span class="rvts27">Insert</span><span class="rvts20"> key, a small window pops up and prompts you to enter the number of frames to insert. Type the number and click OK. If you change your mind, press Cancel (Esc) to hide the window.</span></li>
+ <li class="rvps7"><span class="rvts21">Truncate</span><span class="rvts20"> – removes all frames of the movie, starting from the frame next to the Selection cursor. It's a rarely used function, so it has no hotkey, it's only available through the main menu or by the right-click.</span></li>
 </ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When TASing in Taseditor you're going to most often use </span><span class="rvts30">Ctrl + Delete</span><span class="rvts21"> (</span><span class="rvts22">Delete Frames</span><span class="rvts21">) and </span><span class="rvts30">Ctrl + Insert</span><span class="rvts21"> (</span><span class="rvts22">Clone Frames</span><span class="rvts21">) to quickly move edited segments up/down in the frame list, thus performing certain in-game actions sooner or later.</span></p>
-<p class="rvps10"><span class="rvts21">Unlike FCEUX hotkeys, these key combinations can't be changed, so if you have some other emulator functions assigned to </span><span class="rvts30">Ctrl</span><span class="rvts21">, </span><span class="rvts30">Insert</span><span class="rvts21"> or </span><span class="rvts30">Delete</span><span class="rvts21">, you'll have to change emulator settings.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="lua"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-lua.png"/></p>
-<p class="rvps10"><span class="rvts21">Under the Splicer you can see a small </span><span class="rvts25">Lua</span><span class="rvts21"> section.</span></p>
-<p class="rvps10"><span class="rvts21">There is one inactive button and one checkbox here, their purpose will be described later. While you're not familiar with Lua scripting, you won't need this section.</span></p>
-<p class="rvps10"><span class="rvts21">The Lua scripting language allows to automate some part of TASers' work and to create your own plug-ins for Taseditor.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="bookmarks"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-bookmarks.png"/></p>
-<p class="rvps10"><span class="rvts21">Then goes the Bookmarks/Branches section. We should speak of </span><span class="rvts21">Bookmarks</span><span class="rvts21"> at a greater length here.</span></p>
-<p class="rvps10"><span class="rvts25">Bookmarks</span><span class="rvts21"> are the evolution of emulator savestates. Before Taseditor the savestates were the main way to navigate the movie, with their help TASers return back to the place of a mistake and fix it. In Taseditor there are better navigation methods, but this one was left too.</span></p>
-<p class="rvps10"><span class="rvts21">You have 10 slots for Bookmarks in your disposal. These are numbered with digits from 0 to 9. You can set any of 10 Bookmarks to any movie frame, pointing to that frame with the Playback cursor beforehand.</span></p>
-<p class="rvps10"><span class="rvts25">Example 1. </span><span class="rvts21">Set the light-blue cursor to the frame you want a Bookmark at, and make an emulator savestate (</span><span class="rvts30">Shift</span><span class="rvts21"> + </span><span class="rvts26">F1</span><span class="rvts21">-</span><span class="rvts26">F10</span><span class="rvts21"> by default). For example, press </span><span class="rvts26">Shift + F1</span><span class="rvts21"> to set the first Bookmark. It will appear in the Bookmarks List, flashing one time with the red light.</span></p>
-<p class="rvps10"><span class="rvts25">Example 2. </span><span class="rvts21">Set the light-blue cursor to the needed frame and right-click on any line in the Bookmarks List. For example, right-click on the line 2 to create the Bookmark in slot 2.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">You can undo the Bookmark set operations with </span><span class="rvts30">Ctrl + Z</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">The Bookmarks List displays the frame number where each Bookmark is sat, and the real time of setting the Bookmark. If you hover the mouse cursor over a Bookmark's time (the right column in the List), you'll see the screenshot from the game.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When setting a Bookmark, Taseditor saves to the chosen slot the data about the Playback cursor position and entire movie contents. Now at any time you can either make a "</span><span class="rvts37">spatial jump to the Bookmark</span><span class="rvts21">" (simply returning the Playback cursor to the bookmarked place), or make a "</span><span class="rvts37">temporal jump to the Bookmark</span><span class="rvts21">", returning the whole movie to the state saved in the Bookmark slot.</span></p>
-<p class="rvps10"><span class="rvts21">To jump to a Bookmark in space, left-click on the </span><span class="rvts25">left half</span><span class="rvts21"> of the needed Bookmark (the pale-colored half of the Bookmarks List where the frame number is displayed). Or use the keyboard – press the corresponding number key (numeric keys </span><span class="rvts26">0</span><span class="rvts21">-</span><span class="rvts26">9</span><span class="rvts21"> are under the </span><span class="rvts26">F1</span><span class="rvts21">-</span><span class="rvts26">F10</span><span class="rvts21"> keys). You can notice the jump by seeing the light-blue cursor movement in the Piano Roll and by green flash in the Bookmarks List.</span></p>
-<p class="rvps10"><span class="rvts21">To jump to a Bookmark in time, left-click on the </span><span class="rvts25">right half</span><span class="rvts21"> of the needed Bookmark (the brighter-colored half of the Bookmark List where the time is displayed). Or load the corresponding emulator savestate (keys </span><span class="rvts26">F1</span><span class="rvts21">-</span><span class="rvts26">F10</span><span class="rvts21"> by default). If any Input was changed during this jump in time (since it returns to its state at the time of creating the Bookmark), the Bookmark flashes with blue color, otherwise it flashes green, like in a simple Playback cursor jump. As usual, when an Input changes, the Greenzone truncates automatically. And of course you can undo the change using </span><span class="rvts30">Ctrl + Z</span><span class="rvts21"> to revert the movie to its state before the time jump to the Bookmark.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">So, part of the Bookmarks may be used to speed up your movie navigation. For example, set a Bookmark at the beginning of current game level to be able to return the Playback cursor to that frame and replay the level events anytime. You could use a Marker for the same purpose, but the advantage of the Bookmarks is that you can instantly jump to a Bookmark from any remote segment of the movie, no matter how many Markers are set in between, while to reach the desired Marker you would have to jump on the neighbor Markers.</span></p>
-<p class="rvps10"><span class="rvts21">Another part of the Bookmarks can be used to store alternative approaches to playing the same game segment. When TASing complex games we can't always immediately evaluate the optimality of a playing strategy. Sometimes TASer needs to record several different versions of playing the same segment and then carefully compare the resulting movies, choosing the most appropriate one to be left in the final TAS.</span></p>
-<p class="rvps10"><span class="rvts21">In traditional TASing every such movie is kept in separate file, so to switch between the alternative movies (or rather between alternative branches of your main movie) you need to load corresponding savestates created when recording these playthroughs.</span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-branches.png"/></p>
-<p class="rvps10"><span class="rvts21">In Taseditor all saved branches of the movie are held together, forming the hierarchy called the </span><span class="rvts25">Branches Tree</span><span class="rvts21">. To switch between the alternative branches you need to load the corresponding Bookmark, thus returning the working movie to one of the prepared versions. Basically, it's the same as before. But now we can visualize all alternative playthroughs in a graph scheme to facilitate TASer's comprehension of the multitude of options.</span></p>
-<p class="rvps10"><span class="rvts21">When you test a couple of approaches to playing the 2nd level of the game, the 1st level playthrough remains the same in both branches, so the discrepancy of the Input starts not from the beginning, but from the 2nd level. So, if you left the Bookmark 1 before the beginning of the 2nd level, you'll see the fork in the graph starting from the card 1.</span></p>
-<p class="rvps10"><span class="rvts21">As an experiment, create a new project and make a very short movie. Then set the Playback cursor to the end of existing Input and save a Bookmark into the first slot (</span><span class="rvts26">Shift + F1</span><span class="rvts21">). Advance a few frames after that Bookmark and draw some buttonpresses, then play this new Input and save to Bookmark 2 (</span><span class="rvts26">Shift + F2</span><span class="rvts21">). Now return the movie to the first Bookmark state (press </span><span class="rvts26">F1</span><span class="rvts21">) and add some buttonpresses after the bookmarked frame again, but make sure they are different from the last time. Play this new Input to the end and save the 3rd Bookmark (</span><span class="rvts26">Shift + F3</span><span class="rvts21">) or any other.</span></p>
-<p class="rvps10"><span class="rvts21">Now click on the header of the Bookmarks section ("Bookmarks/Branches" label). The Bookmarks List view will change to the Branches Tree view. If the third Bookmark movie differs from the second Bookmark movie, and the difference starts after the first Bookmark frame, you'll see the picture similar to the above. The cloudlet symbolizes the beginning of the movie (the root of the hierarchy). Bookmarks are presented with cards of corresponding numbers. The blue-colored number stands for the current Bookmark containing the branch that corresponds to working movie (currently displayed in the Piano Roll). If the working movie was changed after saving/loading this Bookmark, you'll see the fireball descending from the current Bookmark.</span></p>
-<p class="rvps10"><span class="rvts21">Red lines connect those Bookmarks that are compatible with the chronology of current working movie. For example, if you set one Bookmark at the end of every level, all such Bookmarks will be sitting on one red line, because the movie of every next Bookmark is actually composed from the movie of previous Bookmark plus an additional level playthrough.</span></p>
-<p class="rvps10"><span class="rvts21">The Branches Tree also displays current Playback cursor position. Try dragging the cursor in the Piano Roll up and down, or just play the whole movie back (press </span><span class="rvts30">Shift + Home</span><span class="rvts21"> and unpause the emulator). You will see how the light-blue arrow pointer rides on red lines that connect all Bookmarks of the current timeline. E.g. if the current branch is the Bookmark 2, the pointer will ride that route: "cloudlet -&gt; Bookmark 1 -&gt; Bookmark 2". And the other Bookmarks will be left aside, because they represent an alternative timeline, conflicting with the currently played movie.</span></p>
-<p class="rvps10"><span class="rvts21">The Branches Tree is automatically rebuilt each time you create a new Bookmark or change an existing Bookmark's contents. Depending on how complex your project is, the graph may appear differently.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps21"><table width="10%" border="0" cellpadding="1" cellspacing="2" style="border-width: 0px;">
-<tr valign="top">
-<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example1.png"/></p>
-</td>
-<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example2.png"/></p>
-</td>
-<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example3.png"/></p>
-</td>
-</tr>
-<tr valign="top">
-<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example4.png"/></p>
-</td>
-<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example5.png"/></p>
-</td>
-<td><p class="rvps5"><img alt="" style="padding : 1px;" src="lib/branches-example6.png"/></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When TASing in Taseditor you're going to most often use </span><span class="rvts27">Ctrl + Delete</span><span class="rvts20"> (</span><span class="rvts21">Delete Frames</span><span class="rvts20">) and </span><span class="rvts27">Ctrl + Insert</span><span class="rvts20"> (</span><span class="rvts21">Clone Frames</span><span class="rvts20">) to quickly move edited segments up/down in the frame list, thus performing certain in-game actions sooner or later.</span></p>
+<p class="rvps7"><span class="rvts20">Unlike FCEUX hotkeys, these key combinations can't be changed, so if you have some other emulator functions assigned to </span><span class="rvts27">Ctrl</span><span class="rvts20">, </span><span class="rvts27">Insert</span><span class="rvts20"> or </span><span class="rvts27">Delete</span><span class="rvts20">, you'll have to change emulator settings.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="lua"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-lua.png"></p>
+<p class="rvps7"><span class="rvts20">Under the Splicer you can see a small </span><span class="rvts22">Lua</span><span class="rvts20"> section.</span></p>
+<p class="rvps7"><span class="rvts20">There is one inactive button and one checkbox here, their purpose will be described later. While you're not familiar with Lua scripting, you won't need this section.</span></p>
+<p class="rvps7"><span class="rvts20">The Lua scripting language allows to automate some part of TASers' work and to create your own plug-ins for Taseditor.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="bookmarks"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-bookmarks.png"></p>
+<p class="rvps7"><span class="rvts20">Then goes the Bookmarks/Branches section. We should speak of </span><span class="rvts20">Bookmarks</span><span class="rvts20"> at a greater length here.</span></p>
+<p class="rvps7"><span class="rvts22">Bookmarks</span><span class="rvts20"> are the evolution of emulator savestates. Before Taseditor the savestates were the main way to navigate the movie, with their help TASers return back to the place of a mistake and fix it. In Taseditor there are better navigation methods, but this one was left too.</span></p>
+<p class="rvps7"><span class="rvts20">You have 10 slots for Bookmarks in your disposal. These are numbered with digits from 0 to 9. You can set any of 10 Bookmarks to any movie frame, pointing to that frame with the Playback cursor beforehand.</span></p>
+<p class="rvps7"><span class="rvts22">Example 1. </span><span class="rvts20">Set the light-blue cursor to the frame you want a Bookmark at, and make an emulator savestate (</span><span class="rvts27">Shift</span><span class="rvts20"> + </span><span class="rvts23">F1</span><span class="rvts20">-</span><span class="rvts23">F10</span><span class="rvts20"> by default). For example, press </span><span class="rvts23">Shift + F1</span><span class="rvts20"> to set the first Bookmark. It will appear in the Bookmarks List, flashing one time with the red light.</span></p>
+<p class="rvps7"><span class="rvts22">Example 2. </span><span class="rvts20">Set the light-blue cursor to the needed frame and right-click on any line in the Bookmarks List. For example, right-click on the line 2 to create the Bookmark in slot 2.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">You can undo the Bookmark set operations with </span><span class="rvts27">Ctrl + Z</span><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20">The Bookmarks List displays the frame number where each Bookmark is sat, and the real time of setting the Bookmark. If you hover the mouse cursor over a Bookmark's time (the right column in the List), you'll see the screenshot from the game.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When setting a Bookmark, Taseditor saves to the chosen slot the data about the Playback cursor position and entire movie contents. Now at any time you can either make a "</span><span class="rvts33">spatial jump to the Bookmark</span><span class="rvts20">" (simply returning the Playback cursor to the bookmarked place), or make a "</span><span class="rvts33">temporal jump to the Bookmark</span><span class="rvts20">", returning the whole movie to the state saved in the Bookmark slot.</span></p>
+<p class="rvps7"><span class="rvts20">To jump to a Bookmark in space, left-click on the </span><span class="rvts22">left half</span><span class="rvts20"> of the needed Bookmark (the pale-colored half of the Bookmarks List where the frame number is displayed). Or use the keyboard – press the corresponding number key (numeric keys </span><span class="rvts23">0</span><span class="rvts20">-</span><span class="rvts23">9</span><span class="rvts20"> are under the </span><span class="rvts23">F1</span><span class="rvts20">-</span><span class="rvts23">F10</span><span class="rvts20"> keys). You can notice the jump by seeing the light-blue cursor movement in the Piano Roll and by green flash in the Bookmarks List.</span></p>
+<p class="rvps7"><span class="rvts20">To jump to a Bookmark in time, left-click on the </span><span class="rvts22">right half</span><span class="rvts20"> of the needed Bookmark (the brighter-colored half of the Bookmark List where the time is displayed). Or load the corresponding emulator savestate (keys </span><span class="rvts23">F1</span><span class="rvts20">-</span><span class="rvts23">F10</span><span class="rvts20"> by default). If any Input was changed during this jump in time (since it returns to its state at the time of creating the Bookmark), the Bookmark flashes with blue color, otherwise it flashes green, like in a simple Playback cursor jump. As usual, when an Input changes, the Greenzone truncates automatically. And of course you can undo the change using </span><span class="rvts27">Ctrl + Z</span><span class="rvts20"> to revert the movie to its state before the time jump to the Bookmark.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">So, part of the Bookmarks may be used to speed up your movie navigation. For example, set a Bookmark at the beginning of current game level to be able to return the Playback cursor to that frame and replay the level events anytime. You could use a Marker for the same purpose, but the advantage of the Bookmarks is that you can instantly jump to a Bookmark from any remote segment of the movie, no matter how many Markers are set in between, while to reach the desired Marker you would have to jump on the neighbor Markers.</span></p>
+<p class="rvps7"><span class="rvts20">Another part of the Bookmarks can be used to store alternative approaches to playing the same game segment. When TASing complex games we can't always immediately evaluate the optimality of a playing strategy. Sometimes TASer needs to record several different versions of playing the same segment and then carefully compare the resulting movies, choosing the most appropriate one to be left in the final TAS.</span></p>
+<p class="rvps7"><span class="rvts20">In traditional TASing every such movie is kept in separate file, so to switch between the alternative movies (or rather between alternative branches of your main movie) you need to load corresponding savestates created when recording these playthroughs.</span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-branches.png"></p>
+<p class="rvps7"><span class="rvts20">In Taseditor all saved branches of the movie are held together, forming the hierarchy called the </span><span class="rvts22">Branches Tree</span><span class="rvts20">. To switch between the alternative branches you need to load the corresponding Bookmark, thus returning the working movie to one of the prepared versions. Basically, it's the same as before. But now we can visualize all alternative playthroughs in a graph scheme to facilitate TASer's comprehension of the multitude of options.</span></p>
+<p class="rvps7"><span class="rvts20">When you test a couple of approaches to playing the 2nd level of the game, the 1st level playthrough remains the same in both branches, so the discrepancy of the Input starts not from the beginning, but from the 2nd level. So, if you left the Bookmark 1 before the beginning of the 2nd level, you'll see the fork in the graph starting from the card 1.</span></p>
+<p class="rvps7"><span class="rvts20">As an experiment, create a new project and make a very short movie. Then set the Playback cursor to the end of existing Input and save a Bookmark into the first slot (</span><span class="rvts23">Shift + F1</span><span class="rvts20">). Advance a few frames after that Bookmark and draw some buttonpresses, then play this new Input and save to Bookmark 2 (</span><span class="rvts23">Shift + F2</span><span class="rvts20">). Now return the movie to the first Bookmark state (press </span><span class="rvts23">F1</span><span class="rvts20">) and add some buttonpresses after the bookmarked frame again, but make sure they are different from the last time. Play this new Input to the end and save the 3rd Bookmark (</span><span class="rvts23">Shift + F3</span><span class="rvts20">) or any other.</span></p>
+<p class="rvps7"><span class="rvts20">Now click on the header of the Bookmarks section ("Bookmarks/Branches" label). The Bookmarks List view will change to the Branches Tree view. If the third Bookmark movie differs from the second Bookmark movie, and the difference starts after the first Bookmark frame, you'll see the picture similar to the above. The cloudlet symbolizes the beginning of the movie (the root of the hierarchy). Bookmarks are presented with cards of corresponding numbers. The blue-colored number stands for the current Bookmark containing the branch that corresponds to working movie (currently displayed in the Piano Roll). If the working movie was changed after saving/loading this Bookmark, you'll see the fireball descending from the current Bookmark.</span></p>
+<p class="rvps7"><span class="rvts20">Red lines connect those Bookmarks that are compatible with the chronology of current working movie. For example, if you set one Bookmark at the end of every level, all such Bookmarks will be sitting on one red line, because the movie of every next Bookmark is actually composed from the movie of previous Bookmark plus an additional level playthrough.</span></p>
+<p class="rvps7"><span class="rvts20">The Branches Tree also displays current Playback cursor position. Try dragging the cursor in the Piano Roll up and down, or just play the whole movie back (press </span><span class="rvts27">Shift + Home</span><span class="rvts20"> and unpause the emulator). You will see how the light-blue arrow pointer rides on red lines that connect all Bookmarks of the current timeline. E.g. if the current branch is the Bookmark 2, the pointer will ride that route: "cloudlet -&gt; Bookmark 1 -&gt; Bookmark 2". And the other Bookmarks will be left aside, because they represent an alternative timeline, conflicting with the currently played movie.</span></p>
+<p class="rvps7"><span class="rvts20">The Branches Tree is automatically rebuilt each time you create a new Bookmark or change an existing Bookmark's contents. Depending on how complex your project is, the graph may appear differently.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps13">
+<table width="10%" border="0" cellpadding="1" cellspacing="2" style="border-width: 0px; border-spacing: 2px; margin: 0px auto;">
+ <tr valign="top">
+  <td style="padding: 1px;">
+   <p class="rvps3"><img alt="" style="padding : 1px;" src="lib/branches-example1.png"></p>
+  </td>
+  <td style="padding: 1px;">
+   <p class="rvps3"><img alt="" style="padding : 1px;" src="lib/branches-example2.png"></p>
+  </td>
+  <td style="padding: 1px;">
+   <p class="rvps3"><img alt="" style="padding : 1px;" src="lib/branches-example3.png"></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td style="padding: 1px;">
+   <p class="rvps3"><img alt="" style="padding : 1px;" src="lib/branches-example4.png"></p>
+  </td>
+  <td style="padding: 1px;">
+   <p class="rvps3"><img alt="" style="padding : 1px;" src="lib/branches-example5.png"></p>
+  </td>
+  <td style="padding: 1px;">
+   <p class="rvps3"><img alt="" style="padding : 1px;" src="lib/branches-example6.png"></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">You can hover the mouse cursor over any Bookmark number to see some info about it.</span></p>
-<p class="rvps10"><span class="rvts21">Also you can make a </span><span class="rvts25">single left-click</span><span class="rvts21"> on any Bookmark card to send the Playback cursor to the bookmarked frame (spatial jump). By clicking the cloudlet you send the Playback cursor to the beginning of the movie (equal to pressing </span><span class="rvts30">Shift + Home</span><span class="rvts21">), and by clicking the fireball you send the Playback cursor to the end of the movie (equal to </span><span class="rvts30">Shift + End</span><span class="rvts21">).</span></p>
-<p class="rvps10"><span class="rvts21">Besides, you can </span><span class="rvts25">double-click</span><span class="rvts21"> a Bookmark by the left mouse button to jump to the Bookmark in time. The working movie reverts to the Bookmark's state, the Bookmark becomes current branch and the Playback cursor moves to the Bookmark frame.</span></p>
-<p class="rvps10"><span class="rvts21">Finally, you can </span><span class="rvts25">right-click</span><span class="rvts21"> any card to save the current movie state and the Playback cursor position to the chosen Bookmark.</span></p>
-<p class="rvps10"><span class="rvts21">As you see, the Branches Tree view supports the same functionality as the Bookmarks List view does. Thus it's recommended for advanced users to stick to the Branch Tree view, because it provides more info for a TASer. When you want to switch back to the Bookmarks List view, click the section header again (the "Branches" label).</span></p>
-<p class="rvps10"><span class="rvts21">Now try using all 10 available slots. Each time slightly change the current movie Input and watch the changes on the FCEUX screen before saving them to a Bookmark. The position of each card on the Tree is defined by the Input preceding the bookmarked frame. It's implied that TASer always watches the edited Input segment in the emulator, and only then saves the tested work into a Bookmark.</span></p>
-<p class="rvps10"><span class="rvts21">In hands of an experienced TASer Bookmarks become very powerful tool, allowing to greatly simplify the TASing process and implement ideas that look impossible. Usually, an idea is labeled "impossible" only due to its monstrous unbounded complexity. But lower the complexity a hundred times (with the help of tools and a smart process organization), and the achievement moves from the "impossible" category to just "hard" one.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="history"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-history.png"/></p>
-<p class="rvps10"><span class="rvts21">The </span><span class="rvts25">History</span><span class="rvts21"> section is located below the Bookmarks.</span></p>
-<p class="rvps10"><span class="rvts21">Taseditor keeps strict accounting of all operations in the current project. Every user's action that changes an Input, Markers or Bookmarks is recorded to the log displayed in this section.</span></p>
-<p class="rvps10"><span class="rvts21">The current item of the History Log is highlighted blue. Other items have white background if they aren't related to the current item, or purple background if they represent the changes made in the same place as the current item. For example, if current History Log item was created by changing the Input of frame 27, all other items affecting that frame will be highlighted purple.</span></p>
-<p class="rvps10"><span class="rvts21">To undo logged operations you can either use the </span><span class="rvts30">Ctrl + Z</span><span class="rvts21"> and </span><span class="rvts30">Ctrl + Y</span><span class="rvts21"> keys, or simply click </span><span class="rvts21">any line in the History Log with the left mouse button, thus returning the movie to the time when the clicked item was created. </span></p>
-<p class="rvps10"><span class="rvts21">You may notice the purple cursor line appearing in the Piano Roll for a short moment. It's supposed to stress your attention on the place of the undone changes.</span></p>
-<p class="rvps10"><span class="rvts21">The maximum number of undo levels can be set in the </span><a class="rvts38" href="ProgramCustomization.html#Setmaxundolevels">Config</a><span class="rvts21"> menu, that value defines the maximum size of the History Log and therefore the amount of used memory.</span></p>
-<p class="rvps10"><span class="rvts21">The full list of all possible records in the History Log can be found in the </span><a class="rvts38" href="Operations.html">Reference</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><a name="selection"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/toolbox-selection.png"/></p>
-<p class="rvps10"><span class="rvts21">At the very bottom of the Toolbox there are 4 buttons controlling the Selection cursor.</span></p>
-<p class="rvps10"><span class="rvts21">The meaning of the "</span><span class="rvts29">&lt;&lt;</span><span class="rvts21">" and "</span><span class="rvts29">&gt;&gt;</span><span class="rvts21">" buttons can be easily guessed by analogy with the upper "</span><span class="rvts29">&lt;&lt;</span><span class="rvts21">" and "</span><span class="rvts29">&gt;&gt;</span><span class="rvts21">" buttons in the Playback section. The upper part of TAS Editor window contains the Playback cursor-related elements, and the lower window part contains Selection cursor-related elements.</span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts29">&lt;&lt;</span><span class="rvts21">" button (jump back) moves the Selection cursor </span><span class="rvts21">to the frame where the nearest upper Marker is located. </span><span class="rvts21">In the above picture it will jump from frame 27 to frame 22 where the Marker 2 is set. Using this button you can quickly return the selection to the beginning of the edited segment or to any marked segment. This button has its keyboard analog: </span><span class="rvts30">Ctrl + Page Up</span><span class="rvts21">. You can hold this button to let the dark-blue cursor rapidly jump on Markers up in the Piano Roll.</span></p>
-<p class="rvps10"><span class="rvts21">The "</span><span class="rvts29">&gt;&gt;</span><span class="rvts21">" button (jump forward) moves the Selection cursor to the nearest marked frame below it. In the above picture it will jump from frame 27 to a frame outside the visible area (where the next Marker is set), and Piano Roll will automatically scroll after the Selection cursor. Using this button you can quickly navigate down through the movie. This button has its keyboard analog: </span><span class="rvts30">Ctrl + Page Down</span><span class="rvts21">. You can hold this button as well.</span></p>
-<p class="rvps10"><span class="rvts21">Since the Selection cursor isn't tied to the game emulation, its jumps on Markers always happen instantly, regardless of the Greenzone presence on the target frame. So it's useful to read the Marker Notes one by one this way, watching them in the lower edit field and pressing </span><span class="rvts30">Ctrl + Page Down</span><span class="rvts21"> to make an instant jump to the next Note. </span><span class="rvts21">Besides </span><span class="rvts25">Page Up</span><span class="rvts21"> / </span><span class="rvts25">Page Down</span><span class="rvts21"> keys you can roll the mouse wheel while holding the </span><span class="rvts30">Ctrl</span><span class="rvts21"> key.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The buttons "</span><span class="rvts29">Similar</span><span class="rvts21">" and "</span><span class="rvts29">More</span><span class="rvts21">" are used for searching similar Notes. This is another experimental feature of Taseditor, and it will be described later.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps2"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Now you are familiar with fundamental principles of the program usage.</span></p>
-<p class="rvps10"><span class="rvts21">In the next chapter: </span><a class="rvts38" href="TASingProcess.html">systematic approach to TASing</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid;"><p class="rvps10"><span class="rvts25">PRACTICE: </span><span class="rvts21">Beat the World 1-1 in Super Mario Bros (or any other game) using only the mouse, without Recording.</span></p>
-<p class="rvps10"><span class="rvts21">No need to do a speedrun, just make yourself familiar with the routine of Input drawing / erasing and watching the results using the mouse wheel / middle mouse button.</span></p>
-<p class="rvps10"><span class="rvts25">Estimated time: </span><span class="rvts21">20-30 minutes.</span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">You can hover the mouse cursor over any Bookmark number to see some info about it.</span></p>
+<p class="rvps7"><span class="rvts20">Also you can make a </span><span class="rvts22">single left-click</span><span class="rvts20"> on any Bookmark card to send the Playback cursor to the bookmarked frame (spatial jump). By clicking the cloudlet you send the Playback cursor to the beginning of the movie (equal to pressing </span><span class="rvts27">Shift + Home</span><span class="rvts20">), and by clicking the fireball you send the Playback cursor to the end of the movie (equal to </span><span class="rvts27">Shift + End</span><span class="rvts20">).</span></p>
+<p class="rvps7"><span class="rvts20">Besides, you can </span><span class="rvts22">double-click</span><span class="rvts20"> a Bookmark by the left mouse button to jump to the Bookmark in time. The working movie reverts to the Bookmark's state, the Bookmark becomes current branch and the Playback cursor moves to the Bookmark frame.</span></p>
+<p class="rvps7"><span class="rvts20">Finally, you can </span><span class="rvts22">right-click</span><span class="rvts20"> any card to save the current movie state and the Playback cursor position to the chosen Bookmark.</span></p>
+<p class="rvps7"><span class="rvts20">As you see, the Branches Tree view supports the same functionality as the Bookmarks List view does. Thus it's recommended for advanced users to stick to the Branch Tree view, because it provides more info for a TASer. When you want to switch back to the Bookmarks List view, click the section header again (the "Branches" label).</span></p>
+<p class="rvps7"><span class="rvts20">Now try using all 10 available slots. Each time slightly change the current movie Input and watch the changes on the FCEUX screen before saving them to a Bookmark. The position of each card on the Tree is defined by the Input preceding the bookmarked frame. It's implied that TASer always watches the edited Input segment in the emulator, and only then saves the tested work into a Bookmark.</span></p>
+<p class="rvps7"><span class="rvts20">In hands of an experienced TASer Bookmarks become very powerful tool, allowing to greatly simplify the TASing process and implement ideas that look impossible. Usually, an idea is labeled "impossible" only due to its monstrous unbounded complexity. But lower the complexity a hundred times (with the help of tools and a smart process organization), and the achievement moves from the "impossible" category to just "hard" one.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="history"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-history.png"></p>
+<p class="rvps7"><span class="rvts20">The </span><span class="rvts22">History</span><span class="rvts20"> section is located below the Bookmarks.</span></p>
+<p class="rvps7"><span class="rvts20">Taseditor keeps strict accounting of all operations in the current project. Every user's action that changes an Input, Markers or Bookmarks is recorded to the log displayed in this section.</span></p>
+<p class="rvps7"><span class="rvts20">The current item of the History Log is highlighted blue. Other items have white background if they aren't related to the current item, or purple background if they represent the changes made in the same place as the current item. For example, if current History Log item was created by changing the Input of frame 27, all other items affecting that frame will be highlighted purple.</span></p>
+<p class="rvps7"><span class="rvts20">To undo logged operations you can either use the </span><span class="rvts27">Ctrl + Z</span><span class="rvts20"> and </span><span class="rvts27">Ctrl + Y</span><span class="rvts20"> keys, or simply click </span><span class="rvts20">any line in the History Log with the left mouse button, thus returning the movie to the time when the clicked item was created.&nbsp;</span></p>
+<p class="rvps7"><span class="rvts20">You may notice the purple cursor line appearing in the Piano Roll for a short moment. It's supposed to stress your attention on the place of the undone changes.</span></p>
+<p class="rvps7"><span class="rvts20">The maximum number of undo levels can be set in the </span><a class="rvts34" href="ProgramCustomization.html#Setmaxundolevels">Config</a><span class="rvts20"> menu, that value defines the maximum size of the History Log and therefore the amount of used memory.</span></p>
+<p class="rvps7"><span class="rvts20">The full list of all possible records in the History Log can be found in the </span><a class="rvts34" href="Operations.html">Reference</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="selection"></a><span class="rvts20"><br/></span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/toolbox-selection.png"></p>
+<p class="rvps7"><span class="rvts20">At the very bottom of the Toolbox there are 4 buttons controlling the Selection cursor.</span></p>
+<p class="rvps7"><span class="rvts20">The meaning of the "</span><span class="rvts26">&lt;&lt;</span><span class="rvts20">" and "</span><span class="rvts26">&gt;&gt;</span><span class="rvts20">" buttons can be easily guessed by analogy with the upper "</span><span class="rvts26">&lt;&lt;</span><span class="rvts20">" and "</span><span class="rvts26">&gt;&gt;</span><span class="rvts20">" buttons in the Playback section. The upper part of TAS Editor window contains the Playback cursor-related elements, and the lower window part contains Selection cursor-related elements.</span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts26">&lt;&lt;</span><span class="rvts20">" button (jump back) moves the Selection cursor </span><span class="rvts20">to the frame where the nearest upper Marker is located. </span><span class="rvts20">In the above picture it will jump from frame 27 to frame 22 where the Marker 2 is set. Using this button you can quickly return the selection to the beginning of the edited segment or to any marked segment. This button has its keyboard analog: </span><span class="rvts27">Ctrl + Page Up</span><span class="rvts20">. You can hold this button to let the dark-blue cursor rapidly jump on Markers up in the Piano Roll.</span></p>
+<p class="rvps7"><span class="rvts20">The "</span><span class="rvts26">&gt;&gt;</span><span class="rvts20">" button (jump forward) moves the Selection cursor to the nearest marked frame below it. In the above picture it will jump from frame 27 to a frame outside the visible area (where the next Marker is set), and Piano Roll will automatically scroll after the Selection cursor. Using this button you can quickly navigate down through the movie. This button has its keyboard analog: </span><span class="rvts27">Ctrl + Page Down</span><span class="rvts20">. You can hold this button as well.</span></p>
+<p class="rvps7"><span class="rvts20">Since the Selection cursor isn't tied to the game emulation, its jumps on Markers always happen instantly, regardless of the Greenzone presence on the target frame. So it's useful to read the Marker Notes one by one this way, watching them in the lower edit field and pressing </span><span class="rvts27">Ctrl + Page Down</span><span class="rvts20"> to make an instant jump to the next Note. </span><span class="rvts20">Besides </span><span class="rvts22">Page Up</span><span class="rvts20"> / </span><span class="rvts22">Page Down</span><span class="rvts20"> keys you can roll the mouse wheel while holding the </span><span class="rvts27">Ctrl</span><span class="rvts20"> key.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The buttons "</span><span class="rvts26">Similar</span><span class="rvts20">" and "</span><span class="rvts26">More</span><span class="rvts20">" are used for searching similar Notes. This is another experimental feature of Taseditor, and it will be described later.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Now you are familiar with fundamental principles of the program usage.</span></p>
+<p class="rvps7"><span class="rvts20">In the next chapter: </span><a class="rvts34" href="TASingProcess.html">systematic approach to TASing</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps7"><span class="rvts22">PRACTICE: </span><span class="rvts20">Beat the World 1-1 in Super Mario Bros (or any other game) using only the mouse, without Recording.</span></p>
+   <p class="rvps7"><span class="rvts20">No need to do a speedrun, just make yourself familiar with the routine of Input drawing / erasing and watching the results using the mouse wheel / middle mouse button.</span></p>
+   <p class="rvps7"><span class="rvts22">Estimated time: </span><span class="rvts20">20-30 minutes.</span></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/feature-tour">Easily create Help documents</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com">Easy EBook and documentation generator</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

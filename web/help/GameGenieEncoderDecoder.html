@@ -1,104 +1,295 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Game Genie Encoder/Decoder</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("GameGenieEncoderDecoder");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Game Genie Encoder/Decoder</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="Game Genie Decoder/Encoder,Making Game Genie codes">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Game Genie Encoder/Decoder">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Game Genie Encoder/Decoder" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Game Genie Encoder/Decoder</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Debug.html">Debug</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Debug.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="CodeDataLogger.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="LuaScripting.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">Game Genie Decoder/Encoder</span></p>
-<p><br/></p>
-<p>This will take an NES address space PRG address ($8000-$FFFF), a comparison value (for 8-letter GG codes; refer to a Game Genie code FAQ for an explanation of what this does), and a Value that replaces the addressed byte.</p>
-<p><br/></p>
-<p>Filling in the Address and Value fields will produce a 6-letter code; if you also fill out the Compare field, it will produce an 8-letter code. &nbsp;The code so produced will appear in the Game Genie Code box immediately; you can then click "Add to Cheat List" to activate it.</p>
-<p><br/></p>
-<p>To decrypt a Game Genie code, enter it into the Game Genie Code box, and the Address and Value fields will be automatically filled in, as will the Compare field if it was an 8-letter code.</p>
-<p><span class="rvts16"><br/></span></p>
-<p><span class="rvts16">Adding Game Genie codes</span></p>
-<p><br/></p>
-<p>In the Game Genie Code Decoder/Encoder window, type the code into the Game Genie Code box and click "Add to Cheat List", which will add it to the <a class="rvts18" href="CheatSearch.html">Cheat Search</a> cheat list. You can then enable/disable them by double-clicking the code in the box (a * means the code is active).</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Making Game Genie codes permanent</span></p>
-<p><br/></p>
-<p>Using the Game Genie Code Decoder/Encoder, enter in your code in the "Game Genie Code" box, and under "Possible Affected ROM File Addresses", a list of possible matches (usually from 1 to 5) is displayed. Using the built-in Hex Editor, go to the first listed address in the ROM, and change its value to the value given in the "Value" box (of the GG code Decoder/Encoder window). If the desired effect isn't achieved, undo the change (Ctrl+Z) and try the next address. Repeat until the desired effect is achieved, and then save the ROM.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">How do I make my own Game Genie codes?</span></p>
-<p><br/></p>
-<p>First of all, you must:</p>
-<p><br/></p>
-<p>* have a decent amount of ASM knowledge;</p>
-<p>* know how to use the debugger;</p>
-<p>* understand NES PRG-ROM bank switching.</p>
-<p><br/></p>
-<p>Once you've found a part of PRG-ROM you want to change to create a code effect, snap the <a class="rvts18" href="Debugger.html">Debugger</a> (if it's not so already) and find the code's location in the PRG-ROM's address space ($8000-$FFFF) (you'll want the debugger snapped so the game won't swap banks out from under you). Then, using the built-in <a class="rvts18" href="HexEditor.html">Hex Editor</a>, view the NES memory and go to the PRG-ROM address you wish to modify, then right-click the byte and choose "Create Game Genie Code at this Address". The Game Genie Code Decoder/Encoder will appear, with the Address and Compare boxes filled in (the Compare box represents the address's original value). Enter the new value into the "Value" box. </p>
-<p><br/></p>
-<p>An alternative way to enter the code is to locate the desired address in the debugger, and then middle-click on it, which will summon the GG Code Decoder/Encoder. Then enter the code as described above.</p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free EPub and documentation generator</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="GameGenieEncoderDecoder"
+		  data-hnd-context="40"
+		  data-hnd-title="Game Genie Encoder/Decoder"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Debug.html">Debug</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Debug.html" title="Debug" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="CodeDataLogger.html" title="Code/Data Logger" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="LuaScripting.html" title="Lua Scripting" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Game Genie Encoder/Decoder</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">Game Genie Decoder/Encoder</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This will take an NES address space PRG address ($8000-$FFFF), a comparison value (for 8-letter GG codes; refer to a Game Genie code FAQ for an explanation of what this does), and a Value that replaces the addressed byte.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Filling in the Address and Value fields will produce a 6-letter code; if you also fill out the Compare field, it will produce an 8-letter code. &nbsp;The code so produced will appear in the Game Genie Code box immediately; you can then click "Add to Cheat List" to activate it.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To decrypt a Game Genie code, enter it into the Game Genie Code box, and the Address and Value fields will be automatically filled in, as will the Compare field if it was an 8-letter code.</span></p>
+<p class="rvps2"><span class="rvts21"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Adding Game Genie codes</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">In the Game Genie Code Decoder/Encoder window, type the code into the Game Genie Code box and click "Add to Cheat List", which will add it to the </span><a class="rvts89" href="CheatSearch.html">Cheat Search</a><span class="rvts6"> cheat list. You can then enable/disable them by double-clicking the code in the box (a * means the code is active).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Making Game Genie codes permanent</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Using the Game Genie Code Decoder/Encoder, enter in your code in the "Game Genie Code" box, and under "Possible Affected ROM File Addresses", a list of possible matches (usually from 1 to 5) is displayed. Using the built-in Hex Editor, go to the first listed address in the ROM, and change its value to the value given in the "Value" box (of the GG code Decoder/Encoder window). If the desired effect isn't achieved, undo the change (Ctrl+Z) and try the next address. Repeat until the desired effect is achieved, and then save the ROM.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">How do I make my own Game Genie codes?</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">First of all, you must:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* have a decent amount of ASM knowledge;</span></p>
+<p class="rvps2"><span class="rvts6">* know how to use the debugger;</span></p>
+<p class="rvps2"><span class="rvts6">* understand NES PRG-ROM bank switching.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Once you've found a part of PRG-ROM you want to change to create a code effect, snap the </span><a class="rvts89" href="Debugger.html">Debugger</a><span class="rvts6"> (if it's not so already) and find the code's location in the PRG-ROM's address space ($8000-$FFFF) (you'll want the debugger snapped so the game won't swap banks out from under you). Then, using the built-in </span><a class="rvts89" href="HexEditor.html">Hex Editor</a><span class="rvts6">, view the NES memory and go to the PRG-ROM address you wish to modify, then right-click the byte and choose "Create Game Genie Code at this Address". The Game Genie Code Decoder/Encoder will appear, with the Address and Compare boxes filled in (the Compare box represents the address's original value). Enter the new value into the "Value" box.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">An alternative way to enter the code is to locate the desired address in the debugger, and then middle-click on it, which will summon the GG Code Decoder/Encoder. Then enter the code as described above.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Full-featured Kindle eBooks generator</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

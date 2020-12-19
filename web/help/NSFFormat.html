@@ -1,408 +1,599 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>NSF Format</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("NSFFormat");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>NSF Format</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="NSF Format">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="NSF Format" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>NSF Format</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Technicalinformation.html">Technical Information</a> &rsaquo;&rsaquo; <a href="Sound.html">Sound</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Sound.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="Sound.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="NESSound.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts27">NES Music Format Spec</span></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;---------------------</p>
-<p><br/></p>
-<p><br/></p>
-<p>By: Kevin Horton &nbsp;khorton@iquest.net</p>
-<p><br/></p>
-<p><br/></p>
-<p>NOTE:</p>
-<p>-----</p>
-<p><br/></p>
-<p><br/></p>
-<p>Remember that I am very willing to add stuff and update this spec. &nbsp;If</p>
-<p>you find a new sound chip or other change let me know and I will get back</p>
-<p>with you. &nbsp;E-mail to the above address. </p>
-<p><br/></p>
-<p><br/></p>
-<p>V1.61 - 06/27/2000 Updated spec a bit</p>
-<p>V1.60 - 06/01/2000 Updated Sunsoft, MMC5, and Namco chip information</p>
-<p>V1.50 - 05/28/2000 Updated FDS, added Sunsoft and Namco chips</p>
-<p>V1.32 - 11/27/1999 Added MMC5 register locations</p>
-<p>V1.30 - 11/14/1999 Added MMC5 audio bit, added some register info</p>
-<p>V1.20 - 09/12/1999 VRC and FDS prelim sound info added</p>
-<p>V1.00 - 05/11/1999 First official NSF specification file</p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p>This file encompasses a way to transfer NES music data in a small, easy to</p>
-<p>use format.</p>
-<p><br/></p>
-<p>The basic idea is one rips the music/sound code from an NES game and prepends</p>
-<p>a small header to the data.</p>
-<p><br/></p>
-<p>A program of some form (6502/sound emulator) then takes the data and loads</p>
-<p>it into the proper place into the 6502's address space, then inits and plays</p>
-<p>the tune.</p>
-<p><br/></p>
-<p>Here's an overview of the header:</p>
-<p><br/></p>
-<p>offset &nbsp;# of bytes &nbsp; Function</p>
-<p>----------------------------</p>
-<p><br/></p>
-<p>0000 &nbsp; &nbsp;5 &nbsp; STRING &nbsp;"NESM",01Ah &nbsp;; denotes an NES sound format file</p>
-<p>0005 &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Version number (currently 01h)</p>
-<p>0006 &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Total songs &nbsp; (1=1 song, 2=2 songs, etc)</p>
-<p>0007 &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Starting song (1= 1st song, 2=2nd song, etc)</p>
-<p>0008 &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) load address of data (8000-FFFF)</p>
-<p>000a &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) init address of data (8000-FFFF)</p>
-<p>000c &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) play address of data (8000-FFFF)</p>
-<p>000e &nbsp; &nbsp;32 &nbsp;STRING &nbsp;The name of the song, null terminated</p>
-<p>002e &nbsp; &nbsp;32 &nbsp;STRING &nbsp;The artist, if known, null terminated</p>
-<p>004e &nbsp; &nbsp;32 &nbsp;STRING &nbsp;The Copyright holder, null terminated</p>
-<p>006e &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) speed, in 1/1000000th sec ticks, NTSC (see text)</p>
-<p>0070 &nbsp; &nbsp;8 &nbsp; BYTE &nbsp; &nbsp;Bankswitch Init Values (see text, and FDS section)</p>
-<p>0078 &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) speed, in 1/1000000th sec ticks, PAL (see text)</p>
-<p>007a &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;PAL/NTSC bits:</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 0: if clear, this is an NTSC tune</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 0: if set, this is a PAL tune</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 1: if set, this is a dual PAL/NTSC tune</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bits 2-7: not used. they *must* be 0</p>
-<p>007b &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Extra Sound Chip Support</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 0: if set, this song uses VRCVI</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 1: if set, this song uses VRCVII</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 2: if set, this song uses FDS Sound</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 3: if set, this song uses MMC5 audio</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 4: if set, this song uses Namco 106</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bit 5: if set, this song uses Sunsoft FME-07</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bits 6,7: future expansion: they *must* be 0</p>
-<p>007c &nbsp; &nbsp;4 &nbsp; ---- &nbsp; &nbsp;4 extra bytes for expansion (must be 00h)</p>
-<p>0080 &nbsp; &nbsp;nnn ---- &nbsp; &nbsp;The music program/data follows</p>
-<p><br/></p>
-<p>This may look somewhat familiar; &nbsp;if so that's because this is somewhat</p>
-<p>sorta of based on the PSID file format for C64 music/sound.</p>
-<p><br/></p>
-<p><br/></p>
-<p>Loading a tune into RAM</p>
-<p>-----------------------</p>
-<p><br/></p>
-<p>If offsets 0070h to 0077h have 00h in them, then bankswitching is *not*</p>
-<p>used. &nbsp;If one or more bytes are something other than 00h then bankswitching</p>
-<p>is used. &nbsp;If bankswitching is used then the load address is still used,</p>
-<p>but you now use (ADDRESS AND 0FFFh) to determine where on the first bank</p>
-<p>to load the data.</p>
-<p><br/></p>
-<p><br/></p>
-<p>Each bank is 4K in size, and that means there are 8 of them for the</p>
-<p>entire 08000h-0ffffh range in the 6502's address space. &nbsp;You determine where</p>
-<p>in memory the data goes by setting bytes 070h thru 077h in the file.</p>
-<p>These determine the inital bank values that will be used, and hence where</p>
-<p>the data will be loaded into the address space.</p>
-<p><br/></p>
-<p>Here's an example:</p>
-<p><br/></p>
-<p>METROID.NSF will be used for the following explaination.</p>
-<p><br/></p>
-<p>The file is set up like so: &nbsp;(starting at 070h in the file)</p>
-<p><br/></p>
-<p><br/></p>
-<p>0070: 05 05 05 05 05 05 05 05 - 00 00 00 00 00 00 00 00</p>
-<p>0080: ... music data goes here...</p>
-<p><br/></p>
-<p>Since 0070h-0077h are something other than 00h, then we know that this</p>
-<p>tune uses bankswitching. &nbsp;The load address for the data is specified as</p>
-<p>08000h. &nbsp;We take this AND 0fffh and get 0000h, so we will load data in</p>
-<p>at byte 0 of bank 0, since data is loaded into the banks sequentially</p>
-<p>starting from bank 0 up until the music data is fully loaded.</p>
-<p><br/></p>
-<p>Metroid has 6 4K banks in it, numbered 0 through 5. &nbsp;The 6502's address</p>
-<p>space has 8 4K bankswitchable blocks on it, starting at 08000h-08fffh,</p>
-<p>09000h-09fffh, 0a000h-0afffh ... 0f000h-0ffffh. &nbsp;Each one of these is 4K in</p>
-<p>size, and the current bank is controlled by writes to 05ff8h thru 05fffh,</p>
-<p>one byte per bank. &nbsp;So, 05ff8h controls the 08000h-08fffh range, 05ff9h </p>
-<p>controls the 09000h-09fffh range, etc. up to 05fffh which controls the </p>
-<p>0f000h-0ffffh range. &nbsp;When the song is loaded into RAM, it is loaded into</p>
-<p>the banks and not the 6502's address space. &nbsp;Once this is done, then the</p>
-<p>bank control registers are written to set up the inital bank values.</p>
-<p>To do this, the value at 0070h in the file is written to 05ff8h, 0071h</p>
-<p>is written to 05ff9h, etc. all the way to 0077h is written to 05fffh.</p>
-<p>This is should be done before every call to the init routine.</p>
-<p><br/></p>
-<p>If the tune was not bankswitched, then it is simply loaded in at the </p>
-<p>specified load address, until EOF</p>
-<p><br/></p>
-<p><br/></p>
-<p>Initalizing a tune</p>
-<p>------------------</p>
-<p><br/></p>
-<p>This is pretty simple. &nbsp;Load the desired song # into the accumulator,</p>
-<p>minus 1 and set the X register to specify PAL (X=1) or NTSC (X=0).</p>
-<p>If this is a single standard tune (i.e. PAL *or* NTSC but not both)</p>
-<p>then the X register contents should not matter. &nbsp;Once the song # and</p>
-<p>optional PAL/NTSC standard are loaded, simply call the INIT address.</p>
-<p>Once init is done, it should perform an RTS.</p>
-<p><br/></p>
-<p><br/></p>
-<p>Playing a tune</p>
-<p>--------------</p>
-<p><br/></p>
-<p>Once the tune has been initalized, it can now be played. &nbsp;To do this,</p>
-<p>simply call the play address several times a second. &nbsp;How many times</p>
-<p>per second is determined by offsets 006eh and 006fh in the file.</p>
-<p>These bytes denote the speed of playback in 1/1000000ths of a second. &nbsp;</p>
-<p>For the "usual" 60Hz playback rate, set this to 411ah. &nbsp;</p>
-<p><br/></p>
-<p>To generate a differing playback rate, use this formula:</p>
-<p><br/></p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; 1000000</p>
-<p>PBRATE= ---------</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;speed</p>
-<p><br/></p>
-<p>Where PBRATE is the value you stick into 006e/006fh in the file, and</p>
-<p>speed is the desired speed in hertz. </p>
-<p><br/></p>
-<p><br/></p>
-<p>"Proper" way to load the tune</p>
-<p>-----------------------------</p>
-<p><br/></p>
-<p>1) If the tune is bankswitched, go to #3.</p>
-<p><br/></p>
-<p>2) Load the data into the 6502's address space starting at the specified</p>
-<p> &nbsp; load address. Go to #4.</p>
-<p><br/></p>
-<p>3) Load the data into a RAM area, starting at (start_address AND 0fffh).</p>
-<p><br/></p>
-<p>4) Tune load is done.</p>
-<p><br/></p>
-<p><br/></p>
-<p>"Proper" way to init a tune</p>
-<p>---------------------------</p>
-<p><br/></p>
-<p>1) Clear all RAM at 0000h-07ffh.</p>
-<p><br/></p>
-<p>2) Clear all RAM at 6000h-7fffh.</p>
-<p><br/></p>
-<p>3) Init the sound registers by writing 00h to 04000-0400Fh, 10h to 4010h,</p>
-<p> &nbsp; and 00h to 4011h-4013h.</p>
-<p><br/></p>
-<p>4) Set volume register 04015h to 00fh.</p>
-<p><br/></p>
-<p>5) If this is a banked tune, load the bank values from the header into</p>
-<p> &nbsp; 5ff8-5fffh.</p>
-<p><br/></p>
-<p>6) Set the accumulator and X registers for the desired song.</p>
-<p><br/></p>
-<p>7) Call the music init routine.</p>
-<p><br/></p>
-<p><br/></p>
-<p>"Proper" way to play a tune</p>
-<p>---------------------------</p>
-<p><br/></p>
-<p>1) Call the play address of the music at periodic intervals determined</p>
-<p> &nbsp; by the speed words. &nbsp;Which word to use is determined by which mode</p>
-<p> &nbsp; you are in- PAL or NTSC.</p>
-<p><br/></p>
-<p><br/></p>
-<p>Sound Chip Support</p>
-<p>------------------</p>
-<p><br/></p>
-<p>Byte 007bh of the file stores the sound chip flags. &nbsp;If a particular flag</p>
-<p>is set, those sound registers should be enabled. &nbsp;If the flag is clear,</p>
-<p>then those registers should be disabled.</p>
-<p><br/></p>
-<p>* VRCVI Uses registers 9000-9002, A000-A002, and B000-B002, write only.</p>
-<p><br/></p>
-<p>Caveats: 1) The above registers are *write only* and must not disrupt music</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;code that happens to be stored there.</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; 2) Major caveat: &nbsp;The A0 and A1 lines are flipped on a few games!!</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;If you rip the music and it sounds all funny, flip around </p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;the xxx1 and xxx2 register pairs. &nbsp;(i.e. 9001 and 9002) &nbsp;9000</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;and 9003 can be left untouched. &nbsp;I decided to do this since it </p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;would make things easier all around, and this means you only </p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;will have to change the music code in a very few places (6).</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Esper2 and Madara will need this change, while Castlevania 3j</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;will not for instance.</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; </p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; 3) See my VRCVI.TXT doc for a complete register description.</p>
-<p><br/></p>
-<p>* VRCVII Uses registers 9010 and 9030, write only.</p>
-<p><br/></p>
-<p>Caveats: 1) Same caveat as #1, above.</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; 2) See my VRCVII.TXT doc for a complete register description.</p>
-<p><br/></p>
-<p>* FDS Sound uses registers from 4040 through 4092.</p>
-<p><br/></p>
-<p>Caveats: 1) 6000-DFFF is assumed to be RAM, since 6000-DFFF is RAM on the</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;FDS. &nbsp;E000-FFFF is usually not included in FDS games because</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;it is the BIOS ROM. &nbsp;However, it can be used on FDS rips to help</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;the ripper (for modified play/init addresses).</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; 2) Bankswitching operates slightly different on FDS tunes. &nbsp;</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;5FF6 and 5FF7 control the banks 6000-6FFF and 7000-7FFF </p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;respectively. &nbsp;NSF header offsets 76h and 77h correspond to</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;*both* 6000-7FFF *AND* E000-FFFF. &nbsp;Keep this in mind!</p>
-<p><br/></p>
-<p>* MMC5 Sound Uses registers 5000-5015, write only as well as 5205 and 5206,</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;and 5C00-5FF5</p>
-<p><br/></p>
-<p>Caveats: 1) Generating a proper doc file. &nbsp;Be patient. &nbsp;</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; 2) 5205 and 5206 are a hardware 8*8 multiplier. &nbsp;The idea being</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;you write your two bytes to be multiplied into 5205 and 5206</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;and after doing so, you read the result back out. &nbsp;Still working</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;on what exactly triggers it (I think a write to either 5205</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;or 5206 triggers the multiply).</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; 3) 5C00-5FF5 should be RAM to emulate EXRAM while in MMC5 mode.</p>
-<p><br/></p>
-<p>Note: Thanks to Mamiya for the EXRAM info.</p>
-<p><br/></p>
-<p><br/></p>
-<p>* Namco 106 Sound Uses registers 4800 and F800. &nbsp;</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;This works similar to VRC7. &nbsp;4800 is the "data" port which is</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;readable and writable, while F800 is the "address" port and is</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;writable only.</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;The address is 7 bits plus a "mode" bit. &nbsp;Bit 7 controls</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;address auto-incrementing. &nbsp;If bit 7 is set, the address will</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;auto-increment after a byte of data is read or written from/to</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4800.</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$40 ffffffff f:frequency L</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$42 ffffffff f:frequency M</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$44 ---sssff f:frequency H s:tone length (8-s)*4 in 4bit-samples</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$46 tttttttt t:tone address(4bit-address,$41 means high-4bits of $20)</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$47 -cccvvvv v:linear volume 1+c:number of channels in use($7F only)</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$40-47:ch1 $48-4F:ch2 ... $78-7F:ch8</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;ch2-ch8 same to ch1</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$00-3F(8ch)...77(1ch) hhhhllll tone data</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;h:odd address data(signed 4bit)</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;l:even address data(signed 4bit)</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;real frequency = (f * NES_BASECYCLES) / (40000h * (c+1) * (8-s)*4 * 45)</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;NES_BASECYCLES 21477270(Hz)</p>
-<p><br/></p>
-<p>Note: &nbsp;Very Special thanks to Mamiya for this information!</p>
-<p><br/></p>
-<p><br/></p>
-<p>* Sunsoft FME-07 Sound uses registers C000 and E000</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;This is similar to the common AY 3-8910 sound chip that is</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;used on tons of arcade machines, and in the Intellivision.</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;C000 is the address port</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;E000 is the data port</p>
-<p><br/></p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Both are write-only, and behave like the AY 3-8910.</p>
-<p><br/></p>
-<p>Note: &nbsp;Special thanks to Mamiya for this information as well</p>
-<p><br/></p>
-<p><br/></p>
-<p>Caveats</p>
-<p>-------</p>
-<p><br/></p>
-<p>1) The starting song number and maximum song numbers start counting at</p>
-<p> &nbsp; 1, while the init address of the tune starts counting at 0. &nbsp;To</p>
-<p> &nbsp; "fix", simply pass the desired song number minus 1 to the init</p>
-<p> &nbsp; routine.</p>
-<p><br/></p>
-<p>2) The NTSC speed word is used *only* for NTSC tunes, or dual PAL/NTSC tunes.</p>
-<p> &nbsp; The PAL speed word is used *only* for PAL tunes, or dual PAL/NTSC tunes.</p>
-<p><br/></p>
-<p>3) The length of the text in the name, artist, and copyright fields must </p>
-<p> &nbsp; be 31 characters or less! &nbsp;There has to be at least a single NULL byte</p>
-<p> &nbsp; (00h) after the text, between fields.</p>
-<p><br/></p>
-<p>4) If a field is not known (name, artist, copyright) then the field must</p>
-<p> &nbsp; contain the string "&lt;?&gt;" (without quotes). &nbsp;</p>
-<p><br/></p>
-<p>5) There should be 8K of RAM present at 6000-7FFFh. MMC5 tunes need RAM at</p>
-<p> &nbsp; 5C00-5FF7 to emulate its EXRAM. 8000-FFFF Should be read-only (not </p>
-<p> &nbsp; writable) after a tune has loaded. &nbsp;The only time this area should be </p>
-<p> &nbsp; writable is if an FDS tune is being played.</p>
-<p><br/></p>
-<p>6) Do not assume the state of *anything* on entry to the init routine</p>
-<p> &nbsp; except A and X. &nbsp;Y can be anything, as can the flags. &nbsp;</p>
-<p><br/></p>
-<p>7) Do not assume the state of *anything* on entry to the play routine either.</p>
-<p> &nbsp; Flags, X, A, and Y could be at any state. &nbsp;I've fixed about 10 tunes</p>
-<p> &nbsp; because of this problem and the problem, above.</p>
-<p><br/></p>
-<p>8) The stack sits at 1FFh and grows down. &nbsp;Make sure the tune does not</p>
-<p> &nbsp; attempt to use 1F0h-1FFh for variables. (Armed Dragon Villigust did and</p>
-<p> &nbsp; I had to relocate its RAM usage to 2xx)</p>
-<p><br/></p>
-<p>9) Variables should sit in the 0000h-07FFh area *only*. &nbsp;If the tune writes</p>
-<p> &nbsp; outside this range, say 1400h this is bad and should be relocated. </p>
-<p> &nbsp; (Terminator 3 did this and I relocated it to 04xx).</p>
-<p><br/></p>
-<p>That's it!</p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/iphone-website-generation">Free iPhone documentation generator</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="NSFFormat"
+		  data-hnd-context="29"
+		  data-hnd-title="NSF Format"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Technicalinformation.html">Technical Information</a></li><li><a href="Sound.html">Sound</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Sound.html" title="Sound" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="Sound.html" title="Sound" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="NESSound.html" title="NES Sound" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>NSF Format</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts37">NES Music Format Spec</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ---------------------</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">By: Kevin Horton &nbsp;khorton@iquest.net</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">NOTE:</span></p>
+<p class="rvps2"><span class="rvts6">-----</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Remember that I am very willing to add stuff and update this spec. &nbsp;If</span></p>
+<p class="rvps2"><span class="rvts6">you find a new sound chip or other change let me know and I will get back</span></p>
+<p class="rvps2"><span class="rvts6">with you. &nbsp;E-mail to the above address.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">V1.61 - 06/27/2000 Updated spec a bit</span></p>
+<p class="rvps2"><span class="rvts6">V1.60 - 06/01/2000 Updated Sunsoft, MMC5, and Namco chip information</span></p>
+<p class="rvps2"><span class="rvts6">V1.50 - 05/28/2000 Updated FDS, added Sunsoft and Namco chips</span></p>
+<p class="rvps2"><span class="rvts6">V1.32 - 11/27/1999 Added MMC5 register locations</span></p>
+<p class="rvps2"><span class="rvts6">V1.30 - 11/14/1999 Added MMC5 audio bit, added some register info</span></p>
+<p class="rvps2"><span class="rvts6">V1.20 - 09/12/1999 VRC and FDS prelim sound info added</span></p>
+<p class="rvps2"><span class="rvts6">V1.00 - 05/11/1999 First official NSF specification file</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This file encompasses a way to transfer NES music data in a small, easy to</span></p>
+<p class="rvps2"><span class="rvts6">use format.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The basic idea is one rips the music/sound code from an NES game and prepends</span></p>
+<p class="rvps2"><span class="rvts6">a small header to the data.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">A program of some form (6502/sound emulator) then takes the data and loads</span></p>
+<p class="rvps2"><span class="rvts6">it into the proper place into the 6502's address space, then inits and plays</span></p>
+<p class="rvps2"><span class="rvts6">the tune.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Here's an overview of the header:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">offset &nbsp;# of bytes &nbsp; Function</span></p>
+<p class="rvps2"><span class="rvts6">----------------------------</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">0000 &nbsp; &nbsp;5 &nbsp; STRING &nbsp;"NESM",01Ah &nbsp;; denotes an NES sound format file</span></p>
+<p class="rvps2"><span class="rvts6">0005 &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Version number (currently 01h)</span></p>
+<p class="rvps2"><span class="rvts6">0006 &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Total songs &nbsp; (1=1 song, 2=2 songs, etc)</span></p>
+<p class="rvps2"><span class="rvts6">0007 &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Starting song (1= 1st song, 2=2nd song, etc)</span></p>
+<p class="rvps2"><span class="rvts6">0008 &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) load address of data (8000-FFFF)</span></p>
+<p class="rvps2"><span class="rvts6">000a &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) init address of data (8000-FFFF)</span></p>
+<p class="rvps2"><span class="rvts6">000c &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) play address of data (8000-FFFF)</span></p>
+<p class="rvps2"><span class="rvts6">000e &nbsp; &nbsp;32 &nbsp;STRING &nbsp;The name of the song, null terminated</span></p>
+<p class="rvps2"><span class="rvts6">002e &nbsp; &nbsp;32 &nbsp;STRING &nbsp;The artist, if known, null terminated</span></p>
+<p class="rvps2"><span class="rvts6">004e &nbsp; &nbsp;32 &nbsp;STRING &nbsp;The Copyright holder, null terminated</span></p>
+<p class="rvps2"><span class="rvts6">006e &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) speed, in 1/1000000th sec ticks, NTSC (see text)</span></p>
+<p class="rvps2"><span class="rvts6">0070 &nbsp; &nbsp;8 &nbsp; BYTE &nbsp; &nbsp;Bankswitch Init Values (see text, and FDS section)</span></p>
+<p class="rvps2"><span class="rvts6">0078 &nbsp; &nbsp;2 &nbsp; WORD &nbsp; &nbsp;(lo/hi) speed, in 1/1000000th sec ticks, PAL (see text)</span></p>
+<p class="rvps2"><span class="rvts6">007a &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;PAL/NTSC bits:</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bit 0: if clear, this is an NTSC tune</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bit 0: if set, this is a PAL tune</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bit 1: if set, this is a dual PAL/NTSC tune</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bits 2-7: not used. they *must* be 0</span></p>
+<p class="rvps2"><span class="rvts6">007b &nbsp; &nbsp;1 &nbsp; BYTE &nbsp; &nbsp;Extra Sound Chip Support</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bit 0: if set, this song uses VRCVI</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bit 1: if set, this song uses VRCVII</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bit 2: if set, this song uses FDS Sound</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bit 3: if set, this song uses MMC5 audio</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bit 4: if set, this song uses Namco 106</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bit 5: if set, this song uses Sunsoft FME-07</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bits 6,7: future expansion: they *must* be 0</span></p>
+<p class="rvps2"><span class="rvts6">007c &nbsp; &nbsp;4 &nbsp; ---- &nbsp; &nbsp;4 extra bytes for expansion (must be 00h)</span></p>
+<p class="rvps2"><span class="rvts6">0080 &nbsp; &nbsp;nnn ---- &nbsp; &nbsp;The music program/data follows</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This may look somewhat familiar; &nbsp;if so that's because this is somewhat</span></p>
+<p class="rvps2"><span class="rvts6">sorta of based on the PSID file format for C64 music/sound.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Loading a tune into RAM</span></p>
+<p class="rvps2"><span class="rvts6">-----------------------</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If offsets 0070h to 0077h have 00h in them, then bankswitching is *not*</span></p>
+<p class="rvps2"><span class="rvts6">used. &nbsp;If one or more bytes are something other than 00h then bankswitching</span></p>
+<p class="rvps2"><span class="rvts6">is used. &nbsp;If bankswitching is used then the load address is still used,</span></p>
+<p class="rvps2"><span class="rvts6">but you now use (ADDRESS AND 0FFFh) to determine where on the first bank</span></p>
+<p class="rvps2"><span class="rvts6">to load the data.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Each bank is 4K in size, and that means there are 8 of them for the</span></p>
+<p class="rvps2"><span class="rvts6">entire 08000h-0ffffh range in the 6502's address space. &nbsp;You determine where</span></p>
+<p class="rvps2"><span class="rvts6">in memory the data goes by setting bytes 070h thru 077h in the file.</span></p>
+<p class="rvps2"><span class="rvts6">These determine the inital bank values that will be used, and hence where</span></p>
+<p class="rvps2"><span class="rvts6">the data will be loaded into the address space.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Here's an example:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">METROID.NSF will be used for the following explaination.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The file is set up like so: &nbsp;(starting at 070h in the file)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">0070: 05 05 05 05 05 05 05 05 - 00 00 00 00 00 00 00 00</span></p>
+<p class="rvps2"><span class="rvts6">0080: ... music data goes here...</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Since 0070h-0077h are something other than 00h, then we know that this</span></p>
+<p class="rvps2"><span class="rvts6">tune uses bankswitching. &nbsp;The load address for the data is specified as</span></p>
+<p class="rvps2"><span class="rvts6">08000h. &nbsp;We take this AND 0fffh and get 0000h, so we will load data in</span></p>
+<p class="rvps2"><span class="rvts6">at byte 0 of bank 0, since data is loaded into the banks sequentially</span></p>
+<p class="rvps2"><span class="rvts6">starting from bank 0 up until the music data is fully loaded.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Metroid has 6 4K banks in it, numbered 0 through 5. &nbsp;The 6502's address</span></p>
+<p class="rvps2"><span class="rvts6">space has 8 4K bankswitchable blocks on it, starting at 08000h-08fffh,</span></p>
+<p class="rvps2"><span class="rvts6">09000h-09fffh, 0a000h-0afffh ... 0f000h-0ffffh. &nbsp;Each one of these is 4K in</span></p>
+<p class="rvps2"><span class="rvts6">size, and the current bank is controlled by writes to 05ff8h thru 05fffh,</span></p>
+<p class="rvps2"><span class="rvts6">one byte per bank. &nbsp;So, 05ff8h controls the 08000h-08fffh range, 05ff9h&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">controls the 09000h-09fffh range, etc. up to 05fffh which controls the&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">0f000h-0ffffh range. &nbsp;When the song is loaded into RAM, it is loaded into</span></p>
+<p class="rvps2"><span class="rvts6">the banks and not the 6502's address space. &nbsp;Once this is done, then the</span></p>
+<p class="rvps2"><span class="rvts6">bank control registers are written to set up the inital bank values.</span></p>
+<p class="rvps2"><span class="rvts6">To do this, the value at 0070h in the file is written to 05ff8h, 0071h</span></p>
+<p class="rvps2"><span class="rvts6">is written to 05ff9h, etc. all the way to 0077h is written to 05fffh.</span></p>
+<p class="rvps2"><span class="rvts6">This is should be done before every call to the init routine.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If the tune was not bankswitched, then it is simply loaded in at the&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">specified load address, until EOF</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Initalizing a tune</span></p>
+<p class="rvps2"><span class="rvts6">------------------</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This is pretty simple. &nbsp;Load the desired song # into the accumulator,</span></p>
+<p class="rvps2"><span class="rvts6">minus 1 and set the X register to specify PAL (X=1) or NTSC (X=0).</span></p>
+<p class="rvps2"><span class="rvts6">If this is a single standard tune (i.e. PAL *or* NTSC but not both)</span></p>
+<p class="rvps2"><span class="rvts6">then the X register contents should not matter. &nbsp;Once the song # and</span></p>
+<p class="rvps2"><span class="rvts6">optional PAL/NTSC standard are loaded, simply call the INIT address.</span></p>
+<p class="rvps2"><span class="rvts6">Once init is done, it should perform an RTS.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Playing a tune</span></p>
+<p class="rvps2"><span class="rvts6">--------------</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Once the tune has been initalized, it can now be played. &nbsp;To do this,</span></p>
+<p class="rvps2"><span class="rvts6">simply call the play address several times a second. &nbsp;How many times</span></p>
+<p class="rvps2"><span class="rvts6">per second is determined by offsets 006eh and 006fh in the file.</span></p>
+<p class="rvps2"><span class="rvts6">These bytes denote the speed of playback in 1/1000000ths of a second. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">For the "usual" 60Hz playback rate, set this to 411ah. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To generate a differing playback rate, use this formula:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1000000</span></p>
+<p class="rvps2"><span class="rvts6">PBRATE= ---------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; speed</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Where PBRATE is the value you stick into 006e/006fh in the file, and</span></p>
+<p class="rvps2"><span class="rvts6">speed is the desired speed in hertz.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">"Proper" way to load the tune</span></p>
+<p class="rvps2"><span class="rvts6">-----------------------------</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">1) If the tune is bankswitched, go to #3.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">2) Load the data into the 6502's address space starting at the specified</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;load address. Go to #4.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">3) Load the data into a RAM area, starting at (start_address AND 0fffh).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">4) Tune load is done.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">"Proper" way to init a tune</span></p>
+<p class="rvps2"><span class="rvts6">---------------------------</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">1) Clear all RAM at 0000h-07ffh.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">2) Clear all RAM at 6000h-7fffh.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">3) Init the sound registers by writing 00h to 04000-0400Fh, 10h to 4010h,</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;and 00h to 4011h-4013h.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">4) Set volume register 04015h to 00fh.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">5) If this is a banked tune, load the bank values from the header into</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;5ff8-5fffh.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">6) Set the accumulator and X registers for the desired song.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">7) Call the music init routine.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">"Proper" way to play a tune</span></p>
+<p class="rvps2"><span class="rvts6">---------------------------</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">1) Call the play address of the music at periodic intervals determined</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;by the speed words. &nbsp;Which word to use is determined by which mode</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;you are in- PAL or NTSC.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Sound Chip Support</span></p>
+<p class="rvps2"><span class="rvts6">------------------</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Byte 007bh of the file stores the sound chip flags. &nbsp;If a particular flag</span></p>
+<p class="rvps2"><span class="rvts6">is set, those sound registers should be enabled. &nbsp;If the flag is clear,</span></p>
+<p class="rvps2"><span class="rvts6">then those registers should be disabled.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* VRCVI Uses registers 9000-9002, A000-A002, and B000-B002, write only.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Caveats: 1) The above registers are *write only* and must not disrupt music</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; code that happens to be stored there.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2) Major caveat: &nbsp;The A0 and A1 lines are flipped on a few games!!</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; If you rip the music and it sounds all funny, flip around&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; the xxx1 and xxx2 register pairs. &nbsp;(i.e. 9001 and 9002) &nbsp;9000</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; and 9003 can be left untouched. &nbsp;I decided to do this since it&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; would make things easier all around, and this means you only&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; will have to change the music code in a very few places (6).</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Esper2 and Madara will need this change, while Castlevania 3j</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; will not for instance.</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;3) See my VRCVI.TXT doc for a complete register description.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* VRCVII Uses registers 9010 and 9030, write only.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Caveats: 1) Same caveat as #1, above.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2) See my VRCVII.TXT doc for a complete register description.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* FDS Sound uses registers from 4040 through 4092.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Caveats: 1) 6000-DFFF is assumed to be RAM, since 6000-DFFF is RAM on the</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; FDS. &nbsp;E000-FFFF is usually not included in FDS games because</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; it is the BIOS ROM. &nbsp;However, it can be used on FDS rips to help</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; the ripper (for modified play/init addresses).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2) Bankswitching operates slightly different on FDS tunes. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5FF6 and 5FF7 control the banks 6000-6FFF and 7000-7FFF&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; respectively. &nbsp;NSF header offsets 76h and 77h correspond to</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; *both* 6000-7FFF *AND* E000-FFFF. &nbsp;Keep this in mind!</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* MMC5 Sound Uses registers 5000-5015, write only as well as 5205 and 5206,</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; and 5C00-5FF5</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Caveats: 1) Generating a proper doc file. &nbsp;Be patient. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;2) 5205 and 5206 are a hardware 8*8 multiplier. &nbsp;The idea being</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; you write your two bytes to be multiplied into 5205 and 5206</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; and after doing so, you read the result back out. &nbsp;Still working</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; on what exactly triggers it (I think a write to either 5205</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; or 5206 triggers the multiply).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;3) 5C00-5FF5 should be RAM to emulate EXRAM while in MMC5 mode.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Note: Thanks to Mamiya for the EXRAM info.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* Namco 106 Sound Uses registers 4800 and F800. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; This works similar to VRC7. &nbsp;4800 is the "data" port which is</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; readable and writable, while F800 is the "address" port and is</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; writable only.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; The address is 7 bits plus a "mode" bit. &nbsp;Bit 7 controls</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; address auto-incrementing. &nbsp;If bit 7 is set, the address will</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; auto-increment after a byte of data is read or written from/to</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4800.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; $40 ffffffff f:frequency L</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; $42 ffffffff f:frequency M</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; $44 ---sssff f:frequency H s:tone length (8-s)*4 in 4bit-samples</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; $46 tttttttt t:tone address(4bit-address,$41 means high-4bits of $20)</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; $47 -cccvvvv v:linear volume 1+c:number of channels in use($7F only)</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; $40-47:ch1 $48-4F:ch2 ... $78-7F:ch8</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ch2-ch8 same to ch1</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; $00-3F(8ch)...77(1ch) hhhhllll tone data</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; h:odd address data(signed 4bit)</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; l:even address data(signed 4bit)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; real frequency = (f * NES_BASECYCLES) / (40000h * (c+1) * (8-s)*4 * 45)</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; NES_BASECYCLES 21477270(Hz)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Note: &nbsp;Very Special thanks to Mamiya for this information!</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">* Sunsoft FME-07 Sound uses registers C000 and E000</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; This is similar to the common AY 3-8910 sound chip that is</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; used on tons of arcade machines, and in the Intellivision.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; C000 is the address port</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; E000 is the data port</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Both are write-only, and behave like the AY 3-8910.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Note: &nbsp;Special thanks to Mamiya for this information as well</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Caveats</span></p>
+<p class="rvps2"><span class="rvts6">-------</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">1) The starting song number and maximum song numbers start counting at</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;1, while the init address of the tune starts counting at 0. &nbsp;To</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;"fix", simply pass the desired song number minus 1 to the init</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;routine.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">2) The NTSC speed word is used *only* for NTSC tunes, or dual PAL/NTSC tunes.</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;The PAL speed word is used *only* for PAL tunes, or dual PAL/NTSC tunes.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">3) The length of the text in the name, artist, and copyright fields must&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;be 31 characters or less! &nbsp;There has to be at least a single NULL byte</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;(00h) after the text, between fields.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">4) If a field is not known (name, artist, copyright) then the field must</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;contain the string "&lt;?&gt;" (without quotes). &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">5) There should be 8K of RAM present at 6000-7FFFh. MMC5 tunes need RAM at</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;5C00-5FF7 to emulate its EXRAM. 8000-FFFF Should be read-only (not&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;writable) after a tune has loaded. &nbsp;The only time this area should be&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;writable is if an FDS tune is being played.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">6) Do not assume the state of *anything* on entry to the init routine</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;except A and X. &nbsp;Y can be anything, as can the flags. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">7) Do not assume the state of *anything* on entry to the play routine either.</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;Flags, X, A, and Y could be at any state. &nbsp;I've fixed about 10 tunes</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;because of this problem and the problem, above.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">8) The stack sits at 1FFh and grows down. &nbsp;Make sure the tune does not</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;attempt to use 1F0h-1FFh for variables. (Armed Dragon Villigust did and</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;I had to relocate its RAM usage to 2xx)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">9) Variables should sit in the 0000h-07FFh area *only*. &nbsp;If the tune writes</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;outside this range, say 1400h this is bad and should be relocated.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; &nbsp;(Terminator 3 did this and I relocated it to 04xx).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">That's it!</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour">Full-featured Help generator</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

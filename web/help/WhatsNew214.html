@@ -1,179 +1,370 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>What's New? 2.1.4 (changelog)</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("WhatsNew214");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>What's New? 2.1.4 (changelog)</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="What's New? 2.1.4 (changelog)">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="What's New? 2.1.4 (changelog)" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>What's New? 2.1.4 (changelog)</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="WhatsNew215.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="WhatsNew213.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">What's New? </span><span class="rvts20">2.1.4a</span></p>
-<p>Released 01 June 2010</p>
-<p>2.1.4 is a maintenance release that fixes these bugs in 2.1.4:</p>
-<p>fix crash bug on .fcm convert</p>
-<p>fix erroneous reporting of savestate past the end of movie error during read-only loadstates</p>
-<p><br/></p>
-<p>Released 31 May 2010</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts21">The 2.1.4 release fixes many bugs and adds new features compared to 2.1.3. In addition it also fixes up the movie code significantly; fixing implementation problems, loading speed, adding new features, and fixing bugs. </span></p>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts22">Common </span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">Added microphone support option. When enabled, Port 2 Start activates the Microphone</span></li>
-<li><span class="rvts21">Prevent .zip files containing no recognized files from causing crash</span></li>
-<li><span class="rvts21">Autohold - Added player 3 and 4 to autohold notification window, labeled controller input</span></li>
-<li><span class="rvts21">mapper 19 savestate fix mirroring for "Dream Master (J)" corrected to "four-screen" by CRC check</span></li>
-<li><span class="rvts21">Disable auto-savestates during turbo </span></li>
-<li><span class="rvts21">Fixed so Gotcha! auto-enables the zapper</span></li>
-<li><span class="rvts21">Autohold - Added player 3 and 4 to autohold notification window, labeled controller input</span></li>
-</ul>
-<p><span class="rvts23"><br/></span></p>
-<p><span class="rvts23">Movies</span></p>
-<p><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">Fully implemented "bulletproof" read-only</span></li>
-<li><span class="rvts21">Movie code now fully conforms to the Savestate section of the Laws of TAS</span></li>
-<li><span class="rvts21">Fixed a potential desync that plays out an extra frame without an update to the frame count involving heavy lua use, joypad.get, and a loadstate</span></li>
-<li><span class="rvts21">Movie support for microphone</span></li>
-<li><span class="rvts21">Movies now have a "finished" mode. &nbsp;If a playback stops the movie isn't cleared from memory, and can be replayed or a state loaded Similar functionality as DeSmuME and GENS rerecording</span></li>
-<li><span class="rvts21">New PPU flag in movie headers (doesn't change an emulators PPU state when loading a movie)</span></li>
-<li><span class="rvts21">Much faster movie loading and movie-savestate loading</span></li>
-<li><span class="rvts21">Made gamepad 2 off by default (so less movies should have unused player 2 data)</span></li>
-<li><span class="rvts21">Implemented a "full savestate-movie load" mode similar to the implementation in VBA-rr and SNES9x-rr. &nbsp;In this mode loading a savestate in read+write doesn't truncate the movie to its frame count immediately. &nbsp;Instead it waits until input is recording into the movie (next frame). &nbsp;For win32 this feature is togglable in movie options and the context menu. &nbsp;For SDL this is off by default and a toggle will need to be added</span></li>
-<li><span class="rvts21">Movie + loadstate errors are handled more gracefully now, with more informative error messages and the movie doesn't have to stop if backups are enabled</span></li>
-<li><span class="rvts21">Fix PlayMovieFromBeginning when using a movie that starts from savestate</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts23">Lua</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">fix bug that caused zapper.read() to crash when movie playback ends</span></li>
-<li><span class="rvts21">Win32 - Added option for palette selection as color for LUA colors. Included is a LUA script to display all choices with the value used to pick displayed color</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts21">New Lua functions</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">movie.ispoweron()</span></li>
-<li><span class="rvts21">movie.isfromsavestate()</span></li>
-<li><span class="rvts21">emu.addgamegenie()</span></li>
-<li><span class="rvts21">emu.delgamegenie()</span></li>
-<li><span class="rvts21">savestate.object() which is savestate.create() with intuitive numbering under windows</span></li>
-<li><span class="rvts21">gui.getpixel() which gets any gui.pixel() set pixel colors, and possibly other functions</span></li>
-<li><span class="rvts21">emu.getscreenpixel() which gets the RGB and Palette of any pixel on the screen</span></li>
-<li><span class="rvts21">lua function movie.getfilename() which returns the current movie filename without the path included</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts23">Input Display</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">Input display updates on loadstate</span></li>
-<li><span class="rvts21">Input display overhaul that uses different colors for different input contexts</span></li>
-<li><span class="rvts21">Input display now shows both currently pressed buttons and buttons held the previous frame</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts23">Win32</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">Added NTSC 2x scalar option with some CFG config options of it's own Added Ram Search hotkeys for the first 6 search types in the list</span></li>
-<li><span class="rvts21">Add Cheat buttons for Ram Search and Ram Watch</span></li>
-<li><span class="rvts21">With special scaler in window mode, it's possible to resize to anything above the minimum.</span></li>
-<li><span class="rvts21">Recording a new movie adds it to recent movies list</span></li>
-<li><span class="rvts21">Replay dialog, when selecting a movie in a relative path (.\movies for example), the recent movies list stores an absolute path instead</span></li>
-<li><span class="rvts21">Replay dialog shows PAL flag and New PPU flags</span></li>
-<li><span class="rvts21">CDLogger - fixed bug preventing correct interrupt vectors from logging</span></li>
-<li><span class="rvts21">Memwatch - ignore spaces at the beginnign of an address in the address boxes</span></li>
-<li><span class="rvts21">Replay dialog - fix bug that was causing it to always report savestate movies as soft-reset</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts22">Debugger</span></p>
-<p><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">Added conditional debugging option 'K', for bank PC is on</span></li>
-<li><span class="rvts21">Fixed bug involving pausing emulation outside of the debugger, then trying to use the debugger commands, and having the CPU registers become corrupted</span></li>
-<li><span class="rvts21">Made debugger able to break on and distinguish Stack reads/writes</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts23">Hex Editor</span></p>
-<p><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">Added "Goto" command</span></li>
-<li><span class="rvts21">Made the Hex Editor display the Frozen, Bookmarked, etc. status of the selected address, and made the Frozen color override the Bookmarked color.</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts23">Cheat Search</span></p>
-<p><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">Made enabling/disabling cheats no longer deselect the selected cheat</span></li>
-<li><span class="rvts21">Added context menu to Cheat Dialog Cheat Listbox, populated list with Toggle Cheat, Poke Cheat Value, and Goto In Hex Editor</span></li>
-<li><span class="rvts21">Enabled multi-select for Cheat menu to allow multiple toggles and deletes</span></li>
-<li><span class="rvts21">Made cheat menu's Pause When Active effect immediate</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts23">GUI</span></p>
-<p><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts21">Added Tools - GUI option to partially disable visual themes, so the emulator can be made to look like it did in 2.1.1 and earlier releases. Drag &amp; Drop - if dropping a .fcm with no ROM loaded, prompt for one (same functionality that was added to .fm2 files)</span></li>
-<li><span class="rvts21">Added single-instance mode, which makes starting a second copy of FCEUX load the file into the first, then exit.Mode off by default, togglable under Config - GUI</span></li>
-</ul>
-<p><span class="rvts21"><br/></span></p>
-<p><span class="rvts21"><br/></span></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="WhatsNew214"
+		  data-hnd-context="77"
+		  data-hnd-title="What's New? 2.1.4 (changelog)"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Intro.html">Introduction</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew215.html" title="What's New? 2.1.5 (changelog)" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew213.html" title="What's New? 2.1.3 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>What's New? 2.1.4 (changelog)</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.1.4a</span></p>
+<p class="rvps2"><span class="rvts6">Released 01 June 2010</span></p>
+<p class="rvps2"><span class="rvts6">2.1.4 is a maintenance release that fixes these bugs in 2.1.4:</span></p>
+<p class="rvps2"><span class="rvts6">fix crash bug on .fcm convert</span></p>
+<p class="rvps2"><span class="rvts6">fix erroneous reporting of savestate past the end of movie error during read-only loadstates</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Released 31 May 2010</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts32">The 2.1.4 release fixes many bugs and adds new features compared to 2.1.3. In addition it also fixes up the movie code significantly; fixing implementation problems, loading speed, adding new features, and fixing bugs.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts33">Common&nbsp;</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">Added microphone support option. When enabled, Port 2 Start activates the Microphone</span></li>
+ <li class="rvps2"><span class="rvts32">Prevent .zip files containing no recognized files from causing crash</span></li>
+ <li class="rvps2"><span class="rvts32">Autohold - Added player 3 and 4 to autohold notification window, labeled controller input</span></li>
+ <li class="rvps2"><span class="rvts32">mapper 19 savestate fix mirroring for "Dream Master (J)" corrected to "four-screen" by CRC check</span></li>
+ <li class="rvps2"><span class="rvts32">Disable auto-savestates during turbo&nbsp;</span></li>
+ <li class="rvps2"><span class="rvts32">Fixed so Gotcha! auto-enables the zapper</span></li>
+ <li class="rvps2"><span class="rvts32">Autohold - Added player 3 and 4 to autohold notification window, labeled controller input</span></li>
+</ul>
+<p class="rvps2"><span class="rvts34"><br/></span></p>
+<p class="rvps2"><span class="rvts34">Movies</span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">Fully implemented "bulletproof" read-only</span></li>
+ <li class="rvps2"><span class="rvts32">Movie code now fully conforms to the Savestate section of the Laws of TAS</span></li>
+ <li class="rvps2"><span class="rvts32">Fixed a potential desync that plays out an extra frame without an update to the frame count involving heavy lua use, joypad.get, and a loadstate</span></li>
+ <li class="rvps2"><span class="rvts32">Movie support for microphone</span></li>
+ <li class="rvps2"><span class="rvts32">Movies now have a "finished" mode. &nbsp;If a playback stops the movie isn't cleared from memory, and can be replayed or a state loaded Similar functionality as DeSmuME and GENS rerecording</span></li>
+ <li class="rvps2"><span class="rvts32">New PPU flag in movie headers (doesn't change an emulators PPU state when loading a movie)</span></li>
+ <li class="rvps2"><span class="rvts32">Much faster movie loading and movie-savestate loading</span></li>
+ <li class="rvps2"><span class="rvts32">Made gamepad 2 off by default (so less movies should have unused player 2 data)</span></li>
+ <li class="rvps2"><span class="rvts32">Implemented a "full savestate-movie load" mode similar to the implementation in VBA-rr and SNES9x-rr. &nbsp;In this mode loading a savestate in read+write doesn't truncate the movie to its frame count immediately. &nbsp;Instead it waits until input is recording into the movie (next frame). &nbsp;For win32 this feature is togglable in movie options and the context menu. &nbsp;For SDL this is off by default and a toggle will need to be added</span></li>
+ <li class="rvps2"><span class="rvts32">Movie + loadstate errors are handled more gracefully now, with more informative error messages and the movie doesn't have to stop if backups are enabled</span></li>
+ <li class="rvps2"><span class="rvts32">Fix PlayMovieFromBeginning when using a movie that starts from savestate</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts34">Lua</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">fix bug that caused zapper.read() to crash when movie playback ends</span></li>
+ <li class="rvps2"><span class="rvts32">Win32 - Added option for palette selection as color for LUA colors. Included is a LUA script to display all choices with the value used to pick displayed color</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts32">New Lua functions</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">movie.ispoweron()</span></li>
+ <li class="rvps2"><span class="rvts32">movie.isfromsavestate()</span></li>
+ <li class="rvps2"><span class="rvts32">emu.addgamegenie()</span></li>
+ <li class="rvps2"><span class="rvts32">emu.delgamegenie()</span></li>
+ <li class="rvps2"><span class="rvts32">savestate.object() which is savestate.create() with intuitive numbering under windows</span></li>
+ <li class="rvps2"><span class="rvts32">gui.getpixel() which gets any gui.pixel() set pixel colors, and possibly other functions</span></li>
+ <li class="rvps2"><span class="rvts32">emu.getscreenpixel() which gets the RGB and Palette of any pixel on the screen</span></li>
+ <li class="rvps2"><span class="rvts32">lua function movie.getfilename() which returns the current movie filename without the path included</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts34">Input Display</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">Input display updates on loadstate</span></li>
+ <li class="rvps2"><span class="rvts32">Input display overhaul that uses different colors for different input contexts</span></li>
+ <li class="rvps2"><span class="rvts32">Input display now shows both currently pressed buttons and buttons held the previous frame</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts34">Win32</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">Added NTSC 2x scalar option with some CFG config options of it's own Added Ram Search hotkeys for the first 6 search types in the list</span></li>
+ <li class="rvps2"><span class="rvts32">Add Cheat buttons for Ram Search and Ram Watch</span></li>
+ <li class="rvps2"><span class="rvts32">With special scaler in window mode, it's possible to resize to anything above the minimum.</span></li>
+ <li class="rvps2"><span class="rvts32">Recording a new movie adds it to recent movies list</span></li>
+ <li class="rvps2"><span class="rvts32">Replay dialog, when selecting a movie in a relative path (.\movies for example), the recent movies list stores an absolute path instead</span></li>
+ <li class="rvps2"><span class="rvts32">Replay dialog shows PAL flag and New PPU flags</span></li>
+ <li class="rvps2"><span class="rvts32">CDLogger - fixed bug preventing correct interrupt vectors from logging</span></li>
+ <li class="rvps2"><span class="rvts32">Memwatch - ignore spaces at the beginnign of an address in the address boxes</span></li>
+ <li class="rvps2"><span class="rvts32">Replay dialog - fix bug that was causing it to always report savestate movies as soft-reset</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts33">Debugger</span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">Added conditional debugging option 'K', for bank PC is on</span></li>
+ <li class="rvps2"><span class="rvts32">Fixed bug involving pausing emulation outside of the debugger, then trying to use the debugger commands, and having the CPU registers become corrupted</span></li>
+ <li class="rvps2"><span class="rvts32">Made debugger able to break on and distinguish Stack reads/writes</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts34">Hex Editor</span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">Added "Goto" command</span></li>
+ <li class="rvps2"><span class="rvts32">Made the Hex Editor display the Frozen, Bookmarked, etc. status of the selected address, and made the Frozen color override the Bookmarked color.</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts34">Cheat Search</span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">Made enabling/disabling cheats no longer deselect the selected cheat</span></li>
+ <li class="rvps2"><span class="rvts32">Added context menu to Cheat Dialog Cheat Listbox, populated list with Toggle Cheat, Poke Cheat Value, and Goto In Hex Editor</span></li>
+ <li class="rvps2"><span class="rvts32">Enabled multi-select for Cheat menu to allow multiple toggles and deletes</span></li>
+ <li class="rvps2"><span class="rvts32">Made cheat menu's Pause When Active effect immediate</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts34">GUI</span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts32">Added Tools - GUI option to partially disable visual themes, so the emulator can be made to look like it did in 2.1.1 and earlier releases. Drag &amp; Drop - if dropping a .fcm with no ROM loaded, prompt for one (same functionality that was added to .fm2 files)</span></li>
+ <li class="rvps2"><span class="rvts32">Added single-instance mode, which makes starting a second copy of FCEUX load the file into the first, then exit.Mode off by default, togglable under Config - GUI</span></li>
+</ul>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/create-epub-ebooks">Produce electronic books easily</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

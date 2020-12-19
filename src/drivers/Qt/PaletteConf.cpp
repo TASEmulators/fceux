@@ -32,9 +32,12 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
    //QPushButton *closebutton;
 	QPushButton *button;
 	QTextEdit *comments;
+	QStyle    *style;
 	int hue, tint;
 	char stmp[64];
 	std::string paletteFile;
+
+	style = this->style();
 
 	resize( 512, 600 );
 
@@ -63,6 +66,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	connect(deemphSwap, SIGNAL(stateChanged(int)), this, SLOT(deemphswap_Changed(int)) );
 
 	button = new QPushButton( tr("Open Palette") );
+	button->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
 	hbox1->addWidget( button );
 
 	connect( button, SIGNAL(clicked(void)), this, SLOT(openPaletteFile(void)) );
@@ -81,6 +85,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 
 	button = new QPushButton( tr("Clear") );
+	button->setIcon( style->standardIcon( QStyle::SP_LineEditClearButton ) );
 	hbox1->addWidget( button );
 
 	connect( button, SIGNAL(clicked(void)), this, SLOT(clearPalette(void)) );
@@ -308,7 +313,7 @@ void PaletteConfDialog_t::openPaletteFile(void)
 	dialog.setNameFilter(tr("NES Palettes (*.pal *.PAL) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.Palette", &last );

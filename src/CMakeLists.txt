@@ -81,14 +81,16 @@ else(WIN32)
   pkg_check_modules( SDL2 REQUIRED sdl2)
 
   if ( ${SDL2_FOUND} )
-	  add_definitions( ${SDL2_CFLAGS} )
+	  add_definitions( ${SDL2_CFLAGS} -D__SDL__ )
   endif()
 
   # Check for LUA
-  pkg_check_modules( LUA lua-5.1)
+  pkg_search_module( LUA lua5.1 lua-5.1 )
 
   if ( ${LUA_FOUND} )
      # Use System LUA
+	  message( STATUS "Using System Lua ${LUA_VERSION}" )
+
 	  add_definitions( -D_S9XLUA_H  ${LUA_CFLAGS} )
 
 	  set( LUA_ENGINE_SOURCE  ${CMAKE_CURRENT_SOURCE_DIR}/lua-engine.cpp )
@@ -96,6 +98,8 @@ else(WIN32)
   else ()
 
      # Use Internal LUA
+	  message( STATUS "Using Internal Lua" )
+
      add_definitions( -D_S9XLUA_H  -I${CMAKE_CURRENT_SOURCE_DIR}/lua/src )
 
 	  set( LUA_ENGINE_SOURCE  
@@ -279,6 +283,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/BMW8544.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/bonza.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/bs-5.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/boards/bs4xxxr.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/cheapocabra.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/cityfighter.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/coolboy.cpp
@@ -371,6 +376,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/input/suborkb.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/toprider.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/virtualboy.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/input/lcdcompzapper.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/zapper.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/backward.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/ConvertUTF.c
@@ -425,22 +431,34 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleWindow.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerGL.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerSDL.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/InputConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/HotKeyConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TimingConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/FrameTimingStats.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/PaletteConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GuiConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/MoviePlay.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/MovieOptions.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/LuaControl.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/CheatsConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GameGenie.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/HexEditor.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/MsgLogViewer.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/CodeDataLogger.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/SymbolicDebug.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleDebugger.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleUtilities.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleVideoConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleSoundConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/iNesHeaderEditor.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TraceLogger.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AboutWindow.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/fceuWrapper.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ppuViewer.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/NameTableViewer.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RamWatch.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RamSearch.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/config.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/input.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/nes_shm.cpp  
@@ -509,19 +527,24 @@ install( TARGETS  ${APP_NAME}
 	BUNDLE  DESTINATION  . COMPONENT Runtime 
 	RUNTIME  DESTINATION  bin COMPONENT Runtime )
 
-set( APPS  ${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app)
-set( DIRS  ${CMAKE_BINARY_DIR} /usr/local/lib)
-
-message(STATUS APPS: ${APPS})
-message(STATUS DIRS: ${DIRS} )
+# Use \$ to defer expansion until install script is called; CPack will call it with its own CMAKE_INSTALL_PREFIX
+set(APP \${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app)
 
 set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
-set(CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
 set(CPACK_GENERATOR "DRAGNDROP")
 include(CPACK)
 
-install( CODE "include(BundleUtilities) 
-	fixup_bundle( \"${APPS}\" \"\" \"${DIRS}\") "
+# macdeployqt tool that comes with Qt: https://doc.qt.io/qt-5/macos-deployment.html#macdeploy
+# Compared to fixup_bundle, correctly finds and installs Qt-specific resources as well as non-Qt dependencies
+find_program(MACDEPLOYQT macdeployqt)
+if(NOT MACDEPLOYQT)
+	message(FATAL_ERROR "Could not find macdeployqt executable")
+endif()
+
+install( CODE "
+	message(STATUS \"Deploying and fixing up dependencies in app: ${APP}\")
+	execute_process(COMMAND \"${MACDEPLOYQT}\" \"${APP}\" -verbose=1)
+		"
 	COMPONENT Runtime
 	)
 
@@ -532,7 +555,7 @@ install( TARGETS  ${APP_NAME}
 
 install( FILES     ${CMAKE_CURRENT_SOURCE_DIR}/auxlib.lua                DESTINATION share/fceux/luaScripts  )
 install( DIRECTORY ${CMAKE_SOURCE_DIR}/output/.                          DESTINATION share/fceux  )
-install( FILES     ${CMAKE_SOURCE_DIR}/fceux.png                         DESTINATION share/pixmaps  )
+install( FILES     ${CMAKE_SOURCE_DIR}/fceux1.png                        DESTINATION share/pixmaps  )
 install( FILES     ${CMAKE_SOURCE_DIR}/fceux.desktop                     DESTINATION share/applications  )
 install( FILES     ${CMAKE_SOURCE_DIR}/documentation/fceux.6             DESTINATION share/man/man6  )
 install( FILES     ${CMAKE_SOURCE_DIR}/documentation/fceux-net-server.6  DESTINATION share/man/man6  )

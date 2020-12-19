@@ -27,8 +27,28 @@
 
 static GuiCheatsDialog_t *win = NULL;
 //----------------------------------------------------------------------------
+void openCheatDialog(QWidget *parent)
+{
+   if ( win != NULL )
+   {
+      return;
+   }
+   win = new GuiCheatsDialog_t(parent);
+	
+   win->show();
+}
+//----------------------------------------------------------------------------
+void updateCheatDialog(void)
+{
+   if ( win == NULL )
+   {
+      return;
+   }
+   win->showActiveCheatList( true );
+}
+//----------------------------------------------------------------------------
 GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QHBoxLayout *mainLayout, *hbox, *hbox1;
 	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3;
@@ -36,14 +56,6 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	QLabel *lbl;
 	QGroupBox *groupBox;
 	QFrame *frame;
-	QScreen *screen = QGuiApplication::primaryScreen();
-	double devPixRatio = 1.0f;
-
-	if ( screen != NULL )
-   {
-		devPixRatio = (int)( screen->devicePixelRatio() + 0.50f);
-    	//printf("Pix Ratio: %f \n", devPixRatio );
-	}
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -51,8 +63,11 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	QFontMetrics fm(font);
 
-	//fontCharWidth = fm.boundingRect('X').width() * devPixRatio;
-	fontCharWidth = 2.00 * fm.averageCharWidth() * devPixRatio;
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    fontCharWidth = 2 * fm.horizontalAdvance(QLatin1Char('2'));
+#else
+    fontCharWidth = 2 * fm.width(QLatin1Char('2'));
+#endif
 
 	setWindowTitle("Cheat Search");
 
@@ -417,6 +432,7 @@ GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
 	}
 	wasPausedByCheats = false;
 
+   win = NULL;
    printf("Destroy Cheat Window Event\n");
 }
 //----------------------------------------------------------------------------
@@ -618,7 +634,7 @@ int GuiCheatsDialog_t::activeCheatListCB (char *name, uint32 a, uint8 v, int c, 
 
 	if (c >= 0)
 	{
-		sprintf (codeStr, "$%04X:%02X:%02X", a,v,c);
+		sprintf (codeStr, "$%04X?%02X:%02X", a,c,v);
 	}
 	else
 	{
@@ -644,6 +660,7 @@ int GuiCheatsDialog_t::activeCheatListCB (char *name, uint32 a, uint8 v, int c, 
 
 	item->setTextAlignment( 0, Qt::AlignLeft);
 	item->setTextAlignment( 1, Qt::AlignLeft);
+	item->setTextAlignment( 2, Qt::AlignLeft);
 
 	actvCheatIdx++;
 
@@ -684,7 +701,7 @@ void GuiCheatsDialog_t::openCheatFile(void)
 	dialog.setNameFilter(tr("Cheat files (*.cht *.CHT) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
@@ -749,7 +766,7 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 	dialog.setNameFilter(tr("Cheat files (*.cht *.CHT) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 
 	if ( GameInfo )

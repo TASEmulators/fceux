@@ -1,246 +1,437 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>What's New? 2.1 (changelog)</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("WhatsNew210");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>What's New? 2.1 (changelog)</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="What's New? 2.1 (changelog)">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="What's New? 2.1 (changelog)" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>What's New? 2.1 (changelog)</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="WhatsNew211.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="WhatsNew203.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">What's New? </span><span class="rvts20">2.1</span></p>
-<p>Released March 29, 2009</p>
-<p><br/></p>
-<p>This release includes a multitude of new features, major fixes, and enhancements.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">New Features Win32</span></p>
-<p><br/></p>
-<p>*The latest mappers and mapper fixes from FCEU-mm. &nbsp;Adds support for many new games such as Warioland II (Unl), Shu Qi Yu, &nbsp;and Street Dance</p>
-<p>*Full screen mode fixed! &nbsp;Also, Alt+Enter properly toggles full screen.</p>
-<p>*Individual control for sound channels! (See <a class="rvts18" href="SoundOptions.html">sound config</a> for details).</p>
-<p>*Undo/Redo Savestate/Loadstate features installed! &nbsp;No more loss of data to unintentional presses. &nbsp;(See <a class="rvts18" href="Gettingstarted.html">getting started</a> for details).</p>
-<p>*Movie subtitles can now be included in .fm2 files. &nbsp;See <a class="rvts18" href="fm2.html">.fm2 documentation</a> for details and <a class="rvts18" href="MovieOptions.html">Movie options</a> for details on customizing.</p>
-<p>*Auto-backup for movie files. &nbsp;(See <a class="rvts18" href="MovieOptions.html">movie options</a> for details).</p>
-<p>*A Ram change monitor for the Memory watch dialog. (see <a class="rvts18" href="MemoryWatch.html">memwatch</a> for details).</p>
-<p>*Frame counter works even without a movie loaded.</p>
-<p>*AVI Directory Override option.</p>
-<p><br/></p>
-<p><span class="rvts16">Major Bug / Crash Bug Fixes</span></p>
-<p><br/></p>
-<p>*Fixed throttling problems that resulted on AMD Dualcore processors. (Caused FCEUX to appear to be in turbo mode).</p>
-<p>*Fix major crash issue where NROM game (such as SMB) savestates were writing erroneous information if a non NROM game was loaded prior.</p>
-<p>*Fixed a bug that caused a new sav file to not get created when loading a 2nd battery backed game.</p>
-<p>*Fix Directory Overrides so to allow users to have no override. &nbsp;Also fixes directory override reset bug.</p>
-<p><br/></p>
-<p><span class="rvts16">Minor Bug fixes</span></p>
-<p><br/></p>
-<p>*Hotkeys - prevent "Hotkey explosion" where some laptop keys set off all unassigned hotkeys</p>
-<p>*Timing - "disable throttling when sound is off" now only affects FCEUX when sound is off</p>
-<p>*Clip Left and Right sides taken into account when drawing on screen (record/play/pause, lag &amp; frame counters, messages, etc)</p>
-<p>*Fixed bug where having sound off and Mute turbo caused chirps when toggling</p>
-<p>*Video settings - fixed bug when both aspect ratio correction and special scaling 3x are set, video was getting resized incorrectly</p>
-<p>*Auto-save cleanup -prevent loading an auto-save from previous session. &nbsp;Added flags for enabling auto-save menu item.</p>
-<p>*Fixed issues related to big endian compiling. </p>
-<p>*Fix bug so that Escape can now be assigned as a hotkey</p>
-<p>*Fixed bug in screenshot numbering that caused numbering to not reset when changing games.</p>
-<p><br/></p>
-<p><span class="rvts16">GUI / Menu Enhancements</span></p>
-<p><br/></p>
-<p>*A right-click context menu added! &nbsp;Includes many commonly used items for a variety of situations.</p>
-<p>*Menu items that are hotkey mappable now show their current hotkey mapping</p>
-<p>*Major overhaul to the Menu organization. &nbsp;</p>
-<p>*All FCEUX features are now accessible in the menu</p>
-<p>*Alt Menu Shortcuts properly configured</p>
-<p>*Menu items are properly grayed when not useable</p>
-<p>*All movie related menu items moved to a<a class="rvts18" href="MovieOptions.html"> Movie options</a> dialog </p>
-<p>*Removed hard-coded Accel keys and replaced with re-mappable hotkeys (Open &amp; Close ROM)</p>
-<p>*Drag &amp; Drop for .fm2 and .lua files</p>
-<p>*Many new functions added to the context menu (See <a class="rvts18" href="ContextMenuItems.html">context menu</a> for details)</p>
-<p>*New Mappable Hotkeys: Open Cheats, Open ROM, Close ROM, Undo/Redo savestate, Toggle Movie Subtitles</p>
-<p><br/></p>
-<p><span class="rvts16">Lua</span></p>
-<p><br/></p>
-<p>*Added input.get() ! &nbsp;Returns the mouse info and all keyboard buttons pressed by the user.</p>
-<p>*Fixed joypad.set(). &nbsp;False now sets a button to off. &nbsp;Nil does not affect the button at all (allowing the user to still control it).</p>
-<p>*gui.text() Increased height (to approx. 7 lines).</p>
-<p>*speedmode("turbo") now turns on turbo (which employs frame-skipping) rather than max speed.</p>
-<p>*memory.readbyte will recognize frozen addresses (cheats).</p>
-<p>*movie.framecount() always return a number, even when no movie is playing (since the frame counter is implemented without a movie loaded).</p>
-<p>*Added FCEU.poweron()</p>
-<p>*Added FCEU.softreset()</p>
-<p>*Added FCEU.lagged()</p>
-<p>*Added FCEU.lagcount()</p>
-<p>*Added FCEU.getreadonly()</p>
-<p>*Added FCEU.setreadonly()</p>
-<p>*Added FCEU.fceu_setrenderplanes(sprites, background) </p>
-<p>*Added movie.active()</p>
-<p>*Added movie.rerecordcount()</p>
-<p>*Added movie.length()</p>
-<p>*Added movie.getname()</p>
-<p>*Added movie.playbeginning()</p>
-<p>*Added -lua command line argment, loads a Lua script on startup</p>
-<p>*Added zapper.read() - returns the zapper (mouse) data. &nbsp;(Currently does return zapper data in movie playback).</p>
-<p>*Added joypad.write and joypad.get for naming consistency. </p>
-<p>*Added rom.readbyte()</p>
-<p>*Added rom.readbytesigned()</p>
-<p><br/></p>
-<p><span class="rvts16">Sound Config</span></p>
-<p><br/></p>
-<p>*Turning sound off disabled sound config controls</p>
-<p>*Re-enabled sound buffer time slider control</p>
-<p><br/></p>
-<p><span class="rvts16">Hex Editor</span></p>
-<p><br/></p>
-<p>*Freezing ram addresses automatically updates the Cheats dialog if it is open.</p>
-<p>* Added prevention from freezing more than 256 addresses at once (doing so caused crash bugs).</p>
-<p>*Dialog remembers window size.</p>
-<p>*Dump Rom &amp; Dump PPU to file Dialogs use ROM to build default filename</p>
-<p>*Maximize and minimize buttons added.</p>
-<p>*Help menu item added</p>
-<p><br/></p>
-<p><span class="rvts16">Memory Watch</span></p>
-<p><br/></p>
-<p>*Dialog now includes Ram change monitoring. (see <a class="rvts18" href="MemoryWatch.html">memwatch</a> for details).</p>
-<p>*Dialog is now collapsible to 1 column.</p>
-<p>*No longer crashes when attempting to load an invalid file from the recent file menu.</p>
-<p>*Cancel option added to the save changes dialog.</p>
-<p>*Memory address values that are frozen by the debugger or hex editor are displayed in blue.</p>
-<p>*Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position.</p>
-<p>*Save as dialog uses ROM name to build a default memory watch filename if there was no last used memory watch filename</p>
-<p>*Drag and drop for .txt (memory watch) files.</p>
-<p>*Minor menu and hotkey fixes.</p>
-<p>*Watch values now compatible with custom windows dialog colors.</p>
-<p><br/></p>
-<p><span class="rvts16">Debugger</span></p>
-<p><br/></p>
-<p>*Shows scanlines and PPU pixel values</p>
-<p>*Shows scanlines even while in VBlank</p>
-<p>*Added a Run Line button (runs 1 scanline per click)</p>
-<p>*Run 128 Lines button (runs 128 scanlines per click)</p>
-<p>*Number of active cheats listed.</p>
-<p>*Cheats list automatically updated if ram addresses are frozen in the hex editor.</p>
-<p>*Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position.</p>
-<p>*Debugger now has a minimum valid size</p>
-<p>*Added "Restore original window size" button</p>
-<p><br/></p>
-<p><span class="rvts16">PPU Viewer </span></p>
-<p><br/></p>
-<p>*Default refresh value set to 15</p>
-<p>*Refresh value stored in the .cfg file</p>
-<p><br/></p>
-<p><span class="rvts16">Nametable Viewer</span></p>
-<p><br/></p>
-<p>*Default refresh value set to 15</p>
-<p>*Refresh value stored in the .cfg file</p>
-<p><br/></p>
-<p><span class="rvts16">Trace Logger</span></p>
-<p><br/></p>
-<p>*Fixed bug where user can't scroll the log window while it is auto-updating.</p>
-<p>*Changed message about F2 pause (left over from FCEUXDSP) to display the current hotkey mapping.</p>
-<p><br/></p>
-<p><span class="rvts16">Text Hooker</span></p>
-<p><br/></p>
-<p>*Saving a .tht file no longer crashes</p>
-<p>*Dialog updates every frame</p>
-<p>*Initialization error checking reinstalled,</p>
-<p>*Dialog remembers window position</p>
-<p>*Fixed bug where canceling save as produces an error message.</p>
-<p>*Save As produces default filename based on the current ROM</p>
-<p><br/></p>
-<p><span class="rvts16">Message Log</span></p>
-<p><br/></p>
-<p>*Remembers X,Y position</p>
-<p>*Resized width and height</p>
-<p>*Allowed more lines of text to appear on the screen at once.</p>
-<p><br/></p>
-<p><span class="rvts16">Metadata</span></p>
-<p><br/></p>
-<p>*Remembers window position</p>
-<p>*Can be called from the context menu if a movie is loaded (see <a class="rvts18" href="ContextMenuItems.html">context menu</a> for details).</p>
-<p><br/></p>
-<p><span class="rvts16">TASEdit</span></p>
-<p><br/></p>
-<p>*added help menu item</p>
-<p>*disabled menu items that are not currently implemented.</p>
-<p><br/></p>
-<p><span class="rvts16">Turbo</span></p>
-<p>*Turbo now employs frame skip, greatly increasing its speed</p>
-<p>*The mute turbo option completely bypasses sound processing (another big speed boost)</p>
-<p>*Turbo now works with the Lazy wait for VBlank sync setting</p>
-<p><br/></p>
-<p><span class="rvts16">SDL </span></p>
-<p>*SDL Movie subtitle support and subtitle toggle hotkey added.</p>
-<p>*SDL Added fcm to fm2 converter tool to SDL version.</p>
-<p>*SDL Improved the SDL sound code; drastically improves quality of sound.</p>
-<p>*SDL Savestate slots are now mappable.</p>
-<p>*SDL Major updates to SDL documentation</p>
-<p>*SDL Added Shift+M for toggling automatic movie backups.</p>
-<p>*SDL Added option to mute FCEUX for avi capturing, check the documentation for more details.</p>
-<p>*SDL Added --noconfig command line option</p>
-<p>*SDL Frame Advance Skip Lag frames toggle implemented</p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Write eBooks for the Kindle</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="WhatsNew210"
+		  data-hnd-context="67"
+		  data-hnd-title="What's New? 2.1 (changelog)"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Intro.html">Introduction</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew211.html" title="What's New? 2.1.1 (changelog)" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew203.html" title="What's New? 2.0.3 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>What's New? 2.1 (changelog)</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.1</span></p>
+<p class="rvps2"><span class="rvts6">Released March 29, 2009</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This release includes a multitude of new features, major fixes, and enhancements.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">New Features Win32</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*The latest mappers and mapper fixes from FCEU-mm. &nbsp;Adds support for many new games such as Warioland II (Unl), Shu Qi Yu, &nbsp;and Street Dance</span></p>
+<p class="rvps2"><span class="rvts6">*Full screen mode fixed! &nbsp;Also, Alt+Enter properly toggles full screen.</span></p>
+<p class="rvps2"><span class="rvts6">*Individual control for sound channels! (See </span><a class="rvts35" href="SoundOptions.html">sound config</a><span class="rvts6"> for details).</span></p>
+<p class="rvps2"><span class="rvts6">*Undo/Redo Savestate/Loadstate features installed! &nbsp;No more loss of data to unintentional presses. &nbsp;(See </span><a class="rvts35" href="Gettingstarted.html">getting started</a><span class="rvts6"> for details).</span></p>
+<p class="rvps2"><span class="rvts6">*Movie subtitles can now be included in .fm2 files. &nbsp;See </span><a class="rvts35" href="fm2.html">.fm2 documentation</a><span class="rvts6"> for details and </span><a class="rvts35" href="MovieOptions.html">Movie options</a><span class="rvts6"> for details on customizing.</span></p>
+<p class="rvps2"><span class="rvts6">*Auto-backup for movie files. &nbsp;(See </span><a class="rvts35" href="MovieOptions.html">movie options</a><span class="rvts6"> for details).</span></p>
+<p class="rvps2"><span class="rvts6">*A Ram change monitor for the Memory watch dialog. (see </span><a class="rvts35" href="MemoryWatch.html">memwatch</a><span class="rvts6"> for details).</span></p>
+<p class="rvps2"><span class="rvts6">*Frame counter works even without a movie loaded.</span></p>
+<p class="rvps2"><span class="rvts6">*AVI Directory Override option.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Major Bug / Crash Bug Fixes</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Fixed throttling problems that resulted on AMD Dualcore processors. (Caused FCEUX to appear to be in turbo mode).</span></p>
+<p class="rvps2"><span class="rvts6">*Fix major crash issue where NROM game (such as SMB) savestates were writing erroneous information if a non NROM game was loaded prior.</span></p>
+<p class="rvps2"><span class="rvts6">*Fixed a bug that caused a new sav file to not get created when loading a 2nd battery backed game.</span></p>
+<p class="rvps2"><span class="rvts6">*Fix Directory Overrides so to allow users to have no override. &nbsp;Also fixes directory override reset bug.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Minor Bug fixes</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Hotkeys - prevent "Hotkey explosion" where some laptop keys set off all unassigned hotkeys</span></p>
+<p class="rvps2"><span class="rvts6">*Timing - "disable throttling when sound is off" now only affects FCEUX when sound is off</span></p>
+<p class="rvps2"><span class="rvts6">*Clip Left and Right sides taken into account when drawing on screen (record/play/pause, lag &amp; frame counters, messages, etc)</span></p>
+<p class="rvps2"><span class="rvts6">*Fixed bug where having sound off and Mute turbo caused chirps when toggling</span></p>
+<p class="rvps2"><span class="rvts6">*Video settings - fixed bug when both aspect ratio correction and special scaling 3x are set, video was getting resized incorrectly</span></p>
+<p class="rvps2"><span class="rvts6">*Auto-save cleanup -prevent loading an auto-save from previous session. &nbsp;Added flags for enabling auto-save menu item.</span></p>
+<p class="rvps2"><span class="rvts6">*Fixed issues related to big endian compiling.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">*Fix bug so that Escape can now be assigned as a hotkey</span></p>
+<p class="rvps2"><span class="rvts6">*Fixed bug in screenshot numbering that caused numbering to not reset when changing games.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">GUI / Menu Enhancements</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*A right-click context menu added! &nbsp;Includes many commonly used items for a variety of situations.</span></p>
+<p class="rvps2"><span class="rvts6">*Menu items that are hotkey mappable now show their current hotkey mapping</span></p>
+<p class="rvps2"><span class="rvts6">*Major overhaul to the Menu organization. &nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">*All FCEUX features are now accessible in the menu</span></p>
+<p class="rvps2"><span class="rvts6">*Alt Menu Shortcuts properly configured</span></p>
+<p class="rvps2"><span class="rvts6">*Menu items are properly grayed when not useable</span></p>
+<p class="rvps2"><span class="rvts6">*All movie related menu items moved to a</span><a class="rvts35" href="MovieOptions.html"> Movie options</a><span class="rvts6"> dialog&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">*Removed hard-coded Accel keys and replaced with re-mappable hotkeys (Open &amp; Close ROM)</span></p>
+<p class="rvps2"><span class="rvts6">*Drag &amp; Drop for .fm2 and .lua files</span></p>
+<p class="rvps2"><span class="rvts6">*Many new functions added to the context menu (See </span><a class="rvts35" href="ContextMenuItems.html">context menu</a><span class="rvts6"> for details)</span></p>
+<p class="rvps2"><span class="rvts6">*New Mappable Hotkeys: Open Cheats, Open ROM, Close ROM, Undo/Redo savestate, Toggle Movie Subtitles</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Lua</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Added input.get() ! &nbsp;Returns the mouse info and all keyboard buttons pressed by the user.</span></p>
+<p class="rvps2"><span class="rvts6">*Fixed joypad.set(). &nbsp;False now sets a button to off. &nbsp;Nil does not affect the button at all (allowing the user to still control it).</span></p>
+<p class="rvps2"><span class="rvts6">*gui.text() Increased height (to approx. 7 lines).</span></p>
+<p class="rvps2"><span class="rvts6">*speedmode("turbo") now turns on turbo (which employs frame-skipping) rather than max speed.</span></p>
+<p class="rvps2"><span class="rvts6">*memory.readbyte will recognize frozen addresses (cheats).</span></p>
+<p class="rvps2"><span class="rvts6">*movie.framecount() always return a number, even when no movie is playing (since the frame counter is implemented without a movie loaded).</span></p>
+<p class="rvps2"><span class="rvts6">*Added FCEU.poweron()</span></p>
+<p class="rvps2"><span class="rvts6">*Added FCEU.softreset()</span></p>
+<p class="rvps2"><span class="rvts6">*Added FCEU.lagged()</span></p>
+<p class="rvps2"><span class="rvts6">*Added FCEU.lagcount()</span></p>
+<p class="rvps2"><span class="rvts6">*Added FCEU.getreadonly()</span></p>
+<p class="rvps2"><span class="rvts6">*Added FCEU.setreadonly()</span></p>
+<p class="rvps2"><span class="rvts6">*Added FCEU.fceu_setrenderplanes(sprites, background)&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">*Added movie.active()</span></p>
+<p class="rvps2"><span class="rvts6">*Added movie.rerecordcount()</span></p>
+<p class="rvps2"><span class="rvts6">*Added movie.length()</span></p>
+<p class="rvps2"><span class="rvts6">*Added movie.getname()</span></p>
+<p class="rvps2"><span class="rvts6">*Added movie.playbeginning()</span></p>
+<p class="rvps2"><span class="rvts6">*Added -lua command line argment, loads a Lua script on startup</span></p>
+<p class="rvps2"><span class="rvts6">*Added zapper.read() - returns the zapper (mouse) data. &nbsp;(Currently does return zapper data in movie playback).</span></p>
+<p class="rvps2"><span class="rvts6">*Added joypad.write and joypad.get for naming consistency.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">*Added rom.readbyte()</span></p>
+<p class="rvps2"><span class="rvts6">*Added rom.readbytesigned()</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Sound Config</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Turning sound off disabled sound config controls</span></p>
+<p class="rvps2"><span class="rvts6">*Re-enabled sound buffer time slider control</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Hex Editor</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Freezing ram addresses automatically updates the Cheats dialog if it is open.</span></p>
+<p class="rvps2"><span class="rvts6">* Added prevention from freezing more than 256 addresses at once (doing so caused crash bugs).</span></p>
+<p class="rvps2"><span class="rvts6">*Dialog remembers window size.</span></p>
+<p class="rvps2"><span class="rvts6">*Dump Rom &amp; Dump PPU to file Dialogs use ROM to build default filename</span></p>
+<p class="rvps2"><span class="rvts6">*Maximize and minimize buttons added.</span></p>
+<p class="rvps2"><span class="rvts6">*Help menu item added</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Memory Watch</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Dialog now includes Ram change monitoring. (see </span><a class="rvts35" href="MemoryWatch.html">memwatch</a><span class="rvts6"> for details).</span></p>
+<p class="rvps2"><span class="rvts6">*Dialog is now collapsible to 1 column.</span></p>
+<p class="rvps2"><span class="rvts6">*No longer crashes when attempting to load an invalid file from the recent file menu.</span></p>
+<p class="rvps2"><span class="rvts6">*Cancel option added to the save changes dialog.</span></p>
+<p class="rvps2"><span class="rvts6">*Memory address values that are frozen by the debugger or hex editor are displayed in blue.</span></p>
+<p class="rvps2"><span class="rvts6">*Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position.</span></p>
+<p class="rvps2"><span class="rvts6">*Save as dialog uses ROM name to build a default memory watch filename if there was no last used memory watch filename</span></p>
+<p class="rvps2"><span class="rvts6">*Drag and drop for .txt (memory watch) files.</span></p>
+<p class="rvps2"><span class="rvts6">*Minor menu and hotkey fixes.</span></p>
+<p class="rvps2"><span class="rvts6">*Watch values now compatible with custom windows dialog colors.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Debugger</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Shows scanlines and PPU pixel values</span></p>
+<p class="rvps2"><span class="rvts6">*Shows scanlines even while in VBlank</span></p>
+<p class="rvps2"><span class="rvts6">*Added a Run Line button (runs 1 scanline per click)</span></p>
+<p class="rvps2"><span class="rvts6">*Run 128 Lines button (runs 128 scanlines per click)</span></p>
+<p class="rvps2"><span class="rvts6">*Number of active cheats listed.</span></p>
+<p class="rvps2"><span class="rvts6">*Cheats list automatically updated if ram addresses are frozen in the hex editor.</span></p>
+<p class="rvps2"><span class="rvts6">*Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position.</span></p>
+<p class="rvps2"><span class="rvts6">*Debugger now has a minimum valid size</span></p>
+<p class="rvps2"><span class="rvts6">*Added "Restore original window size" button</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">PPU Viewer&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Default refresh value set to 15</span></p>
+<p class="rvps2"><span class="rvts6">*Refresh value stored in the .cfg file</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Nametable Viewer</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Default refresh value set to 15</span></p>
+<p class="rvps2"><span class="rvts6">*Refresh value stored in the .cfg file</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Trace Logger</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Fixed bug where user can't scroll the log window while it is auto-updating.</span></p>
+<p class="rvps2"><span class="rvts6">*Changed message about F2 pause (left over from FCEUXDSP) to display the current hotkey mapping.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Text Hooker</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Saving a .tht file no longer crashes</span></p>
+<p class="rvps2"><span class="rvts6">*Dialog updates every frame</span></p>
+<p class="rvps2"><span class="rvts6">*Initialization error checking reinstalled,</span></p>
+<p class="rvps2"><span class="rvts6">*Dialog remembers window position</span></p>
+<p class="rvps2"><span class="rvts6">*Fixed bug where canceling save as produces an error message.</span></p>
+<p class="rvps2"><span class="rvts6">*Save As produces default filename based on the current ROM</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Message Log</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Remembers X,Y position</span></p>
+<p class="rvps2"><span class="rvts6">*Resized width and height</span></p>
+<p class="rvps2"><span class="rvts6">*Allowed more lines of text to appear on the screen at once.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Metadata</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*Remembers window position</span></p>
+<p class="rvps2"><span class="rvts6">*Can be called from the context menu if a movie is loaded (see </span><a class="rvts35" href="ContextMenuItems.html">context menu</a><span class="rvts6"> for details).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">TASEdit</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">*added help menu item</span></p>
+<p class="rvps2"><span class="rvts6">*disabled menu items that are not currently implemented.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Turbo</span></p>
+<p class="rvps2"><span class="rvts6">*Turbo now employs frame skip, greatly increasing its speed</span></p>
+<p class="rvps2"><span class="rvts6">*The mute turbo option completely bypasses sound processing (another big speed boost)</span></p>
+<p class="rvps2"><span class="rvts6">*Turbo now works with the Lazy wait for VBlank sync setting</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">SDL&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">*SDL Movie subtitle support and subtitle toggle hotkey added.</span></p>
+<p class="rvps2"><span class="rvts6">*SDL Added fcm to fm2 converter tool to SDL version.</span></p>
+<p class="rvps2"><span class="rvts6">*SDL Improved the SDL sound code; drastically improves quality of sound.</span></p>
+<p class="rvps2"><span class="rvts6">*SDL Savestate slots are now mappable.</span></p>
+<p class="rvps2"><span class="rvts6">*SDL Major updates to SDL documentation</span></p>
+<p class="rvps2"><span class="rvts6">*SDL Added Shift+M for toggling automatic movie backups.</span></p>
+<p class="rvps2"><span class="rvts6">*SDL Added option to mute FCEUX for avi capturing, check the documentation for more details.</span></p>
+<p class="rvps2"><span class="rvts6">*SDL Added --noconfig command line option</span></p>
+<p class="rvps2"><span class="rvts6">*SDL Frame Advance Skip Lag frames toggle implemented</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/create-epub-ebooks">Full-featured EPub generator</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

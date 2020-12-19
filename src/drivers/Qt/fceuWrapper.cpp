@@ -2,8 +2,11 @@
 //
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <limits.h>
+#include <unzip.h>
 
+#include <QStyleFactory>
 #include "Qt/main.h"
 #include "Qt/throttle.h"
 #include "Qt/config.h"
@@ -19,6 +22,7 @@
 #include "Qt/CodeDataLogger.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/fceux_git_info.h"
 
 #include "common/cheat.h"
@@ -51,6 +55,8 @@ int KillFCEUXonFrame = 0;
 
 bool swapDuty = 0;
 bool turbo = false;
+bool pauseAfterPlayback = false;
+bool suggestReadOnlyReplay = true;
 unsigned int gui_draw_area_width   = 256;
 unsigned int gui_draw_area_height  = 256;
 
@@ -64,6 +70,7 @@ static int periodic_saves = 0;
 static int   mutexLocks = 0;
 static int   mutexPending = 0;
 static bool  emulatorHasMutux = 0;
+static unsigned int emulatorCycleCount = 0;
 
 extern double g_fpsScale;
 
@@ -75,33 +82,9 @@ int mutecapture = 0;
 //*****************************************************************
 //
 
-/**
-* Prints a textual message without adding a newline at the end.
-*
-* @param text The text of the message.
-*
-* TODO: This function should have a better name.
-**/
-void FCEUD_Message(const char *text)
-{
-	fputs(text, stdout);
-	//fprintf(stdout, "\n");
-}
-
-/**
-* Shows an error message in a message box.
-* (For now: prints to stderr.)
-* 
-* If running in Qt mode, display a dialog message box of the error.
-*
-* @param errormsg Text of the error message.
-**/
-void FCEUD_PrintError(const char *errormsg)
-{
-	fprintf(stderr, "%s\n", errormsg);
-
-	consoleWindow->QueueErrorMsgWindow( errormsg );
-}
+// Message functions defined in MsgLogViewer.cpp
+//void FCEUD_Message(const char *text)
+//void FCEUD_PrintError(const char *errormsg)
 
 /**
  * Opens a file, C++ style, to be read a byte at a time.
@@ -206,18 +189,42 @@ DriverKill()
 }
 
 /**
+ * Reloads last game
+ */
+int reloadLastGame(void)
+{
+	std::string lastRom;
+	g_config->getOption(std::string("SDL.LastOpenFile"), &lastRom);
+	return LoadGame(lastRom.c_str(), false);
+}
+
+/**
  * Loads a game, given a full path/filename.  The driver code must be
  * initialized after the game is loaded, because the emulator code
  * provides data necessary for the driver code(number of scanlines to
  * render, what virtual input devices to use, etc.).
  */
-int LoadGame(const char *path)
+int LoadGame(const char *path, bool silent)
 {
-	int gg_enabled, autoLoadDebug, autoOpenDebugger;
+	char fullpath[4096];
+	int gg_enabled, autoLoadDebug, autoOpenDebugger, autoInputPreset;
 
 	if (isloaded){
 		CloseGame();
 	}
+
+#if defined(__linux) || defined(__APPLE__)
+
+	// Resolve absolute path to file
+	if ( realpath( path, fullpath ) == NULL )
+	{
+		strcpy( fullpath, path );
+	}
+#else
+	strcpy( fullpath, path );
+#endif
+
+	//printf("Fullpath: %zi '%s'\n", sizeof(fullpath), fullpath );
 
 	// For some reason, the core of the emulator clears the state of 
 	// the game genie option selection. So check the config each time
@@ -226,7 +233,7 @@ int LoadGame(const char *path)
 
 	FCEUI_SetGameGenie (gg_enabled);
 
-	if(!FCEUI_LoadGame(path, 1)) {
+	if(!FCEUI_LoadGame(fullpath, 1, silent)) {
 		return 0;
 	}
 
@@ -250,12 +257,19 @@ int LoadGame(const char *path)
 
 	CDLoggerROMChanged();
 
-    int state_to_load;
-    g_config->getOption("SDL.AutoLoadState", &state_to_load);
-    if (state_to_load >= 0 && state_to_load < 10){
-        FCEUI_SelectState(state_to_load, 0);
-        FCEUI_LoadState(NULL, false);
-    }
+	int state_to_load;
+	g_config->getOption("SDL.AutoLoadState", &state_to_load);
+	if (state_to_load >= 0 && state_to_load < 10){
+	    FCEUI_SelectState(state_to_load, 0);
+	    FCEUI_LoadState(NULL, false);
+	}
+
+	g_config->getOption( "SDL.AutoInputPreset", &autoInputPreset );
+
+	if ( autoInputPreset )
+	{
+		loadInputSettingsFromFile();
+	}
 
 	ParseGIInput(GameInfo);
 	RefreshThrottleFPS();
@@ -304,12 +318,21 @@ CloseGame(void)
 	debugSymbolTable.clear();
 	CDLoggerROMClosed();
 
-    int state_to_save;
-    g_config->getOption("SDL.AutoSaveState", &state_to_save);
-    if (state_to_save < 10 && state_to_save >= 0){
-        FCEUI_SelectState(state_to_save, 0);
-        FCEUI_SaveState(NULL, false);
-    }
+   int state_to_save;
+   g_config->getOption("SDL.AutoSaveState", &state_to_save);
+   if (state_to_save < 10 && state_to_save >= 0){
+       FCEUI_SelectState(state_to_save, 0);
+       FCEUI_SaveState(NULL, false);
+   }
+
+	int autoInputPreset;
+	g_config->getOption( "SDL.AutoInputPreset", &autoInputPreset );
+
+	if ( autoInputPreset )
+	{
+		saveInputSettingsToFile();
+	}
+
 	FCEUI_CloseGame();
 
 	DriverKill();
@@ -360,11 +383,18 @@ bool fceuWrapperGameLoaded(void)
 	return (isloaded ? true : false);
 }
 
+void fceuWrapperRequestAppExit(void)
+{
+	if ( consoleWindow )
+	{
+		consoleWindow->requestClose();
+	}
+}
+
 static const char *DriverUsage =
 "Option         Value   Description\n"
 "--pal          {0|1}   Use PAL timing.\n"
 "--newppu       {0|1}   Enable the new PPU core. (WARNING: May break savestates)\n"
-"--inputcfg     d       Configures input device d on startup.\n"
 "--input(1,2)   d       Set which input device to emulate for input 1 or 2.\n"
 "                         Devices:  gamepad zapper powerpad.0 powerpad.1\n"
 "                         arkanoid\n"
@@ -382,8 +412,6 @@ static const char *DriverUsage =
 "--(x/y)scale   x       Multiply width/height by x. \n"
 "                         (Real numbers >0 with OpenGL, otherwise integers >0).\n"
 "--(x/y)stretch {0|1}   Stretch to fill surface on x/y axis (OpenGL only).\n"
-"--bpp       {8|16|32}  Set bits per pixel.\n"
-"--opengl       {0|1}   Enable OpenGL support.\n"
 "--fullscreen   {0|1}   Enable full screen mode.\n"
 "--noframe      {0|1}   Hide title bar and window decorations.\n"
 "--special      {1-4}   Use special video scaling filters\n"
@@ -412,7 +440,6 @@ static const char *DriverUsage =
 "--players      x       Set the number of local players in a network play\n"
 "                       session.\n"
 "--rp2mic       {0|1}   Replace Port 2 Start with microphone (Famicom).\n"
-"--nogui                Don't load the GTK GUI\n"
 "--4buttonexit {0|1}    exit the emulator when A+B+Select+Start is pressed\n"
 "--loadstate {0-9|>9}   load from the given state when the game is loaded\n"
 "--savestate {0-9|>9}   save to the given state when the game is closed\n"
@@ -423,6 +450,7 @@ static const char *DriverUsage =
 
 static void ShowUsage(const char *prog)
 {
+	int i,j;
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
 	puts(DriverUsage);
 #ifdef _S9XLUA_H
@@ -432,6 +460,25 @@ static void ShowUsage(const char *prog)
 	puts ("--videolog     c       Calls mencoder to grab the video and audio streams to\n                         encode them. Check the documentation for more on this.");
 	puts ("--mute        {0|1}    Mutes FCEUX while still passing the audio stream to\n                         mencoder during avi creation.");
 #endif
+	puts ("--style=KEY            Use Qt GUI Style based on supplied key. Available system style keys are:\n");
+
+	QStringList styleList = QStyleFactory::keys();
+
+	j=0;
+	for (i=0; i<styleList.size(); i++)
+	{
+		printf("  %16s  ", styleList[i].toStdString().c_str() ); j++;
+
+		if ( j >= 4 )
+		{
+			printf("\n"); j=0;
+		}
+	}
+	printf("\n\n");
+	printf(" Custom Qt stylesheets (.qss files) may be used by setting an\n");
+	printf(" environment variable named FCEUX_QT_STYLESHEET equal to the \n");
+	printf(" full (absolute) path to the qss file.\n");
+
 	puts("");
 	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
 	SDL_version v; 
@@ -505,16 +552,7 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		g_config->save();
 	}
 
-
-	//g_config->getOption("SDL.InputCfg", &s);
-
-	//if (s.size() != 0)
-	//{
-	//	InitVideo(GameInfo);
-	//	InputCfg(s);
-	//}
-
-	 // update the input devices
+	// update the input devices
 	UpdateInput(g_config);
 
 	// check for a .fcm file to convert to .fm2
@@ -682,8 +720,16 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		input_display = id;
 		// not exactly an id as an true/false switch; still better than creating another int for that
 		g_config->getOption("SDL.SubtitleDisplay", &id); 
-		extern int movieSubtitles;
-		movieSubtitles = id;
+		movieSubtitles = id ? true : false;
+	}
+
+	// Emulation Timing Mechanism
+	{
+		int timingMode;
+
+		g_config->getOption("SDL.EmuTimingMech", &timingMode);
+
+		setTimingMode( timingMode );
 	}
 	
 	// load the hotkeys from the config life
@@ -711,10 +757,20 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		if(s.find(".fm2") != std::string::npos || s.find(".fm3") != std::string::npos)
 		{
 			static int pauseframe;
+			char replayReadOnlySetting;
 			g_config->getOption("SDL.PauseFrame", &pauseframe);
 			g_config->setOption("SDL.PauseFrame", 0);
+
+			if (suggestReadOnlyReplay)
+			{
+				replayReadOnlySetting = true;
+			}
+			else
+			{
+				replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
+			}
 			FCEUI_printf("Playing back movie located at %s\n", s.c_str());
-			FCEUI_LoadMovie(s.c_str(), false, pauseframe ? pauseframe : false);
+			FCEUI_LoadMovie(s.c_str(), replayReadOnlySetting, pauseframe ? pauseframe : false);
 		}
 		else
 		{
@@ -739,7 +795,8 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	g_config->setOption("SDL.LuaScript", "");
 	if (s != "")
 	{
-#ifdef __linux
+#if defined(__linux) || defined(__APPLE__)
+
 		// Resolve absolute path to file
 		char fullpath[2048];
 		if ( realpath( s.c_str(), fullpath ) != NULL )
@@ -895,13 +952,6 @@ FCEUD_Update(uint8 *XBuf,
 	}
   	else 
 	{
-		//if (!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
-		//{
-		//	while (SpeedThrottle())
-		//	{
-		//		FCEUD_UpdateInput();
-		//	}
-		//}
 		if (XBuf && (inited&4)) 
 		{
 			BlitScreen(XBuf); blitDone = 1;
@@ -945,6 +995,8 @@ static void DoFun(int frameskip, int periodic_saves)
 	//	opause=FCEUI_EmulationPaused();
 	//	SilenceSound(opause);
 	//}
+	
+	emulatorCycleCount++;
 }
 
 void fceuWrapperLock(void)
@@ -1012,17 +1064,22 @@ int  fceuWrapperUpdate( void )
 
 	if ( !lock_acq )
 	{
-		printf("Error: Emulator Failed to Acquire Mutex\n");
+		if ( GameInfo )
+		{
+			printf("Error: Emulator Failed to Acquire Mutex\n");
+		}
 		usleep( 100000 );
 
 		return -1;
 	}
 	emulatorHasMutux = 1;
  
-	if ( GameInfo && !FCEUI_EmulationPaused() )
+	if ( GameInfo )
 	{
 		DoFun(frameskip, periodic_saves);
 	
+		hexEditorUpdateMemoryValues();
+
 		fceuWrapperUnLock();
 
 		emulatorHasMutux = 0;
@@ -1045,6 +1102,277 @@ int  fceuWrapperUpdate( void )
 	return 0;
 }
 
+ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
+{
+	int idx=0, ret;
+	unzFile zf;
+	unz_file_info fi;
+	char filename[512];
+	ArchiveScanRecord rec;
+		
+	zf = unzOpen( fname.c_str() );
+
+	if ( zf == NULL )
+	{
+		//printf("Error: Failed to open Zip File: '%s'\n", fname.c_str() );
+		return rec;
+	}
+	rec.type = 0;
+
+	ret = unzGoToFirstFile( zf );
+
+	//printf("unzGoToFirstFile: %i \n", ret );
+
+	while ( ret == 0 )
+	{
+		FCEUARCHIVEFILEINFO_ITEM item;
+
+		unzGetCurrentFileInfo( zf, &fi, filename, sizeof(filename), NULL, 0, NULL, 0 );
+
+		//printf("Filename: %u '%s' \n", fi.uncompressed_size, filename );
+
+		item.name.assign( filename );
+		item.size  = fi.uncompressed_size;
+		item.index = idx; idx++;
+
+		rec.files.push_back( item );
+
+		ret = unzGoToNextFile( zf );
+
+		//printf("unzGoToNextFile: %i \n", ret );
+	}
+	rec.numFilesInArchive = idx;
+
+	unzClose( zf );
+
+	return rec;
+}
+
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int* userCancel)
+{
+	int ret;
+	FCEUFILE* fp = 0;
+	unzFile zf;
+	unz_file_info fi;
+	char filename[512];
+	char foundFile = 0;
+	void *tmpMem = NULL;
+	std::string searchFile;
+
+	if ( innerFilename != NULL )
+	{
+		searchFile = *innerFilename;
+	}
+	else
+	{
+		std::vector <std::string> fileList;
+
+		for (size_t i=0; i<asr.files.size(); i++)
+		{
+			char base[512], suffix[32];
+
+			getFileBaseName( asr.files[i].name.c_str(), base, suffix );
+
+			if ( (strcasecmp( suffix, ".nes" ) == 0) ||
+			     (strcasecmp( suffix, ".nsf" ) == 0) ||
+			     (strcasecmp( suffix, ".fds" ) == 0) ||
+			     (strcasecmp( suffix, ".unf" ) == 0) ||
+			     (strcasecmp( suffix, ".unif") == 0) )
+			{
+				fileList.push_back( asr.files[i].name );
+			}
+		}
+
+		if ( fileList.size() > 1 )
+		{
+			if ( consoleWindow != NULL )
+			{
+				int sel = consoleWindow->showListSelectDialog( "Select ROM From Archive", fileList );
+
+				if ( sel < 0 )
+				{
+					if ( userCancel )
+					{
+						*userCancel = 1;
+					}
+					return fp;
+				}
+				searchFile = fileList[sel];
+			}
+		}
+		else if ( fileList.size() > 0 )
+		{
+			searchFile = fileList[0];
+		}
+	}
+
+	zf = unzOpen( fname.c_str() );
+
+	if ( zf == NULL )
+	{
+		//printf("Error: Failed to open Zip File: '%s'\n", fname.c_str() );
+		return fp;
+	}
+
+	//printf("Searching for %s in %s \n", searchFile.c_str(), fname.c_str() );
+
+	ret = unzGoToFirstFile( zf );
+
+	//printf("unzGoToFirstFile: %i \n", ret );
+
+	while ( ret == 0 )
+	{
+		unzGetCurrentFileInfo( zf, &fi, filename, sizeof(filename), NULL, 0, NULL, 0 );
+
+		//printf("Filename: %u '%s' \n", fi.uncompressed_size, filename );
+
+		if ( strcmp( searchFile.c_str(), filename ) == 0 )
+		{
+		   //printf("Found Filename: %u '%s' \n", fi.uncompressed_size, filename );
+			foundFile = 1; break;
+		}
+
+		ret = unzGoToNextFile( zf );
+
+		//printf("unzGoToNextFile: %i \n", ret );
+	}
+
+	if ( !foundFile )
+	{
+		unzClose( zf );
+		return fp;
+	}
+
+	tmpMem = ::malloc( fi.uncompressed_size );
+
+	if ( tmpMem == NULL )
+	{
+		unzClose( zf );
+		return fp;
+	}
+
+	EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(fi.uncompressed_size);
+
+	unzOpenCurrentFile( zf );
+	unzReadCurrentFile( zf, tmpMem, fi.uncompressed_size );
+	unzCloseCurrentFile( zf );
+
+	ms->fwrite( tmpMem, fi.uncompressed_size );
+
+	free( tmpMem );
+
+	//if we extracted the file correctly
+	fp = new FCEUFILE();
+	fp->archiveFilename = fname;
+	fp->filename = searchFile;
+	fp->fullFilename = fp->archiveFilename + "|" + fp->filename;
+	fp->archiveIndex = ret;
+	fp->mode = FCEUFILE::READ;
+	fp->size = fi.uncompressed_size;
+	fp->stream = ms;
+	fp->archiveCount = (int)asr.numFilesInArchive;
+	ms->fseek(0,SEEK_SET); //rewind so that the rom analyzer sees a freshly opened file
+
+	unzClose( zf );
+
+	return fp;
+}
+
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename)
+{
+	int userCancel = 0;
+
+	return FCEUD_OpenArchive( asr, fname, innerFilename, &userCancel );
+}
+
+FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex, int* userCancel)
+{
+	int ret, idx=0;
+	FCEUFILE* fp = 0;
+	unzFile zf;
+	unz_file_info fi;
+	char filename[512];
+	char foundFile = 0;
+	void *tmpMem = NULL;
+
+	zf = unzOpen( fname.c_str() );
+
+	if ( zf == NULL )
+	{
+		//printf("Error: Failed to open Zip File: '%s'\n", fname.c_str() );
+		return fp;
+	}
+
+	ret = unzGoToFirstFile( zf );
+
+	//printf("unzGoToFirstFile: %i \n", ret );
+
+	while ( ret == 0 )
+	{
+		unzGetCurrentFileInfo( zf, &fi, filename, sizeof(filename), NULL, 0, NULL, 0 );
+
+		//printf("Filename: %u '%s' \n", fi.uncompressed_size, filename );
+
+		if ( idx == innerIndex )
+		{
+		   //printf("Found Filename: %u '%s' \n", fi.uncompressed_size, filename );
+			foundFile = 1; break;
+		}
+		idx++;
+
+		ret = unzGoToNextFile( zf );
+
+		//printf("unzGoToNextFile: %i \n", ret );
+	}
+
+	if ( !foundFile )
+	{
+		unzClose( zf );
+		return fp;
+	}
+
+	tmpMem = ::malloc( fi.uncompressed_size );
+
+	if ( tmpMem == NULL )
+	{
+		unzClose( zf );
+		return fp;
+	}
+
+	EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(fi.uncompressed_size);
+
+	unzOpenCurrentFile( zf );
+	unzReadCurrentFile( zf, tmpMem, fi.uncompressed_size );
+	unzCloseCurrentFile( zf );
+
+	ms->fwrite( tmpMem, fi.uncompressed_size );
+
+	free( tmpMem );
+
+	//if we extracted the file correctly
+	fp = new FCEUFILE();
+	fp->archiveFilename = fname;
+	fp->filename = filename;
+	fp->fullFilename = fp->archiveFilename + "|" + fp->filename;
+	fp->archiveIndex = ret;
+	fp->mode = FCEUFILE::READ;
+	fp->size = fi.uncompressed_size;
+	fp->stream = ms;
+	fp->archiveCount = (int)asr.numFilesInArchive;
+	ms->fseek(0,SEEK_SET); //rewind so that the rom analyzer sees a freshly opened file
+
+	unzClose( zf );
+
+	return fp;
+}
+
+FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex)
+{
+	int userCancel = 0;
+
+	return FCEUD_OpenArchiveIndex( asr, fname, innerIndex, &userCancel );
+}
+
 // dummy functions
 
 #define DUMMY(__f) \
@@ -1061,15 +1389,9 @@ void FCEUI_AviVideoUpdate(const unsigned char* buffer) { }
 int FCEUD_ShowStatusIcon(void) {return 0;}
 bool FCEUI_AviIsRecording(void) {return false;}
 void FCEUI_UseInputPreset(int preset) { }
-bool FCEUD_PauseAfterPlayback() { return false; }
+bool FCEUD_PauseAfterPlayback() { return pauseAfterPlayback; }
 
 void FCEUD_TurboOn	 (void) { /* TODO */ };
 void FCEUD_TurboOff   (void) { /* TODO */ };
 void FCEUD_TurboToggle(void) { /* TODO */ };
-
-FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex) { return 0; }
-FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename) { return 0; }
-FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex, int* userCancel) { return 0; }
-FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int* userCancel) { return 0; }
-ArchiveScanRecord FCEUD_ScanArchive(std::string fname) { return ArchiveScanRecord(); }
 

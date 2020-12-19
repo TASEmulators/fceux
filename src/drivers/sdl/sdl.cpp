@@ -190,17 +190,26 @@ static void ShowUsage(char *prog)
 }
 
 /**
+ * Reloads last game.
+ */
+int reloadLastGame() {
+	std::string lastRom;
+	g_config->getOption(std::string("SDL.LastOpenFile"), &lastRom);
+	return LoadGame(lastRom.c_str());
+}
+
+/**
  * Loads a game, given a full path/filename.  The driver code must be
  * initialized after the game is loaded, because the emulator code
  * provides data necessary for the driver code(number of scanlines to
  * render, what virtual input devices to use, etc.).
  */
-int LoadGame(const char *path)
+int LoadGame(const char *path, bool silent)
 {
 	if (isloaded){
 		CloseGame();
 	}
-	if(!FCEUI_LoadGame(path, 1)) {
+	if(!FCEUI_LoadGame(path, 1, silent)) {
 		return 0;
 	}
 
@@ -524,6 +533,10 @@ void FCEUD_TraceInstruction() {
 	return;
 }
 
+void fceuWrapperRequestAppExit(void)
+{
+	gtk_gui_run = false;
+}
 
 #ifdef _GTK
 	int noGui = 0;
@@ -813,7 +826,6 @@ int main(int argc, char *argv[])
 		input_display = id;
 		// not exactly an id as an true/false switch; still better than creating another int for that
 		g_config->getOption("SDL.SubtitleDisplay", &id); 
-		extern int movieSubtitles;
 		movieSubtitles = id;
 	}
 	
@@ -1050,6 +1062,43 @@ void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
 {
 	printf("Lua Output: %s\n", str );
 }
+//----------------------------------------------------
+int LuaKillMessageBox(void)
+{
+	int kill = 0;
+	fprintf(stderr, "The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n");
+	char buffer[64];
+	while (true) {
+		fprintf(stderr, "(y/n): ");
+		fgets(buffer, sizeof(buffer), stdin);
+		if (buffer[0] == 'y' || buffer[0] == 'Y') {
+			kill = 1;
+			break;
+		}
+
+		if (buffer[0] == 'n' || buffer[0] == 'N')
+			break;
+	}
+	return 0;
+}
+//----------------------------------------------------
+#ifdef  WIN32
+int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char* const format, ...) 
+#else
+int LuaPrintfToWindowConsole(const char *__restrict format, ...)  throw()
+#endif
+{
+   int retval;
+   va_list args;
+	char msg[2048];
+   va_start( args, format );
+   retval = ::vfprintf( stdout, format, args );
+   va_end(args);
+
+	msg[ sizeof(msg)-1 ] = 0;
+
+   return(retval);
+};
 //----------------------------------------------------
 
 

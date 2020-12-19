@@ -32,6 +32,8 @@ class GuiCheatsDialog_t : public QDialog
 
 		int activeCheatListCB (char *name, uint32 a, uint8 v, int c, int s, int type, void *data);
 
+		void showActiveCheatList(bool redraw);
+
 	protected:
 		void closeEvent(QCloseEvent *event);
 
@@ -75,7 +77,6 @@ class GuiCheatsDialog_t : public QDialog
 
 	private:
 		void showCheatSearchResults(void);
-		void showActiveCheatList(bool redraw);
 
    public slots:
       void closeWindow(void);
@@ -97,3 +98,7 @@ class GuiCheatsDialog_t : public QDialog
 		void actvCheatItemClicked( QTreeWidgetItem *item, int column);
 
 };
+
+void openCheatDialog(QWidget *parent);
+
+void updateCheatDialog(void);

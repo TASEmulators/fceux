@@ -1,420 +1,611 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Implementation</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("Implementation");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Implementation</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Implementation">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Implementation" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Implementation</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="TASEditorInside.html">TAS Editor Inside</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="TASEditorInside.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="Ideas.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="MistakeProofing.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts19">Implementation</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">At first the TAS Editor was based on the codebase of experimental tool named TASEdit, using FCEUX 2.1.5 as a kick-start.</span></p>
-<p class="rvps10"><span class="rvts21">The premise of TASEdit was to build an input editor (like TAS Movie Editor) into emulator, so that the delay between editing and checking results would greatly shrink. Since there was no research done on typical behaviors in TASing process, the concept was vague and the code wasn't scalable. Thus, soon after formulating the new vision of the editing tool the code of TAS Editor was fully rewritten to make adding new features easier.</span></p>
-<p class="rvps10"><span class="rvts21">The premise of TAS Editor is to create a tool that is more handy than traditional rerecording tools, not just for Input editing/splicing, but also for Input creation and, most importantly, polishing (optimizing).</span></p>
-<p class="rvps10"><span class="rvts21">The following architecture of TAS Editor was designed according to author's notion of a methodical TASing and of features needed for such TASing.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts75">TAS Editor modules (classes)</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">taseditor.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Main – Main gate between emulator and Taseditor</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">the point of launching TAS Editor from emulator</span></li>
-<li class="rvps10"><span class="rvts21">the point of quitting from TAS Editor</span></li>
-<li class="rvps10"><span class="rvts21">regularly (at the end of every frame) updates all modules that need regular update</span></li>
-<li class="rvps10"><span class="rvts21">implements operations of the "File" menu: creating New project, opening a file, saving, compact saving, import, export</span></li>
-<li class="rvps10"><span class="rvts21">handles some FCEUX hotkeys</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">taseditor_window.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Window – User Interface</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">implements all operations with TAS Editor window: creating, redrawing, resizing, moving, tooltips, clicks</span></li>
-<li class="rvps10"><span class="rvts21">subclasses all buttons and checkboxes in TAS Editor window GUI in order to disable Spacebar key and process Middle clicks</span></li>
-<li class="rvps10"><span class="rvts21">processes OS messages and sends signals from user to TAS Editor modules (also implements some minor commands on-site, like Greenzone capacity dialog and such)</span></li>
-<li class="rvps10"><span class="rvts21">switches off/on emulator's keyboard input when the window loses/gains focus</span></li>
-<li class="rvps10"><span class="rvts21">on demand: updates the window caption; updates mouse cursor icon</span></li>
-<li class="rvps10"><span class="rvts21">updates all checkboxes and menu items when some settings change</span></li>
-<li class="rvps10"><span class="rvts21">stores info about 10 last projects (File-&gt;Recent) and updates it when saving/loading files</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: window caption, help filename, size and other properties of all GUI items</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">bookmarks.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Bookmarks – Manager of Bookmarks</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores 10 Bookmarks</span></li>
-<li class="rvps10"><span class="rvts21">implements all operations with Bookmarks: initialization, setting Bookmarks, jumping to Bookmarks, deploying Branches</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: resets all Bookmarks and Branches</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of Bookmarks List: creating, redrawing, mouseover, clicks</span></li>
-<li class="rvps10"><span class="rvts21">regularly updates flashings in Bookmarks List</span></li>
-<li class="rvps10"><span class="rvts21">on demand: updates colors of rows in Bookmarks List, reflecting conditions of respective Piano Roll rows</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: save id, ids of commands, labels for panel, gradients for flashings, id of default slot</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">branches.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Branches – Manager of Branches</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores info about Branches (relations of Bookmarks) and the id of current Branch</span></li>
-<li class="rvps10"><span class="rvts21">also stores the time of the last modification (see fireball) and the time of project beginning (see cloudlet)</span></li>
-<li class="rvps10"><span class="rvts21">also caches data used in calculations (cached_first_difference, cached_timelines)</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: sends warning to caller</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of Branches Tree: creating, recalculating relations, animating, redrawing, mouseover, clicks</span></li>
-<li class="rvps10"><span class="rvts21">on demand: reacts on Bookmarks/current Movie changes and recalculates the Branches Tree</span></li>
-<li class="rvps10"><span class="rvts21">regularly updates animations in Branches Tree and calculates Playback cursor position on the Tree</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: coordinates for building Branches Tree, animation timings</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">bookmark.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Bookmark – Single Bookmark data</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores all info of one specific Bookmark: movie snapshot, a savestate of 1 frame, a screenshot of the frame, a state of flashing for this Bookmark's row</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: sends warning to caller</span></li>
-<li class="rvps10"><span class="rvts21">implements procedure of "Bookmark set": creating movie snapshot, setting key frame on current Playback position, copying savestate from Greenzone, making and compressing screenshot, launching flashing animation</span></li>
-<li class="rvps10"><span class="rvts21">launches respective flashings for "Bookmark jump" and "Branch deploy"</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">snapshot.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Snapshot – Snapshot of all edited data</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores the data of specific snapshot of the movie: InputLog, LagLog, Markers at the moment of creating the snapshot, keyframe, start and end frame of operation, type of operation and description of the snapshot (including the time of creation)</span></li>
-<li class="rvps10"><span class="rvts21">also stores info about sequential recording/drawing of input</span></li>
-<li class="rvps10"><span class="rvts21">streamlines snapshot creation: copying Input from movie data, copying LagLog from Greenzone, copying Markers from Markers Manager, setting time of creation</span></li>
-<li class="rvps10"><span class="rvts21">streamlines restoring Markers data from snapshot</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: sends warning to caller</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">inputlog.cpp</span></p>
-<p class="rvps10"><span class="rvts21">InputLog – Log of Input</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores the data about Input state: size, type of Input, Input Log data (commands and joysticks)</span></li>
-<li class="rvps10"><span class="rvts21">optionally can store map of Hot Changes</span></li>
-<li class="rvps10"><span class="rvts21">implements InputLog creation: copying Input, copying Hot Changes</span></li>
-<li class="rvps10"><span class="rvts21">implements full/partial restoring of data from InputLog: Input, Hot Changes</span></li>
-<li class="rvps10"><span class="rvts21">implements compression and decompression of stored data</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: sends warning to caller</span></li>
-<li class="rvps10"><span class="rvts21">implements searching of first mismatch comparing two InputLogs or comparing this InputLog to a movie</span></li>
-<li class="rvps10"><span class="rvts21">provides interface for reading specific data: reading Input of any given frame, reading value at any point of Hot Changes map</span></li>
-<li class="rvps10"><span class="rvts21">implements all operations with Hot Changes maps: copying (full/partial), updating/fading, setting new hot places by comparing two InputLogs</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">laglog.cpp</span></p>
-<p class="rvps10"><span class="rvts21">LagLog – Log of Lag occurrence</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores the frame-by-frame log of lag occurrence</span></li>
-<li class="rvps10"><span class="rvts21">implements compression and decompression of stored data</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: sends warning to caller</span></li>
-<li class="rvps10"><span class="rvts21">provides interface for reading and writing log data</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">markers.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Markers – Snapshot of Markers state</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores the data about Markers state: array of distributing Markers among movie frames, and array of Notes</span></li>
-<li class="rvps10"><span class="rvts21">implements compression and decompression of stored data</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: sends warning to caller</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: max length of a Note</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">popup_display.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Popup display – Manager of popup windows</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">implements all operations with popup windows: initialization, redrawing, centering, screenshot decompression and conversion</span></li>
-<li class="rvps10"><span class="rvts21">regularly inspects changes of Bookmarks Manager and shows/updates/hides popup windows</span></li>
-<li class="rvps10"><span class="rvts21">on demand: updates contents of popup windows</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: coordinates and appearance of popup windows, timings of fade in/out</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">history.cpp</span></p>
-<p class="rvps10"><span class="rvts21">History – History of movie modifications</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores array of History items (snapshots, backup_bookmarks, backup_current_branch) and pointer to current snapshot</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: clears the array and starts new history by making snapshot of current movie data</span></li>
-<li class="rvps10"><span class="rvts21">on demand: checks the difference between the last snapshot and current movie, and makes a decision to create new point of rollback. In special cases it can create a point of rollback without checking the difference, assuming that caller already checked it</span></li>
-<li class="rvps10"><span class="rvts21">implements all restoring operations: undo, redo, revert to any snapshot from the array</span></li>
-<li class="rvps10"><span class="rvts21">also stores the state of "undo pointer"</span></li>
-<li class="rvps10"><span class="rvts21">regularly updates the state of "undo pointer"</span></li>
-<li class="rvps10"><span class="rvts21">regularly (when emulator is paused) searches for uncompressed items in the History Log and compresses first found item</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of History List: creating, redrawing, clicks, auto-scrolling</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: save id, ids and names of all possible types of modification, timings of "undo pointer"</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">piano_roll.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Piano Roll – Piano Roll interface</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">implements the working of Piano Roll List: creating, redrawing, scrolling, mouseover, clicks, drag</span></li>
-<li class="rvps10"><span class="rvts21">regularly updates the size of the List according to current movie input</span></li>
-<li class="rvps10"><span class="rvts21">on demand: scrolls visible area of the List to any given item: to Playback Cursor, to Selection Cursor, to "undo pointer", to a Marker</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads current position of vertical scrolling from a project file. On error: scrolls the List to the beginning</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of Piano Roll List Header: creating, redrawing, animating, mouseover, clicks</span></li>
-<li class="rvps10"><span class="rvts21">regularly updates lights in the Header according to button presses data from Recorder and Alt key state</span></li>
-<li class="rvps10"><span class="rvts21">on demand: launches flashes in the Header</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of mouse wheel: List scrolling, Playback cursor movement, Selection cursor movement, scrolling across gaps</span></li>
-<li class="rvps10"><span class="rvts21">implements context menu on Right-click</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: save id, ids of columns, widths of columns, tables of colors, gradient of Hot Changes, gradient of Header flashings, timings of flashes, all fonts used in TAS Editor, images</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">selection.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Selection – Manager of selections</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">contains definition of the type "Set of selected frames"</span></li>
-<li class="rvps10"><span class="rvts21">stores array of Sets of selected frames (History of selections)</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: clears the array and starts new history by making empty selection</span></li>
-<li class="rvps10"><span class="rvts21">constantly tracks changes in selected rows of Piano Roll List, and makes a decision to create new point of selection rollback</span></li>
-<li class="rvps10"><span class="rvts21">implements all selection restoring operations: undo, redo</span></li>
-<li class="rvps10"><span class="rvts21">on demand: changes current selection: remove selection, jump to a frame with Selection cursor, select region, select all, select between Markers, reselect clipboard</span></li>
-<li class="rvps10"><span class="rvts21">regularly ensures that selection doesn't go beyond curent Piano Roll limits, detects if selection moved to another Marker and updates Note in the lower text field</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of lower buttons &lt;&lt; and &gt;&gt; (jumping on Markers)</span></li>
-<li class="rvps10"><span class="rvts21">also here's the code of lower text field (for editing Marker Notes)</span></li>
-<li class="rvps10"><span class="rvts21">stores resource: save id, lower text field prefix</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">editor.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Editor – Tool for editing</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">implements operations of changing Input: toggle input in region, set input by pattern, toggle selected region, apply pattern to input selection</span></li>
-<li class="rvps10"><span class="rvts21">implements operations of changing Markers: toggle Markers in selection, apply patern to Markers in selection, mark/unmark all selected frames</span></li>
-<li class="rvps10"><span class="rvts21">stores Autofire Patterns data and their loading/generating code</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: patterns filename, id of buttonpresses in patterns</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">splicer.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Splicer – Tool for montage</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">implements operations of mass-changing input: copy/paste, cloning, clearing region, insertion and deletion of frames, truncating</span></li>
-<li class="rvps10"><span class="rvts21">stores data about the selection used in last "Copy to Clipboard" operation</span></li>
-<li class="rvps10"><span class="rvts21">regularly checks the state of current selection and displays info on GUI, also displays info about input in Clipboard</span></li>
-<li class="rvps10"><span class="rvts21">when launching TAS Editor, it checks Clipboard contents</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: mnemonics of buttons, texts for selection/clipboard info on GUI</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">taseditor_config.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Config – Current settings</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores current state of all TAS Editor settings</span></li>
-<li class="rvps10"><span class="rvts21">all TAS Editor modules can get or set any data within Config</span></li>
-<li class="rvps10"><span class="rvts21">when launching FCEUX, the emulator writes data from fceux.cfg file to the Config, when exiting it reads the data back to fceux.cfg</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: default values of all settings, min/max values of settings</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">playback.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Playback – Player of emulation states</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">implements the working of movie player: show any frame (jump), run/cancel seekng. pause, rewinding</span></li>
-<li class="rvps10"><span class="rvts21">regularly tracks and controls emulation process, prompts redrawing of Piano Roll List rows, finishes seeking when reaching target frame, animates target frame, makes Piano Roll follow Playback cursor, detects if Playback cursor moved to another Marker and updates Note in the upper text field</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of upper buttons &lt;&lt; and &gt;&gt; (jumping on Markers)</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of buttons &lt; and &gt; (frame-by-frame movement)</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of button || (pause) and middle mouse button, also reacts on external changes of emulation pause</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of progressbar: init, reset, set value, click (cancel seeking)</span></li>
-<li class="rvps10"><span class="rvts21">also here's the code of upper text field (for editing Marker Notes)</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: upper text field prefix, timings of target frame animation, response times of GUI buttons, progressbar scale</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">greenzone.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Greenzone – Access zone</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores array of savestates, used for faster movie navigation by Playback cursor</span></li>
-<li class="rvps10"><span class="rvts21">also stores LagLog of current movie Input</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: truncates Greenzone to last successfully read savestate</span></li>
-<li class="rvps10"><span class="rvts21">regularly checks if there's a savestate of current emulation state, if there's no such savestate in array then creates one and updates lag info for previous frame</span></li>
-<li class="rvps10"><span class="rvts21">implements the working of "Auto-adjust Input according to lag" feature</span></li>
-<li class="rvps10"><span class="rvts21">regularly runs gradual cleaning of the savestates array (for memory saving), deleting oldest savestates</span></li>
-<li class="rvps10"><span class="rvts21">on demand: (when movie input was changed) truncates the size of Greenzone, deleting savestates that became irrelevant because of new input. After truncating it may also move Playback cursor (which must always reside within Greenzone) and may launch Playback seeking</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: save id, properties of gradual cleaning, timing of cleaning</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">recorder.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Recorder – Tool for input recording</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">at the moment of recording movie input (at the very end of a frame) by emulator's call the Recorder intercepts input data and applies its filters (multitracking/etc), then reflects input changes into History and Greenzone</span></li>
-<li class="rvps10"><span class="rvts21">regularly tracks virtual joypad buttonpresses and provides data for Piano Roll List Header lights. Also reacts on external changes of Recording status, and updates GUI (Recorder panel and Bookmarks/Branches caption)</span></li>
-<li class="rvps10"><span class="rvts21">implements input editing in Read-only mode (ColumnSet by pressing buttons on virtual joypad)</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: ids and names of multitracking modes, suffixes for TAS Editor window caption</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">markers_manager.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Markers_manager – Manager of Markers</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores one snapshot of Markers, representing current state of Markers in the project</span></li>
-<li class="rvps10"><span class="rvts21">saves and loads the data from a project file. On error: clears the data</span></li>
-<li class="rvps10"><span class="rvts21">regularly ensures that the size of current Markers array is not less than the number of frames in current input</span></li>
-<li class="rvps10"><span class="rvts21">implements all operations with Markers: setting Marker to a frame, removing Marker, inserting/deleting frames between Markers, truncating Markers array, changing Notes, finding frame for any given Marker, access to the data of Snapshot of Markers state</span></li>
-<li class="rvps10"><span class="rvts21">implements full/partial copying of data between two Snapshots of Markers state, and searching for first difference between two Snapshots of Markers state</span></li>
-<li class="rvps10"><span class="rvts21">also here's the code of searching for "similar" Notes</span></li>
-<li class="rvps10"><span class="rvts21">also here's the code of editing Marker Notes</span></li>
-<li class="rvps10"><span class="rvts21">also here's the code of Find Note dialog </span></li>
-<li class="rvps10"><span class="rvts21">stores resources: save id, properties of searching for similar Notes</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">taseditor_lua.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Lua – Manager of Lua features</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">implements logic of all functions of "taseditor" Lua library</span></li>
-<li class="rvps10"><span class="rvts21">stores the list of pending input changes</span></li>
-<li class="rvps10"><span class="rvts21">on demand: (from FCEUX Lua engine) updates "</span><span class="rvts29">Run function</span><span class="rvts21">" button</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: ids of joypads for input changes, max length of a name for </span><span class="rvts20">applychanges()</span><span class="rvts21">, default caption for the "</span><span class="rvts29">Run function</span><span class="rvts21">" button</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts20">taseditor_project.cpp</span></p>
-<p class="rvps10"><span class="rvts21">Project – Manager of working project</span></p>
-<p class="rvps10"><span class="rvts39">[single instance]</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">stores the info about current project filename and about having unsaved changes</span></li>
-<li class="rvps10"><span class="rvts21">implements saving and loading project files from filesystem</span></li>
-<li class="rvps10"><span class="rvts21">implements autosave function</span></li>
-<li class="rvps10"><span class="rvts21">stores resources: autosave period scale, default filename, fm3 format offsets</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts75">Emulator modifications</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Taseditor needs the following modifications to be applied to an emulator code.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">Main</span><span class="rvts21">/</span><span class="rvts25">Window</span><span class="rvts21">:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">call Taseditor's update() function after every emulated frame and when emulation is paused, no less than 20 times per second (necessary for smooth animations and controls in TAS Editor window)</span></li>
-<li class="rvps10"><span class="rvts21">dispatch OS messages to Taseditor window, including accelerator table commands</span></li>
-<li class="rvps10"><span class="rvts21">if emulator doesn't make use of mouse wheel, it should resend WM_MOUSEWHEEL to Taseditor, same with middle mouse clicks on emulator's own window</span></li>
-<li class="rvps24" style="text-indent: 30px"><span class="rvts21">on exit: emulator should ask Taseditor, so it can check unsaved changes in current project and allow user to save before quitting. If the </span><span class="rvts20">askSave()</span><span class="rvts21"> function returns </span><span class="rvts70">false</span><span class="rvts21">, the exit should be cancelled (means that user chose "Cancel")</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">Movie</span><span class="rvts21">:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">there should be an interface for full control over the current movie data (creating/reading/writing/any modification). The movie should be the last layer between user's input and emulated game, which means that the game should not take input from virtual pads, only from movie data. An alternative (FCEUX example) would be to always sync changes into virtual pads every time the movie data changes. Either way, Taseditor interacts with the game by reading and modifying movie data and doesn't poll virtual pads. The Piano Roll displays current movie data and edits Input of current movie data only</span></li>
-<li class="rvps10"><span class="rvts21">in Recording mode: at the very beginning of a frame (right after the Input for the frame is written into current movie data) emulator should call Taseditor's Recorder function (and Recorder may change the movie data)</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">Input</span><span class="rvts21">:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">provide an interface for knowing which buttons are currently held (it's necessary for the Piano Roll Header)</span></li>
-<li class="rvps10"><span class="rvts21">hardware commands (Reset/Power/etc) should not be executed immediately after user invokes them, they should work as well as buttons input from virtual pads, meaning that when Taseditor is engaged it may either allow or prohibit the commands. In fact, when Taseditor is engaged and is not Recording, user should not be able to even invoke hardware commands</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">Output</span><span class="rvts21">:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">provide read access to current state of lag indicator (needed at the end of every frame)</span></li>
-<li class="rvps10"><span class="rvts21">have public function for storing current screenshot in RAM (also screenshot with Lua HUD)</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">SaveStates</span><span class="rvts21">:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">have public function for making a savestate in RAM and function for loading the state from RAM array</span></li>
-<li class="rvps10"><span class="rvts21">savestates must restore the game state precisely</span></li>
-<li class="rvps10"><span class="rvts21">saving and loading should not take too much time, because the Greenzone automatically creates a new savestate for every frame, which should be transparent for user</span></li>
-<li class="rvps10"><span class="rvts21">savestates should be stored in compressed form, so that they don't take too much space, because for a comfortable work in Taseditor the Greenzone should have at least 1000 savestates for nearby frames</span></li>
-<li class="rvps10"><span class="rvts21">Greenzone savestates should not store current movie data (that would be a waste of space)</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">Config</span><span class="rvts21">:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">on emulator start: emulator should load </span><span class="rvts70">taseditor_config</span><span class="rvts21"> data from the common settings file. If the file is not found, no changes should be made to </span><span class="rvts70">taseditor_config</span><span class="rvts21"> (it will have its default settings)</span></li>
-<li class="rvps10"><span class="rvts21">on emulator exit: save </span><span class="rvts70">taseditor_config</span><span class="rvts21"> data to the common settings file</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">Lua engine</span><span class="rvts21">:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">add support for </span><span class="rvts20">taseditor</span><span class="rvts21"> library. The core of each function is implemented by Taseditor, but emulator should take parameters from Lua stack and send them to respective function of Taseditor's Lua gate, then receive returned data and push it into Lua stack</span></li>
-<li class="rvps10"><span class="rvts21">add support for </span><a class="rvts27" href="LuaAPI.html#registermanual">Manual function</a><span class="rvts21"> and </span><a class="rvts27" href="LuaAPI.html#registerauto">Auto function</a></li>
-<li class="rvps10"><span class="rvts21">notify Taseditor about changing the Manual function status (registered/re-registered/empty) so that it can change the appearance of the "</span><span class="rvts29">Run function</span><span class="rvts21">" button</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">Replay</span><span class="rvts21">:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">emulator should be able to replay Taseditor project files as usual movie files, ignoring the additional data at the end of the file</span></li>
-<li class="rvps10"><span class="rvts21">since Taseditor project file can be huge, emulator shouldn't load it into memory when opening</span></li>
-<li class="rvps10"><span class="rvts21">emulator should be able to distinguish between a normal movie and a Taseditor project file. If it's a project file: when user tries to rerecord, emulator should refuse and suggest launching TAS Editor instead. If user agrees, emulator should send Taseditor the reference to the project file</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts25">Other</span><span class="rvts21">:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">emulator must be stable and deterministic. Desyncs will totally break Playback cursor navigation and make TASing unfeasible</span></li>
-<li class="rvps10"><span class="rvts21">it's recommended to implement all the points mentioned in </span><a class="rvts27" href="MistakeProofing.html">Mistake-proofing</a><span class="rvts21"> that are related to emulator modification. In particular, Taseditor should be able to change certain settings, and user shouldn't be able to change them while Taseditor is engaged</span></li>
-<li class="rvps10"><span class="rvts21">good emulation speed is necessary for adequate </span><a class="rvts27" href="NonlinearTASing.html#turbo-seeking">Turbo seeking</a><span class="rvts21"> feature. Also there should be an option to mute sound when turbo is on.</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="Implementation"
+		  data-hnd-context="24"
+		  data-hnd-title="Implementation"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="TASEditorInside.html">TAS Editor Inside</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="TASEditorInside.html" title="TAS Editor Inside" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="Ideas.html" title="Ideas" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="MistakeProofing.html" title="Mistake-proofing" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Implementation</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts18">Implementation</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">At first the TAS Editor was based on the codebase of experimental tool named TASEdit, using FCEUX 2.1.5 as a kick-start.</span></p>
+<p class="rvps7"><span class="rvts20">The premise of TASEdit was to build an input editor (like TAS Movie Editor) into emulator, so that the delay between editing and checking results would greatly shrink. Since there was no research done on typical behaviors in TASing process, the concept was vague and the code wasn't scalable. Thus, soon after formulating the new vision of the editing tool the code of TAS Editor was fully rewritten to make adding new features easier.</span></p>
+<p class="rvps7"><span class="rvts20">The premise of TAS Editor is to create a tool that is more handy than traditional rerecording tools, not just for Input editing/splicing, but also for Input creation and, most importantly, polishing (optimizing).</span></p>
+<p class="rvps7"><span class="rvts20">The following architecture of TAS Editor was designed according to author's notion of a methodical TASing and of features needed for such TASing.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts18">TAS Editor modules (classes)</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">taseditor.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Main – Main gate between emulator and Taseditor</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">the point of launching TAS Editor from emulator</span></li>
+ <li class="rvps7"><span class="rvts20">the point of quitting from TAS Editor</span></li>
+ <li class="rvps7"><span class="rvts20">regularly (at the end of every frame) updates all modules that need regular update</span></li>
+ <li class="rvps7"><span class="rvts20">implements operations of the "File" menu: creating New project, opening a file, saving, compact saving, import, export</span></li>
+ <li class="rvps7"><span class="rvts20">handles some FCEUX hotkeys</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">taseditor_window.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Window – User Interface</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">implements all operations with TAS Editor window: creating, redrawing, resizing, moving, tooltips, clicks</span></li>
+ <li class="rvps7"><span class="rvts20">subclasses all buttons and checkboxes in TAS Editor window GUI in order to disable Spacebar key and process Middle clicks</span></li>
+ <li class="rvps7"><span class="rvts20">processes OS messages and sends signals from user to TAS Editor modules (also implements some minor commands on-site, like Greenzone capacity dialog and such)</span></li>
+ <li class="rvps7"><span class="rvts20">switches off/on emulator's keyboard input when the window loses/gains focus</span></li>
+ <li class="rvps7"><span class="rvts20">on demand: updates the window caption; updates mouse cursor icon</span></li>
+ <li class="rvps7"><span class="rvts20">updates all checkboxes and menu items when some settings change</span></li>
+ <li class="rvps7"><span class="rvts20">stores info about 10 last projects (File-&gt;Recent) and updates it when saving/loading files</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: window caption, help filename, size and other properties of all GUI items</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">bookmarks.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Bookmarks – Manager of Bookmarks</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores 10 Bookmarks</span></li>
+ <li class="rvps7"><span class="rvts20">implements all operations with Bookmarks: initialization, setting Bookmarks, jumping to Bookmarks, deploying Branches</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: resets all Bookmarks and Branches</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of Bookmarks List: creating, redrawing, mouseover, clicks</span></li>
+ <li class="rvps7"><span class="rvts20">regularly updates flashings in Bookmarks List</span></li>
+ <li class="rvps7"><span class="rvts20">on demand: updates colors of rows in Bookmarks List, reflecting conditions of respective Piano Roll rows</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: save id, ids of commands, labels for panel, gradients for flashings, id of default slot</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">branches.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Branches – Manager of Branches</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores info about Branches (relations of Bookmarks) and the id of current Branch</span></li>
+ <li class="rvps7"><span class="rvts20">also stores the time of the last modification (see fireball) and the time of project beginning (see cloudlet)</span></li>
+ <li class="rvps7"><span class="rvts20">also caches data used in calculations (cached_first_difference, cached_timelines)</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: sends warning to caller</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of Branches Tree: creating, recalculating relations, animating, redrawing, mouseover, clicks</span></li>
+ <li class="rvps7"><span class="rvts20">on demand: reacts on Bookmarks/current Movie changes and recalculates the Branches Tree</span></li>
+ <li class="rvps7"><span class="rvts20">regularly updates animations in Branches Tree and calculates Playback cursor position on the Tree</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: coordinates for building Branches Tree, animation timings</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">bookmark.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Bookmark – Single Bookmark data</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores all info of one specific Bookmark: movie snapshot, a savestate of 1 frame, a screenshot of the frame, a state of flashing for this Bookmark's row</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: sends warning to caller</span></li>
+ <li class="rvps7"><span class="rvts20">implements procedure of "Bookmark set": creating movie snapshot, setting key frame on current Playback position, copying savestate from Greenzone, making and compressing screenshot, launching flashing animation</span></li>
+ <li class="rvps7"><span class="rvts20">launches respective flashings for "Bookmark jump" and "Branch deploy"</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">snapshot.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Snapshot – Snapshot of all edited data</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores the data of specific snapshot of the movie: InputLog, LagLog, Markers at the moment of creating the snapshot, keyframe, start and end frame of operation, type of operation and description of the snapshot (including the time of creation)</span></li>
+ <li class="rvps7"><span class="rvts20">also stores info about sequential recording/drawing of input</span></li>
+ <li class="rvps7"><span class="rvts20">streamlines snapshot creation: copying Input from movie data, copying LagLog from Greenzone, copying Markers from Markers Manager, setting time of creation</span></li>
+ <li class="rvps7"><span class="rvts20">streamlines restoring Markers data from snapshot</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: sends warning to caller</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">inputlog.cpp</span></p>
+<p class="rvps7"><span class="rvts20">InputLog – Log of Input</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores the data about Input state: size, type of Input, Input Log data (commands and joysticks)</span></li>
+ <li class="rvps7"><span class="rvts20">optionally can store map of Hot Changes</span></li>
+ <li class="rvps7"><span class="rvts20">implements InputLog creation: copying Input, copying Hot Changes</span></li>
+ <li class="rvps7"><span class="rvts20">implements full/partial restoring of data from InputLog: Input, Hot Changes</span></li>
+ <li class="rvps7"><span class="rvts20">implements compression and decompression of stored data</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: sends warning to caller</span></li>
+ <li class="rvps7"><span class="rvts20">implements searching of first mismatch comparing two InputLogs or comparing this InputLog to a movie</span></li>
+ <li class="rvps7"><span class="rvts20">provides interface for reading specific data: reading Input of any given frame, reading value at any point of Hot Changes map</span></li>
+ <li class="rvps7"><span class="rvts20">implements all operations with Hot Changes maps: copying (full/partial), updating/fading, setting new hot places by comparing two InputLogs</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">laglog.cpp</span></p>
+<p class="rvps7"><span class="rvts20">LagLog – Log of Lag occurrence</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores the frame-by-frame log of lag occurrence</span></li>
+ <li class="rvps7"><span class="rvts20">implements compression and decompression of stored data</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: sends warning to caller</span></li>
+ <li class="rvps7"><span class="rvts20">provides interface for reading and writing log data</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">markers.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Markers – Snapshot of Markers state</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores the data about Markers state: array of distributing Markers among movie frames, and array of Notes</span></li>
+ <li class="rvps7"><span class="rvts20">implements compression and decompression of stored data</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: sends warning to caller</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: max length of a Note</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">popup_display.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Popup display – Manager of popup windows</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">implements all operations with popup windows: initialization, redrawing, centering, screenshot decompression and conversion</span></li>
+ <li class="rvps7"><span class="rvts20">regularly inspects changes of Bookmarks Manager and shows/updates/hides popup windows</span></li>
+ <li class="rvps7"><span class="rvts20">on demand: updates contents of popup windows</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: coordinates and appearance of popup windows, timings of fade in/out</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">history.cpp</span></p>
+<p class="rvps7"><span class="rvts20">History – History of movie modifications</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores array of History items (snapshots, backup_bookmarks, backup_current_branch) and pointer to current snapshot</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: clears the array and starts new history by making snapshot of current movie data</span></li>
+ <li class="rvps7"><span class="rvts20">on demand: checks the difference between the last snapshot and current movie, and makes a decision to create new point of rollback. In special cases it can create a point of rollback without checking the difference, assuming that caller already checked it</span></li>
+ <li class="rvps7"><span class="rvts20">implements all restoring operations: undo, redo, revert to any snapshot from the array</span></li>
+ <li class="rvps7"><span class="rvts20">also stores the state of "undo pointer"</span></li>
+ <li class="rvps7"><span class="rvts20">regularly updates the state of "undo pointer"</span></li>
+ <li class="rvps7"><span class="rvts20">regularly (when emulator is paused) searches for uncompressed items in the History Log and compresses first found item</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of History List: creating, redrawing, clicks, auto-scrolling</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: save id, ids and names of all possible types of modification, timings of "undo pointer"</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">piano_roll.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Piano Roll – Piano Roll interface</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">implements the working of Piano Roll List: creating, redrawing, scrolling, mouseover, clicks, drag</span></li>
+ <li class="rvps7"><span class="rvts20">regularly updates the size of the List according to current movie input</span></li>
+ <li class="rvps7"><span class="rvts20">on demand: scrolls visible area of the List to any given item: to Playback Cursor, to Selection Cursor, to "undo pointer", to a Marker</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads current position of vertical scrolling from a project file. On error: scrolls the List to the beginning</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of Piano Roll List Header: creating, redrawing, animating, mouseover, clicks</span></li>
+ <li class="rvps7"><span class="rvts20">regularly updates lights in the Header according to button presses data from Recorder and Alt key state</span></li>
+ <li class="rvps7"><span class="rvts20">on demand: launches flashes in the Header</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of mouse wheel: List scrolling, Playback cursor movement, Selection cursor movement, scrolling across gaps</span></li>
+ <li class="rvps7"><span class="rvts20">implements context menu on Right-click</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: save id, ids of columns, widths of columns, tables of colors, gradient of Hot Changes, gradient of Header flashings, timings of flashes, all fonts used in TAS Editor, images</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">selection.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Selection – Manager of selections</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">contains definition of the type "Set of selected frames"</span></li>
+ <li class="rvps7"><span class="rvts20">stores array of Sets of selected frames (History of selections)</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: clears the array and starts new history by making empty selection</span></li>
+ <li class="rvps7"><span class="rvts20">constantly tracks changes in selected rows of Piano Roll List, and makes a decision to create new point of selection rollback</span></li>
+ <li class="rvps7"><span class="rvts20">implements all selection restoring operations: undo, redo</span></li>
+ <li class="rvps7"><span class="rvts20">on demand: changes current selection: remove selection, jump to a frame with Selection cursor, select region, select all, select between Markers, reselect clipboard</span></li>
+ <li class="rvps7"><span class="rvts20">regularly ensures that selection doesn't go beyond curent Piano Roll limits, detects if selection moved to another Marker and updates Note in the lower text field</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of lower buttons &lt;&lt; and &gt;&gt; (jumping on Markers)</span></li>
+ <li class="rvps7"><span class="rvts20">also here's the code of lower text field (for editing Marker Notes)</span></li>
+ <li class="rvps7"><span class="rvts20">stores resource: save id, lower text field prefix</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">editor.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Editor – Tool for editing</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">implements operations of changing Input: toggle input in region, set input by pattern, toggle selected region, apply pattern to input selection</span></li>
+ <li class="rvps7"><span class="rvts20">implements operations of changing Markers: toggle Markers in selection, apply patern to Markers in selection, mark/unmark all selected frames</span></li>
+ <li class="rvps7"><span class="rvts20">stores Autofire Patterns data and their loading/generating code</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: patterns filename, id of buttonpresses in patterns</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">splicer.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Splicer – Tool for montage</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">implements operations of mass-changing input: copy/paste, cloning, clearing region, insertion and deletion of frames, truncating</span></li>
+ <li class="rvps7"><span class="rvts20">stores data about the selection used in last "Copy to Clipboard" operation</span></li>
+ <li class="rvps7"><span class="rvts20">regularly checks the state of current selection and displays info on GUI, also displays info about input in Clipboard</span></li>
+ <li class="rvps7"><span class="rvts20">when launching TAS Editor, it checks Clipboard contents</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: mnemonics of buttons, texts for selection/clipboard info on GUI</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">taseditor_config.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Config – Current settings</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores current state of all TAS Editor settings</span></li>
+ <li class="rvps7"><span class="rvts20">all TAS Editor modules can get or set any data within Config</span></li>
+ <li class="rvps7"><span class="rvts20">when launching FCEUX, the emulator writes data from fceux.cfg file to the Config, when exiting it reads the data back to fceux.cfg</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: default values of all settings, min/max values of settings</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">playback.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Playback – Player of emulation states</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">implements the working of movie player: show any frame (jump), run/cancel seekng. pause, rewinding</span></li>
+ <li class="rvps7"><span class="rvts20">regularly tracks and controls emulation process, prompts redrawing of Piano Roll List rows, finishes seeking when reaching target frame, animates target frame, makes Piano Roll follow Playback cursor, detects if Playback cursor moved to another Marker and updates Note in the upper text field</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of upper buttons &lt;&lt; and &gt;&gt; (jumping on Markers)</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of buttons &lt; and &gt; (frame-by-frame movement)</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of button || (pause) and middle mouse button, also reacts on external changes of emulation pause</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of progressbar: init, reset, set value, click (cancel seeking)</span></li>
+ <li class="rvps7"><span class="rvts20">also here's the code of upper text field (for editing Marker Notes)</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: upper text field prefix, timings of target frame animation, response times of GUI buttons, progressbar scale</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">greenzone.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Greenzone – Access zone</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores array of savestates, used for faster movie navigation by Playback cursor</span></li>
+ <li class="rvps7"><span class="rvts20">also stores LagLog of current movie Input</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: truncates Greenzone to last successfully read savestate</span></li>
+ <li class="rvps7"><span class="rvts20">regularly checks if there's a savestate of current emulation state, if there's no such savestate in array then creates one and updates lag info for previous frame</span></li>
+ <li class="rvps7"><span class="rvts20">implements the working of "Auto-adjust Input according to lag" feature</span></li>
+ <li class="rvps7"><span class="rvts20">regularly runs gradual cleaning of the savestates array (for memory saving), deleting oldest savestates</span></li>
+ <li class="rvps7"><span class="rvts20">on demand: (when movie input was changed) truncates the size of Greenzone, deleting savestates that became irrelevant because of new input. After truncating it may also move Playback cursor (which must always reside within Greenzone) and may launch Playback seeking</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: save id, properties of gradual cleaning, timing of cleaning</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">recorder.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Recorder – Tool for input recording</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">at the moment of recording movie input (at the very end of a frame) by emulator's call the Recorder intercepts input data and applies its filters (multitracking/etc), then reflects input changes into History and Greenzone</span></li>
+ <li class="rvps7"><span class="rvts20">regularly tracks virtual joypad buttonpresses and provides data for Piano Roll List Header lights. Also reacts on external changes of Recording status, and updates GUI (Recorder panel and Bookmarks/Branches caption)</span></li>
+ <li class="rvps7"><span class="rvts20">implements input editing in Read-only mode (ColumnSet by pressing buttons on virtual joypad)</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: ids and names of multitracking modes, suffixes for TAS Editor window caption</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">markers_manager.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Markers_manager – Manager of Markers</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores one snapshot of Markers, representing current state of Markers in the project</span></li>
+ <li class="rvps7"><span class="rvts20">saves and loads the data from a project file. On error: clears the data</span></li>
+ <li class="rvps7"><span class="rvts20">regularly ensures that the size of current Markers array is not less than the number of frames in current input</span></li>
+ <li class="rvps7"><span class="rvts20">implements all operations with Markers: setting Marker to a frame, removing Marker, inserting/deleting frames between Markers, truncating Markers array, changing Notes, finding frame for any given Marker, access to the data of Snapshot of Markers state</span></li>
+ <li class="rvps7"><span class="rvts20">implements full/partial copying of data between two Snapshots of Markers state, and searching for first difference between two Snapshots of Markers state</span></li>
+ <li class="rvps7"><span class="rvts20">also here's the code of searching for "similar" Notes</span></li>
+ <li class="rvps7"><span class="rvts20">also here's the code of editing Marker Notes</span></li>
+ <li class="rvps7"><span class="rvts20">also here's the code of Find Note dialog&nbsp;</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: save id, properties of searching for similar Notes</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">taseditor_lua.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Lua – Manager of Lua features</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">implements logic of all functions of "taseditor" Lua library</span></li>
+ <li class="rvps7"><span class="rvts20">stores the list of pending input changes</span></li>
+ <li class="rvps7"><span class="rvts20">on demand: (from FCEUX Lua engine) updates "</span><span class="rvts26">Run function</span><span class="rvts20">" button</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: ids of joypads for input changes, max length of a name for </span><span class="rvts19">applychanges()</span><span class="rvts20">, default caption for the "</span><span class="rvts26">Run function</span><span class="rvts20">" button</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts19">taseditor_project.cpp</span></p>
+<p class="rvps7"><span class="rvts20">Project – Manager of working project</span></p>
+<p class="rvps7"><span class="rvts35">[single instance]</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">stores the info about current project filename and about having unsaved changes</span></li>
+ <li class="rvps7"><span class="rvts20">implements saving and loading project files from filesystem</span></li>
+ <li class="rvps7"><span class="rvts20">implements autosave function</span></li>
+ <li class="rvps7"><span class="rvts20">stores resources: autosave period scale, default filename, fm3 format offsets</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts18">Emulator modifications</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Taseditor needs the following modifications to be applied to an emulator code.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">Main</span><span class="rvts20">/</span><span class="rvts22">Window</span><span class="rvts20">:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">call Taseditor's update() function after every emulated frame and when emulation is paused, no less than 20 times per second (necessary for smooth animations and controls in TAS Editor window)</span></li>
+ <li class="rvps7"><span class="rvts20">dispatch OS messages to Taseditor window, including accelerator table commands</span></li>
+ <li class="rvps7"><span class="rvts20">if emulator doesn't make use of mouse wheel, it should resend WM_MOUSEWHEEL to Taseditor, same with middle mouse clicks on emulator's own window</span></li>
+ <li style="text-indent: 30px" class="rvps15"><span class="rvts20">on exit: emulator should ask Taseditor, so it can check unsaved changes in current project and allow user to save before quitting. If the </span><span class="rvts19">askSave()</span><span class="rvts20"> function returns </span><span class="rvts63">false</span><span class="rvts20">, the exit should be cancelled (means that user chose "Cancel")</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">Movie</span><span class="rvts20">:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">there should be an interface for full control over the current movie data (creating/reading/writing/any modification). The movie should be the last layer between user's input and emulated game, which means that the game should not take input from virtual pads, only from movie data. An alternative (FCEUX example) would be to always sync changes into virtual pads every time the movie data changes. Either way, Taseditor interacts with the game by reading and modifying movie data and doesn't poll virtual pads. The Piano Roll displays current movie data and edits Input of current movie data only</span></li>
+ <li class="rvps7"><span class="rvts20">in Recording mode: at the very beginning of a frame (right after the Input for the frame is written into current movie data) emulator should call Taseditor's Recorder function (and Recorder may change the movie data)</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">Input</span><span class="rvts20">:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">provide an interface for knowing which buttons are currently held (it's necessary for the Piano Roll Header)</span></li>
+ <li class="rvps7"><span class="rvts20">hardware commands (Reset/Power/etc) should not be executed immediately after user invokes them, they should work as well as buttons input from virtual pads, meaning that when Taseditor is engaged it may either allow or prohibit the commands. In fact, when Taseditor is engaged and is not Recording, user should not be able to even invoke hardware commands</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">Output</span><span class="rvts20">:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">provide read access to current state of lag indicator (needed at the end of every frame)</span></li>
+ <li class="rvps7"><span class="rvts20">have public function for storing current screenshot in RAM (also screenshot with Lua HUD)</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">SaveStates</span><span class="rvts20">:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">have public function for making a savestate in RAM and function for loading the state from RAM array</span></li>
+ <li class="rvps7"><span class="rvts20">savestates must restore the game state precisely</span></li>
+ <li class="rvps7"><span class="rvts20">saving and loading should not take too much time, because the Greenzone automatically creates a new savestate for every frame, which should be transparent for user</span></li>
+ <li class="rvps7"><span class="rvts20">savestates should be stored in compressed form, so that they don't take too much space, because for a comfortable work in Taseditor the Greenzone should have at least 1000 savestates for nearby frames</span></li>
+ <li class="rvps7"><span class="rvts20">Greenzone savestates should not store current movie data (that would be a waste of space)</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">Config</span><span class="rvts20">:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">on emulator start: emulator should load </span><span class="rvts63">taseditor_config</span><span class="rvts20"> data from the common settings file. If the file is not found, no changes should be made to </span><span class="rvts63">taseditor_config</span><span class="rvts20"> (it will have its default settings)</span></li>
+ <li class="rvps7"><span class="rvts20">on emulator exit: save </span><span class="rvts63">taseditor_config</span><span class="rvts20"> data to the common settings file</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">Lua engine</span><span class="rvts20">:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">add support for </span><span class="rvts19">taseditor</span><span class="rvts20"> library. The core of each function is implemented by Taseditor, but emulator should take parameters from Lua stack and send them to respective function of Taseditor's Lua gate, then receive returned data and push it into Lua stack</span></li>
+ <li class="rvps7"><span class="rvts20">add support for </span><a class="rvts24" href="LuaAPI.html#registermanual">Manual function</a><span class="rvts20"> and </span><a class="rvts24" href="LuaAPI.html#registerauto">Auto function</a></li>
+ <li class="rvps7"><span class="rvts20">notify Taseditor about changing the Manual function status (registered/re-registered/empty) so that it can change the appearance of the "</span><span class="rvts26">Run function</span><span class="rvts20">" button</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">Replay</span><span class="rvts20">:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">emulator should be able to replay Taseditor project files as usual movie files, ignoring the additional data at the end of the file</span></li>
+ <li class="rvps7"><span class="rvts20">since Taseditor project file can be huge, emulator shouldn't load it into memory when opening</span></li>
+ <li class="rvps7"><span class="rvts20">emulator should be able to distinguish between a normal movie and a Taseditor project file. If it's a project file: when user tries to rerecord, emulator should refuse and suggest launching TAS Editor instead. If user agrees, emulator should send Taseditor the reference to the project file</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts22">Other</span><span class="rvts20">:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">emulator must be stable and deterministic. Desyncs will totally break Playback cursor navigation and make TASing unfeasible</span></li>
+ <li class="rvps7"><span class="rvts20">it's recommended to implement all the points mentioned in </span><a class="rvts24" href="MistakeProofing.html">Mistake-proofing</a><span class="rvts20"> that are related to emulator modification. In particular, Taseditor should be able to change certain settings, and user shouldn't be able to change them while Taseditor is engaged</span></li>
+ <li class="rvps7"><span class="rvts20">good emulation speed is necessary for adequate </span><a class="rvts24" href="NonlinearTASing.html#turbo-seeking">Turbo seeking</a><span class="rvts20"> feature. Also there should be an option to mute sound when turbo is on.</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p></p>
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/create-epub-ebooks">Free EPub producer</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

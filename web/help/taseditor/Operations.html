@@ -1,687 +1,887 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Operations</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("Operations");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Operations</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Operations">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Operations" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Operations</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Reference.html">Reference</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="Navigation.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="LuaAPI.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="Operations"
+		  data-hnd-context="19"
+		  data-hnd-title="Operations"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Reference.html">Reference</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Reference.html" title="Reference" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="Navigation.html" title="Navigation" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="LuaAPI.html" title="Lua API" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Operations</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Operations</span></p>
+<p class="rvps2"><span class="rvts18">Operations</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts21">All modifications of the movie are registered in History Log. Every record of the Log contains the time when the modification was done and the keyframe (or starting and ending frames of the section) to which the modification was applied.</span></p>
-<p class="rvps10"><span class="rvts21">Here you can find the list of </span><span class="rvts24">all possible types of History Log records and corresponding operations with the movie.</span></p>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
-<div class="rvps21"><table width="420" border="1" cellpadding="0" cellspacing="0" style="border-color: #000000 #d3c4af #d3c4af #000000; border-style: solid;">
-<tr valign="middle">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #0000ff; width: 132px; height: 10px;"><p class="rvps5"><span class="rvts66">Input change</span></p>
-</td>
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #0000ff; width: 150px; height: 10px;"><p class="rvps5"><span class="rvts66">Markers change</span></p>
-</td>
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #0000ff; width: 124px; height: 10px;"><p class="rvps5"><span class="rvts66">Other</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Set">Set</a></p>
-</td>
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#MarkerSet">Marker Set</a></p>
-</td>
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ede4e4; width: 124px; height: 10px;"><p class="rvps5"><span class="rvts67">Initialization</span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Unset">Unset</a></p>
-</td>
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#MarkerRemove">Marker Remove</a></p>
-</td>
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ede4e4; width: 124px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Undefined">Undefined</a></p>
-</td>
-</tr>
-<tr valign="middle">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Pattern">Pattern</a></p>
-</td>
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#MarkerPattern">Marker Pattern</a></p>
-</td>
-<td rowspan="12" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; width: 124px;"><p class="rvps5"><span class="rvts65"><br/></span></p>
-</td>
-</tr>
-<tr valign="middle">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Clear">Clear</a></p>
-</td>
-<td rowspan="3" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ffffff; width: 150px;"><p class="rvps1"><br/></p>
-</td>
-</tr>
-<tr valign="middle">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Cut">Cut</a></p>
-</td>
-</tr>
-<tr valign="middle">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Paste">Paste</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#PasteInsert">PasteInsert</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Clone">Clone</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Insert">Insert</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#InsertNum">Insert#</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Delete">Delete</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Truncate">Truncate</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Record">Record</a></p>
-</td>
-<td rowspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; width: 150px; height: 10px;"><p class="rvps5"><span class="rvts65"><br/></span></p>
-</td>
-</tr>
-<tr valign="top">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ccffff; width: 132px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Import">Import</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Branch">Branch</a></p>
-</td>
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #ede4e4; width: 124px;"><p class="rvps5"><a class="rvts67" href="Operations.html#Bookmark">Bookmark</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td rowspan="8" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; width: 132px; height: 10px;"><p class="rvps5"><span class="rvts65"><br/></span></p>
-</td>
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#MarkerBranch">Marker Branch</a></p>
-</td>
-<td rowspan="9" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; width: 124px;"><p class="rvps5"><span class="rvts6"><br/></span></p>
-</td>
-</tr>
-<tr valign="top">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#MarkerRename">Marker Rename</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#MarkerDrag">Marker Drag</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#MarkerSwap">Marker Swap</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#MarkerShift">Marker Shift</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#LUAMarkerSet">LUA Marker Set</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#LUAMarkerRemove">LUA Marker Remove</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #f2f2c8; width: 150px; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#LUAMarkerRename">LUA Marker Rename</a></p>
-</td>
-</tr>
-<tr valign="top">
-<td colspan="2" valign="middle" style="border-color : #d3c4af #000000 #000000 #d3c4af; border-style: solid; background-color: #d3f8d6; height: 10px;"><p class="rvps5"><a class="rvts67" href="Operations.html#LUAChange">LUA Change</a></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20">All modifications of the movie are registered in History Log. Every record of the Log contains the time when the modification was done and the keyframe (or starting and ending frames of the section) to which the modification was applied.</span></p>
+<p class="rvps7"><span class="rvts20">Here you can find the list of </span><span class="rvts20">all possible types of History Log records and corresponding operations with the movie.</span></p>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
+<div class="rvps13">
+<table width="420" border="1" cellpadding="0" cellspacing="0" style="border-color: #000000 #ffffff #ffffff #000000; border-style: solid; border-spacing: 0px; margin: 0px auto;">
+ <tr valign="middle">
+  <td width="132" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #0000ff;">
+   <p class="rvps3"><span class="rvts59">Input change</span></p>
+  </td>
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #0000ff;">
+   <p class="rvps3"><span class="rvts59">Markers change</span></p>
+  </td>
+  <td width="124" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #0000ff;">
+   <p class="rvps3"><span class="rvts59">Other</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="132" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ccffff;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Set">Set</a></p>
+  </td>
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#MarkerSet">Marker Set</a></p>
+  </td>
+  <td width="124" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ede4e4;">
+   <p class="rvps3"><span class="rvts60">Initialization</span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="132" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ccffff;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Unset">Unset</a></p>
+  </td>
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#MarkerRemove">Marker Remove</a></p>
+  </td>
+  <td width="124" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ede4e4;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Undefined">Undefined</a></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="132" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ccffff;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Pattern">Pattern</a></p>
+  </td>
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#MarkerPattern">Marker Pattern</a></p>
+  </td>
+  <td rowspan="12" width="124" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px;">
+   <p class="rvps3"><span class="rvts35"><br/></span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="132" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ccffff;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Clear">Clear</a></p>
+  </td>
+  <td rowspan="3" width="150" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ffffff;">
+   <p class="rvps3"><span class="rvts6"><br/></span></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="132" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ccffff;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Cut">Cut</a></p>
+  </td>
+ </tr>
+ <tr valign="middle">
+  <td width="132" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ccffff;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Paste">Paste</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td colspan="2" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #d3f8d6;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#PasteInsert">PasteInsert</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td colspan="2" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #d3f8d6;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Clone">Clone</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td colspan="2" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #d3f8d6;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Insert">Insert</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td colspan="2" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #d3f8d6;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#InsertNum">Insert#</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td colspan="2" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #d3f8d6;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Delete">Delete</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td colspan="2" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #d3f8d6;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Truncate">Truncate</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="132" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ccffff;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Record">Record</a></p>
+  </td>
+  <td rowspan="2" width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px;">
+   <p class="rvps3"><span class="rvts35"><br/></span></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="132" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ccffff;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Import">Import</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td colspan="2" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #d3f8d6;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Branch">Branch</a></p>
+  </td>
+  <td width="124" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #ede4e4;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#Bookmark">Bookmark</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td rowspan="8" width="132" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px;">
+   <p class="rvps3"><span class="rvts35"><br/></span></p>
+  </td>
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#MarkerBranch">Marker Branch</a></p>
+  </td>
+  <td rowspan="9" width="124" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px;">
+   <p class="rvps3"><span class="rvts6"><br/></span></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#MarkerRename">Marker Rename</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#MarkerDrag">Marker Drag</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#MarkerSwap">Marker Swap</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#MarkerShift">Marker Shift</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#LUAMarkerSet">LUA Marker Set</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#LUAMarkerRemove">LUA Marker Remove</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td width="150" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #f2f2c8;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#LUAMarkerRename">LUA Marker Rename</a></p>
+  </td>
+ </tr>
+ <tr valign="top">
+  <td colspan="2" height="10" valign="middle" style="border-color : #ffffff #000000 #000000 #ffffff; border-style: solid; padding: 0px; background-color: #d3f8d6;">
+   <p class="rvps3"><a class="rvts60" href="Operations.html#LUAChange">LUA Change</a></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps21"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><a name="Initialization"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Initialization</span></p>
-<p class="rvps10"><span class="rvts42">Category: other</span></p>
-<p class="rvps10"><span class="rvts21">The record is created automatically when a new History Log is created.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">when creating a new project</span></li>
-<li class="rvps10"><span class="rvts21">when loading a compactly saved project that has no History Log</span></li>
+<p class="rvps13"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><a name="Initialization"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Initialization</span></p>
+<p class="rvps7"><span class="rvts6">Category: other</span></p>
+<p class="rvps7"><span class="rvts20">The record is created automatically when a new History Log is created.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">when creating a new project</span></li>
+ <li class="rvps7"><span class="rvts20">when loading a compactly saved project that has no History Log</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:24:53 Initialization</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">very rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after zeroth frame.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="Undefined"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Undefined</span></p>
-<p class="rvps10"><span class="rvts42">Category: other</span></p>
-<p class="rvps10"><span class="rvts21">Undefined modification. </span><span class="rvts21">The record should not appear in TAS Editor 1.0.</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">never</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><a name="Set"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Set</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when one or more buttonpresses appear in one or several frames.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps27" style="text-indent: 30px"><span class="rvts21">click on an empty Input cell of the Piano Roll</span></li>
-<li class="rvps27" style="text-indent: 30px"><span class="rvts21">draw a new stroke by dragging the mouse after clicking on an empty Input cell</span></li>
-<li class="rvps27" style="text-indent: 30px"><span class="rvts30">Shift</span><span class="rvts21"> + click on an empty Input cell</span></li>
-<li class="rvps27" style="text-indent: 30px"><span class="rvts21">select some frames and then click on a button symbol in the Header of the Piano Roll</span></li>
-<li class="rvps27" style="text-indent: 30px"><span class="rvts21">select some frames and then press a key assigned to a virtual gamepad button</span></li>
+<p class="rvps14"><span class="rvts35">20:24:53 Initialization</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">very rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after zeroth frame.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="Undefined"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Undefined</span></p>
+<p class="rvps7"><span class="rvts6">Category: other</span></p>
+<p class="rvps7"><span class="rvts20">Undefined modification. </span><span class="rvts20">The record should not appear in TAS Editor 1.0.</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">never</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><a name="Set"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Set</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when one or more buttonpresses appear in one or several frames.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts20">click on an empty Input cell of the Piano Roll</span></li>
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts20">draw a new stroke by dragging the mouse after clicking on an empty Input cell</span></li>
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts27">Shift</span><span class="rvts20"> + click on an empty Input cell</span></li>
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts20">select some frames and then click on a button symbol in the Header of the Piano Roll</span></li>
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts20">select some frames and then press a key assigned to a virtual gamepad button</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:25:18 Set 15-21</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">very often</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input was changed.</span></p>
-<p class="rvps11"><span class="rvts22"><br/></span></p>
-<p class="rvps11"><a name="Unset"></a>
-<span class="rvts22"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Unset</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when one or more buttonpresses disappear from one or several frames.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps27" style="text-indent: 30px"><span class="rvts21">click on an occupied Input cell of the Piano Roll</span></li>
-<li class="rvps27" style="text-indent: 30px"><span class="rvts21">erase some Input by dragging the mouse after clicking on an occupied Input cell</span></li>
-<li class="rvps27" style="text-indent: 30px"><span class="rvts30">Shift</span><span class="rvts21"> + click on an occupied Input cell</span></li>
-<li class="rvps27" style="text-indent: 30px"><span class="rvts21">select some frames and then click on a button symbol in the Header of the Piano Roll</span></li>
-<li class="rvps27" style="text-indent: 30px"><span class="rvts21">select some frames and then press a key assigned to a virtual gamepad button</span></li>
+<p class="rvps14"><span class="rvts35">20:25:18 Set 15-21</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">very often</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input was changed.</span></p>
+<p class="rvps2"><span class="rvts21"><br/></span></p>
+<p class="rvps2"><a name="Unset"></a><span class="rvts21"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Unset</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when one or more buttonpresses disappear from one or several frames.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts20">click on an occupied Input cell of the Piano Roll</span></li>
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts20">erase some Input by dragging the mouse after clicking on an occupied Input cell</span></li>
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts27">Shift</span><span class="rvts20"> + click on an occupied Input cell</span></li>
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts20">select some frames and then click on a button symbol in the Header of the Piano Roll</span></li>
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts20">select some frames and then press a key assigned to a virtual gamepad button</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:25:22 Unset 21</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">very often</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Pattern"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Pattern</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when a sequence of buttonpresses changes to currently chosen pattern.</span></p>
-<p class="rvps10"><span class="rvts21">The name of the pattern is added to the text of the record.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps24" style="text-indent: 30px"><span class="rvts30">Alt</span><span class="rvts21"> + click on an Input cell of the Piano Roll</span></li>
-<li class="rvps27" style="text-indent: 30px"><span class="rvts30">Alt</span><span class="rvts21"> + dragging the mouse after clicking on an Input cell</span></li>
-<li class="rvps10"><span class="rvts21">select some frames and then </span><span class="rvts30">Alt</span><span class="rvts21"> + click on a button symbol in the Header of the Piano Roll</span></li>
-<li class="rvps27" style="text-indent: 30px"><span class="rvts21">select some frames and then </span><span class="rvts30">Alt</span><span class="rvts21"> + press a key assigned to a virtual gamepad button</span></li>
+<p class="rvps14"><span class="rvts35">20:25:22 Unset 21</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">very often</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Pattern"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Pattern</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when a sequence of buttonpresses changes to currently chosen pattern.</span></p>
+<p class="rvps7"><span class="rvts20">The name of the pattern is added to the text of the record.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li style="text-indent: 30px" class="rvps15"><span class="rvts27">Alt</span><span class="rvts20"> + click on an Input cell of the Piano Roll</span></li>
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts27">Alt</span><span class="rvts20"> + dragging the mouse after clicking on an Input cell</span></li>
+ <li class="rvps7"><span class="rvts20">select some frames and then </span><span class="rvts27">Alt</span><span class="rvts20"> + click on a button symbol in the Header of the Piano Roll</span></li>
+ <li style="text-indent: 30px" class="rvps17"><span class="rvts20">select some frames and then </span><span class="rvts27">Alt</span><span class="rvts20"> + press a key assigned to a virtual gamepad button</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:25:40 Pattern 21-30 Alternating (1010...)</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Clear"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Clear</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when all buttonpresses disappear from one or several frames.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">select some frames and then press </span><span class="rvts30">Delete</span></li>
-<li class="rvps10"><span class="rvts21">select some frames and then choose </span><span class="rvts25">Edit -&gt; Clear</span><span class="rvts21"> in TAS Editor menu</span></li>
-<li class="rvps10"><span class="rvts21">right-click on a selected frame number and choose </span><span class="rvts25">Clear </span><span class="rvts21">in the context menu</span></li>
+<p class="rvps14"><span class="rvts35">20:25:40 Pattern 21-30 Alternating (1010...)</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Clear"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Clear</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when all buttonpresses disappear from one or several frames.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">select some frames and then press </span><span class="rvts27">Delete</span></li>
+ <li class="rvps7"><span class="rvts20">select some frames and then choose </span><span class="rvts22">Edit -&gt; Clear</span><span class="rvts20"> in TAS Editor menu</span></li>
+ <li class="rvps7"><span class="rvts20">right-click on a selected frame number and choose </span><span class="rvts22">Clear </span><span class="rvts20">in the context menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:26:51 Clear 15-20</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">moderately</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Cut"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Cut</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when all buttonpresses disappear from one or several frames, caused by "Cut" operation.</span></p>
-<p class="rvps10"><span class="rvts21">This is identical to the </span><a class="rvts27" href="Operations.html#Clear">Clear</a><span class="rvts21"> operation, except that buttonpresses are copied to the Clipboard before deleting them.</span></p>
-<p class="rvps10"><span class="rvts34">Note:</span><span class="rvts21"> although you can undo this operation, the Clipboard contents won't revert.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">select some frames and then press </span><span class="rvts30">Ctrl + X</span></li>
-<li class="rvps10"><span class="rvts21">select some frames and then choose </span><span class="rvts25">Edit -&gt; Cut</span><span class="rvts21"> in TAS Editor menu</span></li>
+<p class="rvps14"><span class="rvts35">20:26:51 Clear 15-20</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">moderately</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Cut"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Cut</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when all buttonpresses disappear from one or several frames, caused by "Cut" operation.</span></p>
+<p class="rvps7"><span class="rvts20">This is identical to the </span><a class="rvts24" href="Operations.html#Clear">Clear</a><span class="rvts20"> operation, except that buttonpresses are copied to the Clipboard before deleting them.</span></p>
+<p class="rvps7"><span class="rvts31">Note:</span><span class="rvts20"> although you can undo this operation, the Clipboard contents won't revert.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">select some frames and then press </span><span class="rvts27">Ctrl + X</span></li>
+ <li class="rvps7"><span class="rvts20">select some frames and then choose </span><span class="rvts22">Edit -&gt; Cut</span><span class="rvts20"> in TAS Editor menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:27:05 Cut 21-23</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Paste"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Paste</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when a Clipboard data is pasted into the movie.</span></p>
-<p class="rvps10"><span class="rvts21">Depending on the "Superimpose" checkbox, the old Input on those frames is either erased or combined with the new Input. The Piano Roll Header briefly flashes symbols of those buttons that were added in the Paste process.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">select some frames and then press </span><span class="rvts30">Ctrl + V</span></li>
-<li class="rvps10"><span class="rvts21">select some frames and then choose </span><span class="rvts25">Edit -&gt; Paste</span><span class="rvts21"> in TAS Editor menu</span></li>
+<p class="rvps14"><span class="rvts35">20:27:05 Cut 21-23</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Paste"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Paste</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when a Clipboard data is pasted into the movie.</span></p>
+<p class="rvps7"><span class="rvts20">Depending on the "Superimpose" checkbox, the old Input on those frames is either erased or combined with the new Input. The Piano Roll Header briefly flashes symbols of those buttons that were added in the Paste process.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">select some frames and then press </span><span class="rvts27">Ctrl + V</span></li>
+ <li class="rvps7"><span class="rvts20">select some frames and then choose </span><span class="rvts22">Edit -&gt; Paste</span><span class="rvts20"> in TAS Editor menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:27:11 Paste 21</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">moderately/rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="PasteInsert"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">PasteInsert</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change, Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when a Clipboard data is inserted into the movie.</span></p>
-<p class="rvps10"><span class="rvts21">Old Input and Markers are shifted down to make place for the Input from Clipboard.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">select some frames and then press </span><span class="rvts30">Ctrl + Shift + V</span></li>
-<li class="rvps10"><span class="rvts21">select some frames and then choose </span><span class="rvts25">Edit -&gt; PasteInsert</span><span class="rvts21"> in TAS Editor menu</span></li>
+<p class="rvps14"><span class="rvts35">20:27:11 Paste 21</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">moderately/rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="PasteInsert"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">PasteInsert</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change, Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when a Clipboard data is inserted into the movie.</span></p>
+<p class="rvps7"><span class="rvts20">Old Input and Markers are shifted down to make place for the Input from Clipboard.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">select some frames and then press </span><span class="rvts27">Ctrl + Shift + V</span></li>
+ <li class="rvps7"><span class="rvts20">select some frames and then choose </span><span class="rvts22">Edit -&gt; PasteInsert</span><span class="rvts20"> in TAS Editor menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:27:16 PasteInsert 21</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Clone"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Clone</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change, Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when copies of one or several frames are inserted into the movie, shifting the following Input and Markers down.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">select some frames and then press </span><span class="rvts30">Ctrl + Insert</span></li>
-<li class="rvps10"><span class="rvts21">select some frames and then choose </span><span class="rvts25">Edit -&gt; Clone</span><span class="rvts21"> in TAS Editor menu</span></li>
-<li class="rvps10"><span class="rvts21">right-click on a selected frame number and choose </span><span class="rvts25">Clone </span><span class="rvts21">in the context menu</span></li>
+<p class="rvps14"><span class="rvts35">20:27:16 PasteInsert 21</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Clone"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Clone</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change, Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when copies of one or several frames are inserted into the movie, shifting the following Input and Markers down.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">select some frames and then press </span><span class="rvts27">Ctrl + Insert</span></li>
+ <li class="rvps7"><span class="rvts20">select some frames and then choose </span><span class="rvts22">Edit -&gt; Clone</span><span class="rvts20"> in TAS Editor menu</span></li>
+ <li class="rvps7"><span class="rvts20">right-click on a selected frame number and choose </span><span class="rvts22">Clone </span><span class="rvts20">in the context menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:27:34 Clone 23</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">often</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Insert"></a>
-<span class="rvts63"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Insert</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change, Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when one or several blank frames are inserted into the movie, shifting the following Input and Markers down.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">select some frames and then press </span><span class="rvts30">Ctrl + Shift + Insert</span></li>
-<li class="rvps10"><span class="rvts21">select some frames and then choose </span><span class="rvts25">Edit -&gt; Insert</span><span class="rvts21"> in TAS Editor menu</span></li>
-<li class="rvps10"><span class="rvts21">right-click on a selected frame number and choose </span><span class="rvts25">Insert </span><span class="rvts21">in the context menu</span></li>
+<p class="rvps14"><span class="rvts35">20:27:34 Clone 23</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">often</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Insert"></a><span class="rvts57"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Insert</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change, Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when one or several blank frames are inserted into the movie, shifting the following Input and Markers down.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">select some frames and then press </span><span class="rvts27">Ctrl + Shift + Insert</span></li>
+ <li class="rvps7"><span class="rvts20">select some frames and then choose </span><span class="rvts22">Edit -&gt; Insert</span><span class="rvts20"> in TAS Editor menu</span></li>
+ <li class="rvps7"><span class="rvts20">right-click on a selected frame number and choose </span><span class="rvts22">Insert </span><span class="rvts20">in the context menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:25:58 Insert 21</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">moderately</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="InsertNum"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Insert#</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change, Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when a specific number of blank frames is inserted into the movie, shifting the following Input and Markers down.</span></p>
-<p class="rvps10"><span class="rvts21">If there's Selection in the Piano Roll, this operation inserts frames before the Selection, otherwise it inserts frames before the Playback cursor.</span></p>
-<p class="rvps10"><span class="rvts21">The number of inserted frames is added to the text of the record.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">press </span><span class="rvts30">Insert</span><span class="rvts21"> and enter the number of frames to insert</span></li>
-<li class="rvps10"><span class="rvts21">choose </span><span class="rvts25">Edit -&gt; Insert # of Frames</span><span class="rvts21"> in TAS Editor menu</span></li>
-<li class="rvps10"><span class="rvts21">right-click on a selected frame number and choose </span><span class="rvts25">Insert # of Frames </span><span class="rvts21">in the context menu</span></li>
+<p class="rvps14"><span class="rvts35">20:25:58 Insert 21</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">moderately</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="InsertNum"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Insert#</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change, Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when a specific number of blank frames is inserted into the movie, shifting the following Input and Markers down.</span></p>
+<p class="rvps7"><span class="rvts20">If there's Selection in the Piano Roll, this operation inserts frames before the Selection, otherwise it inserts frames before the Playback cursor.</span></p>
+<p class="rvps7"><span class="rvts20">The number of inserted frames is added to the text of the record.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">press </span><span class="rvts27">Insert</span><span class="rvts20"> and enter the number of frames to insert</span></li>
+ <li class="rvps7"><span class="rvts20">choose </span><span class="rvts22">Edit -&gt; Insert # of Frames</span><span class="rvts20"> in TAS Editor menu</span></li>
+ <li class="rvps7"><span class="rvts20">right-click on a selected frame number and choose </span><span class="rvts22">Insert # of Frames </span><span class="rvts20">in the context menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:26:09 Insert#4 29</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Delete"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Delete</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change, Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when one or several frames are deleted from the movie, shifting the following Input and Markers up.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">select some frames and then press </span><span class="rvts30">Ctrl + Delete</span></li>
-<li class="rvps10"><span class="rvts21">select some frames and then choose </span><span class="rvts25">Edit -&gt; Delete</span><span class="rvts21"> in TAS Editor menu</span></li>
-<li class="rvps10"><span class="rvts21">right-click on a selected frame number and choose </span><span class="rvts25">Delete </span><span class="rvts21">in the context menu</span></li>
+<p class="rvps14"><span class="rvts35">20:26:09 Insert#4 29</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Delete"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Delete</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change, Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when one or several frames are deleted from the movie, shifting the following Input and Markers up.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">select some frames and then press </span><span class="rvts27">Ctrl + Delete</span></li>
+ <li class="rvps7"><span class="rvts20">select some frames and then choose </span><span class="rvts22">Edit -&gt; Delete</span><span class="rvts20"> in TAS Editor menu</span></li>
+ <li class="rvps7"><span class="rvts20">right-click on a selected frame number and choose </span><span class="rvts22">Delete </span><span class="rvts20">in the context menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:26:12 Delete 33</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">often</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Truncate"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Truncate</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change, Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when the tail of the movie is truncated, deleting all Input (and Markers) starting from either the Selection cursor or the Playback cursor (when there's no Selection).</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">choose </span><span class="rvts25">Edit -&gt; Truncate movie</span><span class="rvts21"> in TAS Editor menu</span></li>
-<li class="rvps10"><span class="rvts21">right-click on a selected frame number and choose </span><span class="rvts25">Truncate movie </span><span class="rvts21">in the context menu</span></li>
+<p class="rvps14"><span class="rvts35">20:26:12 Delete 33</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">often</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Truncate"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Truncate</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change, Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when the tail of the movie is truncated, deleting all Input (and Markers) starting from either the Selection cursor or the Playback cursor (when there's no Selection).</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">choose </span><span class="rvts22">Edit -&gt; Truncate movie</span><span class="rvts20"> in TAS Editor menu</span></li>
+ <li class="rvps7"><span class="rvts20">right-click on a selected frame number and choose </span><span class="rvts22">Truncate movie </span><span class="rvts20">in the context menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:26:28 Truncate 42</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">very rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the frame of movie truncation.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Record"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Record</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when the emulator is recording Input using gamepads.</span></p>
-<p class="rvps10"><span class="rvts21">The new Input appears at the Playback cursor frame. Depending on the "Superimpose" checkbox, the old Input of the frame is either overwritten or combined with the new Input. The Piano Roll Header briefly flashes symbols of those buttons that were added in the Recording process.</span></p>
-<p class="rvps10"><span class="rvts21">IDs of gamepads whose Input was changed are added to the text of the record.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">switch Recording mode on, unpause the emulator and press any keys assigned to buttons of gamepads</span></li>
-<li class="rvps10"><span class="rvts21">when emulator is paused, switch Recording mode on, hold any keys assigned to buttons of virtual pads and press </span><span class="rvts26">Frame Advance</span></li>
+<p class="rvps14"><span class="rvts35">20:26:28 Truncate 42</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">very rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the frame of movie truncation.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Record"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Record</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when the emulator is recording Input using gamepads.</span></p>
+<p class="rvps7"><span class="rvts20">The new Input appears at the Playback cursor frame. Depending on the "Superimpose" checkbox, the old Input of the frame is either overwritten or combined with the new Input. The Piano Roll Header briefly flashes symbols of those buttons that were added in the Recording process.</span></p>
+<p class="rvps7"><span class="rvts20">IDs of gamepads whose Input was changed are added to the text of the record.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">switch Recording mode on, unpause the emulator and press any keys assigned to buttons of gamepads</span></li>
+ <li class="rvps7"><span class="rvts20">when emulator is paused, switch Recording mode on, hold any keys assigned to buttons of virtual pads and press </span><span class="rvts23">Frame Advance</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:28:01 Record(1P) 18-24</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">moderately</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the Playback cursor position.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Import"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Import</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when an Input from another FM2/FM3 movie is imported into the current project.</span></p>
-<p class="rvps10"><span class="rvts21">Current movie Input is substituted by the Input of imported file. Markers are not changed.</span></p>
-<p class="rvps10"><span class="rvts21">The filename of the Input source is added to the text of the record. </span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">choose </span><span class="rvts25">File -&gt; Import Input</span><span class="rvts21"> in TAS Editor menu and open the file which should be the source of Input</span></li>
+<p class="rvps14"><span class="rvts35">20:28:01 Record(1P) 18-24</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">moderately</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the Playback cursor position.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Import"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Import</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when an Input from another FM2/FM3 movie is imported into the current project.</span></p>
+<p class="rvps7"><span class="rvts20">Current movie Input is substituted by the Input of imported file. Markers are not changed.</span></p>
+<p class="rvps7"><span class="rvts20">The filename of the Input source is added to the text of the record.&nbsp;</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">choose </span><span class="rvts22">File -&gt; Import Input</span><span class="rvts20"> in TAS Editor menu and open the file which should be the source of Input</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:28:53 Import Battletoads-WIP1.fm2</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">very rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Bookmark"></a>
-<span class="rvts64"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Bookmark0</span></p>
-<p class="rvps11"><span class="rvts22">Bookmark1</span></p>
-<p class="rvps11"><span class="rvts22">Bookmark2</span></p>
-<p class="rvps11"><span class="rvts22">Bookmark3</span></p>
-<p class="rvps11"><span class="rvts22">Bookmark4</span></p>
-<p class="rvps11"><span class="rvts22">Bookmark5</span></p>
-<p class="rvps11"><span class="rvts22">Bookmark6</span></p>
-<p class="rvps11"><span class="rvts22">Bookmark7</span></p>
-<p class="rvps11"><span class="rvts22">Bookmark8</span></p>
-<p class="rvps11"><span class="rvts22">Bookmark9</span></p>
-<p class="rvps10"><span class="rvts42">Category: other</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when the data of a Bookmark slot is changed.</span></p>
-<p class="rvps10"><span class="rvts34">Note:</span><span class="rvts21"> re-saving a Bookmark into the same slot only works when the new Bookmark data differs from the data stored in the slot, e.g. when the Bookmark is placed to another frame or when the current movie Input differs from the Input stored in the slot.</span></p>
-<p class="rvps10"><span class="rvts21">When a Bookmark is successfully saved, its Branch becomes "the current branch of the movie", and the emulator shows the message "Branch # saved."</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">press a "Save state" hotkey: </span><span class="rvts25">Shift + </span><span class="rvts21">key in the row from </span><span class="rvts26">F1</span><span class="rvts21"> to </span><span class="rvts26">F10</span></li>
-<li class="rvps10"><span class="rvts21">right-click anywhere inside the Bookmarks List</span></li>
-<li class="rvps10"><span class="rvts21">right-click on a Bookmark icon in the Branches Tree</span></li>
+<p class="rvps14"><span class="rvts35">20:28:53 Import Battletoads-WIP1.fm2</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">very rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Bookmark"></a><span class="rvts58"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Bookmark0</span></p>
+<p class="rvps2"><span class="rvts21">Bookmark1</span></p>
+<p class="rvps2"><span class="rvts21">Bookmark2</span></p>
+<p class="rvps2"><span class="rvts21">Bookmark3</span></p>
+<p class="rvps2"><span class="rvts21">Bookmark4</span></p>
+<p class="rvps2"><span class="rvts21">Bookmark5</span></p>
+<p class="rvps2"><span class="rvts21">Bookmark6</span></p>
+<p class="rvps2"><span class="rvts21">Bookmark7</span></p>
+<p class="rvps2"><span class="rvts21">Bookmark8</span></p>
+<p class="rvps2"><span class="rvts21">Bookmark9</span></p>
+<p class="rvps7"><span class="rvts6">Category: other</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when the data of a Bookmark slot is changed.</span></p>
+<p class="rvps7"><span class="rvts31">Note:</span><span class="rvts20"> re-saving a Bookmark into the same slot only works when the new Bookmark data differs from the data stored in the slot, e.g. when the Bookmark is placed to another frame or when the current movie Input differs from the Input stored in the slot.</span></p>
+<p class="rvps7"><span class="rvts20">When a Bookmark is successfully saved, its Branch becomes "the current branch of the movie", and the emulator shows the message "Branch # saved."</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">press a "Save state" hotkey: </span><span class="rvts22">Shift + </span><span class="rvts20">key in the row from </span><span class="rvts23">F1</span><span class="rvts20"> to </span><span class="rvts23">F10</span></li>
+ <li class="rvps7"><span class="rvts20">right-click anywhere inside the Bookmarks List</span></li>
+ <li class="rvps7"><span class="rvts20">right-click on a Bookmark icon in the Branches Tree</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:28:53 Bookmark1 10</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">often</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="Branch"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Branch0 to</span></p>
-<p class="rvps11"><span class="rvts22">Branch1 to</span></p>
-<p class="rvps11"><span class="rvts22">Branch2 to</span></p>
-<p class="rvps11"><span class="rvts22">Branch3 to</span></p>
-<p class="rvps11"><span class="rvts22">Branch4 to</span></p>
-<p class="rvps11"><span class="rvts22">Branch5 to</span></p>
-<p class="rvps11"><span class="rvts22">Branch6 to</span></p>
-<p class="rvps11"><span class="rvts22">Branch7 to</span></p>
-<p class="rvps11"><span class="rvts22">Branch8 to</span></p>
-<p class="rvps11"><span class="rvts22">Branch9 to</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change, Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when the current movie is substituted with the data of a Bookmark slot. Both Input and Markers are substituted.</span></p>
-<p class="rvps10"><span class="rvts21">The time of the Bookmark creation is added to the text of the record, because the movie is actually reverted to its own state at that time.</span></p>
-<p class="rvps10"><span class="rvts21">When a Bookmark is successfully loaded, its Branch becomes "the current branch of the movie", and the emulator shows the message "Branch # loaded."</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">press a "Load state" hotkey: </span><span class="rvts25">Shift + </span><span class="rvts21">key in the row from </span><span class="rvts26">F1</span><span class="rvts21"> to </span><span class="rvts26">F10</span></li>
-<li class="rvps10"><span class="rvts21">click on the right half of the Bookmarks List</span></li>
-<li class="rvps10"><span class="rvts21">double-click on a Bookmark icon in the Branches Tree</span></li>
+<p class="rvps14"><span class="rvts35">20:28:53 Bookmark1 10</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">often</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="Branch"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Branch0 to</span></p>
+<p class="rvps2"><span class="rvts21">Branch1 to</span></p>
+<p class="rvps2"><span class="rvts21">Branch2 to</span></p>
+<p class="rvps2"><span class="rvts21">Branch3 to</span></p>
+<p class="rvps2"><span class="rvts21">Branch4 to</span></p>
+<p class="rvps2"><span class="rvts21">Branch5 to</span></p>
+<p class="rvps2"><span class="rvts21">Branch6 to</span></p>
+<p class="rvps2"><span class="rvts21">Branch7 to</span></p>
+<p class="rvps2"><span class="rvts21">Branch8 to</span></p>
+<p class="rvps2"><span class="rvts21">Branch9 to</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change, Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when the current movie is substituted with the data of a Bookmark slot. Both Input and Markers are substituted.</span></p>
+<p class="rvps7"><span class="rvts20">The time of the Bookmark creation is added to the text of the record, because the movie is actually reverted to its own state at that time.</span></p>
+<p class="rvps7"><span class="rvts20">When a Bookmark is successfully loaded, its Branch becomes "the current branch of the movie", and the emulator shows the message "Branch # loaded."</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">press a "Load state" hotkey: </span><span class="rvts22">Shift + </span><span class="rvts20">key in the row from </span><span class="rvts23">F1</span><span class="rvts20"> to </span><span class="rvts23">F10</span></li>
+ <li class="rvps7"><span class="rvts20">click on the right half of the Bookmarks List</span></li>
+ <li class="rvps7"><span class="rvts20">double-click on a Bookmark icon in the Branches Tree</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:29:02 Branch1 to 20:28:15</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">moderately</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="MarkerBranch"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Marker Branch0 to</span></p>
-<p class="rvps11"><span class="rvts22">Marker Branch1 to</span></p>
-<p class="rvps11"><span class="rvts22">Marker Branch2 to</span></p>
-<p class="rvps11"><span class="rvts22">Marker Branch3 to</span></p>
-<p class="rvps11"><span class="rvts22">Marker Branch4 to</span></p>
-<p class="rvps11"><span class="rvts22">Marker Branch5 to</span></p>
-<p class="rvps11"><span class="rvts22">Marker Branch6 to</span></p>
-<p class="rvps11"><span class="rvts22">Marker Branch7 to</span></p>
-<p class="rvps11"><span class="rvts22">Marker Branch8 to</span></p>
-<p class="rvps11"><span class="rvts22">Marker Branch9 to</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when current movie is substituted with the data of a Bookmark slot, but the new Input was identical to the old Input, and only Markers were different.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">press a "Load state" hotkey: </span><span class="rvts25">Shift + </span><span class="rvts21">key in the row from </span><span class="rvts26">F1</span><span class="rvts21"> to </span><span class="rvts26">F10</span></li>
-<li class="rvps10"><span class="rvts21">click on the right half of the Bookmarks List</span></li>
-<li class="rvps10"><span class="rvts21">double-click on the a Bookmark icon in the Branches Tree</span></li>
+<p class="rvps14"><span class="rvts35">20:29:02 Branch1 to 20:28:15</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">moderately</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="MarkerBranch"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Marker Branch0 to</span></p>
+<p class="rvps2"><span class="rvts21">Marker Branch1 to</span></p>
+<p class="rvps2"><span class="rvts21">Marker Branch2 to</span></p>
+<p class="rvps2"><span class="rvts21">Marker Branch3 to</span></p>
+<p class="rvps2"><span class="rvts21">Marker Branch4 to</span></p>
+<p class="rvps2"><span class="rvts21">Marker Branch5 to</span></p>
+<p class="rvps2"><span class="rvts21">Marker Branch6 to</span></p>
+<p class="rvps2"><span class="rvts21">Marker Branch7 to</span></p>
+<p class="rvps2"><span class="rvts21">Marker Branch8 to</span></p>
+<p class="rvps2"><span class="rvts21">Marker Branch9 to</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when current movie is substituted with the data of a Bookmark slot, but the new Input was identical to the old Input, and only Markers were different.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">press a "Load state" hotkey: </span><span class="rvts22">Shift + </span><span class="rvts20">key in the row from </span><span class="rvts23">F1</span><span class="rvts20"> to </span><span class="rvts23">F10</span></li>
+ <li class="rvps7"><span class="rvts20">click on the right half of the Bookmarks List</span></li>
+ <li class="rvps7"><span class="rvts20">double-click on the a Bookmark icon in the Branches Tree</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:29:33 Marker Branch1 to 20:28:15</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">very rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="MarkerSet"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Marker Set</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when a Marker appears on one or several frames.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">double-click on a non-marked frame number in the Piano Roll</span></li>
-<li class="rvps10"><span class="rvts21">select some frames and then click on the "Frame#" in the Header of the Piano Roll</span></li>
-<li class="rvps10"><span class="rvts21">right-click on a selected frame number and choose </span><span class="rvts25">Set Markers </span><span class="rvts21">in the context menu</span></li>
+<p class="rvps14"><span class="rvts35">20:29:33 Marker Branch1 to 20:28:15</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">very rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="MarkerSet"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Marker Set</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when a Marker appears on one or several frames.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">double-click on a non-marked frame number in the Piano Roll</span></li>
+ <li class="rvps7"><span class="rvts20">select some frames and then click on the "Frame#" in the Header of the Piano Roll</span></li>
+ <li class="rvps7"><span class="rvts20">right-click on a selected frame number and choose </span><span class="rvts22">Set Markers </span><span class="rvts20">in the context menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:29:47 Marker Set 15-18</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">often</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="MarkerRemove"></a>
-<span class="rvts64"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Marker Remove</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when Markers disappear from one or several frames.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">double-click on a marked frame number in the Piano Roll, drag the Marker outside the Piano Roll and release it</span></li>
-<li class="rvps10"><span class="rvts21">select some frames and then click on the "Frame#" in the Header of the Piano Roll</span></li>
-<li class="rvps10"><span class="rvts21">right-click on a selected frame number and choose </span><span class="rvts25">Remove Markers </span><span class="rvts21">in the context menu</span></li>
+<p class="rvps14"><span class="rvts35">20:29:47 Marker Set 15-18</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">often</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="MarkerRemove"></a><span class="rvts58"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Marker Remove</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when Markers disappear from one or several frames.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">double-click on a marked frame number in the Piano Roll, drag the Marker outside the Piano Roll and release it</span></li>
+ <li class="rvps7"><span class="rvts20">select some frames and then click on the "Frame#" in the Header of the Piano Roll</span></li>
+ <li class="rvps7"><span class="rvts20">right-click on a selected frame number and choose </span><span class="rvts22">Remove Markers </span><span class="rvts20">in the context menu</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:29:52 Marker Remove 16-18</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">moderately</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="MarkerPattern"></a>
-<span class="rvts64"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Marker Pattern</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when a sequence of Markers is created using currently chosen pattern.</span></p>
-<p class="rvps10"><span class="rvts21">The name of the pattern is added to the text of the record.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">select some frames and then </span><span class="rvts30">Alt</span><span class="rvts21"> + click on the "Frame#" in the Header of the Piano Roll</span></li>
+<p class="rvps14"><span class="rvts35">20:29:52 Marker Remove 16-18</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">moderately</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="MarkerPattern"></a><span class="rvts58"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Marker Pattern</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when a sequence of Markers is created using currently chosen pattern.</span></p>
+<p class="rvps7"><span class="rvts20">The name of the pattern is added to the text of the record.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">select some frames and then </span><span class="rvts27">Alt</span><span class="rvts20"> + click on the "Frame#" in the Header of the Piano Roll</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:30:11 Marker Pattern 20-30 One Quarter (10001000...)</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">very rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="MarkerRename"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Marker Rename</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when Note of a Marker is changed.</span></p>
-<p class="rvps10"><span class="rvts21">The new text of the Note is added to the text of the record.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">type the text of the Note right after creating the new Marker by double-click</span></li>
-<li class="rvps10"><span class="rvts21">click on the upper edit field, erase old text and type new, then press </span><span class="rvts25">Enter</span><span class="rvts21"> or click anywhere outside the edit field</span></li>
-<li class="rvps10"><span class="rvts21">click on the lower edit field, erase old text and type new, then press </span><span class="rvts25">Enter</span><span class="rvts21"> or click anywhere outside the edit field</span></li>
+<p class="rvps14"><span class="rvts35">20:30:11 Marker Pattern 20-30 One Quarter (10001000...)</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">very rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="MarkerRename"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Marker Rename</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when Note of a Marker is changed.</span></p>
+<p class="rvps7"><span class="rvts20">The new text of the Note is added to the text of the record.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">type the text of the Note right after creating the new Marker by double-click</span></li>
+ <li class="rvps7"><span class="rvts20">click on the upper edit field, erase old text and type new, then press </span><span class="rvts22">Enter</span><span class="rvts20"> or click anywhere outside the edit field</span></li>
+ <li class="rvps7"><span class="rvts20">click on the lower edit field, erase old text and type new, then press </span><span class="rvts22">Enter</span><span class="rvts20"> or click anywhere outside the edit field</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:31:01 Marker Rename 20 Testing...</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">often</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="MarkerDrag"></a>
-<span class="rvts64"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Marker Drag</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created after moving a Marker from one frame to another.</span></p>
-<p class="rvps10"><span class="rvts21">The old and new frame number, as well as the Note of the Marker, are added to the text of the record.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">double-click on a marked frame number in the Piano Roll, drag the Marker to a non-marked frame number and release</span></li>
+<p class="rvps14"><span class="rvts35">20:31:01 Marker Rename 20 Testing...</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">often</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="MarkerDrag"></a><span class="rvts58"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Marker Drag</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created after moving a Marker from one frame to another.</span></p>
+<p class="rvps7"><span class="rvts20">The old and new frame number, as well as the Note of the Marker, are added to the text of the record.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">double-click on a marked frame number in the Piano Roll, drag the Marker to a non-marked frame number and release</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:31:08 Marker Drag 20=&gt;15 Testing...</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">moderately</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="MarkerSwap"></a>
-<span class="rvts64"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Marker Swap</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when two Markers switch places.</span></p>
-<p class="rvps10"><span class="rvts21">The old and new frame number of the dragged Marker, as well as its Note, are added to the text of the record.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">double-click on a marked frame number in the Piano Roll, drag the Marker to another marked frame number and release</span></li>
+<p class="rvps14"><span class="rvts35">20:31:08 Marker Drag 20=&gt;15 Testing...</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">moderately</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="MarkerSwap"></a><span class="rvts58"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Marker Swap</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when two Markers switch places.</span></p>
+<p class="rvps7"><span class="rvts20">The old and new frame number of the dragged Marker, as well as its Note, are added to the text of the record.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">double-click on a marked frame number in the Piano Roll, drag the Marker to another marked frame number and release</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:31:14 Marker Swap 24&lt;=&gt;28</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="MarkerShift"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">Marker Shift</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when a splicing operation didn't change Input but still shifted some Markers up or down.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">insert blank frame near the end of the movie (granted that there's no buttonpresses after the frame, yet there is at least one Marker)</span></li>
-<li class="rvps10"><span class="rvts21">clone a blank frame near the end of the movie (granted that there's no buttonpresses after the frame, yet there is at least one Marker)</span></li>
-<li class="rvps10"><span class="rvts21">copy a blank frame to the Clipboard and </span><a class="rvts27" href="Operations.html#PasteInsert">PasteInsert</a><span class="rvts21"> it somewhere near the end of the movie (granted that there's no buttonpresses, yet there is at least one Marker)</span></li>
+<p class="rvps14"><span class="rvts35">20:31:14 Marker Swap 24&lt;=&gt;28</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="MarkerShift"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Marker Shift</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when a splicing operation didn't change Input but still shifted some Markers up or down.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">insert blank frame near the end of the movie (granted that there's no buttonpresses after the frame, yet there is at least one Marker)</span></li>
+ <li class="rvps7"><span class="rvts20">clone a blank frame near the end of the movie (granted that there's no buttonpresses after the frame, yet there is at least one Marker)</span></li>
+ <li class="rvps7"><span class="rvts20">copy a blank frame to the Clipboard and </span><a class="rvts24" href="Operations.html#PasteInsert">PasteInsert</a><span class="rvts20"> it somewhere near the end of the movie (granted that there's no buttonpresses, yet there is at least one Marker)</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:31:44 Marker Shift 21</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">very rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="LUAMarkerSet"></a>
-<span class="rvts64"><br/></span></p>
-<p class="rvps11"><span class="rvts22">LUA Marker Set</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when a Marker appears on a frame as a result of using </span><span class="rvts20">taseditor.setmarker()</span><span class="rvts21"> function.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">run a Lua script with a </span><span class="rvts20">taseditor.setmarker(framenum)</span><span class="rvts21"> line</span></li>
+<p class="rvps14"><span class="rvts35">20:31:44 Marker Shift 21</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">very rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="LUAMarkerSet"></a><span class="rvts58"><br/></span></p>
+<p class="rvps2"><span class="rvts21">LUA Marker Set</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when a Marker appears on a frame as a result of using </span><span class="rvts19">taseditor.setmarker()</span><span class="rvts20"> function.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">run a Lua script with a </span><span class="rvts19">taseditor.setmarker(framenum)</span><span class="rvts20"> line</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:35:14 LUA Marker Set 0</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="LUAMarkerRemove"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">LUA Marker Remove</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when a Marker disappears from one frame as a result of using </span><span class="rvts20">taseditor.removemarker()</span><span class="rvts21"> function.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">run a Lua script with a </span><span class="rvts20">taseditor.removemarker(framenum)</span><span class="rvts21"> line</span></li>
+<p class="rvps14"><span class="rvts35">20:35:14 LUA Marker Set 0</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="LUAMarkerRemove"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">LUA Marker Remove</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when a Marker disappears from one frame as a result of using </span><span class="rvts19">taseditor.removemarker()</span><span class="rvts20"> function.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">run a Lua script with a </span><span class="rvts19">taseditor.removemarker(framenum)</span><span class="rvts20"> line</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:36:12 LUA Marker Remove 0</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="LUAMarkerRename"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">LUA Marker Rename</span></p>
-<p class="rvps10"><span class="rvts42">Category: Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when Note of a Marker is changed as a result of using </span><span class="rvts20">taseditor.setnote()</span><span class="rvts21"> function.</span></p>
-<p class="rvps10"><span class="rvts21">The new text of the Note is added to the text of the record.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">run a Lua script with a </span><span class="rvts20">taseditor.setnote(markernum, newtext)</span><span class="rvts21"> line</span></li>
+<p class="rvps14"><span class="rvts35">20:36:12 LUA Marker Remove 0</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="LUAMarkerRename"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">LUA Marker Rename</span></p>
+<p class="rvps7"><span class="rvts6">Category: Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when Note of a Marker is changed as a result of using </span><span class="rvts19">taseditor.setnote()</span><span class="rvts20"> function.</span></p>
+<p class="rvps7"><span class="rvts20">The new text of the Note is added to the text of the record.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">run a Lua script with a </span><span class="rvts19">taseditor.setnote(markernum, newtext)</span><span class="rvts20"> line</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39"><br/></span></p>
-<p class="rvps22"><span class="rvts39">20:37:03 LUA Marker Rename 0 Hello from Lua!</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is not truncated.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><a name="LUAChange"></a>
-<span class="rvts21"><br/></span></p>
-<p class="rvps11"><span class="rvts22">LUA Change</span></p>
-<p class="rvps10"><span class="rvts42">Category: Input change, Markers change</span></p>
-<p class="rvps10"><span class="rvts21">The record is created when Input or Markers were changed as a result of using </span><span class="rvts20">taseditor.applyinputchanges()</span><span class="rvts21"> function.</span></p>
-<p class="rvps10"><span class="rvts21">Instead of the word "Change" the operation can be named with any other text provided by the parameter of </span><span class="rvts20">taseditor.applyinputchanges()</span><span class="rvts21"> function.</span></p>
-<p class="rvps10"><span class="rvts21">Examples:</span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">run a Lua script containing such lines as </span><span class="rvts20">taseditor.submitinputchange(frame, joypad, input)</span><span class="rvts21"> and </span><span class="rvts20">taseditor.applyinputchanges(name)</span></li>
-<li class="rvps10"><span class="rvts21">run a Lua script containing such lines as </span><span class="rvts20">taseditor.submitinsertframes(frame, number)</span><span class="rvts21"> or </span><span class="rvts20">taseditor.submitdeleteframes(frame, number)</span><span class="rvts21"> and </span><span class="rvts20">taseditor.applyinputchanges(name)</span></li>
+<p class="rvps14"><span class="rvts35"><br/></span></p>
+<p class="rvps14"><span class="rvts35">20:37:03 LUA Marker Rename 0 Hello from Lua!</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is not truncated.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><a name="LUAChange"></a><span class="rvts20"><br/></span></p>
+<p class="rvps2"><span class="rvts21">LUA Change</span></p>
+<p class="rvps7"><span class="rvts6">Category: Input change, Markers change</span></p>
+<p class="rvps7"><span class="rvts20">The record is created when Input or Markers were changed as a result of using </span><span class="rvts19">taseditor.applyinputchanges()</span><span class="rvts20"> function.</span></p>
+<p class="rvps7"><span class="rvts20">Instead of the word "Change" the operation can be named with any other text provided by the parameter of </span><span class="rvts19">taseditor.applyinputchanges()</span><span class="rvts20"> function.</span></p>
+<p class="rvps7"><span class="rvts20">Examples:</span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">run a Lua script containing such lines as </span><span class="rvts19">taseditor.submitinputchange(frame, joypad, input)</span><span class="rvts20"> and </span><span class="rvts19">taseditor.applyinputchanges(name)</span></li>
+ <li class="rvps7"><span class="rvts20">run a Lua script containing such lines as </span><span class="rvts19">taseditor.submitinsertframes(frame, number)</span><span class="rvts20"> or </span><span class="rvts19">taseditor.submitdeleteframes(frame, number)</span><span class="rvts20"> and </span><span class="rvts19">taseditor.applyinputchanges(name)</span></li>
 </ul>
-<p class="rvps22"><span class="rvts39">20:39:56 LUA Corruptor 10</span></p>
-<p class="rvps10"><span class="rvts21">Used: </span><span class="rvts37">rarely</span></p>
-<p class="rvps10"><span class="rvts64">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
-<p class="rvps10"><span class="rvts64"><br/></span></p>
+<p class="rvps14"><span class="rvts35">20:39:56 LUA Corruptor 10</span></p>
+<p class="rvps7"><span class="rvts20">Used: </span><span class="rvts33">rarely</span></p>
+<p class="rvps7"><span class="rvts58">Greenzone is truncated after the first frame where Input or Lag was changed.</span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
+<p class="rvps7"><span class="rvts58"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Free Kindle producer</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/create-epub-ebooks">Write EPub books for the iPad</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

@@ -23,31 +23,26 @@
 	<div id="page_content">
 
   <center><h1>FCEUX SDL FAQ</h1></center>
-  <center><i>Last updated February 10, 2012<br /></i> by punkrockguy318<br />
+  <center><i>Last updated December 9, 2020<br /></i> by mjbudd77<br />
   </center>
  <p><b>Table of Contents:</b></p>
  <ul>
-  <li><a href="#svn">What is the subversion build and how can I get it?</a></li>
+  <li><a href="#git">What is the git build and how can I get it?</a></li>
   <li><a href="#config">How do I configure a gamepad?</a></li>
   <li><a href="#sound">My sound is stuttery/laggy.  How can I fix this?</a></li>
+  <li><a href="#timing">My game is skipping frames.  How can I fix this?</a></li>
   <li><a href="#hotkeys1">How can I change my hotkey bindings?</a></li>
   <li><a href="#hotkeys2">Can I map hotkeys to my gamepad?</a></li>
  </ul>
- <a name="subversion"><h3>What is the subversion build and how can I get it?</h3></a>
+ <a name="git"><h3>What is the git build and how can I get it?</h3></a>
  <p>The most recent changes to fceuX are reflected immediately in the fceux
- sourceforge subversion server.  You can checkout the source code to build
+ github server.  You can checkout the source code to build
  fceuX with the most recent sources by running the following command:</p>
- <p><b>svn co https://fceultra.svn.sourceforge.net/svnroot/fceultra/fceu fceux</b></p>
- <p>Instructions for compiling and installing fceuX can be found in the "README-SDL" file.</p>
+ <p><b>git clone https://github.com/TASVideos/fceux.git</b></p>
+ <p>Instructions for compiling and installing fceuX can be found in the "README" file.</p>
  <a name="config"><h3>How do I configure a gamepad?</h3></a>
- <p>
- <p>If you have the GTK GUI compiled into fceuX, you can configure the gamepad by
+ <p>Using the Qt GUI, you can configure the gamepad by
  selecting "Options...Gamepad" in the menubar.</p>
- <p>You can allso configure the first gamepad by running <b>fceux --inputcfg gamepad1</b> </p>
-  <p>When you configure a button you will be presented with a black window with a titlebar
-  indicating what button to map.  FceuX will look for two
-  of the same keypress/joystick event in a row.  If it doesn't find two of the same 
-  keypresses in a row, it will allow you to map the button to two separate keys.</p>
  </p>
  <a name="sound"><h3>My sound is stuttery/laggy.  How can I fix this?</h3></a>
  <p>Try using different SDL audio drivers.  You can set the SDL audio driver with
@@ -58,11 +53,21 @@
  you may want to try the latest version of fceuX to see if you are still having issues.  FceuX 
  2.1.4 fixed the majority of the reported sound issues.
  </p>
+ <a name="timing"><h3>My game is skipping frames.  How can I improve this?</h3></a>
+ <p>The Qt/SDL version of fceux runs two threads. One for the GUI and one for the emulation. 
+ The realtime OS scheduling and priority of both of these threads can be tuned via the GUI 
+ timing config options window (accessible via the menu bar). For Mac OSX systems, fceux must
+ have root permission to increase process priority. For Linux systems, add the following
+ lines to the <b>/etc/security/limits.conf</b> file to ensure that fceux users have the proper system
+ resource permissions (requires reboot after editing for changes to take place):
+ <pre>
+*                -    priority     99    
+*                -    rtprio       99    
+*                -    nice        -20    
+ </pre>
+ </p>
  <a name="hotkeys1"><h3>How can I change my emulator hotkey bindings?</h3></a>
- <p>You need to edit your ~/.fceux/fceux.cfg file.  The SDL.Hotkeys.* values
- are SDL keysyms, which can be found in SDL_keysym.h (probably
- /usr/include/SDL/SDL_keysym.h on your system).  At the time of writing,
- hotkeys are not mappable from the GUI in sdl (although it is planned for the future).
+ <p>SDL hotkey bindings can be remapped using the Qt GUI. Selecting "Options...HotKeys" in the menubar.
  </p>
  <a name="hotkeys2"><h3>Can I map emulator hotkeys to my gamepad?</h3></a>
  <p>If you want to map particular hotkeys (pause, save state, load state, etc) to buttons on 
@@ -77,6 +82,8 @@
   <tr><th>Name:</th><th>Contribution(s):</th></tr>
   <tr><td><a href="mailto:ltsmooth42 _at_ gmail _dot_ com">Lukas Sabota</a></td>
   <td>Author of this document</td></tr>
+  <tr><td>mjbudd77</td>
+  <td>Qt/SDL Updates</td></tr>
  </table>
  </p>
  </div>

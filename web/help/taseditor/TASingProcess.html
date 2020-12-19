@@ -1,179 +1,374 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>3. TASing Process</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("TASingProcess");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>3. TASing Process</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="3. TASing Process">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="3. TASing Process" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>3. TASing Process</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="BeginnersGuide.html">Beginner's Guide</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="BeginnersGuide.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="Toolbox.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="TASingMethodology.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts19">TASing Process</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">TASing is about striving for an absolute perfectness. For TASers, a game is more than just an amusement, it's an interesting and complex task.</span></p>
-<p class="rvps10"><span class="rvts21">People enjoy solving creative tasks, because it allows them to express their individuality and improve various skills. However, complicated tasks require both inventiveness and methodicalness. This Manual describes dry and methodical side of TASing, as for inventiveness – you'll have to show it yourself in real setting.</span></p>
-<p class="rvps10"><span class="rvts21">In general, to create a perfect (or very close to perfect) playthrough of the game you have to record an imperfect walkthrough and then work on consecutive improvements of its separate parts. When every fragment of the movie is perfect, we may consider the whole TAS to be perfect as well.</span></p>
-<p class="rvps10"><span class="rvts21">The concentration of efforts on small segments of the movie is the key to success. Every working segment has to be large enough to represent an adequate subtask, but small enough to make the task simple.</span></p>
-<p class="rvps10"><span class="rvts21">Without such structuring an effective and comfortable TASing would not be possible. There's too many factors affecting the final result of the game, and some of those factors append or contradict each other. Human memory is not enough to keep and calculate all interconnections of the game factors within a large segment of the playthrough. Therefore, when TASers deal with long play sessions, they aren't different from regular players who are carried by the temptation to use the first observations as a base for making decisions. But regular players can get away with such carefree approach, while TASers would end up with a clearly imperfect walkthrough.</span></p>
-<p class="rvps10"><span class="rvts21">Thus real TASing implies that segments are small. Much smaller than a single level of a typical videogame. The whole process of TASing may be portrayed like this: a man watches the recording of his own unfinished playthrough of the game, selects a small piece of the movie and throws all forces into improving it, then selects another piece and so on until the end of the game.</span></p>
-<p class="rvps10"><span class="rvts21">Of course, it's an incomplete picture, because besides the movie editing TASers also research and experiment with the game (to expose hidden factors) and do many other things. But that's beyond the scope of this Guide.</span></p>
-<p class="rvps10"><span class="rvts21">The skill of choosing adequate segments comes with experience. Many TASers don't even think what makes them spontaneously focus on a segment of the game and unconsciously limit the beginning and the end of current work. Some believe that they simply record the movie frame-by-frame in succession, but if you watch it from outside you can note that those repeated rerecords occur within a window of 20-200 frames, and the window goes forward the movie by making jumps (the end of previous segment becomes the beginning of next segment). Consider watching live stream videos of TASing, and you'll see certain regularities in handling savestates.</span></p>
-<p class="rvps10"><span class="rvts21">Here we'll try to analyze the behavior, in order to learn how to define current segment limits sensibly. And then practical TASing will make you do it mechanically.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">An adequate segment (subtask) is supposed to give TASer a consistent goal and simple means to reach it.</span></p>
-<p class="rvps10"><span class="rvts21">The </span><span class="rvts25">goal</span><span class="rvts21"> of a segment playthrough is usually to achieve certain in-game event. For example, the goal of playing through the whole game is the event when "THE END" text appears on the screen. The goal of one level can be such event as "the value of the level counter in RAM was increased" or simply "the screen faded at the end of current level". And the goal of a small segment may be something like "the character successfully landed on the other side of the pit". These intermediate goals are defined by the context.</span></p>
-<p class="rvps10"><span class="rvts21">Based on the goal, TASer defines the </span><span class="rvts25">optimality criterion</span><span class="rvts21"> in mind. The criterion is the rule which lets you compare any two versions of playing through the current segment of the game. When you're TASing, it's not enough to simply reach the goal, you have to try many approaches to reaching it, and then choose the best approach of all. For example, in a speedrun the best approach to playing a segment is usually the one in which the target event occurs as early as possible. E.g. if the 1st approach to playing the segment made the event occur at frame 350, and the 2nd approach made it appear at frame 340, then the 2nd approach is better than the 1st, and the final movie should contain exactly the 2nd approach.</span></p>
-<p class="rvps10"><span class="rvts21">There's a lot of </span><span class="rvts25">means</span><span class="rvts21"> for reaching the target event. In theory, any gameplay aspect (including those not planned by developers) may help or impede the progress in some way. So, to cope with this vague multitude of possibilities you should regard all aspects of the game as </span><span class="rvts21">optimality factors</span><span class="rvts21">.</span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/smb-zigzag.png"/></p>
-<p class="rvps10"><span class="rvts21">An </span><span class="rvts25">optimality factor</span><span class="rvts21"> is an aspect of the game that directly affects optimality of playing current segment. The word "directly" implies a monotonous dependence of outcome from applying the factor. For example, on this picture there's no monotonous dependence between the distance to finish and the duration of holding </span><span class="rvts29">Right</span><span class="rvts21">. Pressing the same </span><span class="rvts29">R</span><span class="rvts21"> button either makes Mario be closer to the finish, or moves him away, depending on his position.</span></p>
-<p class="rvps10"><span class="rvts21">When people perceive such segment in a whole, it's difficult to guess the best moment to release the </span><span class="rvts29">R</span><span class="rvts21"> button, when to press the </span><span class="rvts29">L</span><span class="rvts21"> button and so on. So, in order to simplify the understanding of complex dependencies (and thus reveal factors), such segments should be broken into several subsegments.</span></p>
-<p class="rvps10"><span class="rvts21">Correct statement of question usually cuts off many irrelevant possibilities. For example, regular player could wait until the difficult enemy character walks away, but in a speedrun such tactic is not considered.</span></p>
-<p class="rvps10"><span class="rvts21">Thus even in an open-world game TASer is left with a limited set of useful actions and in-game indicators that must be followed while polishing one segment. And the less the segment is, the more limited is this set, so it's easier to find an ideal sequence of actions by going over combinations of factors.</span></p>
-<p class="rvps10"><span class="rvts21">On the other hand, the less the segment is, the less its goal intersects with the final goal of the TAS. The final goal is to make perfect walkthrough, e.g. the fastest in the world (which means the frame counter at the end of the movie should be as low as possible). But in terms of every specific segment the goal may be completely different, sometimes even opposite (for example, to stay in bonus stage as long as possible, which then grants time saving at another point of the game). That's why in very small segments the optimality criterion is not used, and playing such micro-segment is only evaluated as a part of a full-fledged segment.</span></p>
-<p class="rvps10"><span class="rvts21">For example, when your character is jumping over a pit and shooting enemies at the same time, every bullet release can be considered a separate subsegment (so it becomes easy to isolate such factors as "recharge timer", "max 3 bullets on screen" and so on). But then, when comparing approaches, you should compare different versions of jumping over the pit. Even if the 1st approach to jumping (which ends at the frame 350) allowed you to shoot two enemies and the 2nd approach (which ends at frame 340) allowed to shoot only single enemy, you are supposed to choose the 2nd approach, because the optimality criterion of the unbroken segment fits the final goal of the speedrun better.</span></p>
-<p class="rvps10"><span class="rvts21">While TASing you have to maintain an optimal balance between the necessity to decrease segments in order to grasp factors and the need to increase them in order to use a relevant criterion. This skill comes with time, so don't sweat it and just rely on your intuition.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td valign="top" style="border-color: #000000; border-style: solid; height: 160px;"><p class="rvps10"><span class="rvts21">Let's have an example when the segment is too large. In a Super Mario Bros speedrun you are expected to reach the end of World 1-1 as fast as possible, which means you have to maximize the X coordinate of the character moving from left to right. The basic premise is that at the beginning of the level the X value equals zero and at the end of the level it is one thousand. Using gamepad buttons you can influence the coordinate in various ways.</span></p>
-<p class="rvps10"><span class="rvts21">If we take the whole level from the moment </span><span class="rvts34">X = 0</span><span class="rvts21"> to the event </span><span class="rvts34">X = 1000</span><span class="rvts21"> as our working segment, we can immediately see the optimality criterion (the best approach will be the one with minimal value of the frame counter when </span><span class="rvts34">X &gt;= 1000</span><span class="rvts21">), but we can't see definite factors. How exactly we're supposed to press buttons to get the </span><span class="rvts34">X = 1000</span><span class="rvts21"> within minimal number of frames? Well, we can apply a regular player's logic and intuition. When we press the </span><span class="rvts29">R</span><span class="rvts21"> button, the X coordinate usually increases, and with the </span><span class="rvts29">L</span><span class="rvts21"> button it decreases. So the most obvious decision is to hold the </span><span class="rvts29">R</span><span class="rvts21"> button and see how many frames is needed to grow the value of X to one thousand. When testing such approach in emulator, it appears that Mario is hampered by obstacles and the X coordinate does not grow, even though the </span><span class="rvts29">R</span><span class="rvts21"> button is held. This way a new factor comes to light – the need to jump over obstacles and pits. Using the </span><span class="rvts29">A</span><span class="rvts21"> button Mario eventually reaches the </span><span class="rvts34">X = 1000</span><span class="rvts21"> event, and the optimality criterion can eliminate all alternative playthroughs where the </span><span class="rvts29">A</span><span class="rvts21"> button presses were ill-timed (e.g. where Mario stumbled over edges of pipes, the frame counter at the end of the segment was higher).</span></p>
-<p class="rvps10"><span class="rvts21">Now the player (or rather, TASer who is stuck in player's mindset) may think that all factors are applied and the segment is perfect. But it isn't. Super Mario Bros has somewhat complex physics engine. The X coordinate is influenced by current horizontal speed, and speed is influenced by acceleration. Acceleration is affected by the </span><span class="rvts29">B</span><span class="rvts21"> button, skidding, Mario's direction and air-ground state. There are also teleporter pipes and useful glitches like the "flagpole glitch" and so on. A lot of things to bear in mind. But, according to certain research, human working memory can only store </span><a class="rvts27" href="http://en.wikipedia.org/wiki/The_Magical_Number_Seven,_Plus_or_Minus_Two" target="_blank">about 7 objects</a><span class="rvts21">, thus some factors inevitably slip away when you're editing Input on large segment. You'd better shrink the segment to such a scale which reveals factors individually or in a small group.</span></p>
-<p class="rvps10"><span class="rvts21">If we focus on the segment from </span><span class="rvts34">X = 0</span><span class="rvts21"> to </span><span class="rvts34">X = 100</span><span class="rvts21">, the optimality criterion will be the same, but now it also becomes obvious that in the first half of the segment Mario runs slower, and in the second half he runs with constant speed which can be considered maximum. This way you begin to appreciate the acceleration factor, so you add the RAM address to Memory Watch and start analyzing possible ways to influence the acceleration. After some experiments with turning and jumping you can discover more factors. </span><span class="rvts21">As a result, you're going to find an intricate combination of </span><span class="rvts29">R</span><span class="rvts21">, </span><span class="rvts29">L</span><span class="rvts21">, </span><span class="rvts29">B</span><span class="rvts21"> and </span><span class="rvts29">A</span><span class="rvts21"> buttonpresses that makes the event </span><span class="rvts34">X = 100</span><span class="rvts21"> occur faster than simply holding </span><span class="rvts29">R</span><span class="rvts21"> and </span><span class="rvts29">B</span><span class="rvts21">. And even if the new playthrough of the segment is only several frames faster than old, it's much closer to perfectness.</span></p>
-</td>
-</tr>
-</table>
-</div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td valign="top" style="border-color: #000000; border-style: solid; height: 426px;"><p class="rvps10"><span class="rvts21">Now let's take a look at another extreme. When segment is too small, its optimality criterion may contradict the final goal of the TAS.</span></p>
-<p class="rvps10"><span class="rvts21">First, if you get carried away by maximizing speed and acceleration in equal intervals between </span><span class="rvts34">every next hundred of pixels</span><span class="rvts21">, you may forget about the shortcut pipe, because diving into pipes resets speed value to zero, which contradicts with the goal of current segment. In short term the diving factor is disadvantageous for a speedrunner, and its long-term profit may be overlooked when you're busy with habitual actions.</span></p>
-<p class="rvps10"><img align="right" alt="" style="padding : 6px;" src="lib/smb-segments.gif"/></p>
-<p class="rvps10"><span class="rvts21">In this case the segment was chosen without much foresight, and as a consequence it sprouted wrong criterion of optimality ("the frame counter at the event </span><span class="rvts34">X = 200</span><span class="rvts21"> must be minimal"). Instead, the segment should end at the moment when </span><span class="rvts34">any </span><span class="rvts40">Down</span><span class="rvts34"> button press starts diving animation</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">Of course such mistakes are often noticed when replaying finished movie on a fresh mind, but sometimes the situation is less obvious and is only revealed after publishing.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Second, in the same SMB game after diving into the pipe (World 1-1) you have to reach the exit to the right. It may seem necessary to start maximizing speed from the very beginning. But as you may see in the picture, within first dozen of frames it's better to hold the </span><span class="rvts29">L</span><span class="rvts21"> button instead of </span><span class="rvts29">R</span><span class="rvts21">, so that Mario lands slightly aloof from the wall that needs to be jumped over. If you hold </span><span class="rvts29">R</span><span class="rvts21"> too early, Mario will land close to the wall and will have to jump vertically, thus losing gathered speed.</span></p>
-<p class="rvps10"><span class="rvts21">This peculiarity is not so obvious when you choose optimizing the segment from the event </span><span class="rvts34">Mario appears</span><span class="rvts21"> to the </span><span class="rvts34">Mario lands</span><span class="rvts21"> event. The optimality criterion of such small segment will direct you to wrong sequence of buttonpresses.</span></p>
-<p class="rvps10"><span class="rvts21">Here you should choose the segment from the frame when </span><span class="rvts34">Mario appears</span><span class="rvts21"> to the moment of </span><span class="rvts34">overcoming the corner of the wall</span><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21">Unfortunately, even experienced TASers not always choose correct limits right away. Sometimes you have to rethink and redo, throw away results of many tests and change the scale of the segment, play the same part of the game many times again.</span></p>
-</td>
-</tr>
-</table>
-</div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">As you might have noticed, this document avoids measuring segments in real frames of the movie. Because actual size of segment varies from game to game and from stage to stage. Some parts of the game contain so little possibilities that they can last for more than a thousand of frames and still be easy to play and replay. By the way, some segments don't even need to be played more than once, since they are so simple that any successful playthrough is optimal (for instance, watching unskippable cutscenes between levels). And on the contrary, some stages of the game are supersaturated with events and factors, so you are going to sweat even over a dozen of frames.</span></p>
-<p class="rvps10"><span class="rvts21">Experienced TASers regard every segment individually (although they don't think too much about it). It's bad idea to choose the next segment by the same principle as previous, this would only work well in extremely repetitive games.</span></p>
-<p class="rvps10"><span class="rvts21">If you want, you can limit the end of current segment by a fixed frame number (e.g. set the goal to maximize the X coordinate value when </span><span class="rvts34">the frame counter = 200</span><span class="rvts21">). But usually it's more convenient to associate the end with some small frontier of the game (like passing over a trap or defeating another enemy) – then the goal itself is going to suggest you basic means for reaching it. The task "touch a flower as fast as possible" sounds more natural (for a gamer) than the task "at the frame 300 become as close to the flower as possible".</span></p>
-<p class="rvps10"><span class="rvts21">In the vast majority of video games the gameplay divides into "rooms", "enemy waves" and "traps", which are always separated by short periods of relaxation. Even in constantly scrolling and open-world games the level design ensures that there are intense moments and filler intervals between them. The truth is, </span><span class="rvts25">game designers also structure player's task into subtasks</span><span class="rvts21">, and in some cases TASer can even borrow the prepared segmentation. Just don't forget to critically assess it and subdivide into more subsegments when needed. Though, such subdivision will naturally take place in the process of editing Input on a excessively large segment. So TASing doesn't always require intense intellectual efforts. If you're skillful and smart, most of time you can just go with the flow and enjoy TASing no less than conventional gaming.</span></p>
-<p class="rvps10"><span class="rvts21">All this can be compared to how writers divide their books into chapters (game levels), and chapters into paragraphs and sentences (segments) in order to aid with comfortable reading and comprehending author's ideas. A regular reader (player) is satisfied with the author's subdivision, but a literary critic (TASer) needs to be able to "read between lines" by dividing text his own way.</span></p>
-<p class="rvps10"><span class="rvts21">For example, in Super Mario Bros every group of enemies is separated by a quiet space which doesn't require any skills, and it can be light-heartedly ran over or jumped over while holding </span><span class="rvts29">Right</span><span class="rvts21"> (granted that Mario speed is already at maximum). So you don't even need TAS tools to be perfect at these moments. These intervals are the most suitable place to set a goal – if you mark an end of the segment at such place, the optimality criterion won't contradict with final goal of TAS for sure. And usually these moments occur often enough so the segment between them is of an acceptable size.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The division to segments was always present in TASing, but Taseditor allows to accentuate the process visually. Here you can mark the beginning and the end of a segment using Markers or Bookmarks. Thanks to the visible boundaries you won't be distracted onto adjacent Input and can focus on analyzing only closest factors.</span></p>
-<p class="rvps10"><span class="rvts21">The frame of current segment beginning is usually chosen when watching a test playthrough of the current segment. When recording or watching such playthrough you already pick one or two key factors of optimality. So it's only logical to start the segment at the moment when these factors join into force or dramatically change the behavior. For example, at the beginning of every level you usually start a new segment, because that's the point where you regain the ability to move forward (after the cutscene between levels ends). So it's wise to set a Marker or a Bookmark at the beginning of every level, thus marking both the level boundary and the beginning of current work segment.</span></p>
-<p class="rvps10"><span class="rvts21">And if in the process of optimizing the segment you reveal some factors that join into force earlier than current beginning of the segment, you can always adjust the chosen boundaries of the segment, or break it in two subsegments.</span></p>
-<p class="rvps10"><a name="EndOfSegment"></a>
-<span class="rvts21">The ending frame of current segment is more mobile than the frame of beginning. When you define your goal (e.g. to make the X coordinate reach the value of 50) you can mark the end of current segment by setting a Marker/Bookmark to the frame where current imperfect playthrough accomplishes this goal. Then by polishing the Input you try to reach the goal (</span><span class="rvts34">X = 50</span><span class="rvts21">) at an earlier frame. And if in the process of modifying and testing a new Input you discover that the goal indeed can be reached earlier, you move the closing Marker/Bookmark up (to the frame of the improved end). After that you continue testing new approaches, searching for even better one until you don't feel any more potential. In traditional TASing this is exactly how the main Bookmark (storing current best playthrough of the segment) gradually moves up.</span></p>
-<p class="rvps10"><span class="rvts21">Well, sometimes you can indulge in laziness and avoid marking the end of current segment, instead you just keep the goal in mind and remember the number of the frame where the target event occurs in the best case so far. Such behavior is reasonable when the segment is very simple and you don't plan to redo it many times.</span></p>
-<p class="rvps10"><span class="rvts21">Moreover, in many platformer games where the player character has constant running speed most of segments can be played optimally from the first try (you just have to hold the </span><span class="rvts29">Right</span><span class="rvts21"> button and maybe jump over trivial obstacles). So if you don't see any obvious mistakes and don't intend to search for hidden flaws, you may as well skip the segment shaping, just proceed to next segment right away. Such simple games are especially suitable for newbie TASers, because TASing them is very similar to casual playing through videogames using savestates (when you only revise the most obvious mistakes, like falling into a pit, and ignore non-fatal roughness).</span></p>
-<p class="rvps10"><span class="rvts21">But in complex TASes, where the mind is occupied with many optimality factors, you shouldn't hurry. To make your thought process more precise, you'd better be perfectly aware of current segment boundaries. So mark the beginning of any difficult segment with a Marker, and mark the end by setting a Bookmark every time you find an improvement (use one and the same slot). Since it's not easy to find an improvement when dealing with difficult tasks, don't expect you'll have to re-set the Bookmark too often.</span></p>
-<p class="rvps10"><span class="rvts21">When you're confident you've found perfect solution of the segment, move to the next segment. Don't remove old Markers, since they may be useful in future, in case you begin doubting the perfectness of your decisions (e.g. after finding a new trick). The logic of movie dividing will most likely remain the same even after finding the new factor (the trick).</span></p>
-<p class="rvps10"><span class="rvts21">Also, if in the middle of optimization process you become confident you've found perfect Input for the first half (or a third) of current segment, you can divide the segment in two and focus on optimizing the remaining section. Such situations often rise when the initially chosen segment was too large and its logical parts naturally emerged in the process of editing the Input.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">So, if you don't like to keep things organized, you can avoid Markers and Bookmarks whatsoever, working mostly in terms of fuzzy in-game concepts and imagining segments as some emotional sequences of events. Unfortunately, the data about fuzzy goals also occupies part of human working memory, and as a result you won't have enough resources to keep all optimality factors in mind. And you won't even notice how you've overlooked a multitude of possibilities.</span></p>
-<p class="rvps10"><span class="rvts21">On the contrary, if you like to keep an order, it's recommended to accompany Markers with text Notes, either before, or during, or after the optimization of the current segment. For example, make up a name for the segment or put a tag. This way you document the development of the TAS during actual TASing, give an objective meaning to the Input appearing in the process. This is especially useful when TASing in co-authorship. But even when working alone, you may notice the documentation from previous levels motivates you to carry on. It only takes seconds to type that kind of texts, and then it helps not to abandon the project.</span></p>
-<p class="rvps10"><span class="rvts21">Notes also help to better unlock the potential of tricks and bugs of the game. By writing the text you actually formalize your knowledge about the described phenomenon. When the essence of the trick is kept in your mind, you may think that you already know everything about it, and that your current TAS uses the trick the best way possible. But when you construct an objective model (a verbal description of the trick) you often find its new sides.</span></p>
-<p class="rvps10"><span class="rvts21">It's not uncommon for TASVideos.org to see how one TASer read the description of a trick in the submission text written by another TASer and found a way to use the trick better than original author. There were also cases when author himself reads his recent submission, facepalms and urgently records an improvement.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Making a perfect TAS can take anything from several days to several years, depending on complexity of the chosen game. Most of that time is spent on finding an ideal sequence of buttonpresses for every segment.</span></p>
-<p class="rvps10"><span class="rvts21">Often it seems right away that current Input is already the best possible. But usually it's not so, especially if you make the conclusion judging by the external image of the emulated game instead of its internal state (Memory Watch). So it's always reasonable to suppose that current result is not perfect. If you don't see any mistakes or potential improvements at the moment, try to watch the segment together with several previous segments (e.g. watch the last half a minute of your movie), because it's possible that previous segments contain some unregistered optimality factors that have an effect on current segment. And if you still don't get any ideas, consider moving to next segment, but don't completely refuse further attempts to criticize and improve finished segments.</span></p>
-<p class="rvps10"><span class="rvts21">Rewatch the finished part of your movie from time to time – either from the very beginning, or from the beginning of current level – and try to notice imperfections. Taseditor allows to edit Input in any part of the movie while the movie is still playing, so you can quickly test any spontaneous idea right when it comes to your mind. If the new idea appears to be unsuccessful, just undo latest changes or load the Bookmark containing the last stable state of the movie.</span></p>
-<p class="rvps10"><a name="resyncing"></a>
-<span class="rvts21">And if the new idea in fact improves you TAS, after a joyful anticipation you have to ensure that all the following segments of Input sync to the game (because implementing the idea has changed the flow of the game). Most of time it's not necessary to redo all the following Input. Usually you only have to delete or insert a few frames (thus shifting all following segments up or down), or modify several segments between the place of implementing the new idea and the nearest checkpoint (the end of current level, etc). Checkpoints usually reset many in-game properties to default value (e.g. they require you to walk over specific platform, thus equalizing the Y coordinate), so after the checkpoint you old Input will sync with new timeline of the game once you adjust it to match the flow of game events.</span></p>
-<p class="rvps10"><span class="rvts21">Anyway, even in cases when you have to redo considerable parts of the movie, resyincing is much easier than TASing from zero ground, because now you know the best approach for each segment and only have to match your previous results. And sometimes you can even excel them, because, when you're doing these forced modifications in order to resync old Input, you still possess TASer's critical thinking, so you may notice another mistake or unimplemented idea by the way.</span></p>
-<p class="rvps10"><span class="rvts21">Sometimes it's like a snowslide – as the trouble grows, so grows the thrill of all the discoveries. Many ingenious speedrun overtakes were made because of noticing a small improvement in the middle of the movie, which then forced TASer to re-record the remaining half of the movie (in order to resync it using traditional method) and stumble upon new discoveries in the process. And then these new tricks appear to be useful in the first level of the game! Since the game has single engine, a trick that works in one level may be applied in another, where the similar conditions are met. Even if some conditions aren't met, sometimes you can create them by losing something less important... So, in the end, as the movie gets rewritten many times, the initial small improvement turns into large-scale progress.</span></p>
-<p class="rvps10"><span class="rvts21">You should learn not to feel sorry when you have to throw away results of your hard work. In TASing you're expected to reconsider even polished parts of the movie from time to time. The traditional method of TASing quickly makes you accustomed to inevitable losses of time, because any inattention or slipped finger requires you to rerecord part of current segment. Taseditor averts such minor losses, but doesn't change the fact that you have to retry new approaches after finding new optimality factors.</span></p>
-<p class="rvps10"><span class="rvts21">For example, when polishing the Input near the end of World 1-3, you've suddenly found a new trick allowing you to get a mushroom, and it also appears to work in the World 1-1. Now you have to redo both 1-1, 1-3 and even 1-2, because you now play World 1-2 with big Mario. Of course, TASing the same levels second time is easier, but the fact of wasted time may dispirit you at first. Sometimes it may seem that fixing the old mistake is not worth spending additional time. At this point you'd better stop thinking too much and just choose one of the two options – either immediately start fixing, or postpone it for an indefinite period (and leave the Marker with a note describing the issue). If at the end of the project you accumulate a critical mass of such postponed plans, the movie should be called a "test run" and probably also published, at least as a WIP (work in progress). Then take some considerable rest until you feel like redoing the TAS (making an improvement).</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">Despite all the difficulties, TASing can bring enjoyment both to viewers and authors. TASes are made by people who consider this kind of work to be balanced (paid off) by the excitement from intermediate and final results. In many senses TASing is similar to a special meta-videogame with a unique gameplay mechanic. And until games bring fun, people play them no matter how hardcore they are.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">In the next chapter: </span><a class="rvts27" href="TASingMethodology.html">descriptions of Input optimization methods</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
-<tr valign="top">
-<td style="border-color: #000000; border-style: solid;"><p class="rvps10"><span class="rvts25">PRACTICE: </span><span class="rvts21">Watch the imperfect playthrough of the 1st level that you made in previous chapter, and divide it into segments using Markers and your own discretion. If the movie is rather long, no need to structure it all, you just have to feel the principles.</span></p>
-<p class="rvps10"><span class="rvts25">Estimated time: </span><span class="rvts21">5-10 minutes.</span></p>
-</td>
-</tr>
-</table>
-</div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com/help-authoring-tool">Free help authoring environment</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="TASingProcess"
+		  data-hnd-context="8"
+		  data-hnd-title="3. TASing Process"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="BeginnersGuide.html">Beginner's Guide</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="BeginnersGuide.html" title="Beginner's Guide" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="Toolbox.html" title="2.2. Toolbox" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="TASingMethodology.html" title="4. TASing Methodology" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>3. TASing Process</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts18">TASing Process</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">TASing is about striving for an absolute perfectness. For TASers, a game is more than just an amusement, it's an interesting and complex task.</span></p>
+<p class="rvps7"><span class="rvts20">People enjoy solving creative tasks, because it allows them to express their individuality and improve various skills. However, complicated tasks require both inventiveness and methodicalness. This Manual describes dry and methodical side of TASing, as for inventiveness – you'll have to show it yourself in real setting.</span></p>
+<p class="rvps7"><span class="rvts20">In general, to create a perfect (or very close to perfect) playthrough of the game you have to record an imperfect walkthrough and then work on consecutive improvements of its separate parts. When every fragment of the movie is perfect, we may consider the whole TAS to be perfect as well.</span></p>
+<p class="rvps7"><span class="rvts20">The concentration of efforts on small segments of the movie is the key to success. Every working segment has to be large enough to represent an adequate subtask, but small enough to make the task simple.</span></p>
+<p class="rvps7"><span class="rvts20">Without such structuring an effective and comfortable TASing would not be possible. There's too many factors affecting the final result of the game, and some of those factors append or contradict each other. Human memory is not enough to keep and calculate all interconnections of the game factors within a large segment of the playthrough. Therefore, when TASers deal with long play sessions, they aren't different from regular players who are carried by the temptation to use the first observations as a base for making decisions. But regular players can get away with such carefree approach, while TASers would end up with a clearly imperfect walkthrough.</span></p>
+<p class="rvps7"><span class="rvts20">Thus real TASing implies that segments are small. Much smaller than a single level of a typical videogame. The whole process of TASing may be portrayed like this: a man watches the recording of his own unfinished playthrough of the game, selects a small piece of the movie and throws all forces into improving it, then selects another piece and so on until the end of the game.</span></p>
+<p class="rvps7"><span class="rvts20">Of course, it's an incomplete picture, because besides the movie editing TASers also research and experiment with the game (to expose hidden factors) and do many other things. But that's beyond the scope of this Guide.</span></p>
+<p class="rvps7"><span class="rvts20">The skill of choosing adequate segments comes with experience. Many TASers don't even think what makes them spontaneously focus on a segment of the game and unconsciously limit the beginning and the end of current work. Some believe that they simply record the movie frame-by-frame in succession, but if you watch it from outside you can note that those repeated rerecords occur within a window of 20-200 frames, and the window goes forward the movie by making jumps (the end of previous segment becomes the beginning of next segment). Consider watching live stream videos of TASing, and you'll see certain regularities in handling savestates.</span></p>
+<p class="rvps7"><span class="rvts20">Here we'll try to analyze the behavior, in order to learn how to define current segment limits sensibly. And then practical TASing will make you do it mechanically.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">An adequate segment (subtask) is supposed to give TASer a consistent goal and simple means to reach it.</span></p>
+<p class="rvps7"><span class="rvts20">The </span><span class="rvts22">goal</span><span class="rvts20"> of a segment playthrough is usually to achieve certain in-game event. For example, the goal of playing through the whole game is the event when "THE END" text appears on the screen. The goal of one level can be such event as "the value of the level counter in RAM was increased" or simply "the screen faded at the end of current level". And the goal of a small segment may be something like "the character successfully landed on the other side of the pit". These intermediate goals are defined by the context.</span></p>
+<p class="rvps7"><span class="rvts20">Based on the goal, TASer defines the </span><span class="rvts22">optimality criterion</span><span class="rvts20"> in mind. The criterion is the rule which lets you compare any two versions of playing through the current segment of the game. When you're TASing, it's not enough to simply reach the goal, you have to try many approaches to reaching it, and then choose the best approach of all. For example, in a speedrun the best approach to playing a segment is usually the one in which the target event occurs as early as possible. E.g. if the 1st approach to playing the segment made the event occur at frame 350, and the 2nd approach made it appear at frame 340, then the 2nd approach is better than the 1st, and the final movie should contain exactly the 2nd approach.</span></p>
+<p class="rvps7"><span class="rvts20">There's a lot of </span><span class="rvts22">means</span><span class="rvts20"> for reaching the target event. In theory, any gameplay aspect (including those not planned by developers) may help or impede the progress in some way. So, to cope with this vague multitude of possibilities you should regard all aspects of the game as </span><span class="rvts20">optimality factors</span><span class="rvts20">.</span></p>
+<p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/smb-zigzag.png"></p>
+<p class="rvps7"><span class="rvts20">An </span><span class="rvts22">optimality factor</span><span class="rvts20"> is an aspect of the game that directly affects optimality of playing current segment. The word "directly" implies a monotonous dependence of outcome from applying the factor. For example, on this picture there's no monotonous dependence between the distance to finish and the duration of holding </span><span class="rvts26">Right</span><span class="rvts20">. Pressing the same </span><span class="rvts26">R</span><span class="rvts20"> button either makes Mario be closer to the finish, or moves him away, depending on his position.</span></p>
+<p class="rvps7"><span class="rvts20">When people perceive such segment in a whole, it's difficult to guess the best moment to release the </span><span class="rvts26">R</span><span class="rvts20"> button, when to press the </span><span class="rvts26">L</span><span class="rvts20"> button and so on. So, in order to simplify the understanding of complex dependencies (and thus reveal factors), such segments should be broken into several subsegments.</span></p>
+<p class="rvps7"><span class="rvts20">Correct statement of question usually cuts off many irrelevant possibilities. For example, regular player could wait until the difficult enemy character walks away, but in a speedrun such tactic is not considered.</span></p>
+<p class="rvps7"><span class="rvts20">Thus even in an open-world game TASer is left with a limited set of useful actions and in-game indicators that must be followed while polishing one segment. And the less the segment is, the more limited is this set, so it's easier to find an ideal sequence of actions by going over combinations of factors.</span></p>
+<p class="rvps7"><span class="rvts20">On the other hand, the less the segment is, the less its goal intersects with the final goal of the TAS. The final goal is to make perfect walkthrough, e.g. the fastest in the world (which means the frame counter at the end of the movie should be as low as possible). But in terms of every specific segment the goal may be completely different, sometimes even opposite (for example, to stay in bonus stage as long as possible, which then grants time saving at another point of the game). That's why in very small segments the optimality criterion is not used, and playing such micro-segment is only evaluated as a part of a full-fledged segment.</span></p>
+<p class="rvps7"><span class="rvts20">For example, when your character is jumping over a pit and shooting enemies at the same time, every bullet release can be considered a separate subsegment (so it becomes easy to isolate such factors as "recharge timer", "max 3 bullets on screen" and so on). But then, when comparing approaches, you should compare different versions of jumping over the pit. Even if the 1st approach to jumping (which ends at the frame 350) allowed you to shoot two enemies and the 2nd approach (which ends at frame 340) allowed to shoot only single enemy, you are supposed to choose the 2nd approach, because the optimality criterion of the unbroken segment fits the final goal of the speedrun better.</span></p>
+<p class="rvps7"><span class="rvts20">While TASing you have to maintain an optimal balance between the necessity to decrease segments in order to grasp factors and the need to increase them in order to use a relevant criterion. This skill comes with time, so don't sweat it and just rely on your intuition.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td height="172" valign="top" style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps7"><span class="rvts20">Let's have an example when the segment is too large. In a Super Mario Bros speedrun you are expected to reach the end of World 1-1 as fast as possible, which means you have to maximize the X coordinate of the character moving from left to right. The basic premise is that at the beginning of the level the X value equals zero and at the end of the level it is one thousand. Using gamepad buttons you can influence the coordinate in various ways.</span></p>
+   <p class="rvps7"><span class="rvts20">If we take the whole level from the moment </span><span class="rvts31">X = 0</span><span class="rvts20"> to the event </span><span class="rvts31">X = 1000</span><span class="rvts20"> as our working segment, we can immediately see the optimality criterion (the best approach will be the one with minimal value of the frame counter when </span><span class="rvts31">X &gt;= 1000</span><span class="rvts20">), but we can't see definite factors. How exactly we're supposed to press buttons to get the </span><span class="rvts31">X = 1000</span><span class="rvts20"> within minimal number of frames? Well, we can apply a regular player's logic and intuition. When we press the </span><span class="rvts26">R</span><span class="rvts20"> button, the X coordinate usually increases, and with the </span><span class="rvts26">L</span><span class="rvts20"> button it decreases. So the most obvious decision is to hold the </span><span class="rvts26">R</span><span class="rvts20"> button and see how many frames is needed to grow the value of X to one thousand. When testing such approach in emulator, it appears that Mario is hampered by obstacles and the X coordinate does not grow, even though the </span><span class="rvts26">R</span><span class="rvts20"> button is held. This way a new factor comes to light – the need to jump over obstacles and pits. Using the </span><span class="rvts26">A</span><span class="rvts20"> button Mario eventually reaches the </span><span class="rvts31">X = 1000</span><span class="rvts20"> event, and the optimality criterion can eliminate all alternative playthroughs where the </span><span class="rvts26">A</span><span class="rvts20"> button presses were ill-timed (e.g. where Mario stumbled over edges of pipes, the frame counter at the end of the segment was higher).</span></p>
+   <p class="rvps7"><span class="rvts20">Now the player (or rather, TASer who is stuck in player's mindset) may think that all factors are applied and the segment is perfect. But it isn't. Super Mario Bros has somewhat complex physics engine. The X coordinate is influenced by current horizontal speed, and speed is influenced by acceleration. Acceleration is affected by the </span><span class="rvts26">B</span><span class="rvts20"> button, skidding, Mario's direction and air-ground state. There are also teleporter pipes and useful glitches like the "flagpole glitch" and so on. A lot of things to bear in mind. But, according to certain research, human working memory can only store </span><a class="rvts24" href="http://en.wikipedia.org/wiki/The_Magical_Number_Seven,_Plus_or_Minus_Two" target="_blank">about 7 objects</a><span class="rvts20">, thus some factors inevitably slip away when you're editing Input on large segment. You'd better shrink the segment to such a scale which reveals factors individually or in a small group.</span></p>
+   <p class="rvps7"><span class="rvts20">If we focus on the segment from </span><span class="rvts31">X = 0</span><span class="rvts20"> to </span><span class="rvts31">X = 100</span><span class="rvts20">, the optimality criterion will be the same, but now it also becomes obvious that in the first half of the segment Mario runs slower, and in the second half he runs with constant speed which can be considered maximum. This way you begin to appreciate the acceleration factor, so you add the RAM address to Memory Watch and start analyzing possible ways to influence the acceleration. After some experiments with turning and jumping you can discover more factors. </span><span class="rvts20">As a result, you're going to find an intricate combination of </span><span class="rvts26">R</span><span class="rvts20">, </span><span class="rvts26">L</span><span class="rvts20">, </span><span class="rvts26">B</span><span class="rvts20"> and </span><span class="rvts26">A</span><span class="rvts20"> buttonpresses that makes the event </span><span class="rvts31">X = 100</span><span class="rvts20"> occur faster than simply holding </span><span class="rvts26">R</span><span class="rvts20"> and </span><span class="rvts26">B</span><span class="rvts20">. And even if the new playthrough of the segment is only several frames faster than old, it's much closer to perfectness.</span></p>
+  </td>
+ </tr>
+</table>
+</div>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td height="438" valign="top" style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps7"><span class="rvts20">Now let's take a look at another extreme. When segment is too small, its optimality criterion may contradict the final goal of the TAS.</span></p>
+   <p class="rvps7"><span class="rvts20">First, if you get carried away by maximizing speed and acceleration in equal intervals between </span><span class="rvts31">every next hundred of pixels</span><span class="rvts20">, you may forget about the shortcut pipe, because diving into pipes resets speed value to zero, which contradicts with the goal of current segment. In short term the diving factor is disadvantageous for a speedrunner, and its long-term profit may be overlooked when you're busy with habitual actions.</span></p>
+   <p class="rvps7"><img alt="" style="float: right; padding : 6px;" src="lib/smb-segments.gif"></p>
+   <p class="rvps7"><span class="rvts20">In this case the segment was chosen without much foresight, and as a consequence it sprouted wrong criterion of optimality ("the frame counter at the event </span><span class="rvts31">X = 200</span><span class="rvts20"> must be minimal"). Instead, the segment should end at the moment when </span><span class="rvts31">any </span><span class="rvts36">Down</span><span class="rvts31"> button press starts diving animation</span><span class="rvts20">.</span></p>
+   <p class="rvps7"><span class="rvts20">Of course such mistakes are often noticed when replaying finished movie on a fresh mind, but sometimes the situation is less obvious and is only revealed after publishing.</span></p>
+   <p class="rvps7"><span class="rvts20"><br/></span></p>
+   <p class="rvps7"><span class="rvts20">Second, in the same SMB game after diving into the pipe (World 1-1) you have to reach the exit to the right. It may seem necessary to start maximizing speed from the very beginning. But as you may see in the picture, within first dozen of frames it's better to hold the </span><span class="rvts26">L</span><span class="rvts20"> button instead of </span><span class="rvts26">R</span><span class="rvts20">, so that Mario lands slightly aloof from the wall that needs to be jumped over. If you hold </span><span class="rvts26">R</span><span class="rvts20"> too early, Mario will land close to the wall and will have to jump vertically, thus losing gathered speed.</span></p>
+   <p class="rvps7"><span class="rvts20">This peculiarity is not so obvious when you choose optimizing the segment from the event </span><span class="rvts31">Mario appears</span><span class="rvts20"> to the </span><span class="rvts31">Mario lands</span><span class="rvts20"> event. The optimality criterion of such small segment will direct you to wrong sequence of buttonpresses.</span></p>
+   <p class="rvps7"><span class="rvts20">Here you should choose the segment from the frame when </span><span class="rvts31">Mario appears</span><span class="rvts20"> to the moment of </span><span class="rvts31">overcoming the corner of the wall</span><span class="rvts20">.</span></p>
+   <p class="rvps7"><span class="rvts20">Unfortunately, even experienced TASers not always choose correct limits right away. Sometimes you have to rethink and redo, throw away results of many tests and change the scale of the segment, play the same part of the game many times again.</span></p>
+  </td>
+ </tr>
+</table>
+</div>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">As you might have noticed, this document avoids measuring segments in real frames of the movie. Because actual size of segment varies from game to game and from stage to stage. Some parts of the game contain so little possibilities that they can last for more than a thousand of frames and still be easy to play and replay. By the way, some segments don't even need to be played more than once, since they are so simple that any successful playthrough is optimal (for instance, watching unskippable cutscenes between levels). And on the contrary, some stages of the game are supersaturated with events and factors, so you are going to sweat even over a dozen of frames.</span></p>
+<p class="rvps7"><span class="rvts20">Experienced TASers regard every segment individually (although they don't think too much about it). It's bad idea to choose the next segment by the same principle as previous, this would only work well in extremely repetitive games.</span></p>
+<p class="rvps7"><span class="rvts20">If you want, you can limit the end of current segment by a fixed frame number (e.g. set the goal to maximize the X coordinate value when </span><span class="rvts31">the frame counter = 200</span><span class="rvts20">). But usually it's more convenient to associate the end with some small frontier of the game (like passing over a trap or defeating another enemy) – then the goal itself is going to suggest you basic means for reaching it. The task "touch a flower as fast as possible" sounds more natural (for a gamer) than the task "at the frame 300 become as close to the flower as possible".</span></p>
+<p class="rvps7"><span class="rvts20">In the vast majority of video games the gameplay divides into "rooms", "enemy waves" and "traps", which are always separated by short periods of relaxation. Even in constantly scrolling and open-world games the level design ensures that there are intense moments and filler intervals between them. The truth is, </span><span class="rvts22">game designers also structure player's task into subtasks</span><span class="rvts20">, and in some cases TASer can even borrow the prepared segmentation. Just don't forget to critically assess it and subdivide into more subsegments when needed. Though, such subdivision will naturally take place in the process of editing Input on a excessively large segment. So TASing doesn't always require intense intellectual efforts. If you're skillful and smart, most of time you can just go with the flow and enjoy TASing no less than conventional gaming.</span></p>
+<p class="rvps7"><span class="rvts20">All this can be compared to how writers divide their books into chapters (game levels), and chapters into paragraphs and sentences (segments) in order to aid with comfortable reading and comprehending author's ideas. A regular reader (player) is satisfied with the author's subdivision, but a literary critic (TASer) needs to be able to "read between lines" by dividing text his own way.</span></p>
+<p class="rvps7"><span class="rvts20">For example, in Super Mario Bros every group of enemies is separated by a quiet space which doesn't require any skills, and it can be light-heartedly ran over or jumped over while holding </span><span class="rvts26">Right</span><span class="rvts20"> (granted that Mario speed is already at maximum). So you don't even need TAS tools to be perfect at these moments. These intervals are the most suitable place to set a goal – if you mark an end of the segment at such place, the optimality criterion won't contradict with final goal of TAS for sure. And usually these moments occur often enough so the segment between them is of an acceptable size.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The division to segments was always present in TASing, but Taseditor allows to accentuate the process visually. Here you can mark the beginning and the end of a segment using Markers or Bookmarks. Thanks to the visible boundaries you won't be distracted onto adjacent Input and can focus on analyzing only closest factors.</span></p>
+<p class="rvps7"><span class="rvts20">The frame of current segment beginning is usually chosen when watching a test playthrough of the current segment. When recording or watching such playthrough you already pick one or two key factors of optimality. So it's only logical to start the segment at the moment when these factors join into force or dramatically change the behavior. For example, at the beginning of every level you usually start a new segment, because that's the point where you regain the ability to move forward (after the cutscene between levels ends). So it's wise to set a Marker or a Bookmark at the beginning of every level, thus marking both the level boundary and the beginning of current work segment.</span></p>
+<p class="rvps7"><span class="rvts20">And if in the process of optimizing the segment you reveal some factors that join into force earlier than current beginning of the segment, you can always adjust the chosen boundaries of the segment, or break it in two subsegments.</span></p>
+<p class="rvps7"><a name="EndOfSegment"></a><span class="rvts20">The ending frame of current segment is more mobile than the frame of beginning. When you define your goal (e.g. to make the X coordinate reach the value of 50) you can mark the end of current segment by setting a Marker/Bookmark to the frame where current imperfect playthrough accomplishes this goal. Then by polishing the Input you try to reach the goal (</span><span class="rvts31">X = 50</span><span class="rvts20">) at an earlier frame. And if in the process of modifying and testing a new Input you discover that the goal indeed can be reached earlier, you move the closing Marker/Bookmark up (to the frame of the improved end). After that you continue testing new approaches, searching for even better one until you don't feel any more potential. In traditional TASing this is exactly how the main Bookmark (storing current best playthrough of the segment) gradually moves up.</span></p>
+<p class="rvps7"><span class="rvts20">Well, sometimes you can indulge in laziness and avoid marking the end of current segment, instead you just keep the goal in mind and remember the number of the frame where the target event occurs in the best case so far. Such behavior is reasonable when the segment is very simple and you don't plan to redo it many times.</span></p>
+<p class="rvps7"><span class="rvts20">Moreover, in many platformer games where the player character has constant running speed most of segments can be played optimally from the first try (you just have to hold the </span><span class="rvts26">Right</span><span class="rvts20"> button and maybe jump over trivial obstacles). So if you don't see any obvious mistakes and don't intend to search for hidden flaws, you may as well skip the segment shaping, just proceed to next segment right away. Such simple games are especially suitable for newbie TASers, because TASing them is very similar to casual playing through videogames using savestates (when you only revise the most obvious mistakes, like falling into a pit, and ignore non-fatal roughness).</span></p>
+<p class="rvps7"><span class="rvts20">But in complex TASes, where the mind is occupied with many optimality factors, you shouldn't hurry. To make your thought process more precise, you'd better be perfectly aware of current segment boundaries. So mark the beginning of any difficult segment with a Marker, and mark the end by setting a Bookmark every time you find an improvement (use one and the same slot). Since it's not easy to find an improvement when dealing with difficult tasks, don't expect you'll have to re-set the Bookmark too often.</span></p>
+<p class="rvps7"><span class="rvts20">When you're confident you've found perfect solution of the segment, move to the next segment. Don't remove old Markers, since they may be useful in future, in case you begin doubting the perfectness of your decisions (e.g. after finding a new trick). The logic of movie dividing will most likely remain the same even after finding the new factor (the trick).</span></p>
+<p class="rvps7"><span class="rvts20">Also, if in the middle of optimization process you become confident you've found perfect Input for the first half (or a third) of current segment, you can divide the segment in two and focus on optimizing the remaining section. Such situations often rise when the initially chosen segment was too large and its logical parts naturally emerged in the process of editing the Input.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">So, if you don't like to keep things organized, you can avoid Markers and Bookmarks whatsoever, working mostly in terms of fuzzy in-game concepts and imagining segments as some emotional sequences of events. Unfortunately, the data about fuzzy goals also occupies part of human working memory, and as a result you won't have enough resources to keep all optimality factors in mind. And you won't even notice how you've overlooked a multitude of possibilities.</span></p>
+<p class="rvps7"><span class="rvts20">On the contrary, if you like to keep an order, it's recommended to accompany Markers with text Notes, either before, or during, or after the optimization of the current segment. For example, make up a name for the segment or put a tag. This way you document the development of the TAS during actual TASing, give an objective meaning to the Input appearing in the process. This is especially useful when TASing in co-authorship. But even when working alone, you may notice the documentation from previous levels motivates you to carry on. It only takes seconds to type that kind of texts, and then it helps not to abandon the project.</span></p>
+<p class="rvps7"><span class="rvts20">Notes also help to better unlock the potential of tricks and bugs of the game. By writing the text you actually formalize your knowledge about the described phenomenon. When the essence of the trick is kept in your mind, you may think that you already know everything about it, and that your current TAS uses the trick the best way possible. But when you construct an objective model (a verbal description of the trick) you often find its new sides.</span></p>
+<p class="rvps7"><span class="rvts20">It's not uncommon for TASVideos.org to see how one TASer read the description of a trick in the submission text written by another TASer and found a way to use the trick better than original author. There were also cases when author himself reads his recent submission, facepalms and urgently records an improvement.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Making a perfect TAS can take anything from several days to several years, depending on complexity of the chosen game. Most of that time is spent on finding an ideal sequence of buttonpresses for every segment.</span></p>
+<p class="rvps7"><span class="rvts20">Often it seems right away that current Input is already the best possible. But usually it's not so, especially if you make the conclusion judging by the external image of the emulated game instead of its internal state (Memory Watch). So it's always reasonable to suppose that current result is not perfect. If you don't see any mistakes or potential improvements at the moment, try to watch the segment together with several previous segments (e.g. watch the last half a minute of your movie), because it's possible that previous segments contain some unregistered optimality factors that have an effect on current segment. And if you still don't get any ideas, consider moving to next segment, but don't completely refuse further attempts to criticize and improve finished segments.</span></p>
+<p class="rvps7"><span class="rvts20">Rewatch the finished part of your movie from time to time – either from the very beginning, or from the beginning of current level – and try to notice imperfections. Taseditor allows to edit Input in any part of the movie while the movie is still playing, so you can quickly test any spontaneous idea right when it comes to your mind. If the new idea appears to be unsuccessful, just undo latest changes or load the Bookmark containing the last stable state of the movie.</span></p>
+<p class="rvps7"><a name="resyncing"></a><span class="rvts20">And if the new idea in fact improves you TAS, after a joyful anticipation you have to ensure that all the following segments of Input sync to the game (because implementing the idea has changed the flow of the game). Most of time it's not necessary to redo all the following Input. Usually you only have to delete or insert a few frames (thus shifting all following segments up or down), or modify several segments between the place of implementing the new idea and the nearest checkpoint (the end of current level, etc). Checkpoints usually reset many in-game properties to default value (e.g. they require you to walk over specific platform, thus equalizing the Y coordinate), so after the checkpoint you old Input will sync with new timeline of the game once you adjust it to match the flow of game events.</span></p>
+<p class="rvps7"><span class="rvts20">Anyway, even in cases when you have to redo considerable parts of the movie, resyincing is much easier than TASing from zero ground, because now you know the best approach for each segment and only have to match your previous results. And sometimes you can even excel them, because, when you're doing these forced modifications in order to resync old Input, you still possess TASer's critical thinking, so you may notice another mistake or unimplemented idea by the way.</span></p>
+<p class="rvps7"><span class="rvts20">Sometimes it's like a snowslide – as the trouble grows, so grows the thrill of all the discoveries. Many ingenious speedrun overtakes were made because of noticing a small improvement in the middle of the movie, which then forced TASer to re-record the remaining half of the movie (in order to resync it using traditional method) and stumble upon new discoveries in the process. And then these new tricks appear to be useful in the first level of the game! Since the game has single engine, a trick that works in one level may be applied in another, where the similar conditions are met. Even if some conditions aren't met, sometimes you can create them by losing something less important... So, in the end, as the movie gets rewritten many times, the initial small improvement turns into large-scale progress.</span></p>
+<p class="rvps7"><span class="rvts20">You should learn not to feel sorry when you have to throw away results of your hard work. In TASing you're expected to reconsider even polished parts of the movie from time to time. The traditional method of TASing quickly makes you accustomed to inevitable losses of time, because any inattention or slipped finger requires you to rerecord part of current segment. Taseditor averts such minor losses, but doesn't change the fact that you have to retry new approaches after finding new optimality factors.</span></p>
+<p class="rvps7"><span class="rvts20">For example, when polishing the Input near the end of World 1-3, you've suddenly found a new trick allowing you to get a mushroom, and it also appears to work in the World 1-1. Now you have to redo both 1-1, 1-3 and even 1-2, because you now play World 1-2 with big Mario. Of course, TASing the same levels second time is easier, but the fact of wasted time may dispirit you at first. Sometimes it may seem that fixing the old mistake is not worth spending additional time. At this point you'd better stop thinking too much and just choose one of the two options – either immediately start fixing, or postpone it for an indefinite period (and leave the Marker with a note describing the issue). If at the end of the project you accumulate a critical mass of such postponed plans, the movie should be called a "test run" and probably also published, at least as a WIP (work in progress). Then take some considerable rest until you feel like redoing the TAS (making an improvement).</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">Despite all the difficulties, TASing can bring enjoyment both to viewers and authors. TASes are made by people who consider this kind of work to be balanced (paid off) by the excitement from intermediate and final results. In many senses TASing is similar to a special meta-videogame with a unique gameplay mechanic. And until games bring fun, people play them no matter how hardcore they are.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">In the next chapter: </span><a class="rvts24" href="TASingMethodology.html">descriptions of Input optimization methods</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps7">
+<table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
+ <tr valign="top">
+  <td style="border-color: #000000; border-style: solid; padding: 6px;">
+   <p class="rvps7"><span class="rvts22">PRACTICE: </span><span class="rvts20">Watch the imperfect playthrough of the 1st level that you made in previous chapter, and divide it into segments using Markers and your own discretion. If the movie is rather long, no need to structure it all, you just have to feel the principles.</span></p>
+   <p class="rvps7"><span class="rvts22">Estimated time: </span><span class="rvts20">5-10 minutes.</span></p>
+  </td>
+ </tr>
+</table>
+</div>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p></p>
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/feature-tour/iphone-website-generation">Create iPhone web-based documentation</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

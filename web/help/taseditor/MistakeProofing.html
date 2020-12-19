@@ -1,202 +1,393 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Mistake-proofing</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("MistakeProofing");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Mistake-proofing</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Mistake-proofing">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Mistake-proofing" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Mistake-proofing</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="TASEditorInside.html">TAS Editor Inside</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="TASEditorInside.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="Implementation.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="FM3format.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts19">Mistake-proofing</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">This page lists many small details of implementation that improve interaction between user and the program. All these points must be considered when porting Taseditor to other platforms.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">When the user closes the emulator, emulator sends a request to Taseditor in order to allow it to close the project first. If the project contains unsaved data, Taseditor shows the Yes/No/Cancel dialog. The user can either save the changes, or save none of them, or cancel the attempt to close the emulator.</span></li>
-<li class="rvps10"><span class="rvts21">When playing back an fm3 project outside Taseditor (like a regular movie), the user can switch the emulator to Recording mode and try rerecording. In this case, the emulator tells the user that current movie is a Taseditor project, and suggests to start editing it. In case of refuse, emulator disables the Recording mode and resumes playing back the project movie. In case of agreement, emulator sends a signal to Taseditor, and at the end of the current frame Taseditor will launch and load the currently played project.</span></li>
-<li class="rvps10"><span class="rvts21">When a ROM is loaded into emulator, the user can launch Taseditor at any moment. If he opens the Taseditor window while playing or recording a movie, Taseditor will automatically create a nameless project containing this movie Input. But if the movie is starting from a savestate, Taseditor will display a warning about not supporting such movies and then create a blank project.</span></li>
-<li class="rvps10"><span class="rvts21">While the project has no name, autosave function doesn't work.</span></li>
-<li class="rvps10"><span class="rvts21">When saving a nameless project, Taseditor suggests the current ROM name as a name for the fm3 project, with the extension changed to .fm3.</span></li>
-<li class="rvps10"><span class="rvts21">Since the FM3 format is a superstructure over the FM2 format, the user can open fm2 files just like Taseditor projects, using the "Open TAS Editor Project" dialog and choosing the filter "All Files (*.*)". When opening fm2 files, Taseditor additionally informs the user about it with the Yes/No dialog. The user can either load the fm2 file as a new project or cancel the loading.</span></li>
-<li class="rvps10"><span class="rvts21">After opening an fm2 file or a corrupted fm3 file, the project is considered nameless, even though the TAS Editor window caption displays the name of the loaded file. At the first saving attempt (</span><span class="rvts30">Ctrl + S</span><span class="rvts21">) Taseditor will bring the SaveAs dialog, where the loaded fm2/fm3 file name will be suggested as a name for the project. The user can either save the project with this name or change the name. This way Taseditor draws your attention to the fact that the new project significantly differs from the file that exists on the disk under the same name.</span></li>
-<li class="rvps10"><span class="rvts21">FM3 projects store the version number of the FM3 format used when saving the file. Different versions can be totally or partially incompatible with each other. If the loaded project version doesn't match the currently supported one, Taseditor shows the Yes/No/Cancel dialog. The user can either resume his attempt to load the whole project (not recommended), or load only the Input from the FM2 data (recommended), or cancel loading.</span></li>
-<li class="rvps10"><span class="rvts21">FM2 format (and therefore fm3 too) stores the MD5 checksum of the ROM used when creating the movie/project. When loading a project, Taseditor compares the current ROM checksum with the project's one, and if they don't match, brings the Yes/No dialog, displaying the original and the current ROM names. The user can resume loading or cancel it. Later, when saving this project, Taseditor will notice the checksum mismatch again and suggest replacing the ROM name and the checksum in the file before saving. The user can either approve the replacing, or save the project with the old name and checksum, or cancel the saving.</span></li>
-<li class="rvps10"><span class="rvts21">When loading a corrupted project file, Taseditor tries the best of its ability to prevent emulator crash. If an error is found in the middle of loading, the further loading stops and the rest data is replaced with the default data. Particularly, if the error occurred while loading the Greenzone, the project is left with only the Greenzone frames that were successfully pulled out of the file, the rest frames will be pale. Project loading error messages are logged into the FCEUX Message Log.</span></li>
-<li class="rvps10"><span class="rvts21">When loading a project, Taseditor respects current settings of "Greenzone capacity" and "Undo levels". For example, if while saving a project the Greenzone capacity was 5000, but when loading the project the Greenzone capacity is 3000, some frames will be skipped when loading. It's necessary so that a project saved on a more powerful computer can be opened on a less powerful one, that doesn't have enough memory.</span></li>
-<li class="rvps10"><span class="rvts21">When launching, Taseditor loads the data about patterns from the </span><span class="rvts20">taseditor_patterns.txt</span><span class="rvts21"> file. If this file cannot be opened (fer example, it was removed), Taseditor creates a small set of default patterns, in order to keep the Patterns menu filled.</span></li>
-<li class="rvps10"><span class="rvts21">Savestates used by the Greenzone differ from regular savestates a bit. They don't contain movie data, because it's useless information for the Greenzone purposes. Besides, they are always compressed, in order to save memory.</span></li>
-<li class="rvps10"><span class="rvts21">If after a </span><a class="rvts27" href="Operations.html#Delete">Delete</a><span class="rvts21"> or </span><a class="rvts27" href="Operations.html#LUAChange">Lua Change</a><span class="rvts21"> operation the user effectively removes all Input from the movie, Taseditor will create one blank frame in the movie beginning.</span></li>
-<li class="rvps10"><span class="rvts21">When user is selecting a range of frames by stretching, it's still possible to use hotkeys with the other hand. To avoid conflict, during DRAG_MODE_SELECTION and DRAG_MODE_DESELECTION some functions related to changing the Selection will not work:</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts20">clearSelection()</span></li>
-<li class="rvps10"><span class="rvts20">selectAll()</span></li>
-<li class="rvps10"><span class="rvts20">selectBetweenMarkers()</span><span class="rvts21"> – </span><span class="rvts30">Ctrl + A</span></li>
-<li class="rvps10"><span class="rvts20">selection.undo()</span><span class="rvts21"> – </span><span class="rvts30">Ctrl + Q</span></li>
-<li class="rvps10"><span class="rvts20">selection.redo()</span><span class="rvts21"> – </span><span class="rvts30">Ctrl + W</span></li>
-<li class="rvps10"><span class="rvts20">reselectClipboard()</span><span class="rvts21"> – </span><span class="rvts30">Ctrl + B</span></li>
-<li class="rvps10"><span class="rvts20">selection.Transpose()</span><span class="rvts21"> – </span><span class="rvts30">Ctrl + Up</span><span class="rvts21">, </span><span class="rvts30">Ctrl + Down</span><span class="rvts21">, </span><span class="rvts30">Ctrl + Home</span><span class="rvts21">, </span><span class="rvts30">Ctrl + End</span></li>
-<li class="rvps10"><span class="rvts20">selection.JumpPrevMarker()</span><span class="rvts21"> – </span><span class="rvts30">Ctrl + Page Up</span></li>
-<li class="rvps10"><span class="rvts20">selection.JumpNextMarker()</span><span class="rvts21"> – </span><span class="rvts30">Ctrl + Page Down</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Since the icon column is rather narrow, the user may accidentally miss clicking it. So when you click the left border of the Piano Roll or a bit to the left from it, Taseditor assumes that was a click on the icons column. As a result, the user doesn't have to precisely aim when he needs to move the Playback cursor or start dragging it.</span></li>
-<li class="rvps10"><span class="rvts21">When emulator is paused, the middle mouse button works only under condition that the right button is released. Since the middle button is usually a wheel, the user can accidentally push it while rolling the wheel with the right button held (Playback cursor navigation). As for rolling the wheel with modifier keys held, this is used much less often, so they don't need such protection.</span></li>
-<li class="rvps10"><span class="rvts21">Any middleclick over the FCEUX window is sent to Taseditor window. Similarly, the wheel rolling message is sent to Taseditor, when the focus is on the FCEUX window. And the rightclick on the FCEUX window doesn't work at all. Thanks to that, you can use the middle button (the wheel) even when the mouse cursor is over the FCEUX window.</span></li>
-<li class="rvps10"><span class="rvts21">Even when the Recording mode is on, Taseditor won't rerecord Input while seeking. Thanks to that, you can safely drag the Playback cursor without disabling the Recording mode.</span></li>
-<li class="rvps10"><span class="rvts21">When Taseditor is engaged, the following menu commands are available only when the Recording mode if on and the Playback is not seeking:</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">NES -&gt; Reset</span></li>
-<li class="rvps10"><span class="rvts21">NES -&gt; Power</span></li>
-<li class="rvps10"><span class="rvts21">NES -&gt; Eject/insert Disk</span></li>
-<li class="rvps10"><span class="rvts21">NES -&gt; Switch Disk Side</span></li>
-<li class="rvps10"><span class="rvts21">NES -&gt; Insert Coin</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">When Taseditor is engaged, the following FCEUX menu commands are unavailable:</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">File -&gt; Open ROM</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Close</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Recent</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Savestate -&gt; Load State</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Savestate -&gt; Save State</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Savestate -&gt; Load State From</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Savestate -&gt; Save State As</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Savestate -&gt; Next save slot</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Savestate -&gt; Previous save slot</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Savestate -&gt; View save slots</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Movie -&gt; Recent</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Movie -&gt; Record Movie</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Movie -&gt; Play Movie</span></li>
-<li class="rvps10"><span class="rvts21">File -&gt; Movie -&gt; Stop Movie</span></li>
-<li class="rvps10"><span class="rvts21">Config -&gt; Enable -&gt; Auto-savestates (always off when Taseditor is engaged)</span></li>
-<li class="rvps10"><span class="rvts21">Config -&gt; Enable -&gt; Backup Savestates (always off when Taseditor is engaged)</span></li>
-<li class="rvps10"><span class="rvts21">Config -&gt; Enable -&gt; Compress Savestates (always on when Taseditor is engaged)</span></li>
-<li class="rvps10"><span class="rvts21">Config -&gt; PAL Emulation (set up this before launching Taseditor)</span></li>
-<li class="rvps10"><span class="rvts21">Config -&gt; PPU -&gt; New PPU / Old PPU (set up this before launching Taseditor)</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">It's also necessary to ensure that the user can not change the movie synchronization settings while editing the project. So when Taseditor is engaged, the following GUI elements in the "Input Configuration" window are locked:</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">the "Attach four-score" checkbox</span></li>
-<li class="rvps10"><span class="rvts21">the "Replace port 2 Start With &nbsp;Microphone" checkbox</span></li>
-<li class="rvps10"><span class="rvts21">ListBox for port0</span></li>
-<li class="rvps10"><span class="rvts21">ListBox for port1</span></li>
-<li class="rvps10"><span class="rvts21">ListBox for port2</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">When Taseditor is engaged, the following hotkeys are not working:</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Hide Menu Toggle</span></li>
-<li class="rvps10"><span class="rvts21">Fastest Speed</span></li>
-<li class="rvps10"><span class="rvts21">Save State As...</span></li>
-<li class="rvps10"><span class="rvts21">Load State From...</span></li>
-<li class="rvps10"><span class="rvts21">Record Movie To...</span></li>
-<li class="rvps10"><span class="rvts21">Play Movie From...</span></li>
-<li class="rvps10"><span class="rvts21">Stop Movie</span></li>
-<li class="rvps10"><span class="rvts21">Toggle Dipswitch – because these commands are not supported by the FM2 format yet</span></li>
-<li class="rvps10"><span class="rvts21">Load Last Auto-save</span></li>
-<li class="rvps10"><span class="rvts21">View save slots</span></li>
-<li class="rvps10"><span class="rvts21">Open ROM</span></li>
-<li class="rvps10"><span class="rvts21">Close ROM</span></li>
-<li class="rvps10"><span class="rvts21">Undo/Redo Savestate</span></li>
-<li class="rvps10"><span class="rvts21">Toggle Fullscreen</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Hotkeys that change their behavior when Taseditor is engaged:</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 40px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Power</span></li>
-<li class="rvps10"><span class="rvts26">Reset</span></li>
-<li class="rvps10"><span class="rvts21">Eject or Insert FDS Disk</span></li>
-<li class="rvps10"><span class="rvts21">Switch FDS Disk Side</span></li>
-<li class="rvps10"><span class="rvts21">Insert Coin</span></li>
-<li class="rvps10"><span class="rvts26">Savestate Slot 0</span><span class="rvts21"> – </span><span class="rvts26">Savestate Slot 9</span></li>
-<li class="rvps10"><span class="rvts26">Save State</span></li>
-<li class="rvps10"><span class="rvts26">Save State to Slot 0</span><span class="rvts21"> – </span><span class="rvts26">Save State to Slot 9</span></li>
-<li class="rvps10"><span class="rvts26">Load State</span></li>
-<li class="rvps10"><span class="rvts26">Load State from Slot 0</span><span class="rvts21"> – </span><span class="rvts26">Load State from Slot 9</span></li>
-<li class="rvps10"><span class="rvts26">Play Movie From Beginning</span></li>
-<li class="rvps10"><span class="rvts26">Reload ROM or TAS Editor Project</span></li>
-<li class="rvps10"><span class="rvts21">Open TAS Editor</span></li>
-</ul>
-<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts21">Since the </span><span class="rvts30">Alt</span><span class="rvts21"> and </span><span class="rvts26">F10</span><span class="rvts21"> keys are actively used in Taseditor work, their standard behavior (open main menu) is disabled.</span></li>
-<li class="rvps10"><span class="rvts21">Since the </span><span class="rvts26">Spacebar</span><span class="rvts21"> key is used as a hotkey by default, its standard behavior (simulate the click on the currently focused GUI element) is disabled. Also, all GUI elements of the TAS Editor window handle the middleclick message and send it to the Playback, thus the middleclick works independently of the mouse cursor position.</span></li>
-<li class="rvps10"><span class="rvts21">Since the context menu on the rightclick at the Piano Roll is not often used, it appears only if the user clicks the selected line in the frame number column (Frame#). In all the rest cases the context menu doesn't appear, instead the rightclick-and-hold at the Piano Roll allows to drag its contents in any direction.</span></li>
-<li class="rvps10"><span class="rvts21">Since the right button is often used for the Playback cursor navigation with the wheel, the user is encouraged to click it without caring about the current mouse cursor position. In theory it's possible that the user accidentally rightclicks a Bookmark. To avoid such unintended commands, the Bookmark List and the Branches Tree both require to press and release the right button over the same Bookmark. Also, if between pressing and releasing the user rotated the wheel, the Bookmark won't be changed.</span></li>
-<li class="rvps10"><span class="rvts21">The user can jump to a Bookmark with a single click on the desired icon in the Branches Tree. Doing so he expects that after the click the light-blue triangle (the Playback cursor icon) will also jump to the place in the Branches Tree. It is indeed so for Bookmarks that don't contradict with the current timeline, but it's not so for Bookmarks representing alternative strategies. After jumping to the frame of such Bookmark, the Playback cursor will appear on another branch (even though it's on the same frame of the movie). To notify the user about possible misconception, the mouse cursor turns into an arrow with a question mark when the user points to such Bookmarks.</span></li>
-<li class="rvps10"><span class="rvts21">While the Branches Tree is transforming, hovering the mouse cursor over its elements doesn't work, because the active element area is constantly moving and running away from the mouse cursor.</span></li>
-</ul>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com">Full-featured Documentation generator</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="MistakeProofing"
+		  data-hnd-context="25"
+		  data-hnd-title="Mistake-proofing"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="TASEditorInside.html">TAS Editor Inside</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="TASEditorInside.html" title="TAS Editor Inside" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="Implementation.html" title="Implementation" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="FM3format.html" title="FM3 format" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Mistake-proofing</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts18">Mistake-proofing</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">This page lists many small details of implementation that improve interaction between user and the program. All these points must be considered when porting Taseditor to other platforms.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">When the user closes the emulator, emulator sends a request to Taseditor in order to allow it to close the project first. If the project contains unsaved data, Taseditor shows the Yes/No/Cancel dialog. The user can either save the changes, or save none of them, or cancel the attempt to close the emulator.</span></li>
+ <li class="rvps7"><span class="rvts20">When playing back an fm3 project outside Taseditor (like a regular movie), the user can switch the emulator to Recording mode and try rerecording. In this case, the emulator tells the user that current movie is a Taseditor project, and suggests to start editing it. In case of refuse, emulator disables the Recording mode and resumes playing back the project movie. In case of agreement, emulator sends a signal to Taseditor, and at the end of the current frame Taseditor will launch and load the currently played project.</span></li>
+ <li class="rvps7"><span class="rvts20">When a ROM is loaded into emulator, the user can launch Taseditor at any moment. If he opens the Taseditor window while playing or recording a movie, Taseditor will automatically create a nameless project containing this movie Input. But if the movie is starting from a savestate, Taseditor will display a warning about not supporting such movies and then create a blank project.</span></li>
+ <li class="rvps7"><span class="rvts20">While the project has no name, autosave function doesn't work.</span></li>
+ <li class="rvps7"><span class="rvts20">When saving a nameless project, Taseditor suggests the current ROM name as a name for the fm3 project, with the extension changed to .fm3.</span></li>
+ <li class="rvps7"><span class="rvts20">Since the FM3 format is a superstructure over the FM2 format, the user can open fm2 files just like Taseditor projects, using the "Open TAS Editor Project" dialog and choosing the filter "All Files (*.*)". When opening fm2 files, Taseditor additionally informs the user about it with the Yes/No dialog. The user can either load the fm2 file as a new project or cancel the loading.</span></li>
+ <li class="rvps7"><span class="rvts20">After opening an fm2 file or a corrupted fm3 file, the project is considered nameless, even though the TAS Editor window caption displays the name of the loaded file. At the first saving attempt (</span><span class="rvts27">Ctrl + S</span><span class="rvts20">) Taseditor will bring the SaveAs dialog, where the loaded fm2/fm3 file name will be suggested as a name for the project. The user can either save the project with this name or change the name. This way Taseditor draws your attention to the fact that the new project significantly differs from the file that exists on the disk under the same name.</span></li>
+ <li class="rvps7"><span class="rvts20">FM3 projects store the version number of the FM3 format used when saving the file. Different versions can be totally or partially incompatible with each other. If the loaded project version doesn't match the currently supported one, Taseditor shows the Yes/No/Cancel dialog. The user can either resume his attempt to load the whole project (not recommended), or load only the Input from the FM2 data (recommended), or cancel loading.</span></li>
+ <li class="rvps7"><span class="rvts20">FM2 format (and therefore fm3 too) stores the MD5 checksum of the ROM used when creating the movie/project. When loading a project, Taseditor compares the current ROM checksum with the project's one, and if they don't match, brings the Yes/No dialog, displaying the original and the current ROM names. The user can resume loading or cancel it. Later, when saving this project, Taseditor will notice the checksum mismatch again and suggest replacing the ROM name and the checksum in the file before saving. The user can either approve the replacing, or save the project with the old name and checksum, or cancel the saving.</span></li>
+ <li class="rvps7"><span class="rvts20">When loading a corrupted project file, Taseditor tries the best of its ability to prevent emulator crash. If an error is found in the middle of loading, the further loading stops and the rest data is replaced with the default data. Particularly, if the error occurred while loading the Greenzone, the project is left with only the Greenzone frames that were successfully pulled out of the file, the rest frames will be pale. Project loading error messages are logged into the FCEUX Message Log.</span></li>
+ <li class="rvps7"><span class="rvts20">When loading a project, Taseditor respects current settings of "Greenzone capacity" and "Undo levels". For example, if while saving a project the Greenzone capacity was 5000, but when loading the project the Greenzone capacity is 3000, some frames will be skipped when loading. It's necessary so that a project saved on a more powerful computer can be opened on a less powerful one, that doesn't have enough memory.</span></li>
+ <li class="rvps7"><span class="rvts20">When launching, Taseditor loads the data about patterns from the </span><span class="rvts19">taseditor_patterns.txt</span><span class="rvts20"> file. If this file cannot be opened (fer example, it was removed), Taseditor creates a small set of default patterns, in order to keep the Patterns menu filled.</span></li>
+ <li class="rvps7"><span class="rvts20">Savestates used by the Greenzone differ from regular savestates a bit. They don't contain movie data, because it's useless information for the Greenzone purposes. Besides, they are always compressed, in order to save memory.</span></li>
+ <li class="rvps7"><span class="rvts20">If after a </span><a class="rvts24" href="Operations.html#Delete">Delete</a><span class="rvts20"> or </span><a class="rvts24" href="Operations.html#LUAChange">Lua Change</a><span class="rvts20"> operation the user effectively removes all Input from the movie, Taseditor will create one blank frame in the movie beginning.</span></li>
+ <li class="rvps7"><span class="rvts20">When user is selecting a range of frames by stretching, it's still possible to use hotkeys with the other hand. To avoid conflict, during DRAG_MODE_SELECTION and DRAG_MODE_DESELECTION some functions related to changing the Selection will not work:</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 40px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts19">clearSelection()</span></li>
+ <li class="rvps7"><span class="rvts19">selectAll()</span></li>
+ <li class="rvps7"><span class="rvts19">selectBetweenMarkers()</span><span class="rvts20"> – </span><span class="rvts27">Ctrl + A</span></li>
+ <li class="rvps7"><span class="rvts19">selection.undo()</span><span class="rvts20"> – </span><span class="rvts27">Ctrl + Q</span></li>
+ <li class="rvps7"><span class="rvts19">selection.redo()</span><span class="rvts20"> – </span><span class="rvts27">Ctrl + W</span></li>
+ <li class="rvps7"><span class="rvts19">reselectClipboard()</span><span class="rvts20"> – </span><span class="rvts27">Ctrl + B</span></li>
+ <li class="rvps7"><span class="rvts19">selection.Transpose()</span><span class="rvts20"> – </span><span class="rvts27">Ctrl + Up</span><span class="rvts20">, </span><span class="rvts27">Ctrl + Down</span><span class="rvts20">, </span><span class="rvts27">Ctrl + Home</span><span class="rvts20">, </span><span class="rvts27">Ctrl + End</span></li>
+ <li class="rvps7"><span class="rvts19">selection.JumpPrevMarker()</span><span class="rvts20"> – </span><span class="rvts27">Ctrl + Page Up</span></li>
+ <li class="rvps7"><span class="rvts19">selection.JumpNextMarker()</span><span class="rvts20"> – </span><span class="rvts27">Ctrl + Page Down</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">Since the icon column is rather narrow, the user may accidentally miss clicking it. So when you click the left border of the Piano Roll or a bit to the left from it, Taseditor assumes that was a click on the icons column. As a result, the user doesn't have to precisely aim when he needs to move the Playback cursor or start dragging it.</span></li>
+ <li class="rvps7"><span class="rvts20">When emulator is paused, the middle mouse button works only under condition that the right button is released. Since the middle button is usually a wheel, the user can accidentally push it while rolling the wheel with the right button held (Playback cursor navigation). As for rolling the wheel with modifier keys held, this is used much less often, so they don't need such protection.</span></li>
+ <li class="rvps7"><span class="rvts20">Any middleclick over the FCEUX window is sent to Taseditor window. Similarly, the wheel rolling message is sent to Taseditor, when the focus is on the FCEUX window. And the rightclick on the FCEUX window doesn't work at all. Thanks to that, you can use the middle button (the wheel) even when the mouse cursor is over the FCEUX window.</span></li>
+ <li class="rvps7"><span class="rvts20">Even when the Recording mode is on, Taseditor won't rerecord Input while seeking. Thanks to that, you can safely drag the Playback cursor without disabling the Recording mode.</span></li>
+ <li class="rvps7"><span class="rvts20">When Taseditor is engaged, the following menu commands are available only when the Recording mode if on and the Playback is not seeking:</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 40px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">NES -&gt; Reset</span></li>
+ <li class="rvps7"><span class="rvts20">NES -&gt; Power</span></li>
+ <li class="rvps7"><span class="rvts20">NES -&gt; Eject/insert Disk</span></li>
+ <li class="rvps7"><span class="rvts20">NES -&gt; Switch Disk Side</span></li>
+ <li class="rvps7"><span class="rvts20">NES -&gt; Insert Coin</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">When Taseditor is engaged, the following FCEUX menu commands are unavailable:</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 40px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">File -&gt; Open ROM</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Close</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Recent</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Savestate -&gt; Load State</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Savestate -&gt; Save State</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Savestate -&gt; Load State From</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Savestate -&gt; Save State As</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Savestate -&gt; Next save slot</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Savestate -&gt; Previous save slot</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Savestate -&gt; View save slots</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Movie -&gt; Recent</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Movie -&gt; Record Movie</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Movie -&gt; Play Movie</span></li>
+ <li class="rvps7"><span class="rvts20">File -&gt; Movie -&gt; Stop Movie</span></li>
+ <li class="rvps7"><span class="rvts20">Config -&gt; Enable -&gt; Auto-savestates (always off when Taseditor is engaged)</span></li>
+ <li class="rvps7"><span class="rvts20">Config -&gt; Enable -&gt; Backup Savestates (always off when Taseditor is engaged)</span></li>
+ <li class="rvps7"><span class="rvts20">Config -&gt; Enable -&gt; Compress Savestates (always on when Taseditor is engaged)</span></li>
+ <li class="rvps7"><span class="rvts20">Config -&gt; PAL Emulation (set up this before launching Taseditor)</span></li>
+ <li class="rvps7"><span class="rvts20">Config -&gt; PPU -&gt; New PPU / Old PPU (set up this before launching Taseditor)</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">It's also necessary to ensure that the user can not change the movie synchronization settings while editing the project. So when Taseditor is engaged, the following GUI elements in the "Input Configuration" window are locked:</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 40px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">the "Attach four-score" checkbox</span></li>
+ <li class="rvps7"><span class="rvts20">the "Replace port 2 Start With &nbsp;Microphone" checkbox</span></li>
+ <li class="rvps7"><span class="rvts20">ListBox for port0</span></li>
+ <li class="rvps7"><span class="rvts20">ListBox for port1</span></li>
+ <li class="rvps7"><span class="rvts20">ListBox for port2</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">When Taseditor is engaged, the following hotkeys are not working:</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 40px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">Hide Menu Toggle</span></li>
+ <li class="rvps7"><span class="rvts20">Fastest Speed</span></li>
+ <li class="rvps7"><span class="rvts20">Save State As...</span></li>
+ <li class="rvps7"><span class="rvts20">Load State From...</span></li>
+ <li class="rvps7"><span class="rvts20">Record Movie To...</span></li>
+ <li class="rvps7"><span class="rvts20">Play Movie From...</span></li>
+ <li class="rvps7"><span class="rvts20">Stop Movie</span></li>
+ <li class="rvps7"><span class="rvts20">Toggle Dipswitch – because these commands are not supported by the FM2 format yet</span></li>
+ <li class="rvps7"><span class="rvts20">Load Last Auto-save</span></li>
+ <li class="rvps7"><span class="rvts20">View save slots</span></li>
+ <li class="rvps7"><span class="rvts20">Open ROM</span></li>
+ <li class="rvps7"><span class="rvts20">Close ROM</span></li>
+ <li class="rvps7"><span class="rvts20">Undo/Redo Savestate</span></li>
+ <li class="rvps7"><span class="rvts20">Toggle Fullscreen</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">Hotkeys that change their behavior when Taseditor is engaged:</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 40px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">Power</span></li>
+ <li class="rvps7"><span class="rvts23">Reset</span></li>
+ <li class="rvps7"><span class="rvts20">Eject or Insert FDS Disk</span></li>
+ <li class="rvps7"><span class="rvts20">Switch FDS Disk Side</span></li>
+ <li class="rvps7"><span class="rvts20">Insert Coin</span></li>
+ <li class="rvps7"><span class="rvts23">Savestate Slot 0</span><span class="rvts20"> – </span><span class="rvts23">Savestate Slot 9</span></li>
+ <li class="rvps7"><span class="rvts23">Save State</span></li>
+ <li class="rvps7"><span class="rvts23">Save State to Slot 0</span><span class="rvts20"> – </span><span class="rvts23">Save State to Slot 9</span></li>
+ <li class="rvps7"><span class="rvts23">Load State</span></li>
+ <li class="rvps7"><span class="rvts23">Load State from Slot 0</span><span class="rvts20"> – </span><span class="rvts23">Load State from Slot 9</span></li>
+ <li class="rvps7"><span class="rvts23">Play Movie From Beginning</span></li>
+ <li class="rvps7"><span class="rvts23">Reload ROM or TAS Editor Project</span></li>
+ <li class="rvps7"><span class="rvts20">Open TAS Editor</span></li>
+</ul>
+<ul style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: disc;">
+ <li class="rvps7"><span class="rvts20">Since the </span><span class="rvts27">Alt</span><span class="rvts20"> and </span><span class="rvts23">F10</span><span class="rvts20"> keys are actively used in Taseditor work, their standard behavior (open main menu) is disabled.</span></li>
+ <li class="rvps7"><span class="rvts20">Since the </span><span class="rvts23">Spacebar</span><span class="rvts20"> key is used as a hotkey by default, its standard behavior (simulate the click on the currently focused GUI element) is disabled. Also, all GUI elements of the TAS Editor window handle the middleclick message and send it to the Playback, thus the middleclick works independently of the mouse cursor position.</span></li>
+ <li class="rvps7"><span class="rvts20">Since the context menu on the rightclick at the Piano Roll is not often used, it appears only if the user clicks the selected line in the frame number column (Frame#). In all the rest cases the context menu doesn't appear, instead the rightclick-and-hold at the Piano Roll allows to drag its contents in any direction.</span></li>
+ <li class="rvps7"><span class="rvts20">Since the right button is often used for the Playback cursor navigation with the wheel, the user is encouraged to click it without caring about the current mouse cursor position. In theory it's possible that the user accidentally rightclicks a Bookmark. To avoid such unintended commands, the Bookmark List and the Branches Tree both require to press and release the right button over the same Bookmark. Also, if between pressing and releasing the user rotated the wheel, the Bookmark won't be changed.</span></li>
+ <li class="rvps7"><span class="rvts20">The user can jump to a Bookmark with a single click on the desired icon in the Branches Tree. Doing so he expects that after the click the light-blue triangle (the Playback cursor icon) will also jump to the place in the Branches Tree. It is indeed so for Bookmarks that don't contradict with the current timeline, but it's not so for Bookmarks representing alternative strategies. After jumping to the frame of such Bookmark, the Playback cursor will appear on another branch (even though it's on the same frame of the movie). To notify the user about possible misconception, the mouse cursor turns into an arrow with a question mark when the user points to such Bookmarks.</span></li>
+ <li class="rvps7"><span class="rvts20">While the Branches Tree is transforming, hovering the mouse cursor over its elements doesn't work, because the active element area is constantly moving and running away from the mouse cursor.</span></li>
+</ul>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p></p>
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/create-epub-ebooks">Full-featured EPub generator</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

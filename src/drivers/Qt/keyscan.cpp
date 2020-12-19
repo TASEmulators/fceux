@@ -553,10 +553,10 @@ SDL_Keycode convQtKey2SDLKeyCode( Qt::Key q )
 			s = SDLK_LGUI;
 		break;
 		case  Key_Alt:
-			s = SDL_SCANCODE_LALT;
+			s = SDLK_LALT;
 		break;
 		case  Key_CapsLock:
-			s = SDLK_LALT;
+			s = SDLK_CAPSLOCK;
 		break;
 		case  Key_NumLock:
 			s = SDLK_NUMLOCKCLEAR;
@@ -954,6 +954,28 @@ SDL_Keycode convQtKey2SDLKeyCode( Qt::Key q )
 	return s;
 }
 
+SDL_Keymod convQtKey2SDLModifier( Qt::KeyboardModifiers m )
+{
+	int s = 0;
+
+	if ( m != Qt::NoModifier )
+	{
+		if ( m & Qt::ShiftModifier )
+		{
+			s |= (KMOD_LSHIFT | KMOD_RSHIFT);
+		}
+		if ( m & Qt::AltModifier )
+		{
+			s |= (KMOD_LALT | KMOD_RALT);
+		}
+		if ( m & Qt::ControlModifier )
+		{
+			s |= (KMOD_LCTRL | KMOD_RCTRL);
+		}
+	}
+	return (SDL_Keymod)s;
+}
+
 int  pushKeyEvent( QKeyEvent *event, int pressDown )
 {
 	SDL_Event sdlev;
@@ -973,8 +995,10 @@ int  pushKeyEvent( QKeyEvent *event, int pressDown )
 
 	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey( sdlev.key.keysym.sym );
 
-	sdlev.key.keysym.mod = 0;
+	sdlev.key.keysym.mod = convQtKey2SDLModifier( event->modifiers() );
 	sdlev.key.repeat = 0;
+
+	//printf("Modifiers: %08X -> %08X \n", event->modifiers(), sdlev.key.keysym.mod );
 
 	if (sdlev.key.keysym.scancode != SDL_SCANCODE_UNKNOWN)
 	{

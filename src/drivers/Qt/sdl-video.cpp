@@ -30,7 +30,6 @@
 
 #include "utils/memory.h"
 
-//#include "sdl-icon.h"
 #include "Qt/dface.h"
 
 #include "common/configSys.h"
@@ -59,9 +58,6 @@ static int s_srendline, s_erendline;
 static int s_tlines;
 static int s_inited = 0;
 
-//#ifdef OPENGL
-//static int s_useOpenGL = 0;
-//#endif
 static double s_exs = 1.0, s_eys = 1.0;
 static int s_eefx = 0;
 static int s_clipSides = 0;
@@ -97,18 +93,19 @@ KillVideo()
 		nes_shm->clear_pixbuf();
 	}
 
-	//destroy_gui_video();
+	// if the rest of the system has been initialized, shut it down
+	// shut down the system that converts from 8 to 16/32 bpp
+	if (initBlitToHighDone)
+	{
+		KillBlitToHigh();
+
+		initBlitToHighDone = 0;
+	}
 
 	// return failure if the video system was not initialized
 	if (s_inited == 0)
 		return -1;
 
-		// if the rest of the system has been initialized, shut it down
-//		// shut down the system that converts from 8 to 16/32 bpp
-//		if (s_curbpp > 8)
-//		{
-//			KillBlitToHigh();
-//		}
 
 	// SDL Video system is not used.
 	// shut down the SDL video sub-system
@@ -152,10 +149,7 @@ int InitVideo(FCEUGI *gi)
 	// load the relevant configuration variables
 	g_config->getOption("SDL.Fullscreen", &s_fullscreen);
 	g_config->getOption("SDL.DoubleBuffering", &doublebuf);
-//#ifdef OPENGL
-//	g_config->getOption("SDL.OpenGL", &s_useOpenGL);
-//#endif
-	//g_config->getOption("SDL.SpecialFilter", &s_sponge);
+	g_config->getOption("SDL.SpecialFilter", &s_sponge);
 	g_config->getOption("SDL.XStretch", &xstretch);
 	g_config->getOption("SDL.YStretch", &ystretch);
 	//g_config->getOption("SDL.LastXRes", &xres);
@@ -167,7 +161,6 @@ int InitVideo(FCEUGI *gi)
 	//g_config->getOption("SDL.YScale", &s_eys);
 	uint32_t  rmask, gmask, bmask;
 
-	s_sponge = 0;
 	s_exs = 1.0;
 	s_eys = 1.0;
 	xres = gui_draw_area_width;
@@ -177,12 +170,57 @@ int InitVideo(FCEUGI *gi)
 	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
 	s_tlines = s_erendline - s_srendline + 1;
 
-	//init_gui_video( s_useOpenGL );
+	nes_shm->video.preScaler = s_sponge;
+
+	switch ( s_sponge )
+	{
+		case 0: // None
+			 nes_shm->video.scale = 1;
+		break;
+		case 1: // hq2x
+		case 2: // Scale2x
+		case 3: // NTSC 2x
+		case 6: // Prescale2x
+			 nes_shm->video.scale = 2;
+		break;
+		case 4: // hq3x
+		case 5: // Scale3x
+		case 7: // Prescale3x
+			 nes_shm->video.scale = 3;
+		break;
+		case 8: // Prescale4x
+			 nes_shm->video.scale = 4;
+		break;
+		case 9: // PAL
+			 nes_shm->video.scale = 3;
+		break;
+	}
 
 	s_inited = 1;
 
 	// check to see if we are showing FPS
 	FCEUI_SetShowFPS(show_fps);
+
+	int iScale = nes_shm->video.scale;
+	if ( s_sponge == 3 )
+	{
+		nes_shm->video.ncol = iScale*301;
+	}
+	else
+	{
+		nes_shm->video.ncol = iScale*NWIDTH;
+	}
+	if ( s_sponge == 9 )
+	{
+		nes_shm->video.nrow  = 1*s_tlines;
+		nes_shm->video.xyRatio = 3;
+	}
+	else
+	{
+		nes_shm->video.nrow  = iScale*s_tlines;
+		nes_shm->video.xyRatio = 1;
+	}
+	nes_shm->video.pitch = nes_shm->video.ncol * 4;
 
 #ifdef LSB_FIRST
 	rmask = 0x00FF0000;
@@ -217,6 +255,8 @@ int InitVideo(FCEUGI *gi)
 
 		initBlitToHighDone = 1;
 	}
+
+	s_paletterefresh = 1;
 
 	return 0;
 }
@@ -326,7 +366,7 @@ void
 BlitScreen(uint8 *XBuf)
 {
 	uint8 *dest;
-	int w, h, pitch;
+	int w, h, pitch, iScale;
 
 	// refresh the palette if required
 	if (s_paletterefresh) 
@@ -338,14 +378,31 @@ BlitScreen(uint8 *XBuf)
 	// XXX soules - not entirely sure why this is being done yet
 	XBuf += s_srendline * 256;
 
-	dest  = (uint8*)nes_shm->pixbuf;
-	w     = GL_NES_WIDTH;
-	h     = GL_NES_HEIGHT;
-	pitch = w*4;
+	dest   = (uint8*)nes_shm->pixbuf;
+	iScale = nes_shm->video.scale;
 
-	nes_shm->ncol    = NWIDTH;
-	nes_shm->nrow    = s_tlines;
-	nes_shm->pitch   = pitch;
+	if ( s_sponge == 3 )
+	{
+		w = iScale*301;
+	}
+	else
+	{
+		w = iScale*NWIDTH;
+	}
+	if ( s_sponge == 9 )
+	{
+		h  = 1*s_tlines;
+	}
+	else
+	{
+		h  = iScale*s_tlines;
+	}
+	pitch  = w*4;
+
+	nes_shm->video.ncol    = w;
+	nes_shm->video.nrow    = h;
+	nes_shm->video.pitch   = pitch;
+	nes_shm->video.preScaler = s_sponge;
 
 	if ( dest == NULL ) return;
 
@@ -355,7 +412,7 @@ BlitScreen(uint8 *XBuf)
 	}
 	else
 	{
-		Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, 1, 1);
+		Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, iScale, iScale);
 	}
 	nes_shm->blitUpdated = 1;
 
@@ -429,16 +486,28 @@ BlitScreen(uint8 *XBuf)
  *  Converts an x-y coordinate in the window manager into an x-y
  *  coordinate on FCEU's screen.
  */
-uint32
-PtoV(uint16 x,
-	uint16 y)
+uint32 PtoV(double nx, double ny)
 {
-	y = (uint16)((double)y / s_eys);
-	x = (uint16)((double)x / s_exs);
-	if(s_clipSides) {
+	int x, y;
+	y = (int)( ny * (double)nes_shm->video.nrow );
+	x = (int)( nx * (double)nes_shm->video.ncol );
+
+	//printf("Scaled (%i,%i) \n", x, y);
+
+	x = x / nes_shm->video.scale;
+
+	if ( nes_shm->video.xyRatio == 1 )
+	{
+		y = y / nes_shm->video.scale;
+	}
+	//printf("UnScaled (%i,%i) \n", x, y);
+
+	if (s_clipSides) 
+	{
 		x += 8;
 	}
 	y += s_srendline;
+
 	return (x | (y << 16));
 }
 

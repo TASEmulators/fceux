@@ -1,131 +1,319 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Hex Editor</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("HexEditor");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Hex Editor</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="Hex Editor">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Hex Editor">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Hex Editor" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Hex Editor</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Debug.html">Debug</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Debug.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="NameTableViewer.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="TraceLogger.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p><span class="rvts17">Hex Editor</span></p>
-<p><br/></p>
-<p><br/></p>
-<p>The Hex Editor is a very powerful memory viewing/editing tool, it obsoletes the Memory Viewer tool from the FCE Ultra and FCEU Rerecording branches.</p>
-<p><br/></p>
-<p>It can do a wide range of things. &nbsp;It allows you to view the entire RAM &amp; ROM contents in a resizable dialog window. It makes it easy to edit the game's RAM, PPU memory, and even its currently-loaded ROM data by simply typing in values in the editor. You can also "freeze" parts of RAM (to prevent the game from modifying the data there), search for data (Ctrl+F), and even copy and paste data to/from the clipboard. &nbsp;Furthermore, table files are supported, so you can edit a game's text in real-time and see the result immediately.</p>
-<p><br/></p>
-<p>Basically, it lets you tinker with any part of a game's RAM or ROM while it is running.</p>
-<p><br/></p>
-<p><span class="rvts16">Using the Hex Editor</span></p>
-<p><br/></p>
-<p>The Hex Editor lets you edit three major areas:</p>
-<p><br/></p>
-<p><span class="rvts32">1. NES MEMORY</span></p>
-<p>This allows you to directly edit all of the NES address space (System Bus - $0000-$FFFF). While you can easily modify RAM, or write directly to registers by typing in data, you cannot modify ROM data ($8000-$FFFF) itself. This is because most mappers have registers which are located in this space; so writing there can trigger mapper operations that may cause the game to crash or glitch if you don't know what you're doing. &nbsp;If you want to edit the ROM itself, right-click on the offset and select &nbsp;"Go here in ROM file"; that will take you directly to where you need to be so you can start editing. &nbsp;You can also freeze RAM by clicking on it with the middle mouse button, or by using the right-click menu. This works by adding it directly to the Cheat List, which you can see from the <a class="rvts18" href="CheatSearch.html">Cheat Console</a>. Finally, the right-click menu can be used to quickly add a read or write breakpoint to the debugger. When adding a breakpoint to the range of ROM addresses ($8000-$FFFF), the Hex Editor also takes into account the number of the bank in which the byte is located.</p>
-<p><br/></p>
-<p><span class="rvts32">2. PPU MEMORY</span></p>
-<p>This allows you to directly view and write to PPU memory (VRAM).</p>
-<p><br/></p>
-<p><span class="rvts32">3. OAM MEMORY</span></p>
-<p>This allows you to directly view and write to OAM memory (sprite RAM).</p>
-<p><br/></p>
-<p><span class="rvts32">4. THE ROM FILE</span></p>
-<p>This allows you to edit the ROM file in real time, i.e. while the game is running. If you make a mistake, press Ctrl+Z or Edit-&gt;Undo to undo your change (then load a save-state if the game crashed).</p>
-<p><br/></p>
-<p>The Hex Editor also has support for table files (*.tbl) to map bytes to text. Each line consists of four characters of the form "xx=y", where "xx" is the hex value, and "y" is the character that that value represents. I have also added an extension to represent the Return key: &nbsp;xx=ret whereby pressing the Return key will enter that value into the ROM. &nbsp;You can copy/paste data or text by selecting it and using Ctrl+C (to copy) and Ctrl+V (to paste). Plus, there is an Edit-&gt;Find feature that you can use to search for data. This feature should be fairly intuitive, so I won't bother to explain it.</p>
-<p><br/></p>
-<p>When you're done editing, remember to save the ROM file (File-&gt;Save) or your changes will be lost when you close the ROM.</p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts16">Why can't I edit NES memory beyond $8000?</span></p>
-<p><span class="rvts10"><br/></span></p>
-<p>NES memory from $8000-$FFFF is where the game's PRG-ROM code is mapped. &nbsp;Whenever you type in a value in the NES memory editor, it effectively writes that value to that address. Many games use mappers, which are usually accessed by writing to $8000-$FFFF (which is read-only)... and if *you* were to do so, it may trigger a bankswitch, which could easily make the game crash. In any event, doing so will not modify the ROM itself. &nbsp;What you *can* do, though, is edit the PRG-ROM itself by right-clicking on the offset you wish to edit, and selecting "Go here in the ROM file", which should take you to that spot in the ROM instead, where you can change the data at instead.</p>
-<p><br/></p>
-<p><span class="rvts16">Highlighting</span></p>
-<p><br/></p>
-<p>The Hex Editor highlights certain bytes with different colors to help you distinguish different data.</p>
-<p>Usually all bytes are colored black.</p>
-<p>Bookmarked RAM addresses are highlighted by <span class="rvts49">green color</span>.</p>
-<p>Freezed RAM addresses are highlighted by <span class="rvts48">blue color</span>.</p>
-<p>Modified ROM bytes are highlighted by <span class="rvts50">red color</span>.</p>
-<p>If you have the <a class="rvts18" href="CodeDataLogger.html">Code/Data Logger</a> running, bytes that were logged will be colored:</p>
-<p>For PRG ROM segment:</p>
-<p><span class="rvts52">Dark-yellow</span> - the byte is code</p>
-<p><span class="rvts53">Blue</span> - the byte is data</p>
-<p><span class="rvts54">Cyan</span> - the byte is PCM audio data</p>
-<p><span class="rvts51">Green</span> - the byte is both code and data</p>
-<p>For CHR ROM segment:</p>
-<p><span class="rvts55">Yellow</span> - the byte was rendered</p>
-<p><span class="rvts56">Light-blue</span> - the byte was read programmatically</p>
-<p><span class="rvts57">Light-green</span> - the byte was both rendered and read programmatically</p>
-<p><br/></p>
-<p><span class="rvts16">Highlight Activity</span></p>
-<p><br/></p>
-<p>This feature of the Hex Editor can draw your attention to bytes that changed their value since the last frame, or since the last update of Hex Editor window (if "Fade when paused" option is enabled).</p>
-<p>If you don't need this feature, you can switch it off in the "Highlighting" submenu.</p>
-<p>You can customize this feature by changing "fading period".</p>
-<p>IMPORTANT NOTE: this feature does not track the actual changes of RAM. It works by simply comparing current values to previously displayed values of the same addresses. That's why the feature works with RAM/PPU/OAM/ROM as well.</p>
-<p><br/></p>
-<p><br/></p>
-<p><br/></p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create Help documents</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="HexEditor"
+		  data-hnd-context="15"
+		  data-hnd-title="Hex Editor"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Debug.html">Debug</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Debug.html" title="Debug" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="NameTableViewer.html" title="Name Table Viewer" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="TraceLogger.html" title="Trace Logger" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Hex Editor</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts22">Hex Editor</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Hex Editor is a very powerful memory viewing/editing tool, it obsoletes the Memory Viewer tool from the FCE Ultra and FCEU Rerecording branches.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">It can do a wide range of things. &nbsp;It allows you to view the entire RAM &amp; ROM contents in a resizable dialog window. It makes it easy to edit the game's RAM, PPU memory, and even its currently-loaded ROM data by simply typing in values in the editor. You can also "freeze" parts of RAM (to prevent the game from modifying the data there), search for data (Ctrl+F), and even copy and paste data to/from the clipboard. &nbsp;Furthermore, table files are supported, so you can edit a game's text in real-time and see the result immediately.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Basically, it lets you tinker with any part of a game's RAM or ROM while it is running.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Using the Hex Editor</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Hex Editor lets you edit three major areas:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts45">1. NES MEMORY</span></p>
+<p class="rvps2"><span class="rvts6">This allows you to directly edit all of the NES address space (System Bus - $0000-$FFFF). While you can easily modify RAM, or write directly to registers by typing in data, you cannot modify ROM data ($8000-$FFFF) itself. This is because most mappers have registers which are located in this space; so writing there can trigger mapper operations that may cause the game to crash or glitch if you don't know what you're doing. &nbsp;If you want to edit the ROM itself, right-click on the offset and select &nbsp;"Go here in ROM file"; that will take you directly to where you need to be so you can start editing. &nbsp;You can also freeze RAM by clicking on it with the middle mouse button, or by using the right-click menu. This works by adding it directly to the Cheat List, which you can see from the </span><a class="rvts75" href="CheatSearch.html">Cheat Console</a><span class="rvts6">. Finally, the right-click menu can be used to quickly add a read or write breakpoint to the debugger. When adding a breakpoint to the range of ROM addresses ($8000-$FFFF), the Hex Editor also takes into account the number of the bank in which the byte is located.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts45">2. PPU MEMORY</span></p>
+<p class="rvps2"><span class="rvts6">This allows you to directly view and write to PPU memory (VRAM).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts45">3. THE ROM FILE</span></p>
+<p class="rvps2"><span class="rvts6">This allows you to edit the ROM file in real time, i.e. while the game is running. If you make a mistake, press Ctrl+Z or Edit-&gt;Undo to undo your change (then load a save-state if the game crashed).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Hex Editor also has support for table files (*.tbl) to map bytes to text. Each line consists of four characters of the form "xx=y", where "xx" is the hex value, and "y" is the character that that value represents. I have also added an extension to represent the Return key: &nbsp;xx=ret whereby pressing the Return key will enter that value into the ROM. &nbsp;You can copy/paste data or text by selecting it and using Ctrl+C (to copy) and Ctrl+V (to paste). Plus, there is an Edit-&gt;Find feature that you can use to search for data. This feature should be fairly intuitive, so I won't bother to explain it.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">When you're done editing, remember to save the ROM file (File-&gt;Save) or your changes will be lost when you close the ROM.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Why can't I edit NES memory beyond $8000?</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts6">NES memory from $8000-$FFFF is where the game's PRG-ROM code is mapped. &nbsp;Whenever you type in a value in the NES memory editor, it effectively writes that value to that address. Many games use mappers, which are usually accessed by writing to $8000-$FFFF (which is read-only)... and if *you* were to do so, it may trigger a bankswitch, which could easily make the game crash. In any event, doing so will not modify the ROM itself. &nbsp;What you *can* do, though, is edit the PRG-ROM itself by right-clicking on the offset you wish to edit, and selecting "Go here in the ROM file", which should take you to that spot in the ROM instead, where you can change the data at instead.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Highlighting</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Hex Editor highlights certain bytes with different colors to help you distinguish different data.</span></p>
+<p class="rvps2"><span class="rvts6">Usually all bytes are colored black.</span></p>
+<p class="rvps2"><span class="rvts6">Bookmarked RAM addresses are highlighted by </span><span class="rvts77">green color</span><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6">Freezed RAM addresses are highlighted by </span><span class="rvts76">blue color</span><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6">Modified ROM bytes are highlighted by </span><span class="rvts78">red color</span><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6">If you have the </span><a class="rvts75" href="CodeDataLogger.html">Code/Data Logger</a><span class="rvts6"> running, bytes that were logged will be colored:</span></p>
+<p class="rvps2"><span class="rvts6">For PRG ROM segment:</span></p>
+<p class="rvps2"><span class="rvts80">Dark-yellow</span><span class="rvts6"> - the byte is code</span></p>
+<p class="rvps2"><span class="rvts81">Blue</span><span class="rvts6"> - the byte is data</span></p>
+<p class="rvps2"><span class="rvts82">Cyan</span><span class="rvts6"> - the byte is PCM audio data</span></p>
+<p class="rvps2"><span class="rvts79">Green</span><span class="rvts6"> - the byte is both code and data</span></p>
+<p class="rvps2"><span class="rvts6">For CHR ROM segment:</span></p>
+<p class="rvps2"><span class="rvts83">Yellow</span><span class="rvts6"> - the byte was rendered</span></p>
+<p class="rvps2"><span class="rvts84">Light-blue</span><span class="rvts6"> - the byte was read programmatically</span></p>
+<p class="rvps2"><span class="rvts85">Light-green</span><span class="rvts6"> - the byte was both rendered and read programmatically</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Highlight Activity</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This feature of the Hex Editor can draw your attention to bytes that changed their value since the last frame, or since the last update of Hex Editor window (if "Fade when paused" option is enabled).</span></p>
+<p class="rvps2"><span class="rvts6">If you don't need this feature, you can switch it off in the "Highlighting" submenu.</span></p>
+<p class="rvps2"><span class="rvts6">You can customize this feature by changing "fading period".</span></p>
+<p class="rvps2"><span class="rvts6">IMPORTANT NOTE: this feature does not track the actual changes of RAM. It works by simply comparing current values to previously displayed values of the same addresses. That's why the feature works with RAM/PPU/ROM as well.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com">Easy EBook and documentation generator</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

@@ -3,7 +3,7 @@ var oFS				= new ActiveXObject("Scripting.FileSystemObject");
 
 var outfile			= "./userconfig/scmrev.h";
 var cmd_revision	= " rev-parse HEAD";
-var cmd_describe	= " describe --always --long --dirty";
+var cmd_describe	= " describe --tags --always --long --dirty";
 var cmd_branch		= " rev-parse --abbrev-ref HEAD";
 
 function GetGitExe()

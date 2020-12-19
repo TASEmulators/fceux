@@ -7,7 +7,8 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -458,6 +459,17 @@ BEGIN
     PUSHBUTTON      "R",311,198,19,32,12
     PUSHBUTTON      "B",312,126,19,32,12
     PUSHBUTTON      "A",313,162,19,32,12
+END
+
+LCDCOMPZAPPERDIALOG DIALOGEX 4, 109, 129, 116
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Zapper Configuration"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+DEFPUSHBUTTON   "Close", BTN_CLOSE, 13, 94, 56, 14
+GROUPBOX        "Zapper", 312, 8, 7, 118, 75, WS_GROUP
+PUSHBUTTON      "Trigger", 300, 15, 38, 30, 12
+PUSHBUTTON      "Light Sensor", 301, 14, 19, 98, 12
 END
 
 QUIZKINGDIALOG DIALOG 30, 123, 160, 74
@@ -2026,6 +2038,11 @@ BEGIN
         BOTTOMMARGIN, 226
     END
 
+    "LCDCOMPZAPPERDIALOG", DIALOG
+    BEGIN
+    END
+
+    "QUIZKINGDIALOG", DIALOG
     IDD_LUA, DIALOG
     BEGIN
     END
@@ -3061,7 +3078,8 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

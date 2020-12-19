@@ -1,0 +1,141 @@
+﻿<html>
+	
+<head>
+	<title>What's New? 2.3.0 (changelog)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "fceux.html?" + sTopicUrl;
+			}
+			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			{
+				top.FrameTOC.SelectTocItem("WhatsNew230");
+			}
+		});
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>What's New? 2.3.0 (changelog)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="FCEUltraVersionHistory.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="WhatsNew223.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p class="rvps3"><span class="rvts17">What's New? </span><span class="rvts20">2.3.0</span></p>
+<p class="rvps3">Released -- 14 December 2020</p>
+<p class="rvps3"><br/></p>
+<p class="rvps3"><br/></p>
+<p class="rvps3">The 2.3.0 release includes 4 years worth of improvements and bug fixes.</p>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts22">Common</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">64 bit build support</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Emulation</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Added Mapper 111 cheapocabra</span></li>
+<li class="rvps3"><span class="rvts21">Added Mapper 190</span></li>
+<li class="rvps3"><span class="rvts21">Added RAM Init Options: default (00 00 00 00 FF FF FF FF as always), all FF, all 00, random.</span></li>
+<li class="rvps3"><span class="rvts21">New UNIF mappers</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Lua</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Various improvements and bug fixes to pre-existing functions</span></li>
+<li class="rvps3"><span class="rvts21">Fix parsing of lua colors over 0x80000000 on 32bits systems</span></li>
+<li class="rvps3"><span class="rvts21">Lua write callbacks: adding optional third parameter to retrieve the value written, added Sprites.lua script to visualize sprites</span></li>
+</ul>
+<p class="rvps3"><span class="rvts21"><br/></span></p>
+<p class="rvps3"><span class="rvts21">New Lua functions:</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">emu.exit()</span></li>
+<li class="rvps3"><span class="rvts21">rom.getfilename()</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23">Win32</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Various GUI improvements and bug fixes</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts22">Debugger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Added memory read/write conditional breakpoint capability.</span></li>
+<li class="rvps3"><span class="rvts21">Added illegal opcode support for breakpoints.</span></li>
+<li class="rvps3"><span class="rvts21">Support for 'S' register in conditional debugger breakpoints</span></li>
+</ul>
+<p class="rvps3"><span class="rvts22"><br/></span></p>
+<p class="rvps3"><span class="rvts22">Trace Logger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Added bank number log option</span></li>
+</ul>
+<p class="rvps3"><span class="rvts22"><br/></span></p>
+<p class="rvps3"><span class="rvts22">CDLogger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3">Fix <span class="rvts21">Fixed VRAM data logging glitch</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts22">Hex Editor</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">Added OAM view feature</span></li>
+<li class="rvps3"><span class="rvts21">Bookmark fixes for all view region types</span></li>
+<li class="rvps3"><span class="rvts21">Prevent middle mouse button from attempting to "FreezeRam" when not in RAM mode</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23">SDL</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li class="rvps3"><span class="rvts21">GUI completely rewritten using Qt5. Replaces old GTK GUI.</span></li>
+<li class="rvps3"><span class="rvts21">New Qt GUI now contains most of the debug tools that previously only existed in windows version.</span></li>
+</ul>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p class="rvps3"><span class="rvts23"><br/></span></p>
+<p></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create Web Help sites</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2020</div>
+		</div>
+	</body>
+	
+</html>
+

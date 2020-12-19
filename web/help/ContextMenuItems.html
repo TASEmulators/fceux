@@ -1,202 +1,393 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>Context Menu Items</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("ContextMenuItems");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>Context Menu Items</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="context menu">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Context Menu Items">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Context Menu Items" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>Context Menu Items</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Config.html">Config</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="Config.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="MapHotkeys.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="Tools2.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="ContextMenuItems"
+		  data-hnd-context="68"
+		  data-hnd-title="Context Menu Items"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Config.html">Config</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Config.html" title="Config" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="MapHotkeys.html" title="Map Hotkeys" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="Tools2.html" title="Tools" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>Context Menu Items</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts17">Context Menu</span></p>
-<p><br/></p>
-<p>FCEUX includes a context menu that allows commonly used menu functions for various situations. &nbsp;There are some functions that appear only here.</p>
-<p><br/></p>
-<p>This page describes all the possible menu items in each possible context situation.</p>
-<p><br/></p>
-<p><span class="rvts16">No game loaded.</span></p>
-<p><br/></p>
-<p>Appears when no game is loaded.</p>
-<p><br/></p>
-<p><span class="rvts10">Open ROM</span></p>
-<p>Same as the File &gt; Open ROM option</p>
-<p><br/></p>
-<p><span class="rvts10">Last ROM used</span></p>
-<p>Opens the most recently used file from the Recent Files Menu</p>
-<p><br/></p>
-<p><span class="rvts10">Help</span></p>
-<p>Brings up the Getting Started chapter in the help document.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Game Loaded</span></p>
-<p><br/></p>
-<p>Appears when a game is loaded, but not a movie (.fm2).</p>
-<p><br/></p>
-<p><span class="rvts10">Play Movie...</span></p>
-<p>Same as the File &gt; Movie &gt; Play Movie menu item.</p>
-<p><br/></p>
-<p><span class="rvts10">Record Movie...</span></p>
-<p>Same as the File &gt; Movie &gt; Record Movie menu item.</p>
-<p><br/></p>
-<p><span class="rvts10">Undo savestate</span></p>
-<p>If this option is enabled it means the last savestate saved over-wrote a previous savestate file. &nbsp;This option restores the previous savestate file.</p>
-<p><br/></p>
-<p><span class="rvts10">Redo savestate</span></p>
-<p>If this option is in the menu, it means that Undo savestate was recently used to restore a previous savestate. &nbsp;This reverts that change.</p>
-<p><br/></p>
-<p><span class="rvts10">Rewind to last auto-save</span></p>
-<p>Auto-save must be enabled for this menu item to be accessible. &nbsp;Same as the Load last auto-save Hotkey Item. &nbsp;It loads the last auto-savestate. &nbsp;Auto-savestates are created once about every 4 seconds, so this typically has the effect of rewinding emulation.</p>
-<p><br/></p>
-<p><span class="rvts10">Screenshot</span></p>
-<p>Same as File &gt; Screenshot.</p>
-<p><span class="rvts10"><br/></span></p>
-<p><span class="rvts10">Close ROM</span></p>
-<p>Same as File &gt; Close</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Movie loaded - Read-only</span></p>
-<p><br/></p>
-<p>Appears when a movie is loaded and Read-only mode is set.</p>
-<p><br/></p>
-<p><span class="rvts10">Toggle to read+write</span></p>
-<p>Sets Read status to Read+Write.</p>
-<p><br/></p>
-<p><span class="rvts10">Play Movie from Beginning</span></p>
-<p>Same as File &gt; Movie &gt; Play from Beginning. &nbsp;Turns Read status to Read-Only and plays the movie from frame 1.</p>
-<p><br/></p>
-<p><span class="rvts10">Stop Movie Replay</span></p>
-<p>Same as File &gt; Movie &gt; Stop Movie.</p>
-<p><br/></p>
-<p><span class="rvts10">View comments and subtitles</span></p>
-<p>Opens up the Metadata dialog. &nbsp;Same as the Metadata button on the Play movie dialog.</p>
-<p><br/></p>
-<p><span class="rvts10">Undo savestate</span></p>
-<p>If this option is enabled it means the last savestate saved over-wrote a previous savestate file. &nbsp;This option restores the previous savestate file.</p>
-<p><br/></p>
-<p><span class="rvts10">Redo savestate</span></p>
-<p>If this option is in the menu, it means that Undo savestate was recently used to restore a previous savestate. &nbsp;This reverts that change.</p>
-<p><br/></p>
-<p><span class="rvts10">Rewind to last auto-save</span></p>
-<p>Auto-save must be enabled for this menu item to be accessible. &nbsp;Same as the Load last auto-save Hotkey Item. &nbsp;It loads the last auto-savestate. &nbsp;Auto-savestates are created once about every 4 seconds, so this typically has the effect of rewinding emulation.</p>
-<p><br/></p>
-<p><span class="rvts10">Help</span></p>
-<p>Opens the Movie recording chapter of the help document.</p>
-<p><br/></p>
-<p><br/></p>
-<p><span class="rvts16">Movie loaded - Read + Write</span></p>
-<p><br/></p>
-<p><span class="rvts10">Toggle to Read-only</span></p>
-<p>Sets Read status to Read-Only.</p>
-<p><br/></p>
-<p><span class="rvts10">Play Movie From Beginning</span></p>
-<p>Same as File &gt; Movie &gt; Play from Beginning. &nbsp;Turns Read status to Read-Only and plays the movie from frame 1.</p>
-<p><br/></p>
-<p><span class="rvts10">Stop Movie Recording</span></p>
-<p>Same as File &gt; Movie &gt; Stop Movie.</p>
-<p><br/></p>
-<p><span class="rvts10">View comments and subtitles</span></p>
-<p>Opens up the Metadata dialog. &nbsp;Same as the Metadata button on the Play movie dialog.</p>
-<p><br/></p>
-<p><span class="rvts10">Make backup</span></p>
-<p>Generates a backup .fm2. &nbsp;Uses the same file naming system as the auto-movie backup. &nbsp;(See <a class="rvts18" href="MovieOptions.html">movie options</a> for details).</p>
-<p><br/></p>
-<p><span class="rvts10">Undo savestate</span></p>
-<p>If this option is enabled it means the last savestate saved over-wrote a previous savestate file. &nbsp;This option restores the previous savestate file.</p>
-<p><br/></p>
-<p><span class="rvts10">Redo savestate</span></p>
-<p>If this option is in the menu, it means that Undo savestate was recently used to restore a previous savestate. &nbsp;This reverts that change.</p>
-<p><br/></p>
-<p><span class="rvts10">Undo loadstate</span></p>
-<p>If this option is enabled it was because the Loadstate function was called sometime while the game was loaded. &nbsp;This function restores the game state to where it was before loadstate was called.</p>
-<p><br/></p>
-<p><span class="rvts10">Redo loadstate</span></p>
-<p>If Undo loadstate was called, this option is available. &nbsp;It reverts the change and restores the game back to the point it was when loadstate was called.</p>
-<p><br/></p>
-<p><span class="rvts10">Help</span></p>
-<p>Opens the Movie recording chapter of the help document.</p>
-<p><br/></p>
-<p><span class="rvts10">Additional items may also appear related to these situations:</span></p>
-<p><br/></p>
-<p><span class="rvts16">Lua</span></p>
-<p><br/></p>
-<p><span class="rvts10">Load last Lua</span></p>
-<p>If there is at least 1 filename in the Recent Lua Files menu this calls the most recently used Lua script file. &nbsp;Has the same effect as the File &gt; Lua &gt; Reload Lua Script menu item.</p>
-<p><br/></p>
-<p><span class="rvts10">Stop Lua</span></p>
-<p>If a Lua script is currently loaded this option is available. &nbsp;Same as File &gt; Lua &gt; Stop Lua Script.</p>
-<p><br/></p>
-<p><span class="rvts16">Hide Menu</span></p>
-<p><br/></p>
-<p><span class="rvts10">Unhide menu</span></p>
-<p>If the main FCEUX menu is hidden this option is available. Restores the main menu.</p>
-<p><br/></p>
-<p><span class="rvts16">Subtitles</span></p>
-<p><br/></p>
-<p>If a movie is loaded and has subtitles:</p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li>a<span class="rvts10"> toggle subtitles </span>option will be in the menu</li>
-<li>a<span class="rvts10"> Dump to SRT file </span>option will be available. &nbsp;This dumps the subtitles to a standard subtitle file compatible with A/V containers such as .mkv</li>
+<p class="rvps2"><span class="rvts22">Context Menu</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">FCEUX includes a context menu that allows commonly used menu functions for various situations. &nbsp;There are some functions that appear only here.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">This page describes all the possible menu items in each possible context situation.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">No game loaded.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Appears when no game is loaded.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Open ROM</span></p>
+<p class="rvps2"><span class="rvts6">Same as the File &gt; Open ROM option</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Last ROM used</span></p>
+<p class="rvps2"><span class="rvts6">Opens the most recently used file from the Recent Files Menu</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Help</span></p>
+<p class="rvps2"><span class="rvts6">Brings up the Getting Started chapter in the help document.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Game Loaded</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Appears when a game is loaded, but not a movie (.fm2).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Play Movie...</span></p>
+<p class="rvps2"><span class="rvts6">Same as the File &gt; Movie &gt; Play Movie menu item.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Record Movie...</span></p>
+<p class="rvps2"><span class="rvts6">Same as the File &gt; Movie &gt; Record Movie menu item.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Undo savestate</span></p>
+<p class="rvps2"><span class="rvts6">If this option is enabled it means the last savestate saved over-wrote a previous savestate file. &nbsp;This option restores the previous savestate file.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Redo savestate</span></p>
+<p class="rvps2"><span class="rvts6">If this option is in the menu, it means that Undo savestate was recently used to restore a previous savestate. &nbsp;This reverts that change.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Rewind to last auto-save</span></p>
+<p class="rvps2"><span class="rvts6">Auto-save must be enabled for this menu item to be accessible. &nbsp;Same as the Load last auto-save Hotkey Item. &nbsp;It loads the last auto-savestate. &nbsp;Auto-savestates are created once about every 4 seconds, so this typically has the effect of rewinding emulation.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Screenshot</span></p>
+<p class="rvps2"><span class="rvts6">Same as File &gt; Screenshot.</span></p>
+<p class="rvps2"><span class="rvts15"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Close ROM</span></p>
+<p class="rvps2"><span class="rvts6">Same as File &gt; Close</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Movie loaded - Read-only</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Appears when a movie is loaded and Read-only mode is set.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Toggle to read+write</span></p>
+<p class="rvps2"><span class="rvts6">Sets Read status to Read+Write.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Play Movie from Beginning</span></p>
+<p class="rvps2"><span class="rvts6">Same as File &gt; Movie &gt; Play from Beginning. &nbsp;Turns Read status to Read-Only and plays the movie from frame 1.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Stop Movie Replay</span></p>
+<p class="rvps2"><span class="rvts6">Same as File &gt; Movie &gt; Stop Movie.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">View comments and subtitles</span></p>
+<p class="rvps2"><span class="rvts6">Opens up the Metadata dialog. &nbsp;Same as the Metadata button on the Play movie dialog.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Undo savestate</span></p>
+<p class="rvps2"><span class="rvts6">If this option is enabled it means the last savestate saved over-wrote a previous savestate file. &nbsp;This option restores the previous savestate file.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Redo savestate</span></p>
+<p class="rvps2"><span class="rvts6">If this option is in the menu, it means that Undo savestate was recently used to restore a previous savestate. &nbsp;This reverts that change.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Rewind to last auto-save</span></p>
+<p class="rvps2"><span class="rvts6">Auto-save must be enabled for this menu item to be accessible. &nbsp;Same as the Load last auto-save Hotkey Item. &nbsp;It loads the last auto-savestate. &nbsp;Auto-savestates are created once about every 4 seconds, so this typically has the effect of rewinding emulation.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Help</span></p>
+<p class="rvps2"><span class="rvts6">Opens the Movie recording chapter of the help document.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Movie loaded - Read + Write</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Toggle to Read-only</span></p>
+<p class="rvps2"><span class="rvts6">Sets Read status to Read-Only.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Play Movie From Beginning</span></p>
+<p class="rvps2"><span class="rvts6">Same as File &gt; Movie &gt; Play from Beginning. &nbsp;Turns Read status to Read-Only and plays the movie from frame 1.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Stop Movie Recording</span></p>
+<p class="rvps2"><span class="rvts6">Same as File &gt; Movie &gt; Stop Movie.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">View comments and subtitles</span></p>
+<p class="rvps2"><span class="rvts6">Opens up the Metadata dialog. &nbsp;Same as the Metadata button on the Play movie dialog.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Make backup</span></p>
+<p class="rvps2"><span class="rvts6">Generates a backup .fm2. &nbsp;Uses the same file naming system as the auto-movie backup. &nbsp;(See </span><a class="rvts63" href="MovieOptions.html">movie options</a><span class="rvts6"> for details).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Undo savestate</span></p>
+<p class="rvps2"><span class="rvts6">If this option is enabled it means the last savestate saved over-wrote a previous savestate file. &nbsp;This option restores the previous savestate file.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Redo savestate</span></p>
+<p class="rvps2"><span class="rvts6">If this option is in the menu, it means that Undo savestate was recently used to restore a previous savestate. &nbsp;This reverts that change.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Undo loadstate</span></p>
+<p class="rvps2"><span class="rvts6">If this option is enabled it was because the Loadstate function was called sometime while the game was loaded. &nbsp;This function restores the game state to where it was before loadstate was called.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Redo loadstate</span></p>
+<p class="rvps2"><span class="rvts6">If Undo loadstate was called, this option is available. &nbsp;It reverts the change and restores the game back to the point it was when loadstate was called.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Help</span></p>
+<p class="rvps2"><span class="rvts6">Opens the Movie recording chapter of the help document.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Additional items may also appear related to these situations:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Lua</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Load last Lua</span></p>
+<p class="rvps2"><span class="rvts6">If there is at least 1 filename in the Recent Lua Files menu this calls the most recently used Lua script file. &nbsp;Has the same effect as the File &gt; Lua &gt; Reload Lua Script menu item.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Stop Lua</span></p>
+<p class="rvps2"><span class="rvts6">If a Lua script is currently loaded this option is available. &nbsp;Same as File &gt; Lua &gt; Stop Lua Script.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Hide Menu</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts15">Unhide menu</span></p>
+<p class="rvps2"><span class="rvts6">If the main FCEUX menu is hidden this option is available. Restores the main menu.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Subtitles</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If a movie is loaded and has subtitles:</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts6">a</span><span class="rvts15"> toggle subtitles </span><span class="rvts6">option will be in the menu</span></li>
+ <li class="rvps2"><span class="rvts6">a</span><span class="rvts15"> Dump to SRT file </span><span class="rvts6">option will be available. &nbsp;This dumps the subtitles to a standard subtitle file compatible with A/V containers such as .mkv</span></li>
 </ul>
-<p><br/></p>
-<p><br/></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
 <p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/create-epub-ebooks">Full-featured EBook editor</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/help-authoring-tool">Full-featured multi-format Help generator</a></p>
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

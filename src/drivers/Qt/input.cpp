@@ -22,7 +22,8 @@
 #include "Qt/dface.h"
 #include "Qt/input.h"
 #include "Qt/config.h"
-
+#include "Qt/ConsoleWindow.h"
+#include "Qt/ConsoleUtilities.h"
 
 #include "Qt/sdl.h"
 #include "Qt/sdl-video.h"
@@ -97,6 +98,22 @@ ParseGIInput (FCEUGI * gi)
 	cspec = gi->cspecial;
 }
 
+int getInputSelection( int port, int *cur, int *usr )
+{
+	if ( (port >= 0) && (port < 3) )
+	{
+		if ( cur )
+		{
+			*cur = CurInputType[port];
+		}
+		if ( usr )
+		{
+			*usr = UsrInputType[port];
+		}
+	}
+	return 0;
+}
+
 
 static uint8 QuizKingData = 0;
 static uint8 HyperShotData = 0;
@@ -132,6 +149,7 @@ DoCheatSeq ()
 
 #include "keyscan.h"
 static uint8  g_keyState[SDL_NUM_SCANCODES];
+static int    keyModifier = 0;
 static int DIPS = 0;
 
 static uint8 keyonce[SDL_NUM_SCANCODES];
@@ -139,6 +157,7 @@ static uint8 keyonce[SDL_NUM_SCANCODES];
 
 int getKeyState( int k )
 {
+	k = SDL_GetScancodeFromKey(k);
 	if ( (k >= 0) && (k < SDL_NUM_SCANCODES) )
 	{
 		return g_keyState[k];
@@ -186,16 +205,213 @@ static int g_fkbEnabled = 0;
 // this function loads the sdl hotkeys from the config file into the
 // global scope.  this elimates the need for accessing the config file
 
-int Hotkeys[HK_MAX] = { 0 };
+struct hotkey_t Hotkeys[HK_MAX];
+
+hotkey_t::hotkey_t(void)
+{
+	value = 0; modifier = 0; prevState = 0;
+}
+
+int  hotkey_t::getString( char *s )
+{
+	s[0] = 0;
+
+	if ( modifier != 0 )
+	{
+		if ( modifier & (KMOD_LSHIFT | KMOD_RSHIFT) )
+		{
+			strcat( s, "Shift+" );
+		}
+
+		if ( modifier & (KMOD_LALT | KMOD_RALT) )
+		{
+			strcat( s, "Alt+" );
+		}
+
+		if ( modifier & (KMOD_LCTRL | KMOD_RCTRL) )
+		{
+			strcat( s, "Ctrl+" );
+		}
+	}
+
+	strcat( s, SDL_GetKeyName(value) );
+
+	return 0;
+}
+
+int  hotkey_t::getState(void)
+{
+	int k;
+
+	if ( modifier != 0 )
+	{
+		if ( modifier & (KMOD_LSHIFT | KMOD_RSHIFT) )
+		{
+			if ( !g_keyState[SDL_SCANCODE_LSHIFT] && !g_keyState[SDL_SCANCODE_RSHIFT] )
+			{
+				return 0;
+			}
+		}
+
+		if ( modifier & (KMOD_LALT | KMOD_RALT) )
+		{
+			if ( !g_keyState[SDL_SCANCODE_LALT] && !g_keyState[SDL_SCANCODE_RALT] )
+			{
+				return 0;
+			}
+		}
+
+		if ( modifier & (KMOD_LCTRL | KMOD_RCTRL) )
+		{
+			if ( !g_keyState[SDL_SCANCODE_LCTRL] && !g_keyState[SDL_SCANCODE_RCTRL] )
+			{
+				return 0;
+			}
+		}
+	}
+	else
+	{
+		if ( keyModifier != 0 )
+		{
+			return 0;
+		}
+	}
+
+	k = SDL_GetScancodeFromKey(value);
+	if ( (k >= 0) && (k < SDL_NUM_SCANCODES) )
+	{
+		return g_keyState[k];
+	}
+	return 0;
+}
+
+int hotkey_t::getRisingEdge(void)
+{
+	if ( value < 0 )
+	{
+		return 0;
+	}
+
+	if ( getState() )
+	{
+		if (!prevState)
+		{
+			prevState = 1;
+			return 1;
+		}
+	} 
+	else 
+	{
+		prevState = 0;
+	}
+	return 0;
+}
+
+void hotkey_t::setModifierFromString( const char *s )
+{
+	int i,j;
+	char id[128];
+
+	i=0; j=0;
+	modifier = 0;
+
+	while ( s[i] != 0 )
+	{
+		j=0;
+		while ( isalnum(s[i]) || (s[i] == '_') )
+		{
+			id[j] = tolower(s[i]); j++; i++;
+		}
+		id[j] = 0;
+
+		if ( j == 0 ) break;
+
+		if ( strcmp( id, "ctrl" ) == 0 )
+		{
+			modifier |= (KMOD_LCTRL | KMOD_RCTRL);
+		}
+		else if ( strcmp( id, "alt" ) == 0 )
+		{
+			modifier |= (KMOD_LALT | KMOD_RALT);
+		}
+		else if ( strcmp( id, "shift" ) == 0 )
+		{
+			modifier |= (KMOD_LSHIFT | KMOD_RSHIFT);
+		}
+
+		if ( (s[i] == '+') || (s[i] == '|') )
+		{
+			i++;
+		}
+		else
+		{
+			break;
+		}
+	}
+}
 
 // on every cycle of keyboardinput()
 void
 setHotKeys (void)
 {
+	int j,k;
+	std::string keyText;
 	std::string prefix = "SDL.Hotkeys.";
+	char id[64], val[128];
+//SDL_Keycode SDL_GetKeyFromName(const char* name)
+
 	for (int i = 0; i < HK_MAX; i++)
 	{
-		g_config->getOption (prefix + getHotkeyString(i), &Hotkeys[i]);
+		g_config->getOption (prefix + getHotkeyString(i), &keyText);
+
+		//printf("Key: '%s'\n", keyText.c_str() );
+
+		j=0;
+
+		while ( keyText[j] != 0 )
+		{
+			while ( isspace(keyText[j]) ) j++;
+
+			if ( isalpha( keyText[j] ) || (keyText[j] == '_') )
+			{
+				k=0;
+				while ( isalnum( keyText[j] ) || (keyText[j] == '_') )
+				{
+					id[k] = keyText[j]; j++; k++;
+				}
+				id[k] = 0;
+
+				if ( keyText[j] != '=' )
+				{
+					printf("Error: Invalid Hot Key Config for %s = %s \n", getHotkeyString(i), keyText.c_str() );
+					break;
+				}
+				j++;
+
+				k=0;
+				while ( !isspace(keyText[j]) && (keyText[j] != 0) )
+				{
+					val[k] = keyText[j]; j++; k++;
+				}
+				val[k] = 0;
+
+				//printf("ID:%s  Val:%s \n", id, val );
+
+				if ( strcmp( id, "key" ) == 0 )
+				{
+					Hotkeys[i].value = SDL_GetKeyFromName( val );
+				}
+				else if ( strcmp( id, "mod" ) == 0 )
+				{
+					Hotkeys[i].setModifierFromString( val );
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
+
 	}
 	return;
 }
@@ -253,58 +469,6 @@ std::string GetFilename (const char *title, bool save, const char *filter)
 	fname = GetOpenFileName (&ofn);
 
 #endif
-//#ifdef _GTK
-//	int fullscreen = 0;
-//	g_config->getOption ("SDL.Fullscreen", &fullscreen);
-//	if (fullscreen)
-//		ToggleFS ();
-//
-//	GtkWidget *fileChooser;
-//
-//	GtkFileFilter *filterX;
-//	GtkFileFilter *filterAll;
-//
-//	filterX = gtk_file_filter_new ();
-//	gtk_file_filter_add_pattern (filterX, filter);
-//	gtk_file_filter_set_name (filterX, filter);
-//
-//
-//	filterAll = gtk_file_filter_new ();
-//	gtk_file_filter_add_pattern (filterAll, "*");
-//	gtk_file_filter_set_name (filterAll, "All Files");
-//
-//	if (save)
-//		fileChooser = gtk_file_chooser_dialog_new ("Save as", NULL,
-//							GTK_FILE_CHOOSER_ACTION_SAVE,
-//							"_Cancel",
-//							GTK_RESPONSE_CANCEL,
-//							"_Save",
-//							GTK_RESPONSE_ACCEPT, NULL);
-//	else
-//		fileChooser = gtk_file_chooser_dialog_new ("Open", NULL,
-//							GTK_FILE_CHOOSER_ACTION_OPEN,
-//							"_Cancel",
-//							GTK_RESPONSE_CANCEL,
-//							"_Open",
-//							GTK_RESPONSE_ACCEPT, NULL);
-//
-//	// TODO: make file filters case insensitive     
-//	//gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterX);
-//	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (fileChooser), filterAll);
-//	int response = gtk_dialog_run (GTK_DIALOG (fileChooser));
-//
-//	// flush gtk events
-//	while (gtk_events_pending ())
-//		gtk_main_iteration_do (TRUE);
-//
-//	if (response == GTK_RESPONSE_ACCEPT)
-//		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
-//
-//	gtk_widget_destroy (fileChooser);
-//
-//	while (gtk_events_pending ())
-//		gtk_main_iteration_do (TRUE);
-//#endif
 	FCEUI_ToggleEmulationPause ();
 	return fname;
 }
@@ -314,71 +478,6 @@ std::string GetFilename (const char *title, bool save, const char *filter)
  */
 std::string GetUserText (const char *title)
 {
-#ifdef _GTK
-/*	prg318 - 10/13/11 - this is broken in recent build and causes 
- *	segfaults/very weird behavior i'd rather remove it for now than it cause 
- *	accidental segfaults
- *	TODO fix it
-*/
-#if 0
-//
-//	GtkWidget* d;
-//	GtkWidget* entry;
-//	
-//	d = gtk_dialog_new_with_buttons(title, NULL, GTK_DIALOG_MODAL, GTK_STOCK_OK, GTK_RESPONSE_OK); 
-//	
-//	entry = gtk_entry_new();
-//
-//	GtkWidget* vbox = gtk_dialog_get_content_area(GTK_DIALOG(d));
-//	
-//	gtk_container_add(GTK_CONTAINER(vbox), entry);
-//	
-//	gtk_widget_show_all(d);
-//	
-//	gtk_dialog_run(GTK_DIALOG(d));
-//	
-//	// flush gtk events
-//	while(gtk_events_pending())
-//			gtk_main_iteration_do(TRUE);
-//
-//		std::string input = gtk_entry_get_text(GTK_ENTRY(entry));
-//	
-//		if (FCEUI_EmulationPaused() == 0)
-//        	FCEUI_ToggleEmulationPause(); // pause emulation
-//	
-//		int fullscreen = 0; 
-//		g_config->getOption("SDL.Fullscreen", &fullscreen);
-//		if(fullscreen)
-//			ToggleFS(); // disable fullscreen emulation
-//	
-//	FILE *fpipe;
-//	std::string command = "zenity --entry --title=\"";
-//	command.append(title);
-//	command.append("\" --text=\"");
-//	command.append(title);
-//	command.append(":\"");
-//	
-//	if (!(fpipe = (FILE*)popen(command.c_str(),"r"))) // If fpipe is NULL
-//		FCEUD_PrintError("Pipe error on opening zenity");
-//	int c;
-//	std::string input;
-//	while((c = fgetc(fpipe)))
-//	{
-//		if (c == EOF || c == '\n')
-//			break;
-//		input += c;
-//	}
-//    	pclose(fpipe);
-//     gtk_widget_destroy(d);
-//
-//
-//     while(gtk_events_pending())
-//     gtk_main_iteration_do(TRUE);
-//
-//     FCEUI_ToggleEmulationPause(); // unpause emulation
-//     return input;
-#endif // #if 0
-#endif
   return "";
 }
 
@@ -445,7 +544,7 @@ static void KeyboardCommands (void)
 	// check if the family keyboard is enabled
 	if (CurInputType[2] == SIFC_FKB)
 	{
-		if ( g_keyState[SDL_SCANCODE_SCROLLLOCK] )
+		if ( Hotkeys[HK_FKB_ENABLE].getRisingEdge() )
 		{
 			g_fkbEnabled ^= 1;
 			FCEUI_DispMessage ("Family Keyboard %sabled.", 0,
@@ -476,7 +575,7 @@ static void KeyboardCommands (void)
 	}
 
 
-	if (_keyonly (Hotkeys[HK_TOGGLE_BG]))
+	if ( Hotkeys[HK_TOGGLE_BG].getRisingEdge() )
 	{
 		if (is_shift)
 		{
@@ -538,17 +637,17 @@ static void KeyboardCommands (void)
 		// Famicom disk-system games
 	if (gametype == GIT_FDS)
 	{
-		if (_keyonly (Hotkeys[HK_FDS_SELECT]))
+		if ( Hotkeys[HK_FDS_SELECT].getRisingEdge() )
 		{
 			FCEUI_FDSSelect ();
 		}
-		if (_keyonly (Hotkeys[HK_FDS_EJECT]))
+		if ( Hotkeys[HK_FDS_EJECT].getRisingEdge() )
 		{
 			FCEUI_FDSInsert ();
 		}
 	}
 
-	if (_keyonly (Hotkeys[HK_SCREENSHOT]))
+	if ( Hotkeys[HK_SCREENSHOT].getRisingEdge() )
 	{
 		FCEUI_SaveSnapshot ();
 	}
@@ -556,13 +655,13 @@ static void KeyboardCommands (void)
 	// if not NES Sound Format
 	if (gametype != GIT_NSF)
 	{
-		if (_keyonly (Hotkeys[HK_CHEAT_MENU]))
+		if ( Hotkeys[HK_CHEAT_MENU].getRisingEdge() )
 		{
 			DoCheatSeq ();
 		}
 
 		// f5 (default) save key, hold shift to save movie
-		if (_keyonly (Hotkeys[HK_SAVE_STATE]))
+		if ( Hotkeys[HK_SAVE_STATE].getRisingEdge() )
 		{
 			if (is_shift)
 			{
@@ -577,7 +676,7 @@ static void KeyboardCommands (void)
 		}
 
 		// f7 to load state, Shift-f7 to load movie
-		if (_keyonly (Hotkeys[HK_LOAD_STATE]))
+		if ( Hotkeys[HK_LOAD_STATE].getRisingEdge() )
 		{
 			if (is_shift)
 			{
@@ -610,42 +709,42 @@ static void KeyboardCommands (void)
 	}
 
 
-	if (_keyonly (Hotkeys[HK_DECREASE_SPEED]))
+	if ( Hotkeys[HK_DECREASE_SPEED].getRisingEdge() )
 	{
 		DecreaseEmulationSpeed();
 	}
 
-	if (_keyonly(Hotkeys[HK_INCREASE_SPEED]))
+	if ( Hotkeys[HK_INCREASE_SPEED].getRisingEdge() )
 	{
 		IncreaseEmulationSpeed ();
 	}
 
-	if (_keyonly (Hotkeys[HK_TOGGLE_FRAME_DISPLAY]))
+	if ( Hotkeys[HK_TOGGLE_FRAME_DISPLAY].getRisingEdge() )
 	{
 		FCEUI_MovieToggleFrameDisplay ();
 	}
 
-	if (_keyonly (Hotkeys[HK_TOGGLE_INPUT_DISPLAY]))
+	if ( Hotkeys[HK_TOGGLE_INPUT_DISPLAY].getRisingEdge() )
 	{
 		FCEUI_ToggleInputDisplay ();
 		extern int input_display;
 		g_config->setOption ("SDL.InputDisplay", input_display);
 	}
 
-	if (_keyonly (Hotkeys[HK_MOVIE_TOGGLE_RW]))
+	if ( Hotkeys[HK_MOVIE_TOGGLE_RW].getRisingEdge() )
 	{
 		FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
 	}
 
 #ifdef CREATE_AVI
-	if (_keyonly (Hotkeys[HK_MUTE_CAPTURE]))
+	if ( Hotkeys[HK_MUTE_CAPTURE].getRisingEdge() )
 	{
 		extern int mutecapture;
 		mutecapture ^= 1;
 	}
 #endif
 
-	if (_keyonly (Hotkeys[HK_PAUSE]))
+	if ( Hotkeys[HK_PAUSE].getRisingEdge() )
 	{
 		//FCEUI_ToggleEmulationPause(); 
 		// use the wrapper function instead of the fceui function directly
@@ -654,19 +753,20 @@ static void KeyboardCommands (void)
 	}
 
 	// Toggle throttling
-	if ( _keyonly(Hotkeys[HK_TURBO]) )
+	if ( Hotkeys[HK_TURBO].getRisingEdge() )
 	{
 		NoWaiting ^= 1;
 		//printf("NoWaiting: 0x%04x\n", NoWaiting );
 	}
 
 	static bool frameAdvancing = false;
-	if ( _keyonly(Hotkeys[HK_FRAME_ADVANCE]))
+	if ( Hotkeys[HK_FRAME_ADVANCE].getState() )
 	{
 		if (frameAdvancing == false)
 		{
 			FCEUI_FrameAdvance ();
 			frameAdvancing = true;
+			//printf("Frame Advance Start\n");
 		}
 	}
 	else
@@ -675,17 +775,19 @@ static void KeyboardCommands (void)
 		{
 			FCEUI_FrameAdvanceEnd ();
 			frameAdvancing = false;
+			//printf("Frame Advance End\n");
 		}
 	}
 
-	if (_keyonly (Hotkeys[HK_RESET]))
+	if ( Hotkeys[HK_RESET].getRisingEdge() )
 	{
 		FCEUI_ResetNES ();
 	}
-	//if(_keyonly(Hotkeys[HK_POWER])) {
+	//if( Hotkeys[HK_POWER].getRisingEdge() ) 
+	//{
 	//    FCEUI_PowerNES();
 	//}
-	if (_keyonly (Hotkeys[HK_QUIT]))
+	if ( Hotkeys[HK_QUIT].getRisingEdge() )
 	{
 		CloseGame();
 		FCEUI_Kill();
@@ -694,7 +796,7 @@ static void KeyboardCommands (void)
 	}
 	else
 #ifdef _S9XLUA_H
-	if (_keyonly (Hotkeys[HK_LOAD_LUA]))
+	if ( Hotkeys[HK_LOAD_LUA].getRisingEdge() )
 	{
 		std::string fname;
 		fname = GetFilename ("Open LUA script...", false, "Lua scripts|*.lua");
@@ -705,64 +807,54 @@ static void KeyboardCommands (void)
 
 	for (int i = 0; i < 10; i++)
 	{
-		if (_keyonly (Hotkeys[HK_SELECT_STATE_0 + i]))
+		if ( Hotkeys[HK_SELECT_STATE_0 + i].getRisingEdge() )
 		{
-#ifdef _GTK
-			setStateMenuItem(i);
-#endif
 			FCEUI_SelectState (i, 1);
 		}
 	}
 
-	if (_keyonly (Hotkeys[HK_SELECT_STATE_NEXT]))
+	if ( Hotkeys[HK_SELECT_STATE_NEXT].getRisingEdge() )
 	{
 		FCEUI_SelectStateNext (1);
-#ifdef _GTK
-		setStateMenuItem( CurrentState );
-#endif
 	}
 
-	if (_keyonly (Hotkeys[HK_SELECT_STATE_PREV]))
+	if ( Hotkeys[HK_SELECT_STATE_PREV].getRisingEdge() )
 	{
 		FCEUI_SelectStateNext (-1);
-#ifdef _GTK
-		setStateMenuItem( CurrentState );
-#endif
 	}
 
-	if (_keyonly (Hotkeys[HK_BIND_STATE]))
+	if ( Hotkeys[HK_BIND_STATE].getRisingEdge() )
 	{
 		bindSavestate ^= 1;
 		FCEUI_DispMessage ("Savestate binding to movie %sabled.", 0,
 		bindSavestate ? "en" : "dis");
 	}
 
-	if (_keyonly (Hotkeys[HK_FA_LAG_SKIP]))
+	if ( Hotkeys[HK_FA_LAG_SKIP].getRisingEdge() )
 	{
 		frameAdvanceLagSkip ^= 1;
 		FCEUI_DispMessage ("Skipping lag in Frame Advance %sabled.", 0,
 		frameAdvanceLagSkip ? "en" : "dis");
 	}
 
-	if (_keyonly (Hotkeys[HK_LAG_COUNTER_DISPLAY]))
+	if ( Hotkeys[HK_LAG_COUNTER_DISPLAY].getRisingEdge() )
 	{
 		lagCounterDisplay ^= 1;
 	}
 
-	if (_keyonly (Hotkeys[HK_TOGGLE_SUBTITLE]))
+	if ( Hotkeys[HK_TOGGLE_SUBTITLE].getRisingEdge() )
 	{
-		extern int movieSubtitles;
-		movieSubtitles ^= 1;
+		movieSubtitles = !movieSubtitles;
 		FCEUI_DispMessage ("Movie subtitles o%s.", 0,
 		movieSubtitles ? "n" : "ff");
 	}
 
-	if (_keyonly (Hotkeys[HK_VOLUME_DOWN]))
+	if ( Hotkeys[HK_VOLUME_DOWN].getRisingEdge() )
 	{
 		FCEUD_SoundVolumeAdjust(-1);
 	}
 
-	if (_keyonly (Hotkeys[HK_VOLUME_UP]))
+	if ( Hotkeys[HK_VOLUME_UP].getRisingEdge() )
 	{
 		FCEUD_SoundVolumeAdjust(1);
 	}
@@ -771,11 +863,13 @@ static void KeyboardCommands (void)
 	if (gametype == GIT_VSUNI)
 	{
 		// insert coin
-		if (_keyonly (Hotkeys[HK_VS_INSERT_COIN]))
+		if ( Hotkeys[HK_VS_INSERT_COIN].getRisingEdge() )
+		{
 			FCEUI_VSUniCoin ();
+		}
 
 		// toggle dipswitch display
-		if (_keyonly (Hotkeys[HK_VS_TOGGLE_DIPSWITCH]))
+		if ( Hotkeys[HK_VS_TOGGLE_DIPSWITCH].getRisingEdge() )
 		{
 			DIPS ^= 1;
 			FCEUI_VSUniToggleDIPView ();
@@ -801,10 +895,14 @@ static void KeyboardCommands (void)
 		if (keyonly (T))
 			FCEUI_NTSCSELTINT ();
 
-		if (_keyonly (Hotkeys[HK_DECREASE_SPEED]))
+		if (Hotkeys[HK_DECREASE_SPEED].getRisingEdge())
+		{
 			FCEUI_NTSCDEC ();
-		if (_keyonly (Hotkeys[HK_INCREASE_SPEED]))
+		}
+		if (Hotkeys[HK_INCREASE_SPEED].getRisingEdge())
+		{
 			FCEUI_NTSCINC ();
+		}
 
 		if ((CurInputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH))
 		{
@@ -861,31 +959,46 @@ do {                                              \
  * Return the state of the mouse buttons.  Input 'd' is an array of 3
  * integers that store <x, y, button state>.
  */
-void				// removed static for a call in lua-engine.cpp
-GetMouseData (uint32 (&d)[3])
+void GetMouseData (uint32 (&d)[3])
 {
-	int x, y;
-	uint32 t;
+	uint32 t, b;
+	double nx = 0.0, ny = 0.0;
 
-	// retrieve the state of the mouse from SDL
-	t = SDL_GetMouseState (&x, &y);
+	b = 0; // map mouse buttons
 
-	d[2] = 0;
-	if (t & SDL_BUTTON (1))
+	if ( consoleWindow->viewport_SDL )
 	{
-		d[2] |= 0x1;
+		consoleWindow->viewport_SDL->getNormalizedCursorPos(nx,ny);
+
+		if ( consoleWindow->viewport_SDL->getMouseButtonState( Qt::LeftButton ) )
+		{
+			b |= 0x01;
+		}
+		if ( consoleWindow->viewport_SDL->getMouseButtonState( Qt::RightButton ) )
+		{
+			b |= 0x02;
+		}
 	}
-	if (t & SDL_BUTTON (3))
+	else
 	{
-		d[2] |= 0x2;
+		consoleWindow->viewport_GL->getNormalizedCursorPos(nx,ny);
+
+		if ( consoleWindow->viewport_GL->getMouseButtonState( Qt::LeftButton ) )
+		{
+			b |= 0x01;
+		}
+		if ( consoleWindow->viewport_GL->getMouseButtonState( Qt::RightButton ) )
+		{
+			b |= 0x02;
+		}
 	}
 
-	// get the mouse position from the SDL video driver
-	t = PtoV (x, y);
+	t = PtoV (nx, ny);
+	d[2] = b;
 	d[0] = t & 0xFFFF;
 	d[1] = (t >> 16) & 0xFFFF;
-	// debug print 
-	// printf("mouse %d %d %d\n", d[0], d[1], d[2]);
+
+	//printf("mouse %d %d %d\n", d[0], d[1], d[2]);
 }
 
 void GetMouseRelative (int32 (&d)[3])
@@ -954,8 +1067,16 @@ UpdatePhysicalInput ()
 				//printf("SDL_Event.type: %i  Keysym: %i  ScanCode: %i\n", 
 				//		event.type, event.key.keysym.sym, event.key.keysym.scancode );
 
+				keyModifier = event.key.keysym.mod;
+				g_keyState[SDL_SCANCODE_LSHIFT] = ( event.key.keysym.mod & KMOD_LSHIFT ) ? 1 : 0;
+				g_keyState[SDL_SCANCODE_RSHIFT] = ( event.key.keysym.mod & KMOD_RSHIFT ) ? 1 : 0;
+			   g_keyState[SDL_SCANCODE_LALT]   = ( event.key.keysym.mod & KMOD_LALT   ) ? 1 : 0;
+				g_keyState[SDL_SCANCODE_RALT]   = ( event.key.keysym.mod & KMOD_RALT   ) ? 1 : 0;
+			   g_keyState[SDL_SCANCODE_LCTRL]  = ( event.key.keysym.mod & KMOD_LCTRL  ) ? 1 : 0;
+				g_keyState[SDL_SCANCODE_RCTRL]  = ( event.key.keysym.mod & KMOD_RCTRL  ) ? 1 : 0;
+
 				g_keyState[ event.key.keysym.scancode ] = (event.type == SDL_KEYDOWN) ? 1 : 0;
-				//checkKeyBoardState( event.key.keysym.scancode );
+
 				break;
 			case SDL_JOYDEVICEADDED:
 				AddJoystick( event.jdevice.which );
@@ -1742,214 +1863,360 @@ int DWaitButton (const uint8_t * text, ButtConfig * bc, int *buttonConfigStatus 
 	return (0);
 }
 
-/**
- * This function takes in button inputs until either it sees two of
- * the same button presses in a row or gets four inputs and then saves
- * the total number of button presses.  Each of the keys pressed is
- * used as input for the specified button, thus allowing up to four
- * possible settings for each input button.
- */
-//	void
-//ConfigButton (char *text, ButtConfig * bc)
-//{
-//	uint8 buf[256];
-//	int wc;
-//
-//	for (wc = 0; wc < MAXBUTTCONFIG; wc++)
-//	{
-//		sprintf ((char *) buf, "%s (%d)", text, wc + 1);
-//		DWaitButton (buf, bc, wc, NULL);
-//
-//		if (wc &&
-//				bc->ButtType[wc] == bc->ButtType[wc - 1] &&
-//				bc->DeviceNum[wc] == bc->DeviceNum[wc - 1] &&
-//				bc->ButtonNum[wc] == bc->ButtonNum[wc - 1])
-//		{
-//			break;
-//		}
-//	}
-//}
-
-/**
- * Update the button configuration for a specified device.
- */
 extern Config *g_config;
 
-//void ConfigDevice (int which, int arg)
-//{
-//	char buf[256];
-//	int x;
-//	std::string prefix;
-//	const char *str[10] =
-//	{ "A", "B", "SELECT", "START", "UP", "DOWN", "LEFT", "RIGHT", "Rapid A",
-//		"Rapid B"
-//	};
-//
-//	// XXX soules - set the configuration options so that later calls
-//	//              don't override these.  This is a temp hack until I
-//	//              can clean up this file.
-//
-//	ButtonConfigBegin ();
-//	switch (which)
-//	{
-//		case FCFGD_QUIZKING:
-//			prefix = "SDL.Input.QuizKing.";
-//			for (x = 0; x < 6; x++)
-//			{
-//				sprintf (buf, "Quiz King Buzzer #%d", x + 1);
-//				ConfigButton (buf, &QuizKingButtons[x]);
-//
-//				g_config->setOption (prefix + QuizKingNames[x],
-//						QuizKingButtons[x].ButtonNum);
-//			}
-//
-//			if (QuizKingButtons[0].ButtType == BUTTC_KEYBOARD)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Keyboard");
-//			}
-//			else if (QuizKingButtons[0].ButtType == BUTTC_JOYSTICK)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Joystick");
-//			}
-//			else
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Unknown");
-//			}
-//			g_config->setOption (prefix + "DeviceNum",
-//					QuizKingButtons[0].DeviceNum);
-//			break;
-//		case FCFGD_HYPERSHOT:
-//			prefix = "SDL.Input.HyperShot.";
-//			for (x = 0; x < 4; x++)
-//			{
-//				sprintf (buf, "Hyper Shot %d: %s",
-//						((x & 2) >> 1) + 1, (x & 1) ? "JUMP" : "RUN");
-//				ConfigButton (buf, &HyperShotButtons[x]);
-//
-//				g_config->setOption (prefix + HyperShotNames[x],
-//						HyperShotButtons[x].ButtonNum);
-//			}
-//
-//			if (HyperShotButtons[0].ButtType == BUTTC_KEYBOARD)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Keyboard");
-//			}
-//			else if (HyperShotButtons[0].ButtType == BUTTC_JOYSTICK)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Joystick");
-//			}
-//			else
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Unknown");
-//			}
-//			g_config->setOption (prefix + "DeviceNum",
-//					HyperShotButtons[0].DeviceNum);
-//			break;
-//		case FCFGD_POWERPAD:
-//			snprintf (buf, 256, "SDL.Input.PowerPad.%d", (arg & 1));
-//			prefix = buf;
-//			for (x = 0; x < 12; x++)
-//			{
-//				sprintf (buf, "PowerPad %d: %d", (arg & 1) + 1, x + 11);
-//				ConfigButton (buf, &powerpadsc[arg & 1][x]);
-//
-//				g_config->setOption (prefix + PowerPadNames[x],
-//						powerpadsc[arg & 1][x].ButtonNum);
-//			}
-//
-//			if (powerpadsc[arg & 1][0].ButtType == BUTTC_KEYBOARD)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Keyboard");
-//			}
-//			else if (powerpadsc[arg & 1][0].ButtType == BUTTC_JOYSTICK)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Joystick");
-//			}
-//			else
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Unknown");
-//			}
-//			g_config->setOption (prefix + "DeviceNum",
-//					powerpadsc[arg & 1][0].DeviceNum);
-//			break;
-//
-//		case FCFGD_GAMEPAD:
-//			snprintf (buf, 256, "SDL.Input.GamePad.%d", arg);
-//			prefix = buf;
-//			for (x = 0; x < 10; x++)
-//			{
-//				sprintf (buf, "GamePad #%d: %s", arg + 1, str[x]);
-//				ConfigButton (buf, &GamePadConfig[arg][x]);
-//
-//				g_config->setOption (prefix + GamePadNames[x],
-//						GamePadConfig[arg][x].ButtonNum);
-//			}
-//
-//			if (GamePadConfig[arg][0].ButtType == BUTTC_KEYBOARD)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Keyboard");
-//			}
-//			else if (GamePadConfig[arg][0].ButtType == BUTTC_JOYSTICK)
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Joystick");
-//			}
-//			else
-//			{
-//				g_config->setOption (prefix + "DeviceType", "Unknown");
-//			}
-//			g_config->setOption (prefix + "DeviceNum",
-//					GamePadConfig[arg][0].DeviceNum);
-//			break;
-//	}
-//
-//	ButtonConfigEnd ();
-//}
+static const char *stdPortInputEncode( int v )
+{
+	const char *s;
 
+	switch ( v )
+	{
+		default:
+		case SI_NONE:
+			s = "SI_NONE";
+		break;
+		case SI_GAMEPAD:
+			s = "SI_GAMEPAD";
+		break;
+		case SI_ZAPPER:
+			s = "SI_ZAPPER";
+		break;
+		case SI_POWERPADA:
+			s = "SI_POWERPADA";
+		break;
+		case SI_POWERPADB:
+			s = "SI_POWERPADB";
+		break;
+		case SI_ARKANOID:
+			s = "SI_ARKANOID";
+		break;
+	}
+	return s;
+}
 
-/**
- * Update the button configuration for a device, specified by a text string.
- */
-//void InputCfg (const std::string & text)
-//{
-//
-//	if (noGui)
-//	{
-//		if (text.find ("gamepad") != std::string::npos)
-//		{
-//			int device = (text[strlen ("gamepad")] - '1');
-//			if (device < 0 || device > 3)
-//			{
-//				FCEUD_PrintError
-//					("Invalid gamepad device specified; must be one of gamepad1 through gamepad4");
-//				exit (-1);
-//			}
-//			ConfigDevice (FCFGD_GAMEPAD, device);
-//		}
-//		else if (text.find ("powerpad") != std::string::npos)
-//		{
-//			int device = (text[strlen ("powerpad")] - '1');
-//			if (device < 0 || device > 1)
-//			{
-//				FCEUD_PrintError
-//					("Invalid powerpad device specified; must be powerpad1 or powerpad2");
-//				exit (-1);
-//			}
-//			ConfigDevice (FCFGD_POWERPAD, device);
-//		}
-//		else if (text.find ("hypershot") != std::string::npos)
-//		{
-//			ConfigDevice (FCFGD_HYPERSHOT, 0);
-//		}
-//		else if (text.find ("quizking") != std::string::npos)
-//		{
-//			ConfigDevice (FCFGD_QUIZKING, 0);
-//		}
-//	}
-//	else
-//		printf ("Please run \"fceux --nogui\" before using --inputcfg\n");
-//
-//}
+static int stdPortInputDecode( const char *s )
+{
+	int ret = SI_NONE;
 
+	if ( s[0] == 0 )
+	{
+		return ret;
+	}
+
+	if ( isdigit(s[0]) )
+	{
+		ret = atoi(s);
+	}
+	else 
+	{
+		if ( strcmp( s, "SI_GAMEPAD" ) == 0 )
+		{
+			ret = SI_GAMEPAD;
+		}
+		else if ( strcmp( s, "SI_ZAPPER" ) == 0 )
+		{
+			ret = SI_ZAPPER;
+		}
+		else if ( strcmp( s, "SI_POWERPADA" ) == 0 )
+		{
+			ret = SI_POWERPADA;
+		}
+		else if ( strcmp( s, "SI_POWERPADB" ) == 0 )
+		{
+			ret = SI_POWERPADB;
+		}
+		else if ( strcmp( s, "SI_ARKANOID" ) == 0 )
+		{
+			ret = SI_ARKANOID;
+		}
+	}
+
+	return ret;
+}
+
+static const char *expPortInputEncode( int v )
+{
+	const char *s;
+
+	switch ( v )
+	{
+		default:
+		case SIFC_NONE:
+			s = "SIFC_NONE";
+		break;
+		case SIFC_ARKANOID:
+			s = "SIFC_ARKANOID";
+		break;
+		case SIFC_SHADOW:
+			s = "SIFC_SHADOW";
+		break;
+		case SIFC_HYPERSHOT:
+			s = "SIFC_HYPERSHOT";
+		break;
+		case SIFC_FKB:
+			s = "SIFC_FKB";
+		break;
+		case SIFC_MAHJONG:
+			s = "SIFC_MAHJONG";
+		break;
+		case SIFC_QUIZKING:
+			s = "SIFC_QUIZKING";
+		break;
+		case SIFC_FTRAINERA:
+			s = "SIFC_FTRAINERA";
+		break;
+		case SIFC_FTRAINERB:
+			s = "SIFC_FTRAINERB";
+		break;
+		case SIFC_OEKAKIDS:
+			s = "SIFC_OEKAKIDS";
+		break;
+		case SIFC_TOPRIDER:
+			s = "SIFC_TOPRIDER";
+		break;
+	}
+	return s;
+}
+
+static int expPortInputDecode( const char *s )
+{
+	int ret = SIFC_NONE;
+
+	if ( s[0] == 0 )
+	{
+		return ret;
+	}
+
+	if ( isdigit(s[0]) )
+	{
+		ret = atoi(s);
+	}
+	else 
+	{
+		if ( strcmp( s, "SIFC_ARKANOID" ) == 0 )
+		{
+			ret = SIFC_ARKANOID;
+		}
+		else if ( strcmp( s, "SIFC_SHADOW" ) == 0 )
+		{
+			ret = SIFC_SHADOW;
+		}
+		else if ( strcmp( s, "SIFC_HYPERSHOT" ) == 0 )
+		{
+			ret = SIFC_HYPERSHOT;
+		}
+		else if ( strcmp( s, "SIFC_FKB" ) == 0 )
+		{
+			ret = SIFC_FKB;
+		}
+		else if ( strcmp( s, "SIFC_MAHJONG" ) == 0 )
+		{
+			ret = SIFC_MAHJONG;
+		}
+		else if ( strcmp( s, "SIFC_QUIZKING" ) == 0 )
+		{
+			ret = SIFC_QUIZKING;
+		}
+		else if ( strcmp( s, "SIFC_FTRAINERA" ) == 0 )
+		{
+			ret = SIFC_FTRAINERA;
+		}
+		else if ( strcmp( s, "SIFC_FTRAINERB" ) == 0 )
+		{
+			ret = SIFC_FTRAINERB;
+		}
+		else if ( strcmp( s, "SIFC_OEKAKIDS" ) == 0 )
+		{
+			ret = SIFC_OEKAKIDS;
+		}
+		else if ( strcmp( s, "SIFC_TOPRIDER" ) == 0 )
+		{
+			ret = SIFC_TOPRIDER;
+		}
+	}
+
+	return ret;
+}
+
+static bool boolDecode( const char *s )
+{
+	bool ret = false;
+
+	if ( isdigit(s[0]) )
+	{
+		ret = atoi(s) != 0;
+	}
+	else if ( strcasecmp( s, "true" ) == 0 )
+	{
+		ret = true;
+	}
+	return ret;
+}
+
+int saveInputSettingsToFile( const char *filename )
+{
+	QDir dir;
+	std::string path;
+	const char *baseDir = FCEUI_GetBaseDirectory();
+	char base[256];
+
+	path = std::string(baseDir) + "/input/presets/";
+
+	dir.mkpath( QString::fromStdString(path) );
+
+	if ( filename != NULL )
+	{
+		getFileBaseName( filename, base, NULL );
+
+		path += std::string(base) + ".pre";
+	}
+	else
+	{
+		const char *romFile = getRomFile();
+
+		if ( romFile == NULL )
+		{
+			return -1;
+		}
+		getFileBaseName( romFile, base, NULL );
+
+		path += std::string(base) + ".pre";
+	}
+
+	FILE *fp = fopen( path.c_str(), "w");
+
+	if ( fp == NULL )
+	{
+		return -1;
+	}
+	fprintf( fp, "# Input Port Settings\n");
+	fprintf( fp, "InputTypePort1   = %s \n", stdPortInputEncode( CurInputType[0] ) );
+	fprintf( fp, "InputTypePort2   = %s \n", stdPortInputEncode( CurInputType[1] ) );
+	fprintf( fp, "InputTypeExpPort = %s \n", expPortInputEncode( CurInputType[2] ) );
+	fprintf( fp, "Enable4Score     = %i \n", (eoptions & EO_FOURSCORE) ? 1 : 0 );
+	fprintf( fp, "EnableMicPort2   = %i \n", replaceP2StartWithMicrophone );
+
+	fclose(fp);
+
+	return 0;
+}
+
+int loadInputSettingsFromFile( const char *filename )
+{
+	QDir dir;
+	std::string path;
+	const char *baseDir = FCEUI_GetBaseDirectory();
+	char base[256], line[256];
+	char id[128], val[128];
+	int i, j;
+
+	path = std::string(baseDir) + "/input/presets/";
+
+	dir.mkpath( QString::fromStdString(path) );
+
+	if ( filename != NULL )
+	{
+		getFileBaseName( filename, base, NULL );
+
+		path += std::string(base) + ".pre";
+	}
+	else
+	{
+		const char *romFile = getRomFile();
+
+		if ( romFile == NULL )
+		{
+			return -1;
+		}
+		getFileBaseName( romFile, base, NULL );
+
+		path += std::string(base) + ".pre";
+	}
+
+	FILE *fp = fopen( path.c_str(), "r");
+
+	if ( fp == NULL )
+	{
+		return -1;
+	}
+
+	while ( fgets( line, sizeof(line)-1, fp ) != 0 )
+	{
+		i=0;
+		while ( line[i] != 0 )
+		{
+			if ( line[i] == '#' )
+			{
+				line[i] = 0; break;
+			}
+			i++;
+		}
+
+		i=0;
+		while ( isspace(line[i]) ) i++;
+
+		j=0;
+		while ( isalnum(line[i]) || (line[i] == '_') )
+		{
+			id[j] = line[i]; i++; j++;
+		}
+		id[j] = 0;
+
+		if ( j == 0 ) continue;
+
+		while ( isspace(line[i]) ) i++;
+
+		if ( line[i] == '=' ) i++;
+
+		while ( isspace(line[i]) ) i++;
+
+		j=0;
+		while ( line[i] && !isspace(line[i]) )
+		{
+			val[j] = line[i]; i++; j++;
+		}
+		val[j] = 0;
+
+		if ( j == 0 )
+		{
+			printf("Warning: No Value Specified for Token ID: '%s'\n", id );
+			continue;
+		}
+		//printf("ID: '%s'   Val: '%s' \n", id, val );
+
+		if ( strcmp( id, "InputTypePort1" ) == 0 )
+		{
+			CurInputType[0] = UsrInputType[0] = stdPortInputDecode( val );
+		}
+		else if ( strcmp( id, "InputTypePort2" ) == 0 )
+		{
+			CurInputType[1] = UsrInputType[1] = stdPortInputDecode( val );
+		}
+		else if ( strcmp( id, "InputTypeExpPort" ) == 0 )
+		{
+			CurInputType[2] = UsrInputType[2] = expPortInputDecode( val );
+		}
+		else if ( strcmp( id, "Enable4Score" ) == 0 )
+		{
+			if ( boolDecode( val ) )
+			{
+				eoptions &= ~EO_FOURSCORE;
+			}
+			else
+			{
+				eoptions |= EO_FOURSCORE;
+			}
+		}
+		else if ( strcmp( id, "EnableMicPort2" ) == 0 )
+		{
+			replaceP2StartWithMicrophone = boolDecode( val );
+		}
+	}
+
+	fclose(fp);
+
+	return 0;
+}
 
 /**
  * Hack to map the new configuration onto the existing button

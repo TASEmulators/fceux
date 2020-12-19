@@ -1,4 +1,4 @@
-FCEUX SDL 2.2.3 SDL README
+FCEUX SDL 2.3.0 SDL README
 ==========================
 Originally By Lukas Sabota (sf: punkrockguy318)
 Updated By mjbudd77
@@ -7,7 +7,7 @@ Updated By mjbudd77
 
 http://www.fceux.com
 
-Last Modified: July 12, 2020
+Last Modified: October 21, 2020
 
 Table of Contents
 -----------------
@@ -22,7 +22,7 @@ Table of Contents
 
 1 - Requirements
 ----------------
-* sdl2  - Version >= 2.0
+* sdl2  - Version >= 2.0  (sdl2 >= 2.8 recommended)
 * cmake - Required to build fceux.
 * qt5 OR gtk3  - (qt version >= 5.11 recommended) (gtk3 >= 3.22 recommended)
 * liblua5.1 (optional) - Will statically link internally if the system cannot provide this.
@@ -37,15 +37,19 @@ The old scons build system is no longer supported.
 Fceux can be compiled and built using the cmake build system.  To compile, run:
 
 	mkdir build; cd build;
-   cmake  -DCMAKE_BUILD_TYPE=Release  ..    # For a release build
+   cmake  -DCMAKE_INSTALL_PREFIX=/usr  -DCMAKE_BUILD_TYPE=Release  ..    # For a release build
 
 To build a binary with debug information included in it:
-   cmake  -DCMAKE_BUILD_TYPE=Debug    ..    
+   cmake  -DCMAKE_INSTALL_PREFIX=/usr  -DCMAKE_BUILD_TYPE=Debug    ..    
 
 The Qt version of the GUI builds by default and this is the preferred GUI for use. 
 For those who must have GTK/Gnome style, 
 the GTK version of the GUI can be selected to build with:
-	cmake -DCMAKE_BUILD_TYPE=Release -DGTK=1 ..  # Release build using GTK GUI
+	cmake -DCMAKE_INSTALL_PREFIX=/usr  -DCMAKE_BUILD_TYPE=Release -DGTK=1 ..  # Release build using GTK GUI
+
+The Qt version GUI by far exceeds the GTK gui in capability and performance.
+I HIGHLY RECOMMEND USING THE Qt GUI instead of the GTK. See the TODO-SDL file for
+a capability matrix that compares what the two GUIs can do.
 
 To do the actual compiling:
    make
@@ -58,9 +62,8 @@ After a sucessful compilation, the fceux binary will be generated to
 
 	sudo make install
 
-You can optionally define a install prefix when running cmake from the previous step:
-
-	cmake -DCMAKE_INSTALL_PREFIX=/usr/local install
+By default cmake will use an installation prefix of /usr/local.
+The recommended installation prefix is /usr (this is where the installed fceux.desktop file expects everything to be)
 
 You can choose to install the lua scripts (located in output/luaScripts) to a directory of your choosing:
 
@@ -87,6 +90,13 @@ See above build instructions.
 OpenGL options:
 For Linux builds, the OpenGL library preference can be either GLVND or LEGACY (default). 
 To use GLVND OpenGL, add a -DGLVND=1 on the cmake command line.
+
+Qt Styling Options:
+The Qt GUI can use custom Qt widget styling by providing it a Qt stylesheet file. At startup, the GUI will look
+for an environment variable named FCEUX_QT_STYLESHEET that must contain the full path to the file. If the variable
+is defined and the file is readable by the program, then the styling settings will be used by the GUI.
+Bash Shell Setup Example:
+export FCEUX_QT_STYLESHEET=/home/me/myQt.stylesheet
 
 5 - LUA Scripting
 -----------------

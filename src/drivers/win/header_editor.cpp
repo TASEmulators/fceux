@@ -159,11 +159,11 @@ bool LoadHeader(HWND parent, iNES_HEADER* header)
 			error = errors::UNIF_HEADER;
 		else if (!memcmp(header, "NESM", 4))
 			error = errors::NSF_HEADER;
-/*		else if (!memcmp(header, "NSFE", 4))
-			error = errors::NSFE_HEADER;
-		else if (!memcmp(header, "NESM\2", 4))
-			error = errors::NSF2_HEADER;
-*/		else
+		/*		else if (!memcmp(header, "NSFE", 4))
+					error = errors::NSFE_HEADER;
+				else if (!memcmp(header, "NESM\2", 4))
+					error = errors::NSF2_HEADER;
+		*/		else
 			error = errors::INVALID_HEADER;
 		FCEU_fclose(fp);
 	}
@@ -174,27 +174,27 @@ bool LoadHeader(HWND parent, iNES_HEADER* header)
 	{
 		switch (error)
 		{
-			case errors::OPEN_FAILED:
-			{
-				char buf[1024];
-				sprintf(buf, "Error opening %s!", LoadedRomFName);
-				MessageBox(parent, buf, "iNES Header Editor", MB_OK | MB_ICONERROR);
-				break;
-			}
-			case errors::INVALID_HEADER:
-				MessageBox(parent, "Invalid iNES header.", "iNES Header Editor", MB_OK | MB_ICONERROR);
-				break;
-			case errors::FDS_HEADER:
-				MessageBox(parent, "Editing header of an FDS file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
-				break;
-			case errors::UNIF_HEADER:
-				MessageBox(parent, "Editing header of a UNIF file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
-				break;
-			case errors::NSF_HEADER:
-//			case errors::NSF2_HEADER:
-//			case errors::NSFE_HEADER:
-				MessageBox(parent, "Editing header of an NSF file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
-				break;
+		case errors::OPEN_FAILED:
+		{
+			char buf[1024];
+			sprintf(buf, "Error opening %s!", LoadedRomFName);
+			MessageBox(parent, buf, "iNES Header Editor", MB_OK | MB_ICONERROR);
+			break;
+		}
+		case errors::INVALID_HEADER:
+			MessageBox(parent, "Invalid iNES header.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+			break;
+		case errors::FDS_HEADER:
+			MessageBox(parent, "Editing header of an FDS file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+			break;
+		case errors::UNIF_HEADER:
+			MessageBox(parent, "Editing header of a UNIF file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+			break;
+		case errors::NSF_HEADER:
+			//			case errors::NSF2_HEADER:
+			//			case errors::NSFE_HEADER:
+			MessageBox(parent, "Editing header of an NSF file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+			break;
 		}
 		return false;
 	}
@@ -353,7 +353,7 @@ HWND InitHeaderEditDialog(HWND hwnd, iNES_HEADER* header)
 				SendDlgItemMessage(hwnd, IDC_PRGROM_COMBO, CB_SETITEMDATA, SendDlgItemMessage(hwnd, IDC_PRGROM_COMBO, CB_ADDSTRING, 0, (LPARAM)buf), size);
 			}
 		}
-		
+
 		if (size >= 1024)
 			sprintf(buf, "%dKB", size / 1024);
 		else
@@ -502,85 +502,85 @@ INT_PTR CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP)
 	static iNES_HEADER* header;
 
 	switch (uMsg) {
-		case WM_INITDIALOG:
+	case WM_INITDIALOG:
+	{
+		header = (iNES_HEADER*)lP;
+		if (!header)
+			goto wm_close;
+		else
+			InitHeaderEditDialog(hDlg, header);
+
+		// Put the window aside the main window when in game.
+		if (GameInfo)
+			CalcSubWindowPos(hDlg, NULL);
+
+	}
+	break;
+	case WM_COMMAND:
+		switch (HIWORD(wP))
 		{
-			header = (iNES_HEADER*)lP;
-			if (!header)
-				goto wm_close;
-			else
-				InitHeaderEditDialog(hDlg, header);
-
-			// Put the window aside the main window when in game.
-			if (GameInfo)
-				CalcSubWindowPos(hDlg, NULL);
-
-		}
-		break;
-		case WM_COMMAND:
-			switch (HIWORD(wP))
+		case BN_CLICKED:
+		{
+			int id = LOWORD(wP);
+			switch (id)
 			{
-				case BN_CLICKED:
+			case IDC_RADIO_VERSION_STANDARD:
+				ToggleINES20(hDlg, false);
+				break;
+			case IDC_RADIO_VERSION_INES20:
+				ToggleINES20(hDlg, true);
+				break;
+			case IDC_RADIO_SYSTEM_NORMAL:
+			case IDC_RADIO_SYSTEM_PLAYCHOICE10:
+			case IDC_RADIO_SYSTEM_EXTEND:
+				ToggleExtendSystemList(hDlg, IsDlgButtonChecked(hDlg, IDC_RADIO_SYSTEM_EXTEND) == BST_CHECKED);
+			case IDC_RADIO_SYSTEM_VS:
+				// Both ines 1.0 and 2.0 can trigger VS System, but only 2.0 enables the extra detailed properties
+				ToggleVSSystemGroup(hDlg, IsDlgButtonChecked(hDlg, IDC_RADIO_VERSION_INES20) == BST_CHECKED && IsDlgButtonChecked(hDlg, IDC_RADIO_SYSTEM_VS) == BST_CHECKED);
+				break;
+			case IDC_CHECK_UNOFFICIAL:
+				ToggleUnofficialPropertiesEnabled(hDlg, false, IsDlgButtonChecked(hDlg, IDC_CHECK_UNOFFICIAL) == BST_CHECKED);
+				break;
+			case IDC_CHECK_UNOFFICIAL_PRGRAM:
+				ToggleUnofficialPrgRamPresent(hDlg, false, true, IsDlgButtonChecked(hDlg, IDC_CHECK_UNOFFICIAL_PRGRAM) == BST_CHECKED);
+				break;
+			case IDC_CHECK_UNOFFICIAL_EXTRA_REGION:
+				ToggleUnofficialExtraRegionCode(hDlg, false, true, IsDlgButtonChecked(hDlg, IDC_CHECK_UNOFFICIAL_EXTRA_REGION) == BST_CHECKED);
+				break;
+			case IDC_RESTORE_BUTTON:
+				SetHeaderData(hDlg, header);
+				break;
+			case IDSAVE:
+			{
+				iNES_HEADER newHeader;
+				if (WriteHeaderData(hDlg, &newHeader))
 				{
-					int id = LOWORD(wP);
-					switch (id)
-					{
-						case IDC_RADIO_VERSION_STANDARD:
-							ToggleINES20(hDlg, false);
-							break;
-						case IDC_RADIO_VERSION_INES20:
-							ToggleINES20(hDlg, true);
-							break;
-						case IDC_RADIO_SYSTEM_NORMAL:
-						case IDC_RADIO_SYSTEM_PLAYCHOICE10:
-						case IDC_RADIO_SYSTEM_EXTEND:
-							ToggleExtendSystemList(hDlg, IsDlgButtonChecked(hDlg, IDC_RADIO_SYSTEM_EXTEND) == BST_CHECKED);
-						case IDC_RADIO_SYSTEM_VS:
-							// Both ines 1.0 and 2.0 can trigger VS System, but only 2.0 enables the extra detailed properties
-							ToggleVSSystemGroup(hDlg, IsDlgButtonChecked(hDlg, IDC_RADIO_VERSION_INES20) == BST_CHECKED && IsDlgButtonChecked(hDlg, IDC_RADIO_SYSTEM_VS) == BST_CHECKED);
-							break;
-						case IDC_CHECK_UNOFFICIAL:
-							ToggleUnofficialPropertiesEnabled(hDlg, false, IsDlgButtonChecked(hDlg, IDC_CHECK_UNOFFICIAL) == BST_CHECKED);
-							break;
-						case IDC_CHECK_UNOFFICIAL_PRGRAM:
-							ToggleUnofficialPrgRamPresent(hDlg, false, true, IsDlgButtonChecked(hDlg, IDC_CHECK_UNOFFICIAL_PRGRAM) == BST_CHECKED);
-							break;
-						case IDC_CHECK_UNOFFICIAL_EXTRA_REGION:
-							ToggleUnofficialExtraRegionCode(hDlg, false, true, IsDlgButtonChecked(hDlg, IDC_CHECK_UNOFFICIAL_EXTRA_REGION) == BST_CHECKED);
-							break;
-						case IDC_RESTORE_BUTTON:
-							SetHeaderData(hDlg, header);
-							break;
-						case IDSAVE:
-						{
-							iNES_HEADER newHeader;
-							if (WriteHeaderData(hDlg, &newHeader))
-							{
-								char path[4096] = { 0 };
-								if (ShowINESFileBox(hDlg, path, true))
-									SaveINESFile(hDlg, path, &newHeader);
-							}
-						}
-						break;
-						case IDCLOSE:
-							goto wm_close;
-					}
+					char path[4096] = { 0 };
+					if (ShowINESFileBox(hDlg, path, true))
+						SaveINESFile(hDlg, path, &newHeader);
 				}
 			}
-		break;
-		case WM_CLOSE:
-		case WM_QUIT:
-wm_close:
-			if (GameInfo)
-				DestroyWindow(hDlg);
-			else
-			{
-				EndDialog(hDlg, 0);
-				LoadedRomFName[0] = 0;
-			}
 			break;
-		case WM_DESTROY:
-			hHeadEditor = NULL;
-			free(header);
+			case IDCLOSE:
+				goto wm_close;
+			}
+		}
+		}
+		break;
+	case WM_CLOSE:
+	case WM_QUIT:
+	wm_close:
+		if (GameInfo)
+			DestroyWindow(hDlg);
+		else
+		{
+			EndDialog(hDlg, 0);
+			LoadedRomFName[0] = 0;
+		}
+		break;
+	case WM_DESTROY:
+		hHeadEditor = NULL;
+		free(header);
 		break;
 	}
 	return false;
@@ -628,7 +628,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 	// Mapper#
 	int mapper = header->ROM_type >> 4 | header->ROM_type2 & 0xF0;
 	if (ines20)
-		mapper |= (header->ROM_type3 & 0xF0) << 4;
+		mapper |= (header->ROM_type3 & 0x0F) << 8;
 	sprintf(buf, "%d ", mapper);
 	if (SendDlgItemMessage(hwnd, IDC_MAPPER_COMBO, CB_SELECTSTRING, 0, (LPARAM)buf) == CB_ERR)
 		SetDlgItemText(hwnd, IDC_MAPPER_COMBO, buf);
@@ -672,7 +672,8 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 			else sprintf(buf, "%dB", prg_ram);
 		}
 
-	} else
+	}
+	else
 	{
 		if (!(header->RAM_size & 0x10) && header->ROM_type3)
 			sprintf(buf, "%dKB", header->ROM_type3 ? 1 : header->ROM_type3 * 8);
@@ -692,7 +693,8 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 				sprintf(buf, "%dKB", prg_nvram / 1024);
 			else sprintf(buf, "%dB", prg_nvram);
 		}
-	} else
+	}
+	else
 		CheckDlgButton(hwnd, IDC_CHECK_BATTERYNVRAM, header->ROM_type & 0x2 ? BST_CHECKED : BST_UNCHECKED);
 
 	if (SendDlgItemMessage(hwnd, IDC_PRGNVRAM_COMBO, CB_SELECTSTRING, 0, (LPARAM)buf) == CB_ERR)
@@ -763,21 +765,21 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 	{
 		int region = header->TV_system & 3;
 		switch (region) {
-			case 0:
-				// NTSC
-				CheckRadioButton(hwnd, IDC_RADIO_REGION_NTSC, IDC_RADIO_REGION_DENDY, IDC_RADIO_REGION_NTSC);
-				break;
-			case 1:
-				// PAL
-				CheckRadioButton(hwnd, IDC_RADIO_REGION_NTSC, IDC_RADIO_REGION_DENDY, IDC_RADIO_REGION_PAL);
-				break;
-			case 2:
-				// Dual
-				CheckRadioButton(hwnd, IDC_RADIO_REGION_NTSC, IDC_RADIO_REGION_DENDY, IDC_RADIO_REGION_DUAL);
-				break;
-			case 3:
-				// Dendy
-				CheckRadioButton(hwnd, IDC_RADIO_REGION_NTSC, IDC_RADIO_REGION_DENDY, IDC_RADIO_REGION_DENDY);
+		case 0:
+			// NTSC
+			CheckRadioButton(hwnd, IDC_RADIO_REGION_NTSC, IDC_RADIO_REGION_DENDY, IDC_RADIO_REGION_NTSC);
+			break;
+		case 1:
+			// PAL
+			CheckRadioButton(hwnd, IDC_RADIO_REGION_NTSC, IDC_RADIO_REGION_DENDY, IDC_RADIO_REGION_PAL);
+			break;
+		case 2:
+			// Dual
+			CheckRadioButton(hwnd, IDC_RADIO_REGION_NTSC, IDC_RADIO_REGION_DENDY, IDC_RADIO_REGION_DUAL);
+			break;
+		case 3:
+			// Dendy
+			CheckRadioButton(hwnd, IDC_RADIO_REGION_NTSC, IDC_RADIO_REGION_DENDY, IDC_RADIO_REGION_DENDY);
 		}
 	}
 	else {
@@ -798,25 +800,25 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 	int system = header->ROM_type2 & 3;
 	switch (system)
 	{
-		default:
+	default:
 		// Normal
-		case 0:
-			CheckRadioButton(hwnd, IDC_RADIO_SYSTEM_NORMAL, IDC_RADIO_SYSTEM_EXTEND, IDC_RADIO_SYSTEM_NORMAL);
-			break;
+	case 0:
+		CheckRadioButton(hwnd, IDC_RADIO_SYSTEM_NORMAL, IDC_RADIO_SYSTEM_EXTEND, IDC_RADIO_SYSTEM_NORMAL);
+		break;
 		// VS. System
-		case 1:
-			CheckRadioButton(hwnd, IDC_RADIO_SYSTEM_NORMAL, IDC_RADIO_SYSTEM_EXTEND, IDC_RADIO_SYSTEM_VS);
-			break;
+	case 1:
+		CheckRadioButton(hwnd, IDC_RADIO_SYSTEM_NORMAL, IDC_RADIO_SYSTEM_EXTEND, IDC_RADIO_SYSTEM_VS);
+		break;
 		// PlayChoice-10
-		case 2:
-			CheckRadioButton(hwnd, IDC_RADIO_SYSTEM_NORMAL, IDC_RADIO_SYSTEM_EXTEND, IDC_RADIO_SYSTEM_PLAYCHOICE10);
-			// PlayChoice-10 is an unofficial setting for ines 1.0
-			unofficial = !ines20;
-			break;
+	case 2:
+		CheckRadioButton(hwnd, IDC_RADIO_SYSTEM_NORMAL, IDC_RADIO_SYSTEM_EXTEND, IDC_RADIO_SYSTEM_PLAYCHOICE10);
+		// PlayChoice-10 is an unofficial setting for ines 1.0
+		unofficial = !ines20;
+		break;
 		// Extend
-		case 3:
-			// The 7th byte is different between ines 1.0 and 2.0, so we need to check it
-			if (ines20) CheckRadioButton(hwnd, IDC_RADIO_SYSTEM_NORMAL, IDC_RADIO_SYSTEM_EXTEND, IDC_RADIO_SYSTEM_EXTEND);
+	case 3:
+		// The 7th byte is different between ines 1.0 and 2.0, so we need to check it
+		if (ines20) CheckRadioButton(hwnd, IDC_RADIO_SYSTEM_NORMAL, IDC_RADIO_SYSTEM_EXTEND, IDC_RADIO_SYSTEM_EXTEND);
 	}
 
 	// it's quite ambiguous to put them here, but it's better to have a default selection than leave the dropdown blank, because user might switch to ines 2.0 anytime
@@ -891,11 +893,9 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 
 	if (mapper < 4096)
 	{
-		if (mapper < 256)
-		{
-			_header.ROM_type |= (mapper & 0xF) << 4;
-			_header.ROM_type2 |= (mapper & 0xF0);
-		} else
+		_header.ROM_type |= (mapper & 0xF) << 4;
+		_header.ROM_type2 |= (mapper & 0xF0);
+		if (mapper >= 256)
 		{
 			if (ines20)
 				_header.ROM_type3 |= mapper >> 8;
@@ -906,7 +906,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 				SetFocus(GetDlgItem(hwnd, IDC_MAPPER_COMBO));
 				return false;
 			}
-		}	
+		}
 	}
 	else {
 		sprintf(buf, "Mapper# should be less than %d in iNES %d.0 format.", 4096, 2);
@@ -929,7 +929,8 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 				SetFocus(GetDlgItem(hwnd, IDC_SUBMAPPER_EDIT));
 				return false;
 			}
-		} else
+		}
+		else
 		{
 			MessageBox(hwnd, "The sub mapper# you have entered is invalid. Please enter a decimal number.", "Error", MB_OK | MB_ICONERROR);
 			SetFocus(GetDlgItem(hwnd, IDC_SUBMAPPER_EDIT));
@@ -1021,7 +1022,8 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 			SetFocus(GetDlgItem(hwnd, IDC_PRGROM_COMBO));
 			return false;
 		}
-	} else
+	}
+	else
 		return false;
 
 	// PRG RAM
@@ -1326,7 +1328,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 			MessageBox(hwnd, "Invalid extend system type", "Error", MB_OK | MB_ICONERROR);
 			SetFocus(GetDlgItem(hwnd, IDC_SYSTEM_EXTEND_COMBO));
 			return false;
-		}			
+		}
 	}
 
 	// Input device
@@ -1424,7 +1426,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 	printf("%02X\n", _header.reserved[1]);
 #endif
 
-return true;
+	return true;
 }
 
 int GetComboBoxByteSize(HWND hwnd, UINT id, int* value)
@@ -1512,32 +1514,33 @@ bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exa
 		{
 			switch (id)
 			{
-				default:
-					success = false;
+			default:
+				success = false;
 				break;
-				case IDC_MAPPER_COMBO:
-					if (!(success = sscanf(buf, "%d", value) > 0))
-						success = SearchByString(hwnd, id, value, buf);
-					else
-						SetDlgItemText(hwnd, id, buf);
+			case IDC_MAPPER_COMBO:
+				if (!(success = sscanf(buf, "%d", value) > 0))
+					success = SearchByString(hwnd, id, value, buf);
+				else
+					SetDlgItemText(hwnd, id, buf);
 				break;
-				case IDC_VS_SYSTEM_COMBO:
-				case IDC_VS_PPU_COMBO:
-				case IDC_SYSTEM_EXTEND_COMBO:
-					if (!(success = sscanf(buf, "$%X", (unsigned int *)value) > 0))
-						success = SearchByString(hwnd, id, value, buf);
-					else
+			case IDC_VS_SYSTEM_COMBO:
+			case IDC_VS_PPU_COMBO:
+			case IDC_SYSTEM_EXTEND_COMBO:
+				if (!(success = sscanf(buf, "$%X", (unsigned int *)value) > 0))
+					success = SearchByString(hwnd, id, value, buf);
+				else
+					SetDlgItemText(hwnd, id, buf);
+				break;
+			case IDC_INPUT_DEVICE_COMBO:
+				if (success = sscanf(buf, "$%X", (unsigned int *)value) > 0)
+				{
+					char buf2[8];
+					sprintf(buf2, "$%02X", *value);
+					if (SendDlgItemMessage(hwnd, id, CB_SELECTSTRING, 0, (LPARAM)buf2) == CB_ERR)
 						SetDlgItemText(hwnd, id, buf);
-					break;
-				case IDC_INPUT_DEVICE_COMBO:
-					if (success = sscanf(buf, "$%X", (unsigned int *)value) > 0)
-					{
-						char buf2[8];
-						sprintf(buf2, "$%02X", *value);
-						if (SendDlgItemMessage(hwnd, id, CB_SELECTSTRING, 0, (LPARAM)buf2) == CB_ERR)
-							SetDlgItemText(hwnd, id, buf);
-					} else
-						success = SearchByString(hwnd, id, value, buf);
+				}
+				else
+					success = SearchByString(hwnd, id, value, buf);
 				break;
 			}
 

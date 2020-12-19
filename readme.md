@@ -7,8 +7,8 @@ An open source NES Emulator for Windows and Unix that features solid emulation a
 Interim builds:
 * Win32: [fceux.zip](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux.zip?branch=master&job=Windows%2032)
 * Win64: [fceux64.zip](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux64.zip?branch=master&job=Windows%2064)
-* Ubuntu: [fceux-2.2.3-amd64.deb](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux-2.2.3-amd64.deb?branch=master&job=Ubuntu)
-* MacOSX: [fceux-2.2.3-Darwin.dmg](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux-2.2.3-Darwin.dmg?branch=master&job=MacOS)
+* Ubuntu: [fceux-2.3.0-amd64.deb](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux-2.3.0-amd64.deb?branch=master&job=Ubuntu)
+* MacOSX: [fceux-2.3.0-Darwin.dmg](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux-2.3.0-Darwin.dmg?branch=master&job=MacOS)
 * Status: [Appveyor](https://ci.appveyor.com/project/zeromus/fceux/)
 
 But you might like mesen more: https://github.com/SourMesen/Mesen 
@@ -17,4 +17,4 @@ You should get releases from here: https://sourceforge.net/projects/fceultra/fil
 
 That's because github forces us to use tags we don't have for releases.
 
-2.2.3 is the most recent release but most people are using the autobuilds.
+2.3.0 is the most recent release but most people are using the autobuilds.

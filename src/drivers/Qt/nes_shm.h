@@ -20,9 +20,15 @@ struct  nes_shm_t
 	uint32_t  render_count;
 	uint32_t  blit_count;
 
-	int   ncol;
-	int   nrow;
-	int   pitch;
+	struct 
+	{
+		int   ncol;
+		int   nrow;
+		int   pitch;
+		int   scale;
+		int   xyRatio;
+		int   preScaler;
+	} video;
 
 	char  runEmulator;
 	char  blitUpdated;
@@ -57,7 +63,7 @@ struct  nes_shm_t
 		} cmd[64];
 	} guiEvent;
 
-	uint32_t  pixbuf[65536]; // 256 x 256
+	uint32_t  pixbuf[1048576]; // 1024 x 1024
 
 	void clear_pixbuf(void)
 	{

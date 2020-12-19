@@ -30,7 +30,7 @@ static char loadedcdfile[512] = {0};
 static int getDefaultCDLFile( char *filepath );
 //----------------------------------------------------
 CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QVBoxLayout *mainLayout, *vbox1, *vbox;
 	QHBoxLayout *hbox;
@@ -324,7 +324,7 @@ void CodeDataLoggerDialog_t::saveCdlFileAs(void)
 	dialog.setNameFilter(tr("CDL Files (*.cdl *.CDL) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 	dialog.setDefaultSuffix( tr(".cdl") );
 
@@ -387,7 +387,7 @@ void CodeDataLoggerDialog_t::loadCdlFile(void)
 	dialog.setNameFilter(tr("CDL files (*.cdl *.CDL) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	romFile = getRomFile();
@@ -470,7 +470,7 @@ void CodeDataLoggerDialog_t::SaveStrippedROM(int invert)
 		dialog.setDefaultSuffix( tr(".nes") );
 	}
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 
 	romFile = getRomFile();
@@ -623,7 +623,14 @@ static int getDefaultCDLFile( char *filepath )
 
 	parseFilepath( romFile, dir, baseFile );
 	
-	sprintf( filepath, "%s/%s.cdl", dir, baseFile );
+	if ( dir[0] == 0 )
+	{
+		sprintf( filepath, "%s.cdl", baseFile );
+	}
+	else
+	{
+		sprintf( filepath, "%s/%s.cdl", dir, baseFile );
+	}
 
 	//printf("%s\n", filepath );
 
@@ -785,6 +792,8 @@ void CDLoggerROMChanged(void)
 	ResetCDLog();
 	RenameCDLog("");
 
+	g_config->getOption("SDL.AutoResumeCDL", &autoResumeCDL);
+
 	if (!autoResumeCDL)
 		return;
 
@@ -827,7 +836,7 @@ void SaveCDLogFile(void)
 	FP = fopen(loadedcdfile, "wb");
 	if (FP == NULL)
 	{
-		FCEUD_PrintError("Error Saving File");
+		FCEUD_PrintError("Error Saving CDL File");
 		return;
 	}
 	fwrite(cdloggerdata, cdloggerdataSize, 1, FP);

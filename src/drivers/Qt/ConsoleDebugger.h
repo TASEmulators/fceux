@@ -22,6 +22,7 @@
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QPlainTextEdit>
+#include <QClipboard>
 #include <QScrollBar>
 
 #include "Qt/main.h"
@@ -37,6 +38,7 @@ struct dbg_asm_entry_t
 	int  line;
 	uint8  opcode[3];
 	std::string  text;
+	debugSymbol_t  sym;
 
 	enum
 	{
@@ -110,23 +112,34 @@ class QAsmView : public QWidget
 		void setSymbolDebugEnable( bool value );
 		void setRegisterNameEnable( bool value );
 		int  getCtxMenuAddr(void){ return ctxMenuAddr; };
+		int  getCursorAddr(void){ return cursorLineAddr; };
+		void setPC_placement( int mode, int ofs = 0 );
+		void setBreakpointAtSelectedLine(void);
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
    	void keyReleaseEvent(QKeyEvent *event);
 		void mousePressEvent(QMouseEvent * event);
+		void mouseReleaseEvent(QMouseEvent * event);
 		void mouseMoveEvent(QMouseEvent * event);
 		void resizeEvent(QResizeEvent *event);
+		void wheelEvent(QWheelEvent *event);
 		void contextMenuEvent(QContextMenuEvent *event);
+		void loadHighlightToClipboard(void);
 
 		void calcFontData(void);
 		QPoint convPixToCursor( QPoint p );
+		bool textIsHighlighted(void);
+		void setHighlightEndCoord( int x, int y );
+		void loadClipboard( const char *txt );
+		void drawText( QPainter *painter, int x, int y, const char *txt );
 
 	private:
 		ConsoleDebugger *parent;
 		QFont       font;
 		QScrollBar *vbar;
 		QScrollBar *hbar;
+		QClipboard *clipboard;
 
 		int ctxMenuAddr;
 		int maxLineLen;
@@ -144,13 +157,59 @@ class QAsmView : public QWidget
 		int pxLineXScroll;
 		int cursorPosX;
 		int cursorPosY;
+		int cursorLineAddr;
+		int pcLinePlacement;
+		int pcLineOffset;
+
+		int  selAddrLine;
+		int  selAddrChar;
+		int  selAddrWidth;
+		int  selAddrValue;
+		char selAddrText[128];
+
+		int  txtHlgtAnchorChar;
+		int  txtHlgtAnchorLine;
+		int  txtHlgtStartChar;
+		int  txtHlgtStartLine;
+		int  txtHlgtEndChar;
+		int  txtHlgtEndLine;
+
+		int  wheelPixelCounter;
 
 		dbg_asm_entry_t  *asmPC;
 		std::vector <dbg_asm_entry_t*> asmEntry;
 
+		bool  useDarkTheme;
 		bool  displayROMoffsets;
 		bool  symbolicDebugEnable;
 		bool  registerNameEnable;
+		bool  mouseLeftBtnDown;
+
+};
+
+class DebuggerStackDisplay : public QPlainTextEdit
+{
+   Q_OBJECT
+
+	public:
+   DebuggerStackDisplay(QWidget *parent = 0);
+	~DebuggerStackDisplay(void);
+
+      void updateText(void);
+
+   protected:
+      void keyPressEvent(QKeyEvent *event);
+      void contextMenuEvent(QContextMenuEvent *event);
+
+      int  stackBytesPerLine;
+      bool showAddrs;
+
+	private slots:
+      void toggleShowAddr(void);
+      void sel1BytePerLine(void);
+      void sel2BytesPerLine(void);
+      void sel3BytesPerLine(void);
+      void sel4BytesPerLine(void);
 };
 
 class ConsoleDebugger : public QDialog
@@ -181,7 +240,7 @@ class ConsoleDebugger : public QDialog
 		QScrollBar  *vbar;
 		QScrollBar  *hbar;
 		QAsmView    *asmView;
-		QPlainTextEdit *stackText;
+		DebuggerStackDisplay *stackText;
 		QLineEdit *seekEntry;
 		QLineEdit *pcEntry;
 		QLineEdit *regAEntry;
@@ -239,6 +298,7 @@ class ConsoleDebugger : public QDialog
 		void asmViewCtxMenuAddBM(void);
 		void asmViewCtxMenuAddSym(void);
 		void asmViewCtxMenuOpenHexEdit(void);
+		void asmViewCtxMenuRunToCursor(void);
 	private slots:
 		void updatePeriodic(void);
 		void hbarChanged(int value);
@@ -247,6 +307,7 @@ class ConsoleDebugger : public QDialog
 		void debugStepIntoCB(void);
 		void debugStepOutCB(void);
 		void debugStepOverCB(void);
+		void debugRunToCursorCB(void);
 		void debugRunLineCB(void);
 		void debugRunLine128CB(void);
 		void seekToCB(void);
@@ -273,6 +334,12 @@ class ConsoleDebugger : public QDialog
 		void cpuCycleThresChanged(const QString &txt);
 		void instructionsThresChanged(const QString &txt);
 		void selBmAddrChanged(const QString &txt);
+		void pcSetPlaceTop(void);
+		void pcSetPlaceUpperMid(void);
+		void pcSetPlaceCenter(void);
+		void pcSetPlaceLowerMid(void);
+		void pcSetPlaceBottom(void);
+		void pcSetPlaceCustom(void);
 
 };
 

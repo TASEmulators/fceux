@@ -1,129 +1,326 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>2. Program Interface</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.1.648">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "index.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("ProgramInterface");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>2. Program Interface</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="2. Program Interface">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="2. Program Interface" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="TAS Editor Manual" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>2. Program Interface</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="BeginnersGuide.html">Beginner's Guide</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="BeginnersGuide.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="Introduction.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="PianoRoll.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
+
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>TAS Editor Manual</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="ProgramInterface"
+		  data-hnd-context="5"
+		  data-hnd-title="2. Program Interface"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="BeginnersGuide.html">Beginner's Guide</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="BeginnersGuide.html" title="Beginner's Guide" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="Introduction.html" title="1. Introduction" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="PianoRoll.html" title="2.1. Piano Roll" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>2. Program Interface</h2>
+
+            <div class="main-content">
+                
 <p></p>
-<p><span class="rvts19">Program Interface</span></p>
+<p class="rvps2"><span class="rvts18">Program Interface</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps10"><span class="rvts21">This chapter describes the program interface and ways of interacting with it.</span></p>
-<p class="rvps10"><span class="rvts21">The description uses many specific terms, so make sure you know the </span><a class="rvts32" href="Glossary.html">Glossary</a><span class="rvts21"> before starting the read. Also, it's advisable to run Taseditor right now, to be able to check everything you read in practice.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">To enter Taseditor do the following:</span></p>
-<ol style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps14"><span class="rvts21">launch FCEUX emulator</span></li>
-<li class="rvps14"><span class="rvts21">load any game ROM (File -&gt; Open ROM)</span></li>
-<li class="rvps14"><span class="rvts21">open Taseditor window (Tools -&gt; TAS Editor)</span></li>
+<p class="rvps7"><span class="rvts20">This chapter describes the program interface and ways of interacting with it.</span></p>
+<p class="rvps7"><span class="rvts20">The description uses many specific terms, so make sure you know the </span><a class="rvts29" href="Glossary.html">Glossary</a><span class="rvts20"> before starting the read. Also, it's advisable to run Taseditor right now, to be able to check everything you read in practice.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">To enter Taseditor do the following:</span></p>
+<ol style="text-indent: 30px; padding: 0; margin: 0 0 0 0px; list-style-position: inside; list-style-type: decimal;">
+ <li value="1" class="rvps9"><span class="rvts20">launch FCEUX emulator</span></li>
+ <li value="2" class="rvps9"><span class="rvts20">load any game ROM (File -&gt; Open ROM)</span></li>
+ <li value="3" class="rvps9"><span class="rvts20">open Taseditor window (Tools -&gt; TAS Editor)</span></li>
 </ol>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">When you engage Taseditor, the game is reset, and the emulator pauses. It shall stay paused as you TAS, to prevent the game from urging you on and distracting from analysis of information.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps18"><img alt="" style="padding : 1px;" src="lib/Monitor-example.png"/></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">While TASing in Taseditor, a considerable part of the desktop is covered by the very Taseditor window. Emulator window is used for picture output, and you'd better scale it up to 2x size, so you won't miss a tiny detail even at a cursory glance. During your work you'll have to move eyes between emulator window and Taseditor window (mostly contents of the Piano Roll). So put those windows close to each other. The remaining space of the desktop can be populated with RAM Watch window, Lua console, etc.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">You can adjust the size of TAS Editor window by dragging its edges with the mouse. The size and position are automatically saved and restored at next launch.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The window caption displays the program name ("TAS Editor") and the name of current project. If there are any unsaved changes, an asterisk is added to the end of the text. Besides, when the Input Recording mode is on, the word "Recording" appears in the window caption.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21">The main menu of the program is similar to one found in text editors like Notepad.</span></p>
-<p class="rvps10"><span class="rvts21">The </span><span class="rvts25">File</span><span class="rvts21"> item is responsible for all file operations – creating a new TAS project, opening an existing file, saving, data importing and exporting. There's also a "Recent" sub-menu that stores direct paths to recently used projects.</span></p>
-<p class="rvps10"><span class="rvts21">The </span><span class="rvts25">Edit</span><span class="rvts21"> item contains functions that let you edit TAS movie like a simple text file or a table file. Most of those functions can be accessed through standard key combinations, such as </span><span class="rvts30">Ctrl + C</span><span class="rvts21">, </span><span class="rvts30">Ctrl + V</span><span class="rvts21"> and others. They will be reviewed later.</span></p>
-<p class="rvps10"><span class="rvts21">The </span><span class="rvts25">View</span><span class="rvts21"> item allows to adjust the program appearance. Besides, here you can open the "Find Note" window, used to search text in Marker Notes. All of that will be described later. Until you study the </span><a class="rvts33" href="ProgramCustomization.html">Chapter 5</a><span class="rvts21"> of this Guide, it's recommended to keep default preferences.</span></p>
-<p class="rvps10"><span class="rvts21">The </span><span class="rvts25">Config</span><span class="rvts21"> item stores the rest settings, e.g. project auto-saving timer, the number of undo levels and other features that will be described during the learning flow. Don't change those settings for now.</span></p>
-<p class="rvps10"><span class="rvts21">Finally, the </span><span class="rvts25">Help</span><span class="rvts21"> item contains the link to local copy of this Guide and the "About" window. Here you can also switch on/off hints (tooltips).</span></p>
-<p class="rvps10"><span class="rvts21">To the right of the main menu there is the </span><span class="rvts25">Pattern</span><span class="rvts21"> item, displaying the name of current pattern. Patterns are just templates for speeding up the Input creation. They will be described in </span><a class="rvts31" href="AdvancedFeatures.html#UsingPatterns">Chapter 6</a><span class="rvts21">.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<div class="rvps10"><table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-width: 0px;">
-<tr valign="top">
-<td style="width: 125px;"><p class="rvps2"><img alt="" style="padding : 1px;" src="lib/pianoroll.png"/></p>
-</td>
-<td style="width: 797px;"><div class="rvps10"><table width="100%" border="0" cellpadding="10" cellspacing="0" style="border-width: 0px;">
-<tr valign="top">
-<td><p class="rvps10"><span class="rvts21">Contents of the TAS Editor window can be divided into 2 parts – the workspace (Piano Roll) to the left and the Toolbox to the right.</span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps17"><a class="rvts23" href="PianoRoll.html">Proceed to the Piano Roll description</a></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-</td>
-</tr>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">When you engage Taseditor, the game is reset, and the emulator pauses. It shall stay paused as you TAS, to prevent the game from urging you on and distracting from analysis of information.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps3"><img alt="" style="padding : 1px;" src="lib/Monitor-example.png"></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">While TASing in Taseditor, a considerable part of the desktop is covered by the very Taseditor window. Emulator window is used for picture output, and you'd better scale it up to 2x size, so you won't miss a tiny detail even at a cursory glance. During your work you'll have to move eyes between emulator window and Taseditor window (mostly contents of the Piano Roll). So put those windows close to each other. The remaining space of the desktop can be populated with RAM Watch window, Lua console, etc.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">You can adjust the size of TAS Editor window by dragging its edges with the mouse. The size and position are automatically saved and restored at next launch.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The window caption displays the program name ("TAS Editor") and the name of current project. If there are any unsaved changes, an asterisk is added to the end of the text. Besides, when the Input Recording mode is on, the word "Recording" appears in the window caption.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20">The main menu of the program is similar to one found in text editors like Notepad.</span></p>
+<p class="rvps7"><span class="rvts20">The </span><span class="rvts22">File</span><span class="rvts20"> item is responsible for all file operations – creating a new TAS project, opening an existing file, saving, data importing and exporting. There's also a "Recent" sub-menu that stores direct paths to recently used projects.</span></p>
+<p class="rvps7"><span class="rvts20">The </span><span class="rvts22">Edit</span><span class="rvts20"> item contains functions that let you edit TAS movie like a simple text file or a table file. Most of those functions can be accessed through standard key combinations, such as </span><span class="rvts27">Ctrl + C</span><span class="rvts20">, </span><span class="rvts27">Ctrl + V</span><span class="rvts20"> and others. They will be reviewed later.</span></p>
+<p class="rvps7"><span class="rvts20">The </span><span class="rvts22">View</span><span class="rvts20"> item allows to adjust the program appearance. Besides, here you can open the "Find Note" window, used to search text in Marker Notes. All of that will be described later. Until you study the </span><a class="rvts30" href="ProgramCustomization.html">Chapter 5</a><span class="rvts20"> of this Guide, it's recommended to keep default preferences.</span></p>
+<p class="rvps7"><span class="rvts20">The </span><span class="rvts22">Config</span><span class="rvts20"> item stores the rest settings, e.g. project auto-saving timer, the number of undo levels and other features that will be described during the learning flow. Don't change those settings for now.</span></p>
+<p class="rvps7"><span class="rvts20">Finally, the </span><span class="rvts22">Help</span><span class="rvts20"> item contains the link to local copy of this Guide and the "About" window. Here you can also switch on/off hints (tooltips).</span></p>
+<p class="rvps7"><span class="rvts20">To the right of the main menu there is the </span><span class="rvts22">Pattern</span><span class="rvts20"> item, displaying the name of current pattern. Patterns are just templates for speeding up the Input creation. They will be described in </span><a class="rvts28" href="AdvancedFeatures.html#UsingPatterns">Chapter 6</a><span class="rvts20">.</span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<div class="rvps7">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-width: 0px; border-spacing: 0px;">
+ <tr valign="top">
+  <td width="125" style="padding: 0px;">
+   <p class="rvps2"><img alt="" style="padding : 1px;" src="lib/pianoroll.png"></p>
+  </td>
+  <td width="797" style="padding: 0px;">
+   <div class="rvps7">
+   <table width="100%" border="0" cellpadding="10" cellspacing="0" style="border-width: 0px; border-spacing: 0px;">
+    <tr valign="top">
+     <td style="padding: 10px;">
+      <p class="rvps7"><span class="rvts20">Contents of the TAS Editor window can be divided into 2 parts – the workspace (Piano Roll) to the left and the Toolbox to the right.</span></p>
+      <p class="rvps7"><span class="rvts20"><br/></span></p>
+      <p class="rvps11"><a class="rvts11" href="PianoRoll.html">Proceed to the Piano Roll description</a></p>
+      <p class="rvps2"><span class="rvts6"><br/></span></p>
+      <p class="rvps2"><span class="rvts6"><br/></span></p>
+     </td>
+    </tr>
+   </table>
+   </div>
+   <p class="rvps7"><span class="rvts20"><br/></span></p>
+   <p class="rvps7"><span class="rvts6"><br/></span></p>
+  </td>
+  <td width="67" style="padding: 0px;">
+   <p class="rvps12"><img alt="" style="padding : 1px;" src="lib/toolbox.png"></p>
+  </td>
+ </tr>
 </table>
 </div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts6"><br/></span></p>
-</td>
-<td style="width: 67px;"><p class="rvps19"><img alt="" style="padding : 1px;" src="lib/toolbox.png"/></p>
-</td>
-</tr>
-</table>
-</div>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
-<p class="rvps10"><span class="rvts21"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
+<p class="rvps7"><span class="rvts20"><br/></span></p>
 <p></p>
-<p class="rvps8"><span class="rvts17">Created with the Personal Edition of HelpNDoc: </span><a class="rvts18" href="http://www.helpndoc.com">Free PDF documentation generator</a></p>
-</div>
-	
-	<div id="topic_footer">
+<p class="rvps6" style="clear: both;"><span class="rvts16">Created with the Personal Edition of HelpNDoc: </span><a class="rvts17" href="https://www.helpndoc.com/feature-tour/create-help-files-for-the-qt-help-framework">Create help files for the Qt Help Framework</a></p>
 
-			<div id="topic_footer_content">
-				&copy; 2011-2013 AnS</div>
-		</div>
-	</body>
-	
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">&copy; 2011-2013 AnS</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

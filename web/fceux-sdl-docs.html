@@ -23,7 +23,7 @@
 	<div id="page_content">
 
   <center><h1>FCEUX SDL Documentation</h1></center>
-  <center><i>Last updated October 11, 2011<br />Valid as of FCEUX 2.1.5</i><br></center>
+  <center><i>Last updated December 9, 2020<br />Valid as of FCEUX 2.3.0</i><br></center>
  <p>
  <b>Table of Contents:</b>
  <ul>
@@ -36,6 +36,7 @@
    <li /><a href="#features-ips">Automatic IPS Patching</a>
   <li /><a href="#using">Using FCEUX</a>
   <ul>
+   <li /><a href="#gui-styling">Qt GUI Style</a>
    <li /><a href="#using-hotkeys">Hotkey Assignments</a>
    <ul>
     <li /><a href="#using-keys-vs">VS Unisystem</a>
@@ -186,12 +187,24 @@ necessarily 100% accurate or complete):
  <p>
  
  </p>
+ <a name="gui-styling"><h3>Qt GUI Style</h3></a>
+ <p>
+The Qt GUI can either use the standard system style/themes or custom stylesheets.
+The available standard styles that are installed on the system will be listed when running the executable command line help. 
+To use a provided system style, use the --style command line argument.
+To use a custom Qt stylesheet file, set an environment variable named FCEUX_QT_STYLESHEET that contains
+the full path to the file. This will check for this at startup.
+If the variable is defined and the file is readable by the program,
+then the styling settings will be used by the GUI.<br>
+<br>Bash Shell Setup Example:
+	<pre>
+   export FCEUX_QT_STYLESHEET=/home/me/myFceux.qss
+	</pre>
+	For information on Qt stylesheet syntax, see <a href=https://doc.qt.io/>Qt online documentation</a>
+ </p>
  <a name="using-hotkeys"><h3>Hotkey Assignments</h3></a>
  <p>
- <b>NOTE:</b>There is not a GUI available to remap these hotkeys for SDL.  If you really
- want to remap the hotkeys, you can edit the config file manually and replace the values
- with SDL keysyms.  Alternatively, you can use a tool like <a href="http://qjoypad.sourceforge.net/">qjoypad</a> 
- or <a href="http://joy2key.sourceforge.net/">joy2key</a> and even map hotkeys to joystick buttons/axes.
+ <b>NOTE:</b> The GUI has a window to remap these hotkeys for SDL.  
  <p>
  <table border>
  <tr><th>Key:</th><th>Action:</th></tr>
@@ -242,7 +255,7 @@ necessarily 100% accurate or complete):
  </p>
  <a name="using-keys-gamepad"><h4>Gamepad</h4></a>
  <p> These are the default keys for the P1 gamepad.  These can
- be remapped using the --inputcfg command line parameter or the GTK GUI
+ be remapped the Qt GUI
  <table border>
  <tr><th>Key:</th><th nowrap>Button on Emulated Gamepad:</th></tr>
  <tr><td>D</td><td>B</td></tr>
@@ -292,8 +305,10 @@ necessarily 100% accurate or complete):
   are taken in the form of "--parameter value". Most arguments that have
   both a parameter and a value will be saved in the configuration file.
   </p>
-  <b>NOTE: </b>This list is incomplete!  For a full list of options, run
-  fceux without any arguments.
+  <b>NOTE: </b>This list is incomplete!  For a full list of options, run:
+  <pre>
+     fceux --help
+  </pre>
   <p>
   <table border>
    <tr><th>Argument:</th><th>Value Type:</th><th>Default value:</th><th>Description:</th></tr>
@@ -321,6 +336,8 @@ necessarily 100% accurate or complete):
   <tr><td>Unknown</td><td>Original Author</td></tr>
   <tr><td><a href="mailto:ltsmooth42 _at_ gmail _dot_ com">Lukas Sabota</a></td>
   <td>FCEUX SDL documentation revival.</td></tr>
+  <tr><td>mjbudd77</td>
+  <td>FCEUX Qt/SDL documentation upates.</td></tr>
  </table>
  </p>
 </div>

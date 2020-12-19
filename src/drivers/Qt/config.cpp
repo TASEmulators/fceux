@@ -55,7 +55,7 @@ static const char* HotkeyStrings[HK_MAX] = {
 		"SelectState0", "SelectState1", "SelectState2", "SelectState3",
 		"SelectState4", "SelectState5", "SelectState6", "SelectState7", 
 		"SelectState8", "SelectState9", "SelectStateNext", "SelectStatePrev",
-		"VolumeDown", "VolumeUp" };
+		"VolumeDown", "VolumeUp", "FKB_Enable" };
 
 const char *getHotkeyString( int i )
 {
@@ -206,7 +206,6 @@ InitConfig()
 	config->addOption('y', "yres", "SDL.YResolution", 0);
 	config->addOption("SDL.LastXRes", 0);
 	config->addOption("SDL.LastYRes", 0);
-	config->addOption('b', "bpp", "SDL.BitsPerPixel", 32);
 	config->addOption("doublebuf", "SDL.DoubleBuffering", 1);
 	config->addOption("autoscale", "SDL.AutoScale", 1);
 	config->addOption("keepratio", "SDL.KeepRatio", 1);
@@ -221,7 +220,7 @@ InitConfig()
 
 	// OpenGL options
 	config->addOption("opengl", "SDL.OpenGL", 1);
-	config->addOption("openglip", "SDL.OpenGLip", 1);
+	config->addOption("openglip", "SDL.OpenGLip", 0);
 	config->addOption("SDL.SpecialFilter", 0);
 	config->addOption("SDL.SpecialFX", 0);
 	config->addOption("SDL.Vsync", 1);
@@ -241,9 +240,8 @@ InitConfig()
 	config->addOption("input3", "SDL.Input.2", "Gamepad.2");
 	config->addOption("input4", "SDL.Input.3", "Gamepad.3");
 
-	// allow for input configuration
-	//config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
-    
+	config->addOption("autoInputPreset", "SDL.AutoInputPreset", 0);
+
 	// display input
 	config->addOption("inputdisplay", "SDL.InputDisplay", 0);
 
@@ -260,8 +258,10 @@ InitConfig()
 	config->addOption("hexEditFgColor", "SDL.HexEditFgColor", "#FFFFFF");
     
 	// Debugger Options
-	config->addOption("autoLoadDebugFiles", "SDL.AutoLoadDebugFiles", 1);
-	config->addOption("autoOpenDebugger"  , "SDL.AutoOpenDebugger"  , 0);
+	config->addOption("autoLoadDebugFiles"     , "SDL.AutoLoadDebugFiles", 1);
+	config->addOption("autoOpenDebugger"       , "SDL.AutoOpenDebugger"  , 0);
+	config->addOption("debuggerPCPlacementMode", "SDL.DebuggerPCPlacement"  , 0);
+	config->addOption("debuggerPCDLineOffset"  , "SDL.DebuggerPCLineOffset" , 0);
 
 	// Code Data Logger Options
 	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);
@@ -305,11 +305,21 @@ InitConfig()
 	config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", home_dir);
 	config->addOption("_lastopennsf", "SDL.LastOpenNSF", home_dir);
 	config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", home_dir);
+	config->addOption("_lastopenmovie", "SDL.LastOpenMovie", home_dir);
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
 
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
     
+	config->addOption("_setSchedParam"      , "SDL.SetSchedParam" , 0);
+	config->addOption("_emuSchedPolicy"     , "SDL.EmuSchedPolicy", 0);
+	config->addOption("_emuSchedNice"       , "SDL.EmuSchedNice"  , 0);
+	config->addOption("_emuSchedPrioRt"     , "SDL.EmuSchedPrioRt", 40);
+	config->addOption("_guiSchedPolicy"     , "SDL.GuiSchedPolicy", 0);
+	config->addOption("_guiSchedNice"       , "SDL.GuiSchedNice"  , 0);
+	config->addOption("_guiSchedPrioRt"     , "SDL.GuiSchedPrioRt", 40);
+	config->addOption("_emuTimingMech"      , "SDL.EmuTimingMech" , 0);
+
 	// fcm -> fm2 conversion
 	config->addOption("fcmconvert", "SDL.FCMConvert", "");
     
@@ -433,11 +443,25 @@ InitConfig()
 		SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
 		SDLK_6, SDLK_7, SDLK_8, SDLK_9,
 		SDLK_PAGEUP, // select state next
-		SDLK_PAGEDOWN}; // select state prev
+		SDLK_PAGEDOWN, // select state prev
+		0, // Volume Down Internal 
+		0, // Volume Up Internal 
+		SDLK_SCROLLLOCK }; // FKB Enable Toggle
 
 	prefix = "SDL.Hotkeys.";
 	for(int i=0; i < HK_MAX; i++)
-		config->addOption(prefix + HotkeyStrings[i], Hotkeys[i]);
+	{
+		char buf[256];
+		std::string keyText;
+
+		keyText.assign(" mod=");
+
+		sprintf( buf, "  key=%s", SDL_GetKeyName( Hotkeys[i] ) );
+
+		keyText.append( buf );
+
+		config->addOption(prefix + HotkeyStrings[i], keyText);
+	}
 	// All mouse devices
 	config->addOption("SDL.OekaKids.0.DeviceType", "Mouse");
 	config->addOption("SDL.OekaKids.0.DeviceNum", 0);

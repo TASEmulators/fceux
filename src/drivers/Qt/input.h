@@ -14,18 +14,15 @@ enum {
 };
 struct ButtConfig
 {
-	int    ButtType; //[MAXBUTTCONFIG];
-	int    DeviceNum; //[MAXBUTTCONFIG];
-	int    ButtonNum; //[MAXBUTTCONFIG];
+	int    ButtType; 
+	int    DeviceNum; 
+	int    ButtonNum; 
    int    state;
-	//uint32_t NumC;
-	//uint64 DeviceID[MAXBUTTCONFIG];	/* TODO */
 };
 
 extern int NoWaiting;
 extern CFGSTRUCT InputConfig[];
 extern ARGPSTRUCT InputArgs[];
-extern int Hotkeys[];
 void ParseGIInput(FCEUGI *GI);
 void setHotKeys(void);
 int getKeyState( int k );
@@ -34,6 +31,23 @@ void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
 int DWaitButton(const uint8_t *text, ButtConfig *bc, int *buttonConfigStatus = NULL);
 
+struct hotkey_t
+{
+	int value;
+	int modifier;
+	char prevState;
+
+	hotkey_t(void);
+
+	int getState(void);
+
+	int getRisingEdge(void);
+
+	int getString( char *s );
+
+	void setModifierFromString( const char *s );
+};
+extern struct hotkey_t Hotkeys[];
 
 #define FCFGD_GAMEPAD   1
 #define FCFGD_POWERPAD  2
@@ -53,15 +67,20 @@ extern bool replaceP2StartWithMicrophone;
 
 void IncreaseEmulationSpeed(void);
 void DecreaseEmulationSpeed(void);
+int CustomEmulationSpeed(int spdPercent);
 
 int DTestButtonJoy(ButtConfig *bc);
 
 void FCEUD_UpdateInput(void);
 
 void UpdateInput(Config *config);
-//void InputCfg(const std::string &);
 
 std::string GetUserText(const char* title);
 const char* ButtonName(const ButtConfig* bc);
+
+int getInputSelection( int port, int *cur, int *usr );
+int saveInputSettingsToFile( const char *fileBase = NULL );
+int loadInputSettingsFromFile( const char *filename = NULL );
+
 #endif
 

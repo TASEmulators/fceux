@@ -38,17 +38,52 @@ int  getDirFromFile( const char *path, char *dir )
 //---------------------------------------------------------------------------
 const char *getRomFile( void )
 {
+	static char filePath[2048];
+
 	if ( GameInfo )
 	{
-		return GameInfo->filename;
+		//printf("filename: '%s' \n", GameInfo->filename );
+		//printf("archiveFilename: '%s' \n", GameInfo->archiveFilename );
+
+		if ( GameInfo->archiveFilename != NULL )
+		{
+			char dir[1024], base[512], suffix[64];
+
+			parseFilepath( GameInfo->archiveFilename, dir, base, suffix );
+
+			filePath[0] = 0;
+
+			if ( dir[0] != 0 )
+			{
+				strcat( filePath, dir );
+			}
+
+			parseFilepath( GameInfo->filename, dir, base, suffix );
+
+			strcat( filePath, base   );
+			strcat( filePath, suffix );
+
+			//printf("ArchivePath: '%s' \n", filePath );
+
+			return filePath;
+		}
+		else
+		{
+			return GameInfo->filename;
+		}
 	}
 	return NULL;
 }
 //---------------------------------------------------------------------------
 // Return file base name stripping out preceding path and trailing suffix.
-int getFileBaseName( const char *filepath, char *base )
+int getFileBaseName( const char *filepath, char *base, char *suffix )
 {
 	int i=0,j=0,end=0;
+
+	if ( suffix != NULL )
+	{
+		suffix[0] = 0;
+	}
 	if ( filepath == NULL )
 	{
 		base[0] = 0;
@@ -77,6 +112,10 @@ int getFileBaseName( const char *filepath, char *base )
 		j--;
 		if ( base[j] == '.' )
 		{
+			if ( suffix != NULL )
+			{
+				strcpy( suffix, &base[j] );
+			}
 			end=j; base[j] = 0; break;
 		}
 	}
@@ -86,6 +125,11 @@ int getFileBaseName( const char *filepath, char *base )
 int parseFilepath( const char *filepath, char *dir, char *base, char *suffix )
 {
 	int i=0,j=0,end=0;
+
+	if ( suffix != NULL )
+	{
+		suffix[0] = 0;
+	}
 	if ( filepath == NULL )
 	{
 		if ( dir   ) dir[0] = 0;
@@ -143,5 +187,140 @@ int parseFilepath( const char *filepath, char *dir, char *base, char *suffix )
 		}
 	}
 	return end;
+}
+//---------------------------------------------------------------------------
+// FCEU Data Entry Custom Validators
+//---------------------------------------------------------------------------
+fceuDecIntValidtor::fceuDecIntValidtor( int min, int max, QObject *parent)
+     : QValidator(parent)
+{
+	this->min = min;
+	this->max = max;
+}
+//---------------------------------------------------------------------------
+void fceuDecIntValidtor::setMinMax( int min, int max)
+{
+	this->min = min;
+	this->max = max;
+}
+//---------------------------------------------------------------------------
+QValidator::State fceuDecIntValidtor::validate(QString &input, int &pos) const
+{
+   int i, v;
+   //printf("Validate: %i '%s'\n", input.size(), input.toStdString().c_str() );
+
+   if ( input.size() == 0 )
+   {
+      return QValidator::Acceptable;
+   }
+   std::string s = input.toStdString();
+   i=0;
+
+   if (s[i] == '-')
+	{
+		if ( min >= 0 )
+		{
+   		return QValidator::Invalid;
+		}
+		i++;
+	}
+	else if ( s[i] == '+' )
+   {
+      i++;
+   }
+
+   if ( s[i] == 0 )
+   {
+      return QValidator::Acceptable;
+   }
+
+   if ( isdigit(s[i]) )
+   {
+      while ( isdigit(s[i]) ) i++;
+
+      if ( s[i] == 0 )
+      {
+			v = strtol( s.c_str(), NULL, 0 );
+
+			if ( v < min )
+			{
+   			return QValidator::Invalid;
+			}
+			else if ( v > max )
+			{
+   			return QValidator::Invalid;
+			}
+         return QValidator::Acceptable;
+      }
+   }
+   return QValidator::Invalid;
+}
+//---------------------------------------------------------------------------
+// FCEU Data Entry Custom Validators
+//---------------------------------------------------------------------------
+fceuHexIntValidtor::fceuHexIntValidtor( int min, int max, QObject *parent)
+     : QValidator(parent)
+{
+	this->min = min;
+	this->max = max;
+}
+//---------------------------------------------------------------------------
+void fceuHexIntValidtor::setMinMax( int min, int max)
+{
+	this->min = min;
+	this->max = max;
+}
+//---------------------------------------------------------------------------
+QValidator::State fceuHexIntValidtor::validate(QString &input, int &pos) const
+{
+   int i, v;
+   //printf("Validate: %i '%s'\n", input.size(), input.toStdString().c_str() );
+
+   if ( input.size() == 0 )
+   {
+      return QValidator::Acceptable;
+   }
+	input = input.toUpper();
+   std::string s = input.toStdString();
+   i=0;
+
+   if (s[i] == '-')
+	{
+		if ( min >= 0 )
+		{
+   		return QValidator::Invalid;
+		}
+		i++;
+	}
+	else if ( s[i] == '+' )
+   {
+      i++;
+   }
+
+   if ( s[i] == 0 )
+   {
+      return QValidator::Acceptable;
+   }
+
+   if ( isxdigit(s[i]) )
+   {
+      while ( isxdigit(s[i]) ) i++;
+
+      if ( s[i] == 0 )
+      {
+			v = strtol( s.c_str(), NULL, 16 );
+
+			if ( v < min )
+			{
+   			return QValidator::Invalid;
+			}
+			else if ( v > max )
+			{
+   			return QValidator::Invalid;
+			}
+         return QValidator::Acceptable;
+      }
+   }
+   return QValidator::Invalid;
 }
 //---------------------------------------------------------------------------

@@ -42,8 +42,8 @@
 	<h1>Downloads</h1>
 		<p>The FCEUX team maintains two ports: SDL and Win32.
 		The Win32 port has an extensive set of native gui amenities and tools. 
-		The SDL port supports many of the features of the Win32 build (Lua scripting, movie recording), 
-		but some of the Win32 features (debugger, TAS Editor) are exclusive to Windows.
+		The SDL port supports most of the features of the Win32 build (debug tools, Lua scripting, movie recording), 
+		but some of the Win32 features (TAS Editor) are exclusive to Windows.
 		The SDL port should run in any UNIX-like OS (Linux/Solaris/BSD/OSX).
 		</p>
 		
@@ -58,11 +58,13 @@
 		
 		<h4>SDL</h4>
 		<ul>
-			<li><a href="http://scons.org/">Scons is required to build from source.</a></li>
-			<li>Requires SDL and libz</li>
-			<li>GTK2.0 and OpenGL are optional, but recommended.</li>
-			<li>The GTK GUI is enabled by default, but you can disable it by editing the SConstruct file.</li>
-			<li>For (somewhat outdated) instructions on installing on an Ubuntu or Debian system, check the how to at <a href="http://ubuntuforums.org/showthread.php?t=971455">Ubuntuforums.</a></li>
+			<li><a href="https://cmake.org/">Cmake is required to build from source.</a></li>
+			<li>Cross platform Qt GUI replaces deprecated GTK GUI</li>
+			<li>Requires Qt5, SDL2, minizip, zlib, and OpenGL</li>
+			<li>Lua 5.1 is optional, if the system cannot provide this, an internal version of Lua will be statically linked</li>
+			<li>The Qt GUI is required and will automatically be part of the build.</li>
+			<li>For installation instructions on Linux systems, see the README at the root level of the source tree</li>
+			<li>For build examples, see the script files in the pipelines directory of the project</li>
 		</ul>
 		
 		<h3>Download</h3>
@@ -75,8 +77,8 @@
 		<ul>
 			<li><a href="https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux.zip?branch=master&job=Windows%2032">Windows 32-bit</a></li>
 			<li><a href="https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux64.zip?branch=master&job=Windows%2064">Windows 64-bit</a></li>
-			<li><a href="https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux-2.2.3-amd64.deb?branch=master&job=Ubuntu">Ubuntu Linux</a></li>
-			<li><a href="https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux-2.2.3-Darwin.dmg?branch=master&job=MacOS">Mac OS X</a></li>
+			<li><a href="https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux-2.3.0-amd64.deb?branch=master&job=Ubuntu">Ubuntu Linux</a></li>
+			<li><a href="https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux-2.3.0-Darwin.dmg?branch=master&job=MacOS">Mac OS X</a></li>
 		</ul>
 		
 		<h3>Source Code</h3>
@@ -87,9 +89,9 @@
 		<h4>Compiling</h4>
 		<ul>
 			<li>Win32 uses MS Visual Studio 2010. Newer versions of visual studio should be able to build it, with a little trouble.</li>
-			<li>The SDL build uses Scons</li>
+			<li>The Qt/SDL build uses Cmake</li>
 			<li>Everything needed to compile the win32 version is included in SVN</li>
-			<li>The GTK port requires SDL and libz</li>
+			<li>The Qt/SDL port requires development packages for Qt5, SDL2, minizip, zlib, and OpenGL</li>
 		</ul>
 		<h3>Old Versions</h3>
 		<table border="1">

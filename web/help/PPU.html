@@ -1,367 +1,558 @@
-﻿<html>
-	
+
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<title>PPU - 2C02</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.8.0.560">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#topic_header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript">
-		$(document).ready(function()
-		{
-			if (top.frames.length == 0)
-			{
-				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
-				top.location.href = "fceux.html?" + sTopicUrl;
-			}
-			else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			{
-				top.FrameTOC.SelectTocItem("PPU");
-			}
-		});
-	</script>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="generator" content="HelpNDoc Personal Edition 7.0.0.199">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico"/>
+
+  <title>PPU - 2C02</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="">
+
+
+
+  
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="PPU - 2C02">
+  <meta name="twitter:description" content="">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="PPU - 2C02" />
+  <meta property="og:type" content="article" />
+  <meta property="og:description" content="" />
+  <meta property="og:site_name" content="FCEUX Help" /> 
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendors/bootstrap-3.4.1/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="vendors/bootstrap-3.4.1/css/ie10-viewport-bug-workaround.css" rel="stylesheet"/>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+      <script src="vendors/html5shiv-3.7.3/html5shiv.min.js"></script>
+      <script src="vendors/respond-1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- JsTree styles -->
+  <link href="vendors/jstree-3.3.10/themes/default/style.min.css" rel="stylesheet"/>
+
+  <!-- Hnd styles -->
+  <link href="css/layout.min.css" rel="stylesheet" />
+  <link href="css/effects.min.css" rel="stylesheet" />
+  <link href="css/theme-light-blue.min.css" rel="stylesheet" />
+  <link href="css/print.min.css" rel="stylesheet" media="print" />
+  <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+
+  <!-- Content style -->
+  <link href="css/hnd.content.css" rel="stylesheet" />
+
+  
+
+
+
 </head>
 
-<body>
+<body class="md-nav-expanded">
 
-	<div id="topic_header">
-			<div id="topic_header_content">
-				<h1>PPU - 2C02</h1>
-				
-				<div id="topic_breadcrumb">
-					<a href="Technicalinformation.html">Technical Information</a> &rsaquo;&rsaquo; <a href="NESProcessor.html">NES Processing</a> &rsaquo;&rsaquo; </div>
-				</div>
-			<div id="topic_header_nav">
-				<a href="NESProcessor.html"><img src="img/arrow_up.png" alt="Parent"/></a>
-				
-				<a href="6502CPU.html"><img src="img/arrow_left.png" alt="Previous"/></a>
-				
-				<a href="NESScrolling1.html"><img src="img/arrow_right.png" alt="Next"/></a>
-				
-				</div>
-			<div class="clear"></div>
-		</div>
-	<div id="topic_content">
-		
-<p></p>
-<p>*******************************</p>
-<p>*NTSC 2C02 technical operation*</p>
-<p>*******************************</p>
-<p>Brad Taylor (big_time_software@hotmail.com)</p>
-<p><br/></p>
-<p>1st release: Sept 25th, Y2K</p>
-<p>2nd release: Jan &nbsp;27th, 2K3</p>
-<p>3rd release: Feb &nbsp; 4th, 2K3</p>
-<p>4th release: Feb &nbsp;19th, 2K3</p>
-<p><br/></p>
-<p><br/></p>
-<p> This document describes the low-level operation and technical details of the 2C02, the NES's PPU. In general, it contains important information in regards to PPU timing, which no NES coder/emulator author should be without. This document assumes that you already understand the basics of how the PPU works, like how the playfield/object images are generated, and the behaviour of scroll/address counters during playfield rendering.</p>
-<p><br/></p>
-<p> Alot of the concepts behind how the PPU works described here have been extracted from Nintendo's patent documentation (U.S.#4,824,106). With block diagrams of the PPU's architecture (and even some schematics), these papers will definetely aid in the comprehension of this complex device.</p>
-<p><br/></p>
-<p> Since the first release, this document has been given a major overhaul. Most sections of the document have been reworked, and new information has been added just about everywhere. If you've read the old version of this document before, I recommend that you read this new one in it's entirity; there's new information even in sections which may look like they haven't changed much.</p>
-<p><br/></p>
-<p> Topics discussed hereon are as follows.</p>
-<p><br/></p>
-<p> - Video signal generation</p>
-<p> - PPU base timing</p>
-<p> - Miscellanious PPU info</p>
-<p> - PPU memory access cycles</p>
-<p> - Frame rendering details</p>
-<p> - Scanline rendering details</p>
-<p> - In-range object evaluation</p>
-<p> - Details of playfield render pipeline</p>
-<p> - Details of object pattern fetch &amp; render</p>
-<p> - Extra cycle frames</p>
-<p> - The MMC3's scanline counter</p>
-<p> - PPU pixel priority quirk</p>
-<p> - Graphical enhancements</p>
-<p><br/></p>
-<p><br/></p>
-<p>+-------+</p>
-<p>|History|</p>
-<p>+-------+</p>
-<p> On the weekend of Sept. 25th, Y2K, I setup an experiment with my NTSC NES MB &amp; my PC so's I could RE the PPU's timing. What I did was (using a PC interface) analyse the changes that occur on the PPU's address and data pins on every rising &amp; falling edge of the PPU's clock. I was not planning on removing the PPU from the motherboard (yet), so basically I just kept everything intact (minus the stuff I added onto the MB so I could monitor the PPU's signals), and popped in a game, so that it would initialize the PPU for me (I used DK classics, since it was only taking somthing like 4 frames before it was turning on the background/sprites).</p>
-<p><br/></p>
-<p> The only change I made was taking out the 21 MHz clock generator circuitry. To replace the clock signal, I connected a port controlled latch to the NES's main clock line instead. Now, by writing a 0 or a 1 out to an PC ISA port of my choice (I was using $104), I was able to control the 21 MHz clockline of the NES. After I would create a rise or a fall on the NES's clock line, I would then read in the data that appeared on the PPU's address and data pins, which included monitoring what PPU registers the game read/wrote to (&amp; the data that was read/written).</p>
-<p><br/></p>
-<p><br/></p>
-<p>+-----------------------+</p>
-<p>|Video signal generation|</p>
-<p>+-----------------------+</p>
-<p> A 21.48 MHz clock signal is fed into the PPU. This is the NES's main clock line, which is shared by the CPU.</p>
-<p><br/></p>
-<p> Inside the PPU, the 21.48 MHz signal is used to clock a three-stage Johnson counter. The complimentery outputs of both master and slave portions of each stage are used to form 12 mutually exclusive output phases- all 3.58 MHz each (the NTSC colorburst). These 12 different phases form the basis of all color generation for the PPU's composite video output.</p>
-<p><br/></p>
-<p> Naturally, when the user programs the lower 4-bits of a palette register, they are essentially selecting any 1 of 12 phases to be routed to the PPU's video out pin (this corresponds to chrominance (tint/hue) video information) when the appropriate pixel indexes it. Other chrominance combinations (0 &amp; 13) are simply hardwired to a 1 or 0 to generate grayscale pixels.</p>
-<p><br/></p>
-<p> Bits 4 &amp; 5 of a palette entry selects 1 of 4 linear DC voltage offsets to apply to the selected chrominance signal (this corresponds to luminance (brightness) video information) for a pixel.</p>
-<p><br/></p>
-<p> Chrominance values 14 &amp; 15 yield a black pixel color, regardless of any luminance value setting. </p>
-<p><br/></p>
-<p> Luminance value 0, mixed with chrominance value 13 yield a "blacker than black" pixel color. This super black pixel has an output voltage level close to the vertical/horizontal syncronization pulses. Because of this, some video monitors will display warped/distorted screens for games which use this color for black (Game Genie is the best example of this). Essentially what is happening is the video monitor's horizontal timing is compromised by what it thinks are extra syncronization pulses in the scanline. This is not damaging to the monitors which are effected by it, but use of the super black color should be avoided, due to the graphical distortion it causes.</p>
-<p><br/></p>
-<p> The amplitude of the selected chrominance signal (via the 4 lower bits of a palette register) remain constant regardless of bits 4 or 5. Thus it is not possible to adjust the saturation level of a particular color.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+---------------+</p>
-<p>|PPU base timing|</p>
-<p>+---------------+</p>
-<p> Other than the 3-stage Johnson counter, the 21.48 MHz signal is not used directly by any other PPU hardware. Instead, the signal is divided by 4 to get 5.37 MHz, and is used as the smallest unit of timing in the PPU. All following references to PPU clock cycle (abbr. "cc") timing in this document will be in respect to this timing base, unless otherwise indicated.</p>
-<p><br/></p>
-<p> - Pixels are rendered at the same rate as the base PPU clock. In other words, 1 clock cycle= 1 pixel.</p>
-<p><br/></p>
-<p> - 341 PPU cc's make up the time of a typical scanline (or 341/3 CPU cc's).</p>
-<p><br/></p>
-<p> - One frame consists of 262 scanlines. This equals 341*262 PPU cc's per frame (divide by 3 for # of CPU cc's).</p>
-<p><br/></p>
-<p><br/></p>
-<p>+------------------------+</p>
-<p>|PPU memory access cycles|</p>
-<p>+------------------------+</p>
-<p> All PPU memory access cycles are 2 clocks long, and can be made back-to-back (typically done during rendering). Here's how the access breaks down:</p>
-<p><br/></p>
-<p> At the beginning of the access cycle, PPU address lines 8..13 are updated with the target address. This data remains here until the next time an access cycle occurs.</p>
-<p><br/></p>
-<p> The lower 8-bits of the PPU address lines are multiplexed with the data bus, to reduce the PPU's pin count. On the first clock cycle of the access, A0..A7 are put on the PPU's data bus, and the ALE (address latch enable) line is activated for the first half of the cycle. This loads the lower 8-bit address into an external 8-bit transparent latch strobed by ALE (74LS373 is used).</p>
-<p><br/></p>
-<p> On the second clock cycle, the /RD (or /WR) line is activated, and stays active for the entire cycle. Appropriate data is driven onto the bus during this time.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+----------------------+</p>
-<p>|Miscellanious PPU info|</p>
-<p>+----------------------+</p>
-<p> - Sprite DMA is 1536 clock cycles long (512 CPU cc's). 256 individual transfers are made from CPU memory to a temp register inside the CPU, then from the CPU's temp reg, to $2004.</p>
-<p><br/></p>
-<p> - The PPU makes NO external access to the PPU bus, unless the playfield or objects are enabled during a scanline outside vblank. This means that the PPU's address and data busses are dead while in this state.</p>
-<p><br/></p>
-<p> - palette RAM is accessed internally during playfield rendering (i.e., the palette address/data is never put on the PPU bus during this time). Additionally, when the programmer accesses palette RAM via $2006/7, the palette address accessed actually does show up on the PPU address bus, but the PPU's /RD &amp; /WR flags are not activated. This is required; to prevent writing over name table data falling under the approprite mirrored area (since the name table RAM's address decoder simply consists of an inverter connected to the A13 line- effectively decoding all addresses in $2000-$3FFF).</p>
-<p><br/></p>
-<p> - the VINT impulse (NMI) and bit $2002.7 are set simultaniously. Reading $2002 will reset bit 7, but it seems that the VINT flag goes down on it's own. Because of this, when the PPU generates a VINT, it doesn't require any acknowledgement whatsoever; it will continue firing off VINTs, regardless of inservice to $2002. The only way to stop VINTs is to clear $2000.7.</p>
-<p><br/></p>
-<p> - Because the PPU cannot make a read from PPU memory immediately upon request (via $2007), there is an internal buffer, which acts as a 1-stage data pipeline. As a read is requested, the contents of the read buffer are returned to the NES's CPU. After this, at the PPU's earliest convience (according to PPU read cycle timings), the PPU will fetch the requested data from the PPU memory, and throw it in the read buffer. Writes to PPU mem via $2007 are pipelined as well, but it is unknown to me if the PPU uses this same buffer (this could be easily tested by writing somthing to $2007, and seeing if the same value is returned immediately after reading).</p>
-<p><br/></p>
-<p><br/></p>
-<p>+-----------------------+</p>
-<p>|Frame rendering details|</p>
-<p>+-----------------------+</p>
-<p> &nbsp;The following describes the PPU's status during all 262 scanlines of a frame. Any scanlines where work is done (like image rendering), consists of the steps which will be described in the next section.</p>
-<p><br/></p>
-<p> 0..19: &nbsp; &nbsp; &nbsp; &nbsp;Starting at the instant the VINT flag is pulled down (when a NMI is generated), 20 scanlines make up the period of time on the PPU which I like to call the VINT period. During this time, the PPU makes no access to it's external memory (i.e. name / pattern tables, etc.).</p>
-<p><br/></p>
-<p> 20: &nbsp; &nbsp; &nbsp; &nbsp;After 20 scanlines worth of time go by (since the VINT flag was set), the PPU starts to render scanlines. This first scanline is a dummy one; although it will access it's external memory in the same sequence it would for drawing a valid scanline, no on-screen pixels are rendered during this time, making the fetched background data immaterial. Both horizontal *and* vertical scroll counters are updated (presumably) at cc offset 256 in this scanline. Other than that, the operation of this scanline is identical to any other. The primary reason this scanline exists is to start the object render pipeline, since it takes 256 cc's worth of time to determine which objects are in range or not for any particular scanline.</p>
-<p><br/></p>
-<p> 21..260: after rendering 1 dummy scanline, the PPU starts to render the actual data to be displayed on the screen. This is done for 240 scanlines, of course.</p>
-<p><br/></p>
-<p> 261: &nbsp; &nbsp; &nbsp; &nbsp;after the very last rendered scanline finishes, the PPU does nothing for 1 scanline (i.e. the programmer gets screwed out of perfectly good VINT time). When this scanline finishes, the VINT flag is set, and the process of drawing lines starts all over again.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+--------------------------+</p>
-<p>|Scanline rendering details|</p>
-<p>+--------------------------+</p>
-<p> Naturally, the PPU will fetch data from name, attribute, and pattern tables during a scanline to produce an image on the screen. This section details the PPU's doings during this time.</p>
-<p><br/></p>
-<p> As explained before, external PPU memory can be accessed every 2 cc's. With 341 cc's per scanline, this gives the PPU enough time to make 170 memory accesses per scanline (and it uses all of them!). After the 170th fetch, the PPU does nothing for 1 clock cycle. Remember that a single pixel is rendered every clock cycle.</p>
-<p><br/></p>
-<p><br/></p>
-<p> Memory fetch phase 1 thru 128</p>
-<p> -----------------------------</p>
-<p> 1. Name table byte</p>
-<p> 2. Attribute table byte</p>
-<p> 3. Pattern table bitmap #0</p>
-<p> 4. Pattern table bitmap #1</p>
-<p><br/></p>
-<p> This process is repeated 32 times (32 tiles in a scanline).</p>
-<p><br/></p>
-<p><br/></p>
-<p> This is when the PPU retrieves the appropriate data from PPU memory for rendering the playfield. The first playfield tile fetched here is actually the 3rd to be drawn on the screen (the playfield data for the first 2 tiles to be rendered on this scanline are fetched at the end of the scanline prior to this one).</p>
-<p><br/></p>
-<p> All valid on-screen pixel data arrives at the PPU's video out pin during this time (256 clocks). For determining the precise delay between when a tile's bitmap fetch phase starts (the whole 4 memory fetches), and when the first pixel of that tile's bitmap data hits the video out pin, the formula is (16-n) clock cycles, where n is the fine horizontal scroll offset (0..7 pixels). This information is relivant for understanding the exact timing operation of the "object 0 collision" flag.</p>
-<p><br/></p>
-<p> Note that the PPU fetches an attribute table byte for every 8 sequential horizontal pixels it draws. This essentially limits the PPU's color area (the area of pixels which are forced to use the same 3-color palette) to only 8 horizontally sequential pixels.</p>
-<p><br/></p>
-<p> It is also during this time that the PPU evaluates the "Y coordinate" entries of all 64 objects in object attribute RAM (OAM), to see if the objects are within range (to be drawn on the screen) for the *next* scanline (this is why Y-coordinate entries in the OAM must be programmed to a value 1 less than the scanline the object is to appear on). Each evaluation (presumably) takes 4 clock cycles, for a total of 256 (which is why it's done during on-screen pixel rendering).</p>
-<p><br/></p>
-<p><br/></p>
-<p> In-range object evaluation</p>
-<p> --------------------------</p>
-<p> An 8-bit comparator is used to calculate the 9-bit difference between the current scanline (minus 21), and each Y-coordinate (plus 1) of every object entry in the OAM. Objects are considered in range if the comparator produces a difference in the range of 0..7 (if $2000.5 currently = 0), or 0..15 (if $2000.5 currently = 1).</p>
-<p><br/></p>
-<p> (Note that a 9-bit comparison result is generated. This means that setting object scanline coordinates for ranges -1..-15 are actually interpreted as ranges 241..255. For this reason, objects with these ranges will never be considered to be part of any on-screen scanline range, and will not allow smooth object scrolling off the top of the screen.)</p>
-<p><br/></p>
-<p> Tile index (8 bits), X-coordinate (8 bits), &amp; attribute information (4 bits; vertical inversion is excluded) from the in-range OAM element, plus the associated 4-bit result of the range comparison accumulate in a part of the PPU called the "sprite temporary memory". Logical inversion is applied to the loaded 4-bit range comparison result, if the object's vertical inversion attribute bit is set.</p>
-<p><br/></p>
-<p> Since object range evaluations occur sequentially through the OAM (starting from entry 0 to 63), the sprite temporary memory always fills in order from the highest priority in-range object, to lower ones. A 4-bit "in-range" counter is used to determine the number of found objects on the scanline (from 0 up to 8), and serves as an index pointer for placement of found object data into the 8-element sprite temporary memory. The counter is reset at the beginning of the object evaluation phase, and is post-incremented everytime an object is found in-range. This occurs until the counter equals 8, when found object data after this is discarded, and a flag (bit 5 of $2002) is raised, indicating that it is going to be dropping objects for the next scanline.</p>
-<p><br/></p>
-<p> An additional memory bit associated with the sprite temporary memory is used to indicate that the primary object (#0) was found to be in range. This will be used later on to detect primary object-to-playfield pixel collisions.</p>
-<p><br/></p>
-<p><br/></p>
-<p> Playfield render pipeline details</p>
-<p> ---------------------------------</p>
-<p> As pattern table &amp; palette select data is fetched, it is loaded into internal latches (the palette select data is selected from the fetched byte via a 2-bit 1-of-4 selector).</p>
-<p><br/></p>
-<p> At the start of a new tile fetch phase (every 8 cc's), both latched pattern table bitmaps are loaded into the upper 8-bits of 2- 16-bit shift registers (which both shift right every clock cycle). The palette select data is also transfered into another latch during this time (which feeds the serial inputs of 2 8-bit right shift registers shifted every clock). The pixel data is fed into these extra shift registers in order to implement fine horizontal scrolling, since the periods when the PPU fetch tile data is fixed.</p>
-<p><br/></p>
-<p> A single bit from each shift register is selected, to form the valid 4-bit playfield pixel for the current clock cycle. The bit selection offset is based on the fine horizontal scroll value (this selects bit positions 0..7 for all 4 shift registers). The selected 4-bit pixel data will then be fed into the multiplexer (described later) to be mixed with object data.</p>
-<p><br/></p>
-<p><br/></p>
-<p> Memory fetch phase 129 thru 160</p>
-<p> -------------------------------</p>
-<p> 1. Garbage name table byte</p>
-<p> 2. Garbage name table byte</p>
-<p> 3. Pattern table bitmap #0 for applicable object (for next scanline)</p>
-<p> 4. Pattern table bitmap #1 for applicable object (for next scanline)</p>
-<p><br/></p>
-<p> This process is repeated 8 times.</p>
-<p><br/></p>
-<p><br/></p>
-<p> This is the period of time when the PPU retrieves the appropriate pattern table data for the objects to be drawn on the *next* scanline. When less than 8 objects exist on the next scanline (as the in-range object evaluation counter indicates), dummy pattern table fetches take place for the remaining fetches. Internally, the fetched dummy-data is discarded, and replaced with completely transparent bitmap patterns).</p>
-<p><br/></p>
-<p> Although the fetched name table data is thrown away, and the name table address is somewhat unpredictable, the address does seem to relate to the first name table tile to be fetched for the next scanline. This would seem to imply that PPU cc #256 is when the PPU's scroll/address counters have their horizontal scroll values automatically updated.</p>
-<p><br/></p>
-<p> It should also be noted that because this fetch is required for objects on the next scanline, it is neccessary for a garbage scanline to exist prior to the very first scanline to be actually rendered, so that object attribute RAM entries can be evaluated, and the appropriate bitmap data retrieved.</p>
-<p><br/></p>
-<p> As far as the wasted fetch phases here, well, what can I say. Either Nintendo's engineers were VERY lazy, and didn't want to add the small amount of extra circuitry to the PPU so that 16 object fetches could take place per scanline, or Nintendo couldn't spot the extra memory required to implement 16 object scanlines. Thing is though- between the object attribute mem, sprite temporary &amp; buffer mem, and palette mem, that's already 2406 bits of RAM; I don't think it would've killed them to just add the 408 bits it would've took for an extra 8 objects, which would've made games with horrible OAM cycling (Double Dragon 2 w/ 2 players) look half-decent (hell, with 16 object scanlines, games would hardly even need OAM cycling).</p>
-<p><br/></p>
-<p> </p>
-<p> Details of object pattern fetch &amp; render</p>
-<p> ----------------------------------------</p>
-<p> Where the PPU fetches pattern table data for an individual object is conditioned on the contents of the sprite temporary memory element, and $2000.5. If $2000.5 = 0, the tile index data is used as usual, and $2000.3 selects the pattern table to use. If $2000.5 = 1, the MSB of the range result value become the LSB of the indexed tile, and the LSB of the tile index value determines pattern table selection. The lower 3 bits of the range result value are always used as the fine vertical offset into the selected pattern.</p>
-<p><br/></p>
-<p> Horizontal inversion (bit order reversing) is applied to fetched bitmaps, if indicated in the sprite temporary memory element.</p>
-<p><br/></p>
-<p> The fetched pattern table data (which is 2 bytes), plus the associated 3 attribute bits (palette select &amp; priority), and the x coordinate byte in sprite temporary memory are then loaded into a part of the PPU called the "sprite buffer memory" (the primary object present bit is also copied). This memory area again, is large enough to hold the contents for 8 sprites.</p>
-<p><br/></p>
-<p> The composition of one sprite buffer element here is: 2 8-bit shift registers (the fetched pattern table data is loaded in here, where it will be serialized at the appropriate time), a 3-bit latch (which holds the color &amp; priority data for an object), and an 8-bit down counter (this is where the x coordinate is loaded).</p>
-<p><br/></p>
-<p> The counter is decremented every time the PPU renders a pixel (the first 256 cc's of a scanline; see "Memory fetch phase 1 thru 128" above). When the counter equals 0, the pattern table data in the shift registers will start to serialize (1 shift per clock). Before this time, or 8 clocks after, consider the outputs of the serializers for each stage to be 0 (transparency).</p>
-<p><br/></p>
-<p> The streams of all 8 object serializers are prioritized, and ultimately only one stream (with palette select &amp; priority information) is selected for output to the multiplexer (where object &amp; playfield pixels are prioritized).</p>
-<p><br/></p>
-<p> The data for the first sprite buffer entry (including the primary object present flag) has the first chance to enter the multiplexer, if it's output pixel is non-transparent (non-zero). Otherwise, priority is passed to the next serializer in the sprite buffer memory, and the test for non-transparency is made again (the primary object present status will always be passed to the multiplexer as false in this case). This is done until the last (8th) stage is reached, when the object data is passed through unconditionally. Keep in mind that this whole process occurs every clock cycle (hardware is used to determine priority instantly).</p>
-<p><br/></p>
-<p> The multiplexer does 2 things: determines primary object collisions, and decides which pixel data to pass through to index the palette RAM- either the playfield's or the object's.</p>
-<p><br/></p>
-<p> Primary object collisions occur when a non-transparent playfield pixel coincides with a non-transparent object pixel, while the primary object present status entering the multiplexer for the current clock cycle is true. This causes a flip-flop ($2002.6) to be set, and remains set (presumably) some time after the VINT occurence (prehaps up until scanline 20?).</p>
-<p><br/></p>
-<p> The decision for selecting the data to pass through to the palette index is made rather easilly. The condition to use object (opposed to playfield) data is:</p>
-<p><br/></p>
-<p> (OBJpri=foreground OR PFpixel=xparent) AND OBJpixel&lt;&gt;xparent</p>
-<p><br/></p>
-<p> Since the PPU has 2 palettes; one for objects, and one for playfield, the appropriate palette will be selected depending on which pixel data is passed through.</p>
-<p><br/></p>
-<p> After the palette look-up, the operation of events follows the aforementioned steps in the "video signal generation" section.</p>
-<p><br/></p>
-<p><br/></p>
-<p> Memory fetch phase 161 thru 168</p>
-<p> -------------------------------</p>
-<p> 1. Name table byte</p>
-<p> 2. Attribute table byte</p>
-<p> 3. Pattern table bitmap #0 (for next scanline)</p>
-<p> 4. Pattern table bitmap #1 (for next scanline)</p>
-<p><br/></p>
-<p> This process is repeated 2 times.</p>
-<p><br/></p>
-<p><br/></p>
-<p> It is during this time that the PPU fetches the appliciable playfield data for the first and second tiles to be rendered on the screen for the *next* scanline. These fetches initialize the internal playfield pixel pipelines (2- 16-bit shift registers) with valid bitmap data. The rest of tiles (3..32) are fetched at the beginning of the following scanline.</p>
-<p><br/></p>
-<p><br/></p>
-<p> Memory fetch phase 169 thru 170</p>
-<p> -------------------------------</p>
-<p> 1. Name table byte</p>
-<p> 2. Name table byte</p>
-<p><br/></p>
-<p><br/></p>
-<p> I'm unclear of the reason why this particular access to memory is made. The name table address that is accessed 2 times in a row here, is also the same nametable address that points to the 3rd tile to be rendered on the screen (or basically, the first name table address that will be accessed when the PPU is fetching playfield data on the next scanline).</p>
-<p><br/></p>
-<p><br/></p>
-<p> After memory access 170</p>
-<p> -----------------------</p>
-<p> The PPU simply rests for 1 cycle here (or the equivelant of half a memory access cycle) before repeating the whole pixel/scanline rendering process.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+------------------+</p>
-<p>|Extra cycle frames|</p>
-<p>+------------------+</p>
-<p> Scanline 20 is the only scanline that has variable length. On every odd frame, this scanline is only 340 cycles (the dead cycle at the end is removed). This is done to cause a shift in the NTSC colorburst phase.</p>
-<p><br/></p>
-<p> You see, a 3.58 MHz signal, the NTSC colorburst, is required to be modulated into a luminance carrying signal in order for color to be generated on an NTSC monitor. Since the PPU's video out consists of basically square waves (as opposed to sine waves, which would be preferred), it takes an entire colorburst cycle (1/3.58 MHz) for an NTSC monitor to identify the color of a PPU pixel accurately.</p>
-<p><br/></p>
-<p> But now you remember that the PPU renders pixels at 5.37 MHz- 1.5x the rate of the colorburst. This means that if a single pixel resides on a scanline with a color different to those surrounding it, the pixel will probably be misrepresented on the screen, sometimes appearing faintly.</p>
-<p><br/></p>
-<p> Well, to somewhat fix this problem, they added this extra pixel into every odd frame (shifting the colorburst phase over a bit), and changing the way the monitor interprets isolated colored pixels each frame. This is why when you play games with detailed background graphics, the background seems to flicker a bit. Once you start scrolling the screen however, it seems as if some pixels become invisible; this is how stationary PPU images would look without this cycle removed from odd frames.</p>
-<p><br/></p>
-<p> Certain scroll rates expose this NTSC PPU color caveat regardless of the toggling phase shift. Some of Zelda 2's dungeon backgrounds are a good place to see this effect.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+---------------------------+</p>
-<p>|The MMC3's scanline counter|</p>
-<p>+---------------------------+</p>
-<p> As most people know, the MMC3 bases it's scanline counter on PPU address line A13 (which is why IRQ's can be fired off manually by toggling A13 a bunch of times via $2006). What's not common knowledge is the number of times A13 is expected to toggle in a scanline (although if you've been paying close attention to the doc here, you should already know ;)</p>
-<p><br/></p>
-<p> A13 was probably used for the IRQ counter (as opposed to using the PPU's /READ line) because this address line already needed to be connected to the MMC for bankswitching purposes (so in other words, to reduce the MMC3's pin count by 1). They also probably used this method of counting (as opposed to a CPU cycle counter) since A13 cycles (0 -&gt; 1) exactly 42 times per scanline, whereas the CPU count of cycles per scanline is not an exact integer (113.67). Having said that, I guess Nintendo wanted to provide an "easy-to-use" method of generating special image effects, without making programmers have to figure out how many clock cycles to program an IRQ counter with (a pretty lame excuse for not providing an IRQ counter with CPU clock cycle precision (which would have been more useful and versatile)).</p>
-<p><br/></p>
-<p> Regardless of any values PPU registers are programmed with, A13 will operate in a predictable fashion during image rendering (and if you understand how PPU addressing works, you should understand that A13 is the *only* address line with fixed behaviour during image rendering).</p>
-<p><br/></p>
-<p><br/></p>
-<p>+------------------------+</p>
-<p>|PPU pixel priority quirk|</p>
-<p>+------------------------+</p>
-<p> Object data is prioritized between itself, then prioritized between the playfield. There are some odd side effects to this scheme of rendering, however. For instance, imagine a low priority object pixel with foreground priority, a high priority object pixel with background priority, and a playfield pixel all coinciding (all non-transparent).</p>
-<p><br/></p>
-<p> Ideally, the playfield is considered to be the middle layer between background and foreground priority objects. This means that the playfield pixel should hide the background priority object pixel (regardless of object priority), and the foreground priority object should appear atop the PF pixel.</p>
-<p><br/></p>
-<p> However, because of the way the PPU renders (as just described), OBJ priority is evaluated first, and therefore the background object pixel wins, which means that you'll only be seeing the PF pixel after this mess.</p>
-<p><br/></p>
-<p> A good game to demonstrate this behaviour is Megaman 2. Go into airman's stage. First, jump into the energy bar, just to confirm that megaman's sprite is of a higher priority than the energy bar's. Now, get to the second half of the stage, where the clouds cover the energy bar. The energy bar will be ontop of the clouds, but megaman will be behind them. Now, look what happens when you jump into the energy bar here... you see the clouds where megaman underlaps the energy bar.</p>
-<p><br/></p>
-<p><br/></p>
-<p>+----------------------+</p>
-<p>|Graphical enhancements|</p>
-<p>+----------------------+</p>
-<p> Since an NES cartridge has access to the PPU bus, any number of on-cart hardware schemes can be used to enhance the graphic capabilities of the NES. After all, the PPU's playfield pipeline is very simple: it fetches 272 playfield pixels per scanline (as 34*2 byte fetches, in real-time), and outputs 256 of them to the screen (with the 0..7 pixel offset determined by the fine X scroll register), along with object data combined with it.</p>
-<p><br/></p>
-<p> Essentially, you can bypass the PPU's simple scrolling system, implement a custom one on your cart (fetching bitmap data in your own fashion), and feed the PPU bitmap data in your own order.</p>
-<p><br/></p>
-<p> The possibilities of this are endless (like sporting multiple playfields, or even playfield rotation/scaling), but of course what it comes down to is the amount of cartridge hardware required.</p>
-<p><br/></p>
-<p> Generally, playfield rotation/scaling can be done quite easily- it only requires a few sets of 16-bit registers and adders (the 16 bits are broken up into 8.8 fixed point values). But this kind of implementation is more suited for an integrated circuit, since this would require dozens of discrete logic chips.</p>
-<p><br/></p>
-<p> Multiple playfields are another thing which could be easily done. The caveat here is that pixel pipelines (i.e., shift registers) and a multiplexer would have to be implemented on the cart (not to mention exclusive name table RAM) in order to process the playfield bitmaps from multiple sources. The access to the CHR-ROM/RAM would also have to increased- but as it stands, the CHR-ROM/RAM bandwidth is 1.34 MHz, a rather low frequency. With a memory device capable of a 10.74 MHz bandwith, you could have 8 playfields to work with. Generally, this would be very useful for displaying multiple huge objects on the screen- without ever having to worry about annoying flicker.</p>
-<p><br/></p>
-<p> The only restriction to doing any of this is that:</p>
-<p><br/></p>
-<p> - every 8 sequential horizontal pixels sent to the PPU must share the same palette select value. Because of this, hardware would have to be implemented to decide which palette select value to feed the PPU between 8 horizontally sequential pixels, if they do not all share the same palette select value. The on-screen results of this may not be too flattering sometimes, but this is a small price to pay to do some neat graphical tricks on the NES.</p>
-<p><br/></p>
-<p> -only the playfield palette can be used. As usual, this pretty much limits your randomly accessable colors to about 12+1.</p>
-<p><br/></p>
-<p> It's a damn shame that Nintendo never created a MMC which would enhance graphics on the NES in useful ways as mentioned above. The MMC5 was the only device that came close, and it's only selling features were the single-tile color area, and the vertical split screen mode (which I don't think any game ever used). Considering the amount of pins (100) the MMC5 had, and number of gates they put in it just for the EXRAM (which was 1K bytes), they could've put some really useful graphics hardware inside there instead.</p>
-<p><br/></p>
-<p> Prehaps the infamous Color Dreams "Hellraiser" cart was the closest the NES ever came to seeing such sophisticated graphics. The cart was never released, but from what I've read, it was going to use some sort of frame buffer, and a Z80 CPU to do the graphical rendering. It had been rumored that the game had 3D graphics (or at least 2.5D) in it. If so (and the game was actually good), prehaps it would have raised a few eyebrows in the industry, and inspired Nintendo to develop a new MMC chip with similar capabilities, in order to keep the NES in it's profit margin for another few years (and allow it to compete somewhat with the more advanced systems of the time).</p>
-<p><br/></p>
-<p>EOF</p>
-<p></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour">Easily create CHM Help documents</a></p>
-</div>
-	
-	<div id="topic_footer">
 
-			<div id="topic_footer_content">
-				2016</div>
-		</div>
-	</body>
-	
+
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible">Skip to main content</a>
+  </div>
+
+  <header class="headroom">
+    <button class="hnd-toggle btn btn-default">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>        
+    </button>
+    <h1>FCEUX Help</h1>
+    
+  </header>
+
+  <nav id="panel-left" class="md-nav-expanded">
+    <!-- Nav tabs -->
+    <ul class="tab-tabs nav nav-tabs" role="tablist">
+      <li id="nav-close"> 
+        <button class="hnd-toggle btn btn-default">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+      </li>
+      
+	  
+        <li role="presentation" class="tab active">
+            <a href="#contents" id="tab-contents" aria-controls="contents" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-list"></i>
+                Contents
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#index" id="tab-index" aria-controls="index" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-asterisk"></i>
+                Index
+            </a>
+        </li>
+      
+        <li role="presentation" class="tab">
+            <a href="#search" id="tab-search" aria-controls="search" role="tab" data-toggle="tab">
+                <i class="glyphicon glyphicon-search"></i>
+                Search
+            </a>
+        </li>
+      
+    </ul>  <!-- /Nav tabs -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+	  
+      <div role="tabpanel" class="tab-pane active" id="contents">
+        <div id="toc" class="tree-container unselectable"
+            data-url="_toc.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /contents-->
+      
+      <div role="tabpanel" class="tab-pane" id="index">
+        <div id="keywords" class="tree-container unselectable"
+            data-url="_keywords.json"
+            data-openlvl="1"
+        >
+            
+        </div>
+      </div>  <!-- /index-->
+      
+      <div role="tabpanel" class="tab-pane" id="search">
+        <div class="search-content">
+          <div class="search-input">
+            <form id="search-form">
+              <div class="form-group">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="input-search" name="input-search" placeholder="Search..." />
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">
+                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>  <!-- /search-input -->
+          <div class="search-result">
+            <div id="search-info"></div>
+            <div class="tree-container unselectable" id="search-tree"></div>
+          </div>  <!-- /search-result -->
+        </div>  <!-- /search-content -->
+      </div>  <!-- /search-->
+      
+    </div>  <!-- /Tab panes -->
+
+  </nav>
+
+  <div id="main">
+
+    <article>
+        <div id="topic-content" class="container-fluid" 
+		  data-hnd-id="PPU"
+		  data-hnd-context="33"
+		  data-hnd-title="PPU - 2C02"
+		>
+            
+                <div class="navigation">
+                    <ol class="breadcrumb">
+                        <li><a href="Technicalinformation.html">Technical Information</a></li><li><a href="NESProcessor.html">NES Processing</a></li>
+                    </ol>
+                    <div class="nav-arrows">
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="NESProcessor.html" title="NES Processing" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="6502CPU.html" title="CPU - 6502" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="NESScrolling1.html" title="NES Scrolling 1" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                    </div>
+                </div> 
+            
+
+            <a id="main-content"></a>
+
+            <h2>PPU - 2C02</h2>
+
+            <div class="main-content">
+                
+<p></p>
+<p class="rvps2"><span class="rvts6">*******************************</span></p>
+<p class="rvps2"><span class="rvts6">*NTSC 2C02 technical operation*</span></p>
+<p class="rvps2"><span class="rvts6">*******************************</span></p>
+<p class="rvps2"><span class="rvts6">Brad Taylor (big_time_software@hotmail.com)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">1st release: Sept 25th, Y2K</span></p>
+<p class="rvps2"><span class="rvts6">2nd release: Jan &nbsp;27th, 2K3</span></p>
+<p class="rvps2"><span class="rvts6">3rd release: Feb &nbsp; 4th, 2K3</span></p>
+<p class="rvps2"><span class="rvts6">4th release: Feb &nbsp;19th, 2K3</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This document describes the low-level operation and technical details of the 2C02, the NES's PPU. In general, it contains important information in regards to PPU timing, which no NES coder/emulator author should be without. This document assumes that you already understand the basics of how the PPU works, like how the playfield/object images are generated, and the behaviour of scroll/address counters during playfield rendering.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Alot of the concepts behind how the PPU works described here have been extracted from Nintendo's patent documentation (U.S.#4,824,106). With block diagrams of the PPU's architecture (and even some schematics), these papers will definetely aid in the comprehension of this complex device.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Since the first release, this document has been given a major overhaul. Most sections of the document have been reworked, and new information has been added just about everywhere. If you've read the old version of this document before, I recommend that you read this new one in it's entirity; there's new information even in sections which may look like they haven't changed much.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Topics discussed hereon are as follows.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Video signal generation</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- PPU base timing</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Miscellanious PPU info</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- PPU memory access cycles</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Frame rendering details</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Scanline rendering details</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- In-range object evaluation</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Details of playfield render pipeline</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Details of object pattern fetch &amp; render</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Extra cycle frames</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- The MMC3's scanline counter</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- PPU pixel priority quirk</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Graphical enhancements</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+-------+</span></p>
+<p class="rvps2"><span class="rvts6">|History|</span></p>
+<p class="rvps2"><span class="rvts6">+-------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;On the weekend of Sept. 25th, Y2K, I setup an experiment with my NTSC NES MB &amp; my PC so's I could RE the PPU's timing. What I did was (using a PC interface) analyse the changes that occur on the PPU's address and data pins on every rising &amp; falling edge of the PPU's clock. I was not planning on removing the PPU from the motherboard (yet), so basically I just kept everything intact (minus the stuff I added onto the MB so I could monitor the PPU's signals), and popped in a game, so that it would initialize the PPU for me (I used DK classics, since it was only taking somthing like 4 frames before it was turning on the background/sprites).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The only change I made was taking out the 21 MHz clock generator circuitry. To replace the clock signal, I connected a port controlled latch to the NES's main clock line instead. Now, by writing a 0 or a 1 out to an PC ISA port of my choice (I was using $104), I was able to control the 21 MHz clockline of the NES. After I would create a rise or a fall on the NES's clock line, I would then read in the data that appeared on the PPU's address and data pins, which included monitoring what PPU registers the game read/wrote to (&amp; the data that was read/written).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+-----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">|Video signal generation|</span></p>
+<p class="rvps2"><span class="rvts6">+-----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;A 21.48 MHz clock signal is fed into the PPU. This is the NES's main clock line, which is shared by the CPU.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Inside the PPU, the 21.48 MHz signal is used to clock a three-stage Johnson counter. The complimentery outputs of both master and slave portions of each stage are used to form 12 mutually exclusive output phases- all 3.58 MHz each (the NTSC colorburst). These 12 different phases form the basis of all color generation for the PPU's composite video output.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Naturally, when the user programs the lower 4-bits of a palette register, they are essentially selecting any 1 of 12 phases to be routed to the PPU's video out pin (this corresponds to chrominance (tint/hue) video information) when the appropriate pixel indexes it. Other chrominance combinations (0 &amp; 13) are simply hardwired to a 1 or 0 to generate grayscale pixels.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Bits 4 &amp; 5 of a palette entry selects 1 of 4 linear DC voltage offsets to apply to the selected chrominance signal (this corresponds to luminance (brightness) video information) for a pixel.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Chrominance values 14 &amp; 15 yield a black pixel color, regardless of any luminance value setting.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Luminance value 0, mixed with chrominance value 13 yield a "blacker than black" pixel color. This super black pixel has an output voltage level close to the vertical/horizontal syncronization pulses. Because of this, some video monitors will display warped/distorted screens for games which use this color for black (Game Genie is the best example of this). Essentially what is happening is the video monitor's horizontal timing is compromised by what it thinks are extra syncronization pulses in the scanline. This is not damaging to the monitors which are effected by it, but use of the super black color should be avoided, due to the graphical distortion it causes.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The amplitude of the selected chrominance signal (via the 4 lower bits of a palette register) remain constant regardless of bits 4 or 5. Thus it is not possible to adjust the saturation level of a particular color.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+---------------+</span></p>
+<p class="rvps2"><span class="rvts6">|PPU base timing|</span></p>
+<p class="rvps2"><span class="rvts6">+---------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Other than the 3-stage Johnson counter, the 21.48 MHz signal is not used directly by any other PPU hardware. Instead, the signal is divided by 4 to get 5.37 MHz, and is used as the smallest unit of timing in the PPU. All following references to PPU clock cycle (abbr. "cc") timing in this document will be in respect to this timing base, unless otherwise indicated.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Pixels are rendered at the same rate as the base PPU clock. In other words, 1 clock cycle= 1 pixel.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- 341 PPU cc's make up the time of a typical scanline (or 341/3 CPU cc's).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- One frame consists of 262 scanlines. This equals 341*262 PPU cc's per frame (divide by 3 for # of CPU cc's).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">|PPU memory access cycles|</span></p>
+<p class="rvps2"><span class="rvts6">+------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;All PPU memory access cycles are 2 clocks long, and can be made back-to-back (typically done during rendering). Here's how the access breaks down:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;At the beginning of the access cycle, PPU address lines 8..13 are updated with the target address. This data remains here until the next time an access cycle occurs.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The lower 8-bits of the PPU address lines are multiplexed with the data bus, to reduce the PPU's pin count. On the first clock cycle of the access, A0..A7 are put on the PPU's data bus, and the ALE (address latch enable) line is activated for the first half of the cycle. This loads the lower 8-bit address into an external 8-bit transparent latch strobed by ALE (74LS373 is used).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;On the second clock cycle, the /RD (or /WR) line is activated, and stays active for the entire cycle. Appropriate data is driven onto the bus during this time.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">|Miscellanious PPU info|</span></p>
+<p class="rvps2"><span class="rvts6">+----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Sprite DMA is 1536 clock cycles long (512 CPU cc's). 256 individual transfers are made from CPU memory to a temp register inside the CPU, then from the CPU's temp reg, to $2004.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- The PPU makes NO external access to the PPU bus, unless the playfield or objects are enabled during a scanline outside vblank. This means that the PPU's address and data busses are dead while in this state.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- palette RAM is accessed internally during playfield rendering (i.e., the palette address/data is never put on the PPU bus during this time). Additionally, when the programmer accesses palette RAM via $2006/7, the palette address accessed actually does show up on the PPU address bus, but the PPU's /RD &amp; /WR flags are not activated. This is required; to prevent writing over name table data falling under the approprite mirrored area (since the name table RAM's address decoder simply consists of an inverter connected to the A13 line- effectively decoding all addresses in $2000-$3FFF).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- the VINT impulse (NMI) and bit $2002.7 are set simultaniously. Reading $2002 will reset bit 7, but it seems that the VINT flag goes down on it's own. Because of this, when the PPU generates a VINT, it doesn't require any acknowledgement whatsoever; it will continue firing off VINTs, regardless of inservice to $2002. The only way to stop VINTs is to clear $2000.7.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- Because the PPU cannot make a read from PPU memory immediately upon request (via $2007), there is an internal buffer, which acts as a 1-stage data pipeline. As a read is requested, the contents of the read buffer are returned to the NES's CPU. After this, at the PPU's earliest convience (according to PPU read cycle timings), the PPU will fetch the requested data from the PPU memory, and throw it in the read buffer. Writes to PPU mem via $2007 are pipelined as well, but it is unknown to me if the PPU uses this same buffer (this could be easily tested by writing somthing to $2007, and seeing if the same value is returned immediately after reading).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+-----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">|Frame rendering details|</span></p>
+<p class="rvps2"><span class="rvts6">+-----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp; The following describes the PPU's status during all 262 scanlines of a frame. Any scanlines where work is done (like image rendering), consists of the steps which will be described in the next section.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;0..19:</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">Starting at the instant the VINT flag is pulled down (when a NMI is generated), 20 scanlines make up the period of time on the PPU which I like to call the VINT period. During this time, the PPU makes no access to it's external memory (i.e. name / pattern tables, etc.).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;20:</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">After 20 scanlines worth of time go by (since the VINT flag was set), the PPU starts to render scanlines. This first scanline is a dummy one; although it will access it's external memory in the same sequence it would for drawing a valid scanline, no on-screen pixels are rendered during this time, making the fetched background data immaterial. Both horizontal *and* vertical scroll counters are updated (presumably) at cc offset 256 in this scanline. Other than that, the operation of this scanline is identical to any other. The primary reason this scanline exists is to start the object render pipeline, since it takes 256 cc's worth of time to determine which objects are in range or not for any particular scanline.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;21..260: after rendering 1 dummy scanline, the PPU starts to render the actual data to be displayed on the screen. This is done for 240 scanlines, of course.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;261:</span><span class="rvts6"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts6">after the very last rendered scanline finishes, the PPU does nothing for 1 scanline (i.e. the programmer gets screwed out of perfectly good VINT time). When this scanline finishes, the VINT flag is set, and the process of drawing lines starts all over again.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+--------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">|Scanline rendering details|</span></p>
+<p class="rvps2"><span class="rvts6">+--------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Naturally, the PPU will fetch data from name, attribute, and pattern tables during a scanline to produce an image on the screen. This section details the PPU's doings during this time.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;As explained before, external PPU memory can be accessed every 2 cc's. With 341 cc's per scanline, this gives the PPU enough time to make 170 memory accesses per scanline (and it uses all of them!). After the 170th fetch, the PPU does nothing for 1 clock cycle. Remember that a single pixel is rendered every clock cycle.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Memory fetch phase 1 thru 128</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;-----------------------------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;1. Name table byte</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;2. Attribute table byte</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;3. Pattern table bitmap #0</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;4. Pattern table bitmap #1</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This process is repeated 32 times (32 tiles in a scanline).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This is when the PPU retrieves the appropriate data from PPU memory for rendering the playfield. The first playfield tile fetched here is actually the 3rd to be drawn on the screen (the playfield data for the first 2 tiles to be rendered on this scanline are fetched at the end of the scanline prior to this one).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;All valid on-screen pixel data arrives at the PPU's video out pin during this time (256 clocks). For determining the precise delay between when a tile's bitmap fetch phase starts (the whole 4 memory fetches), and when the first pixel of that tile's bitmap data hits the video out pin, the formula is (16-n) clock cycles, where n is the fine horizontal scroll offset (0..7 pixels). This information is relivant for understanding the exact timing operation of the "object 0 collision" flag.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Note that the PPU fetches an attribute table byte for every 8 sequential horizontal pixels it draws. This essentially limits the PPU's color area (the area of pixels which are forced to use the same 3-color palette) to only 8 horizontally sequential pixels.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;It is also during this time that the PPU evaluates the "Y coordinate" entries of all 64 objects in object attribute RAM (OAM), to see if the objects are within range (to be drawn on the screen) for the *next* scanline (this is why Y-coordinate entries in the OAM must be programmed to a value 1 less than the scanline the object is to appear on). Each evaluation (presumably) takes 4 clock cycles, for a total of 256 (which is why it's done during on-screen pixel rendering).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;In-range object evaluation</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;--------------------------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;An 8-bit comparator is used to calculate the 9-bit difference between the current scanline (minus 21), and each Y-coordinate (plus 1) of every object entry in the OAM. Objects are considered in range if the comparator produces a difference in the range of 0..7 (if $2000.5 currently = 0), or 0..15 (if $2000.5 currently = 1).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;(Note that a 9-bit comparison result is generated. This means that setting object scanline coordinates for ranges -1..-15 are actually interpreted as ranges 241..255. For this reason, objects with these ranges will never be considered to be part of any on-screen scanline range, and will not allow smooth object scrolling off the top of the screen.)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Tile index (8 bits), X-coordinate (8 bits), &amp; attribute information (4 bits; vertical inversion is excluded) from the in-range OAM element, plus the associated 4-bit result of the range comparison accumulate in a part of the PPU called the "sprite temporary memory". Logical inversion is applied to the loaded 4-bit range comparison result, if the object's vertical inversion attribute bit is set.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Since object range evaluations occur sequentially through the OAM (starting from entry 0 to 63), the sprite temporary memory always fills in order from the highest priority in-range object, to lower ones. A 4-bit "in-range" counter is used to determine the number of found objects on the scanline (from 0 up to 8), and serves as an index pointer for placement of found object data into the 8-element sprite temporary memory. The counter is reset at the beginning of the object evaluation phase, and is post-incremented everytime an object is found in-range. This occurs until the counter equals 8, when found object data after this is discarded, and a flag (bit 5 of $2002) is raised, indicating that it is going to be dropping objects for the next scanline.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;An additional memory bit associated with the sprite temporary memory is used to indicate that the primary object (#0) was found to be in range. This will be used later on to detect primary object-to-playfield pixel collisions.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Playfield render pipeline details</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;---------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;As pattern table &amp; palette select data is fetched, it is loaded into internal latches (the palette select data is selected from the fetched byte via a 2-bit 1-of-4 selector).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;At the start of a new tile fetch phase (every 8 cc's), both latched pattern table bitmaps are loaded into the upper 8-bits of 2- 16-bit shift registers (which both shift right every clock cycle). The palette select data is also transfered into another latch during this time (which feeds the serial inputs of 2 8-bit right shift registers shifted every clock). The pixel data is fed into these extra shift registers in order to implement fine horizontal scrolling, since the periods when the PPU fetch tile data is fixed.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;A single bit from each shift register is selected, to form the valid 4-bit playfield pixel for the current clock cycle. The bit selection offset is based on the fine horizontal scroll value (this selects bit positions 0..7 for all 4 shift registers). The selected 4-bit pixel data will then be fed into the multiplexer (described later) to be mixed with object data.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Memory fetch phase 129 thru 160</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;-------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;1. Garbage name table byte</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;2. Garbage name table byte</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;3. Pattern table bitmap #0 for applicable object (for next scanline)</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;4. Pattern table bitmap #1 for applicable object (for next scanline)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This process is repeated 8 times.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This is the period of time when the PPU retrieves the appropriate pattern table data for the objects to be drawn on the *next* scanline. When less than 8 objects exist on the next scanline (as the in-range object evaluation counter indicates), dummy pattern table fetches take place for the remaining fetches. Internally, the fetched dummy-data is discarded, and replaced with completely transparent bitmap patterns).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Although the fetched name table data is thrown away, and the name table address is somewhat unpredictable, the address does seem to relate to the first name table tile to be fetched for the next scanline. This would seem to imply that PPU cc #256 is when the PPU's scroll/address counters have their horizontal scroll values automatically updated.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;It should also be noted that because this fetch is required for objects on the next scanline, it is neccessary for a garbage scanline to exist prior to the very first scanline to be actually rendered, so that object attribute RAM entries can be evaluated, and the appropriate bitmap data retrieved.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;As far as the wasted fetch phases here, well, what can I say. Either Nintendo's engineers were VERY lazy, and didn't want to add the small amount of extra circuitry to the PPU so that 16 object fetches could take place per scanline, or Nintendo couldn't spot the extra memory required to implement 16 object scanlines. Thing is though- between the object attribute mem, sprite temporary &amp; buffer mem, and palette mem, that's already 2406 bits of RAM; I don't think it would've killed them to just add the 408 bits it would've took for an extra 8 objects, which would've made games with horrible OAM cycling (Double Dragon 2 w/ 2 players) look half-decent (hell, with 16 object scanlines, games would hardly even need OAM cycling).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Details of object pattern fetch &amp; render</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;----------------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Where the PPU fetches pattern table data for an individual object is conditioned on the contents of the sprite temporary memory element, and $2000.5. If $2000.5 = 0, the tile index data is used as usual, and $2000.3 selects the pattern table to use. If $2000.5 = 1, the MSB of the range result value become the LSB of the indexed tile, and the LSB of the tile index value determines pattern table selection. The lower 3 bits of the range result value are always used as the fine vertical offset into the selected pattern.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Horizontal inversion (bit order reversing) is applied to fetched bitmaps, if indicated in the sprite temporary memory element.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The fetched pattern table data (which is 2 bytes), plus the associated 3 attribute bits (palette select &amp; priority), and the x coordinate byte in sprite temporary memory are then loaded into a part of the PPU called the "sprite buffer memory" (the primary object present bit is also copied). This memory area again, is large enough to hold the contents for 8 sprites.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The composition of one sprite buffer element here is: 2 8-bit shift registers (the fetched pattern table data is loaded in here, where it will be serialized at the appropriate time), a 3-bit latch (which holds the color &amp; priority data for an object), and an 8-bit down counter (this is where the x coordinate is loaded).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The counter is decremented every time the PPU renders a pixel (the first 256 cc's of a scanline; see "Memory fetch phase 1 thru 128" above). When the counter equals 0, the pattern table data in the shift registers will start to serialize (1 shift per clock). Before this time, or 8 clocks after, consider the outputs of the serializers for each stage to be 0 (transparency).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The streams of all 8 object serializers are prioritized, and ultimately only one stream (with palette select &amp; priority information) is selected for output to the multiplexer (where object &amp; playfield pixels are prioritized).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The data for the first sprite buffer entry (including the primary object present flag) has the first chance to enter the multiplexer, if it's output pixel is non-transparent (non-zero). Otherwise, priority is passed to the next serializer in the sprite buffer memory, and the test for non-transparency is made again (the primary object present status will always be passed to the multiplexer as false in this case). This is done until the last (8th) stage is reached, when the object data is passed through unconditionally. Keep in mind that this whole process occurs every clock cycle (hardware is used to determine priority instantly).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The multiplexer does 2 things: determines primary object collisions, and decides which pixel data to pass through to index the palette RAM- either the playfield's or the object's.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Primary object collisions occur when a non-transparent playfield pixel coincides with a non-transparent object pixel, while the primary object present status entering the multiplexer for the current clock cycle is true. This causes a flip-flop ($2002.6) to be set, and remains set (presumably) some time after the VINT occurence (prehaps up until scanline 20?).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The decision for selecting the data to pass through to the palette index is made rather easilly. The condition to use object (opposed to playfield) data is:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;(OBJpri=foreground OR PFpixel=xparent) AND OBJpixel&lt;&gt;xparent</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Since the PPU has 2 palettes; one for objects, and one for playfield, the appropriate palette will be selected depending on which pixel data is passed through.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;After the palette look-up, the operation of events follows the aforementioned steps in the "video signal generation" section.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Memory fetch phase 161 thru 168</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;-------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;1. Name table byte</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;2. Attribute table byte</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;3. Pattern table bitmap #0 (for next scanline)</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;4. Pattern table bitmap #1 (for next scanline)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;This process is repeated 2 times.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;It is during this time that the PPU fetches the appliciable playfield data for the first and second tiles to be rendered on the screen for the *next* scanline. These fetches initialize the internal playfield pixel pipelines (2- 16-bit shift registers) with valid bitmap data. The rest of tiles (3..32) are fetched at the beginning of the following scanline.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Memory fetch phase 169 thru 170</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;-------------------------------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;1. Name table byte</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;2. Name table byte</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;I'm unclear of the reason why this particular access to memory is made. The name table address that is accessed 2 times in a row here, is also the same nametable address that points to the 3rd tile to be rendered on the screen (or basically, the first name table address that will be accessed when the PPU is fetching playfield data on the next scanline).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;After memory access 170</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;-----------------------</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The PPU simply rests for 1 cycle here (or the equivelant of half a memory access cycle) before repeating the whole pixel/scanline rendering process.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+------------------+</span></p>
+<p class="rvps2"><span class="rvts6">|Extra cycle frames|</span></p>
+<p class="rvps2"><span class="rvts6">+------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Scanline 20 is the only scanline that has variable length. On every odd frame, this scanline is only 340 cycles (the dead cycle at the end is removed). This is done to cause a shift in the NTSC colorburst phase.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;You see, a 3.58 MHz signal, the NTSC colorburst, is required to be modulated into a luminance carrying signal in order for color to be generated on an NTSC monitor. Since the PPU's video out consists of basically square waves (as opposed to sine waves, which would be preferred), it takes an entire colorburst cycle (1/3.58 MHz) for an NTSC monitor to identify the color of a PPU pixel accurately.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;But now you remember that the PPU renders pixels at 5.37 MHz- 1.5x the rate of the colorburst. This means that if a single pixel resides on a scanline with a color different to those surrounding it, the pixel will probably be misrepresented on the screen, sometimes appearing faintly.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Well, to somewhat fix this problem, they added this extra pixel into every odd frame (shifting the colorburst phase over a bit), and changing the way the monitor interprets isolated colored pixels each frame. This is why when you play games with detailed background graphics, the background seems to flicker a bit. Once you start scrolling the screen however, it seems as if some pixels become invisible; this is how stationary PPU images would look without this cycle removed from odd frames.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Certain scroll rates expose this NTSC PPU color caveat regardless of the toggling phase shift. Some of Zelda 2's dungeon backgrounds are a good place to see this effect.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+---------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">|The MMC3's scanline counter|</span></p>
+<p class="rvps2"><span class="rvts6">+---------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;As most people know, the MMC3 bases it's scanline counter on PPU address line A13 (which is why IRQ's can be fired off manually by toggling A13 a bunch of times via $2006). What's not common knowledge is the number of times A13 is expected to toggle in a scanline (although if you've been paying close attention to the doc here, you should already know ;)</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;A13 was probably used for the IRQ counter (as opposed to using the PPU's /READ line) because this address line already needed to be connected to the MMC for bankswitching purposes (so in other words, to reduce the MMC3's pin count by 1). They also probably used this method of counting (as opposed to a CPU cycle counter) since A13 cycles (0 -&gt; 1) exactly 42 times per scanline, whereas the CPU count of cycles per scanline is not an exact integer (113.67). Having said that, I guess Nintendo wanted to provide an "easy-to-use" method of generating special image effects, without making programmers have to figure out how many clock cycles to program an IRQ counter with (a pretty lame excuse for not providing an IRQ counter with CPU clock cycle precision (which would have been more useful and versatile)).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Regardless of any values PPU registers are programmed with, A13 will operate in a predictable fashion during image rendering (and if you understand how PPU addressing works, you should understand that A13 is the *only* address line with fixed behaviour during image rendering).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">|PPU pixel priority quirk|</span></p>
+<p class="rvps2"><span class="rvts6">+------------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Object data is prioritized between itself, then prioritized between the playfield. There are some odd side effects to this scheme of rendering, however. For instance, imagine a low priority object pixel with foreground priority, a high priority object pixel with background priority, and a playfield pixel all coinciding (all non-transparent).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Ideally, the playfield is considered to be the middle layer between background and foreground priority objects. This means that the playfield pixel should hide the background priority object pixel (regardless of object priority), and the foreground priority object should appear atop the PF pixel.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;However, because of the way the PPU renders (as just described), OBJ priority is evaluated first, and therefore the background object pixel wins, which means that you'll only be seeing the PF pixel after this mess.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;A good game to demonstrate this behaviour is Megaman 2. Go into airman's stage. First, jump into the energy bar, just to confirm that megaman's sprite is of a higher priority than the energy bar's. Now, get to the second half of the stage, where the clouds cover the energy bar. The energy bar will be ontop of the clouds, but megaman will be behind them. Now, look what happens when you jump into the energy bar here... you see the clouds where megaman underlaps the energy bar.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">+----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">|Graphical enhancements|</span></p>
+<p class="rvps2"><span class="rvts6">+----------------------+</span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Since an NES cartridge has access to the PPU bus, any number of on-cart hardware schemes can be used to enhance the graphic capabilities of the NES. After all, the PPU's playfield pipeline is very simple: it fetches 272 playfield pixels per scanline (as 34*2 byte fetches, in real-time), and outputs 256 of them to the screen (with the 0..7 pixel offset determined by the fine X scroll register), along with object data combined with it.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Essentially, you can bypass the PPU's simple scrolling system, implement a custom one on your cart (fetching bitmap data in your own fashion), and feed the PPU bitmap data in your own order.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The possibilities of this are endless (like sporting multiple playfields, or even playfield rotation/scaling), but of course what it comes down to is the amount of cartridge hardware required.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Generally, playfield rotation/scaling can be done quite easily- it only requires a few sets of 16-bit registers and adders (the 16 bits are broken up into 8.8 fixed point values). But this kind of implementation is more suited for an integrated circuit, since this would require dozens of discrete logic chips.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Multiple playfields are another thing which could be easily done. The caveat here is that pixel pipelines (i.e., shift registers) and a multiplexer would have to be implemented on the cart (not to mention exclusive name table RAM) in order to process the playfield bitmaps from multiple sources. The access to the CHR-ROM/RAM would also have to increased- but as it stands, the CHR-ROM/RAM bandwidth is 1.34 MHz, a rather low frequency. With a memory device capable of a 10.74 MHz bandwith, you could have 8 playfields to work with. Generally, this would be very useful for displaying multiple huge objects on the screen- without ever having to worry about annoying flicker.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;The only restriction to doing any of this is that:</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;- every 8 sequential horizontal pixels sent to the PPU must share the same palette select value. Because of this, hardware would have to be implemented to decide which palette select value to feed the PPU between 8 horizontally sequential pixels, if they do not all share the same palette select value. The on-screen results of this may not be too flattering sometimes, but this is a small price to pay to do some neat graphical tricks on the NES.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;-only the playfield palette can be used. As usual, this pretty much limits your randomly accessable colors to about 12+1.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;It's a damn shame that Nintendo never created a MMC which would enhance graphics on the NES in useful ways as mentioned above. The MMC5 was the only device that came close, and it's only selling features were the single-tile color area, and the vertical split screen mode (which I don't think any game ever used). Considering the amount of pins (100) the MMC5 had, and number of gates they put in it just for the EXRAM (which was 1K bytes), they could've put some really useful graphics hardware inside there instead.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;Prehaps the infamous Color Dreams "Hellraiser" cart was the closest the NES ever came to seeing such sophisticated graphics. The cart was never released, but from what I've read, it was going to use some sort of frame buffer, and a Z80 CPU to do the graphical rendering. It had been rumored that the game had 3D graphics (or at least 2.5D) in it. If so (and the game was actually good), prehaps it would have raised a few eyebrows in the industry, and inspired Nintendo to develop a new MMC chip with similar capabilities, in order to keep the NES in it's profit margin for another few years (and allow it to compete somewhat with the more advanced systems of the time).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">EOF</span></p>
+<p></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com">Free Qt Help documentation generator</a></p>
+
+            </div>
+            
+            <div id="topic_footer"><div id="topic_footer_content">2020</div></div>
+        </div>  <!-- /#topic-content -->
+    </article>
+
+    <footer></footer>
+
+  </div>  <!-- /#main -->
+
+  <div class="mask" data-toggle="sm-nav-expanded"></div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="hndModal" tabindex="-1" role="dialog" aria-labelledby="hndModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="hndModalLabel"></h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary modal-btn-close" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Splitter -->
+  <div id="hnd-splitter" style="left: 250px"></div>  
+
+  <!-- Scripts -->
+  <script src="vendors/jquery-3.5.1/jquery.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+  <script src="vendors/bootstrap-3.4.1/js/ie10-viewport-bug-workaround.js"></script>
+  <script src="vendors/markjs-8.11.1/jquery.mark.min.js"></script>
+  <script src="vendors/uri-1.19.2/uri.min.js"></script>
+  <script src="vendors/imageMapResizer-1.0.10/imageMapResizer.min.js"></script>
+  <script src="vendors/headroom-0.11.0/headroom.min.js"></script>
+  <script src="vendors/jstree-3.3.10/jstree.min.js"></script>  
+  <script src="vendors/interactjs-1.9.22/interact.min.js"></script>  
+
+  <!-- HelpNDoc scripts -->
+  <script src="js/polyfill.object.min.js"></script>
+  <script src="_translations.js"></script>
+  <script src="js/hndsd.min.js"></script>
+  <script src="js/hndse.min.js"></script>
+  <script src="js/app.min.js"></script>
+
+  <!-- Init script -->
+  <script>
+    $(function() {
+      // Create the app
+      var app = new Hnd.App();
+      // Update translations
+      hnd_ut(app);
+	  // Instanciate imageMapResizer
+	  imageMapResize();
+	  // Custom JS
+	  
+      // Boot the app
+      app.Boot();
+    });
+  </script>
+
+
+
+</body>
+
 </html>
 

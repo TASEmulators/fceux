@@ -23,25 +23,46 @@ class ConsoleViewSDL_t : public QWidget
 
 		void transfer2LocalBuffer(void);
 
+      void setLinearFilterEnable( bool ena );
+
+		bool   getSqrPixelOpt(void){ return sqrPixels; };
+		void   setSqrPixelOpt( bool val ){ sqrPixels = val; return; };
+		bool   getAutoScaleOpt(void){ return autoScaleEna; };
+		void   setAutoScaleOpt( bool val ){ autoScaleEna = val; return; };
+		double getScaleX(void){ return xscale; };
+		double getScaleY(void){ return yscale; };
+		void   setScaleXY( double xs, double ys );
+		void   getNormalizedCursorPos( double &x, double &y );
+		bool   getMouseButtonState( unsigned int btn );
+
 	protected:
 
 	//void paintEvent(QPaintEvent *event);
 	void resizeEvent(QResizeEvent *event);
-	 int  view_width;
-	 int  view_height;
+	void mousePressEvent(QMouseEvent * event);
+	void mouseReleaseEvent(QMouseEvent * event);
 
-	 double devPixRatio;
-	 int  rw;
-	 int  rh;
-	 int  sx;
-	 int  sy;
-	 int  sdlRendW;
-	 int  sdlRendH;
+	int  view_width;
+	int  view_height;
 
-	 bool vsyncEnabled;
+	double devPixRatio;
+	double xscale;
+	double yscale;
+	int  rw;
+	int  rh;
+	int  sx;
+	int  sy;
+	int  sdlRendW;
+	int  sdlRendH;
 
-	 uint32_t  *localBuf;
+	bool vsyncEnabled;
+	bool linearFilter;
+	bool sqrPixels;
+	bool autoScaleEna;
+
+	uint32_t  *localBuf;
 	uint32_t   localBufSize;
+	unsigned int mouseButtonMask;
 
  	SDL_Window   *sdlWindow;
 	SDL_Renderer *sdlRenderer;

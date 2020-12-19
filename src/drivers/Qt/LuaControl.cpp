@@ -1,9 +1,12 @@
 // LuaControl.cpp
 //
+#include <stdio.h>
+#include <string.h>
 #include <list>
 
 #include <QTextEdit>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include "../../fceu.h"
 
@@ -20,12 +23,64 @@
 #include "Qt/ConsoleUtilities.h"
 
 static bool luaScriptRunning = false;
+static bool updateLuaDisplay = false;
+static bool openLuaKillMsgBox = false;
+static int  luaKillMsgBoxRetVal = 0;
 
-static std::string luaOutputText;
+struct luaConsoleOutputBuffer
+{
+   int  head;
+   int  tail;
+   int  size;
+   char *buf;
+
+   luaConsoleOutputBuffer(void)
+   {
+      tail = head = 0;
+      size = 4096;
+
+      buf = (char*)malloc(size);
+   }
+
+  ~luaConsoleOutputBuffer(void)
+   {
+      if ( buf )
+      {
+         free(buf); buf = NULL;
+      }
+   }
+   
+   void addLine( const char *l )
+   {
+		int i=0;
+      //printf("Adding Line %i: '%s'\n", head, l );
+		while ( l[i] != 0 )
+		{
+      	buf[head] = l[i]; i++;
+
+      	head = (head + 1) % size;
+
+      	if ( head == tail )
+      	{
+      	   tail = (tail + 1) % size;
+      	}
+      }
+   }
+
+   void clear(void)
+   {
+      tail = head = 0;
+   }
+};
+
+static luaConsoleOutputBuffer outBuf;
+
 static std::list <LuaControlDialog_t*> winList;
+
+static void updateLuaWindows( void );
 //----------------------------------------------------
 LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog( parent, Qt::Window )
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
@@ -95,6 +150,12 @@ LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
 	setLayout( mainLayout );
 
 	winList.push_back( this );
+
+   periodicTimer  = new QTimer( this );
+
+   connect( periodicTimer, &QTimer::timeout, this, &LuaControlDialog_t::updatePeriodic );
+
+   periodicTimer->start( 200 ); // 5hz
 }
 
 //----------------------------------------------------
@@ -103,6 +164,8 @@ LuaControlDialog_t::~LuaControlDialog_t(void)
 	std::list <LuaControlDialog_t*>::iterator it;
 	  
 	printf("Destroy Lua Control Window\n");
+
+   periodicTimer->stop();
 
 	for (it = winList.begin(); it != winList.end(); it++)
 	{
@@ -130,6 +193,43 @@ void LuaControlDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------
+void LuaControlDialog_t::updatePeriodic(void)
+{
+   //printf("Update Lua\n");
+   if ( updateLuaDisplay )
+   {
+      updateLuaWindows();
+      updateLuaDisplay = false;
+   }
+
+	if ( openLuaKillMsgBox )
+	{
+		openLuaKillMessageBox();
+		openLuaKillMsgBox = false;
+	}
+}
+//----------------------------------------------------
+void LuaControlDialog_t::openLuaKillMessageBox(void)
+{
+	int ret;
+	QMessageBox msgBox(this);
+
+	luaKillMsgBoxRetVal = 0;
+
+	msgBox.setIcon( QMessageBox::Warning );
+	msgBox.setText( tr("The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n") );
+	msgBox.setStandardButtons(QMessageBox::Yes);
+	msgBox.addButton(QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::No);
+
+	ret = msgBox.exec();
+
+	if ( ret == QMessageBox::Yes )
+	{
+		luaKillMsgBoxRetVal = 1;
+	}
+}
+//----------------------------------------------------
 void LuaControlDialog_t::openLuaScriptFile(void)
 {
 #ifdef _S9XLUA_H
@@ -144,7 +244,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	dialog.setNameFilter(tr("LUA Scripts (*.lua *.LUA) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::Hidden );
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
 
 	g_config->getOption ("SDL.LastLoadLua", &last );
@@ -193,7 +293,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 void LuaControlDialog_t::startLuaScript(void)
 {
 #ifdef _S9XLUA_H
-	luaOutputText.clear();
+	outBuf.clear();
 	fceuWrapperLock();
 	if ( 0 == FCEU_LoadLuaCode( scriptPath->text().toStdString().c_str(), scriptArgs->text().toStdString().c_str() ) )
    {
@@ -214,6 +314,9 @@ void LuaControlDialog_t::stopLuaScript(void)
 //----------------------------------------------------
 void LuaControlDialog_t::refreshState(void)
 {
+   int i;
+   std::string luaOutputText;
+
 	if ( luaScriptRunning )
 	{
 		stopButton->setEnabled( true );
@@ -224,10 +327,22 @@ void LuaControlDialog_t::refreshState(void)
 		stopButton->setEnabled( false );
 		startButton->setText( tr("Start") );
 	}
+
+   i = outBuf.tail;
+
+   while ( i != outBuf.head )
+   {
+      luaOutputText.append( 1, outBuf.buf[i] );
+
+      i = (i + 1) % outBuf.size;
+   }
+
 	luaOutput->setText( luaOutputText.c_str() );
+
+   luaOutput->moveCursor( QTextCursor::End );
 }
 //----------------------------------------------------
-void updateLuaWindows( void )
+static void updateLuaWindows( void )
 {
 	std::list <LuaControlDialog_t*>::iterator it;
 	  
@@ -243,7 +358,7 @@ void WinLuaOnStart(intptr_t hDlgAsInt)
 
 	//printf("Lua Script Running: %i \n", luaScriptRunning );
 
-	updateLuaWindows();
+	updateLuaDisplay = true;
 }
 //----------------------------------------------------
 void WinLuaOnStop(intptr_t hDlgAsInt)
@@ -252,15 +367,52 @@ void WinLuaOnStop(intptr_t hDlgAsInt)
 
 	//printf("Lua Script Running: %i \n", luaScriptRunning );
 
-	updateLuaWindows();
+	updateLuaDisplay = true;
 }
 //----------------------------------------------------
 void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
 {
 	//printf("%s\n", str );
 
-	luaOutputText.append( str );
+   outBuf.addLine( str );
 	
-	updateLuaWindows();
+	updateLuaDisplay = true;
+}
+//----------------------------------------------------
+#ifdef  WIN32
+int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char* const format, ...) 
+#else
+int LuaPrintfToWindowConsole(const char *__restrict format, ...)  throw()
+#endif
+{
+   int retval;
+   va_list args;
+	char msg[2048];
+   va_start( args, format );
+   retval = ::vsnprintf( msg, sizeof(msg), format, args );
+   va_end(args);
+
+	msg[ sizeof(msg)-1 ] = 0;
+
+   outBuf.addLine( msg );
+
+	updateLuaDisplay = true;
+
+   return(retval);
+};
+//----------------------------------------------------
+int LuaKillMessageBox(void)
+{
+	//printf("Kill Lua Prompted\n");
+	luaKillMsgBoxRetVal = 0;
+
+	openLuaKillMsgBox = true;
+
+	while ( openLuaKillMsgBox )
+	{
+		usleep(100000);
+	}
+	
+	return luaKillMsgBoxRetVal;
 }
 //----------------------------------------------------

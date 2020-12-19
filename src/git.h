@@ -39,8 +39,9 @@ enum ESI
 	SI_SNES			= 7,
 	SI_SNES_MOUSE	= 8,
 	SI_VIRTUALBOY	= 9,
+	SI_LCDCOMP_ZAPPER  = 10,
 
-	SI_COUNT = SI_VIRTUALBOY
+	SI_COUNT = SI_LCDCOMP_ZAPPER
 };
 
 inline const char* ESI_Name(ESI esi)
@@ -56,7 +57,8 @@ inline const char* ESI_Name(ESI esi)
 		"Subor Mouse",
 		"SNES Pad",
 		"SNES Mouse",
-		"Virtual Boy"
+		"Virtual Boy",
+		"LCD Zapper (Advance)"
 	};
 
 	if(esi >= SI_NONE && esi <= SI_COUNT)
@@ -85,8 +87,9 @@ enum ESIFC
 	SIFC_BWORLD		= 13,
 	SIFC_TOPRIDER	= 14,
 	SIFC_FAMINETSYS = 15,
+	SIFC_HORI4PLAYER = 16,
 
-	SIFC_COUNT = SIFC_FAMINETSYS
+	SIFC_COUNT = SIFC_HORI4PLAYER
 };
 
 
@@ -109,7 +112,8 @@ inline const char* ESIFC_Name(ESIFC esifc)
 		"Oeka Kids Tablet",
 		"Barcode World",
 		"Top Rider",
-		"Famicom Network Controller"
+		"Famicom Network Controller",
+		"Hori 4-Player Adapter"
 	};
 
 	if(esifc >= SIFC_NONE && esifc <= SIFC_COUNT)

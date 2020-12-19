@@ -25,6 +25,10 @@ echo '****************************************'
 echo '***  Installing Package Dependencies ***'
 echo '****************************************'
 echo '****************************************'
+echo '****************************************'
+echo 'Install Dependency Updates'
+echo '****************************************'
+sudo apt-get --assume-yes update
 # Install Lua-5.1 development package
 echo '****************************************'
 echo 'Install Dependency lua5.1-dev'
@@ -89,28 +93,27 @@ echo '**************************'
 echo '***  Building Project  ***'
 echo '**************************'
 mkdir -p $INSTALL_PREFIX/usr;
-#scons   --clean
-#scons   GTK3=1   SYSTEM_LUA=1   SYSTEM_MINIZIP=1   CREATE_AVI=1  install  --prefix=$INSTALL_PREFIX/usr
+
 echo "Num CPU: `nproc`";
 mkdir buildQT; cd buildQT;
 cmake  \
    -DCMAKE_BUILD_TYPE=Release  \
-   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
+   -DCMAKE_INSTALL_PREFIX=/usr \
    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 	..
 make -j `nproc`
-make  install
+make  install  DESTDIR=$INSTALL_PREFIX
 
 cd ..;
 mkdir buildGTK; cd buildGTK;
 cmake  \
    -DGTK=1 \
    -DCMAKE_BUILD_TYPE=Release  \
-   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/usr \
+   -DCMAKE_INSTALL_PREFIX=/usr \
    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 	..
 make -j `nproc`
-make  install
+make  install  DESTDIR=$INSTALL_PREFIX
 
 # Install Files
 #cd .. # cd out of build
