@@ -1061,7 +1061,7 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 					// found matching address - replace its name and comment
 					if (node->name)
 						free(node->name);
-					if (strlen(node->name))
+					if (strlen(newName))
 					{
 						node->name = (char*)malloc(strlen(newName) + 1);
 						strcpy(node->name, newName);
