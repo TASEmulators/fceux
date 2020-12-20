@@ -11,9 +11,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="favicon.ico"/>
 
-  <title>What's New? 2.3.0 (changelog)</title>
+  <title>Famicom Disk Sytem</title>
   <meta name="description" content="" /> 
-  <meta name="keywords" content="">
+  <meta name="keywords" content="Famicom Disk System">
 
 
 
@@ -21,11 +21,11 @@
 
   <!-- Twitter Card data -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="What's New? 2.3.0 (changelog)">
+  <meta name="twitter:title" content="Famicom Disk Sytem">
   <meta name="twitter:description" content="">
 
   <!-- Open Graph data -->
-  <meta property="og:title" content="What's New? 2.3.0 (changelog)" />
+  <meta property="og:title" content="Famicom Disk Sytem" />
   <meta property="og:type" content="article" />
   <meta property="og:description" content="" />
   <meta property="og:site_name" content="FCEUX Help" /> 
@@ -163,96 +163,68 @@
 
     <article>
         <div id="topic-content" class="container-fluid" 
-		  data-hnd-id="Newtopic"
-		  data-hnd-context="84"
-		  data-hnd-title="What's New? 2.3.0 (changelog)"
+		  data-hnd-id="FamicomDiskSytem"
+		  data-hnd-context="7"
+		  data-hnd-title="Famicom Disk Sytem"
 		>
             
                 <div class="navigation">
                     <ol class="breadcrumb">
-                        <li><a href="Intro.html">Introduction</a></li>
+                        <li><a href="General.html">General</a></li>
                     </ol>
                     <div class="nav-arrows">
-                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="FCEUltraVersionHistory.html" title="FCE Ultra Version History" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew223.html" title="What's New? 2.2.3 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                        <div class="btn-group btn-group-xs" role="group"><a class="btn btn-default" href="General.html" title="General" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="CustomizingthroughtheConfigFil.html" title="Customizing through the Config File" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="AVICapturing.html" title="AVI Capturing" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
                     </div>
                 </div> 
             
 
             <a id="main-content"></a>
 
-            <h2>What's New? 2.3.0 (changelog)</h2>
+            <h2>Famicom Disk Sytem</h2>
 
             <div class="main-content">
                 
 <p></p>
-<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.3.0</span></p>
-<p class="rvps2"><span class="rvts6">Released -- 15 December 2020</span></p>
+<p class="rvps2"><span class="rvts22">Famicom Disk System</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The Family Computer Disk System (FDS) was released in 1986 by Nintendo as a peripheral for the Family Computer ("Famicom") console in Japan. It was a unit that used proprietary floppy disks for data storage. It was announced, but never released, for the North American Nintendo Entertainment System.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The device was connected to the Famicom deck by plugging a modified cartridge known as the RAM Adapter into the system's cartridge port, which attached via a supplied cable to the disk drive.&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">The floppy disks used were double-sided, with a capacity of 64 kilobytes per side. Many games spanned both sides of a disk, requiring the user to switch sides at some point during gameplay. A few games used two full disks (four sides). The Famicom Disk System was capable of running on six C-cell batteries or the supplied AC adapter. The battery option was included due to the likelihood of a standard set of AC sockets already being occupied by a Famicom and a television.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">FDS BIOS ROM</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">In order to play any Famicom (.fds) game, you will need the FDS BIOS ROM image and it must be named disksys.rom.</span></p>
+<p class="rvps2"><span class="rvts6">It must be in the base FCEU directory unless you specified a path to disksys.rom in the </span><a class="rvts44" href="Directories.html">Directory Overrides List</a><span class="rvts6">. FCEUX will not load FDS games without this file.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">File types</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Two types of FDS disk images are supported: disk images with the FWNES-style header, and disk images with no header. The number of sides on headerless disk images is calculated by the total file size, so don't put extraneous data at the end of the file.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Writing to disk image</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">If a loaded disk image is written to during emulation, FCEUX will store the modified disk image in the save games directory, which is "sav" under the base directory by default (unless changed under the </span><a class="rvts44" href="Directories.html">Directory Overrides List</a><span class="rvts6">).</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Eject/Insert Disk</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Emulates the ejecting of the current disk or the inserting of a new disk. &nbsp;If a disk image is loaded, this command will eject it. &nbsp;If a disk is ejected, this will insert a new disk.</span></p>
+<p class="rvps2"><span class="rvts6">This command can be mapped to a keyboard/joypad button in the </span><a class="rvts44" href="MapHotkeys.html">Map Hotkeys Menu</a><span class="rvts6">.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps5"><span class="rvts27">The 2.3.0 release includes 4 years worth of improvements and bug fixes.</span></p>
-<p class="rvps5"><span class="rvts28"><br/></span></p>
-<p class="rvps5"><span class="rvts29">Common</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts27">64 bit build support</span></li>
-</ul>
-<p class="rvps2"><span class="rvts31"><br/></span></p>
-<p class="rvps5"><span class="rvts28">Emulation</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts27">Added Mapper 111 cheapocabra</span></li>
- <li class="rvps5"><span class="rvts27">Added Mapper 190</span></li>
- <li class="rvps5"><span class="rvts27">Added RAM Init Options: default (00 00 00 00 FF FF FF FF as always), all FF, all 00, random.</span></li>
- <li class="rvps5"><span class="rvts27">New UNIF mappers</span></li>
-</ul>
-<p class="rvps5"><span class="rvts28"><br/></span></p>
-<p class="rvps5"><span class="rvts28">Lua</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts27">Various improvements and bug fixes to pre-existing functions</span></li>
- <li class="rvps5"><span class="rvts27">Fix parsing of lua colors over 0x80000000 on 32bits systems</span></li>
- <li class="rvps5"><span class="rvts27">Lua write callbacks: adding optional third parameter to retrieve the value written, added Sprites.lua script to visualize sprites</span></li>
-</ul>
-<p class="rvps5"><span class="rvts30"><br/></span></p>
-<p class="rvps5"><span class="rvts30">New Lua functions:</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts27">emu.exit()</span></li>
- <li class="rvps5"><span class="rvts27">rom.getfilename()</span></li>
-</ul>
-<p class="rvps5"><span class="rvts28"><br/></span></p>
-<p class="rvps5"><span class="rvts28">Win32</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts27">Various GUI improvements and bug fixes</span></li>
-</ul>
-<p class="rvps5"><span class="rvts28"><br/></span></p>
-<p class="rvps5"><span class="rvts29">Debugger</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts27">Added memory read/write conditional breakpoint capability.</span></li>
- <li class="rvps5"><span class="rvts27">Added illegal opcode support for breakpoints.</span></li>
- <li class="rvps5"><span class="rvts27">Support for 'S' register in conditional debugger breakpoints</span></li>
-</ul>
-<p class="rvps5"><span class="rvts29"><br/></span></p>
-<p class="rvps5"><span class="rvts29">Trace Logger</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts27">Added bank number log option</span></li>
-</ul>
-<p class="rvps5"><span class="rvts29"><br/></span></p>
-<p class="rvps5"><span class="rvts29">CDLogger</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts27">Fix&nbsp;Fixed VRAM data logging glitch</span></li>
-</ul>
-<p class="rvps5"><span class="rvts30"><br/></span></p>
-<p class="rvps5"><span class="rvts29">Hex Editor</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts27">Added OAM view feature</span></li>
- <li class="rvps5"><span class="rvts27">Bookmark fixes for all view region types</span></li>
- <li class="rvps5"><span class="rvts27">Prevent middle mouse button from attempting to "FreezeRam" when not in RAM mode</span></li>
-</ul>
-<p class="rvps5"><span class="rvts28"><br/></span></p>
-<p class="rvps5"><span class="rvts28">SDL</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts27">GUI completely rewritten using Qt5. Replaces old GTK GUI.</span></li>
- <li class="rvps5"><span class="rvts27">New Qt GUI now contains most of the debug tools that previously only existed in windows version.</span></li>
- <li class="rvps5"><span class="rvts27">Build setup migrated to cmake. Replaces scons build setup.</span></li>
-</ul>
-<p class="rvps2"><span class="rvts31"><br/></span></p>
+<p class="rvps2"><span class="rvts21">Switch Disk Side</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">When prompted by the game, you can emulate the Switching sides of the FDS disk with the NES -&gt; Switch Disk Side command.</span></p>
+<p class="rvps2"><span class="rvts6">This command can be mapped to a keyboard/joypad button in the </span><a class="rvts44" href="MapHotkeys.html">Map Hotkeys Menu</a><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To switch disk side you first have to eject the disk, and after switching sides you have to insert the disk back.</span></p>
+<p class="rvps2"><span class="rvts6">Many FDS games ask you to switch disk side before you can proceed from the title screen. So you have to do the following:</span></p>
+<p class="rvps2"><span class="rvts6">1) choose </span><span class="rvts45">NES -&gt; Eject/Insert Disk</span><span class="rvts6">, the message "Disk 0 Side A Ejected" will appear</span></p>
+<p class="rvps2"><span class="rvts6">2) choose </span><span class="rvts45">NES -&gt; Switch Disk Side</span><span class="rvts6">, the message "Disk 0 Side B Selected" will appear</span></p>
+<p class="rvps2"><span class="rvts6">3) choose </span><span class="rvts45">NES -&gt; Eject/Insert Disk</span><span class="rvts6"> again, the message "Disk 0 Side B Inserted" will appear, and the game will change from title screen to player select screen.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
 <p></p>
 <p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour/create-help-files-for-the-qt-help-framework">Create help files for the Qt Help Framework</a></p>
 
