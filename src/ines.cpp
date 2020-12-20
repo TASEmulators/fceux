@@ -737,7 +737,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	struct md5_context md5;
 
 	if (FCEU_fread(&head, 1, 16, fp) != 16 || memcmp(&head, "NES\x1A", 4))
-		return 0;
+		return LOADER_INVALID_FORMAT;
 	
 	head.cleanup();
 
@@ -794,7 +794,8 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		if ((VROM = (uint8*)FCEU_malloc(VROM_size << 13)) == NULL) {
 			free(ROM);
 			ROM = NULL;
-			return 0;
+			FCEU_PrintError("Unable to allocate memory.");
+			return LOADER_HANDLED_ERROR;
 		}
 		memset(VROM, 0xFF, VROM_size << 13);
 	}
@@ -902,7 +903,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		goto init_ok;
 	case 1:
 		FCEU_PrintError("iNES mapper #%d is not supported at all.", MapperNo);
-		goto init_ok; // this error is still allowed to run as NROM?
+		break;
 	case 2:
 		FCEU_PrintError("Unable to allocate CHR-RAM.");
 		break;
@@ -915,7 +916,8 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	VROM = NULL;
 	trainerpoo = NULL;
 	ExtraNTARAM = NULL;
-	return 0;
+	return LOADER_HANDLED_ERROR;
+
 init_ok:
 
 	GameInfo->mappernum = MapperNo;
@@ -949,7 +951,7 @@ init_ok:
 		else
 			FCEUI_SetVidSystem(0);
 	}
-	return 1;
+	return LOADER_OK;
 }
 
 // bbit edited: the whole function below was added
