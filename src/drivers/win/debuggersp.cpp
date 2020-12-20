@@ -412,7 +412,6 @@ Name* parse(char* lines, const char* filename)
 					{
 						first = prev = nn;
 					}
-					printf("nnoffset: %s, %d\n", nn->offset, nn->offsetNumeric);
 				}
 				
 				// Free the allocated node
