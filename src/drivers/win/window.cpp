@@ -3358,6 +3358,9 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 		// Debugger -> Add breakpoint
 		case IDC_ADDBP_ADDR_START: case IDC_ADDBP_ADDR_END:
 
+		// Array Size, Init value in Symbolic Name in Debugger
+		case IDC_EDIT_SYMBOLIC_ARRAY: case IDC_EDIT_SYMBOLIC_INIT:
+
 		// Address, Value, Compare, Known Value, Note equal, Greater than and Less than in Cheat
 		case IDC_CHEAT_ADDR: case IDC_CHEAT_VAL: case IDC_CHEAT_COM:
 		case IDC_CHEAT_VAL_KNOWN: case IDC_CHEAT_VAL_NE_BY:

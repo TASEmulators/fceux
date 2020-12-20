@@ -64,5 +64,6 @@ void GoToDebuggerBookmark(HWND hwnd);
 int isHex(char c);
 
 bool DoSymbolicDebugNaming(int offset, HWND parentHWND);
-void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char* newComment);
+void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char* newComment, int size, int init, bool nameOverwrite, bool commentHeadOnly, bool commentOverwrite);
+void DeleteSymbolicName(uint16 address, int size);
 void WriteNameFileToDisk(const char* filename, Name* node);
