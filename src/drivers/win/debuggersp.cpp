@@ -936,11 +936,20 @@ INT_PTR CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 				if (node->comment && node->comment[0])
 					SetDlgItemText(hwndDlg, IDC_SYMBOLIC_COMMENT, node->comment);
 			}
+			SetDlgItemText(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY, "10");
+			SetDlgItemText(hwndDlg, IDC_EDIT_SYMBOLIC_INIT, "0");
 			// set focus to IDC_SYMBOLIC_NAME
 			SendMessage(hwndDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hwndDlg, IDC_SYMBOLIC_NAME), true);
 			//always set the limits
 			SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_NAME, EM_SETLIMITTEXT, NL_MAX_NAME_LEN, 0);
 			SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_COMMENT, EM_SETLIMITTEXT, NL_MAX_MULTILINE_COMMENT_LEN, 0);
+			SendDlgItemMessage(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY, EM_SETLIMITTEXT, 2, 0);
+			SendDlgItemMessage(hwndDlg, IDC_EDIT_SYMBOLIC_INIT, EM_SETLIMITTEXT, 2, 0);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_SYMBOLIC_INIT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+
+			CheckDlgButton(hwndDlg, IDC_CHECK_SYMBOLIC_NAME_OVERWRITE, BST_CHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD, BST_CHECKED);
 			break;
 		}
 		case WM_CLOSE:
@@ -954,19 +963,86 @@ INT_PTR CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 				{
 					switch(LOWORD(wParam))
 					{
+						case IDC_CHECK_SYMBOLIC_DELETE:
+						{
+							bool delete_mode = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_DELETE) == BST_CHECKED;
+							EnableWindow(GetDlgItem(hwndDlg, IDC_STATIC_SYMBOLIC_NAME), !delete_mode);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_STATIC_SYMBOLIC_COMMENT), !delete_mode);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_SYMBOLIC_NAME), !delete_mode);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_SYMBOLIC_COMMENT), !delete_mode);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_NAME_OVERWRITE), !delete_mode);
+							if (delete_mode)
+							{
+								EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_OVERWRITE), FALSE);
+								EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD), FALSE);
+								EnableWindow(GetDlgItem(hwndDlg, IDC_STATIC_SYMBOLIC_INIT), FALSE);
+								EnableWindow(GetDlgItem(hwndDlg, IDC_EDIT_SYMBOLIC_INIT), FALSE);
+							} else
+							{
+								bool array_chk = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_ARRAY) == BST_CHECKED;
+								bool comment_head_only = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD) == BST_CHECKED;
+								EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD), array_chk);
+								EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_NAME_OVERWRITE), array_chk);
+								EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_OVERWRITE), array_chk && !comment_head_only);
+								EnableWindow(GetDlgItem(hwndDlg, IDC_STATIC_SYMBOLIC_INIT), array_chk);
+								EnableWindow(GetDlgItem(hwndDlg, IDC_EDIT_SYMBOLIC_INIT), array_chk);
+							}
+							break;
+						}
+						case IDC_CHECK_SYMBOLIC_ARRAY:
+						{
+							bool array_chk = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_ARRAY) == BST_CHECKED;
+							bool delete_mode = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_DELETE) == BST_CHECKED;
+							bool comment_head_only = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD) == BST_CHECKED;
+							EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_NAME_OVERWRITE), array_chk && !delete_mode);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD), array_chk && !delete_mode);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_OVERWRITE), array_chk && !comment_head_only && !delete_mode);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY), array_chk);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_STATIC_SYMBOLIC_BYTE), array_chk);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_STATIC_SYMBOLIC_INIT), array_chk && !delete_mode);
+							EnableWindow(GetDlgItem(hwndDlg, IDC_EDIT_SYMBOLIC_INIT), array_chk && !delete_mode);
+							break;
+						}
+						case IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD:
+						{
+							bool comment_head_only = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD) == BST_CHECKED;
+							EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_OVERWRITE), !comment_head_only);
+							break;
+						}
 						case IDOK:
 						{
 							unsigned int newAddress = 0;
-							char newOffset[6] = {0};
+							char newOffset[6] = { 0 };
 							GetDlgItemText(hwndDlg, IDC_SYMBOLIC_ADDRESS, newOffset, 6);
 							if (sscanf(newOffset, "%*[$]%4X", &newAddress) != EOF)
 							{
-								char newName[NL_MAX_NAME_LEN + 1] = {0};
-								GetDlgItemText(hwndDlg, IDC_SYMBOLIC_NAME, newName, NL_MAX_NAME_LEN + 1);
-								char newComment[NL_MAX_MULTILINE_COMMENT_LEN + 1] = {0};
-								GetDlgItemText(hwndDlg, IDC_SYMBOLIC_COMMENT, newComment, NL_MAX_MULTILINE_COMMENT_LEN + 1);
-								
-								AddNewSymbolicName(newAddress, newOffset, newName, newComment);
+
+								unsigned int arraySize = 0;
+								unsigned int arrayInit = 0;
+								if (IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_ARRAY) == BST_CHECKED)
+								{
+									char strArraySize[6] = { 0 };
+									GetDlgItemText(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY, strArraySize, 6);
+									if (*strArraySize)
+										sscanf(strArraySize, "%4X", &arraySize);
+								}
+
+								if (IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_DELETE) == BST_UNCHECKED)
+								{
+									char newName[NL_MAX_NAME_LEN + 1] = { 0 };
+									GetDlgItemText(hwndDlg, IDC_SYMBOLIC_NAME, newName, NL_MAX_NAME_LEN + 1);
+									char newComment[NL_MAX_MULTILINE_COMMENT_LEN + 1] = { 0 };
+									GetDlgItemText(hwndDlg, IDC_SYMBOLIC_COMMENT, newComment, NL_MAX_MULTILINE_COMMENT_LEN + 1);
+
+									char strArrayInit[6] = { 0 };
+									GetDlgItemText(hwndDlg, IDC_EDIT_SYMBOLIC_INIT, strArrayInit, 6);
+									if (*strArrayInit)
+										sscanf(strArrayInit, "%4X", &arrayInit);
+
+									AddNewSymbolicName(newAddress, newOffset, newName, newComment, arraySize, arrayInit, IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_NAME_OVERWRITE) == BST_CHECKED, IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD) == BST_CHECKED, IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_OVERWRITE) == BST_CHECKED);
+								} else
+									DeleteSymbolicName(newAddress, arraySize);
+
 								WriteNameFileToDisk(generateNLFilenameForAddress(newAddress), getNamesPointerForAddress(newAddress));
 							}
 							EndDialog(hwndDlg, 1);
@@ -998,11 +1074,8 @@ bool DoSymbolicDebugNaming(int offset, HWND parentHWND)
 	return false;
 }
 
-void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char* newComment)
+void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char* newComment, int size, int init, bool nameOverwrite, bool commentHeadOnly, bool commentOverwrite)
 {
-	Name* initialNode = getNamesPointerForAddress(newAddress);
-	Name* node = initialNode;
-	
 	// remove all delimiterChars from name and comment
 	char* pos = newName;
 	while (pos < newName + strlen(newName))
@@ -1025,122 +1098,172 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 
 	if (*newName || *newComment)
 	{
-		if (!initialNode)
-		{
-			// no previous data, create new list
-			node = (Name*)malloc(sizeof(Name));
-			node->offset = (char*)malloc(strlen(newOffset) + 1);
-			strcpy(node->offset, newOffset);
-			node->offsetNumeric = newAddress;
-			if (strlen(newName))
+		int i = 0;
+		char* tmpNewOffset = (char*)malloc(strlen(newOffset) + 1);
+		strcpy(tmpNewOffset, newOffset);
+		uint16 tmpNewAddress = newAddress;
+		int tmpInit = init;
+		do {
+			Name* node = getNamesPointerForAddress(tmpNewAddress);
+			if (!node)
 			{
-				node->name = (char*)malloc(strlen(newName) + 1);
-				strcpy(node->name, newName);
-			}
-			else
-			{
-				node->name = 0;
-			}
-			if (strlen(newComment))
-			{
-				node->comment = (char*)malloc(strlen(newComment) + 1);
-				strcpy(node->comment, newComment);
-			} else
-			{
-				node->comment = 0;
-			}
-			node->next = 0;
-			setNamesPointerForAddress(newAddress, node);
-		} else
-		{
-			// search the list
-			while (node)
-			{
-				if (node->offsetNumeric == newAddress)
+				node = (Name*)malloc(sizeof(Name));
+				node->offset = (char*)malloc(strlen(tmpNewOffset) + 1);
+				strcpy(node->offset, tmpNewOffset);
+				node->offsetNumeric = tmpNewAddress;
+
+				// Node name
+				if (strlen(newName))
 				{
-					// found matching address - replace its name and comment
-					if (node->name)
-						free(node->name);
-					if (strlen(newName))
+					if (size)
+					{
+						char arr_index[16];
+						sprintf(arr_index, "[%X]", tmpInit);
+						node->name = (char*)malloc(strlen(newName) + strlen(arr_index) + 1);
+						strcpy(node->name, newName);
+						strcat(node->name, arr_index);
+					}
+					else
 					{
 						node->name = (char*)malloc(strlen(newName) + 1);
 						strcpy(node->name, newName);
-					} else
-					{
-						node->name = 0;
 					}
-					if (node->comment)
-					{
-						free(node->comment);
-					}
-					if (strlen(newComment))
-					{
-						node->comment = (char*)malloc(strlen(newComment) + 1);
-						strcpy(node->comment, newComment);
-					} else
-					{
-						node->comment = 0;
-					}
-					break;
 				}
-				if (node->next)
+				else
+					node->name = 0;
+
+				if ((i == 0 || !commentHeadOnly) && strlen(newComment))
 				{
-					node = node->next;
-				} else
+					node->comment = (char*)malloc(strlen(newComment) + 1);
+					strcpy(node->comment, newComment);
+				}
+				else
+					node->comment = 0;
+
+				node->next = 0;
+				setNamesPointerForAddress(tmpNewAddress, node);
+			}
+			else
+			{
+				while (node)
 				{
-					// this is the last node in the list - so just append the address
-					Name* newNode = (Name*)malloc(sizeof(Name));
-					node->next = newNode;
-					newNode->offset = (char*)malloc(strlen(newOffset) + 1);
-					strcpy(newNode->offset, newOffset);
-					newNode->offsetNumeric = newAddress;
-					
-					if (strlen(newName))
+					if (node->offsetNumeric == tmpNewAddress)
 					{
-						newNode->name = (char*)malloc(strlen(newName) + 1);
-						strcpy(newNode->name, newName);
+						// found matching address, proccessing its name and comment based on the configuration
+						if ((i == 0 || nameOverwrite) && node->name)
+						{
+							free(node->name);
+							node->name = 0;
+						}
+						if (!node->name && strlen(newName))
+						{
+							if (size)
+							{
+								char arr_index[16];
+								sprintf(arr_index, "[%X]", tmpInit);
+								node->name = (char*)malloc(strlen(newName) + strlen(arr_index) + 1);
+								strcpy(node->name, newName);
+								strcat(node->name, arr_index);
+							}
+							else
+							{
+								node->name = (char*)malloc(strlen(newName) + 1);
+								strcpy(node->name, newName);
+							}
+						}
+
+						if ((i == 0 || !commentHeadOnly && commentOverwrite) && node->comment)
+						{
+							free(node->comment);
+							node->comment = 0;
+						}
+						if (!node->comment && strlen(newComment))
+						{
+							node->comment = (char*)malloc(strlen(newComment) + 1);
+							strcpy(node->comment, newComment);
+						}
+
+						break;
 					}
+
+					if (node->next)
+						node = node->next;
 					else {
-						newNode->name = 0;
+						// this is the last node in the list - so just append the address
+						Name* newNode = (Name*)malloc(sizeof(Name));
+						newNode->offset = (char*)malloc(strlen(tmpNewOffset) + 1);
+						strcpy(newNode->offset, tmpNewOffset);
+						newNode->offsetNumeric = tmpNewAddress;
+
+						// Node name
+						if (strlen(newName))
+						{
+							if (size)
+							{
+								char arr_index[16];
+								sprintf(arr_index, "[%X]", tmpInit);
+								newNode->name = (char*)malloc(strlen(newName) + strlen(arr_index) + 1);
+								strcpy(newNode->name, newName);
+								strcat(newNode->name, arr_index);
+							}
+							else
+							{
+								newNode->name = (char*)malloc(strlen(newName) + 1);
+								strcpy(newNode->name, newName);
+							}
+						}
+						else
+							newNode->name = 0;
+
+						if ((i == 0 || !commentHeadOnly) && strlen(newComment))
+						{
+							newNode->comment = (char*)malloc(strlen(newComment) + 1);
+							strcpy(newNode->comment, newComment);
+						}
+						else
+							newNode->comment = 0;
+
+						newNode->next = 0;
+						node->next = newNode;
+						break;
 					}
-					if (strlen(newComment))
-					{
-						newNode->comment = (char*)malloc(strlen(newComment) + 1);
-						strcpy(newNode->comment, newComment);
-					} else {
-						newNode->comment = 0;
-					}
-					newNode->next = 0;
-					break;
 				}
 			}
-		}
-	} else
-	{
-		// name and comment field are all empty - remove the address from the list
-		Name* previousNode = 0;
+			++tmpNewAddress;
+			++tmpInit;
+			sprintf(tmpNewOffset, "$%04X", tmpNewAddress);
+		} while (++i < size);
+	}
+}
+
+void DeleteSymbolicName(uint16 address, int size)
+{
+	int i = 0;
+	uint16 tmpAddress = address;
+	do {
+		Name* prev = 0;
+		Name* initialNode = getNamesPointerForAddress(tmpAddress);
+		Name* node = initialNode;
 		while (node)
 		{
-			if (node->offsetNumeric == newAddress)
+			if (node->offsetNumeric == tmpAddress)
 			{
-				// found matching address - delete it
 				if (node->offset)
 					free(node->offset);
 				if (node->name)
 					free(node->name);
-				if (node->comment)
-					free(node->comment);
-				if (previousNode)
-					previousNode->next = node->next;
+				if (prev)
+					prev->next = node->next;
 				if (node == initialNode)
-					setNamesPointerForAddress(newAddress, node->next);
+					setNamesPointerForAddress(tmpAddress, node->next);
 				free(node);
 				break;
 			}
-			previousNode = node;
+			prev = node;
 			node = node->next;
 		}
-	}
+		++tmpAddress;
+	} while (++i < size);
 }
 
 void WriteNameFileToDisk(const char* filename, Name* node)
