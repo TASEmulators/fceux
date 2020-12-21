@@ -1336,132 +1336,30 @@ void HexEditorDialog_t::actvHighlightRVCB(bool enable)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::openDebugSymbolEditWindow( int addr )
 {
-	int ret, bank, charWidth;
-	QDialog dialog(this);
-	QHBoxLayout *hbox;
-	QVBoxLayout *mainLayout;
-	QLabel *lbl;
-	QLineEdit *filepath, *addrEntry, *nameEntry, *commentEntry;
-	QPushButton *okButton, *cancelButton;
-	char stmp[512];
+	int ret, bank;
 	debugSymbol_t *sym;
-	QFont font;
-	font.setFamily("Courier New");
-	font.setStyle( QFont::StyleNormal );
-	font.setStyleHint( QFont::Monospace );
+	SymbolEditWindow win(this);
 
-	QFontMetrics fm(font);
-
-#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
-    charWidth = fm.horizontalAdvance(QLatin1Char('2'));
-#else
-    charWidth = fm.width(QLatin1Char('2'));
-#endif
-
-	 if ( addr < 0x8000 )
-	 {
-		 bank = -1;
-	 }
-	 else
-	 {
-		 bank = getBank( addr );
-	 }
-
-	sym = debugSymbolTable.getSymbolAtBankOffset( bank, addr );
-
-	generateNLFilenameForAddress( addr, stmp );
-
-	dialog.setWindowTitle( tr("Symbolic Debug Naming") );
-
-	hbox       = new QHBoxLayout();
-	mainLayout = new QVBoxLayout();
-
-	lbl = new QLabel( tr("File") );
-	filepath = new QLineEdit();
-	filepath->setFont( font );
-	filepath->setText( tr(stmp) );
-	filepath->setReadOnly( true );
-	filepath->setMinimumWidth( charWidth * (filepath->text().size() + 4) );
-
-	hbox->addWidget( lbl );
-	hbox->addWidget( filepath );
-
-	mainLayout->addLayout( hbox );
-
-	sprintf( stmp, "%04X", addr );
-
-	hbox = new QHBoxLayout();
-	lbl  = new QLabel( tr("Address") );
-	addrEntry = new QLineEdit();
-	addrEntry->setFont( font );
-	addrEntry->setText( tr(stmp) );
-	addrEntry->setReadOnly( true );
-	addrEntry->setAlignment(Qt::AlignCenter);
-	addrEntry->setMaximumWidth( charWidth * 6 );
-
-	hbox->addWidget( lbl );
-	hbox->addWidget( addrEntry );
-
-	lbl  = new QLabel( tr("Name") );
-	nameEntry = new QLineEdit();
-
-	hbox->addWidget( lbl );
-	hbox->addWidget( nameEntry );
-
-	mainLayout->addLayout( hbox );
-
-	hbox = new QHBoxLayout();
-	lbl  = new QLabel( tr("Comment") );
-	commentEntry = new QLineEdit();
-
-	hbox->addWidget( lbl );
-	hbox->addWidget( commentEntry );
-
-	mainLayout->addLayout( hbox );
-
-	hbox         = new QHBoxLayout();
-	okButton     = new QPushButton( tr("OK") );
-	cancelButton = new QPushButton( tr("Cancel") );
-
-	mainLayout->addLayout( hbox );
-	hbox->addWidget( cancelButton );
-	hbox->addWidget(     okButton );
-
-	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
-   connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
-
-	okButton->setDefault(true);
-
-	if ( sym != NULL )
+	if ( addr < 0x8000 )
 	{
-		nameEntry->setText( tr(sym->name.c_str()) );
-		commentEntry->setText( tr(sym->comment.c_str()) );
+	   bank = -1;
+	}
+	else
+	{
+	   bank = getBank( addr );
 	}
 
-	dialog.setLayout( mainLayout );
+  	sym = debugSymbolTable.getSymbolAtBankOffset( bank, addr );
 
-	ret = dialog.exec();
+	win.setAddr( addr );
+
+	win.setSym( sym );
+
+	ret = win.exec();
 
 	if ( ret == QDialog::Accepted )
 	{
-		if ( sym == NULL )
-		{
-			sym = new debugSymbol_t();
-			sym->ofs     = addr;
-			sym->name    = nameEntry->text().toStdString();
-			sym->comment = commentEntry->text().toStdString();
-
-			debugSymbolTable.addSymbolAtBankOffset( bank, addr, sym );
-		}
-		else
-		{
-			sym->name    = nameEntry->text().toStdString();
-			sym->comment = commentEntry->text().toStdString();
-		}
-		sym->trimTrailingSpaces();
-		//fceuWrapperLock();
 		updateAllDebuggerWindows();
-		//fceuWrapperUnLock();
 	}
 }
 //----------------------------------------------------------------------------

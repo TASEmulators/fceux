@@ -12,6 +12,7 @@
 #include "../../asm.h"
 #include "../../x6502.h"
 
+#include "Qt/fceuWrapper.h"
 #include "Qt/SymbolicDebug.h"
 #include "Qt/ConsoleUtilities.h"
 
@@ -64,6 +65,29 @@ debugSymbol_t *debugSymbolPage_t::getSymbolAtOffset( int ofs )
 		sym = it->second;
 	}
 	return sym;
+}
+//--------------------------------------------------------------
+int debugSymbolPage_t::deleteSymbolAtOffset( int ofs )
+{
+	debugSymbol_t*sym = NULL;
+	std::map <int, debugSymbol_t*>::iterator it;
+
+	it = symMap.find( ofs );
+
+	if ( it != symMap.end() )
+	{
+		sym = it->second;
+		symMap.erase(it);
+	}
+	else
+	{
+		return -1;
+	}
+	if ( sym != NULL )
+	{
+		delete sym;
+	}
+	return 0;
 }
 //--------------------------------------------------------------
 int debugSymbolPage_t::save(void)
@@ -576,6 +600,25 @@ int debugSymbolTable_t::addSymbolAtBankOffset( int bank, int ofs, debugSymbol_t 
 	return 0;
 }
 //--------------------------------------------------------------
+int debugSymbolTable_t::deleteSymbolAtBankOffset( int bank, int ofs )
+{
+	debugSymbolPage_t *page;
+	std::map <int, debugSymbolPage_t*>::iterator it;
+
+	it = pageMap.find( bank );
+
+	if ( it == pageMap.end() )
+	{
+		return -1;
+	}
+	else
+	{
+		page = it->second;
+	}
+
+	return page->deleteSymbolAtOffset( ofs );
+}
+//--------------------------------------------------------------
 debugSymbol_t *debugSymbolTable_t::getSymbolAtBankOffset( int bank, int ofs )
 {
 	debugSymbol_t*sym = NULL;
@@ -1052,5 +1095,468 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 	}
 	
 	return 0;
+}
+//--------------------------------------------------------------
+// Symbol Add/Edit Window Object
+//--------------------------------------------------------------
+SymbolEditWindow::SymbolEditWindow(QWidget *parent)
+	: QDialog(parent)
+{
+	QHBoxLayout *hbox;
+	QVBoxLayout *mainLayout;
+	QGridLayout *grid;
+	QLabel      *lbl;
+	fceuHexIntValidtor *validator;
+
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+
+	QFontMetrics fm(font);
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    charWidth = fm.horizontalAdvance(QLatin1Char('2'));
+#else
+    charWidth = fm.width(QLatin1Char('2'));
+#endif
+
+	bank = -1;
+	addr = -1;
+	sym  = NULL;
+
+	setWindowTitle( tr("Symbolic Debug Naming") );
+
+	hbox       = new QHBoxLayout();
+	mainLayout = new QVBoxLayout();
+
+	lbl = new QLabel( tr("File") );
+	filepath = new QLineEdit();
+	filepath->setFont( font );
+	filepath->setReadOnly( true );
+	filepath->setMinimumWidth( charWidth * (filepath->text().size() + 4) );
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( filepath );
+
+	mainLayout->addLayout( hbox );
+
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr("Address") );
+	addrEntry = new QLineEdit();
+	addrEntry->setFont( font );
+	addrEntry->setReadOnly( true );
+	addrEntry->setAlignment(Qt::AlignCenter);
+	addrEntry->setMaximumWidth( charWidth * 6 );
+
+	hbox->addWidget( lbl, 1, Qt::AlignLeft );
+	hbox->addWidget( addrEntry, 10, Qt::AlignLeft );
+
+	isArrayBox = new QCheckBox( tr("Array") );
+	hbox->addWidget( isArrayBox, 10, Qt::AlignRight );
+
+	validator = new fceuHexIntValidtor( 0x00, 0xFF, this );
+	arraySizeLbl[0] = new QLabel( tr("Size: 0x") );
+	arraySize = new QLineEdit();
+	arraySize->setFont( font );
+	arraySize->setText( tr("01") );
+	arraySize->setAlignment(Qt::AlignCenter);
+	arraySize->setMaximumWidth( charWidth * 4 );
+	arraySize->setValidator( validator );
+
+	hbox->addWidget( arraySizeLbl[0], 0, Qt::AlignRight );
+	hbox->addWidget( arraySize );
+
+	arraySizeLbl[1] = new QLabel( tr("Bytes") );
+	hbox->addWidget( arraySizeLbl[1], 0, Qt::AlignLeft );
+
+	validator = new fceuHexIntValidtor( 0x00, 0xFF, this );
+	arrayInitLbl = new QLabel( tr("Init: 0x") );
+	arrayInit = new QLineEdit();
+	arrayInit->setFont( font );
+	arrayInit->setText( tr("00") );
+	arrayInit->setAlignment(Qt::AlignCenter);
+	arrayInit->setMaximumWidth( charWidth * 4 );
+	arrayInit->setValidator( validator );
+
+	hbox->addWidget( arrayInitLbl, 0, Qt::AlignRight );
+	hbox->addWidget( arrayInit );
+
+	mainLayout->addLayout( hbox );
+
+	//hbox = new QHBoxLayout();
+	grid = new QGridLayout();
+	mainLayout->addLayout( grid );
+	lbl  = new QLabel( tr("Name") );
+	nameEntry = new QLineEdit();
+
+	arrayNameOverWrite = new QCheckBox( tr("Overwrite Names in Array Body") );
+	arrayNameOverWrite->setChecked( true );
+
+	grid->addWidget( lbl, 0, 0 );
+	grid->addWidget( nameEntry, 0, 1 );
+
+	grid->addWidget( arrayNameOverWrite, 1, 1 );
+
+	lbl  = new QLabel( tr("Comment") );
+	commentEntry = new QPlainTextEdit();
+
+	grid->addWidget( lbl, 2, 0 );
+	grid->addWidget( commentEntry, 2, 1 );
+
+	commentHeadOnly       = new QCheckBox( tr("Comment Head Address Only") );
+	arrayCommentOverWrite = new QCheckBox( tr("Overwrite Comments in Array Body") );
+
+	commentHeadOnly->setChecked(true);
+
+	grid->addWidget( commentHeadOnly, 3, 1 );
+	grid->addWidget( arrayCommentOverWrite, 4, 1 );
+
+	hbox         = new QHBoxLayout();
+	deleteBox    = new QCheckBox( tr("Delete") );
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	//okButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton ) );
+	okButton->setIcon( style()->standardIcon( QStyle::SP_DialogOkButton ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( deleteBox    );
+	hbox->addWidget( cancelButton );
+	hbox->addWidget(     okButton );
+
+	connect(     okButton, SIGNAL(clicked(void)), this, SLOT(accept(void)) );
+   connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(reject(void)) );
+
+	deleteBox->setEnabled( false );
+	okButton->setDefault(true);
+
+	if ( sym != NULL )
+	{
+		nameEntry->setText( tr(sym->name.c_str()) );
+		commentEntry->setPlainText( tr(sym->comment.c_str()) );
+	}
+
+	setLayout( mainLayout );
+
+	updateArraySensitivity();
+
+	connect( isArrayBox     , SIGNAL(stateChanged(int)), this, SLOT(isArrayStateChanged(int)) );
+	connect( commentHeadOnly, SIGNAL(stateChanged(int)), this, SLOT(arrayCommentHeadOnlyChanged(int)) );
+}
+//--------------------------------------------------------------
+SymbolEditWindow::~SymbolEditWindow(void)
+{
+
+}
+//--------------------------------------------------------------
+void SymbolEditWindow::closeEvent(QCloseEvent *event)
+{
+   printf("Debugger Close Window Event\n");
+   done(0);
+	deleteLater();
+   event->accept();
+}
+//--------------------------------------------------------------
+void SymbolEditWindow::closeWindow(void)
+{
+   //printf("Close Window\n");
+   done(0);
+	deleteLater();
+}
+//--------------------------------------------------------------
+void SymbolEditWindow::updateArraySensitivity(void)
+{
+	if ( isArrayBox->isChecked() )
+	{
+		arraySize->setEnabled( true );
+		arrayInit->setEnabled( true );
+		arraySizeLbl[0]->setEnabled( true );
+		arraySizeLbl[1]->setEnabled( true );
+		arrayInitLbl->setEnabled( true );
+		commentHeadOnly->setEnabled( true );
+		arrayNameOverWrite->setEnabled( true );
+
+		arrayCommentOverWrite->setEnabled( !commentHeadOnly->isChecked() );
+	}
+	else
+	{
+		arraySize->setEnabled( false );
+		arrayInit->setEnabled( false );
+		arraySizeLbl[0]->setEnabled( false );
+		arraySizeLbl[1]->setEnabled( false );
+		arrayInitLbl->setEnabled( false );
+		commentHeadOnly->setEnabled( false );
+		arrayNameOverWrite->setEnabled( false );
+		arrayCommentOverWrite->setEnabled( false );
+	}
+
+}
+//--------------------------------------------------------------
+void SymbolEditWindow::isArrayStateChanged( int state )
+{
+	updateArraySensitivity();
+}
+//--------------------------------------------------------------
+void SymbolEditWindow::arrayCommentHeadOnlyChanged( int state )
+{
+	updateArraySensitivity();
+}
+//--------------------------------------------------------------
+void SymbolEditWindow::setAddr( int addrIn )
+{
+	char stmp[512];
+
+	addr = addrIn;
+
+	sprintf( stmp, "%04X", addr );
+
+	addrEntry->setText( tr(stmp) );
+
+	if ( addr < 0x8000 )
+	{
+	   bank = -1;
+	}
+	else
+	{
+	   bank = getBank( addr );
+	}
+
+	generateNLFilenameForAddress( addr, stmp );
+
+	filepath->setText( tr(stmp) );
+	filepath->setMinimumWidth( charWidth * (filepath->text().size() + 4) );
+}
+//--------------------------------------------------------------
+void SymbolEditWindow::setSym( debugSymbol_t *symIn )
+{
+	sym = symIn;
+
+	if ( sym != NULL )
+	{
+		nameEntry->setText( tr(sym->name.c_str()) );
+		commentEntry->setPlainText( tr(sym->comment.c_str()) );
+		deleteBox->setEnabled( true );
+
+		determineArrayStart();
+	}
+	else
+	{
+		nameEntry->clear();
+		commentEntry->clear();
+		deleteBox->setEnabled( false );
+
+		arrayInit->setText( tr("00") );
+	}
+}
+//--------------------------------------------------------------
+int SymbolEditWindow::exec(void)
+{
+	int ret, b, a, size, init, i;
+	bool isNew = 0;
+
+	ret = QDialog::exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		fceuWrapperLock();
+		if ( isArrayBox->isChecked() )
+		{
+			size = atoi( arraySize->text().toStdString().c_str() );
+			init = atoi( arrayInit->text().toStdString().c_str() );
+
+			for (i=0; i<size; i++)
+			{
+				isNew = false;
+
+				a = addr + init + i;
+
+				if ( a < 0x8000 )
+				{
+				   b = -1;
+				}
+				else
+				{
+				   b = getBank( a );
+				}
+				
+				sym = debugSymbolTable.getSymbolAtBankOffset( b, a );
+
+				if ( deleteBox->isChecked() )
+				{
+					if ( sym != NULL )
+					{
+						debugSymbolTable.deleteSymbolAtBankOffset( b, a );
+					}
+				}
+				else
+				{
+					if ( sym == NULL )
+					{
+						sym = new debugSymbol_t();
+
+						sym->ofs = a;
+
+						debugSymbolTable.addSymbolAtBankOffset( b, a, sym );
+
+						isNew = true;
+					}
+					sym->ofs     = a;
+					//sym->name    = nameEntry->text().toStdString();
+					//sym->comment = commentEntry->toPlainText().toStdString();
+
+					if ( (i == 0) || isNew || arrayNameOverWrite->isChecked() )
+					{
+						setSymNameWithArray( init + i );
+					}
+					if ( (i == 0) || !commentHeadOnly->isChecked() )
+					{
+						if ( isNew || arrayCommentOverWrite->isChecked() || (i == 0) )
+						{
+							sym->comment = commentEntry->toPlainText().toStdString();
+						}
+					}
+					sym->trimTrailingSpaces();
+				}
+			}
+		}
+		else
+		{
+			if ( deleteBox->isChecked() )
+			{
+				if ( sym != NULL )
+				{
+					debugSymbolTable.deleteSymbolAtBankOffset( bank, addr );
+				}
+			}
+			else if ( sym == NULL )
+			{
+				sym = new debugSymbol_t();
+				sym->ofs     = addr;
+				sym->name    = nameEntry->text().toStdString();
+				sym->comment = commentEntry->toPlainText().toStdString();
+
+				debugSymbolTable.addSymbolAtBankOffset( bank, addr, sym );
+			}
+			else
+			{
+				sym->name    = nameEntry->text().toStdString();
+				sym->comment = commentEntry->toPlainText().toStdString();
+			}
+			sym->trimTrailingSpaces();
+		}
+		fceuWrapperUnLock();
+	}
+	return ret;
+}
+//--------------------------------------------------------------
+void SymbolEditWindow::determineArrayStart(void)
+{
+	int i,j;
+	char stmp[512];
+	char digits[128];
+
+	if ( sym == NULL )
+	{
+		return;
+	}
+	strcpy( stmp, nameEntry->text().toStdString().c_str() );
+
+	// Find Current Array Braces
+	i=0;
+	while ( stmp[i] != 0 )
+	{
+		if ( stmp[i] == '[' )
+		{
+			break;
+		}
+		i++;
+	}
+
+	if ( stmp[i] != '[' )
+	{
+		return;
+	}
+	i++;
+
+	while ( isspace( stmp[i] ) ) i++;
+
+	j=0;
+	while ( isdigit( stmp[i] ) )
+	{
+		digits[j] = stmp[i]; i++; j++;
+	}
+	digits[j] = 0;
+
+	while ( isspace( stmp[i] ) ) i++;
+
+	if ( stmp[i] != ']' )
+	{
+		return;
+	}
+
+	if ( j > 0 )
+	{
+		int val;
+
+		val = atoi( digits );
+
+		if ( (val >= 0) && (val < 256) )
+		{
+			sprintf( digits, "%02X", val );
+
+			arrayInit->setText( tr(digits) );
+		}
+	}
+
+	return;
+}
+//--------------------------------------------------------------
+void SymbolEditWindow::setSymNameWithArray(int idx)
+{
+	int i;
+	char stmp[512];
+
+	if ( sym == NULL )
+	{
+		return;
+	}
+	strcpy( stmp, nameEntry->text().toStdString().c_str() );
+
+	// Remove Current Array Braces
+	i=0;
+	while ( stmp[i] != 0 )
+	{
+		if ( stmp[i] == '[' )
+		{
+			stmp[i] = 0; break;
+		}
+		i++;
+	}
+	i--;
+
+	// Remove Trailing Spaces
+	while ( i >= 0 )
+	{
+		if ( isspace( stmp[i] ) )
+		{
+			stmp[i] = 0;
+		}
+		else
+		{
+			break;
+		}
+		i--;
+	}
+
+	// Reform with base string and new index.
+	sym->name.assign( stmp );
+
+	sym->trimTrailingSpaces();
+
+	sprintf( stmp, "[%i]", idx );
+
+	sym->name.append( stmp );
+
 }
 //--------------------------------------------------------------
