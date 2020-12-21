@@ -735,6 +735,7 @@ static int SubLoad(FCEUFILE *fp) {
 	uint8 header[16];
 	int x;
 
+	FCEU_fseek(fp, 0, SEEK_SET);
 	FCEU_fread(header, 16, 1, fp);
 
 	if (memcmp(header, "FDS\x1a", 4)) {
@@ -746,7 +747,7 @@ static int SubLoad(FCEUFILE *fp) {
 			TotalSides = t / 65500;
 			FCEU_fseek(fp, 0, SEEK_SET);
 		} else
-			return(0);
+			return 1;
 	} else
 		TotalSides = header[4];
 
@@ -756,18 +757,12 @@ static int SubLoad(FCEUFILE *fp) {
 	if (TotalSides < 1) TotalSides = 1;
 
 	for (x = 0; x < TotalSides; x++) {
-		diskdata[x] = (uint8*)FCEU_malloc(65500);
-		if (!diskdata[x]) {
-			int zol;
-			for (zol = 0; zol < x; zol++)
-				free(diskdata[zol]);
-			return 0;
-		}
+		if ((diskdata[x] = (uint8*)FCEU_malloc(65500)) == NULL) return 2;
 		FCEU_fread(diskdata[x], 1, 65500, fp);
 		md5_update(&md5, diskdata[x], 65500);
 	}
 	md5_finish(&md5, GameInfo->MD5.data);
-	return(1);
+	return 0;
 }
 
 static void PreSave(void) {
@@ -792,21 +787,37 @@ int FDSLoad(const char *name, FCEUFILE *fp) {
 	FILE *zp;
 	int x;
 
+	// try to load FDS image first
+	FreeFDSMemory();
+	int load_result = SubLoad(fp);
+	switch (load_result)
+	{
+	case 1:
+		FreeFDSMemory();
+		return LOADER_INVALID_FORMAT;
+	case 2:
+		FreeFDSMemory();
+		FCEU_PrintError("Unable to allocate memory.");
+		return LOADER_HANDLED_ERROR;
+	}
+
+	// load FDS BIOS next
 	char *fn = strdup(FCEU_MakeFName(FCEUMKF_FDSROM, 0, 0).c_str());
 
 	if (!(zp = FCEUD_UTF8fopen(fn, "rb"))) {
 		FCEU_PrintError("FDS BIOS ROM image missing: %s", FCEU_MakeFName(FCEUMKF_FDSROM, 0, 0).c_str());
 		free(fn);
-		return 0;
+		FreeFDSMemory();
+		return LOADER_HANDLED_ERROR;
 	}
-
 	free(fn);
 
 	fseek(zp, 0L, SEEK_END);
 	if (ftell(zp) != 8192) {
 		fclose(zp);
+		FreeFDSMemory();
 		FCEU_PrintError("FDS BIOS ROM image incompatible: %s", FCEU_MakeFName(FCEUMKF_FDSROM, 0, 0).c_str());
-		return 0;
+		return LOADER_HANDLED_ERROR;
 	}
 	fseek(zp, 0L, SEEK_SET);
 
@@ -831,21 +842,12 @@ int FDSLoad(const char *name, FCEUFILE *fp) {
 			free(FDSBIOS);
 		FDSBIOS = NULL;
 		fclose(zp);
+		FreeFDSMemory();
 		FCEU_PrintError("Error reading FDS BIOS ROM image.");
-		return 0;
+		return LOADER_HANDLED_ERROR;
 	}
 
 	fclose(zp);
-
-	FCEU_fseek(fp, 0, SEEK_SET);
-
-	FreeFDSMemory();
-	if (!SubLoad(fp)) {
-		if(FDSBIOS)
-			free(FDSBIOS);
-		FDSBIOS = NULL;
-		return(0);
-	}
 
 	if (!disableBatteryLoading) {
 		FCEUFILE *tp;
@@ -866,7 +868,8 @@ int FDSLoad(const char *name, FCEUFILE *fp) {
 					free(FDSBIOS);
 				FDSBIOS = NULL;
 				free(fn);
-				return(0);
+				FreeFDSMemory();
+				return LOADER_HANDLED_ERROR;
 			}
 			FCEU_fclose(tp);
 			DiskWritten = 1;  /* For save state handling. */
@@ -929,7 +932,7 @@ int FDSLoad(const char *name, FCEUFILE *fp) {
 
 	FCEUI_SetVidSystem(0);
 
-	return 1;
+	return LOADER_OK;
 }
 
 void FDSClose(void) {
