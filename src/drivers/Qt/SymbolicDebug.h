@@ -133,6 +133,7 @@ class SymbolEditWindow : public QDialog
 		~SymbolEditWindow(void);
 
 		void setAddr( int addrIn );
+		void setBank( int bankIn );
 		void setSym( debugSymbol_t *symIn );
 
 	protected:

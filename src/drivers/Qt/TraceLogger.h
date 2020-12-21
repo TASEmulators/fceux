@@ -73,6 +73,7 @@ class QTraceLogView : public QWidget
 		void mousePressEvent(QMouseEvent * event);
 		void mouseReleaseEvent(QMouseEvent * event);
 		void mouseMoveEvent(QMouseEvent * event);
+		void keyPressEvent(QKeyEvent *event);
 
 		void calcFontData(void);
 		QPoint convPixToCursor( QPoint p );

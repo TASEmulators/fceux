@@ -1313,19 +1313,27 @@ void SymbolEditWindow::setAddr( int addrIn )
 
 	addrEntry->setText( tr(stmp) );
 
-	if ( addr < 0x8000 )
+	if ( bank < 0 )
 	{
-	   bank = -1;
-	}
-	else
-	{
-	   bank = getBank( addr );
+		if ( addr < 0x8000 )
+		{
+		   bank = -1;
+		}
+		else
+		{
+		   bank = getBank( addr );
+		}
 	}
 
 	generateNLFilenameForAddress( addr, stmp );
 
 	filepath->setText( tr(stmp) );
 	filepath->setMinimumWidth( charWidth * (filepath->text().size() + 4) );
+}
+//--------------------------------------------------------------
+void SymbolEditWindow::setBank( int bankIn )
+{
+	bank = bankIn;
 }
 //--------------------------------------------------------------
 void SymbolEditWindow::setSym( debugSymbol_t *symIn )
@@ -1401,9 +1409,7 @@ int SymbolEditWindow::exec(void)
 
 						isNew = true;
 					}
-					sym->ofs     = a;
-					//sym->name    = nameEntry->text().toStdString();
-					//sym->comment = commentEntry->toPlainText().toStdString();
+					sym->ofs = a;
 
 					if ( (i == 0) || isNew || arrayNameOverWrite->isChecked() )
 					{
