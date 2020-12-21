@@ -7,6 +7,23 @@
 #include <list>
 #include <map>
 
+#include <QWidget>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QPushButton>
+#include <QFont>
+#include <QLabel>
+#include <QTimer>
+#include <QFont>
+#include <QFrame>
+#include <QGroupBox>
+#include <QLineEdit>
+#include <QPlainTextEdit>
+
 struct debugSymbol_t 
 {
 	int   ofs;
@@ -69,7 +86,10 @@ struct debugSymbolPage_t
 
 	int addSymbol( debugSymbol_t *sym );
 
+	int deleteSymbolAtOffset( int ofs );
+
 	debugSymbol_t *getSymbolAtOffset( int ofs );
+
 
 	std::map <int, debugSymbol_t*> symMap;
 };
@@ -91,7 +111,9 @@ class debugSymbolTable_t
 
 		debugSymbol_t *getSymbolAtBankOffset( int bank, int ofs );
 
-		int addSymbolAtBankOffset(  int bank, int ofs, debugSymbol_t *sym );
+		int addSymbolAtBankOffset( int bank, int ofs, debugSymbol_t *sym );
+
+		int deleteSymbolAtBankOffset( int bank, int ofs );
 
 	private:
 		std::map <int, debugSymbolPage_t*> pageMap;
@@ -102,11 +124,58 @@ class debugSymbolTable_t
 
 extern  debugSymbolTable_t  debugSymbolTable;
 
-//struct MemoryMappedRegister
-//{
-//	char* offset;
-//	char* name;
-//};
+class SymbolEditWindow : public QDialog
+{
+   Q_OBJECT
+
+	public:
+		SymbolEditWindow(QWidget *parent = 0);
+		~SymbolEditWindow(void);
+
+		void setAddr( int addrIn );
+		void setBank( int bankIn );
+		void setSym( debugSymbol_t *symIn );
+
+	protected:
+		void closeEvent(QCloseEvent *event);
+
+		void updateArraySensitivity(void);
+		void setSymNameWithArray(int idx = 0);
+		void determineArrayStart(void);
+
+		QFont      font;
+		QLineEdit *filepath;
+		QLineEdit *addrEntry;
+		QLineEdit *nameEntry;
+		QPlainTextEdit *commentEntry;
+		QLineEdit      *arraySize;
+		QLineEdit      *arrayInit;
+		QCheckBox      *isArrayBox;
+		QCheckBox      *arrayNameOverWrite;
+		QCheckBox      *arrayCommentOverWrite;
+		QCheckBox      *commentHeadOnly;
+		QCheckBox      *deleteBox;
+		QLabel         *arraySizeLbl[2];
+		QLabel         *arrayInitLbl;
+
+		QPushButton *okButton;
+		QPushButton *cancelButton;
+
+		debugSymbol_t *sym;
+
+		int  addr;
+		int  bank;
+		int  charWidth;
+
+	public slots:
+		void closeWindow(void);
+		int  exec(void);
+
+	private slots:
+		void isArrayStateChanged( int state );
+		void arrayCommentHeadOnlyChanged( int state );
+
+};
 
 
 int generateNLFilenameForBank(int bank, char *NLfilename);

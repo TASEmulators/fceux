@@ -1105,6 +1105,7 @@ QTraceLogView::QTraceLogView(QWidget *parent)
 
 	this->setPalette(pal);
 	this->setMouseTracking(true);
+	this->setFocusPolicy(Qt::StrongFocus);
 
 	calcFontData();
 
@@ -1328,6 +1329,28 @@ void QTraceLogView::loadClipboard( const char *txt )
 	if ( clipboard->supportsSelection() )
 	{
 		clipboard->setText( tr(txt), QClipboard::Selection );
+	}
+}
+//----------------------------------------------------
+void QTraceLogView::keyPressEvent(QKeyEvent *event)
+{
+	//printf("Key Press: %i \n", event->key() );
+
+	if ( !textIsHighlighted() )
+	{
+		if ( selAddrIdx >= 0 )
+		{
+			if ( event->key() == Qt::Key_B )
+   		{
+				ctxMenuAddBP();
+				event->accept();
+   		}
+			else if ( event->key() == Qt::Key_S )
+   		{
+				ctxMenuAddSym();
+				event->accept();
+   		}
+		}
 	}
 }
 //----------------------------------------------------
@@ -1741,118 +1764,21 @@ void QTraceLogView::ctxMenuAddBP(void)
 //----------------------------------------------------------------------------
 void QTraceLogView::openDebugSymbolEditWindow( int addr, int bank )
 {
-	int ret, charWidth;
-	QDialog dialog(this);
-	QHBoxLayout *hbox;
-	QVBoxLayout *mainLayout;
-	QLabel *lbl;
-	QLineEdit *filepath, *addrEntry, *nameEntry, *commentEntry;
-	QPushButton *okButton, *cancelButton;
-	char stmp[512];
+	int ret;
 	debugSymbol_t *sym;
-	QFontMetrics fm(font);
+	SymbolEditWindow win(this);
 
-#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
-    charWidth = fm.horizontalAdvance(QLatin1Char('2'));
-#else
-    charWidth = fm.width(QLatin1Char('2'));
-#endif
+  	sym = debugSymbolTable.getSymbolAtBankOffset( bank, addr );
 
-	sym = debugSymbolTable.getSymbolAtBankOffset( bank, addr );
+	win.setAddr( addr );
+	win.setBank( bank );
 
-	generateNLFilenameForAddress( addr, stmp );
+	win.setSym( sym );
 
-	dialog.setWindowTitle( tr("Symbolic Debug Naming") );
-
-	hbox       = new QHBoxLayout();
-	mainLayout = new QVBoxLayout();
-
-	lbl = new QLabel( tr("File") );
-	filepath = new QLineEdit();
-	filepath->setFont( font );
-	filepath->setText( tr(stmp) );
-	filepath->setReadOnly( true );
-	filepath->setMinimumWidth( charWidth * (filepath->text().size() + 4) );
-
-	hbox->addWidget( lbl );
-	hbox->addWidget( filepath );
-
-	mainLayout->addLayout( hbox );
-
-	sprintf( stmp, "%04X", addr );
-
-	hbox = new QHBoxLayout();
-	lbl  = new QLabel( tr("Address") );
-	addrEntry = new QLineEdit();
-	addrEntry->setFont( font );
-	addrEntry->setText( tr(stmp) );
-	addrEntry->setReadOnly( true );
-	addrEntry->setAlignment(Qt::AlignCenter);
-	addrEntry->setMaximumWidth( charWidth * 6 );
-
-	hbox->addWidget( lbl );
-	hbox->addWidget( addrEntry );
-
-	lbl  = new QLabel( tr("Name") );
-	nameEntry = new QLineEdit();
-
-	hbox->addWidget( lbl );
-	hbox->addWidget( nameEntry );
-
-	mainLayout->addLayout( hbox );
-
-	hbox = new QHBoxLayout();
-	lbl  = new QLabel( tr("Comment") );
-	commentEntry = new QLineEdit();
-
-	hbox->addWidget( lbl );
-	hbox->addWidget( commentEntry );
-
-	mainLayout->addLayout( hbox );
-
-	hbox         = new QHBoxLayout();
-	okButton     = new QPushButton( tr("OK") );
-	cancelButton = new QPushButton( tr("Cancel") );
-
-	mainLayout->addLayout( hbox );
-	hbox->addWidget( cancelButton );
-	hbox->addWidget(     okButton );
-
-	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
-   connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
-
-	okButton->setDefault(true);
-
-	if ( sym != NULL )
-	{
-		nameEntry->setText( tr(sym->name.c_str()) );
-		commentEntry->setText( tr(sym->comment.c_str()) );
-	}
-
-	dialog.setLayout( mainLayout );
-
-	ret = dialog.exec();
+	ret = win.exec();
 
 	if ( ret == QDialog::Accepted )
 	{
-		fceuWrapperLock();
-		if ( sym == NULL )
-		{
-			sym = new debugSymbol_t();
-			sym->ofs     = addr;
-			sym->name    = nameEntry->text().toStdString();
-			sym->comment = commentEntry->text().toStdString();
-
-			debugSymbolTable.addSymbolAtBankOffset( bank, addr, sym );
-		}
-		else
-		{
-			sym->name    = nameEntry->text().toStdString();
-			sym->comment = commentEntry->text().toStdString();
-		}
-		sym->trimTrailingSpaces();
-		fceuWrapperUnLock();
-
 		updateAllDebuggerWindows();
 	}
 }
@@ -1909,12 +1835,12 @@ void QTraceLogView::contextMenuEvent(QContextMenuEvent *event)
 		{
 			act = new QAction(tr("Add Symbolic Debug Marker"), &menu);
 		 	menu.addAction(act);
-			//act->setShortcut( QKeySequence(tr("S")));
+			act->setShortcut( QKeySequence(tr("S")));
 			connect( act, SIGNAL(triggered(void)), this, SLOT(ctxMenuAddSym(void)) );
 
 			act = new QAction(tr("Add Breakpoint"), &menu);
 			menu.addAction(act);
-			//act->setShortcut( QKeySequence(tr("B")));
+			act->setShortcut( QKeySequence(tr("B")));
 			connect( act, SIGNAL(triggered(void)), this, SLOT(ctxMenuAddBP(void)) );
 
 			menu.exec(event->globalPos());
