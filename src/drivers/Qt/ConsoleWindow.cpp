@@ -20,6 +20,7 @@
 #include "../../fceu.h"
 #include "../../fds.h"
 #include "../../movie.h"
+#include "../../version.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -98,6 +99,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
    	setCentralWidget(viewport_GL);
 	}
 
+	setWindowTitle( tr(FCEU_NAME_AND_VERSION) );
    setWindowIcon(QIcon(":fceux1.png"));
 
 	gameTimer  = new QTimer( this );
