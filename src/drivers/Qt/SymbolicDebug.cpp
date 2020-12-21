@@ -1377,7 +1377,7 @@ int SymbolEditWindow::exec(void)
 			{
 				isNew = false;
 
-				a = addr + init + i;
+				a = addr + i;
 
 				if ( a < 0x8000 )
 				{
