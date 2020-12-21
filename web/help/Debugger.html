@@ -298,8 +298,15 @@
 <p class="rvps2"><span class="rvts6">FCEUX allows you to label any address of RAM or ROM with a human-readable symbolic name.</span></p>
 <p class="rvps2"><span class="rvts6">For example, when you've figured out that at the address $C022 there's a subroutine which refills player HP, you can right-click the address and type a name like "AddHealthpoints". You can also add a comment, which will be seen while browsing the code near this address. From now on, the address will be substituted by the name everywhere - in all instructions referencing this address, in Hex Editor window, in the log produced by Trace Logger. E.g., JSR $C022 will look like JSR AddHealthpoints.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">You can also label a series of adresses as an array by specifiying the array size, every address label in range will be followed with an array index. For example, if you label $C000 with name "ArrayName", and set the size to 0xF, then $C000 is named "ArrayName[0]", $C001 is "ArrayName[1]"... and so on, the last labeled address is $C00E with name "ArrayName[E]". The start index number can be manually set to a value other than zero.</span></p>
+<p class="rvps2"><span class="rvts6">A name must be specified in array labeling, or the debugger only show the comment of the addresses.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">When entering the name, you can use any symbols except #. It's also recommended to avoid whitespaces in names.</span></p>
 <p class="rvps2"><span class="rvts6">To rename an address, just right-click the name.</span></p>
+<p class="rvps2"><span class="rvts6">Note that each label is individual, when you rename one of the labels in an array, the other label won't change simutaneously. To change all the names in an array, you should edit the name of the first element in the array, specify the array size and check "Overwrite names in array body".</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">To delete a label, check the "Delete" checkbox and click OK.</span></p>
+<p class="rvps2"><span class="rvts6">The array size specified in delete mode indicates labels of how many bytes will be deleted. If you select $C000 and set array size to 0xF, all the labels form $C000 to $C00E are deleted.&nbsp;</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">The data for Symbolic Debugging is stored in </span><a class="rvts71" href="NLFilesFormat.html">NL files</a><span class="rvts6"> in the same folder as the ROM. You can edit the files in any text editor (to reload all NL files of the currently active ROM file press the "Reload Symbols" button), but it's more convenient to use right-clicks.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
@@ -358,15 +365,17 @@
  <li class="rvps2"><span class="rvts6">Number &nbsp; &nbsp;-&gt; '#' [0123456789ABCDEF]*</span></li>
  <li class="rvps2"><span class="rvts6">Address &nbsp; -&gt; '$' [0123456789ABCDEF]* | '$' '[' Connect ']'</span></li>
  <li class="rvps2"><span class="rvts6">Register &nbsp;-&gt; 'A' | 'X' | 'Y' | 'P'</span></li>
- <li class="rvps2"><span class="rvts6">Flag &nbsp; &nbsp; &nbsp;-&gt; 'N' | 'C' | 'Z' | 'I' | 'B' | 'V'</span></li>
+ <li class="rvps2"><span class="rvts6">Flag &nbsp; &nbsp; &nbsp;-&gt; 'N' | 'C' | 'Z' | 'I' | 'B' | 'V' </span><span class="rvts74">| 'D' | 'U'</span></li>
  <li class="rvps2"><span class="rvts6">PC Bank &nbsp; -&gt; 'K'</span></li>
  <li class="rvps2"><span class="rvts6">Data Bank &nbsp; -&gt; 'T'</span></li>
+ <li class="rvps2"><span class="rvts74">Read/Write Value</span><span class="rvts6"> &nbsp; -&gt; </span><span class="rvts74">'R' | 'W'</span></li>
 </ul>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">The parser is very strict. All numbers are hexadecimal. Always prefix a number with # for an immediate value, or $ for a memory address. If a memory address needs to be calculated use $[] with the calculation inside the brackets.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Registers A/X/Y are 8-bit unsigned values. Register P is the 16-bit program counter.</span></p>
-<p class="rvps2"><span class="rvts6">Flags evaluate to 1 if set, 0 if clear.</span></p>
+<p class="rvps2"><span class="rvts6">Flags evaluate to 1 if set, 0 if clear. (U is the unused bit of the status register, and D is the unused decimal flag.)</span></p>
+<p class="rvps2"><span class="rvts6">For instructions that read or write a single byte (e.g. LDA, STY, PHA, ASL abs), condition R evaluates to the value that will be read by the instruction, and condition W evaluates to the value that will be written.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Connecting operators || or &amp;&amp; combine boolean terms. Parentheses dictate order of operations.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
