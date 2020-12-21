@@ -479,10 +479,21 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	//try to load each different format
 	bool FCEUXLoad(const char *name, FCEUFILE * fp);
 
-	if (iNESLoad(fullname, fp, OverwriteVidMode) ||
-		NSFLoad(fullname, fp) ||
-		UNIFLoad(fullname, fp) ||
-		FDSLoad(fullname, fp))
+	int load_result;
+	load_result = iNESLoad(fullname, fp, OverwriteVidMode);
+	if (load_result == LOADER_INVALID_FORMAT)
+	{
+		load_result = NSFLoad(fullname, fp);
+		if (load_result == LOADER_INVALID_FORMAT)
+		{
+			load_result = UNIFLoad(fullname, fp);
+			if (load_result == LOADER_INVALID_FORMAT)
+			{
+				load_result = FDSLoad(fullname, fp);
+			}
+		}
+	}	
+	if (load_result == LOADER_OK)
 	{
 
 #ifdef WIN32
@@ -559,7 +570,17 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	}
 	else {
 		if (!silent)
-			FCEU_PrintError("An error occurred while loading the file.");
+		{
+			switch (load_result)
+			{
+			case LOADER_UNHANDLED_ERROR:
+				FCEU_PrintError("An error occurred while loading the file.");
+				break;
+			case LOADER_INVALID_FORMAT:
+				FCEU_PrintError("Unknown ROM file format.");
+				break;
+			}
+		}
 
 		delete GameInfo;
 		GameInfo = 0;

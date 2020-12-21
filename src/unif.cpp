@@ -544,18 +544,17 @@ static int InitializeBoard(void) {
 					SetupCartCHRMapping(0, UNIFchrrama, CHRRAMSize, 1);
 					AddExState(UNIFchrrama, CHRRAMSize, 0, "CHRR");
 				} else
-					return(-1);
+					return 2;
 			}
 			if (bmap[x].flags & BMCFLAG_FORCE4)
 				mirrortodo = 4;
 			MooMirroring();
 			bmap[x].init(&UNIFCart);
-			return(1);
+			return 0;
 		}
 		x++;
 	}
-	FCEU_PrintError("Board type not supported.");
-	return(0);
+	return 1;
 }
 
 static void UNIFGI(GI h) {
@@ -586,51 +585,56 @@ int UNIFLoad(const char *name, FCEUFILE *fp) {
 	FCEU_fseek(fp, 0, SEEK_SET);
 	FCEU_fread(&unhead, 1, 4, fp);
 	if (memcmp(&unhead, "UNIF", 4))
-		return 0;
+		return LOADER_INVALID_FORMAT;
 
 	ResetCartMapping();
 
 	ResetExState(0, 0);
 	ResetUNIF();
-	if (!FCEU_read32le(&unhead.info, fp))
-		goto aborto;
-	if (FCEU_fseek(fp, 0x20, SEEK_SET) < 0)
-		goto aborto;
-	if (!LoadUNIFChunks(fp))
-		goto aborto;
+	if (!FCEU_read32le(&unhead.info, fp)
+		|| (FCEU_fseek(fp, 0x20, SEEK_SET) < 0)
+		|| !LoadUNIFChunks(fp))
 	{
-		int x;
-		struct md5_context md5;
-
-		md5_starts(&md5);
-
-		for (x = 0; x < 32; x++)
-			if (malloced[x]) {
-				md5_update(&md5, malloced[x], mallocedsizes[x]);
-			}
-		md5_finish(&md5, UNIFCart.MD5);
-		FCEU_printf(" ROM MD5:  0x");
-		for (x = 0; x < 16; x++)
-			FCEU_printf("%02x", UNIFCart.MD5[x]);
-		FCEU_printf("\n");
-		memcpy(&GameInfo->MD5, &UNIFCart.MD5, sizeof(UNIFCart.MD5));
+		FreeUNIF();
+		ResetUNIF();
+		FCEU_PrintError("Error reading UNIF ROM image.");
+		return LOADER_HANDLED_ERROR;
 	}
 
-	if (!InitializeBoard())
-		goto aborto;
+	struct md5_context md5;
+	md5_starts(&md5);
+	for (int x = 0; x < 32; x++)
+		if (malloced[x]) {
+			md5_update(&md5, malloced[x], mallocedsizes[x]);
+		}
+	md5_finish(&md5, UNIFCart.MD5);
+	FCEU_printf(" ROM MD5:  0x");
+	for (int x = 0; x < 16; x++)
+		FCEU_printf("%02x", UNIFCart.MD5[x]);
+	FCEU_printf("\n");
+	memcpy(&GameInfo->MD5, &UNIFCart.MD5, sizeof(UNIFCart.MD5));
+
+	int result = InitializeBoard();
+	switch (result)
+	{
+	case 0:
+		goto init_ok;
+	case 1:
+		FCEU_PrintError("UNIF mapper \"%s\" is not supported at all.", sboardname);
+		break;
+	case 2:
+		FCEU_PrintError("Unable to allocate CHR-RAM.");
+		break;
+	}
+	FreeUNIF();
+	ResetUNIF();
+	return LOADER_HANDLED_ERROR;
+
+init_ok:
 
 	FCEU_LoadGameSave(&UNIFCart);
-
 	strcpy(LoadedRomFName, name); //For the debugger list
 	GameInterface = UNIFGI;
 	currCartInfo = &UNIFCart;
-	return 1;
-
- aborto:
-
-	FreeUNIF();
-	ResetUNIF();
-
-
-	return 0;
+	return LOADER_OK;
 }

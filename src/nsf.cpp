@@ -174,7 +174,7 @@ int NSFLoad(const char *name, FCEUFILE *fp)
 	FCEU_fseek(fp,0,SEEK_SET);
 	FCEU_fread(&NSFHeader,1,0x80,fp);
 	if(memcmp(NSFHeader.ID,"NESM\x1a",5))
-		return 0;
+		return LOADER_INVALID_FORMAT;
 	NSFHeader.SongName[31]=NSFHeader.Artist[31]=NSFHeader.Copyright[31]=0;
 
 	LoadAddr=NSFHeader.LoadAddressLow;
@@ -183,7 +183,7 @@ int NSFLoad(const char *name, FCEUFILE *fp)
 	if(LoadAddr<0x6000)
 	{
 		FCEUD_PrintError("Invalid load address.");
-		return(0);
+		return LOADER_HANDLED_ERROR;
 	}
 	InitAddr=NSFHeader.InitAddressLow;
 	InitAddr|=NSFHeader.InitAddressHigh<<8;
@@ -196,8 +196,11 @@ int NSFLoad(const char *name, FCEUFILE *fp)
 	NSFMaxBank=((NSFSize+(LoadAddr&0xfff)+4095)/4096);
 	NSFMaxBank=PRGsize[0]=uppow2(NSFMaxBank);
 
-	if(!(NSFDATA=(uint8 *)FCEU_malloc(NSFMaxBank*4096)))
-		return 0;
+	if (!(NSFDATA = (uint8 *)FCEU_malloc(NSFMaxBank * 4096)))
+	{
+		FCEU_PrintError("Unable to allocate memory.");
+		return LOADER_HANDLED_ERROR;
+	}
 
 	FCEU_fseek(fp,0x80,SEEK_SET);
 	memset(NSFDATA,0x00,NSFMaxBank*4096);
@@ -288,7 +291,7 @@ int NSFLoad(const char *name, FCEUFILE *fp)
 
 	FCEUI_SetVidSystem(NSFHeader.VideoSystem);
 
-	return 1;
+	return LOADER_OK;
 }
 
 static DECLFR(NSFVectorRead)

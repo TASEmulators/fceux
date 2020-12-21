@@ -737,7 +737,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	struct md5_context md5;
 
 	if (FCEU_fread(&head, 1, 16, fp) != 16 || memcmp(&head, "NES\x1A", 4))
-		return 0;
+		return LOADER_INVALID_FORMAT;
 	
 	head.cleanup();
 
@@ -794,7 +794,8 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		if ((VROM = (uint8*)FCEU_malloc(VROM_size << 13)) == NULL) {
 			free(ROM);
 			ROM = NULL;
-			return 0;
+			FCEU_PrintError("Unable to allocate memory.");
+			return LOADER_HANDLED_ERROR;
 		}
 		memset(VROM, 0xFF, VROM_size << 13);
 	}
@@ -902,12 +903,9 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		goto init_ok;
 	case 1:
 		FCEU_PrintError("iNES mapper #%d is not supported at all.", MapperNo);
-		goto init_ok; // this error is still allowed to run as NROM?
+		break;
 	case 2:
 		FCEU_PrintError("Unable to allocate CHR-RAM.");
-		break;
-	case 3:
-		FCEU_PrintError("CHR-RAM size < 1k is not supported.");
 		break;
 	}
 	if (ROM) free(ROM);
@@ -918,7 +916,8 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	VROM = NULL;
 	trainerpoo = NULL;
 	ExtraNTARAM = NULL;
-	return 0;
+	return LOADER_HANDLED_ERROR;
+
 init_ok:
 
 	GameInfo->mappernum = MapperNo;
@@ -952,7 +951,7 @@ init_ok:
 		else
 			FCEUI_SetVidSystem(0);
 	}
-	return 1;
+	return LOADER_OK;
 }
 
 // bbit edited: the whole function below was added
@@ -1023,7 +1022,8 @@ static int iNES_Init(int num) {
 
 	while (tmp->init) {
 		if (num == tmp->number) {
-			UNIFchrrama = 0;	// need here for compatibility with UNIF mapper code
+			// is this code used by the UNIF loader in any way?
+			UNIFchrrama = NULL;	// need here for compatibility with UNIF mapper code
 			if (!VROM_size) {
 				if(!iNESCart.ines2)
 				{
@@ -1038,36 +1038,24 @@ static int iNES_Init(int num) {
 					default:  CHRRAMSize = 8 * 1024; break;
 					}
 					iNESCart.vram_size = CHRRAMSize;
-					if (CHRRAMSize < 1024) return 3; // unsupported size, VPage only goes down to 1k banks, NES program can corrupt memory if used
-					if ((VROM = (uint8*)FCEU_dmalloc(CHRRAMSize)) == NULL) return 2;
-					FCEU_MemoryRand(VROM, CHRRAMSize);
 				}
 				else
 				{
 					CHRRAMSize = iNESCart.battery_vram_size + iNESCart.vram_size;
-					if (CHRRAMSize > 0)
-					{
-						if ((VROM = (uint8*)FCEU_dmalloc(CHRRAMSize)) == NULL) return 2;
-					}
-					else {
-						// mapper 256 (OneBus) has not CHR-RAM _and_ has not CHR-ROM region in iNES file
-						// so zero-sized CHR should be supported at least for this mapper
-						VROM = NULL;
-					}
 				}
-
-				UNIFchrrama = VROM;
-				if(CHRRAMSize == 0)
+				if (CHRRAMSize > 0)
 				{
-					//probably a mistake. 
-					//but (for chrram): "Use of $00 with no CHR ROM implies that the game is wired to map nametable memory in CHR space. The value $00 MUST NOT be used if a mapper isn't defined to allow this. "
-					//well, i'm not going to do that now. we'll save it for when it's needed
-					//"it's only mapper 218 and no other mappers"
-				}
-				else
-				{
+					// again. seems like this code never executed for UNIF files
+					// so why we need to set UNIFchrrama here?
+					if ((UNIFchrrama = VROM = (uint8*)FCEU_dmalloc(CHRRAMSize)) == NULL) return 2;
+					FCEU_MemoryRand(VROM, CHRRAMSize);
 					SetupCartCHRMapping(0, VROM, CHRRAMSize, 1);
 					AddExState(VROM, CHRRAMSize, 0, "CHRR");
+				}
+				else {
+					// mapper 256 (OneBus) has not CHR-RAM _and_ has not CHR-ROM region in iNES file
+					// so zero-sized CHR should be supported at least for this mapper
+					VROM = NULL;
 				}
 			}
 			if (head.ROM_type & 8)
