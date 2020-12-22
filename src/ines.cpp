@@ -1022,7 +1022,6 @@ static int iNES_Init(int num) {
 
 	while (tmp->init) {
 		if (num == tmp->number) {
-			// is this code used by the UNIF loader in any way?
 			UNIFchrrama = NULL;	// need here for compatibility with UNIF mapper code
 			if (!VROM_size) {
 				if(!iNESCart.ines2)
@@ -1045,8 +1044,6 @@ static int iNES_Init(int num) {
 				}
 				if (CHRRAMSize > 0)
 				{
-					// again. seems like this code never executed for UNIF files
-					// so why we need to set UNIFchrrama here?
 					if ((UNIFchrrama = VROM = (uint8*)FCEU_dmalloc(CHRRAMSize)) == NULL) return 2;
 					FCEU_MemoryRand(VROM, CHRRAMSize);
 					SetupCartCHRMapping(0, VROM, CHRRAMSize, 1);

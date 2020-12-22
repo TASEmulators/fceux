@@ -219,41 +219,41 @@
 <p class="rvps2"><span class="rvts6">Integer keys (also used for booleans, with a 1 for true and 0 for false) must have a value that can be stored as int32:</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">&nbsp;</span><span class="rvts45">- version</span><span class="rvts6"> (required) - the version of the movie file format; for now it is always 3</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts6">&nbsp;</span><span class="rvts45">- emuVersion</span><span class="rvts6"> (required) - the version of the emulator used to produce the movie</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts6">&nbsp;</span><span class="rvts45">- rerecordCount</span><span class="rvts6"> (optional) - the rerecord count</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts6">&nbsp;-</span><span class="rvts45"> palFlag</span><span class="rvts6"> (bool) (optional) - true if the movie uses PAL timing</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts6">&nbsp;-</span><span class="rvts45"> NewPPU</span><span class="rvts6"> (bool) (optional) - true if the movie uses New PPU</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts6">&nbsp;</span><span class="rvts45">- FDS</span><span class="rvts6"> (bool) (optional) - true if movie was recorded on a Famicom Disk System (FDS) game</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts6">&nbsp;</span><span class="rvts45">- fourscore</span><span class="rvts6"> (bool) - true if a fourscore was used. If fourscore is not used, then port0 and port1 are required</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts6">&nbsp;</span><span class="rvts45">- port0 </span><span class="rvts6">- indicates the type of input device attached to the port 0. Supported values are:</span></p>
 <p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp;SI_NONE = 0</span></p>
 <p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp;SI_GAMEPAD = 1</span></p>
 <p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp;SI_ZAPPER = 2</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts6">&nbsp;</span><span class="rvts45">- port1</span><span class="rvts6"> - indicates the type of input device attached to the port 1. Supported values are:</span></p>
 <p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp;SI_NONE = 0</span></p>
 <p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp;SI_GAMEPAD = 1</span></p>
 <p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp;SI_ZAPPER = 2</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts45">&nbsp;- port2</span><span class="rvts6"> (required) - indicates the type of the FCExp port device which was attached. Supported values are:</span></p>
 <p class="rvps2"><span class="rvts6">&nbsp; &nbsp; &nbsp;SIFC_NONE = 0</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts6">&nbsp;</span><span class="rvts45">- binary</span><span class="rvts6"> (bool) (optional) - true if input log is stored in binary format</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
-<p class="rvps2"><span class="rvts6">&nbsp;</span><span class="rvts45">- length</span><span class="rvts6"> (optional) - movie size (number of frames in the input log). If this key is specified and the number is &gt;= 0, the input log ends after specified number of records, and any remaining data should not be parsed. This key is used in </span><span class="rvts111">fm3</span><span class="rvts6"> format to allow storing extra data after the end of input log</span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
+<p class="rvps2"><span class="rvts6">&nbsp;</span><span class="rvts45">- length</span><span class="rvts6"> (optional) - movie size (number of frames in the input log). If this key is specified and the number is &gt;= 0, the input log ends after specified number of records, and any remaining data should not be parsed. This key is used in </span><span class="rvts113">fm3</span><span class="rvts6"> format to allow storing extra data after the end of input log</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">String keys have values that consist of the remainder of the key-value pair line. As a consequence, string values cannot contain newlines.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts45">&nbsp;- romFilename</span><span class="rvts6"> (required) - the name of the file used to record the movie</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts45">&nbsp;- comment </span><span class="rvts6">(optional) - simply a memo</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 36px; list-style-position: outside; list-style-type: circle;">
  <li class="rvps2"><span class="rvts6">by convention, the first token in the comment value is the subject of the comment</span></li>
@@ -264,7 +264,7 @@
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside;">
  <li class="rvps2"><span class="rvts6">comment author adelikat</span></li>
 </ul>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts45">&nbsp;- subtitle </span><span class="rvts6">(optional) - a message that will be displayed on screen when movie is played back (unless Subtitles are turned off, see </span><a class="rvts23" href="MovieOptions.html">Movie options</a><span class="rvts6">)</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 36px; list-style-position: outside; list-style-type: circle;">
  <li class="rvps2"><span class="rvts6">by convention, subtitles begin with the word "subtitle"</span></li>
@@ -276,12 +276,12 @@
  <li class="rvps2"><span class="rvts6">subtitle 1000 Level Two</span></li>
 </ul>
 <p class="rvps2"><span class="rvts6">At frame 1000 the words "Level Two" will be displayed on the screen</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts45">&nbsp;- guid </span><span class="rvts6">(required) - a unique identifier for a movie, generated when the movie is created, which is used when loading a savestate to make sure it belongs to the current movie</span></p>
 <p class="rvps2"><span class="rvts6">GUID keys have a value which is in the standard guide format: 452DE2C3-EF43-2FA9-77AC-0677FC51543B</span></p>
-<p class="rvps2"><span class="rvts114"><br/></span></p>
+<p class="rvps2"><span class="rvts116"><br/></span></p>
 <p class="rvps2"><span class="rvts45">&nbsp;- romChecksum </span><span class="rvts6">(required) - the base64 of the hexified MD5 hash of the ROM which was used to record the movie</span></p>
-<p class="rvps2"><span class="rvts113"><br/></span></p>
+<p class="rvps2"><span class="rvts115"><br/></span></p>
 <p class="rvps2"><span class="rvts45">&nbsp;- savestate </span><span class="rvts6">(optional) - a </span><a class="rvts23" href="fcs.html">fcs</a><span class="rvts6"> savestate blob, in case a movie was recorded from savestate &nbsp;</span></p>
 <p class="rvps2"><span class="rvts6">Hex string keys (used for binary blobs) have a value that is like 0x0123456789ABCDEF...</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
@@ -291,7 +291,7 @@
 <p class="rvps2"><span class="rvts6">The input log section consists of movie records either in the form of text lines or in the form of binary data.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts112">Text format (default format):</span></p>
+<p class="rvps2"><span class="rvts114">Text format (default format):</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Every frame of the movie is represented by line of text beginning and ending with a | (pipe).</span></p>
 <p class="rvps2"><span class="rvts6">The fields in the line are as follows, except when fourscore is used.</span></p>
@@ -336,7 +336,7 @@
 <p class="rvps2"><span class="rvts6">{commands, player1, player2, player3, player4, port2}</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts112">Binary format:</span></p>
+<p class="rvps2"><span class="rvts114">Binary format:</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Input log section starts with a | (pipe).</span></p>
 <p class="rvps2"><span class="rvts6">Every frame of the movie is represented by a record of a fixed length which can be determined by the devices on port0 and port1.</span></p>
