@@ -1637,6 +1637,7 @@ bool SaveINESFile(HWND hwnd, char* path, iNES_HEADER* header)
 	{
 		sprintf(buf, "Creating target file %s failed.", path);
 		MessageBox(hwnd, buf, "iNES Header Editor", MB_OK | MB_ICONERROR);
+		FCEU_fclose(source);
 		return false;
 	}
 
