@@ -980,6 +980,12 @@ INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						// get the address(es)
 						char str_addrs[1024];
 						GetDlgItemText(hDlg, addrCtrlID, str_addrs, 1024);
+						if (!str_addrs[0])
+						{
+							MessageBox(hDlg, "You must enter an address.", "Error", MB_OK | MB_ICONERROR);
+							return true;
+						}
+						
 						char* next = strtok(str_addrs, ",");
 						int i = 0;
 						unsigned int addrSize = 4;
