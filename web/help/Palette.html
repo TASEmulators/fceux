@@ -198,7 +198,9 @@
 <p class="rvps2"><span class="rvts21">Load Palette</span></p>
 <p class="rvps2"><span class="rvts6">Allows you to load a custom color palette (.pal) file to use for the current game loaded.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">A note on on the format of external palettes; Palette files are expected to contain 64 8-bit RGB triplets (each in that order; red comes first in the triplet in the file, then green, then blue). Each 8-bit value represents brightness for that particular color. 0 is minimum, 255 is maximum.</span></p>
+<p class="rvps2"><span class="rvts6">A note on on the format of external palettes; Palette files are expected to contain 64 or 512 8-bit RGB triplets (each in that order; red comes first in the triplet in the file, then green, then blue). Each 8-bit value represents brightness for that particular color. 0 is minimum, 255 is maximum.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">A palette file with 64 entries while have emphasis colors generated automatically. A 512 entry file will specify a set of 64 colors to use with each emphasis state. The high 3 bits of $2001 correspond to 8 different 64 color palettes.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Palettes can be set on a per-game basis. To do this, put a palette file in the same directory the game is in, and add the extension "pal". Examples:</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>

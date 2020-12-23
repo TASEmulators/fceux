@@ -197,10 +197,10 @@
 <p class="rvps2"><span class="rvts6">The Code/Data Logger keeps track of every byte in the ROM and records whether it's code (is executed) or data (is read).</span></p>
 <p class="rvps2"><span class="rvts6">You can combine this logging feature with other tools to make them much more powerful:</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts89" href="Debugger.html">Debugger</a><span class="rvts6"> to see which branches of the game code were executed and which weren't yet</span></li>
- <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts89" href="TraceLogger.html">Trace Logger</a><span class="rvts6"> to let it log the code selectively</span></li>
- <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts89" href="PPUViewer.html">PPU Viewer</a><span class="rvts6"> to let it only display graphics that was drawn on screen at least once</span></li>
- <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts89" href="HexEditor.html">Hex Editor</a><span class="rvts6"> to enable smart coloring of bytes (so you can observe which bytes are used by the game and how/when they are used)</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts90" href="Debugger.html">Debugger</a><span class="rvts6"> to see which branches of the game code were executed and which weren't yet</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts90" href="TraceLogger.html">Trace Logger</a><span class="rvts6"> to let it log the code selectively</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts90" href="PPUViewer.html">PPU Viewer</a><span class="rvts6"> to let it only display graphics that was drawn on screen at least once</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts90" href="HexEditor.html">Hex Editor</a><span class="rvts6"> to enable smart coloring of bytes (so you can observe which bytes are used by the game and how/when they are used)</span></li>
  <li class="rvps2"><span class="rvts6">combine with (an external) Tile Viewer to see which graphics was used during certain play session, and which was not</span></li>
  <li class="rvps2"><span class="rvts6">combine with (an external) ROM Corruptor to make it only corrupt data, but not code</span></li>
  <li class="rvps2"><span class="rvts6">combine with (an external) Disassembler to help it separate code from data</span></li>
@@ -208,18 +208,18 @@
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">See, it is very useful for finding certain types of data or code branches. It also makes debugging work more visual, since you can always see which lines of the disassembled code were executed and which weren't.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">Furthermore, while the Code/Data Logger is running, the </span><a class="rvts89" href="HexEditor.html">Hex Editor</a><span class="rvts6"> will color-code ROM bytes depending on whether they were logged as code or data:</span></p>
+<p class="rvps2"><span class="rvts6">Furthermore, while the Code/Data Logger is running, the </span><a class="rvts90" href="HexEditor.html">Hex Editor</a><span class="rvts6"> will color-code ROM bytes depending on whether they were logged as code or data:</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">For PRG ROM:</span></p>
-<p class="rvps2"><span class="rvts81">Dark-yellow</span><span class="rvts6"> - the byte is code</span></p>
-<p class="rvps2"><span class="rvts82">Blue</span><span class="rvts6"> - the byte is data</span></p>
-<p class="rvps2"><span class="rvts83">Cyan</span><span class="rvts6"> - the byte is PCM audio data</span></p>
-<p class="rvps2"><span class="rvts80">Green</span><span class="rvts6"> - the byte is both code and data</span></p>
+<p class="rvps2"><span class="rvts82">Dark-yellow</span><span class="rvts6"> - the byte is code</span></p>
+<p class="rvps2"><span class="rvts83">Blue</span><span class="rvts6"> - the byte is data</span></p>
+<p class="rvps2"><span class="rvts84">Cyan</span><span class="rvts6"> - the byte is PCM audio data</span></p>
+<p class="rvps2"><span class="rvts81">Green</span><span class="rvts6"> - the byte is both code and data</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">For CHR ROM:</span></p>
-<p class="rvps2"><span class="rvts84">Yellow</span><span class="rvts6"> - the byte was rendered</span></p>
-<p class="rvps2"><span class="rvts85">Light-blue</span><span class="rvts6"> - the byte was read programmatically</span></p>
-<p class="rvps2"><span class="rvts86">Light-green</span><span class="rvts6"> - the byte was both rendered and read programmatically</span></p>
+<p class="rvps2"><span class="rvts85">Yellow</span><span class="rvts6"> - the byte was rendered</span></p>
+<p class="rvps2"><span class="rvts86">Light-blue</span><span class="rvts6"> - the byte was read programmatically</span></p>
+<p class="rvps2"><span class="rvts87">Light-green</span><span class="rvts6"> - the byte was both rendered and read programmatically</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">The Code/Data Logger can also be used to generate a stripped NES ROM.</span></p>
 <p class="rvps2"><span class="rvts6">"Stripped" NES ROM is a ROM in which everything that was not logged by the Code/Data Logger is removed. It can be useful in many ways, for example, you can view the ROM in an external Hex Editor or a Tile Viewer, and you'll see only the parts that were used while playing. Furthermore, you could use it to create a demo ROM by only playing through the parts you would like others to see.</span></p>
