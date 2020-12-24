@@ -132,8 +132,8 @@ int LoadTableFile();
 void UnloadTableFile();
 void InputData(char *input);
 int GetMemViewData(uint32 i);
-int UpdateCheatColorCallB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data); //mbg merge 6/29/06 - added arg
-int DeleteCheatCallB(char *name, uint32 a, uint8 v, int compare,int s,int type); //mbg merge 6/29/06 - added arg
+//int UpdateCheatColorCallB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data); //mbg merge 6/29/06 - added arg
+//int DeleteCheatCallB(char *name, uint32 a, uint8 v, int compare,int s,int type); //mbg merge 6/29/06 - added arg
 void FreezeRam(int address, int mode, int final);
 int GetHexScreenCoordx(int offset);
 int GetHexScreenCoordy(int offset);
@@ -429,8 +429,8 @@ int LoadTableFile()
 void UnloadTableFile(){
 	for(int i = 0;i < 256;i++){
 		int j = i;
-		if(j < 0x20)j = 0x2E;
-		//if(j > 0x7e)j = 0x2E;
+		if(j < 0x20) j = 0x2E;
+//		if(j > 0x7e) j = 0x2E;
 		chartable[i] = j;
 	}
 	TableFileLoaded = 0;
@@ -439,179 +439,132 @@ void UnloadTableFile(){
 void UpdateMemoryView(int draw_all)
 {
 	if (!hMemView) return;
-	int MemFontWidth = debugSystem->HexeditorFontWidth + HexCharSpacing;
-	int MemFontHeight = debugSystem->HexeditorFontHeight + HexRowHeightBorder;
-
+	const int MemFontWidth = debugSystem->HexeditorFontWidth + HexCharSpacing;
+	const int MemFontHeight = debugSystem->HexeditorFontHeight + HexRowHeightBorder;
+	const char hex[] = "0123456789ABCDEF";
+	const COLORREF CBackColor = RGB(HexBackColorR, HexBackColorG, HexBackColorB);
+	const COLORREF CForeColor = RGB(HexForeColorR, HexForeColorG, HexForeColorB);
 	int i, j;
 	int byteValue;
 	int byteHighlightingValue;
-	//LPVOID lpMsgBuf;
-	//int curlength;
 	char str[100];
-	
+
 	if (PreviousCurOffset != CurOffset)
 		resetHighlightingActivityLog();
 
-	/*
-	if(draw_all){
-	for(i = CurOffset;i < CurOffset+DataAmount;i+=16){
-	MoveToEx(HDataDC,0,MemFontHeight*((i-CurOffset)/16),NULL);
-	sprintf(str,"%06X: ",i);
-	for(j = 0;j < 16;j++){
-	sprintf(str2,"%02X ",GetMem(i+j));
-	strcat(str,str2);
-	}
-	strcat(str," : ");
-	k = strlen(str);
-	for(j = 0;j < 16;j++){
-	str[k+j] = GetMem(i+j);
-	if(str[k+j] < 0x20)str[k+j] = 0x2E;
-	if(str[k+j] > 0x7e)str[k+j] = 0x2E;
-	}
-	str[k+16] = 0;
-	TextOut(HDataDC,0,0,str,strlen(str));
-	}
-	} else {*/
 	for (i = CurOffset; i < CurOffset + DataAmount; i += 16)
 	{
+		const int MemLineRow = MemFontHeight * ((i - CurOffset) / 16);
+		int MemLinePos = 8 * MemFontWidth;
+		int pos = i - CurOffset;
 		if ((PreviousCurOffset != CurOffset) || draw_all)
 		{
-			MoveToEx(HDataDC,0,MemFontHeight*((i-CurOffset)/16),NULL);
+			SetBkColor(HDataDC, CBackColor);		//addresses back color
 			if (i < MaxSize)
-				SetTextColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));	//addresses text color			000 = black, 255255255 = white
+				SetTextColor(HDataDC, CForeColor);	//addresses text color #000000 = black, #FFFFFF = white
 			else
-				SetTextColor(HDataDC,RGB(HexBoundColorR,HexBoundColorG,HexBoundColorB)); // addresses out of bounds
-			SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));		//addresses back color
-			sprintf(str,"%06X: ",i);
-			TextOut(HDataDC,0,0,str,strlen(str));
+				SetTextColor(HDataDC, RGB(HexBoundColorR, HexBoundColorG, HexBoundColorB));	//addresses out of bounds
+			sprintf(str, "%06X:                                                         :", i);
+			TextOut(HDataDC, 0, MemLineRow, str, strlen(str));
 		}
-		for(j = 0;j < 16;j++)
+		for (j = 0; j < 16; j++)
 		{
-			byteValue = GetMemViewData(i+j);
-			if (MemView_HighlightActivity && ((PreviousValues[i+j-CurOffset] != byteValue) && (PreviousValues[i+j-CurOffset] != PREVIOUS_VALUE_UNDEFINED)))
-				byteHighlightingValue = HighlightedBytes[i+j-CurOffset] = MemView_HighlightActivity_FadingPeriod;
+			byteValue = GetMemViewData(i + j);
+			if (MemView_HighlightActivity && ((PreviousValues[pos] != byteValue) && (PreviousValues[pos] != PREVIOUS_VALUE_UNDEFINED)))
+				byteHighlightingValue = HighlightedBytes[pos] = MemView_HighlightActivity_FadingPeriod;
 			else
-				byteHighlightingValue = HighlightedBytes[i+j-CurOffset];
-			
-			if ((CursorEndAddy == -1) && (CursorStartAddy == i+j))
+				byteHighlightingValue = HighlightedBytes[pos];
+
+			if ((CursorEndAddy == -1) && (CursorStartAddy == i + j))
 			{
 				//print up single highlighted text
-				MoveToEx(HDataDC, 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16), NULL);
-				if(TempData != PREVIOUS_VALUE_UNDEFINED)
+				if (TempData != PREVIOUS_VALUE_UNDEFINED)
 				{
 					// User is typing New Data
-					// 1st nybble
-					sprintf(str,"%X",TempData);
-					SetBkColor(HDataDC,RGB(255,255,255));
-					SetTextColor(HDataDC,RGB(255,0,0));
-					TextOut(HDataDC,0,0,str,1);
-					// 2nd nybble
-					MoveToEx(HDataDC, MemFontWidth + 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16), NULL);
-					sprintf(str,"%X", byteValue % 16);
-					SetTextColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
-					SetBkColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));
-					TextOut(HDataDC, 0, 0, str, 1);
-				} else
-				{
-					// Selecting a Single Byte
-					sprintf(str,"%X",(int)(byteValue / 16));
-					SetTextColor(HDataDC,RGB(255,255,255));		//single address highlight
-					SetBkColor(HDataDC,RGB(0,0,0));
-					TextOut(HDataDC,0,0,str,1);
-					// 2nd nybble
-					MoveToEx(HDataDC, MemFontWidth + 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16), NULL);
-					sprintf(str,"%X", byteValue % 16);
-					SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);
-					SetBkColor(HDataDC,BGColorList[i+j-CurOffset]);
-					TextOut(HDataDC,0,0,str,1);
+					// 1st nibble
+					SetBkColor(HDataDC, RGB(255, 255, 255));
+					SetTextColor(HDataDC, RGB(255, 0, 0));
+					str[0] = hex[(byteValue >> 4) & 0xF];
+					str[1] = 0;
+					TextOut(HDataDC, MemLinePos, MemLineRow, str, 1);
+					// 2nd nibble
+					SetBkColor(HDataDC, CForeColor);
+					SetTextColor(HDataDC, CBackColor);
+					str[0] = hex[(byteValue >> 0) & 0xF];
+					str[1] = 0;
+					TextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, str, 1);
 				}
-				//TextOut(HDataDC,0,0," ",1);
+				else
+				{
+					// Single Byte highlight
+					// 1st nibble
+					SetBkColor(HDataDC, RGB(0, 0, 0));
+					SetTextColor(HDataDC, RGB(255, 255, 255));
+					str[0] = hex[(byteValue >> 4) & 0xF];
+					str[1] = 0;
+					TextOut(HDataDC, MemLinePos, MemLineRow, str, 1);
+					// 2nd nibble
+					SetBkColor(HDataDC, BGColorList[pos]);
+					SetTextColor(HDataDC, TextColorList[pos]);
+					str[0] = hex[(byteValue >> 0) & 0xF];
+					str[1] = 0;
+					TextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, str, 1);
+				}
 
 				// single address highlight - right column
-				SetTextColor(HDataDC,RGB(255,255,255));
-				SetBkColor(HDataDC,RGB(0,0,0));
-				MoveToEx(HDataDC, (59 + j) * MemFontWidth, MemFontHeight * ((i - CurOffset) / 16), NULL); //todo: try moving this above the for loop
+				SetBkColor(HDataDC, RGB(0, 0, 0));
+				SetTextColor(HDataDC, RGB(255, 255, 255));
 				str[0] = chartable[byteValue];
-				if((u8)str[0] < 0x20)str[0] = 0x2E;
-				//if(str[0] > 0x7e)str[0] = 0x2E;
+				if ((u8)str[0] < 0x20) str[0] = 0x2E;
+//				if ((u8)str[0] > 0x7e) str[0] = 0x2E;
 				str[1] = 0;
-				TextOut(HDataDC,0,0,str,1);
+				TextOut(HDataDC, (59 + j) * MemFontWidth, MemLineRow, str, 1);
 
-				PreviousValues[i+j-CurOffset] = PREVIOUS_VALUE_UNDEFINED; //set it to redraw this one next time
-			} else if (draw_all || (PreviousValues[i+j-CurOffset] != byteValue) || byteHighlightingValue)
+				PreviousValues[pos] = PREVIOUS_VALUE_UNDEFINED; //set it to redraw this one next time
+			}
+			else if (draw_all || (PreviousValues[pos] != byteValue) || byteHighlightingValue)
 			{
+				COLORREF tmpcolor = TextColorList[pos];
+				SetBkColor(HDataDC, BGColorList[pos]);
 				// print up normal text
 				if (byteHighlightingValue)
 				{
 					// fade out 1 step
 					if (MemView_HighlightActivity_FadeWhenPaused || !FCEUI_EmulationPaused() || JustFrameAdvanced)
-						byteHighlightingValue = (--HighlightedBytes[i+j-CurOffset]);
+						byteHighlightingValue = (--HighlightedBytes[pos]);
 
 					if (byteHighlightingValue > 0)
 					{
+						// if the byte was changed in current frame, use brightest color, even if the "fading period" demands different color
+						// also use the last color if byteHighlightingValue points outside the array of predefined colors
 						if (byteHighlightingValue == MemView_HighlightActivity_FadingPeriod - 1 || byteHighlightingValue >= HIGHLIGHT_ACTIVITY_NUM_COLORS)
-							// if the byte was changed in current frame, use brightest color, even if the "fading period" demands different color
-							// also use the last color if byteHighlightingValue points outside the array of predefined colors
-							SetTextColor(HDataDC, highlightActivityColors[HIGHLIGHT_ACTIVITY_NUM_COLORS - 1]);
+							tmpcolor = highlightActivityColors[HIGHLIGHT_ACTIVITY_NUM_COLORS - 1];
 						else
-							SetTextColor(HDataDC, highlightActivityColors[byteHighlightingValue]);
-							
-					} else
-					{
-						SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);
+							tmpcolor = highlightActivityColors[byteHighlightingValue];
 					}
-				} else
-				{
-					SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);//(8+j*3)*MemFontWidth
 				}
-				SetBkColor(HDataDC,BGColorList[i+j-CurOffset]);
-				MoveToEx(HDataDC, 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16),NULL);
-				sprintf(str,"%X", (int)(byteValue / 16));
-				TextOut(HDataDC, 0, 0, str, 1);
-				MoveToEx(HDataDC, MemFontWidth + 8 * MemFontWidth + (j * 3 * MemFontWidth), MemFontHeight * ((i - CurOffset) / 16),NULL);
-				sprintf(str,"%X", byteValue % 16);
-				TextOut(HDataDC, 0, 0, str, 1);
+				SetTextColor(HDataDC, tmpcolor);
+				str[0] = hex[(byteValue >> 4) & 0xF];
+				str[1] = hex[(byteValue >> 0) & 0xF];
+				str[2] = 0;
+				TextOut(HDataDC, MemLinePos, MemLineRow, str, 2);
 
-				MoveToEx(HDataDC,(59+j)*MemFontWidth,MemFontHeight*((i-CurOffset)/16),NULL); //todo: try moving this above the for loop
 				str[0] = chartable[byteValue];
-				if((u8)str[0] < 0x20)str[0] = 0x2E;
-				//if(str[0] > 0x7e)str[0] = 0x2E;
+				if ((u8)str[0] < 0x20) str[0] = 0x2E;
+//				if ((u8)str[0] > 0x7e) str[0] = 0x2E;
 				str[1] = 0;
-				TextOut(HDataDC,0,0,str,1);
+				TextOut(HDataDC, (59 + j) * MemFontWidth, MemLineRow, str, 1);
 
-				PreviousValues[i+j-CurOffset] = byteValue;
+				PreviousValues[pos] = byteValue;
 			}
+			MemLinePos += MemFontWidth * 3;
+			pos++;
 		}
-
-		if(draw_all)
-		{
-			MoveToEx(HDataDC,56*MemFontWidth,MemFontHeight*((i-CurOffset)/16),NULL);
-			SetTextColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));	//Column separator
-			SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
-			TextOut(HDataDC,0,0," : ",3);
-		}
-		/*
-		 for(j = 0;j < 16;j++){
-		 if((OldValues[i+j-CurOffset] != GetMem(i+j)) || draw_all){
-		 MoveToEx(HDataDC,(59+j)*MemFontWidth,MemFontHeight*((i-CurOffset)/16),NULL); //todo: try moving this above the for loop
-		 SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);
-		 SetBkColor(HDataDC,BGColorList[i+j-CurOffset]);
-		 str[0] = GetMem(i+j);
-		 if(str[0] < 0x20)str[0] = 0x2E;
-		 if(str[0] > 0x7e)str[0] = 0x2E;
-		 str[1] = 0;
-		 TextOut(HDataDC,0,0,str,1);
-		 if(CursorStartAddy != i+j)OldValues[i+j-CurOffset] = GetMem(i+j);
-			}
-			}
-			*/
 	}
-	//	}
 
-	SetTextColor(HDataDC,RGB(0,0,0));
-	SetBkColor(HDataDC,RGB(0,0,0));
-
-	MoveToEx(HDataDC,0,0,NULL);	
+	SetTextColor(HDataDC, RGB(0, 0, 0));
+	SetBkColor(HDataDC, RGB(0, 0, 0));
+	MoveToEx(HDataDC, 0, 0, NULL);
 	PreviousCurOffset = CurOffset;
 	return;
 }
@@ -724,7 +677,7 @@ void UpdateColorTable()
 	switch (EditingMode)
 	{
 		case MODE_NES_MEMORY:
-			for (uint32 a = CurOffset; a < CurOffset + DataAmount; ++a)
+			for (int a = CurOffset; a < CurOffset + DataAmount; ++a)
 				if (FCEUI_FindCheatMapByte(a))
 					TextColorList[a - CurOffset] = RGB(HexFreezeColorR, HexFreezeColorG, HexFreezeColorB);
 			break;
@@ -1244,7 +1197,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		mDC = GetDC(hwnd);
 		HDataDC = mDC;//deleteme
 		SelectObject (HDataDC, debugSystem->hHexeditorFont);
-		SetTextAlign(HDataDC,TA_UPDATECP | TA_TOP | TA_LEFT);
+		SetTextAlign(HDataDC,TA_NOUPDATECP | TA_TOP | TA_LEFT);
 
 		GetTextMetrics (HDataDC, &tm);
 
@@ -2308,7 +2261,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 											// the total bookmark count has reached the limit of bookmarks (64),
 											// discard it
 											++discardBookmarkCount;
-										else if (import[j].address > GetMaxSize(import[j].editmode))
+										else if (import[j].address > (unsigned int)GetMaxSize(import[j].editmode))
 											// the bookmark is out of valid range for current game,
 											// discard it.
 											++outOfRangeBookmarkCount;

@@ -1044,7 +1044,8 @@ static int iNES_Init(int num) {
 				}
 				if (CHRRAMSize > 0)
 				{
-					if ((UNIFchrrama = VROM = (uint8*)FCEU_dmalloc(CHRRAMSize)) == NULL) return 2;
+					int mCHRRAMSize = (CHRRAMSize < 1024) ? 1024 : CHRRAMSize; // VPage has a resolution of 1k banks, ensure minimum allocation to prevent malicious access from NES software
+					if ((UNIFchrrama = VROM = (uint8*)FCEU_dmalloc(mCHRRAMSize)) == NULL) return 2;
 					FCEU_MemoryRand(VROM, CHRRAMSize);
 					SetupCartCHRMapping(0, VROM, CHRRAMSize, 1);
 					AddExState(VROM, CHRRAMSize, 0, "CHRR");
