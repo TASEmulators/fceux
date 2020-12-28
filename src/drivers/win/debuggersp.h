@@ -61,7 +61,7 @@ void DeleteAllDebuggerBookmarks();
 void FillDebuggerBookmarkListbox(HWND hwnd);
 
 void GoToDebuggerBookmark(HWND hwnd);
-int isHex(char c);
+extern bool IsLetterLegalHex(char c);
 
 bool DoSymbolicDebugNaming(int offset, HWND parentHWND);
 void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char* newComment, int size, int init, bool nameOverwrite, bool commentHeadOnly, bool commentOverwrite);

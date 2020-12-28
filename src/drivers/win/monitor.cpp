@@ -120,7 +120,7 @@ BOOL updateResults(HWND hwndDlg, int rule)
 			
 			for (unsigned int j=0;j<len;j++)
 			{
-				if (isHex(input_buff[j]) == FALSE)
+				if (IsLetterLegalHex(input_buff[j]) == FALSE)
 				{
 					return FALSE;
 				}
