@@ -104,17 +104,6 @@ MemoryMappedRegister RegNames[] = {
 int RegNameCount = sizeof(RegNames)/sizeof(MemoryMappedRegister);
 
 /**
-* Tests whether a char is a valid hexadecimal character.
-* 
-* @param c The char to test
-* @return True or false.
-**/
-int isHex(char c)
-{
-	return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
-}
-
-/**
 * Parses a line from a NL file.
 * @param line The line to parse
 * @param n The name structure to write the information to
@@ -165,10 +154,10 @@ int parseLine(char* line, Name* n)
 	if (llen == 5) // Offset size of normal lines of the form $XXXX
 	{
 		if (line[0] != '$'
-			|| !isHex(line[1])
-			|| !isHex(line[2])
-			|| !isHex(line[3])
-			|| !isHex(line[4])
+			|| !IsLetterLegalHex(line[1])
+			|| !IsLetterLegalHex(line[2])
+			|| !IsLetterLegalHex(line[3])
+			|| !IsLetterLegalHex(line[4])
 		)
 		{
 			return 4;
@@ -178,10 +167,10 @@ int parseLine(char* line, Name* n)
 	{
 		int i;
 		if (line[0] != '$'
-			|| !isHex(line[1])
-			|| !isHex(line[2])
-			|| !isHex(line[3])
-			|| !isHex(line[4])
+			|| !IsLetterLegalHex(line[1])
+			|| !IsLetterLegalHex(line[2])
+			|| !IsLetterLegalHex(line[3])
+			|| !IsLetterLegalHex(line[4])
 			|| line[5] != '/'
 		)
 		{
@@ -190,7 +179,7 @@ int parseLine(char* line, Name* n)
 		
 		for (i=6;line[i];i++)
 		{
-			if (!isHex(line[i]))
+			if (!IsLetterLegalHex(line[i]))
 			{
 				return 6;
 			}
@@ -381,7 +370,7 @@ Name* parse(char* lines, const char* filename)
 				int i;
 				
 				// Create a node for each element of the array
-				for (i=0;i<=arrlen;i++)
+				for (i = 0; i < arrlen; i++)
 				{
 					char numbuff[10] = {0};
 
