@@ -269,7 +269,7 @@ static void PalettePoke(uint32 addr, uint8 data)
 		}
 		else
 		{
-			UPALRAM[addr-1] = UPALRAM[0x10|(addr-1)] = data;
+			UPALRAM[addr-1] = data;
 		}
 	}
 	else
