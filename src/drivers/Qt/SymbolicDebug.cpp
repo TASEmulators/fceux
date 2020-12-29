@@ -298,7 +298,7 @@ int generateNLFilenameForBank(int bank, char *NLfilename)
 int debugSymbolTable_t::loadFileNL( int bank )
 {
 	FILE *fp;
-	int i, j, ofs, lineNum = 0, literal = 0;
+	int i, j, ofs, lineNum = 0, literal = 0, array = 0;
 	char fileName[512], line[512];
 	char stmp[512];
 	debugSymbolPage_t *page = NULL;
@@ -364,6 +364,8 @@ int debugSymbolTable_t::loadFileNL( int bank )
 		else if ( line[i] == '$' )
 		{
 			// Line is a new debug offset
+			array = 0;
+
 			j=0; i++;
 			if ( !isxdigit( line[i] ) )
 			{
@@ -376,6 +378,18 @@ int debugSymbolTable_t::loadFileNL( int bank )
 			stmp[j] = 0;
 
 			ofs = strtol( stmp, NULL, 16 );
+
+			if ( line[i] == '/' )
+			{
+				j=0; i++;
+				while ( isxdigit( line[i] ) )
+				{
+					stmp[j] = line[i]; i++; j++;
+				}
+				stmp[j] = 0;
+
+				array = strtol( stmp, NULL, 16 );
+			}
 
 			if ( line[i] != '#' )
 			{
@@ -484,10 +498,39 @@ int debugSymbolTable_t::loadFileNL( int bank )
 
 			sym->comment.assign( stmp );
 
-			if ( page->addSymbol( sym ) )
-			{  
-				printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, stmp, lineNum, fileName );
-				delete sym; sym = NULL; // Failed to add symbol
+			if ( array > 0 )
+			{
+				debugSymbol_t *arraySym = NULL;
+
+				for (j=0; j<array; j++)
+				{
+					arraySym = new debugSymbol_t();
+
+					if ( arraySym )
+					{
+						arraySym->ofs = sym->ofs + j;
+
+						sprintf( stmp, "[%i]", j );
+						arraySym->name.assign( sym->name );
+						arraySym->name.append( stmp );
+						arraySym->comment.assign( sym->comment );
+
+						if ( page->addSymbol( arraySym ) )
+						{
+							printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, arraySym->name.c_str(), lineNum, fileName );
+							delete arraySym; arraySym = NULL; // Failed to add symbol
+						}
+					}
+				}
+				delete sym; sym = NULL; // Delete temporary symbol
+			}
+			else
+			{
+				if ( page->addSymbol( sym ) )
+				{
+					printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, sym->name.c_str(), lineNum, fileName );
+					delete sym; sym = NULL; // Failed to add symbol
+				}
 			}
 		}
 	}
