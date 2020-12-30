@@ -351,9 +351,9 @@ static void DoNamcoSound(int32 *Wave, int Count) {
 
 static void Mapper19_StateRestore(int version) {
 	SyncPRG();
+	SyncMirror();
 	FixNTAR();
 	FixCRR();
-	SyncMirror();
 	int x;
 	for (x = 0x40; x < 0x80; x++)
 		FixCache(x, IRAM[x]);
