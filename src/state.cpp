@@ -61,14 +61,14 @@
 
 using namespace std;
 
-static void (*SPreSave)(void);
-static void (*SPostSave)(void);
+static void (*SPreSave)(void) = NULL;
+static void (*SPostSave)(void) = NULL;
 
 static int SaveStateStatus[10];
 static int StateShow;
 
 //tells the save system innards that we're loading the old format
-bool FCEU_state_loading_old_format;
+bool FCEU_state_loading_old_format = false;
 
 char lastSavestateMade[2048]; //Stores the filename of the last savestate made (needed for UndoSavestate)
 bool undoSS = false;		  //This will be true if there is lastSavestateMade, it was made since ROM was loaded, a backup state for lastSavestateMade exists
@@ -413,7 +413,7 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 
 	if(SPreSave) SPreSave();
 	totalsize+=WriteStateChunk(os,0x10,SFMDATA);
-	if(SPreSave) SPostSave();
+	if(SPostSave) SPostSave();
 
 	//save the length of the file
 	int len = memory_savestate.size();
