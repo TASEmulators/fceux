@@ -949,7 +949,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 
 	// Mapper
 	int mapper;
-	if (!GetComboBoxListItemData(hwnd, IDC_MAPPER_COMBO, &mapper, buf))
+	if (!GetComboBoxListItemData(hwnd, IDC_MAPPER_COMBO, &mapper, buf, header))
 	{
 		if (header) {
 			MessageBox(hwnd, "The mapper# you have entered is invalid. Please enter a decimal number or select an item from the dropdown list.", "Error", MB_OK | MB_ICONERROR);
@@ -1509,7 +1509,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 		if (ines20) {
 			// VS System type
 			int system;
-			if (GetComboBoxListItemData(hwnd, IDC_VS_SYSTEM_COMBO, &system, buf) && system <= 0xF)
+			if (GetComboBoxListItemData(hwnd, IDC_VS_SYSTEM_COMBO, &system, buf, header) && system <= 0xF)
 				_header.VS_hardware |= (system & 0xF) << 4;
 			else
 			{
@@ -1526,7 +1526,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 			}
 			// VS PPU type
 			int ppu;
-			if (GetComboBoxListItemData(hwnd, IDC_VS_PPU_COMBO, &ppu, buf) && system <= 0xF)
+			if (GetComboBoxListItemData(hwnd, IDC_VS_PPU_COMBO, &ppu, buf, header) && system <= 0xF)
 				_header.VS_hardware |= ppu & 0xF;
 			else
 			{
@@ -1550,7 +1550,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 		// Extend System
 		_header.ROM_type2 |= 3;
 		int extend;
-		if (GetComboBoxListItemData(hwnd, IDC_SYSTEM_EXTEND_COMBO, &extend, buf) && extend <= 0x3F)
+		if (GetComboBoxListItemData(hwnd, IDC_SYSTEM_EXTEND_COMBO, &extend, buf, header) && extend <= 0x3F)
 			_header.VS_hardware |= extend & 0x3F;
 		else
 		{
@@ -1571,7 +1571,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 	if (ines20)
 	{
 		int input;
-		if (GetComboBoxListItemData(hwnd, IDC_INPUT_DEVICE_COMBO, &input, buf, true) && input <= 0x3F)
+		if (GetComboBoxListItemData(hwnd, IDC_INPUT_DEVICE_COMBO, &input, buf, header) && input <= 0x3F)
 			_header.reserved[1] |= input & 0x3F;
 		else
 		{
@@ -1701,7 +1701,7 @@ int GetComboBoxByteSize(HWND hwnd, UINT id, int* value, iNES_HEADER* header)
 		case IDC_CHRNVRAM_COMBO: name = "CHR NVRAM"; break;
 	}
 
-	if (!GetComboBoxListItemData(hwnd, id, value, buf, true))
+	if (!GetComboBoxListItemData(hwnd, id, value, buf, header))
 	{
 		char buf2[4];
 		if (sscanf(buf, "%d%3[KMB]", value, buf2) < 2 || !strcmp(buf2, ""))
@@ -1747,7 +1747,7 @@ int GetComboBoxByteSize(HWND hwnd, UINT id, int* value, iNES_HEADER* header)
 	return err;
 }
 
-bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exact)
+bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, iNES_HEADER* header)
 {
 
 	bool success = true;
@@ -1757,10 +1757,10 @@ bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exa
 	else {
 		GetDlgItemText(hwnd, id, buf, 256);
 
-		if (exact)
-			*value = SendDlgItemMessage(hwnd, id, CB_FINDSTRINGEXACT, 0, (LPARAM)buf);
-		else
+		if (header)
 			*value = SendDlgItemMessage(hwnd, id, CB_SELECTSTRING, 0, (LPARAM)buf);
+		else
+			*value = SendDlgItemMessage(hwnd, id, CB_FINDSTRINGEXACT, 0, (LPARAM)buf);
 
 		if (*value != CB_ERR)
 			*value = SendDlgItemMessage(hwnd, id, CB_GETITEMDATA, *value, 0);
@@ -1773,16 +1773,16 @@ bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exa
 					break;
 				case IDC_MAPPER_COMBO:
 					if (!(success = sscanf(buf, "%d", value) > 0))
-						success = SearchByString(hwnd, id, value, buf);
-					else
+						success = SearchByString(hwnd, id, value, buf, header);
+					else if (header)
 						SetDlgItemText(hwnd, id, buf);
 					break;
 				case IDC_VS_SYSTEM_COMBO:
 				case IDC_VS_PPU_COMBO:
 				case IDC_SYSTEM_EXTEND_COMBO:
 					if (!(success = sscanf(buf, "$%X", (unsigned int *)value) > 0))
-						success = SearchByString(hwnd, id, value, buf);
-					else
+						success = SearchByString(hwnd, id, value, buf, header);
+					else if (header)
 						SetDlgItemText(hwnd, id, buf);
 					break;
 				case IDC_INPUT_DEVICE_COMBO:
@@ -1790,15 +1790,15 @@ bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exa
 					{
 						char buf2[8];
 						sprintf(buf2, "$%02X", *value);
-						if (SendDlgItemMessage(hwnd, id, CB_SELECTSTRING, 0, (LPARAM)buf2) == CB_ERR)
+						if (header && SendDlgItemMessage(hwnd, id, CB_SELECTSTRING, 0, (LPARAM)buf2) == CB_ERR)
 							SetDlgItemText(hwnd, id, buf);
 					}
 					else
-						success = SearchByString(hwnd, id, value, buf);
+						success = SearchByString(hwnd, id, value, buf, header);
 					break;
 			}
 
-			if (!success)
+			if (header && !success)
 				SetDlgItemText(hwnd, id, buf);
 		}
 	}
@@ -1914,7 +1914,7 @@ bool SaveINESFile(HWND hwnd, char* path, iNES_HEADER* header)
 
 }
 
-bool SearchByString(HWND hwnd, UINT id, int* value, char* buf)
+bool SearchByString(HWND hwnd, UINT id, int* value, char* buf, iNES_HEADER* header)
 {
 	if (buf[0] != ' ' && buf[0] != 0)
 	{
@@ -1925,7 +1925,8 @@ bool SearchByString(HWND hwnd, UINT id, int* value, char* buf)
 			{
 				if (!stricmp(buf, bmap[i].name))
 				{
-					SendDlgItemMessage(hwnd, id, CB_SETCURSEL, i, 0);
+					if (header)
+						SendDlgItemMessage(hwnd, id, CB_SETCURSEL, i, 0);
 					*value = SendDlgItemMessage(hwnd, id, CB_GETITEMDATA, i, 0);
 					return true;
 				}
@@ -1942,7 +1943,8 @@ bool SearchByString(HWND hwnd, UINT id, int* value, char* buf)
 					{
 						if (!stricmp(buf, checkList[j]))
 						{
-							SendDlgItemMessage(hwnd, id, CB_SETCURSEL, j, 0);
+							if (header)
+								SendDlgItemMessage(hwnd, id, CB_SETCURSEL, j, 0);
 							*value = SendDlgItemMessage(hwnd, id, CB_GETITEMDATA, j, 0);
 							return true;
 						}

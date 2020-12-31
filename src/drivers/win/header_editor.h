@@ -18,8 +18,8 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header);
 bool LoadHeader(HWND parent, iNES_HEADER* header);
 bool WriteHeaderData(HWND hwnd, iNES_HEADER* header = NULL);
 int GetComboBoxByteSize(HWND hwnd, UINT id, int* value, iNES_HEADER* header);
-bool SearchByString(HWND hwnd, UINT id, int* value, char* buf);
-bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, bool exact = false);
+bool SearchByString(HWND hwnd, UINT id, int* value, char* buf, iNES_HEADER* header = NULL);
+bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, iNES_HEADER* header = NULL);
 bool SaveINESFile(HWND hwnd, char* path, iNES_HEADER* header);
 
 INT_PTR CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP);
