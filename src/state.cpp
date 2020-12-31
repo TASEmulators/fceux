@@ -860,6 +860,9 @@ void ResetExState(void (*PreSave)(void), void (*PostSave)(void))
 
 void AddExState(void *v, uint32 s, int type, const char *desc)
 {
+	//do not accept extra state information if a null pointer was provided for v, so list won't terminate early
+	if (v == 0) return;
+	
 	if(s==~0)
 	{
 		SFORMAT* sf = (SFORMAT*)v;
