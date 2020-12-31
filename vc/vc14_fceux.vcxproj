@@ -279,7 +279,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>.;../src/drivers/win/zlib;../src/drivers/win/directx/x64;../src;../src/drivers/win/lua/include;userconfig;defaultconfig;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;WIN64;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_;NOMINMAX;HAS_vsnprintf;_S9XLUA_H;_DEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <ForceConformanceInForLoopScope>false</ForceConformanceInForLoopScope>
@@ -287,6 +287,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>comctl32.lib;ws2_32.lib;vfw32.lib;winmm.lib;htmlhelp.lib;../src/drivers/win/directx/x64/dsound.lib;../src/drivers/win/directx/x64/dxguid.lib;../src/drivers/win/directx/x64/ddraw.lib;../src/drivers/win/directx/x64/dinput.lib;../src/drivers/win/lua/x64/lua51.lib;../src/drivers/win/lua/x64/luaperks.lib;psapi.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -317,6 +318,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>comctl32.lib;ws2_32.lib;vfw32.lib;winmm.lib;htmlhelp.lib;../src/drivers/win/directx/x64/dsound.lib;../src/drivers/win/directx/x64/dxguid.lib;../src/drivers/win/directx/x64/ddraw.lib;../src/drivers/win/directx/x64/dinput.lib;../src/drivers/win/lua/x64/lua51.lib;../src/drivers/win/lua/x64/luaperks.lib;psapi.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -349,6 +351,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>comctl32.lib;ws2_32.lib;vfw32.lib;winmm.lib;htmlhelp.lib;../src/drivers/win/directx/x64/dsound.lib;../src/drivers/win/directx/x64/dxguid.lib;../src/drivers/win/directx/x64/ddraw.lib;../src/drivers/win/directx/x64/dinput.lib;../src/drivers/win/lua/x64/lua51.lib;../src/drivers/win/lua/x64/luaperks.lib;psapi.lib;mpr.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -1507,5 +1510,10 @@
       <Output ItemName="ClCompile" TaskParameter="OutputItemList" />
     </UNDUPOBJ_TASK>
   </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties />
+    </VisualStudio>
+  </ProjectExtensions>
   <!-- ================ UNDUPOBJ ================ -->
 </Project>
