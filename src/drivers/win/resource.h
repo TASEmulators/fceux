@@ -571,7 +571,10 @@
 #define IDC_RADIO_REGION_DUAL           1033
 #define MW_NAME11                       1033
 #define MW_ADDR11                       1034
+#define IDC_ROM_FILE_EDIT               1034
 #define MW_VAL11                        1035
+#define IDC_EDIT2                       1035
+#define IDC_HEX_HEADER_EDIT             1035
 #define IDC_INPUT_DEVICE_COMBO          1036
 #define MW_NAME12                       1036
 #define MW_ADDR12                       1037
@@ -585,6 +588,7 @@
 #define IDC_RADIO_SYSTEM_EXTEND         1041
 #define MW_VAL13                        1041
 #define MW_NAME14                       1042
+#define IDC_COMBO1                      1042
 #define MW_ADDR14                       1043
 #define IDC_SYSTEM_EXTEND_COMBO         1043
 #define MW_VAL14                        1044
@@ -1207,7 +1211,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        312
 #define _APS_NEXT_COMMAND_VALUE         40009
-#define _APS_NEXT_CONTROL_VALUE         1030
+#define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
