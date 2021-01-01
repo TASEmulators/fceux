@@ -1328,7 +1328,6 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 						}
 						else
 							SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
-						}
 
 						return false;
 					}
