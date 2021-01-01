@@ -1085,11 +1085,11 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 								SetFocus(GetDlgItem(hwnd, IDC_PRGROM_COMBO));
 								SendDlgItemMessage(hwnd, IDC_PRGROM_COMBO, EM_SETSEL, 0, -1);
 							}
-							return false;
 						}
 						else
 							SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
 
+						return false;
 					}
 				}
 				else {
@@ -1307,29 +1307,30 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 
 					if (!fit)
 					{
-						int result10 = (chr_rom / 1024 / 8 + 1) * 8 * 1024;
-						if (result10 < result)
-							result = result10;
-						char buf2[64];
-						if (result % 1024 != 0)
-							sprintf(buf2, "%dB", result);
-						else
-							sprintf(buf2, "%dKB", result / 1024);
-						sprintf(buf, "CHR ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
-						if (MessageBox(hwnd, buf, "Error", MB_YESNO | MB_ICONERROR) == IDYES)
-							SetDlgItemText(hwnd, IDC_CHRROM_COMBO, buf2);
-						else
+						if (header)
 						{
-							if (header)
+							int result10 = (chr_rom / 1024 / 8 + 1) * 8 * 1024;
+							if (result10 < result)
+								result = result10;
+							char buf2[64];
+							if (result % 1024 != 0)
+								sprintf(buf2, "%dB", result);
+							else
+								sprintf(buf2, "%dKB", result / 1024);
+							sprintf(buf, "CHR ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
+							if (MessageBox(hwnd, buf, "Error", MB_YESNO | MB_ICONERROR) == IDYES)
+								SetDlgItemText(hwnd, IDC_CHRROM_COMBO, buf2);
+							else
 							{
 								SetFocus(GetDlgItem(hwnd, IDC_CHRROM_COMBO));
 								SendDlgItemMessage(hwnd, IDC_CHRROM_COMBO, EM_SETSEL, 0, -1);
 							}
-							else
-								SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
-
-							return false;
 						}
+						else
+							SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
+						}
+
+						return false;
 					}
 				}
 				else {
@@ -1657,12 +1658,9 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 			{
 				SetFocus(GetDlgItem(hwnd, IDC_MAPPER_COMBO));
 				SendDlgItemMessage(hwnd, IDC_MAPPER_COMBO, EM_SETSEL, 0, -1);
+				return false;
 			}
 		}
-		else
-			SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
-
-		return false;
 	}
 
 	memcpy(_header.ID, "NES\x1A", 4);
