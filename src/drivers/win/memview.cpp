@@ -1997,6 +1997,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			return 0;
 
 		case MENU_MV_EDIT_COPY:
+		{
 			if(CursorEndAddy == -1)i = 1;
 			else i = CursorEndAddy-CursorStartAddy+1;
 
@@ -2017,13 +2018,14 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					strcat(pGlobal,str);
 				}
 			}
-			GlobalUnlock (hGlobal);
-			OpenClipboard (hwnd) ;
-			EmptyClipboard () ;
-			SetClipboardData (CF_TEXT, hGlobal) ;
+			GlobalUnlock(hGlobal);
+			OpenClipboard(hwnd) ;
+			EmptyClipboard() ;
+			SetClipboardData(CF_TEXT, hGlobal) ;
+			SetClipboardData(CF_LOCALE, hGlobal);
 			CloseClipboard () ;
 			return 0;
-
+		}
 		case MENU_MV_EDIT_PASTE:
 
 			OpenClipboard(hwnd);
