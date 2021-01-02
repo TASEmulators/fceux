@@ -115,16 +115,16 @@ struct
 }
 popupmenu[] =
 {
-	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SYMBOLIC_NAME,  "Add symbolic debug name"},
-	{0x0000,0x2000, MODE_NES_MEMORY, ID_ADDRESS_FRZ_SUBMENU,    "Freeze/Unfreeze This Address"},
-	{0x6000,0x7FFF, MODE_NES_MEMORY, ID_ADDRESS_FRZ_SUBMENU,    "Freeze/Unfreeze This Address"},
-	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_ADDBP_R,        "Add Debugger Read Breakpoint"},
-	{0x0000,0x3FFF, MODE_NES_PPU,    ID_ADDRESS_ADDBP_R,        "Add Debugger Read Breakpoint"},
-	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_ADDBP_W,        "Add Debugger Write Breakpoint"},
-	{0x0000,0x3FFF, MODE_NES_PPU,    ID_ADDRESS_ADDBP_W,        "Add Debugger Write Breakpoint"},
-	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_ADDBP_X,        "Add Debugger Execute Breakpoint"},
-	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SEEK_IN_ROM,    "Go Here In ROM File"},
-	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_CREATE_GG_CODE, "Create Game Genie Code At This Address"}
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SYMBOLIC_NAME,       "Add symbolic debug name"},
+	{0x0000,0x2000, MODE_NES_MEMORY, ID_ADDRESS_FRZ_SUBMENU,         "Freeze/Unfreeze This Address"},
+	{0x6000,0x7FFF, MODE_NES_MEMORY, ID_ADDRESS_FRZ_SUBMENU,         "Freeze/Unfreeze This Address"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_ADDBP_R,             "Add Debugger Read Breakpoint"},
+	{0x0000,0x3FFF, MODE_NES_PPU,    ID_ADDRESS_ADDBP_R,             "Add Debugger Read Breakpoint"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_ADDBP_W,             "Add Debugger Write Breakpoint"},
+	{0x0000,0x3FFF, MODE_NES_PPU,    ID_ADDRESS_ADDBP_W,             "Add Debugger Write Breakpoint"},
+	{0x0000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_ADDBP_X,             "Add Debugger Execute Breakpoint"},
+	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SEEK_IN_ROM,         "Go Here In ROM File"},
+	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_CREATE_GG_CODE,      "Create Game Genie Code At This Address"}
 };
 #define POPUPNUM (sizeof popupmenu / sizeof popupmenu[0])
 
@@ -1503,6 +1503,24 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			{
 				switch(popupmenu[i].id)
 				{
+					case ID_ADDRESS_SYMBOLIC_NAME:
+					{
+						if (j <= CursorEndAddy && j >= CursorStartAddy)
+						{
+							if (j >= 0x8000 && bank != -1)
+								sprintf(str, "Add Symbolic Debug Name For Address %02X:%04X-%02X:%04X", bank, CursorStartAddy, bank, CursorEndAddy);
+							else
+								sprintf(str, "Add Symbolic Debug Name For Address %04X-%04X", CursorStartAddy, CursorEndAddy);
+						} else
+						{
+							if (j >= 0x8000 && bank != -1)
+								sprintf(str, "Add Symbolic Debug Name For Address %02X:%04X", bank, j);
+							else
+								sprintf(str, "Add Symbolic Debug Name For Address %04X", j);
+						}
+						popupmenu[i].text = str;
+						break;
+					}
 					//this will set the text for the menu dynamically based on the id
 					case ID_ADDRESS_FRZ_SUBMENU:
 					{
@@ -1798,7 +1816,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				break;
 			case ID_ADDRESS_SYMBOLIC_NAME:
 			{
-				if (DoSymbolicDebugNaming(j, hMemView))
+				if (j <= CursorEndAddy && j >= CursorStartAddy ? DoSymbolicDebugNaming(CursorStartAddy, CursorEndAddy - CursorStartAddy + 1, hMemView) : DoSymbolicDebugNaming(j, hMemView))
 				{
 					// enable "Symbolic Debug" if not yet enabled
 					if (!symbDebugEnabled)
@@ -2021,7 +2039,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			GlobalUnlock(hGlobal);
 			OpenClipboard(hwnd) ;
 			EmptyClipboard() ;
-			SetClipboardData(CF_TEXT, hGlobal) ;
+			SetClipboardData(CF_TEXT, hGlobal);
 			SetClipboardData(CF_LOCALE, hGlobal);
 			CloseClipboard () ;
 			return 0;

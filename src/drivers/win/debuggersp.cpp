@@ -910,7 +910,9 @@ INT_PTR CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 		case WM_INITDIALOG:
 		{
 			CenterWindow(hwndDlg);
-			unsigned int newAddress = lParam;
+			unsigned int* range = (unsigned int*)lParam;
+			unsigned int newAddress = range[0];
+			unsigned int arraySize = range[1];
 			// filename
 			generateNLFilenameForAddress(newAddress);
 			SetDlgItemText(hwndDlg, IDC_SYMBOLIC_FILENAME, NLfilename);
@@ -925,20 +927,29 @@ INT_PTR CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 				if (node->comment && node->comment[0])
 					SetDlgItemText(hwndDlg, IDC_SYMBOLIC_COMMENT, node->comment);
 			}
-			SetDlgItemText(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY, "10");
 			SetDlgItemText(hwndDlg, IDC_EDIT_SYMBOLIC_INIT, "0");
 			// set focus to IDC_SYMBOLIC_NAME
 			SendMessage(hwndDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hwndDlg, IDC_SYMBOLIC_NAME), true);
 			//always set the limits
 			SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_NAME, EM_SETLIMITTEXT, NL_MAX_NAME_LEN, 0);
 			SendDlgItemMessage(hwndDlg, IDC_SYMBOLIC_COMMENT, EM_SETLIMITTEXT, NL_MAX_MULTILINE_COMMENT_LEN, 0);
-			SendDlgItemMessage(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY, EM_SETLIMITTEXT, 2, 0);
-			SendDlgItemMessage(hwndDlg, IDC_EDIT_SYMBOLIC_INIT, EM_SETLIMITTEXT, 2, 0);
+			SendDlgItemMessage(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY, EM_SETLIMITTEXT, 4, 0);
+			SendDlgItemMessage(hwndDlg, IDC_EDIT_SYMBOLIC_INIT, EM_SETLIMITTEXT, 4, 0);
 			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_EDIT_SYMBOLIC_INIT), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 
 			CheckDlgButton(hwndDlg, IDC_CHECK_SYMBOLIC_NAME_OVERWRITE, BST_CHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD, BST_CHECKED);
+			if (arraySize != -1)
+			{
+				char str[4];
+				sprintf(str, "%X", arraySize);
+				SetDlgItemText(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY, str);
+				CheckDlgButton(hwndDlg, IDC_CHECK_SYMBOLIC_ARRAY, BST_CHECKED);
+				goto symbolic_array;
+			} else
+				SetDlgItemText(hwndDlg, IDC_EDIT_SYMBOLIC_ARRAY, "10");
+
 			break;
 		}
 		case WM_CLOSE:
@@ -980,6 +991,7 @@ INT_PTR CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 						}
 						case IDC_CHECK_SYMBOLIC_ARRAY:
 						{
+							symbolic_array:
 							bool array_chk = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_ARRAY) == BST_CHECKED;
 							bool delete_mode = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_DELETE) == BST_CHECKED;
 							bool comment_head_only = IsDlgButtonChecked(hwndDlg, IDC_CHECK_SYMBOLIC_COMMENT_ARRAY_HEAD) == BST_CHECKED;
@@ -1055,10 +1067,16 @@ INT_PTR CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 // returns true if user pressed OK, false if Cancel
 bool DoSymbolicDebugNaming(int offset, HWND parentHWND)
 {
+	return DoSymbolicDebugNaming(offset, -1, parentHWND);
+}
+
+bool DoSymbolicDebugNaming(int offsetStart, int size, HWND parentHWND)
+{
 	if (!FCEUI_EmulationPaused())
 		FCEUI_ToggleEmulationPause();
 	loadNameFiles();
-	if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_SYMBOLIC_DEBUG_NAMING), parentHWND, SymbolicNamingCallB, offset))
+	int range[2] = { offsetStart, size };
+	if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_SYMBOLIC_DEBUG_NAMING), parentHWND, SymbolicNamingCallB, (LPARAM)range))
 		return true;
 	return false;
 }
