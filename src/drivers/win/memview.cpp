@@ -94,6 +94,18 @@ int HexBackColorB = 255;
 int HexForeColorR = 0;		// Black
 int HexForeColorG = 0;
 int HexForeColorB = 0;
+int HexHlBackColorR = 0;   // Black
+int HexHlBackColorG = 0;
+int HexHlBackColorB = 0;
+int HexHlForeColorR = 255; // White
+int HexHlForeColorG = 255;
+int HexHlForeColorB = 255;
+int HexHlShdBackColorR = 224; // Grey
+int HexHlShdBackColorG = 224;
+int HexHlShdBackColorB = 224;
+int HexHlShdForeColorR = 0; // Black
+int HexHlShdForeColorG = 0;
+int HexHlShdForeColorB = 0;
 int HexFreezeColorR = 0;	// Blue
 int HexFreezeColorG = 0;
 int HexFreezeColorB = 255;
@@ -147,6 +159,7 @@ void OpenFindDialog();
 static int GetFileData(uint32 offset);
 static int WriteFileData(uint32 offset,int data);
 static void PalettePoke(uint32 addr, uint8 data);
+void SwitchEditingText(int editingText);
 
 
 HWND hMemView, hMemFind;
@@ -182,9 +195,15 @@ int CursorDragPoint = -1;//, CursorShiftPoint = -1;
 int TempData = PREVIOUS_VALUE_UNDEFINED;
 int DataAmount;
 int MaxSize;
+COLORREF *CurBGColorList;
+COLORREF *CurTextColorList;
+COLORREF *DimBGColorList;
+COLORREF *DimTextColorList;
+COLORREF *HexBGColorList;
+COLORREF *HexTextColorList;
+COLORREF *AnsiBGColorList;
+COLORREF *AnsiTextColorList;
 
-COLORREF *BGColorList;
-COLORREF *TextColorList;
 int PreviousCurOffset;
 int *PreviousValues;	// for HighlightActivity feature and for speedhack too
 unsigned int *HighlightedBytes;
@@ -265,12 +284,10 @@ void UndoLastPatch(){
 }
 
 void GotoAddress(HWND hwnd) {
-	char* gotoaddressstring;
+	char gotoaddressstring[18];
 	int gotoaddress;
-	char* gototitle;
+	char gototitle[8];
 	
-	gototitle = (char*)malloc(18);
-	gotoaddressstring = (char*)malloc(8);
 	gotoaddressstring[0] = '\0';
 	sprintf(gototitle, "%s%X%s", "Goto (0-", MaxSize-1, ")");
 	if(CWin32InputBox::InputBox(gototitle, "Goto which address:", gotoaddressstring, 8, false, hwnd) == IDOK)
@@ -498,22 +515,22 @@ void UpdateMemoryView(int draw_all)
 				{
 					// Single Byte highlight
 					// 1st nibble
-					SetBkColor(HDataDC, RGB(0, 0, 0));
-					SetTextColor(HDataDC, RGB(255, 255, 255));
+					SetBkColor(HDataDC, EditingText ? RGB(HexHlShdBackColorR, HexHlShdBackColorG, HexHlShdBackColorB) : RGB(HexHlBackColorR, HexHlBackColorG, HexHlBackColorB));
+					SetTextColor(HDataDC, EditingText ? RGB(255, 0, 0) : RGB(255, 255, 255));
 					str[0] = hex[(byteValue >> 4) & 0xF];
 					str[1] = 0;
 					TextOut(HDataDC, MemLinePos, MemLineRow, str, 1);
 					// 2nd nibble
-					SetBkColor(HDataDC, BGColorList[pos]);
-					SetTextColor(HDataDC, TextColorList[pos]);
+					SetBkColor(HDataDC, HexBGColorList[pos]);
+					SetTextColor(HDataDC, HexTextColorList[pos]);
 					str[0] = hex[(byteValue >> 0) & 0xF];
 					str[1] = 0;
 					TextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, str, 1);
 				}
 
 				// single address highlight - right column
-				SetBkColor(HDataDC, RGB(0, 0, 0));
-				SetTextColor(HDataDC, RGB(255, 255, 255));
+				SetBkColor(HDataDC, EditingText ? RGB(HexHlBackColorR, HexHlBackColorG, HexHlBackColorB) : RGB(HexHlShdBackColorR, HexHlShdBackColorG, HexHlShdBackColorB));
+				SetTextColor(HDataDC, EditingText ? RGB(HexHlForeColorR, HexHlForeColorG, HexHlForeColorB) : RGB(HexHlShdForeColorR, HexHlShdForeColorG, HexHlShdForeColorB));
 				str[0] = chartable[byteValue];
 				if ((u8)str[0] < 0x20) str[0] = 0x2E;
 //				if ((u8)str[0] > 0x7e) str[0] = 0x2E;
@@ -524,8 +541,8 @@ void UpdateMemoryView(int draw_all)
 			}
 			else if (draw_all || (PreviousValues[pos] != byteValue) || byteHighlightingValue)
 			{
-				COLORREF tmpcolor = TextColorList[pos];
-				SetBkColor(HDataDC, BGColorList[pos]);
+				COLORREF hexTmpColor = HexTextColorList[pos];
+				COLORREF ansiTmpColor = AnsiTextColorList[pos];
 				// print up normal text
 				if (byteHighlightingValue)
 				{
@@ -538,17 +555,26 @@ void UpdateMemoryView(int draw_all)
 						// if the byte was changed in current frame, use brightest color, even if the "fading period" demands different color
 						// also use the last color if byteHighlightingValue points outside the array of predefined colors
 						if (byteHighlightingValue == MemView_HighlightActivity_FadingPeriod - 1 || byteHighlightingValue >= HIGHLIGHT_ACTIVITY_NUM_COLORS)
-							tmpcolor = highlightActivityColors[HIGHLIGHT_ACTIVITY_NUM_COLORS - 1];
+						{
+							hexTmpColor = highlightActivityColors[HIGHLIGHT_ACTIVITY_NUM_COLORS - 1];
+							ansiTmpColor = highlightActivityColors[HIGHLIGHT_ACTIVITY_NUM_COLORS - 1];
+						}
 						else
-							tmpcolor = highlightActivityColors[byteHighlightingValue];
+						{
+							hexTmpColor = highlightActivityColors[byteHighlightingValue];
+							ansiTmpColor = highlightActivityColors[byteHighlightingValue];
+						}
 					}
 				}
-				SetTextColor(HDataDC, tmpcolor);
+				SetBkColor(HDataDC, HexBGColorList[pos]);
+				SetTextColor(HDataDC, hexTmpColor);
 				str[0] = hex[(byteValue >> 4) & 0xF];
 				str[1] = hex[(byteValue >> 0) & 0xF];
 				str[2] = 0;
 				TextOut(HDataDC, MemLinePos, MemLineRow, str, 2);
 
+				SetBkColor(HDataDC, AnsiBGColorList[pos]);
+				SetTextColor(HDataDC, ansiTmpColor);
 				str[0] = chartable[byteValue];
 				if ((u8)str[0] < 0x20) str[0] = 0x2E;
 //				if ((u8)str[0] > 0x7e) str[0] = 0x2E;
@@ -658,20 +684,27 @@ void UpdateColorTable()
 	{
 		if((i+CurOffset >= CursorStartAddy) && (i+CurOffset <= CursorEndAddy))
 		{
-			BGColorList[i] = RGB(HexForeColorR,HexForeColorG,HexForeColorB);			//Highlighter color bg	- 2 columns
-			TextColorList[i] = RGB(HexBackColorR,HexBackColorG,HexBackColorB);		//Highlighter color text - 2 columns
+			CurBGColorList[i] = RGB(HexHlBackColorR, HexHlBackColorG, HexHlBackColorB);			//Highlighter color bg	- 2 columns
+			DimBGColorList[i] = RGB(HexHlShdBackColorR, HexHlShdBackColorG, HexHlShdBackColorB);
+			CurTextColorList[i] = RGB(HexHlForeColorR, HexHlForeColorG, HexHlForeColorB);		//Highlighter color text - 2 columns
+			DimTextColorList[i] = RGB(HexHlShdForeColorR, HexHlShdForeColorG, HexHlShdForeColorB);
 			continue;
 		}
 
-		BGColorList[i] = RGB(HexBackColorR,HexBackColorG,HexBackColorB);			//Regular color bb - 2columns
-		TextColorList[i] = RGB(HexForeColorR,HexForeColorG,HexForeColorB);		//Regular color text - 2 columns
+		CurBGColorList[i] = RGB(HexBackColorR, HexBackColorG, HexBackColorB);			//Regular color bb - 2columns
+		DimBGColorList[i] = RGB(HexBackColorR, HexBackColorG, HexBackColorB);			//Regular color bb - 2columns
+		CurTextColorList[i] = RGB(HexForeColorR, HexForeColorG, HexForeColorB);		//Regular color text - 2 columns
+		DimTextColorList[i] = RGB(HexForeColorR, HexForeColorG, HexForeColorB);		//Regular color text - 2 columns
 	}
 
 	for (j=0;j<hexBookmarks.bookmarkCount;j++)
 	{
 		if(hexBookmarks[j].editmode != EditingMode) continue;
 		if(((int)hexBookmarks[j].address >= CurOffset) && ((int)hexBookmarks[j].address < CurOffset+DataAmount))
-			TextColorList[hexBookmarks[j].address - CurOffset] = RGB(0,0xCC,0); // Green for Bookmarks
+		{
+			CurTextColorList[hexBookmarks[j].address - CurOffset] = RGB(0, 0xCC, 0); // Green for Bookmarks
+			DimTextColorList[hexBookmarks[j].address - CurOffset] = RGB(0, 0xCC, 0); // Green for Bookmarks
+		}
 	}
 
 	switch (EditingMode)
@@ -679,7 +712,10 @@ void UpdateColorTable()
 		case MODE_NES_MEMORY:
 			for (int a = CurOffset; a < CurOffset + DataAmount; ++a)
 				if (FCEUI_FindCheatMapByte(a))
-					TextColorList[a - CurOffset] = RGB(HexFreezeColorR, HexFreezeColorG, HexFreezeColorB);
+				{
+					CurTextColorList[a - CurOffset] = RGB(HexFreezeColorR, HexFreezeColorG, HexFreezeColorB);
+					DimTextColorList[a - CurOffset] = RGB(HexFreezeColorR, HexFreezeColorG, HexFreezeColorB);
+				}
 			break;
 		case MODE_NES_FILE:
 			if (cdloggerdataSize)
@@ -695,22 +731,30 @@ void UpdateColorTable()
 							if ((cdloggerdata[temp_offset] & 3) == 3)
 							{
 								// the byte is both Code and Data - green
-								TextColorList[i] = RGB(0, 190, 0);
+								CurTextColorList[i] = RGB(0, 190, 0);
+								DimTextColorList[i] = RGB(0, 190, 0);
 							}
 							else if ((cdloggerdata[temp_offset] & 3) == 1)
 							{
 								// the byte is Code - dark-yellow
-								TextColorList[i] = RGB(160, 140, 0);
+								CurTextColorList[i] = RGB(160, 140, 0);
+								DimTextColorList[i] = RGB(160, 140, 0);
 							}
 							else if ((cdloggerdata[temp_offset] & 3) == 2)
 							{
 								// the byte is Data - blue/cyan
 								if (cdloggerdata[temp_offset] & 0x40)
+								{
 									// PCM data - cyan
-									TextColorList[i] = RGB(0, 130, 160);
+									CurTextColorList[i] = RGB(0, 130, 160);
+									DimTextColorList[i] = RGB(0, 130, 160);
+								}
 								else
+								{
 									// non-PCM data - blue
-									TextColorList[i] = RGB(0, 0, 210);
+									CurTextColorList[i] = RGB(0, 0, 210);
+									DimTextColorList[i] = RGB(0, 0, 210);
+								}
 							}
 						}
 						else
@@ -722,17 +766,20 @@ void UpdateColorTable()
 								if ((cdloggervdata[temp_offset] & 3) == 3)
 								{
 									// the byte was both rendered and read programmatically - light-green
-									TextColorList[i] = RGB(5, 255, 5);
+									CurTextColorList[i] = RGB(5, 255, 5);
+									DimTextColorList[i] = RGB(5, 255, 5);
 								}
 								else if ((cdloggervdata[temp_offset] & 3) == 1)
 								{
 									// the byte was rendered - yellow
-									TextColorList[i] = RGB(210, 190, 0);
+									CurTextColorList[i] = RGB(210, 190, 0);
+									DimTextColorList[i] = RGB(210, 190, 0);
 								}
 								else if ((cdloggervdata[temp_offset] & 3) == 2)
 								{
 									// the byte was read programmatically - light-blue
-									TextColorList[i] = RGB(15, 15, 255);
+									CurTextColorList[i] = RGB(15, 15, 255);
+									DimTextColorList[i] = RGB(15, 15, 255);
 								}
 							}
 						}
@@ -746,7 +793,10 @@ void UpdateColorTable()
 				//if((tmp->addr < CurOffset+DataAmount) && (tmp->addr+tmp->size > CurOffset))
 				for (i = tmp->addr; i < tmp->addr + tmp->size; i++) {
 					if ((i > CurOffset) && (i < CurOffset + DataAmount))
-						TextColorList[i - CurOffset] = RGB(RomFreezeColorR, RomFreezeColorG, RomFreezeColorB);
+					{
+						CurTextColorList[i - CurOffset] = RGB(RomFreezeColorR, RomFreezeColorG, RomFreezeColorB);
+						DimTextColorList[i - CurOffset] = RGB(RomFreezeColorR, RomFreezeColorG, RomFreezeColorB);
+					}
 				}
 				tmp = tmp->last;
 			}
@@ -1140,6 +1190,10 @@ void KillMemView()
 		UnregisterClass("MEMVIEW", fceu_hInstance);
 		hMemView = NULL;
 		hMemFind = NULL;
+		free(CurTextColorList);
+		free(DimTextColorList);
+		free(CurBGColorList);
+		free(DimBGColorList);
 		if (EditingMode == MODE_NES_MEMORY)
 			ReleaseCheatMap();
 	}
@@ -1205,8 +1259,14 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		//Allocate Memory for color lists
 		DataAmount = 0x100;
 		//mbg merge 7/18/06 added casts:
-		TextColorList = (COLORREF*)malloc(DataAmount*sizeof(COLORREF));
-		BGColorList = (COLORREF*)malloc(DataAmount*sizeof(COLORREF));
+		CurTextColorList = (COLORREF*)malloc(DataAmount*sizeof(COLORREF));
+		CurBGColorList = (COLORREF*)malloc(DataAmount*sizeof(COLORREF));
+		DimTextColorList = (COLORREF*)malloc(DataAmount*sizeof(COLORREF));
+		DimBGColorList = (COLORREF*)malloc(DataAmount*sizeof(COLORREF));
+		HexTextColorList = CurTextColorList;
+		HexBGColorList = CurBGColorList;
+		AnsiTextColorList = DimTextColorList;
+		AnsiBGColorList = DimBGColorList;
 		PreviousValues = (int*)malloc(DataAmount*sizeof(int));
 		HighlightedBytes = (unsigned int*)malloc(DataAmount*sizeof(unsigned int));
 		resetHighlightingActivityLog();
@@ -1347,10 +1407,11 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		}
 
 		//if(CursorShiftPoint == -1){
-		if(wParam == VK_LEFT)CursorStartAddy--;
-		if(wParam == VK_RIGHT)CursorStartAddy++;
-		if(wParam == VK_UP)CursorStartAddy-=16;
-		if(wParam == VK_DOWN)CursorStartAddy+=16;
+		if (wParam == VK_LEFT) CursorStartAddy--;
+		if (wParam == VK_RIGHT) CursorStartAddy++;
+		if (wParam == VK_UP) CursorStartAddy-=16;
+		if (wParam == VK_DOWN) CursorStartAddy+=16;
+		if (wParam == VK_TAB) SwitchEditingText(!EditingText);
 		/*} else {
 		if(wParam == VK_LEFT)CursorShiftPoint--;
 		if(wParam == VK_RIGHT)CursorShiftPoint++;
@@ -1425,7 +1486,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		y = GET_Y_LPARAM(lParam);
 		if((i = GetAddyFromCoord(x,y)) < 0) { CursorDragPoint = -1; return 0; }
 		if(i > MaxSize) { CursorDragPoint = -1; return 0; }
-		EditingText = AddyWasText;
+		SwitchEditingText(AddyWasText);
 		lbuttondownx = x;
 		lbuttondowny = y;
 		CursorStartAddy = CursorDragPoint = i;
@@ -1442,7 +1503,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			i = GetAddyFromCoord(x,y);
 			if (i >= 0 && i < MaxSize)
 			{
-				EditingText = AddyWasText;
+				SwitchEditingText(AddyWasText);
 				CursorStartAddy = i;
 				UpdateCaption();
 				UpdateColorTable();
@@ -1459,7 +1520,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			AutoScrollFromCoord(x,y);
 			i = GetAddyFromCoord(x,y);
 			if (i >= MaxSize)i = MaxSize-1;
-			EditingText = AddyWasText;
+			SwitchEditingText(AddyWasText);
 			if(i >= 0){
 				CursorStartAddy = std::min(i,CursorDragPoint);
 				CursorEndAddy = std::max(i,CursorDragPoint);
@@ -1876,8 +1937,14 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			if (CurOffset >= MaxSize - DataAmount) CurOffset = MaxSize - DataAmount;
 			if (CurOffset < 0) CurOffset = 0;
 			//mbg merge 7/18/06 added casts:
-			TextColorList = (COLORREF*)realloc(TextColorList,DataAmount*sizeof(COLORREF));
-			BGColorList = (COLORREF*)realloc(BGColorList,DataAmount*sizeof(COLORREF));
+			CurTextColorList = (COLORREF*)realloc(CurTextColorList, DataAmount*sizeof(COLORREF));
+			CurBGColorList = (COLORREF*)realloc(CurBGColorList, DataAmount*sizeof(COLORREF));
+			DimTextColorList = (COLORREF*)realloc(DimTextColorList, DataAmount*sizeof(COLORREF));
+			DimBGColorList = (COLORREF*)realloc(DimBGColorList, DataAmount*sizeof(COLORREF));
+			HexTextColorList = EditingText ? DimTextColorList : CurTextColorList;
+			HexBGColorList = EditingText ? DimBGColorList : CurBGColorList;
+			AnsiTextColorList = EditingText ? CurTextColorList : DimTextColorList;
+			AnsiBGColorList = EditingText ? CurBGColorList : DimBGColorList;
 			PreviousValues = (int*)realloc(PreviousValues,(DataAmount)*sizeof(int));
 			HighlightedBytes = (unsigned int*)realloc(HighlightedBytes,(DataAmount)*sizeof(unsigned int));
 			resetHighlightingActivityLog();
@@ -2917,4 +2984,25 @@ INT_PTR CALLBACK importBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 			}
 	}
 	return FALSE;
+}
+
+
+void SwitchEditingText(int editingText) {
+	if (EditingText != editingText)
+	{
+		if (editingText) {
+			HexTextColorList = DimTextColorList;
+			HexBGColorList = DimBGColorList;
+			AnsiTextColorList = CurTextColorList;
+			AnsiBGColorList = CurBGColorList;
+		}
+		else
+		{
+			HexTextColorList = CurTextColorList;
+			HexBGColorList = CurBGColorList;
+			AnsiTextColorList = DimTextColorList;
+			AnsiBGColorList = DimBGColorList;
+		}
+		EditingText = editingText;
+	}
 }
