@@ -1511,7 +1511,9 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	{
 		if (!lbuttondown && CursorEndAddy == -1)
 		{
-			int addr = GetAddyFromCoord(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			int x = GET_X_LPARAM(lParam);
+			int y = GET_Y_LPARAM(lParam);
+			int addr = GetAddyFromCoord(x,y);
 			if (addr >= 0 && addr < MaxSize)
 			{
 				SwitchEditingText(AddyWasText);
