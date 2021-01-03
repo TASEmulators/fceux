@@ -205,7 +205,6 @@ int *PreviousValues;	// for HighlightActivity feature and for speedhack too
 unsigned int *HighlightedBytes;
 
 int lbuttondown;
-int mousex, mousey;
 
 int FindAsText;
 int FindDirectionUp;
@@ -1367,13 +1366,29 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					tmpEndAddy = CursorStartAddy;
 				}
 				if (wParam == VK_RIGHT)
+				{
+					if (tmpEndAddy == MaxSize - 1)
+						return 0;
 					++tmpEndAddy;
+				}
 				else if (wParam == VK_LEFT)
+				{
+					if (tmpEndAddy == 0)
+						return 0;
 					--tmpEndAddy;
+				}
 				else if (wParam == VK_DOWN)
+				{	
+					if (tmpEndAddy == MaxSize - 1)
+						return 0;
 					tmpEndAddy += 16;
+				}
 				else if (wParam == VK_UP)
+				{
+					if (tmpEndAddy == 0)
+						return 0;
 					tmpEndAddy -= 16;
+				}
 
 				if (tmpEndAddy < 0)
 					tmpEndAddy = 0;
@@ -1413,13 +1428,29 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				// Move the cursor
 
 				if (wParam == VK_RIGHT)
+				{
+					if (CursorStartAddy == MaxSize - 1)
+						return 0;
 					CursorStartAddy++;
+				}
 				else if (wParam == VK_DOWN)
+				{
+					if (CursorStartAddy == MaxSize - 1)
+						return 0;
 					CursorStartAddy += 16;
+				}
 				else if (wParam == VK_UP)
+				{
+					if (CursorStartAddy == 0)
+						return 0;
 					CursorStartAddy -= 16;
+				}
 				else if (wParam == VK_LEFT)
+				{
+					if (CursorStartAddy == 0)
+						return 0;
 					CursorStartAddy--;
+				}
 
 				CursorEndAddy = -1;
 				if (CursorStartAddy < CurOffset)
@@ -1433,28 +1464,30 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		{
 			if (wParam == VK_PRIOR)
 			{
+				if (CurOffset == 0)
+					return 0;
 				CurOffset -= DataAmount;
 				CursorStartAddy -= DataAmount;
 			}
 			else if (wParam == VK_NEXT)
 			{
+				if (CurOffset >= (MaxSize - DataAmount) / 16 * 16)
+					return 0;
 				CurOffset += DataAmount;
 				CursorStartAddy += DataAmount;
 			}
 			else if (wParam == VK_HOME)
 			{
+				if (CurOffset == 0)
+					return 0;
 				CurOffset = 0;
 				CursorStartAddy = 0;
 			}
 			else if (wParam == VK_END) {
-				CurOffset = MaxSize - DataAmount;
+				if (CurOffset == (MaxSize - DataAmount) / 16 * 16) 
+				CurOffset = (MaxSize - DataAmount) / 16 * 16;
 				CursorStartAddy = MaxSize - 1;
 			}
-
-			if (CurOffset >= MaxSize - DataAmount)
-				CurOffset = MaxSize - DataAmount;
-			if (CurOffset < 0)
-				CurOffset = 0;
 
 			CursorEndAddy = -1;
 			TempData = PREVIOUS_VALUE_UNDEFINED;
@@ -1477,6 +1510,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			CursorEndAddy = MaxSize - 1;
 		if (CursorEndAddy == CursorStartAddy)
 			CursorEndAddy = -1;
+		if (CurOffset + DataAmount >= MaxSize)
+			CurOffset = (MaxSize - DataAmount) / 16 * 16;
+		if (CurOffset < 0)
+			CurOffset = 0;
 
 		//This updates the scroll bar to curoffset
 		SCROLLINFO si;
@@ -1492,7 +1529,8 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	case WM_LBUTTONDOWN:
 		SetCapture(hwnd);
 		lbuttondown = 1;
-		if((tmpStartAddy = GetAddyFromCoord(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam))) < 0)
+		tmpStartAddy = GetAddyFromCoord(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		if(tmpStartAddy < 0)
 		{
 			CursorDragPoint = -1;
 			return 0;
@@ -1503,7 +1541,9 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			return 0;
 		}
 		SwitchEditingText(AddyWasText);
-		CursorStartAddy = CursorDragPoint = tmpStartAddy;
+		CursorStartAddy = tmpStartAddy;
+		CursorDragPoint = tmpStartAddy;
+		CursorEndAddy = -1;
 		UpdateCaption();
 		UpdateColorTable();
 		return 0;
@@ -1511,9 +1551,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	{
 		if (!lbuttondown && CursorEndAddy == -1)
 		{
-			int x = GET_X_LPARAM(lParam);
-			int y = GET_Y_LPARAM(lParam);
-			int addr = GetAddyFromCoord(x,y);
+			int addr = GetAddyFromCoord(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 			if (addr >= 0 && addr < MaxSize)
 			{
 				SwitchEditingText(AddyWasText);
@@ -1526,13 +1564,14 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		break;
 	}
 	case WM_MOUSEMOVE:
+	{
 		if (CursorDragPoint < 0)
 			return 0;
-		mousex = GET_X_LPARAM(lParam); 
-		mousey = GET_Y_LPARAM(lParam); 
+		int x = GET_X_LPARAM(lParam); 
+		int y = GET_Y_LPARAM(lParam); 
 		if(lbuttondown){
-			AutoScrollFromCoord(mousex,mousey);
-			tmpEndAddy = GetAddyFromCoord(mousex,mousey);
+			AutoScrollFromCoord(x,y);
+			tmpEndAddy = GetAddyFromCoord(x,y);
 			if (tmpEndAddy >= MaxSize)
 				tmpEndAddy = MaxSize - 1;
 			SwitchEditingText(AddyWasText);
@@ -1547,6 +1586,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			UpdateColorTable();
 		}
 		return 0;
+	}
 	case WM_LBUTTONUP:
 		lbuttondown = 0;
 		if (CursorEndAddy == CursorStartAddy)
