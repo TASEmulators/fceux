@@ -279,9 +279,9 @@ void UndoLastPatch(){
 }
 
 void GotoAddress(HWND hwnd) {
-	char gotoaddressstring[18];
+	static char gotoaddressstring[18];
 	int gotoaddress;
-	char gototitle[8];
+	static char gototitle[8];
 	
 	gotoaddressstring[0] = '\0';
 	sprintf(gototitle, "%s%X%s", "Goto (0-", MaxSize-1, ")");
