@@ -279,10 +279,10 @@ void UndoLastPatch(){
 }
 
 void GotoAddress(HWND hwnd) {
-	static char gotoaddressstring[18];
+	char* gotoaddressstring = (char*)malloc(18);
 	int gotoaddress;
-	static char gototitle[8];
-	
+	char* gototitle = (char*)malloc(8);
+
 	gotoaddressstring[0] = '\0';
 	sprintf(gototitle, "%s%X%s", "Goto (0-", MaxSize-1, ")");
 	if(CWin32InputBox::InputBox(gototitle, "Goto which address:", gotoaddressstring, 8, false, hwnd) == IDOK)
