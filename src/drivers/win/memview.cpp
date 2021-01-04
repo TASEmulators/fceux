@@ -1075,7 +1075,7 @@ int GetHexScreenCoordx(int offset)
 
 int GetHexScreenCoordy(int offset)
 {
-	return (offset / 16) * (debugSystem->HexeditorFontHeight + HexRowHeightBorder);
+	return (offset - CurOffset) / 16 * (debugSystem->HexeditorFontHeight + HexRowHeightBorder);
 }
 
 //0000E0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  : ................
