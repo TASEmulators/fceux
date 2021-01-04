@@ -477,7 +477,7 @@ void UpdateMemoryView(int draw_all)
 			else
 				SetTextColor(HDataDC, RGB(HexBoundColorR, HexBoundColorG, HexBoundColorB));	//addresses out of bounds
 			sprintf(str, "%06X:                                                         :", i);
-			TextOut(HDataDC, 0, MemLineRow, str, strlen(str));
+			ExtTextOut(HDataDC, 0, MemLineRow, NULL, NULL, str, strlen(str), NULL);
 		}
 		for (j = 0; j < 16; j++)
 		{
@@ -498,13 +498,13 @@ void UpdateMemoryView(int draw_all)
 					SetTextColor(HDataDC, RGB(255, 0, 0));
 					str[0] = hex[(byteValue >> 4) & 0xF];
 					str[1] = 0;
-					TextOut(HDataDC, MemLinePos, MemLineRow, str, 1);
+					ExtTextOut(HDataDC, MemLinePos, MemLineRow, NULL, NULL, str, 1, NULL);
 					// 2nd nibble
 					SetBkColor(HDataDC, CForeColor);
 					SetTextColor(HDataDC, CBackColor);
 					str[0] = hex[(byteValue >> 0) & 0xF];
 					str[1] = 0;
-					TextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, str, 1);
+					ExtTextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, NULL, NULL, str, 1, NULL);
 				}
 				else
 				{
@@ -514,13 +514,13 @@ void UpdateMemoryView(int draw_all)
 					SetTextColor(HDataDC, EditingText ? RGB(255, 0, 0) : RGB(255, 255, 255));
 					str[0] = hex[(byteValue >> 4) & 0xF];
 					str[1] = 0;
-					TextOut(HDataDC, MemLinePos, MemLineRow, str, 1);
+					ExtTextOut(HDataDC, MemLinePos, MemLineRow, NULL, NULL, str, 1, NULL);
 					// 2nd nibble
 					SetBkColor(HDataDC, HexBGColorList[pos]);
 					SetTextColor(HDataDC, HexTextColorList[pos]);
 					str[0] = hex[(byteValue >> 0) & 0xF];
 					str[1] = 0;
-					TextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, str, 1);
+					ExtTextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, NULL, NULL, str, 1, NULL);
 				}
 
 				// single address highlight - right column
@@ -530,7 +530,7 @@ void UpdateMemoryView(int draw_all)
 				if ((u8)str[0] < 0x20) str[0] = 0x2E;
 //				if ((u8)str[0] > 0x7e) str[0] = 0x2E;
 				str[1] = 0;
-				TextOut(HDataDC, (59 + j) * MemFontWidth, MemLineRow, str, 1);
+				ExtTextOut(HDataDC, (59 + j) * MemFontWidth, MemLineRow, NULL, NULL, str, 1, NULL);
 
 				PreviousValues[pos] = PREVIOUS_VALUE_UNDEFINED; //set it to redraw this one next time
 			}
@@ -566,7 +566,7 @@ void UpdateMemoryView(int draw_all)
 				str[0] = hex[(byteValue >> 4) & 0xF];
 				str[1] = hex[(byteValue >> 0) & 0xF];
 				str[2] = 0;
-				TextOut(HDataDC, MemLinePos, MemLineRow, str, 2);
+				ExtTextOut(HDataDC, MemLinePos, MemLineRow, NULL, NULL, str, 2, NULL);
 
 				SetBkColor(HDataDC, AnsiBGColorList[pos]);
 				SetTextColor(HDataDC, ansiTmpColor);
@@ -574,7 +574,7 @@ void UpdateMemoryView(int draw_all)
 				if ((u8)str[0] < 0x20) str[0] = 0x2E;
 //				if ((u8)str[0] > 0x7e) str[0] = 0x2E;
 				str[1] = 0;
-				TextOut(HDataDC, (59 + j) * MemFontWidth, MemLineRow, str, 1);
+				ExtTextOut(HDataDC, (59 + j) * MemFontWidth, MemLineRow, NULL, NULL, str, 1, NULL);
 
 				PreviousValues[pos] = byteValue;
 			}
