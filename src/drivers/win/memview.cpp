@@ -1341,7 +1341,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				}
 				else if (wParam == VK_UP)
 				{
-					if (tmpEndAddy >= 0)
+					if (tmpEndAddy <= 0)
 						return 0;
 					tmpEndAddy -= 16;
 				}
