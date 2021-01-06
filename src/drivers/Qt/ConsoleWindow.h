@@ -168,6 +168,8 @@ class  consoleWin_t : public QMainWindow
 		void openDebugWindow(void);
 		void openHexEditor(void);
       void openGamePadConfWin(void);
+      void toggleFullscreen(void);
+		void toggleMenuVis(void);
 	private slots:
 		void closeApp(void);
 		void openROMFile(void);
@@ -192,7 +194,6 @@ class  consoleWin_t : public QMainWindow
 		void openCodeDataLogger(void);
 		void openTraceLogger(void);
       void toggleAutoResume(void);
-      void toggleFullscreen(void);
       void updatePeriodic(void);
       void changeState0(void);
       void changeState1(void);
