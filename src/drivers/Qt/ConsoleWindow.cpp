@@ -491,11 +491,19 @@ void consoleWin_t::createMainMenu(void)
 	 fullscreen = new QAction(tr("Fullscreen"), this);
     fullscreen->setShortcut( QKeySequence(tr("Alt+Return")));
     fullscreen->setStatusTip(tr("Fullscreen"));
-    //fullscreen->setIcon( style->standardIcon( QStyle::SP_TitleBarMaxButton ) );
     fullscreen->setIcon( QIcon(":icons/view-fullscreen.png") );
     connect(fullscreen, SIGNAL(triggered()), this, SLOT(toggleFullscreen(void)) );
 
     optMenu->addAction(fullscreen);
+
+	 // Options -> Hide Menu Screen
+	 act = new QAction(tr("Hide Menu"), this);
+    act->setShortcut( QKeySequence(tr("Alt+M")));
+    act->setStatusTip(tr("Hide Menu"));
+    act->setIcon( style->standardIcon( QStyle::SP_TitleBarMaxButton ) );
+    connect(act, SIGNAL(triggered()), this, SLOT(toggleMenuVis(void)) );
+
+    optMenu->addAction(act);
 
 	 //-----------------------------------------------------------------------
 	 // Emulation
@@ -840,6 +848,18 @@ void consoleWin_t::createMainMenu(void)
 
     helpMenu->addAction(msgLogAct);
 };
+//---------------------------------------------------------------------------
+void consoleWin_t::toggleMenuVis(void)
+{
+	if ( menuBar()->isVisible() )
+	{
+		menuBar()->setVisible( false );
+	}
+	else
+	{
+		menuBar()->setVisible( true );
+	}
+}
 //---------------------------------------------------------------------------
 void consoleWin_t::closeApp(void)
 {
