@@ -588,21 +588,33 @@ static void KeyboardCommands (void)
 	}
 
 	// Alt-Enter to toggle full-screen
-	// This is already handled by GTK Accelerator
-	//if (keyonly (ENTER) && is_alt)
-	//{
-	//	ToggleFS ();
-	//}
-	//
+	// This is already handled by Qt Menu Actions
+	// So only process if menu is hidden or disabled.
+	if ( is_alt )
+	{
+		if (keyonly (ENTER))
+		{
+			if ( consoleWindow )
+			{
+				if ( !consoleWindow->menuBar()->isVisible() )
+				{
+					consoleWindow->toggleFullscreen();
+				}
+			}
+		}
+	}
 	
 	// Alt-M to toggle Main Menu Visibility
-	//if ( is_alt )
-	//{
-	//	if (keyonly (M))
-	//	{
-	//		toggleMenuVis(); // TODO
-	//	}
-	//}
+	if ( is_alt )
+	{
+		if (keyonly (M))
+		{
+			if ( consoleWindow )
+			{
+				consoleWindow->toggleMenuVis(); 
+			}
+		}
+	}
 
 	// Toggle Movie auto-backup
 	if ( is_shift )

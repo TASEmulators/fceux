@@ -107,7 +107,7 @@ typedef struct
 
 CONFIG ServerConfig;
 
-int LoadConfigFile(char *fn)
+int LoadConfigFile(const char *fn)
 {
 	FILE *fp;
 	ServerConfig.Port = ServerConfig.MaxClients = ServerConfig.ConnectTimeout = ServerConfig.FrameDivisor = ~0;
@@ -174,10 +174,10 @@ static uint32 de32(uint8 *morp)
 
 static char *CleanNick(char *nick);
 static int NickUnique(ClientEntry *client);
-static void AddClientToGame(ClientEntry *client, uint8 id[16], uint8 extra[64]) throw(int);
-static void SendToAll(GameEntry *game, int cmd, uint8 *data, uint32 len) throw(int);
-static void BroadcastText(GameEntry *game, const char *fmt, ...) throw(int);
-static void TextToClient(ClientEntry *client, const char *fmt, ...) throw(int);
+static void AddClientToGame(ClientEntry *client, uint8 id[16], uint8 extra[64]) throw();
+static void SendToAll(GameEntry *game, int cmd, uint8 *data, uint32 len) throw();
+static void BroadcastText(GameEntry *game, const char *fmt, ...) throw();
+static void TextToClient(ClientEntry *client, const char *fmt, ...) throw();
 static void KillClient(ClientEntry *client);
 
 #define NBTCP_LOGINLEN      0x100
@@ -233,7 +233,7 @@ static uint8 *MakeMPS(ClientEntry *client)
 }
 
 /* Returns 1 if we are back to normal game mode, 0 if more data is yet to arrive. */
-static int CheckNBTCPReceive(ClientEntry *client) throw(int)
+static int CheckNBTCPReceive(ClientEntry *client) throw()
 {
 	if(!client->nbtcplen)
 		throw(1); /* Should not happen. */
@@ -469,7 +469,7 @@ static int NickUnique(ClientEntry *client)
 	return(1);
 }
 
-static int MakeSendTCP(ClientEntry *client, uint8 *data, uint32 len) throw(int)
+static int MakeSendTCP(ClientEntry *client, uint8 *data, uint32 len) throw()
 {
 	if(send(client->TCPSocket, data, len, MSG_NOSIGNAL) != len)
 		throw(1);
@@ -477,7 +477,7 @@ static int MakeSendTCP(ClientEntry *client, uint8 *data, uint32 len) throw(int)
 	return(1);
 }
 
-static void SendToAll(GameEntry *game, int cmd, uint8 *data, uint32 len) throw(int)
+static void SendToAll(GameEntry *game, int cmd, uint8 *data, uint32 len) throw()
 {
 	uint8 poo[5];
 	int x;
@@ -506,7 +506,7 @@ static void SendToAll(GameEntry *game, int cmd, uint8 *data, uint32 len) throw(i
 	}
 }
 
-static void TextToClient(ClientEntry *client, const char *fmt, ...) throw(int)
+static void TextToClient(ClientEntry *client, const char *fmt, ...) throw()
 {
 	char *moo;
 	va_list ap;
@@ -528,7 +528,7 @@ static void TextToClient(ClientEntry *client, const char *fmt, ...) throw(int)
 	free(moo);
 }
 
-static void BroadcastText(GameEntry *game, const char *fmt, ...) throw(int)
+static void BroadcastText(GameEntry *game, const char *fmt, ...) throw()
 {
 	char *moo;
 	va_list ap;
@@ -595,7 +595,7 @@ static void KillClient(ClientEntry *client)
 		BroadcastText(game,"%s",bmsg);
 }
 
-static void AddClientToGame(ClientEntry *client, uint8 id[16], uint8 extra[64]) throw(int)
+static void AddClientToGame(ClientEntry *client, uint8 id[16], uint8 extra[64]) throw()
 {
 	int wg;
 	GameEntry *game,*fegame;
