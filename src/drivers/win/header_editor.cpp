@@ -1085,11 +1085,11 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 								SetFocus(GetDlgItem(hwnd, IDC_PRGROM_COMBO));
 								SendDlgItemMessage(hwnd, IDC_PRGROM_COMBO, EM_SETSEL, 0, -1);
 							}
-							return false;
 						}
 						else
 							SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
 
+						return false;
 					}
 				}
 				else {
@@ -1307,29 +1307,29 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 
 					if (!fit)
 					{
-						int result10 = (chr_rom / 1024 / 8 + 1) * 8 * 1024;
-						if (result10 < result)
-							result = result10;
-						char buf2[64];
-						if (result % 1024 != 0)
-							sprintf(buf2, "%dB", result);
-						else
-							sprintf(buf2, "%dKB", result / 1024);
-						sprintf(buf, "CHR ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
-						if (MessageBox(hwnd, buf, "Error", MB_YESNO | MB_ICONERROR) == IDYES)
-							SetDlgItemText(hwnd, IDC_CHRROM_COMBO, buf2);
-						else
+						if (header)
 						{
-							if (header)
+							int result10 = (chr_rom / 1024 / 8 + 1) * 8 * 1024;
+							if (result10 < result)
+								result = result10;
+							char buf2[64];
+							if (result % 1024 != 0)
+								sprintf(buf2, "%dB", result);
+							else
+								sprintf(buf2, "%dKB", result / 1024);
+							sprintf(buf, "CHR ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
+							if (MessageBox(hwnd, buf, "Error", MB_YESNO | MB_ICONERROR) == IDYES)
+								SetDlgItemText(hwnd, IDC_CHRROM_COMBO, buf2);
+							else
 							{
 								SetFocus(GetDlgItem(hwnd, IDC_CHRROM_COMBO));
 								SendDlgItemMessage(hwnd, IDC_CHRROM_COMBO, EM_SETSEL, 0, -1);
 							}
-							else
-								SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
-
-							return false;
 						}
+						else
+							SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
+
+						return false;
 					}
 				}
 				else {
@@ -1657,12 +1657,9 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 			{
 				SetFocus(GetDlgItem(hwnd, IDC_MAPPER_COMBO));
 				SendDlgItemMessage(hwnd, IDC_MAPPER_COMBO, EM_SETSEL, 0, -1);
+				return false;
 			}
 		}
-		else
-			SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
-
-		return false;
 	}
 
 	memcpy(_header.ID, "NES\x1A", 4);
@@ -1719,30 +1716,30 @@ int GetComboBoxByteSize(HWND hwnd, UINT id, int* value, iNES_HEADER* header)
 		}
 	}
 
-	if (header)
+	if (err)
 	{
-		switch (err)
+		if (header)
 		{
-			case errors::FORMAT_ERR:
-				sprintf(buf, "%s size you entered is invalid, it should be positive decimal integer followed with unit, e.g. 1024B, 128KB, 4MB", name);
-				break;
-			case errors::UNIT_ERR:
-				sprintf(buf, "The unit of %s size you entered is invalid, it must be B, KB or MB", name);
-				break;
-			case errors::MINUS_ERR:
-				sprintf(buf, "Negative value of %s is not supported by iNES header.", name);
-				break;
-		}
+			switch (err)
+			{
+				case errors::FORMAT_ERR:
+					sprintf(buf, "%s size you entered is invalid, it should be positive decimal integer followed with unit, e.g. 1024B, 128KB, 4MB", name);
+					break;
+				case errors::UNIT_ERR:
+					sprintf(buf, "The unit of %s size you entered is invalid, it must be B, KB or MB", name);
+					break;
+				case errors::MINUS_ERR:
+					sprintf(buf, "Negative value of %s is not supported by iNES header.", name);
+					break;
+			}
 
-		if (err)
-		{
 			MessageBox(hwnd, buf, "Error", MB_OK | MB_ICONERROR);
 			SetFocus(GetDlgItem(hwnd, id));
 			SendDlgItemMessage(hwnd, id, EM_SETSEL, 0, -1);
 		}
+		else
+			SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
 	}
-	else
-		SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, "");
 
 	return err;
 }

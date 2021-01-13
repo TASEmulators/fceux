@@ -123,6 +123,12 @@ extern int HexBackColorB;
 extern int HexForeColorR;
 extern int HexForeColorG;
 extern int HexForeColorB;
+extern int HexHlBackColorR;
+extern int HexHlBackColorG;
+extern int HexHlBackColorB;
+extern int HexHlForeColorR;
+extern int HexHlForeColorG;
+extern int HexHlForeColorB;
 extern int HexFreezeColorR;
 extern int HexFreezeColorG;
 extern int HexFreezeColorB;
@@ -132,6 +138,12 @@ extern int RomFreezeColorB;
 extern int HexBoundColorR;
 extern int HexBoundColorG;
 extern int HexBoundColorB;
+extern int HexHlShdBackColorR;
+extern int HexHlShdBackColorG;
+extern int HexHlShdBackColorB;
+extern int HexHlShdForeColorR;
+extern int HexHlShdForeColorG;
+extern int HexHlShdForeColorB;
 extern int importBookmarkProps;
 
 //adelikat:  Hacky fix for Ram Watch recent menu
@@ -451,6 +463,18 @@ static CFGSTRUCT fceuconfig[] =
 	AC(HexForeColorR),
 	AC(HexForeColorG),
 	AC(HexForeColorB),
+	AC(HexHlBackColorR),
+	AC(HexHlBackColorG),
+	AC(HexHlBackColorB),
+	AC(HexHlForeColorR),
+	AC(HexHlForeColorG),
+	AC(HexHlForeColorB),
+	AC(HexHlShdBackColorR),
+	AC(HexHlShdBackColorG),
+	AC(HexHlShdBackColorB),
+	AC(HexHlShdForeColorR),
+	AC(HexHlShdForeColorG),
+	AC(HexHlShdForeColorB),
 	AC(HexFreezeColorR),
 	AC(HexFreezeColorG),
 	AC(HexFreezeColorB),
