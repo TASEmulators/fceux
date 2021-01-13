@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 SRC_PNG=../fceux1.png
 ICON_PATH=/usr/share/icons/hicolor
