@@ -53,20 +53,51 @@
     To run FCEUX in Mac OSX, you must have the following library dependencies installed on your system:
        <p>
 		 Qt5, SDL2, minizip, and zlib
+		 </p>
 		 <p>
-		 If you are attempting to use the appveyor pipeline autobuild of fceux, you must install these
-		 dependencies via the home brew package management tool. The following commands will install
-		 the necessary dependencies to run the autobuild:
+		 There are a few installation options:
+		 <ul>
+			 <li><p><b>--- Installing DMG package from the appveyor autobuild ---</b><br><br>
+		 The DMG package created by the appveyor autobuild should have all the necessary dependencies bundled into it. 
+		 So you only need to download it, perform the drag and drop install, and then it is ready for use. Since the application is not signed,
+		 you may need to tell the OS that you trust this application (one time operation) to give it permission to run.
+				 </p></li>
+				 <li><p><b>--- Installing via homebrew package manager ---</b><br><br>
+					 Homebrew can now be used to install the latest release or the current development revision (git head).<br><br>
+		 To install the latest release:
+		 <pre>
+		 brew install fceux
+		 </pre>
+		 To install the current development revision:
+		 <pre>
+		 brew install --HEAD fceux
+		 </pre></p></li>
+		 <li><p><b>--- Building from source ---</b><br><br>
+		 To build from source, you must install the necessary dependencies to your system. The easiest way to do 
+		 this is via the home brew package management tool. The following commands will install
+		 the necessary dependencies to allow for building from source:
+		 </p>
 		 <pre>
 		 brew install qt5
 		 brew install sdl2
 		 brew install minizip
 		 </pre>
-		 If you are attempting to compile fceux, you can either install the dependencies via home brew
-		 or you can install the dmg packages available from the Qt and SDL websites. The cmake and make 
-		 build tools are required to compile fceux. See the README file in the root directory of the 
-		 project for build instructions. You can also look at what is being done in the ./pipelines/macOS_build.sh
+		 Otherwise you can install the dmg packages available from the Qt and SDL websites. 
+		 <br><br>The following tools are required to build from source:
+		 <ul>
+			 <li>cmake</li>
+			 <li>make</li>
+			 <li>pkg-config</li>
+			 <li>bash</li>
+			 <li>C++ Compiler (clang or gcc)</li>
+		 </ul>
+		 <br>See the README file in the root directory of the project for build instructions.
+		 <br><br>You can also look at what is being done in the ./pipelines/macOS_build.sh
 		 script if you wish to build fceux in the same way the autobuild does.
+		 <br><br>If you wish to produce a debug build, then use the script:
+		 <pre>./scripts/unix_debug_build.sh</pre>
+		 </li>
+		 </ul>
 	</div>
 </div>
 

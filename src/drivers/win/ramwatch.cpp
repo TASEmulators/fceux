@@ -997,20 +997,6 @@ INT_PTR CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 						do {
 							sscanf(next, "%04X", &msg->Addresses[i]);
-							// When an invalid address is in it
-							if (!IsHardwareAddressValid(msg->Addresses[i]))
-							{
-								MessageBox(hDlg, "You have entered an invalid address.", "Error", MB_ICONERROR | MB_OK);
-								// Comment out, leave it unfreed until next ID_OK event or close the dialog
-								// free(msg->Addresses);
-								// msg->Addresses = NULL;
-
-								char* start = next + strspn(next, ", ");
-								char* end = start + strcspn(start, ", ");
-								SendDlgItemMessage(hDlg, addrCtrlID, EM_SETSEL, start - str_addrs, end - str_addrs);
-								SetFocus(GetDlgItem(hDlg, addrCtrlID));
-								return true;
-							}
 							++i;
 							if (i == addrSize)
 								msg->Addresses = (unsigned int*)realloc(msg->Addresses, sizeof(unsigned int) * (addrSize += 4));

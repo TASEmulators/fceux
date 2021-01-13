@@ -205,7 +205,6 @@ int *PreviousValues;	// for HighlightActivity feature and for speedhack too
 unsigned int *HighlightedBytes;
 
 int lbuttondown;
-int mousex, mousey;
 
 int FindAsText;
 int FindDirectionUp;
@@ -280,10 +279,10 @@ void UndoLastPatch(){
 }
 
 void GotoAddress(HWND hwnd) {
-	char gotoaddressstring[18];
+	char* gotoaddressstring = (char*)malloc(18);
 	int gotoaddress;
-	char gototitle[8];
-	
+	char* gototitle = (char*)malloc(8);
+
 	gotoaddressstring[0] = '\0';
 	sprintf(gototitle, "%s%X%s", "Goto (0-", MaxSize-1, ")");
 	if(CWin32InputBox::InputBox(gototitle, "Goto which address:", gotoaddressstring, 8, false, hwnd) == IDOK)
@@ -478,7 +477,7 @@ void UpdateMemoryView(int draw_all)
 			else
 				SetTextColor(HDataDC, RGB(HexBoundColorR, HexBoundColorG, HexBoundColorB));	//addresses out of bounds
 			sprintf(str, "%06X:                                                         :", i);
-			TextOut(HDataDC, 0, MemLineRow, str, strlen(str));
+			ExtTextOut(HDataDC, 0, MemLineRow, NULL, NULL, str, strlen(str), NULL);
 		}
 		for (j = 0; j < 16; j++)
 		{
@@ -499,13 +498,13 @@ void UpdateMemoryView(int draw_all)
 					SetTextColor(HDataDC, RGB(255, 0, 0));
 					str[0] = hex[(byteValue >> 4) & 0xF];
 					str[1] = 0;
-					TextOut(HDataDC, MemLinePos, MemLineRow, str, 1);
+					ExtTextOut(HDataDC, MemLinePos, MemLineRow, NULL, NULL, str, 1, NULL);
 					// 2nd nibble
 					SetBkColor(HDataDC, CForeColor);
 					SetTextColor(HDataDC, CBackColor);
 					str[0] = hex[(byteValue >> 0) & 0xF];
 					str[1] = 0;
-					TextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, str, 1);
+					ExtTextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, NULL, NULL, str, 1, NULL);
 				}
 				else
 				{
@@ -515,13 +514,13 @@ void UpdateMemoryView(int draw_all)
 					SetTextColor(HDataDC, EditingText ? RGB(255, 0, 0) : RGB(255, 255, 255));
 					str[0] = hex[(byteValue >> 4) & 0xF];
 					str[1] = 0;
-					TextOut(HDataDC, MemLinePos, MemLineRow, str, 1);
+					ExtTextOut(HDataDC, MemLinePos, MemLineRow, NULL, NULL, str, 1, NULL);
 					// 2nd nibble
 					SetBkColor(HDataDC, HexBGColorList[pos]);
 					SetTextColor(HDataDC, HexTextColorList[pos]);
 					str[0] = hex[(byteValue >> 0) & 0xF];
 					str[1] = 0;
-					TextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, str, 1);
+					ExtTextOut(HDataDC, MemLinePos + MemFontWidth, MemLineRow, NULL, NULL, str, 1, NULL);
 				}
 
 				// single address highlight - right column
@@ -531,7 +530,7 @@ void UpdateMemoryView(int draw_all)
 				if ((u8)str[0] < 0x20) str[0] = 0x2E;
 //				if ((u8)str[0] > 0x7e) str[0] = 0x2E;
 				str[1] = 0;
-				TextOut(HDataDC, (59 + j) * MemFontWidth, MemLineRow, str, 1);
+				ExtTextOut(HDataDC, (59 + j) * MemFontWidth, MemLineRow, NULL, NULL, str, 1, NULL);
 
 				PreviousValues[pos] = PREVIOUS_VALUE_UNDEFINED; //set it to redraw this one next time
 			}
@@ -567,7 +566,7 @@ void UpdateMemoryView(int draw_all)
 				str[0] = hex[(byteValue >> 4) & 0xF];
 				str[1] = hex[(byteValue >> 0) & 0xF];
 				str[2] = 0;
-				TextOut(HDataDC, MemLinePos, MemLineRow, str, 2);
+				ExtTextOut(HDataDC, MemLinePos, MemLineRow, NULL, NULL, str, 2, NULL);
 
 				SetBkColor(HDataDC, AnsiBGColorList[pos]);
 				SetTextColor(HDataDC, ansiTmpColor);
@@ -575,7 +574,7 @@ void UpdateMemoryView(int draw_all)
 				if ((u8)str[0] < 0x20) str[0] = 0x2E;
 //				if ((u8)str[0] > 0x7e) str[0] = 0x2E;
 				str[1] = 0;
-				TextOut(HDataDC, (59 + j) * MemFontWidth, MemLineRow, str, 1);
+				ExtTextOut(HDataDC, (59 + j) * MemFontWidth, MemLineRow, NULL, NULL, str, 1, NULL);
 
 				PreviousValues[pos] = byteValue;
 			}
@@ -1076,7 +1075,7 @@ int GetHexScreenCoordx(int offset)
 
 int GetHexScreenCoordy(int offset)
 {
-	return (offset / 16) * (debugSystem->HexeditorFontHeight + HexRowHeightBorder);
+	return (offset - CurOffset) / 16 * (debugSystem->HexeditorFontHeight + HexRowHeightBorder);
 }
 
 //0000E0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  : ................
@@ -1311,52 +1310,8 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	case WM_KEYDOWN:
 	{
-		if (GetKeyState(VK_CONTROL) & 0x8000) {
 
-			if (wParam >= '0' && wParam <= '9')
-			{
-				char buf[3];
-				sprintf(buf, "%c", wParam);
-				int key_num;
-				sscanf(buf, "%d", &key_num);
-				key_num = (key_num + 9) % 10;
-				if (hexBookmarks.shortcuts[key_num] != -1)
-				{
-					int address = hexBookmarks[hexBookmarks.shortcuts[key_num]].address;
-					if (address != -1)
-					{
-						ChangeMemViewFocus(hexBookmarks[hexBookmarks.shortcuts[key_num]].editmode, address, -1);
-						// it stops here to prevent update the scroll info, color table and caption twice,
-						// because ChangeMemViewFocus already contained those codes.
-						return 0;
-					}
-				}
-			}
-
-			switch (wParam) {
-				case 0x43: //Ctrl+C
-					MemViewCallB(hMemView, WM_COMMAND, MENU_MV_EDIT_COPY, 0); //recursion at work
-					return 0;
-				case 0x56: //Ctrl+V
-					MemViewCallB(hMemView, WM_COMMAND, MENU_MV_EDIT_PASTE, 0);
-					return 0;
-				case 0x5a: //Ctrl+Z
-					UndoLastPatch();
-					break;
-				case 0x41: //Ctrl+A
-					// Fall through to Ctrl+G
-				case 0x47: //Ctrl+G
-					GotoAddress(hwnd);
-					break;
-				case 0x46: //Ctrl+F
-					OpenFindDialog();
-					break;
-				default:
-					return 0;
-			}
-		}
-
-		if (wParam == VK_DOWN || wParam == VK_UP || wParam == VK_RIGHT || wParam == VK_LEFT)
+		if (wParam == VK_DOWN || wParam == VK_UP || wParam == VK_RIGHT || wParam == VK_LEFT || wParam == VK_PRIOR || wParam == VK_NEXT || wParam == VK_HOME || wParam == VK_END)
 		{
 			if (GetKeyState(VK_SHIFT) & 0x8000)
 			{
@@ -1367,13 +1322,61 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					tmpEndAddy = CursorStartAddy;
 				}
 				if (wParam == VK_RIGHT)
+				{
+					if (tmpEndAddy >= MaxSize - 1)
+						return 0;
 					++tmpEndAddy;
+				}
 				else if (wParam == VK_LEFT)
+				{
+					if (tmpEndAddy <= 0)
+						return 0;
 					--tmpEndAddy;
+				}
 				else if (wParam == VK_DOWN)
+				{	
+					if (tmpEndAddy >= MaxSize - 1)
+						return 0;
 					tmpEndAddy += 16;
+				}
 				else if (wParam == VK_UP)
+				{
+					if (tmpEndAddy <= 0)
+						return 0;
 					tmpEndAddy -= 16;
+				}
+				else if (wParam == VK_PRIOR)
+				{
+					if (tmpEndAddy <= 0)
+						return 0;
+					tmpEndAddy -= DataAmount;
+					CurOffset -= DataAmount;
+				}
+				else if (wParam == VK_NEXT)
+				{
+					if (tmpEndAddy >= MaxSize - 1)
+						return 0;
+					tmpEndAddy += DataAmount;
+					CurOffset += DataAmount;
+				}
+				else if (wParam == VK_HOME)
+				{
+					if (tmpEndAddy <= 0)
+						return 0;
+					if (GetKeyState(VK_CONTROL) & 0x8000)
+						tmpEndAddy = 0;
+					else
+						tmpEndAddy = tmpEndAddy / 16 * 16;
+				}
+				else if (wParam == VK_END)
+				{
+					if (tmpEndAddy >= MaxSize - 1)
+						return 0;
+					if (GetKeyState(VK_CONTROL) & 0x8000)
+						tmpEndAddy = MaxSize - 1;
+					else 
+						tmpEndAddy = tmpEndAddy / 16 * 16 + 15;
+				}
 
 				if (tmpEndAddy < 0)
 					tmpEndAddy = 0;
@@ -1408,18 +1411,108 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					CursorEndAddy = -1;
 				}
 			}
+			else if (GetKeyState(VK_CONTROL) & 0x8000)
+			{
+				if (wParam == VK_UP)
+				{
+					if (CurOffset <= 0)
+						return 0;
+					CurOffset -= 16;
+					if (CursorEndAddy == -1 && CursorStartAddy >= CurOffset + DataAmount)
+						CursorStartAddy -= 16;
+				}
+				else if (wParam == VK_DOWN)
+				{
+					if (CurOffset >= (MaxSize - DataAmount) / 16 * 16)
+						return 0;
+					CurOffset += 16;
+					if (CursorEndAddy == -1 && CursorStartAddy < CurOffset)
+						CursorStartAddy += 16;
+				}
+				else if (wParam == VK_PRIOR)
+				{
+					if (CurOffset <= 0)
+						return 0;
+					CurOffset -= DataAmount;
+				}
+				else if (wParam == VK_NEXT)
+				{
+					if (CurOffset >= (MaxSize - DataAmount) / 16 * 16)
+						return 0;
+					CurOffset += DataAmount;
+				}
+				else if (wParam == VK_HOME)
+				{
+					if (CursorStartAddy == 0 && CursorEndAddy == -1 && CurOffset == 0)
+						return 0;
+					CursorStartAddy = 0;
+					CursorEndAddy = -1;
+					CurOffset = 0;
+				}
+				else if (wParam == VK_END)
+				{
+					if (CursorStartAddy == 0 && CursorEndAddy == -1 && CurOffset ==(MaxSize - DataAmount) / 16 * 16)
+						return 0;
+					CurOffset = (MaxSize - DataAmount) / 16 * 16;
+					CursorStartAddy = MaxSize - 1;
+					CursorEndAddy = -1;
+				}
+
+				TempData = PREVIOUS_VALUE_UNDEFINED;
+			}
 			else
 			{
 				// Move the cursor
 
 				if (wParam == VK_RIGHT)
+				{
+					if (CursorStartAddy >= MaxSize - 1)
+						return 0;
 					CursorStartAddy++;
+				}
 				else if (wParam == VK_DOWN)
+				{
+					if (CursorStartAddy >= MaxSize - 1)
+						return 0;
 					CursorStartAddy += 16;
+				}
 				else if (wParam == VK_UP)
+				{
+					if (CursorStartAddy <= 0)
+						return 0;
 					CursorStartAddy -= 16;
+				}
 				else if (wParam == VK_LEFT)
+				{
+					if (CursorStartAddy <= 0)
+						return 0;
 					CursorStartAddy--;
+				} else if (wParam == VK_PRIOR)
+				{
+					if (CurOffset <= 0)
+						return 0;
+					CurOffset -= DataAmount;
+					CursorStartAddy -= DataAmount;
+				}
+				else if (wParam == VK_NEXT)
+				{
+					if (CurOffset >= (MaxSize - DataAmount) / 16 * 16)
+						return 0;
+					CurOffset += DataAmount;
+					CursorStartAddy += DataAmount;
+				}
+				else if (wParam == VK_HOME)
+				{
+					if (CurOffset <= 0)
+						return 0;
+					CurOffset = 0;
+					CursorStartAddy = 0;
+				}
+				else if (wParam == VK_END) {
+					if (CurOffset >= (MaxSize - DataAmount) / 16 * 16)
+						CurOffset = (MaxSize - DataAmount) / 16 * 16;
+					CursorStartAddy = MaxSize - 1;
+				}
 
 				CursorEndAddy = -1;
 				if (CursorStartAddy < CurOffset)
@@ -1428,36 +1521,65 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					CurOffset = (CursorStartAddy - DataAmount + 0x10) / 16 * 16;
 			}
 			TempData = PREVIOUS_VALUE_UNDEFINED;
-		}
-		else if (wParam == VK_PRIOR || wParam == VK_NEXT || wParam == VK_HOME || wParam == VK_END)
-		{
-			if (wParam == VK_PRIOR)
-			{
-				CurOffset -= DataAmount;
-				CursorStartAddy -= DataAmount;
-			}
-			else if (wParam == VK_NEXT)
-			{
-				CurOffset += DataAmount;
-				CursorStartAddy += DataAmount;
-			}
-			else if (wParam == VK_HOME)
-			{
-				CurOffset = 0;
-				CursorStartAddy = 0;
-			}
-			else if (wParam == VK_END) {
-				CurOffset = MaxSize - DataAmount;
-				CursorStartAddy = MaxSize - 1;
-			}
 
-			if (CurOffset >= MaxSize - DataAmount)
-				CurOffset = MaxSize - DataAmount;
+
+			// Cursor Out of bound check
+			if (CursorStartAddy < 0)
+				CursorStartAddy = 0;
+			if (CursorStartAddy >= MaxSize)
+				CursorStartAddy = MaxSize - 1;
+			if (CursorEndAddy >= MaxSize)
+				CursorEndAddy = MaxSize - 1;
+			if (CursorEndAddy == CursorStartAddy)
+				CursorEndAddy = -1;
+			if (CurOffset + DataAmount >= MaxSize)
+				CurOffset = (MaxSize - DataAmount) / 16 * 16;
 			if (CurOffset < 0)
 				CurOffset = 0;
+		}
+		else if (GetKeyState(VK_CONTROL) & 0x8000) {
 
-			CursorEndAddy = -1;
-			TempData = PREVIOUS_VALUE_UNDEFINED;
+			if (wParam >= '0' && wParam <= '9')
+			{
+				char buf[3];
+				sprintf(buf, "%c", wParam);
+				int key_num;
+				sscanf(buf, "%d", &key_num);
+				key_num = (key_num + 9) % 10;
+				if (hexBookmarks.shortcuts[key_num] != -1)
+				{
+					int address = hexBookmarks[hexBookmarks.shortcuts[key_num]].address;
+					if (address != -1)
+					{
+						ChangeMemViewFocus(hexBookmarks[hexBookmarks.shortcuts[key_num]].editmode, address, -1);
+						// it stops here to prevent update the scroll info, color table and caption twice,
+						// because ChangeMemViewFocus already contained those codes.
+						return 0;
+					}
+				}
+			}
+
+			switch (wParam) {
+			case 0x43: //Ctrl+C
+				MemViewCallB(hMemView, WM_COMMAND, MENU_MV_EDIT_COPY, 0); //recursion at work
+				return 0;
+			case 0x56: //Ctrl+V
+				MemViewCallB(hMemView, WM_COMMAND, MENU_MV_EDIT_PASTE, 0);
+				return 0;
+			case 0x5a: //Ctrl+Z
+				UndoLastPatch();
+				break;
+			case 0x41: //Ctrl+A
+					   // Fall through to Ctrl+G
+			case 0x47: //Ctrl+G
+				GotoAddress(hwnd);
+				break;
+			case 0x46: //Ctrl+F
+				OpenFindDialog();
+				break;
+			default:
+				return 0;
+			}
 		}
 		else if (wParam == VK_TAB && (GetKeyState(VK_CONTROL) & 0x8000) == 0 && (GetKeyState(VK_MENU) & 0x8000) == 0)
 		{
@@ -1467,16 +1589,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		else
 			// Pressed a key without any function, stop
 			return 0;
-
-		// Out of bound check
-		if (CursorStartAddy < 0)
-			CursorStartAddy = 0;
-		if (CursorStartAddy >= MaxSize)
-			CursorStartAddy = MaxSize - 1;
-		if (CursorEndAddy >= MaxSize)
-			CursorEndAddy = MaxSize - 1;
-		if (CursorEndAddy == CursorStartAddy)
-			CursorEndAddy = -1;
 
 		//This updates the scroll bar to curoffset
 		SCROLLINFO si;
@@ -1492,7 +1604,8 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	case WM_LBUTTONDOWN:
 		SetCapture(hwnd);
 		lbuttondown = 1;
-		if((tmpStartAddy = GetAddyFromCoord(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam))) < 0)
+		tmpStartAddy = GetAddyFromCoord(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		if(tmpStartAddy < 0)
 		{
 			CursorDragPoint = -1;
 			return 0;
@@ -1503,7 +1616,9 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			return 0;
 		}
 		SwitchEditingText(AddyWasText);
-		CursorStartAddy = CursorDragPoint = tmpStartAddy;
+		CursorStartAddy = tmpStartAddy;
+		CursorDragPoint = tmpStartAddy;
+		CursorEndAddy = -1;
 		UpdateCaption();
 		UpdateColorTable();
 		return 0;
@@ -1524,13 +1639,14 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		break;
 	}
 	case WM_MOUSEMOVE:
+	{
 		if (CursorDragPoint < 0)
 			return 0;
-		mousex = GET_X_LPARAM(lParam); 
-		mousey = GET_Y_LPARAM(lParam); 
+		int x = GET_X_LPARAM(lParam); 
+		int y = GET_Y_LPARAM(lParam); 
 		if(lbuttondown){
-			AutoScrollFromCoord(mousex,mousey);
-			tmpEndAddy = GetAddyFromCoord(mousex,mousey);
+			AutoScrollFromCoord(x,y);
+			tmpEndAddy = GetAddyFromCoord(x,y);
 			if (tmpEndAddy >= MaxSize)
 				tmpEndAddy = MaxSize - 1;
 			SwitchEditingText(AddyWasText);
@@ -1545,6 +1661,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			UpdateColorTable();
 		}
 		return 0;
+	}
 	case WM_LBUTTONUP:
 		lbuttondown = 0;
 		if (CursorEndAddy == CursorStartAddy)

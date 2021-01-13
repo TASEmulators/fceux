@@ -989,7 +989,7 @@ unsigned int ReadValueAtHardwareAddress(HWAddressType address, unsigned int size
 	for(unsigned int i = 0; i < size; i++)
 	{
 		value <<= 8;
-		value |= (IsHardwareAddressValid(address) ? GetMem(address) : 0);
+		value |= GetMem(address);
 		address++;
 	}
 	return value;
