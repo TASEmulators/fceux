@@ -1,6 +1,6 @@
 // GameApp.cpp
 //
-#ifdef __linux__
+#if defined(__linux__) || defined(__unix__)
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -1922,7 +1922,7 @@ void consoleWin_t::openMsgLogWin(void)
 int consoleWin_t::setNicePriority( int value )
 {
 	int ret = 0;
-#if defined(__linux__)
+#if defined(__linux__) || defined(__unix__)
 
 	if ( value < -20 )
 	{
@@ -1989,7 +1989,7 @@ int consoleWin_t::getSchedParam( int &policy, int &priority )
 {
 	int ret = 0;
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__unix__)
 	struct sched_param  p;
 
 	policy = sched_getscheduler( getpid() );
@@ -2025,7 +2025,7 @@ int consoleWin_t::getSchedParam( int &policy, int &priority )
 int consoleWin_t::setSchedParam( int policy, int priority )
 {
 	int ret = 0;
-#if defined(__linux__)
+#if defined(__linux__) || defined(__unix__)
 	struct sched_param  p;
 	int minPrio, maxPrio;
 
@@ -2131,13 +2131,13 @@ void consoleWin_t::updatePeriodic(void)
 
 emulatorThread_t::emulatorThread_t(void)
 {
-	#if defined(__linux__) || defined(__APPLE__)
+	#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 	pself = 0;
 	#endif
 
 }
 
-#ifdef __linux__
+#if defined(__linux__) 
 #ifndef SYS_gettid
 #error "SYS_gettid unavailable on this system"
 #endif
@@ -2150,7 +2150,7 @@ void emulatorThread_t::init(void)
 {
 	int opt;
 
-	#if defined(__linux__) || defined(__APPLE__)
+	#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 	if ( pthread_self() == (pthread_t)QThread::currentThreadId() )
 	{
 		pself = pthread_self();
@@ -2160,7 +2160,7 @@ void emulatorThread_t::init(void)
 
 	#if defined(__linux__)
 	pid = gettid();
-	#elif defined(__APPLE__)
+	#elif defined(__APPLE__) || defined(__unix__)
 	pid = getpid();
 	#endif
 
@@ -2193,7 +2193,7 @@ void emulatorThread_t::setPriority( QThread::Priority priority_req )
 int emulatorThread_t::setNicePriority( int value )
 {
 	int ret = 0;
-#if defined(__linux__)
+#if defined(__linux__) || defined(__unix__)
 
 	if ( value < -20 )
 	{
@@ -2273,7 +2273,7 @@ int emulatorThread_t::getSchedParam( int &policy, int &priority )
 int emulatorThread_t::setSchedParam( int policy, int priority )
 {
 	int ret = 0;
-#if defined(__linux__)
+#if defined(__linux__) || defined(__unix__)
 	struct sched_param  p;
 	int minPrio, maxPrio;
 
