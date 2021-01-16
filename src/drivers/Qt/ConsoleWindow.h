@@ -36,7 +36,7 @@ class  emulatorThread_t : public QThread
 
 		void setPriority( QThread::Priority priority );
 
-		#if defined(__linux__) || defined(__APPLE__)
+		#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 		int setSchedParam( int policy, int priority );
 		int getSchedParam( int &policy, int &priority );
 		int setNicePriority( int value );
@@ -47,7 +47,7 @@ class  emulatorThread_t : public QThread
 	private:
 		void init(void);
 
-		#if defined(__linux__) || defined(__APPLE__)
+		#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 		pthread_t  pself;
 		int        pid;
 		#endif
@@ -77,7 +77,7 @@ class  consoleWin_t : public QMainWindow
 
 		int  showListSelectDialog( const char *title, std::vector <std::string> &l );
 
-		#if defined(__linux__) || defined(__APPLE__)
+		#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 		int setSchedParam( int policy, int priority );
 		int getSchedParam( int &policy, int &priority );
 		int setNicePriority( int value );

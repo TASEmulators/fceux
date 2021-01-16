@@ -213,7 +213,7 @@ int LoadGame(const char *path, bool silent)
 		CloseGame();
 	}
 
-#if defined(__linux) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 
 	// Resolve absolute path to file
 	if ( realpath( path, fullpath ) == NULL )
@@ -795,7 +795,7 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	g_config->setOption("SDL.LuaScript", "");
 	if (s != "")
 	{
-#if defined(__linux) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 
 		// Resolve absolute path to file
 		char fullpath[2048];

@@ -2168,7 +2168,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		{  // Edit Area is ASCII
 			key = (uchar)event->text()[0].toLatin1();
 
-			if ( ::isascii( key ) )
+			if ( isascii( key ) )
 			{
 				int offs = (cursorPosX-32);
 				int addr = 16*(lineOffset+cursorPosY) + offs;

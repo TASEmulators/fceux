@@ -1,4 +1,4 @@
-#ifdef __linux
+#if defined(__linux__) || defined(__unix__) 
 #include <stdlib.h>
 #include <unistd.h>
 #define SetCurrentDir chdir
@@ -6206,7 +6206,7 @@ void FCEU_LuaFrameBoundary()
 		FCEU_LuaOnStop();
 	}
 
-#if defined(__linux) || defined(__APPLE__)
+#if defined(__linux) || defined(__APPLE__) || defined(__unix__)
 	if (exitScheduled)
 	{  // This function does not exit immediately, 
 		// it requests for the application to exit when next convenient.
