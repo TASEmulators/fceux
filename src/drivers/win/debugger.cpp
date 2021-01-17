@@ -437,26 +437,41 @@ void HighlightSyntax(int lines)
 	bool commentline;
 	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
 
+	/*
+	A quick band-aid to fix highlight color problem when you symbolic name or comment an address
+	with multibyte characters.
+	RICHEDIT20 uses character rather than byte as the unit, and some of the ANSI character sets
+	in Windows have multibyte characters. When this situation happens, the highlight range
+	calculation can not match the content in char* string, which makes hightlight color become
+	completely screwed up.
+	I don't know how many people would like to name a symbol with characters other than English,
+	and you may never encounter this problem even though you name it with your own language,
+	because the ANSI charset of your language is all in one byte. However, it's quite annoying
+	when you are not good at English and the codepage of your own language contains MBCs.
+	*/
+	wchar_t debug_wcs[35000];
+	MultiByteToWideChar(CP_ACP, 0, debug_str, -1, debug_wcs, 35000);
+
 	for (int line = 0; ; line++)
 	{
 		commentline = false;
 		wordbreak = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDWORDBREAK, (WPARAM)WB_RIGHT, (LPARAM)newline.chrg.cpMin + 21);
 		for (int ch = newline.chrg.cpMin; ; ch++)
 		{
-			if (debug_str[ch] == '=' || debug_str[ch] == '@' || debug_str[ch] == '\n' || debug_str[ch] == '-' || debug_str[ch] == ';')
+			if (debug_wcs[ch] == L'=' || debug_wcs[ch] == L'@' || debug_wcs[ch] == L'\n' || debug_wcs[ch] == L'-' || debug_wcs[ch] == L';')
 			{
 				opbreak = ch;
 				break;
 			}
 		}
-		if (debug_str[newline.chrg.cpMin] == ';')
+		if (debug_wcs[newline.chrg.cpMin] == L';')
 			commentline = true;
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)newline.chrg.cpMin + 20, (LPARAM)opbreak);
 		int oldline = newline.chrg.cpMin;
 		newline.chrg.cpMin = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&newline) + 1;
 		if(newline.chrg.cpMin == 0) break;
 		// symbolic address
-		if (debug_str[newline.chrg.cpMin - 2] == ':')
+		if (debug_wcs[newline.chrg.cpMin - 2] == L':')
 		{
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)oldline, (LPARAM)newline.chrg.cpMin);
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&mnem);
@@ -478,8 +493,8 @@ void HighlightSyntax(int lines)
 		numpos = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&num);
 		if (numpos != 0)
 		{
-			if (debug_str[numpos + 3] == ',' || debug_str[numpos + 3] == ')' || debug_str[numpos + 3] == '\n'
-				|| debug_str[numpos + 3] == ' ' //zero 30-nov-2017 - in support of combined label/offset disassembly. not sure this is a good idea
+			if (debug_wcs[numpos + 3] == L',' || debug_wcs[numpos + 3] == L')' || debug_wcs[numpos + 3] == L'\n'
+				|| debug_wcs[numpos + 3] == L' ' //zero 30-nov-2017 - in support of combined label/offset disassembly. not sure this is a good idea
 				)
 				wordbreak = numpos + 2;
 			else
@@ -659,6 +674,9 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		strcat(debug_str, "\n");
 		instructions_count++;
 	}
+
+	// prevent the font of the edit control from screwing up when it contains MBC or characters not contained the current font.
+	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETLANGOPTIONS, 0, SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETLANGOPTIONS, 0, 0) & ~IMF_AUTOFONT);
 
 	// basic syntax highlighter and due richedit optimizations
 	int eventMask = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, 0);
@@ -1517,28 +1535,44 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 	if (onlyCheckWhenNothingSelected)
 		if (sel_end > sel_start)
 			return EOF;
-	
+
+	/*
+	A quick band-aid to fix highlight color problem when you symbolic name or comment an address
+	with multibyte characters.
+	RICHEDIT20 uses character rather than byte as the unit, and some of the ANSI character sets
+	in Windows have multibyte characters. When this situation happens, the highlight range
+	calculation can not match the content in char* string, which makes hightlight color become
+	completely screwed up.
+	I don't know how many people would like to name a symbol with characters other than English,
+	and you may never encounter this problem even though you name it with your own language,
+	because the ANSI charset of your language is all in one byte. However, it's quite annoying
+	when you are not good at English and the codepage of your own language contains MBCs.
+	*/
+	wchar_t debug_wcs[35000];
+	MultiByteToWideChar(CP_ACP, 0, debug_str, -1, debug_wcs, 35000);
+
+
 	// find the ":" or "$" before sel_start
 	int i = sel_start - 1;
 	for (; i > sel_start - 6; i--)
-		if ((i >= 0 && debug_str[i] == ':' || debug_str[i] == '$') && debug_str[i+3] != '\n')
+		if ((i >= 0 && debug_wcs[i] == L':' || debug_wcs[i] == L'$') && debug_wcs[i+3] != L'\n')
 			break;
 	if (i > sel_start - 6)
 	{
-		char offsetBuffer[5];
-		strncpy(offsetBuffer, debug_str + i + 1, 4);
+		wchar_t offsetBuffer[5];
+		wcsncpy(offsetBuffer, debug_wcs + i + 1, 4);
 		offsetBuffer[4] = 0;
 		// invalidate the string if a space or \r is found in it
-		char* firstspace = strstr(offsetBuffer, " ");
+		wchar_t* firstspace = wcsstr(offsetBuffer, L" ");
 		if (!firstspace)
-			firstspace = strstr(offsetBuffer, "\r");
+			firstspace = wcsstr(offsetBuffer, L"\r");
 		if (!firstspace)
 		{
 			unsigned int offset;
 			int numend;
-			if (sscanf(offsetBuffer, "%4X", &offset) != EOF)
+			if (swscanf(offsetBuffer, L"%4X", &offset) != EOF)
 			{
-				if (debug_str[i+3] == ',' || debug_str[i+3] == ')')
+				if (debug_wcs[i + 3] == L',' || debug_wcs[i+3] == L')')
 					numend = 3;
 				else
 					numend = 5;
@@ -1554,28 +1588,30 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 	{
 		uint16 addr;
 		Name* node;
-		char* name;
+		wchar_t* name;
 		int nameLen;
-		char* start_pos;
-		char* pos;
+		wchar_t* start_pos;
+		wchar_t* pos;
 	
 		// first, try finding the name of disassembly_addresses[lineNumber]
 		addr = disassembly_addresses[lineNumber];
 		node = findNode(getNamesPointerForAddress(addr), addr);
 		if (node && node->name && *(node->name))
 		{
-			name = node->name;
-			nameLen = strlen(name);
+			nameLen = MultiByteToWideChar(CP_ACP, 0, node->name, -1, 0, 0);
+			name = (wchar_t*)malloc(nameLen * sizeof(wchar_t));
+			MultiByteToWideChar(CP_ACP, 0, node->name, -1, name, nameLen);
 			if (sel_start - nameLen <= 0)
-				start_pos = debug_str;
+				start_pos = debug_wcs;
 			else
-				start_pos = debug_str + (sel_start - nameLen);
-			pos = strstr(start_pos, name);
-			if (pos && pos <= debug_str + sel_start)
+				start_pos = debug_wcs + (sel_start - nameLen);
+			pos = wcsstr(start_pos, name);
+			free(name);
+			if (pos && pos <= debug_wcs + sel_start)
 			{
 				// clicked on the Name
 				// select the text
-				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_str), (LPARAM)((int)(pos - debug_str) + nameLen));
+				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_wcs), (LPARAM)((int)(pos - debug_wcs) + nameLen));
 				PrintOffsetToSeekAndBookmarkFields(addr);
 				return (int)addr;
 			}
@@ -1588,18 +1624,20 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 			node = findNode(getNamesPointerForAddress(addr), addr);
 			if (node && node->name && *(node->name))
 			{
-				name = node->name;
-				nameLen = strlen(name);
+				nameLen = MultiByteToWideChar(CP_ACP, 0, node->name, -1, 0, 0);
+				name = (wchar_t*)malloc(nameLen * sizeof(wchar_t));
+				MultiByteToWideChar(CP_ACP, 0, node->name, -1, name, nameLen);
 				if (sel_start - nameLen <= 0)
-					start_pos = debug_str;
+					start_pos = debug_wcs;
 				else
-					start_pos = debug_str + (sel_start - nameLen);
-				pos = strstr(start_pos, name);
-				if (pos && pos <= debug_str + sel_start)
+					start_pos = debug_wcs + (sel_start - nameLen);
+				pos = wcsstr(start_pos, name);
+				free(name);
+				if (pos && pos <= debug_wcs + sel_start)
 				{
 					// clicked on the operand name
 					// select the text
-					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_str), (LPARAM)((int)(pos - debug_str) + nameLen));
+					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_wcs), (LPARAM)((int)(pos - debug_wcs) + nameLen));
 					PrintOffsetToSeekAndBookmarkFields(addr);
 					return (int)addr;
 				}

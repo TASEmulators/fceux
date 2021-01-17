@@ -1542,7 +1542,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			if (wParam >= '0' && wParam <= '9')
 			{
 				char buf[3];
-				sprintf(buf, "%c", wParam);
+				sprintf(buf, "%c", (int)wParam);
 				int key_num;
 				sscanf(buf, "%d", &key_num);
 				key_num = (key_num + 9) % 10;
