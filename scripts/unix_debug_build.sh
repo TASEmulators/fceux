@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 CLEAN_BUILD=0;
 MAKE_ARGS="";
