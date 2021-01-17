@@ -4,7 +4,7 @@
 #include "Qt/sdl.h"
 #include "Qt/throttle.h"
 
-#if defined(__linux) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 #include <time.h>
 #endif
 
@@ -32,7 +32,7 @@ bool MaxSpeed = false;
 
 double getHighPrecTimeStamp(void)
 {
-#if defined(__linux) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 	struct timespec ts;
 	double t;
 
@@ -212,7 +212,7 @@ RefreshThrottleFPS(void)
 int highPrecSleep( double timeSeconds )
 {
 	int ret = 0;
-#if defined(__linux) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 	struct timespec req, rem;
 	
 	req.tv_sec  = (long)timeSeconds;
