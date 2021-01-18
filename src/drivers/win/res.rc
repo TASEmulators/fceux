@@ -2743,6 +2743,17 @@ BEGIN
         MENUITEM "Highlight Activity",          ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY
         MENUITEM "Set fading period...",        ID_HIGHLIGHTING_SETFADINGPERIOD
         MENUITEM "Fade when paused",            ID_HIGHLIGHTING_FADEWHENPAUSED
+		MENUITEM SEPARATOR
+		POPUP "Hex Editor colors"
+        BEGIN
+            MENUITEM SEPARATOR
+            MENUITEM "Restore defaults",            ID_HEXEDITOR_DEFCOLOR
+        END
+        POPUP "Code / Data Logger colors"
+        BEGIN
+			MENUITEM SEPARATOR
+			MENUITEM "Restore defaults",            ID_CDLOGGER_DEFCOLOR
+        END
     END
     POPUP "&Bookmarks"
     BEGIN

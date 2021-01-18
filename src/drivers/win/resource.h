@@ -914,6 +914,8 @@
 #define ID_BOOKMARKS_SAVEAS             40006
 #define ID_BOOKMARKS_OPTION             40007
 #define ID_BOOKMARKS_EXPORT             40008
+#define ID_HEXEDITOR_DEFCOLOR           40009
+#define ID_CDLOGGER_DEFCOLOR            40010
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1210,7 +1212,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        312
-#define _APS_NEXT_COMMAND_VALUE         40009
+#define _APS_NEXT_COMMAND_VALUE         40011
 #define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

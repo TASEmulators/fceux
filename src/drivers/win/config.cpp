@@ -116,34 +116,32 @@ extern int GGConv_wndx, GGConv_wndy;
 extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
 
+// owomomo: I'm tired to write those repeated words
+#define _PCS(name, suf) name##Color##suf
+#define CNRGB(name) _PCS(name, R), _PCS(name, G), _PCS(name, B)
+#define ACRGB(name) AC(_PCS(name, R)), AC(_PCS(name, G)), AC(_PCS(name, B))
+#define OPRGB(_OP) \
+_OP(HexFore), \
+_OP(HexBack), \
+_OP(HexHlBack), \
+_OP(HexHlFore), \
+_OP(HexHlShdFore), \
+_OP(HexHlShdBack), \
+_OP(HexFreeze), \
+_OP(RomFreeze), \
+_OP(HexBound), \
+_OP(HexBookmark), \
+_OP(CdlCode), \
+_OP(CdlData), \
+_OP(CdlPcm), \
+_OP(CdlCodeData), \
+_OP(CdlRender), \
+_OP(CdlRead), \
+_OP(CdlRenderRead)
+#define MemViewRGB OPRGB(CNRGB)
+
 extern int HexRowHeightBorder;
-extern int HexBackColorR;
-extern int HexBackColorG;
-extern int HexBackColorB;
-extern int HexForeColorR;
-extern int HexForeColorG;
-extern int HexForeColorB;
-extern int HexHlBackColorR;
-extern int HexHlBackColorG;
-extern int HexHlBackColorB;
-extern int HexHlForeColorR;
-extern int HexHlForeColorG;
-extern int HexHlForeColorB;
-extern int HexFreezeColorR;
-extern int HexFreezeColorG;
-extern int HexFreezeColorB;
-extern int RomFreezeColorR;
-extern int RomFreezeColorG;
-extern int RomFreezeColorB;
-extern int HexBoundColorR;
-extern int HexBoundColorG;
-extern int HexBoundColorB;
-extern int HexHlShdBackColorR;
-extern int HexHlShdBackColorG;
-extern int HexHlShdBackColorB;
-extern int HexHlShdForeColorR;
-extern int HexHlShdForeColorG;
-extern int HexHlShdForeColorB;
+extern int MemViewRGB;
 extern int importBookmarkProps;
 
 //adelikat:  Hacky fix for Ram Watch recent menu
@@ -457,33 +455,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(fullscreenByDoubleclick),
 	AC(CurrentState),
 	AC(HexRowHeightBorder),
-	AC(HexBackColorR),
-	AC(HexBackColorG),
-	AC(HexBackColorB),
-	AC(HexForeColorR),
-	AC(HexForeColorG),
-	AC(HexForeColorB),
-	AC(HexHlBackColorR),
-	AC(HexHlBackColorG),
-	AC(HexHlBackColorB),
-	AC(HexHlForeColorR),
-	AC(HexHlForeColorG),
-	AC(HexHlForeColorB),
-	AC(HexHlShdBackColorR),
-	AC(HexHlShdBackColorG),
-	AC(HexHlShdBackColorB),
-	AC(HexHlShdForeColorR),
-	AC(HexHlShdForeColorG),
-	AC(HexHlShdForeColorB),
-	AC(HexFreezeColorR),
-	AC(HexFreezeColorG),
-	AC(HexFreezeColorB),
-	AC(RomFreezeColorR),
-	AC(RomFreezeColorG),
-	AC(RomFreezeColorB),
-	AC(HexBoundColorR),
-	AC(HexBoundColorG),
-	AC(HexBoundColorB),
+	OPRGB(ACRGB),
 	AC(importBookmarkProps),
 	//ACS(memwLastfile[2048]),
 

@@ -76,6 +76,12 @@ using namespace std;
 #define ID_ADDRESS_FRZ_SEP              52
 #define ID_ADDRESS_FRZ_UNFREEZE_ALL     53
 
+#define HIGHLIGHTING_SUBMENU_POS        3
+#define HEXEDITOR_COLOR_SUBMENU_POS     4 
+#define CDLOGGER_COLOR_SUBMENU_POS      5
+#define ID_COLOR_HEXEDITOR              600
+#define ID_COLOR_CDLOGGER               650
+
 #define HIGHLIGHT_ACTIVITY_MIN_VALUE 0
 #define HIGHLIGHT_ACTIVITY_NUM_COLORS 16
 #define PREVIOUS_VALUE_UNDEFINED -1
@@ -87,34 +93,64 @@ string memviewhelp = "HexEditor"; //Hex Editor Help Page
 int HexRowHeightBorder = 0;		//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
 int HexCharSpacing = 1;		// pixels between chars
 
+
+
 // Partial List of Color Definitions
-int HexBackColorR = 255;	// White
-int HexBackColorG = 255;
-int HexBackColorB = 255;
-int HexForeColorR = 0;		// Black
-int HexForeColorG = 0;
-int HexForeColorB = 0;
-int HexHlBackColorR = 0;   // Black
-int HexHlBackColorG = 0;
-int HexHlBackColorB = 0;
-int HexHlForeColorR = 255; // White
-int HexHlForeColorG = 255;
-int HexHlForeColorB = 255;
-int HexHlShdBackColorR = 224; // Grey
-int HexHlShdBackColorG = 224;
-int HexHlShdBackColorB = 224;
-int HexHlShdForeColorR = 0; // Black
-int HexHlShdForeColorG = 0;
-int HexHlShdForeColorB = 0;
-int HexFreezeColorR = 0;	// Blue
-int HexFreezeColorG = 0;
-int HexFreezeColorB = 255;
-int RomFreezeColorR = 255;	// Red
-int RomFreezeColorG = 0;
-int RomFreezeColorB = 0;
-int HexBoundColorR = 220;	// Grey
-int HexBoundColorG = 220;
-int HexBoundColorB = 220;
+
+// owomomo: I'm tired to write those repeated words.
+#define _COMMA ,
+#define _PCS(name, suf, op, val) name##Color##suf##op##val
+#define CNRGB(name, r, g, b, op, sep) _PCS(name, R, op, r) sep _PCS(name, G, op, g) sep _PCS(name, B, op, b)
+#define DEFRGB(name, r, g, b) CNRGB(name, r, g, b, =, _COMMA)
+#define CMPRGB(name, r, g, b) CNRGB(name, r, g, b, ==, &&)
+
+#define OPHEXRGB(_OP, _SEP) \
+/* normal hex text color */ \
+_OP(HexFore,         0,   0,   0) _SEP /* Black */ \
+/* normal hex background color */ \
+_OP(HexBack,       255, 255, 255) _SEP /* White */ \
+/* highlight hex text color */ \
+_OP(HexHlFore,     255, 255, 255) _SEP /* White */ \
+/* highlight hex background color */ \
+_OP(HexHlBack,       0,   0,   0) _SEP /* Black */ \
+/* unfocused highlight hex text color */ \
+_OP(HexHlShdFore,    0,   0,   0) _SEP /* Black */ \
+/* unfocused highlight hex background color */ \
+_OP(HexHlShdBack,  224, 224, 224) _SEP /* Grey */ \
+/* freezed color */ \
+_OP(HexFreeze,       0,   0, 255) _SEP /* Blue */ \
+/* freezed color in ROM */ \
+_OP(RomFreeze,     255,   0,   0) _SEP /* Red */ \
+/* hex color out of bounds */ \
+_OP(HexBound,      220, 220, 220) _SEP /* Grey */ \
+/* bookmark color */ \
+_OP(HexBookmark,     0, 204,   0) /* Light Green */
+
+#define OPCDLRGB(_OP, _SEP) \
+/* Logged as code */ \
+_OP(CdlCode,       160, 140,   0) _SEP /* Dark yellow */ \
+/* Logged as data */ \
+_OP(CdlData,         0,   0, 210) _SEP /* Blue */ \
+/* Logged as PCM */ \
+_OP(CdlPcm,          0, 130, 160) _SEP /* Cyan */ \
+/* Logged as code and data */ \
+_OP(CdlCodeData,     0, 190,   0) _SEP /* Green */ \
+/* Rendered */ \
+_OP(CdlRender,     210, 190,   0) _SEP /* Yellow */ \
+/* Read */ \
+_OP(CdlRead,        15,  15, 255) _SEP /* Light blue */ \
+/* Rendered and read */ \
+_OP(CdlRenderRead,   5, 255,   5)  /* Light green */
+
+#define DefHexRGB OPHEXRGB(DEFRGB, _COMMA)
+#define RestoreDefaultHexColor() (DefHexRGB)
+#define IsHexColorDefault() (OPHEXRGB(CMPRGB, &&))
+
+#define DefCdlRGB OPCDLRGB(DEFRGB, _COMMA)
+#define RestoreDefaultCdlColor() (DefCdlRGB)
+#define IsCdlColorDefault() (OPCDLRGB(CMPRGB, &&))
+
+int DefHexRGB, DefCdlRGB;
 
 // This defines all of our right click popup menus
 struct
@@ -138,7 +174,48 @@ popupmenu[] =
 	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_SEEK_IN_ROM,         "Go Here In ROM File"},
 	{0x8000,0xFFFF, MODE_NES_MEMORY, ID_ADDRESS_CREATE_GG_CODE,      "Create Game Genie Code At This Address"}
 };
+
 #define POPUPNUM (sizeof popupmenu / sizeof popupmenu[0])
+
+// The color configure menu
+#define PPRGB(name) &name##ColorR, &name##ColorG, &name##ColorB
+struct {
+	int *r, *g, *b;
+	char* text;
+}
+hexcolormenu[] = {
+	{ PPRGB(HexFore),       "Normal text" },
+//	{ PPRGB(HexBack),       "Normal text background"}
+	{ 0, 0, 0,              NULL },
+	{ PPRGB(HexHlFore),     "Selected text" },
+	{ PPRGB(HexHlBack),     "Selected background" },
+	{ PPRGB(HexHlShdFore),  "Selected text (unfocused)" },
+	{ PPRGB(HexHlShdBack),  "Selected background (unfocused)" },
+	{ 0, 0, 0,              NULL },
+	{ PPRGB(HexFreeze),     "Freezed address"},
+//  { PPRGB(RomFreeze),     "Freezed ROM address"},
+	{ PPRGB(HexBookmark),   "Bookmark"},
+},
+cdlcolormenu[] = {
+	{ PPRGB(CdlCode),       "Code"},
+	{ PPRGB(CdlData),       "Data"},
+	{ PPRGB(CdlPcm),        "PCM Data"},
+	{ PPRGB(CdlCodeData),   "Code && Data"},
+	{ 0, 0, 0,              NULL },
+	{ PPRGB(CdlRender),     "Render"},
+	{ PPRGB(CdlRead),       "Read"},
+	{ PPRGB(CdlRenderRead), "Render && Read"}
+};
+
+#define HEXCOLORMENUNUM (sizeof hexcolormenu / sizeof hexcolormenu[0])
+#define CDLCOLORMENUNUM (sizeof cdlcolormenu / sizeof cdlcolormenu[0])
+
+
+#define MKRGB(name) (RGB(name##ColorR, name##ColorG, name##ColorB))
+#define STRGB(name, r, g, b) (name##ColorR = r, name##ColorG = g, name##ColorB = b)
+
+
+#define COLORITEMNUM ();
 
 int LoadTableFile();
 void UnloadTableFile();
@@ -153,7 +230,7 @@ int GetAddyFromCoord(int x,int y);
 void AutoScrollFromCoord(int x,int y);
 LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-INT_PTR CALLBACK importBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK ImportBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 void FindNext();
 void OpenFindDialog();
 static int GetFileData(uint32 offset);
@@ -454,8 +531,8 @@ void UpdateMemoryView(int draw_all)
 	const int MemFontWidth = debugSystem->HexeditorFontWidth + HexCharSpacing;
 	const int MemFontHeight = debugSystem->HexeditorFontHeight + HexRowHeightBorder;
 	const char hex[] = "0123456789ABCDEF";
-	const COLORREF CBackColor = RGB(HexBackColorR, HexBackColorG, HexBackColorB);
-	const COLORREF CForeColor = RGB(HexForeColorR, HexForeColorG, HexForeColorB);
+	const COLORREF CBackColor = MKRGB(HexBack);
+	const COLORREF CForeColor = MKRGB(HexFore);
 	int i, j;
 	int byteValue;
 	int byteHighlightingValue;
@@ -475,7 +552,7 @@ void UpdateMemoryView(int draw_all)
 			if (i < MaxSize)
 				SetTextColor(HDataDC, CForeColor);	//addresses text color #000000 = black, #FFFFFF = white
 			else
-				SetTextColor(HDataDC, RGB(HexBoundColorR, HexBoundColorG, HexBoundColorB));	//addresses out of bounds
+				SetTextColor(HDataDC, MKRGB(HexBound));	//addresses out of bounds
 			sprintf(str, "%06X:                                                         :", i);
 			ExtTextOut(HDataDC, 0, MemLineRow, NULL, NULL, str, strlen(str), NULL);
 		}
@@ -510,7 +587,7 @@ void UpdateMemoryView(int draw_all)
 				{
 					// Single Byte highlight
 					// 1st nibble
-					SetBkColor(HDataDC, EditingText ? RGB(HexHlShdBackColorR, HexHlShdBackColorG, HexHlShdBackColorB) : RGB(HexHlBackColorR, HexHlBackColorG, HexHlBackColorB));
+					SetBkColor(HDataDC, EditingText ? MKRGB(HexHlShdBack) : MKRGB(HexHlBack));
 					SetTextColor(HDataDC, EditingText ? RGB(255, 0, 0) : RGB(255, 255, 255));
 					str[0] = hex[(byteValue >> 4) & 0xF];
 					str[1] = 0;
@@ -524,8 +601,8 @@ void UpdateMemoryView(int draw_all)
 				}
 
 				// single address highlight - right column
-				SetBkColor(HDataDC, EditingText ? RGB(HexHlBackColorR, HexHlBackColorG, HexHlBackColorB) : RGB(HexHlShdBackColorR, HexHlShdBackColorG, HexHlShdBackColorB));
-				SetTextColor(HDataDC, EditingText ? RGB(HexHlForeColorR, HexHlForeColorG, HexHlForeColorB) : RGB(HexHlShdForeColorR, HexHlShdForeColorG, HexHlShdForeColorB));
+				SetBkColor(HDataDC, EditingText ? MKRGB(HexHlBack) : MKRGB(HexHlShdBack));
+				SetTextColor(HDataDC, EditingText ? MKRGB(HexHlFore) : MKRGB(HexHlShdFore));
 				str[0] = chartable[byteValue];
 				if ((u8)str[0] < 0x20) str[0] = 0x2E;
 //				if ((u8)str[0] > 0x7e) str[0] = 0x2E;
@@ -679,17 +756,17 @@ void UpdateColorTable()
 	{
 		if((i+CurOffset >= CursorStartAddy) && (i+CurOffset <= CursorEndAddy))
 		{
-			CurBGColorList[i] = RGB(HexHlBackColorR, HexHlBackColorG, HexHlBackColorB);			//Highlighter color bg	- 2 columns
-			DimBGColorList[i] = RGB(HexHlShdBackColorR, HexHlShdBackColorG, HexHlShdBackColorB);
-			CurTextColorList[i] = RGB(HexHlForeColorR, HexHlForeColorG, HexHlForeColorB);		//Highlighter color text - 2 columns
-			DimTextColorList[i] = RGB(HexHlShdForeColorR, HexHlShdForeColorG, HexHlShdForeColorB);
+			CurBGColorList[i] = MKRGB(HexHlBack);			//Highlighter color bg	- 2 columns
+			DimBGColorList[i] = MKRGB(HexHlShdBack);
+			CurTextColorList[i] = MKRGB(HexHlFore);		//Highlighter color text - 2 columns
+			DimTextColorList[i] = MKRGB(HexHlShdFore);
 			continue;
 		}
 
-		CurBGColorList[i] = RGB(HexBackColorR, HexBackColorG, HexBackColorB);			//Regular color bb - 2columns
-		DimBGColorList[i] = RGB(HexBackColorR, HexBackColorG, HexBackColorB);			//Regular color bb - 2columns
-		CurTextColorList[i] = RGB(HexForeColorR, HexForeColorG, HexForeColorB);		//Regular color text - 2 columns
-		DimTextColorList[i] = RGB(HexForeColorR, HexForeColorG, HexForeColorB);		//Regular color text - 2 columns
+		CurBGColorList[i] = MKRGB(HexBack);			//Regular color bb - 2columns
+		DimBGColorList[i] = MKRGB(HexBack);			//Regular color bb - 2columns
+		CurTextColorList[i] = MKRGB(HexFore);		//Regular color text - 2 columns
+		DimTextColorList[i] = MKRGB(HexFore);		//Regular color text - 2 columns
 	}
 
 	for (j=0;j<hexBookmarks.bookmarkCount;j++)
@@ -697,8 +774,8 @@ void UpdateColorTable()
 		if(hexBookmarks[j].editmode != EditingMode) continue;
 		if(((int)hexBookmarks[j].address >= CurOffset) && ((int)hexBookmarks[j].address < CurOffset+DataAmount))
 		{
-			CurTextColorList[hexBookmarks[j].address - CurOffset] = RGB(0, 0xCC, 0); // Green for Bookmarks
-			DimTextColorList[hexBookmarks[j].address - CurOffset] = RGB(0, 0xCC, 0); // Green for Bookmarks
+			CurTextColorList[hexBookmarks[j].address - CurOffset] = MKRGB(HexBookmark); // Green for Bookmarks
+			DimTextColorList[hexBookmarks[j].address - CurOffset] = MKRGB(HexBookmark); // Green for Bookmarks
 		}
 	}
 
@@ -708,8 +785,8 @@ void UpdateColorTable()
 			for (int a = CurOffset; a < CurOffset + DataAmount; ++a)
 				if (FCEUI_FindCheatMapByte(a))
 				{
-					CurTextColorList[a - CurOffset] = RGB(HexFreezeColorR, HexFreezeColorG, HexFreezeColorB);
-					DimTextColorList[a - CurOffset] = RGB(HexFreezeColorR, HexFreezeColorG, HexFreezeColorB);
+					CurTextColorList[a - CurOffset] = MKRGB(HexFreeze);
+					DimTextColorList[a - CurOffset] = MKRGB(HexFreeze);
 				}
 			break;
 		case MODE_NES_FILE:
@@ -727,14 +804,14 @@ void UpdateColorTable()
 							if ((cdloggerdata[temp_offset] & 3) == 3)
 							{
 								// the byte is both Code and Data - green
-								CurTextColorList[i] = RGB(0, 190, 0);
-								DimTextColorList[i] = RGB(0, 190, 0);
+								CurTextColorList[i] = MKRGB(CdlCodeData);
+								DimTextColorList[i] = MKRGB(CdlCodeData);
 							}
 							else if ((cdloggerdata[temp_offset] & 3) == 1)
 							{
 								// the byte is Code - dark-yellow
-								CurTextColorList[i] = RGB(160, 140, 0);
-								DimTextColorList[i] = RGB(160, 140, 0);
+								CurTextColorList[i] = MKRGB(CdlCode);
+								DimTextColorList[i] = MKRGB(CdlCode);
 							}
 							else if ((cdloggerdata[temp_offset] & 3) == 2)
 							{
@@ -742,14 +819,14 @@ void UpdateColorTable()
 								if (cdloggerdata[temp_offset] & 0x40)
 								{
 									// PCM data - cyan
-									CurTextColorList[i] = RGB(0, 130, 160);
-									DimTextColorList[i] = RGB(0, 130, 160);
+									CurTextColorList[i] = MKRGB(CdlPcm);
+									DimTextColorList[i] = MKRGB(CdlPcm);
 								}
 								else
 								{
 									// non-PCM data - blue
-									CurTextColorList[i] = RGB(0, 0, 210);
-									DimTextColorList[i] = RGB(0, 0, 210);
+									CurTextColorList[i] = MKRGB(CdlData);
+									DimTextColorList[i] = MKRGB(CdlData);
 								}
 							}
 						}
@@ -762,20 +839,20 @@ void UpdateColorTable()
 								if ((cdloggervdata[temp_offset] & 3) == 3)
 								{
 									// the byte was both rendered and read programmatically - light-green
-									CurTextColorList[i] = RGB(5, 255, 5);
-									DimTextColorList[i] = RGB(5, 255, 5);
+									CurTextColorList[i] = MKRGB(CdlRenderRead);
+									DimTextColorList[i] = MKRGB(CdlRenderRead);
 								}
 								else if ((cdloggervdata[temp_offset] & 3) == 1)
 								{
 									// the byte was rendered - yellow
-									CurTextColorList[i] = RGB(210, 190, 0);
-									DimTextColorList[i] = RGB(210, 190, 0);
+									CurTextColorList[i] = MKRGB(CdlRender);
+									DimTextColorList[i] = MKRGB(CdlRender);
 								}
 								else if ((cdloggervdata[temp_offset] & 3) == 2)
 								{
 									// the byte was read programmatically - light-blue
-									CurTextColorList[i] = RGB(15, 15, 255);
-									DimTextColorList[i] = RGB(15, 15, 255);
+									CurTextColorList[i] = MKRGB(CdlRead);
+									DimTextColorList[i] = MKRGB(CdlRead);
 								}
 							}
 						}
@@ -790,8 +867,8 @@ void UpdateColorTable()
 				for (i = tmp->addr; i < tmp->addr + tmp->size; i++) {
 					if ((i > CurOffset) && (i < CurOffset + DataAmount))
 					{
-						CurTextColorList[i - CurOffset] = RGB(RomFreezeColorR, RomFreezeColorG, RomFreezeColorB);
-						DimTextColorList[i - CurOffset] = RGB(RomFreezeColorR, RomFreezeColorG, RomFreezeColorB);
+						CurTextColorList[i - CurOffset] = MKRGB(RomFreeze);
+						DimTextColorList[i - CurOffset] = MKRGB(RomFreeze);
 					}
 				}
 				tmp = tmp->last;
@@ -1197,15 +1274,16 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		return 0;
 
 	case WM_CREATE:
-		SetWindowPos(hwnd,0,MemView_wndx,MemView_wndy,MemViewSizeX,MemViewSizeY,SWP_NOZORDER|SWP_NOOWNERZORDER);
+	{
+		SetWindowPos(hwnd, 0, MemView_wndx, MemView_wndy, MemViewSizeX, MemViewSizeY, SWP_NOZORDER | SWP_NOOWNERZORDER);
 
 		debuggerWasActive = 1;
 		HDataDC = GetDC(hwnd);
-		SelectObject (HDataDC, debugSystem->hHexeditorFont);
-		SetTextAlign(HDataDC,TA_NOUPDATECP | TA_TOP | TA_LEFT);
+		SelectObject(HDataDC, debugSystem->hHexeditorFont);
+		SetTextAlign(HDataDC, TA_NOUPDATECP | TA_TOP | TA_LEFT);
 
-//		TEXTMETRIC textMetric;
-//		GetTextMetrics (HDataDC, &textMetric);
+		//		TEXTMETRIC textMetric;
+		//		GetTextMetrics (HDataDC, &textMetric);
 
 		MaxSize = 0x10000;
 		//Allocate Memory for color lists
@@ -1231,16 +1309,29 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		UpdateColorTable(); //draw it
 
 		// update menus
+		HMENU menu = GetMenu(hwnd);
+
 		for (int i = MODE_NES_MEMORY; i <= MODE_NES_FILE; i++)
-			if(EditingMode == i) {
-				CheckMenuRadioItem(GetMenu(hwnd), MENU_MV_VIEW_RAM, MENU_MV_VIEW_ROM, MENU_MV_VIEW_RAM, MF_BYCOMMAND);
+			if (EditingMode == i) {
+				CheckMenuRadioItem(menu, MENU_MV_VIEW_RAM, MENU_MV_VIEW_ROM, MENU_MV_VIEW_RAM, MF_BYCOMMAND);
 				break;
 			}
-		CheckMenuItem(GetMenu(hwnd), ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY, (MemView_HighlightActivity) ? MF_CHECKED: MF_UNCHECKED);
-		CheckMenuItem(GetMenu(hwnd), ID_HIGHLIGHTING_FADEWHENPAUSED, (MemView_HighlightActivity_FadeWhenPaused) ? MF_CHECKED: MF_UNCHECKED);
+		CheckMenuItem(menu, ID_HIGHLIGHTING_HIGHLIGHT_ACTIVITY, (MemView_HighlightActivity) ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(menu, ID_HIGHLIGHTING_FADEWHENPAUSED, (MemView_HighlightActivity_FadeWhenPaused) ? MF_CHECKED : MF_UNCHECKED);
 
-		updateBookmarkMenus(GetSubMenu(GetMenu(hwnd), BOOKMARKS_SUBMENU_POS));
-		return 0;
+		updateBookmarkMenus(GetSubMenu(menu, BOOKMARKS_SUBMENU_POS));
+
+		HMENU hilightMenu = GetSubMenu(menu, HIGHLIGHTING_SUBMENU_POS);
+
+		HMENU hexColorMenu = GetSubMenu(hilightMenu, HEXEDITOR_COLOR_SUBMENU_POS);
+		for (int i = 0; i < HEXCOLORMENUNUM; ++i)
+			InsertMenu(hexColorMenu, i, MF_BYPOSITION | (hexcolormenu[i].text ? MF_STRING : MF_SEPARATOR), ID_COLOR_HEXEDITOR + i, hexcolormenu[i].text);
+
+		HMENU cdlColorMenu = GetSubMenu(hilightMenu, CDLOGGER_COLOR_SUBMENU_POS);
+		for (int i = 0; i < CDLCOLORMENUNUM; ++i)
+			InsertMenu(cdlColorMenu, i, MF_BYPOSITION | (cdlcolormenu[i].text ? MF_STRING : MF_SEPARATOR), ID_COLOR_CDLOGGER + i, cdlcolormenu[i].text);
+	}
+	return 0;
 	case WM_PAINT:
 		BeginPaint(hwnd, &ps);
 		EndPaint(hwnd, &ps);
@@ -2350,7 +2441,81 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			resetHighlightingActivityLog();
 			return 0;
 		}
+		case ID_COLOR_HEXEDITOR:
+		case ID_COLOR_HEXEDITOR + 1:
+		case ID_COLOR_HEXEDITOR + 2:
+		case ID_COLOR_HEXEDITOR + 3:
+		case ID_COLOR_HEXEDITOR + 4:
+		case ID_COLOR_HEXEDITOR + 5:
+		case ID_COLOR_HEXEDITOR + 6:
+		case ID_COLOR_HEXEDITOR + 7:
+		case ID_COLOR_HEXEDITOR + 8:
+		case ID_COLOR_HEXEDITOR + 9:
+		{
+			int index = wParam - ID_COLOR_HEXEDITOR;
+			int backup = RGB(*hexcolormenu[index].r, *hexcolormenu[index].g, *hexcolormenu[index].b);
+			CHOOSECOLOR choose;
+			COLORREF ref;
+			memset(&choose, 0, sizeof(CHOOSECOLOR));
+			choose.lStructSize = sizeof(CHOOSECOLOR);
+			choose.hwndOwner = hwnd;
+			choose.rgbResult = backup;
+			choose.lpCustColors = &ref;
+			choose.Flags = CC_RGBINIT | CC_FULLOPEN | CC_ANYCOLOR;
+			if (ChooseColor(&choose) && choose.rgbResult != backup)
+			{
+				*hexcolormenu[index].r = GetRValue(choose.rgbResult);
+				*hexcolormenu[index].g = GetGValue(choose.rgbResult);
+				*hexcolormenu[index].b = GetBValue(choose.rgbResult);
+				UpdateColorTable();
+			}
+		}
+		break;
+		case ID_HEXEDITOR_DEFCOLOR:
+			if (!IsHexColorDefault() && MessageBox(hwnd, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
+			{
+				RestoreDefaultHexColor();
+				UpdateColorTable();
+			}
+		break;
+		case ID_COLOR_CDLOGGER:
+		case ID_COLOR_CDLOGGER + 1:
+		case ID_COLOR_CDLOGGER + 2:
+		case ID_COLOR_CDLOGGER + 3:
+		case ID_COLOR_CDLOGGER + 4:
+		case ID_COLOR_CDLOGGER + 5:
+		case ID_COLOR_CDLOGGER + 6:
+		case ID_COLOR_CDLOGGER + 7:
+		case ID_COLOR_CDLOGGER + 8:
+		case ID_COLOR_CDLOGGER + 9:
+		{
+			int index = wParam - ID_COLOR_CDLOGGER;
+			int backup = RGB(*cdlcolormenu[index].r, *cdlcolormenu[index].g, *cdlcolormenu[index].b);
 
+			CHOOSECOLOR choose;
+			COLORREF ref;
+			memset(&choose, 0, sizeof(CHOOSECOLOR));
+			choose.lStructSize = sizeof(CHOOSECOLOR);
+			choose.hwndOwner = hwnd;
+			choose.rgbResult = RGB(*cdlcolormenu[index].r, *cdlcolormenu[index].g, *cdlcolormenu[index].b);
+			choose.lpCustColors = &ref;
+			choose.Flags = CC_RGBINIT | CC_FULLOPEN | CC_ANYCOLOR;
+			if (ChooseColor(&choose) && choose.rgbResult != backup)
+			{
+				*cdlcolormenu[index].r = GetRValue(choose.rgbResult);
+				*cdlcolormenu[index].g = GetGValue(choose.rgbResult);
+				*cdlcolormenu[index].b = GetBValue(choose.rgbResult);
+				UpdateColorTable();
+			}
+		}
+		break;
+		case ID_CDLOGGER_DEFCOLOR:
+			if (!IsCdlColorDefault() && MessageBox(hwnd, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
+			{
+				RestoreDefaultCdlColor();
+				UpdateColorTable();
+			}
+		break;
 		case MENU_MV_BOOKMARKS_RM_ALL:
 			if (hexBookmarks.bookmarkCount)
 			{
@@ -2569,7 +2734,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 									}
 									strcat(buffer, " with yours.\r\nYou must choose which side would be reserved. Do you want to continue?");
 
-									continue_ = MessageBox(hwnd, buffer, "Bookmark conflict", MB_YESNO | MB_ICONEXCLAMATION) == IDYES && DialogBoxParam(fceu_hInstance, "IMPORTBOOKMARKOPTIONDIALOG", hwnd, importBookmarkCallB, (LPARAM)&tmpImportBookmarkProps);
+									continue_ = MessageBox(hwnd, buffer, "Bookmark conflict", MB_YESNO | MB_ICONEXCLAMATION) == IDYES && DialogBoxParam(fceu_hInstance, "IMPORTBOOKMARKOPTIONDIALOG", hwnd, ImportBookmarkCallB, (LPARAM)&tmpImportBookmarkProps);
 									
 									if (tmpImportBookmarkProps & IMPORT_OVERWRITE_NO_PROMPT)
 										importBookmarkProps = tmpImportBookmarkProps;
@@ -2644,7 +2809,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case ID_BOOKMARKS_OPTION:
 		{
 			int tmpImportBookmarkProps = importBookmarkProps;
-			if (DialogBoxParam(fceu_hInstance, "IMPORTBOOKMARKOPTIONDIALOG", hwnd, importBookmarkCallB, (LPARAM)&tmpImportBookmarkProps))
+			if (DialogBoxParam(fceu_hInstance, "IMPORTBOOKMARKOPTIONDIALOG", hwnd, ImportBookmarkCallB, (LPARAM)&tmpImportBookmarkProps))
 				importBookmarkProps = tmpImportBookmarkProps;
 		}
 		return 0;
@@ -2949,7 +3114,7 @@ void PalettePoke(uint32 addr, uint8 data)
 	}
 }
 
-INT_PTR CALLBACK importBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK ImportBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static int* tmpImportBookmarkProps;
 
@@ -3127,7 +3292,6 @@ INT_PTR CALLBACK importBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 	}
 	return FALSE;
 }
-
 
 void SwitchEditingText(int editingText) {
 	if (EditingText != editingText)
