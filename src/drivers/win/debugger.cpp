@@ -79,9 +79,9 @@ bool debuggerIDAFont = false;
 unsigned int IDAFontSize = 16;
 bool debuggerDisplayROMoffsets = false;
 
-char debug_str[35000] = {0};
-char debug_cdl_str[500] = {0};
-char debug_str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
+wchar_t* debug_wstr;
+char* debug_cdl_str;
+char* debug_str_decoration_comment;
 char* debug_decoration_comment;
 char* debug_decoration_comment_end_pos;
 
@@ -437,41 +437,26 @@ void HighlightSyntax(int lines)
 	bool commentline;
 	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
 
-	/*
-	A quick band-aid to fix highlight color problem when you symbolic name or comment an address
-	with multibyte characters.
-	RICHEDIT20 uses character rather than byte as the unit, and some of the ANSI character sets
-	in Windows have multibyte characters. When this situation happens, the highlight range
-	calculation can not match the content in char* string, which makes hightlight color become
-	completely screwed up.
-	I don't know how many people would like to name a symbol with characters other than English,
-	and you may never encounter this problem even though you name it with your own language,
-	because the ANSI charset of your language is all in one byte. However, it's quite annoying
-	when you are not good at English and the codepage of your own language contains MBCs.
-	*/
-	wchar_t debug_wcs[35000];
-	MultiByteToWideChar(CP_ACP, 0, debug_str, -1, debug_wcs, 35000);
-
 	for (int line = 0; ; line++)
 	{
 		commentline = false;
 		wordbreak = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDWORDBREAK, (WPARAM)WB_RIGHT, (LPARAM)newline.chrg.cpMin + 21);
 		for (int ch = newline.chrg.cpMin; ; ch++)
 		{
-			if (debug_wcs[ch] == L'=' || debug_wcs[ch] == L'@' || debug_wcs[ch] == L'\n' || debug_wcs[ch] == L'-' || debug_wcs[ch] == L';')
+			if (debug_wstr[ch] == L'=' || debug_wstr[ch] == L'@' || debug_wstr[ch] == L'\n' || debug_wstr[ch] == L'-' || debug_wstr[ch] == L';')
 			{
 				opbreak = ch;
 				break;
 			}
 		}
-		if (debug_wcs[newline.chrg.cpMin] == L';')
+		if (debug_wstr[newline.chrg.cpMin] == L';')
 			commentline = true;
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)newline.chrg.cpMin + 20, (LPARAM)opbreak);
 		int oldline = newline.chrg.cpMin;
 		newline.chrg.cpMin = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&newline) + 1;
 		if(newline.chrg.cpMin == 0) break;
 		// symbolic address
-		if (debug_wcs[newline.chrg.cpMin - 2] == L':')
+		if (debug_wstr[newline.chrg.cpMin - 2] == L':')
 		{
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)oldline, (LPARAM)newline.chrg.cpMin);
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&mnem);
@@ -493,8 +478,8 @@ void HighlightSyntax(int lines)
 		numpos = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&num);
 		if (numpos != 0)
 		{
-			if (debug_wcs[numpos + 3] == L',' || debug_wcs[numpos + 3] == L')' || debug_wcs[numpos + 3] == L'\n'
-				|| debug_wcs[numpos + 3] == L' ' //zero 30-nov-2017 - in support of combined label/offset disassembly. not sure this is a good idea
+			if (debug_wstr[numpos + 3] == L',' || debug_wstr[numpos + 3] == L')' || debug_wstr[numpos + 3] == L'\n'
+				|| debug_wstr[numpos + 3] == L' ' //zero 30-nov-2017 - in support of combined label/offset disassembly. not sure this is a good idea
 				)
 				wordbreak = numpos + 2;
 			else
@@ -511,7 +496,8 @@ void HighlightSyntax(int lines)
 
 void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 {
-	char chr[40] = {0};
+	wchar_t chr[40] = { 0 };
+	wchar_t debug_wbuf[2048] = { 0 };
 	int size;
 	uint8 opcode[3];
 	unsigned int instruction_addr;
@@ -534,7 +520,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 	GetClientRect(GetDlgItem(hWnd, id), &rect);
 	int lines = (rect.bottom-rect.top) / debugSystem->disasmFontHeight;
 
-	debug_str[0] = 0;
+	debug_wstr[0] = 0;
 	PCLine = -1;
 	unsigned int instructions_count = 0;
 	for (int i = 0; i < lines; i++)
@@ -552,8 +538,8 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			{
 				if (node->name)
 				{
-					strcat(debug_str, node->name);
-					strcat(debug_str, ":\n");
+					swprintf(debug_wbuf, L"%S:\n", node->name);
+					wcscat(debug_wstr, debug_wbuf);
 					// we added one line to the disassembly window
 					disassembly_addresses.push_back(addr);
 					disassembly_operands.resize(i + 1);
@@ -571,9 +557,8 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 					{
 						debug_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
 						debug_decoration_comment_end_pos[1] = 0;		// set \0 instead of \n
-						strcat(debug_str, "; ");
-						strcat(debug_str, debug_decoration_comment);
-						strcat(debug_str, "\n");
+						swprintf(debug_wbuf, L"; %S\n", debug_decoration_comment);
+						wcscat(debug_wstr, debug_wbuf);
 						// we added one line to the disassembly window
 						disassembly_addresses.push_back(addr);
 						disassembly_operands.resize(i + 1);
@@ -591,30 +576,30 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		{
 			PC_pointerOffset = instructions_count;
 			PCPointerWasDrawn = true;
-			beginningOfPCPointerLine = strlen(debug_str);
-			strcat(debug_str, ">");
+			beginningOfPCPointerLine = wcslen(debug_wstr);
+			wcscat(debug_wstr, L">");
 			PCLine = instructions_count;
 		} else
 		{
-			strcat(debug_str, " ");
+			wcscat(debug_wstr, L" ");
 		}
 
 		if (addr >= 0x8000)
 		{
 			if (debuggerDisplayROMoffsets && GetNesFileAddress(addr) != -1)
 			{
-				sprintf(chr, " %06X: ", GetNesFileAddress(addr));
+				swprintf(chr, L" %06X: ", GetNesFileAddress(addr));
 			} else
 			{
-				sprintf(chr, "%02X:%04X: ", getBank(addr), addr);
+				swprintf(chr, L"%02X:%04X: ", getBank(addr), addr);
 			}
 		} else
 		{
-			sprintf(chr, "  :%04X: ", addr);
+			swprintf(chr, L"  :%04X: ", addr);
 		}
 		
 		// Add address
-		strcat(debug_str, chr);
+		wcscat(debug_wstr, chr);
 		disassembly_addresses.push_back(addr);
 		if (symbDebugEnabled)
 			disassembly_operands.resize(i + 1);
@@ -622,27 +607,27 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		size = opsize[GetMem(addr)];
 		if (size == 0)
 		{
-			sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
-			strcat(debug_str, chr);
+			swprintf(chr, L"%02X        UNDEFINED", GetMem(addr++));
+			wcscat(debug_wstr, chr);
 		} else
 		{
 			if ((addr + size) > 0xFFFF)
 			{
 				while (addr < 0xFFFF)
 				{
-					sprintf(chr, "%02X        OVERFLOW\n", GetMem(addr++));
-					strcat(debug_str, chr);
+					swprintf(chr, L"%02X        OVERFLOW\n", GetMem(addr++));
+					wcscat(debug_wstr, chr);
 				}
 				break;
 			}
 			for (int j = 0; j < size; j++)
 			{
-				sprintf(chr, "%02X ", opcode[j] = GetMem(addr++));
-				strcat(debug_str, chr);
+				swprintf(chr, L"%02X ", opcode[j] = GetMem(addr++));
+				wcscat(debug_wstr, chr);
 			}
 			while (size < 3)
 			{
-				strcat(debug_str, "   "); //pad output to align ASM
+				wcscat(debug_wstr, L"   "); //pad output to align ASM
 				size++;
 			}
 			
@@ -669,9 +654,10 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			}
 
 			// append the disassembly to current line
-			strcat(strcat(debug_str, " "), bufferForDisassemblyWithPlentyOfStuff);
+			swprintf(debug_wbuf, L" %S", bufferForDisassemblyWithPlentyOfStuff);
+			wcscat(debug_wstr, debug_wbuf);
 		}
-		strcat(debug_str, "\n");
+		wcscat(debug_wstr, L"\n");
 		instructions_count++;
 	}
 
@@ -682,7 +668,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 	int eventMask = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, 0);
 	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, false, 0);
 
-	SetDlgItemText(hWnd, id, debug_str);
+	SetDlgItemTextW(hWnd, id, debug_wstr);
 	HighlightSyntax(lines);
 	HighlightPC();
 
@@ -1459,8 +1445,15 @@ void DebuggerExit()
 	FCEUI_Debugger().badopbreak = 0;
 	debugger_open = 0;
 	inDebugger = false;
-	DestroyWindow(hDebug);
-	hDebug=0;
+	// in case someone call it multiple times
+	if (hDebug)
+	{
+		DestroyWindow(hDebug);
+		hDebug = NULL;
+		free(debug_wstr);
+		free(debug_cdl_str);
+		free(debug_str_decoration_comment);
+	}
 }
 
 static RECT currDebuggerRect;
@@ -1536,31 +1529,15 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 		if (sel_end > sel_start)
 			return EOF;
 
-	/*
-	A quick band-aid to fix highlight color problem when you symbolic name or comment an address
-	with multibyte characters.
-	RICHEDIT20 uses character rather than byte as the unit, and some of the ANSI character sets
-	in Windows have multibyte characters. When this situation happens, the highlight range
-	calculation can not match the content in char* string, which makes hightlight color become
-	completely screwed up.
-	I don't know how many people would like to name a symbol with characters other than English,
-	and you may never encounter this problem even though you name it with your own language,
-	because the ANSI charset of your language is all in one byte. However, it's quite annoying
-	when you are not good at English and the codepage of your own language contains MBCs.
-	*/
-	wchar_t debug_wcs[35000];
-	MultiByteToWideChar(CP_ACP, 0, debug_str, -1, debug_wcs, 35000);
-
-
 	// find the ":" or "$" before sel_start
 	int i = sel_start - 1;
 	for (; i > sel_start - 6; i--)
-		if ((i >= 0 && debug_wcs[i] == L':' || debug_wcs[i] == L'$') && debug_wcs[i+3] != L'\n')
+		if ((i >= 0 && debug_wstr[i] == L':' || debug_wstr[i] == L'$') && debug_wstr[i+3] != L'\n')
 			break;
 	if (i > sel_start - 6)
 	{
 		wchar_t offsetBuffer[5];
-		wcsncpy(offsetBuffer, debug_wcs + i + 1, 4);
+		wcsncpy(offsetBuffer, debug_wstr + i + 1, 4);
 		offsetBuffer[4] = 0;
 		// invalidate the string if a space or \r is found in it
 		wchar_t* firstspace = wcsstr(offsetBuffer, L" ");
@@ -1572,7 +1549,7 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 			int numend;
 			if (swscanf(offsetBuffer, L"%4X", &offset) != EOF)
 			{
-				if (debug_wcs[i + 3] == L',' || debug_wcs[i+3] == L')')
+				if (debug_wstr[i + 3] == L',' || debug_wstr[i+3] == L')')
 					numend = 3;
 				else
 					numend = 5;
@@ -1602,16 +1579,16 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 			name = (wchar_t*)malloc(nameLen * sizeof(wchar_t));
 			MultiByteToWideChar(CP_ACP, 0, node->name, -1, name, nameLen);
 			if (sel_start - nameLen <= 0)
-				start_pos = debug_wcs;
+				start_pos = debug_wstr;
 			else
-				start_pos = debug_wcs + (sel_start - nameLen);
+				start_pos = debug_wstr + (sel_start - nameLen);
 			pos = wcsstr(start_pos, name);
 			free(name);
-			if (pos && pos <= debug_wcs + sel_start)
+			if (pos && pos <= debug_wstr + sel_start)
 			{
 				// clicked on the Name
 				// select the text
-				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_wcs), (LPARAM)((int)(pos - debug_wcs) + nameLen));
+				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_wstr), (LPARAM)((int)(pos - debug_wstr) + nameLen));
 				PrintOffsetToSeekAndBookmarkFields(addr);
 				return (int)addr;
 			}
@@ -1628,16 +1605,16 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 				name = (wchar_t*)malloc(nameLen * sizeof(wchar_t));
 				MultiByteToWideChar(CP_ACP, 0, node->name, -1, name, nameLen);
 				if (sel_start - nameLen <= 0)
-					start_pos = debug_wcs;
+					start_pos = debug_wstr;
 				else
-					start_pos = debug_wcs + (sel_start - nameLen);
+					start_pos = debug_wstr + (sel_start - nameLen);
 				pos = wcsstr(start_pos, name);
 				free(name);
-				if (pos && pos <= debug_wcs + sel_start)
+				if (pos && pos <= debug_wstr + sel_start)
 				{
 					// clicked on the operand name
 					// select the text
-					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_wcs), (LPARAM)((int)(pos - debug_wcs) + nameLen));
+					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_wstr), (LPARAM)((int)(pos - debug_wstr) + nameLen));
 					PrintOffsetToSeekAndBookmarkFields(addr);
 					return (int)addr;
 				}
@@ -1893,6 +1870,11 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			// Enable Context Sub-Menus
 			hDebugcontext = LoadMenu(fceu_hInstance,"DEBUGCONTEXTMENUS");
 			hDisasmcontext = LoadMenu(fceu_hInstance,"DISASMCONTEXTMENUS");
+
+			// init buffers
+			debug_wstr = (wchar_t*)malloc(16384 * sizeof(wchar_t));
+			debug_cdl_str = (char*)malloc(512);
+			debug_str_decoration_comment = (char*)malloc(NL_MAX_MULTILINE_COMMENT_LEN + 10);
 
 			// subclass editfield
 			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWLP_WNDPROC, (LONG_PTR)IDC_DEBUGGER_DISASSEMBLY_WndProc);
