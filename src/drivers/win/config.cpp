@@ -117,26 +117,27 @@ extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
 
 // owomomo: I'm tired to write those repeated words
-#define _PCS(name, suf) name##Color##suf
-#define CNRGB(name) _PCS(name, R), _PCS(name, G), _PCS(name, B)
-#define ACRGB(name) AC(_PCS(name, R)), AC(_PCS(name, G)), AC(_PCS(name, B))
+#define SBRGB(name, suf) name##Color##suf
+#define CNRGB(name) SBRGB(name, R), SBRGB(name, G), SBRGB(name, B)
+#define ACRGB(name) AC(SBRGB(name, R)), AC(SBRGB(name, G)), AC(SBRGB(name, B))
 #define OPRGB(_OP) \
-_OP(HexFore), \
-_OP(HexBack), \
-_OP(HexHlBack), \
-_OP(HexHlFore), \
+_OP(HexFore),      \
+_OP(HexBack),      \
+_OP(HexHlBack),    \
+_OP(HexHlFore),    \
 _OP(HexHlShdFore), \
 _OP(HexHlShdBack), \
-_OP(HexFreeze), \
-_OP(RomFreeze), \
-_OP(HexBound), \
-_OP(HexBookmark), \
-_OP(CdlCode), \
-_OP(CdlData), \
-_OP(CdlPcm), \
-_OP(CdlCodeData), \
-_OP(CdlRender), \
-_OP(CdlRead), \
+_OP(HexFreeze),    \
+_OP(RomFreeze),    \
+_OP(HexBound),     \
+_OP(HexBookmark),  \
+_OP(HexAddr),      \
+_OP(CdlCode),      \
+_OP(CdlData),      \
+_OP(CdlPcm),       \
+_OP(CdlCodeData),  \
+_OP(CdlRender),    \
+_OP(CdlRead),      \
 _OP(CdlRenderRead)
 #define MemViewRGB OPRGB(CNRGB)
 
