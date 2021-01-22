@@ -117,7 +117,7 @@ extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
 
 // owomomo: I'm tired to write those repeated words
-#define ACRGB(name) AC(SBCLR(name, R)), AC(SBCLR(name, G)), AC(SBCLR(name, B))
+#define ACRGB(name) AC(name##Color##R), AC(name##Color##G), AC(name##Color##B)
 #define ACOPRGB(_OP) OPHEXRGB(_OP, _COMMA), OPCDLRGB(_OP, _COMMA), OPDBGRGB(_OP, _COMMA)
 
 extern int HexRowHeightBorder;
