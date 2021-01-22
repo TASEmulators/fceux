@@ -23,7 +23,6 @@
 #include "../../cart.h" //mbg merge 7/18/06 moved beneath fceu.h
 #include "../../x6502.h"
 #include "../../debug.h"
-#include "debugger.h"
 #include "tracer.h"
 #include "cdlogger.h"
 #include "main.h" //for GetRomName()

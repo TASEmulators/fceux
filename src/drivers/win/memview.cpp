@@ -93,67 +93,9 @@ string memviewhelp = "HexEditor"; //Hex Editor Help Page
 int HexRowHeightBorder = 0;		//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
 int HexCharSpacing = 1;		// pixels between chars
 
-
-// Partial List of Color Definitions
-
-// owomomo: I'm tired to write those repeated words.
-#define OPHEXRGB(_OP, _SEP)                              \
-/* normal hex text color */                              \
-_OP(HexFore,         0,   0,   0) _SEP /* Black */       \
-/* normal hex background color */                        \
-_OP(HexBack,       255, 255, 255) _SEP /* White */       \
-/* highlight hex text color */                           \
-_OP(HexHlFore,     255, 255, 255) _SEP /* White */       \
-/* highlight hex background color */                     \
-_OP(HexHlBack,       0,   0,   0) _SEP /* Black */       \
-/* unfocused highlight hex text color */                 \
-_OP(HexHlShdFore,    0,   0,   0) _SEP /* Black */       \
-/* unfocused highlight hex background color */           \
-_OP(HexHlShdBack,  224, 224, 224) _SEP /* Grey */        \
-/* freezed color */                                      \
-_OP(HexFreeze,       0,   0, 255) _SEP /* Blue */        \
-/* freezed color in ROM */                               \
-_OP(RomFreeze,     255,   0,   0) _SEP /* Red */         \
-/* hex color out of bounds */                            \
-_OP(HexBound,      220, 220, 220) _SEP /* Grey */        \
-/* bookmark color */                                     \
-_OP(HexBookmark,     0, 204,   0) _SEP /* Light green */ \
-/* address header color*/                                \
-_OP(HexAddr,       128, 128, 128)      /* Dark grey */
-
-#define OPCDLRGB(_OP, _SEP)                              \
-/* Logged as code */                                     \
-_OP(CdlCode,       160, 140,   0) _SEP /* Dark yellow */ \
-/* Logged as data */                                     \
-_OP(CdlData,         0,   0, 210) _SEP /* Blue */        \
-/* Logged as PCM */                                      \
-_OP(CdlPcm,          0, 130, 160) _SEP /* Cyan */        \
-/* Logged as code and data */                            \
-_OP(CdlCodeData,     0, 190,   0) _SEP /* Green */       \
-/* Rendered */                                           \
-_OP(CdlRender,     210, 190,   0) _SEP /* Yellow */      \
-/* Read */                                               \
-_OP(CdlRead,        15,  15, 255) _SEP /* Light blue */  \
-/* Rendered and read */                                  \
-_OP(CdlRenderRead,   5, 255,   5)      /* Light green */
-
-
-#define _COMMA ,
-
-#define SBRGB(name, suf) name##Color##suf
-#define SPRGB(pf, name, suf) pf SBRGB(name, suf)
-#define CSRGB(pf, name, suf, op, val) SPRGB(pf, name, suf)##op##val
-#define CNRGB(pf, name, r, g, b, op, sep) CSRGB(pf, name, R, op, r) sep CSRGB(pf, name, G, op, g) sep CSRGB(pf, name, B, op, b)
-
-#define DEFRGB(name, r, g, b) CNRGB( , name, r, g, b, =, _COMMA)
-#define CMPRGB(name, r, g, b) CNRGB( , name, r, g, b, ==, &&)
-
-
-#define DefHexRGB OPHEXRGB(DEFRGB, _COMMA)
 #define RestoreDefaultHexColor() (DefHexRGB)
 #define IsHexColorDefault() (OPHEXRGB(CMPRGB, &&))
 
-#define DefCdlRGB OPCDLRGB(DEFRGB, _COMMA)
 #define RestoreDefaultCdlColor() (DefCdlRGB)
 #define IsCdlColorDefault() (OPCDLRGB(CMPRGB, &&))
 
@@ -217,8 +159,6 @@ cdlcolormenu[] = {
 
 #define HEXCOLORMENUNUM (sizeof hexcolormenu / sizeof hexcolormenu[0])
 #define CDLCOLORMENUNUM (sizeof cdlcolormenu / sizeof cdlcolormenu[0])
-
-#define MKRGB(name) (RGB(SBRGB(name, R), SBRGB(name, G), SBRGB(name, B)))
 
 #define COLORITEMNUM ();
 
@@ -2502,7 +2442,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			memset(&choose, 0, sizeof(CHOOSECOLOR));
 			choose.lStructSize = sizeof(CHOOSECOLOR);
 			choose.hwndOwner = hwnd;
-			choose.rgbResult = RGB(*cdlcolormenu[index].r, *cdlcolormenu[index].g, *cdlcolormenu[index].b);
+			choose.rgbResult = backup;
 			choose.lpCustColors = ref;
 			choose.Flags = CC_RGBINIT | CC_FULLOPEN | CC_ANYCOLOR;
 			if (ChooseColor(&choose) && choose.rgbResult != backup)

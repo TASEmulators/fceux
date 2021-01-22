@@ -85,11 +85,25 @@ char* debug_str_decoration_comment;
 char* debug_decoration_comment;
 char* debug_decoration_comment_end_pos;
 
-CHARFORMAT2 mnem;
-CHARFORMAT2 oper;
-CHARFORMAT2 comm;
 FINDTEXT newline;
 FINDTEXT num;
+
+#define SBCF(name) SBT(name, ChFmt)
+#define MKCF(name) &##SBCF(name)
+#define INITCF(name, r, g, b)                  \
+(memset(MKCF(name), 0, sizeof(SBCF(name))),     \
+SBCF(name).cbSize = sizeof(SBCF(name)),        \
+SBCF(name).dwMask = CFM_COLOR,                 \
+SBCF(name).crTextColor = RGB(r, g, b))
+
+#define DefDbgCharFmt OPDBGRGB(SBCF, _COMMA)
+#define InitDbgCharFormat() (OPDBGRGB(INITCF, _COMMA))
+
+#define RestoreDefaultDebugColor() (DefDbgRGB)
+#define IsDebugColorDefault() (OPDBGRGB(CMPRGB, &&))
+
+int DefDbgRGB;
+CHARFORMAT2 DefDbgCharFmt;
 
 // this is used to keep track of addresses that lines of Disassembly window correspond to
 std::vector<uint16> disassembly_addresses;
@@ -418,12 +432,7 @@ void HighlightPC()
 		int old_start, old_end;
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)start, (LPARAM)start+20);
-		CHARFORMAT2 cf;
-		memset(&cf, 0, sizeof cf);
-		cf.cbSize = sizeof cf;
-		cf.dwMask = CFM_COLOR;
-		cf.crTextColor = RGB(0,0,255);
-		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&cf);
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgPC));
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
     }
 }
@@ -459,16 +468,34 @@ void HighlightSyntax(int lines)
 		if (debug_wstr[newline.chrg.cpMin - 2] == L':')
 		{
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)oldline, (LPARAM)newline.chrg.cpMin);
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&mnem);
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgSym));
 			continue;
 		}
 		if (!commentline)
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&mnem);
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgMnem));
 		// comment
 		if (opbreak < newline.chrg.cpMin)
 		{
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)opbreak, (LPARAM)newline.chrg.cpMin);
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&comm);
+			if (commentline)
+				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgComm));
+			else
+			{
+				if (debug_wstr[opbreak] == L'-')
+					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION,
+						(LPARAM)MKCF(DbgRts));
+				else
+				{
+					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgOpComm));
+					if (debug_wstr[opbreak] == L'@')
+					{
+						// effective address
+						FINDTEXT ft = { { opbreak, newline.chrg.cpMin }, "=" };
+						SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, opbreak, SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft));
+						SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgEff));
+					}
+				}
+			}
 		}
 		if (commentline)
 			continue;
@@ -485,7 +512,7 @@ void HighlightSyntax(int lines)
 			else
 				wordbreak = numpos + 4;
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)numpos, (LPARAM)wordbreak + 1);
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)&oper);
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgOper));
 		}
 		if (newline.chrg.cpMin == 0)
 			break;
@@ -2600,30 +2627,7 @@ void DebugSystem::init()
 	hDisasmFont = debuggerIDAFont ? hIDAFont : hFixedFont;
 	disasmFontHeight = debuggerIDAFont ? IDAFontSize : fixedFontHeight;
 
-	memset(&mnem, 0, sizeof mnem);
-	mnem.cbSize = sizeof mnem;
-	//if (!debuggerIDAFont)
-	//{
-	//	mnem.dwMask = CFM_COLOR | CFM_BOLD;
-	//	mnem.dwEffects = CFE_BOLD;
-	//} else
-	mnem.dwMask = CFM_COLOR;
-	mnem.crTextColor = RGB(0,0,128);
-
-	memset(&oper, 0, sizeof oper);
-	oper.cbSize = sizeof oper;
-	//if (!debuggerIDAFont)
-	//{
-	//	oper.dwMask = CFM_COLOR | CFM_BOLD;
-	//	oper.dwEffects = CFE_BOLD;
-	//} else
-	oper.dwMask = CFM_COLOR;
-	oper.crTextColor = RGB(0,128,0);
-
-	memset(&comm, 0, sizeof comm);
-	comm.cbSize = sizeof comm;
-	comm.dwMask = CFM_COLOR;
-	comm.crTextColor = RGB(128,128,128);
+	InitDbgCharFormat();
 
 	newline.lpstrText  = "\r";
 	newline.chrg.cpMin = 0;

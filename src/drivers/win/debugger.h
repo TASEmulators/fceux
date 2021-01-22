@@ -72,4 +72,88 @@ public:
 // extern WNDPROC DefaultEditCtrlProc;
 // extern INT_PTR APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP);
 
+#define _COMMA ,
+#define SBT(name, suf) name##suf
+#define SBCLR(name, suf) SBT(name, Color)##suf
+#define SPCLR(pf, name, suf) pf SBCLR(name, suf)
+#define CSCLR(pf, name, suf, op, val) SPCLR(pf, name, suf)##op##val
+#define CNRGB(pf, name, op, r, g, b, sep) CSCLR(pf, name, R, op, r) sep CSCLR(pf, name, G, op, g) sep CSCLR(pf, name, B, op, b)
+#define MKRGB(name) (RGB(SBCLR(name, R), SBCLR(name, G), SBCLR(name, B)))
+#define DEFRGB(name, r, g, b) CNRGB( , name, =, r, g, b, _COMMA)
+#define EXTDEFRGB(name, r, g, b) CNRGB( , name, , , , , _COMMA)
+#define CMPRGB(name, r, g, b) CNRGB( , name, ==, r, g, b, &&)
+
+
+// Partial List of Color Definitions
+
+// owomomo: I'm tired to write those repeated words.
+#define OPHEXRGB(_OP, _SEP)                              \
+/* normal hex text color */                              \
+_OP(HexFore,         0,   0,   0) _SEP /* Black */       \
+/* normal hex background color */                        \
+_OP(HexBack,       255, 255, 255) _SEP /* White */       \
+/* highlight hex text color */                           \
+_OP(HexHlFore,     255, 255, 255) _SEP /* White */       \
+/* highlight hex background color */                     \
+_OP(HexHlBack,       0,   0,   0) _SEP /* Black */       \
+/* unfocused highlight hex text color */                 \
+_OP(HexHlShdFore,    0,   0,   0) _SEP /* Black */       \
+/* unfocused highlight hex background color */           \
+_OP(HexHlShdBack,  224, 224, 224) _SEP /* Grey */        \
+/* freezed color */                                      \
+_OP(HexFreeze,       0,   0, 255) _SEP /* Blue */        \
+/* freezed color in ROM */                               \
+_OP(RomFreeze,     255,   0,   0) _SEP /* Red */         \
+/* hex color out of bounds */                            \
+_OP(HexBound,      220, 220, 220) _SEP /* Grey */        \
+/* bookmark color */                                     \
+_OP(HexBookmark,     0, 204,   0) _SEP /* Light green */ \
+/* address header color*/                                \
+_OP(HexAddr,       128, 128, 128)      /* Dark grey */
+
+#define OPCDLRGB(_OP, _SEP)                              \
+/* Logged as code */                                     \
+_OP(CdlCode,       160, 140,   0) _SEP /* Dark yellow */ \
+/* Logged as data */                                     \
+_OP(CdlData,         0,   0, 210) _SEP /* Blue */        \
+/* Logged as PCM */                                      \
+_OP(CdlPcm,          0, 130, 160) _SEP /* Cyan */        \
+/* Logged as code and data */                            \
+_OP(CdlCodeData,     0, 190,   0) _SEP /* Green */       \
+/* Rendered */                                           \
+_OP(CdlRender,     210, 190,   0) _SEP /* Yellow */      \
+/* Read */                                               \
+_OP(CdlRead,        15,  15, 255) _SEP /* Light blue */  \
+/* Rendered and read */                                  \
+_OP(CdlRenderRead,   5, 255,   5)      /* Light green */
+
+// Debugger color list
+
+// owomomo: the configurable colors
+#define OPDBGRGB(_OP, _SEP)                        \
+/* PC */                                           \
+_OP(DbgPC,       0,   0, 255) _SEP /* Blue */      \
+/* Mnemonic */                                     \
+_OP(DbgMnem,     0,   0, 128) _SEP /* Dark blue */ \
+/* Operand */                                      \
+_OP(DbgOper,     0, 128,   0) _SEP /* Green */     \
+/* Comment */                                      \
+_OP(DbgComm,   128, 128, 128) _SEP /* Grey */      \
+/* Operand comment */                              \
+_OP(DbgOpComm, 128, 128, 255) _SEP /* Purple */    \
+/* Symbolic name */                                \
+_OP(DbgSym,     34,  75, 143) _SEP /* Rurikon */   \
+/* Effective address */                            \
+_OP(DbgEff,    106, 109, 169) _SEP /* Fujinando */ \
+/* RTS */                                          \
+_OP(DbgRts,    187,  80,  93)      /* Imayou */
+
+#define DefHexRGB OPHEXRGB(DEFRGB, _COMMA)
+#define DefCdlRGB OPCDLRGB(DEFRGB, _COMMA)
+#define DefDbgRGB OPDBGRGB(DEFRGB, _COMMA)
+
+#define ExtDefRGB OPHEXRGB(EXTDEFRGB, _COMMA), OPCDLRGB(EXTDEFRGB, _COMMA), OPDBGRGB(EXTDEFRGB, _COMMA)
+
+extern int ExtDefRGB;
+
 #endif

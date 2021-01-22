@@ -117,32 +117,10 @@ extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
 
 // owomomo: I'm tired to write those repeated words
-#define SBRGB(name, suf) name##Color##suf
-#define CNRGB(name) SBRGB(name, R), SBRGB(name, G), SBRGB(name, B)
-#define ACRGB(name) AC(SBRGB(name, R)), AC(SBRGB(name, G)), AC(SBRGB(name, B))
-#define OPRGB(_OP) \
-_OP(HexFore),      \
-_OP(HexBack),      \
-_OP(HexHlBack),    \
-_OP(HexHlFore),    \
-_OP(HexHlShdFore), \
-_OP(HexHlShdBack), \
-_OP(HexFreeze),    \
-_OP(RomFreeze),    \
-_OP(HexBound),     \
-_OP(HexBookmark),  \
-_OP(HexAddr),      \
-_OP(CdlCode),      \
-_OP(CdlData),      \
-_OP(CdlPcm),       \
-_OP(CdlCodeData),  \
-_OP(CdlRender),    \
-_OP(CdlRead),      \
-_OP(CdlRenderRead)
-#define MemViewRGB OPRGB(CNRGB)
+#define ACRGB(name) AC(SBCLR(name, R)), AC(SBCLR(name, G)), AC(SBCLR(name, B))
+#define ACOPRGB(_OP) OPHEXRGB(_OP, _COMMA), OPCDLRGB(_OP, _COMMA), OPDBGRGB(_OP, _COMMA)
 
 extern int HexRowHeightBorder;
-extern int MemViewRGB;
 extern int importBookmarkProps;
 
 //adelikat:  Hacky fix for Ram Watch recent menu
@@ -456,8 +434,8 @@ static CFGSTRUCT fceuconfig[] =
 	AC(fullscreenByDoubleclick),
 	AC(CurrentState),
 	AC(HexRowHeightBorder),
-	OPRGB(ACRGB),
 	AC(importBookmarkProps),
+	ACOPRGB(ACRGB),
 	//ACS(memwLastfile[2048]),
 
 	AC(AutoRWLoad),
