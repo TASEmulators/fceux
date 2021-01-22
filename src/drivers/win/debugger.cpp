@@ -89,18 +89,15 @@ FINDTEXT newline;
 FINDTEXT num;
 
 #define SBCF(name) SBT(name, ChFmt)
-#define MKCF(name) &##SBCF(name)
-#define INITCF(name, r, g, b)                  \
-(memset(MKCF(name), 0, sizeof(SBCF(name))),     \
-SBCF(name).cbSize = sizeof(SBCF(name)),        \
-SBCF(name).dwMask = CFM_COLOR,                 \
+#define INITCF(name, r, g, b)               \
+(memset(MKCF(name), 0, sizeof(SBCF(name))), \
+SBCF(name).cbSize = sizeof(SBCF(name)),     \
+SBCF(name).dwMask = CFM_COLOR,              \
 SBCF(name).crTextColor = RGB(r, g, b))
+#define MKCF(name) &##SBCF(name)
 
 #define DefDbgCharFmt OPDBGRGB(SBCF, _COMMA)
 #define InitDbgCharFormat() (OPDBGRGB(INITCF, _COMMA))
-
-#define RestoreDefaultDebugColor() (DefDbgRGB)
-#define IsDebugColorDefault() (OPDBGRGB(CMPRGB, &&))
 
 int DefDbgRGB;
 CHARFORMAT2 DefDbgCharFmt;

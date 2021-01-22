@@ -69,23 +69,7 @@ public:
 
 } *debugSystem;
 
-// extern WNDPROC DefaultEditCtrlProc;
-// extern INT_PTR APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP);
-
-#define _COMMA ,
-#define SBT(name, suf) name##suf
-#define SBCLR(name, suf) SBT(name, Color)##suf
-#define SPCLR(pf, name, suf) pf SBCLR(name, suf)
-#define CSCLR(pf, name, suf, op, val) SPCLR(pf, name, suf)##op##val
-#define CNRGB(pf, name, op, r, g, b, sep) CSCLR(pf, name, R, op, r) sep CSCLR(pf, name, G, op, g) sep CSCLR(pf, name, B, op, b)
-#define MKRGB(name) (RGB(SBCLR(name, R), SBCLR(name, G), SBCLR(name, B)))
-#define DEFRGB(name, r, g, b) CNRGB( , name, =, r, g, b, _COMMA)
-#define EXTDEFRGB(name, r, g, b) CNRGB( , name, , , , , _COMMA)
-#define CMPRGB(name, r, g, b) CNRGB( , name, ==, r, g, b, &&)
-
-
 // Partial List of Color Definitions
-
 // owomomo: I'm tired to write those repeated words.
 #define OPHEXRGB(_OP, _SEP)                              \
 /* normal hex text color */                              \
@@ -128,7 +112,6 @@ _OP(CdlRead,        15,  15, 255) _SEP /* Light blue */  \
 _OP(CdlRenderRead,   5, 255,   5)      /* Light green */
 
 // Debugger color list
-
 // owomomo: the configurable colors
 #define OPDBGRGB(_OP, _SEP)                        \
 /* PC */                                           \
@@ -148,12 +131,35 @@ _OP(DbgEff,    106, 109, 169) _SEP /* Fujinando */ \
 /* RTS */                                          \
 _OP(DbgRts,    187,  80,  93)      /* Imayou */
 
-#define DefHexRGB OPHEXRGB(DEFRGB, _COMMA)
-#define DefCdlRGB OPCDLRGB(DEFRGB, _COMMA)
-#define DefDbgRGB OPDBGRGB(DEFRGB, _COMMA)
+#define _COMMA ,
+#define SBT(name, suf) name##suf
+#define SBCLR(name, suf) SBT(name, Color)##suf
+#define SPCLR(pf, name, suf) pf SBCLR(name, suf)
+#define CSCLR(pf, name, suf, op, val) SPCLR(pf, name, suf)##op##val
+#define CNRGB(pf, name, op, r, g, b, sep) CSCLR(pf, name, R, op, r) sep CSCLR(pf, name, G, op, g) sep CSCLR(pf, name, B, op, b)
+#define MKRGB(name) (RGB(SBCLR(name, R), SBCLR(name, G), SBCLR(name, B)))
+#define DEFRGB(name, r, g, b) CNRGB( , name, =, r, g, b, _COMMA)
+#define DCLRGB(name, r, g, b) CNRGB( , name, , , , , _COMMA)
+#define CMPRGB(name, r, g, b) CNRGB( , name, ==, r, g, b, &&)
 
-#define ExtDefRGB OPHEXRGB(EXTDEFRGB, _COMMA), OPCDLRGB(EXTDEFRGB, _COMMA), OPDBGRGB(EXTDEFRGB, _COMMA)
+#define RGBOP DCLRGB
 
-extern int ExtDefRGB;
+#define DefHexRGB OPHEXRGB(RGBOP, _COMMA)
+#define DefCdlRGB OPCDLRGB(RGBOP, _COMMA)
+#define DefDbgRGB OPDBGRGB(RGBOP, _COMMA)
+
+extern int DefHexRGB, DefCdlRGB, DefDbgRGB;
+
+#undef RGBOP
+#define RGBOP DEFRGB
+
+#define RestoreDefaultDebugColor() (DefDbgRGB)
+#define IsDebugColorDefault() (OPDBGRGB(CMPRGB, &&))
+
+#define RestoreDefaultHexColor() (DefHexRGB)
+#define IsHexColorDefault() (OPHEXRGB(CMPRGB, &&))
+
+#define RestoreDefaultCdlColor() (DefCdlRGB)
+#define IsCdlColorDefault() (OPCDLRGB(CMPRGB, &&))
 
 #endif

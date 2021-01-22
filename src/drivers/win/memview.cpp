@@ -93,12 +93,6 @@ string memviewhelp = "HexEditor"; //Hex Editor Help Page
 int HexRowHeightBorder = 0;		//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
 int HexCharSpacing = 1;		// pixels between chars
 
-#define RestoreDefaultHexColor() (DefHexRGB)
-#define IsHexColorDefault() (OPHEXRGB(CMPRGB, &&))
-
-#define RestoreDefaultCdlColor() (DefCdlRGB)
-#define IsCdlColorDefault() (OPCDLRGB(CMPRGB, &&))
-
 int DefHexRGB, DefCdlRGB;
 
 // This defines all of our right click popup menus
