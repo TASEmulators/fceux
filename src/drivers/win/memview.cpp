@@ -1264,9 +1264,9 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		HMENU hilightMenu = GetSubMenu(menu, HIGHLIGHTING_SUBMENU_POS);
 
-		for (int i = 0; i < 2; ++i)
-			for (int j = 0; j < sizeof(colormenu) / sizeof(COLORMENU); ++j)
-				InsertMenu(menu, i, MF_BYPOSITION | (colormenu[i].items[j].text ? MF_STRING : MF_SEPARATOR), colormenu[i].base_id + j, (LPCSTR)colormenu[i].items[j].text);
+		for (int i = 0; i < sizeof(colormenu) / sizeof(colormenu[0]); ++i)
+			for (int j = 0; j < colormenu[i].size; ++j)
+				InsertMenu(GetSubMenu(hilightMenu, colormenu[i].sub), j, MF_BYPOSITION | (colormenu[i].items[j].text ? MF_STRING : MF_SEPARATOR), colormenu[i].base_id + j, (LPCSTR)colormenu[i].items[j].text);
 	}
 	return 0;
 	case WM_PAINT:

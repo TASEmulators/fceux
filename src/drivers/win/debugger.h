@@ -123,7 +123,7 @@ _OP(DbgOper,     0, 128,   0) _SEP /* Green */     \
 /* Comment */                                      \
 _OP(DbgComm,   128, 128, 128) _SEP /* Grey */      \
 /* Operand note */                                 \
-_OP(DbgOpNt, 128, 128, 255) _SEP /* Purple */      \
+_OP(DbgOpNt, 128, 128, 255)   _SEP /* Purple */    \
 /* Symbolic name */                                \
 _OP(DbgSym,     34,  75, 143) _SEP /* Rurikon */   \
 /* Effective address */                            \
@@ -136,7 +136,7 @@ _OP(DbgRts,    187,  80,  93)      /* Imayou */
 
 #define SBCLR(name, suf) SBT(name, Color)##suf
 #define SPCLR(pf, name, suf) pf SBCLR(name, suf)
-#define CSCLR(pf, name, suf, op, val) SPCLR(pf, name, suf)##op##val
+#define CSCLR(pf, name, suf, op, val) SPCLR(pf, name, suf) op val
 #define CNRGB(pf, name, op, r, g, b, sep) CSCLR(pf, name, R, op, r) sep CSCLR(pf, name, G, op, g) sep CSCLR(pf, name, B, op, b)
 #define PPRGB(name) CNRGB(&, name, , , , , _COMMA)
 #define MKRGB(name) (RGB(SBCLR(name, R), SBCLR(name, G), SBCLR(name, B)))
@@ -146,14 +146,13 @@ _OP(DbgRts,    187,  80,  93)      /* Imayou */
 
 #define SBCF(name) SBT(name, ChFmt)
 #define PPCF(name) &SBCF(name)
-#define DEFCF(name) (SBCF(name).crTextColor = MKRGB(name))
-#define PPCCF(name) PPRGB(name),PPCF(name)
-#define INITCF(name, r, g, b)               \
-(memset(MKCF(name), 0, sizeof(SBCF(name))), \
+#define DEFCF(name, r, g, b) (DEFRGB(name, r, g, b), SBCF(name).crTextColor = RGB(r, g, b))
+#define PPCCF(name) PPRGB(name), PPCF(name)
+#define INITCF(name)                        \
+(memset(PPCF(name), 0, sizeof(SBCF(name))), \
 SBCF(name).cbSize = sizeof(SBCF(name)),     \
 SBCF(name).dwMask = CFM_COLOR,              \
-DEFCF(name))
-#define MKCF(name) &##SBCF(name)
+SBCF(name).crTextColor = MKRGB(name))
 
 #define RGBOP DCLRGB
 
@@ -174,7 +173,7 @@ extern int DefHexRGB, DefCdlRGB, DefDbgRGB;
 #define IsCdlColorDefault() (!(OPCDLRGB(CMPRGB, ||)))
 
 #define InitDbgCharFormat() (OPDBGRGB(INITCF, _COMMA))
-#define RestoreDefaultDebugColor() ((DefDbgRGB),(OPDBGRGB(DEFCF, _COMMA)))
+#define RestoreDefaultDebugColor() (OPDBGRGB(DEFCF, _COMMA))
 #define IsDebugColorDefault() (!(OPDBGRGB(CMPRGB, ||)))
 
 #endif

@@ -441,7 +441,7 @@ void HighlightPC()
 		int old_start, old_end;
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)start, (LPARAM)start+20);
-		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgPC));
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgPC));
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
     }
 }
@@ -477,31 +477,31 @@ void HighlightSyntax(int lines)
 		if (debug_wstr[newline.chrg.cpMin - 2] == L':')
 		{
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)oldline, (LPARAM)newline.chrg.cpMin);
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgSym));
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgSym));
 			continue;
 		}
 		if (!commentline)
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgMnem));
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgMnem));
 		// comment
 		if (opbreak < newline.chrg.cpMin)
 		{
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)opbreak, (LPARAM)newline.chrg.cpMin);
 			if (commentline)
-				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgComm));
+				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgComm));
 			else
 			{
 				if (debug_wstr[opbreak] == L'-')
 					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION,
-						(LPARAM)MKCF(DbgRts));
+						(LPARAM)PPCF(DbgRts));
 				else
 				{
-					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgOpNt));
+					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgOpNt));
 					if (debug_wstr[opbreak] == L'@')
 					{
 						// effective address
 						FINDTEXT ft = { { opbreak, newline.chrg.cpMin }, "=" };
 						SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, opbreak, SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft));
-						SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgEff));
+						SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgEff));
 					}
 				}
 			}
@@ -521,7 +521,7 @@ void HighlightSyntax(int lines)
 			else
 				wordbreak = numpos + 4;
 			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)numpos, (LPARAM)wordbreak + 1);
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)MKCF(DbgOper));
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgOper));
 		}
 		if (newline.chrg.cpMin == 0)
 			break;
