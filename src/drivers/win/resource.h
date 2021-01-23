@@ -591,6 +591,7 @@
 #define IDC_COMBO1                      1042
 #define MW_ADDR14                       1043
 #define IDC_SYSTEM_EXTEND_COMBO         1043
+#define IDC_DEBUGGER_SYNTAX_HIGHLIGHT   1043
 #define MW_VAL14                        1044
 #define MW_NAME15                       1045
 #define MW_ADDR15                       1046
@@ -1213,7 +1214,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        312
 #define _APS_NEXT_COMMAND_VALUE         40011
-#define _APS_NEXT_CONTROL_VALUE         1043
+#define _APS_NEXT_CONTROL_VALUE         1044
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

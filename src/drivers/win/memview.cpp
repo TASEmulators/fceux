@@ -119,42 +119,42 @@ popupmenu[] =
 };
 
 #define POPUPNUM (sizeof popupmenu / sizeof popupmenu[0])
-
 // The color configure menu
-#define PPRGB(name) CNRGB(&, name, , , , , _COMMA)
-struct {
-	int *r, *g, *b;
-	char* text;
-}
-hexcolormenu[] = {
-	{ PPRGB(HexFore),       "Normal text" },
-	{ PPRGB(HexAddr),       "Address header"},
-//	{ PPRGB(HexBack),       "Normal text background"}
-	{ 0, 0, 0,              NULL },
-	{ PPRGB(HexHlFore),     "Selected text" },
-	{ PPRGB(HexHlBack),     "Selected background" },
-	{ PPRGB(HexHlShdFore),  "Selected text (unfocused)" },
-	{ PPRGB(HexHlShdBack),  "Selected background (unfocused)" },
-	{ 0, 0, 0,              NULL },
-	{ PPRGB(HexFreeze),     "Freezed address"},
-//  { PPRGB(RomFreeze),     "Freezed ROM address"},
-	{ PPRGB(HexBookmark),   "Bookmark"},
+COLORMENU hexcolormenu[] = {
+	{ "Normal text",                     PPRGB(HexFore)      },
+	{ "Address header",                  PPRGB(HexAddr)      },
+//	{ "Normal text background",          PPRGB(HexBack)      },
+	{ NULL,                              0, 0, 0             },
+	{ "Selected text",                   PPRGB(HexHlFore)    },
+	{ "Selected background",             PPRGB(HexHlBack)    },
+	{ "Selected text (unfocused)",       PPRGB(HexHlShdFore) },
+	{ "Selected background (unfocused)", PPRGB(HexHlShdBack) },
+	{ NULL,                              0, 0, 0             },
+	{ "Freezed address",                 PPRGB(HexFreeze),   },
+//  { "Freezed ROM address",             PPRGB(RomFreeze),   },
+	{ "Bookmark",                        PPRGB(HexBookmark)  }
 },
 cdlcolormenu[] = {
-	{ PPRGB(CdlCode),       "Code"},
-	{ PPRGB(CdlData),       "Data"},
-	{ PPRGB(CdlPcm),        "PCM Data"},
-	{ PPRGB(CdlCodeData),   "Code && Data"},
-	{ 0, 0, 0,              NULL },
-	{ PPRGB(CdlRender),     "Render"},
-	{ PPRGB(CdlRead),       "Read"},
-	{ PPRGB(CdlRenderRead), "Render && Read"}
+	{ "Code",           PPRGB(CdlCode)       },
+	{ "Data",           PPRGB(CdlData)       },
+	{ "PCM Data",       PPRGB(CdlPcm)        },
+	{ "Code && Data",   PPRGB(CdlCodeData)   },
+	{ NULL,             0, 0, 0              },
+	{ "Render",         PPRGB(CdlRender)     },
+	{ "Read",           PPRGB(CdlRead)       },
+	{ "Render && Read", PPRGB(CdlRenderRead) }
 };
 
-#define HEXCOLORMENUNUM (sizeof hexcolormenu / sizeof hexcolormenu[0])
-#define CDLCOLORMENUNUM (sizeof cdlcolormenu / sizeof cdlcolormenu[0])
-
-#define COLORITEMNUM ();
+struct {
+	COLORMENU* items;
+	int base_id;
+	int sub;
+	int size;
+} colormenu[] =
+{
+	{ hexcolormenu, ID_COLOR_HEXEDITOR, 4, sizeof(hexcolormenu) / sizeof(hexcolormenu[0]) },
+	{ cdlcolormenu, ID_COLOR_CDLOGGER, 5, sizeof(cdlcolormenu) / sizeof(cdlcolormenu[0]) }
+};
 
 int LoadTableFile();
 void UnloadTableFile();
@@ -1264,13 +1264,9 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		HMENU hilightMenu = GetSubMenu(menu, HIGHLIGHTING_SUBMENU_POS);
 
-		HMENU hexColorMenu = GetSubMenu(hilightMenu, HEXEDITOR_COLOR_SUBMENU_POS);
-		for (int i = 0; i < HEXCOLORMENUNUM; ++i)
-			InsertMenu(hexColorMenu, i, MF_BYPOSITION | (hexcolormenu[i].text ? MF_STRING : MF_SEPARATOR), ID_COLOR_HEXEDITOR + i, hexcolormenu[i].text);
-
-		HMENU cdlColorMenu = GetSubMenu(hilightMenu, CDLOGGER_COLOR_SUBMENU_POS);
-		for (int i = 0; i < CDLCOLORMENUNUM; ++i)
-			InsertMenu(cdlColorMenu, i, MF_BYPOSITION | (cdlcolormenu[i].text ? MF_STRING : MF_SEPARATOR), ID_COLOR_CDLOGGER + i, cdlcolormenu[i].text);
+		for (int i = 0; i < 2; ++i)
+			for (int j = 0; j < sizeof(colormenu) / sizeof(COLORMENU); ++j)
+				InsertMenu(menu, i, MF_BYPOSITION | (colormenu[i].items[j].text ? MF_STRING : MF_SEPARATOR), colormenu[i].base_id + j, (LPCSTR)colormenu[i].items[j].text);
 	}
 	return 0;
 	case WM_PAINT:
@@ -2392,31 +2388,17 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case ID_COLOR_HEXEDITOR + 7:
 		case ID_COLOR_HEXEDITOR + 8:
 		case ID_COLOR_HEXEDITOR + 9:
-		{
-			int index = wParam - ID_COLOR_HEXEDITOR;
-			int backup = RGB(*hexcolormenu[index].r, *hexcolormenu[index].g, *hexcolormenu[index].b);
-			CHOOSECOLOR choose;
-			memset(&choose, 0, sizeof(CHOOSECOLOR));
-			choose.lStructSize = sizeof(CHOOSECOLOR);
-			choose.hwndOwner = hwnd;
-			choose.rgbResult = backup;
-			choose.lpCustColors = ref;
-			choose.Flags = CC_RGBINIT | CC_FULLOPEN | CC_ANYCOLOR;
-			if (ChooseColor(&choose) && choose.rgbResult != backup)
-			{
-				*hexcolormenu[index].r = GetRValue(choose.rgbResult);
-				*hexcolormenu[index].g = GetGValue(choose.rgbResult);
-				*hexcolormenu[index].b = GetBValue(choose.rgbResult);
+			if (ChangeColor(hwnd, &hexcolormenu[wParam - ID_COLOR_HEXEDITOR], ref))
 				UpdateColorTable();
-			}
-		}
 		break;
 		case ID_HEXEDITOR_DEFCOLOR:
-			if (!IsHexColorDefault() && MessageBox(hwnd, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
+		{
+			if (IsHexColorDefault() && MessageBox(hwnd, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
 			{
 				RestoreDefaultHexColor();
 				UpdateColorTable();
 			}
+		}
 		break;
 		case ID_COLOR_CDLOGGER:
 		case ID_COLOR_CDLOGGER + 1:
@@ -2428,32 +2410,15 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case ID_COLOR_CDLOGGER + 7:
 		case ID_COLOR_CDLOGGER + 8:
 		case ID_COLOR_CDLOGGER + 9:
-		{
-			int index = wParam - ID_COLOR_CDLOGGER;
-			int backup = RGB(*cdlcolormenu[index].r, *cdlcolormenu[index].g, *cdlcolormenu[index].b);
-
-			CHOOSECOLOR choose;
-			memset(&choose, 0, sizeof(CHOOSECOLOR));
-			choose.lStructSize = sizeof(CHOOSECOLOR);
-			choose.hwndOwner = hwnd;
-			choose.rgbResult = backup;
-			choose.lpCustColors = ref;
-			choose.Flags = CC_RGBINIT | CC_FULLOPEN | CC_ANYCOLOR;
-			if (ChooseColor(&choose) && choose.rgbResult != backup)
-			{
-				*cdlcolormenu[index].r = GetRValue(choose.rgbResult);
-				*cdlcolormenu[index].g = GetGValue(choose.rgbResult);
-				*cdlcolormenu[index].b = GetBValue(choose.rgbResult);
+			if (ChangeColor(hwnd, &cdlcolormenu[wParam - ID_COLOR_CDLOGGER], ref))
 				UpdateColorTable();
-			}
-		}
 		break;
 		case ID_CDLOGGER_DEFCOLOR:
-			if (!IsCdlColorDefault() && MessageBox(hwnd, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
-			{
-				RestoreDefaultCdlColor();
-				UpdateColorTable();
-			}
+		if (IsCdlColorDefault() && MessageBox(hwnd, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
+		{
+			RestoreDefaultCdlColor();
+			UpdateColorTable();
+		}
 		break;
 		case MENU_MV_BOOKMARKS_RM_ALL:
 			if (hexBookmarks.bookmarkCount)
@@ -3250,4 +3215,25 @@ void SwitchEditingText(int editingText) {
 		}
 		EditingText = editingText;
 	}
+}
+
+bool ChangeColor(HWND hwnd, COLORMENU* item, COLORREF* ref)
+{
+	int backup = RGB(*item->r, *item->g, *item->b);
+	CHOOSECOLOR choose;
+	memset(&choose, 0, sizeof(CHOOSECOLOR));
+	choose.lStructSize = sizeof(CHOOSECOLOR);
+	choose.hwndOwner = hwnd;
+	choose.rgbResult = backup;
+	choose.lpCustColors = ref;
+	choose.Flags = CC_RGBINIT | CC_FULLOPEN | CC_ANYCOLOR;
+	if (ChooseColor(&choose) && choose.rgbResult != backup)
+	{
+		*item->r = GetRValue(choose.rgbResult);
+		*item->g = GetGValue(choose.rgbResult);
+		*item->b = GetBValue(choose.rgbResult);
+		return true;
+	}
+	return false;
+
 }

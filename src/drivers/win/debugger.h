@@ -122,8 +122,8 @@ _OP(DbgMnem,     0,   0, 128) _SEP /* Dark blue */ \
 _OP(DbgOper,     0, 128,   0) _SEP /* Green */     \
 /* Comment */                                      \
 _OP(DbgComm,   128, 128, 128) _SEP /* Grey */      \
-/* Operand comment */                              \
-_OP(DbgOpComm, 128, 128, 255) _SEP /* Purple */    \
+/* Operand note */                                 \
+_OP(DbgOpNt, 128, 128, 255) _SEP /* Purple */      \
 /* Symbolic name */                                \
 _OP(DbgSym,     34,  75, 143) _SEP /* Rurikon */   \
 /* Effective address */                            \
@@ -133,33 +133,48 @@ _OP(DbgRts,    187,  80,  93)      /* Imayou */
 
 #define _COMMA ,
 #define SBT(name, suf) name##suf
+
 #define SBCLR(name, suf) SBT(name, Color)##suf
 #define SPCLR(pf, name, suf) pf SBCLR(name, suf)
 #define CSCLR(pf, name, suf, op, val) SPCLR(pf, name, suf)##op##val
 #define CNRGB(pf, name, op, r, g, b, sep) CSCLR(pf, name, R, op, r) sep CSCLR(pf, name, G, op, g) sep CSCLR(pf, name, B, op, b)
+#define PPRGB(name) CNRGB(&, name, , , , , _COMMA)
 #define MKRGB(name) (RGB(SBCLR(name, R), SBCLR(name, G), SBCLR(name, B)))
 #define DEFRGB(name, r, g, b) CNRGB( , name, =, r, g, b, _COMMA)
 #define DCLRGB(name, r, g, b) CNRGB( , name, , , , , _COMMA)
-#define CMPRGB(name, r, g, b) CNRGB( , name, ==, r, g, b, &&)
+#define CMPRGB(name, r, g, b) CNRGB( , name, !=, r, g, b, ||)
+
+#define SBCF(name) SBT(name, ChFmt)
+#define PPCF(name) &SBCF(name)
+#define DEFCF(name) (SBCF(name).crTextColor = MKRGB(name))
+#define PPCCF(name) PPRGB(name),PPCF(name)
+#define INITCF(name, r, g, b)               \
+(memset(MKCF(name), 0, sizeof(SBCF(name))), \
+SBCF(name).cbSize = sizeof(SBCF(name)),     \
+SBCF(name).dwMask = CFM_COLOR,              \
+DEFCF(name))
+#define MKCF(name) &##SBCF(name)
 
 #define RGBOP DCLRGB
 
 #define DefHexRGB OPHEXRGB(RGBOP, _COMMA)
 #define DefCdlRGB OPCDLRGB(RGBOP, _COMMA)
 #define DefDbgRGB OPDBGRGB(RGBOP, _COMMA)
+#define DefDbgChFmt OPDBGRGB(SBCF, _COMMA)
 
 extern int DefHexRGB, DefCdlRGB, DefDbgRGB;
 
 #undef RGBOP
 #define RGBOP DEFRGB
 
-#define RestoreDefaultDebugColor() (DefDbgRGB)
-#define IsDebugColorDefault() (OPDBGRGB(CMPRGB, &&))
-
 #define RestoreDefaultHexColor() (DefHexRGB)
-#define IsHexColorDefault() (OPHEXRGB(CMPRGB, &&))
+#define IsHexColorDefault() (!(OPHEXRGB(CMPRGB, ||)))
 
 #define RestoreDefaultCdlColor() (DefCdlRGB)
-#define IsCdlColorDefault() (OPCDLRGB(CMPRGB, &&))
+#define IsCdlColorDefault() (!(OPCDLRGB(CMPRGB, ||)))
+
+#define InitDbgCharFormat() (OPDBGRGB(INITCF, _COMMA))
+#define RestoreDefaultDebugColor() ((DefDbgRGB),(OPDBGRGB(DEFCF, _COMMA)))
+#define IsDebugColorDefault() (!(OPDBGRGB(CMPRGB, ||)))
 
 #endif
