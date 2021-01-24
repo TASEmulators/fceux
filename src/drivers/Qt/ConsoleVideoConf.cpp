@@ -164,6 +164,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	connect(clipSidesCbx, SIGNAL(stateChanged(int)), this, SLOT(clipSidesChanged(int)) );
 	connect(showFPS_cbx , SIGNAL(stateChanged(int)), this, SLOT(showFPSChanged(int)) );
 	connect(sqrPixCbx   , SIGNAL(stateChanged(int)), this, SLOT(sqrPixChanged(int)) );
+	connect(autoScaleCbx, SIGNAL(stateChanged(int)), this, SLOT(autoScaleChanged(int)) );
 
 	main_vbox->addWidget( new_PPU_ena );
 	main_vbox->addWidget( frmskipcbx  );
@@ -309,6 +310,26 @@ void ConsoleVideoConfDialog_t::openGL_linearFilterChanged( int value )
       }
    }
 }
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::autoScaleChanged( int value )
+{
+   bool opt =  (value != Qt::Unchecked);
+   g_config->setOption("SDL.AutoScale", opt );
+   g_config->save ();
+
+   if ( consoleWindow != NULL )
+   {
+      if ( consoleWindow->viewport_GL )
+      {
+         consoleWindow->viewport_GL->setAutoScaleOpt( opt );
+      }
+      if ( consoleWindow->viewport_SDL )
+      {
+         consoleWindow->viewport_SDL->setAutoScaleOpt( opt );
+      }
+   }
+}
+
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::use_new_PPU_changed( int value )
 {

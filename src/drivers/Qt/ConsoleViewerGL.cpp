@@ -79,6 +79,10 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 		g_config->getOption("SDL.OpenGLip", &opt );
 		
 		linearFilter = (opt) ? true : false;
+
+		g_config->getOption ("SDL.AutoScale", &opt);
+
+		autoScaleEna = (opt) ? true : false;
 	}
 }
 
