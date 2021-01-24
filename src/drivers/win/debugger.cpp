@@ -145,7 +145,7 @@ void RestoreSize(HWND hwndDlg)
 {
 	HDC hdc = GetDC(hwndDlg);
 	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
-	const int DEFAULT_WIDTH = MulDiv(820 + (debuggerIDAFont ? 64 : 0), GetDeviceCaps(hdc, LOGPIXELSX), 96);	//Original width
+	const int DEFAULT_WIDTH = MulDiv(840 + (debuggerIDAFont ? 64 : 0), GetDeviceCaps(hdc, LOGPIXELSX), 96);	//Original width
 	const int DEFAULT_HEIGHT = MulDiv(606 + (debuggerIDAFont ? 2 : 0), GetDeviceCaps(hdc, LOGPIXELSY), 96);	//Original height
 	ReleaseDC(hwndDlg, hdc);
 	
