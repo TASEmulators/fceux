@@ -223,6 +223,7 @@ class ppuTileEditor_t : public QDialog
 	private slots:
 		void periodicUpdate(void);
 		void paletteChanged(int index);
+		void showKeyAssignments(void);
 };
 
 class ppuViewerDialog_t : public QDialog

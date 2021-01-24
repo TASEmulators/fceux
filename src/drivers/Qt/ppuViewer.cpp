@@ -26,9 +26,12 @@
 #include <QDir>
 #include <QMenu>
 #include <QAction>
+#include <QMenuBar>
 #include <QPainter>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QHeaderView>
+#include <QTreeWidget>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -1024,8 +1027,37 @@ ppuTileEditor_t::ppuTileEditor_t(int patternIndex, QWidget *parent)
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
+	QMenuBar *menuBar;
+	QMenu *helpMenu;
+	QAction *act;
+	int useNativeMenuBar;
 
 	this->setFocusPolicy(Qt::StrongFocus);
+
+	menuBar = new QMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu 
+	//-----------------------------------------------------------------------
+	// Help
+	helpMenu = menuBar->addMenu(tr("Help"));
+
+	// Help -> Key Assignments
+	act = new QAction(tr("Keys"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("View Key Descriptions"));
+	connect(act, SIGNAL(triggered()), this, SLOT(showKeyAssignments(void)) );
+	
+	helpMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// End Menu 
+	//-----------------------------------------------------------------------
 
 	tileAddr = 0;
 	palIdx = pindex[ patternIndex ];
@@ -1035,6 +1067,8 @@ ppuTileEditor_t::ppuTileEditor_t(int patternIndex, QWidget *parent)
 	setWindowTitle( tr("PPU Tile Editor") );
 
 	mainLayout = new QVBoxLayout();
+
+	mainLayout->setMenuBar( menuBar );
 
 	setLayout( mainLayout );
 
@@ -1184,6 +1218,69 @@ void ppuTileEditor_t::setCellValue( int y, int x, int colorIndex )
 	}
 	writeMemPPU( a+8, val );
 
+}
+//----------------------------------------------------
+void ppuTileEditor_t::showKeyAssignments(void)
+{
+	int i;
+	QDialog *dialog;
+	QVBoxLayout *mainLayout;
+	QTreeWidget *tree;
+	QTreeWidgetItem *item;
+	const char *txt[] = 
+	{ 
+		"Up"   , "Move Selected Cell Up",
+		"Down" , "Move Selected Cell Down",
+		"Left" , "Move Selected Cell Left",
+		"Right", "Move Selected Cell Right",
+		"1"    , "Set Selected Cell to Color #1",
+		"2"    , "Set Selected Cell to Color #2",
+		"3"    , "Set Selected Cell to Color #3",
+		"4"    , "Set Selected Cell to Color #4",
+		"P"    , "Cycle to Next Tile Palette",
+		"ESC"  , "Close Window",
+		NULL
+	};
+
+	dialog = new QDialog(this);
+	dialog->setWindowTitle("Tile Editor Key Descriptions");
+	dialog->resize( 512, 512 );
+
+	tree = new QTreeWidget();
+
+	tree->setColumnCount(2);
+
+	item = new QTreeWidgetItem();
+	item->setText( 0, QString::fromStdString( "Key" ) );
+	item->setText( 1, QString::fromStdString( "Description" ) );
+	item->setTextAlignment( 0, Qt::AlignLeft);
+	item->setTextAlignment( 1, Qt::AlignLeft);
+
+	tree->setHeaderItem( item );
+
+	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+
+	i=0;
+	while ( txt[i] != NULL )
+	{
+
+		item = new QTreeWidgetItem();
+
+		item->setText( 0, tr(txt[i]) ); i++;
+		item->setText( 1, tr(txt[i]) ); i++;
+
+		item->setTextAlignment( 0, Qt::AlignLeft);
+		item->setTextAlignment( 1, Qt::AlignLeft);
+
+		tree->addTopLevelItem( item );
+	}
+	mainLayout = new QVBoxLayout();
+
+	mainLayout->addWidget( tree );
+
+	dialog->setLayout( mainLayout );
+
+	dialog->show();
 }
 //----------------------------------------------------
 void ppuTileEditor_t::keyPressEvent(QKeyEvent *event)
