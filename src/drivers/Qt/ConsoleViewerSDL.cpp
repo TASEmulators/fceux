@@ -86,6 +86,9 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 		g_config->getOption ("SDL.AutoScale", &opt);
 
 		autoScaleEna = (opt) ? true : false;
+
+		g_config->getOption("SDL.XScale", &xscale);
+		g_config->getOption("SDL.YScale", &yscale);
 	}
 }
 
@@ -272,6 +275,9 @@ void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
 	view_width  = s.width();
 	view_height = s.height();
 	printf("SDL Resize: %i x %i \n", view_width, view_height);
+
+	gui_draw_area_width = view_width;
+	gui_draw_area_height = view_height;
 
 	reset();
 }

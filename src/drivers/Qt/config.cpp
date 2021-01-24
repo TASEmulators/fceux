@@ -225,11 +225,13 @@ InitConfig()
 	config->addOption('y', "yres", "SDL.YResolution", 0);
 	config->addOption("SDL.LastXRes", 0);
 	config->addOption("SDL.LastYRes", 0);
+	config->addOption("SDL.WinSizeX", 512);
+	config->addOption("SDL.WinSizeY", 512);
 	config->addOption("doublebuf", "SDL.DoubleBuffering", 1);
 	config->addOption("autoscale", "SDL.AutoScale", 1);
 	config->addOption("keepratio", "SDL.KeepRatio", 1);
-	config->addOption("xscale", "SDL.XScale", 1.0);
-	config->addOption("yscale", "SDL.YScale", 1.0);
+	config->addOption("xscale", "SDL.XScale", 2.0);
+	config->addOption("yscale", "SDL.YScale", 2.0);
 	config->addOption("xstretch", "SDL.XStretch", 0);
 	config->addOption("ystretch", "SDL.YStretch", 0);
 	config->addOption("noframe", "SDL.NoFrame", 0);
