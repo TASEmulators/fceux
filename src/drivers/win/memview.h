@@ -27,7 +27,7 @@ struct COLORMENU {
 	int *r, *g, *b;
 };
 bool ChangeColor(HWND hwnd, COLORMENU* item, COLORREF* ref);
-BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL(WINAPI *opMenu)(HMENU hmenu, UINT item, BOOL byPos, LPCMENUITEMINFO info));
+BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL (WINAPI *opMenu)(HMENU hmenu, UINT item, BOOL byPos, LPCMENUITEMINFO info));
 #define InsertColorMenu(hwnd, menu, item, pos, id) OpColorMenu(hwnd, menu, item, pos, id, InsertMenuItem)
 #define ModifyColorMenu(hwnd, menu, item, pos, id) OpColorMenu(hwnd, menu, item, pos, id, SetMenuItemInfo)
 #define GetHexColorMenu(hwnd) (GetSubMenu(GetSubMenu(GetMenu(hwnd), HIGHLIGHTING_SUBMENU_POS), HEXEDITOR_COLOR_SUBMENU_POS))

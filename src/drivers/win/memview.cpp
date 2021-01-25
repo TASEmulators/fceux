@@ -527,7 +527,7 @@ void UpdateMemoryView(int draw_all)
 					// Single Byte highlight
 					// 1st nibble
 					SetBkColor(HDataDC, EditingText ? MKRGB(HexHlShdBack) : MKRGB(HexHlBack));
-					SetTextColor(HDataDC, EditingText ? RGB(255, 0, 0) : RGB(255, 255, 255));
+					SetTextColor(HDataDC, EditingText ? RGB(255, 0, 0) : MKRGB(HexHlFore));
 					str[0] = hex[(byteValue >> 4) & 0xF];
 					str[1] = 0;
 					ExtTextOut(HDataDC, MemLinePos, MemLineRow, NULL, NULL, str, 1, NULL);
@@ -3262,7 +3262,7 @@ bool ChangeColor(HWND hwnd, COLORMENU* item, COLORREF* ref)
 }
 
 
-BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL(WINAPI *opMenu)(HMENU hmenu, UINT item, BOOL byPos, LPCMENUITEMINFO info))
+BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL (WINAPI *opMenu)(HMENU hmenu, UINT item, BOOL byPos, LPCMENUITEMINFO info))
 {
 	#define MIIM_STRING 0x40
 	#define MIIM_BITMAP 0x80
@@ -3277,9 +3277,6 @@ BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL(W
 
 	if (item->text)
 	{
-		char menu_str[64];
-		sprintf(menu_str, "%s\t#%02X%02X%02X", item->text, *item->r, *item->g, *item->b);
-
 		HDC hdc = GetDC(hwnd);
 		HDC memdc = CreateCompatibleDC(hdc);
 		if (!item->bitmap)
@@ -3289,25 +3286,25 @@ BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL(W
 		RECT rect = { 1, 1, 9, 9 };
 		FillRect(memdc, &rect, brush);
 
-		info->fMask = MIIM_ID | MIIM_STRING | MIIM_BITMAP;
-		info->dwTypeData = menu_str;
-		info->cch = strlen(menu_str);
-		info->wID = id;
-		_info.bitmap = item->bitmap;
-		opMenu(menu, pos, TRUE, info);
-
 		DeleteObject(brush);
 		DeleteDC(memdc);
 		ReleaseDC(hwnd, hdc);
 
-		return TRUE;
+		_info.bitmap = item->bitmap;
+
+		char menu_str[64];
+		sprintf(menu_str, "%s\t#%02X%02X%02X", item->text, *item->r, *item->g, *item->b);
+		info->dwTypeData = menu_str;
+		info->cch = strlen(menu_str);
+
+		info->wID = id;
+		info->fMask = MIIM_ID | MIIM_STRING | MIIM_BITMAP;
 	}
 	else
 	{
 		info->fMask = MIIM_TYPE;
 		info->fType = MFT_SEPARATOR;
-		return opMenu(menu, pos, TRUE, info);
 	}
 
-	return FALSE;
+	return opMenu(menu, pos, TRUE, info);
 }
