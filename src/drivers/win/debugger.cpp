@@ -113,9 +113,9 @@ struct DBGCOLORMENU {
 #define ID_COLOR_DEBUGGER     200
 #define ID_DEBUGGER_DEFCOLOR  250
 
-bool ChangeColor(HWND hwnd, DBGCOLORMENU* item, COLORREF* ref)
+bool ChangeColor(HWND hwnd, DBGCOLORMENU* item)
 {
-	if (ChangeColor(hwnd, (COLORMENU*)item, ref))
+	if (ChangeColor(hwnd, (COLORMENU*)item))
 	{
 		item->fmt->crTextColor = RGB(*item->menu.r, *item->menu.g, *item->menu.b);
 		return true;
@@ -1832,8 +1832,6 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	static COLORREF ref[16] = { 0 };
-
 	//these messages get handled at any time
 	switch(uMsg)
 	{
@@ -2084,7 +2082,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								case ID_COLOR_DEBUGGER + 12:
 								{
 									int index = ret - ID_COLOR_DEBUGGER;
-									if (ChangeColor(hwndDlg, &dbgcolormenu[index], ref))
+									if (ChangeColor(hwndDlg, &dbgcolormenu[index]))
 									{
 										HWND debug_edit = GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY);
 										GetClientRect(debug_edit, &rect);

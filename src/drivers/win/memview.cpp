@@ -88,6 +88,8 @@ using namespace std;
 
 COLORREF highlightActivityColors[HIGHLIGHT_ACTIVITY_NUM_COLORS] = { 0x0, 0x004035, 0x185218, 0x5e5c34, 0x804c00, 0xba0300, 0xd10038, 0xb21272, 0xba00ab, 0x6f00b0, 0x3700c2, 0x000cba, 0x002cc9, 0x0053bf, 0x0072cf, 0x3c8bc7 };
 
+COLORREF custom_color[16] = { 0 }; // User defined color for ChooseColor()
+
 string memviewhelp = "HexEditor"; //Hex Editor Help Page
 
 int HexRowHeightBorder = 0;		//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
@@ -1205,8 +1207,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	static int tmpStartAddy = -1;
 	static int tmpEndAddy = -1;
-
-	static COLORREF ref[16] = { 0 };
 
 	switch (message) {
 
@@ -2395,7 +2395,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case ID_COLOR_HEXEDITOR + 9:
 		{
 			int index = wParam - ID_COLOR_HEXEDITOR;
-			if (ChangeColor(hwnd, &hexcolormenu[index], ref))
+			if (ChangeColor(hwnd, &hexcolormenu[index]))
 			{
 				UpdateColorTable();
 				ModifyColorMenu(hwnd, GetHexColorMenu(hwnd), &hexcolormenu[index], index, wParam);
@@ -2425,7 +2425,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case ID_COLOR_CDLOGGER + 9:
 		{
 			int index = wParam - ID_COLOR_CDLOGGER;
-			if (ChangeColor(hwnd, &cdlcolormenu[index], ref))
+			if (ChangeColor(hwnd, &cdlcolormenu[index]))
 			{
 				UpdateColorTable();
 				ModifyColorMenu(hwnd, GetCdlColorMenu(hwnd), &cdlcolormenu[index], index, wParam);
@@ -3240,7 +3240,7 @@ void SwitchEditingText(int editingText) {
 	}
 }
 
-bool ChangeColor(HWND hwnd, COLORMENU* item, COLORREF* ref)
+bool ChangeColor(HWND hwnd, COLORMENU* item)
 {
 	int backup = RGB(*item->r, *item->g, *item->b);
 	CHOOSECOLOR choose;
@@ -3248,7 +3248,7 @@ bool ChangeColor(HWND hwnd, COLORMENU* item, COLORREF* ref)
 	choose.lStructSize = sizeof(CHOOSECOLOR);
 	choose.hwndOwner = hwnd;
 	choose.rgbResult = backup;
-	choose.lpCustColors = ref;
+	choose.lpCustColors = custom_color;
 	choose.Flags = CC_RGBINIT | CC_FULLOPEN | CC_ANYCOLOR;
 	if (ChooseColor(&choose) && choose.rgbResult != backup)
 	{

@@ -119,6 +119,7 @@ extern int MLogPosX,MLogPosY;
 // owomomo: I'm tired to write those repeated words
 #define ACRGB(name) AC(name##Color##R), AC(name##Color##G), AC(name##Color##B)
 #define ACOPRGB(_OP) OPHEXRGB(_OP, _COMMA), OPCDLRGB(_OP, _COMMA), OPDBGRGB(_OP, _COMMA)
+extern COLORREF custom_color[];
 
 extern int HexRowHeightBorder;
 extern int importBookmarkProps;
@@ -436,6 +437,22 @@ static CFGSTRUCT fceuconfig[] =
 	AC(HexRowHeightBorder),
 	AC(importBookmarkProps),
 	ACOPRGB(ACRGB),
+	AC(custom_color[0]),
+	AC(custom_color[1]),
+	AC(custom_color[2]),
+	AC(custom_color[3]),
+	AC(custom_color[4]),
+	AC(custom_color[5]),
+	AC(custom_color[6]),
+	AC(custom_color[7]),
+	AC(custom_color[8]),
+	AC(custom_color[9]),
+	AC(custom_color[10]),
+	AC(custom_color[11]),
+	AC(custom_color[12]),
+	AC(custom_color[13]),
+	AC(custom_color[14]),
+	AC(custom_color[15]),
 	//ACS(memwLastfile[2048]),
 
 	AC(AutoRWLoad),
