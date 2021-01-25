@@ -121,28 +121,28 @@ popupmenu[] =
 #define POPUPNUM (sizeof popupmenu / sizeof popupmenu[0])
 // The color configure menu
 COLORMENU hexcolormenu[] = {
-	{ "Normal text",                     NULL, PPRGB(HexFore)      },
-	{ "Address header",                  NULL, PPRGB(HexAddr)      },
-//	{ "Normal text background",          NULL, PPRGB(HexBack)      },
-	{ NULL,                              NULL, 0, 0, 0             },
-	{ "Selected text",                   NULL, PPRGB(HexHlFore)    },
-	{ "Selected background",             NULL, PPRGB(HexHlBack)    },
-	{ "Selected text (unfocused)",       NULL, PPRGB(HexHlShdFore) },
-	{ "Selected background (unfocused)", NULL, PPRGB(HexHlShdBack) },
-	{ NULL,                              NULL, 0, 0, 0             },
-	{ "Freezed address",                 NULL, PPRGB(HexFreeze),   },
-//  { "Freezed ROM address",             NULL, PPRGB(RomFreeze),   },
-	{ "Bookmark",                        NULL, PPRGB(HexBookmark)  }
+	{ "Normal text",                     PPRGB(HexFore)      },
+	{ "Address header",                  PPRGB(HexAddr)      },
+//	{ "Normal text background",          PPRGB(HexBack)      },
+	{ NULL                                                   },
+	{ "Selected text",                   PPRGB(HexHlFore)    },
+	{ "Selected background",             PPRGB(HexHlBack)    },
+	{ "Selected text (unfocused)",       PPRGB(HexHlShdFore) },
+	{ "Selected background (unfocused)", PPRGB(HexHlShdBack) },
+	{ NULL                                                   },
+	{ "Freezed address",                 PPRGB(HexFreeze),   },
+//  { "Freezed ROM address",             PPRGB(RomFreeze),   },
+	{ "Bookmark",                        PPRGB(HexBookmark)  }
 },
 cdlcolormenu[] = {
-	{ "Code",           NULL, PPRGB(CdlCode)       },
-	{ "Data",           NULL, PPRGB(CdlData)       },
-	{ "PCM Data",       NULL, PPRGB(CdlPcm)        },
-	{ "Code && Data",   NULL, PPRGB(CdlCodeData)   },
-	{ NULL,             NULL, 0, 0, 0              },
-	{ "Render",         NULL, PPRGB(CdlRender)     },
-	{ "Read",           NULL, PPRGB(CdlRead)       },
-	{ "Render && Read", NULL, PPRGB(CdlRenderRead) }
+	{ "Code",           PPRGB(CdlCode)       },
+	{ "Data",           PPRGB(CdlData)       },
+	{ "PCM Data",       PPRGB(CdlPcm)        },
+	{ "Code && Data",   PPRGB(CdlCodeData)   },
+	{ NULL                                   },
+	{ "Render",         PPRGB(CdlRender)     },
+	{ "Read",           PPRGB(CdlRead)       },
+	{ "Render && Read", PPRGB(CdlRenderRead) }
 };
 
 struct {
@@ -3267,6 +3267,9 @@ BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL (
 	#define MIIM_STRING 0x40
 	#define MIIM_BITMAP 0x80
 
+	#define COLORMENU_ICON_SIZE 14
+	#define COLORMENU_ICON_BORDER 1
+
 	struct {
 		MENUITEMINFO info;
 		HBITMAP bitmap;
@@ -3280,10 +3283,10 @@ BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL (
 		HDC hdc = GetDC(hwnd);
 		HDC memdc = CreateCompatibleDC(hdc);
 		if (!item->bitmap)
-			item->bitmap = CreateCompatibleBitmap(hdc, 10, 10);
+			item->bitmap = CreateCompatibleBitmap(hdc, COLORMENU_ICON_SIZE, COLORMENU_ICON_SIZE);
 		SelectObject(memdc, item->bitmap);
 		HBRUSH brush = CreateSolidBrush(RGB(*item->r, *item->g, *item->b));
-		RECT rect = { 1, 1, 9, 9 };
+		RECT rect = { COLORMENU_ICON_BORDER, COLORMENU_ICON_BORDER, COLORMENU_ICON_SIZE - COLORMENU_ICON_BORDER, COLORMENU_ICON_SIZE - COLORMENU_ICON_BORDER };
 		FillRect(memdc, &rect, brush);
 
 		DeleteObject(brush);

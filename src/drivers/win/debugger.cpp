@@ -96,18 +96,18 @@ struct DBGCOLORMENU {
 	COLORMENU menu;
 	CHARFORMAT2 *fmt;
 } dbgcolormenu[] = {
-	{ "PC",                NULL, PPCCF(DbgPC)   }, 
-	{ NULL,                NULL, 0, 0, 0, NULL  },
-	{ "Mnemonic",          NULL, PPCCF(DbgMnem) },
-	{ NULL,                NULL, 0, 0, 0, NULL  },
-	{ "Symbolic name",     NULL, PPCCF(DbgSym)  },
-	{ "Comment" ,          NULL, PPCCF(DbgComm) },
-	{ NULL ,               NULL, 0, 0, 0, NULL  },
-	{ "Operand" ,          NULL, PPCCF(DbgOper) },
-	{ "Operand note" ,     NULL, PPCCF(DbgOpNt) },
-	{ "Effective address", NULL, PPCCF(DbgEff)  },
-	{ NULL ,               NULL, 0, 0, 0, NULL  },
-	{ "RTS Line",          NULL, PPCCF(DbgRts)  }
+	{ "PC",                PPCCF(DbgPC)   }, 
+	{ NULL                                },
+	{ "Mnemonic",          PPCCF(DbgMnem) },
+	{ NULL                                },
+	{ "Symbolic name",     PPCCF(DbgSym)  },
+	{ "Comment" ,          PPCCF(DbgComm) },
+	{ NULL                                },
+	{ "Operand" ,          PPCCF(DbgOper) },
+	{ "Operand note" ,     PPCCF(DbgOpNt) },
+	{ "Effective address", PPCCF(DbgEff)  },
+	{ NULL                                },
+	{ "RTS Line",          PPCCF(DbgRts)  }
 };
 
 #define ID_COLOR_DEBUGGER     200
