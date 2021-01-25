@@ -80,7 +80,7 @@ bool debuggerIDAFont = false;
 unsigned int IDAFontSize = 16;
 bool debuggerDisplayROMoffsets = false;
 
-wchar_t* debug_wstr;
+wchar_t debug_wstr[16384];
 char* debug_cdl_str;
 char* debug_str_decoration_comment;
 char* debug_decoration_comment;
@@ -96,23 +96,32 @@ struct DBGCOLORMENU {
 	COLORMENU menu;
 	CHARFORMAT2 *fmt;
 } dbgcolormenu[] = {
-	{ "PC",                PPCCF(DbgPC)   }, 
-	{ NULL,                0, 0, 0, NULL  },
-	{ "Mnemonic",          PPCCF(DbgMnem) },
-	{ NULL,                0, 0, 0, NULL  },
-	{ "Symbolic name",     PPCCF(DbgSym)  },
-	{ "Comment" ,          PPCCF(DbgComm) },
-	{ NULL ,               0, 0, 0, NULL  },
-	{ "Operand" ,          PPCCF(DbgOper) },
-	{ "Operand note" ,     PPCCF(DbgOpNt) },
-	{ "Effective address", PPCCF(DbgEff)  },
-	{ NULL ,               0, 0, 0, NULL  },
-	{ "RTS Line",          PPCCF(DbgRts)  }
+	{ "PC",                NULL, PPCCF(DbgPC)   }, 
+	{ NULL,                NULL, 0, 0, 0, NULL  },
+	{ "Mnemonic",          NULL, PPCCF(DbgMnem) },
+	{ NULL,                NULL, 0, 0, 0, NULL  },
+	{ "Symbolic name",     NULL, PPCCF(DbgSym)  },
+	{ "Comment" ,          NULL, PPCCF(DbgComm) },
+	{ NULL ,               NULL, 0, 0, 0, NULL  },
+	{ "Operand" ,          NULL, PPCCF(DbgOper) },
+	{ "Operand note" ,     NULL, PPCCF(DbgOpNt) },
+	{ "Effective address", NULL, PPCCF(DbgEff)  },
+	{ NULL ,               NULL, 0, 0, 0, NULL  },
+	{ "RTS Line",          NULL, PPCCF(DbgRts)  }
 };
 
 #define ID_COLOR_DEBUGGER     200
 #define ID_DEBUGGER_DEFCOLOR  250
 
+bool ChangeColor(HWND hwnd, DBGCOLORMENU* item, COLORREF* ref)
+{
+	if (ChangeColor(hwnd, (COLORMENU*)item, ref))
+	{
+		item->fmt->crTextColor = RGB(*item->menu.r, *item->menu.g, *item->menu.b);
+		return true;
+	}
+	return false;
+}
 
 // this is used to keep track of addresses that lines of Disassembly window correspond to
 std::vector<uint16> disassembly_addresses;
@@ -1488,9 +1497,13 @@ void DebuggerExit()
 		hcolorpopupmenu = NULL;
 		DestroyWindow(hDebug);
 		hDebug = NULL;
-		free(debug_wstr);
 		free(debug_cdl_str);
 		free(debug_str_decoration_comment);
+		for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
+		{
+			DeleteObject(dbgcolormenu[i].menu.bitmap);
+			dbgcolormenu[i].menu.bitmap = NULL;
+		}
 	}
 }
 
@@ -1826,6 +1839,10 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 		case WM_INITDIALOG:
 		{
+			// init buffers
+			debug_cdl_str = (char*)malloc(512);
+			debug_str_decoration_comment = (char*)malloc(NL_MAX_MULTILINE_COMMENT_LEN + 10);
+
 			char str[256] = { 0 };
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_CYCLES, break_on_cycles ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, break_on_instructions ? BST_CHECKED : BST_UNCHECKED);
@@ -1906,18 +1923,13 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			hDebugcontext = LoadMenu(fceu_hInstance,"DEBUGCONTEXTMENUS");
 			hDisasmcontext = LoadMenu(fceu_hInstance,"DISASMCONTEXTMENUS");
 
-			// init buffers
-			debug_wstr = (wchar_t*)malloc(32768 * sizeof(wchar_t));
-			debug_cdl_str = (char*)malloc(512);
-			debug_str_decoration_comment = (char*)malloc(NL_MAX_MULTILINE_COMMENT_LEN + 10);
-
 			// subclass editfield
 			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWLP_WNDPROC, (LONG_PTR)IDC_DEBUGGER_DISASSEMBLY_WndProc);
 
 			// prepare color menu
 			hcolorpopupmenu = CreatePopupMenu();
 			for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
-				InsertMenu(hcolorpopupmenu, i, MF_BYPOSITION | (dbgcolormenu[i].menu.text ? MF_STRING : MF_SEPARATOR), ID_COLOR_DEBUGGER + i, dbgcolormenu[i].menu.text);
+				InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
 			AppendMenu(hcolorpopupmenu, MF_SEPARATOR, NULL, NULL);
 			AppendMenu(hcolorpopupmenu, MF_STRING, ID_DEBUGGER_DEFCOLOR, "Restore defaults");
 
@@ -1984,93 +1996,116 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		//adelikat:  Buttons that don't need a rom loaded to do something, such as autoload
 		case WM_COMMAND:
 		{
-			switch(LOWORD(wParam))
+			switch (HIWORD(wParam))
 			{
-				case DEBUGAUTOLOAD:
-					debuggerAutoload ^= 1;
-					break;
-				case DEBUGLOADDEB:
-					debuggerSaveLoadDEBFiles = !debuggerSaveLoadDEBFiles;
-					break;
-				case DEBUGIDAFONT:
-					debuggerIDAFont ^= 1;
-					debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
-					debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
-					SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
-					UpdateDebugger(false);
-					break;
-				case IDC_DEBUGGER_CYCLES_EXCEED:
+				case BN_CLICKED:
 				{
-					if (HIWORD(wParam) == EN_CHANGE)
+					switch (LOWORD(wParam))
 					{
-						char str[16];
-						GetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str, 16);
-						break_cycles_limit = strtoul(str, NULL, 10);
-					}
-					break;
-				}
-				case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
-				{
-					if (HIWORD(wParam) == EN_CHANGE)
-					{
-						char str[16];
-						GetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str, 16);
-						break_instructions_limit = strtoul(str, NULL, 10);
-					}
-					break;
-				}
-				case IDC_DEBUGGER_SYNTAX_HIGHLIGHT:
-				{
-					RECT rect;
-					GetWindowRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_SYNTAX_HIGHLIGHT), &rect);
-					int ret = TrackPopupMenu(hcolorpopupmenu, TPM_LEFTALIGN | TPM_BOTTOMALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, rect.right, rect.bottom, NULL, hwndDlg, NULL);
-					switch (ret)
-					{
-						case ID_DEBUGGER_DEFCOLOR:
+						case DEBUGAUTOLOAD:
+							debuggerAutoload ^= 1;
+							break;
+						case DEBUGLOADDEB:
+							debuggerSaveLoadDEBFiles = !debuggerSaveLoadDEBFiles;
+							break;
+						case DEBUGIDAFONT:
+							debuggerIDAFont ^= 1;
+							debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
+							debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
+							SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
+							UpdateDebugger(false);
+							break;
+						case IDC_DEBUGGER_CYCLES_EXCEED:
 						{
-							if (!IsDebugColorDefault() && MessageBox(hwndDlg, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
+							if (HIWORD(wParam) == EN_CHANGE)
 							{
-								RestoreDefaultDebugColor();
-								HWND debug_edit = GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY);
-								GetClientRect(debug_edit, &rect);
-								HighlightSyntax((rect.bottom - rect.top) / debugSystem->disasmFontHeight);
-								HighlightPC();
-								InvalidateRect(debug_edit, 0, true);
+								char str[16];
+								GetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str, 16);
+								break_cycles_limit = strtoul(str, NULL, 10);
 							}
 							break;
 						}
-						case ID_COLOR_DEBUGGER:
-						case ID_COLOR_DEBUGGER + 1:
-						case ID_COLOR_DEBUGGER + 2:
-						case ID_COLOR_DEBUGGER + 3:
-						case ID_COLOR_DEBUGGER + 4:
-						case ID_COLOR_DEBUGGER + 5:
-						case ID_COLOR_DEBUGGER + 6:
-						case ID_COLOR_DEBUGGER + 7:
-						case ID_COLOR_DEBUGGER + 8:
-						case ID_COLOR_DEBUGGER + 9:
-						case ID_COLOR_DEBUGGER + 10:
-						case ID_COLOR_DEBUGGER + 11:
-						case ID_COLOR_DEBUGGER + 12:
+						case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
 						{
-							int index = ret - ID_COLOR_DEBUGGER;
-							COLORMENU* item = (COLORMENU*)&dbgcolormenu[index];
-							if (ChangeColor(hwndDlg, item, ref))
+							if (HIWORD(wParam) == EN_CHANGE)
 							{
-								HWND debug_edit = GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY);
-								GetClientRect(debug_edit, &rect);
-								dbgcolormenu[index].fmt->crTextColor = RGB(*item->r, *item->g, *item->b);
-								HighlightSyntax((rect.bottom - rect.top) / debugSystem->disasmFontHeight);
-								HighlightPC();
-								InvalidateRect(debug_edit, 0, true);
+								char str[16];
+								GetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str, 16);
+								break_instructions_limit = strtoul(str, NULL, 10);
 							}
+							break;
 						}
-						break;
+						case IDC_DEBUGGER_SYNTAX_HIGHLIGHT:
+						{
+							// a temporary solution to prevent sending BN_CLICKED repeatedly
+							static bool colormenupop = false;
+							if (colormenupop)
+								break;
+							colormenupop = true;
+							SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_SYNTAX_HIGHLIGHT, BM_SETSTATE, TRUE, 0);
+							RECT rect;
+							GetWindowRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_SYNTAX_HIGHLIGHT), &rect);
+							int ret = TrackPopupMenu(hcolorpopupmenu, TPM_LEFTALIGN | TPM_BOTTOMALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, rect.right, rect.bottom, NULL, hwndDlg, NULL);
+							switch (ret)
+							{
+								case ID_DEBUGGER_DEFCOLOR:
+								{
+									if (!IsDebugColorDefault() && MessageBox(hwndDlg, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
+									{
+										RestoreDefaultDebugColor();
+
+										HWND debug_edit = GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY);
+										GetClientRect(debug_edit, &rect);
+										int eventMask = SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, 0);
+										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, false, 0);
+										HighlightSyntax((rect.bottom - rect.top) / debugSystem->disasmFontHeight);
+										HighlightPC();
+										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, true, 0);
+										InvalidateRect(debug_edit, 0, true);
+										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, eventMask);
+
+										for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
+											ModifyColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
+									}
+								}
+								break;
+								case ID_COLOR_DEBUGGER:
+								case ID_COLOR_DEBUGGER + 1:
+								case ID_COLOR_DEBUGGER + 2:
+								case ID_COLOR_DEBUGGER + 3:
+								case ID_COLOR_DEBUGGER + 4:
+								case ID_COLOR_DEBUGGER + 5:
+								case ID_COLOR_DEBUGGER + 6:
+								case ID_COLOR_DEBUGGER + 7:
+								case ID_COLOR_DEBUGGER + 8:
+								case ID_COLOR_DEBUGGER + 9:
+								case ID_COLOR_DEBUGGER + 10:
+								case ID_COLOR_DEBUGGER + 11:
+								case ID_COLOR_DEBUGGER + 12:
+								{
+									int index = ret - ID_COLOR_DEBUGGER;
+									if (ChangeColor(hwndDlg, &dbgcolormenu[index], ref))
+									{
+										HWND debug_edit = GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY);
+										GetClientRect(debug_edit, &rect);
+										int eventMask = SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, 0);
+										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, false, 0);
+										HighlightSyntax((rect.bottom - rect.top) / debugSystem->disasmFontHeight);
+										HighlightPC();
+										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, true, 0);
+										InvalidateRect(debug_edit, 0, true);
+										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, eventMask);
+
+										ModifyColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[index].menu, index, ret);
+									}
+								}
+							}
+							colormenupop = false;
+							SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_SYNTAX_HIGHLIGHT, BM_SETSTATE, FALSE, 0);
+						}
 					}
-					break;
 				}
 			}
-			break;
 		}
 	}
 

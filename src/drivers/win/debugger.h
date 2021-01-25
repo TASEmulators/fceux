@@ -142,12 +142,13 @@ _OP(DbgRts,    187,  80,  93)      /* Imayou */
 #define MKRGB(name) (RGB(SBCLR(name, R), SBCLR(name, G), SBCLR(name, B)))
 #define DEFRGB(name, r, g, b) CNRGB( , name, =, r, g, b, _COMMA)
 #define DCLRGB(name, r, g, b) CNRGB( , name, , , , , _COMMA)
-#define CMPRGB(name, r, g, b) CNRGB( , name, !=, r, g, b, ||)
+#define CMPRGB(name, r, g, b) (CNRGB( , name, !=, r, g, b, ||))
 
 #define SBCF(name) SBT(name, ChFmt)
 #define PPCF(name) &SBCF(name)
-#define DEFCF(name, r, g, b) (DEFRGB(name, r, g, b), SBCF(name).crTextColor = RGB(r, g, b))
 #define PPCCF(name) PPRGB(name), PPCF(name)
+#define DEFCF(name, r, g, b) (DEFRGB(name, r, g, b), SBCF(name).crTextColor = RGB(r, g, b))
+#define CMPCF(name, r, g, b) (CNRGB( , name, !=, r, g, b, ||) || SBCF(name).crTextColor != RGB(r, g, b))
 #define INITCF(name)                        \
 (memset(PPCF(name), 0, sizeof(SBCF(name))), \
 SBCF(name).cbSize = sizeof(SBCF(name)),     \
@@ -174,6 +175,6 @@ extern int DefHexRGB, DefCdlRGB, DefDbgRGB;
 
 #define InitDbgCharFormat() (OPDBGRGB(INITCF, _COMMA))
 #define RestoreDefaultDebugColor() (OPDBGRGB(DEFCF, _COMMA))
-#define IsDebugColorDefault() (!(OPDBGRGB(CMPRGB, ||)))
+#define IsDebugColorDefault() (!(OPDBGRGB(CMPCF, ||)))
 
 #endif
