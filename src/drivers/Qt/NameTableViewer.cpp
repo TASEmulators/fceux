@@ -22,6 +22,9 @@
 #include <stdint.h>
 
 #include <QDir>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
 #include <QPainter>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -109,25 +112,106 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
 	QGroupBox   *frame;
+	QMenuBar *menuBar;
+	QMenu *viewMenu;
+	QAction *act;
 	char stmp[64];
+	int useNativeMenuBar;
 
 	nameTableViewWindow = this;
+
+	compactView = false;
+
+	menuBar = new QMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu 
+	//-----------------------------------------------------------------------
+	// View
+	viewMenu = menuBar->addMenu(tr("View"));
+
+	// View -> Show Scroll Lines
+	act = new QAction(tr("Show Scroll Lines"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setCheckable(true);
+	act->setChecked(drawScrollLines);
+	act->setStatusTip(tr("Show Scroll Lines"));
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(menuScrollLinesChanged(bool)) );
+	showScrollLineAct = act;
+	
+	viewMenu->addAction(act);
+
+	// View -> Show Grid Lines
+	act = new QAction(tr("Show Grid Lines"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setCheckable(true);
+	act->setChecked(drawGridLines);
+	act->setStatusTip(tr("Show Grid Lines"));
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(menuGridLinesChanged(bool)) );
+	showGridLineAct = act;
+
+	viewMenu->addAction(act);
+
+	// View -> Show Attributes
+	act = new QAction(tr("Show Attributes"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setCheckable(true);
+	act->setChecked(attview);
+	act->setStatusTip(tr("Show Attributes"));
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(menuAttributesChanged(bool)) );
+	showAttributesAct = act;
+
+	viewMenu->addAction(act);
+
+	// View -> Ignore Palette
+	act = new QAction(tr("Ignore Palette"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setCheckable(true);
+	act->setChecked(attview);
+	act->setStatusTip(tr("Ignore Palette"));
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(menuIgnPalChanged(bool)) );
+	ignPalAct = act;
+
+	viewMenu->addAction(act);
+
+	// View -> Compact View Palette
+	act = new QAction(tr("Toggle Compact"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Toggle Compact"));
+	connect(act, SIGNAL(triggered()), this, SLOT(menuCompactChanged()) );
+
+	viewMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// End Menu 
+	//-----------------------------------------------------------------------
 
 	setWindowTitle( tr("Name Table Viewer") );
 
 	mainLayout = new QVBoxLayout();
 
+	mainLayout->setMenuBar( menuBar );
+
 	setLayout( mainLayout );
 
 	vbox   = new QVBoxLayout();
-	frame  = new QGroupBox( tr("Name Tables") );
+	//frame  = new QGroupBox( tr("Name Tables") );
 	ntView = new ppuNameTableView_t(this);
 	grid   = new QGridLayout();
+	ctlPanelFrame = new QFrame();
+	nameTableFrame = new QFrame();
 
 	vbox->addWidget( ntView );
-	frame->setLayout( vbox );
-	mainLayout->addWidget( frame, 100 );
-	mainLayout->addLayout( grid ,   1 );
+	nameTableFrame->setLayout( vbox );
+	mainLayout->addWidget( nameTableFrame, 100 );
+	mainLayout->addWidget( ctlPanelFrame, 1 );
+
+	ctlPanelFrame->setLayout( grid );
 
 	showScrollLineCbox = new QCheckBox( tr("Show Scroll Lines") );
 	showGridLineCbox   = new QCheckBox( tr("Show Grid Lines") );
@@ -179,6 +263,8 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	frame  = new QGroupBox( tr("Current Mirroring") );
 	grid   = new QGridLayout();
 
+	mirrorGroup = frame;
+
 	mainLayout->addLayout( hbox, 1 );
 	hbox->addWidget( frame );
 	frame->setLayout( grid );
@@ -214,6 +300,8 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	hbox->addWidget( frame );
 	frame->setLayout( vbox );
 
+	dataDisplayGroup = frame;
+
 	tileID     = new QLabel( tr("Tile ID:") );
 	tileXY     = new QLabel( tr("X/Y :") );
 	ppuAddrLbl = new QLabel( tr("PPU Address:") );
@@ -228,9 +316,11 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	
 	updateTimer  = new QTimer( this );
 
-   connect( updateTimer, &QTimer::timeout, this, &ppuNameTableViewerDialog_t::periodicUpdate );
+	connect( updateTimer, &QTimer::timeout, this, &ppuNameTableViewerDialog_t::periodicUpdate );
 
 	updateTimer->start( 33 ); // 30hz
+
+	updateVisibility();
 }
 //----------------------------------------------------
 ppuNameTableViewerDialog_t::~ppuNameTableViewerDialog_t(void)
@@ -264,6 +354,23 @@ void ppuNameTableViewerDialog_t::periodicUpdate(void)
 	{
 		this->update();
 		redrawtables = false;
+	}
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::updateVisibility(void)
+{
+
+	if ( compactView )
+	{
+		ctlPanelFrame->hide();
+		mirrorGroup->hide();
+		dataDisplayGroup->hide();
+	}
+	else
+	{
+		ctlPanelFrame->show();
+		mirrorGroup->show();
+		dataDisplayGroup->show();
 	}
 }
 //----------------------------------------------------
@@ -372,25 +479,69 @@ void ppuNameTableViewerDialog_t::scanLineChanged( const QString &txt )
 	//printf("ScanLine: '%s'  %i\n", s.c_str(), PPUViewScanline );
 }
 //----------------------------------------------------
+void ppuNameTableViewerDialog_t::menuScrollLinesChanged(bool checked)
+{
+	drawScrollLines = checked;
+
+	showScrollLineCbox->setChecked( checked );
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::menuGridLinesChanged(bool checked)
+{
+	drawGridLines = checked;
+
+	showGridLineCbox->setChecked( checked );
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::menuAttributesChanged(bool checked)
+{
+	attview = checked;
+
+	showAttrbCbox->setChecked( checked );
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::menuIgnPalChanged(bool checked)
+{
+	hidepal = checked;
+
+	ignorePaletteCbox->setChecked( checked );
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::menuCompactChanged(void)
+{
+	compactView = !compactView;
+
+	updateVisibility();
+}
+//----------------------------------------------------
 void ppuNameTableViewerDialog_t::showScrollLinesChanged(int state)
 {
 	drawScrollLines = (state != Qt::Unchecked);
+
+	showScrollLineAct->setChecked( drawScrollLines );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::showGridLinesChanged(int state)
 {
 	drawGridLines = (state != Qt::Unchecked);
+
+	showGridLineAct->setChecked( drawGridLines );
+
 	redrawtables = true;
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::showAttrbChanged(int state)
 {
 	attview = (state != Qt::Unchecked);
+
+	showAttributesAct->setChecked( attview );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::ignorePaletteChanged(int state)
 {
 	hidepal = (state != Qt::Unchecked);
+
+	ignPalAct->setChecked( hidepal );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::refreshSliderChanged(int value)
@@ -578,11 +729,11 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 
 			for (x=0; x<256; x+=8)
 			{
-				painter.drawLine( xx + x, yy, xx + x, yy + hh );
+				painter.drawLine( xx + x*w, yy, xx + x*w, yy + hh );
 			}
 			for (y=0; y<240; y+=8)
 			{
-				painter.drawLine( xx, yy + y, xx + ww, yy + y );
+				painter.drawLine( xx, yy + y*h, xx + ww, yy + y*h );
 			}
 		}
 	}

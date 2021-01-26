@@ -87,16 +87,26 @@ class ppuNameTableViewerDialog_t : public QDialog
 		QRadioButton *vertMirrorBtn;
 		QRadioButton *fourScreenBtn;
 		QRadioButton *singleScreenBtn[4];
+		QFrame *nameTableFrame;
+		QFrame *ctlPanelFrame;
+		QGroupBox *mirrorGroup;
+		QGroupBox *dataDisplayGroup;
 		QLabel *tileID;
 		QLabel *tileXY;
 		QLabel *ppuAddrLbl;
 		QLabel *attrbLbl;
+		QAction *showScrollLineAct;
+		QAction *showGridLineAct;
+		QAction *showAttributesAct;
+		QAction *ignPalAct;
+		bool    compactView;
 
 	public slots:
 		void closeWindow(void);
 	private slots:
 		void periodicUpdate(void);
 		void updateMirrorButtons(void);
+		void updateVisibility(void);
 		void horzMirrorClicked(void);
 		void vertMirrorClicked(void);
 		void fourScreenClicked(void);
@@ -110,6 +120,11 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void showScrollLinesChanged(int state);
 		void refreshSliderChanged(int value);
 		void scanLineChanged( const QString &txt );
+		void menuScrollLinesChanged( bool checked ); 
+		void menuGridLinesChanged( bool checked ); 
+		void menuAttributesChanged( bool checked );
+		void menuIgnPalChanged( bool checked );
+		void menuCompactChanged(void);
 };
 
 int openNameTableViewWindow( QWidget *parent );
