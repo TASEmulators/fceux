@@ -1927,7 +1927,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			hDisasmcontext = LoadMenu(fceu_hInstance,"DISASMCONTEXTMENUS");
 
 			// prevent the font of the edit control from screwing up when it contains MBC or characters not contained the current font.
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETLANGOPTIONS, 0, SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETLANGOPTIONS, 0, 0) & ~IMF_AUTOFONT);
+			SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETLANGOPTIONS, 0, SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_GETLANGOPTIONS, 0, 0) & ~IMF_AUTOFONT);
 
 			// subclass editfield
 			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWLP_WNDPROC, (LONG_PTR)IDC_DEBUGGER_DISASSEMBLY_WndProc);
