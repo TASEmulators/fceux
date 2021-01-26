@@ -21,8 +21,6 @@ extern int curr_ram_size;
 extern bool noMisalign;
 
 void ResetResults();
-void CloseRamWindows(); //Close the Ram Search & Watch windows when rom closes
-void ReopenRamWindows(); //Reopen them when a new Rom is loaded
 void Update_RAM_Search(); //keeps RAM values up to date in the search and watch windows
 
 void SetSearchType(int SearchType); //Set the search type

@@ -123,7 +123,7 @@ _OP(DbgOper,     0, 128,   0) _SEP /* Green */     \
 /* Comment */                                      \
 _OP(DbgComm,   128, 128, 128) _SEP /* Grey */      \
 /* Operand note */                                 \
-_OP(DbgOpNt, 128, 128, 255)   _SEP /* Purple */    \
+_OP(DbgOpNt,   128, 128, 255) _SEP /* Purple */    \
 /* Symbolic name */                                \
 _OP(DbgSym,     34,  75, 143) _SEP /* Rurikon */   \
 /* Effective address */                            \

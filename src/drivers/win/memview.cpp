@@ -253,7 +253,7 @@ void resetHighlightingActivityLog()
 }
 
 void ApplyPatch(int addr,int size, uint8* data){
-	UNDOSTRUCT *tmp=(UNDOSTRUCT*)malloc(sizeof(UNDOSTRUCT)); //mbg merge 7/18/06 removed struct qualifiers and added cast
+	UNDOSTRUCT *tmp = (UNDOSTRUCT*)malloc(sizeof(UNDOSTRUCT)); //mbg merge 7/18/06 removed struct qualifiers and added cast
 
 	int i;
 
@@ -1286,7 +1286,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		char *ftmp;
 
 		len=DragQueryFile((HDROP)wParam,0,0,0)+1; 
-		if((ftmp=(char*)malloc(len))) 
+		if(ftmp = (char*)malloc(len)) 
 		{
 			DragQueryFile((HDROP)wParam,0,ftmp,len); 
 			string fileDropped = ftmp;
@@ -1303,6 +1303,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				std::string str = "Could not open " + fileDropped;
 				MessageBox(hwnd, str.c_str(), "File error", 0);
 			}
+			free(ftmp);
 		}            
 	}
 	break;
@@ -3264,50 +3265,45 @@ bool ChangeColor(HWND hwnd, COLORMENU* item)
 
 BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL (WINAPI *opMenu)(HMENU hmenu, UINT item, BOOL byPos, LPCMENUITEMINFO info))
 {
-	#define MIIM_STRING 0x40
-	#define MIIM_BITMAP 0x80
 
-	#define COLORMENU_ICON_SIZE 14
-	#define COLORMENU_ICON_BORDER 1
-
-	struct {
-		MENUITEMINFO info;
-		HBITMAP bitmap;
-	} _info;
-	memset(&_info, 0, sizeof(_info));
-	MENUITEMINFO* info = (MENUITEMINFO*)&_info;
-	info->cbSize = sizeof(_info);
+	MENUITEMINFO info;
+	memset(&info, 0, sizeof(MENUITEMINFO));
+	info.cbSize = sizeof(MENUITEMINFO);
 
 	if (item->text)
 	{
 		HDC hdc = GetDC(hwnd);
 		HDC memdc = CreateCompatibleDC(hdc);
+		
+		int width = GetSystemMetrics(SM_CXMENUCHECK);
+		int height = GetSystemMetrics(SM_CYMENUCHECK);
+
 		if (!item->bitmap)
-			item->bitmap = CreateCompatibleBitmap(hdc, COLORMENU_ICON_SIZE, COLORMENU_ICON_SIZE);
+			item->bitmap = CreateCompatibleBitmap(hdc, width, height);
 		SelectObject(memdc, item->bitmap);
 		HBRUSH brush = CreateSolidBrush(RGB(*item->r, *item->g, *item->b));
-		RECT rect = { COLORMENU_ICON_BORDER, COLORMENU_ICON_BORDER, COLORMENU_ICON_SIZE - COLORMENU_ICON_BORDER, COLORMENU_ICON_SIZE - COLORMENU_ICON_BORDER };
+		RECT rect = { 1, 1, width - 1, height - 1};
 		FillRect(memdc, &rect, brush);
-
 		DeleteObject(brush);
 		DeleteDC(memdc);
 		ReleaseDC(hwnd, hdc);
 
-		_info.bitmap = item->bitmap;
-
 		char menu_str[64];
 		sprintf(menu_str, "%s\t#%02X%02X%02X", item->text, *item->r, *item->g, *item->b);
-		info->dwTypeData = menu_str;
-		info->cch = strlen(menu_str);
 
-		info->wID = id;
-		info->fMask = MIIM_ID | MIIM_STRING | MIIM_BITMAP;
+		info.dwTypeData = menu_str;
+		info.cch = strlen(menu_str);
+		info.hbmpUnchecked = item->bitmap;
+		info.wID = id;
+
+		info.fMask = MIIM_ID | MIIM_TYPE | MIIM_CHECKMARKS;
+		info.fType = MFT_STRING;
 	}
 	else
 	{
-		info->fMask = MIIM_TYPE;
-		info->fType = MFT_SEPARATOR;
+		info.fMask = MIIM_TYPE;
+		info.fType = MFT_SEPARATOR;
 	}
 
-	return opMenu(menu, pos, TRUE, info);
+	return opMenu(menu, pos, TRUE, &info);
 }

@@ -115,7 +115,7 @@ INT_PTR CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			if (autoloadCDL)
 			{
 				char nameo[2048];
-				strcpy(nameo, GetRomPath());
+				strcpy(nameo, GetRomPath().c_str());
 				strcat(nameo, mass_replace(GetRomName(), "|", ".").c_str());
 				strcat(nameo, ".cdl");
 				LoadCDLog(nameo);
@@ -288,8 +288,8 @@ void SaveCDLogFile()
 	if (loadedcdfile[0] == 0)
 	{
 		char nameo[2048];
-		strcpy(nameo, GetRomPath());
-		strcat(nameo, mass_replace(GetRomName(), "|", ".").c_str());
+		strcpy(nameo, GetRomName().c_str());
+		strcat(nameo, mass_replace(GetRomPath(), "|", ".").c_str());
 		strcat(nameo, ".cdl");
 		RenameCDLog(nameo);
 	}
@@ -499,7 +499,7 @@ void CDLoggerROMChanged()
 
 	// try to load respective CDL file
 	char nameo[2048];
-	strcpy(nameo, GetRomPath());
+	strcpy(nameo, GetRomName().c_str());
 	strcat(nameo, mass_replace(GetRomName(), "|", ".").c_str());
 	strcat(nameo, ".cdl");
 

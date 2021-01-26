@@ -80,7 +80,7 @@ bool debuggerIDAFont = false;
 unsigned int IDAFontSize = 16;
 bool debuggerDisplayROMoffsets = false;
 
-wchar_t debug_wstr[16384];
+wchar_t* debug_wstr;
 char* debug_cdl_str;
 char* debug_str_decoration_comment;
 char* debug_decoration_comment;
@@ -1265,7 +1265,11 @@ void DeleteBreak(int sel)
 }
 
 void KillDebugger() {
-	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_RESETCONTENT,0,0);
+	if (hDebug)
+	{
+		SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_RESETCONTENT,0,0);
+		DebuggerExit();
+	}
 	FCEUI_Debugger().reset();
 	FCEUI_SetEmulationPaused(0); //mbg merge 7/18/06 changed from userpause
 }
@@ -1493,17 +1497,20 @@ void DebuggerExit()
 	// in case someone call it multiple times
 	if (hDebug)
 	{
-		DestroyMenu(hcolorpopupmenu);
-		hcolorpopupmenu = NULL;
-		DestroyWindow(hDebug);
-		hDebug = NULL;
-		free(debug_cdl_str);
-		free(debug_str_decoration_comment);
+		// release bitmap icons
 		for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 		{
 			DeleteObject(dbgcolormenu[i].menu.bitmap);
 			dbgcolormenu[i].menu.bitmap = NULL;
 		}
+		// Destroy color menu
+		DestroyMenu(hcolorpopupmenu);
+		// Destroy debug window
+		DestroyWindow(hDebug);
+		hDebug = NULL;
+		free(debug_wstr);
+		free(debug_cdl_str);
+		free(debug_str_decoration_comment);
 	}
 }
 
@@ -1837,10 +1844,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 		case WM_INITDIALOG:
 		{
-			// init buffers
-			debug_cdl_str = (char*)malloc(512);
-			debug_str_decoration_comment = (char*)malloc(NL_MAX_MULTILINE_COMMENT_LEN + 10);
-
 			char str[256] = { 0 };
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_CYCLES, break_on_cycles ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, break_on_instructions ? BST_CHECKED : BST_UNCHECKED);
@@ -2657,6 +2660,13 @@ void DoDebug(uint8 halt)
 {
 	if (!debugger_open)
 	{
+		// init buffers
+		// owomomo: initialize buffers even before the debugger is open,
+		// because some of the operations about hDebug may occur before
+		// its WM_INITDIALOG runs.
+		debug_wstr = (wchar_t*)malloc(16384 * sizeof(wchar_t));
+		debug_cdl_str = (char*)malloc(512);
+		debug_str_decoration_comment = (char*)malloc(NL_MAX_MULTILINE_COMMENT_LEN + 10);
 		hDebug = CreateDialog(fceu_hInstance,"DEBUGGER",NULL,DebuggerCallB);
 		if(DbgSizeX != -1 && DbgSizeY != -1)
 			SetWindowPos(hDebug,0,0,0,DbgSizeX,DbgSizeY,SWP_NOMOVE|SWP_NOZORDER|SWP_NOOWNERZORDER);

@@ -1098,40 +1098,6 @@ void ResetResults()
 	if (RamSearchHWnd)
 		ListView_SetItemCount(GetDlgItem(RamSearchHWnd,IDC_RAMLIST),ResultCount);
 }
-void CloseRamWindows() //Close the Ram Search & Watch windows when rom closes
-{
-	ResetWatches();
-	ResetResults();
-	if (RamSearchHWnd)
-		SendMessage(RamSearchHWnd,WM_CLOSE,NULL,NULL);
-	if (RamWatchHWnd)
-		SendMessage(RamWatchHWnd,WM_CLOSE,NULL,NULL);
-}
-void ReopenRamWindows() //Reopen them when a new Rom is loaded
-{
-	HWND hwnd = GetActiveWindow();
-
-	if(!RamSearchHWnd)
-	{
-		reset_address_info();
-		INT_PTR CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-		RamSearchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, RamSearchProc);
-	}
-
-	if (AutoRWLoad)
-		OpenRWRecentFile(0);
-
-	if (!RamWatchHWnd)
-		RamWatchHWnd = CreateDialog(hInst, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, RamWatchProc);
-
-	if (hwnd == hWnd && hwnd != GetActiveWindow())
-		SetActiveWindow(hWnd); // restore focus to the main window if it had it before
-}
-
-
-
-
-
 
 void RefreshRamListSelectedCountControlStatus(HWND hDlg)
 {
