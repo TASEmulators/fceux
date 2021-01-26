@@ -77,6 +77,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 
 		ppuNameTableView_t *ntView;
 		QCheckBox *showScrollLineCbox;
+		QCheckBox *showGridLineCbox;
 		QCheckBox *showAttrbCbox;
 		QCheckBox *ignorePaletteCbox;
 		QSlider   *refreshSlider;
@@ -92,7 +93,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		QLabel *attrbLbl;
 
 	public slots:
-      void closeWindow(void);
+		void closeWindow(void);
 	private slots:
 		void periodicUpdate(void);
 		void updateMirrorButtons(void);
@@ -105,6 +106,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void singleScreen3Clicked(void);
 		void showAttrbChanged(int state);
 		void ignorePaletteChanged(int state);
+		void showGridLinesChanged(int state);
 		void showScrollLinesChanged(int state);
 		void refreshSliderChanged(int value);
 		void scanLineChanged( const QString &txt );

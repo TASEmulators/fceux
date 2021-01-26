@@ -52,6 +52,7 @@ static int xpos = 0, ypos = 0;
 static int attview = 0;
 static int hidepal = 0;
 static bool drawScrollLines = true;
+static bool drawGridLines = true;
 static bool redrawtables = true;
 
 // checkerboard tile for attribute view
@@ -112,7 +113,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	nameTableViewWindow = this;
 
-   setWindowTitle( tr("Name Table Viewer") );
+	setWindowTitle( tr("Name Table Viewer") );
 
 	mainLayout = new QVBoxLayout();
 
@@ -129,18 +130,22 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	mainLayout->addLayout( grid ,   1 );
 
 	showScrollLineCbox = new QCheckBox( tr("Show Scroll Lines") );
+	showGridLineCbox   = new QCheckBox( tr("Show Grid Lines") );
 	showAttrbCbox      = new QCheckBox( tr("Show Attributes") );
 	ignorePaletteCbox  = new QCheckBox( tr("Ignore Palette") );
 
 	showScrollLineCbox->setChecked( drawScrollLines );
+	showGridLineCbox->setChecked( drawGridLines );
 	showAttrbCbox->setChecked( attview );
 	ignorePaletteCbox->setChecked( hidepal );
 
 	grid->addWidget( showScrollLineCbox, 0, 0, Qt::AlignLeft );
-	grid->addWidget( showAttrbCbox     , 1, 0, Qt::AlignLeft );
-	grid->addWidget( ignorePaletteCbox , 2, 0, Qt::AlignLeft );
+	grid->addWidget( showGridLineCbox  , 1, 0, Qt::AlignLeft );
+	grid->addWidget( showAttrbCbox     , 2, 0, Qt::AlignLeft );
+	grid->addWidget( ignorePaletteCbox , 2, 1, Qt::AlignLeft );
 
 	connect( showScrollLineCbox, SIGNAL(stateChanged(int)), this, SLOT(showScrollLinesChanged(int)));
+	connect( showGridLineCbox  , SIGNAL(stateChanged(int)), this, SLOT(showGridLinesChanged(int)));
 	connect( showAttrbCbox     , SIGNAL(stateChanged(int)), this, SLOT(showAttrbChanged(int)));
 	connect( ignorePaletteCbox , SIGNAL(stateChanged(int)), this, SLOT(ignorePaletteChanged(int)));
 
@@ -372,6 +377,12 @@ void ppuNameTableViewerDialog_t::showScrollLinesChanged(int state)
 	drawScrollLines = (state != Qt::Unchecked);
 }
 //----------------------------------------------------
+void ppuNameTableViewerDialog_t::showGridLinesChanged(int state)
+{
+	drawGridLines = (state != Qt::Unchecked);
+	redrawtables = true;
+}
+//----------------------------------------------------
 void ppuNameTableViewerDialog_t::showAttrbChanged(int state)
 {
 	attview = (state != Qt::Unchecked);
@@ -504,6 +515,7 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 	int n,i,j,ii,jj,w,h,x,y,xx,yy,ww,hh;
 	QPainter painter(this);
 	QColor scanLineColor(255,255,255);
+	QColor gridLineColor(128,128,128);
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
 
@@ -558,6 +570,19 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 			if ( (ypos >= yy) && (ypos < (yy+hh)) )
 			{
 				painter.drawLine( xx, ypos, xx + ww, ypos );
+			}
+		}
+		if ( drawGridLines )
+		{
+			painter.setPen( gridLineColor );
+
+			for (x=0; x<256; x+=8)
+			{
+				painter.drawLine( xx + x, yy, xx + x, yy + hh );
+			}
+			for (y=0; y<240; y+=8)
+			{
+				painter.drawLine( xx, yy + y, xx + ww, yy + y );
 			}
 		}
 	}
