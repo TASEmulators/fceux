@@ -539,6 +539,22 @@ void HighlightSyntax(int lines)
 	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
 }
 
+void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
+{
+	// basic syntax highlighter and due richedit optimizations
+	int eventMask = SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, 0);
+	SendDlgItemMessage(hDebug, id, WM_SETREDRAW, false, 0);
+
+	if (text)
+		SetDlgItemTextW(hWnd, id, debug_wstr);
+	HighlightSyntax(lines);
+	HighlightPC();
+
+	SendDlgItemMessage(hWnd, id, WM_SETREDRAW, true, 0);
+	InvalidateRect(GetDlgItem(hWnd, id), 0, true);
+	SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, eventMask);
+}
+
 void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 {
 	wchar_t chr[40] = { 0 };
@@ -705,21 +721,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		wcscat(debug_wstr, L"\n");
 		instructions_count++;
 	}
-
-	// prevent the font of the edit control from screwing up when it contains MBC or characters not contained the current font.
-	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETLANGOPTIONS, 0, SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETLANGOPTIONS, 0, 0) & ~IMF_AUTOFONT);
-
-	// basic syntax highlighter and due richedit optimizations
-	int eventMask = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, 0);
-	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, false, 0);
-
-	SetDlgItemTextW(hWnd, id, debug_wstr);
-	HighlightSyntax(lines);
-	HighlightPC();
-
-	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, true, 0);
-	InvalidateRect(GetDlgItem(hWnd, id), 0, true);
-	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, eventMask);
+	UpdateDisassembleView(hWnd, id, lines, true);
 
 	// fill the left panel data
 	debug_cdl_str[0] = 0;
@@ -1924,6 +1926,9 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			hDebugcontext = LoadMenu(fceu_hInstance,"DEBUGCONTEXTMENUS");
 			hDisasmcontext = LoadMenu(fceu_hInstance,"DISASMCONTEXTMENUS");
 
+			// prevent the font of the edit control from screwing up when it contains MBC or characters not contained the current font.
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETLANGOPTIONS, 0, SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETLANGOPTIONS, 0, 0) & ~IMF_AUTOFONT);
+
 			// subclass editfield
 			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWLP_WNDPROC, (LONG_PTR)IDC_DEBUGGER_DISASSEMBLY_WndProc);
 
@@ -2054,17 +2059,8 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 									if (!IsDebugColorDefault() && MessageBox(hwndDlg, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
 									{
 										RestoreDefaultDebugColor();
-
-										HWND debug_edit = GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY);
-										GetClientRect(debug_edit, &rect);
-										int eventMask = SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, 0);
-										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, false, 0);
-										HighlightSyntax((rect.bottom - rect.top) / debugSystem->disasmFontHeight);
-										HighlightPC();
-										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, true, 0);
-										InvalidateRect(debug_edit, 0, true);
-										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, eventMask);
-
+										GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
+										UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
 										for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 											ModifyColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
 									}
@@ -2087,16 +2083,8 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 									int index = ret - ID_COLOR_DEBUGGER;
 									if (ChangeColor(hwndDlg, &dbgcolormenu[index]))
 									{
-										HWND debug_edit = GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY);
-										GetClientRect(debug_edit, &rect);
-										int eventMask = SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, 0);
-										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, false, 0);
-										HighlightSyntax((rect.bottom - rect.top) / debugSystem->disasmFontHeight);
-										HighlightPC();
-										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETREDRAW, true, 0);
-										InvalidateRect(debug_edit, 0, true);
-										SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETEVENTMASK, 0, eventMask);
-
+										GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
+										UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
 										ModifyColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[index].menu, index, ret);
 									}
 								}
