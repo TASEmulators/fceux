@@ -2199,6 +2199,10 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								ModifyColorMenu(hwndDlg, GetSubMenu(GetMenu(hwndDlg), 1), &dbgcolormenu[index].menu, index, wParam);
 							}
 						}
+						break;
+						case IDC_DEBUGGER_RESTORESIZE:
+							RestoreSize(hwndDlg);
+							break;
 					}
 				}
 			}
@@ -2446,9 +2450,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				{
 					case BN_CLICKED:
 						switch(LOWORD(wParam)) {
-							case IDC_DEBUGGER_RESTORESIZE: 
-								RestoreSize(hwndDlg); 
-								break;
 							case IDC_DEBUGGER_BP_ADD:
 								childwnd = 1;
 								if (DialogBoxParam(fceu_hInstance,"ADDBP",hwndDlg,AddbpCallB, 0)) AddBreakList();
