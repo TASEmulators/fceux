@@ -109,8 +109,8 @@ struct DBGCOLORMENU {
 	{ "RTS Line",          PPCCF(DbgRts)  }
 };
 
-#define IDC_DEBUGGER_RESTORESIZE      100
-#define ID_COLOR_DEBUGGER             200
+#define IDC_DEBUGGER_RESTORESIZE      1000
+#define ID_COLOR_DEBUGGER             2000
 
 bool ChangeColor(HWND hwnd, DBGCOLORMENU* item)
 {
@@ -398,7 +398,8 @@ INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			switch(HIWORD(wParam)) {
 				case BN_CLICKED:
 					switch(LOWORD(wParam)) {
-						case IDC_ADDBP_MODE_F: {
+						case IDC_ADDBP_MODE_F:
+						{
 							UpdateDialog(hwndDlg);
 							break;
 						}
@@ -2090,10 +2091,13 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				p[0].x = p[1].x = new_w - curr_w;
 				p[0].y = new_h_l - curr_h_l;
 				p[1].y = new_h_r - curr_h_r;
-				EnumChildWindows(hwndDlg, DebuggerEnumWindowsProc, (LPARAM)p);	//Initiate callback for resizing child windows
+				if (p[0].x != 0 || p[0].y != 0 || p[1].x != 0 || p[1].y != 0)
+				{
+					EnumChildWindows(hwndDlg, DebuggerEnumWindowsProc, (LPARAM)p);	//Initiate callback for resizing child windows
+					InvalidateRect(hwndDlg, 0, TRUE);
+					UpdateWindow(hwndDlg);
+				}
 				currDebuggerRect = newDebuggerRect;						//Store current debugger window size (for future calculations in EnumChildWindows
-				InvalidateRect(hwndDlg,0,TRUE);
-				UpdateWindow(hwndDlg);
 			}
 			break;
 		}
