@@ -68,7 +68,6 @@ static HMENU hDebugcontext;     //Handle to context menu
 static HMENU hDebugcontextsub;  //Handle to context sub menu
 static HMENU hDisasmcontext;     //Handle to context menu
 static HMENU hDisasmcontextsub;  //Handle to context sub menu
-static HMENU hcolorpopupmenu;        //Handle to color context menu
 WNDPROC IDC_DEBUGGER_DISASSEMBLY_oldWndProc = 0;
 
 // static HFONT hFont;
@@ -110,8 +109,8 @@ struct DBGCOLORMENU {
 	{ "RTS Line",          PPCCF(DbgRts)  }
 };
 
-#define ID_COLOR_DEBUGGER     200
-#define ID_DEBUGGER_DEFCOLOR  250
+#define IDC_DEBUGGER_RESTORESIZE      100
+#define ID_COLOR_DEBUGGER             200
 
 bool ChangeColor(HWND hwnd, DBGCOLORMENU* item)
 {
@@ -150,12 +149,23 @@ void UpdateOtherDebuggingDialogs()
 	PPUViewDoBlit();		//PPU Viewer
 }
 
+// owomomo: I don't understand why the debuggerIDAFont value must be added,
+// if someone knows, please comment here and tell me...
+#define DEBUGGER_DEFAULT_WIDTH 760 // + (debuggerIDAFont ? 64 : 0))
+#define DEBUGGER_DEFAULT_HEIGHT 590 //  + (debuggerIDAFont ? 2 : 0))
+
+#define DEBUGGER_MIN_HEIGHT_LEFT 120 // Minimum height for the left part
+#define DEBUGGER_MIN_HEIGHT_RIGHT  DEBUGGER_DEFAULT_HEIGHT // Minimun height for the right part.
+
+#define DEBUGGER_MIN_WIDTH 360 // Minimum width for debugger
+#define DEBUGGER_MIN_HEIGHT DEBUGGER_MIN_HEIGHT_LEFT  // Minimum height for debugger
+
 void RestoreSize(HWND hwndDlg)
 {
 	HDC hdc = GetDC(hwndDlg);
 	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
-	const int DEFAULT_WIDTH = MulDiv(840 + (debuggerIDAFont ? 64 : 0), GetDeviceCaps(hdc, LOGPIXELSX), 96);	//Original width
-	const int DEFAULT_HEIGHT = MulDiv(606 + (debuggerIDAFont ? 2 : 0), GetDeviceCaps(hdc, LOGPIXELSY), 96);	//Original height
+	const int DEFAULT_WIDTH = MulDiv(DEBUGGER_DEFAULT_WIDTH, GetDeviceCaps(hdc, LOGPIXELSX), 96);	//Original width
+	const int DEFAULT_HEIGHT = MulDiv(DEBUGGER_DEFAULT_HEIGHT, GetDeviceCaps(hdc, LOGPIXELSY), 96);	//Original height
 	ReleaseDC(hwndDlg, hdc);
 	
 	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
@@ -435,7 +445,7 @@ INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	return FALSE; //TRUE;
 }
 
-void HighlightPC()
+void HighlightPC(HWND hWnd)
 {
 	if (PCLine == -1)
 		return;
@@ -444,30 +454,30 @@ void HighlightPC()
 	ft.lpstrText  = ">";
 	ft.chrg.cpMin = 0;
 	ft.chrg.cpMax = -1;
-	int start = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft);
+	int start = SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft);
 	if (start >= 0)
 	{
 		int old_start, old_end;
-		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
-		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)start, (LPARAM)start+20);
-		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgPC));
-		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
+		SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
+		SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)start, (LPARAM)start+20);
+		SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgPC));
+		SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
     }
 }
 
-void HighlightSyntax(int lines)
+void HighlightSyntax(HWND hWnd, int lines)
 {
 	int wordbreak = 0;
 	int opbreak = 0;
 	int numpos = 0;
 	int old_start, old_end;
 	bool commentline;
-	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
+	SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
 
 	for (int line = 0; ; line++)
 	{
 		commentline = false;
-		wordbreak = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDWORDBREAK, (WPARAM)WB_RIGHT, (LPARAM)newline.chrg.cpMin + 21);
+		wordbreak = SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDWORDBREAK, (WPARAM)WB_RIGHT, (LPARAM)newline.chrg.cpMin + 21);
 		for (int ch = newline.chrg.cpMin; ; ch++)
 		{
 			if (debug_wstr[ch] == L'=' || debug_wstr[ch] == L'@' || debug_wstr[ch] == L'\n' || debug_wstr[ch] == L'-' || debug_wstr[ch] == L';')
@@ -478,39 +488,39 @@ void HighlightSyntax(int lines)
 		}
 		if (debug_wstr[newline.chrg.cpMin] == L';')
 			commentline = true;
-		SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)newline.chrg.cpMin + 20, (LPARAM)opbreak);
+		SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)newline.chrg.cpMin + 20, (LPARAM)opbreak);
 		int oldline = newline.chrg.cpMin;
-		newline.chrg.cpMin = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&newline) + 1;
+		newline.chrg.cpMin = SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&newline) + 1;
 		if(newline.chrg.cpMin == 0) break;
 		// symbolic address
 		if (debug_wstr[newline.chrg.cpMin - 2] == L':')
 		{
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)oldline, (LPARAM)newline.chrg.cpMin);
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgSym));
+			SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)oldline, (LPARAM)newline.chrg.cpMin);
+			SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgSym));
 			continue;
 		}
 		if (!commentline)
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgMnem));
+			SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgMnem));
 		// comment
 		if (opbreak < newline.chrg.cpMin)
 		{
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)opbreak, (LPARAM)newline.chrg.cpMin);
+			SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)opbreak, (LPARAM)newline.chrg.cpMin);
 			if (commentline)
-				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgComm));
+				SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgComm));
 			else
 			{
 				if (debug_wstr[opbreak] == L'-')
-					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION,
+					SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION,
 						(LPARAM)PPCF(DbgRts));
 				else
 				{
-					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgOpNt));
+					SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgOpNt));
 					if (debug_wstr[opbreak] == L'@')
 					{
 						// effective address
 						FINDTEXT ft = { { opbreak, newline.chrg.cpMin }, "=" };
-						SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, opbreak, SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft));
-						SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgEff));
+						SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, opbreak, SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft));
+						SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgEff));
 					}
 				}
 			}
@@ -520,7 +530,7 @@ void HighlightSyntax(int lines)
 		// operand
 		num.chrg.cpMin = wordbreak;
 		num.chrg.cpMax = wordbreak + 6;
-		numpos = SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&num);
+		numpos = SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&num);
 		if (numpos != 0)
 		{
 			if (debug_wstr[numpos + 3] == L',' || debug_wstr[numpos + 3] == L')' || debug_wstr[numpos + 3] == L'\n'
@@ -529,26 +539,26 @@ void HighlightSyntax(int lines)
 				wordbreak = numpos + 2;
 			else
 				wordbreak = numpos + 4;
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)numpos, (LPARAM)wordbreak + 1);
-			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgOper));
+			SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)numpos, (LPARAM)wordbreak + 1);
+			SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgOper));
 		}
 		if (newline.chrg.cpMin == 0)
 			break;
 	}
 
-	SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
+	SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)old_start, (LPARAM)old_end);
 }
 
 void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 {
 	// basic syntax highlighter and due richedit optimizations
 	int eventMask = SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, 0);
-	SendDlgItemMessage(hDebug, id, WM_SETREDRAW, false, 0);
+	SendDlgItemMessage(hWnd, id, WM_SETREDRAW, false, 0);
 
 	if (text)
 		SetDlgItemTextW(hWnd, id, debug_wstr);
-	HighlightSyntax(lines);
-	HighlightPC();
+	HighlightSyntax(hWnd, lines);
+	HighlightPC(hWnd);
 
 	SendDlgItemMessage(hWnd, id, WM_SETREDRAW, true, 0);
 	InvalidateRect(GetDlgItem(hWnd, id), 0, true);
@@ -1505,8 +1515,9 @@ void DebuggerExit()
 			DeleteObject(dbgcolormenu[i].menu.bitmap);
 			dbgcolormenu[i].menu.bitmap = NULL;
 		}
-		// Destroy color menu
-		DestroyMenu(hcolorpopupmenu);
+		// Destroy menu
+		DestroyMenu(hDebugcontext);
+		DestroyMenu(hDisasmcontext);
 		// Destroy debug window
 		DestroyWindow(hDebug);
 		hDebug = NULL;
@@ -1522,51 +1533,145 @@ static RECT newDebuggerRect;
 //used to move all child items in the dialog when you resize (except for the dock fill controls which are resized)
 BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
-	int dx = (newDebuggerRect.right-newDebuggerRect.left)-(currDebuggerRect.right-currDebuggerRect.left);	//Calculate & store difference in width of old size vs new size
-	int dy = (newDebuggerRect.bottom-newDebuggerRect.top)-(currDebuggerRect.bottom-currDebuggerRect.top);	//ditto wtih height
-
-	HWND editbox = GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY);		//Get handle for Disassembly list box (large guy on the left)
-	HWND icontray = GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL);		//Get handle for Icontray, vertical column to the left of disassembly
-	HWND addrline = GetDlgItem(hDebug, IDC_DEBUGGER_ADDR_LINE);		//Get handle of address line (text area under the disassembly
-	HWND vscr = GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY_VSCR);	//Get handle for disassembly Vertical Scrollbar
-
-	char str[8] = {0};
+	POINT* p = (POINT*)lParam;
+	int dx = p[0].x;
+	int dy_l = p[0].y;
+	int dy_r = p[1].y;
 
 	RECT crect;
-	GetWindowRect(hwnd,&crect);					//Get rect of current child to be resized
-	ScreenToClient(hDebug,(LPPOINT)&crect);		//Convert rect coordinates to client area coordinates
-	ScreenToClient(hDebug,((LPPOINT)&crect)+1);
+	HWND parent = GetParent(hwnd);
+	GetWindowRect(hwnd, &crect);					//Get rect of current child to be resized
+	ScreenToClient(parent, (LPPOINT)&crect);		//Convert rect coordinates to client area coordinates
+	ScreenToClient(parent, ((LPPOINT)&crect) + 1);
 
-	if(hwnd == editbox)
+	switch (GetDlgCtrlID(hwnd))
 	{
-		crect.right += dx;
-		crect.bottom += dy;
-		SetWindowPos(hwnd,0,0,0,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER | SWP_NOMOVE);
-		GetScrollInfo(GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si);
-		Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
-	} else if(hwnd == icontray)
-	{
-		crect.bottom += dy;
-		SetWindowPos(hwnd,0,0,0,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER | SWP_NOMOVE);
-	} else if(hwnd == addrline)
-	{
-		crect.top += dy;
-		crect.bottom += dy;
-		crect.right += dx;
-		SetWindowPos(hwnd,0,crect.left,crect.top,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER);
-	} else if(hwnd == vscr)
-	{
-		 crect.bottom += dy;
-		 crect.left += dx;
-		 crect.right += dx;
-		 SetWindowPos(hwnd,0,crect.left,crect.top,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER);
-	} else
-	{
-		crect.left += dx;
-		//if (crect.left < 256) crect.left = 256;		//Limit how far left the remaining child windows will move
-		SetWindowPos(hwnd,0,crect.left,crect.top,0,0,SWP_NOZORDER | SWP_NOSIZE);
+		case IDC_DEBUGGER_DISASSEMBLY:
+			// horizontal and vertical stretch
+			crect.right += dx;
+			crect.bottom += dy_l;
+			SetWindowPos(hwnd, 0, 0, 0, crect.right - crect.left, crect.bottom - crect.top, SWP_NOZORDER | SWP_NOMOVE);
+			GetScrollInfo(GetDlgItem(parent, IDC_DEBUGGER_DISASSEMBLY_VSCR), SB_CTL, &si);
+			Disassemble(parent, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+			break;
+		case IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL:
+			// vertical stretch, no movement
+			crect.bottom += dy_l;
+			SetWindowPos(hwnd, 0, 0, 0, crect.right - crect.left, crect.bottom - crect.top, SWP_NOZORDER | SWP_NOMOVE);
+			break;
+		case IDC_DEBUGGER_VAL_S:
+		case IDC_DEBUGGER_STACK_CONTENTS:
+		case IDC_DEBUGGER_BP_LIST:
+		case IDC_DEBUGGER_BREAKPOINTS:
+			// vertical stretch half length, move left and right full length, stick top
+			crect.bottom += dy_r / 2;
+			crect.left += dx;
+			crect.right += dx;
+			SetWindowPos(hwnd, 0, crect.left, crect.top, crect.right - crect.left, crect.bottom - crect.top, SWP_NOZORDER);
+			break;
+		case LIST_DEBUGGER_BOOKMARKS:
+		case IDC_DEBUGGER_BOOKMARKS:
+			// vertical strectch half length, move left and right full length, stick bottom
+			crect.bottom += dy_r;
+			crect.top += dy_r / 2;
+			crect.left += dx;
+			crect.right += dx;
+			SetWindowPos(hwnd, 0, crect.left, crect.top, crect.right - crect.left, crect.bottom - crect.top, SWP_NOZORDER);
+			break;
+		case IDC_DEBUGGER_RUN:
+		case IDC_DEBUGGER_STEP_IN:
+		case IDC_DEBUGGER_STEP_OUT:
+		case IDC_DEBUGGER_STEP_OVER:
+		case IDC_DEBUGGER_RUN_LINE:
+		case IDC_DEBUGGER_RUN_FRAME2:
+		case IDC_DEBUGGER_SEEK_TO:
+		case IDC_DEBUGGER_VAL_PCSEEK:
+		case IDC_DEBUGGER_TEXT_PC:
+		case IDC_DEBUGGER_VAL_PC:
+		case IDC_DEBUGGER_SEEK_PC:
+		case IDC_DEBUGGER_TEXT_A:
+		case IDC_DEBUGGER_VAL_A:
+		case IDC_DEBUGGER_TEXT_X:
+		case IDC_DEBUGGER_VAL_X:
+		case IDC_DEBUGGER_TEXT_Y:
+		case IDC_DEBUGGER_VAL_Y:
+			// no stretch, move left and right full length
+			crect.left += dx;
+			SetWindowPos(hwnd, 0, crect.left, crect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+			break;
+		case IDC_DEBUGGER_BP_ADD:
+		case IDC_DEBUGGER_BP_DEL:
+		case IDC_DEBUGGER_BP_EDIT:
+		case IDC_DEBUGGER_BREAK_ON_BAD_OP:
+		case IDC_DEBUGGER_STATUSFLAGS:
+		case IDC_DEBUGGER_FLAG_N:
+		case IDC_DEBUGGER_FLAG_V:
+		case IDC_DEBUGGER_FLAG_U:
+		case IDC_DEBUGGER_FLAG_B:
+		case IDC_DEBUGGER_FLAG_D:
+		case IDC_DEBUGGER_FLAG_I:
+		case IDC_DEBUGGER_FLAG_Z:
+		case IDC_DEBUGGER_FLAG_C:
+		case IDC_DEBUGGER_VAL_S2:
+		case IDC_DEBUGGER_TEXT_PPU:
+		case IDC_DEBUGGER_VAL_PPU:
+		case IDC_DEBUGGER_TEXT_SPR:
+		case IDC_DEBUGGER_VAL_SPR:
+		case IDC_DEBUGGER_TEXT_SLINE:
+		case IDC_DEBUGGER_VAL_SLINE:
+		case IDC_DEBUGGER_TEXT_PPUPIXEL:
+		case IDC_DEBUGGER_VAL_PPUPIXEL:
+		case IDC_DEBUGGER_TEXT_CYCLES_COUNT:
+		case IDC_DEBUGGER_VAL_CYCLES_COUNT:
+		case IDC_DEBUGGER_VAL_CYCLES_COUNT2:
+		case IDC_DEBUGGER_BREAK_ON_CYCLES:
+		case IDC_DEBUGGER_CYCLES_EXCEED:
+		case IDC_DEBUGGER_BOOKMARK:
+		case IDC_DEBUGGER_BOOKMARK_ADD:
+		case IDC_DEBUGGER_BOOKMARK_DEL:
+		case IDC_DEBUGGER_BOOKMARK_EDIT:
+		case IDC_DEBUGGER_TEXT_INSTRUCTIONS_COUNT:
+		case IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT:
+		case IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT2:
+		case IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS:
+		case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
+		case IDC_DEBUGGER_RESET_COUNTERS:
+			// no stretch, move up and down half length, move left and right full length
+			crect.top += dy_r / 2;
+			crect.left += dx;
+			SetWindowPos(hwnd, 0, crect.left, crect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+			break;
+		case IDC_DEBUGGER_VAL_S3:
+		case IDC_DEBUGGER_ROM_OFFSETS:
+		case IDC_DEBUGGER_ENABLE_SYMBOLIC:
+		case IDC_DEBUGGER_PREDEFINED_REGS:
+		case IDC_DEBUGGER_RELOAD_SYMS:
+		case IDC_DEBUGGER_ROM_PATCHER:
+		case DEBUGAUTOLOAD:
+		case DEBUGLOADDEB:
+		case DEBUGIDAFONT:
+			// no stretch, move up and down full length, move left and right full length
+			crect.top += dy_r;
+			crect.left += dx;
+			SetWindowPos(hwnd, 0, crect.left, crect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+			break;
+		case IDC_DEBUGGER_ADDR_LINE:
+			// horizontal stretch, move up and down full length 
+			crect.top += dy_l;
+			crect.bottom += dy_r;
+			crect.right += dx;
+			SetWindowPos(hwnd, 0, crect.left, crect.top, crect.right - crect.left, crect.bottom - crect.top, SWP_NOZORDER);
+			break;
+		case IDC_DEBUGGER_DISASSEMBLY_VSCR:
+			// vertical stretch,  move left and right full length
+			crect.bottom += dy_l;
+			crect.left += dx;
+			crect.right += dx;
+			SetWindowPos(hwnd, 0, crect.left, crect.top, crect.right - crect.left, crect.bottom - crect.top, SWP_NOZORDER);
 	}
+
 	return TRUE;
+
 }
 
 void LoadGameDebuggerData(HWND hwndDlg = hDebug)
@@ -1900,8 +2005,8 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 			// limit input
 			// Don't limit address entry. See: debugcpp offsetStringToInt
-			DefaultEditCtrlProc = (WNDPROC)
 			//DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PCSEEK), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+			DefaultEditCtrlProc = (WNDPROC)
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PC), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_A), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_X), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
@@ -1932,12 +2037,12 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			// subclass editfield
 			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWLP_WNDPROC, (LONG_PTR)IDC_DEBUGGER_DISASSEMBLY_WndProc);
 
-			// prepare color menu
-			hcolorpopupmenu = CreatePopupMenu();
+			// prepare menu
+			HMENU hdbgmenu = GetMenu(hwndDlg);
+			InsertMenu(hdbgmenu, 0, MF_STRING | MF_BYPOSITION, IDC_DEBUGGER_RESTORESIZE, "Default window size");
+			HMENU hcolorpopupmenu = GetSubMenu(hdbgmenu, 1);
 			for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 				InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
-			AppendMenu(hcolorpopupmenu, MF_SEPARATOR, NULL, NULL);
-			AppendMenu(hcolorpopupmenu, MF_STRING, ID_DEBUGGER_DEFCOLOR, "Restore defaults");
 
 			debugger_open = 1;
 			inDebugger = true;
@@ -1945,35 +2050,50 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		}
 		case WM_SIZE:
 		{
-			if(wParam == SIZE_RESTORED)										//If dialog was resized
+			if(wParam == SIZE_RESTORED)						//If dialog was resized
 			{
-				GetWindowRect(hwndDlg,&newDebuggerRect);					//Get new size
+				GetWindowRect(hwndDlg,&newDebuggerRect);	//Get new size
+
 				//Force a minimum Dialog size-------------------------------
-				if (newDebuggerRect.right - newDebuggerRect.left < 368 || newDebuggerRect.bottom - newDebuggerRect.top < 150)	//If either x or y is too small run the force size routine
-				{
-					if (newDebuggerRect.right - newDebuggerRect.left < 367)	//If width is too small reset to previous width
-					{
-						newDebuggerRect.right = currDebuggerRect.right;
-						newDebuggerRect.left = currDebuggerRect.left;
-						
-					}
-					if (newDebuggerRect.bottom - newDebuggerRect.top < 150)	//If heigth is too small reset to previous height
-					{
-						newDebuggerRect.top = currDebuggerRect.top;
-						newDebuggerRect.bottom = currDebuggerRect.bottom;
-					}
-					SetWindowPos(hwndDlg,HWND_TOPMOST,newDebuggerRect.left,newDebuggerRect.top,(newDebuggerRect.right-newDebuggerRect.left),(newDebuggerRect.bottom-newDebuggerRect.top),SWP_SHOWWINDOW);
-				}
-				//Else run normal resizing procedure-------------------------
-				else														
-				{
-					DbgSizeX = newDebuggerRect.right-newDebuggerRect.left;	//Store new size (this will be used to store in the .cfg file)	
-					DbgSizeY = newDebuggerRect.bottom-newDebuggerRect.top;
-					EnumChildWindows(hwndDlg,DebuggerEnumWindowsProc,0);	//Initiate callback for resizing child windows
-					currDebuggerRect = newDebuggerRect;						//Store current debugger window size (for future calculations in EnumChildWindows
-					InvalidateRect(hwndDlg,0,TRUE);
-					UpdateWindow(hwndDlg);
-				}
+				DbgSizeX = newDebuggerRect.right - newDebuggerRect.left;	//Store new size (this will be used to store in the .cfg file)	
+				DbgSizeY = newDebuggerRect.bottom - newDebuggerRect.top;
+
+				// convert minimum size to actural screen size
+				// owomomo: the minimum height is different between left and right part,
+				// but width is the same, similarly hereinafter
+				HDC hdc = GetDC(hwndDlg);
+				int min_w = MulDiv(DEBUGGER_MIN_WIDTH, GetDeviceCaps(hdc, LOGPIXELSX), 96);
+				int min_h_l = MulDiv(DEBUGGER_MIN_HEIGHT_LEFT, GetDeviceCaps(hdc, LOGPIXELSY), 96);
+				int min_h_r = MulDiv(DEBUGGER_MIN_HEIGHT_RIGHT, GetDeviceCaps(hdc, LOGPIXELSY), 96);
+				ReleaseDC(hwndDlg, hdc);
+
+				// calculate current width and height
+				int curr_w = currDebuggerRect.right - currDebuggerRect.left;
+				int curr_h_l = currDebuggerRect.bottom - currDebuggerRect.top;
+				int curr_h_r = curr_h_l;
+				// calculate new width and height
+				int new_w = newDebuggerRect.right - newDebuggerRect.left;
+				int new_h_l = newDebuggerRect.bottom - newDebuggerRect.top;
+				int new_h_r = new_h_l;
+
+				// when the size is smaller than the minimum, calculate it as the minimum size
+				if (curr_w < min_w) curr_w = min_w;
+				if (curr_h_l < min_h_l) curr_h_l = min_h_l;
+				if (curr_h_r < min_h_r) curr_h_r = min_h_r;
+
+				if (new_w < min_w) new_w = min_w;
+				if (new_h_l < min_h_l) new_h_l = min_h_l;
+				if (new_h_r < min_h_r) new_h_r = min_h_r;
+
+				POINT p[2];
+				// Calculate ditto with size
+				p[0].x = p[1].x = new_w - curr_w;
+				p[0].y = new_h_l - curr_h_l;
+				p[1].y = new_h_r - curr_h_r;
+				EnumChildWindows(hwndDlg, DebuggerEnumWindowsProc, (LPARAM)p);	//Initiate callback for resizing child windows
+				currDebuggerRect = newDebuggerRect;						//Store current debugger window size (for future calculations in EnumChildWindows
+				InvalidateRect(hwndDlg,0,TRUE);
+				UpdateWindow(hwndDlg);
 			}
 			break;
 		}
@@ -2041,56 +2161,42 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							}
 							break;
 						}
-						case IDC_DEBUGGER_SYNTAX_HIGHLIGHT:
+						case ID_DEBUGGER_DEFCOLOR:
 						{
-							// a temporary solution to prevent sending BN_CLICKED repeatedly
-							static bool colormenupop = false;
-							if (colormenupop)
-								break;
-							colormenupop = true;
-							SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_SYNTAX_HIGHLIGHT, BM_SETSTATE, TRUE, 0);
-							RECT rect;
-							GetWindowRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_SYNTAX_HIGHLIGHT), &rect);
-							int ret = TrackPopupMenu(hcolorpopupmenu, TPM_LEFTALIGN | TPM_BOTTOMALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, rect.right, rect.bottom, NULL, hwndDlg, NULL);
-							switch (ret)
+							if (!IsDebugColorDefault() && MessageBox(hwndDlg, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
 							{
-								case ID_DEBUGGER_DEFCOLOR:
-								{
-									if (!IsDebugColorDefault() && MessageBox(hwndDlg, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
-									{
-										RestoreDefaultDebugColor();
-										GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
-										UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
-										for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
-											ModifyColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
-									}
-								}
-								break;
-								case ID_COLOR_DEBUGGER:
-								case ID_COLOR_DEBUGGER + 1:
-								case ID_COLOR_DEBUGGER + 2:
-								case ID_COLOR_DEBUGGER + 3:
-								case ID_COLOR_DEBUGGER + 4:
-								case ID_COLOR_DEBUGGER + 5:
-								case ID_COLOR_DEBUGGER + 6:
-								case ID_COLOR_DEBUGGER + 7:
-								case ID_COLOR_DEBUGGER + 8:
-								case ID_COLOR_DEBUGGER + 9:
-								case ID_COLOR_DEBUGGER + 10:
-								case ID_COLOR_DEBUGGER + 11:
-								case ID_COLOR_DEBUGGER + 12:
-								{
-									int index = ret - ID_COLOR_DEBUGGER;
-									if (ChangeColor(hwndDlg, &dbgcolormenu[index]))
-									{
-										GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
-										UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
-										ModifyColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[index].menu, index, ret);
-									}
-								}
+								RestoreDefaultDebugColor();
+								RECT rect;
+								GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
+								UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
+								HMENU hcolorpopupmenu = GetSubMenu(GetMenu(hwndDlg), 1);
+								for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
+									ModifyColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
 							}
-							colormenupop = false;
-							SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_SYNTAX_HIGHLIGHT, BM_SETSTATE, FALSE, 0);
+						}
+						break;
+						case ID_COLOR_DEBUGGER:
+						case ID_COLOR_DEBUGGER + 1:
+						case ID_COLOR_DEBUGGER + 2:
+						case ID_COLOR_DEBUGGER + 3:
+						case ID_COLOR_DEBUGGER + 4:
+						case ID_COLOR_DEBUGGER + 5:
+						case ID_COLOR_DEBUGGER + 6:
+						case ID_COLOR_DEBUGGER + 7:
+						case ID_COLOR_DEBUGGER + 8:
+						case ID_COLOR_DEBUGGER + 9:
+						case ID_COLOR_DEBUGGER + 10:
+						case ID_COLOR_DEBUGGER + 11:
+						case ID_COLOR_DEBUGGER + 12:
+						{
+							int index = wParam - ID_COLOR_DEBUGGER;
+							if (ChangeColor(hwndDlg, &dbgcolormenu[index]))
+							{
+								RECT rect;
+								GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
+								UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
+								ModifyColorMenu(hwndDlg, GetSubMenu(GetMenu(hwndDlg), 1), &dbgcolormenu[index].menu, index, wParam);
+							}
 						}
 					}
 				}
@@ -2174,11 +2280,11 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						si.nPos = si.nMax - si.nPage;
 					SetScrollInfo((HWND)lParam,SB_CTL,&si,TRUE);
 
-					Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+					Disassemble(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
 					// "Address Bookmark Add" follows the address
 					char str[16];
 					sprintf(str,"%04X", si.nPos);
-					SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
+					SetDlgItemText(hwndDlg, IDC_DEBUGGER_BOOKMARK, str);
 				}
 				break;
 			}

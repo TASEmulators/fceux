@@ -400,6 +400,7 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		case WM_QUIT:
 		case WM_CLOSE:
 			DestroyWindow(hCheatTip);
+			DestroyMenu(hCheatcontext);
 			if (CheatStyle)
 				DestroyWindow(hwndDlg);
 			else

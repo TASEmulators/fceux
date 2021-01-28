@@ -426,6 +426,11 @@ void PIANO_ROLL::free()
 		ImageList_Destroy(hImgList);
 		hImgList = 0;
 	}
+	if (hrMenu)
+	{
+		DestroyMenu(hrMenu);
+		hrMenu = 0;
+	}
 	headerColors.resize(0);
 }
 void PIANO_ROLL::reset()
