@@ -113,8 +113,9 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QGroupBox   *frame;
 	QMenuBar *menuBar;
-	QMenu *viewMenu;
-	QAction *act;
+	QMenu *viewMenu, *subMenu;
+	QAction *act, *zoomAct[4];
+	QActionGroup *group;
 	char stmp[64];
 	int useNativeMenuBar;
 
@@ -179,6 +180,31 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	viewMenu->addAction(act);
 
+	// View -> Image Zoom
+	subMenu = viewMenu->addMenu( tr("Image Zoom"));
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	for (int i=0; i<4; i++)
+	{
+	        char stmp[8];
+
+	        sprintf( stmp, "%ix", i+1 );
+
+	        zoomAct[i] = new QAction(tr(stmp), this);
+	        zoomAct[i]->setCheckable(true);
+
+	        group->addAction(zoomAct[i]);
+		subMenu->addAction(zoomAct[i]);
+	}
+	zoomAct[0]->setChecked(true);
+
+	connect(zoomAct[0], SIGNAL(triggered()), this, SLOT(changeZoom1x(void)) );
+	connect(zoomAct[1], SIGNAL(triggered()), this, SLOT(changeZoom2x(void)) );
+	connect(zoomAct[2], SIGNAL(triggered()), this, SLOT(changeZoom3x(void)) );
+	connect(zoomAct[3], SIGNAL(triggered()), this, SLOT(changeZoom4x(void)) );
+
 	// View -> Compact View Palette
 	act = new QAction(tr("Toggle Compact"), this);
 	//act->setShortcut(QKeySequence::Open);
@@ -199,19 +225,29 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
-	vbox   = new QVBoxLayout();
+	//vbox   = new QVBoxLayout();
 	//frame  = new QGroupBox( tr("Name Tables") );
 	ntView = new ppuNameTableView_t(this);
 	grid   = new QGridLayout();
 	ctlPanelFrame = new QFrame();
-	nameTableFrame = new QFrame();
+	//nameTableFrame = new QFrame();
 
-	vbox->addWidget( ntView );
-	nameTableFrame->setLayout( vbox );
-	mainLayout->addWidget( nameTableFrame, 100 );
+	scrollArea = new QScrollArea();
+	scrollArea->setWidgetResizable(false);
+	scrollArea->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
+	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	scrollArea->setMinimumSize( QSize( 512, 480 ) );
+
+	//vbox->addWidget( ntView );
+	//nameTableFrame->setLayout( vbox );
+	scrollArea->setWidget( ntView );
+	mainLayout->addWidget( scrollArea, 100 );
 	mainLayout->addWidget( ctlPanelFrame, 1 );
 
 	ctlPanelFrame->setLayout( grid );
+
+	ntView->setScrollPointer( scrollArea );
 
 	showScrollLineCbox = new QCheckBox( tr("Show Scroll Lines") );
 	showGridLineCbox   = new QCheckBox( tr("Show Grid Lines") );
@@ -352,9 +388,31 @@ void ppuNameTableViewerDialog_t::periodicUpdate(void)
 
 	if ( redrawtables )
 	{
-		this->update();
+		//this->update();
+		//this->scrollArea->update();
+		this->scrollArea->viewport()->update();
 		redrawtables = false;
 	}
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::changeZoom1x(void)
+{
+	ntView->setViewScale(1);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::changeZoom2x(void)
+{
+	ntView->setViewScale(2);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::changeZoom3x(void)
+{
+	ntView->setViewScale(3);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::changeZoom4x(void)
+{
+	ntView->setViewScale(4);
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::updateVisibility(void)
@@ -553,12 +611,22 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 	: QWidget(parent)
 {
 	this->parent = (ppuNameTableViewerDialog_t*)parent;
+	this->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMouseTracking(true);
-	viewWidth = 256 * 2;
-	viewHeight = 240 * 2;
+	viewScale = 2;
+	viewWidth = 256 * 2 * viewScale;
+	viewHeight = 240 * 2 * viewScale;
 	setMinimumWidth( viewWidth );
 	setMinimumHeight( viewHeight );
+	resize( viewWidth, viewHeight );
+
+	this->setGeometry(QRect(0,0,viewWidth,viewHeight));
+
+	viewRect= QRect(0, 0, 512, 480);
+
+	selTable   = 0;
+	scrollArea = NULL;
 }
 //----------------------------------------------------
 ppuNameTableView_t::~ppuNameTableView_t(void)
@@ -566,12 +634,139 @@ ppuNameTableView_t::~ppuNameTableView_t(void)
 
 }
 //----------------------------------------------------
+void ppuNameTableView_t::setScrollPointer( QScrollArea *sa )
+{
+	scrollArea = sa;
+}
+//----------------------------------------------------
+void ppuNameTableView_t::setViewScale( int reqScale )
+{
+	int prevScale;
+	int vw, vh, vx, vy;
+
+	vw = viewRect.width()/2;
+	vh = viewRect.height()/2;
+	//vx = viewRect.x() + vw;
+	//vy = viewRect.y() + vh;
+	vx = selTileLoc.x();
+	vy = selTileLoc.y();
+
+	prevScale = viewScale;
+
+	viewScale = reqScale;
+
+	if ( viewScale < 1 )
+	{
+		viewScale = 1;
+	}
+	else if ( viewScale > 4 )
+	{
+		viewScale = 4;
+	}
+
+	viewWidth = 256 * 2 * viewScale;
+	viewHeight = 240 * 2 * viewScale;
+	setMinimumWidth( viewWidth );
+	setMinimumHeight( viewHeight );
+	resize( viewWidth, viewHeight );
+
+	vx = (vx * viewScale) / prevScale;
+	vy = (vy * viewScale) / prevScale;
+
+	if ( vx < 0 ) vx = 0;
+	if ( vy < 0 ) vy = 0;
+
+	if ( vx > viewWidth  ) vx = viewWidth;
+	if ( vy > viewHeight ) vy = viewHeight;
+
+	if ( scrollArea != NULL )
+	{
+		scrollArea->ensureVisible( vx, vy, vw, vh );
+	}
+
+	redrawtables = 1;
+}
+//----------------------------------------------------
 void ppuNameTableView_t::resizeEvent(QResizeEvent *event)
 {
-	viewWidth  = event->size().width();
-	viewHeight = event->size().height();
+	//viewWidth  = event->size().width();
+	//viewHeight = event->size().height();
 
-	//printf("%ix%i\n", viewWidth, viewHeight );
+	printf("%ix%i\n", event->size().width(), event->size().height() );
+
+	redrawtables = 1;
+}
+//----------------------------------------------------
+int ppuNameTableView_t::convertXY2TableTile( int x, int y, int *tableIdxOut, int *tileXout, int *tileYout )
+{
+	int i, xx, yy, w, h, TileX, TileY, NameTable;
+	ppuNameTable_t *tbl = NULL;
+
+	NameTable = 0;
+
+	*tableIdxOut = -1;
+	*tileXout = -1;
+	*tileYout = -1;
+
+	if ( vnapage[0] == NULL )
+	{
+		return -1;
+	}
+	for (i=0; i<4; i++)
+	{
+		xx = nameTable[i].x;
+		yy = nameTable[i].y;
+		w = (nameTable[i].w * 256);
+		h = (nameTable[i].h * 240);
+
+		if ( (x >= xx) && (x < (xx+w) ) &&
+		     (y >= yy) && (y < (yy+h) ) )
+		{
+			tbl = &nameTable[i];
+			NameTable = i;
+			break;
+		}
+	}
+
+	if ( tbl == NULL )
+	{
+		//printf("Mouse not over a tile\n");
+		return -1;
+	}
+
+	xx = tbl->x; yy = tbl->y;
+	w  = tbl->w;  h = tbl->h;
+
+	if ( (NameTable%2) == 1 )
+	{
+		TileX = ((x - xx) / (w*8)) + 32;
+	}
+	else
+	{
+		TileX = (x - xx) / (w*8);
+	}
+
+	if ( (NameTable/2) == 1 )
+	{
+		TileY = ((y - yy) / (h*8)) + 30;
+	}
+	else
+	{
+		TileY = (y - yy) / (h*8);
+	}
+
+	*tableIdxOut = NameTable;
+	*tileXout    = TileX % 32;
+	*tileYout    = TileY % 30;
+
+	return 0;
+}
+//----------------------------------------------------
+int  ppuNameTableView_t::calcTableTileAddr( int NameTable, int TileX, int TileY )
+{
+	int PPUAddress = 0x2000+(NameTable*0x400)+((TileY%30)*32)+(TileX%32);
+
+	return PPUAddress;
 }
 //----------------------------------------------------
 void ppuNameTableView_t::computeNameTableProperties( int x, int y )
@@ -643,17 +838,130 @@ void ppuNameTableView_t::computeNameTableProperties( int x, int y )
 	}
 }
 //----------------------------------------------------
+void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
+{
+	if ( event->key() == Qt::Key_Minus )
+	{
+		setViewScale( viewScale-1 );
+
+		event->accept();
+	}
+	else if ( event->key() == Qt::Key_Plus )
+	{
+		setViewScale( viewScale+1 );
+
+		event->accept();
+	}
+	else if ( event->key() == Qt::Key_Up )
+	{
+		int y = selTile.y();
+
+		y--;
+		
+		if ( y < 0 )
+		{
+			if ( selTable < 2 )
+			{
+				selTable += 2;
+			}	
+			else 
+			{
+				selTable -= 2;
+			}	
+			y = 29;
+		}
+		selTile.setY( y );
+
+		ensureVis = true;
+	}
+	else if ( event->key() == Qt::Key_Down )
+	{
+		int y = selTile.y();
+
+		y++;
+		
+		if ( y >= 30 )
+		{
+			if ( selTable < 2 )
+			{
+				selTable += 2;
+			}	
+			else 
+			{
+				selTable -= 2;
+			}	
+			y = 0;
+		}
+		selTile.setY( y );
+
+		ensureVis = true;
+	}
+	else if ( event->key() == Qt::Key_Left )
+	{
+		int x = selTile.x();
+
+		x--;
+		
+		if ( x < 0 )
+		{
+			if ( selTable % 2 )
+			{
+				selTable -= 1;
+			}	
+			else 
+			{
+				selTable += 1;
+			}	
+			x = 31;
+		}
+		selTile.setX( x );
+
+		ensureVis = true;
+	}
+	else if ( event->key() == Qt::Key_Right )
+	{
+		int x = selTile.x();
+
+		x++;
+		
+		if ( x >= 32 )
+		{
+			if ( selTable % 2 )
+			{
+				selTable -= 1;
+			}	
+			else 
+			{
+				selTable += 1;
+			}	
+			x = 0;
+		}
+		selTile.setX( x );
+
+		ensureVis = true;
+	}
+}
+//----------------------------------------------------
 void ppuNameTableView_t::mouseMoveEvent(QMouseEvent *event)
 {
-	computeNameTableProperties( event->pos().x(), event->pos().y() );
+	//printf("MouseMove: (%i,%i) \n", event->pos().x(), event->pos().y() );
+	//computeNameTableProperties( event->pos().x(), event->pos().y() );
 }
 //----------------------------------------------------------------------------
 void ppuNameTableView_t::mousePressEvent(QMouseEvent * event)
 {
-	//QPoint tile = convPixToTile( event->pos() );
+	int tIdx, tx, ty;
+
+	convertXY2TableTile( event->pos().x(), event->pos().y(), &tIdx, &tx, &ty );
 
 	if ( event->button() == Qt::LeftButton )
 	{
+		printf(" %i  %i  %i \n", tIdx, tx, ty );
+		selTable = tIdx;
+		selTile.setX( tx );
+		selTile.setY( ty );
+
+		computeNameTableProperties( event->pos().x(), event->pos().y() );
 	}
 	else if ( event->button() == Qt::RightButton )
 	{
@@ -667,13 +975,14 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 	QPainter painter(this);
 	QColor scanLineColor(255,255,255);
 	QColor gridLineColor(128,128,128);
-	viewWidth  = event->rect().width();
-	viewHeight = event->rect().height();
+	QPen   pen;
+	
+	viewRect = event->rect();
 
 	w = viewWidth / (256*2);
   	h = viewHeight / (240*2);
 
-	//printf("%ix%i\n", viewWidth, viewHeight );
+	//printf("(%i,%i) %ix%i\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height() );
 
 	xx = 0; yy = 0;
 
@@ -738,6 +1047,30 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 		}
 	}
 
+	xx = nameTable[ selTable ].tile[ selTile.y() ][ selTile.x() ].x;
+	yy = nameTable[ selTable ].tile[ selTile.y() ][ selTile.x() ].y;
+
+	selTileLoc.setX( xx );
+	selTileLoc.setY( yy );
+
+	pen.setWidth( 3 );
+	pen.setColor( QColor(  0,  0,  0) );
+	painter.setPen( pen );
+
+	painter.drawRect( xx, yy, w*8, h*8 );
+
+	pen.setWidth( 1 );
+	pen.setColor( QColor(255,255,255) );
+	painter.setPen( pen );
+
+	painter.drawRect( xx, yy, w*8, h*8 );
+
+	if ( ensureVis && scrollArea )
+	{
+		scrollArea->ensureVisible( selTileLoc.x(), selTileLoc.y(), 128, 128 );
+
+		ensureVis = false;
+	}
 }
 //----------------------------------------------------
 static void initNameTableViewer(void)

@@ -16,6 +16,7 @@
 #include <QSlider>
 #include <QLineEdit>
 #include <QGroupBox>
+#include <QScrollArea>
 #include <QCloseEvent>
 
 struct  ppuNameTablePixel_t
@@ -51,16 +52,31 @@ class ppuNameTableView_t : public QWidget
 		ppuNameTableView_t( QWidget *parent = 0);
 		~ppuNameTableView_t(void);
 
+		void setViewScale( int reqScale );
+		int  getViewScale( void ){ return viewScale; };
+
+		void setScrollPointer( QScrollArea *sa );
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
+		void keyPressEvent(QKeyEvent *event);
 		void mouseMoveEvent(QMouseEvent *event);
 		void mousePressEvent(QMouseEvent * event);
 		void computeNameTableProperties( int x, int y );
+		int  convertXY2TableTile( int x, int y, int *tableIdxOut, int *tileXout, int *tileYout );
+		int  calcTableTileAddr( int table, int tileX, int tileY );
 
 		ppuNameTableViewerDialog_t *parent;
 		int viewWidth;
 		int viewHeight;
+		int viewScale;
+		int selTable;
+		QPoint selTile;
+		QPoint selTileLoc;
+		QRect viewRect;
+		QScrollArea  *scrollArea;
+
+		bool  ensureVis;
 };
 
 class ppuNameTableViewerDialog_t : public QDialog
@@ -76,6 +92,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void closeEvent(QCloseEvent *bar);
 
 		ppuNameTableView_t *ntView;
+		QScrollArea *scrollArea;
 		QCheckBox *showScrollLineCbox;
 		QCheckBox *showGridLineCbox;
 		QCheckBox *showAttrbCbox;
@@ -125,6 +142,10 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void menuAttributesChanged( bool checked );
 		void menuIgnPalChanged( bool checked );
 		void menuCompactChanged(void);
+		void changeZoom1x(void);
+		void changeZoom2x(void);
+		void changeZoom3x(void);
+		void changeZoom4x(void);
 };
 
 int openNameTableViewWindow( QWidget *parent );
