@@ -56,6 +56,10 @@ class ppuNameTableView_t : public QWidget
 		int  getViewScale( void ){ return viewScale; };
 
 		void setScrollPointer( QScrollArea *sa );
+
+		QColor tileSelColor;
+		QColor tileGridColor;
+		QColor attrGridColor;
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
@@ -73,8 +77,6 @@ class ppuNameTableView_t : public QWidget
 		int selTable;
 		QPoint selTile;
 		QPoint selTileLoc;
-		QColor tileGridColor;
-		QColor attrGridColor;
 		QRect  viewRect;
 		QScrollArea  *scrollArea;
 
@@ -92,6 +94,8 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib, int palAddr );
 	protected:
 		void closeEvent(QCloseEvent *bar);
+
+		void openColorPicker( QColor *c );
 
 		ppuNameTableView_t *ntView;
 		QScrollArea *scrollArea;
@@ -116,7 +120,6 @@ class ppuNameTableViewerDialog_t : public QDialog
 		QAction *showAttributesAct;
 		QAction *ignPalAct;
 		QLabel  *mirrorLbl;
-		bool    compactView;
 
 	public slots:
 		void closeWindow(void);
@@ -135,7 +138,9 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void menuGridLinesChanged( bool checked ); 
 		void menuAttributesChanged( bool checked );
 		void menuIgnPalChanged( bool checked );
-		void menuCompactChanged(void);
+		void setTileSelectorColor(void);
+		void setTileGridColor(void);
+		void setAttrGridColor(void);
 		void changeZoom1x(void);
 		void changeZoom2x(void);
 		void changeZoom3x(void);

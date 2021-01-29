@@ -27,6 +27,7 @@
 #include <QMenuBar>
 #include <QPainter>
 #include <QInputDialog>
+#include <QColorDialog>
 #include <QMessageBox>
 
 #include "../../types.h"
@@ -118,7 +119,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QGroupBox   *frame;
 	QMenuBar *menuBar;
-	QMenu *viewMenu, *subMenu;
+	QMenu *viewMenu, *colorMenu, *subMenu;
 	QAction *act, *zoomAct[4];
 	QActionGroup *group;
 	QLabel *lbl;
@@ -132,8 +133,6 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	font.setStyleHint( QFont::Monospace );
 
 	nameTableViewWindow = this;
-
-	compactView = false;
 
 	menuBar = new QMenuBar(this);
 
@@ -224,6 +223,33 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	connect(act, SIGNAL(triggered()), this, SLOT(menuCompactChanged()) );
 
 	viewMenu->addAction(act);
+
+	// Colors
+	colorMenu = menuBar->addMenu(tr("Colors"));
+
+	// Colors -> Tile Selector
+	act = new QAction(tr("Tile Selector"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Tile Selector"));
+	connect(act, SIGNAL(triggered()), this, SLOT(setTileSelectorColor()) );
+	
+	colorMenu->addAction(act);
+
+	// Colors -> Tile Grid
+	act = new QAction(tr("Tile Grid"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Tile Grid"));
+	connect(act, SIGNAL(triggered()), this, SLOT(setTileGridColor()) );
+	
+	colorMenu->addAction(act);
+
+	// Colors -> Attr Grid
+	act = new QAction(tr("Attr Grid"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Attr Grid"));
+	connect(act, SIGNAL(triggered()), this, SLOT(setAttrGridColor()) );
+	
+	colorMenu->addAction(act);
 
 	//-----------------------------------------------------------------------
 	// End Menu 
@@ -460,18 +486,6 @@ void ppuNameTableViewerDialog_t::changeZoom4x(void)
 void ppuNameTableViewerDialog_t::updateVisibility(void)
 {
 
-	//if ( compactView )
-	//{
-	//	ctlPanelFrame->hide();
-	//	mirrorGroup->hide();
-	//	dataDisplayGroup->hide();
-	//}
-	//else
-	//{
-	//	ctlPanelFrame->show();
-	//	mirrorGroup->show();
-	//	dataDisplayGroup->show();
-	//}
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib, int palAddr )
@@ -585,11 +599,39 @@ void ppuNameTableViewerDialog_t::menuIgnPalChanged(bool checked)
 	ignorePaletteCbox->setChecked( checked );
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::menuCompactChanged(void)
+void ppuNameTableViewerDialog_t::openColorPicker( QColor *c )
 {
-	compactView = !compactView;
+	int ret;
+	QColorDialog dialog( this );
 
-	updateVisibility();
+	dialog.setCurrentColor( *c );
+	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		//QString colorText;
+		//colorText = dialog.selectedColor().name();
+		//printf("FG Color string '%s'\n", colorText.toStdString().c_str() );
+		//g_config->setOption("SDL.HexEditFgColor", colorText.toStdString().c_str() );
+		*c = dialog.selectedColor();
+	}
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::setTileSelectorColor(void)
+{
+	openColorPicker( &ntView->tileSelColor );
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::setTileGridColor(void)
+{
+	openColorPicker( &ntView->tileGridColor );
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::setAttrGridColor(void)
+{
+	openColorPicker( &ntView->attrGridColor );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::showScrollLinesChanged(int state)
@@ -657,6 +699,7 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 	selTable   = 0;
 	scrollArea = NULL;
 
+	tileSelColor.setRgb(255,255,255);
 	tileGridColor.setRgb(255,  0,  0);
 	attrGridColor.setRgb(  0,  0,255);
 }
@@ -1078,7 +1121,7 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 	painter.drawRect( xx, yy, w*8, h*8 );
 
 	pen.setWidth( 1 );
-	pen.setColor( QColor(255,255,255) );
+	pen.setColor( tileSelColor );
 	painter.setPen( pen );
 
 	painter.drawRect( xx, yy, w*8, h*8 );
