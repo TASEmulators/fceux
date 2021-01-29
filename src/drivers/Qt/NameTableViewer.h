@@ -96,6 +96,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void closeEvent(QCloseEvent *bar);
 
 		void openColorPicker( QColor *c );
+		void changeRate( int divider );
 
 		ppuNameTableView_t *ntView;
 		QScrollArea *scrollArea;
@@ -104,7 +105,6 @@ class ppuNameTableViewerDialog_t : public QDialog
 		QCheckBox *showAttrGridCbox;
 		QCheckBox *showAttrbCbox;
 		QCheckBox *ignorePaletteCbox;
-		QSlider   *refreshSlider;
 		QLineEdit *scanLineEdit;
 		QTimer    *updateTimer;
 		QLineEdit *ppuAddrLbl;
@@ -132,7 +132,6 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void showTileGridChanged(int state);
 		void showAttrGridChanged(int state);
 		void showScrollLinesChanged(int state);
-		void refreshSliderChanged(int value);
 		void scanLineChanged( const QString &txt );
 		void menuScrollLinesChanged( bool checked ); 
 		void menuGridLinesChanged( bool checked ); 
@@ -145,6 +144,12 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void changeZoom2x(void);
 		void changeZoom3x(void);
 		void changeZoom4x(void);
+		void changeRate1(void);
+		void changeRate2(void);
+		void changeRate4(void);
+		void changeRate8(void);
+		void changeRate16(void);
+		void forceRefresh(void);
 };
 
 int openNameTableViewWindow( QWidget *parent );

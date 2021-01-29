@@ -120,7 +120,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QGroupBox   *frame;
 	QMenuBar *menuBar;
 	QMenu *viewMenu, *colorMenu, *subMenu;
-	QAction *act, *zoomAct[4];
+	QAction *act, *zoomAct[4], *rateAct[5];
 	QActionGroup *group;
 	QLabel *lbl;
 	QFont   font;
@@ -216,13 +216,53 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	connect(zoomAct[2], SIGNAL(triggered()), this, SLOT(changeZoom3x(void)) );
 	connect(zoomAct[3], SIGNAL(triggered()), this, SLOT(changeZoom4x(void)) );
 
-	// View -> Compact View Palette
-	act = new QAction(tr("Toggle Compact"), this);
-	//act->setShortcut(QKeySequence::Open);
-	act->setStatusTip(tr("Toggle Compact"));
-	connect(act, SIGNAL(triggered()), this, SLOT(menuCompactChanged()) );
+	viewMenu->addSeparator();
+
+	// View -> Refresh
+	act = new QAction(tr("Refresh"), this);
+	act->setShortcut( QKeySequence(tr("F5") ) );
+	act->setStatusTip(tr("Refresh"));
+	connect(act, SIGNAL(triggered()), this, SLOT(forceRefresh()) );
 
 	viewMenu->addAction(act);
+
+	// View -> Auto Refresh Rate
+	subMenu = viewMenu->addMenu( tr("Auto Refresh Rate"));
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	for (int i=0; i<5; i++)
+	{
+	        char stmp[8];
+
+		switch ( i )
+		{
+			case 0:
+				strcpy( stmp, "Full" );
+			break;
+			default:
+	        		sprintf( stmp, "1/%i", 0x01 << i );
+			break;
+		}
+
+	        rateAct[i] = new QAction(tr(stmp), this);
+	        rateAct[i]->setCheckable(true);
+
+	        group->addAction(rateAct[i]);
+		subMenu->addAction(rateAct[i]);
+	}
+	rateAct[0]->setChecked( NTViewRefresh == 0  );
+	rateAct[1]->setChecked( NTViewRefresh == 1  );
+	rateAct[2]->setChecked( NTViewRefresh == 3  );
+	rateAct[3]->setChecked( NTViewRefresh == 7  );
+	rateAct[4]->setChecked( NTViewRefresh == 19 );
+
+	connect(rateAct[0], SIGNAL(triggered()), this, SLOT(changeRate1(void)) );
+	connect(rateAct[1], SIGNAL(triggered()), this, SLOT(changeRate2(void)) );
+	connect(rateAct[2], SIGNAL(triggered()), this, SLOT(changeRate4(void)) );
+	connect(rateAct[3], SIGNAL(triggered()), this, SLOT(changeRate8(void)) );
+	connect(rateAct[4], SIGNAL(triggered()), this, SLOT(changeRate16(void)) );
 
 	// Colors
 	colorMenu = menuBar->addMenu(tr("Colors"));
@@ -374,20 +414,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	connect( showAttrGridCbox  , SIGNAL(stateChanged(int)), this, SLOT(showAttrGridChanged(int)));
 	connect( showAttrbCbox     , SIGNAL(stateChanged(int)), this, SLOT(showAttrbChanged(int)));
 	connect( ignorePaletteCbox , SIGNAL(stateChanged(int)), this, SLOT(ignorePaletteChanged(int)));
-//
-//	hbox   = new QHBoxLayout();
-//	refreshSlider  = new QSlider( Qt::Horizontal );
-//	hbox->addWidget( new QLabel( tr("Refresh: More") ) );
-//	hbox->addWidget( refreshSlider );
-//	hbox->addWidget( new QLabel( tr("Less") ) );
-//	grid->addLayout( hbox, 0, 1, Qt::AlignRight );
-//
-//	refreshSlider->setMinimum( 0);
-//	refreshSlider->setMaximum(25);
-//	refreshSlider->setValue(NTViewRefresh);
-//
-//	connect( refreshSlider, SIGNAL(valueChanged(int)), this, SLOT(refreshSliderChanged(int)));
-//
+
 	hbox1     = new QHBoxLayout();
 	hbox      = new QHBoxLayout();
 
@@ -481,6 +508,54 @@ void ppuNameTableViewerDialog_t::changeZoom3x(void)
 void ppuNameTableViewerDialog_t::changeZoom4x(void)
 {
 	ntView->setViewScale(4);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::changeRate( int divider )
+{
+	if ( divider > 0 )
+	{
+		int i = 60 / divider;
+
+		NTViewRefresh = (60 / i) - 1;
+
+		//printf("NTViewRefresh: %i \n", NTViewRefresh );
+	}
+	else
+	{
+		NTViewRefresh = 1;
+	}
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::changeRate1(void)
+{
+	changeRate(1);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::changeRate2(void)
+{
+	changeRate(2);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::changeRate4(void)
+{
+	changeRate(4);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::changeRate8(void)
+{
+	changeRate(8);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::changeRate16(void)
+{
+	changeRate(16);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::forceRefresh(void)
+{
+	NTViewSkip = 100;
+
+	FCEUD_UpdateNTView( -1, true);
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::updateVisibility(void)
@@ -671,11 +746,6 @@ void ppuNameTableViewerDialog_t::ignorePaletteChanged(int state)
 	hidepal = (state != Qt::Unchecked);
 
 	ignPalAct->setChecked( hidepal );
-}
-//----------------------------------------------------
-void ppuNameTableViewerDialog_t::refreshSliderChanged(int value)
-{
-	NTViewRefresh = value;
 }
 //----------------------------------------------------
 ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
@@ -1351,7 +1421,6 @@ void FCEUD_UpdateNTView(int scanline, bool drawall)
 
 	if (oldntmirroring != ntmirroring)
 	{
-		//UpdateMirroringButtons();
 		oldntmirroring = ntmirroring;
 	}
 
