@@ -62,7 +62,7 @@ class ppuNameTableView_t : public QWidget
 		void keyPressEvent(QKeyEvent *event);
 		void mouseMoveEvent(QMouseEvent *event);
 		void mousePressEvent(QMouseEvent * event);
-		void computeNameTableProperties( int x, int y );
+		void computeNameTableProperties( int NameTable, int TileX, int TileY );
 		int  convertXY2TableTile( int x, int y, int *tableIdxOut, int *tileXout, int *tileYout );
 		int  calcTableTileAddr( int table, int tileX, int tileY );
 
@@ -73,7 +73,9 @@ class ppuNameTableView_t : public QWidget
 		int selTable;
 		QPoint selTile;
 		QPoint selTileLoc;
-		QRect viewRect;
+		QColor tileGridColor;
+		QColor attrGridColor;
+		QRect  viewRect;
 		QScrollArea  *scrollArea;
 
 		bool  ensureVis;
@@ -87,53 +89,45 @@ class ppuNameTableViewerDialog_t : public QDialog
 		ppuNameTableViewerDialog_t(QWidget *parent = 0);
 		~ppuNameTableViewerDialog_t(void);
 
-		void setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib );
+		void setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib, int palAddr );
 	protected:
 		void closeEvent(QCloseEvent *bar);
 
 		ppuNameTableView_t *ntView;
 		QScrollArea *scrollArea;
 		QCheckBox *showScrollLineCbox;
-		QCheckBox *showGridLineCbox;
+		QCheckBox *showTileGridCbox;
+		QCheckBox *showAttrGridCbox;
 		QCheckBox *showAttrbCbox;
 		QCheckBox *ignorePaletteCbox;
 		QSlider   *refreshSlider;
 		QLineEdit *scanLineEdit;
 		QTimer    *updateTimer;
-		QRadioButton *horzMirrorBtn;
-		QRadioButton *vertMirrorBtn;
-		QRadioButton *fourScreenBtn;
-		QRadioButton *singleScreenBtn[4];
-		QFrame *nameTableFrame;
-		QFrame *ctlPanelFrame;
-		QGroupBox *mirrorGroup;
-		QGroupBox *dataDisplayGroup;
-		QLabel *tileID;
-		QLabel *tileXY;
-		QLabel *ppuAddrLbl;
-		QLabel *attrbLbl;
+		QLineEdit *ppuAddrLbl;
+		QLineEdit *nameTableLbl;
+		QLineEdit *tileLocLbl;
+		QLineEdit *tileIdxLbl;
+		QLineEdit *tileAddrLbl;
+		QLineEdit *attrDataLbl;
+		QLineEdit *attrAddrLbl;
+		QLineEdit *palAddrLbl;
 		QAction *showScrollLineAct;
-		QAction *showGridLineAct;
+		QAction *showTileGridAct;
 		QAction *showAttributesAct;
 		QAction *ignPalAct;
+		QLabel  *mirrorLbl;
 		bool    compactView;
 
 	public slots:
 		void closeWindow(void);
 	private slots:
 		void periodicUpdate(void);
-		void updateMirrorButtons(void);
+		void updateMirrorText(void);
 		void updateVisibility(void);
-		void horzMirrorClicked(void);
-		void vertMirrorClicked(void);
-		void fourScreenClicked(void);
-		void singleScreen0Clicked(void);
-		void singleScreen1Clicked(void);
-		void singleScreen2Clicked(void);
-		void singleScreen3Clicked(void);
 		void showAttrbChanged(int state);
 		void ignorePaletteChanged(int state);
-		void showGridLinesChanged(int state);
+		void showTileGridChanged(int state);
+		void showAttrGridChanged(int state);
 		void showScrollLinesChanged(int state);
 		void refreshSliderChanged(int value);
 		void scanLineChanged( const QString &txt );

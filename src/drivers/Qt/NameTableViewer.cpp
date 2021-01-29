@@ -37,6 +37,7 @@
 #include "../../debug.h"
 #include "../../palette.h"
 
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/NameTableViewer.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -55,8 +56,11 @@ static int xpos = 0, ypos = 0;
 static int attview = 0;
 static int hidepal = 0;
 static bool drawScrollLines = true;
-static bool drawGridLines = true;
+static bool drawTileGridLines = true;
+static bool drawAttrGridLines = false;
 static bool redrawtables = true;
+
+//extern int FCEUPPU_GetAttr(int ntnum, int xt, int yt);
 
 // checkerboard tile for attribute view
 static const uint8_t ATTRIBUTE_VIEW_TILE[16] = { 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -88,7 +92,7 @@ enum NT_MirrorType
 static NT_MirrorType ntmirroring = NT_NONE, oldntmirroring = NT_NONE;
 
 static void initNameTableViewer(void);
-static void ChangeMirroring(void);
+//static void ChangeMirroring(void);
 //----------------------------------------------------
 int openNameTableViewWindow( QWidget *parent )
 {
@@ -108,16 +112,24 @@ int openNameTableViewWindow( QWidget *parent )
 ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	: QDialog( parent, Qt::Window )
 {
-	QVBoxLayout *mainLayout, *vbox;
-	QHBoxLayout *hbox;
+	QHBoxLayout *mainLayout;
+	QVBoxLayout *vbox1, *vbox2;
+	QHBoxLayout *hbox, *hbox1;
 	QGridLayout *grid;
 	QGroupBox   *frame;
 	QMenuBar *menuBar;
 	QMenu *viewMenu, *subMenu;
 	QAction *act, *zoomAct[4];
 	QActionGroup *group;
+	QLabel *lbl;
+	QFont   font;
 	char stmp[64];
 	int useNativeMenuBar;
+	fceuDecIntValidtor *validator;
+
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
 
 	nameTableViewWindow = this;
 
@@ -148,13 +160,13 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Show Grid Lines
-	act = new QAction(tr("Show Grid Lines"), this);
+	act = new QAction(tr("Show Tile Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
-	act->setChecked(drawGridLines);
-	act->setStatusTip(tr("Show Grid Lines"));
+	act->setChecked(drawTileGridLines);
+	act->setStatusTip(tr("Show Tile Grid"));
 	connect(act, SIGNAL(triggered(bool)), this, SLOT(menuGridLinesChanged(bool)) );
-	showGridLineAct = act;
+	showTileGridAct = act;
 
 	viewMenu->addAction(act);
 
@@ -219,18 +231,17 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	setWindowTitle( tr("Name Table Viewer") );
 
-	mainLayout = new QVBoxLayout();
+	mainLayout = new QHBoxLayout();
 
 	mainLayout->setMenuBar( menuBar );
 
 	setLayout( mainLayout );
 
-	//vbox   = new QVBoxLayout();
-	//frame  = new QGroupBox( tr("Name Tables") );
+	vbox1  = new QVBoxLayout();
+	vbox2  = new QVBoxLayout();
+	frame  = new QGroupBox( tr("Tile Info") );
 	ntView = new ppuNameTableView_t(this);
 	grid   = new QGridLayout();
-	ctlPanelFrame = new QFrame();
-	//nameTableFrame = new QFrame();
 
 	scrollArea = new QScrollArea();
 	scrollArea->setWidgetResizable(false);
@@ -239,114 +250,145 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
 	scrollArea->setMinimumSize( QSize( 512, 480 ) );
 
-	//vbox->addWidget( ntView );
-	//nameTableFrame->setLayout( vbox );
-	scrollArea->setWidget( ntView );
-	mainLayout->addWidget( scrollArea, 100 );
-	mainLayout->addWidget( ctlPanelFrame, 1 );
-
-	ctlPanelFrame->setLayout( grid );
-
 	ntView->setScrollPointer( scrollArea );
 
+	scrollArea->setWidget( ntView );
+	mainLayout->addLayout( vbox1, 100 );
+	mainLayout->addLayout( vbox2, 1 );
+
+	vbox1->addWidget( scrollArea, 100 );
+
+	vbox2->addWidget( frame );
+	frame->setLayout( grid );
+
+	lbl = new QLabel( tr("PPU Addr:") );
+	lbl->setFont( font );
+	grid->addWidget( lbl, 0, 0, Qt::AlignLeft );
+
+	lbl = new QLabel( tr("Name Table:") );
+	lbl->setFont( font );
+	grid->addWidget( lbl, 1, 0, Qt::AlignLeft );
+
+	lbl = new QLabel( tr("Location:") );
+	lbl->setFont( font );
+	grid->addWidget( lbl, 2, 0, Qt::AlignLeft );
+
+	lbl = new QLabel( tr("Tile Index:") );
+	lbl->setFont( font );
+	grid->addWidget( lbl, 3, 0, Qt::AlignLeft );
+
+	lbl = new QLabel( tr("Tile Addr:") );
+	lbl->setFont( font );
+	grid->addWidget( lbl, 4, 0, Qt::AlignLeft );
+
+	lbl = new QLabel( tr("Attribute Data:") );
+	lbl->setFont( font );
+	grid->addWidget( lbl, 5, 0, Qt::AlignLeft );
+
+	lbl = new QLabel( tr("Attribute Addr:") );
+	lbl->setFont( font );
+	grid->addWidget( lbl, 6, 0, Qt::AlignLeft );
+
+	lbl = new QLabel( tr("Palette Addr:") );
+	lbl->setFont( font );
+	grid->addWidget( lbl, 7, 0, Qt::AlignLeft );
+
+	ppuAddrLbl = new QLineEdit();
+	ppuAddrLbl->setReadOnly(true);
+	grid->addWidget( ppuAddrLbl, 0, 1, Qt::AlignLeft );
+
+	nameTableLbl = new QLineEdit();
+	nameTableLbl->setReadOnly(true);
+	grid->addWidget( nameTableLbl, 1, 1, Qt::AlignLeft );
+
+	tileLocLbl = new QLineEdit();
+	tileLocLbl->setReadOnly(true);
+	grid->addWidget( tileLocLbl, 2, 1, Qt::AlignLeft );
+
+	tileIdxLbl = new QLineEdit();
+	tileIdxLbl->setReadOnly(true);
+	grid->addWidget( tileIdxLbl, 3, 1, Qt::AlignLeft );
+
+	tileAddrLbl = new QLineEdit();
+	tileAddrLbl->setReadOnly(true);
+	grid->addWidget( tileAddrLbl, 4, 1, Qt::AlignLeft );
+
+	attrDataLbl = new QLineEdit();
+	attrDataLbl->setReadOnly(true);
+	grid->addWidget( attrDataLbl, 5, 1, Qt::AlignLeft );
+
+	attrAddrLbl = new QLineEdit();
+	attrAddrLbl->setReadOnly(true);
+	grid->addWidget( attrAddrLbl, 6, 1, Qt::AlignLeft );
+
+	palAddrLbl = new QLineEdit();
+	palAddrLbl->setReadOnly(true);
+	grid->addWidget( palAddrLbl, 7, 1, Qt::AlignLeft );
+
 	showScrollLineCbox = new QCheckBox( tr("Show Scroll Lines") );
-	showGridLineCbox   = new QCheckBox( tr("Show Grid Lines") );
+	showTileGridCbox   = new QCheckBox( tr("Show Tile Grid") );
+	showAttrGridCbox   = new QCheckBox( tr("Show Attr Grid") );
 	showAttrbCbox      = new QCheckBox( tr("Show Attributes") );
 	ignorePaletteCbox  = new QCheckBox( tr("Ignore Palette") );
 
 	showScrollLineCbox->setChecked( drawScrollLines );
-	showGridLineCbox->setChecked( drawGridLines );
+	showTileGridCbox->setChecked( drawTileGridLines );
+	showAttrGridCbox->setChecked( drawAttrGridLines );
 	showAttrbCbox->setChecked( attview );
 	ignorePaletteCbox->setChecked( hidepal );
 
-	grid->addWidget( showScrollLineCbox, 0, 0, Qt::AlignLeft );
-	grid->addWidget( showGridLineCbox  , 1, 0, Qt::AlignLeft );
-	grid->addWidget( showAttrbCbox     , 2, 0, Qt::AlignLeft );
-	grid->addWidget( ignorePaletteCbox , 2, 1, Qt::AlignLeft );
+	vbox2->addWidget( showScrollLineCbox );
+	vbox2->addWidget( showTileGridCbox   );
+	vbox2->addWidget( showAttrGridCbox   );
+	vbox2->addWidget( showAttrbCbox      );
+	vbox2->addWidget( ignorePaletteCbox  );
 
 	connect( showScrollLineCbox, SIGNAL(stateChanged(int)), this, SLOT(showScrollLinesChanged(int)));
-	connect( showGridLineCbox  , SIGNAL(stateChanged(int)), this, SLOT(showGridLinesChanged(int)));
+	connect( showTileGridCbox  , SIGNAL(stateChanged(int)), this, SLOT(showTileGridChanged(int)));
+	connect( showAttrGridCbox  , SIGNAL(stateChanged(int)), this, SLOT(showAttrGridChanged(int)));
 	connect( showAttrbCbox     , SIGNAL(stateChanged(int)), this, SLOT(showAttrbChanged(int)));
 	connect( ignorePaletteCbox , SIGNAL(stateChanged(int)), this, SLOT(ignorePaletteChanged(int)));
+//
+//	hbox   = new QHBoxLayout();
+//	refreshSlider  = new QSlider( Qt::Horizontal );
+//	hbox->addWidget( new QLabel( tr("Refresh: More") ) );
+//	hbox->addWidget( refreshSlider );
+//	hbox->addWidget( new QLabel( tr("Less") ) );
+//	grid->addLayout( hbox, 0, 1, Qt::AlignRight );
+//
+//	refreshSlider->setMinimum( 0);
+//	refreshSlider->setMaximum(25);
+//	refreshSlider->setValue(NTViewRefresh);
+//
+//	connect( refreshSlider, SIGNAL(valueChanged(int)), this, SLOT(refreshSliderChanged(int)));
+//
+	hbox1     = new QHBoxLayout();
+	hbox      = new QHBoxLayout();
 
-	hbox   = new QHBoxLayout();
-	refreshSlider  = new QSlider( Qt::Horizontal );
-	hbox->addWidget( new QLabel( tr("Refresh: More") ) );
-	hbox->addWidget( refreshSlider );
-	hbox->addWidget( new QLabel( tr("Less") ) );
-	grid->addLayout( hbox, 0, 1, Qt::AlignRight );
+	vbox1->addLayout( hbox1, 1);
 
-	refreshSlider->setMinimum( 0);
-	refreshSlider->setMaximum(25);
-	refreshSlider->setValue(NTViewRefresh);
+	lbl       = new QLabel( tr("Mirroring Type:") );
+	mirrorLbl = new QLabel( tr("Vertical") );
+	hbox->addWidget( lbl      , 1, Qt::AlignRight );
+	hbox->addWidget( mirrorLbl, 1, Qt::AlignLeft );
 
-	connect( refreshSlider, SIGNAL(valueChanged(int)), this, SLOT(refreshSliderChanged(int)));
+	hbox1->addLayout( hbox, 1 );
 
-	hbox         = new QHBoxLayout();
+	hbox     = new QHBoxLayout();
+
 	scanLineEdit = new QLineEdit();
-	hbox->addWidget( new QLabel( tr("Display on Scanline:") ) );
-	hbox->addWidget( scanLineEdit );
-	grid->addLayout( hbox, 1, 1, Qt::AlignRight );
+	hbox->addWidget( new QLabel( tr("Display on Scanline:") ), 1, Qt::AlignRight );
+	hbox->addWidget( scanLineEdit, 1, Qt::AlignLeft );
 
+	hbox1->addLayout( hbox, 1 );
+
+	validator = new fceuDecIntValidtor( 0, 255, this );
 	scanLineEdit->setMaxLength( 3 );
-	scanLineEdit->setInputMask( ">900;" );
+	scanLineEdit->setValidator( validator );
 	sprintf( stmp, "%i", NTViewScanline );
 	scanLineEdit->setText( tr(stmp) );
 
 	connect( scanLineEdit, SIGNAL(textEdited(const QString &)), this, SLOT(scanLineChanged(const QString &)));
-
-	hbox   = new QHBoxLayout();
-	frame  = new QGroupBox( tr("Current Mirroring") );
-	grid   = new QGridLayout();
-
-	mirrorGroup = frame;
-
-	mainLayout->addLayout( hbox, 1 );
-	hbox->addWidget( frame );
-	frame->setLayout( grid );
-
-	horzMirrorBtn = new QRadioButton( tr("Horizontal") );
-	vertMirrorBtn = new QRadioButton( tr("Vertical") );
-	fourScreenBtn = new QRadioButton( tr("Four Screen") );
-	singleScreenBtn[0] = new QRadioButton( tr("Single Screen 0") );
-	singleScreenBtn[1] = new QRadioButton( tr("Single Screen 1") );
-	singleScreenBtn[2] = new QRadioButton( tr("Single Screen 2") );
-	singleScreenBtn[3] = new QRadioButton( tr("Single Screen 3") );
-
-	grid->addWidget( horzMirrorBtn, 0, 0, Qt::AlignLeft );
-	grid->addWidget( vertMirrorBtn, 1, 0, Qt::AlignLeft );
-	grid->addWidget( fourScreenBtn, 2, 0, Qt::AlignLeft );
-	grid->addWidget( singleScreenBtn[0], 0, 1, Qt::AlignLeft );
-	grid->addWidget( singleScreenBtn[1], 1, 1, Qt::AlignLeft );
-	grid->addWidget( singleScreenBtn[2], 2, 1, Qt::AlignLeft );
-	grid->addWidget( singleScreenBtn[3], 3, 1, Qt::AlignLeft );
-
-	connect( horzMirrorBtn     , SIGNAL(clicked(void)), this, SLOT(horzMirrorClicked(void)));
-	connect( vertMirrorBtn     , SIGNAL(clicked(void)), this, SLOT(vertMirrorClicked(void)));
-	connect( fourScreenBtn     , SIGNAL(clicked(void)), this, SLOT(fourScreenClicked(void)));
-	connect( singleScreenBtn[0], SIGNAL(clicked(void)), this, SLOT(singleScreen0Clicked(void)));
-	connect( singleScreenBtn[1], SIGNAL(clicked(void)), this, SLOT(singleScreen1Clicked(void)));
-	connect( singleScreenBtn[2], SIGNAL(clicked(void)), this, SLOT(singleScreen2Clicked(void)));
-	connect( singleScreenBtn[3], SIGNAL(clicked(void)), this, SLOT(singleScreen3Clicked(void)));
-
-	updateMirrorButtons();
-
-	vbox   = new QVBoxLayout();
-	frame  = new QGroupBox( tr("Properties") );
-	hbox->addWidget( frame );
-	frame->setLayout( vbox );
-
-	dataDisplayGroup = frame;
-
-	tileID     = new QLabel( tr("Tile ID:") );
-	tileXY     = new QLabel( tr("X/Y :") );
-	ppuAddrLbl = new QLabel( tr("PPU Address:") );
-	attrbLbl   = new QLabel( tr("Attribute:") );
-
-	vbox->addWidget( tileID );
-	vbox->addWidget( tileXY );
-	vbox->addWidget( ppuAddrLbl );
-	vbox->addWidget( attrbLbl );
 
 	FCEUD_UpdateNTView( -1, true);
 	
@@ -356,6 +398,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	updateTimer->start( 33 ); // 30hz
 
+	updateMirrorText();
 	updateVisibility();
 }
 //----------------------------------------------------
@@ -369,28 +412,27 @@ ppuNameTableViewerDialog_t::~ppuNameTableViewerDialog_t(void)
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("Name Table Viewer Close Window Event\n");
-   done(0);
+	printf("Name Table Viewer Close Window Event\n");
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::closeWindow(void)
 {
-   printf("Close Window\n");
-   done(0);
+	printf("Close Window\n");
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::periodicUpdate(void)
 {
-	updateMirrorButtons();
+	updateMirrorText();
 
 	if ( redrawtables )
 	{
-		//this->update();
-		//this->scrollArea->update();
 		this->scrollArea->viewport()->update();
+
 		redrawtables = false;
 	}
 }
@@ -418,110 +460,84 @@ void ppuNameTableViewerDialog_t::changeZoom4x(void)
 void ppuNameTableViewerDialog_t::updateVisibility(void)
 {
 
-	if ( compactView )
-	{
-		ctlPanelFrame->hide();
-		mirrorGroup->hide();
-		dataDisplayGroup->hide();
-	}
-	else
-	{
-		ctlPanelFrame->show();
-		mirrorGroup->show();
-		dataDisplayGroup->show();
-	}
+	//if ( compactView )
+	//{
+	//	ctlPanelFrame->hide();
+	//	mirrorGroup->hide();
+	//	dataDisplayGroup->hide();
+	//}
+	//else
+	//{
+	//	ctlPanelFrame->show();
+	//	mirrorGroup->show();
+	//	dataDisplayGroup->show();
+	//}
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib )
+void ppuNameTableViewerDialog_t::setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib, int palAddr )
 {
-	char stmp[64];
+	char stmp[32];
 
-	sprintf( stmp, "Tile ID: %02X", TileID);
+	sprintf( stmp, "%02X", TileID);
+	tileIdxLbl->setText( tr(stmp) );
 
-	tileID->setText( tr(stmp) );
+	sprintf( stmp, "%04X", TileID << 4);
+	tileAddrLbl->setText( tr(stmp) );
 
-	sprintf( stmp, "X/Y : %0d/%0d", TileX, TileY);
+	sprintf( stmp, "%0d, %0d", TileX, TileY);
+	tileLocLbl->setText( tr(stmp) );
 
-	tileXY->setText( tr(stmp) );
-
-	sprintf(stmp,"PPU Address: %04X",PPUAddress);
-
+	sprintf(stmp,"%04X",PPUAddress);
 	ppuAddrLbl->setText( tr(stmp) );
 
-	sprintf(stmp,"Attribute: %1X (%04X)",Attrib,AttAddress);
+	sprintf(stmp,"%1X",NameTable);
+	nameTableLbl->setText( tr(stmp) );
 
-	attrbLbl->setText( tr(stmp) );
+	sprintf(stmp,"%02X",Attrib);
+	attrDataLbl->setText( tr(stmp) );
+
+	sprintf(stmp,"%04X",AttAddress);
+	attrAddrLbl->setText( tr(stmp) );
+
+	sprintf(stmp,"%04X", palAddr );
+	palAddrLbl->setText( tr(stmp) );
+
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::updateMirrorButtons(void)
+void ppuNameTableViewerDialog_t::updateMirrorText(void)
 {
+	const char *txt = "";
+
 	switch ( ntmirroring )
 	{
 		default:
 		case NT_NONE:
+			txt = "None";
 		break;
 		case NT_HORIZONTAL:
-			horzMirrorBtn->setChecked(true);
+			txt = "Horizontal";
 		break;
 		case NT_VERTICAL:
-			vertMirrorBtn->setChecked(true);
+			txt = "Vertical";
 		break;
 		case NT_FOUR_SCREEN:
-			fourScreenBtn->setChecked(true);
+			txt = "Four Screen";
 		break;
 		case NT_SINGLE_SCREEN_TABLE_0:
+			txt = "Single Screen 0";
+		break;
 		case NT_SINGLE_SCREEN_TABLE_1:
+			txt = "Single Screen 1";
+		break;
 		case NT_SINGLE_SCREEN_TABLE_2:
+			txt = "Single Screen 2";
+		break;
 		case NT_SINGLE_SCREEN_TABLE_3:
-		{
-			int i = ntmirroring - NT_SINGLE_SCREEN_TABLE_0;
-
-			singleScreenBtn[i]->setChecked(true);
-		}
+			txt = "Single Screen 3";
 		break;
 	}
-}
-//----------------------------------------------------
-void ppuNameTableViewerDialog_t::horzMirrorClicked(void)
-{
-	ntmirroring = NT_HORIZONTAL;
-	ChangeMirroring();
-}
-//----------------------------------------------------
-void ppuNameTableViewerDialog_t::vertMirrorClicked(void)
-{
-	ntmirroring = NT_VERTICAL;
-	ChangeMirroring();
-}
-//----------------------------------------------------
-void ppuNameTableViewerDialog_t::fourScreenClicked(void)
-{
-	ntmirroring = NT_FOUR_SCREEN;
-	ChangeMirroring();
-}
-//----------------------------------------------------
-void ppuNameTableViewerDialog_t::singleScreen0Clicked(void)
-{
-	ntmirroring = NT_SINGLE_SCREEN_TABLE_0;
-	ChangeMirroring();
-}
-//----------------------------------------------------
-void ppuNameTableViewerDialog_t::singleScreen1Clicked(void)
-{
-	ntmirroring = NT_SINGLE_SCREEN_TABLE_1;
-	ChangeMirroring();
-}
-//----------------------------------------------------
-void ppuNameTableViewerDialog_t::singleScreen2Clicked(void)
-{
-	ntmirroring = NT_SINGLE_SCREEN_TABLE_2;
-	ChangeMirroring();
-}
-//----------------------------------------------------
-void ppuNameTableViewerDialog_t::singleScreen3Clicked(void)
-{
-	ntmirroring = NT_SINGLE_SCREEN_TABLE_3;
-	ChangeMirroring();
+
+	mirrorLbl->setText( tr(txt) );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::scanLineChanged( const QString &txt )
@@ -534,7 +550,11 @@ void ppuNameTableViewerDialog_t::scanLineChanged( const QString &txt )
 	{
 		NTViewScanline = strtoul( s.c_str(), NULL, 10 );
 	}
-	//printf("ScanLine: '%s'  %i\n", s.c_str(), PPUViewScanline );
+	else
+	{
+		NTViewScanline = 0;
+	}
+	//printf("ScanLine: '%s'  %i\n", s.c_str(), NTViewScanline );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::menuScrollLinesChanged(bool checked)
@@ -546,9 +566,9 @@ void ppuNameTableViewerDialog_t::menuScrollLinesChanged(bool checked)
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::menuGridLinesChanged(bool checked)
 {
-	drawGridLines = checked;
+	drawTileGridLines = checked;
 
-	showGridLineCbox->setChecked( checked );
+	showTileGridCbox->setChecked( checked );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::menuAttributesChanged(bool checked)
@@ -579,11 +599,20 @@ void ppuNameTableViewerDialog_t::showScrollLinesChanged(int state)
 	showScrollLineAct->setChecked( drawScrollLines );
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::showGridLinesChanged(int state)
+void ppuNameTableViewerDialog_t::showTileGridChanged(int state)
 {
-	drawGridLines = (state != Qt::Unchecked);
+	drawTileGridLines = (state != Qt::Unchecked);
 
-	showGridLineAct->setChecked( drawGridLines );
+	showTileGridAct->setChecked( drawTileGridLines );
+
+	redrawtables = true;
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::showAttrGridChanged(int state)
+{
+	drawAttrGridLines = (state != Qt::Unchecked);
+
+	//showAttrGridAct->setChecked( drawAttrGridLines );
 
 	redrawtables = true;
 }
@@ -627,6 +656,9 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 
 	selTable   = 0;
 	scrollArea = NULL;
+
+	tileGridColor.setRgb(255,  0,  0);
+	attrGridColor.setRgb(  0,  0,255);
 }
 //----------------------------------------------------
 ppuNameTableView_t::~ppuNameTableView_t(void)
@@ -692,7 +724,7 @@ void ppuNameTableView_t::resizeEvent(QResizeEvent *event)
 	//viewWidth  = event->size().width();
 	//viewHeight = event->size().height();
 
-	printf("%ix%i\n", event->size().width(), event->size().height() );
+	//printf("%ix%i\n", event->size().width(), event->size().height() );
 
 	redrawtables = 1;
 }
@@ -769,57 +801,13 @@ int  ppuNameTableView_t::calcTableTileAddr( int NameTable, int TileX, int TileY 
 	return PPUAddress;
 }
 //----------------------------------------------------
-void ppuNameTableView_t::computeNameTableProperties( int x, int y )
+void ppuNameTableView_t::computeNameTableProperties( int NameTable, int TileX, int TileY )
 {
-	int i, xx, yy, w, h, TileID, TileX, TileY, NameTable, PPUAddress, AttAddress, Attrib;
-	ppuNameTable_t *tbl = NULL;
-
-	NameTable = 0;
+	int TileID, PPUAddress, AttAddress, Attrib, palAddr;
 
 	if ( vnapage[0] == NULL )
 	{
 		return;
-	}
-	for (i=0; i<4; i++)
-	{
-		xx = nameTable[i].x;
-		yy = nameTable[i].y;
-		w = (nameTable[i].w * 256);
-		h = (nameTable[i].h * 240);
-
-		if ( (x >= xx) && (x < (xx+w) ) &&
-		     (y >= yy) && (y < (yy+h) ) )
-		{
-			tbl = &nameTable[i];
-			NameTable = i;
-			break;
-		}
-	}
-
-	if ( tbl == NULL )
-	{
-		//printf("Mouse not over a tile\n");
-		return;
-	}
-	xx = tbl->x; yy = tbl->y;
-	w  = tbl->w;  h = tbl->h;
-
-	if ( (NameTable%2) == 1 )
-	{
-		TileX = ((x - xx) / (w*8)) + 32;
-	}
-	else
-	{
-		TileX = (x - xx) / (w*8);
-	}
-
-	if ( (NameTable/2) == 1 )
-	{
-		TileY = ((y - yy) / (h*8)) + 30;
-	}
-	else
-	{
-		TileY = (y - yy) / (h*8);
 	}
 
 	PPUAddress = 0x2000+(NameTable*0x400)+((TileY%30)*32)+(TileX%32);
@@ -828,13 +816,16 @@ void ppuNameTableView_t::computeNameTableProperties( int x, int y )
 
 	AttAddress = 0x23C0 | (PPUAddress & 0x0C00) | ((PPUAddress >> 4) & 0x38) | ((PPUAddress >> 2) & 0x07);
 	Attrib = vnapage[(AttAddress>>10)&0x3][AttAddress&0x3FF];
-	Attrib = (Attrib >> ((PPUAddress&2) | ((PPUAddress&64)>>4))) & 0x3;
+	//Attrib = (Attrib >> ((PPUAddress&2) | ((PPUAddress&64)>>4))) & 0x3;
+
+	//palAddr = 0x3F00 + ( FCEUPPU_GetAttr( NameTable, TileX, TileY ) * 4 );
+	palAddr = 0x3F00 + ( (Attrib >> ((PPUAddress&2) | ((PPUAddress&64)>>4))) & 0x3 ) * 4;
 
 	//printf("NT:%i Tile X/Y : %i/%i \n", NameTable, TileX, TileY );
 
 	if ( parent )
 	{
-		parent->setPropertyLabels( TileID, TileX, TileY, NameTable, PPUAddress, AttAddress, Attrib );
+		parent->setPropertyLabels( TileID, TileX, TileY, NameTable, PPUAddress, AttAddress, Attrib, palAddr );
 	}
 }
 //----------------------------------------------------
@@ -872,7 +863,11 @@ void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
 		}
 		selTile.setY( y );
 
+		computeNameTableProperties( selTable, selTile.x(), selTile.y() );
+
 		ensureVis = true;
+
+		event->accept();
 	}
 	else if ( event->key() == Qt::Key_Down )
 	{
@@ -894,7 +889,11 @@ void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
 		}
 		selTile.setY( y );
 
+		computeNameTableProperties( selTable, selTile.x(), selTile.y() );
+
 		ensureVis = true;
+
+		event->accept();
 	}
 	else if ( event->key() == Qt::Key_Left )
 	{
@@ -916,7 +915,11 @@ void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
 		}
 		selTile.setX( x );
 
+		computeNameTableProperties( selTable, selTile.x(), selTile.y() );
+
 		ensureVis = true;
+
+		event->accept();
 	}
 	else if ( event->key() == Qt::Key_Right )
 	{
@@ -938,14 +941,17 @@ void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
 		}
 		selTile.setX( x );
 
+		computeNameTableProperties( selTable, selTile.x(), selTile.y() );
+
 		ensureVis = true;
+
+		event->accept();
 	}
 }
 //----------------------------------------------------
 void ppuNameTableView_t::mouseMoveEvent(QMouseEvent *event)
 {
 	//printf("MouseMove: (%i,%i) \n", event->pos().x(), event->pos().y() );
-	//computeNameTableProperties( event->pos().x(), event->pos().y() );
 }
 //----------------------------------------------------------------------------
 void ppuNameTableView_t::mousePressEvent(QMouseEvent * event)
@@ -956,12 +962,12 @@ void ppuNameTableView_t::mousePressEvent(QMouseEvent * event)
 
 	if ( event->button() == Qt::LeftButton )
 	{
-		printf(" %i  %i  %i \n", tIdx, tx, ty );
+		//printf(" %i  %i  %i \n", tIdx, tx, ty );
 		selTable = tIdx;
 		selTile.setX( tx );
 		selTile.setY( ty );
 
-		computeNameTableProperties( event->pos().x(), event->pos().y() );
+		computeNameTableProperties( tIdx, tx, ty );
 	}
 	else if ( event->button() == Qt::RightButton )
 	{
@@ -974,7 +980,6 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 	int n,i,j,ii,jj,w,h,x,y,xx,yy,ww,hh;
 	QPainter painter(this);
 	QColor scanLineColor(255,255,255);
-	QColor gridLineColor(128,128,128);
 	QPen   pen;
 	
 	viewRect = event->rect();
@@ -1032,15 +1037,28 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 				painter.drawLine( xx, ypos, xx + ww, ypos );
 			}
 		}
-		if ( drawGridLines )
+		if ( drawTileGridLines )
 		{
-			painter.setPen( gridLineColor );
+			painter.setPen( tileGridColor );
 
 			for (x=0; x<256; x+=8)
 			{
 				painter.drawLine( xx + x*w, yy, xx + x*w, yy + hh );
 			}
 			for (y=0; y<240; y+=8)
+			{
+				painter.drawLine( xx, yy + y*h, xx + ww, yy + y*h );
+			}
+		}
+		if ( drawAttrGridLines )
+		{
+			painter.setPen( attrGridColor );
+
+			for (x=0; x<256; x+=16)
+			{
+				painter.drawLine( xx + x*w, yy, xx + x*w, yy + hh );
+			}
+			for (y=0; y<240; y+=16)
 			{
 				painter.drawLine( xx, yy + y*h, xx + ww, yy + y*h );
 			}
@@ -1071,6 +1089,8 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 
 		ensureVis = false;
 	}
+	computeNameTableProperties( selTable, selTile.x(), selTile.y() );
+
 }
 //----------------------------------------------------
 static void initNameTableViewer(void)
@@ -1086,47 +1106,47 @@ static void initNameTableViewer(void)
 
 }
 //----------------------------------------------------
-static void ChangeMirroring(void)
-{
-	switch (ntmirroring)
-	{
-		case NT_HORIZONTAL:
-			vnapage[0] = vnapage[1] = &NTARAM[0x000];
-			vnapage[2] = vnapage[3] = &NTARAM[0x400];
-			break;
-		case NT_VERTICAL:
-			vnapage[0] = vnapage[2] = &NTARAM[0x000];
-			vnapage[1] = vnapage[3] = &NTARAM[0x400];
-			break;
-		case NT_FOUR_SCREEN:
-			vnapage[0] = &NTARAM[0x000];
-			vnapage[1] = &NTARAM[0x400];
-			if(ExtraNTARAM)
-			{
-				vnapage[2] = ExtraNTARAM;
-				vnapage[3] = ExtraNTARAM + 0x400;
-			}
-			break;
-		case NT_SINGLE_SCREEN_TABLE_0:
-			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = &NTARAM[0x000];
-			break;
-		case NT_SINGLE_SCREEN_TABLE_1:
-			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = &NTARAM[0x400];
-			break;
-		case NT_SINGLE_SCREEN_TABLE_2:
-			if(ExtraNTARAM)
-				vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = ExtraNTARAM;
-			break;
-		case NT_SINGLE_SCREEN_TABLE_3:
-			if(ExtraNTARAM)
-				vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = ExtraNTARAM + 0x400;
-			break;
-		default:
-		case NT_NONE:
-			break;
-	}
-	return;
-}
+//static void ChangeMirroring(void)
+//{
+//	switch (ntmirroring)
+//	{
+//		case NT_HORIZONTAL:
+//			vnapage[0] = vnapage[1] = &NTARAM[0x000];
+//			vnapage[2] = vnapage[3] = &NTARAM[0x400];
+//			break;
+//		case NT_VERTICAL:
+//			vnapage[0] = vnapage[2] = &NTARAM[0x000];
+//			vnapage[1] = vnapage[3] = &NTARAM[0x400];
+//			break;
+//		case NT_FOUR_SCREEN:
+//			vnapage[0] = &NTARAM[0x000];
+//			vnapage[1] = &NTARAM[0x400];
+//			if(ExtraNTARAM)
+//			{
+//				vnapage[2] = ExtraNTARAM;
+//				vnapage[3] = ExtraNTARAM + 0x400;
+//			}
+//			break;
+//		case NT_SINGLE_SCREEN_TABLE_0:
+//			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = &NTARAM[0x000];
+//			break;
+//		case NT_SINGLE_SCREEN_TABLE_1:
+//			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = &NTARAM[0x400];
+//			break;
+//		case NT_SINGLE_SCREEN_TABLE_2:
+//			if(ExtraNTARAM)
+//				vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = ExtraNTARAM;
+//			break;
+//		case NT_SINGLE_SCREEN_TABLE_3:
+//			if(ExtraNTARAM)
+//				vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = ExtraNTARAM + 0x400;
+//			break;
+//		default:
+//		case NT_NONE:
+//			break;
+//	}
+//	return;
+//}
 //----------------------------------------------------
 inline void DrawChr( ppuNameTableTile_t *tile, const uint8_t *chr, int pal)
 {
@@ -1207,8 +1227,6 @@ static void DrawNameTable(int scanline, int ntnum, bool invalidateCache)
 				//if((((x>>1)&1) == 1) && (((y>>1)&1) == 1)) a = (table[a]&0xC0)>>6;
 
 				int chr = table[ntaddr]*16;
-
-				extern int FCEUPPU_GetAttr(int ntnum, int xt, int yt);
 
 				//test.. instead of pretending that the nametable is a screen at 0,0 we pretend that it is at the current xscroll and yscroll
 				//int xpos = ((RefreshAddr & 0x400) >> 2) | ((RefreshAddr & 0x1F) << 3) | XOffset;
