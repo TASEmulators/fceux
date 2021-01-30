@@ -114,7 +114,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	: QDialog( parent, Qt::Window )
 {
 	QHBoxLayout *mainLayout;
-	QVBoxLayout *vbox1, *vbox2;
+	QVBoxLayout *vbox1, *vbox2, *vbox3;
 	QHBoxLayout *hbox, *hbox1;
 	QGridLayout *grid;
 	QGroupBox   *frame;
@@ -339,6 +339,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	vbox1  = new QVBoxLayout();
 	vbox2  = new QVBoxLayout();
+	vbox3  = new QVBoxLayout();
 	frame  = new QGroupBox( tr("Tile Info") );
 	ntView = new ppuNameTableView_t(this);
 	grid   = new QGridLayout();
@@ -359,7 +360,8 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	vbox1->addWidget( scrollArea, 100 );
 
 	vbox2->addWidget( frame );
-	frame->setLayout( grid );
+	frame->setLayout( vbox3 );
+	vbox3->addLayout( grid );
 
 	lbl = new QLabel( tr("PPU Addr:") );
 	lbl->setFont( font );
@@ -425,6 +427,10 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	palAddrLbl->setReadOnly(true);
 	grid->addWidget( palAddrLbl, 7, 1, Qt::AlignLeft );
 
+	selTileView = new ppuNameTableTileView_t(this);
+	//grid->addWidget( selTileView, 8, 0, 2, 1, Qt::AlignLeft );
+	vbox3->addWidget( selTileView );
+
 	showScrollLineCbox = new QCheckBox( tr("Show Scroll Lines") );
 	showTileGridCbox   = new QCheckBox( tr("Show Tile Grid") );
 	showAttrGridCbox   = new QCheckBox( tr("Show Attr Grid") );
@@ -437,6 +443,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	showAttrbCbox->setChecked( attview );
 	ignorePaletteCbox->setChecked( hidepal );
 
+	//vbox2->addWidget( selTileView );
 	vbox2->addWidget( showScrollLineCbox );
 	vbox2->addWidget( showTileGridCbox   );
 	vbox2->addWidget( showAttrGridCbox   );
@@ -520,6 +527,13 @@ void ppuNameTableViewerDialog_t::periodicUpdate(void)
 
 	if ( redrawtables || (cycleCount == 0) )
 	{
+		QPoint p;
+
+		p = ntView->getSelTile();
+
+		this->selTileView->setTile( ntView->getSelTable(), p.x(), p.y() );
+		this->selTileView->update();
+
 		this->scrollArea->viewport()->update();
 
 		redrawtables = false;
@@ -1534,5 +1548,119 @@ void FCEUD_UpdateNTView(int scanline, bool drawall)
 	chrchanged = 0;
 	redrawtables = true;
 	return;	
+}
+//----------------------------------------------------
+ppuNameTableTileView_t::ppuNameTableTileView_t( QWidget *parent )
+	: QWidget(parent)
+{
+	//this->setFocusPolicy(Qt::StrongFocus);
+	//this->setMouseTracking(true);
+	this->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+
+	viewWidth = 128;
+	viewHeight = 128;
+	setMinimumWidth( viewWidth );
+	setMinimumHeight( viewHeight );
+
+	selTable = 0;
+	tileX = 0;
+	tileY = 0;
+}
+//----------------------------------------------------
+ppuNameTableTileView_t::~ppuNameTableTileView_t(void)
+{
+
+}
+//----------------------------------------------------
+void ppuNameTableTileView_t::setTile( int table, int x, int y )
+{
+	selTable = table;
+	tileX = x; tileY = y;
+}
+//----------------------------------------------------
+void ppuNameTableTileView_t::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+}
+//----------------------------------------------------
+void ppuNameTableTileView_t::paintEvent(QPaintEvent *event)
+{
+	int x,y,w,h,xx,yy;
+	QPainter painter(this);
+	QPen     pen;
+	ppuNameTableTile_t *tile;
+
+	pen = painter.pen();
+
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
+
+	//printf("NameTable TileView %ix%i \n", viewWidth, viewHeight );
+	
+	w = viewWidth / 8;
+  	h = viewHeight / 8;
+
+	if ( w < h )
+	{
+	   h = w;
+	}
+	else
+	{
+	   w = h;
+	}
+	
+	xx = 0;
+
+	tile = &nameTable[ selTable ].tile[ tileY ][ tileX ];
+
+	// Draw Tile Pixels as rectangles
+	for (x=0; x < 8; x++)
+	{
+		yy = 0;
+	
+		for (y=0; y < 8; y++)
+		{
+			painter.fillRect( xx, yy, w, h, tile->pixel[y][x].color );
+			yy += h;
+		}
+		xx += w;
+	}
+	
+	//if ( drawTileGrid )
+	//{
+	//	pen.setWidth( 1 );
+	//	pen.setColor( QColor(128,128,128) );
+	//	painter.setPen( pen );
+
+	//	// Draw Tile Pixel grid lines
+	//	xx = 0; y = 8*h;
+	//	
+	//	for (x=0; x<9; x++)
+	//	{
+	//	           painter.drawLine( xx, 0 , xx, y ); xx += w;
+	//	}
+	//	yy = 0; x = 8*w;
+	//	
+	//	for (y=0; y<9; y++)
+	//	{
+	//	           painter.drawLine( 0, yy , x, yy ); yy += h;
+	//	}
+	//}
+
+	//x = selPix.x() * w;
+	//y = selPix.y() * h;
+
+	//pen.setWidth( 6 );
+	//pen.setColor( QColor(  0,  0,  0) );
+	//painter.setPen( pen );
+
+	//painter.drawRect( x, y, w, h );
+
+	//pen.setWidth( 2 );
+	//pen.setColor( QColor(255,  0,  0) );
+	//painter.setPen( pen );
+
+	//painter.drawRect( x, y, w, h );
 }
 //----------------------------------------------------

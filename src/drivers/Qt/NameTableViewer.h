@@ -59,6 +59,9 @@ class ppuNameTableView_t : public QWidget
 		void setHoverFocus( bool hoverFocus );
 		bool getHoverFocus( void ){ return hover2Focus; };
 
+		int     getSelTable(void){ return selTable; };
+		QPoint  getSelTile(void){ return selTile; };
+
 		QColor tileSelColor;
 		QColor tileGridColor;
 		QColor attrGridColor;
@@ -86,6 +89,27 @@ class ppuNameTableView_t : public QWidget
 		bool  hover2Focus;
 };
 
+class ppuNameTableTileView_t : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		ppuNameTableTileView_t( QWidget *parent = 0);
+		~ppuNameTableTileView_t(void);
+
+		void setTile( int table, int x, int y );
+
+	protected:
+		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+
+		int viewWidth;
+		int viewHeight;
+		int selTable;
+		int tileX;
+		int tileY;
+};
+
 class ppuNameTableViewerDialog_t : public QDialog
 {
    Q_OBJECT
@@ -102,6 +126,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void changeRate( int divider );
 
 		ppuNameTableView_t *ntView;
+		ppuNameTableTileView_t *selTileView;
 		QScrollArea *scrollArea;
 		QCheckBox *showScrollLineCbox;
 		QCheckBox *showTileGridCbox;
