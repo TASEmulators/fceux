@@ -56,6 +56,8 @@ class ppuNameTableView_t : public QWidget
 		int  getViewScale( void ){ return viewScale; };
 
 		void setScrollPointer( QScrollArea *sa );
+		void setHoverFocus( bool hoverFocus );
+		bool getHoverFocus( void ){ return hover2Focus; };
 
 		QColor tileSelColor;
 		QColor tileGridColor;
@@ -81,6 +83,7 @@ class ppuNameTableView_t : public QWidget
 		QScrollArea  *scrollArea;
 
 		bool  ensureVis;
+		bool  hover2Focus;
 };
 
 class ppuNameTableViewerDialog_t : public QDialog
@@ -117,16 +120,22 @@ class ppuNameTableViewerDialog_t : public QDialog
 		QLineEdit *palAddrLbl;
 		QAction *showScrollLineAct;
 		QAction *showTileGridAct;
+		QAction *showAttrGridAct;
 		QAction *showAttributesAct;
 		QAction *ignPalAct;
+		QAction *zoomAct[4];
+		QAction *rateAct[5];
+		QAction *focusAct[2];
 		QLabel  *mirrorLbl;
+
+		int      cycleCount;
 
 	public slots:
 		void closeWindow(void);
+		void refreshMenuSelections(void);
 	private slots:
 		void periodicUpdate(void);
 		void updateMirrorText(void);
-		void updateVisibility(void);
 		void showAttrbChanged(int state);
 		void ignorePaletteChanged(int state);
 		void showTileGridChanged(int state);
@@ -134,12 +143,15 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void showScrollLinesChanged(int state);
 		void scanLineChanged( const QString &txt );
 		void menuScrollLinesChanged( bool checked ); 
-		void menuGridLinesChanged( bool checked ); 
+		void menuTileGridLinesChanged( bool checked ); 
+		void menuAttrGridLinesChanged( bool checked ); 
 		void menuAttributesChanged( bool checked );
 		void menuIgnPalChanged( bool checked );
 		void setTileSelectorColor(void);
 		void setTileGridColor(void);
 		void setAttrGridColor(void);
+		void setClickFocus(void);
+		void setHoverFocus(void);
 		void changeZoom1x(void);
 		void changeZoom2x(void);
 		void changeZoom3x(void);

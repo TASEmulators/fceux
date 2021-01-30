@@ -120,7 +120,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QGroupBox   *frame;
 	QMenuBar *menuBar;
 	QMenu *viewMenu, *colorMenu, *subMenu;
-	QAction *act, *zoomAct[4], *rateAct[5];
+	QAction *act;
 	QActionGroup *group;
 	QLabel *lbl;
 	QFont   font;
@@ -158,14 +158,25 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	
 	viewMenu->addAction(act);
 
-	// View -> Show Grid Lines
+	// View -> Show Tile Grid
 	act = new QAction(tr("Show Tile Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(drawTileGridLines);
 	act->setStatusTip(tr("Show Tile Grid"));
-	connect(act, SIGNAL(triggered(bool)), this, SLOT(menuGridLinesChanged(bool)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(menuTileGridLinesChanged(bool)) );
 	showTileGridAct = act;
+
+	viewMenu->addAction(act);
+
+	// View -> Show Attr Grid
+	act = new QAction(tr("Show Attr Grid"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setCheckable(true);
+	act->setChecked(drawAttrGridLines);
+	act->setStatusTip(tr("Show Attr Grid"));
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(menuAttrGridLinesChanged(bool)) );
+	showAttrGridAct = act;
 
 	viewMenu->addAction(act);
 
@@ -215,6 +226,27 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	connect(zoomAct[1], SIGNAL(triggered()), this, SLOT(changeZoom2x(void)) );
 	connect(zoomAct[2], SIGNAL(triggered()), this, SLOT(changeZoom3x(void)) );
 	connect(zoomAct[3], SIGNAL(triggered()), this, SLOT(changeZoom4x(void)) );
+
+	viewMenu->addSeparator();
+
+	// View -> Tile Focus
+	subMenu = viewMenu->addMenu( tr("Tile Focus"));
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	focusAct[0] = new QAction(tr("Click"), this);
+	focusAct[0]->setCheckable(true);
+	group->addAction(focusAct[0]);
+	subMenu->addAction(focusAct[0]);
+	connect(focusAct[0], SIGNAL(triggered()), this, SLOT(setClickFocus(void)) );
+
+	focusAct[1] = new QAction(tr("Hover"), this);
+	focusAct[1]->setCheckable(true);
+	focusAct[1]->setChecked(false);
+	group->addAction(focusAct[1]);
+	subMenu->addAction(focusAct[1]);
+	connect(focusAct[1], SIGNAL(triggered()), this, SLOT(setHoverFocus(void)) );
 
 	viewMenu->addSeparator();
 
@@ -294,6 +326,8 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// End Menu 
 	//-----------------------------------------------------------------------
+
+	cycleCount = 0;
 
 	setWindowTitle( tr("Name Table Viewer") );
 
@@ -452,7 +486,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	updateTimer->start( 33 ); // 30hz
 
 	updateMirrorText();
-	updateVisibility();
+	refreshMenuSelections();
 }
 //----------------------------------------------------
 ppuNameTableViewerDialog_t::~ppuNameTableViewerDialog_t(void)
@@ -480,9 +514,11 @@ void ppuNameTableViewerDialog_t::closeWindow(void)
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::periodicUpdate(void)
 {
+	cycleCount = (cycleCount + 1) % 30;
+
 	updateMirrorText();
 
-	if ( redrawtables )
+	if ( redrawtables || (cycleCount == 0) )
 	{
 		this->scrollArea->viewport()->update();
 
@@ -493,21 +529,39 @@ void ppuNameTableViewerDialog_t::periodicUpdate(void)
 void ppuNameTableViewerDialog_t::changeZoom1x(void)
 {
 	ntView->setViewScale(1);
+
+	refreshMenuSelections();
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::changeZoom2x(void)
 {
 	ntView->setViewScale(2);
+
+	refreshMenuSelections();
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::changeZoom3x(void)
 {
 	ntView->setViewScale(3);
+
+	refreshMenuSelections();
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::changeZoom4x(void)
 {
 	ntView->setViewScale(4);
+
+	refreshMenuSelections();
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::setClickFocus(void)
+{
+	ntView->setHoverFocus(false);
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::setHoverFocus(void)
+{
+	ntView->setHoverFocus(true);
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::changeRate( int divider )
@@ -558,9 +612,21 @@ void ppuNameTableViewerDialog_t::forceRefresh(void)
 	FCEUD_UpdateNTView( -1, true);
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::updateVisibility(void)
+void ppuNameTableViewerDialog_t::refreshMenuSelections(void)
 {
+	focusAct[0]->setChecked( !ntView->getHoverFocus() );
+	focusAct[1]->setChecked(  ntView->getHoverFocus() );
 
+	zoomAct[0]->setChecked( ntView->getViewScale() == 1 );
+	zoomAct[1]->setChecked( ntView->getViewScale() == 2 );
+	zoomAct[2]->setChecked( ntView->getViewScale() == 3 );
+	zoomAct[3]->setChecked( ntView->getViewScale() == 4 );
+
+	rateAct[0]->setChecked( NTViewRefresh == 0  );
+	rateAct[1]->setChecked( NTViewRefresh == 1  );
+	rateAct[2]->setChecked( NTViewRefresh == 3  );
+	rateAct[3]->setChecked( NTViewRefresh == 7  );
+	rateAct[4]->setChecked( NTViewRefresh == 19 );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib, int palAddr )
@@ -653,11 +719,18 @@ void ppuNameTableViewerDialog_t::menuScrollLinesChanged(bool checked)
 	showScrollLineCbox->setChecked( checked );
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::menuGridLinesChanged(bool checked)
+void ppuNameTableViewerDialog_t::menuTileGridLinesChanged(bool checked)
 {
 	drawTileGridLines = checked;
 
 	showTileGridCbox->setChecked( checked );
+}
+//----------------------------------------------------
+void ppuNameTableViewerDialog_t::menuAttrGridLinesChanged(bool checked)
+{
+	drawAttrGridLines = checked;
+
+	showAttrGridCbox->setChecked( checked );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::menuAttributesChanged(bool checked)
@@ -729,7 +802,7 @@ void ppuNameTableViewerDialog_t::showAttrGridChanged(int state)
 {
 	drawAttrGridLines = (state != Qt::Unchecked);
 
-	//showAttrGridAct->setChecked( drawAttrGridLines );
+	showAttrGridAct->setChecked( drawAttrGridLines );
 
 	redrawtables = true;
 }
@@ -755,7 +828,7 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 	this->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMouseTracking(true);
-	viewScale = 2;
+	viewScale = 1;
 	viewWidth = 256 * 2 * viewScale;
 	viewHeight = 240 * 2 * viewScale;
 	setMinimumWidth( viewWidth );
@@ -766,8 +839,9 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 
 	viewRect= QRect(0, 0, 512, 480);
 
-	selTable   = 0;
-	scrollArea = NULL;
+	selTable    = 0;
+	scrollArea  = NULL;
+	hover2Focus = false;
 
 	tileSelColor.setRgb(255,255,255);
 	tileGridColor.setRgb(255,  0,  0);
@@ -782,6 +856,11 @@ ppuNameTableView_t::~ppuNameTableView_t(void)
 void ppuNameTableView_t::setScrollPointer( QScrollArea *sa )
 {
 	scrollArea = sa;
+}
+//----------------------------------------------------
+void ppuNameTableView_t::setHoverFocus( bool hoverFocus )
+{
+	hover2Focus = hoverFocus;
 }
 //----------------------------------------------------
 void ppuNameTableView_t::setViewScale( int reqScale )
@@ -944,15 +1023,19 @@ void ppuNameTableView_t::computeNameTableProperties( int NameTable, int TileX, i
 //----------------------------------------------------
 void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
 {
-	if ( event->key() == Qt::Key_Minus )
+	if ( (event->key() == Qt::Key_Minus) || (event->key() == Qt::Key_Underscore) )
 	{
 		setViewScale( viewScale-1 );
 
+		parent->refreshMenuSelections();
+
 		event->accept();
 	}
-	else if ( event->key() == Qt::Key_Plus )
+	else if ( (event->key() == Qt::Key_Plus) || (event->key() == Qt::Key_Equal) )
 	{
 		setViewScale( viewScale+1 );
+
+		parent->refreshMenuSelections();
 
 		event->accept();
 	}
@@ -979,6 +1062,7 @@ void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
 		computeNameTableProperties( selTable, selTile.x(), selTile.y() );
 
 		ensureVis = true;
+		redrawtables = true;
 
 		event->accept();
 	}
@@ -1005,6 +1089,7 @@ void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
 		computeNameTableProperties( selTable, selTile.x(), selTile.y() );
 
 		ensureVis = true;
+		redrawtables = true;
 
 		event->accept();
 	}
@@ -1031,6 +1116,7 @@ void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
 		computeNameTableProperties( selTable, selTile.x(), selTile.y() );
 
 		ensureVis = true;
+		redrawtables = true;
 
 		event->accept();
 	}
@@ -1057,6 +1143,7 @@ void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
 		computeNameTableProperties( selTable, selTile.x(), selTile.y() );
 
 		ensureVis = true;
+		redrawtables = true;
 
 		event->accept();
 	}
@@ -1064,6 +1151,20 @@ void ppuNameTableView_t::keyPressEvent(QKeyEvent *event)
 //----------------------------------------------------
 void ppuNameTableView_t::mouseMoveEvent(QMouseEvent *event)
 {
+	if ( hover2Focus )
+	{
+		int tIdx, tx, ty;
+
+		convertXY2TableTile( event->pos().x(), event->pos().y(), &tIdx, &tx, &ty );
+
+		selTable = tIdx;
+		selTile.setX( tx );
+		selTile.setY( ty );
+
+		computeNameTableProperties( tIdx, tx, ty );
+
+		redrawtables = true;
+	}
 	//printf("MouseMove: (%i,%i) \n", event->pos().x(), event->pos().y() );
 }
 //----------------------------------------------------------------------------
@@ -1085,6 +1186,7 @@ void ppuNameTableView_t::mousePressEvent(QMouseEvent * event)
 	else if ( event->button() == Qt::RightButton )
 	{
 	}
+	redrawtables = true;
 }
 //----------------------------------------------------
 void ppuNameTableView_t::paintEvent(QPaintEvent *event)
