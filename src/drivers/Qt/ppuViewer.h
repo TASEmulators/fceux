@@ -50,6 +50,8 @@ class ppuPatternView_t : public QWidget
 		void setPattern( ppuPatternTable_t *p );
 		void setTileLabel( QLabel *l );
 		QPoint convPixToTile( QPoint p );
+
+		bool getDrawTileGrid(void){ return drawTileGrid; };
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
@@ -58,29 +60,37 @@ class ppuPatternView_t : public QWidget
 		void mousePressEvent(QMouseEvent * event);
 		void contextMenuEvent(QContextMenuEvent *event);
 
+		void openColorPicker( QColor *c );
+
 		int patternIndex;
 		int viewWidth;
 		int viewHeight;
 		int mode;
 		bool drawTileGrid;
+		bool hover2Focus;
 		QLabel *tileLabel;
 		QPoint  selTile;
+		QColor  selTileColor;
+		QColor  gridColor;
 		ppuPatternTable_t *pattern;
+   public slots:
+	void toggleTileGridLines(void);
+   	void setTileSelectorColor(void);
+   	void setTileGridColor(void);
    private slots:
-      void showTileMode(void);
-      void exitTileMode(void);
-      void selPalette0(void);
-      void selPalette1(void);
-      void selPalette2(void);
-      void selPalette3(void);
-      void selPalette4(void);
-      void selPalette5(void);
-      void selPalette6(void);
-      void selPalette7(void);
-      void selPalette8(void);
-      void openTileEditor(void);
-      void cycleNextPalette(void);
-      void toggleTileGridLines(void);
+	void showTileMode(void);
+	void exitTileMode(void);
+	void selPalette0(void);
+	void selPalette1(void);
+	void selPalette2(void);
+	void selPalette3(void);
+	void selPalette4(void);
+	void selPalette5(void);
+	void selPalette6(void);
+	void selPalette7(void);
+	void selPalette8(void);
+	void openTileEditor(void);
+	void cycleNextPalette(void);
 };
 
 class ppuPalatteView_t : public QWidget

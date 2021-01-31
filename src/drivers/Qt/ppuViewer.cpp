@@ -29,6 +29,7 @@
 #include <QMenuBar>
 #include <QPainter>
 #include <QInputDialog>
+#include <QColorDialog>
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QTreeWidget>
@@ -92,17 +93,30 @@ int openPPUViewWindow( QWidget *parent )
 ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	: QDialog( parent, Qt::Window )
 {
+	QMenuBar    *menuBar;
 	QVBoxLayout *mainLayout, *vbox;
 	QVBoxLayout *patternVbox[2];
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
+	QMenu *viewMenu, *colorMenu;
+	QAction *act;
 	char stmp[64];
+	int useNativeMenuBar;
 
 	ppuViewWindow = this;
+
+	menuBar = new QMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
 
 	setWindowTitle( tr("PPU Viewer") );
 
 	mainLayout = new QVBoxLayout();
+
+	mainLayout->setMenuBar( menuBar );
 
 	setLayout( mainLayout );
 
@@ -197,6 +211,77 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	
 	FCEUD_UpdatePPUView( -1, 1 );
 
+	//-----------------------------------------------------------------------
+	// Menu 
+	//-----------------------------------------------------------------------
+	// View1
+	viewMenu = menuBar->addMenu(tr("View1"));
+
+	// View1 -> Toggle Grid
+	act = new QAction(tr("Toggle Grid"), this);
+	//act->setShortcut(QKeySequence::Open);
+	//act->setCheckable(true);
+	//act->setChecked( patternView[0]->getDrawTileGrid() );
+	act->setStatusTip(tr("Toggle Grid"));
+	connect( act, SIGNAL(triggered()), patternView[0], SLOT(toggleTileGridLines()) );
+	
+	viewMenu->addAction(act);
+
+	// View1 -> Colors
+	colorMenu = viewMenu->addMenu(tr("Colors"));
+
+	// View1 -> Colors -> Tile Selector
+	act = new QAction(tr("Tile Selector"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Tile Selector"));
+	connect(act, SIGNAL(triggered()), patternView[0], SLOT(setTileSelectorColor()) );
+	
+	colorMenu->addAction(act);
+
+	// View1 -> Colors -> Tile Grid
+	act = new QAction(tr("Tile Grid"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Tile Grid"));
+	connect(act, SIGNAL(triggered()), patternView[0], SLOT(setTileGridColor()) );
+	
+	colorMenu->addAction(act);
+
+	// View2
+	viewMenu = menuBar->addMenu(tr("View2"));
+
+	// View2 -> Toggle Grid
+	act = new QAction(tr("Toggle Grid"), this);
+	//act->setShortcut(QKeySequence::Open);
+	//act->setCheckable(true);
+	//act->setChecked( patternView[1]->getDrawTileGrid() );
+	act->setStatusTip(tr("Toggle Grid"));
+	connect( act, SIGNAL(triggered()), patternView[1], SLOT(toggleTileGridLines()) );
+	
+	viewMenu->addAction(act);
+
+	// View2 -> Colors
+	colorMenu = viewMenu->addMenu(tr("Colors"));
+
+	// View2 -> Colors -> Tile Selector
+	act = new QAction(tr("Tile Selector"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Tile Selector"));
+	connect(act, SIGNAL(triggered()), patternView[1], SLOT(setTileSelectorColor()) );
+	
+	colorMenu->addAction(act);
+
+	// View2 -> Colors -> Tile Grid
+	act = new QAction(tr("Tile Grid"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Tile Grid"));
+	connect(act, SIGNAL(triggered()), patternView[1], SLOT(setTileGridColor()) );
+	
+	colorMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// End Menu 
+	//-----------------------------------------------------------------------
+
 	updateTimer  = new QTimer( this );
 
 	connect( updateTimer, &QTimer::timeout, this, &ppuViewerDialog_t::periodicUpdate );
@@ -280,6 +365,10 @@ ppuPatternView_t::ppuPatternView_t( int patternIndexID, QWidget *parent)
 	tileLabel = NULL;
 	mode = 0;
 	drawTileGrid = true;
+	hover2Focus  = false;
+
+	selTileColor.setRgb(255,255,255);
+	gridColor.setRgb(128,128,128);
 }
 //----------------------------------------------------
 void ppuPatternView_t::setPattern( ppuPatternTable_t *p )
@@ -295,6 +384,36 @@ void ppuPatternView_t::setTileLabel( QLabel *l )
 ppuPatternView_t::~ppuPatternView_t(void)
 {
 
+}
+//----------------------------------------------------
+void ppuPatternView_t::openColorPicker( QColor *c )
+{
+	int ret;
+	QColorDialog dialog( this );
+
+	dialog.setCurrentColor( *c );
+	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
+	dialog.show();
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		//QString colorText;
+		//colorText = dialog.selectedColor().name();
+		//printf("FG Color string '%s'\n", colorText.toStdString().c_str() );
+		//g_config->setOption("SDL.HexEditFgColor", colorText.toStdString().c_str() );
+		*c = dialog.selectedColor();
+	}
+}
+//----------------------------------------------------
+void ppuPatternView_t::setTileSelectorColor(void)
+{
+	openColorPicker( &selTileColor );
+}
+//----------------------------------------------------
+void ppuPatternView_t::setTileGridColor(void)
+{
+	openColorPicker( &gridColor );
 }
 //----------------------------------------------------
 QPoint ppuPatternView_t::convPixToTile( QPoint p )
@@ -373,36 +492,50 @@ void ppuPatternView_t::keyPressEvent(QKeyEvent *event)
 	
 	     	FCEUD_UpdatePPUView( -1, 0 );
 	}
+	else if ( event->key() == Qt::Key_F5 )
+	{
+		// Load Tile Viewport
+		PPUViewSkip = 100;
+
+		FCEUD_UpdatePPUView( -1, 1 );
+	}
 
 }
 //----------------------------------------------------
 void ppuPatternView_t::mouseMoveEvent(QMouseEvent *event)
 {
-   if ( mode == 0 )
-   {
-	   QPoint tile = convPixToTile( event->pos() );
+	if ( mode == 0 )
+	{
+		QPoint tile = convPixToTile( event->pos() );
 
-	   if ( (tile.x() < 16) && (tile.y() < 16) )
-	   {
-	   	char stmp[64];
-	   	sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
-	   	tileLabel->setText( tr(stmp) );
-
-		selTile = tile;
-	   }
+		if ( (tile.x() < 16) && (tile.y() < 16) )
+		{
+		        if ( hover2Focus )
+			{
+				char stmp[64];
+				sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
+				tileLabel->setText( tr(stmp) );
+				
+				selTile = tile;
+			}
+		}
 	}
 }
 //----------------------------------------------------------------------------
 void ppuPatternView_t::mousePressEvent(QMouseEvent * event)
 {
-	//QPoint tile = convPixToTile( event->pos() );
+	QPoint tile = convPixToTile( event->pos() );
 
 	if ( event->button() == Qt::LeftButton )
 	{
-		// Load Tile Viewport
-		PPUViewSkip = 100;
-
-		FCEUD_UpdatePPUView( -1, 0 );
+		if ( (tile.x() < 16) && (tile.y() < 16) )
+		{
+			char stmp[64];
+			sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
+			tileLabel->setText( tr(stmp) );
+				
+			selTile = tile;
+		}
 	}
 }
 //----------------------------------------------------
@@ -577,7 +710,7 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 	//printf("PPU PatternView %ix%i \n", viewWidth, viewHeight );
 
 	pen.setWidth( 1 );
-	pen.setColor( QColor( 128, 128, 128) );
+	pen.setColor( gridColor );
 	painter.setPen( pen );
 
 	w = viewWidth / 128;
@@ -658,6 +791,10 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 				}
 
 				xx = (i*8)*w;
+				yy = (j*8)*h;
+
+				pattern->tile[jj][ii].x = xx;
+				pattern->tile[jj][ii].y = yy;
 
 				for (x=0; x < 8; x++)
 				{
@@ -665,8 +802,6 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 
 					for (y=0; y < 8; y++)
 					{
-						pattern->tile[jj][ii].x = xx;
-						pattern->tile[jj][ii].y = yy;
 						painter.fillRect( xx, yy, w, h, pattern->tile[jj][ii].pixel[y][x].color );
 						yy += h;
 					}
@@ -691,6 +826,21 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 				painter.drawLine( 0, yy , x, yy ); yy += (8*h);
 			}
 		}
+
+		xx = pattern->tile[ selTile.y() ][ selTile.x() ].x;
+		yy = pattern->tile[ selTile.y() ][ selTile.x() ].y;
+
+		pen.setWidth( 3 );
+		pen.setColor( QColor(  0,  0,  0) );
+		painter.setPen( pen );
+
+		painter.drawRect( xx, yy, w*8, h*8 );
+
+		pen.setWidth( 1 );
+		pen.setColor( selTileColor );
+		painter.setPen( pen );
+
+		painter.drawRect( xx, yy, w*8, h*8 );
 	}
 	else
 	{
@@ -699,6 +849,10 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 			for (j=0; j<16; j++) //Rows
 			{
 				xx = (i*8)*w;
+				yy = (j*8)*h;
+
+				pattern->tile[j][i].x = xx;
+				pattern->tile[j][i].y = yy;
 
 				for (x=0; x < 8; x++)
 				{
@@ -706,8 +860,6 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 
 					for (y=0; y < 8; y++)
 					{
-						pattern->tile[j][i].x = xx;
-						pattern->tile[j][i].y = yy;
 						painter.fillRect( xx, yy, w, h, pattern->tile[j][i].pixel[y][x].color );
 						yy += h;
 					}
@@ -732,6 +884,21 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 				painter.drawLine( 0, yy , x, yy ); yy += (8*h);
 			}
 		}
+
+		xx = pattern->tile[ selTile.y() ][ selTile.x() ].x;
+		yy = pattern->tile[ selTile.y() ][ selTile.x() ].y;
+
+		pen.setWidth( 3 );
+		pen.setColor( QColor(  0,  0,  0) );
+		painter.setPen( pen );
+
+		painter.drawRect( xx, yy, w*8, h*8 );
+
+		pen.setWidth( 1 );
+		pen.setColor( selTileColor );
+		painter.setPen( pen );
+
+		painter.drawRect( xx, yy, w*8, h*8 );
 	}
 }
 //----------------------------------------------------
