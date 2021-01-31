@@ -218,8 +218,8 @@ class ppuTileEditor_t : public QDialog
 		int     palIdx;
 		int     tileAddr;
 
-   public slots:
-      void closeWindow(void);
+	public slots:
+		void closeWindow(void);
 	private slots:
 		void periodicUpdate(void);
 		void paletteChanged(int index);
@@ -239,7 +239,7 @@ class ppuViewerDialog_t : public QDialog
 		ppuPatternView_t *patternView[2];
 		ppuPalatteView_t *paletteView;
 
-      void closeEvent(QCloseEvent *bar);
+		void closeEvent(QCloseEvent *bar);
 	private:
 
 		QGroupBox  *patternFrame[2];
@@ -252,8 +252,10 @@ class ppuViewerDialog_t : public QDialog
 		QLineEdit  *scanLineEdit;
 		QTimer     *updateTimer;
 
-   public slots:
-      void closeWindow(void);
+		int         cycleCount;
+
+	public slots:
+		void closeWindow(void);
 	private slots:
 		void periodicUpdate(void);
 		void sprite8x16Changed0(int state);

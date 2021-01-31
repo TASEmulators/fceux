@@ -30,6 +30,15 @@ struct ppuNameTableTile_t
 
 	int  x;
 	int  y;
+	int  pTbl;
+	int  pal;
+
+	ppuNameTableTile_t(void)
+	{
+		x = y = 0;
+		pTbl  = 0;
+		pal   = 0;
+	}
 };
 
 struct ppuNameTable_t
@@ -40,6 +49,12 @@ struct ppuNameTable_t
 	int  y;
 	int  w;
 	int  h;
+
+	ppuNameTable_t(void)
+	{
+		x = y = 0;
+		w = h = 8;
+	}
 };
 
 class ppuNameTableViewerDialog_t;
@@ -71,6 +86,7 @@ class ppuNameTableView_t : public QWidget
 		void keyPressEvent(QKeyEvent *event);
 		void mouseMoveEvent(QMouseEvent *event);
 		void mousePressEvent(QMouseEvent * event);
+		void contextMenuEvent(QContextMenuEvent *event);
 		void computeNameTableProperties( int NameTable, int TileX, int TileY );
 		int  convertXY2TableTile( int x, int y, int *tableIdxOut, int *tileXout, int *tileYout );
 		int  calcTableTileAddr( int table, int tileX, int tileY );
@@ -79,6 +95,10 @@ class ppuNameTableView_t : public QWidget
 		int viewWidth;
 		int viewHeight;
 		int viewScale;
+		int ppuAddr;
+		int atrbAddr;
+		int tileAddr;
+		int palAddr;
 		int selTable;
 		QPoint selTile;
 		QPoint selTileLoc;
@@ -87,6 +107,11 @@ class ppuNameTableView_t : public QWidget
 
 		bool  ensureVis;
 		bool  hover2Focus;
+	private slots:
+		void openTilePpuViewer(void);
+		void openPpuAddrHexEdit(void);
+		void openTileAddrHexEdit(void);
+		void openAtrbAddrHexEdit(void);
 };
 
 class ppuNameTableTileView_t : public QWidget

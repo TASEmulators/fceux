@@ -38,12 +38,15 @@
 #include "../../debug.h"
 #include "../../palette.h"
 
+#include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/NameTableViewer.h"
+#include "Qt/HexEditor.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/input.h"
 #include "Qt/config.h"
+#include "Qt/ppuViewer.h"
 #include "Qt/fceuWrapper.h"
 
 static ppuNameTableViewerDialog_t *nameTableViewWindow = NULL;
@@ -856,6 +859,10 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 	selTable    = 0;
 	scrollArea  = NULL;
 	hover2Focus = false;
+	ppuAddr     = 0x2000;
+	palAddr     = 0x3F00;
+	atrbAddr    = 0x3F00;
+	tileAddr    = 0x0000;
 
 	tileSelColor.setRgb(255,255,255);
 	tileGridColor.setRgb(255,  0,  0);
@@ -1009,19 +1016,23 @@ int  ppuNameTableView_t::calcTableTileAddr( int NameTable, int TileX, int TileY 
 //----------------------------------------------------
 void ppuNameTableView_t::computeNameTableProperties( int NameTable, int TileX, int TileY )
 {
-	int TileID, PPUAddress, AttAddress, Attrib, palAddr;
+	int TileID, PPUAddress, AttAddress, Attrib;
 
 	if ( vnapage[0] == NULL )
 	{
 		return;
 	}
 
-	PPUAddress = 0x2000+(NameTable*0x400)+((TileY%30)*32)+(TileX%32);
+	ppuAddr = PPUAddress = 0x2000+(NameTable*0x400)+((TileY%30)*32)+(TileX%32);
 
 	TileID = vnapage[(PPUAddress>>10)&0x3][PPUAddress&0x3FF];
 
-	AttAddress = 0x23C0 | (PPUAddress & 0x0C00) | ((PPUAddress >> 4) & 0x38) | ((PPUAddress >> 2) & 0x07);
+	tileAddr = TileID << 4;
+
+	atrbAddr = AttAddress = 0x23C0 | (PPUAddress & 0x0C00) | ((PPUAddress >> 4) & 0x38) | ((PPUAddress >> 2) & 0x07);
+
 	Attrib = vnapage[(AttAddress>>10)&0x3][AttAddress&0x3FF];
+
 	//Attrib = (Attrib >> ((PPUAddress&2) | ((PPUAddress&64)>>4))) & 0x3;
 
 	//palAddr = 0x3F00 + ( FCEUPPU_GetAttr( NameTable, TileX, TileY ) * 4 );
@@ -1201,6 +1212,71 @@ void ppuNameTableView_t::mousePressEvent(QMouseEvent * event)
 	{
 	}
 	redrawtables = true;
+}
+//----------------------------------------------------
+void ppuNameTableView_t::contextMenuEvent(QContextMenuEvent *event)
+{
+	QAction *act;
+	QMenu menu(this);
+	QMenu *subMenu;
+	//QActionGroup *group;
+	char stmp[64];
+	int tIdx, tx, ty;
+
+	convertXY2TableTile( event->pos().x(), event->pos().y(), &tIdx, &tx, &ty );
+
+	selTable = tIdx;
+	selTile.setX( tx );
+	selTile.setY( ty );
+
+	redrawtables = true;
+
+	sprintf( stmp, "Open Tile %X%X in PPU Viewer", selTile.x(), selTile.y() );
+	act = new QAction(tr(stmp), &menu);
+	act->setShortcut( QKeySequence(tr("V")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(openTilePpuViewer(void)) );
+	menu.addAction( act );
+
+	sprintf( stmp, "Open Tile Addr $%04X in Hex Editor", tileAddr );
+	act = new QAction(tr(stmp), &menu);
+	//act->setShortcut( QKeySequence(tr("H")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(openTileAddrHexEdit(void)) );
+	menu.addAction( act );
+
+	sprintf( stmp, "Open Attr Addr $%04X in Hex Editor", atrbAddr );
+	act = new QAction(tr(stmp), &menu);
+	//act->setShortcut( QKeySequence(tr("H")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(openAtrbAddrHexEdit(void)) );
+	menu.addAction( act );
+
+	sprintf( stmp, "Open PPU Addr $%04X in Hex Editor", ppuAddr );
+	act = new QAction(tr(stmp), &menu);
+	//act->setShortcut( QKeySequence(tr("H")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(openPpuAddrHexEdit(void)) );
+	menu.addAction( act );
+
+	menu.exec(event->globalPos());
+
+}
+//----------------------------------------------------
+void ppuNameTableView_t::openTilePpuViewer(void)
+{
+	openPPUViewWindow( consoleWindow );
+}
+//----------------------------------------------------
+void ppuNameTableView_t::openTileAddrHexEdit(void)
+{
+	hexEditorOpenFromDebugger( QHexEdit::MODE_NES_PPU, tileAddr );
+}
+//----------------------------------------------------
+void ppuNameTableView_t::openAtrbAddrHexEdit(void)
+{
+	hexEditorOpenFromDebugger( QHexEdit::MODE_NES_PPU, atrbAddr );
+}
+//----------------------------------------------------
+void ppuNameTableView_t::openPpuAddrHexEdit(void)
+{
+	hexEditorOpenFromDebugger( QHexEdit::MODE_NES_PPU, ppuAddr );
 }
 //----------------------------------------------------
 void ppuNameTableView_t::paintEvent(QPaintEvent *event)
@@ -1383,6 +1459,8 @@ inline void DrawChr( ppuNameTableTile_t *tile, const uint8_t *chr, int pal)
 	uint8 chr0, chr1;
 	//uint8 *table = &VPage[0][0]; //use the background table
 	//pbitmap += 3*
+	//
+	tile->pal  = pal;
 
 	for (y = 0; y < 8; y++) { //todo: use index for y?
 		chr0 = chr[index];
@@ -1470,6 +1548,8 @@ static void DrawNameTable(int scanline, int ntnum, bool invalidateCache)
 
 				const uint8* chrp = FCEUPPU_GetCHR(ptable+chr,refreshaddr);
 				if (attview) chrp = ATTRIBUTE_VIEW_TILE;
+
+				nameTable[ntnum].tile[y][x].pTbl = ptable;
 
 				//a good way to do it:
 				DrawChr( &nameTable[ntnum].tile[y][x], chrp, a);

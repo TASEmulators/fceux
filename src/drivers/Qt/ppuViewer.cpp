@@ -99,7 +99,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 
 	ppuViewWindow = this;
 
-   setWindowTitle( tr("PPU Viewer") );
+	setWindowTitle( tr("PPU Viewer") );
 
 	mainLayout = new QVBoxLayout();
 
@@ -191,11 +191,14 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 
 	connect( refreshSlider, SIGNAL(valueChanged(int)), this, SLOT(refreshSliderChanged(int)));
 
+	cycleCount  = 0;
+	PPUViewSkip = 100;
+	
 	FCEUD_UpdatePPUView( -1, 1 );
 
 	updateTimer  = new QTimer( this );
 
-   connect( updateTimer, &QTimer::timeout, this, &ppuViewerDialog_t::periodicUpdate );
+	connect( updateTimer, &QTimer::timeout, this, &ppuViewerDialog_t::periodicUpdate );
 
 	updateTimer->start( 33 ); // 30hz
 }
@@ -226,7 +229,9 @@ void ppuViewerDialog_t::closeWindow(void)
 //----------------------------------------------------
 void ppuViewerDialog_t::periodicUpdate(void)
 {
-	if ( redrawWindow )
+	cycleCount = (cycleCount + 1) % 30;
+
+	if ( redrawWindow || (cycleCount == 0) )
 	{
 		this->update();
 		redrawWindow = false;
@@ -382,7 +387,7 @@ void ppuPatternView_t::mouseMoveEvent(QMouseEvent *event)
 	   	sprintf( stmp, "Tile: $%X%X", tile.y(), tile.x() );
 	   	tileLabel->setText( tr(stmp) );
 
-         selTile = tile;
+		selTile = tile;
 	   }
 	}
 }
@@ -495,7 +500,7 @@ void ppuPatternView_t::exitTileMode(void)
 //----------------------------------------------------
 void ppuPatternView_t::openTileEditor(void)
 {
-   ppuTileEditor_t *tileEditor;
+	ppuTileEditor_t *tileEditor;
 
 	tileEditor = new ppuTileEditor_t( patternIndex, this );
 
@@ -506,7 +511,7 @@ void ppuPatternView_t::openTileEditor(void)
 //----------------------------------------------------
 void ppuPatternView_t::cycleNextPalette(void)
 {
-   pindex[ patternIndex ] = (pindex[ patternIndex ] + 1) % 9;
+	pindex[ patternIndex ] = (pindex[ patternIndex ] + 1) % 9;
 
 	PPUViewSkip = 100;
 
