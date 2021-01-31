@@ -45,6 +45,7 @@
 #include "Qt/dface.h"
 #include "Qt/input.h"
 #include "Qt/config.h"
+#include "Qt/HexEditor.h"
 #include "Qt/fceuWrapper.h"
 
 #define PATTERNWIDTH          128
@@ -362,7 +363,7 @@ void ppuPatternView_t::keyPressEvent(QKeyEvent *event)
 	}
 	else if ( event->key() == Qt::Key_E )
 	{
-	   openTileEditor();
+		openTileEditor();
 	}
 	else if ( event->key() == Qt::Key_P )
 	{
@@ -1261,6 +1262,7 @@ void ppuTileEditor_t::setCellValue( int y, int x, int colorIndex )
 	}
 	writeMemPPU( a+8, val );
 
+	hexEditorRequestUpdateAll();
 }
 //----------------------------------------------------
 void ppuTileEditor_t::showKeyAssignments(void)

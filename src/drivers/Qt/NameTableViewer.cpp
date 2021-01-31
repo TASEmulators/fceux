@@ -1218,9 +1218,9 @@ void ppuNameTableView_t::contextMenuEvent(QContextMenuEvent *event)
 {
 	QAction *act;
 	QMenu menu(this);
-	QMenu *subMenu;
+	//QMenu *subMenu;
 	//QActionGroup *group;
-	char stmp[64];
+	char stmp[128];
 	int tIdx, tx, ty;
 
 	convertXY2TableTile( event->pos().x(), event->pos().y(), &tIdx, &tx, &ty );
@@ -1233,7 +1233,7 @@ void ppuNameTableView_t::contextMenuEvent(QContextMenuEvent *event)
 
 	sprintf( stmp, "Open Tile %X%X in PPU Viewer", selTile.x(), selTile.y() );
 	act = new QAction(tr(stmp), &menu);
-	act->setShortcut( QKeySequence(tr("V")));
+	//act->setShortcut( QKeySequence(tr("V")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTilePpuViewer(void)) );
 	menu.addAction( act );
 

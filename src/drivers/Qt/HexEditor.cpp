@@ -409,7 +409,7 @@ memBlock_t::memBlock_t( void )
 {
 	buf = NULL;
 	_size = 0;
-   _maxLines = 0;
+	_maxLines = 0;
 	memAccessFunc = NULL;
 }
 //----------------------------------------------------------------------------
@@ -441,7 +441,7 @@ int memBlock_t::reAlloc( int newSize )
 		::free( buf ); buf = NULL;
 	}
 	_size = 0;
-   _maxLines = 0;
+	_maxLines = 0;
 
 	buf = (struct memByte_t *)malloc( newSize * sizeof(struct memByte_t) );
 
@@ -918,7 +918,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// File -> Close
 	closeAct = new QAction(tr("Close"), this);
-	//closeAct->setShortcuts(QKeySequence::Open);
+	closeAct->setShortcut(QKeySequence(tr("Esc")));
 	closeAct->setStatusTip(tr("Close Window"));
 	connect(closeAct, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 	
