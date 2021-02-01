@@ -1016,18 +1016,21 @@ int  ppuNameTableView_t::calcTableTileAddr( int NameTable, int TileX, int TileY 
 //----------------------------------------------------
 void ppuNameTableView_t::computeNameTableProperties( int NameTable, int TileX, int TileY )
 {
-	int TileID, PPUAddress, AttAddress, Attrib;
+	int TileID, PPUAddress, AttAddress, Attrib, ptable = 0;
 
 	if ( vnapage[0] == NULL )
 	{
 		return;
+	}
+	if (PPU[0]&0x10){ //use the correct pattern table based on this bit
+		ptable=0x1000;
 	}
 
 	ppuAddr = PPUAddress = 0x2000+(NameTable*0x400)+((TileY%30)*32)+(TileX%32);
 
 	TileID = vnapage[(PPUAddress>>10)&0x3][PPUAddress&0x3FF];
 
-	tileAddr = TileID << 4;
+	tileAddr = ptable | (TileID << 4);
 
 	atrbAddr = AttAddress = 0x23C0 | (PPUAddress & 0x0C00) | ((PPUAddress >> 4) & 0x38) | ((PPUAddress >> 2) & 0x07);
 
@@ -1231,7 +1234,7 @@ void ppuNameTableView_t::contextMenuEvent(QContextMenuEvent *event)
 
 	redrawtables = true;
 
-	sprintf( stmp, "Open Tile %X%X in PPU Viewer", selTile.x(), selTile.y() );
+	sprintf( stmp, "Open Tile $%04X in PPU Viewer", tileAddr );
 	act = new QAction(tr(stmp), &menu);
 	//act->setShortcut( QKeySequence(tr("V")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTilePpuViewer(void)) );
@@ -1261,7 +1264,18 @@ void ppuNameTableView_t::contextMenuEvent(QContextMenuEvent *event)
 //----------------------------------------------------
 void ppuNameTableView_t::openTilePpuViewer(void)
 {
+	int pTable,x,y;
+
+	pTable = tileAddr >= 0x1000;
+	y = (tileAddr & 0x0F00) >> 8;
+	x = (tileAddr & 0x00F0) >> 4;
+
 	openPPUViewWindow( consoleWindow );
+
+	//printf("TileAddr: %04X   %i,%X%X\n", tileAddr, pTable, x, y );
+
+	setPPUSelPatternTile(  pTable,  x,  y );
+	setPPUSelPatternTile( !pTable, -1, -1 );
 }
 //----------------------------------------------------
 void ppuNameTableView_t::openTileAddrHexEdit(void)
@@ -1549,7 +1563,8 @@ static void DrawNameTable(int scanline, int ntnum, bool invalidateCache)
 				const uint8* chrp = FCEUPPU_GetCHR(ptable+chr,refreshaddr);
 				if (attview) chrp = ATTRIBUTE_VIEW_TILE;
 
-				nameTable[ntnum].tile[y][x].pTbl = ptable;
+				nameTable[ntnum].tile[y][x].pTbl    = ptable;
+				nameTable[ntnum].tile[y][x].pTblAdr = ptable+chr;
 
 				//a good way to do it:
 				DrawChr( &nameTable[ntnum].tile[y][x], chrp, a);

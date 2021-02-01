@@ -30,6 +30,7 @@ struct ppuNameTableTile_t
 
 	int  x;
 	int  y;
+	int  pTblAdr;
 	int  pTbl;
 	int  pal;
 
@@ -38,6 +39,7 @@ struct ppuNameTableTile_t
 		x = y = 0;
 		pTbl  = 0;
 		pal   = 0;
+		pTblAdr = 0;
 	}
 };
 

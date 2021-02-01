@@ -47,8 +47,11 @@ class ppuPatternView_t : public QWidget
 		ppuPatternView_t( int patternIndex, QWidget *parent = 0);
 		~ppuPatternView_t(void);
 
+		void updateCycleCounter(void);
+		void updateSelTileLabel(void);
 		void setPattern( ppuPatternTable_t *p );
 		void setTileLabel( QLabel *l );
+		void setTileCoord( int x, int y );
 		QPoint convPixToTile( QPoint p );
 
 		bool getDrawTileGrid(void){ return drawTileGrid; };
@@ -65,6 +68,7 @@ class ppuPatternView_t : public QWidget
 		int patternIndex;
 		int viewWidth;
 		int viewHeight;
+		int cycleCount;
 		int mode;
 		bool drawTileGrid;
 		bool hover2Focus;
@@ -244,10 +248,9 @@ class ppuViewerDialog_t : public QDialog
 		ppuViewerDialog_t(QWidget *parent = 0);
 		~ppuViewerDialog_t(void);
 
-	protected:
-
 		ppuPatternView_t *patternView[2];
 		ppuPalatteView_t *paletteView;
+	protected:
 
 		void closeEvent(QCloseEvent *bar);
 	private:
@@ -275,4 +278,5 @@ class ppuViewerDialog_t : public QDialog
 };
 
 int openPPUViewWindow( QWidget *parent );
+void setPPUSelPatternTile( int table, int x, int y );
 
