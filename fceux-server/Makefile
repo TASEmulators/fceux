@@ -1,12 +1,12 @@
-PREFIX  = 	/usr
+PREFIX  ?= 	/usr
 OUTFILE = 	fceux-net-server
 
-CC	=	g++
+CXX	?=	g++
 OBJS	=	server.o md5.o throttle.o
 
 
 all:		${OBJS}
-		${CC} -o ${OUTFILE} ${OBJS}
+		${CXX} ${CXXFLAGS} -o ${OUTFILE} ${OBJS} ${LDFLAGS}
 
 clean:
 		rm -f ${OUTFILE} ${OBJS}
