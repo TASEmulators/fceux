@@ -116,7 +116,8 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	QVBoxLayout *patternVbox[2];
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
-	QMenu *viewMenu, *colorMenu;
+	QActionGroup *group;
+	QMenu *viewMenu, *colorMenu, *optMenu, *subMenu;
 	QAction *act;
 	char stmp[64];
 	int useNativeMenuBar;
@@ -296,6 +297,28 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	
 	colorMenu->addAction(act);
 
+	// Options
+	optMenu = menuBar->addMenu(tr("Options"));
+
+	// Options -> Focus
+	subMenu = optMenu->addMenu(tr("Focus Policy"));
+	group   = new QActionGroup(this);
+	group->setExclusive(true);
+
+	act = new QAction(tr("Click"), this);
+	act->setCheckable(true);
+	act->setChecked(true);
+	group->addAction(act);
+	subMenu->addAction(act);
+	connect(act, SIGNAL(triggered()), this, SLOT(setClickFocus(void)) );
+
+	act = new QAction(tr("Hover"), this);
+	act->setCheckable(true);
+	act->setChecked(false);
+	group->addAction(act);
+	subMenu->addAction(act);
+	connect(act, SIGNAL(triggered()), this, SLOT(setHoverFocus(void)) );
+
 	//-----------------------------------------------------------------------
 	// End Menu 
 	//-----------------------------------------------------------------------
@@ -372,6 +395,18 @@ void ppuViewerDialog_t::refreshSliderChanged(int value)
 	PPUViewRefresh = value;
 }
 //----------------------------------------------------
+void ppuViewerDialog_t::setClickFocus(void)
+{
+	patternView[0]->setHoverFocus(false);
+	patternView[1]->setHoverFocus(false);
+}
+//----------------------------------------------------
+void ppuViewerDialog_t::setHoverFocus(void)
+{
+	patternView[0]->setHoverFocus(true);
+	patternView[1]->setHoverFocus(true);
+}
+//----------------------------------------------------
 ppuPatternView_t::ppuPatternView_t( int patternIndexID, QWidget *parent)
 	: QWidget(parent)
 {
@@ -402,6 +437,11 @@ void ppuPatternView_t::setPattern( ppuPatternTable_t *p )
 void ppuPatternView_t::setTileLabel( QLabel *l )
 {
 	tileLabel = l;
+}
+//----------------------------------------------------
+void ppuPatternView_t::setHoverFocus( bool h )
+{
+	hover2Focus = h;
 }
 //----------------------------------------------------
 void ppuPatternView_t::setTileCoord( int x, int y )

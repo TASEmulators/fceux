@@ -52,6 +52,7 @@ class ppuPatternView_t : public QWidget
 		void setPattern( ppuPatternTable_t *p );
 		void setTileLabel( QLabel *l );
 		void setTileCoord( int x, int y );
+		void setHoverFocus( bool h );
 		QPoint convPixToTile( QPoint p );
 
 		bool getDrawTileGrid(void){ return drawTileGrid; };
@@ -275,6 +276,8 @@ class ppuViewerDialog_t : public QDialog
 		void sprite8x16Changed1(int state);
 		void refreshSliderChanged(int value);
 		void scanLineChanged( const QString &s );
+		void setClickFocus(void);
+		void setHoverFocus(void);
 };
 
 int openPPUViewWindow( QWidget *parent );
