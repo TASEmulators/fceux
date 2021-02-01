@@ -149,26 +149,28 @@ void UpdateOtherDebuggingDialogs()
 	PPUViewDoBlit();		//PPU Viewer
 }
 
-// owomomo: I don't understand why the debuggerIDAFont value must be added,
-// if someone knows, please comment here and tell me...
-#define DEBUGGER_DEFAULT_WIDTH 760 // + (debuggerIDAFont ? 64 : 0))
-#define DEBUGGER_DEFAULT_HEIGHT 590 //  + (debuggerIDAFont ? 2 : 0))
+#define DISASM_DEFAULT_WIDTH (debuggerIDAFont ? 540 : 470)
 
 #define DEBUGGER_MIN_HEIGHT_LEFT 120 // Minimum height for the left part
-#define DEBUGGER_MIN_HEIGHT_RIGHT  DEBUGGER_DEFAULT_HEIGHT // Minimun height for the right part.
+#define DEBUGGER_MIN_HEIGHT_RIGHT 590 // Minimun height for the right part.
 
 #define DEBUGGER_MIN_WIDTH 360 // Minimum width for debugger
-#define DEBUGGER_MIN_HEIGHT DEBUGGER_MIN_HEIGHT_LEFT  // Minimum height for debugger
+#define DEBUGGER_DEFAULT_HEIGHT 594 // default height for debugger
+// owomomo: default width of the debugger is depend on the default width of disasm view, so it's not defined here.
 
 void RestoreSize(HWND hwndDlg)
 {
 	HDC hdc = GetDC(hwndDlg);
-	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
-	const int DEFAULT_WIDTH = MulDiv(DEBUGGER_DEFAULT_WIDTH, GetDeviceCaps(hdc, LOGPIXELSX), 96);	//Original width
-	const int DEFAULT_HEIGHT = MulDiv(DEBUGGER_DEFAULT_HEIGHT, GetDeviceCaps(hdc, LOGPIXELSY), 96);	//Original height
+	RECT wndRect, disasmRect;
+	GetWindowRect(hwndDlg, &wndRect);
+	GetWindowRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &disasmRect);
+
+	int default_width = (disasmRect.left - wndRect.left) + DISASM_DEFAULT_WIDTH + (wndRect.right - disasmRect.right);
+	int default_height = MulDiv(DEBUGGER_DEFAULT_HEIGHT, GetDeviceCaps(hdc, LOGPIXELSY), 96);
+
 	ReleaseDC(hwndDlg, hdc);
 	
-	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
+	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,default_width,default_height,SWP_SHOWWINDOW);
 }
 
 unsigned int NewBreakWindows(HWND hwndDlg, unsigned int num, bool enable)
@@ -1870,7 +1872,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 			mouse_x = GET_X_LPARAM(lParam);
 			mouse_y = GET_Y_LPARAM(lParam);
 			
-			if(mouse_y<0 || mouse_x<0)
+			if(mouse_y < 0 || mouse_x < 0)
 				break;
 
 			tmp = mouse_y / debugSystem->disasmFontHeight;

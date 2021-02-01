@@ -529,7 +529,7 @@ void UpdateMemoryView(int draw_all)
 					// Single Byte highlight
 					// 1st nibble
 					SetBkColor(HDataDC, EditingText ? MKRGB(HexHlShdBack) : MKRGB(HexHlBack));
-					SetTextColor(HDataDC, EditingText ? RGB(255, 0, 0) : MKRGB(HexHlFore));
+					SetTextColor(HDataDC, EditingText ? MKRGB(HexHlShdFore) : MKRGB(HexHlFore));
 					str[0] = hex[(byteValue >> 4) & 0xF];
 					str[1] = 0;
 					ExtTextOut(HDataDC, MemLinePos, MemLineRow, NULL, NULL, str, 1, NULL);
