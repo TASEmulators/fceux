@@ -907,7 +907,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	fileMenu->addAction(saveROM);
 
 	// File -> Goto Address
-	gotoAddrAct = new QAction(tr("Goto Addresss"), this);
+	gotoAddrAct = new QAction(tr("Goto Address"), this);
 	gotoAddrAct->setShortcut(QKeySequence(tr("Ctrl+A")));
 	gotoAddrAct->setStatusTip(tr("Goto Address"));
 	connect(gotoAddrAct, SIGNAL(triggered()), this, SLOT(openGotoAddrDialog(void)) );
