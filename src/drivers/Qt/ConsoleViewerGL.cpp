@@ -28,6 +28,8 @@
 #include <QScreen>
 #include <QMouseEvent>
 
+#include <GL/gl.h>
+
 #include "Qt/nes_shm.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleViewerGL.h"
