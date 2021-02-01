@@ -116,34 +116,12 @@ extern int GGConv_wndx, GGConv_wndy;
 extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
 
+// owomomo: I'm tired to write those repeated words
+#define ACRGB(name) AC(name##Color##R), AC(name##Color##G), AC(name##Color##B)
+#define ACOPRGB(_OP) OPHEXRGB(_OP, _COMMA), OPCDLRGB(_OP, _COMMA), OPDBGRGB(_OP, _COMMA)
+extern COLORREF custom_color[];
+
 extern int HexRowHeightBorder;
-extern int HexBackColorR;
-extern int HexBackColorG;
-extern int HexBackColorB;
-extern int HexForeColorR;
-extern int HexForeColorG;
-extern int HexForeColorB;
-extern int HexHlBackColorR;
-extern int HexHlBackColorG;
-extern int HexHlBackColorB;
-extern int HexHlForeColorR;
-extern int HexHlForeColorG;
-extern int HexHlForeColorB;
-extern int HexFreezeColorR;
-extern int HexFreezeColorG;
-extern int HexFreezeColorB;
-extern int RomFreezeColorR;
-extern int RomFreezeColorG;
-extern int RomFreezeColorB;
-extern int HexBoundColorR;
-extern int HexBoundColorG;
-extern int HexBoundColorB;
-extern int HexHlShdBackColorR;
-extern int HexHlShdBackColorG;
-extern int HexHlShdBackColorB;
-extern int HexHlShdForeColorR;
-extern int HexHlShdForeColorG;
-extern int HexHlShdForeColorB;
 extern int importBookmarkProps;
 
 //adelikat:  Hacky fix for Ram Watch recent menu
@@ -457,34 +435,24 @@ static CFGSTRUCT fceuconfig[] =
 	AC(fullscreenByDoubleclick),
 	AC(CurrentState),
 	AC(HexRowHeightBorder),
-	AC(HexBackColorR),
-	AC(HexBackColorG),
-	AC(HexBackColorB),
-	AC(HexForeColorR),
-	AC(HexForeColorG),
-	AC(HexForeColorB),
-	AC(HexHlBackColorR),
-	AC(HexHlBackColorG),
-	AC(HexHlBackColorB),
-	AC(HexHlForeColorR),
-	AC(HexHlForeColorG),
-	AC(HexHlForeColorB),
-	AC(HexHlShdBackColorR),
-	AC(HexHlShdBackColorG),
-	AC(HexHlShdBackColorB),
-	AC(HexHlShdForeColorR),
-	AC(HexHlShdForeColorG),
-	AC(HexHlShdForeColorB),
-	AC(HexFreezeColorR),
-	AC(HexFreezeColorG),
-	AC(HexFreezeColorB),
-	AC(RomFreezeColorR),
-	AC(RomFreezeColorG),
-	AC(RomFreezeColorB),
-	AC(HexBoundColorR),
-	AC(HexBoundColorG),
-	AC(HexBoundColorB),
 	AC(importBookmarkProps),
+	ACOPRGB(ACRGB),
+	AC(custom_color[0]),
+	AC(custom_color[1]),
+	AC(custom_color[2]),
+	AC(custom_color[3]),
+	AC(custom_color[4]),
+	AC(custom_color[5]),
+	AC(custom_color[6]),
+	AC(custom_color[7]),
+	AC(custom_color[8]),
+	AC(custom_color[9]),
+	AC(custom_color[10]),
+	AC(custom_color[11]),
+	AC(custom_color[12]),
+	AC(custom_color[13]),
+	AC(custom_color[14]),
+	AC(custom_color[15]),
 	//ACS(memwLastfile[2048]),
 
 	AC(AutoRWLoad),

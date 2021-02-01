@@ -54,7 +54,7 @@ int SeparatorCache::sepOffY = 0;
 std::map<int, SeparatorCache> separatorCache;
 
 HWND RamWatchHWnd;
-#define gamefilename GetRomName()
+#define gamefilename GetRomName().c_str()
 #define hWnd hAppWnd
 #define hInst fceu_hInstance
 // static char Str_Tmp [1024];
@@ -367,8 +367,9 @@ void RWAddRecentFile(const char *filename)
 
 void OpenRWRecentFile(int memwRFileNumber)
 {
-	if(!ResetWatches())
+	if (!AskSaveRamWatch())
 		return;
+	ResetWatches();
 
 	int rnum = memwRFileNumber;
 	if ((unsigned int)rnum >= MAX_RECENT_WATCHES)
@@ -670,8 +671,6 @@ bool Load_Watches(bool clear)
 
 bool ResetWatches()
 {
-	if(!AskSaveRamWatch())
-		return false;
 	for (;WatchCount >= 0; WatchCount--)
 	{
 		free(rswatches[WatchCount].comment);
@@ -1334,6 +1333,8 @@ INT_PTR CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 				case RAMMENU_FILE_APPEND:
 					return Load_Watches(false);
 				case RAMMENU_FILE_NEW:
+					if (!AskSaveRamWatch())
+						return true;
 					ResetWatches();
 					return true;
 				case IDC_C_WATCH_REMOVE:

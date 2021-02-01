@@ -21,7 +21,6 @@
 #include "common.h"
 #include "utils/xstring.h"
 #include "debuggersp.h"
-#include "debugger.h"
 #include "../../fceu.h"
 #include "../../debug.h"
 #include "../../conddebug.h"

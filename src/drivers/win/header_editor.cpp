@@ -1806,7 +1806,7 @@ bool GetComboBoxListItemData(HWND hwnd, UINT id, int* value, char* buf, iNES_HEA
 // Warning: when in save mode, the content of buf might be overwritten by the save filename which user changed.
 bool ShowINESFileBox(HWND parent, char* buf, iNES_HEADER* header)
 {
-	char *filename = NULL, *path = NULL;
+	char filename[2048] = { 0 }, path[2048] = { 0 };
 	bool success = true;
 
 	if (header)
@@ -1814,24 +1814,23 @@ bool ShowINESFileBox(HWND parent, char* buf, iNES_HEADER* header)
 		// When open this dialog for saving prpose, the buf must be a separate buf.
 		if (buf && buf != LoadedRomFName)
 		{
-			extern char* GetRomName(bool force = false);
-			extern char* GetRomPath(bool force = false);
-			filename = GetRomName(true);
+			extern std::string GetRomName(bool force = false);
+			extern std::string GetRomPath(bool force = false);
+			strcpy(filename, GetRomName(true).c_str());
 			char* second = strchr(filename, '|');
 			if (second)
 			{
-				char* _filename = (char*)calloc(1, 2048);
+				char _filename[2048];
 				strcpy(_filename, second + 1);
 				char* third = strrchr(filename, '\\');
 				if (third)
 					strcpy(_filename, third + 1);
-				free(filename);
-				filename = _filename;
+				strcpy(filename, _filename);
 			}
 			char header_str[32];
 			sprintf(header_str, " [%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X].nes", header->ROM_size, header->VROM_size, header->ROM_size, header->ROM_type2, header->ROM_type3, header->Upper_ROM_VROM_size, header->RAM_size, header->VRAM_size, header->TV_system, header->VS_hardware, header->reserved[0], header->reserved[1]);
 			strcat(filename, header_str);
-			path = GetRomPath(true);
+			strcpy(path, GetRomPath(true).c_str());
 		}
 		else
 			success = false;
@@ -1839,8 +1838,6 @@ bool ShowINESFileBox(HWND parent, char* buf, iNES_HEADER* header)
 	else {
 		if (!buf)
 			buf = LoadedRomFName;
-		filename = (char*)calloc(1, 2048);
-		path = (char*)calloc(1, 2048);
 	}
 
 	if (success)
@@ -1863,9 +1860,6 @@ bool ShowINESFileBox(HWND parent, char* buf, iNES_HEADER* header)
 		else
 			success = false;
 	}
-
-	if (filename) free(filename);
-	if (path) free(path);
 
 	return success;
 }

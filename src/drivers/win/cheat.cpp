@@ -22,7 +22,6 @@
 #include "cheat.h"
 #include "memview.h"
 #include "memwatch.h"
-#include "debugger.h"
 #include "ramwatch.h"
 #include "../../fceu.h"
 #include "../../cart.h"
@@ -401,6 +400,7 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		case WM_QUIT:
 		case WM_CLOSE:
 			DestroyWindow(hCheatTip);
+			DestroyMenu(hCheatcontext);
 			if (CheatStyle)
 				DestroyWindow(hwndDlg);
 			else

@@ -418,6 +418,7 @@
 #define IDC_DEBUGGER_VAL_SPR            311
 #define IDC_BTN_CHEAT_ADDFROMFILE       311
 #define IDC_DEBUGGER_BOOKMARK           312
+#define DEBUGGERMENU                    312
 #define IDC_DEBUGGER_CYCLES_EXCEED      313
 #define IDC_DEBUGGER_INSTRUCTIONS_EXCEED 314
 #define MENU_DIRECTORIES                320
@@ -431,6 +432,7 @@
 #define IDC_CHEAT_CHECK_NE_BY           401
 #define IDC_WINSIZE_MUL_Y               401
 #define CHECK_ENABLE_FOURSCORE          401
+#define IDC_DEBUGGER_STATUSFLAGS        401
 #define IDC_CHEAT_CHECK_GT_BY           402
 #define IDC_FORCE_INT_VIDEO_SCALARS     402
 #define IDC_DEBUGGER_BREAKPOINTS        402
@@ -592,14 +594,20 @@
 #define MW_ADDR14                       1043
 #define IDC_SYSTEM_EXTEND_COMBO         1043
 #define MW_VAL14                        1044
+#define IDC_DEBUGGER_TEXT_SLINE         1044
 #define MW_NAME15                       1045
+#define IDC_DEBUGGER_TEXT_PPUPIXEL      1045
 #define MW_ADDR15                       1046
 #define IDC_VS_SYSTEM_COMBO             1046
+#define IDC_DEBUGGER_TEXT_CYCLES_COUNT  1046
 #define IDC_VS_PPU_COMBO                1047
 #define MW_VAL15                        1047
+#define IDC_DEBUGGER_TEXT_INSTRUCTIONS_COUNT 1047
 #define MW_NAME16                       1048
+#define IDC_DEBUGGER_VAL_S3             1048
 #define MW_ADDR16                       1049
 #define IDC_MAPPER_TEXT                 1049
+#define IDC_DEBUGGER_TEXT_A             1049
 #define IDC_SUBMAPPER_TEXT              1050
 #define MW_VAL16                        1050
 #define IDC_PRGROM_TEXT                 1051
@@ -751,7 +759,6 @@
 #define MEMW_EDIT01RMADDRESS            1189
 #define MEMW_EDIT02RMADDRESS            1190
 #define MEMW_EDIT03RMADDRESS            1191
-#define IDC_DEBUGGER_RESTORESIZE        1191
 #define IDC_MOVIE_CLOSE                 1192
 #define EDIT00_RESULTS                  1193
 #define IDC_MOVIE_PAUSEAFTERPLAYBACK    1193
@@ -914,6 +921,9 @@
 #define ID_BOOKMARKS_SAVEAS             40006
 #define ID_BOOKMARKS_OPTION             40007
 #define ID_BOOKMARKS_EXPORT             40008
+#define ID_HEXEDITOR_DEFCOLOR           40009
+#define ID_CDLOGGER_DEFCOLOR            40010
+#define ID_DEBUGGER_DEFCOLOR            40011
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1197,21 +1207,27 @@
 #define CHEAT_CONTEXT_POSSI_ADDTOMEMORYWATCH 40600
 #define CHEAT_CONTEXT_POSSI_ADDCHEAT    40601
 #define CHEAT_CONTEXT_POSSI_ADDTORAMWATCH 40603
+#define IDC_DEBUGGER_BOOKMARKS          45535
 #define MW_VALUELABEL2                  65423
 #define MW_VALUELABEL1                  65426
 #define IDC_STATIC_SLASHTEXT            65442
+#define IDC_DEBUGGER_TEXT_SPR           65530
+#define IDC_DEBUGGER_TEXT_PPU           65531
 #define IDC_BOOKMARK_NAME_TEXT          65532
+#define IDC_DEBUGGER_TEXT_PC            65532
 #define IDC_BOOKMARK_ADDRESS_TEXT       65533
+#define IDC_DEBUGGER_TEXT_Y             65533
 #define IDC_NTVIEW_SCANLINE_TEXT        65534
 #define IDC_BOOKMARK_SHORTCUT_PREFIX_TEXT 65534
+#define IDC_DEBUGGER_TEXT_X             65534
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        312
-#define _APS_NEXT_COMMAND_VALUE         40009
-#define _APS_NEXT_CONTROL_VALUE         1043
+#define _APS_NEXT_RESOURCE_VALUE        313
+#define _APS_NEXT_COMMAND_VALUE         40012
+#define _APS_NEXT_CONTROL_VALUE         1050
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
