@@ -576,7 +576,7 @@ Config::parse(int argc,
 						
 			// TODO  0 = good -1 = bad
 			std::string fname = cfgd_dir_name + dir->d_name;
-			printf("Loading auxilary configuration file at %s...\n", fname.c_str());
+			printf("Loading auxiliary configuration file at %s...\n", fname.c_str());
 			if (_loadFile(fname.c_str()) != 0)
 			{
 				printf("Failed to parse configuration at %s\n", fname.c_str());

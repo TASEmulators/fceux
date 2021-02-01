@@ -1904,12 +1904,12 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 		int misc_roms = 0;
 		if (sscanf(buf, "%d", &misc_roms) < 1)
 		{
-			showErrorMsgWindow("Invalid miscellanous ROM(s) count. If you don't know what value should be, we recommend to set it to 0.");
+			showErrorMsgWindow("Invalid miscellaneous ROM(s) count. If you don't know what value should be, we recommend to set it to 0.");
 			return false;
 		}
 		if (misc_roms > 3)
 		{
-			showErrorMsgWindow("Miscellanous ROM(s) count has exceeded the limit of iNES 2.0 (3)");
+			showErrorMsgWindow("Miscellaneous ROM(s) count has exceeded the limit of iNES 2.0 (3)");
 			return false;
 		}
 		_header.reserved[0] |= misc_roms & 3;
