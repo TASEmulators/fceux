@@ -1,58 +1,74 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
 .\" (C) Copyright 2012 Joe Nahmias <jello@debian.org>
-.Dd November 19, 2014
-.Dt FCEUX-NET-SERVER 6
-.Os
-.Sh NAME
-.Nm fceux-net-server
-.Nd FCEUX game server
-.Sh SYNOPSIS
-.Nm fceux-net-server
-.Op Cm options
-.Sh DESCRIPTION
+.\"
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH FCEUX-NET-SERVER 6 "October 12, 2012"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+fceux-net-server \- FCE Ultra game server
+.SH SYNOPSIS
+.B fceux-net-server
+.RI [ options ]
+.SH DESCRIPTION
 This manual page documents briefly the
-.Nm
+.B fceux-net-server
 command.
-.Pp
-.Nm
-is the game server for multiplayer use of the
-.Xr fceux 6
-family of NES emulators.
-This server will first look in
-.Pa /etc/fceux-server.conf
-for options.
-If that file does not exist, it will use the defaults given here.
-Any argument given directly will override any default values.
-.Sh OPTIONS
-The options are as follows:
-.Bl -tag -width Ds
-.It Fl h , Fl -help
+.PP
+\fBfceux-net-server\fP is the game server for multiplayer use of the FCE Ultra
+family of NES emulators.  This server will first look in
+\fI/etc/fceux-server.conf\fP for options.  If that file does not exist, it will
+use the defaults given here.  Any argument given directly will override any
+default values.
+.SH OPTIONS
+These programs follow the usual GNU command line syntax, with long
+options starting with two dashes (`-').
+A summary of options is included below.
+.TP
+.B \-h, \-\-help
 Displays a help message.
-.It Fl v , Fl -version
+.TP
+.B \-v, \-\-version
 Displays the version number and quits.
-.It Fl p Ar port , Fl -port Ar port
-Starts server on given port; the default is 4046.
-.It Fl w Ar password , Fl -password Ar password
+.TP
+.B \-p, \-\-port
+Starts server on given port (default = \fI4046\fP).
+.TP
+.B \-w, \-\-password
 Specifies a password for entry.
-.It Fl m Ar num , Fl -maxclients Ar num
-Specifies the maximum number of clients allowed to access the server;
-the default is 100.
-.It Fl t Ar timeout , Fl -timeout Ar timeout
-Specifies the number of seconds before the server times out; the default is 5.
-.It Fl f Ar divisor , Fl -framedivisor Ar divisor
+.TP
+.B \-m, \-\-maxclients
+Specifies the maximum number of clients allowed to access the
+server (default = \fI100\fP).
+.TP
+.B \-t, \-\-timeout
+Specifies the number of seconds before the server times out (default = \fI5\fP).
+.TP
+.B \-f, \-\-framedivisor
 Specifies frame divisor, which controls the number of updates sent to client;
-calculated as: 60 \(di framedivisor = updates per second.
-The default is 1.
-.It Fl c Ar file , Fl -configfile Ar file
-Loads the given configuration file.
-The default is
-.Pa /etc/fceux-server.conf .
-.El
-.Sh SEE ALSO
-.Xr fceux 6
-.Pp
-.Lk http://fceux.com/ "The FCEUX homepage" .
-.Sh AUTHORS
-.An -nosplit
-This manual page was written by
-.An Joe Nahmias  Aq Mt jello@debian.org
+calculated as: 60 / framedivisor = updates per second (default = \fI1\fP).
+.TP
+.B \-c, \-\-configfile
+Loads the given configuration file (default = \fI/etc/fceux\-server.conf\fP).
+.SH SEE ALSO
+.BR fceux (6),
+The
+.B FCEUX
+project homepage
+.RI < http://fceux.com/ >.
+.SH AUTHOR
+This manual page was written by Joe Nahmias <jello@debian.org>
 for the Debian GNU/Linux system (but may be used by others).
+
