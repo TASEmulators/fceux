@@ -581,15 +581,32 @@ void ppuPatternView_t::keyPressEvent(QKeyEvent *event)
 	}
 	else if ( event->key() == Qt::Key_Up )
 	{
-		int y;
+		int x, y;
 
 		y = selTile.y();
+		x = selTile.x();
 
-		y--;
+		if ( PPUView_sprite16Mode[ patternIndex ] )
+		{
+			if ( (x % 2) == 0 )
+			{
+				y -= 2;
+				x++;
+			}
+			else
+			{
+				x--;
+			}
+		}
+		else
+		{
+			y--;
+		}
 		if ( y < 0 )
 		{
-			y = 15;
+			y += 16;
 		}
+		selTile.setX(x);
 		selTile.setY(y);
 
 		cycleCount = 0;
@@ -600,15 +617,32 @@ void ppuPatternView_t::keyPressEvent(QKeyEvent *event)
 	}
 	else if ( event->key() == Qt::Key_Down )
 	{
-		int y;
+		int x,y;
 
 		y = selTile.y();
+		x = selTile.x();
 
-		y++;
+		if ( PPUView_sprite16Mode[ patternIndex ] )
+		{
+			if ( (x % 2) )
+			{
+				y += 2;
+				x--;
+			}
+			else
+			{
+				x++;
+			}
+		}
+		else
+		{
+			y++;
+		}
 		if ( y >= 16 )
 		{
 			y = 0;
 		}
+		selTile.setX(x);
 		selTile.setY(y);
 
 		cycleCount = 0;
@@ -619,16 +653,38 @@ void ppuPatternView_t::keyPressEvent(QKeyEvent *event)
 	}
 	else if ( event->key() == Qt::Key_Left )
 	{
-		int x;
+		int x,y;
 
 		x = selTile.x();
+		y = selTile.y();
 
-		x--;
+		if ( PPUView_sprite16Mode[ patternIndex ] )
+		{
+			x -= 2;
+
+			if ( x < 0 )
+			{
+				if ( y % 2 )
+				{
+					y--;
+				}
+				else
+				{
+					y++;
+				}
+				x += 16;
+			}
+		}
+		else
+		{
+			x--;
+		}
 		if ( x < 0 )
 		{
 			x = 15;
 		}
 		selTile.setX(x);
+		selTile.setY(y);
 
 		cycleCount = 0;
 
@@ -638,16 +694,45 @@ void ppuPatternView_t::keyPressEvent(QKeyEvent *event)
 	}
 	else if ( event->key() == Qt::Key_Right )
 	{
-		int x;
+		int x,y;
 
 		x = selTile.x();
+		y = selTile.y();
 
-		x++;
+		if ( PPUView_sprite16Mode[ patternIndex ] )
+		{
+			x += 2;
+
+			if ( x >= 16 )
+			{
+				if ( y % 2 )
+				{
+					y--;
+				}
+				else
+				{
+					y++;
+				}
+				if ( x % 2 )
+				{
+					x = 1;
+				}
+				else
+				{
+					x = 0;
+				}
+			}
+		}
+		else
+		{
+			x++;
+		}
 		if ( x >= 16 )
 		{
 			x = 0;
 		}
 		selTile.setX(x);
+		selTile.setY(y);
 
 		cycleCount = 0;
 
