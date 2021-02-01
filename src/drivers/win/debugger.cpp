@@ -983,6 +983,21 @@ void UpdateBreakpointsCaption()
 	SetDlgItemText(hDebug, IDC_DEBUGGER_BREAKPOINTS, str);
 }
 
+int GetDebuggerLineHeight(HWND hwnd)
+{
+	FINDTEXT _newline = newline;
+	_newline.chrg.cpMin = 0;
+	_newline.chrg.cpMax = -1;
+	_newline.chrg.cpMin = SendDlgItemMessage(hwnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, FR_DOWN, (LPARAM)&_newline) + 1;
+	_newline.chrg.cpMax = SendDlgItemMessage(hwnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, FR_DOWN, (LPARAM)&_newline) + 1;
+
+	POINT line1, line2;
+	SendDlgItemMessage(hwnd, IDC_DEBUGGER_DISASSEMBLY, EM_POSFROMCHAR, (WPARAM)&line1, _newline.chrg.cpMin);
+	SendDlgItemMessage(hwnd, IDC_DEBUGGER_DISASSEMBLY, EM_POSFROMCHAR, (WPARAM)&line2, _newline.chrg.cpMax);
+
+	return line2.y - line1.y;
+}
+
 void UpdateDebugger(bool jump_to_pc)
 {
 	//don't do anything if the debugger is not visible
@@ -1986,7 +2001,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			SetScrollInfo(GetDlgItem(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si,TRUE);
 
 			//setup font
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY,WM_SETFONT,(WPARAM)debugSystem->hDisasmFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_X,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
@@ -2036,6 +2050,15 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 			// prevent the font of the edit control from screwing up when it contains MBC or characters not contained the current font.
 			SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETLANGOPTIONS, 0, SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_GETLANGOPTIONS, 0, 0) & ~IMF_AUTOFONT);
+
+			SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
+			/* owomomo: calculate the actural line height of the disassembly view. 
+			   the font height is not always equals to the line height in rich edit control.
+			   Maybe it's occasionally the same on your operating system, but it can mess up
+			   the mouse identifying especially using IDA font.
+			 */
+			SetDlgItemText(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, "\r\n\r\n\r\n");
+			debugSystem->disasmFontHeight = GetDebuggerLineHeight(hwndDlg);
 
 			// subclass editfield
 			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWLP_WNDPROC, (LONG_PTR)IDC_DEBUGGER_DISASSEMBLY_WndProc);
@@ -2140,8 +2163,8 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						case DEBUGIDAFONT:
 							debuggerIDAFont ^= 1;
 							debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
-							debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
 							SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
+							debugSystem->disasmFontHeight = GetDebuggerLineHeight(hwndDlg);
 							UpdateDebugger(false);
 							break;
 						case IDC_DEBUGGER_CYCLES_EXCEED:
