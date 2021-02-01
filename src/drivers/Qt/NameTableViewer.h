@@ -16,6 +16,7 @@
 #include <QSlider>
 #include <QLineEdit>
 #include <QGroupBox>
+#include <QScrollArea>
 #include <QCloseEvent>
 
 struct  ppuNameTablePixel_t
@@ -29,6 +30,17 @@ struct ppuNameTableTile_t
 
 	int  x;
 	int  y;
+	int  pTblAdr;
+	int  pTbl;
+	int  pal;
+
+	ppuNameTableTile_t(void)
+	{
+		x = y = 0;
+		pTbl  = 0;
+		pal   = 0;
+		pTblAdr = 0;
+	}
 };
 
 struct ppuNameTable_t
@@ -39,6 +51,12 @@ struct ppuNameTable_t
 	int  y;
 	int  w;
 	int  h;
+
+	ppuNameTable_t(void)
+	{
+		x = y = 0;
+		w = h = 8;
+	}
 };
 
 class ppuNameTableViewerDialog_t;
@@ -51,16 +69,72 @@ class ppuNameTableView_t : public QWidget
 		ppuNameTableView_t( QWidget *parent = 0);
 		~ppuNameTableView_t(void);
 
+		void setViewScale( int reqScale );
+		int  getViewScale( void ){ return viewScale; };
+
+		void setScrollPointer( QScrollArea *sa );
+		void setHoverFocus( bool hoverFocus );
+		bool getHoverFocus( void ){ return hover2Focus; };
+
+		int     getSelTable(void){ return selTable; };
+		QPoint  getSelTile(void){ return selTile; };
+
+		QColor tileSelColor;
+		QColor tileGridColor;
+		QColor attrGridColor;
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
+		void keyPressEvent(QKeyEvent *event);
 		void mouseMoveEvent(QMouseEvent *event);
 		void mousePressEvent(QMouseEvent * event);
-		void computeNameTableProperties( int x, int y );
+		void contextMenuEvent(QContextMenuEvent *event);
+		void computeNameTableProperties( int NameTable, int TileX, int TileY );
+		int  convertXY2TableTile( int x, int y, int *tableIdxOut, int *tileXout, int *tileYout );
+		int  calcTableTileAddr( int table, int tileX, int tileY );
 
 		ppuNameTableViewerDialog_t *parent;
 		int viewWidth;
 		int viewHeight;
+		int viewScale;
+		int ppuAddr;
+		int atrbAddr;
+		int tileAddr;
+		int palAddr;
+		int selTable;
+		QPoint selTile;
+		QPoint selTileLoc;
+		QRect  viewRect;
+		QScrollArea  *scrollArea;
+
+		bool  ensureVis;
+		bool  hover2Focus;
+	private slots:
+		void openTilePpuViewer(void);
+		void openPpuAddrHexEdit(void);
+		void openTileAddrHexEdit(void);
+		void openAtrbAddrHexEdit(void);
+};
+
+class ppuNameTableTileView_t : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		ppuNameTableTileView_t( QWidget *parent = 0);
+		~ppuNameTableTileView_t(void);
+
+		void setTile( int table, int x, int y );
+
+	protected:
+		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+
+		int viewWidth;
+		int viewHeight;
+		int selTable;
+		int tileX;
+		int tileY;
 };
 
 class ppuNameTableViewerDialog_t : public QDialog
@@ -71,43 +145,75 @@ class ppuNameTableViewerDialog_t : public QDialog
 		ppuNameTableViewerDialog_t(QWidget *parent = 0);
 		~ppuNameTableViewerDialog_t(void);
 
-		void setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib );
+		void setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib, int palAddr );
 	protected:
 		void closeEvent(QCloseEvent *bar);
 
+		void openColorPicker( QColor *c );
+		void changeRate( int divider );
+
 		ppuNameTableView_t *ntView;
+		ppuNameTableTileView_t *selTileView;
+		QScrollArea *scrollArea;
 		QCheckBox *showScrollLineCbox;
+		QCheckBox *showTileGridCbox;
+		QCheckBox *showAttrGridCbox;
 		QCheckBox *showAttrbCbox;
 		QCheckBox *ignorePaletteCbox;
-		QSlider   *refreshSlider;
 		QLineEdit *scanLineEdit;
 		QTimer    *updateTimer;
-		QRadioButton *horzMirrorBtn;
-		QRadioButton *vertMirrorBtn;
-		QRadioButton *fourScreenBtn;
-		QRadioButton *singleScreenBtn[4];
-		QLabel *tileID;
-		QLabel *tileXY;
-		QLabel *ppuAddrLbl;
-		QLabel *attrbLbl;
+		QLineEdit *ppuAddrLbl;
+		QLineEdit *nameTableLbl;
+		QLineEdit *tileLocLbl;
+		QLineEdit *tileIdxLbl;
+		QLineEdit *tileAddrLbl;
+		QLineEdit *attrDataLbl;
+		QLineEdit *attrAddrLbl;
+		QLineEdit *palAddrLbl;
+		QAction *showScrollLineAct;
+		QAction *showTileGridAct;
+		QAction *showAttrGridAct;
+		QAction *showAttributesAct;
+		QAction *ignPalAct;
+		QAction *zoomAct[4];
+		QAction *rateAct[5];
+		QAction *focusAct[2];
+		QLabel  *mirrorLbl;
+
+		int      cycleCount;
 
 	public slots:
-      void closeWindow(void);
+		void closeWindow(void);
+		void refreshMenuSelections(void);
 	private slots:
 		void periodicUpdate(void);
-		void updateMirrorButtons(void);
-		void horzMirrorClicked(void);
-		void vertMirrorClicked(void);
-		void fourScreenClicked(void);
-		void singleScreen0Clicked(void);
-		void singleScreen1Clicked(void);
-		void singleScreen2Clicked(void);
-		void singleScreen3Clicked(void);
+		void updateMirrorText(void);
 		void showAttrbChanged(int state);
 		void ignorePaletteChanged(int state);
+		void showTileGridChanged(int state);
+		void showAttrGridChanged(int state);
 		void showScrollLinesChanged(int state);
-		void refreshSliderChanged(int value);
 		void scanLineChanged( const QString &txt );
+		void menuScrollLinesChanged( bool checked ); 
+		void menuTileGridLinesChanged( bool checked ); 
+		void menuAttrGridLinesChanged( bool checked ); 
+		void menuAttributesChanged( bool checked );
+		void menuIgnPalChanged( bool checked );
+		void setTileSelectorColor(void);
+		void setTileGridColor(void);
+		void setAttrGridColor(void);
+		void setClickFocus(void);
+		void setHoverFocus(void);
+		void changeZoom1x(void);
+		void changeZoom2x(void);
+		void changeZoom3x(void);
+		void changeZoom4x(void);
+		void changeRate1(void);
+		void changeRate2(void);
+		void changeRate4(void);
+		void changeRate8(void);
+		void changeRate16(void);
+		void forceRefresh(void);
 };
 
 int openNameTableViewWindow( QWidget *parent );

@@ -1,4 +1,23 @@
-// HotKeyConf.cpp
+/* FCE Ultra - NES/Famicom Emulator
+ *
+ * Copyright notice for this file:
+ *  Copyright (C) 2020 mjbudd77
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+// iNesHeaderEditor.cpp
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -1885,12 +1904,12 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 		int misc_roms = 0;
 		if (sscanf(buf, "%d", &misc_roms) < 1)
 		{
-			showErrorMsgWindow("Invalid miscellanous ROM(s) count. If you don't know what value should be, we recommend to set it to 0.");
+			showErrorMsgWindow("Invalid miscellaneous ROM(s) count. If you don't know what value should be, we recommend to set it to 0.");
 			return false;
 		}
 		if (misc_roms > 3)
 		{
-			showErrorMsgWindow("Miscellanous ROM(s) count has exceeded the limit of iNES 2.0 (3)");
+			showErrorMsgWindow("Miscellaneous ROM(s) count has exceeded the limit of iNES 2.0 (3)");
 			return false;
 		}
 		_header.reserved[0] |= misc_roms & 3;

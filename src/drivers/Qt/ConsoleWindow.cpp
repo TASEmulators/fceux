@@ -1,4 +1,23 @@
-// GameApp.cpp
+/* FCE Ultra - NES/Famicom Emulator
+ *
+ * Copyright notice for this file:
+ *  Copyright (C) 2020 mjbudd77
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+// ConsoleWindow.cpp
 //
 #if defined(__linux__) || defined(__unix__)
 #include <unistd.h>
@@ -63,11 +82,17 @@
 consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
-	int opt;
+	int opt, xWinSize = 512, yWinSize = 512;
 	int use_SDL_video = false;
-   int setFullScreen = false;
+	int setFullScreen = false;
 
-	this->resize( 512, 512 );
+	g_config->getOption( "SDL.WinSizeX", &xWinSize );
+	g_config->getOption( "SDL.WinSizeY", &yWinSize );
+
+	if ( xWinSize < 256 ) xWinSize = 256;
+	if ( yWinSize < 256 ) yWinSize = 256;
+
+	this->resize( xWinSize, yWinSize );
 
 	g_config->getOption( "SDL.Fullscreen", &setFullScreen );
 	g_config->setOption( "SDL.Fullscreen", 0 ); // Reset full screen config parameter to false so it is never saved this way
@@ -100,13 +125,13 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	}
 
 	setWindowTitle( tr(FCEU_NAME_AND_VERSION) );
-   setWindowIcon(QIcon(":fceux1.png"));
+	setWindowIcon(QIcon(":fceux1.png"));
 
 	gameTimer  = new QTimer( this );
 	mutex      = new QMutex( QMutex::Recursive );
 	emulatorThread = new emulatorThread_t();
 
-   connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
+	connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
 
 	connect( gameTimer, &QTimer::timeout, this, &consoleWin_t::updatePeriodic );
 
@@ -133,8 +158,27 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 consoleWin_t::~consoleWin_t(void)
 {
+	QSize w;
 	QClipboard *clipboard;
 
+	// Save window size and image scaling parameters at app exit.
+	w = consoleWindow->size();
+
+	if ( viewport_GL != NULL )
+	{
+		g_config->setOption( "SDL.XScale", viewport_GL->getScaleX() );
+		g_config->setOption( "SDL.YScale", viewport_GL->getScaleY() );
+	}
+	else if ( viewport_SDL != NULL )
+	{
+		g_config->setOption( "SDL.XScale", viewport_SDL->getScaleX() );
+		g_config->setOption( "SDL.YScale", viewport_SDL->getScaleY() );
+	}
+	g_config->setOption( "SDL.WinSizeX", w.width() );
+	g_config->setOption( "SDL.WinSizeY", w.height() );
+	g_config->save();
+
+	// Signal Emulator Thread to Stop
 	nes_shm->runEmulator = 0;
 
 	gameTimer->stop(); 

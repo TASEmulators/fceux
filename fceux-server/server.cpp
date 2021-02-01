@@ -753,7 +753,7 @@ int main(int argc, char *argv[])
 			i++;
 			if(argc == i)
 			{
-				printf("Please specify the maximium ammount of clients.\n");
+				printf("Please specify the maximium amount of clients.\n");
 				return -1;
 			}
 			ServerConfig.MaxClients = atoi(argv[i]);
@@ -764,7 +764,7 @@ int main(int argc, char *argv[])
 			i++;
 			if(argc == i)
 			{
-				printf("Please specify the conenction timeout time in seconds.\n");
+				printf("Please specify the connection timeout time in seconds.\n");
 				return -1;
 			}
 			ServerConfig.ConnectTimeout = atoi(argv[i]);

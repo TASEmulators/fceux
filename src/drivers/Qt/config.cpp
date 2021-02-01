@@ -1,3 +1,22 @@
+/* FCE Ultra - NES/Famicom Emulator
+ *
+ * Copyright notice for this file:
+ *  Copyright (C) 2020 mjbudd77
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 #include "Qt/main.h"
 #include "Qt/throttle.h"
 #include "Qt/config.h"
@@ -206,11 +225,13 @@ InitConfig()
 	config->addOption('y', "yres", "SDL.YResolution", 0);
 	config->addOption("SDL.LastXRes", 0);
 	config->addOption("SDL.LastYRes", 0);
+	config->addOption("SDL.WinSizeX", 512);
+	config->addOption("SDL.WinSizeY", 512);
 	config->addOption("doublebuf", "SDL.DoubleBuffering", 1);
 	config->addOption("autoscale", "SDL.AutoScale", 1);
 	config->addOption("keepratio", "SDL.KeepRatio", 1);
-	config->addOption("xscale", "SDL.XScale", 1.0);
-	config->addOption("yscale", "SDL.YScale", 1.0);
+	config->addOption("xscale", "SDL.XScale", 2.0);
+	config->addOption("yscale", "SDL.YScale", 2.0);
 	config->addOption("xstretch", "SDL.XStretch", 0);
 	config->addOption("ystretch", "SDL.YStretch", 0);
 	config->addOption("noframe", "SDL.NoFrame", 0);

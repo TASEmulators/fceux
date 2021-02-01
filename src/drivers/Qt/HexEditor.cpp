@@ -1,4 +1,23 @@
-// HotKeyConf.cpp
+/* FCE Ultra - NES/Famicom Emulator
+ *
+ * Copyright notice for this file:
+ *  Copyright (C) 2020 mjbudd77
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+// HexEditor.cpp
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -390,7 +409,7 @@ memBlock_t::memBlock_t( void )
 {
 	buf = NULL;
 	_size = 0;
-   _maxLines = 0;
+	_maxLines = 0;
 	memAccessFunc = NULL;
 }
 //----------------------------------------------------------------------------
@@ -422,7 +441,7 @@ int memBlock_t::reAlloc( int newSize )
 		::free( buf ); buf = NULL;
 	}
 	_size = 0;
-   _maxLines = 0;
+	_maxLines = 0;
 
 	buf = (struct memByte_t *)malloc( newSize * sizeof(struct memByte_t) );
 
@@ -888,7 +907,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	fileMenu->addAction(saveROM);
 
 	// File -> Goto Address
-	gotoAddrAct = new QAction(tr("Goto Addresss"), this);
+	gotoAddrAct = new QAction(tr("Goto Address"), this);
 	gotoAddrAct->setShortcut(QKeySequence(tr("Ctrl+A")));
 	gotoAddrAct->setStatusTip(tr("Goto Address"));
 	connect(gotoAddrAct, SIGNAL(triggered()), this, SLOT(openGotoAddrDialog(void)) );
@@ -899,7 +918,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// File -> Close
 	closeAct = new QAction(tr("Close"), this);
-	//closeAct->setShortcuts(QKeySequence::Open);
+	closeAct->setShortcut(QKeySequence(tr("Esc")));
 	closeAct->setStatusTip(tr("Close Window"));
 	connect(closeAct, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 	
