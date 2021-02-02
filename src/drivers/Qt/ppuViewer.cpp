@@ -1255,8 +1255,10 @@ static void DrawPatternTable( ppuPatternTable_t *pattern, uint8_t *table, uint8_
 	int p=0,tmp;
 	uint8_t chr0,chr1,logs,shift;
 
-	if (!palo)
+	if (palo == NULL)
+	{
 		return;
+	}
 
 	pal <<= 2;
 	for (i = 0; i < 16; i++)		//Columns
