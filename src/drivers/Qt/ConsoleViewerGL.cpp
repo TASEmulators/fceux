@@ -28,7 +28,7 @@
 #include <QScreen>
 #include <QMouseEvent>
 
-#if defined(__arm__) && defined(__linux__)
+#if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2)
 #include <GL/gl.h>
 #endif
 
