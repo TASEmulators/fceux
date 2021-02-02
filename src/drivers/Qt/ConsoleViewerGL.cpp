@@ -28,7 +28,9 @@
 #include <QScreen>
 #include <QMouseEvent>
 
+#if defined(__arm__) && defined(__linux__)
 #include <GL/gl.h>
+#endif
 
 #include "Qt/nes_shm.h"
 #include "Qt/fceuWrapper.h"
