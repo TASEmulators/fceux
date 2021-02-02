@@ -149,28 +149,51 @@ void UpdateOtherDebuggingDialogs()
 	PPUViewDoBlit();		//PPU Viewer
 }
 
-#define DISASM_DEFAULT_WIDTH (debuggerIDAFont ? 540 : 470)
+// owomomo: these values should alwasy sync with default debugger window size changes.
+/*
+  The default width of disasm view.
+  ***NOTE: Currently disasm text is NOT scaled with the screen dpi, so DO NOT use 
+  Muldiv(DISASM_DEFAULT_WIDTH, GetDeviceCaps(hdc, LOGPIXELSY), 96) to convert this
+  value!
+*/
+#define DISASM_DEFAULT_WIDTH (debuggerIDAFont ? 540 : 470) 
 
+/*
+  The left and right margin of the disasm view in the debugger window, it can be
+  caclulated by the size of the debugger and the disasm view. 
+  Here's an fake code example of how to get this value:
+  
+  RECT wndRect, disasmRect;
+  GetWindowRect(hDebug, &wndRect);
+  GetWindowRect(GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY), &disasmRect);
+  (disasmRect.left - wndRect.left) + (wndRect.right - disasmRect.right);
+
+  The reason why I directly write it here is to deal with the situation when debugger
+  width is narrow that some of the left panel is not shown in the window,
+  (wndRect.right - disasmRect.right) can't get the right value.
+*/
+#define DISASM_MARGIN 378
+
+/*
+  When the window size is smaller than these values, the window itself can be shrinked
+  more, but the panel will keep their minimum size. 
+*/
 #define DEBUGGER_MIN_HEIGHT_LEFT 120 // Minimum height for the left part
 #define DEBUGGER_MIN_HEIGHT_RIGHT 590 // Minimun height for the right part.
+#define DEBUGGER_MIN_WIDTH 380 // Minimum width for debugger
 
-#define DEBUGGER_MIN_WIDTH 360 // Minimum width for debugger
 #define DEBUGGER_DEFAULT_HEIGHT 594 // default height for debugger
-// owomomo: default width of the debugger is depend on the default width of disasm view, so it's not defined here.
-
+/*
+  The default width of the debugger is depend on the default width of disasm view,
+  Since the margin varies from screen dpi but disasm view is not, they cant' use
+  so it's not defined here.
+*/
+// #define DEBUGGER_DEFAULT_WIDTH (DISASM_MARGIN + DISASM_DEFAULT_WIDTH)
 void RestoreSize(HWND hwndDlg)
 {
 	HDC hdc = GetDC(hwndDlg);
-	RECT wndRect, disasmRect;
-	GetWindowRect(hwndDlg, &wndRect);
-	GetWindowRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &disasmRect);
-
-	int default_width = (disasmRect.left - wndRect.left) + DISASM_DEFAULT_WIDTH + (wndRect.right - disasmRect.right);
-	int default_height = MulDiv(DEBUGGER_DEFAULT_HEIGHT, GetDeviceCaps(hdc, LOGPIXELSY), 96);
-
+	SetWindowPos(hwndDlg,HWND_TOP, DbgPosX, DbgPosY, MulDiv(DISASM_MARGIN, GetDeviceCaps(hdc, LOGPIXELSY), 96) + DISASM_DEFAULT_WIDTH, MulDiv(DEBUGGER_DEFAULT_HEIGHT, GetDeviceCaps(hdc, LOGPIXELSY), 96), SWP_SHOWWINDOW);
 	ReleaseDC(hwndDlg, hdc);
-	
-	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,default_width,default_height,SWP_SHOWWINDOW);
 }
 
 unsigned int NewBreakWindows(HWND hwndDlg, unsigned int num, bool enable)
@@ -2123,8 +2146,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			}
 			break;
 		}
-
-
 		case WM_CLOSE:
 		case WM_QUIT:
 			//exitdebug:
@@ -2227,7 +2248,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						break;
 						case IDC_DEBUGGER_RESTORESIZE:
 							RestoreSize(hwndDlg);
-							RestoreSize(hwndDlg); // owomomo: When the user make the size too small to show the full width of the panel on the right side, it has to perform twice to restore the default window size. This is a temporary fix.
 							break;
 					}
 				}
@@ -2368,11 +2388,11 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				}
 				SetScrollInfo((HWND)lParam,SB_CTL,&si,TRUE);
 
-				Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+				Disassemble(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
 				// "Address Bookmark Add" follows the address
 				char str[16];
 				sprintf(str,"%04X", si.nPos);
-				SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
+				SetDlgItemText(hwndDlg, IDC_DEBUGGER_BOOKMARK, str);
 				break;
 			}
 			case WM_KEYDOWN:
@@ -2389,7 +2409,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				{
 					setString = true;
 					RECT rectDisassembly;
-					GetClientRect(GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY),&rectDisassembly);
+					GetClientRect(GetDlgItem(hwndDlg,IDC_DEBUGGER_DISASSEMBLY),&rectDisassembly);
 					int height = rectDisassembly.bottom-rectDisassembly.top;
 					mouse_y -= 10;
 					if(mouse_y > height)
@@ -2398,9 +2418,9 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				}
 
 				if (setString)
-					SetDlgItemText(hDebug, IDC_DEBUGGER_ADDR_LINE, "Leftclick = Inline Assembler. Midclick = Game Genie. Rightclick = Hexeditor.");
+					SetDlgItemText(hwndDlg, IDC_DEBUGGER_ADDR_LINE, "Leftclick = Inline Assembler. Midclick = Game Genie. Rightclick = Hexeditor.");
 				else
-					SetDlgItemText(hDebug, IDC_DEBUGGER_ADDR_LINE, "");
+					SetDlgItemText(hwndDlg, IDC_DEBUGGER_ADDR_LINE, "");
 				break;
 			}
 			case WM_LBUTTONDOWN:
@@ -2591,10 +2611,10 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								{
 									sprintf(str,"%04X", tmp);
 									SetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str);
-									Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, tmp);
+									Disassemble(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, tmp);
 									// "Address Bookmark Add" follows the address
 									sprintf(str,"%04X", si.nPos);
-									SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
+									SetDlgItemText(hwndDlg, IDC_DEBUGGER_BOOKMARK, str);
 								}
 								break;
 							}
