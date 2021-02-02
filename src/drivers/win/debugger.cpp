@@ -2227,6 +2227,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						break;
 						case IDC_DEBUGGER_RESTORESIZE:
 							RestoreSize(hwndDlg);
+							RestoreSize(hwndDlg); // owomomo: When the user make the size too small to show the full width of the panel on the right side, it has to perform twice to restore the default window size. This is a temporary fix.
 							break;
 					}
 				}
