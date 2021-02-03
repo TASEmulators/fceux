@@ -53,6 +53,7 @@
 #include "Qt/GamePadConf.h"
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
+#include "Qt/PaletteEditor.h"
 #include "Qt/GuiConf.h"
 #include "Qt/MoviePlay.h"
 #include "Qt/MovieOptions.h"
@@ -755,6 +756,14 @@ void consoleWin_t::createMainMenu(void)
 
 	toolsMenu->addAction(act);
 
+	// Tools -> Palette Editor
+	act = new QAction(tr("Palette Editor ..."), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Open Palette Editor Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openPaletteEditorWin(void)) );
+
+	toolsMenu->addAction(act);
+
 	 //-----------------------------------------------------------------------
 	 // Debug
     debugMenu = menuBar()->addMenu(tr("Debug"));
@@ -1431,6 +1440,17 @@ void consoleWin_t::openTimingStatWin(void)
    tmStatWin = new FrameTimingDialog_t(this);
 	
    tmStatWin->show();
+}
+
+void consoleWin_t::openPaletteEditorWin(void)
+{
+	PaletteEditorDialog_t *win;
+
+	//printf("Open Palette Editor Window\n");
+	
+   win = new PaletteEditorDialog_t(this);
+	
+   win->show();
 }
 
 void consoleWin_t::openMovieOptWin(void)
