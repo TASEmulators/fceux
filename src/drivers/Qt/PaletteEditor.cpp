@@ -53,7 +53,7 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 {
 	QVBoxLayout *mainLayout;
 	QMenuBar *menuBar;
-	QMenu *fileMenu;
+	QMenu *fileMenu, *memMenu;
 	QAction *act;
 	int useNativeMenuBar;
 
@@ -89,13 +89,16 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	
 	fileMenu->addAction(act);
 
-	// File -> Load
-	act = new QAction(tr("Load"), this);
+	// Memory
+	memMenu = menuBar->addMenu(tr("Memory"));
+
+	// Emulator -> Write To
+	act = new QAction(tr("Write To"), this);
 	act->setShortcut( QKeySequence(tr("F5")));
-	act->setStatusTip(tr("Load Palette Memory"));
+	act->setStatusTip(tr("Write to Active Color Palette"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setActivePalette(void)) );
 	
-	fileMenu->addAction(act);
+	memMenu->addAction(act);
 
 	//-----------------------------------------------------------------------
 	// End Menu 
@@ -121,7 +124,7 @@ PaletteEditorDialog_t::~PaletteEditorDialog_t(void)
 //----------------------------------------------------------------------------
 void PaletteEditorDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Palette Editor Close Window Event\n");
+	//printf("Palette Editor Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();
@@ -407,7 +410,7 @@ void nesPaletteView::keyPressEvent(QKeyEvent *event)
 
 	if ( event->key() == Qt::Key_E )
 	{
-		openColorPicker( &color[ selCell.y()*16 + selCell.x() ] );
+		openColorPicker();
 
 		event->accept();
 	}
@@ -458,7 +461,7 @@ void nesPaletteView::contextMenuEvent(QContextMenuEvent *event)
 //----------------------------------------------------------------------------
 void nesPaletteView::editSelColor(void)
 {
-	openColorPicker( &color[ selCell.y()*16 + selCell.x() ] );
+	openColorPicker();
 }
 //----------------------------------------------------------------------------
 QPoint nesPaletteView::convPixToCell( QPoint p )
@@ -475,20 +478,18 @@ QPoint nesPaletteView::convPixToCell( QPoint p )
 	return c;
 }
 //----------------------------------------------------------------------------
-void nesPaletteView::openColorPicker( QColor *c )
+void nesPaletteView::openColorPicker(void)
 {
-	int ret;
-	QColorDialog dialog( this );
+	int idx;
+	QColor *c;
 
-	dialog.setCurrentColor( *c );
-	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
-	dialog.show();
-	ret = dialog.exec();
+	idx = selCell.y()*16 + selCell.x();
 
-	if ( ret == QDialog::Accepted )
-	{
-		*c = dialog.selectedColor();
-	}
+	c = &color[idx];
+
+	nesColorPickerDialog_t *dialog = new nesColorPickerDialog_t(idx, c, this);
+
+	dialog->show();
 }
 //----------------------------------------------------------------------------
 static int conv2hex( int i )
@@ -569,5 +570,125 @@ void nesPaletteView::paintEvent(QPaintEvent *event)
 		}
 		yy += h;
 	}
+}
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+nesColorPickerDialog_t::nesColorPickerDialog_t( int palIndex, QColor *c, QWidget *parent )
+	: QDialog( parent )
+{
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QPushButton *okButton;
+	QPushButton *cancelButton;
+	QPushButton *resetButton;
+	QStyle *style;
+	char stmp[128];
+
+	style = this->style();
+
+	sprintf( stmp, "Pick Palette Color $%02X", palIndex );
+
+	setWindowTitle( stmp );
+
+	palIdx = palIndex;
+	colorPtr = c;
+	origColor = *c;
+
+	mainLayout = new QVBoxLayout();
+
+	setLayout( mainLayout );
+
+	colorDialog = new QColorDialog(this);
+
+	mainLayout->addWidget( colorDialog );
+
+	colorDialog->setCurrentColor( *c );
+	colorDialog->setWindowFlags(Qt::Widget);
+	colorDialog->setOption( QColorDialog::DontUseNativeDialog, true );
+	colorDialog->setOption( QColorDialog::NoButtons, true );
+	
+	connect( colorDialog, SIGNAL(colorSelected(const QColor &))      , this, SLOT(colorChanged( const QColor &)) );
+	connect( colorDialog, SIGNAL(currentColorChanged(const QColor &)), this, SLOT(colorChanged( const QColor &)) );
+
+	connect( colorDialog, SIGNAL(accepted(void)), this, SLOT(colorAccepted(void)) );
+	connect( colorDialog, SIGNAL(rejected(void)), this, SLOT(colorRejected(void)) );
+
+	hbox = new QHBoxLayout();
+	mainLayout->addLayout( hbox );
+
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+	resetButton  = new QPushButton( tr("Reset") );
+
+	okButton->setIcon( style->standardIcon( QStyle::SP_DialogApplyButton ) );
+	cancelButton->setIcon( style->standardIcon( QStyle::SP_DialogCancelButton ) );
+	resetButton->setIcon( style->standardIcon( QStyle::SP_DialogResetButton ) );
+
+	hbox->addWidget( resetButton, 1  );
+	hbox->addStretch( 10 );
+	hbox->addWidget( okButton, 1     );
+	hbox->addWidget( cancelButton, 1 );
+
+	connect( okButton    , SIGNAL(clicked(void)), this, SLOT(colorAccepted(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(colorRejected(void)) );
+	connect( resetButton , SIGNAL(clicked(void)), this, SLOT(resetColor(void)) );
+}
+//----------------------------------------------------------------------------
+nesColorPickerDialog_t::~nesColorPickerDialog_t(void)
+{
+	//printf("nesColorPicker Destroyed\n");
+}
+//----------------------------------------------------------------------------
+void nesColorPickerDialog_t::closeEvent(QCloseEvent *event)
+{
+	//printf("nesColorPicker Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void nesColorPickerDialog_t::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void nesColorPickerDialog_t::colorChanged( const QColor &color )
+{
+	//printf("Color Changed: R:%i  G%i  B%i \n", color.red(), color.green(), color.blue() );
+
+	*colorPtr = color;
+
+	( (nesPaletteView*)parent())->setActivePalette();
+}
+//----------------------------------------------------------------------------
+void nesColorPickerDialog_t::colorAccepted(void)
+{
+	//printf("nesColorPicker Accepted\n");
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void nesColorPickerDialog_t::colorRejected(void)
+{
+	//printf("nesColorPicker Rejected\n");
+
+	// Reset to original color
+	*colorPtr = origColor;
+
+	( (nesPaletteView*)parent())->setActivePalette();
+
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void nesColorPickerDialog_t::resetColor(void)
+{
+	// Reset to original color
+	*colorPtr = origColor;
+
+	colorDialog->setCurrentColor( origColor );
+
+	( (nesPaletteView*)parent())->setActivePalette();
 }
 //----------------------------------------------------------------------------

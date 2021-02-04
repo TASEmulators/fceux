@@ -16,8 +16,35 @@
 #include <QColor>
 #include <QGroupBox>
 #include <QPainter>
+#include <QColorDialog>
 
 #include "Qt/main.h"
+
+class nesColorPickerDialog_t : public QDialog
+{
+	Q_OBJECT
+
+	public:
+		nesColorPickerDialog_t( int palIndex, QColor *c, QWidget *parent = 0);
+		~nesColorPickerDialog_t(void);
+
+	protected:
+		void closeEvent(QCloseEvent *event);
+
+	private:
+		QColorDialog *colorDialog;
+		QColor *colorPtr;
+		QColor  origColor;
+		int     palIdx;
+
+	public slots:
+		void closeWindow(void);
+	private slots:
+		void colorChanged( const QColor &color );
+		void colorAccepted(void);
+		void colorRejected(void);
+		void resetColor(void);
+};
 
 class nesPaletteView : public QWidget
 {
@@ -35,7 +62,7 @@ class nesPaletteView : public QWidget
 		QPoint  convPixToCell( QPoint p );
 
 		void  setActivePalette(void);
-		void  openColorPicker( QColor *c );
+		void  openColorPicker(void);
 		int   loadFromFile( const char *filepath );
 		int   saveToFile( const char *filepath );
 
