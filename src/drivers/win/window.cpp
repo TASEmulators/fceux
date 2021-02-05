@@ -1119,6 +1119,13 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 		{
 			DoDebug(0);
 		}
+
+		extern HWND hWndPal;
+		if (hWndPal)
+		{
+			extern void RedrawPalette(HWND);
+			RedrawPalette(hWndPal);
+		}
 	}
 	else
 	{

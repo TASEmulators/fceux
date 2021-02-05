@@ -610,6 +610,7 @@
 #define IDC_DEBUGGER_TEXT_A             1049
 #define IDC_SUBMAPPER_TEXT              1050
 #define MW_VAL16                        1050
+#define IDC_PALETTE_PREVIEW             1050
 #define IDC_PRGROM_TEXT                 1051
 #define MW_NAME17                       1051
 #define MW_ADDR17                       1052
@@ -1227,7 +1228,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        313
 #define _APS_NEXT_COMMAND_VALUE         40012
-#define _APS_NEXT_CONTROL_VALUE         1050
+#define _APS_NEXT_CONTROL_VALUE         1051
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
