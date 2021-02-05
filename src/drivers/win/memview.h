@@ -32,4 +32,8 @@ BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL (
 #define ModifyColorMenu(hwnd, menu, item, pos, id) OpColorMenu(hwnd, menu, item, pos, id, SetMenuItemInfo)
 #define GetHexColorMenu(hwnd) (GetSubMenu(GetSubMenu(GetMenu(hwnd), HIGHLIGHTING_SUBMENU_POS), HEXEDITOR_COLOR_SUBMENU_POS))
 #define GetCdlColorMenu(hwnd) (GetSubMenu(GetSubMenu(GetMenu(hwnd), HIGHLIGHTING_SUBMENU_POS), CDLOGGER_COLOR_SUBMENU_POS))
+
+UINT CALLBACK ChooseColorHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+HBITMAP CreateColorMenuBitmap(HWND hwnd, int width, int height, COLORREF color);
+HICON CreateChooseColorIcon(HWND hwnd, int width, int height, COLORREF color);
 #endif
