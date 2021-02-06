@@ -39,6 +39,8 @@ nes_shm_t *open_nes_shm(void)
 
 	vaddr = (nes_shm_t*)malloc( sizeof(struct nes_shm_t) );
 
+	memset(vaddr, 0, sizeof(struct nes_shm_t));
+
 	//int shmId;
 	//struct shmid_ds ds;
 
