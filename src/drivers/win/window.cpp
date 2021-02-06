@@ -1123,8 +1123,10 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 		extern HWND hWndPal;
 		if (hWndPal)
 		{
-			extern void RedrawPalette(HWND);
-			RedrawPalette(hWndPal);
+			extern void InvalidatePalettePreviewRect(HWND);
+			InvalidatePalettePreviewRect(hWndPal);
+			extern void UpdatePalettePreviewCaption(HWND);
+			UpdatePalettePreviewCaption(hWndPal);
 		}
 	}
 	else

@@ -5,6 +5,8 @@
 #include "window.h"
 #include "gui.h"
 
+#define ToGrey(r, g, b) ((int)((float)(r) * 0.299F + (float)(g) * 0.587F + (float)(b) * 0.114F))
+
 int cpalette_count = 0;
 u8 cpalette[64*8*3] = {0};
 extern int palnotch;
@@ -13,7 +15,18 @@ extern int palsharpness;
 extern int palcontrast;
 extern int palbrightness;
 extern bool paldeemphswap;
+bool palcolorindex = false;
 HWND hWndPal = NULL;
+
+struct PALPV {
+	int mouse_index;
+	float cell_height, cell_width;
+	char buf[4];
+	RECT pvRect;
+	SIZE pvSize;
+	HBITMAP pvBitmap;
+	HFONT font;
+} *palpv;
 
 bool SetPalette(const char* nameo)
 {
@@ -69,14 +82,44 @@ int LoadPaletteFile()
 /**
 * Notify the dialog to redraw the palette preview area
 **/
-void RedrawPalette(HWND hwnd)
+void InvalidatePalettePreviewRect(HWND hwnd)
 {
-	RECT rect;
-	GetWindowRect(GetDlgItem(hwnd, IDC_PALETTE_PREVIEW), &rect);
-	ScreenToClient(hwnd, (POINT*)&rect);
-	ScreenToClient(hwnd, ((POINT*)&rect) + 1);
-	InvalidateRect(hwnd, &rect, FALSE);
+	InvalidateRect(hwnd, &palpv->pvRect, FALSE);
 	UpdateWindow(hwnd);
+}
+
+void UpdatePalettePreviewCaption(HWND hwnd, int x, int y)
+{
+	int mouse_index = -1;
+
+	if (x > palpv->pvRect.left && x < palpv->pvRect.right && y > palpv->pvRect.top && y < palpv->pvRect.bottom)
+		mouse_index = floor((float)(x -= palpv->pvRect.left) / palpv->cell_width) + (int)floor((float)(y -= palpv->pvRect.top) / palpv->cell_height) * 16;
+
+	if (palpv->mouse_index != mouse_index)
+	{
+		if (mouse_index != -1)
+		{
+			char str[64];
+			if (force_grayscale)
+				sprintf(str, "Greyscale $%02X: #%02X (Actural: #%02X%02X%02X)", mouse_index, ToGrey(palo[mouse_index].r, palo[mouse_index].g, palo[mouse_index].b), palo[mouse_index].r, palo[mouse_index].g, palo[mouse_index].b);
+			else
+				sprintf(str, "Color $%02X: #%02X%02X%02X", mouse_index, palo[mouse_index].r, palo[mouse_index].g, palo[mouse_index].b);
+			SetDlgItemText(hwnd, IDC_PALETTE_PREVIEW_GROUPBOX, str);
+		}
+		else
+			SetDlgItemText(hwnd, IDC_PALETTE_PREVIEW_GROUPBOX, "Preview");
+		palpv->mouse_index = mouse_index;
+	}
+}
+
+void UpdatePalettePreviewCaption(HWND hwnd)
+{
+	POINT p;
+	GetCursorPos(&p);
+	ScreenToClient(hwnd, &p);
+
+	palpv->mouse_index = -1;
+	UpdatePalettePreviewCaption(hwnd, p.x, p.y);
 }
 
 /**
@@ -84,11 +127,11 @@ void RedrawPalette(HWND hwnd)
 **/
 INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	char text[40];
+
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:
-
+		{
 			if(ntsccol_enable)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_ENABLED, BST_CHECKED);
 
@@ -101,6 +144,9 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			if (eoptions & EO_CPALETTE)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
 
+			if (palcolorindex)
+				CheckDlgButton(hwndDlg, CHECK_PALETTE_COLOR_INDEX, BST_CHECKED);
+
 			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,       TBM_SETRANGE, 1, MAKELONG(0, 128));
 			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,        TBM_SETRANGE, 1, MAKELONG(0, 128));
 			SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR,   TBM_SETRANGE, 1, MAKELONG(0, 100));
@@ -109,6 +155,7 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			SendDlgItemMessage(hwndDlg, CTL_PALCONTRAST_TRACKBAR,TBM_SETRANGE, 1, MAKELONG(0, 200));
 			SendDlgItemMessage(hwndDlg, CTL_PALBRIGHT_TRACKBAR,  TBM_SETRANGE, 1, MAKELONG(0, 100));
 
+			char text[40];
 			FCEUI_GetNTSCTH(&ntsctint, &ntschue);
 			sprintf(text, "Notch: %d%%", palnotch);
 			SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE,   WM_SETTEXT, 0, (LPARAM) text);
@@ -135,8 +182,33 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			EnableWindow(GetDlgItem(hwndDlg, 64395), ntsccol_enable);
 			EnableWindow(GetDlgItem(hwndDlg, CTL_HUE_TRACKBAR), ntsccol_enable);
 			EnableWindow(GetDlgItem(hwndDlg, CTL_TINT_TRACKBAR), ntsccol_enable);
-			break;
+
+			palpv = (PALPV*)malloc(sizeof(PALPV));
+			
+			HWND hpalpv = GetDlgItem(hwndDlg, IDC_PALETTE_PREVIEW);
+			GetClientRect(hpalpv, &palpv->pvRect);
+			palpv->pvSize = *((SIZE*)&palpv->pvRect + 1);
+			ClientToScreen(hpalpv, (POINT*)&palpv->pvRect);
+			ClientToScreen(hpalpv, ((POINT*)&palpv->pvRect) + 1);
+			ScreenToClient(hwndDlg, (POINT*)&palpv->pvRect);
+			ScreenToClient(hwndDlg, ((POINT*)&palpv->pvRect) + 1);
+
+			LOGFONT logFont;
+			GetObject((HANDLE)SendMessage(hwndDlg, WM_GETFONT, NULL, NULL), sizeof(logFont), &logFont);
+			palpv->font = (HFONT)CreateFontIndirect(&logFont);
+
+			palpv->cell_width = (float)palpv->pvSize.cx / 16;
+			palpv->cell_height = (float)palpv->pvSize.cy / 4;
+
+			HDC hdc = GetDC(hwndDlg);
+			HDC memdc = CreateCompatibleDC(hdc);
+			palpv->pvBitmap = CreateCompatibleBitmap(hdc, palpv->pvSize.cx, palpv->pvSize.cy);
+			DeleteDC(memdc);
+			ReleaseDC(hwndDlg, hdc);
+		}
+		break;
 		case WM_HSCROLL:
+		{
 			ntsctint      = SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR,       TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
 			ntschue       = SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR,        TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
 			palnotch      = SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR,   TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
@@ -146,6 +218,7 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			palbrightness = SendDlgItemMessage(hwndDlg, CTL_PALBRIGHT_TRACKBAR,  TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
 			FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
 
+			char text[40];
 			sprintf(text, "Notch: %d%%", palnotch);
 			SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE,   WM_SETTEXT, 0, (LPARAM) text);
 			sprintf(text, "Saturation: %d%%", palsaturation);
@@ -156,165 +229,178 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			SendDlgItemMessage(hwndDlg, STATIC_CONTRASTVALUE,WM_SETTEXT, 0, (LPARAM) text);
 			sprintf(text, "Brightness: %d%%", palbrightness);
 			SendDlgItemMessage(hwndDlg, STATIC_BRIGHTVALUE,  WM_SETTEXT, 0, (LPARAM) text);
-			
-			RedrawPalette(hwndDlg);
-			break;
+
+			if (~eoptions & EO_CPALETTE)
+			{
+				UpdatePalettePreviewCaption(hwndDlg);
+				InvalidatePalettePreviewRect(hwndDlg);
+			}
+		}
+		break;
 		case WM_PAINT:
 		{
 			if (!palo)
 				break;
 
-			RECT pvRect, wndRect;
-			HWND pvHwnd = GetDlgItem(hwndDlg, IDC_PALETTE_PREVIEW);
-			GetClientRect(pvHwnd, &pvRect);
-			GetClientRect(hwndDlg, &wndRect);
-
-			int col_width = (pvRect.right - pvRect.left) / 16;
-			int col_height = (pvRect.bottom - pvRect.top) / 4;
-
-			int width = col_width * 16;
-			int height = col_height * 4;
-
 			PAINTSTRUCT paint;
 			HDC hdc = BeginPaint(hwndDlg, &paint);
 			HDC memdc = CreateCompatibleDC(hdc);
-			HBITMAP pvBitmap = CreateCompatibleBitmap(hdc, width, height);
 
-			ClientToScreen(pvHwnd, (POINT*)&pvRect);
-			ClientToScreen(pvHwnd, ((POINT*)&pvRect) + 1);
-			ClientToScreen(hwndDlg, (POINT*)&wndRect);
-			ClientToScreen(hwndDlg, ((POINT*)&wndRect) + 1);
+			HGDIOBJ oldObj = SelectObject(memdc, palpv->pvBitmap);
+			HFONT oldFont = SelectFont(memdc, palpv->font);
 
-			HGDIOBJ oldObj = SelectObject(memdc, pvBitmap);
-			int i = 0;
-			RECT rect = { 0, 0, col_width, col_height };
-			while(i < 64)
+			RECT rect;
+			float left, top = -palpv->cell_height, right, bottom = 0.0F;
+			for (int i = 0; i < 64; ++i)
 			{
-				COLORREF color;
-				if (force_grayscale)
+				if (i % 16 == 0)
 				{
-					int gray = palo[i].r * 0.299 + palo[i].g * 0.587 + palo[i].b * 0.114;
-					color = RGB(gray, gray, gray);
+					left = 0.0F;
+					right = palpv->cell_width;
+					top += palpv->cell_height;
+					bottom += palpv->cell_height;
 				}
 				else
-					color = RGB(palo[i].r, palo[i].g, palo[i].b);
+				{
+					left += palpv->cell_width;
+					right += palpv->cell_width;
+				}
+
+				rect.left = round(left);
+				rect.right = round(right);
+				rect.top = round(top);
+				rect.bottom = round(bottom);
+
+				int grey = ToGrey(palo[i].r, palo[i].g, palo[i].b);
+				COLORREF color = force_grayscale ? RGB(grey, grey, grey) : RGB(palo[i].r, palo[i].g, palo[i].b);
 				HBRUSH brush = CreateSolidBrush(color);
 				FillRect(memdc, &rect, brush);
 				DeleteObject(brush);
-			
-				if (++i % 16 == 0)
+
+				if (palcolorindex)
 				{
-					rect.left = 0;
-					rect.right = col_width;
-					rect.top += col_height;
-					rect.bottom += col_height;
-				}
-				else
-				{
-					rect.left += col_width;
-					rect.right += col_width;
+					SetTextColor(memdc, grey > 127 ? RGB(0, 0, 0) : RGB(255, 255, 255));
+					SetBkColor(memdc, color);
+
+					sprintf(palpv->buf, "%X", i);
+					SIZE str_size;
+					GetTextExtentPoint(memdc, palpv->buf, strlen(palpv->buf), &str_size);
+					TextOut(memdc, rect.left + (rect.right - rect.left - str_size.cx) / 2, rect.top + (rect.bottom - rect.top - str_size.cy) / 2, palpv->buf, strlen(palpv->buf));
 				}
 			}
 
-			StretchBlt(hdc, pvRect.left - wndRect.left, pvRect.top - wndRect.top, pvRect.right - pvRect.left, pvRect.bottom - pvRect.top, memdc, 0, 0, width, height, SRCCOPY);
+			BitBlt(hdc, palpv->pvRect.left, palpv->pvRect.top,  palpv->pvSize.cx, palpv->pvSize.cy, memdc, 0, 0, SRCCOPY);
 
 			EndPaint(hwndDlg, &paint);
 
+			SelectFont(memdc, oldFont);
 			SelectObject(memdc, oldObj);
 			DeleteDC(memdc);
 
 			break;
 		}
+		case WM_MOUSEMOVE:
+			if (palo)
+				UpdatePalettePreviewCaption(hwndDlg, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			break;
+
+//		case WM_LBUTTONDOWN:
+//			break;
+
 		case WM_CLOSE:
 		case WM_QUIT:
 			goto gornk;
 
 		case WM_COMMAND:
-			if(!(wParam>>16))
+			switch (HIWORD(wParam))
 			{
-				switch(wParam&0xFFFF)
-				{
-					case CHECK_PALETTE_ENABLED:
-						ntsccol_enable ^= 1;
-						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue); // it recalculates everything, use it for PAL block too!
-						EnableWindow(GetDlgItem(hwndDlg, 65463), ntsccol_enable);
-						EnableWindow(GetDlgItem(hwndDlg, 64395), ntsccol_enable);
-						EnableWindow(GetDlgItem(hwndDlg, CTL_HUE_TRACKBAR), ntsccol_enable);
-						EnableWindow(GetDlgItem(hwndDlg, CTL_TINT_TRACKBAR), ntsccol_enable);
-						RedrawPalette(hwndDlg);
-						break;
-
-					case CHECK_PALETTE_GRAYSCALE:
-						force_grayscale ^= 1;
-						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
-						RedrawPalette(hwndDlg);
-						break;
-
-					case CHECK_DEEMPH_SWAP:
-						paldeemphswap ^= 1;
-						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
-						RedrawPalette(hwndDlg);
-						break;
-
-					case CHECK_PALETTE_CUSTOM:
+				case BN_CLICKED:
+					switch (LOWORD(wParam))
 					{
-						if (eoptions & EO_CPALETTE)
-						{
-							//disable user palette
-							FCEUI_SetUserPalette(0,0);
-							eoptions &= ~EO_CPALETTE;
-						} else
-						{
-							//switch to user palette (even if it isn't loaded yet!?)
-							FCEUI_SetUserPalette(cpalette,64); //just have to guess the size I guess
-							eoptions |= EO_CPALETTE;
-						}
-						RedrawPalette(hwndDlg);
-						break;
-					}
+						case CHECK_PALETTE_ENABLED:
+							ntsccol_enable ^= 1;
+							FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue); // it recalculates everything, use it for PAL block too!
+							EnableWindow(GetDlgItem(hwndDlg, CTL_HUE_TEXT), ntsccol_enable);
+							EnableWindow(GetDlgItem(hwndDlg, CTL_TINT_TEXT), ntsccol_enable);
+							EnableWindow(GetDlgItem(hwndDlg, CTL_HUE_TRACKBAR), ntsccol_enable);
+							EnableWindow(GetDlgItem(hwndDlg, CTL_TINT_TRACKBAR), ntsccol_enable);
+							break;
 
-					case BTN_PALETTE_LOAD:
-						if (LoadPaletteFile())
-						{
+						case CHECK_PALETTE_GRAYSCALE:
+							force_grayscale ^= 1;
+							FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
+							break;
+
+						case CHECK_DEEMPH_SWAP:
+							paldeemphswap ^= 1;
+							FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
+							break;
+
+						case CHECK_PALETTE_CUSTOM:
+							if (eoptions & EO_CPALETTE)
+							{
+								//disable user palette
+								FCEUI_SetUserPalette(0, 0);
+								eoptions &= ~EO_CPALETTE;
+							}
+							else
+							{
+								//switch to user palette (even if it isn't loaded yet!?)
+								FCEUI_SetUserPalette(cpalette, 64); //just have to guess the size I guess
+								eoptions |= EO_CPALETTE;
+							}
+							break;
+
+						case CHECK_PALETTE_COLOR_INDEX:
+							palcolorindex ^= 1;
+							break;
+
+						case BTN_PALETTE_LOAD:
+							if (!LoadPaletteFile())
+								return 0;
 							CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
-							RedrawPalette(hwndDlg);
+							break;
+
+						case BTN_PALETTE_RESET:
+						{
+							palnotch = 90;
+							palsaturation = 100;
+							palsharpness = 50;
+							palcontrast = 100;
+							palbrightness = 50;
+
+							char text[40];
+							sprintf(text, "Notch: %d%%", palnotch);
+							SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE, WM_SETTEXT, 0, (LPARAM)text);
+							sprintf(text, "Saturation: %d%%", palsaturation);
+							SendDlgItemMessage(hwndDlg, STATIC_SATVALUE, WM_SETTEXT, 0, (LPARAM)text);
+							sprintf(text, "Sharpness: %d%%", palsharpness);
+							SendDlgItemMessage(hwndDlg, STATIC_SHARPVALUE, WM_SETTEXT, 0, (LPARAM)text);
+							sprintf(text, "Contrast: %d%%", palcontrast);
+							SendDlgItemMessage(hwndDlg, STATIC_CONTRASTVALUE, WM_SETTEXT, 0, (LPARAM)text);
+							sprintf(text, "Brightness: %d%%", palbrightness);
+							SendDlgItemMessage(hwndDlg, STATIC_BRIGHTVALUE, WM_SETTEXT, 0, (LPARAM)text);
+
+							SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR, TBM_SETPOS, 1, palnotch);
+							SendDlgItemMessage(hwndDlg, CTL_PALSAT_TRACKBAR, TBM_SETPOS, 1, palsaturation);
+							SendDlgItemMessage(hwndDlg, CTL_PALSHARP_TRACKBAR, TBM_SETPOS, 1, palsharpness);
+							SendDlgItemMessage(hwndDlg, CTL_PALCONTRAST_TRACKBAR, TBM_SETPOS, 1, palcontrast);
+							SendDlgItemMessage(hwndDlg, CTL_PALBRIGHT_TRACKBAR, TBM_SETPOS, 1, palbrightness);
+
+							FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
+							break;
 						}
-						break;
-
-					case BTN_PALETTE_RESET:
-						palnotch      = 90;
-						palsaturation = 100;
-						palsharpness  = 50;
-						palcontrast   = 100;
-						palbrightness = 50;
-
-						sprintf(text, "Notch: %d%%", palnotch);
-						SendDlgItemMessage(hwndDlg, STATIC_NOTCHVALUE, WM_SETTEXT, 0, (LPARAM) text);
-						sprintf(text, "Saturation: %d%%", palsaturation);
-						SendDlgItemMessage(hwndDlg, STATIC_SATVALUE, WM_SETTEXT, 0, (LPARAM) text);
-						sprintf(text, "Sharpness: %d%%", palsharpness);
-						SendDlgItemMessage(hwndDlg, STATIC_SHARPVALUE, WM_SETTEXT, 0, (LPARAM) text);
-						sprintf(text, "Contrast: %d%%", palcontrast);
-						SendDlgItemMessage(hwndDlg, STATIC_CONTRASTVALUE,WM_SETTEXT, 0, (LPARAM) text);
-						sprintf(text, "Brightness: %d%%", palbrightness);
-						SendDlgItemMessage(hwndDlg, STATIC_BRIGHTVALUE,  WM_SETTEXT, 0, (LPARAM) text);
-
-						SendDlgItemMessage(hwndDlg, CTL_PALNOTCH_TRACKBAR,   TBM_SETPOS, 1, palnotch);
-						SendDlgItemMessage(hwndDlg, CTL_PALSAT_TRACKBAR,     TBM_SETPOS, 1, palsaturation);
-						SendDlgItemMessage(hwndDlg, CTL_PALSHARP_TRACKBAR,   TBM_SETPOS, 1, palsharpness);
-						SendDlgItemMessage(hwndDlg, CTL_PALCONTRAST_TRACKBAR,TBM_SETPOS, 1, palcontrast);
-						SendDlgItemMessage(hwndDlg, CTL_PALBRIGHT_TRACKBAR,  TBM_SETPOS, 1, palbrightness);
-
-						FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
-						RedrawPalette(hwndDlg);
-						break;
-
-					case BUTTON_CLOSE:
-gornk:
-						DestroyWindow(hwndDlg);
-						hWndPal = 0; // Yay for user race conditions.
-						break;
-				}
+						case BUTTON_CLOSE:
+							gornk:
+								DestroyWindow(hwndDlg);
+								hWndPal = 0; // Yay for user race conditions.
+								DeleteFont(palpv->font);
+								DeleteObject(palpv->pvBitmap);
+								free(palpv);
+								return 0;
+					}
+					UpdatePalettePreviewCaption(hwndDlg);
+					InvalidatePalettePreviewRect(hwndDlg);
 			}
 	}
 

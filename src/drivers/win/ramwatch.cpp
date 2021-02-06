@@ -1685,8 +1685,9 @@ SeparatorCache::SeparatorCache(HWND hwnd, char* text) {
 		SIZE size;
 
 		HDC hdc = GetDC(hwnd);
-		SelectFont(hdc, sepFon);
+		HGDIOBJ oldObj = SelectFont(hdc, sepFon);
 		GetTextExtentPoint(hdc, text, strlen(text), &size);
+		SelectObject(hdc, oldObj);
 		ReleaseDC(hwnd, hdc);
 
 		sepOffX = size.cx + 8;
