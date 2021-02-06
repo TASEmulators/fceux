@@ -25,7 +25,7 @@
 #define __FCEU_VERSION
 
 //todo - everyone will want to support this eventually, i suppose
-#ifdef _MSC_VER
+#if  defined(_MSC_VER) && !defined(__QT_DRIVER__)
 #include "scmrev.h"
 #else
 #ifdef SVN_REV

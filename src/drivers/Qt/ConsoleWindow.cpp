@@ -145,6 +145,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	if ( opt )
 	{
+		#ifndef WIN32
 		int policy, prio, nice;
 
 		g_config->getOption( "SDL.GuiSchedPolicy", &policy );
@@ -154,6 +155,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		setNicePriority( nice );
 
 		setSchedParam( policy, prio );
+		#endif
 	}
 }
 
@@ -1983,6 +1985,7 @@ void consoleWin_t::openMsgLogWin(void)
    return;
 }
 
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 int consoleWin_t::setNicePriority( int value )
 {
 	int ret = 0;
@@ -2135,6 +2138,7 @@ int consoleWin_t::setSchedParam( int policy, int priority )
 #endif
 	return ret;
 }
+#endif
 
 void consoleWin_t::syncActionConfig( QAction *act, const char *property )
 {
@@ -2232,6 +2236,7 @@ void emulatorThread_t::init(void)
 
 	if ( opt )
 	{
+		#ifndef WIN32
 		int policy, prio, nice;
 
 		g_config->getOption( "SDL.EmuSchedPolicy", &policy );
@@ -2241,6 +2246,7 @@ void emulatorThread_t::init(void)
 		setNicePriority( nice );
 
 		setSchedParam( policy, prio );
+		#endif
 	}
 }
 
@@ -2254,6 +2260,7 @@ void emulatorThread_t::setPriority( QThread::Priority priority_req )
 	//printf("Set Priority: %i \n", priority() );
 }
 
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
 int emulatorThread_t::setNicePriority( int value )
 {
 	int ret = 0;
@@ -2384,6 +2391,7 @@ int emulatorThread_t::setSchedParam( int policy, int priority )
 #endif
 	return ret;
 }
+#endif
 
 void emulatorThread_t::run(void)
 {

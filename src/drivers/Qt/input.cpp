@@ -1540,9 +1540,9 @@ static ButtConfig fkbmap[0x48] = {
 	MK (LEFTSHIFT), MK (Z), MK (X), MK (C), MK (V), MK (B), MK (N), MK (M),
 	MK (COMMA),
 	MK (PERIOD), MK (SLASH), MK (RIGHTALT), MK (RIGHTSHIFT), MK (LEFTALT),
-	MK (SPACE),
-	MK (DELETE), MK (END), MK (PAGEDOWN),
-	MK (CURSORUP), MK (CURSORLEFT), MK (CURSORRIGHT), MK (CURSORDOWN)
+	MK (SPACE)
+	//MK (DELETE), MK (END), MK (PAGEDOWN),
+	//MK (CURSORUP), MK (CURSORLEFT), MK (CURSORRIGHT), MK (CURSORDOWN)
 };
 
 /**
@@ -1788,7 +1788,7 @@ int DWaitButton (const uint8_t * text, ButtConfig * bc, int *buttonConfigStatus 
 	{
 		int done = 0;
 
-      usleep(10000);
+      SDL_Delay(10);
       timeout_ms -= 10;
 
       if ( timeout_ms <= 0 )

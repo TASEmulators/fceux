@@ -48,6 +48,7 @@
 #include "../../fceu.h"
 #include "../../movie.h"
 #include "../../version.h"
+#include "../../common/os_utils.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -61,6 +62,11 @@
 #include "../videolog/nesvideos-piece.h"
 #endif
 
+#ifdef _MSC_VER 
+//not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif
 //*****************************************************************
 // Define Global Variables to be shared with FCEU Core
 //*****************************************************************
@@ -136,13 +142,17 @@ EMUFILE_FILE* FCEUD_UTF8_fstream(const char *fn, const char *m)
 	//return new std::fstream(fn,mode);
 }
 
-static const char *s_linuxCompilerString = "g++ " __VERSION__;
+#ifdef _MSC_VER
+static const char *s_CompilerString = "MSVC";
+#else
+static const char *s_CompilerString = "g++ " __VERSION__;
+#endif
 /**
  * Returns the compiler string.
  */
 const char *FCEUD_GetCompilerString(void)
 {
-	return s_linuxCompilerString;
+	return s_CompilerString;
 }
 
 /**
@@ -314,7 +324,7 @@ int LoadGame(const char *path, bool silent)
 	}
 	isloaded = 1;
 
-	FCEUD_NetworkConnect();
+	//FCEUD_NetworkConnect();
 	return 1;
 }
 
@@ -861,7 +871,7 @@ FCEUD_Update(uint8 *XBuf,
 			 int Count)
 {
 	int blitDone = 0;
-	extern int FCEUDnetplay;
+	//extern int FCEUDnetplay;
 
 	#ifdef CREATE_AVI
 	if (LoggingEnabled == 2 || (eoptions&EO_NOTHROTTLE))
@@ -955,19 +965,19 @@ FCEUD_Update(uint8 *XBuf,
 				}
 			}
 		} //else puts("Skipped");
-		else if (!NoWaiting && FCEUDnetplay && (uflow || tmpcan >= (Count * 1.8))) 
-		{
-			if (Count > tmpcan) Count=tmpcan;
-			while(tmpcan > 0) 
-			{
-				//	printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
-				#ifdef CREATE_AVI
-				if (!mutecapture)
-				#endif
-				  WriteSound(Buffer, (Count <= tmpcan)?Count : tmpcan);
-				tmpcan -= Count;
-			}
-		}
+		//else if (!NoWaiting && FCEUDnetplay && (uflow || tmpcan >= (Count * 1.8))) 
+		//{
+		//	if (Count > tmpcan) Count=tmpcan;
+		//	while(tmpcan > 0) 
+		//	{
+		//		//	printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
+		//		#ifdef CREATE_AVI
+		//		if (!mutecapture)
+		//		#endif
+		//		  WriteSound(Buffer, (Count <= tmpcan)?Count : tmpcan);
+		//		tmpcan -= Count;
+		//	}
+		//}
 	}
   	else 
 	{
@@ -1076,7 +1086,7 @@ int  fceuWrapperUpdate( void )
 	// sleep to allow request to be serviced.
 	if ( mutexPending > 0 )
 	{
-		usleep( 100000 );
+		msleep( 100 );
 	}
 
 	lock_acq = fceuWrapperTryLock();
@@ -1087,7 +1097,7 @@ int  fceuWrapperUpdate( void )
 		{
 			printf("Error: Emulator Failed to Acquire Mutex\n");
 		}
-		usleep( 100000 );
+		msleep( 100 );
 
 		return -1;
 	}
@@ -1116,7 +1126,7 @@ int  fceuWrapperUpdate( void )
 
 		emulatorHasMutux = 0;
 
-		usleep( 100000 );
+		msleep( 100 );
 	}
 	return 0;
 }

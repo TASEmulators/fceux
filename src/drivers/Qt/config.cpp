@@ -34,16 +34,17 @@
 #include <windows.h>
 #endif
 
-#include <unistd.h>
+//#include <unistd.h>
 
 #include <csignal>
 #include <cstring>
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+//#include <sys/time.h>
+//#include <sys/stat.h>
+//#include <sys/types.h>
+#include <direct.h>
 
 static const char* HotkeyStrings[HK_MAX] = {
 		"CheatMenu",
@@ -321,6 +322,10 @@ InitConfig()
     config->addOption("periodicsaves", "SDL.PeriodicSaves", 0);
 
 	char* home_dir = getenv("HOME");
+	if ( home_dir == NULL )
+	{
+		home_dir = "";
+	}
 	// prefixed with _ because they are internal (not cli options)
 	config->addOption("_lastopenfile", "SDL.LastOpenFile", home_dir);
 	config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", home_dir);

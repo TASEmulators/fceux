@@ -54,6 +54,7 @@
 #include "../../asm.h"
 #include "../../ppu.h"
 #include "../../x6502.h"
+#include "../../common/os_utils.h"
 #include "common/configSys.h"
 
 #include "Qt/main.h"
@@ -2592,7 +2593,7 @@ void FCEUD_DebugBreakpoint( int bpNum )
 				frameAdvance_Delay_count++;
 			}
 		}
-		usleep(16667);
+		msleep(16);
 	}
 	// since we unfreezed emulation, reset delta_cycles counter
 	ResetDebugStatisticsDeltaCounters();

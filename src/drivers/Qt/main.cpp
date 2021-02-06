@@ -51,6 +51,7 @@ static void MessageOutput(QtMsgType type, const QMessageLogContext &context, con
     }
 }
 
+#undef main   // undef main in case SDL_Main
 
 int main( int argc, char *argv[] )
 {
@@ -58,6 +59,8 @@ int main( int argc, char *argv[] )
    qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
    const char *styleSheetEnv = NULL;
+
+   printf("test\n");
 
    styleSheetEnv = ::getenv("FCEUX_QT_STYLESHEET");
 

@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <dirent.h>
+
+//#include <dirent.h>
 
 #include "../../types.h"
 #include "configSys.h"
@@ -559,6 +560,7 @@ Config::parse(int argc,
         return error;
     }
 
+#ifndef WIN32
 	// try to read cfg.d/*
 	std::string cfgd_dir_name = _dir + "/" + "cfg.d/";
 	DIR *d;
@@ -585,7 +587,9 @@ Config::parse(int argc,
 
 		closedir(d);
 	}
-
+#else
+// FIXME TODO WIN32
+#endif
     // parse the arguments
     return _parseArgs(argc, argv);
 }

@@ -21,6 +21,7 @@
 #include "utils/memory.h"
 #include "utils/xstring.h"
 #include <sstream>
+#include <algorithm>
 
 #ifdef CREATE_AVI
 #include "drivers/videolog/nesvideos-piece.h"
@@ -28,11 +29,15 @@
 
 #ifdef WIN32
 #include <windows.h>
+
+#ifdef __WIN_DRIVER__
 #include "./drivers/win/common.h"
 #include "./drivers/win/window.h"
 extern void AddRecentMovieFile(const char *filename);
 #include "./drivers/win/taseditor.h"
 extern bool mustEngageTaseditor;
+#endif
+
 #endif
 
 extern int RAMInitOption;
@@ -619,7 +624,7 @@ static void LoadFM2_binarychunk(MovieData& movieData, EMUFILE* fp, int size)
 	fp->fseek(curr,SEEK_SET);
 
 	//the amount todo is the min of the limiting size we received and the remaining contents of the file
-	int todo = std::min(size, flen);
+	int todo = std::min<int>(size, flen);
 
 	int numRecords = todo/recordsize;
 	if (movieData.loadFrameCount!=-1 && movieData.loadFrameCount<numRecords)
@@ -866,7 +871,7 @@ static void OnMovieClosed()
 	freshMovie = false;					//No longer a fresh movie loaded
 	if (bindSavestate) AutoSS = false;	//If bind movies to savestates is true, then there is no longer a valid auto-save to load
 
-#ifdef WIN32
+#if defined(__WIN_DRIVER__)
 	SetMainWindowText();
 #endif
 }
@@ -1032,7 +1037,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 		return true;	//adelikat: file did not fail to load, so return true (false is only for file not exist/unable to open errors
 	}
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	//Fix relative path if necessary and then add to the recent movie menu
 	extern std::string BaseDirectory;
 
@@ -1099,7 +1104,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 	else
 		FCEU_DispMessage("Replay started Read+Write.",0);
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	SetMainWindowText();
 #endif
 
@@ -1129,7 +1134,7 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 	if (NULL == openRecordingMovie(fname))
 		return;
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	//Add to the recent movie menu
 	AddRecentMovieFile(fname);
 #endif
@@ -1176,7 +1181,7 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 //either dumps the current joystick state or loads one state from the movie
 void FCEUMOV_AddInputState()
 {
-#ifdef _WIN32
+#ifdef __WIN_DRIVER__
 	if (movieMode == MOVIEMODE_TASEDITOR)
 	{
 		// if movie length is less or equal to currFrame, pad it with empty frames
@@ -1410,7 +1415,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 	{
 		if (currMovieData.loadFrameCount >= 0)
 		{
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 			int result = MessageBox(hAppWnd, "This movie is a TAS Editor project file.\nIt can be modified in TAS Editor only.\n\nOpen it in TAS Editor now?", "Movie Replay", MB_YESNO);
 			if (result == IDYES)
 				mustEngageTaseditor = true;
@@ -1498,7 +1503,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 		if(tempMovieData.guid != currMovieData.guid)
 		{
 			//mbg 8/18/08 - this code  can be used to turn the error message into an OK/CANCEL
-			#ifdef WIN32
+			#ifdef __WIN_DRIVER__
 				std::string msg = "There is a mismatch between savestate's movie and current movie.\ncurrent: " + currMovieData.guid.toString() + "\nsavestate: " + tempMovieData.guid.toString() + "\n\nThis means that you have loaded a savestate belonging to a different movie than the one you are playing now.\n\nContinue loading this savestate anyway?";
 				int result = MessageBox(hAppWnd, msg.c_str(), "Error loading savestate", MB_OKCANCEL);
 				if(result == IDCANCEL)
@@ -1892,7 +1897,7 @@ void FCEUI_MoviePlayFromBeginning(void)
 {
 	if (movieMode == MOVIEMODE_TASEDITOR)
 	{
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 		handleEmuCmdByTaseditor(EMUCMD_MOVIE_PLAY_FROM_BEGINNING);
 #endif
 	} else if (movieMode != MOVIEMODE_INACTIVE)
@@ -1925,7 +1930,7 @@ void FCEUI_MoviePlayFromBeginning(void)
 			//currMovieData.loadSavestateFrom(&currMovieData.savestate); //TODO: make something like this work instead so it doesn't have to reload
 		}
 	}
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	SetMainWindowText();
 #endif
 }

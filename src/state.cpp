@@ -43,7 +43,7 @@
 #endif
 
 //TODO - we really need some kind of global platform-specific options api
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 #include "drivers/win/main.h"
 #include "drivers/win/cheat.h"
 #include "drivers/win/ram_search.h"
@@ -312,7 +312,7 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 
 				//MBG TODO - can this be moved to a better place?
 				//does it even make sense, displaying XBuf when its XBackBuf we just loaded?
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 				else
 				{
 					FCEUD_BlitScreen(XBuf);
@@ -795,7 +795,7 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 		}
 		#endif
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 #endif
 
@@ -874,7 +874,7 @@ void AddExState(void *v, uint32 s, int type, const char *desc)
 			std::string desc = tmp;
 			if(names.find(desc) != names.end())
 			{
-#ifdef _MSC_VER
+#ifdef __WIN_DRIVER__
 				MessageBox(NULL,"OH NO!!! YOU HAVE AN INVALID SFORMAT! POST A BUG TICKET ALONG WITH INFO ON THE ROM YOURE USING\n","OOPS",MB_OK);
 #else
 				printf("OH NO!!! YOU HAVE AN INVALID SFORMAT! POST A BUG TICKET ALONG WITH INFO ON THE ROM YOURE USING\n");

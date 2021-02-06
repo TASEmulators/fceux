@@ -239,7 +239,7 @@ int highPrecSleep( double timeSeconds )
 
 	ret = nanosleep( &req, &rem );
 #else
-	SDL_Delay( (long)(time_left * 1e3) );
+	SDL_Delay( (long)(timeSeconds * 1e3) );
 #endif
 	return ret;
 }

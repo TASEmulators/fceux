@@ -11,17 +11,16 @@ set(CMAKE_AUTOUIC ON)
 endif()
 
 if(WIN32)
-  set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_WIN})
-  include_directories( ${CMAKE_SOURCE_DIR}/src/drivers/win/directx ${CMAKE_SOURCE_DIR}/src/drivers/win/zlib )
-  add_definitions(
-    -DWIN32
-    -DFCEUDEF_DEBUGGER
-    -D_USE_SHARED_MEMORY_
-    -DPSS_STYLE=2
-    -DNOMINMAX
-        -D_S9XLUA_H
-  )
-  link_directories( ${CMAKE_SOURCE_DIR}/src/drivers/win/directx )
+     find_package(OpenGL REQUIRED)
+     find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+     add_definitions( ${Qt5Widgets_DEFINITIONS}  )
+     include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
+     add_definitions( -DMSVC )
+     add_definitions( -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
+     add_definitions( -DFCEUDEF_DEBUGGER )
+     include_directories( C:/SDL2/include )
+     include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
+	 set( SDL2_LDFLAGS  C:/SDL2/lib/x64/SDL2.lib )
 else(WIN32)
   # Non Windows System
   # UNIX (Linux or Mac OSX)
@@ -149,6 +148,24 @@ else(WIN32)
 
 endif(WIN32)
 
+set( ZLIB_SOURCE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/adler32.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/compress.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/crc32.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/deflate.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/gzio.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/infblock.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/infcodes.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/inffast.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/inflate.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/inftrees.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/infutil.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/trees.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/uncompr.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/unzip.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/zutil.c 
+	)
+
 include_directories( ${CMAKE_SOURCE_DIR}/src )
 include_directories( ${CMAKE_SOURCE_DIR}/src/drivers )
 
@@ -189,6 +206,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/wave.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/x6502.cpp
 	${LUA_ENGINE_SOURCE}
+	${ZLIB_SOURCE}
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/01-222.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/09-034a.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/103.cpp
@@ -403,8 +421,8 @@ set(SRC_DRIVERS_COMMON
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/vidblit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/os_utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/nes_ntsc.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/nesvideos-piece.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/rgbtorgb.cpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/nesvideos-piece.cpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/rgbtorgb.cpp
 )
 
 if ( ${GTK} )
@@ -514,13 +532,17 @@ else()
 target_link_libraries( ${APP_NAME}  
    ${Qt5Widgets_LIBRARIES}
    ${Qt5OpenGL_LIBRARIES}
-   ${OPENGL_LDFLAGS}
+   ${OPENGL_LDFLAGS}  OpenGL::GL
  	${SDL2_LDFLAGS}
 	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
 	${LUA_LDFLAGS}
  	${SYS_LIBS}
 )
 endif()
+
+target_link_libraries( ${APP_NAME} wsock32 ws2_32 )
+
+set_target_properties(${APP_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 
 if (APPLE)
 

@@ -24,6 +24,10 @@
 #include <string.h>
 #include <math.h>
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include <QApplication>
 #include <QScreen>
 #include <QMouseEvent>

@@ -23,11 +23,16 @@
 #include <string.h>
 #include <list>
 
+#ifdef WIN32
+#include <Windows.h>
+#endif
+
 #include <QTextEdit>
 #include <QFileDialog>
 #include <QMessageBox>
 
 #include "../../fceu.h"
+#include "../../common/os_utils.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -429,7 +434,7 @@ int LuaKillMessageBox(void)
 
 	while ( openLuaKillMsgBox )
 	{
-		usleep(100000);
+		msleep(100);
 	}
 	
 	return luaKillMsgBoxRetVal;

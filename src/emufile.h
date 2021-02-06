@@ -219,7 +219,7 @@ public:
 		reserve(pos+(s32)bytes);
 		memcpy(buf()+pos,ptr,bytes);
 		pos += (s32)bytes;
-		len = std::max(pos,len);
+		len = std::max<int>(pos,len);
 	}
 
 	virtual int fseek(int offset, int origin){
