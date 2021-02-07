@@ -52,6 +52,10 @@ class GamePadConfDialog_t : public QDialog
 
       int  portNum;
       int  buttonConfigStatus;
+      int  changeSeqStatus; // status of sequentally changing buttons mechanism
+        //    0 - we can start new change process
+        // 1-10 - changing in progress
+        //   -1 - changing is aborted
 
       void changeButton( int port, int button );
       void clearButton( int port, int button );
@@ -98,6 +102,7 @@ class GamePadConfDialog_t : public QDialog
       void saveProfileCallback(void);
       void deleteProfileCallback(void);
 		void updatePeriodic(void);
+        void changeSequentallyCallback(void);
 
 };
 
