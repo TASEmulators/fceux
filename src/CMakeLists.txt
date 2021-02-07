@@ -20,7 +20,9 @@ if(WIN32)
      add_definitions( -DFCEUDEF_DEBUGGER )
      include_directories( C:/SDL2/include )
      include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
-	 set( SDL2_LDFLAGS  C:/SDL2/lib/x64/SDL2.lib )
+     set( OPENGL_LDFLAGS  OpenGL::GL )
+     set( SDL2_LDFLAGS  C:/SDL2/lib/x64/SDL2.lib )
+     set( SYS_LIBS  wsock32 ws2_32 )
 else(WIN32)
   # Non Windows System
   # UNIX (Linux or Mac OSX)
@@ -58,6 +60,7 @@ else(WIN32)
   pkg_check_modules( MINIZIP REQUIRED minizip)
 
   if ( ${MINIZIP_FOUND} )
+	  message( STATUS "Using System minizip ${MINIZIP_VERSION}" )
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
   endif()
 
@@ -72,6 +75,7 @@ else(WIN32)
 
   # Check for zlib
   if ( ${ZLIB_FOUND} )
+	  message( STATUS "Using System zlib ${ZLIB_VERSION_STRING}" )
 	  #add_definitions( ${ZLIB_CFLAGS} )
 	  include_directories( ${ZLIB_INCLUDE_DIRS} )
   endif()
@@ -86,56 +90,6 @@ else(WIN32)
   # Check for LUA
   pkg_search_module( LUA lua5.1 lua-5.1 )
 
-  if ( ${LUA_FOUND} )
-     # Use System LUA
-	  message( STATUS "Using System Lua ${LUA_VERSION}" )
-
-	  add_definitions( -D_S9XLUA_H  ${LUA_CFLAGS} )
-
-	  set( LUA_ENGINE_SOURCE  ${CMAKE_CURRENT_SOURCE_DIR}/lua-engine.cpp )
-
-  else ()
-
-     # Use Internal LUA
-	  message( STATUS "Using Internal Lua" )
-
-     add_definitions( -D_S9XLUA_H  -I${CMAKE_CURRENT_SOURCE_DIR}/lua/src )
-
-	  set( LUA_ENGINE_SOURCE  
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lapi.c 
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lauxlib.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lbaselib.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lcode.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldblib.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldebug.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldo.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldump.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lfunc.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lgc.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/linit.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/liolib.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/llex.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lmathlib.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lmem.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/loadlib.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lobject.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lopcodes.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/loslib.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lparser.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lstate.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lstring.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lstrlib.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ltable.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ltablib.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ltm.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lundump.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lvm.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lzio.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/print.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/lua-engine.cpp 
-     )
-  endif()
-
   add_definitions( -DHAVE_ASPRINTF ) # What system wouldn't have this?
   #add_definitions( -DCREATE_AVI    ) 
 
@@ -148,23 +102,78 @@ else(WIN32)
 
 endif(WIN32)
 
-set( ZLIB_SOURCE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/adler32.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/compress.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/crc32.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/deflate.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/gzio.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/infblock.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/infcodes.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/inffast.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/inflate.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/inftrees.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/infutil.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/trees.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/uncompr.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/unzip.c 
-    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/zutil.c 
-	)
+if ( ${LUA_FOUND} )
+   # Use System LUA
+        message( STATUS "Using System Lua ${LUA_VERSION}" )
+
+        add_definitions( -D_S9XLUA_H  ${LUA_CFLAGS} )
+
+        set( LUA_ENGINE_SOURCE  ${CMAKE_CURRENT_SOURCE_DIR}/lua-engine.cpp )
+
+else ()
+
+   # Use Internal LUA
+        message( STATUS "Using Internal Lua" )
+
+   add_definitions( -D_S9XLUA_H  -I${CMAKE_CURRENT_SOURCE_DIR}/lua/src )
+
+        set( LUA_ENGINE_SOURCE  
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lapi.c 
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lauxlib.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lbaselib.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lcode.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldblib.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldebug.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldo.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ldump.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lfunc.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lgc.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/linit.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/liolib.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/llex.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lmathlib.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lmem.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/loadlib.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lobject.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lopcodes.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/loslib.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lparser.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lstate.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lstring.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lstrlib.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ltable.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ltablib.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/ltm.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lundump.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lvm.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lzio.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/print.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/lua-engine.cpp 
+   )
+endif()
+
+if ( NOT ${ZLIB_FOUND} )
+
+   message( STATUS "Using Internal zlib" )
+
+   set( ZLIB_SOURCE 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/adler32.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/compress.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/crc32.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/deflate.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/gzio.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/infblock.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/infcodes.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/inffast.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/inflate.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/inftrees.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/infutil.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/trees.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/uncompr.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/unzip.c 
+       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/zutil.c 
+   	)
+endif()
 
 include_directories( ${CMAKE_SOURCE_DIR}/src )
 include_directories( ${CMAKE_SOURCE_DIR}/src/drivers )
@@ -397,7 +406,6 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/input/lcdcompzapper.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/zapper.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/backward.cpp
-  	${CMAKE_CURRENT_SOURCE_DIR}/utils/ConvertUTF.c
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/xstring.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/crc32.cpp     
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/endian.cpp  
@@ -532,7 +540,7 @@ else()
 target_link_libraries( ${APP_NAME}  
    ${Qt5Widgets_LIBRARIES}
    ${Qt5OpenGL_LIBRARIES}
-   ${OPENGL_LDFLAGS}  OpenGL::GL
+   ${OPENGL_LDFLAGS}  
  	${SDL2_LDFLAGS}
 	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
 	${LUA_LDFLAGS}
@@ -540,9 +548,11 @@ target_link_libraries( ${APP_NAME}
 )
 endif()
 
-target_link_libraries( ${APP_NAME} wsock32 ws2_32 )
+if (WIN32)
+	#   target_link_libraries( ${APP_NAME} wsock32 ws2_32 )
 
-set_target_properties(${APP_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+   set_target_properties(${APP_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
 
 if (APPLE)
 

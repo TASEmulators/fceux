@@ -54,7 +54,7 @@
 #include "../../asm.h"
 #include "../../ppu.h"
 #include "../../x6502.h"
-#include "../../common/os_utils.h"
+#include "common/os_utils.h"
 #include "common/configSys.h"
 
 #include "Qt/main.h"

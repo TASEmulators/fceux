@@ -41,10 +41,14 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
-//#include <sys/time.h>
-//#include <sys/stat.h>
-//#include <sys/types.h>
+
+#ifdef WIN32
 #include <direct.h>
+#else
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
 
 static const char* HotkeyStrings[HK_MAX] = {
 		"CheatMenu",

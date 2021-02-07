@@ -8,6 +8,7 @@
 #include <io.h>
 #else
 #include <errno.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #endif
 

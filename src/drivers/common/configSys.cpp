@@ -4,7 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-//#include <dirent.h>
+#ifndef WIN32
+#include <dirent.h>
+#endif
 
 #include "../../types.h"
 #include "configSys.h"

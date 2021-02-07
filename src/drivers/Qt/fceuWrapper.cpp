@@ -48,12 +48,12 @@
 #include "../../fceu.h"
 #include "../../movie.h"
 #include "../../version.h"
-#include "../../common/os_utils.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
 #endif
 
+#include "common/os_utils.h"
 #include "common/configSys.h"
 #include "../../oldmovie.h"
 #include "../../types.h"

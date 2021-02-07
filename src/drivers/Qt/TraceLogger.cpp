@@ -41,7 +41,8 @@
 #include "../../ines.h"
 #include "../../nsf.h"
 #include "../../movie.h"
-#include "../../common/os_utils.h"
+
+#include "common/os_utils.h"
 
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/TraceLogger.h"
