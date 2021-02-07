@@ -16,7 +16,7 @@ if(WIN32)
      add_definitions( ${Qt5Widgets_DEFINITIONS}  )
      include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
      add_definitions( -DMSVC )
-     add_definitions( -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
+     add_definitions( -D__SDL__  -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
      add_definitions( -DFCEUDEF_DEBUGGER )
      include_directories( C:/SDL2/include )
      include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
@@ -69,15 +69,6 @@ else(WIN32)
   # Check for OpenGL
   if ( ${OPENGL_FOUND} )
 	include_directories( ${OPENGL_INCLUDE_DIR} )
-  endif()
-
-  #pkg_check_modules( ZLIB REQUIRED zlib) # Use built in find package instead for zlib
-
-  # Check for zlib
-  if ( ${ZLIB_FOUND} )
-	  message( STATUS "Using System zlib ${ZLIB_VERSION_STRING}" )
-	  #add_definitions( ${ZLIB_CFLAGS} )
-	  include_directories( ${ZLIB_INCLUDE_DIRS} )
   endif()
 
   # Check for SDL2
@@ -152,7 +143,12 @@ else ()
    )
 endif()
 
-if ( NOT ${ZLIB_FOUND} )
+if ( ${ZLIB_FOUND} )
+
+  message( STATUS "Using System zlib ${ZLIB_VERSION_STRING}" )
+  #add_definitions( ${ZLIB_CFLAGS} )
+  include_directories( ${ZLIB_INCLUDE_DIRS} )
+else()
 
    message( STATUS "Using Internal zlib" )
 

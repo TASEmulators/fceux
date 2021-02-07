@@ -405,7 +405,7 @@ void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
 }
 //----------------------------------------------------
 #ifdef  WIN32
-int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char* const format, ...) 
+int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char* format, ...) 
 #else
 int LuaPrintfToWindowConsole(const char *__restrict format, ...)  throw()
 #endif
