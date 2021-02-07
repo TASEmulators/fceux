@@ -7,8 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -414,8 +413,11 @@ BEGIN
     CONTROL         "",CTL_PALBRIGHT_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,78,133,70,15
     PUSHBUTTON      "Reset",BTN_PALETTE_RESET,161,132,50,14,WS_DISABLED
     GROUPBOX        "Preview",IDC_PALETTE_PREVIEW_GROUPBOX,10,157,208,68
-    CONTROL         "Color index",CHECK_PALETTE_COLOR_INDEX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,166,53,10
-    LTEXT           "                                                                                                                                                                 ",IDC_PALETTE_PREVIEW,15,178,198,43,NOT WS_VISIBLE
+    CONTROL         "Color index",CHECK_PALETTE_COLOR_INDEX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,166,49,10
+    LTEXT           "Current palette:",IDC_STATIC,70,167,53,8
+    LTEXT           "None",IDC_PALETTE_CURRENT,127,167,46,8
+    PUSHBUTTON      "Save...",BTN_PALETTE_SAVE,177,163,38,14
+    LTEXT           "",IDC_PALETTE_PREVIEW,15,178,198,43,NOT WS_VISIBLE
     LTEXT           "NTSC Color Emulation overrides Internal default Palette.\nIndividual Game Palette overrides Internal+NTSC Palettes.\nCustom Palette overrides all of the above.\nPAL Emulation overrides other choices when PAL filter is selected",IDC_STATIC,10,227,217,33
     DEFPUSHBUTTON   "Close",BUTTON_CLOSE,162,261,56,14
 END
@@ -3240,8 +3242,7 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

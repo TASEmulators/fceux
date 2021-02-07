@@ -114,9 +114,9 @@ struct DBGCOLORMENU {
 
 bool ChangeColor(HWND hwnd, DBGCOLORMENU* item)
 {
-	if (ChangeColor(hwnd, (COLORMENU*)item))
+	if (ChangeColor(hwnd, (CHOOSECOLORINFO*)item))
 	{
-		item->fmt->crTextColor = RGB(*item->menu.r, *item->menu.g, *item->menu.b);
+		item->fmt->crTextColor = RGB(*item->menu.info.r, *item->menu.info.g, *item->menu.info.b);
 		return true;
 	}
 	return false;

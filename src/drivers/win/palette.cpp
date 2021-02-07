@@ -1,11 +1,13 @@
 #include "../../version.h"
 #include "common.h"
-#include "../../palette.h"
 #include "main.h"
 #include "window.h"
 #include "gui.h"
+#include "../../palette.h"
+#include "memview.h"
 
 #define ToGrey(r, g, b) ((int)((float)(r) * 0.299F + (float)(g) * 0.587F + (float)(b) * 0.114F))
+#define GetPaletteIndex(x, y) ((x) > palpv->pvRect.left && (x) < palpv->pvRect.right && (y) > palpv->pvRect.top && (y) < palpv->pvRect.bottom ? floor((float)((x) - palpv->pvRect.left) / palpv->cell_width) + (int)floor((float)((y) - palpv->pvRect.top) / palpv->cell_height) * 16 : -1)
 
 int cpalette_count = 0;
 u8 cpalette[64*8*3] = {0};
@@ -17,6 +19,7 @@ extern int palbrightness;
 extern bool paldeemphswap;
 bool palcolorindex = false;
 HWND hWndPal = NULL;
+extern pal *palette, *rp2c04001, *rp2c04002, *rp2c04003, *rp2c05004, *palette_game, *palette_ntsc, *palette_user, *palette_unvarying;
 
 struct PALPV {
 	int mouse_index;
@@ -52,9 +55,9 @@ bool SetPalette(const char* nameo)
 *
 * @return Flag that indicates failure (0) or success (1)
 **/
-int LoadPaletteFile()
+int LoadPaletteFile(HWND hwnd)
 {
-	const char filter[]="All usable files (*.pal)\0*.pal\0All Files (*.*)\0*.*\0\0";
+	const char filter[]="Palette file (*.pal)\0*.pal\0All Files (*.*)\0*.*\0\0";
 
 	bool success = false;
 	char nameo[2048];
@@ -75,10 +78,54 @@ int LoadPaletteFile()
 	if(GetOpenFileName(&ofn))
 	{
 		success = SetPalette(nameo);
+		if (!success)
+			MessageBox(hwnd, "Error loading palette file.", "Load palette file", MB_OK | MB_ICONERROR);
 	}
 
 	return success;
 }
+
+/**
+* Prompts the user for a palette file and saves that file.
+* @return Flag that indicates failure (0) or success (1)
+**/
+int SavePaletteFile(HWND hwnd)
+{
+	const char filter[] = "Palette file (*.pal)\0*.pal\0All Files (*.*)\0*.*\0\0";
+
+	bool success = false;
+	char nameo[2048];
+
+	// Display save file dialog
+	OPENFILENAME ofn;
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hInstance = fceu_hInstance;
+	ofn.lpstrTitle = FCEU_NAME" Save Palette File...";
+	ofn.lpstrFilter = filter;
+	ofn.lpstrDefExt = "pal";
+	nameo[0] = 0;
+	ofn.lpstrFile = nameo;
+	ofn.nMaxFile = 256;
+	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.lpstrInitialDir = 0;
+
+	if (GetSaveFileName(&ofn))
+	{
+		FILE* pal_file = fopen(nameo, "wb");
+		if (pal_file)
+		{
+			fwrite(palo, 64 * 3, 1, pal_file);
+			fclose(pal_file);
+			success = true;
+		}
+		else
+			MessageBox(hwnd, "Error saving palette file.", "Save palette file", MB_OK | MB_ICONERROR);
+	}
+
+	return success;
+}
+
 /**
 * Notify the dialog to redraw the palette preview area
 **/
@@ -90,10 +137,7 @@ void InvalidatePalettePreviewRect(HWND hwnd)
 
 void UpdatePalettePreviewCaption(HWND hwnd, int x, int y)
 {
-	int mouse_index = -1;
-
-	if (x > palpv->pvRect.left && x < palpv->pvRect.right && y > palpv->pvRect.top && y < palpv->pvRect.bottom)
-		mouse_index = floor((float)(x -= palpv->pvRect.left) / palpv->cell_width) + (int)floor((float)(y -= palpv->pvRect.top) / palpv->cell_height) * 16;
+	int mouse_index = GetPaletteIndex(x, y);
 
 	if (palpv->mouse_index != mouse_index)
 	{
@@ -120,6 +164,33 @@ void UpdatePalettePreviewCaption(HWND hwnd)
 
 	palpv->mouse_index = -1;
 	UpdatePalettePreviewCaption(hwnd, p.x, p.y);
+
+}
+
+void UpdateCurrentPaletteName(HWND hwnd)
+{
+	if (!palo)
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "None");
+	else if (palo == (pal*)&palette)
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "NES Default");
+	else if (palo == (pal*)&rp2c04001)
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "RP2C04-01");
+	else if (palo == (pal*)&rp2c04002)
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "RP2C04-02");
+	else if (palo == (pal*)&rp2c04003)
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "RP2C04-03");
+	else if (palo == (pal*)&rp2c05004)
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "RC2C05-04");
+	else if (palo == (pal*)&palette_game)
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "Game specific");
+	else if (palo == (pal*)&palette_ntsc)
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "NTSC");
+	else if (palo == (pal*)&palette_user)
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "Custom");
+	else if (palo == (pal*)&palette_unvarying)
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "Internal");
+	else
+		SetDlgItemText(hwnd, IDC_PALETTE_CURRENT, "Unknown");
 }
 
 /**
@@ -132,6 +203,7 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 	{
 		case WM_INITDIALOG:
 		{
+
 			if(ntsccol_enable)
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_ENABLED, BST_CHECKED);
 
@@ -205,6 +277,9 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			palpv->pvBitmap = CreateCompatibleBitmap(hdc, palpv->pvSize.cx, palpv->pvSize.cy);
 			DeleteDC(memdc);
 			ReleaseDC(hwndDlg, hdc);
+
+			UpdateCurrentPaletteName(hwndDlg);
+			UpdatePalettePreviewCaption(hwndDlg);
 		}
 		break;
 		case WM_HSCROLL:
@@ -285,7 +360,7 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 					sprintf(palpv->buf, "%X", i);
 					SIZE str_size;
 					GetTextExtentPoint(memdc, palpv->buf, strlen(palpv->buf), &str_size);
-					TextOut(memdc, rect.left + (rect.right - rect.left - str_size.cx) / 2, rect.top + (rect.bottom - rect.top - str_size.cy) / 2, palpv->buf, strlen(palpv->buf));
+					ExtTextOut(memdc, rect.left + (rect.right - rect.left - str_size.cx) / 2, rect.top + (rect.bottom - rect.top - str_size.cy) / 2, NULL, NULL, palpv->buf, strlen(palpv->buf), NULL);
 				}
 			}
 
@@ -304,8 +379,52 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 				UpdatePalettePreviewCaption(hwndDlg, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 			break;
 
-//		case WM_LBUTTONDOWN:
-//			break;
+		case WM_LBUTTONDOWN:
+			if (palo && palpv->mouse_index != -1)
+			{
+				CHOOSECOLORINFO info;
+				char str[16];
+				sprintf(str, "$%02X", palpv->mouse_index);
+				info.name = str;
+
+				int r = palo[palpv->mouse_index].r;
+				int g = palo[palpv->mouse_index].g;
+				int b = palo[palpv->mouse_index].b;
+
+				info.r = &r;
+				info.g = &g;
+				info.b = &b;
+
+				if (ChangeColor(hwndDlg, &info))
+				{
+					if (palo[palpv->mouse_index].r != r || palo[palpv->mouse_index].g != g || palo[palpv->mouse_index].b != b)
+					{
+						if (eoptions & EO_CPALETTE)
+						{
+							palo[palpv->mouse_index].r = r;
+							palo[palpv->mouse_index].g = g;
+							palo[palpv->mouse_index].b = b;
+							FCEU_ResetPalette();
+						}
+						else
+						{
+							memcpy(cpalette, palo, 64 * 3);
+							pal* tmp_palo = (pal*)&cpalette;
+							tmp_palo[palpv->mouse_index].r = r;
+							tmp_palo[palpv->mouse_index].g = g;
+							tmp_palo[palpv->mouse_index].b = b;
+							FCEUI_SetUserPalette(cpalette, 64);
+							eoptions |= EO_CPALETTE;
+							UpdateCurrentPaletteName(hwndDlg);
+							CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
+						}
+
+						UpdatePalettePreviewCaption(hwndDlg);
+						InvalidatePalettePreviewRect(hwndDlg);
+					}
+				}
+			}
+			break;
 
 		case WM_CLOSE:
 		case WM_QUIT:
@@ -324,16 +443,23 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 							EnableWindow(GetDlgItem(hwndDlg, CTL_TINT_TEXT), ntsccol_enable);
 							EnableWindow(GetDlgItem(hwndDlg, CTL_HUE_TRACKBAR), ntsccol_enable);
 							EnableWindow(GetDlgItem(hwndDlg, CTL_TINT_TRACKBAR), ntsccol_enable);
+							UpdateCurrentPaletteName(hwndDlg);
+							UpdatePalettePreviewCaption(hwndDlg);
+							InvalidatePalettePreviewRect(hwndDlg);
 							break;
 
 						case CHECK_PALETTE_GRAYSCALE:
 							force_grayscale ^= 1;
 							FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
+							UpdatePalettePreviewCaption(hwndDlg);
+							InvalidatePalettePreviewRect(hwndDlg);
 							break;
 
 						case CHECK_DEEMPH_SWAP:
 							paldeemphswap ^= 1;
 							FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
+							UpdatePalettePreviewCaption(hwndDlg);
+							InvalidatePalettePreviewRect(hwndDlg);
 							break;
 
 						case CHECK_PALETTE_CUSTOM:
@@ -349,16 +475,28 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 								FCEUI_SetUserPalette(cpalette, 64); //just have to guess the size I guess
 								eoptions |= EO_CPALETTE;
 							}
+							UpdateCurrentPaletteName(hwndDlg);
+							UpdatePalettePreviewCaption(hwndDlg);
+							InvalidatePalettePreviewRect(hwndDlg);
 							break;
 
 						case CHECK_PALETTE_COLOR_INDEX:
 							palcolorindex ^= 1;
+							InvalidatePalettePreviewRect(hwndDlg);
 							break;
 
 						case BTN_PALETTE_LOAD:
-							if (!LoadPaletteFile())
-								return 0;
-							CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
+							if (LoadPaletteFile(hwndDlg))
+							{
+								CheckDlgButton(hwndDlg, CHECK_PALETTE_CUSTOM, BST_CHECKED);
+								UpdateCurrentPaletteName(hwndDlg);
+								UpdatePalettePreviewCaption(hwndDlg);
+								InvalidatePalettePreviewRect(hwndDlg);
+							}
+							break;
+
+						case BTN_PALETTE_SAVE:
+							SavePaletteFile(hwndDlg);
 							break;
 
 						case BTN_PALETTE_RESET:
@@ -388,6 +526,10 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 							SendDlgItemMessage(hwndDlg, CTL_PALBRIGHT_TRACKBAR, TBM_SETPOS, 1, palbrightness);
 
 							FCEUI_SetNTSCTH(ntsccol_enable, ntsctint, ntschue);
+
+							UpdatePalettePreviewCaption(hwndDlg);
+							InvalidatePalettePreviewRect(hwndDlg);
+
 							break;
 						}
 						case BUTTON_CLOSE:
@@ -399,8 +541,6 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 								free(palpv);
 								return 0;
 					}
-					UpdatePalettePreviewCaption(hwndDlg);
-					InvalidatePalettePreviewRect(hwndDlg);
 			}
 	}
 

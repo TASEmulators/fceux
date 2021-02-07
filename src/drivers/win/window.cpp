@@ -1127,6 +1127,8 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 			InvalidatePalettePreviewRect(hWndPal);
 			extern void UpdatePalettePreviewCaption(HWND);
 			UpdatePalettePreviewCaption(hWndPal);
+			extern void UpdateCurrentPaletteName(HWND);
+			UpdateCurrentPaletteName(hWndPal);
 		}
 	}
 	else

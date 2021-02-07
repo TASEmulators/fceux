@@ -513,7 +513,7 @@
 #define IDC_CHEAT_AUTOLOADSAVE          1013
 #define IDC_CHECK_SHORTCUT              1013
 #define IDC_CHECK_SYMBOLIC_ARRAY        1013
-#define CHECK_PALETTE_COLOR_INDEX               1013
+#define CHECK_PALETTE_COLOR_INDEX       1013
 #define IDC_RESTORE_BUTTON              1014
 #define MW_VAL04                        1014
 #define MW_NAME05                       1015
@@ -616,8 +616,10 @@
 #define MW_NAME17                       1051
 #define IDC_PALETTE_PREVIEW_GROUPBOX    1051
 #define MW_ADDR17                       1052
+#define IDC_PALETTE_CURRENT             1052
 #define IDC_CHRROM_TEXT                 1053
 #define MW_VAL17                        1053
+#define BTN_PALETTE_SAVE                1053
 #define MW_NAME18                       1054
 #define MW_ADDR18                       1055
 #define IDC_PRGRAM_TEXT                 1055
@@ -1232,7 +1234,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        313
 #define _APS_NEXT_COMMAND_VALUE         40012
-#define _APS_NEXT_CONTROL_VALUE         1052
+#define _APS_NEXT_CONTROL_VALUE         1054
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

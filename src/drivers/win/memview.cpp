@@ -2396,7 +2396,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case ID_COLOR_HEXEDITOR + 9:
 		{
 			int index = wParam - ID_COLOR_HEXEDITOR;
-			if (ChangeColor(hwnd, &hexcolormenu[index]))
+			if (ChangeColor(hwnd, (CHOOSECOLORINFO*)&hexcolormenu[index]))
 			{
 				UpdateColorTable();
 				ModifyColorMenu(hwnd, GetHexColorMenu(hwnd), &hexcolormenu[index], index, wParam);
@@ -2426,7 +2426,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case ID_COLOR_CDLOGGER + 9:
 		{
 			int index = wParam - ID_COLOR_CDLOGGER;
-			if (ChangeColor(hwnd, &cdlcolormenu[index]))
+			if (ChangeColor(hwnd, (CHOOSECOLORINFO*)&cdlcolormenu[index]))
 			{
 				UpdateColorTable();
 				ModifyColorMenu(hwnd, GetCdlColorMenu(hwnd), &cdlcolormenu[index], index, wParam);
@@ -3241,7 +3241,7 @@ void SwitchEditingText(int editingText) {
 	}
 }
 
-bool ChangeColor(HWND hwnd, COLORMENU* item)
+bool ChangeColor(HWND hwnd, CHOOSECOLORINFO* item)
 {
 	int backup = RGB(*item->r, *item->g, *item->b);
 	CHOOSECOLOR choose;
@@ -3272,15 +3272,16 @@ BOOL OpColorMenu(HWND hwnd, HMENU menu, COLORMENU* item, int pos, int id, BOOL (
 	memset(&info, 0, sizeof(MENUITEMINFO));
 	info.cbSize = sizeof(MENUITEMINFO);
 
-	if (item->text)
+	CHOOSECOLORINFO *color_info = (CHOOSECOLORINFO*)item;
+	if (color_info->name)
 	{
 
 		if (item->bitmap)
 			DeleteObject(item->bitmap);
-		item->bitmap = CreateColorMenuBitmap(hwnd, GetSystemMetrics(SM_CXMENUCHECK), GetSystemMetrics(SM_CYMENUCHECK), RGB(*item->r, *item->g, *item->b));
+		item->bitmap = CreateColorBitmap(hwnd, GetSystemMetrics(SM_CXMENUCHECK), GetSystemMetrics(SM_CYMENUCHECK), RGB(*color_info->r, *color_info->g, *color_info->b));
 
 		char menu_str[64];
-		sprintf(menu_str, "%s\t#%02X%02X%02X", item->text, *item->r, *item->g, *item->b);
+		sprintf(menu_str, "%s\t#%02X%02X%02X", color_info->name, *color_info->r, *color_info->g, *color_info->b);
 
 		info.dwTypeData = menu_str;
 		info.cch = strlen(menu_str);
@@ -3307,11 +3308,11 @@ UINT CALLBACK ChooseColorHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM l
 	{
 		case WM_INITDIALOG:
 		{
-			COLORMENU* item = (COLORMENU*)((CHOOSECOLOR*)lParam)->lCustData;
+			CHOOSECOLORINFO* item = (CHOOSECOLORINFO*)((CHOOSECOLOR*)lParam)->lCustData;
 
 			char title[128];
 			strcpy(title, "Choose color for ");
-			strcat(title, item->text);
+			strcat(title, item->name);
 			SetWindowText(hdlg, title);
 
 			icon = CreateChooseColorIcon(hdlg, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), RGB(*item->r, *item->g, *item->b));
@@ -3326,7 +3327,7 @@ UINT CALLBACK ChooseColorHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM l
 	return FALSE;
 }
 
-HBITMAP CreateColorMenuBitmap(HWND hwnd, int width, int height, COLORREF color)
+HBITMAP CreateColorBitmap(HWND hwnd, int width, int height, COLORREF color)
 {
 
 	HDC hdc = GetDC(hwnd);
@@ -3349,7 +3350,7 @@ HBITMAP CreateColorMenuBitmap(HWND hwnd, int width, int height, COLORREF color)
 HICON CreateChooseColorIcon(HWND hwnd, int width, int height, COLORREF color)
 {
 
-	HBITMAP bitmap = CreateColorMenuBitmap(hwnd, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), color);
+	HBITMAP bitmap = CreateColorBitmap(hwnd, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), color);
 
 	ICONINFO info;
 	memset(&info, 0, sizeof(ICONINFO));
