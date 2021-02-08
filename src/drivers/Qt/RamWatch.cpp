@@ -728,14 +728,14 @@ void ramWatch_t::updateMem (void)
 	}
 	else if (size == 2)
 	{
-		val.u16 = GetMem (addr) | (GetMem (addr + 1) << 8);
+		val.u16 = (GetMem (addr) << 8) | GetMem (addr + 1);
 	}
 	else
 	{
 		val.u8 = GetMem (addr);
 	}
 }
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------.----
 void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 {
 	int ret, isSep = 0;
