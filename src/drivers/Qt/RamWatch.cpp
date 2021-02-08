@@ -730,9 +730,12 @@ void ramWatch_t::updateMem (void)
 	{
 		val.u16 = (GetMem (addr) << 8) | GetMem (addr + 1);
 	}
-	else
+	else if (size == 4)
 	{
-		val.u8 = GetMem (addr);
+		val.u32  = GetMem (addr + 3);
+		val.u32 |= GetMem (addr + 2) << 8;
+		val.u32 |= GetMem (addr + 1) << 16;
+		val.u32 |= GetMem (addr    ) << 24;
 	}
 }
 //------------------------------------------------------------------------.----
