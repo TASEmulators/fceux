@@ -1243,7 +1243,14 @@ void RamSearchDialog_t::addRamWatchClicked(void)
    }
    strcpy( desc, "Quick Watch Add");
 
-   ramWatchList.add_entry( desc, addr, dpyType, dpySize, 0 );
+   int size = 1;
+   switch (dpySize) {
+   case 'd': size = 4; break;
+   case 'w': size = 2; break;
+   case 'b': size = 1; break;
+   default: break;
+   }
+   ramWatchList.add_entry( desc, addr, dpyType, size, 0 );
 
    openRamWatchWindow(consoleWindow);
 }
