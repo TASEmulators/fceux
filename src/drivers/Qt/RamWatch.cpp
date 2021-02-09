@@ -420,6 +420,18 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		   	}
 		   	sprintf (valStr2, "0x%08X", rw->val.u32);
 		   }
+		   else if (rw->size == 3)
+		   {
+		   	if (rw->type == 's')
+		   	{
+		   		sprintf (valStr1, "%i", rw->val.i24);
+		   	}
+		   	else
+		   	{
+		   		sprintf (valStr1, "%u", rw->val.u24);
+		   	}
+		   	sprintf (valStr2, "0x%06X", rw->val.u24);
+		   }
 		   else if (rw->size == 2)
 		   {
 		   	if (rw->type == 's')
@@ -730,6 +742,12 @@ void ramWatch_t::updateMem (void)
 	{
 		val.u16 = (GetMem (addr) << 8) | GetMem (addr + 1);
 	}
+	else if (size == 3)
+	{
+		val.u24  = GetMem (addr + 2);
+		val.u24 |= GetMem (addr + 1) << 8;
+		val.u24 |= GetMem (addr    ) << 16;
+	}
 	else if (size == 4)
 	{
 		val.u32  = GetMem (addr + 3);
@@ -738,7 +756,7 @@ void ramWatch_t::updateMem (void)
 		val.u32 |= GetMem (addr    ) << 24;
 	}
 }
-//------------------------------------------------------------------------.----
+//----------------------------------------------------------------------------
 void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 {
 	int ret, isSep = 0;
@@ -749,7 +767,7 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 	QLineEdit *addrEntry, *notesEntry;
 	QGroupBox *frame;
 	QRadioButton *signedTypeBtn, *unsignedTypeBtn;
-	QRadioButton *dataSize1Btn, *dataSize2Btn, *dataSize4Btn;
+	QRadioButton *dataSize1Btn, *dataSize2Btn, *dataSize3Btn, *dataSize4Btn;
 	QPushButton *cancelButton, *okButton;
 
 	if ( rw == NULL )
@@ -820,10 +838,12 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 
 	dataSize1Btn = new QRadioButton( tr("1 Byte") );
 	dataSize2Btn = new QRadioButton( tr("2 Bytes") );
+	dataSize3Btn = new QRadioButton( tr("3 Bytes") );
 	dataSize4Btn = new QRadioButton( tr("4 Bytes") );
 
 	vbox->addWidget( dataSize1Btn );
 	vbox->addWidget( dataSize2Btn );
+	vbox->addWidget( dataSize3Btn );
 	vbox->addWidget( dataSize4Btn );
 
 	hbox = new QHBoxLayout();
@@ -862,6 +882,7 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 			unsignedTypeBtn->setEnabled(false);
 			dataSize1Btn->setEnabled(false);
 			dataSize2Btn->setEnabled(false);
+			dataSize3Btn->setEnabled(false);
 			dataSize4Btn->setEnabled(false);
 		}
 		else
@@ -870,6 +891,7 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 	   	unsignedTypeBtn->setChecked( rw->type != 's' );
 			dataSize1Btn->setChecked( rw->size == 1 );
 			dataSize2Btn->setChecked( rw->size == 2 );
+			dataSize3Btn->setChecked( rw->size == 3 );
 			dataSize4Btn->setChecked( rw->size == 4 );
 		}
 	}
@@ -879,6 +901,7 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 	   unsignedTypeBtn->setChecked( false );
 		dataSize1Btn->setChecked( true );
 		dataSize2Btn->setChecked( false );
+		dataSize3Btn->setChecked( false );
 		dataSize4Btn->setChecked( false );
 	}
 
@@ -893,6 +916,10 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 		if ( dataSize4Btn->isChecked() )
 		{
 			size = 4;
+		}
+		else if ( dataSize3Btn->isChecked() )
+		{
+			size = 3;
 		}
 		else if ( dataSize2Btn->isChecked() )
 		{
@@ -1135,6 +1162,10 @@ void RamWatchDialog_t::saveWatchFile (const char *filename, int append )
 			{
 				sizeChar = 'd';
 			}
+			else if ( rw->size == 3 )
+			{
+				sizeChar = 't';
+			}
 			else if ( rw->size == 2 )
 			{
 				sizeChar = 'w';
@@ -1268,7 +1299,7 @@ void RamWatchDialog_t::loadWatchFile (const char *filename, int append )
 			printf ("Error: Invalid RAM Watch Byte Type: %c", t);
 			continue;
 		}
-		if (!isdigit (s) && (s != 's') && (s != 'b') && (s != 'w') && (s != 'd') )
+		if (!isdigit (s) && (s != 's') && (s != 'b') && (s != 't') && (s != 'w') && (s != 'd') )
 		{
 			printf ("Error: Invalid RAM Watch Byte Size: %c", s);
 			continue;
@@ -1285,6 +1316,10 @@ void RamWatchDialog_t::loadWatchFile (const char *filename, int append )
 		{
 			s = 2;
 		}
+		else if ( s == 't' )
+		{
+			s = 3;
+		}
 		else if ( s == 'd' )
 		{
 			s = 4;
@@ -1294,7 +1329,7 @@ void RamWatchDialog_t::loadWatchFile (const char *filename, int append )
 			s = s - '0';
 		}
 
-		if ((s != 1) && (s != 2) && (s != 4))
+		if ((s != 1) && (s != 2) && (s != 3) && (s != 4))
 		{
 			printf ("Error: Invalid RAM Watch Byte Size: %i", s);
 			continue;

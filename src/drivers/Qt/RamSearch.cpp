@@ -74,6 +74,10 @@ struct memoryState_t
 	union {
 	   int32_t    i;
 	   uint32_t   u;
+	} v24;
+	union {
+	   int32_t    i;
+	   uint32_t   u;
 	} v32;
 };
 
@@ -386,6 +390,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	ds1_btn = new QRadioButton( tr("1 Byte") );
 	ds2_btn = new QRadioButton( tr("2 Byte") );
+	ds3_btn = new QRadioButton( tr("3 Byte") );
 	ds4_btn = new QRadioButton( tr("4 Byte") );
 	misalignedCbox = new QCheckBox( tr("Check Misaligned") );
 	misalignedCbox->setEnabled(dpySize != 'b');
@@ -394,14 +399,17 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	ds1_btn->setChecked( dpySize == 'b' );
 	ds2_btn->setChecked( dpySize == 'w' );
+	ds3_btn->setChecked( dpySize == 't' );
 	ds4_btn->setChecked( dpySize == 'd' );
 
 	connect( ds1_btn, SIGNAL(clicked(void)), this, SLOT(ds1Clicked(void)));
 	connect( ds2_btn, SIGNAL(clicked(void)), this, SLOT(ds2Clicked(void)));
+	connect( ds3_btn, SIGNAL(clicked(void)), this, SLOT(ds3Clicked(void)));
 	connect( ds4_btn, SIGNAL(clicked(void)), this, SLOT(ds4Clicked(void)));
 
 	vbox->addWidget( ds1_btn );
 	vbox->addWidget( ds2_btn );
+	vbox->addWidget( ds3_btn );
 	vbox->addWidget( ds4_btn );
 	vbox->addWidget( misalignedCbox );
 
@@ -665,6 +673,20 @@ void RamSearchDialog_t::SearchRelative(void)
             }
          }
          break;
+         case 't':
+         {
+            if ( dpyType == 's')
+            {
+                x = loc->val.v24.i;
+                y = loc->hist.back().v24.i;
+            }
+            else
+            {
+                x = loc->val.v24.u;
+                y = loc->hist.back().v24.u;
+            }
+         }
+         break;
          case 'd':
          {
             if ( dpyType == 's')
@@ -790,6 +812,18 @@ void RamSearchDialog_t::SearchSpecificValue(void)
             else
             {
                x = loc->val.v16.u;
+            }
+         }
+         break;
+         case 't':
+         {
+            if ( dpyType == 's')
+            {
+               x = loc->val.v24.i;
+            }
+            else
+            {
+               x = loc->val.v24.u;
             }
          }
          break;
@@ -1065,6 +1099,7 @@ void RamSearchDialog_t::resetSearch(void)
 		memLoc[addr].addr      = addr;
 		memLoc[addr].val.v8.u  = GetMem(addr);
 		memLoc[addr].val.v16.u = ReadValueAtHardwareAddress(addr, 2);
+		memLoc[addr].val.v24.u = ReadValueAtHardwareAddress(addr, 3);
 		memLoc[addr].val.v32.u = ReadValueAtHardwareAddress(addr, 4);
 		memLoc[addr].elimMask  = 0;
 		memLoc[addr].chgCount  = 0;
@@ -1246,6 +1281,7 @@ void RamSearchDialog_t::addRamWatchClicked(void)
    int size = 1;
    switch (dpySize) {
    case 'd': size = 4; break;
+   case 't': size = 3; break;
    case 'w': size = 2; break;
    case 'b': size = 1; break;
    default: break;
@@ -1364,6 +1400,13 @@ void RamSearchDialog_t::ds2Clicked(void)
 	calcRamList();
 }
 //----------------------------------------------------------------------------
+void RamSearchDialog_t::ds3Clicked(void)
+{
+	dpySize = 't';
+	misalignedCbox->setEnabled(true);
+	calcRamList();
+}
+//----------------------------------------------------------------------------
 void RamSearchDialog_t::ds4Clicked(void)
 {
 	dpySize = 'd';
@@ -1400,6 +1443,10 @@ void RamSearchDialog_t::calcRamList(void)
 	{
 		dataSize = 4;
 	}
+	else if ( dpySize == 't' )
+	{
+		dataSize = 3;
+	}
 	else if ( dpySize == 'w' )
 	{
 		dataSize = 2;
@@ -1422,6 +1469,17 @@ void RamSearchDialog_t::calcRamList(void)
 					     (memLoc[addr+1].elimMask == 0)	&&
 					     (memLoc[addr+2].elimMask == 0)	&&
 					     (memLoc[addr+3].elimMask == 0)	)
+					{
+						actvSrchList.push_back( &memLoc[addr] );
+					}
+				}
+			break;
+			case 't':
+				if ( (addr+2) < endAddr )
+				{
+					if ( (memLoc[addr].elimMask == 0) &&
+					     (memLoc[addr+1].elimMask == 0) &&
+					     (memLoc[addr+2].elimMask == 0) )
 					{
 						actvSrchList.push_back( &memLoc[addr] );
 					}
@@ -1461,11 +1519,20 @@ void RamSearchDialog_t::updateRamValues(void)
 
 		val.v8.u  = GetMem(loc->addr);
 		val.v16.u = ReadValueAtHardwareAddress(loc->addr, 2);
+		val.v24.u = ReadValueAtHardwareAddress(loc->addr, 3);
 		val.v32.u = ReadValueAtHardwareAddress(loc->addr, 4);
 
 		if ( dpySize == 'd' )
 		{
 			if ( memLoc[loc->addr].val.v32.u != val.v32.u )
+			{
+				memLoc[loc->addr].val = val;
+				memLoc[loc->addr].chgCount++;
+			}
+		}
+		else if ( dpySize == 't' )
+		{
+			if ( memLoc[loc->addr].val.v24.u != val.v24.u )
 			{
 				memLoc[loc->addr].val = val;
 				memLoc[loc->addr].chgCount++;
@@ -1873,6 +1940,24 @@ void QRamSearchView::paintEvent(QPaintEvent *event)
 			{
 				sprintf( valStr , "%i", loc->val.v32.i );
 				sprintf( prevStr, "%i", loc->hist.back().v32.i );
+			}
+		}
+		else if ( dpySize == 't' )
+		{
+			if ( dpyType == 'h' )
+			{
+				sprintf( valStr , "0x%06X", loc->val.v24.u );
+				sprintf( prevStr, "0x%06X", loc->hist.back().v24.u );
+			}
+			else if ( dpyType == 'u' )
+			{
+				sprintf( valStr , "%u", loc->val.v24.u );
+				sprintf( prevStr, "%u", loc->hist.back().v24.u );
+			}
+			else
+			{
+				sprintf( valStr , "%i", loc->val.v24.i );
+				sprintf( prevStr, "%i", loc->hist.back().v24.i );
 			}
 		}
 		else if ( dpySize == 'w' )

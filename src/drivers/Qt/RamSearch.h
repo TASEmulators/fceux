@@ -103,6 +103,7 @@ class RamSearchDialog_t : public QDialog
 
 		QRadioButton *ds1_btn;
 		QRadioButton *ds2_btn;
+		QRadioButton *ds3_btn;
 		QRadioButton *ds4_btn;
 
 		QRadioButton *signed_btn;
@@ -150,6 +151,7 @@ class RamSearchDialog_t : public QDialog
 		void misalignedChanged(int state);
 		void ds1Clicked(void);
 		void ds2Clicked(void);
+		void ds3Clicked(void);
 		void ds4Clicked(void);
 		void signedTypeClicked(void);
 		void unsignedTypeClicked(void);
