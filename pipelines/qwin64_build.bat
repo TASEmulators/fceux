@@ -50,7 +50,12 @@ REM Create Zip Archive
 @if ERRORLEVEL 1 goto end
 
 cd %PROJECT_ROOT%\output
-%PROJECT_ROOT%\vc\zip -X -9 -u -r %PROJECT_ROOT%\vc\qfceux64.zip fceux.chm taseditor.chm palettes luaScripts tools
+%PROJECT_ROOT%\vc\zip -X -9 -u -r %PROJECT_ROOT%\vc\qfceux64.zip  palettes luaScripts tools
+@if ERRORLEVEL 1 goto end
+
+mkdir doc
+copy *.chm doc\.
+%PROJECT_ROOT%\vc\zip -X -9 -u -r %PROJECT_ROOT%\vc\qfceux64.zip  doc
 @if ERRORLEVEL 1 goto end
 
 cd %PROJECT_ROOT%
