@@ -15,7 +15,7 @@ if(WIN32)
      find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
      add_definitions( ${Qt5Widgets_DEFINITIONS}  )
      include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
-     add_definitions( -DMSVC )
+     add_definitions( -DMSVC -D_CRT_SECURE_NO_WARNINGS )
      add_definitions( -D__SDL__  -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
      add_definitions( -DFCEUDEF_DEBUGGER )
      include_directories( C:/SDL2/include )
@@ -496,10 +496,17 @@ endif()
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
 
+if (WIN32)
+add_custom_command( 
+	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp  
+	COMMAND  ${CMAKE_SOURCE_DIR}/scripts/genGitHdr.bat  ${CMAKE_CURRENT_BINARY_DIR} 
+	VERBATIM )
+else()
 add_custom_command( 
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp  
 	COMMAND  ${CMAKE_SOURCE_DIR}/scripts/genGitHdr.sh  ${CMAKE_CURRENT_BINARY_DIR} 
 	VERBATIM )
+endif()
 
 set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp PROPERTY SKIP_AUTOGEN ON)
 

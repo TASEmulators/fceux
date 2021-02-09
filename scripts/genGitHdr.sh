@@ -10,7 +10,7 @@ echo "Output File: $OUTPUT_DIR/$FILE";
 GIT_URL=`git config --get remote.origin.url`;
 GIT_REV=`git rev-parse HEAD`;
 
-echo "// fceux_gitrev.cpp -- DO NOT EDIT: This file is auto-generated at build" >| $TMP_FILE;
+echo "// fceux_git_info.cpp -- DO NOT EDIT: This file is auto-generated at build" >| $TMP_FILE;
 echo "#include \"Qt/fceux_git_info.h\" " >> $TMP_FILE;
 echo "#define FCEUX_GIT_URL  \"$GIT_URL\" " >> $TMP_FILE;
 echo "#define FCEUX_GIT_REV  \"$GIT_REV\" " >> $TMP_FILE;
