@@ -9,6 +9,9 @@ environment:
   - job_name: Windows 64
     appveyor_build_worker_image: Visual Studio 2019
 
+  - job_name: Windows 64 Qt/SDL
+    appveyor_build_worker_image: Visual Studio 2019
+
   - job_name: Ubuntu
     appveyor_build_worker_image: Ubuntu2004
     #appveyor_build_worker_image: Ubuntu1804
@@ -33,6 +36,14 @@ for:
 
     build_script:
     - cmd: pipelines/win64_build.bat
+
+  -
+    matrix:
+      only:
+        - job_name: Windows 64 Qt/SDL
+
+    build_script:
+    - cmd: pipelines/qwin64_build.bat
 
   -
     matrix:
