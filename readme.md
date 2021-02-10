@@ -7,6 +7,7 @@ An open source NES Emulator for Windows and Unix that features solid emulation a
 Interim builds:
 * Win32: [fceux.zip](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux.zip?branch=master&job=Windows%2032)
 * Win64: [fceux64.zip](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux64.zip?branch=master&job=Windows%2064)
+* Win64 Qt/SDL: [qfceux64.zip](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/qfceux64.zip?branch=master&job=Win64%20Qt)
 * Ubuntu: [fceux-2.3.0-amd64.deb](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux-2.3.0-amd64.deb?branch=master&job=Ubuntu)
 * MacOSX: [fceux-2.3.0-Darwin.dmg](https://ci.appveyor.com/api/projects/zeromus/fceux/artifacts/fceux-2.3.0-Darwin.dmg?branch=master&job=MacOS)
 * Status: [Appveyor](https://ci.appveyor.com/project/zeromus/fceux/)
