@@ -288,8 +288,8 @@ void SaveCDLogFile()
 	if (loadedcdfile[0] == 0)
 	{
 		char nameo[2048];
-		strcpy(nameo, GetRomName().c_str());
-		strcat(nameo, mass_replace(GetRomPath(), "|", ".").c_str());
+		strcpy(nameo, GetRomPath().c_str());
+		strcat(nameo, mass_replace(GetRomName(), "|", ".").c_str());
 		strcat(nameo, ".cdl");
 		RenameCDLog(nameo);
 	}
@@ -499,7 +499,7 @@ void CDLoggerROMChanged()
 
 	// try to load respective CDL file
 	char nameo[2048];
-	strcpy(nameo, GetRomName().c_str());
+	strcpy(nameo, GetRomPath().c_str());
 	strcat(nameo, mass_replace(GetRomName(), "|", ".").c_str());
 	strcat(nameo, ".cdl");
 
