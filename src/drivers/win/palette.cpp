@@ -19,7 +19,7 @@ extern int palbrightness;
 extern bool paldeemphswap;
 bool palcolorindex = false;
 HWND hWndPal = NULL;
-extern pal *palette, *rp2c04001, *rp2c04002, *rp2c04003, *rp2c05004, *palette_game, *palette_ntsc, *palette_user, *palette_unvarying;
+extern pal palette[512], rp2c04001[512], rp2c04002[512], rp2c04003[512], rp2c05004[512], palette_game[64*8], palette_ntsc[64*8], palette_user[64*8], palette_unvarying[23];
 
 struct PALPV {
 	int mouse_index;

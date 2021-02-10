@@ -3251,7 +3251,7 @@ bool ChangeColor(HWND hwnd, CHOOSECOLORINFO* item)
 	choose.rgbResult = backup;
 	choose.lCustData = (LPARAM)item;
 	choose.lpCustColors = custom_color;
-	choose.lpfnHook = ChooseColorHookProc;
+	choose.lpfnHook = (LPCCHOOKPROC)ChooseColorHookProc;
 	choose.Flags = CC_RGBINIT | CC_FULLOPEN | CC_ANYCOLOR | CC_ENABLEHOOK;
 	if (ChooseColor(&choose) && choose.rgbResult != backup)
 	{
