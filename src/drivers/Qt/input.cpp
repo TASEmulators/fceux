@@ -1160,7 +1160,7 @@ DTestButton (ButtConfig * bc)
 }
 
 
-#define MK(x)       {BUTTC_KEYBOARD,0,MKK(x),0}
+#define MK(x)       {BUTTC_KEYBOARD,0,(x),0}
 //#define MK2(x1,x2)  {BUTTC_KEYBOARD,0,MKK(x1)}
 #define MKZ()       {0,0,-1,0}
 #define GPZ()       {MKZ(), MKZ(), MKZ(), MKZ()}
@@ -1269,15 +1269,15 @@ UpdateGamepad(void)
 
 static ButtConfig powerpadsc[2][12] = {
 	{
-		MK (O), MK (P), MK (BRACKET_LEFT),
-		MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
-		MK (APOSTROPHE),
-		MK (M), MK (COMMA), MK (PERIOD), MK (SLASH)},
+		MK (SDLK_O), MK (SDLK_P), MK (SDLK_BRACKET_LEFT),
+		MK (SDLK_BRACKET_RIGHT), MK (SDLK_K), MK (SDLK_L), MK (SDLK_SEMICOLON),
+		MK (SDLK_APOSTROPHE),
+		MK (SDLK_M), MK (SDLK_COMMA), MK (SDLK_PERIOD), MK (SDLK_SLASH)},
 	{
-		MK (O), MK (P), MK (BRACKET_LEFT),
-		MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
-		MK (APOSTROPHE),
-		MK (M), MK (COMMA), MK (PERIOD), MK (SLASH)}
+		MK (SDLK_O), MK (SDLK_P), MK (SDLK_BRACKET_LEFT),
+		MK (SDLK_BRACKET_RIGHT), MK (SDLK_K), MK (SDLK_L), MK (SDLK_SEMICOLON),
+		MK (SDLK_APOSTROPHE),
+		MK (SDLK_M), MK (SDLK_COMMA), MK (SDLK_PERIOD), MK (SDLK_SLASH)}
 };
 
 static uint32 powerpadbuf[2] = { 0, 0 };
@@ -1525,24 +1525,23 @@ void InitInputInterface ()
 	FCEUI_SetInputFourscore ((eoptions & EO_FOURSCORE) != 0);
 }
 
-
 static ButtConfig fkbmap[0x48] = {
-	MK (F1), MK (F2), MK (F3), MK (F4), MK (F5), MK (F6), MK (F7), MK (F8),
-	MK (1), MK (2), MK (3), MK (4), MK (5), MK (6), MK (7), MK (8), MK (9),
-	MK (0),
-	MK (MINUS), MK (EQUAL), MK (BACKSLASH), MK (BACKSPACE),
-	MK (ESCAPE), MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y), MK (U), MK (I),
-	MK (O),
-	MK (P), MK (GRAVE), MK (BRACKET_LEFT), MK (ENTER),
-	MK (LEFTCONTROL), MK (A), MK (S), MK (D), MK (F), MK (G), MK (H), MK (J),
-	MK (K),
-	MK (L), MK (SEMICOLON), MK (APOSTROPHE), MK (BRACKET_RIGHT), MK (INSERT),
-	MK (LEFTSHIFT), MK (Z), MK (X), MK (C), MK (V), MK (B), MK (N), MK (M),
-	MK (COMMA),
-	MK (PERIOD), MK (SLASH), MK (RIGHTALT), MK (RIGHTSHIFT), MK (LEFTALT),
-	MK (SPACE)
-	//MK (DELETE), MK (END), MK (PAGEDOWN),
-	//MK (CURSORUP), MK (CURSORLEFT), MK (CURSORRIGHT), MK (CURSORDOWN)
+	MK (SDLK_F1), MK (SDLK_F2), MK (SDLK_F3), MK (SDLK_F4), MK (SDLK_F5), MK (SDLK_F6), MK (SDLK_F7), MK (SDLK_F8),
+	MK (SDLK_1), MK (SDLK_2), MK (SDLK_3), MK (SDLK_4), MK (SDLK_5), MK (SDLK_6), MK (SDLK_7), MK (SDLK_8), MK (SDLK_9),
+	MK (SDLK_0),
+	MK (SDLK_MINUS), MK (SDLK_EQUAL), MK (SDLK_BACKSLASH), MK (SDLK_BACKSPACE),
+	MK (SDLK_ESCAPE), MK (SDLK_Q), MK (SDLK_W), MK (SDLK_E), MK (SDLK_R), MK (SDLK_T), MK (SDLK_Y), MK (SDLK_U), MK (SDLK_I),
+	MK (SDLK_O),
+	MK (SDLK_P), MK (SDLK_GRAVE), MK (SDLK_BRACKET_LEFT), MK (SDLK_ENTER),
+	MK (SDLK_LEFTCONTROL), MK (SDLK_A), MK (SDLK_S), MK (SDLK_D), MK (SDLK_F), MK (SDLK_G), MK (SDLK_H), MK (SDLK_J),
+	MK (SDLK_K),
+	MK (SDLK_L), MK (SDLK_SEMICOLON), MK (SDLK_APOSTROPHE), MK (SDLK_BRACKET_RIGHT), MK (SDLK_INSERT),
+	MK (SDLK_LEFTSHIFT), MK (SDLK_Z), MK (SDLK_X), MK (SDLK_C), MK (SDLK_V), MK (SDLK_B), MK (SDLK_N), MK (SDLK_M),
+	MK (SDLK_COMMA),
+	MK (SDLK_PERIOD), MK (SDLK_SLASH), MK (SDLK_RIGHTALT), MK (SDLK_RIGHTSHIFT), MK (SDLK_LEFTALT),
+	MK (SDLK_SPACE),
+	MK (SDLK_DELETE), MK (SDLK_END), MK (SDLK_PAGEDOWN),
+	MK (SDLK_CURSORUP), MK (SDLK_CURSORLEFT), MK (SDLK_CURSORRIGHT), MK (SDLK_CURSORDOWN)
 };
 
 /**
@@ -1564,7 +1563,7 @@ static void UpdateFKB ()
 }
 
 static ButtConfig HyperShotButtons[4] = {
-	MK (Q), MK (W), MK (E), MK (R)
+	MK (SDLK_Q), MK (SDLK_W), MK (SDLK_E), MK (SDLK_R)
 };
 
 /**
@@ -1586,9 +1585,9 @@ UpdateHyperShot ()
 }
 
 static ButtConfig MahjongButtons[21] = {
-	MK (Q), MK (W), MK (E), MK (R), MK (T),
-	MK (A), MK (S), MK (D), MK (F), MK (G), MK (H), MK (J), MK (K), MK (L),
-	MK (Z), MK (X), MK (C), MK (V), MK (B), MK (N), MK (M)
+	MK (SDLK_Q), MK (SDLK_W), MK (SDLK_E), MK (SDLK_R), MK (SDLK_T),
+	MK (SDLK_A), MK (SDLK_S), MK (SDLK_D), MK (SDLK_F), MK (SDLK_G), MK (SDLK_H), MK (SDLK_J), MK (SDLK_K), MK (SDLK_L),
+	MK (SDLK_Z), MK (SDLK_X), MK (SDLK_C), MK (SDLK_V), MK (SDLK_B), MK (SDLK_N), MK (SDLK_M)
 };
 
 /**
@@ -1610,7 +1609,7 @@ UpdateMahjong ()
 }
 
 static ButtConfig QuizKingButtons[6] = {
-	MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y)
+	MK (SDLK_Q), MK (SDLK_W), MK (SDLK_E), MK (SDLK_R), MK (SDLK_T), MK (SDLK_Y)
 };
 
 /**
@@ -1633,7 +1632,7 @@ UpdateQuizKing ()
 }
 
 static ButtConfig TopRiderButtons[8] = {
-	MK (Q), MK (W), MK (E), MK (R), MK (T), MK (Y), MK (U), MK (I)
+	MK (SDLK_Q), MK (SDLK_W), MK (SDLK_E), MK (SDLK_R), MK (SDLK_T), MK (SDLK_Y), MK (SDLK_U), MK (SDLK_I)
 };
 
 /**
@@ -1654,10 +1653,10 @@ UpdateTopRider ()
 }
 
 static ButtConfig FTrainerButtons[12] = {
-	MK (O), MK (P), MK (BRACKET_LEFT),
-	MK (BRACKET_RIGHT), MK (K), MK (L), MK (SEMICOLON),
-	MK (APOSTROPHE),
-	MK (M), MK (COMMA), MK (PERIOD), MK (SLASH)
+	MK (SDLK_O), MK (SDLK_P), MK (SDLK_BRACKET_LEFT),
+	MK (SDLK_BRACKET_RIGHT), MK (SDLK_K), MK (SDLK_L), MK (SDLK_SEMICOLON),
+	MK (SDLK_APOSTROPHE),
+	MK (SDLK_M), MK (SDLK_COMMA), MK (SDLK_PERIOD), MK (SDLK_SLASH)
 };
 
 /**
