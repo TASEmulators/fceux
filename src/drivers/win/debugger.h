@@ -57,11 +57,14 @@ public:
 	HFONT hFixedFont;
 	int fixedFontWidth;
 	int fixedFontHeight;
+	int fixedFontLineHeight;
 
 	HFONT hIDAFont;
+	int IDAFontLineHeight;
 
 	HFONT hDisasmFont;
-	int disasmFontHeight;
+
+	int disasmLineHeight;
 
 	HFONT hHexeditorFont;
 	int HexeditorFontWidth;
