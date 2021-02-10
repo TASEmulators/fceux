@@ -328,6 +328,10 @@ InitConfig()
 	char* home_dir = getenv("HOME");
 	if ( home_dir == NULL )
 	{
+		home_dir = getenv("HOMEPATH");
+	}
+	if ( home_dir == NULL )
+	{
 		home_dir = "";
 	}
 	// prefixed with _ because they are internal (not cli options)
