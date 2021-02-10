@@ -131,6 +131,10 @@ typedef uint32_t uint32;
 
 #endif
 
+#if defined(WIN32) && !defined(__QT_DRIVER__)
+#define  __WIN_DRIVER__
+#endif
+
 
 typedef void (*writefunc)(uint32 A, uint8 V);
 typedef uint8 (*readfunc)(uint32 A);

@@ -25,10 +25,12 @@
 #include <string.h>
 #include <string>
 
+#ifndef WIN32
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#endif
 
 #include <SDL.h>
 #include <QHeaderView>
@@ -47,6 +49,7 @@
 //----------------------------------------------------------------------------
 static bool hasNicePermissions( int val )
 {
+#ifndef WIN32
 	int usrID;
 	bool usrRoot;
 
@@ -74,6 +77,7 @@ static bool hasNicePermissions( int val )
 	}
 #endif
 
+#endif
 	return false;
 }
 //----------------------------------------------------------------------------
@@ -103,9 +107,13 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	emuSchedPrioLabel  = new QLabel( tr("Priority (RT)") );
 	emuSchedNiceLabel  = new QLabel( tr("Priority (Nice)") );
 
+#ifndef WIN32
 	emuSchedPolicyBox->addItem( tr("SCHED_OTHER") , SCHED_OTHER );
 	emuSchedPolicyBox->addItem( tr("SCHED_FIFO")  , SCHED_FIFO  );
 	emuSchedPolicyBox->addItem( tr("SCHED_RR")    , SCHED_RR    );
+#else
+	emuSchedPolicyBox->addItem( tr("TODO") , 0 );
+#endif
 
 	grid->addWidget( new QLabel( tr("Policy") ), 0, 0 );
 	grid->addWidget( emuSchedPolicyBox, 0, 1 );
@@ -126,9 +134,13 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	guiSchedPrioLabel  = new QLabel( tr("Priority (RT)") );
 	guiSchedNiceLabel  = new QLabel( tr("Priority (Nice)") );
 
+#ifndef WIN32
 	guiSchedPolicyBox->addItem( tr("SCHED_OTHER") , SCHED_OTHER );
 	guiSchedPolicyBox->addItem( tr("SCHED_FIFO")  , SCHED_FIFO  );
 	guiSchedPolicyBox->addItem( tr("SCHED_RR")    , SCHED_RR    );
+#else
+	guiSchedPolicyBox->addItem( tr("TODO") , 0 );
+#endif
 
 	grid->addWidget( new QLabel( tr("Policy") ), 0, 0 );
 	grid->addWidget( guiSchedPolicyBox, 0, 1 );
@@ -199,6 +211,7 @@ void TimingConfDialog_t::emuSchedCtlChange( int state )
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::saveValues(void)
 {
+#ifndef WIN32
 	int policy, prio, nice;
 
 	if ( consoleWindow == NULL )
@@ -226,10 +239,12 @@ void TimingConfDialog_t::saveValues(void)
 	//printf("GUI Sched: %i  %i  %i\n", policy, prio, nice );
 
 	g_config->save();
+#endif
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::emuSchedNiceChange(int val)
 {
+#ifndef WIN32
 	if ( consoleWindow == NULL )
 	{
 		return;
@@ -253,10 +268,12 @@ void TimingConfDialog_t::emuSchedNiceChange(int val)
 		updateSliderValues();
 	}
 	fceuWrapperUnLock();
+#endif
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::emuSchedPrioChange(int val)
 {
+#ifndef WIN32
 	int policy, prio;
 
 	if ( consoleWindow == NULL )
@@ -284,10 +301,12 @@ void TimingConfDialog_t::emuSchedPrioChange(int val)
 		updateSliderValues();
 	}
 	fceuWrapperUnLock();
+#endif
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::emuSchedPolicyChange( int index )
 {
+#ifndef WIN32
 	int policy, prio;
 
 	if ( consoleWindow == NULL )
@@ -320,10 +339,12 @@ void TimingConfDialog_t::emuSchedPolicyChange( int index )
 	updateSliderLimits();
 	updateSliderValues();
 	fceuWrapperUnLock();
+#endif
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::guiSchedNiceChange(int val)
 {
+#ifndef WIN32
 	if ( consoleWindow == NULL )
 	{
 		return;
@@ -347,10 +368,12 @@ void TimingConfDialog_t::guiSchedNiceChange(int val)
 		updateSliderValues();
 	}
 	fceuWrapperUnLock();
+#endif
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::guiSchedPrioChange(int val)
 {
+#ifndef WIN32
 	int policy, prio;
 
 	if ( consoleWindow == NULL )
@@ -378,10 +401,12 @@ void TimingConfDialog_t::guiSchedPrioChange(int val)
 		updateSliderValues();
 	}
 	fceuWrapperUnLock();
+#endif
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::guiSchedPolicyChange( int index )
 {
+#ifndef WIN32
 	int policy, prio;
 
 	if ( consoleWindow == NULL )
@@ -414,10 +439,12 @@ void TimingConfDialog_t::guiSchedPolicyChange( int index )
 	updateSliderLimits();
 	updateSliderValues();
 	fceuWrapperUnLock();
+#endif
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::updatePolicyBox(void)
 {
+#ifndef WIN32
 	int policy, prio;
 
 	if ( consoleWindow == NULL )
@@ -445,11 +472,12 @@ void TimingConfDialog_t::updatePolicyBox(void)
 			guiSchedPolicyBox->setCurrentIndex( j );
 		}
 	}
-
+#endif
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::updateSliderValues(void)
 {
+#ifndef WIN32
 	int policy, prio;
 	bool hasNicePerms;
 
@@ -496,7 +524,7 @@ void TimingConfDialog_t::updateSliderValues(void)
 
 	guiSchedNiceLabel->setEnabled( hasNicePerms );
 	guiSchedNiceSlider->setEnabled( hasNicePerms );
-
+#endif
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::updateSliderLimits(void)
@@ -506,6 +534,7 @@ void TimingConfDialog_t::updateSliderLimits(void)
 		return;
 	}
 
+#ifndef WIN32
 	emuSchedNiceSlider->setMinimum( -20 );
 	emuSchedNiceSlider->setMaximum(  20 );
 	emuSchedPrioSlider->setMinimum( consoleWindow->emulatorThread->getMinSchedPriority() );
@@ -515,6 +544,7 @@ void TimingConfDialog_t::updateSliderLimits(void)
 	guiSchedNiceSlider->setMaximum(  20 );
 	guiSchedPrioSlider->setMinimum( consoleWindow->getMinSchedPriority() );
 	guiSchedPrioSlider->setMaximum( consoleWindow->getMaxSchedPriority() );
+#endif
 
 }
 //----------------------------------------------------------------------------

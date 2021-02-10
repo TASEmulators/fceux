@@ -7,3 +7,4 @@ int fceu_mkpath( const char *path );
 
 bool fceu_file_exists( const char *filepath );
 
+int msleep( int ms );

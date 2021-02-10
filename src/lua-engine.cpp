@@ -14,6 +14,7 @@
 #endif
 
 #ifdef WIN32
+#include <Windows.h>
 #include <direct.h>
 #define SetCurrentDir _chdir
 #endif
@@ -38,7 +39,7 @@
 
 extern char FileBase[];
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 #include "drivers/win/common.h"
 #include "drivers/win/main.h"
 #include "drivers/win/taseditor/selection.h"
@@ -81,7 +82,7 @@ void fceuWrapperRequestAppExit(void);
 
 bool CheckLua()
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	HMODULE mod = LoadLibrary("lua51.dll");
 	if(!mod)
 	{
@@ -96,7 +97,7 @@ bool CheckLua()
 
 bool DemandLua()
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	if(!CheckLua())
 	{
 		MessageBox(NULL, "lua51.dll was not found. Please get it into your PATH or in the same directory as fceux.exe", "FCEUX", MB_OK | MB_ICONERROR);
@@ -145,7 +146,7 @@ extern "C"
  #endif
 #endif
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 extern void AddRecentLuaFile(const char *filename);
 #endif
 
@@ -187,7 +188,7 @@ static void(*info_print)(intptr_t uid, const char* str);
 static void(*info_onstart)(intptr_t uid);
 static void(*info_onstop)(intptr_t uid);
 static intptr_t info_uid;
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void TaseditorDisableManualFunctionIfNeeded();
@@ -202,7 +203,13 @@ int LuaKillMessageBox(void);
 int LuaPrintfToWindowConsole(const char *__restrict format, ...) 
                   __THROWNL __attribute__ ((__format__ (__printf__, 1, 2)));
 #else
+
+#ifdef WIN32
+int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char * format, ...);
+#else
 int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw();
+#endif
+
 #endif
 
 #endif
@@ -331,7 +338,7 @@ static void FCEU_LuaOnStop()
 	//	FCEUI_ToggleEmulationPause();
 
 	//zero 21-nov-2014 - this variable doesnt exist outside windows so it cant have this feature
-	#ifdef _MSC_VER
+	#ifdef __WIN_DRIVER__
 	if (fps_scale != 256)							//thanks, we already know it's on normal speed
 		FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);	//TODO: Ideally lua returns the speed to the speed the user set before running the script
 													//rather than returning it to normal, and turbo off.  Perhaps some flags and a FCEUD_GetEmulationSpeed function
@@ -339,7 +346,7 @@ static void FCEU_LuaOnStop()
 
 	turbo = false;
 	//FCEUD_TurboOff();
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	TaseditorDisableManualFunctionIfNeeded();
 #endif
 }
@@ -451,7 +458,7 @@ static int emu_poweron(lua_State *L) {
 }
 
 static int emu_debuggerloop(lua_State *L) {
-	#ifdef WIN32
+	#ifdef __WIN_DRIVER__
 	extern void win_debuggerLoop();
 		win_debuggerLoop();
 	#endif
@@ -459,7 +466,7 @@ static int emu_debuggerloop(lua_State *L) {
 }
 
 static int emu_debuggerloopstep(lua_State *L) {
-	#ifdef WIN32
+	#ifdef __WIN_DRIVER__
 	extern void win_debuggerLoopStep();
 		win_debuggerLoopStep();
 	#endif
@@ -603,7 +610,7 @@ extern void ReloadRom(void);
 //  If the rom can't be loaded, loads the most recent one.
 static int emu_loadrom(lua_State *L) 
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	const char* str = lua_tostring(L,1);
 
 	//special case: reload rom
@@ -630,10 +637,13 @@ static int emu_loadrom(lua_State *L)
 	const char *nameo2 = luaL_checkstring(L,1);
 	char nameo[2048];
 
+	#ifndef WIN32
 	if ( realpath( nameo2, nameo ) == NULL )
 	{
 		strncpy(nameo, nameo2, sizeof(nameo));
 	}
+	#endif
+
 	//printf("Attempting to Load ROM: '%s'\n", nameo );
 	if (!LoadGame(nameo, true)) 
 	{
@@ -1366,7 +1376,7 @@ void CallRegisteredLuaSaveFunctions(int savestateNumber, LuaSaveData& saveData)
 				// This is grounds for trashing the function
 				lua_pushnil(L);
 				lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_BEFORESAVE]);
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 				MessageBox(hAppWnd, lua_tostring(L, -1), "Lua Error in SAVE function", MB_OK);
 #else
 				LuaPrintfToWindowConsole("Lua error in registersave function: %s\n", lua_tostring(L, -1));
@@ -1393,7 +1403,7 @@ void CallRegisteredLuaLoadFunctions(int savestateNumber, const LuaSaveData& save
 
 		if (lua_isfunction(L, -1))
 		{
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 			// since the scriptdata can be very expensive to load
 			// (e.g. the registered save function returned some huge tables)
 			// check the number of parameters the registered load function expects
@@ -1419,7 +1429,7 @@ void CallRegisteredLuaLoadFunctions(int savestateNumber, const LuaSaveData& save
 				// This is grounds for trashing the function
 				lua_pushnil(L);
 				lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_AFTERLOAD]);
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 				MessageBox(hAppWnd, lua_tostring(L, -1), "Lua Error in LOAD function", MB_OK);
 #else
 				LuaPrintfToWindowConsole("Lua error in registerload function: %s\n", lua_tostring(L, -1));
@@ -2061,7 +2071,7 @@ void HandleCallbackError(lua_State* L)
 		sprintf(errmsg, "%s\n%s", lua_tostring(L,-1), trace);
 
 		// Error?
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 		MessageBox( hAppWnd, errmsg, "Lua run error", MB_OK | MB_ICONSTOP);
 #else
 		LuaPrintfToWindowConsole("Lua thread bombed out: %s\n", errmsg);
@@ -2304,7 +2314,7 @@ void TaseditorManualFunction()
 	CallRegisteredLuaFunctions(LUACALL_TASEDITOR_MANUAL);
 }
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 void TaseditorDisableManualFunctionIfNeeded()
 {
 	if (L)
@@ -2426,7 +2436,7 @@ static int memory_registerexec(lua_State *L)
 
 //adelikat: table pulled from GENS.  credz nitsuja!
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 const char* s_keyToName[256] =
 {
 	NULL,
@@ -2540,7 +2550,7 @@ const char* s_keyToName[256] =
 static int input_get(lua_State *L) {
 	lua_newtable(L);
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	// keyboard and mouse button status
 	{
 		extern int EnableBackgroundInput;
@@ -2753,7 +2763,7 @@ static int joypad_getimmediate(lua_State *L)
 		luaL_error(L,"Invalid input port (valid range 1-4, specified %d)", which);
 	}
 	// Currently only supports Windows, sorry...
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	extern uint32 GetGamepadPressedImmediate();
 	uint8 buttons = GetGamepadPressedImmediate() >> ((which - 1) * 8);
 
@@ -3664,7 +3674,7 @@ static inline bool str2colour(uint32 *colour, lua_State *L, const char *str) {
 		int color;
 		sscanf(str+1, "%X", &color);
 		int len = strlen(str+1);
-		int missing = std::max(0, 8-len);
+		int missing = std::max<int>(0, 8-len);
 		color <<= missing << 2;
 		if(missing >= 2) color |= 0xFF;
 		*colour = color;
@@ -4240,10 +4250,10 @@ static void PutTextInternal (const char *str, int len, short x, short y, int col
 				}
 				else if(backOpac)
 				{
-					for(int y3 = std::max(0,y2-1); y3 <= std::min(6,y2+1); y3++)
+					for(int y3 = std::max<int>(0,y2-1); y3 <= std::min<int>(6,y2+1); y3++)
 					{
 						unsigned int glyphLine = *((unsigned int*)Cur_Glyph + y3);
-						for(int x3 = std::max(0,x2-1); x3 <= std::min(3,x2+1); x3++)
+						for(int x3 = std::max<int>(0,x2-1); x3 <= std::min<int>(3,x2+1); x3++)
 						{
 							int shift = x3 << 3;
 							int mask = 0xFF << shift;
@@ -4446,9 +4456,9 @@ void LuaDrawTextTransWH(const char *str, size_t l, int &x, int y, uint32 color, 
 		return;
 
 	size_t len = l;
-	int defaultAlpha = std::max(0, std::min(transparencyModifier, 255));
+	int defaultAlpha = std::max<int>(0, std::min<int>(transparencyModifier, 255));
 	int diffx;
-	int diffy = std::max(0, std::min(7, LUA_SCREEN_HEIGHT - y));
+	int diffy = std::max<int>(0, std::min<int>(7, LUA_SCREEN_HEIGHT - y));
 
 	while(*str && len && y < LUA_SCREEN_HEIGHT)
 	{
@@ -4465,7 +4475,7 @@ void LuaDrawTextTransWH(const char *str, size_t l, int &x, int y, uint32 color, 
 		{
 			x = origX;
 			y += 8;
-			diffy = std::max(0, std::min(7, LUA_SCREEN_HEIGHT - y));
+			diffy = std::max<int>(0, std::min<int>(7, LUA_SCREEN_HEIGHT - y));
 			continue;
 		}
 		else if(c == '\t') // just in case
@@ -4475,9 +4485,9 @@ void LuaDrawTextTransWH(const char *str, size_t l, int &x, int y, uint32 color, 
 			continue;
 		}
 
-		diffx = std::max(0, std::min(7, LUA_SCREEN_WIDTH - x));
+		diffx = std::max<int>(0, std::min<int>(7, LUA_SCREEN_WIDTH - x));
 		int ch  = FixJoedChar(c);
-		int wid = std::min(diffx, JoedCharWidth(c));
+		int wid = std::min<int>(diffx, JoedCharWidth(c));
 
 		for(int y2 = 0; y2 < diffy; y2++)
 		{
@@ -4941,7 +4951,7 @@ static int taseditor_registermanual(lua_State *L)
 	lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
 	lua_insert(L,1);
 	lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	taseditor_lua.enableRunFunction(caption);
 #endif
 	return 1;
@@ -4950,7 +4960,7 @@ static int taseditor_registermanual(lua_State *L)
 // bool taseditor.engaged()
 static int taseditor_engaged(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushboolean(L, taseditor_lua.engaged());
 #else
 	lua_pushboolean(L, false);
@@ -4961,7 +4971,7 @@ static int taseditor_engaged(lua_State *L)
 // bool taseditor.markedframe(int frame)
 static int taseditor_markedframe(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushboolean(L, taseditor_lua.markedframe(luaL_checkinteger(L, 1)));
 #else
 	lua_pushboolean(L, false);
@@ -4972,7 +4982,7 @@ static int taseditor_markedframe(lua_State *L)
 // int taseditor.getmarker(int frame)
 static int taseditor_getmarker(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getmarker(luaL_checkinteger(L, 1)));
 #else
 	lua_pushinteger(L, -1);
@@ -4983,7 +4993,7 @@ static int taseditor_getmarker(lua_State *L)
 // int taseditor.setmarker(int frame)
 static int taseditor_setmarker(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.setmarker(luaL_checkinteger(L, 1)));
 #else
 	lua_pushinteger(L, -1);
@@ -4994,7 +5004,7 @@ static int taseditor_setmarker(lua_State *L)
 // taseditor.removemarker(int frame)
 static int taseditor_removemarker(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	taseditor_lua.removemarker(luaL_checkinteger(L, 1));
 #endif
 	return 0;
@@ -5003,7 +5013,7 @@ static int taseditor_removemarker(lua_State *L)
 // string taseditor.getnote(int index)
 static int taseditor_getnote(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushstring(L, taseditor_lua.getnote(luaL_checkinteger(L, 1)));
 #else
 	lua_pushnil(L);
@@ -5014,7 +5024,7 @@ static int taseditor_getnote(lua_State *L)
 // taseditor.setnote(int index, string newtext)
 static int taseditor_setnote(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	taseditor_lua.setnote(luaL_checkinteger(L, 1), luaL_checkstring(L, 2));
 #endif
 	return 0;
@@ -5023,7 +5033,7 @@ static int taseditor_setnote(lua_State *L)
 // int taseditor.getcurrentbranch()
 static int taseditor_getcurrentbranch(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getcurrentbranch());
 #else
 	lua_pushinteger(L, -1);
@@ -5034,7 +5044,7 @@ static int taseditor_getcurrentbranch(lua_State *L)
 // string taseditor.getrecordermode()
 static int taseditor_getrecordermode(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushstring(L, taseditor_lua.getrecordermode());
 #else
 	lua_pushnil(L);
@@ -5045,7 +5055,7 @@ static int taseditor_getrecordermode(lua_State *L)
 // int taseditor.getsuperimpose()
 static int taseditor_getsuperimpose(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getsuperimpose());
 #else
 	lua_pushinteger(L, -1);
@@ -5056,7 +5066,7 @@ static int taseditor_getsuperimpose(lua_State *L)
 // int taseditor.getlostplayback()
 static int taseditor_getlostplayback(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getlostplayback());
 #else
 	lua_pushinteger(L, -1);
@@ -5067,7 +5077,7 @@ static int taseditor_getlostplayback(lua_State *L)
 // int taseditor.getplaybacktarget()
 static int taseditor_getplaybacktarget(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getplaybacktarget());
 #else
 	lua_pushinteger(L, -1);
@@ -5078,7 +5088,7 @@ static int taseditor_getplaybacktarget(lua_State *L)
 // taseditor.setplayback(int frame)
 static int taseditor_setplayback(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	taseditor_lua.setplayback(luaL_checkinteger(L, 1));
 #endif
 	return 0;
@@ -5087,7 +5097,7 @@ static int taseditor_setplayback(lua_State *L)
 // taseditor.stopseeking()
 static int taseditor_stopseeking(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	taseditor_lua.stopseeking();
 #endif
 	return 0;
@@ -5096,7 +5106,7 @@ static int taseditor_stopseeking(lua_State *L)
 // table taseditor.getselection()
 static int taseditor_getselection(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	// create temp vector and provide its reference to TAS Editor for filling the vector with data
 	std::vector<int> cur_set;
 	taseditor_lua.getselection(cur_set);
@@ -5122,7 +5132,7 @@ static int taseditor_getselection(lua_State *L)
 // taseditor.setselection(table new_set)
 static int taseditor_setselection(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	std::vector<int> cur_set;
 	// retrieve new_set data from table to vector
 	if (!lua_isnil(L, 1))
@@ -5147,7 +5157,7 @@ static int taseditor_setselection(lua_State *L)
 // int taseditor.getinput(int frame, int joypad)
 static int taseditor_getinput(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getinput(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2)));
 #else
 	lua_pushinteger(L, -1);
@@ -5158,7 +5168,7 @@ static int taseditor_getinput(lua_State *L)
 // taseditor.submitinputchange(int frame, int joypad, int input)
 static int taseditor_submitinputchange(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	taseditor_lua.submitinputchange(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
 #endif
 	return 0;
@@ -5167,7 +5177,7 @@ static int taseditor_submitinputchange(lua_State *L)
 // taseditor.submitinsertframes(int frame, int joypad, int input)
 static int taseditor_submitinsertframes(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	taseditor_lua.submitinsertframes(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
 #endif
 	return 0;
@@ -5176,7 +5186,7 @@ static int taseditor_submitinsertframes(lua_State *L)
 // taseditor.submitdeleteframes(int frame, int joypad, int input)
 static int taseditor_submitdeleteframes(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	taseditor_lua.submitdeleteframes(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
 #endif
 	return 0;
@@ -5185,7 +5195,7 @@ static int taseditor_submitdeleteframes(lua_State *L)
 // int taseditor.applyinputchanges([string name])
 static int taseditor_applyinputchanges(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	if (lua_isnil(L, 1))
 	{
 		lua_pushinteger(L, taseditor_lua.applyinputchanges(""));
@@ -5206,7 +5216,7 @@ static int taseditor_applyinputchanges(lua_State *L)
 // taseditor.clearinputchanges()
 static int taseditor_clearinputchanges(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	taseditor_lua.clearinputchanges();
 #endif
 	return 0;
@@ -5216,7 +5226,7 @@ static int taseditor_clearinputchanges(lua_State *L)
 
 static int cdl_loadcdlog(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	const char *nameo = luaL_checkstring(L, 1);
 	lua_pushinteger(L, LoadCDLog(nameo));
 #else
@@ -5227,7 +5237,7 @@ static int cdl_loadcdlog(lua_State *L)
 
 static int cdl_loadfile(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	LoadCDLogFile();
 #endif
 	return 0;
@@ -5235,7 +5245,7 @@ static int cdl_loadfile(lua_State *L)
 
 static int cdl_savecdlogfile(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	SaveCDLogFile();
 #endif
 	return 0;
@@ -5243,7 +5253,7 @@ static int cdl_savecdlogfile(lua_State *L)
 
 static int cdl_savecdlogfileas(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	const char *nameo = luaL_checkstring(L, 1);
 	RenameCDLog(nameo);
 	SaveCDLogFile();
@@ -5253,7 +5263,7 @@ static int cdl_savecdlogfileas(lua_State *L)
 
 static int cdl_docdlogger(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushinteger(L, DoCDLogger());
 #else
 	lua_pushinteger(L, 0);
@@ -5263,7 +5273,7 @@ static int cdl_docdlogger(lua_State *L)
 
 static int cdl_pausecdlogging(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	lua_pushinteger(L, PauseCDLogging());
 #else
 	lua_pushinteger(L, 0);
@@ -5273,7 +5283,7 @@ static int cdl_pausecdlogging(lua_State *L)
 
 static int cdl_startcdlogging(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	StartCDLogging();
 #endif
 	return 0;
@@ -5281,7 +5291,7 @@ static int cdl_startcdlogging(lua_State *L)
 
 static int cdl_resetcdlog(lua_State *L)
 {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	ResetCDLog();
 #endif
 	return 0;
@@ -5322,7 +5332,7 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	static const char * const titles [] = {"Notice", "Question", "Warning", "Error"};
 	const char* answer = "ok";
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	static const int etypes [] = {MB_OK, MB_YESNO, MB_YESNOCANCEL, MB_OKCANCEL, MB_ABORTRETRYIGNORE};
 	static const int eicons [] = {MB_ICONINFORMATION, MB_ICONQUESTION, MB_ICONWARNING, MB_ICONERROR};
 	//StopSound(); //mbg merge 7/27/08
@@ -5503,7 +5513,7 @@ use_console:
 }
 
 static int doOpenFilePopup(lua_State *L, bool saveFile) {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	char filename[PATH_MAX];
 	OPENFILENAME ofn;
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -5714,7 +5724,7 @@ bool luabitop_validate(lua_State *L) // originally named as luaopen_bit
   if (b != (UBits)1437217655L || BAD_SAR) {  /* Perform a simple self-test. */
 	const char *msg = "compiled with incompatible luaconf.h";
 #ifdef LUA_NUMBER_DOUBLE
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	if (b == (UBits)1610612736L)
 	  msg = "use D3DCREATE_FPU_PRESERVE with DirectX";
 #endif
@@ -5763,7 +5773,7 @@ static void FCEU_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 
 		int kill = 0;
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 		// Uh oh
 				//StopSound(); //mbg merge 7/23/08
 		int ret = MessageBox(hAppWnd, "The Lua script running has been running a long time. It may have gone crazy. Kill it?\n\n(No = don't check anymore either)", "Lua Script Gone Nuts?", MB_YESNO);
@@ -5819,7 +5829,7 @@ static int emu_exec_count(lua_State *L) {
 	return 1;
 }
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 static HANDLE readyEvent, goEvent;
 DWORD WINAPI emu_exec_time_proc(LPVOID lpParameter)
 {
@@ -6183,7 +6193,7 @@ void FCEU_LuaFrameBoundary()
 		sprintf(errmsg, "%s\n%s", lua_tostring(thread,-1), trace);
 
 		// Error?
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 				//StopSound();//StopSound(); //mbg merge 7/23/08
 		MessageBox( hAppWnd, errmsg, "Lua run error", MB_OK | MB_ICONSTOP);
 #else
@@ -6206,7 +6216,7 @@ void FCEU_LuaFrameBoundary()
 		FCEU_LuaOnStop();
 	}
 
-#if defined(__linux) || defined(__APPLE__) || defined(__unix__)
+#ifndef __WIN_DRIVER__
 	if (exitScheduled)
 	{  // This function does not exit immediately, 
 		// it requests for the application to exit when next convenient.
@@ -6255,7 +6265,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 
 		L = lua_open();
 		luaL_openlibs(L);
-		#if defined( WIN32) && !defined(NEED_MINGW_HACKS)
+		#if defined( __WIN_DRIVER__) && !defined(NEED_MINGW_HACKS)
 		iuplua_open(L);
 		iupcontrolslua_open(L);
 		luaopen_winapi(L);
@@ -6334,7 +6344,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 	int result = luaL_loadfile(L,filename);
 
 	if (result) {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 		// Doing this here caused nasty problems; reverting to MessageBox-from-dialog behavior.
 				//StopSound();//StopSound(); //mbg merge 7/23/08
 		MessageBox(NULL, lua_tostring(L,-1), "Lua load error", MB_OK | MB_ICONSTOP);
@@ -6348,7 +6358,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 			lua_settop(L,0);
 		return 0; // Oh shit.
 	}
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	AddRecentLuaFile(filename); //Add the filename to our recent lua menu
 #endif
 
@@ -6372,7 +6382,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 	// Set up our protection hook to be executed once every 10,000 bytecode instructions.
 	//lua_sethook(thread, FCEU_LuaHookFunction, LUA_MASKCOUNT, 10000);
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 	info_print = PrintToWindowConsole;
 	info_onstart = WinLuaOnStart;
 	info_onstop = WinLuaOnStop;
@@ -6402,7 +6412,7 @@ void FCEU_ReloadLuaCode()
 {
 	if (!luaScriptName)
 	{
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 		// no script currently running, then try loading the most recent
 		extern char *recent_lua[];
 		char*& fname = recent_lua[0];
@@ -6458,7 +6468,7 @@ void FCEU_LuaStop() {
 
 	//sometimes iup uninitializes com
 	//MBG TODO - test whether this is really necessary. i dont think it is
-	#ifdef WIN32
+	#ifdef __WIN_DRIVER__
 	CoInitialize(0);
 	#endif
 
@@ -6554,7 +6564,7 @@ void FCEU_LuaGui(uint8 *XBuf)
 		numTries = 1000;
 		int ret = lua_pcall(L, 0, 0, 0);
 		if (ret != 0) {
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 			//StopSound();//StopSound(); //mbg merge 7/23/08
 			MessageBox(hAppWnd, lua_tostring(L, -1), "Lua Error in GUI function", MB_OK);
 #else

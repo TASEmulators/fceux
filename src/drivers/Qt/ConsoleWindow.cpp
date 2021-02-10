@@ -53,6 +53,7 @@
 #include "Qt/GamePadConf.h"
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
+#include "Qt/PaletteEditor.h"
 #include "Qt/GuiConf.h"
 #include "Qt/MoviePlay.h"
 #include "Qt/MovieOptions.h"
@@ -144,6 +145,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	if ( opt )
 	{
+		#ifndef WIN32
 		int policy, prio, nice;
 
 		g_config->getOption( "SDL.GuiSchedPolicy", &policy );
@@ -153,6 +155,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		setNicePriority( nice );
 
 		setSchedParam( policy, prio );
+		#endif
 	}
 }
 
@@ -752,6 +755,14 @@ void consoleWin_t::createMainMenu(void)
 	//act->setShortcut( QKeySequence(tr("Shift+F7")));
 	act->setStatusTip(tr("Open Frame Timing Window"));
 	connect(act, SIGNAL(triggered()), this, SLOT(openTimingStatWin(void)) );
+
+	toolsMenu->addAction(act);
+
+	// Tools -> Palette Editor
+	act = new QAction(tr("Palette Editor ..."), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Open Palette Editor Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openPaletteEditorWin(void)) );
 
 	toolsMenu->addAction(act);
 
@@ -1433,6 +1444,17 @@ void consoleWin_t::openTimingStatWin(void)
    tmStatWin->show();
 }
 
+void consoleWin_t::openPaletteEditorWin(void)
+{
+	PaletteEditorDialog_t *win;
+
+	//printf("Open Palette Editor Window\n");
+	
+   win = new PaletteEditorDialog_t(this);
+	
+   win->show();
+}
+
 void consoleWin_t::openMovieOptWin(void)
 {
 	MovieOptionsDialog_t *win;
@@ -1963,6 +1985,7 @@ void consoleWin_t::openMsgLogWin(void)
    return;
 }
 
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 int consoleWin_t::setNicePriority( int value )
 {
 	int ret = 0;
@@ -2115,6 +2138,7 @@ int consoleWin_t::setSchedParam( int policy, int priority )
 #endif
 	return ret;
 }
+#endif
 
 void consoleWin_t::syncActionConfig( QAction *act, const char *property )
 {
@@ -2212,6 +2236,7 @@ void emulatorThread_t::init(void)
 
 	if ( opt )
 	{
+		#ifndef WIN32
 		int policy, prio, nice;
 
 		g_config->getOption( "SDL.EmuSchedPolicy", &policy );
@@ -2221,6 +2246,7 @@ void emulatorThread_t::init(void)
 		setNicePriority( nice );
 
 		setSchedParam( policy, prio );
+		#endif
 	}
 }
 
@@ -2234,6 +2260,7 @@ void emulatorThread_t::setPriority( QThread::Priority priority_req )
 	//printf("Set Priority: %i \n", priority() );
 }
 
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
 int emulatorThread_t::setNicePriority( int value )
 {
 	int ret = 0;
@@ -2364,6 +2391,7 @@ int emulatorThread_t::setSchedParam( int policy, int priority )
 #endif
 	return ret;
 }
+#endif
 
 void emulatorThread_t::run(void)
 {

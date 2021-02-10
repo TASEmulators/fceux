@@ -83,6 +83,7 @@ int closeGamePadConfWindow(void)
 //----------------------------------------------------
 GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	: QDialog( parent )
+	, changeSeqStatus(0)
 {
 	QWidget *mainWidget;
 	QVBoxLayout *mainLayout;
@@ -98,6 +99,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    QPushButton *removeProfileButton;
    QPushButton *clearAllButton;
    QPushButton *closebutton;
+   QPushButton *changeSeqButton = nullptr;
    QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
 	QScrollArea *scroll;
 	QStyle      *style;
@@ -267,11 +269,14 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
    clearAllButton     = new QPushButton(tr("Clear All"));
    closebutton        = new QPushButton(tr("Close"));
+   changeSeqButton    = new QPushButton(tr("Change Sequentially"));
 
 	clearAllButton->setIcon( style->standardIcon( QStyle::SP_LineEditClearButton ) );
 	closebutton->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
+	changeSeqButton->setIcon( style->standardIcon( QStyle::QStyle::SP_ArrowDown ) );
 
 	hbox4->addWidget( clearAllButton    );
+	hbox4->addWidget( changeSeqButton   );
 	hbox4->addWidget( closebutton       );
 
    connect(button[0], SIGNAL(clicked()), this, SLOT(changeButton0(void)) );
@@ -303,6 +308,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
    connect(clearAllButton   , SIGNAL(clicked()), this, SLOT(clearAllCallback(void)) );
    connect(closebutton      , SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
+   connect(changeSeqButton  , SIGNAL(clicked()), this, SLOT(changeSequentallyCallback(void)) );
 
    connect(portSel    , SIGNAL(activated(int)), this, SLOT(portSelect(int)) );
    connect(devSel     , SIGNAL(activated(int)), this, SLOT(deviceSelect(int)) );
@@ -557,14 +563,19 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
    ButtonConfigBegin ();
 
    button[x]->setText("Waiting" );
+   button[x]->setStyleSheet("background-color: green; color: white;");
 
 	DWaitButton (NULL, &GamePad[padNo].bmap[x], &buttonConfigStatus );
 
-   keyNameStr = ButtonName( &GamePad[padNo].bmap[x] );
+    button[x]->setText("Change");
+    button[x]->setStyleSheet("");
 
-   keyName[x]->setText( keyNameStr );
-   button[x]->setText("Change");
-	lcl[padNo].btn[x].needsSave = 1;
+    if (buttonConfigStatus != 0)
+    {
+        keyNameStr = ButtonName( &GamePad[padNo].bmap[x] );
+        keyName[x]->setText( keyNameStr );
+        lcl[padNo].btn[x].needsSave = 1;
+    }
 
    ButtonConfigEnd ();
 
@@ -582,6 +593,17 @@ void GamePadConfDialog_t::clearButton( int padNo, int x )
 //----------------------------------------------------
 void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
 {
+    if (changeSeqStatus != 0)
+    {
+        // change sequentially still in progress
+        // now try to abort its progress
+        changeSeqStatus = -1;
+        // ... out from waiting gamepad button event loop
+        buttonConfigStatus = 0;
+        // and ignore this event
+        event->ignore();
+        return;
+    }
 	promptToSave();
 
    printf("GamePad Close Window Event\n");
@@ -593,7 +615,17 @@ void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------
 void GamePadConfDialog_t::closeWindow(void)
 {
-	promptToSave();
+    if (changeSeqStatus != 0)
+    {
+        // change sequentially still in progress
+        // now try to abort its progress
+        changeSeqStatus = -1;
+        // ... out from waiting gamepad button event loop
+        buttonConfigStatus = 0;
+        return;
+    }
+
+    promptToSave();
 
    printf("Close Window\n");
    buttonConfigStatus = 0;
@@ -947,6 +979,34 @@ void GamePadConfDialog_t::updatePeriodic(void)
 		efs_chkbox->setChecked( fourScore );
 	}
 }
+
+//----------------------------------------------------
+
+void GamePadConfDialog_t::changeSequentallyCallback(void)
+{
+    // get pointer to button
+    QPushButton* changeSeqButton = qobject_cast<QPushButton*>(sender());
+    if (!changeSeqButton)
+        return;
+
+    // disable it for user input
+    changeSeqButton->setEnabled(false);
+
+    // change button for every button on gamepad
+    for (int i = 0; i < GAMEPAD_NUM_BUTTONS; ++i)
+    {
+        changeSeqStatus += 1;
+        if (this->isHidden()) break;
+        changeButton(portNum, i);
+        if (this->isHidden()) break;
+        // abort?
+        if (changeSeqStatus == -1) break;
+    }
+    // return all back
+    changeSeqStatus = 0;
+    changeSeqButton->setEnabled(true);
+}
+
 //----------------------------------------------------
 GamePadConfigButton_t::GamePadConfigButton_t(int i)
 {

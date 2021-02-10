@@ -37,7 +37,7 @@
 #include "fceulua.h"
 #endif
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 #include "drivers/win/common.h" //For DirectX constants
 #include "drivers/win/input.h"
 #endif
@@ -289,7 +289,7 @@ void FCEU_PutImage(void)
 			uint32 ci = 0;
 			uint32 color;
 
-#ifdef WIN32
+#ifdef __WIN_DRIVER__
 			// This doesn't work in anything except windows for now.
 			// It doesn't get set anywhere in other ports.
 			if (!oldInputDisplay)

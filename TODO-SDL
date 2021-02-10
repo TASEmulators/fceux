@@ -62,7 +62,7 @@ QT
 ===
    * Clean out rest of old GTK comments and #ifdefs
 	* GUI Debug Tools Pretty Much Done
-   * GUI should compile in windows as well.... but testing is not a priority since the windows gui already has a totally separate backend.
+   * GUI now compiles in windows as well.
 
 BUGS
 ====

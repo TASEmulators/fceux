@@ -34,18 +34,18 @@
 #include <string>
 #include "common/configSys.h"
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <cstring>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <cerrno>
-#include <fcntl.h>
 
 #ifdef WIN32
 #include <winsock.h>
 #else
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>

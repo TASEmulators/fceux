@@ -23,6 +23,10 @@
 #include <string.h>
 #include <list>
 
+#ifdef WIN32
+#include <Windows.h>
+#endif
+
 #include <QTextEdit>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -32,6 +36,8 @@
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
 #endif
+
+#include "common/os_utils.h"
 
 #include "Qt/LuaControl.h"
 #include "Qt/main.h"
@@ -399,7 +405,7 @@ void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
 }
 //----------------------------------------------------
 #ifdef  WIN32
-int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char* const format, ...) 
+int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char* format, ...) 
 #else
 int LuaPrintfToWindowConsole(const char *__restrict format, ...)  throw()
 #endif
@@ -429,7 +435,7 @@ int LuaKillMessageBox(void)
 
 	while ( openLuaKillMsgBox )
 	{
-		usleep(100000);
+		msleep(100);
 	}
 	
 	return luaKillMsgBoxRetVal;

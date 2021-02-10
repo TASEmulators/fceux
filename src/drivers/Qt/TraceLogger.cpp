@@ -42,6 +42,8 @@
 #include "../../nsf.h"
 #include "../../movie.h"
 
+#include "common/os_utils.h"
+
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/TraceLogger.h"
 #include "Qt/main.h"
@@ -367,7 +369,7 @@ void TraceLoggerDialog_t::logMaxLinesChanged(int index)
 	logPrev = logging;
 	logging = 0;
 
-	usleep(1000);
+	msleep(1);
 
 	initTraceLogBuffer( maxLines );
 
@@ -382,7 +384,7 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 	if ( logging )
 	{
 		logging = 0;
-		usleep( 1000 );
+		msleep( 1 );
 		pushMsgToLogBuffer("Logging Finished");
 		startStopButton->setText( tr("Start Logging") );
 

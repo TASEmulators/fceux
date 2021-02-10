@@ -98,7 +98,7 @@ extern bool movieSubtitles;
 
 //#include "driver.h"
 
-typedef struct {
+typedef struct fceu_settings_struct {
 	int PAL;
 	int NetworkPlay;
 	int SoundVolume;		//Master volume

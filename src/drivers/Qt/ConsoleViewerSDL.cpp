@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <unistd.h>
+//#include <unistd.h>
 
 #include "Qt/nes_shm.h"
 #include "Qt/fceuWrapper.h"

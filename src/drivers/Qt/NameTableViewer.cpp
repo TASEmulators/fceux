@@ -537,6 +537,7 @@ void ppuNameTableViewerDialog_t::periodicUpdate(void)
 		this->selTileView->setTile( ntView->getSelTable(), p.x(), p.y() );
 		this->selTileView->update();
 
+		this->ntView->update();
 		this->scrollArea->viewport()->update();
 
 		redrawtables = false;

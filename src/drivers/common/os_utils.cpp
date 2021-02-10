@@ -4,8 +4,11 @@
 
 #if defined(WIN32)
 #include <windows.h>
+#include <direct.h>
+#include <io.h>
 #else
 #include <errno.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #endif
 
@@ -15,8 +18,8 @@ int fceu_mkdir( const char *path )
 {
 	int retval;
 #if defined(WIN32)
-	retval = mkdir(path);
-	chmod(path, 755);
+	retval = _mkdir(path);
+	_chmod(path, 755);
 #else
 	retval = mkdir(path, S_IRWXU);
 
@@ -67,7 +70,7 @@ bool fceu_file_exists( const char *filepath )
 {
 #ifdef WIN32
 	FILE *fp;
-	fp = ::fopen( filename, "r" );
+	fp = ::fopen( filepath, "r" );
 
 	if ( fp != NULL )
 	{
@@ -83,5 +86,16 @@ bool fceu_file_exists( const char *filepath )
 	}
 #endif
 	return false;
+}
+//************************************************************
+int msleep( int ms )
+{
+	int ret = 0;
+	#ifdef WIN32
+	Sleep(ms);
+	#else
+	ret = usleep(ms*1000);
+	#endif
+	return ret;
 }
 //************************************************************

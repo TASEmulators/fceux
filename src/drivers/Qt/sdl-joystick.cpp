@@ -27,8 +27,8 @@
 #include "Qt/sdl-joystick.h"
 
 #include <cstdlib>
-#include <unistd.h>
-#include <fcntl.h>
+//#include <unistd.h>
+//#include <fcntl.h>
 #include <cerrno>
 
 //#define MAX_JOYSTICKS	32

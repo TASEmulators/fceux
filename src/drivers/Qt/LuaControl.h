@@ -4,6 +4,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdarg.h>
 
 #include <QWidget>
 #include <QDialog>
@@ -55,7 +56,7 @@ class LuaControlDialog_t : public QDialog
 
 // Formatted print
 #ifdef  WIN32
-	int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char* const format, ...) ;
+	int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char* format, ...) ;
 #elif  __linux__ 
 	#ifdef __THROWNL
 	int LuaPrintfToWindowConsole(const char *__restrict format, ...) 
