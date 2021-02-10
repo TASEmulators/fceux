@@ -1119,6 +1119,17 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 		{
 			DoDebug(0);
 		}
+
+		extern HWND hWndPal;
+		if (hWndPal)
+		{
+			extern void InvalidatePalettePreviewRect(HWND);
+			InvalidatePalettePreviewRect(hWndPal);
+			extern void UpdatePalettePreviewCaption(HWND);
+			UpdatePalettePreviewCaption(hWndPal);
+			extern void UpdateCurrentPaletteName(HWND);
+			UpdateCurrentPaletteName(hWndPal);
+		}
 	}
 	else
 	{
