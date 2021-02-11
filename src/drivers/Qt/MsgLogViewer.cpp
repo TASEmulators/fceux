@@ -24,6 +24,10 @@
 #include <string.h>
 #include <string>
 
+#ifdef WIN32
+#include <Windows.h>
+#endif
+
 #include <SDL.h>
 #include <QHeaderView>
 #include <QCloseEvent>
@@ -44,9 +48,21 @@ class msgLogBuf_t
 	public:
 	msgLogBuf_t(void)
 	{
-		char filename[256];
+		char filename[512];
 
+		#ifdef WIN32
+		if ( GetTempPathA( sizeof(filename), filename ) > 0 )
+		{
+			//printf("PATH: %s \n", filename );
+			strcat( filename, "fceux.log");
+		}
+		else
+		{
+			strcpy( filename, "fceux.log" );
+		}
+		#else
 		strcpy( filename, "/tmp/fceux.log" );
+		#endif
 
 		fp = ::fopen( filename, "w+");
 
