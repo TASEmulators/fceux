@@ -31,6 +31,10 @@ class TimingConfDialog_t : public QDialog
 		void closeEvent(QCloseEvent *event);
 
 		QCheckBox  *emuPrioCtlEna;
+#ifdef WIN32
+		QComboBox  *emuSchedPrioBox;
+		QComboBox  *guiSchedPrioBox;
+#else
 		QComboBox  *emuSchedPolicyBox;
 		QSlider    *emuSchedPrioSlider;
 		QSlider    *emuSchedNiceSlider;
@@ -41,6 +45,7 @@ class TimingConfDialog_t : public QDialog
 		QSlider    *guiSchedNiceSlider;
 		QLabel     *guiSchedPrioLabel;
 		QLabel     *guiSchedNiceLabel;
+#endif
 		QComboBox  *timingDevSelBox;
 
 	private:

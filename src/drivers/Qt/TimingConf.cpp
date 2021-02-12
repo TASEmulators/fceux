@@ -101,19 +101,48 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	grid       = new QGridLayout();
 	emuPrioBox->setLayout( grid );
 
+	mainLayout->addWidget( emuPrioCtlEna );
+	mainLayout->addWidget( emuPrioBox );
+	mainLayout->addWidget( guiPrioBox );
+
+#ifdef WIN32
+	emuSchedPrioBox  = new QComboBox();
+	guiSchedPrioBox  = new QComboBox();
+
+	grid->addWidget( emuSchedPrioBox, 0, 0 );
+
+	grid       = new QGridLayout();
+	guiPrioBox->setLayout( grid );
+
+	grid->addWidget( guiSchedPrioBox, 0, 0 );
+
+	emuSchedPrioBox->addItem( tr("Idle"  )       , QThread::IdlePriority );
+	emuSchedPrioBox->addItem( tr("Lowest")       , QThread::LowestPriority );
+	emuSchedPrioBox->addItem( tr("Low"   )       , QThread::LowPriority );
+	emuSchedPrioBox->addItem( tr("Normal")       , QThread::NormalPriority );
+	emuSchedPrioBox->addItem( tr("High")         , QThread::HighPriority );
+	emuSchedPrioBox->addItem( tr("Highest")      , QThread::HighestPriority );
+	emuSchedPrioBox->addItem( tr("Time Critical"), QThread::TimeCriticalPriority );
+	emuSchedPrioBox->addItem( tr("Inherit")      , QThread::InheritPriority );
+
+	guiSchedPrioBox->addItem( tr("Idle"  )       , QThread::IdlePriority );
+	guiSchedPrioBox->addItem( tr("Lowest")       , QThread::LowestPriority );
+	guiSchedPrioBox->addItem( tr("Low"   )       , QThread::LowPriority );
+	guiSchedPrioBox->addItem( tr("Normal")       , QThread::NormalPriority );
+	guiSchedPrioBox->addItem( tr("High")         , QThread::HighPriority );
+	guiSchedPrioBox->addItem( tr("Highest")      , QThread::HighestPriority );
+	guiSchedPrioBox->addItem( tr("Time Critical"), QThread::TimeCriticalPriority );
+	guiSchedPrioBox->addItem( tr("Inherit")      , QThread::InheritPriority );
+#else
 	emuSchedPolicyBox  = new QComboBox();
 	emuSchedPrioSlider = new QSlider( Qt::Horizontal );
 	emuSchedNiceSlider = new QSlider( Qt::Horizontal );
 	emuSchedPrioLabel  = new QLabel( tr("Priority (RT)") );
 	emuSchedNiceLabel  = new QLabel( tr("Priority (Nice)") );
 
-#ifndef WIN32
 	emuSchedPolicyBox->addItem( tr("SCHED_OTHER") , SCHED_OTHER );
 	emuSchedPolicyBox->addItem( tr("SCHED_FIFO")  , SCHED_FIFO  );
 	emuSchedPolicyBox->addItem( tr("SCHED_RR")    , SCHED_RR    );
-#else
-	emuSchedPolicyBox->addItem( tr("TODO") , 0 );
-#endif
 
 	grid->addWidget( new QLabel( tr("Policy") ), 0, 0 );
 	grid->addWidget( emuSchedPolicyBox, 0, 1 );
@@ -121,9 +150,6 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	grid->addWidget( emuSchedPrioSlider, 1, 1 );
 	grid->addWidget( emuSchedNiceLabel, 2, 0 );
 	grid->addWidget( emuSchedNiceSlider, 2, 1 );
-
-	mainLayout->addWidget( emuPrioCtlEna );
-	mainLayout->addWidget( emuPrioBox );
 
 	grid       = new QGridLayout();
 	guiPrioBox->setLayout( grid );
@@ -134,13 +160,9 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	guiSchedPrioLabel  = new QLabel( tr("Priority (RT)") );
 	guiSchedNiceLabel  = new QLabel( tr("Priority (Nice)") );
 
-#ifndef WIN32
 	guiSchedPolicyBox->addItem( tr("SCHED_OTHER") , SCHED_OTHER );
 	guiSchedPolicyBox->addItem( tr("SCHED_FIFO")  , SCHED_FIFO  );
 	guiSchedPolicyBox->addItem( tr("SCHED_RR")    , SCHED_RR    );
-#else
-	guiSchedPolicyBox->addItem( tr("TODO") , 0 );
-#endif
 
 	grid->addWidget( new QLabel( tr("Policy") ), 0, 0 );
 	grid->addWidget( guiSchedPolicyBox, 0, 1 );
@@ -148,12 +170,15 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	grid->addWidget( guiSchedPrioSlider, 1, 1 );
 	grid->addWidget( guiSchedNiceLabel, 2, 0 );
 	grid->addWidget( guiSchedNiceSlider, 2, 1 );
-
-	mainLayout->addWidget( guiPrioBox );
+#endif
 
 	hbox = new QHBoxLayout();
 	timingDevSelBox = new QComboBox();
+#ifdef WIN32
+	timingDevSelBox->addItem( tr("SDL_Delay") , 0 );
+#else
 	timingDevSelBox->addItem( tr("NanoSleep") , 0 );
+#endif
 
 #ifdef __linux__
 	timingDevSelBox->addItem( tr("Timer FD")  , 1 );
@@ -173,12 +198,17 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	updateSliderValues();
 	updateTimingMech();
 
+#ifdef WIN32
+	connect( emuSchedPrioBox   , SIGNAL(activated(int))   , this, SLOT(emuSchedPrioChange(int))   );
+	connect( guiSchedPrioBox   , SIGNAL(activated(int))   , this, SLOT(guiSchedPrioChange(int))   );
+#else
 	connect( emuSchedPolicyBox   , SIGNAL(activated(int))   , this, SLOT(emuSchedPolicyChange(int))   );
 	connect( emuSchedNiceSlider  , SIGNAL(valueChanged(int)), this, SLOT(emuSchedNiceChange(int))     );
 	connect( emuSchedPrioSlider  , SIGNAL(valueChanged(int)), this, SLOT(emuSchedPrioChange(int))     );
 	connect( guiSchedPolicyBox   , SIGNAL(activated(int))   , this, SLOT(guiSchedPolicyChange(int))   );
 	connect( guiSchedNiceSlider  , SIGNAL(valueChanged(int)), this, SLOT(guiSchedNiceChange(int))     );
 	connect( guiSchedPrioSlider  , SIGNAL(valueChanged(int)), this, SLOT(guiSchedPrioChange(int))     );
+#endif
 	connect( emuPrioCtlEna       , SIGNAL(stateChanged(int)), this, SLOT(emuSchedCtlChange(int))      );
 	connect( timingDevSelBox     , SIGNAL(activated(int))   , this, SLOT(emuTimingMechChange(int))    );
 }
@@ -273,13 +303,18 @@ void TimingConfDialog_t::emuSchedNiceChange(int val)
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::emuSchedPrioChange(int val)
 {
-#ifndef WIN32
-	int policy, prio;
-
 	if ( consoleWindow == NULL )
 	{
 		return;
 	}
+#ifdef WIN32
+	printf("Setting EMU Thread to %i\n", val );
+	fceuWrapperLock();
+	consoleWindow->emulatorThread->setPriority( (QThread::Priority)val);
+	fceuWrapperUnLock();
+#else
+	int policy, prio;
+
 	fceuWrapperLock();
 	consoleWindow->emulatorThread->getSchedParam( policy, prio );
 
@@ -373,7 +408,10 @@ void TimingConfDialog_t::guiSchedNiceChange(int val)
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::guiSchedPrioChange(int val)
 {
-#ifndef WIN32
+#ifdef WIN32
+	printf("Setting GUI Thread to %i\n", val );
+	QThread::currentThread()->setPriority( (QThread::Priority)val);
+#else
 	int policy, prio;
 
 	if ( consoleWindow == NULL )
@@ -444,13 +482,38 @@ void TimingConfDialog_t::guiSchedPolicyChange( int index )
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::updatePolicyBox(void)
 {
-#ifndef WIN32
-	int policy, prio;
-
 	if ( consoleWindow == NULL )
 	{
 		return;
 	}
+#ifdef WIN32
+	int prio;
+
+	prio = consoleWindow->emulatorThread->priority();
+
+	printf("EMU Priority %i\n",  prio );
+	for (int j=0; j<emuSchedPrioBox->count(); j++)
+	{
+		if ( emuSchedPrioBox->itemData(j).toInt() == prio )
+		{
+			printf("EMU Found Priority %i  %i\n",  j , prio );
+			emuSchedPrioBox->setCurrentIndex( j );
+		}
+	}
+
+	prio = QThread::currentThread()->priority();
+
+	for (int j=0; j<guiSchedPrioBox->count(); j++)
+	{
+		if ( guiSchedPrioBox->itemData(j).toInt() == prio )
+		{
+			printf("GUI Found Priority %i  %i\n",  j , prio );
+			guiSchedPrioBox->setCurrentIndex( j );
+		}
+	}
+#else
+	int policy, prio;
+
 	consoleWindow->emulatorThread->getSchedParam( policy, prio );
 
 	for (int j=0; j<emuSchedPolicyBox->count(); j++)
