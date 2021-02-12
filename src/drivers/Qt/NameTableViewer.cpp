@@ -931,6 +931,8 @@ void ppuNameTableView_t::setViewScale( int reqScale )
 	}
 
 	redrawtables = 1;
+
+	calcPixelLocations();
 }
 //----------------------------------------------------
 void ppuNameTableView_t::resizeEvent(QResizeEvent *event)
@@ -941,6 +943,8 @@ void ppuNameTableView_t::resizeEvent(QResizeEvent *event)
 	//printf("%ix%i\n", event->size().width(), event->size().height() );
 
 	redrawtables = 1;
+
+	calcPixelLocations();
 }
 //----------------------------------------------------
 int ppuNameTableView_t::convertXY2TableTile( int x, int y, int *tableIdxOut, int *tileXout, int *tileYout )
@@ -1294,10 +1298,57 @@ void ppuNameTableView_t::openPpuAddrHexEdit(void)
 	hexEditorOpenFromDebugger( QHexEdit::MODE_NES_PPU, ppuAddr );
 }
 //----------------------------------------------------
+void ppuNameTableView_t::calcPixelLocations(void)
+{
+	ppuNameTable_t *nt;
+	int n,i,j,ii,jj,w,h,x,y,xx,yy;
+
+	w = viewWidth / (256*2);
+	h = viewHeight / (240*2);
+
+	//printf("(%i,%i) %ix%i\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height() );
+
+	xx = 0; yy = 0;
+
+	for (n=0; n<4; n++)
+	{
+		nt = &nameTable[n];
+
+		nt->w = w; nt->h = h;
+
+		nt->x = xx = (n%2) * (viewWidth / 2);
+		nt->y = yy = (n/2) * (viewHeight / 2);
+
+		jj = 0;
+
+		for (j=0; j<30; j++)
+		{
+			ii = 0;
+
+			for (i=0; i<32; i++)
+			{
+				nt->tile[j][i].x = xx+(ii*w);
+				nt->tile[j][i].y = yy+(jj*h);
+
+				for (y=0; y<8; y++)
+				{
+					for (x=0; x<8; x++)
+					{
+						nt->tile[j][i].pixel[y][x].x = xx+(ii+x)*w;
+						nt->tile[j][i].pixel[y][x].y = yy+(jj+y)*h;
+					}
+				}
+				ii += 8;
+			}
+			jj += 8;
+		}
+	}
+}
+//----------------------------------------------------
 void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 {
 	ppuNameTable_t *nt;
-	int n,i,j,ii,jj,w,h,x,y,xx,yy,ww,hh;
+	int n,i,j,w,h,x,y,xx,yy,ww,hh;
 	QPainter painter(this);
 	QColor scanLineColor(255,255,255);
 	QPen   pen;
@@ -1322,20 +1373,13 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 
 		for (j=0; j<30; j++)
 		{
-			jj = (j*8);
-
 			for (i=0; i<32; i++)
 			{
-				ii = (i*8);
-
-				nt->tile[j][i].x = xx+(ii*w);
-				nt->tile[j][i].y = yy+(jj*h);
-
 				for (y=0; y<8; y++)
 				{
 					for (x=0; x<8; x++)
 					{
-						painter.fillRect( xx+(ii+x)*w, yy+(jj+y)*h, w, h, nt->tile[j][i].pixel[y][x].color );
+						painter.fillRect( nt->tile[j][i].pixel[y][x].x, nt->tile[j][i].pixel[y][x].y, w, h, nt->tile[j][i].pixel[y][x].color );
 					}
 				}
 			}

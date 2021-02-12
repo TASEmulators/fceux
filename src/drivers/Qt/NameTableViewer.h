@@ -21,7 +21,14 @@
 
 struct  ppuNameTablePixel_t
 {
+	int  x;
+	int  y;
 	QColor color;
+
+	ppuNameTablePixel_t(void)
+	{
+		x = y = 0;
+	}
 };
 
 struct ppuNameTableTile_t
@@ -75,6 +82,8 @@ class ppuNameTableView_t : public QWidget
 		void setScrollPointer( QScrollArea *sa );
 		void setHoverFocus( bool hoverFocus );
 		bool getHoverFocus( void ){ return hover2Focus; };
+
+		void calcPixelLocations(void);
 
 		int     getSelTable(void){ return selTable; };
 		QPoint  getSelTile(void){ return selTile; };
@@ -146,6 +155,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		~ppuNameTableViewerDialog_t(void);
 
 		void setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib, int palAddr );
+
 	protected:
 		void closeEvent(QCloseEvent *bar);
 
