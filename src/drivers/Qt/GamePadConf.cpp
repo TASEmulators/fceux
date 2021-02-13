@@ -23,6 +23,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QScrollArea>
+#include <QPainter>
 
 #include "Qt/GamePadConf.h"
 #include "Qt/main.h"
@@ -86,7 +87,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	, changeSeqStatus(0)
 {
 	QWidget *mainWidget;
-	QVBoxLayout *mainLayout;
+	QVBoxLayout *mainLayoutV;
+	QHBoxLayout *mainLayoutH;
 	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3, *hbox4, *hbox5;
 	QVBoxLayout *vbox, *vbox1, *vbox2;
 	QGridLayout *grid;
@@ -315,9 +317,10 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
    connect(efs_chkbox , SIGNAL(stateChanged(int)), this, SLOT(ena4score(int)) );
    connect(udlr_chkbox, SIGNAL(stateChanged(int)), this, SLOT(oppDirEna(int)) );
 
-	mainLayout = new QVBoxLayout();
-	vbox1      = new QVBoxLayout();
-	vbox2      = new QVBoxLayout();
+	mainLayoutH = new QHBoxLayout();
+	mainLayoutV = new QVBoxLayout();
+	vbox1       = new QVBoxLayout();
+	vbox2       = new QVBoxLayout();
 
 	hbox5->addWidget( efs_chkbox );
 	hbox5->addWidget( udlr_chkbox );
@@ -331,10 +334,15 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	vbox2->addWidget( frame2 );
 	vbox2->addLayout( hbox4 );
 
-	mainLayout->addLayout( vbox1 );
-	mainLayout->addLayout( vbox2 );
+	gpView = new GamePadView_t(this);
 
-	mainWidget->setLayout( mainLayout );
+	mainLayoutV->addLayout( vbox1 );
+	mainLayoutV->addWidget( gpView );
+
+	mainLayoutH->addLayout( mainLayoutV );
+	mainLayoutH->addLayout( vbox2 );
+
+	mainWidget->setLayout( mainLayoutH );
 	mainWidget->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
 
 	scroll->setWidget( mainWidget );
@@ -946,31 +954,31 @@ void GamePadConfDialog_t::promptToSave(void)
 //----------------------------------------------------
 void GamePadConfDialog_t::updatePeriodic(void)
 {
-   for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
-   {
-      const char *txt, *style;
-      if ( GamePad[portNum].bmap[i].state )
-      {
-         txt = "  T  ";
-         style = "background-color: green; color: white;";
-      }
-      else
-      {
-         txt = "  F  ";
-         style = "background-color: red; color: white;";
-      }
-      keyState[i]->setText( tr(txt) );
-      keyState[i]->setStyleSheet( style );
-
-		if ( lcl[portNum].btn[i].needsSave )
+	for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+	{
+		const char *txt, *style;
+		if ( GamePad[portNum].bmap[i].state )
 		{
-      	keyName[i]->setStyleSheet("color: red;");
+		   txt = "  T  ";
+		   style = "background-color: green; color: white;";
 		}
 		else
 		{
-      	keyName[i]->setStyleSheet("color: black;");
+		   txt = "  F  ";
+		   style = "background-color: red; color: white;";
 		}
-   }
+		keyState[i]->setText( tr(txt) );
+		keyState[i]->setStyleSheet( style );
+
+		if ( lcl[portNum].btn[i].needsSave )
+		{
+			keyName[i]->setStyleSheet("color: red;");
+		}
+		else
+		{
+			keyName[i]->setStyleSheet("color: black;");
+		}
+	}
 
 	int fourScore;
 	g_config->getOption("SDL.FourScore", &fourScore);
@@ -978,6 +986,9 @@ void GamePadConfDialog_t::updatePeriodic(void)
 	{
 		efs_chkbox->setChecked( fourScore );
 	}
+
+	gpView->setPort( portNum );
+	gpView->update();
 }
 
 //----------------------------------------------------
@@ -1024,5 +1035,302 @@ void GamePadConfigButton_t::keyReleaseEvent(QKeyEvent *event)
 {
    //printf("GamePad Button Key Release: 0x%x \n", event->key() );
 	pushKeyEvent( event, 0 );
+}
+//----------------------------------------------------
+//----------------------------------------------------
+// Game Pad Viewer
+//----------------------------------------------------
+//----------------------------------------------------
+GamePadView_t::GamePadView_t( QWidget *parent)
+	: QWidget(parent)
+{
+	this->setFocusPolicy(Qt::StrongFocus);
+	this->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+	this->setMouseTracking(true);
+	viewWidth = 128*3;
+	viewHeight = 128;
+	setMinimumWidth( viewWidth );
+	setMinimumHeight( viewHeight );
+
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+	QFontMetrics fm(font);
+
+	#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = fm.horizontalAdvance(QLatin1Char('2'));
+	#else
+	pxCharWidth = fm.width(QLatin1Char('2'));
+	#endif
+	pxCharHeight = fm.lineSpacing();
+
+	portNum = 0;
+}
+//----------------------------------------------------
+GamePadView_t::~GamePadView_t(void)
+{
+
+}
+//----------------------------------------------------
+void GamePadView_t::setPort(int port)
+{
+	portNum = port;
+}
+//----------------------------------------------------
+void GamePadView_t::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+
+	//printf("%ix%i\n", event->size().width(), event->size().height() );
+}
+//----------------------------------------------------
+void GamePadView_t::keyPressEvent(QKeyEvent *event)
+{
+	pushKeyEvent( event, 1 );
+}
+//----------------------------------------------------
+void GamePadView_t::keyReleaseEvent(QKeyEvent *event)
+{
+	pushKeyEvent( event, 0 );
+}
+//----------------------------------------------------
+void GamePadView_t::mouseMoveEvent(QMouseEvent *event)
+{
+
+}
+//----------------------------------------------------
+void GamePadView_t::mousePressEvent(QMouseEvent * event)
+{
+
+}
+//----------------------------------------------------
+void GamePadView_t::drawLetterOnButton( QPainter &painter, QRect &rect, QColor &color, int ch )
+{
+	int x,y;
+	char c[2];
+
+	c[0] = ch;
+	c[1] = 0;
+
+	x = rect.x() + (rect.width()  - pxCharWidth) / 2;
+	y = rect.y() + (rect.height() - pxCharHeight) / 2;
+
+	painter.setPen( color );
+	painter.drawText( x, y+pxCharHeight, tr(c) );
+}
+//----------------------------------------------------
+void GamePadView_t::paintEvent(QPaintEvent *event)
+{
+	int w, h, x, y, b = 5;
+	int w3, bw, bh, ws, hs, ht, ws2;
+	QPainter painter(this);
+	QColor white(255,255,255);
+	QColor black(  0,  0,  0);
+	QColor clear(  0,  0,  0,  0);
+	QColor gray (128,128,128);
+	QColor green(  0,255,  0);
+	QRect  gp1, gp2;
+	QRect  upBtn, dnBtn, lBtn, rBtn, cBtn;
+	QRect  selBtn, stBtn;
+	QRect   bBtn,  aBtn, tbBtn, taBtn, tBox;
+
+	w = viewWidth;
+	h = viewHeight;
+
+	if ( w > (3*h) )
+	{
+		w = 3*h;
+	}
+	else
+	{
+		h = w/3;
+	}
+	x = (viewWidth  - w) / 2;
+	y = (viewHeight - h) / 2;
+
+	gp1.setRect( x, y, w, h );
+	
+	painter.fillRect( gp1, gray );
+
+	x = x+b;
+	y = y+b;
+	w = w-(2*b);
+	h = h-(2*b);
+
+	gp2.setRect( x, y, w, h );
+
+	painter.fillRect( gp2, black );
+
+	w3 = w / 3;
+	bw = w3 / 5;
+	bh = bw;
+
+	x = gp2.x() + bw;
+	y = gp2.y() + (h/5);
+
+	upBtn.setRect( x+bw , y       , bw, bh );
+	dnBtn.setRect( x+bw , y+(bh*2), bw, bh );
+	lBtn.setRect( x        , y+bh, bw, bh );
+	rBtn.setRect( x+(bw*2) , y+bh, bw, bh );
+	cBtn.setRect( x+bw , y+bh, bw, bh );
+
+	painter.fillRect( upBtn.x()-b, upBtn.y()-b,  upBtn.width()+(2*b), 3*upBtn.height()+(2*b), gray );
+	painter.fillRect( lBtn.x()-b ,  lBtn.y()-b, 3*lBtn.width()+(2*b),    lBtn.height()+(2*b), gray );
+
+	painter.fillRect(  cBtn, black );
+
+	if ( GamePad[portNum].bmap[4].state )
+	{
+		painter.fillRect( upBtn, green );
+	}
+	else
+	{
+		painter.fillRect( upBtn, black );
+	}
+
+	if ( GamePad[portNum].bmap[5].state ) 
+	{
+		painter.fillRect( dnBtn, green );
+	}
+	else
+	{
+		painter.fillRect( dnBtn, black );
+	}
+
+	if ( GamePad[portNum].bmap[6].state ) 
+	{
+		painter.fillRect(  lBtn, green );
+	}
+	else
+	{
+		painter.fillRect(  lBtn, black );
+	}
+
+	if ( GamePad[portNum].bmap[7].state ) 
+	{
+		painter.fillRect(  rBtn, green );
+	}
+	else
+	{
+		painter.fillRect(  rBtn, black );
+	}
+
+	bw = w3 / 3;
+	bh = bw / 2;
+
+	x = gp2.x() + w3;
+	y = gp2.y() + (3*h/5);
+
+	selBtn.setRect( x+(bw/3) , y , bw, bh );
+	 stBtn.setRect( x+(5*bw)/3, y , bw, bh );
+
+	if ( GamePad[portNum].bmap[2].state ) 
+	{
+		painter.fillRect(  selBtn, green );
+	}
+	else
+	{
+		painter.fillRect(  selBtn, gray );
+	}
+
+	if ( GamePad[portNum].bmap[3].state ) 
+	{
+		painter.fillRect(   stBtn, green );
+	}
+	else
+	{
+		painter.fillRect(   stBtn, gray );
+	}
+
+	//bw = w3 / 3;
+	bh =  h / 3;
+	bw = bh;
+
+	ht = pxCharHeight;
+	bh = (h-ht)/ 3;
+	bw = bh;
+	hs = (ht-pxCharHeight)/2;
+	ws = (w3 - (5*pxCharWidth))/2;
+
+	painter.setPen( white );
+
+	x = gp2.x() + (2*w3) + ws;
+	y = gp2.y() + (ht-hs);
+
+	painter.drawText( x, y, tr("Turbo") );
+
+	ws  = (w3 - (2*bw)) / 3;
+	hs  = (h  - (2*bh) - ht) / 3;
+	ws2 = (ws / 2);
+
+	x = gp2.x() + (2*w3);
+	y = gp2.y() + (ht+hs);
+
+	tbBtn.setRect( x+ws , y , bw, bh );
+	taBtn.setRect( x+bw+(2*ws), y , bw, bh );
+
+	y = gp2.y() + (ht+bh+(2*hs));
+
+	bBtn.setRect( x+ws , y , bw, bh );
+	aBtn.setRect( x+bw+(2*ws), y , bw, bh );
+
+	if ( GamePad[portNum].bmap[9].state ) 
+	{
+		painter.setBrush(Qt::green);
+	}
+	else
+	{
+		painter.setBrush(Qt::red);
+	}
+	painter.setPen( white );
+	painter.drawEllipse( tbBtn );
+	drawLetterOnButton( painter, tbBtn, black, 'B');
+
+	if ( GamePad[portNum].bmap[8].state ) 
+	{
+		painter.setBrush(Qt::green);
+	}
+	else
+	{
+		painter.setBrush(Qt::red);
+	}
+	painter.setPen( white );
+	painter.drawEllipse( taBtn );
+	drawLetterOnButton( painter, taBtn, black, 'A');
+
+	if ( GamePad[portNum].bmap[1].state ) 
+	{
+		painter.setBrush(Qt::green);
+	}
+	else
+	{
+		painter.setBrush(Qt::red);
+	}
+	painter.setPen( white );
+	painter.drawEllipse(  bBtn );
+	drawLetterOnButton( painter, bBtn, black, 'B');
+
+	if ( GamePad[portNum].bmap[0].state ) 
+	{
+		painter.setBrush(Qt::green);
+	}
+	else
+	{
+		painter.setBrush(Qt::red);
+	}
+	painter.setPen( white );
+	painter.drawEllipse(  aBtn );
+	drawLetterOnButton( painter, aBtn, black, 'A');
+
+	painter.setBrush(clear);
+
+	tBox.setTop( gp2.y()+2 );
+	tBox.setLeft( gp2.x()+(2*w3)+ws2 );
+	tBox.setWidth( w3-ws );
+	tBox.setBottom( taBtn.y() + (aBtn.y() - taBtn.y() + bh)/2 );
+
+	painter.setPen( white );
+	painter.drawRect( tBox );
 }
 //----------------------------------------------------
