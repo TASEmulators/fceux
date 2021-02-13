@@ -63,6 +63,7 @@ static bool drawScrollLines = true;
 static bool drawTileGridLines = true;
 static bool drawAttrGridLines = false;
 static bool redrawtables = true;
+static bool resetDrawCounter = true;
 
 //extern int FCEUPPU_GetAttr(int ntnum, int xt, int yt);
 
@@ -524,11 +525,9 @@ void ppuNameTableViewerDialog_t::closeWindow(void)
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::periodicUpdate(void)
 {
-	cycleCount = (cycleCount + 1) % 30;
-
 	updateMirrorText();
 
-	if ( redrawtables || (cycleCount == 0) )
+	if ( redrawtables )
 	{
 		QPoint p;
 
@@ -538,10 +537,29 @@ void ppuNameTableViewerDialog_t::periodicUpdate(void)
 		this->selTileView->update();
 
 		this->ntView->update();
-		this->scrollArea->viewport()->update();
+		//this->scrollArea->viewport()->update();
 
 		redrawtables = false;
 	}
+	else
+	{
+		if ( resetDrawCounter )
+		{
+			if ( cycleCount >= 4 )
+			{
+				cycleCount = 0;
+				resetDrawCounter = false;
+			}
+		}
+
+		if ( (cycleCount >= 0 ) && (cycleCount < 4) )
+		{
+			this->ntView->updateTable(cycleCount);
+		}
+	}
+
+	cycleCount = (cycleCount + 1) % 30;
+
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::changeZoom1x(void)
@@ -1298,6 +1316,15 @@ void ppuNameTableView_t::openPpuAddrHexEdit(void)
 	hexEditorOpenFromDebugger( QHexEdit::MODE_NES_PPU, ppuAddr );
 }
 //----------------------------------------------------
+void ppuNameTableView_t::updateTable(int idx)
+{
+	ppuNameTable_t *nt;
+
+	nt = &nameTable[idx];
+
+	this->update( nt->x, nt->y, nt->w*256, nt->h*240 );
+}
+//----------------------------------------------------
 void ppuNameTableView_t::calcPixelLocations(void)
 {
 	ppuNameTable_t *nt;
@@ -1352,6 +1379,7 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 	QPainter painter(this);
 	QColor scanLineColor(255,255,255);
 	QPen   pen;
+	QRect  pixelRect;
 	
 	viewRect = event->rect();
 
@@ -1360,7 +1388,9 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 
 	//printf("(%i,%i) %ix%i\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height() );
 
-	xx = 0; yy = 0;
+	xx = 0; yy = 0; 
+	ww = w*256;
+	hh = h*240;
 
 	for (n=0; n<4; n++)
 	{
@@ -1371,6 +1401,14 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 		nt->x = xx = (n%2) * (viewWidth / 2);
 		nt->y = yy = (n/2) * (viewHeight / 2);
 
+		pixelRect.setRect( xx, yy, ww, hh );
+
+		if ( !viewRect.intersects( pixelRect ) )
+		{
+			//printf("Table:%i Not in View\n", n);
+			continue;
+
+		}
 		for (j=0; j<30; j++)
 		{
 			for (i=0; i<32; i++)
@@ -1379,15 +1417,20 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 				{
 					for (x=0; x<8; x++)
 					{
-						painter.fillRect( nt->tile[j][i].pixel[y][x].x, nt->tile[j][i].pixel[y][x].y, w, h, nt->tile[j][i].pixel[y][x].color );
+						pixelRect.setRect( nt->tile[j][i].pixel[y][x].x, nt->tile[j][i].pixel[y][x].y, w, h );
+
+						if ( viewRect.intersects( pixelRect ) )
+						{
+						   painter.fillRect( nt->tile[j][i].pixel[y][x].x, nt->tile[j][i].pixel[y][x].y, w, h, nt->tile[j][i].pixel[y][x].color );
+						}
 					}
 				}
 			}
 		}
 		if ( drawScrollLines )
 		{
-			ww = nt->w * 256;
-			hh = nt->h * 240;
+			//ww = nt->w * 256;
+			//hh = nt->h * 240;
 
 			painter.setPen( scanLineColor );
 
@@ -1686,7 +1729,7 @@ void FCEUD_UpdateNTView(int scanline, bool drawall)
 	}
 
 	chrchanged = 0;
-	redrawtables = true;
+	resetDrawCounter = true;
 	return;	
 }
 //----------------------------------------------------

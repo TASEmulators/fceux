@@ -88,6 +88,8 @@ class ppuNameTableView_t : public QWidget
 		int     getSelTable(void){ return selTable; };
 		QPoint  getSelTile(void){ return selTile; };
 
+		void    updateTable(int idx);
+
 		QColor tileSelColor;
 		QColor tileGridColor;
 		QColor attrGridColor;
