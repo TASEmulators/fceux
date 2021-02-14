@@ -163,7 +163,10 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3;
 	QGroupBox *box, *hdrBox;
 	QGridLayout *grid;
+	QStyle      *style;
 	char stmp[128];
+
+	style = this->style();
 
 	initOK = false;
 
@@ -460,6 +463,10 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	restoreBtn = new QPushButton( tr("Restore") );
 	saveAsBtn  = new QPushButton( tr("Save As") );
 	closeBtn   = new QPushButton( tr("Close") );
+
+	restoreBtn->setIcon( style->standardIcon( QStyle::SP_DialogResetButton ) );
+	saveAsBtn->setIcon( style->standardIcon( QStyle::SP_DialogSaveButton ) );
+	closeBtn->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
 
 	grid->addWidget( restoreBtn, 0, 0, Qt::AlignLeft );
 	grid->addWidget( saveAsBtn , 0, 1, Qt::AlignRight );
