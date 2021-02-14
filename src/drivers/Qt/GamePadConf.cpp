@@ -23,6 +23,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QPainter>
 
 #include "Qt/GamePadConf.h"
@@ -86,27 +87,28 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	: QDialog( parent )
 	, changeSeqStatus(0)
 {
-	QWidget *mainWidget;
+	//QWidget *mainWidget;
 	QVBoxLayout *mainLayoutV;
 	QHBoxLayout *mainLayoutH;
-	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3, *hbox4, *hbox5;
+	QHBoxLayout *hbox, *hbox1, *hbox2;
 	QVBoxLayout *vbox, *vbox1, *vbox2;
-	QGridLayout *grid;
+	QGridLayout *grid, *grid1;
 	QCheckBox *udlr_chkbox;
-   QGroupBox *frame1, *frame2;
+	QGroupBox *frame1, *frame2;
 	QLabel *label;
-   QPushButton *newProfileButton;
-   QPushButton *saveProfileButton;
-   QPushButton *applyProfileButton;
-   QPushButton *removeProfileButton;
-   QPushButton *clearAllButton;
-   QPushButton *closebutton;
-   QPushButton *changeSeqButton = nullptr;
-   QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
-	QScrollArea *scroll;
+	QPushButton *newProfileButton;
+	QPushButton *saveProfileButton;
+	QPushButton *applyProfileButton;
+	QPushButton *removeProfileButton;
+	QPushButton *clearAllButton;
+	QPushButton *closebutton;
+	QPushButton *changeSeqButton = nullptr;
+	QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
+	QScrollArea *scroll = NULL;
 	QStyle      *style;
 	std::string prefix;
 	char stmp[256];
+	bool useScroll = false;
 
 	style = this->style();
 
@@ -115,40 +117,44 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	// Ensure that joysticks are enabled, no harm calling init again.
 	InitJoysticks();
 
-	scroll = new QScrollArea(this);
+	if ( useScroll )
+	{
+		scroll = new QScrollArea(this);
+	}
 	mainWidget = new QWidget();
 
-   portNum = 0;
-   buttonConfigStatus = 1;
+	portNum = 0;
+	buttonConfigStatus = 1;
+	
+	inputTimer  = new QTimer( this );
+	
+	connect( inputTimer, &QTimer::timeout, this, &GamePadConfDialog_t::updatePeriodic );
+	
+	setWindowTitle( tr("GamePad Config") );
 
-   inputTimer  = new QTimer( this );
+	grid1 = new QGridLayout();
 
-   connect( inputTimer, &QTimer::timeout, this, &GamePadConfDialog_t::updatePeriodic );
-
-   setWindowTitle( tr("GamePad Config") );
-
+	grid1->setColumnStretch( 0,  1 );
+	grid1->setColumnStretch( 1, 10 );
 	hbox1 = new QHBoxLayout();
 	hbox2 = new QHBoxLayout();
-	hbox3 = new QHBoxLayout();
-	hbox4 = new QHBoxLayout();
-	hbox5 = new QHBoxLayout();
 
 	label = new QLabel(tr("Console Port:"));
 	portSel = new QComboBox();
-	hbox1->addWidget( label );
-	hbox1->addWidget( portSel );
+	grid1->addWidget( label  , 0, 0 );
+	grid1->addWidget( portSel, 0, 1 );
 
-   portSel->addItem( tr("1"), 0 );
-   portSel->addItem( tr("2"), 1 );
-   portSel->addItem( tr("3"), 2 );
-   portSel->addItem( tr("4"), 3 );
+	portSel->addItem( tr("1"), 0 );
+	portSel->addItem( tr("2"), 1 );
+	portSel->addItem( tr("3"), 2 );
+	portSel->addItem( tr("4"), 3 );
 
 	label = new QLabel(tr("Device:"));
 	devSel = new QComboBox();
-	hbox2->addWidget( label );
-	hbox2->addWidget( devSel );
+	grid1->addWidget( label , 1, 0 );
+	grid1->addWidget( devSel, 1, 1 );
 
-   devSel->addItem( tr("Keyboard"), -1 );
+	devSel->addItem( tr("Keyboard"), -1 );
 
 	for (int i=0; i<MAX_JOYSTICKS; i++)
 	{
@@ -174,55 +180,55 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	label = new QLabel(tr("GUID:"));
 	guidLbl = new QLabel();
 
-	hbox3->addWidget( label );
-	hbox3->addWidget( guidLbl );
+	grid1->addWidget( label  , 2, 0 );
+	grid1->addWidget( guidLbl, 2, 1 );
 
 	guidLbl->setText( GamePad[portNum].getGUID() );
 
-   frame1 = new QGroupBox(tr("Mapping Profile:"));
-   //grid   = new QGridLayout();
-   vbox   = new QVBoxLayout();
-
-   //frame1->setLayout( grid );
-   frame1->setLayout( vbox );
+	frame1 = new QGroupBox(tr("Mapping Profile:"));
+	//grid   = new QGridLayout();
+	vbox   = new QVBoxLayout();
+	
+	//frame1->setLayout( grid );
+	frame1->setLayout( vbox );
 
 	hbox = new QHBoxLayout();
 	vbox->addLayout( hbox );
 
 	mapSel = new QComboBox();
-   hbox->addWidget( mapSel );
+	hbox->addWidget( mapSel );
 
-   mapSel->setWhatsThis( tr("Combo box for selection of a saved button mapping profile for the selected device"));
-   mapSel->addItem( tr("default"), 0 );
+	mapSel->setWhatsThis( tr("Combo box for selection of a saved button mapping profile for the selected device"));
+	mapSel->addItem( tr("default"), 0 );
 
 	hbox = new QHBoxLayout();
 	vbox->addLayout( hbox );
 
-   applyProfileButton = new QPushButton( tr("Load") );
+	applyProfileButton = new QPushButton( tr("Load") );
 	applyProfileButton->setWhatsThis(tr("Sets Current Active Map to the Selected Profile"));
 	applyProfileButton->setIcon( style->standardIcon( QStyle::SP_DialogApplyButton ) );
-   hbox->addWidget( applyProfileButton );
+	hbox->addWidget( applyProfileButton );
 
-   saveProfileButton = new QPushButton( tr("Save") );
+	saveProfileButton = new QPushButton( tr("Save") );
 	saveProfileButton->setWhatsThis(tr("Stores Current Active Map to the Selected Profile"));
 	saveProfileButton->setIcon( style->standardIcon( QStyle::SP_DialogSaveButton ) );
-   hbox->addWidget( saveProfileButton );
+	hbox->addWidget( saveProfileButton );
 
 	hbox = new QHBoxLayout();
 	vbox->addLayout( hbox );
 
-   newProfileButton   = new QPushButton( tr("New") );
+	newProfileButton   = new QPushButton( tr("New") );
 	newProfileButton->setWhatsThis(tr("Create a New Map Profile"));
 	newProfileButton->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
-   hbox->addWidget( newProfileButton );
+	hbox->addWidget( newProfileButton );
 
-   removeProfileButton   = new QPushButton( tr("Delete") );
+	removeProfileButton   = new QPushButton( tr("Delete") );
 	removeProfileButton->setWhatsThis(tr("Deletes the Selected Map Profile"));
 	removeProfileButton->setIcon( style->standardIcon( QStyle::SP_TrashIcon ) );
-   hbox->addWidget( removeProfileButton );
+	hbox->addWidget( removeProfileButton );
 
-   mapMsg = new QLabel();
-   vbox->addWidget(mapMsg);
+	mapMsg = new QLabel();
+	vbox->addWidget(mapMsg);
 
 	efs_chkbox  = new QCheckBox( tr("Enable Four Score") );
 	udlr_chkbox = new QCheckBox( tr("Allow Up+Down/Left+Right") );
@@ -235,104 +241,104 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &opposite_dirs);
 	udlr_chkbox->setChecked( opposite_dirs );
 
-   frame2 = new QGroupBox(tr("Current Active Button Mappings:"));
-   grid   = new QGridLayout();
-
-   grid-> setHorizontalSpacing(50);
-
-   frame2->setLayout( grid );
-
-   for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
-   {
-      char text[64];
-	   QLabel *buttonName;
-
-      sprintf( text, "%s:", GamePadNames[i] );
-
-	   //hbox2 = new QHBoxLayout();
-
-      //hbox2->setAlignment(Qt::AlignCenter);
-
-	   buttonName     = new QLabel(tr(text));
-	   keyName[i]     = new QLabel();
-	   keyState[i]    = new QLabel( tr("F") );
-	   label          = new QLabel( tr("State:") );
-      button[i]      = new GamePadConfigButton_t(i);
-      clearButton[i] = new QPushButton( tr("Clear") );
-
-      grid->addWidget( buttonName    , i, 0, Qt::AlignCenter );
-      grid->addWidget( keyName[i]    , i, 1, Qt::AlignCenter );
-      grid->addWidget( label         , i, 2, Qt::AlignCenter );
-      grid->addWidget( keyState[i]   , i, 3, Qt::AlignCenter );
-      grid->addWidget( button[i]     , i, 4, Qt::AlignCenter );
-      grid->addWidget( clearButton[i], i, 5, Qt::AlignCenter );
-   }
+	frame2 = new QGroupBox(tr("Current Active Button Mappings:"));
+	grid   = new QGridLayout();
+	
+	//grid-> setHorizontalSpacing(10);
+	
+	frame2->setLayout( grid );
+	
+	for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+	{
+		char text[64];
+	        QLabel *buttonName;
+	
+		sprintf( text, "%s:", GamePadNames[i] );
+	
+	        //hbox2 = new QHBoxLayout();
+	
+		//hbox2->setAlignment(Qt::AlignCenter);
+	
+	        buttonName     = new QLabel(tr(text));
+	        keyName[i]     = new QLabel();
+	        //keyState[i]    = new QLabel( tr("F") );
+	        //label          = new QLabel( tr("State:") );
+		button[i]      = new GamePadConfigButton_t(i);
+		clearButton[i] = new QPushButton( tr("Clear") );
+		
+		grid->addWidget( buttonName    , i, 0, Qt::AlignCenter );
+		grid->addWidget( keyName[i]    , i, 1, Qt::AlignCenter );
+		//grid->addWidget( label         , i, 2, Qt::AlignCenter );
+		//grid->addWidget( keyState[i]   , i, 3, Qt::AlignCenter );
+		grid->addWidget( button[i]     , i, 2, Qt::AlignCenter );
+		grid->addWidget( clearButton[i], i, 3, Qt::AlignCenter );
+	}
 	updateCntrlrDpy();
-
-   clearAllButton     = new QPushButton(tr("Clear All"));
-   closebutton        = new QPushButton(tr("Close"));
-   changeSeqButton    = new QPushButton(tr("Change Sequentially"));
+	
+	clearAllButton     = new QPushButton(tr("Clear All"));
+	closebutton        = new QPushButton(tr("Close"));
+	changeSeqButton    = new QPushButton(tr("Change Sequentially"));
 
 	clearAllButton->setIcon( style->standardIcon( QStyle::SP_LineEditClearButton ) );
 	closebutton->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
 	changeSeqButton->setIcon( style->standardIcon( QStyle::QStyle::SP_ArrowDown ) );
 
-	hbox4->addWidget( clearAllButton    );
-	hbox4->addWidget( changeSeqButton   );
-	hbox4->addWidget( closebutton       );
+	hbox1->addWidget( clearAllButton    );
+	hbox1->addWidget( changeSeqButton   );
+	hbox1->addWidget( closebutton       );
 
-   connect(button[0], SIGNAL(clicked()), this, SLOT(changeButton0(void)) );
-   connect(button[1], SIGNAL(clicked()), this, SLOT(changeButton1(void)) );
-   connect(button[2], SIGNAL(clicked()), this, SLOT(changeButton2(void)) );
-   connect(button[3], SIGNAL(clicked()), this, SLOT(changeButton3(void)) );
-   connect(button[4], SIGNAL(clicked()), this, SLOT(changeButton4(void)) );
-   connect(button[5], SIGNAL(clicked()), this, SLOT(changeButton5(void)) );
-   connect(button[6], SIGNAL(clicked()), this, SLOT(changeButton6(void)) );
-   connect(button[7], SIGNAL(clicked()), this, SLOT(changeButton7(void)) );
-   connect(button[8], SIGNAL(clicked()), this, SLOT(changeButton8(void)) );
-   connect(button[9], SIGNAL(clicked()), this, SLOT(changeButton9(void)) );
+	connect(button[0], SIGNAL(clicked()), this, SLOT(changeButton0(void)) );
+	connect(button[1], SIGNAL(clicked()), this, SLOT(changeButton1(void)) );
+	connect(button[2], SIGNAL(clicked()), this, SLOT(changeButton2(void)) );
+	connect(button[3], SIGNAL(clicked()), this, SLOT(changeButton3(void)) );
+	connect(button[4], SIGNAL(clicked()), this, SLOT(changeButton4(void)) );
+	connect(button[5], SIGNAL(clicked()), this, SLOT(changeButton5(void)) );
+	connect(button[6], SIGNAL(clicked()), this, SLOT(changeButton6(void)) );
+	connect(button[7], SIGNAL(clicked()), this, SLOT(changeButton7(void)) );
+	connect(button[8], SIGNAL(clicked()), this, SLOT(changeButton8(void)) );
+	connect(button[9], SIGNAL(clicked()), this, SLOT(changeButton9(void)) );
 
 	connect(clearButton[0], SIGNAL(clicked()), this, SLOT(clearButton0(void)) );
-   connect(clearButton[1], SIGNAL(clicked()), this, SLOT(clearButton1(void)) );
-   connect(clearButton[2], SIGNAL(clicked()), this, SLOT(clearButton2(void)) );
-   connect(clearButton[3], SIGNAL(clicked()), this, SLOT(clearButton3(void)) );
-   connect(clearButton[4], SIGNAL(clicked()), this, SLOT(clearButton4(void)) );
-   connect(clearButton[5], SIGNAL(clicked()), this, SLOT(clearButton5(void)) );
-   connect(clearButton[6], SIGNAL(clicked()), this, SLOT(clearButton6(void)) );
-   connect(clearButton[7], SIGNAL(clicked()), this, SLOT(clearButton7(void)) );
-   connect(clearButton[8], SIGNAL(clicked()), this, SLOT(clearButton8(void)) );
-   connect(clearButton[9], SIGNAL(clicked()), this, SLOT(clearButton9(void)) );
-
-   connect(newProfileButton   , SIGNAL(clicked()), this, SLOT(newProfileCallback(void)) );
-   connect(applyProfileButton , SIGNAL(clicked()), this, SLOT(loadProfileCallback(void)) );
-   connect(saveProfileButton  , SIGNAL(clicked()), this, SLOT(saveProfileCallback(void)) );
-   connect(removeProfileButton, SIGNAL(clicked()), this, SLOT(deleteProfileCallback(void)) );
-
-   connect(clearAllButton   , SIGNAL(clicked()), this, SLOT(clearAllCallback(void)) );
-   connect(closebutton      , SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
-   connect(changeSeqButton  , SIGNAL(clicked()), this, SLOT(changeSequentallyCallback(void)) );
-
-   connect(portSel    , SIGNAL(activated(int)), this, SLOT(portSelect(int)) );
-   connect(devSel     , SIGNAL(activated(int)), this, SLOT(deviceSelect(int)) );
-   connect(efs_chkbox , SIGNAL(stateChanged(int)), this, SLOT(ena4score(int)) );
-   connect(udlr_chkbox, SIGNAL(stateChanged(int)), this, SLOT(oppDirEna(int)) );
+	connect(clearButton[1], SIGNAL(clicked()), this, SLOT(clearButton1(void)) );
+	connect(clearButton[2], SIGNAL(clicked()), this, SLOT(clearButton2(void)) );
+	connect(clearButton[3], SIGNAL(clicked()), this, SLOT(clearButton3(void)) );
+	connect(clearButton[4], SIGNAL(clicked()), this, SLOT(clearButton4(void)) );
+	connect(clearButton[5], SIGNAL(clicked()), this, SLOT(clearButton5(void)) );
+	connect(clearButton[6], SIGNAL(clicked()), this, SLOT(clearButton6(void)) );
+	connect(clearButton[7], SIGNAL(clicked()), this, SLOT(clearButton7(void)) );
+	connect(clearButton[8], SIGNAL(clicked()), this, SLOT(clearButton8(void)) );
+	connect(clearButton[9], SIGNAL(clicked()), this, SLOT(clearButton9(void)) );
+	
+	connect(newProfileButton   , SIGNAL(clicked()), this, SLOT(newProfileCallback(void)) );
+	connect(applyProfileButton , SIGNAL(clicked()), this, SLOT(loadProfileCallback(void)) );
+	connect(saveProfileButton  , SIGNAL(clicked()), this, SLOT(saveProfileCallback(void)) );
+	connect(removeProfileButton, SIGNAL(clicked()), this, SLOT(deleteProfileCallback(void)) );
+	
+	connect(clearAllButton   , SIGNAL(clicked()), this, SLOT(clearAllCallback(void)) );
+	connect(closebutton      , SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
+	connect(changeSeqButton  , SIGNAL(clicked()), this, SLOT(changeSequentallyCallback(void)) );
+	
+	connect(portSel    , SIGNAL(activated(int)), this, SLOT(portSelect(int)) );
+	connect(devSel     , SIGNAL(activated(int)), this, SLOT(deviceSelect(int)) );
+	connect(efs_chkbox , SIGNAL(stateChanged(int)), this, SLOT(ena4score(int)) );
+	connect(udlr_chkbox, SIGNAL(stateChanged(int)), this, SLOT(oppDirEna(int)) );
 
 	mainLayoutH = new QHBoxLayout();
 	mainLayoutV = new QVBoxLayout();
 	vbox1       = new QVBoxLayout();
 	vbox2       = new QVBoxLayout();
 
-	hbox5->addWidget( efs_chkbox );
-	hbox5->addWidget( udlr_chkbox );
+	hbox2->addWidget( efs_chkbox );
+	hbox2->addWidget( udlr_chkbox );
 
-	vbox1->addLayout( hbox1 );
-	vbox1->addLayout( hbox2 );
-	vbox1->addLayout( hbox3 );
+	vbox1->addLayout( grid1 );
+	//vbox1->addLayout( hbox2 );
+	//vbox1->addLayout( hbox3 );
 	vbox1->addWidget( frame1);
-	vbox1->addLayout( hbox5 );
+	vbox1->addLayout( hbox2 );
 
 	vbox2->addWidget( frame2 );
-	vbox2->addLayout( hbox4 );
+	vbox2->addLayout( hbox1 );
 
 	gpView = new GamePadView_t(this);
 
@@ -345,19 +351,29 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	mainWidget->setLayout( mainLayoutH );
 	mainWidget->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
 
-	scroll->setWidget( mainWidget );
-	scroll->setWidgetResizable(true);
-	scroll->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
-	scroll->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded );
-	scroll->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	if ( useScroll )
+	{
+		scroll->setWidget( mainWidget );
+		scroll->setWidgetResizable(true);
+		scroll->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
+		scroll->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+		scroll->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	}
 	
 	QHBoxLayout *dialogLayout = new QHBoxLayout();
 
-	dialogLayout->addWidget( scroll );
+	if ( useScroll )
+	{
+		dialogLayout->addWidget( scroll );
+	}
+	else
+	{
+		dialogLayout->addWidget( mainWidget );
+	}
 
 	setLayout( dialogLayout );
 
-   inputTimer->start( 33 ); // 30hz
+	inputTimer->start( 33 ); // 30hz
 
 	for (int i=0; i<GAMEPAD_NUM_DEVICES; i++)
 	{
@@ -369,18 +385,25 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 		lcl[i].guid.assign( GamePad[i].getGUID() );
 	}
 
-   loadMapList();
+	loadMapList();
+
 }
 
 //----------------------------------------------------
 GamePadConfDialog_t::~GamePadConfDialog_t(void)
 {
-   inputTimer->stop();
-   buttonConfigStatus = 0;
+	inputTimer->stop();
+	buttonConfigStatus = 0;
 	gamePadConfWin = NULL;
 
 	printf("GamePad Window Deleted\n");
 }
+
+void GamePadConfDialog_t::resizeEvent(QResizeEvent *event)
+{
+	//printf("%ix%i\n", event->size().width(), event->size().height() );
+}
+
 void GamePadConfDialog_t::keyPressEvent(QKeyEvent *event)
 {
    //printf("GamePad Window Key Press: 0x%x \n", event->key() );
@@ -948,7 +971,6 @@ void GamePadConfDialog_t::promptToSave(void)
 	msgBox.setText( tr(msg.c_str()) );
 
 	msgBox.show();
-	//msgBox.resize( 512, 128 );
 	msgBox.exec();
 }
 //----------------------------------------------------
@@ -956,19 +978,19 @@ void GamePadConfDialog_t::updatePeriodic(void)
 {
 	for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
 	{
-		const char *txt, *style;
-		if ( GamePad[portNum].bmap[i].state )
-		{
-		   txt = "  T  ";
-		   style = "background-color: green; color: white;";
-		}
-		else
-		{
-		   txt = "  F  ";
-		   style = "background-color: red; color: white;";
-		}
-		keyState[i]->setText( tr(txt) );
-		keyState[i]->setStyleSheet( style );
+		//const char *txt, *style;
+		//if ( GamePad[portNum].bmap[i].state )
+		//{
+		//   txt = "  T  ";
+		//   style = "background-color: green; color: white;";
+		//}
+		//else
+		//{
+		//   txt = "  F  ";
+		//   style = "background-color: red; color: white;";
+		//}
+		//keyState[i]->setText( tr(txt) );
+		//keyState[i]->setStyleSheet( style );
 
 		if ( lcl[portNum].btn[i].needsSave )
 		{

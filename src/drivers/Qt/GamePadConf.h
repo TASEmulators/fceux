@@ -68,6 +68,9 @@ class GamePadConfDialog_t : public QDialog
 		~GamePadConfDialog_t(void);
 
 	protected:
+		void resizeEvent(QResizeEvent *event);
+
+		QWidget   *mainWidget;
 		QTimer    *inputTimer;
 		QComboBox *portSel;
 		QComboBox *devSel;
