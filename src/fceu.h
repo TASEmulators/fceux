@@ -43,7 +43,7 @@ void AutoFire(void);
 void FCEUI_RewindToLastAutosave(void);
 
 //mbg 7/23/06
-char *FCEUI_GetAboutString();
+const char *FCEUI_GetAboutString(void);
 
 extern uint64 timestampbase;
 

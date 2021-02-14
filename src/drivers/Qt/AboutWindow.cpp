@@ -31,6 +31,7 @@
 #include "Qt/AboutWindow.h"
 #include "Qt/fceux_git_info.h"
 #include "../../version.h"
+#include "../../fceu.h"
 
 static const char *Authors[] = {
 	"Linux/SDL Developers:",
@@ -146,6 +147,9 @@ AboutWindow::AboutWindow(QWidget *parent)
 	mainLayout->addLayout( hbox1 );
 
 	credits = new QTextEdit();
+
+	credits->insertPlainText( FCEUI_GetAboutString() );
+	credits->insertPlainText( "\n\n");
 
 	i=0;
 	while ( Authors[i] != NULL )
