@@ -324,7 +324,7 @@ void PaletteConfDialog_t::openPaletteFile(void)
 {
 	int ret, useNativeFileDialogVal;
 	QString filename;
-	std::string last;
+	std::string last, iniPath;
 	char dir[512];
 	char exePath[512];
 	QFileDialog  dialog(this, tr("Open NES Palette") );
@@ -345,6 +345,7 @@ void PaletteConfDialog_t::openPaletteFile(void)
 		if ( d.exists() )
 		{
 			urls << QUrl::fromLocalFile( d.absolutePath() );
+			iniPath = d.absolutePath().toStdString();
 		}
 	}
 #ifdef WIN32
@@ -355,6 +356,7 @@ void PaletteConfDialog_t::openPaletteFile(void)
 	if ( d.exists() )
 	{
 		urls << QUrl::fromLocalFile( d.absolutePath() );
+		iniPath = d.absolutePath().toStdString();
 	}
 #endif
 
@@ -370,7 +372,7 @@ void PaletteConfDialog_t::openPaletteFile(void)
 
 	if ( last.size() == 0 )
 	{
-	   last.assign( "/usr/share/fceux/palettes" );
+	   last.assign( iniPath );
 	}
 
 	getDirFromFile( last.c_str(), dir );
@@ -397,10 +399,10 @@ void PaletteConfDialog_t::openPaletteFile(void)
 		}
 	}
 
-   if ( filename.isNull() )
-   {
-      return;
-   }
+	if ( filename.isNull() )
+	{
+	   return;
+	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	if ( fceuWrapperTryLock() )

@@ -46,6 +46,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/PaletteEditor.h"
+#include "Qt/ConsoleUtilities.h"
 
 //----------------------------------------------------------------------------
 PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
@@ -146,7 +147,41 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 {
 	int ret, useNativeFileDialogVal;
 	QString filename;
+	char dir[512];
+	char exePath[512];
+	std::string  last, iniPath;
 	QFileDialog  dialog(this, tr("Open Palette From File") );
+	QList<QUrl> urls;
+	QDir  d;
+
+	fceuExecutablePath( exePath, sizeof(exePath) );
+
+	//urls = dialog.sidebarUrls();
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile( QDir( FCEUI_GetBaseDirectory() ).absolutePath() );
+
+	if ( exePath[0] != 0 )
+	{
+		d.setPath( QString(exePath) + "/../palettes" );
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+			iniPath = d.absolutePath().toStdString();
+		}
+	}
+#ifdef WIN32
+
+#else
+	d.setPath("/usr/share/fceux/palettes");
+
+	if ( d.exists() )
+	{
+		urls << QUrl::fromLocalFile( d.absolutePath() );
+		iniPath = d.absolutePath().toStdString();
+	}
+#endif
 
 	const QStringList filters(
 	{ 
@@ -162,12 +197,21 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
 
-	dialog.setDirectory( tr("/usr/share/fceux/palettes") );
+	g_config->getOption ("SDL.Palette", &last );
+
+	if ( last.size() == 0 )
+	{
+	   last.assign( iniPath );
+	}
+	getDirFromFile( last.c_str(), dir );
+
+	dialog.setDirectory( tr(dir) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -190,6 +234,7 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	palView->loadFromFile( filename.toStdString().c_str() );
+	g_config->setOption ("SDL.Palette", filename.toStdString().c_str() );
 
    return;
 }
