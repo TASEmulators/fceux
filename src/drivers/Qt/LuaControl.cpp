@@ -258,11 +258,87 @@ void LuaControlDialog_t::openLuaKillMessageBox(void)
 void LuaControlDialog_t::openLuaScriptFile(void)
 {
 #ifdef _S9XLUA_H
-   int ret, useNativeFileDialogVal;
+	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
 	char dir[512];
+	char exePath[512];
+	const char *luaPath;
 	QFileDialog  dialog(this, tr("Open LUA Script") );
+	QList<QUrl> urls;
+	QDir  d;
+
+	fceuExecutablePath( exePath, sizeof(exePath) );
+
+	//urls = dialog.sidebarUrls();
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+	urls << QUrl::fromLocalFile( QDir( FCEUI_GetBaseDirectory() ).absolutePath() );
+
+	if ( exePath[0] != 0 )
+	{
+		d.setPath( QString(exePath) + "/../luaScripts" );
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+	}
+#ifndef WIN32
+	d.setPath( "/usr/share/fceux/luaScripts" );
+
+	if ( d.exists() )
+	{
+		urls << QUrl::fromLocalFile( d.absolutePath() );
+	}
+#endif
+
+	luaPath = getenv("LUA_PATH");
+
+	// Parse LUA_PATH and add to urls
+	if ( luaPath )
+	{
+		int i,j;
+		char stmp[1024];
+
+		i=j=0;
+		while ( luaPath[i] != 0 )
+		{
+			if ( luaPath[i] == ';' )
+			{
+				stmp[j] = 0;
+
+				if ( j > 0 )
+				{
+					d.setPath(stmp);
+
+					if ( d.exists() )
+					{
+						urls << QUrl::fromLocalFile( d.absolutePath() );
+					}
+				}
+				j=0;
+			}
+			else
+			{
+				stmp[j] = luaPath[i]; j++;
+			}
+			i++;
+		}
+
+		stmp[j] = 0;
+
+		if ( j > 0 )
+		{
+			d.setPath(stmp);
+
+			if ( d.exists() )
+			{
+				urls << QUrl::fromLocalFile( d.absolutePath() );
+			}
+		}
+	}
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
@@ -274,10 +350,14 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 
 	g_config->getOption ("SDL.LastLoadLua", &last );
 
-   if ( last.size() == 0 )
-   {
-      last.assign( "/usr/share/fceux/luaScripts" );
-   }
+	if ( last.size() == 0 )
+	{
+#ifdef WIN32
+	   last.assign( FCEUI_GetBaseDirectory() );
+#else
+	   last.assign( "/usr/share/fceux/luaScripts" );
+#endif
+	}
 
 	getDirFromFile( last.c_str(), dir );
 
@@ -287,6 +367,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -303,9 +384,9 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	}
 
 	if ( filename.isNull() )
-   {
-      return;
-   }
+	{
+	   return;
+	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	g_config->setOption ("SDL.LastLoadLua", filename.toStdString().c_str() );
@@ -321,9 +402,9 @@ void LuaControlDialog_t::startLuaScript(void)
 	outBuf.clear();
 	fceuWrapperLock();
 	if ( 0 == FCEU_LoadLuaCode( scriptPath->text().toStdString().c_str(), scriptArgs->text().toStdString().c_str() ) )
-   {
-      printf("Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toStdString().c_str() );
-   }
+	{
+	   printf("Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toStdString().c_str() );
+	}
 	fceuWrapperUnLock();
 #endif
 }
@@ -339,8 +420,8 @@ void LuaControlDialog_t::stopLuaScript(void)
 //----------------------------------------------------
 void LuaControlDialog_t::refreshState(void)
 {
-   int i;
-   std::string luaOutputText;
+	int i;
+	std::string luaOutputText;
 
 	if ( luaScriptRunning )
 	{
@@ -353,18 +434,18 @@ void LuaControlDialog_t::refreshState(void)
 		startButton->setText( tr("Start") );
 	}
 
-   i = outBuf.tail;
-
-   while ( i != outBuf.head )
-   {
-      luaOutputText.append( 1, outBuf.buf[i] );
-
-      i = (i + 1) % outBuf.size;
-   }
+	i = outBuf.tail;
+	
+	while ( i != outBuf.head )
+	{
+	   luaOutputText.append( 1, outBuf.buf[i] );
+	
+	   i = (i + 1) % outBuf.size;
+	}
 
 	luaOutput->setText( luaOutputText.c_str() );
 
-   luaOutput->moveCursor( QTextCursor::End );
+	luaOutput->moveCursor( QTextCursor::End );
 }
 //----------------------------------------------------
 static void updateLuaWindows( void )
