@@ -155,7 +155,16 @@ static void
 GetBaseDirectory(std::string &dir)
 {
 	char *home = getenv("HOME");
-	if(home) {
+
+#ifdef WIN32
+	if ( home == NULL )
+	{
+		home = getenv("HOMEPATH");
+	}
+#endif
+
+	if (home) 
+	{
 		dir = std::string(home) + "/.fceux";
 	} else {
 #ifdef WIN32
