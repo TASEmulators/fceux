@@ -440,7 +440,7 @@ void consoleWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // Options
-    optMenu = menuBar()->addMenu(tr("Options"));
+    optMenu = menuBar()->addMenu(tr("&Options"));
 
 	 // Options -> Input Config
 	 inputConfig = new QAction(tr("Input Config"), this);
@@ -554,7 +554,7 @@ void consoleWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // Emulation
-    emuMenu = menuBar()->addMenu(tr("Emulation"));
+    emuMenu = menuBar()->addMenu(tr("&Emulation"));
 
 	 // Emulation -> Power
 	 powerAct = new QAction(tr("Power"), this);
@@ -724,7 +724,7 @@ void consoleWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // Tools
-    toolsMenu = menuBar()->addMenu(tr("Tools"));
+    toolsMenu = menuBar()->addMenu(tr("&Tools"));
 
 	 // Tools -> Cheats
 	 cheatsAct = new QAction(tr("Cheats..."), this);
@@ -768,7 +768,7 @@ void consoleWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // Debug
-    debugMenu = menuBar()->addMenu(tr("Debug"));
+    debugMenu = menuBar()->addMenu(tr("&Debug"));
 
 	 // Debug -> Debugger 
 	 debuggerAct = new QAction(tr("Debugger..."), this);
@@ -877,7 +877,7 @@ void consoleWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // Help
-    helpMenu = menuBar()->addMenu(tr("Help"));
+    helpMenu = menuBar()->addMenu(tr("&Help"));
  
 	 // Help -> About FCEUX
 	 aboutAct = new QAction(tr("About FCEUX"), this);

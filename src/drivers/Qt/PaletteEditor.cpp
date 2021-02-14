@@ -71,7 +71,7 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	// Menu 
 	//-----------------------------------------------------------------------
 	// File
-	fileMenu = menuBar->addMenu(tr("File"));
+	fileMenu = menuBar->addMenu(tr("&File"));
 
 	// File -> Open
 	act = new QAction(tr("Open"), this);

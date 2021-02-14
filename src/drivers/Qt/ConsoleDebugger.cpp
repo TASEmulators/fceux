@@ -118,7 +118,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	// Menu Start
 	//-----------------------------------------------------------------------
 	// Debug
-   debugMenu = menuBar->addMenu(tr("Debug"));
+   debugMenu = menuBar->addMenu(tr("&Debug"));
 
 	// Debug -> Run
 	act = new QAction(tr("Run"), this);

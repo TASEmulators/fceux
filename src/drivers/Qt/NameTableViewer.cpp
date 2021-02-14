@@ -149,7 +149,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	// Menu 
 	//-----------------------------------------------------------------------
 	// View
-	viewMenu = menuBar->addMenu(tr("View"));
+	viewMenu = menuBar->addMenu(tr("&View"));
 
 	// View -> Show Scroll Lines
 	act = new QAction(tr("Show Scroll Lines"), this);

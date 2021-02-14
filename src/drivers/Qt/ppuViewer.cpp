@@ -234,7 +234,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	// Menu 
 	//-----------------------------------------------------------------------
 	// View1
-	viewMenu = menuBar->addMenu(tr("View1"));
+	viewMenu = menuBar->addMenu(tr("&View1"));
 
 	// View1 -> Toggle Grid
 	act = new QAction(tr("Toggle Grid"), this);

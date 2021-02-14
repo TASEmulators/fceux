@@ -888,7 +888,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	// Menu 
 	//-----------------------------------------------------------------------
 	// File
-	fileMenu = menuBar->addMenu(tr("File"));
+	fileMenu = menuBar->addMenu(tr("&File"));
 
 	// File -> Save ROM
 	saveROM = new QAction(tr("Save ROM"), this);
@@ -925,7 +925,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	fileMenu->addAction(closeAct);
 
 	// Edit
-	editMenu = menuBar->addMenu(tr("Edit"));
+	editMenu = menuBar->addMenu(tr("&Edit"));
 
 	// Edit -> Undo
 	undoEditAct = new QAction(tr("Undo"), this);
@@ -963,7 +963,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	editMenu->addAction(act);
 
 	// View
-	viewMenu = menuBar->addMenu(tr("View"));
+	viewMenu = menuBar->addMenu(tr("&View"));
 
 	group   = new QActionGroup(this);
 
@@ -1051,7 +1051,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
    colorMenu->addAction(actColorBG);
 
 	// Bookmarks Menu
-   bookmarkMenu = menuBar->addMenu(tr("Bookmarks"));
+   bookmarkMenu = menuBar->addMenu(tr("&Bookmarks"));
 
 	//-----------------------------------------------------------------------
 	// Menu End 

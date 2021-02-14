@@ -104,7 +104,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	// Menu 
 	//-----------------------------------------------------------------------
 	// File
-   fileMenu = menuBar->addMenu(tr("File"));
+   fileMenu = menuBar->addMenu(tr("&File"));
 
 	// File -> New List
 	menuAct = new QAction(tr("New List"), this);
@@ -157,7 +157,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
    fileMenu->addAction(menuAct);
 
 	// Watch
-   watchMenu = menuBar->addMenu(tr("Watch"));
+   watchMenu = menuBar->addMenu(tr("&Watch"));
 
 	// Watch -> New Watch
 	menuAct = new QAction(tr("New Watch"), this);
