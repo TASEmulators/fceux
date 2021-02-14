@@ -17,6 +17,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include <QDir>
+
 #include "Qt/main.h"
 #include "Qt/throttle.h"
 #include "Qt/config.h"
@@ -157,6 +159,10 @@ GetBaseDirectory(std::string &dir)
 	char *home = getenv("HOME");
 
 #ifdef WIN32
+	if ( home == NULL )
+	{
+		home = getenv("USERPROFILE");
+	}
 	if ( home == NULL )
 	{
 		home = getenv("HOMEPATH");
