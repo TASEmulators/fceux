@@ -39,6 +39,7 @@ class FrameTimingDialog_t : public QDialog
 		QTreeWidgetItem *frameTimeIdle;
 		QTreeWidgetItem *frameTimeIdlePct;
 		QTreeWidgetItem *frameLateCount;
+		QGroupBox       *statFrame;
 
 		QTreeWidget  *tree;
 

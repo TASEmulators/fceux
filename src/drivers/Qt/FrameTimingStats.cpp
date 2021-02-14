@@ -43,7 +43,6 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 {
 	QVBoxLayout *mainLayout, *vbox;
 	QHBoxLayout *hbox;
-	QGroupBox   *frame;
 	QTreeWidgetItem *item;
 	QPushButton *resetBtn;
 	struct frameTimingStat_t stats;
@@ -56,8 +55,8 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 
 	mainLayout = new QVBoxLayout();
 	vbox       = new QVBoxLayout();
-	frame      = new QGroupBox( tr("Timing Statistics") );
-	frame->setLayout( vbox );
+	statFrame  = new QGroupBox( tr("Timing Statistics") );
+	statFrame->setLayout( vbox );
 
 	tree = new QTreeWidget();
 	vbox->addWidget( tree );
@@ -131,6 +130,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	resetBtn     = new QPushButton( tr("Reset") );
 
 	timingEnable->setChecked( stats.enabled );
+	statFrame->setEnabled( stats.enabled );
 
 	hbox->addWidget( timingEnable );
 	hbox->addWidget( resetBtn     );
@@ -139,7 +139,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	connect( resetBtn    , SIGNAL(clicked(void))    , this, SLOT(resetTimingClicked(void)) );
 
 	mainLayout->addLayout( hbox  );
-	mainLayout->addWidget( frame );
+	mainLayout->addWidget( statFrame );
 
 	setLayout( mainLayout );
 
@@ -263,6 +263,8 @@ void FrameTimingDialog_t::updateTimingStats(void)
 	sprintf( stmp, "%u", stats.lateCount );
 	frameLateCount->setText( 1, tr("0") );
 	frameLateCount->setText( 2, tr(stmp) );
+
+	statFrame->setEnabled( stats.enabled );
 
 	tree->viewport()->update();
 }
