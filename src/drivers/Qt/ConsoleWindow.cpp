@@ -1019,7 +1019,10 @@ void consoleWin_t::openROMFile(void)
 	QString filename;
 	std::string last;
 	char dir[512];
+	char *romDir;
 	QFileDialog  dialog(this, tr("Open ROM File") );
+	QList<QUrl> urls;
+	QDir d;
 
 	const QStringList filters(
 			{ "All Useable files (*.nes *.NES *.nsf *.NSF *.fds *.FDS *.unf *.UNF *.unif *.UNIF *.zip *.ZIP)",
@@ -1029,6 +1032,23 @@ void consoleWin_t::openROMFile(void)
            "FDS files (*.fds *.FDS)",
            "Any files (*)"
          });
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+	urls << QUrl::fromLocalFile( QDir( FCEUI_GetBaseDirectory() ).absolutePath() );
+
+	romDir = getenv("FCEUX_ROM_PATH");
+
+	if ( romDir != NULL )
+	{
+		d.setPath(romDir);
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+	}
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
@@ -1048,6 +1068,7 @@ void consoleWin_t::openROMFile(void)
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1063,10 +1084,10 @@ void consoleWin_t::openROMFile(void)
 		}
 	}
 
-   if ( filename.isNull() )
-   {
-      return;
-   }
+	if ( filename.isNull() )
+	{
+	   return;
+	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
@@ -1092,8 +1113,27 @@ void consoleWin_t::loadNSF(void)
 	QString filename;
 	std::string last;
 	char dir[512];
+	char *romDir;
 	QFileDialog  dialog(this, tr("Load NSF File") );
+	QList<QUrl> urls;
+	QDir d;
 
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+	urls << QUrl::fromLocalFile( QDir( FCEUI_GetBaseDirectory() ).absolutePath() );
+
+	romDir = getenv("FCEUX_ROM_PATH");
+
+	if ( romDir != NULL )
+	{
+		d.setPath(romDir);
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+	}
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
 	dialog.setNameFilter(tr("NSF Sound Files (*.nsf *.NSF) ;; Zip Files (*.zip *.ZIP) ;; All files (*)"));
@@ -1112,6 +1152,7 @@ void consoleWin_t::loadNSF(void)
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1146,7 +1187,36 @@ void consoleWin_t::loadStateFrom(void)
 	QString filename;
 	std::string last;
 	char dir[512];
+	const char *base;
 	QFileDialog  dialog(this, tr("Load State From File") );
+	QList<QUrl> urls;
+	QDir d;
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/fcs");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		d.setPath( QString(base) + "/sav");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+	}
+
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
@@ -1166,6 +1236,7 @@ void consoleWin_t::loadStateFrom(void)
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1200,7 +1271,35 @@ void consoleWin_t::saveStateAs(void)
 	QString filename;
 	std::string last;
 	char dir[512];
+	const char *base;
 	QFileDialog  dialog(this, tr("Save State To File") );
+	QList<QUrl> urls;
+	QDir d;
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/fcs");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		d.setPath( QString(base) + "/sav");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+	}
 
 	dialog.setFileMode(QFileDialog::AnyFile);
 
@@ -1213,6 +1312,13 @@ void consoleWin_t::saveStateAs(void)
 
 	g_config->getOption ("SDL.LastSaveStateAs", &last );
 
+	if ( last.size() == 0 )
+	{
+		if ( base )
+		{
+			last = std::string(base) + "/sav";
+		}
+	}
 	getDirFromFile( last.c_str(), dir );
 
 	dialog.setDirectory( tr(dir) );
@@ -1221,6 +1327,7 @@ void consoleWin_t::saveStateAs(void)
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1237,9 +1344,9 @@ void consoleWin_t::saveStateAs(void)
 	}
 
 	if ( filename.isNull() )
-   {
-      return;
-   }
+	{
+	   return;
+	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	g_config->setOption ("SDL.LastSaveStateAs", filename.toStdString().c_str() );
@@ -1644,6 +1751,11 @@ void consoleWin_t::loadGameGenieROM(void)
 	std::string last;
 	char dir[512];
 	QFileDialog  dialog(this, tr("Open Game Genie ROM") );
+	QList<QUrl> urls;
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
@@ -1663,6 +1775,7 @@ void consoleWin_t::loadGameGenieROM(void)
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1678,10 +1791,10 @@ void consoleWin_t::loadGameGenieROM(void)
 		}
 	}
 
-   if ( filename.isNull() )
-   {
-      return;
-   }
+	if ( filename.isNull() )
+	{
+	   return;
+	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
@@ -1727,6 +1840,11 @@ void consoleWin_t::fdsLoadBiosFile(void)
 	std::string last;
 	char dir[512];
 	QFileDialog  dialog(this, tr("Load FDS BIOS (disksys.rom)") );
+	QList<QUrl> urls;
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
@@ -1746,6 +1864,7 @@ void consoleWin_t::fdsLoadBiosFile(void)
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
 
 	dialog.show();
 	ret = dialog.exec();
@@ -1761,10 +1880,10 @@ void consoleWin_t::fdsLoadBiosFile(void)
 		}
 	}
 
-   if ( filename.isNull() )
-   {
-      return;
-   }
+	if ( filename.isNull() )
+	{
+	   return;
+	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	// copy BIOS file to proper place (~/.fceux/disksys.rom)

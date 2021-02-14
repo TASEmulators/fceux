@@ -195,7 +195,7 @@ GetBaseDirectory(std::string &dir)
 Config *
 InitConfig()
 {
-	std::string dir, prefix;
+	std::string dir, prefix, savPath, movPath;
 	Config *config;
 
 	GetBaseDirectory(dir);
@@ -337,24 +337,18 @@ InitConfig()
 	config->addOption("loadstate", "SDL.AutoLoadState", INVALID_STATE);
 	config->addOption("savestate", "SDL.AutoSaveState", INVALID_STATE);
 
-    //TODO implement this
-    config->addOption("periodicsaves", "SDL.PeriodicSaves", 0);
+	//TODO implement this
+	config->addOption("periodicsaves", "SDL.PeriodicSaves", 0);
 
-	char* home_dir = getenv("HOME");
-	if ( home_dir == NULL )
-	{
-		home_dir = getenv("HOMEPATH");
-	}
-	if ( home_dir == NULL )
-	{
-		home_dir = "";
-	}
+	savPath = dir + "/sav";
+	movPath = dir + "/movies";
+
 	// prefixed with _ because they are internal (not cli options)
-	config->addOption("_lastopenfile", "SDL.LastOpenFile", home_dir);
-	config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", home_dir);
-	config->addOption("_lastopennsf", "SDL.LastOpenNSF", home_dir);
-	config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", home_dir);
-	config->addOption("_lastopenmovie", "SDL.LastOpenMovie", home_dir);
+	config->addOption("_lastopenfile", "SDL.LastOpenFile", dir);
+	config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", savPath );
+	config->addOption("_lastopennsf", "SDL.LastOpenNSF", dir);
+	config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", savPath );
+	config->addOption("_lastopenmovie", "SDL.LastOpenMovie", movPath);
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
 
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
@@ -378,8 +372,8 @@ InitConfig()
 	// enable new PPU core
 	config->addOption("newppu", "SDL.NewPPU", 0);
 
-    // quit when a+b+select+start is pressed
-    config->addOption("4buttonexit", "SDL.ABStartSelectExit", 0);
+	// quit when a+b+select+start is pressed
+	config->addOption("4buttonexit", "SDL.ABStartSelectExit", 0);
 
 	// GamePad 0 - 3
 	for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) 
