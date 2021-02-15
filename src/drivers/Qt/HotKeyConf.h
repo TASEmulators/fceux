@@ -29,15 +29,15 @@ class HotKeyConfDialog_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *event);
 		void keyPressEvent(QKeyEvent *event);
-   	void keyReleaseEvent(QKeyEvent *event);
+		void keyReleaseEvent(QKeyEvent *event);
 		void assignHotkey(QKeyEvent *event);
 
 		QTreeWidget *tree;
 
 	private:
 
-   public slots:
-      void closeWindow(void);
+	public slots:
+		void closeWindow(void);
 	private slots:
 
 };

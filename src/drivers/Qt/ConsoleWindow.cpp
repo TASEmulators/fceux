@@ -288,7 +288,7 @@ void consoleWin_t::keyReleaseEvent(QKeyEvent *event)
 //---------------------------------------------------------------------------
 void consoleWin_t::createMainMenu(void)
 {
-   QAction *act;
+	QAction *act;
 	QMenu *subMenu;
 	QActionGroup *group;
 	int useNativeMenuBar;
@@ -296,459 +296,478 @@ void consoleWin_t::createMainMenu(void)
 
 	style = this->style();
 
-   // This is needed for menu bar to show up on MacOS
+	// This is needed for menu bar to show up on MacOS
 	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
 
 	menuBar()->setNativeMenuBar( useNativeMenuBar ? true : false );
 
-	 //-----------------------------------------------------------------------
-	 // File
-    fileMenu = menuBar()->addMenu(tr("&File"));
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar()->addMenu(tr("&File"));
 
-	 // File -> Open ROM
-	 openROM = new QAction(tr("Open ROM"), this);
-    openROM->setShortcuts(QKeySequence::Open);
-    openROM->setStatusTip(tr("Open ROM File"));
-    //openROM->setIcon( QIcon(":icons/rom.png") );
-    //openROM->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
-    openROM->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
-    connect(openROM, SIGNAL(triggered()), this, SLOT(openROMFile(void)) );
+	// File -> Open ROM
+	openROM = new QAction(tr("Open ROM"), this);
+	openROM->setShortcuts(QKeySequence::Open);
+	openROM->setStatusTip(tr("Open ROM File"));
+	//openROM->setIcon( QIcon(":icons/rom.png") );
+	//openROM->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
+	openROM->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(openROM, SIGNAL(triggered()), this, SLOT(openROMFile(void)) );
+	
+	fileMenu->addAction(openROM);
 
-    fileMenu->addAction(openROM);
+	// File -> Close ROM
+	closeROM = new QAction(tr("Close ROM"), this);
+	closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
+	closeROM->setStatusTip(tr("Close Loaded ROM"));
+	closeROM->setIcon( style->standardIcon( QStyle::SP_BrowserStop ) );
+	connect(closeROM, SIGNAL(triggered()), this, SLOT(closeROMCB(void)) );
+	
+	fileMenu->addAction(closeROM);
+	
+	fileMenu->addSeparator();
 
-	 // File -> Close ROM
-	 closeROM = new QAction(tr("Close ROM"), this);
-    closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
-    closeROM->setStatusTip(tr("Close Loaded ROM"));
-    closeROM->setIcon( style->standardIcon( QStyle::SP_BrowserStop ) );
-    connect(closeROM, SIGNAL(triggered()), this, SLOT(closeROMCB(void)) );
+	// File -> Play NSF
+	playNSF = new QAction(tr("Play NSF"), this);
+	playNSF->setShortcut( QKeySequence(tr("Ctrl+N")));
+	playNSF->setStatusTip(tr("Play NSF"));
+	connect(playNSF, SIGNAL(triggered()), this, SLOT(loadNSF(void)) );
+	
+	fileMenu->addAction(playNSF);
+	
+	fileMenu->addSeparator();
 
-    fileMenu->addAction(closeROM);
+	// File -> Load State From
+	loadStateAct = new QAction(tr("Load State From"), this);
+	//loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
+	loadStateAct->setStatusTip(tr("Load State From"));
+	loadStateAct->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(loadStateAct, SIGNAL(triggered()), this, SLOT(loadStateFrom(void)) );
+	
+	fileMenu->addAction(loadStateAct);
 
-    fileMenu->addSeparator();
+	// File -> Save State As
+	saveStateAct = new QAction(tr("Save State As"), this);
+	//loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
+	saveStateAct->setStatusTip(tr("Save State As"));
+	saveStateAct->setIcon( style->standardIcon( QStyle::SP_DialogSaveButton ) );
+	connect(saveStateAct, SIGNAL(triggered()), this, SLOT(saveStateAs(void)) );
+	
+	fileMenu->addAction(saveStateAct);
 
-	 // File -> Play NSF
-	 playNSF = new QAction(tr("Play NSF"), this);
-    playNSF->setShortcut( QKeySequence(tr("Ctrl+N")));
-    playNSF->setStatusTip(tr("Play NSF"));
-    connect(playNSF, SIGNAL(triggered()), this, SLOT(loadNSF(void)) );
+	// File -> Quick Load
+	quickLoadAct = new QAction(tr("Quick Load"), this);
+	quickLoadAct->setShortcut( QKeySequence(tr("F7")));
+	quickLoadAct->setStatusTip(tr("Quick Load"));
+	connect(quickLoadAct, SIGNAL(triggered()), this, SLOT(quickLoad(void)) );
+	
+	fileMenu->addAction(quickLoadAct);
 
-    fileMenu->addAction(playNSF);
+	// File -> Quick Save
+	quickSaveAct = new QAction(tr("Quick Save"), this);
+	quickSaveAct->setShortcut( QKeySequence(tr("F5")));
+	quickSaveAct->setStatusTip(tr("Quick Save"));
+	connect(quickSaveAct, SIGNAL(triggered()), this, SLOT(quickSave(void)) );
+	
+	fileMenu->addAction(quickSaveAct);
 
-    fileMenu->addSeparator();
+	// File -> Change State
+	subMenu = fileMenu->addMenu(tr("Change State"));
+	group   = new QActionGroup(this);
 
-	 // File -> Load State From
-	 loadStateAct = new QAction(tr("Load State From"), this);
-    //loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
-    loadStateAct->setStatusTip(tr("Load State From"));
-    loadStateAct->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
-    connect(loadStateAct, SIGNAL(triggered()), this, SLOT(loadStateFrom(void)) );
+	group->setExclusive(true);
 
-    fileMenu->addAction(loadStateAct);
+	for (int i=0; i<10; i++)
+	{
+	        char stmp[8];
 
-	 // File -> Save State As
-	 saveStateAct = new QAction(tr("Save State As"), this);
-    //loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
-    saveStateAct->setStatusTip(tr("Save State As"));
-    saveStateAct->setIcon( style->standardIcon( QStyle::SP_DialogSaveButton ) );
-    connect(saveStateAct, SIGNAL(triggered()), this, SLOT(saveStateAs(void)) );
+	        sprintf( stmp, "%i", i );
 
-    fileMenu->addAction(saveStateAct);
+	        state[i] = new QAction(tr(stmp), this);
+	        state[i]->setCheckable(true);
 
-	 // File -> Quick Load
-	 quickLoadAct = new QAction(tr("Quick Load"), this);
-    quickLoadAct->setShortcut( QKeySequence(tr("F7")));
-    quickLoadAct->setStatusTip(tr("Quick Load"));
-    connect(quickLoadAct, SIGNAL(triggered()), this, SLOT(quickLoad(void)) );
+	        group->addAction(state[i]);
+		 subMenu->addAction(state[i]);
+	}
+	state[0]->setChecked(true);
 
-    fileMenu->addAction(quickLoadAct);
-
-	 // File -> Quick Save
-	 quickSaveAct = new QAction(tr("Quick Save"), this);
-    quickSaveAct->setShortcut( QKeySequence(tr("F5")));
-    quickSaveAct->setStatusTip(tr("Quick Save"));
-    connect(quickSaveAct, SIGNAL(triggered()), this, SLOT(quickSave(void)) );
-
-    fileMenu->addAction(quickSaveAct);
-
-	 // File -> Change State
-	 subMenu = fileMenu->addMenu(tr("Change State"));
-	 group   = new QActionGroup(this);
-
-	 group->setExclusive(true);
-
-	 for (int i=0; i<10; i++)
-	 {
-		 char stmp[8];
-
-		 sprintf( stmp, "%i", i );
-
-		 state[i] = new QAction(tr(stmp), this);
-		 state[i]->setCheckable(true);
-
-		 group->addAction(state[i]);
-	 	 subMenu->addAction(state[i]);
-	 }
-	 state[0]->setChecked(true);
-
-    connect(state[0], SIGNAL(triggered()), this, SLOT(changeState0(void)) );
-    connect(state[1], SIGNAL(triggered()), this, SLOT(changeState1(void)) );
-    connect(state[2], SIGNAL(triggered()), this, SLOT(changeState2(void)) );
-    connect(state[3], SIGNAL(triggered()), this, SLOT(changeState3(void)) );
-    connect(state[4], SIGNAL(triggered()), this, SLOT(changeState4(void)) );
-    connect(state[5], SIGNAL(triggered()), this, SLOT(changeState5(void)) );
-    connect(state[6], SIGNAL(triggered()), this, SLOT(changeState6(void)) );
-    connect(state[7], SIGNAL(triggered()), this, SLOT(changeState7(void)) );
-    connect(state[8], SIGNAL(triggered()), this, SLOT(changeState8(void)) );
-    connect(state[9], SIGNAL(triggered()), this, SLOT(changeState9(void)) );
-
-    fileMenu->addSeparator();
+	connect(state[0], SIGNAL(triggered()), this, SLOT(changeState0(void)) );
+	connect(state[1], SIGNAL(triggered()), this, SLOT(changeState1(void)) );
+	connect(state[2], SIGNAL(triggered()), this, SLOT(changeState2(void)) );
+	connect(state[3], SIGNAL(triggered()), this, SLOT(changeState3(void)) );
+	connect(state[4], SIGNAL(triggered()), this, SLOT(changeState4(void)) );
+	connect(state[5], SIGNAL(triggered()), this, SLOT(changeState5(void)) );
+	connect(state[6], SIGNAL(triggered()), this, SLOT(changeState6(void)) );
+	connect(state[7], SIGNAL(triggered()), this, SLOT(changeState7(void)) );
+	connect(state[8], SIGNAL(triggered()), this, SLOT(changeState8(void)) );
+	connect(state[9], SIGNAL(triggered()), this, SLOT(changeState9(void)) );
+	
+	fileMenu->addSeparator();
 
 #ifdef _S9XLUA_H
-    // File -> Quick Save
-	 loadLuaAct = new QAction(tr("Load Lua Script"), this);
-    //loadLuaAct->setShortcut( QKeySequence(tr("F5")));
-    loadLuaAct->setStatusTip(tr("Load Lua Script"));
-    //loadLuaAct->setIcon( QIcon(":icons/lua-logo.png") );
-    connect(loadLuaAct, SIGNAL(triggered()), this, SLOT(loadLua(void)) );
-
-    fileMenu->addAction(loadLuaAct);
-
-    fileMenu->addSeparator();
+	// File -> Quick Save
+	loadLuaAct = new QAction(tr("Load Lua Script"), this);
+	//loadLuaAct->setShortcut( QKeySequence(tr("F5")));
+	loadLuaAct->setStatusTip(tr("Load Lua Script"));
+	//loadLuaAct->setIcon( QIcon(":icons/lua-logo.png") );
+	connect(loadLuaAct, SIGNAL(triggered()), this, SLOT(loadLua(void)) );
+	
+	fileMenu->addAction(loadLuaAct);
+	
+	fileMenu->addSeparator();
 #else
-    loadLuaAct = NULL;
+	loadLuaAct = NULL;
 #endif
 
-	 // File -> Screenshort
-	 scrShotAct = new QAction(tr("Screenshot"), this);
-    scrShotAct->setShortcut( QKeySequence(tr("F12")));
-    scrShotAct->setStatusTip(tr("Screenshot"));
-    scrShotAct->setIcon( QIcon(":icons/camera.png") );
-    connect(scrShotAct, SIGNAL(triggered()), this, SLOT(takeScreenShot()));
-
-    fileMenu->addAction(scrShotAct);
-
-	 // File -> Quit
-	 quitAct = new QAction(tr("Quit"), this);
-    quitAct->setShortcut( QKeySequence(tr("Ctrl+Q")));
-    quitAct->setStatusTip(tr("Quit the Application"));
-    //quitAct->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
-    quitAct->setIcon( QIcon(":icons/application-exit.png") );
-    connect(quitAct, SIGNAL(triggered()), this, SLOT(closeApp()));
-
-    fileMenu->addAction(quitAct);
-
-	 //-----------------------------------------------------------------------
-	 // Options
-    optMenu = menuBar()->addMenu(tr("&Options"));
-
-	 // Options -> Input Config
-	 inputConfig = new QAction(tr("Input Config"), this);
-    //inputConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-    inputConfig->setStatusTip(tr("Input Configure"));
-    inputConfig->setIcon( QIcon(":icons/input-gaming.png") );
-    connect(inputConfig, SIGNAL(triggered()), this, SLOT(openInputConfWin(void)) );
-
-    optMenu->addAction(inputConfig);
-
-	 // Options -> GamePad Config
-	 gamePadConfig = new QAction(tr("GamePad Config"), this);
-    //gamePadConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-    gamePadConfig->setStatusTip(tr("GamePad Configure"));
-    gamePadConfig->setIcon( QIcon(":icons/input-gaming-symbolic.png") );
-    connect(gamePadConfig, SIGNAL(triggered()), this, SLOT(openGamePadConfWin(void)) );
-
-    optMenu->addAction(gamePadConfig);
-
-	 // Options -> Sound Config
-	 gameSoundConfig = new QAction(tr("Sound Config"), this);
-    //gameSoundConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-    gameSoundConfig->setStatusTip(tr("Sound Configure"));
-    gameSoundConfig->setIcon( style->standardIcon( QStyle::SP_MediaVolume ) );
-    connect(gameSoundConfig, SIGNAL(triggered()), this, SLOT(openGameSndConfWin(void)) );
-
-    optMenu->addAction(gameSoundConfig);
-
-	 // Options -> Video Config
-	 gameVideoConfig = new QAction(tr("Video Config"), this);
-    //gameVideoConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-    gameVideoConfig->setStatusTip(tr("Video Preferences"));
-    gameVideoConfig->setIcon( style->standardIcon( QStyle::SP_ComputerIcon ) );
-    connect(gameVideoConfig, SIGNAL(triggered()), this, SLOT(openGameVideoConfWin(void)) );
-
-    optMenu->addAction(gameVideoConfig);
-
-	 // Options -> HotKey Config
-	 hotkeyConfig = new QAction(tr("Hotkey Config"), this);
-    //hotkeyConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-    hotkeyConfig->setStatusTip(tr("Hotkey Configure"));
-    hotkeyConfig->setIcon( QIcon(":icons/input-keyboard.png") );
-    connect(hotkeyConfig, SIGNAL(triggered()), this, SLOT(openHotkeyConfWin(void)) );
-
-    optMenu->addAction(hotkeyConfig);
-
-	 // Options -> Palette Config
-	 paletteConfig = new QAction(tr("Palette Config"), this);
-    //paletteConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-    paletteConfig->setStatusTip(tr("Palette Configure"));
-    paletteConfig->setIcon( QIcon(":icons/graphics-palette.png") );
-    connect(paletteConfig, SIGNAL(triggered()), this, SLOT(openPaletteConfWin(void)) );
-
-    optMenu->addAction(paletteConfig);
-
-	 // Options -> GUI Config
-	 guiConfig = new QAction(tr("GUI Config"), this);
-    //guiConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-    guiConfig->setStatusTip(tr("GUI Configure"));
-    guiConfig->setIcon( style->standardIcon( QStyle::SP_TitleBarNormalButton ) );
-    connect(guiConfig, SIGNAL(triggered()), this, SLOT(openGuiConfWin(void)) );
-
-    optMenu->addAction(guiConfig);
-
-	 // Options -> Timing Config
-	 timingConfig = new QAction(tr("Timing Config"), this);
-    //timingConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-    timingConfig->setStatusTip(tr("Timing Configure"));
-    timingConfig->setIcon( QIcon(":icons/timer.png") );
-    connect(timingConfig, SIGNAL(triggered()), this, SLOT(openTimingConfWin(void)) );
-
-    optMenu->addAction(timingConfig);
-
-	 // Options -> Movie Options
-	 movieConfig = new QAction(tr("Movie Options"), this);
-    //movieConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-    movieConfig->setStatusTip(tr("Movie Options"));
-    movieConfig->setIcon( QIcon(":icons/movie.png") );
-    connect(movieConfig, SIGNAL(triggered()), this, SLOT(openMovieOptWin(void)) );
-
-    optMenu->addAction(movieConfig);
-
-	 // Options -> Auto-Resume
-	 autoResume = new QAction(tr("Auto-Resume Play"), this);
-    //autoResume->setShortcut( QKeySequence(tr("Ctrl+C")));
-    autoResume->setCheckable(true);
-    autoResume->setStatusTip(tr("Auto-Resume Play"));
-    connect(autoResume, SIGNAL(triggered()), this, SLOT(toggleAutoResume(void)) );
-
-    optMenu->addAction(autoResume);
-
-    optMenu->addSeparator();
-
-	 // Options -> Full Screen
-	 fullscreen = new QAction(tr("Fullscreen"), this);
-    fullscreen->setShortcut( QKeySequence(tr("Alt+Return")));
-    fullscreen->setStatusTip(tr("Fullscreen"));
-    fullscreen->setIcon( QIcon(":icons/view-fullscreen.png") );
-    connect(fullscreen, SIGNAL(triggered()), this, SLOT(toggleFullscreen(void)) );
-
-    optMenu->addAction(fullscreen);
-
-	 // Options -> Hide Menu Screen
-	 act = new QAction(tr("Hide Menu"), this);
-    act->setShortcut( QKeySequence(tr("Alt+M")));
-    act->setStatusTip(tr("Hide Menu"));
-    act->setIcon( style->standardIcon( QStyle::SP_TitleBarMaxButton ) );
-    connect(act, SIGNAL(triggered()), this, SLOT(toggleMenuVis(void)) );
-
-    optMenu->addAction(act);
-
-	 //-----------------------------------------------------------------------
-	 // Emulation
-    emuMenu = menuBar()->addMenu(tr("&Emulation"));
-
-	 // Emulation -> Power
-	 powerAct = new QAction(tr("Power"), this);
-    //powerAct->setShortcut( QKeySequence(tr("Ctrl+P")));
-    powerAct->setStatusTip(tr("Power On Console"));
-    powerAct->setIcon( QIcon(":icons/power.png") );
-    connect(powerAct, SIGNAL(triggered()), this, SLOT(powerConsoleCB(void)) );
-
-    emuMenu->addAction(powerAct);
-
-	 // Emulation -> Reset
-	 resetAct = new QAction(tr("Reset"), this);
-    //resetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
-    resetAct->setStatusTip(tr("Reset Console"));
-    resetAct->setIcon( style->standardIcon( QStyle::SP_DialogResetButton ) );
-    connect(resetAct, SIGNAL(triggered()), this, SLOT(consoleHardReset(void)) );
-
-    emuMenu->addAction(resetAct);
-
-	 // Emulation -> Soft Reset
-	 sresetAct = new QAction(tr("Soft Reset"), this);
-    //sresetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
-    sresetAct->setStatusTip(tr("Soft Reset of Console"));
-    sresetAct->setIcon( style->standardIcon( QStyle::SP_BrowserReload ) );
-    connect(sresetAct, SIGNAL(triggered()), this, SLOT(consoleSoftReset(void)) );
-
-    emuMenu->addAction(sresetAct);
-
-	 // Emulation -> Pause
-	 pauseAct = new QAction(tr("Pause"), this);
-    pauseAct->setShortcut( QKeySequence(tr("Pause")));
-    pauseAct->setStatusTip(tr("Pause Console"));
-    pauseAct->setIcon( style->standardIcon( QStyle::SP_MediaPause ) );
-    connect(pauseAct, SIGNAL(triggered()), this, SLOT(consolePause(void)) );
-
-    emuMenu->addAction(pauseAct);
-
-    emuMenu->addSeparator();
-
-	 // Emulation -> Enable Game Genie
-	 gameGenieAct = new QAction(tr("Enable Game Genie"), this);
-    //gameGenieAct->setShortcut( QKeySequence(tr("Ctrl+G")));
-    gameGenieAct->setCheckable(true);
-    gameGenieAct->setStatusTip(tr("Enable Game Genie"));
-    connect(gameGenieAct, SIGNAL(triggered(bool)), this, SLOT(toggleGameGenie(bool)) );
-
-	 syncActionConfig( gameGenieAct, "SDL.GameGenie" );
-
-    emuMenu->addAction(gameGenieAct);
-
-	 // Emulation -> Load Game Genie ROM
-	 loadGgROMAct = new QAction(tr("Load Game Genie ROM"), this);
-    //loadGgROMAct->setShortcut( QKeySequence(tr("Ctrl+G")));
-    loadGgROMAct->setStatusTip(tr("Load Game Genie ROM"));
-    connect(loadGgROMAct, SIGNAL(triggered()), this, SLOT(loadGameGenieROM(void)) );
-
-    emuMenu->addAction(loadGgROMAct);
-
-    emuMenu->addSeparator();
-
-	 // Emulation -> Insert Coin
-	 insCoinAct = new QAction(tr("Insert Coin"), this);
-    //insCoinAct->setShortcut( QKeySequence(tr("Ctrl+G")));
-    insCoinAct->setStatusTip(tr("Insert Coin"));
-    connect(insCoinAct, SIGNAL(triggered()), this, SLOT(insertCoin(void)) );
-
-    emuMenu->addAction(insCoinAct);
-
-    emuMenu->addSeparator();
-
-	 // Emulation -> FDS
-	 subMenu = emuMenu->addMenu(tr("FDS"));
-
-	 // Emulation -> FDS -> Switch Disk
-	 fdsSwitchAct = new QAction(tr("Switch Disk"), this);
-    //fdsSwitchAct->setShortcut( QKeySequence(tr("Ctrl+G")));
-    fdsSwitchAct->setStatusTip(tr("Switch Disk"));
-    connect(fdsSwitchAct, SIGNAL(triggered()), this, SLOT(fdsSwitchDisk(void)) );
-
-    subMenu->addAction(fdsSwitchAct);
-
-	 // Emulation -> FDS -> Eject Disk
-	 fdsEjectAct = new QAction(tr("Eject Disk"), this);
-    //fdsEjectAct->setShortcut( QKeySequence(tr("Ctrl+G")));
-    fdsEjectAct->setStatusTip(tr("Eject Disk"));
-    connect(fdsEjectAct, SIGNAL(triggered()), this, SLOT(fdsEjectDisk(void)) );
-
-    subMenu->addAction(fdsEjectAct);
-
-	 // Emulation -> FDS -> Load BIOS
-	 fdsLoadBiosAct = new QAction(tr("Load BIOS"), this);
-    //fdsLoadBiosAct->setShortcut( QKeySequence(tr("Ctrl+G")));
-    fdsLoadBiosAct->setStatusTip(tr("Load BIOS"));
-    connect(fdsLoadBiosAct, SIGNAL(triggered()), this, SLOT(fdsLoadBiosFile(void)) );
-
-    subMenu->addAction(fdsLoadBiosAct);
-
-    emuMenu->addSeparator();
-
-    // Emulation -> Speed
-	 subMenu = emuMenu->addMenu(tr("Speed"));
-
-	 // Emulation -> Speed -> Speed Up
-	 act = new QAction(tr("Speed Up"), this);
-    act->setShortcut( QKeySequence(tr("=")));
-    act->setStatusTip(tr("Speed Up"));
-    act->setIcon( style->standardIcon( QStyle::SP_MediaSeekForward ) );
-    connect(act, SIGNAL(triggered()), this, SLOT(emuSpeedUp(void)) );
-
-    subMenu->addAction(act);
-
-    // Emulation -> Speed -> Slow Down
-	 act = new QAction(tr("Slow Down"), this);
-    act->setShortcut( QKeySequence(tr("-")));
-    act->setStatusTip(tr("Slow Down"));
-    act->setIcon( style->standardIcon( QStyle::SP_MediaSeekBackward ) );
-    connect(act, SIGNAL(triggered()), this, SLOT(emuSlowDown(void)) );
-
-    subMenu->addAction(act);
-
-    subMenu->addSeparator();
-
-    // Emulation -> Speed -> Slowest Speed
-	 act = new QAction(tr("Slowest"), this);
-    //act->setShortcut( QKeySequence(tr("-")));
-    act->setStatusTip(tr("Slowest"));
-    act->setIcon( style->standardIcon( QStyle::SP_MediaSkipBackward ) );
-    connect(act, SIGNAL(triggered()), this, SLOT(emuSlowestSpd(void)) );
-
-    subMenu->addAction(act);
-
-    // Emulation -> Speed -> Normal Speed
-	 act = new QAction(tr("Normal"), this);
-    //act->setShortcut( QKeySequence(tr("-")));
-    act->setStatusTip(tr("Normal"));
-    act->setIcon( style->standardIcon( QStyle::SP_MediaPlay ) );
-    connect(act, SIGNAL(triggered()), this, SLOT(emuNormalSpd(void)) );
-
-    subMenu->addAction(act);
-
-    // Emulation -> Speed -> Fastest Speed
-	 act = new QAction(tr("Turbo"), this);
-    //act->setShortcut( QKeySequence(tr("-")));
-    act->setStatusTip(tr("Turbo (Fastest)"));
-    act->setIcon( style->standardIcon( QStyle::SP_MediaSkipForward ) );
-    connect(act, SIGNAL(triggered()), this, SLOT(emuFastestSpd(void)) );
-
-    subMenu->addAction(act);
-
-    // Emulation -> Speed -> Custom Speed
-	 act = new QAction(tr("Custom"), this);
-    //act->setShortcut( QKeySequence(tr("-")));
-    act->setStatusTip(tr("Custom"));
-    connect(act, SIGNAL(triggered()), this, SLOT(emuCustomSpd(void)) );
-
-    subMenu->addAction(act);
-
-    subMenu->addSeparator();
-
-    // Emulation -> Speed -> Set Frame Advance Delay
-	 act = new QAction(tr("Set Frame Advance Delay"), this);
-    //act->setShortcut( QKeySequence(tr("-")));
-    act->setStatusTip(tr("Set Frame Advance Delay"));
-    connect(act, SIGNAL(triggered()), this, SLOT(emuSetFrameAdvDelay(void)) );
-
-    subMenu->addAction(act);
-
-	 //-----------------------------------------------------------------------
-	 // Tools
-    toolsMenu = menuBar()->addMenu(tr("&Tools"));
-
-	 // Tools -> Cheats
-	 cheatsAct = new QAction(tr("Cheats..."), this);
-    //cheatsAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    cheatsAct->setStatusTip(tr("Open Cheat Window"));
-    connect(cheatsAct, SIGNAL(triggered()), this, SLOT(openCheats(void)) );
-
-    toolsMenu->addAction(cheatsAct);
-
-	 // Tools -> RAM Search
-	 ramSearchAct = new QAction(tr("RAM Search..."), this);
-    //ramSearchAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    ramSearchAct->setStatusTip(tr("Open RAM Search Window"));
-    connect(ramSearchAct, SIGNAL(triggered()), this, SLOT(openRamSearch(void)) );
-
-    toolsMenu->addAction(ramSearchAct);
-
-	 // Tools -> RAM Watch
-	 ramWatchAct = new QAction(tr("RAM Watch..."), this);
-    //ramWatchAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    ramWatchAct->setStatusTip(tr("Open RAM Watch Window"));
-    connect(ramWatchAct, SIGNAL(triggered()), this, SLOT(openRamWatch(void)) );
-
-    toolsMenu->addAction(ramWatchAct);
+	// File -> Screenshort
+	scrShotAct = new QAction(tr("Screenshot"), this);
+	scrShotAct->setShortcut( QKeySequence(tr("F12")));
+	scrShotAct->setStatusTip(tr("Screenshot"));
+	scrShotAct->setIcon( QIcon(":icons/camera.png") );
+	connect(scrShotAct, SIGNAL(triggered()), this, SLOT(takeScreenShot()));
+	
+	fileMenu->addAction(scrShotAct);
+
+	// File -> Quit
+	quitAct = new QAction(tr("Quit"), this);
+	quitAct->setShortcut( QKeySequence(tr("Ctrl+Q")));
+	quitAct->setStatusTip(tr("Quit the Application"));
+	//quitAct->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
+	quitAct->setIcon( QIcon(":icons/application-exit.png") );
+	connect(quitAct, SIGNAL(triggered()), this, SLOT(closeApp()));
+	
+	fileMenu->addAction(quitAct);
+
+	//-----------------------------------------------------------------------
+	// Options
+	optMenu = menuBar()->addMenu(tr("&Options"));
+
+	// Options -> Input Config
+	inputConfig = new QAction(tr("Input Config"), this);
+	//inputConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+	inputConfig->setStatusTip(tr("Input Configure"));
+	inputConfig->setIcon( QIcon(":icons/input-gaming.png") );
+	connect(inputConfig, SIGNAL(triggered()), this, SLOT(openInputConfWin(void)) );
+	
+	optMenu->addAction(inputConfig);
+
+	// Options -> GamePad Config
+	gamePadConfig = new QAction(tr("GamePad Config"), this);
+	//gamePadConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+	gamePadConfig->setStatusTip(tr("GamePad Configure"));
+	gamePadConfig->setIcon( QIcon(":icons/input-gaming-symbolic.png") );
+	connect(gamePadConfig, SIGNAL(triggered()), this, SLOT(openGamePadConfWin(void)) );
+	
+	optMenu->addAction(gamePadConfig);
+
+	// Options -> Sound Config
+	gameSoundConfig = new QAction(tr("Sound Config"), this);
+	//gameSoundConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+	gameSoundConfig->setStatusTip(tr("Sound Configure"));
+	gameSoundConfig->setIcon( style->standardIcon( QStyle::SP_MediaVolume ) );
+	connect(gameSoundConfig, SIGNAL(triggered()), this, SLOT(openGameSndConfWin(void)) );
+	
+	optMenu->addAction(gameSoundConfig);
+
+	// Options -> Video Config
+	gameVideoConfig = new QAction(tr("Video Config"), this);
+	//gameVideoConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+	gameVideoConfig->setStatusTip(tr("Video Preferences"));
+	gameVideoConfig->setIcon( style->standardIcon( QStyle::SP_ComputerIcon ) );
+	connect(gameVideoConfig, SIGNAL(triggered()), this, SLOT(openGameVideoConfWin(void)) );
+	
+	optMenu->addAction(gameVideoConfig);
+
+	// Options -> HotKey Config
+	hotkeyConfig = new QAction(tr("Hotkey Config"), this);
+	//hotkeyConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+	hotkeyConfig->setStatusTip(tr("Hotkey Configure"));
+	hotkeyConfig->setIcon( QIcon(":icons/input-keyboard.png") );
+	connect(hotkeyConfig, SIGNAL(triggered()), this, SLOT(openHotkeyConfWin(void)) );
+	
+	optMenu->addAction(hotkeyConfig);
+
+	// Options -> Palette Config
+	paletteConfig = new QAction(tr("Palette Config"), this);
+	//paletteConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+	paletteConfig->setStatusTip(tr("Palette Configure"));
+	paletteConfig->setIcon( QIcon(":icons/graphics-palette.png") );
+	connect(paletteConfig, SIGNAL(triggered()), this, SLOT(openPaletteConfWin(void)) );
+	
+	optMenu->addAction(paletteConfig);
+
+	// Options -> GUI Config
+	guiConfig = new QAction(tr("GUI Config"), this);
+	//guiConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+	guiConfig->setStatusTip(tr("GUI Configure"));
+	guiConfig->setIcon( style->standardIcon( QStyle::SP_TitleBarNormalButton ) );
+	connect(guiConfig, SIGNAL(triggered()), this, SLOT(openGuiConfWin(void)) );
+	
+	optMenu->addAction(guiConfig);
+
+	// Options -> Timing Config
+	timingConfig = new QAction(tr("Timing Config"), this);
+	//timingConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+	timingConfig->setStatusTip(tr("Timing Configure"));
+	timingConfig->setIcon( QIcon(":icons/timer.png") );
+	connect(timingConfig, SIGNAL(triggered()), this, SLOT(openTimingConfWin(void)) );
+	
+	optMenu->addAction(timingConfig);
+
+	// Options -> Movie Options
+	movieConfig = new QAction(tr("Movie Options"), this);
+	//movieConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+	movieConfig->setStatusTip(tr("Movie Options"));
+	movieConfig->setIcon( QIcon(":icons/movie.png") );
+	connect(movieConfig, SIGNAL(triggered()), this, SLOT(openMovieOptWin(void)) );
+	
+	optMenu->addAction(movieConfig);
+
+	// Options -> Auto-Resume
+	autoResume = new QAction(tr("Auto-Resume Play"), this);
+	//autoResume->setShortcut( QKeySequence(tr("Ctrl+C")));
+	autoResume->setCheckable(true);
+	autoResume->setStatusTip(tr("Auto-Resume Play"));
+	connect(autoResume, SIGNAL(triggered()), this, SLOT(toggleAutoResume(void)) );
+
+	optMenu->addAction(autoResume);
+	
+	optMenu->addSeparator();
+
+	// Options -> Full Screen
+	fullscreen = new QAction(tr("Fullscreen"), this);
+	fullscreen->setShortcut( QKeySequence(tr("Alt+Return")));
+	fullscreen->setStatusTip(tr("Fullscreen"));
+	fullscreen->setIcon( QIcon(":icons/view-fullscreen.png") );
+	connect(fullscreen, SIGNAL(triggered()), this, SLOT(toggleFullscreen(void)) );
+	
+	optMenu->addAction(fullscreen);
+
+	// Options -> Hide Menu Screen
+	act = new QAction(tr("Hide Menu"), this);
+	act->setShortcut( QKeySequence(tr("Alt+M")));
+	act->setStatusTip(tr("Hide Menu"));
+	act->setIcon( style->standardIcon( QStyle::SP_TitleBarMaxButton ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(toggleMenuVis(void)) );
+	
+	optMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Emulation
+	emuMenu = menuBar()->addMenu(tr("&Emulation"));
+
+	// Emulation -> Power
+	powerAct = new QAction(tr("Power"), this);
+	//powerAct->setShortcut( QKeySequence(tr("Ctrl+P")));
+	powerAct->setStatusTip(tr("Power On Console"));
+	powerAct->setIcon( QIcon(":icons/power.png") );
+	connect(powerAct, SIGNAL(triggered()), this, SLOT(powerConsoleCB(void)) );
+	
+	emuMenu->addAction(powerAct);
+
+	// Emulation -> Reset
+	resetAct = new QAction(tr("Reset"), this);
+	//resetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
+	resetAct->setStatusTip(tr("Reset Console"));
+	resetAct->setIcon( style->standardIcon( QStyle::SP_DialogResetButton ) );
+	connect(resetAct, SIGNAL(triggered()), this, SLOT(consoleHardReset(void)) );
+	
+	emuMenu->addAction(resetAct);
+
+	// Emulation -> Soft Reset
+	sresetAct = new QAction(tr("Soft Reset"), this);
+	//sresetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
+	sresetAct->setStatusTip(tr("Soft Reset of Console"));
+	sresetAct->setIcon( style->standardIcon( QStyle::SP_BrowserReload ) );
+	connect(sresetAct, SIGNAL(triggered()), this, SLOT(consoleSoftReset(void)) );
+	
+	emuMenu->addAction(sresetAct);
+
+	// Emulation -> Pause
+	pauseAct = new QAction(tr("Pause"), this);
+	pauseAct->setShortcut( QKeySequence(tr("Pause")));
+	pauseAct->setStatusTip(tr("Pause Console"));
+	pauseAct->setIcon( style->standardIcon( QStyle::SP_MediaPause ) );
+	connect(pauseAct, SIGNAL(triggered()), this, SLOT(consolePause(void)) );
+	
+	emuMenu->addAction(pauseAct);
+	
+	emuMenu->addSeparator();
+
+	// Emulation -> Enable Game Genie
+	gameGenieAct = new QAction(tr("Enable Game Genie"), this);
+	//gameGenieAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+	gameGenieAct->setCheckable(true);
+	gameGenieAct->setStatusTip(tr("Enable Game Genie"));
+	connect(gameGenieAct, SIGNAL(triggered(bool)), this, SLOT(toggleGameGenie(bool)) );
+
+	syncActionConfig( gameGenieAct, "SDL.GameGenie" );
+
+	emuMenu->addAction(gameGenieAct);
+
+	// Emulation -> Load Game Genie ROM
+	loadGgROMAct = new QAction(tr("Load Game Genie ROM"), this);
+	//loadGgROMAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+	loadGgROMAct->setStatusTip(tr("Load Game Genie ROM"));
+	connect(loadGgROMAct, SIGNAL(triggered()), this, SLOT(loadGameGenieROM(void)) );
+	
+	emuMenu->addAction(loadGgROMAct);
+	
+	emuMenu->addSeparator();
+
+	// Emulation -> Insert Coin
+	insCoinAct = new QAction(tr("Insert Coin"), this);
+	//insCoinAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+	insCoinAct->setStatusTip(tr("Insert Coin"));
+	connect(insCoinAct, SIGNAL(triggered()), this, SLOT(insertCoin(void)) );
+	
+	emuMenu->addAction(insCoinAct);
+	
+	emuMenu->addSeparator();
+
+	// Emulation -> FDS
+	subMenu = emuMenu->addMenu(tr("FDS"));
+
+	// Emulation -> FDS -> Switch Disk
+	fdsSwitchAct = new QAction(tr("Switch Disk"), this);
+	//fdsSwitchAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+	fdsSwitchAct->setStatusTip(tr("Switch Disk"));
+	connect(fdsSwitchAct, SIGNAL(triggered()), this, SLOT(fdsSwitchDisk(void)) );
+	
+	subMenu->addAction(fdsSwitchAct);
+
+	// Emulation -> FDS -> Eject Disk
+	fdsEjectAct = new QAction(tr("Eject Disk"), this);
+	//fdsEjectAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+	fdsEjectAct->setStatusTip(tr("Eject Disk"));
+	connect(fdsEjectAct, SIGNAL(triggered()), this, SLOT(fdsEjectDisk(void)) );
+	
+	subMenu->addAction(fdsEjectAct);
+
+	// Emulation -> FDS -> Load BIOS
+	fdsLoadBiosAct = new QAction(tr("Load BIOS"), this);
+	//fdsLoadBiosAct->setShortcut( QKeySequence(tr("Ctrl+G")));
+	fdsLoadBiosAct->setStatusTip(tr("Load BIOS"));
+	connect(fdsLoadBiosAct, SIGNAL(triggered()), this, SLOT(fdsLoadBiosFile(void)) );
+	
+	subMenu->addAction(fdsLoadBiosAct);
+	
+	emuMenu->addSeparator();
+
+	// Emulation -> Speed
+	subMenu = emuMenu->addMenu(tr("Speed"));
+
+	// Emulation -> Speed -> Speed Up
+	act = new QAction(tr("Speed Up"), this);
+	act->setShortcut( QKeySequence(tr("=")));
+	act->setStatusTip(tr("Speed Up"));
+	act->setIcon( style->standardIcon( QStyle::SP_MediaSeekForward ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(emuSpeedUp(void)) );
+	
+	subMenu->addAction(act);
+
+	// Emulation -> Speed -> Slow Down
+	act = new QAction(tr("Slow Down"), this);
+	act->setShortcut( QKeySequence(tr("-")));
+	act->setStatusTip(tr("Slow Down"));
+	act->setIcon( style->standardIcon( QStyle::SP_MediaSeekBackward ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(emuSlowDown(void)) );
+	
+	subMenu->addAction(act);
+	
+	subMenu->addSeparator();
+
+	// Emulation -> Speed -> Slowest Speed
+	act = new QAction(tr("Slowest"), this);
+	//act->setShortcut( QKeySequence(tr("-")));
+	act->setStatusTip(tr("Slowest"));
+	act->setIcon( style->standardIcon( QStyle::SP_MediaSkipBackward ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(emuSlowestSpd(void)) );
+	
+	subMenu->addAction(act);
+
+	// Emulation -> Speed -> Normal Speed
+	act = new QAction(tr("Normal"), this);
+	//act->setShortcut( QKeySequence(tr("-")));
+	act->setStatusTip(tr("Normal"));
+	act->setIcon( style->standardIcon( QStyle::SP_MediaPlay ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(emuNormalSpd(void)) );
+	
+	subMenu->addAction(act);
+	
+	// Emulation -> Speed -> Fastest Speed
+	act = new QAction(tr("Turbo"), this);
+	//act->setShortcut( QKeySequence(tr("-")));
+	act->setStatusTip(tr("Turbo (Fastest)"));
+	act->setIcon( style->standardIcon( QStyle::SP_MediaSkipForward ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(emuFastestSpd(void)) );
+	
+	subMenu->addAction(act);
+	
+	// Emulation -> Speed -> Custom Speed
+	act = new QAction(tr("Custom"), this);
+	//act->setShortcut( QKeySequence(tr("-")));
+	act->setStatusTip(tr("Custom"));
+	connect(act, SIGNAL(triggered()), this, SLOT(emuCustomSpd(void)) );
+	
+	subMenu->addAction(act);
+	
+	subMenu->addSeparator();
+	
+	// Emulation -> Speed -> Set Frame Advance Delay
+	act = new QAction(tr("Set Frame Advance Delay"), this);
+	//act->setShortcut( QKeySequence(tr("-")));
+	act->setStatusTip(tr("Set Frame Advance Delay"));
+	connect(act, SIGNAL(triggered()), this, SLOT(emuSetFrameAdvDelay(void)) );
+	
+	subMenu->addAction(act);
+
+	emuMenu->addSeparator();
+
+	// Emulation -> AutoFire Pattern
+	subMenu = emuMenu->addMenu(tr("AutoFire Pattern"));
+	
+	// Emulation -> AutoFire Pattern -> # On Frames
+	act = new QAction(tr("# On Frames"), this);
+	act->setStatusTip(tr("# On Frames"));
+	connect(act, SIGNAL(triggered()), this, SLOT(setAutoFireOnFrames(void)) );
+	
+	subMenu->addAction(act);
+
+	// Emulation -> AutoFire Pattern -> # Off Frames
+	act = new QAction(tr("# Off Frames"), this);
+	act->setStatusTip(tr("# Off Frames"));
+	connect(act, SIGNAL(triggered()), this, SLOT(setAutoFireOffFrames(void)) );
+	
+	subMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Tools
+	toolsMenu = menuBar()->addMenu(tr("&Tools"));
+
+	// Tools -> Cheats
+	cheatsAct = new QAction(tr("Cheats..."), this);
+	//cheatsAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	cheatsAct->setStatusTip(tr("Open Cheat Window"));
+	connect(cheatsAct, SIGNAL(triggered()), this, SLOT(openCheats(void)) );
+	
+	toolsMenu->addAction(cheatsAct);
+
+	// Tools -> RAM Search
+	ramSearchAct = new QAction(tr("RAM Search..."), this);
+	//ramSearchAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	ramSearchAct->setStatusTip(tr("Open RAM Search Window"));
+	connect(ramSearchAct, SIGNAL(triggered()), this, SLOT(openRamSearch(void)) );
+	
+	toolsMenu->addAction(ramSearchAct);
+
+	// Tools -> RAM Watch
+	ramWatchAct = new QAction(tr("RAM Watch..."), this);
+	//ramWatchAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	ramWatchAct->setStatusTip(tr("Open RAM Watch Window"));
+	connect(ramWatchAct, SIGNAL(triggered()), this, SLOT(openRamWatch(void)) );
+	
+	toolsMenu->addAction(ramWatchAct);
 
 	// Tools -> Frame Timing
 	act = new QAction(tr("Frame Timing ..."), this);
@@ -768,140 +787,140 @@ void consoleWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // Debug
-    debugMenu = menuBar()->addMenu(tr("&Debug"));
+	debugMenu = menuBar()->addMenu(tr("&Debug"));
 
-	 // Debug -> Debugger 
-	 debuggerAct = new QAction(tr("Debugger..."), this);
-    //debuggerAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    debuggerAct->setStatusTip(tr("Open 6502 Debugger"));
-    connect(debuggerAct, SIGNAL(triggered()), this, SLOT(openDebugWindow(void)) );
+	// Debug -> Debugger 
+	debuggerAct = new QAction(tr("Debugger..."), this);
+	//debuggerAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	debuggerAct->setStatusTip(tr("Open 6502 Debugger"));
+	connect(debuggerAct, SIGNAL(triggered()), this, SLOT(openDebugWindow(void)) );
+	
+	debugMenu->addAction(debuggerAct);
 
-    debugMenu->addAction(debuggerAct);
+	// Debug -> Hex Editor
+	hexEditAct = new QAction(tr("Hex Editor..."), this);
+	//hexEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	hexEditAct->setStatusTip(tr("Open Memory Hex Editor"));
+	connect(hexEditAct, SIGNAL(triggered()), this, SLOT(openHexEditor(void)) );
+	
+	debugMenu->addAction(hexEditAct);
 
-	 // Debug -> Hex Editor
-	 hexEditAct = new QAction(tr("Hex Editor..."), this);
-    //hexEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    hexEditAct->setStatusTip(tr("Open Memory Hex Editor"));
-    connect(hexEditAct, SIGNAL(triggered()), this, SLOT(openHexEditor(void)) );
+	// Debug -> PPU Viewer
+	ppuViewAct = new QAction(tr("PPU Viewer..."), this);
+	//ppuViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	ppuViewAct->setStatusTip(tr("Open PPU Viewer"));
+	connect(ppuViewAct, SIGNAL(triggered()), this, SLOT(openPPUViewer(void)) );
+	
+	debugMenu->addAction(ppuViewAct);
 
-    debugMenu->addAction(hexEditAct);
+	// Debug -> Name Table Viewer
+	ntViewAct = new QAction(tr("Name Table Viewer..."), this);
+	//ntViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	ntViewAct->setStatusTip(tr("Open Name Table Viewer"));
+	connect(ntViewAct, SIGNAL(triggered()), this, SLOT(openNTViewer(void)) );
+	
+	debugMenu->addAction(ntViewAct);
 
-	 // Debug -> PPU Viewer
-	 ppuViewAct = new QAction(tr("PPU Viewer..."), this);
-    //ppuViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    ppuViewAct->setStatusTip(tr("Open PPU Viewer"));
-    connect(ppuViewAct, SIGNAL(triggered()), this, SLOT(openPPUViewer(void)) );
+	// Debug -> Trace Logger
+	traceLogAct = new QAction(tr("Trace Logger..."), this);
+	//traceLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	traceLogAct->setStatusTip(tr("Open Trace Logger"));
+	connect(traceLogAct, SIGNAL(triggered()), this, SLOT(openTraceLogger(void)) );
+	
+	debugMenu->addAction(traceLogAct);
 
-    debugMenu->addAction(ppuViewAct);
+	// Debug -> Code/Data Logger
+	codeDataLogAct = new QAction(tr("Code/Data Logger..."), this);
+	//codeDataLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	codeDataLogAct->setStatusTip(tr("Open Code Data Logger"));
+	connect(codeDataLogAct, SIGNAL(triggered()), this, SLOT(openCodeDataLogger(void)) );
+	
+	debugMenu->addAction(codeDataLogAct);
 
-	 // Debug -> Name Table Viewer
-	 ntViewAct = new QAction(tr("Name Table Viewer..."), this);
-    //ntViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    ntViewAct->setStatusTip(tr("Open Name Table Viewer"));
-    connect(ntViewAct, SIGNAL(triggered()), this, SLOT(openNTViewer(void)) );
+	// Debug -> Game Genie Encode/Decode Viewer
+	ggEncodeAct = new QAction(tr("Game Genie Encode/Decode"), this);
+	//ggEncodeAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	ggEncodeAct->setStatusTip(tr("Open Game Genie Encode/Decode"));
+	connect(ggEncodeAct, SIGNAL(triggered()), this, SLOT(openGGEncoder(void)) );
+	
+	debugMenu->addAction(ggEncodeAct);
 
-    debugMenu->addAction(ntViewAct);
+	// Debug -> iNES Header Editor
+	iNesEditAct = new QAction(tr("iNES Header Editor..."), this);
+	//iNesEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	iNesEditAct->setStatusTip(tr("Open iNES Header Editor"));
+	connect(iNesEditAct, SIGNAL(triggered()), this, SLOT(openNesHeaderEditor(void)) );
+	
+	debugMenu->addAction(iNesEditAct);
 
-	 // Debug -> Trace Logger
-	 traceLogAct = new QAction(tr("Trace Logger..."), this);
-    //traceLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    traceLogAct->setStatusTip(tr("Open Trace Logger"));
-    connect(traceLogAct, SIGNAL(triggered()), this, SLOT(openTraceLogger(void)) );
+	//-----------------------------------------------------------------------
+	// Movie
+	movieMenu = menuBar()->addMenu(tr("Movie"));
 
-    debugMenu->addAction(traceLogAct);
+	// Movie -> Play
+	openMovAct = new QAction(tr("Play"), this);
+	openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	openMovAct->setStatusTip(tr("Play Movie File"));
+	openMovAct->setIcon( style->standardIcon( QStyle::SP_MediaPlay ) );
+	connect(openMovAct, SIGNAL(triggered()), this, SLOT(openMovie(void)) );
+	
+	movieMenu->addAction(openMovAct);
 
-	 // Debug -> Code/Data Logger
-	 codeDataLogAct = new QAction(tr("Code/Data Logger..."), this);
-    //codeDataLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    codeDataLogAct->setStatusTip(tr("Open Code Data Logger"));
-    connect(codeDataLogAct, SIGNAL(triggered()), this, SLOT(openCodeDataLogger(void)) );
+	// Movie -> Stop
+	stopMovAct = new QAction(tr("Stop"), this);
+	//stopMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	stopMovAct->setStatusTip(tr("Stop Movie Recording"));
+	stopMovAct->setIcon( style->standardIcon( QStyle::SP_MediaStop ) );
+	connect(stopMovAct, SIGNAL(triggered()), this, SLOT(stopMovie(void)) );
+	
+	movieMenu->addAction(stopMovAct);
+	
+	movieMenu->addSeparator();
 
-    debugMenu->addAction(codeDataLogAct);
+	// Movie -> Record
+	recMovAct = new QAction(tr("Record"), this);
+	recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	recMovAct->setStatusTip(tr("Record Movie"));
+	recMovAct->setIcon( QIcon(":icons/media-record.png") );
+	connect(recMovAct, SIGNAL(triggered()), this, SLOT(recordMovie(void)) );
+	
+	movieMenu->addAction(recMovAct);
 
-	 // Debug -> Game Genie Encode/Decode Viewer
-	 ggEncodeAct = new QAction(tr("Game Genie Encode/Decode"), this);
-    //ggEncodeAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    ggEncodeAct->setStatusTip(tr("Open Game Genie Encode/Decode"));
-    connect(ggEncodeAct, SIGNAL(triggered()), this, SLOT(openGGEncoder(void)) );
+	// Movie -> Record As
+	recAsMovAct = new QAction(tr("Record As"), this);
+	//recAsMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	recAsMovAct->setStatusTip(tr("Record Movie"));
+	connect(recAsMovAct, SIGNAL(triggered()), this, SLOT(recordMovieAs(void)) );
+	
+	movieMenu->addAction(recAsMovAct);
 
-    debugMenu->addAction(ggEncodeAct);
-
-	 // Debug -> iNES Header Editor
-	 iNesEditAct = new QAction(tr("iNES Header Editor..."), this);
-    //iNesEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    iNesEditAct->setStatusTip(tr("Open iNES Header Editor"));
-    connect(iNesEditAct, SIGNAL(triggered()), this, SLOT(openNesHeaderEditor(void)) );
-
-    debugMenu->addAction(iNesEditAct);
-
-	 //-----------------------------------------------------------------------
-	 // Movie
-    movieMenu = menuBar()->addMenu(tr("Movie"));
-
-	 // Movie -> Play
-	 openMovAct = new QAction(tr("Play"), this);
-    openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    openMovAct->setStatusTip(tr("Play Movie File"));
-    openMovAct->setIcon( style->standardIcon( QStyle::SP_MediaPlay ) );
-    connect(openMovAct, SIGNAL(triggered()), this, SLOT(openMovie(void)) );
-
-    movieMenu->addAction(openMovAct);
-
-	 // Movie -> Stop
-	 stopMovAct = new QAction(tr("Stop"), this);
-    //stopMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
-    stopMovAct->setStatusTip(tr("Stop Movie Recording"));
-    stopMovAct->setIcon( style->standardIcon( QStyle::SP_MediaStop ) );
-    connect(stopMovAct, SIGNAL(triggered()), this, SLOT(stopMovie(void)) );
-
-    movieMenu->addAction(stopMovAct);
-
-    movieMenu->addSeparator();
-
-	 // Movie -> Record
-	 recMovAct = new QAction(tr("Record"), this);
-    recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
-    recMovAct->setStatusTip(tr("Record Movie"));
-    recMovAct->setIcon( QIcon(":icons/media-record.png") );
-    connect(recMovAct, SIGNAL(triggered()), this, SLOT(recordMovie(void)) );
-
-    movieMenu->addAction(recMovAct);
-
-	  // Movie -> Record As
-	 recAsMovAct = new QAction(tr("Record As"), this);
-    //recAsMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
-    recAsMovAct->setStatusTip(tr("Record Movie"));
-    connect(recAsMovAct, SIGNAL(triggered()), this, SLOT(recordMovieAs(void)) );
-
-    movieMenu->addAction(recAsMovAct);
-
-	 //-----------------------------------------------------------------------
-	 // Help
-    helpMenu = menuBar()->addMenu(tr("&Help"));
+	//-----------------------------------------------------------------------
+	// Help
+	helpMenu = menuBar()->addMenu(tr("&Help"));
  
-	 // Help -> About FCEUX
-	 aboutAct = new QAction(tr("About FCEUX"), this);
-    aboutAct->setStatusTip(tr("About FCEUX"));
-    aboutAct->setIcon( style->standardIcon( QStyle::SP_MessageBoxInformation ) );
-    connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutFCEUX(void)) );
+	// Help -> About FCEUX
+	aboutAct = new QAction(tr("About FCEUX"), this);
+	aboutAct->setStatusTip(tr("About FCEUX"));
+	aboutAct->setIcon( style->standardIcon( QStyle::SP_MessageBoxInformation ) );
+	connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutFCEUX(void)) );
+	
+	helpMenu->addAction(aboutAct);
 
-    helpMenu->addAction(aboutAct);
+	// Help -> About Qt
+	aboutActQt = new QAction(tr("About Qt"), this);
+	aboutActQt->setStatusTip(tr("About Qt"));
+	aboutActQt->setIcon( style->standardIcon( QStyle::SP_TitleBarMenuButton ) );
+	connect(aboutActQt, SIGNAL(triggered()), this, SLOT(aboutQt(void)) );
+	
+	helpMenu->addAction(aboutActQt);
 
-	 // Help -> About Qt
-	 aboutActQt = new QAction(tr("About Qt"), this);
-    aboutActQt->setStatusTip(tr("About Qt"));
-    aboutActQt->setIcon( style->standardIcon( QStyle::SP_TitleBarMenuButton ) );
-    connect(aboutActQt, SIGNAL(triggered()), this, SLOT(aboutQt(void)) );
-
-    helpMenu->addAction(aboutActQt);
-
-	 // Help -> Message Log
-	 msgLogAct = new QAction(tr("Message Log"), this);
-    msgLogAct->setStatusTip(tr("Message Log"));
-    msgLogAct->setIcon( style->standardIcon( QStyle::SP_MessageBoxWarning ) );
-    connect(msgLogAct, SIGNAL(triggered()), this, SLOT(openMsgLogWin(void)) );
-
-    helpMenu->addAction(msgLogAct);
+	// Help -> Message Log
+	msgLogAct = new QAction(tr("Message Log"), this);
+	msgLogAct->setStatusTip(tr("Message Log"));
+	msgLogAct->setIcon( style->standardIcon( QStyle::SP_MessageBoxWarning ) );
+	connect(msgLogAct, SIGNAL(triggered()), this, SLOT(openMsgLogWin(void)) );
+	
+	helpMenu->addAction(msgLogAct);
 };
 //---------------------------------------------------------------------------
 void consoleWin_t::toggleMenuVis(void)
@@ -1936,24 +1955,24 @@ void consoleWin_t::emuCustomSpd(void)
 	int ret;
 	QInputDialog dialog(this);
 
-   dialog.setWindowTitle( tr("Emulation Speed") );
-   dialog.setLabelText( tr("Enter a percentage from 1 to 1000.") );
-   dialog.setOkButtonText( tr("Ok") );
-   dialog.setInputMode( QInputDialog::IntInput );
-   dialog.setIntRange( 1, 1000 );
-   dialog.setIntValue( 100 );
-
-   dialog.show();
-   ret = dialog.exec();
-
-   if ( QDialog::Accepted == ret )
-   {
-      int spdPercent;
-
-      spdPercent = dialog.intValue();
-
-      CustomEmulationSpeed( spdPercent );
-   }
+	dialog.setWindowTitle( tr("Emulation Speed") );
+	dialog.setLabelText( tr("Enter a percentage from 1 to 1000.") );
+	dialog.setOkButtonText( tr("Ok") );
+	dialog.setInputMode( QInputDialog::IntInput );
+	dialog.setIntRange( 1, 1000 );
+	dialog.setIntValue( 100 );
+	
+	dialog.show();
+	ret = dialog.exec();
+	
+	if ( QDialog::Accepted == ret )
+	{
+	   int spdPercent;
+	
+	   spdPercent = dialog.intValue();
+	
+	   CustomEmulationSpeed( spdPercent );
+	}
 }
 
 void consoleWin_t::emuSetFrameAdvDelay(void)
@@ -1961,20 +1980,62 @@ void consoleWin_t::emuSetFrameAdvDelay(void)
 	int ret;
 	QInputDialog dialog(this);
 
-   dialog.setWindowTitle( tr("Frame Advance Delay") );
-   dialog.setLabelText( tr("How much time should elapse before holding the frame advance unpauses the simulation?") );
-   dialog.setOkButtonText( tr("Ok") );
-   dialog.setInputMode( QInputDialog::IntInput );
-   dialog.setIntRange( 0, 1000 );
-   dialog.setIntValue( frameAdvance_Delay );
+	dialog.setWindowTitle( tr("Frame Advance Delay") );
+	dialog.setLabelText( tr("How much time should elapse before holding the frame advance unpauses the simulation?") );
+	dialog.setOkButtonText( tr("Ok") );
+	dialog.setInputMode( QInputDialog::IntInput );
+	dialog.setIntRange( 0, 1000 );
+	dialog.setIntValue( frameAdvance_Delay );
+	
+	dialog.show();
+	ret = dialog.exec();
+	
+	if ( QDialog::Accepted == ret )
+	{
+	   frameAdvance_Delay = dialog.intValue();
+	}
+}
 
-   dialog.show();
-   ret = dialog.exec();
+void consoleWin_t::setAutoFireOnFrames(void)
+{
+	int ret;
+	QInputDialog dialog(this);
 
-   if ( QDialog::Accepted == ret )
-   {
-      frameAdvance_Delay = dialog.intValue();
-   }
+	dialog.setWindowTitle( tr("AutoFire Pattern ON Frames") );
+	dialog.setLabelText( tr("Specify desired number of ON frames in autofire pattern:") );
+	dialog.setOkButtonText( tr("Ok") );
+	dialog.setInputMode( QInputDialog::IntInput );
+	dialog.setIntRange( 1, 30 );
+	dialog.setIntValue( autoFireOnFrames );
+	
+	dialog.show();
+	ret = dialog.exec();
+	
+	if ( QDialog::Accepted == ret )
+	{
+	   autoFireOnFrames = dialog.intValue();
+	}
+}
+
+void consoleWin_t::setAutoFireOffFrames(void)
+{
+	int ret;
+	QInputDialog dialog(this);
+
+	dialog.setWindowTitle( tr("AutoFire Pattern OFF Frames") );
+	dialog.setLabelText( tr("Specify desired number of OFF frames in autofire pattern:") );
+	dialog.setOkButtonText( tr("Ok") );
+	dialog.setInputMode( QInputDialog::IntInput );
+	dialog.setIntRange( 1, 30 );
+	dialog.setIntValue( autoFireOffFrames );
+	
+	dialog.show();
+	ret = dialog.exec();
+	
+	if ( QDialog::Accepted == ret )
+	{
+	   autoFireOffFrames = dialog.intValue();
+	}
 }
 
 void consoleWin_t::openMovie(void)
@@ -2048,10 +2109,10 @@ void consoleWin_t::recordMovieAs(void)
 		}
 	}
 
-   if ( filename.isNull() )
-   {
-      return;
-   }
+	if ( filename.isNull() )
+	{
+	   return;
+	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	int pauseframe;
@@ -2067,7 +2128,7 @@ void consoleWin_t::recordMovieAs(void)
 	FCEUI_SaveMovie ( filename.toStdString().c_str(), MOVIE_FLAG_NONE, author);
 	fceuWrapperUnLock();
 
-   return;
+	return;
 }
 
 void consoleWin_t::aboutFCEUX(void)
@@ -2076,10 +2137,10 @@ void consoleWin_t::aboutFCEUX(void)
 
 	//printf("About FCEUX Window\n");
 	
-   aboutWin = new AboutWindow(this);
+	aboutWin = new AboutWindow(this);
 	
-   aboutWin->show();
-   return;
+	aboutWin->show();
+	return;
 }
 
 void consoleWin_t::aboutQt(void)
@@ -2088,8 +2149,8 @@ void consoleWin_t::aboutQt(void)
 	
 	QMessageBox::aboutQt(this);
 
-   //printf("About Qt Destroyed\n");
-   return;
+	//printf("About Qt Destroyed\n");
+	return;
 }
 
 void consoleWin_t::openMsgLogWin(void)
@@ -2101,7 +2162,7 @@ void consoleWin_t::openMsgLogWin(void)
 
 	msgLogWin->show();
 
-   return;
+	return;
 }
 
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)

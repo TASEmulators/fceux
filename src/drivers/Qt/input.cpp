@@ -22,6 +22,7 @@
 #include "Qt/dface.h"
 #include "Qt/input.h"
 #include "Qt/config.h"
+#include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 
@@ -44,6 +45,8 @@
 
 /** GLOBALS **/
 int NoWaiting = 0;
+int autoFireOnFrames = 1;
+int autoFireOffFrames = 1;
 extern Config *g_config;
 extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
 
@@ -1191,14 +1194,31 @@ UpdateGamepad(void)
 	if (FCEUMOV_Mode (MOVIEMODE_PLAY))
 	{
 		return;
-	 }
+	}
 
-	static int rapid = 0;
+	static int rapid[4][2] = { 0 };
 	uint32 JS = 0;
 	int x;
 	int wg;
+	int onFrames;
+	int offFrames;
+	int totalFrames;
+	bool fire, emuUpdated = false;
+	static unsigned int emuCount = 0;
 
-	rapid ^= 1;
+	if ( emulatorCycleCount != emuCount)
+	{
+		emuUpdated = true;
+		emuCount   = emulatorCycleCount;
+	}
+
+	onFrames  = autoFireOnFrames;
+	offFrames = autoFireOffFrames;
+
+	if ( onFrames  < 1 ) onFrames  = 1;
+	if ( offFrames < 1 ) offFrames = 1;
+
+	totalFrames = onFrames + offFrames;
 
 	int opposite_dirs;
 	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &opposite_dirs);
@@ -1219,40 +1239,53 @@ UpdateGamepad(void)
 					// test for left+right and up+down
 					if(x == 4){
 						up = true;
-                    }
+					}
 					if((x == 5) && (up == true)){
 						continue;
-                    }
+					}
 					if(x == 6){
 						left = true;
-                    }
+					}
 					if((x == 7) && (left == true)){
 						continue;
-                    }
+					}
 				}
 				JS |= (1 << x) << (wg << 3);
 			}
 		}
 
-        int four_button_exit;
-        g_config->getOption("SDL.ABStartSelectExit", &four_button_exit);
-        // if a+b+start+select is pressed, exit
-        if (four_button_exit && JS == 15) {
-            FCEUI_printf("all buttons pressed, exiting\n");
-            CloseGame();
-            FCEUI_Kill();
-            exit(0);
-        }
+		int four_button_exit;
+		g_config->getOption("SDL.ABStartSelectExit", &four_button_exit);
+		// if a+b+start+select is pressed, exit
+		if (four_button_exit && JS == 15) {
+		    FCEUI_printf("all buttons pressed, exiting\n");
+		    CloseGame();
+		    FCEUI_Kill();
+		    exit(0);
+		}
+
 
 		// rapid-fire a, rapid-fire b
-		if (rapid)
+		for (x = 0; x < 2; x++)
 		{
-			for (x = 0; x < 2; x++)
+			if (DTestButton (&GamePad[wg].bmap[8 + x]))
 			{
-				if (DTestButton (&GamePad[wg].bmap[8 + x]))
+				fire = (rapid[wg][x] < onFrames);
+
+				//printf("wg:%i  x:%i  %i Fire:%i \n", wg, x, rapid[wg][x], fire );
+
+				if ( fire )
 				{
 					JS |= (1 << x) << (wg << 3);
 				}
+				if ( emuUpdated )
+				{
+					rapid[wg][x] = (rapid[wg][x] + 1) % totalFrames;
+				}
+			}
+			else
+			{
+				rapid[wg][x] =  0;
 			}
 		}
 	}

@@ -95,7 +95,7 @@ static int periodic_saves = 0;
 static int   mutexLocks = 0;
 static int   mutexPending = 0;
 static bool  emulatorHasMutux = 0;
-static unsigned int emulatorCycleCount = 0;
+unsigned int emulatorCycleCount = 0;
 
 extern double g_fpsScale;
 
