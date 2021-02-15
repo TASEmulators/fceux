@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <QApplication>
+//#include <QProxyStyle>
 
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceuWrapper.h"
@@ -51,36 +52,51 @@ static void MessageOutput(QtMsgType type, const QMessageLogContext &context, con
     }
 }
 
+
+// This custom menu style wrapper used to prevent the menu bar from permanently stealing window focus when the ALT key is pressed.
+//class MenuStyle : public QProxyStyle
+//{
+//public:
+//    int styleHint(StyleHint stylehint, const QStyleOption *opt, const QWidget *widget, QStyleHintReturn *returnData) const
+//    {
+//        if (stylehint == QStyle::SH_MenuBar_AltKeyNavigation)
+//            return 0;
+//
+//        return QProxyStyle::styleHint(stylehint, opt, widget, returnData);
+//    }
+//};
+
+
 #undef main   // undef main in case SDL_Main
 
 int main( int argc, char *argv[] )
 {
 	int retval;
-   qInstallMessageHandler(MessageOutput);
+	qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
-   const char *styleSheetEnv = NULL;
+	const char *styleSheetEnv = NULL;
+	
+	//app.setStyle( new MenuStyle() );
 
-   printf("test\n");
-
-   styleSheetEnv = ::getenv("FCEUX_QT_STYLESHEET");
-
-   if ( styleSheetEnv != NULL )
-   {
-      QFile File(styleSheetEnv);
-
-      if ( File.open(QFile::ReadOnly) )
-      {
-         QString StyleSheet = QLatin1String(File.readAll());
-
-         app.setStyleSheet(StyleSheet);
-
-         printf("Using Qt Stylesheet file '%s'\n", styleSheetEnv );
-      }
-      else
-      {
-         printf("Warning: Could not open Qt Stylesheet file '%s'\n", styleSheetEnv );
-      }
-   }
+	styleSheetEnv = ::getenv("FCEUX_QT_STYLESHEET");
+	
+	if ( styleSheetEnv != NULL )
+	{
+	   QFile File(styleSheetEnv);
+	
+	   if ( File.open(QFile::ReadOnly) )
+	   {
+	      QString StyleSheet = QLatin1String(File.readAll());
+	
+	      app.setStyleSheet(StyleSheet);
+	
+	      printf("Using Qt Stylesheet file '%s'\n", styleSheetEnv );
+	   }
+	   else
+	   {
+	      printf("Warning: Could not open Qt Stylesheet file '%s'\n", styleSheetEnv );
+	   }
+	}
 
 	fceuWrapperInit( argc, argv );
 

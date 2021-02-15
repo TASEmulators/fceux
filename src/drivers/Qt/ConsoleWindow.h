@@ -56,6 +56,17 @@ class  emulatorThread_t : public QThread
 		void finished();
 };
 
+class  consoleMenuBar : public QMenuBar
+{
+	public:
+		consoleMenuBar(QWidget *parent = 0);
+		~consoleMenuBar(void);
+
+	protected:
+		void keyPressEvent(QKeyEvent *event);
+		void keyReleaseEvent(QKeyEvent *event);
+};
+
 class  consoleWin_t : public QMainWindow
 {
 	Q_OBJECT
@@ -89,6 +100,8 @@ class  consoleWin_t : public QMainWindow
 		emulatorThread_t *emulatorThread;
 
 	protected:
+		consoleMenuBar *menubar;
+
 		QMenu *fileMenu;
 		QMenu *optMenu;
 		QMenu *emuMenu;
@@ -155,11 +168,11 @@ class  consoleWin_t : public QMainWindow
 		bool        closeRequested;
 
 	protected:
-    void closeEvent(QCloseEvent *event);
-	 void keyPressEvent(QKeyEvent *event);
-	 void keyReleaseEvent(QKeyEvent *event);
-	 void syncActionConfig( QAction *act, const char *property );
-	 void showErrorMsgWindow(void);
+		void closeEvent(QCloseEvent *event);
+		void keyPressEvent(QKeyEvent *event);
+		void keyReleaseEvent(QKeyEvent *event);
+		void syncActionConfig( QAction *act, const char *property );
+		void showErrorMsgWindow(void);
 
 	private:
 		void createMainMenu(void);

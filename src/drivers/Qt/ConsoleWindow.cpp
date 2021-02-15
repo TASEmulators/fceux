@@ -294,16 +294,19 @@ void consoleWin_t::createMainMenu(void)
 	int useNativeMenuBar;
 	QStyle *style;
 
-	style = this->style();
+	style   = this->style();
+	menubar = new consoleMenuBar(this);
+
+	this->setMenuBar(menubar);
 
 	// This is needed for menu bar to show up on MacOS
 	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
 
-	menuBar()->setNativeMenuBar( useNativeMenuBar ? true : false );
+	menubar->setNativeMenuBar( useNativeMenuBar ? true : false );
 
 	//-----------------------------------------------------------------------
 	// File
-	fileMenu = menuBar()->addMenu(tr("&File"));
+	fileMenu = menubar->addMenu(tr("&File"));
 
 	// File -> Open ROM
 	openROM = new QAction(tr("Open ROM"), this);
@@ -440,7 +443,7 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Options
-	optMenu = menuBar()->addMenu(tr("&Options"));
+	optMenu = menubar->addMenu(tr("&Options"));
 
 	// Options -> Input Config
 	inputConfig = new QAction(tr("Input Config"), this);
@@ -554,7 +557,7 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Emulation
-	emuMenu = menuBar()->addMenu(tr("&Emulation"));
+	emuMenu = menubar->addMenu(tr("&Emulation"));
 
 	// Emulation -> Power
 	powerAct = new QAction(tr("Power"), this);
@@ -743,7 +746,7 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Tools
-	toolsMenu = menuBar()->addMenu(tr("&Tools"));
+	toolsMenu = menubar->addMenu(tr("&Tools"));
 
 	// Tools -> Cheats
 	cheatsAct = new QAction(tr("Cheats..."), this);
@@ -787,7 +790,7 @@ void consoleWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // Debug
-	debugMenu = menuBar()->addMenu(tr("&Debug"));
+	debugMenu = menubar->addMenu(tr("&Debug"));
 
 	// Debug -> Debugger 
 	debuggerAct = new QAction(tr("Debugger..."), this);
@@ -855,7 +858,7 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Movie
-	movieMenu = menuBar()->addMenu(tr("Movie"));
+	movieMenu = menubar->addMenu(tr("Movie"));
 
 	// Movie -> Play
 	openMovAct = new QAction(tr("Play"), this);
@@ -896,7 +899,7 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Help
-	helpMenu = menuBar()->addMenu(tr("&Help"));
+	helpMenu = menubar->addMenu(tr("&Help"));
  
 	// Help -> About FCEUX
 	aboutAct = new QAction(tr("About FCEUX"), this);
@@ -925,13 +928,13 @@ void consoleWin_t::createMainMenu(void)
 //---------------------------------------------------------------------------
 void consoleWin_t::toggleMenuVis(void)
 {
-	if ( menuBar()->isVisible() )
+	if ( menubar->isVisible() )
 	{
-		menuBar()->setVisible( false );
+		menubar->setVisible( false );
 	}
 	else
 	{
-		menuBar()->setVisible( true );
+		menubar->setVisible( true );
 	}
 }
 //---------------------------------------------------------------------------
@@ -2587,3 +2590,35 @@ void emulatorThread_t::run(void)
 	printf("Emulator Exit\n");
 	emit finished();
 }
+
+//-----------------------------------------------------------------------------
+// Custom QMenuBar for Console
+//-----------------------------------------------------------------------------
+consoleMenuBar::consoleMenuBar(QWidget *parent)
+	: QMenuBar(parent)
+{
+
+}
+consoleMenuBar::~consoleMenuBar(void)
+{
+
+}
+
+void consoleMenuBar::keyPressEvent(QKeyEvent *event)
+{
+	QMenuBar::keyPressEvent(event);
+
+	// Force de-focus of menu bar when escape key is pressed.
+	// This prevents the menubar from hi-jacking keyboard input focus
+	// when using menu accelerators
+	if ( event->key() == Qt::Key_Escape )
+	{
+		((QWidget*)parent())->setFocus();
+	}
+}
+
+void consoleMenuBar::keyReleaseEvent(QKeyEvent *event)
+{
+	QMenuBar::keyReleaseEvent(event);
+}
+//-----------------------------------------------------------------------------
