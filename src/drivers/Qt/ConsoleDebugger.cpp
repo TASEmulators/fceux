@@ -109,7 +109,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	
 	menuBar = new QMenuBar(this);
 
-   // This is needed for menu bar to show up on MacOS
+	// This is needed for menu bar to show up on MacOS
 	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
 
 	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
@@ -118,69 +118,69 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	// Menu Start
 	//-----------------------------------------------------------------------
 	// Debug
-   debugMenu = menuBar->addMenu(tr("&Debug"));
+	debugMenu = menuBar->addMenu(tr("&Debug"));
 
 	// Debug -> Run
-	act = new QAction(tr("Run"), this);
-   act->setShortcut(QKeySequence( tr("F5") ) );
-   act->setStatusTip(tr("Run"));
-   connect( act, SIGNAL(triggered()), this, SLOT(debugRunCB(void)) );
-
-   debugMenu->addAction(act);
+	act = new QAction(tr("&Run"), this);
+	act->setShortcut(QKeySequence( tr("F5") ) );
+	act->setStatusTip(tr("Run"));
+	connect( act, SIGNAL(triggered()), this, SLOT(debugRunCB(void)) );
+	
+	debugMenu->addAction(act);
 
 	// Debug -> Step Into
-	act = new QAction(tr("Step Into"), this);
-   act->setShortcut(QKeySequence( tr("F11") ) );
-   act->setStatusTip(tr("Step Into"));
-   connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
-
-   debugMenu->addAction(act);
+	act = new QAction(tr("Step &Into"), this);
+	act->setShortcut(QKeySequence( tr("F11") ) );
+	act->setStatusTip(tr("Step Into"));
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
+	
+	debugMenu->addAction(act);
 
 	// Debug -> Step Out
-	act = new QAction(tr("Step Out"), this);
-   act->setShortcut(QKeySequence( tr("Shift+F11") ) );
-   act->setStatusTip(tr("Step Out"));
-   connect( act, SIGNAL(triggered()), this, SLOT(debugStepOutCB(void)) );
-
-   debugMenu->addAction(act);
+	act = new QAction(tr("&Step Out"), this);
+	act->setShortcut(QKeySequence( tr("Shift+F11") ) );
+	act->setStatusTip(tr("Step Out"));
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOutCB(void)) );
+	
+	debugMenu->addAction(act);
 
 	// Debug -> Step Over
-	act = new QAction(tr("Step Over"), this);
-   act->setShortcut(QKeySequence( tr("F10") ) );
-   act->setStatusTip(tr("Step Over"));
-   connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
-
-   debugMenu->addAction(act);
+	act = new QAction(tr("Step &Over"), this);
+	act->setShortcut(QKeySequence( tr("F10") ) );
+	act->setStatusTip(tr("Step Over"));
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
+	
+	debugMenu->addAction(act);
 
 	// Debug -> Run to Selected Line
-	act = new QAction(tr("Run to Selected Line"), this);
-   act->setShortcut(QKeySequence( tr("F1") ) );
-   act->setStatusTip(tr("Run to Selected Line"));
-   connect( act, SIGNAL(triggered()), this, SLOT(debugRunToCursorCB(void)) );
-
-   debugMenu->addAction(act);
+	act = new QAction(tr("Run to S&elected Line"), this);
+	act->setShortcut(QKeySequence( tr("F1") ) );
+	act->setStatusTip(tr("Run to Selected Line"));
+	connect( act, SIGNAL(triggered()), this, SLOT(debugRunToCursorCB(void)) );
+	
+	debugMenu->addAction(act);
 
 	// Debug -> Run Line
-	act = new QAction(tr("Run Line"), this);
-   act->setShortcut(QKeySequence( tr("F6") ) );
-   act->setStatusTip(tr("Run Line"));
-   connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
-
-   debugMenu->addAction(act);
+	act = new QAction(tr("Run &Line"), this);
+	act->setShortcut(QKeySequence( tr("F6") ) );
+	act->setStatusTip(tr("Run Line"));
+	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
+	
+	debugMenu->addAction(act);
 
 	// Debug -> Run 128 Lines
-	act = new QAction(tr("Run 128 Lines"), this);
-   act->setShortcut(QKeySequence( tr("F7") ) );
-   act->setStatusTip(tr("Run 128 Lines"));
-   connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
-
-   debugMenu->addAction(act);
+	act = new QAction(tr("Run &128 Lines"), this);
+	act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Run 128 Lines"));
+	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
+	
+	debugMenu->addAction(act);
 
 	// Options
-   optMenu = menuBar->addMenu(tr("Options"));
+	optMenu = menuBar->addMenu(tr("&Options"));
 
 	// Options -> PC Position
-	subMenu  = optMenu->addMenu(tr("PC Line Positioning"));
+	subMenu  = optMenu->addMenu(tr("&PC Line Positioning"));
 	actGroup = new QActionGroup(this);
 
 	actGroup->setExclusive(true);
@@ -188,56 +188,56 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	g_config->getOption( "SDL.DebuggerPCPlacement", &opt );
 
 	// Options -> PC Position -> Top Line
-	act = new QAction(tr("Top Line"), this);
-   act->setStatusTip(tr("Top Line"));
+	act = new QAction(tr("&Top Line"), this);
+	act->setStatusTip(tr("Top Line"));
 	act->setCheckable(true);
 	act->setChecked( opt == 0 );
-   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceTop(void)) );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceTop(void)) );
 	actGroup->addAction(act);
 	subMenu->addAction(act);
 
 	// Options -> PC Position -> Upper Mid-Line
-	act = new QAction(tr("Upper Mid-Line"), this);
-   act->setStatusTip(tr("Upper Mid-Line"));
+	act = new QAction(tr("&Upper Mid-Line"), this);
+	act->setStatusTip(tr("Upper Mid-Line"));
 	act->setCheckable(true);
 	act->setChecked( opt == 1 );
-   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceUpperMid(void)) );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceUpperMid(void)) );
 	actGroup->addAction(act);
 	subMenu->addAction(act);
 
 	// Options -> PC Position -> Center Line
-	act = new QAction(tr("Center Line"), this);
-   act->setStatusTip(tr("Center Line"));
+	act = new QAction(tr("&Center Line"), this);
+	act->setStatusTip(tr("Center Line"));
 	act->setCheckable(true);
 	act->setChecked( opt == 2 );
-   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCenter(void)) );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCenter(void)) );
 	actGroup->addAction(act);
 	subMenu->addAction(act);
 
 	// Options -> PC Position -> Lower Mid-Line
-	act = new QAction(tr("Lower Mid-Line"), this);
-   act->setStatusTip(tr("Lower Mid-Line"));
+	act = new QAction(tr("&Lower Mid-Line"), this);
+	act->setStatusTip(tr("Lower Mid-Line"));
 	act->setCheckable(true);
 	act->setChecked( opt == 3 );
-   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceLowerMid(void)) );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceLowerMid(void)) );
 	actGroup->addAction(act);
 	subMenu->addAction(act);
 
 	// Options -> PC Position -> Bottom
-	act = new QAction(tr("Bottom Line"), this);
-   act->setStatusTip(tr("Bottom Line"));
+	act = new QAction(tr("&Bottom Line"), this);
+	act->setStatusTip(tr("Bottom Line"));
 	act->setCheckable(true);
 	act->setChecked( opt == 4 );
-   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceBottom(void)) );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceBottom(void)) );
 	actGroup->addAction(act);
 	subMenu->addAction(act);
 
 	// Options -> PC Position -> Custom Line 
-	act = new QAction(tr("Custom Line Offset"), this);
-   act->setStatusTip(tr("Custom Line Offset"));
+	act = new QAction(tr("Custom Line &Offset"), this);
+	act->setStatusTip(tr("Custom Line Offset"));
 	act->setChecked( opt == 5 );
 	act->setCheckable(true);
-   connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCustom(void)) );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCustom(void)) );
 	actGroup->addAction(act);
 	subMenu->addAction(act);
 
@@ -258,7 +258,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	asmLineSelLbl->setWordWrap( true );
 
-   asmView->setScrollBars( hbar, vbar );
+	asmView->setScrollBars( hbar, vbar );
 
 	grid->addWidget( asmView, 0, 0 );
 	grid->addWidget( vbar   , 0, 1 );
@@ -293,31 +293,31 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	button = new QPushButton( tr("Run") );
 	grid->addWidget( button, 0, 0, Qt::AlignLeft );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunCB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunCB(void)) );
 
 	button = new QPushButton( tr("Step Into") );
 	grid->addWidget( button, 0, 1, Qt::AlignLeft );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepIntoCB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepIntoCB(void)) );
 
 	button = new QPushButton( tr("Step Out") );
 	grid->addWidget( button, 1, 0, Qt::AlignLeft );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOutCB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOutCB(void)) );
 
 	button = new QPushButton( tr("Step Over") );
 	grid->addWidget( button, 1, 1, Qt::AlignLeft );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOverCB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOverCB(void)) );
 
 	button = new QPushButton( tr("Run Line") );
 	grid->addWidget( button, 2, 0, Qt::AlignLeft );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLineCB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLineCB(void)) );
 
 	button = new QPushButton( tr("128 Lines") );
 	grid->addWidget( button, 2, 1, Qt::AlignLeft );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLine128CB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLine128CB(void)) );
 
 	button = new QPushButton( tr("Seek To:") );
 	grid->addWidget( button, 3, 0, Qt::AlignLeft );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(seekToCB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(seekToCB(void)) );
 
 	seekEntry = new QLineEdit();
 	seekEntry->setFont( font );
@@ -342,7 +342,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	button = new QPushButton( tr("Seek PC") );
 	grid->addWidget( button, 4, 1, Qt::AlignLeft );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(seekPCCB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(seekPCCB(void)) );
 
 	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("A:") );
@@ -421,19 +421,19 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	hbox   = new QHBoxLayout();
 	button = new QPushButton( tr("Add") );
 	hbox->addWidget( button );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(add_BP_CB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(add_BP_CB(void)) );
 
 	button = new QPushButton( tr("Delete") );
 	hbox->addWidget( button );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BP_CB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BP_CB(void)) );
 
 	button = new QPushButton( tr("Edit") );
 	hbox->addWidget( button );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BP_CB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BP_CB(void)) );
 
 	brkBadOpsCbox = new QCheckBox( tr("Break on Bad Opcodes") );
 	brkBadOpsCbox->setChecked( FCEUI_Debugger().badopbreak );
-   connect( brkBadOpsCbox, SIGNAL(stateChanged(int)), this, SLOT(breakOnBadOpcodeCB(int)) );
+	connect( brkBadOpsCbox, SIGNAL(stateChanged(int)), this, SLOT(breakOnBadOpcodeCB(int)) );
 
 	vbox->addWidget( bpTree );
 	vbox->addLayout( hbox   );
@@ -516,7 +516,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	cpuCycExdVal->setValidator( validator );
 	cpuCycExdVal->setAlignment(Qt::AlignLeft);
 	cpuCycExdVal->setMaximumWidth( 18 * fontCharWidth );
-   cpuCycExdVal->setCursorPosition(0);
+	cpuCycExdVal->setCursorPosition(0);
 	connect( cpuCycExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(cpuCycleThresChanged(const QString &)));
 
 	validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
@@ -525,14 +525,14 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	instrExdVal->setValidator( validator );
 	instrExdVal->setAlignment(Qt::AlignLeft);
 	instrExdVal->setMaximumWidth( 18 * fontCharWidth );
-   instrExdVal->setCursorPosition(0);
+	instrExdVal->setCursorPosition(0);
 	connect( instrExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(instructionsThresChanged(const QString &)));
 
 	brkCpuCycExd->setChecked( break_on_cycles );
-   connect( brkCpuCycExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnCyclesCB(int)) );
+	connect( brkCpuCycExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnCyclesCB(int)) );
 
 	brkInstrsExd->setChecked( break_on_instructions );
-   connect( brkInstrsExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnInstructionsCB(int)) );
+	connect( brkInstrsExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnInstructionsCB(int)) );
 
 	hbox3     = new QHBoxLayout();
 	hbox      = new QHBoxLayout();
@@ -568,15 +568,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	button    = new QPushButton( tr("Add") );
 	vbox->addWidget( button );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(add_BM_CB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(add_BM_CB(void)) );
 
 	button    = new QPushButton( tr("Delete") );
 	vbox->addWidget( button );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BM_CB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BM_CB(void)) );
 
 	button    = new QPushButton( tr("Name") );
 	vbox->addWidget( button );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BM_CB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BM_CB(void)) );
 
 	hbox->addWidget( bmTree );
 	hbox->addLayout( vbox   );
@@ -587,7 +587,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	frame        = new QFrame();
 	vbox         = new QVBoxLayout();
 	button       = new QPushButton( tr("Reset Counters") );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(resetCountersCB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(resetCountersCB(void)) );
 	vbox->addWidget( button );
 	vbox->addWidget( frame  );
 	hbox3->addLayout( vbox  );
@@ -603,14 +603,14 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	symDbgChkBox->setChecked(true);
 	regNamChkBox->setChecked(true);
 
-   connect( romOfsChkBox, SIGNAL(stateChanged(int)), this, SLOT(displayROMoffsetCB(int)) );
-   connect( symDbgChkBox, SIGNAL(stateChanged(int)), this, SLOT(symbolDebugEnableCB(int)) );
-   connect( regNamChkBox, SIGNAL(stateChanged(int)), this, SLOT(registerNameEnableCB(int)) );
+	connect( romOfsChkBox, SIGNAL(stateChanged(int)), this, SLOT(displayROMoffsetCB(int)) );
+	connect( symDbgChkBox, SIGNAL(stateChanged(int)), this, SLOT(symbolDebugEnableCB(int)) );
+	connect( regNamChkBox, SIGNAL(stateChanged(int)), this, SLOT(registerNameEnableCB(int)) );
 
 
 	button       = new QPushButton( tr("Reload Symbols") );
 	vbox->addWidget( button );
-   connect( button, SIGNAL(clicked(void)), this, SLOT(reloadSymbolsCB(void)) );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(reloadSymbolsCB(void)) );
 
 	button       = new QPushButton( tr("ROM Patcher") );
 	vbox->addWidget( button );
@@ -637,8 +637,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	g_config->getOption( "SDL.AutoLoadDebugFiles", &opt );
 	debFileChkBox->setChecked( opt );
 
-   connect( autoOpenChkBox, SIGNAL(stateChanged(int)), this, SLOT(autoOpenDebugCB(int)) );
-   connect( debFileChkBox , SIGNAL(stateChanged(int)), this, SLOT(debFileAutoLoadCB(int)) );
+	connect( autoOpenChkBox, SIGNAL(stateChanged(int)), this, SLOT(autoOpenDebugCB(int)) );
+	connect( debFileChkBox , SIGNAL(stateChanged(int)), this, SLOT(debFileAutoLoadCB(int)) );
 
 	button->setEnabled(false); // TODO
 
@@ -657,9 +657,9 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	periodicTimer  = new QTimer( this );
 
-   connect( periodicTimer, &QTimer::timeout, this, &ConsoleDebugger::updatePeriodic );
+	connect( periodicTimer, &QTimer::timeout, this, &ConsoleDebugger::updatePeriodic );
 	connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
-   connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
+	connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
 	bpListUpdate( false );
 

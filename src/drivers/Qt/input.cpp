@@ -610,7 +610,7 @@ static void KeyboardCommands (void)
 	// Alt-M to toggle Main Menu Visibility
 	if ( is_alt )
 	{
-		if (keyonly (M))
+		if (keyonly (SLASH))
 		{
 			if ( consoleWindow )
 			{

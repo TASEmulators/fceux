@@ -309,7 +309,7 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu = menubar->addMenu(tr("&File"));
 
 	// File -> Open ROM
-	openROM = new QAction(tr("Open ROM"), this);
+	openROM = new QAction(tr("&Open ROM"), this);
 	openROM->setShortcuts(QKeySequence::Open);
 	openROM->setStatusTip(tr("Open ROM File"));
 	//openROM->setIcon( QIcon(":icons/rom.png") );
@@ -320,7 +320,7 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu->addAction(openROM);
 
 	// File -> Close ROM
-	closeROM = new QAction(tr("Close ROM"), this);
+	closeROM = new QAction(tr("&Close ROM"), this);
 	closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
 	closeROM->setStatusTip(tr("Close Loaded ROM"));
 	closeROM->setIcon( style->standardIcon( QStyle::SP_BrowserStop ) );
@@ -331,7 +331,7 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu->addSeparator();
 
 	// File -> Play NSF
-	playNSF = new QAction(tr("Play NSF"), this);
+	playNSF = new QAction(tr("Play &NSF"), this);
 	playNSF->setShortcut( QKeySequence(tr("Ctrl+N")));
 	playNSF->setStatusTip(tr("Play NSF"));
 	connect(playNSF, SIGNAL(triggered()), this, SLOT(loadNSF(void)) );
@@ -341,7 +341,7 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu->addSeparator();
 
 	// File -> Load State From
-	loadStateAct = new QAction(tr("Load State From"), this);
+	loadStateAct = new QAction(tr("Load State &From"), this);
 	//loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
 	loadStateAct->setStatusTip(tr("Load State From"));
 	loadStateAct->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
@@ -350,7 +350,7 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu->addAction(loadStateAct);
 
 	// File -> Save State As
-	saveStateAct = new QAction(tr("Save State As"), this);
+	saveStateAct = new QAction(tr("Save State &As"), this);
 	//loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
 	saveStateAct->setStatusTip(tr("Save State As"));
 	saveStateAct->setIcon( style->standardIcon( QStyle::SP_DialogSaveButton ) );
@@ -359,7 +359,7 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu->addAction(saveStateAct);
 
 	// File -> Quick Load
-	quickLoadAct = new QAction(tr("Quick Load"), this);
+	quickLoadAct = new QAction(tr("Quick &Load"), this);
 	quickLoadAct->setShortcut( QKeySequence(tr("F7")));
 	quickLoadAct->setStatusTip(tr("Quick Load"));
 	connect(quickLoadAct, SIGNAL(triggered()), this, SLOT(quickLoad(void)) );
@@ -367,7 +367,7 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu->addAction(quickLoadAct);
 
 	// File -> Quick Save
-	quickSaveAct = new QAction(tr("Quick Save"), this);
+	quickSaveAct = new QAction(tr("Quick &Save"), this);
 	quickSaveAct->setShortcut( QKeySequence(tr("F5")));
 	quickSaveAct->setStatusTip(tr("Quick Save"));
 	connect(quickSaveAct, SIGNAL(triggered()), this, SLOT(quickSave(void)) );
@@ -375,7 +375,7 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu->addAction(quickSaveAct);
 
 	// File -> Change State
-	subMenu = fileMenu->addMenu(tr("Change State"));
+	subMenu = fileMenu->addMenu(tr("Change &State"));
 	group   = new QActionGroup(this);
 
 	group->setExclusive(true);
@@ -384,7 +384,7 @@ void consoleWin_t::createMainMenu(void)
 	{
 	        char stmp[8];
 
-	        sprintf( stmp, "%i", i );
+	        sprintf( stmp, "&%i", i );
 
 	        state[i] = new QAction(tr(stmp), this);
 	        state[i]->setCheckable(true);
@@ -409,7 +409,7 @@ void consoleWin_t::createMainMenu(void)
 
 #ifdef _S9XLUA_H
 	// File -> Quick Save
-	loadLuaAct = new QAction(tr("Load Lua Script"), this);
+	loadLuaAct = new QAction(tr("Load &Lua Script"), this);
 	//loadLuaAct->setShortcut( QKeySequence(tr("F5")));
 	loadLuaAct->setStatusTip(tr("Load Lua Script"));
 	//loadLuaAct->setIcon( QIcon(":icons/lua-logo.png") );
@@ -423,7 +423,7 @@ void consoleWin_t::createMainMenu(void)
 #endif
 
 	// File -> Screenshort
-	scrShotAct = new QAction(tr("Screenshot"), this);
+	scrShotAct = new QAction(tr("Screens&hot"), this);
 	scrShotAct->setShortcut( QKeySequence(tr("F12")));
 	scrShotAct->setStatusTip(tr("Screenshot"));
 	scrShotAct->setIcon( QIcon(":icons/camera.png") );
@@ -432,7 +432,7 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu->addAction(scrShotAct);
 
 	// File -> Quit
-	quitAct = new QAction(tr("Quit"), this);
+	quitAct = new QAction(tr("&Quit"), this);
 	quitAct->setShortcut( QKeySequence(tr("Ctrl+Q")));
 	quitAct->setStatusTip(tr("Quit the Application"));
 	//quitAct->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
@@ -446,7 +446,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu = menubar->addMenu(tr("&Options"));
 
 	// Options -> Input Config
-	inputConfig = new QAction(tr("Input Config"), this);
+	inputConfig = new QAction(tr("&Input Config"), this);
 	//inputConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	inputConfig->setStatusTip(tr("Input Configure"));
 	inputConfig->setIcon( QIcon(":icons/input-gaming.png") );
@@ -455,7 +455,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(inputConfig);
 
 	// Options -> GamePad Config
-	gamePadConfig = new QAction(tr("GamePad Config"), this);
+	gamePadConfig = new QAction(tr("&GamePad Config"), this);
 	//gamePadConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	gamePadConfig->setStatusTip(tr("GamePad Configure"));
 	gamePadConfig->setIcon( QIcon(":icons/input-gaming-symbolic.png") );
@@ -464,7 +464,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(gamePadConfig);
 
 	// Options -> Sound Config
-	gameSoundConfig = new QAction(tr("Sound Config"), this);
+	gameSoundConfig = new QAction(tr("&Sound Config"), this);
 	//gameSoundConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	gameSoundConfig->setStatusTip(tr("Sound Configure"));
 	gameSoundConfig->setIcon( style->standardIcon( QStyle::SP_MediaVolume ) );
@@ -473,7 +473,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(gameSoundConfig);
 
 	// Options -> Video Config
-	gameVideoConfig = new QAction(tr("Video Config"), this);
+	gameVideoConfig = new QAction(tr("&Video Config"), this);
 	//gameVideoConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	gameVideoConfig->setStatusTip(tr("Video Preferences"));
 	gameVideoConfig->setIcon( style->standardIcon( QStyle::SP_ComputerIcon ) );
@@ -482,7 +482,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(gameVideoConfig);
 
 	// Options -> HotKey Config
-	hotkeyConfig = new QAction(tr("Hotkey Config"), this);
+	hotkeyConfig = new QAction(tr("Hot&Key Config"), this);
 	//hotkeyConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	hotkeyConfig->setStatusTip(tr("Hotkey Configure"));
 	hotkeyConfig->setIcon( QIcon(":icons/input-keyboard.png") );
@@ -491,7 +491,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(hotkeyConfig);
 
 	// Options -> Palette Config
-	paletteConfig = new QAction(tr("Palette Config"), this);
+	paletteConfig = new QAction(tr("&Palette Config"), this);
 	//paletteConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	paletteConfig->setStatusTip(tr("Palette Configure"));
 	paletteConfig->setIcon( QIcon(":icons/graphics-palette.png") );
@@ -500,7 +500,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(paletteConfig);
 
 	// Options -> GUI Config
-	guiConfig = new QAction(tr("GUI Config"), this);
+	guiConfig = new QAction(tr("G&UI Config"), this);
 	//guiConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	guiConfig->setStatusTip(tr("GUI Configure"));
 	guiConfig->setIcon( style->standardIcon( QStyle::SP_TitleBarNormalButton ) );
@@ -509,7 +509,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(guiConfig);
 
 	// Options -> Timing Config
-	timingConfig = new QAction(tr("Timing Config"), this);
+	timingConfig = new QAction(tr("&Timing Config"), this);
 	//timingConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	timingConfig->setStatusTip(tr("Timing Configure"));
 	timingConfig->setIcon( QIcon(":icons/timer.png") );
@@ -518,7 +518,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(timingConfig);
 
 	// Options -> Movie Options
-	movieConfig = new QAction(tr("Movie Options"), this);
+	movieConfig = new QAction(tr("&Movie Options"), this);
 	//movieConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	movieConfig->setStatusTip(tr("Movie Options"));
 	movieConfig->setIcon( QIcon(":icons/movie.png") );
@@ -527,7 +527,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(movieConfig);
 
 	// Options -> Auto-Resume
-	autoResume = new QAction(tr("Auto-Resume Play"), this);
+	autoResume = new QAction(tr("Auto-&Resume Play"), this);
 	//autoResume->setShortcut( QKeySequence(tr("Ctrl+C")));
 	autoResume->setCheckable(true);
 	autoResume->setStatusTip(tr("Auto-Resume Play"));
@@ -538,7 +538,7 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addSeparator();
 
 	// Options -> Full Screen
-	fullscreen = new QAction(tr("Fullscreen"), this);
+	fullscreen = new QAction(tr("&Fullscreen"), this);
 	fullscreen->setShortcut( QKeySequence(tr("Alt+Return")));
 	fullscreen->setStatusTip(tr("Fullscreen"));
 	fullscreen->setIcon( QIcon(":icons/view-fullscreen.png") );
@@ -547,8 +547,8 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(fullscreen);
 
 	// Options -> Hide Menu Screen
-	act = new QAction(tr("Hide Menu"), this);
-	act->setShortcut( QKeySequence(tr("Alt+M")));
+	act = new QAction(tr("&Hide Menu"), this);
+	act->setShortcut( QKeySequence(tr("Alt+/")));
 	act->setStatusTip(tr("Hide Menu"));
 	act->setIcon( style->standardIcon( QStyle::SP_TitleBarMaxButton ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(toggleMenuVis(void)) );
@@ -560,7 +560,7 @@ void consoleWin_t::createMainMenu(void)
 	emuMenu = menubar->addMenu(tr("&Emulation"));
 
 	// Emulation -> Power
-	powerAct = new QAction(tr("Power"), this);
+	powerAct = new QAction(tr("&Power"), this);
 	//powerAct->setShortcut( QKeySequence(tr("Ctrl+P")));
 	powerAct->setStatusTip(tr("Power On Console"));
 	powerAct->setIcon( QIcon(":icons/power.png") );
@@ -569,7 +569,7 @@ void consoleWin_t::createMainMenu(void)
 	emuMenu->addAction(powerAct);
 
 	// Emulation -> Reset
-	resetAct = new QAction(tr("Reset"), this);
+	resetAct = new QAction(tr("&Reset"), this);
 	//resetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
 	resetAct->setStatusTip(tr("Reset Console"));
 	resetAct->setIcon( style->standardIcon( QStyle::SP_DialogResetButton ) );
@@ -578,7 +578,7 @@ void consoleWin_t::createMainMenu(void)
 	emuMenu->addAction(resetAct);
 
 	// Emulation -> Soft Reset
-	sresetAct = new QAction(tr("Soft Reset"), this);
+	sresetAct = new QAction(tr("&Soft Reset"), this);
 	//sresetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
 	sresetAct->setStatusTip(tr("Soft Reset of Console"));
 	sresetAct->setIcon( style->standardIcon( QStyle::SP_BrowserReload ) );
@@ -587,7 +587,7 @@ void consoleWin_t::createMainMenu(void)
 	emuMenu->addAction(sresetAct);
 
 	// Emulation -> Pause
-	pauseAct = new QAction(tr("Pause"), this);
+	pauseAct = new QAction(tr("&Pause"), this);
 	pauseAct->setShortcut( QKeySequence(tr("Pause")));
 	pauseAct->setStatusTip(tr("Pause Console"));
 	pauseAct->setIcon( style->standardIcon( QStyle::SP_MediaPause ) );
@@ -598,7 +598,7 @@ void consoleWin_t::createMainMenu(void)
 	emuMenu->addSeparator();
 
 	// Emulation -> Enable Game Genie
-	gameGenieAct = new QAction(tr("Enable Game Genie"), this);
+	gameGenieAct = new QAction(tr("Enable Game &Genie"), this);
 	//gameGenieAct->setShortcut( QKeySequence(tr("Ctrl+G")));
 	gameGenieAct->setCheckable(true);
 	gameGenieAct->setStatusTip(tr("Enable Game Genie"));
@@ -619,7 +619,7 @@ void consoleWin_t::createMainMenu(void)
 	emuMenu->addSeparator();
 
 	// Emulation -> Insert Coin
-	insCoinAct = new QAction(tr("Insert Coin"), this);
+	insCoinAct = new QAction(tr("&Insert Coin"), this);
 	//insCoinAct->setShortcut( QKeySequence(tr("Ctrl+G")));
 	insCoinAct->setStatusTip(tr("Insert Coin"));
 	connect(insCoinAct, SIGNAL(triggered()), this, SLOT(insertCoin(void)) );
@@ -629,10 +629,10 @@ void consoleWin_t::createMainMenu(void)
 	emuMenu->addSeparator();
 
 	// Emulation -> FDS
-	subMenu = emuMenu->addMenu(tr("FDS"));
+	subMenu = emuMenu->addMenu(tr("&FDS"));
 
 	// Emulation -> FDS -> Switch Disk
-	fdsSwitchAct = new QAction(tr("Switch Disk"), this);
+	fdsSwitchAct = new QAction(tr("&Switch Disk"), this);
 	//fdsSwitchAct->setShortcut( QKeySequence(tr("Ctrl+G")));
 	fdsSwitchAct->setStatusTip(tr("Switch Disk"));
 	connect(fdsSwitchAct, SIGNAL(triggered()), this, SLOT(fdsSwitchDisk(void)) );
@@ -640,7 +640,7 @@ void consoleWin_t::createMainMenu(void)
 	subMenu->addAction(fdsSwitchAct);
 
 	// Emulation -> FDS -> Eject Disk
-	fdsEjectAct = new QAction(tr("Eject Disk"), this);
+	fdsEjectAct = new QAction(tr("&Eject Disk"), this);
 	//fdsEjectAct->setShortcut( QKeySequence(tr("Ctrl+G")));
 	fdsEjectAct->setStatusTip(tr("Eject Disk"));
 	connect(fdsEjectAct, SIGNAL(triggered()), this, SLOT(fdsEjectDisk(void)) );
@@ -648,7 +648,7 @@ void consoleWin_t::createMainMenu(void)
 	subMenu->addAction(fdsEjectAct);
 
 	// Emulation -> FDS -> Load BIOS
-	fdsLoadBiosAct = new QAction(tr("Load BIOS"), this);
+	fdsLoadBiosAct = new QAction(tr("&Load BIOS"), this);
 	//fdsLoadBiosAct->setShortcut( QKeySequence(tr("Ctrl+G")));
 	fdsLoadBiosAct->setStatusTip(tr("Load BIOS"));
 	connect(fdsLoadBiosAct, SIGNAL(triggered()), this, SLOT(fdsLoadBiosFile(void)) );
@@ -658,10 +658,10 @@ void consoleWin_t::createMainMenu(void)
 	emuMenu->addSeparator();
 
 	// Emulation -> Speed
-	subMenu = emuMenu->addMenu(tr("Speed"));
+	subMenu = emuMenu->addMenu(tr("&Speed"));
 
 	// Emulation -> Speed -> Speed Up
-	act = new QAction(tr("Speed Up"), this);
+	act = new QAction(tr("Speed &Up"), this);
 	act->setShortcut( QKeySequence(tr("=")));
 	act->setStatusTip(tr("Speed Up"));
 	act->setIcon( style->standardIcon( QStyle::SP_MediaSeekForward ) );
@@ -670,7 +670,7 @@ void consoleWin_t::createMainMenu(void)
 	subMenu->addAction(act);
 
 	// Emulation -> Speed -> Slow Down
-	act = new QAction(tr("Slow Down"), this);
+	act = new QAction(tr("Slow &Down"), this);
 	act->setShortcut( QKeySequence(tr("-")));
 	act->setStatusTip(tr("Slow Down"));
 	act->setIcon( style->standardIcon( QStyle::SP_MediaSeekBackward ) );
@@ -681,7 +681,7 @@ void consoleWin_t::createMainMenu(void)
 	subMenu->addSeparator();
 
 	// Emulation -> Speed -> Slowest Speed
-	act = new QAction(tr("Slowest"), this);
+	act = new QAction(tr("&Slowest"), this);
 	//act->setShortcut( QKeySequence(tr("-")));
 	act->setStatusTip(tr("Slowest"));
 	act->setIcon( style->standardIcon( QStyle::SP_MediaSkipBackward ) );
@@ -690,7 +690,7 @@ void consoleWin_t::createMainMenu(void)
 	subMenu->addAction(act);
 
 	// Emulation -> Speed -> Normal Speed
-	act = new QAction(tr("Normal"), this);
+	act = new QAction(tr("&Normal"), this);
 	//act->setShortcut( QKeySequence(tr("-")));
 	act->setStatusTip(tr("Normal"));
 	act->setIcon( style->standardIcon( QStyle::SP_MediaPlay ) );
@@ -699,7 +699,7 @@ void consoleWin_t::createMainMenu(void)
 	subMenu->addAction(act);
 	
 	// Emulation -> Speed -> Fastest Speed
-	act = new QAction(tr("Turbo"), this);
+	act = new QAction(tr("&Turbo"), this);
 	//act->setShortcut( QKeySequence(tr("-")));
 	act->setStatusTip(tr("Turbo (Fastest)"));
 	act->setIcon( style->standardIcon( QStyle::SP_MediaSkipForward ) );
@@ -708,7 +708,7 @@ void consoleWin_t::createMainMenu(void)
 	subMenu->addAction(act);
 	
 	// Emulation -> Speed -> Custom Speed
-	act = new QAction(tr("Custom"), this);
+	act = new QAction(tr("&Custom"), this);
 	//act->setShortcut( QKeySequence(tr("-")));
 	act->setStatusTip(tr("Custom"));
 	connect(act, SIGNAL(triggered()), this, SLOT(emuCustomSpd(void)) );
@@ -718,7 +718,7 @@ void consoleWin_t::createMainMenu(void)
 	subMenu->addSeparator();
 	
 	// Emulation -> Speed -> Set Frame Advance Delay
-	act = new QAction(tr("Set Frame Advance Delay"), this);
+	act = new QAction(tr("Set Frame &Advance Delay"), this);
 	//act->setShortcut( QKeySequence(tr("-")));
 	act->setStatusTip(tr("Set Frame Advance Delay"));
 	connect(act, SIGNAL(triggered()), this, SLOT(emuSetFrameAdvDelay(void)) );
@@ -728,18 +728,18 @@ void consoleWin_t::createMainMenu(void)
 	emuMenu->addSeparator();
 
 	// Emulation -> AutoFire Pattern
-	subMenu = emuMenu->addMenu(tr("AutoFire Pattern"));
+	subMenu = emuMenu->addMenu(tr("&AutoFire Pattern"));
 	
 	// Emulation -> AutoFire Pattern -> # On Frames
-	act = new QAction(tr("# On Frames"), this);
-	act->setStatusTip(tr("# On Frames"));
+	act = new QAction(tr("# O&N Frames"), this);
+	act->setStatusTip(tr("# ON Frames"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setAutoFireOnFrames(void)) );
 	
 	subMenu->addAction(act);
 
 	// Emulation -> AutoFire Pattern -> # Off Frames
-	act = new QAction(tr("# Off Frames"), this);
-	act->setStatusTip(tr("# Off Frames"));
+	act = new QAction(tr("# O&FF Frames"), this);
+	act->setStatusTip(tr("# OFF Frames"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setAutoFireOffFrames(void)) );
 	
 	subMenu->addAction(act);
@@ -749,7 +749,7 @@ void consoleWin_t::createMainMenu(void)
 	toolsMenu = menubar->addMenu(tr("&Tools"));
 
 	// Tools -> Cheats
-	cheatsAct = new QAction(tr("Cheats..."), this);
+	cheatsAct = new QAction(tr("&Cheats..."), this);
 	//cheatsAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	cheatsAct->setStatusTip(tr("Open Cheat Window"));
 	connect(cheatsAct, SIGNAL(triggered()), this, SLOT(openCheats(void)) );
@@ -757,7 +757,7 @@ void consoleWin_t::createMainMenu(void)
 	toolsMenu->addAction(cheatsAct);
 
 	// Tools -> RAM Search
-	ramSearchAct = new QAction(tr("RAM Search..."), this);
+	ramSearchAct = new QAction(tr("RAM &Search..."), this);
 	//ramSearchAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	ramSearchAct->setStatusTip(tr("Open RAM Search Window"));
 	connect(ramSearchAct, SIGNAL(triggered()), this, SLOT(openRamSearch(void)) );
@@ -765,7 +765,7 @@ void consoleWin_t::createMainMenu(void)
 	toolsMenu->addAction(ramSearchAct);
 
 	// Tools -> RAM Watch
-	ramWatchAct = new QAction(tr("RAM Watch..."), this);
+	ramWatchAct = new QAction(tr("RAM &Watch..."), this);
 	//ramWatchAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	ramWatchAct->setStatusTip(tr("Open RAM Watch Window"));
 	connect(ramWatchAct, SIGNAL(triggered()), this, SLOT(openRamWatch(void)) );
@@ -773,7 +773,7 @@ void consoleWin_t::createMainMenu(void)
 	toolsMenu->addAction(ramWatchAct);
 
 	// Tools -> Frame Timing
-	act = new QAction(tr("Frame Timing ..."), this);
+	act = new QAction(tr("&Frame Timing ..."), this);
 	//act->setShortcut( QKeySequence(tr("Shift+F7")));
 	act->setStatusTip(tr("Open Frame Timing Window"));
 	connect(act, SIGNAL(triggered()), this, SLOT(openTimingStatWin(void)) );
@@ -781,7 +781,7 @@ void consoleWin_t::createMainMenu(void)
 	toolsMenu->addAction(act);
 
 	// Tools -> Palette Editor
-	act = new QAction(tr("Palette Editor ..."), this);
+	act = new QAction(tr("&Palette Editor ..."), this);
 	//act->setShortcut( QKeySequence(tr("Shift+F7")));
 	act->setStatusTip(tr("Open Palette Editor Window"));
 	connect(act, SIGNAL(triggered()), this, SLOT(openPaletteEditorWin(void)) );
@@ -793,7 +793,7 @@ void consoleWin_t::createMainMenu(void)
 	debugMenu = menubar->addMenu(tr("&Debug"));
 
 	// Debug -> Debugger 
-	debuggerAct = new QAction(tr("Debugger..."), this);
+	debuggerAct = new QAction(tr("&Debugger..."), this);
 	//debuggerAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	debuggerAct->setStatusTip(tr("Open 6502 Debugger"));
 	connect(debuggerAct, SIGNAL(triggered()), this, SLOT(openDebugWindow(void)) );
@@ -801,7 +801,7 @@ void consoleWin_t::createMainMenu(void)
 	debugMenu->addAction(debuggerAct);
 
 	// Debug -> Hex Editor
-	hexEditAct = new QAction(tr("Hex Editor..."), this);
+	hexEditAct = new QAction(tr("&Hex Editor..."), this);
 	//hexEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	hexEditAct->setStatusTip(tr("Open Memory Hex Editor"));
 	connect(hexEditAct, SIGNAL(triggered()), this, SLOT(openHexEditor(void)) );
@@ -809,7 +809,7 @@ void consoleWin_t::createMainMenu(void)
 	debugMenu->addAction(hexEditAct);
 
 	// Debug -> PPU Viewer
-	ppuViewAct = new QAction(tr("PPU Viewer..."), this);
+	ppuViewAct = new QAction(tr("&PPU Viewer..."), this);
 	//ppuViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	ppuViewAct->setStatusTip(tr("Open PPU Viewer"));
 	connect(ppuViewAct, SIGNAL(triggered()), this, SLOT(openPPUViewer(void)) );
@@ -817,7 +817,7 @@ void consoleWin_t::createMainMenu(void)
 	debugMenu->addAction(ppuViewAct);
 
 	// Debug -> Name Table Viewer
-	ntViewAct = new QAction(tr("Name Table Viewer..."), this);
+	ntViewAct = new QAction(tr("&Name Table Viewer..."), this);
 	//ntViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	ntViewAct->setStatusTip(tr("Open Name Table Viewer"));
 	connect(ntViewAct, SIGNAL(triggered()), this, SLOT(openNTViewer(void)) );
@@ -825,7 +825,7 @@ void consoleWin_t::createMainMenu(void)
 	debugMenu->addAction(ntViewAct);
 
 	// Debug -> Trace Logger
-	traceLogAct = new QAction(tr("Trace Logger..."), this);
+	traceLogAct = new QAction(tr("&Trace Logger..."), this);
 	//traceLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	traceLogAct->setStatusTip(tr("Open Trace Logger"));
 	connect(traceLogAct, SIGNAL(triggered()), this, SLOT(openTraceLogger(void)) );
@@ -833,7 +833,7 @@ void consoleWin_t::createMainMenu(void)
 	debugMenu->addAction(traceLogAct);
 
 	// Debug -> Code/Data Logger
-	codeDataLogAct = new QAction(tr("Code/Data Logger..."), this);
+	codeDataLogAct = new QAction(tr("&Code/Data Logger..."), this);
 	//codeDataLogAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	codeDataLogAct->setStatusTip(tr("Open Code Data Logger"));
 	connect(codeDataLogAct, SIGNAL(triggered()), this, SLOT(openCodeDataLogger(void)) );
@@ -841,7 +841,7 @@ void consoleWin_t::createMainMenu(void)
 	debugMenu->addAction(codeDataLogAct);
 
 	// Debug -> Game Genie Encode/Decode Viewer
-	ggEncodeAct = new QAction(tr("Game Genie Encode/Decode"), this);
+	ggEncodeAct = new QAction(tr("&Game Genie Encode/Decode"), this);
 	//ggEncodeAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	ggEncodeAct->setStatusTip(tr("Open Game Genie Encode/Decode"));
 	connect(ggEncodeAct, SIGNAL(triggered()), this, SLOT(openGGEncoder(void)) );
@@ -849,7 +849,7 @@ void consoleWin_t::createMainMenu(void)
 	debugMenu->addAction(ggEncodeAct);
 
 	// Debug -> iNES Header Editor
-	iNesEditAct = new QAction(tr("iNES Header Editor..."), this);
+	iNesEditAct = new QAction(tr("&iNES Header Editor..."), this);
 	//iNesEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	iNesEditAct->setStatusTip(tr("Open iNES Header Editor"));
 	connect(iNesEditAct, SIGNAL(triggered()), this, SLOT(openNesHeaderEditor(void)) );
@@ -858,10 +858,10 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Movie
-	movieMenu = menubar->addMenu(tr("Movie"));
+	movieMenu = menubar->addMenu(tr("&Movie"));
 
 	// Movie -> Play
-	openMovAct = new QAction(tr("Play"), this);
+	openMovAct = new QAction(tr("&Play"), this);
 	openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	openMovAct->setStatusTip(tr("Play Movie File"));
 	openMovAct->setIcon( style->standardIcon( QStyle::SP_MediaPlay ) );
@@ -870,7 +870,7 @@ void consoleWin_t::createMainMenu(void)
 	movieMenu->addAction(openMovAct);
 
 	// Movie -> Stop
-	stopMovAct = new QAction(tr("Stop"), this);
+	stopMovAct = new QAction(tr("&Stop"), this);
 	//stopMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	stopMovAct->setStatusTip(tr("Stop Movie Recording"));
 	stopMovAct->setIcon( style->standardIcon( QStyle::SP_MediaStop ) );
@@ -881,7 +881,7 @@ void consoleWin_t::createMainMenu(void)
 	movieMenu->addSeparator();
 
 	// Movie -> Record
-	recMovAct = new QAction(tr("Record"), this);
+	recMovAct = new QAction(tr("&Record"), this);
 	recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	recMovAct->setStatusTip(tr("Record Movie"));
 	recMovAct->setIcon( QIcon(":icons/media-record.png") );
@@ -890,7 +890,7 @@ void consoleWin_t::createMainMenu(void)
 	movieMenu->addAction(recMovAct);
 
 	// Movie -> Record As
-	recAsMovAct = new QAction(tr("Record As"), this);
+	recAsMovAct = new QAction(tr("Record &As"), this);
 	//recAsMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	recAsMovAct->setStatusTip(tr("Record Movie"));
 	connect(recAsMovAct, SIGNAL(triggered()), this, SLOT(recordMovieAs(void)) );
@@ -902,7 +902,7 @@ void consoleWin_t::createMainMenu(void)
 	helpMenu = menubar->addMenu(tr("&Help"));
  
 	// Help -> About FCEUX
-	aboutAct = new QAction(tr("About FCEUX"), this);
+	aboutAct = new QAction(tr("&About FCEUX"), this);
 	aboutAct->setStatusTip(tr("About FCEUX"));
 	aboutAct->setIcon( style->standardIcon( QStyle::SP_MessageBoxInformation ) );
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutFCEUX(void)) );
@@ -910,7 +910,7 @@ void consoleWin_t::createMainMenu(void)
 	helpMenu->addAction(aboutAct);
 
 	// Help -> About Qt
-	aboutActQt = new QAction(tr("About Qt"), this);
+	aboutActQt = new QAction(tr("About &Qt"), this);
 	aboutActQt->setStatusTip(tr("About Qt"));
 	aboutActQt->setIcon( style->standardIcon( QStyle::SP_TitleBarMenuButton ) );
 	connect(aboutActQt, SIGNAL(triggered()), this, SLOT(aboutQt(void)) );
@@ -918,7 +918,7 @@ void consoleWin_t::createMainMenu(void)
 	helpMenu->addAction(aboutActQt);
 
 	// Help -> Message Log
-	msgLogAct = new QAction(tr("Message Log"), this);
+	msgLogAct = new QAction(tr("&Message Log"), this);
 	msgLogAct->setStatusTip(tr("Message Log"));
 	msgLogAct->setIcon( style->standardIcon( QStyle::SP_MessageBoxWarning ) );
 	connect(msgLogAct, SIGNAL(triggered()), this, SLOT(openMsgLogWin(void)) );

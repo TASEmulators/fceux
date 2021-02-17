@@ -75,7 +75,7 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	fileMenu = menuBar->addMenu(tr("&File"));
 
 	// File -> Open
-	act = new QAction(tr("Open"), this);
+	act = new QAction(tr("&Open"), this);
 	act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Open Palette From File"));
 	connect(act, SIGNAL(triggered()), this, SLOT(openPaletteFileDialog(void)) );
@@ -83,7 +83,7 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	fileMenu->addAction(act);
 
 	// File -> Save
-	act = new QAction(tr("Save"), this);
+	act = new QAction(tr("&Save"), this);
 	act->setShortcut( QKeySequence::Save );
 	act->setStatusTip(tr("Save Palette To File"));
 	connect(act, SIGNAL(triggered()), this, SLOT(savePaletteFileDialog(void)) );
@@ -91,10 +91,10 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	fileMenu->addAction(act);
 
 	// Memory
-	memMenu = menuBar->addMenu(tr("Memory"));
+	memMenu = menuBar->addMenu(tr("&Memory"));
 
 	// Emulator -> Write To
-	act = new QAction(tr("Write To"), this);
+	act = new QAction(tr("&Write To"), this);
 	act->setShortcut( QKeySequence(tr("F5")));
 	act->setStatusTip(tr("Write to Active Color Palette"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setActivePalette(void)) );

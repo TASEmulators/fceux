@@ -152,7 +152,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu = menuBar->addMenu(tr("&View"));
 
 	// View -> Show Scroll Lines
-	act = new QAction(tr("Show Scroll Lines"), this);
+	act = new QAction(tr("Show &Scroll Lines"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(drawScrollLines);
@@ -163,7 +163,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Show Tile Grid
-	act = new QAction(tr("Show Tile Grid"), this);
+	act = new QAction(tr("Show &Tile Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(drawTileGridLines);
@@ -174,7 +174,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Show Attr Grid
-	act = new QAction(tr("Show Attr Grid"), this);
+	act = new QAction(tr("Show &Attr Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(drawAttrGridLines);
@@ -185,7 +185,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Show Attributes
-	act = new QAction(tr("Show Attributes"), this);
+	act = new QAction(tr("Show &Attributes"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(attview);
@@ -196,7 +196,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Ignore Palette
-	act = new QAction(tr("Ignore Palette"), this);
+	act = new QAction(tr("&Ignore Palette"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(attview);
@@ -207,7 +207,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Image Zoom
-	subMenu = viewMenu->addMenu( tr("Image Zoom"));
+	subMenu = viewMenu->addMenu( tr("Image &Zoom"));
 	group   = new QActionGroup(this);
 
 	group->setExclusive(true);
@@ -216,7 +216,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	{
 	        char stmp[8];
 
-	        sprintf( stmp, "%ix", i+1 );
+	        sprintf( stmp, "&%ix", i+1 );
 
 	        zoomAct[i] = new QAction(tr(stmp), this);
 	        zoomAct[i]->setCheckable(true);
@@ -234,18 +234,18 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addSeparator();
 
 	// View -> Tile Focus
-	subMenu = viewMenu->addMenu( tr("Tile Focus"));
+	subMenu = viewMenu->addMenu( tr("Tile &Focus"));
 	group   = new QActionGroup(this);
 
 	group->setExclusive(true);
 
-	focusAct[0] = new QAction(tr("Click"), this);
+	focusAct[0] = new QAction(tr("&Click"), this);
 	focusAct[0]->setCheckable(true);
 	group->addAction(focusAct[0]);
 	subMenu->addAction(focusAct[0]);
 	connect(focusAct[0], SIGNAL(triggered()), this, SLOT(setClickFocus(void)) );
 
-	focusAct[1] = new QAction(tr("Hover"), this);
+	focusAct[1] = new QAction(tr("&Hover"), this);
 	focusAct[1]->setCheckable(true);
 	focusAct[1]->setChecked(false);
 	group->addAction(focusAct[1]);
@@ -255,7 +255,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addSeparator();
 
 	// View -> Refresh
-	act = new QAction(tr("Refresh"), this);
+	act = new QAction(tr("&Refresh"), this);
 	act->setShortcut( QKeySequence(tr("F5") ) );
 	act->setStatusTip(tr("Refresh"));
 	connect(act, SIGNAL(triggered()), this, SLOT(forceRefresh()) );
@@ -263,7 +263,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Auto Refresh Rate
-	subMenu = viewMenu->addMenu( tr("Auto Refresh Rate"));
+	subMenu = viewMenu->addMenu( tr("Auto &Refresh Rate"));
 	group   = new QActionGroup(this);
 
 	group->setExclusive(true);
@@ -301,10 +301,10 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	connect(rateAct[4], SIGNAL(triggered()), this, SLOT(changeRate16(void)) );
 
 	// Colors
-	colorMenu = menuBar->addMenu(tr("Colors"));
+	colorMenu = menuBar->addMenu(tr("&Colors"));
 
 	// Colors -> Tile Selector
-	act = new QAction(tr("Tile Selector"), this);
+	act = new QAction(tr("Tile &Selector"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Tile Selector"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setTileSelectorColor()) );
@@ -312,7 +312,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	colorMenu->addAction(act);
 
 	// Colors -> Tile Grid
-	act = new QAction(tr("Tile Grid"), this);
+	act = new QAction(tr("Tile &Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Tile Grid"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setTileGridColor()) );
@@ -320,7 +320,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	colorMenu->addAction(act);
 
 	// Colors -> Attr Grid
-	act = new QAction(tr("Attr Grid"), this);
+	act = new QAction(tr("&Attr Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Attr Grid"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setAttrGridColor()) );

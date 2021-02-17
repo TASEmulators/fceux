@@ -104,118 +104,118 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	// Menu 
 	//-----------------------------------------------------------------------
 	// File
-   fileMenu = menuBar->addMenu(tr("&File"));
+	fileMenu = menuBar->addMenu(tr("&File"));
 
 	// File -> New List
-	menuAct = new QAction(tr("New List"), this);
-   menuAct->setShortcut( QKeySequence(tr("Ctrl+N")) );
-   menuAct->setStatusTip(tr("New List"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
-
-   fileMenu->addAction(menuAct);
+	menuAct = new QAction(tr("&New List"), this);
+	menuAct->setShortcut( QKeySequence(tr("Ctrl+N")) );
+	menuAct->setStatusTip(tr("New List"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+	
+	fileMenu->addAction(menuAct);
 
 	// File -> Open 
-	menuAct = new QAction(tr("Open"), this);
-   menuAct->setShortcut( QKeySequence(tr("Ctrl+O")) );
-   menuAct->setStatusTip(tr("Open Watch File"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(openListCB(void)) );
-
-   fileMenu->addAction(menuAct);
+	menuAct = new QAction(tr("&Open"), this);
+	menuAct->setShortcut( QKeySequence(tr("Ctrl+O")) );
+	menuAct->setStatusTip(tr("Open Watch File"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(openListCB(void)) );
+	
+	fileMenu->addAction(menuAct);
 
 	// File -> Save 
-	menuAct = new QAction(tr("Save"), this);
-   menuAct->setShortcut( QKeySequence(tr("Ctrl+S")) );
-   menuAct->setStatusTip(tr("Save Watch File"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(saveListCB(void)) );
-
-   fileMenu->addAction(menuAct);
+	menuAct = new QAction(tr("&Save"), this);
+	menuAct->setShortcut( QKeySequence(tr("Ctrl+S")) );
+	menuAct->setStatusTip(tr("Save Watch File"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(saveListCB(void)) );
+	
+	fileMenu->addAction(menuAct);
 
 	// File -> Save As
-	menuAct = new QAction(tr("Save As"), this);
-   menuAct->setShortcut( QKeySequence(tr("Ctrl+Shift+S")) );
-   menuAct->setStatusTip(tr("Save As Watch File"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(saveListAs(void)) );
-
-   fileMenu->addAction(menuAct);
+	menuAct = new QAction(tr("Save &As"), this);
+	menuAct->setShortcut( QKeySequence(tr("Ctrl+Shift+S")) );
+	menuAct->setStatusTip(tr("Save As Watch File"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(saveListAs(void)) );
+	
+	fileMenu->addAction(menuAct);
 
 	// File -> Append
-	menuAct = new QAction(tr("Append from File"), this);
-   //menuAct->setShortcut( QKeySequence(tr("Ctrl+A")) );
-   menuAct->setStatusTip(tr("Append from File"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(appendListCB(void)) );
-
-   fileMenu->addAction(menuAct);
+	menuAct = new QAction(tr("&Append from File"), this);
+	//menuAct->setShortcut( QKeySequence(tr("Ctrl+A")) );
+	menuAct->setStatusTip(tr("Append from File"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(appendListCB(void)) );
+	
+	fileMenu->addAction(menuAct);
 
 	fileMenu->addSeparator();
 
 	// File -> Append
-	menuAct = new QAction(tr("Close"), this);
-   menuAct->setShortcut( QKeySequence(tr("Alt+F4")) );
-   menuAct->setStatusTip(tr("Close Window"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
-
-   fileMenu->addAction(menuAct);
+	menuAct = new QAction(tr("&Close"), this);
+	menuAct->setShortcut( QKeySequence(tr("Alt+F4")) );
+	menuAct->setStatusTip(tr("Close Window"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(menuAct);
 
 	// Watch
-   watchMenu = menuBar->addMenu(tr("&Watch"));
+	watchMenu = menuBar->addMenu(tr("&Watch"));
 
 	// Watch -> New Watch
-	menuAct = new QAction(tr("New Watch"), this);
-   menuAct->setShortcut( QKeySequence(tr("N")) );
-   menuAct->setStatusTip(tr("New Watch"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(newWatchClicked(void)) );
-
-   watchMenu->addAction(menuAct);
+	menuAct = new QAction(tr("&New Watch"), this);
+	menuAct->setShortcut( QKeySequence(tr("N")) );
+	menuAct->setStatusTip(tr("New Watch"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(newWatchClicked(void)) );
+	
+	watchMenu->addAction(menuAct);
 
 	// Watch -> Edit Watch
-	menuAct = new QAction(tr("Edit Watch"), this);
-   menuAct->setShortcut( QKeySequence(tr("E")) );
-   menuAct->setStatusTip(tr("Edit Watch"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(editWatchClicked(void)) );
-
-   watchMenu->addAction(menuAct);
+	menuAct = new QAction(tr("&Edit Watch"), this);
+	menuAct->setShortcut( QKeySequence(tr("E")) );
+	menuAct->setStatusTip(tr("Edit Watch"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(editWatchClicked(void)) );
+	
+	watchMenu->addAction(menuAct);
 
 	// Watch -> Remove Watch
-	menuAct = new QAction(tr("Remove Watch"), this);
-   menuAct->setShortcut( QKeySequence(tr("R")) );
-   menuAct->setStatusTip(tr("Remove Watch"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(removeWatchClicked(void)) );
-
-   watchMenu->addAction(menuAct);
+	menuAct = new QAction(tr("&Remove Watch"), this);
+	menuAct->setShortcut( QKeySequence(tr("R")) );
+	menuAct->setStatusTip(tr("Remove Watch"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(removeWatchClicked(void)) );
+	
+	watchMenu->addAction(menuAct);
 
 	// Watch -> Duplicate Watch
-	menuAct = new QAction(tr("Duplicate Watch"), this);
-   menuAct->setShortcut( QKeySequence(tr("A")) );
-   menuAct->setStatusTip(tr("Duplicate Watch"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(dupWatchClicked(void)) );
-
-   watchMenu->addAction(menuAct);
+	menuAct = new QAction(tr("Duplic&ate Watch"), this);
+	menuAct->setShortcut( QKeySequence(tr("A")) );
+	menuAct->setStatusTip(tr("Duplicate Watch"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(dupWatchClicked(void)) );
+	
+	watchMenu->addAction(menuAct);
 
 	// Watch -> Add Separator
-	menuAct = new QAction(tr("Add Separator"), this);
-   menuAct->setShortcut( QKeySequence(tr("S")) );
-   menuAct->setStatusTip(tr("Add Separator"));
-   //connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
-
-   watchMenu->addAction(menuAct);
+	menuAct = new QAction(tr("Add &Separator"), this);
+	menuAct->setShortcut( QKeySequence(tr("S")) );
+	menuAct->setStatusTip(tr("Add Separator"));
+	//connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
+	
+	watchMenu->addAction(menuAct);
 
 	watchMenu->addSeparator();
 
 	// Watch -> Move Up
-	menuAct = new QAction(tr("Move Up"), this);
-   menuAct->setShortcut( QKeySequence(tr("U")) );
-   menuAct->setStatusTip(tr("Move Up"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(moveWatchUpClicked(void)) );
-
-   watchMenu->addAction(menuAct);
+	menuAct = new QAction(tr("Move &Up"), this);
+	menuAct->setShortcut( QKeySequence(tr("U")) );
+	menuAct->setStatusTip(tr("Move Up"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(moveWatchUpClicked(void)) );
+	
+	watchMenu->addAction(menuAct);
 
 	// Watch -> Move Down
-	menuAct = new QAction(tr("Move Down"), this);
-   menuAct->setShortcut( QKeySequence(tr("D")) );
-   menuAct->setStatusTip(tr("Move Down"));
-   connect(menuAct, SIGNAL(triggered()), this, SLOT(moveWatchDownClicked(void)) );
-
-   watchMenu->addAction(menuAct);
+	menuAct = new QAction(tr("Move &Down"), this);
+	menuAct->setShortcut( QKeySequence(tr("D")) );
+	menuAct->setStatusTip(tr("Move Down"));
+	connect(menuAct, SIGNAL(triggered()), this, SLOT(moveWatchDownClicked(void)) );
+	
+	watchMenu->addAction(menuAct);
 
 	//-----------------------------------------------------------------------
 	// End Menu
@@ -296,11 +296,11 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
-   ramWatchMainWin = this;
+	ramWatchMainWin = this;
 
 	updateTimer  = new QTimer( this );
 
-   connect( updateTimer, &QTimer::timeout, this, &RamWatchDialog_t::periodicUpdate );
+	connect( updateTimer, &QTimer::timeout, this, &RamWatchDialog_t::periodicUpdate );
 
 	updateTimer->start( 100 ); // 10hz
 }
@@ -309,10 +309,10 @@ RamWatchDialog_t::~RamWatchDialog_t(void)
 {
 	updateTimer->stop();
 
-   if ( ramWatchMainWin == this )
-   {
-      ramWatchMainWin = NULL;
-   }
+	if ( ramWatchMainWin == this )
+	{
+	   ramWatchMainWin = NULL;
+	}
 	printf("Destroy RAM Watch Config Window\n");
 }
 //----------------------------------------------------------------------------

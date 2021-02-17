@@ -891,7 +891,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	fileMenu = menuBar->addMenu(tr("&File"));
 
 	// File -> Save ROM
-	saveROM = new QAction(tr("Save ROM"), this);
+	saveROM = new QAction(tr("&Save ROM"), this);
 	//saveROM->setShortcut(QKeySequence::Open);
 	saveROM->setStatusTip(tr("Save ROM File"));
 	connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFile(void)) );
@@ -899,7 +899,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	fileMenu->addAction(saveROM);
 
 	// File -> Save ROM As
-	saveROM = new QAction(tr("Save ROM As"), this);
+	saveROM = new QAction(tr("Save ROM &As"), this);
 	//saveROM->setShortcut(QKeySequence::Open);
 	saveROM->setStatusTip(tr("Save ROM File As"));
 	connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFileAs(void)) );
@@ -907,7 +907,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	fileMenu->addAction(saveROM);
 
 	// File -> Goto Address
-	gotoAddrAct = new QAction(tr("Goto Address"), this);
+	gotoAddrAct = new QAction(tr("&Goto Address"), this);
 	gotoAddrAct->setShortcut(QKeySequence(tr("Ctrl+A")));
 	gotoAddrAct->setStatusTip(tr("Goto Address"));
 	connect(gotoAddrAct, SIGNAL(triggered()), this, SLOT(openGotoAddrDialog(void)) );
@@ -917,7 +917,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	fileMenu->addSeparator();
 
 	// File -> Close
-	closeAct = new QAction(tr("Close"), this);
+	closeAct = new QAction(tr("&Close"), this);
 	closeAct->setShortcut(QKeySequence(tr("Esc")));
 	closeAct->setStatusTip(tr("Close Window"));
 	connect(closeAct, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
@@ -928,7 +928,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	editMenu = menuBar->addMenu(tr("&Edit"));
 
 	// Edit -> Undo
-	undoEditAct = new QAction(tr("Undo"), this);
+	undoEditAct = new QAction(tr("&Undo"), this);
 	undoEditAct->setShortcut(QKeySequence(tr("U")));
 	undoEditAct->setStatusTip(tr("Undo Edit"));
 	undoEditAct->setEnabled(false);
@@ -938,7 +938,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	editMenu->addSeparator();
 
 	// Edit -> Copy
-	act = new QAction(tr("Copy"), this);
+	act = new QAction(tr("&Copy"), this);
 	act->setShortcut(QKeySequence(tr("Ctrl+C")));
 	act->setStatusTip(tr("Copy"));
 	connect(act, SIGNAL(triggered()), this, SLOT(copyToClipboard(void)) );
@@ -946,7 +946,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	editMenu->addAction(act);
 
 	// Edit -> Paste
-	act = new QAction(tr("Paste"), this);
+	act = new QAction(tr("&Paste"), this);
 	act->setShortcut(QKeySequence(tr("Ctrl+V")));
 	act->setStatusTip(tr("Paste"));
 	connect(act, SIGNAL(triggered()), this, SLOT(pasteFromClipboard(void)) );
@@ -955,7 +955,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	editMenu->addSeparator();
 
 	// Edit -> Find
-	act = new QAction(tr("Find"), this);
+	act = new QAction(tr("&Find"), this);
 	act->setShortcut(QKeySequence(tr("Ctrl+F")));
 	act->setStatusTip(tr("Find"));
 	connect(act, SIGNAL(triggered()), this, SLOT(openFindDialog(void)) );
@@ -970,7 +970,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	group->setExclusive(true);
 
 	// View -> RAM
-	viewRAM = new QAction(tr("RAM"), this);
+	viewRAM = new QAction(tr("&RAM"), this);
 	//viewRAM->setShortcuts(QKeySequence::Open);
 	viewRAM->setStatusTip(tr("View RAM"));
 	viewRAM->setCheckable(true);
@@ -980,78 +980,78 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	viewMenu->addAction(viewRAM);
 
 	// View -> PPU
-	viewPPU = new QAction(tr("PPU"), this);
-   //viewPPU->setShortcuts(QKeySequence::Open);
-   viewPPU->setStatusTip(tr("View PPU"));
+	viewPPU = new QAction(tr("&PPU"), this);
+	//viewPPU->setShortcuts(QKeySequence::Open);
+	viewPPU->setStatusTip(tr("View PPU"));
 	viewPPU->setCheckable(true);
-   connect(viewPPU, SIGNAL(triggered()), this, SLOT(setViewPPU(void)) );
+	connect(viewPPU, SIGNAL(triggered()), this, SLOT(setViewPPU(void)) );
 
 	group->addAction(viewPPU);
-   viewMenu->addAction(viewPPU);
+	viewMenu->addAction(viewPPU);
 
 	// View -> OAM
-	viewOAM = new QAction(tr("OAM"), this);
-   //viewOAM->setShortcuts(QKeySequence::Open);
-   viewOAM->setStatusTip(tr("View OAM"));
+	viewOAM = new QAction(tr("&OAM"), this);
+	//viewOAM->setShortcuts(QKeySequence::Open);
+	viewOAM->setStatusTip(tr("View OAM"));
 	viewOAM->setCheckable(true);
-   connect(viewOAM, SIGNAL(triggered()), this, SLOT(setViewOAM(void)) );
+	connect(viewOAM, SIGNAL(triggered()), this, SLOT(setViewOAM(void)) );
 
 	group->addAction(viewOAM);
-   viewMenu->addAction(viewOAM);
+	viewMenu->addAction(viewOAM);
 
 	// View -> ROM
-	viewROM = new QAction(tr("ROM"), this);
-   //viewROM->setShortcuts(QKeySequence::Open);
-   viewROM->setStatusTip(tr("View ROM"));
+	viewROM = new QAction(tr("&ROM"), this);
+	//viewROM->setShortcuts(QKeySequence::Open);
+	viewROM->setStatusTip(tr("View ROM"));
 	viewROM->setCheckable(true);
-   connect(viewROM, SIGNAL(triggered()), this, SLOT(setViewROM(void)) );
+	connect(viewROM, SIGNAL(triggered()), this, SLOT(setViewROM(void)) );
 
 	group->addAction(viewROM);
-   viewMenu->addAction(viewROM);
+	viewMenu->addAction(viewROM);
 
 	viewRAM->setChecked(true); // Set default view
 
 	// Color Menu
-   colorMenu = menuBar->addMenu(tr("Color"));
+	colorMenu = menuBar->addMenu(tr("&Color"));
 
 	// Color -> Highlight Activity
-	actHlgt = new QAction(tr("Highlight Activity"), this);
-   //actHlgt->setShortcuts(QKeySequence::Open);
-   actHlgt->setStatusTip(tr("Highlight Activity"));
+	actHlgt = new QAction(tr("Highlight &Activity"), this);
+	//actHlgt->setShortcuts(QKeySequence::Open);
+	actHlgt->setStatusTip(tr("Highlight Activity"));
 	actHlgt->setCheckable(true);
 	actHlgt->setChecked(true);
-   connect(actHlgt, SIGNAL(triggered(bool)), this, SLOT(actvHighlightCB(bool)) );
+	connect(actHlgt, SIGNAL(triggered(bool)), this, SLOT(actvHighlightCB(bool)) );
 
-   colorMenu->addAction(actHlgt);
+	colorMenu->addAction(actHlgt);
 
 	// Color -> Highlight Reverse Video
-	actHlgtRV = new QAction(tr("Highlight Reverse Video"), this);
-   //actHlgtRV->setShortcuts(QKeySequence::Open);
-   actHlgtRV->setStatusTip(tr("Highlight Reverse Video"));
+	actHlgtRV = new QAction(tr("Highlight &Reverse Video"), this);
+	//actHlgtRV->setShortcuts(QKeySequence::Open);
+	actHlgtRV->setStatusTip(tr("Highlight Reverse Video"));
 	actHlgtRV->setCheckable(true);
 	actHlgtRV->setChecked(true);
-   connect(actHlgtRV, SIGNAL(triggered(bool)), this, SLOT(actvHighlightRVCB(bool)) );
+	connect(actHlgtRV, SIGNAL(triggered(bool)), this, SLOT(actvHighlightRVCB(bool)) );
 
-   colorMenu->addAction(actHlgtRV);
+	colorMenu->addAction(actHlgtRV);
 
 	// Color -> ForeGround Color
-	actColorFG = new QAction(tr("ForeGround Color"), this);
-   //actColorFG->setShortcuts(QKeySequence::Open);
-   actColorFG->setStatusTip(tr("ForeGround Color"));
-   connect(actColorFG, SIGNAL(triggered(void)), this, SLOT(pickForeGroundColor(void)) );
-
-   colorMenu->addAction(actColorFG);
+	actColorFG = new QAction(tr("&ForeGround Color"), this);
+	//actColorFG->setShortcuts(QKeySequence::Open);
+	actColorFG->setStatusTip(tr("ForeGround Color"));
+	connect(actColorFG, SIGNAL(triggered(void)), this, SLOT(pickForeGroundColor(void)) );
+	
+	colorMenu->addAction(actColorFG);
 
 	// Color -> BackGround Color
-	actColorBG = new QAction(tr("BackGround Color"), this);
-   //actColorBG->setShortcuts(QKeySequence::Open);
-   actColorBG->setStatusTip(tr("BackGround Color"));
-   connect(actColorBG, SIGNAL(triggered(void)), this, SLOT(pickBackGroundColor(void)) );
-
-   colorMenu->addAction(actColorBG);
+	actColorBG = new QAction(tr("&BackGround Color"), this);
+	//actColorBG->setShortcuts(QKeySequence::Open);
+	actColorBG->setStatusTip(tr("BackGround Color"));
+	connect(actColorBG, SIGNAL(triggered(void)), this, SLOT(pickBackGroundColor(void)) );
+	
+	colorMenu->addAction(actColorBG);
 
 	// Bookmarks Menu
-   bookmarkMenu = menuBar->addMenu(tr("&Bookmarks"));
+	bookmarkMenu = menuBar->addMenu(tr("&Bookmarks"));
 
 	//-----------------------------------------------------------------------
 	// Menu End 
@@ -1172,12 +1172,12 @@ void HexEditorDialog_t::populateBookmarkMenu(void)
 	bookmarkMenu->clear();
 
 	// Bookmarks -> Remove All Bookmarks
-	act = new QAction(tr("Remove All Bookmarks"), bookmarkMenu);
-   //act->setShortcuts(QKeySequence::Open);
-   act->setStatusTip(tr("Remove All Bookmarks"));
-   connect(act, SIGNAL(triggered(void)), this, SLOT(removeAllBookmarks(void)) );
-
-   bookmarkMenu->addAction(act);
+	act = new QAction(tr("&Remove All Bookmarks"), bookmarkMenu);
+	//act->setShortcuts(QKeySequence::Open);
+	act->setStatusTip(tr("Remove All Bookmarks"));
+	connect(act, SIGNAL(triggered(void)), this, SLOT(removeAllBookmarks(void)) );
+	
+	bookmarkMenu->addAction(act);
 	bookmarkMenu->addSeparator();
 
 	for (int i=0; i<hbm.size(); i++)
@@ -1188,9 +1188,9 @@ void HexEditorDialog_t::populateBookmarkMenu(void)
 		{
 			//printf("%p  %p  \n", b, editor );
 			hAct = new HexBookMarkMenuAction(tr(b->desc), bookmarkMenu);
-   		bookmarkMenu->addAction(hAct);
+			bookmarkMenu->addAction(hAct);
 			hAct->bm = b; hAct->qedit = editor;
-   		connect(hAct, SIGNAL(triggered(void)), hAct, SLOT(activateCB(void)) );
+			connect(hAct, SIGNAL(triggered(void)), hAct, SLOT(activateCB(void)) );
 		}
 	}
 }

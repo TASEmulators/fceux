@@ -234,10 +234,10 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	// Menu 
 	//-----------------------------------------------------------------------
 	// View1
-	viewMenu = menuBar->addMenu(tr("&View1"));
+	viewMenu = menuBar->addMenu(tr("View&1"));
 
 	// View1 -> Toggle Grid
-	act = new QAction(tr("Toggle Grid"), this);
+	act = new QAction(tr("Toggle &Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	//act->setCheckable(true);
 	//act->setChecked( patternView[0]->getDrawTileGrid() );
@@ -247,10 +247,10 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View1 -> Colors
-	colorMenu = viewMenu->addMenu(tr("Colors"));
+	colorMenu = viewMenu->addMenu(tr("&Colors"));
 
 	// View1 -> Colors -> Tile Selector
-	act = new QAction(tr("Tile Selector"), this);
+	act = new QAction(tr("Tile &Selector"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Tile Selector"));
 	connect(act, SIGNAL(triggered()), patternView[0], SLOT(setTileSelectorColor()) );
@@ -258,7 +258,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	colorMenu->addAction(act);
 
 	// View1 -> Colors -> Tile Grid
-	act = new QAction(tr("Tile Grid"), this);
+	act = new QAction(tr("Tile &Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Tile Grid"));
 	connect(act, SIGNAL(triggered()), patternView[0], SLOT(setTileGridColor()) );
@@ -266,10 +266,10 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	colorMenu->addAction(act);
 
 	// View2
-	viewMenu = menuBar->addMenu(tr("View2"));
+	viewMenu = menuBar->addMenu(tr("View&2"));
 
 	// View2 -> Toggle Grid
-	act = new QAction(tr("Toggle Grid"), this);
+	act = new QAction(tr("Toggle &Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	//act->setCheckable(true);
 	//act->setChecked( patternView[1]->getDrawTileGrid() );
@@ -279,10 +279,10 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View2 -> Colors
-	colorMenu = viewMenu->addMenu(tr("Colors"));
+	colorMenu = viewMenu->addMenu(tr("&Colors"));
 
 	// View2 -> Colors -> Tile Selector
-	act = new QAction(tr("Tile Selector"), this);
+	act = new QAction(tr("Tile &Selector"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Tile Selector"));
 	connect(act, SIGNAL(triggered()), patternView[1], SLOT(setTileSelectorColor()) );
@@ -290,7 +290,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	colorMenu->addAction(act);
 
 	// View2 -> Colors -> Tile Grid
-	act = new QAction(tr("Tile Grid"), this);
+	act = new QAction(tr("Tile &Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Tile Grid"));
 	connect(act, SIGNAL(triggered()), patternView[1], SLOT(setTileGridColor()) );
@@ -298,21 +298,21 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	colorMenu->addAction(act);
 
 	// Options
-	optMenu = menuBar->addMenu(tr("Options"));
+	optMenu = menuBar->addMenu(tr("&Options"));
 
 	// Options -> Focus
-	subMenu = optMenu->addMenu(tr("Focus Policy"));
+	subMenu = optMenu->addMenu(tr("&Focus Policy"));
 	group   = new QActionGroup(this);
 	group->setExclusive(true);
 
-	act = new QAction(tr("Click"), this);
+	act = new QAction(tr("&Click"), this);
 	act->setCheckable(true);
 	act->setChecked(true);
 	group->addAction(act);
 	subMenu->addAction(act);
 	connect(act, SIGNAL(triggered()), this, SLOT(setClickFocus(void)) );
 
-	act = new QAction(tr("Hover"), this);
+	act = new QAction(tr("&Hover"), this);
 	act->setCheckable(true);
 	act->setChecked(false);
 	group->addAction(act);
