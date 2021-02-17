@@ -194,6 +194,7 @@ class  consoleWin_t : public QMainWindow
 		void closeROMCB(void);
 		void aboutFCEUX(void);
 		void aboutQt(void);
+		void openOnlineDocs(void);
 		void openMsgLogWin(void);
 		void openInputConfWin(void);
 		void openGameSndConfWin(void);

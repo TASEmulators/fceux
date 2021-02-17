@@ -35,6 +35,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include "../../fceu.h"
 #include "../../fds.h"
@@ -924,6 +926,14 @@ void consoleWin_t::createMainMenu(void)
 	connect(msgLogAct, SIGNAL(triggered()), this, SLOT(openMsgLogWin(void)) );
 	
 	helpMenu->addAction(msgLogAct);
+
+	// Help -> Documentation
+	act = new QAction(tr("&Docs (Online)"), this);
+	act->setStatusTip(tr("Documentation"));
+	act->setIcon( style->standardIcon( QStyle::SP_DialogHelpButton ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(openOnlineDocs(void)) );
+	
+	helpMenu->addAction(act);
 };
 //---------------------------------------------------------------------------
 void consoleWin_t::toggleMenuVis(void)
@@ -2165,6 +2175,15 @@ void consoleWin_t::openMsgLogWin(void)
 
 	msgLogWin->show();
 
+	return;
+}
+
+void consoleWin_t::openOnlineDocs(void)
+{
+	if ( QDesktopServices::openUrl( QUrl("http://fceux.com/web/help/fceux.html") ) == false )
+	{
+		QueueErrorMsgWindow("Error: Failed to open link to: http://fceux.com/web/help/fceux.html");
+	}
 	return;
 }
 
