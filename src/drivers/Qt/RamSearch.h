@@ -38,7 +38,7 @@ class QRamSearchView : public QWidget
 		void resizeEvent(QResizeEvent *event);
 		void wheelEvent(QWheelEvent *event);
 
-      int  convPixToLine( QPoint p );
+		int  convPixToLine( QPoint p );
 		void calcFontData(void);
 
 		QFont       font;
@@ -127,13 +127,14 @@ class RamSearchDialog_t : public QDialog
 	private:
 		void updateRamValues(void);
 		void calcRamList(void);
-      void SearchRelative(void);
-      void SearchSpecificValue(void);
-      void SearchSpecificAddress(void);
-      void SearchNumberChanges(void);
+		void SearchRelative(void);
+		void SearchSpecificValue(void);
+		void SearchSpecificAddress(void);
+		void SearchNumberChanges(void);
+		void copyRamToLocalBuffer(void);
 
-   public slots:
-      void closeWindow(void);
+	public slots:
+		void closeWindow(void);
 	private slots:
 		void runSearch(void);
 		void resetSearch(void);

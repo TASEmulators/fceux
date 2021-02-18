@@ -95,6 +95,7 @@ struct memoryLocation_t
 	}
 };
 static struct memoryLocation_t  memLoc[0x10000];
+static uint8_t  lclMemBuf[0x10000];
 
 static std::list <struct memoryLocation_t*>   actvSrchList;
 static std::list <struct memoryLocation_t*> deactvSrchList;
@@ -182,9 +183,9 @@ void openRamSearchWindow( QWidget *parent )
 	{
 		return;
 	}
-   ramSearchWin = new RamSearchDialog_t(parent);
+	ramSearchWin = new RamSearchDialog_t(parent);
 	
-   ramSearchWin->show();
+	ramSearchWin->show();
 }
 
 //----------------------------------------------------------------------------
@@ -196,7 +197,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	QVBoxLayout *vbox, *vbox1, *vbox2;
 	QGridLayout *grid;
 	QGroupBox *frame;
-   ramSearchInputValidator *inpValidator;
+	ramSearchInputValidator *inpValidator;
 
 	setWindowTitle("RAM Search");
 
@@ -216,14 +217,14 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	grid->addWidget( hbar   , 1, 0 );
 
 	connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
-   connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
+	connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
 	ramView->setScrollBars( hbar, vbar );
 	hbar->setMinimum(0);
 	hbar->setMaximum(100);
 	vbar->setMinimum(0);
 	vbar->setMaximum(ShowROM ? 0x10000 : 0x8000);
-   vbar->setValue(0);
+	vbar->setValue(0);
 
 	vbox  = new QVBoxLayout();
 	hbox1->addLayout( grid, 100);
@@ -297,14 +298,14 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	df_btn->setChecked( cmpOp == 'd' );
 	md_btn->setChecked( cmpOp == '%' );
 
-   connect( lt_btn, SIGNAL(clicked(void)), this, SLOT(opLtClicked(void)) );
-   connect( gt_btn, SIGNAL(clicked(void)), this, SLOT(opGtClicked(void)) );
-   connect( le_btn, SIGNAL(clicked(void)), this, SLOT(opLeClicked(void)) );
-   connect( ge_btn, SIGNAL(clicked(void)), this, SLOT(opGeClicked(void)) );
-   connect( eq_btn, SIGNAL(clicked(void)), this, SLOT(opEqClicked(void)) );
-   connect( ne_btn, SIGNAL(clicked(void)), this, SLOT(opNeClicked(void)) );
-   connect( df_btn, SIGNAL(clicked(void)), this, SLOT(opDfClicked(void)) );
-   connect( md_btn, SIGNAL(clicked(void)), this, SLOT(opMdClicked(void)) );
+	connect( lt_btn, SIGNAL(clicked(void)), this, SLOT(opLtClicked(void)) );
+	connect( gt_btn, SIGNAL(clicked(void)), this, SLOT(opGtClicked(void)) );
+	connect( le_btn, SIGNAL(clicked(void)), this, SLOT(opLeClicked(void)) );
+	connect( ge_btn, SIGNAL(clicked(void)), this, SLOT(opGeClicked(void)) );
+	connect( eq_btn, SIGNAL(clicked(void)), this, SLOT(opEqClicked(void)) );
+	connect( ne_btn, SIGNAL(clicked(void)), this, SLOT(opNeClicked(void)) );
+	connect( df_btn, SIGNAL(clicked(void)), this, SLOT(opDfClicked(void)) );
+	connect( md_btn, SIGNAL(clicked(void)), this, SLOT(opMdClicked(void)) );
 
 	diffByEdit = new QLineEdit();
 	moduloEdit = new QLineEdit();
@@ -312,14 +313,14 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	diffByEdit->setEnabled( cmpOp == 'd' );
 	moduloEdit->setEnabled( cmpOp == '%' );
 
-   inpValidator = new ramSearchInputValidator(this);
-   diffByEdit->setMaxLength( 16 );
-   diffByEdit->setCursorPosition(0);
-   diffByEdit->setValidator( inpValidator );
-
-   moduloEdit->setMaxLength( 16 );
-   moduloEdit->setCursorPosition(0);
-   moduloEdit->setValidator( inpValidator );
+	inpValidator = new ramSearchInputValidator(this);
+	diffByEdit->setMaxLength( 16 );
+	diffByEdit->setCursorPosition(0);
+	diffByEdit->setValidator( inpValidator );
+	
+	moduloEdit->setMaxLength( 16 );
+	moduloEdit->setCursorPosition(0);
+	moduloEdit->setValidator( inpValidator );
 
 	vbox->addWidget( lt_btn );
 	vbox->addWidget( gt_btn );
@@ -352,22 +353,22 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	pv_btn->setChecked(true);
 
-   connect( pv_btn, SIGNAL(clicked(void)), this, SLOT(pvBtnClicked(void)) );
-   connect( sv_btn, SIGNAL(clicked(void)), this, SLOT(svBtnClicked(void)) );
-   connect( sa_btn, SIGNAL(clicked(void)), this, SLOT(saBtnClicked(void)) );
-   connect( nc_btn, SIGNAL(clicked(void)), this, SLOT(ncBtnClicked(void)) );
+	connect( pv_btn, SIGNAL(clicked(void)), this, SLOT(pvBtnClicked(void)) );
+	connect( sv_btn, SIGNAL(clicked(void)), this, SLOT(svBtnClicked(void)) );
+	connect( sa_btn, SIGNAL(clicked(void)), this, SLOT(saBtnClicked(void)) );
+	connect( nc_btn, SIGNAL(clicked(void)), this, SLOT(ncBtnClicked(void)) );
 
 	specValEdit   = new QLineEdit();
 	specAddrEdit  = new QLineEdit();
 	numChangeEdit = new QLineEdit();
 
-   specValEdit->setValidator( inpValidator );
-   specAddrEdit->setValidator( inpValidator );
-   numChangeEdit->setValidator( inpValidator );
-
-   specValEdit->setEnabled(false);
-   specAddrEdit->setEnabled(false);
-   numChangeEdit->setEnabled(false);
+	specValEdit->setValidator( inpValidator );
+	specAddrEdit->setValidator( inpValidator );
+	numChangeEdit->setValidator( inpValidator );
+	
+	specValEdit->setEnabled(false);
+	specAddrEdit->setEnabled(false);
+	numChangeEdit->setEnabled(false);
 
 	grid->addWidget( pv_btn       , 0, 0, Qt::AlignLeft );
 	grid->addWidget( sv_btn       , 1, 0, Qt::AlignLeft );
@@ -441,7 +442,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	updateTimer  = new QTimer( this );
 
-   connect( updateTimer, &QTimer::timeout, this, &RamSearchDialog_t::periodicUpdate );
+	connect( updateTimer, &QTimer::timeout, this, &RamSearchDialog_t::periodicUpdate );
 
 	updateTimer->start( 8 ); // ~120hz
 }
@@ -464,61 +465,63 @@ RamSearchDialog_t::~RamSearchDialog_t(void)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("RAM Search Close Window Event\n");
-   done(0);
+	printf("RAM Search Close Window Event\n");
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::closeWindow(void)
 {
-   //printf("Close Window\n");
-   done(0);
+	//printf("Close Window\n");
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::periodicUpdate(void)
 {
-   int selAddr = -1;
+	int selAddr = -1;
 
-   fceuWrapperLock();
 	if ( currFrameCounter != frameCounterLastPass )
 	{
-      //if ( currFrameCounter != (frameCounterLastPass+1) )
-      //{
-      //   printf("Warning: Ram Search Missed Frame: %i \n", currFrameCounter );
-      //}  
+		fceuWrapperLock();
+		copyRamToLocalBuffer();
+		fceuWrapperUnLock();
+
+		//if ( currFrameCounter != (frameCounterLastPass+1) )
+		//{
+		//   printf("Warning: Ram Search Missed Frame: %i \n", currFrameCounter );
+		//}  
 		updateRamValues();
 
-      if ( autoSearchCbox->isChecked() )
-      {
-         runSearch();
-      }
+		if ( autoSearchCbox->isChecked() )
+		{
+		   runSearch();
+		}
 		frameCounterLastPass = currFrameCounter;
 	}
-   fceuWrapperUnLock();
-
-   undoButton->setEnabled( deactvFrameStack.size() > 0 );
-
-   selAddr = ramView->getSelAddr();
-
-   if ( selAddr >= 0 )
-   {
-      elimButton->setEnabled(true);
-      watchButton->setEnabled(true);
-      addCheatButton->setEnabled(true);
-      hexEditButton->setEnabled(true);
-   }
-   else
-   {
-      elimButton->setEnabled(false);
-      watchButton->setEnabled(false);
-      addCheatButton->setEnabled(false);
-      hexEditButton->setEnabled(false);
-   }
 
 	if ( (cycleCounter % 10) == 0)
 	{
+		undoButton->setEnabled( deactvFrameStack.size() > 0 );
+		
+		selAddr = ramView->getSelAddr();
+		
+		if ( selAddr >= 0 )
+		{
+		   elimButton->setEnabled(true);
+		   watchButton->setEnabled(true);
+		   addCheatButton->setEnabled(true);
+		   hexEditButton->setEnabled(true);
+		}
+		else
+		{
+		   elimButton->setEnabled(false);
+		   watchButton->setEnabled(false);
+		   addCheatButton->setEnabled(false);
+		   hexEditButton->setEnabled(false);
+		}
+
 		ramView->update();
 	}
 	cycleCounter++;
@@ -1020,7 +1023,7 @@ static unsigned int ReadValueAtHardwareAddress(int address, unsigned int size)
 		if ( address < maxAddr )
 		{
 			value <<= 8;
-			value |= GetMem(address);
+			value |= lclMemBuf[address];
 			address++;
 		}
 	}
@@ -1053,8 +1056,22 @@ void RamSearchDialog_t::runSearch(void)
    undoButton->setEnabled( deactvFrameStack.size() > 0 );
 }
 //----------------------------------------------------------------------------
+void RamSearchDialog_t::copyRamToLocalBuffer(void)
+{
+	for (unsigned int addr=0; addr<0x10000; addr++)
+	{
+		lclMemBuf[addr] = GetMem(addr);
+	}
+}
+//----------------------------------------------------------------------------
 void RamSearchDialog_t::resetSearch(void)
 {
+	memset( lclMemBuf, 0, sizeof(lclMemBuf));
+
+	fceuWrapperLock();
+	copyRamToLocalBuffer();
+	fceuWrapperUnLock();
+
 	actvSrchList.clear();
 	deactvSrchList.clear();
 	deactvFrameStack.clear();
@@ -1063,7 +1080,7 @@ void RamSearchDialog_t::resetSearch(void)
 	{
 		memLoc[addr].hist.clear();
 		memLoc[addr].addr      = addr;
-		memLoc[addr].val.v8.u  = GetMem(addr);
+		memLoc[addr].val.v8.u  = lclMemBuf[addr];
 		memLoc[addr].val.v16.u = ReadValueAtHardwareAddress(addr, 2);
 		memLoc[addr].val.v32.u = ReadValueAtHardwareAddress(addr, 4);
 		memLoc[addr].elimMask  = 0;
@@ -1136,134 +1153,138 @@ void RamSearchDialog_t::clearChangeCounts(void)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::eliminateSelAddr(void)
 {
-   int elimCount = 0, op = '!';
+	int elimCount = 0, op = '!';
 	std::list <struct memoryLocation_t*>::iterator it;
   	memoryLocation_t *loc = NULL;
-   int64_t x = 0, y = 0, p = 0;
-   bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
-
-   switch ( op )
-   {
-      case '<':
-         cmpFun = LessCmp;
-      break;
-      case '>':
-         cmpFun = MoreCmp;
-      break;
-      case '=':
-         cmpFun = EqualCmp;
-      break;
-      case '!':
-         cmpFun = UnequalCmp;
-      break;
-      case 'l':
-         cmpFun = LessEqualCmp;
-      break;
-      case 'm':
-         cmpFun = MoreEqualCmp;
-      break;
-      case 'd':
-         cmpFun = DiffByCmp;
-         p      = getLineEditValue( diffByEdit );
-      break;
-      case '%':
-         cmpFun = ModIsCmp;
-         p      = getLineEditValue( moduloEdit );
-      break;
-      default:
-         cmpFun = NULL;
-      break;
-   }
-
-   if ( cmpFun == NULL )
-   {
-      return;
-   }
-   y = ramView->getSelAddr();
-
-   if ( y < 0 )
-   {
-      return;
-   }
-
-   printf("Performing Eliminate Address Operation %zi: 'x %c 0x%llx' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
-        (unsigned long long int)y, (long long int)p, (unsigned long long int)p );
+	int64_t x = 0, y = 0, p = 0;
+	bool (*cmpFun)(int64_t x, int64_t y, int64_t p) = NULL;
+	
+	switch ( op )
+	{
+	   case '<':
+	      cmpFun = LessCmp;
+	   break;
+	   case '>':
+	      cmpFun = MoreCmp;
+	   break;
+	   case '=':
+	      cmpFun = EqualCmp;
+	   break;
+	   case '!':
+	      cmpFun = UnequalCmp;
+	   break;
+	   case 'l':
+	      cmpFun = LessEqualCmp;
+	   break;
+	   case 'm':
+	      cmpFun = MoreEqualCmp;
+	   break;
+	   case 'd':
+	      cmpFun = DiffByCmp;
+	      p      = getLineEditValue( diffByEdit );
+	   break;
+	   case '%':
+	      cmpFun = ModIsCmp;
+	      p      = getLineEditValue( moduloEdit );
+	   break;
+	   default:
+	      cmpFun = NULL;
+	   break;
+	}
+	
+	if ( cmpFun == NULL )
+	{
+	   return;
+	}
+	y = ramView->getSelAddr();
+	
+	if ( y < 0 )
+	{
+	   return;
+	}
+	
+	printf("Performing Eliminate Address Operation %zi: 'x %c 0x%llx' '%lli'  '0x%llx' \n", deactvFrameStack.size()+1, cmpOp,
+	     (unsigned long long int)y, (long long int)p, (unsigned long long int)p );
 
 	it = actvSrchList.begin();
 
 	while (it != actvSrchList.end())
 	{
-      loc = *it;
-
-      x = loc->addr;
-
-      if ( cmpFun( x, y, p ) == false )
-      {
-         //printf("Eliminated Address: $%04X\n", loc->addr );
-         it = actvSrchList.erase(it);
-
-         deactvSrchList.push_back( loc ); elimCount++;
-      }
-      else 
-      {
-			loc->hist.push_back( loc->val );
-         it++;
-      }
-   }
-
-   deactvFrameStack.push_back( elimCount );
+	   loc = *it;
+	
+	   x = loc->addr;
+	
+	   if ( cmpFun( x, y, p ) == false )
+	   {
+	      //printf("Eliminated Address: $%04X\n", loc->addr );
+	      it = actvSrchList.erase(it);
+	
+	      deactvSrchList.push_back( loc ); elimCount++;
+	   }
+	   else 
+	   {
+	     		loc->hist.push_back( loc->val );
+	      it++;
+	   }
+	}
+	
+	deactvFrameStack.push_back( elimCount );
    
 	vbar->setMaximum( actvSrchList.size() );
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::addCheatClicked(void)
 {
-   int addr = ramView->getSelAddr();
-   char desc[128];
+	int addr = ramView->getSelAddr();
+	char desc[128];
+	
+	if ( addr < 0 )
+	{
+	   return;
+	}
+	strcpy( desc, "Quick Cheat Add");
 
-   if ( addr < 0 )
-   {
-      return;
-   }
-   strcpy( desc, "Quick Cheat Add");
+	fceuWrapperLock();
 
 	FCEUI_AddCheat( desc, addr, GetMem(addr), -1, 1 );
 
-   updateCheatDialog();
+	updateCheatDialog();
+
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::addRamWatchClicked(void)
 {
-   int addr = ramView->getSelAddr();
-   char desc[128];
-
-   if ( addr < 0 )
-   {
-      return;
-   }
-   strcpy( desc, "Quick Watch Add");
-
-   int size = 1;
-   switch (dpySize) {
-   case 'd': size = 4; break;
-   case 'w': size = 2; break;
-   case 'b': size = 1; break;
-   default: break;
-   }
-   ramWatchList.add_entry( desc, addr, dpyType, size, 0 );
-
-   openRamWatchWindow(consoleWindow);
+	int addr = ramView->getSelAddr();
+	char desc[128];
+	
+	if ( addr < 0 )
+	{
+	   return;
+	}
+	strcpy( desc, "Quick Watch Add");
+	
+	int size = 1;
+	switch (dpySize) {
+	case 'd': size = 4; break;
+	case 'w': size = 2; break;
+	case 'b': size = 1; break;
+	default: break;
+	}
+	ramWatchList.add_entry( desc, addr, dpyType, size, 0 );
+	
+	openRamWatchWindow(consoleWindow);
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::hexEditSelAddr(void)
 {
-   int addr = ramView->getSelAddr();
-
-   if ( addr < 0 )
-   {
-      return;
-   }
-   hexEditorOpenFromDebugger( QHexEdit::MODE_NES_RAM, addr );
+	int addr = ramView->getSelAddr();
+	
+	if ( addr < 0 )
+	{
+	   return;
+	}
+	hexEditorOpenFromDebugger( QHexEdit::MODE_NES_RAM, addr );
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::opLtClicked(void)
@@ -1324,30 +1345,30 @@ void RamSearchDialog_t::opMdClicked(void)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::pvBtnClicked(void)
 {
-   specValEdit->setEnabled(false);
-   specAddrEdit->setEnabled(false);
-   numChangeEdit->setEnabled(false);
+	specValEdit->setEnabled(false);
+	specAddrEdit->setEnabled(false);
+	numChangeEdit->setEnabled(false);
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::svBtnClicked(void)
 {
-   specValEdit->setEnabled(true);
-   specAddrEdit->setEnabled(false);
-   numChangeEdit->setEnabled(false);
+	specValEdit->setEnabled(true);
+	specAddrEdit->setEnabled(false);
+	numChangeEdit->setEnabled(false);
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::saBtnClicked(void)
 {
-   specValEdit->setEnabled(false);
-   specAddrEdit->setEnabled(true);
-   numChangeEdit->setEnabled(false);
+	specValEdit->setEnabled(false);
+	specAddrEdit->setEnabled(true);
+	numChangeEdit->setEnabled(false);
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::ncBtnClicked(void)
 {
-   specValEdit->setEnabled(false);
-   specAddrEdit->setEnabled(false);
-   numChangeEdit->setEnabled(true);
+	specValEdit->setEnabled(false);
+	specAddrEdit->setEnabled(false);
+	numChangeEdit->setEnabled(true);
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::ds1Clicked(void)
@@ -1459,7 +1480,7 @@ void RamSearchDialog_t::updateRamValues(void)
 	{
 		loc = *it;
 
-		val.v8.u  = GetMem(loc->addr);
+		val.v8.u  = lclMemBuf[loc->addr];
 		val.v16.u = ReadValueAtHardwareAddress(loc->addr, 2);
 		val.v32.u = ReadValueAtHardwareAddress(loc->addr, 4);
 
