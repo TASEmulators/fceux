@@ -367,7 +367,6 @@ void CodeDataLoggerDialog_t::saveCdlFileAs(void)
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -423,7 +422,6 @@ void CodeDataLoggerDialog_t::loadCdlFile(void)
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -508,7 +506,6 @@ void CodeDataLoggerDialog_t::SaveStrippedROM(int invert)
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )

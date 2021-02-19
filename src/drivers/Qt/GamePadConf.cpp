@@ -818,7 +818,6 @@ void GamePadConfDialog_t::newProfileCallback(void)
    dialog.setLabelText( tr("Specify New Profile Name") );
    dialog.setOkButtonText( tr("Create") );
 
-   dialog.show();
    ret = dialog.exec();
 
    if ( QDialog::Accepted == ret )

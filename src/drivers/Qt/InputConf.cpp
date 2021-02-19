@@ -449,7 +449,6 @@ void InputConfDialog_t::openLoadPresetFile(void)
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -464,9 +463,9 @@ void InputConfDialog_t::openLoadPresetFile(void)
 	}
 
 	if ( filename.isNull() )
-   {
-      return;
-   }
+	{
+	   return;
+	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	fceuWrapperLock();
@@ -522,7 +521,6 @@ void InputConfDialog_t::openSavePresetFile(void)
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -537,9 +535,9 @@ void InputConfDialog_t::openSavePresetFile(void)
 	}
 
 	if ( filename.isNull() )
-   {
-      return;
-   }
+	{
+	   return;
+	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	saveInputSettingsToFile( filename.toStdString().c_str() );

@@ -1221,22 +1221,21 @@ void ConsoleDebugger::edit_BM_name( int addr )
 	sprintf( stmp, "Specify Bookmark Name for %04X", addr );
 
 	dialog.setWindowTitle( tr("Edit Bookmark") );
-   dialog.setLabelText( tr(stmp) );
-   dialog.setOkButtonText( tr("Edit") );
+	dialog.setLabelText( tr(stmp) );
+	dialog.setOkButtonText( tr("Edit") );
 
 	if ( bm != NULL )
 	{
 		dialog.setTextValue( tr(bm->name.c_str()) );
 	}
 
-   dialog.show();
-   ret = dialog.exec();
+	ret = dialog.exec();
 
 	if ( QDialog::Accepted == ret )
-   {
-		bm->name = dialog.textValue().toStdString();
-		bmListUpdate(false);
-   }
+	{
+	     	bm->name = dialog.textValue().toStdString();
+	     	bmListUpdate(false);
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::bmListUpdate( bool reset )
@@ -1548,22 +1547,21 @@ void ConsoleDebugger::pcSetPlaceCustom(void)
 
 	g_config->getOption("SDL.DebuggerPCLineOffset" , &ofs );
 
-   dialog.setWindowTitle( tr("PC Line Offset") );
-   dialog.setLabelText( tr("Enter a line offset from 0 to 100.") );
-   dialog.setOkButtonText( tr("Ok") );
-   dialog.setInputMode( QInputDialog::IntInput );
-   dialog.setIntRange( 0, 100 );
-   dialog.setIntValue( ofs );
-
-   dialog.show();
-   ret = dialog.exec();
-
-   if ( QDialog::Accepted == ret )
-   {
-      ofs = dialog.intValue();
-
-		asmView->setPC_placement( 5, ofs );
-   }
+	dialog.setWindowTitle( tr("PC Line Offset") );
+	dialog.setLabelText( tr("Enter a line offset from 0 to 100.") );
+	dialog.setOkButtonText( tr("Ok") );
+	dialog.setInputMode( QInputDialog::IntInput );
+	dialog.setIntRange( 0, 100 );
+	dialog.setIntValue( ofs );
+	
+	ret = dialog.exec();
+	
+	if ( QDialog::Accepted == ret )
+	{
+	   ofs = dialog.intValue();
+	
+	     	asmView->setPC_placement( 5, ofs );
+	}
 
 }
 //----------------------------------------------------------------------------

@@ -790,7 +790,6 @@ void ppuNameTableViewerDialog_t::openColorPicker( QColor *c )
 
 	dialog.setCurrentColor( *c );
 	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret == QDialog::Accepted )
