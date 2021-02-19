@@ -876,7 +876,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	//QVBoxLayout *mainLayout;
 	QGridLayout *grid;
 	QMenuBar *menuBar;
-	QMenu *fileMenu, *editMenu, *viewMenu, *colorMenu;
+	QMenu *fileMenu, *editMenu, *viewMenu, *colorMenu, *subMenu;
 	QAction *saveROM, *closeAct;
 	QAction *act, *actHlgt, *actHlgtRV, *actColorFG, *actColorBG;
 	QActionGroup *group;
@@ -1018,6 +1018,55 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	viewMenu->addAction(viewROM);
 
 	viewRAM->setChecked(true); // Set default view
+
+	viewMenu->addSeparator();
+
+	// View -> Refresh Rate
+	subMenu = viewMenu->addMenu( tr("Re&fresh Rate") );
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	// View -> Refresh Rate -> 5 Hz
+	act = new QAction(tr("5 Hz"), this);
+	act->setCheckable(true);
+	connect(act, SIGNAL(triggered()), this, SLOT(setViewRefresh5Hz(void)) );
+
+	group->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> Refresh Rate -> 10 Hz
+	act = new QAction(tr("10 Hz"), this);
+	act->setCheckable(true);
+	act->setChecked(true);
+	connect(act, SIGNAL(triggered()), this, SLOT(setViewRefresh10Hz(void)) );
+
+	group->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> Refresh Rate -> 20 Hz
+	act = new QAction(tr("20 Hz"), this);
+	act->setCheckable(true);
+	connect(act, SIGNAL(triggered()), this, SLOT(setViewRefresh20Hz(void)) );
+
+	group->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> Refresh Rate -> 30 Hz
+	act = new QAction(tr("30 Hz"), this);
+	act->setCheckable(true);
+	connect(act, SIGNAL(triggered()), this, SLOT(setViewRefresh30Hz(void)) );
+
+	group->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> Refresh Rate -> 60 Hz
+	act = new QAction(tr("60 Hz"), this);
+	act->setCheckable(true);
+	connect(act, SIGNAL(triggered()), this, SLOT(setViewRefresh60Hz(void)) );
+
+	group->addAction(act);
+	subMenu->addAction(act);
 
 	// Color Menu
 	colorMenu = menuBar->addMenu(tr("&Color"));
@@ -1348,6 +1397,36 @@ void HexEditorDialog_t::setViewOAM(void)
 void HexEditorDialog_t::setViewROM(void)
 {
 	editor->setMode( QHexEdit::MODE_NES_ROM );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setViewRefresh5Hz(void)
+{
+	periodicTimer->stop();
+	periodicTimer->start(200);
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setViewRefresh10Hz(void)
+{
+	periodicTimer->stop();
+	periodicTimer->start(100);
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setViewRefresh20Hz(void)
+{
+	periodicTimer->stop();
+	periodicTimer->start(50);
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setViewRefresh30Hz(void)
+{
+	periodicTimer->stop();
+	periodicTimer->start(33);
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::setViewRefresh60Hz(void)
+{
+	periodicTimer->stop();
+	periodicTimer->start(16);
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::actvHighlightCB(bool enable)

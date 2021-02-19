@@ -308,6 +308,11 @@ class HexEditorDialog_t : public QDialog
 		void pasteFromClipboard(void);
 		void openFindDialog(void);
 		void undoRomPatch(void);
+		void setViewRefresh5Hz(void);
+		void setViewRefresh10Hz(void);
+		void setViewRefresh20Hz(void);
+		void setViewRefresh30Hz(void);
+		void setViewRefresh60Hz(void);
 };
 
 int hexEditorNumWindows(void);
