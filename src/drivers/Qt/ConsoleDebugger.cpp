@@ -2220,7 +2220,7 @@ void  QAsmView::updateAssemblyView(void)
 
 	pxLineWidth = maxLineLen * pxCharWidth;
 
-	setMinimumWidth( 50 * pxCharWidth );
+	//setMinimumWidth( 50 * pxCharWidth );
 
 	vbar->setMaximum( asmEntry.size() );
 }
@@ -3009,6 +3009,8 @@ QAsmView::QAsmView(QWidget *parent)
 	this->setMouseTracking(true);
 
 	calcFontData();
+
+	setMinimumWidth( 50 * pxCharWidth );
 
 	vbar = NULL;
 	hbar = NULL;
