@@ -2063,6 +2063,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 			cursorPosX = 47;
 		}
 		resetCursor();
+		update();
 	}
 	else if (event->matches(QKeySequence::MoveToPreviousChar))
 	{
@@ -2086,16 +2087,19 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 			cursorPosX = 0;
 		}
 		resetCursor();
+		update();
 	}
 	else if (event->matches(QKeySequence::MoveToEndOfLine))
 	{
 		cursorPosX = 47;
 		resetCursor();
+		update();
 	}
 	else if (event->matches(QKeySequence::MoveToStartOfLine))
 	{
 		cursorPosX = 0;
 		resetCursor();
+		update();
 	}
 	else if (event->matches(QKeySequence::MoveToPreviousLine))
 	{
@@ -2114,6 +2118,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 			vbar->setValue( lineOffset );
 		}
 		resetCursor();
+		update();
 	}
 	else if (event->matches(QKeySequence::MoveToNextLine))
 	{
@@ -2132,6 +2137,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 			vbar->setValue( lineOffset );
 		}
 		resetCursor();
+		update();
 
 	}
 	else if (event->matches(QKeySequence::MoveToNextPage))
@@ -2144,6 +2150,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		}
 		vbar->setValue( lineOffset );
 	     	resetCursor();
+		update();
 	}
 	else if (event->matches(QKeySequence::MoveToPreviousPage))
 	{
@@ -2155,18 +2162,21 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		}
 		vbar->setValue( lineOffset );
 		resetCursor();
+		update();
 	}
 	else if (event->matches(QKeySequence::MoveToEndOfDocument))
 	{
 		lineOffset = maxLineOffset;
 		vbar->setValue( lineOffset );
 	     	resetCursor();
+		update();
 	}
 	else if (event->matches(QKeySequence::MoveToStartOfDocument))
 	{
 		lineOffset = 0;
 		vbar->setValue( lineOffset );
 		resetCursor();
+		update();
 	}
 	else if (Qt::ControlModifier == event->modifiers())
 	{
@@ -2186,10 +2196,12 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 	else if (event->key() == Qt::Key_Tab && (cursorPosX < 32) )
 	{  // switch from hex to ascii edit
 	    cursorPosX = 32 + (cursorPosX / 2);
+		update();
 	}
 	else if (event->key() == Qt::Key_Backtab  && (cursorPosX >= 32) )
 	{  // switch from ascii to hex edit
 	   cursorPosX = 2 * (cursorPosX - 32);
+		update();
 	}
 	else
 	{
@@ -2213,6 +2225,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 				editAddr  = -1;
 				editValue =  0;
 				editMask  =  0;
+				update();
 			}
 		}
 		else
@@ -2257,6 +2270,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		      {
 		         cursorPosX = 0;
 		      }
+			update();
 		   }
 		}
 		//printf("Key: %c  %i \n", key, key);
@@ -2342,6 +2356,7 @@ void QHexEdit::mouseMoveEvent(QMouseEvent * event)
 	{
 		//printf("Left Button Move: (%i,%i)\n", c.x(), c.y() );
 		setHighlightEndCoord( addr % 16, addr / 16 );
+		update();
 	}
 }
 //----------------------------------------------------------------------------
@@ -2364,6 +2379,7 @@ void QHexEdit::mousePressEvent(QMouseEvent * event)
 		txtHlgtAnchorChar = addr % 16;
 		txtHlgtAnchorLine = addr / 16;
 		setHighlightEndCoord( txtHlgtAnchorChar, txtHlgtAnchorLine );
+		update();
 	}
 
 }
@@ -2387,6 +2403,7 @@ void QHexEdit::mouseReleaseEvent(QMouseEvent * event)
 		{
 			loadHighlightToClipboard();
 		}
+		update();
 	}
 
 }
