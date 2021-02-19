@@ -239,6 +239,10 @@ static int getRAM( unsigned int i )
 //----------------------------------------------------------------------------
 static int getPPU( unsigned int i )
 {
+	if (GameInfo == NULL )
+	{
+		return 0;
+	}
 	i &= 0x3FFF;
 	if (i < 0x2000)return VPage[(i) >> 10][(i)];
 	//NSF PPU Viewer crash here (UGETAB) (Also disabled by 'MaxSize = 0x2000')
@@ -260,6 +264,10 @@ static int getOAM( unsigned int i )
 //----------------------------------------------------------------------------
 static int getROM( unsigned int offset)
 {
+	if (GameInfo == NULL )
+	{
+		return 0;
+	}
 	if (offset < 16)
 	{
 		return *((unsigned char *)&head+offset);
@@ -2953,7 +2961,14 @@ int QHexEdit::getRomAddrColor( int addr, QColor &fg, QColor &bg )
 	{
 		return -1;
 	}
-	mb.buf[addr].data = memAccessFunc(addr);
+	if ( memAccessFunc )
+	{
+		mb.buf[addr].data = memAccessFunc(addr);
+	}
+	else
+	{
+		mb.buf[addr].data = 0;
+	}
 
 	if ( (txtHlgtStartAddr != txtHlgtEndAddr) && (addr >= txtHlgtStartAddr) && (addr <= txtHlgtEndAddr) )
 	{
