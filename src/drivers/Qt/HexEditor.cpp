@@ -2552,42 +2552,42 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 		{
 			QMenu *subMenu;
 
-			act = new QAction(tr("Add Symbolic Debug Name"), &menu);
-   		menu.addAction(act);
+			act = new QAction(tr("Add &Symbolic Debug Name"), &menu);
+			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addDebugSym(void)) );
 
-			subMenu = menu.addMenu(tr("Freeze/Unfreeze Address"));
+			subMenu = menu.addMenu(tr("&Freeze/Unfreeze Address"));
 
-			act = new QAction(tr("Toggle State"), &menu);
+			act = new QAction(tr("&Toggle State"), &menu);
 			act->setShortcut( QKeySequence(tr("Shift+F")));
 			subMenu->addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamToggle(void)) );
 
-			act = new QAction(tr("Freeze"), &menu);
+			act = new QAction(tr("&Freeze"), &menu);
 			subMenu->addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamSet(void)) );
 
-			act = new QAction(tr("Unfreeze"), &menu);
+			act = new QAction(tr("&Unfreeze"), &menu);
 			subMenu->addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamUnset(void)) );
 
 			subMenu->addSeparator();
 
-			act = new QAction(tr("Unfreeze All"), &menu);
+			act = new QAction(tr("Unfreeze &All"), &menu);
 			subMenu->addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamUnsetAll(void)) );
 
-			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add &Read Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamReadBP(void)) );
 
-			sprintf( stmp, "Add Write Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add &Write Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamWriteBP(void)) );
 
-			sprintf( stmp, "Add Execute Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add &Execute Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamExecuteBP(void)) );
@@ -2599,46 +2599,46 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 				if ( romAddr >= 0 )
 				{
 					jumpToRomValue = romAddr;
-					sprintf( stmp, "Go Here in ROM File: (%08X)", romAddr );
+					sprintf( stmp, "&Go Here in ROM File: (%08X)", romAddr );
 					act = new QAction(tr(stmp), &menu);
-   				menu.addAction(act);
+					menu.addAction(act);
 					connect( act, SIGNAL(triggered(void)), this, SLOT(jumpToROM(void)) );
 				}
 			}
 
-			act = new QAction(tr("Add Bookmark"), &menu);
-   		menu.addAction(act);
+			act = new QAction(tr("Add Book&mark"), &menu);
+			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
 		break;
 		case MODE_NES_PPU:
 		{
-			sprintf( stmp, "Add Read Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add &Read Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addPpuReadBP(void)) );
 
-			sprintf( stmp, "Add Write Breakpoint for Address $%04X", addr );
+			sprintf( stmp, "Add &Write Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addPpuWriteBP(void)) );
 
-			act = new QAction(tr("Add Bookmark"), &menu);
-   		menu.addAction(act);
+			act = new QAction(tr("Add Book&mark"), &menu);
+			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
 		break;
 		case MODE_NES_OAM:
 		{
-			act = new QAction(tr("Add Bookmark"), &menu);
-   		menu.addAction(act);
+			act = new QAction(tr("Add Book&mark"), &menu);
+			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
 		break;
 		case MODE_NES_ROM:
 		{
-			act = new QAction(tr("Add Bookmark"), &menu);
-   		menu.addAction(act);
+			act = new QAction(tr("Add Book&mark"), &menu);
+			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addBookMarkCB(void)) );
 		}
 		break;

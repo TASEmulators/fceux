@@ -802,14 +802,14 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 	QAction *paletteAct[9];
 	char stmp[64];
 
-	act = new QAction(tr("Open Tile Editor"), &menu);
+	act = new QAction(tr("Open Tile &Editor"), &menu);
 	act->setShortcut( QKeySequence(tr("E")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTileEditor(void)) );
 	menu.addAction( act );
 
 	if ( mode )
 	{
-		sprintf( stmp, "Exit Tile View: %X%X", selTile.y(), selTile.x() );
+		sprintf( stmp, "Exit Tile &View: %X%X", selTile.y(), selTile.x() );
 		
 		act = new QAction(tr(stmp), &menu);
 		act->setShortcut( QKeySequence(tr("Z")));
@@ -818,7 +818,7 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 	}
 	else
 	{
-		sprintf( stmp, "View Tile: %X%X", selTile.y(), selTile.x() );
+		sprintf( stmp, "&View Tile: %X%X", selTile.y(), selTile.x() );
 		
 		act = new QAction(tr(stmp), &menu);
 		act->setShortcut( QKeySequence(tr("Z")));
@@ -826,19 +826,19 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 		menu.addAction( act );
 	}
 
-	act = new QAction(tr("Draw Tile Grid Lines"), &menu);
+	act = new QAction(tr("Draw Tile &Grid Lines"), &menu);
 	act->setCheckable(true);
 	act->setChecked(drawTileGrid);
 	act->setShortcut( QKeySequence(tr("G")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(toggleTileGridLines(void)) );
 	menu.addAction( act );
 
-	act = new QAction(tr("Next Palette"), &menu);
+	act = new QAction(tr("Next &Palette"), &menu);
 	act->setShortcut( QKeySequence(tr("P")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(cycleNextPalette(void)) );
 	menu.addAction( act );
 
-	subMenu = menu.addMenu(tr("Palette Select"));
+	subMenu = menu.addMenu(tr("Palette &Select"));
 	group   = new QActionGroup(&menu);
 
 	group->setExclusive(true);
@@ -847,7 +847,7 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 	{
 	   char stmp[8];
 
-	   sprintf( stmp, "%i", i+1 );
+	   sprintf( stmp, "&%i", i+1 );
 
 	   paletteAct[i] = new QAction(tr(stmp), &menu);
 	   paletteAct[i]->setCheckable(true);

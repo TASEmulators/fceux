@@ -3781,28 +3781,28 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 
 		if ( enableRunToCursor )
 		{
-			act = new QAction(tr("Run To Cursor"), &menu);
+			act = new QAction(tr("Run To &Cursor"), &menu);
 			menu.addAction(act);
 			//act->setShortcut( QKeySequence(tr("Ctrl+F10")));
 			connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuRunToCursor(void)) );
 		}
 
-		act = new QAction(tr("Add Breakpoint"), &menu);
+		act = new QAction(tr("Add &Breakpoint"), &menu);
 		menu.addAction(act);
 		act->setShortcut( QKeySequence(tr("B")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
 
-		act = new QAction(tr("Add Symbolic Debug Marker"), &menu);
+		act = new QAction(tr("Add &Symbolic Debug Marker"), &menu);
 	 	menu.addAction(act);
 		act->setShortcut( QKeySequence(tr("S")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddSym(void)) );
 
-		act = new QAction(tr("Add Bookmark"), &menu);
+		act = new QAction(tr("Add Book&mark"), &menu);
 	 	menu.addAction(act);
 		act->setShortcut( QKeySequence(tr("M")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBM(void)) );
 		
-		act = new QAction(tr("Open Hex Editor"), &menu);
+		act = new QAction(tr("Open &Hex Editor"), &menu);
 	 	menu.addAction(act);
 		act->setShortcut( QKeySequence(tr("H")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuOpenHexEdit(void)) );
