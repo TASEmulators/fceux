@@ -25,6 +25,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/CheatsConf.h"
 
 #include "Qt/sdl.h"
 #include "Qt/sdl-video.h"
@@ -134,21 +135,6 @@ static void UpdateFTrainer (void);
 static void UpdateTopRider (void);
 
 static uint32 JSreturn = 0;
-
-/**
- * Configure cheat devices (game genie, etc.).  Restarts the keyboard
- * and video subsystems.
- */
-static void
-DoCheatSeq ()
-{
-	SilenceSound (1);
-	KillVideo ();
-
-	DoConsoleCheatConfig ();
-	InitVideo (GameInfo);
-	SilenceSound (0);
-}
 
 #include "keyscan.h"
 static uint8  g_keyState[SDL_NUM_SCANCODES];
@@ -672,7 +658,7 @@ static void KeyboardCommands (void)
 	{
 		if ( Hotkeys[HK_CHEAT_MENU].getRisingEdge() )
 		{
-			DoCheatSeq ();
+			openCheatDialog( consoleWindow );
 		}
 
 		// f5 (default) save key, hold shift to save movie
