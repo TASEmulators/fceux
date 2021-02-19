@@ -1085,11 +1085,11 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	vbar->setMinimum(0);
 	vbar->setMaximum( 0x10000 / 16 );
 
-   editor->setScrollBars( hbar, vbar );
-
-   //connect( vbar, SIGNAL(sliderMoved(int)), this, SLOT(vbarMoved(int)) );
-   connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
-   connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
+	editor->setScrollBars( hbar, vbar );
+	
+	//connect( vbar, SIGNAL(sliderMoved(int)), this, SLOT(vbarMoved(int)) );
+	connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
+	connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
 
 	findDialog = NULL;
 
@@ -1097,9 +1097,10 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	periodicTimer  = new QTimer( this );
 
-   connect( periodicTimer, &QTimer::timeout, this, &HexEditorDialog_t::updatePeriodic );
+	connect( periodicTimer, &QTimer::timeout, this, &HexEditorDialog_t::updatePeriodic );
 
 	periodicTimer->start( 100 ); // 10hz
+	//periodicTimer->start( 16 ); // 10hz
 
 	// Lock the mutex before adding a new window to the list,
 	// we want to be sure that the emulator is not iterating the list
@@ -1508,6 +1509,8 @@ QHexEdit::QHexEdit(QWidget *parent)
 	this->setPalette(pal);
 
 	calcFontData();
+
+	setMinimumWidth( pxLineWidth );
 
 	memAccessFunc = getRAM;
 	viewMode    = MODE_NES_RAM;
