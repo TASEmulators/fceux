@@ -213,7 +213,6 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 	dialog.setSidebarUrls(urls);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -267,7 +266,6 @@ void PaletteEditorDialog_t::savePaletteFileDialog(void)
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )

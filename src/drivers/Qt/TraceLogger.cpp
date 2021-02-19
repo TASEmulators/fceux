@@ -437,7 +437,6 @@ void TraceLoggerDialog_t::openLogFile(void)
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )

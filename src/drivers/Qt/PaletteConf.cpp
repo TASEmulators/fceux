@@ -385,7 +385,6 @@ void PaletteConfDialog_t::openPaletteFile(void)
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 	dialog.setSidebarUrls(urls);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )

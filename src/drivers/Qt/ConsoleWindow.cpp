@@ -1102,7 +1102,6 @@ void consoleWin_t::openROMFile(void)
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 	dialog.setSidebarUrls(urls);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -1186,7 +1185,6 @@ void consoleWin_t::loadNSF(void)
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 	dialog.setSidebarUrls(urls);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -1270,7 +1268,6 @@ void consoleWin_t::loadStateFrom(void)
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 	dialog.setSidebarUrls(urls);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -1361,7 +1358,6 @@ void consoleWin_t::saveStateAs(void)
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 	dialog.setSidebarUrls(urls);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -1809,7 +1805,6 @@ void consoleWin_t::loadGameGenieROM(void)
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 	dialog.setSidebarUrls(urls);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -1898,7 +1893,6 @@ void consoleWin_t::fdsLoadBiosFile(void)
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 	dialog.setSidebarUrls(urls);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -1975,7 +1969,6 @@ void consoleWin_t::emuCustomSpd(void)
 	dialog.setIntRange( 1, 1000 );
 	dialog.setIntValue( 100 );
 	
-	dialog.show();
 	ret = dialog.exec();
 	
 	if ( QDialog::Accepted == ret )
@@ -2000,7 +1993,6 @@ void consoleWin_t::emuSetFrameAdvDelay(void)
 	dialog.setIntRange( 0, 1000 );
 	dialog.setIntValue( frameAdvance_Delay );
 	
-	dialog.show();
 	ret = dialog.exec();
 	
 	if ( QDialog::Accepted == ret )
@@ -2021,7 +2013,6 @@ void consoleWin_t::setAutoFireOnFrames(void)
 	dialog.setIntRange( 1, 30 );
 	dialog.setIntValue( autoFireOnFrames );
 	
-	dialog.show();
 	ret = dialog.exec();
 	
 	if ( QDialog::Accepted == ret )
@@ -2042,7 +2033,6 @@ void consoleWin_t::setAutoFireOffFrames(void)
 	dialog.setIntRange( 1, 30 );
 	dialog.setIntValue( autoFireOffFrames );
 	
-	dialog.show();
 	ret = dialog.exec();
 	
 	if ( QDialog::Accepted == ret )
@@ -2108,7 +2098,6 @@ void consoleWin_t::recordMovieAs(void)
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )

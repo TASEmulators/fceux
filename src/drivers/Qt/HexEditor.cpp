@@ -1274,7 +1274,6 @@ void HexEditorDialog_t::pickForeGroundColor(void)
 	QColorDialog dialog( this );
 
 	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret == QDialog::Accepted )
@@ -1293,7 +1292,6 @@ void HexEditorDialog_t::pickBackGroundColor(void)
 	QColorDialog dialog( this );
 
 	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret == QDialog::Accepted )
@@ -1356,7 +1354,6 @@ void HexEditorDialog_t::saveRomFileAs(void)
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret )
@@ -1826,7 +1823,6 @@ void QHexEdit::openGotoAddrDialog(void)
 	dialog.setOkButtonText( tr("Go") );
 	//dialog.setTextValue( tr("0") );
 
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( QDialog::Accepted == ret )
@@ -2680,7 +2676,6 @@ void QHexEdit::addBookMarkCB(void)
    dialog.setOkButtonText( tr("Add") );
 	dialog.setTextValue( tr(stmp) );
 
-   dialog.show();
    ret = dialog.exec();
 
    if ( QDialog::Accepted == ret )
