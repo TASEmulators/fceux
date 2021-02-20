@@ -20,24 +20,22 @@
 
 class HotKeyConfDialog_t : public QDialog
 {
-   Q_OBJECT
+	Q_OBJECT
 
-	public:
-		HotKeyConfDialog_t(QWidget *parent = 0);
-		~HotKeyConfDialog_t(void);
+public:
+	HotKeyConfDialog_t(QWidget *parent = 0);
+	~HotKeyConfDialog_t(void);
 
-	protected:
-		void closeEvent(QCloseEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void keyReleaseEvent(QKeyEvent *event);
-		void assignHotkey(QKeyEvent *event);
+protected:
+	void closeEvent(QCloseEvent *event);
+	void keyPressEvent(QKeyEvent *event);
+	void keyReleaseEvent(QKeyEvent *event);
+	void assignHotkey(QKeyEvent *event);
 
-		QTreeWidget *tree;
+	QTreeWidget *tree;
 
-	private:
-
-	public slots:
-		void closeWindow(void);
-	private slots:
-
+private:
+public slots:
+	void closeWindow(void);
+private slots:
 };

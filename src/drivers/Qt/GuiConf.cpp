@@ -31,55 +31,67 @@
 
 //----------------------------------------------------
 GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog(parent)
 {
 	int useNativeFileDialogVal;
 	int useNativeMenuBarVal;
 	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QPushButton *closeButton;
 
 	//resize( 512, 600 );
 
 	// sync with config
-	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
-	g_config->getOption ("SDL.UseNativeMenuBar", &useNativeMenuBarVal);
+	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+	g_config->getOption("SDL.UseNativeMenuBar", &useNativeMenuBarVal);
 
-   setWindowTitle( tr("GUI Config") );
+	setWindowTitle(tr("GUI Config"));
 
 	mainLayout = new QVBoxLayout();
 
-	useNativeFileDialog  = new QCheckBox( tr("Use Native OS File Dialog") );
-	useNativeMenuBar     = new QCheckBox( tr("Use Native OS Menu Bar") );
+	useNativeFileDialog = new QCheckBox(tr("Use Native OS File Dialog"));
+	useNativeMenuBar = new QCheckBox(tr("Use Native OS Menu Bar"));
 
-	useNativeFileDialog->setChecked( useNativeFileDialogVal );
-	useNativeMenuBar->setChecked( useNativeMenuBarVal );
+	useNativeFileDialog->setChecked(useNativeFileDialogVal);
+	useNativeMenuBar->setChecked(useNativeMenuBarVal);
 
-	connect(useNativeFileDialog , SIGNAL(stateChanged(int)), this, SLOT(useNativeFileDialogChanged(int)) );
-	connect(useNativeMenuBar    , SIGNAL(stateChanged(int)), this, SLOT(useNativeMenuBarChanged(int)) );
+	connect(useNativeFileDialog, SIGNAL(stateChanged(int)), this, SLOT(useNativeFileDialogChanged(int)));
+	connect(useNativeMenuBar, SIGNAL(stateChanged(int)), this, SLOT(useNativeMenuBarChanged(int)));
 
-	mainLayout->addWidget( useNativeFileDialog );
-	mainLayout->addWidget( useNativeMenuBar );
+	mainLayout->addWidget(useNativeFileDialog);
+	mainLayout->addWidget(useNativeMenuBar);
 
-	setLayout( mainLayout );
+	closeButton = new QPushButton( tr("Close") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
+	hbox = new QHBoxLayout();
+	hbox->addStretch(3);
+	hbox->addWidget( closeButton, 3 );
+	hbox->addStretch(3);
+	mainLayout->addLayout( hbox );
+
+	setLayout(mainLayout);
 }
 
 //----------------------------------------------------
 GuiConfDialog_t::~GuiConfDialog_t(void)
 {
-   printf("Destroy GUI Config Close Window\n");
+	printf("Destroy GUI Config Close Window\n");
 }
 //----------------------------------------------------------------------------
 void GuiConfDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("GUI Config Close Window Event\n");
-   done(0);
+	printf("GUI Config Close Window Event\n");
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------
 void GuiConfDialog_t::closeWindow(void)
 {
-   //printf("Close Window\n");
-   done(0);
+	//printf("Close Window\n");
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------
@@ -87,15 +99,15 @@ void GuiConfDialog_t::useNativeFileDialogChanged(int state)
 {
 	int value = (state == Qt::Unchecked) ? 0 : 1;
 
-	g_config->setOption ("SDL.UseNativeFileDialog", value);
+	g_config->setOption("SDL.UseNativeFileDialog", value);
 }
 //----------------------------------------------------
 void GuiConfDialog_t::useNativeMenuBarChanged(int state)
 {
 	int value = (state == Qt::Unchecked) ? 0 : 1;
 
-	g_config->setOption ("SDL.UseNativeMenuBar", value);
+	g_config->setOption("SDL.UseNativeMenuBar", value);
 
-	consoleWindow->menuBar()->setNativeMenuBar( value );
+	consoleWindow->menuBar()->setNativeMenuBar(value);
 }
 //----------------------------------------------------

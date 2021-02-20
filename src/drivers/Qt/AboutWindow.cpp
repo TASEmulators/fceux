@@ -59,18 +59,19 @@ AboutWindow::AboutWindow(QWidget *parent)
 {
 	int i;
 	QVBoxLayout *mainLayout;
-	QHBoxLayout *hbox1;
+	QHBoxLayout *hbox1, *hbox;
 	QPixmap pm(":fceux1.png");
 	QPixmap pm2;
 	QLabel *lbl;
 	QTextEdit *credits;
+	QPushButton *closeButton;
 	char stmp[256];
 
 	pm2 = pm.scaled( 64, 64 );
 
 	setWindowTitle( tr("About fceuX") );
 
-	resize( 512, 512 );
+	resize( 512, 600 );
 
 	mainLayout = new QVBoxLayout();
 
@@ -162,11 +163,38 @@ AboutWindow::AboutWindow(QWidget *parent)
 
 	mainLayout->addWidget( credits );
 
+	closeButton = new QPushButton( tr("OK") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
+	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
+	hbox = new QHBoxLayout();
+	hbox->addStretch(5);
+	hbox->addWidget( closeButton, 1 );
+	mainLayout->addLayout( hbox );
+
 	setLayout( mainLayout );
+
+	closeButton->setFocus();
+	closeButton->setDefault(true);
 }
 //----------------------------------------------------------------------------
 AboutWindow::~AboutWindow(void)
 {
 
+}
+//----------------------------------------------------------------------------
+void AboutWindow::closeEvent(QCloseEvent *event)
+{
+	printf("About Window Close Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void AboutWindow::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
 }
 //----------------------------------------------------------------------------

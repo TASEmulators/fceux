@@ -20,27 +20,24 @@
 
 class MsgLogViewDialog_t : public QDialog
 {
-   Q_OBJECT
+	Q_OBJECT
 
-	public:
-		MsgLogViewDialog_t(QWidget *parent = 0);
-		~MsgLogViewDialog_t(void);
+public:
+	MsgLogViewDialog_t(QWidget *parent = 0);
+	~MsgLogViewDialog_t(void);
 
-	protected:
-		void closeEvent(QCloseEvent *event);
+protected:
+	void closeEvent(QCloseEvent *event);
 
-		QTimer *updateTimer;
-		QPlainTextEdit *txtView;
+	QTimer *updateTimer;
+	QPlainTextEdit *txtView;
 
-		size_t totalLines;
+	size_t totalLines;
 
-	private:
-
-   public slots:
-      void closeWindow(void);
-	private slots:
-		void updatePeriodic(void);
-		void clearLog(void);
-
+private:
+public slots:
+	void closeWindow(void);
+private slots:
+	void updatePeriodic(void);
+	void clearLog(void);
 };
-

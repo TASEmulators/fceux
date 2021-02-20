@@ -90,6 +90,16 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	
 	fileMenu->addAction(act);
 
+	fileMenu->addSeparator();
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut( QKeySequence::Close );
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
 	// Memory
 	memMenu = menuBar->addMenu(tr("&Memory"));
 

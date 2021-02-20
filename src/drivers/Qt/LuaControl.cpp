@@ -50,151 +50,161 @@
 static bool luaScriptRunning = false;
 static bool updateLuaDisplay = false;
 static bool openLuaKillMsgBox = false;
-static int  luaKillMsgBoxRetVal = 0;
+static int luaKillMsgBoxRetVal = 0;
 
 struct luaConsoleOutputBuffer
 {
-   int  head;
-   int  tail;
-   int  size;
-   char *buf;
+	int head;
+	int tail;
+	int size;
+	char *buf;
 
-   luaConsoleOutputBuffer(void)
-   {
-      tail = head = 0;
-      size = 4096;
+	luaConsoleOutputBuffer(void)
+	{
+		tail = head = 0;
+		size = 4096;
 
-      buf = (char*)malloc(size);
-   }
+		buf = (char *)malloc(size);
+	}
 
-  ~luaConsoleOutputBuffer(void)
-   {
-      if ( buf )
-      {
-         free(buf); buf = NULL;
-      }
-   }
-   
-   void addLine( const char *l )
-   {
-		int i=0;
-      //printf("Adding Line %i: '%s'\n", head, l );
-		while ( l[i] != 0 )
+	~luaConsoleOutputBuffer(void)
+	{
+		if (buf)
 		{
-      	buf[head] = l[i]; i++;
+			free(buf);
+			buf = NULL;
+		}
+	}
 
-      	head = (head + 1) % size;
+	void addLine(const char *l)
+	{
+		int i = 0;
+		//printf("Adding Line %i: '%s'\n", head, l );
+		while (l[i] != 0)
+		{
+			buf[head] = l[i];
+			i++;
 
-      	if ( head == tail )
-      	{
-      	   tail = (tail + 1) % size;
-      	}
-      }
-   }
+			head = (head + 1) % size;
 
-   void clear(void)
-   {
-      tail = head = 0;
-   }
+			if (head == tail)
+			{
+				tail = (tail + 1) % size;
+			}
+		}
+	}
+
+	void clear(void)
+	{
+		tail = head = 0;
+	}
 };
 
 static luaConsoleOutputBuffer outBuf;
 
-static std::list <LuaControlDialog_t*> winList;
+static std::list<LuaControlDialog_t *> winList;
 
-static void updateLuaWindows( void );
+static void updateLuaWindows(void);
 //----------------------------------------------------
 LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
-	: QDialog( parent, Qt::Window )
+	: QDialog(parent, Qt::Window)
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
+	QPushButton *closeButton;
 	QLabel *lbl;
 	std::string filename;
 
-	resize( 512, 512 );
+	resize(512, 512);
 
-   setWindowTitle( tr("Lua Script Control") );
+	setWindowTitle(tr("Lua Script Control"));
 
 	mainLayout = new QVBoxLayout();
 
-	lbl = new QLabel( tr("Script File:") );
+	lbl = new QLabel(tr("Script File:"));
 
 	scriptPath = new QLineEdit();
 	scriptArgs = new QLineEdit();
 
-	g_config->getOption ("SDL.LastLoadLua", &filename );
+	g_config->getOption("SDL.LastLoadLua", &filename);
 
-	scriptPath->setText( filename.c_str() );
+	scriptPath->setText(filename.c_str());
 
 	luaOutput = new QTextEdit();
 	luaOutput->setReadOnly(true);
 
 	hbox = new QHBoxLayout();
 
-	browseButton = new QPushButton( tr("Browse") );
-	stopButton   = new QPushButton( tr("Stop") );
+	browseButton = new QPushButton(tr("Browse"));
+	stopButton = new QPushButton(tr("Stop"));
 
-	if ( luaScriptRunning )
+	if (luaScriptRunning)
 	{
-		startButton  = new QPushButton( tr("Restart") );
+		startButton = new QPushButton(tr("Restart"));
 	}
 	else
 	{
-		startButton  = new QPushButton( tr("Start") );
+		startButton = new QPushButton(tr("Start"));
 	}
 
-	stopButton->setEnabled( luaScriptRunning );
+	stopButton->setEnabled(luaScriptRunning);
 
-	connect(browseButton , SIGNAL(clicked()), this, SLOT(openLuaScriptFile(void)) );
-	connect(stopButton   , SIGNAL(clicked()), this, SLOT(stopLuaScript(void)) );
-	connect(startButton  , SIGNAL(clicked()), this, SLOT(startLuaScript(void)) );
-	
-	hbox->addWidget( browseButton );
-	hbox->addWidget( stopButton   );
-	hbox->addWidget( startButton  );
+	connect(browseButton, SIGNAL(clicked()), this, SLOT(openLuaScriptFile(void)));
+	connect(stopButton, SIGNAL(clicked()), this, SLOT(stopLuaScript(void)));
+	connect(startButton, SIGNAL(clicked()), this, SLOT(startLuaScript(void)));
 
-	mainLayout->addWidget( lbl );
-	mainLayout->addWidget( scriptPath );
-	mainLayout->addLayout( hbox );
+	hbox->addWidget(browseButton);
+	hbox->addWidget(stopButton);
+	hbox->addWidget(startButton);
+
+	mainLayout->addWidget(lbl);
+	mainLayout->addWidget(scriptPath);
+	mainLayout->addLayout(hbox);
 
 	hbox = new QHBoxLayout();
-	lbl = new QLabel( tr("Arguments:") );
+	lbl = new QLabel(tr("Arguments:"));
 
-	hbox->addWidget( lbl );
-	hbox->addWidget( scriptArgs );
+	hbox->addWidget(lbl);
+	hbox->addWidget(scriptArgs);
 
+	mainLayout->addLayout(hbox);
+
+	lbl = new QLabel(tr("Output Console:"));
+	mainLayout->addWidget(lbl);
+	mainLayout->addWidget(luaOutput);
+
+	closeButton = new QPushButton( tr("Close") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
+	hbox = new QHBoxLayout();
+	hbox->addStretch(5);
+	hbox->addWidget( closeButton, 1 );
 	mainLayout->addLayout( hbox );
 
-	lbl = new QLabel( tr("Output Console:") );
-	mainLayout->addWidget( lbl );
-	mainLayout->addWidget( luaOutput );
+	setLayout(mainLayout);
 
-	//connect(useNativeFileDialog , SIGNAL(stateChanged(int)), this, SLOT(useNativeFileDialogChanged(int)) );
+	winList.push_back(this);
 
-	setLayout( mainLayout );
+	periodicTimer = new QTimer(this);
 
-	winList.push_back( this );
+	connect(periodicTimer, &QTimer::timeout, this, &LuaControlDialog_t::updatePeriodic);
 
-   periodicTimer  = new QTimer( this );
-
-   connect( periodicTimer, &QTimer::timeout, this, &LuaControlDialog_t::updatePeriodic );
-
-   periodicTimer->start( 200 ); // 5hz
+	periodicTimer->start(200); // 5hz
 }
 
 //----------------------------------------------------
 LuaControlDialog_t::~LuaControlDialog_t(void)
 {
-	std::list <LuaControlDialog_t*>::iterator it;
-	  
+	std::list<LuaControlDialog_t *>::iterator it;
+
 	printf("Destroy Lua Control Window\n");
 
-   periodicTimer->stop();
+	periodicTimer->stop();
 
 	for (it = winList.begin(); it != winList.end(); it++)
 	{
-		if ( (*it) == this )
+		if ((*it) == this)
 		{
 			winList.erase(it);
 			//printf("Removing Lua Window\n");
@@ -205,29 +215,29 @@ LuaControlDialog_t::~LuaControlDialog_t(void)
 //----------------------------------------------------
 void LuaControlDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("Lua Control Close Window Event\n");
-   done(0);
+	printf("Lua Control Close Window Event\n");
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------
 void LuaControlDialog_t::closeWindow(void)
 {
-   //printf("Lua Control Close Window\n");
-   done(0);
+	//printf("Lua Control Close Window\n");
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------
 void LuaControlDialog_t::updatePeriodic(void)
 {
-   //printf("Update Lua\n");
-   if ( updateLuaDisplay )
-   {
-      updateLuaWindows();
-      updateLuaDisplay = false;
-   }
+	//printf("Update Lua\n");
+	if (updateLuaDisplay)
+	{
+		updateLuaWindows();
+		updateLuaDisplay = false;
+	}
 
-	if ( openLuaKillMsgBox )
+	if (openLuaKillMsgBox)
 	{
 		openLuaKillMessageBox();
 		openLuaKillMsgBox = false;
@@ -241,15 +251,15 @@ void LuaControlDialog_t::openLuaKillMessageBox(void)
 
 	luaKillMsgBoxRetVal = 0;
 
-	msgBox.setIcon( QMessageBox::Warning );
-	msgBox.setText( tr("The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n") );
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setText(tr("The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n"));
 	msgBox.setStandardButtons(QMessageBox::Yes);
 	msgBox.addButton(QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::No);
 
 	ret = msgBox.exec();
 
-	if ( ret == QMessageBox::Yes )
+	if (ret == QMessageBox::Yes)
 	{
 		luaKillMsgBoxRetVal = 1;
 	}
@@ -264,78 +274,79 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	char dir[512];
 	char exePath[512];
 	const char *luaPath;
-	QFileDialog  dialog(this, tr("Open LUA Script") );
+	QFileDialog dialog(this, tr("Open LUA Script"));
 	QList<QUrl> urls;
-	QDir  d;
+	QDir d;
 
-	fceuExecutablePath( exePath, sizeof(exePath) );
+	fceuExecutablePath(exePath, sizeof(exePath));
 
 	//urls = dialog.sidebarUrls();
-	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QDir::rootPath());
 	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
 	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
-	urls << QUrl::fromLocalFile( QDir( FCEUI_GetBaseDirectory() ).absolutePath() );
+	urls << QUrl::fromLocalFile(QDir(FCEUI_GetBaseDirectory()).absolutePath());
 
-	if ( exePath[0] != 0 )
+	if (exePath[0] != 0)
 	{
-		d.setPath( QString(exePath) + "/../luaScripts" );
+		d.setPath(QString(exePath) + "/../luaScripts");
 
-		if ( d.exists() )
+		if (d.exists())
 		{
-			urls << QUrl::fromLocalFile( d.absolutePath() );
+			urls << QUrl::fromLocalFile(d.absolutePath());
 		}
 	}
 #ifndef WIN32
-	d.setPath( "/usr/share/fceux/luaScripts" );
+	d.setPath("/usr/share/fceux/luaScripts");
 
-	if ( d.exists() )
+	if (d.exists())
 	{
-		urls << QUrl::fromLocalFile( d.absolutePath() );
+		urls << QUrl::fromLocalFile(d.absolutePath());
 	}
 #endif
 
 	luaPath = getenv("LUA_PATH");
 
 	// Parse LUA_PATH and add to urls
-	if ( luaPath )
+	if (luaPath)
 	{
-		int i,j;
+		int i, j;
 		char stmp[1024];
 
-		i=j=0;
-		while ( luaPath[i] != 0 )
+		i = j = 0;
+		while (luaPath[i] != 0)
 		{
-			if ( luaPath[i] == ';' )
+			if (luaPath[i] == ';')
 			{
 				stmp[j] = 0;
 
-				if ( j > 0 )
+				if (j > 0)
 				{
 					d.setPath(stmp);
 
-					if ( d.exists() )
+					if (d.exists())
 					{
-						urls << QUrl::fromLocalFile( d.absolutePath() );
+						urls << QUrl::fromLocalFile(d.absolutePath());
 					}
 				}
-				j=0;
+				j = 0;
 			}
 			else
 			{
-				stmp[j] = luaPath[i]; j++;
+				stmp[j] = luaPath[i];
+				j++;
 			}
 			i++;
 		}
 
 		stmp[j] = 0;
 
-		if ( j > 0 )
+		if (j > 0)
 		{
 			d.setPath(stmp);
 
-			if ( d.exists() )
+			if (d.exists())
 			{
-				urls << QUrl::fromLocalFile( d.absolutePath() );
+				urls << QUrl::fromLocalFile(d.absolutePath());
 			}
 		}
 	}
@@ -345,52 +356,52 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	dialog.setNameFilter(tr("LUA Scripts (*.lua *.LUA) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
-	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
+	dialog.setFilter(QDir::AllEntries | QDir::AllDirs | QDir::Hidden);
+	dialog.setLabelText(QFileDialog::Accept, tr("Load"));
 
-	g_config->getOption ("SDL.LastLoadLua", &last );
+	g_config->getOption("SDL.LastLoadLua", &last);
 
-	if ( last.size() == 0 )
+	if (last.size() == 0)
 	{
 #ifdef WIN32
-	   last.assign( FCEUI_GetBaseDirectory() );
+		last.assign(FCEUI_GetBaseDirectory());
 #else
-	   last.assign( "/usr/share/fceux/luaScripts" );
+		last.assign("/usr/share/fceux/luaScripts");
 #endif
 	}
 
-	getDirFromFile( last.c_str(), dir );
+	getDirFromFile(last.c_str(), dir);
 
-	dialog.setDirectory( tr(dir) );
+	dialog.setDirectory(tr(dir));
 
 	// Check config option to use native file dialog or not
-	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
 	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
 	dialog.setSidebarUrls(urls);
 
 	ret = dialog.exec();
 
-	if ( ret )
+	if (ret)
 	{
 		QStringList fileList;
 		fileList = dialog.selectedFiles();
 
-		if ( fileList.size() > 0 )
+		if (fileList.size() > 0)
 		{
 			filename = fileList[0];
 		}
 	}
 
-	if ( filename.isNull() )
+	if (filename.isNull())
 	{
-	   return;
+		return;
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption ("SDL.LastLoadLua", filename.toStdString().c_str() );
+	g_config->setOption("SDL.LastLoadLua", filename.toStdString().c_str());
 
-	scriptPath->setText( filename.toStdString().c_str() );
+	scriptPath->setText(filename.toStdString().c_str());
 
 #endif
 }
@@ -400,9 +411,9 @@ void LuaControlDialog_t::startLuaScript(void)
 #ifdef _S9XLUA_H
 	outBuf.clear();
 	fceuWrapperLock();
-	if ( 0 == FCEU_LoadLuaCode( scriptPath->text().toStdString().c_str(), scriptArgs->text().toStdString().c_str() ) )
+	if (0 == FCEU_LoadLuaCode(scriptPath->text().toStdString().c_str(), scriptArgs->text().toStdString().c_str()))
 	{
-	   printf("Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toStdString().c_str() );
+		printf("Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toStdString().c_str());
 	}
 	fceuWrapperUnLock();
 #endif
@@ -422,35 +433,35 @@ void LuaControlDialog_t::refreshState(void)
 	int i;
 	std::string luaOutputText;
 
-	if ( luaScriptRunning )
+	if (luaScriptRunning)
 	{
-		stopButton->setEnabled( true );
-		startButton->setText( tr("Restart") );
+		stopButton->setEnabled(true);
+		startButton->setText(tr("Restart"));
 	}
 	else
 	{
-		stopButton->setEnabled( false );
-		startButton->setText( tr("Start") );
+		stopButton->setEnabled(false);
+		startButton->setText(tr("Start"));
 	}
 
 	i = outBuf.tail;
-	
-	while ( i != outBuf.head )
+
+	while (i != outBuf.head)
 	{
-	   luaOutputText.append( 1, outBuf.buf[i] );
-	
-	   i = (i + 1) % outBuf.size;
+		luaOutputText.append(1, outBuf.buf[i]);
+
+		i = (i + 1) % outBuf.size;
 	}
 
-	luaOutput->setText( luaOutputText.c_str() );
+	luaOutput->setText(luaOutputText.c_str());
 
-	luaOutput->moveCursor( QTextCursor::End );
+	luaOutput->moveCursor(QTextCursor::End);
 }
 //----------------------------------------------------
-static void updateLuaWindows( void )
+static void updateLuaWindows(void)
 {
-	std::list <LuaControlDialog_t*>::iterator it;
-	  
+	std::list<LuaControlDialog_t *>::iterator it;
+
 	for (it = winList.begin(); it != winList.end(); it++)
 	{
 		(*it)->refreshState();
@@ -475,35 +486,35 @@ void WinLuaOnStop(intptr_t hDlgAsInt)
 	updateLuaDisplay = true;
 }
 //----------------------------------------------------
-void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
+void PrintToWindowConsole(intptr_t hDlgAsInt, const char *str)
 {
 	//printf("%s\n", str );
 
-   outBuf.addLine( str );
-	
+	outBuf.addLine(str);
+
 	updateLuaDisplay = true;
 }
 //----------------------------------------------------
-#ifdef  WIN32
-int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char* format, ...) 
+#ifdef WIN32
+int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char *format, ...)
 #else
-int LuaPrintfToWindowConsole(const char *__restrict format, ...)  throw()
+int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw()
 #endif
 {
-   int retval;
-   va_list args;
+	int retval;
+	va_list args;
 	char msg[2048];
-   va_start( args, format );
-   retval = ::vsnprintf( msg, sizeof(msg), format, args );
-   va_end(args);
+	va_start(args, format);
+	retval = ::vsnprintf(msg, sizeof(msg), format, args);
+	va_end(args);
 
-	msg[ sizeof(msg)-1 ] = 0;
+	msg[sizeof(msg) - 1] = 0;
 
-   outBuf.addLine( msg );
+	outBuf.addLine(msg);
 
 	updateLuaDisplay = true;
 
-   return(retval);
+	return (retval);
 };
 //----------------------------------------------------
 int LuaKillMessageBox(void)
@@ -513,11 +524,11 @@ int LuaKillMessageBox(void)
 
 	openLuaKillMsgBox = true;
 
-	while ( openLuaKillMsgBox )
+	while (openLuaKillMsgBox)
 	{
 		msleep(100);
 	}
-	
+
 	return luaKillMsgBoxRetVal;
 }
 //----------------------------------------------------

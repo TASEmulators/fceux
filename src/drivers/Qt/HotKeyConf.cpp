@@ -38,15 +38,17 @@
 
 //----------------------------------------------------------------------------
 HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
-	: QDialog( parent )
+	: QDialog(parent)
 {
 	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QPushButton *closeButton;
 	QTreeWidgetItem *item;
 	std::string prefix = "SDL.Hotkeys.";
 
 	setWindowTitle("Hotkey Configuration");
 
-	resize( 512, 512 );
+	resize(512, 512);
 
 	mainLayout = new QVBoxLayout();
 
@@ -55,36 +57,45 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 	tree->setColumnCount(2);
 
 	item = new QTreeWidgetItem();
-	item->setText( 0, QString::fromStdString( "Command" ) );
-	item->setText( 1, QString::fromStdString( "Key" ) );
-	item->setTextAlignment( 0, Qt::AlignLeft);
-	item->setTextAlignment( 1, Qt::AlignCenter);
+	item->setText(0, QString::fromStdString("Command"));
+	item->setText(1, QString::fromStdString("Key"));
+	item->setTextAlignment(0, Qt::AlignLeft);
+	item->setTextAlignment(1, Qt::AlignCenter);
 
-	tree->setHeaderItem( item );
+	tree->setHeaderItem(item);
 
-	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-	for (int i=0; i<HK_MAX; i++)
+	for (int i = 0; i < HK_MAX; i++)
 	{
 		char keyName[128];
 		std::string optionName = prefix + getHotkeyString(i);
 
 		//g_config->getOption (optionName.c_str (), &keycode);
-		Hotkeys[i].getString( keyName );
+		Hotkeys[i].getString(keyName);
 
 		item = new QTreeWidgetItem();
 
-		item->setText( 0, QString::fromStdString( optionName ) );
-		item->setText( 1, QString::fromStdString( keyName ) );
+		item->setText(0, QString::fromStdString(optionName));
+		item->setText(1, QString::fromStdString(keyName));
 
-		item->setTextAlignment( 0, Qt::AlignLeft);
-		item->setTextAlignment( 1, Qt::AlignCenter);
+		item->setTextAlignment(0, Qt::AlignLeft);
+		item->setTextAlignment(1, Qt::AlignCenter);
 
-		tree->addTopLevelItem( item );
+		tree->addTopLevelItem(item);
 	}
-	mainLayout->addWidget( tree );
+	mainLayout->addWidget(tree);
 
-	setLayout( mainLayout );
+	closeButton = new QPushButton( tr("Close") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
+	hbox = new QHBoxLayout();
+	hbox->addStretch(5);
+	hbox->addWidget( closeButton, 1 );
+	mainLayout->addLayout( hbox );
+
+	setLayout(mainLayout);
 }
 //----------------------------------------------------------------------------
 HotKeyConfDialog_t::~HotKeyConfDialog_t(void)
@@ -94,94 +105,96 @@ HotKeyConfDialog_t::~HotKeyConfDialog_t(void)
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("Hot Key Close Window Event\n");
-   done(0);
+	printf("Hot Key Close Window Event\n");
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::closeWindow(void)
 {
-   //printf("Close Window\n");
-   done(0);
+	//printf("Close Window\n");
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::assignHotkey(QKeyEvent *event)
 {
 	bool keyIsModifier;
-	SDL_Keycode k = convQtKey2SDLKeyCode( (Qt::Key)event->key() );
-	SDL_Keymod  m = convQtKey2SDLModifier( event->modifiers() );
-	
-	keyIsModifier = (k == SDLK_LCTRL ) || (k == SDLK_RCTRL ) ||
-	                (k == SDLK_LSHIFT) || (k == SDLK_RSHIFT) ||
-	                (k == SDLK_LALT  ) || (k == SDLK_RALT  ) ||
-	                (k == SDLK_LGUI  ) || (k == SDLK_RGUI  ) ||
-						 (k == SDLK_CAPSLOCK);
+	SDL_Keycode k = convQtKey2SDLKeyCode((Qt::Key)event->key());
+	SDL_Keymod m = convQtKey2SDLModifier(event->modifiers());
 
-	if ( (k != SDLK_UNKNOWN) && !keyIsModifier )
+	keyIsModifier = (k == SDLK_LCTRL) || (k == SDLK_RCTRL) ||
+					(k == SDLK_LSHIFT) || (k == SDLK_RSHIFT) ||
+					(k == SDLK_LALT) || (k == SDLK_RALT) ||
+					(k == SDLK_LGUI) || (k == SDLK_RGUI) ||
+					(k == SDLK_CAPSLOCK);
+
+	if ((k != SDLK_UNKNOWN) && !keyIsModifier)
 	{
-		QList <QTreeWidgetItem *> l;
-			
+		QList<QTreeWidgetItem *> l;
+
 		l = tree->selectedItems();
 
-		for (size_t i=0; i < l.size(); i++)
+		for (size_t i = 0; i < l.size(); i++)
 		{
-			int j,idx;
+			int j, idx;
 			QString qs;
 			QTreeWidgetItem *item;
 			std::string keyText;
 			char keyName[128];
 			char buf[256];
 
-
 			keyText.assign(" mod=");
 
-			j=0;
-			if ( m & (KMOD_LSHIFT | KMOD_RSHIFT) )
+			j = 0;
+			if (m & (KMOD_LSHIFT | KMOD_RSHIFT))
 			{
-				if ( j > 0 )
+				if (j > 0)
 				{
-					keyText.append("+"); 
+					keyText.append("+");
 				}
-				keyText.append("Shift"); j++;
+				keyText.append("Shift");
+				j++;
 			}
-			if ( m & (KMOD_LALT | KMOD_RALT) )
+			if (m & (KMOD_LALT | KMOD_RALT))
 			{
-				if ( j > 0 )
+				if (j > 0)
 				{
-					keyText.append("+"); 
+					keyText.append("+");
 				}
-				keyText.append("Alt"); j++;
+				keyText.append("Alt");
+				j++;
 			}
-			if ( m & (KMOD_LCTRL | KMOD_RCTRL) )
+			if (m & (KMOD_LCTRL | KMOD_RCTRL))
 			{
-				if ( j > 0 )
+				if (j > 0)
 				{
-					keyText.append("+"); 
+					keyText.append("+");
 				}
-				keyText.append("Ctrl"); j++;
+				keyText.append("Ctrl");
+				j++;
 			}
 
-			sprintf( buf, "  key=%s", SDL_GetKeyName( k ) );
+			sprintf(buf, "  key=%s", SDL_GetKeyName(k));
 
-			keyText.append( buf );
+			keyText.append(buf);
 
 			item = l.at(i);
 
-			idx = tree->indexOfTopLevelItem( item );
+			idx = tree->indexOfTopLevelItem(item);
 
 			qs = item->text(0);
 
-			g_config->setOption ( qs.toStdString(), keyText );
+			g_config->setOption(qs.toStdString(), keyText);
 
 			setHotKeys();
 
-			Hotkeys[idx].getString( keyName );
+			Hotkeys[idx].getString(keyName);
 
-			item->setText( 1, QString::fromStdString( keyName ) );
+			item->setText(1, QString::fromStdString(keyName));
 
-   		//printf("Hotkey Window Key Press: 0x%x  item:%p\n  '%s' : %i\n", 
+			//printf("Hotkey Window Key Press: 0x%x  item:%p\n  '%s' : %i\n",
 			//		k, item, qs.toStdString().c_str(), idx );
 		}
 	}
@@ -189,13 +202,13 @@ void HotKeyConfDialog_t::assignHotkey(QKeyEvent *event)
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::keyPressEvent(QKeyEvent *event)
 {
-   //printf("Hotkey Window Key Press: 0x%x \n", event->key() );
-	assignHotkey( event );
+	//printf("Hotkey Window Key Press: 0x%x \n", event->key() );
+	assignHotkey(event);
 }
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::keyReleaseEvent(QKeyEvent *event)
 {
-   //printf("Hotkey Window Key Release: 0x%x \n", event->key() );
-	assignHotkey( event );
+	//printf("Hotkey Window Key Release: 0x%x \n", event->key() );
+	assignHotkey(event);
 }
 //----------------------------------------------------------------------------

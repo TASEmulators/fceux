@@ -148,9 +148,9 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	fileMenu->addSeparator();
 
-	// File -> Append
+	// File -> Close
 	menuAct = new QAction(tr("&Close"), this);
-	menuAct->setShortcut( QKeySequence(tr("Alt+F4")) );
+	menuAct->setShortcut( QKeySequence::Close );
 	menuAct->setStatusTip(tr("Close Window"));
 	connect(menuAct, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 	

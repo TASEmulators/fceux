@@ -37,10 +37,11 @@
 
 struct GamePadConfigLocalData_t
 {
-	std::string  guid;
-	std::string  profile;
+	std::string guid;
+	std::string profile;
 
-	struct {
+	struct
+	{
 
 		char needsSave;
 
@@ -48,12 +49,11 @@ struct GamePadConfigLocalData_t
 
 	GamePadConfigLocalData_t(void)
 	{
-		for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+		for (int i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
 		{
 			btn[i].needsSave = 0;
 		}
 	}
-
 };
 
 static GamePadConfigLocalData_t lcl[GAMEPAD_NUM_DEVICES];
@@ -61,9 +61,9 @@ static GamePadConfigLocalData_t lcl[GAMEPAD_NUM_DEVICES];
 static GamePadConfDialog_t *gamePadConfWin = NULL;
 
 //----------------------------------------------------
-int openGamePadConfWindow( QWidget *parent )
+int openGamePadConfWindow(QWidget *parent)
 {
-	if ( gamePadConfWin != NULL )
+	if (gamePadConfWin != NULL)
 	{
 		return -1;
 	}
@@ -76,16 +76,15 @@ int openGamePadConfWindow( QWidget *parent )
 //----------------------------------------------------
 int closeGamePadConfWindow(void)
 {
-	if ( gamePadConfWin != NULL )
+	if (gamePadConfWin != NULL)
 	{
-   	gamePadConfWin->closeWindow();
+		gamePadConfWin->closeWindow();
 	}
 	return 0;
 }
 //----------------------------------------------------
 GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
-	: QDialog( parent )
-	, changeSeqStatus(0)
+	: QDialog(parent), changeSeqStatus(0)
 {
 	//QWidget *mainWidget;
 	QVBoxLayout *mainLayoutV;
@@ -105,7 +104,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	QPushButton *changeSeqButton = nullptr;
 	QPushButton *clearButton[GAMEPAD_NUM_BUTTONS];
 	QScrollArea *scroll = NULL;
-	QStyle      *style;
+	QStyle *style;
 	std::string prefix;
 	char stmp[256];
 	bool useScroll = false;
@@ -117,7 +116,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	// Ensure that joysticks are enabled, no harm calling init again.
 	InitJoysticks();
 
-	if ( useScroll )
+	if (useScroll)
 	{
 		scroll = new QScrollArea(this);
 	}
@@ -125,268 +124,267 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	portNum = 0;
 	buttonConfigStatus = 1;
-	
-	inputTimer  = new QTimer( this );
-	
-	connect( inputTimer, &QTimer::timeout, this, &GamePadConfDialog_t::updatePeriodic );
-	
-	setWindowTitle( tr("GamePad Config") );
+
+	inputTimer = new QTimer(this);
+
+	connect(inputTimer, &QTimer::timeout, this, &GamePadConfDialog_t::updatePeriodic);
+
+	setWindowTitle(tr("GamePad Config"));
 
 	grid1 = new QGridLayout();
 
-	grid1->setColumnStretch( 0,  1 );
-	grid1->setColumnStretch( 1, 10 );
+	grid1->setColumnStretch(0, 1);
+	grid1->setColumnStretch(1, 10);
 	hbox1 = new QHBoxLayout();
 	hbox2 = new QHBoxLayout();
 
 	label = new QLabel(tr("Console Port:"));
 	portSel = new QComboBox();
-	grid1->addWidget( label  , 0, 0 );
-	grid1->addWidget( portSel, 0, 1 );
+	grid1->addWidget(label, 0, 0);
+	grid1->addWidget(portSel, 0, 1);
 
-	portSel->addItem( tr("1"), 0 );
-	portSel->addItem( tr("2"), 1 );
-	portSel->addItem( tr("3"), 2 );
-	portSel->addItem( tr("4"), 3 );
+	portSel->addItem(tr("1"), 0);
+	portSel->addItem(tr("2"), 1);
+	portSel->addItem(tr("3"), 2);
+	portSel->addItem(tr("4"), 3);
 
 	label = new QLabel(tr("Device:"));
 	devSel = new QComboBox();
-	grid1->addWidget( label , 1, 0 );
-	grid1->addWidget( devSel, 1, 1 );
+	grid1->addWidget(label, 1, 0);
+	grid1->addWidget(devSel, 1, 1);
 
-	devSel->addItem( tr("Keyboard"), -1 );
+	devSel->addItem(tr("Keyboard"), -1);
 
-	for (int i=0; i<MAX_JOYSTICKS; i++)
+	for (int i = 0; i < MAX_JOYSTICKS; i++)
 	{
-		jsDev_t *js = getJoystickDevice( i );
+		jsDev_t *js = getJoystickDevice(i);
 
-		if ( js != NULL )
+		if (js != NULL)
 		{
-			if ( js->isConnected() )
+			if (js->isConnected())
 			{
-				sprintf( stmp, "%i: %s", i, js->getName() );
-   			devSel->addItem( tr(stmp), i );
+				sprintf(stmp, "%i: %s", i, js->getName());
+				devSel->addItem(tr(stmp), i);
 			}
 		}
 	}
-	for (int i=0; i<devSel->count(); i++)
+	for (int i = 0; i < devSel->count(); i++)
 	{
-		if ( devSel->itemData(i).toInt() == GamePad[portNum].getDeviceIndex() )
+		if (devSel->itemData(i).toInt() == GamePad[portNum].getDeviceIndex())
 		{
-			devSel->setCurrentIndex( i );
+			devSel->setCurrentIndex(i);
 		}
 	}
 
 	label = new QLabel(tr("GUID:"));
 	guidLbl = new QLabel();
 
-	grid1->addWidget( label  , 2, 0 );
-	grid1->addWidget( guidLbl, 2, 1 );
+	grid1->addWidget(label, 2, 0);
+	grid1->addWidget(guidLbl, 2, 1);
 
-	guidLbl->setText( GamePad[portNum].getGUID() );
+	guidLbl->setText(GamePad[portNum].getGUID());
 
 	frame1 = new QGroupBox(tr("Mapping Profile:"));
 	//grid   = new QGridLayout();
-	vbox   = new QVBoxLayout();
-	
+	vbox = new QVBoxLayout();
+
 	//frame1->setLayout( grid );
-	frame1->setLayout( vbox );
+	frame1->setLayout(vbox);
 
 	hbox = new QHBoxLayout();
-	vbox->addLayout( hbox );
+	vbox->addLayout(hbox);
 
 	mapSel = new QComboBox();
-	hbox->addWidget( mapSel );
+	hbox->addWidget(mapSel);
 
-	mapSel->setWhatsThis( tr("Combo box for selection of a saved button mapping profile for the selected device"));
-	mapSel->addItem( tr("default"), 0 );
+	mapSel->setWhatsThis(tr("Combo box for selection of a saved button mapping profile for the selected device"));
+	mapSel->addItem(tr("default"), 0);
 
 	hbox = new QHBoxLayout();
-	vbox->addLayout( hbox );
+	vbox->addLayout(hbox);
 
-	applyProfileButton = new QPushButton( tr("Load") );
+	applyProfileButton = new QPushButton(tr("Load"));
 	applyProfileButton->setWhatsThis(tr("Sets Current Active Map to the Selected Profile"));
-	applyProfileButton->setIcon( style->standardIcon( QStyle::SP_DialogApplyButton ) );
-	hbox->addWidget( applyProfileButton );
+	applyProfileButton->setIcon(style->standardIcon(QStyle::SP_DialogApplyButton));
+	hbox->addWidget(applyProfileButton);
 
-	saveProfileButton = new QPushButton( tr("Save") );
+	saveProfileButton = new QPushButton(tr("Save"));
 	saveProfileButton->setWhatsThis(tr("Stores Current Active Map to the Selected Profile"));
-	saveProfileButton->setIcon( style->standardIcon( QStyle::SP_DialogSaveButton ) );
-	hbox->addWidget( saveProfileButton );
+	saveProfileButton->setIcon(style->standardIcon(QStyle::SP_DialogSaveButton));
+	hbox->addWidget(saveProfileButton);
 
 	hbox = new QHBoxLayout();
-	vbox->addLayout( hbox );
+	vbox->addLayout(hbox);
 
-	newProfileButton   = new QPushButton( tr("New") );
+	newProfileButton = new QPushButton(tr("New"));
 	newProfileButton->setWhatsThis(tr("Create a New Map Profile"));
-	newProfileButton->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
-	hbox->addWidget( newProfileButton );
+	newProfileButton->setIcon(style->standardIcon(QStyle::SP_FileIcon));
+	hbox->addWidget(newProfileButton);
 
-	removeProfileButton   = new QPushButton( tr("Delete") );
+	removeProfileButton = new QPushButton(tr("Delete"));
 	removeProfileButton->setWhatsThis(tr("Deletes the Selected Map Profile"));
-	removeProfileButton->setIcon( style->standardIcon( QStyle::SP_TrashIcon ) );
-	hbox->addWidget( removeProfileButton );
+	removeProfileButton->setIcon(style->standardIcon(QStyle::SP_TrashIcon));
+	hbox->addWidget(removeProfileButton);
 
 	mapMsg = new QLabel();
 	vbox->addWidget(mapMsg);
 
-	efs_chkbox  = new QCheckBox( tr("Enable Four Score") );
-	udlr_chkbox = new QCheckBox( tr("Allow Up+Down/Left+Right") );
+	efs_chkbox = new QCheckBox(tr("Enable Four Score"));
+	udlr_chkbox = new QCheckBox(tr("Allow Up+Down/Left+Right"));
 
 	int fourScore;
 	g_config->getOption("SDL.FourScore", &fourScore);
-	efs_chkbox->setChecked( fourScore );
+	efs_chkbox->setChecked(fourScore);
 
 	int opposite_dirs;
 	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &opposite_dirs);
-	udlr_chkbox->setChecked( opposite_dirs );
+	udlr_chkbox->setChecked(opposite_dirs);
 
 	frame2 = new QGroupBox(tr("Current Active Button Mappings:"));
-	grid   = new QGridLayout();
-	
+	grid = new QGridLayout();
+
 	//grid-> setHorizontalSpacing(10);
-	
-	frame2->setLayout( grid );
-	
-	for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+
+	frame2->setLayout(grid);
+
+	for (int i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
 	{
 		char text[64];
-	        QLabel *buttonName;
-	
-		sprintf( text, "%s:", GamePadNames[i] );
-	
-	        //hbox2 = new QHBoxLayout();
-	
+		QLabel *buttonName;
+
+		sprintf(text, "%s:", GamePadNames[i]);
+
+		//hbox2 = new QHBoxLayout();
+
 		//hbox2->setAlignment(Qt::AlignCenter);
-	
-	        buttonName     = new QLabel(tr(text));
-	        keyName[i]     = new QLabel();
-	        //keyState[i]    = new QLabel( tr("F") );
-	        //label          = new QLabel( tr("State:") );
-		button[i]      = new GamePadConfigButton_t(i);
-		clearButton[i] = new QPushButton( tr("Clear") );
-		
-		grid->addWidget( buttonName    , i, 0, Qt::AlignCenter );
-		grid->addWidget( keyName[i]    , i, 1, Qt::AlignCenter );
+
+		buttonName = new QLabel(tr(text));
+		keyName[i] = new QLabel();
+		//keyState[i]    = new QLabel( tr("F") );
+		//label          = new QLabel( tr("State:") );
+		button[i] = new GamePadConfigButton_t(i);
+		clearButton[i] = new QPushButton(tr("Clear"));
+
+		grid->addWidget(buttonName, i, 0, Qt::AlignCenter);
+		grid->addWidget(keyName[i], i, 1, Qt::AlignCenter);
 		//grid->addWidget( label         , i, 2, Qt::AlignCenter );
 		//grid->addWidget( keyState[i]   , i, 3, Qt::AlignCenter );
-		grid->addWidget( button[i]     , i, 2, Qt::AlignCenter );
-		grid->addWidget( clearButton[i], i, 3, Qt::AlignCenter );
+		grid->addWidget(button[i], i, 2, Qt::AlignCenter);
+		grid->addWidget(clearButton[i], i, 3, Qt::AlignCenter);
 	}
 	updateCntrlrDpy();
-	
-	clearAllButton     = new QPushButton(tr("Clear All"));
-	closebutton        = new QPushButton(tr("Close"));
-	changeSeqButton    = new QPushButton(tr("Change Sequentially"));
 
-	clearAllButton->setIcon( style->standardIcon( QStyle::SP_LineEditClearButton ) );
-	closebutton->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
-	changeSeqButton->setIcon( style->standardIcon( QStyle::QStyle::SP_ArrowDown ) );
+	clearAllButton = new QPushButton(tr("Clear All"));
+	closebutton = new QPushButton(tr("Close"));
+	changeSeqButton = new QPushButton(tr("Change Sequentially"));
 
-	hbox1->addWidget( clearAllButton    );
-	hbox1->addWidget( changeSeqButton   );
-	hbox1->addWidget( closebutton       );
+	clearAllButton->setIcon(style->standardIcon(QStyle::SP_LineEditClearButton));
+	closebutton->setIcon(style->standardIcon(QStyle::SP_DialogCloseButton));
+	changeSeqButton->setIcon(style->standardIcon(QStyle::QStyle::SP_ArrowDown));
 
-	connect(button[0], SIGNAL(clicked()), this, SLOT(changeButton0(void)) );
-	connect(button[1], SIGNAL(clicked()), this, SLOT(changeButton1(void)) );
-	connect(button[2], SIGNAL(clicked()), this, SLOT(changeButton2(void)) );
-	connect(button[3], SIGNAL(clicked()), this, SLOT(changeButton3(void)) );
-	connect(button[4], SIGNAL(clicked()), this, SLOT(changeButton4(void)) );
-	connect(button[5], SIGNAL(clicked()), this, SLOT(changeButton5(void)) );
-	connect(button[6], SIGNAL(clicked()), this, SLOT(changeButton6(void)) );
-	connect(button[7], SIGNAL(clicked()), this, SLOT(changeButton7(void)) );
-	connect(button[8], SIGNAL(clicked()), this, SLOT(changeButton8(void)) );
-	connect(button[9], SIGNAL(clicked()), this, SLOT(changeButton9(void)) );
+	hbox1->addWidget(clearAllButton);
+	hbox1->addWidget(changeSeqButton);
+	hbox1->addWidget(closebutton);
 
-	connect(clearButton[0], SIGNAL(clicked()), this, SLOT(clearButton0(void)) );
-	connect(clearButton[1], SIGNAL(clicked()), this, SLOT(clearButton1(void)) );
-	connect(clearButton[2], SIGNAL(clicked()), this, SLOT(clearButton2(void)) );
-	connect(clearButton[3], SIGNAL(clicked()), this, SLOT(clearButton3(void)) );
-	connect(clearButton[4], SIGNAL(clicked()), this, SLOT(clearButton4(void)) );
-	connect(clearButton[5], SIGNAL(clicked()), this, SLOT(clearButton5(void)) );
-	connect(clearButton[6], SIGNAL(clicked()), this, SLOT(clearButton6(void)) );
-	connect(clearButton[7], SIGNAL(clicked()), this, SLOT(clearButton7(void)) );
-	connect(clearButton[8], SIGNAL(clicked()), this, SLOT(clearButton8(void)) );
-	connect(clearButton[9], SIGNAL(clicked()), this, SLOT(clearButton9(void)) );
-	
-	connect(newProfileButton   , SIGNAL(clicked()), this, SLOT(newProfileCallback(void)) );
-	connect(applyProfileButton , SIGNAL(clicked()), this, SLOT(loadProfileCallback(void)) );
-	connect(saveProfileButton  , SIGNAL(clicked()), this, SLOT(saveProfileCallback(void)) );
-	connect(removeProfileButton, SIGNAL(clicked()), this, SLOT(deleteProfileCallback(void)) );
-	
-	connect(clearAllButton   , SIGNAL(clicked()), this, SLOT(clearAllCallback(void)) );
-	connect(closebutton      , SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
-	connect(changeSeqButton  , SIGNAL(clicked()), this, SLOT(changeSequentallyCallback(void)) );
-	
-	connect(portSel    , SIGNAL(activated(int)), this, SLOT(portSelect(int)) );
-	connect(devSel     , SIGNAL(activated(int)), this, SLOT(deviceSelect(int)) );
-	connect(efs_chkbox , SIGNAL(stateChanged(int)), this, SLOT(ena4score(int)) );
-	connect(udlr_chkbox, SIGNAL(stateChanged(int)), this, SLOT(oppDirEna(int)) );
+	connect(button[0], SIGNAL(clicked()), this, SLOT(changeButton0(void)));
+	connect(button[1], SIGNAL(clicked()), this, SLOT(changeButton1(void)));
+	connect(button[2], SIGNAL(clicked()), this, SLOT(changeButton2(void)));
+	connect(button[3], SIGNAL(clicked()), this, SLOT(changeButton3(void)));
+	connect(button[4], SIGNAL(clicked()), this, SLOT(changeButton4(void)));
+	connect(button[5], SIGNAL(clicked()), this, SLOT(changeButton5(void)));
+	connect(button[6], SIGNAL(clicked()), this, SLOT(changeButton6(void)));
+	connect(button[7], SIGNAL(clicked()), this, SLOT(changeButton7(void)));
+	connect(button[8], SIGNAL(clicked()), this, SLOT(changeButton8(void)));
+	connect(button[9], SIGNAL(clicked()), this, SLOT(changeButton9(void)));
+
+	connect(clearButton[0], SIGNAL(clicked()), this, SLOT(clearButton0(void)));
+	connect(clearButton[1], SIGNAL(clicked()), this, SLOT(clearButton1(void)));
+	connect(clearButton[2], SIGNAL(clicked()), this, SLOT(clearButton2(void)));
+	connect(clearButton[3], SIGNAL(clicked()), this, SLOT(clearButton3(void)));
+	connect(clearButton[4], SIGNAL(clicked()), this, SLOT(clearButton4(void)));
+	connect(clearButton[5], SIGNAL(clicked()), this, SLOT(clearButton5(void)));
+	connect(clearButton[6], SIGNAL(clicked()), this, SLOT(clearButton6(void)));
+	connect(clearButton[7], SIGNAL(clicked()), this, SLOT(clearButton7(void)));
+	connect(clearButton[8], SIGNAL(clicked()), this, SLOT(clearButton8(void)));
+	connect(clearButton[9], SIGNAL(clicked()), this, SLOT(clearButton9(void)));
+
+	connect(newProfileButton, SIGNAL(clicked()), this, SLOT(newProfileCallback(void)));
+	connect(applyProfileButton, SIGNAL(clicked()), this, SLOT(loadProfileCallback(void)));
+	connect(saveProfileButton, SIGNAL(clicked()), this, SLOT(saveProfileCallback(void)));
+	connect(removeProfileButton, SIGNAL(clicked()), this, SLOT(deleteProfileCallback(void)));
+
+	connect(clearAllButton, SIGNAL(clicked()), this, SLOT(clearAllCallback(void)));
+	connect(closebutton, SIGNAL(clicked()), this, SLOT(closeWindow(void)));
+	connect(changeSeqButton, SIGNAL(clicked()), this, SLOT(changeSequentallyCallback(void)));
+
+	connect(portSel, SIGNAL(activated(int)), this, SLOT(portSelect(int)));
+	connect(devSel, SIGNAL(activated(int)), this, SLOT(deviceSelect(int)));
+	connect(efs_chkbox, SIGNAL(stateChanged(int)), this, SLOT(ena4score(int)));
+	connect(udlr_chkbox, SIGNAL(stateChanged(int)), this, SLOT(oppDirEna(int)));
 
 	mainLayoutH = new QHBoxLayout();
 	mainLayoutV = new QVBoxLayout();
-	vbox1       = new QVBoxLayout();
-	vbox2       = new QVBoxLayout();
+	vbox1 = new QVBoxLayout();
+	vbox2 = new QVBoxLayout();
 
-	hbox2->addWidget( efs_chkbox );
-	hbox2->addWidget( udlr_chkbox );
+	hbox2->addWidget(efs_chkbox);
+	hbox2->addWidget(udlr_chkbox);
 
-	vbox1->addLayout( grid1 );
+	vbox1->addLayout(grid1);
 	//vbox1->addLayout( hbox2 );
 	//vbox1->addLayout( hbox3 );
-	vbox1->addWidget( frame1);
-	vbox1->addLayout( hbox2 );
+	vbox1->addWidget(frame1);
+	vbox1->addLayout(hbox2);
 
-	vbox2->addWidget( frame2 );
-	vbox2->addLayout( hbox1 );
+	vbox2->addWidget(frame2);
+	vbox2->addLayout(hbox1);
 
 	gpView = new GamePadView_t(this);
 
-	mainLayoutV->addLayout( vbox1 );
-	mainLayoutV->addWidget( gpView );
+	mainLayoutV->addLayout(vbox1);
+	mainLayoutV->addWidget(gpView);
 
-	mainLayoutH->addLayout( mainLayoutV );
-	mainLayoutH->addLayout( vbox2 );
+	mainLayoutH->addLayout(mainLayoutV);
+	mainLayoutH->addLayout(vbox2);
 
-	mainWidget->setLayout( mainLayoutH );
-	mainWidget->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+	mainWidget->setLayout(mainLayoutH);
+	mainWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	if ( useScroll )
+	if (useScroll)
 	{
-		scroll->setWidget( mainWidget );
+		scroll->setWidget(mainWidget);
 		scroll->setWidgetResizable(true);
-		scroll->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
-		scroll->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded );
-		scroll->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+		scroll->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+		scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+		scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	}
-	
+
 	QHBoxLayout *dialogLayout = new QHBoxLayout();
 
-	if ( useScroll )
+	if (useScroll)
 	{
-		dialogLayout->addWidget( scroll );
+		dialogLayout->addWidget(scroll);
 	}
 	else
 	{
-		dialogLayout->addWidget( mainWidget );
+		dialogLayout->addWidget(mainWidget);
 	}
 
-	setLayout( dialogLayout );
+	setLayout(dialogLayout);
 
-	inputTimer->start( 33 ); // 30hz
+	inputTimer->start(33); // 30hz
 
-	for (int i=0; i<GAMEPAD_NUM_DEVICES; i++)
+	for (int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
 	{
-		sprintf( stmp, "SDL.Input.GamePad.%i.", i );
+		sprintf(stmp, "SDL.Input.GamePad.%i.", i);
 		prefix = stmp;
 
-		g_config->getOption(prefix + "Profile", &lcl[i].profile );
+		g_config->getOption(prefix + "Profile", &lcl[i].profile);
 
-		lcl[i].guid.assign( GamePad[i].getGUID() );
+		lcl[i].guid.assign(GamePad[i].getGUID());
 	}
 
 	loadMapList();
-
 }
 
 //----------------------------------------------------
@@ -406,114 +404,116 @@ void GamePadConfDialog_t::resizeEvent(QResizeEvent *event)
 
 void GamePadConfDialog_t::keyPressEvent(QKeyEvent *event)
 {
-   //printf("GamePad Window Key Press: 0x%x \n", event->key() );
-	pushKeyEvent( event, 1 );
+	//printf("GamePad Window Key Press: 0x%x \n", event->key() );
+	pushKeyEvent(event, 1);
 }
 
 void GamePadConfDialog_t::keyReleaseEvent(QKeyEvent *event)
 {
-   //printf("GamePad Window Key Release: 0x%x \n", event->key() );
-	pushKeyEvent( event, 0 );
+	//printf("GamePad Window Key Release: 0x%x \n", event->key() );
+	pushKeyEvent(event, 0);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::loadMapList(void)
 {
-   QDir dir;
-   QStringList filters, fileList;
-   const char *baseDir = FCEUI_GetBaseDirectory();
-   const char *guid;
-   std::string path;
+	QDir dir;
+	QStringList filters, fileList;
+	const char *baseDir = FCEUI_GetBaseDirectory();
+	const char *guid;
+	std::string path;
 	std::string prefix, mapName;
-   int index, devIdx;
-   jsDev_t *js;
-	size_t n=0;
+	int index, devIdx;
+	jsDev_t *js;
+	size_t n = 0;
 	char stmp[256];
 
-	index  = devSel->currentIndex();
+	index = devSel->currentIndex();
 	devIdx = devSel->itemData(index).toInt();
 
-   if ( devIdx < 0 )
-   {
-      guid = "keyboard";
-   }
-   else
-   {
-      js = getJoystickDevice( devIdx );
+	if (devIdx < 0)
+	{
+		guid = "keyboard";
+	}
+	else
+	{
+		js = getJoystickDevice(devIdx);
 
-      guid = js->getGUID();
-   }
+		guid = js->getGUID();
+	}
 
-   if ( guid == NULL )
-   {
-      return;
-   }
+	if (guid == NULL)
+	{
+		return;
+	}
 
-   path = std::string(baseDir) + "/input/" + std::string(guid);
+	path = std::string(baseDir) + "/input/" + std::string(guid);
 
-   dir.setPath( QString::fromStdString(path) );
+	dir.setPath(QString::fromStdString(path));
 
-   filters << "*.txt";
-   dir.setNameFilters(filters);
-   
-   fileList = dir.entryList( filters, QDir::Files, QDir::NoSort );
+	filters << "*.txt";
+	dir.setNameFilters(filters);
 
-	sprintf( stmp, "SDL.Input.GamePad.%u.", portNum );
+	fileList = dir.entryList(filters, QDir::Files, QDir::NoSort);
+
+	sprintf(stmp, "SDL.Input.GamePad.%u.", portNum);
 	prefix = stmp;
 
-	g_config->getOption(prefix + "Profile", &mapName );
+	g_config->getOption(prefix + "Profile", &mapName);
 
-   mapSel->clear();
-   mapSel->addItem( tr("default"), 0 ); n=1;
+	mapSel->clear();
+	mapSel->addItem(tr("default"), 0);
+	n = 1;
 
-   for (size_t i=0; i < fileList.size(); i++)
-   {
-      size_t suffixIdx;
-      std::string fileName = fileList[i].toStdString();
+	for (size_t i = 0; i < fileList.size(); i++)
+	{
+		size_t suffixIdx;
+		std::string fileName = fileList[i].toStdString();
 
-      suffixIdx = fileName.find_last_of('.');
+		suffixIdx = fileName.find_last_of('.');
 
-      fileName.erase( suffixIdx );
+		fileName.erase(suffixIdx);
 
-      //printf("File: %s \n", fileName.c_str() );
-      //
+		//printf("File: %s \n", fileName.c_str() );
+		//
 
-      if ( fileName.compare("default") == 0 ) continue;
+		if (fileName.compare("default") == 0)
+			continue;
 
-      mapSel->addItem( tr(fileName.c_str()), (int)i+1 ); 
+		mapSel->addItem(tr(fileName.c_str()), (int)i + 1);
 
-		if ( mapName.compare( fileName ) == 0 )
+		if (mapName.compare(fileName) == 0)
 		{
 			mapSel->setCurrentIndex(n);
 		}
 		n++;
-   }
+	}
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::updateCntrlrDpy(void)
 {
-   char keyNameStr[128];
+	char keyNameStr[128];
 
-	for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+	for (int i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
 	{
 		if (GamePad[portNum].bmap[i].ButtType == BUTTC_KEYBOARD)
 		{
-			snprintf( keyNameStr, sizeof (keyNameStr), "%s",
-				  SDL_GetKeyName (GamePad[portNum].bmap[i].ButtonNum));
+			snprintf(keyNameStr, sizeof(keyNameStr), "%s",
+					 SDL_GetKeyName(GamePad[portNum].bmap[i].ButtonNum));
 		}
 		else
 		{
-			strcpy( keyNameStr, ButtonName( &GamePad[portNum].bmap[i] ) );
+			strcpy(keyNameStr, ButtonName(&GamePad[portNum].bmap[i]));
 		}
 
-		keyName[i]->setText( tr(keyNameStr) );
+		keyName[i]->setText(tr(keyNameStr));
 
 		//if ( lcl[portNum].btn[i].needsSave )
 		//{
-      //	keyName[i]->setStyleSheet("color: red;");
+		//	keyName[i]->setStyleSheet("color: red;");
 		//}
 		//else
 		//{
-      //	keyName[i]->setStyleSheet("color: black;");
+		//	keyName[i]->setStyleSheet("color: black;");
 		//}
 	}
 }
@@ -524,16 +524,16 @@ void GamePadConfDialog_t::portSelect(int index)
 	portNum = index;
 	updateCntrlrDpy();
 
-	for (int i=0; i<devSel->count(); i++)
+	for (int i = 0; i < devSel->count(); i++)
 	{
-		if ( devSel->itemData(i).toInt() == GamePad[portNum].getDeviceIndex() )
+		if (devSel->itemData(i).toInt() == GamePad[portNum].getDeviceIndex())
 		{
-			devSel->setCurrentIndex( i );
+			devSel->setCurrentIndex(i);
 		}
 	}
-	guidLbl->setText( GamePad[portNum].getGUID() );
+	guidLbl->setText(GamePad[portNum].getGUID());
 
-   loadMapList();
+	loadMapList();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::deviceSelect(int index)
@@ -541,25 +541,25 @@ void GamePadConfDialog_t::deviceSelect(int index)
 	jsDev_t *js;
 	int devIdx = devSel->itemData(index).toInt();
 
-	js = getJoystickDevice( devIdx );
+	js = getJoystickDevice(devIdx);
 
-	if ( js != NULL )
+	if (js != NULL)
 	{
-		if ( js->isConnected() )
+		if (js->isConnected())
 		{
-			guidLbl->setText( js->getGUID() );
+			guidLbl->setText(js->getGUID());
 		}
 	}
 	else
 	{
 		guidLbl->setText("");
 	}
-	GamePad[portNum].setDeviceIndex( devIdx );
+	GamePad[portNum].setDeviceIndex(devIdx);
 
-	lcl[portNum].guid.assign( GamePad[portNum].getGUID() );
+	lcl[portNum].guid.assign(GamePad[portNum].getGUID());
 	lcl[portNum].profile.assign("default");
 
-   loadMapList();
+	loadMapList();
 
 	updateCntrlrDpy();
 }
@@ -580,195 +580,195 @@ void GamePadConfDialog_t::oppDirEna(int state)
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton(int padNo, int x)
 {
-   //char buf[256];
-   //std::string prefix;
-   const char *keyNameStr;
+	//char buf[256];
+	//std::string prefix;
+	const char *keyNameStr;
 
-   if ( buttonConfigStatus == 2 )
-   {
-      buttonConfigStatus = 0;
-      return;
-   }
-   buttonConfigStatus = 2;
+	if (buttonConfigStatus == 2)
+	{
+		buttonConfigStatus = 0;
+		return;
+	}
+	buttonConfigStatus = 2;
 
-   ButtonConfigBegin ();
+	ButtonConfigBegin();
 
-   button[x]->setText("Waiting" );
-   button[x]->setStyleSheet("background-color: green; color: white;");
+	button[x]->setText("Waiting");
+	button[x]->setStyleSheet("background-color: green; color: white;");
 
-	DWaitButton (NULL, &GamePad[padNo].bmap[x], &buttonConfigStatus );
+	DWaitButton(NULL, &GamePad[padNo].bmap[x], &buttonConfigStatus);
 
-    button[x]->setText("Change");
-    button[x]->setStyleSheet("");
+	button[x]->setText("Change");
+	button[x]->setStyleSheet("");
 
-    if (buttonConfigStatus != 0)
-    {
-        keyNameStr = ButtonName( &GamePad[padNo].bmap[x] );
-        keyName[x]->setText( keyNameStr );
-        lcl[padNo].btn[x].needsSave = 1;
-    }
+	if (buttonConfigStatus != 0)
+	{
+		keyNameStr = ButtonName(&GamePad[padNo].bmap[x]);
+		keyName[x]->setText(keyNameStr);
+		lcl[padNo].btn[x].needsSave = 1;
+	}
 
-   ButtonConfigEnd ();
+	ButtonConfigEnd();
 
-   buttonConfigStatus = 1;
+	buttonConfigStatus = 1;
 }
 //----------------------------------------------------
-void GamePadConfDialog_t::clearButton( int padNo, int x )
+void GamePadConfDialog_t::clearButton(int padNo, int x)
 {
 	GamePad[padNo].bmap[x].ButtonNum = -1;
 
-   keyName[x]->setText("");
+	keyName[x]->setText("");
 
 	lcl[padNo].btn[x].needsSave = 1;
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
 {
-    if (changeSeqStatus != 0)
-    {
-        // change sequentially still in progress
-        // now try to abort its progress
-        changeSeqStatus = -1;
-        // ... out from waiting gamepad button event loop
-        buttonConfigStatus = 0;
-        // and ignore this event
-        event->ignore();
-        return;
-    }
+	if (changeSeqStatus != 0)
+	{
+		// change sequentially still in progress
+		// now try to abort its progress
+		changeSeqStatus = -1;
+		// ... out from waiting gamepad button event loop
+		buttonConfigStatus = 0;
+		// and ignore this event
+		event->ignore();
+		return;
+	}
 	promptToSave();
 
-   printf("GamePad Close Window Event\n");
-   buttonConfigStatus = 0;
-   done(0);
+	printf("GamePad Close Window Event\n");
+	buttonConfigStatus = 0;
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::closeWindow(void)
 {
-    if (changeSeqStatus != 0)
-    {
-        // change sequentially still in progress
-        // now try to abort its progress
-        changeSeqStatus = -1;
-        // ... out from waiting gamepad button event loop
-        buttonConfigStatus = 0;
-        return;
-    }
+	if (changeSeqStatus != 0)
+	{
+		// change sequentially still in progress
+		// now try to abort its progress
+		changeSeqStatus = -1;
+		// ... out from waiting gamepad button event loop
+		buttonConfigStatus = 0;
+		return;
+	}
 
-    promptToSave();
+	promptToSave();
 
-   printf("Close Window\n");
-   buttonConfigStatus = 0;
-   done(0);
+	printf("Close Window\n");
+	buttonConfigStatus = 0;
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton0(void)
 {
-   changeButton( portNum, 0 );
+	changeButton(portNum, 0);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton1(void)
 {
-   changeButton( portNum, 1 );
+	changeButton(portNum, 1);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton2(void)
 {
-   changeButton( portNum, 2 );
+	changeButton(portNum, 2);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton3(void)
 {
-   changeButton( portNum, 3 );
+	changeButton(portNum, 3);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton4(void)
 {
-   changeButton( portNum, 4 );
+	changeButton(portNum, 4);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton5(void)
 {
-   changeButton( portNum, 5 );
+	changeButton(portNum, 5);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton6(void)
 {
-   changeButton( portNum, 6 );
+	changeButton(portNum, 6);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton7(void)
 {
-   changeButton( portNum, 7 );
+	changeButton(portNum, 7);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton8(void)
 {
-   changeButton( portNum, 8 );
+	changeButton(portNum, 8);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton9(void)
 {
-   changeButton( portNum, 9 );
+	changeButton(portNum, 9);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton0(void)
 {
-   clearButton( portNum, 0 );
+	clearButton(portNum, 0);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton1(void)
 {
-   clearButton( portNum, 1 );
+	clearButton(portNum, 1);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton2(void)
 {
-   clearButton( portNum, 2 );
+	clearButton(portNum, 2);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton3(void)
 {
-   clearButton( portNum, 3 );
+	clearButton(portNum, 3);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton4(void)
 {
-   clearButton( portNum, 4 );
+	clearButton(portNum, 4);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton5(void)
 {
-   clearButton( portNum, 5 );
+	clearButton(portNum, 5);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton6(void)
 {
-   clearButton( portNum, 6 );
+	clearButton(portNum, 6);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton7(void)
 {
-   clearButton( portNum, 7 );
+	clearButton(portNum, 7);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton8(void)
 {
-   clearButton( portNum, 8 );
+	clearButton(portNum, 8);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton9(void)
 {
-   clearButton( portNum, 9 );
+	clearButton(portNum, 9);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearAllCallback(void)
 {
-	for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+	for (int i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
 	{
-   	clearButton( portNum, i );
+		clearButton(portNum, i);
 	}
 }
 //----------------------------------------------------
@@ -778,187 +778,186 @@ void GamePadConfDialog_t::saveConfig(void)
 	char stmp[256];
 	std::string prefix, mapName;
 
-	sprintf( stmp, "SDL.Input.GamePad.%u.", portNum );
+	sprintf(stmp, "SDL.Input.GamePad.%u.", portNum);
 	prefix = stmp;
 
-   mapName = mapSel->currentText().toStdString();
+	mapName = mapSel->currentText().toStdString();
 
-	g_config->setOption(prefix + "DeviceGUID", GamePad[portNum].getGUID() );
-	g_config->setOption(prefix + "Profile"   , mapName.c_str()            );
+	g_config->setOption(prefix + "DeviceGUID", GamePad[portNum].getGUID());
+	g_config->setOption(prefix + "Profile", mapName.c_str());
 
-	for (i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+	for (i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
 	{
 		lcl[portNum].btn[i].needsSave = 0;
 	}
 	g_config->save();
 }
 //----------------------------------------------------
-void GamePadConfDialog_t::createNewProfile( const char *name )
+void GamePadConfDialog_t::createNewProfile(const char *name)
 {
 	char stmp[256];
-   //printf("Creating: %s \n", name );
+	//printf("Creating: %s \n", name );
 
-   GamePad[portNum].createProfile(name);
+	GamePad[portNum].createProfile(name);
 
-   mapSel->addItem( tr(name) );
+	mapSel->addItem(tr(name));
 
-	mapSel->setCurrentIndex( mapSel->count() - 1 );
+	mapSel->setCurrentIndex(mapSel->count() - 1);
 	saveConfig();
 
-   sprintf( stmp, "Mapping Created: %s/%s \n", GamePad[portNum].getGUID(), name );
-   mapMsg->setText( tr(stmp) );
+	sprintf(stmp, "Mapping Created: %s/%s \n", GamePad[portNum].getGUID(), name);
+	mapMsg->setText(tr(stmp));
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::newProfileCallback(void)
 {
-   int ret;
-   QInputDialog dialog(this);
+	int ret;
+	QInputDialog dialog(this);
 
-   dialog.setWindowTitle( tr("New Profile") );
-   dialog.setLabelText( tr("Specify New Profile Name") );
-   dialog.setOkButtonText( tr("Create") );
+	dialog.setWindowTitle(tr("New Profile"));
+	dialog.setLabelText(tr("Specify New Profile Name"));
+	dialog.setOkButtonText(tr("Create"));
 
-   ret = dialog.exec();
+	ret = dialog.exec();
 
-   if ( QDialog::Accepted == ret )
-   {
-      createNewProfile( dialog.textValue().toStdString().c_str() );
-   }
+	if (QDialog::Accepted == ret)
+	{
+		createNewProfile(dialog.textValue().toStdString().c_str());
+	}
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::loadProfileCallback(void)
 {
-   char stmp[256];
-   int index, devIdx, ret;
-   std::string mapName;
+	char stmp[256];
+	int index, devIdx, ret;
+	std::string mapName;
 
-	index  = devSel->currentIndex();
+	index = devSel->currentIndex();
 	devIdx = devSel->itemData(index).toInt();
 
-   mapName = mapSel->currentText().toStdString();
+	mapName = mapSel->currentText().toStdString();
 
-	GamePad[portNum].setDeviceIndex( devIdx );
+	GamePad[portNum].setDeviceIndex(devIdx);
 
-   if ( mapName.compare("default") == 0 )
-   {
-      ret =GamePad[portNum].loadDefaults();
-   }
-   else
-   {
-      ret = GamePad[portNum].loadProfile( mapName.c_str() );
-   }
-   if ( ret == 0 )
-   {
+	if (mapName.compare("default") == 0)
+	{
+		ret = GamePad[portNum].loadDefaults();
+	}
+	else
+	{
+		ret = GamePad[portNum].loadProfile(mapName.c_str());
+	}
+	if (ret == 0)
+	{
 		saveConfig();
 
-      sprintf( stmp, "Mapping Loaded: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
-   }
-   else
-   {
-      sprintf( stmp, "Error: Failed to Load Mapping: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
-   }
-   mapMsg->setText( tr(stmp) );
+		sprintf(stmp, "Mapping Loaded: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
+	}
+	else
+	{
+		sprintf(stmp, "Error: Failed to Load Mapping: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
+	}
+	mapMsg->setText(tr(stmp));
 
 	updateCntrlrDpy();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::saveProfileCallback(void)
 {
-   int ret;
-   std::string mapName;
-   char stmp[256];
+	int ret;
+	std::string mapName;
+	char stmp[256];
 
-   mapName = mapSel->currentText().toStdString();
+	mapName = mapSel->currentText().toStdString();
 
-   ret = GamePad[portNum].saveCurrentMapToFile( mapName.c_str() );
+	ret = GamePad[portNum].saveCurrentMapToFile(mapName.c_str());
 
-   if ( ret == 0 )
-   {
+	if (ret == 0)
+	{
 		saveConfig();
 
-      sprintf( stmp, "Mapping Saved: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
-   }
-   else
-   {
-      sprintf( stmp, "Error: Failed to Save Mapping: %s \n", mapName.c_str() );
-   }
-   mapMsg->setText( tr(stmp) );
-
+		sprintf(stmp, "Mapping Saved: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
+	}
+	else
+	{
+		sprintf(stmp, "Error: Failed to Save Mapping: %s \n", mapName.c_str());
+	}
+	mapMsg->setText(tr(stmp));
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::deleteProfileCallback(void)
 {
-   int ret;
-   std::string mapName;
-   char stmp[256];
+	int ret;
+	std::string mapName;
+	char stmp[256];
 
-   mapName = mapSel->currentText().toStdString();
+	mapName = mapSel->currentText().toStdString();
 
-   ret = GamePad[portNum].deleteMapping( mapName.c_str() );
+	ret = GamePad[portNum].deleteMapping(mapName.c_str());
 
-   if ( ret == 0 )
-   {
-      sprintf( stmp, "Mapping Deleted: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str() );
-   }
-   else
-   {
-      sprintf( stmp, "Error: Failed to Delete Mapping: %s \n", mapName.c_str() );
-   }
-   mapMsg->setText( tr(stmp) );
+	if (ret == 0)
+	{
+		sprintf(stmp, "Mapping Deleted: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
+	}
+	else
+	{
+		sprintf(stmp, "Error: Failed to Delete Mapping: %s \n", mapName.c_str());
+	}
+	mapMsg->setText(tr(stmp));
 
-   loadMapList();
+	loadMapList();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::promptToSave(void)
 {
-	int i,j,n;
+	int i, j, n;
 	std::string msg;
 	QMessageBox msgBox(this);
 	char saveRequired = 0;
 	char padNeedsSave[GAMEPAD_NUM_DEVICES];
 	char stmp[256];
 
-	n=0;
-	for (i=0; i<GAMEPAD_NUM_DEVICES; i++)
+	n = 0;
+	for (i = 0; i < GAMEPAD_NUM_DEVICES; i++)
 	{
 		padNeedsSave[i] = 0;
 
-		for (j=0; j<GAMEPAD_NUM_BUTTONS; j++)
+		for (j = 0; j < GAMEPAD_NUM_BUTTONS; j++)
 		{
-			if ( lcl[i].btn[j].needsSave )
+			if (lcl[i].btn[j].needsSave)
 			{
 				padNeedsSave[i] = 1;
-				saveRequired = 1; 
+				saveRequired = 1;
 				n++;
 				break;
 			}
 		}
 	}
 
-	if ( !saveRequired )
+	if (!saveRequired)
 	{
 		return;
 	}
-	sprintf( stmp, "Warning: Gamepad mappings have not been saved for port%c ", (n > 1) ? 's':' ');
+	sprintf(stmp, "Warning: Gamepad mappings have not been saved for port%c ", (n > 1) ? 's' : ' ');
 
-	msg.assign( stmp );
+	msg.assign(stmp);
 
-	j=n;
-	for (i=0; i<GAMEPAD_NUM_DEVICES; i++)
+	j = n;
+	for (i = 0; i < GAMEPAD_NUM_DEVICES; i++)
 	{
-		if ( padNeedsSave[i] )
+		if (padNeedsSave[i])
 		{
-			sprintf( stmp, "%i", i+1 );
+			sprintf(stmp, "%i", i + 1);
 
 			msg.append(stmp);
 
 			j--;
 
-			if ( j > 1 )
+			if (j > 1)
 			{
 				msg.append(", ");
-			} 
-			else if ( j == 1 )
+			}
+			else if (j == 1)
 			{
 				msg.append(" and ");
 			}
@@ -966,8 +965,8 @@ void GamePadConfDialog_t::promptToSave(void)
 	}
 	msg.append(".");
 
-	msgBox.setIcon( QMessageBox::Warning );
-	msgBox.setText( tr(msg.c_str()) );
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setText(tr(msg.c_str()));
 
 	msgBox.show();
 	msgBox.exec();
@@ -975,7 +974,7 @@ void GamePadConfDialog_t::promptToSave(void)
 //----------------------------------------------------
 void GamePadConfDialog_t::updatePeriodic(void)
 {
-	for (int i=0; i<GAMEPAD_NUM_BUTTONS; i++)
+	for (int i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
 	{
 		//const char *txt, *style;
 		//if ( GamePad[portNum].bmap[i].state )
@@ -991,7 +990,7 @@ void GamePadConfDialog_t::updatePeriodic(void)
 		//keyState[i]->setText( tr(txt) );
 		//keyState[i]->setStyleSheet( style );
 
-		if ( lcl[portNum].btn[i].needsSave )
+		if (lcl[portNum].btn[i].needsSave)
 		{
 			keyName[i]->setStyleSheet("color: red;");
 		}
@@ -1003,12 +1002,12 @@ void GamePadConfDialog_t::updatePeriodic(void)
 
 	int fourScore;
 	g_config->getOption("SDL.FourScore", &fourScore);
-	if ( fourScore != efs_chkbox->isChecked() )
+	if (fourScore != efs_chkbox->isChecked())
 	{
-		efs_chkbox->setChecked( fourScore );
+		efs_chkbox->setChecked(fourScore);
 	}
 
-	gpView->setPort( portNum );
+	gpView->setPort(portNum);
 	gpView->update();
 }
 
@@ -1016,27 +1015,30 @@ void GamePadConfDialog_t::updatePeriodic(void)
 
 void GamePadConfDialog_t::changeSequentallyCallback(void)
 {
-    // get pointer to button
-    QPushButton* changeSeqButton = qobject_cast<QPushButton*>(sender());
-    if (!changeSeqButton)
-        return;
+	// get pointer to button
+	QPushButton *changeSeqButton = qobject_cast<QPushButton *>(sender());
+	if (!changeSeqButton)
+		return;
 
-    // disable it for user input
-    changeSeqButton->setEnabled(false);
+	// disable it for user input
+	changeSeqButton->setEnabled(false);
 
-    // change button for every button on gamepad
-    for (int i = 0; i < GAMEPAD_NUM_BUTTONS; ++i)
-    {
-        changeSeqStatus += 1;
-        if (this->isHidden()) break;
-        changeButton(portNum, i);
-        if (this->isHidden()) break;
-        // abort?
-        if (changeSeqStatus == -1) break;
-    }
-    // return all back
-    changeSeqStatus = 0;
-    changeSeqButton->setEnabled(true);
+	// change button for every button on gamepad
+	for (int i = 0; i < GAMEPAD_NUM_BUTTONS; ++i)
+	{
+		changeSeqStatus += 1;
+		if (this->isHidden())
+			break;
+		changeButton(portNum, i);
+		if (this->isHidden())
+			break;
+		// abort?
+		if (changeSeqStatus == -1)
+			break;
+	}
+	// return all back
+	changeSeqStatus = 0;
+	changeSeqButton->setEnabled(true);
 }
 
 //----------------------------------------------------
@@ -1048,41 +1050,41 @@ GamePadConfigButton_t::GamePadConfigButton_t(int i)
 //----------------------------------------------------
 void GamePadConfigButton_t::keyPressEvent(QKeyEvent *event)
 {
-   //printf("GamePad Button Key Press: 0x%x \n", event->key() );
-	pushKeyEvent( event, 1 );
+	//printf("GamePad Button Key Press: 0x%x \n", event->key() );
+	pushKeyEvent(event, 1);
 }
 
 void GamePadConfigButton_t::keyReleaseEvent(QKeyEvent *event)
 {
-   //printf("GamePad Button Key Release: 0x%x \n", event->key() );
-	pushKeyEvent( event, 0 );
+	//printf("GamePad Button Key Release: 0x%x \n", event->key() );
+	pushKeyEvent(event, 0);
 }
 //----------------------------------------------------
 //----------------------------------------------------
 // Game Pad Viewer
 //----------------------------------------------------
 //----------------------------------------------------
-GamePadView_t::GamePadView_t( QWidget *parent)
+GamePadView_t::GamePadView_t(QWidget *parent)
 	: QWidget(parent)
 {
 	this->setFocusPolicy(Qt::StrongFocus);
-	this->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	this->setMouseTracking(true);
-	viewWidth = 128*3;
+	viewWidth = 128 * 3;
 	viewHeight = 128;
-	setMinimumWidth( viewWidth );
-	setMinimumHeight( viewHeight );
+	setMinimumWidth(viewWidth);
+	setMinimumHeight(viewHeight);
 
 	font.setFamily("Courier New");
-	font.setStyle( QFont::StyleNormal );
-	font.setStyleHint( QFont::Monospace );
+	font.setStyle(QFont::StyleNormal);
+	font.setStyleHint(QFont::Monospace);
 	QFontMetrics fm(font);
 
-	#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	pxCharWidth = fm.horizontalAdvance(QLatin1Char('2'));
-	#else
+#else
 	pxCharWidth = fm.width(QLatin1Char('2'));
-	#endif
+#endif
 	pxCharHeight = fm.lineSpacing();
 
 	portNum = 0;
@@ -1090,7 +1092,6 @@ GamePadView_t::GamePadView_t( QWidget *parent)
 //----------------------------------------------------
 GamePadView_t::~GamePadView_t(void)
 {
-
 }
 //----------------------------------------------------
 void GamePadView_t::setPort(int port)
@@ -1100,7 +1101,7 @@ void GamePadView_t::setPort(int port)
 //----------------------------------------------------
 void GamePadView_t::resizeEvent(QResizeEvent *event)
 {
-	viewWidth  = event->size().width();
+	viewWidth = event->size().width();
 	viewHeight = event->size().height();
 
 	//printf("%ix%i\n", event->size().width(), event->size().height() );
@@ -1108,37 +1109,35 @@ void GamePadView_t::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------
 void GamePadView_t::keyPressEvent(QKeyEvent *event)
 {
-	pushKeyEvent( event, 1 );
+	pushKeyEvent(event, 1);
 }
 //----------------------------------------------------
 void GamePadView_t::keyReleaseEvent(QKeyEvent *event)
 {
-	pushKeyEvent( event, 0 );
+	pushKeyEvent(event, 0);
 }
 //----------------------------------------------------
 void GamePadView_t::mouseMoveEvent(QMouseEvent *event)
 {
-
 }
 //----------------------------------------------------
-void GamePadView_t::mousePressEvent(QMouseEvent * event)
+void GamePadView_t::mousePressEvent(QMouseEvent *event)
 {
-
 }
 //----------------------------------------------------
-void GamePadView_t::drawLetterOnButton( QPainter &painter, QRect &rect, QColor &color, int ch )
+void GamePadView_t::drawLetterOnButton(QPainter &painter, QRect &rect, QColor &color, int ch)
 {
-	int x,y;
+	int x, y;
 	char c[2];
 
 	c[0] = ch;
 	c[1] = 0;
 
-	x = rect.x() + (rect.width()  - pxCharWidth) / 2;
+	x = rect.x() + (rect.width() - pxCharWidth) / 2;
 	y = rect.y() + (rect.height() - pxCharHeight) / 2;
 
-	painter.setPen( color );
-	painter.drawText( x, y+pxCharHeight, tr(c) );
+	painter.setPen(color);
+	painter.drawText(x, y + pxCharHeight, tr(c));
 }
 //----------------------------------------------------
 void GamePadView_t::paintEvent(QPaintEvent *event)
@@ -1146,157 +1145,157 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	int w, h, x, y, b = 5;
 	int w3, bw, bh, ws, hs, ht, ws2;
 	QPainter painter(this);
-	QColor white(255,255,255);
-	QColor black(  0,  0,  0);
-	QColor clear(  0,  0,  0,  0);
-	QColor gray (128,128,128);
-	QColor green(  0,255,  0);
-	QRect  gp1, gp2;
-	QRect  upBtn, dnBtn, lBtn, rBtn, cBtn;
-	QRect  selBtn, stBtn;
-	QRect   bBtn,  aBtn, tbBtn, taBtn, tBox;
+	QColor white(255, 255, 255);
+	QColor black(0, 0, 0);
+	QColor clear(0, 0, 0, 0);
+	QColor gray(128, 128, 128);
+	QColor green(0, 255, 0);
+	QRect gp1, gp2;
+	QRect upBtn, dnBtn, lBtn, rBtn, cBtn;
+	QRect selBtn, stBtn;
+	QRect bBtn, aBtn, tbBtn, taBtn, tBox;
 
 	w = viewWidth;
 	h = viewHeight;
 
-	if ( w > (3*h) )
+	if (w > (3 * h))
 	{
-		w = 3*h;
+		w = 3 * h;
 	}
 	else
 	{
-		h = w/3;
+		h = w / 3;
 	}
-	x = (viewWidth  - w) / 2;
+	x = (viewWidth - w) / 2;
 	y = (viewHeight - h) / 2;
 
-	gp1.setRect( x, y, w, h );
-	
-	painter.fillRect( gp1, gray );
+	gp1.setRect(x, y, w, h);
 
-	x = x+b;
-	y = y+b;
-	w = w-(2*b);
-	h = h-(2*b);
+	painter.fillRect(gp1, gray);
 
-	gp2.setRect( x, y, w, h );
+	x = x + b;
+	y = y + b;
+	w = w - (2 * b);
+	h = h - (2 * b);
 
-	painter.fillRect( gp2, black );
+	gp2.setRect(x, y, w, h);
+
+	painter.fillRect(gp2, black);
 
 	w3 = w / 3;
 	bw = w3 / 5;
 	bh = bw;
 
 	x = gp2.x() + bw;
-	y = gp2.y() + (h/5);
+	y = gp2.y() + (h / 5);
 
-	upBtn.setRect( x+bw , y       , bw, bh );
-	dnBtn.setRect( x+bw , y+(bh*2), bw, bh );
-	lBtn.setRect( x        , y+bh, bw, bh );
-	rBtn.setRect( x+(bw*2) , y+bh, bw, bh );
-	cBtn.setRect( x+bw , y+bh, bw, bh );
+	upBtn.setRect(x + bw, y, bw, bh);
+	dnBtn.setRect(x + bw, y + (bh * 2), bw, bh);
+	lBtn.setRect(x, y + bh, bw, bh);
+	rBtn.setRect(x + (bw * 2), y + bh, bw, bh);
+	cBtn.setRect(x + bw, y + bh, bw, bh);
 
-	painter.fillRect( upBtn.x()-b, upBtn.y()-b,  upBtn.width()+(2*b), 3*upBtn.height()+(2*b), gray );
-	painter.fillRect( lBtn.x()-b ,  lBtn.y()-b, 3*lBtn.width()+(2*b),    lBtn.height()+(2*b), gray );
+	painter.fillRect(upBtn.x() - b, upBtn.y() - b, upBtn.width() + (2 * b), 3 * upBtn.height() + (2 * b), gray);
+	painter.fillRect(lBtn.x() - b, lBtn.y() - b, 3 * lBtn.width() + (2 * b), lBtn.height() + (2 * b), gray);
 
-	painter.fillRect(  cBtn, black );
+	painter.fillRect(cBtn, black);
 
-	if ( GamePad[portNum].bmap[4].state )
+	if (GamePad[portNum].bmap[4].state)
 	{
-		painter.fillRect( upBtn, green );
+		painter.fillRect(upBtn, green);
 	}
 	else
 	{
-		painter.fillRect( upBtn, black );
+		painter.fillRect(upBtn, black);
 	}
 
-	if ( GamePad[portNum].bmap[5].state ) 
+	if (GamePad[portNum].bmap[5].state)
 	{
-		painter.fillRect( dnBtn, green );
+		painter.fillRect(dnBtn, green);
 	}
 	else
 	{
-		painter.fillRect( dnBtn, black );
+		painter.fillRect(dnBtn, black);
 	}
 
-	if ( GamePad[portNum].bmap[6].state ) 
+	if (GamePad[portNum].bmap[6].state)
 	{
-		painter.fillRect(  lBtn, green );
+		painter.fillRect(lBtn, green);
 	}
 	else
 	{
-		painter.fillRect(  lBtn, black );
+		painter.fillRect(lBtn, black);
 	}
 
-	if ( GamePad[portNum].bmap[7].state ) 
+	if (GamePad[portNum].bmap[7].state)
 	{
-		painter.fillRect(  rBtn, green );
+		painter.fillRect(rBtn, green);
 	}
 	else
 	{
-		painter.fillRect(  rBtn, black );
+		painter.fillRect(rBtn, black);
 	}
 
 	bw = w3 / 3;
 	bh = bw / 2;
 
 	x = gp2.x() + w3;
-	y = gp2.y() + (3*h/5);
+	y = gp2.y() + (3 * h / 5);
 
-	selBtn.setRect( x+(bw/3) , y , bw, bh );
-	 stBtn.setRect( x+(5*bw)/3, y , bw, bh );
+	selBtn.setRect(x + (bw / 3), y, bw, bh);
+	stBtn.setRect(x + (5 * bw) / 3, y, bw, bh);
 
-	if ( GamePad[portNum].bmap[2].state ) 
+	if (GamePad[portNum].bmap[2].state)
 	{
-		painter.fillRect(  selBtn, green );
+		painter.fillRect(selBtn, green);
 	}
 	else
 	{
-		painter.fillRect(  selBtn, gray );
+		painter.fillRect(selBtn, gray);
 	}
 
-	if ( GamePad[portNum].bmap[3].state ) 
+	if (GamePad[portNum].bmap[3].state)
 	{
-		painter.fillRect(   stBtn, green );
+		painter.fillRect(stBtn, green);
 	}
 	else
 	{
-		painter.fillRect(   stBtn, gray );
+		painter.fillRect(stBtn, gray);
 	}
 
 	//bw = w3 / 3;
-	bh =  h / 3;
+	bh = h / 3;
 	bw = bh;
 
 	ht = pxCharHeight;
-	bh = (h-ht)/ 3;
+	bh = (h - ht) / 3;
 	bw = bh;
-	hs = (ht-pxCharHeight)/2;
-	ws = (w3 - (5*pxCharWidth))/2;
+	hs = (ht - pxCharHeight) / 2;
+	ws = (w3 - (5 * pxCharWidth)) / 2;
 
-	painter.setPen( white );
+	painter.setPen(white);
 
-	x = gp2.x() + (2*w3) + ws;
-	y = gp2.y() + (ht-hs);
+	x = gp2.x() + (2 * w3) + ws;
+	y = gp2.y() + (ht - hs);
 
-	painter.drawText( x, y, tr("Turbo") );
+	painter.drawText(x, y, tr("Turbo"));
 
-	ws  = (w3 - (2*bw)) / 3;
-	hs  = (h  - (2*bh) - ht) / 3;
+	ws = (w3 - (2 * bw)) / 3;
+	hs = (h - (2 * bh) - ht) / 3;
 	ws2 = (ws / 2);
 
-	x = gp2.x() + (2*w3);
-	y = gp2.y() + (ht+hs);
+	x = gp2.x() + (2 * w3);
+	y = gp2.y() + (ht + hs);
 
-	tbBtn.setRect( x+ws , y , bw, bh );
-	taBtn.setRect( x+bw+(2*ws), y , bw, bh );
+	tbBtn.setRect(x + ws, y, bw, bh);
+	taBtn.setRect(x + bw + (2 * ws), y, bw, bh);
 
-	y = gp2.y() + (ht+bh+(2*hs));
+	y = gp2.y() + (ht + bh + (2 * hs));
 
-	bBtn.setRect( x+ws , y , bw, bh );
-	aBtn.setRect( x+bw+(2*ws), y , bw, bh );
+	bBtn.setRect(x + ws, y, bw, bh);
+	aBtn.setRect(x + bw + (2 * ws), y, bw, bh);
 
-	if ( GamePad[portNum].bmap[9].state ) 
+	if (GamePad[portNum].bmap[9].state)
 	{
 		painter.setBrush(Qt::green);
 	}
@@ -1304,11 +1303,11 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	{
 		painter.setBrush(Qt::red);
 	}
-	painter.setPen( white );
-	painter.drawEllipse( tbBtn );
-	drawLetterOnButton( painter, tbBtn, black, 'B');
+	painter.setPen(white);
+	painter.drawEllipse(tbBtn);
+	drawLetterOnButton(painter, tbBtn, black, 'B');
 
-	if ( GamePad[portNum].bmap[8].state ) 
+	if (GamePad[portNum].bmap[8].state)
 	{
 		painter.setBrush(Qt::green);
 	}
@@ -1316,11 +1315,11 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	{
 		painter.setBrush(Qt::red);
 	}
-	painter.setPen( white );
-	painter.drawEllipse( taBtn );
-	drawLetterOnButton( painter, taBtn, black, 'A');
+	painter.setPen(white);
+	painter.drawEllipse(taBtn);
+	drawLetterOnButton(painter, taBtn, black, 'A');
 
-	if ( GamePad[portNum].bmap[1].state ) 
+	if (GamePad[portNum].bmap[1].state)
 	{
 		painter.setBrush(Qt::green);
 	}
@@ -1328,11 +1327,11 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	{
 		painter.setBrush(Qt::red);
 	}
-	painter.setPen( white );
-	painter.drawEllipse(  bBtn );
-	drawLetterOnButton( painter, bBtn, black, 'B');
+	painter.setPen(white);
+	painter.drawEllipse(bBtn);
+	drawLetterOnButton(painter, bBtn, black, 'B');
 
-	if ( GamePad[portNum].bmap[0].state ) 
+	if (GamePad[portNum].bmap[0].state)
 	{
 		painter.setBrush(Qt::green);
 	}
@@ -1340,18 +1339,18 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	{
 		painter.setBrush(Qt::red);
 	}
-	painter.setPen( white );
-	painter.drawEllipse(  aBtn );
-	drawLetterOnButton( painter, aBtn, black, 'A');
+	painter.setPen(white);
+	painter.drawEllipse(aBtn);
+	drawLetterOnButton(painter, aBtn, black, 'A');
 
 	painter.setBrush(clear);
 
-	tBox.setTop( gp2.y()+2 );
-	tBox.setLeft( gp2.x()+(2*w3)+ws2 );
-	tBox.setWidth( w3-ws );
-	tBox.setBottom( taBtn.y() + (aBtn.y() - taBtn.y() + bh)/2 );
+	tBox.setTop(gp2.y() + 2);
+	tBox.setLeft(gp2.x() + (2 * w3) + ws2);
+	tBox.setWidth(w3 - ws);
+	tBox.setBottom(taBtn.y() + (aBtn.y() - taBtn.y() + bh) / 2);
 
-	painter.setPen( white );
-	painter.drawRect( tBox );
+	painter.setPen(white);
+	painter.drawRect(tBox);
 }
 //----------------------------------------------------
