@@ -266,6 +266,11 @@ int LoadGame(const char *path, bool silent)
 		return 0;
 	}
 
+	if ( consoleWindow )
+	{
+		consoleWindow->addRecentRom( fullpath );
+	}
+
 	hexEditorLoadBookmarks();
 
 	g_config->getOption( "SDL.AutoLoadDebugFiles", &autoLoadDebug );

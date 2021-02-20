@@ -351,6 +351,14 @@ InitConfig()
 	config->addOption("_lastopenmovie", "SDL.LastOpenMovie", movPath);
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
 
+	for (unsigned int i=0; i<10; i++)
+	{
+		char buf[128];
+		sprintf(buf, "SDL.RecentRom%02u", i);
+
+		config->addOption( buf, "");
+	}
+
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
     

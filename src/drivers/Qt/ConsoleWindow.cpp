@@ -118,13 +118,13 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	{
 		viewport_SDL = new ConsoleViewSDL_t(this);
 
-   	setCentralWidget(viewport_SDL);
+		setCentralWidget(viewport_SDL);
 	}
 	else
 	{
 		viewport_GL = new ConsoleViewGL_t(this);
 
-   	setCentralWidget(viewport_GL);
+		setCentralWidget(viewport_GL);
 	}
 
 	setWindowTitle( tr(FCEU_NAME_AND_VERSION) );
@@ -159,6 +159,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		setSchedParam( policy, prio );
 		#endif
 	}
+
+	recentRomMenuReset = false;
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -225,6 +227,8 @@ consoleWin_t::~consoleWin_t(void)
 		clipboard->clear( QClipboard::Selection );
 	}
 
+	clearRomList();
+
 	if ( this == consoleWindow )
 	{
 		consoleWindow = NULL;
@@ -262,10 +266,10 @@ void consoleWin_t::QueueErrorMsgWindow( const char *msg )
 
 void consoleWin_t::closeEvent(QCloseEvent *event)
 {
-   //printf("Main Window Close Event\n");
+	//printf("Main Window Close Event\n");
 	closeGamePadConfWindow();
 
-   event->accept();
+	event->accept();
 
 	closeApp();
 }
@@ -277,13 +281,13 @@ void consoleWin_t::requestClose(void)
 
 void consoleWin_t::keyPressEvent(QKeyEvent *event)
 {
-   //printf("Key Press: 0x%x \n", event->key() );
+	//printf("Key Press: 0x%x \n", event->key() );
 	pushKeyEvent( event, 1 );
 }
 
 void consoleWin_t::keyReleaseEvent(QKeyEvent *event)
 {
-   //printf("Key Release: 0x%x \n", event->key() );
+	//printf("Key Release: 0x%x \n", event->key() );
 	pushKeyEvent( event, 0 );
 }
 
@@ -330,6 +334,11 @@ void consoleWin_t::createMainMenu(void)
 	
 	fileMenu->addAction(closeROM);
 	
+	// File -> Recent ROMs
+	recentRomMenu = fileMenu->addMenu( tr("&Recent ROMs") );
+
+	buildRecentRomMenu();
+
 	fileMenu->addSeparator();
 
 	// File -> Play NSF
@@ -392,7 +401,7 @@ void consoleWin_t::createMainMenu(void)
 	        state[i]->setCheckable(true);
 
 	        group->addAction(state[i]);
-		 subMenu->addAction(state[i]);
+		subMenu->addAction(state[i]);
 	}
 	state[0]->setChecked(true);
 
@@ -935,6 +944,120 @@ void consoleWin_t::createMainMenu(void)
 	
 	helpMenu->addAction(act);
 };
+//---------------------------------------------------------------------------
+void consoleWin_t::clearRomList(void)
+{
+	std::list <std::string*>::iterator it;
+
+	for (it=romList.begin(); it != romList.end(); it++)
+	{
+		delete *it;
+	}
+	romList.clear();
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::buildRecentRomMenu(void)
+{
+	QAction *act;
+	std::string s;
+	std::string *sptr;
+	char buf[128];
+
+	clearRomList();
+	recentRomMenu->clear();
+
+	for (int i=0; i<10; i++)
+	{
+		sprintf(buf, "SDL.RecentRom%02i", i);
+
+		g_config->getOption( buf, &s);
+
+		//printf("Recent Rom:%i  '%s'\n", i, s.c_str() );
+
+		if ( s.size() > 0 )
+		{
+			act = new consoleRecentRomAction( tr(s.c_str()), recentRomMenu);
+
+			recentRomMenu->addAction( act );
+
+			connect(act, SIGNAL(triggered()), act, SLOT(activateCB(void)) );
+
+			sptr = new std::string();
+
+			sptr->assign( s.c_str() );
+
+			romList.push_front( sptr );
+		}
+	}
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::saveRecentRomMenu(void)
+{
+	int i;
+	std::string *s;
+	std::list <std::string*>::iterator it;
+	char buf[128];
+
+	i = romList.size() - 1;
+
+	for (it=romList.begin(); it != romList.end(); it++)
+	{
+		s = *it;
+		sprintf(buf, "SDL.RecentRom%02i", i);
+
+		g_config->setOption( buf, s->c_str() );
+
+		//printf("Recent Rom:%u  '%s'\n", i, s->c_str() );
+		i--;
+	}
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::addRecentRom( const char *rom )
+{
+	std::string *s;
+	std::list <std::string*>::iterator match_it;
+
+	for (match_it=romList.begin(); match_it != romList.end(); match_it++)
+	{
+		s = *match_it;
+
+		if ( s->compare( rom ) == 0 )
+		{
+			//printf("Found Match: %s\n", rom );
+			break;
+		}
+	}
+
+	if ( match_it != romList.end() )
+	{
+		s = *match_it;
+
+		romList.erase(match_it);
+
+		romList.push_back(s);
+	}
+	else
+	{
+		s = new std::string();
+
+		s->assign( rom );
+		
+		romList.push_back(s);
+
+		if ( romList.size() > 10 )
+		{
+			s = romList.front();
+
+			romList.pop_front();
+
+			delete s;
+		}
+	}
+
+	saveRecentRomMenu();
+
+	recentRomMenuReset = true;
+}
 //---------------------------------------------------------------------------
 void consoleWin_t::toggleMenuVis(void)
 {
@@ -2379,6 +2502,14 @@ void consoleWin_t::updatePeriodic(void)
 		errorMsgValid = false;
 	}
 
+	if ( recentRomMenuReset )
+	{
+		fceuWrapperLock();
+		buildRecentRomMenu();
+		recentRomMenuReset = false;
+		fceuWrapperUnLock();
+	}
+
 	if ( closeRequested )
 	{
 		closeApp();
@@ -2629,4 +2760,27 @@ void consoleMenuBar::keyReleaseEvent(QKeyEvent *event)
 {
 	QMenuBar::keyReleaseEvent(event);
 }
+//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+consoleRecentRomAction::consoleRecentRomAction(QString desc, QWidget *parent)
+	: QAction( desc, parent )
+{
+	path = desc.toStdString();
+}
+//----------------------------------------------------------------------------
+consoleRecentRomAction::~consoleRecentRomAction(void)
+{
+	//printf("Recent ROM Menu Action Deleted\n");
+}
+//----------------------------------------------------------------------------
+void consoleRecentRomAction::activateCB(void)
+{
+	printf("Activate Recent ROM: %s \n", path.c_str() );
+
+	fceuWrapperLock();
+	CloseGame ();
+	LoadGame ( path.c_str() );
+	fceuWrapperUnLock();
+}
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -67,6 +67,21 @@ class  consoleMenuBar : public QMenuBar
 		void keyReleaseEvent(QKeyEvent *event);
 };
 
+class  consoleRecentRomAction : public QAction
+{
+	Q_OBJECT
+
+	public:
+		consoleRecentRomAction( QString title, QWidget *parent = 0);
+		~consoleRecentRomAction(void);
+
+		std::string  path;
+
+	public slots:
+		void activateCB(void);
+
+};
+
 class  consoleWin_t : public QMainWindow
 {
 	Q_OBJECT
@@ -99,6 +114,8 @@ class  consoleWin_t : public QMainWindow
 
 		emulatorThread_t *emulatorThread;
 
+		void addRecentRom( const char *rom );
+
 	protected:
 		consoleMenuBar *menubar;
 
@@ -109,6 +126,7 @@ class  consoleWin_t : public QMainWindow
 		QMenu *debugMenu;
 		QMenu *movieMenu;
 		QMenu *helpMenu;
+		QMenu *recentRomMenu;
 		
 		QAction *openROM;
 		QAction *closeROM;
@@ -166,6 +184,9 @@ class  consoleWin_t : public QMainWindow
 		std::string errorMsg;
 		bool        errorMsgValid;
 		bool        closeRequested;
+		bool        recentRomMenuReset;
+
+		std::list <std::string*> romList;
 
 	protected:
 		void closeEvent(QCloseEvent *event);
@@ -176,6 +197,9 @@ class  consoleWin_t : public QMainWindow
 
 	private:
 		void createMainMenu(void);
+		void buildRecentRomMenu(void);
+		void saveRecentRomMenu(void);
+		void clearRomList(void);
 
 	public slots:
 		void openDebugWindow(void);
