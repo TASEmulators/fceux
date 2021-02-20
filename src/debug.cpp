@@ -37,12 +37,18 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 	}
 	else // BT_C
 	{
-		if (GameInfo->type == GIT_NSF) { //NSF Breakpoint keywords
+		int type = GIT_CART;
+
+		if (GameInfo)
+		{
+			type = GameInfo->type;
+		}
+		if (type == GIT_NSF) { //NSF Breakpoint keywords
 			if (strcmp(offsetBuffer,"LOAD") == 0) return (NSFHeader.LoadAddressLow | (NSFHeader.LoadAddressHigh<<8));
 			if (strcmp(offsetBuffer,"INIT") == 0) return (NSFHeader.InitAddressLow | (NSFHeader.InitAddressHigh<<8));
 			if (strcmp(offsetBuffer,"PLAY") == 0) return (NSFHeader.PlayAddressLow | (NSFHeader.PlayAddressHigh<<8));
 		}
-		else if (GameInfo->type == GIT_FDS) { //FDS Breakpoint keywords
+		else if (type == GIT_FDS) { //FDS Breakpoint keywords
 			if (strcmp(offsetBuffer,"NMI1") == 0) return (GetMem(0xDFF6) | (GetMem(0xDFF7)<<8));
 			if (strcmp(offsetBuffer,"NMI2") == 0) return (GetMem(0xDFF8) | (GetMem(0xDFF9)<<8));
 			if (strcmp(offsetBuffer,"NMI3") == 0) return (GetMem(0xDFFA) | (GetMem(0xDFFB)<<8));
