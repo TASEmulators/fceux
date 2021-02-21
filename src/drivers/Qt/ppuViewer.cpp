@@ -1524,7 +1524,7 @@ ppuTileEditor_t::ppuTileEditor_t(int patternIndex, QWidget *parent)
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
 	QMenuBar *menuBar;
-	QMenu *helpMenu;
+	QMenu *fileMenu, *helpMenu;
 	QAction *act;
 	int useNativeMenuBar;
 
@@ -1540,8 +1540,19 @@ ppuTileEditor_t::ppuTileEditor_t(int patternIndex, QWidget *parent)
 	//-----------------------------------------------------------------------
 	// Menu 
 	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
 	// Help
-	helpMenu = menuBar->addMenu(tr("Help"));
+	helpMenu = menuBar->addMenu(tr("&Help"));
 
 	// Help -> Key Assignments
 	act = new QAction(tr("Keys"), this);
