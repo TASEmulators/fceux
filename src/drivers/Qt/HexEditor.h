@@ -44,7 +44,7 @@ struct memBlock_t
 
 	struct memByte_t *buf;
 	int  _size;
-   int  _maxLines;
+	int  _maxLines;
 	int (*memAccessFunc)( unsigned int offset);
 };
 
@@ -94,6 +94,21 @@ class HexBookMarkMenuAction : public QAction
 
 };
 
+class HexEditorCharTable_t
+{
+	public:
+		HexEditorCharTable_t(void);
+		~HexEditorCharTable_t(void);
+
+		char  map[256];
+		bool  extAsciiEnable;
+		bool  customMapLoaded;
+
+		void  resetAscii(void);
+
+		int   loadFromFile( const char *filepath );
+};
+
 class HexEditorDialog_t;
 
 class QHexEdit : public QWidget
@@ -132,6 +147,9 @@ class QHexEdit : public QWidget
 			MODE_NES_ROM
 		};
 		static const int HIGHLIGHT_ACTIVITY_NUM_COLORS = 16;
+
+		HexEditorCharTable_t  charTable;
+
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -282,6 +300,8 @@ class HexEditorDialog_t : public QDialog
 		QAction    *viewROM;
 		QAction    *gotoAddrAct;
 		QAction    *undoEditAct;
+		QAction    *loadTableAct;
+		QAction    *unloadTableAct;
 
 	private:
 
@@ -294,6 +314,8 @@ class HexEditorDialog_t : public QDialog
 		void hbarChanged(int value);
 		void saveRomFile(void);
 		void saveRomFileAs(void);
+		void loadTableFromFile(void);
+		void unloadTable(void);
 		void setViewRAM(void);
 		void setViewPPU(void);
 		void setViewOAM(void);

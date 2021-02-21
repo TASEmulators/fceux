@@ -731,6 +731,195 @@ void HexBookMarkMenuAction::activateCB(void)
 	qedit->setAddr( bm->addr );
 }
 //----------------------------------------------------------------------------
+HexEditorCharTable_t::HexEditorCharTable_t(void)
+{
+	extAsciiEnable  = true;
+	customMapLoaded = false;
+
+	resetAscii();
+}
+//----------------------------------------------------------------------------
+HexEditorCharTable_t::~HexEditorCharTable_t(void)
+{
+}
+//----------------------------------------------------------------------------
+void HexEditorCharTable_t::resetAscii(void)
+{
+	for (int i=0; i<256; i++)
+	{
+		if (i > 127)
+		{	// Extended Ascii
+			if ( extAsciiEnable )
+			{
+				map[i] = i;
+			}
+			else
+			{
+				map[i] = '.';
+			}
+		}
+		else
+		{       // Normal Ascii
+			if ( isprint(i) )
+			{
+				map[i] = i;
+			}
+			else
+			{
+				map[i] = '.';
+			}
+		}
+	}
+	customMapLoaded = false;
+}
+//----------------------------------------------------------------------------
+int HexEditorCharTable_t::loadFromFile( const char *filepath )
+{
+	int i,j,hexValue,mapValue,retVal, lineNum = 0;
+	FILE *fp;
+	char line[256];
+	char tk[64];
+	char errMsg[256];
+	char tmpMap[256];
+
+	retVal = 0;
+	errMsg[0] = 0;
+
+	fp = ::fopen( filepath, "r");
+
+	if ( fp == NULL )
+	{
+		return -1;
+	}
+	memset( tmpMap, '.', sizeof(tmpMap) );
+
+	while ( fgets( line, sizeof(line), fp ) != 0 )
+	{
+		lineNum++;
+
+		if ( retVal != 0 )
+		{
+			break;
+		}
+		//printf("%s\n", line);
+
+		i=0;
+		while ( isspace(line[i]) ) i++;
+
+		if ( line[i] == '#' )
+		{	// Comment line, skip it
+			line[i] = 0; continue;
+		}
+
+		while ( isspace(line[i]) ) i++;
+
+		j=0;
+		while ( isxdigit(line[i]) )
+		{
+			tk[j] = line[i]; i++; j++;
+		}
+		tk[j] = 0;
+
+		if ( j == 0 )
+		{	// Line did not start with a hex character, skip it
+			continue;
+		}
+		hexValue = strtol( tk, NULL, 16 );
+
+		if ( hexValue > 255 )
+		{
+			sprintf( errMsg, "Error: Line %i: Hex Value 0x%X exceeds 0xFF \n", lineNum, hexValue );
+			retVal = -1;
+			continue;
+		}
+
+		while ( isspace(line[i]) ) i++;
+
+		if ( line[i] != '=' )
+		{
+			sprintf( errMsg, "Error: Line %i: Expected assignment operator '=' but got '%c' \n", lineNum, line[i] );
+			retVal = -1;
+			continue;
+		}
+		i++;
+
+		while ( isspace(line[i]) ) i++;
+
+		mapValue = 0;
+
+		if (line[i] == '0')
+		{	// Hex Value Remap or '0'
+			i++;
+			if ( line[i] == 'x')
+			{
+				i++; j=0;
+				while ( isxdigit(line[i]) )
+				{
+					tk[j] = line[i]; i++; j++;
+				}
+				tk[j] = 0;
+				
+				mapValue = strtol( tk, NULL, 16 );
+			}
+			else
+			{
+				mapValue = '0';
+			}
+		}
+		else if (line[i] == '$')
+		{	// Hex Value Remap or '$'
+			i++;
+			if ( isxdigit(line[i]) )
+			{
+				j=0;
+				while ( isxdigit(line[i]) )
+				{
+					tk[j] = line[i]; i++; j++;
+				}
+				tk[j] = 0;
+				
+				mapValue = strtol( tk, NULL, 16 );
+			}
+			else
+			{
+				mapValue = '$';
+			}
+		}
+		else
+		{	// Hex to Character Mapping
+			mapValue = line[i];
+		}
+
+		if ( mapValue > 255 )
+		{
+			sprintf( errMsg, "Error: Line %i: Map Value 0x%X exceeds 0xFF \n", lineNum, mapValue );
+			retVal = -1;
+			continue;
+		}
+
+		tmpMap[ hexValue ] = mapValue;
+	}
+
+	if ( retVal == 0 )
+	{
+		memcpy( map, tmpMap, 256 );
+		customMapLoaded = true;
+	}
+	else
+	{
+		if ( errMsg[0] != 0 )
+		{
+			if ( consoleWindow != NULL )
+			{
+				consoleWindow->QueueErrorMsgWindow(errMsg);
+			}
+		}
+	}
+	
+	::fclose(fp);
+	return retVal;
+}
+//----------------------------------------------------------------------------
 HexEditorFindDialog_t::HexEditorFindDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
@@ -900,7 +1089,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// File -> Save ROM
 	saveROM = new QAction(tr("&Save ROM"), this);
-	//saveROM->setShortcut(QKeySequence::Open);
+	saveROM->setShortcut(QKeySequence::Save);
 	saveROM->setStatusTip(tr("Save ROM File"));
 	connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFile(void)) );
 	
@@ -908,11 +1097,27 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// File -> Save ROM As
 	saveROM = new QAction(tr("Save ROM &As"), this);
-	//saveROM->setShortcut(QKeySequence::Open);
+	saveROM->setShortcut(QKeySequence::SaveAs);
 	saveROM->setStatusTip(tr("Save ROM File As"));
 	connect(saveROM, SIGNAL(triggered()), this, SLOT(saveRomFileAs(void)) );
 	
 	fileMenu->addAction(saveROM);
+
+	// File -> Load Table
+	loadTableAct = new QAction(tr("&Load TBL File"), this);
+	//loadTableAct->setShortcut(QKeySequence::Open);
+	loadTableAct->setStatusTip(tr("Load Table from File"));
+	connect(loadTableAct, SIGNAL(triggered()), this, SLOT(loadTableFromFile(void)) );
+	
+	fileMenu->addAction(loadTableAct);
+
+	// File -> Unload Table
+	unloadTableAct = new QAction(tr("&Unload TBL File"), this);
+	//unloadTableAct->setShortcut(QKeySequence::Open);
+	unloadTableAct->setStatusTip(tr("Unload Table"));
+	connect(unloadTableAct, SIGNAL(triggered()), this, SLOT(unloadTable(void)) );
+	
+	fileMenu->addAction(unloadTableAct);
 
 	// File -> Goto Address
 	gotoAddrAct = new QAction(tr("&Goto Address"), this);
@@ -926,7 +1131,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// File -> Close
 	closeAct = new QAction(tr("&Close"), this);
-	closeAct->setShortcut(QKeySequence(tr("Esc")));
+	closeAct->setShortcut(QKeySequence::Close);
 	closeAct->setStatusTip(tr("Close Window"));
 	connect(closeAct, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 	
@@ -937,7 +1142,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// Edit -> Undo
 	undoEditAct = new QAction(tr("&Undo"), this);
-	undoEditAct->setShortcut(QKeySequence(tr("U")));
+	undoEditAct->setShortcut(QKeySequence::Undo);
 	undoEditAct->setStatusTip(tr("Undo Edit"));
 	undoEditAct->setEnabled(false);
 	connect(undoEditAct, SIGNAL(triggered()), this, SLOT(undoRomPatch(void)) );
@@ -1162,6 +1367,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	FCEUI_CreateCheatMap();
 
+	unloadTableAct->setEnabled( editor->charTable.customMapLoaded );
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::~HexEditorDialog_t(void)
@@ -1368,12 +1574,63 @@ void HexEditorDialog_t::saveRomFileAs(void)
 	}
 
 	if ( filename.isNull() )
-   {
-      return;
-   }
+	{
+	   return;
+	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	iNesSaveAs( filename.toStdString().c_str() );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::loadTableFromFile(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	QFileDialog  dialog(this, tr("Load Table From File") );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("TBL Files (*.tbl *.TBL) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
+	dialog.setDefaultSuffix( tr(".tbl") );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	editor->charTable.loadFromFile( filename.toStdString().c_str() );
+
+	unloadTableAct->setEnabled( editor->charTable.customMapLoaded );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::unloadTable(void)
+{
+	editor->charTable.resetAscii();
+
+	unloadTableAct->setEnabled( editor->charTable.customMapLoaded );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewRAM(void)
@@ -3214,7 +3471,8 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 {
 	int x, y, w, h, row, col, nrow, addr;
 	int c, cx, cy, ca, l;
-	char txt[32], asciiTxt[4];
+	char txt[32];
+       	QString asciiTxt;
 	QPainter painter(this);
 	QColor white("white"), black("black"), blue("blue");
 	bool txtHlgtSet;
@@ -3369,15 +3627,8 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 			{
 				c =  mb.buf[addr].data;
 
-				if ( ::isprint(c) )
-				{
-					asciiTxt[0] = c;
-				}
-				else
-				{
-					asciiTxt[0] = '.';
-				}
-				asciiTxt[1] = 0;
+				asciiTxt.clear();
+				asciiTxt += QChar(charTable.map[c]);
 
 				if ( addr == editAddr )
 				{  // Set a cell currently being editting to red text
@@ -3466,7 +3717,8 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 						painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, QColor("gray") );
 					}
 					painter.drawText( x, y, tr(txt) );
-					painter.drawText( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y, tr(asciiTxt) );
+					//painter.drawText( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y, tr(asciiTxt) );
+					painter.drawText( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y, asciiTxt );
 				}
 			}
 			x += (3*pxCharWidth);
