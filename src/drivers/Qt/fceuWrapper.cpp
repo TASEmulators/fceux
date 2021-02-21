@@ -866,6 +866,13 @@ int  fceuWrapperClose( void )
 	return 0;
 }
 
+int  fceuWrapperMemoryCleanup(void)
+{
+	close_nes_shm();
+
+	return 0;
+}
+
 /**
  * Update the video, audio, and input subsystems with the provided
  * video (XBuf) and audio (Buffer) information.

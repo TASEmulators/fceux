@@ -119,6 +119,8 @@ int main( int argc, char *argv[] )
 
 	delete consoleWindow;
 
+	fceuWrapperMemoryCleanup();
+
 	return retval;
 }
 

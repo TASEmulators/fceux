@@ -87,23 +87,23 @@ std::string FCEUI_GetSnapshotAsName() { return AsSnapshotName; }
 
 void FCEU_KillVirtualVideo(void)
 {
-	//mbg merge TODO 7/17/06 temporarily removed
-	//if(xbsave)
-	//{
-	// free(xbsave);
-	// xbsave=0;
-	//}
-	//if(XBuf)
-	//{
-	//UnmapViewOfFile(XBuf);
-	//CloseHandle(mapXBuf);
-	//mapXBuf=NULL;
-	//}
-	//if(XBackBuf)
-	//{
-	// free(XBackBuf);
-	// XBackBuf=0;
-	//}
+	if ( XBuf )
+	{
+		FCEU_free(XBuf); XBuf = NULL;
+	}
+	if ( XBackBuf )
+	{
+		FCEU_free(XBackBuf); XBackBuf = NULL;
+	}
+	if ( XDBuf )
+	{
+		FCEU_free(XDBuf); XDBuf = NULL;
+	}
+	if ( XDBackBuf )
+	{
+		FCEU_free(XDBackBuf); XDBackBuf = NULL;
+	}
+	//printf("Video Core Cleanup\n");
 }
 
 /**

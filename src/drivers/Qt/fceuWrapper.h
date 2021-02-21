@@ -28,6 +28,7 @@ int CloseGame(void);
 int reloadLastGame(void);
 
 int  fceuWrapperInit( int argc, char *argv[] );
+int  fceuWrapperMemoryCleanup( void );
 int  fceuWrapperClose( void );
 int  fceuWrapperUpdate( void );
 void fceuWrapperLock(void);
