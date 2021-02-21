@@ -117,7 +117,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
 	QActionGroup *group;
-	QMenu *viewMenu, *colorMenu, *optMenu, *subMenu;
+	QMenu *fileMenu, *viewMenu, *colorMenu, *optMenu, *subMenu;
 	QAction *act;
 	char stmp[64];
 	int useNativeMenuBar;
@@ -233,6 +233,17 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// Menu 
 	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
 	// View1
 	viewMenu = menuBar->addMenu(tr("View&1"));
 

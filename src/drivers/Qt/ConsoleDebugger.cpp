@@ -88,7 +88,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QFrame      *frame;
 	QLabel      *lbl;
 	QMenuBar    *menuBar;
-	QMenu       *debugMenu, *optMenu, *subMenu;
+	QMenu       *fileMenu, *debugMenu, *optMenu, *subMenu;
 	QActionGroup *actGroup;
 	QAction     *act;
 	float fontCharWidth;
@@ -117,6 +117,17 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// Menu Start
 	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
 	// Debug
 	debugMenu = menuBar->addMenu(tr("&Debug"));
 

@@ -123,7 +123,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QGroupBox   *frame;
 	QMenuBar *menuBar;
-	QMenu *viewMenu, *colorMenu, *subMenu;
+	QMenu *fileMenu, *viewMenu, *colorMenu, *subMenu;
 	QAction *act;
 	QActionGroup *group;
 	QLabel *lbl;
@@ -148,6 +148,17 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// Menu 
 	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
 	// View
 	viewMenu = menuBar->addMenu(tr("&View"));
 
