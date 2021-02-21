@@ -102,6 +102,7 @@ GameGenieDialog_t::GameGenieDialog_t(QWidget *parent)
 	QTreeWidgetItem *item;
 	QGroupBox *frame;
 	QFont font;
+	QPushButton *closeButton;
 	fceuGGCodeValidtor *ggCodeValidator;
 
 	font.setFamily("Courier New");
@@ -172,6 +173,16 @@ GameGenieDialog_t::GameGenieDialog_t(QWidget *parent)
 	tree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
 
 	mainLayout->addWidget( tree );
+
+	closeButton = new QPushButton( tr("Close") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
+	hbox = new QHBoxLayout();
+	hbox->addStretch(5);
+	hbox->addWidget( closeButton, 1 );
+
+	mainLayout->addLayout( hbox );
 
 	setLayout( mainLayout );
 
