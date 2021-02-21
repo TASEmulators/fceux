@@ -868,6 +868,8 @@ int  fceuWrapperClose( void )
 
 int  fceuWrapperMemoryCleanup(void)
 {
+	FreeCDLog();
+
 	close_nes_shm();
 
 	return 0;
