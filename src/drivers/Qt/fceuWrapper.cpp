@@ -872,6 +872,11 @@ int  fceuWrapperMemoryCleanup(void)
 
 	close_nes_shm();
 
+	if ( g_config )
+	{
+		delete g_config; g_config = NULL;
+	}
+
 	return 0;
 }
 
