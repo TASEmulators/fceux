@@ -25,6 +25,8 @@
 
 #include <QDir>
 #include <QMenu>
+#include <QMenuBar>
+#include <QAction>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -107,7 +109,11 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
 	QGroupBox *frame;
+	QMenuBar *menuBar;
+	QMenu *fileMenu;
+	QAction *act;
 	QLabel *lbl;
+	int useNativeMenuBar;
 
 	if (recBufMax == 0)
 	{
@@ -116,7 +122,35 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 
 	setWindowTitle(tr("Trace Logger"));
 
+	menuBar = new QMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
+	
 	mainLayout = new QVBoxLayout();
+
+	mainLayout->setMenuBar( menuBar );
+
 	grid = new QGridLayout();
 	mainLayout->addLayout(grid, 100);
 
@@ -128,6 +162,7 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	connect(vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)));
 
 	traceView->setScrollBars(hbar, vbar);
+	traceView->setMinimumHeight(256);
 	hbar->setMinimum(0);
 	hbar->setMaximum(100);
 	vbar->setMinimum(0);
