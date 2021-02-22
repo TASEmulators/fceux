@@ -747,6 +747,8 @@ void HexEditorCharTable_t::resetAscii(void)
 {
 	for (int i=0; i<256; i++)
 	{
+		rmap[i] = i;
+
 		if (i > 127)
 		{	// Extended Ascii
 			if ( extAsciiEnable )
@@ -780,7 +782,8 @@ int HexEditorCharTable_t::loadFromFile( const char *filepath )
 	char line[256];
 	char tk[64];
 	char errMsg[256];
-	char tmpMap[256];
+	int  tmpMap[256];
+	int  tmpMapR[256];
 
 	retVal = 0;
 	errMsg[0] = 0;
@@ -791,7 +794,11 @@ int HexEditorCharTable_t::loadFromFile( const char *filepath )
 	{
 		return -1;
 	}
-	memset( tmpMap, '.', sizeof(tmpMap) );
+	for (i=0; i<256; i++)
+	{
+		tmpMap[i]  = -1;
+		tmpMapR[i] = -1;
+	}
 
 	while ( fgets( line, sizeof(line), fp ) != 0 )
 	{
@@ -898,11 +905,17 @@ int HexEditorCharTable_t::loadFromFile( const char *filepath )
 		}
 
 		tmpMap[ hexValue ] = mapValue;
+
+		if ( mapValue < 256 )
+		{
+			tmpMapR[ mapValue ] = hexValue;
+		}
 	}
 
 	if ( retVal == 0 )
 	{
-		memcpy( map, tmpMap, 256 );
+		memcpy(  map, tmpMap , sizeof( map) );
+		memcpy( rmap, tmpMapR, sizeof(rmap) );
 		customMapLoaded = true;
 	}
 	else
@@ -1354,7 +1367,6 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	connect( periodicTimer, &QTimer::timeout, this, &HexEditorDialog_t::updatePeriodic );
 
 	periodicTimer->start( 100 ); // 10hz
-	//periodicTimer->start( 16 ); // 10hz
 
 	// Lock the mutex before adding a new window to the list,
 	// we want to be sure that the emulator is not iterating the list
@@ -2396,6 +2408,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		}
 		resetCursor();
 		update();
+		event->accept();
 	}
 	else if (event->matches(QKeySequence::MoveToPreviousChar))
 	{
@@ -2420,18 +2433,21 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		}
 		resetCursor();
 		update();
+		event->accept();
 	}
 	else if (event->matches(QKeySequence::MoveToEndOfLine))
 	{
 		cursorPosX = 47;
 		resetCursor();
 		update();
+		event->accept();
 	}
 	else if (event->matches(QKeySequence::MoveToStartOfLine))
 	{
 		cursorPosX = 0;
 		resetCursor();
 		update();
+		event->accept();
 	}
 	else if (event->matches(QKeySequence::MoveToPreviousLine))
 	{
@@ -2451,6 +2467,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		}
 		resetCursor();
 		update();
+		event->accept();
 	}
 	else if (event->matches(QKeySequence::MoveToNextLine))
 	{
@@ -2470,6 +2487,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		}
 		resetCursor();
 		update();
+		event->accept();
 
 	}
 	else if (event->matches(QKeySequence::MoveToNextPage))
@@ -2483,6 +2501,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		vbar->setValue( lineOffset );
 	     	resetCursor();
 		update();
+		event->accept();
 	}
 	else if (event->matches(QKeySequence::MoveToPreviousPage))
 	{
@@ -2495,6 +2514,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		vbar->setValue( lineOffset );
 		resetCursor();
 		update();
+		event->accept();
 	}
 	else if (event->matches(QKeySequence::MoveToEndOfDocument))
 	{
@@ -2502,6 +2522,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		vbar->setValue( lineOffset );
 	     	resetCursor();
 		update();
+		event->accept();
 	}
 	else if (event->matches(QKeySequence::MoveToStartOfDocument))
 	{
@@ -2509,55 +2530,63 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		vbar->setValue( lineOffset );
 		resetCursor();
 		update();
+		event->accept();
 	}
 	else if (Qt::ControlModifier == event->modifiers())
 	{
 		if ( event->key() == Qt::Key_A )
 		{
 			openGotoAddrDialog();
+			event->accept();
 		}
-	}
-	else if (Qt::ShiftModifier == event->modifiers())
-	{
-		if ( event->key() == Qt::Key_F )
+		else if ( event->key() == Qt::Key_L )
 		{
 			frzRamAddr = ctxAddr = cursorAddr;
 			frzRamToggle();
+			event->accept();
 		}
 	}
 	else if (event->key() == Qt::Key_Tab && (cursorPosX < 32) )
 	{  // switch from hex to ascii edit
-	    cursorPosX = 32 + (cursorPosX / 2);
+		cursorPosX = 32 + (cursorPosX / 2);
 		update();
+		event->accept();
 	}
 	else if (event->key() == Qt::Key_Backtab  && (cursorPosX >= 32) )
 	{  // switch from ascii to hex edit
 	   cursorPosX = 2 * (cursorPosX - 32);
 		update();
+		event->accept();
 	}
 	else
 	{
 		int key;
 		if ( cursorPosX >= 32 )
 		{  // Edit Area is ASCII
-			key = (uchar)event->text()[0].toLatin1();
+			key = (int)event->text()[0].toLatin1();
 
-			if ( isascii( key ) )
+			if ( (key >= 0) && (key < 256) )
 			{
-				int offs = (cursorPosX-32);
-				int addr = 16*(lineOffset+cursorPosY) + offs;
-				fceuWrapperLock();
-				if ( viewMode == QHexEdit::MODE_NES_ROM )
+				if ( charTable.rmap[key] != -1 )
 				{
-					romEditList.applyPatch( addr, key );
+					key = charTable.rmap[key];
+
+					int offs = (cursorPosX-32);
+					int addr = 16*(lineOffset+cursorPosY) + offs;
+					fceuWrapperLock();
+					if ( viewMode == QHexEdit::MODE_NES_ROM )
+					{
+						romEditList.applyPatch( addr, key );
+					}
+					writeMem( viewMode, addr, key );
+					fceuWrapperUnLock();
+				
+					editAddr  = -1;
+					editValue =  0;
+					editMask  =  0;
+					update();
+					event->accept();
 				}
-				writeMem( viewMode, addr, key );
-				fceuWrapperUnLock();
-			
-				editAddr  = -1;
-				editValue =  0;
-				editMask  =  0;
-				update();
 			}
 		}
 		else
@@ -2566,43 +2595,44 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		
 		   if ( ::isxdigit( key ) )
 		   {
-		      int offs, nibbleValue, nibbleIndex;
+			int offs, nibbleValue, nibbleIndex;
+			
+			offs = (cursorPosX / 2);
+			nibbleIndex = (cursorPosX % 2);
+			
+			editAddr = 16*(lineOffset+cursorPosY) + offs;
+			
+			nibbleValue = convFromXchar( key );
+			
+			if ( nibbleIndex )
+			{
+				nibbleValue = editValue | nibbleValue;
+				
+				fceuWrapperLock();
+				if ( viewMode == QHexEdit::MODE_NES_ROM )
+				{
+					romEditList.applyPatch( editAddr, nibbleValue );
+				}
+				writeMem( viewMode, editAddr, nibbleValue );
+				fceuWrapperUnLock();
+				
+				editAddr  = -1;
+				editValue =  0;
+				editMask  =  0;
+			}
+			else
+			{
+			   editValue = (nibbleValue << 4);
+			   editMask  = 0x00f0;
+			}
+			cursorPosX++;
 		
-		      offs = (cursorPosX / 2);
-		      nibbleIndex = (cursorPosX % 2);
-		
-		      editAddr = 16*(lineOffset+cursorPosY) + offs;
-		
-		      nibbleValue = convFromXchar( key );
-		
-		      if ( nibbleIndex )
-		      {
-		         nibbleValue = editValue | nibbleValue;
-		
-					fceuWrapperLock();
-					if ( viewMode == QHexEdit::MODE_NES_ROM )
-					{
-						romEditList.applyPatch( editAddr, nibbleValue );
-					}
-					writeMem( viewMode, editAddr, nibbleValue );
-					fceuWrapperUnLock();
-		
-		         editAddr  = -1;
-		         editValue =  0;
-		         editMask  =  0;
-		      }
-		      else
-		      {
-		         editValue = (nibbleValue << 4);
-		         editMask  = 0x00f0;
-		      }
-		      cursorPosX++;
-		
-		      if ( cursorPosX >= 32 )
-		      {
-		         cursorPosX = 0;
-		      }
+			if ( cursorPosX >= 32 )
+			{
+			   cursorPosX = 0;
+			}
 			update();
+			event->accept();
 		   }
 		}
 		//printf("Key: %c  %i \n", key, key);
@@ -2816,7 +2846,7 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 			subMenu = menu.addMenu(tr("&Freeze/Unfreeze Address"));
 
 			act = new QAction(tr("&Toggle State"), &menu);
-			act->setShortcut( QKeySequence(tr("Shift+F")));
+			act->setShortcut( QKeySequence(tr("Ctrl+L")));
 			subMenu->addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamToggle(void)) );
 
@@ -3628,7 +3658,15 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 				c =  mb.buf[addr].data;
 
 				asciiTxt.clear();
-				asciiTxt += QChar(charTable.map[c]);
+
+				if ( charTable.map[c] >= 0x20 )
+				{
+					asciiTxt += QChar(charTable.map[c]);
+				}
+				else
+				{
+					asciiTxt += QChar('.');
+				}
 
 				if ( addr == editAddr )
 				{  // Set a cell currently being editting to red text

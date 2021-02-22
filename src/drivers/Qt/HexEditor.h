@@ -100,7 +100,8 @@ class HexEditorCharTable_t
 		HexEditorCharTable_t(void);
 		~HexEditorCharTable_t(void);
 
-		char  map[256];
+		int    map[256];
+		int   rmap[256];
 		bool  extAsciiEnable;
 		bool  customMapLoaded;
 
