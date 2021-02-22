@@ -1085,8 +1085,8 @@ void RamChange()
 			{
 				case 0: whichADDR = 0; break;	//Addr 1
 				case 1: whichADDR = 1; break;	//Addr 2
-				case 2: whichADDR = 11; break;	//Addr 12
-				case 3: whichADDR = 12; break;	//Addr 13
+				case 2: whichADDR = 12; break;	//Addr 13
+				case 3: whichADDR = 13; break;	//Addr 14
 			}
 			GetDlgItemText(hwndMemWatch, MW_ADDR[whichADDR], editboxnow[x], 6);	//Get Address value of edit00
 			SetDlgItemText(hwndMemWatch, MW_RMADDR[x], editboxnow[x]); //Put Address value
