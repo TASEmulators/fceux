@@ -1129,11 +1129,11 @@ void RamChange()
 
 			}
 			sprintf(editchangem[x], "%d", editcount[x]);	//Convert counter to text
-			SetDlgItemText(hwndMemWatch, EDIT00_RESULTS+x, editchangem[x]);	//Display text in results box
+			SetDlgItemText(hwndMemWatch, MW_RESULT[x], editchangem[x]);	//Display text in results box
 		}
 		else
 		{
-			SetDlgItemText(hwndMemWatch, MEMW_EDIT00RMADDRESS+x, "");
+			SetDlgItemText(hwndMemWatch, MW_RMADDR[x], "");
 		}
 	} //End of for loop	
 }
