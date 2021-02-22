@@ -89,4 +89,6 @@ extern nes_shm_t *nes_shm;
 
 nes_shm_t *open_nes_shm(void);
 
+void close_nes_shm(void);
+
 #endif

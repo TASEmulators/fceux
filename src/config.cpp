@@ -14,7 +14,8 @@
 static char *aboutString = 0;
 
 // returns a string suitable for use in an aboutbox
-char *FCEUI_GetAboutString() {
+const char *FCEUI_GetAboutString(void) 
+{
 	const char *aboutTemplate =
 		FCEU_NAME_AND_VERSION "\n\n"
 		"Administrators:\n"
@@ -46,7 +47,7 @@ char *FCEUI_GetAboutString() {
 		"\n"
 		__TIME__ " " __DATE__ "\n";
 
-	if(aboutString) return aboutString;
+	if (aboutString) return aboutString;
 
 	const char *compilerString = FCEUD_GetCompilerString();
 
@@ -54,6 +55,6 @@ char *FCEUI_GetAboutString() {
 	if (!(aboutString = (char*)FCEU_dmalloc(strlen(aboutTemplate) + strlen(compilerString) + 1)))
         return NULL;
 
-    sprintf(aboutString,"%s%s",aboutTemplate,compilerString);
+	sprintf(aboutString,"%s%s",aboutTemplate,compilerString);
 	return aboutString;
 }

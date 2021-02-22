@@ -62,6 +62,7 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 
 	setMinimumWidth( GL_NES_WIDTH );
 	setMinimumHeight( GL_NES_HEIGHT );
+	setFocusPolicy(Qt::StrongFocus);
 
 	QScreen *screen = QGuiApplication::primaryScreen();
 

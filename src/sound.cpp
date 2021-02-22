@@ -564,9 +564,10 @@ void FCEU_SoundCPUHook(int cycles)
    /* Unbelievably ugly hack */
    if(FSettings.SndRate)
    {
-    soundtsoffs+=DMCacc;
-    DoPCM();
-    soundtsoffs-=DMCacc;
+		const uint32 fudge = std::min<uint32>(-DMCacc, soundtsoffs + timestamp);
+		soundtsoffs -= fudge;
+		DoPCM();
+		soundtsoffs += fudge;
    }
    RawDALatch+=t;
    if(RawDALatch&0x80)

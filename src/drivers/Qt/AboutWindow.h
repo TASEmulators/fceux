@@ -15,6 +15,7 @@
 #include <QGroupBox>
 #include <QTreeView>
 #include <QTreeWidget>
+#include <QCloseEvent>
 
 #include "Qt/main.h"
 
@@ -27,9 +28,11 @@ class AboutWindow : public QDialog
 		~AboutWindow(void);
 
 	protected:
+		void closeEvent(QCloseEvent *event);
 
 	private:
 
-	private slots:
+	public slots:
+		void closeWindow(void);
 
 };

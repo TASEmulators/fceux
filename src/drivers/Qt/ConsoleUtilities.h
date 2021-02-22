@@ -12,6 +12,8 @@ int getFileBaseName( const char *filepath, char *base, char *suffix = NULL );
 
 int parseFilepath( const char *filepath, char *dir, char *base, char *suffix = NULL );
 
+int fceuExecutablePath( char *outputPath, int outputSize );
+
 
 class fceuDecIntValidtor : public QValidator
 { 

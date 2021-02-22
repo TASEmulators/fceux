@@ -19,36 +19,35 @@
 
 class PaletteConfDialog_t : public QDialog
 {
-   Q_OBJECT
+	Q_OBJECT
 
-	public:
-		PaletteConfDialog_t(QWidget *parent = 0);
-		~PaletteConfDialog_t(void);
+public:
+	PaletteConfDialog_t(QWidget *parent = 0);
+	~PaletteConfDialog_t(void);
 
-	protected:
-		void closeEvent(QCloseEvent *event);
+protected:
+	void closeEvent(QCloseEvent *event);
 
-		QLineEdit   *custom_palette_path;
-		QCheckBox   *useCustom;
-		QCheckBox   *GrayScale;
-		QCheckBox   *deemphSwap;
-		QCheckBox   *useNTSC;
-		QSlider     *tintSlider;
-		QSlider     *hueSlider;
-		QGroupBox   *tintFrame;
-		QGroupBox   *hueFrame;
-	private:
+	QLineEdit *custom_palette_path;
+	QCheckBox *useCustom;
+	QCheckBox *GrayScale;
+	QCheckBox *deemphSwap;
+	QCheckBox *useNTSC;
+	QSlider *tintSlider;
+	QSlider *hueSlider;
+	QGroupBox *tintFrame;
+	QGroupBox *hueFrame;
 
-   public slots:
-      void closeWindow(void);
-	private slots:
-		void hueChanged(int value);
-		void tintChanged(int value);
-		void openPaletteFile(void);
-		void clearPalette(void);
-		void use_NTSC_Changed(int v);
-		void use_Custom_Changed(int v);
-		void force_GrayScale_Changed(int v);
-		void deemphswap_Changed(int v);
-
+private:
+public slots:
+	void closeWindow(void);
+private slots:
+	void hueChanged(int value);
+	void tintChanged(int value);
+	void openPaletteFile(void);
+	void clearPalette(void);
+	void use_NTSC_Changed(int v);
+	void use_Custom_Changed(int v);
+	void force_GrayScale_Changed(int v);
+	void deemphswap_Changed(int v);
 };

@@ -43,6 +43,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 
 	setMinimumWidth( GL_NES_WIDTH );
 	setMinimumHeight( GL_NES_HEIGHT );
+	setFocusPolicy(Qt::StrongFocus);
 
 	view_width  = GL_NES_WIDTH;
 	view_height = GL_NES_HEIGHT;

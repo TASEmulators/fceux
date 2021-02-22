@@ -19,23 +19,22 @@
 
 class GuiConfDialog_t : public QDialog
 {
-   Q_OBJECT
+	Q_OBJECT
 
-	public:
-		GuiConfDialog_t(QWidget *parent = 0);
-		~GuiConfDialog_t(void);
+public:
+	GuiConfDialog_t(QWidget *parent = 0);
+	~GuiConfDialog_t(void);
 
-	protected:
-		void closeEvent(QCloseEvent *event);
+protected:
+	void closeEvent(QCloseEvent *event);
 
-		QCheckBox   *useNativeFileDialog;
-		QCheckBox   *useNativeMenuBar;
-	private:
+	QCheckBox *useNativeFileDialog;
+	QCheckBox *useNativeMenuBar;
 
-   public slots:
-      void closeWindow(void);
-	private slots:
-		void useNativeFileDialogChanged(int v);
-		void useNativeMenuBarChanged(int v);
-
+private:
+public slots:
+	void closeWindow(void);
+private slots:
+	void useNativeFileDialogChanged(int v);
+	void useNativeMenuBarChanged(int v);
 };

@@ -15,8 +15,10 @@ extern bool turbo;
 extern bool swapDuty;
 extern bool pauseAfterPlayback;
 extern bool suggestReadOnlyReplay;
+extern bool emulatorCycleToggle;
 extern unsigned int gui_draw_area_width;
 extern unsigned int gui_draw_area_height;
+extern unsigned int emulatorCycleCount;
 
 // global configuration object
 extern Config *g_config;
@@ -26,6 +28,7 @@ int CloseGame(void);
 int reloadLastGame(void);
 
 int  fceuWrapperInit( int argc, char *argv[] );
+int  fceuWrapperMemoryCleanup( void );
 int  fceuWrapperClose( void );
 int  fceuWrapperUpdate( void );
 void fceuWrapperLock(void);

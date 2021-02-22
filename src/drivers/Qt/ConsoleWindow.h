@@ -56,13 +56,39 @@ class  emulatorThread_t : public QThread
 		void finished();
 };
 
+class  consoleMenuBar : public QMenuBar
+{
+	public:
+		consoleMenuBar(QWidget *parent = 0);
+		~consoleMenuBar(void);
+
+	protected:
+		void keyPressEvent(QKeyEvent *event);
+		void keyReleaseEvent(QKeyEvent *event);
+};
+
+class  consoleRecentRomAction : public QAction
+{
+	Q_OBJECT
+
+	public:
+		consoleRecentRomAction( QString title, QWidget *parent = 0);
+		~consoleRecentRomAction(void);
+
+		std::string  path;
+
+	public slots:
+		void activateCB(void);
+
+};
+
 class  consoleWin_t : public QMainWindow
 {
 	Q_OBJECT
 
 	public:
 		consoleWin_t(QWidget *parent = 0);
-	   ~consoleWin_t(void);
+		~consoleWin_t(void);
 
 		ConsoleViewGL_t   *viewport_GL;
 		ConsoleViewSDL_t  *viewport_SDL;
@@ -88,81 +114,92 @@ class  consoleWin_t : public QMainWindow
 
 		emulatorThread_t *emulatorThread;
 
-	protected:
-	 QMenu *fileMenu;
-    QMenu *optMenu;
-    QMenu *emuMenu;
-    QMenu *toolsMenu;
-    QMenu *debugMenu;
-    QMenu *movieMenu;
-    QMenu *helpMenu;
-
-    QAction *openROM;
-    QAction *closeROM;
-    QAction *playNSF;
-    QAction *loadStateAct;
-    QAction *saveStateAct;
-    QAction *quickLoadAct;
-    QAction *quickSaveAct;
-    QAction *loadLuaAct;
-    QAction *scrShotAct;
-    QAction *quitAct;
-    QAction *inputConfig;
-    QAction *gamePadConfig;
-    QAction *gameSoundConfig;
-    QAction *gameVideoConfig;
-    QAction *hotkeyConfig;
-    QAction *paletteConfig;
-    QAction *guiConfig;
-    QAction *timingConfig;
-    QAction *movieConfig;
-    QAction *autoResume;
-    QAction *fullscreen;
-    QAction *aboutAct;
-    QAction *aboutActQt;
-    QAction *msgLogAct;
-	 QAction *state[10];
-	 QAction *powerAct;
-	 QAction *resetAct;
-	 QAction *sresetAct;
-	 QAction *pauseAct;
-	 QAction *gameGenieAct;
-	 QAction *loadGgROMAct;
-	 QAction *insCoinAct;
-	 QAction *fdsSwitchAct;
-	 QAction *fdsEjectAct;
-	 QAction *fdsLoadBiosAct;
-	 QAction *cheatsAct;
-	 QAction *ramWatchAct;
-	 QAction *ramSearchAct;
-	 QAction *debuggerAct;
-	 QAction *codeDataLogAct;
-	 QAction *traceLogAct;
-	 QAction *hexEditAct;
-	 QAction *ppuViewAct;
-	 QAction *ntViewAct;
-	 QAction *ggEncodeAct;
-	 QAction *iNesEditAct;
-	 QAction *openMovAct;
-	 QAction *stopMovAct;
-	 QAction *recMovAct;
-	 QAction *recAsMovAct;
-
-	 QTimer  *gameTimer;
-
-	 std::string errorMsg;
-	 bool        errorMsgValid;
-	 bool        closeRequested;
+		void addRecentRom( const char *rom );
 
 	protected:
-    void closeEvent(QCloseEvent *event);
-	 void keyPressEvent(QKeyEvent *event);
-	 void keyReleaseEvent(QKeyEvent *event);
-	 void syncActionConfig( QAction *act, const char *property );
-	 void showErrorMsgWindow(void);
+		consoleMenuBar *menubar;
+
+		QMenu *fileMenu;
+		QMenu *optMenu;
+		QMenu *emuMenu;
+		QMenu *toolsMenu;
+		QMenu *debugMenu;
+		QMenu *movieMenu;
+		QMenu *helpMenu;
+		QMenu *recentRomMenu;
+		
+		QAction *openROM;
+		QAction *closeROM;
+		QAction *playNSF;
+		QAction *loadStateAct;
+		QAction *saveStateAct;
+		QAction *quickLoadAct;
+		QAction *quickSaveAct;
+		QAction *loadLuaAct;
+		QAction *scrShotAct;
+		QAction *quitAct;
+		QAction *inputConfig;
+		QAction *gamePadConfig;
+		QAction *gameSoundConfig;
+		QAction *gameVideoConfig;
+		QAction *hotkeyConfig;
+		QAction *paletteConfig;
+		QAction *guiConfig;
+		QAction *timingConfig;
+		QAction *movieConfig;
+		QAction *autoResume;
+		QAction *fullscreen;
+		QAction *aboutAct;
+		QAction *aboutActQt;
+		QAction *msgLogAct;
+		QAction *state[10];
+		QAction *powerAct;
+		QAction *resetAct;
+		QAction *sresetAct;
+		QAction *pauseAct;
+		QAction *gameGenieAct;
+		QAction *loadGgROMAct;
+		QAction *insCoinAct;
+		QAction *fdsSwitchAct;
+		QAction *fdsEjectAct;
+		QAction *fdsLoadBiosAct;
+		QAction *cheatsAct;
+		QAction *ramWatchAct;
+		QAction *ramSearchAct;
+		QAction *debuggerAct;
+		QAction *codeDataLogAct;
+		QAction *traceLogAct;
+		QAction *hexEditAct;
+		QAction *ppuViewAct;
+		QAction *ntViewAct;
+		QAction *ggEncodeAct;
+		QAction *iNesEditAct;
+		QAction *openMovAct;
+		QAction *stopMovAct;
+		QAction *recMovAct;
+		QAction *recAsMovAct;
+
+		QTimer  *gameTimer;
+
+		std::string errorMsg;
+		bool        errorMsgValid;
+		bool        closeRequested;
+		bool        recentRomMenuReset;
+
+		std::list <std::string*> romList;
+
+	protected:
+		void closeEvent(QCloseEvent *event);
+		void keyPressEvent(QKeyEvent *event);
+		void keyReleaseEvent(QKeyEvent *event);
+		void syncActionConfig( QAction *act, const char *property );
+		void showErrorMsgWindow(void);
 
 	private:
 		void createMainMenu(void);
+		void buildRecentRomMenu(void);
+		void saveRecentRomMenu(void);
+		void clearRomList(void);
 
 	public slots:
 		void openDebugWindow(void);
@@ -181,6 +218,7 @@ class  consoleWin_t : public QMainWindow
 		void closeROMCB(void);
 		void aboutFCEUX(void);
 		void aboutQt(void);
+		void openOnlineDocs(void);
 		void openMsgLogWin(void);
 		void openInputConfWin(void);
 		void openGameSndConfWin(void);
@@ -236,6 +274,8 @@ class  consoleWin_t : public QMainWindow
 		void stopMovie(void);
 		void recordMovie(void);
 		void recordMovieAs(void);
+		void setAutoFireOnFrames(void);
+		void setAutoFireOffFrames(void);
 
 };
 

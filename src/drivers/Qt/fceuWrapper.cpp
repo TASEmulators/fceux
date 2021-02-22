@@ -95,7 +95,7 @@ static int periodic_saves = 0;
 static int   mutexLocks = 0;
 static int   mutexPending = 0;
 static bool  emulatorHasMutux = 0;
-static unsigned int emulatorCycleCount = 0;
+unsigned int emulatorCycleCount = 0;
 
 extern double g_fpsScale;
 
@@ -264,6 +264,11 @@ int LoadGame(const char *path, bool silent)
 
 	if(!FCEUI_LoadGame(fullpath, 1, silent)) {
 		return 0;
+	}
+
+	if ( consoleWindow )
+	{
+		consoleWindow->addRecentRom( fullpath );
 	}
 
 	hexEditorLoadBookmarks();
@@ -857,6 +862,20 @@ int  fceuWrapperClose( void )
 	// exit the infrastructure
 	FCEUI_Kill();
 	SDL_Quit();
+
+	return 0;
+}
+
+int  fceuWrapperMemoryCleanup(void)
+{
+	FreeCDLog();
+
+	close_nes_shm();
+
+	if ( g_config )
+	{
+		delete g_config; g_config = NULL;
+	}
 
 	return 0;
 }

@@ -19,7 +19,22 @@
  */
 // ConsoleUtilities.cpp
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#if WIN32
+#include <Windows.h>
+#include <direct.h>
+#else
+// unix, linux, or apple
+#include <unistd.h>
+#include <libgen.h>
+
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
+#endif
 
 #include "../../fceu.h"
 #include "Qt/ConsoleUtilities.h"
@@ -207,6 +222,74 @@ int parseFilepath( const char *filepath, char *dir, char *base, char *suffix )
 	}
 	return end;
 }
+//---------------------------------------------------------------------------
+//  Returns the path of fceux.exe as a string.
+int fceuExecutablePath( char *outputPath, int outputSize )
+{
+	if ( (outputPath == NULL) || (outputSize <= 0) )
+	{
+		return -1;
+	}
+	outputPath[0] = 0;
+
+#ifdef WIN32
+	TCHAR fullPath[2048];
+	TCHAR driveLetter[3];
+	TCHAR directory[2048];
+	TCHAR finalPath[2048];
+
+	GetModuleFileName(NULL, fullPath, 2048);
+	_splitpath(fullPath, driveLetter, directory, NULL, NULL);
+	snprintf(finalPath, sizeof(finalPath), "%s%s", driveLetter, directory);
+	strncpy( outputPath, finalPath, outputSize );
+	outputPath[outputSize-1] = 0;
+
+	return 0;
+#elif __linux__ || __unix__
+	char exePath[ 2048 ];
+	ssize_t count = ::readlink( "/proc/self/exe", exePath, sizeof(exePath)-1 );
+
+	if ( count > 0 )
+	{
+		char *dir;
+		exePath[count] = 0;
+		//printf("EXE Path: '%s' \n", exePath );
+
+		dir = ::dirname( exePath );
+
+		if ( dir )
+		{
+			//printf("DIR Path: '%s' \n", dir );
+			strncpy( outputPath, dir, outputSize );
+			outputPath[outputSize-1] = 0;
+			return 0;
+		}
+	}
+#elif	  __APPLE__
+	char exePath[ 2048 ];
+	uint32_t bufSize = sizeof(exePath);
+	int result = _NSGetExecutablePath( exePath, &bufSize );
+
+	if ( result == 0 )
+	{
+		char *dir;
+		exePath[ bufSize ] = 0;
+		//printf("EXE Path: '%s' \n", exePath );
+
+		dir = ::dirname( exePath );
+
+		if ( dir )
+		{
+			//printf("DIR Path: '%s' \n", dir );
+			strncpy( outputPath, dir, outputSize );
+			outputPath[outputSize-1] = 0;
+			return 0;
+		}
+	}
+#endif
+	return -1;
+}
+
 //---------------------------------------------------------------------------
 // FCEU Data Entry Custom Validators
 //---------------------------------------------------------------------------

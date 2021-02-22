@@ -402,12 +402,12 @@ MovieData::MovieData()
 	, fds(false)
 	, palFlag(false)
 	, PPUflag(false)
-	, RAMInitOption(0)
-	, RAMInitSeed(0)
 	, rerecordCount(0)
 	, binaryFlag(false)
 	, loadFrameCount(-1)
 	, microphone(false)
+	, RAMInitOption(0)
+	, RAMInitSeed(0)
 {
 	memset(&romChecksum,0,sizeof(MD5DATA));
 }
@@ -735,6 +735,9 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 			state = VALUE;
 			if(isnewline) goto commit;
 			value += c;
+			break;
+		default:
+			break;
 		}
 		goto done;
 

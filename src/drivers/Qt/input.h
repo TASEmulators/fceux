@@ -21,6 +21,8 @@ struct ButtConfig
 };
 
 extern int NoWaiting;
+extern int autoFireOnFrames;
+extern int autoFireOffFrames;
 extern CFGSTRUCT InputConfig[];
 extern ARGPSTRUCT InputArgs[];
 void ParseGIInput(FCEUGI *GI);

@@ -63,6 +63,7 @@ static bool drawScrollLines = true;
 static bool drawTileGridLines = true;
 static bool drawAttrGridLines = false;
 static bool redrawtables = true;
+static bool resetDrawCounter = true;
 
 //extern int FCEUPPU_GetAttr(int ntnum, int xt, int yt);
 
@@ -122,7 +123,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QGroupBox   *frame;
 	QMenuBar *menuBar;
-	QMenu *viewMenu, *colorMenu, *subMenu;
+	QMenu *fileMenu, *viewMenu, *colorMenu, *subMenu;
 	QAction *act;
 	QActionGroup *group;
 	QLabel *lbl;
@@ -147,11 +148,22 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// Menu 
 	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
 	// View
-	viewMenu = menuBar->addMenu(tr("View"));
+	viewMenu = menuBar->addMenu(tr("&View"));
 
 	// View -> Show Scroll Lines
-	act = new QAction(tr("Show Scroll Lines"), this);
+	act = new QAction(tr("Show &Scroll Lines"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(drawScrollLines);
@@ -162,7 +174,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Show Tile Grid
-	act = new QAction(tr("Show Tile Grid"), this);
+	act = new QAction(tr("Show &Tile Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(drawTileGridLines);
@@ -173,7 +185,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Show Attr Grid
-	act = new QAction(tr("Show Attr Grid"), this);
+	act = new QAction(tr("Show &Attr Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(drawAttrGridLines);
@@ -184,7 +196,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Show Attributes
-	act = new QAction(tr("Show Attributes"), this);
+	act = new QAction(tr("Show &Attributes"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(attview);
@@ -195,7 +207,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Ignore Palette
-	act = new QAction(tr("Ignore Palette"), this);
+	act = new QAction(tr("&Ignore Palette"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setCheckable(true);
 	act->setChecked(attview);
@@ -206,7 +218,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Image Zoom
-	subMenu = viewMenu->addMenu( tr("Image Zoom"));
+	subMenu = viewMenu->addMenu( tr("Image &Zoom"));
 	group   = new QActionGroup(this);
 
 	group->setExclusive(true);
@@ -215,7 +227,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	{
 	        char stmp[8];
 
-	        sprintf( stmp, "%ix", i+1 );
+	        sprintf( stmp, "&%ix", i+1 );
 
 	        zoomAct[i] = new QAction(tr(stmp), this);
 	        zoomAct[i]->setCheckable(true);
@@ -233,18 +245,18 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addSeparator();
 
 	// View -> Tile Focus
-	subMenu = viewMenu->addMenu( tr("Tile Focus"));
+	subMenu = viewMenu->addMenu( tr("Tile &Focus"));
 	group   = new QActionGroup(this);
 
 	group->setExclusive(true);
 
-	focusAct[0] = new QAction(tr("Click"), this);
+	focusAct[0] = new QAction(tr("&Click"), this);
 	focusAct[0]->setCheckable(true);
 	group->addAction(focusAct[0]);
 	subMenu->addAction(focusAct[0]);
 	connect(focusAct[0], SIGNAL(triggered()), this, SLOT(setClickFocus(void)) );
 
-	focusAct[1] = new QAction(tr("Hover"), this);
+	focusAct[1] = new QAction(tr("&Hover"), this);
 	focusAct[1]->setCheckable(true);
 	focusAct[1]->setChecked(false);
 	group->addAction(focusAct[1]);
@@ -254,7 +266,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addSeparator();
 
 	// View -> Refresh
-	act = new QAction(tr("Refresh"), this);
+	act = new QAction(tr("&Refresh"), this);
 	act->setShortcut( QKeySequence(tr("F5") ) );
 	act->setStatusTip(tr("Refresh"));
 	connect(act, SIGNAL(triggered()), this, SLOT(forceRefresh()) );
@@ -262,7 +274,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Auto Refresh Rate
-	subMenu = viewMenu->addMenu( tr("Auto Refresh Rate"));
+	subMenu = viewMenu->addMenu( tr("Auto &Refresh Rate"));
 	group   = new QActionGroup(this);
 
 	group->setExclusive(true);
@@ -300,10 +312,10 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	connect(rateAct[4], SIGNAL(triggered()), this, SLOT(changeRate16(void)) );
 
 	// Colors
-	colorMenu = menuBar->addMenu(tr("Colors"));
+	colorMenu = menuBar->addMenu(tr("&Colors"));
 
 	// Colors -> Tile Selector
-	act = new QAction(tr("Tile Selector"), this);
+	act = new QAction(tr("Tile &Selector"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Tile Selector"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setTileSelectorColor()) );
@@ -311,7 +323,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	colorMenu->addAction(act);
 
 	// Colors -> Tile Grid
-	act = new QAction(tr("Tile Grid"), this);
+	act = new QAction(tr("Tile &Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Tile Grid"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setTileGridColor()) );
@@ -319,7 +331,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	colorMenu->addAction(act);
 
 	// Colors -> Attr Grid
-	act = new QAction(tr("Attr Grid"), this);
+	act = new QAction(tr("&Attr Grid"), this);
 	//act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Attr Grid"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setAttrGridColor()) );
@@ -524,11 +536,9 @@ void ppuNameTableViewerDialog_t::closeWindow(void)
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::periodicUpdate(void)
 {
-	cycleCount = (cycleCount + 1) % 30;
-
 	updateMirrorText();
 
-	if ( redrawtables || (cycleCount == 0) )
+	if ( redrawtables )
 	{
 		QPoint p;
 
@@ -538,10 +548,29 @@ void ppuNameTableViewerDialog_t::periodicUpdate(void)
 		this->selTileView->update();
 
 		this->ntView->update();
-		this->scrollArea->viewport()->update();
+		//this->scrollArea->viewport()->update();
 
 		redrawtables = false;
 	}
+	else
+	{
+		if ( resetDrawCounter )
+		{
+			if ( cycleCount >= 4 )
+			{
+				cycleCount = 0;
+				resetDrawCounter = false;
+			}
+		}
+
+		if ( (cycleCount >= 0 ) && (cycleCount < 4) )
+		{
+			this->ntView->updateTable(cycleCount);
+		}
+	}
+
+	cycleCount = (cycleCount + 1) % 30;
+
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::changeZoom1x(void)
@@ -772,7 +801,6 @@ void ppuNameTableViewerDialog_t::openColorPicker( QColor *c )
 
 	dialog.setCurrentColor( *c );
 	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
-	dialog.show();
 	ret = dialog.exec();
 
 	if ( ret == QDialog::Accepted )
@@ -931,6 +959,8 @@ void ppuNameTableView_t::setViewScale( int reqScale )
 	}
 
 	redrawtables = 1;
+
+	calcPixelLocations();
 }
 //----------------------------------------------------
 void ppuNameTableView_t::resizeEvent(QResizeEvent *event)
@@ -941,6 +971,8 @@ void ppuNameTableView_t::resizeEvent(QResizeEvent *event)
 	//printf("%ix%i\n", event->size().width(), event->size().height() );
 
 	redrawtables = 1;
+
+	calcPixelLocations();
 }
 //----------------------------------------------------
 int ppuNameTableView_t::convertXY2TableTile( int x, int y, int *tableIdxOut, int *tileXout, int *tileYout )
@@ -1235,25 +1267,25 @@ void ppuNameTableView_t::contextMenuEvent(QContextMenuEvent *event)
 
 	redrawtables = true;
 
-	sprintf( stmp, "Open Tile $%04X in PPU Viewer", tileAddr );
+	sprintf( stmp, "Open Tile $%04X in PPU &Viewer", tileAddr );
 	act = new QAction(tr(stmp), &menu);
 	//act->setShortcut( QKeySequence(tr("V")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTilePpuViewer(void)) );
 	menu.addAction( act );
 
-	sprintf( stmp, "Open Tile Addr $%04X in Hex Editor", tileAddr );
+	sprintf( stmp, "Open &Tile Addr $%04X in Hex Editor", tileAddr );
 	act = new QAction(tr(stmp), &menu);
 	//act->setShortcut( QKeySequence(tr("H")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTileAddrHexEdit(void)) );
 	menu.addAction( act );
 
-	sprintf( stmp, "Open Attr Addr $%04X in Hex Editor", atrbAddr );
+	sprintf( stmp, "Open &Attr Addr $%04X in Hex Editor", atrbAddr );
 	act = new QAction(tr(stmp), &menu);
 	//act->setShortcut( QKeySequence(tr("H")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openAtrbAddrHexEdit(void)) );
 	menu.addAction( act );
 
-	sprintf( stmp, "Open PPU Addr $%04X in Hex Editor", ppuAddr );
+	sprintf( stmp, "Open &PPU Addr $%04X in Hex Editor", ppuAddr );
 	act = new QAction(tr(stmp), &menu);
 	//act->setShortcut( QKeySequence(tr("H")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openPpuAddrHexEdit(void)) );
@@ -1294,18 +1326,22 @@ void ppuNameTableView_t::openPpuAddrHexEdit(void)
 	hexEditorOpenFromDebugger( QHexEdit::MODE_NES_PPU, ppuAddr );
 }
 //----------------------------------------------------
-void ppuNameTableView_t::paintEvent(QPaintEvent *event)
+void ppuNameTableView_t::updateTable(int idx)
 {
 	ppuNameTable_t *nt;
-	int n,i,j,ii,jj,w,h,x,y,xx,yy,ww,hh;
-	QPainter painter(this);
-	QColor scanLineColor(255,255,255);
-	QPen   pen;
-	
-	viewRect = event->rect();
+
+	nt = &nameTable[idx];
+
+	this->update( nt->x, nt->y, nt->w*256, nt->h*240 );
+}
+//----------------------------------------------------
+void ppuNameTableView_t::calcPixelLocations(void)
+{
+	ppuNameTable_t *nt;
+	int n,i,j,ii,jj,w,h,x,y,xx,yy;
 
 	w = viewWidth / (256*2);
-  	h = viewHeight / (240*2);
+	h = viewHeight / (240*2);
 
 	//printf("(%i,%i) %ix%i\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height() );
 
@@ -1316,18 +1352,18 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 		nt = &nameTable[n];
 
 		nt->w = w; nt->h = h;
-		
+
 		nt->x = xx = (n%2) * (viewWidth / 2);
 		nt->y = yy = (n/2) * (viewHeight / 2);
 
+		jj = 0;
+
 		for (j=0; j<30; j++)
 		{
-			jj = (j*8);
+			ii = 0;
 
 			for (i=0; i<32; i++)
 			{
-				ii = (i*8);
-
 				nt->tile[j][i].x = xx+(ii*w);
 				nt->tile[j][i].y = yy+(jj*h);
 
@@ -1335,15 +1371,76 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 				{
 					for (x=0; x<8; x++)
 					{
-						painter.fillRect( xx+(ii+x)*w, yy+(jj+y)*h, w, h, nt->tile[j][i].pixel[y][x].color );
+						nt->tile[j][i].pixel[y][x].x = xx+(ii+x)*w;
+						nt->tile[j][i].pixel[y][x].y = yy+(jj+y)*h;
+					}
+				}
+				ii += 8;
+			}
+			jj += 8;
+		}
+	}
+}
+//----------------------------------------------------
+void ppuNameTableView_t::paintEvent(QPaintEvent *event)
+{
+	ppuNameTable_t *nt;
+	int n,i,j,w,h,x,y,xx,yy,ww,hh;
+	QPainter painter(this);
+	QColor scanLineColor(255,255,255);
+	QPen   pen;
+	QRect  pixelRect;
+	
+	viewRect = event->rect();
+
+	w = viewWidth / (256*2);
+  	h = viewHeight / (240*2);
+
+	//printf("(%i,%i) %ix%i\n", event->rect().x(), event->rect().y(), event->rect().width(), event->rect().height() );
+
+	xx = 0; yy = 0; 
+	ww = w*256;
+	hh = h*240;
+
+	for (n=0; n<4; n++)
+	{
+		nt = &nameTable[n];
+
+		nt->w = w; nt->h = h;
+		
+		nt->x = xx = (n%2) * (viewWidth / 2);
+		nt->y = yy = (n/2) * (viewHeight / 2);
+
+		pixelRect.setRect( xx, yy, ww, hh );
+
+		if ( !viewRect.intersects( pixelRect ) )
+		{
+			//printf("Table:%i Not in View\n", n);
+			continue;
+
+		}
+		for (j=0; j<30; j++)
+		{
+			for (i=0; i<32; i++)
+			{
+				for (y=0; y<8; y++)
+				{
+					for (x=0; x<8; x++)
+					{
+						pixelRect.setRect( nt->tile[j][i].pixel[y][x].x, nt->tile[j][i].pixel[y][x].y, w, h );
+
+						if ( viewRect.intersects( pixelRect ) )
+						{
+						   painter.fillRect( nt->tile[j][i].pixel[y][x].x, nt->tile[j][i].pixel[y][x].y, w, h, nt->tile[j][i].pixel[y][x].color );
+						}
 					}
 				}
 			}
 		}
 		if ( drawScrollLines )
 		{
-			ww = nt->w * 256;
-			hh = nt->h * 240;
+			//ww = nt->w * 256;
+			//hh = nt->h * 240;
 
 			painter.setPen( scanLineColor );
 
@@ -1642,7 +1739,7 @@ void FCEUD_UpdateNTView(int scanline, bool drawall)
 	}
 
 	chrchanged = 0;
-	redrawtables = true;
+	resetDrawCounter = true;
 	return;	
 }
 //----------------------------------------------------
