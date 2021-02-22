@@ -156,16 +156,24 @@ CreateDirs(const std::string &dir)
 static void
 GetBaseDirectory(std::string &dir)
 {
-	char *home = getenv("HOME");
+	char *home = getenv("FCEUX_HOME");
 
 #ifdef WIN32
+	// Windows users want base directory to be where executable resides.
+	// Only way to override this behavior is to set an FCEUX_HOME 
+	// environment variable prior to starting the application.
+	//if ( home == NULL )
+	//{
+	//	home = getenv("USERPROFILE");
+	//}
+	//if ( home == NULL )
+	//{
+	//	home = getenv("HOMEPATH");
+	//}
+#else
 	if ( home == NULL )
 	{
-		home = getenv("USERPROFILE");
-	}
-	if ( home == NULL )
-	{
-		home = getenv("HOMEPATH");
+		home = getenv("HOME");
 	}
 #endif
 
