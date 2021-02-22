@@ -120,19 +120,23 @@ char romNameWhenClosingEmulator[2048] = {0};
 
 FCEUGI::FCEUGI()
 	: filename(0),
-	  archiveFilename(0) {
+	  archiveFilename(0) 
+{
 	//printf("%08x",opsize); // WTF?!
 }
 
-FCEUGI::~FCEUGI() {
-	if (filename) {
-        free(filename);
-        filename = NULL;
-    }
-	if (archiveFilename) {
-        delete archiveFilename;
-        archiveFilename = NULL;
-    }
+FCEUGI::~FCEUGI() 
+{
+	if (filename) 
+	{
+		free(filename);
+		filename = NULL;
+	}
+	if (archiveFilename) 
+	{
+		free(archiveFilename);
+		archiveFilename = NULL;
+	}
 }
 
 bool CheckFileExists(const char* filename) {
