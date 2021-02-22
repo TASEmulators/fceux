@@ -790,7 +790,7 @@ static INT_PTR CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 			xPositions[i] = r.left;
 
 			// experimental: limit the text length and input to hex values
-			SendDlgItemMessage(hwndDlg, MW_ADDR[i], EM_SETLIMITTEXT, 4, 0);
+			SendDlgItemMessage(hwndDlg, MW_ADDR[i], EM_SETLIMITTEXT, 6, 0);
 			DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, MW_ADDR[i]), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 		}
 
