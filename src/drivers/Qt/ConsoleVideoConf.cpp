@@ -266,7 +266,6 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	main_hbox->addLayout( vbox2 );
 	vbox2->addWidget( gbox, 1 );
-	vbox2->addStretch( 5 );
 	gbox->setLayout(grid);
 
 	ntsc_start = new QLineEdit();
@@ -337,28 +336,64 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	grid->addWidget( pal_end   , 2, 2, Qt::AlignLeft);
 	grid->addWidget( clipSidesCbx, 3, 0, 1, 3);
 
+	gbox  = new QGroupBox( tr("Current Dimensions") );
+	grid  = new QGridLayout();
+
+	vbox2->addWidget( gbox, 1 );
+	gbox->setLayout(grid);
+
+	winSizeReadout = new QLineEdit();
+	winSizeReadout->setFont( font );
+	winSizeReadout->setReadOnly(true);
+	winSizeReadout->setAlignment(Qt::AlignCenter);
+
+	vpSizeReadout = new QLineEdit();
+	vpSizeReadout->setFont( font );
+	vpSizeReadout->setReadOnly(true);
+	vpSizeReadout->setAlignment(Qt::AlignCenter);
+
+	grid->addWidget( new QLabel( tr("Window:") ), 0, 0, Qt::AlignLeft);
+	grid->addWidget( new QLabel( tr("Viewport:") ), 1, 0, Qt::AlignLeft);
+	grid->addWidget( winSizeReadout, 0, 1, Qt::AlignLeft);
+	grid->addWidget( vpSizeReadout, 1, 1, Qt::AlignLeft);
+
+	vbox2->addStretch( 5 );
+
 	setLayout( main_vbox );
 
+	updateReadouts();
+
+	updateTimer  = new QTimer( this );
+
+	connect( updateTimer, &QTimer::timeout, this, &ConsoleVideoConfDialog_t::periodicUpdate );
+
+	updateTimer->start( 500 ); // 2Hz
 }
 //----------------------------------------------------
 ConsoleVideoConfDialog_t::~ConsoleVideoConfDialog_t(void)
 {
 	printf("Destroy Video Config Window\n");
 
+	updateTimer->stop();
 }
 //----------------------------------------------------------------------------
 void ConsoleVideoConfDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("Video Config Close Window Event\n");
-   done(0);
+	printf("Video Config Close Window Event\n");
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void ConsoleVideoConfDialog_t::periodicUpdate(void)
+{
+	updateReadouts();
 }
 //----------------------------------------------------------------------------
 void ConsoleVideoConfDialog_t::closeWindow(void)
 {
-   //printf("Video Config Close Window\n");
-   done(0);
+	//printf("Video Config Close Window\n");
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------
@@ -368,6 +403,34 @@ void  ConsoleVideoConfDialog_t::resetVideo(void)
 	KillVideo ();
 	InitVideo (GameInfo);
 	fceuWrapperUnLock();
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::updateReadouts(void)
+{
+	if ( consoleWindow )
+	{
+		QSize w, v;
+		char stmp[128];
+
+		w = consoleWindow->size();
+
+		if ( consoleWindow->viewport_GL )
+		{
+			v = consoleWindow->viewport_GL->size();
+		}
+		else if ( consoleWindow->viewport_SDL )
+		{
+			v = consoleWindow->viewport_SDL->size();
+		}
+
+		sprintf( stmp, "%i x %i ", w.width(), w.height() );
+
+		winSizeReadout->setText( tr(stmp) );
+
+		sprintf( stmp, "%i x %i ", v.width(), v.height() );
+
+		vpSizeReadout->setText( tr(stmp) );
+	}
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::ntscStartScanLineChanged(const QString &txt)
@@ -714,6 +777,8 @@ void ConsoleVideoConfDialog_t::applyChanges( void )
 		}
 
 		consoleWindow->resize( s );
+
+		updateReadouts();
 	}
 
 }

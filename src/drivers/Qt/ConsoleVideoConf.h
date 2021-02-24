@@ -29,6 +29,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *bar);
 
+		QTimer      *updateTimer;
 		QComboBox   *driverSelect;
 		QComboBox   *scalerSelect;
 		QComboBox   *regionSelect;
@@ -48,18 +49,22 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QLineEdit      *ntsc_end;
 		QLineEdit      *pal_start;
 		QLineEdit      *pal_end;
+		QLineEdit      *winSizeReadout;
+		QLineEdit      *vpSizeReadout;
 
 		void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
 		void  setComboBoxFromProperty( QComboBox *cbx, const char *property );
 		//void  setSliderFromProperty( QSlider *slider, QLabel *lbl, const char *property );
 
 		void  resetVideo(void);
+		void  updateReadouts(void);
 		QSize calcNewScreenSize(void);
 
 	public slots:
 		void closeWindow(void);
 
 	private slots:
+		void  periodicUpdate(void);
 		void  openGL_linearFilterChanged( int value );
 		void  autoScaleChanged( int value );
 		void  sqrPixChanged( int value );
