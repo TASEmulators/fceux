@@ -27,6 +27,7 @@
 #include "Qt/config.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleVideoConf.h"
 #include "Qt/nes_shm.h"
 
@@ -34,17 +35,39 @@
 ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
-	QVBoxLayout *main_vbox;
-	QHBoxLayout *hbox1;
+	QVBoxLayout *main_vbox, *vbox1, *vbox2;
+	QHBoxLayout *main_hbox, *hbox1;
 	QLabel *lbl;
 	QPushButton *button;
 	QStyle *style;
+	QGroupBox *gbox;
+	QGridLayout *grid;
+	fceuDecIntValidtor *validator;
+	QFont font;
+	int opt, fontCharWidth;
+	char stmp[128];
+
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+	QFontMetrics fm(font);
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+    fontCharWidth = fm.horizontalAdvance(QLatin1Char('2'));
+#else
+    fontCharWidth = fm.width(QLatin1Char('2'));
+#endif
 
 	style = this->style();
 
 	setWindowTitle( tr("Video Config") );
 
 	main_vbox = new QVBoxLayout();
+	main_hbox = new QHBoxLayout();
+	vbox1     = new QVBoxLayout();
+
+	main_vbox->addLayout( main_hbox );
+	main_hbox->addLayout( vbox1 );
 
 	// Video Driver Select
 	lbl = new QLabel( tr("Driver:") );
@@ -59,7 +82,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	hbox1->addWidget( lbl );
 	hbox1->addWidget( driverSelect );
 
-	main_vbox->addLayout( hbox1 );
+	vbox1->addLayout( hbox1 );
 
 	// Video Driver Select
 	lbl = new QLabel( tr("Scaler:") );
@@ -82,7 +105,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	hbox1->addWidget( lbl );
 	hbox1->addWidget( scalerSelect );
 
-	main_vbox->addLayout( hbox1 );
+	vbox1->addLayout( hbox1 );
 
 	// Enable OpenGL Linear Filter Checkbox
 	gl_LF_chkBox  = new QCheckBox( tr("Enable OpenGL Linear Filter") );
@@ -91,7 +114,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	connect(gl_LF_chkBox , SIGNAL(stateChanged(int)), this, SLOT(openGL_linearFilterChanged(int)) );
 
-	main_vbox->addWidget( gl_LF_chkBox );
+	vbox1->addWidget( gl_LF_chkBox );
 
 	// Region Select
 	lbl = new QLabel( tr("Region:") );
@@ -115,7 +138,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	hbox1->addWidget( lbl );
 	hbox1->addWidget( regionSelect );
 
-	main_vbox->addLayout( hbox1 );
+	vbox1->addLayout( hbox1 );
 
 	// Enable New PPU Checkbox
 	new_PPU_ena  = new QCheckBox( tr("Enable New PPU") );
@@ -127,7 +150,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	sprtLimCbx  = new QCheckBox( tr("Disable Sprite Limit") );
 
 	// Clip Sides Checkbox
-	clipSidesCbx  = new QCheckBox( tr("Clip Sides") );
+	clipSidesCbx  = new QCheckBox( tr("Clip Left/Right Sides (8 px on each)") );
 
 	// Show FPS Checkbox
 	showFPS_cbx  = new QCheckBox( tr("Show FPS") );
@@ -166,13 +189,13 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	connect(sqrPixCbx   , SIGNAL(stateChanged(int)), this, SLOT(sqrPixChanged(int)) );
 	connect(autoScaleCbx, SIGNAL(stateChanged(int)), this, SLOT(autoScaleChanged(int)) );
 
-	main_vbox->addWidget( new_PPU_ena );
-	main_vbox->addWidget( frmskipcbx  );
-	main_vbox->addWidget( sprtLimCbx  );
-	main_vbox->addWidget( clipSidesCbx);
-	main_vbox->addWidget( showFPS_cbx );
-	main_vbox->addWidget( autoScaleCbx);
-	main_vbox->addWidget( sqrPixCbx   );
+	vbox1->addWidget( new_PPU_ena );
+	vbox1->addWidget( frmskipcbx  );
+	vbox1->addWidget( sprtLimCbx  );
+	//vbox1->addWidget( clipSidesCbx);
+	vbox1->addWidget( showFPS_cbx );
+	vbox1->addWidget( autoScaleCbx);
+	vbox1->addWidget( sqrPixCbx   );
 
 	xScaleBox = new QDoubleSpinBox(this);
 	yScaleBox = new QDoubleSpinBox(this);
@@ -210,12 +233,12 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	hbox1 = new QHBoxLayout();
 	hbox1->addWidget( xScaleLabel );
 	hbox1->addWidget( xScaleBox );
-	main_vbox->addLayout( hbox1 );
+	vbox1->addLayout( hbox1 );
 
 	hbox1 = new QHBoxLayout();
 	hbox1->addWidget( yScaleLabel );
 	hbox1->addWidget( yScaleBox );
-	main_vbox->addLayout( hbox1 );
+	vbox1->addLayout( hbox1 );
 
 	if ( sqrPixCbx->isChecked() )
 	{
@@ -236,6 +259,83 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	connect(button, SIGNAL(clicked()), this, SLOT(closeWindow(void)) );
 
 	main_vbox->addLayout( hbox1 );
+
+	gbox  = new QGroupBox( tr("Drawing Area") );
+	vbox2 = new QVBoxLayout();
+	grid  = new QGridLayout();
+
+	main_hbox->addLayout( vbox2 );
+	vbox2->addWidget( gbox, 1 );
+	vbox2->addStretch( 5 );
+	gbox->setLayout(grid);
+
+	ntsc_start = new QLineEdit();
+	ntsc_end   = new QLineEdit();
+	pal_start  = new QLineEdit();
+	pal_end    = new QLineEdit();
+
+	validator = new fceuDecIntValidtor( 0, 239, this );
+	ntsc_start->setFont( font );
+	ntsc_start->setMaxLength( 3 );
+	ntsc_start->setValidator( validator );
+	ntsc_start->setAlignment(Qt::AlignCenter);
+	ntsc_start->setMaximumWidth( 8 * fontCharWidth );
+	ntsc_start->setCursorPosition(0);
+
+	validator = new fceuDecIntValidtor( 0, 239, this );
+	ntsc_end->setFont( font );
+	ntsc_end->setMaxLength( 3 );
+	ntsc_end->setValidator( validator );
+	ntsc_end->setAlignment(Qt::AlignCenter);
+	ntsc_end->setMaximumWidth( 8 * fontCharWidth );
+	ntsc_end->setCursorPosition(0);
+
+	validator = new fceuDecIntValidtor( 0, 239, this );
+	pal_start->setFont( font );
+	pal_start->setMaxLength( 3 );
+	pal_start->setValidator( validator );
+	pal_start->setAlignment(Qt::AlignCenter);
+	pal_start->setMaximumWidth( 8 * fontCharWidth );
+	pal_start->setCursorPosition(0);
+
+	validator = new fceuDecIntValidtor( 0, 239, this );
+	pal_end->setFont( font );
+	pal_end->setMaxLength( 3 );
+	pal_end->setValidator( validator );
+	pal_end->setAlignment(Qt::AlignCenter);
+	pal_end->setMaximumWidth( 8 * fontCharWidth );
+	pal_end->setCursorPosition(0);
+
+	g_config->getOption("SDL.ScanLineStartNTSC", &opt);
+	sprintf( stmp, "%i", opt );
+	ntsc_start->setText( tr(stmp) );
+
+	g_config->getOption("SDL.ScanLineEndNTSC", &opt);
+	sprintf( stmp, "%i", opt );
+	ntsc_end->setText( tr(stmp) );
+
+	g_config->getOption("SDL.ScanLineStartPAL", &opt);
+	sprintf( stmp, "%i", opt );
+	pal_start->setText( tr(stmp) );
+
+	g_config->getOption("SDL.ScanLineEndPAL", &opt);
+	sprintf( stmp, "%i", opt );
+	pal_end->setText( tr(stmp) );
+
+	connect( ntsc_start, SIGNAL(textEdited(const QString &)), this, SLOT(ntscStartScanLineChanged(const QString &)));
+	connect( ntsc_end  , SIGNAL(textEdited(const QString &)), this, SLOT(ntscEndScanLineChanged(const QString &)));
+	connect( pal_start , SIGNAL(textEdited(const QString &)), this, SLOT(palStartScanLineChanged(const QString &)));
+	connect( pal_end   , SIGNAL(textEdited(const QString &)), this, SLOT(palEndScanLineChanged(const QString &)));
+
+	grid->addWidget( new QLabel( tr("NTSC") )      , 0, 1, Qt::AlignLeft);
+	grid->addWidget( new QLabel( tr("PAL/Dendy") ) , 0, 2, Qt::AlignLeft);
+	grid->addWidget( new QLabel( tr("First Line:") ), 1, 0, Qt::AlignLeft);
+	grid->addWidget( new QLabel( tr("Last Line:")  ), 2, 0, Qt::AlignLeft);
+	grid->addWidget( ntsc_start, 1, 1, Qt::AlignLeft);
+	grid->addWidget( pal_start , 1, 2, Qt::AlignLeft);
+	grid->addWidget( ntsc_end  , 2, 1, Qt::AlignLeft);
+	grid->addWidget( pal_end   , 2, 2, Qt::AlignLeft);
+	grid->addWidget( clipSidesCbx, 3, 0, 1, 3);
 
 	setLayout( main_vbox );
 
@@ -268,6 +368,68 @@ void  ConsoleVideoConfDialog_t::resetVideo(void)
 	KillVideo ();
 	InitVideo (GameInfo);
 	fceuWrapperUnLock();
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::ntscStartScanLineChanged(const QString &txt)
+{
+	int opt;
+	std::string s;
+
+	s = txt.toStdString();
+
+	if ( s.size() > 0 )
+	{
+		opt = strtoul( s.c_str(), NULL, 10 );
+
+		g_config->setOption("SDL.ScanLineStartNTSC", opt);
+
+		printf("NTSC Start: %i \n", opt );
+	}
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::ntscEndScanLineChanged(const QString &txt)
+{
+	int opt;
+	std::string s;
+
+	s = txt.toStdString();
+
+	if ( s.size() > 0 )
+	{
+		opt = strtoul( s.c_str(), NULL, 10 );
+
+		g_config->setOption("SDL.ScanLineEndNTSC", opt);
+	}
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::palStartScanLineChanged(const QString &txt)
+{
+	int opt;
+	std::string s;
+
+	s = txt.toStdString();
+
+	if ( s.size() > 0 )
+	{
+		opt = strtoul( s.c_str(), NULL, 10 );
+
+		g_config->setOption("SDL.ScanLineStartPAL", opt);
+	}
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::palEndScanLineChanged(const QString &txt)
+{
+	int opt;
+	std::string s;
+
+	s = txt.toStdString();
+
+	if ( s.size() > 0 )
+	{
+		opt = strtoul( s.c_str(), NULL, 10 );
+
+		g_config->setOption("SDL.ScanLineEndPAL", opt);
+	}
 }
 //----------------------------------------------------
 void  ConsoleVideoConfDialog_t::setCheckBoxFromProperty( QCheckBox *cbx, const char *property )

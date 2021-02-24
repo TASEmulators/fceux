@@ -140,9 +140,65 @@ void FCEUD_VideoChanged()
 		PAL = 0; // NTSC and Dendy
 }
 
+void CalcVideoDimensions(void)
+{
+	g_config->getOption("SDL.SpecialFilter", &s_sponge);
+
+	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
+	s_tlines = s_erendline - s_srendline + 1;
+
+	nes_shm->video.preScaler = s_sponge;
+
+	switch ( s_sponge )
+	{
+		case 0: // None
+			 nes_shm->video.scale = 1;
+		break;
+		case 1: // hq2x
+		case 2: // Scale2x
+		case 3: // NTSC 2x
+		case 6: // Prescale2x
+			 nes_shm->video.scale = 2;
+		break;
+		case 4: // hq3x
+		case 5: // Scale3x
+		case 7: // Prescale3x
+			 nes_shm->video.scale = 3;
+		break;
+		case 8: // Prescale4x
+			 nes_shm->video.scale = 4;
+		break;
+		case 9: // PAL
+			 nes_shm->video.scale = 3;
+		break;
+	}
+
+	int iScale = nes_shm->video.scale;
+	if ( s_sponge == 3 )
+	{
+		nes_shm->video.ncol = iScale*301;
+	}
+	else
+	{
+		nes_shm->video.ncol = iScale*NWIDTH;
+	}
+	if ( s_sponge == 9 )
+	{
+		nes_shm->video.nrow  = 1*s_tlines;
+		nes_shm->video.xyRatio = 3;
+	}
+	else
+	{
+		nes_shm->video.nrow  = iScale*s_tlines;
+		nes_shm->video.xyRatio = 1;
+	}
+	nes_shm->video.pitch = nes_shm->video.ncol * 4;
+}
+
 int InitVideo(FCEUGI *gi)
 {
 	int doublebuf, xstretch, ystretch, xres, yres, show_fps;
+	int startNTSC, endNTSC, startPAL, endPAL;
 
 	FCEUI_printf("Initializing video...");
 
@@ -159,7 +215,13 @@ int InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.ShowFPS", &show_fps);
 	//g_config->getOption("SDL.XScale", &s_exs);
 	//g_config->getOption("SDL.YScale", &s_eys);
+	g_config->getOption("SDL.ScanLineStartNTSC", &startNTSC);
+	g_config->getOption("SDL.ScanLineEndNTSC", &endNTSC);
+	g_config->getOption("SDL.ScanLineStartPAL", &startPAL);
+	g_config->getOption("SDL.ScanLineEndPAL", &endPAL);
 	uint32_t  rmask, gmask, bmask;
+
+	FCEUI_SetRenderedLines(startNTSC, endNTSC, startPAL, endPAL);
 
 	s_exs = 1.0;
 	s_eys = 1.0;

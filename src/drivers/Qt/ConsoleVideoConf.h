@@ -11,6 +11,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QLineEdit>
 #include <QLabel>
 #include <QSlider>
 #include <QFrame>
@@ -43,6 +44,10 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QDoubleSpinBox *yScaleBox;
 		QLabel         *xScaleLabel;
 		QLabel         *yScaleLabel;
+		QLineEdit      *ntsc_start;
+		QLineEdit      *ntsc_end;
+		QLineEdit      *pal_start;
+		QLineEdit      *pal_end;
 
 		void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
 		void  setComboBoxFromProperty( QComboBox *cbx, const char *property );
@@ -52,7 +57,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QSize calcNewScreenSize(void);
 
 	public slots:
-      void closeWindow(void);
+		void closeWindow(void);
 
 	private slots:
 		void  openGL_linearFilterChanged( int value );
@@ -67,6 +72,10 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  driverChanged(int index);
 		void  scalerChanged(int index);
 		void  applyChanges( void );
+		void  ntscStartScanLineChanged(const QString &);
+		void  ntscEndScanLineChanged(const QString &);
+		void  palStartScanLineChanged(const QString &);
+		void  palEndScanLineChanged(const QString &);
 
 };
 

@@ -241,8 +241,10 @@ InitConfig()
 	config->addOption("ntsccolor", "SDL.NTSCpalette", 0);
 
 	// scanline settings
-	config->addOption("slstart", "SDL.ScanLineStart", 0);
-	config->addOption("slend", "SDL.ScanLineEnd", 239);
+	config->addOption("SDL.ScanLineStartNTSC", 0+8);
+	config->addOption("SDL.ScanLineEndNTSC", 239-8);
+	config->addOption("SDL.ScanLineStartPAL", 0);
+	config->addOption("SDL.ScanLineEndPAL", 239);
 
 	// video controls
 	config->addOption('f', "fullscreen", "SDL.Fullscreen", 0);
@@ -253,8 +255,8 @@ InitConfig()
 	config->addOption('y', "yres", "SDL.YResolution", 0);
 	config->addOption("SDL.LastXRes", 0);
 	config->addOption("SDL.LastYRes", 0);
-	config->addOption("SDL.WinSizeX", 512);
-	config->addOption("SDL.WinSizeY", 512);
+	config->addOption("SDL.WinSizeX", 0);
+	config->addOption("SDL.WinSizeY", 0);
 	config->addOption("doublebuf", "SDL.DoubleBuffering", 1);
 	config->addOption("autoscale", "SDL.AutoScale", 1);
 	config->addOption("keepratio", "SDL.KeepRatio", 1);
@@ -540,7 +542,8 @@ InitConfig()
 void
 UpdateEMUCore(Config *config)
 {
-	int ntsccol, ntsctint, ntschue, flag, region, start, end;
+	int ntsccol, ntsctint, ntschue, flag, region;
+	int startNTSC, endNTSC, startPAL, endPAL;
 	std::string cpalette;
 
 	config->getOption("SDL.NTSCpalette", &ntsccol);
@@ -565,8 +568,10 @@ UpdateEMUCore(Config *config)
 	config->getOption("SDL.DisableSpriteLimit", &flag);
 	FCEUI_DisableSpriteLimitation(flag ? 1 : 0);
 
-	config->getOption("SDL.ScanLineStart", &start);
-	config->getOption("SDL.ScanLineEnd", &end);
+	config->getOption("SDL.ScanLineStartNTSC", &startNTSC);
+	config->getOption("SDL.ScanLineEndNTSC", &endNTSC);
+	config->getOption("SDL.ScanLineStartPAL", &startPAL);
+	config->getOption("SDL.ScanLineEndPAL", &endPAL);
 
 #if DOING_SCANLINE_CHECKS
 	for(int i = 0; i < 2; x++) {
@@ -575,6 +580,6 @@ UpdateEMUCore(Config *config)
 	}
 #endif
 
-	FCEUI_SetRenderedLines(start + 8, end - 8, start, end);
+	FCEUI_SetRenderedLines(startNTSC, endNTSC, startPAL, endPAL);
 }
 

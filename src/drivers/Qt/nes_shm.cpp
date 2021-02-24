@@ -34,7 +34,7 @@ nes_shm_t *open_nes_shm(void)
 
 	memset( vaddr, 0, sizeof(struct nes_shm_t));
 
-	vaddr->video.ncol      = 256;
+	vaddr->video.ncol      = 240;
 	vaddr->video.nrow      = 256;
 	vaddr->video.pitch     = 256 * 4;
 	vaddr->video.scale     = 1;

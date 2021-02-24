@@ -160,6 +160,29 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		#endif
 	}
 
+
+	g_config->getOption( "SDL.WinSizeX", &xWinSize );
+	g_config->getOption( "SDL.WinSizeY", &yWinSize );
+
+	if ( (xWinSize >= 256) && (yWinSize >= 256) )
+	{
+		this->resize( xWinSize, yWinSize );
+	}
+	else
+	{
+		QSize reqSize = calcRequiredSize();
+
+		this->resize( reqSize );
+	}
+
+	g_config->getOption( "SDL.Fullscreen", &setFullScreen );
+	g_config->setOption( "SDL.Fullscreen", 0 ); // Reset full screen config parameter to false so it is never saved this way
+
+	if ( setFullScreen )
+	{
+		this->showFullScreen();
+	}
+
 	recentRomMenuReset = false;
 }
 
@@ -234,6 +257,54 @@ consoleWin_t::~consoleWin_t(void)
 		consoleWindow = NULL;
 	}
 
+}
+
+QSize consoleWin_t::calcRequiredSize(void)
+{
+	QSize out( GL_NES_WIDTH, GL_NES_HEIGHT );
+
+	QSize w, v;
+	double xscale, yscale;
+	int texture_width  = nes_shm->video.ncol;
+	int texture_height = nes_shm->video.nrow;
+	int l=0, r=texture_width;
+	int t=0, b=texture_height;
+	int dw=0, dh=0, rw, rh;
+	bool sqrPixChkd = true;
+
+	CalcVideoDimensions();
+
+	w = size();
+
+	if ( viewport_GL )
+	{
+		v = viewport_GL->size();
+		sqrPixChkd = viewport_GL->getSqrPixelOpt();
+		xscale = viewport_GL->getScaleX();
+		yscale = viewport_GL->getScaleY();
+	}
+	else if ( viewport_SDL )
+	{
+		v = viewport_SDL->size();
+		sqrPixChkd = viewport_SDL->getSqrPixelOpt();
+		xscale = viewport_SDL->getScaleX();
+		yscale = viewport_SDL->getScaleY();
+	}
+
+	dw = 0;
+	dh = menubar->height();
+
+	if ( sqrPixChkd )
+	{
+		yscale = xscale * (double)nes_shm->video.xyRatio;
+	}
+	rw=(int)((r-l)*xscale);
+	rh=(int)((b-t)*yscale);
+
+	out.setWidth( rw + dw );
+	out.setHeight( rh + dh );
+
+	return out;
 }
 
 void consoleWin_t::setCyclePeriodms( int ms )

@@ -116,6 +116,8 @@ class  consoleWin_t : public QMainWindow
 
 		void addRecentRom( const char *rom );
 
+		QSize  calcRequiredSize(void);
+
 	protected:
 		consoleMenuBar *menubar;
 
