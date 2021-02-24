@@ -372,7 +372,7 @@ void  ConsoleVideoConfDialog_t::resetVideo(void)
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::ntscStartScanLineChanged(const QString &txt)
 {
-	int opt;
+	int opt, opt2;
 	std::string s;
 
 	s = txt.toStdString();
@@ -381,15 +381,19 @@ void ConsoleVideoConfDialog_t::ntscStartScanLineChanged(const QString &txt)
 	{
 		opt = strtoul( s.c_str(), NULL, 10 );
 
-		g_config->setOption("SDL.ScanLineStartNTSC", opt);
+		g_config->getOption("SDL.ScanLineEndNTSC", &opt2);
 
-		printf("NTSC Start: %i \n", opt );
+		if ( opt > opt2 )
+		{
+			opt = opt2;
+		}
+		g_config->setOption("SDL.ScanLineStartNTSC", opt);
 	}
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::ntscEndScanLineChanged(const QString &txt)
 {
-	int opt;
+	int opt, opt2;
 	std::string s;
 
 	s = txt.toStdString();
@@ -398,13 +402,19 @@ void ConsoleVideoConfDialog_t::ntscEndScanLineChanged(const QString &txt)
 	{
 		opt = strtoul( s.c_str(), NULL, 10 );
 
+		g_config->getOption("SDL.ScanLineStartNTSC", &opt2);
+
+		if ( opt < opt2 )
+		{
+			opt = opt2;
+		}
 		g_config->setOption("SDL.ScanLineEndNTSC", opt);
 	}
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::palStartScanLineChanged(const QString &txt)
 {
-	int opt;
+	int opt, opt2;
 	std::string s;
 
 	s = txt.toStdString();
@@ -413,13 +423,19 @@ void ConsoleVideoConfDialog_t::palStartScanLineChanged(const QString &txt)
 	{
 		opt = strtoul( s.c_str(), NULL, 10 );
 
+		g_config->getOption("SDL.ScanLineEndPAL", &opt2);
+
+		if ( opt > opt2 )
+		{
+			opt = opt2;
+		}
 		g_config->setOption("SDL.ScanLineStartPAL", opt);
 	}
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::palEndScanLineChanged(const QString &txt)
 {
-	int opt;
+	int opt, opt2;
 	std::string s;
 
 	s = txt.toStdString();
@@ -428,6 +444,12 @@ void ConsoleVideoConfDialog_t::palEndScanLineChanged(const QString &txt)
 	{
 		opt = strtoul( s.c_str(), NULL, 10 );
 
+		g_config->getOption("SDL.ScanLineStartPAL", &opt2);
+
+		if ( opt < opt2 )
+		{
+			opt = opt2;
+		}
 		g_config->setOption("SDL.ScanLineEndPAL", opt);
 	}
 }
