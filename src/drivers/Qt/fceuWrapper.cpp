@@ -314,7 +314,8 @@ int LoadGame(const char *path, bool silent)
 	
 	// set pal/ntsc
 	int id;
-	g_config->getOption("SDL.PAL", &id);
+	id = FCEUI_GetCurrentVidSystem(NULL, NULL);
+	g_config->setOption("SDL.PAL", id);
 	FCEUI_SetRegion(id);
 
 	g_config->getOption("SDL.SwapDuty", &id);
