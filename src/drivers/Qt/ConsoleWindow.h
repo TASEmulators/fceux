@@ -180,6 +180,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *stopMovAct;
 		QAction *recMovAct;
 		QAction *recAsMovAct;
+		QAction *region[3];
 
 		QTimer  *gameTimer;
 
@@ -190,6 +191,7 @@ class  consoleWin_t : public QMainWindow
 
 		std::list <std::string*> romList;
 
+		unsigned int updateCounter;
 	protected:
 		void closeEvent(QCloseEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -202,6 +204,7 @@ class  consoleWin_t : public QMainWindow
 		void buildRecentRomMenu(void);
 		void saveRecentRomMenu(void);
 		void clearRomList(void);
+		void setRegion(int region);
 
 	public slots:
 		void openDebugWindow(void);
@@ -254,6 +257,9 @@ class  consoleWin_t : public QMainWindow
 		void consolePause(void);
 		void toggleGameGenie(bool checked);
 		void loadGameGenieROM(void);
+		void setRegionNTSC(void);
+		void setRegionPAL(void);
+		void setRegionDendy(void);
 		void insertCoin(void);
 		void fdsSwitchDisk(void);
 		void fdsEjectDisk(void);

@@ -183,6 +183,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		this->showFullScreen();
 	}
 
+	updateCounter = 0;
 	recentRomMenuReset = false;
 }
 
@@ -677,6 +678,43 @@ void consoleWin_t::createMainMenu(void)
 	
 	emuMenu->addAction(pauseAct);
 	
+	emuMenu->addSeparator();
+
+	// Emulation -> Region
+	subMenu = emuMenu->addMenu(tr("&Region"));
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	for (int i=0; i<3; i++)
+	{
+		const char *txt;
+
+		if ( i == 1 )
+		{
+			txt = "&PAL";
+		}
+		else if ( i == 2 )
+		{
+			txt = "&Dendy";
+		}
+		else
+		{
+			txt = "&NTSC";
+		}
+
+	        region[i] = new QAction(tr(txt), this);
+	        region[i]->setCheckable(true);
+
+	        group->addAction(region[i]);
+		subMenu->addAction(region[i]);
+	}
+	region[ FCEUI_GetRegion() ]->setChecked(true);
+
+	connect( region[0], SIGNAL(triggered(void)), this, SLOT(setRegionNTSC(void)) );
+	connect( region[1], SIGNAL(triggered(void)), this, SLOT(setRegionPAL(void)) );
+	connect( region[2], SIGNAL(triggered(void)), this, SLOT(setRegionDendy(void)) );
+
 	emuMenu->addSeparator();
 
 	// Emulation -> Enable Game Genie
@@ -1953,6 +1991,42 @@ void consoleWin_t::consolePause(void)
    return;
 }
 
+void consoleWin_t::setRegion(int region)
+{
+	int currentRegion;
+
+	g_config->setOption ("SDL.PAL", region);
+	g_config->save ();
+
+	currentRegion = FCEUI_GetRegion();
+
+	if ( currentRegion != region )
+	{
+		fceuWrapperLock();
+		FCEUI_SetRegion (region, true);
+		fceuWrapperUnLock();
+	}
+	return;
+}
+
+void consoleWin_t::setRegionNTSC(void)
+{
+	setRegion(0);
+	return;
+}
+
+void consoleWin_t::setRegionPAL(void)
+{
+	setRegion(1);
+	return;
+}
+
+void consoleWin_t::setRegionDendy(void)
+{
+	setRegion(2);
+	return;
+}
+
 void consoleWin_t::toggleGameGenie(bool checked)
 {
 	int gg_enabled;
@@ -2567,6 +2641,18 @@ void consoleWin_t::updatePeriodic(void)
 		}
 	}
 
+	// Low Rate Updates
+	if ( (updateCounter % 20) == 0 )
+	{
+		// Keep region menu selection sync'd to actual state
+		int actRegion = FCEUI_GetRegion();
+
+		if ( !region[ actRegion ]->isChecked() )
+		{
+			region[ actRegion ]->setChecked(true);
+		}
+	}
+
 	if ( errorMsgValid )
 	{
 		showErrorMsgWindow();
@@ -2586,6 +2672,8 @@ void consoleWin_t::updatePeriodic(void)
 		closeApp();
 		closeRequested = false;
 	}
+
+	updateCounter++;
 
    return;
 }

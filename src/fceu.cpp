@@ -1073,7 +1073,27 @@ int FCEUI_GetCurrentVidSystem(int *slstart, int *slend) {
 	return(PAL);
 }
 
-void FCEUI_SetRegion(int region, int notify) {
+int  FCEUI_GetRegion(void)
+{
+	int region;
+
+	if ( pal_emulation )
+	{
+		region = 1;
+	}
+	else if ( dendy )
+	{
+		region = 2;
+	}
+	else
+	{
+		region = 0;
+	}
+	return region;
+}
+
+void FCEUI_SetRegion(int region, int notify) 
+{
 	switch (region) {
 		case 0: // NTSC
 			normalscanlines = 240;

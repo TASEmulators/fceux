@@ -313,10 +313,43 @@ int LoadGame(const char *path, bool silent)
 	}
 	
 	// set pal/ntsc
-	int id;
-	id = FCEUI_GetCurrentVidSystem(NULL, NULL);
-	g_config->setOption("SDL.PAL", id);
-	FCEUI_SetRegion(id);
+	int id, region, autoDetectPAL;
+	g_config->getOption("SDL.PAL", &region);
+	g_config->getOption("SDL.AutoDetectPAL", &autoDetectPAL);
+
+	if ( autoDetectPAL )
+	{
+		id = FCEUI_GetCurrentVidSystem(NULL, NULL);
+
+		if ( region == 2 )
+		{	// Dendy mode:
+			//   Run PAL Games as PAL
+			//   Run NTSC Games as Dendy
+			if ( id == 1 )
+			{
+				g_config->setOption("SDL.PAL", id);
+				FCEUI_SetRegion(id);
+			}
+			else
+			{
+				FCEUI_SetRegion(region);
+			}
+		}
+		else
+		{	// Run NTSC games as NTSC and PAL games as PAL
+			g_config->setOption("SDL.PAL", id);
+			FCEUI_SetRegion(id);
+		}
+	}
+	else
+	{
+		// If not Auto-detection of region,
+		// Strictly enforce region GUI selection
+		// Does not matter what type of game is 
+		// loaded, the current region selection is used 
+		FCEUI_SetRegion(region);
+	}
+
 
 	g_config->getOption("SDL.SwapDuty", &id);
 	swapDuty = id;

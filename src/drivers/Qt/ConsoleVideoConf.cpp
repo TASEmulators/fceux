@@ -140,6 +140,9 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	vbox1->addLayout( hbox1 );
 
+	// Enable Region Auto Detection Logic
+	autoRegion  = new QCheckBox( tr("Region Auto Detect") );
+
 	// Enable New PPU Checkbox
 	new_PPU_ena  = new QCheckBox( tr("Enable New PPU") );
 
@@ -161,6 +164,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	// Square Pixels
 	sqrPixCbx  = new QCheckBox( tr("Square Pixels") );
 
+	setCheckBoxFromProperty( autoRegion   , "SDL.AutoDetectPAL");
 	setCheckBoxFromProperty( new_PPU_ena  , "SDL.NewPPU");
 	setCheckBoxFromProperty( frmskipcbx   , "SDL.Frameskip");
 	setCheckBoxFromProperty( sprtLimCbx   , "SDL.DisableSpriteLimit");
@@ -181,6 +185,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 		}
 	}
 
+	connect(autoRegion  , SIGNAL(stateChanged(int)), this, SLOT(autoRegionChanged(int)) );
 	connect(new_PPU_ena , SIGNAL(stateChanged(int)), this, SLOT(use_new_PPU_changed(int)) );
 	connect(frmskipcbx  , SIGNAL(stateChanged(int)), this, SLOT(frameskip_changed(int)) );
 	connect(sprtLimCbx  , SIGNAL(stateChanged(int)), this, SLOT(useSpriteLimitChanged(int)) );
@@ -189,6 +194,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	connect(sqrPixCbx   , SIGNAL(stateChanged(int)), this, SLOT(sqrPixChanged(int)) );
 	connect(autoScaleCbx, SIGNAL(stateChanged(int)), this, SLOT(autoScaleChanged(int)) );
 
+	vbox1->addWidget( autoRegion  );
 	vbox1->addWidget( new_PPU_ena );
 	vbox1->addWidget( frmskipcbx  );
 	vbox1->addWidget( sprtLimCbx  );
@@ -387,6 +393,18 @@ void ConsoleVideoConfDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------------------------------
 void ConsoleVideoConfDialog_t::periodicUpdate(void)
 {
+	int actRegion, selRegion;
+       
+	// Keep region menu selection sync'd to actual state
+	actRegion = FCEUI_GetRegion();
+	selRegion = regionSelect->currentIndex(); 
+
+	if ( actRegion != selRegion )
+	{
+		regionSelect->setCurrentIndex(actRegion); 
+	}
+
+	// Update Window Size Readouts
 	updateReadouts();
 }
 //----------------------------------------------------------------------------
@@ -578,6 +596,13 @@ void ConsoleVideoConfDialog_t::autoScaleChanged( int value )
 }
 
 //----------------------------------------------------
+void ConsoleVideoConfDialog_t::autoRegionChanged( int value )
+{
+	//printf("Value:%i \n", value );
+	g_config->setOption("SDL.AutoDetectPAL", (value == Qt::Checked) );
+	g_config->save ();
+}
+//----------------------------------------------------
 void ConsoleVideoConfDialog_t::use_new_PPU_changed( int value )
 {
 	//printf("Value:%i \n", value );
@@ -682,18 +707,21 @@ void ConsoleVideoConfDialog_t::scalerChanged(int index)
 void ConsoleVideoConfDialog_t::regionChanged(int index)
 {
 	int region;
+	int actRegion = FCEUI_GetRegion();
 	//printf("Region: %i : %i \n", index, regionSelect->itemData(index).toInt() );
 
 	region = regionSelect->itemData(index).toInt();
 
 	g_config->setOption ("SDL.PAL", region);
-
 	g_config->save ();
 
 	// reset sound subsystem for changes to take effect
-	fceuWrapperLock();
-	FCEUI_SetRegion (region, true);
-	fceuWrapperUnLock();
+	if ( actRegion != region )
+	{
+		fceuWrapperLock();
+		FCEUI_SetRegion (region, true);
+		fceuWrapperUnLock();
+	}
 }
 //----------------------------------------------------
 QSize ConsoleVideoConfDialog_t::calcNewScreenSize(void)

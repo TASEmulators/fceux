@@ -33,6 +33,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QComboBox   *driverSelect;
 		QComboBox   *scalerSelect;
 		QComboBox   *regionSelect;
+		QCheckBox   *autoRegion;
 		QCheckBox   *gl_LF_chkBox;
 		QCheckBox   *new_PPU_ena;
 		QCheckBox   *frmskipcbx;
@@ -65,6 +66,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 
 	private slots:
 		void  periodicUpdate(void);
+		void  autoRegionChanged( int value );
 		void  openGL_linearFilterChanged( int value );
 		void  autoScaleChanged( int value );
 		void  sqrPixChanged( int value );
