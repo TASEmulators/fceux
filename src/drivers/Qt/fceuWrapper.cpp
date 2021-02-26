@@ -431,12 +431,27 @@ int  fceuWrapperSoftReset(void)
 
 int  fceuWrapperHardReset(void)
 {
-	if ( isloaded )
+	if ( isloaded && GameInfo )
 	{
-		std::string lastFile;
-		CloseGame();
-		g_config->getOption ("SDL.LastOpenFile", &lastFile);
-		LoadGame (lastFile.c_str());
+		char romPath[2048];
+
+		romPath[0] = 0;
+
+		if ( GameInfo->archiveFilename )
+		{
+			strcpy( romPath, GameInfo->archiveFilename );
+		}
+		else if ( GameInfo->filename )
+		{
+			strcpy( romPath, GameInfo->filename );
+		}
+
+		if ( romPath[0] != 0 )
+		{
+			CloseGame();
+			//printf("Loading: '%s'\n", romPath );
+			LoadGame ( romPath );
+		}
 	}
 	return 0;
 }
