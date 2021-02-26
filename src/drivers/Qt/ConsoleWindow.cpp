@@ -715,6 +715,49 @@ void consoleWin_t::createMainMenu(void)
 	connect( region[1], SIGNAL(triggered(void)), this, SLOT(setRegionPAL(void)) );
 	connect( region[2], SIGNAL(triggered(void)), this, SLOT(setRegionDendy(void)) );
 
+	// Emulation -> RAM Init
+	subMenu = emuMenu->addMenu(tr("&RAM Init"));
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	for (int i=0; i<4; i++)
+	{
+		const char *txt;
+
+		switch (i)
+		{
+			default:
+			case 0:
+				txt = "&Default";
+			break;
+			case 1:
+				txt = "Fill $&FF";
+			break;
+			case 2:
+				txt = "Fill $&00";
+			break;
+			case 3:
+				txt = "&Random";
+			break;
+		}
+
+	        ramInit[i] = new QAction(tr(txt), this);
+	        ramInit[i]->setCheckable(true);
+
+	        group->addAction(ramInit[i]);
+		subMenu->addAction(ramInit[i]);
+	}
+
+	g_config->getOption ("SDL.RamInitMethod", &RAMInitOption);
+
+	ramInit[ RAMInitOption ]->setChecked(true);
+
+	connect( ramInit[0], SIGNAL(triggered(void)), this, SLOT(setRamInit0(void)) );
+	connect( ramInit[1], SIGNAL(triggered(void)), this, SLOT(setRamInit1(void)) );
+	connect( ramInit[2], SIGNAL(triggered(void)), this, SLOT(setRamInit2(void)) );
+	connect( ramInit[3], SIGNAL(triggered(void)), this, SLOT(setRamInit3(void)) );
+
 	emuMenu->addSeparator();
 
 	// Emulation -> Enable Game Genie
@@ -2024,6 +2067,38 @@ void consoleWin_t::setRegionPAL(void)
 void consoleWin_t::setRegionDendy(void)
 {
 	setRegion(2);
+	return;
+}
+
+void consoleWin_t::setRamInit0(void)
+{
+	RAMInitOption = 0;
+
+	g_config->setOption ("SDL.RamInitMethod", RAMInitOption);
+	return;
+}
+
+void consoleWin_t::setRamInit1(void)
+{
+	RAMInitOption = 1;
+
+	g_config->setOption ("SDL.RamInitMethod", RAMInitOption);
+	return;
+}
+
+void consoleWin_t::setRamInit2(void)
+{
+	RAMInitOption = 2;
+
+	g_config->setOption ("SDL.RamInitMethod", RAMInitOption);
+	return;
+}
+
+void consoleWin_t::setRamInit3(void)
+{
+	RAMInitOption = 3;
+
+	g_config->setOption ("SDL.RamInitMethod", RAMInitOption);
 	return;
 }
 

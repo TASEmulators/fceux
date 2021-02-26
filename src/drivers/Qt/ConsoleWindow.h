@@ -181,6 +181,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *recMovAct;
 		QAction *recAsMovAct;
 		QAction *region[3];
+		QAction *ramInit[4];
 
 		QTimer  *gameTimer;
 
@@ -260,6 +261,10 @@ class  consoleWin_t : public QMainWindow
 		void setRegionNTSC(void);
 		void setRegionPAL(void);
 		void setRegionDendy(void);
+		void setRamInit0(void);
+		void setRamInit1(void);
+		void setRamInit2(void);
+		void setRamInit3(void);
 		void insertCoin(void);
 		void fdsSwitchDisk(void);
 		void fdsEjectDisk(void);

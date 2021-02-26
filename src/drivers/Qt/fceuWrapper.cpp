@@ -262,6 +262,10 @@ int LoadGame(const char *path, bool silent)
 
 	FCEUI_SetGameGenie (gg_enabled);
 
+	// Set RAM Init Method Prior to Loading New Game
+	g_config->getOption ("SDL.RamInitMethod", &RAMInitOption);
+
+	// Load the game
 	if(!FCEUI_LoadGame(fullpath, 1, silent)) {
 		return 0;
 	}
