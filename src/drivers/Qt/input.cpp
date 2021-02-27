@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <QFileDialog>
+
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/input.h"
@@ -410,7 +412,7 @@ setHotKeys (void)
   * releasing/capturing mouse pointer during pause toggles
   * */
 void
-TogglePause ()
+TogglePause (void)
 {
 	FCEUI_ToggleEmulationPause ();
 
@@ -426,39 +428,71 @@ TogglePause ()
  * This function opens a file chooser dialog and returns the filename the 
  * user selected.
  * */
-std::string GetFilename (const char *title, bool save, const char *filter)
+static std::string GetFilename (const char *title, int mode, const char *filter)
 {
-	if (FCEUI_EmulationPaused () == 0)
-		FCEUI_ToggleEmulationPause ();
+	int ret, useNativeFileDialogVal;
+	QFileDialog  dialog( consoleWindow, title );
+	std::string  initPath;
+	QList<QUrl>  urls;
+
+	//if (FCEUI_EmulationPaused () == 0)
+	//	FCEUI_ToggleEmulationPause ();
 	std::string fname = "";
 
-#ifdef WIN32
-	OPENFILENAME ofn;		// common dialog box structure
-	char szFile[260];		// buffer for file name
-	HWND hwnd;			// owner window
-	HANDLE hf;			// file handle
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+	urls << QUrl::fromLocalFile( QDir( FCEUI_GetBaseDirectory() ).absolutePath() );
 
-	// Initialize OPENFILENAME
-	memset (&ofn, 0, sizeof (ofn));
-	ofn.lStructSize = sizeof (ofn);
-	ofn.hwndOwner = hwnd;
-	ofn.lpstrFile = szFile;
-	// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
-	// use the contents of szFile to initialize itself.
-	ofn.lpstrFile[0] = '\0';
-	ofn.nMaxFile = sizeof (szFile);
-	ofn.lpstrFilter = "All\0*.*\0";
-	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
-	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	initPath.assign( FCEUI_GetBaseDirectory() );
 
-	// Display the Open dialog box. 
-	fname = GetOpenFileName (&ofn);
+	switch ( mode )
+	{
+		case 0: // Save State
+			dialog.setLabelText( QFileDialog::Accept, dialog.tr("Save") );
+			dialog.setFileMode(QFileDialog::AnyFile);
+			initPath += "/fcs";
+		break;
+		default:
+		case 1: // Load State
+			dialog.setLabelText( QFileDialog::Accept, dialog.tr("Load") );
+			dialog.setFileMode(QFileDialog::ExistingFile);
+			initPath += "/fcs";
+		break;
+		case 2: // Record Movie To
+			dialog.setLabelText( QFileDialog::Accept, dialog.tr("Record") );
+			dialog.setFileMode(QFileDialog::AnyFile);
+			initPath += "/movies";
+		break;
+		case 3: // Load Lua Script
+			dialog.setLabelText( QFileDialog::Accept, dialog.tr("Load") );
+			dialog.setFileMode(QFileDialog::ExistingFile);
+			//initPath += "/fcs";
+		break;
+	}
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setDirectory( dialog.tr(initPath.c_str()) );
 
-#endif
-	FCEUI_ToggleEmulationPause ();
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			fname = fileList[0].toStdString();
+		}
+	}
+
+	//FCEUI_ToggleEmulationPause ();
 	return fname;
 }
 
@@ -474,12 +508,12 @@ std::string GetUserText (const char *title)
 /**
 * Lets the user start a new .fm2 movie file
 **/
-void FCEUD_MovieRecordTo ()
+void FCEUD_MovieRecordTo (void)
 {
-	std::string fname = GetFilename ("Save FM2 movie for recording", true, "FM2 movies|*.fm2");
+	std::string fname = GetFilename ("Save FM2 movie for recording", 2, "FM2 movies|*.fm2");
 	if (!fname.size ())
 		return;			// no filename selected, quit the whole thing
-	std::wstring author = mbstowcs (GetUserText ("Author name"));	// the author can be empty, so no need to check here
+	std::wstring author = mbstowcs (GetUserText ("Author Name"));	// the author can be empty, so no need to check here
 
 	FCEUI_SaveMovie (fname.c_str (), MOVIE_FLAG_FROM_POWERON, author);
 }
@@ -488,9 +522,9 @@ void FCEUD_MovieRecordTo ()
 /**
 * Lets the user save a savestate to a specific file
 **/
-void FCEUD_SaveStateAs ()
+void FCEUD_SaveStateAs (void)
 {
-	std::string fname = GetFilename ("Save savestate as...", true, "Savestates|*.fc0");
+	std::string fname = GetFilename ("Save State As...", 0, "Save States|*.fc0");
 	if (!fname.size ())
 		return;			// no filename selected, quit the whole thing
 
@@ -500,9 +534,9 @@ void FCEUD_SaveStateAs ()
 /**
 * Lets the user load a savestate from a specific file
 */
-void FCEUD_LoadStateFrom ()
+void FCEUD_LoadStateFrom (void)
 {
-	std::string fname = GetFilename ("Load savestate from...", false, "Savestates|*.fc?");
+	std::string fname = GetFilename ("Load State From...", 1, "Save States|*.fc?");
 	if (!fname.size ())
 		return;			// no filename selected, quit the whole thing
 
@@ -800,7 +834,7 @@ static void KeyboardCommands (void)
 	if ( Hotkeys[HK_LOAD_LUA].getRisingEdge() )
 	{
 		std::string fname;
-		fname = GetFilename ("Open LUA script...", false, "Lua scripts|*.lua");
+		fname = GetFilename ("Open LUA script...", 3, "Lua scripts|*.lua");
 		if (fname != "")
 		FCEU_LoadLuaCode (fname.c_str ());
 	}
