@@ -266,14 +266,20 @@ QSize consoleWin_t::calcRequiredSize(void)
 
 	QSize w, v;
 	double xscale, yscale;
-	int texture_width  = nes_shm->video.ncol;
-	int texture_height = nes_shm->video.nrow;
+	int texture_width = GL_NES_WIDTH;
+	int texture_height = GL_NES_HEIGHT;
 	int l=0, r=texture_width;
 	int t=0, b=texture_height;
 	int dw=0, dh=0, rw, rh;
 	bool sqrPixChkd = true;
 
 	CalcVideoDimensions();
+
+	texture_width  = nes_shm->video.ncol;
+	texture_height = nes_shm->video.nrow;
+
+	l=0, r=texture_width;
+	t=0, b=texture_height;
 
 	w = size();
 
