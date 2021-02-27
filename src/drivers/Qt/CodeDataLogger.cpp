@@ -23,6 +23,9 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -56,6 +59,10 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QGroupBox *frame, *subframe;
 	QPushButton *btn;
+	QMenuBar *menuBar;
+	QMenu *fileMenu;
+	QAction *act;
+	int useNativeMenuBar;
 
 	updateTimer = new QTimer(this);
 
@@ -63,12 +70,65 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 
 	setWindowTitle(tr("Code Data Logger"));
 
+	menuBar = new QMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Load
+	act = new QAction(tr("&Load"), this);
+	act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Load From File"));
+	connect(act, SIGNAL(triggered()), this, SLOT(loadCdlFile(void)) );
+	
+	fileMenu->addAction(act);
+
+	// File -> Save
+	act = new QAction(tr("&Save"), this);
+	act->setShortcut(QKeySequence::Save);
+	act->setStatusTip(tr("Save To File"));
+	connect(act, SIGNAL(triggered()), this, SLOT(saveCdlFile(void)) );
+	
+	fileMenu->addAction(act);
+
+	// File -> Save As
+	act = new QAction(tr("Save &As"), this);
+	act->setShortcut(QKeySequence::SaveAs);
+	act->setStatusTip(tr("Save To File As"));
+	connect(act, SIGNAL(triggered()), this, SLOT(saveCdlFileAs(void)) );
+	
+	fileMenu->addAction(act);
+
+	fileMenu->addSeparator();
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
+
 	mainLayout = new QVBoxLayout();
 	vbox1 = new QVBoxLayout();
 	hbox = new QHBoxLayout();
 	grid = new QGridLayout();
 	statLabel = new QLabel(tr(" Logger is Paused: Press Start to Run "));
 	cdlFileLabel = new QLabel(tr("CDL File:"));
+
+	mainLayout->setMenuBar( menuBar );
 
 	vbox1->addLayout(grid);
 	vbox1->addLayout(hbox);
@@ -336,7 +396,7 @@ void CodeDataLoggerDialog_t::saveCdlFileAs(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	const char *romFile;
-	QFileDialog dialog(this, tr("Save CDL To File"));
+	QFileDialog dialog(this, tr("Save CDL File As"));
 
 	dialog.setFileMode(QFileDialog::AnyFile);
 
