@@ -41,7 +41,7 @@ msbuild /m fceux.sln /p:Configuration=Release
 copy src\Release\fceux.exe bin\qfceux.exe
 copy %SDL_INSTALL_PREFIX%\SDL2\lib\x64\SDL2.dll  bin\.
 
-windeployqt bin\qfceux.exe
+windeployqt  --no-compiler-runtime  bin\qfceux.exe
 
 dir bin
 
