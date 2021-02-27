@@ -28,6 +28,7 @@
 #include <string>
 
 #include <SDL.h>
+#include <QMenu>
 #include <QMenuBar>
 #include <QAction>
 #include <QHeaderView>
@@ -204,14 +205,44 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QGroupBox *frame;
 	ramSearchInputValidator *inpValidator;
+	QMenuBar *menuBar;
+	QMenu *fileMenu;
+	QAction *act;
+	int useNativeMenuBar;
 
 	setWindowTitle("RAM Search");
+
+	menuBar = new QMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
 
 	resize(512, 512);
 
 	mainLayout = new QVBoxLayout();
 	hbox1 = new QHBoxLayout();
 
+	mainLayout->setMenuBar( menuBar );
 	mainLayout->addLayout(hbox1, 100);
 
 	grid = new QGridLayout();
