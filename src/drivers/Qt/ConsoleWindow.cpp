@@ -85,30 +85,15 @@
 consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
-	int opt, xWinSize = 512, yWinSize = 512;
+	int opt, xWinSize = 256, yWinSize = 240;
 	int use_SDL_video = false;
 	int setFullScreen = false;
-
-	g_config->getOption( "SDL.WinSizeX", &xWinSize );
-	g_config->getOption( "SDL.WinSizeY", &yWinSize );
-
-	if ( xWinSize < 256 ) xWinSize = 256;
-	if ( yWinSize < 256 ) yWinSize = 256;
-
-	this->resize( xWinSize, yWinSize );
-
-	g_config->getOption( "SDL.Fullscreen", &setFullScreen );
-	g_config->setOption( "SDL.Fullscreen", 0 ); // Reset full screen config parameter to false so it is never saved this way
-
-	if ( setFullScreen )
-	{
-		this->showFullScreen();
-	}
 
 	createMainMenu();
 
 	g_config->getOption( "SDL.VideoDriver", &use_SDL_video );
 
+	firstResize    = true;
 	closeRequested = false;
 	errorMsgValid  = false;
 	viewport_GL    = NULL;
@@ -164,7 +149,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	g_config->getOption( "SDL.WinSizeX", &xWinSize );
 	g_config->getOption( "SDL.WinSizeY", &yWinSize );
 
-	if ( (xWinSize >= 256) && (yWinSize >= 256) )
+	if ( (xWinSize >= 256) && (yWinSize >= 224) )
 	{
 		this->resize( xWinSize, yWinSize );
 	}
@@ -172,7 +157,20 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	{
 		QSize reqSize = calcRequiredSize();
 
-		this->resize( reqSize );
+		// Since the height of menu is unknown until Qt has shows the window
+		// Set the minimum viewport sizes to exactly what we need so that 
+		// the window is resized appropriately. On the first resize event,
+		// we will set the minimum viewport size back to 1x values that the
+		// window can be shrunk by dragging lower corner.
+		if ( viewport_GL != NULL )
+		{
+			viewport_GL->setMinimumSize( reqSize );
+		}
+		else if ( viewport_SDL != NULL )
+		{
+			viewport_SDL->setMinimumSize( reqSize );
+		}
+		//this->resize( reqSize );
 	}
 
 	g_config->getOption( "SDL.Fullscreen", &setFullScreen );
@@ -299,7 +297,7 @@ QSize consoleWin_t::calcRequiredSize(void)
 	}
 
 	dw = 0;
-	dh = menubar->height();
+	dh = 0;
 
 	if ( sqrPixChkd )
 	{
@@ -308,10 +306,34 @@ QSize consoleWin_t::calcRequiredSize(void)
 	rw=(int)((r-l)*xscale);
 	rh=(int)((b-t)*yscale);
 
+	//printf("view %i x %i \n", rw, rh );
+
 	out.setWidth( rw + dw );
 	out.setHeight( rh + dh );
 
+	//printf("Win %i x %i \n", rw + dw, rh + dh );
+
 	return out;
+}
+
+void consoleWin_t::resizeEvent(QResizeEvent *event)
+{
+	if ( firstResize )
+	{
+		// We are assuming that window has been exposed and all sizing of menu is finished
+		// Restore minimum sizes to 1x values after first resize event so that
+		// window is still able to be shrunk by dragging lower corners.
+		if ( viewport_GL != NULL )
+		{
+			viewport_GL->setMinimumSize( QSize( 256, 224 ) );
+		}
+		else if ( viewport_SDL != NULL )
+		{
+			viewport_SDL->setMinimumSize( QSize( 256, 224 ) );
+		}
+		firstResize = false;
+	}
+	//printf("%i x %i \n", event->size().width(), event->size().height() );
 }
 
 void consoleWin_t::setCyclePeriodms( int ms )

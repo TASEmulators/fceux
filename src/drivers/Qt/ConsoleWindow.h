@@ -189,11 +189,13 @@ class  consoleWin_t : public QMainWindow
 		bool        errorMsgValid;
 		bool        closeRequested;
 		bool        recentRomMenuReset;
+		bool        firstResize;
 
 		std::list <std::string*> romList;
 
 		unsigned int updateCounter;
 	protected:
+		void resizeEvent(QResizeEvent *event);
 		void closeEvent(QCloseEvent *event);
 		void keyPressEvent(QKeyEvent *event);
 		void keyReleaseEvent(QKeyEvent *event);

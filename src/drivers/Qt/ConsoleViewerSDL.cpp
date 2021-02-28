@@ -41,8 +41,8 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	setAutoFillBackground(true);
 	setPalette(pal);
 
-	setMinimumWidth( GL_NES_WIDTH );
-	setMinimumHeight( GL_NES_HEIGHT );
+	setMinimumWidth( 256 );
+	setMinimumHeight( 224 );
 	setFocusPolicy(Qt::StrongFocus);
 
 	view_width  = GL_NES_WIDTH;
@@ -275,7 +275,7 @@ void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
 	s = event->size();
 	view_width  = s.width();
 	view_height = s.height();
-	printf("SDL Resize: %i x %i \n", view_width, view_height);
+	//printf("SDL Resize: %i x %i \n", view_width, view_height);
 
 	gui_draw_area_width = view_width;
 	gui_draw_area_height = view_height;

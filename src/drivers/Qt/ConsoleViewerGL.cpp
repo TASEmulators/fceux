@@ -60,8 +60,8 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	rh = 240;
 	mouseButtonMask = 0;
 
-	setMinimumWidth( GL_NES_WIDTH );
-	setMinimumHeight( GL_NES_HEIGHT );
+	setMinimumWidth( 256 );
+	setMinimumHeight( 224 );
 	setFocusPolicy(Qt::StrongFocus);
 
 	QScreen *screen = QGuiApplication::primaryScreen();
