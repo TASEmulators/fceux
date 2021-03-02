@@ -28,9 +28,13 @@ public:
 protected:
 	void closeEvent(QCloseEvent *event);
 
+	void loadQss( const char *filepath );
+
 	QCheckBox *useNativeFileDialog;
 	QCheckBox *useNativeMenuBar;
+	QCheckBox *useCustomStyle;
 	QComboBox *styleComboBox;
+	QLineEdit *custom_qss_path;
 
 private:
 public slots:
@@ -38,5 +42,8 @@ public slots:
 private slots:
 	void useNativeFileDialogChanged(int v);
 	void useNativeMenuBarChanged(int v);
+	void useCustomStyleChanged(int v);
 	void styleChanged(int index);
+	void openQss(void);
+	void clearQss(void);
 };

@@ -74,29 +74,29 @@ int main( int argc, char *argv[] )
 	int retval;
 	qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
-	const char *styleSheetEnv = NULL;
+	//const char *styleSheetEnv = NULL;
 	
 	//app.setStyle( new MenuStyle() );
 
-	styleSheetEnv = ::getenv("FCEUX_QT_STYLESHEET");
-	
-	if ( styleSheetEnv != NULL )
-	{
-	   QFile File(styleSheetEnv);
-	
-	   if ( File.open(QFile::ReadOnly) )
-	   {
-	      QString StyleSheet = QLatin1String(File.readAll());
-	
-	      app.setStyleSheet(StyleSheet);
-	
-	      printf("Using Qt Stylesheet file '%s'\n", styleSheetEnv );
-	   }
-	   else
-	   {
-	      printf("Warning: Could not open Qt Stylesheet file '%s'\n", styleSheetEnv );
-	   }
-	}
+	//styleSheetEnv = ::getenv("FCEUX_QT_STYLESHEET");
+	//
+	//if ( styleSheetEnv != NULL )
+	//{
+	//   QFile File(styleSheetEnv);
+	//
+	//   if ( File.open(QFile::ReadOnly) )
+	//   {
+	//      QString StyleSheet = QLatin1String(File.readAll());
+	//
+	//      app.setStyleSheet(StyleSheet);
+	//
+	//      printf("Using Qt Stylesheet file '%s'\n", styleSheetEnv );
+	//   }
+	//   else
+	//   {
+	//      printf("Warning: Could not open Qt Stylesheet file '%s'\n", styleSheetEnv );
+	//   }
+	//}
 
 	fceuWrapperInit( argc, argv );
 

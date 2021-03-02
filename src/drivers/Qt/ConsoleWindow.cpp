@@ -90,6 +90,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	int opt, xWinSize = 256, yWinSize = 240;
 	int use_SDL_video = false;
 	int setFullScreen = false;
+	int useCustomQss = false;
+	const char *styleSheetEnv = NULL;
 	std::string guiStyle;
 
 	g_config->getOption("SDL.GuiStyle", &guiStyle );
@@ -101,6 +103,35 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		if ( sty != nullptr )
 		{
 			QApplication::setStyle(sty);
+		}
+	}
+
+	styleSheetEnv = ::getenv("FCEUX_QT_STYLESHEET");
+
+	if ( styleSheetEnv )
+	{
+		g_config->setOption("SDL.UseCustomQss", 1);
+		g_config->setOption("SDL.QtStyleSheet", styleSheetEnv);
+	}
+
+	g_config->getOption("SDL.UseCustomQss", &useCustomQss);
+
+	if ( useCustomQss )
+	{
+		g_config->getOption("SDL.QtStyleSheet", &guiStyle );
+
+		if ( guiStyle.size() > 0 )
+		{
+			QFile File(guiStyle.c_str());
+	
+	   		if ( File.open(QFile::ReadOnly) )
+	   		{
+	   		   QString StyleSheet = QLatin1String(File.readAll());
+	
+	   		   setStyleSheet(StyleSheet);
+	
+	   		   //printf("Using Qt Stylesheet file '%s'\n", filepath );
+	   		}
 		}
 	}
 
