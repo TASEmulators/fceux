@@ -36,6 +36,8 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QDesktopServices>
+#include <QStyleFactory>
+#include <QApplication>
 #include <QUrl>
 
 #include "../../fceu.h"
@@ -88,6 +90,19 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	int opt, xWinSize = 256, yWinSize = 240;
 	int use_SDL_video = false;
 	int setFullScreen = false;
+	std::string guiStyle;
+
+	g_config->getOption("SDL.GuiStyle", &guiStyle );
+
+	if ( guiStyle.size() > 0 )
+	{
+		QStyle *sty = QStyleFactory::create( tr(guiStyle.c_str()) );
+
+		if ( sty != nullptr )
+		{
+			QApplication::setStyle(sty);
+		}
+	}
 
 	createMainMenu();
 

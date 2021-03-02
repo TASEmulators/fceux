@@ -20,6 +20,8 @@
 // PaletteConf.cpp
 //
 #include <QTextEdit>
+#include <QApplication>
+#include <QStyleFactory>
 
 #include "Qt/GuiConf.h"
 #include "Qt/main.h"
@@ -38,8 +40,14 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
 	QPushButton *closeButton;
+	QLabel      *lbl;
+	QStringList  styleKeys;
+	QString      selStyle;
 
 	//resize( 512, 600 );
+	//printf("Style: %s \n", style()->objectName().toStdString().c_str() );
+
+	selStyle = style()->objectName();
 
 	// sync with config
 	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -58,12 +66,36 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	connect(useNativeFileDialog, SIGNAL(stateChanged(int)), this, SLOT(useNativeFileDialogChanged(int)));
 	connect(useNativeMenuBar, SIGNAL(stateChanged(int)), this, SLOT(useNativeMenuBarChanged(int)));
 
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr("Style:") );
+
+	styleComboBox = new QComboBox();
+
+	styleKeys = QStyleFactory::keys();
+
+	for (int i=0; i<styleKeys.size(); i++)
+	{
+		styleComboBox->addItem( styleKeys[i], i );
+
+		if ( selStyle.compare( styleKeys[i], Qt::CaseInsensitive ) == 0 )
+		{
+			//printf("Style Match: %s \n", selStyle.toStdString().c_str() );
+			styleComboBox->setCurrentIndex(i);
+		}
+	}
+	connect(styleComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(styleChanged(int)));
+
+	hbox->addWidget( lbl, 1 );
+	hbox->addWidget( styleComboBox, 10 );
+
+	mainLayout->addLayout(hbox);
 	mainLayout->addWidget(useNativeFileDialog);
 	mainLayout->addWidget(useNativeMenuBar);
 
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
 	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
 
 	hbox = new QHBoxLayout();
 	hbox->addStretch(3);
@@ -109,5 +141,25 @@ void GuiConfDialog_t::useNativeMenuBarChanged(int state)
 	g_config->setOption("SDL.UseNativeMenuBar", value);
 
 	consoleWindow->menuBar()->setNativeMenuBar(value);
+}
+//----------------------------------------------------
+void GuiConfDialog_t::styleChanged(int index)
+{
+	QString s;
+	QStyle *sty;
+
+	s = styleComboBox->currentText();
+
+	//printf("Style: '%s'\n", s.toStdString().c_str() );
+
+	sty = QStyleFactory::create( s );
+
+	if ( sty != nullptr )
+	{
+		QApplication::setStyle(sty);
+
+		g_config->setOption("SDL.GuiStyle", s.toStdString().c_str() );
+		g_config->save();
+	}
 }
 //----------------------------------------------------

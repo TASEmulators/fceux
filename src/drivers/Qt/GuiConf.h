@@ -30,6 +30,7 @@ protected:
 
 	QCheckBox *useNativeFileDialog;
 	QCheckBox *useNativeMenuBar;
+	QComboBox *styleComboBox;
 
 private:
 public slots:
@@ -37,4 +38,5 @@ public slots:
 private slots:
 	void useNativeFileDialogChanged(int v);
 	void useNativeMenuBarChanged(int v);
+	void styleChanged(int index);
 };

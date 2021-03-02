@@ -373,6 +373,7 @@ InitConfig()
 
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
+	config->addOption("SDL.GuiStyle", "");
     
 	config->addOption("_setSchedParam"      , "SDL.SetSchedParam" , 0);
 	config->addOption("_emuSchedPolicy"     , "SDL.EmuSchedPolicy", 0);
