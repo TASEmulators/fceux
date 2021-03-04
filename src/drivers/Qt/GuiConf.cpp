@@ -50,7 +50,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	std::string  qssFile;
 
 	//resize( 512, 600 );
-	//printf("Style: %s \n", style()->objectName().toStdString().c_str() );
+	printf("Style: %s \n", style()->objectName().toStdString().c_str() );
 
 	selStyle = style()->objectName();
 
@@ -82,7 +82,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 
 		if ( selStyle.compare( styleKeys[i], Qt::CaseInsensitive ) == 0 )
 		{
-			//printf("Style Match: %s \n", selStyle.toStdString().c_str() );
+			printf("Style Match: %s \n", selStyle.toStdString().c_str() );
 			styleComboBox->setCurrentIndex(i);
 		}
 	}
@@ -191,39 +191,41 @@ void GuiConfDialog_t::useCustomStyleChanged(int state)
 
 	g_config->setOption("SDL.UseCustomQss", value);
 
-	if ( consoleWindow != NULL )
-	{
-		if ( value )
-		{
-			std::string s;
-			g_config->getOption("SDL.QtStyleSheet", &s);
-			loadQss( s.c_str() );
-		}
-		else
-		{
-			consoleWindow->setStyleSheet(NULL);
-		}
-	}
+	//if ( consoleWindow != NULL )
+	//{
+	//	//if ( value )
+	//	//{
+	//	//	//std::string s;
+	//	//	//g_config->getOption("SDL.QtStyleSheet", &s);
+	//	//	//loadQss( s.c_str() );
+	//	//}
+	//	//else
+	//	//{
+	//	//	consoleWindow->setStyleSheet(NULL);
+	//	//}
+	//}
+	QApplication::setStyle( new fceuStyle() );
 }
 //----------------------------------------------------
 void GuiConfDialog_t::styleChanged(int index)
 {
 	QString s;
-	QStyle *sty;
+	//QStyle *sty;
 
 	s = styleComboBox->currentText();
 
 	//printf("Style: '%s'\n", s.toStdString().c_str() );
 
-	sty = QStyleFactory::create( s );
+	//sty = QStyleFactory::create( s );
 
-	if ( sty != nullptr )
-	{
-		QApplication::setStyle(sty);
-
+	//if ( sty != nullptr )
+	//{
 		g_config->setOption("SDL.GuiStyle", s.toStdString().c_str() );
 		g_config->save();
-	}
+
+		//QApplication::setStyle(sty);
+		QApplication::setStyle( new fceuStyle() );
+	//}
 }
 //----------------------------------------------------
 void GuiConfDialog_t::clearQss(void)
@@ -234,15 +236,16 @@ void GuiConfDialog_t::clearQss(void)
 	g_config->setOption("SDL.QtStyleSheet", "");
 	g_config->save();
 
-	if ( consoleWindow != NULL )
-	{
-	      consoleWindow->setStyleSheet(NULL);
-	}
+	//if ( consoleWindow != NULL )
+	//{
+	//      consoleWindow->setStyleSheet(NULL);
+	//}
+	QApplication::setStyle( new fceuStyle() );
 }
 //----------------------------------------------------
 void GuiConfDialog_t::openQss(void)
 {
-	int ret, useNativeFileDialogVal, useCustom;
+	int ret, useNativeFileDialogVal; //, useCustom;
 	QString filename;
 	std::string last, iniPath;
 	char dir[512];
@@ -326,37 +329,155 @@ void GuiConfDialog_t::openQss(void)
 
 	custom_qss_path->setText(filename.toStdString().c_str());
 
-	g_config->getOption("SDL.UseCustomQss", &useCustom);
+	//g_config->getOption("SDL.UseCustomQss", &useCustom);
 
-	if ( useCustom )
-	{
-		loadQss( filename.toStdString().c_str() );
-	}
+	//if ( useCustom )
+	//{
+		//loadQss( filename.toStdString().c_str() );
+	//}
 
 	g_config->setOption("SDL.QtStyleSheet", filename.toStdString().c_str() );
 	g_config->save();
 
+	QApplication::setStyle( new fceuStyle() );
+
 	return;
 }
 //----------------------------------------------------
-void GuiConfDialog_t::loadQss( const char *filepath )
+//void GuiConfDialog_t::loadQss( const char *filepath )
+//{
+//	if ( consoleWindow != NULL )
+//	{
+//	   QFile File(filepath);
+//	
+//	   if ( File.open(QFile::ReadOnly) )
+//	   {
+//	      QString StyleSheet = QLatin1String(File.readAll());
+//	
+//	      consoleWindow->setStyleSheet(StyleSheet);
+//	
+//	      File.close();
+//	      //printf("Using Qt Stylesheet file '%s'\n", filepath );
+//	   }
+//	   else
+//	   {
+//	      //printf("Warning: Could not open Qt Stylesheet file '%s'\n", filepath );
+//	   }
+//	}
+//}
+//----------------------------------------------------
+//---------------------------------------------------- 
+// Custom Style Wrapper Class
+//---------------------------------------------------- 
+//---------------------------------------------------- 
+fceuStyle::fceuStyle() : fceuStyle(styleBase()){}
+
+fceuStyle::fceuStyle(QStyle *style) : QProxyStyle(style)
 {
-	if ( consoleWindow != NULL )
+	printf("New Style!!!\n");
+
+	setObjectName( style->objectName() );
+}
+
+QStyle *fceuStyle::styleBase(QStyle *style) const
+{
+	std::string s;
+	static QStyle *base;
+
+	if ( g_config != NULL )
 	{
-	   QFile File(filepath);
+		g_config->getOption("SDL.GuiStyle", &s );
+	}
+
+	if ( s.size() == 0 )
+	{
+		QStringList styleKeys = QStyleFactory::keys();
+
+		if ( styleKeys.size() > 0 )
+		{
+			s = styleKeys[0].toStdString();
+		}
+	}
+
+	if ( style == NULL )
+	{
+		base = QStyleFactory::create(QString::fromStdString(s));
+	}
+	else
+	{
+		base = style;
+	}
+
+	return base;
+}
+
+void fceuStyle::polish(QPalette &palette) 
+{
+	//basePtr->polish(palette);
+	//QStyle::polish(palette);
 	
-	   if ( File.open(QFile::ReadOnly) )
-	   {
-	      QString StyleSheet = QLatin1String(File.readAll());
-	
-	      consoleWindow->setStyleSheet(StyleSheet);
-	
-	      //printf("Using Qt Stylesheet file '%s'\n", filepath );
-	   }
-	   else
-	   {
-	      //printf("Warning: Could not open Qt Stylesheet file '%s'\n", filepath );
-	   }
+	printf("Polish Palette Style!!!\n");
+	return;
+  // modify palette to dark
+  palette.setColor(QPalette::Window, QColor(53, 53, 53));
+  palette.setColor(QPalette::WindowText, Qt::white);
+  palette.setColor(QPalette::Disabled, QPalette::WindowText,
+                   QColor(127, 127, 127));
+  palette.setColor(QPalette::Base, QColor(42, 42, 42));
+  palette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
+  palette.setColor(QPalette::ToolTipBase, Qt::white);
+  palette.setColor(QPalette::ToolTipText, QColor(53, 53, 53));
+  palette.setColor(QPalette::Text, Qt::white);
+  palette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+  palette.setColor(QPalette::Dark, QColor(35, 35, 35));
+  palette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+  palette.setColor(QPalette::Button, QColor(53, 53, 53));
+  palette.setColor(QPalette::ButtonText, Qt::white);
+  palette.setColor(QPalette::Disabled, QPalette::ButtonText,
+                   QColor(127, 127, 127));
+  palette.setColor(QPalette::BrightText, Qt::red);
+  palette.setColor(QPalette::Link, QColor(42, 130, 218));
+  palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+  palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+  palette.setColor(QPalette::HighlightedText, Qt::white);
+  palette.setColor(QPalette::Disabled, QPalette::HighlightedText,
+                   QColor(127, 127, 127));
+}
+
+void fceuStyle::polish(QApplication *app) 
+{
+	int useCustom;
+	std::string s;
+
+	if (!app) return;
+
+	printf("Load Style Sheet!!!\n");
+	// increase font size for better reading,
+	// setPointSize was reduced from +2 because when applied this way in Qt5, the
+	// font is larger than intended for some reason
+	//QFont defaultFont = QApplication::font();
+	//defaultFont.setPointSize(defaultFont.pointSize() + 1);
+	//app->setFont(defaultFont);
+
+	g_config->getOption("SDL.UseCustomQss", &useCustom);
+	g_config->getOption("SDL.QtStyleSheet", &s);
+
+	if ( useCustom && (s.size() > 0) )
+	{
+		// loadstylesheet
+		QFile file( s.c_str() );
+
+		if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) 
+		{
+			// set stylesheet
+			QString qsStylesheet = QString::fromLatin1( file.readAll() );
+			app->setStyleSheet(qsStylesheet);
+			file.close();
+		}
+	}
+	else
+	{
+		app->setStyleSheet(NULL);
 	}
 }
 //----------------------------------------------------

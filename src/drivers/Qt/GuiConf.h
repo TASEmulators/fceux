@@ -14,8 +14,28 @@
 #include <QFrame>
 #include <QGroupBox>
 #include <QLineEdit>
+#include <QApplication>
+#include <QProxyStyle>
+#include <QStyle>
 
 #include "Qt/main.h"
+
+class fceuStyle : public QProxyStyle
+{
+	Q_OBJECT
+
+public:
+	fceuStyle(void);
+	fceuStyle(QStyle *style);
+
+	QStyle *baseStyle() const;
+
+	void polish(QPalette &palette) override;
+	void polish(QApplication *app) override;
+
+private:
+	QStyle *styleBase(QStyle *style = Q_NULLPTR) const;
+};
 
 class GuiConfDialog_t : public QDialog
 {
@@ -28,7 +48,7 @@ public:
 protected:
 	void closeEvent(QCloseEvent *event);
 
-	void loadQss( const char *filepath );
+	//void loadQss( const char *filepath );
 
 	QCheckBox *useNativeFileDialog;
 	QCheckBox *useNativeMenuBar;
