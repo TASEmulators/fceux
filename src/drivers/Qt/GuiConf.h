@@ -28,6 +28,8 @@ public:
 	fceuStyle(void);
 	fceuStyle(QStyle *style);
 
+	~fceuStyle(void);
+
 	QStyle *baseStyle() const;
 
 	void polish(QPalette &palette) override;
@@ -35,6 +37,8 @@ public:
 
 private:
 	QStyle *styleBase(QStyle *style = Q_NULLPTR) const;
+
+	std::string  rccFilePath;
 };
 
 class GuiConfDialog_t : public QDialog

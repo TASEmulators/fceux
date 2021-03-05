@@ -370,13 +370,27 @@ void GuiConfDialog_t::openQss(void)
 // Custom Style Wrapper Class
 //---------------------------------------------------- 
 //---------------------------------------------------- 
-fceuStyle::fceuStyle() : fceuStyle(styleBase()){}
+fceuStyle::fceuStyle(void) : fceuStyle(styleBase()){}
 
 fceuStyle::fceuStyle(QStyle *style) : QProxyStyle(style)
 {
-	printf("New Style!!!\n");
+	//printf("New Style!!!\n");
 
 	setObjectName( style->objectName() );
+}
+
+fceuStyle::~fceuStyle(void)
+{
+	//printf("Style Deleted: %s\n", objectName().toStdString().c_str() );
+
+	if ( rccFilePath.size() > 0 )
+	{
+		if ( QResource::unregisterResource( QString::fromStdString(rccFilePath) ) )
+		{
+			//printf("Removed Resource: '%s'\n", rccFilePath.c_str() );
+			rccFilePath.clear();
+		}
+	}
 }
 
 QStyle *fceuStyle::styleBase(QStyle *style) const
@@ -473,6 +487,23 @@ void fceuStyle::polish(QApplication *app)
 			QString qsStylesheet = QString::fromLatin1( file.readAll() );
 			app->setStyleSheet(qsStylesheet);
 			file.close();
+		}
+
+		if ( rccFilePath.size() == 0 )
+		{
+			char dir[1024], rccBase[256], tmpFile[2048];
+
+			parseFilepath( s.c_str(), dir, rccBase, NULL );
+
+			sprintf( tmpFile, "%s%s.rcc", dir, rccBase );
+
+			//printf("RCC: '%s%s'\n", dir, rccBase );
+
+			if ( QResource::registerResource( tmpFile ) )
+			{
+				//printf("Loaded RCC File: '%s'\n", tmpFile );
+				rccFilePath.assign( tmpFile );
+			}
 		}
 	}
 	else
