@@ -513,7 +513,7 @@ void GamePadConfDialog_t::updateCntrlrDpy(void)
 		//}
 		//else
 		//{
-		//	keyName[i]->setStyleSheet("color: black;");
+		//	keyName[i]->setStyleSheet(NULL);
 		//}
 	}
 }
@@ -599,7 +599,7 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 	DWaitButton(NULL, &GamePad[padNo].bmap[x], &buttonConfigStatus);
 
 	button[x]->setText("Change");
-	button[x]->setStyleSheet("");
+	button[x]->setStyleSheet(NULL);
 
 	if (buttonConfigStatus != 0)
 	{
@@ -996,7 +996,7 @@ void GamePadConfDialog_t::updatePeriodic(void)
 		}
 		else
 		{
-			keyName[i]->setStyleSheet("color: black;");
+			keyName[i]->setStyleSheet(NULL);
 		}
 	}
 
