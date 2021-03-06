@@ -430,7 +430,7 @@ void fceuStyle::polish(QPalette &palette)
 	//basePtr->polish(palette);
 	//QStyle::polish(palette);
 	
-	printf("Polish Palette Style!!!\n");
+	//printf("Polish Palette Style!!!\n");
 	return;
   // modify palette to dark
   palette.setColor(QPalette::Window, QColor(53, 53, 53));
@@ -465,7 +465,7 @@ void fceuStyle::polish(QApplication *app)
 
 	if (!app) return;
 
-	printf("Load Style Sheet!!!\n");
+	//printf("Load Style Sheet!!!\n");
 	// increase font size for better reading,
 	// setPointSize was reduced from +2 because when applied this way in Qt5, the
 	// font is larger than intended for some reason
@@ -599,13 +599,41 @@ GuiPaletteEditDialog_t::GuiPaletteEditDialog_t(QWidget *parent)
 	QVBoxLayout *mainLayout;
 	QVBoxLayout *vbox;
 	QHBoxLayout *hbox1;
+	QMenuBar    *menuBar;
+	QMenu       *fileMenu;
+	QAction     *act;
 	GuiPaletteColorSelect *pcs;
 	QPalette::ColorGroup g;
 	QWidget *viewport;
 	QFrame  *line;
 	QLabel  *lbl;
+	int useNativeMenuBarVal;
 
 	setWindowTitle(tr("GUI Color Palette Edit"));
+
+	g_config->getOption("SDL.UseNativeMenuBar", &useNativeMenuBarVal);
+
+	menuBar = new QMenuBar(this);
+
+	menuBar->setNativeMenuBar( useNativeMenuBarVal ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
 
 	scrollArea = new QScrollArea(this);
 	viewport   = new QWidget(this);
@@ -616,6 +644,8 @@ GuiPaletteEditDialog_t::GuiPaletteEditDialog_t(QWidget *parent)
 	scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
 
 	mainLayout = new QVBoxLayout(this);
+
+	mainLayout->setMenuBar( menuBar );
 
 	hbox1 = new QHBoxLayout(viewport);
 
@@ -785,7 +815,13 @@ void GuiPaletteColorSelect::updateColor(void)
 //----------------------------------------------------
 void GuiPaletteColorSelect::colorEditClicked(void)
 {
+	QString title;
+
 	guiColorPickerDialog_t *editor = new guiColorPickerDialog_t( &color, this );
+
+	title = QStringLiteral("Pick Palette Color for ") + lbl->text();
+
+	editor->setWindowTitle( title );
 
 	editor->show();
 }
@@ -799,7 +835,6 @@ void GuiPaletteColorSelect::updatePalette(void)
 	pal.setColor( group, role, color );
 
 	QApplication::setPalette( pal );
-
 }
 //----------------------------------------------------
 //----------------------------------------------------
@@ -815,13 +850,10 @@ guiColorPickerDialog_t::guiColorPickerDialog_t( QColor *c, QWidget *parent )
 	QPushButton *cancelButton;
 	QPushButton *resetButton;
 	QStyle *style;
-	char stmp[128];
 
 	style = this->style();
 
-	sprintf( stmp, "Pick Palette Color");
-
-	setWindowTitle( stmp );
+	setWindowTitle( "Pick Palette Color" );
 
 	colorPtr = c;
 	origColor = *c;
