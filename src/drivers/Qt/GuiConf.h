@@ -14,6 +14,7 @@
 #include <QFrame>
 #include <QGroupBox>
 #include <QLineEdit>
+#include <QPalette>
 #include <QApplication>
 #include <QProxyStyle>
 #include <QStyle>
@@ -40,6 +41,41 @@ private:
 
 	std::string  rccFilePath;
 };
+
+class GuiPaletteColorSelect : public QWidget
+{
+	Q_OBJECT
+
+public:
+	GuiPaletteColorSelect( QPalette::ColorGroup group, QPalette::ColorRole role, QWidget *parent = 0);
+	~GuiPaletteColorSelect(void);
+
+	void updateColor(void);
+
+private:
+	QColor     color;
+	QCheckBox *cb;
+	QLabel    *lbl;
+	QPalette::ColorGroup group;
+	QPalette::ColorRole  role;
+
+	void setText(void);
+};
+
+class GuiPaletteEditDialog_t : public QDialog
+{
+	Q_OBJECT
+
+public:
+	GuiPaletteEditDialog_t(QWidget *parent = 0);
+	~GuiPaletteEditDialog_t(void);
+
+protected:
+	void closeEvent(QCloseEvent *event);
+public slots:
+	void closeWindow(void);
+};
+
 
 class GuiConfDialog_t : public QDialog
 {
@@ -70,4 +106,5 @@ private slots:
 	void styleChanged(int index);
 	void openQss(void);
 	void clearQss(void);
+	void openQPalette(void);
 };

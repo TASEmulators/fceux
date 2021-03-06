@@ -23,6 +23,10 @@
 #include <QApplication>
 #include <QStyleFactory>
 #include <QFileDialog>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
+#include <QScrollArea>
 
 #include "Qt/GuiConf.h"
 #include "Qt/main.h"
@@ -43,6 +47,9 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	QVBoxLayout *mainLayout, *vbox1, *vbox2;
 	QHBoxLayout *hbox;
 	QPushButton *closeButton, *button;
+	QMenuBar    *menuBar;
+	QMenu       *fileMenu, *colorMenu;
+	QAction     *act;
 	QLabel      *lbl;
 	QStringList  styleKeys;
 	QString      selStyle;
@@ -61,7 +68,42 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 
 	setWindowTitle(tr("GUI Config"));
 
+	menuBar = new QMenuBar(this);
+
+	menuBar->setNativeMenuBar( useNativeMenuBarVal ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
+	// Color
+	colorMenu = menuBar->addMenu(tr("&Color"));
+
+	// Color -> View QPalette
+	act = new QAction(tr("&View QPalette"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("&View QPalette"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openQPalette(void)) );
+	
+	colorMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
+	
 	mainLayout = new QVBoxLayout();
+
+	mainLayout->setMenuBar( menuBar );
 
 	useNativeFileDialog = new QCheckBox(tr("Use Native OS File Dialog"));
 	useNativeMenuBar = new QCheckBox(tr("Use Native OS Menu Bar"));
@@ -191,55 +233,28 @@ void GuiConfDialog_t::useCustomStyleChanged(int state)
 
 	g_config->setOption("SDL.UseCustomQss", value);
 
-	//if ( consoleWindow != NULL )
-	//{
-	//	//if ( value )
-	//	//{
-	//	//	//std::string s;
-	//	//	//g_config->getOption("SDL.QtStyleSheet", &s);
-	//	//	//loadQss( s.c_str() );
-	//	//}
-	//	//else
-	//	//{
-	//	//	consoleWindow->setStyleSheet(NULL);
-	//	//}
-	//}
 	QApplication::setStyle( new fceuStyle() );
 }
 //----------------------------------------------------
 void GuiConfDialog_t::styleChanged(int index)
 {
 	QString s;
-	//QStyle *sty;
 
 	s = styleComboBox->currentText();
 
-	//printf("Style: '%s'\n", s.toStdString().c_str() );
+	g_config->setOption("SDL.GuiStyle", s.toStdString().c_str() );
+	g_config->save();
 
-	//sty = QStyleFactory::create( s );
-
-	//if ( sty != nullptr )
-	//{
-		g_config->setOption("SDL.GuiStyle", s.toStdString().c_str() );
-		g_config->save();
-
-		//QApplication::setStyle(sty);
-		QApplication::setStyle( new fceuStyle() );
-	//}
+	QApplication::setStyle( new fceuStyle() );
 }
 //----------------------------------------------------
 void GuiConfDialog_t::clearQss(void)
 {
-	//g_config->setOption("SDL.Palette", "");
 	custom_qss_path->setText("");
 
 	g_config->setOption("SDL.QtStyleSheet", "");
 	g_config->save();
 
-	//if ( consoleWindow != NULL )
-	//{
-	//      consoleWindow->setStyleSheet(NULL);
-	//}
 	QApplication::setStyle( new fceuStyle() );
 }
 //----------------------------------------------------
@@ -344,27 +359,12 @@ void GuiConfDialog_t::openQss(void)
 	return;
 }
 //----------------------------------------------------
-//void GuiConfDialog_t::loadQss( const char *filepath )
-//{
-//	if ( consoleWindow != NULL )
-//	{
-//	   QFile File(filepath);
-//	
-//	   if ( File.open(QFile::ReadOnly) )
-//	   {
-//	      QString StyleSheet = QLatin1String(File.readAll());
-//	
-//	      consoleWindow->setStyleSheet(StyleSheet);
-//	
-//	      File.close();
-//	      //printf("Using Qt Stylesheet file '%s'\n", filepath );
-//	   }
-//	   else
-//	   {
-//	      //printf("Warning: Could not open Qt Stylesheet file '%s'\n", filepath );
-//	   }
-//	}
-//}
+void GuiConfDialog_t::openQPalette(void)
+{
+	GuiPaletteEditDialog_t *dialog = new GuiPaletteEditDialog_t(this);
+
+	dialog->show();
+}
 //----------------------------------------------------
 //---------------------------------------------------- 
 // Custom Style Wrapper Class
@@ -510,5 +510,273 @@ void fceuStyle::polish(QApplication *app)
 	{
 		app->setStyleSheet(NULL);
 	}
+}
+//----------------------------------------------------
+//----------------------------------------------------
+// QPalette Edit Dialog Window
+//----------------------------------------------------
+//----------------------------------------------------
+static const char *getRoleText( QPalette::ColorRole role )
+{
+	const char *rTxt;
+
+	switch ( role )
+	{
+		case QPalette::Window:
+			rTxt = "Window";
+		break;
+		case QPalette::WindowText:
+			rTxt = "Window Text";
+		break;
+		case QPalette::Base:
+			rTxt = "Base";
+		break;
+		case QPalette::AlternateBase:
+			rTxt = "AlternateBase";
+		break;
+		case QPalette::ToolTipBase:
+			rTxt = "ToolTipBase";
+		break;
+		case QPalette::ToolTipText:
+			rTxt = "ToolTipText";
+		break;
+		case QPalette::PlaceholderText:
+			rTxt = "PlaceholderText";
+		break;
+		case QPalette::Text:
+			rTxt = "Text";
+		break;
+		case QPalette::Button:
+			rTxt = "Button";
+		break;
+		case QPalette::ButtonText:
+			rTxt = "ButtonText";
+		break;
+		case QPalette::BrightText:
+			rTxt = "BrightText";
+		break;
+		case QPalette::Light:
+			rTxt = "Light";
+		break;
+		case QPalette::Midlight:
+			rTxt = "Midlight";
+		break;
+		case QPalette::Mid:
+			rTxt = "Mid";
+		break;
+		case QPalette::Dark:
+			rTxt = "Dark";
+		break;
+		case QPalette::Shadow:
+			rTxt = "Shadow";
+		break;
+		case QPalette::Highlight:
+			rTxt = "Highlight";
+		break;
+		case QPalette::HighlightedText:
+			rTxt = "HighlightedText";
+		break;
+		case QPalette::Link:
+			rTxt = "Link";
+		break;
+		case QPalette::LinkVisited:
+			rTxt = "LinkVisited";
+		break;
+		case QPalette::NoRole:
+			rTxt = "NoRole";
+		break;
+		default:
+			rTxt = NULL;
+		break;
+	}
+	return rTxt;
+}
+//----------------------------------------------------
+GuiPaletteEditDialog_t::GuiPaletteEditDialog_t(QWidget *parent)
+	: QDialog( parent )
+{
+	QScrollArea *scrollArea;
+	QVBoxLayout *mainLayout;
+	QVBoxLayout *vbox;
+	QHBoxLayout *hbox1;
+	GuiPaletteColorSelect *pcs;
+	QPalette::ColorGroup g;
+	QWidget *viewport;
+	QFrame  *line;
+	QLabel  *lbl;
+
+	setWindowTitle(tr("GUI Color Palette Edit"));
+
+	scrollArea = new QScrollArea(this);
+	viewport   = new QWidget(this);
+	scrollArea->setWidget( viewport );
+	scrollArea->setWidgetResizable(true);
+	scrollArea->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
+	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+
+	mainLayout = new QVBoxLayout(this);
+
+	hbox1 = new QHBoxLayout(viewport);
+
+	//viewport->setLayout( hbox1 );
+
+	mainLayout->addWidget( scrollArea );
+
+	for (int j=0; j<3; j++)
+	{
+		lbl = new QLabel();
+		lbl->setAlignment( Qt::AlignCenter );
+
+		if ( j == 1 )
+		{
+			g = QPalette::Disabled;
+			lbl->setText( tr("Disabled") );
+		}
+		else if ( j == 2 )
+		{
+			g = QPalette::Inactive;
+			lbl->setText( tr("Inactive") );
+		}
+		else
+		{
+			g = QPalette::Active;
+			lbl->setText( tr("Active") );
+		}
+		line = new QFrame(this);
+		line->setFrameShape(QFrame::VLine); // Vertical line
+		line->setFrameShadow(QFrame::Sunken);
+		line->setLineWidth(2);
+
+		vbox = new QVBoxLayout();
+
+		hbox1->addWidget( line );
+		hbox1->addLayout( vbox );
+
+		vbox->addWidget( lbl );
+
+		for (int i=0; i<30; i++)
+		{
+			const char *rTxt = getRoleText( (QPalette::ColorRole)i );
+
+			if ( rTxt )
+			{
+				pcs = new GuiPaletteColorSelect( g, (QPalette::ColorRole)i, this );
+
+				vbox->addWidget( pcs );
+			}
+		}
+	}
+
+	setLayout( mainLayout );
+
+}
+//----------------------------------------------------
+GuiPaletteEditDialog_t::~GuiPaletteEditDialog_t(void)
+{
+
+}
+//----------------------------------------------------
+void GuiPaletteEditDialog_t::closeEvent(QCloseEvent *event)
+{
+	printf("GUI Palette Edit Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------
+void GuiPaletteEditDialog_t::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------
+//----------------------------------------------------
+GuiPaletteColorSelect::GuiPaletteColorSelect( QPalette::ColorGroup group, QPalette::ColorRole role, QWidget *parent)
+	: QWidget(parent)
+{
+	QHBoxLayout *hbox;
+	QPushButton *editBox;
+
+	hbox = new QHBoxLayout();
+
+	setLayout(hbox);
+
+	editBox = new QPushButton( tr("Edit") );
+
+	lbl = new QLabel();
+	cb  = new QCheckBox();
+
+	lbl->setAlignment( Qt::AlignCenter );
+
+	hbox->addWidget(editBox, 1);
+	hbox->addWidget( cb,  1);
+	hbox->addWidget(lbl, 10);
+
+	this->group = group;
+	this->role  = role;
+
+	setText();
+	updateColor();
+}
+//----------------------------------------------------
+GuiPaletteColorSelect::~GuiPaletteColorSelect(void)
+{
+
+}
+//----------------------------------------------------
+void GuiPaletteColorSelect::setText(void)
+{
+	const char *gTxt, *rTxt;
+	char stmp[256];
+
+	switch ( group )
+	{
+		case QPalette::Active:
+			gTxt = "Active";
+		break;
+		case QPalette::Disabled:
+			gTxt = "Disabled";
+		break;
+		case QPalette::Inactive:
+			gTxt = "Inactive";
+		break;
+		default:
+			gTxt = NULL;
+		break;
+	}
+
+	rTxt = getRoleText( role );
+
+	if ( rTxt == NULL )
+	{
+		return;
+	}
+	sprintf( stmp, "%s :: %s", gTxt, rTxt );
+
+	lbl->setText( tr(stmp) );
+
+}
+//----------------------------------------------------
+void GuiPaletteColorSelect::updateColor(void)
+{
+	char stmp[256];
+	QColor txtColor;
+
+	color = this->palette().color( group, role );
+
+	if ( qGray( color.red(), color.green(), color.blue() ) > 128 )
+	{
+		txtColor.setRgb( 0, 0, 0 );
+	}
+	else
+	{
+		txtColor.setRgb( 255, 255, 255 );
+	}
+	sprintf( stmp, "QLabel { background-color : %s; color : %s; border-color : black; }",
+		       color.name().toStdString().c_str(), txtColor.name().toStdString().c_str() );
+
+	lbl->setStyleSheet( stmp );
 }
 //----------------------------------------------------
