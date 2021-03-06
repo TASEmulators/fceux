@@ -717,8 +717,13 @@ GuiPaletteColorSelect::GuiPaletteColorSelect( QPalette::ColorGroup group, QPalet
 	this->group = group;
 	this->role  = role;
 
+	color = this->palette().color( group, role );
+
 	setText();
 	updateColor();
+
+	connect( editBox, SIGNAL(clicked(void)), this, SLOT(colorEditClicked(void)) );
+
 }
 //----------------------------------------------------
 GuiPaletteColorSelect::~GuiPaletteColorSelect(void)
@@ -764,8 +769,6 @@ void GuiPaletteColorSelect::updateColor(void)
 	char stmp[256];
 	QColor txtColor;
 
-	color = this->palette().color( group, role );
-
 	if ( qGray( color.red(), color.green(), color.blue() ) > 128 )
 	{
 		txtColor.setRgb( 0, 0, 0 );
@@ -780,3 +783,146 @@ void GuiPaletteColorSelect::updateColor(void)
 	lbl->setStyleSheet( stmp );
 }
 //----------------------------------------------------
+void GuiPaletteColorSelect::colorEditClicked(void)
+{
+	guiColorPickerDialog_t *editor = new guiColorPickerDialog_t( &color, this );
+
+	editor->show();
+}
+//----------------------------------------------------
+void GuiPaletteColorSelect::updatePalette(void)
+{
+	QPalette pal;
+
+	pal = this->palette();
+
+	pal.setColor( group, role, color );
+
+	QApplication::setPalette( pal );
+
+}
+//----------------------------------------------------
+//----------------------------------------------------
+// Color Picker
+//----------------------------------------------------
+//----------------------------------------------------
+guiColorPickerDialog_t::guiColorPickerDialog_t( QColor *c, QWidget *parent )
+	: QDialog( parent )
+{
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QPushButton *okButton;
+	QPushButton *cancelButton;
+	QPushButton *resetButton;
+	QStyle *style;
+	char stmp[128];
+
+	style = this->style();
+
+	sprintf( stmp, "Pick Palette Color");
+
+	setWindowTitle( stmp );
+
+	colorPtr = c;
+	origColor = *c;
+
+	mainLayout = new QVBoxLayout();
+
+	setLayout( mainLayout );
+
+	colorDialog = new QColorDialog(this);
+
+	mainLayout->addWidget( colorDialog );
+
+	colorDialog->setCurrentColor( *c );
+	colorDialog->setWindowFlags(Qt::Widget);
+	colorDialog->setOption( QColorDialog::DontUseNativeDialog, true );
+	colorDialog->setOption( QColorDialog::NoButtons, true );
+	
+	connect( colorDialog, SIGNAL(colorSelected(const QColor &))      , this, SLOT(colorChanged( const QColor &)) );
+	connect( colorDialog, SIGNAL(currentColorChanged(const QColor &)), this, SLOT(colorChanged( const QColor &)) );
+
+	connect( colorDialog, SIGNAL(accepted(void)), this, SLOT(colorAccepted(void)) );
+	connect( colorDialog, SIGNAL(rejected(void)), this, SLOT(colorRejected(void)) );
+
+	hbox = new QHBoxLayout();
+	mainLayout->addLayout( hbox );
+
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+	resetButton  = new QPushButton( tr("Reset") );
+
+	okButton->setIcon( style->standardIcon( QStyle::SP_DialogApplyButton ) );
+	cancelButton->setIcon( style->standardIcon( QStyle::SP_DialogCancelButton ) );
+	resetButton->setIcon( style->standardIcon( QStyle::SP_DialogResetButton ) );
+
+	hbox->addWidget( resetButton, 1  );
+	hbox->addStretch( 10 );
+	hbox->addWidget( okButton, 1     );
+	hbox->addWidget( cancelButton, 1 );
+
+	connect( okButton    , SIGNAL(clicked(void)), this, SLOT(colorAccepted(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(colorRejected(void)) );
+	connect( resetButton , SIGNAL(clicked(void)), this, SLOT(resetColor(void)) );
+}
+//----------------------------------------------------------------------------
+guiColorPickerDialog_t::~guiColorPickerDialog_t(void)
+{
+	//printf("guiColorPicker Destroyed\n");
+}
+//----------------------------------------------------------------------------
+void guiColorPickerDialog_t::closeEvent(QCloseEvent *event)
+{
+	//printf("guiColorPicker Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void guiColorPickerDialog_t::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void guiColorPickerDialog_t::colorChanged( const QColor &color )
+{
+	//printf("Color Changed: R:%i  G%i  B%i \n", color.red(), color.green(), color.blue() );
+
+	*colorPtr = color;
+
+	( (GuiPaletteColorSelect*)parent())->updateColor();
+	( (GuiPaletteColorSelect*)parent())->updatePalette();
+}
+//----------------------------------------------------------------------------
+void guiColorPickerDialog_t::colorAccepted(void)
+{
+	//printf("guiColorPicker Accepted\n");
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void guiColorPickerDialog_t::colorRejected(void)
+{
+	//printf("guiColorPicker Rejected\n");
+
+	// Reset to original color
+	*colorPtr = origColor;
+
+	( (GuiPaletteColorSelect*)parent())->updateColor();
+	( (GuiPaletteColorSelect*)parent())->updatePalette();
+
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void guiColorPickerDialog_t::resetColor(void)
+{
+	// Reset to original color
+	*colorPtr = origColor;
+
+	colorDialog->setCurrentColor( origColor );
+
+	( (GuiPaletteColorSelect*)parent())->updateColor();
+	( (GuiPaletteColorSelect*)parent())->updatePalette();
+}
+//----------------------------------------------------------------------------

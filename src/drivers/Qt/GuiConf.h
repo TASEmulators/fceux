@@ -5,6 +5,7 @@
 
 #include <QWidget>
 #include <QDialog>
+#include <QColorDialog>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QComboBox>
@@ -42,6 +43,31 @@ private:
 	std::string  rccFilePath;
 };
 
+class guiColorPickerDialog_t : public QDialog
+{
+	Q_OBJECT
+
+	public:
+		guiColorPickerDialog_t( QColor *c, QWidget *parent = 0);
+		~guiColorPickerDialog_t(void);
+
+	protected:
+		void closeEvent(QCloseEvent *event);
+
+	private:
+		QColorDialog *colorDialog;
+		QColor *colorPtr;
+		QColor  origColor;
+
+	public slots:
+		void closeWindow(void);
+	private slots:
+		void colorChanged( const QColor &color );
+		void colorAccepted(void);
+		void colorRejected(void);
+		void resetColor(void);
+};
+
 class GuiPaletteColorSelect : public QWidget
 {
 	Q_OBJECT
@@ -51,6 +77,7 @@ public:
 	~GuiPaletteColorSelect(void);
 
 	void updateColor(void);
+	void updatePalette(void);
 
 private:
 	QColor     color;
@@ -60,6 +87,12 @@ private:
 	QPalette::ColorRole  role;
 
 	void setText(void);
+
+	friend class guiColorPickerDialog_t;
+
+private slots:
+	void colorEditClicked(void);
+
 };
 
 class GuiPaletteEditDialog_t : public QDialog
