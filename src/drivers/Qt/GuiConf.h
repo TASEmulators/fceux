@@ -11,6 +11,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QLabel>
 #include <QFrame>
 #include <QGroupBox>
@@ -41,6 +42,21 @@ private:
 	QStyle *styleBase(QStyle *style = Q_NULLPTR) const;
 
 	std::string  rccFilePath;
+};
+
+class guiStyleTestDialog : public QDialog
+{
+	Q_OBJECT
+
+	public:
+		guiStyleTestDialog( QWidget *parent = 0);
+		~guiStyleTestDialog(void);
+
+	protected:
+		void closeEvent(QCloseEvent *event);
+
+	public slots:
+		void closeWindow(void);
 };
 
 class guiColorPickerDialog_t : public QDialog
@@ -140,4 +156,5 @@ private slots:
 	void openQss(void);
 	void clearQss(void);
 	void openQPalette(void);
+	void openTestWindow(void);
 };

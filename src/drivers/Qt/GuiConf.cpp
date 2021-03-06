@@ -27,6 +27,9 @@
 #include <QMenu>
 #include <QAction>
 #include <QScrollArea>
+#include <QSpinBox>
+#include <QSlider>
+#include <QDial>
 
 #include "Qt/GuiConf.h"
 #include "Qt/main.h"
@@ -77,6 +80,14 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// File
 	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Test Style
+	act = new QAction(tr("&Test"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Test"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openTestWindow(void)) );
+	
+	fileMenu->addAction(act);
 
 	// File -> Close
 	act = new QAction(tr("&Close"), this);
@@ -362,6 +373,13 @@ void GuiConfDialog_t::openQss(void)
 void GuiConfDialog_t::openQPalette(void)
 {
 	GuiPaletteEditDialog_t *dialog = new GuiPaletteEditDialog_t(this);
+
+	dialog->show();
+}
+//----------------------------------------------------
+void GuiConfDialog_t::openTestWindow(void)
+{
+	guiStyleTestDialog *dialog = new guiStyleTestDialog(this);
 
 	dialog->show();
 }
@@ -958,3 +976,266 @@ void guiColorPickerDialog_t::resetColor(void)
 	( (GuiPaletteColorSelect*)parent())->updatePalette();
 }
 //----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+// GUI Style Test Window
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+guiStyleTestDialog::guiStyleTestDialog(QWidget *parent)
+	: QDialog( parent )
+{
+	QScrollArea *scrollArea;
+	QVBoxLayout *mainLayout;
+	QVBoxLayout *vbox, *vbox1, *vbox2;
+	QHBoxLayout *hbox, *hbox1, *hbox2;
+	QGridLayout *grid;
+	QMenuBar    *menuBar;
+	QMenu       *fileMenu;
+	QAction     *act;
+	QWidget *viewport;
+	//QFrame  *line;
+	QLabel  *lbl;
+	QGroupBox *gbox;
+	QPushButton *pushButton;
+	QRadioButton *radioButton;
+	QCheckBox *checkButton;
+	QSlider *slider;
+	QDial *dial;
+	QLineEdit *lineEdit;
+	QComboBox *comboBox;
+	QSpinBox *spinBox;
+	QTextEdit *textEdit;
+	int useNativeMenuBarVal;
+
+	setWindowTitle(tr("GUI Style Test Window"));
+
+	g_config->getOption("SDL.UseNativeMenuBar", &useNativeMenuBarVal);
+
+	menuBar = new QMenuBar(this);
+
+	menuBar->setNativeMenuBar( useNativeMenuBarVal ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
+
+	scrollArea = new QScrollArea(this);
+	viewport   = new QWidget(this);
+	scrollArea->setWidget( viewport );
+	scrollArea->setWidgetResizable(true);
+	scrollArea->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
+	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
+	scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
+
+	mainLayout = new QVBoxLayout(this);
+	vbox1      = new QVBoxLayout(viewport);
+	hbox1      = new QHBoxLayout();
+
+	vbox1->addLayout( hbox1 );
+
+	mainLayout->setMenuBar( menuBar );
+
+	mainLayout->addWidget( scrollArea );
+
+	setLayout( mainLayout );
+
+	vbox2 = new QVBoxLayout();
+	hbox1->addLayout( vbox2 );
+
+	gbox  = new QGroupBox( tr("Text") );
+	grid  = new QGridLayout();
+	vbox2->addWidget( gbox );
+	gbox->setLayout( grid );
+
+	lbl = new QLabel( tr("Label Enabled") );
+	lbl->setEnabled(true);
+	grid->addWidget( lbl, 0, 0 );
+
+	lineEdit = new QLineEdit();
+	lineEdit->setText( tr("Line Edit Enabled") );
+	lineEdit->setEnabled(true);
+	grid->addWidget( lineEdit, 0, 1 );
+
+	lbl = new QLabel( tr("Label Disabled") );
+	lbl->setEnabled(false);
+	grid->addWidget( lbl, 1, 0 );
+
+	lineEdit = new QLineEdit();
+	lineEdit->setText( tr("Line Edit Disabled") );
+	lineEdit->setEnabled(false);
+	grid->addWidget( lineEdit, 1, 1 );
+
+	lbl = new QLabel( tr("Label Link") );
+	lbl->setEnabled(true);
+	grid->addWidget( lbl, 2, 0 );
+
+	lbl = new QLabel();
+	lbl->setText("<a href=\"http://fceux.com\">Website Link</a>");
+	lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	lbl->setOpenExternalLinks(false);
+	grid->addWidget( lbl, 2, 1 );
+
+	lbl = new QLabel( tr("Label Sunken") );
+	lbl->setEnabled(true);
+	lbl->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+	grid->addWidget( lbl, 3, 0 );
+
+	lbl = new QLabel( tr("Label Raised") );
+	lbl->setEnabled(true);
+	lbl->setFrameStyle(QFrame::Panel | QFrame::Raised);
+	grid->addWidget( lbl, 3, 1 );
+
+	gbox  = new QGroupBox( tr("Button") );
+	hbox2 = new QHBoxLayout();
+
+	vbox2->addWidget( gbox );
+	gbox->setLayout( hbox2 );
+
+	pushButton = new QPushButton( tr("Normal") );
+	pushButton->setEnabled(true);
+	hbox2->addWidget( pushButton );
+
+	pushButton = new QPushButton( tr("Disabled") );
+	pushButton->setEnabled(false);
+	hbox2->addWidget( pushButton );
+
+	pushButton = new QPushButton( tr("Default") );
+	pushButton->setEnabled(true);
+	pushButton->setDefault(true);
+	hbox2->addWidget( pushButton );
+
+	gbox  = new QGroupBox( tr("Checkable") );
+	gbox->setCheckable(true);
+	grid  = new QGridLayout();
+
+	vbox2->addWidget( gbox );
+	gbox->setLayout( grid );
+
+	radioButton = new QRadioButton( tr("Radio1") );
+	radioButton->setEnabled(true);
+	radioButton->setChecked(true);
+	grid->addWidget( radioButton, 0, 0 );
+	
+	radioButton = new QRadioButton( tr("Radio2") );
+	radioButton->setEnabled(true);
+	radioButton->setChecked(false);
+	grid->addWidget( radioButton, 0, 1 );
+	
+	radioButton = new QRadioButton( tr("Disabled") );
+	radioButton->setEnabled(false);
+	radioButton->setChecked(false);
+	grid->addWidget( radioButton, 0, 2 );
+	
+	checkButton = new QCheckBox( tr("Checkbox") );
+	checkButton->setEnabled(true);
+	checkButton->setChecked(true);
+	grid->addWidget( checkButton, 1, 0 );
+	
+	checkButton = new QCheckBox( tr("TriState") );
+	checkButton->setEnabled(true);
+	checkButton->setTristate(true);
+	checkButton->setCheckState(Qt::PartiallyChecked);
+	grid->addWidget( checkButton, 1, 1 );
+	
+	checkButton = new QCheckBox( tr("Disabled") );
+	checkButton->setEnabled(false);
+	checkButton->setChecked(true);
+	grid->addWidget( checkButton, 1, 2 );
+	
+	vbox   = new QVBoxLayout();
+	hbox   = new QHBoxLayout();
+	hbox1->addLayout( vbox );
+
+	slider = new QSlider(Qt::Horizontal);
+	slider->setMinimum(-20);
+	slider->setMaximum( 20);
+	vbox->addWidget( slider );
+
+	slider = new QSlider(Qt::Horizontal);
+	slider->setEnabled(false);
+	slider->setMinimum(-20);
+	slider->setMaximum( 20);
+	vbox->addWidget( slider );
+
+	vbox->addLayout( hbox );
+	slider = new QSlider(Qt::Vertical);
+	slider->setMinimum(-20);
+	slider->setMaximum( 20);
+	hbox->addWidget( slider );
+
+	slider = new QSlider(Qt::Vertical);
+	slider->setEnabled(false);
+	slider->setMinimum(-20);
+	slider->setMaximum( 20);
+	hbox->addWidget( slider );
+
+	dial = new QDial();
+	dial->setNotchesVisible(true);
+	hbox->addWidget( dial );
+
+	textEdit = new QTextEdit();
+	textEdit->setText( tr("This is a text edit") );
+	hbox->addWidget( textEdit );
+
+	gbox  = new QGroupBox( tr("Selectable") );
+	hbox2 = new QHBoxLayout();
+	gbox->setLayout( hbox2 );
+
+	vbox1->addWidget( gbox );
+	comboBox = new QComboBox();
+	comboBox->addItem( tr("AAA"), 0 );
+	comboBox->addItem( tr("BBB"), 1 );
+	comboBox->addItem( tr("CCC"), 2 );
+	comboBox->setEnabled(true);
+	hbox2->addWidget( comboBox );
+
+	comboBox = new QComboBox();
+	comboBox->addItem( tr("AAA"), 0 );
+	comboBox->addItem( tr("BBB"), 1 );
+	comboBox->addItem( tr("CCC"), 2 );
+	comboBox->setEnabled(false);
+	hbox2->addWidget( comboBox );
+
+	spinBox = new QSpinBox();
+	spinBox->setEnabled(true);
+	hbox2->addWidget( spinBox );
+
+	spinBox = new QSpinBox();
+	spinBox->setEnabled(false);
+	hbox2->addWidget( spinBox );
+
+}
+//----------------------------------------------------------------------------
+guiStyleTestDialog::~guiStyleTestDialog(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void guiStyleTestDialog::closeEvent(QCloseEvent *event)
+{
+	//printf("GUI Config Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------
+void guiStyleTestDialog::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------
