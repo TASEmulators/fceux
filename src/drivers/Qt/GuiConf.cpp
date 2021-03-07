@@ -43,6 +43,7 @@
 static int writeQPaletteToFile( const char *path, QPalette *pal );
 static int readQPaletteFromFile( const char *path, QPalette *pal );
 
+static GuiPaletteEditDialog_t *editDialog = NULL;
 //----------------------------------------------------
 GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	: QDialog(parent)
@@ -514,9 +515,13 @@ void GuiConfDialog_t::openQPal(void)
 //----------------------------------------------------
 void GuiConfDialog_t::openQPalette(void)
 {
-	GuiPaletteEditDialog_t *dialog = new GuiPaletteEditDialog_t(this);
+	if ( editDialog )
+	{
+		return;
+	}
+	editDialog = new GuiPaletteEditDialog_t(this);
 
-	dialog->show();
+	editDialog->show();
 }
 //----------------------------------------------------
 void GuiConfDialog_t::openTestWindow(void)
@@ -593,6 +598,14 @@ void fceuStyle::polish(QPalette &palette)
 	//basePtr->polish(palette);
 	//QStyle::polish(palette);
 	
+	// If the edit dialog is open, don't over write the palette
+	if ( editDialog )
+	{
+		return;
+	}
+
+	palette = standardPalette();
+
 	if ( !useCustom )
 	{
 		return;
@@ -700,7 +713,7 @@ static const char *getRoleText( QPalette::ColorRole role )
 			rTxt = "Window";
 		break;
 		case QPalette::WindowText:
-			rTxt = "Window Text";
+			rTxt = "WindowText";
 		break;
 		case QPalette::Base:
 			rTxt = "Base";
@@ -843,7 +856,7 @@ static int readQPaletteFromFile( const char *path, QPalette *pal )
 	}
 	while ( fgets( line, sizeof(line), fp ) != 0 )
 	{
-		printf("%s", line );
+		//printf("%s", line );
 
 		i=0;
 
@@ -1060,7 +1073,10 @@ GuiPaletteEditDialog_t::GuiPaletteEditDialog_t(QWidget *parent)
 //----------------------------------------------------
 GuiPaletteEditDialog_t::~GuiPaletteEditDialog_t(void)
 {
-
+	if ( editDialog == this )
+	{
+		editDialog = NULL;
+	}
 }
 //----------------------------------------------------
 void GuiPaletteEditDialog_t::closeEvent(QCloseEvent *event)
