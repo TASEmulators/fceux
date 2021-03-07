@@ -123,6 +123,7 @@ protected:
 	void closeEvent(QCloseEvent *event);
 public slots:
 	void closeWindow(void);
+	void paletteSaveAs(void);
 };
 
 
@@ -142,8 +143,10 @@ protected:
 	QCheckBox *useNativeFileDialog;
 	QCheckBox *useNativeMenuBar;
 	QCheckBox *useCustomStyle;
+	QCheckBox *useCustomPalette;
 	QComboBox *styleComboBox;
 	QLineEdit *custom_qss_path;
+	QLineEdit *custom_qpal_path;
 
 private:
 public slots:
@@ -151,10 +154,13 @@ public slots:
 private slots:
 	void useNativeFileDialogChanged(int v);
 	void useNativeMenuBarChanged(int v);
+	void useCustomQPaletteChanged(int v);
 	void useCustomStyleChanged(int v);
 	void styleChanged(int index);
 	void openQss(void);
 	void clearQss(void);
+	void openQPal(void);
+	void clearQPal(void);
 	void openQPalette(void);
 	void openTestWindow(void);
 };
