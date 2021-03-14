@@ -363,6 +363,30 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	grid->addWidget( winSizeReadout, 0, 1, Qt::AlignLeft);
 	grid->addWidget( vpSizeReadout, 1, 1, Qt::AlignLeft);
 
+	gbox  = new QGroupBox( tr("Viewport Cursor") );
+	grid  = new QGridLayout();
+	cursorSelect = new QComboBox();
+
+	cursorSelect->addItem( tr("Arrow"), 0 );
+	cursorSelect->addItem( tr("Cross"), 1 );
+	cursorSelect->addItem( tr("Blank"), 2 );
+
+	setComboBoxFromProperty( cursorSelect, "SDL.CursorType" );
+
+	connect(cursorSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(cursorShapeChanged(int)) );
+
+	vbox2->addWidget( gbox, 1 );
+	gbox->setLayout(grid);
+
+	grid->addWidget( new QLabel( tr("Shape:") ), 0, 0, Qt::AlignLeft);
+	grid->addWidget( cursorSelect, 0, 1, Qt::AlignLeft);
+
+	cursorVisCbx = new QCheckBox( tr("Visible") );
+	setCheckBoxFromProperty( cursorVisCbx, "SDL.CursorVis" );
+	grid->addWidget( cursorVisCbx, 1, 0, 2, 1, Qt::AlignLeft);
+
+	connect(cursorVisCbx, SIGNAL(stateChanged(int)), this, SLOT(cursorVisChanged(int)) );
+
 	vbox2->addStretch( 5 );
 
 	setLayout( main_vbox );
@@ -721,6 +745,73 @@ void ConsoleVideoConfDialog_t::regionChanged(int index)
 		fceuWrapperLock();
 		FCEUI_SetRegion (region, true);
 		fceuWrapperUnLock();
+	}
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::cursorShapeChanged(int index)
+{
+	int cursorSel;
+	Qt::CursorShape s;
+	//printf("Scaler: %i : %i \n", index, scalerSelect->itemData(index).toInt() );
+
+	cursorSel = cursorSelect->itemData(index).toInt();
+
+	switch ( cursorSel )
+	{
+		case 2:
+			s = Qt::BlankCursor;
+		break;
+		case 1:
+			s = Qt::CrossCursor;
+		break;
+		default:
+		case 0:
+			s = Qt::ArrowCursor;
+			cursorSel = 0;
+		break;
+	}
+	consoleWindow->setViewerCursor( s );
+
+	g_config->setOption ("SDL.CursorType", cursorSel);
+
+	g_config->save ();
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::cursorVisChanged( int value )
+{
+	int vis;
+
+	vis = (value != Qt::Unchecked);
+
+	//printf("Value:%i \n", value );
+	g_config->setOption("SDL.CursorVis", vis );
+	g_config->save ();
+
+	if ( vis )
+	{
+		int opt;
+		Qt::CursorShape s;
+
+		g_config->getOption("SDL.CursorType", &opt );
+
+		switch ( opt )
+		{
+			case 2:
+				s = Qt::BlankCursor;
+			break;
+			case 1:
+				s = Qt::CrossCursor;
+			break;
+			default:
+			case 0:
+				s = Qt::ArrowCursor;
+			break;
+		}
+		consoleWindow->setViewerCursor( s );
+	}
+	else
+	{
+		consoleWindow->setViewerCursor( Qt::BlankCursor );
 	}
 }
 //----------------------------------------------------

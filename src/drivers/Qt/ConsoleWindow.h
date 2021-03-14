@@ -19,6 +19,7 @@
 #include <QTimer>
 #include <QThread>
 #include <QMutex>
+#include <QCursor>
 
 #include "Qt/ConsoleViewerGL.h"
 #include "Qt/ConsoleViewerSDL.h"
@@ -118,6 +119,8 @@ class  consoleWin_t : public QMainWindow
 
 		QSize  calcRequiredSize(void);
 
+		void setViewerCursor( Qt::CursorShape s );
+		Qt::CursorShape getViewerCursor(void);
 	protected:
 		consoleMenuBar *menubar;
 

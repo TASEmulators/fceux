@@ -33,6 +33,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QComboBox   *driverSelect;
 		QComboBox   *scalerSelect;
 		QComboBox   *regionSelect;
+		QComboBox   *cursorSelect;
 		QCheckBox   *autoRegion;
 		QCheckBox   *gl_LF_chkBox;
 		QCheckBox   *new_PPU_ena;
@@ -42,6 +43,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QCheckBox   *showFPS_cbx;
 		QCheckBox   *autoScaleCbx;
 		QCheckBox   *sqrPixCbx;
+		QCheckBox   *cursorVisCbx;
 		QDoubleSpinBox *xScaleBox;
 		QDoubleSpinBox *yScaleBox;
 		QLabel         *xScaleLabel;
@@ -78,6 +80,8 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  regionChanged(int index);
 		void  driverChanged(int index);
 		void  scalerChanged(int index);
+		void  cursorShapeChanged(int index);
+		void  cursorVisChanged(int value);
 		void  applyChanges( void );
 		void  ntscStartScanLineChanged(const QString &);
 		void  ntscEndScanLineChanged(const QString &);

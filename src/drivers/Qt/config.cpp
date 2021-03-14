@@ -270,6 +270,8 @@ InitConfig()
 	config->addOption("special", "SDL.SpecialFilter", 0);
 	config->addOption("showfps", "SDL.ShowFPS", 0);
 	config->addOption("togglemenu", "SDL.ToggleMenu", 0);
+	config->addOption("cursorType", "SDL.CursorType", 0);
+	config->addOption("cursorVis" , "SDL.CursorVis", 1);
 
 	// OpenGL options
 	config->addOption("opengl", "SDL.OpenGL", 1);
