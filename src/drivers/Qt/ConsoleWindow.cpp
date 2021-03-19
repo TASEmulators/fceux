@@ -90,7 +90,6 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	int opt, xWinSize = 256, yWinSize = 240;
 	int use_SDL_video = false;
 	int setFullScreen = false;
-	int cursorVis = true;
 
 	//QString libpath = QLibraryInfo::location(QLibraryInfo::PluginsPath);
 	//printf("LibPath: '%s'\n", libpath.toStdString().c_str() );
@@ -193,32 +192,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	recentRomMenuReset = false;
 
 	// Viewport Cursor Type and Visibility
-	g_config->getOption("SDL.CursorVis", &cursorVis );
-
-	if ( cursorVis )
-	{
-		int cursorType;
-
-		g_config->getOption("SDL.CursorType", &cursorType );
-
-		switch ( cursorType )
-		{
-			case 2:
-				setViewerCursor( Qt::BlankCursor );
-			break;
-			case 1:
-				setViewerCursor( Qt::CrossCursor );
-			break;
-			default:
-			case 0:
-				setViewerCursor( Qt::ArrowCursor );
-			break;
-		}
-	}
-	else
-	{
-		setViewerCursor( Qt::BlankCursor );
-	}
+	loadCursor();
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -350,6 +324,65 @@ QSize consoleWin_t::calcRequiredSize(void)
 	//printf("Win %i x %i \n", rw + dw, rh + dh );
 
 	return out;
+}
+
+void consoleWin_t::loadCursor(void)
+{
+	int cursorVis;
+
+	// Viewport Cursor Type and Visibility
+	g_config->getOption("SDL.CursorVis", &cursorVis );
+
+	if ( cursorVis )
+	{
+		int cursorType;
+
+		g_config->getOption("SDL.CursorType", &cursorType );
+
+		switch ( cursorType )
+		{
+			case 4:
+			{
+				QPixmap reticle(":/icons/reticle.png");
+
+				setViewerCursor( QCursor(reticle.scaled(64,64)) );
+			}
+			break;
+			case 3:
+			{
+				QPixmap reticle(":/icons/reticle.png");
+
+				setViewerCursor( QCursor(reticle.scaled(32,32)) );
+			}
+			break;
+			case 2:
+				setViewerCursor( Qt::BlankCursor );
+			break;
+			case 1:
+				setViewerCursor( Qt::CrossCursor );
+			break;
+			default:
+			case 0:
+				setViewerCursor( Qt::ArrowCursor );
+			break;
+		}
+	}
+	else
+	{
+		setViewerCursor( Qt::BlankCursor );
+	}
+}
+
+void consoleWin_t::setViewerCursor( QCursor s )
+{
+	if ( viewport_GL )
+	{
+		viewport_GL->setCursor(s);
+	}
+	else if ( viewport_SDL )
+	{
+		viewport_SDL->setCursor(s);
+	}
 }
 
 void consoleWin_t::setViewerCursor( Qt::CursorShape s )

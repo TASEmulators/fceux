@@ -119,6 +119,8 @@ class  consoleWin_t : public QMainWindow
 
 		QSize  calcRequiredSize(void);
 
+		void loadCursor(void);
+		void setViewerCursor( QCursor s );
 		void setViewerCursor( Qt::CursorShape s );
 		Qt::CursorShape getViewerCursor(void);
 	protected:

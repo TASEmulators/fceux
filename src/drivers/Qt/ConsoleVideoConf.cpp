@@ -367,9 +367,11 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	grid  = new QGridLayout();
 	cursorSelect = new QComboBox();
 
-	cursorSelect->addItem( tr("Arrow"), 0 );
-	cursorSelect->addItem( tr("Cross"), 1 );
-	cursorSelect->addItem( tr("Blank"), 2 );
+	cursorSelect->addItem( tr("Arrow")  , 0 );
+	cursorSelect->addItem( tr("Cross")  , 1 );
+	cursorSelect->addItem( tr("Blank")  , 2 );
+	cursorSelect->addItem( tr("Reticle 1x"), 3 );
+	cursorSelect->addItem( tr("Reticle 2x"), 4 );
 
 	setComboBoxFromProperty( cursorSelect, "SDL.CursorType" );
 
@@ -751,30 +753,15 @@ void ConsoleVideoConfDialog_t::regionChanged(int index)
 void ConsoleVideoConfDialog_t::cursorShapeChanged(int index)
 {
 	int cursorSel;
-	Qt::CursorShape s;
 	//printf("Scaler: %i : %i \n", index, scalerSelect->itemData(index).toInt() );
 
 	cursorSel = cursorSelect->itemData(index).toInt();
 
-	switch ( cursorSel )
-	{
-		case 2:
-			s = Qt::BlankCursor;
-		break;
-		case 1:
-			s = Qt::CrossCursor;
-		break;
-		default:
-		case 0:
-			s = Qt::ArrowCursor;
-			cursorSel = 0;
-		break;
-	}
-	consoleWindow->setViewerCursor( s );
-
 	g_config->setOption ("SDL.CursorType", cursorSel);
 
 	g_config->save ();
+
+	consoleWindow->loadCursor();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::cursorVisChanged( int value )
@@ -787,32 +774,7 @@ void ConsoleVideoConfDialog_t::cursorVisChanged( int value )
 	g_config->setOption("SDL.CursorVis", vis );
 	g_config->save ();
 
-	if ( vis )
-	{
-		int opt;
-		Qt::CursorShape s;
-
-		g_config->getOption("SDL.CursorType", &opt );
-
-		switch ( opt )
-		{
-			case 2:
-				s = Qt::BlankCursor;
-			break;
-			case 1:
-				s = Qt::CrossCursor;
-			break;
-			default:
-			case 0:
-				s = Qt::ArrowCursor;
-			break;
-		}
-		consoleWindow->setViewerCursor( s );
-	}
-	else
-	{
-		consoleWindow->setViewerCursor( Qt::BlankCursor );
-	}
+	consoleWindow->loadCursor();
 }
 //----------------------------------------------------
 QSize ConsoleVideoConfDialog_t::calcNewScreenSize(void)

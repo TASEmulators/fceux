@@ -13,5 +13,6 @@
         <file>icons/timer.png</file>
         <file>icons/movie.png</file>
         <file>icons/camera.png</file>
+        <file>icons/reticle.png</file>
     </qresource>
 </RCC>
