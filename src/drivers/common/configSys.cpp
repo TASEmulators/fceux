@@ -687,7 +687,7 @@ Config::_loadFile(const char* fname)
 
 		// close the file
 		config.close();
-	} catch(std::fstream::failure e) {
+	} catch(std::fstream::failure &e) {
 		std::cerr << e.what() << std::endl;
 		return -1;
 	}
@@ -743,7 +743,7 @@ Config::save()
 
 		// close the file
 		config.close();
-	} catch(std::fstream::failure e)
+	} catch(std::fstream::failure &e)
 	{
 		std::cerr << e.what() << std::endl;
 		return -1;

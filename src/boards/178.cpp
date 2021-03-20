@@ -37,8 +37,8 @@ static int32 SensorDelay;
 // highly experimental, not actually working, just curious if it hapen to work with some other decoder
 // SND Registers
 static uint8 pcm_enable = 0;
-static int16 pcm_latch = 0x3F6, pcm_clock = 0x3F6;
-static writefunc pcmwrite;
+//static int16 pcm_latch = 0x3F6, pcm_clock = 0x3F6;
+//static writefunc pcmwrite;
 
 static SFORMAT StateRegs[] =
 {

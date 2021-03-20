@@ -127,14 +127,14 @@ static void Sync()
 
 static DECLFW(WriteEXP)
 {
-	uint32 addr = A;
+	//uint32 addr = A;
 	uint8 value = V;
 	reg = value & 0x81;
 }
 
 static DECLFW(WritePRG)
 {
-	uint32 addr = A;
+	//uint32 addr = A;
 	uint8 value = V;
 	switch (reg)
 	{
