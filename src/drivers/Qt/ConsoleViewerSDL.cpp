@@ -135,7 +135,7 @@ void ConsoleViewSDL_t::transfer2LocalBuffer(void)
 {
 	int i=0, hq = 0;
 	int numPixels = nes_shm->video.ncol * nes_shm->video.nrow;
-	int cpSize = numPixels * 4;
+	unsigned int cpSize = numPixels * 4;
  	uint8_t *src, *dest;
 
 	if ( cpSize > localBufSize )
