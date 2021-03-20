@@ -1000,7 +1000,7 @@ void GamePadConfDialog_t::updatePeriodic(void)
 		}
 	}
 
-	int fourScore;
+	bool fourScore = false;
 	g_config->getOption("SDL.FourScore", &fourScore);
 	if (fourScore != efs_chkbox->isChecked())
 	{

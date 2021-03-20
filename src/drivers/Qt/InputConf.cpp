@@ -557,7 +557,7 @@ void InputConfDialog_t::updatePeriodic(void)
 {
 	bool updateNeeded = false;
 	int tmpCurInputType[3], tmpUsrInputType[3];
-	int fourScoreValue;
+	bool fourScoreValue = false;
 
 	for (int i = 0; i < 3; i++)
 	{

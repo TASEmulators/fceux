@@ -69,6 +69,7 @@ public:
     int getOption(const std::string &, std::string *) const;
     int getOption(const std::string &, const char **) const;
     int getOption(const std::string &, int *) const;
+    int getOption(const std::string &, bool *) const;
     int getOption(const std::string &, double *) const;
 
     /**

@@ -449,6 +449,23 @@ Config::getOption(const std::string &name,
 
 int
 Config::getOption(const std::string &name,
+                  bool *value) const
+{
+    std::map<std::string, int>::const_iterator opt_i;
+
+    // confirm that the option exists
+    opt_i = _intOptMap.find(name);
+    if(opt_i == _intOptMap.end()) {
+        return -1;
+    }
+
+    // get the option
+    (*value) = opt_i->second ? true : false;
+    return 0;
+}
+
+int
+Config::getOption(const std::string &name,
                   double *value) const
 {
     std::map<std::string, double>::const_iterator opt_i;
