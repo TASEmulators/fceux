@@ -17,7 +17,7 @@ struct ButtConfig
 	int    ButtType; 
 	int    DeviceNum; 
 	int    ButtonNum; 
-   int    state;
+	int    state;
 };
 
 extern int NoWaiting;
@@ -50,6 +50,20 @@ struct hotkey_t
 	void setModifierFromString( const char *s );
 };
 extern struct hotkey_t Hotkeys[];
+
+struct gamepad_function_key_t
+{
+	int  qKey;
+	unsigned int qModifier;
+
+	struct ButtConfig  bc;
+
+	gamepad_function_key_t(void);
+	~gamepad_function_key_t(void);
+
+	void sendKeyPressEvent(void);
+	void sendKeyReleaseEvent(void);
+};
 
 #define FCFGD_GAMEPAD   1
 #define FCFGD_POWERPAD  2

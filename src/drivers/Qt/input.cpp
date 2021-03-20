@@ -19,6 +19,7 @@
  */
 
 #include <QFileDialog>
+#include <QApplication>
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -405,6 +406,31 @@ setHotKeys (void)
 
 	}
 	return;
+}
+
+gamepad_function_key_t::gamepad_function_key_t(void)
+{
+	qKey = 0;
+	qModifier = Qt::NoModifier;
+}
+
+gamepad_function_key_t::~gamepad_function_key_t(void)
+{
+
+}
+
+void gamepad_function_key_t::sendKeyPressEvent(void)
+{
+	QKeyEvent *k = new QKeyEvent (QEvent::KeyPress, qKey, (Qt::KeyboardModifiers)qModifier );
+
+	qApp->postEvent((QObject*)consoleWindow,(QEvent *)k);
+}
+
+void gamepad_function_key_t::sendKeyReleaseEvent(void)
+{
+	QKeyEvent *k = new QKeyEvent (QEvent::KeyRelease, qKey, (Qt::KeyboardModifiers)qModifier );
+
+	qApp->postEvent((QObject*)consoleWindow,(QEvent *)k);
 }
 
 /***
