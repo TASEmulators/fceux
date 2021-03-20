@@ -37,7 +37,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 {
 	QPalette pal = palette();
 
-	pal.setColor(QPalette::Background, Qt::black);
+	pal.setColor(QPalette::Window, Qt::black);
 	setAutoFillBackground(true);
 	setPalette(pal);
 
