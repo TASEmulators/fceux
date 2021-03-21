@@ -14,16 +14,16 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 
 	public:
 		ConsoleViewGL_t(QWidget *parent = 0);
-	   ~ConsoleViewGL_t(void);
+		~ConsoleViewGL_t(void);
 
 		int  init( void );
 
 		void transfer2LocalBuffer(void);
 
-      void setLinearFilterEnable( bool ena );
+		void setLinearFilterEnable( bool ena );
 
-		bool   getSqrPixelOpt(void){ return sqrPixels; };
-		void   setSqrPixelOpt( bool val ){ sqrPixels = val; return; };
+		bool   getForceAspectOpt(void){ return forceAspect; };
+		void   setForceAspectOpt( bool val ){ forceAspect = val; return; };
 		bool   getAutoScaleOpt(void){ return autoScaleEna; };
 		void   setAutoScaleOpt( bool val ){ autoScaleEna = val; return; };
 		double getScaleX(void){ return xscale; };
@@ -31,9 +31,12 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 		void   setScaleXY( double xs, double ys );
 		void   getNormalizedCursorPos( double &x, double &y );
 		bool   getMouseButtonState( unsigned int btn );
+		void   setAspectXY( double x, double y );
+		void   getAspectXY( double &x, double &y );
+		double getAspectRatio(void);
 
 	protected:
-   void initializeGL(void);
+	void initializeGL(void);
 	void resizeGL(int w, int h);
 	void paintGL(void);
 	void mousePressEvent(QMouseEvent * event);
@@ -44,6 +47,9 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	void doRemap(void);
 
 	double devPixRatio;
+	double aspectRatio;
+	double aspectX;
+	double aspectY;
 	double xscale;
 	double yscale;
 	int  view_width;
@@ -54,7 +60,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	int  rh;
 	GLuint gltexture;
 	bool   linearFilter;
-	bool   sqrPixels;
+	bool   forceAspect;
 	bool   autoScaleEna;
 
 	unsigned int  mouseButtonMask;

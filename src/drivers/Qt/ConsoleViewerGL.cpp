@@ -50,8 +50,11 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	view_height = 0;
 	gltexture   = 0;
 	devPixRatio = 1.0f;
+	aspectRatio = 1.0f;
+	aspectX     = 1.0f;
+	aspectY     = 1.0f;
 	linearFilter = false;
-	sqrPixels    = true;
+	forceAspect  = true;
 	autoScaleEna = true;
 	xscale = 2.0;
 	yscale = 2.0;
@@ -201,8 +204,10 @@ void ConsoleViewGL_t::setScaleXY( double xs, double ys )
 	xscale = xs;
 	yscale = ys;
 
-	if ( sqrPixels )
+	if ( forceAspect )
 	{
+		xyRatio = xyRatio * aspectRatio;
+
 		if ( (xscale*xyRatio) < yscale )
 		{
 			yscale = (xscale*xyRatio);
@@ -212,6 +217,25 @@ void ConsoleViewGL_t::setScaleXY( double xs, double ys )
 			xscale = (yscale/xyRatio);
 		}
 	}
+}
+
+void ConsoleViewGL_t::setAspectXY( double x, double y )
+{
+	aspectX = x;
+	aspectY = y;
+
+	aspectRatio = aspectY / aspectX;
+}
+
+void ConsoleViewGL_t::getAspectXY( double &x, double &y )
+{
+	x = aspectX;
+	y = aspectY;
+}
+
+double ConsoleViewGL_t::getAspectRatio(void)
+{
+	return aspectRatio;
 }
 
 void ConsoleViewGL_t::transfer2LocalBuffer(void)
@@ -314,8 +338,10 @@ void ConsoleViewGL_t::paintGL(void)
 	float xscaleTmp = (float)(view_width)  / (float)(texture_width);
 	float yscaleTmp = (float)(view_height) / (float)(texture_height);
 
-	if ( sqrPixels )
+	if ( forceAspect )
 	{
+		xyRatio = xyRatio * aspectRatio;
+
 		if ( (xscaleTmp*xyRatio) < yscaleTmp )
 		{
 			yscaleTmp = (xscaleTmp*xyRatio);

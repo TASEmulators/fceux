@@ -261,7 +261,10 @@ InitConfig()
 	config->addOption("SDL.WinSizeY", 0);
 	config->addOption("doublebuf", "SDL.DoubleBuffering", 1);
 	config->addOption("autoscale", "SDL.AutoScale", 1);
-	config->addOption("keepratio", "SDL.KeepRatio", 1);
+	config->addOption("forceAspect", "SDL.ForceAspect", 1);
+	config->addOption("aspectSelect", "SDL.AspectSelect", 0);
+	config->addOption("aspectX", "SDL.AspectX", 1.000);
+	config->addOption("aspectY", "SDL.AspectY", 1.000);
 	config->addOption("xscale", "SDL.XScale", 2.000);
 	config->addOption("yscale", "SDL.YScale", 2.000);
 	config->addOption("xstretch", "SDL.XStretch", 0);

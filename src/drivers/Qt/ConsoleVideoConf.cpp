@@ -161,8 +161,8 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	// Auto Scale on Resize
 	autoScaleCbx  = new QCheckBox( tr("Auto Scale on Resize") );
 
-	// Square Pixels
-	sqrPixCbx  = new QCheckBox( tr("Square Pixels") );
+	// Force Aspect Ratio
+	aspectCbx  = new QCheckBox( tr("Force Aspect Ratio") );
 
 	setCheckBoxFromProperty( autoRegion   , "SDL.AutoDetectPAL");
 	setCheckBoxFromProperty( new_PPU_ena  , "SDL.NewPPU");
@@ -176,12 +176,12 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 		if ( consoleWindow->viewport_GL )
 		{
 			autoScaleCbx->setChecked( consoleWindow->viewport_GL->getAutoScaleOpt() );
-			sqrPixCbx->setChecked( consoleWindow->viewport_GL->getSqrPixelOpt() );
+			aspectCbx->setChecked( consoleWindow->viewport_GL->getForceAspectOpt() );
 		}
 		else if ( consoleWindow->viewport_SDL )
 		{
 			autoScaleCbx->setChecked( consoleWindow->viewport_SDL->getAutoScaleOpt() );
-			sqrPixCbx->setChecked( consoleWindow->viewport_SDL->getSqrPixelOpt() );
+			aspectCbx->setChecked( consoleWindow->viewport_SDL->getForceAspectOpt() );
 		}
 	}
 
@@ -191,7 +191,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	connect(sprtLimCbx  , SIGNAL(stateChanged(int)), this, SLOT(useSpriteLimitChanged(int)) );
 	connect(clipSidesCbx, SIGNAL(stateChanged(int)), this, SLOT(clipSidesChanged(int)) );
 	connect(showFPS_cbx , SIGNAL(stateChanged(int)), this, SLOT(showFPSChanged(int)) );
-	connect(sqrPixCbx   , SIGNAL(stateChanged(int)), this, SLOT(sqrPixChanged(int)) );
+	connect(aspectCbx   , SIGNAL(stateChanged(int)), this, SLOT(aspectEnableChanged(int)) );
 	connect(autoScaleCbx, SIGNAL(stateChanged(int)), this, SLOT(autoScaleChanged(int)) );
 
 	vbox1->addWidget( autoRegion  );
@@ -201,7 +201,27 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	//vbox1->addWidget( clipSidesCbx);
 	vbox1->addWidget( showFPS_cbx );
 	vbox1->addWidget( autoScaleCbx);
-	vbox1->addWidget( sqrPixCbx   );
+	vbox1->addWidget( aspectCbx   );
+
+	aspectSelect = new QComboBox();
+
+	aspectSelect->addItem( tr("Default (1:1)"), 0 );
+	aspectSelect->addItem( tr("NTSC (8:7)"), 1 );
+	aspectSelect->addItem( tr("PAL (11:8)"), 2 );
+	aspectSelect->addItem( tr("Standard (4:3)"), 3 );
+	aspectSelect->addItem( tr("Widescreen (16:9)"), 4 );
+	//aspectSelect->addItem( tr("Custom"), 5 ); TODO
+
+	setComboBoxFromProperty( aspectSelect, "SDL.AspectSelect");
+
+	connect(aspectSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(aspectChanged(int)) );
+
+	aspectSelectLabel = new QLabel( tr("Aspect:") );
+
+	hbox1 = new QHBoxLayout();
+	hbox1->addWidget( aspectSelectLabel );
+	hbox1->addWidget( aspectSelect      );
+	vbox1->addLayout( hbox1 );
 
 	xScaleBox = new QDoubleSpinBox(this);
 	yScaleBox = new QDoubleSpinBox(this);
@@ -226,7 +246,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 		}
 	}
 
-	if ( sqrPixCbx->isChecked() )
+	if ( aspectCbx->isChecked() )
 	{
 		xScaleLabel = new QLabel( tr("Scale:") );
 	}
@@ -246,10 +266,15 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	hbox1->addWidget( yScaleBox );
 	vbox1->addLayout( hbox1 );
 
-	if ( sqrPixCbx->isChecked() )
+	if ( aspectCbx->isChecked() )
 	{
 		yScaleLabel->hide();
 		yScaleBox->hide();
+	}
+	else
+	{
+		aspectSelectLabel->hide();
+		aspectSelect->hide();
 	}
 
 	hbox1 = new QHBoxLayout();
@@ -684,22 +709,28 @@ void ConsoleVideoConfDialog_t::showFPSChanged( int value )
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::sqrPixChanged( int value )
+void ConsoleVideoConfDialog_t::aspectEnableChanged( int value )
 {
 	//printf("Value:%i \n", value );
-	int useSqrPix = (value != Qt::Unchecked);
+	int forceAspect = (value != Qt::Unchecked);
 
-	if ( useSqrPix )
+	if ( forceAspect )
 	{
 		xScaleLabel->setText( tr("Scale:") );
 		yScaleLabel->hide();
 		yScaleBox->hide();
+
+		aspectSelectLabel->show();
+		aspectSelect->show();
 	}
 	else
 	{
 		xScaleLabel->setText( tr("X Scale:") );
 		yScaleLabel->show();
 		yScaleBox->show();
+
+		aspectSelectLabel->hide();
+		aspectSelect->hide();
 	}
 
 }
@@ -750,6 +781,18 @@ void ConsoleVideoConfDialog_t::regionChanged(int index)
 	}
 }
 //----------------------------------------------------
+void ConsoleVideoConfDialog_t::aspectChanged(int index)
+{
+	int aspectID;
+
+	aspectID = aspectSelect->itemData(index).toInt();
+
+	g_config->setOption ("SDL.AspectSelect", aspectID);
+	g_config->save ();
+
+	consoleWindow->setViewportAspect();
+}
+//----------------------------------------------------
 void ConsoleVideoConfDialog_t::cursorShapeChanged(int index)
 {
 	int cursorSel;
@@ -784,7 +827,7 @@ QSize ConsoleVideoConfDialog_t::calcNewScreenSize(void)
 	if ( consoleWindow )
 	{
 		QSize w, v;
-		double xscale, yscale;
+		double xscale = 1.0, yscale = 1.0, aspectRatio = 1.0;
 		int texture_width  = nes_shm->video.ncol;
 		int texture_height = nes_shm->video.nrow;
 		int l=0, r=texture_width;
@@ -796,20 +839,22 @@ QSize ConsoleVideoConfDialog_t::calcNewScreenSize(void)
 		if ( consoleWindow->viewport_GL )
 		{
 			v = consoleWindow->viewport_GL->size();
+			aspectRatio = consoleWindow->viewport_GL->getAspectRatio();
 		}
 		else if ( consoleWindow->viewport_SDL )
 		{
 			v = consoleWindow->viewport_SDL->size();
+			aspectRatio = consoleWindow->viewport_SDL->getAspectRatio();
 		}
 
 		dw = w.width()  - v.width();
 		dh = w.height() - v.height();
 
-		if ( sqrPixCbx->isChecked() )
+		if ( aspectCbx->isChecked() )
 		{
 			xscale = xScaleBox->value();
 
-			yscale = xscale * (double)nes_shm->video.xyRatio;
+			yscale = xscale * aspectRatio * (double)nes_shm->video.xyRatio;
 		}
 		else
 		{
@@ -834,7 +879,7 @@ void ConsoleVideoConfDialog_t::applyChanges( void )
 		float xscale, yscale;
 		QSize s = calcNewScreenSize();
 
-		if ( sqrPixCbx->isChecked() )
+		if ( aspectCbx->isChecked() )
 		{
 			yscale = xscale = xScaleBox->value();
 		}
@@ -846,13 +891,13 @@ void ConsoleVideoConfDialog_t::applyChanges( void )
 
 		if ( consoleWindow->viewport_GL )
 		{
-		   consoleWindow->viewport_GL->setSqrPixelOpt( sqrPixCbx->isChecked() );
+		   consoleWindow->viewport_GL->setForceAspectOpt( aspectCbx->isChecked() );
 		   consoleWindow->viewport_GL->setAutoScaleOpt( autoScaleCbx->isChecked() );
 		   consoleWindow->viewport_GL->setScaleXY( xscale, yscale );
 		}
 		if ( consoleWindow->viewport_SDL )
 		{
-		   consoleWindow->viewport_SDL->setSqrPixelOpt( sqrPixCbx->isChecked() );
+		   consoleWindow->viewport_SDL->setForceAspectOpt( aspectCbx->isChecked() );
 		   consoleWindow->viewport_SDL->setAutoScaleOpt( autoScaleCbx->isChecked() );
 		   consoleWindow->viewport_SDL->setScaleXY( xscale, yscale );
 		}

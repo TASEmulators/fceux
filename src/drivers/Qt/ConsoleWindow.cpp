@@ -118,6 +118,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 		setCentralWidget(viewport_GL);
 	}
+	setViewportAspect();
 
 	setWindowTitle( tr(FCEU_NAME_AND_VERSION) );
 	setWindowIcon(QIcon(":fceux1.png"));
@@ -273,13 +274,13 @@ QSize consoleWin_t::calcRequiredSize(void)
 	QSize out( GL_NES_WIDTH, GL_NES_HEIGHT );
 
 	QSize w, v;
-	double xscale, yscale;
+	double xscale = 1.0, yscale = 1.0, aspectRatio = 1.0;
 	int texture_width = GL_NES_WIDTH;
 	int texture_height = GL_NES_HEIGHT;
 	int l=0, r=texture_width;
 	int t=0, b=texture_height;
 	int dw=0, dh=0, rw, rh;
-	bool sqrPixChkd = true;
+	bool forceAspect = true;
 
 	CalcVideoDimensions();
 
@@ -294,14 +295,16 @@ QSize consoleWin_t::calcRequiredSize(void)
 	if ( viewport_GL )
 	{
 		v = viewport_GL->size();
-		sqrPixChkd = viewport_GL->getSqrPixelOpt();
+		forceAspect = viewport_GL->getForceAspectOpt();
+		aspectRatio = viewport_GL->getAspectRatio();
 		xscale = viewport_GL->getScaleX();
 		yscale = viewport_GL->getScaleY();
 	}
 	else if ( viewport_SDL )
 	{
 		v = viewport_SDL->size();
-		sqrPixChkd = viewport_SDL->getSqrPixelOpt();
+		forceAspect = viewport_SDL->getForceAspectOpt();
+		aspectRatio = viewport_SDL->getAspectRatio();
 		xscale = viewport_SDL->getScaleX();
 		yscale = viewport_SDL->getScaleY();
 	}
@@ -309,9 +312,9 @@ QSize consoleWin_t::calcRequiredSize(void)
 	dw = 0;
 	dh = 0;
 
-	if ( sqrPixChkd )
+	if ( forceAspect )
 	{
-		yscale = xscale * (double)nes_shm->video.xyRatio;
+		yscale = xscale * aspectRatio * (double)nes_shm->video.xyRatio;
 	}
 	rw=(int)((r-l)*xscale);
 	rh=(int)((b-t)*yscale);
@@ -324,6 +327,48 @@ QSize consoleWin_t::calcRequiredSize(void)
 	//printf("Win %i x %i \n", rw + dw, rh + dh );
 
 	return out;
+}
+
+void consoleWin_t::setViewportAspect(void)
+{
+	int aspectSel;
+	double x,y;
+
+	g_config->getOption ("SDL.AspectSelect", &aspectSel);
+
+	switch ( aspectSel )
+	{
+		default:
+		case 0:
+			x =  1.0; y = 1.0;
+		break;
+		case 1:
+			x =  8.0; y = 7.0;
+		break;
+		case 2:
+			x = 11.0; y = 8.0;
+		break;
+		case 3:
+			x =  4.0; y = 3.0;
+		break;
+		case 4:
+			x = 16.0; y = 9.0;
+		break;
+		case 5:
+		{
+			x = 1.0; y = 1.0;
+		}
+		break;
+	}
+
+	if ( viewport_GL )
+	{
+		viewport_GL->setAspectXY( x, y );
+	}
+	else if ( viewport_SDL )
+	{
+		viewport_SDL->setAspectXY( x, y );
+	}
 }
 
 void consoleWin_t::loadCursor(void)

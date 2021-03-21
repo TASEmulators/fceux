@@ -57,6 +57,10 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	yscale = 2.0;
 
 	devPixRatio = 1.0f;
+	aspectRatio = 1.0f;
+	aspectX     = 1.0f;
+	aspectY     = 1.0f;
+
 	sdlWindow   = NULL;
 	sdlRenderer = NULL;
 	sdlTexture  = NULL;
@@ -73,7 +77,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 		memset( localBuf, 0, localBufSize );
 	}
 
-	sqrPixels = true;
+	forceAspect  = true;
 	autoScaleEna = true;
 	linearFilter = false;
 
@@ -118,8 +122,10 @@ void ConsoleViewSDL_t::setScaleXY( double xs, double ys )
 	xscale = xs;
 	yscale = ys;
 
-	if ( sqrPixels )
+	if ( forceAspect )
 	{
+		xyRatio = xyRatio * aspectRatio;
+
 		if ( (xscale*xyRatio) < yscale )
 		{
 			yscale = (xscale*xyRatio);
@@ -129,6 +135,25 @@ void ConsoleViewSDL_t::setScaleXY( double xs, double ys )
 			xscale = (yscale/xyRatio);
 		}
 	}
+}
+
+void ConsoleViewSDL_t::setAspectXY( double x, double y )
+{
+	aspectX = x;
+	aspectY = y;
+
+	aspectRatio = aspectY / aspectX;
+}
+
+void ConsoleViewSDL_t::getAspectXY( double &x, double &y )
+{
+	x = aspectX;
+	y = aspectY;
+}
+
+double ConsoleViewSDL_t::getAspectRatio(void)
+{
+	return aspectRatio;
 }
 
 void ConsoleViewSDL_t::transfer2LocalBuffer(void)
@@ -354,8 +379,10 @@ void ConsoleViewSDL_t::render(void)
 	float xscaleTmp = (float)view_width  / (float)nesWidth;
 	float yscaleTmp = (float)view_height / (float)nesHeight;
 
-	if ( sqrPixels )
+	if ( forceAspect )
 	{
+		xyRatio = xyRatio * aspectRatio;
+
 		if ( (xscaleTmp*xyRatio) < yscaleTmp )
 		{
 			yscaleTmp = (xscaleTmp*xyRatio);
