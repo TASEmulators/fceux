@@ -128,7 +128,9 @@ LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
 
 	g_config->getOption("SDL.LastLoadLua", &filename);
 
-	scriptPath->setText(filename.c_str());
+	scriptPath->setText( tr(filename.c_str()) );
+	scriptPath->setClearButtonEnabled(true);
+	scriptArgs->setClearButtonEnabled(true);
 
 	luaOutput = new QTextEdit();
 	luaOutput->setReadOnly(true);
@@ -401,7 +403,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 
 	g_config->setOption("SDL.LastLoadLua", filename.toStdString().c_str());
 
-	scriptPath->setText(filename.toStdString().c_str());
+	scriptPath->setText(filename);
 
 #endif
 }
