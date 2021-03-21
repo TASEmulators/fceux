@@ -314,12 +314,28 @@ QSize consoleWin_t::calcRequiredSize(void)
 
 	if ( forceAspect )
 	{
-		yscale = xscale * aspectRatio * (double)nes_shm->video.xyRatio;
+		yscale = xscale * (double)nes_shm->video.xyRatio;
 	}
 	rw=(int)((r-l)*xscale);
 	rh=(int)((b-t)*yscale);
 
 	//printf("view %i x %i \n", rw, rh );
+
+	if ( forceAspect )
+	{
+		double rr;
+
+		rr = (double)rh / (double)rw;
+
+		if ( rr > aspectRatio )
+		{
+			rw = (int)( (((double)rh) / aspectRatio) + 0.50);
+		}
+		else
+		{
+			rh = (int)( (((double)rw) * aspectRatio) + 0.50);
+		}
+	}
 
 	out.setWidth( rw + dw );
 	out.setHeight( rh + dh );

@@ -206,8 +206,6 @@ void ConsoleViewGL_t::setScaleXY( double xs, double ys )
 
 	if ( forceAspect )
 	{
-		xyRatio = xyRatio * aspectRatio;
-
 		if ( (xscale*xyRatio) < yscale )
 		{
 			yscale = (xscale*xyRatio);
@@ -340,15 +338,13 @@ void ConsoleViewGL_t::paintGL(void)
 
 	if ( forceAspect )
 	{
-		xyRatio = xyRatio * aspectRatio;
-
 		if ( (xscaleTmp*xyRatio) < yscaleTmp )
 		{
-			yscaleTmp = (xscaleTmp*xyRatio);
+			yscaleTmp = xscaleTmp * xyRatio;
 		}
 		else 
 		{
-			xscaleTmp = (yscaleTmp/xyRatio);
+			xscaleTmp = yscaleTmp / xyRatio;
 		}
 	}
 
@@ -368,8 +364,45 @@ void ConsoleViewGL_t::paintGL(void)
 			yscaleTmp = yscale;
 		}
 	}
+
 	rw=(int)((r-l)*xscaleTmp);
 	rh=(int)((b-t)*yscaleTmp);
+
+	if ( forceAspect )
+	{
+		int iw, ih, ax, ay;
+
+		ax = (int)(aspectX+0.50);
+		ay = (int)(aspectY+0.50);
+
+		iw = rw * ay;
+		ih = rh * ax;
+		
+		if ( iw > ih )
+		{
+			rh = (rw * ay) / ax;
+		}
+		else
+		{
+			rw = (rh * ax) / ay;
+		}
+
+		if ( rw > view_width )
+		{
+			rw = view_width;
+			rh = (rw * ay) / ax;
+		}
+
+		if ( rh > view_height )
+		{
+			rh = view_height;
+			rw = (rh * ax) / ay;
+		}
+	}
+
+	if ( rw > view_width ) rw = view_width;
+	if ( rh > view_height) rh = view_height;
+
 	sx=(view_width-rw)/2;   
 	sy=(view_height-rh)/2;
 

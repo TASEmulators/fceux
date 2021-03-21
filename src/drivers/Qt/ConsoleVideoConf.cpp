@@ -853,8 +853,7 @@ QSize ConsoleVideoConfDialog_t::calcNewScreenSize(void)
 		if ( aspectCbx->isChecked() )
 		{
 			xscale = xScaleBox->value();
-
-			yscale = xscale * aspectRatio * (double)nes_shm->video.xyRatio;
+			yscale = xscale * (double)nes_shm->video.xyRatio;
 		}
 		else
 		{
@@ -864,6 +863,21 @@ QSize ConsoleVideoConfDialog_t::calcNewScreenSize(void)
 		rw=(int)((r-l)*xscale);
 		rh=(int)((b-t)*yscale);
 
+		if ( aspectCbx->isChecked() )
+		{
+			double rr;
+
+			rr = (double)rh / (double)rw;
+
+			if ( rr > aspectRatio )
+			{
+				rw = (int)( (((double)rh) / aspectRatio) + 0.50);
+			}
+			else
+			{
+				rh = (int)( (((double)rw) * aspectRatio) + 0.50);
+			}
+		}
 		out.setWidth( rw + dw );
 		out.setHeight( rh + dh );
 	}
