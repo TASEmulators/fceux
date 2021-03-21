@@ -444,7 +444,7 @@ void consoleWin_t::setViewerCursor( Qt::CursorShape s )
 
 Qt::CursorShape consoleWin_t::getViewerCursor(void)
 {
-	Qt::CursorShape s;
+	Qt::CursorShape s = Qt::ArrowCursor;
 
 	if ( viewport_GL )
 	{
