@@ -2872,14 +2872,10 @@ void consoleWin_t::syncActionConfig( QAction *act, const char *property )
 
 void consoleWin_t::updatePeriodic(void)
 {
-	//struct timespec ts;
-	//double t;
-
-	//clock_gettime( CLOCK_REALTIME, &ts );
-
-	//t = (double)ts.tv_sec + (double)(ts.tv_nsec * 1.0e-9);
-   //printf("Run Frame %f\n", t);
 	
+	// Process all events before attempting to render viewport
+	QCoreApplication::processEvents();
+
 	// Update Input Devices
 	FCEUD_UpdateInput();
 	
@@ -2896,7 +2892,6 @@ void consoleWin_t::updatePeriodic(void)
 		else
 		{
 			viewport_GL->transfer2LocalBuffer();
-			//viewport_GL->repaint();
 			viewport_GL->update();
 		}
 	}
