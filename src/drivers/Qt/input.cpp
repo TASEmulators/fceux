@@ -65,6 +65,8 @@ static int buttonConfigInProgress = 0;
 
 extern int gametype;
 
+std::list <gamepad_function_key_t*> gpKeySeqList;
+
 /**
  * Necessary for proper GUI functioning (configuring when a game isn't loaded).
  */

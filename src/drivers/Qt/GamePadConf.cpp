@@ -25,6 +25,10 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QPainter>
+#include <QMenu>
+#include <QMenuBar>
+#include <QAction>
+#include <QHeaderView>
 
 #include "Qt/GamePadConf.h"
 #include "Qt/main.h"
@@ -108,6 +112,11 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	std::string prefix;
 	char stmp[256];
 	bool useScroll = false;
+	int useNativeMenuBar;
+	QMenuBar *menuBar;
+	QMenu *fileMenu;
+	QAction *act;
+	QTreeWidgetItem *item;
 
 	style = this->style();
 
@@ -130,6 +139,31 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	connect(inputTimer, &QTimer::timeout, this, &GamePadConfDialog_t::updatePeriodic);
 
 	setWindowTitle(tr("GamePad Config"));
+
+	menuBar = new QMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
 
 	grid1 = new QGridLayout();
 
@@ -341,14 +375,53 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	gpView = new GamePadView_t(this);
 
+	advOptLayout = new QGroupBox( tr("Advanced Key Bindings") );
+
 	mainLayoutV->addLayout(vbox1);
 	mainLayoutV->addWidget(gpView);
 
 	mainLayoutH->addLayout(mainLayoutV);
 	mainLayoutH->addLayout(vbox2);
+	mainLayoutH->addWidget(advOptLayout);
+	mainLayoutH->setMenuBar( menuBar );
 
 	mainWidget->setLayout(mainLayoutH);
 	mainWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+	hbox1 = new QHBoxLayout();
+	vbox  = new QVBoxLayout();
+
+	advOptLayout->setLayout(hbox1);
+	hbox1->addLayout(vbox);
+
+	newKeyBindBtn  = new QPushButton( tr("New") );
+	editKeyBindBtn = new QPushButton( tr("Edit") );
+	delKeyBindBtn  = new QPushButton( tr("Delete") );
+
+	vbox->addWidget( newKeyBindBtn , 1 );
+	vbox->addWidget( editKeyBindBtn, 1 );
+	vbox->addWidget( delKeyBindBtn , 1 );
+	vbox->addStretch(5);
+
+	keyBindTree = new QTreeWidget();
+
+	keyBindTree->setColumnCount(2);
+
+	item = new QTreeWidgetItem();
+	item->setText(0, QString::fromStdString("JS Button"));
+	item->setText(1, QString::fromStdString("Key Binding"));
+	item->setTextAlignment(0, Qt::AlignLeft);
+	item->setTextAlignment(1, Qt::AlignLeft);
+
+	keyBindTree->setHeaderItem(item);
+
+	keyBindTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+	hbox1->addWidget(keyBindTree);
+
+	connect( newKeyBindBtn, SIGNAL(clicked()), this, SLOT(newKeyBindingCallback(void)));
+	connect(editKeyBindBtn, SIGNAL(clicked()), this, SLOT(editKeyBindingCallback(void)));
+	connect( delKeyBindBtn, SIGNAL(clicked()), this, SLOT(delKeyBindingCallback(void)));
 
 	if (useScroll)
 	{
@@ -385,6 +458,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	}
 
 	loadMapList();
+
+	refreshKeyBindTree();
 }
 
 //----------------------------------------------------
@@ -486,6 +561,31 @@ void GamePadConfDialog_t::loadMapList(void)
 			mapSel->setCurrentIndex(n);
 		}
 		n++;
+	}
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::refreshKeyBindTree(void)
+{
+	QTreeWidgetItem *item;
+	std::list <gamepad_function_key_t*>::iterator it;
+	gamepad_function_key_t *binding;
+	const char *btnName;
+
+	for (it=gpKeySeqList.begin(); it!=gpKeySeqList.end(); it++)
+	{
+		binding = *it;
+
+		item = new QTreeWidgetItem();
+
+		btnName = ButtonName( &binding->bc );
+
+		item->setText(0, QString::fromStdString(btnName));
+		//item->setText(1, QString::fromStdString(keyName));
+
+		item->setTextAlignment(0, Qt::AlignLeft);
+		item->setTextAlignment(1, Qt::AlignLeft);
+
+		keyBindTree->addTopLevelItem(item);
 	}
 }
 //----------------------------------------------------
@@ -970,6 +1070,21 @@ void GamePadConfDialog_t::promptToSave(void)
 
 	msgBox.show();
 	msgBox.exec();
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::newKeyBindingCallback(void)
+{
+	// TODO
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::editKeyBindingCallback(void)
+{
+	// TODO
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::delKeyBindingCallback(void)
+{
+	// TODO
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::updatePeriodic(void)

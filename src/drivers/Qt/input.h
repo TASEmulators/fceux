@@ -2,6 +2,7 @@
 #define _aosdfjk02fmasf
 
 #include <stdint.h>
+#include <list>
 
 #include "common/configSys.h"
 
@@ -64,6 +65,8 @@ struct gamepad_function_key_t
 	void sendKeyPressEvent(void);
 	void sendKeyReleaseEvent(void);
 };
+
+extern std::list <gamepad_function_key_t*> gpKeySeqList;
 
 #define FCFGD_GAMEPAD   1
 #define FCFGD_POWERPAD  2

@@ -15,6 +15,8 @@
 #include <QTimer>
 #include <QGroupBox>
 #include <QPainter>
+#include <QTreeView>
+#include <QTreeWidget>
 
 #include "Qt/main.h"
 
@@ -78,12 +80,18 @@ protected:
 	QComboBox *mapSel;
 	QComboBox *profSel;
 	QCheckBox *efs_chkbox;
+	QGroupBox *advOptLayout;
 	QLabel *guidLbl;
 	QLabel *mapMsg;
 	QLabel *keyName[GAMEPAD_NUM_BUTTONS];
 	QLabel *keyState[GAMEPAD_NUM_BUTTONS];
 	GamePadConfigButton_t *button[GAMEPAD_NUM_BUTTONS];
 	GamePadView_t *gpView;
+
+	QPushButton *newKeyBindBtn;
+	QPushButton *editKeyBindBtn;
+	QPushButton *delKeyBindBtn;
+	QTreeWidget *keyBindTree;
 
 	int portNum;
 	int buttonConfigStatus;
@@ -97,6 +105,8 @@ protected:
 	void keyPressEvent(QKeyEvent *event);
 	void keyReleaseEvent(QKeyEvent *event);
 	void closeEvent(QCloseEvent *bar);
+
+	void refreshKeyBindTree(void);
 
 private:
 	void updateCntrlrDpy(void);
@@ -139,6 +149,9 @@ private slots:
 	void deleteProfileCallback(void);
 	void updatePeriodic(void);
 	void changeSequentallyCallback(void);
+	void newKeyBindingCallback(void);
+	void editKeyBindingCallback(void);
+	void delKeyBindingCallback(void);
 };
 
 int openGamePadConfWindow(QWidget *parent);
