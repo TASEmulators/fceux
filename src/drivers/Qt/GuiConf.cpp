@@ -727,9 +727,11 @@ static const char *getRoleText( QPalette::ColorRole role )
 		case QPalette::ToolTipText:
 			rTxt = "ToolTipText";
 		break;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
 		case QPalette::PlaceholderText:
 			rTxt = "PlaceholderText";
 		break;
+#endif
 		case QPalette::Text:
 			rTxt = "Text";
 		break;

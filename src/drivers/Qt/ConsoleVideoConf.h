@@ -34,6 +34,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QComboBox   *scalerSelect;
 		QComboBox   *regionSelect;
 		QComboBox   *cursorSelect;
+		QComboBox   *aspectSelect;
 		QCheckBox   *autoRegion;
 		QCheckBox   *gl_LF_chkBox;
 		QCheckBox   *new_PPU_ena;
@@ -42,10 +43,11 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QCheckBox   *clipSidesCbx;
 		QCheckBox   *showFPS_cbx;
 		QCheckBox   *autoScaleCbx;
-		QCheckBox   *sqrPixCbx;
+		QCheckBox   *aspectCbx;
 		QCheckBox   *cursorVisCbx;
 		QDoubleSpinBox *xScaleBox;
 		QDoubleSpinBox *yScaleBox;
+		QLabel         *aspectSelectLabel;
 		QLabel         *xScaleLabel;
 		QLabel         *yScaleLabel;
 		QLineEdit      *ntsc_start;
@@ -71,12 +73,13 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  autoRegionChanged( int value );
 		void  openGL_linearFilterChanged( int value );
 		void  autoScaleChanged( int value );
-		void  sqrPixChanged( int value );
+		void  aspectEnableChanged( int value );
 		void  use_new_PPU_changed( int value );
 		void  frameskip_changed( int value );
 		void  useSpriteLimitChanged( int value );
 		void  clipSidesChanged( int value );
 		void  showFPSChanged( int value );
+		void  aspectChanged(int index);
 		void  regionChanged(int index);
 		void  driverChanged(int index);
 		void  scalerChanged(int index);

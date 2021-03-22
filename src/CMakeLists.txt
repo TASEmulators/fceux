@@ -175,7 +175,7 @@ include_directories( ${CMAKE_SOURCE_DIR}/src )
 include_directories( ${CMAKE_SOURCE_DIR}/src/drivers )
 
 if(APPLE)
-  add_definitions( -DPSS_STYLE=4 )
+  add_definitions( -DPSS_STYLE=1 )
 else(APPLE)
   if(UNIX)
     add_definitions( -DPSS_STYLE=1 )

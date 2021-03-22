@@ -57,6 +57,10 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	yscale = 2.0;
 
 	devPixRatio = 1.0f;
+	aspectRatio = 1.0f;
+	aspectX     = 1.0f;
+	aspectY     = 1.0f;
+
 	sdlWindow   = NULL;
 	sdlRenderer = NULL;
 	sdlTexture  = NULL;
@@ -73,7 +77,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 		memset( localBuf, 0, localBufSize );
 	}
 
-	sqrPixels = true;
+	forceAspect  = true;
 	autoScaleEna = true;
 	linearFilter = false;
 
@@ -118,7 +122,7 @@ void ConsoleViewSDL_t::setScaleXY( double xs, double ys )
 	xscale = xs;
 	yscale = ys;
 
-	if ( sqrPixels )
+	if ( forceAspect )
 	{
 		if ( (xscale*xyRatio) < yscale )
 		{
@@ -129,6 +133,25 @@ void ConsoleViewSDL_t::setScaleXY( double xs, double ys )
 			xscale = (yscale/xyRatio);
 		}
 	}
+}
+
+void ConsoleViewSDL_t::setAspectXY( double x, double y )
+{
+	aspectX = x;
+	aspectY = y;
+
+	aspectRatio = aspectY / aspectX;
+}
+
+void ConsoleViewSDL_t::getAspectXY( double &x, double &y )
+{
+	x = aspectX;
+	y = aspectY;
+}
+
+double ConsoleViewSDL_t::getAspectRatio(void)
+{
+	return aspectRatio;
 }
 
 void ConsoleViewSDL_t::transfer2LocalBuffer(void)
@@ -354,7 +377,7 @@ void ConsoleViewSDL_t::render(void)
 	float xscaleTmp = (float)view_width  / (float)nesWidth;
 	float yscaleTmp = (float)view_height / (float)nesHeight;
 
-	if ( sqrPixels )
+	if ( forceAspect )
 	{
 		if ( (xscaleTmp*xyRatio) < yscaleTmp )
 		{
@@ -385,6 +408,42 @@ void ConsoleViewSDL_t::render(void)
 
 	rw=(int)(nesWidth*xscaleTmp);
 	rh=(int)(nesHeight*yscaleTmp);
+
+	if ( forceAspect )
+	{
+		int iw, ih, ax, ay;
+
+		ax = (int)(aspectX+0.50);
+		ay = (int)(aspectY+0.50);
+
+		iw = rw * ay;
+		ih = rh * ax;
+		
+		if ( iw > ih )
+		{
+			rh = (rw * ay) / ax;
+		}
+		else
+		{
+			rw = (rh * ax) / ay;
+		}
+
+		if ( rw > view_width )
+		{
+			rw = view_width;
+			rh = (rw * ay) / ax;
+		}
+
+		if ( rh > view_height )
+		{
+			rh = view_height;
+			rw = (rh * ax) / ay;
+		}
+	}
+
+	if ( rw > view_width ) rw = view_width;
+	if ( rh > view_height) rh = view_height;
+
 	sx=(view_width-rw)/2;   
 	sy=(view_height-rh)/2;
 

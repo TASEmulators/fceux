@@ -605,7 +605,7 @@ static void KeyboardCommands (void)
 		}
 	}
 
-	if (g_keyState[SDL_SCANCODE_LSHIFT]	|| g_keyState[SDL_SCANCODE_RSHIFT])
+	if (g_keyState[SDL_SCANCODE_LSHIFT] || g_keyState[SDL_SCANCODE_RSHIFT])
 	{
 		is_shift = 1;
 	}
@@ -626,14 +626,11 @@ static void KeyboardCommands (void)
 
 	if ( Hotkeys[HK_TOGGLE_BG].getRisingEdge() )
 	{
-		if (is_shift)
-		{
-			FCEUI_SetRenderPlanes (true, false);
-		}
-		else
-		{
-			FCEUI_SetRenderPlanes (true, true);
-		}
+		bool fgOn, bgOn;
+
+		FCEUI_GetRenderPlanes( fgOn, bgOn );
+
+		FCEUI_SetRenderPlanes( fgOn, !bgOn );
 	}
 
 	// Alt-Enter to toggle full-screen

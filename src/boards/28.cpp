@@ -53,8 +53,8 @@ void Mirror(uint8 value)
 
 static void Sync()
 {		
-	int prglo;
-	int prghi;
+	int prglo = 0;
+	int prghi = 0;
 
 	int outb = outer << 1;
 	//this can probably be rolled up, but i have no motivation to do so
