@@ -57,7 +57,7 @@ struct gamepad_function_key_t
 	int  qKey;
 	unsigned int qModifier;
 
-	struct ButtConfig  bc;
+	struct ButtConfig  bmap[2];
 
 	gamepad_function_key_t(void);
 	~gamepad_function_key_t(void);

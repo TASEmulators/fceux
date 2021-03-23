@@ -881,8 +881,8 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 	hbox->addWidget( cancelButton );
 	hbox->addWidget(     okButton );
 
-   connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
-   connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
 
 	okButton->setDefault(true);
 

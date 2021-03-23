@@ -19,6 +19,7 @@
 #include <QTreeWidget>
 
 #include "Qt/main.h"
+#include "Qt/input.h"
 
 class GamePadConfigButton_t : public QPushButton
 {
@@ -30,6 +31,48 @@ protected:
 	void keyReleaseEvent(QKeyEvent *event);
 
 	int idx;
+};
+
+class GamePadConfigHotKey_t : public QPushButton
+{
+public:
+	GamePadConfigHotKey_t(void);
+
+protected:
+	void keyPressEvent(QKeyEvent *event);
+	void keyReleaseEvent(QKeyEvent *event);
+};
+
+class GamePadFuncConfigDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+	GamePadFuncConfigDialog( gamepad_function_key_t *fk, QWidget *parent = 0);
+	~GamePadFuncConfigDialog(void);
+
+protected:
+	void closeEvent(QCloseEvent *bar);
+
+	void changeButton(int x);
+
+	QLineEdit *btnLbl[2];
+	QLineEdit *keySeqLbl;
+
+	GamePadConfigButton_t  *b[2];
+	GamePadConfigHotKey_t  *hk;
+	gamepad_function_key_t *k;
+
+	int  buttonConfigStatus;
+	bool editMode;
+
+public slots:
+	void closeWindow(void);
+private slots:
+	void acceptCB(void);
+	void rejectCB(void);
+	void changeButton0(void);
+	void changeButton1(void);
 };
 
 class GamePadView_t : public QWidget
@@ -106,7 +149,7 @@ protected:
 	void keyReleaseEvent(QKeyEvent *event);
 	void closeEvent(QCloseEvent *bar);
 
-	void refreshKeyBindTree(void);
+	void refreshKeyBindTree( bool reset = false );
 
 private:
 	void updateCntrlrDpy(void);
@@ -114,6 +157,7 @@ private:
 	void loadMapList(void);
 	void saveConfig(void);
 	void promptToSave(void);
+	void openFuncEditWindow( int mode, gamepad_function_key_t *k );
 
 public slots:
 	void closeWindow(void);
