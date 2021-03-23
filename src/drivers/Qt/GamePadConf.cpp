@@ -1561,7 +1561,7 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( gamepad_function_key_t *fk, QW
 
 	b[0] = new GamePadConfigButton_t(0);
 	b[1] = new GamePadConfigButton_t(1);
-	hk   = new GamePadConfigHotKey_t();
+	hk   = new GamePadConfigHotKey_t(k);
 
 	clearButton[0] = new QPushButton( tr("Clear") );
 	clearButton[1] = new QPushButton( tr("Clear") );
@@ -1609,7 +1609,7 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( gamepad_function_key_t *fk, QW
 
 	connect( b[0], SIGNAL(clicked(void)), this, SLOT(changeButton0(void)) );
 	connect( b[1], SIGNAL(clicked(void)), this, SLOT(changeButton1(void)) );
-	//connect( hk,   SIGNAL(clicked(void)), this, SLOT(changeButton1(void)) );
+	connect( hk,   SIGNAL(clicked(void)), this, SLOT(changeKeySeq(void) ) );
 }
 //----------------------------------------------------
 GamePadFuncConfigDialog::~GamePadFuncConfigDialog(void)
@@ -1707,20 +1707,39 @@ void GamePadFuncConfigDialog::changeButton1(void)
 	changeButton(1);
 }
 //----------------------------------------------------
-GamePadConfigHotKey_t::GamePadConfigHotKey_t(void)
+void GamePadFuncConfigDialog::changeKeySeq(void)
+{
+	hk->setCaptureState(true);
+	hk->setStyleSheet("background-color: green; color: white;");
+}
+//----------------------------------------------------
+GamePadConfigHotKey_t::GamePadConfigHotKey_t(gamepad_function_key_t *fk)
 {
 	setText("Change");
+
+	k = fk;
+
+	captureState = false;
 }
 //----------------------------------------------------
 void GamePadConfigHotKey_t::keyPressEvent(QKeyEvent *event)
 {
-	//printf("GamePad Button Key Press: 0x%x \n", event->key() );
+	printf("GamePad Hot Key Press: 0x%x  '%s'\n", event->key(), event->text().toStdString().c_str() );
 	//pushKeyEvent(event, 1);
+	
+	if ( captureState )
+	{
+		k->qKey      = event->key();
+		k->qModifier = event->modifiers();
+	}
 }
 
 void GamePadConfigHotKey_t::keyReleaseEvent(QKeyEvent *event)
 {
-	//printf("GamePad Button Key Release: 0x%x \n", event->key() );
+	printf("GamePad Hot Key Release: 0x%x \n", event->key() );
 	//pushKeyEvent(event, 0);
+
+	captureState = false;
+	setStyleSheet(NULL);
 }
 //----------------------------------------------------

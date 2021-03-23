@@ -36,11 +36,16 @@ protected:
 class GamePadConfigHotKey_t : public QPushButton
 {
 public:
-	GamePadConfigHotKey_t(void);
+	GamePadConfigHotKey_t( gamepad_function_key_t *k );
+
+	void setCaptureState(bool s){ captureState = s; };
 
 protected:
 	void keyPressEvent(QKeyEvent *event);
 	void keyReleaseEvent(QKeyEvent *event);
+
+	gamepad_function_key_t *k;
+	bool captureState;
 };
 
 class GamePadFuncConfigDialog : public QDialog
@@ -73,6 +78,7 @@ private slots:
 	void rejectCB(void);
 	void changeButton0(void);
 	void changeButton1(void);
+	void changeKeySeq(void);
 };
 
 class GamePadView_t : public QWidget
