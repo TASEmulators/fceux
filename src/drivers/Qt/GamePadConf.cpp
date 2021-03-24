@@ -406,13 +406,15 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	keyBindTree = new QTreeWidget();
 
-	keyBindTree->setColumnCount(2);
+	keyBindTree->setColumnCount(3);
 
 	item = new QTreeWidgetItem();
-	item->setText(0, QString::fromStdString("JS Button"));
-	item->setText(1, QString::fromStdString("Key Binding"));
+	item->setText(0, QString::fromStdString("GP Button"));
+	item->setText(1, QString::fromStdString("Press Key"));
+	item->setText(2, QString::fromStdString("Release Key"));
 	item->setTextAlignment(0, Qt::AlignLeft);
 	item->setTextAlignment(1, Qt::AlignLeft);
+	item->setTextAlignment(2, Qt::AlignLeft);
 
 	keyBindTree->setHeaderItem(item);
 
@@ -624,9 +626,11 @@ void GamePadConfDialog_t::refreshKeyBindTree( bool reset )
 
 		item->setText(0, tr(btnSeq));
 		item->setText(1, QString::fromStdString(binding->keySeq[0].name));
+		item->setText(2, QString::fromStdString(binding->keySeq[1].name));
 
 		item->setTextAlignment(0, Qt::AlignLeft);
 		item->setTextAlignment(1, Qt::AlignLeft);
+		item->setTextAlignment(2, Qt::AlignLeft);
 
 		i++;
 	}
