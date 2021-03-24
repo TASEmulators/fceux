@@ -64,6 +64,7 @@ static int cspec = 0;
 static int buttonConfigInProgress = 0;
 
 extern int gametype;
+static int DTestButton (ButtConfig * bc);
 
 std::list <gamepad_function_key_t*> gpKeySeqList;
 
@@ -412,8 +413,16 @@ setHotKeys (void)
 
 gamepad_function_key_t::gamepad_function_key_t(void)
 {
-	qKey = 0;
-	qModifier = Qt::NoModifier;
+	for (int i=0; i<2; i++)
+	{
+		keySeq[i].key = 0;
+		keySeq[i].modifier = Qt::NoModifier;
+	}
+	for (int i=0; i<2; i++)
+	{
+		bmap[i].ButtonNum = -1;
+		bmap[i].state = 0;
+	}
 }
 
 gamepad_function_key_t::~gamepad_function_key_t(void)
@@ -421,18 +430,62 @@ gamepad_function_key_t::~gamepad_function_key_t(void)
 
 }
 
-void gamepad_function_key_t::sendKeyPressEvent(void)
+void gamepad_function_key_t::sendKeyPressEvent(int idx)
 {
-	QKeyEvent *k = new QKeyEvent (QEvent::KeyPress, qKey, (Qt::KeyboardModifiers)qModifier );
+	QKeyEvent *k = new QKeyEvent (QEvent::KeyPress, keySeq[idx].key, (Qt::KeyboardModifiers)keySeq[idx].modifier );
 
 	qApp->postEvent((QObject*)consoleWindow,(QEvent *)k);
 }
 
-void gamepad_function_key_t::sendKeyReleaseEvent(void)
+void gamepad_function_key_t::sendKeyReleaseEvent(int idx)
 {
-	QKeyEvent *k = new QKeyEvent (QEvent::KeyRelease, qKey, (Qt::KeyboardModifiers)qModifier );
+	QKeyEvent *k = new QKeyEvent (QEvent::KeyRelease, keySeq[idx].key, (Qt::KeyboardModifiers)keySeq[idx].modifier );
 
 	qApp->postEvent((QObject*)consoleWindow,(QEvent *)k);
+}
+
+void gamepad_function_key_t::updateStatus(void)
+{
+	int state_lp[2], state[2];
+
+	state_lp[0] = bmap[0].state;
+	state_lp[1] = bmap[1].state;
+
+	state[0] = DTestButton( &bmap[0] );
+	state[1] = DTestButton( &bmap[1] );
+
+	if ( (bmap[0].ButtonNum >= 0) && (bmap[1].ButtonNum >= 0) )
+	{
+		int s,lp;
+
+		s  = state[0] && state[1];
+		lp = state_lp[0] && state_lp[1];
+
+		if ( s && !lp )
+		{
+			sendKeyPressEvent(0);
+		}
+		else if ( !s && lp )
+		{
+			sendKeyReleaseEvent(0);
+			sendKeyPressEvent(1);
+			sendKeyReleaseEvent(1);
+		}
+	}
+	else if ( bmap[1].ButtonNum >= 0 )
+	{
+		if ( state[1] && !state_lp[1] )
+		{
+			sendKeyPressEvent(0);
+		}
+		else if ( !state[1] && state_lp[1] )
+		{
+			sendKeyReleaseEvent(0);
+			sendKeyPressEvent(1);
+			sendKeyReleaseEvent(1);
+		}
+	}
+
 }
 
 /***
@@ -1393,6 +1446,16 @@ static int32 MouseRelative[3] = { 0, 0, 0 };
 
 static uint8 fkbkeys[0x48];
 
+static void updateGamePadKeyMappings(void)
+{
+	std::list <gamepad_function_key_t*>::iterator it;
+
+	for (it=gpKeySeqList.begin(); it!=gpKeySeqList.end(); it++)
+	{
+		(*it)->updateStatus();
+	}
+}
+
 /**
  * Update all of the input devices required for the active game.
  */
@@ -1401,10 +1464,13 @@ void FCEUD_UpdateInput(void)
 	int x;
 	int t = 0;
 
-   if ( buttonConfigInProgress )
-   {
-      return;
-   }
+	if ( buttonConfigInProgress )
+	{
+	   return;
+	}
+
+	updateGamePadKeyMappings();
+
 	UpdatePhysicalInput ();
 	KeyboardCommands ();
 

@@ -36,14 +36,17 @@ protected:
 class GamePadConfigHotKey_t : public QPushButton
 {
 public:
-	GamePadConfigHotKey_t( gamepad_function_key_t *k );
+	GamePadConfigHotKey_t( int idx, gamepad_function_key_t *k );
 
 	void setCaptureState(bool s){ captureState = s; };
 
+	void setKeyNameLbl( QLineEdit *lbl );
 protected:
 	void keyPressEvent(QKeyEvent *event);
 	void keyReleaseEvent(QKeyEvent *event);
 
+	int idx;
+	QLineEdit *keySeqLbl;
 	gamepad_function_key_t *k;
 	bool captureState;
 };
@@ -62,10 +65,10 @@ protected:
 	void changeButton(int x);
 
 	QLineEdit *btnLbl[2];
-	QLineEdit *keySeqLbl;
+	QLineEdit *keySeqLbl[2];
 
 	GamePadConfigButton_t  *b[2];
-	GamePadConfigHotKey_t  *hk;
+	GamePadConfigHotKey_t  *hk[2];
 	gamepad_function_key_t *k;
 
 	int  buttonConfigStatus;
@@ -78,7 +81,12 @@ private slots:
 	void rejectCB(void);
 	void changeButton0(void);
 	void changeButton1(void);
-	void changeKeySeq(void);
+	void changeKeySeq0(void);
+	void changeKeySeq1(void);
+	void clearButton0(void);
+	void clearButton1(void);
+	void clearButton2(void);
+	void clearButton3(void);
 };
 
 class GamePadView_t : public QWidget

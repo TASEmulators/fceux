@@ -54,16 +54,22 @@ extern struct hotkey_t Hotkeys[];
 
 struct gamepad_function_key_t
 {
-	int  qKey;
-	unsigned int qModifier;
+	struct {
+		int  key;
+		unsigned int modifier;
+		std::string  name;
+
+	} keySeq[2];
 
 	struct ButtConfig  bmap[2];
 
 	gamepad_function_key_t(void);
 	~gamepad_function_key_t(void);
 
-	void sendKeyPressEvent(void);
-	void sendKeyReleaseEvent(void);
+	void sendKeyPressEvent(int idx);
+	void sendKeyReleaseEvent(int idx);
+
+	void updateStatus(void);
 };
 
 extern std::list <gamepad_function_key_t*> gpKeySeqList;
