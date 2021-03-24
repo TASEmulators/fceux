@@ -1122,17 +1122,67 @@ void GamePadConfDialog_t::newKeyBindingCallback(void)
 	GamePadFuncConfigDialog *dialog = new GamePadFuncConfigDialog( NULL, this );
 
 	dialog->show();
-	// TODO
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::editKeyBindingCallback(void)
 {
-	// TODO
+	QTreeWidgetItem *item;
+
+	item = keyBindTree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	int i, row;
+	gamepad_function_key_t *k = NULL;
+	std::list <gamepad_function_key_t*>::iterator it;
+
+	row = keyBindTree->indexOfTopLevelItem(item);
+
+	i=0;
+	for (it=gpKeySeqList.begin(); it!=gpKeySeqList.end(); it++)
+	{
+		if ( i == row )
+		{
+			k = *it; break;
+		}
+	}
+	GamePadFuncConfigDialog *dialog = new GamePadFuncConfigDialog( k, this );
+
+	dialog->show();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::delKeyBindingCallback(void)
 {
-	// TODO
+	QTreeWidgetItem *item;
+
+	item = keyBindTree->currentItem();
+
+	if ( item == NULL )
+	{
+		printf( "No Item Selected\n");
+		return;
+	}
+	int i, row;
+	gamepad_function_key_t *k = NULL;
+	std::list <gamepad_function_key_t*>::iterator it;
+
+	row = keyBindTree->indexOfTopLevelItem(item);
+
+	i=0;
+	for (it=gpKeySeqList.begin(); it!=gpKeySeqList.end(); it++)
+	{
+		if ( i == row )
+		{
+			k = *it;
+			gpKeySeqList.erase(it);
+			delete k;
+			break;
+		}
+	}
+	refreshKeyBindTree(true);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::updatePeriodic(void)
@@ -1525,12 +1575,13 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( gamepad_function_key_t *fk, QW
 	: QDialog(parent)
 {
 	QHBoxLayout *hbox;
-	QVBoxLayout *mainLayout, *vbox;
+	QVBoxLayout *mainLayout;
 	QGridLayout *grid;
-	QLabel *lbl;
+	//QLabel *lbl;
 	QGroupBox *frame;
 	QPushButton *okButton, *cancelButton;
 	QPushButton *clearButton[4];
+	const char *keyNameStr;
 
 	if ( fk == NULL )
 	{
@@ -1647,6 +1698,17 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( gamepad_function_key_t *fk, QW
 
 	hk[0]->setKeyNameLbl( keySeqLbl[0] );
 	hk[1]->setKeyNameLbl( keySeqLbl[1] );
+
+	keyNameStr = ButtonName(&k->bmap[0]);
+
+	btnLbl[0]->setText( tr(keyNameStr) );
+
+	keyNameStr = ButtonName(&k->bmap[1]);
+
+	btnLbl[1]->setText( tr(keyNameStr) );
+
+	keySeqLbl[0]->setText( QString::fromStdString(k->keySeq[0].name) );
+	keySeqLbl[1]->setText( QString::fromStdString(k->keySeq[1].name) );
 }
 //----------------------------------------------------
 GamePadFuncConfigDialog::~GamePadFuncConfigDialog(void)
