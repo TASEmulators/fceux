@@ -17,6 +17,7 @@
 #include <QPainter>
 #include <QTreeView>
 #include <QTreeWidget>
+#include <QPropertyAnimation>
 
 #include "Qt/main.h"
 #include "Qt/input.h"
@@ -138,6 +139,7 @@ protected:
 	QComboBox *profSel;
 	QCheckBox *efs_chkbox;
 	QGroupBox *advOptLayout;
+	QPropertyAnimation *advOptWidthAnimation;
 	QLabel *guidLbl;
 	QLabel *mapMsg;
 	QLabel *keyName[GAMEPAD_NUM_BUTTONS];
@@ -210,6 +212,9 @@ private slots:
 	void newKeyBindingCallback(void);
 	void editKeyBindingCallback(void);
 	void delKeyBindingCallback(void);
+	void advBindingViewChanged(bool state);
+	void advOptResizeDone(void);
+	void advOptWidthChange(const QVariant &value);
 };
 
 int openGamePadConfWindow(QWidget *parent);

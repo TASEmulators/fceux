@@ -1450,6 +1450,11 @@ static void updateGamePadKeyMappings(void)
 {
 	std::list <gamepad_function_key_t*>::iterator it;
 
+	if ( gpKeySeqList.size() == 0 )
+	{
+		return;
+	}
+
 	for (it=gpKeySeqList.begin(); it!=gpKeySeqList.end(); it++)
 	{
 		(*it)->updateStatus();

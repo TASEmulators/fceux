@@ -115,7 +115,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	bool useScroll = false;
 	int useNativeMenuBar;
 	QMenuBar *menuBar;
-	QMenu *fileMenu;
+	QMenu *fileMenu, *extMenu;
 	QAction *act;
 	QTreeWidgetItem *item;
 
@@ -161,6 +161,18 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 	
 	fileMenu->addAction(act);
+
+	// Extensions
+	extMenu = menuBar->addMenu(tr("&Extensions"));
+
+	// Extensions -> Show Adv Bindings
+	act = new QAction(tr("&Show Adv Bindings"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Show Adv Bindings"));
+	act->setCheckable(true);
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(advBindingViewChanged(bool)) );
+	
+	extMenu->addAction(act);
 
 	//-----------------------------------------------------------------------
 	// Menu End
@@ -377,6 +389,16 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	gpView = new GamePadView_t(this);
 
 	advOptLayout = new QGroupBox( tr("Advanced Key Bindings") );
+	advOptLayout->setMaximumWidth(0);
+
+	advOptWidthAnimation = new QPropertyAnimation( advOptLayout, "maximumWidth");
+	advOptWidthAnimation->setDuration(500);
+	advOptWidthAnimation->setStartValue(0);
+	advOptWidthAnimation->setEndValue(512);
+	advOptWidthAnimation->setEasingCurve( QEasingCurve::InOutCirc );
+
+	connect( advOptWidthAnimation, SIGNAL(valueChanged(const QVariant &)), this, SLOT(advOptWidthChange(const QVariant &)));
+	connect( advOptWidthAnimation, SIGNAL(finished(void)), this, SLOT(advOptResizeDone(void)) );
 
 	mainLayoutV->addLayout(vbox1);
 	mainLayoutV->addWidget(gpView);
@@ -418,7 +440,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	keyBindTree->setHeaderItem(item);
 
-	keyBindTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	keyBindTree->header()->setSectionResizeMode(QHeaderView::Interactive);
+	keyBindTree->setMinimumWidth( 256 );
 
 	hbox1->addWidget(keyBindTree);
 
@@ -569,6 +592,32 @@ void GamePadConfDialog_t::loadMapList(void)
 		}
 		n++;
 	}
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::advBindingViewChanged(bool state)
+{
+	if ( state )
+	{
+		advOptWidthAnimation->setStartValue(0);
+		advOptWidthAnimation->setEndValue(512);
+		advOptWidthAnimation->start();
+	}
+	else
+	{
+		advOptWidthAnimation->setStartValue( advOptLayout->width() );
+		advOptWidthAnimation->setEndValue(0);
+		advOptWidthAnimation->start();
+	}
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::advOptWidthChange(const QVariant &value)
+{
+	resize( minimumSizeHint() );
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::advOptResizeDone(void)
+{
+	resize( minimumSizeHint() );
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::refreshKeyBindTree( bool reset )
