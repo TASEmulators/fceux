@@ -1183,12 +1183,14 @@ UpdatePhysicalInput ()
 				keyModifier = event.key.keysym.mod;
 				g_keyState[SDL_SCANCODE_LSHIFT] = ( event.key.keysym.mod & KMOD_LSHIFT ) ? 1 : 0;
 				g_keyState[SDL_SCANCODE_RSHIFT] = ( event.key.keysym.mod & KMOD_RSHIFT ) ? 1 : 0;
-			   g_keyState[SDL_SCANCODE_LALT]   = ( event.key.keysym.mod & KMOD_LALT   ) ? 1 : 0;
+				g_keyState[SDL_SCANCODE_LALT]   = ( event.key.keysym.mod & KMOD_LALT   ) ? 1 : 0;
 				g_keyState[SDL_SCANCODE_RALT]   = ( event.key.keysym.mod & KMOD_RALT   ) ? 1 : 0;
-			   g_keyState[SDL_SCANCODE_LCTRL]  = ( event.key.keysym.mod & KMOD_LCTRL  ) ? 1 : 0;
+				g_keyState[SDL_SCANCODE_LCTRL]  = ( event.key.keysym.mod & KMOD_LCTRL  ) ? 1 : 0;
 				g_keyState[SDL_SCANCODE_RCTRL]  = ( event.key.keysym.mod & KMOD_RCTRL  ) ? 1 : 0;
 
 				g_keyState[ event.key.keysym.scancode ] = (event.type == SDL_KEYDOWN) ? 1 : 0;
+
+				KeyboardCommands();
 
 				break;
 			case SDL_JOYDEVICEADDED:
