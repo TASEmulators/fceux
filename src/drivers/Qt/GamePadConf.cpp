@@ -1922,10 +1922,17 @@ void GamePadConfigHotKey_t::setKeyNameLbl( QLineEdit *lbl )
 //----------------------------------------------------
 void GamePadConfigHotKey_t::keyPressEvent(QKeyEvent *event)
 {
+	bool isModifier;
 	//printf("GamePad Hot Key Press: 0x%x  '%s'\n", event->key(), event->text().toStdString().c_str() );
-	//pushKeyEvent(event, 1);
 	
-	if ( captureState )
+	isModifier = (event->key() == Qt::Key_Shift   ) ||
+	             (event->key() == Qt::Key_Control ) ||
+	             (event->key() == Qt::Key_Meta    ) ||
+	             (event->key() == Qt::Key_Alt     ) ||
+	             (event->key() == Qt::Key_AltGr   ) ||
+	             (event->key() == Qt::Key_CapsLock);
+
+	if ( captureState && !isModifier )
 	{
 		QKeySequence ks( event->modifiers() + event->key() );
 
@@ -1937,15 +1944,13 @@ void GamePadConfigHotKey_t::keyPressEvent(QKeyEvent *event)
 		{
 			keySeqLbl->setText( ks.toString() );
 		}
+		captureState = false;
+		setStyleSheet(NULL);
 	}
 }
 
 void GamePadConfigHotKey_t::keyReleaseEvent(QKeyEvent *event)
 {
 	//printf("GamePad Hot Key Release: 0x%x \n", event->key() );
-	//pushKeyEvent(event, 0);
-
-	captureState = false;
-	setStyleSheet(NULL);
 }
 //----------------------------------------------------
