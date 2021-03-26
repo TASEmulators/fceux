@@ -38,6 +38,7 @@
 #include <QDesktopServices>
 #include <QStyleFactory>
 #include <QApplication>
+#include <QShortcut>
 #include <QUrl>
 
 #include "../../fceu.h"
@@ -555,6 +556,7 @@ void consoleWin_t::createMainMenu(void)
 	QMenu *subMenu;
 	QActionGroup *group;
 	int useNativeMenuBar;
+	//QShortcut *shortcut;
 	QStyle *style;
 
 	style   = this->style();
@@ -572,13 +574,16 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu = menubar->addMenu(tr("&File"));
 
 	// File -> Open ROM
-	openROM = new QAction(tr("&Open ROM"), this);
+	openROM = new QAction(tr("&Open ROM\tCtrl+O"), this);
 	openROM->setShortcuts(QKeySequence::Open);
 	openROM->setStatusTip(tr("Open ROM File"));
 	//openROM->setIcon( QIcon(":icons/rom.png") );
 	//openROM->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
 	openROM->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
 	connect(openROM, SIGNAL(triggered()), this, SLOT(openROMFile(void)) );
+
+	//shortcut = new QShortcut( QKeySequence::Open, this );
+	//connect(shortcut, SIGNAL(activated()), this, SLOT(openROMFile(void)) );
 	
 	fileMenu->addAction(openROM);
 
@@ -1281,6 +1286,56 @@ void consoleWin_t::createMainMenu(void)
 	
 	helpMenu->addAction(act);
 };
+//---------------------------------------------------------------------------
+int consoleWin_t::loadVideoDriver( int driverId )
+{
+	if ( driverId )
+	{  // SDL Driver
+		if ( viewport_SDL != NULL )
+		{  // Already Loaded
+			return 0;
+		}
+
+		if ( viewport_GL != NULL )
+		{
+			if ( viewport_GL == centralWidget() )
+			{
+				takeCentralWidget();
+			}
+			delete viewport_GL;
+
+			viewport_GL = NULL;
+		}
+		
+		viewport_SDL = new ConsoleViewSDL_t(this);
+
+		setCentralWidget(viewport_SDL);
+
+		viewport_SDL->init();
+	}
+	else
+	{  // OpenGL Driver
+		if ( viewport_GL != NULL )
+		{  // Already Loaded
+			return 0;
+		}
+
+		if ( viewport_SDL != NULL )
+		{
+			if ( viewport_SDL == centralWidget() )
+			{
+				takeCentralWidget();
+			}
+			delete viewport_SDL;
+
+			viewport_SDL = NULL;
+		}
+		viewport_GL = new ConsoleViewGL_t(this);
+
+		setCentralWidget(viewport_GL);
+	}
+	return 0;
+}
 //---------------------------------------------------------------------------
 void consoleWin_t::clearRomList(void)
 {

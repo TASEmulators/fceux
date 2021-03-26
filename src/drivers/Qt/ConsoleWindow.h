@@ -113,6 +113,8 @@ class  consoleWin_t : public QMainWindow
 		int getMaxSchedPriority(void);
 		#endif
 
+		int loadVideoDriver( int driverId );
+
 		emulatorThread_t *emulatorThread;
 
 		void addRecentRom( const char *rom );

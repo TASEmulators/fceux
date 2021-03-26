@@ -69,5 +69,6 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	uint32_t   localBufSize;
 
 	private slots:
+		void cleanupGL(void);
 };
 

@@ -103,20 +103,6 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 
 ConsoleViewGL_t::~ConsoleViewGL_t(void)
 {
-	// Make sure the context is current and then explicitly
-    // destroy all underlying OpenGL resources.
-    makeCurrent();
-
-	 // Free GL texture
-	 if (gltexture) 
-	 {
-	 	//printf("Destroying GL Texture\n");
-	 	glDeleteTextures(1, &gltexture);
-	 	gltexture=0;
-	 }
-
-	 doneCurrent();
-
 	if ( localBuf )
 	{
 		free( localBuf ); localBuf = NULL;
@@ -160,15 +146,36 @@ void ConsoleViewGL_t::buildTextures(void)
 
 void ConsoleViewGL_t::initializeGL(void)
 {
+	//printf("initializeGL\n");
 
-	 initializeOpenGLFunctions();
-    // Set up the rendering context, load shaders and other resources, etc.:
-    //QOpenGLFunctions *gl = QOpenGLContext::currentContext()->functions();
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	initializeOpenGLFunctions();
+	// Set up the rendering context, load shaders and other resources, etc.:
+	//QOpenGLFunctions *gl = QOpenGLContext::currentContext()->functions();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	 //printf("GL Init!\n");
 
 	 buildTextures();
+
+	 connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &ConsoleViewGL_t::cleanupGL);
+}
+
+void ConsoleViewGL_t::cleanupGL(void)
+{
+	//printf("cleanupGL\n");
+	// Make sure the context is current and then explicitly
+	// destroy all underlying OpenGL resources.
+	makeCurrent();
+
+	 // Free GL texture
+	 if (gltexture) 
+	 {
+	 	//printf("Destroying GL Texture\n");
+	 	glDeleteTextures(1, &gltexture);
+	 	gltexture=0;
+	 }
+
+	 doneCurrent();
 }
 
 void ConsoleViewGL_t::resizeGL(int w, int h)

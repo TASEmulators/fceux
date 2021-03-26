@@ -747,6 +747,11 @@ void ConsoleVideoConfDialog_t::driverChanged(int index)
 	g_config->save ();
 
 	printf("Note: A restart of the application is needed for video driver change to take effect...\n");
+
+	if ( consoleWindow )
+	{
+		consoleWindow->loadVideoDriver( driver );
+	}
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::scalerChanged(int index)

@@ -44,6 +44,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	setMinimumWidth( 256 );
 	setMinimumHeight( 224 );
 	setFocusPolicy(Qt::StrongFocus);
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	view_width  = GL_NES_WIDTH;
 	view_height = GL_NES_HEIGHT;
@@ -103,6 +104,7 @@ ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
 	{
 		free( localBuf ); localBuf = NULL;
 	}
+	cleanup();
 }
 
 void ConsoleViewSDL_t::setLinearFilterEnable( bool ena )
