@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <list>
 
+#include <QWidget>
+#include <QKeySequence>
+#include <QShortcut>
+#include <QAction>
+
 #include "common/configSys.h"
 
 //#define MAXBUTTCONFIG   4
@@ -34,23 +39,49 @@ void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
 int DWaitButton(const uint8_t *text, ButtConfig *bc, int *buttonConfigStatus = NULL);
 
-struct hotkey_t
+class hotkey_t
 {
-	int value;
-	int modifier;
-	char prevState;
+	public:
+		// Methods
+		hotkey_t(void);
 
-	hotkey_t(void);
+		int init( QWidget *parent );
 
-	int getState(void);
+		int readConfig(void);
 
-	int getRisingEdge(void);
+		int getState(void);
 
-	int getString( char *s );
+		int getRisingEdge(void);
 
-	void setModifierFromString( const char *s );
+		int getString( char *s );
+
+		void setModifierFromString( const char *s );
+
+		void setConfigName(const char *cName);
+		void setAction( QAction *act );
+
+		const char *getConfigName(void);
+		QShortcut *getShortcut(void);
+
+		// Member variables
+		struct 
+		{
+			int value;
+			int modifier;
+		} sdl;
+
+		char prevState;
+
+	private:
+		void conv2SDL(void);
+
+		const char *configName;
+		QKeySequence keySeq;
+		QShortcut *shortcut;
+		QAction   *act;
+		QString    actText;
 };
-extern struct hotkey_t Hotkeys[];
+extern class hotkey_t Hotkeys[];
 
 struct gamepad_function_key_t
 {

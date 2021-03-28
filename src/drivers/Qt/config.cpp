@@ -53,6 +53,8 @@
 #endif
 
 static const char* HotkeyStrings[HK_MAX] = {
+		"OpenROM",
+		"CloseROM",
 		"CheatMenu",
 		"BindState",
 		"LoadLua",
@@ -90,6 +92,157 @@ const char *getHotkeyString( int i )
       return HotkeyStrings[i];
    }
    return NULL;
+}
+
+int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut )
+{
+	const char *name = "";
+	const char *keySeq = "";
+
+	switch ( i )
+	{
+		case HK_OPEN_ROM: 
+			name = "OpenROM"; keySeq = "Ctrl+O";	
+		break;
+		case HK_CLOSE_ROM: 
+			name = "CloseROM"; keySeq = "Ctrl+C";	
+		break;
+		case HK_CHEAT_MENU:
+			name = "CheatMenu"; keySeq = "F1";	
+		break;
+		case HK_BIND_STATE:
+			name = "BindState"; keySeq = "F2";	
+		break;
+		case HK_LOAD_LUA:
+			name = "LoadLua"; keySeq = "F3";	
+		break;
+		case HK_TOGGLE_BG:
+			name = "ToggleBG"; keySeq = "F4";	
+		break;
+		case HK_SAVE_STATE:
+			name = "SaveState"; keySeq = "F5";	
+		break;
+		case HK_FDS_SELECT:
+			name = "FDSSelect"; keySeq = "F6";	
+		break;
+		case HK_LOAD_STATE:
+			name = "LoadState"; keySeq = "F7";	
+		break;
+		case HK_FDS_EJECT:
+			name = "FDSEject"; keySeq = "F7";	
+		break;
+		case HK_VS_INSERT_COIN:
+			name = "VSInsertCoin"; keySeq = "F6";	
+		break;
+		case HK_VS_TOGGLE_DIPSWITCH:
+			name = "VSToggleDip"; keySeq = "F8";	
+		break;
+		case HK_TOGGLE_FRAME_DISPLAY:
+			name = "MovieToggleFrameDisplay"; keySeq = ".";	
+		break;
+		case HK_TOGGLE_SUBTITLE:
+			name = "SubtitleDisplay"; keySeq = "F10";	
+		break;
+		case HK_RESET:
+			name = "Reset"; keySeq = "F11";	
+		break;
+		case HK_SCREENSHOT:
+			name = "Screenshot"; keySeq = "F12";	
+		break;
+		case HK_PAUSE:
+			name = "Pause"; keySeq = "Pause";	
+		break;
+		case HK_DECREASE_SPEED:
+			name = "DecreaseSpeed"; keySeq = "-";	
+		break;
+		case HK_INCREASE_SPEED:
+			name = "IncreaseSpeed"; keySeq = "=";	
+		break;
+		case HK_FRAME_ADVANCE:
+			name = "FrameAdvance"; keySeq = "\\";	
+		break;
+		case HK_TURBO:
+			name = "Turbo"; keySeq = "Tab";	
+		break;
+		case HK_TOGGLE_INPUT_DISPLAY:
+			name = "ToggleInputDisplay"; keySeq = ",";	
+		break;
+		case HK_MOVIE_TOGGLE_RW:
+			name = "ToggleMovieRW"; keySeq = "Q";	
+		break;
+		case HK_MUTE_CAPTURE:
+			name = "MuteCapture"; keySeq = "'";	
+		break;
+		case HK_QUIT:
+			name = "Quit"; keySeq = "";	
+		break;
+		case HK_FA_LAG_SKIP:
+			name = "FrameAdvanceLagSkip"; keySeq = "Delete";	
+		break;
+		case HK_LAG_COUNTER_DISPLAY:
+			name = "LagCounterDisplay"; keySeq = "/";	
+		break;
+		case HK_SELECT_STATE_0:
+			name = "SelectState0"; keySeq = "0";	
+		break;
+		case HK_SELECT_STATE_1:
+			name = "SelectState1"; keySeq = "1";	
+		break;
+		case HK_SELECT_STATE_2:
+			name = "SelectState2"; keySeq = "2";	
+		break;
+		case HK_SELECT_STATE_3:
+			name = "SelectState3"; keySeq = "3";	
+		break;
+		case HK_SELECT_STATE_4:
+			name = "SelectState4"; keySeq = "4";	
+		break;
+		case HK_SELECT_STATE_5:
+			name = "SelectState5"; keySeq = "5";	
+		break;
+		case HK_SELECT_STATE_6:
+			name = "SelectState6"; keySeq = "6";	
+		break;
+		case HK_SELECT_STATE_7:
+			name = "SelectState7"; keySeq = "7";	
+		break;
+		case HK_SELECT_STATE_8:
+			name = "SelectState8"; keySeq = "8";	
+		break;
+		case HK_SELECT_STATE_9:
+			name = "SelectState9"; keySeq = "9";	
+		break;
+		case HK_SELECT_STATE_NEXT:
+			name = "SelectStateNext"; keySeq = "PageUp";	
+		break;
+		case HK_SELECT_STATE_PREV:
+			name = "SelectStatePrev"; keySeq = "PageDown";	
+		break;
+		case HK_VOLUME_DOWN:
+			name = "VolumeDown"; keySeq = "";	
+		break;
+		case HK_VOLUME_UP:
+			name = "VolumeUp"; keySeq = "";	
+		break;
+		case HK_FKB_ENABLE:
+			name = "FKB_Enable"; keySeq = "ScrollLock";	
+		break;
+		default:
+		case HK_MAX:
+			name = ""; keySeq = "";
+		break;
+
+	}
+
+	if ( nameOut )
+	{
+		*nameOut = name;
+	}
+	if ( keySeqOut )
+	{
+		*keySeqOut = keySeq;
+	}
+	return 0;
 }
 
 /**
@@ -487,53 +640,68 @@ InitConfig()
 	// TODO: use a better data structure to store the hotkeys or something
 	//			improve this code overall in the future to make it
 	//			easier to maintain
-	const int Hotkeys[HK_MAX] = {
-		SDLK_F1, // cheat menu
-		SDLK_F2, // bind state
-		SDLK_F3, // load lua
-		SDLK_F4, // toggleBG
-		SDLK_F5, // save state
-		SDLK_F6, // fds select
-		SDLK_F7, // load state
-		SDLK_F8, // fds eject
-		SDLK_F6, // VS insert coin
-		SDLK_F8, // VS toggle dipswitch
-		SDLK_PERIOD, // toggle frame display
-		SDLK_F10, // toggle subtitle
-		SDLK_F11, // reset
-		SDLK_F12, // screenshot
-		SDLK_PAUSE, // pause
-		SDLK_MINUS, // speed++
-		SDLK_EQUALS, // speed--
-		SDLK_BACKSLASH, //frame advnace
-		SDLK_TAB, // turbo
-		SDLK_COMMA, // toggle input display
-		SDLK_q, // toggle movie RW
-		SDLK_QUOTE, // toggle mute capture
-		0, // quit // edit 10/11/11 - don't map to escape, it causes ugly things to happen to sdl.  can be manually appended to config
-		SDLK_DELETE, // frame advance lag skip
-		SDLK_SLASH, // lag counter display
-		SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
-		SDLK_6, SDLK_7, SDLK_8, SDLK_9,
-		SDLK_PAGEUP, // select state next
-		SDLK_PAGEDOWN, // select state prev
-		0, // Volume Down Internal 
-		0, // Volume Up Internal 
-		SDLK_SCROLLLOCK }; // FKB Enable Toggle
+	//const int Hotkeys[HK_MAX] = {
+	//	SDLK_F1, // cheat menu
+	//	SDLK_F2, // bind state
+	//	SDLK_F3, // load lua
+	//	SDLK_F4, // toggleBG
+	//	SDLK_F5, // save state
+	//	SDLK_F6, // fds select
+	//	SDLK_F7, // load state
+	//	SDLK_F8, // fds eject
+	//	SDLK_F6, // VS insert coin
+	//	SDLK_F8, // VS toggle dipswitch
+	//	SDLK_PERIOD, // toggle frame display
+	//	SDLK_F10, // toggle subtitle
+	//	SDLK_F11, // reset
+	//	SDLK_F12, // screenshot
+	//	SDLK_PAUSE, // pause
+	//	SDLK_MINUS, // speed++
+	//	SDLK_EQUALS, // speed--
+	//	SDLK_BACKSLASH, //frame advnace
+	//	SDLK_TAB, // turbo
+	//	SDLK_COMMA, // toggle input display
+	//	SDLK_q, // toggle movie RW
+	//	SDLK_QUOTE, // toggle mute capture
+	//	0, // quit // edit 10/11/11 - don't map to escape, it causes ugly things to happen to sdl.  can be manually appended to config
+	//	SDLK_DELETE, // frame advance lag skip
+	//	SDLK_SLASH, // lag counter display
+	//	SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
+	//	SDLK_6, SDLK_7, SDLK_8, SDLK_9,
+	//	SDLK_PAGEUP, // select state next
+	//	SDLK_PAGEDOWN, // select state prev
+	//	0, // Volume Down Internal 
+	//	0, // Volume Up Internal 
+	//	SDLK_SCROLLLOCK }; // FKB Enable Toggle
+
+
+	//Hotkeys[ HK_OPEN_ROM ].init( "OpenROM", QKeySequence(QKeySequence::Open) );
 
 	prefix = "SDL.Hotkeys.";
+
 	for(int i=0; i < HK_MAX; i++)
 	{
 		char buf[256];
-		std::string keyText;
+		const char *hotKeyName, *hotKeySeq;
+		std::string nameText, keyText;
 
-		keyText.assign(" mod=");
+		getHotKeyConfig( i, &hotKeyName, &hotKeySeq );
 
-		sprintf( buf, "  key=%s", SDL_GetKeyName( Hotkeys[i] ) );
+		printf("Hot Key: '%s' = '%s' \n", hotKeyName, hotKeySeq );
 
-		keyText.append( buf );
+		//keyText.assign(" mod=");
 
-		config->addOption(prefix + HotkeyStrings[i], keyText);
+		//sprintf( buf, "  key=%s", SDL_GetKeyName( Hotkeys[i] ) );
+
+		if ( hotKeyName[0] != 0 )
+		{
+			nameText.assign( hotKeyName );
+			keyText.assign( hotKeySeq );
+
+			config->addOption(prefix + nameText, keyText);
+
+			Hotkeys[i].setConfigName( hotKeyName );
+		}
 	}
 	// All mouse devices
 	config->addOption("SDL.OekaKids.0.DeviceType", "Mouse");

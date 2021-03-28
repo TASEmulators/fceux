@@ -97,6 +97,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	QApplication::setStyle( new fceuStyle() );
 
+	initHotKeys();
+
 	createMainMenu();
 
 	g_config->getOption( "SDL.VideoDriver", &use_SDL_video );
@@ -550,6 +552,20 @@ void consoleWin_t::keyReleaseEvent(QKeyEvent *event)
 }
 
 //---------------------------------------------------------------------------
+void consoleWin_t::initHotKeys(void)
+{
+	for (int i = 0; i < HK_MAX; i++)
+	{
+		Hotkeys[i].init( this );
+	}
+
+	// Frame Advance uses key state directly, disable shortcut events
+        if ( Hotkeys[HK_FRAME_ADVANCE].getShortcut() != nullptr )
+        {
+                Hotkeys[HK_FRAME_ADVANCE].getShortcut()->setEnabled(false);
+        }
+}
+//---------------------------------------------------------------------------
 void consoleWin_t::createMainMenu(void)
 {
 	QAction *act;
@@ -574,25 +590,28 @@ void consoleWin_t::createMainMenu(void)
 	fileMenu = menubar->addMenu(tr("&File"));
 
 	// File -> Open ROM
-	openROM = new QAction(tr("&Open ROM\tCtrl+O"), this);
-	openROM->setShortcuts(QKeySequence::Open);
+	openROM = new QAction(tr("&Open ROM"), this);
+	//openROM->setShortcuts(QKeySequence::Open);
 	openROM->setStatusTip(tr("Open ROM File"));
 	//openROM->setIcon( QIcon(":icons/rom.png") );
 	//openROM->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
 	openROM->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
 	connect(openROM, SIGNAL(triggered()), this, SLOT(openROMFile(void)) );
 
-	//shortcut = new QShortcut( QKeySequence::Open, this );
-	//connect(shortcut, SIGNAL(activated()), this, SLOT(openROMFile(void)) );
+	Hotkeys[ HK_OPEN_ROM ].setAction( openROM );
+	connect( Hotkeys[ HK_OPEN_ROM ].getShortcut(), SIGNAL(activated()), this, SLOT(openROMFile(void)) );
 	
 	fileMenu->addAction(openROM);
 
 	// File -> Close ROM
 	closeROM = new QAction(tr("&Close ROM"), this);
-	closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
+	//closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
 	closeROM->setStatusTip(tr("Close Loaded ROM"));
 	closeROM->setIcon( style->standardIcon( QStyle::SP_BrowserStop ) );
 	connect(closeROM, SIGNAL(triggered()), this, SLOT(closeROMCB(void)) );
+	
+	Hotkeys[ HK_CLOSE_ROM ].setAction( closeROM );
+	connect( Hotkeys[ HK_CLOSE_ROM ].getShortcut(), SIGNAL(activated()), this, SLOT(closeROMCB(void)) );
 	
 	fileMenu->addAction(closeROM);
 	

@@ -121,6 +121,7 @@ void HotKeyConfDialog_t::closeWindow(void)
 void HotKeyConfDialog_t::assignHotkey(QKeyEvent *event)
 {
 	bool keyIsModifier;
+	QKeySequence ks( event->modifiers() + event->key() );
 	SDL_Keycode k = convQtKey2SDLKeyCode((Qt::Key)event->key());
 	SDL_Keymod m = convQtKey2SDLModifier(event->modifiers());
 
@@ -129,6 +130,8 @@ void HotKeyConfDialog_t::assignHotkey(QKeyEvent *event)
 					(k == SDLK_LALT) || (k == SDLK_RALT) ||
 					(k == SDLK_LGUI) || (k == SDLK_RGUI) ||
 					(k == SDLK_CAPSLOCK);
+
+	printf("Assign: '%s' %i  0x%08x\n", ks.toString().toStdString().c_str(), event->key(), event->key() );
 
 	if ((k != SDLK_UNKNOWN) && !keyIsModifier)
 	{
@@ -145,40 +148,40 @@ void HotKeyConfDialog_t::assignHotkey(QKeyEvent *event)
 			char keyName[128];
 			char buf[256];
 
-			keyText.assign(" mod=");
+			keyText = ks.toString().toStdString();
 
-			j = 0;
-			if (m & (KMOD_LSHIFT | KMOD_RSHIFT))
-			{
-				if (j > 0)
-				{
-					keyText.append("+");
-				}
-				keyText.append("Shift");
-				j++;
-			}
-			if (m & (KMOD_LALT | KMOD_RALT))
-			{
-				if (j > 0)
-				{
-					keyText.append("+");
-				}
-				keyText.append("Alt");
-				j++;
-			}
-			if (m & (KMOD_LCTRL | KMOD_RCTRL))
-			{
-				if (j > 0)
-				{
-					keyText.append("+");
-				}
-				keyText.append("Ctrl");
-				j++;
-			}
+			//j = 0;
+			//if (m & (KMOD_LSHIFT | KMOD_RSHIFT))
+			//{
+			//	if (j > 0)
+			//	{
+			//		keyText.append("+");
+			//	}
+			//	keyText.append("Shift");
+			//	j++;
+			//}
+			//if (m & (KMOD_LALT | KMOD_RALT))
+			//{
+			//	if (j > 0)
+			//	{
+			//		keyText.append("+");
+			//	}
+			//	keyText.append("Alt");
+			//	j++;
+			//}
+			//if (m & (KMOD_LCTRL | KMOD_RCTRL))
+			//{
+			//	if (j > 0)
+			//	{
+			//		keyText.append("+");
+			//	}
+			//	keyText.append("Ctrl");
+			//	j++;
+			//}
 
-			sprintf(buf, "  key=%s", SDL_GetKeyName(k));
+			//sprintf(buf, "  key=%s", SDL_GetKeyName(k));
 
-			keyText.append(buf);
+			//keyText.append(buf);
 
 			item = l.at(i);
 

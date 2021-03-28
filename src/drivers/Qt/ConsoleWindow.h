@@ -212,6 +212,7 @@ class  consoleWin_t : public QMainWindow
 		void showErrorMsgWindow(void);
 
 	private:
+		void initHotKeys(void);
 		void createMainMenu(void);
 		void buildRecentRomMenu(void);
 		void saveRecentRomMenu(void);

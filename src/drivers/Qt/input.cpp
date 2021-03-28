@@ -204,32 +204,112 @@ struct hotkey_t Hotkeys[HK_MAX];
 
 hotkey_t::hotkey_t(void)
 {
-	value = 0; modifier = 0; prevState = 0;
+	sdl.value = 0; sdl.modifier = 0; prevState = 0;
+	shortcut = nullptr;
+	act = nullptr;
+	configName = "";
 }
+
+int  hotkey_t::init( QWidget *parent )
+{
+	std::string keyText;
+	std::string prefix = "SDL.Hotkeys.";
+
+	g_config->getOption (prefix + configName, &keyText);
+
+	printf("Initializing: '%s' = '%s'\n", configName, keyText.c_str() );
+
+	shortcut = new QShortcut( QKeySequence( QString::fromStdString(keyText) ), parent );
+
+	printf("ShortCut: '%s' = '%s'\n", configName, shortcut->key().toString().toStdString().c_str() );
+
+	conv2SDL();
+	return 0;
+}
+
+int  hotkey_t::readConfig(void)
+{
+	std::string keyText;
+	std::string prefix = "SDL.Hotkeys.";
+
+	g_config->getOption (prefix + configName, &keyText);
+
+	printf("Config: '%s' = '%s'\n", configName, keyText.c_str() );
+
+	if ( shortcut )
+	{
+		shortcut->setKey( QString::fromStdString( keyText ) );
+
+		printf("ShortCut: '%s' = '%s'\n", configName, shortcut->key().toString().toStdString().c_str() );
+	}
+
+	conv2SDL();
+	return 0;
+}
+
+void  hotkey_t::conv2SDL(void)
+{
+	if ( shortcut == nullptr ) return;
+
+	SDL_Keycode k = convQtKey2SDLKeyCode((Qt::Key)(shortcut->key()[0] & 0x01FFFFFF) );
+	SDL_Keymod m = convQtKey2SDLModifier( (Qt::KeyboardModifier)(shortcut->key()[0] & 0xFE000000) );
+
+	printf("Key: '%s'  0x%08x\n", shortcut->key().toString().toStdString().c_str(), shortcut->key()[0] );
+
+	sdl.value = k;
+	sdl.modifier = m;
+
+	printf("Key: SDL: '%s' \n", SDL_GetKeyName(sdl.value) );
+}
+
+void hotkey_t::setConfigName(const char *cName)
+{
+	configName = cName;
+}
+
+void hotkey_t::setAction( QAction *actIn)
+{
+	act = actIn;
+
+	actText = act->text();
+
+	act->setText( actText + "\t" + shortcut->key().toString() );
+}
+
+QShortcut *hotkey_t::getShortcut(void)
+{
+	return shortcut;
+}
+
+const char *hotkey_t::getConfigName(void)
+{
+	return configName;
+}
+
 
 int  hotkey_t::getString( char *s )
 {
 	s[0] = 0;
 
-	if ( modifier != 0 )
+	if ( sdl.modifier != 0 )
 	{
-		if ( modifier & (KMOD_LSHIFT | KMOD_RSHIFT) )
+		if ( sdl.modifier & (KMOD_LSHIFT | KMOD_RSHIFT) )
 		{
 			strcat( s, "Shift+" );
 		}
 
-		if ( modifier & (KMOD_LALT | KMOD_RALT) )
+		if ( sdl.modifier & (KMOD_LALT | KMOD_RALT) )
 		{
 			strcat( s, "Alt+" );
 		}
 
-		if ( modifier & (KMOD_LCTRL | KMOD_RCTRL) )
+		if ( sdl.modifier & (KMOD_LCTRL | KMOD_RCTRL) )
 		{
 			strcat( s, "Ctrl+" );
 		}
 	}
 
-	strcat( s, SDL_GetKeyName(value) );
+	strcat( s, SDL_GetKeyName(sdl.value) );
 
 	return 0;
 }
@@ -238,9 +318,9 @@ int  hotkey_t::getState(void)
 {
 	int k;
 
-	if ( modifier != 0 )
+	if ( sdl.modifier != 0 )
 	{
-		if ( modifier & (KMOD_LSHIFT | KMOD_RSHIFT) )
+		if ( sdl.modifier & (KMOD_LSHIFT | KMOD_RSHIFT) )
 		{
 			if ( !g_keyState[SDL_SCANCODE_LSHIFT] && !g_keyState[SDL_SCANCODE_RSHIFT] )
 			{
@@ -248,7 +328,7 @@ int  hotkey_t::getState(void)
 			}
 		}
 
-		if ( modifier & (KMOD_LALT | KMOD_RALT) )
+		if ( sdl.modifier & (KMOD_LALT | KMOD_RALT) )
 		{
 			if ( !g_keyState[SDL_SCANCODE_LALT] && !g_keyState[SDL_SCANCODE_RALT] )
 			{
@@ -256,7 +336,7 @@ int  hotkey_t::getState(void)
 			}
 		}
 
-		if ( modifier & (KMOD_LCTRL | KMOD_RCTRL) )
+		if ( sdl.modifier & (KMOD_LCTRL | KMOD_RCTRL) )
 		{
 			if ( !g_keyState[SDL_SCANCODE_LCTRL] && !g_keyState[SDL_SCANCODE_RCTRL] )
 			{
@@ -272,7 +352,7 @@ int  hotkey_t::getState(void)
 		}
 	}
 
-	k = SDL_GetScancodeFromKey(value);
+	k = SDL_GetScancodeFromKey(sdl.value);
 	if ( (k >= 0) && (k < SDL_NUM_SCANCODES) )
 	{
 		return g_keyState[k];
@@ -282,7 +362,7 @@ int  hotkey_t::getState(void)
 
 int hotkey_t::getRisingEdge(void)
 {
-	if ( value < 0 )
+	if ( sdl.value < 0 )
 	{
 		return 0;
 	}
@@ -308,7 +388,7 @@ void hotkey_t::setModifierFromString( const char *s )
 	char id[128];
 
 	i=0; j=0;
-	modifier = 0;
+	sdl.modifier = 0;
 
 	while ( s[i] != 0 )
 	{
@@ -323,15 +403,15 @@ void hotkey_t::setModifierFromString( const char *s )
 
 		if ( strcmp( id, "ctrl" ) == 0 )
 		{
-			modifier |= (KMOD_LCTRL | KMOD_RCTRL);
+			sdl.modifier |= (KMOD_LCTRL | KMOD_RCTRL);
 		}
 		else if ( strcmp( id, "alt" ) == 0 )
 		{
-			modifier |= (KMOD_LALT | KMOD_RALT);
+			sdl.modifier |= (KMOD_LALT | KMOD_RALT);
 		}
 		else if ( strcmp( id, "shift" ) == 0 )
 		{
-			modifier |= (KMOD_LSHIFT | KMOD_RSHIFT);
+			sdl.modifier |= (KMOD_LSHIFT | KMOD_RSHIFT);
 		}
 
 		if ( (s[i] == '+') || (s[i] == '|') )
@@ -353,59 +433,59 @@ setHotKeys (void)
 	std::string keyText;
 	std::string prefix = "SDL.Hotkeys.";
 	char id[64], val[128];
+	const char *hotKeyName, *hotKeySeq;
 //SDL_Keycode SDL_GetKeyFromName(const char* name)
 
 	for (int i = 0; i < HK_MAX; i++)
 	{
-		g_config->getOption (prefix + getHotkeyString(i), &keyText);
+		Hotkeys[i].readConfig();
+		//g_config->getOption (prefix + Hotkeys[i].getConfigName(), &keyText);
 
-		//printf("Key: '%s'\n", keyText.c_str() );
+		//j=0;
 
-		j=0;
+		//while ( keyText[j] != 0 )
+		//{
+		//	while ( isspace(keyText[j]) ) j++;
 
-		while ( keyText[j] != 0 )
-		{
-			while ( isspace(keyText[j]) ) j++;
+		//	if ( isalpha( keyText[j] ) || (keyText[j] == '_') )
+		//	{
+		//		k=0;
+		//		while ( isalnum( keyText[j] ) || (keyText[j] == '_') )
+		//		{
+		//			id[k] = keyText[j]; j++; k++;
+		//		}
+		//		id[k] = 0;
 
-			if ( isalpha( keyText[j] ) || (keyText[j] == '_') )
-			{
-				k=0;
-				while ( isalnum( keyText[j] ) || (keyText[j] == '_') )
-				{
-					id[k] = keyText[j]; j++; k++;
-				}
-				id[k] = 0;
+		//		if ( keyText[j] != '=' )
+		//		{
+		//			printf("Error: Invalid Hot Key Config for %s = %s \n", getHotkeyString(i), keyText.c_str() );
+		//			break;
+		//		}
+		//		j++;
 
-				if ( keyText[j] != '=' )
-				{
-					printf("Error: Invalid Hot Key Config for %s = %s \n", getHotkeyString(i), keyText.c_str() );
-					break;
-				}
-				j++;
+		//		k=0;
+		//		while ( !isspace(keyText[j]) && (keyText[j] != 0) )
+		//		{
+		//			val[k] = keyText[j]; j++; k++;
+		//		}
+		//		val[k] = 0;
 
-				k=0;
-				while ( !isspace(keyText[j]) && (keyText[j] != 0) )
-				{
-					val[k] = keyText[j]; j++; k++;
-				}
-				val[k] = 0;
+		//		//printf("ID:%s  Val:%s \n", id, val );
 
-				//printf("ID:%s  Val:%s \n", id, val );
-
-				if ( strcmp( id, "key" ) == 0 )
-				{
-					Hotkeys[i].value = SDL_GetKeyFromName( val );
-				}
-				else if ( strcmp( id, "mod" ) == 0 )
-				{
-					Hotkeys[i].setModifierFromString( val );
-				}
-			}
-			else
-			{
-				break;
-			}
-		}
+		//		if ( strcmp( id, "key" ) == 0 )
+		//		{
+		//			Hotkeys[i].sdl.value = SDL_GetKeyFromName( val );
+		//		}
+		//		else if ( strcmp( id, "mod" ) == 0 )
+		//		{
+		//			Hotkeys[i].setModifierFromString( val );
+		//		}
+		//	}
+		//	else
+		//	{
+		//		break;
+		//	}
+		//}
 
 	}
 	return;
