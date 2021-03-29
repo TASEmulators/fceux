@@ -69,7 +69,7 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 	for (int i = 0; i < HK_MAX; i++)
 	{
 		char keyName[128];
-		std::string optionName = prefix + getHotkeyString(i);
+		std::string optionName = prefix + Hotkeys[i].getConfigName();
 
 		//g_config->getOption (optionName.c_str (), &keycode);
 		Hotkeys[i].getString(keyName);

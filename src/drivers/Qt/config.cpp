@@ -52,47 +52,47 @@
 #include <sys/types.h>
 #endif
 
-static const char* HotkeyStrings[HK_MAX] = {
-		"OpenROM",
-		"CloseROM",
-		"CheatMenu",
-		"BindState",
-		"LoadLua",
-		"ToggleBG",
-		"SaveState",
-		"FDSSelect",
-		"LoadState",
-		"FDSEject",
-		"VSInsertCoin",
-		"VSToggleDip",
-		"MovieToggleFrameDisplay",
-		"SubtitleDisplay",
-		"Reset",
-		"Screenshot",
-		"Pause",
-		"DecreaseSpeed",
-		"IncreaseSpeed",
-		"FrameAdvance",
-		"Turbo",
-		"ToggleInputDisplay",
-		"ToggleMovieRW",
-		"MuteCapture",
-		"Quit",
-		"FrameAdvanceLagSkip",
-		"LagCounterDisplay",
-		"SelectState0", "SelectState1", "SelectState2", "SelectState3",
-		"SelectState4", "SelectState5", "SelectState6", "SelectState7", 
-		"SelectState8", "SelectState9", "SelectStateNext", "SelectStatePrev",
-		"VolumeDown", "VolumeUp", "FKB_Enable" };
+//static const char* HotkeyStrings[HK_MAX] = {
+//		"OpenROM",
+//		"CloseROM",
+//		"CheatMenu",
+//		"BindState",
+//		"LoadLua",
+//		"ToggleBG",
+//		"SaveState",
+//		"FDSSelect",
+//		"LoadState",
+//		"FDSEject",
+//		"VSInsertCoin",
+//		"VSToggleDip",
+//		"MovieToggleFrameDisplay",
+//		"SubtitleDisplay",
+//		"Reset",
+//		"Screenshot",
+//		"Pause",
+//		"DecreaseSpeed",
+//		"IncreaseSpeed",
+//		"FrameAdvance",
+//		"Turbo",
+//		"ToggleInputDisplay",
+//		"ToggleMovieRW",
+//		"MuteCapture",
+//		"Quit",
+//		"FrameAdvanceLagSkip",
+//		"LagCounterDisplay",
+//		"SelectState0", "SelectState1", "SelectState2", "SelectState3",
+//		"SelectState4", "SelectState5", "SelectState6", "SelectState7", 
+//		"SelectState8", "SelectState9", "SelectStateNext", "SelectStatePrev",
+//		"VolumeDown", "VolumeUp", "FKB_Enable" };
 
-const char *getHotkeyString( int i )
-{
-   if ( (i>=0) && (i<HK_MAX) )
-   {
-      return HotkeyStrings[i];
-   }
-   return NULL;
-}
+//const char *getHotkeyString( int i )
+//{
+//   if ( (i>=0) && (i<HK_MAX) )
+//   {
+//      return HotkeyStrings[i];
+//   }
+//   return NULL;
+//}
 
 int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut )
 {
@@ -108,49 +108,114 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut )
 			name = "CloseROM"; keySeq = "Ctrl+C";	
 		break;
 		case HK_CHEAT_MENU:
-			name = "CheatMenu"; keySeq = "F1";	
+			name = "CheatMenu"; keySeq = "";	
 		break;
 		case HK_BIND_STATE:
-			name = "BindState"; keySeq = "F2";	
+			name = "BindState"; keySeq = "";	
 		break;
 		case HK_LOAD_LUA:
-			name = "LoadLua"; keySeq = "F3";	
+			name = "LoadLua"; keySeq = "Ctrl+L";	
 		break;
 		case HK_TOGGLE_BG:
-			name = "ToggleBG"; keySeq = "F4";	
+			name = "ToggleBG"; keySeq = "";	
 		break;
+		// Save States
 		case HK_SAVE_STATE:
-			name = "SaveState"; keySeq = "F5";	
+			name = "SaveState"; keySeq = "I";	
+		break;
+		case HK_SAVE_STATE_0:
+			name = "SaveState0"; keySeq = "F10";	
+		break;
+		case HK_SAVE_STATE_1:
+			name = "SaveState1"; keySeq = "F1";	
+		break;
+		case HK_SAVE_STATE_2:
+			name = "SaveState2"; keySeq = "F2";	
+		break;
+		case HK_SAVE_STATE_3:
+			name = "SaveState3"; keySeq = "F3";	
+		break;
+		case HK_SAVE_STATE_4:
+			name = "SaveState4"; keySeq = "F4";	
+		break;
+		case HK_SAVE_STATE_5:
+			name = "SaveState5"; keySeq = "F5";	
+		break;
+		case HK_SAVE_STATE_6:
+			name = "SaveState6"; keySeq = "F6";	
+		break;
+		case HK_SAVE_STATE_7:
+			name = "SaveState7"; keySeq = "F7";	
+		break;
+		case HK_SAVE_STATE_8:
+			name = "SaveState8"; keySeq = "F8";	
+		break;
+		case HK_SAVE_STATE_9:
+			name = "SaveState9"; keySeq = "F9";	
+		break;
+		// Load States
+		case HK_LOAD_STATE:
+			name = "LoadState"; keySeq = "Shift+I";	
+		break;
+		case HK_LOAD_STATE_0:
+			name = "LoadState0"; keySeq = "Shift+F10";	
+		break;
+		case HK_LOAD_STATE_1:
+			name = "LoadState1"; keySeq = "Shift+F1";	
+		break;
+		case HK_LOAD_STATE_2:
+			name = "LoadState2"; keySeq = "Shift+F2";	
+		break;
+		case HK_LOAD_STATE_3:
+			name = "LoadState3"; keySeq = "Shift+F3";	
+		break;
+		case HK_LOAD_STATE_4:
+			name = "LoadState4"; keySeq = "Shift+F4";	
+		break;
+		case HK_LOAD_STATE_5:
+			name = "LoadState5"; keySeq = "Shift+F5";	
+		break;
+		case HK_LOAD_STATE_6:
+			name = "LoadState6"; keySeq = "Shift+F6";	
+		break;
+		case HK_LOAD_STATE_7:
+			name = "LoadState7"; keySeq = "Shift+F7";	
+		break;
+		case HK_LOAD_STATE_8:
+			name = "LoadState8"; keySeq = "Shift+F8";	
+		break;
+		case HK_LOAD_STATE_9:
+			name = "LoadState9"; keySeq = "Shift+F9";	
 		break;
 		case HK_FDS_SELECT:
-			name = "FDSSelect"; keySeq = "F6";	
-		break;
-		case HK_LOAD_STATE:
-			name = "LoadState"; keySeq = "F7";	
+			name = "FDSSelect"; keySeq = "";	
 		break;
 		case HK_FDS_EJECT:
-			name = "FDSEject"; keySeq = "F7";	
+			name = "FDSEject"; keySeq = "";	
 		break;
 		case HK_VS_INSERT_COIN:
-			name = "VSInsertCoin"; keySeq = "F6";	
+			name = "VSInsertCoin"; keySeq = "";	
 		break;
 		case HK_VS_TOGGLE_DIPSWITCH:
-			name = "VSToggleDip"; keySeq = "F8";	
+			name = "VSToggleDip"; keySeq = "";	
 		break;
 		case HK_TOGGLE_FRAME_DISPLAY:
 			name = "MovieToggleFrameDisplay"; keySeq = ".";	
 		break;
 		case HK_TOGGLE_SUBTITLE:
-			name = "SubtitleDisplay"; keySeq = "F10";	
+			name = "SubtitleDisplay"; keySeq = "";	
+		break;
+		case HK_POWER:
+			name = "Power"; keySeq = "";	
 		break;
 		case HK_RESET:
-			name = "Reset"; keySeq = "F11";	
-		break;
-		case HK_SCREENSHOT:
-			name = "Screenshot"; keySeq = "F12";	
+			name = "Reset"; keySeq = "Ctrl+R";	
 		break;
 		case HK_PAUSE:
 			name = "Pause"; keySeq = "Pause";	
+		break;
+		case HK_SCREENSHOT:
+			name = "Screenshot"; keySeq = "F12";	
 		break;
 		case HK_DECREASE_SPEED:
 			name = "DecreaseSpeed"; keySeq = "-";	
@@ -213,10 +278,10 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut )
 			name = "SelectState9"; keySeq = "9";	
 		break;
 		case HK_SELECT_STATE_NEXT:
-			name = "SelectStateNext"; keySeq = "PageUp";	
+			name = "SelectStateNext"; keySeq = "";	
 		break;
 		case HK_SELECT_STATE_PREV:
-			name = "SelectStatePrev"; keySeq = "PageDown";	
+			name = "SelectStatePrev"; keySeq = "";	
 		break;
 		case HK_VOLUME_DOWN:
 			name = "VolumeDown"; keySeq = "";	

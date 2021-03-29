@@ -291,25 +291,29 @@ int  hotkey_t::getString( char *s )
 {
 	s[0] = 0;
 
-	if ( sdl.modifier != 0 )
+	if ( shortcut )
 	{
-		if ( sdl.modifier & (KMOD_LSHIFT | KMOD_RSHIFT) )
-		{
-			strcat( s, "Shift+" );
-		}
-
-		if ( sdl.modifier & (KMOD_LALT | KMOD_RALT) )
-		{
-			strcat( s, "Alt+" );
-		}
-
-		if ( sdl.modifier & (KMOD_LCTRL | KMOD_RCTRL) )
-		{
-			strcat( s, "Ctrl+" );
-		}
+		strcpy( s, shortcut->key().toString().toStdString().c_str() );
 	}
+	//if ( sdl.modifier != 0 )
+	//{
+	//	if ( sdl.modifier & (KMOD_LSHIFT | KMOD_RSHIFT) )
+	//	{
+	//		strcat( s, "Shift+" );
+	//	}
 
-	strcat( s, SDL_GetKeyName(sdl.value) );
+	//	if ( sdl.modifier & (KMOD_LALT | KMOD_RALT) )
+	//	{
+	//		strcat( s, "Alt+" );
+	//	}
+
+	//	if ( sdl.modifier & (KMOD_LCTRL | KMOD_RCTRL) )
+	//	{
+	//		strcat( s, "Ctrl+" );
+	//	}
+	//}
+
+	//strcat( s, SDL_GetKeyName(sdl.value) );
 
 	return 0;
 }
