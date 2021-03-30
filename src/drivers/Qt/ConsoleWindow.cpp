@@ -509,11 +509,12 @@ void consoleWin_t::showErrorMsgWindow()
 	QMessageBox msgBox(this);
 
 	fceuWrapperLock();
+	msgBox.resize( this->size() );
 	msgBox.setIcon( QMessageBox::Critical );
 	msgBox.setText( tr(errorMsg.c_str()) );
 	errorMsg.clear();
 	fceuWrapperUnLock();
-	msgBox.show();
+	//msgBox.show();
 	msgBox.exec();
 }
 
