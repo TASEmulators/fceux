@@ -214,6 +214,9 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut )
 		case HK_PAUSE:
 			name = "Pause"; keySeq = "Pause";	
 		break;
+		case HK_QUIT:
+			name = "Quit"; keySeq = "Ctrl+Q";	
+		break;
 		case HK_SCREENSHOT:
 			name = "Screenshot"; keySeq = "F12";	
 		break;
@@ -237,9 +240,6 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut )
 		break;
 		case HK_MUTE_CAPTURE:
 			name = "MuteCapture"; keySeq = "'";	
-		break;
-		case HK_QUIT:
-			name = "Quit"; keySeq = "";	
 		break;
 		case HK_FA_LAG_SKIP:
 			name = "FrameAdvanceLagSkip"; keySeq = "Delete";	
@@ -291,6 +291,12 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut )
 		break;
 		case HK_FKB_ENABLE:
 			name = "FKB_Enable"; keySeq = "ScrollLock";	
+		break;
+		case HK_FULLSCREEN:
+			name = "FullScreen"; keySeq = "Alt+Return";	
+		break;
+		case HK_MAIN_MENU_HIDE:
+			name = "MainMenuHide"; keySeq = "Alt+/";	
 		break;
 		default:
 		case HK_MAX:

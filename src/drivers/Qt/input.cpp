@@ -775,31 +775,31 @@ static void KeyboardCommands (void)
 	// Alt-Enter to toggle full-screen
 	// This is already handled by Qt Menu Actions
 	// So only process if menu is hidden or disabled.
-	if ( is_alt )
-	{
-		if (keyonly (ENTER))
-		{
-			if ( consoleWindow )
-			{
-				if ( !consoleWindow->menuBar()->isVisible() )
-				{
-					consoleWindow->toggleFullscreen();
-				}
-			}
-		}
-	}
+	//if ( is_alt )
+	//{
+	//	if (keyonly (ENTER))
+	//	{
+	//		if ( consoleWindow )
+	//		{
+	//			if ( !consoleWindow->menuBar()->isVisible() )
+	//			{
+	//				consoleWindow->toggleFullscreen();
+	//			}
+	//		}
+	//	}
+	//}
 	
 	// Alt-M to toggle Main Menu Visibility
-	if ( is_alt )
-	{
-		if (keyonly (SLASH))
-		{
-			if ( consoleWindow )
-			{
-				consoleWindow->toggleMenuVis(); 
-			}
-		}
-	}
+	//if ( is_alt )
+	//{
+	//	if (keyonly (SLASH))
+	//	{
+	//		if ( consoleWindow )
+	//		{
+	//			consoleWindow->toggleMenuVis(); 
+	//		}
+	//	}
+	//}
 
 	// Toggle Movie auto-backup
 	if ( is_shift )
