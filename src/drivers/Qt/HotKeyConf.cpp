@@ -52,7 +52,7 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 
 	mainLayout = new QVBoxLayout();
 
-	tree = new QTreeWidget();
+	tree = new HotKeyConfTree_t(this);
 
 	tree->setColumnCount(2);
 
@@ -75,6 +75,8 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 		Hotkeys[i].getString(keyName);
 
 		item = new QTreeWidgetItem();
+
+		item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemNeverHasChildren );
 
 		item->setText(0, QString::fromStdString(optionName));
 		item->setText(1, QString::fromStdString(keyName));
@@ -131,7 +133,7 @@ void HotKeyConfDialog_t::assignHotkey(QKeyEvent *event)
 					(k == SDLK_LGUI) || (k == SDLK_RGUI) ||
 					(k == SDLK_CAPSLOCK);
 
-	printf("Assign: '%s' %i  0x%08x\n", ks.toString().toStdString().c_str(), event->key(), event->key() );
+	//printf("Assign: '%s' %i  0x%08x\n", ks.toString().toStdString().c_str(), event->key(), event->key() );
 
 	if ((k != SDLK_UNKNOWN) && !keyIsModifier)
 	{
@@ -207,11 +209,42 @@ void HotKeyConfDialog_t::keyPressEvent(QKeyEvent *event)
 {
 	//printf("Hotkey Window Key Press: 0x%x \n", event->key() );
 	assignHotkey(event);
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::keyReleaseEvent(QKeyEvent *event)
 {
 	//printf("Hotkey Window Key Release: 0x%x \n", event->key() );
 	assignHotkey(event);
+	event->accept();
+}
+//----------------------------------------------------------------------------
+HotKeyConfTree_t::HotKeyConfTree_t(QWidget *parent)
+	: QTreeWidget(parent)
+{
+
+}
+//----------------------------------------------------------------------------
+HotKeyConfTree_t::~HotKeyConfTree_t(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void HotKeyConfTree_t::keyPressEvent(QKeyEvent *event)
+{
+	if ( parent() )
+	{
+		static_cast<HotKeyConfDialog_t*>(parent())->assignHotkey(event);
+	}
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void HotKeyConfTree_t::keyReleaseEvent(QKeyEvent *event)
+{
+	if ( parent() )
+	{
+		static_cast<HotKeyConfDialog_t*>(parent())->assignHotkey(event);
+	}
+	event->accept();
 }
 //----------------------------------------------------------------------------

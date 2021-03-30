@@ -898,6 +898,9 @@ void consoleWin_t::createMainMenu(void)
 	
 	emuMenu->addAction(powerAct);
 
+	Hotkeys[ HK_POWER ].setAction( powerAct );
+	connect( Hotkeys[ HK_POWER ].getShortcut(), SIGNAL(activated()), this, SLOT(powerConsoleCB(void)) );
+
 	// Emulation -> Reset
 	resetAct = new QAction(tr("&Reset"), this);
 	//resetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
@@ -906,6 +909,9 @@ void consoleWin_t::createMainMenu(void)
 	connect(resetAct, SIGNAL(triggered()), this, SLOT(consoleHardReset(void)) );
 	
 	emuMenu->addAction(resetAct);
+
+	Hotkeys[ HK_RESET ].setAction( resetAct );
+	connect( Hotkeys[ HK_RESET ].getShortcut(), SIGNAL(activated()), this, SLOT(consoleHardReset(void)) );
 
 	// Emulation -> Soft Reset
 	sresetAct = new QAction(tr("&Soft Reset"), this);
@@ -918,13 +924,16 @@ void consoleWin_t::createMainMenu(void)
 
 	// Emulation -> Pause
 	pauseAct = new QAction(tr("&Pause"), this);
-	pauseAct->setShortcut( QKeySequence(tr("Pause")));
+	//pauseAct->setShortcut( QKeySequence(tr("Pause")));
 	pauseAct->setStatusTip(tr("Pause Console"));
 	pauseAct->setIcon( style()->standardIcon( QStyle::SP_MediaPause ) );
 	connect(pauseAct, SIGNAL(triggered()), this, SLOT(consolePause(void)) );
 	
 	emuMenu->addAction(pauseAct);
 	
+	Hotkeys[ HK_PAUSE ].setAction( pauseAct );
+	connect( Hotkeys[ HK_PAUSE ].getShortcut(), SIGNAL(activated()), this, SLOT(consolePause(void)) );
+
 	emuMenu->addSeparator();
 
 	// Emulation -> Region
@@ -1036,6 +1045,9 @@ void consoleWin_t::createMainMenu(void)
 	
 	emuMenu->addAction(insCoinAct);
 	
+	Hotkeys[ HK_VS_INSERT_COIN ].setAction( insCoinAct );
+	connect( Hotkeys[ HK_VS_INSERT_COIN ].getShortcut(), SIGNAL(activated()), this, SLOT(insertCoin(void)) );
+
 	emuMenu->addSeparator();
 
 	// Emulation -> FDS

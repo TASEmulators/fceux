@@ -217,11 +217,11 @@ int  hotkey_t::init( QWidget *parent )
 
 	g_config->getOption (prefix + configName, &keyText);
 
-	printf("Initializing: '%s' = '%s'\n", configName, keyText.c_str() );
+	//printf("Initializing: '%s' = '%s'\n", configName, keyText.c_str() );
 
 	shortcut = new QShortcut( QKeySequence( QString::fromStdString(keyText) ), parent );
 
-	printf("ShortCut: '%s' = '%s'\n", configName, shortcut->key().toString().toStdString().c_str() );
+	//printf("ShortCut: '%s' = '%s'\n", configName, shortcut->key().toString().toStdString().c_str() );
 
 	conv2SDL();
 	return 0;
@@ -234,13 +234,18 @@ int  hotkey_t::readConfig(void)
 
 	g_config->getOption (prefix + configName, &keyText);
 
-	printf("Config: '%s' = '%s'\n", configName, keyText.c_str() );
+	//printf("Config: '%s' = '%s'\n", configName, keyText.c_str() );
 
 	if ( shortcut )
 	{
 		shortcut->setKey( QString::fromStdString( keyText ) );
 
-		printf("ShortCut: '%s' = '%s'\n", configName, shortcut->key().toString().toStdString().c_str() );
+		//printf("ShortCut: '%s' = '%s'\n", configName, shortcut->key().toString().toStdString().c_str() );
+		
+		if ( act )
+		{
+			act->setText( actText + "\t" + shortcut->key().toString() );
+		}
 	}
 
 	conv2SDL();
@@ -254,12 +259,12 @@ void  hotkey_t::conv2SDL(void)
 	SDL_Keycode k = convQtKey2SDLKeyCode((Qt::Key)(shortcut->key()[0] & 0x01FFFFFF) );
 	SDL_Keymod m = convQtKey2SDLModifier( (Qt::KeyboardModifier)(shortcut->key()[0] & 0xFE000000) );
 
-	printf("Key: '%s'  0x%08x\n", shortcut->key().toString().toStdString().c_str(), shortcut->key()[0] );
+	//printf("Key: '%s'  0x%08x\n", shortcut->key().toString().toStdString().c_str(), shortcut->key()[0] );
 
 	sdl.value = k;
 	sdl.modifier = m;
 
-	printf("Key: SDL: '%s' \n", SDL_GetKeyName(sdl.value) );
+	//printf("Key: SDL: '%s' \n", SDL_GetKeyName(sdl.value) );
 }
 
 void hotkey_t::setConfigName(const char *cName)

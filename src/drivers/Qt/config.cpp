@@ -758,7 +758,7 @@ InitConfig()
 
 		getHotKeyConfig( i, &hotKeyName, &hotKeySeq );
 
-		printf("Hot Key: '%s' = '%s' \n", hotKeyName, hotKeySeq );
+		//printf("Hot Key: '%s' = '%s' \n", hotKeyName, hotKeySeq );
 
 		//keyText.assign(" mod=");
 
