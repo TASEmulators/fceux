@@ -77,6 +77,7 @@ private:
 public slots:
 	void closeWindow(void);
 private slots:
+	void resetDefaultsCB(void);
 	void hotKeyActivated(QTreeWidgetItem *item, int column);
 	void hotKeyDoubleClicked(QTreeWidgetItem *item, int column);
 };

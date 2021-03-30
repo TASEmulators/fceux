@@ -42,7 +42,7 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
-	QPushButton *closeButton;
+	QPushButton *closeButton, *resetDefaults;
 	QTreeWidgetItem *item;
 	std::string prefix = "SDL.Hotkeys.";
 
@@ -95,11 +95,16 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 
 	mainLayout->addWidget(tree);
 
+	resetDefaults = new QPushButton( tr("Restore Defaults") );
+	resetDefaults->setIcon(style()->standardIcon(QStyle::SP_DialogResetButton));
+	connect(resetDefaults, SIGNAL(clicked(void)), this, SLOT(resetDefaultsCB(void)));
+
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
 	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
 
 	hbox = new QHBoxLayout();
+	hbox->addWidget( resetDefaults, 1 );
 	hbox->addStretch(5);
 	hbox->addWidget( closeButton, 1 );
 	mainLayout->addLayout( hbox );
@@ -125,6 +130,32 @@ void HotKeyConfDialog_t::closeWindow(void)
 	//printf("Close Window\n");
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void HotKeyConfDialog_t::resetDefaultsCB(void)
+{
+	QTreeWidgetItem *item;
+	std::string confName;
+	std::string prefix = "SDL.Hotkeys.";
+	const char *name, *keySeq;
+
+	for (int i=0; i<HK_MAX; i++)
+	{
+		getHotKeyConfig( i, &name, &keySeq );
+
+		confName = prefix + name;
+
+		g_config->setOption( confName, keySeq );
+
+		item = tree->topLevelItem(i);
+
+		if ( item )
+		{
+			item->setText(1, tr(keySeq));
+		}
+	}
+	setHotKeys();
+
 }
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::keyPressEvent(QKeyEvent *event)
@@ -170,36 +201,11 @@ HotKeyConfTree_t::~HotKeyConfTree_t(void)
 //----------------------------------------------------------------------------
 void HotKeyConfTree_t::keyPressEvent(QKeyEvent *event)
 {
-	//if ( parent() )
-	//{
-	//	static_cast<HotKeyConfDialog_t*>(parent())->assignHotkey(event);
-	//}
-	//if ( event->key() == Qt::Key_Enter )
-	//{
-	//	QTreeWidgetItem *item;
-
-	//	item = currentItem();
-
-	//	event->accept();
-	//	if ( item )
-	//	{
-	//		HotKeyConfSetDialog_t *win = new HotKeyConfSetDialog_t( indexOfTopLevelItem( item ), item, this );
-
-	//		win->exec();
-	//	}
-	//}
-	//else
-	//{
-		QTreeWidget::keyPressEvent(event);
-	//}
+	QTreeWidget::keyPressEvent(event);
 }
 //----------------------------------------------------------------------------
 void HotKeyConfTree_t::keyReleaseEvent(QKeyEvent *event)
 {
-	//if ( parent() )
-	//{
-	//	static_cast<HotKeyConfDialog_t*>(parent())->assignHotkey(event);
-	//}
 	QTreeWidget::keyReleaseEvent(event);
 }
 //----------------------------------------------------------------------------
