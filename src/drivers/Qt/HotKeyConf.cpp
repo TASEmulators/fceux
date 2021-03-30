@@ -55,6 +55,7 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 	tree = new HotKeyConfTree_t(this);
 
 	tree->setColumnCount(2);
+	tree->setSelectionMode( QAbstractItemView::SingleSelection );
 
 	item = new QTreeWidgetItem();
 	item->setText(0, QString::fromStdString("Command"));
@@ -76,7 +77,10 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 
 		item = new QTreeWidgetItem();
 
+		tree->addTopLevelItem(item);
+
 		item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemNeverHasChildren );
+		item->setCheckState( 0, Qt::Checked );
 
 		item->setText(0, QString::fromStdString(optionName));
 		item->setText(1, QString::fromStdString(keyName));
@@ -84,7 +88,6 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 		item->setTextAlignment(0, Qt::AlignLeft);
 		item->setTextAlignment(1, Qt::AlignCenter);
 
-		tree->addTopLevelItem(item);
 	}
 	mainLayout->addWidget(tree);
 
