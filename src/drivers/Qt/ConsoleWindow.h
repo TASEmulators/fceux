@@ -311,6 +311,7 @@ class  consoleWin_t : public QMainWindow
 		void toggleMovieFrameDisplay(void);
 		void toggleMovieReadWrite(void);
 		void toggleInputDisplay(void);
+		void toggleTurboMode(void);
 
 };
 

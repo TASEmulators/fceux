@@ -563,10 +563,8 @@ void consoleWin_t::initHotKeys(void)
 	}
 
 	// Frame Advance uses key state directly, disable shortcut events
-        if ( Hotkeys[HK_FRAME_ADVANCE].getShortcut() != nullptr )
-        {
-                Hotkeys[HK_FRAME_ADVANCE].getShortcut()->setEnabled(false);
-        }
+	Hotkeys[HK_FRAME_ADVANCE].getShortcut()->setEnabled(false);
+	Hotkeys[HK_TURBO        ].getShortcut()->setEnabled(false);
 
 	connect( Hotkeys[ HK_VOLUME_DOWN ].getShortcut(), SIGNAL(activated()), this, SLOT(decrSoundVolume(void)) );
 	connect( Hotkeys[ HK_VOLUME_UP   ].getShortcut(), SIGNAL(activated()), this, SLOT(incrSoundVolume(void)) );
@@ -2780,6 +2778,11 @@ void consoleWin_t::toggleInputDisplay(void)
 	FCEUI_ToggleInputDisplay();
 	g_config->setOption ("SDL.InputDisplay", input_display);
 	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleTurboMode(void)
+{
+	NoWaiting ^= 1;
 }
 
 void consoleWin_t::openMovie(void)

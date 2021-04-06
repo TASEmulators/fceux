@@ -955,9 +955,13 @@ static void KeyboardCommands (void)
 	//}
 
 	// Toggle throttling
-	if ( Hotkeys[HK_TURBO].getRisingEdge() )
+	if ( Hotkeys[HK_TURBO].getState() )
 	{
-		NoWaiting ^= 1;
+		NoWaiting |= 0x01;
+	}
+	else
+	{
+		NoWaiting &= 0x02;
 		//printf("NoWaiting: 0x%04x\n", NoWaiting );
 	}
 
@@ -989,23 +993,23 @@ static void KeyboardCommands (void)
 	//{
 	//    FCEUI_PowerNES();
 	//}
-	if ( Hotkeys[HK_QUIT].getRisingEdge() )
-	{
-		CloseGame();
-		FCEUI_Kill();
-		SDL_Quit();
-		exit(0);
-	}
-	else
-#ifdef _S9XLUA_H
-	if ( Hotkeys[HK_LOAD_LUA].getRisingEdge() )
-	{
-		std::string fname;
-		fname = GetFilename ("Open LUA script...", 3, "Lua scripts|*.lua");
-		if (fname != "")
-		FCEU_LoadLuaCode (fname.c_str ());
-	}
-#endif
+//	if ( Hotkeys[HK_QUIT].getRisingEdge() )
+//	{
+//		CloseGame();
+//		FCEUI_Kill();
+//		SDL_Quit();
+//		exit(0);
+//	}
+//	else
+//#ifdef _S9XLUA_H
+//	if ( Hotkeys[HK_LOAD_LUA].getRisingEdge() )
+//	{
+//		std::string fname;
+//		fname = GetFilename ("Open LUA script...", 3, "Lua scripts|*.lua");
+//		if (fname != "")
+//		FCEU_LoadLuaCode (fname.c_str ());
+//	}
+//#endif
 
 	//for (int i = 0; i < 10; i++)
 	//{
