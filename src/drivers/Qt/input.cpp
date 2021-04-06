@@ -911,32 +911,32 @@ static void KeyboardCommands (void)
 	}
 
 
-	if ( Hotkeys[HK_DECREASE_SPEED].getRisingEdge() )
-	{
-		DecreaseEmulationSpeed();
-	}
+	//if ( Hotkeys[HK_DECREASE_SPEED].getRisingEdge() )
+	//{
+	//	DecreaseEmulationSpeed();
+	//}
 
-	if ( Hotkeys[HK_INCREASE_SPEED].getRisingEdge() )
-	{
-		IncreaseEmulationSpeed ();
-	}
+	//if ( Hotkeys[HK_INCREASE_SPEED].getRisingEdge() )
+	//{
+	//	IncreaseEmulationSpeed ();
+	//}
 
-	if ( Hotkeys[HK_TOGGLE_FRAME_DISPLAY].getRisingEdge() )
-	{
-		FCEUI_MovieToggleFrameDisplay ();
-	}
+	//if ( Hotkeys[HK_TOGGLE_FRAME_DISPLAY].getRisingEdge() )
+	//{
+	//	FCEUI_MovieToggleFrameDisplay ();
+	//}
 
-	if ( Hotkeys[HK_TOGGLE_INPUT_DISPLAY].getRisingEdge() )
-	{
-		FCEUI_ToggleInputDisplay ();
-		extern int input_display;
-		g_config->setOption ("SDL.InputDisplay", input_display);
-	}
+	//if ( Hotkeys[HK_TOGGLE_INPUT_DISPLAY].getRisingEdge() )
+	//{
+	//	FCEUI_ToggleInputDisplay ();
+	//	extern int input_display;
+	//	g_config->setOption ("SDL.InputDisplay", input_display);
+	//}
 
-	if ( Hotkeys[HK_MOVIE_TOGGLE_RW].getRisingEdge() )
-	{
-		FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
-	}
+	//if ( Hotkeys[HK_MOVIE_TOGGLE_RW].getRisingEdge() )
+	//{
+	//	FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
+	//}
 
 #ifdef CREATE_AVI
 	if ( Hotkeys[HK_MUTE_CAPTURE].getRisingEdge() )
@@ -946,13 +946,13 @@ static void KeyboardCommands (void)
 	}
 #endif
 
-	if ( Hotkeys[HK_PAUSE].getRisingEdge() )
-	{
-		//FCEUI_ToggleEmulationPause(); 
-		// use the wrapper function instead of the fceui function directly
-		// so we can handle cursor grabbage
-		TogglePause ();
-	}
+	//if ( Hotkeys[HK_PAUSE].getRisingEdge() )
+	//{
+	//	//FCEUI_ToggleEmulationPause(); 
+	//	// use the wrapper function instead of the fceui function directly
+	//	// so we can handle cursor grabbage
+	//	TogglePause ();
+	//}
 
 	// Toggle throttling
 	if ( Hotkeys[HK_TURBO].getRisingEdge() )
@@ -981,10 +981,10 @@ static void KeyboardCommands (void)
 		}
 	}
 
-	if ( Hotkeys[HK_RESET].getRisingEdge() )
-	{
-		FCEUI_ResetNES ();
-	}
+	//if ( Hotkeys[HK_RESET].getRisingEdge() )
+	//{
+	//	FCEUI_ResetNES ();
+	//}
 	//if( Hotkeys[HK_POWER].getRisingEdge() ) 
 	//{
 	//    FCEUI_PowerNES();
@@ -1025,136 +1025,136 @@ static void KeyboardCommands (void)
 	//	FCEUI_SelectStateNext (-1);
 	//}
 
-	if ( Hotkeys[HK_BIND_STATE].getRisingEdge() )
-	{
-		bindSavestate ^= 1;
-		FCEUI_DispMessage ("Savestate binding to movie %sabled.", 0,
-		bindSavestate ? "en" : "dis");
-	}
+	//if ( Hotkeys[HK_BIND_STATE].getRisingEdge() )
+	//{
+	//	bindSavestate ^= 1;
+	//	FCEUI_DispMessage ("Savestate binding to movie %sabled.", 0,
+	//	bindSavestate ? "en" : "dis");
+	//}
 
-	if ( Hotkeys[HK_FA_LAG_SKIP].getRisingEdge() )
-	{
-		frameAdvanceLagSkip ^= 1;
-		FCEUI_DispMessage ("Skipping lag in Frame Advance %sabled.", 0,
-		frameAdvanceLagSkip ? "en" : "dis");
-	}
+	//if ( Hotkeys[HK_FA_LAG_SKIP].getRisingEdge() )
+	//{
+	//	frameAdvanceLagSkip ^= 1;
+	//	FCEUI_DispMessage ("Skipping lag in Frame Advance %sabled.", 0,
+	//	frameAdvanceLagSkip ? "en" : "dis");
+	//}
 
-	if ( Hotkeys[HK_LAG_COUNTER_DISPLAY].getRisingEdge() )
-	{
-		lagCounterDisplay ^= 1;
-	}
+	//if ( Hotkeys[HK_LAG_COUNTER_DISPLAY].getRisingEdge() )
+	//{
+	//	lagCounterDisplay ^= 1;
+	//}
 
-	if ( Hotkeys[HK_TOGGLE_SUBTITLE].getRisingEdge() )
-	{
-		movieSubtitles = !movieSubtitles;
-		FCEUI_DispMessage ("Movie subtitles o%s.", 0,
-		movieSubtitles ? "n" : "ff");
-	}
+	//if ( Hotkeys[HK_TOGGLE_SUBTITLE].getRisingEdge() )
+	//{
+	//	movieSubtitles = !movieSubtitles;
+	//	FCEUI_DispMessage ("Movie subtitles o%s.", 0,
+	//	movieSubtitles ? "n" : "ff");
+	//}
 
-	if ( Hotkeys[HK_VOLUME_DOWN].getRisingEdge() )
-	{
-		FCEUD_SoundVolumeAdjust(-1);
-	}
+	//if ( Hotkeys[HK_VOLUME_DOWN].getRisingEdge() )
+	//{
+	//	FCEUD_SoundVolumeAdjust(-1);
+	//}
 
-	if ( Hotkeys[HK_VOLUME_UP].getRisingEdge() )
-	{
-		FCEUD_SoundVolumeAdjust(1);
-	}
+	//if ( Hotkeys[HK_VOLUME_UP].getRisingEdge() )
+	//{
+	//	FCEUD_SoundVolumeAdjust(1);
+	//}
 
 	// VS Unisystem games
-	if (gametype == GIT_VSUNI)
-	{
-		// insert coin
-		if ( Hotkeys[HK_VS_INSERT_COIN].getRisingEdge() )
-		{
-			FCEUI_VSUniCoin ();
-		}
-
-		// toggle dipswitch display
-		if ( Hotkeys[HK_VS_TOGGLE_DIPSWITCH].getRisingEdge() )
-		{
-			DIPS ^= 1;
-			FCEUI_VSUniToggleDIPView ();
-		}
-		if (!(DIPS & 1))
-			goto DIPSless;
-
-		// toggle the various dipswitches
-		for(int i=1; i<=8;i++)
-		{
-			if(keyonly(i))
-				FCEUI_VSUniToggleDIP(i-1);
-		}
-	}
-	else
-	{
-		static uint8 bbuf[32];
-		static int bbuft;
-		static int barcoder = 0;
-
-		if (keyonly (H))
-			FCEUI_NTSCSELHUE ();
-		if (keyonly (T))
-			FCEUI_NTSCSELTINT ();
-
-		if (Hotkeys[HK_DECREASE_SPEED].getRisingEdge())
-		{
-			FCEUI_NTSCDEC ();
-		}
-		if (Hotkeys[HK_INCREASE_SPEED].getRisingEdge())
-		{
-			FCEUI_NTSCINC ();
-		}
-
-		if ((CurInputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH))
-		{
-			if (keyonly (F8))
-			{
-				barcoder ^= 1;
-				if (!barcoder)
-				{
-					if (CurInputType[2] == SIFC_BWORLD)
-					{
-						strcpy ((char *) &BWorldData[1], (char *) bbuf);
-						BWorldData[0] = 1;
-					}
-					else
-					{
-						FCEUI_DatachSet (bbuf);
-					}
-					FCEUI_DispMessage ("Barcode Entered", 0);
-				}
-				else
-				{
-					bbuft = 0;
-					FCEUI_DispMessage ("Enter Barcode", 0);
-				}
-			}
-		}
-		else
-		{
-			barcoder = 0;
-		}
-
-#define SSM(x)                                    \
-do {                                              \
-	if(barcoder) {                                \
-		if(bbuft < 13) {                          \
-			bbuf[bbuft++] = '0' + x;              \
-			bbuf[bbuft] = 0;                      \
-		}                                         \
-		FCEUI_DispMessage("Barcode: %s",0, bbuf); \
-	}                                             \
-} while(0)
-
-		DIPSless:
-		for(int i=0; i<10;i++)
-		{
-			if (keyonly (i))
-				SSM (i);
-		}
-#undef SSM
-	}
+//	if (gametype == GIT_VSUNI)
+//	{
+//		// insert coin
+//		if ( Hotkeys[HK_VS_INSERT_COIN].getRisingEdge() )
+//		{
+//			FCEUI_VSUniCoin ();
+//		}
+//
+//		// toggle dipswitch display
+//		if ( Hotkeys[HK_VS_TOGGLE_DIPSWITCH].getRisingEdge() )
+//		{
+//			DIPS ^= 1;
+//			FCEUI_VSUniToggleDIPView ();
+//		}
+//		if (!(DIPS & 1))
+//			goto DIPSless;
+//
+//		// toggle the various dipswitches
+//		for(int i=1; i<=8;i++)
+//		{
+//			if(keyonly(i))
+//				FCEUI_VSUniToggleDIP(i-1);
+//		}
+//	}
+//	else
+//	{
+//		static uint8 bbuf[32];
+//		static int bbuft;
+//		static int barcoder = 0;
+//
+//		if (keyonly (H))
+//			FCEUI_NTSCSELHUE ();
+//		if (keyonly (T))
+//			FCEUI_NTSCSELTINT ();
+//
+//		if (Hotkeys[HK_DECREASE_SPEED].getRisingEdge())
+//		{
+//			FCEUI_NTSCDEC ();
+//		}
+//		if (Hotkeys[HK_INCREASE_SPEED].getRisingEdge())
+//		{
+//			FCEUI_NTSCINC ();
+//		}
+//
+//		if ((CurInputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH))
+//		{
+//			if (keyonly (F8))
+//			{
+//				barcoder ^= 1;
+//				if (!barcoder)
+//				{
+//					if (CurInputType[2] == SIFC_BWORLD)
+//					{
+//						strcpy ((char *) &BWorldData[1], (char *) bbuf);
+//						BWorldData[0] = 1;
+//					}
+//					else
+//					{
+//						FCEUI_DatachSet (bbuf);
+//					}
+//					FCEUI_DispMessage ("Barcode Entered", 0);
+//				}
+//				else
+//				{
+//					bbuft = 0;
+//					FCEUI_DispMessage ("Enter Barcode", 0);
+//				}
+//			}
+//		}
+//		else
+//		{
+//			barcoder = 0;
+//		}
+//
+//#define SSM(x)                                    \
+//do {                                              \
+//	if(barcoder) {                                \
+//		if(bbuft < 13) {                          \
+//			bbuf[bbuft++] = '0' + x;              \
+//			bbuf[bbuft] = 0;                      \
+//		}                                         \
+//		FCEUI_DispMessage("Barcode: %s",0, bbuf); \
+//	}                                             \
+//} while(0)
+//
+//		DIPSless:
+//		for(int i=0; i<10;i++)
+//		{
+//			if (keyonly (i))
+//				SSM (i);
+//		}
+//#undef SSM
+//	}
 }
 
 /**

@@ -43,6 +43,8 @@
 
 #include "../../fceu.h"
 #include "../../fds.h"
+#include "../../file.h"
+#include "../../input.h"
 #include "../../movie.h"
 #include "../../version.h"
 
@@ -565,6 +567,16 @@ void consoleWin_t::initHotKeys(void)
         {
                 Hotkeys[HK_FRAME_ADVANCE].getShortcut()->setEnabled(false);
         }
+
+	connect( Hotkeys[ HK_VOLUME_DOWN ].getShortcut(), SIGNAL(activated()), this, SLOT(decrSoundVolume(void)) );
+	connect( Hotkeys[ HK_VOLUME_UP   ].getShortcut(), SIGNAL(activated()), this, SLOT(incrSoundVolume(void)) );
+
+	connect( Hotkeys[ HK_LAG_COUNTER_DISPLAY  ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleLagCounterDisplay(void)) );
+	connect( Hotkeys[ HK_FA_LAG_SKIP          ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleFrameAdvLagSkip(void))   );
+	connect( Hotkeys[ HK_BIND_STATE           ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieBindSaveState(void)));
+	connect( Hotkeys[ HK_TOGGLE_FRAME_DISPLAY ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieFrameDisplay(void)));
+	connect( Hotkeys[ HK_MOVIE_TOGGLE_RW      ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieReadWrite(void)));
+	connect( Hotkeys[ HK_TOGGLE_INPUT_DISPLAY ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleInputDisplay(void)));
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::createMainMenu(void)
@@ -2709,6 +2721,65 @@ void consoleWin_t::setAutoFireOffFrames(void)
 	{
 	   autoFireOffFrames = dialog.intValue();
 	}
+}
+
+void consoleWin_t::incrSoundVolume(void)
+{
+	fceuWrapperLock();
+	FCEUD_SoundVolumeAdjust( 1);
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::decrSoundVolume(void)
+{
+	fceuWrapperLock();
+	FCEUD_SoundVolumeAdjust(-1);
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleLagCounterDisplay(void)
+{
+	fceuWrapperLock();
+	lagCounterDisplay = !lagCounterDisplay;
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleFrameAdvLagSkip(void)
+{
+	fceuWrapperLock();
+	frameAdvanceLagSkip = !frameAdvanceLagSkip;
+	FCEUI_DispMessage ("Skipping lag in Frame Advance %sabled.", 0, frameAdvanceLagSkip ? "en" : "dis");
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleMovieBindSaveState(void)
+{
+	fceuWrapperLock();
+	bindSavestate = !bindSavestate;
+	FCEUI_DispMessage ("Savestate binding to movie %sabled.", 0, bindSavestate ? "en" : "dis");
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleMovieFrameDisplay(void)
+{
+	fceuWrapperLock();
+	FCEUI_MovieToggleFrameDisplay();
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleMovieReadWrite(void)
+{
+	fceuWrapperLock();
+	FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleInputDisplay(void)
+{
+	fceuWrapperLock();
+	FCEUI_ToggleInputDisplay();
+	g_config->setOption ("SDL.InputDisplay", input_display);
+	fceuWrapperUnLock();
 }
 
 void consoleWin_t::openMovie(void)

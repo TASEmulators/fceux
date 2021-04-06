@@ -17,6 +17,7 @@ extern int postrenderscanlines;
 extern int vblankscanlines;
 
 extern bool AutoResumePlay;
+extern bool frameAdvanceLagSkip;
 extern char romNameWhenClosingEmulator[];
 
 #define DECLFR(x) uint8 x (uint32 A)

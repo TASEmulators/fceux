@@ -303,6 +303,14 @@ class  consoleWin_t : public QMainWindow
 		void recordMovieAs(void);
 		void setAutoFireOnFrames(void);
 		void setAutoFireOffFrames(void);
+		void incrSoundVolume(void);
+		void decrSoundVolume(void);
+		void toggleLagCounterDisplay(void);
+		void toggleFrameAdvLagSkip(void);
+		void toggleMovieBindSaveState(void);
+		void toggleMovieFrameDisplay(void);
+		void toggleMovieReadWrite(void);
+		void toggleInputDisplay(void);
 
 };
 
