@@ -1007,23 +1007,23 @@ static void KeyboardCommands (void)
 	}
 #endif
 
-	for (int i = 0; i < 10; i++)
-	{
-		if ( Hotkeys[HK_SELECT_STATE_0 + i].getRisingEdge() )
-		{
-			FCEUI_SelectState (i, 1);
-		}
-	}
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	if ( Hotkeys[HK_SELECT_STATE_0 + i].getRisingEdge() )
+	//	{
+	//		FCEUI_SelectState (i, 1);
+	//	}
+	//}
 
-	if ( Hotkeys[HK_SELECT_STATE_NEXT].getRisingEdge() )
-	{
-		FCEUI_SelectStateNext (1);
-	}
+	//if ( Hotkeys[HK_SELECT_STATE_NEXT].getRisingEdge() )
+	//{
+	//	FCEUI_SelectStateNext (1);
+	//}
 
-	if ( Hotkeys[HK_SELECT_STATE_PREV].getRisingEdge() )
-	{
-		FCEUI_SelectStateNext (-1);
-	}
+	//if ( Hotkeys[HK_SELECT_STATE_PREV].getRisingEdge() )
+	//{
+	//	FCEUI_SelectStateNext (-1);
+	//}
 
 	if ( Hotkeys[HK_BIND_STATE].getRisingEdge() )
 	{

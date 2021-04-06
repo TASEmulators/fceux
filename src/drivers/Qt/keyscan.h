@@ -45,6 +45,7 @@
 
 #include <QtCore>
 #include <QKeyEvent>
+#include <QKeySequence>
 #include <SDL.h>
 
 SDL_Keycode convQtKey2SDLKeyCode( Qt::Key q );
@@ -52,5 +53,7 @@ SDL_Keycode convQtKey2SDLKeyCode( Qt::Key q );
 SDL_Scancode convQtKey2SDLScanCode( Qt::Key q );
 
 SDL_Keymod convQtKey2SDLModifier( Qt::KeyboardModifiers m );
+
+int  convKeyEvent2Sequence( QKeyEvent *event );
 
 int  pushKeyEvent( QKeyEvent *event, int pressDown );

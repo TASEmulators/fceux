@@ -726,6 +726,9 @@ void consoleWin_t::createMainMenu(void)
 	connect( Hotkeys[ HK_SELECT_STATE_8 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState8(void)) );
 	connect( Hotkeys[ HK_SELECT_STATE_9 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState9(void)) );
 	
+	connect( Hotkeys[ HK_SELECT_STATE_PREV ].getShortcut(), SIGNAL(activated()), this, SLOT(decrementState(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_NEXT ].getShortcut(), SIGNAL(activated()), this, SLOT(incrementState(void)) );
+
 #ifdef _S9XLUA_H
 	// File -> Quick Save
 	loadLuaAct = new QAction(tr("Load &Lua Script"), this);
@@ -2050,6 +2053,20 @@ void consoleWin_t::changeState9(void)
 {
 	fceuWrapperLock();
 	FCEUI_SelectState( 9, 1 );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::incrementState(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectStateNext(1);
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::decrementState(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectStateNext(-1);
 	fceuWrapperUnLock();
 }
 

@@ -262,6 +262,8 @@ class  consoleWin_t : public QMainWindow
 		void changeState7(void);
 		void changeState8(void);
 		void changeState9(void);
+		void incrementState(void);
+		void decrementState(void);
 		void loadLua(void);
 		void takeScreenShot(void);
 		void powerConsoleCB(void);

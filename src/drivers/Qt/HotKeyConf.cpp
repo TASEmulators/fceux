@@ -302,15 +302,16 @@ void HotKeyConfSetDialog_t::keyReleaseEvent(QKeyEvent *event)
 void HotKeyConfSetDialog_t::assignHotkey(QKeyEvent *event)
 {
 	bool keyIsModifier;
-	QKeySequence ks( event->modifiers() + event->key() );
+	//QKeySequence ks( event->modifiers() + event->key() );
+	QKeySequence ks( convKeyEvent2Sequence(event) );
 	SDL_Keycode k = convQtKey2SDLKeyCode((Qt::Key)event->key());
 	//SDL_Keymod m = convQtKey2SDLModifier(event->modifiers());
 
 	keyIsModifier = (k == SDLK_LCTRL) || (k == SDLK_RCTRL) ||
-					(k == SDLK_LSHIFT) || (k == SDLK_RSHIFT) ||
-					(k == SDLK_LALT) || (k == SDLK_RALT) ||
-					(k == SDLK_LGUI) || (k == SDLK_RGUI) ||
-					(k == SDLK_CAPSLOCK);
+			(k == SDLK_LSHIFT) || (k == SDLK_RSHIFT) ||
+			(k == SDLK_LALT) || (k == SDLK_RALT) ||
+			(k == SDLK_LGUI) || (k == SDLK_RGUI) ||
+			(k == SDLK_CAPSLOCK);
 
 	//printf("Assign: '%s' %i  0x%08x\n", ks.toString().toStdString().c_str(), event->key(), event->key() );
 

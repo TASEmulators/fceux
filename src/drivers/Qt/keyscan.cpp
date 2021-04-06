@@ -876,9 +876,9 @@ SDL_Keycode convQtKey2SDLKeyCode(Qt::Key q)
 	case Key_BracketRight:
 		s = SDLK_RIGHTBRACKET;
 		break;
-	//case  Key_AsciiCircum:
-	//	s = SDLK_CARET;
-	//break;
+	case  Key_AsciiCircum:
+		s = SDLK_CARET;
+	break;
 	case Key_Underscore:
 		s = SDLK_UNDERSCORE;
 		break;
@@ -993,6 +993,74 @@ SDL_Keymod convQtKey2SDLModifier(Qt::KeyboardModifiers m)
 		}
 	}
 	return (SDL_Keymod)s;
+}
+
+int convKeyEvent2Sequence( QKeyEvent *event )
+{
+	int k, m;
+
+	k = event->key();
+	m = event->modifiers();
+
+	printf("Key: %x  Modifier: %x \n", k, m );
+
+	switch ( k )
+	{
+		case Qt::Key_Tab:
+		case Qt::Key_Backtab:
+		case Qt::Key_Space:
+		case Qt::Key_Exclam:
+		case Qt::Key_QuoteDbl:
+		case Qt::Key_NumberSign:
+		case Qt::Key_Dollar:
+		case Qt::Key_Percent:
+		case Qt::Key_Ampersand:
+		case Qt::Key_Apostrophe:
+		case Qt::Key_ParenLeft:
+		case Qt::Key_ParenRight:
+		case Qt::Key_Asterisk:
+		case Qt::Key_Plus:
+		case Qt::Key_Comma:
+		case Qt::Key_Minus:
+		case Qt::Key_Period:
+		case Qt::Key_Slash:
+		case Qt::Key_0:
+		case Qt::Key_1:
+		case Qt::Key_2:
+		case Qt::Key_3:
+		case Qt::Key_4:
+		case Qt::Key_5:
+		case Qt::Key_6:
+		case Qt::Key_7:
+		case Qt::Key_8:
+		case Qt::Key_9:
+		case Qt::Key_Colon:
+		case Qt::Key_Semicolon:
+		case Qt::Key_Less:
+		case Qt::Key_Equal:
+		case Qt::Key_Greater:
+		case Qt::Key_Question:
+		case Qt::Key_At:
+		case Qt::Key_BracketLeft:
+		case Qt::Key_Backslash:
+		case Qt::Key_BracketRight:
+		case Qt::Key_AsciiCircum:
+		case Qt::Key_Underscore:
+		case Qt::Key_QuoteLeft:
+		case Qt::Key_BraceLeft:
+		case Qt::Key_Bar:
+		case Qt::Key_BraceRight:
+		case Qt::Key_AsciiTilde:
+			// With these keys, the shift modifier can be implied and 
+			// should not be included in the output. Doing so may create
+			// an impossible double shifted key sequence.
+			m &= ~Qt::ShiftModifier;
+		break;
+		default:
+			// Leave Modifier Unchanged
+		break;
+	}
+	return (m | k);
 }
 
 int pushKeyEvent(QKeyEvent *event, int pressDown)
