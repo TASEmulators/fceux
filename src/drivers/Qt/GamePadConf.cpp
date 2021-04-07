@@ -1934,7 +1934,7 @@ void GamePadConfigHotKey_t::keyPressEvent(QKeyEvent *event)
 
 	if ( captureState && !isModifier )
 	{
-		QKeySequence ks( event->modifiers() + event->key() );
+		QKeySequence ks( convKeyEvent2Sequence(event) );
 
 		k->keySeq[idx].key      = event->key();
 		k->keySeq[idx].modifier = event->modifiers();

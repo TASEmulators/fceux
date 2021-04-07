@@ -145,7 +145,7 @@ static uint32 JSreturn = 0;
 #include "keyscan.h"
 static uint8  g_keyState[SDL_NUM_SCANCODES];
 static int    keyModifier = 0;
-static int DIPS = 0;
+//static int DIPS = 0;
 
 static uint8 keyonce[SDL_NUM_SCANCODES];
 #define KEY(__a) g_keyState[MKK(__a)]
@@ -438,64 +438,9 @@ void hotkey_t::setModifierFromString( const char *s )
 void
 setHotKeys (void)
 {
-	int j,k;
-	std::string keyText;
-	std::string prefix = "SDL.Hotkeys.";
-	char id[64], val[128];
-	const char *hotKeyName, *hotKeySeq;
-//SDL_Keycode SDL_GetKeyFromName(const char* name)
-
 	for (int i = 0; i < HK_MAX; i++)
 	{
 		Hotkeys[i].readConfig();
-		//g_config->getOption (prefix + Hotkeys[i].getConfigName(), &keyText);
-
-		//j=0;
-
-		//while ( keyText[j] != 0 )
-		//{
-		//	while ( isspace(keyText[j]) ) j++;
-
-		//	if ( isalpha( keyText[j] ) || (keyText[j] == '_') )
-		//	{
-		//		k=0;
-		//		while ( isalnum( keyText[j] ) || (keyText[j] == '_') )
-		//		{
-		//			id[k] = keyText[j]; j++; k++;
-		//		}
-		//		id[k] = 0;
-
-		//		if ( keyText[j] != '=' )
-		//		{
-		//			printf("Error: Invalid Hot Key Config for %s = %s \n", getHotkeyString(i), keyText.c_str() );
-		//			break;
-		//		}
-		//		j++;
-
-		//		k=0;
-		//		while ( !isspace(keyText[j]) && (keyText[j] != 0) )
-		//		{
-		//			val[k] = keyText[j]; j++; k++;
-		//		}
-		//		val[k] = 0;
-
-		//		//printf("ID:%s  Val:%s \n", id, val );
-
-		//		if ( strcmp( id, "key" ) == 0 )
-		//		{
-		//			Hotkeys[i].sdl.value = SDL_GetKeyFromName( val );
-		//		}
-		//		else if ( strcmp( id, "mod" ) == 0 )
-		//		{
-		//			Hotkeys[i].setModifierFromString( val );
-		//		}
-		//	}
-		//	else
-		//	{
-		//		break;
-		//	}
-		//}
-
 	}
 	return;
 }
@@ -730,7 +675,7 @@ unsigned int *GetKeyboard(void)
  */
 static void KeyboardCommands (void)
 {
-	int is_shift, is_alt;
+	//int is_shift, is_alt;
 
 	// get the keyboard input
 
@@ -749,33 +694,33 @@ static void KeyboardCommands (void)
 		}
 	}
 
-	if (g_keyState[SDL_SCANCODE_LSHIFT] || g_keyState[SDL_SCANCODE_RSHIFT])
-	{
-		is_shift = 1;
-	}
-	else
-	{
-		is_shift = 0;
-	}
+	//if (g_keyState[SDL_SCANCODE_LSHIFT] || g_keyState[SDL_SCANCODE_RSHIFT])
+	//{
+	//	is_shift = 1;
+	//}
+	//else
+	//{
+	//	is_shift = 0;
+	//}
 
-	if (g_keyState[SDL_SCANCODE_LALT] || g_keyState[SDL_SCANCODE_RALT])
-	{
-		is_alt = 1;
-	}
-	else
-	{
-		is_alt = 0;
-	}
+	//if (g_keyState[SDL_SCANCODE_LALT] || g_keyState[SDL_SCANCODE_RALT])
+	//{
+	//	is_alt = 1;
+	//}
+	//else
+	//{
+	//	is_alt = 0;
+	//}
 
 
-	if ( Hotkeys[HK_TOGGLE_BG].getRisingEdge() )
-	{
-		bool fgOn, bgOn;
+	//if ( Hotkeys[HK_TOGGLE_BG].getRisingEdge() )
+	//{
+	//	bool fgOn, bgOn;
 
-		FCEUI_GetRenderPlanes( fgOn, bgOn );
+	//	FCEUI_GetRenderPlanes( fgOn, bgOn );
 
-		FCEUI_SetRenderPlanes( fgOn, !bgOn );
-	}
+	//	FCEUI_SetRenderPlanes( fgOn, !bgOn );
+	//}
 
 	// Alt-Enter to toggle full-screen
 	// This is already handled by Qt Menu Actions
@@ -807,108 +752,108 @@ static void KeyboardCommands (void)
 	//}
 
 	// Toggle Movie auto-backup
-	if ( is_shift )
-	{
-		if (keyonly (M))
-		{
-			autoMovieBackup ^= 1;
-			FCEUI_DispMessage ("Automatic movie backup %sabled.", 0,
-				 autoMovieBackup ? "en" : "dis");
-		}
-	}
+	//if ( is_shift )
+	//{
+	//	if (keyonly (M))
+	//	{
+	//		autoMovieBackup ^= 1;
+	//		FCEUI_DispMessage ("Automatic movie backup %sabled.", 0,
+	//			 autoMovieBackup ? "en" : "dis");
+	//	}
+	//}
 
-	if ( is_alt )
-	{
-		// Start recording an FM2 movie on Alt+R
-		if (keyonly (R))
-		{
-			FCEUD_MovieRecordTo ();
-		}
-		// Save a state from a file
-		if (keyonly (S))
-		{
-			FCEUD_SaveStateAs ();
-		}
-		// Load a state from a file
-		if (keyonly (L))
-		{
-			FCEUD_LoadStateFrom ();
-		}
-	}
+	//if ( is_alt )
+	//{
+	//	// Start recording an FM2 movie on Alt+R
+	//	if (keyonly (R))
+	//	{
+	//		FCEUD_MovieRecordTo ();
+	//	}
+	//	// Save a state from a file
+	//	if (keyonly (S))
+	//	{
+	//		FCEUD_SaveStateAs ();
+	//	}
+	//	// Load a state from a file
+	//	if (keyonly (L))
+	//	{
+	//		FCEUD_LoadStateFrom ();
+	//	}
+	//}
 
 		// Famicom disk-system games
-	if (gametype == GIT_FDS)
-	{
-		if ( Hotkeys[HK_FDS_SELECT].getRisingEdge() )
-		{
-			FCEUI_FDSSelect ();
-		}
-		if ( Hotkeys[HK_FDS_EJECT].getRisingEdge() )
-		{
-			FCEUI_FDSInsert ();
-		}
-	}
-
-	if ( Hotkeys[HK_SCREENSHOT].getRisingEdge() )
-	{
-		FCEUI_SaveSnapshot ();
-	}
+//	if (gametype == GIT_FDS)
+//	{
+//		if ( Hotkeys[HK_FDS_SELECT].getRisingEdge() )
+//		{
+//			FCEUI_FDSSelect ();
+//		}
+//		if ( Hotkeys[HK_FDS_EJECT].getRisingEdge() )
+//		{
+//			FCEUI_FDSInsert ();
+//		}
+//	}
+//
+//	if ( Hotkeys[HK_SCREENSHOT].getRisingEdge() )
+//	{
+//		FCEUI_SaveSnapshot ();
+//	}
 
 	// if not NES Sound Format
-	if (gametype != GIT_NSF)
-	{
-		if ( Hotkeys[HK_CHEAT_MENU].getRisingEdge() )
-		{
-			openCheatDialog( consoleWindow );
-		}
-
-		// f5 (default) save key, hold shift to save movie
-		if ( Hotkeys[HK_SAVE_STATE].getRisingEdge() )
-		{
-			if (is_shift)
-			{
-				std::string movie_fname = FCEU_MakeFName (FCEUMKF_MOVIE, 0, 0);
-				FCEUI_printf ("Recording movie to %s\n", movie_fname.c_str() );
-				FCEUI_SaveMovie(movie_fname.c_str() , MOVIE_FLAG_NONE, L"");
-			}
-			else
-			{
-				FCEUI_SaveState (NULL);
-			}
-		}
-
-		// f7 to load state, Shift-f7 to load movie
-		if ( Hotkeys[HK_LOAD_STATE].getRisingEdge() )
-		{
-			if (is_shift)
-			{
-				FCEUI_StopMovie ();
-				std::string fname;
-				fname =
-				GetFilename ("Open FM2 movie for playback...", false,
-								"FM2 movies|*.fm2");
-				if (fname != "")
-				{
-					if (fname.find (".fm2") != std::string::npos
-					|| fname.find (".fm3") != std::string::npos)
-					{
-						FCEUI_printf ("Playing back movie located at %s\n",
-										fname.c_str ());
-						FCEUI_LoadMovie (fname.c_str (), false, false);
-					}
-					else
-					{
-						FCEUI_printf
-							("Only .fm2 and .fm3 movies are supported.\n");
-					}
-				}
-			}
-			else
-			{
-				FCEUI_LoadState(NULL);
-			}
-		}
-	}
+//	if (gametype != GIT_NSF)
+//	{
+//		if ( Hotkeys[HK_CHEAT_MENU].getRisingEdge() )
+//		{
+//			openCheatDialog( consoleWindow );
+//		}
+//
+//		// f5 (default) save key, hold shift to save movie
+//		if ( Hotkeys[HK_SAVE_STATE].getRisingEdge() )
+//		{
+//			if (is_shift)
+//			{
+//				std::string movie_fname = FCEU_MakeFName (FCEUMKF_MOVIE, 0, 0);
+//				FCEUI_printf ("Recording movie to %s\n", movie_fname.c_str() );
+//				FCEUI_SaveMovie(movie_fname.c_str() , MOVIE_FLAG_NONE, L"");
+//			}
+//			else
+//			{
+//				FCEUI_SaveState (NULL);
+//			}
+//		}
+//
+//		// f7 to load state, Shift-f7 to load movie
+//		if ( Hotkeys[HK_LOAD_STATE].getRisingEdge() )
+//		{
+//			if (is_shift)
+//			{
+//				FCEUI_StopMovie ();
+//				std::string fname;
+//				fname =
+//				GetFilename ("Open FM2 movie for playback...", false,
+//								"FM2 movies|*.fm2");
+//				if (fname != "")
+//				{
+//					if (fname.find (".fm2") != std::string::npos
+//					|| fname.find (".fm3") != std::string::npos)
+//					{
+//						FCEUI_printf ("Playing back movie located at %s\n",
+//										fname.c_str ());
+//						FCEUI_LoadMovie (fname.c_str (), false, false);
+//					}
+//					else
+//					{
+//						FCEUI_printf
+//							("Only .fm2 and .fm3 movies are supported.\n");
+//					}
+//				}
+//			}
+//			else
+//			{
+//				FCEUI_LoadState(NULL);
+//			}
+//		}
+//	}
 
 
 	//if ( Hotkeys[HK_DECREASE_SPEED].getRisingEdge() )
@@ -1139,25 +1084,26 @@ static void KeyboardCommands (void)
 //		{
 //			barcoder = 0;
 //		}
-//
-//#define SSM(x)                                    \
-//do {                                              \
-//	if(barcoder) {                                \
-//		if(bbuft < 13) {                          \
-//			bbuf[bbuft++] = '0' + x;              \
-//			bbuf[bbuft] = 0;                      \
-//		}                                         \
-//		FCEUI_DispMessage("Barcode: %s",0, bbuf); \
-//	}                                             \
-//} while(0)
-//
-//		DIPSless:
-//		for(int i=0; i<10;i++)
-//		{
-//			if (keyonly (i))
-//				SSM (i);
-//		}
-//#undef SSM
+/*
+#define SSM(x)
+do {                                              \
+	if(barcoder) {                                \
+		if(bbuft < 13) {                          \
+			bbuf[bbuft++] = '0' + x;              \
+			bbuf[bbuft] = 0;                      \
+		}                                         \
+		FCEUI_DispMessage("Barcode: %s",0, bbuf); \
+	}                                             \
+} while(0)
+
+		DIPSless:
+		for(int i=0; i<10;i++)
+		{
+			if (keyonly (i))
+				SSM (i);
+		}
+#undef SSM
+*/
 //	}
 }
 

@@ -572,9 +572,11 @@ void consoleWin_t::initHotKeys(void)
 	connect( Hotkeys[ HK_LAG_COUNTER_DISPLAY  ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleLagCounterDisplay(void)) );
 	connect( Hotkeys[ HK_FA_LAG_SKIP          ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleFrameAdvLagSkip(void))   );
 	connect( Hotkeys[ HK_BIND_STATE           ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieBindSaveState(void)));
-	connect( Hotkeys[ HK_TOGGLE_FRAME_DISPLAY ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieFrameDisplay(void)));
-	connect( Hotkeys[ HK_MOVIE_TOGGLE_RW      ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieReadWrite(void)));
-	connect( Hotkeys[ HK_TOGGLE_INPUT_DISPLAY ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleInputDisplay(void)));
+	connect( Hotkeys[ HK_TOGGLE_FRAME_DISPLAY ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieFrameDisplay(void)) );
+	connect( Hotkeys[ HK_MOVIE_TOGGLE_RW      ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieReadWrite(void))    );
+	connect( Hotkeys[ HK_TOGGLE_INPUT_DISPLAY ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleInputDisplay(void))      );
+	connect( Hotkeys[ HK_TOGGLE_BG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleBackground(void))        );
+	connect( Hotkeys[ HK_TOGGLE_FG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleForeground(void))        );
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::createMainMenu(void)
@@ -1073,6 +1075,9 @@ void consoleWin_t::createMainMenu(void)
 	fdsSwitchAct->setStatusTip(tr("Switch Disk"));
 	connect(fdsSwitchAct, SIGNAL(triggered()), this, SLOT(fdsSwitchDisk(void)) );
 	
+	Hotkeys[ HK_FDS_SELECT ].setAction( fdsSwitchAct );
+	connect( Hotkeys[ HK_FDS_SELECT ].getShortcut(), SIGNAL(activated()), this, SLOT(fdsSwitchDisk(void)) );
+
 	subMenu->addAction(fdsSwitchAct);
 
 	// Emulation -> FDS -> Eject Disk
@@ -1081,6 +1086,9 @@ void consoleWin_t::createMainMenu(void)
 	fdsEjectAct->setStatusTip(tr("Eject Disk"));
 	connect(fdsEjectAct, SIGNAL(triggered()), this, SLOT(fdsEjectDisk(void)) );
 	
+	Hotkeys[ HK_FDS_EJECT ].setAction( fdsEjectAct );
+	connect( Hotkeys[ HK_FDS_EJECT ].getShortcut(), SIGNAL(activated()), this, SLOT(fdsEjectDisk(void)) );
+
 	subMenu->addAction(fdsEjectAct);
 
 	// Emulation -> FDS -> Load BIOS
@@ -1190,6 +1198,9 @@ void consoleWin_t::createMainMenu(void)
 	cheatsAct->setStatusTip(tr("Open Cheat Window"));
 	connect(cheatsAct, SIGNAL(triggered()), this, SLOT(openCheats(void)) );
 	
+	Hotkeys[ HK_CHEAT_MENU ].setAction( cheatsAct );
+	connect( Hotkeys[ HK_CHEAT_MENU ].getShortcut(), SIGNAL(activated()), this, SLOT(openCheats(void)) );
+
 	toolsMenu->addAction(cheatsAct);
 
 	// Tools -> RAM Search
@@ -1298,11 +1309,14 @@ void consoleWin_t::createMainMenu(void)
 
 	// Movie -> Play
 	openMovAct = new QAction(tr("&Play"), this);
-	openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	//openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	openMovAct->setStatusTip(tr("Play Movie File"));
 	openMovAct->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
 	connect(openMovAct, SIGNAL(triggered()), this, SLOT(openMovie(void)) );
 	
+	Hotkeys[ HK_PLAY_MOVIE_FROM ].setAction( openMovAct );
+	connect( Hotkeys[ HK_PLAY_MOVIE_FROM ].getShortcut(), SIGNAL(activated()), this, SLOT(openMovie(void)) );
+
 	movieMenu->addAction(openMovAct);
 
 	// Movie -> Stop
@@ -1312,13 +1326,16 @@ void consoleWin_t::createMainMenu(void)
 	stopMovAct->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
 	connect(stopMovAct, SIGNAL(triggered()), this, SLOT(stopMovie(void)) );
 	
+	Hotkeys[ HK_STOP_MOVIE ].setAction( stopMovAct );
+	connect( Hotkeys[ HK_STOP_MOVIE ].getShortcut(), SIGNAL(activated()), this, SLOT(stopMovie(void)) );
+
 	movieMenu->addAction(stopMovAct);
 	
 	movieMenu->addSeparator();
 
 	// Movie -> Record
 	recMovAct = new QAction(tr("&Record"), this);
-	recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	//recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	recMovAct->setStatusTip(tr("Record Movie"));
 	recMovAct->setIcon( QIcon(":icons/media-record.png") );
 	connect(recMovAct, SIGNAL(triggered()), this, SLOT(recordMovie(void)) );
@@ -1331,6 +1348,9 @@ void consoleWin_t::createMainMenu(void)
 	recAsMovAct->setStatusTip(tr("Record Movie"));
 	connect(recAsMovAct, SIGNAL(triggered()), this, SLOT(recordMovieAs(void)) );
 	
+	Hotkeys[ HK_RECORD_MOVIE_TO ].setAction( recAsMovAct );
+	connect( Hotkeys[ HK_RECORD_MOVIE_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(recordMovieAs(void)) );
+
 	movieMenu->addAction(recAsMovAct);
 
 	//-----------------------------------------------------------------------
@@ -2777,6 +2797,24 @@ void consoleWin_t::toggleInputDisplay(void)
 	fceuWrapperLock();
 	FCEUI_ToggleInputDisplay();
 	g_config->setOption ("SDL.InputDisplay", input_display);
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleBackground(void)
+{
+	bool fgOn, bgOn;
+	fceuWrapperLock();
+	FCEUI_GetRenderPlanes( fgOn,  bgOn );
+	FCEUI_SetRenderPlanes( fgOn, !bgOn );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleForeground(void)
+{
+	bool fgOn, bgOn;
+	fceuWrapperLock();
+	FCEUI_GetRenderPlanes(  fgOn, bgOn );
+	FCEUI_SetRenderPlanes( !fgOn, bgOn );
 	fceuWrapperUnLock();
 }
 

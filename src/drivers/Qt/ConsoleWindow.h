@@ -312,6 +312,8 @@ class  consoleWin_t : public QMainWindow
 		void toggleMovieReadWrite(void);
 		void toggleInputDisplay(void);
 		void toggleTurboMode(void);
+		void toggleBackground(void);
+		void toggleForeground(void);
 
 };
 

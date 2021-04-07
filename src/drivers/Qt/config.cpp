@@ -119,6 +119,9 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut )
 		case HK_TOGGLE_BG:
 			name = "ToggleBG"; keySeq = "";	
 		break;
+		case HK_TOGGLE_FG:
+			name = "ToggleFG"; keySeq = "";	
+		break;
 		// Save States
 		case HK_SAVE_STATE:
 			name = "SaveState"; keySeq = "I";	
@@ -237,6 +240,18 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut )
 		break;
 		case HK_MOVIE_TOGGLE_RW:
 			name = "ToggleMovieRW"; keySeq = "Q";	
+		break;
+		case HK_PLAY_MOVIE_FROM:
+			name = "PlayMovieFrom"; keySeq = "";	
+		break;
+		case HK_MOVIE_PLAY_RESTART:
+			name = "PlayMovieFromBeginning"; keySeq = "";	
+		break;
+		case HK_RECORD_MOVIE_TO:
+			name = "RecordMovieTo"; keySeq = "";	
+		break;
+		case HK_STOP_MOVIE:
+			name = "StopMovie"; keySeq = "";	
 		break;
 		case HK_MUTE_CAPTURE:
 			name = "MuteCapture"; keySeq = "'";	
