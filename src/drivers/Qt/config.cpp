@@ -128,68 +128,68 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 			name = "SaveState"; keySeq = "I"; title = "Save State";
 		break;
 		case HK_SAVE_STATE_0:
-			name = "SaveState0"; keySeq = "F10"; title = "Save State to Slot 0";
+			name = "SaveState0"; keySeq = "Shift+F10"; title = "Save State to Slot 0";
 		break;
 		case HK_SAVE_STATE_1:
-			name = "SaveState1"; keySeq = "F1"; title = "Save State to Slot 1";
+			name = "SaveState1"; keySeq = "Shift+F1"; title = "Save State to Slot 1";
 		break;
 		case HK_SAVE_STATE_2:
-			name = "SaveState2"; keySeq = "F2"; title = "Save State to Slot 2";
+			name = "SaveState2"; keySeq = "Shift+F2"; title = "Save State to Slot 2";
 		break;
 		case HK_SAVE_STATE_3:
-			name = "SaveState3"; keySeq = "F3"; title = "Save State to Slot 3";
+			name = "SaveState3"; keySeq = "Shift+F3"; title = "Save State to Slot 3";
 		break;
 		case HK_SAVE_STATE_4:
-			name = "SaveState4"; keySeq = "F4"; title = "Save State to Slot 4";
+			name = "SaveState4"; keySeq = "Shift+F4"; title = "Save State to Slot 4";
 		break;
 		case HK_SAVE_STATE_5:
-			name = "SaveState5"; keySeq = "F5"; title = "Save State to Slot 5";
+			name = "SaveState5"; keySeq = "Shift+F5"; title = "Save State to Slot 5";
 		break;
 		case HK_SAVE_STATE_6:
-			name = "SaveState6"; keySeq = "F6"; title = "Save State to Slot 6";
+			name = "SaveState6"; keySeq = "Shift+F6"; title = "Save State to Slot 6";
 		break;
 		case HK_SAVE_STATE_7:
-			name = "SaveState7"; keySeq = "F7"; title = "Save State to Slot 7";
+			name = "SaveState7"; keySeq = "Shift+F7"; title = "Save State to Slot 7";
 		break;
 		case HK_SAVE_STATE_8:
-			name = "SaveState8"; keySeq = "F8"; title = "Save State to Slot 8";
+			name = "SaveState8"; keySeq = "Shift+F8"; title = "Save State to Slot 8";
 		break;
 		case HK_SAVE_STATE_9:
-			name = "SaveState9"; keySeq = "F9"; title = "Save State to Slot 9";
+			name = "SaveState9"; keySeq = "Shift+F9"; title = "Save State to Slot 9";
 		break;
 		// Load States
 		case HK_LOAD_STATE:
-			name = "LoadState"; keySeq = "Shift+I";	title = "Load State";
+			name = "LoadState"; keySeq = "P";	title = "Load State";
 		break;
 		case HK_LOAD_STATE_0:
-			name = "LoadState0"; keySeq = "Shift+F10"; title = "Load State From Slot 0";
+			name = "LoadState0"; keySeq = "F10"; title = "Load State From Slot 0";
 		break;
 		case HK_LOAD_STATE_1:
-			name = "LoadState1"; keySeq = "Shift+F1"; title = "Load State From Slot 1";
+			name = "LoadState1"; keySeq = "F1"; title = "Load State From Slot 1";
 		break;
 		case HK_LOAD_STATE_2:
-			name = "LoadState2"; keySeq = "Shift+F2"; title = "Load State From Slot 2";
+			name = "LoadState2"; keySeq = "F2"; title = "Load State From Slot 2";
 		break;
 		case HK_LOAD_STATE_3:
-			name = "LoadState3"; keySeq = "Shift+F3"; title = "Load State From Slot 3";
+			name = "LoadState3"; keySeq = "F3"; title = "Load State From Slot 3";
 		break;
 		case HK_LOAD_STATE_4:
-			name = "LoadState4"; keySeq = "Shift+F4"; title = "Load State From Slot 4";
+			name = "LoadState4"; keySeq = "F4"; title = "Load State From Slot 4";
 		break;
 		case HK_LOAD_STATE_5:
-			name = "LoadState5"; keySeq = "Shift+F5"; title = "Load State From Slot 5";
+			name = "LoadState5"; keySeq = "F5"; title = "Load State From Slot 5";
 		break;
 		case HK_LOAD_STATE_6:
-			name = "LoadState6"; keySeq = "Shift+F6"; title = "Load State From Slot 6";
+			name = "LoadState6"; keySeq = "F6"; title = "Load State From Slot 6";
 		break;
 		case HK_LOAD_STATE_7:
-			name = "LoadState7"; keySeq = "Shift+F7"; title = "Load State From Slot 7";
+			name = "LoadState7"; keySeq = "F7"; title = "Load State From Slot 7";
 		break;
 		case HK_LOAD_STATE_8:
-			name = "LoadState8"; keySeq = "Shift+F8"; title = "Load State From Slot 8";
+			name = "LoadState8"; keySeq = "F8"; title = "Load State From Slot 8";
 		break;
 		case HK_LOAD_STATE_9:
-			name = "LoadState9"; keySeq = "Shift+F9"; title = "Load State From Slot 9";
+			name = "LoadState9"; keySeq = "F9"; title = "Load State From Slot 9";
 		break;
 		case HK_FDS_SELECT:
 			name = "FDSSelect"; keySeq = ""; title = "Switch FDS Disk Side";

@@ -577,6 +577,28 @@ void consoleWin_t::initHotKeys(void)
 	connect( Hotkeys[ HK_TOGGLE_INPUT_DISPLAY ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleInputDisplay(void))      );
 	connect( Hotkeys[ HK_TOGGLE_BG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleBackground(void))        );
 	connect( Hotkeys[ HK_TOGGLE_FG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleForeground(void))        );
+
+	connect( Hotkeys[ HK_SAVE_STATE_0         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState0(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_1         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState1(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_2         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState2(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_3         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState3(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_4         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState4(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_5         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState5(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_6         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState6(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_7         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState7(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_8         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState8(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_9         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState9(void))        );
+
+	connect( Hotkeys[ HK_LOAD_STATE_0         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState0(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_1         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState1(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_2         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState2(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_3         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState3(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_4         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState4(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_5         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState5(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_6         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState6(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_7         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState7(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_8         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState8(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_9         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState9(void))        );
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::createMainMenu(void)
@@ -674,7 +696,7 @@ void consoleWin_t::createMainMenu(void)
 	
 	// File -> Quick Save
 	quickSaveAct = new QAction(tr("Quick &Save"), this);
-	quickSaveAct->setShortcut( QKeySequence(tr("F5")));
+	//quickSaveAct->setShortcut( QKeySequence(tr("F5")));
 	quickSaveAct->setStatusTip(tr("Quick Save"));
 	connect(quickSaveAct, SIGNAL(triggered()), this, SLOT(quickSave(void)) );
 	
@@ -2009,6 +2031,26 @@ void consoleWin_t::quickLoad(void)
 	fceuWrapperUnLock();
 }
 
+void consoleWin_t::loadState(int slot)
+{
+	int prevState;
+	fceuWrapperLock();
+	prevState = FCEUI_SelectState( slot, false );
+	FCEUI_LoadState( NULL, true );
+	FCEUI_SelectState( prevState, false );
+	fceuWrapperUnLock();
+}
+void consoleWin_t::loadState0(void){ loadState(0); }
+void consoleWin_t::loadState1(void){ loadState(1); }
+void consoleWin_t::loadState2(void){ loadState(2); }
+void consoleWin_t::loadState3(void){ loadState(3); }
+void consoleWin_t::loadState4(void){ loadState(4); }
+void consoleWin_t::loadState5(void){ loadState(5); }
+void consoleWin_t::loadState6(void){ loadState(6); }
+void consoleWin_t::loadState7(void){ loadState(7); }
+void consoleWin_t::loadState8(void){ loadState(8); }
+void consoleWin_t::loadState9(void){ loadState(9); }
+
 void consoleWin_t::quickSave(void)
 {
 	fceuWrapperLock();
@@ -2016,75 +2058,43 @@ void consoleWin_t::quickSave(void)
 	fceuWrapperUnLock();
 }
 
-void consoleWin_t::changeState0(void)
+void consoleWin_t::saveState(int slot)
 {
+	int prevState;
 	fceuWrapperLock();
-	FCEUI_SelectState( 0, 1 );
+	prevState = FCEUI_SelectState( slot, false );
+	FCEUI_SaveState( NULL, true );
+	FCEUI_SelectState( prevState, false );
 	fceuWrapperUnLock();
 }
+void consoleWin_t::saveState0(void){ saveState(0); }
+void consoleWin_t::saveState1(void){ saveState(1); }
+void consoleWin_t::saveState2(void){ saveState(2); }
+void consoleWin_t::saveState3(void){ saveState(3); }
+void consoleWin_t::saveState4(void){ saveState(4); }
+void consoleWin_t::saveState5(void){ saveState(5); }
+void consoleWin_t::saveState6(void){ saveState(6); }
+void consoleWin_t::saveState7(void){ saveState(7); }
+void consoleWin_t::saveState8(void){ saveState(8); }
+void consoleWin_t::saveState9(void){ saveState(9); }
 
-void consoleWin_t::changeState1(void)
+void consoleWin_t::changeState(int slot)
 {
 	fceuWrapperLock();
-	FCEUI_SelectState( 1, 1 );
+	FCEUI_SelectState( slot, true );
 	fceuWrapperUnLock();
+	state[slot]->setChecked(true);
 }
-
-void consoleWin_t::changeState2(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 2, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState3(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 3, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState4(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 4, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState5(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 5, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState6(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 6, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState7(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 7, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState8(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 8, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState9(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 9, 1 );
-	fceuWrapperUnLock();
-}
+void consoleWin_t::changeState0(void){ changeState(0); }
+void consoleWin_t::changeState1(void){ changeState(1); }
+void consoleWin_t::changeState2(void){ changeState(2); }
+void consoleWin_t::changeState3(void){ changeState(3); }
+void consoleWin_t::changeState4(void){ changeState(4); }
+void consoleWin_t::changeState5(void){ changeState(5); }
+void consoleWin_t::changeState6(void){ changeState(6); }
+void consoleWin_t::changeState7(void){ changeState(7); }
+void consoleWin_t::changeState8(void){ changeState(8); }
+void consoleWin_t::changeState9(void){ changeState(9); }
 
 void consoleWin_t::incrementState(void)
 {

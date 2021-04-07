@@ -218,6 +218,9 @@ class  consoleWin_t : public QMainWindow
 		void saveRecentRomMenu(void);
 		void clearRomList(void);
 		void setRegion(int region);
+		void changeState(int slot);
+		void saveState(int slot);
+		void loadState(int slot);
 
 	public slots:
 		void openDebugWindow(void);
@@ -314,6 +317,26 @@ class  consoleWin_t : public QMainWindow
 		void toggleTurboMode(void);
 		void toggleBackground(void);
 		void toggleForeground(void);
+		void saveState0(void);
+		void saveState1(void);
+		void saveState2(void);
+		void saveState3(void);
+		void saveState4(void);
+		void saveState5(void);
+		void saveState6(void);
+		void saveState7(void);
+		void saveState8(void);
+		void saveState9(void);
+		void loadState0(void);
+		void loadState1(void);
+		void loadState2(void);
+		void loadState3(void);
+		void loadState4(void);
+		void loadState5(void);
+		void loadState6(void);
+		void loadState7(void);
+		void loadState8(void);
+		void loadState9(void);
 
 };
 
