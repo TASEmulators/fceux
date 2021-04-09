@@ -317,6 +317,7 @@ class  consoleWin_t : public QMainWindow
 		void toggleTurboMode(void);
 		void toggleBackground(void);
 		void toggleForeground(void);
+		void toggleFamKeyBrdEnable(void);
 		void saveState0(void);
 		void saveState1(void);
 		void saveState2(void);

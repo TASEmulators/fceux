@@ -195,7 +195,7 @@ _keyonly (int a)
 
 #define keyonly(__a) _keyonly(MKK(__a))
 
-static int g_fkbEnabled = 0;
+static bool g_fkbEnabled = false;
 
 // this function loads the sdl hotkeys from the config file into the
 // global scope.  this elimates the need for accessing the config file
@@ -670,24 +670,66 @@ unsigned int *GetKeyboard(void)
 	return (unsigned int*)(keystate);
 }
 
+static void FKB_CheckShortcutConflicts(void)
+{
+	bool fkbActv;
+	QShortcut *shortcut;
+
+	fkbActv = g_fkbEnabled && (CurInputType[2] == SIFC_FKB);
+
+	for (int i=0; i<HK_MAX; i++)
+	{
+		shortcut = Hotkeys[i].getShortcut();
+
+		if ( i == HK_FKB_ENABLE )
+		{
+			if ( shortcut )
+			{
+				shortcut->setEnabled(true);
+			}
+			continue;
+		}
+
+		if ( shortcut )
+		{
+			shortcut->setEnabled( !fkbActv );
+		}
+	}
+
+}
+
+void toggleFamilyKeyboardFunc(void)
+{
+	if (CurInputType[2] == SIFC_FKB)
+	{
+		g_fkbEnabled = !g_fkbEnabled;
+
+		FCEUI_DispMessage ("Family Keyboard %sabled.", 0,
+		g_fkbEnabled ? "En" : "Dis");
+	}
+	else
+	{
+		FCEUI_DispMessage ("Family Keyboard Not Active", 0);
+		g_fkbEnabled = false;
+	}
+	FKB_CheckShortcutConflicts();
+}
+
+bool isFamilyKeyboardActv(void)
+{
+	return ( (CurInputType[2] == SIFC_FKB) && g_fkbEnabled );
+}
+
 /**
  * Parse keyboard commands and execute accordingly.
  */
 static void KeyboardCommands (void)
 {
-	//int is_shift, is_alt;
-
 	// get the keyboard input
 
 	// check if the family keyboard is enabled
 	if (CurInputType[2] == SIFC_FKB)
 	{
-		if ( Hotkeys[HK_FKB_ENABLE].getRisingEdge() )
-		{
-			g_fkbEnabled ^= 1;
-			FCEUI_DispMessage ("Family Keyboard %sabled.", 0,
-			g_fkbEnabled ? "en" : "dis");
-		}
 		if (g_fkbEnabled)
 		{
 			return;

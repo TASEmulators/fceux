@@ -137,6 +137,8 @@ const char* ButtonName(const ButtConfig* bc);
 int getInputSelection( int port, int *cur, int *usr );
 int saveInputSettingsToFile( const char *fileBase = NULL );
 int loadInputSettingsFromFile( const char *filename = NULL );
+void toggleFamilyKeyboardFunc(void);
+bool isFamilyKeyboardActv(void);
 
 #endif
 

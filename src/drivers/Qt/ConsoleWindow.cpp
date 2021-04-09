@@ -577,6 +577,7 @@ void consoleWin_t::initHotKeys(void)
 	connect( Hotkeys[ HK_TOGGLE_INPUT_DISPLAY ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleInputDisplay(void))      );
 	connect( Hotkeys[ HK_TOGGLE_BG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleBackground(void))        );
 	connect( Hotkeys[ HK_TOGGLE_FG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleForeground(void))        );
+	connect( Hotkeys[ HK_FKB_ENABLE           ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleFamKeyBrdEnable(void))   );
 
 	connect( Hotkeys[ HK_SAVE_STATE_0         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState0(void))        );
 	connect( Hotkeys[ HK_SAVE_STATE_1         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState1(void))        );
@@ -2373,6 +2374,11 @@ void consoleWin_t::toggleFullscreen(void)
 	{
 		showFullScreen();
 	}
+}
+
+void consoleWin_t::toggleFamKeyBrdEnable(void)
+{
+	toggleFamilyKeyboardFunc();
 }
 
 void consoleWin_t::powerConsoleCB(void)
