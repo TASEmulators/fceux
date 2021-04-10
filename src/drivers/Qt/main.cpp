@@ -45,7 +45,7 @@ static void MessageOutput(QtMsgType type, const QMessageLogContext &context, con
            break;
        case QtWarningMsg:
            sprintf( cmsg, "Qt Warning: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-	   FCEUD_PrintError(cmsg);
+	   FCEUD_Message(cmsg);
            break;
        case QtCriticalMsg:
            sprintf( cmsg, "Qt Critical: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
