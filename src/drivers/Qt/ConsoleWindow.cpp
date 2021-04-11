@@ -111,6 +111,10 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	viewport_GL    = NULL;
 	viewport_SDL   = NULL;
 
+	mainMenuEmuPauseSet   = false;
+	mainMenuEmuWasPaused  = false;
+	mainMenuPauseWhenActv = false;
+
 	if ( use_SDL_video )
 	{
 		viewport_SDL = new ConsoleViewSDL_t(this);
@@ -622,6 +626,9 @@ void consoleWin_t::createMainMenu(void)
 	//-----------------------------------------------------------------------
 	// File
 	fileMenu = menubar->addMenu(tr("&File"));
+	
+	connect( fileMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( fileMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
 
 	// File -> Open ROM
 	openROM = new QAction(tr("&Open ROM"), this);
@@ -808,6 +815,9 @@ void consoleWin_t::createMainMenu(void)
 	// Options
 	optMenu = menubar->addMenu(tr("&Options"));
 
+	connect( optMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( optMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
+
 	// Options -> Input Config
 	inputConfig = new QAction(tr("&Input Config"), this);
 	//inputConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
@@ -927,6 +937,9 @@ void consoleWin_t::createMainMenu(void)
 	//-----------------------------------------------------------------------
 	// Emulation
 	emuMenu = menubar->addMenu(tr("&Emulation"));
+
+	connect( emuMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( emuMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
 
 	// Emulation -> Power
 	powerAct = new QAction(tr("&Power"), this);
@@ -1221,6 +1234,9 @@ void consoleWin_t::createMainMenu(void)
 	// Tools
 	toolsMenu = menubar->addMenu(tr("&Tools"));
 
+	connect( toolsMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( toolsMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
+
 	// Tools -> Cheats
 	cheatsAct = new QAction(tr("&Cheats..."), this);
 	//cheatsAct->setShortcut( QKeySequence(tr("Shift+F7")));
@@ -1267,6 +1283,9 @@ void consoleWin_t::createMainMenu(void)
 	 //-----------------------------------------------------------------------
 	 // Debug
 	debugMenu = menubar->addMenu(tr("&Debug"));
+
+	connect( debugMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( debugMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
 
 	// Debug -> Debugger 
 	debuggerAct = new QAction(tr("&Debugger..."), this);
@@ -1336,6 +1355,9 @@ void consoleWin_t::createMainMenu(void)
 	// Movie
 	movieMenu = menubar->addMenu(tr("&Movie"));
 
+	connect( movieMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( movieMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
+
 	// Movie -> Play
 	openMovAct = new QAction(tr("&Play"), this);
 	//openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
@@ -1386,6 +1408,9 @@ void consoleWin_t::createMainMenu(void)
 	// Help
 	helpMenu = menubar->addMenu(tr("&Help"));
  
+	connect( helpMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( helpMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
+
 	// Help -> About FCEUX
 	aboutAct = new QAction(tr("&About FCEUX"), this);
 	aboutAct->setStatusTip(tr("About FCEUX"));
@@ -2117,6 +2142,35 @@ void consoleWin_t::decrementState(void)
 	fceuWrapperUnLock();
 }
 
+void consoleWin_t::mainMenuOpen(void)
+{
+	//printf("Main Menu Open\n");
+
+	mainMenuEmuWasPaused = FCEUI_EmulationPaused() ? true : false;
+
+	if ( mainMenuPauseWhenActv && !mainMenuEmuPauseSet && !mainMenuEmuWasPaused )
+	{
+		FCEUI_ToggleEmulationPause();
+		mainMenuEmuPauseSet  = true;
+	}
+}
+
+void consoleWin_t::mainMenuClose(void)
+{
+	//printf("Main Menu Close\n");
+
+	if ( mainMenuEmuPauseSet )
+	{
+		bool isPaused = FCEUI_EmulationPaused() ? true : false;
+
+		if ( isPaused != mainMenuEmuWasPaused )
+		{
+			FCEUI_ToggleEmulationPause();
+		}
+		mainMenuEmuPauseSet = false;
+	}
+}
+
 void consoleWin_t::takeScreenShot(void)
 {
 	fceuWrapperLock();
@@ -2410,6 +2464,8 @@ void consoleWin_t::consolePause(void)
 	fceuWrapperLock();
 	fceuWrapperTogglePause();
 	fceuWrapperUnLock();
+
+	mainMenuEmuPauseSet = false;
    return;
 }
 

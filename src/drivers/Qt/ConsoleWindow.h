@@ -199,6 +199,9 @@ class  consoleWin_t : public QMainWindow
 		bool        closeRequested;
 		bool        recentRomMenuReset;
 		bool        firstResize;
+		bool        mainMenuEmuPauseSet;
+		bool        mainMenuEmuWasPaused;
+		bool        mainMenuPauseWhenActv;
 
 		std::list <std::string*> romList;
 
@@ -338,6 +341,8 @@ class  consoleWin_t : public QMainWindow
 		void loadState7(void);
 		void loadState8(void);
 		void loadState9(void);
+		void mainMenuOpen(void);
+		void mainMenuClose(void);
 
 };
 
