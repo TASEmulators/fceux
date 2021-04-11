@@ -566,6 +566,14 @@ void consoleWin_t::initHotKeys(void)
 		Hotkeys[i].init( this );
 	}
 
+	for (int i = 0; i < HK_MAX; i++)
+	{
+		QShortcut *shortcut = Hotkeys[i].getShortcut();
+
+		// Use Lambda Function to set callback
+		connect( shortcut, &QShortcut::activatedAmbiguously, [ this, shortcut ] { warnAmbiguousShortcut( shortcut ); } );
+	}
+
 	// Frame Advance uses key state directly, disable shortcut events
 	Hotkeys[HK_FRAME_ADVANCE].getShortcut()->setEnabled(false);
 	Hotkeys[HK_TURBO        ].getShortcut()->setEnabled(false);
@@ -2433,6 +2441,41 @@ void consoleWin_t::toggleFullscreen(void)
 void consoleWin_t::toggleFamKeyBrdEnable(void)
 {
 	toggleFamilyKeyboardFunc();
+}
+
+void consoleWin_t::warnAmbiguousShortcut( QShortcut *shortcut)
+{
+	char stmp[256];
+	std::string msg;
+	int c = 0;
+
+	sprintf( stmp, "Error: Ambiguous Shortcut Activation for Key Sequence: '%s'\n", shortcut->key().toString().toStdString().c_str() );
+
+	msg.assign( stmp );
+
+	for (int i = 0; i < HK_MAX; i++)
+	{
+		QShortcut *sc = Hotkeys[i].getShortcut();
+
+		if ( sc == NULL )
+		{
+			continue;
+		}
+
+		if ( (sc == shortcut) || (shortcut->key().matches( sc->key() ) == QKeySequence::ExactMatch) )
+		{
+			if ( c == 0 )
+			{
+				msg.append("Hot Key Conflict: "); c++;
+			}
+			else
+			{
+				msg.append(" and "); c++;
+			}
+			msg.append( Hotkeys[i].getConfigName() );
+		}
+	}
+	QueueErrorMsgWindow( msg.c_str() );
 }
 
 void consoleWin_t::powerConsoleCB(void)
