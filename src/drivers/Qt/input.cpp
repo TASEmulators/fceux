@@ -200,7 +200,7 @@ static bool g_fkbEnabled = false;
 // this function loads the sdl hotkeys from the config file into the
 // global scope.  this elimates the need for accessing the config file
 
-struct hotkey_t Hotkeys[HK_MAX];
+class hotkey_t Hotkeys[HK_MAX];
 
 hotkey_t::hotkey_t(void)
 {
