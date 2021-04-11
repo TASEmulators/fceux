@@ -1088,7 +1088,7 @@ static void RefreshLine(int lastpixel) {
 	uint32 vofs;
 	int X1;
 
-	register uint8 *P = Pline;
+	uint8 *P = Pline;
 	int lasttile = lastpixel >> 3;
 	int numtiles;
 	static int norecurse = 0;	// Yeah, recursion would be bad.

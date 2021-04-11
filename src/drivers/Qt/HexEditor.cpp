@@ -34,6 +34,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QActionGroup>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -1847,7 +1848,7 @@ QHexEdit::QHexEdit(QWidget *parent)
 
 	pal = this->palette();
 	pal.setColor(QPalette::Base      , bg );
-	pal.setColor(QPalette::Background, bg );
+	pal.setColor(QPalette::Window    , bg );
 	pal.setColor(QPalette::WindowText, fg );
 
 	//editor->setAutoFillBackground(true);
@@ -1980,7 +1981,7 @@ void QHexEdit::setForeGroundColor( QColor fg )
 
 	pal = this->palette();
 	//pal.setColor(QPalette::Base      , Qt::black);
-	//pal.setColor(QPalette::Background, Qt::black);
+	//pal.setColor(QPalette::Window   , Qt::black);
 	pal.setColor(QPalette::WindowText, fg );
 
 	this->setPalette(pal);
@@ -1992,7 +1993,7 @@ void QHexEdit::setBackGroundColor( QColor bg )
 
 	pal = this->palette();
 	//pal.setColor(QPalette::Base      , Qt::black);
-	pal.setColor(QPalette::Background, bg );
+	pal.setColor(QPalette::Window    , bg );
 	//pal.setColor(QPalette::WindowText, fg );
 
 	this->setPalette(pal);
@@ -3325,17 +3326,17 @@ int QHexEdit::getRomAddrColor( int addr, QColor &fg, QColor &bg )
 	QColor color, oppColor; 
 			
 	fg = this->palette().color(QPalette::WindowText);
-	bg = this->palette().color(QPalette::Background);
+	bg = this->palette().color(QPalette::Window    );
 
 	if ( reverseVideo )
 	{
-		color    = this->palette().color(QPalette::Background);
+		color    = this->palette().color(QPalette::Window    );
 		oppColor = this->palette().color(QPalette::WindowText);
 	}
 	else
 	{
 		color    = this->palette().color(QPalette::WindowText);
-		oppColor = this->palette().color(QPalette::Background);
+		oppColor = this->palette().color(QPalette::Window    );
 	}
 
 	if ( viewMode != MODE_NES_ROM )
@@ -3543,7 +3544,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		lineOffset = maxLineOffset;
 	}
 	
-	painter.fillRect( 0, 0, w, h, this->palette().color(QPalette::Background) );
+	painter.fillRect( 0, 0, w, h, this->palette().color(QPalette::Window) );
 
 	if ( cursorBlinkCount >= 5 )
 	{

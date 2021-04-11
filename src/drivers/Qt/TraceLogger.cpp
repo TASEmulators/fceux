@@ -1186,13 +1186,13 @@ QTraceLogView::QTraceLogView(QWidget *parent)
 	if (useDarkTheme)
 	{
 		pal.setColor(QPalette::Base, fg);
-		pal.setColor(QPalette::Background, fg);
+		pal.setColor(QPalette::Window, fg);
 		pal.setColor(QPalette::WindowText, bg);
 	}
 	else
 	{
 		pal.setColor(QPalette::Base, bg);
-		pal.setColor(QPalette::Background, bg);
+		pal.setColor(QPalette::Window, bg);
 		pal.setColor(QPalette::WindowText, fg);
 	}
 
@@ -1977,7 +1977,7 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 
 	viewLines = nrow;
 
-	painter.fillRect(0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background));
+	painter.fillRect(0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window));
 
 	painter.setPen(this->palette().color(QPalette::WindowText));
 

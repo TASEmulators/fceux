@@ -24,6 +24,7 @@
 #include <QDir>
 #include <QMenu>
 #include <QAction>
+#include <QActionGroup>
 #include <QMenuBar>
 #include <QPainter>
 #include <QInputDialog>

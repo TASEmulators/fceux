@@ -38,6 +38,7 @@
 #include <QDesktopServices>
 #include <QStyleFactory>
 #include <QApplication>
+#include <QActionGroup>
 #include <QShortcut>
 #include <QUrl>
 
@@ -133,7 +134,11 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	setWindowIcon(QIcon(":fceux1.png"));
 
 	gameTimer  = new QTimer( this );
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	mutex      = new QRecursiveMutex();
+#else
 	mutex      = new QMutex( QMutex::Recursive );
+#endif
 	emulatorThread = new emulatorThread_t();
 
 	connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);

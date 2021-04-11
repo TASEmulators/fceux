@@ -33,6 +33,7 @@
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QTreeWidget>
+#include <QActionGroup>
 
 #include "../../types.h"
 #include "../../fceu.h"

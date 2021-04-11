@@ -31,6 +31,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
+#include <QActionGroup>
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QGroupBox>
@@ -1583,13 +1584,13 @@ QRamSearchView::QRamSearchView(QWidget *parent)
 	if (useDarkTheme)
 	{
 		pal.setColor(QPalette::Base, fg);
-		pal.setColor(QPalette::Background, fg);
+		pal.setColor(QPalette::Window, fg);
 		pal.setColor(QPalette::WindowText, bg);
 	}
 	else
 	{
 		pal.setColor(QPalette::Base, bg);
-		pal.setColor(QPalette::Background, bg);
+		pal.setColor(QPalette::Window, bg);
 		pal.setColor(QPalette::WindowText, fg);
 	}
 	this->setPalette(pal);
@@ -1869,7 +1870,7 @@ void QRamSearchView::paintEvent(QPaintEvent *event)
 		it++;
 	}
 
-	painter.fillRect(0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background));
+	painter.fillRect(0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window));
 
 	painter.setPen(this->palette().color(QPalette::WindowText));
 

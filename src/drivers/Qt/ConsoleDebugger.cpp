@@ -37,6 +37,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <QActionGroup>
 #include <QGuiApplication>
 
 #include "../../types.h"
@@ -2986,7 +2987,7 @@ QAsmView::QAsmView(QWidget *parent)
 	//c = pal.color(QPalette::Base);
 	//printf("Base: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
 
-	//c = pal.color(QPalette::Background);
+	//c = pal.color(QPalette::Window);
 	//printf("BackGround: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
 
 	// Figure out if we are using a light or dark theme by checking the 
@@ -3003,13 +3004,13 @@ QAsmView::QAsmView(QWidget *parent)
 	if ( useDarkTheme )
 	{
 		pal.setColor(QPalette::Base      , fg );
-		pal.setColor(QPalette::Background, fg );
+		pal.setColor(QPalette::Window    , fg );
 		pal.setColor(QPalette::WindowText, bg );
 	}
 	else 
 	{
 		pal.setColor(QPalette::Base      , bg );
-		pal.setColor(QPalette::Background, bg );
+		pal.setColor(QPalette::Window    , bg );
 		pal.setColor(QPalette::WindowText, fg );
 	}
 
@@ -3877,7 +3878,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	}
 	selAddr = parent->getBookmarkSelectedAddress();
 
-	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background) );
+	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window) );
 
 	y = pxLineSpacing;
 
