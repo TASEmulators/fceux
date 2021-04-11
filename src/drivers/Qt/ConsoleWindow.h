@@ -127,6 +127,8 @@ class  consoleWin_t : public QMainWindow
 		void setViewerCursor( QCursor s );
 		void setViewerCursor( Qt::CursorShape s );
 		Qt::CursorShape getViewerCursor(void);
+
+		void setMenuAccessPauseEnable(bool enable);
 	protected:
 		consoleMenuBar *menubar;
 

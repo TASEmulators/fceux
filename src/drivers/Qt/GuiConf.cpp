@@ -49,10 +49,10 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	: QDialog(parent)
 {
 	int useNativeFileDialogVal;
-	int useNativeMenuBarVal;
+	int useNativeMenuBarVal, pauseOnMenuAccessVal;
 	int useCustomQssVal, useCustomQPalVal;
 	QVBoxLayout *mainLayout, *vbox1, *vbox2;
-	QHBoxLayout *hbox;
+	QHBoxLayout *hbox, *hbox1;
 	QPushButton *closeButton, *button;
 	QMenuBar    *menuBar;
 	QMenu       *fileMenu, *colorMenu;
@@ -74,6 +74,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	g_config->getOption("SDL.UseNativeMenuBar", &useNativeMenuBarVal);
 	g_config->getOption("SDL.UseCustomQss", &useCustomQssVal);
 	g_config->getOption("SDL.UseCustomQPal", &useCustomQPalVal);
+	g_config->getOption("SDL.PauseOnMainMenuAccess", &pauseOnMenuAccessVal);
 
 	setWindowTitle(tr("GUI Config"));
 
@@ -124,12 +125,15 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 
 	useNativeFileDialog = new QCheckBox(tr("Use Native OS File Dialog"));
 	useNativeMenuBar = new QCheckBox(tr("Use Native OS Menu Bar"));
+	pauseOnMenuAccess = new QCheckBox(tr("Pause On Main Menu Access"));
 
 	useNativeFileDialog->setChecked(useNativeFileDialogVal);
 	useNativeMenuBar->setChecked(useNativeMenuBarVal);
+	pauseOnMenuAccess->setChecked(pauseOnMenuAccessVal);
 
 	connect(useNativeFileDialog, SIGNAL(stateChanged(int)), this, SLOT(useNativeFileDialogChanged(int)));
 	connect(useNativeMenuBar, SIGNAL(stateChanged(int)), this, SLOT(useNativeMenuBarChanged(int)));
+	connect(pauseOnMenuAccess, SIGNAL(stateChanged(int)), this, SLOT(pauseOnMenuAccessChanged(int)));
 
 	styleComboBox = new QComboBox();
 
@@ -220,9 +224,17 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	custom_qss_path->setText(qssFile.c_str());
 	vbox2->addWidget( custom_qss_path );
 
-	mainLayout->addWidget(useNativeFileDialog);
-	mainLayout->addWidget(useNativeMenuBar);
-	mainLayout->addWidget(frame);
+	hbox1 = new QHBoxLayout();
+	vbox1 = new QVBoxLayout();
+
+	mainLayout->addLayout(hbox1);
+	hbox1->addLayout(vbox1);
+	hbox1->addWidget(frame);
+
+	vbox1->addWidget(useNativeFileDialog, 1);
+	vbox1->addWidget(useNativeMenuBar, 1);
+	vbox1->addWidget(pauseOnMenuAccess, 1);
+	vbox1->addStretch(10);
 
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
@@ -273,6 +285,15 @@ void GuiConfDialog_t::useNativeMenuBarChanged(int state)
 	g_config->setOption("SDL.UseNativeMenuBar", value);
 
 	consoleWindow->menuBar()->setNativeMenuBar(value);
+}
+//----------------------------------------------------
+void GuiConfDialog_t::pauseOnMenuAccessChanged(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+
+	g_config->setOption("SDL.PauseOnMainMenuAccess", value);
+
+	consoleWindow->setMenuAccessPauseEnable( value );
 }
 //----------------------------------------------------
 void GuiConfDialog_t::useCustomStyleChanged(int state)

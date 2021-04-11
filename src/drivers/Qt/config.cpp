@@ -52,47 +52,6 @@
 #include <sys/types.h>
 #endif
 
-//static const char* HotkeyStrings[HK_MAX] = {
-//		"OpenROM",
-//		"CloseROM",
-//		"CheatMenu",
-//		"BindState",
-//		"LoadLua",
-//		"ToggleBG",
-//		"SaveState",
-//		"FDSSelect",
-//		"LoadState",
-//		"FDSEject",
-//		"VSInsertCoin",
-//		"VSToggleDip",
-//		"MovieToggleFrameDisplay",
-//		"SubtitleDisplay",
-//		"Reset",
-//		"Screenshot",
-//		"Pause",
-//		"DecreaseSpeed",
-//		"IncreaseSpeed",
-//		"FrameAdvance",
-//		"Turbo",
-//		"ToggleInputDisplay",
-//		"ToggleMovieRW",
-//		"MuteCapture",
-//		"Quit",
-//		"FrameAdvanceLagSkip",
-//		"LagCounterDisplay",
-//		"SelectState0", "SelectState1", "SelectState2", "SelectState3",
-//		"SelectState4", "SelectState5", "SelectState6", "SelectState7", 
-//		"SelectState8", "SelectState9", "SelectStateNext", "SelectStatePrev",
-//		"VolumeDown", "VolumeUp", "FKB_Enable" };
-
-//const char *getHotkeyString( int i )
-//{
-//   if ( (i>=0) && (i<HK_MAX) )
-//   {
-//      return HotkeyStrings[i];
-//   }
-//   return NULL;
-//}
 
 int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const char **titleOut )
 {
@@ -626,6 +585,7 @@ InitConfig()
 
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
+	config->addOption("SDL.PauseOnMainMenuAccess", true);
 	config->addOption("SDL.GuiStyle", "");
 	config->addOption("SDL.QtStyleSheet", "");
 	config->addOption("SDL.QPaletteFile", "");
@@ -776,7 +736,6 @@ InitConfig()
 
 	for(int i=0; i < HK_MAX; i++)
 	{
-		char buf[256];
 		const char *hotKeyName, *hotKeySeq;
 		std::string nameText, keyText;
 

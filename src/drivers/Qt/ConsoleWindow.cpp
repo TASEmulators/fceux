@@ -103,8 +103,6 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	createMainMenu();
 
-	g_config->getOption( "SDL.VideoDriver", &use_SDL_video );
-
 	firstResize    = true;
 	closeRequested = false;
 	errorMsgValid  = false;
@@ -114,6 +112,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	mainMenuEmuPauseSet   = false;
 	mainMenuEmuWasPaused  = false;
 	mainMenuPauseWhenActv = false;
+
+	g_config->getOption( "SDL.PauseOnMainMenuAccess", &mainMenuPauseWhenActv );
 
 	if ( use_SDL_video )
 	{
@@ -394,6 +394,11 @@ void consoleWin_t::setViewportAspect(void)
 	{
 		viewport_SDL->setAspectXY( x, y );
 	}
+}
+
+void consoleWin_t::setMenuAccessPauseEnable( bool enable )
+{
+	mainMenuPauseWhenActv = enable;
 }
 
 void consoleWin_t::loadCursor(void)
