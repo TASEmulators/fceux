@@ -33,7 +33,7 @@ set SDL_INSTALL_PREFIX=%CD%
 
 REM cmake -h
 REM cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
-cmake -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
+cmake -DQT6=1 -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
 
 REM nmake
 msbuild /m fceux.sln /p:Configuration=Release
