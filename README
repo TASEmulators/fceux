@@ -3,7 +3,7 @@ FCEUX SDL 2.3.0 SDL README
 Originally By Lukas Sabota (sf: punkrockguy318)
 Updated By mjbudd77
 
-[NOTE:  This only applies to SDL (non windows) builds]
+[NOTE:  This only applies to Qt/SDL builds]
 
 http://www.fceux.com
 
@@ -24,7 +24,7 @@ Table of Contents
 ----------------
 * sdl2  - Version >= 2.0  (sdl2 >= 2.8 recommended)
 * cmake - Required to build fceux.
-* qt5 OR gtk3  - (qt version >= 5.11 recommended) (gtk3 >= 3.22 recommended)
+* qt5 OR qt6  - (qt version >= 5.11 recommended)
 * liblua5.1 (optional) - Will statically link internally if the system cannot provide this.
 * minizip  
 * zlib  
@@ -43,13 +43,13 @@ To build a binary with debug information included in it:
    cmake  -DCMAKE_INSTALL_PREFIX=/usr  -DCMAKE_BUILD_TYPE=Debug    ..    
 
 The Qt version of the GUI builds by default and this is the preferred GUI for use. 
-For those who must have GTK/Gnome style, 
-the GTK version of the GUI can be selected to build with:
-	cmake -DCMAKE_INSTALL_PREFIX=/usr  -DCMAKE_BUILD_TYPE=Release -DGTK=1 ..  # Release build using GTK GUI
+For those who must have GTK/Gnome style, there is a GTK style plugin for Qt that 
+can be installed to the OS and selected for use via the GUI.
+The previous GTK version of the GUI is now retired and has been removed from the build.
 
-The Qt version GUI by far exceeds the GTK gui in capability and performance.
-I HIGHLY RECOMMEND USING THE Qt GUI instead of the GTK. See the TODO-SDL file for
-a capability matrix that compares what the two GUIs can do.
+The Qt version GUI by far exceeds the old GTK gui in capability and performance.
+The Qt GUI can build/link against both Qt5 and Qt6. To enable building against Qt6, use -DQT6=1 argument:
+   cmake  -DCMAKE_INSTALL_PREFIX=/usr  -DQT6=1  -DCMAKE_BUILD_TYPE=Debug    ..    
 
 To do the actual compiling:
    make
@@ -84,8 +84,8 @@ Look in the src/CMakeList.txt file to tweak options.
 
 4 - GUI
 -------
-The Qt (or GTK) GUI is required and automatically builds as part of the build. The Qt GUI is the default.
-When invoking cmake, the GTK GUI can be built (instead of Qt) by specifying a -DGTK=1 on the command line.
+The Qt GUI is required and automatically builds as part of the build. The Qt GUI is the default.
+When invoking cmake, Qt6 can be used (instead of Qt5) by specifying a -DQT6=1 on the command line.
 See above build instructions.
 OpenGL options:
 For Linux builds, the OpenGL library preference can be either GLVND or LEGACY (default). 
