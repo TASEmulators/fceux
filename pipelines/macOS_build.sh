@@ -52,9 +52,11 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:
 if [ $QT_MAJOR == 6 ]; then
 export Qt6_DIR=`brew --prefix qt6`;
 echo "Qt6_DIR=$Qt6_DIR";
+USE_QT6=1;
 else
 export Qt5_DIR=`brew --prefix qt5`;
 echo "Qt5_DIR=$Qt5_DIR";
+USE_QT6=0;
 fi
 
 echo '**************************'
@@ -73,6 +75,7 @@ cmake \
    -DCPACK_PACKAGE_VERSION_MAJOR=$FCEUX_VERSION_MAJOR \
    -DCPACK_PACKAGE_VERSION_MINOR=$FCEUX_VERSION_MINOR \
    -DCPACK_PACKAGE_VERSION_PATCH=$FCEUX_VERSION_PATCH \
+   -DQT6=$USE_QT6 \
 	.. || exit 1
 make -j $NPROC || exit 1
 sudo make install || exit 1
