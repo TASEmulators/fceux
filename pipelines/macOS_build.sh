@@ -6,6 +6,8 @@ pwd
 uname -a
 sw_vers
 
+QT_MAJOR=6;
+QT_PKGNAME=qt$QT_MAJOR;
 FCEUX_VERSION_MAJOR=2
 FCEUX_VERSION_MINOR=3
 FCEUX_VERSION_PATCH=0
@@ -30,9 +32,9 @@ echo '****************************************'
 brew  install  sdl2
 
 echo '****************************************'
-echo 'Install Dependency Qt5'
+echo "Install Dependency $QT_PKGNAME"
 echo '****************************************'
-brew  install  qt5
+brew  install  $QT_PKGNAME
 
 echo '****************************************'
 echo 'Install Dependency minizip'
@@ -43,10 +45,17 @@ brew  install  minizip
 
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:
 
-QT_CMAKE=`find /usr/local -name Qt5Config.cmake`
-echo $QT_CMAKE;
-export Qt5_DIR=`dirname $QT_CMAKE`;
+#QT_CMAKE=`find /usr/local -name Qt5Config.cmake`
+#echo $QT_CMAKE;
+#export Qt5_DIR=`dirname $QT_CMAKE`;
+
+if [ $QT_MAJOR == 6 ]; then
+export Qt6_DIR=`brew --prefix qt6`;
+echo "Qt6_DIR=$Qt6_DIR";
+else
+export Qt5_DIR=`brew --prefix qt5`;
 echo "Qt5_DIR=$Qt5_DIR";
+fi
 
 echo '**************************'
 echo '***  Building Project  ***'
@@ -57,7 +66,7 @@ cmake \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
 	-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-   -DCMAKE_PREFIX_PATH=`brew --prefix qt5` \
+   -DCMAKE_PREFIX_PATH=`brew --prefix $QT_PKGNAME` \
    -DCMAKE_PROJECT_VERSION_MAJOR=$FCEUX_VERSION_MAJOR \
    -DCMAKE_PROJECT_VERSION_MINOR=$FCEUX_VERSION_MINOR \
    -DCMAKE_PROJECT_VERSION_PATCH=$FCEUX_VERSION_PATCH \
