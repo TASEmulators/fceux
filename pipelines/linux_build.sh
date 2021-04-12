@@ -64,8 +64,8 @@ pkg-config --cflags --libs  minizip
 #echo '****************************************'
 #echo 'Install Dependency libgtk-3-dev'
 #echo '****************************************'
-sudo apt-get --assume-yes  install libgtk-3-dev
-pkg-config --cflags --libs  gtk+-3.0
+#sudo apt-get --assume-yes  install libgtk-3-dev
+#pkg-config --cflags --libs  gtk+-3.0
 #
 ## Install GTK+-3 Sourceview
 #sudo apt-get --assume-yes  install libgtksourceview-3.0-dev
@@ -105,15 +105,15 @@ make -j `nproc`
 make  install  DESTDIR=$INSTALL_PREFIX
 
 cd ..;
-mkdir buildGTK; cd buildGTK;
-cmake  \
-   -DGTK=1 \
-   -DCMAKE_BUILD_TYPE=Release  \
-   -DCMAKE_INSTALL_PREFIX=/usr \
-   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-	..
-make -j `nproc`
-make  install  DESTDIR=$INSTALL_PREFIX
+#mkdir buildGTK; cd buildGTK;
+#cmake  \
+#   -DGTK=1 \
+#   -DCMAKE_BUILD_TYPE=Release  \
+#   -DCMAKE_INSTALL_PREFIX=/usr \
+#   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+#	..
+#make -j `nproc`
+#make  install  DESTDIR=$INSTALL_PREFIX
 
 # Install Files
 #cd .. # cd out of build
@@ -147,15 +147,15 @@ else
    exit 1;
 fi
 
-if [ -e $INSTALL_PREFIX/usr/bin/fceux-gtk ]; then
-   echo '**************************************************************'
-   echo 'Printing Shared Object Dependencies for fceux-gtk Executable'
-   echo '**************************************************************'
-   ldd  $INSTALL_PREFIX/usr/bin/fceux-gtk
-else
-   echo "Error: Executable Failed to build: $INSTALL_PREFIX/usr/bin/fceux-gtk";
-   exit 1;
-fi
+#if [ -e $INSTALL_PREFIX/usr/bin/fceux-gtk ]; then
+#   echo '**************************************************************'
+#   echo 'Printing Shared Object Dependencies for fceux-gtk Executable'
+#   echo '**************************************************************'
+#   ldd  $INSTALL_PREFIX/usr/bin/fceux-gtk
+#else
+#   echo "Error: Executable Failed to build: $INSTALL_PREFIX/usr/bin/fceux-gtk";
+#   exit 1;
+#fi
 
 echo '**************************************************************'
 echo 'Printing To Be Packaged Files '

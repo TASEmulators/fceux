@@ -12,7 +12,7 @@ my $PKG_OUTPUT_FILE="fceux-$VERSION-$ARCH.deb";
 # the rest of the package creation is trival.
 my $SO_LIST="";
 $SO_LIST=`objdump -x  $INSTALL_PREFIX/usr/bin/fceux`;
-$SO_LIST= $SO_LIST . `objdump -x  $INSTALL_PREFIX/usr/bin/fceux-gtk`;
+#$SO_LIST= $SO_LIST . `objdump -x  $INSTALL_PREFIX/usr/bin/fceux-gtk`;
 
 #print "$SO_LIST";
 
