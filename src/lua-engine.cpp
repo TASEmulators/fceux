@@ -551,7 +551,7 @@ static int emu_getdir(lua_State *L) {
 	char directory[2048];
 	char finalPath[2048];
 
-	GetModuleFileName(NULL, fullPath, 2048);
+	GetModuleFileNameA(NULL, fullPath, 2048);
 	_splitpath(fullPath, driveLetter, directory, NULL, NULL);
 	snprintf(finalPath, sizeof(finalPath), "%s%s", driveLetter, directory);
 	lua_pushstring(L, finalPath);

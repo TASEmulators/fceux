@@ -238,7 +238,7 @@ int fceuExecutablePath( char *outputPath, int outputSize )
 	char directory[2048];
 	char finalPath[2048];
 
-	GetModuleFileName(NULL, fullPath, 2048);
+	GetModuleFileNameA(NULL, fullPath, 2048);
 	_splitpath(fullPath, driveLetter, directory, NULL, NULL);
 	snprintf(finalPath, sizeof(finalPath), "%s%s", driveLetter, directory);
 	strncpy( outputPath, finalPath, outputSize );

@@ -390,7 +390,7 @@ GetBaseDirectory(std::string &dir)
 	} else {
 #ifdef WIN32
 		home = new char[MAX_PATH + 1];
-		GetModuleFileName(NULL, home, MAX_PATH + 1);
+		GetModuleFileNameA(NULL, home, MAX_PATH + 1);
 
 		char *lastBS = strrchr(home,'\\');
 		if(lastBS) {
