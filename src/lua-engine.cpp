@@ -546,10 +546,10 @@ static int emu_message(lua_State *L) {
 //  Returns the path of fceux.exe as a string.
 static int emu_getdir(lua_State *L) {
 #ifdef WIN32
-	TCHAR fullPath[2048];
-	TCHAR driveLetter[3];
-	TCHAR directory[2048];
-	TCHAR finalPath[2048];
+	char fullPath[2048];
+	char driveLetter[3];
+	char directory[2048];
+	char finalPath[2048];
 
 	GetModuleFileName(NULL, fullPath, 2048);
 	_splitpath(fullPath, driveLetter, directory, NULL, NULL);
