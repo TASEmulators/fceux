@@ -560,12 +560,16 @@ void consoleWin_t::keyPressEvent(QKeyEvent *event)
 {
 	//printf("Key Press: 0x%x \n", event->key() );
 	pushKeyEvent( event, 1 );
+
+	event->accept();
 }
 
 void consoleWin_t::keyReleaseEvent(QKeyEvent *event)
 {
 	//printf("Key Release: 0x%x \n", event->key() );
 	pushKeyEvent( event, 0 );
+
+	event->accept();
 }
 
 //---------------------------------------------------------------------------
@@ -3553,11 +3557,14 @@ void consoleMenuBar::keyPressEvent(QKeyEvent *event)
 	{
 		((QWidget*)parent())->setFocus();
 	}
+	event->accept();
 }
 
 void consoleMenuBar::keyReleaseEvent(QKeyEvent *event)
 {
 	QMenuBar::keyReleaseEvent(event);
+
+	event->accept();
 }
 //-----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
