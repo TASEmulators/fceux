@@ -401,7 +401,6 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	bpFrame = new QGroupBox(tr("Breakpoints"));
 	vbox3   = new QVBoxLayout();
 	vbox    = new QVBoxLayout();
-	hbox    = new QHBoxLayout();
 	bpTree  = new QTreeWidget();
 
 	bpTree->setColumnCount(2);
@@ -427,8 +426,6 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	connect( bpTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
 			   this, SLOT(bpItemClicked( QTreeWidgetItem*, int)) );
-
-	hbox->addWidget( bpTree );
 
 	hbox   = new QHBoxLayout();
 	button = new QPushButton( tr("Add") );
@@ -3033,6 +3030,8 @@ QAsmView::QAsmView(QWidget *parent)
 	lineOffset = 0;
 	maxLineOffset = 0;
 	ctxMenuAddr = -1;
+	cursorPosX = 0;
+	cursorPosY = 0;
 
 	mouseLeftBtnDown  = false;
 	txtHlgtAnchorLine = -1;

@@ -140,7 +140,6 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
-	vbox              = new QVBoxLayout();
 	hbox              = new QHBoxLayout();
 	grid              = new QGridLayout;
 	patternVbox[0]    = new QVBoxLayout();

@@ -391,7 +391,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	advOptLayout = new QGroupBox( tr("Advanced Key Bindings") );
 	advOptLayout->setMaximumWidth(0);
 
-	advOptWidthAnimation = new QPropertyAnimation( advOptLayout, "maximumWidth");
+	advOptWidthAnimation = new QPropertyAnimation( advOptLayout, "maximumWidth", this);
 	advOptWidthAnimation->setDuration(500);
 	advOptWidthAnimation->setStartValue(0);
 	advOptWidthAnimation->setEndValue(512);
