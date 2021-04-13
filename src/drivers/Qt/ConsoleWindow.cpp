@@ -1392,6 +1392,18 @@ void consoleWin_t::createMainMenu(void)
 
 	movieMenu->addAction(openMovAct);
 
+	// Movie -> Play From Beginning
+	playMovBeginAct = new QAction(tr("Play From &Beginning"), this);
+	//playMovBeginAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	playMovBeginAct->setStatusTip(tr("Play Movie From Beginning"));
+	//playMovBeginAct->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
+	connect(playMovBeginAct, SIGNAL(triggered()), this, SLOT(playMovieFromBeginning(void)) );
+	
+	Hotkeys[ HK_MOVIE_PLAY_RESTART ].setAction( playMovBeginAct );
+	connect( Hotkeys[ HK_MOVIE_PLAY_RESTART ].getShortcut(), SIGNAL(activated()), this, SLOT(playMovieFromBeginning(void)) );
+
+	movieMenu->addAction(playMovBeginAct);
+
 	// Movie -> Stop
 	stopMovAct = new QAction(tr("&Stop"), this);
 	//stopMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
@@ -2967,6 +2979,13 @@ void consoleWin_t::openMovie(void)
 	win->show();
 }
 
+void consoleWin_t::playMovieFromBeginning(void)
+{
+	fceuWrapperLock();
+	FCEUI_MoviePlayFromBeginning();
+	fceuWrapperUnLock();
+}
+
 void consoleWin_t::stopMovie(void)
 {
 	fceuWrapperLock();
@@ -3286,7 +3305,7 @@ void consoleWin_t::updatePeriodic(void)
 	}
 
 	// Low Rate Updates
-	if ( (updateCounter % 20) == 0 )
+	if ( (updateCounter % 30) == 0 )
 	{
 		// Keep region menu selection sync'd to actual state
 		int actRegion = FCEUI_GetRegion();
@@ -3295,6 +3314,20 @@ void consoleWin_t::updatePeriodic(void)
 		{
 			region[ actRegion ]->setChecked(true);
 		}
+
+		powerAct->setEnabled( FCEU_IsValidUI( FCEUI_POWER ) );
+		resetAct->setEnabled( FCEU_IsValidUI( FCEUI_RESET ) );
+		sresetAct->setEnabled( FCEU_IsValidUI( FCEUI_RESET ) );
+		playMovBeginAct->setEnabled( FCEU_IsValidUI( FCEUI_PLAYFROMBEGINNING ) );
+		insCoinAct->setEnabled( FCEU_IsValidUI( FCEUI_INSERT_COIN ) );
+		fdsSwitchAct->setEnabled( FCEU_IsValidUI( FCEUI_SWITCH_DISK ) );
+		fdsEjectAct->setEnabled( FCEU_IsValidUI( FCEUI_EJECT_DISK ) );
+		stopMovAct->setEnabled( FCEU_IsValidUI( FCEUI_STOPMOVIE ) );
+		recentRomMenu->setEnabled( !recentRomMenu->isEmpty() );
+		quickLoadAct->setEnabled( FCEU_IsValidUI( FCEUI_QUICKLOAD ) );
+		quickSaveAct->setEnabled( FCEU_IsValidUI( FCEUI_QUICKSAVE ) );
+		loadStateAct->setEnabled( FCEU_IsValidUI( FCEUI_LOADSTATE ) );
+		saveStateAct->setEnabled( FCEU_IsValidUI( FCEUI_SAVESTATE ) );
 	}
 
 	if ( errorMsgValid )

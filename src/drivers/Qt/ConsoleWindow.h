@@ -195,6 +195,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *ggEncodeAct;
 		QAction *iNesEditAct;
 		QAction *openMovAct;
+		QAction *playMovBeginAct;
 		QAction *stopMovAct;
 		QAction *recMovAct;
 		QAction *recAsMovAct;
@@ -316,6 +317,7 @@ class  consoleWin_t : public QMainWindow
 		void stopMovie(void);
 		void recordMovie(void);
 		void recordMovieAs(void);
+		void playMovieFromBeginning(void);
 		void setAutoFireOnFrames(void);
 		void setAutoFireOffFrames(void);
 		void incrSoundVolume(void);
