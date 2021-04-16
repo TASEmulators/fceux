@@ -326,6 +326,9 @@ class oamPatternView_t : public QWidget
 		QPoint convPixToTile( QPoint p );
 
 		int  getSpriteIndex(void);
+		void setHover2Focus(bool val);
+		void setGridVisibility(bool val);
+		bool getGridVisibility(void){ return showGrid; };
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
@@ -339,6 +342,7 @@ class oamPatternView_t : public QWidget
 		int  viewHeight;
 
 		bool hover2Focus;
+		bool showGrid;
 
 		QColor selSpriteBoxColor;
 		QPoint selSprite;
@@ -439,6 +443,9 @@ class spriteViewerDialog_t : public QDialog
 		void closeWindow(void);
 	private slots:
 		void periodicUpdate(void);
+		void setClickFocus(void);
+		void setHoverFocus(void);
+		void toggleGridVis(void);
 };
 
 int openPPUViewWindow( QWidget *parent );

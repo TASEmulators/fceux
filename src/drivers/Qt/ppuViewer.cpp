@@ -2536,9 +2536,9 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	QGridLayout *infoGrid;
 	QGroupBox   *frame;
 	QLabel      *lbl;
-	//QActionGroup *group;
-	//QMenu *fileMenu, *viewMenu, *colorMenu, *optMenu, *subMenu;
-	//QAction *act;
+	QActionGroup *group;
+	QMenu *fileMenu, *viewMenu, *optMenu, *subMenu;
+	QAction *act;
 	//char stmp[64];
 	int useNativeMenuBar;
 
@@ -2550,6 +2550,57 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
 
 	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu 
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
+	// View
+	viewMenu = menuBar->addMenu(tr("&View"));
+
+	// View -> Toggle Grid
+	act = new QAction(tr("Toggle &Grid"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Toggle Grid"));
+	connect(act, SIGNAL(triggered()), this, SLOT(toggleGridVis(void)) );
+	
+	viewMenu->addAction(act);
+
+	// Focus Policy
+	optMenu = menuBar->addMenu(tr("&Options"));
+
+	// Options -> Focus
+	subMenu = optMenu->addMenu(tr("&Focus Policy"));
+	group   = new QActionGroup(this);
+	group->setExclusive(true);
+
+	act = new QAction(tr("&Click"), this);
+	act->setCheckable(true);
+	act->setChecked(true);
+	group->addAction(act);
+	subMenu->addAction(act);
+	connect(act, SIGNAL(triggered()), this, SLOT(setClickFocus(void)) );
+
+	act = new QAction(tr("&Hover"), this);
+	act->setCheckable(true);
+	act->setChecked(false);
+	group->addAction(act);
+	subMenu->addAction(act);
+	connect(act, SIGNAL(triggered()), this, SLOT(setHoverFocus(void)) );
+	
+	//-----------------------------------------------------------------------
+	// End Menu 
+	//-----------------------------------------------------------------------
 
 	setWindowTitle( tr("Sprite Viewer") );
 
@@ -2667,6 +2718,7 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	frame->setLayout( vbox );
 	hbox1->addWidget( frame );
 	vbox->addWidget( preView );
+	frame->hide(); // TODO Hide until preview code is ready
 
 
 	updateTimer  = new QTimer( this );
@@ -2697,6 +2749,21 @@ void spriteViewerDialog_t::closeWindow(void)
 	printf("Close Window\n");
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------
+void spriteViewerDialog_t::setClickFocus(void)
+{
+	oamView->setHover2Focus(false);
+}
+//----------------------------------------------------
+void spriteViewerDialog_t::setHoverFocus(void)
+{
+	oamView->setHover2Focus(true);
+}
+//----------------------------------------------------
+void spriteViewerDialog_t::toggleGridVis(void)
+{
+	oamView->setGridVisibility( !oamView->getGridVisibility() );
 }
 //----------------------------------------------------
 void spriteViewerDialog_t::periodicUpdate(void)
@@ -2747,6 +2814,7 @@ oamPatternView_t::oamPatternView_t( QWidget *parent )
 	viewWidth = 256;
 	viewHeight = 512;
 	hover2Focus  = false;
+	showGrid = false;
 
 	//selTileColor.setRgb(255,255,255);
 	//gridColor.setRgb(128,128,128);
@@ -2761,6 +2829,10 @@ oamPatternView_t::~oamPatternView_t(void)
 {
 
 }
+//----------------------------------------------------
+void oamPatternView_t::setHover2Focus(bool val){ hover2Focus = val; }
+//----------------------------------------------------
+void oamPatternView_t::setGridVisibility(bool val){ showGrid = val; }
 //----------------------------------------------------
 int oamPatternView_t::getSpriteIndex(void){ return spriteIdx; }
 //----------------------------------------------------
@@ -2958,6 +3030,33 @@ void oamPatternView_t::paintEvent(QPaintEvent *event)
 				}
 				xx += w;
 			}
+		}
+	}
+
+	if ( showGrid )
+	{
+		int tw, th;
+		pen.setWidth( 1 );
+		pen.setColor( QColor(128,128,128) );
+		painter.setPen( pen );
+
+		tw=  8*w;
+		th= 16*h;
+
+		xx = 0;
+		y = 8*th;
+
+		for (x=0; x<=8; x++)
+		{
+			painter.drawLine( xx, 0 , xx, y ); xx += tw;
+		}
+
+		yy = 0;
+		x = 8*tw;
+
+		for (y=0; y<=8; y++)
+		{
+			painter.drawLine( 0, yy , x, yy ); yy += th;
 		}
 	}
 
