@@ -15,6 +15,7 @@
 #include <QFrame>
 #include <QTimer>
 #include <QSlider>
+#include <QSpinBox>
 #include <QLineEdit>
 #include <QGroupBox>
 #include <QCloseEvent>
@@ -291,9 +292,6 @@ struct oamSpriteData_t
 			char   val;
 		} pixel[8][8];
 
-		int  x;
-		int  y;
-
 	} tile[2];
 
 	uint8_t tNum;
@@ -303,6 +301,9 @@ struct oamSpriteData_t
 	uint8_t hFlip;
 	uint8_t vFlip;
 	int     chrAddr;
+	int     x;
+	int     y;
+
 };
 
 struct oamPatternTable_t
@@ -323,6 +324,8 @@ class oamPatternView_t : public QWidget
 		~oamPatternView_t(void);
 
 		QPoint convPixToTile( QPoint p );
+
+		int  getSpriteIndex(void);
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
@@ -330,6 +333,7 @@ class oamPatternView_t : public QWidget
 		void mouseMoveEvent(QMouseEvent *event);
 		void mousePressEvent(QMouseEvent * event);
 		void contextMenuEvent(QContextMenuEvent *event);
+		int  heightForWidth(int w) const;
 
 		int  viewWidth;
 		int  viewHeight;
@@ -343,6 +347,64 @@ class oamPatternView_t : public QWidget
 
 };
 
+class oamTileView_t : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		oamTileView_t( QWidget *parent = 0);
+		~oamTileView_t(void);
+
+		void setIndex( int val );
+	protected:
+		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+		int  heightForWidth(int w) const;
+
+	private:
+		int  viewWidth;
+		int  viewHeight;
+		int  spriteIdx;
+};
+
+class oamPaletteView_t : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		oamPaletteView_t( QWidget *parent = 0);
+		~oamPaletteView_t(void);
+
+		void setIndex( int val );
+	protected:
+		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+		int  heightForWidth(int w) const;
+
+	private:
+		int  viewWidth;
+		int  viewHeight;
+		int  palIdx;
+};
+
+class oamPreview_t : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		oamPreview_t( QWidget *parent = 0);
+		~oamPreview_t(void);
+
+	protected:
+		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+		int  heightForWidth(int w) const;
+
+	private:
+		int  viewWidth;
+		int  viewHeight;
+};
+
 class spriteViewerDialog_t : public QDialog
 {
    Q_OBJECT
@@ -352,6 +414,10 @@ class spriteViewerDialog_t : public QDialog
 		~spriteViewerDialog_t(void);
 
 		oamPatternView_t  *oamView;
+		oamPaletteView_t  *palView;
+		oamTileView_t     *tileView;
+		oamPreview_t      *preView;
+
 	protected:
 
 		void closeEvent(QCloseEvent *bar);
@@ -359,10 +425,12 @@ class spriteViewerDialog_t : public QDialog
 		QTimer *updateTimer;
 		QRadioButton *useSprRam;
 		QRadioButton *useCpuPag;
+		QSpinBox     *cpuPagIdx;
 		QLineEdit    *spriteIndexBox;
 		QLineEdit    *tileIndexBox;
 		QLineEdit    *tileAddrBox;
 		QLineEdit    *palAddrBox;
+		QLineEdit    *posBox;
 		QCheckBox    *hFlipBox;
 		QCheckBox    *vFlipBox;
 		QCheckBox    *bgPrioBox;
