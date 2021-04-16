@@ -2529,9 +2529,11 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	: QDialog(parent)
 {
 	QMenuBar    *menuBar;
-	QVBoxLayout *mainLayout, *vbox;
+	QVBoxLayout *mainLayout, *vbox, *vbox1;
 	QHBoxLayout *hbox, *hbox1;
-	QGridLayout *grid;
+	QGridLayout *infoGrid, *grid;
+	QGroupBox   *frame;
+	QLabel      *lbl;
 	QActionGroup *group;
 	QMenu *fileMenu, *viewMenu, *colorMenu, *optMenu, *subMenu;
 	QAction *act;
@@ -2561,6 +2563,73 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	hbox1->addWidget( oamView );
 
 	mainLayout->addLayout( hbox1 );
+
+	vbox1 = new QVBoxLayout();
+	hbox1->addLayout( vbox1 );
+
+	hbox  = new QHBoxLayout();
+	vbox1->addLayout( hbox );
+
+	useSprRam = new QRadioButton( tr("Sprite RAM") );
+	useCpuPag = new QRadioButton( tr("CPU Page #") );
+
+	hbox->addWidget( new QLabel( tr("Data Source:") ) );
+	hbox->addWidget( useSprRam );
+	hbox->addWidget( useCpuPag );
+
+	frame    = new QGroupBox( tr("Sprite Info") );
+	infoGrid = new QGridLayout();
+	vbox1->addWidget( frame );
+	frame->setLayout( infoGrid );
+
+	lbl      = new QLabel( tr("Sprite Index:") );
+	spriteIndexBox = new QLineEdit();
+	infoGrid->addWidget( lbl, 0, 0 );
+	infoGrid->addWidget( spriteIndexBox, 0, 1 );
+
+	lbl      = new QLabel( tr("Tile Address:") );
+	tileAddrBox = new QLineEdit();
+	infoGrid->addWidget( lbl, 0, 2 );
+	infoGrid->addWidget( tileAddrBox, 0, 3 );
+
+	lbl      = new QLabel( tr("Tile Index:") );
+	tileIndexBox   = new QLineEdit();
+	infoGrid->addWidget( lbl, 1, 0 );
+	infoGrid->addWidget( tileIndexBox, 1, 1 );
+
+	lbl      = new QLabel( tr("Palette Address:") );
+	palAddrBox = new QLineEdit();
+	infoGrid->addWidget( lbl, 1, 2 );
+	infoGrid->addWidget( palAddrBox, 1, 3 );
+
+	lbl      = new QLabel( tr("Tile:") );
+	//tileIndexBox   = new QLineEdit();
+	infoGrid->addWidget( lbl, 2, 0, 5, 1, Qt::AlignTop );
+	//infoGrid->addWidget( tileIndexBox, 2, 1 );
+	
+	lbl      = new QLabel( tr("Palette:") );
+	//tileIndexBox   = new QLineEdit();
+	infoGrid->addWidget( lbl, 2, 2, Qt::AlignTop );
+	//infoGrid->addWidget( tileIndexBox, 2, 1 );
+	
+	lbl      = new QLabel( tr("Position (X,Y):") );
+	//tileIndexBox   = new QLineEdit();
+	infoGrid->addWidget( lbl, 3, 2, Qt::AlignTop );
+	//infoGrid->addWidget( tileIndexBox, 2, 1 );
+
+	hFlipBox = new QCheckBox( tr("Horizontal Flip") );
+	infoGrid->addWidget( hFlipBox, 4, 2, 1, 2 );
+
+	vFlipBox = new QCheckBox( tr("Vertical Flip") );
+	infoGrid->addWidget( vFlipBox, 5, 2, 1, 2 );
+
+	bgPrioBox = new QCheckBox( tr("Background Priority") );
+	infoGrid->addWidget( bgPrioBox, 6, 2, 1, 2 );
+
+	lbl      = new QLabel( tr("Preview:") );
+	//tileIndexBox   = new QLineEdit();
+	infoGrid->addWidget( lbl, 7, 0 );
+	//infoGrid->addWidget( tileIndexBox, 2, 1 );
 
 	updateTimer  = new QTimer( this );
 

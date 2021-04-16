@@ -10,6 +10,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QLabel>
 #include <QFrame>
 #include <QTimer>
@@ -356,6 +357,15 @@ class spriteViewerDialog_t : public QDialog
 		void closeEvent(QCloseEvent *bar);
 	private:
 		QTimer *updateTimer;
+		QRadioButton *useSprRam;
+		QRadioButton *useCpuPag;
+		QLineEdit    *spriteIndexBox;
+		QLineEdit    *tileIndexBox;
+		QLineEdit    *tileAddrBox;
+		QLineEdit    *palAddrBox;
+		QCheckBox    *hFlipBox;
+		QCheckBox    *vFlipBox;
+		QCheckBox    *bgPrioBox;
 
 	public slots:
 		void closeWindow(void);
