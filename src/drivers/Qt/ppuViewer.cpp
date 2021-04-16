@@ -2798,6 +2798,64 @@ QPoint oamPatternView_t::convPixToTile( QPoint p )
 //----------------------------------------------------
 void oamPatternView_t::keyPressEvent(QKeyEvent *event)
 {
+	int x,y;
+
+	if ( event->key() == Qt::Key_Up )
+	{
+		y = selSprite.y();
+
+		y = (y - 1);
+
+		if ( y < 0 )
+		{
+			y = 7;
+		}
+		
+		selSprite.setY(y);
+		spriteIdx = selSprite.y()*8 + selSprite.x();
+	}
+	else if ( event->key() == Qt::Key_Down )
+	{
+		y = selSprite.y();
+
+		y = (y + 1);
+
+		if ( y > 7 )
+		{
+			y = 0;
+		}
+		
+		selSprite.setY(y);
+		spriteIdx = selSprite.y()*8 + selSprite.x();
+	}
+	else if ( event->key() == Qt::Key_Left )
+	{
+		x = selSprite.x();
+
+		x = (x - 1);
+
+		if ( x < 0 )
+		{
+			x = 7;
+		}
+		
+		selSprite.setX(x);
+		spriteIdx = selSprite.y()*8 + selSprite.x();
+	}
+	else if ( event->key() == Qt::Key_Right )
+	{
+		x = selSprite.x();
+
+		x = (x + 1);
+
+		if ( x > 7 )
+		{
+			x = 0;
+		}
+		
+		selSprite.setX(x);
+		spriteIdx = selSprite.y()*8 + selSprite.x();
+	}
 
 }
 //----------------------------------------------------
