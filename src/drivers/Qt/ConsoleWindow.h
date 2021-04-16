@@ -191,6 +191,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *traceLogAct;
 		QAction *hexEditAct;
 		QAction *ppuViewAct;
+		QAction *oamViewAct;
 		QAction *ntViewAct;
 		QAction *ggEncodeAct;
 		QAction *iNesEditAct;
@@ -307,6 +308,7 @@ class  consoleWin_t : public QMainWindow
 		void emuCustomSpd(void);
 		void emuSetFrameAdvDelay(void);
 		void openPPUViewer(void);
+		void openOAMViewer(void);
 		void openNTViewer(void);
 		void openGGEncoder(void);
 		void openNesHeaderEditor(void);

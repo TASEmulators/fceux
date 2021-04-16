@@ -1333,6 +1333,14 @@ void consoleWin_t::createMainMenu(void)
 	
 	debugMenu->addAction(ppuViewAct);
 
+	// Debug -> Sprite Viewer
+	oamViewAct = new QAction(tr("&Sprite Viewer..."), this);
+	//oamViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	oamViewAct->setStatusTip(tr("Open Sprite Viewer"));
+	connect(oamViewAct, SIGNAL(triggered()), this, SLOT(openOAMViewer(void)) );
+	
+	debugMenu->addAction(oamViewAct);
+
 	// Debug -> Name Table Viewer
 	ntViewAct = new QAction(tr("&Name Table Viewer..."), this);
 	//ntViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
@@ -2389,6 +2397,13 @@ void consoleWin_t::openPPUViewer(void)
 	//printf("Open GUI PPU Viewer Window\n");
 	
 	openPPUViewWindow(this);
+}
+
+void consoleWin_t::openOAMViewer(void)
+{
+	//printf("Open GUI OAM Viewer Window\n");
+	
+	openOAMViewWindow(this);
 }
 
 void consoleWin_t::openNTViewer(void)

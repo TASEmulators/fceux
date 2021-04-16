@@ -280,6 +280,85 @@ class ppuViewerDialog_t : public QDialog
 		void setHoverFocus(void);
 };
 
+struct oamSpriteData_t
+{
+	struct 
+	{
+		struct 
+		{
+			QColor color;
+			char   val;
+		} pixel[8][8];
+
+		int  x;
+		int  y;
+
+	} tile[2];
+
+	uint8_t tNum;
+	uint8_t bank;
+	uint8_t pal;
+	uint8_t pri;
+	uint8_t hFlip;
+	uint8_t vFlip;
+	int     chrAddr;
+};
+
+struct oamPatternTable_t
+{
+	struct oamSpriteData_t sprite[64];
+
+	bool  mode8x16;
+	int  w;
+	int  h;
+};
+
+class oamPatternView_t : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		oamPatternView_t( QWidget *parent = 0);
+		~oamPatternView_t(void);
+
+	protected:
+		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+		void keyPressEvent(QKeyEvent *event);
+		void mouseMoveEvent(QMouseEvent *event);
+		void mousePressEvent(QMouseEvent * event);
+		void contextMenuEvent(QContextMenuEvent *event);
+
+		int  viewWidth;
+		int  viewHeight;
+
+		bool hover2Focus;
+	private:
+
+};
+
+class spriteViewerDialog_t : public QDialog
+{
+   Q_OBJECT
+
+	public:
+		spriteViewerDialog_t(QWidget *parent = 0);
+		~spriteViewerDialog_t(void);
+
+		oamPatternView_t  *oamView;
+	protected:
+
+		void closeEvent(QCloseEvent *bar);
+	private:
+		QTimer *updateTimer;
+
+	public slots:
+		void closeWindow(void);
+	private slots:
+		void periodicUpdate(void);
+};
+
 int openPPUViewWindow( QWidget *parent );
+int openOAMViewWindow( QWidget *parent );
 void setPPUSelPatternTile( int table, int x, int y );
 
