@@ -1331,7 +1331,7 @@ static void DrawPatternTable( ppuPatternTable_t *pattern, uint8_t *table, uint8_
 //----------------------------------------------------
 static void drawSpriteTable(void)
 {
-	int j=0, y,x,p,tmp,idx,chr0,chr1,pal;
+	int j=0, y,x,yy,xx,p,tmp,idx,chr0,chr1,pal,t0,t1;
 	uint8_t *chrcache;
 	struct oamSpriteData_t *spr;
 
@@ -1341,8 +1341,7 @@ static void drawSpriteTable(void)
 	{
 		spr = &oamPattern.sprite[i];
 
-		spr->tNum  = (oam[j+1] >> 1);
-		spr->pal   = (oam[j+2] & 0x03) + 4;
+		spr->pal   = (oam[j+2] & 0x03) | 0x04;
 		spr->pri   = (oam[j+2] & 0x20) ? 1 : 0;
 		spr->hFlip = (oam[j+2] & 0x40) ? 1 : 0;
 		spr->vFlip = (oam[j+2] & 0x80) ? 1 : 0;
@@ -1350,13 +1349,15 @@ static void drawSpriteTable(void)
 		if ( oamPattern.mode8x16 )
 		{
 			spr->bank  = (oam[j+1] & 0x01);
+			spr->tNum  = (oam[j+1] & 0xFE);
 		}
 		else
 		{
 			spr->bank  = (PPU[0] & 0x08) ? 1 : 0;
+			spr->tNum  = (oam[j+1]);
 		}
 
-		idx = spr->tNum << 5;
+		idx = spr->tNum << 4;
 
 		if ( spr->bank )
 		{
@@ -1369,27 +1370,54 @@ static void drawSpriteTable(void)
 			spr->chrAddr = idx;
 		}
 
-		//printf("OAM:%i  TileAddr:$%04X \n", i, spr->chrAddr );
-
-		pal = spr->pal;
-
-		for (y = 0; y < 8; y++)
+		if ( oamPattern.mode8x16 && spr->vFlip )
 		{
+			t0 = 1; t1 = 0;
+		}
+		else
+		{
+			t0 = 0; t1 = 1;
+		}
+		//printf("OAM:$%02X  TileNum:$%02X  TileAddr:$%04X \n", i, spr->tNum, spr->chrAddr );
+
+		pal = spr->pal * 4;
+
+		for (yy = 0; yy < 8; yy++)
+		{
+			if ( spr->vFlip )
+			{
+				y = 7 - yy;
+			}
+			else
+			{
+				y = yy;
+			}
+
 			chr0 = chrcache[idx];
 			chr1 = chrcache[idx + 8];
 			tmp = 7;
-			for (x = 0; x < 8; x++)
+
+			for (xx = 0; xx < 8; xx++)
 			{
+				if ( spr->hFlip )
+				{
+					x = 7 - xx;
+				}
+				else
+				{
+					x = xx;
+				}
+
 				p  =  (chr0 >> tmp) & 1;
 				p |= ((chr1 >> tmp) & 1) << 1;
 
-				spr->tile[0].pixel[y][x].val = p;
+				spr->tile[t0].pixel[y][x].val = p;
 
 				p = palcache[p | pal];
 				tmp--;
-				spr->tile[0].pixel[y][x].color.setBlue( palo[p].b );
-				spr->tile[0].pixel[y][x].color.setGreen( palo[p].g );
-				spr->tile[0].pixel[y][x].color.setRed( palo[p].r );
+				spr->tile[t0].pixel[y][x].color.setBlue( palo[p].b );
+				spr->tile[t0].pixel[y][x].color.setGreen( palo[p].g );
+				spr->tile[t0].pixel[y][x].color.setRed( palo[p].r );
 
 				//printf("Tile: %X%X Pixel: (%i,%i)  P:%i RGB: (%i,%i,%i)\n", j, i, x, y, p,
 				//	  pattern->tile[j][i].pixel[y][x].color.red(), 
@@ -1400,23 +1428,41 @@ static void drawSpriteTable(void)
 		}
 		idx+=8;
 
-		for (y = 0; y < 8; y++)
+		for (yy = 0; yy < 8; yy++)
 		{
+			if ( spr->vFlip )
+			{
+				y = 7 - yy;
+			}
+			else
+			{
+				y = yy;
+			}
 			chr0 = chrcache[idx];
 			chr1 = chrcache[idx + 8];
 			tmp = 7;
-			for (x = 0; x < 8; x++)
+
+			for (xx = 0; xx < 8; xx++)
 			{
+				if ( spr->hFlip )
+				{
+					x = 7 - xx;
+				}
+				else
+				{
+					x = xx;
+				}
+
 				p  =  (chr0 >> tmp) & 1;
 				p |= ((chr1 >> tmp) & 1) << 1;
 
-				spr->tile[1].pixel[y][x].val = p;
+				spr->tile[t1].pixel[y][x].val = p;
 
 				p = palcache[p | pal];
 				tmp--;
-				spr->tile[1].pixel[y][x].color.setBlue( palo[p].b );
-				spr->tile[1].pixel[y][x].color.setGreen( palo[p].g );
-				spr->tile[1].pixel[y][x].color.setRed( palo[p].r );
+				spr->tile[t1].pixel[y][x].color.setBlue( palo[p].b );
+				spr->tile[t1].pixel[y][x].color.setGreen( palo[p].g );
+				spr->tile[t1].pixel[y][x].color.setRed( palo[p].r );
 
 				//printf("Tile: %X%X Pixel: (%i,%i)  P:%i RGB: (%i,%i,%i)\n", j, i, x, y, p,
 				//	  pattern->tile[j][i].pixel[y][x].color.red(), 
