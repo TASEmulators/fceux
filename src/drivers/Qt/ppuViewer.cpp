@@ -1335,6 +1335,10 @@ static void drawSpriteTable(void)
 	uint8_t *chrcache;
 	struct oamSpriteData_t *spr;
 
+	if (palo == NULL)
+	{
+		return;
+	}
 	oamPattern.mode8x16 = (PPU[0] & 0x20) ? 1 : 0;
 
 	for (int i=0; i<64; i++)
@@ -1541,7 +1545,7 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 	PPUViewSkip = 0;
 	
 	// update palette only if required
-	if ((memcmp(pallast, PALRAM, 32) != 0) || (memcmp(pallast+32, UPALRAM, 3) != 0))
+	if ( (palo != NULL) && ( (memcmp(pallast, PALRAM, 32) != 0) || (memcmp(pallast+32, UPALRAM, 3) != 0) ))
 	{
 		//printf("Updated PPU View Palette\n");
 		memcpy(pallast, PALRAM, 32);
@@ -3196,7 +3200,7 @@ void oamPaletteView_t::paintEvent(QPaintEvent *event)
 {
 	int x,w,h,xx,yy,p,p2;
 	QPainter painter(this);
-	QColor color;
+	QColor color( 0, 0, 0);
 	//QPen pen;
 	//char showSelector;
 
@@ -3222,11 +3226,13 @@ void oamPaletteView_t::paintEvent(QPaintEvent *event)
 	xx = 0;
 	for (x=0; x < 4; x++)
 	{
-		p = palcache[p2 | x];
-		color.setBlue( palo[p].b );
-		color.setGreen( palo[p].g );
-		color.setRed( palo[p].r );
-
+		if ( palo != NULL )
+		{
+			p = palcache[p2 | x];
+			color.setBlue( palo[p].b );
+			color.setGreen( palo[p].g );
+			color.setRed( palo[p].r );
+		}
 		painter.fillRect( xx, yy, w, h, color );
 		xx += w;
 	}
