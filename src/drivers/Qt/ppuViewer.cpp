@@ -49,6 +49,7 @@
 #include "Qt/config.h"
 #include "Qt/HexEditor.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleWindow.h"
 
 #define PATTERNWIDTH          128
 #define PATTERNHEIGHT         128
@@ -2532,7 +2533,7 @@ void ppuTileEditColorPicker_t::paintEvent(QPaintEvent *event)
 //----------------------------------------------------
 //----------------------------------------------------
 spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Window)
 {
 	QMenuBar    *menuBar;
 	QVBoxLayout *mainLayout, *vbox, *vbox1, *vbox2, *vbox3, *vbox4;
@@ -2845,6 +2846,24 @@ int oamPatternView_t::heightForWidth(int w) const
 	return 2*w;
 }
 //----------------------------------------------------
+void oamPatternView_t::openTilePpuViewer(void)
+{
+	int pTable,x,y,tileAddr;
+
+	tileAddr = oamPattern.sprite[ spriteIdx ].chrAddr;
+
+	pTable = tileAddr >= 0x1000;
+	y = (tileAddr & 0x0F00) >> 8;
+	x = (tileAddr & 0x00F0) >> 4;
+
+	openPPUViewWindow( consoleWindow );
+
+	//printf("TileAddr: %04X   %i,%X%X\n", tileAddr, pTable, x, y );
+
+	setPPUSelPatternTile(  pTable,  x,  y );
+	setPPUSelPatternTile( !pTable, -1, -1 );
+}
+//----------------------------------------------------
 void oamPatternView_t::resizeEvent(QResizeEvent *event)
 {
 	viewWidth  = event->size().width();
@@ -2979,9 +2998,9 @@ void oamPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 	//QActionGroup *group;
 	//char stmp[64];
 
-	act = new QAction(tr("Open Tile &Editor"), &menu);
-	act->setShortcut( QKeySequence(tr("E")));
-	connect( act, SIGNAL(triggered(void)), this, SLOT(openTileEditor(void)) );
+	act = new QAction(tr("Open PPU CHR &Viewer"), &menu);
+	//act->setShortcut( QKeySequence(tr("E")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(openTilePpuViewer(void)) );
 	menu.addAction( act );
 
 	menu.exec(event->globalPos());

@@ -349,6 +349,9 @@ class oamPatternView_t : public QWidget
 		int    spriteIdx;
 	private:
 
+	private slots:
+		void openTilePpuViewer(void);
+
 };
 
 class oamTileView_t : public QWidget
