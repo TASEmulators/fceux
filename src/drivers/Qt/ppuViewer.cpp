@@ -2609,9 +2609,11 @@ oamPatternView_t::oamPatternView_t( QWidget *parent )
 
 	//selTileColor.setRgb(255,255,255);
 	//gridColor.setRgb(128,128,128);
-	//selTile.setX(-1);
-	//selTile.setY(-1);
-
+	selSpriteBoxColor.setRgb(255,0,0);
+	
+	selSprite.setX(-1);
+	selSprite.setY(-1);
+	spriteIdx = -1;
 }
 //----------------------------------------------------
 oamPatternView_t::~oamPatternView_t(void)
@@ -2623,7 +2625,27 @@ void oamPatternView_t::resizeEvent(QResizeEvent *event)
 {
 	viewWidth  = event->size().width();
 	viewHeight = event->size().height();
+}
+//----------------------------------------------------
+QPoint oamPatternView_t::convPixToTile( QPoint p )
+{
+	QPoint t(0,0);
+	int x,y,w,h,i,j;
 
+	x = p.x(); y = p.y();
+
+	w = oamPattern.w;
+	h = oamPattern.h;
+
+	i = x / (w*8);
+	j = y / (h*16);
+
+	//printf("(x,y) = (%i,%i) w=%i h=%i  $%X%X \n", x, y, w, h, jj, ii );
+
+	t.setX(i);
+	t.setY(j);
+
+	return t;
 }
 //----------------------------------------------------
 void oamPatternView_t::keyPressEvent(QKeyEvent *event)
@@ -2633,12 +2655,38 @@ void oamPatternView_t::keyPressEvent(QKeyEvent *event)
 //----------------------------------------------------
 void oamPatternView_t::mouseMoveEvent(QMouseEvent *event)
 {
+	QPoint tile = convPixToTile( event->pos() );
+
+	//printf("Tile: (%i,%i) = %i \n", tile.x(), tile.y(), tile.y()*8 + tile.x() );
+	
+	if ( hover2Focus )
+	{
+		if ( (tile.x() >= 0) && (tile.x() < 8) &&
+			(tile.y() >= 0) && (tile.y() < 8) )
+		{
+			selSprite = tile;
+			spriteIdx = tile.y()*8 + tile.x();
+			printf("Tile: (%i,%i) = %i \n", tile.x(), tile.y(), tile.y()*8 + tile.x() );
+		}
+	}
+
 
 }
 //----------------------------------------------------
 void oamPatternView_t::mousePressEvent(QMouseEvent *event)
 {
+	QPoint tile = convPixToTile( event->pos() );
 
+	if ( event->button() == Qt::LeftButton )
+	{
+		if ( (tile.x() >= 0) && (tile.x() < 8) &&
+			(tile.y() >= 0) && (tile.y() < 8) )
+		{
+			selSprite = tile;
+			spriteIdx = tile.y()*8 + tile.x();
+			//printf("Tile: (%i,%i) = %i \n", tile.x(), tile.y(), tile.y()*8 + tile.x() );
+		}
+	}
 }
 //----------------------------------------------------
 void oamPatternView_t::contextMenuEvent(QContextMenuEvent *event)
@@ -2661,14 +2709,25 @@ void oamPatternView_t::paintEvent(QPaintEvent *event)
 {
 	int i,j,x,y,w,h,xx,yy,ii,jj,rr;
 	QPainter painter(this);
-	//QPen pen;
+	QPen pen;
 	//char showSelector;
+
+	pen = painter.pen();
 
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
 
 	w = viewWidth  / 64;
   	h = viewHeight / 128;
+
+	if ( w < h )
+	{
+		h = w;
+	}
+	else
+	{
+		w = h;
+	}
 
 	oamPattern.w = w;
 	oamPattern.h = h;
@@ -2694,6 +2753,26 @@ void oamPatternView_t::paintEvent(QPaintEvent *event)
 				xx += w;
 			}
 		}
+	}
+
+	if ( (spriteIdx >= 0) && (spriteIdx < 64) )
+	{
+		xx = (spriteIdx % 8) * (w*8);
+		yy = (spriteIdx / 8) * (h*16);
+
+		pen.setWidth( 3 );
+		pen.setColor( QColor(  0,  0,  0) );
+		painter.setPen( pen );
+
+		painter.drawRect( xx, yy, w*8, h*16 );
+
+		pen.setWidth( 1 );
+		pen.setColor( QColor(255,255,255) );
+		painter.setPen( pen );
+
+		painter.drawRect( xx, yy, w*8, h*16 );
+
+		//painter.fillRect( ii, jj, w*8, h*16, selSpriteBoxColor );
 	}
 }
 //----------------------------------------------------

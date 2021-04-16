@@ -321,6 +321,7 @@ class oamPatternView_t : public QWidget
 		oamPatternView_t( QWidget *parent = 0);
 		~oamPatternView_t(void);
 
+		QPoint convPixToTile( QPoint p );
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
@@ -333,6 +334,10 @@ class oamPatternView_t : public QWidget
 		int  viewHeight;
 
 		bool hover2Focus;
+
+		QColor selSpriteBoxColor;
+		QPoint selSprite;
+		int    spriteIdx;
 	private:
 
 };
