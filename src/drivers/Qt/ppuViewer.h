@@ -404,6 +404,7 @@ class oamPreview_t : public QWidget
 		~oamPreview_t(void);
 
 		void setIndex(int val);
+		void setMinScale(int val);
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
@@ -457,6 +458,8 @@ class spriteViewerDialog_t : public QDialog
 		void setHoverFocus(void);
 		void toggleGridVis(void);
 		void togglePreviewVis(bool);
+		void setPreviewSize1x(void);
+		void setPreviewSize2x(void);
 		void previewAnimWidthChange(const QVariant &);
 		void previewAnimResizeDone(void);
 };

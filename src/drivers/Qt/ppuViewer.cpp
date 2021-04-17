@@ -2591,6 +2591,25 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	
 	viewMenu->addAction(act);
 
+	// View -> Preview Size
+	subMenu = viewMenu->addMenu(tr("Preview &Size"));
+	group   = new QActionGroup(this);
+	group->setExclusive(true);
+
+	act = new QAction(tr("&1x"), this);
+	act->setCheckable(true);
+	act->setChecked(true);
+	group->addAction(act);
+	subMenu->addAction(act);
+	connect(act, SIGNAL(triggered()), this, SLOT(setPreviewSize1x(void)) );
+
+	act = new QAction(tr("&2x"), this);
+	act->setCheckable(true);
+	act->setChecked(false);
+	group->addAction(act);
+	subMenu->addAction(act);
+	connect(act, SIGNAL(triggered()), this, SLOT(setPreviewSize2x(void)) );
+
 	// Focus Policy
 	optMenu = menuBar->addMenu(tr("&Options"));
 
@@ -2810,6 +2829,17 @@ void spriteViewerDialog_t::setHoverFocus(void)
 void spriteViewerDialog_t::toggleGridVis(void)
 {
 	oamView->setGridVisibility( !oamView->getGridVisibility() );
+}
+//----------------------------------------------------
+void spriteViewerDialog_t::setPreviewSize1x(void)
+{
+	preView->setMinScale(1);
+	resize( minimumSizeHint() );
+}
+//----------------------------------------------------
+void spriteViewerDialog_t::setPreviewSize2x(void)
+{
+	preView->setMinScale(2);
 }
 //----------------------------------------------------
 void spriteViewerDialog_t::togglePreviewVis(bool state)
@@ -3352,6 +3382,18 @@ oamPreview_t::~oamPreview_t(void)
 void oamPreview_t::setIndex(int val)
 {
 	selSprite = val;
+}
+//----------------------------------------------------
+void oamPreview_t::setMinScale(int scale)
+{
+	if ( scale < 1 )
+	{
+		scale = 1;
+	}
+	setMinimumWidth( scale*256 );
+	setMinimumHeight( scale*240 );
+
+	return;
 }
 //----------------------------------------------------
 int  oamPreview_t::heightForWidth(int w) const
