@@ -2834,12 +2834,25 @@ void spriteViewerDialog_t::toggleGridVis(void)
 void spriteViewerDialog_t::setPreviewSize1x(void)
 {
 	preView->setMinScale(1);
-	resize( minimumSizeHint() );
+
+	if ( previewFrame->width() > 300 )
+	{
+		previewAnimation->setStartValue( previewFrame->width() );
+		previewAnimation->setEndValue(300);
+		previewAnimation->start();
+	}
 }
 //----------------------------------------------------
 void spriteViewerDialog_t::setPreviewSize2x(void)
 {
 	preView->setMinScale(2);
+
+	if ( (previewFrame->width() > 100) && (previewFrame->width() < 600) )
+	{
+		previewAnimation->setStartValue( previewFrame->width() );
+		previewAnimation->setEndValue(600);
+		previewAnimation->start();
+	}
 }
 //----------------------------------------------------
 void spriteViewerDialog_t::togglePreviewVis(bool state)
