@@ -2544,8 +2544,9 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	QActionGroup *group;
 	QMenu *fileMenu, *viewMenu, *optMenu, *subMenu;
 	QAction *act;
+	QFont font;
 	//char stmp[64];
-	int useNativeMenuBar;
+	int useNativeMenuBar, pxCharWidth;
 
 	spriteViewWindow = this;
 
@@ -2615,6 +2616,18 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// End Menu 
 	//-----------------------------------------------------------------------
+	
+	// Monospace Font for Data Display Fields (LineEdits)
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+
+	QFontMetrics metrics(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+#else
+	pxCharWidth = metrics.width(QLatin1Char('2'));
+#endif
 
 	setWindowTitle( tr("Sprite Viewer") );
 
@@ -2660,25 +2673,33 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 
 	lbl      = new QLabel( tr("Sprite Index:") );
 	spriteIndexBox = new QLineEdit();
+	spriteIndexBox->setFont(font);
 	spriteIndexBox->setReadOnly(true);
+	spriteIndexBox->setMinimumWidth( 4 * pxCharWidth );
 	infoGrid->addWidget( lbl, 0, 0 );
 	infoGrid->addWidget( spriteIndexBox, 0, 1 );
 
 	lbl      = new QLabel( tr("Tile Address:") );
 	tileAddrBox = new QLineEdit();
+	tileAddrBox->setFont(font);
 	tileAddrBox->setReadOnly(true);
+	tileAddrBox->setMinimumWidth( 6 * pxCharWidth );
 	infoGrid->addWidget( lbl, 1, 0 );
 	infoGrid->addWidget( tileAddrBox, 1, 1 );
 
 	lbl      = new QLabel( tr("Tile Index:") );
 	tileIndexBox   = new QLineEdit();
+	tileIndexBox->setFont(font);
 	tileIndexBox->setReadOnly(true);
+	tileIndexBox->setMinimumWidth( 4 * pxCharWidth );
 	infoGrid->addWidget( lbl, 2, 0 );
 	infoGrid->addWidget( tileIndexBox, 2, 1 );
 
 	lbl      = new QLabel( tr("Palette Address:") );
 	palAddrBox = new QLineEdit();
+	palAddrBox->setFont(font);
 	palAddrBox->setReadOnly(true);
+	palAddrBox->setMinimumWidth( 6 * pxCharWidth );
 	infoGrid->addWidget( lbl, 3, 0 );
 	infoGrid->addWidget( palAddrBox, 3, 1 );
 
@@ -2705,7 +2726,9 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	
 	lbl      = new QLabel( tr("Position (X,Y):") );
 	posBox   = new QLineEdit();
+	posBox->setFont(font);
 	posBox->setReadOnly(true);
+	posBox->setMinimumWidth( 10 * pxCharWidth );
 	infoGrid->addWidget( lbl, 4, 0 );
 	infoGrid->addWidget( posBox, 4, 1 );
 
