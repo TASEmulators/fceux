@@ -408,6 +408,7 @@ class oamPreview_t : public QWidget
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
 		int  heightForWidth(int w) const;
+		QSize sizeHint(void) const;
 
 	private:
 		int  viewWidth;

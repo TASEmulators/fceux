@@ -2761,7 +2761,7 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	previewAnimation = new QPropertyAnimation( previewFrame, "maximumWidth", this);
 	previewAnimation->setDuration(500);
 	previewAnimation->setStartValue(0);
-	previewAnimation->setEndValue(512);
+	previewAnimation->setEndValue(600);
 	previewAnimation->setEasingCurve( QEasingCurve::InOutCirc );
 
 	connect( previewAnimation, SIGNAL(valueChanged(const QVariant &)), this, SLOT(previewAnimWidthChange(const QVariant &)));
@@ -2814,18 +2814,10 @@ void spriteViewerDialog_t::toggleGridVis(void)
 //----------------------------------------------------
 void spriteViewerDialog_t::togglePreviewVis(bool state)
 {
-	//if ( previewFrame->isHidden() )
-	//{
-	//	previewFrame->show();
-	//}
-	//else
-	//{
-	//	previewFrame->hide();
-	//}
 	if ( state )
 	{
 		previewAnimation->setStartValue(0);
-		previewAnimation->setEndValue(512);
+		previewAnimation->setEndValue(600);
 		previewAnimation->start();
 	}
 	else
@@ -3367,6 +3359,11 @@ int  oamPreview_t::heightForWidth(int w) const
 	return ((w*256)/240);
 }
 //----------------------------------------------------
+QSize oamPreview_t::sizeHint(void) const
+{
+	return QSize(512,480);
+}
+//----------------------------------------------------
 void oamPreview_t::resizeEvent(QResizeEvent *event)
 {
 	viewWidth  = event->size().width();
@@ -3386,6 +3383,8 @@ void oamPreview_t::paintEvent(QPaintEvent *event)
 
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
+
+	//printf("Draw: %i,%i\n", viewWidth, viewHeight );
 
 	w = viewWidth  / 256;
   	h = viewHeight / 240;
