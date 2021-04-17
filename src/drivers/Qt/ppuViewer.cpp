@@ -2723,7 +2723,7 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	frame->setLayout( vbox );
 	hbox1->addWidget( frame );
 	vbox->addWidget( preView );
-	frame->hide(); // TODO Hide until preview code is ready
+	//frame->hide(); // TODO Hide until preview code is ready
 
 
 	updateTimer  = new QTimer( this );
@@ -2807,6 +2807,7 @@ void spriteViewerDialog_t::periodicUpdate(void)
 	tileView->setIndex(idx);
 	tileView->setIndex(idx);
 	palView->setIndex(idx);
+	preView->setIndex(idx);
 
 	oamView->update();
 	tileView->update();
@@ -3281,6 +3282,11 @@ oamPreview_t::~oamPreview_t(void)
 
 }
 //----------------------------------------------------
+void oamPreview_t::setIndex(int val)
+{
+	selSprite = val;
+}
+//----------------------------------------------------
 int  oamPreview_t::heightForWidth(int w) const
 {
 	return ((w*256)/240);
@@ -3294,13 +3300,15 @@ void oamPreview_t::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------
 void oamPreview_t::paintEvent(QPaintEvent *event)
 {
-	int w,h;
+	int w,h,i,j,x,y,xx,yy,nt;
 	QPainter painter(this);
-	//QColor color;
-	//QPen pen;
+	QColor bgColor(0, 0, 0);
+	QPen pen;
 	//char showSelector;
+	char spriteRendered[64];
+	struct oamSpriteData_t *spr;
 
-	//pen = painter.pen();
+	pen = painter.pen();
 
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
@@ -3317,5 +3325,62 @@ void oamPreview_t::paintEvent(QPaintEvent *event)
 		w = h;
 	}
 
+	if ( palo != NULL )
+	{
+		int p = palcache[0];
+
+		bgColor.setRed( palo[p].r );
+		bgColor.setGreen( palo[p].g );
+		bgColor.setBlue( palo[p].b );
+	}
+	painter.fillRect( 0, 0, w*256, h*240, bgColor );
+
+	nt = ( oamPattern.mode8x16 ) ? 2 : 1;
+
+	for (i=63; i>=0; i--)
+	{
+		spr = &oamPattern.sprite[i];
+
+		spriteRendered[i] = 0;
+		//printf("Sprite: (%i,%i) -> (%02X,%02X) \n", spr->x, spr->y, spr->x, spr->y );
+
+		// Check if sprite is off screen
+		if ( spr->y >= 0xEF )
+		{
+			continue;
+		}
+
+		yy = spr->y * h;
+
+		for (j=0; j<nt; j++)
+		{
+			for (y=0; y<8; y++)
+			{
+				xx = spr->x * w;
+
+				for (x=0; x < 8; x++)
+				{
+					painter.fillRect( xx, yy, w, h, spr->tile[j].pixel[y][x].color );
+					xx += w;
+				}
+				yy += h;
+			}
+		}
+		spriteRendered[i] = 1;
+	}
+
+	if ( spriteRendered[ selSprite ] )
+	{
+		spr = &oamPattern.sprite[selSprite];
+
+		pen.setWidth( 1 );
+		pen.setColor( QColor(128,128,128) );
+		painter.setPen( pen );
+
+		yy = spr->y * h;
+		xx = spr->x * w;
+
+		painter.drawRect( xx, yy, w*8, h*nt*8 );
+	}
 }
 //----------------------------------------------------

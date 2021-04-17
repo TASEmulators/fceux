@@ -402,6 +402,7 @@ class oamPreview_t : public QWidget
 		oamPreview_t( QWidget *parent = 0);
 		~oamPreview_t(void);
 
+		void setIndex(int val);
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
@@ -410,6 +411,7 @@ class oamPreview_t : public QWidget
 	private:
 		int  viewWidth;
 		int  viewHeight;
+		int  selSprite;
 };
 
 class spriteViewerDialog_t : public QDialog
