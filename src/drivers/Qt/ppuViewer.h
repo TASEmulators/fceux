@@ -441,6 +441,7 @@ class spriteViewerDialog_t : public QDialog
 		QCheckBox    *hFlipBox;
 		QCheckBox    *vFlipBox;
 		QCheckBox    *bgPrioBox;
+		QCheckBox    *showPosHex;
 
 	public slots:
 		void closeWindow(void);

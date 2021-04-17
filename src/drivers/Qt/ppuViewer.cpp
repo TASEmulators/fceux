@@ -2693,15 +2693,15 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	palView  = new oamPaletteView_t(this);
 	vbox->addWidget( palView );
 	vbox3->addWidget( frame, 1 );
-	//infoGrid->addWidget( frame, 2, 2, 1, 2, Qt::AlignTop );
 	
 	lbl      = new QLabel( tr("Position (X,Y):") );
 	posBox   = new QLineEdit();
-	hbox     = new QHBoxLayout();
 	posBox->setReadOnly(true);
-	vbox4->addLayout( hbox, 1 );
-	hbox->addWidget( lbl );
-	hbox->addWidget( posBox );
+	infoGrid->addWidget( lbl, 4, 0 );
+	infoGrid->addWidget( posBox, 4, 1 );
+
+	showPosHex = new QCheckBox( tr("Show Position in Hex") );
+	vbox4->addWidget( showPosHex, 1 );
 
 	hFlipBox = new QCheckBox( tr("Horizontal Flip") );
 	hFlipBox->setFocusPolicy(Qt::NoFocus);
@@ -2790,7 +2790,14 @@ void spriteViewerDialog_t::periodicUpdate(void)
 	sprintf( stmp, "$%04X", 0x3F00 + (oamPattern.sprite[idx].pal*4) );
 	palAddrBox->setText( tr(stmp) );
 
-	sprintf( stmp, "%i,%i", oamPattern.sprite[idx].x, oamPattern.sprite[idx].y );
+	if ( showPosHex->isChecked() )
+	{
+		sprintf( stmp, "$%02X, $%02X", oamPattern.sprite[idx].x, oamPattern.sprite[idx].y );
+	}
+	else
+	{
+		sprintf( stmp, "%3i, %3i", oamPattern.sprite[idx].x, oamPattern.sprite[idx].y );
+	}
 	posBox->setText( tr(stmp) );
 
 	hFlipBox->setChecked( oamPattern.sprite[idx].hFlip );
