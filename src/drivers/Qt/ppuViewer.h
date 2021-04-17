@@ -19,6 +19,7 @@
 #include <QLineEdit>
 #include <QGroupBox>
 #include <QCloseEvent>
+#include <QPropertyAnimation>
 
 #include "Qt/main.h"
 
@@ -444,6 +445,8 @@ class spriteViewerDialog_t : public QDialog
 		QCheckBox    *vFlipBox;
 		QCheckBox    *bgPrioBox;
 		QCheckBox    *showPosHex;
+		QGroupBox    *previewFrame;
+		QPropertyAnimation *previewAnimation;
 
 	public slots:
 		void closeWindow(void);
@@ -452,6 +455,9 @@ class spriteViewerDialog_t : public QDialog
 		void setClickFocus(void);
 		void setHoverFocus(void);
 		void toggleGridVis(void);
+		void togglePreviewVis(bool);
+		void previewAnimWidthChange(const QVariant &);
+		void previewAnimResizeDone(void);
 };
 
 int openPPUViewWindow( QWidget *parent );

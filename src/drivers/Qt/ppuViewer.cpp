@@ -2581,6 +2581,15 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	
 	viewMenu->addAction(act);
 
+	// View -> Show Preview
+	act = new QAction(tr("Show &Preview"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setCheckable(true);
+	act->setStatusTip(tr("Show Preview Area"));
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(togglePreviewVis(bool)) );
+	
+	viewMenu->addAction(act);
+
 	// Focus Policy
 	optMenu = menuBar->addMenu(tr("&Options"));
 
@@ -2723,8 +2732,17 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	frame->setLayout( vbox );
 	hbox1->addWidget( frame );
 	vbox->addWidget( preView );
-	//frame->hide(); // TODO Hide until preview code is ready
+	previewFrame = frame;
+	previewFrame->setMaximumWidth(0);
 
+	previewAnimation = new QPropertyAnimation( previewFrame, "maximumWidth", this);
+	previewAnimation->setDuration(500);
+	previewAnimation->setStartValue(0);
+	previewAnimation->setEndValue(512);
+	previewAnimation->setEasingCurve( QEasingCurve::InOutCirc );
+
+	connect( previewAnimation, SIGNAL(valueChanged(const QVariant &)), this, SLOT(previewAnimWidthChange(const QVariant &)));
+	connect( previewAnimation, SIGNAL(finished(void)), this, SLOT(previewAnimResizeDone(void)) );
 
 	updateTimer  = new QTimer( this );
 
@@ -2769,6 +2787,40 @@ void spriteViewerDialog_t::setHoverFocus(void)
 void spriteViewerDialog_t::toggleGridVis(void)
 {
 	oamView->setGridVisibility( !oamView->getGridVisibility() );
+}
+//----------------------------------------------------
+void spriteViewerDialog_t::togglePreviewVis(bool state)
+{
+	//if ( previewFrame->isHidden() )
+	//{
+	//	previewFrame->show();
+	//}
+	//else
+	//{
+	//	previewFrame->hide();
+	//}
+	if ( state )
+	{
+		previewAnimation->setStartValue(0);
+		previewAnimation->setEndValue(512);
+		previewAnimation->start();
+	}
+	else
+	{
+		previewAnimation->setStartValue( previewFrame->width() );
+		previewAnimation->setEndValue(0);
+		previewAnimation->start();
+	}
+}
+//----------------------------------------------------
+void spriteViewerDialog_t::previewAnimWidthChange(const QVariant &value)
+{
+	resize( minimumSizeHint() );
+}
+//----------------------------------------------------
+void spriteViewerDialog_t::previewAnimResizeDone(void)
+{
+	resize( minimumSizeHint() );
 }
 //----------------------------------------------------
 void spriteViewerDialog_t::periodicUpdate(void)
@@ -3304,7 +3356,6 @@ void oamPreview_t::paintEvent(QPaintEvent *event)
 	QPainter painter(this);
 	QColor bgColor(0, 0, 0);
 	QPen pen;
-	//char showSelector;
 	char spriteRendered[64];
 	struct oamSpriteData_t *spr;
 
