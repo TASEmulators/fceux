@@ -591,11 +591,36 @@ QStyle *fceuStyle::styleBase(QStyle *style) const
 
 	if ( s.size() == 0 )
 	{
+		int i, idx = -1;
+#ifdef WIN32
+		QString defaultStyle("windows");
+#elif __APPLE__
+		QString defaultStyle("fusion");
+#else
+		QString defaultStyle("fusion");
+#endif
+
 		QStringList styleKeys = QStyleFactory::keys();
 
-		if ( styleKeys.size() > 0 )
+		for (i=0; i<styleKeys.size(); i++)
 		{
-			s = styleKeys[0].toStdString();
+			//printf("Style: '%s'\n", styleKeys[i].toStdString().c_str() );
+
+			if ( defaultStyle.compare( styleKeys[i], Qt::CaseInsensitive ) == 0 )
+			{
+				//printf("Style Match: %s\n", styleKeys[i].toStdString().c_str() );
+				idx = i;
+				break;
+			}
+		}
+
+		if ( (idx >= 0) && (idx < styleKeys.size()) )
+		{
+			s = styleKeys[idx].toStdString();
+		}
+		else
+		{
+			s.assign("fusion");
 		}
 	}
 
