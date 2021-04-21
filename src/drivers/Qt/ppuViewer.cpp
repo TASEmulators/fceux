@@ -2714,7 +2714,7 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	hbox1->addLayout( vbox3 );
 	vbox3->addWidget( oamView );
 	vbox3->addLayout( hbox );
-	hbox->addWidget( new QLabel( tr("Display on Scan Line:") ), 1 );
+	hbox->addWidget( new QLabel( tr("Display on Scanline:") ), 1 );
 	hbox->addWidget( scanLineEdit, 1 );
 	hbox->addStretch(5);
 
