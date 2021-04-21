@@ -139,7 +139,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	QActionGroup *group;
 	QMenu *fileMenu, *viewMenu, *colorMenu, *optMenu, *subMenu;
 	QAction *act;
-	char stmp[64];
+	//char stmp[64];
 	int useNativeMenuBar;
 
 	ppuViewWindow = this;
@@ -211,7 +211,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	grid->addLayout( hbox, 0, 1, Qt::AlignRight );
 
 	hbox         = new QHBoxLayout();
-	scanLineEdit = new QLineEdit();
+	scanLineEdit = new QSpinBox();
 	hbox->addWidget( new QLabel( tr("Display on Scanline:") ) );
 	hbox->addWidget( scanLineEdit );
 	grid->addLayout( hbox, 1, 1, Qt::AlignRight );
@@ -231,12 +231,10 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	patternView[1]->setTileLabel( tileLabel[1] );
 	paletteView->setTileLabel( paletteFrame );
 
-	scanLineEdit->setMaxLength( 3 );
-	scanLineEdit->setInputMask( ">900;" );
-	sprintf( stmp, "%i", PPUViewScanline );
-	scanLineEdit->setText( tr(stmp) );
+	scanLineEdit->setRange( 0, 256 );
+	scanLineEdit->setValue( PPUViewScanline );
 
-	connect( scanLineEdit, SIGNAL(textEdited(const QString &)), this, SLOT(scanLineChanged(const QString &)));
+	connect( scanLineEdit, SIGNAL(valueChanged(int)), this, SLOT(scanLineChanged(int)));
 
 	refreshSlider->setMinimum( 0);
 	refreshSlider->setMaximum(25);
@@ -395,19 +393,17 @@ void ppuViewerDialog_t::periodicUpdate(void)
 	}
 	patternView[0]->updateCycleCounter();
 	patternView[1]->updateCycleCounter();
+
+	if ( scanLineEdit->value() != PPUViewScanline )
+	{
+		scanLineEdit->setValue( PPUViewScanline );
+	}
 }
 //----------------------------------------------------
-void ppuViewerDialog_t::scanLineChanged( const QString &txt )
+void ppuViewerDialog_t::scanLineChanged(int value)
 {
-	std::string s;
-
-	s = txt.toStdString();
-
-	if ( s.size() > 0 )
-	{
-		PPUViewScanline = strtoul( s.c_str(), NULL, 10 );
-	}
-	//printf("ScanLine: '%s'  %i\n", s.c_str(), PPUViewScanline );
+	PPUViewScanline = value;
+	//printf("ScanLine: %i\n", PPUViewScanline );
 }
 //----------------------------------------------------
 void ppuViewerDialog_t::sprite8x16Changed0(int state)
@@ -2536,9 +2532,9 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	: QDialog(parent, Qt::Window)
 {
 	QMenuBar    *menuBar;
-	QVBoxLayout *mainLayout, *vbox, *vbox1, *vbox2, *vbox3, *vbox4;
+	QVBoxLayout *mainLayout, *vbox, *vbox1, *vbox2, *vbox3;
 	QHBoxLayout *hbox, *hbox1, *hbox2;
-	QGridLayout *infoGrid;
+	QGridLayout *grid;
 	QGroupBox   *frame;
 	QLabel      *lbl;
 	QActionGroup *group;
@@ -2583,32 +2579,32 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	viewMenu->addAction(act);
 
 	// View -> Show Preview
-	act = new QAction(tr("Show &Preview"), this);
+	//act = new QAction(tr("Show &Preview"), this);
 	//act->setShortcut(QKeySequence::Close);
-	act->setCheckable(true);
-	act->setStatusTip(tr("Show Preview Area"));
-	connect(act, SIGNAL(triggered(bool)), this, SLOT(togglePreviewVis(bool)) );
-	
-	viewMenu->addAction(act);
+	//act->setCheckable(true);
+	//act->setStatusTip(tr("Show Preview Area"));
+	//connect(act, SIGNAL(triggered(bool)), this, SLOT(togglePreviewVis(bool)) );
+	//
+	//viewMenu->addAction(act);
 
 	// View -> Preview Size
-	subMenu = viewMenu->addMenu(tr("Preview &Size"));
-	group   = new QActionGroup(this);
-	group->setExclusive(true);
+	//subMenu = viewMenu->addMenu(tr("Preview &Size"));
+	//group   = new QActionGroup(this);
+	//group->setExclusive(true);
 
-	act = new QAction(tr("&1x"), this);
-	act->setCheckable(true);
-	act->setChecked(true);
-	group->addAction(act);
-	subMenu->addAction(act);
-	connect(act, SIGNAL(triggered()), this, SLOT(setPreviewSize1x(void)) );
+	//act = new QAction(tr("&1x"), this);
+	//act->setCheckable(true);
+	//act->setChecked(true);
+	//group->addAction(act);
+	//subMenu->addAction(act);
+	//connect(act, SIGNAL(triggered()), this, SLOT(setPreviewSize1x(void)) );
 
-	act = new QAction(tr("&2x"), this);
-	act->setCheckable(true);
-	act->setChecked(false);
-	group->addAction(act);
-	subMenu->addAction(act);
-	connect(act, SIGNAL(triggered()), this, SLOT(setPreviewSize2x(void)) );
+	//act = new QAction(tr("&2x"), this);
+	//act->setCheckable(true);
+	//act->setChecked(false);
+	//group->addAction(act);
+	//subMenu->addAction(act);
+	//connect(act, SIGNAL(triggered()), this, SLOT(setPreviewSize2x(void)) );
 
 	// Focus Policy
 	optMenu = menuBar->addMenu(tr("&Options"));
@@ -2656,28 +2652,81 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 
 	setLayout( mainLayout );
 
-	oamView = new oamPatternView_t(this);
-
-	hbox1 = new QHBoxLayout();
-	hbox1->addWidget( oamView );
-
-	mainLayout->addLayout( hbox1 );
-
-	vbox1 = new QVBoxLayout();
-	vbox2 = new QVBoxLayout();
-	hbox1->addLayout( vbox1, 1);
-
-	hbox  = new QHBoxLayout();
-	vbox1->addLayout( hbox );
+	oamView  = new oamPatternView_t(this);
+	tileView = new oamTileView_t(this);
+	palView  = new oamPaletteView_t(this);
+	preView  = new oamPreview_t(this);
 
 	useSprRam = new QRadioButton( tr("Sprite RAM") );
 	useCpuPag = new QRadioButton( tr("CPU Page #") );
 	cpuPagIdx = new QSpinBox(this);
 
+	scanLineEdit = new QSpinBox(this);
+	scanLineEdit->setRange( 0, 256 );
+	scanLineEdit->setValue( PPUViewScanline );
+
+	connect( scanLineEdit, SIGNAL(valueChanged(int)), this, SLOT(scanLineChanged(int)));
+
 	useSprRam->setChecked(true);
 	useSprRam->setEnabled(false); // TODO Implement CPU paging option
 	cpuPagIdx->setEnabled(false);
 	useCpuPag->setEnabled(false);
+
+	hFlipBox = new QCheckBox( tr("Horizontal Flip") );
+	hFlipBox->setFocusPolicy(Qt::NoFocus);
+
+	vFlipBox = new QCheckBox( tr("Vertical Flip") );
+	vFlipBox->setFocusPolicy(Qt::NoFocus);
+
+	bgPrioBox = new QCheckBox( tr("Background Priority") );
+	bgPrioBox->setFocusPolicy(Qt::NoFocus);
+
+	spriteIndexBox = new QLineEdit();
+	spriteIndexBox->setFont(font);
+	spriteIndexBox->setReadOnly(true);
+	spriteIndexBox->setMinimumWidth( 4 * pxCharWidth );
+
+	tileAddrBox = new QLineEdit();
+	tileAddrBox->setFont(font);
+	tileAddrBox->setReadOnly(true);
+	tileAddrBox->setMinimumWidth( 6 * pxCharWidth );
+
+	tileIndexBox   = new QLineEdit();
+	tileIndexBox->setFont(font);
+	tileIndexBox->setReadOnly(true);
+	tileIndexBox->setMinimumWidth( 4 * pxCharWidth );
+
+	palAddrBox = new QLineEdit();
+	palAddrBox->setFont(font);
+	palAddrBox->setReadOnly(true);
+	palAddrBox->setMinimumWidth( 6 * pxCharWidth );
+
+	posBox   = new QLineEdit();
+	posBox->setFont(font);
+	posBox->setReadOnly(true);
+	posBox->setMinimumWidth( 10 * pxCharWidth );
+
+	showPosHex = new QCheckBox( tr("Show Position in Hex") );
+
+	hbox1 = new QHBoxLayout();
+	vbox3 = new QVBoxLayout();
+	hbox  = new QHBoxLayout();
+	hbox1->addLayout( vbox3 );
+	vbox3->addWidget( oamView );
+	vbox3->addLayout( hbox );
+	hbox->addWidget( new QLabel( tr("Display on Scan Line:") ), 1 );
+	hbox->addWidget( scanLineEdit, 1 );
+	hbox->addStretch(5);
+
+	mainLayout->addLayout( hbox1 );
+
+	vbox1 = new QVBoxLayout();
+	hbox1->addLayout( vbox1);
+
+	vbox2 = new QVBoxLayout();
+
+	hbox  = new QHBoxLayout();
+	vbox1->addLayout( hbox, 1 );
 
 	hbox->addWidget( new QLabel( tr("Data Source:") ) );
 	hbox->addWidget( useSprRam );
@@ -2685,112 +2734,70 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	hbox->addWidget( cpuPagIdx );
 
 	frame    = new QGroupBox( tr("Sprite Info") );
-	infoGrid = new QGridLayout();
-	vbox1->addWidget( frame );
+	grid     = new QGridLayout();
+	vbox1->addWidget( frame, 1 );
 	frame->setLayout( vbox2 );
-	//vbox2->addLayout( infoGrid );
-
-	lbl      = new QLabel( tr("Sprite Index:") );
-	spriteIndexBox = new QLineEdit();
-	spriteIndexBox->setFont(font);
-	spriteIndexBox->setReadOnly(true);
-	spriteIndexBox->setMinimumWidth( 4 * pxCharWidth );
-	infoGrid->addWidget( lbl, 0, 0 );
-	infoGrid->addWidget( spriteIndexBox, 0, 1 );
-
-	lbl      = new QLabel( tr("Tile Address:") );
-	tileAddrBox = new QLineEdit();
-	tileAddrBox->setFont(font);
-	tileAddrBox->setReadOnly(true);
-	tileAddrBox->setMinimumWidth( 6 * pxCharWidth );
-	infoGrid->addWidget( lbl, 1, 0 );
-	infoGrid->addWidget( tileAddrBox, 1, 1 );
-
-	lbl      = new QLabel( tr("Tile Index:") );
-	tileIndexBox   = new QLineEdit();
-	tileIndexBox->setFont(font);
-	tileIndexBox->setReadOnly(true);
-	tileIndexBox->setMinimumWidth( 4 * pxCharWidth );
-	infoGrid->addWidget( lbl, 2, 0 );
-	infoGrid->addWidget( tileIndexBox, 2, 1 );
-
-	lbl      = new QLabel( tr("Palette Address:") );
-	palAddrBox = new QLineEdit();
-	palAddrBox->setFont(font);
-	palAddrBox->setReadOnly(true);
-	palAddrBox->setMinimumWidth( 6 * pxCharWidth );
-	infoGrid->addWidget( lbl, 3, 0 );
-	infoGrid->addWidget( palAddrBox, 3, 1 );
 
 	hbox2    = new QHBoxLayout();
-	vbox3    = new QVBoxLayout();
 	frame    = new QGroupBox( tr("Tile:") );
-	vbox     = new QVBoxLayout();
-	tileView = new oamTileView_t(this);
-	frame->setLayout( vbox );
-	vbox->addWidget( tileView );
+	hbox     = new QHBoxLayout();
+	frame->setLayout( hbox );
+	hbox->addWidget( tileView );
 	vbox2->addLayout( hbox2 );
-	vbox3->addWidget( frame, 4 );
-	hbox2->addLayout( vbox3, 1 );
+	hbox2->addWidget( frame );
+	hbox2->addLayout( grid  );
 	
-	frame    = new QGroupBox( tr("Palette:") );
 	vbox     = new QVBoxLayout();
-	vbox4    = new QVBoxLayout();
-	vbox4->addLayout( infoGrid );
-	hbox2->addLayout( vbox4, 1 );
-	frame->setLayout( vbox );
-	palView  = new oamPaletteView_t(this);
-	vbox->addWidget( palView );
-	vbox3->addWidget( frame, 1 );
-	
-	lbl      = new QLabel( tr("Position (X,Y):") );
-	posBox   = new QLineEdit();
-	posBox->setFont(font);
-	posBox->setReadOnly(true);
-	posBox->setMinimumWidth( 10 * pxCharWidth );
-	infoGrid->addWidget( lbl, 4, 0 );
-	infoGrid->addWidget( posBox, 4, 1 );
+	hbox->addLayout( vbox );
 
-	showPosHex = new QCheckBox( tr("Show Position in Hex") );
-	vbox4->addWidget( showPosHex, 1 );
+	vbox->addWidget( hFlipBox );
 
-	hFlipBox = new QCheckBox( tr("Horizontal Flip") );
-	hFlipBox->setFocusPolicy(Qt::NoFocus);
-	vbox4->addWidget( hFlipBox, 1 );
+	vbox->addWidget( vFlipBox );
 
-	vFlipBox = new QCheckBox( tr("Vertical Flip") );
-	vFlipBox->setFocusPolicy(Qt::NoFocus);
-	vbox4->addWidget( vFlipBox, 1 );
+	vbox->addWidget( bgPrioBox );
 
-	bgPrioBox = new QCheckBox( tr("Background Priority") );
-	bgPrioBox->setFocusPolicy(Qt::NoFocus);
-	vbox4->addWidget( bgPrioBox, 1 );
-
-	vbox4->addStretch(10);
+	frame    = new QGroupBox( tr("Palette:") );
+	hbox     = new QHBoxLayout();
+  	hbox->addWidget( palView );
+	frame->setLayout( hbox );
+	vbox->addWidget( frame );
 
 	frame    = new QGroupBox( tr("Preview:") );
 	vbox     = new QVBoxLayout();
-	preView  = new oamPreview_t(this);
-	frame->setLayout( vbox );
-	hbox1->addWidget( frame );
 	vbox->addWidget( preView );
-	previewFrame = frame;
-	previewFrame->setMaximumWidth(0);
+	frame->setLayout( vbox );
+	vbox1->addWidget( frame, 10 );
 
-	previewAnimation = new QPropertyAnimation( previewFrame, "maximumWidth", this);
-	previewAnimation->setDuration(500);
-	previewAnimation->setStartValue(0);
-	previewAnimation->setEndValue(600);
-	previewAnimation->setEasingCurve( QEasingCurve::InOutCirc );
 
-	connect( previewAnimation, SIGNAL(valueChanged(const QVariant &)), this, SLOT(previewAnimWidthChange(const QVariant &)));
-	connect( previewAnimation, SIGNAL(finished(void)), this, SLOT(previewAnimResizeDone(void)) );
+	lbl      = new QLabel( tr("Sprite Index:") );
+	grid->addWidget( lbl, 0, 0 );
+	grid->addWidget( spriteIndexBox, 0, 1 );
+
+	lbl      = new QLabel( tr("Tile Address:") );
+	grid->addWidget( lbl, 1, 0 );
+	grid->addWidget( tileAddrBox, 1, 1 );
+
+	lbl      = new QLabel( tr("Tile Index:") );
+	grid->addWidget( lbl, 2, 0 );
+	grid->addWidget( tileIndexBox, 2, 1 );
+
+	lbl      = new QLabel( tr("Palette Address:") );
+	grid->addWidget( lbl, 3, 0 );
+	grid->addWidget( palAddrBox, 3, 1 );
+
+	lbl      = new QLabel( tr("Position (X,Y):") );
+	grid->addWidget( lbl, 4, 0 );
+	grid->addWidget( posBox, 4, 1 );
+
+	grid->addWidget( showPosHex, 5, 0, 1, 2 );
 
 	updateTimer  = new QTimer( this );
 
 	connect( updateTimer, &QTimer::timeout, this, &spriteViewerDialog_t::periodicUpdate );
 
 	updateTimer->start( 33 ); // 30hz
+
+	resize( minimumSizeHint() );
 }
 //----------------------------------------------------
 spriteViewerDialog_t::~spriteViewerDialog_t(void)
@@ -2831,60 +2838,18 @@ void spriteViewerDialog_t::toggleGridVis(void)
 	oamView->setGridVisibility( !oamView->getGridVisibility() );
 }
 //----------------------------------------------------
-void spriteViewerDialog_t::setPreviewSize1x(void)
+void spriteViewerDialog_t::scanLineChanged(int value)
 {
-	preView->setMinScale(1);
-
-	if ( previewFrame->width() > 300 )
-	{
-		previewAnimation->setStartValue( previewFrame->width() );
-		previewAnimation->setEndValue(300);
-		previewAnimation->start();
-	}
-}
-//----------------------------------------------------
-void spriteViewerDialog_t::setPreviewSize2x(void)
-{
-	preView->setMinScale(2);
-
-	if ( (previewFrame->width() > 100) && (previewFrame->width() < 600) )
-	{
-		previewAnimation->setStartValue( previewFrame->width() );
-		previewAnimation->setEndValue(600);
-		previewAnimation->start();
-	}
-}
-//----------------------------------------------------
-void spriteViewerDialog_t::togglePreviewVis(bool state)
-{
-	if ( state )
-	{
-		previewAnimation->setStartValue(0);
-		previewAnimation->setEndValue(600);
-		previewAnimation->start();
-	}
-	else
-	{
-		previewAnimation->setStartValue( previewFrame->width() );
-		previewAnimation->setEndValue(0);
-		previewAnimation->start();
-	}
-}
-//----------------------------------------------------
-void spriteViewerDialog_t::previewAnimWidthChange(const QVariant &value)
-{
-	resize( minimumSizeHint() );
-}
-//----------------------------------------------------
-void spriteViewerDialog_t::previewAnimResizeDone(void)
-{
-	resize( minimumSizeHint() );
+	PPUViewScanline = value;
+	//printf("ScanLine: %i\n", PPUViewScanline );
 }
 //----------------------------------------------------
 void spriteViewerDialog_t::periodicUpdate(void)
 {
 	int idx;
 	char stmp[32];
+
+	//return;
 
 	idx = oamView->getSpriteIndex();
 
@@ -2909,6 +2874,11 @@ void spriteViewerDialog_t::periodicUpdate(void)
 		sprintf( stmp, "%3i, %3i", oamPattern.sprite[idx].x, oamPattern.sprite[idx].y );
 	}
 	posBox->setText( tr(stmp) );
+
+	if ( scanLineEdit->value() != PPUViewScanline )
+	{
+		scanLineEdit->setValue( PPUViewScanline );
+	}
 
 	hFlipBox->setChecked( oamPattern.sprite[idx].hFlip );
 	vFlipBox->setChecked( oamPattern.sprite[idx].vFlip );
@@ -2962,6 +2932,21 @@ int oamPatternView_t::getSpriteIndex(void){ return spriteIdx; }
 int oamPatternView_t::heightForWidth(int w) const
 {
 	return 2*w;
+}
+//----------------------------------------------------
+QSize oamPatternView_t::minimumSizeHint(void) const
+{
+	return QSize(256,512);
+}
+//----------------------------------------------------
+QSize oamPatternView_t::maximumSizeHint(void) const
+{
+	return QSize(512,1024);
+}
+//----------------------------------------------------
+QSize oamPatternView_t::sizeHint(void) const
+{
+	return QSize(384,768);
 }
 //----------------------------------------------------
 void oamPatternView_t::openTilePpuViewer(void)
@@ -3228,8 +3213,8 @@ oamTileView_t::oamTileView_t(QWidget *parent)
 	: QWidget(parent)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	viewWidth = 8;
-	viewHeight = 16;
+	viewWidth = 80;
+	viewHeight = 160;
 	setMinimumWidth( viewWidth );
 	setMinimumHeight( viewHeight );
 
@@ -3249,6 +3234,21 @@ void oamTileView_t::setIndex( int val )
 int  oamTileView_t::heightForWidth(int w) const
 {
 	return 2*w;
+}
+//----------------------------------------------------
+QSize oamTileView_t::minimumSizeHint(void) const
+{
+	return QSize(8,16);
+}
+//----------------------------------------------------
+QSize oamTileView_t::maximumSizeHint(void) const
+{
+	return QSize(128,256);
+}
+//----------------------------------------------------
+QSize oamTileView_t::sizeHint(void) const
+{
+	return QSize(64,128);
 }
 //----------------------------------------------------
 void oamTileView_t::resizeEvent(QResizeEvent *event)
@@ -3327,6 +3327,21 @@ int  oamPaletteView_t::heightForWidth(int w) const
 	return w/4;
 }
 //----------------------------------------------------
+QSize oamPaletteView_t::minimumSizeHint(void) const
+{
+	return QSize(48,12);
+}
+//----------------------------------------------------
+QSize oamPaletteView_t::maximumSizeHint(void) const
+{
+	return QSize(256,64);
+}
+//----------------------------------------------------
+QSize oamPaletteView_t::sizeHint(void) const
+{
+	return QSize(128,32);
+}
+//----------------------------------------------------
 void oamPaletteView_t::resizeEvent(QResizeEvent *event)
 {
 	viewWidth  = event->size().width();
@@ -3385,6 +3400,8 @@ oamPreview_t::oamPreview_t(QWidget *parent)
 	viewWidth = 256;
 	setMinimumWidth( viewWidth );
 	setMinimumHeight( viewHeight );
+	selSprite = 0;
+	cx = cy = 0;
 }
 //----------------------------------------------------
 oamPreview_t::~oamPreview_t(void)
@@ -3412,6 +3429,16 @@ void oamPreview_t::setMinScale(int scale)
 int  oamPreview_t::heightForWidth(int w) const
 {
 	return ((w*256)/240);
+}
+//----------------------------------------------------
+QSize oamPreview_t::minimumSizeHint(void) const
+{
+	return QSize(256,240);
+}
+//----------------------------------------------------
+QSize oamPreview_t::maximumSizeHint(void) const
+{
+	return QSize(512,480);
 }
 //----------------------------------------------------
 QSize oamPreview_t::sizeHint(void) const
@@ -3453,6 +3480,9 @@ void oamPreview_t::paintEvent(QPaintEvent *event)
 		w = h;
 	}
 
+	cx = (viewWidth  - (256*w)) / 2;
+	cy = (viewHeight - (240*h)) / 2;
+
 	if ( palo != NULL )
 	{
 		int p = palcache[0];
@@ -3461,7 +3491,7 @@ void oamPreview_t::paintEvent(QPaintEvent *event)
 		bgColor.setGreen( palo[p].g );
 		bgColor.setBlue( palo[p].b );
 	}
-	painter.fillRect( 0, 0, w*256, h*240, bgColor );
+	painter.fillRect( cx, cy, w*256, h*240, bgColor );
 
 	nt = ( oamPattern.mode8x16 ) ? 2 : 1;
 
@@ -3478,13 +3508,13 @@ void oamPreview_t::paintEvent(QPaintEvent *event)
 			continue;
 		}
 
-		yy = spr->y * h;
+		yy = (spr->y * h) + cy;
 
 		for (j=0; j<nt; j++)
 		{
 			for (y=0; y<8; y++)
 			{
-				xx = spr->x * w;
+				xx = (spr->x * w) + cx;
 
 				for (x=0; x < 8; x++)
 				{
@@ -3505,8 +3535,8 @@ void oamPreview_t::paintEvent(QPaintEvent *event)
 		pen.setColor( QColor(128,128,128) );
 		painter.setPen( pen );
 
-		yy = spr->y * h;
-		xx = spr->x * w;
+		yy = (spr->y * h) + cy;
+		xx = (spr->x * w) + cx;
 
 		painter.drawRect( xx, yy, w*8, h*nt*8 );
 	}
