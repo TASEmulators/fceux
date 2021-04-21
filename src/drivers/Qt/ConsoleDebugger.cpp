@@ -2104,7 +2104,8 @@ void  QAsmView::updateAssemblyView(void)
 		{
 			sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
 			line.append(chr);
-		} else
+		}
+		else
 		{
 			if ((addr + size) > 0xFFFF)
 			{
@@ -2113,6 +2114,7 @@ void  QAsmView::updateAssemblyView(void)
 					sprintf(chr, "%02X        OVERFLOW\n", GetMem(addr++));
 					line.append(chr);
 				}
+				delete a;
 				break;
 			}
 			for (int j = 0; j < size; j++)
