@@ -14,6 +14,7 @@
 #include <QFrame>
 #include <QTimer>
 #include <QSlider>
+#include <QSpinBox>
 #include <QLineEdit>
 #include <QGroupBox>
 #include <QScrollArea>
@@ -198,7 +199,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		QCheckBox *showAttrGridCbox;
 		QCheckBox *showAttrbCbox;
 		QCheckBox *ignorePaletteCbox;
-		QLineEdit *scanLineEdit;
+		QSpinBox  *scanLineEdit;
 		QTimer    *updateTimer;
 		QLineEdit *ppuAddrLbl;
 		QLineEdit *nameTableLbl;
@@ -231,7 +232,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void showTileGridChanged(int state);
 		void showAttrGridChanged(int state);
 		void showScrollLinesChanged(int state);
-		void scanLineChanged( const QString &txt );
+		void scanLineChanged(int value);
 		void menuScrollLinesChanged( bool checked ); 
 		void menuTileGridLinesChanged( bool checked ); 
 		void menuAttrGridLinesChanged( bool checked ); 

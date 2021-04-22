@@ -143,9 +143,8 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QActionGroup *group;
 	QLabel *lbl;
 	QFont   font;
-	char stmp[64];
+	//char stmp[64];
 	int useNativeMenuBar;
-	fceuDecIntValidtor *validator;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -502,19 +501,15 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	hbox     = new QHBoxLayout();
 
-	scanLineEdit = new QLineEdit();
+	scanLineEdit = new QSpinBox();
+	scanLineEdit->setRange( 0, 255 );
+	scanLineEdit->setValue( NTViewScanline );
 	hbox->addWidget( new QLabel( tr("Display on Scanline:") ), 1, Qt::AlignRight );
 	hbox->addWidget( scanLineEdit, 1, Qt::AlignLeft );
 
 	hbox1->addLayout( hbox, 1 );
 
-	validator = new fceuDecIntValidtor( 0, 255, this );
-	scanLineEdit->setMaxLength( 3 );
-	scanLineEdit->setValidator( validator );
-	sprintf( stmp, "%i", NTViewScanline );
-	scanLineEdit->setText( tr(stmp) );
-
-	connect( scanLineEdit, SIGNAL(textEdited(const QString &)), this, SLOT(scanLineChanged(const QString &)));
+	connect( scanLineEdit, SIGNAL(valueChanged(int)), this, SLOT(scanLineChanged(int)));
 
 	FCEUD_UpdateNTView( -1, true);
 	
@@ -762,21 +757,10 @@ void ppuNameTableViewerDialog_t::updateMirrorText(void)
 	mirrorLbl->setText( tr(txt) );
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::scanLineChanged( const QString &txt )
+void ppuNameTableViewerDialog_t::scanLineChanged(int val)
 {
-	std::string s;
-
-	s = txt.toStdString();
-
-	if ( s.size() > 0 )
-	{
-		NTViewScanline = strtoul( s.c_str(), NULL, 10 );
-	}
-	else
-	{
-		NTViewScanline = 0;
-	}
-	//printf("ScanLine: '%s'  %i\n", s.c_str(), NTViewScanline );
+	NTViewScanline = val;
+	//printf("ScanLine:  %i\n", NTViewScanline );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::menuScrollLinesChanged(bool checked)

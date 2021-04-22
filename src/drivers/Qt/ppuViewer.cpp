@@ -245,7 +245,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	patternView[1]->setTileLabel( tileLabel[1] );
 	paletteView->setTileLabel( paletteFrame );
 
-	scanLineEdit->setRange( 0, 256 );
+	scanLineEdit->setRange( 0, 255 );
 	scanLineEdit->setValue( PPUViewScanline );
 
 	connect( scanLineEdit, SIGNAL(valueChanged(int)), this, SLOT(scanLineChanged(int)));
@@ -2705,7 +2705,7 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	cpuPagIdx = new QSpinBox(this);
 
 	scanLineEdit = new QSpinBox(this);
-	scanLineEdit->setRange( 0, 256 );
+	scanLineEdit->setRange( 0, 255 );
 	scanLineEdit->setValue( PPUViewScanline );
 
 	connect( scanLineEdit, SIGNAL(valueChanged(int)), this, SLOT(scanLineChanged(int)));
