@@ -148,6 +148,31 @@ class ppuNameTableTileView_t : public QWidget
 		int tileY;
 };
 
+class ppuNameTablePaletteView_t : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		ppuNameTablePaletteView_t( QWidget *parent = 0);
+		~ppuNameTablePaletteView_t(void);
+
+		void setTile( int table, int x, int y );
+	protected:
+		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+		int  heightForWidth(int w) const;
+		QSize  minimumSizeHint(void) const;
+		QSize  maximumSizeHint(void) const;
+		QSize  sizeHint(void) const;
+
+	private:
+		int  viewWidth;
+		int  viewHeight;
+		int  selTable;
+		int  tileX;
+		int  tileY;
+};
+
 class ppuNameTableViewerDialog_t : public QDialog
 {
    Q_OBJECT
@@ -166,6 +191,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 
 		ppuNameTableView_t *ntView;
 		ppuNameTableTileView_t *selTileView;
+		ppuNameTablePaletteView_t *selTilePalView;
 		QScrollArea *scrollArea;
 		QCheckBox *showScrollLineCbox;
 		QCheckBox *showTileGridCbox;

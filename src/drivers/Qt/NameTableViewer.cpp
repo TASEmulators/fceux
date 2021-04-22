@@ -114,6 +114,20 @@ int openNameTableViewWindow( QWidget *parent )
 
 	return 0;
 }
+//----------------------------------------------------------------------------
+static int conv2hex( int i )
+{
+	int h = 0;
+	if ( i >= 10 )
+	{
+		h = 'A' + i - 10;
+	}
+	else
+	{
+		h = '0' + i;
+	}
+	return h;
+}
 //----------------------------------------------------
 ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	: QDialog( parent, Qt::Window )
@@ -444,8 +458,10 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	grid->addWidget( palAddrLbl, 7, 1, Qt::AlignLeft );
 
 	selTileView = new ppuNameTableTileView_t(this);
+	selTilePalView = new ppuNameTablePaletteView_t(this);
 	//grid->addWidget( selTileView, 8, 0, 2, 1, Qt::AlignLeft );
 	vbox3->addWidget( selTileView );
+	vbox3->addWidget( selTilePalView );
 
 	showScrollLineCbox = new QCheckBox( tr("Show Scroll Lines") );
 	showTileGridCbox   = new QCheckBox( tr("Show Tile Grid") );
@@ -547,6 +563,9 @@ void ppuNameTableViewerDialog_t::periodicUpdate(void)
 
 		this->selTileView->setTile( ntView->getSelTable(), p.x(), p.y() );
 		this->selTileView->update();
+
+		this->selTilePalView->setTile( ntView->getSelTable(), p.x(), p.y() );
+		this->selTilePalView->update();
 
 		this->ntView->update();
 		//this->scrollArea->viewport()->update();
@@ -1857,5 +1876,123 @@ void ppuNameTableTileView_t::paintEvent(QPaintEvent *event)
 	//painter.setPen( pen );
 
 	//painter.drawRect( x, y, w, h );
+}
+//----------------------------------------------------
+//-- Name Table Tile Palette View
+//----------------------------------------------------
+ppuNameTablePaletteView_t::ppuNameTablePaletteView_t(QWidget *parent)
+	: QWidget(parent)
+{
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	viewHeight = 32;
+	viewWidth = viewHeight*4;
+	setMinimumWidth( viewWidth );
+	setMinimumHeight( viewHeight );
+
+	selTable = 0;
+	tileX = 0;
+	tileY = 0;
+}
+//----------------------------------------------------
+ppuNameTablePaletteView_t::~ppuNameTablePaletteView_t(void)
+{
+
+}
+//----------------------------------------------------
+void ppuNameTablePaletteView_t::setTile( int table, int x, int y )
+{
+	selTable = table;
+	tileX = x; tileY = y;
+}
+//----------------------------------------------------
+int  ppuNameTablePaletteView_t::heightForWidth(int w) const
+{
+	return w/4;
+}
+//----------------------------------------------------
+QSize ppuNameTablePaletteView_t::minimumSizeHint(void) const
+{
+	return QSize(48,12);
+}
+//----------------------------------------------------
+QSize ppuNameTablePaletteView_t::maximumSizeHint(void) const
+{
+	return QSize(256,64);
+}
+//----------------------------------------------------
+QSize ppuNameTablePaletteView_t::sizeHint(void) const
+{
+	return QSize(128,32);
+}
+//----------------------------------------------------
+void ppuNameTablePaletteView_t::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+}
+//----------------------------------------------------
+void ppuNameTablePaletteView_t::paintEvent(QPaintEvent *event)
+{
+	int x,w,h,xx,yy,p,p2,i,j;
+	QPainter painter(this);
+	QColor color( 0, 0, 0);
+	QColor  white(255,255,255), black(0,0,0);
+	ppuNameTableTile_t *tile;
+	//QPen pen;
+	//char showSelector;
+	char c[4];
+
+	//pen = painter.pen();
+
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
+
+	w = viewWidth  / 4;
+  	h = viewHeight;
+
+	if ( w < h )
+	{
+		h = w;
+	}
+	else
+	{
+		w = h;
+	}
+
+	i = w / 4;
+	j = h / 4;
+
+	tile = &nameTable[ selTable ].tile[ tileY ][ tileX ];
+
+	p2 = tile->pal * 4;
+	yy = 0;
+	xx = 0;
+	for (x=0; x < 4; x++)
+	{
+		if ( palo != NULL )
+		{
+			p = palcache[p2 | x];
+			color.setBlue( palo[p].b );
+			color.setGreen( palo[p].g );
+			color.setRed( palo[p].r );
+
+			c[0] = conv2hex( (p & 0xF0) >> 4 );
+			c[1] = conv2hex(  p & 0x0F);
+			c[2] =  0;
+		}
+		painter.fillRect( xx, yy, w, h, color );
+
+		if ( qGray( color.red(), color.green(), color.blue() ) > 128 )
+		{
+			painter.setPen( black );
+		}
+		else
+		{
+			painter.setPen( white );
+		}
+		painter.drawText( xx+i, yy+h-j, tr(c) );
+
+		xx += w;
+	}
 }
 //----------------------------------------------------
