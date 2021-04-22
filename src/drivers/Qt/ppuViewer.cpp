@@ -109,6 +109,20 @@ int openOAMViewWindow( QWidget *parent )
 
 	return 0;
 }
+//----------------------------------------------------------------------------
+static int conv2hex( int i )
+{
+	int h = 0;
+	if ( i >= 10 )
+	{
+		h = 'A' + i - 10;
+	}
+	else
+	{
+		h = '0' + i;
+	}
+	return h;
+}
 //----------------------------------------------------
 void setPPUSelPatternTile( int table, int x, int y )
 {
@@ -1657,15 +1671,23 @@ void ppuPalatteView_t::mousePressEvent(QMouseEvent * event)
 //----------------------------------------------------
 void ppuPalatteView_t::paintEvent(QPaintEvent *event)
 {
-	int x,y,w,h,xx,yy;
+	int x,y,w,h,xx,yy,i,j,p,ii;
 	QPainter painter(this);
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
+	QColor color, black(0,0,0), white(255,255,255);
+	QPen     pen;
+	char     c[4];
+
+	pen = painter.pen();
 
 	//printf("PPU PatternView %ix%i \n", viewWidth, viewHeight );
 
 	w = viewWidth / PALETTEWIDTH;
   	h = viewHeight / PALETTEHEIGHT;
+
+	i = w / 4;
+	j = h / 4;
 
 	yy = 0;
 	for (y=0; y < PALETTEHEIGHT; y++)
@@ -1674,7 +1696,28 @@ void ppuPalatteView_t::paintEvent(QPaintEvent *event)
 
 		for (x=0; x < PALETTEWIDTH; x++)
 		{
-			painter.fillRect( xx, yy, w, h, ppuv_palette[y][x] );
+			ii = (y*PALETTEWIDTH) + x;
+
+			p = palcache[ii];
+
+			color = ppuv_palette[y][x];
+
+			c[0] = conv2hex( (p & 0xF0) >> 4 );
+			c[1] = conv2hex(  p & 0x0F);
+			c[2] =  0;
+
+			painter.fillRect( xx, yy, w, h, color );
+
+			if ( qGray( color.red(), color.green(), color.blue() ) > 128 )
+			{
+				painter.setPen( black );
+			}
+			else
+			{
+				painter.setPen( white );
+			}
+			painter.drawText( xx+i, yy+h-j, tr(c) );
+
 			xx += w;
 		}
 		yy += h;
@@ -3350,11 +3393,13 @@ void oamPaletteView_t::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------
 void oamPaletteView_t::paintEvent(QPaintEvent *event)
 {
-	int x,w,h,xx,yy,p,p2;
+	int x,w,h,xx,yy,p,p2,i,j;
 	QPainter painter(this);
 	QColor color( 0, 0, 0);
+	QColor  white(255,255,255), black(0,0,0);
 	//QPen pen;
 	//char showSelector;
+	char c[4];
 
 	//pen = painter.pen();
 
@@ -3373,6 +3418,9 @@ void oamPaletteView_t::paintEvent(QPaintEvent *event)
 		w = h;
 	}
 
+	i = w / 4;
+	j = h / 4;
+
 	p2 = palIdx * 4;
 	yy = 0;
 	xx = 0;
@@ -3384,8 +3432,23 @@ void oamPaletteView_t::paintEvent(QPaintEvent *event)
 			color.setBlue( palo[p].b );
 			color.setGreen( palo[p].g );
 			color.setRed( palo[p].r );
+
+			c[0] = conv2hex( (p & 0xF0) >> 4 );
+			c[1] = conv2hex(  p & 0x0F);
+			c[2] =  0;
 		}
 		painter.fillRect( xx, yy, w, h, color );
+
+		if ( qGray( color.red(), color.green(), color.blue() ) > 128 )
+		{
+			painter.setPen( black );
+		}
+		else
+		{
+			painter.setPen( white );
+		}
+		painter.drawText( xx+i, yy+h-j, tr(c) );
+
 		xx += w;
 	}
 }
