@@ -967,6 +967,11 @@ int initTraceLogBuffer(int maxRecs)
 
 		size = maxRecs * sizeof(traceRecord_t);
 
+		if ( recBuf != NULL )
+		{
+			free(recBuf); recBuf = NULL;
+		}
+
 		recBuf = (traceRecord_t *)malloc(size);
 
 		if (recBuf)
@@ -978,6 +983,7 @@ int initTraceLogBuffer(int maxRecs)
 		{
 			recBufMax = 0;
 		}
+		recBufHead = recBufTail = 0;
 	}
 	return recBuf == NULL;
 }
@@ -1001,9 +1007,13 @@ static void pushToLogBuffer(traceRecord_t &rec)
 	recBuf[recBufHead] = rec;
 	recBufHead = (recBufHead + 1) % recBufMax;
 
-	if (recBufHead == recBufTail)
-	{
-		printf("Trace Log Overrun!!!\n");
+	if ( logging )
+	{	// Warning that an buffer overrun has occurred,
+		// This means that some instructions have not been written to the log.
+		if (recBufHead == recBufTail)
+		{
+			printf("Trace Log Overrun!!!\n");
+		}
 	}
 }
 //----------------------------------------------------
