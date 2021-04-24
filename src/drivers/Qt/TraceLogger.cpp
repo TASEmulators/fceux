@@ -46,6 +46,7 @@
 
 #include "common/os_utils.h"
 
+#include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/TraceLogger.h"
 #include "Qt/main.h"
@@ -99,6 +100,7 @@ static int recBufMax = 0;
 static int recBufHead = 0;
 static int recBufTail = 0;
 static FILE *logFile = NULL;
+static bool overrunWarningArmed = true;
 static TraceLoggerDialog_t *traceLogWindow = NULL;
 static void pushMsgToLogBuffer(const char *msg);
 //----------------------------------------------------
@@ -378,6 +380,7 @@ void TraceLoggerDialog_t::updatePeriodic(void)
 	else
 	{
 		recBufTail = recBufHead;
+		overrunWarningArmed = true;
 	}
 
 	if (traceViewCounter > 20)
@@ -439,6 +442,21 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 		pushMsgToLogBuffer("Log Start");
 		startStopButton->setText(tr("Stop Logging"));
 		logging = 1;
+	}
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::showBufferWarning(void)
+{
+	const char *msg = "\
+Error: Trace Logger Circular Buffer Overrun has been detected!\n\n\
+This means that some instructions have not been written to the log\
+ file and resulting log of instructions is incomplete.\n\n\
+Recommend increasing buffer size (max lines) to at least 1,000,000 lines.\n\n\
+This message won't show again until logging is stopped and started again.";
+
+	if ( consoleWindow )
+	{
+		consoleWindow->QueueErrorMsgWindow(msg);
 	}
 }
 //----------------------------------------------------
@@ -1004,15 +1022,24 @@ void openTraceLoggerWindow(QWidget *parent)
 //----------------------------------------------------
 static void pushToLogBuffer(traceRecord_t &rec)
 {
+
 	recBuf[recBufHead] = rec;
 	recBufHead = (recBufHead + 1) % recBufMax;
 
-	if ( logging )
-	{	// Warning that an buffer overrun has occurred,
-		// This means that some instructions have not been written to the log.
-		if (recBufHead == recBufTail)
-		{
-			printf("Trace Log Overrun!!!\n");
+	if ( logFile != NULL )
+	{
+		if ( overrunWarningArmed )
+		{	// Don't spam with buffer overrun warning messages,
+			// we will print once if this happens.
+			if (recBufHead == recBufTail)
+			{
+				if ( traceLogWindow )
+				{
+					traceLogWindow->showBufferWarning();
+				}
+				printf("Trace Log Overrun!!!\n");
+				overrunWarningArmed = false;
+			}
 		}
 	}
 }

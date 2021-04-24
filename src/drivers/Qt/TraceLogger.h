@@ -139,6 +139,7 @@ public:
 	TraceLoggerDialog_t(QWidget *parent = 0);
 	~TraceLoggerDialog_t(void);
 
+	void showBufferWarning(void);
 protected:
 	QTimer *updateTimer;
 	QCheckBox *logLastCbox;
