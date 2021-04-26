@@ -100,7 +100,7 @@ static int recBufMax = 0;
 static int recBufHead = 0;
 static int recBufTail = 0;
 static traceRecord_t *logBuf = NULL;
-static int logBufMax = 1000000;
+static int logBufMax = 3000000;
 static int logBufHead = 0;
 static int logBufTail = 0;
 static FILE *logFile = NULL;
@@ -328,7 +328,7 @@ TraceLoggerDialog_t::~TraceLoggerDialog_t(void)
 	msleep(1);
 	diskThread->requestInterruption();
 	diskThread->quit();
-	diskThread->wait( 1000 );
+	diskThread->wait( 1000000 );
 
 	traceLogWindow = NULL;
 
@@ -389,7 +389,7 @@ void TraceLoggerDialog_t::updatePeriodic(void)
 		overrunWarningArmed = true;
 	}
 
-	if (traceViewCounter > 20)
+	if (traceViewCounter > 5)
 	{
 		if (recBufHead != recbufHeadLp)
 		{
@@ -522,7 +522,7 @@ void TraceLoggerDialog_t::openLogFile(void)
 		fclose(logFile);
 		logFile = NULL;
 	}
-	logFile = fopen(filename.toStdString().c_str(), "w");
+	logFile = fopen(filename.toStdString().c_str(), "wb");
 
 	return;
 }
@@ -1034,8 +1034,22 @@ static void pushToLogBuffer(traceRecord_t &rec)
 
 	if ( logBuf )
 	{
+		int nextHead, delayCount = 0;
 		logBuf[logBufHead] = rec;
-		logBufHead = (logBufHead + 1) % logBufMax;
+		nextHead = (logBufHead + 1) % logBufMax;
+
+		while (nextHead == logBufTail)
+		{
+			SDL_Delay(1);
+
+			delayCount++;
+
+			if ( delayCount > 10000 )
+			{
+				break;
+			}
+		}
+		logBufHead = nextHead;
 
 		if ( overrunWarningArmed )
 		{	// Don't spam with buffer overrun warning messages,
@@ -2169,7 +2183,7 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 TraceLogDiskThread_t::TraceLogDiskThread_t( QObject *parent )
 	: QThread(parent)
 {
-
+	setPriority( QThread::HighestPriority );
 }
 //----------------------------------------------------
 TraceLogDiskThread_t::~TraceLogDiskThread_t(void)
@@ -2193,6 +2207,7 @@ void TraceLogDiskThread_t::run(void)
 	char line[256];
 	char buf[8192];
 	int i,idx=0;
+	int blockSize = 4 * 1024;
 
 	printf("Trace Log Disk Start\n");
 
@@ -2228,12 +2243,13 @@ void TraceLogDiskThread_t::run(void)
 
 			logBufTail = (logBufTail + 1) % logBufMax;
 
-			if ( idx >= 4096 )
+			if ( idx >= blockSize )
 			{
 				fwrite( buf, idx, 1, logFile ); idx = 0;
+				//fflush(logFile);
 			}
 		}
-		SDL_Delay(10);
+		SDL_Delay(1);
 	}
 	
 	if ( idx > 0 )
