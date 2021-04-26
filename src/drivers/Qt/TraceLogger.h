@@ -131,6 +131,23 @@ private slots:
 	void ctxMenuAddSym(void);
 };
 
+class  TraceLogDiskThread_t : public QThread
+{
+	Q_OBJECT
+
+	protected:
+		void run( void ) override;
+
+	public:
+		TraceLogDiskThread_t( QObject *parent = 0 );
+		~TraceLogDiskThread_t(void);
+
+	private:
+
+	signals:
+		void finished(void);
+};
+
 class TraceLoggerDialog_t : public QDialog
 {
 	Q_OBJECT
@@ -138,6 +155,8 @@ class TraceLoggerDialog_t : public QDialog
 public:
 	TraceLoggerDialog_t(QWidget *parent = 0);
 	~TraceLoggerDialog_t(void);
+
+	TraceLogDiskThread_t *diskThread;
 
 	void showBufferWarning(void);
 protected:

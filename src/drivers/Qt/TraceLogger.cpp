@@ -99,6 +99,10 @@ static traceRecord_t *recBuf = NULL;
 static int recBufMax = 0;
 static int recBufHead = 0;
 static int recBufTail = 0;
+static traceRecord_t *logBuf = NULL;
+static int logBufMax = 1000000;
+static int logBufHead = 0;
+static int logBufTail = 0;
 static FILE *logFile = NULL;
 static bool overrunWarningArmed = true;
 static TraceLoggerDialog_t *traceLogWindow = NULL;
@@ -311,21 +315,23 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 
 	connect(updateTimer, &QTimer::timeout, this, &TraceLoggerDialog_t::updatePeriodic);
 
-	updateTimer->start(10); // 100hz
+	updateTimer->start(50); // 20hz
+
+	diskThread = new TraceLogDiskThread_t(this);
 }
 //----------------------------------------------------
 TraceLoggerDialog_t::~TraceLoggerDialog_t(void)
 {
 	updateTimer->stop();
 
-	traceLogWindow = NULL;
 	logging = 0;
+	msleep(1);
+	diskThread->requestInterruption();
+	diskThread->quit();
+	diskThread->wait( 1000 );
 
-	if (logFile)
-	{
-		fclose(logFile);
-		logFile = NULL;
-	}
+	traceLogWindow = NULL;
+
 	printf("Trace Logger Window Deleted\n");
 }
 //----------------------------------------------------
@@ -366,16 +372,16 @@ void TraceLoggerDialog_t::updatePeriodic(void)
 
 	if (logFile && logFileCbox->isChecked())
 	{
-		char line[256];
+		//char line[256];
 
-		while (recBufHead != recBufTail)
-		{
-			recBuf[recBufTail].convToText(line);
+		//while (recBufHead != recBufTail)
+		//{
+		//	recBuf[recBufTail].convToText(line);
 
-			fprintf(logFile, "%s\n", line);
+		//	fprintf(logFile, "%s\n", line);
 
-			recBufTail = (recBufTail + 1) % recBufMax;
-		}
+		//	recBufTail = (recBufTail + 1) % recBufMax;
+		//}
 	}
 	else
 	{
@@ -427,17 +433,17 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 		pushMsgToLogBuffer("Logging Finished");
 		startStopButton->setText(tr("Start Logging"));
 
-		if (logFile)
-		{
-			fclose(logFile);
-			logFile = NULL;
-		}
+		diskThread->requestInterruption();
+		diskThread->quit();
+		diskThread->wait(1000);
 	}
 	else
 	{
 		if (logFileCbox->isChecked())
 		{
 			openLogFile();
+			diskThread->start();
+			msleep(100);
 		}
 		pushMsgToLogBuffer("Log Start");
 		startStopButton->setText(tr("Stop Logging"));
@@ -1026,12 +1032,15 @@ static void pushToLogBuffer(traceRecord_t &rec)
 	recBuf[recBufHead] = rec;
 	recBufHead = (recBufHead + 1) % recBufMax;
 
-	if ( logFile != NULL )
+	if ( logBuf )
 	{
+		logBuf[logBufHead] = rec;
+		logBufHead = (logBufHead + 1) % logBufMax;
+
 		if ( overrunWarningArmed )
 		{	// Don't spam with buffer overrun warning messages,
 			// we will print once if this happens.
-			if (recBufHead == recBufTail)
+			if (logBufHead == logBufTail)
 			{
 				if ( traceLogWindow )
 				{
@@ -2155,5 +2164,90 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 		}
 		captureHighLightText = false;
 	}
+}
+//----------------------------------------------------
+TraceLogDiskThread_t::TraceLogDiskThread_t( QObject *parent )
+	: QThread(parent)
+{
+
+}
+//----------------------------------------------------
+TraceLogDiskThread_t::~TraceLogDiskThread_t(void)
+{
+	printf("Disk Thread Cleanup\n");
+	if (logFile)
+	{
+		fclose(logFile);
+		logFile = NULL;
+	}
+
+	if ( logBuf )
+	{
+		free(logBuf);
+		logBuf = NULL;
+	}
+}
+//----------------------------------------------------
+void TraceLogDiskThread_t::run(void)
+{
+	char line[256];
+	char buf[8192];
+	int i,idx=0;
+
+	printf("Trace Log Disk Start\n");
+
+	if ( logFile == NULL )
+	{
+		return;
+	}
+
+	if ( logBuf == NULL )
+	{
+		size_t size;
+
+		size = logBufMax * sizeof(traceRecord_t);
+
+		logBufHead = logBufTail = 0;
+
+		logBuf = (traceRecord_t *)malloc(size);
+	}
+	idx = 0;
+
+	while ( !isInterruptionRequested() )
+	{
+		while (logBufHead != logBufTail)
+		{
+			logBuf[logBufTail].convToText(line);
+
+			i=0;
+			while ( line[i] != 0 )
+			{
+				buf[idx] = line[i]; i++; idx++;
+			}
+			buf[idx] = '\n'; idx++;
+
+			logBufTail = (logBufTail + 1) % logBufMax;
+
+			if ( idx >= 4096 )
+			{
+				fwrite( buf, idx, 1, logFile ); idx = 0;
+			}
+		}
+		SDL_Delay(10);
+	}
+	
+	if ( idx > 0 )
+	{
+		fwrite( buf, idx, 1, logFile ); idx = 0;
+	}
+
+	if (logFile)
+	{
+		fclose(logFile);
+		logFile = NULL;
+	}
+	
+	printf("Trace Log Disk Exit\n");
+	emit finished();
 }
 //----------------------------------------------------

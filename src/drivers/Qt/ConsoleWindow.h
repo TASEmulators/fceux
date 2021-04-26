@@ -36,7 +36,7 @@ class  emulatorThread_t : public QThread
 		void run( void ) override;
 
 	public:
-		emulatorThread_t(void);
+		emulatorThread_t( QObject *parent = 0 );
 
 		void setPriority( QThread::Priority priority );
 

@@ -139,7 +139,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 #else
 	mutex      = new QMutex( QMutex::Recursive );
 #endif
-	emulatorThread = new emulatorThread_t();
+	emulatorThread = new emulatorThread_t(this);
 
 	connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
 
@@ -3370,7 +3370,8 @@ void consoleWin_t::updatePeriodic(void)
    return;
 }
 
-emulatorThread_t::emulatorThread_t(void)
+emulatorThread_t::emulatorThread_t( QObject *parent )
+	: QThread(parent)
 {
 	#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 	pself = 0;
