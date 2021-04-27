@@ -23,6 +23,14 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#endif
+
 #include <QDir>
 #include <QMenu>
 #include <QMenuBar>
@@ -112,7 +120,7 @@ static HANDLE logFile = INVALID_HANDLE_VALUE;
 #else
 static int logFile = -1;
 #endif
-static char  logFilePath[512];
+static char  logFilePath[512] = { 0 };
 //----------------------------------------------------
 TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	: QDialog(parent, Qt::Window)
@@ -447,7 +455,10 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 	{
 		if (logFileCbox->isChecked())
 		{
-			openLogFile();
+			if ( logFilePath[0] == 0 )
+			{
+				openLogFile();
+			}
 			diskThread->start();
 			msleep(100);
 		}
@@ -2024,7 +2035,6 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 	int i, x, y, v, ofs, row, start, end, nrow, lineLen;
 	QPainter painter(this);
 	char line[256];
-	//traceRecord_t rec[64];
 	QColor hlgtFG("white"), hlgtBG("blue");
 
 	painter.setFont(font);
@@ -2184,7 +2194,6 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 TraceLogDiskThread_t::TraceLogDiskThread_t( QObject *parent )
 	: QThread(parent)
 {
-	setPriority( QThread::HighestPriority );
 }
 //----------------------------------------------------
 TraceLogDiskThread_t::~TraceLogDiskThread_t(void)
@@ -2219,18 +2228,28 @@ void TraceLogDiskThread_t::run(void)
 
 	printf("Trace Log Disk Start\n");
 
+	setPriority( QThread::HighestPriority );
+
 #ifdef WIN32
 	logFile = CreateFileA( logFilePath, GENERIC_WRITE, 
 			0, NULL, OPEN_ALWAYS, FILE_FLAG_WRITE_THROUGH | FILE_FLAG_NO_BUFFERING, NULL );
 
 	if ( logFile == INVALID_HANDLE_VALUE )
 	{
+		char stmp[1024];
+		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath );
+		consoleWindow->QueueErrorMsgWindow(stmp);
 		return;
 	}
 #else
+	logFile = open( logFilePath, O_CREAT | O_WRONLY | O_TRUNC, 
+			S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
 
 	if ( logFile == -1 )
 	{
+		char stmp[1024];
+		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath );
+		consoleWindow->QueueErrorMsgWindow(stmp);
 		return;
 	}
 #endif
@@ -2267,8 +2286,7 @@ void TraceLogDiskThread_t::run(void)
 				DWORD bytesWritten;
 				WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
 				#else
-				fwrite( buf, idx, 1, logFile ); idx = 0;
-				//fflush(logFile);
+				write( logFile, buf, idx ); idx = 0;
 				#endif
 			}
 		}
@@ -2281,7 +2299,7 @@ void TraceLogDiskThread_t::run(void)
 		DWORD bytesWritten;
 		WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
 		#else
-		fwrite( buf, idx, 1, logFile ); idx = 0;
+		write( logFile, buf, idx ); idx = 0;
 		#endif
 	}
 
