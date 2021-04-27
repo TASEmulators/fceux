@@ -106,7 +106,6 @@ static int oldcodecount = 0, olddatacount = 0;
 static traceRecord_t *recBuf = NULL;
 static int recBufMax = 0;
 static int recBufHead = 0;
-static int recBufTail = 0;
 static traceRecord_t *logBuf = NULL;
 static int logBufMax = 3000000;
 static int logBufHead = 0;
@@ -384,24 +383,10 @@ void TraceLoggerDialog_t::updatePeriodic(void)
 		traceViewDrawEnable = 0;
 	}
 
-	//if (logFileCbox->isChecked())
-	//{
-	//	//char line[256];
-
-	//	//while (recBufHead != recBufTail)
-	//	//{
-	//	//	recBuf[recBufTail].convToText(line);
-
-	//	//	fprintf(logFile, "%s\n", line);
-
-	//	//	recBufTail = (recBufTail + 1) % recBufMax;
-	//	//}
-	//}
-	//else
-	//{
-	//	recBufTail = recBufHead;
-	//	overrunWarningArmed = true;
-	//}
+	if ( !logging || !logFileCbox->isChecked())
+	{
+		overrunWarningArmed = true;
+	}
 
 	if (traceViewCounter > 5)
 	{
@@ -1019,7 +1004,7 @@ int initTraceLogBuffer(int maxRecs)
 		{
 			recBufMax = 0;
 		}
-		recBufHead = recBufTail = 0;
+		recBufHead = 0;
 	}
 	return recBuf == NULL;
 }
