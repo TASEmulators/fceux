@@ -103,10 +103,16 @@ static traceRecord_t *logBuf = NULL;
 static int logBufMax = 3000000;
 static int logBufHead = 0;
 static int logBufTail = 0;
-static FILE *logFile = NULL;
 static bool overrunWarningArmed = true;
 static TraceLoggerDialog_t *traceLogWindow = NULL;
 static void pushMsgToLogBuffer(const char *msg);
+#ifdef WIN32
+#include <windows.h>
+static HANDLE logFile = INVALID_HANDLE_VALUE;
+#else
+static int logFile = -1;
+#endif
+static char  logFilePath[512];
 //----------------------------------------------------
 TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	: QDialog(parent, Qt::Window)
@@ -370,24 +376,24 @@ void TraceLoggerDialog_t::updatePeriodic(void)
 		traceViewDrawEnable = 0;
 	}
 
-	if (logFile && logFileCbox->isChecked())
-	{
-		//char line[256];
+	//if (logFileCbox->isChecked())
+	//{
+	//	//char line[256];
 
-		//while (recBufHead != recBufTail)
-		//{
-		//	recBuf[recBufTail].convToText(line);
+	//	//while (recBufHead != recBufTail)
+	//	//{
+	//	//	recBuf[recBufTail].convToText(line);
 
-		//	fprintf(logFile, "%s\n", line);
+	//	//	fprintf(logFile, "%s\n", line);
 
-		//	recBufTail = (recBufTail + 1) % recBufMax;
-		//}
-	}
-	else
-	{
-		recBufTail = recBufHead;
-		overrunWarningArmed = true;
-	}
+	//	//	recBufTail = (recBufTail + 1) % recBufMax;
+	//	//}
+	//}
+	//else
+	//{
+	//	recBufTail = recBufHead;
+	//	overrunWarningArmed = true;
+	//}
 
 	if (traceViewCounter > 5)
 	{
@@ -517,12 +523,7 @@ void TraceLoggerDialog_t::openLogFile(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	if (logFile)
-	{
-		fclose(logFile);
-		logFile = NULL;
-	}
-	logFile = fopen(filename.toStdString().c_str(), "wb");
+	strcpy( logFilePath, filename.toStdString().c_str() );
 
 	return;
 }
@@ -2189,11 +2190,18 @@ TraceLogDiskThread_t::TraceLogDiskThread_t( QObject *parent )
 TraceLogDiskThread_t::~TraceLogDiskThread_t(void)
 {
 	printf("Disk Thread Cleanup\n");
-	if (logFile)
+#ifdef WIN32
+	if (logFile != INVALID_HANDLE_VALUE)
 	{
-		fclose(logFile);
-		logFile = NULL;
+		CloseHandle( logFile );
+		logFile = INVALID_HANDLE_VALUE;
 	}
+#else
+	if ( logFile != -1 )
+	{
+		close(logFile); logFile = -1;
+	}
+#endif
 
 	if ( logBuf )
 	{
@@ -2211,11 +2219,21 @@ void TraceLogDiskThread_t::run(void)
 
 	printf("Trace Log Disk Start\n");
 
-	if ( logFile == NULL )
+#ifdef WIN32
+	logFile = CreateFileA( logFilePath, GENERIC_WRITE, 
+			0, NULL, OPEN_ALWAYS, FILE_FLAG_WRITE_THROUGH | FILE_FLAG_NO_BUFFERING, NULL );
+
+	if ( logFile == INVALID_HANDLE_VALUE )
 	{
 		return;
 	}
+#else
 
+	if ( logFile == -1 )
+	{
+		return;
+	}
+#endif
 	if ( logBuf == NULL )
 	{
 		size_t size;
@@ -2245,8 +2263,13 @@ void TraceLogDiskThread_t::run(void)
 
 			if ( idx >= blockSize )
 			{
+				#ifdef WIN32
+				DWORD bytesWritten;
+				WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
+				#else
 				fwrite( buf, idx, 1, logFile ); idx = 0;
 				//fflush(logFile);
+				#endif
 			}
 		}
 		SDL_Delay(1);
@@ -2254,14 +2277,25 @@ void TraceLogDiskThread_t::run(void)
 	
 	if ( idx > 0 )
 	{
+		#ifdef WIN32
+		DWORD bytesWritten;
+		WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
+		#else
 		fwrite( buf, idx, 1, logFile ); idx = 0;
+		#endif
 	}
 
-	if (logFile)
+	#ifdef WIN32
+	if ( logFile != INVALID_HANDLE_VALUE )
 	{
-		fclose(logFile);
-		logFile = NULL;
+		CloseHandle( logFile ); logFile = INVALID_HANDLE_VALUE; 
 	}
+	#else
+	if ( logFile != -1 )
+	{
+		close(logFile); logFile = -1;
+	}
+	#endif
 	
 	printf("Trace Log Disk Exit\n");
 	emit finished();
