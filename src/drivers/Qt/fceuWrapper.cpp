@@ -36,6 +36,7 @@
 #include "Qt/sdl-video.h"
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
+#include "Qt/AviRecord.h"
 #include "Qt/HexEditor.h"
 #include "Qt/SymbolicDebug.h"
 #include "Qt/CodeDataLogger.h"
@@ -981,6 +982,7 @@ FCEUD_Update(uint8 *XBuf,
 		return;
 	}
 	#endif
+	aviRecordAddAudioFrame( Buffer, Count );
 	
 	int ocount = Count;
 	// apply frame scaling to Count

@@ -3096,7 +3096,19 @@ void consoleWin_t::recordMovieAs(void)
 
 void consoleWin_t::aviOpen(void)
 {
-	aviRecordOpenFile( NULL, 0, 256, 240 );
+	printf("AVI!!!\n");
+	if ( aviRecordRunning() )
+	{
+		fceuWrapperLock();
+		aviRecordClose();
+		fceuWrapperUnLock();
+	}
+	else
+	{
+		fceuWrapperLock();
+		aviRecordOpenFile( NULL, 0, 256, 240 );
+		fceuWrapperUnLock();
+	}
 }
 
 void consoleWin_t::aboutFCEUX(void)
