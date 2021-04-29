@@ -34,6 +34,7 @@
 
 #include "common/configSys.h"
 #include "Qt/sdl-video.h"
+#include "Qt/AviRecord.h"
 #include "Qt/fceuWrapper.h"
 
 #ifdef CREATE_AVI
@@ -478,7 +479,7 @@ BlitScreen(uint8 *XBuf)
 	}
 	nes_shm->blitUpdated = 1;
 
-	//guiPixelBufferReDraw();
+	aviRecordAddFrame();
 
 #ifdef CREATE_AVI
  { int fps = FCEUI_GetDesiredFPS();

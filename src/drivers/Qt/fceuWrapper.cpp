@@ -939,8 +939,8 @@ int  fceuWrapperMemoryCleanup(void)
  */
 void
 FCEUD_Update(uint8 *XBuf,
-			 int32 *Buffer,
-			 int Count)
+	 int32 *Buffer,
+	 int Count)
 {
 	int blitDone = 0;
 	//extern int FCEUDnetplay;

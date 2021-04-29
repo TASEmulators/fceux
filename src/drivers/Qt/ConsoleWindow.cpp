@@ -63,6 +63,7 @@
 #include "Qt/PaletteConf.h"
 #include "Qt/PaletteEditor.h"
 #include "Qt/GuiConf.h"
+#include "Qt/AviRecord.h"
 #include "Qt/MoviePlay.h"
 #include "Qt/MovieOptions.h"
 #include "Qt/TimingConf.h"
@@ -1445,6 +1446,15 @@ void consoleWin_t::createMainMenu(void)
 	connect( Hotkeys[ HK_RECORD_MOVIE_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(recordMovieAs(void)) );
 
 	movieMenu->addAction(recAsMovAct);
+
+	// Movie -> Avi Record
+	act = new QAction(tr("A&VI Record"), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F5")));
+	act->setCheckable(true);
+	act->setStatusTip(tr("AVI Record"));
+	connect(act, SIGNAL(triggered()), this, SLOT(aviOpen(void)) );
+	
+	movieMenu->addAction(act);
 
 	//-----------------------------------------------------------------------
 	// Help
@@ -3082,6 +3092,11 @@ void consoleWin_t::recordMovieAs(void)
 	fceuWrapperUnLock();
 
 	return;
+}
+
+void consoleWin_t::aviOpen(void)
+{
+	aviRecordOpenFile( NULL, 0, 256, 240 );
 }
 
 void consoleWin_t::aboutFCEUX(void)

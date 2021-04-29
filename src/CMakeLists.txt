@@ -436,8 +436,7 @@ set(SRC_DRIVERS_COMMON
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/vidblit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/os_utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/nes_ntsc.c
-  #${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/nesvideos-piece.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/rgbtorgb.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/rgbtorgb.cpp
 )
 
 set(SRC_DRIVERS_SDL
@@ -483,6 +482,10 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-joystick.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-throttle.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/unix-netplay.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AviRecord.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/avi-utils.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/fileio.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/gwavi.cpp
 )
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})

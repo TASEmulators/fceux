@@ -357,6 +357,7 @@ class  consoleWin_t : public QMainWindow
 		void mainMenuOpen(void);
 		void mainMenuClose(void);
 		void warnAmbiguousShortcut( QShortcut*);
+		void aviOpen(void);
 
 };
 
