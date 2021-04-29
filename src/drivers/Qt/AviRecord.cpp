@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "driver.h"
+
 #include "Qt/AviRecord.h"
 #include "Qt/avi/gwavi.h"
 #include "Qt/nes_shm.h"
@@ -39,11 +41,14 @@ int aviRecordOpenFile( const char *filepath, int format, int width, int height )
 {
 	char fourcc[8];
 	gwavi_audio_t  audioConfig;
+	unsigned int fps;
 
 	if ( gwavi != NULL )
 	{
 		delete gwavi; gwavi = NULL;
 	}
+	fps = FCEUI_GetDesiredFPS() >> 24;
+
 	audioConfig.channels = 1;
 	audioConfig.bits     = 16;
 	audioConfig.samples_per_second = 48000;
@@ -52,7 +57,7 @@ int aviRecordOpenFile( const char *filepath, int format, int width, int height )
 
 	gwavi = new gwavi_t();
 
-	if ( gwavi->open( "/tmp/test.avi", nes_shm->video.ncol, nes_shm->video.nrow, fourcc, 60, &audioConfig ) )
+	if ( gwavi->open( "/tmp/test.avi", nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, &audioConfig ) )
 	{
 		printf("Error: Failed to open AVI file.\n");
 		recordEnable = false;
