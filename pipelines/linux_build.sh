@@ -77,6 +77,12 @@ echo 'Install Dependency Qt5'
 echo '****************************************'
 sudo apt-get --assume-yes  install qt5-default
 
+# Install x264 
+echo '****************************************'
+echo 'Install Optional Dependency libx264-dev'
+echo '****************************************'
+sudo apt-get --assume-yes  install libx264-dev
+
 # Install scons
 #echo '****************************************'
 #echo 'Install Build Dependency scons'
