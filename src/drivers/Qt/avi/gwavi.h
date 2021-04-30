@@ -146,6 +146,8 @@ class gwavi_t
 	long offsets_start;
 	unsigned int *offsets;
 	int offset_count;
+	int bits_per_pixel;
+	char fourcc[8];
 
 	// helper functions
 	int write_avi_header(FILE *out, struct gwavi_header_t *avi_header);

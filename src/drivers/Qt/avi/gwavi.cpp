@@ -79,6 +79,7 @@ gwavi_t::gwavi_t(void)
 	offsets_start = 0;
 	offsets = 0;
 	offset_count = 0;
+	bits_per_pixel = 24;
 }
 
 gwavi_t::~gwavi_t(void)
@@ -91,9 +92,16 @@ int
 gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	   const char *fourcc, unsigned int fps, struct gwavi_audio_t *audio)
 {
+	int size = 0;
+	memset( this->fourcc, 0, sizeof(this->fourcc) );
+	strcpy( this->fourcc, fourcc );
+
 	if (check_fourcc(fourcc) != 0)
+	{
 		(void)fprintf(stderr, "WARNING: given fourcc does not seem to "
 			      "be valid: %s\n", fourcc);
+	}
+
 	if (fps < 1)
 	{
 		return -1;
@@ -118,18 +126,34 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 		avi_header.data_streams = 1;
 	}
 
+	if ( strcmp( fourcc, "I420" ) == 0 )
+	{  // I420   YUV 4:2:0
+		bits_per_pixel = 12;
+	}
+	else
+	{	// Plain RGB24
+		bits_per_pixel = 24;
+	}
+	size = (width * height * bits_per_pixel);
+
+	if ( (size % 8) != 0 )
+	{
+		printf("Warning: Video Buffer Size not on an 8 bit boundary: %ix%i:%i\n", width, height, bits_per_pixel);
+	}
+	size = size / 8;
+
 	/* this field gets updated when calling gwavi_close() */
 	avi_header.number_of_frames = 0;
 	avi_header.width = width;
 	avi_header.height = height;
-	avi_header.buffer_size = (width * height * 3);
+	avi_header.buffer_size = size;
 
 	/* set stream header */
 	(void)strcpy(stream_header_v.data_type, "vids");
 	(void)memcpy(stream_header_v.codec, fourcc, 4);
 	stream_header_v.time_scale = 1;
 	stream_header_v.data_rate = fps;
-	stream_header_v.buffer_size = (width * height * 3);
+	stream_header_v.buffer_size = size;
 	stream_header_v.data_length = 0;
 
 	/* set stream format */
@@ -137,13 +161,13 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	stream_format_v.width = width;
 	stream_format_v.height = height;
 	stream_format_v.num_planes = 1;
-	stream_format_v.bits_per_pixel = 24;
+	stream_format_v.bits_per_pixel = bits_per_pixel;
 	stream_format_v.compression_type =
 		((unsigned int)fourcc[3] << 24) +
 		((unsigned int)fourcc[2] << 16) +
 		((unsigned int)fourcc[1] << 8) +
 		((unsigned int)fourcc[0]);
-	stream_format_v.image_size = width * height * 3;
+	stream_format_v.image_size = size;
 	stream_format_v.colors_used = 0;
 	stream_format_v.colors_important = 0;
 
@@ -467,8 +491,12 @@ int
 gwavi_t::set_codec( const char *fourcc)
 {
 	if (check_fourcc(fourcc) != 0)
+	{
 		(void)fprintf(stderr, "WARNING: given fourcc does not seem to "
 			      "be valid: %s\n", fourcc);
+	}
+	memset( this->fourcc, 0, sizeof(this->fourcc) );
+	strcpy( this->fourcc, fourcc );
 
 	memcpy(stream_header_v.codec, fourcc, 4);
 	stream_format_v.compression_type =
@@ -495,7 +523,7 @@ gwavi_t::set_codec( const char *fourcc)
 int
 gwavi_t::set_size( unsigned int width, unsigned int height)
 {
-	unsigned int size = (width * height * 3);
+	unsigned int size = (width * height * bits_per_pixel) / 8;
 
 	avi_header.data_rate = size;
 	avi_header.width = width;
