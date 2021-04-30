@@ -3104,7 +3104,7 @@ void consoleWin_t::recordMovieAs(void)
 
 void consoleWin_t::aviOpen(void)
 {
-	printf("AVI!!!\n");
+	//printf("AVI!!!\n");
 	if ( aviRecordRunning() )
 	{
 		fceuWrapperLock();
@@ -3116,7 +3116,7 @@ void consoleWin_t::aviOpen(void)
 	else
 	{
 		fceuWrapperLock();
-		aviRecordOpenFile( "/tmp/test.avi" );
+		aviRecordOpenFile(NULL);
 		aviDiskThread->start();
 		fceuWrapperUnLock();
 	}

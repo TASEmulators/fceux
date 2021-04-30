@@ -265,6 +265,44 @@ int aviRecordOpenFile( const char *filepath )
 	char fourcc[8];
 	gwavi_audio_t  audioConfig;
 	unsigned int fps;
+	char fileName[1024];
+
+
+	if ( filepath != NULL )
+	{
+		strcpy( fileName, filepath );
+	}
+	else
+	{
+		const char *romFile;
+
+		romFile = getRomFile();
+
+		if ( romFile )
+		{
+			char base[512];
+			const char *baseDir = FCEUI_GetBaseDirectory();
+
+			getFileBaseName( romFile, base );
+
+			if ( baseDir )
+			{
+				strcpy( fileName, baseDir );
+				strcat( fileName, "/avi/" );
+			}
+			else
+			{
+				fileName[0] = 0;
+			}
+			strcat( fileName, base );
+			strcat( fileName, ".avi");
+			//printf("AVI Filepath:'%s'\n", fileName );
+		}
+		else
+		{
+			return -1;
+		}
+	}
 
 	if ( gwavi != NULL )
 	{
@@ -292,7 +330,7 @@ int aviRecordOpenFile( const char *filepath )
 
 	gwavi = new gwavi_t();
 
-	if ( gwavi->open( filepath, nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, &audioConfig ) )
+	if ( gwavi->open( fileName, nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, &audioConfig ) )
 	{
 		printf("Error: Failed to open AVI file.\n");
 		recordEnable = false;
@@ -438,7 +476,7 @@ void AviRecordDiskThread_t::run(void)
 	int16_t audioOut[48000];
 	uint32_t videoOut[1048576];
 	char writeAudio = 1;
-	int  avgAudioPerFrame;
+	int  avgAudioPerFrame, localVideoFormat;
 
 	printf("AVI Record Disk Start\n");
 
@@ -454,13 +492,25 @@ void AviRecordDiskThread_t::run(void)
 	height    = nes_shm->video.nrow;
 	numPixels = width * height;
 
+	rgb24 = (unsigned char *)malloc( numPixels * sizeof(uint32_t) );
+
+	if ( rgb24 )
+	{
+		memset( rgb24, 0, numPixels * sizeof(uint32_t) );
+	}
+	else
+	{
+		// Error allocating buffer.
+		return;
+	}
+	localVideoFormat = videoFormat;
+
 #ifdef _USE_X264
-	if ( videoFormat == 2)
+	if ( localVideoFormat == 2)
 	{
 		X264::init( width, height );
 	}
 #endif
-	rgb24 = (unsigned char *)malloc( numPixels * sizeof(uint32_t) );
 
 	while ( !isInterruptionRequested() )
 	{
@@ -478,13 +528,13 @@ void AviRecordDiskThread_t::run(void)
 
 			writeAudio = 1;
 
-			if ( videoFormat == 1)
+			if ( localVideoFormat == 1)
 			{
 				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
 				gwavi->add_frame( rgb24, (numPixels*3)/2 );
 			}
 			#ifdef _USE_X264
-			else if ( videoFormat == 2)
+			else if ( localVideoFormat == 2)
 			{
 				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
 				X264::encode_frame( rgb24, width, height );
@@ -533,7 +583,7 @@ void AviRecordDiskThread_t::run(void)
 	free(rgb24);
 
 #ifdef _USE_X264
-	if ( videoFormat == 2)
+	if ( localVideoFormat == 2)
 	{
 		X264::close();
 	}

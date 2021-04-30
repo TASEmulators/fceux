@@ -335,22 +335,26 @@ LoadCPalette(const std::string &file)
 static void
 CreateDirs(const std::string &dir)
 {
-	const char *subs[9]={"fcs","snaps","gameinfo","sav","cheats","movies","input"};
+	const char *subs[]={"fcs","snaps","gameinfo","sav","cheats","avi", "movies","input", NULL };
 	std::string subdir;
-	int x;
+	int x=0;
 
 #if defined(WIN32) || defined(NEED_MINGW_HACKS)
 	mkdir(dir.c_str());
 	chmod(dir.c_str(), 755);
-	for(x = 0; x < 7; x++) {
+	while ( subs[x] != NULL )
+	{
 		subdir = dir + PSS + subs[x];
 		mkdir(subdir.c_str());
+		x++;
 	}
 #else
 	mkdir(dir.c_str(), S_IRWXU);
-	for(x = 0; x < 7; x++) {
+	while ( subs[x] != NULL )
+	{
 		subdir = dir + PSS + subs[x];
 		mkdir(subdir.c_str(), S_IRWXU);
+		x++;
 	}
 #endif
 }
