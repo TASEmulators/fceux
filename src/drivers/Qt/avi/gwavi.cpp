@@ -81,6 +81,11 @@ gwavi_t::gwavi_t(void)
 	offset_count = 0;
 }
 
+gwavi_t::~gwavi_t(void)
+{
+
+}
+
 
 int
 gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
@@ -105,9 +110,13 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	avi_header.flags = 0x10;
 
 	if (audio)
+	{
 		avi_header.data_streams = 2;
+	}
 	else
+	{
 		avi_header.data_streams = 1;
+	}
 
 	/* this field gets updated when calling gwavi_close() */
 	avi_header.number_of_frames = 0;

@@ -4,13 +4,23 @@
 #include <string.h>
 
 #include "driver.h"
+#include "common/os_utils.h"
 
 #include "Qt/AviRecord.h"
 #include "Qt/avi/gwavi.h"
 #include "Qt/nes_shm.h"
+#include "Qt/ConsoleUtilities.h"
 
 static gwavi_t  *gwavi = NULL;
 static bool      recordEnable = false;
+static int       vbufHead = 0;
+static int       vbufTail = 0;
+static int       vbufSize = 0;
+static int       abufHead = 0;
+static int       abufTail = 0;
+static int       abufSize = 0;
+static uint32_t *rawVideoBuf = NULL;
+static int16_t  *rawAudioBuf = NULL;
 //**************************************************************************************
 
 static void convertRgb_32_to_24( const unsigned char *src, unsigned char *dest, int w, int h, int nPix )
@@ -64,6 +74,12 @@ int aviRecordOpenFile( const char *filepath, int format, int width, int height )
 		return -1;
 	}
 
+	vbufSize    = 1024 * 1024 * 60;
+	rawVideoBuf = (uint32_t*)malloc( vbufSize * sizeof(uint32_t) );
+
+	abufSize    = 48000;
+	rawAudioBuf = (int16_t*)malloc( abufSize * sizeof(uint16_t) );
+
 	recordEnable = true;
 	return 0;
 }
@@ -79,17 +95,37 @@ int aviRecordAddFrame( void )
 	{
 		return -1;
 	}
-	int numPixels, bufferSize;
+	int i, head, numPixels, availSize;
 
 	numPixels  = nes_shm->video.ncol * nes_shm->video.nrow;
-	bufferSize = numPixels * sizeof(uint32_t);
 
+	availSize = (vbufTail - vbufHead);
+	if ( availSize <= 0 )
 	{
-		unsigned char rgb24[bufferSize];
-		convertRgb_32_to_24( (const unsigned char*)nes_shm->pixbuf, rgb24,
-				nes_shm->video.ncol, nes_shm->video.nrow, numPixels );
-		gwavi->add_frame( rgb24, numPixels*3 );
+		availSize += vbufSize;
 	}
+
+	while ( numPixels > availSize )
+	{
+		//printf("Video Unavail %i \n", availSize );
+		msleep(1);
+
+		availSize = (vbufTail - vbufHead);
+		if ( availSize <= 0 )
+		{
+			availSize += vbufSize;
+		}
+	}
+
+	i = 0; head = vbufHead;
+
+	while ( i < numPixels )
+	{
+		rawVideoBuf[ head ] = nes_shm->pixbuf[i]; i++;
+
+		head = (head + 1) % vbufSize;
+	}
+	vbufHead = head;
 
 	return 0;
 }
@@ -105,13 +141,15 @@ int aviRecordAddAudioFrame( int32_t *buf, int numSamples )
 	{
 		return -1;
 	}
-	int16_t lclBuf[numSamples];
 
 	for (int i=0; i<numSamples; i++)
 	{
-		lclBuf[i] = buf[i];
+		rawAudioBuf[ abufHead ] = buf[i];
+
+		abufHead = (abufHead + 1) % abufSize;
 	}
-	gwavi->add_audio( (unsigned char *)lclBuf, numSamples*2);
+
+	return 0;
 }
 //**************************************************************************************
 int aviRecordClose(void)
@@ -125,6 +163,17 @@ int aviRecordClose(void)
 		delete gwavi; gwavi = NULL;
 	}
 
+	if ( rawVideoBuf != NULL )
+	{
+		free(rawVideoBuf); rawVideoBuf = NULL;
+	}
+	if ( rawAudioBuf != NULL )
+	{
+		free(rawAudioBuf); rawAudioBuf = NULL;
+	}
+	vbufTail = abufTail = 0;
+	vbufSize = abufSize = 0;
+
 	return 0;
 }
 //**************************************************************************************
@@ -132,4 +181,92 @@ bool aviRecordRunning(void)
 {
 	return recordEnable;
 }
+//**************************************************************************************
+// AVI Recorder Disk Thread
+//**************************************************************************************
+//----------------------------------------------------
+AviRecordDiskThread_t::AviRecordDiskThread_t( QObject *parent )
+	: QThread(parent)
+{
+}
+//----------------------------------------------------
+AviRecordDiskThread_t::~AviRecordDiskThread_t(void)
+{
+
+}
+//----------------------------------------------------
+void AviRecordDiskThread_t::run(void)
+{
+	int numPixels, width, height, numPixelsReady = 0;
+	int numSamples = 0;
+	unsigned char *rgb24;
+	int16_t audioOut[48000];
+	uint32_t videoOut[1048576];
+
+	printf("AVI Record Disk Start\n");
+
+	setPriority( QThread::HighestPriority );
+
+	//avgAudioPerFrame = 48000 / 60;
+
+	width     = nes_shm->video.ncol;
+	height    = nes_shm->video.nrow;
+	numPixels = width * height;
+
+	rgb24 = (unsigned char *)malloc( numPixels * sizeof(uint32_t) );
+
+	while ( !isInterruptionRequested() )
+	{
+		
+		while ( (numPixelsReady < numPixels) && (vbufTail != vbufHead) )
+		{
+			videoOut[ numPixelsReady ] = rawVideoBuf[ vbufTail ]; numPixelsReady++;
+			
+			vbufTail = (vbufTail + 1) % vbufSize;
+		}
+
+		if ( numPixelsReady >= numPixels )
+		{
+			convertRgb_32_to_24( (const unsigned char*)videoOut, rgb24,
+					width, height, numPixels );
+			gwavi->add_frame( rgb24, numPixels*3 );
+
+			numPixelsReady = 0;
+
+			numSamples = 0;
+
+			while ( abufHead != abufTail )
+			{
+				audioOut[ numSamples ] = rawAudioBuf[ abufTail ]; numSamples++;
+
+				abufTail = (abufTail + 1) % abufSize;
+
+				//if ( numSamples > avgAudioPerFrame )
+				//{
+				//	break;
+				//}
+			}
+
+			if ( numSamples > 0 )
+			{
+				//printf("NUM Audio Samples: %i \n", numSamples );
+				gwavi->add_audio( (unsigned char *)audioOut, numSamples*2);
+
+				numSamples = 0;
+			}
+		}
+		else
+		{
+			msleep(1);
+		}
+	}
+
+	free(rgb24);
+
+	aviRecordClose();
+
+	printf("AVI Record Disk Exit\n");
+	emit finished();
+}
+//----------------------------------------------------
 //**************************************************************************************

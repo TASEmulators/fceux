@@ -115,6 +115,7 @@ class gwavi_t
 {
 	public:
 	gwavi_t(void);
+	~gwavi_t(void);
 
 	int open(const char *filename, unsigned int width,
 		   unsigned int height, const char *fourcc, unsigned int fps,

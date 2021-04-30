@@ -27,6 +27,7 @@
 #include "Qt/ConsoleViewerGL.h"
 #include "Qt/ConsoleViewerSDL.h"
 #include "Qt/GamePadConf.h"
+#include "Qt/AviRecord.h"
 
 class  emulatorThread_t : public QThread
 {
@@ -123,6 +124,7 @@ class  consoleWin_t : public QMainWindow
 		int loadVideoDriver( int driverId );
 
 		emulatorThread_t *emulatorThread;
+		AviRecordDiskThread_t *aviDiskThread;
 
 		void addRecentRom( const char *rom );
 

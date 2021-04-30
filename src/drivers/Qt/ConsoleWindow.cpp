@@ -209,6 +209,10 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	// Viewport Cursor Type and Visibility
 	loadCursor();
+
+	// Create AVI Recording Disk Thread
+	aviDiskThread = new AviRecordDiskThread_t(this);
+
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -243,6 +247,10 @@ consoleWin_t::~consoleWin_t(void)
 	//printf("Thread Finished: %i \n", gameThread->isFinished() );
 	emulatorThread->quit();
 	emulatorThread->wait( 1000 );
+
+	aviDiskThread->requestInterruption();
+	aviDiskThread->quit();
+	aviDiskThread->wait( 10000 );
 
 	fceuWrapperLock();
 	fceuWrapperClose();
@@ -3100,13 +3108,16 @@ void consoleWin_t::aviOpen(void)
 	if ( aviRecordRunning() )
 	{
 		fceuWrapperLock();
-		aviRecordClose();
+		aviDiskThread->requestInterruption();
+		aviDiskThread->quit();
+		aviDiskThread->wait(10000);
 		fceuWrapperUnLock();
 	}
 	else
 	{
 		fceuWrapperLock();
 		aviRecordOpenFile( NULL, 0, 256, 240 );
+		aviDiskThread->start();
 		fceuWrapperUnLock();
 	}
 }
