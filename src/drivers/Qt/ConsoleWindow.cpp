@@ -3116,7 +3116,7 @@ void consoleWin_t::aviOpen(void)
 	else
 	{
 		fceuWrapperLock();
-		aviRecordOpenFile( NULL, 0, 256, 240 );
+		aviRecordOpenFile( "/tmp/test.avi" );
 		aviDiskThread->start();
 		fceuWrapperUnLock();
 	}

@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <QThread>
 
-int aviRecordOpenFile( const char *filepath, int format, int width, int height );
+int aviRecordOpenFile( const char *filepath );
 
 int aviRecordAddFrame( void );
 

@@ -14,6 +14,7 @@
 #include "Qt/avi/gwavi.h"
 #include "Qt/nes_shm.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/fceuWrapper.h"
 
 static gwavi_t  *gwavi = NULL;
 static bool      recordEnable = false;
@@ -26,6 +27,7 @@ static int       abufSize = 0;
 static uint32_t *rawVideoBuf = NULL;
 static int16_t  *rawAudioBuf = NULL;
 static int       videoFormat = 2;
+static int       audioSampleRate = 48000;
 //**************************************************************************************
 
 static void convertRgb_32_to_24( const unsigned char *src, unsigned char *dest, int w, int h, int nPix )
@@ -258,7 +260,7 @@ static int close(void)
 }; // End X264 namespace
 #endif
 //**************************************************************************************
-int aviRecordOpenFile( const char *filepath, int format, int width, int height )
+int aviRecordOpenFile( const char *filepath )
 {
 	char fourcc[8];
 	gwavi_audio_t  audioConfig;
@@ -270,11 +272,14 @@ int aviRecordOpenFile( const char *filepath, int format, int width, int height )
 	}
 	fps = FCEUI_GetDesiredFPS() >> 24;
 
+	g_config->getOption("SDL.Sound.Rate", &audioSampleRate);
+
 	audioConfig.channels = 1;
 	audioConfig.bits     = 16;
-	audioConfig.samples_per_second = 48000;
+	audioConfig.samples_per_second = audioSampleRate;
 
 	memset( fourcc, 0, sizeof(fourcc) );
+
 
 	if ( videoFormat == 1 )
 	{
@@ -287,7 +292,7 @@ int aviRecordOpenFile( const char *filepath, int format, int width, int height )
 
 	gwavi = new gwavi_t();
 
-	if ( gwavi->open( "/tmp/test.avi", nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, &audioConfig ) )
+	if ( gwavi->open( filepath, nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, &audioConfig ) )
 	{
 		printf("Error: Failed to open AVI file.\n");
 		recordEnable = false;
@@ -299,6 +304,11 @@ int aviRecordOpenFile( const char *filepath, int format, int width, int height )
 
 	abufSize    = 48000;
 	rawAudioBuf = (int16_t*)malloc( abufSize * sizeof(uint16_t) );
+
+	vbufHead = 0;
+	vbufTail = 0;
+	abufHead = 0;
+	abufTail = 0;
 
 	recordEnable = true;
 	return 0;
@@ -315,6 +325,11 @@ int aviRecordAddFrame( void )
 	{
 		return -1;
 	}
+	if ( FCEUI_EmulationPaused() )
+	{
+		return 0;
+	}
+
 	int i, head, numPixels, availSize;
 
 	numPixels  = nes_shm->video.ncol * nes_shm->video.nrow;
@@ -418,16 +433,22 @@ AviRecordDiskThread_t::~AviRecordDiskThread_t(void)
 void AviRecordDiskThread_t::run(void)
 {
 	int numPixels, width, height, numPixelsReady = 0;
-	int numSamples = 0;
+	int fps = 60, numSamples = 0;
 	unsigned char *rgb24;
 	int16_t audioOut[48000];
 	uint32_t videoOut[1048576];
+	char writeAudio = 1;
+	int  avgAudioPerFrame;
 
 	printf("AVI Record Disk Start\n");
 
 	setPriority( QThread::HighestPriority );
 
-	//avgAudioPerFrame = 48000 / 60;
+	fps = FCEUI_GetDesiredFPS() >> 24;
+
+	avgAudioPerFrame = (audioSampleRate / fps) + 1;
+
+	printf("Avg Audio Rate per Frame: %i \n", avgAudioPerFrame );
 
 	width     = nes_shm->video.ncol;
 	height    = nes_shm->video.nrow;
@@ -453,6 +474,10 @@ void AviRecordDiskThread_t::run(void)
 
 		if ( numPixelsReady >= numPixels )
 		{
+			//printf("Adding Frame:%i\n", frameCount++);
+
+			writeAudio = 1;
+
 			if ( videoFormat == 1)
 			{
 				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
@@ -474,26 +499,29 @@ void AviRecordDiskThread_t::run(void)
 
 			numPixelsReady = 0;
 
-			numSamples = 0;
-
-			while ( abufHead != abufTail )
+			if ( writeAudio )
 			{
-				audioOut[ numSamples ] = rawAudioBuf[ abufTail ]; numSamples++;
-
-				abufTail = (abufTail + 1) % abufSize;
-
-				//if ( numSamples > avgAudioPerFrame )
-				//{
-				//	break;
-				//}
-			}
-
-			if ( numSamples > 0 )
-			{
-				//printf("NUM Audio Samples: %i \n", numSamples );
-				gwavi->add_audio( (unsigned char *)audioOut, numSamples*2);
-
 				numSamples = 0;
+
+				while ( abufHead != abufTail )
+				{
+					audioOut[ numSamples ] = rawAudioBuf[ abufTail ]; numSamples++;
+
+					abufTail = (abufTail + 1) % abufSize;
+
+					if ( numSamples > avgAudioPerFrame )
+					{
+						break;
+					}
+				}
+
+				if ( numSamples > 0 )
+				{
+					//printf("NUM Audio Samples: %i \n", numSamples );
+					gwavi->add_audio( (unsigned char *)audioOut, numSamples*2);
+
+					numSamples = 0;
+				}
 			}
 		}
 		else
