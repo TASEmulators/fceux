@@ -130,6 +130,10 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	{  // I420   YUV 4:2:0
 		bits_per_pixel = 12;
 	}
+	else if ( strcmp( fourcc, "X264" ) == 0 )
+	{  // X264   H.264
+		bits_per_pixel = 12;
+	}
 	else
 	{	// Plain RGB24
 		bits_per_pixel = 24;
@@ -269,10 +273,12 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 			    stderr);
 		return -1;
 	}
-	if (len < 256)
-		(void)fprintf(stderr, "WARNING: specified buffer len seems "
-			      "rather small: %d. Are you sure about this?\n",
-			      (int)len);
+	//if (len < 256)
+	//{
+	//	(void)fprintf(stderr, "WARNING: specified buffer len seems "
+	//		      "rather small: %d. Are you sure about this?\n",
+	//		      (int)len);
+	//}
 
 	offset_count++;
 	stream_header_v.data_length++;

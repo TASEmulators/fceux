@@ -6,6 +6,10 @@
 #include "driver.h"
 #include "common/os_utils.h"
 
+#ifdef _USE_X264
+#include "x264.h"
+#endif
+
 #include "Qt/AviRecord.h"
 #include "Qt/avi/gwavi.h"
 #include "Qt/nes_shm.h"
@@ -21,7 +25,7 @@ static int       abufTail = 0;
 static int       abufSize = 0;
 static uint32_t *rawVideoBuf = NULL;
 static int16_t  *rawAudioBuf = NULL;
-static int       videoFormat = 1;
+static int       videoFormat = 2;
 //**************************************************************************************
 
 static void convertRgb_32_to_24( const unsigned char *src, unsigned char *dest, int w, int h, int nPix )
@@ -146,6 +150,114 @@ void Convert_4byte_To_I420Frame(const void* data, unsigned char* dest, unsigned 
     //#endif
 }
 //**************************************************************************************
+#ifdef _USE_X264
+
+namespace X264
+{
+static x264_param_t param;
+static x264_picture_t pic;
+static x264_picture_t pic_out;
+static x264_t *hdl = NULL;
+static x264_nal_t *nal = NULL;
+static int i_nal = 0;
+static int i_frame = 0;
+
+static int init( int width, int height )
+{
+	/* Get default params for preset/tuning */
+	if( x264_param_default_preset( &param, "medium", NULL ) < 0 )
+	{
+	    goto x264_init_fail;
+	}
+	
+	/* Configure non-default params */
+	param.i_bitdepth = 8;
+	param.i_csp = X264_CSP_I420;
+	param.i_width  = width;
+	param.i_height = height;
+	param.b_vfr_input = 0;
+	param.b_repeat_headers = 1;
+	param.b_annexb = 1;
+	
+	/* Apply profile restrictions. */
+	if( x264_param_apply_profile( &param, "high" ) < 0 )
+	{
+	    goto x264_init_fail;
+	}
+	
+	if( x264_picture_alloc( &pic, param.i_csp, param.i_width, param.i_height ) < 0 )
+	{
+	    goto x264_init_fail;
+	}
+
+	hdl = x264_encoder_open( &param );
+	if ( hdl == NULL )
+	{
+		goto x264_init_fail;
+	}
+	i_frame = 0;
+
+	return 0;
+
+x264_init_fail:
+	return -1;
+}
+
+static int encode_frame( unsigned char *inBuf, int width, int height )
+{
+	int luma_size = width * height;
+	int chroma_size = luma_size / 4;
+	int i_frame_size = 0;
+	int ofs;
+
+	ofs = 0;
+	memcpy( pic.img.plane[0], &inBuf[ofs], luma_size   ); ofs += luma_size;
+	memcpy( pic.img.plane[1], &inBuf[ofs], chroma_size ); ofs += chroma_size;
+	memcpy( pic.img.plane[2], &inBuf[ofs], chroma_size ); ofs += chroma_size;
+
+	pic.i_pts = i_frame++;
+
+	i_frame_size = x264_encoder_encode( hdl, &nal, &i_nal, &pic, &pic_out );
+
+	if ( i_frame_size < 0 )
+	{
+		return -1;
+	}
+	else if ( i_frame_size )
+	{
+		gwavi->add_frame( nal->p_payload, i_frame_size );
+	}
+	return i_frame_size;
+}
+
+static int close(void)
+{
+	int i_frame_size;
+
+	/* Flush delayed frames */
+	while( x264_encoder_delayed_frames( hdl ) )
+	{
+	    i_frame_size = x264_encoder_encode( hdl, &nal, &i_nal, NULL, &pic_out );
+
+	    if ( i_frame_size < 0 )
+	    {
+	        break;
+	    }
+	    else if( i_frame_size )
+	    {
+		gwavi->add_frame( nal->p_payload, i_frame_size );
+	    }
+	}
+	
+	x264_encoder_close( hdl );
+	x264_picture_clean( &pic );
+
+	return 0;
+}
+
+}; // End X264 namespace
+#endif
+//**************************************************************************************
 int aviRecordOpenFile( const char *filepath, int format, int width, int height )
 {
 	char fourcc[8];
@@ -164,9 +276,13 @@ int aviRecordOpenFile( const char *filepath, int format, int width, int height )
 
 	memset( fourcc, 0, sizeof(fourcc) );
 
-	if ( videoFormat )
+	if ( videoFormat == 1 )
 	{
 		strcpy( fourcc, "I420");
+	}
+	else if ( videoFormat == 2 )
+	{
+		strcpy( fourcc, "X264");
 	}
 
 	gwavi = new gwavi_t();
@@ -317,6 +433,12 @@ void AviRecordDiskThread_t::run(void)
 	height    = nes_shm->video.nrow;
 	numPixels = width * height;
 
+#ifdef _USE_X264
+	if ( videoFormat == 2)
+	{
+		X264::init( width, height );
+	}
+#endif
 	rgb24 = (unsigned char *)malloc( numPixels * sizeof(uint32_t) );
 
 	while ( !isInterruptionRequested() )
@@ -331,11 +453,18 @@ void AviRecordDiskThread_t::run(void)
 
 		if ( numPixelsReady >= numPixels )
 		{
-			if ( videoFormat )
+			if ( videoFormat == 1)
 			{
 				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
 				gwavi->add_frame( rgb24, (numPixels*3)/2 );
 			}
+			#ifdef _USE_X264
+			else if ( videoFormat == 2)
+			{
+				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
+				X264::encode_frame( rgb24, width, height );
+			}
+			#endif
 			else
 			{
 				convertRgb_32_to_24( (const unsigned char*)videoOut, rgb24,
@@ -375,6 +504,12 @@ void AviRecordDiskThread_t::run(void)
 
 	free(rgb24);
 
+#ifdef _USE_X264
+	if ( videoFormat == 2)
+	{
+		X264::close();
+	}
+#endif
 	aviRecordClose();
 
 	printf("AVI Record Disk Exit\n");

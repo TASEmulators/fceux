@@ -75,6 +75,13 @@ else(WIN32)
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
   endif()
 
+  pkg_check_modules( X264 x264)
+
+  if ( ${X264_FOUND} )
+	  message( STATUS "Using System X264 Encoder Library ${X264_VERSION}" )
+	  add_definitions( -D_USE_X264 ${X264_CFLAGS} )
+  endif()
+
   #pkg_check_modules( GL gl) # Use built in find package instead for OpenGL
 
   # Check for OpenGL
@@ -525,7 +532,7 @@ target_link_libraries( ${APP_NAME}
    ${OPENGL_LDFLAGS}  
  	${SDL2_LDFLAGS}
 	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
-	${LUA_LDFLAGS}
+	${LUA_LDFLAGS} ${X264_LDFLAGS}
  	${SYS_LIBS}
 )
 
