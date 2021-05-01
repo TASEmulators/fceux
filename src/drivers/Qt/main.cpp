@@ -83,6 +83,13 @@ int main( int argc, char *argv[] )
 	QApplication app(argc, argv);
 	//const char *styleSheetEnv = NULL;
 	
+	#ifdef WIN32
+	if (AttachConsole(ATTACH_PARENT_PROCESS))
+	{
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
+	#endif
 	//app.setStyle( new MenuStyle() );
 
 	//styleSheetEnv = ::getenv("FCEUX_QT_STYLESHEET");

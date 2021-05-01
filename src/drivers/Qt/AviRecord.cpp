@@ -3,6 +3,11 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef WIN32
+#include <windows.h>
+#include <vfw.h>
+#endif
+
 #include "driver.h"
 #include "common/os_utils.h"
 
@@ -13,6 +18,7 @@
 #include "Qt/AviRecord.h"
 #include "Qt/avi/gwavi.h"
 #include "Qt/nes_shm.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/fceuWrapper.h"
 
@@ -26,31 +32,48 @@ static int       abufTail = 0;
 static int       abufSize = 0;
 static uint32_t *rawVideoBuf = NULL;
 static int16_t  *rawAudioBuf = NULL;
-static int       videoFormat = 2;
+static int       videoFormat = AVI_VFW;
 static int       audioSampleRate = 48000;
 //**************************************************************************************
 
-static void convertRgb_32_to_24( const unsigned char *src, unsigned char *dest, int w, int h, int nPix )
+static void convertRgb_32_to_24( const unsigned char *src, unsigned char *dest, int w, int h, int nPix, bool verticalFlip )
 {
 	int i=0, j=0, x, y;
 
-	// Uncompressed RGB needs to be flipped vertically
-	y = h-1;
-
-	while ( y >= 0 )
+	if ( verticalFlip )
 	{
-		x = 0;
-		i = y*w*4;
+		// Uncompressed RGB needs to be flipped vertically
+		y = h-1;
 
-		while ( x < w )
+		while ( y >= 0 )
 		{
-			dest[j] = src[i]; i++; j++;
-			dest[j] = src[i]; i++; j++;
-			dest[j] = src[i]; i++; j++;
-			i++; 
-			x++;
+			x = 0;
+			i = y*w*4;
+
+			while ( x < w )
+			{
+				dest[j] = src[i]; i++; j++;
+				dest[j] = src[i]; i++; j++;
+				dest[j] = src[i]; i++; j++;
+				i++; 
+				x++;
+			}
+			y--;
 		}
-		y--;
+	}
+	else
+	{
+		int size;
+
+		size = nPix*4;
+		i=0;
+		while ( i < size )
+		{
+				dest[j] = src[i]; i++; j++;
+				dest[j] = src[i]; i++; j++;
+				dest[j] = src[i]; i++; j++;
+				i++; 
+		}
 	}
 }
 //**************************************************************************************
@@ -260,6 +283,127 @@ static int close(void)
 }; // End X264 namespace
 #endif
 //**************************************************************************************
+// Windows VFW Interface
+#ifdef WIN32
+namespace VFW
+{
+static bool cmpSet = false;
+static COMPVARS  cmpvars;
+static DWORD dwFlags = 0;
+static BITMAPINFOHEADER   bmapIn;
+static LPBITMAPINFOHEADER bmapOut = NULL;
+static DWORD frameNum = 0;
+static DWORD dwQuality = 0;
+static LPVOID outBuf = NULL;
+
+static int chooseConfig(int width, int height)
+{
+	bool ret;
+
+	if ( cmpSet )
+	{
+		ICCompressorFree( &cmpvars );
+		cmpSet = false;
+	}
+	memset( &cmpvars, 0, sizeof(COMPVARS));
+	cmpvars.cbSize = sizeof(COMPVARS);
+	ret = ICCompressorChoose( HWND(consoleWindow->winId()), ICMF_CHOOSE_ALLCOMPRESSORS,
+			0, NULL, &cmpvars, 0);
+
+	//printf("hic:%i\n", cmpvars.hic);
+	printf("FCC:%08X  %c%c%c%c \n", cmpvars.fccHandler,
+	    (cmpvars.fccHandler & 0x000000FF) ,
+	    (cmpvars.fccHandler & 0x0000FF00) >>  8,
+	    (cmpvars.fccHandler & 0x00FF0000) >> 16,
+	    (cmpvars.fccHandler & 0xFF000000) >> 24 );
+
+
+	if ( ret )
+	{
+		cmpSet = true;
+	}
+	return (cmpSet == false) ? -1 : 0;
+}
+
+static int init( int width, int height )
+{
+	void *h;
+	DWORD dwFormatSize, dwCompressBufferSize;
+
+	memset( &bmapIn, 0, sizeof(bmapIn));
+	bmapIn.biSize = sizeof(BITMAPINFOHEADER);
+	bmapIn.biWidth = width;
+	bmapIn.biHeight = height;
+	bmapIn.biPlanes = 1;
+	bmapIn.biBitCount = 24;
+	bmapIn.biCompression = BI_RGB;
+	bmapIn.biSizeImage = width * height * 3;
+
+	dwFormatSize = ICCompressGetFormatSize( cmpvars.hic, &bmapIn );
+
+	printf("Format Size:%i  %zi\n", dwFormatSize, sizeof(BITMAPINFOHEADER));
+
+	h = GlobalAlloc(GHND, dwFormatSize); 
+	bmapOut = (LPBITMAPINFOHEADER)GlobalLock(h); 
+	memset( bmapOut, 0, sizeof(bmapOut));
+	bmapOut->biSize = sizeof(BITMAPINFOHEADER);
+	ICCompressGetFormat( cmpvars.hic, &bmapIn, bmapOut);
+	
+	// Find the worst-case buffer size. 
+	dwCompressBufferSize = ICCompressGetSize( cmpvars.hic, &bmapIn, bmapOut); 
+ 
+	printf("Worst Case Compress Buffer Size: %i\n", dwCompressBufferSize );
+
+	// Allocate a buffer and get lpOutput to point to it. 
+	h = GlobalAlloc(GHND, dwCompressBufferSize); 
+	outBuf = (LPVOID)GlobalLock(h);
+
+	dwQuality = ICGetDefaultQuality( cmpvars.hic ); 
+
+	ICCompressBegin( cmpvars.hic, &bmapIn, bmapOut );
+	//msleep(5000);
+	return 0;
+}
+
+static int close(void)
+{
+	ICCompressEnd( cmpvars.hic);
+	return 0;
+}
+
+static int encode_frame( unsigned char *inBuf, int width, int height )
+{
+	DWORD ret;
+	DWORD flagsOut = 0, reserved = 0;
+	int bytesWritten = 0;
+
+	ret = ICCompress( 
+		cmpvars.hic, 
+		dwFlags, 
+		bmapOut,
+		outBuf,
+		&bmapIn, 
+		inBuf,
+		&reserved,
+		&flagsOut,
+		frameNum++,
+		0,
+		dwQuality,
+		NULL, NULL );
+
+	if ( ret == ICERR_OK )
+	{
+		//printf("Compressing Frame:%i   Size:%i\n", frameNum, bmapOut->biSizeImage);
+		bytesWritten = bmapOut->biSizeImage;
+		gwavi->add_frame( (unsigned char*)outBuf, bytesWritten );
+	}
+
+	return bytesWritten;
+}
+
+} // End namespace VFW
+#endif
+//**************************************************************************************
 int aviRecordOpenFile( const char *filepath )
 {
 	char fourcc[8];
@@ -267,6 +411,18 @@ int aviRecordOpenFile( const char *filepath )
 	unsigned int fps;
 	char fileName[1024];
 
+#ifdef WIN32
+	if ( videoFormat == AVI_VFW )
+	{
+		if ( !VFW::cmpSet )
+		{
+			if ( VFW::chooseConfig( nes_shm->video.ncol, nes_shm->video.nrow ) )
+			{
+				return -1;
+			}
+		}
+	}
+#endif
 
 	if ( filepath != NULL )
 	{
@@ -318,15 +474,23 @@ int aviRecordOpenFile( const char *filepath )
 
 	memset( fourcc, 0, sizeof(fourcc) );
 
-
-	if ( videoFormat == 1 )
+	if ( videoFormat == AVI_I420 )
 	{
 		strcpy( fourcc, "I420");
 	}
-	else if ( videoFormat == 2 )
+	#ifdef _USE_X264
+	else if ( videoFormat == AVI_X264 )
 	{
 		strcpy( fourcc, "X264");
 	}
+	#endif 
+	#ifdef WIN32
+	else if ( videoFormat == AVI_VFW )
+	{
+		memcpy( fourcc, &VFW::cmpvars.fccHandler, 4);
+		printf("Set VFW FourCC: %s", fourcc);
+	}
+	#endif 
 
 	gwavi = new gwavi_t();
 
@@ -473,8 +637,8 @@ void AviRecordDiskThread_t::run(void)
 	int numPixels, width, height, numPixelsReady = 0;
 	int fps = 60, numSamples = 0;
 	unsigned char *rgb24;
-	int16_t audioOut[48000];
-	uint32_t videoOut[1048576];
+	int16_t *audioOut;
+	uint32_t *videoOut;
 	char writeAudio = 1;
 	int  avgAudioPerFrame, localVideoFormat;
 
@@ -506,11 +670,20 @@ void AviRecordDiskThread_t::run(void)
 	localVideoFormat = videoFormat;
 
 #ifdef _USE_X264
-	if ( localVideoFormat == 2)
+	if ( localVideoFormat == AVI_X264)
 	{
 		X264::init( width, height );
 	}
 #endif
+#ifdef WIN32
+	if ( localVideoFormat == AVI_VFW)
+	{
+		VFW::init( width, height );
+	}
+#endif
+
+	audioOut = (int16_t *)malloc(48000);
+	videoOut = (uint32_t*)malloc(1048576);
 
 	while ( !isInterruptionRequested() )
 	{
@@ -528,22 +701,30 @@ void AviRecordDiskThread_t::run(void)
 
 			writeAudio = 1;
 
-			if ( localVideoFormat == 1)
+			if ( localVideoFormat == AVI_I420)
 			{
 				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
 				gwavi->add_frame( rgb24, (numPixels*3)/2 );
 			}
 			#ifdef _USE_X264
-			else if ( localVideoFormat == 2)
+			else if ( localVideoFormat == AVI_X264)
 			{
 				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
 				X264::encode_frame( rgb24, width, height );
 			}
 			#endif
+			#ifdef WIN32
+			else if ( localVideoFormat == AVI_VFW)
+			{
+				convertRgb_32_to_24( (const unsigned char*)videoOut, rgb24,
+						width, height, numPixels, true );
+				writeAudio = VFW::encode_frame( rgb24, width, height ) > 0;
+			}
+			#endif
 			else
 			{
 				convertRgb_32_to_24( (const unsigned char*)videoOut, rgb24,
-						width, height, numPixels );
+						width, height, numPixels, true );
 				gwavi->add_frame( rgb24, numPixels*3 );
 			}
 
@@ -583,12 +764,21 @@ void AviRecordDiskThread_t::run(void)
 	free(rgb24);
 
 #ifdef _USE_X264
-	if ( localVideoFormat == 2)
+	if ( localVideoFormat == AVI_X264)
 	{
 		X264::close();
 	}
 #endif
+#ifdef WIN32
+	if ( localVideoFormat == AVI_VFW)
+	{
+		VFW::close();
+	}
+#endif
 	aviRecordClose();
+
+	free(audioOut);
+	free(videoOut);
 
 	printf("AVI Record Disk Exit\n");
 	emit finished();

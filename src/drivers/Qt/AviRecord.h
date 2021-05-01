@@ -7,6 +7,19 @@
 #include <stdint.h>
 #include <QThread>
 
+enum aviEncoderList
+{
+	AVI_RGB24 = 0,
+	AVI_I420,
+	#ifdef _USE_X264
+	AVI_X264,
+	#endif
+	#ifdef WIN32
+	AVI_VFW,
+	#endif
+	AVI_NUM_ENC
+};
+
 int aviRecordOpenFile( const char *filepath );
 
 int aviRecordAddFrame( void );
