@@ -32,7 +32,7 @@ static int       abufTail = 0;
 static int       abufSize = 0;
 static uint32_t *rawVideoBuf = NULL;
 static int16_t  *rawAudioBuf = NULL;
-static int       videoFormat = AVI_VFW;
+static int       videoFormat = AVI_RGB24;
 static int       audioSampleRate = 48000;
 //**************************************************************************************
 
@@ -369,6 +369,12 @@ static int close(void)
 
 	GlobalFree(bmapOut);
 	GlobalFree(outBuf);
+
+	if ( cmpSet )
+	{
+		ICCompressorFree( &cmpvars );
+		cmpSet = false;
+	}
 	return 0;
 }
 
