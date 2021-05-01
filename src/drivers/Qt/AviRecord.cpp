@@ -310,13 +310,11 @@ static int chooseConfig(int width, int height)
 	ret = ICCompressorChoose( HWND(consoleWindow->winId()), ICMF_CHOOSE_ALLCOMPRESSORS,
 			0, NULL, &cmpvars, 0);
 
-	//printf("hic:%i\n", cmpvars.hic);
 	printf("FCC:%08X  %c%c%c%c \n", cmpvars.fccHandler,
 	    (cmpvars.fccHandler & 0x000000FF) ,
 	    (cmpvars.fccHandler & 0x0000FF00) >>  8,
 	    (cmpvars.fccHandler & 0x00FF0000) >> 16,
 	    (cmpvars.fccHandler & 0xFF000000) >> 24 );
-
 
 	if ( ret )
 	{
@@ -341,7 +339,7 @@ static int init( int width, int height )
 
 	dwFormatSize = ICCompressGetFormatSize( cmpvars.hic, &bmapIn );
 
-	printf("Format Size:%i  %zi\n", dwFormatSize, sizeof(BITMAPINFOHEADER));
+	//printf("Format Size:%i  %zi\n", dwFormatSize, sizeof(BITMAPINFOHEADER));
 
 	h = GlobalAlloc(GHND, dwFormatSize); 
 	bmapOut = (LPBITMAPINFOHEADER)GlobalLock(h); 
@@ -352,7 +350,7 @@ static int init( int width, int height )
 	// Find the worst-case buffer size. 
 	dwCompressBufferSize = ICCompressGetSize( cmpvars.hic, &bmapIn, bmapOut); 
  
-	printf("Worst Case Compress Buffer Size: %i\n", dwCompressBufferSize );
+	//printf("Worst Case Compress Buffer Size: %i\n", dwCompressBufferSize );
 
 	// Allocate a buffer and get lpOutput to point to it. 
 	h = GlobalAlloc(GHND, dwCompressBufferSize); 
@@ -361,13 +359,16 @@ static int init( int width, int height )
 	dwQuality = ICGetDefaultQuality( cmpvars.hic ); 
 
 	ICCompressBegin( cmpvars.hic, &bmapIn, bmapOut );
-	//msleep(5000);
+	
 	return 0;
 }
 
 static int close(void)
 {
 	ICCompressEnd( cmpvars.hic);
+
+	GlobalFree(bmapOut);
+	GlobalFree(outBuf);
 	return 0;
 }
 
@@ -414,12 +415,9 @@ int aviRecordOpenFile( const char *filepath )
 #ifdef WIN32
 	if ( videoFormat == AVI_VFW )
 	{
-		if ( !VFW::cmpSet )
+		if ( VFW::chooseConfig( nes_shm->video.ncol, nes_shm->video.nrow ) )
 		{
-			if ( VFW::chooseConfig( nes_shm->video.ncol, nes_shm->video.nrow ) )
-			{
-				return -1;
-			}
+			return -1;
 		}
 	}
 #endif
