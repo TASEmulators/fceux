@@ -356,7 +356,10 @@ static int init( int width, int height )
 	h = GlobalAlloc(GHND, dwCompressBufferSize); 
 	outBuf = (LPVOID)GlobalLock(h);
 
-	dwQuality = ICGetDefaultQuality( cmpvars.hic ); 
+	//dwQuality = ICGetDefaultQuality( cmpvars.hic ); 
+	dwQuality = cmpvars.lQ; 
+
+	//printf("Quality Setting: %i\n", dwQuality );
 
 	ICCompressBegin( cmpvars.hic, &bmapIn, bmapOut );
 	
