@@ -48,6 +48,7 @@
 #include "../../input.h"
 #include "../../movie.h"
 #include "../../version.h"
+#include "common/os_utils.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"

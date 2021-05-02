@@ -76,6 +76,7 @@ static std::list <ConsoleDebugger*> dbgWinList;
 
 static void DeleteBreak(int sel);
 static bool waitingAtBp = false;
+static bool bpDebugEnable = true;
 static int  lastBpIdx   = 0;
 //----------------------------------------------------------------------------
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
@@ -2565,11 +2566,16 @@ void ConsoleDebugger::vbarChanged(int value)
 	asmView->setLine( value );
 }
 //----------------------------------------------------------------------------
+void bpDebugSetEnable(bool val)
+{
+	bpDebugEnable = val;
+}
+//----------------------------------------------------------------------------
 void FCEUD_DebugBreakpoint( int bpNum )
 {
 	std::list <ConsoleDebugger*>::iterator it;
 
-	if ( !nes_shm->runEmulator )
+	if ( !nes_shm->runEmulator || !bpDebugEnable )
 	{
 		return;
 	}
@@ -2585,7 +2591,8 @@ void FCEUD_DebugBreakpoint( int bpNum )
 		(*it)->breakPointNotify( bpNum );
 	}
 
-	while ( nes_shm->runEmulator && FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
+	while ( nes_shm->runEmulator && bpDebugEnable &&
+			FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 	{
 		// HACK: break when Frame Advance is pressed
 		extern bool frameAdvanceRequested;
@@ -2615,6 +2622,11 @@ void FCEUD_DebugBreakpoint( int bpNum )
 bool debuggerWindowIsOpen(void)
 {
 	return (dbgWinList.size() > 0);
+}
+//----------------------------------------------------------------------------
+bool debuggerWaitingAtBreakpoint(void)
+{
+	return waitingAtBp;
 }
 //----------------------------------------------------------------------------
 void updateAllDebuggerWindows( void )

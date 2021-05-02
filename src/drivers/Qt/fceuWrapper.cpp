@@ -381,9 +381,32 @@ CloseGame(void)
 {
 	std::string filename;
 
-	if(!isloaded) {
+	if (!isloaded) {
 		return(0);
 	}
+
+	// If the emulation thread is stuck hanging at a breakpoint,
+	// disable breakpoint debugging and wait for the thread to 
+	// complete its frame. So that it is idle with a minimal call
+	// stack when we close the ROM. After thread has completed the
+	// frame, it is then safe to re-enable breakpoint debugging.
+	if ( debuggerWaitingAtBreakpoint() )
+	{
+		bpDebugSetEnable(false);
+
+		if ( fceuWrapperIsLocked() )
+		{
+			fceuWrapperUnLock();
+			msleep(100);
+			fceuWrapperLock();
+		}
+		else
+		{
+			msleep(100);
+		}
+		bpDebugSetEnable(true);
+	}
+
 	hexEditorSaveBookmarks();
 	saveGameDebugBreakpoints();
 	debuggerClearAllBreakpoints();
