@@ -83,6 +83,7 @@ bool swapDuty = 0;
 bool turbo = false;
 bool pauseAfterPlayback = false;
 bool suggestReadOnlyReplay = true;
+bool showStatusIconOpt = true;
 unsigned int gui_draw_area_width   = 256;
 unsigned int gui_draw_area_height  = 256;
 
@@ -1485,14 +1486,21 @@ FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int
     }
 DUMMY(FCEUD_HideMenuToggle)
 DUMMY(FCEUD_MovieReplayFrom)
-DUMMY(FCEUD_ToggleStatusIcon)
-DUMMY(FCEUD_AviRecordTo)
-DUMMY(FCEUD_AviStop)
-void FCEUI_AviVideoUpdate(const unsigned char* buffer) { }
-int FCEUD_ShowStatusIcon(void) {return 0;}
-bool FCEUI_AviIsRecording(void) {return false;}
+//DUMMY(FCEUD_AviRecordTo)
+//DUMMY(FCEUD_AviStop)
+//void FCEUI_AviVideoUpdate(const unsigned char* buffer) { }
+//bool FCEUI_AviIsRecording(void) {return false;}
 void FCEUI_UseInputPreset(int preset) { }
 bool FCEUD_PauseAfterPlayback() { return pauseAfterPlayback; }
+
+int FCEUD_ShowStatusIcon(void)
+{
+	return showStatusIconOpt;
+}
+void FCEUD_ToggleStatusIcon(void)
+{
+	showStatusIconOpt = !showStatusIconOpt;
+}
 
 void FCEUD_TurboOn	 (void) { /* TODO */ };
 void FCEUD_TurboOff   (void) { /* TODO */ };

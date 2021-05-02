@@ -625,6 +625,71 @@ bool aviRecordRunning(void)
 {
 	return recordEnable;
 }
+bool FCEUI_AviIsRecording(void)
+{
+	return recordEnable;
+}
+//**************************************************************************************
+void FCEUD_AviRecordTo(void)
+{
+	return;
+}
+//**************************************************************************************
+void FCEUD_AviStop(void)
+{
+	return;
+}
+//**************************************************************************************
+void FCEUI_AviVideoUpdate(const unsigned char* buffer)
+{	// This is not used by Qt Emulator, avi recording pulls from the post processed video buffer
+	// instead of emulation core video buffer. This allows for the video scaler effects
+	// and higher resolution to be seen in recording.
+	return;
+}
+//**************************************************************************************
+int aviGetSelVideoFormat(void)
+{
+	return videoFormat;
+}
+//**************************************************************************************
+void aviSetSelVideoFormat(int idx)
+{
+	videoFormat = idx;
+	printf("AVI Video Format Changed:%i\n", videoFormat );
+}
+//**************************************************************************************
+int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList )
+{
+	std::string s;
+
+	for (int i=0; i<AVI_NUM_ENC; i++)
+	{
+		switch ( i )
+		{
+			default:
+				s.assign("Unknown");
+			break;
+			case AVI_RGB24:
+				s.assign("RGB 24");
+			break;
+			case AVI_I420:
+				s.assign("I420 (YUV 4:2:0)");
+			break;
+			#ifdef _USE_X264
+			case AVI_X264:
+				s.assign("X264 (H.264)");
+			break;
+			#endif
+			#ifdef WIN32
+			case AVI_VFW:
+				s.assign("VfW (Video for Windows)");
+			break;
+			#endif
+		}
+		formatList.push_back(s);
+	}
+	return AVI_NUM_ENC;
+}
 //**************************************************************************************
 // AVI Recorder Disk Thread
 //**************************************************************************************

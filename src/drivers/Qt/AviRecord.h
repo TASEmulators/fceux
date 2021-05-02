@@ -5,6 +5,10 @@
 #define __AVI_RECORD_H__
 
 #include <stdint.h>
+#include <string>
+#include <vector>
+#include <list>
+
 #include <QThread>
 
 enum aviEncoderList
@@ -29,6 +33,12 @@ int aviRecordAddAudioFrame( int32_t *buf, int numSamples );
 int aviRecordClose(void);
 
 bool aviRecordRunning(void);
+
+int aviGetSelVideoFormat(void);
+
+void aviSetSelVideoFormat(int idx);
+
+int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList );
 
 class  AviRecordDiskThread_t : public QThread
 {

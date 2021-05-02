@@ -640,7 +640,7 @@ void consoleWin_t::initHotKeys(void)
 void consoleWin_t::createMainMenu(void)
 {
 	QAction *act;
-	QMenu *subMenu;
+	QMenu *subMenu, *aviMenu;
 	QActionGroup *group;
 	int useNativeMenuBar;
 	//QShortcut *shortcut;
@@ -1455,14 +1455,64 @@ void consoleWin_t::createMainMenu(void)
 
 	movieMenu->addAction(recAsMovAct);
 
-	// Movie -> Avi Record
-	act = new QAction(tr("A&VI Record"), this);
-	//act->setShortcut( QKeySequence(tr("Shift+F5")));
-	act->setCheckable(true);
-	act->setStatusTip(tr("AVI Record"));
-	connect(act, SIGNAL(triggered()), this, SLOT(aviOpen(void)) );
+	movieMenu->addSeparator();
+
+	// Movie -> Avi Recording
+	aviMenu = movieMenu->addMenu( tr("A&VI Recording") );
+
+	// Movie -> Avi Recording -> Record
+	recAviAct = new QAction(tr("&Record"), this);
+	//recAviAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	recAviAct->setStatusTip(tr("AVI Record Start"));
+	recAviAct->setIcon( QIcon(":icons/media-record.png") );
+	connect(recAviAct, SIGNAL(triggered()), this, SLOT(aviRecordStart(void)) );
 	
-	movieMenu->addAction(act);
+	aviMenu->addAction(recAviAct);
+
+	// Movie -> Avi Recording -> Record
+	recAsAviAct = new QAction(tr("Record &As"), this);
+	//recAsAviAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	recAsAviAct->setStatusTip(tr("AVI Record As Start"));
+	//recAsAviAct->setIcon( QIcon(":icons/media-record.png") );
+	connect(recAsAviAct, SIGNAL(triggered()), this, SLOT(aviRecordAsStart(void)) );
+	
+	aviMenu->addAction(recAsAviAct);
+
+	// Movie -> Avi Recording -> Stop
+	stopAviAct = new QAction(tr("&Stop"), this);
+	//stopAviAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	stopAviAct->setStatusTip(tr("AVI Record Stop"));
+	stopAviAct->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
+	connect(stopAviAct, SIGNAL(triggered()), this, SLOT(aviRecordStop(void)) );
+	
+	aviMenu->addAction(stopAviAct);
+
+	subMenu = aviMenu->addMenu( tr("Video Format") );
+
+	{
+		std::vector <std::string> formatList;
+		group   = new QActionGroup(this);
+
+		group->setExclusive(true);
+
+		FCEUD_AviGetFormatOpts( formatList );
+
+		for (size_t i=0; i<formatList.size(); i++)
+		{
+			act = new QAction(tr( formatList[i].c_str() ), this);
+
+			printf("%s\n", formatList[i].c_str() );
+
+	        	act->setCheckable(true);
+	        	group->addAction(act);
+			subMenu->addAction(act);
+
+			act->setChecked( aviGetSelVideoFormat() == i );
+
+			// Use Lambda Function to set callback
+			connect( act, &QAction::triggered, [ this, i ] { aviVideoFormatChanged( i ); } );
+		}
+	}
 
 	//-----------------------------------------------------------------------
 	// Help
@@ -3102,9 +3152,96 @@ void consoleWin_t::recordMovieAs(void)
 	return;
 }
 
-void consoleWin_t::aviOpen(void)
+void consoleWin_t::aviRecordStart(void)
 {
-	//printf("AVI!!!\n");
+	if ( !aviRecordRunning() )
+	{
+		fceuWrapperLock();
+		aviRecordOpenFile(NULL);
+		aviDiskThread->start();
+		fceuWrapperUnLock();
+	}
+}
+
+void consoleWin_t::aviRecordAsStart(void)
+{
+	if ( aviRecordRunning() )
+	{
+		return;
+	}
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	//char dir[512];
+	const char *base;
+	QFileDialog  dialog(this, tr("Save AVI Movie for Recording") );
+	QList<QUrl> urls;
+	QDir d;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("AVI Movies (*.avi) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/avi");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		dialog.setDirectory( d.absolutePath() );
+	}
+	dialog.setDefaultSuffix( tr(".avi") );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	FCEUI_printf ("AVI Recording movie to %s\n", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+	aviRecordOpenFile( filename.toStdString().c_str() );
+	aviDiskThread->start();
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::aviRecordStop(void)
+{
 	if ( aviRecordRunning() )
 	{
 		fceuWrapperLock();
@@ -3113,13 +3250,11 @@ void consoleWin_t::aviOpen(void)
 		aviDiskThread->wait(10000);
 		fceuWrapperUnLock();
 	}
-	else
-	{
-		fceuWrapperLock();
-		aviRecordOpenFile(NULL);
-		aviDiskThread->start();
-		fceuWrapperUnLock();
-	}
+}
+
+void consoleWin_t::aviVideoFormatChanged(int idx)
+{
+	aviSetSelVideoFormat(idx);
 }
 
 void consoleWin_t::aboutFCEUX(void)
@@ -3381,6 +3516,11 @@ void consoleWin_t::updatePeriodic(void)
 		quickSaveAct->setEnabled( FCEU_IsValidUI( FCEUI_QUICKSAVE ) );
 		loadStateAct->setEnabled( FCEU_IsValidUI( FCEUI_LOADSTATE ) );
 		saveStateAct->setEnabled( FCEU_IsValidUI( FCEUI_SAVESTATE ) );
+		recMovAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
+		recAsMovAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
+		recAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
+		recAsAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
+		stopAviAct->setEnabled( FCEU_IsValidUI( FCEUI_STOPAVI ) );
 	}
 
 	if ( errorMsgValid )

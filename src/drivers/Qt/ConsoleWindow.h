@@ -204,6 +204,9 @@ class  consoleWin_t : public QMainWindow
 		QAction *recAsMovAct;
 		QAction *region[3];
 		QAction *ramInit[4];
+		QAction *recAviAct;
+		QAction *recAsAviAct;
+		QAction *stopAviAct;
 
 		QTimer  *gameTimer;
 
@@ -359,7 +362,10 @@ class  consoleWin_t : public QMainWindow
 		void mainMenuOpen(void);
 		void mainMenuClose(void);
 		void warnAmbiguousShortcut( QShortcut*);
-		void aviOpen(void);
+		void aviRecordStart(void);
+		void aviRecordAsStart(void);
+		void aviRecordStop(void);
+		void aviVideoFormatChanged(int idx);
 
 };
 
