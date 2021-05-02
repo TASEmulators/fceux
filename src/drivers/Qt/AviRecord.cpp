@@ -24,6 +24,7 @@
 
 static gwavi_t  *gwavi = NULL;
 static bool      recordEnable = false;
+static bool      recordAudio  = true;
 static int       vbufHead = 0;
 static int       vbufTail = 0;
 static int       vbufSize = 0;
@@ -585,6 +586,10 @@ int aviRecordAddAudioFrame( int32_t *buf, int numSamples )
 	{
 		return -1;
 	}
+	if ( !recordAudio )
+	{
+		return -1;
+	}
 
 	for (int i=0; i<numSamples; i++)
 	{
@@ -621,6 +626,16 @@ int aviRecordClose(void)
 	return 0;
 }
 //**************************************************************************************
+bool aviGetAudioEnable(void)
+{
+	return recordAudio;
+}
+//**************************************************************************************
+void aviSetAudioEnable(bool val)
+{
+	recordAudio = val;
+}
+//**************************************************************************************
 bool aviRecordRunning(void)
 {
 	return recordEnable;
@@ -655,7 +670,9 @@ int aviGetSelVideoFormat(void)
 void aviSetSelVideoFormat(int idx)
 {
 	videoFormat = idx;
-	printf("AVI Video Format Changed:%i\n", videoFormat );
+	//printf("AVI Video Format Changed:%i\n", videoFormat );
+
+	g_config->setOption("SDL.AviVideoFormat", videoFormat);
 }
 //**************************************************************************************
 int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList )
@@ -802,7 +819,7 @@ void AviRecordDiskThread_t::run(void)
 
 			numPixelsReady = 0;
 
-			if ( writeAudio )
+			if ( writeAudio && recordAudio )
 			{
 				numSamples = 0;
 

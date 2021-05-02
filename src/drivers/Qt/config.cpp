@@ -521,6 +521,7 @@ InitConfig()
 	config->addOption("pauseframe", "SDL.PauseFrame", 0);
 	config->addOption("recordhud", "SDL.RecordHUD", 1);
 	config->addOption("moviemsg", "SDL.MovieMsg", 1);
+	config->addOption("SDL.AviVideoFormat", 0);
 
 	// Hex Editor Options
 	config->addOption("hexEditBgColor", "SDL.HexEditBgColor", "#000000");

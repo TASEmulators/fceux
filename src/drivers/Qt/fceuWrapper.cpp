@@ -581,7 +581,7 @@ static void ShowUsage(const char *prog)
 
 int  fceuWrapperInit( int argc, char *argv[] )
 {
-	int error;
+	int opt, error;
 	std::string s;
 
 	for (int i=0; i<argc; i++)
@@ -710,6 +710,9 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	else
 		FCEUI_SetAviDisableMovieMessages(false);
   
+	g_config->getOption("SDL.AviVideoFormat", &opt);
+	aviSetSelVideoFormat(opt);
+
 	// check for a .fm2 file to rip the subtitles
 	g_config->getOption("SDL.RipSubs", &s);
 	g_config->setOption("SDL.RipSubs", "");

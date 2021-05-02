@@ -34,6 +34,10 @@ int aviRecordClose(void);
 
 bool aviRecordRunning(void);
 
+bool aviGetAudioEnable(void);
+
+void aviSetAudioEnable(bool val);
+
 int aviGetSelVideoFormat(void);
 
 void aviSetSelVideoFormat(int idx);

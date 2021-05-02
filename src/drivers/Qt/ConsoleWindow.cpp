@@ -1487,6 +1487,7 @@ void consoleWin_t::createMainMenu(void)
 	
 	aviMenu->addAction(stopAviAct);
 
+	// Movie -> Avi Recording -> Video Format
 	subMenu = aviMenu->addMenu( tr("Video Format") );
 
 	{
@@ -1512,7 +1513,15 @@ void consoleWin_t::createMainMenu(void)
 			// Use Lambda Function to set callback
 			connect( act, &QAction::triggered, [ this, i ] { aviVideoFormatChanged( i ); } );
 		}
+
 	}
+
+	// Movie -> Avi Recording -> Include Audio
+	act = new QAction(tr("Include Audio"), this);
+       	act->setCheckable(true);
+	act->setChecked( aviGetAudioEnable() );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(aviAudioEnableChange(bool)) );
+	aviMenu->addAction(act);
 
 	//-----------------------------------------------------------------------
 	// Help
@@ -3252,6 +3261,13 @@ void consoleWin_t::aviRecordStop(void)
 	}
 }
 
+void consoleWin_t::aviAudioEnableChange(bool checked)
+{
+	aviSetAudioEnable( checked );
+
+	return;
+}
+
 void consoleWin_t::aviVideoFormatChanged(int idx)
 {
 	aviSetSelVideoFormat(idx);
@@ -3516,6 +3532,7 @@ void consoleWin_t::updatePeriodic(void)
 		quickSaveAct->setEnabled( FCEU_IsValidUI( FCEUI_QUICKSAVE ) );
 		loadStateAct->setEnabled( FCEU_IsValidUI( FCEUI_LOADSTATE ) );
 		saveStateAct->setEnabled( FCEU_IsValidUI( FCEUI_SAVESTATE ) );
+		openMovAct->setEnabled( FCEU_IsValidUI( FCEUI_PLAYMOVIE ) );
 		recMovAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
 		recAsMovAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
 		recAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
