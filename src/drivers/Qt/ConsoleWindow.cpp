@@ -1503,7 +1503,7 @@ void consoleWin_t::createMainMenu(void)
 		{
 			act = new QAction(tr( formatList[i].c_str() ), this);
 
-			printf("%s\n", formatList[i].c_str() );
+			//printf("%s\n", formatList[i].c_str() );
 
 	        	act->setCheckable(true);
 	        	group->addAction(act);
