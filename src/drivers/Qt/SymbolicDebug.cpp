@@ -1514,6 +1514,7 @@ int SymbolEditWindow::exec(void)
 			}
 			sym->trimTrailingSpaces();
 		}
+		debugSymbolTable.save(); // Save table to disk immediately after an add, edit, or delete
 		fceuWrapperUnLock();
 	}
 	return ret;
