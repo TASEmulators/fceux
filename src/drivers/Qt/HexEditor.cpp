@@ -2846,20 +2846,23 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 
 			subMenu = menu.addMenu(tr("&Freeze/Unfreeze Address"));
 
-			act = new QAction(tr("&Toggle State"), &menu);
-			act->setShortcut( QKeySequence(tr("Ctrl+L")));
-			subMenu->addAction(act);
-			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamToggle(void)) );
+			if ( frzRamAddrValid( addr ) )
+			{
+				act = new QAction(tr("&Toggle State"), &menu);
+				act->setShortcut( QKeySequence(tr("Ctrl+L")));
+				subMenu->addAction(act);
+				connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamToggle(void)) );
 
-			act = new QAction(tr("&Freeze"), &menu);
-			subMenu->addAction(act);
-			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamSet(void)) );
+				act = new QAction(tr("&Freeze"), &menu);
+				subMenu->addAction(act);
+				connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamSet(void)) );
 
-			act = new QAction(tr("&Unfreeze"), &menu);
-			subMenu->addAction(act);
-			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamUnset(void)) );
+				act = new QAction(tr("&Unfreeze"), &menu);
+				subMenu->addAction(act);
+				connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamUnset(void)) );
 
-			subMenu->addSeparator();
+				subMenu->addSeparator();
+			}
 
 			act = new QAction(tr("Unfreeze &All"), &menu);
 			subMenu->addAction(act);
@@ -3016,6 +3019,8 @@ int QHexEdit::FreezeRam( const char *name, uint32_t a, uint8_t v, int c, int s, 
 				if ( s )
 				{
 					FCEUI_DelCheat( frzIdx );
+					frzRamAddr = -1;
+					return 0;
 				}
 			break;
 			default:
@@ -3101,7 +3106,7 @@ void QHexEdit::frzRamUnsetAll(void)
 		return;
 	}
 	fceuWrapperLock();
-	FCEUI_ListCheats( RamFreezeCB, this);
+	FCEU_DeleteAllCheats();
 	updateCheatDialog();
 	fceuWrapperUnLock();
 }

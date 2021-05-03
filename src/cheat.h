@@ -30,7 +30,8 @@ extern int savecheats;
 extern int globalCheatDisabled;
 extern int disableAutoLSCheats;
 
-int FCEU_DisableAllCheats();
+int FCEU_DisableAllCheats(void);
+int FCEU_DeleteAllCheats(void);
 
 typedef struct {
 	uint16 addr;
