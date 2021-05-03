@@ -1468,6 +1468,9 @@ void consoleWin_t::createMainMenu(void)
 	recAviAct->setIcon( QIcon(":icons/media-record.png") );
 	connect(recAviAct, SIGNAL(triggered()), this, SLOT(aviRecordStart(void)) );
 	
+	Hotkeys[ HK_RECORD_AVI ].setAction( recAviAct );
+	connect( Hotkeys[ HK_RECORD_AVI ].getShortcut(), SIGNAL(activated()), this, SLOT(aviRecordStart(void)) );
+
 	aviMenu->addAction(recAviAct);
 
 	// Movie -> Avi Recording -> Record
@@ -1477,6 +1480,9 @@ void consoleWin_t::createMainMenu(void)
 	//recAsAviAct->setIcon( QIcon(":icons/media-record.png") );
 	connect(recAsAviAct, SIGNAL(triggered()), this, SLOT(aviRecordAsStart(void)) );
 	
+	Hotkeys[ HK_RECORD_AVI_TO ].setAction( recAsAviAct );
+	connect( Hotkeys[ HK_RECORD_AVI_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(aviRecordAsStart(void)) );
+
 	aviMenu->addAction(recAsAviAct);
 
 	// Movie -> Avi Recording -> Stop
@@ -1486,6 +1492,9 @@ void consoleWin_t::createMainMenu(void)
 	stopAviAct->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
 	connect(stopAviAct, SIGNAL(triggered()), this, SLOT(aviRecordStop(void)) );
 	
+	Hotkeys[ HK_STOP_AVI ].setAction( stopAviAct );
+	connect( Hotkeys[ HK_STOP_AVI ].getShortcut(), SIGNAL(activated()), this, SLOT(aviRecordStop(void)) );
+
 	aviMenu->addAction(stopAviAct);
 
 	// Movie -> Avi Recording -> Video Format

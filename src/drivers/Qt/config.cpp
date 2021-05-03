@@ -213,6 +213,15 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 		case HK_STOP_MOVIE:
 			name = "StopMovie"; keySeq = "";
 		break;
+		case HK_RECORD_AVI:
+			name = "RecordAvi"; keySeq = "";
+		break;
+		case HK_RECORD_AVI_TO:
+			name = "RecordAviTo"; keySeq = "";
+		break;
+		case HK_STOP_AVI:
+			name = "StopAvi"; keySeq = "";
+		break;
 		case HK_MUTE_CAPTURE:
 			name = "MuteCapture"; keySeq = "'";
 		break;
