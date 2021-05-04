@@ -269,6 +269,8 @@ class QHexEdit : public QWidget
 		bool rolColHlgtEna;
 		bool altColHlgtEna;
 
+	public slots:
+		void changeFontRequest(void);
 	private slots:
 		void jumpToROM(void);
 		void addBookMarkCB(void);
@@ -377,6 +379,7 @@ class HexEditorDialog_t : public QDialog
 		void setViewRefresh20Hz(void);
 		void setViewRefresh30Hz(void);
 		void setViewRefresh60Hz(void);
+		void changeFontRequest(void);
 };
 
 int hexEditorNumWindows(void);

@@ -30,6 +30,7 @@
 #include <QPainter>
 #include <QMenuBar>
 #include <QFileDialog>
+#include <QFontDialog>
 #include <QColorDialog>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -1240,6 +1241,17 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	viewMenu->addSeparator();
 
+	// View -> Font
+	act = new QAction(tr("Set &Font..."), this);
+	//act->setShortcuts(QKeySequence::Open);
+	act->setStatusTip(tr("Change Font"));
+	//act->setCheckable(true);
+	connect(act, SIGNAL(triggered()), this, SLOT(changeFontRequest(void)) );
+
+	viewMenu->addAction(act);
+
+	viewMenu->addSeparator();
+
 	// View -> Refresh Rate
 	subMenu = viewMenu->addMenu( tr("Re&fresh Rate") );
 	group   = new QActionGroup(this);
@@ -1702,6 +1714,11 @@ void HexEditorDialog_t::setViewROM(void)
 	editor->setMode( QHexEdit::MODE_NES_ROM );
 }
 //----------------------------------------------------------------------------
+void HexEditorDialog_t::changeFontRequest(void)
+{
+	editor->changeFontRequest();
+}
+//----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewRefresh5Hz(void)
 {
 	periodicTimer->stop();
@@ -1879,14 +1896,23 @@ QHexEdit::QHexEdit(QWidget *parent)
 	: QWidget( parent )
 {
 	QPalette pal;
-	std::string colorString;
+	std::string fontString, colorString;
 
 	this->parent = (HexEditorDialog_t*)parent;
 	this->setFocusPolicy(Qt::StrongFocus);
 
-	font.setFamily("Courier New");
-	font.setStyle( QFont::StyleNormal );
-	font.setStyleHint( QFont::Monospace );
+	g_config->getOption("SDL.HexEditFont", &fontString);
+
+	if ( fontString.size() > 0 )
+	{
+		font.fromString( QString::fromStdString( fontString ) );
+	}
+	else
+	{
+		font.setFamily("Courier New");
+		font.setStyle( QFont::StyleNormal );
+		font.setStyleHint( QFont::Monospace );
+	}
 
 	g_config->getOption("SDL.HexEditBgColor", &colorString);
 	bgColor.setNamedColor( colorString.c_str() );
@@ -2017,6 +2043,24 @@ void QHexEdit::calcFontData(void)
     pxCursorHeight = pxCharHeight;
     //_pxSelectionSub = _pxCharHeight / 5;
 	 viewLines   = (viewHeight - pxLineSpacing) / pxLineSpacing;
+}
+//----------------------------------------------------------------------------
+void QHexEdit::changeFontRequest(void)
+{
+	bool ok = false;
+
+	QFont selFont = QFontDialog::getFont( &ok, font, this, tr("Select Font"), QFontDialog::MonospacedFonts );
+
+	if ( ok )
+	{
+		font = selFont;
+
+		calcFontData();
+
+		//printf("Font Changed to: '%s'\n", font.toString().toStdString().c_str() );
+
+		g_config->setOption("SDL.HexEditFont", font.toString().toStdString().c_str() );
+	}
 }
 //----------------------------------------------------------------------------
 void QHexEdit::setHighlightActivity( int enable )
