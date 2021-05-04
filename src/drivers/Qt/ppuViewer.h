@@ -58,6 +58,7 @@ class ppuPatternView_t : public QWidget
 		void setHoverFocus( bool h );
 		QPoint convPixToTile( QPoint p );
 
+		bool getHoverFocus(void){ return hover2Focus; };
 		bool getDrawTileGrid(void){ return drawTileGrid; };
 	protected:
 		void paintEvent(QPaintEvent *event);
@@ -328,6 +329,7 @@ class oamPatternView_t : public QWidget
 
 		int  getSpriteIndex(void);
 		void setHover2Focus(bool val);
+		bool getHoverFocus(void){ return hover2Focus; };
 		void setGridVisibility(bool val);
 		bool getGridVisibility(void){ return showGrid; };
 	protected:

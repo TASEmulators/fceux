@@ -901,6 +901,8 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 	tileSelColor.setRgb(255,255,255);
 	tileGridColor.setRgb(255,  0,  0);
 	attrGridColor.setRgb(  0,  0,255);
+
+	g_config->getOption("SDL.NT_TileFocusPolicy", &hover2Focus );
 }
 //----------------------------------------------------
 ppuNameTableView_t::~ppuNameTableView_t(void)
@@ -916,6 +918,8 @@ void ppuNameTableView_t::setScrollPointer( QScrollArea *sa )
 void ppuNameTableView_t::setHoverFocus( bool hoverFocus )
 {
 	hover2Focus = hoverFocus;
+
+	g_config->setOption("SDL.NT_TileFocusPolicy", hover2Focus );
 }
 //----------------------------------------------------
 void ppuNameTableView_t::setViewScale( int reqScale )

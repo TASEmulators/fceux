@@ -349,14 +349,14 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 
 	act = new QAction(tr("&Click"), this);
 	act->setCheckable(true);
-	act->setChecked(true);
+	act->setChecked( !patternView[0]->getHoverFocus() );
 	group->addAction(act);
 	subMenu->addAction(act);
 	connect(act, SIGNAL(triggered()), this, SLOT(setClickFocus(void)) );
 
 	act = new QAction(tr("&Hover"), this);
 	act->setCheckable(true);
-	act->setChecked(false);
+	act->setChecked( patternView[0]->getHoverFocus() );
 	group->addAction(act);
 	subMenu->addAction(act);
 	connect(act, SIGNAL(triggered()), this, SLOT(setHoverFocus(void)) );
@@ -467,6 +467,8 @@ ppuPatternView_t::ppuPatternView_t( int patternIndexID, QWidget *parent)
 	gridColor.setRgb(128,128,128);
 	selTile.setX(-1);
 	selTile.setY(-1);
+
+	g_config->getOption("SDL.PPU_TileFocusPolicy", &hover2Focus );
 }
 //----------------------------------------------------
 void ppuPatternView_t::setPattern( ppuPatternTable_t *p )
@@ -482,6 +484,8 @@ void ppuPatternView_t::setTileLabel( QLabel *l )
 void ppuPatternView_t::setHoverFocus( bool h )
 {
 	hover2Focus = h;
+
+	g_config->setOption("SDL.PPU_TileFocusPolicy", hover2Focus );
 }
 //----------------------------------------------------
 void ppuPatternView_t::setTileCoord( int x, int y )
@@ -2589,6 +2593,11 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 
 	spriteViewWindow = this;
 
+	oamView  = new oamPatternView_t(this);
+	tileView = new oamTileView_t(this);
+	palView  = new oamPaletteView_t(this);
+	preView  = new oamPreview_t(this);
+
 	menuBar = new QMenuBar(this);
 
 	// This is needed for menu bar to show up on MacOS
@@ -2659,14 +2668,14 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 
 	act = new QAction(tr("&Click"), this);
 	act->setCheckable(true);
-	act->setChecked(true);
+	act->setChecked( !oamView->getHoverFocus() );
 	group->addAction(act);
 	subMenu->addAction(act);
 	connect(act, SIGNAL(triggered()), this, SLOT(setClickFocus(void)) );
 
 	act = new QAction(tr("&Hover"), this);
 	act->setCheckable(true);
-	act->setChecked(false);
+	act->setChecked( oamView->getHoverFocus() );
 	group->addAction(act);
 	subMenu->addAction(act);
 	connect(act, SIGNAL(triggered()), this, SLOT(setHoverFocus(void)) );
@@ -2694,11 +2703,6 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	mainLayout->setMenuBar( menuBar );
 
 	setLayout( mainLayout );
-
-	oamView  = new oamPatternView_t(this);
-	tileView = new oamTileView_t(this);
-	palView  = new oamPaletteView_t(this);
-	preView  = new oamPreview_t(this);
 
 	useSprRam = new QRadioButton( tr("Sprite RAM") );
 	useCpuPag = new QRadioButton( tr("CPU Page #") );
@@ -2959,6 +2963,8 @@ oamPatternView_t::oamPatternView_t( QWidget *parent )
 	selSprite.setX(0);
 	selSprite.setY(0);
 	spriteIdx = 0;
+
+	g_config->getOption("SDL.OAM_TileFocusPolicy", &hover2Focus );
 }
 //----------------------------------------------------
 oamPatternView_t::~oamPatternView_t(void)
@@ -2966,7 +2972,12 @@ oamPatternView_t::~oamPatternView_t(void)
 
 }
 //----------------------------------------------------
-void oamPatternView_t::setHover2Focus(bool val){ hover2Focus = val; }
+void oamPatternView_t::setHover2Focus(bool val)
+{
+	hover2Focus = val;
+
+	g_config->setOption("SDL.OAM_TileFocusPolicy", hover2Focus );
+}
 //----------------------------------------------------
 void oamPatternView_t::setGridVisibility(bool val){ showGrid = val; }
 //----------------------------------------------------
