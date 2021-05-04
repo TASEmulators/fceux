@@ -535,6 +535,8 @@ InitConfig()
 	// Hex Editor Options
 	config->addOption("hexEditBgColor", "SDL.HexEditBgColor", "#000000");
 	config->addOption("hexEditFgColor", "SDL.HexEditFgColor", "#FFFFFF");
+	config->addOption("SDL.HexEditCursorColorRC", "#000080");
+	config->addOption("SDL.HexEditAltColColor"  , "#545454");
     
 	// Debugger Options
 	config->addOption("autoLoadDebugFiles"     , "SDL.AutoLoadDebugFiles", 1);

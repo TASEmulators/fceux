@@ -8,6 +8,7 @@
 
 #include <QWidget>
 #include <QDialog>
+#include <QColorDialog>
 #include <QTimer>
 #include <QAction>
 #include <QVBoxLayout>
@@ -110,6 +111,32 @@ class HexEditorCharTable_t
 		int   loadFromFile( const char *filepath );
 };
 
+class hexEditColorPickerDialog_t : public QDialog
+{
+	Q_OBJECT
+
+	public:
+		hexEditColorPickerDialog_t( QColor *c, const char *title, const char *configName, QWidget *parent = 0);
+		~hexEditColorPickerDialog_t(void);
+
+	protected:
+		void closeEvent(QCloseEvent *event);
+
+	private:
+		QColorDialog *colorDialog;
+		QColor *colorPtr;
+		QColor  origColor;
+		std::string confName;
+
+	public slots:
+		void closeWindow(void);
+	private slots:
+		void colorChanged( const QColor &color );
+		void colorAccepted(void);
+		void colorRejected(void);
+		void resetColor(void);
+};
+
 class HexEditorDialog_t;
 
 class QHexEdit : public QWidget
@@ -141,6 +168,7 @@ class QHexEdit : public QWidget
 		int  findPattern( std::vector <unsigned char> &varray, int dir );
 		void requestUpdate(void);
 		void setRowColHlgtEna(bool val);
+		void setAltColHlgtEna(bool val);
 
 		enum {
 			MODE_NES_RAM = 0,
@@ -152,6 +180,10 @@ class QHexEdit : public QWidget
 
 		HexEditorCharTable_t  charTable;
 
+		QColor      bgColor;
+		QColor      fgColor;
+		QColor      rowColHlgtColor;
+		QColor      altColHlgtColor;
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
@@ -183,7 +215,6 @@ class QHexEdit : public QWidget
 		QScrollBar *hbar;
 		QColor      highLightColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
 		QColor      rvActvTextColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
-		QColor      rowColHlgtColor;
 		QClipboard *clipboard;
 
 		HexEditorDialog_t *parent;
@@ -236,6 +267,7 @@ class QHexEdit : public QWidget
 		bool mouseLeftBtnDown;
 		bool updateRequested;
 		bool rolColHlgtEna;
+		bool altColHlgtEna;
 
 	private slots:
 		void jumpToROM(void);
@@ -307,6 +339,7 @@ class HexEditorDialog_t : public QDialog
 		QAction    *loadTableAct;
 		QAction    *unloadTableAct;
 		QAction    *rolColHlgtAct;
+		QAction    *altColHlgtAct;
 
 	private:
 
@@ -328,8 +361,11 @@ class HexEditorDialog_t : public QDialog
 		void actvHighlightCB(bool value); 
 		void actvHighlightRVCB(bool value); 
 		void rolColHlgtChanged(bool);
+		void altColHlgtChanged(bool);
 		void pickForeGroundColor(void);
 		void pickBackGroundColor(void);
+		void pickCursorRowColumnColor(void);
+		void pickAlternateColumnColor(void);
 		void removeAllBookmarks(void);
 		void openGotoAddrDialog(void);
 		void copyToClipboard(void);

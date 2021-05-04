@@ -1320,6 +1320,16 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	colorMenu->addAction(rolColHlgtAct);
 
+	// Color -> Highlight Reverse Video
+	altColHlgtAct = new QAction(tr("&Alternating Column Colors"), this);
+	//altColHlgtAct->setShortcuts(QKeySequence::Open);
+	altColHlgtAct->setStatusTip(tr("&Alternating Column Colors"));
+	altColHlgtAct->setCheckable(true);
+	altColHlgtAct->setChecked(false);
+	connect(altColHlgtAct, SIGNAL(triggered(bool)), this, SLOT(altColHlgtChanged(bool)) );
+
+	colorMenu->addAction(altColHlgtAct);
+
 	// Color -> ForeGround Color
 	actColorFG = new QAction(tr("&ForeGround Color"), this);
 	//actColorFG->setShortcuts(QKeySequence::Open);
@@ -1335,6 +1345,22 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	connect(actColorBG, SIGNAL(triggered(void)), this, SLOT(pickBackGroundColor(void)) );
 	
 	colorMenu->addAction(actColorBG);
+
+	// Color -> Cursor Row/Column Color
+	act = new QAction(tr("&Cursor Row/Column Color"), this);
+	//act->setShortcuts(QKeySequence::Open);
+	act->setStatusTip(tr("Cursor Row/Column Color"));
+	connect(act, SIGNAL(triggered(void)), this, SLOT(pickCursorRowColumnColor(void)) );
+	
+	colorMenu->addAction(act);
+
+	// Color -> Alternate Column Color
+	act = new QAction(tr("&Alternate Column Color"), this);
+	//act->setShortcuts(QKeySequence::Open);
+	act->setStatusTip(tr("Alternate Column Color"));
+	connect(act, SIGNAL(triggered(void)), this, SLOT(pickAlternateColumnColor(void)) );
+	
+	colorMenu->addAction(act);
 
 	// Bookmarks Menu
 	bookmarkMenu = menuBar->addMenu(tr("&Bookmarks"));
@@ -1499,46 +1525,38 @@ void HexEditorDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::pickForeGroundColor(void)
 {
-	int ret;
-	QColorDialog dialog( this );
-	QPalette pal;
+	hexEditColorPickerDialog_t *dialog;
 
-	pal = editor->palette();
+	dialog = new hexEditColorPickerDialog_t( &editor->fgColor, "Pick Foreground Color", "SDL.HexEditFgColor", editor );
 
-	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
-	dialog.setCurrentColor( pal.color(QPalette::WindowText) );
-	ret = dialog.exec();
-
-	if ( ret == QDialog::Accepted )
-	{
-		QString colorText;
-		colorText = dialog.selectedColor().name();
-		//printf("FG Color string '%s'\n", colorText.toStdString().c_str() );
-		g_config->setOption("SDL.HexEditFgColor", colorText.toStdString().c_str() );
-		editor->setForeGroundColor( dialog.selectedColor() );
-	}
+	dialog->show();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::pickBackGroundColor(void)
 {
-	int ret;
-	QColorDialog dialog( this );
-	QPalette pal;
+	hexEditColorPickerDialog_t *dialog;
 
-	pal = editor->palette();
+	dialog = new hexEditColorPickerDialog_t( &editor->bgColor, "Pick Background Color", "SDL.HexEditBgColor", editor );
 
-	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
-	dialog.setCurrentColor( pal.color(QPalette::Window) );
-	ret = dialog.exec();
+	dialog->show();
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::pickCursorRowColumnColor(void)
+{
+	hexEditColorPickerDialog_t *dialog;
 
-	if ( ret == QDialog::Accepted )
-	{
-		QString colorText;
-		colorText = dialog.selectedColor().name();
-		//printf("BG Color string '%s'\n", colorText.toStdString().c_str() );
-		g_config->setOption("SDL.HexEditBgColor", colorText.toStdString().c_str() );
-		editor->setBackGroundColor( dialog.selectedColor() );
-	}
+	dialog = new hexEditColorPickerDialog_t( &editor->rowColHlgtColor, "Pick Cursor Row/Column Color", "SDL.HexEditCursorColorRC", editor );
+
+	dialog->show();
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::pickAlternateColumnColor(void)
+{
+	hexEditColorPickerDialog_t *dialog;
+
+	dialog = new hexEditColorPickerDialog_t( &editor->altColHlgtColor, "Pick Alternate Column Color", "SDL.HexEditAltColColor", editor );
+
+	dialog->show();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::vbarMoved(int value)
@@ -1732,6 +1750,12 @@ void HexEditorDialog_t::rolColHlgtChanged(bool enable)
 	editor->setRowColHlgtEna( enable );
 }
 //----------------------------------------------------------------------------
+void HexEditorDialog_t::altColHlgtChanged(bool enable)
+{
+	//printf("Highlight: %i \n", enable );
+	editor->setAltColHlgtEna( enable );
+}
+//----------------------------------------------------------------------------
 void HexEditorDialog_t::openDebugSymbolEditWindow( int addr )
 {
 	int ret, bank;
@@ -1855,7 +1879,6 @@ QHexEdit::QHexEdit(QWidget *parent)
 	: QWidget( parent )
 {
 	QPalette pal;
-	QColor bg, fg;
 	std::string colorString;
 
 	this->parent = (HexEditorDialog_t*)parent;
@@ -1866,19 +1889,23 @@ QHexEdit::QHexEdit(QWidget *parent)
 	font.setStyleHint( QFont::Monospace );
 
 	g_config->getOption("SDL.HexEditBgColor", &colorString);
-	bg.setNamedColor( colorString.c_str() );
+	bgColor.setNamedColor( colorString.c_str() );
 	g_config->getOption("SDL.HexEditFgColor", &colorString);
-	fg.setNamedColor( colorString.c_str() );
+	fgColor.setNamedColor( colorString.c_str() );
 
-	rowColHlgtColor = QColor("dark blue");
+	g_config->getOption("SDL.HexEditCursorColorRC", &colorString);
+	rowColHlgtColor.setNamedColor( colorString.c_str() );
 	rolColHlgtEna   = false;
 
-	pal = this->palette();
-	pal.setColor(QPalette::Base      , bg );
-	pal.setColor(QPalette::Window    , bg );
-	pal.setColor(QPalette::WindowText, fg );
+	g_config->getOption("SDL.HexEditAltColColor", &colorString);
+	altColHlgtColor.setNamedColor( colorString.c_str() );
+	altColHlgtEna   = false;
 
-	//editor->setAutoFillBackground(true);
+	pal = this->palette();
+	pal.setColor(QPalette::Base      , bgColor );
+	pal.setColor(QPalette::Window    , bgColor );
+	pal.setColor(QPalette::WindowText, fgColor );
+
 	this->setPalette(pal);
 
 	calcFontData();
@@ -2967,6 +2994,11 @@ void QHexEdit::setRowColHlgtEna(bool val)
 	rolColHlgtEna = val;
 }
 //----------------------------------------------------------------------------
+void QHexEdit::setAltColHlgtEna(bool val)
+{
+	altColHlgtEna = val;
+}
+//----------------------------------------------------------------------------
 void QHexEdit::addBookMarkCB(void)
 {
 	int ret;
@@ -3358,18 +3390,18 @@ int QHexEdit::getRomAddrColor( int addr, QColor &fg, QColor &bg )
 	int temp_offset;
 	QColor color, oppColor; 
 			
-	fg = this->palette().color(QPalette::WindowText);
-	bg = this->palette().color(QPalette::Window    );
+	fg = fgColor;
+	bg = bgColor;
 
 	if ( reverseVideo )
 	{
-		color    = this->palette().color(QPalette::Window    );
-		oppColor = this->palette().color(QPalette::WindowText);
+		color    = bgColor;
+		oppColor = fgColor;
 	}
 	else
 	{
-		color    = this->palette().color(QPalette::WindowText);
-		oppColor = this->palette().color(QPalette::Window    );
+		color    = fgColor;
+		oppColor = bgColor;
 	}
 
 	if ( viewMode != MODE_NES_ROM )
@@ -3577,7 +3609,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		lineOffset = maxLineOffset;
 	}
 	
-	painter.fillRect( 0, 0, w, h, this->palette().color(QPalette::Window) );
+	painter.fillRect( 0, 0, w, h, bgColor );
 
 	if ( cursorBlinkCount >= 5 )
 	{
@@ -3608,6 +3640,18 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	}
 	cursorAddr = ca;
 
+	if ( altColHlgtEna )
+	{
+		for (int i=0; i<16; i++)
+		{
+			if ( (i % 2) == 0 )
+			{	
+				painter.fillRect( pxHexOffset - (0.5*pxCharWidth) + (i*3*pxCharWidth) - pxLineXScroll , 0, (3*pxCharWidth), viewHeight, altColHlgtColor );
+			}
+		}
+
+	}
+
 	if ( rolColHlgtEna )
 	{
 		painter.fillRect( 0 , cy, viewWidth, pxCursorHeight, rowColHlgtColor );
@@ -3622,12 +3666,12 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		}
 	}
 
-	if ( cursorBlink )
-	{
-		painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, QColor("gray") );
-	}
+	//if ( cursorBlink )
+	//{
+	//	painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, QColor("gray") );
+	//}
 
-	painter.setPen( this->palette().color(QPalette::WindowText));
+	painter.setPen( fgColor );
 
 	addr = lineOffset * 16;
 	y = pxYoffset;
@@ -3639,7 +3683,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		l = lineOffset + row;
 		x = pxXoffset - pxLineXScroll;
 
-		painter.setPen( this->palette().color(QPalette::WindowText));
+		painter.setPen( fgColor );
 		sprintf( txt, "%06X", addr );
 		painter.drawText( x, y, tr(txt) );
 
@@ -3722,7 +3766,33 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 					txt[1] = convToXchar( c & 0x0F );
 					txt[2] = 0;
 					painter.drawText( x, y, tr(txt) );
-				        painter.setPen( this->palette().color(QPalette::WindowText));
+
+					if ( cursorBlink && (ca == addr) )
+					{
+						painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, fgColor );
+
+						painter.setPen( bgColor );
+
+						if ( cursorPosX < 32 )
+						{
+							if ( cursorPosX % 2 )
+							{
+								txt[0] = convToXchar( c & 0x0F );
+								txt[1] = 0;
+							}
+							else
+							{
+								txt[0] = convToXchar( (editValue >> 4) & 0x0F );
+								txt[1] = 0;
+							}
+							painter.drawText( cx, y, tr(txt) );
+						}
+						else
+						{
+							painter.drawText( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y, asciiTxt );
+						}
+					}
+				        painter.setPen( fgColor );
 				} 
 				else
 				{
@@ -3773,7 +3843,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 						}
 						else 
 						{
-							painter.setPen( this->palette().color(QPalette::WindowText));
+							painter.setPen( fgColor );
 						}
 					}
 					else if ( actvHighlightEnable && (mb.buf[addr].actv > 0) )
@@ -3791,19 +3861,41 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 					}
 					else
 					{
-						painter.setPen( this->palette().color(QPalette::WindowText));
+						painter.setPen( fgColor );
 					}
 					txt[0] = convToXchar( (c >> 4) & 0x0F );
 					txt[1] = convToXchar( c & 0x0F );
 					txt[2] = 0;
 
-					if ( cursorBlink && (ca == addr) )
-					{
-						painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, QColor("gray") );
-					}
 					painter.drawText( x, y, tr(txt) );
 					//painter.drawText( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y, tr(asciiTxt) );
 					painter.drawText( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y, asciiTxt );
+
+					if ( cursorBlink && (ca == addr) )
+					{
+						painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, fgColor );
+
+						painter.setPen( bgColor );
+
+						if ( cursorPosX < 32 )
+						{
+							if ( cursorPosX % 2 )
+							{
+								txt[0] = convToXchar( c & 0x0F );
+								txt[1] = 0;
+							}
+							else
+							{
+								txt[0] = convToXchar( (c >> 4) & 0x0F );
+								txt[1] = 0;
+							}
+							painter.drawText( cx, y, tr(txt) );
+						}
+						else
+						{
+							painter.drawText( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y, asciiTxt );
+						}
+					}
 				}
 			}
 			x += (3*pxCharWidth);
@@ -3814,7 +3906,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		y += pxLineSpacing;
 	}
 
-	painter.setPen( this->palette().color(QPalette::WindowText));
+	painter.setPen( fgColor );
 	for (x=0; x<16; x++)
 	{
 		txt[0] = '0';
@@ -3907,5 +3999,135 @@ void hexEditorUpdateMemoryValues(void)
 		(*it)->editor->checkMemActivity();
 	}
 	memNeedsCheck = false;
+}
+//----------------------------------------------------------------------------
+// Hed Editor Color Picker
+//----------------------------------------------------------------------------
+hexEditColorPickerDialog_t::hexEditColorPickerDialog_t( QColor *c, const char *title, const char *configName, QWidget *parent )
+	: QDialog( parent )
+{
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QPushButton *okButton;
+	QPushButton *cancelButton;
+	QPushButton *resetButton;
+	QStyle *style;
+	//char stmp[128];
+
+	style = this->style();
+
+	setWindowTitle( title );
+
+	colorPtr = c;
+	origColor = *c;
+
+	if ( configName )
+	{
+		confName.assign( configName );
+	}
+
+	mainLayout = new QVBoxLayout();
+
+	setLayout( mainLayout );
+
+	colorDialog = new QColorDialog(this);
+
+	mainLayout->addWidget( colorDialog );
+
+	colorDialog->setWindowFlags(Qt::Widget);
+	colorDialog->setOption( QColorDialog::DontUseNativeDialog, true );
+	colorDialog->setOption( QColorDialog::NoButtons, true );
+	colorDialog->setCurrentColor( *c );
+	
+	connect( colorDialog, SIGNAL(colorSelected(const QColor &))      , this, SLOT(colorChanged( const QColor &)) );
+	connect( colorDialog, SIGNAL(currentColorChanged(const QColor &)), this, SLOT(colorChanged( const QColor &)) );
+
+	connect( colorDialog, SIGNAL(accepted(void)), this, SLOT(colorAccepted(void)) );
+	connect( colorDialog, SIGNAL(rejected(void)), this, SLOT(colorRejected(void)) );
+
+	hbox = new QHBoxLayout();
+	mainLayout->addLayout( hbox );
+
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+	resetButton  = new QPushButton( tr("Reset") );
+
+	okButton->setIcon( style->standardIcon( QStyle::SP_DialogApplyButton ) );
+	cancelButton->setIcon( style->standardIcon( QStyle::SP_DialogCancelButton ) );
+	resetButton->setIcon( style->standardIcon( QStyle::SP_DialogResetButton ) );
+
+	hbox->addWidget( resetButton, 1  );
+	hbox->addStretch( 10 );
+	hbox->addWidget( okButton, 1     );
+	hbox->addWidget( cancelButton, 1 );
+
+	connect( okButton    , SIGNAL(clicked(void)), this, SLOT(colorAccepted(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(colorRejected(void)) );
+	connect( resetButton , SIGNAL(clicked(void)), this, SLOT(resetColor(void)) );
+}
+//----------------------------------------------------------------------------
+hexEditColorPickerDialog_t::~hexEditColorPickerDialog_t(void)
+{
+	//printf("nesColorPicker Destroyed\n");
+}
+//----------------------------------------------------------------------------
+void hexEditColorPickerDialog_t::closeEvent(QCloseEvent *event)
+{
+	//printf("nesColorPicker Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void hexEditColorPickerDialog_t::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void hexEditColorPickerDialog_t::colorChanged( const QColor &color )
+{
+	//printf("Color Changed: R:%i  G%i  B%i \n", color.red(), color.green(), color.blue() );
+
+	*colorPtr = color;
+}
+//----------------------------------------------------------------------------
+void hexEditColorPickerDialog_t::colorAccepted(void)
+{
+	if ( confName.size() > 0 )
+	{
+		QString colorText;
+
+		colorText = colorPtr->name();
+
+		//printf("Saving '%s' = Color string '%s'\n", confName.c_str(), colorText.toStdString().c_str() );
+
+		g_config->setOption( confName.c_str(), colorText.toStdString().c_str() );
+
+		g_config->save();
+	}
+
+	//printf("hexColorPicker Accepted\n");
+	deleteLater();
+
+}
+//----------------------------------------------------------------------------
+void hexEditColorPickerDialog_t::colorRejected(void)
+{
+	//printf("hexColorPicker Rejected\n");
+
+	// Reset to original color
+	*colorPtr = origColor;
+
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void hexEditColorPickerDialog_t::resetColor(void)
+{
+	// Reset to original color
+	*colorPtr = origColor;
+
+	colorDialog->setCurrentColor( origColor );
 }
 //----------------------------------------------------------------------------
