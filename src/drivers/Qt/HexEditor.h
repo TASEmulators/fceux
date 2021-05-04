@@ -140,6 +140,7 @@ class QHexEdit : public QWidget
 		void clearHighlight(void);
 		int  findPattern( std::vector <unsigned char> &varray, int dir );
 		void requestUpdate(void);
+		void setRowColHlgtEna(bool val);
 
 		enum {
 			MODE_NES_RAM = 0,
@@ -182,6 +183,7 @@ class QHexEdit : public QWidget
 		QScrollBar *hbar;
 		QColor      highLightColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
 		QColor      rvActvTextColor[ HIGHLIGHT_ACTIVITY_NUM_COLORS ];
+		QColor      rowColHlgtColor;
 		QClipboard *clipboard;
 
 		HexEditorDialog_t *parent;
@@ -233,6 +235,7 @@ class QHexEdit : public QWidget
 		bool actvHighlightEnable;
 		bool mouseLeftBtnDown;
 		bool updateRequested;
+		bool rolColHlgtEna;
 
 	private slots:
 		void jumpToROM(void);
@@ -303,6 +306,7 @@ class HexEditorDialog_t : public QDialog
 		QAction    *undoEditAct;
 		QAction    *loadTableAct;
 		QAction    *unloadTableAct;
+		QAction    *rolColHlgtAct;
 
 	private:
 
@@ -323,6 +327,7 @@ class HexEditorDialog_t : public QDialog
 		void setViewROM(void);
 		void actvHighlightCB(bool value); 
 		void actvHighlightRVCB(bool value); 
+		void rolColHlgtChanged(bool);
 		void pickForeGroundColor(void);
 		void pickBackGroundColor(void);
 		void removeAllBookmarks(void);

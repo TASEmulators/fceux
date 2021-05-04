@@ -1310,6 +1310,16 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	colorMenu->addAction(actHlgtRV);
 
+	// Color -> Highlight Reverse Video
+	rolColHlgtAct = new QAction(tr("Highlight &Cursor Row/Column"), this);
+	//rolColHlgtAct->setShortcuts(QKeySequence::Open);
+	rolColHlgtAct->setStatusTip(tr("Highlight Cursor Row/Column"));
+	rolColHlgtAct->setCheckable(true);
+	rolColHlgtAct->setChecked(false);
+	connect(rolColHlgtAct, SIGNAL(triggered(bool)), this, SLOT(rolColHlgtChanged(bool)) );
+
+	colorMenu->addAction(rolColHlgtAct);
+
 	// Color -> ForeGround Color
 	actColorFG = new QAction(tr("&ForeGround Color"), this);
 	//actColorFG->setShortcuts(QKeySequence::Open);
@@ -1491,8 +1501,12 @@ void HexEditorDialog_t::pickForeGroundColor(void)
 {
 	int ret;
 	QColorDialog dialog( this );
+	QPalette pal;
+
+	pal = editor->palette();
 
 	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
+	dialog.setCurrentColor( pal.color(QPalette::WindowText) );
 	ret = dialog.exec();
 
 	if ( ret == QDialog::Accepted )
@@ -1509,8 +1523,12 @@ void HexEditorDialog_t::pickBackGroundColor(void)
 {
 	int ret;
 	QColorDialog dialog( this );
+	QPalette pal;
+
+	pal = editor->palette();
 
 	dialog.setOption( QColorDialog::DontUseNativeDialog, true );
+	dialog.setCurrentColor( pal.color(QPalette::Window) );
 	ret = dialog.exec();
 
 	if ( ret == QDialog::Accepted )
@@ -1708,6 +1726,12 @@ void HexEditorDialog_t::actvHighlightRVCB(bool enable)
 	editor->setHighlightReverseVideo( enable );
 }
 //----------------------------------------------------------------------------
+void HexEditorDialog_t::rolColHlgtChanged(bool enable)
+{
+	//printf("Highlight: %i \n", enable );
+	editor->setRowColHlgtEna( enable );
+}
+//----------------------------------------------------------------------------
 void HexEditorDialog_t::openDebugSymbolEditWindow( int addr )
 {
 	int ret, bank;
@@ -1846,6 +1870,9 @@ QHexEdit::QHexEdit(QWidget *parent)
 	g_config->getOption("SDL.HexEditFgColor", &colorString);
 	fg.setNamedColor( colorString.c_str() );
 
+	rowColHlgtColor = QColor("dark blue");
+	rolColHlgtEna   = false;
+
 	pal = this->palette();
 	pal.setColor(QPalette::Base      , bg );
 	pal.setColor(QPalette::Window    , bg );
@@ -1980,8 +2007,6 @@ void QHexEdit::setForeGroundColor( QColor fg )
 	QPalette pal;
 
 	pal = this->palette();
-	//pal.setColor(QPalette::Base      , Qt::black);
-	//pal.setColor(QPalette::Window   , Qt::black);
 	pal.setColor(QPalette::WindowText, fg );
 
 	this->setPalette(pal);
@@ -1992,9 +2017,7 @@ void QHexEdit::setBackGroundColor( QColor bg )
 	QPalette pal;
 
 	pal = this->palette();
-	//pal.setColor(QPalette::Base      , Qt::black);
 	pal.setColor(QPalette::Window    , bg );
-	//pal.setColor(QPalette::WindowText, fg );
 
 	this->setPalette(pal);
 }
@@ -2939,6 +2962,11 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 
 }
 //----------------------------------------------------------------------------
+void QHexEdit::setRowColHlgtEna(bool val)
+{
+	rolColHlgtEna = val;
+}
+//----------------------------------------------------------------------------
 void QHexEdit::addBookMarkCB(void)
 {
 	int ret;
@@ -2962,18 +2990,18 @@ void QHexEdit::addBookMarkCB(void)
 		break;
 	}
 
-   dialog.setWindowTitle( tr("Add Bookmark") );
-   dialog.setLabelText( tr("Specify New Bookmark Description") );
-   dialog.setOkButtonText( tr("Add") );
+	dialog.setWindowTitle( tr("Add Bookmark") );
+	dialog.setLabelText( tr("Specify New Bookmark Description") );
+	dialog.setOkButtonText( tr("Add") );
 	dialog.setTextValue( tr(stmp) );
 
-   ret = dialog.exec();
-
-   if ( QDialog::Accepted == ret )
-   {
-		hbm.addBookMark( ctxAddr, viewMode, dialog.textValue().toStdString().c_str() );
-		parent->populateBookmarkMenu();
-   }
+	ret = dialog.exec();
+	
+	if ( QDialog::Accepted == ret )
+	{
+	     	hbm.addBookMark( ctxAddr, viewMode, dialog.textValue().toStdString().c_str() );
+	     	parent->populateBookmarkMenu();
+	}
 }
 //----------------------------------------------------------------------------
 static int RamFreezeCB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data)
@@ -3580,6 +3608,20 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	}
 	cursorAddr = ca;
 
+	if ( rolColHlgtEna )
+	{
+		painter.fillRect( 0 , cy, viewWidth, pxCursorHeight, rowColHlgtColor );
+
+		if ( cursorPosX < 32 )
+		{
+			painter.fillRect( cx - (0.5*pxCharWidth) , 0, (3*pxCharWidth), viewHeight, rowColHlgtColor );
+		}
+		else
+		{
+			painter.fillRect( cx, 0, (pxCharWidth), viewHeight, rowColHlgtColor );
+		}
+	}
+
 	if ( cursorBlink )
 	{
 		painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, QColor("gray") );
@@ -3591,7 +3633,6 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	y = pxYoffset;
 
 	txtHlgtSet = textIsHighlighted();
-
 
 	for ( row=0; row < nrow; row++)
 	{
@@ -3774,7 +3815,13 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	}
 
 	painter.setPen( this->palette().color(QPalette::WindowText));
-	painter.drawText( pxHexOffset - pxLineXScroll, pxLineSpacing, "00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F" );
+	for (x=0; x<16; x++)
+	{
+		txt[0] = '0';
+		txt[1] = convToXchar( x );
+		txt[2] = 0;
+		painter.drawText( pxHexOffset - pxLineXScroll + (x * pxCharWidth * 3), pxLineSpacing, txt );
+	}
 	painter.drawLine( pxHexOffset - (pxCharWidth/2) - pxLineXScroll, 0, pxHexOffset - (pxCharWidth/2) - pxLineXScroll, h );
 	painter.drawLine( pxHexAscii  - (pxCharWidth/2) - pxLineXScroll, 0, pxHexAscii  - (pxCharWidth/2) - pxLineXScroll, h );
 	painter.drawLine( 0, pxLineSpacing + (pxLineLead), w, pxLineSpacing + (pxLineLead) );
