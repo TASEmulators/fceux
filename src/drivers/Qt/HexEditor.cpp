@@ -3610,12 +3610,15 @@ void QHexEdit::memModeUpdate(void)
 void QHexEdit::paintEvent(QPaintEvent *event)
 {
 	int x, y, w, h, row, col, nrow, addr;
-	int c, cx, cy, ca, l;
+	int c, cx, cy, ca, l, recty;
+	int pxCharWidth3;
 	char txt[32];
        	QString asciiTxt;
 	QPainter painter(this);
 	QColor white("white"), black("black"), blue("blue");
 	bool txtHlgtSet;
+
+	pxCharWidth3 = 3*pxCharWidth;
 
 	painter.setFont(font);
 	w = event->rect().width();
@@ -3671,7 +3674,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	{
 		int a = (cursorPosX / 2);
 		int r = (cursorPosX % 2);
-		cx = pxHexOffset + (a*3*pxCharWidth) + (r*pxCharWidth) - pxLineXScroll;
+		cx = pxHexOffset + (a*pxCharWidth3) + (r*pxCharWidth) - pxLineXScroll;
 
 		ca = 16*(lineOffset + cursorPosY) + a;
 	}
@@ -3690,7 +3693,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		{
 			if ( (i % 2) == 0 )
 			{	
-				painter.fillRect( pxHexOffset - (0.5*pxCharWidth) + (i*3*pxCharWidth) - pxLineXScroll , 0, (3*pxCharWidth), viewHeight, altColHlgtColor );
+				painter.fillRect( pxHexOffset - (0.5*pxCharWidth) + (i*pxCharWidth3) - pxLineXScroll , 0, (3*pxCharWidth), viewHeight, altColHlgtColor );
 			}
 		}
 
@@ -3698,22 +3701,19 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 	if ( rolColHlgtEna )
 	{
-		painter.fillRect( 0 , cy, viewWidth, pxCursorHeight, rowColHlgtColor );
+		//painter.fillRect( 0 , cy - pxLineLead, viewWidth, pxLineSpacing, rowColHlgtColor );
+		painter.fillRect( 0 , cy - pxLineLead/2, viewWidth, pxLineSpacing, rowColHlgtColor );
+		//painter.fillRect( 0 , cy, viewWidth, pxLineSpacing, rowColHlgtColor );
 
 		if ( cursorPosX < 32 )
 		{
-			painter.fillRect( cx - (0.5*pxCharWidth) , 0, (3*pxCharWidth), viewHeight, rowColHlgtColor );
+			painter.fillRect( cx - (0.5*pxCharWidth) , 0, (pxCharWidth3), viewHeight, rowColHlgtColor );
 		}
 		else
 		{
 			painter.fillRect( cx, 0, (pxCharWidth), viewHeight, rowColHlgtColor );
 		}
 	}
-
-	//if ( cursorBlink )
-	//{
-	//	painter.fillRect( cx , cy, pxCharWidth, pxCursorHeight, QColor("gray") );
-	//}
 
 	painter.setPen( fgColor );
 
@@ -3727,11 +3727,13 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		l = lineOffset + row;
 		x = pxXoffset - pxLineXScroll;
 
+
 		painter.setPen( fgColor );
 		sprintf( txt, "%06X", addr );
 		painter.drawText( x, y, tr(txt) );
 
 		x = pxHexOffset - pxLineXScroll;
+		recty = pxYoffset + (pxLineSpacing*row) - pxCursorHeight + pxLineLead - (pxLineLead/2); // This must be this way to avoid rounding error
 
 		if ( txtHlgtSet && (l >= txtHlgtStartLine) && (l <= txtHlgtEndLine) )
 		{
@@ -3758,7 +3760,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 			x = pxHexOffset - pxLineXScroll;
 
-			painter.fillRect( x + (hlgtXs*pxCharWidth), y - pxLineSpacing + pxLineLead, hlgtXd*pxCharWidth, pxLineSpacing, blue );
+			painter.fillRect( x + (hlgtXs*pxCharWidth), recty, hlgtXd*pxCharWidth, pxLineSpacing, blue );
 
 			if ( l == txtHlgtStartLine )
 			{
@@ -3781,7 +3783,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 			x = pxHexAscii - pxLineXScroll;
 
-			painter.fillRect( x + (hlgtXs*pxCharWidth), y - pxLineSpacing + pxLineLead, hlgtXd*pxCharWidth, pxLineSpacing, blue );
+			painter.fillRect( x + (hlgtXs*pxCharWidth), recty, hlgtXd*pxCharWidth, pxLineSpacing, blue );
 		}
 
 		x = pxHexOffset - pxLineXScroll;
@@ -3849,8 +3851,8 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 						if ( reverseVideo )
 						{
 							painter.setPen( romFgColor );
-							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, romBgColor );
-							painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, romBgColor );
+							painter.fillRect( x - (0.5*pxCharWidth) , recty, pxCharWidth3, pxLineSpacing, romBgColor );
+							painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, recty, pxCharWidth, pxLineSpacing, romBgColor );
 						}
 						else
 						{
@@ -3864,8 +3866,8 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 							if ( reverseVideo )
 							{
 								painter.setPen( white );
-								painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, blue );
-								painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, blue );
+								painter.fillRect( x - (0.5*pxCharWidth) , recty, pxCharWidth3, pxLineSpacing, blue );
+								painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, recty, pxCharWidth, pxLineSpacing, blue );
 							}
 							else
 							{
@@ -3877,8 +3879,8 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 							if ( reverseVideo )
 							{
 								painter.setPen( rvActvTextColor[ mb.buf[addr].actv ] );
-								painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
-								painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
+								painter.fillRect( x - (0.5*pxCharWidth) , recty, pxCharWidth3, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
+								painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, recty, pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
 							}
 							else
 							{
@@ -3895,8 +3897,8 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 						if ( reverseVideo )
 						{
 							painter.setPen( rvActvTextColor[ mb.buf[addr].actv ] );
-							painter.fillRect( x - (0.5*pxCharWidth) , y-pxLineSpacing+pxLineLead, 3*pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
-							painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, y-pxLineSpacing+pxLineLead, pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
+							painter.fillRect( x - (0.5*pxCharWidth) , recty, pxCharWidth3, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
+							painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, recty, pxCharWidth, pxLineSpacing, highLightColor[ mb.buf[addr].actv ] );
 						}
 						else
 						{
@@ -3942,11 +3944,10 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 					}
 				}
 			}
-			x += (3*pxCharWidth);
+			x += (pxCharWidth3);
 			addr++;
 		}
 
-		//addr += 16;
 		y += pxLineSpacing;
 	}
 
@@ -3956,7 +3957,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 		txt[0] = '0';
 		txt[1] = convToXchar( x );
 		txt[2] = 0;
-		painter.drawText( pxHexOffset - pxLineXScroll + (x * pxCharWidth * 3), pxLineSpacing, txt );
+		painter.drawText( pxHexOffset - pxLineXScroll + (x * pxCharWidth3), pxLineSpacing, txt );
 	}
 	painter.drawLine( pxHexOffset - (pxCharWidth/2) - pxLineXScroll, 0, pxHexOffset - (pxCharWidth/2) - pxLineXScroll, h );
 	painter.drawLine( pxHexAscii  - (pxCharWidth/2) - pxLineXScroll, 0, pxHexAscii  - (pxCharWidth/2) - pxLineXScroll, h );
