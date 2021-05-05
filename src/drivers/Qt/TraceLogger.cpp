@@ -121,6 +121,22 @@ static int logFile = -1;
 #endif
 static char  logFilePath[512] = { 0 };
 //----------------------------------------------------
+static void initLogOption( const char *name, int bitmask )
+{
+	int opt;
+
+	g_config->getOption(name, &opt);
+
+	if ( opt )
+	{
+		logging_options |= bitmask;
+	}
+	else
+	{
+		logging_options &= ~bitmask;
+	}
+}
+//----------------------------------------------------
 TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	: QDialog(parent, Qt::Window)
 {
@@ -262,6 +278,20 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	toLeftDisassemblyCbox = new QCheckBox(tr("To the Left from Disassembly"));
 	logInstrCountCbox = new QCheckBox(tr("Log Instructions Count"));
 	logBankNumCbox = new QCheckBox(tr("Log Bank Number"));
+
+	initLogOption("SDL.TraceLogRegisterState", LOG_REGISTERS );
+	initLogOption("SDL.TraceLogProcessorState", LOG_PROCESSOR_STATUS );
+	initLogOption("SDL.TraceLogNewInstructions", LOG_NEW_INSTRUCTIONS );
+	initLogOption("SDL.TraceLogNewData", LOG_NEW_DATA );
+	initLogOption("SDL.TraceLogFrameCount", LOG_FRAMES_COUNT );
+	initLogOption("SDL.TraceLogCycleCount", LOG_CYCLES_COUNT );
+	initLogOption("SDL.TraceLogInstructionCount", LOG_INSTRUCTIONS_COUNT );
+	initLogOption("SDL.TraceLogMessages", LOG_MESSAGES );
+	initLogOption("SDL.TraceLogBreakpointHits", LOG_BREAKPOINTS );
+	initLogOption("SDL.TraceLogBankNumber", LOG_BANK_NUMBER );
+	initLogOption("SDL.TraceLogSymbolic", LOG_SYMBOLIC );
+	initLogOption("SDL.TraceLogStackTabbing", LOG_CODE_TABBING );
+	initLogOption("SDL.TraceLogLeftDisassembly", LOG_TO_THE_LEFT );
 
 	logRegCbox->setChecked((logging_options & LOG_REGISTERS) ? true : false);
 	logFrameCbox->setChecked((logging_options & LOG_FRAMES_COUNT) ? true : false);
@@ -544,6 +574,7 @@ void TraceLoggerDialog_t::logRegStateChanged(int state)
 	{
 		logging_options |= LOG_REGISTERS;
 	}
+	g_config->setOption("SDL.TraceLogRegisterState", (logging_options & LOG_REGISTERS) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logFrameStateChanged(int state)
@@ -556,6 +587,7 @@ void TraceLoggerDialog_t::logFrameStateChanged(int state)
 	{
 		logging_options |= LOG_FRAMES_COUNT;
 	}
+	g_config->setOption("SDL.TraceLogFrameCount", (logging_options & LOG_FRAMES_COUNT) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logEmuMsgStateChanged(int state)
@@ -568,6 +600,7 @@ void TraceLoggerDialog_t::logEmuMsgStateChanged(int state)
 	{
 		logging_options |= LOG_MESSAGES;
 	}
+	g_config->setOption("SDL.TraceLogMessages", (logging_options & LOG_MESSAGES) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::symTraceEnaStateChanged(int state)
@@ -580,6 +613,7 @@ void TraceLoggerDialog_t::symTraceEnaStateChanged(int state)
 	{
 		logging_options |= LOG_SYMBOLIC;
 	}
+	g_config->setOption("SDL.TraceLogSymbolic", (logging_options & LOG_SYMBOLIC) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logProcStatFlagStateChanged(int state)
@@ -592,6 +626,7 @@ void TraceLoggerDialog_t::logProcStatFlagStateChanged(int state)
 	{
 		logging_options |= LOG_PROCESSOR_STATUS;
 	}
+	g_config->setOption("SDL.TraceLogProcessorState", (logging_options & LOG_PROCESSOR_STATUS) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logCyclesCountStateChanged(int state)
@@ -604,6 +639,7 @@ void TraceLoggerDialog_t::logCyclesCountStateChanged(int state)
 	{
 		logging_options |= LOG_CYCLES_COUNT;
 	}
+	g_config->setOption("SDL.TraceLogCycleCount", (logging_options & LOG_CYCLES_COUNT) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logBreakpointStateChanged(int state)
@@ -616,6 +652,7 @@ void TraceLoggerDialog_t::logBreakpointStateChanged(int state)
 	{
 		logging_options |= LOG_BREAKPOINTS;
 	}
+	g_config->setOption("SDL.TraceLogBreakpointHits", (logging_options & LOG_BREAKPOINTS) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::useStackPointerStateChanged(int state)
@@ -628,6 +665,7 @@ void TraceLoggerDialog_t::useStackPointerStateChanged(int state)
 	{
 		logging_options |= LOG_CODE_TABBING;
 	}
+	g_config->setOption("SDL.TraceLogStackTabbing", (logging_options & LOG_CODE_TABBING) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::toLeftDisassemblyStateChanged(int state)
@@ -640,6 +678,7 @@ void TraceLoggerDialog_t::toLeftDisassemblyStateChanged(int state)
 	{
 		logging_options |= LOG_TO_THE_LEFT;
 	}
+	g_config->setOption("SDL.TraceLogLeftDisassembly", (logging_options & LOG_TO_THE_LEFT) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logInstrCountStateChanged(int state)
@@ -652,6 +691,7 @@ void TraceLoggerDialog_t::logInstrCountStateChanged(int state)
 	{
 		logging_options |= LOG_INSTRUCTIONS_COUNT;
 	}
+	g_config->setOption("SDL.TraceLogInstructionCount", (logging_options & LOG_INSTRUCTIONS_COUNT) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logBankNumStateChanged(int state)
@@ -664,6 +704,7 @@ void TraceLoggerDialog_t::logBankNumStateChanged(int state)
 	{
 		logging_options |= LOG_BANK_NUMBER;
 	}
+	g_config->setOption("SDL.TraceLogBankNumber", (logging_options & LOG_BANK_NUMBER) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logNewMapCodeChanged(int state)
@@ -676,6 +717,7 @@ void TraceLoggerDialog_t::logNewMapCodeChanged(int state)
 	{
 		logging_options |= LOG_NEW_INSTRUCTIONS;
 	}
+	g_config->setOption("SDL.TraceLogNewInstructions", (logging_options & LOG_NEW_INSTRUCTIONS) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logNewMapDataChanged(int state)
@@ -688,6 +730,7 @@ void TraceLoggerDialog_t::logNewMapDataChanged(int state)
 	{
 		logging_options |= LOG_NEW_DATA;
 	}
+	g_config->setOption("SDL.TraceLogNewData", (logging_options & LOG_NEW_DATA) ? 1 : 0 );
 }
 //----------------------------------------------------
 traceRecord_t::traceRecord_t(void)

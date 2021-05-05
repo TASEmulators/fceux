@@ -549,6 +549,21 @@ InitConfig()
 	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);
 	config->addOption("autoLoadCDL"  , "SDL.AutoLoadCDL", 1);
 	config->addOption("autoResumeCDL", "SDL.AutoResumeCDL", 0);
+
+	// Trace Logger Options
+	config->addOption("SDL.TraceLogRegisterState", 1);
+	config->addOption("SDL.TraceLogProcessorState", 1);
+	config->addOption("SDL.TraceLogNewInstructions", 0);
+	config->addOption("SDL.TraceLogNewData", 0);
+	config->addOption("SDL.TraceLogFrameCount", 0);
+	config->addOption("SDL.TraceLogCycleCount", 0);
+	config->addOption("SDL.TraceLogInstructionCount", 0);
+	config->addOption("SDL.TraceLogMessages", 1);
+	config->addOption("SDL.TraceLogBreakpointHits", 1);
+	config->addOption("SDL.TraceLogBankNumber", 0);
+	config->addOption("SDL.TraceLogSymbolic", 0);
+	config->addOption("SDL.TraceLogStackTabbing", 1);
+	config->addOption("SDL.TraceLogLeftDisassembly", 1);
 	
 	// overwrite the config file?
 	config->addOption("no-config", "SDL.NoConfig", 0);
