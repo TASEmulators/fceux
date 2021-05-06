@@ -222,6 +222,15 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 		case HK_STOP_AVI:
 			name = "StopAvi"; keySeq = "";
 		break;
+		case HK_RECORD_WAV:
+			name = "RecordWav"; keySeq = "";
+		break;
+		case HK_RECORD_WAV_TO:
+			name = "RecordWavTo"; keySeq = "";
+		break;
+		case HK_STOP_WAV:
+			name = "StopWav"; keySeq = "";
+		break;
 		case HK_MUTE_CAPTURE:
 			name = "MuteCapture"; keySeq = "'";
 		break;
@@ -344,7 +353,7 @@ LoadCPalette(const std::string &file)
 static void
 CreateDirs(const std::string &dir)
 {
-	const char *subs[]={"fcs","snaps","gameinfo","sav","cheats","avi", "movies","input", NULL };
+	const char *subs[]={"fcs","snaps","gameinfo","sav","cheats","avi","wav","movies","input", NULL };
 	std::string subdir;
 	int x=0;
 

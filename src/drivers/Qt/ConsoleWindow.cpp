@@ -47,6 +47,7 @@
 #include "../../file.h"
 #include "../../input.h"
 #include "../../movie.h"
+#include "../../wave.h"
 #include "../../version.h"
 #include "common/os_utils.h"
 
@@ -1532,6 +1533,45 @@ void consoleWin_t::createMainMenu(void)
 	act->setChecked( aviGetAudioEnable() );
 	connect(act, SIGNAL(triggered(bool)), this, SLOT(aviAudioEnableChange(bool)) );
 	aviMenu->addAction(act);
+
+	// Movie -> WAV Recording
+	subMenu = movieMenu->addMenu( tr("&WAV Recording") );
+
+	// Movie -> Avi Recording -> Record
+	recWavAct = new QAction(tr("&Record"), this);
+	//recWavAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	recWavAct->setStatusTip(tr("WAV Record Start"));
+	recWavAct->setIcon( QIcon(":icons/media-record.png") );
+	connect(recWavAct, SIGNAL(triggered()), this, SLOT(wavRecordStart(void)) );
+	
+	Hotkeys[ HK_RECORD_WAV ].setAction( recWavAct );
+	connect( Hotkeys[ HK_RECORD_WAV ].getShortcut(), SIGNAL(activated()), this, SLOT(wavRecordStart(void)) );
+
+	subMenu->addAction(recWavAct);
+
+	// Movie -> WAV Recording -> Record
+	recAsWavAct = new QAction(tr("Record &As"), this);
+	//recAsWavAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	recAsWavAct->setStatusTip(tr("WAV Record As Start"));
+	//recAsWavAct->setIcon( QIcon(":icons/media-record.png") );
+	connect(recAsWavAct, SIGNAL(triggered()), this, SLOT(wavRecordAsStart(void)) );
+	
+	Hotkeys[ HK_RECORD_WAV_TO ].setAction( recAsWavAct );
+	connect( Hotkeys[ HK_RECORD_WAV_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(wavRecordAsStart(void)) );
+
+	subMenu->addAction(recAsWavAct);
+
+	// Movie -> WAV Recording -> Stop
+	stopWavAct = new QAction(tr("&Stop"), this);
+	//stopWavAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	stopWavAct->setStatusTip(tr("WAV Record Stop"));
+	stopWavAct->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
+	connect(stopWavAct, SIGNAL(triggered()), this, SLOT(wavRecordStop(void)) );
+	
+	Hotkeys[ HK_STOP_WAV ].setAction( stopWavAct );
+	connect( Hotkeys[ HK_STOP_WAV ].getShortcut(), SIGNAL(activated()), this, SLOT(wavRecordStop(void)) );
+
+	subMenu->addAction(stopWavAct);
 
 	//-----------------------------------------------------------------------
 	// Help
@@ -3283,6 +3323,131 @@ void consoleWin_t::aviVideoFormatChanged(int idx)
 	aviSetSelVideoFormat(idx);
 }
 
+void consoleWin_t::wavRecordStart(void)
+{
+	if ( !FCEUI_WaveRecordRunning() )
+	{
+		const char *romFile;
+		char fileName[1024];
+
+		romFile = getRomFile();
+
+		if ( romFile )
+		{
+			char base[512];
+			const char *baseDir = FCEUI_GetBaseDirectory();
+
+			getFileBaseName( romFile, base );
+
+			if ( baseDir )
+			{
+				strcpy( fileName, baseDir );
+				strcat( fileName, "/wav/" );
+			}
+			else
+			{
+				fileName[0] = 0;
+			}
+			strcat( fileName, base );
+			strcat( fileName, ".wav");
+			//printf("WAV Filepath:'%s'\n", fileName );
+		}
+		else
+		{
+			return;
+		}
+		fceuWrapperLock();
+		FCEUI_BeginWaveRecord( fileName );
+		fceuWrapperUnLock();
+	}
+}
+
+void consoleWin_t::wavRecordAsStart(void)
+{
+	if ( FCEUI_WaveRecordRunning() )
+	{
+		return;
+	}
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	//char dir[512];
+	const char *base;
+	QFileDialog  dialog(this, tr("Save WAV Movie for Recording") );
+	QList<QUrl> urls;
+	QDir d;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("WAV Movies (*.wav) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/wav");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		dialog.setDirectory( d.absolutePath() );
+	}
+	dialog.setDefaultSuffix( tr(".wav") );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	FCEUI_printf ("WAV Recording movie to %s\n", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+	FCEUI_BeginWaveRecord( filename.toStdString().c_str() );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::wavRecordStop(void)
+{
+	if ( FCEUI_WaveRecordRunning() )
+	{
+		fceuWrapperLock();
+		FCEUI_EndWaveRecord();
+		fceuWrapperUnLock();
+	}
+}
+
 void consoleWin_t::aboutFCEUX(void)
 {
 	AboutWindow *aboutWin;
@@ -3548,6 +3713,9 @@ void consoleWin_t::updatePeriodic(void)
 		recAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
 		recAsAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
 		stopAviAct->setEnabled( FCEU_IsValidUI( FCEUI_STOPAVI ) );
+		recWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
+		recAsWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
+		stopWavAct->setEnabled( FCEUI_WaveRecordRunning() );
 	}
 
 	if ( errorMsgValid )
