@@ -1980,6 +1980,10 @@ void ppuNameTablePaletteView_t::paintEvent(QPaintEvent *event)
 		}
 		painter.drawText( xx+i, yy+h-j, tr(c) );
 
+		painter.setPen( black );
+		painter.drawRect( xx, yy, w-1, h-1 );
+		painter.setPen( white );
+		painter.drawRect( xx+1, yy+1, w-3, h-3 );
 		xx += w;
 	}
 }

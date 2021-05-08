@@ -148,7 +148,7 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	QMenuBar    *menuBar;
 	QVBoxLayout *mainLayout, *vbox;
 	QVBoxLayout *patternVbox[2];
-	QHBoxLayout *hbox;
+	QHBoxLayout *hbox, *hbox1, *hbox2;
 	QGridLayout *grid;
 	QActionGroup *group;
 	QMenu *fileMenu, *viewMenu, *colorMenu, *optMenu, *subMenu;
@@ -231,10 +231,30 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	grid->addLayout( hbox, 1, 1, Qt::AlignRight );
 
 	vbox         = new QVBoxLayout();
+	//paletteFrame = new QGroupBox( tr("Palettes: ---- Top Row: Background ---- Bottom Row: Sprites") );
 	paletteFrame = new QGroupBox( tr("Palettes:") );
-	paletteView  = new ppuPalatteView_t(this);
+	//paletteView  = new ppuPalatteView_t(this);
 
-	vbox->addWidget( paletteView, 1 );
+	hbox1        = new QHBoxLayout();
+	hbox2        = new QHBoxLayout();
+
+	for (int i=0; i<8; i++)
+	{
+		tilePalView[i] = new tilePaletteView_t(this);
+
+		if ( i < 4 )
+		{
+			hbox1->addWidget( tilePalView[i] );
+		}
+		else
+		{
+			hbox2->addWidget( tilePalView[i] );
+		}
+		tilePalView[i]->setIndex(i);
+	}
+
+	vbox->addLayout( hbox1, 1 );
+	vbox->addLayout( hbox2, 1 );
 	paletteFrame->setLayout( vbox );
 
 	mainLayout->addWidget( paletteFrame,  1 );
@@ -243,7 +263,6 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	patternView[1]->setPattern( &pattern1 );
 	patternView[0]->setTileLabel( tileLabel[0] );
 	patternView[1]->setTileLabel( tileLabel[1] );
-	paletteView->setTileLabel( paletteFrame );
 
 	scanLineEdit->setRange( 0, 255 );
 	scanLineEdit->setValue( PPUViewScanline );
@@ -1599,147 +1618,132 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 	redrawWindow = true;
 }
 //----------------------------------------------------
-ppuPalatteView_t::ppuPalatteView_t(QWidget *parent)
+//-- Tile Palette View
+//----------------------------------------------------
+tilePaletteView_t::tilePaletteView_t(QWidget *parent)
 	: QWidget(parent)
 {
-	this->setFocusPolicy(Qt::StrongFocus);
-	this->setMouseTracking(true);
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	viewHeight = 32;
+	viewWidth = viewHeight*4;
+	setMinimumWidth( viewWidth );
+	setMinimumHeight( viewHeight );
 
-	setMinimumWidth( 32 * PALETTEWIDTH );
-	setMinimumHeight( 32 * PALETTEHEIGHT );
-
-	viewWidth  = 32 * PALETTEWIDTH;
-	viewHeight = 32 * PALETTEHEIGHT;
-
-	boxWidth  = viewWidth / PALETTEWIDTH;
-	boxHeight = viewHeight / PALETTEHEIGHT;
-
-	frame = NULL;
+	palIdx = 0;
 }
 //----------------------------------------------------
-ppuPalatteView_t::~ppuPalatteView_t(void)
+tilePaletteView_t::~tilePaletteView_t(void)
 {
 
 }
 //----------------------------------------------------
-void ppuPalatteView_t::setTileLabel( QGroupBox *l )
+void tilePaletteView_t::setIndex( int val )
 {
-	frame = l;
+	palIdx = val;
 }
 //----------------------------------------------------
-QPoint ppuPalatteView_t::convPixToTile( QPoint p )
+int  tilePaletteView_t::heightForWidth(int w) const
 {
-	QPoint t(0,0);
-
-	t.setX( p.x() / boxWidth );
-	t.setY( p.y() / boxHeight );
-
-	return t;
+	return w/4;
 }
 //----------------------------------------------------
-void ppuPalatteView_t::resizeEvent(QResizeEvent *event)
+QSize tilePaletteView_t::minimumSizeHint(void) const
+{
+	return QSize(48,12);
+}
+//----------------------------------------------------
+QSize tilePaletteView_t::maximumSizeHint(void) const
+{
+	return QSize(256,64);
+}
+//----------------------------------------------------
+QSize tilePaletteView_t::sizeHint(void) const
+{
+	return QSize(128,32);
+}
+//----------------------------------------------------
+void tilePaletteView_t::resizeEvent(QResizeEvent *event)
 {
 	viewWidth  = event->size().width();
 	viewHeight = event->size().height();
-
-	boxWidth  = viewWidth / PALETTEWIDTH;
-	boxHeight = viewHeight / PALETTEHEIGHT;
 }
 //----------------------------------------------------
-void ppuPalatteView_t::mouseMoveEvent(QMouseEvent *event)
+void tilePaletteView_t::paintEvent(QPaintEvent *event)
 {
-	QPoint tile = convPixToTile( event->pos() );
-
-	if ( (tile.x() < PALETTEWIDTH) && (tile.y() < PALETTEHEIGHT) )
-	{
-		char stmp[64];
-		int ix = (tile.y()<<4)|tile.x();
-
-		sprintf( stmp, "Palette: $%02X", palcache[ix]);
-
-		frame->setTitle( tr(stmp) );
-	}
-}
-//----------------------------------------------------------------------------
-void ppuPalatteView_t::mousePressEvent(QMouseEvent * event)
-{
-	//QPoint tile = convPixToTile( event->pos() );
-
-	//if ( event->button() == Qt::LeftButton )
-	//{
-	//}
-	//else if ( event->button() == Qt::RightButton )
-	//{
-	//}
-}
-//----------------------------------------------------
-void ppuPalatteView_t::paintEvent(QPaintEvent *event)
-{
-	int x,y,w,h,xx,yy,i,j,p,ii;
+	int x,w,h,xx,yy,p,p2,i,j;
 	QPainter painter(this);
+	QColor color( 0, 0, 0);
+	QColor  white(255,255,255), black(0,0,0);
+	//QPen pen;
+	//char showSelector;
+	char c[4];
+
+	//pen = painter.pen();
+
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
-	QColor color, black(0,0,0), white(255,255,255);
-	QPen     pen;
-	char     c[4];
 
-	pen = painter.pen();
+	w = viewWidth  / 4;
+  	h = viewHeight;
 
-	//printf("PPU PatternView %ix%i \n", viewWidth, viewHeight );
-
-	w = viewWidth / PALETTEWIDTH;
-  	h = viewHeight / PALETTEHEIGHT;
+	//if ( w < h )
+	//{
+	//	h = w;
+	//}
+	//else
+	//{
+	//	w = h;
+	//}
 
 	i = w / 4;
 	j = h / 4;
 
+	p2 = palIdx * 4;
 	yy = 0;
-	for (y=0; y < PALETTEHEIGHT; y++)
+	xx = 0;
+	for (x=0; x < 4; x++)
 	{
-		xx = 0;
-
-		for (x=0; x < PALETTEWIDTH; x++)
+		if ( palo != NULL )
 		{
-			ii = (y*PALETTEWIDTH) + x;
-
-			p = palcache[ii];
-
-			color = ppuv_palette[y][x];
+			p = palcache[p2 | x];
+			color.setBlue( palo[p].b );
+			color.setGreen( palo[p].g );
+			color.setRed( palo[p].r );
 
 			c[0] = conv2hex( (p & 0xF0) >> 4 );
 			c[1] = conv2hex(  p & 0x0F);
 			c[2] =  0;
-
-			painter.fillRect( xx, yy, w, h, color );
-
-			if ( qGray( color.red(), color.green(), color.blue() ) > 128 )
-			{
-				painter.setPen( black );
-			}
-			else
-			{
-				painter.setPen( white );
-			}
-			painter.drawText( xx+i, yy+h-j, tr(c) );
-
-			xx += w;
 		}
-		yy += h;
-	}
+		painter.fillRect( xx, yy, w, h, color );
 
-	y = PALETTEHEIGHT*h;
-	for (int i=0; i<=PALETTEWIDTH; i++)
-	{
-		x = i*w; 
-		painter.drawLine( x, 0 , x, y );
+		if ( qGray( color.red(), color.green(), color.blue() ) > 128 )
+		{
+			painter.setPen( black );
+		}
+		else
+		{
+			painter.setPen( white );
+		}
+		painter.drawText( xx+i, yy+h-j, tr(c) );
+
+		painter.setPen( black );
+		painter.drawRect( xx, yy, w-1, h-1 );
+		painter.setPen( white );
+		painter.drawRect( xx+1, yy+1, w-3, h-3 );
+		xx += w;
 	}
 	
-	x = PALETTEWIDTH*w; 
-	for (int i=0; i<=PALETTEHEIGHT; i++)
-	{
-		y = i*h;
-		painter.drawLine( 0, y, x, y );
-	}
+	//painter.setPen( black );
+	//painter.drawLine( 0, 0   , w*4, 0 );
+	//painter.drawLine( 0, h-1 , w*4, h-1 );
+	//xx = 0;
+
+	//for (int i=0; i < 5; i++)
+	//{
+	//	painter.drawLine( xx, 0 , xx, h );
+
+	//	xx += w;
+	//}
 }
 //----------------------------------------------------
 //----------------------------------------------------
@@ -3460,6 +3464,10 @@ void oamPaletteView_t::paintEvent(QPaintEvent *event)
 		}
 		painter.drawText( xx+i, yy+h-j, tr(c) );
 
+		painter.setPen( black );
+		painter.drawRect( xx, yy, w-1, h-1 );
+		painter.setPen( white );
+		painter.drawRect( xx+1, yy+1, w-3, h-3 );
 		xx += w;
 	}
 }

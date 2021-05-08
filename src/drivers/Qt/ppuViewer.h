@@ -102,26 +102,27 @@ class ppuPatternView_t : public QWidget
 	void cycleNextPalette(void);
 };
 
-class ppuPalatteView_t : public QWidget
+class tilePaletteView_t : public QWidget
 {
 	Q_OBJECT
 
 	public:
-		ppuPalatteView_t(QWidget *parent = 0);
-		~ppuPalatteView_t(void);
+		tilePaletteView_t( QWidget *parent = 0);
+		~tilePaletteView_t(void);
 
-		void setTileLabel( QGroupBox *l );
-		QPoint convPixToTile( QPoint p );
+		void setIndex( int val );
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void mousePressEvent(QMouseEvent * event);
-		int viewWidth;
-		int viewHeight;
-		int boxWidth;
-		int boxHeight;
-		QGroupBox *frame;
+		int  heightForWidth(int w) const;
+		QSize  minimumSizeHint(void) const;
+		QSize  maximumSizeHint(void) const;
+		QSize  sizeHint(void) const;
+
+	private:
+		int  viewWidth;
+		int  viewHeight;
+		int  palIdx;
 };
 
 class ppuTileView_t : public QWidget
@@ -253,8 +254,8 @@ class ppuViewerDialog_t : public QDialog
 		ppuViewerDialog_t(QWidget *parent = 0);
 		~ppuViewerDialog_t(void);
 
-		ppuPatternView_t *patternView[2];
-		ppuPalatteView_t *paletteView;
+		ppuPatternView_t  *patternView[2];
+		tilePaletteView_t *tilePalView[8];
 	protected:
 
 		void closeEvent(QCloseEvent *bar);
