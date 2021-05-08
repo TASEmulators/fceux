@@ -114,15 +114,24 @@ class tilePaletteView_t : public QWidget
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
+		void mouseMoveEvent(QMouseEvent *event);
+		void contextMenuEvent(QContextMenuEvent *event);
 		int  heightForWidth(int w) const;
 		QSize  minimumSizeHint(void) const;
 		QSize  maximumSizeHint(void) const;
 		QSize  sizeHint(void) const;
+		QPoint convPixToCell( QPoint p );
 
 	private:
 		int  viewWidth;
 		int  viewHeight;
 		int  palIdx;
+		int  boxWidth;
+		int  boxHeight;
+		int  selBox;
+
+	private slots:
+		void openColorPicker(void);
 };
 
 class ppuTileView_t : public QWidget

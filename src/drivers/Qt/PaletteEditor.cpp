@@ -298,7 +298,7 @@ void PaletteEditorDialog_t::savePaletteFileDialog(void)
 	palView->saveToFile( filename.toStdString().c_str() );
 }
 //----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
+//---NES Color Palette Viewer
 //----------------------------------------------------------------------------
 nesPaletteView::nesPaletteView( QWidget *parent)
 	: QWidget(parent)
@@ -743,5 +743,359 @@ void nesColorPickerDialog_t::resetColor(void)
 	colorDialog->setCurrentColor( origColor );
 
 	( (nesPaletteView*)parent())->setActivePalette();
+}
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//---NES Color Palette Viewer
+//----------------------------------------------------------------------------
+static void PalettePoke(uint32 addr, uint8 data)
+{
+	data = data & 0x3F;
+	addr = addr & 0x1F;
+	if ((addr & 3) == 0)
+	{
+		addr = (addr & 0xC) >> 2;
+		if (addr == 0)
+		{
+			PALRAM[0x00] = PALRAM[0x04] = PALRAM[0x08] = PALRAM[0x0C] = data;
+		}
+		else
+		{
+			UPALRAM[addr-1] = data;
+		}
+	}
+	else
+	{
+		PALRAM[addr] = data;
+	}
+}
+//----------------------------------------------------------------------------
+nesPalettePickerView::nesPalettePickerView( QWidget *parent)
+	: QWidget(parent)
+{
+	this->setFocusPolicy(Qt::StrongFocus);
+	this->setMouseTracking(true);
+
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+	//font.setPixelSize( boxPixSize / 3 );
+	QFontMetrics fm(font);
+
+	#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = fm.horizontalAdvance(QLatin1Char('2'));
+	#else
+	pxCharWidth = fm.width(QLatin1Char('2'));
+	#endif
+	pxCharHeight = fm.height();
+
+	boxWidth  = pxCharWidth  * 4;
+  	boxHeight = pxCharHeight * 2;
+	selBox    = 0;
+
+	viewWidth = boxWidth * 16;
+	viewHeight = boxHeight * 4;
+	setMinimumWidth( viewWidth );
+	setMinimumHeight( viewHeight );
+}
+//----------------------------------------------------------------------------
+nesPalettePickerView::~nesPalettePickerView(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerView::setSelBox( int val )
+{
+	if ( val != selBox )
+	{
+
+		fceuWrapperLock();
+		PalettePoke( palAddr, val );
+		FCEUD_UpdatePPUView( -1, 1 );
+		fceuWrapperUnLock();
+
+		this->update();
+	}
+	selBox = val;
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerView::setSelBox( QPoint p )
+{
+	if ( (p.x() >= 0) && (p.x() < 16) &&
+	       (p.y() >= 0) && (p.y() < 4) )
+	{
+		setSelBox( (p.y() * 16) + p.x() );
+	}
+}
+//----------------------------------------------------------------------------
+void  nesPalettePickerView::setPalAddr( int a )
+{
+	palAddr = a;
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerView::loadActivePalette(void)
+{
+	if ( palo == NULL )
+	{
+		return;
+	}
+
+	for (int p=0; p<NUM_COLORS; p++)
+	{
+		color[p].setBlue( palo[p].b );
+		color[p].setGreen( palo[p].g );
+		color[p].setRed( palo[p].r );
+	}
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerView::resizeEvent(QResizeEvent *event)
+{
+	//viewWidth  = event->size().width();
+	//viewHeight = event->size().height();
+
+	//boxWidth  = viewWidth / 16;
+  	//boxHeight = viewHeight / 4;
+}
+//----------------------------------------------------
+void nesPalettePickerView::keyPressEvent(QKeyEvent *event)
+{
+	//printf("NES Palette View Key Press: 0x%x \n", event->key() );
+
+	//if ( event->key() == Qt::Key_E )
+	//{
+	//	openColorPicker();
+
+	//	event->accept();
+	//}
+
+	event->ignore();
+}
+//----------------------------------------------------
+void nesPalettePickerView::mouseMoveEvent(QMouseEvent *event)
+{
+	QPoint cell = convPixToCell( event->pos() );
+
+	//printf("Cell %X%X\n", cell.y(), cell.x() ); 
+
+	if ( (cell.x() >= 0) && (cell.x() < 16) &&
+	       (cell.y() >= 0) && (cell.y() < 4) )
+	{
+		selCell = cell;
+	}
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerView::mousePressEvent(QMouseEvent * event)
+{
+	QPoint cell = convPixToCell( event->pos() );
+
+	if ( event->button() == Qt::LeftButton )
+	{
+		//printf("Set
+		// Set Cell
+		setSelBox( cell );
+	}
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerView::contextMenuEvent(QContextMenuEvent *event)
+{
+	QAction *act;
+	QMenu menu(this);
+	//QMenu *subMenu;
+	//QActionGroup *group;
+	char stmp[64];
+
+	sprintf( stmp, "Edit Color %X%X", selCell.y(), selCell.x() );
+	act = new QAction(tr(stmp), &menu);
+	act->setShortcut( QKeySequence(tr("E")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(editSelColor(void)) );
+	menu.addAction( act );
+
+	menu.exec(event->globalPos());
+}
+//----------------------------------------------------------------------------
+QPoint nesPalettePickerView::convPixToCell( QPoint p )
+{
+	int x,y;
+	QPoint c;
+
+	x = p.x();
+	y = p.y();
+
+	c.setX( x / boxWidth );
+	c.setY( y / boxHeight);
+
+	return c;
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerView::paintEvent(QPaintEvent *event)
+{
+	int x,y,w,h,xx,yy,ii,i,j;
+	QPainter painter(this);
+	QPen     pen;
+	char     c[4];
+	QColor   white(255,255,255), black(0,0,0);
+
+	pen = painter.pen();
+
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
+
+	//printf("PPU nesPalettePickerView %ix%i \n", viewWidth, viewHeight );
+	
+	w = viewWidth / 16;
+  	h = viewHeight / 4;
+
+	boxWidth = w;
+	boxHeight = h;
+
+	xx = 0; yy = 0;
+
+	if ( w < h )
+	{
+	   h = w;
+	}
+	else
+	{
+	   w = h;
+	}
+
+	i = w / 4;
+	j = h / 4;
+
+	ii=0;
+	
+	// Draw Tile Pixels as rectangles
+	for (y=0; y < 4; y++)
+	{
+		xx = 0;
+	
+		for (x=0; x < 16; x++)
+		{
+			c[0] = conv2hex( (ii & 0xF0) >> 4 );
+			c[1] = conv2hex(  ii & 0x0F);
+			c[2] =  0;
+
+			painter.fillRect( xx, yy, w, h, color[ ii ] ); 
+
+			if ( qGray( color[ii].red(), color[ii].green(), color[ii].blue() ) > 128 )
+	        	{
+				painter.setPen( black );
+			}
+			else
+			{
+				painter.setPen( white );
+	        	}
+			painter.drawText( xx+i, yy+h-j, tr(c) );
+
+			if ( ii == selBox )
+			{
+				painter.setPen( black );
+				painter.drawRect( xx, yy, w-1, h-1 );
+				painter.setPen( white );
+				painter.drawRect( xx+1, yy+1, w-3, h-3 );
+			}
+			xx += w; ii++;
+		}
+		yy += h;
+	}
+}
+//----------------------------------------------------------------------------
+// NES Color Picker Dialog
+//----------------------------------------------------------------------------
+nesPalettePickerDialog::nesPalettePickerDialog( int idx, QWidget *parent)
+	: QDialog( parent )
+{
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QPushButton *okButton, *cancelButton, *resetButton;
+
+	mainLayout = new QVBoxLayout();
+
+	//mainLayout->setMenuBar( menuBar );
+
+	setLayout( mainLayout );
+
+	palView = new nesPalettePickerView(this);
+
+	mainLayout->addWidget( palView, 10 );
+
+	palView->loadActivePalette();
+
+	palIdx  = idx;
+	palAddr = 0x3F00 + palIdx;
+
+	palOrigVal = READPAL_MOTHEROFALL(palIdx & 0x1F);
+	palView->setPalAddr( palAddr );
+	palView->setSelBox( palOrigVal );
+
+//	printf("Idx:%02X  Addr:%04X  OrigVal: %02X \n", palIdx, palAddr, palOrigVal );
+
+	hbox = new QHBoxLayout();
+	okButton     = new QPushButton( tr("Ok") );
+	resetButton  = new QPushButton( tr("Reset") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	hbox->addWidget( cancelButton, 1 );
+	hbox->addWidget( resetButton , 1 );
+	hbox->addStretch( 5 ); 
+	hbox->addWidget( okButton    , 1 );
+
+	mainLayout->addLayout( hbox, 1 );
+
+	connect(     okButton, SIGNAL(clicked(void)), this, SLOT(    okButtonClicked(void)) );
+	connect(  resetButton, SIGNAL(clicked(void)), this, SLOT( resetButtonClicked(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(cancelButtonClicked(void)) );
+}
+//----------------------------------------------------------------------------
+nesPalettePickerDialog::~nesPalettePickerDialog(void)
+{
+	printf("Destroy Palette Editor Config Window\n");
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerDialog::closeEvent(QCloseEvent *event)
+{
+	//printf("Palette Editor Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerDialog::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerDialog::resetButtonClicked(void)
+{
+	fceuWrapperLock();
+	PalettePoke( palAddr, palOrigVal );
+	FCEUD_UpdatePPUView( -1, 1 );
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerDialog::cancelButtonClicked(void)
+{	
+	fceuWrapperLock();
+	PalettePoke( palAddr, palOrigVal );
+	FCEUD_UpdatePPUView( -1, 1 );
+	fceuWrapperUnLock();
+
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void nesPalettePickerDialog::okButtonClicked(void)
+{
+	fceuWrapperLock();
+	PalettePoke( palAddr, palView->getSelBox() );
+	FCEUD_UpdatePPUView( -1, 1 );
+	fceuWrapperUnLock();
+
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
 }
 //----------------------------------------------------------------------------

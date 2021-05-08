@@ -50,6 +50,7 @@
 #include "Qt/HexEditor.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
+#include "Qt/PaletteEditor.h"
 
 #define PATTERNWIDTH          128
 #define PATTERNHEIGHT         128
@@ -1615,7 +1616,10 @@ tilePaletteView_t::tilePaletteView_t(QWidget *parent)
 	setMinimumWidth( viewWidth );
 	setMinimumHeight( viewHeight );
 
+	boxWidth  = viewWidth/4;
+	boxHeight = viewHeight;
 	palIdx = 0;
+	selBox = 0;
 }
 //----------------------------------------------------
 tilePaletteView_t::~tilePaletteView_t(void)
@@ -1646,6 +1650,54 @@ QSize tilePaletteView_t::maximumSizeHint(void) const
 QSize tilePaletteView_t::sizeHint(void) const
 {
 	return QSize(128,32);
+}
+//----------------------------------------------------
+QPoint tilePaletteView_t::convPixToCell( QPoint p )
+{
+	QPoint o;
+
+	o.setX( p.x() / boxWidth );
+	o.setY( 0 );
+
+	return o;
+}
+//----------------------------------------------------
+void tilePaletteView_t::mouseMoveEvent(QMouseEvent *event)
+{
+	QPoint cell = convPixToCell( event->pos() );
+
+	selBox = cell.x();
+}
+//----------------------------------------------------
+void tilePaletteView_t::contextMenuEvent(QContextMenuEvent *event)
+{
+	QAction *act;
+	QMenu menu(this);
+	//QMenu *subMenu;
+	//char stmp[64];
+	QPoint p;
+
+	p = convPixToCell( event->pos() );
+
+	selBox = p.x();
+
+	act = new QAction(tr("Change Color"), &menu);
+	//act->setCheckable(true);
+	//act->setChecked(drawTileGrid);
+	//act->setShortcut( QKeySequence(tr("G")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(openColorPicker(void)) );
+	menu.addAction( act );
+
+	menu.exec(event->globalPos());
+}
+//----------------------------------------------------
+void tilePaletteView_t::openColorPicker(void)
+{
+	nesPalettePickerDialog *dialog;
+
+	dialog = new nesPalettePickerDialog( (palIdx*4) + selBox, this );
+
+	dialog->show();
 }
 //----------------------------------------------------
 void tilePaletteView_t::resizeEvent(QResizeEvent *event)
@@ -1680,6 +1732,9 @@ void tilePaletteView_t::paintEvent(QPaintEvent *event)
 	//{
 	//	w = h;
 	//}
+
+	boxWidth  = w;
+	boxHeight = h;
 
 	i = w / 4;
 	j = h / 4;
