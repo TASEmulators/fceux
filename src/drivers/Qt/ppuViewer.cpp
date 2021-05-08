@@ -68,7 +68,6 @@ static bool PPUView_maskUnusedGraphics = true;
 static bool PPUView_invertTheMask = false;
 static int PPUView_sprite16Mode[2] = { 0, 0 };
 static int pindex[2] = { 0, 0 };
-static QColor ppuv_palette[PALETTEHEIGHT][PALETTEWIDTH];
 static uint8_t pallast[32+3] = { 0 }; // palette cache for change comparison
 static uint8_t palcache[36] = { 0 }; //palette cache for drawing
 static uint8_t chrcache0[0x1000] = {0}, chrcache1[0x1000] = {0}, logcache0[0x1000] = {0}, logcache1[0x1000] = {0}; //cache CHR, fixes a refresh problem when right-clicking
@@ -1533,7 +1532,7 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 	{
 		return;
 	}
-	int x,y,i;
+	int x,i;
 
 	if (refreshchr)
 	{
@@ -1591,19 +1590,6 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 		palcache[0x04] = palcache[0x14] = UPALRAM[0];
 		palcache[0x08] = palcache[0x18] = UPALRAM[1];
 		palcache[0x0C] = palcache[0x1C] = UPALRAM[2];
-
-		//draw palettes
-		for (y = 0; y < PALETTEHEIGHT; y++)
-		{
-			for (x = 0; x < PALETTEWIDTH; x++)
-			{
-				i = (y*PALETTEWIDTH) + x;
-
-				ppuv_palette[y][x].setBlue( palo[palcache[i]].b );
-				ppuv_palette[y][x].setGreen( palo[palcache[i]].g );
-				ppuv_palette[y][x].setRed( palo[palcache[i]].r );
-			}
-		}
 	}
 
 	DrawPatternTable( &pattern0,chrcache0,logcache0,pindex[0]);
