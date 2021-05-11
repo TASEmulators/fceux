@@ -1070,6 +1070,7 @@ void nesPalettePickerDialog::closeWindow(void)
 void nesPalettePickerDialog::resetButtonClicked(void)
 {
 	fceuWrapperLock();
+	palView->setSelBox( palOrigVal );
 	PalettePoke( palAddr, palOrigVal );
 	FCEUD_UpdatePPUView( -1, 1 );
 	fceuWrapperUnLock();
