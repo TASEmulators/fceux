@@ -857,9 +857,9 @@ void GuiCheatsDialog_t::addActvCheat(void)
 	int c = -1;
 	std::string name, cmpStr;
 
-	a = strtoul(cheatAddrEntry->text().toStdString().c_str(), NULL, 16);
+	a = strtoul(cheatAddrEntry->displayText().toStdString().c_str(), NULL, 16);
 
-	v = strtoul(cheatValEntry->text().toStdString().c_str(), NULL, 16);
+	v = strtoul(cheatValEntry->displayText().toStdString().c_str(), NULL, 16);
 
 	cmpStr = cheatCmpEntry->text().toStdString();
 
@@ -931,9 +931,9 @@ void GuiCheatsDialog_t::updateCheatParameters(void)
 	}
 	//printf("Row: %i \n", row );
 
-	a = strtoul(cheatAddrEntry->text().toStdString().c_str(), NULL, 16);
+	a = strtoul(cheatAddrEntry->displayText().toStdString().c_str(), NULL, 16);
 
-	v = strtoul(cheatValEntry->text().toStdString().c_str(), NULL, 16);
+	v = strtoul(cheatValEntry->displayText().toStdString().c_str(), NULL, 16);
 
 	cmpStr = cheatCmpEntry->text().toStdString();
 
