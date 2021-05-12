@@ -640,16 +640,23 @@ void CodeDataLoggerDialog_t::SaveStrippedROM(int invert)
 
 		fwrite(&cdlhead, 1, 16, fp);
 
+		int rom_sel = 0;
+		if (GameInfo->type == GIT_FDS)
+		{
+			rom_sel = 1;
+		}
+		cdloggerdataSize = PRGsize[rom_sel];
+
 		for (i = 0; i < (int)cdloggerdataSize; i++)
 		{
 			unsigned char pchar;
 			if (cdloggerdata[i] & 3)
 			{
-				pchar = invert ? 0 : PRGptr[0][i];
+				pchar = invert ? 0 : PRGptr[rom_sel][i];
 			}
 			else
 			{
-				pchar = invert ? PRGptr[0][i] : 0;
+				pchar = invert ? PRGptr[rom_sel][i] : 0;
 			}
 			fputc(pchar, fp);
 		}
@@ -735,8 +742,14 @@ void FreeCDLog(void)
 //----------------------------------------------------
 void InitCDLog(void)
 {
+	int rom_sel = 0;
+
 	fceuWrapperLock();
-	cdloggerdataSize = PRGsize[0];
+	if (GameInfo->type == GIT_FDS)
+	{
+		rom_sel = 1;
+	}
+	cdloggerdataSize = PRGsize[rom_sel];
 	cdloggerdata = (unsigned char *)malloc(cdloggerdataSize);
 	if (!CHRram[0] || (CHRptr[0] == PRGptr[0]))
 	{ // Some kind of workaround for my OneBus VRAM hack, will remove it if I find another solution for that
