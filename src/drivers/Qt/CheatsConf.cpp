@@ -859,7 +859,7 @@ void GuiCheatsDialog_t::addActvCheat(void)
 
 	a = strtoul(cheatAddrEntry->displayText().toStdString().c_str(), NULL, 16);
 
-	v = strtoul(cheatValEntry->text().toStdString().c_str(), NULL, 16);
+	v = strtoul(cheatValEntry->displayText().toStdString().c_str(), NULL, 16);
 
 	cmpStr = cheatCmpEntry->text().toStdString();
 
@@ -933,7 +933,7 @@ void GuiCheatsDialog_t::updateCheatParameters(void)
 
 	a = strtoul(cheatAddrEntry->displayText().toStdString().c_str(), NULL, 16);
 
-	v = strtoul(cheatValEntry->text().toStdString().c_str(), NULL, 16);
+	v = strtoul(cheatValEntry->displayText().toStdString().c_str(), NULL, 16);
 
 	cmpStr = cheatCmpEntry->text().toStdString();
 
