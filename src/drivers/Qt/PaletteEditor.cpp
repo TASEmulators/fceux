@@ -481,17 +481,22 @@ void nesPaletteView::mouseMoveEvent(QMouseEvent *event)
 	       (cell.y() >= 0) && (cell.y() < 4) )
 	{
 		selCell = cell;
+		update();
 	}
 }
 //----------------------------------------------------------------------------
 void nesPaletteView::mousePressEvent(QMouseEvent * event)
 {
-	//QPoint cell = convPixToCell( event->pos() );
+	QPoint cell = convPixToCell( event->pos() );
 
 	if ( event->button() == Qt::LeftButton )
 	{
-		// Set Cell
-		//setSelCell( cell );
+		if ( (cell.x() >= 0) && (cell.x() < 16) &&
+		       (cell.y() >= 0) && (cell.y() < 4) )
+		{
+			selCell = cell;
+			update();
+		}
 	}
 }
 //----------------------------------------------------------------------------
@@ -502,6 +507,17 @@ void nesPaletteView::contextMenuEvent(QContextMenuEvent *event)
 	//QMenu *subMenu;
 	//QActionGroup *group;
 	char stmp[64];
+
+	QPoint cell = convPixToCell( event->pos() );
+
+	//printf("Cell %X%X\n", cell.y(), cell.x() ); 
+
+	if ( (cell.x() >= 0) && (cell.x() < 16) &&
+	       (cell.y() >= 0) && (cell.y() < 4) )
+	{
+		selCell = cell;
+		update();
+	}
 
 	sprintf( stmp, "Edit Color %X%X", selCell.y(), selCell.x() );
 	act = new QAction(tr(stmp), &menu);
@@ -623,6 +639,18 @@ void nesPaletteView::paintEvent(QPaintEvent *event)
 		}
 		yy += h;
 	}
+
+	xx = selCell.x() * w;
+	yy = selCell.y() * h;
+
+	pen.setWidth( 5 );
+	pen.setColor( white );
+	painter.setPen( pen );
+	painter.drawRect( xx, yy, w-1, h-1 );
+	pen.setWidth( 3 );
+	pen.setColor( black );
+	painter.setPen( pen );
+	painter.drawRect( xx+1, yy+1, w-3, h-3 );
 }
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
