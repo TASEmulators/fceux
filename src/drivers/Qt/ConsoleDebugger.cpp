@@ -336,7 +336,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	seekEntry->setFont( font );
 	seekEntry->setText("0000");
 	seekEntry->setMaxLength( 4 );
-	seekEntry->setInputMask( ">HHHH;" );
+	seekEntry->setInputMask( ">HHHH;0" );
 	seekEntry->setAlignment(Qt::AlignCenter);
 	seekEntry->setMaximumWidth( 6 * fontCharWidth );
 	grid->addWidget( seekEntry, 3, 1, Qt::AlignLeft );
@@ -346,7 +346,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	pcEntry = new QLineEdit();
 	pcEntry->setFont( font );
 	pcEntry->setMaxLength( 4 );
-	pcEntry->setInputMask( ">HHHH;" );
+	pcEntry->setInputMask( ">HHHH;0" );
 	pcEntry->setAlignment(Qt::AlignCenter);
 	pcEntry->setMaximumWidth( 6 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -362,7 +362,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	regAEntry = new QLineEdit();
 	regAEntry->setFont( font );
 	regAEntry->setMaxLength( 2 );
-	regAEntry->setInputMask( ">HH;" );
+	regAEntry->setInputMask( ">HH;0" );
 	regAEntry->setAlignment(Qt::AlignCenter);
 	regAEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -371,7 +371,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	regXEntry = new QLineEdit();
 	regXEntry->setFont( font );
 	regXEntry->setMaxLength( 2 );
-	regXEntry->setInputMask( ">HH;" );
+	regXEntry->setInputMask( ">HH;0" );
 	regXEntry->setAlignment(Qt::AlignCenter);
 	regXEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -380,7 +380,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	regYEntry = new QLineEdit();
 	regYEntry->setFont( font );
 	regYEntry->setMaxLength( 2 );
-	regYEntry->setInputMask( ">HH;" );
+	regYEntry->setInputMask( ">HH;0" );
 	regYEntry->setAlignment(Qt::AlignCenter);
 	regYEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -1696,7 +1696,7 @@ void ConsoleDebugger::seekToCB (void)
 {
 	std::string s;
 
-	s = seekEntry->text().toStdString();
+	s = seekEntry->displayText().toStdString();
 
 	//printf("Seek To: '%s'\n", s.c_str() );
 
@@ -2240,7 +2240,8 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	std::string s;
 	long int i;
 
-	s = pcEntry->text().toStdString();
+	s = pcEntry->displayText().toStdString();
+
 	if ( s.size() > 0 )
 	{
 		i = strtol( s.c_str(), NULL, 16 );
@@ -2252,7 +2253,8 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	X.PC = i;
 	//printf("Set PC: '%s'  %04X\n", s.c_str(), X.PC );
 
-	s = regAEntry->text().toStdString();
+	s = regAEntry->displayText().toStdString();
+
 	if ( s.size() > 0 )
 	{
 		i = strtol( s.c_str(), NULL, 16 );
@@ -2264,7 +2266,8 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	X.A  = i;
 	//printf("Set A: '%s'  %02X\n", s.c_str(), X.A );
 
-	s = regXEntry->text().toStdString();
+	s = regXEntry->displayText().toStdString();
+
 	if ( s.size() > 0 )
 	{
 		i = strtol( s.c_str(), NULL, 16 );
@@ -2276,7 +2279,8 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	X.X  = i;
 	//printf("Set X: '%s'  %02X\n", s.c_str(), X.X );
 
-	s = regYEntry->text().toStdString();
+	s = regYEntry->displayText().toStdString();
+
 	if ( s.size() > 0 )
 	{
 		i = strtol( s.c_str(), NULL, 16 );
