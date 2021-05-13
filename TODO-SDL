@@ -34,7 +34,7 @@ Multi-thread (GUI and emulation on separate threads) |     YES     |     NO     
 Emulation speed control via menu                     |     YES     |     NO      |
 Emulation speed control via hotkeys                  |     YES     |     YES     |
 Fullscreen functionality                             |     YES     |     YES     |
-AVI Record Functionality                             |     NO      |     NO      |
+AVI/WAV Record Functionality                         |     YES     |     NO      |
 NES Emulation Power/Reset/Pause functionality        |     YES     |     YES     |
 Game genie load/enable capability                    |     YES     |     YES     |
 Movie record/save/play functionality                 |     YES     |     YES     |
@@ -47,6 +47,8 @@ TAS Editor                                           |     NO      |     NO     
 6502 Debugger Window                                 |     YES     |     YES     |
 PPU Viewer                                           |     YES     |     NO      |
 Name Table Viewer                                    |     YES     |     NO      |
+Sprite Viewer                                        |     YES     |     NO      |
+NES Palette Editor                                   |     YES     |     NO      |
 Memory Hex Editor                                    |     YES     |     YES     |
 Trace Logger                                         |     YES     |     NO      |
 Code/Data Logger                                     |     YES     |     NO      |

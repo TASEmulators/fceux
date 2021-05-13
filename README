@@ -7,7 +7,7 @@ Updated By mjbudd77
 
 http://www.fceux.com
 
-Last Modified: October 21, 2020
+Last Modified: May 13, 2021
 
 Table of Contents
 -----------------
@@ -30,7 +30,7 @@ Table of Contents
 * minizip  
 * zlib  
 * openGL
-* c++ compiler -- you may use g++ from gcc or clang++ from llvm.
+* c++ compiler -- you may use g++ from gcc or clang++ from llvm or msvc 2019
 
 2 - Installation
 ----------------
