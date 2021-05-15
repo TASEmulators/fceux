@@ -148,10 +148,13 @@ void CalcVideoDimensions(void)
 	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
 	s_tlines = s_erendline - s_srendline + 1;
 
+	//printf("Calc Video: %i -> %i \n", s_srendline, s_erendline );
+
 	nes_shm->video.preScaler = s_sponge;
 
 	switch ( s_sponge )
 	{
+		default:
 		case 0: // None
 			 nes_shm->video.scale = 1;
 		break;

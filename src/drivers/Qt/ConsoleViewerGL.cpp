@@ -46,8 +46,8 @@ extern unsigned int gui_draw_area_height;
 ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	: QOpenGLWidget( parent )
 {
-	view_width  = 0;
-	view_height = 0;
+	view_width  = 256;
+	view_height = 224;
 	gltexture   = 0;
 	devPixRatio = 1.0f;
 	aspectRatio = 1.0f;
@@ -142,6 +142,7 @@ void ConsoleViewGL_t::buildTextures(void)
 			GL_RGBA8, w, h, 0,
 					GL_BGRA, GL_UNSIGNED_BYTE, 0 );
 
+	//printf("Texture Built: %ix%i\n", w, h);
 }
 
 void ConsoleViewGL_t::initializeGL(void)

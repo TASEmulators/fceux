@@ -815,6 +815,8 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	// update the emu core
 	UpdateEMUCore(g_config);
 
+	CalcVideoDimensions();
+
 	#ifdef CREATE_AVI
 	g_config->getOption("SDL.VideoLog", &s);
 	g_config->setOption("SDL.VideoLog", "");
