@@ -291,6 +291,7 @@ class  consoleWin_t : public QMainWindow
 		void decrementState(void);
 		void loadLua(void);
 		void takeScreenShot(void);
+		void prepareScreenShot(void);
 		void powerConsoleCB(void);
 		void consoleHardReset(void);
 		void consoleSoftReset(void);

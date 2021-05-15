@@ -31,6 +31,10 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+
+#include <QPixmap>
+#include <QWindow>
+#include <QScreen>
 #include <QHeaderView>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -824,7 +828,7 @@ void consoleWin_t::createMainMenu(void)
 	//scrShotAct->setShortcut( QKeySequence(tr("F12")));
 	scrShotAct->setStatusTip(tr("Screenshot"));
 	scrShotAct->setIcon( QIcon(":icons/camera.png") );
-	connect(scrShotAct, SIGNAL(triggered()), this, SLOT(takeScreenShot()));
+	connect(scrShotAct, SIGNAL(triggered()), this, SLOT(prepareScreenShot(void)));
 	
 	fileMenu->addAction(scrShotAct);
 
@@ -2340,10 +2344,60 @@ void consoleWin_t::mainMenuClose(void)
 	}
 }
 
+void consoleWin_t::prepareScreenShot(void)
+{
+	// Set a timer single shot to take the screen shot. This gives time
+	// for the GUI to remove the menu from view before taking the image.
+	QTimer::singleShot( 100, Qt::CoarseTimer, this, SLOT(takeScreenShot(void)) );
+}
+
+//void consoleWin_t::takeScreenShot(void)
+//{
+//	fceuWrapperLock();
+//	FCEUI_SaveSnapshot();
+//	fceuWrapperUnLock();
+//}
+
 void consoleWin_t::takeScreenShot(void)
 {
+	int u=0;
+	QPixmap  image;
+	QScreen *screen = QGuiApplication::primaryScreen();
+
+	if (const QWindow *window = windowHandle())
+	{
+		screen = window->screen();
+	}
+
+	if (screen == NULL)
+	{
+		return;
+	}
+
 	fceuWrapperLock();
-	FCEUI_SaveSnapshot();
+
+	if ( viewport_GL )
+	{
+		image = screen->grabWindow( viewport_GL->winId() );
+	}
+	else if ( viewport_SDL )
+	{
+		image = screen->grabWindow( viewport_SDL->winId() );
+	}
+
+	for (u = 0; u < 99999; ++u)
+	{
+		FILE *pp = FCEUD_UTF8fopen( FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(), "rb");
+
+		if (pp == NULL)
+		{
+			break;
+		}
+		fclose(pp);
+	}
+
+	image.save( tr( FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str() ), "png" );
+
 	fceuWrapperUnLock();
 }
 
