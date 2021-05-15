@@ -54,7 +54,7 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 {
 	QVBoxLayout *mainLayout;
 	QMenuBar *menuBar;
-	QMenu *fileMenu, *memMenu;
+	QMenu *fileMenu, *memMenu, *subMenu;
 	QAction *act;
 	int useNativeMenuBar;
 
@@ -89,6 +89,18 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	connect(act, SIGNAL(triggered()), this, SLOT(savePaletteFileDialog(void)) );
 	
 	fileMenu->addAction(act);
+
+	fileMenu->addSeparator();
+
+	// File -> Export
+	subMenu = fileMenu->addMenu( tr("E&xport As") );
+
+	act = new QAction(tr("&Adobe Color Table"), this);
+	//act->setShortcut( QKeySequence::Save );
+	act->setStatusTip(tr("Export Palette in ACT Format"));
+	connect(act, SIGNAL(triggered()), this, SLOT(exportPaletteFileDialog(void)) );
+
+	subMenu->addAction(act);
 
 	fileMenu->addSeparator();
 
@@ -298,6 +310,56 @@ void PaletteEditorDialog_t::savePaletteFileDialog(void)
 	palView->saveToFile( filename.toStdString().c_str() );
 }
 //----------------------------------------------------------------------------
+void PaletteEditorDialog_t::exportPaletteFileDialog(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	QFileDialog  dialog(this, tr("Export Palette To File") );
+	const char *home;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("Adobe Color Table Files (*.act *.ACT) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Export") );
+	dialog.setDefaultSuffix( tr(".act") );
+
+	home = ::getenv("HOME");
+
+	if ( home )
+	{
+		dialog.setDirectory( tr(home) );
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	palView->exportToFileACT( filename.toStdString().c_str() );
+}
+//----------------------------------------------------------------------------
 //---NES Color Palette Viewer
 //----------------------------------------------------------------------------
 nesPaletteView::nesPaletteView( QWidget *parent)
@@ -440,6 +502,41 @@ int  nesPaletteView::saveToFile( const char *filepath )
 	if ( numBytes != (3*NUM_COLORS) )
 	{
 		printf("Error Failed to Save Palette\n");
+		ret = -1;
+	}
+
+	::fclose(fp);
+
+	return ret;
+}
+//----------------------------------------------------------------------------
+int  nesPaletteView::exportToFileACT( const char *filepath )
+{
+	FILE *fp;
+	int   i=0, ret = 0, numBytes;
+	unsigned char buf[768];
+
+	fp = ::fopen( filepath, "wb");
+
+	if ( fp == NULL )
+	{
+		return -1;
+	}
+	memset( buf, 0, sizeof(buf) );
+
+	i = 0;
+
+	for (int p=0; p<NUM_COLORS; p++)
+	{
+		buf[i] = color[p].red();  i++;
+		buf[i] = color[p].green(); i++;
+		buf[i] = color[p].blue(); i++;
+	}
+	numBytes = ::fwrite( buf, 1, 768, fp );
+
+	if ( numBytes != 768 )
+	{
+		printf("Error Failed to Export Palette\n");
 		ret = -1;
 	}
 

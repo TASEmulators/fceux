@@ -65,6 +65,7 @@ class nesPaletteView : public QWidget
 		void  openColorPicker(void);
 		int   loadFromFile( const char *filepath );
 		int   saveToFile( const char *filepath );
+		int   exportToFileACT( const char *filepath );
 
 	protected:
 		void paintEvent(QPaintEvent *event);
@@ -108,6 +109,7 @@ class PaletteEditorDialog_t : public QDialog
 	private slots:
 		void openPaletteFileDialog(void);
 		void savePaletteFileDialog(void);
+		void exportPaletteFileDialog(void);
 		void setActivePalette(void);
 
 };
