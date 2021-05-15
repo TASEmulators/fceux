@@ -16,7 +16,8 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 		ConsoleViewGL_t(QWidget *parent = 0);
 		~ConsoleViewGL_t(void);
 
-		int  init( void );
+		int  init(void);
+		void reset(void);
 
 		void transfer2LocalBuffer(void);
 

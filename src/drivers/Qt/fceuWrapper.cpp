@@ -356,17 +356,27 @@ int LoadGame(const char *path, bool silent)
 		FCEUI_SetRegion(region);
 	}
 
+	// Always re-calculate video dimensions after setting region.
+	CalcVideoDimensions();
+
+	// Force re-send of video settings to console viewer
+	if ( consoleWindow )
+	{
+		consoleWindow->videoReset();
+	}
 
 	g_config->getOption("SDL.SwapDuty", &id);
 	swapDuty = id;
 	
-	std::string filename;
-	g_config->getOption("SDL.Sound.RecordFile", &filename);
-	if(filename.size()) {
-		if(!FCEUI_BeginWaveRecord(filename.c_str())) {
-			g_config->setOption("SDL.Sound.RecordFile", "");
-		}
-	}
+	// Wave Recording done through menu or hotkeys
+	//std::string filename;
+	//g_config->getOption("SDL.Sound.RecordFile", &filename);
+	//if (filename.size()) 
+	//{
+	//	if (!FCEUI_BeginWaveRecord(filename.c_str())) {
+	//		g_config->setOption("SDL.Sound.RecordFile", "");
+	//	}
+	//}
 	isloaded = 1;
 
 	//FCEUD_NetworkConnect();

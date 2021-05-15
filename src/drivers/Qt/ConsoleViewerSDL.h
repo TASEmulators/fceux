@@ -14,7 +14,7 @@ class ConsoleViewSDL_t : public QWidget
 
 	public:
 		ConsoleViewSDL_t(QWidget *parent = 0);
-	   ~ConsoleViewSDL_t(void);
+		~ConsoleViewSDL_t(void);
 
 		int  init(void);
 		void reset(void);

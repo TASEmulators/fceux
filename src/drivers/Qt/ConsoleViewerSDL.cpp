@@ -194,14 +194,14 @@ int ConsoleViewSDL_t::init(void)
 {
 	WId windowHandle;
 
-   if ( linearFilter )
-   {
-       SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
-   }
-   else
-   {
-       SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
-   }
+	if ( linearFilter )
+	{
+	    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
+	}
+	else
+	{
+	    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
+	}
 
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) 
 	{

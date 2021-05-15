@@ -114,16 +114,23 @@ int ConsoleViewGL_t::init( void )
 	return 0;
 }
 
+void ConsoleViewGL_t::reset(void)
+{
+	buildTextures();
+
+	return;
+}
+
 void ConsoleViewGL_t::buildTextures(void)
 {
 	int w, h;
-	 glEnable(GL_TEXTURE_RECTANGLE);
+	glEnable(GL_TEXTURE_RECTANGLE);
 
-	 if ( gltexture )
-	 {
-	 	glDeleteTextures(1, &gltexture);
-	 	gltexture=0;
-	 }
+	if ( gltexture )
+	{
+		glDeleteTextures(1, &gltexture);
+		gltexture=0;
+	}
 
 	glGenTextures(1, &gltexture);
 	//printf("Linear Interpolation on GL Texture: %s \n", linearFilter ? "Enabled" : "Disabled");

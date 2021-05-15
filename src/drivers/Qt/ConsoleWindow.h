@@ -106,6 +106,8 @@ class  consoleWin_t : public QMainWindow
 		QMutex *mutex;
 #endif
 
+		int  videoInit(void);
+		void videoReset(void);
 		void requestClose(void);
 
 	 	void QueueErrorMsgWindow( const char *msg );

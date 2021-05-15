@@ -118,14 +118,7 @@ int main( int argc, char *argv[] )
 
 	consoleWindow->show();
 
-	if ( consoleWindow->viewport_SDL )
-	{
-		consoleWindow->viewport_SDL->init();
-	}
-	else
-	{
-		consoleWindow->viewport_GL->init();
-	}
+	consoleWindow->videoInit();
 
 	retval = app.exec();
 

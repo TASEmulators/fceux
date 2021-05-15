@@ -240,6 +240,7 @@ int InitVideo(FCEUGI *gi)
 
 	switch ( s_sponge )
 	{
+		default:
 		case 0: // None
 			 nes_shm->video.scale = 1;
 		break;

@@ -298,6 +298,34 @@ consoleWin_t::~consoleWin_t(void)
 
 }
 
+int consoleWin_t::videoInit(void)
+{
+	int ret = 0;
+
+	if ( viewport_SDL )
+	{
+		ret = viewport_SDL->init();
+	}
+	else if ( viewport_GL )
+	{
+		ret = viewport_GL->init();
+	}
+	return ret;
+}
+
+void consoleWin_t::videoReset(void)
+{
+	if ( viewport_SDL )
+	{
+		viewport_SDL->reset();
+	}
+	else if ( viewport_GL )
+	{
+		viewport_GL->reset();
+	}
+	return;
+}
+
 QSize consoleWin_t::calcRequiredSize(void)
 {
 	QSize out( GL_NES_WIDTH, GL_NES_HEIGHT );
