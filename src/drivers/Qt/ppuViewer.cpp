@@ -35,6 +35,8 @@
 #include <QHeaderView>
 #include <QTreeWidget>
 #include <QActionGroup>
+#include <QClipboard>
+#include <QGuiApplication>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -1719,8 +1721,8 @@ void tilePaletteView_t::contextMenuEvent(QContextMenuEvent *event)
 {
 	QAction *act;
 	QMenu menu(this);
-	//QMenu *subMenu;
-	//char stmp[64];
+	QMenu *subMenu;
+	char stmp[128];
 	QPoint p;
 
 	p = convPixToCell( event->pos() );
@@ -1739,7 +1741,72 @@ void tilePaletteView_t::contextMenuEvent(QContextMenuEvent *event)
 	connect( act, SIGNAL(triggered(void)), this, SLOT(exportPaletteFileDialog(void)) );
 	menu.addAction( act );
 
+	if ( palo )
+	{
+		int i;
+
+		i = palcache[ (palIdx << 2) | selBox ];
+
+		subMenu = menu.addMenu( tr("Copy Color to Clipboard") );
+
+		sprintf( stmp, "Hex #%02X%02X%02X", palo[i].r, palo[i].g, palo[i].b );
+		act = new QAction(tr(stmp), &menu);
+		//act->setShortcut( QKeySequence(tr("G")));
+		connect( act, SIGNAL(triggered(void)), this, SLOT(copyColor2ClipBoardHex(void)) );
+		subMenu->addAction( act );
+
+		sprintf( stmp, "rgb(%3i,%3i,%3i)", palo[i].r, palo[i].g, palo[i].b );
+		act = new QAction(tr(stmp), &menu);
+		//act->setShortcut( QKeySequence(tr("G")));
+		connect( act, SIGNAL(triggered(void)), this, SLOT(copyColor2ClipBoardRGB(void)) );
+		subMenu->addAction( act );
+	}
+
 	menu.exec(event->globalPos());
+}
+//----------------------------------------------------
+void tilePaletteView_t::copyColor2ClipBoardHex(void)
+{
+	int p;
+	char txt[64];
+	QClipboard *clipboard = QGuiApplication::clipboard();
+
+	if ( palo == NULL )
+	{
+		return;
+	}
+	p = palcache[ (palIdx << 2) | selBox ];
+
+	sprintf( txt, "#%02X%02X%02X", palo[p].r, palo[p].g, palo[p].b );
+
+	clipboard->setText( tr(txt), QClipboard::Clipboard );
+
+	if ( clipboard->supportsSelection() )
+	{
+		clipboard->setText( tr(txt), QClipboard::Selection );
+	}
+}
+//----------------------------------------------------
+void tilePaletteView_t::copyColor2ClipBoardRGB(void)
+{
+	int p;
+	char txt[64];
+	QClipboard *clipboard = QGuiApplication::clipboard();
+
+	if ( palo == NULL )
+	{
+		return;
+	}
+	p = palcache[ (palIdx << 2) | selBox ];
+
+	sprintf( txt, "rgb(%3i,%3i,%3i)", palo[p].r, palo[p].g, palo[p].b );
+
+	clipboard->setText( tr(txt), QClipboard::Clipboard );
+
+	if ( clipboard->supportsSelection() )
+	{
+		clipboard->setText( tr(txt), QClipboard::Selection );
+	}
 }
 //----------------------------------------------------
 void tilePaletteView_t::exportPaletteFileDialog(void)
@@ -1796,7 +1863,7 @@ void tilePaletteView_t::openColorPicker(void)
 {
 	nesPalettePickerDialog *dialog;
 
-	dialog = new nesPalettePickerDialog( (palIdx*4) + selBox, this );
+	dialog = new nesPalettePickerDialog( (palIdx << 2) + selBox, this );
 
 	dialog->show();
 }
@@ -1840,7 +1907,7 @@ void tilePaletteView_t::paintEvent(QPaintEvent *event)
 	i = w / 4;
 	j = h / 4;
 
-	p2 = palIdx * 4;
+	p2 = palIdx << 2;
 	yy = 0;
 	xx = 0;
 	for (x=0; x < 4; x++)

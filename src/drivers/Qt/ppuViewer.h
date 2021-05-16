@@ -133,6 +133,8 @@ class tilePaletteView_t : public QWidget
 	private slots:
 		void openColorPicker(void);
 		void exportPaletteFileDialog(void);
+		void copyColor2ClipBoardHex(void);
+		void copyColor2ClipBoardRGB(void);
 };
 
 class ppuTileView_t : public QWidget
