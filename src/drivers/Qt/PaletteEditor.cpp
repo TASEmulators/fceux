@@ -1023,19 +1023,19 @@ void nesPalettePickerView::mousePressEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void nesPalettePickerView::contextMenuEvent(QContextMenuEvent *event)
 {
-	QAction *act;
-	QMenu menu(this);
-	//QMenu *subMenu;
-	//QActionGroup *group;
-	char stmp[64];
-
-	sprintf( stmp, "Edit Color %X%X", selCell.y(), selCell.x() );
-	act = new QAction(tr(stmp), &menu);
-	act->setShortcut( QKeySequence(tr("E")));
-	connect( act, SIGNAL(triggered(void)), this, SLOT(editSelColor(void)) );
-	menu.addAction( act );
-
-	menu.exec(event->globalPos());
+//	QAction *act;
+//	QMenu menu(this);
+//	//QMenu *subMenu;
+//	//QActionGroup *group;
+//	char stmp[64];
+//
+//	sprintf( stmp, "Edit Color %X%X", selCell.y(), selCell.x() );
+//	act = new QAction(tr(stmp), &menu);
+//	act->setShortcut( QKeySequence(tr("E")));
+//	connect( act, SIGNAL(triggered(void)), this, SLOT(editSelColor(void)) );
+//	menu.addAction( act );
+//
+//	menu.exec(event->globalPos());
 }
 //----------------------------------------------------------------------------
 QPoint nesPalettePickerView::convPixToCell( QPoint p )
@@ -1130,6 +1130,7 @@ void nesPalettePickerView::paintEvent(QPaintEvent *event)
 nesPalettePickerDialog::nesPalettePickerDialog( int idx, QWidget *parent)
 	: QDialog( parent )
 {
+	char stmp[128];
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
 	QPushButton *okButton, *cancelButton, *resetButton;
@@ -1148,6 +1149,9 @@ nesPalettePickerDialog::nesPalettePickerDialog( int idx, QWidget *parent)
 
 	palIdx  = idx;
 	palAddr = 0x3F00 + palIdx;
+
+	sprintf( stmp, "Pick Palette Color for Address $%04X", palAddr );
+	setWindowTitle( tr(stmp) );
 
 	palOrigVal = READPAL_MOTHEROFALL(palIdx & 0x1F);
 	palView->setPalAddr( palAddr );
