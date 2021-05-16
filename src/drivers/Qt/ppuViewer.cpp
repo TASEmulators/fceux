@@ -28,6 +28,7 @@
 #include <QAction>
 #include <QMenuBar>
 #include <QPainter>
+#include <QFileDialog>
 #include <QInputDialog>
 #include <QColorDialog>
 #include <QMessageBox>
@@ -141,6 +142,51 @@ void setPPUSelPatternTile( int table, int x, int y )
 	ppuViewWindow->patternView[ table ]->setTileCoord( x, y );
 	ppuViewWindow->patternView[ table ]->updateSelTileLabel();
 }
+//----------------------------------------------------
+static int exportActivePaletteACT( const char *filename )
+{
+	FILE *fp;
+	int i=0, c, ret = 0, numBytes;
+	unsigned char buf[768];
+
+	fp = fopen( filename, "wb");
+
+	if ( fp == NULL )
+	{
+		return -1;
+	}
+	memset( buf, 0, sizeof(buf) );
+
+	i=0;
+	for (int p=0; p<32; p++)
+	{
+		c = palcache[p];
+
+		//printf("%i: %02X\n", p, c );
+
+		if ( palo )
+		{
+			buf[i] = palo[c].r; i++;
+			buf[i] = palo[c].g; i++;
+			buf[i] = palo[c].b; i++;
+
+			//printf("%i: %02X    #%02X%02X%02X  rgb( %3i,%3i,%3i)\n", p, c,
+			//	palo[c].r, palo[c].g, palo[c].b, palo[c].r, palo[c].g, palo[c].b );
+		}
+	}
+
+	numBytes = ::fwrite( buf, 1, 768, fp );
+
+	if ( numBytes != 768 )
+	{
+		printf("Error Failed to Export Palette\n");
+		ret = -1;
+	}
+	::fclose(fp);
+
+	return ret;
+}
+//----------------------------------------------------
 //----------------------------------------------------
 ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	: QDialog( parent, Qt::Window )
@@ -1688,7 +1734,62 @@ void tilePaletteView_t::contextMenuEvent(QContextMenuEvent *event)
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openColorPicker(void)) );
 	menu.addAction( act );
 
+	act = new QAction(tr("Export ACT"), &menu);
+	//act->setShortcut( QKeySequence(tr("G")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(exportPaletteFileDialog(void)) );
+	menu.addAction( act );
+
 	menu.exec(event->globalPos());
+}
+//----------------------------------------------------
+void tilePaletteView_t::exportPaletteFileDialog(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	QFileDialog  dialog(this, tr("Export Palette To File") );
+	const char *home;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("Adobe Color Table Files (*.act *.ACT) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Export") );
+	dialog.setDefaultSuffix( tr(".act") );
+
+	home = ::getenv("HOME");
+
+	if ( home )
+	{
+		dialog.setDirectory( tr(home) );
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	exportActivePaletteACT( filename.toStdString().c_str() );
 }
 //----------------------------------------------------
 void tilePaletteView_t::openColorPicker(void)

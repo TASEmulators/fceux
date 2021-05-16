@@ -132,6 +132,7 @@ class tilePaletteView_t : public QWidget
 
 	private slots:
 		void openColorPicker(void);
+		void exportPaletteFileDialog(void);
 };
 
 class ppuTileView_t : public QWidget
