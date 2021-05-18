@@ -273,8 +273,8 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
-	char exePath[512];
+	char dir[2048];
+	char exePath[2048];
 	const char *luaPath;
 	QFileDialog dialog(this, tr("Open LUA Script"));
 	QList<QUrl> urls;
@@ -312,7 +312,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	if (luaPath)
 	{
 		int i, j;
-		char stmp[1024];
+		char stmp[2048];
 
 		i = j = 0;
 		while (luaPath[i] != 0)
