@@ -144,11 +144,18 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QLabel *lbl;
 	QFont   font;
 	//char stmp[64];
-	int useNativeMenuBar;
+	int useNativeMenuBar, pxCharWidth;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
+
+	QFontMetrics metrics(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+#else
+	pxCharWidth = metrics.width(QLatin1Char('2'));
+#endif
 
 	nameTableViewWindow = this;
 
@@ -423,6 +430,8 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	lbl = new QLabel( tr("Palette Addr:") );
 	lbl->setFont( font );
 	grid->addWidget( lbl, 7, 0, Qt::AlignLeft );
+
+	grid->setColumnMinimumWidth( 1, pxCharWidth * 6 );
 
 	ppuAddrLbl = new QLineEdit();
 	ppuAddrLbl->setReadOnly(true);
