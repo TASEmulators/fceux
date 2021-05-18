@@ -1301,7 +1301,7 @@ void GuiPaletteColorSelect::setText(void)
 
 	rTxt = getRoleText( role );
 
-	if ( rTxt == NULL )
+	if ( (gTxt == NULL) || (rTxt == NULL) )
 	{
 		return;
 	}

@@ -449,7 +449,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	connect(editKeyBindBtn, SIGNAL(clicked()), this, SLOT(editKeyBindingCallback(void)));
 	connect( delKeyBindBtn, SIGNAL(clicked()), this, SLOT(delKeyBindingCallback(void)));
 
-	if (useScroll)
+	if (useScroll && (scroll != NULL) )
 	{
 		scroll->setWidget(mainWidget);
 		scroll->setWidgetResizable(true);
@@ -460,7 +460,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	QHBoxLayout *dialogLayout = new QHBoxLayout();
 
-	if (useScroll)
+	if (useScroll && (scroll != NULL) )
 	{
 		dialogLayout->addWidget(scroll);
 	}
