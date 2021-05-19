@@ -105,8 +105,9 @@ KillVideo()
 
 	// return failure if the video system was not initialized
 	if (s_inited == 0)
+	{
 		return -1;
-
+	}
 
 	// SDL Video system is not used.
 	// shut down the SDL video sub-system
