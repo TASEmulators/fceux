@@ -73,6 +73,7 @@ gwavi_t::gwavi_t(void)
 	memset( &stream_format_v, 0, sizeof(struct gwavi_stream_format_v_t) );
 	memset( &stream_header_a, 0, sizeof(struct gwavi_stream_header_t) );
 	memset( &stream_format_a, 0, sizeof(struct gwavi_stream_format_a_t) );
+	memset(  fourcc, 0, sizeof(fourcc) );
 	marker = 0;
 	offsets_ptr = 0;
 	offsets_len = 0;
@@ -142,7 +143,7 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 
 	if ( (size % 8) != 0 )
 	{
-		printf("Warning: Video Buffer Size not on an 8 bit boundary: %ix%i:%i\n", width, height, bits_per_pixel);
+		printf("Warning: Video Buffer Size not on an 8 bit boundary: %ux%u:%i\n", width, height, bits_per_pixel);
 	}
 	size = size / 8;
 
@@ -287,11 +288,22 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 	if (maxi_pad > 0)
 		maxi_pad = 4 - maxi_pad;
 
-	if (offset_count >= offsets_len) {
+	if (offset_count >= offsets_len)
+	{
+		void *tmpPtr;
 		offsets_len += 1024;
-		offsets = (unsigned int *)realloc(offsets,
-					(size_t)offsets_len *
+		tmpPtr = realloc( offsets,
+				(size_t)offsets_len *
 					sizeof(unsigned int));
+
+		if ( tmpPtr )
+		{
+			offsets = (unsigned int *)tmpPtr;
+		}
+		else
+		{
+			fprintf(stderr, "gwavi_add_frame: realloc() failed\n");
+		}
 	}
 
 	offsets[offsets_ptr++] = (unsigned int)(len + maxi_pad);
@@ -347,13 +359,25 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 
 	maxi_pad = len % 4;
 	if (maxi_pad > 0)
+	{
 		maxi_pad = 4 - maxi_pad;
+	}
 
-	if (offset_count >= offsets_len) {
+	if (offset_count >= offsets_len)
+	{
+		void *tmpPtr;
 		offsets_len += 1024;
-		offsets = (unsigned int *)realloc(offsets,
-					(size_t)offsets_len *
-					sizeof(unsigned int));
+		tmpPtr = realloc( offsets,
+				(size_t)offsets_len *
+				sizeof(unsigned int));
+		if ( tmpPtr )
+		{
+			offsets = (unsigned int *)tmpPtr;
+		}
+		else
+		{
+			fprintf(stderr, "gwavi_add_audio: realloc() failed\n");
+		}
 	}
 
 	offsets[offsets_ptr++] =
