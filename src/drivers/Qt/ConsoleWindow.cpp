@@ -676,7 +676,7 @@ void consoleWin_t::createMainMenu(void)
 	QAction *act;
 	QMenu *subMenu, *aviMenu;
 	QActionGroup *group;
-	int useNativeMenuBar, opt;
+	int useNativeMenuBar;
 	//QShortcut *shortcut;
 
 	menubar = new consoleMenuBar(this);
@@ -969,8 +969,7 @@ void consoleWin_t::createMainMenu(void)
 	//autoResume->setShortcut( QKeySequence(tr("Ctrl+C")));
 	autoResume->setCheckable(true);
 	autoResume->setStatusTip(tr("Auto-Resume Play"));
-	g_config->getOption ("SDL.AutoResume", &opt );
-	autoResume->setChecked( opt ? true : false );
+	syncActionConfig( autoResume, "SDL.AutoResume" );
 	connect(autoResume, SIGNAL(triggered()), this, SLOT(toggleAutoResume(void)) );
 
 	optMenu->addAction(autoResume);
