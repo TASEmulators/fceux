@@ -260,6 +260,7 @@ void KillBlitToHigh(void)
 			hq3x_Kill();
 		else
 			hq2x_Kill();
+		free(specbuf);
 		specbuf=NULL;
 	}
 	if (nes_ntsc) {
