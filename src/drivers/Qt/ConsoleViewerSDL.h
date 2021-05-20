@@ -41,6 +41,7 @@ class ConsoleViewSDL_t : public QWidget
 	protected:
 
 	//void paintEvent(QPaintEvent *event);
+	void showEvent(QShowEvent *event);
 	void resizeEvent(QResizeEvent *event);
 	void mousePressEvent(QMouseEvent * event);
 	void mouseReleaseEvent(QMouseEvent * event);

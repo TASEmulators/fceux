@@ -293,6 +293,19 @@ void ConsoleViewSDL_t::reset(void)
 	}
 }
 
+void ConsoleViewSDL_t::showEvent(QShowEvent *event)
+{
+	//printf("SDL Show: %i x %i \n", width(), height() );
+
+	//view_width  = width();
+	//view_height = height();
+
+	//gui_draw_area_width = view_width;
+	//gui_draw_area_height = view_height;
+
+	//reset();
+}
+
 void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
 {
 	QSize s;

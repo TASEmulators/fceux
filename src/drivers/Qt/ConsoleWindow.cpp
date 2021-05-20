@@ -1671,7 +1671,10 @@ int consoleWin_t::loadVideoDriver( int driverId )
 
 		setCentralWidget(viewport_SDL);
 
+		setViewportAspect();
+
 		viewport_SDL->init();
+
 	}
 	else
 	{  // OpenGL Driver
@@ -1693,7 +1696,12 @@ int consoleWin_t::loadVideoDriver( int driverId )
 		viewport_GL = new ConsoleViewGL_t(this);
 
 		setCentralWidget(viewport_GL);
+
+		setViewportAspect();
+
+		viewport_GL->init();
 	}
+
 	return 0;
 }
 //---------------------------------------------------------------------------
