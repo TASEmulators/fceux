@@ -122,6 +122,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	mainMenuPauseWhenActv = false;
 
 	g_config->getOption( "SDL.PauseOnMainMenuAccess", &mainMenuPauseWhenActv );
+	g_config->getOption ("SDL.VideoDriver", &use_SDL_video);
 
 	if ( use_SDL_video )
 	{
