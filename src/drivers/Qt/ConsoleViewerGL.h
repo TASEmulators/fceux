@@ -46,6 +46,8 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	void buildTextures(void);
 	void calcPixRemap(void);
 	void doRemap(void);
+	void chkExtnsGL(void);
+	int  forcePwr2( int in );
 
 	double devPixRatio;
 	double aspectRatio;
@@ -59,11 +61,15 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	int  sy;
 	int  rw;
 	int  rh;
+	int  txtWidth;
+	int  txtHeight;
 	GLuint gltexture;
 	bool   linearFilter;
 	bool   forceAspect;
 	bool   autoScaleEna;
+	bool   reqPwr2;
 
+	unsigned int  textureType;
 	unsigned int  mouseButtonMask;
 
 	uint32_t  *localBuf;
