@@ -3084,8 +3084,10 @@ void consoleWin_t::emuSetFrameAdvDelay(void)
 
 void consoleWin_t::setAutoFireOnFrames(void)
 {
-	int ret;
+	int ret, autoFireOnFrames, autoFireOffFrames;
 	QInputDialog dialog(this);
+
+	GetAutoFirePattern( &autoFireOnFrames, &autoFireOffFrames );
 
 	dialog.setWindowTitle( tr("AutoFire Pattern ON Frames") );
 	dialog.setLabelText( tr("Specify desired number of ON frames in autofire pattern:") );
@@ -3098,14 +3100,18 @@ void consoleWin_t::setAutoFireOnFrames(void)
 	
 	if ( QDialog::Accepted == ret )
 	{
-	   autoFireOnFrames = dialog.intValue();
+		autoFireOnFrames = dialog.intValue();
+
+		SetAutoFirePattern( autoFireOnFrames, autoFireOffFrames );
 	}
 }
 
 void consoleWin_t::setAutoFireOffFrames(void)
 {
-	int ret;
+	int ret, autoFireOnFrames, autoFireOffFrames;
 	QInputDialog dialog(this);
+
+	GetAutoFirePattern( &autoFireOnFrames, &autoFireOffFrames );
 
 	dialog.setWindowTitle( tr("AutoFire Pattern OFF Frames") );
 	dialog.setLabelText( tr("Specify desired number of OFF frames in autofire pattern:") );
@@ -3118,7 +3124,9 @@ void consoleWin_t::setAutoFireOffFrames(void)
 	
 	if ( QDialog::Accepted == ret )
 	{
-	   autoFireOffFrames = dialog.intValue();
+		autoFireOffFrames = dialog.intValue();
+
+		SetAutoFirePattern( autoFireOnFrames, autoFireOffFrames );
 	}
 }
 

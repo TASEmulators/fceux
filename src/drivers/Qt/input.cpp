@@ -49,8 +49,6 @@
 
 /** GLOBALS **/
 int NoWaiting = 0;
-int autoFireOnFrames = 1;
-int autoFireOffFrames = 1;
 extern Config *g_config;
 extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
 
@@ -1377,29 +1375,10 @@ UpdateGamepad(void)
 		return;
 	}
 
-	static int rapid[4][2] = { 0 };
 	uint32 JS = 0;
 	int x;
 	int wg;
-	int onFrames;
-	int offFrames;
-	int totalFrames;
-	bool fire, emuUpdated = false;
-	static unsigned int emuCount = 0;
-
-	if ( emulatorCycleCount != emuCount)
-	{
-		emuUpdated = true;
-		emuCount   = emulatorCycleCount;
-	}
-
-	onFrames  = autoFireOnFrames;
-	offFrames = autoFireOffFrames;
-
-	if ( onFrames  < 1 ) onFrames  = 1;
-	if ( offFrames < 1 ) offFrames = 1;
-
-	totalFrames = onFrames + offFrames;
+	bool fire;
 
 	int opposite_dirs;
 	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &opposite_dirs);
@@ -1451,22 +1430,12 @@ UpdateGamepad(void)
 		{
 			if (DTestButton (&GamePad[wg].bmap[8 + x]))
 			{
-				fire = (rapid[wg][x] < onFrames);
-
-				//printf("wg:%i  x:%i  %i Fire:%i \n", wg, x, rapid[wg][x], fire );
+				fire = GetAutoFireState(x);
 
 				if ( fire )
 				{
 					JS |= (1 << x) << (wg << 3);
 				}
-				if ( emuUpdated )
-				{
-					rapid[wg][x] = (rapid[wg][x] + 1) % totalFrames;
-				}
-			}
-			else
-			{
-				rapid[wg][x] =  0;
 			}
 		}
 	}
