@@ -644,42 +644,72 @@ void FCEUI_Kill(void) {
 }
 
 int rapidAlternator = 0;
-int AutoFirePattern[8] = { 1, 0, 0, 0, 0, 0, 0, 0 };
+//int AutoFirePattern[8] = { 1, 0, 0, 0, 0, 0, 0, 0 };
 int AutoFirePatternLength = 2;
 
-void SetAutoFirePattern(int onframes, int offframes) {
-	int i;
-	for (i = 0; i < onframes && i < 8; i++) {
-		AutoFirePattern[i] = 1;
-	}
-	for (; i < 8; i++) {
-		AutoFirePattern[i] = 0;
-	}
-	if (onframes + offframes < 2) {
-		AutoFirePatternLength = 2;
-	} else if (onframes + offframes > 8) {
-		AutoFirePatternLength = 8;
-	} else {
-		AutoFirePatternLength = onframes + offframes;
-	}
+void SetAutoFirePattern(int onframes, int offframes) 
+{
+	//int i;
+	//for (i = 0; i < onframes && i < 8; i++) {
+	//	AutoFirePattern[i] = 1;
+	//}
+	//for (; i < 8; i++) {
+	//	AutoFirePattern[i] = 0;
+	//}
+	//if (onframes + offframes < 2) {
+	//	AutoFirePatternLength = 2;
+	//} else if (onframes + offframes > 8) {
+	//	AutoFirePatternLength = 8;
+	//} else {
+	//	AutoFirePatternLength = onframes + offframes;
+	//}
+	AutoFirePatternLength = onframes + offframes;
 	AFon = onframes; AFoff = offframes;
 }
 
-void SetAutoFireOffset(int offset) {
+void GetAutoFirePattern( int *onframes, int *offframes)
+{
+	if ( onframes )
+	{
+		*onframes = AFon;
+	}
+	if ( offframes )
+	{
+		*offframes = AFoff;
+	}
+}
+
+void SetAutoFireOffset(int offset)
+{
 	if (offset < 0 || offset > 8) return;
 	AutoFireOffset = offset;
 }
 
-void AutoFire(void) {
+bool GetAutoFireState(int btnIdx)
+{
+	return rapidAlternator;
+}
+
+void AutoFire(void) 
+{
 	static int counter = 0;
 	if (justLagged == false)
-		counter = (counter + 1) % (8 * 7 * 5 * 3);
+	{
+		//counter = (counter + 1) % (8 * 7 * 5 * 3);
+		counter = (counter + 1) % AutoFirePatternLength;
+	}
 	//If recording a movie, use the frame # for the autofire so the offset
 	//doesn't get screwed up when loading.
-	if (FCEUMOV_Mode(MOVIEMODE_RECORD | MOVIEMODE_PLAY)) {
-		rapidAlternator = AutoFirePattern[(AutoFireOffset + FCEUMOV_GetFrame()) % AutoFirePatternLength]; //adelikat: TODO: Think through this, MOVIEMODE_FINISHED should not use movie data for auto-fire?
-	} else {
-		rapidAlternator = AutoFirePattern[(AutoFireOffset + counter) % AutoFirePatternLength];
+	if (FCEUMOV_Mode(MOVIEMODE_RECORD | MOVIEMODE_PLAY)) 
+	{
+		//rapidAlternator = AutoFirePattern[(AutoFireOffset + FCEUMOV_GetFrame()) % AutoFirePatternLength]; //adelikat: TODO: Think through this, MOVIEMODE_FINISHED should not use movie data for auto-fire?
+		//adelikat: TODO: Think through this, MOVIEMODE_FINISHED should not use movie data for auto-fire?
+		rapidAlternator = ( (AutoFireOffset + FCEUMOV_GetFrame()) % AutoFirePatternLength ) < AFon; 
+	}
+	else
+	{
+		//rapidAlternator = AutoFirePattern[(AutoFireOffset + counter) % AutoFirePatternLength];
+		rapidAlternator = ( (AutoFireOffset + counter) % AutoFirePatternLength ) < AFon;
 	}
 }
 

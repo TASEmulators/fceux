@@ -40,6 +40,8 @@ void PowerNES(void);
 
 void SetAutoFireOffset(int offset);
 void SetAutoFirePattern(int onframes, int offframes);
+void GetAutoFirePattern( int *onframes, int *offframes);
+bool GetAutoFireState(int btnIdx);
 void AutoFire(void);
 void FCEUI_RewindToLastAutosave(void);
 
