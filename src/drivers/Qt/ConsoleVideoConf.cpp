@@ -910,15 +910,19 @@ void ConsoleVideoConfDialog_t::applyChanges( void )
 
 		if ( consoleWindow->viewport_GL )
 		{
-		   consoleWindow->viewport_GL->setForceAspectOpt( aspectCbx->isChecked() );
-		   consoleWindow->viewport_GL->setAutoScaleOpt( autoScaleCbx->isChecked() );
-		   consoleWindow->viewport_GL->setScaleXY( xscale, yscale );
+         		consoleWindow->viewport_GL->setLinearFilterEnable( gl_LF_chkBox->isChecked() );
+			consoleWindow->viewport_GL->setForceAspectOpt( aspectCbx->isChecked() );
+			consoleWindow->viewport_GL->setAutoScaleOpt( autoScaleCbx->isChecked() );
+			consoleWindow->viewport_GL->setScaleXY( xscale, yscale );
+			consoleWindow->viewport_GL->reset();
 		}
 		if ( consoleWindow->viewport_SDL )
 		{
-		   consoleWindow->viewport_SDL->setForceAspectOpt( aspectCbx->isChecked() );
-		   consoleWindow->viewport_SDL->setAutoScaleOpt( autoScaleCbx->isChecked() );
-		   consoleWindow->viewport_SDL->setScaleXY( xscale, yscale );
+         		consoleWindow->viewport_SDL->setLinearFilterEnable( gl_LF_chkBox->isChecked() );
+			consoleWindow->viewport_SDL->setForceAspectOpt( aspectCbx->isChecked() );
+			consoleWindow->viewport_SDL->setAutoScaleOpt( autoScaleCbx->isChecked() );
+			consoleWindow->viewport_SDL->setScaleXY( xscale, yscale );
+			consoleWindow->viewport_SDL->reset();
 		}
 
 		consoleWindow->resize( s );
