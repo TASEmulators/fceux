@@ -1171,7 +1171,7 @@ void GetMouseData (uint32 (&d)[3])
 			b |= 0x02;
 		}
 	}
-	else
+	else if ( consoleWindow->viewport_GL )
 	{
 		consoleWindow->viewport_GL->getNormalizedCursorPos(nx,ny);
 

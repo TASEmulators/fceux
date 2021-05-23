@@ -215,7 +215,7 @@ static INPUTC ZAPVSC={ReadZapperVS,0,StrobeZapperVS,UpdateZapper,ZapperFrapper,D
 INPUTC *FCEU_InitZapper(int w)
 {
 	memset(&ZD[w],0,sizeof(ZAPPER));
-	if(GameInfo->type == GIT_VSUNI)
+	if ( (GameInfo != NULL) && (GameInfo->type == GIT_VSUNI) )
 		return(&ZAPVSC);
 	else
 		return(&ZAPC);
