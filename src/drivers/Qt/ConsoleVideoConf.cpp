@@ -164,12 +164,16 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	// Force Aspect Ratio
 	aspectCbx  = new QCheckBox( tr("Force Aspect Ratio") );
 
+	// Draw Input Aids
+	drawInputAidsCbx = new QCheckBox( tr("Draw Input Aids") );
+
 	setCheckBoxFromProperty( autoRegion   , "SDL.AutoDetectPAL");
 	setCheckBoxFromProperty( new_PPU_ena  , "SDL.NewPPU");
 	setCheckBoxFromProperty( frmskipcbx   , "SDL.Frameskip");
 	setCheckBoxFromProperty( sprtLimCbx   , "SDL.DisableSpriteLimit");
 	setCheckBoxFromProperty( clipSidesCbx , "SDL.ClipSides");
 	setCheckBoxFromProperty( showFPS_cbx  , "SDL.ShowFPS");
+	setCheckBoxFromProperty( drawInputAidsCbx, "SDL.DrawInputAids" );
 	
 	if ( consoleWindow )
 	{
@@ -185,20 +189,22 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 		}
 	}
 
-	connect(autoRegion  , SIGNAL(stateChanged(int)), this, SLOT(autoRegionChanged(int)) );
-	connect(new_PPU_ena , SIGNAL(stateChanged(int)), this, SLOT(use_new_PPU_changed(int)) );
-	connect(frmskipcbx  , SIGNAL(stateChanged(int)), this, SLOT(frameskip_changed(int)) );
-	connect(sprtLimCbx  , SIGNAL(stateChanged(int)), this, SLOT(useSpriteLimitChanged(int)) );
-	connect(clipSidesCbx, SIGNAL(stateChanged(int)), this, SLOT(clipSidesChanged(int)) );
-	connect(showFPS_cbx , SIGNAL(stateChanged(int)), this, SLOT(showFPSChanged(int)) );
-	connect(aspectCbx   , SIGNAL(stateChanged(int)), this, SLOT(aspectEnableChanged(int)) );
-	connect(autoScaleCbx, SIGNAL(stateChanged(int)), this, SLOT(autoScaleChanged(int)) );
+	connect(autoRegion      , SIGNAL(stateChanged(int)), this, SLOT(autoRegionChanged(int)) );
+	connect(new_PPU_ena     , SIGNAL(stateChanged(int)), this, SLOT(use_new_PPU_changed(int)) );
+	connect(frmskipcbx      , SIGNAL(stateChanged(int)), this, SLOT(frameskip_changed(int)) );
+	connect(sprtLimCbx      , SIGNAL(stateChanged(int)), this, SLOT(useSpriteLimitChanged(int)) );
+	connect(clipSidesCbx    , SIGNAL(stateChanged(int)), this, SLOT(clipSidesChanged(int)) );
+	connect(showFPS_cbx     , SIGNAL(stateChanged(int)), this, SLOT(showFPSChanged(int)) );
+	connect(aspectCbx       , SIGNAL(stateChanged(int)), this, SLOT(aspectEnableChanged(int)) );
+	connect(autoScaleCbx    , SIGNAL(stateChanged(int)), this, SLOT(autoScaleChanged(int)) );
+	connect(drawInputAidsCbx, SIGNAL(stateChanged(int)), this, SLOT(drawInputAidsChanged(int)) );
 
 	vbox1->addWidget( autoRegion  );
 	vbox1->addWidget( new_PPU_ena );
 	vbox1->addWidget( frmskipcbx  );
 	vbox1->addWidget( sprtLimCbx  );
 	//vbox1->addWidget( clipSidesCbx);
+	vbox1->addWidget( drawInputAidsCbx );
 	vbox1->addWidget( showFPS_cbx );
 	vbox1->addWidget( autoScaleCbx);
 	vbox1->addWidget( aspectCbx   );
@@ -412,7 +418,9 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	setCheckBoxFromProperty( cursorVisCbx, "SDL.CursorVis" );
 	grid->addWidget( cursorVisCbx, 1, 0, 2, 1, Qt::AlignLeft);
 
-	connect(cursorVisCbx, SIGNAL(stateChanged(int)), this, SLOT(cursorVisChanged(int)) );
+	//grid->addWidget( drawInputAidsCbx, 2, 0, 2, 1, Qt::AlignLeft);
+
+	connect(cursorVisCbx    , SIGNAL(stateChanged(int)), this, SLOT(cursorVisChanged(int)) );
 
 	vbox2->addStretch( 5 );
 
@@ -823,6 +831,19 @@ void ConsoleVideoConfDialog_t::cursorVisChanged( int value )
 	g_config->save ();
 
 	consoleWindow->loadCursor();
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::drawInputAidsChanged( int value )
+{
+	int draw;
+
+	draw = (value != Qt::Unchecked);
+
+	//printf("Value:%i \n", value );
+	g_config->setOption("SDL.DrawInputAids", draw );
+	g_config->save ();
+
+	drawInputAidsEnable = draw;
 }
 //----------------------------------------------------
 QSize ConsoleVideoConfDialog_t::calcNewScreenSize(void)

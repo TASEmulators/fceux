@@ -504,6 +504,7 @@ InitConfig()
 	config->addOption("togglemenu", "SDL.ToggleMenu", 0);
 	config->addOption("cursorType", "SDL.CursorType", 0);
 	config->addOption("cursorVis" , "SDL.CursorVis", 1);
+	config->addOption("SDL.DrawInputAids", 1);
 
 	// OpenGL options
 	config->addOption("opengl", "SDL.OpenGL", 1);

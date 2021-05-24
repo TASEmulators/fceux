@@ -17,6 +17,7 @@ extern bool pauseAfterPlayback;
 extern bool suggestReadOnlyReplay;
 extern bool emulatorCycleToggle;
 extern bool showStatusIconOpt;
+extern bool drawInputAidsEnable;
 extern unsigned int gui_draw_area_width;
 extern unsigned int gui_draw_area_height;
 extern unsigned int emulatorCycleCount;

@@ -84,6 +84,7 @@ bool turbo = false;
 bool pauseAfterPlayback = false;
 bool suggestReadOnlyReplay = true;
 bool showStatusIconOpt = true;
+bool drawInputAidsEnable = true;
 unsigned int gui_draw_area_width   = 256;
 unsigned int gui_draw_area_height  = 256;
 
@@ -735,6 +736,8 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	{
 		AutoResumePlay = false;
 	}
+
+	g_config->getOption ("SDL.DrawInputAids", &drawInputAidsEnable);
 
 	// check to see if recording HUD to AVI is enabled
 	int rh;
@@ -1547,6 +1550,11 @@ int FCEUD_ShowStatusIcon(void)
 void FCEUD_ToggleStatusIcon(void)
 {
 	showStatusIconOpt = !showStatusIconOpt;
+}
+
+bool FCEUD_ShouldDrawInputAids(void)
+{
+	return drawInputAidsEnable;
 }
 
 void FCEUD_TurboOn	 (void) { /* TODO */ };

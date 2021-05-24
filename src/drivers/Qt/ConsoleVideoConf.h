@@ -45,6 +45,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QCheckBox   *autoScaleCbx;
 		QCheckBox   *aspectCbx;
 		QCheckBox   *cursorVisCbx;
+		QCheckBox   *drawInputAidsCbx;
 		QDoubleSpinBox *xScaleBox;
 		QDoubleSpinBox *yScaleBox;
 		QLabel         *aspectSelectLabel;
@@ -85,6 +86,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  scalerChanged(int index);
 		void  cursorShapeChanged(int index);
 		void  cursorVisChanged(int value);
+		void  drawInputAidsChanged(int value);
 		void  applyChanges( void );
 		void  ntscStartScanLineChanged(const QString &);
 		void  ntscEndScanLineChanged(const QString &);
