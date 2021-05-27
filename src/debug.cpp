@@ -500,17 +500,18 @@ void LogCDData(uint8 *opcode, uint16 A, int size) {
 				datacount++;
 				if (!(cdloggerdata[j] & 1))undefinedcount--;
 			}
-		} /* else {
+		}  else {
 			if (cdloggerdata[j] & 1) {
 				codecount--;
+				cdloggerdata[j] &= 0xFE;
 				if (!(cdloggerdata[j] & 2))undefinedcount--;
 			}
 			if (cdloggerdata[j] & 2) {
 				datacount--;
-				if (!(cdloggerdata[j] & 1))undefinedcount--;
+				cdloggerdata[j] &= 0xFD;
+				if (!(cdloggerdata[j] & 1)) undefinedcount--;
 			}
-			cdloggerdata[j] = 0;
-		} */
+		}
 	}
 }
 
