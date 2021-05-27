@@ -339,6 +339,10 @@ void ConsoleViewSDL_t::mouseReleaseEvent(QMouseEvent * event)
 
 bool ConsoleViewSDL_t::getMouseButtonState( unsigned int btn )
 {
+	//int x, y;
+        //uint32_t b;
+	//b = SDL_GetMouseState( &x, &y);
+	//printf("SDL Mouse:  (%i,%i)  0x%x \n", x, y, b );
 	return (mouseButtonMask & btn) ? true : false;
 }
 
