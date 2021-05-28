@@ -339,11 +339,44 @@ void ConsoleViewSDL_t::mouseReleaseEvent(QMouseEvent * event)
 
 bool ConsoleViewSDL_t::getMouseButtonState( unsigned int btn )
 {
-	//int x, y;
-        //uint32_t b;
-	//b = SDL_GetMouseState( &x, &y);
-	//printf("SDL Mouse:  (%i,%i)  0x%x \n", x, y, b );
-	return (mouseButtonMask & btn) ? true : false;
+	bool isPressed = false;
+
+	if ( mouseButtonMask & btn )
+	{
+		isPressed = true;
+	}
+	else
+	{	// Check SDL mouse state just in case SDL is intercepting 
+		// mouse events from window system causing Qt not to see them.
+		int x, y;
+        	uint32_t b;
+		b = SDL_GetMouseState( &x, &y);
+		
+		if ( btn & Qt::LeftButton )
+		{
+			if ( b & SDL_BUTTON(SDL_BUTTON_LEFT) )
+			{
+				isPressed = true;
+			}
+		}
+
+		if ( btn & Qt::RightButton )
+		{
+			if ( b & SDL_BUTTON(SDL_BUTTON_RIGHT) )
+			{
+				isPressed = true;
+			}
+		}
+
+		if ( btn & Qt::MiddleButton )
+		{
+			if ( b & SDL_BUTTON(SDL_BUTTON_MIDDLE) )
+			{
+				isPressed = true;
+			}
+		}
+	}
+	return isPressed;
 }
 
 void  ConsoleViewSDL_t::getNormalizedCursorPos( double &x, double &y )
