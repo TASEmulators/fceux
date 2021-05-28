@@ -740,6 +740,7 @@ void ConsoleVideoConfDialog_t::aspectEnableChanged( int value )
 		aspectSelectLabel->hide();
 		aspectSelect->hide();
 	}
+	g_config->setOption ("SDL.ForceAspect", forceAspect);
 
 }
 //----------------------------------------------------

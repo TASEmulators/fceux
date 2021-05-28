@@ -103,6 +103,8 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 
 		g_config->getOption("SDL.XScale", &xscale);
 		g_config->getOption("SDL.YScale", &yscale);
+
+		g_config->getOption ("SDL.ForceAspect", &forceAspect);
 	}
 }
 
