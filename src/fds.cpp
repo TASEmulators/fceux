@@ -87,7 +87,6 @@ static int32 DiskSeekIRQ;
 static uint8 SelectDisk, InDisk;
 
 /* 4024(w), 4025(w), 4031(r) by dink(fbneo) */
-#define USE_DINK // remove this and old code after testing phase
 enum FDS_DiskBlockIDs { DSK_INIT = 0, DSK_VOLUME, DSK_FILECNT, DSK_FILEHDR, DSK_FILEDATA };
 static uint8  mapperFDS_control;    // 4025(w) control register
 static uint16 mapperFDS_filesize;	// size of file being read/written
@@ -156,7 +155,6 @@ static void FDSInit(void) {
 	InDisk = 0;
 	SelectDisk = 0;
 
-#ifdef USE_DINK
 	mapperFDS_control = 0;
 	mapperFDS_filesize = 0;
 	mapperFDS_block = 0;
@@ -164,7 +162,6 @@ static void FDSInit(void) {
 	mapperFDS_blocklen = 0;
 	mapperFDS_diskaddr = 0;
 	mapperFDS_diskaccess = 0;
-#endif
 }
 
 void FCEU_FDSInsert(void)
@@ -256,22 +253,6 @@ static DECLFR(FDSRead4030) {
 	return ret;
 }
 
-#ifndef USE_DINK
-static DECLFR(FDSRead4031) {
-	static uint8 z = 0;
-	if (InDisk != 255) {
-		z = diskdata[InDisk][DiskPtr];
-		if (!fceuindbg) {
-			if (DiskPtr < 64999) DiskPtr++;
-			DiskSeekIRQ = 150;
-			X6502_IRQEnd(FCEU_IQEXT2);
-		}
-	}
-	return z;
-}
-
-#else
-
 static DECLFR(FDSRead4031) {
 	static uint8 ret = 0;
 
@@ -311,8 +292,6 @@ static DECLFR(FDSRead4031) {
 
 	return ret;
 }
-
-#endif
 
 static DECLFR(FDSRead4032) {
 	uint8 ret;
@@ -603,18 +582,6 @@ static DECLFW(FDSWrite) {
 		break;
 	case 0x4023: break;
 	case 0x4024:
-#ifndef USE_DINK
-		if ((InDisk != 255) && !(FDSRegs[5] & 0x4) && (FDSRegs[3] & 0x1)) {
-			if (DiskPtr >= 0 && DiskPtr < 65500) {
-				if (writeskip)
-					writeskip--;
-				else if (DiskPtr >= 2) {
-					DiskWritten = 1;
-					diskdata[InDisk][DiskPtr - 2] = V;
-				}
-			}
-		}
-#else
 		if (mapperFDS_diskinsert && ~mapperFDS_control & 0x04) {
 
 			if (mapperFDS_diskaccess == 0) {
@@ -626,6 +593,7 @@ static DECLFW(FDSWrite) {
 				case DSK_FILEHDR:
 					if (mapperFDS_diskaddr < mapperFDS_blocklen) {
 						fds_disk() = V;
+						DiskWritten = 1;
 						switch (mapperFDS_diskaddr) {
 							case 13: mapperFDS_filesize = V; break;
 							case 14:
@@ -641,33 +609,15 @@ static DECLFW(FDSWrite) {
 				default:
 					if (mapperFDS_diskaddr < mapperFDS_blocklen) {
 						fds_disk() = V;
+					DiskWritten = 1;
 						mapperFDS_diskaddr++;
 					}
 					break;
 			}
 
 		}
-#endif
 		break;
 	case 0x4025:
-#ifndef USE_DINK
-		X6502_IRQEnd(FCEU_IQEXT2);
-		if (InDisk != 255) {
-			if (!(V & 0x40)) {
-				if ((FDSRegs[5] & 0x40) && !(V & 0x10)) {
-					DiskSeekIRQ = 200;
-					DiskPtr -= 2;
-				}
-				if (DiskPtr < 0) DiskPtr = 0;
-			}
-			if (!(V & 0x4)) writeskip = 2;
-			if (V & 2) {
-				DiskPtr = 0; DiskSeekIRQ = 200;
-			}
-			if (V & 0x40) DiskSeekIRQ = 200;
-		}
-		setmirror(((V >> 3) & 1) ^ 1);
-#else
 		X6502_IRQEnd(FCEU_IQEXT2);
 		if (mapperFDS_diskinsert) {
 			if (V & 0x40 && ~mapperFDS_control & 0x40) {
@@ -714,7 +664,6 @@ static DECLFW(FDSWrite) {
 		}
 		mapperFDS_control = V;
 		setmirror(((V >> 3) & 1) ^ 1);
-#endif
 		break;
 	}
 	FDSRegs[A & 7] = V;
@@ -906,7 +855,6 @@ int FDSLoad(const char *name, FCEUFILE *fp) {
 	AddExState(&SelectDisk, 1, 0, "SELD");
 	AddExState(&InDisk, 1, 0, "INDI");
 	AddExState(&DiskWritten, 1, 0, "DSKW");
-#ifdef USE_DINK
 	AddExState(&mapperFDS_control, 1, 0, "CTRG");
 	AddExState(&mapperFDS_filesize, 2, 1, "FLSZ");
 	AddExState(&mapperFDS_block, 1, 0, "BLCK");
@@ -914,7 +862,6 @@ int FDSLoad(const char *name, FCEUFILE *fp) {
 	AddExState(&mapperFDS_blocklen, 2, 1, "BLKL");
 	AddExState(&mapperFDS_diskaddr, 2, 1, "DADR");
 	AddExState(&mapperFDS_diskaccess, 1, 0, "DACC");
-#endif
 
 	CHRRAMSize = 8192;
 	CHRRAM = (uint8*)FCEU_gmalloc(CHRRAMSize);
