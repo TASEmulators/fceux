@@ -632,7 +632,7 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 		QList<QUrl> urls = event->mimeData()->urls();
 
 		fceuWrapperLock();
-		LoadGame( urls[0].path().toStdString().c_str() );
+		LoadGame( urls[0].toString( QUrl::PreferLocalFile ).toStdString().c_str() );
 		fceuWrapperUnLock();
 		event->accept();
 	}
