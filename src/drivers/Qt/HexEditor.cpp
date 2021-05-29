@@ -3982,7 +3982,6 @@ void hexEditorSaveBookmarks(void)
 {
 	std::list <HexEditorDialog_t*>::iterator it;
 
-	printf("Save Bookmarks\n");
 	hbm.saveToFile();
 	hbm.removeAll();
 

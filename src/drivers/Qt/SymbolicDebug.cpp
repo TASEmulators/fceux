@@ -119,6 +119,17 @@ int debugSymbolPage_t::save(void)
 	char stmp[512];
 	int i,j;
 
+	if ( symMap.size() == 0 )
+	{
+		//printf("Skipping Empty Debug Page Save\n");
+		return 0;
+	}
+	if ( pageNum == -2 )
+	{
+		//printf("Skipping Register Debug Page Save\n");
+		return 0;
+	}
+
 	romFile = getRomFile();
 
 	if ( romFile == NULL )
