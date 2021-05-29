@@ -100,7 +100,6 @@ else(WIN32)
   pkg_search_module( LUA lua5.1 lua-5.1 )
 
   add_definitions( -DHAVE_ASPRINTF ) # What system wouldn't have this?
-  #add_definitions( -DCREATE_AVI    ) 
 
   if(APPLE)
 	set( OPENGL_LDFLAGS  "-framework OpenGL" )
