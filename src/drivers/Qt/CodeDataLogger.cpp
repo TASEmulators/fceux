@@ -888,6 +888,8 @@ void CDLoggerROMClosed(void)
 	{
 		//printf("Auto Saving CDL\n");
 		SaveCDLogFile();
+
+		autoSaveArmedCDL = false;
 	}
 }
 //----------------------------------------------------
@@ -931,8 +933,6 @@ void RenameCDLog(const char *newName)
 //----------------------------------------------------
 void SaveCDLogFile(void)
 {
-	autoSaveArmedCDL = false;
-
 	if (loadedcdfile[0] == 0)
 	{
 		char nameo[1024];
