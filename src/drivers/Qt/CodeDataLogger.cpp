@@ -47,6 +47,7 @@
 static int autoSaveCDL = true;
 static int autoLoadCDL = true;
 static int autoResumeCDL = false;
+static bool autoSaveArmedCDL = false;
 static char loadedcdfile[512] = {0};
 
 static int getDefaultCDLFile(char *filepath);
@@ -856,6 +857,7 @@ void StartCDLogging(void)
 	FCEUI_SetLoggingCD(1);
 	//EnableTracerMenuItems();
 	//SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
+	autoSaveArmedCDL = true;
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------
@@ -877,9 +879,14 @@ bool PauseCDLogging(void)
 //----------------------------------------------------
 void CDLoggerROMClosed(void)
 {
+	g_config->getOption("SDL.AutoSaveCDL", &autoSaveCDL);
+
 	PauseCDLogging();
-	if (autoSaveCDL)
+
+	// Only auto save CDL file if the logger has actually been started at least once.
+	if (autoSaveCDL && autoSaveArmedCDL)
 	{
+		//printf("Auto Saving CDL\n");
 		SaveCDLogFile();
 	}
 }
@@ -924,6 +931,8 @@ void RenameCDLog(const char *newName)
 //----------------------------------------------------
 void SaveCDLogFile(void)
 {
+	autoSaveArmedCDL = false;
+
 	if (loadedcdfile[0] == 0)
 	{
 		char nameo[1024];
