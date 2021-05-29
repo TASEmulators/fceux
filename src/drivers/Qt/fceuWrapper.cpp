@@ -739,6 +739,13 @@ int  fceuWrapperInit( int argc, char *argv[] )
 
 	g_config->getOption ("SDL.DrawInputAids", &drawInputAidsEnable);
 
+	// Initialize Autofire Pattern
+	int autofireOnFrames=1, autofireOffFrames=1;
+	g_config->getOption ("SDL.AutofireOnFrames" , &autofireOnFrames );
+	g_config->getOption ("SDL.AutofireOffFrames", &autofireOffFrames);
+
+	SetAutoFirePattern( autofireOnFrames, autofireOffFrames );
+
 	// check to see if recording HUD to AVI is enabled
 	int rh;
 	g_config->getOption("SDL.RecordHUD", &rh);

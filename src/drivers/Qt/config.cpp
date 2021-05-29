@@ -529,6 +529,10 @@ InitConfig()
 	config->addOption("input4", "SDL.Input.3", "Gamepad.3");
 
 	config->addOption("autoInputPreset", "SDL.AutoInputPreset", 0);
+	config->addOption("SDL.AutofireOnFrames" , 1);
+	config->addOption("SDL.AutofireOffFrames", 1);
+	config->addOption("SDL.AutofireCustomOnFrames" , 1);
+	config->addOption("SDL.AutofireCustomOffFrames", 1);
 
 	// display input
 	config->addOption("inputdisplay", "SDL.InputDisplay", 0);

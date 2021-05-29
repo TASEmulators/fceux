@@ -678,6 +678,7 @@ void consoleWin_t::createMainMenu(void)
 	QMenu *subMenu, *aviMenu;
 	QActionGroup *group;
 	int useNativeMenuBar;
+	int customAutofireOnFrames, customAutofireOffFrames;
 	//QShortcut *shortcut;
 
 	menubar = new consoleMenuBar(this);
@@ -1283,17 +1284,45 @@ void consoleWin_t::createMainMenu(void)
 	// Emulation -> AutoFire Pattern
 	subMenu = emuMenu->addMenu(tr("&AutoFire Pattern"));
 	
-	// Emulation -> AutoFire Pattern -> # On Frames
-	act = new QAction(tr("# O&N Frames"), this);
-	act->setStatusTip(tr("# ON Frames"));
-	connect(act, SIGNAL(triggered()), this, SLOT(setAutoFireOnFrames(void)) );
-	
-	subMenu->addAction(act);
+	group   = new QActionGroup(this);
+	group->setExclusive(true);
 
-	// Emulation -> AutoFire Pattern -> # Off Frames
-	act = new QAction(tr("# O&FF Frames"), this);
-	act->setStatusTip(tr("# OFF Frames"));
-	connect(act, SIGNAL(triggered()), this, SLOT(setAutoFireOffFrames(void)) );
+	for (int i=1; i<6; i++)
+	{
+		char stmp[64];
+
+		for (int j=1; j<=(6-i); j++)
+		{
+			sprintf( stmp, "%i On, %i Off", i, j );
+			autoFireMenuAction *afAct = new autoFireMenuAction( i, j, tr(stmp), this);
+			afAct->setCheckable(true);
+			group->addAction(afAct);
+			subMenu->addAction(afAct);
+			afActList.push_back(afAct);
+
+			connect( afAct, SIGNAL(triggered(void)), afAct, SLOT(activateCB(void)) );
+		}
+	}
+
+	g_config->getOption("SDL.AutofireCustomOnFrames"  , &customAutofireOnFrames );
+	g_config->getOption("SDL.AutofireCustomOffFrames" , &customAutofireOffFrames);
+
+	afActCustom = new autoFireMenuAction( customAutofireOnFrames, customAutofireOffFrames, tr("Custom"), this);
+	afActCustom->setCheckable(true);
+	group->addAction(afActCustom);
+	subMenu->addAction(afActCustom);
+	//afActList.push_back(afAct);
+
+	connect( afActCustom, SIGNAL(triggered(void)), afActCustom, SLOT(activateCB(void)) );
+
+	subMenu->addSeparator();
+
+	syncAutoFirePatternMenu();
+
+	// Emulation -> AutoFire Pattern -> Set Custom Pattern
+	act = new QAction(tr("Set Custom Pattern"), this);
+	act->setStatusTip(tr("Set Custom Pattern"));
+	connect(act, SIGNAL(triggered()), this, SLOT(setCustomAutoFire(void)) );
 	
 	subMenu->addAction(act);
 
@@ -3082,51 +3111,96 @@ void consoleWin_t::emuSetFrameAdvDelay(void)
 	}
 }
 
-void consoleWin_t::setAutoFireOnFrames(void)
+void consoleWin_t::syncAutoFirePatternMenu(void)
 {
-	int ret, autoFireOnFrames, autoFireOffFrames;
-	QInputDialog dialog(this);
+	int on, off;
 
-	GetAutoFirePattern( &autoFireOnFrames, &autoFireOffFrames );
+	GetAutoFirePattern( &on, &off );
 
-	dialog.setWindowTitle( tr("AutoFire Pattern ON Frames") );
-	dialog.setLabelText( tr("Specify desired number of ON frames in autofire pattern:") );
-	dialog.setOkButtonText( tr("Ok") );
-	dialog.setInputMode( QInputDialog::IntInput );
-	dialog.setIntRange( 1, 30 );
-	dialog.setIntValue( autoFireOnFrames );
-	
-	ret = dialog.exec();
-	
-	if ( QDialog::Accepted == ret )
+	for (size_t i=0; i<afActList.size(); i++)
 	{
-		autoFireOnFrames = dialog.intValue();
-
-		SetAutoFirePattern( autoFireOnFrames, autoFireOffFrames );
+		if ( afActList[i]->isMatch( on, off ) )
+		{
+			afActList[i]->setChecked(true);
+			return;
+		}
 	}
-}
 
-void consoleWin_t::setAutoFireOffFrames(void)
+	// If we get here, then the custom option is selected.
+	afActCustom->setChecked(true);
+
+}
+void consoleWin_t::setCustomAutoFire(void)
 {
 	int ret, autoFireOnFrames, autoFireOffFrames;
-	QInputDialog dialog(this);
+	QDialog dialog(this);
+	QLabel *lbl;
+	QGridLayout *grid;
+	QVBoxLayout *vbox;
+	QSpinBox *onBox, *offBox;
+	QPushButton *okButton, *cancelButton;
 
-	GetAutoFirePattern( &autoFireOnFrames, &autoFireOffFrames );
+	autoFireOnFrames  = afActCustom->getOnValue();
+	autoFireOffFrames = afActCustom->getOffValue();
 
-	dialog.setWindowTitle( tr("AutoFire Pattern OFF Frames") );
-	dialog.setLabelText( tr("Specify desired number of OFF frames in autofire pattern:") );
-	dialog.setOkButtonText( tr("Ok") );
-	dialog.setInputMode( QInputDialog::IntInput );
-	dialog.setIntRange( 1, 30 );
-	dialog.setIntValue( autoFireOffFrames );
+	dialog.setWindowTitle( tr("Custom AutoFire Pattern") );
+
+	 onBox = new QSpinBox();
+	offBox = new QSpinBox();
+
+	 onBox->setMinimum( 1);
+	offBox->setMinimum( 1);
+	 onBox->setMaximum(30);
+	offBox->setMaximum(30);
+
+	 onBox->setValue( autoFireOnFrames  );
+	offBox->setValue( autoFireOffFrames );
+
+	vbox = new QVBoxLayout();
+	grid = new QGridLayout();
+
+	lbl = new QLabel( tr("# ON Frames") );
+
+	grid->addWidget( lbl, 0, 0 );
+
+	lbl = new QLabel( tr("# OFF Frames") );
+
+	grid->addWidget( lbl, 1, 0 );
+
+	grid->addWidget( onBox , 0, 1 );
+	grid->addWidget( offBox, 1, 1 );
+
+	    okButton = new QPushButton( tr("Ok") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	grid->addWidget( cancelButton , 2, 0 );
+	grid->addWidget(     okButton , 2, 1 );
+
+	vbox->addLayout( grid );
+
+	dialog.setLayout( vbox );
 	
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+
+	okButton->setDefault(true);
+
 	ret = dialog.exec();
 	
 	if ( QDialog::Accepted == ret )
 	{
-		autoFireOffFrames = dialog.intValue();
+		autoFireOnFrames  =  onBox->value();
+		autoFireOffFrames = offBox->value();
 
-		SetAutoFirePattern( autoFireOnFrames, autoFireOffFrames );
+		afActCustom->setPattern( autoFireOnFrames, autoFireOffFrames );
+
+		if ( afActCustom->isChecked() )
+		{
+			afActCustom->activateCB();
+		}
+		g_config->setOption("SDL.AutofireCustomOnFrames"  , autoFireOnFrames );
+		g_config->setOption("SDL.AutofireCustomOffFrames" , autoFireOffFrames);
+		g_config->save();
 	}
 }
 
@@ -4111,4 +4185,33 @@ void consoleRecentRomAction::activateCB(void)
 	fceuWrapperUnLock();
 }
 //-----------------------------------------------------------------------------
+autoFireMenuAction::autoFireMenuAction(int on, int off, QString name, QWidget *parent)
+	: QAction( name, parent)
+{
+	onFrames = on;  offFrames = off;
+}
+//-----------------------------------------------------------------------------
+autoFireMenuAction::~autoFireMenuAction(void)
+{
+
+}
+//-----------------------------------------------------------------------------
+void autoFireMenuAction::activateCB(void)
+{
+	g_config->setOption("SDL.AutofireOnFrames"  , onFrames );
+	g_config->setOption("SDL.AutofireOffFrames" , offFrames);
+	g_config->save();
+
+	SetAutoFirePattern( onFrames, offFrames );
+}
+//-----------------------------------------------------------------------------
+bool autoFireMenuAction::isMatch( int on, int off )
+{
+	return ( (on == onFrames) && (off == offFrames) );
+}
+//-----------------------------------------------------------------------------
+void autoFireMenuAction::setPattern(int on, int off)
+{
+	onFrames = on;  offFrames = off;
+}
 //-----------------------------------------------------------------------------
