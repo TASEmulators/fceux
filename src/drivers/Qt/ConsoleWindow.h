@@ -16,6 +16,8 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QKeyEvent>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QTimer>
 #include <QThread>
 #include <QCursor>
@@ -257,6 +259,8 @@ class  consoleWin_t : public QMainWindow
 		void closeEvent(QCloseEvent *event);
 		void keyPressEvent(QKeyEvent *event);
 		void keyReleaseEvent(QKeyEvent *event);
+		void dragEnterEvent(QDragEnterEvent *event);
+		void dropEvent(QDropEvent *event);
 		void syncActionConfig( QAction *act, const char *property );
 		void showErrorMsgWindow(void);
 

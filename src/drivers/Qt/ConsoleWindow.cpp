@@ -140,6 +140,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	setWindowTitle( tr(FCEU_NAME_AND_VERSION) );
 	setWindowIcon(QIcon(":fceux1.png"));
+	setAcceptDrops(true);
 
 	gameTimer  = new QTimer( this );
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
@@ -614,6 +615,27 @@ void consoleWin_t::keyReleaseEvent(QKeyEvent *event)
 	pushKeyEvent( event, 0 );
 
 	event->accept();
+}
+
+void consoleWin_t::dragEnterEvent(QDragEnterEvent *event)
+{
+	if (event->mimeData()->hasUrls() )
+	{
+		event->acceptProposedAction();
+	}
+}
+
+void consoleWin_t::dropEvent(QDropEvent *event)
+{
+	if (event->mimeData()->hasUrls() )
+	{
+		QList<QUrl> urls = event->mimeData()->urls();
+
+		fceuWrapperLock();
+		LoadGame( urls[0].path().toStdString().c_str() );
+		fceuWrapperUnLock();
+		event->accept();
+	}
 }
 
 //---------------------------------------------------------------------------
