@@ -41,6 +41,8 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	QGroupBox *frame;
 	QSlider *vslider;
 
+	sndQuality = 1;
+
 	setWindowTitle(tr("Sound Config"));
 
 	mainLayout = new QVBoxLayout();
@@ -73,6 +75,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	qualitySelect->addItem(tr("Very High"), 2);
 
 	setComboBoxFromProperty(qualitySelect, "SDL.Sound.Quality");
+	g_config->getOption("SDL.Sound.Quality", &sndQuality );
 
 	connect(qualitySelect, SIGNAL(currentIndexChanged(int)), this, SLOT(soundQualityChanged(int)));
 
@@ -192,47 +195,47 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	frame = new QGroupBox(tr("Square2"));
 	vbox2 = new QVBoxLayout();
 	sqr2Lbl = new QLabel("255");
-	vslider = new QSlider(Qt::Vertical);
-	vslider->setMinimum(0);
-	vslider->setMaximum(255);
-	setSliderFromProperty(vslider, sqr2Lbl, "SDL.Sound.Square2Volume");
+	sqr2Slider = new QSlider(Qt::Vertical);
+	sqr2Slider->setMinimum(0);
+	sqr2Slider->setMaximum(255);
+	setSliderFromProperty(sqr2Slider, sqr2Lbl, "SDL.Sound.Square2Volume");
 
 	vbox2->addWidget(sqr2Lbl);
-	vbox2->addWidget(vslider);
+	vbox2->addWidget(sqr2Slider);
 	frame->setLayout(vbox2);
 	hbox2->addWidget(frame);
 
-	connect(vslider, SIGNAL(valueChanged(int)), this, SLOT(square2Changed(int)));
+	connect(sqr2Slider, SIGNAL(valueChanged(int)), this, SLOT(square2Changed(int)));
 
 	frame = new QGroupBox(tr("Noise"));
 	vbox2 = new QVBoxLayout();
 	nseLbl = new QLabel("255");
-	vslider = new QSlider(Qt::Vertical);
-	vslider->setMinimum(0);
-	vslider->setMaximum(255);
-	setSliderFromProperty(vslider, nseLbl, "SDL.Sound.NoiseVolume");
+	nseSlider = new QSlider(Qt::Vertical);
+	nseSlider->setMinimum(0);
+	nseSlider->setMaximum(255);
+	setSliderFromProperty(nseSlider, nseLbl, "SDL.Sound.NoiseVolume");
 
 	vbox2->addWidget(nseLbl);
-	vbox2->addWidget(vslider);
+	vbox2->addWidget(nseSlider);
 	frame->setLayout(vbox2);
 	hbox2->addWidget(frame);
 
-	connect(vslider, SIGNAL(valueChanged(int)), this, SLOT(noiseChanged(int)));
+	connect(nseSlider, SIGNAL(valueChanged(int)), this, SLOT(noiseChanged(int)));
 
 	frame = new QGroupBox(tr("PCM"));
 	vbox2 = new QVBoxLayout();
 	pcmLbl = new QLabel("255");
-	vslider = new QSlider(Qt::Vertical);
-	vslider->setMinimum(0);
-	vslider->setMaximum(255);
-	setSliderFromProperty(vslider, pcmLbl, "SDL.Sound.PCMVolume");
+	pcmSlider = new QSlider(Qt::Vertical);
+	pcmSlider->setMinimum(0);
+	pcmSlider->setMaximum(255);
+	setSliderFromProperty(pcmSlider, pcmLbl, "SDL.Sound.PCMVolume");
 
 	vbox2->addWidget(pcmLbl);
-	vbox2->addWidget(vslider);
+	vbox2->addWidget(pcmSlider);
 	frame->setLayout(vbox2);
 	hbox2->addWidget(frame);
 
-	connect(vslider, SIGNAL(valueChanged(int)), this, SLOT(pcmChanged(int)));
+	connect(pcmSlider, SIGNAL(valueChanged(int)), this, SLOT(pcmChanged(int)));
 
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
@@ -247,6 +250,8 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	// Set Final Layout
 	setLayout(mainLayout);
+
+	setSliderEnables();
 }
 //----------------------------------------------------
 ConsoleSndConfDialog_t::~ConsoleSndConfDialog_t(void)
@@ -267,6 +272,29 @@ void ConsoleSndConfDialog_t::closeWindow(void)
 	//printf("Sound Close Window\n");
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------
+void ConsoleSndConfDialog_t::setSliderEnables(void)
+{
+	if ( sndQuality == 0 )
+	{
+		sqr2Lbl->setEnabled(false);
+		nseLbl->setEnabled(false);
+		pcmLbl->setEnabled(false);
+		sqr2Slider->setEnabled(false);
+		nseSlider->setEnabled(false);
+		pcmSlider->setEnabled(false);
+	}
+	else
+	{
+		sqr2Lbl->setEnabled(true);
+		nseLbl->setEnabled(true);
+		pcmLbl->setEnabled(true);
+		sqr2Slider->setEnabled(true);
+		nseSlider->setEnabled(true);
+		pcmSlider->setEnabled(true);
+	}
+
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::setCheckBoxFromProperty(QCheckBox *cbx, const char *property)
@@ -489,6 +517,7 @@ void ConsoleSndConfDialog_t::soundQualityChanged(int index)
 	//printf("Sound Quality: %i : %i \n", index, qualitySelect->itemData(index).toInt() );
 
 	g_config->setOption("SDL.Sound.Quality", qualitySelect->itemData(index).toInt());
+	g_config->getOption("SDL.Sound.Quality", &sndQuality );
 
 	// reset sound subsystem for changes to take effect
 	if (fceuWrapperTryLock())
@@ -498,6 +527,8 @@ void ConsoleSndConfDialog_t::soundQualityChanged(int index)
 		fceuWrapperUnLock();
 	}
 	g_config->save();
+
+	setSliderEnables();
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::soundRateChanged(int index)
