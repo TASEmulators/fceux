@@ -121,20 +121,28 @@ void ConsoleViewSDL_t::setLinearFilterEnable( bool ena )
 
 void ConsoleViewSDL_t::setScaleXY( double xs, double ys )
 {
-	float xyRatio   = (float)nes_shm->video.xyRatio;
+	//float xyRatio   = (float)nes_shm->video.xyRatio;
 
 	xscale = xs;
 	yscale = ys;
 
 	if ( forceAspect )
 	{
-		if ( (xscale*xyRatio) < yscale )
+		//if ( (xscale*xyRatio) < yscale )
+		//{
+		//	yscale = (xscale*xyRatio);
+		//}
+		//else 
+		//{
+		//	xscale = (yscale/xyRatio);
+		//}
+		if ( xscale < yscale )
 		{
-			yscale = (xscale*xyRatio);
+			yscale = xscale;
 		}
 		else 
 		{
-			xscale = (yscale/xyRatio);
+			xscale = yscale;
 		}
 	}
 }
@@ -419,27 +427,42 @@ void ConsoleViewSDL_t::render(void)
 {
 	int nesWidth  = GL_NES_WIDTH;
 	int nesHeight = GL_NES_HEIGHT;
-	float xyRatio = 1.0;
+	//float xyRatio = 1.0;
+	float ixScale = 1.0;
+	float iyScale = 1.0;
 
 	if ( nes_shm != NULL )
 	{
 		nesWidth  = nes_shm->video.ncol;
 		nesHeight = nes_shm->video.nrow;
-		xyRatio   = (float)nes_shm->video.xyRatio;
+		//xyRatio   = (float)nes_shm->video.xyRatio;
+		ixScale   = (float)nes_shm->video.xscale;
+		iyScale   = (float)nes_shm->video.yscale;
 	}
 	//printf(" %i x %i \n", nesWidth, nesHeight );
 	float xscaleTmp = (float)view_width  / (float)nesWidth;
 	float yscaleTmp = (float)view_height / (float)nesHeight;
 
+	xscaleTmp *= ixScale;
+	yscaleTmp *= iyScale;
+
 	if ( forceAspect )
 	{
-		if ( (xscaleTmp*xyRatio) < yscaleTmp )
+		//if ( (xscaleTmp*xyRatio) < yscaleTmp )
+		//{
+		//	yscaleTmp = (xscaleTmp*xyRatio);
+		//}
+		//else 
+		//{
+		//	xscaleTmp = (yscaleTmp/xyRatio);
+		//}
+		if ( xscaleTmp < yscaleTmp )
 		{
-			yscaleTmp = (xscaleTmp*xyRatio);
+			yscaleTmp = xscaleTmp;
 		}
 		else 
 		{
-			xscaleTmp = (yscaleTmp/xyRatio);
+			xscaleTmp = yscaleTmp;
 		}
 	}
 
@@ -460,8 +483,8 @@ void ConsoleViewSDL_t::render(void)
 		}
 	}
 
-	rw=(int)(nesWidth*xscaleTmp);
-	rh=(int)(nesHeight*yscaleTmp);
+	rw=(int)(nesWidth*xscaleTmp/ixScale);
+	rh=(int)(nesHeight*yscaleTmp/iyScale);
 
 	if ( forceAspect )
 	{
