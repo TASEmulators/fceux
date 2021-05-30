@@ -792,6 +792,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 						lastindex = index;
 					}
 				}
+				src += (256-xr);
 			}
 
 		}

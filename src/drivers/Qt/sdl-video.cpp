@@ -437,7 +437,7 @@ void
 BlitScreen(uint8 *XBuf)
 {
 	uint8 *dest;
-	int w, h, pitch, ixScale, iyScale;
+	int w, h, pitch, bw, ixScale, iyScale;
 
 	// refresh the palette if required
 	if (s_paletterefresh) 
@@ -456,10 +456,12 @@ BlitScreen(uint8 *XBuf)
 	if ( s_sponge == 3 )
 	{
 		w = ixScale*301;
+		bw = 256;
 	}
 	else
 	{
 		w = ixScale*NWIDTH;
+		bw = NWIDTH;
 	}
 	if ( s_sponge == 9 )
 	{
@@ -484,7 +486,7 @@ BlitScreen(uint8 *XBuf)
 	}
 	else
 	{
-		Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, ixScale, iyScale);
+		Blit8ToHigh(XBuf + NOFFSET, dest, bw, s_tlines, pitch, ixScale, iyScale);
 	}
 	nes_shm->blitUpdated = 1;
 
