@@ -401,6 +401,12 @@ CloseGame(void)
 {
 	std::string filename;
 
+	if ( nes_shm )
+	{	// Clear Screen on Game Close
+		nes_shm->clear_pixbuf();
+		nes_shm->blitUpdated = 1;
+	}
+
 	if (!isloaded) {
 		return(0);
 	}
