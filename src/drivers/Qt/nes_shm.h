@@ -25,7 +25,8 @@ struct  nes_shm_t
 		int   ncol;
 		int   nrow;
 		int   pitch;
-		int   scale;
+		int   xscale;
+		int   yscale;
 		int   xyRatio;
 		int   preScaler;
 	} video;

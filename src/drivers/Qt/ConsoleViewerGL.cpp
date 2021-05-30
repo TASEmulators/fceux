@@ -163,7 +163,7 @@ void ConsoleViewGL_t::buildTextures(void)
 
 	if ( textureType == GL_TEXTURE_RECTANGLE )
 	{
-		printf("Using GL_TEXTURE_RECTANGLE\n");
+		//printf("Using GL_TEXTURE_RECTANGLE\n");
 		glEnable(GL_TEXTURE_RECTANGLE);
 		glGenTextures(1, &gltexture);
 		//printf("Linear Interpolation on GL Texture: %s \n", linearFilter ? "Enabled" : "Disabled");
@@ -184,7 +184,7 @@ void ConsoleViewGL_t::buildTextures(void)
 	}
 	else
 	{
-		printf("Using GL_TEXTURE_2D\n");
+		//printf("Using GL_TEXTURE_2D\n");
 		glEnable(GL_TEXTURE_2D);
 		glGenTextures(1, &gltexture);
 		//printf("Linear Interpolation on GL Texture: %s \n", linearFilter ? "Enabled" : "Disabled");
@@ -224,7 +224,7 @@ void ConsoleViewGL_t::chkExtnsGL(void)
 
 	glGetIntegerv(GL_NUM_EXTENSIONS, &NumberOfExtensions);
 
-	printf("Number of GL Externsions: %i \n", NumberOfExtensions );
+	//printf("Number of GL Externsions: %i \n", NumberOfExtensions );
 
   	c = glGetString( GL_VERSION );
 
@@ -264,12 +264,12 @@ void ConsoleViewGL_t::chkExtnsGL(void)
 
 				if ( strcmp( extName, "GL_ARB_texture_rectangle" ) == 0 )
 				{
-					printf("GL Has: %s\n", extName );
+					//printf("GL Has: %s\n", extName );
 					textureType = GL_TEXTURE_RECTANGLE;
 				}
 				else if ( strcmp( extName, "GL_ARB_texture_non_power_of_two" ) == 0 )
 				{
-					printf("GL Has: %s\n", extName );
+					//printf("GL Has: %s\n", extName );
 					reqPwr2 = false;
 				}
 			}
@@ -343,20 +343,28 @@ void ConsoleViewGL_t::setLinearFilterEnable( bool ena )
 
 void ConsoleViewGL_t::setScaleXY( double xs, double ys )
 {
-	float xyRatio   = (float)nes_shm->video.xyRatio;
+	//float xyRatio   = (float)nes_shm->video.xyRatio;
 
 	xscale = xs;
 	yscale = ys;
 
 	if ( forceAspect )
 	{
-		if ( (xscale*xyRatio) < yscale )
+		//if ( (xscale*xyRatio) < yscale )
+		//{
+		//	yscale = (xscale*xyRatio);
+		//}
+		//else 
+		//{
+		//	xscale = (yscale/xyRatio);
+		//}
+		if ( xscale < yscale )
 		{
-			yscale = (xscale*xyRatio);
+			yscale = xscale;
 		}
 		else 
 		{
-			xscale = (yscale/xyRatio);
+			xscale = yscale;
 		}
 	}
 }
@@ -476,19 +484,32 @@ void ConsoleViewGL_t::paintGL(void)
 	int l=0, r=texture_width;
 	int t=0, b=texture_height;
 
-	float xyRatio   = (float)nes_shm->video.xyRatio;
+	float ixScale   = (float)nes_shm->video.xscale;
+	float iyScale   = (float)nes_shm->video.yscale;
+	//float xyRatio   = (float)nes_shm->video.xyRatio;
 	float xscaleTmp = (float)(view_width)  / (float)(texture_width);
 	float yscaleTmp = (float)(view_height) / (float)(texture_height);
 
+	xscaleTmp *= ixScale;
+	yscaleTmp *= iyScale;
+
 	if ( forceAspect )
 	{
-		if ( (xscaleTmp*xyRatio) < yscaleTmp )
+		//if ( (xscaleTmp*xyRatio) < yscaleTmp )
+		//{
+		//	yscaleTmp = xscaleTmp * xyRatio;
+		//}
+		//else 
+		//{
+		//	xscaleTmp = yscaleTmp / xyRatio;
+		//}
+		if ( xscaleTmp < yscaleTmp )
 		{
-			yscaleTmp = xscaleTmp * xyRatio;
+			yscaleTmp = xscaleTmp;
 		}
 		else 
 		{
-			xscaleTmp = yscaleTmp / xyRatio;
+			xscaleTmp = yscaleTmp;
 		}
 	}
 
@@ -509,8 +530,8 @@ void ConsoleViewGL_t::paintGL(void)
 		}
 	}
 
-	rw=(int)((r-l)*xscaleTmp);
-	rh=(int)((b-t)*yscaleTmp);
+	rw=(int)((r-l)*xscaleTmp/ixScale);
+	rh=(int)((b-t)*yscaleTmp/iyScale);
 
 	if ( forceAspect )
 	{

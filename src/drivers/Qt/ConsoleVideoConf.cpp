@@ -879,13 +879,13 @@ QSize ConsoleVideoConfDialog_t::calcNewScreenSize(void)
 
 		if ( aspectCbx->isChecked() )
 		{
-			xscale = xScaleBox->value();
+			xscale = xScaleBox->value() / nes_shm->video.xscale;
 			yscale = xscale * (double)nes_shm->video.xyRatio;
 		}
 		else
 		{
-			xscale = xScaleBox->value();
-			yscale = yScaleBox->value();
+			xscale = xScaleBox->value() / nes_shm->video.xscale;
+			yscale = yScaleBox->value() / nes_shm->video.yscale;
 		}
 		rw=(int)((r-l)*xscale);
 		rh=(int)((b-t)*yscale);

@@ -150,28 +150,33 @@ void CalcVideoDimensions(void)
 	{
 		default:
 		case 0: // None
-			 nes_shm->video.scale = 1;
+			nes_shm->video.xscale = 1;
+			nes_shm->video.yscale = 1;
 		break;
 		case 1: // hq2x
 		case 2: // Scale2x
 		case 3: // NTSC 2x
 		case 6: // Prescale2x
-			 nes_shm->video.scale = 2;
+			nes_shm->video.xscale = 2;
+			nes_shm->video.yscale = 2;
 		break;
 		case 4: // hq3x
 		case 5: // Scale3x
 		case 7: // Prescale3x
-			 nes_shm->video.scale = 3;
+			nes_shm->video.xscale = 3;
+			nes_shm->video.yscale = 3;
 		break;
 		case 8: // Prescale4x
-			 nes_shm->video.scale = 4;
+			nes_shm->video.xscale = 4;
+			nes_shm->video.yscale = 4;
 		break;
 		case 9: // PAL
-			 nes_shm->video.scale = 3;
+			nes_shm->video.xscale = 3;
+			nes_shm->video.yscale = 1;
 		break;
 	}
 
-	int iScale = nes_shm->video.scale;
+	int iScale = nes_shm->video.xscale;
 	if ( s_sponge == 3 )
 	{
 		nes_shm->video.ncol = iScale*301;
@@ -236,24 +241,29 @@ int InitVideo(FCEUGI *gi)
 	{
 		default:
 		case 0: // None
-			 nes_shm->video.scale = 1;
+			nes_shm->video.xscale = 1;
+			nes_shm->video.yscale = 1;
 		break;
 		case 1: // hq2x
 		case 2: // Scale2x
 		case 3: // NTSC 2x
 		case 6: // Prescale2x
-			 nes_shm->video.scale = 2;
+			nes_shm->video.xscale = 2;
+			nes_shm->video.yscale = 2;
 		break;
 		case 4: // hq3x
 		case 5: // Scale3x
 		case 7: // Prescale3x
-			 nes_shm->video.scale = 3;
+			nes_shm->video.xscale = 3;
+			nes_shm->video.yscale = 3;
 		break;
 		case 8: // Prescale4x
-			 nes_shm->video.scale = 4;
+			nes_shm->video.xscale = 4;
+			nes_shm->video.yscale = 4;
 		break;
 		case 9: // PAL
-			 nes_shm->video.scale = 3;
+			nes_shm->video.xscale = 3;
+			nes_shm->video.yscale = 1;
 		break;
 	}
 
@@ -262,7 +272,7 @@ int InitVideo(FCEUGI *gi)
 	// check to see if we are showing FPS
 	FCEUI_SetShowFPS(show_fps);
 
-	int iScale = nes_shm->video.scale;
+	int iScale = nes_shm->video.xscale;
 	if ( s_sponge == 3 )
 	{
 		nes_shm->video.ncol = iScale*301;
@@ -427,7 +437,7 @@ void
 BlitScreen(uint8 *XBuf)
 {
 	uint8 *dest;
-	int w, h, pitch, iScale;
+	int w, h, pitch, ixScale, iyScale;
 
 	// refresh the palette if required
 	if (s_paletterefresh) 
@@ -439,16 +449,17 @@ BlitScreen(uint8 *XBuf)
 	// XXX soules - not entirely sure why this is being done yet
 	XBuf += s_srendline * 256;
 
-	dest   = (uint8*)nes_shm->pixbuf;
-	iScale = nes_shm->video.scale;
+	dest    = (uint8*)nes_shm->pixbuf;
+	ixScale = nes_shm->video.xscale;
+	iyScale = nes_shm->video.yscale;
 
 	if ( s_sponge == 3 )
 	{
-		w = iScale*301;
+		w = ixScale*301;
 	}
 	else
 	{
-		w = iScale*NWIDTH;
+		w = ixScale*NWIDTH;
 	}
 	if ( s_sponge == 9 )
 	{
@@ -456,7 +467,7 @@ BlitScreen(uint8 *XBuf)
 	}
 	else
 	{
-		h  = iScale*s_tlines;
+		h  = ixScale*s_tlines;
 	}
 	pitch  = w*4;
 
@@ -473,7 +484,7 @@ BlitScreen(uint8 *XBuf)
 	}
 	else
 	{
-		Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, iScale, iScale);
+		Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines, pitch, ixScale, iyScale);
 	}
 	nes_shm->blitUpdated = 1;
 
@@ -493,12 +504,13 @@ uint32 PtoV(double nx, double ny)
 
 	//printf("Scaled (%i,%i) \n", x, y);
 
-	x = x / nes_shm->video.scale;
+	x = x / nes_shm->video.xscale;
+	y = y / nes_shm->video.yscale;
 
-	if ( nes_shm->video.xyRatio == 1 )
-	{
-		y = y / nes_shm->video.scale;
-	}
+	//if ( nes_shm->video.xyRatio == 1 )
+	//{
+	//	y = y / nes_shm->video.scale;
+	//}
 	//printf("UnScaled (%i,%i) \n", x, y);
 
 	if (s_clipSides) 

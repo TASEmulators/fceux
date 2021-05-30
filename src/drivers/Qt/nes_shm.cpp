@@ -37,7 +37,8 @@ nes_shm_t *open_nes_shm(void)
 	vaddr->video.ncol      = GL_NES_WIDTH;
 	vaddr->video.nrow      = GL_NES_HEIGHT;
 	vaddr->video.pitch     = GL_NES_WIDTH * 4;
-	vaddr->video.scale     = 1;
+	vaddr->video.xscale    = 1;
+	vaddr->video.yscale    = 1;
 	vaddr->video.xyRatio   = 1;
 	vaddr->video.preScaler = 0;
 
