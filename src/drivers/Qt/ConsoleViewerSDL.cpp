@@ -126,21 +126,11 @@ void ConsoleViewSDL_t::setLinearFilterEnable( bool ena )
 
 void ConsoleViewSDL_t::setScaleXY( double xs, double ys )
 {
-	//float xyRatio   = (float)nes_shm->video.xyRatio;
-
 	xscale = xs;
 	yscale = ys;
 
 	if ( forceAspect )
 	{
-		//if ( (xscale*xyRatio) < yscale )
-		//{
-		//	yscale = (xscale*xyRatio);
-		//}
-		//else 
-		//{
-		//	xscale = (yscale/xyRatio);
-		//}
 		if ( xscale < yscale )
 		{
 			yscale = xscale;
@@ -317,7 +307,7 @@ void ConsoleViewSDL_t::setCursor(const QCursor &c)
 
 	if (pm.format() != QImage::Format_ARGB32)
 	{
-		printf("Coverting Image to ARGB32\n");
+		//printf("Coverting Image to ARGB32\n");
 		pm = pm.convertToFormat(QImage::Format_ARGB32);
 	}
 
@@ -358,7 +348,7 @@ void ConsoleViewSDL_t::setCursor(const QCursor &c)
 	}
 	else
 	{
-		printf("SDL Cursor Initialized at (%i,%i)\n", c.hotSpot().x(), c.hotSpot().y() );
+		//printf("SDL Cursor Initialized at (%i,%i)\n", c.hotSpot().x(), c.hotSpot().y() );
 		SDL_SetCursor(sdlCursor);
 		SDL_ShowCursor( SDL_ENABLE );
 	}
@@ -397,7 +387,7 @@ void ConsoleViewSDL_t::setCursor( Qt::CursorShape s )
 	}
 	else
 	{
-		printf("SDL System Cursor Initialized\n");
+		//printf("SDL System Cursor Initialized\n");
 		SDL_SetCursor(sdlCursor);
 	}
 
@@ -530,7 +520,6 @@ void ConsoleViewSDL_t::render(void)
 {
 	int nesWidth  = GL_NES_WIDTH;
 	int nesHeight = GL_NES_HEIGHT;
-	//float xyRatio = 1.0;
 	float ixScale = 1.0;
 	float iyScale = 1.0;
 
@@ -538,7 +527,6 @@ void ConsoleViewSDL_t::render(void)
 	{
 		nesWidth  = nes_shm->video.ncol;
 		nesHeight = nes_shm->video.nrow;
-		//xyRatio   = (float)nes_shm->video.xyRatio;
 		ixScale   = (float)nes_shm->video.xscale;
 		iyScale   = (float)nes_shm->video.yscale;
 	}
@@ -551,14 +539,6 @@ void ConsoleViewSDL_t::render(void)
 
 	if ( forceAspect )
 	{
-		//if ( (xscaleTmp*xyRatio) < yscaleTmp )
-		//{
-		//	yscaleTmp = (xscaleTmp*xyRatio);
-		//}
-		//else 
-		//{
-		//	xscaleTmp = (yscaleTmp/xyRatio);
-		//}
 		if ( xscaleTmp < yscaleTmp )
 		{
 			yscaleTmp = xscaleTmp;

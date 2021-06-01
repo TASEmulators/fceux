@@ -343,21 +343,11 @@ void ConsoleViewGL_t::setLinearFilterEnable( bool ena )
 
 void ConsoleViewGL_t::setScaleXY( double xs, double ys )
 {
-	//float xyRatio   = (float)nes_shm->video.xyRatio;
-
 	xscale = xs;
 	yscale = ys;
 
 	if ( forceAspect )
 	{
-		//if ( (xscale*xyRatio) < yscale )
-		//{
-		//	yscale = (xscale*xyRatio);
-		//}
-		//else 
-		//{
-		//	xscale = (yscale/xyRatio);
-		//}
 		if ( xscale < yscale )
 		{
 			yscale = xscale;
@@ -486,7 +476,6 @@ void ConsoleViewGL_t::paintGL(void)
 
 	float ixScale   = (float)nes_shm->video.xscale;
 	float iyScale   = (float)nes_shm->video.yscale;
-	//float xyRatio   = (float)nes_shm->video.xyRatio;
 	float xscaleTmp = (float)(view_width)  / (float)(texture_width);
 	float yscaleTmp = (float)(view_height) / (float)(texture_height);
 
@@ -495,14 +484,6 @@ void ConsoleViewGL_t::paintGL(void)
 
 	if ( forceAspect )
 	{
-		//if ( (xscaleTmp*xyRatio) < yscaleTmp )
-		//{
-		//	yscaleTmp = xscaleTmp * xyRatio;
-		//}
-		//else 
-		//{
-		//	xscaleTmp = yscaleTmp / xyRatio;
-		//}
 		if ( xscaleTmp < yscaleTmp )
 		{
 			yscaleTmp = xscaleTmp;
