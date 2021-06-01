@@ -4,6 +4,7 @@
 #pragma  once
 
 #include <QWidget>
+#include <QCursor>
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <SDL.h>
@@ -38,6 +39,8 @@ class ConsoleViewSDL_t : public QWidget
 		void   getAspectXY( double &x, double &y );
 		double getAspectRatio(void);
 
+		void   setCursor(const QCursor &c);
+		void   setCursor( Qt::CursorShape s );
 	protected:
 
 	//void paintEvent(QPaintEvent *event);
@@ -74,6 +77,7 @@ class ConsoleViewSDL_t : public QWidget
  	SDL_Window   *sdlWindow;
 	SDL_Renderer *sdlRenderer;
 	SDL_Texture  *sdlTexture;
+	SDL_Cursor   *sdlCursor;
 	//SDL_Rect      sdlViewport;
 
 	private slots:

@@ -65,6 +65,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	sdlWindow   = NULL;
 	sdlRenderer = NULL;
 	sdlTexture  = NULL;
+	sdlCursor   = NULL;
 
 	vsyncEnabled = false;
 	mouseButtonMask = 0;
@@ -105,6 +106,10 @@ ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
 	if ( localBuf )
 	{
 		free( localBuf ); localBuf = NULL;
+	}
+	if ( sdlCursor )
+	{
+		SDL_FreeCursor(sdlCursor); sdlCursor = NULL;
 	}
 	cleanup();
 }
@@ -301,6 +306,104 @@ void ConsoleViewSDL_t::reset(void)
 	{
 		cleanup();
 	}
+}
+
+void ConsoleViewSDL_t::setCursor(const QCursor &c)
+{
+	QImage pm;
+	SDL_Surface *s;
+
+	pm = c.pixmap().toImage();
+
+	if (pm.format() != QImage::Format_ARGB32)
+	{
+		printf("Coverting Image to ARGB32\n");
+		pm = pm.convertToFormat(QImage::Format_ARGB32);
+	}
+
+	// QImage stores each pixel in ARGB format
+	// Mask appropriately for the endianness
+	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	    Uint32 amask = 0x000000ff;
+	    Uint32 rmask = 0x0000ff00;
+	    Uint32 gmask = 0x00ff0000;
+	    Uint32 bmask = 0xff000000;
+	#else
+	    Uint32 amask = 0xff000000;
+	    Uint32 rmask = 0x00ff0000;
+	    Uint32 gmask = 0x0000ff00;
+	    Uint32 bmask = 0x000000ff;
+	#endif
+
+	s = SDL_CreateRGBSurfaceFrom((void*)pm.constBits(),
+		pm.width(), pm.height(), pm.depth(), pm.bytesPerLine(),
+			rmask, gmask, bmask, amask);
+
+	if ( s == NULL )
+	{
+		printf("Error: Failed to create SDL Surface for Icon\n");
+		return;
+	}
+
+	if ( sdlCursor )
+	{
+		SDL_FreeCursor(sdlCursor); sdlCursor = NULL;
+	}
+
+	sdlCursor = SDL_CreateColorCursor( s, c.hotSpot().x(), c.hotSpot().y() );
+
+	if ( sdlCursor == NULL )
+	{
+		printf("SDL Cursor Failed: %s\n", SDL_GetError() );
+	}
+	else
+	{
+		printf("SDL Cursor Initialized at (%i,%i)\n", c.hotSpot().x(), c.hotSpot().y() );
+		SDL_SetCursor(sdlCursor);
+		SDL_ShowCursor( SDL_ENABLE );
+	}
+
+	QWidget::setCursor(c);
+}
+
+void ConsoleViewSDL_t::setCursor( Qt::CursorShape s )
+{
+	SDL_SystemCursor sdlSysCursor;
+
+	switch ( s )
+	{
+		default:
+		case Qt::ArrowCursor:
+			sdlSysCursor = SDL_SYSTEM_CURSOR_ARROW;
+		break;
+		case Qt::BlankCursor:
+			sdlSysCursor = SDL_SYSTEM_CURSOR_ARROW;
+		break;
+		case Qt::CrossCursor:
+			sdlSysCursor = SDL_SYSTEM_CURSOR_CROSSHAIR;
+		break;
+	}
+
+	if ( sdlCursor )
+	{
+		SDL_FreeCursor(sdlCursor); sdlCursor = NULL;
+	}
+
+	sdlCursor = SDL_CreateSystemCursor( sdlSysCursor );
+
+	if ( sdlCursor == NULL )
+	{
+		printf("SDL Cursor Failed: %s\n", SDL_GetError() );
+	}
+	else
+	{
+		printf("SDL System Cursor Initialized\n");
+		SDL_SetCursor(sdlCursor);
+	}
+
+	SDL_ShowCursor( (s == Qt::BlankCursor) ? SDL_DISABLE : SDL_ENABLE );
+
+	QWidget::setCursor(s);
 }
 
 void ConsoleViewSDL_t::showEvent(QShowEvent *event)
