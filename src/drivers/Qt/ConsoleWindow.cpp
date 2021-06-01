@@ -1753,6 +1753,9 @@ int consoleWin_t::loadVideoDriver( int driverId )
 		viewport_GL->init();
 	}
 
+	// Reload Viewport Cursor Type and Visibility
+	loadCursor();
+
 	return 0;
 }
 //---------------------------------------------------------------------------
