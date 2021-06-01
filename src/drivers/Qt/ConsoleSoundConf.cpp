@@ -276,24 +276,26 @@ void ConsoleSndConfDialog_t::closeWindow(void)
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::setSliderEnables(void)
 {
-	if ( sndQuality == 0 )
-	{
-		sqr2Lbl->setEnabled(false);
-		nseLbl->setEnabled(false);
-		pcmLbl->setEnabled(false);
-		sqr2Slider->setEnabled(false);
-		nseSlider->setEnabled(false);
-		pcmSlider->setEnabled(false);
-	}
-	else
-	{
-		sqr2Lbl->setEnabled(true);
-		nseLbl->setEnabled(true);
-		pcmLbl->setEnabled(true);
-		sqr2Slider->setEnabled(true);
-		nseSlider->setEnabled(true);
-		pcmSlider->setEnabled(true);
-	}
+	// For now, always leave all sliders enabled.
+	// Until we figure out how low qualtiy sound uses these
+	//if ( sndQuality == 0 )
+	//{
+	//	sqr2Lbl->setEnabled(false);
+	//	nseLbl->setEnabled(false);
+	//	pcmLbl->setEnabled(false);
+	//	sqr2Slider->setEnabled(false);
+	//	nseSlider->setEnabled(false);
+	//	pcmSlider->setEnabled(false);
+	//}
+	//else
+	//{
+	//	sqr2Lbl->setEnabled(true);
+	//	nseLbl->setEnabled(true);
+	//	pcmLbl->setEnabled(true);
+	//	sqr2Slider->setEnabled(true);
+	//	nseSlider->setEnabled(true);
+	//	pcmSlider->setEnabled(true);
+	//}
 
 }
 //----------------------------------------------------
