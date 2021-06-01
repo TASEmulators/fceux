@@ -112,6 +112,12 @@ ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
 		SDL_FreeCursor(sdlCursor); sdlCursor = NULL;
 	}
 	cleanup();
+
+	if ( sdlWindow )
+	{
+		SDL_DestroyWindow( sdlWindow );
+		sdlWindow = NULL;
+	}
 }
 
 void ConsoleViewSDL_t::setLinearFilterEnable( bool ena )
