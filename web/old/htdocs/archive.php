@@ -95,7 +95,7 @@ post more information soon.
 
     <h3 class="boxsubhead">5 June 2008</h3>
     <p>
-      No, this project is not dead.  There are a few of us developers working in subversion.  However, we could always use more help.  We need both SDL and Windows developers.  If interested, just come chat with us in #fceu on irc.freenode.net<br>
+      No, this project is not dead.  There are a few of us developers working in subversion.  However, we could always use more help.  We need both SDL and Windows developers.  If interested, just come chat with us in #fceu on irc.libera.chat<br>
         <a href="mailto:ltsmooth42 _at_ gmail _dot _com">Lukas Sabota</a>
       </p>
 
