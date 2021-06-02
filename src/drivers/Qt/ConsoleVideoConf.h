@@ -75,7 +75,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  openGL_linearFilterChanged( int value );
 		void  autoScaleChanged( int value );
 		void  aspectEnableChanged( int value );
-		void  use_new_PPU_changed( int value );
+		void  use_new_PPU_changed( bool value );
 		void  frameskip_changed( int value );
 		void  useSpriteLimitChanged( int value );
 		void  clipSidesChanged( int value );

@@ -14,6 +14,7 @@
 #include <QSlider>
 #include <QFrame>
 #include <QGroupBox>
+#include <QSpinBox>
 #include <QTreeView>
 #include <QTreeWidget>
 
@@ -48,16 +49,25 @@ protected:
 #endif
 	QComboBox *timingDevSelBox;
 
+	QGroupBox *ppuOverClockBox;
+	QSpinBox  *postRenderBox;
+	QSpinBox  *vblankScanlinesBox;
+	QCheckBox *no7bitSamples;
+
+	QTimer    *updateTimer;
+
 private:
 	void updatePolicyBox(void);
 	void updateSliderLimits(void);
 	void updateSliderValues(void);
 	void updateTimingMech(void);
+	void updateOverclocking(void);
 	void saveValues(void);
 
 public slots:
 	void closeWindow(void);
 private slots:
+	void periodicUpdate(void);
 	void emuSchedCtlChange(int state);
 	void emuSchedNiceChange(int val);
 	void emuSchedPrioChange(int val);
@@ -66,4 +76,8 @@ private slots:
 	void guiSchedPrioChange(int val);
 	void guiSchedPolicyChange(int index);
 	void emuTimingMechChange(int index);
+	void overclockingToggled(bool on);
+	void postRenderChanged(int value);
+	void vblankScanlinesChanged(int value);
+	void no7bitChanged(int value);
 };

@@ -23,6 +23,7 @@
 #include "Qt/throttle.h"
 #include "Qt/config.h"
 
+#include "fceu.h"
 #include "../common/cheat.h"
 
 #include "Qt/input.h"
@@ -840,6 +841,8 @@ UpdateEMUCore(Config *config)
 	if(cpalette.size()) {
 		LoadCPalette(cpalette);
 	}
+
+	config->getOption("SDL.NewPPU", &newppu);
 
 	config->getOption("SDL.PAL", &region);
 	FCEUI_SetRegion(region);

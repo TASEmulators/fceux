@@ -20,6 +20,7 @@
 // ConsoleVideoConf.cpp
 //
 #include <QCloseEvent>
+#include <QMessageBox>
 
 #include "../../fceu.h"
 #include "Qt/main.h"
@@ -189,8 +190,8 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 		}
 	}
 
+	connect(new_PPU_ena     , SIGNAL(clicked(bool))    , this, SLOT(use_new_PPU_changed(bool)) );
 	connect(autoRegion      , SIGNAL(stateChanged(int)), this, SLOT(autoRegionChanged(int)) );
-	connect(new_PPU_ena     , SIGNAL(stateChanged(int)), this, SLOT(use_new_PPU_changed(int)) );
 	connect(frmskipcbx      , SIGNAL(stateChanged(int)), this, SLOT(frameskip_changed(int)) );
 	connect(sprtLimCbx      , SIGNAL(stateChanged(int)), this, SLOT(useSpriteLimitChanged(int)) );
 	connect(clipSidesCbx    , SIGNAL(stateChanged(int)), this, SLOT(clipSidesChanged(int)) );
@@ -662,13 +663,43 @@ void ConsoleVideoConfDialog_t::autoRegionChanged( int value )
 	g_config->save ();
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::use_new_PPU_changed( int value )
+void ConsoleVideoConfDialog_t::use_new_PPU_changed( bool value )
 {
-	//printf("Value:%i \n", value );
-	g_config->setOption("SDL.NewPPU", (value == Qt::Checked) );
+	bool reqNewPPU;
+
+	reqNewPPU = value;
+
+	if ( reqNewPPU )
+	{
+		if ( overclock_enabled )
+		{
+			QMessageBox::StandardButton ret;
+			const char *msg = "The new PPU does not support overclocking. This will be disabled. Do you wish to continue?";
+
+			ret =  QMessageBox::question( this, tr("Overclocking"), tr(msg) );
+
+			if ( ret == QMessageBox::No )
+			{
+				//printf("Skipping New PPU Activation\n");
+				new_PPU_ena->setChecked(false);
+				return;
+			}
+		}
+	}
+
+	//printf("NEW PPU Value:%i \n", reqNewPPU );
+	fceuWrapperLock();
+
+	newppu = reqNewPPU;
+
+	if ( newppu )
+	{	
+		overclock_enabled = 0;
+	}
+
+	g_config->setOption("SDL.NewPPU", newppu );
 	g_config->save ();
 
-	fceuWrapperLock();
 	UpdateEMUCore (g_config);
 	fceuWrapperUnLock();
 }

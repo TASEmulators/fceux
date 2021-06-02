@@ -961,13 +961,7 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	}
 #endif
 	
-	{
-		int id;
-		g_config->getOption("SDL.NewPPU", &id);
-		if (id)
-			newppu = 1;
-	}
-
+	g_config->getOption("SDL.NewPPU", &newppu);
 	g_config->getOption("SDL.Frameskip", &frameskip);
 
 	return 0;
