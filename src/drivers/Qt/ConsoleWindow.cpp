@@ -3198,6 +3198,9 @@ void consoleWin_t::setCustomAutoFire(void)
 	    okButton = new QPushButton( tr("Ok") );
 	cancelButton = new QPushButton( tr("Cancel") );
 
+	    okButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton  ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
 	grid->addWidget( cancelButton , 2, 0 );
 	grid->addWidget(     okButton , 2, 1 );
 
