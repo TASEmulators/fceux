@@ -947,7 +947,10 @@ void ConsoleVideoConfDialog_t::applyChanges( void )
 			consoleWindow->viewport_SDL->reset();
 		}
 
-		consoleWindow->resize( s );
+		if ( !consoleWindow->isFullScreen() && !consoleWindow->isMaximized() )
+		{
+			consoleWindow->resize( s );
+		}
 
 		updateReadouts();
 	}
