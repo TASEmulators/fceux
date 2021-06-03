@@ -43,10 +43,8 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	QStyle *style;
 	QGroupBox *gbox;
 	QGridLayout *grid;
-	fceuDecIntValidtor *validator;
 	QFont font;
 	int opt, fontCharWidth;
-	char stmp[128];
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -204,7 +202,6 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	vbox1->addWidget( new_PPU_ena );
 	vbox1->addWidget( frmskipcbx  );
 	vbox1->addWidget( sprtLimCbx  );
-	//vbox1->addWidget( clipSidesCbx);
 	vbox1->addWidget( drawInputAidsCbx );
 	vbox1->addWidget( showFPS_cbx );
 	vbox1->addWidget( autoScaleCbx);
@@ -306,63 +303,52 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	vbox2->addWidget( gbox, 1 );
 	gbox->setLayout(grid);
 
-	ntsc_start = new QLineEdit();
-	ntsc_end   = new QLineEdit();
-	pal_start  = new QLineEdit();
-	pal_end    = new QLineEdit();
+	ntsc_start = new QSpinBox();
+	ntsc_end   = new QSpinBox();
+	pal_start  = new QSpinBox();
+	pal_end    = new QSpinBox();
 
-	validator = new fceuDecIntValidtor( 0, 239, this );
+	ntsc_start->setRange( 0, 239 );
+	  ntsc_end->setRange( 0, 239 );
+	 pal_start->setRange( 0, 239 );
+	   pal_end->setRange( 0, 239 );
+
 	ntsc_start->setFont( font );
-	ntsc_start->setMaxLength( 3 );
-	ntsc_start->setValidator( validator );
-	ntsc_start->setAlignment(Qt::AlignCenter);
-	ntsc_start->setMaximumWidth( 8 * fontCharWidth );
-	ntsc_start->setCursorPosition(0);
+	  ntsc_end->setFont( font );
+	 pal_start->setFont( font );
+	   pal_end->setFont( font );
 
-	validator = new fceuDecIntValidtor( 0, 239, this );
-	ntsc_end->setFont( font );
-	ntsc_end->setMaxLength( 3 );
-	ntsc_end->setValidator( validator );
-	ntsc_end->setAlignment(Qt::AlignCenter);
-	ntsc_end->setMaximumWidth( 8 * fontCharWidth );
-	ntsc_end->setCursorPosition(0);
+	ntsc_start->setMinimumWidth( fontCharWidth * 8 );
+	  ntsc_end->setMinimumWidth( fontCharWidth * 8 );
+	 pal_start->setMinimumWidth( fontCharWidth * 8 );
+	   pal_end->setMinimumWidth( fontCharWidth * 8 );
 
-	validator = new fceuDecIntValidtor( 0, 239, this );
-	pal_start->setFont( font );
-	pal_start->setMaxLength( 3 );
-	pal_start->setValidator( validator );
-	pal_start->setAlignment(Qt::AlignCenter);
-	pal_start->setMaximumWidth( 8 * fontCharWidth );
-	pal_start->setCursorPosition(0);
-
-	validator = new fceuDecIntValidtor( 0, 239, this );
-	pal_end->setFont( font );
-	pal_end->setMaxLength( 3 );
-	pal_end->setValidator( validator );
-	pal_end->setAlignment(Qt::AlignCenter);
-	pal_end->setMaximumWidth( 8 * fontCharWidth );
-	pal_end->setCursorPosition(0);
+	ntsc_start->setMaximumWidth( fontCharWidth * 8 );
+	  ntsc_end->setMaximumWidth( fontCharWidth * 8 );
+	 pal_start->setMaximumWidth( fontCharWidth * 8 );
+	   pal_end->setMaximumWidth( fontCharWidth * 8 );
 
 	g_config->getOption("SDL.ScanLineStartNTSC", &opt);
-	sprintf( stmp, "%i", opt );
-	ntsc_start->setText( tr(stmp) );
+	ntsc_start->setValue( opt );
 
 	g_config->getOption("SDL.ScanLineEndNTSC", &opt);
-	sprintf( stmp, "%i", opt );
-	ntsc_end->setText( tr(stmp) );
+	ntsc_end->setValue( opt );
 
 	g_config->getOption("SDL.ScanLineStartPAL", &opt);
-	sprintf( stmp, "%i", opt );
-	pal_start->setText( tr(stmp) );
+	pal_start->setValue( opt );
 
 	g_config->getOption("SDL.ScanLineEndPAL", &opt);
-	sprintf( stmp, "%i", opt );
-	pal_end->setText( tr(stmp) );
+	pal_end->setValue( opt );
 
-	connect( ntsc_start, SIGNAL(textEdited(const QString &)), this, SLOT(ntscStartScanLineChanged(const QString &)));
-	connect( ntsc_end  , SIGNAL(textEdited(const QString &)), this, SLOT(ntscEndScanLineChanged(const QString &)));
-	connect( pal_start , SIGNAL(textEdited(const QString &)), this, SLOT(palStartScanLineChanged(const QString &)));
-	connect( pal_end   , SIGNAL(textEdited(const QString &)), this, SLOT(palEndScanLineChanged(const QString &)));
+	ntsc_start->setRange( 0, ntsc_end->value() );
+	  ntsc_end->setRange( ntsc_start->value(), 239 );
+	 pal_start->setRange( 0, pal_end->value() );
+	   pal_end->setRange( pal_start->value(), 239 );
+
+	connect( ntsc_start, SIGNAL(valueChanged(int)), this, SLOT(ntscStartScanLineChanged(int)));
+	connect( ntsc_end  , SIGNAL(valueChanged(int)), this, SLOT(ntscEndScanLineChanged(int)));
+	connect( pal_start , SIGNAL(valueChanged(int)), this, SLOT(palStartScanLineChanged(int)));
+	connect( pal_end   , SIGNAL(valueChanged(int)), this, SLOT(palEndScanLineChanged(int)));
 
 	grid->addWidget( new QLabel( tr("NTSC") )      , 0, 1, Qt::AlignLeft);
 	grid->addWidget( new QLabel( tr("PAL/Dendy") ) , 0, 2, Qt::AlignLeft);
@@ -511,88 +497,76 @@ void ConsoleVideoConfDialog_t::updateReadouts(void)
 	}
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::ntscStartScanLineChanged(const QString &txt)
+void ConsoleVideoConfDialog_t::ntscStartScanLineChanged(int value)
 {
 	int opt, opt2;
-	std::string s;
 
-	s = txt.toStdString();
+	opt = value;
 
-	if ( s.size() > 0 )
+	g_config->getOption("SDL.ScanLineEndNTSC", &opt2);
+
+	if ( opt > opt2 )
 	{
-		opt = strtoul( s.c_str(), NULL, 10 );
-
-		g_config->getOption("SDL.ScanLineEndNTSC", &opt2);
-
-		if ( opt > opt2 )
-		{
-			opt = opt2;
-		}
-		g_config->setOption("SDL.ScanLineStartNTSC", opt);
+		opt = opt2;
 	}
+	g_config->setOption("SDL.ScanLineStartNTSC", opt);
+
+	ntsc_start->setRange(  0, opt2 );
+	  ntsc_end->setRange( opt, 239 );
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::ntscEndScanLineChanged(const QString &txt)
+void ConsoleVideoConfDialog_t::ntscEndScanLineChanged(int value)
 {
 	int opt, opt2;
-	std::string s;
 
-	s = txt.toStdString();
+	opt = value;
 
-	if ( s.size() > 0 )
+	g_config->getOption("SDL.ScanLineStartNTSC", &opt2);
+
+	if ( opt < opt2 )
 	{
-		opt = strtoul( s.c_str(), NULL, 10 );
-
-		g_config->getOption("SDL.ScanLineStartNTSC", &opt2);
-
-		if ( opt < opt2 )
-		{
-			opt = opt2;
-		}
-		g_config->setOption("SDL.ScanLineEndNTSC", opt);
+		opt = opt2;
 	}
+	g_config->setOption("SDL.ScanLineEndNTSC", opt);
+
+	ntsc_start->setRange(    0, opt );
+	  ntsc_end->setRange( opt2, 239 );
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::palStartScanLineChanged(const QString &txt)
+void ConsoleVideoConfDialog_t::palStartScanLineChanged(int value)
 {
 	int opt, opt2;
-	std::string s;
 
-	s = txt.toStdString();
+	opt = value;
 
-	if ( s.size() > 0 )
+	g_config->getOption("SDL.ScanLineEndPAL", &opt2);
+
+	if ( opt > opt2 )
 	{
-		opt = strtoul( s.c_str(), NULL, 10 );
-
-		g_config->getOption("SDL.ScanLineEndPAL", &opt2);
-
-		if ( opt > opt2 )
-		{
-			opt = opt2;
-		}
-		g_config->setOption("SDL.ScanLineStartPAL", opt);
+		opt = opt2;
 	}
+	g_config->setOption("SDL.ScanLineStartPAL", opt);
+
+	pal_start->setRange(  0, opt2 );
+	  pal_end->setRange( opt, 239 );
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::palEndScanLineChanged(const QString &txt)
+void ConsoleVideoConfDialog_t::palEndScanLineChanged(int value)
 {
 	int opt, opt2;
-	std::string s;
 
-	s = txt.toStdString();
+	opt = value;
 
-	if ( s.size() > 0 )
+	g_config->getOption("SDL.ScanLineStartPAL", &opt2);
+
+	if ( opt < opt2 )
 	{
-		opt = strtoul( s.c_str(), NULL, 10 );
-
-		g_config->getOption("SDL.ScanLineStartPAL", &opt2);
-
-		if ( opt < opt2 )
-		{
-			opt = opt2;
-		}
-		g_config->setOption("SDL.ScanLineEndPAL", opt);
+		opt = opt2;
 	}
+	g_config->setOption("SDL.ScanLineEndPAL", opt);
+
+	pal_start->setRange(    0, opt );
+	  pal_end->setRange( opt2, 239 );
 }
 //----------------------------------------------------
 void  ConsoleVideoConfDialog_t::setCheckBoxFromProperty( QCheckBox *cbx, const char *property )
