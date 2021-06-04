@@ -25,6 +25,10 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceuWrapper.h"
 
+#ifdef WIN32
+#include <QtPlatformHeaders/QWindowsWindowFunctions>
+#endif
+
 consoleWin_t *consoleWindow = NULL;
 
 static void MessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -120,6 +124,12 @@ int main( int argc, char *argv[] )
 
 	consoleWindow->videoInit();
 
+#ifdef WIN32
+	// This function is needed to fix the issue referenced below. It adds a 1-pixel border
+	// around the fullscreen window due to some limitation in windows.
+	// https://doc.qt.io/qt-5/windows-issues.html#fullscreen-opengl-based-windows
+	QWindowsWindowFunctions::setHasBorderInFullScreen( consoleWindow->windowHandle(), true);
+#endif
 	retval = app.exec();
 
 	//printf("App Return: %i \n", retval );
