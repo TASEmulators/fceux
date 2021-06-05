@@ -935,6 +935,12 @@ void ConsoleVideoConfDialog_t::applyChanges( void )
 			yscale = yScaleBox->value();
 		}
 
+		// Save desired scaling and window size to config.
+		g_config->setOption("SDL.XScale", xscale );
+		g_config->setOption("SDL.YScale", yscale );
+		g_config->setOption("SDL.WinSizeX", s.width() );
+		g_config->setOption("SDL.WinSizeY", s.height() );
+
 		if ( consoleWindow->viewport_GL )
 		{
          		consoleWindow->viewport_GL->setLinearFilterEnable( gl_LF_chkBox->isChecked() );

@@ -231,18 +231,24 @@ consoleWin_t::~consoleWin_t(void)
 	// Save window size and image scaling parameters at app exit.
 	w = consoleWindow->size();
 
-	if ( viewport_GL != NULL )
+	// Only Save window size if not fullscreen and not maximized
+	if ( !consoleWindow->isFullScreen() && !consoleWindow->isMaximized() )
 	{
-		g_config->setOption( "SDL.XScale", viewport_GL->getScaleX() );
-		g_config->setOption( "SDL.YScale", viewport_GL->getScaleY() );
+		// Scaling is only saved when applying video settings
+		//if ( viewport_GL != NULL )
+		//{
+		//	g_config->setOption( "SDL.XScale", viewport_GL->getScaleX() );
+		//	g_config->setOption( "SDL.YScale", viewport_GL->getScaleY() );
+		//}
+		//else if ( viewport_SDL != NULL )
+		//{
+		//	g_config->setOption( "SDL.XScale", viewport_SDL->getScaleX() );
+		//	g_config->setOption( "SDL.YScale", viewport_SDL->getScaleY() );
+		//}
+
+		g_config->setOption( "SDL.WinSizeX", w.width() );
+		g_config->setOption( "SDL.WinSizeY", w.height() );
 	}
-	else if ( viewport_SDL != NULL )
-	{
-		g_config->setOption( "SDL.XScale", viewport_SDL->getScaleX() );
-		g_config->setOption( "SDL.YScale", viewport_SDL->getScaleY() );
-	}
-	g_config->setOption( "SDL.WinSizeX", w.width() );
-	g_config->setOption( "SDL.WinSizeY", w.height() );
 	g_config->save();
 
 	// Signal Emulator Thread to Stop
