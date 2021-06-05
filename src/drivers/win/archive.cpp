@@ -324,7 +324,12 @@ struct FormatRecord
 typedef std::vector<FormatRecord> TFormatRecords;
 TFormatRecords formatRecords;
 static bool archiveSystemInitialized=false;
+
+#ifdef WIN64
+static LibRef libref("7z_64.dll");
+#else
 static LibRef libref("7z.dll");
+#endif
 
 void initArchiveSystem()
 {

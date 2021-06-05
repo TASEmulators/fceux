@@ -181,7 +181,7 @@
     </Manifest>
     <PostBuildEvent>
       <Command>xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z.dll" "$(OutDir)"
-</Command>
+xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -224,7 +224,7 @@
     </Manifest>
     <PostBuildEvent>
       <Command>xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z.dll" "$(OutDir)"
-</Command>
+xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='PublicRelease|Win32'">
@@ -268,7 +268,7 @@
     </Manifest>
     <PostBuildEvent>
       <Command>xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z.dll" "$(OutDir)"
-</Command>
+xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -300,6 +300,10 @@
     <PreBuildEvent>
       <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -333,6 +337,10 @@
     <PreBuildEvent>
       <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='PublicRelease|x64'">
     <Midl>
@@ -366,6 +374,10 @@
     <PreBuildEvent>
       <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\boards\01-222.cpp">
