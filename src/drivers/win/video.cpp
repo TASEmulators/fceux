@@ -1189,7 +1189,7 @@ INT_PTR CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		//CheckRadioButton(hwndDlg,IDC_RADIO_SCALE,IDC_RADIO_STRETCH,(vmodes[0].flags&VMDF_STRFS)?IDC_RADIO_STRETCH:IDC_RADIO_SCALE);
 
 		// -Video Modes Tag-
-		char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x","Prescale2x","Prescale3x","Prescale4x","PAL"};
+		char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x","Prescale2x","Prescale3x","Prescale4x","PAL 3x"};
 		int x;
 		for(x=0;x<10;x++)
 		{

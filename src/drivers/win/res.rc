@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -399,19 +399,19 @@ BEGIN
     CONTROL         "Hue",CTL_HUE_TRACKBAR,"msctls_trackbar32",WS_DISABLED | WS_TABSTOP,121,69,91,11
     CONTROL         "Force Grayscale",CHECK_PALETTE_GRAYSCALE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,57,85,12
     CONTROL         "Use Custom Palette",CHECK_PALETTE_CUSTOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,22,85,12
-    GROUPBOX        "PAL Emulation",IDC_STATIC,10,89,208,66,WS_DISABLED
-    LTEXT           "Saturation:",STATIC_SATVALUE,83,100,58,8,WS_DISABLED
-    CONTROL         "",CTL_PALSAT_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,78,110,70,15
-    PUSHBUTTON      "Reset",BTN_PALETTE_RESET,161,132,50,14,WS_DISABLED
-    LTEXT           "Notch:",STATIC_NOTCHVALUE,16,100,46,8,WS_DISABLED
-    CONTROL         "",CTL_PALNOTCH_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,11,110,68,15
-    LTEXT           "Sharpness:",STATIC_SHARPVALUE,161,99,50,8,WS_DISABLED
-    CONTROL         "",CTL_PALSHARP_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,156,109,61,15
-    LTEXT           "NTSC Color Emulation overrides Internal default Palette.\nIndividual Game Palette overrides Internal+NTSC Palettes.\nCustom Palette overrides all of the above.\nPAL Emulation overrides other choices when PAL filter is selected",IDC_STATIC,10,159,208,33
-    LTEXT           "Contrast: ",STATIC_CONTRASTVALUE,16,126,55,8,WS_DISABLED
-    CONTROL         "",CTL_PALCONTRAST_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,11,134,67,15
-    LTEXT           "Brightness: ",STATIC_BRIGHTVALUE,83,125,61,8,WS_DISABLED
-    CONTROL         "",CTL_PALBRIGHT_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_DISABLED | WS_TABSTOP,78,133,70,15
+    GROUPBOX        "PAL Simulation",IDC_STATIC,10,89,208,66
+    LTEXT           "Saturation:",STATIC_SATVALUE,83,100,58,8
+    CONTROL         "",CTL_PALSAT_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_TABSTOP,78,110,70,15
+    PUSHBUTTON      "Reset",BTN_PALETTE_RESET,161,132,50,14
+    LTEXT           "Notch:",STATIC_NOTCHVALUE,16,100,46,8
+    CONTROL         "",CTL_PALNOTCH_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_TABSTOP,11,110,68,15
+    LTEXT           "Sharpness:",STATIC_SHARPVALUE,151,99,60,8
+    CONTROL         "",CTL_PALSHARP_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_TABSTOP,146,109,71,15
+    LTEXT           "NTSC Color Emulation overrides Internal default Palette.\nIndividual Game Palette overrides Internal+NTSC Palettes.\nCustom Palette overrides all of the above.\nPAL Simulation overrides other choices when PAL filter is selected in Video Configuration.",IDC_STATIC,10,159,208,43
+    LTEXT           "Contrast: ",STATIC_CONTRASTVALUE,16,126,55,8
+    CONTROL         "",CTL_PALCONTRAST_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_TABSTOP,11,134,67,15
+    LTEXT           "Brightness: ",STATIC_BRIGHTVALUE,83,125,61,8
+    CONTROL         "",CTL_PALBRIGHT_TRACKBAR,"msctls_trackbar32",TBS_NOTICKS | WS_TABSTOP,78,133,70,15
     CONTROL         "De-emphasis bit swap",CHECK_DEEMPH_SWAP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,73,83,10
     DEFPUSHBUTTON   "Close",BUTTON_CLOSE,162,195,56,14
 END
@@ -2382,9 +2382,13 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON3               ICON                    "res/taseditor-icon.ico"
+
 IDI_ICON4               ICON                    "res/taseditor-icon32.ico"
+
 ICON_1                  ICON                    "res/ICON_1.ico"
+
 ICON_2                  ICON                    "res/ICON_2.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3123,110 +3127,214 @@ END
 //
 
 IDB_BITMAP0             BITMAP                  "res\\te_0.bmp"
+
 IDB_BITMAP1             BITMAP                  "res\\te_1.bmp"
+
 IDB_BITMAP2             BITMAP                  "res\\te_2.bmp"
+
 IDB_BITMAP3             BITMAP                  "res\\te_3.bmp"
+
 IDB_BITMAP4             BITMAP                  "res\\te_4.bmp"
+
 IDB_BITMAP5             BITMAP                  "res\\te_5.bmp"
+
 IDB_BITMAP6             BITMAP                  "res\\te_6.bmp"
+
 IDB_BITMAP7             BITMAP                  "res\\te_7.bmp"
+
 IDB_BITMAP8             BITMAP                  "res\\te_8.bmp"
+
 IDB_BITMAP9             BITMAP                  "res\\te_9.bmp"
+
 IDB_BITMAP10            BITMAP                  "res\\te_10.bmp"
+
 IDB_BITMAP11            BITMAP                  "res\\te_11.bmp"
+
 IDB_BITMAP12            BITMAP                  "res\\te_12.bmp"
+
 IDB_BITMAP13            BITMAP                  "res\\te_13.bmp"
+
 IDB_BITMAP14            BITMAP                  "res\\te_14.bmp"
+
 IDB_BITMAP15            BITMAP                  "res\\te_15.bmp"
+
 IDB_BITMAP16            BITMAP                  "res\\te_16.bmp"
+
 IDB_BITMAP17            BITMAP                  "res\\te_17.bmp"
+
 IDB_BITMAP18            BITMAP                  "res\\te_18.bmp"
+
 IDB_BITMAP19            BITMAP                  "res\\te_19.bmp"
+
 IDB_TE_ARROW            BITMAP                  "res\\te_arrow.bmp"
+
 IDB_TE_GREEN_ARROW      BITMAP                  "res\\te_green_arrow.bmp"
+
 IDB_TE_GREEN_BLUE_ARROW BITMAP                  "res\\te_green_blue_arrow.bmp"
+
 IDB_PIANO_0             BITMAP                  "res\\te_piano_0.bmp"
+
 IDB_PIANO_1             BITMAP                  "res\\te_piano_1.bmp"
+
 IDB_PIANO_2             BITMAP                  "res\\te_piano_2.bmp"
+
 IDB_PIANO_3             BITMAP                  "res\\te_piano_3.bmp"
+
 IDB_PIANO_4             BITMAP                  "res\\te_piano_4.bmp"
+
 IDB_PIANO_5             BITMAP                  "res\\te_piano_5.bmp"
+
 IDB_PIANO_6             BITMAP                  "res\\te_piano_6.bmp"
+
 IDB_PIANO_7             BITMAP                  "res\\te_piano_7.bmp"
+
 IDB_PIANO_8             BITMAP                  "res\\te_piano_8.bmp"
+
 IDB_PIANO_9             BITMAP                  "res\\te_piano_9.bmp"
+
 IDB_PIANO_10            BITMAP                  "res\\te_piano_10.bmp"
+
 IDB_PIANO_11            BITMAP                  "res\\te_piano_11.bmp"
+
 IDB_PIANO_12            BITMAP                  "res\\te_piano_12.bmp"
+
 IDB_PIANO_13            BITMAP                  "res\\te_piano_13.bmp"
+
 IDB_PIANO_14            BITMAP                  "res\\te_piano_14.bmp"
+
 IDB_PIANO_15            BITMAP                  "res\\te_piano_15.bmp"
+
 IDB_PIANO_16            BITMAP                  "res\\te_piano_16.bmp"
+
 IDB_PIANO_17            BITMAP                  "res\\te_piano_17.bmp"
+
 IDB_PIANO_18            BITMAP                  "res\\te_piano_18.bmp"
+
 IDB_PIANO_19            BITMAP                  "res\\te_piano_19.bmp"
+
 IDB_PIANO_PLAYBACK_0    BITMAP                  "res\\te_piano_0_playback.bmp"
+
 IDB_PIANO_PLAYBACK_1    BITMAP                  "res\\te_piano_1_playback.bmp"
+
 IDB_PIANO_PLAYBACK_2    BITMAP                  "res\\te_piano_2_playback.bmp"
+
 IDB_PIANO_PLAYBACK_3    BITMAP                  "res\\te_piano_3_playback.bmp"
+
 IDB_PIANO_PLAYBACK_4    BITMAP                  "res\\te_piano_4_playback.bmp"
+
 IDB_PIANO_PLAYBACK_5    BITMAP                  "res\\te_piano_5_playback.bmp"
+
 IDB_PIANO_PLAYBACK_6    BITMAP                  "res\\te_piano_6_playback.bmp"
+
 IDB_PIANO_PLAYBACK_7    BITMAP                  "res\\te_piano_7_playback.bmp"
+
 IDB_PIANO_PLAYBACK_8    BITMAP                  "res\\te_piano_8_playback.bmp"
+
 IDB_PIANO_PLAYBACK_9    BITMAP                  "res\\te_piano_9_playback.bmp"
+
 IDB_PIANO_PLAYBACK_10   BITMAP                  "res\\te_piano_10_playback.bmp"
+
 IDB_PIANO_PLAYBACK_11   BITMAP                  "res\\te_piano_11_playback.bmp"
+
 IDB_PIANO_PLAYBACK_12   BITMAP                  "res\\te_piano_12_playback.bmp"
+
 IDB_PIANO_PLAYBACK_13   BITMAP                  "res\\te_piano_13_playback.bmp"
+
 IDB_PIANO_PLAYBACK_14   BITMAP                  "res\\te_piano_14_playback.bmp"
+
 IDB_PIANO_PLAYBACK_15   BITMAP                  "res\\te_piano_15_playback.bmp"
+
 IDB_PIANO_PLAYBACK_16   BITMAP                  "res\\te_piano_16_playback.bmp"
+
 IDB_PIANO_PLAYBACK_17   BITMAP                  "res\\te_piano_17_playback.bmp"
+
 IDB_PIANO_PLAYBACK_18   BITMAP                  "res\\te_piano_18_playback.bmp"
+
 IDB_PIANO_PLAYBACK_19   BITMAP                  "res\\te_piano_19_playback.bmp"
+
 IDB_PIANO_LOSTPOS_0     BITMAP                  "res\\te_piano_0_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_1     BITMAP                  "res\\te_piano_1_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_2     BITMAP                  "res\\te_piano_2_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_3     BITMAP                  "res\\te_piano_3_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_4     BITMAP                  "res\\te_piano_4_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_5     BITMAP                  "res\\te_piano_5_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_6     BITMAP                  "res\\te_piano_6_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_7     BITMAP                  "res\\te_piano_7_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_8     BITMAP                  "res\\te_piano_8_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_9     BITMAP                  "res\\te_piano_9_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_10    BITMAP                  "res\\te_piano_10_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_11    BITMAP                  "res\\te_piano_11_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_12    BITMAP                  "res\\te_piano_12_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_13    BITMAP                  "res\\te_piano_13_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_14    BITMAP                  "res\\te_piano_14_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_15    BITMAP                  "res\\te_piano_15_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_16    BITMAP                  "res\\te_piano_16_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_17    BITMAP                  "res\\te_piano_17_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_18    BITMAP                  "res\\te_piano_18_lostpos.bmp"
+
 IDB_PIANO_LOSTPOS_19    BITMAP                  "res\\te_piano_19_lostpos.bmp"
+
 IDB_BITMAP_SELECTED0    BITMAP                  "res\\te_0_selected.bmp"
+
 IDB_BITMAP_SELECTED1    BITMAP                  "res\\te_1_selected.bmp"
+
 IDB_BITMAP_SELECTED2    BITMAP                  "res\\te_2_selected.bmp"
+
 IDB_BITMAP_SELECTED3    BITMAP                  "res\\te_3_selected.bmp"
+
 IDB_BITMAP_SELECTED4    BITMAP                  "res\\te_4_selected.bmp"
+
 IDB_BITMAP_SELECTED5    BITMAP                  "res\\te_5_selected.bmp"
+
 IDB_BITMAP_SELECTED6    BITMAP                  "res\\te_6_selected.bmp"
+
 IDB_BITMAP_SELECTED7    BITMAP                  "res\\te_7_selected.bmp"
+
 IDB_BITMAP_SELECTED8    BITMAP                  "res\\te_8_selected.bmp"
+
 IDB_BITMAP_SELECTED9    BITMAP                  "res\\te_9_selected.bmp"
+
 IDB_BITMAP_SELECTED10   BITMAP                  "res\\te_10_selected.bmp"
+
 IDB_BITMAP_SELECTED11   BITMAP                  "res\\te_11_selected.bmp"
+
 IDB_BITMAP_SELECTED12   BITMAP                  "res\\te_12_selected.bmp"
+
 IDB_BITMAP_SELECTED13   BITMAP                  "res\\te_13_selected.bmp"
+
 IDB_BITMAP_SELECTED14   BITMAP                  "res\\te_14_selected.bmp"
+
 IDB_BITMAP_SELECTED15   BITMAP                  "res\\te_15_selected.bmp"
+
 IDB_BITMAP_SELECTED16   BITMAP                  "res\\te_16_selected.bmp"
+
 IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
+
 IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
+
 IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
+
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // English (U.S.) resources
+
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

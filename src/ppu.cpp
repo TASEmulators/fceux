@@ -1688,12 +1688,12 @@ void FCEUPPU_SetVideoSystem(int w) {
 		scanlines_per_frame = dendy ? 262: 312;
 		FSettings.FirstSLine = FSettings.UsrFirstSLine[1];
 		FSettings.LastSLine = FSettings.UsrLastSLine[1];
-		//paldeemphswap = 1; // dendy has pal ppu, and pal ppu has these swapped
+		paldeemphswap = 1; // dendy has pal ppu, and pal ppu has these swapped
 	} else {
 		scanlines_per_frame = 262;
 		FSettings.FirstSLine = FSettings.UsrFirstSLine[0];
 		FSettings.LastSLine = FSettings.UsrLastSLine[0];
-		//paldeemphswap = 0;
+		paldeemphswap = 0;
 	}
 }
 
