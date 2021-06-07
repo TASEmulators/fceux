@@ -238,20 +238,54 @@ uint32 GetGamepadPressedImmediate()
 
 int DTestButton(ButtConfig *bc)
 {
-	uint32 x;//mbg merge 7/17/06 changed to uint
+	static unsigned int *keys_data = GetKeyboard_nr();
 
-	for(x=0;x<bc->NumC;x++)
+	for(int x=0; x < bc->NumC; x++)
 	{
-		if(bc->ButtType[x]==BUTTC_KEYBOARD)
+		if(bc->ButtType[x] == BUTTC_KEYBOARD)
 		{
-			if(keys_nr[bc->ButtonNum[x]])
+			int cmd = bc->ButtonNum[x];
+			int cmdmask = cmd&CMD_KEY_MASK;
+
+			/* test CTRL, SHIFT, ALT */
+			if (cmd & CMD_KEY_ALT)
 			{
-				return(1);
+				int ctlstate = (cmd & CMD_KEY_LALT) ? keys_data[SCAN_LEFTALT] : 0;
+				ctlstate |= (cmd & CMD_KEY_RALT) ? keys_data[SCAN_RIGHTALT] : 0;
+				if (!ctlstate)
+					return 0;
+			}
+			else if ((cmdmask != SCAN_LEFTALT && keys_data[SCAN_LEFTALT]) || (cmdmask != SCAN_RIGHTALT && keys_data[SCAN_RIGHTALT]))
+				return 0;
+
+			if (cmd & CMD_KEY_CTRL)
+			{
+				int ctlstate = (cmd & CMD_KEY_LCTRL) ? keys_data[SCAN_LEFTCONTROL] : 0;
+				ctlstate |= (cmd & CMD_KEY_RCTRL) ? keys_data[SCAN_RIGHTCONTROL] : 0;
+				if (!ctlstate)
+					continue;
+			}
+			else if ((cmdmask != SCAN_LEFTCONTROL && keys_data[SCAN_LEFTCONTROL]) || (cmdmask != SCAN_RIGHTCONTROL && keys_data[SCAN_RIGHTCONTROL]))
+				continue;
+
+			if (cmd & CMD_KEY_SHIFT)
+			{
+				int ctlstate = (cmd & CMD_KEY_LSHIFT) ? keys_data[SCAN_LEFTSHIFT] : 0;
+				ctlstate |= (cmd & CMD_KEY_RSHIFT) ? keys_data[SCAN_RIGHTSHIFT] : 0;
+				if (!ctlstate)
+					continue;
+			}
+			else if ((cmdmask != SCAN_LEFTSHIFT && keys_data[SCAN_LEFTSHIFT]) || (cmdmask != SCAN_RIGHTSHIFT && keys_data[SCAN_RIGHTSHIFT]))
+				continue;
+
+			if(keys_data[cmdmask])
+			{
+				return 1;
 			}
 		}
 	}
-	if(DTestButtonJoy(bc)) return(1);
-	return(0);
+	if (DTestButtonJoy(bc)) return 1;
+	return 0;
 }
 
 void UpdateGamepad(bool snes)
@@ -856,19 +890,19 @@ int DWaitButton(HWND hParent, const uint8 *text, ButtConfig *bc);
 int DWaitSimpleButton(HWND hParent, const uint8 *text);
 
 CFGSTRUCT InputConfig[]={
-	AC(powerpadsc),
-	AC(QuizKingButtons),
-	AC(FTrainerButtons),
-	AC(HyperShotButtons),
-	AC(MahjongButtons),
-	AC(GamePadConfig),
-	AC(GamePadPreset1),
-	AC(GamePadPreset2),
-	AC(GamePadPreset3),
-	AC(fkbmap),
-	AC(suborkbmap),
-	AC(virtualboysc),
-	AC(lcdcompzappersc),
+	VAC(powerpadsc, 2),
+	VAC(QuizKingButtons, 2),
+	VAC(FTrainerButtons, 2),
+	VAC(HyperShotButtons, 2),
+	VAC(MahjongButtons, 2),
+	VAC(GamePadConfig, 2),
+	VAC(GamePadPreset1, 2),
+	VAC(GamePadPreset2, 2),
+	VAC(GamePadPreset3, 2),
+	VAC(fkbmap, 2),
+	VAC(suborkbmap, 2),
+	VAC(virtualboysc, 2),
+	VAC(lcdcompzappersc, 2),
 	ENDCFGSTRUCT
 };
 
@@ -910,7 +944,7 @@ void InitInputStuff(void)
             JoyClearBC(&lcdcompzappersc[x][y]);
 }
 
-static char *MakeButtString(ButtConfig *bc)
+static char *MakeButtString(ButtConfig *bc, int appendKB = 1)
 {
 	uint32 x; //mbg merge 7/17/06  changed to uint
 	char tmpstr[512];
@@ -924,7 +958,48 @@ static char *MakeButtString(ButtConfig *bc)
 
 		if(bc->ButtType[x] == BUTTC_KEYBOARD)
 		{
-			strcat(tmpstr,"KB: ");
+			if (appendKB)
+				strcat(tmpstr,"KB: ");
+
+			if ((bc->ButtonNum[x] & CMD_KEY_CTRL) == CMD_KEY_CTRL)
+			{
+				strcat(tmpstr, "Ctrl + ");
+			}
+			else if ((bc->ButtonNum[x] & CMD_KEY_CTRL) == CMD_KEY_LCTRL)
+			{
+				strcat(tmpstr, "Left Ctrl + ");
+			}
+			else if ((bc->ButtonNum[x] & CMD_KEY_CTRL) == CMD_KEY_RCTRL)
+			{
+				strcat(tmpstr, "Right Ctrl + ");
+			}
+
+			if ((bc->ButtonNum[x] & CMD_KEY_ALT) == CMD_KEY_ALT)
+			{
+				strcat(tmpstr, "Alt + ");
+			}
+			else if ((bc->ButtonNum[x] & CMD_KEY_ALT) == CMD_KEY_LALT)
+			{
+				strcat(tmpstr, "Left Alt + ");
+			}
+			else if ((bc->ButtonNum[x] & CMD_KEY_ALT) == CMD_KEY_RALT)
+			{
+				strcat(tmpstr, "Right Alt + ");
+			}
+
+			if ((bc->ButtonNum[x] & CMD_KEY_SHIFT) == CMD_KEY_SHIFT)
+			{
+				strcat(tmpstr, "Shift + ");
+			}
+			else if ((bc->ButtonNum[x] & CMD_KEY_SHIFT) == CMD_KEY_LSHIFT)
+			{
+				strcat(tmpstr, "Left Shift + ");
+			}
+			else if ((bc->ButtonNum[x] & CMD_KEY_SHIFT) == CMD_KEY_RSHIFT)
+			{
+				strcat(tmpstr, "Right Shift + ");
+			}
+
 			if(!GetKeyNameText(((bc->ButtonNum[x] & 0x7F) << 16) | ((bc->ButtonNum[x] & 0x80) << 17), tmpstr+strlen(tmpstr), 16))
 			{
 				// GetKeyNameText wasn't able to provide a name for the key, then just show scancode
@@ -958,6 +1033,109 @@ static char *MakeButtString(ButtConfig *bc)
 	return(astr);
 }
 
+static uint8 keyonce[MKK_COUNT];
+
+static int newpressed(int a)
+{
+	if (keys_nr[a])
+	{
+		if (!keyonce[a])
+		{
+			keyonce[a] = 1;
+			return 1;
+		}
+	}
+	else
+	{
+		keyonce[a] = 0;
+	}
+
+	return 0;
+}
+
+static int GetKeyPressed()
+{
+	int key = 0;
+	int i;
+
+	keys_nr = GetKeyboard_nr();
+
+	for (i = 0; i < 256 && !key; ++i)
+	{
+		if (newpressed(i))
+		{
+			key = i;
+		}
+	}
+
+	return key;
+}
+
+static int NothingPressed()
+{
+	int i;
+
+	keys_nr = GetKeyboard_nr();
+
+	for (i = 0; i < 256; ++i)
+	{
+		if (keys_nr[i])
+		{
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static int GetKeyMeta(int key)
+{
+	int meta = key & (~CMD_KEY_MASK);
+
+	switch (key & CMD_KEY_MASK)
+	{
+	case SCAN_LEFTCONTROL:
+	case SCAN_RIGHTCONTROL:
+		return CMD_KEY_CTRL | meta;
+
+	case SCAN_LEFTALT:
+	case SCAN_RIGHTALT:
+		return CMD_KEY_ALT | meta;
+
+	case SCAN_LEFTSHIFT:
+	case SCAN_RIGHTSHIFT:
+		return CMD_KEY_SHIFT | meta;
+
+	default:
+		break;
+	}
+
+	return meta;
+}
+
+static void ClearExtraMeta(int* key)
+{
+	switch ((*key) & 0xff)
+	{
+	case SCAN_LEFTCONTROL:
+	case SCAN_RIGHTCONTROL:
+		*key &= ~(CMD_KEY_CTRL);
+		break;
+
+	case SCAN_LEFTALT:
+	case SCAN_RIGHTALT:
+		*key &= ~(CMD_KEY_ALT);
+		break;
+
+	case SCAN_LEFTSHIFT:
+	case SCAN_RIGHTSHIFT:
+		*key &= ~(CMD_KEY_SHIFT);
+		break;
+
+	default:
+		break;
+	}
+}
 
 static int DWBStarted;
 static ButtConfig *DWBButtons;
@@ -967,30 +1145,23 @@ static HWND die;
 
 static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-
-	switch(uMsg) {
+   static int key = 0;
+   switch(uMsg) {
    case WM_DESTROY:
 	   die = NULL;                         
 	   return(0);
+
    case WM_TIMER:
 	   {
 		   uint8 devicenum;
 		   uint16 buttonnum;
 		   GUID guid;
+		   ButtConfig *bc = DWBButtons;
+		   char *nstr;
+		   int wc = bc->NumC;
 
 		   if(DoJoyWaitTest(&guid, &devicenum, &buttonnum))
 		   {
-			   ButtConfig *bc = DWBButtons;
-			   char *nstr;
-			   int wc;
-			   if(DWBStarted)
-			   {
-				   ButtConfig *bc = DWBButtons;
-				   bc->NumC = 0;
-				   DWBStarted = 0;
-			   }
-			   wc = bc->NumC;
-			   //FCEU_printf("%d: %d\n",devicenum,buttonnum);
 			   bc->ButtType[wc]=BUTTC_JOYSTICK;
 			   bc->DeviceNum[wc]=devicenum;
 			   bc->ButtonNum[wc]=buttonnum;
@@ -1010,58 +1181,76 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			   SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
 			   free(nstr);
 		   }
+		   {
+			   int newkey;
+			   int meta = GetKeyMeta(key);
+
+			   KeyboardUpdateState();
+
+			   if ((newkey = GetKeyPressed()) != 0)
+			   {
+				   key = newkey | meta;
+				   ClearExtraMeta(&key);
+				   bc->ButtType[wc] = BUTTC_KEYBOARD;
+				   bc->DeviceNum[wc] = 0;
+				   bc->ButtonNum[wc] = key;
+
+				   /* Stop config if the user pushes the same button twice in a row. */
+				   if (wc && bc->ButtType[wc] == bc->ButtType[wc - 1] && bc->DeviceNum[wc] == bc->DeviceNum[wc - 1] &&
+					   bc->ButtonNum[wc] == bc->ButtonNum[wc - 1])
+					   goto gornk;
+
+				   bc->NumC++;
+				   nstr = MakeButtString(bc);
+				   bc->NumC--;
+				   SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
+				   free(nstr);
+			   }
+			   else if (NothingPressed() && key)
+			   {
+				   bc->ButtType[wc] = BUTTC_KEYBOARD;
+				   bc->DeviceNum[wc] = 0;
+				   bc->ButtonNum[wc] = key;
+
+				   /* Stop config if the user pushes the same button twice in a row. */
+				   if (wc && bc->ButtType[wc] == bc->ButtType[wc - 1] && bc->DeviceNum[wc] == bc->DeviceNum[wc - 1] &&
+					   bc->ButtonNum[wc] == bc->ButtonNum[wc - 1])
+					   goto gornk;
+
+				   bc->NumC++;
+				   /* Stop config if we reached our maximum button limit. */
+				   if (bc->NumC >= MAXBUTTCONFIG)
+					   goto gornk;
+
+				   nstr = MakeButtString(bc);
+				   SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
+				   free(nstr);
+
+				   key = 0;
+			   }
+		   }
 	   }
+
 	   break;
-   case WM_USER + 666:
-	   //SetFocus(GetDlgItem(hwndDlg,LBL_DWBDIALOG_TEXT));
-	   if(DWBStarted)
-	   {
-		   char *nstr;
-		   ButtConfig *bc = DWBButtons;
-		   bc->NumC = 0;
-		   DWBStarted = 0;
-		   nstr = MakeButtString(bc);
-		   SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
-		   free(nstr);
-	   }
 
-	   {
-		   ButtConfig *bc = DWBButtons;
-		   int wc = bc->NumC;
-		   char *nstr;
-
-		   bc->ButtType[wc]=BUTTC_KEYBOARD;
-		   bc->DeviceNum[wc]=0;
-		   bc->ButtonNum[wc]=lParam&255;
-
-		   //Stop config if the user pushes the same button twice in a row.
-		   if(wc && bc->ButtType[wc]==bc->ButtType[wc-1] && bc->DeviceNum[wc]==bc->DeviceNum[wc-1] &&
-			   bc->ButtonNum[wc]==bc->ButtonNum[wc-1])   
-			   goto gornk;
-
-		   bc->NumC++;
-		   //Stop config if we reached our maximum button limit.
-		   if(bc->NumC >= MAXBUTTCONFIG)
-			   goto gornk;
-
-		   nstr = MakeButtString(bc);
-		   SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
-		   free(nstr);
-	   }
-	   break;
    case WM_INITDIALOG:
+	   key = 0;
+	   memset(keyonce, 0, sizeof(keyonce));
 	   SetWindowText(hwndDlg, (char*)DWBText); //mbg merge 7/17/06 added cast
 	   BeginJoyWait(hwndDlg);
+	   KeyboardSetBackgroundAccess(true);
 	   SetTimer(hwndDlg,666,25,0);     //Every 25ms.
+	   if (DWBButtons->NumC)
 	   {
 		   char *nstr = MakeButtString(DWBButtons);
 		   SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
 		   free(nstr);
 	   }
-   
-	   
-
+	   DWBButtons->NumC = 0;
+	   /* workaround for enter and tab keys */
+	   SetFocus(NULL);
 	   break;
+
    case WM_CLOSE:
    case WM_QUIT: goto gornk;
 
@@ -1082,8 +1271,8 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 gornk:
 		   KillTimer(hwndDlg,666);
 		   EndJoyWait(hAppWnd);
-		   SetForegroundWindow(GetParent(hwndDlg));
-		   DestroyWindow(hwndDlg);
+		   KeyboardSetBackgroundAccess(false);
+		   EndDialog(hwndDlg, 0);
 		   break;
 	   }
 	}
@@ -1096,39 +1285,8 @@ int DWaitButton(HWND hParent, const uint8 *text, ButtConfig *bc)
 	DWBButtons = bc;
 	DWBStarted = 1;
 
-	die = CreateDialog(fceu_hInstance, "DWBDIALOG", hParent, DWBCallB);
-
-	EnableWindow(hParent, 0);
-
-	ShowWindow(die, 1);
-
-	while(die)
-	{
-		MSG msg;
-		while(PeekMessage(&msg, 0, 0, 0, PM_NOREMOVE))
-		{
-			if(GetMessage(&msg, 0, 0, 0) > 0)
-			{
-				if(msg.message == WM_KEYDOWN || msg.message == WM_SYSKEYDOWN)
-				{
-					LPARAM tmpo;
-
-					tmpo = ((msg.lParam >> 16) & 0x7F) | ((msg.lParam >> 17) & 0x80);
-					PostMessage(die,WM_USER+666,0,tmpo);
-					continue;
-				}
-				if(msg.message == WM_SYSCOMMAND) continue;
-				if(!IsDialogMessage(die, &msg))
-				{
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
-				}
-			}
-		}
-		Sleep(10);
-	}
-
-	EnableWindow(hParent, 1);
+	int nRet = DialogBox(fceu_hInstance, "DWBDIALOG", hParent, DWBCallB);
+	SetFocus(hParent);
 	return 0; //mbg merge TODO 7/17/06  - had to add this return value--is it right?
 }
 
