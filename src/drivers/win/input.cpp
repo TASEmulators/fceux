@@ -278,6 +278,16 @@ int DTestButton(ButtConfig *bc)
 			else if ((cmdmask != SCAN_LEFTSHIFT && keys_data[SCAN_LEFTSHIFT]) || (cmdmask != SCAN_RIGHTSHIFT && keys_data[SCAN_RIGHTSHIFT]))
 				continue;
 
+			if (cmd & CMD_KEY_WIN)
+			{
+				int ctlstate = (cmd & CMD_KEY_LWIN) ? keys_data[SCAN_LEFTWIN] : 0;
+				ctlstate |= (cmd & CMD_KEY_RWIN) ? keys_data[SCAN_RIGHTWIN] : 0;
+				if (!ctlstate)
+					continue;
+			}
+			else if ((cmdmask != SCAN_LEFTWIN && keys_data[SCAN_LEFTWIN]) || (cmdmask != SCAN_RIGHTWIN && keys_data[SCAN_RIGHTWIN]))
+				continue;
+
 			if(keys_data[cmdmask])
 			{
 				return 1;
@@ -1000,6 +1010,19 @@ static char *MakeButtString(ButtConfig *bc, int appendKB = 1)
 				strcat(tmpstr, "Right Shift + ");
 			}
 
+			if ((bc->ButtonNum[x] & CMD_KEY_WIN) == CMD_KEY_WIN)
+			{
+				strcat(tmpstr, "Win + ");
+			}
+			else if ((bc->ButtonNum[x] & CMD_KEY_WIN) == CMD_KEY_LWIN)
+			{
+				strcat(tmpstr, "Left Win + ");
+			}
+			else if ((bc->ButtonNum[x] & CMD_KEY_WIN) == CMD_KEY_RWIN)
+			{
+				strcat(tmpstr, "Right Win + ");
+			}
+
 			if(!GetKeyNameText(((bc->ButtonNum[x] & 0x7F) << 16) | ((bc->ButtonNum[x] & 0x80) << 17), tmpstr+strlen(tmpstr), 16))
 			{
 				// GetKeyNameText wasn't able to provide a name for the key, then just show scancode
@@ -1106,6 +1129,10 @@ static int GetKeyMeta(int key)
 	case SCAN_RIGHTSHIFT:
 		return CMD_KEY_SHIFT | meta;
 
+	case SCAN_LEFTWIN:
+	case SCAN_RIGHTWIN:
+		return CMD_KEY_WIN | meta;
+
 	default:
 		break;
 	}
@@ -1140,6 +1167,7 @@ static void ClearExtraMeta(int* key)
 static int DWBStarted;
 static ButtConfig *DWBButtons;
 static const uint8 *DWBText;
+static uint8 DWBFirstPress;
 
 static HWND die;
 
@@ -1158,10 +1186,15 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 		   GUID guid;
 		   ButtConfig *bc = DWBButtons;
 		   char *nstr;
-		   int wc = bc->NumC;
 
 		   if(DoJoyWaitTest(&guid, &devicenum, &buttonnum))
 		   {
+			   if (DWBFirstPress)
+			   {
+				   bc->NumC = 0;
+				   DWBFirstPress = 0;
+			   }
+			   int wc = bc->NumC;
 			   bc->ButtType[wc]=BUTTC_JOYSTICK;
 			   bc->DeviceNum[wc]=devicenum;
 			   bc->ButtonNum[wc]=buttonnum;
@@ -1191,6 +1224,12 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			   {
 				   key = newkey | meta;
 				   ClearExtraMeta(&key);
+				   if (DWBFirstPress)
+				   {
+					   bc->NumC = 0;
+					   DWBFirstPress = 0;
+				   }
+				   int wc = bc->NumC;
 				   bc->ButtType[wc] = BUTTC_KEYBOARD;
 				   bc->DeviceNum[wc] = 0;
 				   bc->ButtonNum[wc] = key;
@@ -1208,6 +1247,7 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			   }
 			   else if (NothingPressed() && key)
 			   {
+				   int wc = bc->NumC;
 				   bc->ButtType[wc] = BUTTC_KEYBOARD;
 				   bc->DeviceNum[wc] = 0;
 				   bc->ButtonNum[wc] = key;
@@ -1235,6 +1275,7 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 
    case WM_INITDIALOG:
 	   key = 0;
+	   DWBFirstPress = 1;
 	   memset(keyonce, 0, sizeof(keyonce));
 	   SetWindowText(hwndDlg, (char*)DWBText); //mbg merge 7/17/06 added cast
 	   BeginJoyWait(hwndDlg);
@@ -1246,7 +1287,6 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 		   SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
 		   free(nstr);
 	   }
-	   DWBButtons->NumC = 0;
 	   /* workaround for enter and tab keys */
 	   SetFocus(NULL);
 	   break;
