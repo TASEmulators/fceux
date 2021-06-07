@@ -13,6 +13,9 @@
 #define CMD_KEY_LALT			(1<<20)
 #define CMD_KEY_RALT			(1<<21)
 #define CMD_KEY_ALT				(CMD_KEY_LALT|CMD_KEY_RALT)
+#define CMD_KEY_LWIN			(1<<22)
+#define CMD_KEY_RWIN			(1<<23)
+#define CMD_KEY_WIN				(CMD_KEY_LWIN|CMD_KEY_RWIN)
 
 void ConfigInput(HWND hParent);
 int InitDInput(void);

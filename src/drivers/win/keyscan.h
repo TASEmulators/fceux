@@ -124,6 +124,9 @@
 #define SCAN_F10                0x44
 #define SCAN_F11                0x57
 #define SCAN_F12                0x58
- 
+
+#define SCAN_LEFTWIN 0xDB
+#define SCAN_RIGHTWIN 0xDC
+
 #define MKK(k) SCAN_##k
 #define MKK_COUNT (256)
