@@ -1035,8 +1035,8 @@ static char *MakeButtString(ButtConfig *bc, int appendKB = 1)
 			sprintf(tmpstr+strlen(tmpstr), "%d ", bc->DeviceNum[x]);
 			if(bc->ButtonNum[x] & 0x8000)
 			{
-				char *asel[3]={"x","y","z"};
-				sprintf(tmpstr+strlen(tmpstr), "axis %s%s", asel[bc->ButtonNum[x] & 3],(bc->ButtonNum[x]&0x4000)?"-":"+");
+				char *asel[6]={"x","y","z","rx","ry","rz"};
+				sprintf(tmpstr+strlen(tmpstr), "axis %s%s", asel[bc->ButtonNum[x] & 7],(bc->ButtonNum[x]&0x4000)?"-":"+");
 			}
 			else if(bc->ButtonNum[x] & 0x2000)
 			{
@@ -1058,7 +1058,7 @@ static char *MakeButtString(ButtConfig *bc, int appendKB = 1)
 
 static uint8 keyonce[MKK_COUNT];
 
-static int newpressed(int a)
+static int IsNewpressed(int a)
 {
 	if (keys_nr[a])
 	{
@@ -1085,7 +1085,7 @@ static int GetKeyPressed()
 
 	for (i = 0; i < 256 && !key; ++i)
 	{
-		if (newpressed(i))
+		if (IsNewpressed(i))
 		{
 			key = i;
 		}
