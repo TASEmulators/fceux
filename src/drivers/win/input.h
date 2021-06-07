@@ -43,7 +43,7 @@ extern uint8 BWorldData[1 + 13 + 1];
 typedef struct {
         uint8  ButtType[MAXBUTTCONFIG];
         uint8  DeviceNum[MAXBUTTCONFIG];
-        uint16 ButtonNum[MAXBUTTCONFIG];
+        int ButtonNum[MAXBUTTCONFIG];
         uint32 NumC;
         GUID DeviceInstance[MAXBUTTCONFIG];
         //uint64 DeviceID[MAXBUTTCONFIG];        /* TODO */

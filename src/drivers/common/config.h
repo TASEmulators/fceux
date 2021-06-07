@@ -23,16 +23,21 @@ void LoadFCEUConfig(const char *filename, CFGSTRUCT *cfgst);
 // isn't really hurting much.
 
 // Single piece of data(integer).
-#define AC(x)   { #x,&x,sizeof(x)}
-#define NAC(w,x) { #w,&x,sizeof(x)}
+#define AC(x)   {#x,&x,sizeof(x)}
+#define NAC(w,x) {#w,&x,sizeof(x)}
+// VAC intruduced for backward compatibility with 
+// configuration files of previous versions
+#define VAC(x,version) {#x "_V" #version,&x,sizeof(x)}
 
 // Array.
 #define ACA(x)   {#x,x,sizeof(x)}
 #define NACA(w,x) {#w,x,sizeof(x)}
+#define VACA(x,version) {#x "_V" #version,x,sizeof(x)}
 
 // String(pointer) with automatic memory allocation.
 #define ACS(x)  {#x,&x,0}
 #define NACS(w,x)  {#w,&x,0}
+#define VACS(x,version) {#x "_V" #version,&x,0}
 
 #define _DRIVERS_CONFIGH
 #endif

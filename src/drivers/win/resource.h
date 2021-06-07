@@ -11,7 +11,7 @@
 #define LBL_KEY_COMBO                   100
 #define LBL_CDLOGGER_CODECOUNT          100
 #define CHECK_PALETTE_ENABLED           100
-#define LBL_DWBDIALOG_TEXT              100
+#define LBL_DWBDIALOG_TEXT              100 | WS_TABSTOP
 #define GRP_GAMEPAD1                    100
 #define IDC_TRACER_LOG                  100
 #define MENU_MV_FILE_SAVE               100
