@@ -840,6 +840,7 @@ int main(int argc,char *argv[])
 		do_exit();
 		return 1;
 	}
+	UpdateMenuHotkeys(FCEUMENU_MAIN);
 
 	debugSystem = new DebugSystem();
 	debugSystem->init();
