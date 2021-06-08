@@ -929,9 +929,15 @@ void InitInputStuff(void)
 	for (x = 0; x < 2; x++)
         for (y = 0; y < 2; y++)
             JoyClearBC(&lcdcompzappersc[x][y]);
+
+	JoyClearBC(&autoHoldKeys);
+	JoyClearBC(&autoHoldClearKeys);
+
+	for (x = 0; x<EMUCMD_MAX; x++)
+		JoyClearBC(&FCEUD_CommandMapping[x]);
 }
 
-static char *MakeButtString(ButtConfig *bc, int appendKB = 1)
+char *MakeButtString(ButtConfig *bc, int appendKB)
 {
 	uint32 x; //mbg merge 7/17/06  changed to uint
 	char tmpstr[512];
@@ -1143,7 +1149,7 @@ static void ClearExtraMeta(int* key)
 
 static int DWBStarted;
 static ButtConfig *DWBButtons;
-static const uint8 *DWBText;
+static const char *DWBText;
 static uint8 DWBFirstPress;
 
 static HWND die;
@@ -1296,7 +1302,7 @@ gornk:
 	return 0;
 }
 
-int DWaitButton(HWND hParent, const uint8 *text, ButtConfig *bc)
+int DWaitButton(HWND hParent, const char *text, ButtConfig *bc)
 {
 	DWBText=text;
 	DWBButtons = bc;
@@ -1345,7 +1351,7 @@ static INT_PTR CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 			   char btext[128];
 			   btext[0]=0;
 			   GetDlgItemText(hwndDlg, b, btext, 128);
-			   DWaitButton(hwndDlg, (uint8*)btext,&DoTBButtons[b - 300]); //mbg merge 7/17/06 added cast
+			   DWaitButton(hwndDlg, btext,&DoTBButtons[b - 300]); //mbg merge 7/17/06 added cast
 		   }
 		   else switch(wParam&0xFFFF)
 		   {
@@ -1737,7 +1743,7 @@ INT_PTR CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				{
 					char btext[128] = { 0 };
 					GetDlgItemText(hwndDlg, BTN_AUTO_HOLD, btext, sizeof(btext) );
-					DWaitButton(hwndDlg, (uint8*)btext, &autoHoldKeys);
+					DWaitButton(hwndDlg, btext, &autoHoldKeys);
 					if (autoHoldKeys.NumC)
 					{
 						char *nstr = MakeButtString(&autoHoldKeys);
@@ -1755,7 +1761,7 @@ INT_PTR CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				{
 					char btext[128] = { 0 };
 					GetDlgItemText(hwndDlg, BTN_CLEAR_AH, btext, 128);
-					DWaitButton(hwndDlg, (uint8*)btext, &autoHoldClearKeys);
+					DWaitButton(hwndDlg, btext, &autoHoldClearKeys);
 					if (autoHoldClearKeys.NumC)
 					{
 						char *nstr = MakeButtString(&autoHoldClearKeys);
@@ -1801,62 +1807,26 @@ void DestroyInput(void)
 	}
 }
 
-int FCEUD_CommandMapping[EMUCMD_MAX];
+//int FCEUD_CommandMapping[EMUCMD_MAX];
+ButtConfig FCEUD_CommandMapping[EMUCMD_MAX];
 
 CFGSTRUCT HotkeyConfig[]={
-	AC(FCEUD_CommandMapping),
+	VAC(FCEUD_CommandMapping, 2),
 	ENDCFGSTRUCT
 };
 
 int FCEUD_TestCommandState(int c)
 {
-	int cmd=FCEUD_CommandMapping[c];
-	int cmdmask=cmd&CMD_KEY_MASK;
-
 	// allow certain commands be affected by key repeat
-	if(c == EMUCMD_FRAME_ADVANCE || c == EMUCMD_SPEED_TURBO || c == EMUCMD_TASEDITOR_REWIND) // TODO: this should be made more general by detecting if the command has an "off" function
+	switch (c)
 	{
-		keys = GetKeyboard_nr();
-		keys_nr = GetKeyboard_nr();
+	case EMUCMD_FRAME_ADVANCE:
+	case EMUCMD_SPEED_TURBO:
+	case EMUCMD_TASEDITOR_REWIND:
+		return DTestButton(&FCEUD_CommandMapping[c], 0);
+	default:
+		return DTestButton(&FCEUD_CommandMapping[c], 1);
 	}
-	else
-	{
-		keys = GetKeyboard_jd();
-		keys_nr = GetKeyboard_nr();
-	}
-
-	/* test CTRL, SHIFT, ALT */
-	if (cmd & CMD_KEY_ALT)
-	{
-		int ctlstate =	(cmd & CMD_KEY_LALT) ? keys_nr[SCAN_LEFTALT] : 0;
-		ctlstate |=		(cmd & CMD_KEY_RALT) ? keys_nr[SCAN_RIGHTALT] : 0;
-		if (!ctlstate)
-			return 0;
-	}
-	else if((cmdmask != SCAN_LEFTALT && keys_nr[SCAN_LEFTALT]) || (cmdmask != SCAN_RIGHTALT && keys_nr[SCAN_RIGHTALT]))
-		return 0;
-
-	if (cmd & CMD_KEY_CTRL)
-	{
-		int ctlstate =	(cmd & CMD_KEY_LCTRL) ? keys_nr[SCAN_LEFTCONTROL] : 0;
-		ctlstate |=		(cmd & CMD_KEY_RCTRL) ? keys_nr[SCAN_RIGHTCONTROL] : 0;
-		if (!ctlstate)
-			return 0;
-	}
-	else if((cmdmask != SCAN_LEFTCONTROL && keys_nr[SCAN_LEFTCONTROL]) || (cmdmask != SCAN_RIGHTCONTROL && keys_nr[SCAN_RIGHTCONTROL]))
-		return 0;
-
-	if (cmd & CMD_KEY_SHIFT)
-	{
-		int ctlstate =	(cmd & CMD_KEY_LSHIFT) ? keys_nr[SCAN_LEFTSHIFT] : 0;
-		ctlstate |=		(cmd & CMD_KEY_RSHIFT) ? keys_nr[SCAN_RIGHTSHIFT] : 0;
-		if (!ctlstate)
-			return 0;
-	}
-	else if((cmdmask != SCAN_LEFTSHIFT && keys_nr[SCAN_LEFTSHIFT]) || (cmdmask != SCAN_RIGHTSHIFT && keys_nr[SCAN_RIGHTSHIFT]))
-		return 0;
-
-	return keys[cmdmask] ? 1 : 0;
 }
 
 void FCEUD_TurboOn    (void) 

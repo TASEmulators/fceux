@@ -443,11 +443,11 @@ bool ShouldDisplayMapping(int mapn, int filter, const int* conflictTable)
 	}
 	else if(filter == EMUCMDTYPE_MAX + 1) /* Assigned */
 	{
-		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd] != 0;
+		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd].NumC != 0;
 	}
 	else if(filter == EMUCMDTYPE_MAX + 2) /* Unassigned */
 	{
-		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd] == 0;
+		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd].NumC == 0;
 	}
 	else if(filter == EMUCMDTYPE_MAX + 3) /* Conflicts */
 	{
@@ -472,10 +472,23 @@ void PopulateConflictTable(int* conflictTable)
 	{
 		for(unsigned int j = i + 1; j < EMUCMD_MAX; ++j)
 		{
-			if(FCEUD_CommandMapping[i] &&
-				FCEUD_CommandMapping[i] == FCEUD_CommandMapping[j] &&
-				 // AnS: added the condition that both commands must have the same EMUCMDFLAG_TASEDITOR, or else they are not considered conflicting
-				 (FCEUI_CommandTable[i].flags & EMUCMDFLAG_TASEDITOR) == (FCEUI_CommandTable[j].flags & EMUCMDFLAG_TASEDITOR))
+			bool hasConflicsts = false;
+			for (unsigned int x = 0; x < FCEUD_CommandMapping[i].NumC; ++x)
+			{
+				for (unsigned int y = 0; y < FCEUD_CommandMapping[j].NumC; ++y)
+				{
+					if ((FCEUI_CommandTable[i].flags & EMUCMDFLAG_TASEDITOR) == (FCEUI_CommandTable[j].flags & EMUCMDFLAG_TASEDITOR)
+						&& FCEUD_CommandMapping[i].ButtType[x] == FCEUD_CommandMapping[j].ButtType[y]
+						&& FCEUD_CommandMapping[i].DeviceNum[x] == FCEUD_CommandMapping[j].DeviceNum[y]
+						&& FCEUD_CommandMapping[i].ButtonNum[x] == FCEUD_CommandMapping[j].ButtonNum[y])
+					{
+						hasConflicsts = true;
+						break;
+					}
+				}
+				if (hasConflicsts) break;
+			}
+			if (hasConflicsts)
 			{
 				conflictTable[i] = 1;
 				conflictTable[j] = 1;
@@ -551,9 +564,9 @@ void PopulateMappingDisplay(HWND hwndDlg)
 			lvi.mask = LVIF_TEXT;
 			lvi.iItem = idx;
 			lvi.iSubItem = 2;
-			lvi.pszText = GetKeyComboName(FCEUD_CommandMapping[FCEUI_CommandTable[i].cmd]);
-
+			lvi.pszText = MakeButtString(&FCEUD_CommandMapping[FCEUI_CommandTable[i].cmd], 0);
 			SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
+			free(lvi.pszText);
 
 			idx++;
 		}
@@ -651,7 +664,7 @@ void InitFilterComboBox(HWND hwndDlg)
 * Checks what ListView line was selected and shows the dialog
 * that prompts the user to enter a hotkey.
 **/
-void AskForHotkey(HWND hwndListView)
+void AskForHotkey(HWND hwndDlg, HWND hwndListView)
 {
 	int nSel = SendMessage(hwndListView, LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
@@ -669,20 +682,16 @@ void AskForHotkey(HWND hwndListView)
 
 		int nCmd = lvi.lParam;
 
-		int nRet = DialogBox(fceu_hInstance, "NEWINPUT", hwndListView, ChangeInputDialogProc);
+		//int nRet = DialogBox(fceu_hInstance, "NEWINPUT", hwndListView, ChangeInputDialogProc);
+		DWaitButton(hwndDlg, FCEUI_CommandTable[nCmd].name, &FCEUD_CommandMapping[nCmd]);
 		
-		if (nRet)
-		{
-			// nRet will be -1 when the user selects "clear".
-			FCEUD_CommandMapping[nCmd] = ( nRet < 0)  ? 0 : nRet;
-
-			memset(&lvi, 0, sizeof(lvi));
-			lvi.mask = LVIF_TEXT;
-			lvi.iItem = nSel;
-			lvi.iSubItem = 2;
-			lvi.pszText = GetKeyComboName(FCEUD_CommandMapping[nCmd]);
-			SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
-		}
+		memset(&lvi, 0, sizeof(lvi));
+		lvi.mask = LVIF_TEXT;
+		lvi.iItem = nSel;
+		lvi.iSubItem = 2;
+		lvi.pszText = MakeButtString(&FCEUD_CommandMapping[nCmd], 0);
+		SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
+		free(lvi.pszText);
 	}
 }
 
@@ -695,7 +704,10 @@ void ApplyDefaultCommandMapping()
 
 	for(unsigned i = 0; i < NUM_DEFAULT_MAPPINGS; ++i)
 	{
-		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd] = DefaultCommandMapping[i].key;
+		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd].ButtType[0] = BUTTC_KEYBOARD;
+		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd].DeviceNum[0] = 0;
+		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd].ButtonNum[0] = DefaultCommandMapping[i].key;
+		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd].NumC = 1;
 	}
 }
 
@@ -781,7 +793,7 @@ INT_PTR CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 					switch (code)
 					{
 						case LVN_ITEMACTIVATE:
-							AskForHotkey(hwndListView);
+							AskForHotkey(hwndDlg, hwndListView);
 
 							// TODO: Only redraw if Conflicts filter
 							// is active.
