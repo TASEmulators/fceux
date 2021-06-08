@@ -19,10 +19,8 @@
 
 void ConfigInput(HWND hParent);
 int InitDInput(void);
-void CreateInputStuff(void);
 void InitInputStuff(void);
 void DestroyInput(void);
-void InputScreenChanged(int fs);
 void SetAutoFireDesynch(int DesynchOn);
 int GetAutoFireDesynch();
 uint32 GetGamepadPressedImmediate();
@@ -65,7 +63,6 @@ void ParseGIInput(FCEUGI *GameInfo);
 #define FCFGD_HYPERSHOT 3
 #define FCFGD_QUIZKING  4
 
-void SetEmulationSpeed(int type);
 int FCEUD_TestCommandState(int c);
 void FCEUD_UpdateInput();
 int DWaitButton(HWND hParent, const char *text, ButtConfig *bc);
