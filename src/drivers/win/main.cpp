@@ -827,6 +827,7 @@ int main(int argc,char *argv[])
 		}
 	}
 
+	CreateMainWindow();
 
 	if (!InitDInput())
 	{
@@ -839,8 +840,6 @@ int main(int argc,char *argv[])
 		do_exit();
 		return 1;
 	}
-
-	CreateMainWindow();
 
 	debugSystem = new DebugSystem();
 	debugSystem->init();
