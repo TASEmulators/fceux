@@ -98,7 +98,7 @@ void ParseGIInput(FCEUGI *gi)
 	}
 }
 
-
+ButtConfig autoHoldKeys, autoHoldClearKeys;
 static uint8 QuizKingData=0;
 static uint8 HyperShotData=0;
 static uint32 MahjongData=0;
@@ -183,28 +183,6 @@ int GetAutoFireDesynch()
 	return DesynchAutoFire;
 }
 
-// Test button state using current keyboard data.
-// Clone of DTestButton, but uses local variables.
-int DTestButtonImmediate(ButtConfig *bc)
-{
-	uint32 x;//mbg merge 7/17/06 changed to uint
-
-	static unsigned int *keys_im=GetKeyboard_nr();
-
-	for(x=0;x<bc->NumC;x++)
-	{
-		if(bc->ButtType[x]==BUTTC_KEYBOARD)
-		{
-			if(keys_im[bc->ButtonNum[x]])
-			{
-				return(1);
-			}
-		}
-	}
-	if(DTestButtonJoy(bc)) return(1); // Needs joystick.h. Tested with PPJoy mapped with Print Screen
-	return(0);
-}
-
 uint32 GetGamepadPressedImmediate()
 {
 	// Get selected joypad buttons, ignoring NES polling
@@ -220,7 +198,7 @@ uint32 GetGamepadPressedImmediate()
 	{
 
 		for(x=0;x<8;x++)
-			if(DTestButtonImmediate(&GamePadConfig[wg][x]))
+			if(DTestButton(&GamePadConfig[wg][x]))
 				JSButtons|=(1<<x)<<(wg<<3);
 
 		// Check if U+D/L+R is disabled
@@ -236,9 +214,9 @@ uint32 GetGamepadPressedImmediate()
 	return JSButtons;
 }
 
-int DTestButton(ButtConfig *bc)
+int DTestButton(ButtConfig *bc, uint8_t just_down)
 {
-	static unsigned int *keys_data = GetKeyboard_nr();
+	static unsigned int *keys_data = !just_down ? GetKeyboard_nr() : GetKeyboard_jd();
 
 	for(int x=0; x < bc->NumC; x++)
 	{
@@ -896,9 +874,6 @@ static void UpdateFTrainer(void)
 	}
 }
 
-int DWaitButton(HWND hParent, const uint8 *text, ButtConfig *bc);
-int DWaitSimpleButton(HWND hParent, const uint8 *text);
-
 CFGSTRUCT InputConfig[]={
 	VAC(powerpadsc, 2),
 	VAC(QuizKingButtons, 2),
@@ -913,6 +888,8 @@ CFGSTRUCT InputConfig[]={
 	VAC(suborkbmap, 2),
 	VAC(virtualboysc, 2),
 	VAC(lcdcompzappersc, 2),
+	AC(autoHoldKeys),
+	AC(autoHoldClearKeys),
 	ENDCFGSTRUCT
 };
 
@@ -1330,52 +1307,6 @@ int DWaitButton(HWND hParent, const uint8 *text, ButtConfig *bc)
 	return 0; //mbg merge TODO 7/17/06  - had to add this return value--is it right?
 }
 
-int DWaitSimpleButton(HWND hParent, const uint8 *text)
-{
-	DWBStarted = 1;
-	int ret = 0;
-
-	die = CreateDialog(fceu_hInstance, "DWBDIALOGSIMPLE", hParent, NULL);
-	SetWindowText(die, (char*)text); //mbg merge 7/17/06 added cast
-	EnableWindow(hParent, 0);
-
-	ShowWindow(die, 1);
-
-	while(die)
-	{
-		MSG msg;
-		while(PeekMessage(&msg, 0, 0, 0, PM_NOREMOVE))
-		{
-			if(GetMessage(&msg, 0, 0, 0) > 0)
-			{
-				if(msg.message == WM_KEYDOWN || msg.message == WM_SYSKEYDOWN)
-				{
-					LPARAM tmpo;
-
-					tmpo=((msg.lParam>>16)&0x7F)|((msg.lParam>>17)&0x80);
-					ret = tmpo;
-					goto done;
-				}
-				if(msg.message == WM_SYSCOMMAND) continue;
-				if(!IsDialogMessage(die, &msg))
-				{
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
-				}
-			}
-		}
-		Sleep(10);
-	}
-done:
-	EndDialog(die,0);
-	EnableWindow(hParent, 1);
-
-	if(ret == 1) // convert Esc to nothing (why is it 1 and not VK_ESCAPE?)
-		ret = 0;
-	return ret;
-}
-
-
 static ButtConfig *DoTBButtons=0;
 static const char *DoTBTitle=0;
 static int DoTBMax=0;
@@ -1622,27 +1553,25 @@ INT_PTR CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		);
 
 		// Initialize the auto key controls
-		extern int autoHoldKey, autoHoldClearKey;
-		char btext[128];
-		if (autoHoldKey)
+		if (autoHoldKeys.NumC)
 		{
-			if (!GetKeyNameText((autoHoldKey & 0x7F) << 16 | (autoHoldKey & 0x80) << 17, btext, 128))
-				sprintf(btext, "KB: %d", autoHoldKey);
+			char *nstr = MakeButtString(&autoHoldKeys);
+			SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, nstr);
+			free(nstr);
 		} else
 		{
-			sprintf(btext, "not assigned");
-		}
-		SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, btext);
+			SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, "not assigned");
+		}		
 
-		if (autoHoldClearKey)
+		if (autoHoldClearKeys.NumC)
 		{
-			if (!GetKeyNameText(autoHoldClearKey << 16, btext, 128))
-				sprintf(btext, "KB: %d", autoHoldClearKey);
+			char *nstr = MakeButtString(&autoHoldClearKeys);
+			SetDlgItemText(hwndDlg, LBL_CLEAR_AH, nstr);
+			free(nstr);
 		} else
 		{
-			sprintf(btext, "not assigned");
+			SetDlgItemText(hwndDlg, LBL_CLEAR_AH, "not assigned");
 		}
-		SetDlgItemText(hwndDlg, LBL_CLEAR_AH, btext);
 
 		CenterWindowOnScreen(hwndDlg);
 		UpdateFourscoreState(hwndDlg);
@@ -1807,53 +1736,36 @@ INT_PTR CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			case BTN_AUTO_HOLD: // auto-hold button
 				{
 					char btext[128] = { 0 };
-
 					GetDlgItemText(hwndDlg, BTN_AUTO_HOLD, btext, sizeof(btext) );
-
-					int button = DWaitSimpleButton(hwndDlg, (uint8*)btext); //mbg merge 7/17/06 
-
-					if(button)
+					DWaitButton(hwndDlg, (uint8*)btext, &autoHoldKeys);
+					if (autoHoldKeys.NumC)
 					{
-						if(!GetKeyNameText((button & 0x7F) << 16 | (button & 0x80) << 17, btext, 128))
-						{
-							sprintf(btext, "KB: %d", button);
-						}
+						char *nstr = MakeButtString(&autoHoldKeys);
+						SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, nstr);
+						free(nstr);
 					}
 					else
 					{
-						sprintf(btext, "not assigned");
+						SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, "not assigned");
 					}
-
-					extern int autoHoldKey;
-					autoHoldKey = button;
-					SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, btext);
 				}
 				break;
 
 			case BTN_CLEAR_AH: // auto-hold clear button
 				{
 					char btext[128] = { 0 };
-
 					GetDlgItemText(hwndDlg, BTN_CLEAR_AH, btext, 128);
-
-					int button = DWaitSimpleButton(hwndDlg, (uint8*)btext); //mbg merge 7/17/06 added cast
-
-					if(button)
+					DWaitButton(hwndDlg, (uint8*)btext, &autoHoldClearKeys);
+					if (autoHoldClearKeys.NumC)
 					{
-						if( !GetKeyNameText((button & 0x7F) << 16 | (button & 0x80 << 17), btext, sizeof(btext)))
-						{
-							sprintf(btext, "KB: %d", button);
-						}
+						char *nstr = MakeButtString(&autoHoldClearKeys);
+						SetDlgItemText(hwndDlg, LBL_CLEAR_AH, nstr);
+						free(nstr);
 					}
 					else
 					{
-						sprintf(btext, "not assigned");
+						SetDlgItemText(hwndDlg, LBL_CLEAR_AH, "not assigned");
 					}
-
-					extern int autoHoldClearKey;
-					autoHoldClearKey = button;
-
-					SetDlgItemText(hwndDlg, LBL_CLEAR_AH, btext);
 				}
 				break;
 
@@ -1902,33 +1814,15 @@ int FCEUD_TestCommandState(int c)
 	int cmdmask=cmd&CMD_KEY_MASK;
 
 	// allow certain commands be affected by key repeat
-	if(c == EMUCMD_FRAME_ADVANCE/*
-								|| c == EMUCMD_SOUND_VOLUME_UP
-								|| c == EMUCMD_SOUND_VOLUME_DOWN
-								|| c == EMUCMD_SPEED_SLOWER
-								|| c == EMUCMD_SPEED_FASTER*/)
+	if(c == EMUCMD_FRAME_ADVANCE || c == EMUCMD_SPEED_TURBO || c == EMUCMD_TASEDITOR_REWIND) // TODO: this should be made more general by detecting if the command has an "off" function
 	{
-		keys=GetKeyboard_nr(); 
-		/*		if((cmdmask & CMD_KEY_LALT) == CMD_KEY_LALT
-		|| (cmdmask & CMD_KEY_RALT) == CMD_KEY_RALT
-		|| (cmdmask & CMD_KEY_LALT) == CMD_KEY_LALT
-		|| (cmdmask & CMD_KEY_LCTRL) == CMD_KEY_LCTRL
-		|| (cmdmask & CMD_KEY_RCTRL) == CMD_KEY_RCTRL
-		|| (cmdmask & CMD_KEY_LSHIFT) == CMD_KEY_LSHIFT
-		|| (cmdmask & CMD_KEY_RSHIFT) == CMD_KEY_RSHIFT)*/
-		keys_nr=GetKeyboard_nr();
-		//		else
-		//			keys_nr=GetKeyboard_nr();
-	}
-	else if(c != EMUCMD_SPEED_TURBO && c != EMUCMD_TASEDITOR_REWIND) // TODO: this should be made more general by detecting if the command has an "off" function
-	{
-		keys=GetKeyboard_jd();
-		keys_nr=GetKeyboard_nr(); 
+		keys = GetKeyboard_nr();
+		keys_nr = GetKeyboard_nr();
 	}
 	else
 	{
-		keys=GetKeyboard_nr(); 
-		keys_nr=GetKeyboard_nr();
+		keys = GetKeyboard_jd();
+		keys_nr = GetKeyboard_nr();
 	}
 
 	/* test CTRL, SHIFT, ALT */
