@@ -827,19 +827,20 @@ int main(int argc,char *argv[])
 		}
 	}
 
+
+	if (!InitDInput())
+	{
+		do_exit();
+		return 1;
+	}
+
+	if (!DriverInitialize())
+	{
+		do_exit();
+		return 1;
+	}
+
 	CreateMainWindow();
-
-	if(!InitDInput())
-	{
-		do_exit();
-		return 1;
-	}
-
-	if(!DriverInitialize())
-	{
-		do_exit();
-		return 1;
-	}
 
 	debugSystem = new DebugSystem();
 	debugSystem->init();
