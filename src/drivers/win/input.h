@@ -68,6 +68,7 @@ void ParseGIInput(FCEUGI *GameInfo);
 void SetEmulationSpeed(int type);
 int FCEUD_TestCommandState(int c);
 void FCEUD_UpdateInput();
+int DTestButton(ButtConfig *bc, uint8_t just_down = 0);
 
 extern CFGSTRUCT HotkeyConfig[];
 
