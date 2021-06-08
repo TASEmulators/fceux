@@ -1004,10 +1004,19 @@ char *MakeButtString(ButtConfig *bc, int appendKB)
 				strcat(tmpstr, "Right Win + ");
 			}
 
-			if(!GetKeyNameText(((bc->ButtonNum[x] & 0x7F) << 16) | ((bc->ButtonNum[x] & 0x80) << 17), tmpstr+strlen(tmpstr), 16))
+			/* For some weird reason NumLock and Pause keys are messed up */
+			if (bc->ButtonNum[x] == SCAN_NUMLOCK)
+			{
+				strcat(tmpstr, "NumLock");
+			}
+			else if (bc->ButtonNum[x] == SCAN_PAUSE)
+			{
+				strcat(tmpstr, "Pause");
+			}
+			else if (!GetKeyNameText(((bc->ButtonNum[x] & 0x7F) << 16) | ((bc->ButtonNum[x] & 0x80) << 17), tmpstr + strlen(tmpstr), 16))
 			{
 				// GetKeyNameText wasn't able to provide a name for the key, then just show scancode
-				sprintf(tmpstr+strlen(tmpstr),"%03d",bc->ButtonNum[x]);
+				sprintf(tmpstr + strlen(tmpstr), "%03d", bc->ButtonNum[x]);
 			}
 		}
 		else if(bc->ButtType[x] == BUTTC_JOYSTICK)
