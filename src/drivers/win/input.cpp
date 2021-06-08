@@ -1148,6 +1148,7 @@ static void ClearExtraMeta(int* key)
 
 static int DWBStarted;
 static ButtConfig *DWBButtons;
+static ButtConfig DWBButtonsBackup;
 static const char *DWBText;
 static uint8 DWBFirstPress;
 
@@ -1259,6 +1260,7 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 	   key = 0;
 	   DWBFirstPress = 1;
 	   memset(keyonce, 0, sizeof(keyonce));
+	   memcpy(&DWBButtonsBackup, DWBButtons, sizeof(ButtConfig));
 	   SetWindowText(hwndDlg, (char*)DWBText); //mbg merge 7/17/06 added cast
 	   BeginJoyWait(hwndDlg);
 	   KeyboardSetBackgroundAccess(true);
@@ -1289,6 +1291,9 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			   free(nstr);
 		   }
 		   break;
+	   case BTN_CANCEL:
+		   memcpy(DWBButtons, &DWBButtonsBackup, sizeof(ButtConfig));
+		   goto gornk;
 	   case BTN_CLOSE:
 gornk:
 		   KillTimer(hwndDlg,666);

@@ -11,12 +11,12 @@
 #define LBL_KEY_COMBO                   100
 #define LBL_CDLOGGER_CODECOUNT          100
 #define CHECK_PALETTE_ENABLED           100
-#define LBL_DWBDIALOG_TEXT              100 | WS_TABSTOP
 #define GRP_GAMEPAD1                    100
 #define IDC_TRACER_LOG                  100
 #define MENU_MV_FILE_SAVE               100
 #define IDC_ROMPATCHER_OFFSET_BOX       100
 #define IDC_ASSEMBLER_HISTORY           100
+#define LBL_DWBDIALOG_TEXT              100
 #define MENU_CLOSE_FILE                 101
 #define CB_DISABLE_SPEED_THROTTLING     101
 #define LBL_CDLOGGER_DATACOUNT          101
@@ -246,6 +246,7 @@
 #define IDI_ICON4                       201
 #define BTN_OK                          201
 #define BUTTON_BATTERY                  201
+#define BTN_CLEAR2                      201
 #define MENU_EJECT_DISK                 202
 #define TXT_FAM                         202
 #define MENU_MV_EDIT_PASTE              202
