@@ -8,7 +8,6 @@
 #define MENU_OPEN_FILE                  100
 #define EDIT_ROM                        100
 #define LBL_LOG_TEXT                    100
-#define LBL_KEY_COMBO                   100
 #define LBL_CDLOGGER_CODECOUNT          100
 #define CHECK_PALETTE_ENABLED           100
 #define GRP_GAMEPAD1                    100
@@ -244,7 +243,6 @@
 #define IDC_NTVIEW_REFRESH_TRACKBAR     201
 #define IDC_ASSEMBLER_APPLY             201
 #define IDI_ICON4                       201
-#define BTN_OK                          201
 #define BUTTON_BATTERY                  201
 #define BTN_CLEAR2                      201
 #define MENU_EJECT_DISK                 202
