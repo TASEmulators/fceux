@@ -213,12 +213,14 @@ void TASEDITOR_WINDOW::updateTooltips()
 			// for other controls we provide hwnd
 			toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
 		char tooltipText[TOOLTIP_TEXT_MAX_LEN];
-		if (windowItems[i].hotkeyEmuCmd && FCEUD_CommandMapping[windowItems[i].hotkeyEmuCmd])
+		if (windowItems[i].hotkeyEmuCmd && FCEUD_CommandMapping[windowItems[i].hotkeyEmuCmd].NumC)
 		{
 			// add hotkey mapping if needed
 			strcpy(tooltipText, windowItems[i].tooltipText);
 			strcat(tooltipText, " (hotkey: ");
-			strcat(tooltipText, GetKeyComboName(FCEUD_CommandMapping[windowItems[i].hotkeyEmuCmd]));
+			char *buttName = MakeButtString(&FCEUD_CommandMapping[windowItems[i].hotkeyEmuCmd], 0);
+			strcat(tooltipText, buttName);
+			free(buttName);
 			strcat(tooltipText, ")");
 			toolInfo.lpszText = tooltipText;
 		} else
