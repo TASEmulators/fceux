@@ -108,7 +108,7 @@ static uint32 FamiNetSysData = 0;
 
 static void UpdateFKB(void);
 static void UpdateSuborKB(void);
-void UpdateGamepad(void);
+void UpdateGamepad(bool snes);
 static void UpdateQuizKing(void);
 static void UpdateHyperShot(void);
 static void UpdateMahjong(void);
@@ -122,8 +122,6 @@ int NoWaiting=0;
 bool turbo = false;
 
 #include "keyscan.h"
-static unsigned int *keys=0;
-static unsigned int *keys_nr=0;
 static int DIPS=0;
 
 //#define KEY(__a) keys_nr[MKK(__a)]
@@ -1043,6 +1041,7 @@ static uint8 keyonce[MKK_COUNT];
 
 static int IsNewpressed(int a)
 {
+	unsigned int *keys_nr = GetKeyboard_nr();
 	if (keys_nr[a])
 	{
 		if (!keyonce[a])
@@ -1064,7 +1063,7 @@ static int GetKeyPressed()
 	int key = 0;
 	int i;
 
-	keys_nr = GetKeyboard_nr();
+	unsigned int keys_nr = *GetKeyboard_nr();
 
 	for (i = 0; i < 256 && !key; ++i)
 	{
@@ -1081,7 +1080,7 @@ static int NothingPressed()
 {
 	int i;
 
-	keys_nr = GetKeyboard_nr();
+	unsigned int *keys_nr = GetKeyboard_nr();
 
 	for (i = 0; i < 256; ++i)
 	{
