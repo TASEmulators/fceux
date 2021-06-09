@@ -106,7 +106,7 @@ struct DBGCOLORMENU {
 	{ "Operand note" ,     PPCCF(DbgOpNt) },
 	{ "Effective address", PPCCF(DbgEff)  },
 	{ NULL                                },
-	{ "RTS Line",          PPCCF(DbgRts)  }
+	{ "RTS/RTI Line",      PPCCF(DbgRts)  }
 };
 
 #define IDC_DEBUGGER_RESTORESIZE      1000
@@ -717,8 +717,10 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 						replaceNames(pageNames[p], bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
 			}
 
-			// special case: an RTS opcode
-			if (GetMem(instruction_addr) == 0x60)
+            uint8 opCode = GetMem(instruction_addr);
+            
+			// special case: an RTS or RTI opcode
+			if (opCode == 0x60 || opCode == 0x40)
 			{
 				// add "----------" to emphasize the end of subroutine
 				strcat(bufferForDisassemblyWithPlentyOfStuff, " ");
