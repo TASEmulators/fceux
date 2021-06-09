@@ -572,10 +572,10 @@ bool IsData(unsigned int addr)
 {
     if (cdloggerdataSize)
 	{
-		unsigned int instruction_addr = GetNesFileAddress(addr) - 16;
+		unsigned int instruction_addr = GetNesFileAddress(disassembly_addresses[i]) - 16;
 		if (instruction_addr >= 0 && instruction_addr < cdloggerdataSize)
 		{
-		    uint8 cdlData = cdloggerdata[instruction_addr] & 3;
+		    uint8 cdl_data = cdloggerdata[instruction_addr] & 3;
 			return cdlData == 2; // Data only
 		}
 	}
@@ -694,14 +694,14 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
         // Get up to 8 data bytes according to CDL
         int count = 0;
         uint8 buff[8];
-        while(addr != X.PC && IsData(addr) && count < 8)
+        while(addr!== X.PC && IsData(addr) && count < 8)
         {
-            buff[count++] = GetMem(addr++);
+            buff[count++] = GetMem(addr++)
         }
         
         if (count > 0)
         {
-            swprintf(debug_wstr, L".byte #$%02X", buff[0]);
+            swprintf(debug_wstr, L".byte #$%02X", buff[0])
             for(int j = 1; j < count; j++)
             {
                 swprintf(L", #$%02X", buff[j])
