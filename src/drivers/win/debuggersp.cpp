@@ -506,7 +506,7 @@ void freeList(Name* n)
 * The caller needs to make sure that str is large enough.
 * 
 * @param list NL list of address definitions
-* @param str The string where replacing takes place.
+* @param str The string where replacing takes place, including trace data.
 * @param addressesLog Vector for collecting addresses that were replaced by names
 **/
 void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
@@ -543,7 +543,7 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 				addrlen = 3;
 			}
 
-			for(;;)
+			while (src)
 			{
 				int myAddrlen = addrlen;
 
@@ -566,10 +566,7 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 					myAddrlen = 5;
 				}
 
-				//special hack: sometimes we have #$00, and we dont want to replace that.
-				//(this isn't a problem with $0000 because on the 6502 we ... dont.. have ... #$XXXX ?
-				//honestly, I don't know anything about this CPU. don't tell anyone.
-				//I'm just inferring from the fact that the algorithm previously relied on that assumption...
+				//we actually found an immediate value, don't replace it
 				if(pos[-1] == '#')
 				{
 					src = pos + myAddrlen;
