@@ -573,11 +573,8 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 					continue;
 				}
 				
-				//zero 30-nov-2017 - change how this works so we can display the address still
-				//append beginning part, plus addrlen for the offset
-				strncat(buff,src,pos-src+myAddrlen);
-				//append a space
-				strcat(buff," ");
+				//append beginning part
+				strncat(buff, src, pos-src);
 				//append the label
 				strcat(buff, list->name);
 				//begin processing after that offset
