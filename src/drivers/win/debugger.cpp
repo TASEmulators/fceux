@@ -568,21 +568,6 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 	SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, eventMask);
 }
 
-bool IsData(unsigned int addr)
-{
-    if (cdloggerdataSize)
-	{
-		unsigned int instruction_addr = GetNesFileAddress(disassembly_addresses[i]) - 16;
-		if (instruction_addr >= 0 && instruction_addr < cdloggerdataSize)
-		{
-		    uint8 cdl_data = cdloggerdata[instruction_addr] & 3;
-			return cdlData == 2; // Data only
-		}
-	}
-    
-    return false;
-}
-
 void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 {
 	wchar_t chr[40] = { 0 };
@@ -690,27 +675,6 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 		// Add address
 		wcscat(debug_wstr, chr);
 		disassembly_addresses.push_back(addr);
-        
-        // Get up to 8 data bytes according to CDL
-        int count = 0;
-        uint8 buff[8];
-        while(addr!== X.PC && IsData(addr) && count < 8)
-        {
-            buff[count++] = GetMem(addr++)
-        }
-        
-        if (count > 0)
-        {
-            swprintf(debug_wstr, L".byte #$%02X", buff[0])
-            for(int j = 1; j < count; j++)
-            {
-                swprintf(L", #$%02X", buff[j])
-            }
-            wcscat(debug_wstr, L"\n");
-		    instructions_count++;
-            continue;
-        }
-        
 		if (symbDebugEnabled)
 			disassembly_operands.resize(i + 1);
 
