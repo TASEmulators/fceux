@@ -250,7 +250,7 @@ int highPrecSleep( double timeSeconds )
 int
 SpeedThrottle(void)
 {
-	if (g_fpsScale >= 32)
+	if ( (g_fpsScale >= 32) || (NoWaiting & 0x01) )
 	{
 		return 0; /* Done waiting */
 	}

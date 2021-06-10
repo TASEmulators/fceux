@@ -486,9 +486,16 @@ static void SetInputStuff(int port)
 	switch(joyports[port].type)
 	{
 	case SI_GAMEPAD:
-		if(GameInfo->type==GIT_VSUNI){
-			joyports[port].driver = &GPCVS;
-		} else {
+		if (GameInfo)
+		{
+			if (GameInfo->type==GIT_VSUNI){
+				joyports[port].driver = &GPCVS;
+			} else {
+				joyports[port].driver= &GPC;
+			}
+		}
+		else
+		{
 			joyports[port].driver= &GPC;
 		}
 		break;

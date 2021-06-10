@@ -125,7 +125,7 @@ static void cfg_Save(FILE *fp)
 	{
 		if(it->first.size()>30 || it->second.size()>30)
 		{
-			int zzz=9;
+			//int zzz=9;
 		}
 		fprintf(fp,"%s %s\n",it->first.c_str(),it->second.c_str());
 	}

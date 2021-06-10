@@ -10,7 +10,7 @@
 #define  GL_WIN_DOUBLE_BUFFER        0x0002
 
 #define  GL_NES_WIDTH   256
-#define  GL_NES_HEIGHT  256
+#define  GL_NES_HEIGHT  240
 #define  NES_AUDIO_BUFLEN   480000
 
 struct  nes_shm_t
@@ -25,7 +25,8 @@ struct  nes_shm_t
 		int   ncol;
 		int   nrow;
 		int   pitch;
-		int   scale;
+		int   xscale;
+		int   yscale;
 		int   xyRatio;
 		int   preScaler;
 	} video;

@@ -125,6 +125,7 @@ void FCEUI_SetVidSystem(int a);
 //Set variables for NTSC(0) / PAL(1) / Dendy(2)
 //Dendy has PAL framerate and resolution, but ~NTSC timings, and has 50 dummy scanlines to force 50 fps
 void FCEUI_SetRegion(int region, int notify = 1);
+int  FCEUI_GetRegion(void);
 
 //Convenience function; returns currently emulated video system(0=NTSC, 1=PAL).
 int FCEUI_GetCurrentVidSystem(int *slstart, int *slend);

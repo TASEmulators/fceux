@@ -40,8 +40,8 @@ static uint16 latcha;
 static uint8 *flashdata;
 static uint32 *flash_write_count;
 static uint8 *FlashPage[32];
-static uint32 *FlashWriteCountPage[32];
-static uint8 flashloaded = false;
+//static uint32 *FlashWriteCountPage[32];
+//static uint8 flashloaded = false;
 
 static uint8 flash_save=0, flash_state=0, flash_mode=0, flash_bank;
 static void (*WLSync)(void);

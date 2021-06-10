@@ -278,6 +278,7 @@ extern bool movie_readonly;
 extern bool autoMovieBackup;
 extern bool fullSaveStateLoads;
 extern int movieRecordMode;
+extern int input_display;
 
 //--------------------------------------------------
 void FCEUI_MakeBackupMovie(bool dispMessage);

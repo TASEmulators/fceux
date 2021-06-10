@@ -1,4 +1,4 @@
-// HotKeyConf.h
+// iNesHeaderEditor.h
 //
 
 #pragma once
@@ -19,7 +19,7 @@
 
 #include "Qt/main.h"
 
-class iNES_HEADER;
+struct iNES_HEADER;
 
 class iNesHeaderEditor_t : public QDialog
 {

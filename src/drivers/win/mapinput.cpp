@@ -101,326 +101,6 @@ static struct
 
 #define NUM_DEFAULT_MAPPINGS		(sizeof(DefaultCommandMapping)/sizeof(DefaultCommandMapping[0]))
 
-static uint8 keyonce[MKK_COUNT];
-static unsigned int *keys_nr = 0;
-
-static const char* ScanNames[256]=
-{
-	/* 0x00-0x0f */ 0, "Escape", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "Minus", "Equals", "Backspace", "Tab",
-	/* 0x10-0x1f */ "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "[", "]", "Enter", "Left Ctrl", "A", "S",
-	/* 0x20-0x2f */ "D", "F", "G", "H", "J", "K", "L", "Semicolon", "Apostrophe", "Tilde", "Left Shift", "Backslash", "Z", "X", "C", "V",
-	/* 0x30-0x3f */	"B", "N", "M", "Comma", "Period", "Slash", "Right Shift", "Numpad *", "Left Alt", "Space", "Caps Lock", "F1", "F2", "F3", "F4", "F5",
-	/* 0x40-0x4f */ "F6", "F7", "F8", "F9", "F10", "NumLock", "ScrollLock", "Numpad 7", "Numpad 8", "Numpad 9", "Numpad Minus", "Numpad 4", "Numpad 5", "Numpad 6", "Numpad Plus", "Numpad 1",
-	/* 0x50-0x5f */	"Numpad 2", "Numpad 3", "Numpad 0", "Numpad Period", 0, 0, "Backslash", "F11", "F12", 0, 0, 0, 0, 0, 0, 0,
-	/* 0x60-0x6f */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0x70-0x7f */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0x80-0x8f */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0x90-0x9f */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Numpad Enter", "Right Ctrl", 0, 0,
-	/* 0xa0-0xaf */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0xb0-0xbf */ 0, 0, 0, 0, 0, "Numpad Divide", 0, "PrintScrn", "Right Alt", 0, 0, 0, 0, 0, 0, 0,
-	/* 0xc0-0xcf */ 0, 0, 0, 0, 0, "Pause", 0, "Home", "Up Arrow", "PgUp", 0, "Left Arrow", 0, "Right Arrow", 0, "End",
-	/* 0xd0-0xdf */ "Down Arrow", "PgDn", "Ins", "Del", 0, 0, 0, 0, 0, 0, 0, "Left Win", "Right Win", "AppMenu", 0, 0,
-	/* 0xe0-0xef */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* 0xf0-0xff */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-
-int _keyonly(int a)
-{
-	if(keys_nr[a])
-	{
-		if(!keyonce[a]) 
-		{
-			keyonce[a] = 1;
-			return 1;
-		}
-	}
-	else
-	{
-		keyonce[a] = 0;
-	}
-
-	return 0;
-}
-
-int GetKeyPressed()
-{
-	int key = 0;
-	int i;
-
-	keys_nr = GetKeyboard_nr();
-
-	for(i = 0; i < 256 && !key; ++i)
-	{
-		if(_keyonly(i))
-		{
-			key = i;
-		}
-	}
-
-	return key;
-}
-
-int NothingPressed()
-{
-	int i;
-
-	keys_nr = GetKeyboard_nr();
-
-	for(i = 0; i < 256; ++i)
-	{
-		if(keys_nr[i])
-		{
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
-int GetKeyMeta(int key)
-{
-	int meta = key & (~CMD_KEY_MASK);
-
-	switch(key & CMD_KEY_MASK)
-	{
-		case SCAN_LEFTCONTROL:
-		case SCAN_RIGHTCONTROL:	
-			return CMD_KEY_CTRL | meta;
-		
-		case SCAN_LEFTALT:
-		case SCAN_RIGHTALT:
-			return CMD_KEY_ALT | meta;
-		
-		case SCAN_LEFTSHIFT:
-		case SCAN_RIGHTSHIFT:
-			return CMD_KEY_SHIFT | meta;
-		
-		default:
-			break;
-	}
-
-	return meta;
-}
-
-void ClearExtraMeta(int* key)
-{
-	switch((*key)&0xff)
-	{
-		case SCAN_LEFTCONTROL:
-		case SCAN_RIGHTCONTROL:
-			*key &= ~(CMD_KEY_CTRL); 
-			break;
-
-		case SCAN_LEFTALT:
-		case SCAN_RIGHTALT:
-			*key &= ~(CMD_KEY_ALT);  
-			break;
-
-		case SCAN_LEFTSHIFT:
-		case SCAN_RIGHTSHIFT:
-			*key &= ~(CMD_KEY_SHIFT); 
-			break;
-
-		default:
-			break;
-	}
-}
-
-DWORD WINAPI NewInputDialogThread(LPVOID lpvArg)
-{
-	struct INPUTDLGTHREADARGS* args = (struct INPUTDLGTHREADARGS*)lpvArg;
-
-	while (args->hThreadExit)
-	{
-		if (WaitForSingleObject(args->hThreadExit, 20) == WAIT_OBJECT_0)
-			break;
-
-		// Poke our owner dialog periodically.
-		PostMessage(args->hwndDlg, WM_USER, 0, 0);
-	}
-
-	return 0;
-}
-
-/**
-* Returns the name of a single key.
-*
-* @param code Keycode
-*
-* @return Name of the key
-*
-* TODO: Replace return value with parameter.
-**/
-const char* GetKeyName(int code)
-{
-	static char name[16];
-
-	code &= 0xff;
-	
-	if(ScanNames[code])
-	{
-		return ScanNames[code];
-	}
-
-	sprintf(name, "Key 0x%.2x", code);
-
-	return name;
-}
-
-/**
-* Returns the name of a pressed key combination.
-* 
-* @param c A keycode
-*
-* @return The name of the key combination.
-*
-* TODO: Replace return value with parameter.
-**/
-char* GetKeyComboName(int c)
-{
-	static char text[80];
-
-	text[0] = '\0';
-	
-	if(!c)
-	{
-		return text;
-	}
-
-	if ((c & CMD_KEY_CTRL) == CMD_KEY_CTRL)
-	{
-		strcat(text, "Ctrl + ");
-	}
-	else if ((c & CMD_KEY_CTRL) == CMD_KEY_LCTRL)
-	{
-		strcat(text, "Left Ctrl + ");
-	}
-	else if ((c & CMD_KEY_CTRL) == CMD_KEY_RCTRL)
-	{
-		strcat(text, "Right Ctrl + ");
-	}
-
-	if ((c & CMD_KEY_ALT) == CMD_KEY_ALT)
-	{
-		strcat(text, "Alt + ");
-	}
-	else if ((c & CMD_KEY_ALT) == CMD_KEY_LALT)
-	{
-		strcat(text, "Left Alt + ");
-	}
-	else if ((c & CMD_KEY_ALT) == CMD_KEY_RALT)
-	{
-		strcat(text, "Right Alt + ");
-	}
-
-	if ((c & CMD_KEY_SHIFT) == CMD_KEY_SHIFT)
-	{
-		strcat(text, "Shift + ");
-	}
-	else if ((c & CMD_KEY_SHIFT) == CMD_KEY_LSHIFT)
-	{
-		strcat(text, "Left Shift + ");
-	}
-	else if ((c & CMD_KEY_SHIFT) == CMD_KEY_RSHIFT)
-	{
-		strcat(text, "Right Shift + ");
-	}
-
-	strcat(text, GetKeyName(c & CMD_KEY_MASK));
-
-	return text;
-}
-
-//Callback function for the dialog where the user can change hotkeys.
-INT_PTR CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	static HANDLE hThread = NULL;
-	static DWORD dwThreadId = 0;
-	static struct INPUTDLGTHREADARGS threadargs;
-	static int key = 0;
-
-	switch (uMsg)
-	{
-		case WM_INITDIALOG:
-		{
-			// Start the message thread.
-			threadargs.hThreadExit = CreateEvent(NULL, TRUE, FALSE, NULL);
-			threadargs.hwndDlg = hwndDlg;
-			hThread = CreateThread(NULL, 0, NewInputDialogThread, (LPVOID)&threadargs, 0, &dwThreadId);
-			
-			key = 0;
-			memset(keyonce, 0, sizeof(keyonce));
-			
-			KeyboardSetBackgroundAccess(true);
-			SetFocus(GetDlgItem(hwndDlg, LBL_KEY_COMBO));
-
-			CenterWindowOnScreen(hwndDlg);
-		}
-
-		return FALSE;
-
-		case WM_COMMAND:
-			switch(LOWORD(wParam))	 // CaH4e3: BN_CLICKED redundant define removed since it always 0, Esc mapping used to be handled as well (I need it too :))
-			{
-				case BTN_OK:
-					// Send quit message.
-					PostMessage(hwndDlg, WM_USER + 99, 0, 0);
-					break;
-				case BTN_CLEAR:
-					key = -1;
-					// Send quit message.
-					PostMessage(hwndDlg, WM_USER + 99, 0, 0);
-					break;
-				default:
-					break;
-			}
-			break;
-
-		case WM_USER:
-			{
-				// Our thread sent us a timer signal.
-				int newkey;
-				int meta = GetKeyMeta(key);
-
-				KeyboardUpdateState();
-
-				if((newkey = GetKeyPressed()) != 0)
-				{
-					key = newkey | meta;
-					ClearExtraMeta(&key);
-					SetDlgItemText(hwndDlg, LBL_KEY_COMBO, GetKeyComboName(key));
-				}
-				else if(NothingPressed() && key)
-				{
-					PostMessage(hwndDlg, WM_USER + 99, 0, 0);		// Send quit message.
-				}
-			}
-			break;
-
-		case WM_CLOSE:
-			// exit without changing the key mapping
-			key = 0;
-		case WM_USER + 99:
-			// Done with keyboard.
-			KeyboardSetBackgroundAccess(false);
-
-			// Kill the thread.
-			SetEvent(threadargs.hThreadExit);
-			WaitForSingleObject(hThread, INFINITE);
-			CloseHandle(hThread);
-			CloseHandle(threadargs.hThreadExit);
-
-			// End the dialog.
-			EndDialog(hwndDlg, key);
-			return TRUE;
-
-	default:
-		break;
-	}
-
-	return FALSE;
-}
-
 /**
 * Checks whether a key should be shown in the current filter mode.
 *
@@ -443,11 +123,11 @@ bool ShouldDisplayMapping(int mapn, int filter, const int* conflictTable)
 	}
 	else if(filter == EMUCMDTYPE_MAX + 1) /* Assigned */
 	{
-		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd] != 0;
+		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd].NumC != 0;
 	}
 	else if(filter == EMUCMDTYPE_MAX + 2) /* Unassigned */
 	{
-		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd] == 0;
+		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd].NumC == 0;
 	}
 	else if(filter == EMUCMDTYPE_MAX + 3) /* Conflicts */
 	{
@@ -472,10 +152,23 @@ void PopulateConflictTable(int* conflictTable)
 	{
 		for(unsigned int j = i + 1; j < EMUCMD_MAX; ++j)
 		{
-			if(FCEUD_CommandMapping[i] &&
-				FCEUD_CommandMapping[i] == FCEUD_CommandMapping[j] &&
-				 // AnS: added the condition that both commands must have the same EMUCMDFLAG_TASEDITOR, or else they are not considered conflicting
-				 (FCEUI_CommandTable[i].flags & EMUCMDFLAG_TASEDITOR) == (FCEUI_CommandTable[j].flags & EMUCMDFLAG_TASEDITOR))
+			bool hasConflicsts = false;
+			for (unsigned int x = 0; x < FCEUD_CommandMapping[i].NumC; ++x)
+			{
+				for (unsigned int y = 0; y < FCEUD_CommandMapping[j].NumC; ++y)
+				{
+					if ((FCEUI_CommandTable[i].flags & EMUCMDFLAG_TASEDITOR) == (FCEUI_CommandTable[j].flags & EMUCMDFLAG_TASEDITOR)
+						&& FCEUD_CommandMapping[i].ButtType[x] == FCEUD_CommandMapping[j].ButtType[y]
+						&& FCEUD_CommandMapping[i].DeviceNum[x] == FCEUD_CommandMapping[j].DeviceNum[y]
+						&& FCEUD_CommandMapping[i].ButtonNum[x] == FCEUD_CommandMapping[j].ButtonNum[y])
+					{
+						hasConflicsts = true;
+						break;
+					}
+				}
+				if (hasConflicsts) break;
+			}
+			if (hasConflicsts)
 			{
 				conflictTable[i] = 1;
 				conflictTable[j] = 1;
@@ -551,9 +244,9 @@ void PopulateMappingDisplay(HWND hwndDlg)
 			lvi.mask = LVIF_TEXT;
 			lvi.iItem = idx;
 			lvi.iSubItem = 2;
-			lvi.pszText = GetKeyComboName(FCEUD_CommandMapping[FCEUI_CommandTable[i].cmd]);
-
+			lvi.pszText = MakeButtString(&FCEUD_CommandMapping[FCEUI_CommandTable[i].cmd], 0);
 			SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
+			free(lvi.pszText);
 
 			idx++;
 		}
@@ -651,7 +344,7 @@ void InitFilterComboBox(HWND hwndDlg)
 * Checks what ListView line was selected and shows the dialog
 * that prompts the user to enter a hotkey.
 **/
-void AskForHotkey(HWND hwndListView)
+void AskForHotkey(HWND hwndDlg, HWND hwndListView)
 {
 	int nSel = SendMessage(hwndListView, LVM_GETNEXTITEM, (WPARAM)-1, LVNI_SELECTED);
 
@@ -669,20 +362,15 @@ void AskForHotkey(HWND hwndListView)
 
 		int nCmd = lvi.lParam;
 
-		int nRet = DialogBox(fceu_hInstance, "NEWINPUT", hwndListView, ChangeInputDialogProc);
+		DWaitButton(hwndDlg, FCEUI_CommandTable[nCmd].name, &FCEUD_CommandMapping[nCmd]);
 		
-		if (nRet)
-		{
-			// nRet will be -1 when the user selects "clear".
-			FCEUD_CommandMapping[nCmd] = ( nRet < 0)  ? 0 : nRet;
-
-			memset(&lvi, 0, sizeof(lvi));
-			lvi.mask = LVIF_TEXT;
-			lvi.iItem = nSel;
-			lvi.iSubItem = 2;
-			lvi.pszText = GetKeyComboName(FCEUD_CommandMapping[nCmd]);
-			SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
-		}
+		memset(&lvi, 0, sizeof(lvi));
+		lvi.mask = LVIF_TEXT;
+		lvi.iItem = nSel;
+		lvi.iSubItem = 2;
+		lvi.pszText = MakeButtString(&FCEUD_CommandMapping[nCmd], 0);
+		SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
+		free(lvi.pszText);
 	}
 }
 
@@ -695,7 +383,10 @@ void ApplyDefaultCommandMapping()
 
 	for(unsigned i = 0; i < NUM_DEFAULT_MAPPINGS; ++i)
 	{
-		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd] = DefaultCommandMapping[i].key;
+		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd].ButtType[0] = BUTTC_KEYBOARD;
+		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd].DeviceNum[0] = 0;
+		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd].ButtonNum[0] = DefaultCommandMapping[i].key;
+		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd].NumC = 1;
 	}
 }
 
@@ -781,7 +472,7 @@ INT_PTR CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 					switch (code)
 					{
 						case LVN_ITEMACTIVATE:
-							AskForHotkey(hwndListView);
+							AskForHotkey(hwndDlg, hwndListView);
 
 							// TODO: Only redraw if Conflicts filter
 							// is active.

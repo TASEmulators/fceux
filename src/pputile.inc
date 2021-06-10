@@ -1,12 +1,12 @@
 uint8 *C;
-register uint8 cc;
+uint8 cc;
 uint32 vadr;
 #ifdef PPU_VRC5FETCH
 uint8 tmpd;
 #endif
 
 #ifndef PPUT_MMC5SP
-	register uint8 zz;
+	uint8 zz;
 #else
 	uint8 xs, ys;
 	xs = X1;

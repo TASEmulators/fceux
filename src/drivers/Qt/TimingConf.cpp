@@ -36,6 +36,7 @@
 #include <QHeaderView>
 #include <QCloseEvent>
 
+#include "fceu.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/input.h"
@@ -85,7 +86,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	: QDialog(parent)
 {
 	int opt;
-	QVBoxLayout *mainLayout;
+	QVBoxLayout *mainLayout, *vbox;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
 	QPushButton *closeButton;
@@ -188,6 +189,33 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	hbox->addWidget(timingDevSelBox);
 	mainLayout->addLayout(hbox);
 
+	vbox = new QVBoxLayout();
+	grid = new QGridLayout();
+	ppuOverClockBox = new QGroupBox( tr("Overclocking (Old PPU Only)") );
+	ppuOverClockBox->setCheckable(true);
+	ppuOverClockBox->setChecked(overclock_enabled);
+	ppuOverClockBox->setEnabled(!newppu);
+	ppuOverClockBox->setLayout(vbox);
+	mainLayout->addWidget( ppuOverClockBox );
+
+	postRenderBox      = new QSpinBox();
+	vblankScanlinesBox = new QSpinBox();
+	no7bitSamples      = new QCheckBox( tr("Don't Overclock 7-bit Samples") );
+
+	postRenderBox->setRange(0, 999);
+	vblankScanlinesBox->setRange(0, 999);
+
+	postRenderBox->setValue( postrenderscanlines );
+	vblankScanlinesBox->setValue( vblankscanlines );
+	no7bitSamples->setChecked( skip_7bit_overclocking );
+
+	vbox->addLayout( grid );
+	grid->addWidget( new QLabel( tr("Post-render") ), 0, 0 );
+	grid->addWidget( new QLabel( tr("Vblank Scanlines") ), 1, 0 );
+	grid->addWidget( postRenderBox, 0, 1 );
+	grid->addWidget( vblankScanlinesBox, 1, 1 );
+	vbox->addWidget( no7bitSamples );
+
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
 	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
@@ -207,6 +235,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	updateSliderLimits();
 	updateSliderValues();
 	updateTimingMech();
+	updateOverclocking();
 
 #ifdef WIN32
 	connect(emuSchedPrioBox, SIGNAL(activated(int)), this, SLOT(emuSchedPrioChange(int)));
@@ -221,11 +250,23 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 #endif
 	connect(emuPrioCtlEna, SIGNAL(stateChanged(int)), this, SLOT(emuSchedCtlChange(int)));
 	connect(timingDevSelBox, SIGNAL(activated(int)), this, SLOT(emuTimingMechChange(int)));
+
+	connect( ppuOverClockBox   , SIGNAL(toggled(bool))    , this, SLOT(overclockingToggled(bool)));
+	connect( postRenderBox     , SIGNAL(valueChanged(int)), this, SLOT(postRenderChanged(int)));
+	connect( vblankScanlinesBox, SIGNAL(valueChanged(int)), this, SLOT(vblankScanlinesChanged(int)));
+	connect( no7bitSamples     , SIGNAL(stateChanged(int)), this, SLOT(no7bitChanged(int)));
+
+	updateTimer  = new QTimer( this );
+
+	connect( updateTimer, &QTimer::timeout, this, &TimingConfDialog_t::periodicUpdate );
+
+	updateTimer->start( 500 ); // 2Hz
 }
 //----------------------------------------------------------------------------
 TimingConfDialog_t::~TimingConfDialog_t(void)
 {
 	printf("Destroy Timing Config Window\n");
+	updateTimer->stop();
 	saveValues();
 }
 //----------------------------------------------------------------------------
@@ -242,6 +283,12 @@ void TimingConfDialog_t::closeWindow(void)
 	//printf("Close Window\n");
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void TimingConfDialog_t::periodicUpdate(void)
+{
+	updateOverclocking();
+
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::emuSchedCtlChange(int state)
@@ -652,5 +699,45 @@ void TimingConfDialog_t::updateTimingMech(void)
 			timingDevSelBox->setCurrentIndex(j);
 		}
 	}
+}
+//----------------------------------------------------------------------------
+void TimingConfDialog_t::overclockingToggled(bool on)
+{
+	fceuWrapperLock();
+	if ( !newppu )
+	{
+		overclock_enabled = on;
+	}
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void TimingConfDialog_t::postRenderChanged(int value)
+{
+	fceuWrapperLock();
+	postrenderscanlines = value;
+	fceuWrapperUnLock();
+	//printf("Post Render %i\n", postrenderscanlines );
+}
+//----------------------------------------------------------------------------
+void TimingConfDialog_t::vblankScanlinesChanged(int value)
+{
+	fceuWrapperLock();
+	vblankscanlines = value;
+	fceuWrapperUnLock();
+	//printf("Vblank Scanlines %i\n", vblankscanlines );
+}
+//----------------------------------------------------------------------------
+void TimingConfDialog_t::no7bitChanged(int value)
+{
+	fceuWrapperLock();
+	skip_7bit_overclocking = (value != Qt::Unchecked);
+	fceuWrapperUnLock();
+	//printf("Skip 7-bit: %i\n", skip_7bit_overclocking );
+}
+//----------------------------------------------------------------------------
+void TimingConfDialog_t::updateOverclocking(void)
+{
+	ppuOverClockBox->setEnabled( !newppu );
+	ppuOverClockBox->setChecked( overclock_enabled );
 }
 //----------------------------------------------------------------------------

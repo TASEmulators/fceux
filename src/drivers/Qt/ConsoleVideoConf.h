@@ -11,6 +11,8 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QLineEdit>
+#include <QSpinBox>
 #include <QLabel>
 #include <QSlider>
 #include <QFrame>
@@ -28,9 +30,13 @@ class ConsoleVideoConfDialog_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *bar);
 
+		QTimer      *updateTimer;
 		QComboBox   *driverSelect;
 		QComboBox   *scalerSelect;
 		QComboBox   *regionSelect;
+		QComboBox   *cursorSelect;
+		QComboBox   *aspectSelect;
+		QCheckBox   *autoRegion;
 		QCheckBox   *gl_LF_chkBox;
 		QCheckBox   *new_PPU_ena;
 		QCheckBox   *frmskipcbx;
@@ -38,35 +44,55 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QCheckBox   *clipSidesCbx;
 		QCheckBox   *showFPS_cbx;
 		QCheckBox   *autoScaleCbx;
-		QCheckBox   *sqrPixCbx;
+		QCheckBox   *aspectCbx;
+		QCheckBox   *cursorVisCbx;
+		QCheckBox   *drawInputAidsCbx;
 		QDoubleSpinBox *xScaleBox;
 		QDoubleSpinBox *yScaleBox;
+		QLabel         *aspectSelectLabel;
 		QLabel         *xScaleLabel;
 		QLabel         *yScaleLabel;
+		QSpinBox       *ntsc_start;
+		QSpinBox       *ntsc_end;
+		QSpinBox       *pal_start;
+		QSpinBox       *pal_end;
+		QLineEdit      *winSizeReadout;
+		QLineEdit      *vpSizeReadout;
 
 		void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
 		void  setComboBoxFromProperty( QComboBox *cbx, const char *property );
 		//void  setSliderFromProperty( QSlider *slider, QLabel *lbl, const char *property );
 
 		void  resetVideo(void);
+		void  updateReadouts(void);
 		QSize calcNewScreenSize(void);
 
 	public slots:
-      void closeWindow(void);
+		void closeWindow(void);
 
 	private slots:
+		void  periodicUpdate(void);
+		void  autoRegionChanged( int value );
 		void  openGL_linearFilterChanged( int value );
 		void  autoScaleChanged( int value );
-		void  sqrPixChanged( int value );
-		void  use_new_PPU_changed( int value );
+		void  aspectEnableChanged( int value );
+		void  use_new_PPU_changed( bool value );
 		void  frameskip_changed( int value );
 		void  useSpriteLimitChanged( int value );
 		void  clipSidesChanged( int value );
 		void  showFPSChanged( int value );
+		void  aspectChanged(int index);
 		void  regionChanged(int index);
 		void  driverChanged(int index);
 		void  scalerChanged(int index);
+		void  cursorShapeChanged(int index);
+		void  cursorVisChanged(int value);
+		void  drawInputAidsChanged(int value);
 		void  applyChanges( void );
+		void  ntscStartScanLineChanged(int value);
+		void  ntscEndScanLineChanged(int value);
+		void  palStartScanLineChanged(int value);
+		void  palEndScanLineChanged(int value);
 
 };
 

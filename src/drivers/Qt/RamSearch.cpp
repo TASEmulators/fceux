@@ -28,8 +28,10 @@
 #include <string>
 
 #include <SDL.h>
+#include <QMenu>
 #include <QMenuBar>
 #include <QAction>
+#include <QActionGroup>
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QGroupBox>
@@ -204,14 +206,44 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QGroupBox *frame;
 	ramSearchInputValidator *inpValidator;
+	QMenuBar *menuBar;
+	QMenu *fileMenu;
+	QAction *act;
+	int useNativeMenuBar;
 
 	setWindowTitle("RAM Search");
+
+	menuBar = new QMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
 
 	resize(512, 512);
 
 	mainLayout = new QVBoxLayout();
 	hbox1 = new QHBoxLayout();
 
+	mainLayout->setMenuBar( menuBar );
 	mainLayout->addLayout(hbox1, 100);
 
 	grid = new QGridLayout();
@@ -1552,13 +1584,13 @@ QRamSearchView::QRamSearchView(QWidget *parent)
 	if (useDarkTheme)
 	{
 		pal.setColor(QPalette::Base, fg);
-		pal.setColor(QPalette::Background, fg);
+		pal.setColor(QPalette::Window, fg);
 		pal.setColor(QPalette::WindowText, bg);
 	}
 	else
 	{
 		pal.setColor(QPalette::Base, bg);
-		pal.setColor(QPalette::Background, bg);
+		pal.setColor(QPalette::Window, bg);
 		pal.setColor(QPalette::WindowText, fg);
 	}
 	this->setPalette(pal);
@@ -1838,7 +1870,7 @@ void QRamSearchView::paintEvent(QPaintEvent *event)
 		it++;
 	}
 
-	painter.fillRect(0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background));
+	painter.fillRect(0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window));
 
 	painter.setPen(this->palette().color(QPalette::WindowText));
 

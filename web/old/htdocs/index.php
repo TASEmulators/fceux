@@ -32,7 +32,7 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts
      mailing list page.
    </p>
    <p>
-     Of course, we are always hanging out at irc.freenode.net #fceu
+     Of course, we are always hanging out at irc.libera.chat #fceu
    </p>
    
  </div>

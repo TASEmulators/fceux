@@ -53,8 +53,8 @@ void Mirror(uint8 value)
 
 static void Sync()
 {		
-	int prglo;
-	int prghi;
+	int prglo = 0;
+	int prghi = 0;
 
 	int outb = outer << 1;
 	//this can probably be rolled up, but i have no motivation to do so
@@ -127,14 +127,14 @@ static void Sync()
 
 static DECLFW(WriteEXP)
 {
-	uint32 addr = A;
+	//uint32 addr = A;
 	uint8 value = V;
 	reg = value & 0x81;
 }
 
 static DECLFW(WritePRG)
 {
-	uint32 addr = A;
+	//uint32 addr = A;
 	uint8 value = V;
 	switch (reg)
 	{

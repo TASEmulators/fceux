@@ -65,9 +65,9 @@ static float  *moire   = NULL;	// modulated signal
 const  float   phasex  = (float) 5/18*2;
 const  float   phasey  = (float) 1/ 6*2;
 const  float   pi      = 3.14f;
-int    palnotch        = 90;
+int    palnotch        = 100;
 int    palsaturation   = 100;
-int    palsharpness    = 50;
+int    palsharpness    = 0;
 int    palcontrast     = 100;
 int    palbrightness   = 50;
 bool   palupdate       = 1;
@@ -107,8 +107,6 @@ static void CalculateShift(uint32 *CBM, int *cshiftr, int *cshiftl)
 
 int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int specfilt, int specfilteropt)
 {
-	//paldeemphswap = 0; // determine this in FCEUPPU_SetVideoSystem() instead
-
 	// -Video Modes Tag-
 	if(specfilt == 3) // NTSC 2x
 	{
@@ -208,6 +206,7 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 		palrgb     = (uint32 *)FCEU_dmalloc((256+512)*PAL_PHASES*sizeof(uint32));
 		palrgb2    = (uint32 *)FCEU_dmalloc((256+512)*PAL_PHASES*sizeof(uint32));
 		moire      = (float  *)FCEU_dmalloc(          PAL_PHASES*sizeof(float));
+		palupdate  = 1;
 	}
 
 	silt = specfilt;	
@@ -260,6 +259,7 @@ void KillBlitToHigh(void)
 			hq3x_Kill();
 		else
 			hq2x_Kill();
+		free(specbuf);
 		specbuf=NULL;
 	}
 	if (nes_ntsc) {
@@ -790,6 +790,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 						lastindex = index;
 					}
 				}
+				src += (256-xr);
 			}
 
 		}

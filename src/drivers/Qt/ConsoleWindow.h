@@ -16,13 +16,20 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QKeyEvent>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QTimer>
 #include <QThread>
+#include <QCursor>
 #include <QMutex>
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+#include <QRecursiveMutex>
+#endif
 
 #include "Qt/ConsoleViewerGL.h"
 #include "Qt/ConsoleViewerSDL.h"
 #include "Qt/GamePadConf.h"
+#include "Qt/AviRecord.h"
 
 class  emulatorThread_t : public QThread
 {
@@ -32,7 +39,7 @@ class  emulatorThread_t : public QThread
 		void run( void ) override;
 
 	public:
-		emulatorThread_t(void);
+		emulatorThread_t( QObject *parent = 0 );
 
 		void setPriority( QThread::Priority priority );
 
@@ -67,6 +74,29 @@ class  consoleMenuBar : public QMenuBar
 		void keyReleaseEvent(QKeyEvent *event);
 };
 
+class  autoFireMenuAction : public QAction
+{
+	Q_OBJECT
+
+	public:
+		autoFireMenuAction(int on, int off, QString name, QWidget *parent = 0);
+		~autoFireMenuAction(void);
+
+		bool isMatch( int on, int off );
+
+		void setPattern( int on, int off );
+
+		int  getOnValue(void){ return onFrames; };
+		int  getOffValue(void){ return offFrames; };
+
+	public slots:
+		void activateCB(void);
+
+	private:
+		int  onFrames;
+		int  offFrames;
+};
+
 class  consoleRecentRomAction : public QAction
 {
 	Q_OBJECT
@@ -95,8 +125,14 @@ class  consoleWin_t : public QMainWindow
 
 		void setCyclePeriodms( int ms );
 
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+		QRecursiveMutex *mutex;
+#else
 		QMutex *mutex;
+#endif
 
+		int  videoInit(void);
+		void videoReset(void);
 		void requestClose(void);
 
 	 	void QueueErrorMsgWindow( const char *msg );
@@ -112,10 +148,23 @@ class  consoleWin_t : public QMainWindow
 		int getMaxSchedPriority(void);
 		#endif
 
+		int loadVideoDriver( int driverId );
+
 		emulatorThread_t *emulatorThread;
+		AviRecordDiskThread_t *aviDiskThread;
 
 		void addRecentRom( const char *rom );
 
+		QSize  calcRequiredSize(void);
+
+		void setViewportAspect(void);
+
+		void loadCursor(void);
+		void setViewerCursor( QCursor s );
+		void setViewerCursor( Qt::CursorShape s );
+		Qt::CursorShape getViewerCursor(void);
+
+		void setMenuAccessPauseEnable(bool enable);
 	protected:
 		consoleMenuBar *menubar;
 
@@ -171,13 +220,23 @@ class  consoleWin_t : public QMainWindow
 		QAction *traceLogAct;
 		QAction *hexEditAct;
 		QAction *ppuViewAct;
+		QAction *oamViewAct;
 		QAction *ntViewAct;
 		QAction *ggEncodeAct;
 		QAction *iNesEditAct;
 		QAction *openMovAct;
+		QAction *playMovBeginAct;
 		QAction *stopMovAct;
 		QAction *recMovAct;
 		QAction *recAsMovAct;
+		QAction *region[3];
+		QAction *ramInit[4];
+		QAction *recAviAct;
+		QAction *recAsAviAct;
+		QAction *stopAviAct;
+		QAction *recWavAct;
+		QAction *recAsWavAct;
+		QAction *stopWavAct;
 
 		QTimer  *gameTimer;
 
@@ -185,21 +244,37 @@ class  consoleWin_t : public QMainWindow
 		bool        errorMsgValid;
 		bool        closeRequested;
 		bool        recentRomMenuReset;
+		bool        firstResize;
+		bool        mainMenuEmuPauseSet;
+		bool        mainMenuEmuWasPaused;
+		bool        mainMenuPauseWhenActv;
 
 		std::list <std::string*> romList;
+		std::vector <autoFireMenuAction*> afActList;
+		autoFireMenuAction *afActCustom;
 
+		unsigned int updateCounter;
 	protected:
+		void resizeEvent(QResizeEvent *event);
 		void closeEvent(QCloseEvent *event);
 		void keyPressEvent(QKeyEvent *event);
 		void keyReleaseEvent(QKeyEvent *event);
+		void dragEnterEvent(QDragEnterEvent *event);
+		void dropEvent(QDropEvent *event);
 		void syncActionConfig( QAction *act, const char *property );
 		void showErrorMsgWindow(void);
 
 	private:
+		void initHotKeys(void);
 		void createMainMenu(void);
 		void buildRecentRomMenu(void);
 		void saveRecentRomMenu(void);
 		void clearRomList(void);
+		void setRegion(int region);
+		void changeState(int slot);
+		void saveState(int slot);
+		void loadState(int slot);
+		void syncAutoFirePatternMenu(void);
 
 	public slots:
 		void openDebugWindow(void);
@@ -244,14 +319,24 @@ class  consoleWin_t : public QMainWindow
 		void changeState7(void);
 		void changeState8(void);
 		void changeState9(void);
+		void incrementState(void);
+		void decrementState(void);
 		void loadLua(void);
 		void takeScreenShot(void);
+		void prepareScreenShot(void);
 		void powerConsoleCB(void);
 		void consoleHardReset(void);
 		void consoleSoftReset(void);
 		void consolePause(void);
 		void toggleGameGenie(bool checked);
 		void loadGameGenieROM(void);
+		void setRegionNTSC(void);
+		void setRegionPAL(void);
+		void setRegionDendy(void);
+		void setRamInit0(void);
+		void setRamInit1(void);
+		void setRamInit2(void);
+		void setRamInit3(void);
 		void insertCoin(void);
 		void fdsSwitchDisk(void);
 		void fdsEjectDisk(void);
@@ -264,6 +349,7 @@ class  consoleWin_t : public QMainWindow
 		void emuCustomSpd(void);
 		void emuSetFrameAdvDelay(void);
 		void openPPUViewer(void);
+		void openOAMViewer(void);
 		void openNTViewer(void);
 		void openGGEncoder(void);
 		void openNesHeaderEditor(void);
@@ -274,8 +360,51 @@ class  consoleWin_t : public QMainWindow
 		void stopMovie(void);
 		void recordMovie(void);
 		void recordMovieAs(void);
-		void setAutoFireOnFrames(void);
-		void setAutoFireOffFrames(void);
+		void playMovieFromBeginning(void);
+		void setCustomAutoFire(void);
+		void incrSoundVolume(void);
+		void decrSoundVolume(void);
+		void toggleLagCounterDisplay(void);
+		void toggleFrameAdvLagSkip(void);
+		void toggleMovieBindSaveState(void);
+		void toggleMovieFrameDisplay(void);
+		void toggleMovieReadWrite(void);
+		void toggleInputDisplay(void);
+		void toggleTurboMode(void);
+		void toggleBackground(void);
+		void toggleForeground(void);
+		void toggleFamKeyBrdEnable(void);
+		void saveState0(void);
+		void saveState1(void);
+		void saveState2(void);
+		void saveState3(void);
+		void saveState4(void);
+		void saveState5(void);
+		void saveState6(void);
+		void saveState7(void);
+		void saveState8(void);
+		void saveState9(void);
+		void loadState0(void);
+		void loadState1(void);
+		void loadState2(void);
+		void loadState3(void);
+		void loadState4(void);
+		void loadState5(void);
+		void loadState6(void);
+		void loadState7(void);
+		void loadState8(void);
+		void loadState9(void);
+		void mainMenuOpen(void);
+		void mainMenuClose(void);
+		void warnAmbiguousShortcut( QShortcut*);
+		void aviRecordStart(void);
+		void aviRecordAsStart(void);
+		void aviRecordStop(void);
+		void aviAudioEnableChange(bool);
+		void aviVideoFormatChanged(int idx);
+		void wavRecordStart(void);
+		void wavRecordAsStart(void);
+		void wavRecordStop(void);
 
 };
 

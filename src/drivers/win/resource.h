@@ -8,15 +8,14 @@
 #define MENU_OPEN_FILE                  100
 #define EDIT_ROM                        100
 #define LBL_LOG_TEXT                    100
-#define LBL_KEY_COMBO                   100
 #define LBL_CDLOGGER_CODECOUNT          100
 #define CHECK_PALETTE_ENABLED           100
-#define LBL_DWBDIALOG_TEXT              100
 #define GRP_GAMEPAD1                    100
 #define IDC_TRACER_LOG                  100
 #define MENU_MV_FILE_SAVE               100
 #define IDC_ROMPATCHER_OFFSET_BOX       100
 #define IDC_ASSEMBLER_HISTORY           100
+#define LBL_DWBDIALOG_TEXT              100
 #define MENU_CLOSE_FILE                 101
 #define CB_DISABLE_SPEED_THROTTLING     101
 #define LBL_CDLOGGER_DATACOUNT          101

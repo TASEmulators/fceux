@@ -14,16 +14,17 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 
 	public:
 		ConsoleViewGL_t(QWidget *parent = 0);
-	   ~ConsoleViewGL_t(void);
+		~ConsoleViewGL_t(void);
 
-		int  init( void );
+		int  init(void);
+		void reset(void);
 
 		void transfer2LocalBuffer(void);
 
-      void setLinearFilterEnable( bool ena );
+		void setLinearFilterEnable( bool ena );
 
-		bool   getSqrPixelOpt(void){ return sqrPixels; };
-		void   setSqrPixelOpt( bool val ){ sqrPixels = val; return; };
+		bool   getForceAspectOpt(void){ return forceAspect; };
+		void   setForceAspectOpt( bool val ){ forceAspect = val; return; };
 		bool   getAutoScaleOpt(void){ return autoScaleEna; };
 		void   setAutoScaleOpt( bool val ){ autoScaleEna = val; return; };
 		double getScaleX(void){ return xscale; };
@@ -31,9 +32,12 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 		void   setScaleXY( double xs, double ys );
 		void   getNormalizedCursorPos( double &x, double &y );
 		bool   getMouseButtonState( unsigned int btn );
+		void   setAspectXY( double x, double y );
+		void   getAspectXY( double &x, double &y );
+		double getAspectRatio(void);
 
 	protected:
-   void initializeGL(void);
+	void initializeGL(void);
 	void resizeGL(int w, int h);
 	void paintGL(void);
 	void mousePressEvent(QMouseEvent * event);
@@ -42,8 +46,13 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	void buildTextures(void);
 	void calcPixRemap(void);
 	void doRemap(void);
+	void chkExtnsGL(void);
+	int  forcePwr2( int in );
 
 	double devPixRatio;
+	double aspectRatio;
+	double aspectX;
+	double aspectY;
 	double xscale;
 	double yscale;
 	int  view_width;
@@ -52,16 +61,21 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	int  sy;
 	int  rw;
 	int  rh;
+	int  txtWidth;
+	int  txtHeight;
 	GLuint gltexture;
 	bool   linearFilter;
-	bool   sqrPixels;
+	bool   forceAspect;
 	bool   autoScaleEna;
+	bool   reqPwr2;
 
+	unsigned int  textureType;
 	unsigned int  mouseButtonMask;
 
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;
 
 	private slots:
+		void cleanupGL(void);
 };
 

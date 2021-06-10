@@ -344,6 +344,8 @@ class ConsoleDebugger : public QDialog
 };
 
 bool debuggerWindowIsOpen(void);
+bool debuggerWaitingAtBreakpoint(void);
+void bpDebugSetEnable(bool val);
 void saveGameDebugBreakpoints(void);
 void loadGameDebugBreakpoints(void);
 void debuggerClearAllBreakpoints(void);

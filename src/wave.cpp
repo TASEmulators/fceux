@@ -124,3 +124,8 @@ bool FCEUI_BeginWaveRecord(const char *fn)
 
  return true;
 }
+
+bool FCEUI_WaveRecordRunning(void)
+{
+	return (soundlog != NULL);
+}

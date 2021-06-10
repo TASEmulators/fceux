@@ -16,7 +16,7 @@ int Assemble(unsigned char *output, int addr, char *str) {
 	output[0] = output[1] = output[2] = 0;
 	char astr[128],ins[4];
 	int len = strlen(str);
-	if ((!len) || (len > 0x127)) return 1;
+	if ((!len) || (len > 127)) return 1;
 
 	strcpy(astr,str);
 	str_ucase(astr);

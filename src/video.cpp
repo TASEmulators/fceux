@@ -271,7 +271,6 @@ void FCEU_PutImage(void)
 	//Fancy input display code
 	if(input_display)
 	{
-		extern uint32 JSAutoHeld;
 		int i, j;
 		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20;		//mbg merge 7/17/06 changed t to uint8*
 		if(input_display > 4) input_display = 4;
@@ -290,6 +289,7 @@ void FCEU_PutImage(void)
 			uint32 color;
 
 #ifdef __WIN_DRIVER__
+			extern uint32 JSAutoHeld;
 			// This doesn't work in anything except windows for now.
 			// It doesn't get set anywhere in other ports.
 			if (!oldInputDisplay)

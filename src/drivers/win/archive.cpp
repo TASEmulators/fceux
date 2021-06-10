@@ -324,7 +324,12 @@ struct FormatRecord
 typedef std::vector<FormatRecord> TFormatRecords;
 TFormatRecords formatRecords;
 static bool archiveSystemInitialized=false;
+
+#ifdef WIN64
+static LibRef libref("7z_64.dll");
+#else
 static LibRef libref("7z.dll");
+#endif
 
 void initArchiveSystem()
 {
@@ -364,6 +369,18 @@ void initArchiveSystem()
 		fr.signature.reserve(len);
 		for(int j=0;j<len;j++)
 			fr.signature.push_back(((char*)prop.bstrVal)[j]);
+
+		//for some reason 7z dropped the signature for zip at some point
+		//it was working perfectly fine before...
+		GetHandlerProperty2(i,NArchive::kExtension,&prop);
+		if(!wcscmp((wchar_t*)prop.bstrVal,L"zip z01 zipx jar xpi odt ods docx xlsx epub ipa apk appx"))
+		{
+			if(fr.signature.size() == 0)
+			{
+				fr.signature.push_back('P');
+				fr.signature.push_back('K');
+			}
+		}
 
 		GetHandlerProperty2(i,NArchive::kClassID,&prop);
 		memcpy((char*)&fr.guid,(char*)prop.bstrVal,16);

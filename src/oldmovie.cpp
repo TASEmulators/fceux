@@ -93,7 +93,7 @@ void convert_metadata(char* metadata, int metadata_size, uint8* tmp, int metadat
 }
 
 //backwards compat
-static void FCEUI_LoadMovie_v1(char *fname, int _read_only);
+//static void FCEUI_LoadMovie_v1(char *fname, int _read_only);
 //static int FCEUI_MovieGetInfo_v1(const char* fname, MOVIE_INFO* info);
 
 //int _old_FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
@@ -539,7 +539,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 
 	uint32 framecount;
 	uint32 rerecord_count;
-	int movieConvertOffset1=0, movieConvertOffset2=0,movieSyncHackOn=0;
+	//int movieConvertOffset1=0, movieConvertOffset2=0,movieSyncHackOn=0;
 
 
 	EMUFILE* fp = FCEUD_UTF8_fstream(fname, "rb");
@@ -599,10 +599,10 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	//md.comments.push_back(L"author " + (std::wstring)(wchar_t*)wcmetadata);
 
 	//  FCEU_PrintError("flags[0] & MOVIE_FLAG_NOSYNCHACK=%d",flags[0] & MOVIE_FLAG_NOSYNCHACK);
-	if(flags[0] & MOVIE_FLAG_NOSYNCHACK)
-		movieSyncHackOn=0;
-	else
-		movieSyncHackOn=1;
+	//if(flags[0] & MOVIE_FLAG_NOSYNCHACK)
+	//	movieSyncHackOn=0;
+	//else
+	//	movieSyncHackOn=1;
 
 	if(flags[0] & MOVIE_FLAG_PAL)
 		md.palFlag = true;

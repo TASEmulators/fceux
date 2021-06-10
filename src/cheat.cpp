@@ -886,7 +886,8 @@ void FCEU_CheatSetByte(uint32 A, uint8 V)
 }
 
 // disable all cheats
-int FCEU_DisableAllCheats(){
+int FCEU_DisableAllCheats(void)
+{
 	int count = 0;
 	struct CHEATF *next = cheats;
 	while(next)
@@ -900,6 +901,28 @@ int FCEU_DisableAllCheats(){
 	savecheats = 1;
 	RebuildSubCheats();
 	return count;
+}
+
+// delete all cheats
+int FCEU_DeleteAllCheats(void)
+{
+	struct CHEATF *cur = cheats;
+	struct CHEATF *next = NULL;
+	while (cur)
+	{
+		next = cur->next;
+		if ( cur->name )
+		{
+			free(cur->name);
+		}
+		free(cur);
+		cur = next;
+	}
+	cheats = cheatsl = 0;
+	savecheats = 1;
+	RebuildSubCheats();
+
+	return 0;
 }
 
 int FCEUI_FindCheatMapByte(uint16 address)

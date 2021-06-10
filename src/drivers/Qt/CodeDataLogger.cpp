@@ -23,6 +23,9 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -44,6 +47,7 @@
 static int autoSaveCDL = true;
 static int autoLoadCDL = true;
 static int autoResumeCDL = false;
+static bool autoSaveArmedCDL = false;
 static char loadedcdfile[512] = {0};
 
 static int getDefaultCDLFile(char *filepath);
@@ -56,6 +60,10 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QGroupBox *frame, *subframe;
 	QPushButton *btn;
+	QMenuBar *menuBar;
+	QMenu *fileMenu;
+	QAction *act;
+	int useNativeMenuBar;
 
 	updateTimer = new QTimer(this);
 
@@ -63,12 +71,65 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 
 	setWindowTitle(tr("Code Data Logger"));
 
+	menuBar = new QMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Load
+	act = new QAction(tr("&Load"), this);
+	act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Load From File"));
+	connect(act, SIGNAL(triggered()), this, SLOT(loadCdlFile(void)) );
+	
+	fileMenu->addAction(act);
+
+	// File -> Save
+	act = new QAction(tr("&Save"), this);
+	act->setShortcut(QKeySequence::Save);
+	act->setStatusTip(tr("Save To File"));
+	connect(act, SIGNAL(triggered()), this, SLOT(saveCdlFile(void)) );
+	
+	fileMenu->addAction(act);
+
+	// File -> Save As
+	act = new QAction(tr("Save &As"), this);
+	act->setShortcut(QKeySequence::SaveAs);
+	act->setStatusTip(tr("Save To File As"));
+	connect(act, SIGNAL(triggered()), this, SLOT(saveCdlFileAs(void)) );
+	
+	fileMenu->addAction(act);
+
+	fileMenu->addSeparator();
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+	
+	fileMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
+
 	mainLayout = new QVBoxLayout();
 	vbox1 = new QVBoxLayout();
 	hbox = new QHBoxLayout();
 	grid = new QGridLayout();
 	statLabel = new QLabel(tr(" Logger is Paused: Press Start to Run "));
 	cdlFileLabel = new QLabel(tr("CDL File:"));
+
+	mainLayout->setMenuBar( menuBar );
 
 	vbox1->addLayout(grid);
 	vbox1->addLayout(hbox);
@@ -336,7 +397,7 @@ void CodeDataLoggerDialog_t::saveCdlFileAs(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	const char *romFile;
-	QFileDialog dialog(this, tr("Save CDL To File"));
+	QFileDialog dialog(this, tr("Save CDL File As"));
 
 	dialog.setFileMode(QFileDialog::AnyFile);
 
@@ -580,16 +641,23 @@ void CodeDataLoggerDialog_t::SaveStrippedROM(int invert)
 
 		fwrite(&cdlhead, 1, 16, fp);
 
+		int rom_sel = 0;
+		if (GameInfo->type == GIT_FDS)
+		{
+			rom_sel = 1;
+		}
+		cdloggerdataSize = PRGsize[rom_sel];
+
 		for (i = 0; i < (int)cdloggerdataSize; i++)
 		{
 			unsigned char pchar;
 			if (cdloggerdata[i] & 3)
 			{
-				pchar = invert ? 0 : PRGptr[0][i];
+				pchar = invert ? 0 : PRGptr[rom_sel][i];
 			}
 			else
 			{
-				pchar = invert ? PRGptr[0][i] : 0;
+				pchar = invert ? PRGptr[rom_sel][i] : 0;
 			}
 			fputc(pchar, fp);
 		}
@@ -675,8 +743,14 @@ void FreeCDLog(void)
 //----------------------------------------------------
 void InitCDLog(void)
 {
+	int rom_sel = 0;
+
 	fceuWrapperLock();
-	cdloggerdataSize = PRGsize[0];
+	if (GameInfo->type == GIT_FDS)
+	{
+		rom_sel = 1;
+	}
+	cdloggerdataSize = PRGsize[rom_sel];
 	cdloggerdata = (unsigned char *)malloc(cdloggerdataSize);
 	if (!CHRram[0] || (CHRptr[0] == PRGptr[0]))
 	{ // Some kind of workaround for my OneBus VRAM hack, will remove it if I find another solution for that
@@ -783,6 +857,7 @@ void StartCDLogging(void)
 	FCEUI_SetLoggingCD(1);
 	//EnableTracerMenuItems();
 	//SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
+	autoSaveArmedCDL = true;
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------
@@ -804,10 +879,17 @@ bool PauseCDLogging(void)
 //----------------------------------------------------
 void CDLoggerROMClosed(void)
 {
+	g_config->getOption("SDL.AutoSaveCDL", &autoSaveCDL);
+
 	PauseCDLogging();
-	if (autoSaveCDL)
+
+	// Only auto save CDL file if the logger has actually been started at least once.
+	if (autoSaveCDL && autoSaveArmedCDL)
 	{
+		//printf("Auto Saving CDL\n");
 		SaveCDLogFile();
+
+		autoSaveArmedCDL = false;
 	}
 }
 //----------------------------------------------------

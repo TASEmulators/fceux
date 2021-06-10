@@ -15,8 +15,12 @@
 #include <QTimer>
 #include <QGroupBox>
 #include <QPainter>
+#include <QTreeView>
+#include <QTreeWidget>
+#include <QPropertyAnimation>
 
 #include "Qt/main.h"
+#include "Qt/input.h"
 
 class GamePadConfigButton_t : public QPushButton
 {
@@ -28,6 +32,62 @@ protected:
 	void keyReleaseEvent(QKeyEvent *event);
 
 	int idx;
+};
+
+class GamePadConfigHotKey_t : public QPushButton
+{
+public:
+	GamePadConfigHotKey_t( int idx, gamepad_function_key_t *k );
+
+	void setCaptureState(bool s){ captureState = s; };
+
+	void setKeyNameLbl( QLineEdit *lbl );
+protected:
+	void keyPressEvent(QKeyEvent *event);
+	void keyReleaseEvent(QKeyEvent *event);
+
+	int idx;
+	QLineEdit *keySeqLbl;
+	gamepad_function_key_t *k;
+	bool captureState;
+};
+
+class GamePadFuncConfigDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+	GamePadFuncConfigDialog( gamepad_function_key_t *fk, QWidget *parent = 0);
+	~GamePadFuncConfigDialog(void);
+
+protected:
+	void closeEvent(QCloseEvent *bar);
+
+	void changeButton(int x);
+
+	QLineEdit *btnLbl[2];
+	QLineEdit *keySeqLbl[2];
+
+	GamePadConfigButton_t  *b[2];
+	GamePadConfigHotKey_t  *hk[2];
+	gamepad_function_key_t *k;
+
+	int  buttonConfigStatus;
+	bool editMode;
+
+public slots:
+	void closeWindow(void);
+private slots:
+	void acceptCB(void);
+	void rejectCB(void);
+	void changeButton0(void);
+	void changeButton1(void);
+	void changeKeySeq0(void);
+	void changeKeySeq1(void);
+	void clearButton0(void);
+	void clearButton1(void);
+	void clearButton2(void);
+	void clearButton3(void);
 };
 
 class GamePadView_t : public QWidget
@@ -78,12 +138,19 @@ protected:
 	QComboBox *mapSel;
 	QComboBox *profSel;
 	QCheckBox *efs_chkbox;
+	QGroupBox *advOptLayout;
+	QPropertyAnimation *advOptWidthAnimation;
 	QLabel *guidLbl;
 	QLabel *mapMsg;
 	QLabel *keyName[GAMEPAD_NUM_BUTTONS];
 	QLabel *keyState[GAMEPAD_NUM_BUTTONS];
 	GamePadConfigButton_t *button[GAMEPAD_NUM_BUTTONS];
 	GamePadView_t *gpView;
+
+	QPushButton *newKeyBindBtn;
+	QPushButton *editKeyBindBtn;
+	QPushButton *delKeyBindBtn;
+	QTreeWidget *keyBindTree;
 
 	int portNum;
 	int buttonConfigStatus;
@@ -98,12 +165,15 @@ protected:
 	void keyReleaseEvent(QKeyEvent *event);
 	void closeEvent(QCloseEvent *bar);
 
+	void refreshKeyBindTree( bool reset = false );
+
 private:
 	void updateCntrlrDpy(void);
 	void createNewProfile(const char *name);
 	void loadMapList(void);
 	void saveConfig(void);
 	void promptToSave(void);
+	void openFuncEditWindow( int mode, gamepad_function_key_t *k );
 
 public slots:
 	void closeWindow(void);
@@ -139,6 +209,12 @@ private slots:
 	void deleteProfileCallback(void);
 	void updatePeriodic(void);
 	void changeSequentallyCallback(void);
+	void newKeyBindingCallback(void);
+	void editKeyBindingCallback(void);
+	void delKeyBindingCallback(void);
+	void advBindingViewChanged(bool state);
+	void advOptResizeDone(void);
+	void advOptWidthChange(const QVariant &value);
 };
 
 int openGamePadConfWindow(QWidget *parent);

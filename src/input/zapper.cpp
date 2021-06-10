@@ -169,24 +169,28 @@ static void UpdateZapper(int w, void *data, int arg)
 {
 	uint32 *ptr=(uint32 *)data;
 
-    bool newclicked = (ptr[2]&3)!=0;
-    bool oldclicked = (ZD[w].lastInput)!=0;
+	bool newclicked = (ptr[2]&3)!=0;
+	bool oldclicked = (ZD[w].lastInput)!=0;
 
 	if(ZD[w].bogo)
-    {
+	{
 		ZD[w].bogo--;	
-    }
+	}
 
-    ZD[w].lastInput = ptr[2]&3;
+	ZD[w].lastInput = ptr[2]&3;
 
     //woah.. this looks like broken bit logic.
-	if(newclicked && !oldclicked)
-    {
+	if (newclicked && !oldclicked)
+	{
 		ZD[w].bogo=5;
-	    ZD[w].mzb=ptr[2];
-	    ZD[w].mzx=ptr[0];
-	    ZD[w].mzy=ptr[1];
-    }
+		ZD[w].mzb=ptr[2];
+		ZD[w].mzx=ptr[0];
+		ZD[w].mzy=ptr[1];
+	}
+	// Always update X,Y so that gunsight draw function
+	// is always following the cursor.
+	ZD[w].mzx=ptr[0];
+	ZD[w].mzy=ptr[1];
 
 }
 
@@ -215,7 +219,7 @@ static INPUTC ZAPVSC={ReadZapperVS,0,StrobeZapperVS,UpdateZapper,ZapperFrapper,D
 INPUTC *FCEU_InitZapper(int w)
 {
 	memset(&ZD[w],0,sizeof(ZAPPER));
-	if(GameInfo->type == GIT_VSUNI)
+	if ( (GameInfo != NULL) && (GameInfo->type == GIT_VSUNI) )
 		return(&ZAPVSC);
 	else
 		return(&ZAPC);

@@ -501,10 +501,10 @@ INT_PTR CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 
 						case BTN_PALETTE_RESET:
 						{
-							palnotch = 90;
+							palnotch      = 100;
 							palsaturation = 100;
-							palsharpness = 50;
-							palcontrast = 100;
+							palsharpness  = 0;
+							palcontrast   = 100;
 							palbrightness = 50;
 
 							char text[40];
@@ -557,4 +557,3 @@ void ConfigPalette()
 	else
 		SetFocus(hWndPal);
 }
-

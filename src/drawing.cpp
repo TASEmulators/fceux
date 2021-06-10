@@ -395,10 +395,10 @@ static int FixJoedChar(uint8 ch)
 	int c = ch - 32;
 	return (c < 0 || c > 98) ? 0 : c;
 }
-static int JoedCharWidth(uint8 ch)
-{
-	return Font6x7[FixJoedChar(ch)*8];
-}
+//static int JoedCharWidth(uint8 ch)
+//{
+//	return Font6x7[FixJoedChar(ch)*8];
+//}
 
 char target[64][256];
 

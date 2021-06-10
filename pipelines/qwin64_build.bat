@@ -2,7 +2,8 @@
 set PROJECT_ROOT=%~dp0..
 set CWD=%CD%
 
-call "C:\Qt\5.15.2\msvc2019_64\bin\qtenv2.bat"
+call "C:\Qt\5.15\msvc2019_64\bin\qtenv2.bat"
+REM call "C:\Qt\6.0\msvc2019_64\bin\qtenv2.bat"
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 cd %CWD%
@@ -32,7 +33,7 @@ set SDL_INSTALL_PREFIX=%CD%
 
 REM cmake -h
 REM cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
-cmake -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
+cmake -DQT6=0 -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
 
 REM nmake
 msbuild /m fceux.sln /p:Configuration=Release
@@ -41,7 +42,7 @@ msbuild /m fceux.sln /p:Configuration=Release
 copy src\Release\fceux.exe bin\qfceux.exe
 copy %SDL_INSTALL_PREFIX%\SDL2\lib\x64\SDL2.dll  bin\.
 
-windeployqt bin\qfceux.exe
+windeployqt  --no-compiler-runtime  bin\qfceux.exe
 
 dir bin
 

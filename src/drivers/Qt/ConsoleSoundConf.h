@@ -27,6 +27,7 @@ public:
 protected:
 	void closeEvent(QCloseEvent *event);
 
+	int  sndQuality;
 	QCheckBox *enaChkbox;
 	QCheckBox *enaLowPass;
 	QCheckBox *swapDutyChkbox;
@@ -40,10 +41,14 @@ protected:
 	QLabel *sqr2Lbl;
 	QLabel *nseLbl;
 	QLabel *pcmLbl;
+	QSlider *sqr2Slider;
+	QSlider *nseSlider;
+	QSlider *pcmSlider;
 
 	void setCheckBoxFromProperty(QCheckBox *cbx, const char *property);
 	void setComboBoxFromProperty(QComboBox *cbx, const char *property);
 	void setSliderFromProperty(QSlider *slider, QLabel *lbl, const char *property);
+	void setSliderEnables(void);
 
 private slots:
 	void closeWindow(void);

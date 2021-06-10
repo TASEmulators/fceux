@@ -214,11 +214,27 @@ int GetPRGAddress(int A){
 	int result;
 	if(A > 0xFFFF)
 		return -1;
-	result = &Page[A>>11][A]-PRGptr[0];
-	if((result > (int)PRGsize[0]) || (result < 0))
-		return -1;
-	else
-		return result;
+	if (GameInfo->type == GIT_FDS) {
+		if (A < 0xE000) {
+			result = &Page[A >> 11][A] - PRGptr[1];
+			if ((result > (int)PRGsize[1]) || (result < 0))
+				return -1;
+			else
+				return result;
+		} else {
+			result = &Page[A >> 11][A] - PRGptr[0];
+			if ((result > (int)PRGsize[0]) || (result < 0))
+				return -1;
+			else
+				return result + PRGsize[1];
+		}
+	} else {
+		result = &Page[A >> 11][A] - PRGptr[0];
+		if ((result > (int)PRGsize[0]) || (result < 0))
+			return -1;
+		else
+			return result;
+	}
 }
 
 /**
@@ -481,12 +497,24 @@ void LogCDData(uint8 *opcode, uint16 A, int size) {
 	}
 
 	if((j = GetPRGAddress(A)) != -1) {
-		if(!(cdloggerdata[j] & 2)) {
-			cdloggerdata[j] |= 2;
-			cdloggerdata[j] |=(A>>11)&0x0c;
-			cdloggerdata[j] |= memop;
-			datacount++;
-			if(!(cdloggerdata[j] & 1))undefinedcount--;
+		if (opwrite[opcode[0]] == 0) {
+			if (!(cdloggerdata[j] & 2)) {
+				cdloggerdata[j] |= 2;
+				cdloggerdata[j] |= (A >> 11) & 0x0c;
+				cdloggerdata[j] |= memop;
+				cdloggerdata[j] |= ((A & 0x8000) >> 8) ^ 0x80;	
+				datacount++;
+				if (!(cdloggerdata[j] & 1))undefinedcount--;
+			}
+		}  else {
+			if (cdloggerdata[j] & 1) {
+				codecount--;
+			}
+			if (cdloggerdata[j] & 2) {
+				datacount--;
+			}
+			if ((cdloggerdata[j] & 3) != 0) undefinedcount++;
+			cdloggerdata[j] = 0;
 		}
 	}
 }

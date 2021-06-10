@@ -17,6 +17,7 @@ extern int postrenderscanlines;
 extern int vblankscanlines;
 
 extern bool AutoResumePlay;
+extern bool frameAdvanceLagSkip;
 extern char romNameWhenClosingEmulator[];
 
 #define DECLFR(x) uint8 x (uint32 A)
@@ -39,6 +40,8 @@ void PowerNES(void);
 
 void SetAutoFireOffset(int offset);
 void SetAutoFirePattern(int onframes, int offframes);
+void GetAutoFirePattern( int *onframes, int *offframes);
+bool GetAutoFireState(int btnIdx);
 void AutoFire(void);
 void FCEUI_RewindToLastAutosave(void);
 
@@ -70,6 +73,7 @@ extern uint8 qtaintramreg;
 extern  uint8  *RAM;            //shared memory modifications
 extern int EmulationPaused;
 extern int frameAdvance_Delay;
+extern int RAMInitOption;
 
 uint8 FCEU_ReadRomByte(uint32 i);
 void FCEU_WriteRomByte(uint32 i, uint8 value);

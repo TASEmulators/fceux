@@ -23,6 +23,7 @@
 #include "Qt/throttle.h"
 #include "Qt/config.h"
 
+#include "fceu.h"
 #include "../common/cheat.h"
 
 #include "Qt/input.h"
@@ -52,44 +53,269 @@
 #include <sys/types.h>
 #endif
 
-static const char* HotkeyStrings[HK_MAX] = {
-		"CheatMenu",
-		"BindState",
-		"LoadLua",
-		"ToggleBG",
-		"SaveState",
-		"FDSSelect",
-		"LoadState",
-		"FDSEject",
-		"VSInsertCoin",
-		"VSToggleDip",
-		"MovieToggleFrameDisplay",
-		"SubtitleDisplay",
-		"Reset",
-		"Screenshot",
-		"Pause",
-		"DecreaseSpeed",
-		"IncreaseSpeed",
-		"FrameAdvance",
-		"Turbo",
-		"ToggleInputDisplay",
-		"ToggleMovieRW",
-		"MuteCapture",
-		"Quit",
-		"FrameAdvanceLagSkip",
-		"LagCounterDisplay",
-		"SelectState0", "SelectState1", "SelectState2", "SelectState3",
-		"SelectState4", "SelectState5", "SelectState6", "SelectState7", 
-		"SelectState8", "SelectState9", "SelectStateNext", "SelectStatePrev",
-		"VolumeDown", "VolumeUp", "FKB_Enable" };
 
-const char *getHotkeyString( int i )
+int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const char **titleOut )
 {
-   if ( (i>=0) && (i<HK_MAX) )
-   {
-      return HotkeyStrings[i];
-   }
-   return NULL;
+	const char *name = "";
+	const char *keySeq = "";
+	const char *title = NULL;
+
+	switch ( i )
+	{
+		case HK_OPEN_ROM: 
+			name = "OpenROM"; keySeq = "Ctrl+O"; title = "Open ROM";
+		break;
+		case HK_CLOSE_ROM: 
+			name = "CloseROM"; keySeq = "Ctrl+C"; title = "Close ROM";
+		break;
+		case HK_CHEAT_MENU:
+			name = "CheatMenu"; keySeq = ""; title = "Open Cheat Window";
+		break;
+		case HK_BIND_STATE:
+			name = "BindState"; keySeq = ""; title = "Bind Save State to Movie";
+		break;
+		case HK_LOAD_LUA:
+			name = "LoadLua"; keySeq = "Ctrl+L";	
+		break;
+		case HK_TOGGLE_BG:
+			name = "ToggleBG"; keySeq = "";	title = "Toggle Background Display";
+		break;
+		case HK_TOGGLE_FG:
+			name = "ToggleFG"; keySeq = "";	title = "Toggle Object Display";
+		break;
+		// Save States
+		case HK_SAVE_STATE:
+			name = "SaveState"; keySeq = "I"; title = "Save State";
+		break;
+		case HK_SAVE_STATE_0:
+			name = "SaveState0"; keySeq = "Shift+F10"; title = "Save State to Slot 0";
+		break;
+		case HK_SAVE_STATE_1:
+			name = "SaveState1"; keySeq = "Shift+F1"; title = "Save State to Slot 1";
+		break;
+		case HK_SAVE_STATE_2:
+			name = "SaveState2"; keySeq = "Shift+F2"; title = "Save State to Slot 2";
+		break;
+		case HK_SAVE_STATE_3:
+			name = "SaveState3"; keySeq = "Shift+F3"; title = "Save State to Slot 3";
+		break;
+		case HK_SAVE_STATE_4:
+			name = "SaveState4"; keySeq = "Shift+F4"; title = "Save State to Slot 4";
+		break;
+		case HK_SAVE_STATE_5:
+			name = "SaveState5"; keySeq = "Shift+F5"; title = "Save State to Slot 5";
+		break;
+		case HK_SAVE_STATE_6:
+			name = "SaveState6"; keySeq = "Shift+F6"; title = "Save State to Slot 6";
+		break;
+		case HK_SAVE_STATE_7:
+			name = "SaveState7"; keySeq = "Shift+F7"; title = "Save State to Slot 7";
+		break;
+		case HK_SAVE_STATE_8:
+			name = "SaveState8"; keySeq = "Shift+F8"; title = "Save State to Slot 8";
+		break;
+		case HK_SAVE_STATE_9:
+			name = "SaveState9"; keySeq = "Shift+F9"; title = "Save State to Slot 9";
+		break;
+		// Load States
+		case HK_LOAD_STATE:
+			name = "LoadState"; keySeq = "P";	title = "Load State";
+		break;
+		case HK_LOAD_STATE_0:
+			name = "LoadState0"; keySeq = "F10"; title = "Load State From Slot 0";
+		break;
+		case HK_LOAD_STATE_1:
+			name = "LoadState1"; keySeq = "F1"; title = "Load State From Slot 1";
+		break;
+		case HK_LOAD_STATE_2:
+			name = "LoadState2"; keySeq = "F2"; title = "Load State From Slot 2";
+		break;
+		case HK_LOAD_STATE_3:
+			name = "LoadState3"; keySeq = "F3"; title = "Load State From Slot 3";
+		break;
+		case HK_LOAD_STATE_4:
+			name = "LoadState4"; keySeq = "F4"; title = "Load State From Slot 4";
+		break;
+		case HK_LOAD_STATE_5:
+			name = "LoadState5"; keySeq = "F5"; title = "Load State From Slot 5";
+		break;
+		case HK_LOAD_STATE_6:
+			name = "LoadState6"; keySeq = "F6"; title = "Load State From Slot 6";
+		break;
+		case HK_LOAD_STATE_7:
+			name = "LoadState7"; keySeq = "F7"; title = "Load State From Slot 7";
+		break;
+		case HK_LOAD_STATE_8:
+			name = "LoadState8"; keySeq = "F8"; title = "Load State From Slot 8";
+		break;
+		case HK_LOAD_STATE_9:
+			name = "LoadState9"; keySeq = "F9"; title = "Load State From Slot 9";
+		break;
+		case HK_FDS_SELECT:
+			name = "FDSSelect"; keySeq = ""; title = "Switch FDS Disk Side";
+		break;
+		case HK_FDS_EJECT:
+			name = "FDSEject"; keySeq = "";	title = "Eject FDS Disk";
+		break;
+		case HK_VS_INSERT_COIN:
+			name = "VSInsertCoin"; keySeq = ""; title = "VS Insert Coin";
+		break;
+		case HK_VS_TOGGLE_DIPSWITCH:
+			name = "VSToggleDip"; keySeq = ""; title = "VS Toggle Dipswitch";
+		break;
+		case HK_TOGGLE_FRAME_DISPLAY:
+			name = "MovieToggleFrameDisplay"; keySeq = ".";	title = "Toggle Frame Display";
+		break;
+		case HK_TOGGLE_SUBTITLE:
+			name = "SubtitleDisplay"; keySeq = ""; title = "Toggle Movie Subtitles";
+		break;
+		case HK_POWER:
+			name = "Power"; keySeq = ""; title = "Power";
+		break;
+		case HK_RESET:
+			name = "Reset"; keySeq = "Ctrl+R"; title = "Reset";
+		break;
+		case HK_PAUSE:
+			name = "Pause"; keySeq = "Pause"; title = "Pause";
+		break;
+		case HK_QUIT:
+			name = "Quit"; keySeq = "Ctrl+Q"; title = "Exit Application";
+		break;
+		case HK_SCREENSHOT:
+			name = "Screenshot"; keySeq = "F12";
+		break;
+		case HK_DECREASE_SPEED:
+			name = "DecreaseSpeed"; keySeq = "-";
+		break;
+		case HK_INCREASE_SPEED:
+			name = "IncreaseSpeed"; keySeq = "=";
+		break;
+		case HK_FRAME_ADVANCE:
+			name = "FrameAdvance"; keySeq = "\\";
+		break;
+		case HK_TURBO:
+			name = "Turbo"; keySeq = "Tab";
+		break;
+		case HK_TOGGLE_INPUT_DISPLAY:
+			name = "ToggleInputDisplay"; keySeq = ",";
+		break;
+		case HK_MOVIE_TOGGLE_RW:
+			name = "ToggleMovieRW"; keySeq = "Q";
+		break;
+		case HK_PLAY_MOVIE_FROM:
+			name = "PlayMovieFrom"; keySeq = "";
+		break;
+		case HK_MOVIE_PLAY_RESTART:
+			name = "PlayMovieFromBeginning"; keySeq = "";
+		break;
+		case HK_RECORD_MOVIE_TO:
+			name = "RecordMovieTo"; keySeq = "";
+		break;
+		case HK_STOP_MOVIE:
+			name = "StopMovie"; keySeq = "";
+		break;
+		case HK_RECORD_AVI:
+			name = "RecordAvi"; keySeq = "";
+		break;
+		case HK_RECORD_AVI_TO:
+			name = "RecordAviTo"; keySeq = "";
+		break;
+		case HK_STOP_AVI:
+			name = "StopAvi"; keySeq = "";
+		break;
+		case HK_RECORD_WAV:
+			name = "RecordWav"; keySeq = "";
+		break;
+		case HK_RECORD_WAV_TO:
+			name = "RecordWavTo"; keySeq = "";
+		break;
+		case HK_STOP_WAV:
+			name = "StopWav"; keySeq = "";
+		break;
+		case HK_MUTE_CAPTURE:
+			name = "MuteCapture"; keySeq = "'";
+		break;
+		case HK_FA_LAG_SKIP:
+			name = "FrameAdvanceLagSkip"; keySeq = "Delete";
+		break;
+		case HK_LAG_COUNTER_DISPLAY:
+			name = "LagCounterDisplay"; keySeq = "/";
+		break;
+		case HK_SELECT_STATE_0:
+			name = "SelectState0"; keySeq = "0"; title = "Select State Slot 0";
+		break;
+		case HK_SELECT_STATE_1:
+			name = "SelectState1"; keySeq = "1"; title = "Select State Slot 1";
+		break;
+		case HK_SELECT_STATE_2:
+			name = "SelectState2"; keySeq = "2"; title = "Select State Slot 2";
+		break;
+		case HK_SELECT_STATE_3:
+			name = "SelectState3"; keySeq = "3"; title = "Select State Slot 3";
+		break;
+		case HK_SELECT_STATE_4:
+			name = "SelectState4"; keySeq = "4"; title = "Select State Slot 4";
+		break;
+		case HK_SELECT_STATE_5:
+			name = "SelectState5"; keySeq = "5"; title = "Select State Slot 5";
+		break;
+		case HK_SELECT_STATE_6:
+			name = "SelectState6"; keySeq = "6"; title = "Select State Slot 6";
+		break;
+		case HK_SELECT_STATE_7:
+			name = "SelectState7"; keySeq = "7"; title = "Select State Slot 7";
+		break;
+		case HK_SELECT_STATE_8:
+			name = "SelectState8"; keySeq = "8"; title = "Select State Slot 8";
+		break;
+		case HK_SELECT_STATE_9:
+			name = "SelectState9"; keySeq = "9"; title = "Select State Slot 9";
+		break;
+		case HK_SELECT_STATE_NEXT:
+			name = "SelectStateNext"; keySeq = ""; title = "Select Next State Slot";
+		break;
+		case HK_SELECT_STATE_PREV:
+			name = "SelectStatePrev"; keySeq = ""; title = "Select Previous State Slot";
+		break;
+		case HK_VOLUME_DOWN:
+			name = "VolumeDown"; keySeq = "";
+		break;
+		case HK_VOLUME_UP:
+			name = "VolumeUp"; keySeq = "";
+		break;
+		case HK_FKB_ENABLE:
+			name = "FKB_Enable"; keySeq = "ScrollLock"; title = "Toggle Family Keyboard Enable";
+		break;
+		case HK_FULLSCREEN:
+			name = "FullScreen"; keySeq = "Alt+Return"; title = "Toggle Fullscreen View";
+		break;
+		case HK_MAIN_MENU_HIDE:
+			name = "MainMenuHide"; keySeq = "Alt+/"; title = "Toggle Main Menu Visibility";
+		break;
+		default:
+		case HK_MAX:
+			name = ""; keySeq = "";
+		break;
+
+	}
+
+	if ( nameOut )
+	{
+		*nameOut = name;
+	}
+	if ( keySeqOut )
+	{
+		*keySeqOut = keySeq;
+	}
+	if ( titleOut )
+	{
+		if ( title == NULL )
+		{
+			title = name;
+		}
+		*titleOut = title;
+	}
+	return 0;
 }
 
 /**
@@ -128,22 +354,26 @@ LoadCPalette(const std::string &file)
 static void
 CreateDirs(const std::string &dir)
 {
-	const char *subs[9]={"fcs","snaps","gameinfo","sav","cheats","movies","input"};
+	const char *subs[]={"fcs","snaps","gameinfo","sav","cheats","avi","wav","movies","input", NULL };
 	std::string subdir;
-	int x;
+	int x=0;
 
 #if defined(WIN32) || defined(NEED_MINGW_HACKS)
 	mkdir(dir.c_str());
 	chmod(dir.c_str(), 755);
-	for(x = 0; x < 7; x++) {
+	while ( subs[x] != NULL )
+	{
 		subdir = dir + PSS + subs[x];
 		mkdir(subdir.c_str());
+		x++;
 	}
 #else
 	mkdir(dir.c_str(), S_IRWXU);
-	for(x = 0; x < 7; x++) {
+	while ( subs[x] != NULL )
+	{
 		subdir = dir + PSS + subs[x];
 		mkdir(subdir.c_str(), S_IRWXU);
+		x++;
 	}
 #endif
 }
@@ -183,7 +413,7 @@ GetBaseDirectory(std::string &dir)
 	} else {
 #ifdef WIN32
 		home = new char[MAX_PATH + 1];
-		GetModuleFileName(NULL, home, MAX_PATH + 1);
+		GetModuleFileNameA(NULL, home, MAX_PATH + 1);
 
 		char *lastBS = strrchr(home,'\\');
 		if(lastBS) {
@@ -216,11 +446,11 @@ InitConfig()
 	// sound options
 	config->addOption('s', "sound", "SDL.Sound", 1);
 	config->addOption("volume", "SDL.Sound.Volume", 150);
-	config->addOption("trianglevol", "SDL.Sound.TriangleVolume", 256);
-	config->addOption("square1vol", "SDL.Sound.Square1Volume", 256);
-	config->addOption("square2vol", "SDL.Sound.Square2Volume", 256);
-	config->addOption("noisevol", "SDL.Sound.NoiseVolume", 256);
-	config->addOption("pcmvol", "SDL.Sound.PCMVolume", 256);
+	config->addOption("trianglevol", "SDL.Sound.TriangleVolume", 255);
+	config->addOption("square1vol", "SDL.Sound.Square1Volume", 255);
+	config->addOption("square2vol", "SDL.Sound.Square2Volume", 255);
+	config->addOption("noisevol", "SDL.Sound.NoiseVolume", 255);
+	config->addOption("pcmvol", "SDL.Sound.PCMVolume", 255);
 	config->addOption("soundrate", "SDL.Sound.Rate", 44100);
 	config->addOption("soundq", "SDL.Sound.Quality", 1);
 	config->addOption("soundrecord", "SDL.Sound.RecordFile", "");
@@ -229,10 +459,12 @@ InitConfig()
     
 	config->addOption('g', "gamegenie", "SDL.GameGenie", 0);
 	config->addOption("pal", "SDL.PAL", 0);
+	config->addOption("autoPal", "SDL.AutoDetectPAL", 1);
 	config->addOption("frameskip", "SDL.Frameskip", 0);
 	config->addOption("clipsides", "SDL.ClipSides", 0);
 	config->addOption("nospritelim", "SDL.DisableSpriteLimit", 1);
 	config->addOption("swapduty", "SDL.SwapDuty", 0);
+	config->addOption("ramInit", "SDL.RamInitMethod", 0);
 
 	// color control
 	config->addOption('p', "palette", "SDL.Palette", "");
@@ -241,8 +473,10 @@ InitConfig()
 	config->addOption("ntsccolor", "SDL.NTSCpalette", 0);
 
 	// scanline settings
-	config->addOption("slstart", "SDL.ScanLineStart", 0);
-	config->addOption("slend", "SDL.ScanLineEnd", 239);
+	config->addOption("SDL.ScanLineStartNTSC", 0+8);
+	config->addOption("SDL.ScanLineEndNTSC", 239-8);
+	config->addOption("SDL.ScanLineStartPAL", 0);
+	config->addOption("SDL.ScanLineEndPAL", 239);
 
 	// video controls
 	config->addOption('f', "fullscreen", "SDL.Fullscreen", 0);
@@ -253,19 +487,25 @@ InitConfig()
 	config->addOption('y', "yres", "SDL.YResolution", 0);
 	config->addOption("SDL.LastXRes", 0);
 	config->addOption("SDL.LastYRes", 0);
-	config->addOption("SDL.WinSizeX", 512);
-	config->addOption("SDL.WinSizeY", 512);
+	config->addOption("SDL.WinSizeX", 0);
+	config->addOption("SDL.WinSizeY", 0);
 	config->addOption("doublebuf", "SDL.DoubleBuffering", 1);
 	config->addOption("autoscale", "SDL.AutoScale", 1);
-	config->addOption("keepratio", "SDL.KeepRatio", 1);
-	config->addOption("xscale", "SDL.XScale", 2.0);
-	config->addOption("yscale", "SDL.YScale", 2.0);
+	config->addOption("forceAspect", "SDL.ForceAspect", 1);
+	config->addOption("aspectSelect", "SDL.AspectSelect", 0);
+	config->addOption("aspectX", "SDL.AspectX", 1.000);
+	config->addOption("aspectY", "SDL.AspectY", 1.000);
+	config->addOption("xscale", "SDL.XScale", 2.000);
+	config->addOption("yscale", "SDL.YScale", 2.000);
 	config->addOption("xstretch", "SDL.XStretch", 0);
 	config->addOption("ystretch", "SDL.YStretch", 0);
 	config->addOption("noframe", "SDL.NoFrame", 0);
 	config->addOption("special", "SDL.SpecialFilter", 0);
 	config->addOption("showfps", "SDL.ShowFPS", 0);
 	config->addOption("togglemenu", "SDL.ToggleMenu", 0);
+	config->addOption("cursorType", "SDL.CursorType", 0);
+	config->addOption("cursorVis" , "SDL.CursorVis", 1);
+	config->addOption("SDL.DrawInputAids", 1);
 
 	// OpenGL options
 	config->addOption("opengl", "SDL.OpenGL", 1);
@@ -290,6 +530,10 @@ InitConfig()
 	config->addOption("input4", "SDL.Input.3", "Gamepad.3");
 
 	config->addOption("autoInputPreset", "SDL.AutoInputPreset", 0);
+	config->addOption("SDL.AutofireOnFrames" , 1);
+	config->addOption("SDL.AutofireOffFrames", 1);
+	config->addOption("SDL.AutofireCustomOnFrames" , 1);
+	config->addOption("SDL.AutofireCustomOffFrames", 1);
 
 	// display input
 	config->addOption("inputdisplay", "SDL.InputDisplay", 0);
@@ -301,10 +545,14 @@ InitConfig()
 	config->addOption("pauseframe", "SDL.PauseFrame", 0);
 	config->addOption("recordhud", "SDL.RecordHUD", 1);
 	config->addOption("moviemsg", "SDL.MovieMsg", 1);
+	config->addOption("SDL.AviVideoFormat", 0);
 
 	// Hex Editor Options
 	config->addOption("hexEditBgColor", "SDL.HexEditBgColor", "#000000");
 	config->addOption("hexEditFgColor", "SDL.HexEditFgColor", "#FFFFFF");
+	config->addOption("SDL.HexEditCursorColorRC", "#000080");
+	config->addOption("SDL.HexEditAltColColor"  , "#545454");
+	config->addOption("SDL.HexEditFont"  , "");
     
 	// Debugger Options
 	config->addOption("autoLoadDebugFiles"     , "SDL.AutoLoadDebugFiles", 1);
@@ -316,6 +564,21 @@ InitConfig()
 	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);
 	config->addOption("autoLoadCDL"  , "SDL.AutoLoadCDL", 1);
 	config->addOption("autoResumeCDL", "SDL.AutoResumeCDL", 0);
+
+	// Trace Logger Options
+	config->addOption("SDL.TraceLogRegisterState", 1);
+	config->addOption("SDL.TraceLogProcessorState", 1);
+	config->addOption("SDL.TraceLogNewInstructions", 0);
+	config->addOption("SDL.TraceLogNewData", 0);
+	config->addOption("SDL.TraceLogFrameCount", 0);
+	config->addOption("SDL.TraceLogCycleCount", 0);
+	config->addOption("SDL.TraceLogInstructionCount", 0);
+	config->addOption("SDL.TraceLogMessages", 1);
+	config->addOption("SDL.TraceLogBreakpointHits", 1);
+	config->addOption("SDL.TraceLogBankNumber", 0);
+	config->addOption("SDL.TraceLogSymbolic", 0);
+	config->addOption("SDL.TraceLogStackTabbing", 1);
+	config->addOption("SDL.TraceLogLeftDisassembly", 1);
 	
 	// overwrite the config file?
 	config->addOption("no-config", "SDL.NoConfig", 0);
@@ -369,7 +632,13 @@ InitConfig()
 
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
-    
+	config->addOption("SDL.PauseOnMainMenuAccess", false);
+	config->addOption("SDL.GuiStyle", "");
+	config->addOption("SDL.QtStyleSheet", "");
+	config->addOption("SDL.QPaletteFile", "");
+	config->addOption("SDL.UseCustomQss", 0);
+	config->addOption("SDL.UseCustomQPal", 0);
+
 	config->addOption("_setSchedParam"      , "SDL.SetSchedParam" , 0);
 	config->addOption("_emuSchedPolicy"     , "SDL.EmuSchedPolicy", 0);
 	config->addOption("_emuSchedNice"       , "SDL.EmuSchedNice"  , 0);
@@ -387,6 +656,11 @@ InitConfig()
 	
 	// enable new PPU core
 	config->addOption("newppu", "SDL.NewPPU", 0);
+
+	// PPU Viewer Preferences
+	config->addOption("SDL.NT_TileFocusPolicy", 0);
+	config->addOption("SDL.PPU_TileFocusPolicy", 0);
+	config->addOption("SDL.OAM_TileFocusPolicy", 0);
 
 	// quit when a+b+select+start is pressed
 	config->addOption("4buttonexit", "SDL.ABStartSelectExit", 0);
@@ -473,53 +747,67 @@ InitConfig()
 	// TODO: use a better data structure to store the hotkeys or something
 	//			improve this code overall in the future to make it
 	//			easier to maintain
-	const int Hotkeys[HK_MAX] = {
-		SDLK_F1, // cheat menu
-		SDLK_F2, // bind state
-		SDLK_F3, // load lua
-		SDLK_F4, // toggleBG
-		SDLK_F5, // save state
-		SDLK_F6, // fds select
-		SDLK_F7, // load state
-		SDLK_F8, // fds eject
-		SDLK_F6, // VS insert coin
-		SDLK_F8, // VS toggle dipswitch
-		SDLK_PERIOD, // toggle frame display
-		SDLK_F10, // toggle subtitle
-		SDLK_F11, // reset
-		SDLK_F12, // screenshot
-		SDLK_PAUSE, // pause
-		SDLK_MINUS, // speed++
-		SDLK_EQUALS, // speed--
-		SDLK_BACKSLASH, //frame advnace
-		SDLK_TAB, // turbo
-		SDLK_COMMA, // toggle input display
-		SDLK_q, // toggle movie RW
-		SDLK_QUOTE, // toggle mute capture
-		0, // quit // edit 10/11/11 - don't map to escape, it causes ugly things to happen to sdl.  can be manually appended to config
-		SDLK_DELETE, // frame advance lag skip
-		SDLK_SLASH, // lag counter display
-		SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
-		SDLK_6, SDLK_7, SDLK_8, SDLK_9,
-		SDLK_PAGEUP, // select state next
-		SDLK_PAGEDOWN, // select state prev
-		0, // Volume Down Internal 
-		0, // Volume Up Internal 
-		SDLK_SCROLLLOCK }; // FKB Enable Toggle
+	//const int Hotkeys[HK_MAX] = {
+	//	SDLK_F1, // cheat menu
+	//	SDLK_F2, // bind state
+	//	SDLK_F3, // load lua
+	//	SDLK_F4, // toggleBG
+	//	SDLK_F5, // save state
+	//	SDLK_F6, // fds select
+	//	SDLK_F7, // load state
+	//	SDLK_F8, // fds eject
+	//	SDLK_F6, // VS insert coin
+	//	SDLK_F8, // VS toggle dipswitch
+	//	SDLK_PERIOD, // toggle frame display
+	//	SDLK_F10, // toggle subtitle
+	//	SDLK_F11, // reset
+	//	SDLK_F12, // screenshot
+	//	SDLK_PAUSE, // pause
+	//	SDLK_MINUS, // speed++
+	//	SDLK_EQUALS, // speed--
+	//	SDLK_BACKSLASH, //frame advnace
+	//	SDLK_TAB, // turbo
+	//	SDLK_COMMA, // toggle input display
+	//	SDLK_q, // toggle movie RW
+	//	SDLK_QUOTE, // toggle mute capture
+	//	0, // quit // edit 10/11/11 - don't map to escape, it causes ugly things to happen to sdl.  can be manually appended to config
+	//	SDLK_DELETE, // frame advance lag skip
+	//	SDLK_SLASH, // lag counter display
+	//	SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
+	//	SDLK_6, SDLK_7, SDLK_8, SDLK_9,
+	//	SDLK_PAGEUP, // select state next
+	//	SDLK_PAGEDOWN, // select state prev
+	//	0, // Volume Down Internal 
+	//	0, // Volume Up Internal 
+	//	SDLK_SCROLLLOCK }; // FKB Enable Toggle
+
+
+	//Hotkeys[ HK_OPEN_ROM ].init( "OpenROM", QKeySequence(QKeySequence::Open) );
 
 	prefix = "SDL.Hotkeys.";
+
 	for(int i=0; i < HK_MAX; i++)
 	{
-		char buf[256];
-		std::string keyText;
+		const char *hotKeyName, *hotKeySeq;
+		std::string nameText, keyText;
 
-		keyText.assign(" mod=");
+		getHotKeyConfig( i, &hotKeyName, &hotKeySeq );
 
-		sprintf( buf, "  key=%s", SDL_GetKeyName( Hotkeys[i] ) );
+		//printf("Hot Key: '%s' = '%s' \n", hotKeyName, hotKeySeq );
 
-		keyText.append( buf );
+		//keyText.assign(" mod=");
 
-		config->addOption(prefix + HotkeyStrings[i], keyText);
+		//sprintf( buf, "  key=%s", SDL_GetKeyName( Hotkeys[i] ) );
+
+		if ( hotKeyName[0] != 0 )
+		{
+			nameText.assign( hotKeyName );
+			keyText.assign( hotKeySeq );
+
+			config->addOption(prefix + nameText, keyText);
+
+			Hotkeys[i].setConfigName( hotKeyName );
+		}
 	}
 	// All mouse devices
 	config->addOption("SDL.OekaKids.0.DeviceType", "Mouse");
@@ -540,7 +828,8 @@ InitConfig()
 void
 UpdateEMUCore(Config *config)
 {
-	int ntsccol, ntsctint, ntschue, flag, region, start, end;
+	int ntsccol, ntsctint, ntschue, flag, region;
+	int startNTSC, endNTSC, startPAL, endPAL;
 	std::string cpalette;
 
 	config->getOption("SDL.NTSCpalette", &ntsccol);
@@ -552,6 +841,8 @@ UpdateEMUCore(Config *config)
 	if(cpalette.size()) {
 		LoadCPalette(cpalette);
 	}
+
+	config->getOption("SDL.NewPPU", &newppu);
 
 	config->getOption("SDL.PAL", &region);
 	FCEUI_SetRegion(region);
@@ -565,8 +856,10 @@ UpdateEMUCore(Config *config)
 	config->getOption("SDL.DisableSpriteLimit", &flag);
 	FCEUI_DisableSpriteLimitation(flag ? 1 : 0);
 
-	config->getOption("SDL.ScanLineStart", &start);
-	config->getOption("SDL.ScanLineEnd", &end);
+	config->getOption("SDL.ScanLineStartNTSC", &startNTSC);
+	config->getOption("SDL.ScanLineEndNTSC", &endNTSC);
+	config->getOption("SDL.ScanLineStartPAL", &startPAL);
+	config->getOption("SDL.ScanLineEndPAL", &endPAL);
 
 #if DOING_SCANLINE_CHECKS
 	for(int i = 0; i < 2; x++) {
@@ -575,6 +868,6 @@ UpdateEMUCore(Config *config)
 	}
 #endif
 
-	FCEUI_SetRenderedLines(start + 8, end - 8, start, end);
+	FCEUI_SetRenderedLines(startNTSC, endNTSC, startPAL, endPAL);
 }
 

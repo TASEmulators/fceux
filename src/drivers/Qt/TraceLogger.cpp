@@ -23,6 +23,14 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#endif
+
 #include <QDir>
 #include <QMenu>
 #include <QMenuBar>
@@ -46,6 +54,7 @@
 
 #include "common/os_utils.h"
 
+#include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/TraceLogger.h"
 #include "Qt/main.h"
@@ -97,10 +106,36 @@ static int oldcodecount = 0, olddatacount = 0;
 static traceRecord_t *recBuf = NULL;
 static int recBufMax = 0;
 static int recBufHead = 0;
-static int recBufTail = 0;
-static FILE *logFile = NULL;
+static traceRecord_t *logBuf = NULL;
+static int logBufMax = 3000000;
+static int logBufHead = 0;
+static int logBufTail = 0;
+static bool overrunWarningArmed = true;
 static TraceLoggerDialog_t *traceLogWindow = NULL;
 static void pushMsgToLogBuffer(const char *msg);
+#ifdef WIN32
+#include <windows.h>
+static HANDLE logFile = INVALID_HANDLE_VALUE;
+#else
+static int logFile = -1;
+#endif
+static char  logFilePath[512] = { 0 };
+//----------------------------------------------------
+static void initLogOption( const char *name, int bitmask )
+{
+	int opt;
+
+	g_config->getOption(name, &opt);
+
+	if ( opt )
+	{
+		logging_options |= bitmask;
+	}
+	else
+	{
+		logging_options &= ~bitmask;
+	}
+}
 //----------------------------------------------------
 TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	: QDialog(parent, Qt::Window)
@@ -244,6 +279,20 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	logInstrCountCbox = new QCheckBox(tr("Log Instructions Count"));
 	logBankNumCbox = new QCheckBox(tr("Log Bank Number"));
 
+	initLogOption("SDL.TraceLogRegisterState", LOG_REGISTERS );
+	initLogOption("SDL.TraceLogProcessorState", LOG_PROCESSOR_STATUS );
+	initLogOption("SDL.TraceLogNewInstructions", LOG_NEW_INSTRUCTIONS );
+	initLogOption("SDL.TraceLogNewData", LOG_NEW_DATA );
+	initLogOption("SDL.TraceLogFrameCount", LOG_FRAMES_COUNT );
+	initLogOption("SDL.TraceLogCycleCount", LOG_CYCLES_COUNT );
+	initLogOption("SDL.TraceLogInstructionCount", LOG_INSTRUCTIONS_COUNT );
+	initLogOption("SDL.TraceLogMessages", LOG_MESSAGES );
+	initLogOption("SDL.TraceLogBreakpointHits", LOG_BREAKPOINTS );
+	initLogOption("SDL.TraceLogBankNumber", LOG_BANK_NUMBER );
+	initLogOption("SDL.TraceLogSymbolic", LOG_SYMBOLIC );
+	initLogOption("SDL.TraceLogStackTabbing", LOG_CODE_TABBING );
+	initLogOption("SDL.TraceLogLeftDisassembly", LOG_TO_THE_LEFT );
+
 	logRegCbox->setChecked((logging_options & LOG_REGISTERS) ? true : false);
 	logFrameCbox->setChecked((logging_options & LOG_FRAMES_COUNT) ? true : false);
 	logEmuMsgCbox->setChecked((logging_options & LOG_MESSAGES) ? true : false);
@@ -309,21 +358,23 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 
 	connect(updateTimer, &QTimer::timeout, this, &TraceLoggerDialog_t::updatePeriodic);
 
-	updateTimer->start(10); // 100hz
+	updateTimer->start(50); // 20hz
+
+	diskThread = new TraceLogDiskThread_t(this);
 }
 //----------------------------------------------------
 TraceLoggerDialog_t::~TraceLoggerDialog_t(void)
 {
 	updateTimer->stop();
 
-	traceLogWindow = NULL;
 	logging = 0;
+	msleep(1);
+	diskThread->requestInterruption();
+	diskThread->quit();
+	diskThread->wait( 1000000 );
 
-	if (logFile)
-	{
-		fclose(logFile);
-		logFile = NULL;
-	}
+	traceLogWindow = NULL;
+
 	printf("Trace Logger Window Deleted\n");
 }
 //----------------------------------------------------
@@ -362,25 +413,12 @@ void TraceLoggerDialog_t::updatePeriodic(void)
 		traceViewDrawEnable = 0;
 	}
 
-	if (logFile && logFileCbox->isChecked())
+	if ( !logging || !logFileCbox->isChecked())
 	{
-		char line[256];
-
-		while (recBufHead != recBufTail)
-		{
-			recBuf[recBufTail].convToText(line);
-
-			fprintf(logFile, "%s\n", line);
-
-			recBufTail = (recBufTail + 1) % recBufMax;
-		}
-	}
-	else
-	{
-		recBufTail = recBufHead;
+		overrunWarningArmed = true;
 	}
 
-	if (traceViewCounter > 20)
+	if (traceViewCounter > 5)
 	{
 		if (recBufHead != recbufHeadLp)
 		{
@@ -424,21 +462,39 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 		pushMsgToLogBuffer("Logging Finished");
 		startStopButton->setText(tr("Start Logging"));
 
-		if (logFile)
-		{
-			fclose(logFile);
-			logFile = NULL;
-		}
+		diskThread->requestInterruption();
+		diskThread->quit();
+		diskThread->wait(1000);
 	}
 	else
 	{
 		if (logFileCbox->isChecked())
 		{
-			openLogFile();
+			if ( logFilePath[0] == 0 )
+			{
+				openLogFile();
+			}
+			diskThread->start();
+			msleep(100);
 		}
 		pushMsgToLogBuffer("Log Start");
 		startStopButton->setText(tr("Stop Logging"));
 		logging = 1;
+	}
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::showBufferWarning(void)
+{
+	const char *msg = "\
+Error: Trace Logger Circular Buffer Overrun has been detected!\n\n\
+This means that some instructions have not been written to the log\
+ file and resulting log of instructions is incomplete.\n\n\
+Recommend increasing buffer size (max lines) to at least 1,000,000 lines.\n\n\
+This message won't show again until logging is stopped and started again.";
+
+	if ( consoleWindow )
+	{
+		consoleWindow->QueueErrorMsgWindow(msg);
 	}
 }
 //----------------------------------------------------
@@ -493,12 +549,7 @@ void TraceLoggerDialog_t::openLogFile(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	if (logFile)
-	{
-		fclose(logFile);
-		logFile = NULL;
-	}
-	logFile = fopen(filename.toStdString().c_str(), "w");
+	strcpy( logFilePath, filename.toStdString().c_str() );
 
 	return;
 }
@@ -523,6 +574,7 @@ void TraceLoggerDialog_t::logRegStateChanged(int state)
 	{
 		logging_options |= LOG_REGISTERS;
 	}
+	g_config->setOption("SDL.TraceLogRegisterState", (logging_options & LOG_REGISTERS) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logFrameStateChanged(int state)
@@ -535,6 +587,7 @@ void TraceLoggerDialog_t::logFrameStateChanged(int state)
 	{
 		logging_options |= LOG_FRAMES_COUNT;
 	}
+	g_config->setOption("SDL.TraceLogFrameCount", (logging_options & LOG_FRAMES_COUNT) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logEmuMsgStateChanged(int state)
@@ -547,6 +600,7 @@ void TraceLoggerDialog_t::logEmuMsgStateChanged(int state)
 	{
 		logging_options |= LOG_MESSAGES;
 	}
+	g_config->setOption("SDL.TraceLogMessages", (logging_options & LOG_MESSAGES) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::symTraceEnaStateChanged(int state)
@@ -559,6 +613,7 @@ void TraceLoggerDialog_t::symTraceEnaStateChanged(int state)
 	{
 		logging_options |= LOG_SYMBOLIC;
 	}
+	g_config->setOption("SDL.TraceLogSymbolic", (logging_options & LOG_SYMBOLIC) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logProcStatFlagStateChanged(int state)
@@ -571,6 +626,7 @@ void TraceLoggerDialog_t::logProcStatFlagStateChanged(int state)
 	{
 		logging_options |= LOG_PROCESSOR_STATUS;
 	}
+	g_config->setOption("SDL.TraceLogProcessorState", (logging_options & LOG_PROCESSOR_STATUS) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logCyclesCountStateChanged(int state)
@@ -583,6 +639,7 @@ void TraceLoggerDialog_t::logCyclesCountStateChanged(int state)
 	{
 		logging_options |= LOG_CYCLES_COUNT;
 	}
+	g_config->setOption("SDL.TraceLogCycleCount", (logging_options & LOG_CYCLES_COUNT) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logBreakpointStateChanged(int state)
@@ -595,6 +652,7 @@ void TraceLoggerDialog_t::logBreakpointStateChanged(int state)
 	{
 		logging_options |= LOG_BREAKPOINTS;
 	}
+	g_config->setOption("SDL.TraceLogBreakpointHits", (logging_options & LOG_BREAKPOINTS) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::useStackPointerStateChanged(int state)
@@ -607,6 +665,7 @@ void TraceLoggerDialog_t::useStackPointerStateChanged(int state)
 	{
 		logging_options |= LOG_CODE_TABBING;
 	}
+	g_config->setOption("SDL.TraceLogStackTabbing", (logging_options & LOG_CODE_TABBING) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::toLeftDisassemblyStateChanged(int state)
@@ -619,6 +678,7 @@ void TraceLoggerDialog_t::toLeftDisassemblyStateChanged(int state)
 	{
 		logging_options |= LOG_TO_THE_LEFT;
 	}
+	g_config->setOption("SDL.TraceLogLeftDisassembly", (logging_options & LOG_TO_THE_LEFT) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logInstrCountStateChanged(int state)
@@ -631,6 +691,7 @@ void TraceLoggerDialog_t::logInstrCountStateChanged(int state)
 	{
 		logging_options |= LOG_INSTRUCTIONS_COUNT;
 	}
+	g_config->setOption("SDL.TraceLogInstructionCount", (logging_options & LOG_INSTRUCTIONS_COUNT) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logBankNumStateChanged(int state)
@@ -643,6 +704,7 @@ void TraceLoggerDialog_t::logBankNumStateChanged(int state)
 	{
 		logging_options |= LOG_BANK_NUMBER;
 	}
+	g_config->setOption("SDL.TraceLogBankNumber", (logging_options & LOG_BANK_NUMBER) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logNewMapCodeChanged(int state)
@@ -655,6 +717,7 @@ void TraceLoggerDialog_t::logNewMapCodeChanged(int state)
 	{
 		logging_options |= LOG_NEW_INSTRUCTIONS;
 	}
+	g_config->setOption("SDL.TraceLogNewInstructions", (logging_options & LOG_NEW_INSTRUCTIONS) ? 1 : 0 );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logNewMapDataChanged(int state)
@@ -667,6 +730,7 @@ void TraceLoggerDialog_t::logNewMapDataChanged(int state)
 	{
 		logging_options |= LOG_NEW_DATA;
 	}
+	g_config->setOption("SDL.TraceLogNewData", (logging_options & LOG_NEW_DATA) ? 1 : 0 );
 }
 //----------------------------------------------------
 traceRecord_t::traceRecord_t(void)
@@ -967,6 +1031,11 @@ int initTraceLogBuffer(int maxRecs)
 
 		size = maxRecs * sizeof(traceRecord_t);
 
+		if ( recBuf != NULL )
+		{
+			free(recBuf); recBuf = NULL;
+		}
+
 		recBuf = (traceRecord_t *)malloc(size);
 
 		if (recBuf)
@@ -978,6 +1047,7 @@ int initTraceLogBuffer(int maxRecs)
 		{
 			recBufMax = 0;
 		}
+		recBufHead = 0;
 	}
 	return recBuf == NULL;
 }
@@ -998,12 +1068,42 @@ void openTraceLoggerWindow(QWidget *parent)
 //----------------------------------------------------
 static void pushToLogBuffer(traceRecord_t &rec)
 {
+
 	recBuf[recBufHead] = rec;
 	recBufHead = (recBufHead + 1) % recBufMax;
 
-	if (recBufHead == recBufTail)
+	if ( logBuf )
 	{
-		printf("Trace Log Overrun!!!\n");
+		int nextHead, delayCount = 0;
+		logBuf[logBufHead] = rec;
+		nextHead = (logBufHead + 1) % logBufMax;
+
+		while (nextHead == logBufTail)
+		{
+			SDL_Delay(1);
+
+			delayCount++;
+
+			if ( delayCount > 10000 )
+			{
+				break;
+			}
+		}
+		logBufHead = nextHead;
+
+		if ( overrunWarningArmed )
+		{	// Don't spam with buffer overrun warning messages,
+			// we will print once if this happens.
+			if (logBufHead == logBufTail)
+			{
+				if ( traceLogWindow )
+				{
+					traceLogWindow->showBufferWarning();
+				}
+				printf("Trace Log Overrun!!!\n");
+				overrunWarningArmed = false;
+			}
+		}
 	}
 }
 //----------------------------------------------------
@@ -1186,13 +1286,13 @@ QTraceLogView::QTraceLogView(QWidget *parent)
 	if (useDarkTheme)
 	{
 		pal.setColor(QPalette::Base, fg);
-		pal.setColor(QPalette::Background, fg);
+		pal.setColor(QPalette::Window, fg);
 		pal.setColor(QPalette::WindowText, bg);
 	}
 	else
 	{
 		pal.setColor(QPalette::Base, bg);
-		pal.setColor(QPalette::Background, bg);
+		pal.setColor(QPalette::Window, bg);
 		pal.setColor(QPalette::WindowText, fg);
 	}
 
@@ -1963,7 +2063,6 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 	int i, x, y, v, ofs, row, start, end, nrow, lineLen;
 	QPainter painter(this);
 	char line[256];
-	//traceRecord_t rec[64];
 	QColor hlgtFG("white"), hlgtBG("blue");
 
 	painter.setFont(font);
@@ -1977,7 +2076,7 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 
 	viewLines = nrow;
 
-	painter.fillRect(0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background));
+	painter.fillRect(0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window));
 
 	painter.setPen(this->palette().color(QPalette::WindowText));
 
@@ -2118,5 +2217,133 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 		}
 		captureHighLightText = false;
 	}
+}
+//----------------------------------------------------
+TraceLogDiskThread_t::TraceLogDiskThread_t( QObject *parent )
+	: QThread(parent)
+{
+}
+//----------------------------------------------------
+TraceLogDiskThread_t::~TraceLogDiskThread_t(void)
+{
+	printf("Disk Thread Cleanup\n");
+#ifdef WIN32
+	if (logFile != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle( logFile );
+		logFile = INVALID_HANDLE_VALUE;
+	}
+#else
+	if ( logFile != -1 )
+	{
+		close(logFile); logFile = -1;
+	}
+#endif
+
+	if ( logBuf )
+	{
+		free(logBuf);
+		logBuf = NULL;
+	}
+}
+//----------------------------------------------------
+void TraceLogDiskThread_t::run(void)
+{
+	char line[256];
+	char buf[8192];
+	int i,idx=0;
+	int blockSize = 4 * 1024;
+
+	printf("Trace Log Disk Start\n");
+
+	setPriority( QThread::HighestPriority );
+
+#ifdef WIN32
+	logFile = CreateFileA( logFilePath, GENERIC_WRITE, 
+			0, NULL, OPEN_ALWAYS, FILE_FLAG_WRITE_THROUGH | FILE_FLAG_NO_BUFFERING, NULL );
+
+	if ( logFile == INVALID_HANDLE_VALUE )
+	{
+		char stmp[1024];
+		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath );
+		consoleWindow->QueueErrorMsgWindow(stmp);
+		return;
+	}
+#else
+	logFile = open( logFilePath, O_CREAT | O_WRONLY | O_TRUNC, 
+			S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
+
+	if ( logFile == -1 )
+	{
+		char stmp[1024];
+		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath );
+		consoleWindow->QueueErrorMsgWindow(stmp);
+		return;
+	}
+#endif
+	if ( logBuf == NULL )
+	{
+		size_t size;
+
+		size = logBufMax * sizeof(traceRecord_t);
+
+		logBufHead = logBufTail = 0;
+
+		logBuf = (traceRecord_t *)malloc(size);
+	}
+	idx = 0;
+
+	while ( !isInterruptionRequested() )
+	{
+		while (logBufHead != logBufTail)
+		{
+			logBuf[logBufTail].convToText(line);
+
+			i=0;
+			while ( line[i] != 0 )
+			{
+				buf[idx] = line[i]; i++; idx++;
+			}
+			buf[idx] = '\n'; idx++;
+
+			logBufTail = (logBufTail + 1) % logBufMax;
+
+			if ( idx >= blockSize )
+			{
+				#ifdef WIN32
+				DWORD bytesWritten;
+				WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
+				#else
+				write( logFile, buf, idx ); idx = 0;
+				#endif
+			}
+		}
+		SDL_Delay(1);
+	}
+	
+	if ( idx > 0 )
+	{
+		#ifdef WIN32
+		DWORD bytesWritten;
+		WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
+		#else
+		write( logFile, buf, idx ); idx = 0;
+		#endif
+	}
+
+	#ifdef WIN32
+	if ( logFile != INVALID_HANDLE_VALUE )
+	{
+		CloseHandle( logFile ); logFile = INVALID_HANDLE_VALUE; 
+	}
+	#else
+	if ( logFile != -1 )
+	{
+		close(logFile); logFile = -1;
+	}
+	#endif
+	
+	printf("Trace Log Disk Exit\n");
+	emit finished();
 }
 //----------------------------------------------------

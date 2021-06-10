@@ -14,6 +14,7 @@
 #include <QFrame>
 #include <QTimer>
 #include <QSlider>
+#include <QSpinBox>
 #include <QLineEdit>
 #include <QGroupBox>
 #include <QScrollArea>
@@ -148,6 +149,31 @@ class ppuNameTableTileView_t : public QWidget
 		int tileY;
 };
 
+class ppuNameTablePaletteView_t : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		ppuNameTablePaletteView_t( QWidget *parent = 0);
+		~ppuNameTablePaletteView_t(void);
+
+		void setTile( int table, int x, int y );
+	protected:
+		void paintEvent(QPaintEvent *event);
+		void resizeEvent(QResizeEvent *event);
+		int  heightForWidth(int w) const;
+		QSize  minimumSizeHint(void) const;
+		QSize  maximumSizeHint(void) const;
+		QSize  sizeHint(void) const;
+
+	private:
+		int  viewWidth;
+		int  viewHeight;
+		int  selTable;
+		int  tileX;
+		int  tileY;
+};
+
 class ppuNameTableViewerDialog_t : public QDialog
 {
    Q_OBJECT
@@ -166,13 +192,14 @@ class ppuNameTableViewerDialog_t : public QDialog
 
 		ppuNameTableView_t *ntView;
 		ppuNameTableTileView_t *selTileView;
+		ppuNameTablePaletteView_t *selTilePalView;
 		QScrollArea *scrollArea;
 		QCheckBox *showScrollLineCbox;
 		QCheckBox *showTileGridCbox;
 		QCheckBox *showAttrGridCbox;
 		QCheckBox *showAttrbCbox;
 		QCheckBox *ignorePaletteCbox;
-		QLineEdit *scanLineEdit;
+		QSpinBox  *scanLineEdit;
 		QTimer    *updateTimer;
 		QLineEdit *ppuAddrLbl;
 		QLineEdit *nameTableLbl;
@@ -205,7 +232,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void showTileGridChanged(int state);
 		void showAttrGridChanged(int state);
 		void showScrollLinesChanged(int state);
-		void scanLineChanged( const QString &txt );
+		void scanLineChanged(int value);
 		void menuScrollLinesChanged( bool checked ); 
 		void menuTileGridLinesChanged( bool checked ); 
 		void menuAttrGridLinesChanged( bool checked ); 

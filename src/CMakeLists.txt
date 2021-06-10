@@ -1,20 +1,32 @@
 
-if ( ${GTK} )
-message( STATUS "GUI backend: GTK")
-set( APP_NAME fceux-gtk)
-else()
-message( STATUS "GUI backend: QT")
 set( APP_NAME fceux)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+
+if ( ${QT6} )
+	message( STATUS "GUI Frontend: Qt6")
+	set( Qt Qt6 )
+else()
+	message( STATUS "GUI Frontend: Qt5")
+	set( Qt Qt5 )
+endif()
+
+if ( ${QT6} )
+  	find_package( Qt6 COMPONENTS Widgets OpenGL OpenGLWidgets REQUIRED)
+  	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
+  	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
+else()
+  	find_package( Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+  	add_definitions( ${Qt5Widgets_DEFINITIONS}  )
+  	include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
 endif()
 
 if(WIN32)
      find_package(OpenGL REQUIRED)
-     find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
-     add_definitions( ${Qt5Widgets_DEFINITIONS}  )
-     include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
+     #find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+     #add_definitions( ${Qt5Widgets_DEFINITIONS}  )
+     #include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
      add_definitions( -DMSVC -D_CRT_SECURE_NO_WARNINGS )
      add_definitions( -D__SDL__  -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
      add_definitions( -DFCEUDEF_DEBUGGER )
@@ -22,7 +34,8 @@ if(WIN32)
      include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
      set( OPENGL_LDFLAGS  OpenGL::GL )
      set( SDL2_LDFLAGS  ${SDL_INSTALL_PREFIX}/SDL2/lib/x64/SDL2.lib )
-     set( SYS_LIBS  wsock32 ws2_32 )
+     set( SYS_LIBS  wsock32 ws2_32 vfw32 )
+     set(APP_ICON_RESOURCES_WINDOWS  ${CMAKE_SOURCE_DIR}/icons/fceux.rc )
 else(WIN32)
   # Non Windows System
   # UNIX (Linux or Mac OSX)
@@ -44,17 +57,16 @@ else(WIN32)
   add_definitions( -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs  -fPIC )
   add_definitions( -DFCEUDEF_DEBUGGER )
 
-  if ( ${GTK} )
-     pkg_check_modules( GTK3 REQUIRED gtk+-3.0)
-     pkg_check_modules( X11  REQUIRED x11)
-     add_definitions( ${GTK3_CFLAGS}  ${X11_CFLAGS} )
-     add_definitions( -D_GTK -DOPENGL )
-  else(${GTK})
-     find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
-     add_definitions( ${Qt5Widgets_DEFINITIONS}  )
-     include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
-     add_definitions( -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
-  endif()
+  #if ( ${QT6} )
+  #	find_package( Qt6 COMPONENTS Widgets OpenGL OpenGLWidgets REQUIRED)
+  #	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
+  #	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${QtOpenGLWidgets_INCLUDE_DIRS} )
+  #else()
+  #	find_package( Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+  #	add_definitions( ${Qt5Widgets_DEFINITIONS}  )
+  #	include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
+  #endif()
+  add_definitions( -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
 
   # Check for libminizip
   pkg_check_modules( MINIZIP REQUIRED minizip)
@@ -62,6 +74,13 @@ else(WIN32)
   if ( ${MINIZIP_FOUND} )
 	  message( STATUS "Using System minizip ${MINIZIP_VERSION}" )
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
+  endif()
+
+  pkg_check_modules( X264 x264)
+
+  if ( ${X264_FOUND} )
+	  message( STATUS "Using System X264 Encoder Library ${X264_VERSION}" )
+	  add_definitions( -D_USE_X264 ${X264_CFLAGS} )
   endif()
 
   #pkg_check_modules( GL gl) # Use built in find package instead for OpenGL
@@ -82,7 +101,6 @@ else(WIN32)
   pkg_search_module( LUA lua5.1 lua-5.1 )
 
   add_definitions( -DHAVE_ASPRINTF ) # What system wouldn't have this?
-  #add_definitions( -DCREATE_AVI    ) 
 
   if(APPLE)
 	set( OPENGL_LDFLAGS  "-framework OpenGL" )
@@ -175,7 +193,7 @@ include_directories( ${CMAKE_SOURCE_DIR}/src )
 include_directories( ${CMAKE_SOURCE_DIR}/src/drivers )
 
 if(APPLE)
-  add_definitions( -DPSS_STYLE=4 )
+  add_definitions( -DPSS_STYLE=1 )
 else(APPLE)
   if(UNIX)
     add_definitions( -DPSS_STYLE=1 )
@@ -425,29 +443,8 @@ set(SRC_DRIVERS_COMMON
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/vidblit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/os_utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/nes_ntsc.c
-  #${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/nesvideos-piece.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/drivers/videolog/rgbtorgb.cpp
 )
 
-if ( ${GTK} )
-set(SRC_DRIVERS_SDL
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/cheat.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/config.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/debugger.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/glxwin.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/gui.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/GamePadConf.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/input.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/memview.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/ramwatch.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-joystick.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-sound.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-throttle.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/sdl-video.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/sdl/unix-netplay.cpp
-)
-else()
 set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/main.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleWindow.cpp  
@@ -491,8 +488,11 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-joystick.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-throttle.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/unix-netplay.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AviRecord.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/avi-utils.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/fileio.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/gwavi.cpp
 )
-endif()
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
 
@@ -518,38 +518,26 @@ set_source_files_properties( ${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Res
 
 add_executable(  ${APP_NAME}  MACOSX_BUNDLE ${APP_ICON} ${SOURCES} ../resources.qrc 
 	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
+elseif (WIN32)
 
+add_executable(  ${APP_NAME}  ${SOURCES} ../resources.qrc 
+	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp
+	${APP_ICON_RESOURCES_WINDOWS} )
 else()
-
-   if ( ${GTK} )
-      add_executable(  ${APP_NAME}  ${SOURCES} 
-   	   ${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
-   else()
-      add_executable(  ${APP_NAME}  ${SOURCES} ../resources.qrc 
-   	   ${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
-   endif()
+add_executable(  ${APP_NAME}  ${SOURCES} ../resources.qrc 
+	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
 endif()
 
-if ( ${GTK} )
-   target_link_libraries( ${APP_NAME}  
-   ${GTK3_LDFLAGS} ${X11_LDFLAGS}
-   ${OPENGL_LDFLAGS}
- 	${SDL2_LDFLAGS}
-	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
-	${LUA_LDFLAGS}
- 	${SYS_LIBS}
-)
-else()
 target_link_libraries( ${APP_NAME}  
-   ${Qt5Widgets_LIBRARIES}
-   ${Qt5OpenGL_LIBRARIES}
+   ${${Qt}Widgets_LIBRARIES}
+   ${${Qt}OpenGL_LIBRARIES}
+   ${${Qt}OpenGLWidgets_LIBRARIES}
    ${OPENGL_LDFLAGS}  
  	${SDL2_LDFLAGS}
 	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
-	${LUA_LDFLAGS}
+	${LUA_LDFLAGS} ${X264_LDFLAGS}
  	${SYS_LIBS}
 )
-endif()
 
 if (WIN32)
 	#   target_link_libraries( ${APP_NAME} wsock32 ws2_32 )

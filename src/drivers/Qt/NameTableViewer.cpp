@@ -24,6 +24,7 @@
 #include <QDir>
 #include <QMenu>
 #include <QAction>
+#include <QActionGroup>
 #include <QMenuBar>
 #include <QPainter>
 #include <QInputDialog>
@@ -113,6 +114,20 @@ int openNameTableViewWindow( QWidget *parent )
 
 	return 0;
 }
+//----------------------------------------------------------------------------
+static int conv2hex( int i )
+{
+	int h = 0;
+	if ( i >= 10 )
+	{
+		h = 'A' + i - 10;
+	}
+	else
+	{
+		h = '0' + i;
+	}
+	return h;
+}
 //----------------------------------------------------
 ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	: QDialog( parent, Qt::Window )
@@ -128,13 +143,19 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	QActionGroup *group;
 	QLabel *lbl;
 	QFont   font;
-	char stmp[64];
-	int useNativeMenuBar;
-	fceuDecIntValidtor *validator;
+	//char stmp[64];
+	int useNativeMenuBar, pxCharWidth;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
+
+	QFontMetrics metrics(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+#else
+	pxCharWidth = metrics.width(QLatin1Char('2'));
+#endif
 
 	nameTableViewWindow = this;
 
@@ -410,6 +431,8 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	lbl->setFont( font );
 	grid->addWidget( lbl, 7, 0, Qt::AlignLeft );
 
+	grid->setColumnMinimumWidth( 1, pxCharWidth * 6 );
+
 	ppuAddrLbl = new QLineEdit();
 	ppuAddrLbl->setReadOnly(true);
 	grid->addWidget( ppuAddrLbl, 0, 1, Qt::AlignLeft );
@@ -443,8 +466,10 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	grid->addWidget( palAddrLbl, 7, 1, Qt::AlignLeft );
 
 	selTileView = new ppuNameTableTileView_t(this);
+	selTilePalView = new ppuNameTablePaletteView_t(this);
 	//grid->addWidget( selTileView, 8, 0, 2, 1, Qt::AlignLeft );
 	vbox3->addWidget( selTileView );
+	vbox3->addWidget( selTilePalView );
 
 	showScrollLineCbox = new QCheckBox( tr("Show Scroll Lines") );
 	showTileGridCbox   = new QCheckBox( tr("Show Tile Grid") );
@@ -485,19 +510,15 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	hbox     = new QHBoxLayout();
 
-	scanLineEdit = new QLineEdit();
+	scanLineEdit = new QSpinBox();
+	scanLineEdit->setRange( 0, 255 );
+	scanLineEdit->setValue( NTViewScanline );
 	hbox->addWidget( new QLabel( tr("Display on Scanline:") ), 1, Qt::AlignRight );
 	hbox->addWidget( scanLineEdit, 1, Qt::AlignLeft );
 
 	hbox1->addLayout( hbox, 1 );
 
-	validator = new fceuDecIntValidtor( 0, 255, this );
-	scanLineEdit->setMaxLength( 3 );
-	scanLineEdit->setValidator( validator );
-	sprintf( stmp, "%i", NTViewScanline );
-	scanLineEdit->setText( tr(stmp) );
-
-	connect( scanLineEdit, SIGNAL(textEdited(const QString &)), this, SLOT(scanLineChanged(const QString &)));
+	connect( scanLineEdit, SIGNAL(valueChanged(int)), this, SLOT(scanLineChanged(int)));
 
 	FCEUD_UpdateNTView( -1, true);
 	
@@ -546,6 +567,9 @@ void ppuNameTableViewerDialog_t::periodicUpdate(void)
 
 		this->selTileView->setTile( ntView->getSelTable(), p.x(), p.y() );
 		this->selTileView->update();
+
+		this->selTilePalView->setTile( ntView->getSelTable(), p.x(), p.y() );
+		this->selTilePalView->update();
 
 		this->ntView->update();
 		//this->scrollArea->viewport()->update();
@@ -742,21 +766,10 @@ void ppuNameTableViewerDialog_t::updateMirrorText(void)
 	mirrorLbl->setText( tr(txt) );
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::scanLineChanged( const QString &txt )
+void ppuNameTableViewerDialog_t::scanLineChanged(int val)
 {
-	std::string s;
-
-	s = txt.toStdString();
-
-	if ( s.size() > 0 )
-	{
-		NTViewScanline = strtoul( s.c_str(), NULL, 10 );
-	}
-	else
-	{
-		NTViewScanline = 0;
-	}
-	//printf("ScanLine: '%s'  %i\n", s.c_str(), NTViewScanline );
+	NTViewScanline = val;
+	//printf("ScanLine:  %i\n", NTViewScanline );
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::menuScrollLinesChanged(bool checked)
@@ -888,6 +901,7 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 	selTable    = 0;
 	scrollArea  = NULL;
 	hover2Focus = false;
+	ensureVis   = false;
 	ppuAddr     = 0x2000;
 	palAddr     = 0x3F00;
 	atrbAddr    = 0x3F00;
@@ -896,6 +910,8 @@ ppuNameTableView_t::ppuNameTableView_t(QWidget *parent)
 	tileSelColor.setRgb(255,255,255);
 	tileGridColor.setRgb(255,  0,  0);
 	attrGridColor.setRgb(  0,  0,255);
+
+	g_config->getOption("SDL.NT_TileFocusPolicy", &hover2Focus );
 }
 //----------------------------------------------------
 ppuNameTableView_t::~ppuNameTableView_t(void)
@@ -911,6 +927,8 @@ void ppuNameTableView_t::setScrollPointer( QScrollArea *sa )
 void ppuNameTableView_t::setHoverFocus( bool hoverFocus )
 {
 	hover2Focus = hoverFocus;
+
+	g_config->setOption("SDL.NT_TileFocusPolicy", hover2Focus );
 }
 //----------------------------------------------------
 void ppuNameTableView_t::setViewScale( int reqScale )
@@ -1855,5 +1873,127 @@ void ppuNameTableTileView_t::paintEvent(QPaintEvent *event)
 	//painter.setPen( pen );
 
 	//painter.drawRect( x, y, w, h );
+}
+//----------------------------------------------------
+//-- Name Table Tile Palette View
+//----------------------------------------------------
+ppuNameTablePaletteView_t::ppuNameTablePaletteView_t(QWidget *parent)
+	: QWidget(parent)
+{
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	viewHeight = 32;
+	viewWidth = viewHeight*4;
+	setMinimumWidth( viewWidth );
+	setMinimumHeight( viewHeight );
+
+	selTable = 0;
+	tileX = 0;
+	tileY = 0;
+}
+//----------------------------------------------------
+ppuNameTablePaletteView_t::~ppuNameTablePaletteView_t(void)
+{
+
+}
+//----------------------------------------------------
+void ppuNameTablePaletteView_t::setTile( int table, int x, int y )
+{
+	selTable = table;
+	tileX = x; tileY = y;
+}
+//----------------------------------------------------
+int  ppuNameTablePaletteView_t::heightForWidth(int w) const
+{
+	return w/4;
+}
+//----------------------------------------------------
+QSize ppuNameTablePaletteView_t::minimumSizeHint(void) const
+{
+	return QSize(48,12);
+}
+//----------------------------------------------------
+QSize ppuNameTablePaletteView_t::maximumSizeHint(void) const
+{
+	return QSize(256,64);
+}
+//----------------------------------------------------
+QSize ppuNameTablePaletteView_t::sizeHint(void) const
+{
+	return QSize(128,32);
+}
+//----------------------------------------------------
+void ppuNameTablePaletteView_t::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+}
+//----------------------------------------------------
+void ppuNameTablePaletteView_t::paintEvent(QPaintEvent *event)
+{
+	int x,w,h,xx,yy,p,p2,i,j;
+	QPainter painter(this);
+	QColor color( 0, 0, 0);
+	QColor  white(255,255,255), black(0,0,0);
+	ppuNameTableTile_t *tile;
+	//QPen pen;
+	//char showSelector;
+	char c[4];
+
+	//pen = painter.pen();
+
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
+
+	w = viewWidth  / 4;
+  	h = viewHeight;
+
+	if ( w < h )
+	{
+		h = w;
+	}
+	else
+	{
+		w = h;
+	}
+
+	i = w / 4;
+	j = h / 4;
+
+	tile = &nameTable[ selTable ].tile[ tileY ][ tileX ];
+
+	p2 = tile->pal * 4;
+	yy = 0;
+	xx = 0;
+	for (x=0; x < 4; x++)
+	{
+		if ( palo != NULL )
+		{
+			p = palcache[p2 | x];
+			color.setBlue( palo[p].b );
+			color.setGreen( palo[p].g );
+			color.setRed( palo[p].r );
+
+			c[0] = conv2hex( (p & 0xF0) >> 4 );
+			c[1] = conv2hex(  p & 0x0F);
+			c[2] =  0;
+		}
+		painter.fillRect( xx, yy, w, h, color );
+
+		if ( qGray( color.red(), color.green(), color.blue() ) > 128 )
+		{
+			painter.setPen( black );
+		}
+		else
+		{
+			painter.setPen( white );
+		}
+		painter.drawText( xx+i, yy+h-j, tr(c) );
+
+		painter.setPen( black );
+		painter.drawRect( xx, yy, w-1, h-1 );
+		painter.setPen( white );
+		painter.drawRect( xx+1, yy+1, w-3, h-3 );
+		xx += w;
+	}
 }
 //----------------------------------------------------

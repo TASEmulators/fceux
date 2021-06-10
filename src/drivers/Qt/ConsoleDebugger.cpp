@@ -37,6 +37,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <QActionGroup>
 #include <QGuiApplication>
 
 #include "../../types.h"
@@ -75,6 +76,7 @@ static std::list <ConsoleDebugger*> dbgWinList;
 
 static void DeleteBreak(int sel);
 static bool waitingAtBp = false;
+static bool bpDebugEnable = true;
 static int  lastBpIdx   = 0;
 //----------------------------------------------------------------------------
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
@@ -334,7 +336,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	seekEntry->setFont( font );
 	seekEntry->setText("0000");
 	seekEntry->setMaxLength( 4 );
-	seekEntry->setInputMask( ">HHHH;" );
+	seekEntry->setInputMask( ">HHHH;0" );
 	seekEntry->setAlignment(Qt::AlignCenter);
 	seekEntry->setMaximumWidth( 6 * fontCharWidth );
 	grid->addWidget( seekEntry, 3, 1, Qt::AlignLeft );
@@ -344,7 +346,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	pcEntry = new QLineEdit();
 	pcEntry->setFont( font );
 	pcEntry->setMaxLength( 4 );
-	pcEntry->setInputMask( ">HHHH;" );
+	pcEntry->setInputMask( ">HHHH;0" );
 	pcEntry->setAlignment(Qt::AlignCenter);
 	pcEntry->setMaximumWidth( 6 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -360,7 +362,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	regAEntry = new QLineEdit();
 	regAEntry->setFont( font );
 	regAEntry->setMaxLength( 2 );
-	regAEntry->setInputMask( ">HH;" );
+	regAEntry->setInputMask( ">HH;0" );
 	regAEntry->setAlignment(Qt::AlignCenter);
 	regAEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -369,7 +371,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	regXEntry = new QLineEdit();
 	regXEntry->setFont( font );
 	regXEntry->setMaxLength( 2 );
-	regXEntry->setInputMask( ">HH;" );
+	regXEntry->setInputMask( ">HH;0" );
 	regXEntry->setAlignment(Qt::AlignCenter);
 	regXEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -378,7 +380,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	regYEntry = new QLineEdit();
 	regYEntry->setFont( font );
 	regYEntry->setMaxLength( 2 );
-	regYEntry->setInputMask( ">HH;" );
+	regYEntry->setInputMask( ">HH;0" );
 	regYEntry->setAlignment(Qt::AlignCenter);
 	regYEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
@@ -400,7 +402,6 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	bpFrame = new QGroupBox(tr("Breakpoints"));
 	vbox3   = new QVBoxLayout();
 	vbox    = new QVBoxLayout();
-	hbox    = new QHBoxLayout();
 	bpTree  = new QTreeWidget();
 
 	bpTree->setColumnCount(2);
@@ -426,8 +427,6 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	connect( bpTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
 			   this, SLOT(bpItemClicked( QTreeWidgetItem*, int)) );
-
-	hbox->addWidget( bpTree );
 
 	hbox   = new QHBoxLayout();
 	button = new QPushButton( tr("Add") );
@@ -881,8 +880,8 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 	hbox->addWidget( cancelButton );
 	hbox->addWidget(     okButton );
 
-   connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
-   connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
 
 	okButton->setDefault(true);
 
@@ -1697,7 +1696,7 @@ void ConsoleDebugger::seekToCB (void)
 {
 	std::string s;
 
-	s = seekEntry->text().toStdString();
+	s = seekEntry->displayText().toStdString();
 
 	//printf("Seek To: '%s'\n", s.c_str() );
 
@@ -2106,7 +2105,8 @@ void  QAsmView::updateAssemblyView(void)
 		{
 			sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
 			line.append(chr);
-		} else
+		}
+		else
 		{
 			if ((addr + size) > 0xFFFF)
 			{
@@ -2115,6 +2115,7 @@ void  QAsmView::updateAssemblyView(void)
 					sprintf(chr, "%02X        OVERFLOW\n", GetMem(addr++));
 					line.append(chr);
 				}
+				delete a;
 				break;
 			}
 			for (int j = 0; j < size; j++)
@@ -2239,7 +2240,8 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	std::string s;
 	long int i;
 
-	s = pcEntry->text().toStdString();
+	s = pcEntry->displayText().toStdString();
+
 	if ( s.size() > 0 )
 	{
 		i = strtol( s.c_str(), NULL, 16 );
@@ -2251,7 +2253,8 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	X.PC = i;
 	//printf("Set PC: '%s'  %04X\n", s.c_str(), X.PC );
 
-	s = regAEntry->text().toStdString();
+	s = regAEntry->displayText().toStdString();
+
 	if ( s.size() > 0 )
 	{
 		i = strtol( s.c_str(), NULL, 16 );
@@ -2263,7 +2266,8 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	X.A  = i;
 	//printf("Set A: '%s'  %02X\n", s.c_str(), X.A );
 
-	s = regXEntry->text().toStdString();
+	s = regXEntry->displayText().toStdString();
+
 	if ( s.size() > 0 )
 	{
 		i = strtol( s.c_str(), NULL, 16 );
@@ -2275,7 +2279,8 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	X.X  = i;
 	//printf("Set X: '%s'  %02X\n", s.c_str(), X.X );
 
-	s = regYEntry->text().toStdString();
+	s = regYEntry->displayText().toStdString();
+
 	if ( s.size() > 0 )
 	{
 		i = strtol( s.c_str(), NULL, 16 );
@@ -2565,11 +2570,16 @@ void ConsoleDebugger::vbarChanged(int value)
 	asmView->setLine( value );
 }
 //----------------------------------------------------------------------------
+void bpDebugSetEnable(bool val)
+{
+	bpDebugEnable = val;
+}
+//----------------------------------------------------------------------------
 void FCEUD_DebugBreakpoint( int bpNum )
 {
 	std::list <ConsoleDebugger*>::iterator it;
 
-	if ( !nes_shm->runEmulator )
+	if ( !nes_shm->runEmulator || !bpDebugEnable )
 	{
 		return;
 	}
@@ -2585,7 +2595,8 @@ void FCEUD_DebugBreakpoint( int bpNum )
 		(*it)->breakPointNotify( bpNum );
 	}
 
-	while ( nes_shm->runEmulator && FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
+	while ( nes_shm->runEmulator && bpDebugEnable &&
+			FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 	{
 		// HACK: break when Frame Advance is pressed
 		extern bool frameAdvanceRequested;
@@ -2615,6 +2626,11 @@ void FCEUD_DebugBreakpoint( int bpNum )
 bool debuggerWindowIsOpen(void)
 {
 	return (dbgWinList.size() > 0);
+}
+//----------------------------------------------------------------------------
+bool debuggerWaitingAtBreakpoint(void)
+{
+	return waitingAtBp;
 }
 //----------------------------------------------------------------------------
 void updateAllDebuggerWindows( void )
@@ -2986,7 +3002,7 @@ QAsmView::QAsmView(QWidget *parent)
 	//c = pal.color(QPalette::Base);
 	//printf("Base: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
 
-	//c = pal.color(QPalette::Background);
+	//c = pal.color(QPalette::Window);
 	//printf("BackGround: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
 
 	// Figure out if we are using a light or dark theme by checking the 
@@ -3003,13 +3019,13 @@ QAsmView::QAsmView(QWidget *parent)
 	if ( useDarkTheme )
 	{
 		pal.setColor(QPalette::Base      , fg );
-		pal.setColor(QPalette::Background, fg );
+		pal.setColor(QPalette::Window    , fg );
 		pal.setColor(QPalette::WindowText, bg );
 	}
 	else 
 	{
 		pal.setColor(QPalette::Base      , bg );
-		pal.setColor(QPalette::Background, bg );
+		pal.setColor(QPalette::Window    , bg );
 		pal.setColor(QPalette::WindowText, fg );
 	}
 
@@ -3032,6 +3048,8 @@ QAsmView::QAsmView(QWidget *parent)
 	lineOffset = 0;
 	maxLineOffset = 0;
 	ctxMenuAddr = -1;
+	cursorPosX = 0;
+	cursorPosY = 0;
 
 	mouseLeftBtnDown  = false;
 	txtHlgtAnchorLine = -1;
@@ -3877,7 +3895,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	}
 	selAddr = parent->getBookmarkSelectedAddress();
 
-	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Background) );
+	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window) );
 
 	y = pxLineSpacing;
 

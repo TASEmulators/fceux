@@ -24,6 +24,7 @@ uint32 *GetJSOr(void);
 
 int InitVideo(FCEUGI *gi);
 int KillVideo(void);
+void CalcVideoDimensions(void);
 void BlitScreen(uint8 *XBuf);
 void LockConsole(void);
 void UnlockConsole(void);

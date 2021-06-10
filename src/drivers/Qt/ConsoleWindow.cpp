@@ -31,17 +31,29 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+
+#include <QPixmap>
+#include <QWindow>
+#include <QScreen>
 #include <QHeaderView>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QDesktopServices>
+#include <QStyleFactory>
+#include <QApplication>
+#include <QActionGroup>
+#include <QShortcut>
 #include <QUrl>
 
 #include "../../fceu.h"
 #include "../../fds.h"
+#include "../../file.h"
+#include "../../input.h"
 #include "../../movie.h"
+#include "../../wave.h"
 #include "../../version.h"
+#include "common/os_utils.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -57,6 +69,7 @@
 #include "Qt/PaletteConf.h"
 #include "Qt/PaletteEditor.h"
 #include "Qt/GuiConf.h"
+#include "Qt/AviRecord.h"
 #include "Qt/MoviePlay.h"
 #include "Qt/MovieOptions.h"
 #include "Qt/TimingConf.h"
@@ -85,34 +98,31 @@
 consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
-	int opt, xWinSize = 512, yWinSize = 512;
+	int opt, xWinSize = 256, yWinSize = 240;
 	int use_SDL_video = false;
 	int setFullScreen = false;
 
-	g_config->getOption( "SDL.WinSizeX", &xWinSize );
-	g_config->getOption( "SDL.WinSizeY", &yWinSize );
+	//QString libpath = QLibraryInfo::location(QLibraryInfo::PluginsPath);
+	//printf("LibPath: '%s'\n", libpath.toStdString().c_str() );
 
-	if ( xWinSize < 256 ) xWinSize = 256;
-	if ( yWinSize < 256 ) yWinSize = 256;
+	QApplication::setStyle( new fceuStyle() );
 
-	this->resize( xWinSize, yWinSize );
-
-	g_config->getOption( "SDL.Fullscreen", &setFullScreen );
-	g_config->setOption( "SDL.Fullscreen", 0 ); // Reset full screen config parameter to false so it is never saved this way
-
-	if ( setFullScreen )
-	{
-		this->showFullScreen();
-	}
+	initHotKeys();
 
 	createMainMenu();
 
-	g_config->getOption( "SDL.VideoDriver", &use_SDL_video );
-
+	firstResize    = true;
 	closeRequested = false;
 	errorMsgValid  = false;
 	viewport_GL    = NULL;
 	viewport_SDL   = NULL;
+
+	mainMenuEmuPauseSet   = false;
+	mainMenuEmuWasPaused  = false;
+	mainMenuPauseWhenActv = false;
+
+	g_config->getOption( "SDL.PauseOnMainMenuAccess", &mainMenuPauseWhenActv );
+	g_config->getOption ("SDL.VideoDriver", &use_SDL_video);
 
 	if ( use_SDL_video )
 	{
@@ -126,13 +136,19 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 		setCentralWidget(viewport_GL);
 	}
+	setViewportAspect();
 
 	setWindowTitle( tr(FCEU_NAME_AND_VERSION) );
 	setWindowIcon(QIcon(":fceux1.png"));
+	setAcceptDrops(true);
 
 	gameTimer  = new QTimer( this );
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	mutex      = new QRecursiveMutex();
+#else
 	mutex      = new QMutex( QMutex::Recursive );
-	emulatorThread = new emulatorThread_t();
+#endif
+	emulatorThread = new emulatorThread_t(this);
 
 	connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
 
@@ -160,7 +176,51 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		#endif
 	}
 
+
+	g_config->getOption( "SDL.WinSizeX", &xWinSize );
+	g_config->getOption( "SDL.WinSizeY", &yWinSize );
+
+	if ( (xWinSize >= 256) && (yWinSize >= 224) )
+	{
+		this->resize( xWinSize, yWinSize );
+	}
+	else
+	{
+		QSize reqSize = calcRequiredSize();
+
+		// Since the height of menu is unknown until Qt has shows the window
+		// Set the minimum viewport sizes to exactly what we need so that 
+		// the window is resized appropriately. On the first resize event,
+		// we will set the minimum viewport size back to 1x values that the
+		// window can be shrunk by dragging lower corner.
+		if ( viewport_GL != NULL )
+		{
+			viewport_GL->setMinimumSize( reqSize );
+		}
+		else if ( viewport_SDL != NULL )
+		{
+			viewport_SDL->setMinimumSize( reqSize );
+		}
+		//this->resize( reqSize );
+	}
+
+	g_config->getOption( "SDL.Fullscreen", &setFullScreen );
+	g_config->setOption( "SDL.Fullscreen", 0 ); // Reset full screen config parameter to false so it is never saved this way
+
+	if ( setFullScreen )
+	{
+		this->showFullScreen();
+	}
+
+	updateCounter = 0;
 	recentRomMenuReset = false;
+
+	// Viewport Cursor Type and Visibility
+	loadCursor();
+
+	// Create AVI Recording Disk Thread
+	aviDiskThread = new AviRecordDiskThread_t(this);
+
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -171,18 +231,24 @@ consoleWin_t::~consoleWin_t(void)
 	// Save window size and image scaling parameters at app exit.
 	w = consoleWindow->size();
 
-	if ( viewport_GL != NULL )
+	// Only Save window size if not fullscreen and not maximized
+	if ( !consoleWindow->isFullScreen() && !consoleWindow->isMaximized() )
 	{
-		g_config->setOption( "SDL.XScale", viewport_GL->getScaleX() );
-		g_config->setOption( "SDL.YScale", viewport_GL->getScaleY() );
+		// Scaling is only saved when applying video settings
+		//if ( viewport_GL != NULL )
+		//{
+		//	g_config->setOption( "SDL.XScale", viewport_GL->getScaleX() );
+		//	g_config->setOption( "SDL.YScale", viewport_GL->getScaleY() );
+		//}
+		//else if ( viewport_SDL != NULL )
+		//{
+		//	g_config->setOption( "SDL.XScale", viewport_SDL->getScaleX() );
+		//	g_config->setOption( "SDL.YScale", viewport_SDL->getScaleY() );
+		//}
+
+		g_config->setOption( "SDL.WinSizeX", w.width() );
+		g_config->setOption( "SDL.WinSizeY", w.height() );
 	}
-	else if ( viewport_SDL != NULL )
-	{
-		g_config->setOption( "SDL.XScale", viewport_SDL->getScaleX() );
-		g_config->setOption( "SDL.YScale", viewport_SDL->getScaleY() );
-	}
-	g_config->setOption( "SDL.WinSizeX", w.width() );
-	g_config->setOption( "SDL.WinSizeY", w.height() );
 	g_config->save();
 
 	// Signal Emulator Thread to Stop
@@ -195,6 +261,10 @@ consoleWin_t::~consoleWin_t(void)
 	//printf("Thread Finished: %i \n", gameThread->isFinished() );
 	emulatorThread->quit();
 	emulatorThread->wait( 1000 );
+
+	aviDiskThread->requestInterruption();
+	aviDiskThread->quit();
+	aviDiskThread->wait( 10000 );
 
 	fceuWrapperLock();
 	fceuWrapperClose();
@@ -236,6 +306,263 @@ consoleWin_t::~consoleWin_t(void)
 
 }
 
+int consoleWin_t::videoInit(void)
+{
+	int ret = 0;
+
+	if ( viewport_SDL )
+	{
+		ret = viewport_SDL->init();
+	}
+	else if ( viewport_GL )
+	{
+		ret = viewport_GL->init();
+	}
+	return ret;
+}
+
+void consoleWin_t::videoReset(void)
+{
+	if ( viewport_SDL )
+	{
+		viewport_SDL->reset();
+	}
+	else if ( viewport_GL )
+	{
+		viewport_GL->reset();
+	}
+	return;
+}
+
+QSize consoleWin_t::calcRequiredSize(void)
+{
+	QSize out( GL_NES_WIDTH, GL_NES_HEIGHT );
+
+	QSize w, v;
+	double xscale = 1.0, yscale = 1.0, aspectRatio = 1.0;
+	int texture_width = GL_NES_WIDTH;
+	int texture_height = GL_NES_HEIGHT;
+	int l=0, r=texture_width;
+	int t=0, b=texture_height;
+	int dw=0, dh=0, rw, rh;
+	bool forceAspect = true;
+
+	CalcVideoDimensions();
+
+	texture_width  = nes_shm->video.ncol;
+	texture_height = nes_shm->video.nrow;
+
+	l=0, r=texture_width;
+	t=0, b=texture_height;
+
+	w = size();
+
+	if ( viewport_GL )
+	{
+		v = viewport_GL->size();
+		forceAspect = viewport_GL->getForceAspectOpt();
+		aspectRatio = viewport_GL->getAspectRatio();
+		xscale = viewport_GL->getScaleX();
+		yscale = viewport_GL->getScaleY();
+	}
+	else if ( viewport_SDL )
+	{
+		v = viewport_SDL->size();
+		forceAspect = viewport_SDL->getForceAspectOpt();
+		aspectRatio = viewport_SDL->getAspectRatio();
+		xscale = viewport_SDL->getScaleX();
+		yscale = viewport_SDL->getScaleY();
+	}
+
+	dw = 0;
+	dh = 0;
+
+	if ( forceAspect )
+	{
+		yscale = xscale * (double)nes_shm->video.xyRatio;
+	}
+	rw=(int)((r-l)*xscale);
+	rh=(int)((b-t)*yscale);
+
+	//printf("view %i x %i \n", rw, rh );
+
+	if ( forceAspect )
+	{
+		double rr;
+
+		rr = (double)rh / (double)rw;
+
+		if ( rr > aspectRatio )
+		{
+			rw = (int)( (((double)rh) / aspectRatio) + 0.50);
+		}
+		else
+		{
+			rh = (int)( (((double)rw) * aspectRatio) + 0.50);
+		}
+	}
+
+	out.setWidth( rw + dw );
+	out.setHeight( rh + dh );
+
+	//printf("Win %i x %i \n", rw + dw, rh + dh );
+
+	return out;
+}
+
+void consoleWin_t::setViewportAspect(void)
+{
+	int aspectSel;
+	double x,y;
+
+	g_config->getOption ("SDL.AspectSelect", &aspectSel);
+
+	switch ( aspectSel )
+	{
+		default:
+		case 0:
+			x =  1.0; y = 1.0;
+		break;
+		case 1:
+			x =  8.0; y = 7.0;
+		break;
+		case 2:
+			x = 11.0; y = 8.0;
+		break;
+		case 3:
+			x =  4.0; y = 3.0;
+		break;
+		case 4:
+			x = 16.0; y = 9.0;
+		break;
+		case 5:
+		{
+			x = 1.0; y = 1.0;
+		}
+		break;
+	}
+
+	if ( viewport_GL )
+	{
+		viewport_GL->setAspectXY( x, y );
+	}
+	else if ( viewport_SDL )
+	{
+		viewport_SDL->setAspectXY( x, y );
+	}
+}
+
+void consoleWin_t::setMenuAccessPauseEnable( bool enable )
+{
+	mainMenuPauseWhenActv = enable;
+}
+
+void consoleWin_t::loadCursor(void)
+{
+	int cursorVis;
+
+	// Viewport Cursor Type and Visibility
+	g_config->getOption("SDL.CursorVis", &cursorVis );
+
+	if ( cursorVis )
+	{
+		int cursorType;
+
+		g_config->getOption("SDL.CursorType", &cursorType );
+
+		switch ( cursorType )
+		{
+			case 4:
+			{
+				QPixmap reticle(":/icons/reticle.png");
+
+				setViewerCursor( QCursor(reticle.scaled(64,64)) );
+			}
+			break;
+			case 3:
+			{
+				QPixmap reticle(":/icons/reticle.png");
+
+				setViewerCursor( QCursor(reticle.scaled(32,32)) );
+			}
+			break;
+			case 2:
+				setViewerCursor( Qt::BlankCursor );
+			break;
+			case 1:
+				setViewerCursor( Qt::CrossCursor );
+			break;
+			default:
+			case 0:
+				setViewerCursor( Qt::ArrowCursor );
+			break;
+		}
+	}
+	else
+	{
+		setViewerCursor( Qt::BlankCursor );
+	}
+}
+
+void consoleWin_t::setViewerCursor( QCursor s )
+{
+	if ( viewport_GL )
+	{
+		viewport_GL->setCursor(s);
+	}
+	else if ( viewport_SDL )
+	{
+		viewport_SDL->setCursor(s);
+	}
+}
+
+void consoleWin_t::setViewerCursor( Qt::CursorShape s )
+{
+	if ( viewport_GL )
+	{
+		viewport_GL->setCursor(s);
+	}
+	else if ( viewport_SDL )
+	{
+		viewport_SDL->setCursor(s);
+	}
+}
+
+Qt::CursorShape consoleWin_t::getViewerCursor(void)
+{
+	Qt::CursorShape s = Qt::ArrowCursor;
+
+	if ( viewport_GL )
+	{
+		s = viewport_GL->cursor().shape();
+	}
+	else if ( viewport_SDL )
+	{
+		s = viewport_SDL->cursor().shape();
+	}
+	return s;
+}
+
+void consoleWin_t::resizeEvent(QResizeEvent *event)
+{
+	if ( firstResize )
+	{
+		// We are assuming that window has been exposed and all sizing of menu is finished
+		// Restore minimum sizes to 1x values after first resize event so that
+		// window is still able to be shrunk by dragging lower corners.
+		if ( viewport_GL != NULL )
+		{
+			viewport_GL->setMinimumSize( QSize( 256, 224 ) );
+		}
+		else if ( viewport_SDL != NULL )
+		{
+			viewport_SDL->setMinimumSize( QSize( 256, 224 ) );
+		}
+		firstResize = false;
+	}
+	//printf("%i x %i \n", event->size().width(), event->size().height() );
+}
+
 void consoleWin_t::setCyclePeriodms( int ms )
 {
 	// If timer is already running, it will be restarted.
@@ -249,11 +576,12 @@ void consoleWin_t::showErrorMsgWindow()
 	QMessageBox msgBox(this);
 
 	fceuWrapperLock();
+	msgBox.resize( this->size() );
 	msgBox.setIcon( QMessageBox::Critical );
 	msgBox.setText( tr(errorMsg.c_str()) );
 	errorMsg.clear();
 	fceuWrapperUnLock();
-	msgBox.show();
+	//msgBox.show();
 	msgBox.exec();
 }
 
@@ -283,24 +611,104 @@ void consoleWin_t::keyPressEvent(QKeyEvent *event)
 {
 	//printf("Key Press: 0x%x \n", event->key() );
 	pushKeyEvent( event, 1 );
+
+	event->accept();
 }
 
 void consoleWin_t::keyReleaseEvent(QKeyEvent *event)
 {
 	//printf("Key Release: 0x%x \n", event->key() );
 	pushKeyEvent( event, 0 );
+
+	event->accept();
 }
 
+void consoleWin_t::dragEnterEvent(QDragEnterEvent *event)
+{
+	if (event->mimeData()->hasUrls() )
+	{
+		event->acceptProposedAction();
+	}
+}
+
+void consoleWin_t::dropEvent(QDropEvent *event)
+{
+	if (event->mimeData()->hasUrls() )
+	{
+		QList<QUrl> urls = event->mimeData()->urls();
+
+		fceuWrapperLock();
+		LoadGame( urls[0].toString( QUrl::PreferLocalFile ).toStdString().c_str() );
+		fceuWrapperUnLock();
+		event->accept();
+	}
+}
+
+//---------------------------------------------------------------------------
+void consoleWin_t::initHotKeys(void)
+{
+	for (int i = 0; i < HK_MAX; i++)
+	{
+		Hotkeys[i].init( this );
+	}
+
+	for (int i = 0; i < HK_MAX; i++)
+	{
+		QShortcut *shortcut = Hotkeys[i].getShortcut();
+
+		// Use Lambda Function to set callback
+		connect( shortcut, &QShortcut::activatedAmbiguously, [ this, shortcut ] { warnAmbiguousShortcut( shortcut ); } );
+	}
+
+	// Frame Advance uses key state directly, disable shortcut events
+	Hotkeys[HK_FRAME_ADVANCE].getShortcut()->setEnabled(false);
+	Hotkeys[HK_TURBO        ].getShortcut()->setEnabled(false);
+
+	connect( Hotkeys[ HK_VOLUME_DOWN ].getShortcut(), SIGNAL(activated()), this, SLOT(decrSoundVolume(void)) );
+	connect( Hotkeys[ HK_VOLUME_UP   ].getShortcut(), SIGNAL(activated()), this, SLOT(incrSoundVolume(void)) );
+
+	connect( Hotkeys[ HK_LAG_COUNTER_DISPLAY  ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleLagCounterDisplay(void)) );
+	connect( Hotkeys[ HK_FA_LAG_SKIP          ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleFrameAdvLagSkip(void))   );
+	connect( Hotkeys[ HK_BIND_STATE           ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieBindSaveState(void)));
+	connect( Hotkeys[ HK_TOGGLE_FRAME_DISPLAY ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieFrameDisplay(void)) );
+	connect( Hotkeys[ HK_MOVIE_TOGGLE_RW      ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMovieReadWrite(void))    );
+	connect( Hotkeys[ HK_TOGGLE_INPUT_DISPLAY ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleInputDisplay(void))      );
+	connect( Hotkeys[ HK_TOGGLE_BG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleBackground(void))        );
+	connect( Hotkeys[ HK_TOGGLE_FG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleForeground(void))        );
+	connect( Hotkeys[ HK_FKB_ENABLE           ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleFamKeyBrdEnable(void))   );
+
+	connect( Hotkeys[ HK_SAVE_STATE_0         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState0(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_1         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState1(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_2         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState2(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_3         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState3(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_4         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState4(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_5         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState5(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_6         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState6(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_7         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState7(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_8         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState8(void))        );
+	connect( Hotkeys[ HK_SAVE_STATE_9         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState9(void))        );
+
+	connect( Hotkeys[ HK_LOAD_STATE_0         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState0(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_1         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState1(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_2         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState2(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_3         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState3(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_4         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState4(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_5         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState5(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_6         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState6(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_7         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState7(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_8         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState8(void))        );
+	connect( Hotkeys[ HK_LOAD_STATE_9         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState9(void))        );
+}
 //---------------------------------------------------------------------------
 void consoleWin_t::createMainMenu(void)
 {
 	QAction *act;
-	QMenu *subMenu;
+	QMenu *subMenu, *aviMenu;
 	QActionGroup *group;
 	int useNativeMenuBar;
-	QStyle *style;
+	int customAutofireOnFrames, customAutofireOffFrames;
+	//QShortcut *shortcut;
 
-	style   = this->style();
 	menubar = new consoleMenuBar(this);
 
 	this->setMenuBar(menubar);
@@ -313,24 +721,33 @@ void consoleWin_t::createMainMenu(void)
 	//-----------------------------------------------------------------------
 	// File
 	fileMenu = menubar->addMenu(tr("&File"));
+	
+	connect( fileMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( fileMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
 
 	// File -> Open ROM
 	openROM = new QAction(tr("&Open ROM"), this);
-	openROM->setShortcuts(QKeySequence::Open);
+	//openROM->setShortcuts(QKeySequence::Open);
 	openROM->setStatusTip(tr("Open ROM File"));
 	//openROM->setIcon( QIcon(":icons/rom.png") );
 	//openROM->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
-	openROM->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
+	openROM->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
 	connect(openROM, SIGNAL(triggered()), this, SLOT(openROMFile(void)) );
+
+	Hotkeys[ HK_OPEN_ROM ].setAction( openROM );
+	connect( Hotkeys[ HK_OPEN_ROM ].getShortcut(), SIGNAL(activated()), this, SLOT(openROMFile(void)) );
 	
 	fileMenu->addAction(openROM);
 
 	// File -> Close ROM
 	closeROM = new QAction(tr("&Close ROM"), this);
-	closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
+	//closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
 	closeROM->setStatusTip(tr("Close Loaded ROM"));
-	closeROM->setIcon( style->standardIcon( QStyle::SP_BrowserStop ) );
+	closeROM->setIcon( style()->standardIcon( QStyle::SP_BrowserStop ) );
 	connect(closeROM, SIGNAL(triggered()), this, SLOT(closeROMCB(void)) );
+	
+	Hotkeys[ HK_CLOSE_ROM ].setAction( closeROM );
+	connect( Hotkeys[ HK_CLOSE_ROM ].getShortcut(), SIGNAL(activated()), this, SLOT(closeROMCB(void)) );
 	
 	fileMenu->addAction(closeROM);
 	
@@ -343,7 +760,7 @@ void consoleWin_t::createMainMenu(void)
 
 	// File -> Play NSF
 	playNSF = new QAction(tr("Play &NSF"), this);
-	playNSF->setShortcut( QKeySequence(tr("Ctrl+N")));
+	//playNSF->setShortcut( QKeySequence(tr("Ctrl+N")));
 	playNSF->setStatusTip(tr("Play NSF"));
 	connect(playNSF, SIGNAL(triggered()), this, SLOT(loadNSF(void)) );
 	
@@ -355,7 +772,7 @@ void consoleWin_t::createMainMenu(void)
 	loadStateAct = new QAction(tr("Load State &From"), this);
 	//loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
 	loadStateAct->setStatusTip(tr("Load State From"));
-	loadStateAct->setIcon( style->standardIcon( QStyle::SP_FileDialogStart ) );
+	loadStateAct->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
 	connect(loadStateAct, SIGNAL(triggered()), this, SLOT(loadStateFrom(void)) );
 	
 	fileMenu->addAction(loadStateAct);
@@ -364,27 +781,33 @@ void consoleWin_t::createMainMenu(void)
 	saveStateAct = new QAction(tr("Save State &As"), this);
 	//loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
 	saveStateAct->setStatusTip(tr("Save State As"));
-	saveStateAct->setIcon( style->standardIcon( QStyle::SP_DialogSaveButton ) );
+	saveStateAct->setIcon( style()->standardIcon( QStyle::SP_DialogSaveButton ) );
 	connect(saveStateAct, SIGNAL(triggered()), this, SLOT(saveStateAs(void)) );
 	
 	fileMenu->addAction(saveStateAct);
 
 	// File -> Quick Load
 	quickLoadAct = new QAction(tr("Quick &Load"), this);
-	quickLoadAct->setShortcut( QKeySequence(tr("F7")));
+	//quickLoadAct->setShortcut( QKeySequence(tr("Shift+I")));
 	quickLoadAct->setStatusTip(tr("Quick Load"));
 	connect(quickLoadAct, SIGNAL(triggered()), this, SLOT(quickLoad(void)) );
 	
 	fileMenu->addAction(quickLoadAct);
 
+	Hotkeys[ HK_LOAD_STATE ].setAction( quickLoadAct );
+	connect( Hotkeys[ HK_LOAD_STATE ].getShortcut(), SIGNAL(activated()), this, SLOT(quickLoad(void)) );
+	
 	// File -> Quick Save
 	quickSaveAct = new QAction(tr("Quick &Save"), this);
-	quickSaveAct->setShortcut( QKeySequence(tr("F5")));
+	//quickSaveAct->setShortcut( QKeySequence(tr("F5")));
 	quickSaveAct->setStatusTip(tr("Quick Save"));
 	connect(quickSaveAct, SIGNAL(triggered()), this, SLOT(quickSave(void)) );
 	
 	fileMenu->addAction(quickSaveAct);
 
+	Hotkeys[ HK_SAVE_STATE ].setAction( quickSaveAct );
+	connect( Hotkeys[ HK_SAVE_STATE ].getShortcut(), SIGNAL(activated()), this, SLOT(quickSave(void)) );
+	
 	// File -> Change State
 	subMenu = fileMenu->addMenu(tr("Change &State"));
 	group   = new QActionGroup(this);
@@ -418,6 +841,31 @@ void consoleWin_t::createMainMenu(void)
 	
 	fileMenu->addSeparator();
 
+	Hotkeys[ HK_SELECT_STATE_0 ].setAction( state[0] );
+	Hotkeys[ HK_SELECT_STATE_1 ].setAction( state[1] );
+	Hotkeys[ HK_SELECT_STATE_2 ].setAction( state[2] );
+	Hotkeys[ HK_SELECT_STATE_3 ].setAction( state[3] );
+	Hotkeys[ HK_SELECT_STATE_4 ].setAction( state[4] );
+	Hotkeys[ HK_SELECT_STATE_5 ].setAction( state[5] );
+	Hotkeys[ HK_SELECT_STATE_6 ].setAction( state[6] );
+	Hotkeys[ HK_SELECT_STATE_7 ].setAction( state[7] );
+	Hotkeys[ HK_SELECT_STATE_8 ].setAction( state[8] );
+	Hotkeys[ HK_SELECT_STATE_9 ].setAction( state[9] );
+
+	connect( Hotkeys[ HK_SELECT_STATE_0 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState0(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_1 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState1(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_2 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState2(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_3 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState3(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_4 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState4(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_5 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState5(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_6 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState6(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_7 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState7(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_8 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState8(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_9 ].getShortcut(), SIGNAL(activated()), this, SLOT(changeState9(void)) );
+	
+	connect( Hotkeys[ HK_SELECT_STATE_PREV ].getShortcut(), SIGNAL(activated()), this, SLOT(decrementState(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_NEXT ].getShortcut(), SIGNAL(activated()), this, SLOT(incrementState(void)) );
+
 #ifdef _S9XLUA_H
 	// File -> Quick Save
 	loadLuaAct = new QAction(tr("Load &Lua Script"), this);
@@ -433,28 +881,37 @@ void consoleWin_t::createMainMenu(void)
 	loadLuaAct = NULL;
 #endif
 
-	// File -> Screenshort
+	// File -> Screenshot
 	scrShotAct = new QAction(tr("Screens&hot"), this);
-	scrShotAct->setShortcut( QKeySequence(tr("F12")));
+	//scrShotAct->setShortcut( QKeySequence(tr("F12")));
 	scrShotAct->setStatusTip(tr("Screenshot"));
 	scrShotAct->setIcon( QIcon(":icons/camera.png") );
-	connect(scrShotAct, SIGNAL(triggered()), this, SLOT(takeScreenShot()));
+	connect(scrShotAct, SIGNAL(triggered()), this, SLOT(prepareScreenShot(void)));
 	
 	fileMenu->addAction(scrShotAct);
 
+	Hotkeys[ HK_SCREENSHOT ].setAction( scrShotAct );
+	connect( Hotkeys[ HK_SCREENSHOT ].getShortcut(), SIGNAL(activated()), this, SLOT(takeScreenShot(void)) );
+
 	// File -> Quit
 	quitAct = new QAction(tr("&Quit"), this);
-	quitAct->setShortcut( QKeySequence(tr("Ctrl+Q")));
+	//quitAct->setShortcut( QKeySequence(tr("Ctrl+Q")));
 	quitAct->setStatusTip(tr("Quit the Application"));
-	//quitAct->setIcon( style->standardIcon( QStyle::SP_DialogCloseButton ) );
+	//quitAct->setIcon( style()->standardIcon( QStyle::SP_DialogCloseButton ) );
 	quitAct->setIcon( QIcon(":icons/application-exit.png") );
 	connect(quitAct, SIGNAL(triggered()), this, SLOT(closeApp()));
 	
 	fileMenu->addAction(quitAct);
 
+	Hotkeys[ HK_QUIT ].setAction( quitAct );
+	connect( Hotkeys[ HK_QUIT ].getShortcut(), SIGNAL(activated()), this, SLOT(closeApp(void)) );
+
 	//-----------------------------------------------------------------------
 	// Options
 	optMenu = menubar->addMenu(tr("&Options"));
+
+	connect( optMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( optMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
 
 	// Options -> Input Config
 	inputConfig = new QAction(tr("&Input Config"), this);
@@ -478,7 +935,7 @@ void consoleWin_t::createMainMenu(void)
 	gameSoundConfig = new QAction(tr("&Sound Config"), this);
 	//gameSoundConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	gameSoundConfig->setStatusTip(tr("Sound Configure"));
-	gameSoundConfig->setIcon( style->standardIcon( QStyle::SP_MediaVolume ) );
+	gameSoundConfig->setIcon( style()->standardIcon( QStyle::SP_MediaVolume ) );
 	connect(gameSoundConfig, SIGNAL(triggered()), this, SLOT(openGameSndConfWin(void)) );
 	
 	optMenu->addAction(gameSoundConfig);
@@ -487,7 +944,7 @@ void consoleWin_t::createMainMenu(void)
 	gameVideoConfig = new QAction(tr("&Video Config"), this);
 	//gameVideoConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	gameVideoConfig->setStatusTip(tr("Video Preferences"));
-	gameVideoConfig->setIcon( style->standardIcon( QStyle::SP_ComputerIcon ) );
+	gameVideoConfig->setIcon( style()->standardIcon( QStyle::SP_ComputerIcon ) );
 	connect(gameVideoConfig, SIGNAL(triggered()), this, SLOT(openGameVideoConfWin(void)) );
 	
 	optMenu->addAction(gameVideoConfig);
@@ -514,7 +971,7 @@ void consoleWin_t::createMainMenu(void)
 	guiConfig = new QAction(tr("G&UI Config"), this);
 	//guiConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
 	guiConfig->setStatusTip(tr("GUI Configure"));
-	guiConfig->setIcon( style->standardIcon( QStyle::SP_TitleBarNormalButton ) );
+	guiConfig->setIcon( style()->standardIcon( QStyle::SP_TitleBarNormalButton ) );
 	connect(guiConfig, SIGNAL(triggered()), this, SLOT(openGuiConfWin(void)) );
 	
 	optMenu->addAction(guiConfig);
@@ -542,6 +999,7 @@ void consoleWin_t::createMainMenu(void)
 	//autoResume->setShortcut( QKeySequence(tr("Ctrl+C")));
 	autoResume->setCheckable(true);
 	autoResume->setStatusTip(tr("Auto-Resume Play"));
+	syncActionConfig( autoResume, "SDL.AutoResume" );
 	connect(autoResume, SIGNAL(triggered()), this, SLOT(toggleAutoResume(void)) );
 
 	optMenu->addAction(autoResume);
@@ -550,25 +1008,34 @@ void consoleWin_t::createMainMenu(void)
 
 	// Options -> Full Screen
 	fullscreen = new QAction(tr("&Fullscreen"), this);
-	fullscreen->setShortcut( QKeySequence(tr("Alt+Return")));
+	//fullscreen->setShortcut( QKeySequence(tr("Alt+Return")));
 	fullscreen->setStatusTip(tr("Fullscreen"));
 	fullscreen->setIcon( QIcon(":icons/view-fullscreen.png") );
 	connect(fullscreen, SIGNAL(triggered()), this, SLOT(toggleFullscreen(void)) );
 	
 	optMenu->addAction(fullscreen);
 
+	Hotkeys[ HK_FULLSCREEN ].setAction( fullscreen );
+	connect( Hotkeys[ HK_FULLSCREEN ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleFullscreen(void)) );
+
 	// Options -> Hide Menu Screen
 	act = new QAction(tr("&Hide Menu"), this);
-	act->setShortcut( QKeySequence(tr("Alt+/")));
+	//act->setShortcut( QKeySequence(tr("Alt+/")));
 	act->setStatusTip(tr("Hide Menu"));
-	act->setIcon( style->standardIcon( QStyle::SP_TitleBarMaxButton ) );
+	act->setIcon( style()->standardIcon( QStyle::SP_TitleBarMaxButton ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(toggleMenuVis(void)) );
 	
 	optMenu->addAction(act);
 
+	Hotkeys[ HK_MAIN_MENU_HIDE ].setAction( act );
+	connect( Hotkeys[ HK_MAIN_MENU_HIDE ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMenuVis(void)) );
+
 	//-----------------------------------------------------------------------
 	// Emulation
 	emuMenu = menubar->addMenu(tr("&Emulation"));
+
+	connect( emuMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( emuMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
 
 	// Emulation -> Power
 	powerAct = new QAction(tr("&Power"), this);
@@ -579,33 +1046,122 @@ void consoleWin_t::createMainMenu(void)
 	
 	emuMenu->addAction(powerAct);
 
+	Hotkeys[ HK_POWER ].setAction( powerAct );
+	connect( Hotkeys[ HK_POWER ].getShortcut(), SIGNAL(activated()), this, SLOT(powerConsoleCB(void)) );
+
 	// Emulation -> Reset
 	resetAct = new QAction(tr("&Reset"), this);
 	//resetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
 	resetAct->setStatusTip(tr("Reset Console"));
-	resetAct->setIcon( style->standardIcon( QStyle::SP_DialogResetButton ) );
+	resetAct->setIcon( style()->standardIcon( QStyle::SP_DialogResetButton ) );
 	connect(resetAct, SIGNAL(triggered()), this, SLOT(consoleHardReset(void)) );
 	
 	emuMenu->addAction(resetAct);
+
+	Hotkeys[ HK_RESET ].setAction( resetAct );
+	connect( Hotkeys[ HK_RESET ].getShortcut(), SIGNAL(activated()), this, SLOT(consoleHardReset(void)) );
 
 	// Emulation -> Soft Reset
 	sresetAct = new QAction(tr("&Soft Reset"), this);
 	//sresetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
 	sresetAct->setStatusTip(tr("Soft Reset of Console"));
-	sresetAct->setIcon( style->standardIcon( QStyle::SP_BrowserReload ) );
+	sresetAct->setIcon( style()->standardIcon( QStyle::SP_BrowserReload ) );
 	connect(sresetAct, SIGNAL(triggered()), this, SLOT(consoleSoftReset(void)) );
 	
 	emuMenu->addAction(sresetAct);
 
 	// Emulation -> Pause
 	pauseAct = new QAction(tr("&Pause"), this);
-	pauseAct->setShortcut( QKeySequence(tr("Pause")));
+	//pauseAct->setShortcut( QKeySequence(tr("Pause")));
 	pauseAct->setStatusTip(tr("Pause Console"));
-	pauseAct->setIcon( style->standardIcon( QStyle::SP_MediaPause ) );
+	pauseAct->setIcon( style()->standardIcon( QStyle::SP_MediaPause ) );
 	connect(pauseAct, SIGNAL(triggered()), this, SLOT(consolePause(void)) );
 	
 	emuMenu->addAction(pauseAct);
 	
+	Hotkeys[ HK_PAUSE ].setAction( pauseAct );
+	connect( Hotkeys[ HK_PAUSE ].getShortcut(), SIGNAL(activated()), this, SLOT(consolePause(void)) );
+
+	emuMenu->addSeparator();
+
+	// Emulation -> Region
+	subMenu = emuMenu->addMenu(tr("&Region"));
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	for (int i=0; i<3; i++)
+	{
+		const char *txt;
+
+		if ( i == 1 )
+		{
+			txt = "&PAL";
+		}
+		else if ( i == 2 )
+		{
+			txt = "&Dendy";
+		}
+		else
+		{
+			txt = "&NTSC";
+		}
+
+	        region[i] = new QAction(tr(txt), this);
+	        region[i]->setCheckable(true);
+
+	        group->addAction(region[i]);
+		subMenu->addAction(region[i]);
+	}
+	region[ FCEUI_GetRegion() ]->setChecked(true);
+
+	connect( region[0], SIGNAL(triggered(void)), this, SLOT(setRegionNTSC(void)) );
+	connect( region[1], SIGNAL(triggered(void)), this, SLOT(setRegionPAL(void)) );
+	connect( region[2], SIGNAL(triggered(void)), this, SLOT(setRegionDendy(void)) );
+
+	// Emulation -> RAM Init
+	subMenu = emuMenu->addMenu(tr("&RAM Init"));
+	group   = new QActionGroup(this);
+
+	group->setExclusive(true);
+
+	for (int i=0; i<4; i++)
+	{
+		const char *txt;
+
+		switch (i)
+		{
+			default:
+			case 0:
+				txt = "&Default";
+			break;
+			case 1:
+				txt = "Fill $&FF";
+			break;
+			case 2:
+				txt = "Fill $&00";
+			break;
+			case 3:
+				txt = "&Random";
+			break;
+		}
+
+	        ramInit[i] = new QAction(tr(txt), this);
+	        ramInit[i]->setCheckable(true);
+
+	        group->addAction(ramInit[i]);
+		subMenu->addAction(ramInit[i]);
+	}
+
+	g_config->getOption ("SDL.RamInitMethod", &RAMInitOption);
+
+	ramInit[ RAMInitOption ]->setChecked(true);
+
+	connect( ramInit[0], SIGNAL(triggered(void)), this, SLOT(setRamInit0(void)) );
+	connect( ramInit[1], SIGNAL(triggered(void)), this, SLOT(setRamInit1(void)) );
+	connect( ramInit[2], SIGNAL(triggered(void)), this, SLOT(setRamInit2(void)) );
+	connect( ramInit[3], SIGNAL(triggered(void)), this, SLOT(setRamInit3(void)) );
+
 	emuMenu->addSeparator();
 
 	// Emulation -> Enable Game Genie
@@ -637,6 +1193,9 @@ void consoleWin_t::createMainMenu(void)
 	
 	emuMenu->addAction(insCoinAct);
 	
+	Hotkeys[ HK_VS_INSERT_COIN ].setAction( insCoinAct );
+	connect( Hotkeys[ HK_VS_INSERT_COIN ].getShortcut(), SIGNAL(activated()), this, SLOT(insertCoin(void)) );
+
 	emuMenu->addSeparator();
 
 	// Emulation -> FDS
@@ -648,6 +1207,9 @@ void consoleWin_t::createMainMenu(void)
 	fdsSwitchAct->setStatusTip(tr("Switch Disk"));
 	connect(fdsSwitchAct, SIGNAL(triggered()), this, SLOT(fdsSwitchDisk(void)) );
 	
+	Hotkeys[ HK_FDS_SELECT ].setAction( fdsSwitchAct );
+	connect( Hotkeys[ HK_FDS_SELECT ].getShortcut(), SIGNAL(activated()), this, SLOT(fdsSwitchDisk(void)) );
+
 	subMenu->addAction(fdsSwitchAct);
 
 	// Emulation -> FDS -> Eject Disk
@@ -656,6 +1218,9 @@ void consoleWin_t::createMainMenu(void)
 	fdsEjectAct->setStatusTip(tr("Eject Disk"));
 	connect(fdsEjectAct, SIGNAL(triggered()), this, SLOT(fdsEjectDisk(void)) );
 	
+	Hotkeys[ HK_FDS_EJECT ].setAction( fdsEjectAct );
+	connect( Hotkeys[ HK_FDS_EJECT ].getShortcut(), SIGNAL(activated()), this, SLOT(fdsEjectDisk(void)) );
+
 	subMenu->addAction(fdsEjectAct);
 
 	// Emulation -> FDS -> Load BIOS
@@ -673,20 +1238,26 @@ void consoleWin_t::createMainMenu(void)
 
 	// Emulation -> Speed -> Speed Up
 	act = new QAction(tr("Speed &Up"), this);
-	act->setShortcut( QKeySequence(tr("=")));
+	//act->setShortcut( QKeySequence(tr("=")));
 	act->setStatusTip(tr("Speed Up"));
-	act->setIcon( style->standardIcon( QStyle::SP_MediaSeekForward ) );
+	act->setIcon( style()->standardIcon( QStyle::SP_MediaSeekForward ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuSpeedUp(void)) );
 	
+	Hotkeys[ HK_INCREASE_SPEED ].setAction( act );
+	connect( Hotkeys[ HK_INCREASE_SPEED ].getShortcut(), SIGNAL(activated()), this, SLOT(emuSpeedUp(void)) );
+
 	subMenu->addAction(act);
 
 	// Emulation -> Speed -> Slow Down
 	act = new QAction(tr("Slow &Down"), this);
-	act->setShortcut( QKeySequence(tr("-")));
+	//act->setShortcut( QKeySequence(tr("-")));
 	act->setStatusTip(tr("Slow Down"));
-	act->setIcon( style->standardIcon( QStyle::SP_MediaSeekBackward ) );
+	act->setIcon( style()->standardIcon( QStyle::SP_MediaSeekBackward ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuSlowDown(void)) );
 	
+	Hotkeys[ HK_DECREASE_SPEED ].setAction( act );
+	connect( Hotkeys[ HK_DECREASE_SPEED ].getShortcut(), SIGNAL(activated()), this, SLOT(emuSlowDown(void)) );
+
 	subMenu->addAction(act);
 	
 	subMenu->addSeparator();
@@ -695,7 +1266,7 @@ void consoleWin_t::createMainMenu(void)
 	act = new QAction(tr("&Slowest"), this);
 	//act->setShortcut( QKeySequence(tr("-")));
 	act->setStatusTip(tr("Slowest"));
-	act->setIcon( style->standardIcon( QStyle::SP_MediaSkipBackward ) );
+	act->setIcon( style()->standardIcon( QStyle::SP_MediaSkipBackward ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuSlowestSpd(void)) );
 	
 	subMenu->addAction(act);
@@ -704,7 +1275,7 @@ void consoleWin_t::createMainMenu(void)
 	act = new QAction(tr("&Normal"), this);
 	//act->setShortcut( QKeySequence(tr("-")));
 	act->setStatusTip(tr("Normal"));
-	act->setIcon( style->standardIcon( QStyle::SP_MediaPlay ) );
+	act->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuNormalSpd(void)) );
 	
 	subMenu->addAction(act);
@@ -713,7 +1284,7 @@ void consoleWin_t::createMainMenu(void)
 	act = new QAction(tr("&Turbo"), this);
 	//act->setShortcut( QKeySequence(tr("-")));
 	act->setStatusTip(tr("Turbo (Fastest)"));
-	act->setIcon( style->standardIcon( QStyle::SP_MediaSkipForward ) );
+	act->setIcon( style()->standardIcon( QStyle::SP_MediaSkipForward ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuFastestSpd(void)) );
 	
 	subMenu->addAction(act);
@@ -741,17 +1312,45 @@ void consoleWin_t::createMainMenu(void)
 	// Emulation -> AutoFire Pattern
 	subMenu = emuMenu->addMenu(tr("&AutoFire Pattern"));
 	
-	// Emulation -> AutoFire Pattern -> # On Frames
-	act = new QAction(tr("# O&N Frames"), this);
-	act->setStatusTip(tr("# ON Frames"));
-	connect(act, SIGNAL(triggered()), this, SLOT(setAutoFireOnFrames(void)) );
-	
-	subMenu->addAction(act);
+	group   = new QActionGroup(this);
+	group->setExclusive(true);
 
-	// Emulation -> AutoFire Pattern -> # Off Frames
-	act = new QAction(tr("# O&FF Frames"), this);
-	act->setStatusTip(tr("# OFF Frames"));
-	connect(act, SIGNAL(triggered()), this, SLOT(setAutoFireOffFrames(void)) );
+	for (int i=1; i<6; i++)
+	{
+		char stmp[64];
+
+		for (int j=1; j<=(6-i); j++)
+		{
+			sprintf( stmp, "%i On, %i Off", i, j );
+			autoFireMenuAction *afAct = new autoFireMenuAction( i, j, tr(stmp), this);
+			afAct->setCheckable(true);
+			group->addAction(afAct);
+			subMenu->addAction(afAct);
+			afActList.push_back(afAct);
+
+			connect( afAct, SIGNAL(triggered(void)), afAct, SLOT(activateCB(void)) );
+		}
+	}
+
+	g_config->getOption("SDL.AutofireCustomOnFrames"  , &customAutofireOnFrames );
+	g_config->getOption("SDL.AutofireCustomOffFrames" , &customAutofireOffFrames);
+
+	afActCustom = new autoFireMenuAction( customAutofireOnFrames, customAutofireOffFrames, tr("Custom"), this);
+	afActCustom->setCheckable(true);
+	group->addAction(afActCustom);
+	subMenu->addAction(afActCustom);
+	//afActList.push_back(afAct);
+
+	connect( afActCustom, SIGNAL(triggered(void)), afActCustom, SLOT(activateCB(void)) );
+
+	subMenu->addSeparator();
+
+	syncAutoFirePatternMenu();
+
+	// Emulation -> AutoFire Pattern -> Set Custom Pattern
+	act = new QAction(tr("Set Custom Pattern"), this);
+	act->setStatusTip(tr("Set Custom Pattern"));
+	connect(act, SIGNAL(triggered()), this, SLOT(setCustomAutoFire(void)) );
 	
 	subMenu->addAction(act);
 
@@ -759,12 +1358,18 @@ void consoleWin_t::createMainMenu(void)
 	// Tools
 	toolsMenu = menubar->addMenu(tr("&Tools"));
 
+	connect( toolsMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( toolsMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
+
 	// Tools -> Cheats
 	cheatsAct = new QAction(tr("&Cheats..."), this);
 	//cheatsAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	cheatsAct->setStatusTip(tr("Open Cheat Window"));
 	connect(cheatsAct, SIGNAL(triggered()), this, SLOT(openCheats(void)) );
 	
+	Hotkeys[ HK_CHEAT_MENU ].setAction( cheatsAct );
+	connect( Hotkeys[ HK_CHEAT_MENU ].getShortcut(), SIGNAL(activated()), this, SLOT(openCheats(void)) );
+
 	toolsMenu->addAction(cheatsAct);
 
 	// Tools -> RAM Search
@@ -803,6 +1408,9 @@ void consoleWin_t::createMainMenu(void)
 	 // Debug
 	debugMenu = menubar->addMenu(tr("&Debug"));
 
+	connect( debugMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( debugMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
+
 	// Debug -> Debugger 
 	debuggerAct = new QAction(tr("&Debugger..."), this);
 	//debuggerAct->setShortcut( QKeySequence(tr("Shift+F7")));
@@ -826,6 +1434,14 @@ void consoleWin_t::createMainMenu(void)
 	connect(ppuViewAct, SIGNAL(triggered()), this, SLOT(openPPUViewer(void)) );
 	
 	debugMenu->addAction(ppuViewAct);
+
+	// Debug -> Sprite Viewer
+	oamViewAct = new QAction(tr("&Sprite Viewer..."), this);
+	//oamViewAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	oamViewAct->setStatusTip(tr("Open Sprite Viewer"));
+	connect(oamViewAct, SIGNAL(triggered()), this, SLOT(openOAMViewer(void)) );
+	
+	debugMenu->addAction(oamViewAct);
 
 	// Debug -> Name Table Viewer
 	ntViewAct = new QAction(tr("&Name Table Viewer..."), this);
@@ -871,29 +1487,50 @@ void consoleWin_t::createMainMenu(void)
 	// Movie
 	movieMenu = menubar->addMenu(tr("&Movie"));
 
+	connect( movieMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( movieMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
+
 	// Movie -> Play
 	openMovAct = new QAction(tr("&Play"), this);
-	openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	//openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	openMovAct->setStatusTip(tr("Play Movie File"));
-	openMovAct->setIcon( style->standardIcon( QStyle::SP_MediaPlay ) );
+	openMovAct->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
 	connect(openMovAct, SIGNAL(triggered()), this, SLOT(openMovie(void)) );
 	
+	Hotkeys[ HK_PLAY_MOVIE_FROM ].setAction( openMovAct );
+	connect( Hotkeys[ HK_PLAY_MOVIE_FROM ].getShortcut(), SIGNAL(activated()), this, SLOT(openMovie(void)) );
+
 	movieMenu->addAction(openMovAct);
+
+	// Movie -> Play From Beginning
+	playMovBeginAct = new QAction(tr("Play From &Beginning"), this);
+	//playMovBeginAct->setShortcut( QKeySequence(tr("Shift+F7")));
+	playMovBeginAct->setStatusTip(tr("Play Movie From Beginning"));
+	//playMovBeginAct->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
+	connect(playMovBeginAct, SIGNAL(triggered()), this, SLOT(playMovieFromBeginning(void)) );
+	
+	Hotkeys[ HK_MOVIE_PLAY_RESTART ].setAction( playMovBeginAct );
+	connect( Hotkeys[ HK_MOVIE_PLAY_RESTART ].getShortcut(), SIGNAL(activated()), this, SLOT(playMovieFromBeginning(void)) );
+
+	movieMenu->addAction(playMovBeginAct);
 
 	// Movie -> Stop
 	stopMovAct = new QAction(tr("&Stop"), this);
 	//stopMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	stopMovAct->setStatusTip(tr("Stop Movie Recording"));
-	stopMovAct->setIcon( style->standardIcon( QStyle::SP_MediaStop ) );
+	stopMovAct->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
 	connect(stopMovAct, SIGNAL(triggered()), this, SLOT(stopMovie(void)) );
 	
+	Hotkeys[ HK_STOP_MOVIE ].setAction( stopMovAct );
+	connect( Hotkeys[ HK_STOP_MOVIE ].getShortcut(), SIGNAL(activated()), this, SLOT(stopMovie(void)) );
+
 	movieMenu->addAction(stopMovAct);
 	
 	movieMenu->addSeparator();
 
 	// Movie -> Record
 	recMovAct = new QAction(tr("&Record"), this);
-	recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	//recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	recMovAct->setStatusTip(tr("Record Movie"));
 	recMovAct->setIcon( QIcon(":icons/media-record.png") );
 	connect(recMovAct, SIGNAL(triggered()), this, SLOT(recordMovie(void)) );
@@ -906,16 +1543,138 @@ void consoleWin_t::createMainMenu(void)
 	recAsMovAct->setStatusTip(tr("Record Movie"));
 	connect(recAsMovAct, SIGNAL(triggered()), this, SLOT(recordMovieAs(void)) );
 	
+	Hotkeys[ HK_RECORD_MOVIE_TO ].setAction( recAsMovAct );
+	connect( Hotkeys[ HK_RECORD_MOVIE_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(recordMovieAs(void)) );
+
 	movieMenu->addAction(recAsMovAct);
+
+	movieMenu->addSeparator();
+
+	// Movie -> Avi Recording
+	aviMenu = movieMenu->addMenu( tr("A&VI Recording") );
+
+	// Movie -> Avi Recording -> Record
+	recAviAct = new QAction(tr("&Record"), this);
+	//recAviAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	recAviAct->setStatusTip(tr("AVI Record Start"));
+	recAviAct->setIcon( QIcon(":icons/media-record.png") );
+	connect(recAviAct, SIGNAL(triggered()), this, SLOT(aviRecordStart(void)) );
+	
+	Hotkeys[ HK_RECORD_AVI ].setAction( recAviAct );
+	connect( Hotkeys[ HK_RECORD_AVI ].getShortcut(), SIGNAL(activated()), this, SLOT(aviRecordStart(void)) );
+
+	aviMenu->addAction(recAviAct);
+
+	// Movie -> Avi Recording -> Record
+	recAsAviAct = new QAction(tr("Record &As"), this);
+	//recAsAviAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	recAsAviAct->setStatusTip(tr("AVI Record As Start"));
+	//recAsAviAct->setIcon( QIcon(":icons/media-record.png") );
+	connect(recAsAviAct, SIGNAL(triggered()), this, SLOT(aviRecordAsStart(void)) );
+	
+	Hotkeys[ HK_RECORD_AVI_TO ].setAction( recAsAviAct );
+	connect( Hotkeys[ HK_RECORD_AVI_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(aviRecordAsStart(void)) );
+
+	aviMenu->addAction(recAsAviAct);
+
+	// Movie -> Avi Recording -> Stop
+	stopAviAct = new QAction(tr("&Stop"), this);
+	//stopAviAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	stopAviAct->setStatusTip(tr("AVI Record Stop"));
+	stopAviAct->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
+	connect(stopAviAct, SIGNAL(triggered()), this, SLOT(aviRecordStop(void)) );
+	
+	Hotkeys[ HK_STOP_AVI ].setAction( stopAviAct );
+	connect( Hotkeys[ HK_STOP_AVI ].getShortcut(), SIGNAL(activated()), this, SLOT(aviRecordStop(void)) );
+
+	aviMenu->addAction(stopAviAct);
+
+	// Movie -> Avi Recording -> Video Format
+	subMenu = aviMenu->addMenu( tr("Video Format") );
+
+	{
+		std::vector <std::string> formatList;
+		group   = new QActionGroup(this);
+
+		group->setExclusive(true);
+
+		FCEUD_AviGetFormatOpts( formatList );
+
+		for (size_t i=0; i<formatList.size(); i++)
+		{
+			act = new QAction(tr( formatList[i].c_str() ), this);
+
+			//printf("%s\n", formatList[i].c_str() );
+
+	        	act->setCheckable(true);
+	        	group->addAction(act);
+			subMenu->addAction(act);
+
+			act->setChecked( aviGetSelVideoFormat() == i );
+
+			// Use Lambda Function to set callback
+			connect( act, &QAction::triggered, [ this, i ] { aviVideoFormatChanged( i ); } );
+		}
+
+	}
+
+	// Movie -> Avi Recording -> Include Audio
+	act = new QAction(tr("Include Audio"), this);
+       	act->setCheckable(true);
+	act->setChecked( aviGetAudioEnable() );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(aviAudioEnableChange(bool)) );
+	aviMenu->addAction(act);
+
+	// Movie -> WAV Recording
+	subMenu = movieMenu->addMenu( tr("&WAV Recording") );
+
+	// Movie -> Avi Recording -> Record
+	recWavAct = new QAction(tr("&Record"), this);
+	//recWavAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	recWavAct->setStatusTip(tr("WAV Record Start"));
+	recWavAct->setIcon( QIcon(":icons/media-record.png") );
+	connect(recWavAct, SIGNAL(triggered()), this, SLOT(wavRecordStart(void)) );
+	
+	Hotkeys[ HK_RECORD_WAV ].setAction( recWavAct );
+	connect( Hotkeys[ HK_RECORD_WAV ].getShortcut(), SIGNAL(activated()), this, SLOT(wavRecordStart(void)) );
+
+	subMenu->addAction(recWavAct);
+
+	// Movie -> WAV Recording -> Record
+	recAsWavAct = new QAction(tr("Record &As"), this);
+	//recAsWavAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	recAsWavAct->setStatusTip(tr("WAV Record As Start"));
+	//recAsWavAct->setIcon( QIcon(":icons/media-record.png") );
+	connect(recAsWavAct, SIGNAL(triggered()), this, SLOT(wavRecordAsStart(void)) );
+	
+	Hotkeys[ HK_RECORD_WAV_TO ].setAction( recAsWavAct );
+	connect( Hotkeys[ HK_RECORD_WAV_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(wavRecordAsStart(void)) );
+
+	subMenu->addAction(recAsWavAct);
+
+	// Movie -> WAV Recording -> Stop
+	stopWavAct = new QAction(tr("&Stop"), this);
+	//stopWavAct->setShortcut( QKeySequence(tr("Shift+F5")));
+	stopWavAct->setStatusTip(tr("WAV Record Stop"));
+	stopWavAct->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
+	connect(stopWavAct, SIGNAL(triggered()), this, SLOT(wavRecordStop(void)) );
+	
+	Hotkeys[ HK_STOP_WAV ].setAction( stopWavAct );
+	connect( Hotkeys[ HK_STOP_WAV ].getShortcut(), SIGNAL(activated()), this, SLOT(wavRecordStop(void)) );
+
+	subMenu->addAction(stopWavAct);
 
 	//-----------------------------------------------------------------------
 	// Help
 	helpMenu = menubar->addMenu(tr("&Help"));
  
+	connect( helpMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( helpMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
+
 	// Help -> About FCEUX
 	aboutAct = new QAction(tr("&About FCEUX"), this);
 	aboutAct->setStatusTip(tr("About FCEUX"));
-	aboutAct->setIcon( style->standardIcon( QStyle::SP_MessageBoxInformation ) );
+	aboutAct->setIcon( style()->standardIcon( QStyle::SP_MessageBoxInformation ) );
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutFCEUX(void)) );
 	
 	helpMenu->addAction(aboutAct);
@@ -923,7 +1682,7 @@ void consoleWin_t::createMainMenu(void)
 	// Help -> About Qt
 	aboutActQt = new QAction(tr("About &Qt"), this);
 	aboutActQt->setStatusTip(tr("About Qt"));
-	aboutActQt->setIcon( style->standardIcon( QStyle::SP_TitleBarMenuButton ) );
+	aboutActQt->setIcon( style()->standardIcon( QStyle::SP_TitleBarMenuButton ) );
 	connect(aboutActQt, SIGNAL(triggered()), this, SLOT(aboutQt(void)) );
 	
 	helpMenu->addAction(aboutActQt);
@@ -931,7 +1690,7 @@ void consoleWin_t::createMainMenu(void)
 	// Help -> Message Log
 	msgLogAct = new QAction(tr("&Message Log"), this);
 	msgLogAct->setStatusTip(tr("Message Log"));
-	msgLogAct->setIcon( style->standardIcon( QStyle::SP_MessageBoxWarning ) );
+	msgLogAct->setIcon( style()->standardIcon( QStyle::SP_MessageBoxWarning ) );
 	connect(msgLogAct, SIGNAL(triggered()), this, SLOT(openMsgLogWin(void)) );
 	
 	helpMenu->addAction(msgLogAct);
@@ -939,11 +1698,72 @@ void consoleWin_t::createMainMenu(void)
 	// Help -> Documentation
 	act = new QAction(tr("&Docs (Online)"), this);
 	act->setStatusTip(tr("Documentation"));
-	act->setIcon( style->standardIcon( QStyle::SP_DialogHelpButton ) );
+	act->setIcon( style()->standardIcon( QStyle::SP_DialogHelpButton ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(openOnlineDocs(void)) );
 	
 	helpMenu->addAction(act);
 };
+//---------------------------------------------------------------------------
+int consoleWin_t::loadVideoDriver( int driverId )
+{
+	if ( driverId )
+	{  // SDL Driver
+		if ( viewport_SDL != NULL )
+		{  // Already Loaded
+			return 0;
+		}
+
+		if ( viewport_GL != NULL )
+		{
+			if ( viewport_GL == centralWidget() )
+			{
+				takeCentralWidget();
+			}
+			delete viewport_GL;
+
+			viewport_GL = NULL;
+		}
+		
+		viewport_SDL = new ConsoleViewSDL_t(this);
+
+		setCentralWidget(viewport_SDL);
+
+		setViewportAspect();
+
+		viewport_SDL->init();
+
+	}
+	else
+	{  // OpenGL Driver
+		if ( viewport_GL != NULL )
+		{  // Already Loaded
+			return 0;
+		}
+
+		if ( viewport_SDL != NULL )
+		{
+			if ( viewport_SDL == centralWidget() )
+			{
+				takeCentralWidget();
+			}
+			delete viewport_SDL;
+
+			viewport_SDL = NULL;
+		}
+		viewport_GL = new ConsoleViewGL_t(this);
+
+		setCentralWidget(viewport_GL);
+
+		setViewportAspect();
+
+		viewport_GL->init();
+	}
+
+	// Reload Viewport Cursor Type and Visibility
+	loadCursor();
+
+	return 0;
+}
 //---------------------------------------------------------------------------
 void consoleWin_t::clearRomList(void)
 {
@@ -1514,6 +2334,26 @@ void consoleWin_t::quickLoad(void)
 	fceuWrapperUnLock();
 }
 
+void consoleWin_t::loadState(int slot)
+{
+	int prevState;
+	fceuWrapperLock();
+	prevState = FCEUI_SelectState( slot, false );
+	FCEUI_LoadState( NULL, true );
+	FCEUI_SelectState( prevState, false );
+	fceuWrapperUnLock();
+}
+void consoleWin_t::loadState0(void){ loadState(0); }
+void consoleWin_t::loadState1(void){ loadState(1); }
+void consoleWin_t::loadState2(void){ loadState(2); }
+void consoleWin_t::loadState3(void){ loadState(3); }
+void consoleWin_t::loadState4(void){ loadState(4); }
+void consoleWin_t::loadState5(void){ loadState(5); }
+void consoleWin_t::loadState6(void){ loadState(6); }
+void consoleWin_t::loadState7(void){ loadState(7); }
+void consoleWin_t::loadState8(void){ loadState(8); }
+void consoleWin_t::loadState9(void){ loadState(9); }
+
 void consoleWin_t::quickSave(void)
 {
 	fceuWrapperLock();
@@ -1521,80 +2361,141 @@ void consoleWin_t::quickSave(void)
 	fceuWrapperUnLock();
 }
 
-void consoleWin_t::changeState0(void)
+void consoleWin_t::saveState(int slot)
+{
+	int prevState;
+	fceuWrapperLock();
+	prevState = FCEUI_SelectState( slot, false );
+	FCEUI_SaveState( NULL, true );
+	FCEUI_SelectState( prevState, false );
+	fceuWrapperUnLock();
+}
+void consoleWin_t::saveState0(void){ saveState(0); }
+void consoleWin_t::saveState1(void){ saveState(1); }
+void consoleWin_t::saveState2(void){ saveState(2); }
+void consoleWin_t::saveState3(void){ saveState(3); }
+void consoleWin_t::saveState4(void){ saveState(4); }
+void consoleWin_t::saveState5(void){ saveState(5); }
+void consoleWin_t::saveState6(void){ saveState(6); }
+void consoleWin_t::saveState7(void){ saveState(7); }
+void consoleWin_t::saveState8(void){ saveState(8); }
+void consoleWin_t::saveState9(void){ saveState(9); }
+
+void consoleWin_t::changeState(int slot)
 {
 	fceuWrapperLock();
-	FCEUI_SelectState( 0, 1 );
+	FCEUI_SelectState( slot, true );
+	fceuWrapperUnLock();
+	state[slot]->setChecked(true);
+}
+void consoleWin_t::changeState0(void){ changeState(0); }
+void consoleWin_t::changeState1(void){ changeState(1); }
+void consoleWin_t::changeState2(void){ changeState(2); }
+void consoleWin_t::changeState3(void){ changeState(3); }
+void consoleWin_t::changeState4(void){ changeState(4); }
+void consoleWin_t::changeState5(void){ changeState(5); }
+void consoleWin_t::changeState6(void){ changeState(6); }
+void consoleWin_t::changeState7(void){ changeState(7); }
+void consoleWin_t::changeState8(void){ changeState(8); }
+void consoleWin_t::changeState9(void){ changeState(9); }
+
+void consoleWin_t::incrementState(void)
+{
+	fceuWrapperLock();
+	FCEUI_SelectStateNext(1);
 	fceuWrapperUnLock();
 }
 
-void consoleWin_t::changeState1(void)
+void consoleWin_t::decrementState(void)
 {
 	fceuWrapperLock();
-	FCEUI_SelectState( 1, 1 );
+	FCEUI_SelectStateNext(-1);
 	fceuWrapperUnLock();
 }
 
-void consoleWin_t::changeState2(void)
+void consoleWin_t::mainMenuOpen(void)
 {
-	fceuWrapperLock();
-	FCEUI_SelectState( 2, 1 );
-	fceuWrapperUnLock();
+	//printf("Main Menu Open\n");
+
+	mainMenuEmuWasPaused = FCEUI_EmulationPaused() ? true : false;
+
+	if ( mainMenuPauseWhenActv && !mainMenuEmuPauseSet && !mainMenuEmuWasPaused )
+	{
+		FCEUI_ToggleEmulationPause();
+		mainMenuEmuPauseSet  = true;
+	}
 }
 
-void consoleWin_t::changeState3(void)
+void consoleWin_t::mainMenuClose(void)
 {
-	fceuWrapperLock();
-	FCEUI_SelectState( 3, 1 );
-	fceuWrapperUnLock();
+	//printf("Main Menu Close\n");
+
+	if ( mainMenuEmuPauseSet )
+	{
+		bool isPaused = FCEUI_EmulationPaused() ? true : false;
+
+		if ( isPaused != mainMenuEmuWasPaused )
+		{
+			FCEUI_ToggleEmulationPause();
+		}
+		mainMenuEmuPauseSet = false;
+	}
 }
 
-void consoleWin_t::changeState4(void)
+void consoleWin_t::prepareScreenShot(void)
 {
-	fceuWrapperLock();
-	FCEUI_SelectState( 4, 1 );
-	fceuWrapperUnLock();
+	// Set a timer single shot to take the screen shot. This gives time
+	// for the GUI to remove the menu from view before taking the image.
+	QTimer::singleShot( 100, Qt::CoarseTimer, this, SLOT(takeScreenShot(void)) );
 }
 
-void consoleWin_t::changeState5(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 5, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState6(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 6, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState7(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 7, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState8(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 8, 1 );
-	fceuWrapperUnLock();
-}
-
-void consoleWin_t::changeState9(void)
-{
-	fceuWrapperLock();
-	FCEUI_SelectState( 9, 1 );
-	fceuWrapperUnLock();
-}
+//void consoleWin_t::takeScreenShot(void)
+//{
+//	fceuWrapperLock();
+//	FCEUI_SaveSnapshot();
+//	fceuWrapperUnLock();
+//}
 
 void consoleWin_t::takeScreenShot(void)
 {
+	int u=0;
+	QPixmap  image;
+	QScreen *screen = QGuiApplication::primaryScreen();
+
+	if (const QWindow *window = windowHandle())
+	{
+		screen = window->screen();
+	}
+
+	if (screen == NULL)
+	{
+		return;
+	}
+
 	fceuWrapperLock();
-	FCEUI_SaveSnapshot();
+
+	if ( viewport_GL )
+	{
+		image = screen->grabWindow( viewport_GL->winId() );
+	}
+	else if ( viewport_SDL )
+	{
+		image = screen->grabWindow( viewport_SDL->winId() );
+	}
+
+	for (u = 0; u < 99999; ++u)
+	{
+		FILE *pp = FCEUD_UTF8fopen( FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(), "rb");
+
+		if (pp == NULL)
+		{
+			break;
+		}
+		fclose(pp);
+	}
+
+	image.save( tr( FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str() ), "png" );
+
 	fceuWrapperUnLock();
 }
 
@@ -1777,6 +2678,13 @@ void consoleWin_t::openPPUViewer(void)
 	openPPUViewWindow(this);
 }
 
+void consoleWin_t::openOAMViewer(void)
+{
+	//printf("Open GUI OAM Viewer Window\n");
+	
+	openOAMViewWindow(this);
+}
+
 void consoleWin_t::openNTViewer(void)
 {
 	//printf("Open GUI Name Table Viewer Window\n");
@@ -1850,6 +2758,46 @@ void consoleWin_t::toggleFullscreen(void)
 	}
 }
 
+void consoleWin_t::toggleFamKeyBrdEnable(void)
+{
+	toggleFamilyKeyboardFunc();
+}
+
+void consoleWin_t::warnAmbiguousShortcut( QShortcut *shortcut)
+{
+	char stmp[256];
+	std::string msg;
+	int c = 0;
+
+	sprintf( stmp, "Error: Ambiguous Shortcut Activation for Key Sequence: '%s'\n", shortcut->key().toString().toStdString().c_str() );
+
+	msg.assign( stmp );
+
+	for (int i = 0; i < HK_MAX; i++)
+	{
+		QShortcut *sc = Hotkeys[i].getShortcut();
+
+		if ( sc == NULL )
+		{
+			continue;
+		}
+
+		if ( (sc == shortcut) || (shortcut->key().matches( sc->key() ) == QKeySequence::ExactMatch) )
+		{
+			if ( c == 0 )
+			{
+				msg.append("Hot Key Conflict: "); c++;
+			}
+			else
+			{
+				msg.append(" and "); c++;
+			}
+			msg.append( Hotkeys[i].getConfigName() );
+		}
+	}
+	QueueErrorMsgWindow( msg.c_str() );
+}
+
 void consoleWin_t::powerConsoleCB(void)
 {
 	fceuWrapperLock();
@@ -1879,7 +2827,77 @@ void consoleWin_t::consolePause(void)
 	fceuWrapperLock();
 	fceuWrapperTogglePause();
 	fceuWrapperUnLock();
+
+	mainMenuEmuPauseSet = false;
    return;
+}
+
+void consoleWin_t::setRegion(int region)
+{
+	int currentRegion;
+
+	g_config->setOption ("SDL.PAL", region);
+	g_config->save ();
+
+	currentRegion = FCEUI_GetRegion();
+
+	if ( currentRegion != region )
+	{
+		fceuWrapperLock();
+		FCEUI_SetRegion (region, true);
+		fceuWrapperUnLock();
+	}
+	return;
+}
+
+void consoleWin_t::setRegionNTSC(void)
+{
+	setRegion(0);
+	return;
+}
+
+void consoleWin_t::setRegionPAL(void)
+{
+	setRegion(1);
+	return;
+}
+
+void consoleWin_t::setRegionDendy(void)
+{
+	setRegion(2);
+	return;
+}
+
+void consoleWin_t::setRamInit0(void)
+{
+	RAMInitOption = 0;
+
+	g_config->setOption ("SDL.RamInitMethod", RAMInitOption);
+	return;
+}
+
+void consoleWin_t::setRamInit1(void)
+{
+	RAMInitOption = 1;
+
+	g_config->setOption ("SDL.RamInitMethod", RAMInitOption);
+	return;
+}
+
+void consoleWin_t::setRamInit2(void)
+{
+	RAMInitOption = 2;
+
+	g_config->setOption ("SDL.RamInitMethod", RAMInitOption);
+	return;
+}
+
+void consoleWin_t::setRamInit3(void)
+{
+	RAMInitOption = 3;
+
+	g_config->setOption ("SDL.RamInitMethod", RAMInitOption);
+	return;
 }
 
 void consoleWin_t::toggleGameGenie(bool checked)
@@ -2124,44 +3142,182 @@ void consoleWin_t::emuSetFrameAdvDelay(void)
 	}
 }
 
-void consoleWin_t::setAutoFireOnFrames(void)
+void consoleWin_t::syncAutoFirePatternMenu(void)
 {
-	int ret;
-	QInputDialog dialog(this);
+	int on, off;
 
-	dialog.setWindowTitle( tr("AutoFire Pattern ON Frames") );
-	dialog.setLabelText( tr("Specify desired number of ON frames in autofire pattern:") );
-	dialog.setOkButtonText( tr("Ok") );
-	dialog.setInputMode( QInputDialog::IntInput );
-	dialog.setIntRange( 1, 30 );
-	dialog.setIntValue( autoFireOnFrames );
+	GetAutoFirePattern( &on, &off );
+
+	for (size_t i=0; i<afActList.size(); i++)
+	{
+		if ( afActList[i]->isMatch( on, off ) )
+		{
+			afActList[i]->setChecked(true);
+			return;
+		}
+	}
+
+	// If we get here, then the custom option is selected.
+	afActCustom->setChecked(true);
+
+}
+void consoleWin_t::setCustomAutoFire(void)
+{
+	int ret, autoFireOnFrames, autoFireOffFrames;
+	QDialog dialog(this);
+	QLabel *lbl;
+	QGridLayout *grid;
+	QVBoxLayout *vbox;
+	QSpinBox *onBox, *offBox;
+	QPushButton *okButton, *cancelButton;
+
+	autoFireOnFrames  = afActCustom->getOnValue();
+	autoFireOffFrames = afActCustom->getOffValue();
+
+	dialog.setWindowTitle( tr("Custom AutoFire Pattern") );
+
+	 onBox = new QSpinBox();
+	offBox = new QSpinBox();
+
+	 onBox->setMinimum( 1);
+	offBox->setMinimum( 1);
+	 onBox->setMaximum(30);
+	offBox->setMaximum(30);
+
+	 onBox->setValue( autoFireOnFrames  );
+	offBox->setValue( autoFireOffFrames );
+
+	vbox = new QVBoxLayout();
+	grid = new QGridLayout();
+
+	lbl = new QLabel( tr("# ON Frames") );
+
+	grid->addWidget( lbl, 0, 0 );
+
+	lbl = new QLabel( tr("# OFF Frames") );
+
+	grid->addWidget( lbl, 1, 0 );
+
+	grid->addWidget( onBox , 0, 1 );
+	grid->addWidget( offBox, 1, 1 );
+
+	    okButton = new QPushButton( tr("Ok") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	    okButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton  ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
+	grid->addWidget( cancelButton , 2, 0 );
+	grid->addWidget(     okButton , 2, 1 );
+
+	vbox->addLayout( grid );
+
+	dialog.setLayout( vbox );
 	
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+
+	okButton->setDefault(true);
+
 	ret = dialog.exec();
 	
 	if ( QDialog::Accepted == ret )
 	{
-	   autoFireOnFrames = dialog.intValue();
+		autoFireOnFrames  =  onBox->value();
+		autoFireOffFrames = offBox->value();
+
+		afActCustom->setPattern( autoFireOnFrames, autoFireOffFrames );
+
+		if ( afActCustom->isChecked() )
+		{
+			afActCustom->activateCB();
+		}
+		g_config->setOption("SDL.AutofireCustomOnFrames"  , autoFireOnFrames );
+		g_config->setOption("SDL.AutofireCustomOffFrames" , autoFireOffFrames);
+		g_config->save();
 	}
 }
 
-void consoleWin_t::setAutoFireOffFrames(void)
+void consoleWin_t::incrSoundVolume(void)
 {
-	int ret;
-	QInputDialog dialog(this);
+	fceuWrapperLock();
+	FCEUD_SoundVolumeAdjust( 1);
+	fceuWrapperUnLock();
+}
 
-	dialog.setWindowTitle( tr("AutoFire Pattern OFF Frames") );
-	dialog.setLabelText( tr("Specify desired number of OFF frames in autofire pattern:") );
-	dialog.setOkButtonText( tr("Ok") );
-	dialog.setInputMode( QInputDialog::IntInput );
-	dialog.setIntRange( 1, 30 );
-	dialog.setIntValue( autoFireOffFrames );
-	
-	ret = dialog.exec();
-	
-	if ( QDialog::Accepted == ret )
-	{
-	   autoFireOffFrames = dialog.intValue();
-	}
+void consoleWin_t::decrSoundVolume(void)
+{
+	fceuWrapperLock();
+	FCEUD_SoundVolumeAdjust(-1);
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleLagCounterDisplay(void)
+{
+	fceuWrapperLock();
+	lagCounterDisplay = !lagCounterDisplay;
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleFrameAdvLagSkip(void)
+{
+	fceuWrapperLock();
+	frameAdvanceLagSkip = !frameAdvanceLagSkip;
+	FCEUI_DispMessage ("Skipping lag in Frame Advance %sabled.", 0, frameAdvanceLagSkip ? "en" : "dis");
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleMovieBindSaveState(void)
+{
+	fceuWrapperLock();
+	bindSavestate = !bindSavestate;
+	FCEUI_DispMessage ("Savestate binding to movie %sabled.", 0, bindSavestate ? "en" : "dis");
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleMovieFrameDisplay(void)
+{
+	fceuWrapperLock();
+	FCEUI_MovieToggleFrameDisplay();
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleMovieReadWrite(void)
+{
+	fceuWrapperLock();
+	FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleInputDisplay(void)
+{
+	fceuWrapperLock();
+	FCEUI_ToggleInputDisplay();
+	g_config->setOption ("SDL.InputDisplay", input_display);
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleBackground(void)
+{
+	bool fgOn, bgOn;
+	fceuWrapperLock();
+	FCEUI_GetRenderPlanes( fgOn,  bgOn );
+	FCEUI_SetRenderPlanes( fgOn, !bgOn );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleForeground(void)
+{
+	bool fgOn, bgOn;
+	fceuWrapperLock();
+	FCEUI_GetRenderPlanes(  fgOn, bgOn );
+	FCEUI_SetRenderPlanes( !fgOn, bgOn );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::toggleTurboMode(void)
+{
+	NoWaiting ^= 1;
 }
 
 void consoleWin_t::openMovie(void)
@@ -2171,6 +3327,13 @@ void consoleWin_t::openMovie(void)
 	win = new MoviePlayDialog_t(this);
 
 	win->show();
+}
+
+void consoleWin_t::playMovieFromBeginning(void)
+{
+	fceuWrapperLock();
+	FCEUI_MoviePlayFromBeginning();
+	fceuWrapperUnLock();
 }
 
 void consoleWin_t::stopMovie(void)
@@ -2254,6 +3417,243 @@ void consoleWin_t::recordMovieAs(void)
 	fceuWrapperUnLock();
 
 	return;
+}
+
+void consoleWin_t::aviRecordStart(void)
+{
+	if ( !aviRecordRunning() )
+	{
+		fceuWrapperLock();
+		aviRecordOpenFile(NULL);
+		aviDiskThread->start();
+		fceuWrapperUnLock();
+	}
+}
+
+void consoleWin_t::aviRecordAsStart(void)
+{
+	if ( aviRecordRunning() )
+	{
+		return;
+	}
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	//char dir[512];
+	const char *base;
+	QFileDialog  dialog(this, tr("Save AVI Movie for Recording") );
+	QList<QUrl> urls;
+	QDir d;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("AVI Movies (*.avi) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/avi");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		dialog.setDirectory( d.absolutePath() );
+	}
+	dialog.setDefaultSuffix( tr(".avi") );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	FCEUI_printf ("AVI Recording movie to %s\n", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+	aviRecordOpenFile( filename.toStdString().c_str() );
+	aviDiskThread->start();
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::aviRecordStop(void)
+{
+	if ( aviRecordRunning() )
+	{
+		fceuWrapperLock();
+		aviDiskThread->requestInterruption();
+		aviDiskThread->quit();
+		aviDiskThread->wait(10000);
+		fceuWrapperUnLock();
+	}
+}
+
+void consoleWin_t::aviAudioEnableChange(bool checked)
+{
+	aviSetAudioEnable( checked );
+
+	return;
+}
+
+void consoleWin_t::aviVideoFormatChanged(int idx)
+{
+	aviSetSelVideoFormat(idx);
+}
+
+void consoleWin_t::wavRecordStart(void)
+{
+	if ( !FCEUI_WaveRecordRunning() )
+	{
+		const char *romFile;
+		char fileName[1024];
+
+		romFile = getRomFile();
+
+		if ( romFile )
+		{
+			char base[512];
+			const char *baseDir = FCEUI_GetBaseDirectory();
+
+			getFileBaseName( romFile, base );
+
+			if ( baseDir )
+			{
+				strcpy( fileName, baseDir );
+				strcat( fileName, "/wav/" );
+			}
+			else
+			{
+				fileName[0] = 0;
+			}
+			strcat( fileName, base );
+			strcat( fileName, ".wav");
+			//printf("WAV Filepath:'%s'\n", fileName );
+		}
+		else
+		{
+			return;
+		}
+		fceuWrapperLock();
+		FCEUI_BeginWaveRecord( fileName );
+		fceuWrapperUnLock();
+	}
+}
+
+void consoleWin_t::wavRecordAsStart(void)
+{
+	if ( FCEUI_WaveRecordRunning() )
+	{
+		return;
+	}
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	//char dir[512];
+	const char *base;
+	QFileDialog  dialog(this, tr("Save WAV Movie for Recording") );
+	QList<QUrl> urls;
+	QDir d;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("WAV Movies (*.wav) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/wav");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		dialog.setDirectory( d.absolutePath() );
+	}
+	dialog.setDefaultSuffix( tr(".wav") );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	qDebug() << "selected file path : " << filename.toUtf8();
+
+	FCEUI_printf ("WAV Recording movie to %s\n", filename.toStdString().c_str() );
+
+	fceuWrapperLock();
+	FCEUI_BeginWaveRecord( filename.toStdString().c_str() );
+	fceuWrapperUnLock();
+}
+
+void consoleWin_t::wavRecordStop(void)
+{
+	if ( FCEUI_WaveRecordRunning() )
+	{
+		fceuWrapperLock();
+		FCEUI_EndWaveRecord();
+		fceuWrapperUnLock();
+	}
 }
 
 void consoleWin_t::aboutFCEUX(void)
@@ -2467,14 +3867,10 @@ void consoleWin_t::syncActionConfig( QAction *act, const char *property )
 
 void consoleWin_t::updatePeriodic(void)
 {
-	//struct timespec ts;
-	//double t;
-
-	//clock_gettime( CLOCK_REALTIME, &ts );
-
-	//t = (double)ts.tv_sec + (double)(ts.tv_nsec * 1.0e-9);
-   //printf("Run Frame %f\n", t);
 	
+	// Process all events before attempting to render viewport
+	QCoreApplication::processEvents();
+
 	// Update Input Devices
 	FCEUD_UpdateInput();
 	
@@ -2491,9 +3887,43 @@ void consoleWin_t::updatePeriodic(void)
 		else
 		{
 			viewport_GL->transfer2LocalBuffer();
-			//viewport_GL->repaint();
 			viewport_GL->update();
 		}
+	}
+
+	// Low Rate Updates
+	if ( (updateCounter % 30) == 0 )
+	{
+		// Keep region menu selection sync'd to actual state
+		int actRegion = FCEUI_GetRegion();
+
+		if ( !region[ actRegion ]->isChecked() )
+		{
+			region[ actRegion ]->setChecked(true);
+		}
+
+		powerAct->setEnabled( FCEU_IsValidUI( FCEUI_POWER ) );
+		resetAct->setEnabled( FCEU_IsValidUI( FCEUI_RESET ) );
+		sresetAct->setEnabled( FCEU_IsValidUI( FCEUI_RESET ) );
+		playMovBeginAct->setEnabled( FCEU_IsValidUI( FCEUI_PLAYFROMBEGINNING ) );
+		insCoinAct->setEnabled( FCEU_IsValidUI( FCEUI_INSERT_COIN ) );
+		fdsSwitchAct->setEnabled( FCEU_IsValidUI( FCEUI_SWITCH_DISK ) );
+		fdsEjectAct->setEnabled( FCEU_IsValidUI( FCEUI_EJECT_DISK ) );
+		stopMovAct->setEnabled( FCEU_IsValidUI( FCEUI_STOPMOVIE ) );
+		recentRomMenu->setEnabled( !recentRomMenu->isEmpty() );
+		quickLoadAct->setEnabled( FCEU_IsValidUI( FCEUI_QUICKLOAD ) );
+		quickSaveAct->setEnabled( FCEU_IsValidUI( FCEUI_QUICKSAVE ) );
+		loadStateAct->setEnabled( FCEU_IsValidUI( FCEUI_LOADSTATE ) );
+		saveStateAct->setEnabled( FCEU_IsValidUI( FCEUI_SAVESTATE ) );
+		openMovAct->setEnabled( FCEU_IsValidUI( FCEUI_PLAYMOVIE ) );
+		recMovAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
+		recAsMovAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
+		recAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
+		recAsAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
+		stopAviAct->setEnabled( FCEU_IsValidUI( FCEUI_STOPAVI ) );
+		recWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
+		recAsWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
+		stopWavAct->setEnabled( FCEUI_WaveRecordRunning() );
 	}
 
 	if ( errorMsgValid )
@@ -2516,10 +3946,13 @@ void consoleWin_t::updatePeriodic(void)
 		closeRequested = false;
 	}
 
+	updateCounter++;
+
    return;
 }
 
-emulatorThread_t::emulatorThread_t(void)
+emulatorThread_t::emulatorThread_t( QObject *parent )
+	: QThread(parent)
 {
 	#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 	pself = 0;
@@ -2754,11 +4187,14 @@ void consoleMenuBar::keyPressEvent(QKeyEvent *event)
 	{
 		((QWidget*)parent())->setFocus();
 	}
+	event->accept();
 }
 
 void consoleMenuBar::keyReleaseEvent(QKeyEvent *event)
 {
 	QMenuBar::keyReleaseEvent(event);
+
+	event->accept();
 }
 //-----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
@@ -2783,4 +4219,33 @@ void consoleRecentRomAction::activateCB(void)
 	fceuWrapperUnLock();
 }
 //-----------------------------------------------------------------------------
+autoFireMenuAction::autoFireMenuAction(int on, int off, QString name, QWidget *parent)
+	: QAction( name, parent)
+{
+	onFrames = on;  offFrames = off;
+}
+//-----------------------------------------------------------------------------
+autoFireMenuAction::~autoFireMenuAction(void)
+{
+
+}
+//-----------------------------------------------------------------------------
+void autoFireMenuAction::activateCB(void)
+{
+	g_config->setOption("SDL.AutofireOnFrames"  , onFrames );
+	g_config->setOption("SDL.AutofireOffFrames" , offFrames);
+	g_config->save();
+
+	SetAutoFirePattern( onFrames, offFrames );
+}
+//-----------------------------------------------------------------------------
+bool autoFireMenuAction::isMatch( int on, int off )
+{
+	return ( (on == onFrames) && (off == offFrames) );
+}
+//-----------------------------------------------------------------------------
+void autoFireMenuAction::setPattern(int on, int off)
+{
+	onFrames = on;  offFrames = off;
+}
 //-----------------------------------------------------------------------------

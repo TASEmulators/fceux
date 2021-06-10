@@ -128,7 +128,9 @@ LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
 
 	g_config->getOption("SDL.LastLoadLua", &filename);
 
-	scriptPath->setText(filename.c_str());
+	scriptPath->setText( tr(filename.c_str()) );
+	scriptPath->setClearButtonEnabled(true);
+	scriptArgs->setClearButtonEnabled(true);
 
 	luaOutput = new QTextEdit();
 	luaOutput->setReadOnly(true);
@@ -198,7 +200,7 @@ LuaControlDialog_t::~LuaControlDialog_t(void)
 {
 	std::list<LuaControlDialog_t *>::iterator it;
 
-	printf("Destroy Lua Control Window\n");
+	//printf("Destroy Lua Control Window\n");
 
 	periodicTimer->stop();
 
@@ -215,7 +217,7 @@ LuaControlDialog_t::~LuaControlDialog_t(void)
 //----------------------------------------------------
 void LuaControlDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Lua Control Close Window Event\n");
+	//printf("Lua Control Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();
@@ -271,8 +273,8 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
-	char exePath[512];
+	char dir[2048];
+	char exePath[2048];
 	const char *luaPath;
 	QFileDialog dialog(this, tr("Open LUA Script"));
 	QList<QUrl> urls;
@@ -310,7 +312,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	if (luaPath)
 	{
 		int i, j;
-		char stmp[1024];
+		char stmp[2048];
 
 		i = j = 0;
 		while (luaPath[i] != 0)
@@ -401,7 +403,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 
 	g_config->setOption("SDL.LastLoadLua", filename.toStdString().c_str());
 
-	scriptPath->setText(filename.toStdString().c_str());
+	scriptPath->setText(filename);
 
 #endif
 }
@@ -413,7 +415,9 @@ void LuaControlDialog_t::startLuaScript(void)
 	fceuWrapperLock();
 	if (0 == FCEU_LoadLuaCode(scriptPath->text().toStdString().c_str(), scriptArgs->text().toStdString().c_str()))
 	{
-		printf("Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toStdString().c_str());
+		char error_msg[2048];
+		sprintf( error_msg, "Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toStdString().c_str());
+		FCEUD_PrintError(error_msg);
 	}
 	fceuWrapperUnLock();
 #endif

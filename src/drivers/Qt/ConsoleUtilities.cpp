@@ -233,12 +233,12 @@ int fceuExecutablePath( char *outputPath, int outputSize )
 	outputPath[0] = 0;
 
 #ifdef WIN32
-	TCHAR fullPath[2048];
-	TCHAR driveLetter[3];
-	TCHAR directory[2048];
-	TCHAR finalPath[2048];
+	char fullPath[2048];
+	char driveLetter[3];
+	char directory[2048];
+	char finalPath[2048];
 
-	GetModuleFileName(NULL, fullPath, 2048);
+	GetModuleFileNameA(NULL, fullPath, 2048);
 	_splitpath(fullPath, driveLetter, directory, NULL, NULL);
 	snprintf(finalPath, sizeof(finalPath), "%s%s", driveLetter, directory);
 	strncpy( outputPath, finalPath, outputSize );
