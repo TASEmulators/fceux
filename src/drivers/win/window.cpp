@@ -2918,7 +2918,7 @@ string HOTKEYMENUINDEX::getQualifiedMenuText(FCEUMENU_INDEX menu_index) {
 }
 
 string HOTKEYMENUINDEX::getQualifiedMenuText(char* text, int emu_cmd_id) {
-	char* combo = GetKeyComboName(FCEUD_CommandMapping[emu_cmd_id]);
+	char* combo = MakeButtString(&FCEUD_CommandMapping[emu_cmd_id], 0);
 	char* str = new char[strlen(text) + strlen(combo) + strlen("\t") + 1];
 	strcpy(str, text);
 	if (strcmp("", combo))
@@ -2926,6 +2926,7 @@ string HOTKEYMENUINDEX::getQualifiedMenuText(char* text, int emu_cmd_id) {
 		strcat(str, "\t");
 		strcat(str, combo);
 	}
+	free(combo);
 	string menustr = str;
 	delete[] str;
 	return menustr;

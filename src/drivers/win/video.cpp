@@ -1269,11 +1269,12 @@ INT_PTR CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_NO8LIM,BST_CHECKED);
 
 		char buf[1024] = "Full Screen";
-		int c = FCEUD_CommandMapping[EMUCMD_MISC_TOGGLEFULLSCREEN];
-		if (c)
+		if (FCEUD_CommandMapping[EMUCMD_MISC_TOGGLEFULLSCREEN].NumC)
 		{
 			strcat(buf, " (");
-			strcat(buf, GetKeyComboName(c));
+			char *buttName = MakeButtString(&FCEUD_CommandMapping[EMUCMD_MISC_TOGGLEFULLSCREEN], 0);
+			strcat(buf, buttName);
+			free(buttName);
 			if (fullscreenByDoubleclick)
 				strcat(buf, " or double-click)");
 			else

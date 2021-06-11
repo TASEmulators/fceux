@@ -38,7 +38,7 @@ static unsigned int keys[256] = {0,}; // with repeat
 static unsigned int keys_nr[256] = {0,}; // non-repeating
 static unsigned int keys_jd[256] = {0,}; // just-down
 static unsigned int keys_jd_lock[256] = {0,}; // just-down released lock
-int autoHoldKey = 0, autoHoldClearKey = 0;
+extern ButtConfig autoHoldKeys, autoHoldClearKeys;
 int ctr=0;
 void KeyboardUpdateState(void)
 {
@@ -115,8 +115,8 @@ void KeyboardUpdateState(void)
 				keys[i] = 0;
 
 	extern uint8 autoHoldOn, autoHoldReset;
-	autoHoldOn = autoHoldKey && keys[autoHoldKey] != 0;
-	autoHoldReset = autoHoldClearKey && keys[autoHoldClearKey] != 0;
+	autoHoldOn = DTestButton(&autoHoldKeys); // autoHoldKey && keys[autoHoldKey] != 0;
+	autoHoldReset = DTestButton(&autoHoldClearKeys); //autoHoldClearKey && keys[autoHoldClearKey] != 0;
 }
 
 unsigned int *GetKeyboard(void)

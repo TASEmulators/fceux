@@ -91,6 +91,12 @@ typedef struct
  LONG MaxY;
  LONG MinZ;
  LONG MaxZ;
+ LONG MinRx;
+ LONG MaxRx;
+ LONG MinRy;
+ LONG MaxRy;
+ LONG MinRz;
+ LONG MaxRz;
 } POWER_RANGER;
 
 static POWER_RANGER ranges[MAX_JOYSTICKS];
@@ -150,15 +156,36 @@ int DTestButtonJoy(ButtConfig *bc)
   
   if(bc->ButtonNum[x]&0x8000)	/* Axis "button" */
   {
-   int sa = bc->ButtonNum[x]&3;
+   int sa = bc->ButtonNum[x]&7;
    long source;
 
-   if(sa == 0) source=((int64)StatusSave[n].lX - ranges[n].MinX) * 262144 /
-                (ranges[n].MaxX - ranges[n].MinX) - 131072;
-   else if(sa == 1) source=((int64)StatusSave[n].lY - ranges[n].MinY) * 262144 /
-                (ranges[n].MaxY - ranges[n].MinY) - 131072;
-   else if(sa == 2) source=((int64)StatusSave[n].lZ - ranges[n].MinZ) * 262144 /
-                (ranges[n].MaxZ - ranges[n].MinZ) - 131072;
+   switch (sa)
+   {
+   case 0:
+	   source = ((int64)StatusSave[n].lX - ranges[n].MinX) * 262144 /
+		   (ranges[n].MaxX - ranges[n].MinX) - 131072;
+	   break;
+   case 1:
+	   source = ((int64)StatusSave[n].lY - ranges[n].MinY) * 262144 /
+		   (ranges[n].MaxY - ranges[n].MinY) - 131072;
+	   break;
+   case 2:
+	   source = ((int64)StatusSave[n].lZ - ranges[n].MinZ) * 262144 /
+		   (ranges[n].MaxZ - ranges[n].MinZ) - 131072;
+	   break;
+   case 3:
+	   source = ((int64)StatusSave[n].lRx - ranges[n].MinRx) * 262144 /
+		   (ranges[n].MaxRx - ranges[n].MinRx) - 131072;
+	   break;
+   case 4:
+	   source = ((int64)StatusSave[n].lRy - ranges[n].MinRy) * 262144 /
+		   (ranges[n].MaxRy - ranges[n].MinRy) - 131072;
+	   break;
+   case 5:
+	   source = ((int64)StatusSave[n].lRz - ranges[n].MinRz) * 262144 /
+		   (ranges[n].MaxRz - ranges[n].MinRz) - 131072;
+	   break;
+   }
 
    /* Now, source is of the range -131072 to 131071.  Good enough. */
    if(bc->ButtonNum[x] & 0x4000)
@@ -191,7 +218,7 @@ int DTestButtonJoy(ButtConfig *bc)
  return(0);
 }
 
-static int canax[MAX_JOYSTICKS][3];
+static int canax[MAX_JOYSTICKS][6];
 
 /* Now the fun configuration test begins. */
 void BeginJoyWait(HWND hwnd)
@@ -242,50 +269,67 @@ int DoJoyWaitTest(GUID *guid, uint8 *devicenum, uint16 *buttonnum)
 
   memcpy(StatusSave[n].rgbButtons, JoyStatus.rgbButtons, 128);
 
-  // lX, lY, lZ
-  long dax, day, daz;
   long source,psource;
 
-  dax = ranges[n].MaxX - ranges[n].MinX;
-  day = ranges[n].MaxY - ranges[n].MinY;
-  daz = ranges[n].MaxZ - ranges[n].MinZ;
-
-  if(dax)
+  for (int axis = 0; axis < 6; axis++)
   {
-   source=((int64)JoyStatus.lX - ranges[n].MinX) * 262144 / dax - 131072;
-   psource=((int64)StatusSave[n].lX - ranges[n].MinX) * 262144 / dax - 131072;
+	  long da, jsl, ssl, min;
+	  switch (axis)
+	  {
+	  case 0:
+		  da = ranges[n].MaxX - ranges[n].MinX;
+		  jsl = JoyStatus.lX;
+		  ssl = StatusSave[n].lX;
+		  min = ranges[n].MinX;
+		  break;
+	  case 1:
+		  da = ranges[n].MaxY - ranges[n].MinY;
+		  jsl = JoyStatus.lY;
+		  ssl = StatusSave[n].lY;
+		  min = ranges[n].MinY;
+		  break;
+	  case 2:
+		  da = ranges[n].MaxZ - ranges[n].MinZ;
+		  jsl = JoyStatus.lZ;
+		  ssl = StatusSave[n].lZ;
+		  min = ranges[n].MinZ;
+		  break;
+	  case 3:
+		  da = ranges[n].MaxRx - ranges[n].MinRx;
+		  jsl = JoyStatus.lRx;
+		  ssl = StatusSave[n].lRx;
+		  min = ranges[n].MinRx;
+		  break;
+	  case 4:
+		  da = ranges[n].MaxRy - ranges[n].MinRy;
+		  jsl = JoyStatus.lRy;
+		  ssl = StatusSave[n].lRy;
+		  min = ranges[n].MinRy;
+		  break;
+	  case 5:
+		  da = ranges[n].MaxRz - ranges[n].MinRz;
+		  jsl = JoyStatus.lRz;
+		  ssl = StatusSave[n].lRz;
+		  min = ranges[n].MinRz;
+		  break;
+	  }
 
-   if(abs(source) >= 65536 && canax[n][0])
-   {
-    *guid = JoyGUID[n];
-    *devicenum = n;
-    *buttonnum = 0x8000 | (0) | ((source < 0) ? 0x4000 : 0);
-    memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));   
-    canax[n][0] = 0;
-    return(1);
-   } else if(abs(source) <= 32768) canax[n][0] = 1;
-  }
+	  if (da)
+	  {
+		  source = ((int64)jsl - min) * 262144 / da - 131072;
+		  psource = ((int64)ssl - min) * 262144 / da - 131072;
 
-  if(day)
-  {
-   source=((int64)JoyStatus.lY - ranges[n].MinY) * 262144 / day - 131072;
-   psource=((int64)StatusSave[n].lY - ranges[n].MinY) * 262144 / day - 131072;
-
-   if(abs(source) >= 65536 && canax[n][1])
-   {
-    *guid = JoyGUID[n];
-    *devicenum = n;
-    *buttonnum = 0x8000 | (1) | ((source < 0) ? 0x4000 : 0);
-    memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
-    canax[n][1] = 0;
-    return(1);
-   }  else if(abs(source) <= 32768) canax[n][1] = 1;
-  }
-
-  if(daz)
-  {
-
-
+		  if (abs(source) >= 65536 && canax[n][axis])
+		  {
+			  *guid = JoyGUID[n];
+			  *devicenum = n;
+			  *buttonnum = 0x8000 | axis | ((source < 0) ? 0x4000 : 0);
+			  memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
+			  canax[n][axis] = 0;
+			  return(1);
+		  }
+		  else if (abs(source) <= 32768) canax[n][axis] = 1;
+	  }
   }
 
   for(x=0; x<4; x++)
@@ -393,6 +437,9 @@ static BOOL CALLBACK JoystickFound(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
  GetARange(Joysticks[n], DIJOFS_X, &ranges[n].MinX, &ranges[n].MaxX);
  GetARange(Joysticks[n], DIJOFS_Y, &ranges[n].MinY, &ranges[n].MaxY);
  GetARange(Joysticks[n], DIJOFS_Z, &ranges[n].MinZ, &ranges[n].MaxZ);
+ GetARange(Joysticks[n], DIJOFS_RX, &ranges[n].MinRx, &ranges[n].MaxRx);
+ GetARange(Joysticks[n], DIJOFS_RY, &ranges[n].MinRy, &ranges[n].MaxRy);
+ GetARange(Joysticks[n], DIJOFS_RZ, &ranges[n].MinRz, &ranges[n].MaxRz);
 
  JoyGUID[numjoysticks] = lpddi->guidInstance;
 

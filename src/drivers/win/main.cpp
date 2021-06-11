@@ -829,17 +829,18 @@ int main(int argc,char *argv[])
 
 	CreateMainWindow();
 
-	if(!InitDInput())
+	if (!InitDInput())
 	{
 		do_exit();
 		return 1;
 	}
 
-	if(!DriverInitialize())
+	if (!DriverInitialize())
 	{
 		do_exit();
 		return 1;
 	}
+	UpdateMenuHotkeys(FCEUMENU_MAIN);
 
 	debugSystem = new DebugSystem();
 	debugSystem->init();

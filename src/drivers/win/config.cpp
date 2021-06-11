@@ -37,7 +37,6 @@
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
 extern CFGSTRUCT HotkeyConfig[];
-extern int autoHoldKey, autoHoldClearKey;
 extern int frameAdvance_Delay;
 extern int EnableAutosave, AutosaveQty, AutosaveFrequency;
 extern int AFon, AFoff, AutoFireOffset;
@@ -272,8 +271,6 @@ static CFGSTRUCT fceuconfig[] =
 	ADDCFGSTRUCT(InputConfig),
 	ADDCFGSTRUCT(HotkeyConfig),
 
-	AC(autoHoldKey),
-	AC(autoHoldClearKey),
 	AC(frame_display),
 	AC(rerecord_display),
 	AC(input_display),
