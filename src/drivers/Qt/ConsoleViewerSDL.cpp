@@ -239,24 +239,18 @@ int ConsoleViewSDL_t::init(void)
 
 	windowHandle = this->winId();
 
-	//printf("Window Handle: %llu \n", windowHandle );
-
-	//sleep(1);
-
-#ifdef WIN32
 	if (sdlWindow == NULL) 
 	{
 		sdlWindow = SDL_CreateWindowFrom( (void*)windowHandle);
 	}
-#else
-	sdlWindow = SDL_CreateWindowFrom( (void*)windowHandle);
-#endif
 
 	if (sdlWindow == NULL) 
 	{
 		printf("[SDL] Failed to create window from handle.\n");
 		return -1;
 	}
+
+	SDL_ShowWindow( sdlWindow );
 
 	uint32_t baseFlags = vsyncEnabled ? SDL_RENDERER_PRESENTVSYNC : 0;
 
@@ -303,6 +297,11 @@ void ConsoleViewSDL_t::cleanup(void)
 	{
 		SDL_DestroyRenderer(sdlRenderer);
 		sdlRenderer = NULL;
+	}
+	if ( sdlWindow )
+	{
+		SDL_DestroyWindow( sdlWindow );
+		sdlWindow = NULL;
 	}
 }
 
