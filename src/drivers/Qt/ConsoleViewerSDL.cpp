@@ -214,14 +214,21 @@ int ConsoleViewSDL_t::init(void)
 	    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
 	}
 
-	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) 
+	if ( SDL_WasInit(SDL_INIT_VIDEO) == 0 )
 	{
-		printf("[SDL] Failed to initialize video subsystem.\n");
-		return -1;
+		if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) 
+		{
+			printf("[SDL] Failed to initialize video subsystem.\n");
+			return -1;
+		}
+		else
+		{
+			printf("Initialized SDL Video Subsystem\n");
+		}
 	}
 	else
 	{
-		printf("Initialized SDL Video Subsystem\n");
+		printf("SDL Video Subsystem is Initialized\n");
 	}
 
 	for (int i=0; i<SDL_GetNumVideoDrivers(); i++)
@@ -236,10 +243,14 @@ int ConsoleViewSDL_t::init(void)
 
 	//sleep(1);
 
+#ifdef WIN32
 	if (sdlWindow == NULL) 
 	{
 		sdlWindow = SDL_CreateWindowFrom( (void*)windowHandle);
 	}
+#else
+	sdlWindow = SDL_CreateWindowFrom( (void*)windowHandle);
+#endif
 
 	if (sdlWindow == NULL) 
 	{
@@ -426,7 +437,7 @@ void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
 	s = event->size();
 	view_width  = s.width();
 	view_height = s.height();
-	//printf("SDL Resize: %i x %i \n", view_width, view_height);
+	printf("SDL Resize: %i x %i \n", view_width, view_height);
 
 	gui_draw_area_width = view_width;
 	gui_draw_area_height = view_height;
