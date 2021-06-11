@@ -236,7 +236,11 @@ int ConsoleViewSDL_t::init(void)
 
 	//sleep(1);
 
-	sdlWindow = SDL_CreateWindowFrom( (void*)windowHandle);
+	if (sdlWindow == NULL) 
+	{
+		sdlWindow = SDL_CreateWindowFrom( (void*)windowHandle);
+	}
+
 	if (sdlWindow == NULL) 
 	{
 		printf("[SDL] Failed to create window from handle.\n");

@@ -122,7 +122,8 @@ int main( int argc, char *argv[] )
 
 	consoleWindow->show();
 
-	consoleWindow->videoInit();
+	// Need to wait for window to initialize before video init can be called.
+	//consoleWindow->videoInit();
 
 #ifdef WIN32
 	// This function is needed to fix the issue referenced below. It adds a 1-pixel border
