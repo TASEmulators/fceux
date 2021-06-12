@@ -51,7 +51,6 @@
 
 // GLOBALS
 extern Config *g_config;
-extern bool force_grayscale;
 
 // STATIC GLOBALS
 static int s_curbpp = 0;
@@ -363,21 +362,9 @@ FCEUD_SetPalette(uint8 index,
                  uint8 g,
                  uint8 b)
 {
-	if ( force_grayscale )
-	{
-		// convert the palette entry to grayscale
-		int gray = ((float)r * 0.299 + (float)g * 0.587 + (float)b * 0.114);
-
-		s_psdl[index].r = gray;
-		s_psdl[index].g = gray;
-		s_psdl[index].b = gray;
-	}
-	else
-	{
-		s_psdl[index].r = r;
-		s_psdl[index].g = g;
-		s_psdl[index].b = b;
-	}
+	s_psdl[index].r = r;
+	s_psdl[index].g = g;
+	s_psdl[index].b = b;
 
 	s_paletterefresh = 1;
 }
