@@ -115,19 +115,9 @@ int RestoreDD(int w)
 
 void FCEUD_SetPalette(unsigned char index, unsigned char r, unsigned char g, unsigned char b)
 {
-	if (force_grayscale)
-	{
-		// convert the palette entry to grayscale
-		int gray = ((float)r * 0.299 + (float)g * 0.587 + (float)b * 0.114);
-		color_palette[index].peRed = gray;
-		color_palette[index].peGreen = gray;
-		color_palette[index].peBlue = gray;
-	} else
-	{
-		color_palette[index].peRed = r;
-		color_palette[index].peGreen = g;
-		color_palette[index].peBlue = b;
-	}
+	color_palette[index].peRed = r;
+	color_palette[index].peGreen = g;
+	color_palette[index].peBlue = b;
 	PaletteChanged=1;
 }
 
