@@ -97,7 +97,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	scalerSelect->addItem( tr("Prescale 2x"), 6 );
 	scalerSelect->addItem( tr("Prescale 3x"), 7 );
 	scalerSelect->addItem( tr("Prescale 4x"), 8 );
-	scalerSelect->addItem( tr("PAL"), 9 );
+	scalerSelect->addItem( tr("PAL 3x"), 9 );
 	
 	hbox1 = new QHBoxLayout();
 

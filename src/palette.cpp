@@ -41,6 +41,7 @@
 #include <cstring>
 
 bool force_grayscale = false;
+pal *grayscaled_palo = NULL;
 
 pal palette_game[64*8]; //custom palette for an individual game. (formerly palettei)
 pal palette_user[64*8]; //user's overridden palette (formerly palettec)
@@ -525,6 +526,29 @@ static void ChoosePalette(void)
 		palo = default_palette[default_palette_selection];
 		//need to calcualte a deemph on the fly.. sorry. maybe support otherwise later
 		ApplyDeemphasisComplete(palo);
+	}
+	if (force_grayscale)
+	{
+		// need to apply grayscale filter
+		// allocate memory for grayscale palette
+		if (grayscaled_palo == NULL)
+			grayscaled_palo = (pal*)malloc(sizeof(pal) * 64 * 8);
+		// make every color grayscale
+		for (int x = 0; x < 64 * 8; x++)
+		{
+			uint8 gray = ((float)palo[x].r * 0.299 + (float)palo[x].g * 0.587 + (float)palo[x].b * 0.114);
+			grayscaled_palo[x].r = gray;
+			grayscaled_palo[x].g = gray;
+			grayscaled_palo[x].b = gray;
+		}
+		// apply new palette
+		palo = grayscaled_palo;
+	}
+	else if (grayscaled_palo != NULL)
+	{
+		// free allocated memory if the grayscale filter is not used anymore
+		free(grayscaled_palo);
+		grayscaled_palo = NULL;
 	}
 }
 
