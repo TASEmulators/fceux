@@ -532,9 +532,9 @@ static void ChoosePalette(void)
 		// need to apply grayscale filter
 		// allocate memory for grayscale palette
 		if (grayscaled_palo == NULL)
-			grayscaled_palo = (pal*)malloc(sizeof(pal) * 512);
+			grayscaled_palo = (pal*)malloc(sizeof(pal) * 64 * 8);
 		// make every color grayscale
-		for (int x = 0; x < 512; x++)
+		for (int x = 0; x < 64 * 8; x++)
 		{
 			uint8 gray = ((float)palo[x].r * 0.299 + (float)palo[x].g * 0.587 + (float)palo[x].b * 0.114);
 			grayscaled_palo[x].r = gray;
@@ -546,6 +546,7 @@ static void ChoosePalette(void)
 	}
 	else if (grayscaled_palo != NULL)
 	{
+		// free allocated memory if the grayscale filter is not used anymore
 		free(grayscaled_palo);
 		grayscaled_palo = NULL;
 	}
