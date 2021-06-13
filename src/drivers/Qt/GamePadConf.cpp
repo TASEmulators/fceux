@@ -118,6 +118,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	QMenu *fileMenu, *extMenu;
 	QAction *act;
 	QTreeWidgetItem *item;
+	const char *guid;
 
 	style = this->style();
 
@@ -229,7 +230,11 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	grid1->addWidget(label, 2, 0);
 	grid1->addWidget(guidLbl, 2, 1);
 
-	guidLbl->setText(GamePad[portNum].getGUID());
+	guid = GamePad[portNum].getGUID();
+	if ( guid )
+	{
+		guidLbl->setText(guid);
+	}
 
 	frame1 = new QGroupBox(tr("Mapping Profile:"));
 	//grid   = new QGridLayout();
@@ -480,7 +485,11 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 		g_config->getOption(prefix + "Profile", &lcl[i].profile);
 
-		lcl[i].guid.assign(GamePad[i].getGUID());
+		guid = GamePad[i].getGUID();
+		if ( guid )
+		{
+			lcl[i].guid.assign(guid);
+		}
 	}
 
 	loadMapList();
@@ -718,6 +727,7 @@ void GamePadConfDialog_t::updateCntrlrDpy(void)
 //----------------------------------------------------
 void GamePadConfDialog_t::portSelect(int index)
 {
+	const char *guid;
 	//printf("Port Number:%i \n", index);
 	portNum = index;
 	updateCntrlrDpy();
@@ -729,7 +739,12 @@ void GamePadConfDialog_t::portSelect(int index)
 			devSel->setCurrentIndex(i);
 		}
 	}
-	guidLbl->setText(GamePad[portNum].getGUID());
+	guid = GamePad[portNum].getGUID();
+
+	if ( guid )
+	{
+		guidLbl->setText(guid);
+	}
 
 	loadMapList();
 }
@@ -737,6 +752,7 @@ void GamePadConfDialog_t::portSelect(int index)
 void GamePadConfDialog_t::deviceSelect(int index)
 {
 	jsDev_t *js;
+	const char *guid;
 	int devIdx = devSel->itemData(index).toInt();
 
 	js = getJoystickDevice(devIdx);
@@ -754,7 +770,11 @@ void GamePadConfDialog_t::deviceSelect(int index)
 	}
 	GamePad[portNum].setDeviceIndex(devIdx);
 
-	lcl[portNum].guid.assign(GamePad[portNum].getGUID());
+	guid = GamePad[portNum].getGUID();
+	if ( guid )
+	{
+		lcl[portNum].guid.assign(guid);
+	}
 	lcl[portNum].profile.assign("default");
 
 	loadMapList();
@@ -975,6 +995,7 @@ void GamePadConfDialog_t::saveConfig(void)
 {
 	int i;
 	char stmp[256];
+	const char *guid;
 	std::string prefix, mapName;
 
 	sprintf(stmp, "SDL.Input.GamePad.%u.", portNum);
@@ -982,7 +1003,12 @@ void GamePadConfDialog_t::saveConfig(void)
 
 	mapName = mapSel->currentText().toStdString();
 
-	g_config->setOption(prefix + "DeviceGUID", GamePad[portNum].getGUID());
+	guid = GamePad[portNum].getGUID();
+
+	if ( guid )
+	{
+		g_config->setOption(prefix + "DeviceGUID", guid);
+	}
 	g_config->setOption(prefix + "Profile", mapName.c_str());
 
 	for (i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
@@ -1240,6 +1266,60 @@ void GamePadConfDialog_t::delKeyBindingCallback(void)
 //----------------------------------------------------
 void GamePadConfDialog_t::updatePeriodic(void)
 {
+
+	for (int i = 0; i < devSel->count(); i++)
+	{
+		int devIdx = devSel->itemData(i).toInt();
+
+		if ( devIdx >= 0 )
+		{
+			jsDev_t *js = getJoystickDevice(devIdx);
+
+			if (js != NULL)
+			{
+				if (!js->isConnected())
+				{
+					//printf("Removing Disconnected JS\n");
+					devSel->removeItem(i);
+					deviceSelect( devSel->currentIndex() );
+				}
+			}
+			else
+			{
+				//printf("Removing NULL JS\n");
+				devSel->removeItem(i);
+				deviceSelect( devSel->currentIndex() );
+			}
+		}
+	}
+
+	for (int i = 0; i < MAX_JOYSTICKS; i++)
+	{
+		jsDev_t *js = getJoystickDevice(i);
+
+		if (js != NULL)
+		{
+			if (js->isConnected())
+			{
+				char jsFound = 0;
+				for (int j = 0; j < devSel->count(); j++)
+				{
+					if ( devSel->itemData(j).toInt() == i )
+					{
+						jsFound = 1; break;
+					}
+				}
+				if ( !jsFound )
+				{
+					char stmp[256];
+					//printf("Adding Newly Connected JS\n");
+					sprintf(stmp, "%i: %s", i, js->getName());
+					devSel->addItem(tr(stmp), i);
+				}
+			}
+		}
+	}
+
 	for (int i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
 	{
 		//const char *txt, *style;
