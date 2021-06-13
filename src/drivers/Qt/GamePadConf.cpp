@@ -1266,6 +1266,9 @@ void GamePadConfDialog_t::delKeyBindingCallback(void)
 //----------------------------------------------------
 void GamePadConfDialog_t::updatePeriodic(void)
 {
+	char jsFound[ MAX_JOYSTICKS ];
+
+	memset( jsFound, 0, sizeof(jsFound) );
 
 	for (int i = 0; i < devSel->count(); i++)
 	{
@@ -1290,6 +1293,7 @@ void GamePadConfDialog_t::updatePeriodic(void)
 				devSel->removeItem(i);
 				deviceSelect( devSel->currentIndex() );
 			}
+			jsFound[ devIdx ] = 1;
 		}
 	}
 
@@ -1301,15 +1305,7 @@ void GamePadConfDialog_t::updatePeriodic(void)
 		{
 			if (js->isConnected())
 			{
-				char jsFound = 0;
-				for (int j = 0; j < devSel->count(); j++)
-				{
-					if ( devSel->itemData(j).toInt() == i )
-					{
-						jsFound = 1; break;
-					}
-				}
-				if ( !jsFound )
+				if ( !jsFound[i] )
 				{
 					char stmp[256];
 					//printf("Adding Newly Connected JS\n");
