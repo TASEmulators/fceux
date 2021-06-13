@@ -90,6 +90,9 @@ struct gamepad_function_key_t
 
 	} keySeq[2];
 
+	int  hk[2];
+	char  keyRelReq[2];
+
 	struct ButtConfig  bmap[2];
 
 	gamepad_function_key_t(void);

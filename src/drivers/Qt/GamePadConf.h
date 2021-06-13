@@ -52,6 +52,32 @@ protected:
 	bool captureState;
 };
 
+class HotKeySelectDialog_t : public QDialog
+{
+	Q_OBJECT
+
+public:
+	HotKeySelectDialog_t( QWidget *parent = 0);
+	~HotKeySelectDialog_t(void);
+
+	int  getSelHotKey(void){ return hotKeyIdx; };
+protected:
+	void closeEvent(QCloseEvent *bar);
+
+	QTreeWidget *tree;
+	QPushButton *okButton;
+	QPushButton *cancelButton;
+
+	int   hotKeyIdx;
+
+public slots:
+	void closeWindow(void);
+private slots:
+	void acceptCB(void);
+	void rejectCB(void);
+	void hotkeyItemClicked(QTreeWidgetItem *item, int column);
+};
+
 class GamePadFuncConfigDialog : public QDialog
 {
 	Q_OBJECT

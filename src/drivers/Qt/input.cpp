@@ -450,6 +450,11 @@ gamepad_function_key_t::gamepad_function_key_t(void)
 	{
 		keySeq[i].key = 0;
 		keySeq[i].modifier = Qt::NoModifier;
+		keyRelReq[i] = 0;
+	}
+	for (int i = 0; i < 2; i++)
+	{
+		hk[i] = -1;
 	}
 	for (int i = 0; i < 2; i++)
 	{
@@ -464,16 +469,41 @@ gamepad_function_key_t::~gamepad_function_key_t(void)
 
 void gamepad_function_key_t::sendKeyPressEvent(int idx)
 {
-	QKeyEvent *k = new QKeyEvent(QEvent::KeyPress, keySeq[idx].key, (Qt::KeyboardModifiers)keySeq[idx].modifier);
+	bool hasShortcut = false;
 
-	qApp->postEvent((QObject *)consoleWindow, (QEvent *)k);
+	// If the hot key has a shortcut associated with it, 
+	// activate shortcut directly instead of attempting to send key sequence events.
+	if ( (hk[idx] >= 0) && (hk[idx] < HK_MAX) )
+	{
+		QShortcut *s = Hotkeys[ hk[idx] ].getShortcut();
+
+		if ( s )
+		{
+			emit s->activated();
+			hasShortcut = true;
+		}
+	}
+
+	if ( !hasShortcut && (keySeq[idx].key > 0) )
+	{
+		QKeyEvent *k = new QKeyEvent(QEvent::KeyPress, keySeq[idx].key, (Qt::KeyboardModifiers)keySeq[idx].modifier);
+
+		qApp->postEvent((QObject *)consoleWindow, (QEvent *)k);
+
+		keyRelReq[idx] = 1;
+	}
 }
 
 void gamepad_function_key_t::sendKeyReleaseEvent(int idx)
 {
-	QKeyEvent *k = new QKeyEvent(QEvent::KeyRelease, keySeq[idx].key, (Qt::KeyboardModifiers)keySeq[idx].modifier);
+	if ( keyRelReq[idx] )
+	{
+		QKeyEvent *k = new QKeyEvent(QEvent::KeyRelease, keySeq[idx].key, (Qt::KeyboardModifiers)keySeq[idx].modifier);
 
-	qApp->postEvent((QObject *)consoleWindow, (QEvent *)k);
+		qApp->postEvent((QObject *)consoleWindow, (QEvent *)k);
+
+		keyRelReq[idx] = 0;
+	}
 }
 
 void gamepad_function_key_t::updateStatus(void)
