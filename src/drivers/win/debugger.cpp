@@ -1506,7 +1506,6 @@ extern char *iNesShortFName();
 
 void DebuggerExit()
 {
-	FCEUI_Debugger().badopbreak = 0;
 	debugger_open = 0;
 	inDebugger = false;
 	// in case someone call it multiple times
