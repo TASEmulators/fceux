@@ -1188,7 +1188,8 @@ void GamePadConfDialog_t::promptToSave(void)
 			}
 		}
 	}
-	msg.append(".");
+	msg.append(".\n");
+	msg.append("Mappings will not persist on emulator restart unless saved.");
 
 	msgBox.setIcon(QMessageBox::Warning);
 	msgBox.setText(tr(msg.c_str()));
