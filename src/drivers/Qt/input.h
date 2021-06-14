@@ -61,12 +61,20 @@ class hotkey_t
 		const char *getConfigName(void);
 		QShortcut *getShortcut(void);
 
+		QKeySequence getKeySeq(void){ return keySeq; };
+
 		// Member variables
 		struct 
 		{
 			int value;
 			int modifier;
 		} sdl;
+
+		struct
+		{
+			int value;
+			int modifier;
+		} qkey;
 
 		char prevState;
 

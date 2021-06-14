@@ -1944,16 +1944,32 @@ void GamePadFuncConfigDialog::changeKeySeq0(void)
 
 	if ( ret == QDialog::Accepted )
 	{
-		printf("Accepted Hot Key: %i\n", hkd.getSelHotKey() );
-		k->hk[0] = hkd.getSelHotKey();
-	}
-	else
-	{
-		printf("Rejected Hot Key\n");
-	}
+		hotkey_t *hkp;
+		char keyName[128];
 
-	hk[0]->setCaptureState(true);
-	hk[0]->setStyleSheet("background-color: green; color: white;");
+		//printf("Accepted Hot Key: %i\n", hkd.getSelHotKey() );
+		k->hk[0] = hkd.getSelHotKey();
+
+		hkp = &Hotkeys[ k->hk[0] ];
+
+		hkp->getString(keyName);
+
+		k->keySeq[0].key      = hkp->qkey.value;
+		k->keySeq[0].modifier = hkp->qkey.modifier;
+		k->keySeq[0].name.assign(hkp->getConfigName());
+
+		if ( keySeqLbl[0] )
+		{
+			keySeqLbl[0]->setText( tr(hkp->getConfigName()) );
+		}
+	}
+	//else
+	//{
+	//	printf("Rejected Hot Key\n");
+	//}
+
+	//hk[0]->setCaptureState(true);
+	//hk[0]->setStyleSheet("background-color: green; color: white;");
 }
 //----------------------------------------------------
 void GamePadFuncConfigDialog::changeKeySeq1(void)
@@ -1965,16 +1981,32 @@ void GamePadFuncConfigDialog::changeKeySeq1(void)
 
 	if ( ret == QDialog::Accepted )
 	{
-		printf("Accepted Hot Key: %i\n", hkd.getSelHotKey() );
-		k->hk[1] = hkd.getSelHotKey();
-	}
-	else
-	{
-		printf("Rejected Hot Key\n");
-	}
+		hotkey_t *hkp;
+		char keyName[128];
 
-	hk[1]->setCaptureState(true);
-	hk[1]->setStyleSheet("background-color: green; color: white;");
+		//printf("Accepted Hot Key: %i\n", hkd.getSelHotKey() );
+		k->hk[1] = hkd.getSelHotKey();
+
+		hkp = &Hotkeys[ k->hk[1] ];
+
+		hkp->getString(keyName);
+
+		k->keySeq[1].key      = hkp->qkey.value;
+		k->keySeq[1].modifier = hkp->qkey.modifier;
+		k->keySeq[1].name.assign(keyName);
+
+		if ( keySeqLbl[1] )
+		{
+			keySeqLbl[1]->setText( tr(hkp->getConfigName()) );
+		}
+	}
+	//else
+	//{
+	//	printf("Rejected Hot Key\n");
+	//}
+
+	//hk[1]->setCaptureState(true);
+	//hk[1]->setStyleSheet("background-color: green; color: white;");
 }
 //----------------------------------------------------
 void GamePadFuncConfigDialog::clearButton0(void)

@@ -200,6 +200,8 @@ hotkey_t::hotkey_t(void)
 {
 	sdl.value = 0;
 	sdl.modifier = 0;
+	qkey.value = 0;
+	qkey.modifier = 0;
 	prevState = 0;
 	shortcut = nullptr;
 	act = nullptr;
@@ -252,6 +254,9 @@ void hotkey_t::conv2SDL(void)
 {
 	if (shortcut == nullptr)
 		return;
+
+	qkey.value    = (Qt::Key)(shortcut->key()[0] & 0x01FFFFFF);
+	qkey.modifier = (Qt::KeyboardModifier)(shortcut->key()[0] & 0xFE000000);
 
 	SDL_Keycode k = convQtKey2SDLKeyCode((Qt::Key)(shortcut->key()[0] & 0x01FFFFFF));
 	SDL_Keymod m = convQtKey2SDLModifier((Qt::KeyboardModifier)(shortcut->key()[0] & 0xFE000000));
@@ -477,7 +482,7 @@ void gamepad_function_key_t::sendKeyPressEvent(int idx)
 	{
 		QShortcut *s = Hotkeys[ hk[idx] ].getShortcut();
 
-		if ( s )
+		if ( s && s->isEnabled() )
 		{
 			emit s->activated();
 			hasShortcut = true;
