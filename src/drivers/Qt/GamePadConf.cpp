@@ -1993,7 +1993,7 @@ void GamePadFuncConfigDialog::changeKeySeq1(void)
 
 		k->keySeq[1].key      = hkp->qkey.value;
 		k->keySeq[1].modifier = hkp->qkey.modifier;
-		k->keySeq[1].name.assign(keyName);
+		k->keySeq[1].name.assign(hkp->getConfigName());
 
 		if ( keySeqLbl[1] )
 		{
