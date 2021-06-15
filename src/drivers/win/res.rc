@@ -2352,9 +2352,6 @@ IDI_ICON4               ICON                    "res/taseditor-icon32.ico"
 
 ICON_1                  ICON                    "res/ICON_1.ico"
 
-ICON_2                  ICON                    "res/ICON_2.ico"
-
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
