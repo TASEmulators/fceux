@@ -390,10 +390,11 @@ TFormatRecords formatRecords;
 static bool archiveSystemInitialized=false;
 
 #ifdef WIN64
-static LibRef libref("7z_64.dll");
+#define _7Z_DLL "7z_64.dll"
 #else
-static LibRef libref("7z.dll");
+#define _7Z_DLL "7z.dll"
 #endif
+static LibRef libref(_7Z_DLL);
 
 void initArchiveSystem()
 {
@@ -475,10 +476,17 @@ static std::string wstringFromPROPVARIANT(BSTR bstr, bool& success)
 	return strret;
 }
 
+static bool endsWith(const std::string& str, const std::string& suffix)
+{
+	return (str.size() >= suffix.size()) && (str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0);
+}
+
 ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 {
 	if(!archiveSystemInitialized)
 	{
+		if (endsWith(fname, ".zip") || endsWith(fname, ".7z") || endsWith(fname, ".rar"))
+			MessageBox(hAppWnd, "Could not locate " _7Z_DLL, "Failure reading archive file", 0);
 		return ArchiveScanRecord();
 	}
 
@@ -576,7 +584,7 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 	FCEUFILE* fp = 0;
 	
 	if(!archiveSystemInitialized) {
-		MessageBox(hAppWnd,"Could not locate 7z.dll","Failure launching archive browser",0);
+		MessageBox(hAppWnd,"Could not locate " _7Z_DLL, "Failure launching archive browser", 0);
 		return 0;
 	}
 
@@ -584,7 +592,7 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 	CreateObjectFunc CreateObject = (CreateObjectFunc)GetProcAddress(libref.hmod,"CreateObject");
 	if(!CreateObject)
 	{
-		MessageBox(hAppWnd,"7z.dll was invalid","Failure launching archive browser",0);
+		MessageBox(hAppWnd, _7Z_DLL " was invalid","Failure launching archive browser",0);
 		return 0;
 	}
 
