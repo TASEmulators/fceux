@@ -102,15 +102,21 @@ class PaletteEditorDialog_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *event);
 
+		QAction *undoAct;
+		QAction *redoAct;
+		QTimer  *updateTimer;
 	private:
 
 	public slots:
 		void closeWindow(void);
 	private slots:
+		void updatePeriodic(void);
 		void openPaletteFileDialog(void);
 		void savePaletteFileDialog(void);
 		void exportPaletteFileDialog(void);
 		void setActivePalette(void);
+		void undoLastOperation(void);
+		void redoLastOperation(void);
 
 };
 

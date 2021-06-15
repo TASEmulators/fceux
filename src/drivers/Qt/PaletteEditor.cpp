@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <vector>
+#include <list>
 
 #include <SDL.h>
 #include <QMenu>
@@ -48,13 +50,22 @@
 #include "Qt/PaletteEditor.h"
 #include "Qt/ConsoleUtilities.h"
 
+struct colorChangeData_t
+{
+	int  palIdx;
+	QColor  oldColor;
+	QColor  newColor;
+};
+
+static std::vector <colorChangeData_t>  undoColorHistory;  
+static std::vector <colorChangeData_t>  redoColorHistory;  
 //----------------------------------------------------------------------------
 PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
 	QVBoxLayout *mainLayout;
 	QMenuBar *menuBar;
-	QMenu *fileMenu, *memMenu, *subMenu;
+	QMenu *fileMenu, *editMenu, *memMenu, *subMenu;
 	QAction *act;
 	int useNativeMenuBar;
 
@@ -112,6 +123,25 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	
 	fileMenu->addAction(act);
 
+	// Edit
+	editMenu = menuBar->addMenu(tr("&Edit"));
+
+	// Edit -> Undo
+	undoAct = new QAction(tr("&Undo"), this);
+	undoAct->setShortcut(QKeySequence::Undo);
+	undoAct->setStatusTip(tr("Undo Last Operation"));
+	connect(undoAct, SIGNAL(triggered()), this, SLOT(undoLastOperation(void)) );
+	
+	editMenu->addAction(undoAct);
+
+	// Edit -> Redo
+	redoAct = new QAction(tr("&Redo"), this);
+	redoAct->setShortcut(QKeySequence::Redo);
+	redoAct->setStatusTip(tr("Redo Last Operation"));
+	connect(redoAct, SIGNAL(triggered()), this, SLOT(redoLastOperation(void)) );
+	
+	editMenu->addAction(redoAct);
+
 	// Memory
 	memMenu = menuBar->addMenu(tr("&Memory"));
 
@@ -127,6 +157,9 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	// End Menu 
 	//-----------------------------------------------------------------------
 
+	undoAct->setEnabled( undoColorHistory.size() > 0 );
+	redoAct->setEnabled( redoColorHistory.size() > 0 );
+
 	mainLayout = new QVBoxLayout();
 
 	mainLayout->setMenuBar( menuBar );
@@ -138,11 +171,22 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	mainLayout->addWidget( palView );
 
 	palView->loadActivePalette();
+
+	updateTimer = new QTimer(this);
+
+	connect(updateTimer, &QTimer::timeout, this, &PaletteEditorDialog_t::updatePeriodic);
+
+	updateTimer->start(500); // 2hz
 }
 //----------------------------------------------------------------------------
 PaletteEditorDialog_t::~PaletteEditorDialog_t(void)
 {
 	printf("Destroy Palette Editor Config Window\n");
+
+	updateTimer->stop();
+
+	undoColorHistory.clear();
+	redoColorHistory.clear();
 }
 //----------------------------------------------------------------------------
 void PaletteEditorDialog_t::closeEvent(QCloseEvent *event)
@@ -163,6 +207,96 @@ void PaletteEditorDialog_t::closeWindow(void)
 void PaletteEditorDialog_t::setActivePalette(void)
 {
 	palView->setActivePalette();
+}
+//----------------------------------------------------------------------------
+void PaletteEditorDialog_t::updatePeriodic(void)
+{
+	undoAct->setEnabled( undoColorHistory.size() > 0 );
+	redoAct->setEnabled( redoColorHistory.size() > 0 );
+
+	if ( undoAct->isEnabled() )
+	{
+		char stmp[64];
+		colorChangeData_t chg;
+
+		chg = undoColorHistory.back();
+
+		sprintf( stmp, "&Undo $%02X = rgb(%3i,%3i,%3i)", chg.palIdx, 
+				chg.newColor.red(), chg.newColor.green(), chg.newColor.blue() );
+
+		undoAct->setText( tr(stmp) );
+	}
+	else
+	{
+		undoAct->setText( tr("&Undo") );
+	}
+
+	if ( redoAct->isEnabled() )
+	{
+		char stmp[64];
+		colorChangeData_t chg;
+
+		chg = redoColorHistory.back();
+
+		sprintf( stmp, "&Redo $%02X = rgb(%3i,%3i,%3i)", chg.palIdx, 
+				chg.newColor.red(), chg.newColor.green(), chg.newColor.blue() );
+
+		redoAct->setText( tr(stmp) );
+	}
+	else
+	{
+		redoAct->setText( tr("&Redo") );
+	}
+}
+//----------------------------------------------------------------------------
+void PaletteEditorDialog_t::undoLastOperation(void)
+{
+	if ( undoColorHistory.size() == 0 )
+	{
+		undoAct->setEnabled(false);
+		return;
+	}
+	colorChangeData_t chg;
+
+	chg = undoColorHistory.back();
+
+	redoColorHistory.push_back(chg);
+	undoColorHistory.pop_back();
+
+	//printf("Undo Palette Op: %02X  \n", chg.palIdx);
+	palView->color[ chg.palIdx ] = chg.oldColor;
+
+	palView->setActivePalette();
+
+	undoAct->setEnabled( undoColorHistory.size() > 0 );
+	redoAct->setEnabled( redoColorHistory.size() > 0 );
+
+	update();
+}
+//----------------------------------------------------------------------------
+void PaletteEditorDialog_t::redoLastOperation(void)
+{
+	if ( redoColorHistory.size() == 0 )
+	{
+		redoAct->setEnabled(false);
+		return;
+	}
+	colorChangeData_t chg;
+
+	chg = redoColorHistory.back();
+
+	undoColorHistory.push_back(chg);
+	redoColorHistory.pop_back();
+
+	//printf("Undo Palette Op: %02X  \n", chg.palIdx);
+	palView->color[ chg.palIdx ] = chg.newColor;
+
+	palView->setActivePalette();
+
+	undoAct->setEnabled( undoColorHistory.size() > 0 );
+	redoAct->setEnabled( redoColorHistory.size() > 0 );
+
+	update();
 }
 //----------------------------------------------------------------------------
 void PaletteEditorDialog_t::openPaletteFileDialog(void)
@@ -408,6 +542,8 @@ void nesPaletteView::loadActivePalette(void)
 		color[p].setGreen( palo[p].g );
 		color[p].setRed( palo[p].r );
 	}
+	undoColorHistory.clear();
+	redoColorHistory.clear();
 }
 //----------------------------------------------------------------------------
 void nesPaletteView::setActivePalette(void)
@@ -471,6 +607,9 @@ int  nesPaletteView::loadFromFile( const char *filepath )
 	}
 
 	::fclose(fp);
+
+	undoColorHistory.clear();
+	redoColorHistory.clear();
 
 	return 0;
 }
@@ -593,6 +732,7 @@ void nesPaletteView::mousePressEvent(QMouseEvent * event)
 		{
 			selCell = cell;
 			update();
+			editSelColor();
 		}
 	}
 }
@@ -844,7 +984,16 @@ void nesColorPickerDialog_t::colorChanged( const QColor &color )
 //----------------------------------------------------------------------------
 void nesColorPickerDialog_t::colorAccepted(void)
 {
-	//printf("nesColorPicker Accepted\n");
+	colorChangeData_t chg;
+
+	chg.palIdx   =  palIdx;
+	chg.oldColor =  origColor;
+	chg.newColor = *colorPtr;
+
+	undoColorHistory.push_back( chg );
+	redoColorHistory.clear();
+
+	//printf("nesColorPicker Accepted: %zi\n", colorChangeHistory.size() );
 	deleteLater();
 }
 //----------------------------------------------------------------------------
