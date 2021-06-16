@@ -337,6 +337,8 @@ int GamePad_t::init(int port, const char *guid, const char *profile)
 
 	portNum = port;
 
+	//printf("Init: %i   %s   %s \n", port, guid, profile );
+
 	// First look for a controller that matches the specific GUID
 	// that is not already in use by another port.
 	if (devIdx < 0)
@@ -369,7 +371,7 @@ int GamePad_t::init(int port, const char *guid, const char *profile)
 	// If a specific controller was not matched,
 	// then look for any game controller that is plugged in
 	// and not already bound.
-	if (devIdx < 0)
+	if ( (devIdx < 0) && (strcmp(guid, "keyboard") != 0) )
 	{
 		for (i = 0; i < MAX_JOYSTICKS; i++)
 		{
@@ -396,7 +398,10 @@ int GamePad_t::init(int port, const char *guid, const char *profile)
 	// game controller, then load default keyboard.
 	if ((portNum == 0) && (devIdx < 0))
 	{
-		loadDefaults();
+		if (loadProfile(profile))
+		{
+			loadDefaults();
+		}
 	}
 
 	return 0;
