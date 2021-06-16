@@ -76,7 +76,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 	QPushButton *closeButton;
 	char stmp[256];
 
-	pm2 = pm.scaled( 64, 64 );
+	pm2 = pm.scaled( 128, 128 );
 
 	setWindowTitle( tr("About fceuX") );
 
@@ -93,13 +93,13 @@ AboutWindow::AboutWindow(QWidget *parent)
 
 	mainLayout->addLayout( hbox1 );
 
-	hbox1 = new QHBoxLayout();
-	lbl = new QLabel( tr("fceuX") );
+	//hbox1 = new QHBoxLayout();
+	//lbl = new QLabel( tr("fceuX") );
 
-	hbox1->addWidget( lbl );
-	hbox1->setAlignment( Qt::AlignCenter );
+	//hbox1->addWidget( lbl );
+	//hbox1->setAlignment( Qt::AlignCenter );
 
-	mainLayout->addLayout( hbox1 );
+	//mainLayout->addLayout( hbox1 );
 
 	hbox1 = new QHBoxLayout();
 	lbl = new QLabel( tr(FCEU_VERSION_STRING) );
