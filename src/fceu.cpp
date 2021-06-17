@@ -425,7 +425,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	int lastpal = PAL;
 	int lastdendy = dendy;
 
-	const char* romextensions[] = { "nes", "fds", 0 };
+	const char* romextensions[] = { "nes", "fds", "nsf", 0 };
 
 	// indicator for if the operaton was canceled by user
 	// currently there's only one situation:

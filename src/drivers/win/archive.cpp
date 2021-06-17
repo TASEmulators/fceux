@@ -10,6 +10,7 @@
 #include "7zip/IArchive.h"
 #include "file.h"
 #include "utils/guid.h"
+#include "utils/xstring.h"
 
 #include "driver.h"
 #include "main.h"
@@ -266,7 +267,7 @@ public:
 	}
 };
 
-//used to move all child items in the dialog when you resize (except for the dock fill controls which are resized)
+// Callback for resizing child controls
 BOOL CALLBACK ArchiveEnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
 	RECT crect;
@@ -311,7 +312,6 @@ public:
 	}
 };
 
-// Callback for resizing child controls
 static INT_PTR CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
@@ -476,18 +476,18 @@ static std::string wstringFromPROPVARIANT(BSTR bstr, bool& success)
 	return strret;
 }
 
-static bool endsWith(const std::string& str, const std::string& suffix)
-{
-	return (str.size() >= suffix.size()) && (str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0);
-}
-
 ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 {
 	if(!archiveSystemInitialized)
 	{
-		if (endsWith(fname, ".zip") || endsWith(fname, ".7z") || endsWith(fname, ".rar"))
+		std::string fext = getExtension(fname.c_str());
+		if ((fext == "zip") || (fext == "7z") || (fext == "rar"))
+		{
 			MessageBox(hAppWnd, "Could not locate " _7Z_DLL, "Failure reading archive file", 0);
-		return ArchiveScanRecord();
+			ArchiveScanRecord error = ArchiveScanRecord();
+			error.numFilesInArchive = -1;
+			return error;
+		}
 	}
 
 	//check the file against the signatures

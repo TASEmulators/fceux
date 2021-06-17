@@ -287,6 +287,13 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, cha
 	if(read)
 	{
 		ArchiveScanRecord asr = FCEUD_ScanArchive(fileToOpen);
+		if (asr.numFilesInArchive < 0)
+		{
+			// error occurred, return
+			// actually it's canceled not by user but an error message already shown
+			*userCancel = 1;
+			return fceufp;
+		}
 		asr.files.FilterByExtension(extensions);
 		if(!asr.isArchive())
 		{
