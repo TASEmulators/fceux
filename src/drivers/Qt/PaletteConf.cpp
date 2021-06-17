@@ -367,6 +367,8 @@ void PaletteConfDialog_t::force_GrayScale_Changed(int state)
 		force_grayscale = value ? true : false;
 		FCEUI_SetNTSCTH(e, t, h);
 		fceuWrapperUnLock();
+
+		g_config->setOption("SDL.ForceGrayScale", force_grayscale);
 	}
 }
 //----------------------------------------------------
@@ -383,6 +385,8 @@ void PaletteConfDialog_t::deemphswap_Changed(int state)
 		paldeemphswap = value ? true : false;
 		FCEUI_SetNTSCTH(e, t, h);
 		fceuWrapperUnLock();
+
+		g_config->setOption("SDL.DeempBitSwap", paldeemphswap);
 	}
 }
 //----------------------------------------------------
@@ -555,6 +559,8 @@ void PaletteConfDialog_t::palNotchChanged(int value)
 		palupdate = 1;
 
 		fceuWrapperUnLock();
+
+		g_config->setOption("SDL.PalNotch", palnotch);
 	}
 }
 //----------------------------------------------------
@@ -571,6 +577,8 @@ void PaletteConfDialog_t::palSaturationChanged(int value)
 		palupdate      = 1;
 
 		fceuWrapperUnLock();
+
+		g_config->setOption("SDL.PalSaturation", palsaturation);
 	}
 }
 //----------------------------------------------------
@@ -582,6 +590,8 @@ void PaletteConfDialog_t::palSharpnessChanged(int value)
 		palupdate      = 1;
 
 		fceuWrapperUnLock();
+
+		g_config->setOption("SDL.PalSharpness", palsharpness);
 	}
 }
 //----------------------------------------------------
@@ -598,6 +608,8 @@ void PaletteConfDialog_t::palContrastChanged(int value)
 		palupdate      = 1;
 
 		fceuWrapperUnLock();
+
+		g_config->setOption("SDL.PalContrast", palcontrast);
 	}
 }
 //----------------------------------------------------
@@ -614,6 +626,8 @@ void PaletteConfDialog_t::palBrightnessChanged(int value)
 		palupdate      = 1;
 
 		fceuWrapperUnLock();
+
+		g_config->setOption("SDL.PalBrightness", palbrightness);
 	}
 }
 //----------------------------------------------------

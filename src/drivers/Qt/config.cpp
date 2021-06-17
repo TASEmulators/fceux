@@ -24,6 +24,7 @@
 #include "Qt/config.h"
 
 #include "fceu.h"
+#include "ppu.h"
 #include "../common/cheat.h"
 
 #include "Qt/input.h"
@@ -53,6 +54,13 @@
 #include <sys/types.h>
 #endif
 
+extern bool force_grayscale;
+extern bool palupdate;
+extern  int palnotch;
+extern  int palsaturation;
+extern  int palsharpness;
+extern  int palcontrast;
+extern  int palbrightness;
 
 int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const char **titleOut )
 {
@@ -471,6 +479,13 @@ InitConfig()
 	config->addOption("tint", "SDL.Tint", 56);
 	config->addOption("hue", "SDL.Hue", 72);
 	config->addOption("ntsccolor", "SDL.NTSCpalette", 0);
+	config->addOption("SDL.ForceGrayScale", 0);
+	config->addOption("SDL.DeempBitSwap", 0);
+	config->addOption("SDL.PalNotch", 100);
+	config->addOption("SDL.PalSaturation", 100);
+	config->addOption("SDL.PalSharpness", 0);
+	config->addOption("SDL.PalContrast", 100);
+	config->addOption("SDL.PalBrightness", 50);
 
 	// scanline settings
 	config->addOption("SDL.ScanLineStartNTSC", 0+8);
@@ -836,6 +851,15 @@ UpdateEMUCore(Config *config)
 	config->getOption("SDL.Tint", &ntsctint);
 	config->getOption("SDL.Hue", &ntschue);
 	FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+
+	config->getOption("SDL.ForceGrayScale", &force_grayscale);
+	config->getOption("SDL.DeempBitSwap"  , &paldeemphswap);
+	config->getOption("SDL.PalNotch"      , &palnotch);
+	config->getOption("SDL.PalSaturation" , &palsaturation);
+	config->getOption("SDL.PalSharpness"  , &palsharpness);
+	config->getOption("SDL.PalContrast"   , &palcontrast);
+	config->getOption("SDL.PalBrightness" , &palbrightness);
+	palupdate = 1;
 
 	config->getOption("SDL.Palette", &cpalette);
 	if(cpalette.size()) {
