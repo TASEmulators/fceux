@@ -29,4 +29,4 @@ void Blit32to16(uint32 *src, uint16 *dest, int xr, int yr, int dpitch,
         int shiftr[3], int shiftl[3]);
 
 
-u32 ModernDeemphColorMap(u8* src, u8* srcbuf, int xscale, int yscale);
+u32 ModernDeemphColorMap(u8* src, u8* srcbuf, int scale);
