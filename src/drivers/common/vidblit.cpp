@@ -496,6 +496,11 @@ u32 ModernDeemphColorMap(u8* src, u8* srcbuf, int scale)
 	else if(scale == 2) _ModernDeemphColorMap<2>(src,srcbuf);
 	else if(scale == 3) _ModernDeemphColorMap<3>(src,srcbuf);
 	else if(scale == 4) _ModernDeemphColorMap<4>(src,srcbuf);
+	else if(scale == 5) _ModernDeemphColorMap<5>(src,srcbuf);
+	else if(scale == 6) _ModernDeemphColorMap<6>(src,srcbuf);
+	else if(scale == 7) _ModernDeemphColorMap<7>(src,srcbuf);
+	else if(scale == 8) _ModernDeemphColorMap<8>(src,srcbuf);
+	else if(scale == 9) _ModernDeemphColorMap<9>(src,srcbuf);
 	else abort();
 }
 
