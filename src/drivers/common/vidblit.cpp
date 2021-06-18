@@ -492,16 +492,16 @@ template<int SCALE> static u32 _ModernDeemphColorMap(u8* src, u8* srcbuf)
 
 u32 ModernDeemphColorMap(u8* src, u8* srcbuf, int scale)
 {
-	if(scale == 1)_ModernDeemphColorMap<1>(src,srcbuf);
-	else if(scale == 2) _ModernDeemphColorMap<2>(src,srcbuf);
-	else if(scale == 3) _ModernDeemphColorMap<3>(src,srcbuf);
-	else if(scale == 4) _ModernDeemphColorMap<4>(src,srcbuf);
-	else if(scale == 5) _ModernDeemphColorMap<5>(src,srcbuf);
-	else if(scale == 6) _ModernDeemphColorMap<6>(src,srcbuf);
-	else if(scale == 7) _ModernDeemphColorMap<7>(src,srcbuf);
-	else if(scale == 8) _ModernDeemphColorMap<8>(src,srcbuf);
-	else if(scale == 9) _ModernDeemphColorMap<9>(src,srcbuf);
-	else abort();
+	if(scale == 1) return _ModernDeemphColorMap<1>(src,srcbuf);
+	else if(scale == 2) return _ModernDeemphColorMap<2>(src,srcbuf);
+	else if(scale == 3) return _ModernDeemphColorMap<3>(src,srcbuf);
+	else if(scale == 4) return _ModernDeemphColorMap<4>(src,srcbuf);
+	else if(scale == 5) return _ModernDeemphColorMap<5>(src,srcbuf);
+	else if(scale == 6) return _ModernDeemphColorMap<6>(src,srcbuf);
+	else if(scale == 7) return _ModernDeemphColorMap<7>(src,srcbuf);
+	else if(scale == 8) return _ModernDeemphColorMap<8>(src,srcbuf);
+	else if(scale == 9) return _ModernDeemphColorMap<9>(src,srcbuf);
+	else { abort(); return 0; }
 }
 
 void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, int yscale)
