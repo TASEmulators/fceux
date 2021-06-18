@@ -186,6 +186,9 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	palFrame->setEnabled( nes_shm->video.preScaler == 9 );
 
 	grid  = new QGridLayout();
+	grid->setColumnStretch( 0, 40 );
+	grid->setColumnStretch( 1, 40 );
+	grid->setColumnStretch( 2, 20 );
 
 	sprintf(stmp, "Notch: %3i%%", palnotch);
 	notchFrame = new QGroupBox(tr(stmp));
