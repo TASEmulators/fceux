@@ -32,6 +32,7 @@ protected:
 	QCheckBox *useCustom;
 	QCheckBox *GrayScale;
 	QCheckBox *deemphSwap;
+	QPushButton *ntscReset;
 	QPushButton *palReset;
 	QSlider *tintSlider;
 	QSlider *hueSlider;
@@ -49,15 +50,18 @@ protected:
 	QGroupBox *sharpnessFrame;
 	QGroupBox *contrastFrame;
 	QGroupBox *brightnessFrame;
+	QTimer    *updateTimer;
 
 private:
 public slots:
 	void closeWindow(void);
 private slots:
+	void updatePeriodic(void);
 	void hueChanged(int value);
 	void tintChanged(int value);
 	void openPaletteFile(void);
 	void clearPalette(void);
+	void ntscResetClicked(void);
 	void use_NTSC_Changed(bool v);
 	void use_Custom_Changed(int v);
 	void force_GrayScale_Changed(int v);

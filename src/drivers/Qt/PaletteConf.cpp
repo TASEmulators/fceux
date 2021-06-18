@@ -27,6 +27,7 @@
 #include "Qt/main.h"
 #include "Qt/input.h"
 #include "Qt/config.h"
+#include "Qt/nes_shm.h"
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleUtilities.h"
@@ -66,7 +67,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	style = this->style();
 
-	resize(512, 650);
+	resize(512, 600);
 
 	// sync with config
 	g_config->getOption("SDL.Hue", &hue);
@@ -79,10 +80,13 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	frame = new QGroupBox(tr("Custom Palette:"));
 	vbox = new QVBoxLayout();
 	hbox1 = new QHBoxLayout();
+	hbox2 = new QHBoxLayout();
 
 	useCustom = new QCheckBox(tr("Use Custom Palette"));
 	GrayScale = new QCheckBox(tr("Force Grayscale"));
 	deemphSwap = new QCheckBox(tr("De-emphasis Bit Swap"));
+
+	hbox1->addWidget(useCustom, 50);
 
 	useCustom->setChecked(FCEUI_GetUserPaletteAvail());
 	GrayScale->setChecked(force_grayscale);
@@ -92,9 +96,10 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	connect(GrayScale, SIGNAL(stateChanged(int)), this, SLOT(force_GrayScale_Changed(int)));
 	connect(deemphSwap, SIGNAL(stateChanged(int)), this, SLOT(deemphswap_Changed(int)));
 
-	button = new QPushButton(tr("Open Palette"));
+	button = new QPushButton(tr("Load"));
 	button->setIcon(style->standardIcon(QStyle::SP_FileDialogStart));
-	hbox1->addWidget(button);
+	//hbox1->addStretch(10);
+	hbox1->addWidget(button, 25);
 
 	connect(button, SIGNAL(clicked(void)), this, SLOT(openPaletteFile(void)));
 
@@ -102,20 +107,23 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	custom_palette_path = new QLineEdit();
 	custom_palette_path->setReadOnly(true);
+	custom_palette_path->setClearButtonEnabled(false);
 	custom_palette_path->setText(paletteFile.c_str());
 
 	hbox = new QHBoxLayout();
 	hbox->addWidget(GrayScale);
 	hbox->addWidget(deemphSwap);
 
-	vbox->addWidget(useCustom);
+	hbox2->addWidget( custom_palette_path );
+	//vbox->addWidget(useCustom);
 	vbox->addLayout(hbox1);
-	vbox->addWidget(custom_palette_path);
+	vbox->addLayout(hbox2);
 	vbox->addLayout(hbox);
 
 	button = new QPushButton(tr("Clear"));
 	button->setIcon(style->standardIcon(QStyle::SP_LineEditClearButton));
-	hbox1->addWidget(button);
+	hbox1->addWidget(button, 25);
+	//hbox2->addWidget(button);
 
 	connect(button, SIGNAL(clicked(void)), this, SLOT(clearPalette(void)));
 
@@ -162,14 +170,20 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	hbox1->addWidget(hueSlider);
 	hueFrame->setLayout(hbox1);
 	hbox2->addWidget(hueFrame);
+
+	ntscReset = new QPushButton( tr("Reset") );
+	hbox2->addWidget(ntscReset);
 	vbox->addLayout(hbox2);
+
+	connect(ntscReset, SIGNAL(clicked(void)), this, SLOT(ntscResetClicked(void)));
 
 	ntscFrame->setLayout(vbox);
 
 	mainLayout->addWidget(ntscFrame);
 
 	palFrame = new QGroupBox(tr("PAL Emulation:"));
-	palFrame->setCheckable(true);
+	palFrame->setCheckable(false);
+	palFrame->setEnabled( nes_shm->video.preScaler == 9 );
 
 	grid  = new QGridLayout();
 
@@ -266,12 +280,19 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	mainLayout->addLayout( hbox );
 
 	setLayout(mainLayout);
+
+	updateTimer = new QTimer(this);
+
+	connect(updateTimer, &QTimer::timeout, this, &PaletteConfDialog_t::updatePeriodic);
+
+	updateTimer->start(500); // 2hz
 }
 
 //----------------------------------------------------
 PaletteConfDialog_t::~PaletteConfDialog_t(void)
 {
 	printf("Destroy Palette Config Window\n");
+	updateTimer->stop();
 }
 //----------------------------------------------------------------------------
 void PaletteConfDialog_t::closeEvent(QCloseEvent *event)
@@ -287,6 +308,17 @@ void PaletteConfDialog_t::closeWindow(void)
 	//printf("Close Window\n");
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------
+void PaletteConfDialog_t::updatePeriodic(void)
+{
+	palFrame->setEnabled( nes_shm->video.preScaler == 9 );
+}
+//----------------------------------------------------
+void PaletteConfDialog_t::ntscResetClicked(void)
+{
+	 hueSlider->setValue( 72 );
+	tintSlider->setValue( 56 );
 }
 //----------------------------------------------------
 void PaletteConfDialog_t::hueChanged(int v)
