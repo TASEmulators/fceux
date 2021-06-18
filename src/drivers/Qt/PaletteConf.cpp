@@ -212,7 +212,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	hbox1->addWidget(saturationSlider);
 	saturationFrame->setLayout(hbox1);
 
-	sprintf(stmp, "Sharpness:");
+	sprintf(stmp, "Sharpness: %3i%%", palsharpness*2);
 	sharpnessFrame = new QGroupBox(tr(stmp));
 	hbox1 = new QHBoxLayout();
 	sharpnessSlider = new QSlider(Qt::Horizontal);
@@ -625,6 +625,11 @@ void PaletteConfDialog_t::palSharpnessChanged(int value)
 {
 	if (fceuWrapperTryLock())
 	{
+		char stmp[64];
+
+		sprintf( stmp, "Sharpness: %3i%%", value*2 );
+		sharpnessFrame->setTitle( tr(stmp) );
+
 		palsharpness   = value;
 		palupdate      = 1;
 
