@@ -67,7 +67,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	style = this->style();
 
-	resize(512, 600);
+	resize(512, 512);
 
 	// sync with config
 	g_config->getOption("SDL.Hue", &hue);
@@ -267,6 +267,10 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	comments->setText(commentText);
 	comments->moveCursor(QTextCursor::Start);
 	comments->setReadOnly(true);
+
+	QFont font = comments->currentFont();
+	QFontMetrics metrics(font);
+	comments->setMinimumHeight( 7 * metrics.lineSpacing() );
 
 	mainLayout->addWidget(comments);
 
