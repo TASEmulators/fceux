@@ -192,8 +192,10 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	sprintf(stmp, "Notch: %3i%%", palnotch);
 	notchFrame = new QGroupBox(tr(stmp));
+	notchFrame->setMinimumWidth( notchFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
 	hbox1 = new QHBoxLayout();
 	notchSlider = new QSlider(Qt::Horizontal);
+	notchSlider->setMinimumWidth(100);
 	notchSlider->setMinimum(0);
 	notchSlider->setMaximum(100);
 	notchSlider->setValue(palnotch);
@@ -203,8 +205,10 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	sprintf(stmp, "Saturation: %3i%%", palsaturation);
 	saturationFrame = new QGroupBox(tr(stmp));
+	saturationFrame->setMinimumWidth( saturationFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
 	hbox1 = new QHBoxLayout();
 	saturationSlider = new QSlider(Qt::Horizontal);
+	saturationSlider->setMinimumWidth(100);
 	saturationSlider->setMinimum(0);
 	saturationSlider->setMaximum(200);
 	saturationSlider->setValue(palsaturation);
@@ -214,8 +218,10 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	sprintf(stmp, "Sharpness: %3i%%", palsharpness*2);
 	sharpnessFrame = new QGroupBox(tr(stmp));
+	sharpnessFrame->setMinimumWidth( sharpnessFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
 	hbox1 = new QHBoxLayout();
 	sharpnessSlider = new QSlider(Qt::Horizontal);
+	sharpnessSlider->setMinimumWidth(50);
 	sharpnessSlider->setMinimum(0);
 	sharpnessSlider->setMaximum(50);
 	sharpnessSlider->setValue(palsharpness);
@@ -225,8 +231,10 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	sprintf(stmp, "Contrast: %3i%%", palcontrast);
 	contrastFrame = new QGroupBox(tr(stmp));
+	contrastFrame->setMinimumWidth( contrastFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
 	hbox1 = new QHBoxLayout();
 	contrastSlider = new QSlider(Qt::Horizontal);
+	contrastSlider->setMinimumWidth(100);
 	contrastSlider->setMinimum(0);
 	contrastSlider->setMaximum(200);
 	contrastSlider->setValue(palcontrast);
@@ -236,8 +244,10 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	sprintf(stmp, "Brightness: %3i%%", palbrightness);
 	brightnessFrame = new QGroupBox(tr(stmp));
+	brightnessFrame->setMinimumWidth( brightnessFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
 	hbox1 = new QHBoxLayout();
 	brightnessSlider = new QSlider(Qt::Horizontal);
+	brightnessSlider->setMinimumWidth(100);
 	brightnessSlider->setMinimum(0);
 	brightnessSlider->setMaximum(100);
 	brightnessSlider->setValue(palbrightness);
@@ -271,9 +281,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	comments->moveCursor(QTextCursor::Start);
 	comments->setReadOnly(true);
 
-	QFont font = comments->currentFont();
-	QFontMetrics metrics(font);
-	comments->setMinimumHeight( 7 * metrics.lineSpacing() );
+	comments->setMinimumHeight( 7 * comments->fontMetrics().lineSpacing() );
 
 	mainLayout->addWidget(comments);
 
