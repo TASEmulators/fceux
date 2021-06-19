@@ -485,7 +485,9 @@ template<int SCALE> static u32 _ModernDeemphColorMap(u8* src, u8* srcbuf)
 
 	//if it was a deemph'd value, grab it from the deemph palette
 	if(deemph != 0)
-		color = palettetranslate[256+(pixel&0x3F)+deemph*64];
+	{
+		color = palettetranslate[256+(pixel&0x3F)+(deemph*64)];
+	}
 
 	return color;
 }
@@ -504,6 +506,26 @@ u32 ModernDeemphColorMap(u8* src, u8* srcbuf, int scale)
 	else { abort(); return 0; }
 }
 
+typedef u32 (*ModernDeemphColorMapFuncPtr)( u8*, u8* );
+
+static ModernDeemphColorMapFuncPtr getModernDeemphColorMapFunc(int scale)
+{
+	ModernDeemphColorMapFuncPtr ptr = NULL;
+
+	if(scale == 1) ptr = &_ModernDeemphColorMap<1>;
+	else if(scale == 2) ptr = &_ModernDeemphColorMap<2>;
+	else if(scale == 3) ptr = &_ModernDeemphColorMap<3>;
+	else if(scale == 4) ptr = &_ModernDeemphColorMap<4>;
+	else if(scale == 5) ptr = &_ModernDeemphColorMap<5>;
+	else if(scale == 6) ptr = &_ModernDeemphColorMap<6>;
+	else if(scale == 7) ptr = &_ModernDeemphColorMap<7>;
+	else if(scale == 8) ptr = &_ModernDeemphColorMap<8>;
+	else if(scale == 9) ptr = &_ModernDeemphColorMap<9>;
+	else { abort(); ptr = NULL; }
+
+	return ptr;
+}
+
 void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, int yscale)
 {
 	int x,y;
@@ -519,6 +541,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 	{
 		int mult; 
 		int base;
+		ModernDeemphColorMapFuncPtr ModernDeemphColorMapFunc = NULL;
 		
 		// -Video Modes Tag-
 		if(silt == 2) mult = 2;
@@ -531,6 +554,8 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 		if(mdcmxs != mdcmys)
 			abort();
 		
+		ModernDeemphColorMapFunc = getModernDeemphColorMapFunc( mdcmxs );
+
 		xr *= mult;
 		yr *= mult;
 		xscale=yscale=1;
@@ -545,7 +570,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			{
 				for(x=xr;x;x--)
 				{
-				 *(uint32 *)dest=ModernDeemphColorMap(src,specbuf8bpp,mdcmxs);
+				 *(uint32 *)dest=ModernDeemphColorMapFunc(src,specbuf8bpp);
 				 dest+=4;
 				 src++;
 				}
@@ -558,7 +583,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			{
 				for(x=xr;x;x--)
 				{
-					uint32 tmp=ModernDeemphColorMap(src,specbuf8bpp,mdcmxs);
+					uint32 tmp=ModernDeemphColorMapFunc(src,specbuf8bpp);
 					*(uint8 *)dest=tmp;
 					*((uint8 *)dest+1)=tmp>>8;
 					*((uint8 *)dest+2)=tmp>>16;
@@ -598,7 +623,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 		{
 			for(x=xr; x; x--)
 			{
-				*(uint32 *)dest = ModernDeemphColorMap(src,XBuf,1);
+				*(uint32 *)dest = _ModernDeemphColorMap<1>(src,XBuf);
 				dest += 4;
 				src++;
 			}
@@ -609,9 +634,11 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 		{
 			uint32 *s = prescalebuf;
 			uint32 *d = (uint32 *)destbackup; // use 32-bit pointers ftw
-			int subpixel;
+			int subpixel,yend;
 
-			for (y=0; y<yr*yscale; y++)
+			yend = yr*yscale;
+
+			for (y=0; y<yend; y++)
 			{
 				int back = xr*(y%yscale>0); // bool as multiplier
 				for (x=0; x<xr; x++)
@@ -937,7 +964,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 					for(x=xr;x;x--)
 					{
 						//THE MAIN BLITTING CODEPATH (there may be others that are important)
-						*(uint32 *)dest = ModernDeemphColorMap(src,XBuf,1);
+						*(uint32 *)dest = _ModernDeemphColorMap<1>(src,XBuf);
 						dest+=4;
 						src++;
 					}
@@ -950,7 +977,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 				{
 					for(x=xr;x;x--)
 					{     
-						uint32 tmp = ModernDeemphColorMap(src,XBuf,1);
+						uint32 tmp = _ModernDeemphColorMap<1>(src,XBuf);
 						*(uint8 *)dest=tmp;
 						*((uint8 *)dest+1)=tmp>>8;
 						*((uint8 *)dest+2)=tmp>>16;
@@ -966,7 +993,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 				{
 					for(x=xr;x;x--)
 					{
-						*(uint16 *)dest = ModernDeemphColorMap(src,XBuf,1);
+						*(uint16 *)dest = _ModernDeemphColorMap<1>(src,XBuf);
 						dest+=2;
 						src++;
 					}
