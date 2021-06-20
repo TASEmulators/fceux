@@ -306,5 +306,6 @@ extern bool lagCounterDisplay;
 extern char lagFlag;
 extern bool turbo;
 void LagCounterReset();
+EMUCMDTABLE* GetEmuCommandById(int cmd);
 
 #endif //_INPUT_H_

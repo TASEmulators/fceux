@@ -1374,3 +1374,16 @@ static void TaseditorCommand(void)
 		handleEmuCmdByTaseditor(execcmd);
 #endif
 }
+
+/**
+* Function to get command info entry by command number
+**/
+EMUCMDTABLE* GetEmuCommandById(int cmd)
+{
+	for (i = 0; i<NUM_EMU_CMDS; ++i)
+	{
+		if (FCEUI_CommandTable[i].cmd == cmd)
+			return &FCEUI_CommandTable[i];
+	}
+	return NULL;
+}

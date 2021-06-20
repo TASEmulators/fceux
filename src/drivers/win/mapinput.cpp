@@ -362,7 +362,8 @@ void AskForHotkey(HWND hwndDlg, HWND hwndListView)
 
 		int nCmd = lvi.lParam;
 
-		DWaitButton(hwndDlg, FCEUI_CommandTable[nCmd].name, &FCEUD_CommandMapping[nCmd]);
+		EMUCMDTABLE* cmd = GetEmuCommandById(nCmd);
+		DWaitButton(hwndDlg, cmd->name, &FCEUD_CommandMapping[nCmd]);
 		
 		memset(&lvi, 0, sizeof(lvi));
 		lvi.mask = LVIF_TEXT;
