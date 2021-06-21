@@ -57,6 +57,7 @@ extern char LoadedRomFName[2048];
 char NLfilename[2048];
 bool symbDebugEnabled = true;
 bool symbRegNames = true;
+bool inlineAddressEnabled = true;
 int debuggerWasActive = 0;
 char temp_chr[40] = {0};
 char delimiterChar[2] = "#";
@@ -572,12 +573,22 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 					src = pos + myAddrlen;
 					continue;
 				}
-				
-				//append beginning part
-				strncat(buff, src, pos-src);
+
+				if (inlineAddressEnabled)
+				{
+					//append up to and including the address, + a space
+					strncat(buff, src, pos - src + myAddrlen);
+					strcat(buff, " ");
+				}
+				else
+				{
+					//append up to but not including the address
+					strncat(buff, src, pos - src);
+				}
+
 				//append the label
 				strcat(buff, list->name);
-				//begin processing after that offset
+				//begin processing after this offset
 				src = pos + myAddrlen;
 
 				if (addressesLog)
@@ -600,9 +611,16 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 		*buff = 0;
 		src = str;
 
+		// BUG: This method is called for each string in the named label list,
+		// but it looks for all the reg names every time.
 		while (pos = strstr(src, RegNames[i].offset)) {
-			*pos = 0;
-			strcat(buff, src);
+			if (inlineAddressEnabled) {
+				strncat(buff, src, pos - src + 5);
+				strcat(buff, " ");
+			} else {
+				strncat(buff, src, pos - src);
+			}
+			
 			strcat(buff, RegNames[i].name);
 			src = pos + 5;
 		}
