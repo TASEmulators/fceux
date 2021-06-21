@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 
+#include <QScreen>
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 
@@ -35,6 +36,8 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 		void   setAspectXY( double x, double y );
 		void   getAspectXY( double &x, double &y );
 		double getAspectRatio(void);
+
+		void   screenChanged(QScreen *scr);
 
 	protected:
 	void initializeGL(void);

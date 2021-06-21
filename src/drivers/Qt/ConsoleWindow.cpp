@@ -221,6 +221,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	// Create AVI Recording Disk Thread
 	aviDiskThread = new AviRecordDiskThread_t(this);
 
+	connect( this->window()->windowHandle(), SIGNAL(screenChanged(QScreen*)), this, SLOT(winScreenChanged(QScreen*)) );
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -332,6 +333,15 @@ void consoleWin_t::videoReset(void)
 		viewport_GL->reset();
 	}
 	return;
+}
+
+void consoleWin_t::winScreenChanged(QScreen *scr)
+{
+	//printf("Screen Changed: %p\n", scr );
+	if ( viewport_GL != NULL )
+	{
+		viewport_GL->screenChanged( scr );
+	}
 }
 
 QSize consoleWin_t::calcRequiredSize(void)

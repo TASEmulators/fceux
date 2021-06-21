@@ -405,6 +405,7 @@ class  consoleWin_t : public QMainWindow
 		void wavRecordStart(void);
 		void wavRecordAsStart(void);
 		void wavRecordStop(void);
+		void winScreenChanged( QScreen *scr );
 
 };
 
