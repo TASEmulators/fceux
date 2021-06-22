@@ -3019,14 +3019,19 @@ END
 
 DEBUGGERMENU MENU
 BEGIN
-    POPUP "Syntax highlight"
+    POPUP "Colors"
     BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Restore default",             ID_DEBUGGER_DEFCOLOR
     END
-	POPUP "Options"
+	POPUP "Symbols"
 	BEGIN
-		MENUITEM "Show Symbol Addresses",       ID_DEBUGGER_INLINE_ADDRESS, CHECKED
+		MENUITEM "Reload",                      ID_DEBUGGER_RELOAD_SYMBOLS
+		MENUITEM "Load .DEB file",              ID_DEBUGGER_LOAD_DEB_FILE,     CHECKED
+		MENUITEM SEPARATOR
+		MENUITEM "Symbolic Debug",              ID_DEBUGGER_SYMBOLIC_DEBUG,    CHECKED
+		MENUITEM "Show Symbol Addresses",       ID_DEBUGGER_INLINE_ADDRESS,    CHECKED
+		MENUITEM "Default Register Names",      ID_DEBUGGER_DEFAULT_REG_NAMES, CHECKED
 	END
 END
 

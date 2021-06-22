@@ -1937,6 +1937,11 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 	return CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, uMsg, wParam, lParam);
 }
 
+// Need to coordinate these with res.rc
+#define MENU_OPTIONS_POS 0
+#define MENU_COLORS_POS 1
+#define MENU_SYMBOLS_POS 2
+
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	//these messages get handled at any time
@@ -2025,12 +2030,13 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 			// prepare menu
 			HMENU hdbgmenu = GetMenu(hwndDlg);
+			// This will go in a submenu soon.
 			InsertMenu(hdbgmenu, 0, MF_STRING | MF_BYPOSITION, IDC_DEBUGGER_RESTORESIZE, "Default window size");
-			HMENU hcolorpopupmenu = GetSubMenu(hdbgmenu, 1);
+			HMENU hcolorpopupmenu = GetSubMenu(hdbgmenu, MENU_COLORS_POS);
 			for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 				InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
 
-			CheckMenuItem(GetSubMenu(hdbgmenu, 2), ID_DEBUGGER_INLINE_ADDRESS, inlineAddressEnabled ? MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(GetSubMenu(hdbgmenu, MENU_SYMBOLS_POS), ID_DEBUGGER_INLINE_ADDRESS, inlineAddressEnabled ? MF_CHECKED : MF_UNCHECKED);
 
 			debugger_open = 1;
 			inDebugger = true;
@@ -2193,6 +2199,19 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							inlineAddressEnabled ^= 1;
 							CheckMenuItem(GetSubMenu(GetMenu(hwndDlg), 2), ID_DEBUGGER_INLINE_ADDRESS, inlineAddressEnabled ? MF_CHECKED : MF_UNCHECKED);
 							UpdateDebugger(false);
+							break;
+						// TODO: Reuse the old IDs from the persistent buttons instead?
+						case ID_DEBUGGER_RELOAD_SYMBOLS:
+							printf("Coming soon!\n");
+							break;
+						case ID_DEBUGGER_LOAD_DEB_FILE:
+							printf("Coming soon!\n");
+							break;
+						case ID_DEBUGGER_SYMBOLIC_DEBUG:
+							printf("Coming soon!\n");
+							break;
+						case ID_DEBUGGER_DEFAULT_REG_NAMES:
+							printf("Coming soon!\n");
 							break;
 					}
 				}
