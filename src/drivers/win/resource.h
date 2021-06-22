@@ -1219,13 +1219,14 @@
 #define IDC_NTVIEW_SCANLINE_TEXT        65534
 #define IDC_BOOKMARK_SHORTCUT_PREFIX_TEXT 65534
 #define IDC_DEBUGGER_TEXT_X             65534
+#define ID_DEBUGGER_INLINE_ADDRESS      65535
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        313
-#define _APS_NEXT_COMMAND_VALUE         40012
+#define _APS_NEXT_COMMAND_VALUE         40013
 #define _APS_NEXT_CONTROL_VALUE         1050
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

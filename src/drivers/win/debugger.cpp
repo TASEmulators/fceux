@@ -110,7 +110,6 @@ struct DBGCOLORMENU {
 
 #define IDC_DEBUGGER_RESTORESIZE      1000
 #define ID_COLOR_DEBUGGER             2000
-#define ID_DEBUGGER_INLINE_ADDRESS    3000
 
 bool ChangeColor(HWND hwnd, DBGCOLORMENU* item)
 {
@@ -2027,10 +2026,11 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			// prepare menu
 			HMENU hdbgmenu = GetMenu(hwndDlg);
 			InsertMenu(hdbgmenu, 0, MF_STRING | MF_BYPOSITION, IDC_DEBUGGER_RESTORESIZE, "Default window size");
-			InsertMenu(hdbgmenu, 2, MF_STRING | MF_BYPOSITION | MF_UNCHECKED, ID_DEBUGGER_INLINE_ADDRESS, "Inline Addresses");
 			HMENU hcolorpopupmenu = GetSubMenu(hdbgmenu, 1);
 			for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 				InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
+
+			CheckMenuItem(GetSubMenu(hdbgmenu, 2), ID_DEBUGGER_INLINE_ADDRESS, inlineAddressEnabled ? MF_CHECKED : MF_UNCHECKED);
 
 			debugger_open = 1;
 			inDebugger = true;
@@ -2191,7 +2191,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							break;
 						case ID_DEBUGGER_INLINE_ADDRESS:
 							inlineAddressEnabled ^= 1;
-							CheckDlgButton(hwndDlg, ID_DEBUGGER_INLINE_ADDRESS, inlineAddressEnabled);
+							CheckMenuItem(GetSubMenu(GetMenu(hwndDlg), 2), ID_DEBUGGER_INLINE_ADDRESS, inlineAddressEnabled ? MF_CHECKED : MF_UNCHECKED);
 							UpdateDebugger(false);
 							break;
 					}

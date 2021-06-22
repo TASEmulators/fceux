@@ -3024,6 +3024,10 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Restore default",             ID_DEBUGGER_DEFCOLOR
     END
+	POPUP "Options"
+	BEGIN
+		MENUITEM "Show Symbol Addresses",       ID_DEBUGGER_INLINE_ADDRESS, CHECKED
+	END
 END
 
 
