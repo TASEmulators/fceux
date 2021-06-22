@@ -33,18 +33,8 @@ int GetNesFileAddress(int A);
 
 inline int RomPageIndexForAddress(int addr) { return (addr-0x8000)>>(debuggerPageSize); }
 
-//old
-//Name* lastBankNames = 0;
-//Name* loadedBankNames = 0;
-
-//new
 Name* pageNames[32] = {0}; //the maximum number of pages we could have is 32, based on 1KB debuggerPageSize
 
-//old
-//int lastBank = -1;
-//int loadedBank = -1;
-
-//new
 int pageNumbersLoaded[32] = {
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,

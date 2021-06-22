@@ -70,7 +70,6 @@ static HMENU hDisasmcontext;     //Handle to context menu
 static HMENU hDisasmcontextsub;  //Handle to context sub menu
 WNDPROC IDC_DEBUGGER_DISASSEMBLY_oldWndProc = 0;
 
-// static HFONT hFont;
 static SCROLLINFO si;
 
 bool debuggerAutoload = false;
@@ -157,7 +156,7 @@ void UpdateOtherDebuggingDialogs()
 
 #define DEBUGGER_MIN_WIDTH 360 // Minimum width for debugger
 #define DEBUGGER_DEFAULT_HEIGHT 594 // default height for debugger
-// owomomo: default width of the debugger is depend on the default width of disasm view, so it's not defined here.
+// Default width of the debugger depends on the default width of disasm view, so it's not defined here.
 
 void RestoreSize(HWND hwndDlg)
 {
@@ -305,13 +304,6 @@ static void UpdateDialog(HWND hwndDlg) {
 	EnableWindow(GetDlgItem(hwndDlg,IDC_ADDBP_MEM_CPU),enable);
 	EnableWindow(GetDlgItem(hwndDlg,IDC_ADDBP_MEM_PPU),enable);
 	EnableWindow(GetDlgItem(hwndDlg,IDC_ADDBP_MEM_SPR),enable);	
-	//nah.. lets leave these checked
-	//CheckDlgButton(hwndDlg,IDC_ADDBP_MODE_R,BST_UNCHECKED);
-	//CheckDlgButton(hwndDlg,IDC_ADDBP_MODE_W,BST_UNCHECKED);
-	//CheckDlgButton(hwndDlg,IDC_ADDBP_MODE_X,BST_UNCHECKED);
-	//CheckDlgButton(hwndDlg,IDC_ADDBP_MEM_CPU,BST_UNCHECKED);
-	//CheckDlgButton(hwndDlg,IDC_ADDBP_MEM_PPU,BST_UNCHECKED);
-	//CheckDlgButton(hwndDlg,IDC_ADDBP_MEM_SPR,BST_UNCHECKED);
 }
 
 INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -923,7 +915,6 @@ void FCEUD_DebugBreakpoint(int bp_num)
 				// normal breakpoint
 				sprintf(str_temp, "Breakpoint %u Hit at $%04X: ", bp_num, X.PC);
 				strcat(str_temp, BreakToText(bp_num));
-				//watchpoint[num].condText
 				OutputLogLine(str_temp);
 			} else if (bp_num == BREAK_TYPE_BADOP)
 			{
@@ -972,7 +963,7 @@ void FCEUD_DebugBreakpoint(int bp_num)
 	void win_debuggerLoop(); // HACK to let user interact with the Debugger while emulator isn't updating
 	win_debuggerLoop();
 
-	// since we unfreezed emulation, reset delta_cycles counter
+	// since we unfroze emulation, reset delta_cycles counter
 	ResetDebugStatisticsDeltaCounters();
 }
 
@@ -1038,8 +1029,6 @@ void UpdateDebugger(bool jump_to_pc)
 	
 
 	// "Address Bookmark Add" follows the address
-	//sprintf(str, "%04X", starting_address);
-	//SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 
 	sprintf(str, "%02X", X.A);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_A, str);
@@ -1130,7 +1119,6 @@ void UpdateDebugger(bool jump_to_pc)
 		sprintf(str, "%02X", GetMem(tmp));
 		for (i = 1; i < 128; i++)
 		{
-			//tmp = ((tmp+1)|0x0100)&0x01FF;  //increment and fix pointer to $0100-$01FF range
 			tmp++;
 			if (tmp > 0x1FF)
 				break;
@@ -1291,7 +1279,7 @@ void KillDebugger() {
 		DebuggerExit();
 	}
 	FCEUI_Debugger().reset();
-	FCEUI_SetEmulationPaused(0); //mbg merge 7/18/06 changed from userpause
+	FCEUI_SetEmulationPaused(0);
 }
 
 
@@ -1354,7 +1342,6 @@ INT_PTR CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 									}
 								}
 								SetWindowText(hwndDlg, "Inline Assembler  *Patches Applied*");
-								//MessageBeep(MB_OK);
 								applied = 1;
 							}
 							break;
@@ -1440,7 +1427,7 @@ INT_PTR CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 }
 
 INT_PTR CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	char str[64]; //mbg merge 7/18/06 changed from unsigned char
+	char str[64];
 	uint8 *c;
 	int i;
 	int *p;
@@ -1456,7 +1443,7 @@ INT_PTR CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			if(iapoffset != -1){
 				CheckDlgButton(hwndDlg, IDC_ROMPATCHER_DOTNES_OFFSET, BST_CHECKED);
-				sprintf((char*)str,"%X",iapoffset); //mbg merge 7/18/06 added cast
+				sprintf((char*)str,"%X",iapoffset);
 				SetDlgItemText(hwndDlg,IDC_ROMPATCHER_OFFSET,str);
 			}
 
@@ -1513,7 +1500,7 @@ void DebuggerExit()
 {
 	debugger_open = 0;
 	inDebugger = false;
-	// in case someone call it multiple times
+	// in case someone calls it multiple times
 	if (hDebug)
 	{
 		// release bitmap icons
@@ -1537,7 +1524,7 @@ void DebuggerExit()
 static RECT currDebuggerRect;
 static RECT newDebuggerRect;
 
-//used to move all child items in the dialog when you resize (except for the dock fill controls which are resized)
+//moves all child items in the dialog when you resize (except for the dock fill controls which are resized)
 BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
 	POINT* p = (POINT*)lParam;
@@ -1992,12 +1979,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			//setup font
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY,WM_SETFONT,(WPARAM)debugSystem->hDisasmFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_X,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_Y,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PC,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 
 			//text limits
@@ -2012,13 +1994,11 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 			// limit input
 			// Don't limit address entry. See: debugcpp offsetStringToInt
-			//DefaultEditCtrlProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PCSEEK), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 			DefaultEditCtrlProc = (WNDPROC)
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PC), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_A), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_X), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_Y), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
-			//SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_BOOKMARK), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 
 			//I'm lazy, disable the controls which I can't mess with right now
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETREADONLY,TRUE,0);
@@ -2066,8 +2046,8 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				DbgSizeX = newDebuggerRect.right - newDebuggerRect.left;	//Store new size (this will be used to store in the .cfg file)	
 				DbgSizeY = newDebuggerRect.bottom - newDebuggerRect.top;
 
-				// convert minimum size to actural screen size
-				// owomomo: the minimum height is different between left and right part,
+				// convert minimum size to actual screen size.
+				// the minimum height is different between left and right part,
 				// but width is the same, similarly hereinafter
 				HDC hdc = GetDC(hwndDlg);
 				int min_w = MulDiv(DEBUGGER_MIN_WIDTH, GetDeviceCaps(hdc, LOGPIXELSX), 96);
@@ -2109,7 +2089,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 		case WM_CLOSE:
 		case WM_QUIT:
-			//exitdebug:
 			DebuggerExit();
 			break;
 		case WM_MOVING:
@@ -2127,7 +2106,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			}
 			break;
 
-		//adelikat:  Buttons that don't need a rom loaded to do something, such as autoload
+		// Buttons that don't need a rom loaded to do something, such as autoload
 		case WM_COMMAND:
 		{
 			switch (HIWORD(wParam))
@@ -2240,7 +2219,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			}
 			case WM_VSCROLL:
 			{
-				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused())
 					UpdateRegs(hwndDlg);
 				if (lParam)
@@ -2287,7 +2265,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							}
 							break;
 						}
-						case SB_THUMBPOSITION: //break;
+						case SB_THUMBPOSITION:
 						case SB_THUMBTRACK: si.nPos = si.nTrackPos; break;
 					}
 					if (si.nPos < si.nMin)
@@ -2312,7 +2290,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					// Only open the menu if a breakpoint is selected
 					if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0) {
 						hDebugcontextsub = GetSubMenu(hDebugcontext,0);
-						//SetMenuDefaultItem(hDebugcontextsub, DEBUGGER_CONTEXT_TOGGLEBREAK, false);
 						if (lParam != -1)
 							TrackPopupMenu(hDebugcontextsub,TPM_RIGHTBUTTON,LOWORD(lParam),HIWORD(lParam),0,hwndDlg,0);	//Create menu
 						else { // Handle the context menu keyboard key
@@ -2396,7 +2373,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 				// mouse_y < 538
 				// > 33) tmp = 33
-				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
 // ################################## End of SP CODE ###########################
@@ -2404,7 +2380,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					if (tmp < (int)disassembly_addresses.size())
 					{
 						int i = disassembly_addresses[tmp];
-						//DoPatcher(GetNesFileAddress(i),hwndDlg);
 						iaPC=i;
 						if (iaPC >= 0x8000)
 						{
@@ -2419,7 +2394,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			{
 				int mouse_x = GET_X_LPARAM(lParam);
 				int mouse_y = GET_Y_LPARAM(lParam);
-				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
 					int tmp = (mouse_y - 10) / debugSystem->disasmFontHeight;
@@ -2440,7 +2414,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			{
 				int mouse_x = GET_X_LPARAM(lParam);
 				int mouse_y = GET_Y_LPARAM(lParam);
-				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
 					int tmp = (mouse_y - 10) / debugSystem->disasmFontHeight;
@@ -2477,7 +2450,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								UpdateDebugger(false);
 								break;
 							case IDC_DEBUGGER_RUN:
-								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
 									FCEUI_ToggleEmulationPause();
@@ -2500,8 +2472,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 									uint64 ts=timestampbase;
 									ts+=timestamp;
 									ts+=341/3;
-									//if (scanline == 240) vblankScanLines++;
-									//else vblankScanLines = 0;
 									FCEUI_Debugger().runline_end_time=ts;
 								}
 								FCEUI_SetEmulationPaused(0);
@@ -2516,14 +2486,11 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 									ts+=timestamp;
 									ts+=128*341/3;
 									FCEUI_Debugger().runline_end_time=ts;
-									//if (scanline+128 >= 240 && scanline+128 <= 257) vblankScanLines = (scanline+128)-240;
-									//else vblankScanLines = 0;
 								}
 								FCEUI_SetEmulationPaused(0);
 								UpdateOtherDebuggingDialogs();
 								break;
 							case IDC_DEBUGGER_STEP_OUT:
-								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused() > 0) {
 									DebuggerState &dbgstate = FCEUI_Debugger();
 									UpdateRegs(hwndDlg);
@@ -2535,7 +2502,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								}
 								break;
 							case IDC_DEBUGGER_STEP_OVER:
-								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
 									int tmp = X.PC;
@@ -2557,7 +2523,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								}
 								break;
 							case IDC_DEBUGGER_SEEK_PC:
-								//mbg merge 7/18/06 changed pausing check
 								if (FCEUI_EmulationPaused())
 								{
 									UpdateRegs(hwndDlg);
@@ -2566,7 +2531,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								break;
 							case IDC_DEBUGGER_SEEK_TO:
 							{
-								//mbg merge 7/18/06 changed pausing check
 								if (FCEUI_EmulationPaused())
 									UpdateRegs(hwndDlg);
 								char str[16];
@@ -2698,7 +2662,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	}
 	
 	
-	return FALSE; //TRUE;
+	return FALSE;
 }
 
 extern void iNESGI(GI h);
@@ -2721,7 +2685,7 @@ void DoPatcher(int address, HWND hParent)
 }
 
 void UpdatePatcher(HWND hwndDlg){
-	char str[75]; //mbg merge 7/18/06 changed from unsigned
+	char str[75];
 	uint8 *p;
 	if(iapoffset != -1){
 		EnableWindow(GetDlgItem(hwndDlg,IDC_ROMPATCHER_PATCH_DATA),TRUE);
@@ -2768,7 +2732,7 @@ void DoDebug(uint8 halt)
 	if (!debugger_open)
 	{
 		// init buffers
-		// owomomo: initialize buffers even before the debugger is open,
+		// initialize buffers even before the debugger is open,
 		// because some of the operations about hDebug may occur before
 		// its WM_INITDIALOG runs.
 		debug_wstr = (wchar_t*)malloc(16384 * sizeof(wchar_t));
@@ -2780,7 +2744,6 @@ void DoDebug(uint8 halt)
 	}
 	if (hDebug)
 	{
-		//SetWindowPos(hDebug,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		ShowWindow(hDebug, SW_SHOWNORMAL);
 		SetForegroundWindow(hDebug);
 		
@@ -2839,8 +2802,6 @@ void DebugSystem::init()
 	GetTextMetrics(hdc,&tm);
 	fixedFontHeight = tm.tmHeight;
 	fixedFontWidth = tm.tmAveCharWidth;
-	//printf("fixed font height: %d\n",fixedFontHeight);
-	//printf("fixed font width: %d\n",fixedFontWidth);
 	SelectObject(hdc, hHexeditorFont);
 	GetTextMetrics(hdc,&tm);
 	HexeditorFontHeight = tm.tmHeight;
@@ -2881,4 +2842,3 @@ DebugSystem::~DebugSystem()
 		hIDAFont = 0;
 	}
 }
-
