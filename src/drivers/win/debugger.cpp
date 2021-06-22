@@ -111,6 +111,7 @@ struct DBGCOLORMENU {
 
 #define IDC_DEBUGGER_RESTORESIZE      1000
 #define ID_COLOR_DEBUGGER             2000
+#define ID_DEBUGGER_ADDRESSLINE       3000
 
 bool ChangeColor(HWND hwnd, DBGCOLORMENU* item)
 {
@@ -2046,6 +2047,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			// prepare menu
 			HMENU hdbgmenu = GetMenu(hwndDlg);
 			InsertMenu(hdbgmenu, 0, MF_STRING | MF_BYPOSITION, IDC_DEBUGGER_RESTORESIZE, "Default window size");
+			InsertMenu(hdbgmenu, 2, MF_STRING | MF_BYPOSITION, ID_DEBUGGER_ADDRESSLINE, "Combined Label/Offset Disassembly");
 			HMENU hcolorpopupmenu = GetSubMenu(hdbgmenu, 1);
 			for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 				InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
@@ -2207,6 +2209,10 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						break;
 						case IDC_DEBUGGER_RESTORESIZE:
 							RestoreSize(hwndDlg);
+							break;
+						case ID_DEBUGGER_ADDRESSLINE:
+							inlineAddressEnabled ^= 1;
+							UpdateDebugger(false);
 							break;
 					}
 				}
