@@ -248,6 +248,7 @@ class  consoleWin_t : public QMainWindow
 		bool        mainMenuEmuPauseSet;
 		bool        mainMenuEmuWasPaused;
 		bool        mainMenuPauseWhenActv;
+		bool        scrHandlerConnected;
 
 		std::list <std::string*> romList;
 		std::vector <autoFireMenuAction*> afActList;
@@ -261,11 +262,13 @@ class  consoleWin_t : public QMainWindow
 		void keyReleaseEvent(QKeyEvent *event);
 		void dragEnterEvent(QDragEnterEvent *event);
 		void dropEvent(QDropEvent *event);
+		void showEvent(QShowEvent *event);
 		void syncActionConfig( QAction *act, const char *property );
 		void showErrorMsgWindow(void);
 
 	private:
 		void initHotKeys(void);
+		void initScreenHandler(void);
 		void createMainMenu(void);
 		void buildRecentRomMenu(void);
 		void saveRecentRomMenu(void);

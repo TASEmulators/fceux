@@ -221,7 +221,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	// Create AVI Recording Disk Thread
 	aviDiskThread = new AviRecordDiskThread_t(this);
 
-	connect( this->window()->windowHandle(), SIGNAL(screenChanged(QScreen*)), this, SLOT(winScreenChanged(QScreen*)) );
+	scrHandlerConnected = false;
 }
 
 consoleWin_t::~consoleWin_t(void)
@@ -335,8 +335,39 @@ void consoleWin_t::videoReset(void)
 	return;
 }
 
+void consoleWin_t::initScreenHandler(void)
+{
+	if ( !scrHandlerConnected )
+	{
+		QWidget *w;
+		
+		w = this->window();
+
+		// This needs to be scheduled after window creation.
+		if ( w != NULL)
+		{
+			QWindow *hdl = w->windowHandle();
+
+			if (hdl != NULL)
+			{
+				//printf("Connecting to screenChanged Signal\n");
+				connect( hdl, SIGNAL(screenChanged(QScreen*)), this, SLOT(winScreenChanged(QScreen*)) );
+				scrHandlerConnected = true;
+
+				winScreenChanged( hdl->screen() );
+			}
+		}
+	}
+
+}
+
 void consoleWin_t::winScreenChanged(QScreen *scr)
 {
+	if ( scr == NULL )
+	{
+		return;
+	}
+
 	//printf("Screen Changed: %p\n", scr );
 	if ( viewport_GL != NULL )
 	{
@@ -652,6 +683,12 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 		fceuWrapperUnLock();
 		event->accept();
 	}
+}
+
+void consoleWin_t::showEvent(QShowEvent *event)
+{
+	//printf("Main Window Show Event\n");
+	initScreenHandler();
 }
 
 //---------------------------------------------------------------------------

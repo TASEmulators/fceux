@@ -30,6 +30,7 @@
 
 #include <QApplication>
 #include <QScreen>
+#include <QWindow>
 #include <QMouseEvent>
 
 #if defined(QT_OPENGL_ES) || defined(QT_OPENGL_ES_2)
@@ -72,13 +73,6 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	setMinimumHeight( 224 );
 	setFocusPolicy(Qt::StrongFocus);
 
-	QScreen *screen = window()->screen();
-
-	if ( screen != NULL )
-	{
-		devPixRatio = screen->devicePixelRatio();
-		//printf("GL Ratio: %f \n", screen->devicePixelRatio() );
-	}
 	localBufSize = (4 * GL_NES_WIDTH) * (4 * GL_NES_HEIGHT) * sizeof(uint32_t);
 
 	localBuf = (uint32_t*)malloc( localBufSize );
@@ -138,6 +132,21 @@ void ConsoleViewGL_t::screenChanged( QScreen *screen )
 
 int ConsoleViewGL_t::init( void )
 {
+	QScreen *screen = NULL;
+
+	if ( window() != NULL )
+	{
+		if ( window()->windowHandle() != NULL )
+		{
+			screen = window()->windowHandle()->screen();
+		}
+	}
+
+	if ( screen != NULL )
+	{
+		devPixRatio = screen->devicePixelRatio();
+		printf("GL Ratio: %f \n", screen->devicePixelRatio() );
+	}
 	return 0;
 }
 
