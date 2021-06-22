@@ -711,6 +711,8 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			
 			if (symbDebugEnabled)
 			{
+				if (symbRegNames)
+				    replaceRegNames(bufferForDisassemblyWithPlentyOfStuff);
 				replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
 				for(int p=0;p<ARRAY_SIZE(pageNames);p++)
 					if(pageNames[p] != NULL)

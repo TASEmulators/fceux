@@ -604,27 +604,43 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 		}
 		list = list->next;
 	}
+}
 
-	for (int i = 0; i < RegNameCount; i++) {
-		if (!symbRegNames) break;
+/**
+* Replaces all offsets in a string with the names of the corresponding NES hardware registers
+* The caller needs to make sure that str is large enough.
+*
+* @param str The string where replacing takes place, including trace data.
+**/
+void replaceRegNames(char* str)
+{
+	static char buff[1001];
+	char* pos;
+	char* src;
+
+	for (int i = 0; i < RegNameCount; i++)
+	{
 		// copypaste, because Name* is too complex to abstract
 		*buff = 0;
 		src = str;
 
-		// BUG: This method is called for each string in the named label list,
-		// but it looks for all the reg names every time.
-		while (pos = strstr(src, RegNames[i].offset)) {
-			if (inlineAddressEnabled) {
+		while (pos = strstr(src, RegNames[i].offset))
+		{
+			if (inlineAddressEnabled)
+			{
 				strncat(buff, src, pos - src + 5);
 				strcat(buff, " ");
-			} else {
+			}
+			else
+			{
 				strncat(buff, src, pos - src);
 			}
-			
+
 			strcat(buff, RegNames[i].name);
 			src = pos + 5;
 		}
-		if (*buff) {
+		if (*buff)
+		{
 			strcat(buff, src);
 			strcpy(str, buff);
 		}
