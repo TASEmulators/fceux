@@ -47,7 +47,7 @@ extern char LoadedRomFName[2048];
 char NLfilename[2048];
 bool symbDebugEnabled = true;
 bool symbRegNames = true;
-bool inlineAddressEnabled = true;
+bool inlineAddressEnabled = false;
 int debuggerWasActive = 0;
 char temp_chr[40] = {0};
 char delimiterChar[2] = "#";
