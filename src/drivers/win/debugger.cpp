@@ -1942,15 +1942,19 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 #define MENU_COLORS_POS 1
 #define MENU_SYMBOLS_POS 2
 
+#define CHECKED_FLAG(b) ((b) ? MF_CHECKED : MF_UNCHECKED)
+#define ENABLED_FLAG(b) ((b) ? MF_ENABLED : MF_GRAYED)
+
 inline void UpdateSymbolsPopup(HMENU symbolsPopup)
 {
-	CheckMenuItem(symbolsPopup, ID_DEBUGGER_SYMBOLIC_DEBUG, symbDebugEnabled ? MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(symbolsPopup, ID_DEBUGGER_DEFAULT_REG_NAMES, symbRegNames ? MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(symbolsPopup, ID_DEBUGGER_INLINE_ADDRESS, inlineAddressEnabled ? MF_ENABLED : MF_DISABLED);
+	CheckMenuItem(symbolsPopup, ID_DEBUGGER_LOAD_DEB_FILE, CHECKED_FLAG(debuggerSaveLoadDEBFiles));
+	CheckMenuItem(symbolsPopup, ID_DEBUGGER_SYMBOLIC_DEBUG, CHECKED_FLAG(symbDebugEnabled));
+	CheckMenuItem(symbolsPopup, ID_DEBUGGER_INLINE_ADDRESS, CHECKED_FLAG(inlineAddressEnabled));
+	CheckMenuItem(symbolsPopup, ID_DEBUGGER_DEFAULT_REG_NAMES, CHECKED_FLAG(symbRegNames));
 
 	// Gray out potentially irrelavant options
-	EnableMenuItem(symbolsPopup, ID_DEBUGGER_DEFAULT_REG_NAMES, symbDebugEnabled ? MF_ENABLED : MF_GRAYED);
-	EnableMenuItem(symbolsPopup, ID_DEBUGGER_INLINE_ADDRESS, symbDebugEnabled ? MF_ENABLED : MF_GRAYED);
+	EnableMenuItem(symbolsPopup, ID_DEBUGGER_DEFAULT_REG_NAMES, ENABLED_FLAG(symbDebugEnabled));
+	EnableMenuItem(symbolsPopup, ID_DEBUGGER_INLINE_ADDRESS, ENABLED_FLAG(symbDebugEnabled));
 }
 
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -2135,7 +2139,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						case DEBUGAUTOLOAD:
 							debuggerAutoload ^= 1;
 							break;
-						case DEBUGLOADDEB:
+						case DEBUGLOADDEB: // TODO: delete/merge with ID_DEBUGGER_LOAD_DEB_FILE
 							debuggerSaveLoadDEBFiles = !debuggerSaveLoadDEBFiles;
 							break;
 						case DEBUGIDAFONT:
@@ -2206,11 +2210,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						case IDC_DEBUGGER_RESTORESIZE:
 							RestoreSize(hwndDlg);
 							break;
-						case ID_DEBUGGER_INLINE_ADDRESS:
-							inlineAddressEnabled ^= 1;
-							CheckMenuItem(GetSubMenu(GetMenu(hwndDlg), 2), ID_DEBUGGER_INLINE_ADDRESS, inlineAddressEnabled ? MF_CHECKED : MF_UNCHECKED);
-							UpdateDebugger(false);
-							break;
 						// TODO: Reuse the old IDs from the persistent buttons instead?
 						case ID_DEBUGGER_RELOAD_SYMBOLS:
 							ramBankNamesLoaded = false;
@@ -2219,16 +2218,20 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							loadNameFiles();
 							UpdateDebugger(false);
 							break;
+						case ID_DEBUGGER_INLINE_ADDRESS:
+							inlineAddressEnabled ^= 1;
+							UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
+							UpdateDebugger(false);
+							break;
 						case ID_DEBUGGER_LOAD_DEB_FILE:
-							printf("Coming soon!\n");
+							debuggerSaveLoadDEBFiles ^= 1;
+							UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
 							break;
 						case ID_DEBUGGER_SYMBOLIC_DEBUG:
-						{
 							symbDebugEnabled ^= 1;
 							UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
 							UpdateDebugger(false);
 							break;
-						}
 						case ID_DEBUGGER_DEFAULT_REG_NAMES:
 							symbRegNames ^= 1;
 							UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
