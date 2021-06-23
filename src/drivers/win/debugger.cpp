@@ -98,12 +98,12 @@ struct DBGCOLORMENU {
 	{ NULL                                },
 	{ "Mnemonic",          PPCCF(DbgMnem) },
 	{ NULL                                },
-	{ "Symbolic name",     PPCCF(DbgSym)  },
+	{ "Symbolic Name",     PPCCF(DbgSym)  },
 	{ "Comment" ,          PPCCF(DbgComm) },
 	{ NULL                                },
 	{ "Operand" ,          PPCCF(DbgOper) },
-	{ "Operand note" ,     PPCCF(DbgOpNt) },
-	{ "Effective address", PPCCF(DbgEff)  },
+	{ "Operand Note" ,     PPCCF(DbgOpNt) },
+	{ "Effective Address", PPCCF(DbgEff)  },
 	{ NULL                                },
 	{ "RTS/RTI Line",      PPCCF(DbgRts)  }
 };

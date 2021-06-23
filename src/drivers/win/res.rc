@@ -3030,7 +3030,7 @@ BEGIN
     POPUP "Colors"
     BEGIN
         MENUITEM SEPARATOR
-        MENUITEM "Restore defaults",            ID_DEBUGGER_DEFCOLOR
+        MENUITEM "Restore Defaults",            ID_DEBUGGER_DEFCOLOR
     END
 	POPUP "Symbols"
 	BEGIN
