@@ -3041,6 +3041,11 @@ BEGIN
 		MENUITEM "Show Symbol Addresses",       ID_DEBUGGER_INLINE_ADDRESS,    CHECKED
 		MENUITEM "Default Register Names",      ID_DEBUGGER_DEFAULT_REG_NAMES, CHECKED
 	END
+	POPUP "Tools"
+	BEGIN
+		MENUITEM "ROM Patcher...",              ID_DEBUGGER_ROM_PATCHER
+	    MENUITEM "Code Dumper...",              ID_DEBUGGER_CODE_DUMPER
+	END
 END
 
 

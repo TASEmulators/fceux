@@ -1940,6 +1940,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 #define MENU_OPTIONS_POS 0
 #define MENU_COLORS_POS 1
 #define MENU_SYMBOLS_POS 2
+#define MENU_TOOLS_POS 3
 
 inline int CheckedFlag(bool b)
 {
@@ -1970,8 +1971,15 @@ inline void UpdateSymbolsPopup(HMENU symbolsPopup)
 	EnableMenuItem(symbolsPopup, ID_DEBUGGER_INLINE_ADDRESS, EnabledFlag(symbDebugEnabled));
 }
 
+inline void UpdateToolsPopup(HMENU symbolsPopup)
+{
+	EnableMenuItem(symbolsPopup, ID_DEBUGGER_ROM_PATCHER, EnabledFlag(GameInfo));
+	EnableMenuItem(symbolsPopup, ID_DEBUGGER_CODE_DUMPER, EnabledFlag(GameInfo));
+}
+
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    static HMENU toolsPopup = NULL;
 	//these messages get handled at any time
 	switch(uMsg)
 	{
@@ -2064,6 +2072,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 			UpdateOptionsPopup(GetSubMenu(hdbgmenu, MENU_OPTIONS_POS));
 			UpdateSymbolsPopup(GetSubMenu(hdbgmenu, MENU_SYMBOLS_POS));
+			UpdateToolsPopup(toolsPopup = GetSubMenu(hdbgmenu, MENU_TOOLS_POS));
 
 			debugger_open = 1;
 			inDebugger = true;
@@ -2268,9 +2277,27 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
 							UpdateDebugger(false);
 							break;
+						// Tools menu
+						case ID_DEBUGGER_ROM_PATCHER:
+							DoPatcher(-1, hwndDlg);
+							break;
+						case ID_DEBUGGER_CODE_DUMPER:
+							printf("Currently, I can only dump the contents of the visible window to console...\n\n");
+							printf("%ls\n", debug_wstr);
+							break;
 					}
 				}
 			}
+		}
+		case WM_INITMENUPOPUP:
+		{
+			// LOWORD(lParam) == position in parent menu, but we can't get a handle to the parent...
+			HMENU menu = (HMENU)wParam;
+		    if (menu == toolsPopup)
+			{
+				UpdateToolsPopup((HMENU)wParam);
+			}
+			break;
 		}
 	}
 
@@ -2688,7 +2715,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								UpdateDebugger(false);
 								break;
 							}
-							case IDC_DEBUGGER_ROM_PATCHER: DoPatcher(-1,hwndDlg); break;
+							case IDC_DEBUGGER_ROM_PATCHER: DoPatcher(-1,hwndDlg); break; // TODO: delete/merge with ID_DEBUGGER_ROM_PATCHER
 							case DEBUGGER_CONTEXT_TOGGLEBREAK: DebuggerCallB(hwndDlg, WM_COMMAND, (LBN_DBLCLK * 0x10000) | (IDC_DEBUGGER_BP_LIST), lParam); break;
 						}
 						break;

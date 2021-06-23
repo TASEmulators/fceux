@@ -1216,6 +1216,8 @@
 #define ID_DEBUGGER_IDA_FONT            45542
 #define ID_DEBUGGER_SHOW_ROM_OFFSETS    45543
 #define ID_DEBUGGER_RESTORE_SIZE        45544
+#define ID_DEBUGGER_ROM_PATCHER         45545
+#define ID_DEBUGGER_CODE_DUMPER         45546
 #define MW_VALUELABEL2                  65423
 #define MW_VALUELABEL1                  65426
 #define IDC_STATIC_SLASHTEXT            65442
