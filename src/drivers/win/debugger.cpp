@@ -108,7 +108,6 @@ struct DBGCOLORMENU {
 	{ "RTS/RTI Line",      PPCCF(DbgRts)  }
 };
 
-#define IDC_DEBUGGER_RESTORESIZE      1000
 #define ID_COLOR_DEBUGGER             2000
 
 bool ChangeColor(HWND hwnd, DBGCOLORMENU* item)
@@ -1952,6 +1951,11 @@ inline int EnabledFlag(bool b)
 	return b ? MF_ENABLED : MF_GRAYED;
 }
 
+inline void UpdateOptionsPopup(HMENU optionsPopup)
+{
+
+}
+
 inline void UpdateSymbolsPopup(HMENU symbolsPopup)
 {
 	CheckMenuItem(symbolsPopup, ID_DEBUGGER_LOAD_DEB_FILE, CheckedFlag(debuggerSaveLoadDEBFiles));
@@ -2052,12 +2056,11 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 			// prepare menu
 			HMENU hdbgmenu = GetMenu(hwndDlg);
-			// This will go in a submenu soon.
-			InsertMenu(hdbgmenu, 0, MF_STRING | MF_BYPOSITION, IDC_DEBUGGER_RESTORESIZE, "Default window size");
 			HMENU hcolorpopupmenu = GetSubMenu(hdbgmenu, MENU_COLORS_POS);
 			for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 				InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
 
+			UpdateOptionsPopup(GetSubMenu(hdbgmenu, MENU_OPTIONS_POS));
 			UpdateSymbolsPopup(GetSubMenu(hdbgmenu, MENU_SYMBOLS_POS));
 
 			debugger_open = 1;
@@ -2214,10 +2217,21 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							}
 						}
 						break;
-						case IDC_DEBUGGER_RESTORESIZE:
+						// Options menu
+						// TODO: Reuse/merge with the old IDs from the persistent buttons.
+						case ID_DEBUGGER_AUTO_OPEN:
+							printf("Coming soon!\n");
+							break;
+						case ID_DEBUGGER_IDA_FONT:
+							printf("Coming soon!\n");
+							break;
+						case ID_DEBUGGER_SHOW_ROM_OFFSETS:
+							printf("Coming soon!\n");
+							break;
+						case ID_DEBUGGER_RESTORE_SIZE:
 							RestoreSize(hwndDlg);
 							break;
-						// TODO: Reuse the old IDs from the persistent buttons instead?
+						// Symbols menu
 						case ID_DEBUGGER_RELOAD_SYMBOLS:
 							ramBankNamesLoaded = false;
 							for (int i = 0; i < ARRAYSIZE(pageNumbersLoaded); i++)
