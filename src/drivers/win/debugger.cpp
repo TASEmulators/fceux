@@ -1942,19 +1942,26 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 #define MENU_COLORS_POS 1
 #define MENU_SYMBOLS_POS 2
 
-#define CHECKED_FLAG(b) ((b) ? MF_CHECKED : MF_UNCHECKED)
-#define ENABLED_FLAG(b) ((b) ? MF_ENABLED : MF_GRAYED)
+inline int CheckedFlag(bool b)
+{
+	return b ? MF_CHECKED : MF_UNCHECKED;
+}
+
+inline int EnabledFlag(bool b)
+{
+	return b ? MF_ENABLED : MF_GRAYED;
+}
 
 inline void UpdateSymbolsPopup(HMENU symbolsPopup)
 {
-	CheckMenuItem(symbolsPopup, ID_DEBUGGER_LOAD_DEB_FILE, CHECKED_FLAG(debuggerSaveLoadDEBFiles));
-	CheckMenuItem(symbolsPopup, ID_DEBUGGER_SYMBOLIC_DEBUG, CHECKED_FLAG(symbDebugEnabled));
-	CheckMenuItem(symbolsPopup, ID_DEBUGGER_INLINE_ADDRESS, CHECKED_FLAG(inlineAddressEnabled));
-	CheckMenuItem(symbolsPopup, ID_DEBUGGER_DEFAULT_REG_NAMES, CHECKED_FLAG(symbRegNames));
+	CheckMenuItem(symbolsPopup, ID_DEBUGGER_LOAD_DEB_FILE, CheckedFlag(debuggerSaveLoadDEBFiles));
+	CheckMenuItem(symbolsPopup, ID_DEBUGGER_SYMBOLIC_DEBUG, CheckedFlag(symbDebugEnabled));
+	CheckMenuItem(symbolsPopup, ID_DEBUGGER_INLINE_ADDRESS, CheckedFlag(inlineAddressEnabled));
+	CheckMenuItem(symbolsPopup, ID_DEBUGGER_DEFAULT_REG_NAMES, CheckedFlag(symbRegNames));
 
 	// Gray out potentially irrelavant options
-	EnableMenuItem(symbolsPopup, ID_DEBUGGER_DEFAULT_REG_NAMES, ENABLED_FLAG(symbDebugEnabled));
-	EnableMenuItem(symbolsPopup, ID_DEBUGGER_INLINE_ADDRESS, ENABLED_FLAG(symbDebugEnabled));
+	EnableMenuItem(symbolsPopup, ID_DEBUGGER_DEFAULT_REG_NAMES, EnabledFlag(symbDebugEnabled));
+	EnableMenuItem(symbolsPopup, ID_DEBUGGER_INLINE_ADDRESS, EnabledFlag(symbDebugEnabled));
 }
 
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
