@@ -702,7 +702,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 			strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
 			
 			if (symbDebugEnabled)
-			{
+			{ // TODO: This will add in both the default name and custom name if you have inlineAddresses enabled.
 				if (symbRegNames)
 				    replaceRegNames(bufferForDisassemblyWithPlentyOfStuff);
 				replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
