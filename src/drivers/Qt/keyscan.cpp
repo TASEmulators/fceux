@@ -1002,7 +1002,7 @@ int convKeyEvent2Sequence( QKeyEvent *event )
 	k = event->key();
 	m = event->modifiers();
 
-	printf("Key: %x  Modifier: %x \n", k, m );
+	//printf("Key: %x  Modifier: %x \n", k, m );
 
 	switch ( k )
 	{
