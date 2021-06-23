@@ -437,7 +437,7 @@ INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			}
         	break;
 	}
-	return FALSE; //TRUE;
+	return FALSE;
 }
 
 void HighlightPC(HWND hWnd)
