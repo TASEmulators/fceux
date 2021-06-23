@@ -1028,6 +1028,7 @@ void UpdateDebugger(bool jump_to_pc)
 
 	// "Address Bookmark Add" follows the address
 
+	// Update register values
 	sprintf(str, "%02X", X.A);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_A, str);
 	sprintf(str, "%02X", X.X);
@@ -1107,6 +1108,7 @@ void UpdateDebugger(bool jump_to_pc)
 
 	UpdateBreakpointsCaption();
 
+	// Draw the stack
 	tmp = X.S|0x0100;
 	sprintf(str, "Stack $%04X", tmp);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_S, str);
@@ -2716,6 +2718,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								break;
 							}
 							case IDC_DEBUGGER_ROM_PATCHER: DoPatcher(-1,hwndDlg); break; // TODO: delete/merge with ID_DEBUGGER_ROM_PATCHER
+							// Double click the breakpoint list
 							case DEBUGGER_CONTEXT_TOGGLEBREAK: DebuggerCallB(hwndDlg, WM_COMMAND, (LBN_DBLCLK * 0x10000) | (IDC_DEBUGGER_BP_LIST), lParam); break;
 						}
 						break;
@@ -2773,6 +2776,7 @@ void DoDebuggerStepInto()
 {
 	if (!hDebug)
 		return;
+	// Click the Step Into button
 	DebuggerCallB(hDebug, WM_COMMAND, IDC_DEBUGGER_STEP_IN, 0);
 }
 
