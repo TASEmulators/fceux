@@ -140,7 +140,7 @@ int beginningOfPCPointerLine = -1;	// index of the first char within debug_str[]
 
 void UpdateOtherDebuggingDialogs()
 {
-	//adelikat: This updates all the other dialogs such as ppu, nametable, logger, etc in one function, should be applied to all the step type buttons
+	//This updates all the other dialogs such as ppu, nametable, logger, etc in one function, should be applied to all the step type buttons
 	NTViewDoBlit(0);		//Nametable Viewer
 	UpdateLogWindow();		//Trace Logger
 	UpdateCDLogger();		//Code/Data Logger
