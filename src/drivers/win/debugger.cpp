@@ -1953,7 +1953,9 @@ inline int EnabledFlag(bool b)
 
 inline void UpdateOptionsPopup(HMENU optionsPopup)
 {
-
+	CheckMenuItem(optionsPopup, ID_DEBUGGER_AUTO_OPEN, CheckedFlag(debuggerAutoload));
+	CheckMenuItem(optionsPopup, ID_DEBUGGER_IDA_FONT, CheckedFlag(debuggerIDAFont));
+	CheckMenuItem(optionsPopup, ID_DEBUGGER_SHOW_ROM_OFFSETS, CheckedFlag(debuggerDisplayROMoffsets));
 }
 
 inline void UpdateSymbolsPopup(HMENU symbolsPopup)
@@ -2146,13 +2148,13 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				{
 					switch (LOWORD(wParam))
 					{
-						case DEBUGAUTOLOAD:
+						case DEBUGAUTOLOAD: // TODO: delete/merge with ID_DEBUGGER_AUTO_OPEN
 							debuggerAutoload ^= 1;
 							break;
 						case DEBUGLOADDEB: // TODO: delete/merge with ID_DEBUGGER_LOAD_DEB_FILE
 							debuggerSaveLoadDEBFiles = !debuggerSaveLoadDEBFiles;
 							break;
-						case DEBUGIDAFONT:
+						case DEBUGIDAFONT: // TODO: delete/merge with ID_DEBUGGER_IDA_FONT
 							debuggerIDAFont ^= 1;
 							debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
 							debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
@@ -2220,13 +2222,21 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						// Options menu
 						// TODO: Reuse/merge with the old IDs from the persistent buttons.
 						case ID_DEBUGGER_AUTO_OPEN:
-							printf("Coming soon!\n");
+							debuggerAutoload ^= 1;
+							UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
 							break;
 						case ID_DEBUGGER_IDA_FONT:
-							printf("Coming soon!\n");
+							debuggerIDAFont ^= 1;
+							debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
+							debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
+							SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
+							UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
+							UpdateDebugger(false);
 							break;
 						case ID_DEBUGGER_SHOW_ROM_OFFSETS:
-							printf("Coming soon!\n");
+							debuggerDisplayROMoffsets ^= 1;
+							UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
+							UpdateDebugger(false);
 							break;
 						case ID_DEBUGGER_RESTORE_SIZE:
 							RestoreSize(hwndDlg);
@@ -2673,7 +2683,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 // ################################## End of SP CODE ###########################
 							
 							case IDC_DEBUGGER_ROM_OFFSETS:
-							{
+							{ // TODO: delete/merge with ID_DEBUGGER_SHOW_ROM_OFFSETS
 								debuggerDisplayROMoffsets ^= 1;
 								UpdateDebugger(false);
 								break;
