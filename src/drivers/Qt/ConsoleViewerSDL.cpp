@@ -650,4 +650,5 @@ void ConsoleViewSDL_t::render(void)
 
 	SDL_RenderPresent(sdlRenderer);
 
+	nes_shm->render_count++;
 }

@@ -3914,7 +3914,6 @@ void consoleWin_t::syncActionConfig( QAction *act, const char *property )
 
 void consoleWin_t::updatePeriodic(void)
 {
-	
 	// Process all events before attempting to render viewport
 	QCoreApplication::processEvents();
 

@@ -653,5 +653,6 @@ void ConsoleViewGL_t::paintGL(void)
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_TEXTURE_RECTANGLE);
 
+	nes_shm->render_count++;
 	 //printf("Paint GL!\n");
 }

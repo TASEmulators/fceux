@@ -34,36 +34,6 @@ struct  nes_shm_t
 	char  runEmulator;
 	char  blitUpdated;
 
-	// Pass Key Events back to QT Gui
-	struct 
-	{
-		int head;
-		int tail;
-
-		struct {
-			int type;
-			int keycode;
-			int state;
-		} data[64];
-
-	} keyEventBuf;
-
-	// Gui Command Event Queue
-	struct 
-	{
-		int head;
-		int tail;
-
-		struct {
-			 int id;
-
-			 union {
-			 	int   i32[4];
-				float f32[4];
-			 } param;
-		} cmd[64];
-	} guiEvent;
-
 	uint32_t  pixbuf[1048576]; // 1024 x 1024
 
 	void clear_pixbuf(void)
@@ -71,19 +41,19 @@ struct  nes_shm_t
 		memset( pixbuf, 0, sizeof(pixbuf) );
 	}
 
-   struct sndBuf_t
-   {
-      int  head;
-      int  tail;
-      int16_t  data[NES_AUDIO_BUFLEN];
-      unsigned int starveCounter;
-   } sndBuf;
+	struct sndBuf_t
+	{
+		int  head;
+		int  tail;
+		int16_t  data[NES_AUDIO_BUFLEN];
+		unsigned int starveCounter;
+	} sndBuf;
 
-   void  push_sound_sample( int16_t sample )
-   {
-      sndBuf.data[ sndBuf.head ] = sample;
-      sndBuf.head = (sndBuf.head + 1) % NES_AUDIO_BUFLEN;
-   }
+	void  push_sound_sample( int16_t sample )
+	{
+		sndBuf.data[ sndBuf.head ] = sample;
+		sndBuf.head = (sndBuf.head + 1) % NES_AUDIO_BUFLEN;
+	}
 };
 
 extern nes_shm_t *nes_shm;

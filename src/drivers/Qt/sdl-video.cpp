@@ -265,6 +265,7 @@ int InitVideo(FCEUGI *gi)
 			nes_shm->video.yscale = 1;
 		break;
 	}
+	nes_shm->render_count = nes_shm->blit_count = 0;
 
 	s_inited = 1;
 
@@ -475,6 +476,7 @@ BlitScreen(uint8 *XBuf)
 	{
 		Blit8ToHigh(XBuf + NOFFSET, dest, bw, s_tlines, pitch, ixScale, iyScale);
 	}
+	nes_shm->blit_count++;
 	nes_shm->blitUpdated = 1;
 
 	aviRecordAddFrame();
