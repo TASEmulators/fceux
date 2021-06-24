@@ -1944,7 +1944,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 #define MENU_SYMBOLS_POS 2
 #define MENU_TOOLS_POS 3
 
-HMENU toolsPopup;
+HMENU toolsPopup, symbolsPopup;
 
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -1975,6 +1975,7 @@ inline void UpdateSymbolsPopup(HMENU symbolsPopup)
 	// Gray out potentially irrelavant options
 	EnableMenuItem(symbolsPopup, ID_DEBUGGER_DEFAULT_REG_NAMES, EnabledFlag(symbDebugEnabled));
 	EnableMenuItem(symbolsPopup, ID_DEBUGGER_INLINE_ADDRESS, EnabledFlag(symbDebugEnabled));
+	EnableMenuItem(symbolsPopup, ID_DEBUGGER_RELOAD_SYMBOLS, EnabledFlag(GameInfo));
 }
 
 inline void UpdateToolsPopup(HMENU symbolsPopup)
@@ -2071,7 +2072,7 @@ void DebuggerInitDialog(HWND hwndDlg)
 		InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
 
 	UpdateOptionsPopup(GetSubMenu(hdbgmenu, MENU_OPTIONS_POS));
-	UpdateSymbolsPopup(GetSubMenu(hdbgmenu, MENU_SYMBOLS_POS));
+	UpdateSymbolsPopup(symbolsPopup = GetSubMenu(hdbgmenu, MENU_SYMBOLS_POS));
 	UpdateToolsPopup(toolsPopup = GetSubMenu(hdbgmenu, MENU_TOOLS_POS));
 
 	debugger_open = 1;
@@ -2239,21 +2240,17 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			break;
 		case ID_DEBUGGER_INLINE_ADDRESS:
 			inlineAddressEnabled ^= 1;
-			UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
 			UpdateDebugger(false);
 			break;
 		case ID_DEBUGGER_LOAD_DEB_FILE:
 			debuggerSaveLoadDEBFiles ^= 1;
-			UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
 			break;
 		case ID_DEBUGGER_SYMBOLIC_DEBUG:
 			symbDebugEnabled ^= 1;
-			UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
 			UpdateDebugger(false);
 			break;
 		case ID_DEBUGGER_DEFAULT_REG_NAMES:
 			symbRegNames ^= 1;
-			UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
 			UpdateDebugger(false);
 			break;
 		// Tools menu
@@ -2522,6 +2519,12 @@ void DebuggerInitMenuPopup(HWND hwndDlg, HMENU hmenu, uint16 pos, bool isWindowM
 	if (hmenu == toolsPopup)
 	{
 		UpdateToolsPopup(hmenu);
+		return;
+	}
+	if (hmenu == symbolsPopup)
+	{
+		UpdateSymbolsPopup(symbolsPopup);
+		return;
 	}
 }
 
