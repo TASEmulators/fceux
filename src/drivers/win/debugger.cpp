@@ -2671,6 +2671,33 @@ void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 curso
 	SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 }
 
+void DebuggerContextMenu(HWND hwndDlg, HWND hwndReceiver, int16 cursorX, int16 cursorY)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	// Handle certain stubborn context menus for nearly incapable controls.
+	if (hwndReceiver == GetDlgItem(hwndDlg, IDC_DEBUGGER_BP_LIST))
+	{
+		// Only open the menu if a breakpoint is selected
+		if (SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_BP_LIST, LB_GETCURSEL, 0, 0) >= 0)
+		{
+			hDebugcontextsub = GetSubMenu(hDebugcontext,0);
+			if (cursorX != -1)
+				// Create menu at cursor pos
+				TrackPopupMenu(hDebugcontextsub, TPM_RIGHTBUTTON, cursorX, cursorY, 0, hwndDlg, NULL);
+			else
+			{ // Handle the context menu keyboard key
+				RECT wrect;
+				GetWindowRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_BP_LIST), &wrect);
+				// Create menu over breakpoints list
+				TrackPopupMenu(hDebugcontextsub, TPM_RIGHTBUTTON, wrect.left + int((wrect.right - wrect.left) / 3), wrect.top + int((wrect.bottom - wrect.top) / 3), 0, hwndDlg, NULL);
+			}						
+		}
+	}
+}
+
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -2718,6 +2745,9 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		case WM_MOUSEWHEEL:
 			DebuggerMouseWheel(hwndDlg, HIWORD(wParam), LOWORD(lParam), HIWORD(lParam), LOWORD(wParam), lParam);
 			break;
+		case WM_CONTEXTMENU:
+			DebuggerContextMenu(hwndDlg, (HWND)wParam, LOWORD(lParam), HIWORD(lParam));
+			break;
 	}
 
 	//these messages only get handled when a game is loaded
@@ -2725,25 +2755,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 		switch(uMsg)
 		{
-			case WM_CONTEXTMENU:
-			{
-				// Handle certain stubborn context menus for nearly incapable controls.
-
-				if (wParam == (INT_PTR)GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST)) {
-					// Only open the menu if a breakpoint is selected
-					if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0) {
-						hDebugcontextsub = GetSubMenu(hDebugcontext,0);
-						if (lParam != -1)
-							TrackPopupMenu(hDebugcontextsub,TPM_RIGHTBUTTON,LOWORD(lParam),HIWORD(lParam),0,hwndDlg,0);	//Create menu
-						else { // Handle the context menu keyboard key
-							RECT wrect;
-							GetWindowRect(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST), &wrect);
-							TrackPopupMenu(hDebugcontextsub,TPM_RIGHTBUTTON,wrect.left + int((wrect.right - wrect.left) / 3),wrect.top + int((wrect.bottom - wrect.top) / 3),0,hwndDlg,0);	//Create menu
-						}						
-					}
-				}
-				break;
-			}
 			case WM_KEYDOWN:
 				MessageBox(hwndDlg,"Die!","I'm dead!",MB_YESNO|MB_ICONINFORMATION);
 				break;
