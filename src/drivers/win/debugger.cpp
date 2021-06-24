@@ -1946,6 +1946,8 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
 HMENU toolsPopup;
 
+INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 inline int CheckedFlag(bool b)
 {
 	return b ? MF_CHECKED : MF_UNCHECKED;
@@ -2127,7 +2129,7 @@ void DebuggerResizeWindow(HWND hwndDlg, UINT resizeType)
 
 void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 {
-	printf("bnclicked: %d\n", btnId);
+	// Buttons that don't need a rom loaded to do something, such as autoload
 	switch (btnId)
 	{
 		case DEBUGAUTOLOAD: // TODO: delete/merge with ID_DEBUGGER_AUTO_OPEN
@@ -2263,6 +2265,255 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			printf("%ls\n", debug_wstr);
 			break;
 	}
+
+	// Buttons that only get handled when a game is loaded
+	if (GameInfo)
+	{
+		switch (btnId)
+		{
+			case IDC_DEBUGGER_BP_ADD:
+				childwnd = 1;
+				if (DialogBoxParam(fceu_hInstance,"ADDBP",hwndDlg,AddbpCallB, 0)) AddBreakList();
+				childwnd = 0;
+				UpdateDebugger(false);
+				break;
+			case IDC_DEBUGGER_BP_DEL:
+				DeleteBreak(SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0));
+				break;
+			case IDC_DEBUGGER_BP_EDIT:
+				WP_edit = SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0);
+				if (DialogBoxParam(fceu_hInstance, "ADDBP", hwndDlg, AddbpCallB, 0)) EditBreakList();
+				WP_edit = -1;
+				UpdateDebugger(false);
+				break;
+			case IDC_DEBUGGER_RUN:
+				if (FCEUI_EmulationPaused()) {
+					UpdateRegs(hwndDlg);
+					FCEUI_ToggleEmulationPause();
+					//DebuggerWasUpdated = false done in above function;
+				}
+				break;
+			case IDC_DEBUGGER_STEP_IN:
+				if (FCEUI_EmulationPaused())
+					UpdateRegs(hwndDlg);
+				FCEUI_Debugger().step = true;
+				FCEUI_SetEmulationPaused(0);
+				UpdateOtherDebuggingDialogs();
+								
+				break;
+			case IDC_DEBUGGER_RUN_LINE:
+				if (FCEUI_EmulationPaused())
+					UpdateRegs(hwndDlg);
+				FCEUI_Debugger().runline = true;
+				{
+					uint64 ts=timestampbase;
+					ts+=timestamp;
+					ts+=341/3;
+					FCEUI_Debugger().runline_end_time=ts;
+				}
+				FCEUI_SetEmulationPaused(0);
+				UpdateOtherDebuggingDialogs();
+				break;
+			case IDC_DEBUGGER_RUN_FRAME2:
+				if (FCEUI_EmulationPaused())
+					UpdateRegs(hwndDlg);
+				FCEUI_Debugger().runline = true;
+				{
+					uint64 ts=timestampbase;
+					ts+=timestamp;
+					ts+=128*341/3;
+					FCEUI_Debugger().runline_end_time=ts;
+				}
+				FCEUI_SetEmulationPaused(0);
+				UpdateOtherDebuggingDialogs();
+				break;
+			case IDC_DEBUGGER_STEP_OUT:
+				if (FCEUI_EmulationPaused() > 0) {
+					DebuggerState &dbgstate = FCEUI_Debugger();
+					UpdateRegs(hwndDlg);
+					if ((dbgstate.stepout) && (MessageBox(hwndDlg,"Step Out is currently in process. Cancel it and setup a new Step Out watch?","Step Out Already Active",MB_YESNO|MB_ICONINFORMATION) != IDYES)) break;
+					if (GetMem(X.PC) == 0x20) dbgstate.jsrcount = 1;
+					else dbgstate.jsrcount = 0;
+					dbgstate.stepout = 1;
+					FCEUI_SetEmulationPaused(0);
+				}
+				break;
+			case IDC_DEBUGGER_STEP_OVER:
+				if (FCEUI_EmulationPaused()) {
+					UpdateRegs(hwndDlg);
+					int tmp = X.PC;
+					uint8 opcode = GetMem(tmp);
+					bool jsr = opcode==0x20;
+					bool call = jsr;
+					#ifdef BRK_3BYTE_HACK
+					//with this hack, treat BRK similar to JSR
+					if(opcode == 0x00)
+						call = true;
+					#endif
+					if (call) {
+						if ((watchpoint[64].flags) && (MessageBox(hwndDlg,"Step Over is currently in process. Cancel it and setup a new Step Over watch?","Step Over Already Active",MB_YESNO|MB_ICONINFORMATION) != IDYES)) break;
+						watchpoint[64].address = (tmp+3);
+						watchpoint[64].flags = WP_E|WP_X;
+					}
+					else FCEUI_Debugger().step = true;
+					FCEUI_SetEmulationPaused(0);
+				}
+				break;
+			case IDC_DEBUGGER_SEEK_PC:
+				if (FCEUI_EmulationPaused())
+				{
+					UpdateRegs(hwndDlg);
+					UpdateDebugger(true);
+				}
+				break;
+			case IDC_DEBUGGER_SEEK_TO:
+			{
+				if (FCEUI_EmulationPaused())
+					UpdateRegs(hwndDlg);
+				char str[16];
+				GetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str,5);
+				int tmp = offsetStringToInt(BT_C, str);
+				if (tmp != -1)
+				{
+					sprintf(str,"%04X", tmp);
+					SetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str);
+					Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, tmp);
+					// "Address Bookmark Add" follows the address
+					sprintf(str,"%04X", si.nPos);
+					SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
+				}
+				break;
+			}
+			case IDC_DEBUGGER_BREAK_ON_BAD_OP: //Break on bad opcode
+				FCEUI_Debugger().badopbreak ^= 1;
+				break;
+			case IDC_DEBUGGER_FLAG_N: X.P^=N_FLAG; UpdateDebugger(false); break;
+			case IDC_DEBUGGER_FLAG_V: X.P^=V_FLAG; UpdateDebugger(false); break;
+			case IDC_DEBUGGER_FLAG_U: X.P^=U_FLAG; UpdateDebugger(false); break;
+			case IDC_DEBUGGER_FLAG_B: X.P^=B_FLAG; UpdateDebugger(false); break;
+			case IDC_DEBUGGER_FLAG_D: X.P^=D_FLAG; UpdateDebugger(false); break;
+			case IDC_DEBUGGER_FLAG_I: X.P^=I_FLAG; UpdateDebugger(false); break;
+			case IDC_DEBUGGER_FLAG_Z: X.P^=Z_FLAG; UpdateDebugger(false); break;
+			case IDC_DEBUGGER_FLAG_C: X.P^=C_FLAG; UpdateDebugger(false); break;
+
+			case IDC_DEBUGGER_RESET_COUNTERS:
+			{
+				ResetDebugStatisticsCounters();
+				UpdateDebugger(false);
+				break;
+			}
+			case IDC_DEBUGGER_BREAK_ON_CYCLES:
+			{
+				break_on_cycles ^= 1;
+				break;
+			}
+			case IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS:
+			{
+				break_on_instructions ^= 1;
+				break;
+			}
+
+// ################################## Start of SP CODE ###########################
+
+			case IDC_DEBUGGER_RELOAD_SYMS:
+			{ // TODO: delete/merge with ID_DEBUGGER_RELOAD_SYMBOLS
+				ramBankNamesLoaded = false;
+				for(int i=0;i<ARRAYSIZE(pageNumbersLoaded);i++)
+					pageNumbersLoaded[i] = -1;
+				loadNameFiles();
+				UpdateDebugger(false);
+				break;
+			}
+			case IDC_DEBUGGER_BOOKMARK_ADD: AddDebuggerBookmark(hwndDlg); break;
+			case IDC_DEBUGGER_BOOKMARK_DEL: DeleteDebuggerBookmark(hwndDlg); break;
+			case IDC_DEBUGGER_BOOKMARK_EDIT: EditDebuggerBookmark(hwndDlg); break;
+			case IDC_DEBUGGER_ENABLE_SYMBOLIC:
+			{ // TODO: delete/merge with ID_DEBUGGER_SYMBOLIC_DEBUG
+				symbDebugEnabled ^= 1;
+				CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
+				UpdateDebugger(false);
+				break;
+			}
+			case IDC_DEBUGGER_PREDEFINED_REGS:
+			{ // TODO: delete/merge with ID_DEBUGGER_DEFAULT_REG_NAMES
+				symbRegNames ^= 1;
+				CheckDlgButton(hwndDlg, IDC_DEBUGGER_PREDEFINED_REGS, symbRegNames ? BST_CHECKED : BST_UNCHECKED);
+				UpdateDebugger(false);
+				break;
+			}
+							
+// ################################## End of SP CODE ###########################
+							
+			case IDC_DEBUGGER_ROM_OFFSETS:
+			{ // TODO: delete/merge with ID_DEBUGGER_SHOW_ROM_OFFSETS
+				debuggerDisplayROMoffsets ^= 1;
+				UpdateDebugger(false);
+				break;
+			}
+			case IDC_DEBUGGER_ROM_PATCHER: DoPatcher(-1,hwndDlg); break; // TODO: delete/merge with ID_DEBUGGER_ROM_PATCHER
+			// Double click the breakpoint list
+			// TODO: wait for the clean double-click callback!
+			case DEBUGGER_CONTEXT_TOGGLEBREAK: DebuggerCallB(hwndDlg, WM_COMMAND, (LBN_DBLCLK * 0x10000) | (IDC_DEBUGGER_BP_LIST), (LPARAM)hwndBtn); break;
+		}
+	}
+}
+
+void DebuggerDblClk(HWND hwndDlg, uint16 itemId, HWND hwndBtn)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	switch (itemId)
+	{
+		case IDC_DEBUGGER_BP_LIST: 
+			EnableBreak(SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0));
+			break;
+		case LIST_DEBUGGER_BOOKMARKS:
+			GoToDebuggerBookmark(hwndDlg);
+			break;
+	}
+}
+
+void DebuggerSelCancel(HWND hwndDlg, uint16 listBoxId, HWND hwndList)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	switch (listBoxId)
+	{
+		case IDC_DEBUGGER_BP_LIST:
+			// Disable the delete and edit buttons
+			EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),FALSE);
+			EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),FALSE);
+			break;
+	}
+}
+
+void DebuggerSelChange(HWND hwndDlg, uint16 listBoxId, HWND hwndList)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	switch (listBoxId)
+	{
+		case IDC_DEBUGGER_BP_LIST:
+		{
+			// If something is selected, enabled the delete and edit buttons.
+			if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0)
+			{
+				EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),TRUE);
+				EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),TRUE);
+			} else
+			{
+				EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),FALSE);
+				EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),FALSE);
+			}
+			break;
+		}
+	}
 }
 
 void DebuggerInitMenuPopup(HWND hwndDlg, HMENU hmenu, uint16 pos, bool isWindowMenu)
@@ -2289,21 +2540,144 @@ void DebuggerMoveWindow(HWND hwndDlg, uint16 x, uint16 y)
 	}
 }
 
+void DebuggerWindowActivate(HWND hwndDlg, uint16 eventType, HWND hwndActivated)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	// Prevents numerous situations where the debugger is out of sync with the data
+	if (eventType != WA_INACTIVE)
+	{
+		UpdateDebugger(false);
+	}
+	else
+	{
+		if (FCEUI_EmulationPaused())
+			UpdateRegs(hwndDlg);
+	}
+}
+
+void DebuggerVScroll(HWND hwndDlg, uint16 eventType, uint16 scrollPos, HWND hwndScrollBar)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	if (FCEUI_EmulationPaused())
+		UpdateRegs(hwndDlg);
+
+	if (hwndScrollBar)
+	{
+		GetScrollInfo(hwndScrollBar, SB_CTL, &si);
+		switch (eventType)
+		{
+			case SB_ENDSCROLL:
+			case SB_TOP:
+			case SB_BOTTOM: break;
+			case SB_LINEUP:
+			{
+				si.nPos = InstructionUp(si.nPos);
+				break;
+			}
+			case SB_LINEDOWN:
+			{
+				si.nPos = InstructionDown(si.nPos);
+				break;
+			}
+			case SB_PAGEUP:
+			{
+				for (int i = si.nPage; i > 0; i--)
+				{
+					si.nPos = InstructionUp(si.nPos);
+					if (si.nPos < si.nMin)
+					{
+						si.nPos = si.nMin;
+						break;
+					}
+				}
+				break;
+			}
+			case SB_PAGEDOWN:
+			{
+				for (int i = si.nPage; i > 0; i--)
+				{
+					si.nPos = InstructionDown(si.nPos);
+					if ((si.nPos + (int)si.nPage) > si.nMax)
+					{
+						si.nPos = si.nMax - si.nPage;
+						break;
+					}
+				}
+				break;
+			}
+			case SB_THUMBPOSITION:
+			case SB_THUMBTRACK: si.nPos = si.nTrackPos; break;
+		}
+		if (si.nPos < si.nMin)
+			si.nPos = si.nMin;
+		if ((si.nPos + (int)si.nPage) > si.nMax)
+			si.nPos = si.nMax - si.nPage;
+		SetScrollInfo(hwndScrollBar, SB_CTL, &si, TRUE);
+
+		Disassemble(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+		// The address in the Add Bookmark textbox follows the scroll pos.
+		char str[16];
+		sprintf(str,"%04X", si.nPos);
+		SetDlgItemText(hwndDlg, IDC_DEBUGGER_BOOKMARK, str);
+	}
+}
+
+void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 cursorY, uint16 vkeyFlags, LPARAM jankyHandle)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	// Try to scroll up or down in units of 8 lines
+	int i = rotAmt / WHEEL_DELTA;
+	if (i < 0)
+	{
+		for (i *= -(int)si.nPage; i > 0; i--)
+		{
+			si.nPos = InstructionDown(si.nPos);
+			if ((si.nPos + (int)si.nPage) > si.nMax)
+			{
+				si.nPos = si.nMax - si.nPage;
+				break;
+			}
+		}
+	} else if (i > 0)
+	{
+		for (i *= si.nPage; i > 0; i--)
+		{
+			si.nPos = InstructionUp(si.nPos);
+			if (si.nPos < si.nMin)
+			{
+				si.nPos = si.nMin;
+				break;
+			}
+		}
+	}
+
+	// This function calls UpdateScrollInfo. Don't worry!
+	Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+	// The address in the Add Bookmark textbox follows the scroll pos.
+	char str[16];
+	sprintf(str,"%04X", si.nPos);
+	SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
+}
+
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	//these messages get handled at any time
-	switch(uMsg)
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
-		{
 			DebuggerInitDialog(hwndDlg);
 			break;
-		}
 		case WM_SIZE:
-		{
 			DebuggerResizeWindow(hwndDlg, wParam);
 			break;
-		}
 		case WM_CLOSE:
 		case WM_QUIT:
 			DebuggerExit();
@@ -2313,24 +2687,34 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		case WM_MOVE:
 			DebuggerMoveWindow(hwndDlg, LOWORD(lParam), HIWORD(lParam));
 			break;
-
-		// Buttons that don't need a rom loaded to do something, such as autoload
 		case WM_COMMAND:
-		{
 			switch (HIWORD(wParam))
 			{
 				case BN_CLICKED:
-				{
 					DebuggerBnClicked(hwndDlg, LOWORD(wParam), (HWND)lParam);
 					break;
-				}
+				case LBN_DBLCLK:
+					DebuggerDblClk(hwndDlg, LOWORD(wParam), (HWND)lParam);
+					break;
+				case LBN_SELCANCEL:
+					DebuggerSelCancel(hwndDlg, LOWORD(wParam), (HWND)lParam);
+					break;
+				case LBN_SELCHANGE:
+					DebuggerSelChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
+					break;
 			}
-		}
 		case WM_INITMENUPOPUP:
-		{
 			DebuggerInitMenuPopup(hwndDlg, (HMENU)wParam, LOWORD(lParam), HIWORD(lParam));
 			break;
-		}
+		case WM_ACTIVATE:
+			DebuggerWindowActivate(hwndDlg, LOWORD(wParam), (HWND)lParam);
+			break;
+		case WM_VSCROLL:
+			DebuggerVScroll(hwndDlg, LOWORD(wParam), HIWORD(wParam), (HWND)lParam);
+			break;
+		case WM_MOUSEWHEEL:
+			DebuggerMouseWheel(hwndDlg, HIWORD(wParam), LOWORD(lParam), HIWORD(lParam), LOWORD(wParam), lParam);
+			break;
 	}
 
 	//these messages only get handled when a game is loaded
@@ -2338,84 +2722,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 		switch(uMsg)
 		{
-			case WM_ACTIVATE:
-			{
-				//Prevents numerous situations where the debugger is out of date with the data
-				if (LOWORD(wParam) != WA_INACTIVE)
-				{
-					UpdateDebugger(false);
-				} else
-				{
-					if (FCEUI_EmulationPaused())
-						UpdateRegs(hwndDlg);
-				}
-				break;
-			}
-			case WM_VSCROLL:
-			{
-				if (FCEUI_EmulationPaused())
-					UpdateRegs(hwndDlg);
-				if (lParam)
-				{
-					GetScrollInfo((HWND)lParam,SB_CTL,&si);
-					switch(LOWORD(wParam))
-					{
-						case SB_ENDSCROLL:
-						case SB_TOP:
-						case SB_BOTTOM: break;
-						case SB_LINEUP:
-						{
-							si.nPos = InstructionUp(si.nPos);
-							break;
-						}
-						case SB_LINEDOWN:
-						{
-							si.nPos = InstructionDown(si.nPos);
-							break;
-						}
-						case SB_PAGEUP:
-						{
-							for (int i = si.nPage; i > 0; i--)
-							{
-								si.nPos = InstructionUp(si.nPos);
-								if (si.nPos < si.nMin)
-								{
-									si.nPos = si.nMin;
-									break;
-								}
-							}
-							break;
-						}
-						case SB_PAGEDOWN:
-						{
-							for (int i = si.nPage; i > 0; i--)
-							{
-								si.nPos = InstructionDown(si.nPos);
-								if ((si.nPos + (int)si.nPage) > si.nMax)
-								{
-									si.nPos = si.nMax - si.nPage;
-									break;
-								}
-							}
-							break;
-						}
-						case SB_THUMBPOSITION:
-						case SB_THUMBTRACK: si.nPos = si.nTrackPos; break;
-					}
-					if (si.nPos < si.nMin)
-						si.nPos = si.nMin;
-					if ((si.nPos + (int)si.nPage) > si.nMax)
-						si.nPos = si.nMax - si.nPage;
-					SetScrollInfo((HWND)lParam,SB_CTL,&si,TRUE);
-
-					Disassemble(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
-					// "Address Bookmark Add" follows the address
-					char str[16];
-					sprintf(str,"%04X", si.nPos);
-					SetDlgItemText(hwndDlg, IDC_DEBUGGER_BOOKMARK, str);
-				}
-				break;
-			}
 			case WM_CONTEXTMENU:
 			{
 				// Handle certain stubborn context menus for nearly incapable controls.
@@ -2435,46 +2741,9 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				}
 				break;
 			}
-			case WM_MOUSEWHEEL:
-			{
-				GetScrollInfo((HWND)lParam,SB_CTL,&si);
-				int i = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
-				if (i < 0)
-				{
-					for (i *= -(int)si.nPage; i > 0; i--)
-					{
-						si.nPos = InstructionDown(si.nPos);
-						if ((si.nPos + (int)si.nPage) > si.nMax)
-						{
-							si.nPos = si.nMax - si.nPage;
-							break;
-						}
-					}
-				} else if (i > 0)
-				{
-					for (i *= si.nPage; i > 0; i--)
-					{
-						si.nPos = InstructionUp(si.nPos);
-						if (si.nPos < si.nMin)
-						{
-							si.nPos = si.nMin;
-							break;
-						}
-					}
-				}
-				SetScrollInfo((HWND)lParam,SB_CTL,&si,TRUE);
-
-				Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
-				// "Address Bookmark Add" follows the address
-				char str[16];
-				sprintf(str,"%04X", si.nPos);
-				SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
-				break;
-			}
 			case WM_KEYDOWN:
 				MessageBox(hwndDlg,"Die!","I'm dead!",MB_YESNO|MB_ICONINFORMATION);
 				break;
-
 			case WM_MOUSEMOVE:
 			{
 				int mouse_x = GET_X_LPARAM(lParam);
@@ -2556,240 +2825,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						int i = disassembly_addresses[tmp];
 						SetGGConvFocus(i,GetMem(i));
 					}
-				}
-				break;
-			}
-			case WM_INITMENUPOPUP:
-			case WM_INITMENU:
-				break;
-			case WM_COMMAND:
-			{
-				switch(HIWORD(wParam))
-				{
-					case BN_CLICKED:
-						switch(LOWORD(wParam)) {
-							case IDC_DEBUGGER_BP_ADD:
-								childwnd = 1;
-								if (DialogBoxParam(fceu_hInstance,"ADDBP",hwndDlg,AddbpCallB, 0)) AddBreakList();
-								childwnd = 0;
-								UpdateDebugger(false);
-								break;
-							case IDC_DEBUGGER_BP_DEL:
-								DeleteBreak(SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0));
-								break;
-							case IDC_DEBUGGER_BP_EDIT:
-								WP_edit = SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0);
-								if (DialogBoxParam(fceu_hInstance, "ADDBP", hwndDlg, AddbpCallB, 0)) EditBreakList();
-								WP_edit = -1;
-								UpdateDebugger(false);
-								break;
-							case IDC_DEBUGGER_RUN:
-								if (FCEUI_EmulationPaused()) {
-									UpdateRegs(hwndDlg);
-									FCEUI_ToggleEmulationPause();
-									//DebuggerWasUpdated = false done in above function;
-								}
-								break;
-							case IDC_DEBUGGER_STEP_IN:
-								if (FCEUI_EmulationPaused())
-									UpdateRegs(hwndDlg);
-								FCEUI_Debugger().step = true;
-								FCEUI_SetEmulationPaused(0);
-								UpdateOtherDebuggingDialogs();
-								
-								break;
-							case IDC_DEBUGGER_RUN_LINE:
-								if (FCEUI_EmulationPaused())
-									UpdateRegs(hwndDlg);
-								FCEUI_Debugger().runline = true;
-								{
-									uint64 ts=timestampbase;
-									ts+=timestamp;
-									ts+=341/3;
-									FCEUI_Debugger().runline_end_time=ts;
-								}
-								FCEUI_SetEmulationPaused(0);
-								UpdateOtherDebuggingDialogs();
-								break;
-							case IDC_DEBUGGER_RUN_FRAME2:
-								if (FCEUI_EmulationPaused())
-									UpdateRegs(hwndDlg);
-								FCEUI_Debugger().runline = true;
-								{
-									uint64 ts=timestampbase;
-									ts+=timestamp;
-									ts+=128*341/3;
-									FCEUI_Debugger().runline_end_time=ts;
-								}
-								FCEUI_SetEmulationPaused(0);
-								UpdateOtherDebuggingDialogs();
-								break;
-							case IDC_DEBUGGER_STEP_OUT:
-								if (FCEUI_EmulationPaused() > 0) {
-									DebuggerState &dbgstate = FCEUI_Debugger();
-									UpdateRegs(hwndDlg);
-									if ((dbgstate.stepout) && (MessageBox(hwndDlg,"Step Out is currently in process. Cancel it and setup a new Step Out watch?","Step Out Already Active",MB_YESNO|MB_ICONINFORMATION) != IDYES)) break;
-									if (GetMem(X.PC) == 0x20) dbgstate.jsrcount = 1;
-									else dbgstate.jsrcount = 0;
-									dbgstate.stepout = 1;
-									FCEUI_SetEmulationPaused(0);
-								}
-								break;
-							case IDC_DEBUGGER_STEP_OVER:
-								if (FCEUI_EmulationPaused()) {
-									UpdateRegs(hwndDlg);
-									int tmp = X.PC;
-									uint8 opcode = GetMem(tmp);
-									bool jsr = opcode==0x20;
-									bool call = jsr;
-									#ifdef BRK_3BYTE_HACK
-									//with this hack, treat BRK similar to JSR
-									if(opcode == 0x00)
-										call = true;
-									#endif
-									if (call) {
-										if ((watchpoint[64].flags) && (MessageBox(hwndDlg,"Step Over is currently in process. Cancel it and setup a new Step Over watch?","Step Over Already Active",MB_YESNO|MB_ICONINFORMATION) != IDYES)) break;
-										watchpoint[64].address = (tmp+3);
-										watchpoint[64].flags = WP_E|WP_X;
-									}
-									else FCEUI_Debugger().step = true;
-									FCEUI_SetEmulationPaused(0);
-								}
-								break;
-							case IDC_DEBUGGER_SEEK_PC:
-								if (FCEUI_EmulationPaused())
-								{
-									UpdateRegs(hwndDlg);
-									UpdateDebugger(true);
-								}
-								break;
-							case IDC_DEBUGGER_SEEK_TO:
-							{
-								if (FCEUI_EmulationPaused())
-									UpdateRegs(hwndDlg);
-								char str[16];
-								GetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str,5);
-								int tmp = offsetStringToInt(BT_C, str);
-								if (tmp != -1)
-								{
-									sprintf(str,"%04X", tmp);
-									SetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str);
-									Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, tmp);
-									// "Address Bookmark Add" follows the address
-									sprintf(str,"%04X", si.nPos);
-									SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
-								}
-								break;
-							}
-							case IDC_DEBUGGER_BREAK_ON_BAD_OP: //Break on bad opcode
-								FCEUI_Debugger().badopbreak ^= 1;
-								break;
-							case IDC_DEBUGGER_FLAG_N: X.P^=N_FLAG; UpdateDebugger(false); break;
-							case IDC_DEBUGGER_FLAG_V: X.P^=V_FLAG; UpdateDebugger(false); break;
-							case IDC_DEBUGGER_FLAG_U: X.P^=U_FLAG; UpdateDebugger(false); break;
-							case IDC_DEBUGGER_FLAG_B: X.P^=B_FLAG; UpdateDebugger(false); break;
-							case IDC_DEBUGGER_FLAG_D: X.P^=D_FLAG; UpdateDebugger(false); break;
-							case IDC_DEBUGGER_FLAG_I: X.P^=I_FLAG; UpdateDebugger(false); break;
-							case IDC_DEBUGGER_FLAG_Z: X.P^=Z_FLAG; UpdateDebugger(false); break;
-							case IDC_DEBUGGER_FLAG_C: X.P^=C_FLAG; UpdateDebugger(false); break;
-
-							case IDC_DEBUGGER_RESET_COUNTERS:
-							{
-								ResetDebugStatisticsCounters();
-								UpdateDebugger(false);
-								break;
-							}
-							case IDC_DEBUGGER_BREAK_ON_CYCLES:
-							{
-								break_on_cycles ^= 1;
-								break;
-							}
-							case IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS:
-							{
-								break_on_instructions ^= 1;
-								break;
-							}
-
-// ################################## Start of SP CODE ###########################
-
-							case IDC_DEBUGGER_RELOAD_SYMS:
-							{ // TODO: delete/merge with ID_DEBUGGER_RELOAD_SYMBOLS
-								ramBankNamesLoaded = false;
-								for(int i=0;i<ARRAYSIZE(pageNumbersLoaded);i++)
-									pageNumbersLoaded[i] = -1;
-								loadNameFiles();
-								UpdateDebugger(false);
-								break;
-							}
-							case IDC_DEBUGGER_BOOKMARK_ADD: AddDebuggerBookmark(hwndDlg); break;
-							case IDC_DEBUGGER_BOOKMARK_DEL: DeleteDebuggerBookmark(hwndDlg); break;
-							case IDC_DEBUGGER_BOOKMARK_EDIT: EditDebuggerBookmark(hwndDlg); break;
-							case IDC_DEBUGGER_ENABLE_SYMBOLIC:
-							{ // TODO: delete/merge with ID_DEBUGGER_SYMBOLIC_DEBUG
-								symbDebugEnabled ^= 1;
-								CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
-								UpdateDebugger(false);
-								break;
-							}
-							case IDC_DEBUGGER_PREDEFINED_REGS:
-							{ // TODO: delete/merge with ID_DEBUGGER_DEFAULT_REG_NAMES
-								symbRegNames ^= 1;
-								CheckDlgButton(hwndDlg, IDC_DEBUGGER_PREDEFINED_REGS, symbRegNames ? BST_CHECKED : BST_UNCHECKED);
-								UpdateDebugger(false);
-								break;
-							}
-							
-// ################################## End of SP CODE ###########################
-							
-							case IDC_DEBUGGER_ROM_OFFSETS:
-							{ // TODO: delete/merge with ID_DEBUGGER_SHOW_ROM_OFFSETS
-								debuggerDisplayROMoffsets ^= 1;
-								UpdateDebugger(false);
-								break;
-							}
-							case IDC_DEBUGGER_ROM_PATCHER: DoPatcher(-1,hwndDlg); break; // TODO: delete/merge with ID_DEBUGGER_ROM_PATCHER
-							// Double click the breakpoint list
-							case DEBUGGER_CONTEXT_TOGGLEBREAK: DebuggerCallB(hwndDlg, WM_COMMAND, (LBN_DBLCLK * 0x10000) | (IDC_DEBUGGER_BP_LIST), lParam); break;
-						}
-						break;
-					case LBN_DBLCLK:
-						switch(LOWORD(wParam)) {
-							case IDC_DEBUGGER_BP_LIST: 
-								EnableBreak(SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0));
-								break;
-// ################################## Start of SP CODE ###########################
-
-							case LIST_DEBUGGER_BOOKMARKS: GoToDebuggerBookmark(hwndDlg); break;
-							
-// ################################## End of SP CODE ###########################
-						}
-						break;
-					case LBN_SELCANCEL:
-						switch(LOWORD(wParam)) {
-							case IDC_DEBUGGER_BP_LIST:
-								EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),FALSE);
-								EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),FALSE);
-								break;
-						}
-						break;
-					case LBN_SELCHANGE:
-						switch(LOWORD(wParam))
-						{
-							case IDC_DEBUGGER_BP_LIST:
-							{
-								if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0)
-								{
-									EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),TRUE);
-									EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),TRUE);
-								} else
-								{
-									EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),FALSE);
-									EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),FALSE);
-								}
-								break;
-							}
-						}
-						break;
 				}
 				break;
 			}
