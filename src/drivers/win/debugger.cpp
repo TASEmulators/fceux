@@ -1944,6 +1944,8 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 #define MENU_SYMBOLS_POS 2
 #define MENU_TOOLS_POS 3
 
+HMENU toolsPopup;
+
 inline int CheckedFlag(bool b)
 {
 	return b ? MF_CHECKED : MF_UNCHECKED;
@@ -1979,158 +1981,329 @@ inline void UpdateToolsPopup(HMENU symbolsPopup)
 	EnableMenuItem(symbolsPopup, ID_DEBUGGER_CODE_DUMPER, EnabledFlag(GameInfo));
 }
 
+void DebuggerInitDialog(HWND hwndDlg)
+{
+	char str[256] = { 0 };
+	CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_CYCLES, break_on_cycles ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, break_on_instructions ? BST_CHECKED : BST_UNCHECKED);
+	sprintf(str, "%u", (unsigned)break_cycles_limit);
+	SetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str);
+	sprintf(str, "%u", (unsigned)break_instructions_limit);
+	SetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str);
+
+	CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_BAD_OP, FCEUI_Debugger().badopbreak ? BST_CHECKED : BST_UNCHECKED);
+
+	CheckDlgButton(hwndDlg, DEBUGLOADDEB, debuggerSaveLoadDEBFiles ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, DEBUGIDAFONT, debuggerIDAFont ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, DEBUGAUTOLOAD, debuggerAutoload ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_DEBUGGER_ROM_OFFSETS, debuggerDisplayROMoffsets ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_DEBUGGER_PREDEFINED_REGS, symbRegNames ? BST_CHECKED : BST_UNCHECKED);
+
+	if (DbgPosX==-32000) DbgPosX=0; //Just in case
+	if (DbgPosY==-32000) DbgPosY=0;
+	SetWindowPos(hwndDlg,0,DbgPosX,DbgPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+
+	GetWindowRect(hwndDlg,&currDebuggerRect);
+
+	si.cbSize = sizeof(SCROLLINFO);
+	si.fMask = SIF_ALL;
+	si.nMin = 0;
+	si.nMax = 0x10000;
+	si.nPos = 0;
+	si.nPage = 8;
+	SetScrollInfo(GetDlgItem(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si,TRUE);
+
+	//setup font
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY,WM_SETFONT,(WPARAM)debugSystem->hDisasmFont,FALSE);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+
+	//text limits
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,EM_SETLIMITTEXT,2,0);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_X,EM_SETLIMITTEXT,2,0);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_Y,EM_SETLIMITTEXT,2,0);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PC,EM_SETLIMITTEXT,4,0);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,EM_SETLIMITTEXT,383,0);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,EM_SETLIMITTEXT,4,0);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETLIMITTEXT,4,0);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETLIMITTEXT,2,0);
+
+	// limit input
+	// Don't limit address entry. See: debugcpp offsetStringToInt
+	DefaultEditCtrlProc = (WNDPROC)
+	SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PC), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_A), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_X), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_Y), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+
+	//I'm lazy, disable the controls which I can't mess with right now
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETREADONLY,TRUE,0);
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETREADONLY,TRUE,0);
+
+// ################################## Start of SP CODE ###########################
+
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BOOKMARK,EM_SETLIMITTEXT,4,0);
+	
+	LoadGameDebuggerData(hwndDlg);
+
+	debuggerWasActive = 1;
+			
+// ################################## End of SP CODE ###########################
+
+	// Enable Context Sub-Menus
+	hDebugcontext = LoadMenu(fceu_hInstance,"DEBUGCONTEXTMENUS");
+	hDisasmcontext = LoadMenu(fceu_hInstance,"DISASMCONTEXTMENUS");
+
+	// prevent the font of the edit control from screwing up when it contains MBC or characters not contained the current font.
+	SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETLANGOPTIONS, 0, SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_GETLANGOPTIONS, 0, 0) & ~IMF_AUTOFONT);
+
+	// subclass editfield
+	IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWLP_WNDPROC, (LONG_PTR)IDC_DEBUGGER_DISASSEMBLY_WndProc);
+
+	// prepare menu
+	HMENU hdbgmenu = GetMenu(hwndDlg);
+	HMENU hcolorpopupmenu = GetSubMenu(hdbgmenu, MENU_COLORS_POS);
+	for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
+		InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
+
+	UpdateOptionsPopup(GetSubMenu(hdbgmenu, MENU_OPTIONS_POS));
+	UpdateSymbolsPopup(GetSubMenu(hdbgmenu, MENU_SYMBOLS_POS));
+	UpdateToolsPopup(toolsPopup = GetSubMenu(hdbgmenu, MENU_TOOLS_POS));
+
+	debugger_open = 1;
+	inDebugger = true;
+}
+
+void DebuggerResizeWindow(HWND hwndDlg, UINT resizeType)
+{
+	if(resizeType == SIZE_RESTORED)				    //If dialog was resized
+	{
+		GetWindowRect(hwndDlg,&newDebuggerRect);	//Get new size
+
+		//Force a minimum Dialog size-------------------------------
+		DbgSizeX = newDebuggerRect.right - newDebuggerRect.left;	//Store new size (this will be stored in the .cfg file)	
+		DbgSizeY = newDebuggerRect.bottom - newDebuggerRect.top;
+
+		// convert minimum size to actual screen size.
+		// the minimum height is different between left and right part,
+		// but width is the same, similarly hereinafter
+		HDC hdc = GetDC(hwndDlg);
+		int min_w = MulDiv(DEBUGGER_MIN_WIDTH, GetDeviceCaps(hdc, LOGPIXELSX), 96);
+		int min_h_l = MulDiv(DEBUGGER_MIN_HEIGHT_LEFT, GetDeviceCaps(hdc, LOGPIXELSY), 96);
+		int min_h_r = MulDiv(DEBUGGER_MIN_HEIGHT_RIGHT, GetDeviceCaps(hdc, LOGPIXELSY), 96);
+		ReleaseDC(hwndDlg, hdc);
+
+		// calculate current width and height
+		int curr_w = currDebuggerRect.right - currDebuggerRect.left;
+		int curr_h_l = currDebuggerRect.bottom - currDebuggerRect.top;
+		int curr_h_r = curr_h_l;
+		// calculate new width and height
+		int new_w = newDebuggerRect.right - newDebuggerRect.left;
+		int new_h_l = newDebuggerRect.bottom - newDebuggerRect.top;
+		int new_h_r = new_h_l;
+
+		// when the size is smaller than the minimum, calculate it as the minimum size
+		if (curr_w < min_w) curr_w = min_w;
+		if (curr_h_l < min_h_l) curr_h_l = min_h_l;
+		if (curr_h_r < min_h_r) curr_h_r = min_h_r;
+
+		if (new_w < min_w) new_w = min_w;
+		if (new_h_l < min_h_l) new_h_l = min_h_l;
+		if (new_h_r < min_h_r) new_h_r = min_h_r;
+
+		POINT p[2];
+		// Calculate ditto with size
+		p[0].x = p[1].x = new_w - curr_w;
+		p[0].y = new_h_l - curr_h_l;
+		p[1].y = new_h_r - curr_h_r;
+		EnumChildWindows(hwndDlg, DebuggerEnumWindowsProc, (LPARAM)p);	//Initiate callback for resizing child windows
+		InvalidateRect(hwndDlg, 0, TRUE);
+		UpdateWindow(hwndDlg);
+		currDebuggerRect = newDebuggerRect;						//Store current debugger window size (for future calculations in EnumChildWindows)
+	}
+}
+
+void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
+{
+	printf("bnclicked: %d\n", btnId);
+	switch (btnId)
+	{
+		case DEBUGAUTOLOAD: // TODO: delete/merge with ID_DEBUGGER_AUTO_OPEN
+			debuggerAutoload ^= 1;
+			break;
+		case DEBUGLOADDEB: // TODO: delete/merge with ID_DEBUGGER_LOAD_DEB_FILE
+			debuggerSaveLoadDEBFiles = !debuggerSaveLoadDEBFiles;
+			break;
+		case DEBUGIDAFONT: // TODO: delete/merge with ID_DEBUGGER_IDA_FONT
+			debuggerIDAFont ^= 1;
+			debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
+			debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
+			SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
+			UpdateDebugger(false);
+			break;
+		case IDC_DEBUGGER_CYCLES_EXCEED:
+		{
+			// Pretty sure this was dead code. BN_CLICKED is not equal to EN_CHANGE.
+			// Does it need to be moved to an EN_CHANGED callback?
+			//if (HIWORD(wParam) == EN_CHANGE)
+			//{
+			//	char str[16];
+			//	GetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str, 16);
+			//	break_cycles_limit = strtoul(str, NULL, 10);
+			//}
+			break;
+		}
+		case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
+		{
+			// Pretty sure this was dead code. BN_CLICKED is not equal to EN_CHANGE.
+			// Does it need to be moved to an EN_CHANGED callback?
+			//if (HIWORD(wParam) == EN_CHANGE)
+			//{
+			//	char str[16];
+			//	GetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str, 16);
+			//	break_instructions_limit = strtoul(str, NULL, 10);
+			//}
+			break;
+		}
+		case ID_DEBUGGER_DEFCOLOR:
+		{
+			if (!IsDebugColorDefault() && MessageBox(hwndDlg, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
+			{
+				RestoreDefaultDebugColor();
+				RECT rect;
+				GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
+				UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
+				HMENU hcolorpopupmenu = GetSubMenu(GetMenu(hwndDlg), 1);
+				for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
+					ModifyColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
+			}
+		}
+		break;
+		case ID_COLOR_DEBUGGER:
+		case ID_COLOR_DEBUGGER + 1:
+		case ID_COLOR_DEBUGGER + 2:
+		case ID_COLOR_DEBUGGER + 3:
+		case ID_COLOR_DEBUGGER + 4:
+		case ID_COLOR_DEBUGGER + 5:
+		case ID_COLOR_DEBUGGER + 6:
+		case ID_COLOR_DEBUGGER + 7:
+		case ID_COLOR_DEBUGGER + 8:
+		case ID_COLOR_DEBUGGER + 9:
+		case ID_COLOR_DEBUGGER + 10:
+		case ID_COLOR_DEBUGGER + 11:
+		case ID_COLOR_DEBUGGER + 12:
+		{
+			int index = btnId - ID_COLOR_DEBUGGER;
+			if (ChangeColor(hwndDlg, &dbgcolormenu[index]))
+			{
+				RECT rect;
+				GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
+				UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
+				ModifyColorMenu(hwndDlg, GetSubMenu(GetMenu(hwndDlg), 1), &dbgcolormenu[index].menu, index, btnId);
+			}
+		}
+		break;
+		// Options menu
+		// TODO: Reuse/merge with the old IDs from the persistent buttons.
+		case ID_DEBUGGER_AUTO_OPEN:
+			debuggerAutoload ^= 1;
+			UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
+			break;
+		case ID_DEBUGGER_IDA_FONT:
+			debuggerIDAFont ^= 1;
+			debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
+			debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
+			SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
+			UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
+			UpdateDebugger(false);
+			break;
+		case ID_DEBUGGER_SHOW_ROM_OFFSETS:
+			debuggerDisplayROMoffsets ^= 1;
+			UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
+			UpdateDebugger(false);
+			break;
+		case ID_DEBUGGER_RESTORE_SIZE:
+			RestoreSize(hwndDlg);
+			break;
+		// Symbols menu
+		case ID_DEBUGGER_RELOAD_SYMBOLS:
+			ramBankNamesLoaded = false;
+			for (int i = 0; i < ARRAYSIZE(pageNumbersLoaded); i++)
+				pageNumbersLoaded[i] = -1;
+			loadNameFiles();
+			UpdateDebugger(false);
+			break;
+		case ID_DEBUGGER_INLINE_ADDRESS:
+			inlineAddressEnabled ^= 1;
+			UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
+			UpdateDebugger(false);
+			break;
+		case ID_DEBUGGER_LOAD_DEB_FILE:
+			debuggerSaveLoadDEBFiles ^= 1;
+			UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
+			break;
+		case ID_DEBUGGER_SYMBOLIC_DEBUG:
+			symbDebugEnabled ^= 1;
+			UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
+			UpdateDebugger(false);
+			break;
+		case ID_DEBUGGER_DEFAULT_REG_NAMES:
+			symbRegNames ^= 1;
+			UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
+			UpdateDebugger(false);
+			break;
+		// Tools menu
+		case ID_DEBUGGER_ROM_PATCHER:
+			DoPatcher(-1, hwndDlg);
+			break;
+		case ID_DEBUGGER_CODE_DUMPER:
+			printf("Currently, I can only dump the contents of the visible window to console...\n\n");
+			printf("%ls\n", debug_wstr);
+			break;
+	}
+}
+
+void DebuggerInitMenuPopup(HWND hwndDlg, HMENU hmenu, uint16 pos, bool isWindowMenu)
+{
+	// We have position in parent menu, but we can't get a handle to the parent...
+	if (hmenu == toolsPopup)
+	{
+		UpdateToolsPopup(hmenu);
+	}
+}
+
+void DebuggerMoveWindow(HWND hwndDlg, uint16 x, uint16 y)
+{
+	if (!IsIconic(hwndDlg))
+	{
+		RECT wrect;
+		GetWindowRect(hwndDlg,&wrect);
+		DbgPosX = wrect.left;
+		DbgPosY = wrect.top;
+
+		#ifdef WIN32
+		WindowBoundsCheckResize(DbgPosX,DbgPosY,DbgSizeX,wrect.right);
+		#endif
+	}
+}
+
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    static HMENU toolsPopup = NULL;
 	//these messages get handled at any time
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:
 		{
-			char str[256] = { 0 };
-			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_CYCLES, break_on_cycles ? BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, break_on_instructions ? BST_CHECKED : BST_UNCHECKED);
-			sprintf(str, "%u", (unsigned)break_cycles_limit);
-			SetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str);
-			sprintf(str, "%u", (unsigned)break_instructions_limit);
-			SetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str);
-
-			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_BAD_OP, FCEUI_Debugger().badopbreak ? BST_CHECKED : BST_UNCHECKED);
-
-			CheckDlgButton(hwndDlg, DEBUGLOADDEB, debuggerSaveLoadDEBFiles ? BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, DEBUGIDAFONT, debuggerIDAFont ? BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, DEBUGAUTOLOAD, debuggerAutoload ? BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_DEBUGGER_ROM_OFFSETS, debuggerDisplayROMoffsets ? BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_DEBUGGER_PREDEFINED_REGS, symbRegNames ? BST_CHECKED : BST_UNCHECKED);
-
-			if (DbgPosX==-32000) DbgPosX=0; //Just in case
-			if (DbgPosY==-32000) DbgPosY=0;
-			SetWindowPos(hwndDlg,0,DbgPosX,DbgPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
-
-			GetWindowRect(hwndDlg,&currDebuggerRect);
-
-			si.cbSize = sizeof(SCROLLINFO);
-			si.fMask = SIF_ALL;
-			si.nMin = 0;
-			si.nMax = 0x10000;
-			si.nPos = 0;
-			si.nPage = 8;
-			SetScrollInfo(GetDlgItem(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si,TRUE);
-
-			//setup font
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY,WM_SETFONT,(WPARAM)debugSystem->hDisasmFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-
-			//text limits
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,EM_SETLIMITTEXT,2,0);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_X,EM_SETLIMITTEXT,2,0);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_Y,EM_SETLIMITTEXT,2,0);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PC,EM_SETLIMITTEXT,4,0);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,EM_SETLIMITTEXT,383,0);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,EM_SETLIMITTEXT,4,0);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETLIMITTEXT,4,0);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETLIMITTEXT,2,0);
-
-			// limit input
-			// Don't limit address entry. See: debugcpp offsetStringToInt
-			DefaultEditCtrlProc = (WNDPROC)
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PC), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_A), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_X), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_Y), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
-
-			//I'm lazy, disable the controls which I can't mess with right now
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETREADONLY,TRUE,0);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETREADONLY,TRUE,0);
-
-// ################################## Start of SP CODE ###########################
-
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BOOKMARK,EM_SETLIMITTEXT,4,0);
-			
-			LoadGameDebuggerData(hwndDlg);
-
-			debuggerWasActive = 1;
-			
-// ################################## End of SP CODE ###########################
-
-			// Enable Context Sub-Menus
-			hDebugcontext = LoadMenu(fceu_hInstance,"DEBUGCONTEXTMENUS");
-			hDisasmcontext = LoadMenu(fceu_hInstance,"DISASMCONTEXTMENUS");
-
-			// prevent the font of the edit control from screwing up when it contains MBC or characters not contained the current font.
-			SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_SETLANGOPTIONS, 0, SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, EM_GETLANGOPTIONS, 0, 0) & ~IMF_AUTOFONT);
-
-			// subclass editfield
-			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWLP_WNDPROC, (LONG_PTR)IDC_DEBUGGER_DISASSEMBLY_WndProc);
-
-			// prepare menu
-			HMENU hdbgmenu = GetMenu(hwndDlg);
-			HMENU hcolorpopupmenu = GetSubMenu(hdbgmenu, MENU_COLORS_POS);
-			for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
-				InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
-
-			UpdateOptionsPopup(GetSubMenu(hdbgmenu, MENU_OPTIONS_POS));
-			UpdateSymbolsPopup(GetSubMenu(hdbgmenu, MENU_SYMBOLS_POS));
-			UpdateToolsPopup(toolsPopup = GetSubMenu(hdbgmenu, MENU_TOOLS_POS));
-
-			debugger_open = 1;
-			inDebugger = true;
+			DebuggerInitDialog(hwndDlg);
 			break;
 		}
 		case WM_SIZE:
 		{
-			if(wParam == SIZE_RESTORED)						//If dialog was resized
-			{
-				GetWindowRect(hwndDlg,&newDebuggerRect);	//Get new size
-
-				//Force a minimum Dialog size-------------------------------
-				DbgSizeX = newDebuggerRect.right - newDebuggerRect.left;	//Store new size (this will be used to store in the .cfg file)	
-				DbgSizeY = newDebuggerRect.bottom - newDebuggerRect.top;
-
-				// convert minimum size to actual screen size.
-				// the minimum height is different between left and right part,
-				// but width is the same, similarly hereinafter
-				HDC hdc = GetDC(hwndDlg);
-				int min_w = MulDiv(DEBUGGER_MIN_WIDTH, GetDeviceCaps(hdc, LOGPIXELSX), 96);
-				int min_h_l = MulDiv(DEBUGGER_MIN_HEIGHT_LEFT, GetDeviceCaps(hdc, LOGPIXELSY), 96);
-				int min_h_r = MulDiv(DEBUGGER_MIN_HEIGHT_RIGHT, GetDeviceCaps(hdc, LOGPIXELSY), 96);
-				ReleaseDC(hwndDlg, hdc);
-
-				// calculate current width and height
-				int curr_w = currDebuggerRect.right - currDebuggerRect.left;
-				int curr_h_l = currDebuggerRect.bottom - currDebuggerRect.top;
-				int curr_h_r = curr_h_l;
-				// calculate new width and height
-				int new_w = newDebuggerRect.right - newDebuggerRect.left;
-				int new_h_l = newDebuggerRect.bottom - newDebuggerRect.top;
-				int new_h_r = new_h_l;
-
-				// when the size is smaller than the minimum, calculate it as the minimum size
-				if (curr_w < min_w) curr_w = min_w;
-				if (curr_h_l < min_h_l) curr_h_l = min_h_l;
-				if (curr_h_r < min_h_r) curr_h_r = min_h_r;
-
-				if (new_w < min_w) new_w = min_w;
-				if (new_h_l < min_h_l) new_h_l = min_h_l;
-				if (new_h_r < min_h_r) new_h_r = min_h_r;
-
-				POINT p[2];
-				// Calculate ditto with size
-				p[0].x = p[1].x = new_w - curr_w;
-				p[0].y = new_h_l - curr_h_l;
-				p[1].y = new_h_r - curr_h_r;
-				EnumChildWindows(hwndDlg, DebuggerEnumWindowsProc, (LPARAM)p);	//Initiate callback for resizing child windows
-				InvalidateRect(hwndDlg, 0, TRUE);
-				UpdateWindow(hwndDlg);
-				currDebuggerRect = newDebuggerRect;						//Store current debugger window size (for future calculations in EnumChildWindows
-			}
+			DebuggerResizeWindow(hwndDlg, wParam);
 			break;
 		}
-
-
 		case WM_CLOSE:
 		case WM_QUIT:
 			DebuggerExit();
@@ -2138,16 +2311,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		case WM_MOVING:
 			break;
 		case WM_MOVE:
-			if (!IsIconic(hwndDlg)) {
-				RECT wrect;
-				GetWindowRect(hwndDlg,&wrect);
-				DbgPosX = wrect.left;
-				DbgPosY = wrect.top;
-
-				#ifdef WIN32
-				WindowBoundsCheckResize(DbgPosX,DbgPosY,DbgSizeX,wrect.right);
-				#endif
-			}
+			DebuggerMoveWindow(hwndDlg, LOWORD(lParam), HIWORD(lParam));
 			break;
 
 		// Buttons that don't need a rom loaded to do something, such as autoload
@@ -2157,148 +2321,14 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			{
 				case BN_CLICKED:
 				{
-					switch (LOWORD(wParam))
-					{
-						case DEBUGAUTOLOAD: // TODO: delete/merge with ID_DEBUGGER_AUTO_OPEN
-							debuggerAutoload ^= 1;
-							break;
-						case DEBUGLOADDEB: // TODO: delete/merge with ID_DEBUGGER_LOAD_DEB_FILE
-							debuggerSaveLoadDEBFiles = !debuggerSaveLoadDEBFiles;
-							break;
-						case DEBUGIDAFONT: // TODO: delete/merge with ID_DEBUGGER_IDA_FONT
-							debuggerIDAFont ^= 1;
-							debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
-							debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
-							SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
-							UpdateDebugger(false);
-							break;
-						case IDC_DEBUGGER_CYCLES_EXCEED:
-						{
-							if (HIWORD(wParam) == EN_CHANGE)
-							{
-								char str[16];
-								GetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str, 16);
-								break_cycles_limit = strtoul(str, NULL, 10);
-							}
-							break;
-						}
-						case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
-						{
-							if (HIWORD(wParam) == EN_CHANGE)
-							{
-								char str[16];
-								GetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str, 16);
-								break_instructions_limit = strtoul(str, NULL, 10);
-							}
-							break;
-						}
-						case ID_DEBUGGER_DEFCOLOR:
-						{
-							if (!IsDebugColorDefault() && MessageBox(hwndDlg, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
-							{
-								RestoreDefaultDebugColor();
-								RECT rect;
-								GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
-								UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
-								HMENU hcolorpopupmenu = GetSubMenu(GetMenu(hwndDlg), 1);
-								for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
-									ModifyColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
-							}
-						}
-						break;
-						case ID_COLOR_DEBUGGER:
-						case ID_COLOR_DEBUGGER + 1:
-						case ID_COLOR_DEBUGGER + 2:
-						case ID_COLOR_DEBUGGER + 3:
-						case ID_COLOR_DEBUGGER + 4:
-						case ID_COLOR_DEBUGGER + 5:
-						case ID_COLOR_DEBUGGER + 6:
-						case ID_COLOR_DEBUGGER + 7:
-						case ID_COLOR_DEBUGGER + 8:
-						case ID_COLOR_DEBUGGER + 9:
-						case ID_COLOR_DEBUGGER + 10:
-						case ID_COLOR_DEBUGGER + 11:
-						case ID_COLOR_DEBUGGER + 12:
-						{
-							int index = wParam - ID_COLOR_DEBUGGER;
-							if (ChangeColor(hwndDlg, &dbgcolormenu[index]))
-							{
-								RECT rect;
-								GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
-								UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
-								ModifyColorMenu(hwndDlg, GetSubMenu(GetMenu(hwndDlg), 1), &dbgcolormenu[index].menu, index, wParam);
-							}
-						}
-						break;
-						// Options menu
-						// TODO: Reuse/merge with the old IDs from the persistent buttons.
-						case ID_DEBUGGER_AUTO_OPEN:
-							debuggerAutoload ^= 1;
-							UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
-							break;
-						case ID_DEBUGGER_IDA_FONT:
-							debuggerIDAFont ^= 1;
-							debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
-							debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
-							SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
-							UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
-							UpdateDebugger(false);
-							break;
-						case ID_DEBUGGER_SHOW_ROM_OFFSETS:
-							debuggerDisplayROMoffsets ^= 1;
-							UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
-							UpdateDebugger(false);
-							break;
-						case ID_DEBUGGER_RESTORE_SIZE:
-							RestoreSize(hwndDlg);
-							break;
-						// Symbols menu
-						case ID_DEBUGGER_RELOAD_SYMBOLS:
-							ramBankNamesLoaded = false;
-							for (int i = 0; i < ARRAYSIZE(pageNumbersLoaded); i++)
-								pageNumbersLoaded[i] = -1;
-							loadNameFiles();
-							UpdateDebugger(false);
-							break;
-						case ID_DEBUGGER_INLINE_ADDRESS:
-							inlineAddressEnabled ^= 1;
-							UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
-							UpdateDebugger(false);
-							break;
-						case ID_DEBUGGER_LOAD_DEB_FILE:
-							debuggerSaveLoadDEBFiles ^= 1;
-							UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
-							break;
-						case ID_DEBUGGER_SYMBOLIC_DEBUG:
-							symbDebugEnabled ^= 1;
-							UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
-							UpdateDebugger(false);
-							break;
-						case ID_DEBUGGER_DEFAULT_REG_NAMES:
-							symbRegNames ^= 1;
-							UpdateSymbolsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_SYMBOLS_POS));
-							UpdateDebugger(false);
-							break;
-						// Tools menu
-						case ID_DEBUGGER_ROM_PATCHER:
-							DoPatcher(-1, hwndDlg);
-							break;
-						case ID_DEBUGGER_CODE_DUMPER:
-							printf("Currently, I can only dump the contents of the visible window to console...\n\n");
-							printf("%ls\n", debug_wstr);
-							break;
-					}
+					DebuggerBnClicked(hwndDlg, LOWORD(wParam), (HWND)lParam);
+					break;
 				}
 			}
 		}
 		case WM_INITMENUPOPUP:
 		{
-			// LOWORD(lParam) == position in parent menu, but we can't get a handle to the parent...
-			HMENU menu = (HMENU)wParam;
-		    if (menu == toolsPopup)
-			{
-				UpdateToolsPopup((HMENU)wParam);
-			}
+			DebuggerInitMenuPopup(hwndDlg, (HMENU)wParam, LOWORD(lParam), HIWORD(lParam));
 			break;
 		}
 	}
@@ -2765,7 +2795,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			}
 		}
 	}
-	
 	
 	return FALSE;
 }
