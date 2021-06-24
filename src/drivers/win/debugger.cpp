@@ -1944,7 +1944,7 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 #define MENU_SYMBOLS_POS 2
 #define MENU_TOOLS_POS 3
 
-HMENU toolsPopup, symbolsPopup;
+HMENU toolsPopup, symbolsPopup, optionsPopup;
 
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -2071,7 +2071,7 @@ void DebuggerInitDialog(HWND hwndDlg)
 	for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 		InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
 
-	UpdateOptionsPopup(GetSubMenu(hdbgmenu, MENU_OPTIONS_POS));
+	UpdateOptionsPopup(optionsPopup = GetSubMenu(hdbgmenu, MENU_OPTIONS_POS));
 	UpdateSymbolsPopup(symbolsPopup = GetSubMenu(hdbgmenu, MENU_SYMBOLS_POS));
 	UpdateToolsPopup(toolsPopup = GetSubMenu(hdbgmenu, MENU_TOOLS_POS));
 
@@ -2212,19 +2212,16 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 		// TODO: Reuse/merge with the old IDs from the persistent buttons.
 		case ID_DEBUGGER_AUTO_OPEN:
 			debuggerAutoload ^= 1;
-			UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
 			break;
 		case ID_DEBUGGER_IDA_FONT:
 			debuggerIDAFont ^= 1;
 			debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
 			debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
 			SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
-			UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
 			UpdateDebugger(false);
 			break;
 		case ID_DEBUGGER_SHOW_ROM_OFFSETS:
 			debuggerDisplayROMoffsets ^= 1;
-			UpdateOptionsPopup(GetSubMenu(GetMenu(hwndDlg), MENU_OPTIONS_POS));
 			UpdateDebugger(false);
 			break;
 		case ID_DEBUGGER_RESTORE_SIZE:
@@ -2524,6 +2521,11 @@ void DebuggerInitMenuPopup(HWND hwndDlg, HMENU hmenu, uint16 pos, bool isWindowM
 	if (hmenu == symbolsPopup)
 	{
 		UpdateSymbolsPopup(symbolsPopup);
+		return;
+	}
+	if (hmenu == optionsPopup)
+	{
+		UpdateOptionsPopup(optionsPopup);
 		return;
 	}
 }
