@@ -559,15 +559,32 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 	SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, eventMask);
 }
 
-// This is most reliable if you dump one subroutine at a time. If you call it with 0x8000 - 0xFFFF,
-// it may misinterpret some things depending on how the data is packed. For instance:
-// Say we have 2C A9 10. The A9 byte is supposted to be the start of a routine (with LDA #$10), but maybe that
-// 2C gets interpreted as the opcode and we get nonsense: BIT $10A9. But the next instruction continues as normal...
-// Could potentially have it use Name*s to inform its search!
-// A lot of reused logic here, but we really don't want to write the whole dumpfile to a string in memory.
-// Note that the endAddr is actually the address of the last INSTRUCTION. This function will grab the
-// operands if they exist, and so may spill over a bit.
-// Could add config to not dump address and raw data.
+/**
+* Dumps disassembled ROM code between startAddr and endAddr (inclusive) to a file.
+* endAddr is the address of the last INSTRUCTION. This funcion will grab the operands if present,
+* and may spill over a bit in the process.
+* 0x80000 - 0xFFFF should get you the loaded banks. However, it's most reliable when you dump one subroutine at a time
+* or already have a lot of labels.
+* 
+* For example, say you have 2C A9 10 60, and the A9 byte is supposed to be the start of a subroutine. If the disassembler
+* comes across that 2C first, it will interpret the code as:
+
+* 2C A9 10 BIT $10A9 
+* 60       RTS
+
+* Nonsense.
+
+* But if you have a named label
+* on that A9 byte, the 2C (BIT) instruction will be INTERRUPTED, and it will show up like this:
+
+* 2C       INTERRUPTED
+* my_subroutine:
+* A9 10    LDA #$10
+* 60       RTS
+*
+* There is a lot of reused logic between this and Disassemble. However, they're different enough that it would
+* be more trouble than it's worth to combine them.
+*/
 void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 {
 	wchar_t chr[40] = { 0 };
@@ -578,15 +595,8 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 	unsigned int addr = startAddr; // Keeps track of which address to get the operands, etc. from
 
 	if (symbDebugEnabled)
-	{
 		loadNameFiles();
-		disassembly_operands.resize(0);
-	}
 
-	//figure out how many lines we can draw
-	int lines = endAddr - startAddr + 1;
-
-	// Could loop from startAddr to endAddr instead. Cut the bullshit
 	unsigned int instructions_count = 0;
 	for (int addr = startAddr; addr <= endAddr;)
 	{
@@ -597,14 +607,15 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 
 		if (symbDebugEnabled)
 		{
-			// insert Name and Comment lines if needed
+			// Insert name and comment lines if present
 			Name* node = findNode(getNamesPointerForAddress(addr), addr);
 			if (node)
 			{
 				if (node->name)
 				{
+					// Could probably ditch these swprintf's and just do fwprintf.
+					// Need to verify exactly how the various buffers are used.
 					swprintf(debug_wbuf, L"%S:\n", node->name);
-					// wcscat(debug_wstr, debug_wbuf);
 					fprintf(fout, "%ls", debug_wbuf);
 				}
 				if (node->comment)
@@ -620,7 +631,6 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 						debug_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
 						debug_decoration_comment_end_pos[1] = 0;		// set \0 instead of \n
 						swprintf(debug_wbuf, L"; %S\n", debug_decoration_comment);
-						// wcscat(debug_wstr, debug_wbuf);
 						fprintf(fout, "%ls", debug_wbuf);
 
 						debug_decoration_comment_end_pos += 2;
@@ -631,17 +641,7 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 			}
 		}
 
-		// Do we really want the PC arrow showing up in the dump?
-		if (addr == X.PC)
-		{ 
-			// wcscat(debug_wstr, L">");
-			fprintf(fout, "%ls", L">");
-		}
-		else
-		{
-			// wcscat(debug_wstr, L" ");
-			fprintf(fout, "%ls", L" ");
-		}
+		fprintf(fout, "%ls", L" ");
 
 		if (addr >= 0x8000)
 		{
@@ -660,14 +660,12 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 		}
 
 		// Add address
-		// wcscat(debug_wstr, chr);
 		fprintf(fout, "%ls", chr);
 
 		size = opsize[GetMem(addr)];
 		if (size == 0)
 		{
 			swprintf(chr, L"%02X        UNDEFINED", GetMem(addr++));
-			// wcscat(debug_wstr, chr);
 			fprintf(fout, "%ls", chr);
 		}
 		else
@@ -677,7 +675,6 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 				while (addr < 0xFFFF)
 				{
 					swprintf(chr, L"%02X        OVERFLOW\n", GetMem(addr++));
-					// wcscat(debug_wstr, chr);
 					fprintf(fout, "%ls", chr);
 				}
 				break;
@@ -687,19 +684,18 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 			{
 				// Write the raw bytes of this instruction
 				swprintf(chr, L"%02X ", opcode[j] = GetMem(addr++));
-				// wcscat(debug_wstr, chr);
 				fprintf(fout, "%ls", chr);
 				if (j != size - 1 && (node = findNode(getNamesPointerForAddress(addr), addr)))
 				{
 					// We were treating this as an operand, but it's named!
-					printf("$%04X - We were treating this as an operand, but it's named %s!\n", addr, node->name);
+					// Probably want an instruction to start here instead.
+					printf("$%04X (%s) came up as an operand for instruction @ %04X\n", addr, node->name, addr - j - 1);
 					size = j + 1;
 					break;
 				}
 			}
 			while (size < 3)
 			{
-				// wcscat(debug_wstr, L"   "); //pad output to align ASM
 				fprintf(fout, "%ls", L"   ");
 				size++;
 			}
@@ -735,7 +731,7 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 
 				uint8 opCode = GetMem(instruction_addr);
 
-				// special case: an RTS or RTI opcode
+				// special case: RTS and RTI
 				if (opCode == 0x60 || opCode == 0x40)
 				{
 					// add "----------" to emphasize the end of subroutine
@@ -745,13 +741,11 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 					bufferForDisassemblyWithPlentyOfStuff[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 				}
 
-				// append the disassembly to current line
+				// append disassembly to current line
 				swprintf(debug_wbuf, L" %S", bufferForDisassemblyWithPlentyOfStuff);
-				// wcscat(debug_wstr, debug_wbuf);
 				fprintf(fout, "%ls", debug_wbuf);
 			}
 		}
-		// wcscat(debug_wstr, L"\n");
 		fprintf(fout, "%ls", L"\n");
 		instructions_count++;
 	}
