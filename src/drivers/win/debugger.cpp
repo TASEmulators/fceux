@@ -682,25 +682,31 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 				}
 				break;
 			}
+			Name* node;
 			for (int j = 0; j < size; j++)
 			{
+				// Write the raw bytes of this instruction
 				swprintf(chr, L"%02X ", opcode[j] = GetMem(addr++));
-				Name* node;
+				// wcscat(debug_wstr, chr);
+				fprintf(fout, "%ls", chr);
 				if (j != size - 1 && (node = findNode(getNamesPointerForAddress(addr), addr)))
 				{
 					// We were treating this as an operand, but it's named!
 					printf("$%04X - We were treating this as an operand, but it's named %s!\n", addr, node->name);
-					fprintf(fout, "XXXX\n");
-					goto continueAddrLoop; // I don't care! YOU refactor it!
+					size = j + 1;
+					break;
 				}
-				// wcscat(debug_wstr, chr);
-				fprintf(fout, "%ls", chr);
 			}
 			while (size < 3)
 			{
 				// wcscat(debug_wstr, L"   "); //pad output to align ASM
 				fprintf(fout, "%ls", L"   ");
 				size++;
+			}
+			if (node)
+			{
+				fprintf(fout, " INTERRUPTED\n");
+				goto continueAddrLoop; // I don't care! YOU refactor it!
 			}
 
 			static char bufferForDisassemblyWithPlentyOfStuff[64 + NL_MAX_NAME_LEN * 10]; //"plenty"
