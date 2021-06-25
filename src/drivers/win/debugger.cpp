@@ -705,46 +705,46 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 			}
 			if (node)
 			{
-				fprintf(fout, " INTERRUPTED\n");
-				goto continueAddrLoop; // I don't care! YOU refactor it!
+				// TODO: Instead of this ominous and confusing message, could print ".byte $XX $YY..."
+				fprintf(fout, " INTERRUPTED");
 			}
-
-			static char bufferForDisassemblyWithPlentyOfStuff[64 + NL_MAX_NAME_LEN * 10]; //"plenty"
-			char* _a = Disassemble(addr, opcode);
-			strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
-
-			if (symbDebugEnabled)
-			{ // TODO: This will add in both the default name and custom name if you have inlineAddresses enabled.
-				if (symbRegNames)
-					replaceRegNames(bufferForDisassemblyWithPlentyOfStuff);
-				replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, NULL);
-				for (int p = 0; p<ARRAY_SIZE(pageNames); p++)
-					if (pageNames[p] != NULL)
-						replaceNames(pageNames[p], bufferForDisassemblyWithPlentyOfStuff, NULL);
-			}
-
-			uint8 opCode = GetMem(instruction_addr);
-
-			// special case: an RTS or RTI opcode
-			if (opCode == 0x60 || opCode == 0x40)
+			else
 			{
-				// add "----------" to emphasize the end of subroutine
-				strcat(bufferForDisassemblyWithPlentyOfStuff, " ");
-				for (int j = strlen(bufferForDisassemblyWithPlentyOfStuff); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
-					bufferForDisassemblyWithPlentyOfStuff[j] = '-';
-				bufferForDisassemblyWithPlentyOfStuff[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
-			}
+				static char bufferForDisassemblyWithPlentyOfStuff[64 + NL_MAX_NAME_LEN * 10]; //"plenty"
+				char* _a = Disassemble(addr, opcode); // I want to remove everything after the @.
+				strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
 
-			// append the disassembly to current line
-			swprintf(debug_wbuf, L" %S", bufferForDisassemblyWithPlentyOfStuff);
-			// wcscat(debug_wstr, debug_wbuf);
-			fprintf(fout, "%ls", debug_wbuf);
+				if (symbDebugEnabled)
+				{ // TODO: This will add in both the default name and custom name if you have inlineAddresses enabled.
+					if (symbRegNames)
+						replaceRegNames(bufferForDisassemblyWithPlentyOfStuff);
+					replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, NULL);
+					for (int p = 0; p<ARRAY_SIZE(pageNames); p++)
+						if (pageNames[p] != NULL)
+							replaceNames(pageNames[p], bufferForDisassemblyWithPlentyOfStuff, NULL);
+				}
+
+				uint8 opCode = GetMem(instruction_addr);
+
+				// special case: an RTS or RTI opcode
+				if (opCode == 0x60 || opCode == 0x40)
+				{
+					// add "----------" to emphasize the end of subroutine
+					strcat(bufferForDisassemblyWithPlentyOfStuff, " ");
+					for (int j = strlen(bufferForDisassemblyWithPlentyOfStuff); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
+						bufferForDisassemblyWithPlentyOfStuff[j] = '-';
+					bufferForDisassemblyWithPlentyOfStuff[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+				}
+
+				// append the disassembly to current line
+				swprintf(debug_wbuf, L" %S", bufferForDisassemblyWithPlentyOfStuff);
+				// wcscat(debug_wstr, debug_wbuf);
+				fprintf(fout, "%ls", debug_wbuf);
+			}
 		}
 		// wcscat(debug_wstr, L"\n");
 		fprintf(fout, "%ls", L"\n");
 		instructions_count++;
-
-	continueAddrLoop:;
 	}
 }
 
