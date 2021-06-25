@@ -710,8 +710,17 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 			}
 			else
 			{
-				static char bufferForDisassemblyWithPlentyOfStuff[64 + NL_MAX_NAME_LEN * 10]; //"plenty"
-				char* _a = Disassemble(addr, opcode); // I want to remove everything after the @.
+				static char bufferForDisassemblyWithPlentyOfStuff[64 + NL_MAX_NAME_LEN * 10]; // "plenty"
+				char* _a = Disassemble(addr, opcode);
+				// This isn't a trace log, so we want to remove the data after the @ or =.
+				// There are lots of hardcoded sprintfs in Disassemble. This really is the easiest way.
+				char* traceInfoIndex = strstr(_a, "@");
+				if (traceInfoIndex)
+					traceInfoIndex[-1] = 0;
+				traceInfoIndex = strstr(_a, "=");
+				if (traceInfoIndex)
+					traceInfoIndex[-1] = 0;
+
 				strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
 
 				if (symbDebugEnabled)
