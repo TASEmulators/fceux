@@ -685,6 +685,14 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 			for (int j = 0; j < size; j++)
 			{
 				swprintf(chr, L"%02X ", opcode[j] = GetMem(addr++));
+				Name* node;
+				if (j != size - 1 && (node = findNode(getNamesPointerForAddress(addr), addr)))
+				{
+					// We were treating this as an operand, but it's named!
+					printf("$%04X - We were treating this as an operand, but it's named %s!\n", addr, node->name);
+					fprintf(fout, "XXXX\n");
+					goto continueAddrLoop; // I don't care! YOU refactor it!
+				}
 				// wcscat(debug_wstr, chr);
 				fprintf(fout, "%ls", chr);
 			}
@@ -729,6 +737,8 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 		// wcscat(debug_wstr, L"\n");
 		fprintf(fout, "%ls", L"\n");
 		instructions_count++;
+
+	continueAddrLoop:;
 	}
 }
 
