@@ -559,6 +559,179 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 	SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, eventMask);
 }
 
+// This is most reliable if you dump one subroutine at a time. If you call it with 0x8000 - 0xFFFF,
+// it may misinterpret some things depending on how the data is packed. For instance:
+// Say we have 2C A9 10. The A9 byte is supposted to be the start of a routine (with LDA #$10), but maybe that
+// 2C gets interpreted as the opcode and we get nonsense: BIT $10A9. But the next instruction continues as normal...
+// Could potentially have it use Name*s to inform its search!
+// A lot of reused logic here, but we really don't want to write the whole dumpfile to a string in memory.
+// Note that the endAddr is actually the address of the last INSTRUCTION. This function will grab the
+// operands if they exist, and so may spill over a bit.
+// Could add config to not dump address and raw data.
+void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
+{
+	wchar_t chr[40] = { 0 };
+	wchar_t debug_wbuf[2048] = { 0 };
+	int size;
+	uint8 opcode[3];
+	unsigned int instruction_addr;
+	unsigned int addr = startAddr; // Keeps track of which address to get the operands, etc. from
+
+	if (symbDebugEnabled)
+	{
+		loadNameFiles();
+		disassembly_operands.resize(0);
+	}
+
+	//figure out how many lines we can draw
+	int lines = endAddr - startAddr + 1;
+
+	// Could loop from startAddr to endAddr instead. Cut the bullshit
+	unsigned int instructions_count = 0;
+	for (int addr = startAddr; addr <= endAddr;)
+	{
+		// PC pointer
+		if (addr > 0xFFFF) break;
+
+		instruction_addr = addr;
+
+		if (symbDebugEnabled)
+		{
+			// insert Name and Comment lines if needed
+			Name* node = findNode(getNamesPointerForAddress(addr), addr);
+			if (node)
+			{
+				if (node->name)
+				{
+					swprintf(debug_wbuf, L"%S:\n", node->name);
+					// wcscat(debug_wstr, debug_wbuf);
+					fprintf(fout, "%ls", debug_wbuf);
+				}
+				if (node->comment)
+				{
+					// make a copy
+					strcpy(debug_str_decoration_comment, node->comment);
+					strcat(debug_str_decoration_comment, "\r\n");
+					// divide the debug_str_decoration_comment into strings (Comment1, Comment2, ...)
+					debug_decoration_comment = debug_str_decoration_comment;
+					debug_decoration_comment_end_pos = strstr(debug_decoration_comment, "\r\n");
+					while (debug_decoration_comment_end_pos)
+					{
+						debug_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
+						debug_decoration_comment_end_pos[1] = 0;		// set \0 instead of \n
+						swprintf(debug_wbuf, L"; %S\n", debug_decoration_comment);
+						// wcscat(debug_wstr, debug_wbuf);
+						fprintf(fout, "%ls", debug_wbuf);
+
+						debug_decoration_comment_end_pos += 2;
+						debug_decoration_comment = debug_decoration_comment_end_pos;
+						debug_decoration_comment_end_pos = strstr(debug_decoration_comment_end_pos, "\r\n");
+					}
+				}
+			}
+		}
+
+		// Do we really want the PC arrow showing up in the dump?
+		if (addr == X.PC)
+		{ 
+			// wcscat(debug_wstr, L">");
+			fprintf(fout, "%ls", L">");
+		}
+		else
+		{
+			// wcscat(debug_wstr, L" ");
+			fprintf(fout, "%ls", L" ");
+		}
+
+		if (addr >= 0x8000)
+		{
+			if (debuggerDisplayROMoffsets && GetNesFileAddress(addr) != -1)
+			{
+				swprintf(chr, L" %06X: ", GetNesFileAddress(addr));
+			}
+			else
+			{
+				swprintf(chr, L"%02X:%04X: ", getBank(addr), addr);
+			}
+		}
+		else
+		{
+			swprintf(chr, L"  :%04X: ", addr);
+		}
+
+		// Add address
+		// wcscat(debug_wstr, chr);
+		fprintf(fout, "%ls", chr);
+
+		size = opsize[GetMem(addr)];
+		if (size == 0)
+		{
+			swprintf(chr, L"%02X        UNDEFINED", GetMem(addr++));
+			// wcscat(debug_wstr, chr);
+			fprintf(fout, "%ls", chr);
+		}
+		else
+		{
+			if ((addr + size) > 0xFFFF)
+			{
+				while (addr < 0xFFFF)
+				{
+					swprintf(chr, L"%02X        OVERFLOW\n", GetMem(addr++));
+					// wcscat(debug_wstr, chr);
+					fprintf(fout, "%ls", chr);
+				}
+				break;
+			}
+			for (int j = 0; j < size; j++)
+			{
+				swprintf(chr, L"%02X ", opcode[j] = GetMem(addr++));
+				// wcscat(debug_wstr, chr);
+				fprintf(fout, "%ls", chr);
+			}
+			while (size < 3)
+			{
+				// wcscat(debug_wstr, L"   "); //pad output to align ASM
+				fprintf(fout, "%ls", L"   ");
+				size++;
+			}
+
+			static char bufferForDisassemblyWithPlentyOfStuff[64 + NL_MAX_NAME_LEN * 10]; //"plenty"
+			char* _a = Disassemble(addr, opcode);
+			strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
+
+			if (symbDebugEnabled)
+			{ // TODO: This will add in both the default name and custom name if you have inlineAddresses enabled.
+				if (symbRegNames)
+					replaceRegNames(bufferForDisassemblyWithPlentyOfStuff);
+				replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, NULL);
+				for (int p = 0; p<ARRAY_SIZE(pageNames); p++)
+					if (pageNames[p] != NULL)
+						replaceNames(pageNames[p], bufferForDisassemblyWithPlentyOfStuff, NULL);
+			}
+
+			uint8 opCode = GetMem(instruction_addr);
+
+			// special case: an RTS or RTI opcode
+			if (opCode == 0x60 || opCode == 0x40)
+			{
+				// add "----------" to emphasize the end of subroutine
+				strcat(bufferForDisassemblyWithPlentyOfStuff, " ");
+				for (int j = strlen(bufferForDisassemblyWithPlentyOfStuff); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
+					bufferForDisassemblyWithPlentyOfStuff[j] = '-';
+				bufferForDisassemblyWithPlentyOfStuff[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+			}
+
+			// append the disassembly to current line
+			swprintf(debug_wbuf, L" %S", bufferForDisassemblyWithPlentyOfStuff);
+			// wcscat(debug_wstr, debug_wbuf);
+			fprintf(fout, "%ls", debug_wbuf);
+		}
+		// wcscat(debug_wstr, L"\n");
+		fprintf(fout, "%ls", L"\n");
+		instructions_count++;
+	}
+}
+
 void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
 {
 	wchar_t chr[40] = { 0 };
@@ -2255,8 +2428,13 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			DoPatcher(-1, hwndDlg);
 			break;
 		case ID_DEBUGGER_CODE_DUMPER:
-			printf("Currently, I can only dump the contents of the visible window to console...\n\n");
-			printf("%ls\n", debug_wstr);
+			FILE *fout = fopen("testdump.txt", "w");
+			// Hardcoded start and end addresses for Rockman 2's NMI routine. Lol
+			// Dump(fout, 0xCFED, 0xD0D3);
+			printf("Taking a dump...\n");
+			Dump(fout, 0x8000, 0xFFFF);
+			printf("I'M DONE!\n");
+			fclose(fout);
 			break;
 	}
 
