@@ -2700,6 +2700,92 @@ void DebuggerContextMenu(HWND hwndDlg, HWND hwndReceiver, int16 cursorX, int16 c
 	}
 }
 
+void DebuggerMouseMove(HWND hwndDlg, int cursorX, int cursorY, int vkFlags)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	bool setString = false;
+	if ((cursorX > 6) && (cursorX < 30) && (cursorY > 10))
+	{
+		setString = true;
+		RECT rectDisassembly;
+		GetClientRect(GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY), &rectDisassembly);
+		int height = rectDisassembly.bottom - rectDisassembly.top;
+		cursorY -= 10;
+		if (cursorY > height)
+			setString = false;
+		cursorY /= debugSystem->disasmFontHeight;
+	}
+
+	if (setString)
+		SetDlgItemText(hDebug, IDC_DEBUGGER_ADDR_LINE, "Left click = Inline Assembler. Middle click = Game Genie. Right click = Hex Editor.");
+	else
+		SetDlgItemText(hDebug, IDC_DEBUGGER_ADDR_LINE, "");
+}
+
+void DebuggerLButtonDown(HWND hwndDlg, int cursorX, int cursorY, int vkFlags)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	if (FCEUI_EmulationPaused() && (cursorX > 6) && (cursorX < 30) && (cursorY > 10))
+	{
+		int tmp = (cursorY - 10) / debugSystem->disasmFontHeight;
+		if (tmp < (int)disassembly_addresses.size())
+		{
+			int i = disassembly_addresses[tmp];
+			iaPC=i;
+			if (iaPC >= 0x8000)
+			{
+				DialogBox(fceu_hInstance, "ASSEMBLER", hwndDlg, AssemblerCallB);
+				UpdateDebugger(false);
+			}
+		}
+	}
+}
+
+void DebuggerRButtonDown(HWND hwndDlg, int cursorX, int cursorY, int vkFlags)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	if (FCEUI_EmulationPaused() && (cursorX > 6) && (cursorX < 30) && (cursorY > 10))
+	{
+		int tmp = (cursorY - 10) / debugSystem->disasmFontHeight;
+		if (tmp < (int)disassembly_addresses.size())
+		{
+			int i = disassembly_addresses[tmp];
+			if (i >= 0x8000)
+				// show ROM data in hex editor
+				ChangeMemViewFocus(3, GetNesFileAddress(i), -1);
+			else
+				// show RAM data in hex editor
+				ChangeMemViewFocus(0, i, -1);
+		}
+	}
+}
+
+void DebuggerMButtonDown(HWND hwndDlg, int cursorX, int cursorY, int vkFlags)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	if (FCEUI_EmulationPaused() && (cursorX > 6) && (cursorX < 30) && (cursorY > 10))
+	{
+		int tmp = (cursorY - 10) / debugSystem->disasmFontHeight;
+		if (tmp < (int)disassembly_addresses.size())
+		{
+			int i = disassembly_addresses[tmp];
+			SetGGConvFocus(i, GetMem(i));
+		}
+	}
+}
+
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -2750,103 +2836,22 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		case WM_CONTEXTMENU:
 			DebuggerContextMenu(hwndDlg, (HWND)wParam, LOWORD(lParam), HIWORD(lParam));
 			break;
+		case WM_MOUSEMOVE:
+			DebuggerMouseMove(hwndDlg, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), wParam);
+			break;
+		case WM_LBUTTONDOWN:
+			DebuggerLButtonDown(hwndDlg, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), wParam);
+			break;
+		case WM_RBUTTONDOWN:
+			DebuggerRButtonDown(hwndDlg, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), wParam);
+			break;
+		case WM_MBUTTONDOWN:
+			DebuggerMButtonDown(hwndDlg, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), wParam);
+			break;
+		case WM_KEYDOWN:
+			MessageBox(hwndDlg, "Die!", "I'm dead!", MB_YESNO | MB_ICONINFORMATION);
+			break;
 	}
-
-	//these messages only get handled when a game is loaded
-	if (GameInfo)
-	{
-		switch(uMsg)
-		{
-			case WM_KEYDOWN:
-				MessageBox(hwndDlg,"Die!","I'm dead!",MB_YESNO|MB_ICONINFORMATION);
-				break;
-			case WM_MOUSEMOVE:
-			{
-				int mouse_x = GET_X_LPARAM(lParam);
-				int mouse_y = GET_Y_LPARAM(lParam);
-
-				bool setString = false;
-				if ((mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
-				{
-					setString = true;
-					RECT rectDisassembly;
-					GetClientRect(GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY),&rectDisassembly);
-					int height = rectDisassembly.bottom-rectDisassembly.top;
-					mouse_y -= 10;
-					if(mouse_y > height)
-						setString = false;
-					mouse_y /= debugSystem->disasmFontHeight;
-				}
-
-				if (setString)
-					SetDlgItemText(hDebug, IDC_DEBUGGER_ADDR_LINE, "Leftclick = Inline Assembler. Midclick = Game Genie. Rightclick = Hexeditor.");
-				else
-					SetDlgItemText(hDebug, IDC_DEBUGGER_ADDR_LINE, "");
-				break;
-			}
-			case WM_LBUTTONDOWN:
-			{
-				int mouse_x = GET_X_LPARAM(lParam);
-				int mouse_y = GET_Y_LPARAM(lParam);
-// ################################## Start of SP CODE ###########################
-
-				// mouse_y < 538
-				// > 33) tmp = 33
-				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
-				{
-// ################################## End of SP CODE ###########################
-					int tmp = (mouse_y - 10) / debugSystem->disasmFontHeight;
-					if (tmp < (int)disassembly_addresses.size())
-					{
-						int i = disassembly_addresses[tmp];
-						iaPC=i;
-						if (iaPC >= 0x8000)
-						{
-							DialogBox(fceu_hInstance,"ASSEMBLER",hwndDlg,AssemblerCallB);
-							UpdateDebugger(false);
-						}
-					}
-				}
-				break;
-			}
-			case WM_RBUTTONDOWN:
-			{
-				int mouse_x = GET_X_LPARAM(lParam);
-				int mouse_y = GET_Y_LPARAM(lParam);
-				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
-				{
-					int tmp = (mouse_y - 10) / debugSystem->disasmFontHeight;
-					if (tmp < (int)disassembly_addresses.size())
-					{
-						int i = disassembly_addresses[tmp];
-						if (i >= 0x8000)
-							// show ROM data in Hexeditor
-							ChangeMemViewFocus(3, GetNesFileAddress(i), -1);
-						else
-							// show RAM data in Hexeditor
-							ChangeMemViewFocus(0, i, -1);
-					}
-				}
-				break;
-			}
-			case WM_MBUTTONDOWN:
-			{
-				int mouse_x = GET_X_LPARAM(lParam);
-				int mouse_y = GET_Y_LPARAM(lParam);
-				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
-				{
-					int tmp = (mouse_y - 10) / debugSystem->disasmFontHeight;
-					if (tmp < (int)disassembly_addresses.size())
-					{
-						int i = disassembly_addresses[tmp];
-						SetGGConvFocus(i,GetMem(i));
-					}
-				}
-				break;
-			}
-		}
-	}
-	
 	return FALSE;
 }
 
