@@ -273,7 +273,7 @@ int fceuExecutablePath( char *outputPath, int outputSize )
 	if ( result == 0 )
 	{
 		char *dir;
-		exePath[ bufSize ] = 0;
+		exePath[ sizeof(exePath)-1 ] = 0;
 		//printf("EXE Path: '%s' \n", exePath );
 
 		dir = ::dirname( exePath );
