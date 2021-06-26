@@ -20,6 +20,13 @@ echo "Number of Processors: $NPROC";
 
 INSTALL_PREFIX=/tmp/fceux
 
+# Clean build and packaging directories
+sudo rm -rf build;
+sudo rm -rf $INSTALL_PREFIX/fceux.app;
+
+# Remove windows specific DLLs so that they don't get installed
+find output -name *.dll -exec rm -f {} \;
+
 gcc --version
 
 echo '****************************************'

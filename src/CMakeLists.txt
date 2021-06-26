@@ -554,8 +554,11 @@ install( TARGETS  ${APP_NAME}
 # Use \$ to defer expansion until install script is called; CPack will call it with its own CMAKE_INSTALL_PREFIX
 set(APP \${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app)
 
+install( DIRECTORY ${CMAKE_SOURCE_DIR}/output/.
+	DESTINATION ${APP_NAME}.app/Contents/Resources COMPONENT Extra )
+
 set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
-set(CPACK_GENERATOR "DRAGNDROP")
+set(CPACK_GENERATOR "DragNDrop")
 include(CPACK)
 
 # macdeployqt tool that comes with Qt: https://doc.qt.io/qt-5/macos-deployment.html#macdeploy
