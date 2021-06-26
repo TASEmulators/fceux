@@ -1218,6 +1218,12 @@
 #define ID_DEBUGGER_RESTORE_SIZE        45544
 #define ID_DEBUGGER_ROM_PATCHER         45545
 #define ID_DEBUGGER_CODE_DUMPER         45546
+#define ID_DUMPER_START_ADDR            45547
+#define ID_DUMPER_END_ADDR              45548
+#define ID_DUMPER_FILEPATH              45549
+#define ID_DUMPER_BROWSE                45550
+#define ID_DUMPER_GO                    45551
+#define ID_DUMPER_NES_ADDR_TOGGLE       45552
 #define MW_VALUELABEL2                  65423
 #define MW_VALUELABEL1                  65426
 #define IDC_STATIC_SLASHTEXT            65442

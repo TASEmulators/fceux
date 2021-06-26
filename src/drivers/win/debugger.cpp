@@ -2135,10 +2135,13 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			FILE *fout = fopen("testdump.txt", "w");
 			// Hardcoded start and end addresses for Rockman 2's NMI routine. Lol
 			// Dump(fout, 0xCFED, 0xD0D3);
-			printf("Taking a dump...\n");
-			Dump(fout, 0x8000, 0xFFFF);
-			printf("I'M DONE!\n");
-			fclose(fout);
+			//printf("Taking a dump...\n");
+			//Dump(fout, 0x8000, 0xFFFF);
+			//printf("I'M DONE!\n");
+			//fclose(fout);
+
+			DialogBox(fceu_hInstance, "CODEDUMPER", hwndDlg, AssemblerCallB);
+
 			break;
 	}
 
