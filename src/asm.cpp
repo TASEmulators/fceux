@@ -527,3 +527,79 @@ char *Disassemble(int addr, uint8 *opcode) {
 
 	return str;
 }
+
+// Need to clean up this interface.
+char *DisassembleLine(int addr) {
+	static char str[64] = { 0 }, chr[25] = { 0 };
+	char *c;
+	int size, j;
+	uint8 opcode[3];
+
+	sprintf(str, "%02X:%04X: ", getBank(addr), addr);
+	size = opsize[GetMem(addr)];
+	if (size == 0)
+	{
+		sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
+		strcat(str, chr);
+	}
+	else {
+		if ((addr + size) > 0x10000) {
+			sprintf(chr, "%02X        OVERFLOW", GetMem(addr));
+			strcat(str, chr);
+		}
+		else {
+			for (j = 0; j < size; j++) {
+				sprintf(chr, "%02X ", opcode[j] = GetMem(addr++));
+				strcat(str, chr);
+			}
+			while (size < 3) {
+				strcat(str, "   "); //pad output to align ASM
+				size++;
+			}
+			strcat(strcat(str, " "), Disassemble(addr, opcode));
+		}
+	}
+	if ((c = strchr(str, '='))) *(c - 1) = 0;
+	if ((c = strchr(str, '@'))) *(c - 1) = 0;
+	return str;
+}
+
+char *DisassembleData(int addr, uint8 *opcode) {
+	static char str[64] = { 0 }, chr[25] = { 0 };
+	char *c;
+	int size, j;
+
+	sprintf(str, "%02X:%04X: ", getBank(addr), addr);
+	size = opsize[opcode[0]];
+	if (size == 0)
+	{
+		sprintf(chr, "%02X        UNDEFINED", opcode[0]);
+		strcat(str, chr);
+	}
+	else
+	{
+		if ((addr + size) > 0x10000)
+		{
+			sprintf(chr, "%02X        OVERFLOW", opcode[0]);
+			strcat(str, chr);
+		}
+		else
+		{
+			for (j = 0; j < size; j++)
+			{
+				sprintf(chr, "%02X ", opcode[j]);
+				addr++;
+				strcat(str, chr);
+			}
+			while (size < 3)
+			{
+				strcat(str, "   "); //pad output to align ASM
+				size++;
+			}
+			strcat(strcat(str, " "), Disassemble(addr, opcode));
+		}
+	}
+	if ((c = strchr(str, '='))) *(c - 1) = 0;
+	if ((c = strchr(str, '@'))) *(c - 1) = 0;
+	return str;
+}

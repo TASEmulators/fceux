@@ -568,6 +568,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\drivers\common\vidblit.cpp" />
     <ClCompile Include="..\src\drivers\win\archive.cpp" />
     <ClCompile Include="..\src\drivers\win\args.cpp" />
+    <ClCompile Include="..\src\drivers\win\assembler.cpp" />
     <ClCompile Include="..\src\drivers\win\aviout.cpp" />
     <ClCompile Include="..\src\drivers\win\cdlogger.cpp" />
     <ClCompile Include="..\src\drivers\win\cheat.cpp" />
@@ -596,6 +597,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\drivers\win\ntview.cpp" />
     <ClCompile Include="..\src\drivers\win\OutputDS.cpp" />
     <ClCompile Include="..\src\drivers\win\palette.cpp" />
+    <ClCompile Include="..\src\drivers\win\patcher.cpp" />
     <ClCompile Include="..\src\drivers\win\ppuview.cpp" />
     <ClCompile Include="..\src\drivers\win\pref.cpp" />
     <ClCompile Include="..\src\drivers\win\ram_search.cpp" />
@@ -1028,6 +1030,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\drivers\common\vidblit.h" />
     <ClInclude Include="..\src\drivers\win\archive.h" />
     <ClInclude Include="..\src\drivers\win\args.h" />
+    <ClInclude Include="..\src\drivers\win\assembler.h" />
     <ClInclude Include="..\src\drivers\win\cdlogger.h" />
     <ClInclude Include="..\src\drivers\win\cheat.h" />
     <ClInclude Include="..\src\drivers\win\common.h" />
@@ -1054,6 +1057,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\drivers\win\ntview.h" />
     <ClInclude Include="..\src\drivers\win\oakra.h" />
     <ClInclude Include="..\src\drivers\win\palette.h" />
+    <ClInclude Include="..\src\drivers\win\patcher.h" />
     <ClInclude Include="..\src\drivers\win\ppuview.h" />
     <ClInclude Include="..\src\drivers\win\pref.h" />
     <ClInclude Include="..\src\drivers\win\ram_search.h" />

@@ -30,7 +30,6 @@ extern char* hexeditorFontName;
 
 void CenterWindow(HWND hwndDlg);
 void DoPatcher(int address,HWND hParent);
-void UpdatePatcher(HWND hwndDlg);
 int GetEditHex(HWND hwndDlg, int id);
 
 extern void AddBreakList();

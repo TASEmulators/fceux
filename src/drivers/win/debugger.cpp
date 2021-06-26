@@ -38,6 +38,8 @@
 #include "cdlogger.h"
 #include "ppuview.h"
 #include "richedit.h"
+#include "assembler.h"
+#include "patcher.h"
 
 // ################################## Start of SP CODE ###########################
 
@@ -964,118 +966,12 @@ void PrintOffsetToSeekAndBookmarkFields(int offset)
 	}
 }
 
-char *DisassembleLine(int addr) {
-	static char str[64]={0},chr[25]={0};
-	char *c;
-	int size,j;
-	uint8 opcode[3];
-
-	sprintf(str, "%02X:%04X: ", getBank(addr),addr);
-	size = opsize[GetMem(addr)];
-	if (size == 0)
-	{
-		sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
-		strcat(str,chr);
-	}
-	else {
-		if ((addr+size) > 0x10000) {
-			sprintf(chr, "%02X        OVERFLOW", GetMem(addr));
-			strcat(str,chr);
-		}
-		else {
-			for (j = 0; j < size; j++) {
-				sprintf(chr, "%02X ", opcode[j] = GetMem(addr++));
-				strcat(str,chr);
-			}
-			while (size < 3) {
-				strcat(str,"   "); //pad output to align ASM
-				size++;
-			}
-			strcat(strcat(str," "),Disassemble(addr,opcode));
-		}
-	}
-	if ((c=strchr(str,'='))) *(c-1) = 0;
-	if ((c=strchr(str,'@'))) *(c-1) = 0;
-	return str;
-}
-
-char *DisassembleData(int addr, uint8 *opcode) {
-	static char str[64]={0},chr[25]={0};
-	char *c;
-	int size,j;
-
-	sprintf(str, "%02X:%04X: ", getBank(addr), addr);
-	size = opsize[opcode[0]];
-	if (size == 0)
-	{
-		sprintf(chr, "%02X        UNDEFINED", opcode[0]);
-		strcat(str,chr);
-	} else
-	{
-		if ((addr+size) > 0x10000)
-		{
-			sprintf(chr, "%02X        OVERFLOW", opcode[0]);
-			strcat(str,chr);
-		} else
-		{
-			for (j = 0; j < size; j++)
-			{
-				sprintf(chr, "%02X ", opcode[j]);
-				addr++;
-				strcat(str,chr);
-			}
-			while (size < 3)
-			{
-				strcat(str,"   "); //pad output to align ASM
-				size++;
-			}
-			strcat(strcat(str," "),Disassemble(addr,opcode));
-		}
-	}
-	if ((c=strchr(str,'='))) *(c-1) = 0;
-	if ((c=strchr(str,'@'))) *(c-1) = 0;
-	return str;
-}
-
-
 int GetEditHex(HWND hwndDlg, int id) {
 	char str[9];
 	int tmp;
 	GetDlgItemText(hwndDlg,id,str,9);
 	tmp = strtol(str,NULL,16);
 	return tmp;
-}
-
-int *GetEditHexData(HWND hwndDlg, int id){
-	static int data[31];
-	char str[60];
-	int i,j, k;
-
-	GetDlgItemText(hwndDlg,id,str,60);
-	memset(data,0,31*sizeof(int));
-	j=0;
-	for(i = 0;i < 60;i++){
-		if(str[i] == 0)break;
-		if((str[i] >= '0') && (str[i] <= '9'))j++;
-		if((str[i] >= 'A') && (str[i] <= 'F'))j++;
-		if((str[i] >= 'a') && (str[i] <= 'f'))j++;
-	}
-
-	j=j&1;
-	for(i = 0;i < 60;i++){
-		if(str[i] == 0)break;
-		k = -1;
-		if((str[i] >= '0') && (str[i] <= '9'))k=str[i]-'0';
-		if((str[i] >= 'A') && (str[i] <= 'F'))k=(str[i]-'A')+10;
-		if((str[i] >= 'a') && (str[i] <= 'f'))k=(str[i]-'a')+10;
-		if(k != -1){
-			if(j&1)data[j>>1] |= k;
-			else data[j>>1] |= k<<4;
-			j++;
-		}
-	}
-	data[j>>1]=-1;
-	return data;
 }
 
 void UpdateRegs(HWND hwndDlg) {
@@ -1472,218 +1368,6 @@ void KillDebugger() {
 	}
 	FCEUI_Debugger().reset();
 	FCEUI_SetEmulationPaused(0);
-}
-
-
-int AddAsmHistory(HWND hwndDlg, int id, char *str) {
-	int index;
-	index = SendDlgItemMessage(hwndDlg,id,CB_FINDSTRINGEXACT,-1,(LPARAM)(LPSTR)str);
-	if (index == CB_ERR) {
-		SendDlgItemMessage(hwndDlg,id,CB_INSERTSTRING,-1,(LPARAM)(LPSTR)str);
-		return 0;
-	}
-	return 1;
-}
-
-INT_PTR CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	int romaddr,count,i,j;
-	char str[128],*dasm;
-	static int patchlen,applied,saved,lastundo;
-	static uint8 patchdata[64][3],undodata[64*3];
-	uint8 *ptr;
-
-	switch(uMsg) {
-		case WM_INITDIALOG:
-			CenterWindow(hwndDlg);
-
-			//set font
-			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-
-			//set limits
-			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_HISTORY,CB_LIMITTEXT,20,0);
-
-			SetDlgItemText(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,DisassembleLine(iaPC));
-			SetFocus(GetDlgItem(hwndDlg,IDC_ASSEMBLER_HISTORY));
-
-			patchlen = 0;
-			applied = 0;
-			saved = 0;
-			lastundo = 0;
-			break;
-		case WM_CLOSE:
-		case WM_QUIT:
-			EndDialog(hwndDlg,0);
-			break;
-		case WM_COMMAND:
-		{
-			switch (HIWORD(wParam))
-			{
-				case BN_CLICKED:
-				{
-					switch (LOWORD(wParam))
-					{
-						case IDC_ASSEMBLER_APPLY:
-							if (patchlen) {
-								ptr = GetNesPRGPointer(GetNesFileAddress(iaPC)-16);
-								count = 0;
-								for (i = 0; i < patchlen; i++) {
-									for (j = 0; j < opsize[patchdata[i][0]]; j++) {
-										if (count == lastundo) undodata[lastundo++] = ptr[count];
-										ptr[count++] = patchdata[i][j];
-									}
-								}
-								SetWindowText(hwndDlg, "Inline Assembler  *Patches Applied*");
-								applied = 1;
-							}
-							break;
-						case IDC_ASSEMBLER_SAVE:
-							if (applied) {
-								count = romaddr = GetNesFileAddress(iaPC);
-								for (i = 0; i < patchlen; i++)
-								{
-									count += opsize[patchdata[i][0]];
-								}
-								if (patchlen) sprintf(str,"Write patch data to file at addresses 0x%06X - 0x%06X?",romaddr,count-1);
-								else sprintf(str,"Undo all previously applied patches?");
-								if (MessageBox(hwndDlg, str, "Save changes to file?", MB_YESNO|MB_ICONINFORMATION) == IDYES) {
-									if (iNesSave()) {
-										saved = 1;
-										applied = 0;
-									}
-									else MessageBox(hwndDlg, "Unable to save changes to file", "Error saving to file", MB_OK | MB_ICONERROR);
-								}
-							}
-							break;
-						case IDC_ASSEMBLER_UNDO:
-							if ((count = SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,LB_GETCOUNT,0,0))) {
-								SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,LB_DELETESTRING,count-1,0);
-								patchlen--;
-								count = 0;
-								for (i = 0; i < patchlen; i++)
-								{
-									count += opsize[patchdata[i][0]];
-								}
-								if (count < lastundo) {
-									ptr = GetNesPRGPointer(GetNesFileAddress(iaPC)-16);
-									j = opsize[patchdata[patchlen][0]];
-									for (i = count; i < (count+j); i++) {
-										ptr[i] = undodata[i];
-									}
-									lastundo -= j;
-									applied = 1;
-								}
-								SetDlgItemText(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,DisassembleLine(iaPC+count));
-							}
-							break;
-						case IDC_ASSEMBLER_DEFPUSHBUTTON:
-							count = 0;
-							for (i = 0; i < patchlen; i++)
-							{
-								count += opsize[patchdata[i][0]];
-							}
-							GetDlgItemText(hwndDlg,IDC_ASSEMBLER_HISTORY,str,21);
-							if (!Assemble(patchdata[patchlen],(iaPC+count),str)) {
-								count = iaPC;
-								for (i = 0; i <= patchlen; i++)
-								{
-									count += opsize[patchdata[i][0]];
-								}
-								if (count > 0x10000) { //note: don't use 0xFFFF!
-									MessageBox(hwndDlg, "Patch data cannot exceed address 0xFFFF", "Address error", MB_OK | MB_ICONERROR);
-									break;
-								}
-								SetDlgItemText(hwndDlg,IDC_ASSEMBLER_HISTORY,"");
-								if (count < 0x10000) SetDlgItemText(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,DisassembleLine(count));
-								else SetDlgItemText(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,"OVERFLOW");
-								dasm = DisassembleData((count-opsize[patchdata[patchlen][0]]),patchdata[patchlen]);
-								SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,LB_INSERTSTRING,-1,(LPARAM)(LPSTR)dasm);
-								AddAsmHistory(hwndDlg,IDC_ASSEMBLER_HISTORY,dasm+16);
-								SetWindowText(hwndDlg, "Inline Assembler");
-								patchlen++;
-							}
-							else { //ERROR!
-								SetWindowText(hwndDlg, "Inline Assembler  *Syntax Error*");
-								MessageBeep(MB_ICONEXCLAMATION);
-							}
-							break;
-					}
-					SetFocus(GetDlgItem(hwndDlg,IDC_ASSEMBLER_HISTORY)); //set focus to combo box after anything is pressed!
-					break;
-				}
-			}
-			break;
-		}
-	}
-	return FALSE;
-}
-
-INT_PTR CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	char str[64];
-	uint8 *c;
-	int i;
-	int *p;
-
-	switch(uMsg) {
-		case WM_INITDIALOG:
-			CenterWindow(hwndDlg);
-
-			//set limits
-			SendDlgItemMessage(hwndDlg,IDC_ROMPATCHER_OFFSET,EM_SETLIMITTEXT,6,0);
-			SendDlgItemMessage(hwndDlg,IDC_ROMPATCHER_PATCH_DATA,EM_SETLIMITTEXT,30,0);
-			UpdatePatcher(hwndDlg);
-
-			if(iapoffset != -1){
-				CheckDlgButton(hwndDlg, IDC_ROMPATCHER_DOTNES_OFFSET, BST_CHECKED);
-				sprintf((char*)str,"%X",iapoffset);
-				SetDlgItemText(hwndDlg,IDC_ROMPATCHER_OFFSET,str);
-			}
-
-			SetFocus(GetDlgItem(hwndDlg,IDC_ROMPATCHER_OFFSET_BOX));
-			break;
-		case WM_CLOSE:
-		case WM_QUIT:
-			EndDialog(hwndDlg,0);
-			break;
-		case WM_COMMAND:
-			switch(HIWORD(wParam)) {
-				case BN_CLICKED:
-					switch(LOWORD(wParam)) {
-						case IDC_ROMPATCHER_BTN_EDIT: //todo: maybe get rid of this button and cause iapoffset to update every time you change the text
-							if(IsDlgButtonChecked(hwndDlg,IDC_ROMPATCHER_DOTNES_OFFSET) == BST_CHECKED)
-								iapoffset = GetEditHex(hwndDlg,IDC_ROMPATCHER_OFFSET);
-							else
-								iapoffset = GetNesFileAddress(GetEditHex(hwndDlg,IDC_ROMPATCHER_OFFSET));
-							if((iapoffset < 16) && (iapoffset != -1)){
-								MessageBox(hDebug, "Sorry, iNES Header editing isn't supported by this tool. If you want to edit the header, please use iNES Header Editor", "Error", MB_OK | MB_ICONASTERISK);
-								iapoffset = -1;
-							}
-							if((iapoffset > PRGsize[0]) && (iapoffset != -1)){
-								MessageBox(hDebug, "Error: .Nes offset outside of PRG rom", "Error", MB_OK | MB_ICONERROR);
-								iapoffset = -1;
-							}
-							UpdatePatcher(hwndDlg);
-							break;
-						case IDC_ROMPATCHER_BTN_APPLY:
-							p = GetEditHexData(hwndDlg,IDC_ROMPATCHER_PATCH_DATA);
-							i=0;
-							c = GetNesPRGPointer(iapoffset-16);
-							while(p[i] != -1){
-								c[i] = p[i];
-								i++;
-							}
-							UpdatePatcher(hwndDlg);
-							break;
-						case IDC_ROMPATCHER_BTN_SAVE:
-							if (!iNesSave())
-								MessageBox(NULL, "Error Saving", "Error", MB_OK | MB_ICONERROR);
-							break;
-					}
-					break;
-			}
-			break;
-	}
-	return FALSE;
 }
 
 extern char *iNesShortFName();
@@ -2444,6 +2128,7 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			break;
 		// Tools menu
 		case ID_DEBUGGER_ROM_PATCHER:
+			printf("wtf");
 			DoPatcher(-1, hwndDlg);
 			break;
 		case ID_DEBUGGER_CODE_DUMPER:
@@ -3070,40 +2755,6 @@ void DoPatcher(int address, HWND hParent)
 	else
 		MessageBox(hDebug, "Sorry, The Patcher only works on INES rom images", "Error", MB_OK | MB_ICONASTERISK);
 	UpdateDebugger(false);
-}
-
-void UpdatePatcher(HWND hwndDlg){
-	char str[75];
-	uint8 *p;
-	if(iapoffset != -1){
-		EnableWindow(GetDlgItem(hwndDlg,IDC_ROMPATCHER_PATCH_DATA),TRUE);
-		EnableWindow(GetDlgItem(hwndDlg,IDC_ROMPATCHER_BTN_APPLY),TRUE);
-
-		if(GetRomAddress(iapoffset) != -1)sprintf(str,"Current Data at NES ROM Address: %04X, .NES file Address: %04X",GetRomAddress(iapoffset),iapoffset);
-		else sprintf(str,"Current Data at .NES file Address: %04X",iapoffset);
-
-		SetDlgItemText(hwndDlg,IDC_ROMPATCHER_CURRENT_DATA_BOX,str);
-
-		sprintf(str,"%04X",GetRomAddress(iapoffset));
-		SetDlgItemText(hwndDlg,IDC_ROMPATCHER_DISASSEMBLY,str);
-
-		if(GetRomAddress(iapoffset) != -1)SetDlgItemText(hwndDlg,IDC_ROMPATCHER_DISASSEMBLY,DisassembleLine(GetRomAddress(iapoffset)));
-		else SetDlgItemText(hwndDlg,IDC_ROMPATCHER_DISASSEMBLY,"Not Currently Loaded in ROM for disassembly");
-
-		p = GetNesPRGPointer(iapoffset-16);
-		sprintf(str,"%02X %02X %02X %02X %02X %02X %02X %02X",
-			p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7]);
-		SetDlgItemText(hwndDlg,IDC_ROMPATCHER_CURRENT_DATA,str);
-
-	} else {
-		SetDlgItemText(hwndDlg,IDC_ROMPATCHER_CURRENT_DATA_BOX,"No Offset Selected");
-		SetDlgItemText(hwndDlg,IDC_ROMPATCHER_CURRENT_DATA,"");
-		SetDlgItemText(hwndDlg,IDC_ROMPATCHER_DISASSEMBLY,"");
-		EnableWindow(GetDlgItem(hwndDlg,IDC_ROMPATCHER_PATCH_DATA),FALSE);
-		EnableWindow(GetDlgItem(hwndDlg,IDC_ROMPATCHER_BTN_APPLY),FALSE);
-	}
-	if(GameInfo->type != GIT_CART)EnableWindow(GetDlgItem(hwndDlg,IDC_ROMPATCHER_BTN_SAVE),FALSE);
-	else EnableWindow(GetDlgItem(hwndDlg,IDC_ROMPATCHER_BTN_SAVE),TRUE);
 }
 
 /// Updates debugger controls that should be enabled/disabled if a game is loaded.
