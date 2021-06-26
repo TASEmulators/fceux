@@ -326,15 +326,46 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 			urls << QUrl::fromLocalFile( d.absolutePath() );
 			iniPath = d.absolutePath().toStdString();
 		}
+
+		#ifdef __APPLE__
+		// Search for MacOSX DragNDrop Resources
+		d.setPath(QString(exePath) + "/../Resources/palettes");
+
+		//printf("Looking for: '%s'\n", d.path().toStdString().c_str());
+
+		if (d.exists())
+		{
+			urls << QUrl::fromLocalFile(d.absolutePath());
+			iniPath = d.absolutePath().toStdString();
+		}
+		#endif
 	}
 #ifdef WIN32
 
 #else
-	d.setPath("/usr/share/fceux/palettes");
-
-	if ( d.exists() )
+	// Linux and MacOSX (homebrew) expect shared data folder to be relative to bin/fceux executable.
+	if (exePath[0] != 0)
 	{
-		urls << QUrl::fromLocalFile( d.absolutePath() );
+		d.setPath(QString(exePath) + "/../share/fceux/palettes");
+	}
+	else
+	{
+		d.setPath(QString("/usr/local/share/fceux/palettes"));
+	}
+	if (!d.exists())
+	{
+		d.setPath(QString("/usr/local/share/fceux/palettes"));
+	}
+	if (!d.exists())
+	{
+		d.setPath(QString("/usr/share/fceux/palettes"));
+	}
+
+	//printf("Looking for: '%s'\n", d.path().toStdString().c_str());
+
+	if (d.exists())
+	{
+		urls << QUrl::fromLocalFile(d.absolutePath());
 		iniPath = d.absolutePath().toStdString();
 	}
 #endif
