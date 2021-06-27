@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<link href="fceux.css" rel="stylesheet" type="text/css" />
+<title>Press Release 2.3.0</title>
+</head>
+
+<body>
+<div id="masthead">
+	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom/Dendy Emulator
+</div>
+<div id="top_nav">
+  <a href="home.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="documentation.html">Documentation</a>
+  <a href="version.html">Versions</a>
+  <a href="contact.html">Contact</a>
+  <a href="links.html">Links</a>
+</div>
+<div id="container">
+	<div id="left_col">
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	 		style="display:inline-block;width:180px;height:150px"
+	 		data-ad-client="ca-pub-0764229755985190"
+	 		data-ad-slot="7648866201"></ins>
+		<script>
+	     (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>	
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	    	 style="display:inline-block;width:180px;height:150px"
+	     	data-ad-client="ca-pub-0764229755985190"
+	     	data-ad-slot="7648866201"></ins>
+		<script>
+	    	 (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
+<div id="page_content">
+<h1>FCEUX 2.3.0 Release</h1>
+<p>02 January 2021</p>
+<p>
+The 2.3.0 release includes 4 years worth of improvements and bug fixes.
+</p>
+
+<h2>Common</h2>
+64 bit build support<br>
+
+<h3>Emulation</h3>
+Added Mapper 111 cheapocabra<br>
+Added Mapper 190<br>
+Added RAM Init Options: default (00 00 00 00 FF FF FF FF as always), all FF, all 00, random<br>
+New UNIF mappers<br>
+Mapper 30 4-screen support<br>
+Mapper 5 MMC5 large WRAM support<br>
+VRC7 patch set finalized with correct values dumped by Nuke.YKT<br>
+Fixed rendering and debugging of mirrored palette entries<br>
+
+<h3>Lua</h3>
+Various improvements and bug fixes to pre-existing functions<br>
+Fix parsing of lua colors over 0x80000000 on 32bits systems<br>
+Extra colors available to lua overlays<br>
+Lua write callbacks: adding optional third parameter to retrieve the value written<br>
+Added Sprites.lua script to visualize sprites<br>
+Zapper control<br>
+
+<h3>New Lua Functions</h3>
+emu.exit()<br>
+rom.getfilename()<br>
+zapper.set(table input)<br>
+
+<h3>Win32</h3>
+Various GUI improvements and bug fixes<br>
+Fixed font rescaling issue<br>
+Relative position mouse support for better fullscreen mouse capture<br>
+Left and right mouse buttons no longer conflict with each other<br>
+Virtual boy controller<br>
+Fixed silly quit message randomizer<br>
+Fixed NTSC filter null pointer crash when closing, NTSC filter now supports emphasis<br>
+Sound output is now 48000 Hz by default<br>
+Improve error message for invalid ROM file<br>
+
+<h3>Debugger</h3>
+Added memory read/write conditional breakpoint capability<br>
+Added illegal opcode support for breakpoints<br>
+Support for 'S' register in conditional debugger breakpoints<br>
+Syntax highlight of disassembly<br>
+Fixed corruption of PPU reset while debugging<br>
+Attribute mode for nametable viewer<br>
+Greyscale palettes for PPU and nametable viewers<br>
+Fixed transparent sprite palette display in PPU viewer<br>
+Fixed accidental filtering of special symbols<br>
+
+<h3>Trace Logger</h3>
+Added bank number log option<br>
+
+<h3>CD Logger</h3>
+Fixed VRAM data logging glitch<br>
+
+<h3>Hex Editor</h3>
+Added OAM view feature<br>
+Added Home/End key response<br>
+Bookmark fixes for all view region types<br>
+Fixed Find dialog to be able to find the first or last byte of the memory region<br>
+Prevent middle mouse button from attempting to "FreezeRam" when not in RAM mode<br>
+Added Load from file feature<br>
+
+<h3>iNES Header Editor</h3>
+A new tool which can edit the iNES header of ROM files<br>
+
+<h3>TAS Editor</h3>
+Fixed dialog height that kept increasing<br>
+
+<h2>SDL</h2>
+GUI completely rewritten using Qt5. Replaces old GTK GUI<br>
+New Qt GUI now contains most of the debug tools that previously only existed in windows version<br>
+Build setup migrated to cmake. Replaces scons build setup<br>
+
+
+</div>
+
+<p>
+<hr>
+
+<div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
+		<br/>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc.
+</div>
+</div>
+</body>
+</html>
