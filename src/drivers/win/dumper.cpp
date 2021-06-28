@@ -24,8 +24,9 @@ extern Name* pageNames[32];
 static char* debug_str_decoration_comment;
 static char* debug_decoration_comment;
 static char* debug_decoration_comment_end_pos;
-static char filename[257];
+static char filename[MAX_PATH + 1];
 static bool showNesFileOffests;
+static OPENFILENAME ofn;
 
 /**
 * Dumps disassembled ROM code between startAddr and endAddr (inclusive) to a file.
@@ -223,6 +224,14 @@ bool DumperInitDialog(HWND hwndDlg, HWND hwndFocused, PROPSHEETPAGE *props)
 {
 	debug_str_decoration_comment = (char*)malloc(NL_MAX_MULTILINE_COMMENT_LEN + 10);
 
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = hwndDlg;
+	ofn.lpstrFilter = "All Files (*.*)\0*.*\0";
+	ofn.lpstrFile = (LPSTR)filename;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_EXPLORER | OFN_OVERWRITEPROMPT;
+	ofn.lpstrDefExt = (LPCTSTR)"asm";
+
 	Edit_SetCueBannerText(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR), L"8000");
 	Edit_SetCueBannerText(GetDlgItem(hwndDlg, ID_DUMPER_END_ADDR), L"FFFF");
 
@@ -231,7 +240,7 @@ bool DumperInitDialog(HWND hwndDlg, HWND hwndFocused, PROPSHEETPAGE *props)
 
 	SendDlgItemMessage(hwndDlg, ID_DUMPER_START_ADDR, EM_SETLIMITTEXT, 6, 0);
 	SendDlgItemMessage(hwndDlg, ID_DUMPER_END_ADDR, EM_SETLIMITTEXT, 6, 0);
-	SendDlgItemMessage(hwndDlg, ID_DUMPER_FILEPATH, EM_SETLIMITTEXT, 256, 0);
+	SendDlgItemMessage(hwndDlg, ID_DUMPER_FILEPATH, EM_SETLIMITTEXT, MAX_PATH, 0);
 
 	// Overwrite default focus, return false
 	SetFocus(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR));
@@ -263,9 +272,13 @@ bool DumperBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 	switch (btnId)
 	{
 		case ID_DUMPER_BROWSE:
-			printf("Browser...\n");
+			// Not sure if these need to be wide strs.
+			if (GetSaveFileName(&ofn))
+			{
+				SetDlgItemText(hwndDlg, ID_DUMPER_FILEPATH, filename);
+			}
 			return true;
-		case IDOK: // Could make "Dump" a DEFPUSHBUTTON, but I don't like the highlight.
+		case IDOK: // Enter press
 		case ID_DUMPER_GO:
 			char str[7];
 			int startAddr, endAddr;
@@ -290,7 +303,7 @@ bool DumperBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 				break;
 			}
 
-			if (!GetDlgItemText(hwndDlg, ID_DUMPER_FILEPATH, filename, 256))
+			if (!GetDlgItemText(hwndDlg, ID_DUMPER_FILEPATH, filename, MAX_PATH))
 			{
 				MessageBox(hwndDlg, "No file path entered.", "Code Dumper", MB_OK | MB_ICONINFORMATION);
 				break;
