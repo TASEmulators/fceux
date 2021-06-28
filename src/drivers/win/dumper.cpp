@@ -230,6 +230,7 @@ BOOL CALLBACK DumperCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SetWindowLongPtr(GetDlgItem(hwndDlg, ID_DUMPER_END_ADDR), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 			SendDlgItemMessage(hwndDlg, ID_DUMPER_START_ADDR, EM_SETLIMITTEXT, 6, 0);
 			SendDlgItemMessage(hwndDlg, ID_DUMPER_END_ADDR, EM_SETLIMITTEXT, 6, 0);
+			SendDlgItemMessage(hwndDlg, ID_DUMPER_FILEPATH, EM_SETLIMITTEXT, 256, 0);
 			SetFocus(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR));
 			return true;
 		case WM_CLOSE:
@@ -247,35 +248,38 @@ BOOL CALLBACK DumperCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							printf("Browser...\n");
 							return true;
 						case ID_DUMPER_GO:
-							int startAddr = GetEditHex(hwndDlg, ID_DUMPER_START_ADDR);
-							int endAddr = GetEditHex(hwndDlg, ID_DUMPER_END_ADDR);
 
-							// Nothing was entered
-							if (startAddr == 0 && endAddr == 0)
-							{
+							static char str[7];
+							int startAddr, endAddr;
+
+							// Nothing was entered.
+							if (GetDlgItemText(hwndDlg, ID_DUMPER_START_ADDR, str, 6))
+								startAddr = strtol(str, NULL, 16);
+							else
 								startAddr = 0x8000;
+
+							if (GetDlgItemText(hwndDlg, ID_DUMPER_END_ADDR, str, 6))
+								endAddr = strtol(str, NULL, 16);
+							else
 								endAddr = 0xFFFF;
-							}
 
 							if (!GetDlgItemText(hwndDlg, ID_DUMPER_FILEPATH, filename, 256))
 							{
-								//printf("Filename was too long!\n");
-								MessageBox(hwndDlg, "No file path entered.", "", MB_OK | MB_ICONINFORMATION);
+								MessageBox(hwndDlg, "No file path entered.", "Code Dumper", MB_OK | MB_ICONINFORMATION);
 								break;
 							}
 
 							FILE *fout;
 							if (!(fout = fopen(filename, "w")))
 							{
-								//printf("Could not open file for writing.");
-								MessageBox(hwndDlg, "Could not open file for writing.", "", MB_OK | MB_ICONINFORMATION);
+								MessageBox(hwndDlg, "Could not open file.", "Code Dumper", MB_OK | MB_ICONINFORMATION);
 								break;
 							}
 
 							printf("Dumping $%04X - $%04X to \"%s\"...\n", startAddr, endAddr, filename);
 							Dump(fout, startAddr, endAddr);
 							fclose(fout);
-							printf("Done\n");
+							printf("Done.\n");
 							return true;
 					}
 			}
