@@ -219,17 +219,29 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 	}
 }
 
-bool DumperInitDialog(HWND hwndDlg)
+bool DumperInitDialog(HWND hwndDlg, HWND hwndFocused, PROPSHEETPAGE *props)
 {
 	debug_str_decoration_comment = (char*)malloc(NL_MAX_MULTILINE_COMMENT_LEN + 10);
+
 	Edit_SetCueBannerText(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR), L"8000");
 	Edit_SetCueBannerText(GetDlgItem(hwndDlg, ID_DUMPER_END_ADDR), L"FFFF");
+
 	SetWindowLongPtr(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
 	SetWindowLongPtr(GetDlgItem(hwndDlg, ID_DUMPER_END_ADDR), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+
 	SendDlgItemMessage(hwndDlg, ID_DUMPER_START_ADDR, EM_SETLIMITTEXT, 6, 0);
 	SendDlgItemMessage(hwndDlg, ID_DUMPER_END_ADDR, EM_SETLIMITTEXT, 6, 0);
 	SendDlgItemMessage(hwndDlg, ID_DUMPER_FILEPATH, EM_SETLIMITTEXT, 256, 0);
+
+	// Overwrite default focus, return false
 	SetFocus(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR));
+	return false;
+}
+
+bool DumperExit(HWND hwndDlg)
+{
+	free(debug_str_decoration_comment);
+	EndDialog(hwndDlg, 0);
 	return true;
 }
 
@@ -253,6 +265,7 @@ bool DumperBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 		case ID_DUMPER_BROWSE:
 			printf("Browser...\n");
 			return true;
+		case IDOK: // Could make "Dump" a DEFPUSHBUTTON, but I don't like the highlight.
 		case ID_DUMPER_GO:
 			char str[7];
 			int startAddr, endAddr;
@@ -295,7 +308,10 @@ bool DumperBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			fclose(fout);
 			printf("Done.\n");
 			return true;
+		case IDCANCEL:
+			return DumperExit(hwndDlg);
 	}
+	return false;
 }
 
 BOOL CALLBACK DumperCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -303,12 +319,10 @@ BOOL CALLBACK DumperCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg)
 	{
 	    case WM_INITDIALOG:
-			return DumperInitDialog(hwndDlg);
+			return DumperInitDialog(hwndDlg, (HWND)wParam, (PROPSHEETPAGE*)lParam);
 		case WM_CLOSE:
 		case WM_QUIT:
-			free(debug_str_decoration_comment);
-			EndDialog(hwndDlg, 0);
-			return true;
+			return DumperExit(hwndDlg);
 		case WM_COMMAND:
 			switch (HIWORD(wParam))
 			{
