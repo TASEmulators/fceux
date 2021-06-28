@@ -923,7 +923,7 @@ void UpdateDebugger(bool jump_to_pc)
 	}
 	
 
-	// "Address Bookmark Add" follows the address
+	// The address in the Add Bookmark textbox follows the scroll pos.
 
 	// Update register values
 	sprintf(str, "%02X", X.A);
@@ -2091,7 +2091,7 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 					sprintf(str,"%04X", tmp);
 					SetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str);
 					Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, tmp);
-					// "Address Bookmark Add" follows the address
+					// The address in the Add Bookmark textbox follows the scroll pos.
 					sprintf(str,"%04X", si.nPos);
 					SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 				}
@@ -2125,9 +2125,6 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 				break_on_instructions ^= 1;
 				break;
 			}
-
-// ################################## Start of SP CODE ###########################
-
 			case IDC_DEBUGGER_RELOAD_SYMS:
 			{ // TODO: delete/merge with ID_DEBUGGER_RELOAD_SYMBOLS
 				ramBankNamesLoaded = false;
