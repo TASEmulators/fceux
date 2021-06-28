@@ -25,6 +25,7 @@ static char* debug_str_decoration_comment;
 static char* debug_decoration_comment;
 static char* debug_decoration_comment_end_pos;
 static char filename[257];
+static bool showNesFileOffests;
 
 /**
 * Dumps disassembled ROM code between startAddr and endAddr (inclusive) to a file.
@@ -112,7 +113,7 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 
 		if (addr >= 0x8000)
 		{
-			if (debuggerDisplayROMoffsets && GetNesFileAddress(addr) != -1)
+			if (showNesFileOffests && GetNesFileAddress(addr) != -1)
 			{
 				swprintf(chr, L" %06X: ", GetNesFileAddress(addr));
 			}
@@ -232,6 +233,19 @@ bool DumperInitDialog(HWND hwndDlg)
 	return true;
 }
 
+static inline int ParseAddressString(HWND hwndDlg, char *str, int default)
+{
+	if (!str[0])
+		return default;
+
+	int addr = strtol(str, NULL, 16);
+
+	if (showNesFileOffests)
+		return GetRomAddress(addr);
+	else
+		return addr;
+}
+
 bool DumperBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 {
 	switch (btnId)
@@ -240,19 +254,28 @@ bool DumperBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			printf("Browser...\n");
 			return true;
 		case ID_DUMPER_GO:
-			static char str[7];
+			char str[7];
 			int startAddr, endAddr;
+			showNesFileOffests = IsDlgButtonChecked(hwndDlg, ID_DUMPER_NES_ADDR_TOGGLE) == BST_CHECKED;
 
-			// Nothing was entered.
-			if (GetDlgItemText(hwndDlg, ID_DUMPER_START_ADDR, str, 6))
-				startAddr = strtol(str, NULL, 16);
-			else
-				startAddr = 0x8000;
+			GetDlgItemText(hwndDlg, ID_DUMPER_START_ADDR, str, 6);
+			startAddr = ParseAddressString(hwndDlg, str, 0x8000);
 
-			if (GetDlgItemText(hwndDlg, ID_DUMPER_END_ADDR, str, 6))
-				endAddr = strtol(str, NULL, 16);
-			else
-				endAddr = 0xFFFF;
+			GetDlgItemText(hwndDlg, ID_DUMPER_END_ADDR, str, 6);
+			endAddr = ParseAddressString(hwndDlg, str, 0xFFFF);
+
+			// -1 means no valid NES memory address for Rom file address. > 0xFFFF means you're dumb.
+			if (startAddr < 0 || startAddr > 0xFFFF)
+			{
+				MessageBox(hwndDlg, "Invalid start address.", "Code Dumper", MB_OK | MB_ICONINFORMATION);
+				break;
+			}
+
+			if (endAddr < 0 || endAddr > 0xFFFF || endAddr < startAddr)
+			{
+				MessageBox(hwndDlg, "Invalid end address.", "Code Dumper", MB_OK | MB_ICONINFORMATION);
+				break;
+			}
 
 			if (!GetDlgItemText(hwndDlg, ID_DUMPER_FILEPATH, filename, 256))
 			{
