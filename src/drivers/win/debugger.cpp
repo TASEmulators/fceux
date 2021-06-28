@@ -40,6 +40,7 @@
 #include "richedit.h"
 #include "assembler.h"
 #include "patcher.h"
+#include "dumper.h"
 
 // ################################## Start of SP CODE ###########################
 
@@ -80,11 +81,11 @@ bool debuggerIDAFont = false;
 unsigned int IDAFontSize = 16;
 bool debuggerDisplayROMoffsets = false;
 
-wchar_t* debug_wstr;
-char* debug_cdl_str;
-char* debug_str_decoration_comment;
-char* debug_decoration_comment;
-char* debug_decoration_comment_end_pos;
+static wchar_t* debug_wstr;
+static char* debug_cdl_str;
+static char* debug_str_decoration_comment;
+static char* debug_decoration_comment;
+static char* debug_decoration_comment_end_pos;
 
 FINDTEXT newline;
 FINDTEXT num;
@@ -559,198 +560,6 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 	SendDlgItemMessage(hWnd, id, WM_SETREDRAW, true, 0);
 	InvalidateRect(GetDlgItem(hWnd, id), 0, true);
 	SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, eventMask);
-}
-
-/**
-* Dumps disassembled ROM code between startAddr and endAddr (inclusive) to a file.
-* endAddr is the address of the last INSTRUCTION. This funcion will grab the operands if present,
-* and may spill over a bit in the process.
-* 0x80000 - 0xFFFF should get you the loaded banks. However, it's most reliable when you dump one subroutine at a time
-* or already have a lot of labels.
-* 
-* For example, say you have 2C A9 10 60, and the A9 byte is supposed to be the start of a subroutine. If the disassembler
-* comes across that 2C first, it will interpret the code as:
-
-* 2C A9 10 BIT $10A9 
-* 60       RTS
-
-* Nonsense.
-
-* But if you have a named label
-* on that A9 byte, the 2C (BIT) instruction will be INTERRUPTED, and it will show up like this:
-
-* 2C       INTERRUPTED
-* my_subroutine:
-* A9 10    LDA #$10
-* 60       RTS
-*
-* There is a lot of reused logic between this and Disassemble. However, they're different enough that it would
-* be more trouble than it's worth to combine them.
-*/
-void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
-{
-	wchar_t chr[40] = { 0 };
-	wchar_t debug_wbuf[2048] = { 0 };
-	int size;
-	uint8 opcode[3];
-	unsigned int instruction_addr;
-	unsigned int addr = startAddr; // Keeps track of which address to get the operands, etc. from
-
-	if (symbDebugEnabled)
-		loadNameFiles();
-
-	unsigned int instructions_count = 0;
-	for (int addr = startAddr; addr <= endAddr;)
-	{
-		// PC pointer
-		if (addr > 0xFFFF) break;
-
-		instruction_addr = addr;
-
-		if (symbDebugEnabled)
-		{
-			// Insert name and comment lines if present
-			Name* node = findNode(getNamesPointerForAddress(addr), addr);
-			if (node)
-			{
-				if (node->name)
-				{
-					// Could probably ditch these swprintf's and just do fwprintf.
-					// Need to verify exactly how the various buffers are used.
-					swprintf(debug_wbuf, L"%S:\n", node->name);
-					fprintf(fout, "%ls", debug_wbuf);
-				}
-				if (node->comment)
-				{
-					// make a copy
-					strcpy(debug_str_decoration_comment, node->comment);
-					strcat(debug_str_decoration_comment, "\r\n");
-					// divide the debug_str_decoration_comment into strings (Comment1, Comment2, ...)
-					debug_decoration_comment = debug_str_decoration_comment;
-					debug_decoration_comment_end_pos = strstr(debug_decoration_comment, "\r\n");
-					while (debug_decoration_comment_end_pos)
-					{
-						debug_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
-						debug_decoration_comment_end_pos[1] = 0;		// set \0 instead of \n
-						swprintf(debug_wbuf, L"; %S\n", debug_decoration_comment);
-						fprintf(fout, "%ls", debug_wbuf);
-
-						debug_decoration_comment_end_pos += 2;
-						debug_decoration_comment = debug_decoration_comment_end_pos;
-						debug_decoration_comment_end_pos = strstr(debug_decoration_comment_end_pos, "\r\n");
-					}
-				}
-			}
-		}
-
-		fprintf(fout, "%ls", L" ");
-
-		if (addr >= 0x8000)
-		{
-			if (debuggerDisplayROMoffsets && GetNesFileAddress(addr) != -1)
-			{
-				swprintf(chr, L" %06X: ", GetNesFileAddress(addr));
-			}
-			else
-			{
-				swprintf(chr, L"%02X:%04X: ", getBank(addr), addr);
-			}
-		}
-		else
-		{
-			swprintf(chr, L"  :%04X: ", addr);
-		}
-
-		// Add address
-		fprintf(fout, "%ls", chr);
-
-		size = opsize[GetMem(addr)];
-		if (size == 0)
-		{
-			swprintf(chr, L"%02X        UNDEFINED", GetMem(addr++));
-			fprintf(fout, "%ls", chr);
-		}
-		else
-		{
-			if ((addr + size) > 0xFFFF)
-			{
-				while (addr < 0xFFFF)
-				{
-					swprintf(chr, L"%02X        OVERFLOW\n", GetMem(addr++));
-					fprintf(fout, "%ls", chr);
-				}
-				break;
-			}
-			Name* node;
-			for (int j = 0; j < size; j++)
-			{
-				// Write the raw bytes of this instruction
-				swprintf(chr, L"%02X ", opcode[j] = GetMem(addr++));
-				fprintf(fout, "%ls", chr);
-				if (j != size - 1 && (node = findNode(getNamesPointerForAddress(addr), addr)))
-				{
-					// We were treating this as an operand, but it's named!
-					// Probably want an instruction to start here instead.
-					printf("$%04X (%s) came up as an operand for instruction @ %04X\n", addr, node->name, addr - j - 1);
-					size = j + 1;
-					break;
-				}
-			}
-			while (size < 3)
-			{
-				fprintf(fout, "%ls", L"   ");
-				size++;
-			}
-			if (node)
-			{
-				// TODO: Instead of this ominous and confusing message, could print ".byte $XX $YY..."
-				fprintf(fout, " INTERRUPTED");
-			}
-			else
-			{
-				static char bufferForDisassemblyWithPlentyOfStuff[64 + NL_MAX_NAME_LEN * 10]; // "plenty"
-				char* _a = Disassemble(addr, opcode);
-				// This isn't a trace log, so we want to remove the data after the @ or =.
-				// There are lots of hardcoded sprintfs in Disassemble. This really is the easiest way.
-				char* traceInfoIndex = strstr(_a, "@");
-				if (traceInfoIndex)
-					traceInfoIndex[-1] = 0;
-				traceInfoIndex = strstr(_a, "=");
-				if (traceInfoIndex)
-					traceInfoIndex[-1] = 0;
-
-				strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
-
-				if (symbDebugEnabled)
-				{ // TODO: This will add in both the default name and custom name if you have inlineAddresses enabled.
-					if (symbRegNames)
-						replaceRegNames(bufferForDisassemblyWithPlentyOfStuff);
-					replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, NULL);
-					for (int p = 0; p<ARRAY_SIZE(pageNames); p++)
-						if (pageNames[p] != NULL)
-							replaceNames(pageNames[p], bufferForDisassemblyWithPlentyOfStuff, NULL);
-				}
-
-				uint8 opCode = GetMem(instruction_addr);
-
-				// special case: RTS and RTI
-				if (opCode == 0x60 || opCode == 0x40)
-				{
-					// add "----------" to emphasize the end of subroutine
-					strcat(bufferForDisassemblyWithPlentyOfStuff, " ");
-					for (int j = strlen(bufferForDisassemblyWithPlentyOfStuff); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
-						bufferForDisassemblyWithPlentyOfStuff[j] = '-';
-					bufferForDisassemblyWithPlentyOfStuff[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
-				}
-
-				// append disassembly to current line
-				swprintf(debug_wbuf, L" %S", bufferForDisassemblyWithPlentyOfStuff);
-				fprintf(fout, "%ls", debug_wbuf);
-			}
-		}
-		fprintf(fout, "%ls", L"\n");
-		instructions_count++;
-	}
 }
 
 void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
@@ -2128,20 +1937,10 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			break;
 		// Tools menu
 		case ID_DEBUGGER_ROM_PATCHER:
-			printf("wtf");
 			DoPatcher(-1, hwndDlg);
 			break;
 		case ID_DEBUGGER_CODE_DUMPER:
-			FILE *fout = fopen("testdump.txt", "w");
-			// Hardcoded start and end addresses for Rockman 2's NMI routine. Lol
-			// Dump(fout, 0xCFED, 0xD0D3);
-			//printf("Taking a dump...\n");
-			//Dump(fout, 0x8000, 0xFFFF);
-			//printf("I'M DONE!\n");
-			//fclose(fout);
-
-			DialogBox(fceu_hInstance, "CODEDUMPER", hwndDlg, AssemblerCallB);
-
+			DialogBox(fceu_hInstance, "CODEDUMPER", hwndDlg, DumperCallB);
 			break;
 	}
 

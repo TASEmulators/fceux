@@ -577,6 +577,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\drivers\win\debugger.cpp" />
     <ClCompile Include="..\src\drivers\win\debuggersp.cpp" />
     <ClCompile Include="..\src\drivers\win\directories.cpp" />
+    <ClCompile Include="..\src\drivers\win\dumper.cpp" />
     <ClCompile Include="..\src\drivers\win\gui.cpp" />
     <ClCompile Include="..\src\drivers\win\guiconfig.cpp" />
     <ClCompile Include="..\src\drivers\win\header_editor.cpp" />
@@ -1038,6 +1039,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\drivers\win\debugger.h" />
     <ClInclude Include="..\src\drivers\win\debuggersp.h" />
     <ClInclude Include="..\src\drivers\win\directories.h" />
+    <ClInclude Include="..\src\drivers\win\dumper.h" />
     <ClInclude Include="..\src\drivers\win\gui.h" />
     <ClInclude Include="..\src\drivers\win\guiconfig.h" />
     <ClInclude Include="..\src\drivers\win\header_editor.h" />

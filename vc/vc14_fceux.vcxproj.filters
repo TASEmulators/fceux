@@ -1117,6 +1117,9 @@
     <ClCompile Include="..\src\drivers\win\assembler.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\win\dumper.cpp">
+      <Filter>drivers\win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
@@ -1630,6 +1633,9 @@
       <Filter>drivers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\assembler.h">
+      <Filter>drivers\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\dumper.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
   </ItemGroup>
