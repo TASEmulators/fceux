@@ -1991,6 +1991,13 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 				case IDC_DEBUGGER_VAL_PC:
 					DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_SEEK_PC, NULL);
 					break;
+				case IDC_DEBUGGER_CYCLES_EXCEED:
+					// Sending click events in this way does not auto-check the box.
+					DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_BREAK_ON_CYCLES, NULL);
+					break;
+				case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
+					DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, NULL);
+					break;
 			}
 			break;
 	}
@@ -2134,11 +2141,13 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			case IDC_DEBUGGER_BREAK_ON_CYCLES:
 			{
 				break_on_cycles ^= 1;
+				CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_CYCLES, break_on_cycles);
 				break;
 			}
 			case IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS:
 			{
 				break_on_instructions ^= 1;
+				CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, break_on_instructions);
 				break;
 			}
 			case IDC_DEBUGGER_RELOAD_SYMS:
