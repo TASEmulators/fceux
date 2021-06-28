@@ -1813,6 +1813,65 @@ void DebuggerResizeWindow(HWND hwndDlg, UINT resizeType)
 	}
 }
 
+void DebuggerLbnDblClk(HWND hwndDlg, uint16 itemId, HWND hwndBtn)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	switch (itemId)
+	{
+	case IDC_DEBUGGER_BP_LIST:
+		EnableBreak(SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_BP_LIST, LB_GETCURSEL, 0, 0));
+		break;
+	case LIST_DEBUGGER_BOOKMARKS:
+		GoToDebuggerBookmark(hwndDlg);
+		break;
+	}
+}
+
+void DebuggerLbnSelCancel(HWND hwndDlg, uint16 listBoxId, HWND hwndList)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	switch (listBoxId)
+	{
+	case IDC_DEBUGGER_BP_LIST:
+		// Disable the delete and edit buttons
+		EnableWindow(GetDlgItem(hwndDlg, IDC_DEBUGGER_BP_DEL), FALSE);
+		EnableWindow(GetDlgItem(hwndDlg, IDC_DEBUGGER_BP_EDIT), FALSE);
+		break;
+	}
+}
+
+void DebuggerLbnSelChange(HWND hwndDlg, uint16 listBoxId, HWND hwndList)
+{
+	// None of these events can be processed without a game loaded.
+	if (!GameInfo)
+		return;
+
+	switch (listBoxId)
+	{
+	case IDC_DEBUGGER_BP_LIST:
+	{
+		// If something is selected, enabled the delete and edit buttons.
+		if (SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_BP_LIST, LB_GETCURSEL, 0, 0) >= 0)
+		{
+			EnableWindow(GetDlgItem(hwndDlg, IDC_DEBUGGER_BP_DEL), TRUE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_DEBUGGER_BP_EDIT), TRUE);
+		}
+		else
+		{
+			EnableWindow(GetDlgItem(hwndDlg, IDC_DEBUGGER_BP_DEL), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_DEBUGGER_BP_EDIT), FALSE);
+		}
+		break;
+	}
+	}
+}
+
 void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 {
 	// Buttons that don't need a rom loaded to do something, such as autoload
@@ -2106,66 +2165,7 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			}
 			case IDC_DEBUGGER_ROM_PATCHER: DoPatcher(-1,hwndDlg); break; // TODO: delete/merge with ID_DEBUGGER_ROM_PATCHER
 			// Double click the breakpoint list
-			// TODO: wait for the clean double-click callback!
-			case DEBUGGER_CONTEXT_TOGGLEBREAK: DebuggerCallB(hwndDlg, WM_COMMAND, (LBN_DBLCLK * 0x10000) | (IDC_DEBUGGER_BP_LIST), (LPARAM)hwndBtn); break;
-		}
-	}
-}
-
-void DebuggerDblClk(HWND hwndDlg, uint16 itemId, HWND hwndBtn)
-{
-	// None of these events can be processed without a game loaded.
-	if (!GameInfo)
-		return;
-
-	switch (itemId)
-	{
-		case IDC_DEBUGGER_BP_LIST: 
-			EnableBreak(SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0));
-			break;
-		case LIST_DEBUGGER_BOOKMARKS:
-			GoToDebuggerBookmark(hwndDlg);
-			break;
-	}
-}
-
-void DebuggerSelCancel(HWND hwndDlg, uint16 listBoxId, HWND hwndList)
-{
-	// None of these events can be processed without a game loaded.
-	if (!GameInfo)
-		return;
-
-	switch (listBoxId)
-	{
-		case IDC_DEBUGGER_BP_LIST:
-			// Disable the delete and edit buttons
-			EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),FALSE);
-			EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),FALSE);
-			break;
-	}
-}
-
-void DebuggerSelChange(HWND hwndDlg, uint16 listBoxId, HWND hwndList)
-{
-	// None of these events can be processed without a game loaded.
-	if (!GameInfo)
-		return;
-
-	switch (listBoxId)
-	{
-		case IDC_DEBUGGER_BP_LIST:
-		{
-			// If something is selected, enabled the delete and edit buttons.
-			if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0)
-			{
-				EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),TRUE);
-				EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),TRUE);
-			} else
-			{
-				EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),FALSE);
-				EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),FALSE);
-			}
-			break;
+			case DEBUGGER_CONTEXT_TOGGLEBREAK: DebuggerLbnDblClk(hwndDlg, IDC_DEBUGGER_BP_LIST, hwndBtn); break;
 		}
 	}
 }
@@ -2488,13 +2488,13 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					DebuggerBnClicked(hwndDlg, LOWORD(wParam), (HWND)lParam);
 					break;
 				case LBN_DBLCLK:
-					DebuggerDblClk(hwndDlg, LOWORD(wParam), (HWND)lParam);
+					DebuggerLbnDblClk(hwndDlg, LOWORD(wParam), (HWND)lParam);
 					break;
 				case LBN_SELCANCEL:
-					DebuggerSelCancel(hwndDlg, LOWORD(wParam), (HWND)lParam);
+					DebuggerLbnSelCancel(hwndDlg, LOWORD(wParam), (HWND)lParam);
 					break;
 				case LBN_SELCHANGE:
-					DebuggerSelChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
+					DebuggerLbnSelChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
 					break;
 				case EN_CHANGE:
 					DebuggerEnChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
@@ -2541,7 +2541,7 @@ void DoDebuggerStepInto()
 	if (!hDebug)
 		return;
 	// Click the Step Into button
-	DebuggerCallB(hDebug, WM_COMMAND, IDC_DEBUGGER_STEP_IN, 0);
+	DebuggerBnClicked(hDebug, IDC_DEBUGGER_STEP_IN, NULL);
 }
 
 void DoPatcher(int address, HWND hParent)
