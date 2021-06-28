@@ -1977,6 +1977,22 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 		case ID_DEBUGGER_CODE_DUMPER:
 			DialogBox(fceu_hInstance, "CODEDUMPER", hwndDlg, DumperCallB);
 			break;
+		case IDOK:
+			// Make pressing Enter synonymous with the button you'd expect depending on the focus.
+			HWND focus;
+			switch (GetDlgCtrlID(focus = GetFocus()))
+			{
+				case IDC_DEBUGGER_VAL_PCSEEK:
+					DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_SEEK_TO, NULL);
+					break;
+				case IDC_DEBUGGER_BOOKMARK:
+					DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_BOOKMARK_ADD, NULL);
+					break;
+				case IDC_DEBUGGER_VAL_PC:
+					DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_SEEK_PC, NULL);
+					break;
+			}
+			break;
 	}
 
 	// Buttons that only get handled when a game is loaded
