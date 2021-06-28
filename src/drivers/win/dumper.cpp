@@ -218,21 +218,69 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 	}
 }
 
+bool DumperInitDialog(HWND hwndDlg)
+{
+	debug_str_decoration_comment = (char*)malloc(NL_MAX_MULTILINE_COMMENT_LEN + 10);
+	Edit_SetCueBannerText(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR), L"8000");
+	Edit_SetCueBannerText(GetDlgItem(hwndDlg, ID_DUMPER_END_ADDR), L"FFFF");
+	SetWindowLongPtr(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+	SetWindowLongPtr(GetDlgItem(hwndDlg, ID_DUMPER_END_ADDR), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
+	SendDlgItemMessage(hwndDlg, ID_DUMPER_START_ADDR, EM_SETLIMITTEXT, 6, 0);
+	SendDlgItemMessage(hwndDlg, ID_DUMPER_END_ADDR, EM_SETLIMITTEXT, 6, 0);
+	SendDlgItemMessage(hwndDlg, ID_DUMPER_FILEPATH, EM_SETLIMITTEXT, 256, 0);
+	SetFocus(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR));
+	return true;
+}
+
+bool DumperBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
+{
+	switch (btnId)
+	{
+		case ID_DUMPER_BROWSE:
+			printf("Browser...\n");
+			return true;
+		case ID_DUMPER_GO:
+			static char str[7];
+			int startAddr, endAddr;
+
+			// Nothing was entered.
+			if (GetDlgItemText(hwndDlg, ID_DUMPER_START_ADDR, str, 6))
+				startAddr = strtol(str, NULL, 16);
+			else
+				startAddr = 0x8000;
+
+			if (GetDlgItemText(hwndDlg, ID_DUMPER_END_ADDR, str, 6))
+				endAddr = strtol(str, NULL, 16);
+			else
+				endAddr = 0xFFFF;
+
+			if (!GetDlgItemText(hwndDlg, ID_DUMPER_FILEPATH, filename, 256))
+			{
+				MessageBox(hwndDlg, "No file path entered.", "Code Dumper", MB_OK | MB_ICONINFORMATION);
+				break;
+			}
+
+			FILE *fout;
+			if (!(fout = fopen(filename, "w")))
+			{
+				MessageBox(hwndDlg, "Could not open file.", "Code Dumper", MB_OK | MB_ICONINFORMATION);
+				break;
+			}
+
+			printf("Dumping $%04X - $%04X to \"%s\"...\n", startAddr, endAddr, filename);
+			Dump(fout, startAddr, endAddr);
+			fclose(fout);
+			printf("Done.\n");
+			return true;
+	}
+}
+
 BOOL CALLBACK DumperCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
 	    case WM_INITDIALOG:
-			debug_str_decoration_comment = (char*)malloc(NL_MAX_MULTILINE_COMMENT_LEN + 10);
-			Edit_SetCueBannerText(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR), L"8000");
-			Edit_SetCueBannerText(GetDlgItem(hwndDlg, ID_DUMPER_END_ADDR), L"FFFF");
-			SetWindowLongPtr(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
-			SetWindowLongPtr(GetDlgItem(hwndDlg, ID_DUMPER_END_ADDR), GWLP_WNDPROC, (LONG_PTR)FilterEditCtrlProc);
-			SendDlgItemMessage(hwndDlg, ID_DUMPER_START_ADDR, EM_SETLIMITTEXT, 6, 0);
-			SendDlgItemMessage(hwndDlg, ID_DUMPER_END_ADDR, EM_SETLIMITTEXT, 6, 0);
-			SendDlgItemMessage(hwndDlg, ID_DUMPER_FILEPATH, EM_SETLIMITTEXT, 256, 0);
-			SetFocus(GetDlgItem(hwndDlg, ID_DUMPER_START_ADDR));
-			return true;
+			return DumperInitDialog(hwndDlg);
 		case WM_CLOSE:
 		case WM_QUIT:
 			free(debug_str_decoration_comment);
@@ -242,46 +290,7 @@ BOOL CALLBACK DumperCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			switch (HIWORD(wParam))
 			{
 				case BN_CLICKED:
-					switch (LOWORD(wParam))
-					{
-						case ID_DUMPER_BROWSE:
-							printf("Browser...\n");
-							return true;
-						case ID_DUMPER_GO:
-
-							static char str[7];
-							int startAddr, endAddr;
-
-							// Nothing was entered.
-							if (GetDlgItemText(hwndDlg, ID_DUMPER_START_ADDR, str, 6))
-								startAddr = strtol(str, NULL, 16);
-							else
-								startAddr = 0x8000;
-
-							if (GetDlgItemText(hwndDlg, ID_DUMPER_END_ADDR, str, 6))
-								endAddr = strtol(str, NULL, 16);
-							else
-								endAddr = 0xFFFF;
-
-							if (!GetDlgItemText(hwndDlg, ID_DUMPER_FILEPATH, filename, 256))
-							{
-								MessageBox(hwndDlg, "No file path entered.", "Code Dumper", MB_OK | MB_ICONINFORMATION);
-								break;
-							}
-
-							FILE *fout;
-							if (!(fout = fopen(filename, "w")))
-							{
-								MessageBox(hwndDlg, "Could not open file.", "Code Dumper", MB_OK | MB_ICONINFORMATION);
-								break;
-							}
-
-							printf("Dumping $%04X - $%04X to \"%s\"...\n", startAddr, endAddr, filename);
-							Dump(fout, startAddr, endAddr);
-							fclose(fout);
-							printf("Done.\n");
-							return true;
-					}
+					return DumperBnClicked(hwndDlg, LOWORD(wParam), (HWND)lParam);
 			}
 			break;
 	}
