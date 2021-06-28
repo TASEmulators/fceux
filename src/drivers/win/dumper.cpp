@@ -316,10 +316,19 @@ bool DumperBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 				break;
 			}
 
+			// This could take a while...
 			printf("Dumping $%04X - $%04X to \"%s\"...\n", startAddr, endAddr, filename);
+			EnableWindow(hwndDlg, false);
+			SetCursor(LoadCursor(NULL, IDC_WAIT));
+
 			Dump(fout, startAddr, endAddr);
 			fclose(fout);
+
 			printf("Done.\n");
+			EnableWindow(hwndDlg, true);
+			SetCursor(LoadCursor(NULL, IDC_ARROW));
+			MessageBeep(MB_ICONINFORMATION);
+
 			return true;
 		case IDCANCEL:
 			return DumperExit(hwndDlg);
