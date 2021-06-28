@@ -1831,30 +1831,6 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
 			UpdateDebugger(false);
 			break;
-		case IDC_DEBUGGER_CYCLES_EXCEED:
-		{
-			// Pretty sure this was dead code. BN_CLICKED is not equal to EN_CHANGE.
-			// Does it need to be moved to an EN_CHANGED callback?
-			//if (HIWORD(wParam) == EN_CHANGE)
-			//{
-			//	char str[16];
-			//	GetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str, 16);
-			//	break_cycles_limit = strtoul(str, NULL, 10);
-			//}
-			break;
-		}
-		case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
-		{
-			// Pretty sure this was dead code. BN_CLICKED is not equal to EN_CHANGE.
-			// Does it need to be moved to an EN_CHANGED callback?
-			//if (HIWORD(wParam) == EN_CHANGE)
-			//{
-			//	char str[16];
-			//	GetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str, 16);
-			//	break_instructions_limit = strtoul(str, NULL, 10);
-			//}
-			break;
-		}
 		case ID_DEBUGGER_DEFCOLOR:
 		{
 			if (!IsDebugColorDefault() && MessageBox(hwndDlg, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
@@ -2470,6 +2446,22 @@ void DebuggerMButtonDown(HWND hwndDlg, int cursorX, int cursorY, int vkFlags)
 	}
 }
 
+void DebuggerEnChange(HWND hwndDlg, uint16 textBoxId, HWND hwndTextbox)
+{
+	char str[16];
+	switch (textBoxId)
+	{
+		case IDC_DEBUGGER_CYCLES_EXCEED:
+			GetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str, 16);
+			break_cycles_limit = strtoul(str, NULL, 10);
+			break;
+		case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
+			GetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str, 16);
+			break_instructions_limit = strtoul(str, NULL, 10);
+			break;
+	}
+}
+
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -2503,6 +2495,9 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					break;
 				case LBN_SELCHANGE:
 					DebuggerSelChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
+					break;
+				case EN_CHANGE:
+					DebuggerEnChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
 					break;
 			}
 		case WM_INITMENUPOPUP:
