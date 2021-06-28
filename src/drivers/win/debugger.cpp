@@ -1648,6 +1648,7 @@ inline void UpdateOptionsPopup(HMENU optionsPopup)
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_AUTO_OPEN, CheckedFlag(debuggerAutoload));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_IDA_FONT, CheckedFlag(debuggerIDAFont));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_SHOW_ROM_OFFSETS, CheckedFlag(debuggerDisplayROMoffsets));
+	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_BAD_OPCODES, CheckedFlag(FCEUI_Debugger().badopbreak));
 }
 
 inline void UpdateSymbolsPopup(HMENU symbolsPopup)
@@ -1944,6 +1945,9 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			debuggerDisplayROMoffsets ^= 1;
 			UpdateDebugger(false);
 			break;
+		case ID_DEBUGGER_BREAK_BAD_OPCODES:
+			FCEUI_Debugger().badopbreak ^= 1;
+			break;
 		case ID_DEBUGGER_RESTORE_SIZE:
 			RestoreSize(hwndDlg);
 			break;
@@ -2120,6 +2124,7 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 				}
 				break;
 			}
+			// TODO: delete/merge with ID_DEBUGGER_BREAK_BAD_OPCODES
 			case IDC_DEBUGGER_BREAK_ON_BAD_OP: //Break on bad opcode
 				FCEUI_Debugger().badopbreak ^= 1;
 				break;
