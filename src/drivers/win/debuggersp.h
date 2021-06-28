@@ -71,5 +71,5 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 void DeleteSymbolicName(uint16 address, int size);
 void WriteNameFileToDisk(const char* filename, Name* node);
 
-extern void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr);
+extern void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr);
 extern void CenterWindow(HWND hwnd);

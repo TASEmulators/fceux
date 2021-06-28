@@ -51,7 +51,7 @@ static OPENFILENAME ofn;
 * A9 10    LDA #$10
 * 60       RTS
 *
-* There is a lot of reused logic between this and Disassemble. However, they're different enough that it would
+* There is a lot of reused logic between this and DisassembleToWindow. However, they're different enough that it would
 * be more trouble than it's worth to combine them.
 */
 void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)

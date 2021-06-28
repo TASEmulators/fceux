@@ -640,6 +640,8 @@ void replaceRegNames(char* str)
 /**
 * Searches an address node in a list of address nodes. The found node
 * has the same offset as the passed parameter offs.
+* 
+* Could speed this up with an actual data structure...
 *
 * @param node The address node list
 * @offs The offset to search
@@ -917,7 +919,7 @@ void GoToDebuggerBookmark(HWND hwnd)
 	// If no bookmark is selected just return
 	if (selectedItem == LB_ERR) return;
 	unsigned int n = getBookmarkAddress(selectedItem);
-	Disassemble(hwnd, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, n);
+	DisassembleToWindow(hwnd, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, n);
 }
 
 INT_PTR CALLBACK SymbolicNamingCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)

@@ -258,6 +258,7 @@ unsigned int AddBreak(HWND hwndDlg)
 
 // This function is for "smart" scrolling...
 // it attempts to scroll up one line by a whole instruction
+// Should we add the label-respecting logic from dumper.cpp?
 int InstructionUp(int from)
 {
 	int i = std::min(16, from), j;
@@ -562,7 +563,7 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 	SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, eventMask);
 }
 
-void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr)
+void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr)
 {
 	wchar_t chr[40] = { 0 };
 	wchar_t debug_wbuf[2048] = { 0 };
@@ -903,7 +904,7 @@ void UpdateDebugger(bool jump_to_pc)
 		{
 			starting_address = InstructionUp(starting_address);
 		}
-		Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
+		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
 
 		// HACK, but I don't see any other way to ensure the ">" pointer is visible when "Symbolic debug" is enabled
 		if (!PCPointerWasDrawn && PC_pointerOffset)
@@ -912,14 +913,14 @@ void UpdateDebugger(bool jump_to_pc)
 			PC_pointerOffset = 0;
 			starting_address = X.PC;
 			// retry with (PC_pointerOffset = 0) now
-			Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
+			DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
 		}
 
 		starting_address = X.PC;
 	} else
 	{
 		starting_address = disassembly_addresses[0];
-		Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
+		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
 	}
 	
 
@@ -1231,7 +1232,7 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 			crect.bottom += dy_l;
 			SetWindowPos(hwnd, 0, 0, 0, crect.right - crect.left, crect.bottom - crect.top, SWP_NOZORDER | SWP_NOMOVE);
 			GetScrollInfo(GetDlgItem(parent, IDC_DEBUGGER_DISASSEMBLY_VSCR), SB_CTL, &si);
-			Disassemble(parent, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+			DisassembleToWindow(parent, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
 			break;
 		case IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL:
 			// vertical stretch, no movement
@@ -1664,10 +1665,10 @@ inline void UpdateSymbolsPopup(HMENU symbolsPopup)
 	EnableMenuItem(symbolsPopup, ID_DEBUGGER_RELOAD_SYMBOLS, EnabledFlag(GameInfo));
 }
 
-inline void UpdateToolsPopup(HMENU symbolsPopup)
+inline void UpdateToolsPopup(HMENU toolsPopup)
 {
-	EnableMenuItem(symbolsPopup, ID_DEBUGGER_ROM_PATCHER, EnabledFlag(GameInfo));
-	EnableMenuItem(symbolsPopup, ID_DEBUGGER_CODE_DUMPER, EnabledFlag(GameInfo));
+	EnableMenuItem(toolsPopup, ID_DEBUGGER_ROM_PATCHER, EnabledFlag(GameInfo));
+	EnableMenuItem(toolsPopup, ID_DEBUGGER_CODE_DUMPER, EnabledFlag(GameInfo));
 }
 
 void DebuggerInitDialog(HWND hwndDlg)
@@ -2117,7 +2118,7 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 				{
 					sprintf(str,"%04X", tmp);
 					SetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str);
-					Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, tmp);
+					DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, tmp);
 					// The address in the Add Bookmark textbox follows the scroll pos.
 					sprintf(str,"%04X", si.nPos);
 					SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
@@ -2312,7 +2313,7 @@ void DebuggerVScroll(HWND hwndDlg, uint16 eventType, uint16 scrollPos, HWND hwnd
 			si.nPos = si.nMax - si.nPage;
 		SetScrollInfo(hwndScrollBar, SB_CTL, &si, TRUE);
 
-		Disassemble(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+		DisassembleToWindow(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
 		// The address in the Add Bookmark textbox follows the scroll pos.
 		char str[16];
 		sprintf(str,"%04X", si.nPos);
@@ -2353,7 +2354,7 @@ void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 curso
 	}
 
 	// This function calls UpdateScrollInfo. Don't worry!
-	Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+	DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
 	// The address in the Add Bookmark textbox follows the scroll pos.
 	char str[16];
 	sprintf(str,"%04X", si.nPos);
