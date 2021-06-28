@@ -128,6 +128,7 @@ INT_PTR CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 				}
 				UpdatePatcher(hwndDlg);
 				break;
+			case IDOK:
 			case IDC_ROMPATCHER_BTN_APPLY:
 				p = GetEditHexData(hwndDlg, IDC_ROMPATCHER_PATCH_DATA);
 				i = 0;
@@ -141,6 +142,9 @@ INT_PTR CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			case IDC_ROMPATCHER_BTN_SAVE:
 				if (!iNesSave())
 					MessageBox(NULL, "Error Saving", "Error", MB_OK | MB_ICONERROR);
+				break;
+			case IDCANCEL:
+				EndDialog(hwndDlg, 0);
 				break;
 			}
 			break;
