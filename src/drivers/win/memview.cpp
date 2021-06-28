@@ -297,9 +297,9 @@ void UndoLastPatch(){
 }
 
 void GotoAddress(HWND hwnd) {
-	char* gotoaddressstring = (char*)malloc(18);
+	char* gotoaddressstring = (char*)malloc(8);
 	int gotoaddress;
-	char* gototitle = (char*)malloc(8);
+	char* gototitle = (char*)malloc(18);
 
 	gotoaddressstring[0] = '\0';
 	sprintf(gototitle, "%s%X%s", "Goto (0-", MaxSize-1, ")");
@@ -310,6 +310,8 @@ void GotoAddress(HWND hwnd) {
 			SetHexEditorAddress(gotoaddress);
 		}
 	}
+	free(gotoaddressstring);
+	free(gototitle);
 }
 
 void SetHexEditorAddress(int gotoaddress)
