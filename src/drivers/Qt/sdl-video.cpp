@@ -223,6 +223,8 @@ int InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.ScanLineEndPAL", &endPAL);
 	uint32_t  rmask, gmask, bmask;
 
+	ClipSidesOffset = s_clipSides ? 8 : 0;
+
 	FCEUI_SetRenderedLines(startNTSC, endNTSC, startPAL, endPAL);
 
 	s_exs = 1.0;
