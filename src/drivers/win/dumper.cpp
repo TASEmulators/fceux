@@ -336,7 +336,7 @@ bool DumperBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 	return false;
 }
 
-BOOL CALLBACK DumperCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK DumperCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
