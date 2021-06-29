@@ -885,6 +885,12 @@ void UpdateDebugger(bool jump_to_pc)
 	ShowWindow(hDebug, SW_SHOWNORMAL);
 	SetForegroundWindow(hDebug);
 
+	if (!GameInfo)
+	{
+		SetDlgItemText(hDebug, IDC_DEBUGGER_DISASSEMBLY, "");
+		return;
+	}
+
 	char str[512] = {0}, str2[512] = {0}, chr[8];
 	int tmp, ret, i, starting_address;
 
@@ -2235,10 +2241,6 @@ void DebuggerMoveWindow(HWND hwndDlg, uint16 x, uint16 y)
 
 void DebuggerWindowActivate(HWND hwndDlg, uint16 eventType, HWND hwndActivated)
 {
-	// None of these events can be processed without a game loaded.
-	if (!GameInfo)
-		return;
-
 	// Prevents numerous situations where the debugger is out of sync with the data
 	if (eventType != WA_INACTIVE)
 	{
@@ -2246,7 +2248,7 @@ void DebuggerWindowActivate(HWND hwndDlg, uint16 eventType, HWND hwndActivated)
 	}
 	else
 	{
-		if (FCEUI_EmulationPaused())
+		if (GameInfo && FCEUI_EmulationPaused())
 			UpdateRegs(hwndDlg);
 	}
 }
