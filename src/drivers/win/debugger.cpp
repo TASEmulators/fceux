@@ -449,12 +449,22 @@ void HighlightPC(HWND hWnd)
 		return;
 
 	FINDTEXT ft;
-	ft.lpstrText  = ">";
+	ft.lpstrText  = "\r";
 	ft.chrg.cpMin = 0;
 	ft.chrg.cpMax = -1;
-	int start = SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft);
+
+	int start = 0;
+
+	for (int i = 0; i < PCLine; i++)
+	{
+		// Scroll down to PCLine by looking for newlines
+		start = SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDTEXT, (WPARAM)FR_DOWN, (LPARAM)&ft) + 1;
+		ft.chrg.cpMin = start;
+	}
+
 	if (start >= 0)
 	{
+		// Highlight PC
 		int old_start, old_end;
 		SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_GETSEL, (WPARAM)&old_start, (LPARAM)&old_end);
 		SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)start, (LPARAM)start+20);
@@ -591,7 +601,7 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr)
 
 	debug_wstr[0] = 0;
 	PCLine = -1;
-	unsigned int instructions_count = 0;
+	unsigned int line_count = 0;
 	for (int i = 0; i < lines; i++)
 	{
 		// PC pointer
@@ -612,6 +622,7 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr)
 					// we added one line to the disassembly window
 					disassembly_addresses.push_back(addr);
 					disassembly_operands.resize(i + 1);
+					line_count++;
 					i++;
 				}
 				if (node->comment)
@@ -636,6 +647,7 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr)
 						debug_decoration_comment_end_pos += 2;
 						debug_decoration_comment = debug_decoration_comment_end_pos;
 						debug_decoration_comment_end_pos = strstr(debug_decoration_comment_end_pos, "\r\n");
+						line_count++;
 					}
 				}
 			}
@@ -643,11 +655,11 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr)
 		
 		if (addr == X.PC)
 		{
-			PC_pointerOffset = instructions_count;
+			PC_pointerOffset = line_count;
 			PCPointerWasDrawn = true;
 			beginningOfPCPointerLine = wcslen(debug_wstr);
 			wcscat(debug_wstr, L">");
-			PCLine = instructions_count;
+			PCLine = line_count;
 		} else
 		{
 			wcscat(debug_wstr, L" ");
@@ -731,7 +743,7 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr)
 			wcscat(debug_wstr, debug_wbuf);
 		}
 		wcscat(debug_wstr, L"\n");
-		instructions_count++;
+		line_count++;
 	}
 	UpdateDisassembleView(hWnd, id, lines, true);
 
@@ -905,6 +917,8 @@ void UpdateDebugger(bool jump_to_pc)
 		if (PC_pointerOffset >= lines)
 			PC_pointerOffset = 0;
 
+		// PC_PointerOffset now indicates number of visible lines, which totally breaks this and that "HACK" below.
+		// Might need to change InstructionUp.
 		// keep the relative position of the ">" pointer inside the Disassembly window
 		for (int i = PC_pointerOffset; i > 0; i--)
 		{
