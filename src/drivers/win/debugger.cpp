@@ -130,9 +130,7 @@ std::vector<std::vector<uint16>> disassembly_operands;
 // this is used to autoscroll the Disassembly window while keeping relative position of the ">" pointer inside this window
 unsigned int PC_pointerOffset = 0;
 int PCLine = -1;
-// this is used for dirty, but unavoidable hack, which is necessary to ensure the ">" pointer is visible when stepping/seeking to PC
-bool PCPointerWasDrawn = false;
-// and another hack...
+// hack to help syntax highlighting find the PC
 int beginningOfPCPointerLine = -1;	// index of the first char within debug_str[] string, where the ">" line starts
 static int skipLinesStatic = 0;
 
@@ -257,8 +255,33 @@ unsigned int AddBreak(HWND hwndDlg)
 	return 0;
 }
 
-// This function is for "smart" scrolling...
-// it attempts to scroll up one line by a whole instruction
+// Tells you how many lines the comments and label name take for a given address.
+// Used for smoothly scrolling through comments.
+static int NumAnnotationLines(int addr)
+{
+	if (symbDebugEnabled)
+	{
+		Name* node = findNode(getNamesPointerForAddress(addr), addr);
+		if (node)
+		{
+			int count = 0;
+
+			if (node->name)
+				count++;
+
+			char* str = node->comment;
+			for (; str; count++)
+				str = strstr(str + 1, "\n");
+
+			return count;
+		}
+	}
+
+	return 0;
+}
+
+// This function is for "smart" scrolling.
+// It attempts to scroll up by a whole instruction heuristically.
 // Should we add the label-respecting logic from dumper.cpp?
 int InstructionUp(int from)
 {
@@ -290,8 +313,17 @@ int InstructionUp(int from)
 	return 0;	// of course, if we can't scroll up, just return 0!
 }
 
-// This all works great if each scrollup call is accompanied by a disassembletowindow call.
-// Realistically, I just need to make this function get the nodes and set things in a sane way.
+int InstructionDown(int from)
+{
+	int tmp = opsize[GetMem(si.nPos)];
+	if ((tmp))
+		return from + tmp;
+	else
+		return from + 1;		// this is data or undefined instruction
+}
+
+// Scroll up one visible line, respecting comments and labels.
+// skipLinesStatic will eventually tell the DisassembleToWindow function how many comment lines to skip.
 int ScrollUp(int from)
 {
 	if (skipLinesStatic)
@@ -300,24 +332,25 @@ int ScrollUp(int from)
 		return from;
 	}
 
-	skipLinesStatic = -1;
-	return InstructionUp(from);
+	int addr = InstructionUp(from);
+	skipLinesStatic = NumAnnotationLines(addr);
+	return addr;
 }
 
 // Can probably get rid of the parameters and let the static vars do the talking
 int ScrollDown(int from)
 {
-	skipLinesStatic++;
-	return from;
-}
-
-int InstructionDown(int from)
-{
-	int tmp = opsize[GetMem(si.nPos)];
-	if ((tmp))
-		return from + tmp;
+	// TODO: Store this annotationLines info so we can stop recomputing it!
+	if (skipLinesStatic == NumAnnotationLines(from))
+	{
+		skipLinesStatic = 0;
+		return InstructionDown(from);
+	}
 	else
-		return from + 1;		// this is data or undefined instruction
+	{
+		skipLinesStatic++;
+		return from;
+	}
 }
 
 static void UpdateDialog(HWND hwndDlg) {
@@ -596,6 +629,19 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 	SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, eventMask);
 }
 
+/**
+* Starting at addr, disassembles code to the debugger window. The number of lines is automatically determined
+* by the window size. id and scrollid tell the function which dialog items to modify, although a hardcoded ID
+* is mixed in, so, eh.
+* skiplines is used so that large comments can appear/disappear line by line, as you would expect in a text file,
+* rather than jumping in all at once.
+*
+* @param hWnd Handle to the debugger window
+* @param id id of the disassembly textbox
+* @param scrollid id of the scrollbar
+* @param addr starting address for disassembly
+* @param skiplines how many comment/label lines to skip, used for smooth scrolling (default 0)
+*/
 void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int skiplines)
 {
 	// Why is this getting called twice per scroll?
@@ -606,7 +652,6 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int
 	unsigned int instruction_addr;
 
 	disassembly_addresses.resize(0);
-	PCPointerWasDrawn = false;
 	beginningOfPCPointerLine = -1;
 	
 	if (symbDebugEnabled)
@@ -615,6 +660,7 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int
 		disassembly_operands.resize(0);
 	}
 
+	skipLinesStatic = skiplines;
 	si.nPos = addr;
 	SetScrollInfo(GetDlgItem(hWnd,scrollid),SB_CTL,&si,TRUE);
 
@@ -689,27 +735,18 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int
 					}
 				}
 			}
-			if (skiplines > 0)
+			if (skiplines)
 			{
 				// We were told to skip more comment/name lines than exist.
-				skipLinesStatic = skiplines = 0;
-				si.nPos = addr = InstructionDown(addr);
-				SetScrollInfo(GetDlgItem(hWnd, scrollid), SB_CTL, &si, TRUE);
-				continue;
-			}
-			if (skiplines < 0)
-			{
-				// Negative skiplines means it just kept going so this is our count
-				skipLinesStatic = -skiplines - 1;
+				skipLinesStatic -= skiplines;
 				skiplines = 0;
-				printf("Janky negative skiplines: %d\n", skipLinesStatic);
+				continue;
 			}
 		}
 		
 		if (addr == X.PC)
 		{
 			PC_pointerOffset = line_count;
-			PCPointerWasDrawn = true;
 			beginningOfPCPointerLine = wcslen(debug_wstr);
 			wcscat(debug_wstr, L">");
 			PCLine = line_count;
@@ -961,7 +998,9 @@ void UpdateDebugger(bool jump_to_pc)
 
 	if (jump_to_pc || disassembly_addresses.size() == 0)
 	{
+		// For relative positioning, we want start pos to be PC address with the comments scrolled offscreen.
 		starting_address = X.PC;
+		skipLinesStatic = NumAnnotationLines(starting_address);
 
 		// ensure that PC pointer will be visible even after the window was resized
 		RECT rect;
@@ -970,27 +1009,14 @@ void UpdateDebugger(bool jump_to_pc)
 		if (PC_pointerOffset >= lines)
 			PC_pointerOffset = 0;
 
-		// PC_PointerOffset now indicates number of visible lines, which totally breaks this and that "HACK" below.
-		// Might need to change InstructionUp.
 		// keep the relative position of the ">" pointer inside the Disassembly window
 		for (int i = PC_pointerOffset; i > 0; i--)
 		{
 			starting_address = ScrollUp(starting_address);
 		}
 		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address, skipLinesStatic);
-
-		// HACK, but I don't see any other way to ensure the ">" pointer is visible when "Symbolic debug" is enabled
-		if (!PCPointerWasDrawn && PC_pointerOffset)
-		{
-			// we've got a problem, probably due to Symbolic info taking so much space that PC pointer couldn't be seen with (PC_pointerOffset > 0)
-			PC_pointerOffset = 0;
-			starting_address = X.PC;
-			// retry with (PC_pointerOffset = 0) now
-			DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
-		}
-
-		starting_address = X.PC;
-	} else
+	}
+	else
 	{
 		starting_address = disassembly_addresses[0];
 		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address, skipLinesStatic);
