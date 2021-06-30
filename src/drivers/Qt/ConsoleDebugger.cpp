@@ -2053,6 +2053,36 @@ void  QAsmView::updateAssemblyView(void)
 
 		a = new dbg_asm_entry_t;
 
+		if (cdloggerdataSize)
+		{
+			uint8_t cdl_data;
+			instruction_addr = GetNesFileAddress(addr) - 16;
+			if ( (instruction_addr >= 0) && (instruction_addr < cdloggerdataSize) )
+			{
+				cdl_data = cdloggerdata[instruction_addr] & 3;
+				if (cdl_data == 3)
+				{
+					line.append("cd ");	// both Code and Data
+				}
+				else if (cdl_data == 2)
+				{
+					line.append(" d ");	// Data
+				}
+				else if (cdl_data == 1)
+				{
+					line.append("c  ");	// Code
+				}
+				else
+				{
+					line.append("   ");	// not logged
+				}
+			}
+			else
+			{
+				line.append("   ");	// cannot be logged
+			}
+		}
+
 		instruction_addr = addr;
 
 		if ( !pc_found )
@@ -2060,23 +2090,23 @@ void  QAsmView::updateAssemblyView(void)
 			if (addr > X.PC)
 			{
 				asmPC = a;
-				line.assign(">");
+				line.append(">");
 				pc_found = 1;
 			}
 			else if (addr == X.PC)
 			{
 				asmPC = a;
-				line.assign(">");
+				line.append(">");
 				pc_found = 1;
 			} 
 			else
 			{
-				line.assign(" ");
+				line.append(" ");
 			}
 		}
 		else 
 		{
-			line.assign(" ");
+			line.append(" ");
 		}
 		a->addr = addr;
 
@@ -3863,6 +3893,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	QColor hlgtFG("white"), hlgtBG("blue");
 	bool forceDarkColor = false;
 	bool txtHlgtSet = false;
+	QPen pen;
 
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
@@ -4007,6 +4038,12 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			y += pxLineSpacing;
 		}
 	}
+	l = (int)(2.5*pxCharWidth);
+	pen = painter.pen();
+	pen.setWidth(3);
+	pen.setColor( this->palette().color(QPalette::WindowText));
+	painter.setPen( pen );
+	painter.drawLine( l, 0, l, viewHeight );
 }
 //----------------------------------------------------------------------------
 // Bookmark Manager Methods
