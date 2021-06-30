@@ -39,6 +39,7 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QGuiApplication>
+#include <QSettings>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -97,6 +98,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QTreeWidgetItem * item;
 	int opt, useNativeMenuBar;
 	fceuDecIntValidtor *validator;
+	QSettings settings;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -687,13 +689,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 			loadGameDebugBreakpoints();
 		}
 	}
+
+	restoreGeometry(settings.value("debugger/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 ConsoleDebugger::~ConsoleDebugger(void)
 {
 	std::list <ConsoleDebugger*>::iterator it;
 
-	printf("Destroy Debugger Window\n");
+	//printf("Destroy Debugger Window\n");
 	periodicTimer->stop();
 
 	for (it = dbgWinList.begin(); it != dbgWinList.end(); it++)
@@ -701,7 +705,7 @@ ConsoleDebugger::~ConsoleDebugger(void)
 		if ( (*it) == this )
 		{
 			dbgWinList.erase(it);
-			printf("Removing Debugger Window\n");
+			//printf("Removing Debugger Window\n");
 			break;
 		}
 	}
@@ -715,16 +719,20 @@ ConsoleDebugger::~ConsoleDebugger(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::closeEvent(QCloseEvent *event)
 {
-   printf("Debugger Close Window Event\n");
-   done(0);
+	QSettings settings;
+	//printf("Debugger Close Window Event\n");
+	settings.setValue("debugger/geometry", saveGeometry());
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::closeWindow(void)
 {
-   //printf("Close Window\n");
-   done(0);
+	QSettings settings;
+	//printf("Close Window\n");
+	settings.setValue("debugger/geometry", saveGeometry());
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------------------------------

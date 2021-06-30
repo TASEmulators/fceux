@@ -29,6 +29,7 @@
 #include <SDL.h>
 #include <QMenuBar>
 #include <QAction>
+#include <QSettings>
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QGroupBox>
@@ -68,6 +69,7 @@ void openRamWatchWindow( QWidget *parent, int force )
 RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	: QDialog( parent, Qt::Window )
 {
+	QSettings settings;
 	QMenuBar *menuBar;
 	QHBoxLayout *mainLayout;
 	QVBoxLayout *vbox, *vbox1;
@@ -303,6 +305,8 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 	connect( updateTimer, &QTimer::timeout, this, &RamWatchDialog_t::periodicUpdate );
 
 	updateTimer->start( 100 ); // 10hz
+
+	restoreGeometry(settings.value("ramWatch/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 RamWatchDialog_t::~RamWatchDialog_t(void)
@@ -318,16 +322,20 @@ RamWatchDialog_t::~RamWatchDialog_t(void)
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("RAM Watch Close Window Event\n");
-   done(0);
+	QSettings settings;
+	//printf("RAM Watch Close Window Event\n");
+	settings.setValue("ramWatch/geometry", saveGeometry());
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::closeWindow(void)
 {
-   //printf("Close Window\n");
-   done(0);
+	QSettings settings;
+	//printf("Close Window\n");
+	settings.setValue("ramWatch/geometry", saveGeometry());
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------------------------------

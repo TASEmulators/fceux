@@ -36,6 +36,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QActionGroup>
+#include <QSettings>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -1085,6 +1086,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	QAction *act, *actHlgt, *actHlgtRV, *actColorFG, *actColorBG;
 	QActionGroup *group;
 	int useNativeMenuBar;
+	QSettings settings;
 
 	QDialog::setWindowTitle( tr("Hex Editor") );
 
@@ -1429,6 +1431,8 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	FCEUI_CreateCheatMap();
 
 	unloadTableAct->setEnabled( editor->charTable.customMapLoaded );
+
+	restoreGeometry(settings.value("hexEditor/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::~HexEditorDialog_t(void)
@@ -1522,7 +1526,9 @@ void HexEditorDialog_t::populateBookmarkMenu(void)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Hex Editor Close Window Event\n");
+	QSettings settings;
+	//printf("Hex Editor Close Window Event\n");
+	settings.setValue("hexEditor/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 	event->accept();
@@ -1530,7 +1536,9 @@ void HexEditorDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::closeWindow(void)
 {
+	QSettings settings;
 	//printf("Close Window\n");
+	settings.setValue("hexEditor/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 }

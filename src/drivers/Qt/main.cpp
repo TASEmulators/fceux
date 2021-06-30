@@ -87,6 +87,10 @@ int main( int argc, char *argv[] )
 	QApplication app(argc, argv);
 	//const char *styleSheetEnv = NULL;
 	
+	QCoreApplication::setOrganizationName("TasVideos");
+	QCoreApplication::setOrganizationDomain("TasVideos.org");
+	QCoreApplication::setApplicationName("fceux");
+
 	#ifdef WIN32
 	if (AttachConsole(ATTACH_PARENT_PROCESS))
 	{

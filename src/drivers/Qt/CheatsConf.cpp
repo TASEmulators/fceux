@@ -29,6 +29,7 @@
 #include <QFileDialog>
 #include <QScreen>
 #include <QGuiApplication>
+#include <QSettings>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -69,6 +70,7 @@ void updateCheatDialog(void)
 GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	: QDialog(parent, Qt::Window)
 {
+	QSettings    settings;
 	QHBoxLayout *mainLayout, *hbox, *hbox1;
 	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3;
 	QTreeWidgetItem *item;
@@ -448,6 +450,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	connect(exportCheatFileBtn, SIGNAL(clicked(void)), this, SLOT(saveCheatFile(void)));
 
 	showActiveCheatList(true);
+
+	restoreGeometry(settings.value("cheatsWindow/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
@@ -460,12 +464,14 @@ GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
 	wasPausedByCheats = false;
 
 	win = NULL;
-	printf("Destroy Cheat Window Event\n");
+	//printf("Destroy Cheat Window Event\n");
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Cheat Close Window Event\n");
+	QSettings settings;
+	//printf("Cheat Close Window Event\n");
+	settings.setValue("cheatsWindow/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 	event->accept();
@@ -473,7 +479,9 @@ void GuiCheatsDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::closeWindow(void)
 {
+	QSettings settings;
 	//printf("Close Window\n");
+	settings.setValue("cheatsWindow/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 }

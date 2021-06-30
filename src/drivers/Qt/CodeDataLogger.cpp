@@ -20,6 +20,7 @@
 // CodeDataLogger.cpp
 //
 #include <QDir>
+#include <QSettings>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -55,6 +56,7 @@ static int getDefaultCDLFile(char *filepath);
 CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 	: QDialog(parent, Qt::Window)
 {
+	QSettings    settings;
 	QVBoxLayout *mainLayout, *vbox1, *vbox;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
@@ -261,18 +263,22 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 		getDefaultCDLFile(nameo);
 		LoadCDLog(nameo);
 	}
+
+	restoreGeometry(settings.value("cdLogger/geometry").toByteArray());
 }
 //----------------------------------------------------
 CodeDataLoggerDialog_t::~CodeDataLoggerDialog_t(void)
 {
 	updateTimer->stop();
 
-	printf("Code Data Logger Window Deleted\n");
+	//printf("Code Data Logger Window Deleted\n");
 }
 //----------------------------------------------------
 void CodeDataLoggerDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Code Data Logger Close Window Event\n");
+	QSettings settings;
+	//printf("Code Data Logger Close Window Event\n");
+	settings.setValue("cdLogger/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 	event->accept();
@@ -280,7 +286,9 @@ void CodeDataLoggerDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------
 void CodeDataLoggerDialog_t::closeWindow(void)
 {
-	printf("Code Data Logger Close Window\n");
+	QSettings settings;
+	//printf("Code Data Logger Close Window\n");
+	settings.setValue("cdLogger/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 }

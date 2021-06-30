@@ -35,6 +35,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
+#include <QSettings>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -140,6 +141,7 @@ static void initLogOption( const char *name, int bitmask )
 TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	: QDialog(parent, Qt::Window)
 {
+	QSettings    settings;
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
@@ -361,6 +363,8 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	updateTimer->start(50); // 20hz
 
 	diskThread = new TraceLogDiskThread_t(this);
+
+	restoreGeometry(settings.value("traceLogger/geometry").toByteArray());
 }
 //----------------------------------------------------
 TraceLoggerDialog_t::~TraceLoggerDialog_t(void)
@@ -380,7 +384,9 @@ TraceLoggerDialog_t::~TraceLoggerDialog_t(void)
 //----------------------------------------------------
 void TraceLoggerDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Trace Logger Close Window Event\n");
+	QSettings settings;
+	//printf("Trace Logger Close Window Event\n");
+	settings.setValue("traceLogger/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 	event->accept();
@@ -388,7 +394,9 @@ void TraceLoggerDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------
 void TraceLoggerDialog_t::closeWindow(void)
 {
-	printf("Trace Logger Close Window\n");
+	QSettings settings;
+	//printf("Trace Logger Close Window\n");
+	settings.setValue("traceLogger/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 }
@@ -2314,7 +2322,11 @@ void TraceLogDiskThread_t::run(void)
 				DWORD bytesWritten;
 				WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
 				#else
-				write( logFile, buf, idx ); idx = 0;
+				if ( write( logFile, buf, idx ) < 0 )
+				{
+					// HANDLE ERROR TODO
+				}
+				idx = 0;
 				#endif
 			}
 		}
@@ -2327,7 +2339,11 @@ void TraceLogDiskThread_t::run(void)
 		DWORD bytesWritten;
 		WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
 		#else
-		write( logFile, buf, idx ); idx = 0;
+		if ( write( logFile, buf, idx ) < 0 )
+		{
+			// HANDLE ERROR TODO
+		}
+		idx = 0;
 		#endif
 	}
 

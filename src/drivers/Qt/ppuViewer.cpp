@@ -28,6 +28,7 @@
 #include <QAction>
 #include <QMenuBar>
 #include <QPainter>
+#include <QSettings>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QColorDialog>
@@ -193,6 +194,7 @@ static int exportActivePaletteACT( const char *filename )
 ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	: QDialog( parent, Qt::Window )
 {
+	QSettings    settings;
 	QMenuBar    *menuBar;
 	QVBoxLayout *mainLayout, *vbox;
 	QVBoxLayout *patternVbox[2];
@@ -437,6 +439,8 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	connect( updateTimer, &QTimer::timeout, this, &ppuViewerDialog_t::periodicUpdate );
 
 	updateTimer->start( 33 ); // 30hz
+
+	restoreGeometry(settings.value("ppuViewer/geometry").toByteArray());
 }
 
 //----------------------------------------------------
@@ -450,7 +454,9 @@ ppuViewerDialog_t::~ppuViewerDialog_t(void)
 //----------------------------------------------------
 void ppuViewerDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("PPU Viewer Close Window Event\n");
+	QSettings settings;
+	//printf("PPU Viewer Close Window Event\n");
+	settings.setValue("ppuViewer/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 	event->accept();
@@ -458,7 +464,9 @@ void ppuViewerDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------
 void ppuViewerDialog_t::closeWindow(void)
 {
-	printf("Close Window\n");
+	QSettings settings;
+	//printf("Close Window\n");
+	settings.setValue("ppuViewer/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 }
@@ -2791,6 +2799,7 @@ void ppuTileEditColorPicker_t::paintEvent(QPaintEvent *event)
 spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	: QDialog(parent, Qt::Window)
 {
+	QSettings    settings;
 	QMenuBar    *menuBar;
 	QVBoxLayout *mainLayout, *vbox, *vbox1, *vbox2, *vbox3;
 	QHBoxLayout *hbox, *hbox1, *hbox2;
@@ -3058,6 +3067,8 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	updateTimer->start( 33 ); // 30hz
 
 	resize( minimumSizeHint() );
+
+	restoreGeometry(settings.value("spriteViewer/geometry").toByteArray());
 }
 //----------------------------------------------------
 spriteViewerDialog_t::~spriteViewerDialog_t(void)
@@ -3070,7 +3081,9 @@ spriteViewerDialog_t::~spriteViewerDialog_t(void)
 //----------------------------------------------------
 void spriteViewerDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Sprite Viewer Close Window Event\n");
+	QSettings settings;
+	//printf("Sprite Viewer Close Window Event\n");
+	settings.setValue("spriteViewer/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 	event->accept();
@@ -3078,7 +3091,9 @@ void spriteViewerDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------
 void spriteViewerDialog_t::closeWindow(void)
 {
-	printf("Close Window\n");
+	QSettings settings;
+	//printf("Close Window\n");
+	settings.setValue("spriteViewer/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 }

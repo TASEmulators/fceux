@@ -30,6 +30,7 @@
 #include <QInputDialog>
 #include <QColorDialog>
 #include <QMessageBox>
+#include <QSettings>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -132,6 +133,7 @@ static int conv2hex( int i )
 ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	: QDialog( parent, Qt::Window )
 {
+	QSettings    settings;
 	QHBoxLayout *mainLayout;
 	QVBoxLayout *vbox1, *vbox2, *vbox3;
 	QHBoxLayout *hbox, *hbox1;
@@ -530,6 +532,8 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	updateMirrorText();
 	refreshMenuSelections();
+
+	restoreGeometry(settings.value("ntViewer/geometry").toByteArray());
 }
 //----------------------------------------------------
 ppuNameTableViewerDialog_t::~ppuNameTableViewerDialog_t(void)
@@ -537,12 +541,14 @@ ppuNameTableViewerDialog_t::~ppuNameTableViewerDialog_t(void)
 	updateTimer->stop();
 	nameTableViewWindow = NULL;
 
-	printf("Name Table Viewer Window Deleted\n");
+	//printf("Name Table Viewer Window Deleted\n");
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Name Table Viewer Close Window Event\n");
+	QSettings settings;
+	//printf("Name Table Viewer Close Window Event\n");
+	settings.setValue("ntViewer/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 	event->accept();
@@ -550,7 +556,9 @@ void ppuNameTableViewerDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::closeWindow(void)
 {
-	printf("Close Window\n");
+	QSettings settings;
+	//printf("Close Window\n");
+	settings.setValue("ntViewer/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 }

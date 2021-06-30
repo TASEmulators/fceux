@@ -30,6 +30,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
+#include <QSettings>
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QColorDialog>
@@ -63,6 +64,7 @@ static std::vector <colorChangeData_t>  redoColorHistory;
 PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
+	QSettings    settings;
 	QVBoxLayout *mainLayout;
 	QMenuBar *menuBar;
 	QMenu *fileMenu, *editMenu, *memMenu, *subMenu;
@@ -177,11 +179,13 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	connect(updateTimer, &QTimer::timeout, this, &PaletteEditorDialog_t::updatePeriodic);
 
 	updateTimer->start(500); // 2hz
+
+	restoreGeometry(settings.value("paletteEditor/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 PaletteEditorDialog_t::~PaletteEditorDialog_t(void)
 {
-	printf("Destroy Palette Editor Config Window\n");
+	//printf("Destroy Palette Editor Config Window\n");
 
 	updateTimer->stop();
 
@@ -191,7 +195,9 @@ PaletteEditorDialog_t::~PaletteEditorDialog_t(void)
 //----------------------------------------------------------------------------
 void PaletteEditorDialog_t::closeEvent(QCloseEvent *event)
 {
+	QSettings settings;
 	//printf("Palette Editor Close Window Event\n");
+	settings.setValue("paletteEditor/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 	event->accept();
@@ -199,7 +205,9 @@ void PaletteEditorDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------------------------------
 void PaletteEditorDialog_t::closeWindow(void)
 {
+	QSettings settings;
 	//printf("Close Window\n");
+	settings.setValue("paletteEditor/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 }
