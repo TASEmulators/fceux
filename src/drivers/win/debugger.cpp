@@ -134,6 +134,7 @@ int PCLine = -1;
 bool PCPointerWasDrawn = false;
 // and another hack...
 int beginningOfPCPointerLine = -1;	// index of the first char within debug_str[] string, where the ">" line starts
+static int skipLinesStatic = 0;
 
 #define INVALID_START_OFFSET 1
 #define INVALID_END_OFFSET 2
@@ -288,6 +289,28 @@ int InstructionUp(int from)
 		return (from - 1);	// else, scroll up one byte
 	return 0;	// of course, if we can't scroll up, just return 0!
 }
+
+// This all works great if each scrollup call is accompanied by a disassembletowindow call.
+// Realistically, I just need to make this function get the nodes and set things in a sane way.
+int ScrollUp(int from)
+{
+	if (skipLinesStatic)
+	{
+		skipLinesStatic--;
+		return from;
+	}
+
+	skipLinesStatic = -1;
+	return InstructionUp(from);
+}
+
+// Can probably get rid of the parameters and let the static vars do the talking
+int ScrollDown(int from)
+{
+	skipLinesStatic++;
+	return from;
+}
+
 int InstructionDown(int from)
 {
 	int tmp = opsize[GetMem(si.nPos)];
@@ -573,8 +596,9 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 	SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, eventMask);
 }
 
-void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr)
+void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int skiplines)
 {
+	// Why is this getting called twice per scroll?
 	wchar_t chr[40] = { 0 };
 	wchar_t debug_wbuf[2048] = { 0 };
 	int size;
@@ -617,13 +641,20 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr)
 			{
 				if (node->name)
 				{
-					swprintf(debug_wbuf, L"%S:\n", node->name);
-					wcscat(debug_wstr, debug_wbuf);
-					// we added one line to the disassembly window
-					disassembly_addresses.push_back(addr);
-					disassembly_operands.resize(i + 1);
-					line_count++;
-					i++;
+					if (skiplines == 0)
+					{
+						swprintf(debug_wbuf, L"%S:\n", node->name);
+						wcscat(debug_wstr, debug_wbuf);
+						// we added one line to the disassembly window
+						disassembly_addresses.push_back(addr);
+						disassembly_operands.resize(i + 1);
+						line_count++;
+						i++;
+					}
+					else
+					{
+						skiplines--;
+					}
 				}
 				if (node->comment)
 				{
@@ -637,19 +668,41 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr)
 					{
 						debug_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
 						debug_decoration_comment_end_pos[1] = 0;		// set \0 instead of \n
-						swprintf(debug_wbuf, L"; %S\n", debug_decoration_comment);
-						wcscat(debug_wstr, debug_wbuf);
-						// we added one line to the disassembly window
-						disassembly_addresses.push_back(addr);
-						disassembly_operands.resize(i + 1);
-						i++;
+						if (skiplines == 0)
+						{
+							swprintf(debug_wbuf, L"; %S\n", debug_decoration_comment);
+							wcscat(debug_wstr, debug_wbuf);
+							// we added one line to the disassembly window
+							disassembly_addresses.push_back(addr);
+							disassembly_operands.resize(i + 1);
+							i++;
+							line_count++;
+						}
+						else
+						{
+							skiplines--;
+						}
 
 						debug_decoration_comment_end_pos += 2;
 						debug_decoration_comment = debug_decoration_comment_end_pos;
 						debug_decoration_comment_end_pos = strstr(debug_decoration_comment_end_pos, "\r\n");
-						line_count++;
 					}
 				}
+			}
+			if (skiplines > 0)
+			{
+				// We were told to skip more comment/name lines than exist.
+				skipLinesStatic = skiplines = 0;
+				si.nPos = addr = InstructionDown(addr);
+				SetScrollInfo(GetDlgItem(hWnd, scrollid), SB_CTL, &si, TRUE);
+				continue;
+			}
+			if (skiplines < 0)
+			{
+				// Negative skiplines means it just kept going so this is our count
+				skipLinesStatic = -skiplines - 1;
+				skiplines = 0;
+				printf("Janky negative skiplines: %d\n", skipLinesStatic);
 			}
 		}
 		
@@ -922,9 +975,9 @@ void UpdateDebugger(bool jump_to_pc)
 		// keep the relative position of the ">" pointer inside the Disassembly window
 		for (int i = PC_pointerOffset; i > 0; i--)
 		{
-			starting_address = InstructionUp(starting_address);
+			starting_address = ScrollUp(starting_address);
 		}
-		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
+		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address, skipLinesStatic);
 
 		// HACK, but I don't see any other way to ensure the ">" pointer is visible when "Symbolic debug" is enabled
 		if (!PCPointerWasDrawn && PC_pointerOffset)
@@ -940,7 +993,7 @@ void UpdateDebugger(bool jump_to_pc)
 	} else
 	{
 		starting_address = disassembly_addresses[0];
-		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address);
+		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address, skipLinesStatic);
 	}
 	
 
@@ -2286,19 +2339,19 @@ void DebuggerVScroll(HWND hwndDlg, uint16 eventType, uint16 scrollPos, HWND hwnd
 			case SB_BOTTOM: break;
 			case SB_LINEUP:
 			{
-				si.nPos = InstructionUp(si.nPos);
+				si.nPos = ScrollUp(si.nPos);
 				break;
 			}
 			case SB_LINEDOWN:
 			{
-				si.nPos = InstructionDown(si.nPos);
+				si.nPos = ScrollDown(si.nPos);
 				break;
 			}
 			case SB_PAGEUP:
 			{
 				for (int i = si.nPage; i > 0; i--)
 				{
-					si.nPos = InstructionUp(si.nPos);
+					si.nPos = ScrollUp(si.nPos);
 					if (si.nPos < si.nMin)
 					{
 						si.nPos = si.nMin;
@@ -2311,7 +2364,7 @@ void DebuggerVScroll(HWND hwndDlg, uint16 eventType, uint16 scrollPos, HWND hwnd
 			{
 				for (int i = si.nPage; i > 0; i--)
 				{
-					si.nPos = InstructionDown(si.nPos);
+					si.nPos = ScrollDown(si.nPos);
 					if ((si.nPos + (int)si.nPage) > si.nMax)
 					{
 						si.nPos = si.nMax - si.nPage;
@@ -2329,7 +2382,7 @@ void DebuggerVScroll(HWND hwndDlg, uint16 eventType, uint16 scrollPos, HWND hwnd
 			si.nPos = si.nMax - si.nPage;
 		SetScrollInfo(hwndScrollBar, SB_CTL, &si, TRUE);
 
-		DisassembleToWindow(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+		DisassembleToWindow(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos, skipLinesStatic);
 		// The address in the Add Bookmark textbox follows the scroll pos.
 		char str[16];
 		sprintf(str,"%04X", si.nPos);
@@ -2349,7 +2402,7 @@ void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 curso
 	{
 		for (i *= -(int)si.nPage; i > 0; i--)
 		{
-			si.nPos = InstructionDown(si.nPos);
+			si.nPos = ScrollDown(si.nPos);
 			if ((si.nPos + (int)si.nPage) > si.nMax)
 			{
 				si.nPos = si.nMax - si.nPage;
@@ -2360,7 +2413,7 @@ void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 curso
 	{
 		for (i *= si.nPage; i > 0; i--)
 		{
-			si.nPos = InstructionUp(si.nPos);
+			si.nPos = ScrollUp(si.nPos);
 			if (si.nPos < si.nMin)
 			{
 				si.nPos = si.nMin;
@@ -2370,7 +2423,7 @@ void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 curso
 	}
 
 	// This function calls UpdateScrollInfo. Don't worry!
-	DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+	DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos, skipLinesStatic);
 	// The address in the Add Bookmark textbox follows the scroll pos.
 	char str[16];
 	sprintf(str,"%04X", si.nPos);
