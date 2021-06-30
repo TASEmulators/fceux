@@ -128,8 +128,7 @@ std::vector<uint16> disassembly_addresses;
 // this is used to keep track of addresses in operands of each printed instruction
 std::vector<std::vector<uint16>> disassembly_operands;
 // this is used to autoscroll the Disassembly window while keeping relative position of the ">" pointer inside this window
-unsigned int PC_pointerOffset = 0;
-int PCLine = -1;
+unsigned int PCLine = -1;
 // hack to help syntax highlighting find the PC
 int beginningOfPCPointerLine = -1;	// index of the first char within debug_str[] string, where the ">" line starts
 static int skipLinesStatic = 0;
@@ -746,10 +745,9 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int
 		
 		if (addr == X.PC)
 		{
-			PC_pointerOffset = line_count;
+			PCLine = line_count;
 			beginningOfPCPointerLine = wcslen(debug_wstr);
 			wcscat(debug_wstr, L">");
-			PCLine = line_count;
 		} else
 		{
 			wcscat(debug_wstr, L" ");
@@ -1006,11 +1004,11 @@ void UpdateDebugger(bool jump_to_pc)
 		RECT rect;
 		GetClientRect(GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY), &rect);
 		unsigned int lines = (rect.bottom-rect.top) / debugSystem->disasmFontHeight;
-		if (PC_pointerOffset >= lines)
-			PC_pointerOffset = 0;
+		if (PCLine >= lines)
+			PCLine = 0;
 
 		// keep the relative position of the ">" pointer inside the Disassembly window
-		for (int i = PC_pointerOffset; i > 0; i--)
+		for (int i = PCLine; i > 0; i--)
 		{
 			starting_address = ScrollUp(starting_address);
 		}
