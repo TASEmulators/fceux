@@ -470,20 +470,29 @@ void LogCDVectors(int which){
 	}
 }
 
-void LogCDData(uint8 *opcode, uint16 A, int size) {
+bool break_on_unlogged_code = false;
+bool break_on_unlogged_data = false;
+
+void LogCDData(uint8 *opcode, uint16 A, int size)
+{
 	int i, j;
 	uint8 memop = 0;
+	bool newCodeHit = false, newDataHit = false;
 
-	if((j = GetPRGAddress(_PC)) != -1)
-		for (i = 0; i < size; i++) {
-			if(cdloggerdata[j+i] & 1)continue; //this has been logged so skip
+	if ((j = GetPRGAddress(_PC)) != -1)
+	{
+		for (i = 0; i < size; i++)
+		{
+			if (cdloggerdata[j+i] & 1) continue; //this has been logged so skip
 			cdloggerdata[j+i] |= 1;
 			cdloggerdata[j+i] |= ((_PC + i) >> 11) & 0x0c;
 			cdloggerdata[j+i] |= ((_PC & 0x8000) >> 8) ^ 0x80;	// 19/07/14 used last reserved bit, if bit 7 is 1, then code is running from lowe area (6000)
-			if(indirectnext)cdloggerdata[j+i] |= 0x10;
+			if (indirectnext)cdloggerdata[j+i] |= 0x10;
 			codecount++;
-			if(!(cdloggerdata[j+i] & 2))undefinedcount--;
+			if (!(cdloggerdata[j+i] & 2))undefinedcount--;
+			newCodeHit = true;
 		}
+	}
 
 	//log instruction jumped to in an indirect jump
 	if(opcode[0] == 0x6c)
@@ -496,26 +505,43 @@ void LogCDData(uint8 *opcode, uint16 A, int size) {
 		case 4: memop = 0x20; break;
 	}
 
-	if((j = GetPRGAddress(A)) != -1) {
-		if (opwrite[opcode[0]] == 0) {
-			if (!(cdloggerdata[j] & 2)) {
+	if ((j = GetPRGAddress(A)) != -1)
+	{
+		if (opwrite[opcode[0]] == 0)
+		{
+			if (!(cdloggerdata[j] & 2))
+			{
 				cdloggerdata[j] |= 2;
 				cdloggerdata[j] |= (A >> 11) & 0x0c;
 				cdloggerdata[j] |= memop;
 				cdloggerdata[j] |= ((A & 0x8000) >> 8) ^ 0x80;	
 				datacount++;
 				if (!(cdloggerdata[j] & 1))undefinedcount--;
+				newDataHit = true;
 			}
-		}  else {
-			if (cdloggerdata[j] & 1) {
+		}
+		else
+		{
+			if (cdloggerdata[j] & 1)
+			{
 				codecount--;
 			}
-			if (cdloggerdata[j] & 2) {
+			if (cdloggerdata[j] & 2)
+			{
 				datacount--;
 			}
 			if ((cdloggerdata[j] & 3) != 0) undefinedcount++;
 			cdloggerdata[j] = 0;
 		}
+	}
+
+	if ( break_on_unlogged_code && newCodeHit )
+	{
+		BreakHit( BREAK_TYPE_UNLOGGED_CODE );
+	}
+	else if ( break_on_unlogged_data && newDataHit )
+	{
+		BreakHit( BREAK_TYPE_UNLOGGED_DATA );
 	}
 }
 
@@ -612,7 +638,7 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 	int i, j;
 	uint8 brk_type;
 	uint8 stackop=0;
-	uint8 stackopstartaddr,stackopendaddr;
+	uint8 stackopstartaddr=0,stackopendaddr=0;
 
 	debugLastAddress = A;
 	debugLastOpcode = opcode[0];

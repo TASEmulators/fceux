@@ -21,6 +21,8 @@
 #define BREAK_TYPE_CYCLES_EXCEED -3
 #define BREAK_TYPE_INSTRUCTIONS_EXCEED -4
 #define BREAK_TYPE_LUA -5
+#define BREAK_TYPE_UNLOGGED_CODE -6
+#define BREAK_TYPE_UNLOGGED_DATA -7
 
 //opbrktype is used to grab the breakpoint type that each instruction will cause.
 //WP_X is not used because ALL opcodes will have the execute bit set.
@@ -98,6 +100,8 @@ bool CondForbidTest(int bp_num);
 void BreakHit(int bp_num);
 
 extern bool break_asap;
+extern bool break_on_unlogged_code;
+extern bool break_on_unlogged_data;
 extern uint64 total_cycles_base;
 extern uint64 delta_cycles_base;
 extern bool break_on_cycles;

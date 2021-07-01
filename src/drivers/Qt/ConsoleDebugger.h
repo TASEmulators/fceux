@@ -255,7 +255,6 @@ class ConsoleDebugger : public QDialog
 		QGroupBox *bmFrame;
 		QTreeWidget *bpTree;
 		QTreeWidget *bmTree;
-		QCheckBox *brkBadOpsCbox;
 		QCheckBox *N_chkbox;
 		QCheckBox *V_chkbox;
 		QCheckBox *U_chkbox;
@@ -325,7 +324,9 @@ class ConsoleDebugger : public QDialog
 		void registerNameEnableCB(int value);
 		void autoOpenDebugCB( int value );
 		void debFileAutoLoadCB( int value );
-		void breakOnBadOpcodeCB(int value);
+		void breakOnBadOpcodeCB(bool value);
+		void breakOnNewCodeCB(bool value);
+		void breakOnNewDataCB(bool value);
 		void breakOnCyclesCB( int value );
 		void breakOnInstructionsCB( int value );
 		void bpItemClicked( QTreeWidgetItem *item, int column);

@@ -191,6 +191,38 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	
 	debugMenu->addAction(act);
 
+	debugMenu->addSeparator();
+
+	// Debug -> Break on Bad Opcodes
+	act = new QAction(tr("Break on Bad &Opcodes"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Break on Bad Opcodes"));
+	act->setCheckable(true);
+	act->setChecked( FCEUI_Debugger().badopbreak );
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnBadOpcodeCB(bool)) );
+	
+	debugMenu->addAction(act);
+
+	// Debug -> Break on Unlogged Code
+	act = new QAction(tr("Break on Unlogged &Code"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Break on Unlogged Code"));
+	act->setCheckable(true);
+	act->setChecked( break_on_unlogged_code );
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnNewCodeCB(bool)) );
+	
+	debugMenu->addAction(act);
+
+	// Debug -> Break on Unlogged Data
+	act = new QAction(tr("Break on Unlogged &Data"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Break on Unlogged Data"));
+	act->setCheckable(true);
+	act->setChecked( break_on_unlogged_data );
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnNewDataCB(bool)) );
+	
+	debugMenu->addAction(act);
+
 	// Options
 	optMenu = menuBar->addMenu(tr("&Options"));
 
@@ -443,13 +475,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	hbox->addWidget( button );
 	connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BP_CB(void)) );
 
-	brkBadOpsCbox = new QCheckBox( tr("Break on Bad Opcodes") );
-	brkBadOpsCbox->setChecked( FCEUI_Debugger().badopbreak );
-	connect( brkBadOpsCbox, SIGNAL(stateChanged(int)), this, SLOT(breakOnBadOpcodeCB(int)) );
-
 	vbox->addWidget( bpTree );
 	vbox->addLayout( hbox   );
-	vbox->addWidget( brkBadOpsCbox );
 	bpFrame->setLayout( vbox );
 
 	sfFrame = new QGroupBox(tr("Status Flags"));
@@ -1426,10 +1453,22 @@ void ConsoleDebugger::delete_BP_CB(void)
 	//bpListUpdate( true );
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::breakOnBadOpcodeCB(int value)
+void ConsoleDebugger::breakOnBadOpcodeCB(bool value)
 {
 	//printf("Value:%i\n", value);
-	FCEUI_Debugger().badopbreak = (value != Qt::Unchecked);
+	FCEUI_Debugger().badopbreak = value;
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::breakOnNewCodeCB(bool value)
+{
+	//printf("Code Value:%i\n", value);
+	break_on_unlogged_code = value;
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::breakOnNewDataCB(bool value)
+{
+	//printf("Data Value:%i\n", value);
+	break_on_unlogged_data = value;
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakOnCyclesCB( int value )
