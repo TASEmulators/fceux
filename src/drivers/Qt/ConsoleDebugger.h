@@ -303,6 +303,7 @@ class ConsoleDebugger : public QDialog
 		void debugRunToCursorCB(void);
 		void debugRunLineCB(void);
 		void debugRunLine128CB(void);
+		void openGotoAddrDialog(void);
 		void seekToCB(void);
 		void seekPCCB(void);
 		void add_BP_CB(void);

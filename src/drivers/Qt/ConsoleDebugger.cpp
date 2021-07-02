@@ -29,6 +29,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QPainter>
+#include <QSpinBox>
 #include <QHeaderView>
 #include <QCloseEvent>
 #include <QGridLayout>
@@ -124,16 +125,12 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	// File
 	fileMenu = menuBar->addMenu(tr("&File"));
 
-	// Symbols -> Load .DEB
-	g_config->getOption( "SDL.AutoLoadDebugFiles", &opt );
-
-	act = new QAction(tr("&Load .DEB on ROM Load"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("&Load .DEB on ROM Load"));
-	act->setCheckable(true);
-	act->setChecked( opt ? true : false );
-	connect( act, SIGNAL(triggered(bool)), this, SLOT(debFileAutoLoadCB(bool)) );
-
+	// File -> Go to Address
+	act = new QAction(tr("&Go to Address"), this);
+	act->setShortcut( QKeySequence(tr("Ctrl+A") ));
+	act->setStatusTip(tr("&Go to Address"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openGotoAddrDialog(void)) );
+	
 	fileMenu->addAction(act);
 
 	// File -> Close
@@ -247,6 +244,32 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	// Options
 	optMenu = menuBar->addMenu(tr("&Options"));
 
+	// Options -> Open Debugger on ROM Load
+	g_config->getOption( "SDL.AutoOpenDebugger", &opt );
+
+	act = new QAction(tr("&Open Debugger on ROM Load"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("&Reload"));
+	act->setCheckable(true);
+	act->setChecked( opt ? true : false );
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(autoOpenDebugCB(bool)) );
+
+	optMenu->addAction(act);
+
+	// Options -> Load .DEB
+	g_config->getOption( "SDL.AutoLoadDebugFiles", &opt );
+
+	act = new QAction(tr("&Load .DEB on ROM Load"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("&Load .DEB on ROM Load"));
+	act->setCheckable(true);
+	act->setChecked( opt ? true : false );
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(debFileAutoLoadCB(bool)) );
+
+	optMenu->addAction(act);
+
+	optMenu->addSeparator();
+
 	// Options -> PC Position
 	subMenu  = optMenu->addMenu(tr("&PC Line Positioning"));
 	actGroup = new QActionGroup(this);
@@ -308,20 +331,6 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCustom(void)) );
 	actGroup->addAction(act);
 	subMenu->addAction(act);
-
-	optMenu->addSeparator();
-
-	// Options -> Open Debugger on ROM Load
-	g_config->getOption( "SDL.AutoOpenDebugger", &opt );
-
-	act = new QAction(tr("&Open Debugger on ROM Load"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("&Reload"));
-	act->setCheckable(true);
-	act->setChecked( opt ? true : false );
-	connect( act, SIGNAL(triggered(bool)), this, SLOT(autoOpenDebugCB(bool)) );
-
-	optMenu->addAction(act);
 
 	// Symbols
 	symMenu = menuBar->addMenu(tr("&Symbols"));
@@ -675,7 +684,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	bmTree->setHeaderItem( item );
 
-	bmTree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
+	//bmTree->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
 
 	connect( bmTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
 			   this, SLOT(bmItemClicked( QTreeWidgetItem*, int)) );
@@ -1797,6 +1806,63 @@ void ConsoleDebugger::seekPCCB (void)
 	}
 	windowUpdateReq = true;
 	//asmView->scrollToPC();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::openGotoAddrDialog(void)
+{
+	int ret;
+	QDialog dialog(this);
+	QLabel *lbl;
+	QSpinBox *sbox;
+	QVBoxLayout *vbox;
+	QHBoxLayout *hbox;
+	QPushButton *okButton, *cancelButton;
+
+	vbox = new QVBoxLayout();
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr("Specify Address [ 0x0000 -> 0xFFFF ]") );
+
+	okButton     = new QPushButton( tr("Go") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	sbox = new QSpinBox();
+	sbox->setRange(0x0000, 0xFFFF);
+	sbox->setDisplayIntegerBase(16);
+	sbox->setValue( X.PC );
+
+	QFont font = sbox->font();
+	font.setCapitalization(QFont::AllUppercase);
+	sbox->setFont(font);
+
+	hbox->addWidget( cancelButton );
+	hbox->addWidget(     okButton );
+
+	vbox->addWidget( lbl  );
+	vbox->addWidget( sbox );
+	vbox->addLayout( hbox );
+
+	dialog.setLayout( vbox );
+
+	dialog.setWindowTitle( tr("Goto Address") );
+
+	okButton->setDefault(true);
+
+	ret = dialog.exec();
+
+	if ( QDialog::Accepted == ret )
+	{
+		int addr, line;
+	
+		addr = sbox->value();
+	
+		line = asmView->getAsmLineFromAddr(addr);
+
+		asmView->setLine( line );
+		vbar->setValue( line );
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::resetCountersCB (void)
@@ -4113,7 +4179,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			y += pxLineSpacing;
 		}
 	}
-	l = (int)(2.5*pxCharWidth);
+	l = (int)(2.5*pxCharWidth) - pxLineXScroll;
 	pen = painter.pen();
 	pen.setWidth(3);
 	pen.setColor( this->palette().color(QPalette::WindowText));
