@@ -249,6 +249,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Reset Counters"));
 	act->setCheckable(false);
+	act->setIcon( style()->standardIcon( QStyle::SP_BrowserReload ) );
 	connect( act, SIGNAL(triggered(void)), this, SLOT(resetCountersCB(void)) );
 
 	debugMenu->addAction(act);
@@ -463,6 +464,17 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setStatusTip(tr("Run 128 Lines"));
 	act->setIcon( QIcon(":icons/RunPpuFrame.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
+
+	toolBar->addAction(act);
+
+	toolBar->addSeparator();
+
+	// Debug -> Reset Counters
+	act = new QAction(tr("Reset &Counters"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Reset Counters"));
+	act->setIcon( style()->standardIcon( QStyle::SP_BrowserReload ) );
+	connect( act, SIGNAL(triggered(void)), this, SLOT(resetCountersCB(void)) );
 
 	toolBar->addAction(act);
 
