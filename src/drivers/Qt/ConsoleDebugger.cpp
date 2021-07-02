@@ -91,7 +91,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QFrame      *frame;
 	QLabel      *lbl;
 	QMenuBar    *menuBar;
-	QMenu       *fileMenu, *debugMenu, *optMenu, *subMenu;
+	QMenu       *fileMenu, *debugMenu, *optMenu, *symMenu, *subMenu;
 	QActionGroup *actGroup;
 	QAction     *act;
 	float fontCharWidth;
@@ -124,6 +124,18 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	// File
 	fileMenu = menuBar->addMenu(tr("&File"));
 
+	// Symbols -> Load .DEB
+	g_config->getOption( "SDL.AutoLoadDebugFiles", &opt );
+
+	act = new QAction(tr("&Load .DEB on ROM Load"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("&Load .DEB on ROM Load"));
+	act->setCheckable(true);
+	act->setChecked( opt ? true : false );
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(debFileAutoLoadCB(bool)) );
+
+	fileMenu->addAction(act);
+
 	// File -> Close
 	act = new QAction(tr("&Close"), this);
 	act->setShortcut(QKeySequence::Close);
@@ -140,7 +152,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setShortcut(QKeySequence( tr("F5") ) );
 	act->setStatusTip(tr("Run"));
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunCB(void)) );
-	
+
 	debugMenu->addAction(act);
 
 	// Debug -> Step Into
@@ -148,7 +160,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setShortcut(QKeySequence( tr("F11") ) );
 	act->setStatusTip(tr("Step Into"));
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
-	
+
 	debugMenu->addAction(act);
 
 	// Debug -> Step Out
@@ -156,7 +168,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setShortcut(QKeySequence( tr("Shift+F11") ) );
 	act->setStatusTip(tr("Step Out"));
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOutCB(void)) );
-	
+
 	debugMenu->addAction(act);
 
 	// Debug -> Step Over
@@ -164,7 +176,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setShortcut(QKeySequence( tr("F10") ) );
 	act->setStatusTip(tr("Step Over"));
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
-	
+
 	debugMenu->addAction(act);
 
 	// Debug -> Run to Selected Line
@@ -172,7 +184,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setShortcut(QKeySequence( tr("F1") ) );
 	act->setStatusTip(tr("Run to Selected Line"));
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunToCursorCB(void)) );
-	
+
 	debugMenu->addAction(act);
 
 	// Debug -> Run Line
@@ -180,7 +192,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setShortcut(QKeySequence( tr("F6") ) );
 	act->setStatusTip(tr("Run Line"));
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
-	
+
 	debugMenu->addAction(act);
 
 	// Debug -> Run 128 Lines
@@ -188,7 +200,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Run 128 Lines"));
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
-	
+
 	debugMenu->addAction(act);
 
 	debugMenu->addSeparator();
@@ -200,7 +212,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setCheckable(true);
 	act->setChecked( FCEUI_Debugger().badopbreak );
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnBadOpcodeCB(bool)) );
-	
+
 	debugMenu->addAction(act);
 
 	// Debug -> Break on Unlogged Code
@@ -210,7 +222,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setCheckable(true);
 	act->setChecked( break_on_unlogged_code );
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnNewCodeCB(bool)) );
-	
+
 	debugMenu->addAction(act);
 
 	// Debug -> Break on Unlogged Data
@@ -220,7 +232,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act->setCheckable(true);
 	act->setChecked( break_on_unlogged_data );
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnNewDataCB(bool)) );
-	
+
 	debugMenu->addAction(act);
 
 	// Options
@@ -287,6 +299,65 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCustom(void)) );
 	actGroup->addAction(act);
 	subMenu->addAction(act);
+
+	optMenu->addSeparator();
+
+	// Options -> Open Debugger on ROM Load
+	g_config->getOption( "SDL.AutoOpenDebugger", &opt );
+
+	act = new QAction(tr("&Open Debugger on ROM Load"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("&Reload"));
+	act->setCheckable(true);
+	act->setChecked( opt ? true : false );
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(autoOpenDebugCB(bool)) );
+
+	optMenu->addAction(act);
+
+	// Symbols
+	symMenu = menuBar->addMenu(tr("&Symbols"));
+
+	// Symbols -> Reload
+	act = new QAction(tr("&Reload"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("&Reload"));
+	//act->setCheckable(true);
+	//act->setChecked( break_on_unlogged_data );
+	connect( act, SIGNAL(triggered(void)), this, SLOT(reloadSymbolsCB(void)) );
+
+	symMenu->addAction(act);
+
+	symMenu->addSeparator();
+
+	// Symbols -> Display ROM Offsets
+	act = new QAction(tr("Show ROM &Offsets"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Show ROM &Offsets"));
+	act->setCheckable(true);
+	act->setChecked(false);
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(displayROMoffsetCB(bool)) );
+
+	symMenu->addAction(act);
+
+	// Symbols -> Symbolic Debug
+	act = new QAction(tr("&Symbolic Debug"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("&Symbolic Debug"));
+	act->setCheckable(true);
+	act->setChecked(true);
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(symbolDebugEnableCB(bool)) );
+
+	symMenu->addAction(act);
+
+	// Symbols -> Symbolic Debug
+	act = new QAction(tr("&Register Names"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("&Register Names"));
+	act->setCheckable(true);
+	act->setChecked(true);
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(registerNameEnableCB(bool)) );
+
+	symMenu->addAction(act);
 
 	//-----------------------------------------------------------------------
 	// Menu End
@@ -617,76 +688,24 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox->addWidget( button );
 	connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BM_CB(void)) );
 
-	hbox->addWidget( bmTree );
-	hbox->addLayout( vbox   );
+	hbox->addWidget( bmTree, 10 );
+	hbox->addLayout( vbox  ,  1 );
 	bmFrame->setLayout( hbox );
 	hbox3->addWidget( bmFrame );
 	vbox1->addLayout( hbox3 );
 
-	frame        = new QFrame();
-	vbox         = new QVBoxLayout();
-	button       = new QPushButton( tr("Reset Counters") );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(resetCountersCB(void)) );
-	vbox->addWidget( button );
-	vbox->addWidget( frame  );
-	hbox3->addLayout( vbox  );
-
-	vbox         = new QVBoxLayout();
-	romOfsChkBox = new QCheckBox( tr("ROM Offsets") );
-	symDbgChkBox = new QCheckBox( tr("Symbolic Debug") );
-	regNamChkBox = new QCheckBox( tr("Register Names") );
-	vbox->addWidget( romOfsChkBox );
-	vbox->addWidget( symDbgChkBox );
-	vbox->addWidget( regNamChkBox );
-
-	symDbgChkBox->setChecked(true);
-	regNamChkBox->setChecked(true);
-
-	connect( romOfsChkBox, SIGNAL(stateChanged(int)), this, SLOT(displayROMoffsetCB(int)) );
-	connect( symDbgChkBox, SIGNAL(stateChanged(int)), this, SLOT(symbolDebugEnableCB(int)) );
-	connect( regNamChkBox, SIGNAL(stateChanged(int)), this, SLOT(registerNameEnableCB(int)) );
-
-
-	button       = new QPushButton( tr("Reload Symbols") );
-	vbox->addWidget( button );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(reloadSymbolsCB(void)) );
-
-	button       = new QPushButton( tr("ROM Patcher") );
-	vbox->addWidget( button );
-	button->setEnabled(false); // TODO
-
-	frame->setLayout( vbox );
-	frame->setFrameShape( QFrame::Box );
-
-	hbox      = new QHBoxLayout();
-	vbox1->addLayout( hbox );
-
-	button         = new QPushButton( tr("Default Window Size") );
-	autoOpenChkBox = new QCheckBox( tr("Auto-Open") );
-	debFileChkBox  = new QCheckBox( tr("DEB Files") );
-	idaFontChkBox  = new QCheckBox( tr("IDA Font") );
-	hbox->addWidget( button );
-	hbox->addWidget( autoOpenChkBox );
-	hbox->addWidget( debFileChkBox  );
-	hbox->addWidget( idaFontChkBox  );
-
-	g_config->getOption( "SDL.AutoOpenDebugger", &opt );
-	autoOpenChkBox->setChecked( opt );
-
-	g_config->getOption( "SDL.AutoLoadDebugFiles", &opt );
-	debFileChkBox->setChecked( opt );
-
-	connect( autoOpenChkBox, SIGNAL(stateChanged(int)), this, SLOT(autoOpenDebugCB(int)) );
-	connect( debFileChkBox , SIGNAL(stateChanged(int)), this, SLOT(debFileAutoLoadCB(int)) );
-
-	button->setEnabled(false); // TODO
+	//frame        = new QFrame();
+	//vbox         = new QVBoxLayout();
+	//button       = new QPushButton( tr("Reset Counters") );
+	//connect( button, SIGNAL(clicked(void)), this, SLOT(resetCountersCB(void)) );
+	//vbox->addWidget( button );
+	//vbox->addWidget( frame  );
+	//hbox3->addLayout( vbox  );
 
 	// IDA font is just a monospace font, we are forcing this anyway. It is just easier to read the assembly.
 	// If a different font is desired, my thought is to open a QFontDialog and let the user pick a new font,
 	// rather than use a checkbox that selects between two. But for the moment, I have more important things
 	// to do.
-	idaFontChkBox->setEnabled(false); 
-	idaFontChkBox->setChecked(true); 
 
 	setLayout( mainLayout );
 
@@ -1531,29 +1550,29 @@ void ConsoleDebugger::instructionsThresChanged(const QString &txt)
 	}
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::displayROMoffsetCB( int value )
+void ConsoleDebugger::displayROMoffsetCB( bool value )
 {
-	asmView->setDisplayROMoffsets(value != Qt::Unchecked);
+	asmView->setDisplayROMoffsets(value);
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::symbolDebugEnableCB( int value )
+void ConsoleDebugger::symbolDebugEnableCB( bool value )
 {
-	asmView->setSymbolDebugEnable(value != Qt::Unchecked);
+	asmView->setSymbolDebugEnable(value);
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::registerNameEnableCB( int value )
+void ConsoleDebugger::registerNameEnableCB( bool value )
 {
-	asmView->setRegisterNameEnable(value != Qt::Unchecked);
+	asmView->setRegisterNameEnable(value);
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::autoOpenDebugCB( int value )
+void ConsoleDebugger::autoOpenDebugCB( bool value )
 {
-	g_config->setOption( "SDL.AutoOpenDebugger", value != Qt::Unchecked);
+	g_config->setOption( "SDL.AutoOpenDebugger", value);
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::debFileAutoLoadCB( int value )
+void ConsoleDebugger::debFileAutoLoadCB( bool value )
 {
-	int autoLoadDebug = value != Qt::Unchecked;
+	int autoLoadDebug = value;
 
 	g_config->setOption("SDL.AutoLoadDebugFiles", autoLoadDebug);
 
