@@ -1825,6 +1825,9 @@ void ConsoleDebugger::openGotoAddrDialog(void)
 	okButton     = new QPushButton( tr("Go") );
 	cancelButton = new QPushButton( tr("Cancel") );
 
+	okButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
 	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
 	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
 

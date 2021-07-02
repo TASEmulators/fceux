@@ -27,6 +27,7 @@
 #include <SDL.h>
 #include <QHeaderView>
 #include <QScrollBar>
+#include <QSpinBox>
 #include <QPainter>
 #include <QMenuBar>
 #include <QFileDialog>
@@ -2186,23 +2187,57 @@ void QHexEdit::openGotoAddrDialog(void)
 {
 	int ret;
 	char stmp[128];
-	QInputDialog dialog(this);
+	QDialog dialog(this);
+	QLabel *lbl;
+	QSpinBox *sbox;
+	QVBoxLayout *vbox;
+	QHBoxLayout *hbox;
+	QPushButton *okButton, *cancelButton;
 
 	sprintf( stmp, "Specify Address [ 0x0 -> 0x%X ]", mb.size()-1 );
 
+	vbox = new QVBoxLayout();
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr(stmp) );
+
+	okButton     = new QPushButton( tr("Go") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	okButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	sbox = new QSpinBox();
+	sbox->setRange(0x0000, mb.size()-1);
+	sbox->setDisplayIntegerBase(16);
+	sbox->setValue( 0 );
+
+	QFont font = sbox->font();
+	font.setCapitalization(QFont::AllUppercase);
+	sbox->setFont(font);
+
+	hbox->addWidget( cancelButton );
+	hbox->addWidget(     okButton );
+
+	vbox->addWidget( lbl  );
+	vbox->addWidget( sbox );
+	vbox->addLayout( hbox );
+
+	dialog.setLayout( vbox );
+
 	dialog.setWindowTitle( tr("Goto Address") );
-	dialog.setLabelText( tr(stmp) );
-	dialog.setOkButtonText( tr("Go") );
-	//dialog.setTextValue( tr("0") );
+
+	okButton->setDefault(true);
 
 	ret = dialog.exec();
 
 	if ( QDialog::Accepted == ret )
 	{
 		int addr;
-		std::string s = dialog.textValue().toStdString();
 	
-		addr = strtol( s.c_str(), NULL, 16 );
+		addr = sbox->value();
 	
 		parent->gotoAddress(addr);
 	}
