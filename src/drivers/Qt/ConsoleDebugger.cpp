@@ -235,6 +235,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	debugMenu->addAction(act);
 
+	// Debug -> Reset Counters
+	act = new QAction(tr("Reset &Counters"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Reset Counters"));
+	act->setCheckable(false);
+	connect( act, SIGNAL(triggered(void)), this, SLOT(resetCountersCB(void)) );
+
+	debugMenu->addAction(act);
+
 	// Options
 	optMenu = menuBar->addMenu(tr("&Options"));
 
