@@ -21,5 +21,8 @@
         <file>icons/RunPpuFrame.png</file>
         <file>icons/RunPpuScanline.png</file>
         <file>icons/arrow-cursor.png</file>
+        <file>icons/JumpTarget.png</file>
+        <file>icons/Undo.png</file>
+        <file>icons/find.png</file>
     </qresource>
 </RCC>

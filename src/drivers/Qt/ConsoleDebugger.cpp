@@ -131,6 +131,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act = new QAction(tr("&Go to Address"), this);
 	act->setShortcut( QKeySequence(tr("Ctrl+A") ));
 	act->setStatusTip(tr("&Go to Address"));
+	//act->setIcon( QIcon(":icons/find.png") );
+	act->setIcon( QIcon(":icons/JumpTarget.png") );
 	connect(act, SIGNAL(triggered()), this, SLOT(openGotoAddrDialog(void)) );
 	
 	fileMenu->addAction(act);
@@ -395,6 +397,18 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	// Tool Bar Setup Start
 	//-----------------------------------------------------------------------
 	
+	// File -> Go to Address
+	act = new QAction(tr("&Go to Address"), this);
+	//act->setShortcut( QKeySequence(tr("Ctrl+A") ));
+	act->setStatusTip(tr("&Go to Address"));
+	//act->setIcon( QIcon(":icons/find.png") );
+	act->setIcon( QIcon(":icons/JumpTarget.png") );
+	connect(act, SIGNAL(triggered()), this, SLOT(openGotoAddrDialog(void)) );
+
+	toolBar->addAction(act);
+
+	toolBar->addSeparator();
+
 	// Debug -> Run
 	act = new QAction(tr("&Run"), this);
 	//act->setShortcut(QKeySequence( tr("F5") ) );
