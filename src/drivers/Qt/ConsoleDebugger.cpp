@@ -84,7 +84,8 @@ static int  lastBpIdx   = 0;
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	: QDialog( parent, Qt::Window )
 {
-	QHBoxLayout *mainLayout;
+	QVBoxLayout *mainLayoutv;
+	QHBoxLayout *mainLayouth;
 	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3, *vbox4;
 	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3;
 	QGridLayout *grid;
@@ -113,6 +114,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//resize( 512, 512 );
 	
 	menuBar = new QMenuBar(this);
+	toolBar = new QToolBar(this);
 
 	// This is needed for menu bar to show up on MacOS
 	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
@@ -148,6 +150,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act = new QAction(tr("&Run"), this);
 	act->setShortcut(QKeySequence( tr("F5") ) );
 	act->setStatusTip(tr("Run"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
+	act->setIcon( QIcon(":icons/debug-run.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunCB(void)) );
 
 	debugMenu->addAction(act);
@@ -156,6 +160,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act = new QAction(tr("Step &Into"), this);
 	act->setShortcut(QKeySequence( tr("F11") ) );
 	act->setStatusTip(tr("Step Into"));
+	act->setIcon( QIcon(":icons/StepInto.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
 
 	debugMenu->addAction(act);
@@ -164,6 +169,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act = new QAction(tr("&Step Out"), this);
 	act->setShortcut(QKeySequence( tr("Shift+F11") ) );
 	act->setStatusTip(tr("Step Out"));
+	act->setIcon( QIcon(":icons/StepOut.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOutCB(void)) );
 
 	debugMenu->addAction(act);
@@ -172,6 +178,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act = new QAction(tr("Step &Over"), this);
 	act->setShortcut(QKeySequence( tr("F10") ) );
 	act->setStatusTip(tr("Step Over"));
+	act->setIcon( QIcon(":icons/StepOver.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
 
 	debugMenu->addAction(act);
@@ -180,6 +187,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act = new QAction(tr("Run to S&elected Line"), this);
 	act->setShortcut(QKeySequence( tr("F1") ) );
 	act->setStatusTip(tr("Run to Selected Line"));
+	act->setIcon( QIcon(":icons/arrow-cursor.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunToCursorCB(void)) );
 
 	debugMenu->addAction(act);
@@ -188,6 +196,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act = new QAction(tr("Run &Line"), this);
 	act->setShortcut(QKeySequence( tr("F6") ) );
 	act->setStatusTip(tr("Run Line"));
+	act->setIcon( QIcon(":icons/RunPpuScanline.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
 
 	debugMenu->addAction(act);
@@ -196,6 +205,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	act = new QAction(tr("Run &128 Lines"), this);
 	act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Run 128 Lines"));
+	act->setIcon( QIcon(":icons/RunPpuFrame.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
 
 	debugMenu->addAction(act);
@@ -380,9 +390,80 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// Menu End
 	//-----------------------------------------------------------------------
-	mainLayout = new QHBoxLayout();
+	
+	//-----------------------------------------------------------------------
+	// Tool Bar Setup Start
+	//-----------------------------------------------------------------------
+	
+	// Debug -> Run
+	act = new QAction(tr("&Run"), this);
+	//act->setShortcut(QKeySequence( tr("F5") ) );
+	act->setStatusTip(tr("Run"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
+	act->setIcon( QIcon(":icons/debug-run.png") );
+	connect( act, SIGNAL(triggered()), this, SLOT(debugRunCB(void)) );
 
-	mainLayout->setMenuBar( menuBar );
+	toolBar->addAction(act);
+
+	// Debug -> Step Into
+	act = new QAction(tr("Step &Into"), this);
+	//act->setShortcut(QKeySequence( tr("F11") ) );
+	act->setStatusTip(tr("Step Into"));
+	act->setIcon( QIcon(":icons/StepInto.png") );
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
+
+	toolBar->addAction(act);
+
+	// Debug -> Step Out
+	act = new QAction(tr("&Step Out"), this);
+	//act->setShortcut(QKeySequence( tr("Shift+F11") ) );
+	act->setStatusTip(tr("Step Out"));
+	act->setIcon( QIcon(":icons/StepOut.png") );
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOutCB(void)) );
+
+	toolBar->addAction(act);
+
+	// Debug -> Step Over
+	act = new QAction(tr("Step &Over"), this);
+	//act->setShortcut(QKeySequence( tr("F10") ) );
+	act->setStatusTip(tr("Step Over"));
+	act->setIcon( QIcon(":icons/StepOver.png") );
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
+
+	toolBar->addAction(act);
+
+	toolBar->addSeparator();
+
+	// Debug -> Run Line
+	act = new QAction(tr("Run &Line"), this);
+	//act->setShortcut(QKeySequence( tr("F6") ) );
+	act->setStatusTip(tr("Run Line"));
+	act->setIcon( QIcon(":icons/RunPpuScanline.png") );
+	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
+
+	toolBar->addAction(act);
+
+	// Debug -> Run 128 Lines
+	act = new QAction(tr("Run &128 Lines"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Run 128 Lines"));
+	act->setIcon( QIcon(":icons/RunPpuFrame.png") );
+	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
+
+	toolBar->addAction(act);
+
+	toolBar->addSeparator();
+
+	//-----------------------------------------------------------------------
+	// Tool Bar Setup End
+	//-----------------------------------------------------------------------
+	
+	mainLayoutv = new QVBoxLayout();
+	mainLayouth = new QHBoxLayout();
+
+	mainLayoutv->setMenuBar( menuBar );
+	mainLayoutv->addWidget( toolBar );
+	mainLayoutv->addLayout( mainLayouth );
 
 	vbox4      = new QVBoxLayout();
 	grid       = new QGridLayout();
@@ -418,8 +499,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//asmText->setMinimumWidth( 20 * fontCharWidth );
 	//asmText->setLineWrapMode( QPlainTextEdit::NoWrap );
 
-	mainLayout->addLayout( vbox4, 10 );
-	mainLayout->addLayout( vbox1, 1 );
+	mainLayouth->addLayout( vbox4, 10 );
+	mainLayouth->addLayout( vbox1, 1 );
 
 	grid    = new QGridLayout();
 
@@ -725,7 +806,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	// rather than use a checkbox that selects between two. But for the moment, I have more important things
 	// to do.
 
-	setLayout( mainLayout );
+	setLayout( mainLayoutv );
 
 	windowUpdateReq   = true;
 

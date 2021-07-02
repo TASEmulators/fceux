@@ -24,6 +24,7 @@
 #include <QPlainTextEdit>
 #include <QClipboard>
 #include <QScrollBar>
+#include <QToolBar>
 
 #include "Qt/main.h"
 #include "Qt/SymbolicDebug.h"
@@ -118,7 +119,7 @@ class QAsmView : public QWidget
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
-   	void keyReleaseEvent(QKeyEvent *event);
+		void keyReleaseEvent(QKeyEvent *event);
 		void mousePressEvent(QMouseEvent * event);
 		void mouseReleaseEvent(QMouseEvent * event);
 		void mouseMoveEvent(QMouseEvent * event);
@@ -234,9 +235,10 @@ class ConsoleDebugger : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *event);
 		//void keyPressEvent(QKeyEvent *event);
-   	//void keyReleaseEvent(QKeyEvent *event);
+		//void keyReleaseEvent(QKeyEvent *event);
 
 		//QTreeWidget *tree;
+		QToolBar    *toolBar;
 		QScrollBar  *vbar;
 		QScrollBar  *hbar;
 		QAsmView    *asmView;
@@ -286,7 +288,7 @@ class ConsoleDebugger : public QDialog
 		void bmListUpdate( bool reset = false );
 
    public slots:
-      void closeWindow(void);
+		void closeWindow(void);
 		void asmViewCtxMenuAddBP(void);
 		void asmViewCtxMenuAddBM(void);
 		void asmViewCtxMenuAddSym(void);
