@@ -93,7 +93,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QFrame      *frame;
 	QLabel      *lbl;
 	QMenuBar    *menuBar;
-	QMenu       *fileMenu, *debugMenu, *optMenu, *symMenu, *subMenu;
+	QMenu       *fileMenu, *viewMenu, *debugMenu,
+		    *optMenu, *symMenu, *subMenu;
 	QActionGroup *actGroup;
 	QAction     *act;
 	float fontCharWidth;
@@ -127,23 +128,44 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	// File
 	fileMenu = menuBar->addMenu(tr("&File"));
 
-	// File -> Go to Address
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+
+	fileMenu->addAction(act);
+
+	// View
+	viewMenu = menuBar->addMenu(tr("&View"));
+
+	// View -> Go to Address
 	act = new QAction(tr("&Go to Address"), this);
 	act->setShortcut( QKeySequence(tr("Ctrl+A") ));
 	act->setStatusTip(tr("&Go to Address"));
 	//act->setIcon( QIcon(":icons/find.png") );
 	act->setIcon( QIcon(":icons/JumpTarget.png") );
 	connect(act, SIGNAL(triggered()), this, SLOT(openGotoAddrDialog(void)) );
-	
-	fileMenu->addAction(act);
 
-	// File -> Close
-	act = new QAction(tr("&Close"), this);
-	act->setShortcut(QKeySequence::Close);
-	act->setStatusTip(tr("Close Window"));
-	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
-	
-	fileMenu->addAction(act);
+	viewMenu->addAction(act);
+
+	// View -> Go to PC
+	act = new QAction(tr("Go to &PC"), this);
+	act->setShortcut( QKeySequence(tr("Ctrl+P") ));
+	act->setStatusTip(tr("Go to &PC"));
+	//act->setIcon( QIcon(":icons/JumpTarget.png") );
+	connect(act, SIGNAL(triggered()), this, SLOT(seekPCCB(void)) );
+
+	viewMenu->addAction(act);
+
+	// View -> Change PC
+	act = new QAction(tr("&Change PC"), this);
+	act->setShortcut( QKeySequence(tr("Ctrl+Shift+P") ));
+	act->setStatusTip(tr("&Change PC"));
+	//act->setIcon( QIcon(":icons/JumpTarget.png") );
+	connect(act, SIGNAL(triggered()), this, SLOT(openChangePcDialog(void)) );
+
+	viewMenu->addAction(act);
 
 	// Debug
 	debugMenu = menuBar->addMenu(tr("&Debug"));
@@ -1913,6 +1935,61 @@ void ConsoleDebugger::seekPCCB (void)
 	}
 	windowUpdateReq = true;
 	//asmView->scrollToPC();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::openChangePcDialog(void)
+{
+	int ret;
+	QDialog dialog(this);
+	QLabel *lbl;
+	QSpinBox *sbox;
+	QVBoxLayout *vbox;
+	QHBoxLayout *hbox;
+	QPushButton *okButton, *cancelButton;
+
+	vbox = new QVBoxLayout();
+	hbox = new QHBoxLayout();
+	lbl  = new QLabel( tr("Specify Address [ 0x0000 -> 0xFFFF ]") );
+
+	okButton     = new QPushButton( tr("Go") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	okButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	sbox = new QSpinBox();
+	sbox->setRange(0x0000, 0xFFFF);
+	sbox->setDisplayIntegerBase(16);
+	sbox->setValue( X.PC );
+
+	QFont font = sbox->font();
+	font.setCapitalization(QFont::AllUppercase);
+	sbox->setFont(font);
+
+	hbox->addWidget( cancelButton );
+	hbox->addWidget(     okButton );
+
+	vbox->addWidget( lbl  );
+	vbox->addWidget( sbox );
+	vbox->addLayout( hbox );
+
+	dialog.setLayout( vbox );
+
+	dialog.setWindowTitle( tr("Change Program Counter") );
+
+	okButton->setDefault(true);
+
+	ret = dialog.exec();
+
+	if ( QDialog::Accepted == ret )
+	{
+		X.PC = sbox->value();
+	
+		windowUpdateReq = true;
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::openGotoAddrDialog(void)

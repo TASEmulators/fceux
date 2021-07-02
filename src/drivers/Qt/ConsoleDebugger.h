@@ -306,6 +306,7 @@ class ConsoleDebugger : public QDialog
 		void debugRunLineCB(void);
 		void debugRunLine128CB(void);
 		void openGotoAddrDialog(void);
+		void openChangePcDialog(void);
 		void seekToCB(void);
 		void seekPCCB(void);
 		void add_BP_CB(void);
