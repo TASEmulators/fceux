@@ -248,8 +248,8 @@ class ConsoleDebugger : public QDialog
 		QLineEdit *regAEntry;
 		QLineEdit *regXEntry;
 		QLineEdit *regYEntry;
-		QLineEdit *cpuCycExdVal;
-		QLineEdit *instrExdVal;
+		//QLineEdit *cpuCycExdVal;
+		//QLineEdit *instrExdVal;
 		QLineEdit *selBmAddr;
 		QLineEdit *cpuCyclesVal;
 		QLineEdit *cpuInstrsVal;
@@ -267,8 +267,8 @@ class ConsoleDebugger : public QDialog
 		QCheckBox *I_chkbox;
 		QCheckBox *Z_chkbox;
 		QCheckBox *C_chkbox;
-		QCheckBox *brkCpuCycExd;
-		QCheckBox *brkInstrsExd;
+		//QCheckBox *brkCpuCycExd;
+		//QCheckBox *brkInstrsExd;
 		QLabel    *emuStatLbl;
 		QLabel    *ppuLbl;
 		QLabel    *spriteLbl;
@@ -277,7 +277,7 @@ class ConsoleDebugger : public QDialog
 		QLabel    *cpuCyclesLbl1;
 		//QLabel    *cpuCyclesLbl2;
 		QLabel    *cpuInstrsLbl1;
-		QLabel    *cpuInstrsLbl2;
+		//QLabel    *cpuInstrsLbl2;
 		QTimer    *periodicTimer;
 		QFont      font;
 

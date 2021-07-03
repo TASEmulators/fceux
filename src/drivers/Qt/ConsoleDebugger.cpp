@@ -654,13 +654,12 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//cpuCyclesLbl2 = new QLabel( tr("(+0):") );
 	cpuCyclesVal  = new QLineEdit( tr("(+0):") );
 	cpuInstrsLbl1 = new QLabel( tr("Instructions:") );
-	cpuInstrsLbl2 = new QLabel( tr("(+0):") );
 	//cpuInstrsLbl2 = new QLabel( tr("(+0):") );
 	cpuInstrsVal  = new QLineEdit( tr("(+0):") );
-	brkCpuCycExd  = new QCheckBox( tr("Break when Exceed") );
-	brkInstrsExd  = new QCheckBox( tr("Break when Exceed") );
-	cpuCycExdVal  = new QLineEdit( tr("0") );
-	instrExdVal   = new QLineEdit( tr("0") );
+	//brkCpuCycExd  = new QCheckBox( tr("Break when Exceed") );
+	//brkInstrsExd  = new QCheckBox( tr("Break when Exceed") );
+	//cpuCycExdVal  = new QLineEdit( tr("0") );
+	//instrExdVal   = new QLineEdit( tr("0") );
 
 	cpuCyclesVal->setFont(font);
 	cpuCyclesVal->setReadOnly(true);
