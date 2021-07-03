@@ -464,10 +464,16 @@ case 0x93: ST_IY(_A&_X&(((A-_Y)>>8)+1));
 case 0x9F: ST_ABY(_A&_X&(((A-_Y)>>8)+1));
 
 /* SYA */
-case 0x9C: ST_ABX(_Y&(((A-_X)>>8)+1));
+case 0x9C: /* Can't reuse existing ST_ABI macro here, due to addressing weirdness. */
+{
+   unsigned int A; GetABIWR(A,_X); A = ((_Y&((A>>8)+1)) << 8) | (A & 0xff); WrMem(A,A>>8); break;
+}
 
 /* SXA */
-case 0x9E: ST_ABY(_X&(((A-_Y)>>8)+1));
+case 0x9E: /* Can't reuse existing ST_ABI macro here, due to addressing weirdness. */
+{
+   unsigned int A; GetABIWR(A,_Y); A = ((_X&((A>>8)+1)) << 8) | (A & 0xff); WrMem(A,A>>8); break;
+}
 
 /* XAS */
 case 0x9B: _S=_A&_X;ST_ABY(_S& (((A-_Y)>>8)+1) );
