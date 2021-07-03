@@ -87,7 +87,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 {
 	QVBoxLayout *mainLayoutv;
 	QHBoxLayout *mainLayouth;
-	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3, *vbox4;
+	QVBoxLayout *vbox, *vbox1, *vbox2, /* *vbox3,*/ *vbox4;
 	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3;
 	QGridLayout *grid;
 	QPushButton *button;
@@ -101,7 +101,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	float fontCharWidth;
 	QTreeWidgetItem * item;
 	int opt, useNativeMenuBar;
-	fceuDecIntValidtor *validator;
+	//fceuDecIntValidtor *validator;
 	QSettings settings;
 
 	font.setFamily("Courier New");
@@ -548,51 +548,51 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//asmText->setMinimumWidth( 20 * fontCharWidth );
 	//asmText->setLineWrapMode( QPlainTextEdit::NoWrap );
 
-	mainLayouth->addLayout( vbox4, 10 );
-	mainLayouth->addLayout( vbox1, 1 );
+	mainLayouth->addLayout( vbox4, 5 );
+	mainLayouth->addLayout( vbox1, 4 );
 
 	grid    = new QGridLayout();
 
 	vbox1->addLayout( hbox1 );
-	hbox1->addLayout( vbox2 );
+	hbox1->addLayout( vbox2, 1 );
 	vbox2->addLayout( grid  );
 
-	button = new QPushButton( tr("Run") );
-	grid->addWidget( button, 0, 0, Qt::AlignLeft );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunCB(void)) );
+	//button = new QPushButton( tr("Run") );
+	//grid->addWidget( button, 0, 0, Qt::AlignLeft );
+	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunCB(void)) );
 
-	button = new QPushButton( tr("Step Into") );
-	grid->addWidget( button, 0, 1, Qt::AlignLeft );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepIntoCB(void)) );
+	//button = new QPushButton( tr("Step Into") );
+	//grid->addWidget( button, 0, 1, Qt::AlignLeft );
+	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepIntoCB(void)) );
 
-	button = new QPushButton( tr("Step Out") );
-	grid->addWidget( button, 1, 0, Qt::AlignLeft );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOutCB(void)) );
+	//button = new QPushButton( tr("Step Out") );
+	//grid->addWidget( button, 1, 0, Qt::AlignLeft );
+	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOutCB(void)) );
 
-	button = new QPushButton( tr("Step Over") );
-	grid->addWidget( button, 1, 1, Qt::AlignLeft );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOverCB(void)) );
+	//button = new QPushButton( tr("Step Over") );
+	//grid->addWidget( button, 1, 1, Qt::AlignLeft );
+	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOverCB(void)) );
 
-	button = new QPushButton( tr("Run Line") );
-	grid->addWidget( button, 2, 0, Qt::AlignLeft );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLineCB(void)) );
+	//button = new QPushButton( tr("Run Line") );
+	//grid->addWidget( button, 2, 0, Qt::AlignLeft );
+	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLineCB(void)) );
 
-	button = new QPushButton( tr("128 Lines") );
-	grid->addWidget( button, 2, 1, Qt::AlignLeft );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLine128CB(void)) );
+	//button = new QPushButton( tr("128 Lines") );
+	//grid->addWidget( button, 2, 1, Qt::AlignLeft );
+	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLine128CB(void)) );
 
-	button = new QPushButton( tr("Seek To:") );
-	grid->addWidget( button, 3, 0, Qt::AlignLeft );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(seekToCB(void)) );
+	//button = new QPushButton( tr("Seek To:") );
+	//grid->addWidget( button, 3, 0, Qt::AlignLeft );
+	//connect( button, SIGNAL(clicked(void)), this, SLOT(seekToCB(void)) );
 
-	seekEntry = new QLineEdit();
-	seekEntry->setFont( font );
-	seekEntry->setText("0000");
-	seekEntry->setMaxLength( 4 );
-	seekEntry->setInputMask( ">HHHH;0" );
-	seekEntry->setAlignment(Qt::AlignCenter);
-	seekEntry->setMaximumWidth( 6 * fontCharWidth );
-	grid->addWidget( seekEntry, 3, 1, Qt::AlignLeft );
+	//seekEntry = new QLineEdit();
+	//seekEntry->setFont( font );
+	//seekEntry->setText("0000");
+	//seekEntry->setMaxLength( 4 );
+	//seekEntry->setInputMask( ">HHHH;0" );
+	//seekEntry->setAlignment(Qt::AlignCenter);
+	//seekEntry->setMaximumWidth( 6 * fontCharWidth );
+	//grid->addWidget( seekEntry, 3, 1, Qt::AlignLeft );
 
 	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("PC:") );
@@ -601,14 +601,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	pcEntry->setMaxLength( 4 );
 	pcEntry->setInputMask( ">HHHH;0" );
 	pcEntry->setAlignment(Qt::AlignCenter);
+	pcEntry->setMinimumWidth( 6 * fontCharWidth );
 	pcEntry->setMaximumWidth( 6 * fontCharWidth );
 	hbox->addWidget( lbl );
 	hbox->addWidget( pcEntry, 1, Qt::AlignLeft );
-	grid->addLayout( hbox, 4, 0, Qt::AlignLeft );
+	grid->addLayout( hbox, 0, 0, Qt::AlignLeft );
 
-	button = new QPushButton( tr("Seek PC") );
-	grid->addWidget( button, 4, 1, Qt::AlignLeft );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(seekPCCB(void)) );
+	//button = new QPushButton( tr("Seek PC") );
+	//grid->addWidget( button, 4, 1, Qt::AlignLeft );
+	//connect( button, SIGNAL(clicked(void)), this, SLOT(seekPCCB(void)) );
 
 	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("A:") );
@@ -617,34 +618,77 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	regAEntry->setMaxLength( 2 );
 	regAEntry->setInputMask( ">HH;0" );
 	regAEntry->setAlignment(Qt::AlignCenter);
+	regAEntry->setMinimumWidth( 4 * fontCharWidth );
 	regAEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
 	hbox->addWidget( regAEntry, 1, Qt::AlignLeft );
+	grid->addLayout( hbox, 0, 1 );
+
+	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("X:") );
 	regXEntry = new QLineEdit();
 	regXEntry->setFont( font );
 	regXEntry->setMaxLength( 2 );
 	regXEntry->setInputMask( ">HH;0" );
 	regXEntry->setAlignment(Qt::AlignCenter);
+	regXEntry->setMinimumWidth( 4 * fontCharWidth );
 	regXEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
 	hbox->addWidget( regXEntry, 1, Qt::AlignLeft );
+	grid->addLayout( hbox, 0, 2 );
+
+	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("Y:") );
 	regYEntry = new QLineEdit();
 	regYEntry->setFont( font );
 	regYEntry->setMaxLength( 2 );
 	regYEntry->setInputMask( ">HH;0" );
 	regYEntry->setAlignment(Qt::AlignCenter);
+	regYEntry->setMinimumWidth( 4 * fontCharWidth );
 	regYEntry->setMaximumWidth( 4 * fontCharWidth );
 	hbox->addWidget( lbl );
 	hbox->addWidget( regYEntry, 1, Qt::AlignLeft );
-	vbox2->addLayout( hbox );
+	grid->addLayout( hbox, 0, 3 );
 
+	cpuCyclesLbl1 = new QLabel( tr("CPU Cycles:") );
+	//cpuCyclesLbl2 = new QLabel( tr("(+0):") );
+	cpuCyclesVal  = new QLineEdit( tr("(+0):") );
+	cpuInstrsLbl1 = new QLabel( tr("Instructions:") );
+	cpuInstrsLbl2 = new QLabel( tr("(+0):") );
+	//cpuInstrsLbl2 = new QLabel( tr("(+0):") );
+	cpuInstrsVal  = new QLineEdit( tr("(+0):") );
+	brkCpuCycExd  = new QCheckBox( tr("Break when Exceed") );
+	brkInstrsExd  = new QCheckBox( tr("Break when Exceed") );
+	cpuCycExdVal  = new QLineEdit( tr("0") );
+	instrExdVal   = new QLineEdit( tr("0") );
+
+	cpuCyclesVal->setFont(font);
+	cpuCyclesVal->setReadOnly(true);
+	cpuCyclesVal->setMinimumWidth( 24 * fontCharWidth );
+	cpuInstrsVal->setFont(font);
+	cpuInstrsVal->setReadOnly(true);
+	cpuInstrsVal->setMinimumWidth( 24 * fontCharWidth );
+
+	//hbox = new QHBoxLayout();
+	//hbox->addWidget( cpuCyclesLbl1, 1 );
+	//hbox->addWidget( cpuCyclesVal , 4 );
+	//grid->addLayout( hbox, 1, 0, 1, 4 );
+	//hbox = new QHBoxLayout();
+	//hbox->addWidget( cpuInstrsLbl1, 1 );
+	//hbox->addWidget( cpuInstrsVal , 4 );
+	//grid->addLayout( hbox, 2, 0, 1, 4 );
+
+	grid->addWidget( cpuCyclesLbl1, 1, 0, 1, 1 );
+	grid->addWidget( cpuCyclesVal , 1, 1, 1, 3 );
+	grid->addWidget( cpuInstrsLbl1, 2, 0, 1, 1 );
+	grid->addWidget( cpuInstrsVal , 2, 1, 1, 3 );
+	
 	stackFrame = new QGroupBox(tr("Stack $0100"));
 	stackText  = new DebuggerStackDisplay(this);
 	hbox       = new QHBoxLayout();
 	hbox->addWidget( stackText );
-	vbox2->addWidget( stackFrame );
+	//vbox2->addWidget( stackFrame );
+	hbox1->addWidget( stackFrame, 10 );
 	stackFrame->setLayout( hbox );
 	stackText->setFont(font);
 	stackText->setReadOnly(true);
@@ -653,7 +697,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//stackText->setMaximumWidth( 16 * fontCharWidth );
 
 	bpFrame = new QGroupBox(tr("Breakpoints"));
-	vbox3   = new QVBoxLayout();
+	//vbox3   = new QVBoxLayout();
 	vbox    = new QVBoxLayout();
 	bpTree  = new QTreeWidget();
 
@@ -720,9 +764,9 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	grid->addWidget( Z_chkbox, 1, 2, Qt::AlignCenter );
 	grid->addWidget( C_chkbox, 1, 3, Qt::AlignCenter );
 
-	vbox3->addWidget( bpFrame);
-	vbox3->addWidget( sfFrame);
-	hbox1->addLayout( vbox3  );
+	vbox1->addWidget( bpFrame);
+	vbox2->addWidget( sfFrame);
+	//hbox1->addLayout( vbox3  );
 
 	hbox2       = new QHBoxLayout();
 	vbox        = new QVBoxLayout();
@@ -740,57 +784,57 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	frame->setLayout( vbox  );
 	frame->setFrameShape( QFrame::Box );
 
-	vbox          = new QVBoxLayout();
-	cpuCyclesLbl1 = new QLabel( tr("CPU Cycles:") );
-	cpuCyclesLbl2 = new QLabel( tr("(+0):") );
-	cpuInstrsLbl1 = new QLabel( tr("Instructions:") );
-	cpuInstrsLbl2 = new QLabel( tr("(+0):") );
-	brkCpuCycExd  = new QCheckBox( tr("Break when Exceed") );
-	brkInstrsExd  = new QCheckBox( tr("Break when Exceed") );
-	cpuCycExdVal  = new QLineEdit( tr("0") );
-	instrExdVal   = new QLineEdit( tr("0") );
-	hbox          = new QHBoxLayout();
-	vbox->addLayout( hbox );
-	hbox->addWidget( cpuCyclesLbl1 );
-	hbox->addWidget( cpuCyclesLbl2 );
-	hbox         = new QHBoxLayout();
-	vbox->addLayout( hbox );
-	hbox->addWidget( brkCpuCycExd );
-	hbox->addWidget( cpuCycExdVal, 1, Qt::AlignLeft );
+	//vbox          = new QVBoxLayout();
+	//cpuCyclesLbl1 = new QLabel( tr("CPU Cycles:") );
+	//cpuCyclesLbl2 = new QLabel( tr("(+0):") );
+	//cpuInstrsLbl1 = new QLabel( tr("Instructions:") );
+	//cpuInstrsLbl2 = new QLabel( tr("(+0):") );
+	//brkCpuCycExd  = new QCheckBox( tr("Break when Exceed") );
+	//brkInstrsExd  = new QCheckBox( tr("Break when Exceed") );
+	//cpuCycExdVal  = new QLineEdit( tr("0") );
+	//instrExdVal   = new QLineEdit( tr("0") );
+	//hbox          = new QHBoxLayout();
+	//vbox->addLayout( hbox );
+	//hbox->addWidget( cpuCyclesLbl1 );
+	//hbox->addWidget( cpuCyclesLbl2 );
+	//hbox         = new QHBoxLayout();
+	//vbox->addLayout( hbox );
+	//hbox->addWidget( brkCpuCycExd );
+	//hbox->addWidget( cpuCycExdVal, 1, Qt::AlignLeft );
 
-	hbox         = new QHBoxLayout();
-	vbox->addLayout( hbox );
-	hbox->addWidget( cpuInstrsLbl1 );
-	hbox->addWidget( cpuInstrsLbl2 );
-	hbox         = new QHBoxLayout();
-	vbox->addLayout( hbox );
-	hbox->addWidget( brkInstrsExd );
-	hbox->addWidget( instrExdVal, 1, Qt::AlignLeft );
-	hbox2->addLayout( vbox );
+	//hbox         = new QHBoxLayout();
+	//vbox->addLayout( hbox );
+	//hbox->addWidget( cpuInstrsLbl1 );
+	//hbox->addWidget( cpuInstrsLbl2 );
+	//hbox         = new QHBoxLayout();
+	//vbox->addLayout( hbox );
+	//hbox->addWidget( brkInstrsExd );
+	//hbox->addWidget( instrExdVal, 1, Qt::AlignLeft );
+	//hbox2->addLayout( vbox );
 
-	validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
-	cpuCycExdVal->setFont( font );
-	cpuCycExdVal->setMaxLength( 16 );
-	cpuCycExdVal->setValidator( validator );
-	cpuCycExdVal->setAlignment(Qt::AlignLeft);
-	cpuCycExdVal->setMaximumWidth( 18 * fontCharWidth );
-	cpuCycExdVal->setCursorPosition(0);
-	connect( cpuCycExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(cpuCycleThresChanged(const QString &)));
+	//validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
+	//cpuCycExdVal->setFont( font );
+	//cpuCycExdVal->setMaxLength( 16 );
+	//cpuCycExdVal->setValidator( validator );
+	//cpuCycExdVal->setAlignment(Qt::AlignLeft);
+	//cpuCycExdVal->setMaximumWidth( 18 * fontCharWidth );
+	//cpuCycExdVal->setCursorPosition(0);
+	//connect( cpuCycExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(cpuCycleThresChanged(const QString &)));
 
-	validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
-	instrExdVal->setFont( font );
-	instrExdVal->setMaxLength( 16 );
-	instrExdVal->setValidator( validator );
-	instrExdVal->setAlignment(Qt::AlignLeft);
-	instrExdVal->setMaximumWidth( 18 * fontCharWidth );
-	instrExdVal->setCursorPosition(0);
-	connect( instrExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(instructionsThresChanged(const QString &)));
+	//validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
+	//instrExdVal->setFont( font );
+	//instrExdVal->setMaxLength( 16 );
+	//instrExdVal->setValidator( validator );
+	//instrExdVal->setAlignment(Qt::AlignLeft);
+	//instrExdVal->setMaximumWidth( 18 * fontCharWidth );
+	//instrExdVal->setCursorPosition(0);
+	//connect( instrExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(instructionsThresChanged(const QString &)));
 
-	brkCpuCycExd->setChecked( break_on_cycles );
-	connect( brkCpuCycExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnCyclesCB(int)) );
+	//brkCpuCycExd->setChecked( break_on_cycles );
+	//connect( brkCpuCycExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnCyclesCB(int)) );
 
-	brkInstrsExd->setChecked( break_on_instructions );
-	connect( brkInstrsExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnInstructionsCB(int)) );
+	//brkInstrsExd->setChecked( break_on_instructions );
+	//connect( brkInstrsExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnInstructionsCB(int)) );
 
 	hbox3     = new QHBoxLayout();
 	hbox      = new QHBoxLayout();
@@ -1644,7 +1688,7 @@ void ConsoleDebugger::breakOnCyclesCB( int value )
 
 	break_on_cycles = (value != Qt::Unchecked);
 
-	s = cpuCycExdVal->text().toStdString();
+	//s = cpuCycExdVal->text().toStdString();
 
    //printf("'%s'\n", txt );
 
@@ -1674,7 +1718,7 @@ void ConsoleDebugger::breakOnInstructionsCB( int value )
 
 	break_on_instructions = (value != Qt::Unchecked);
 
-	s = instrExdVal->text().toStdString();
+	//s = instrExdVal->text().toStdString();
 
    //printf("'%s'\n", txt );
 
@@ -1917,26 +1961,26 @@ void ConsoleDebugger::debugRunLine128CB(void)
 	FCEUI_SetEmulationPaused(0);
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::seekToCB (void)
-{
-	std::string s;
-
-	s = seekEntry->displayText().toStdString();
-
-	//printf("Seek To: '%s'\n", s.c_str() );
-
-	if ( s.size() > 0 )
-	{
-		long int addr, line;
-
-		addr = strtol( s.c_str(), NULL, 16 );
-		
-		line = asmView->getAsmLineFromAddr(addr);
-
-		asmView->setLine( line );
-		vbar->setValue( line );
-	}
-}
+//void ConsoleDebugger::seekToCB (void)
+//{
+//	std::string s;
+//
+//	s = seekEntry->displayText().toStdString();
+//
+//	//printf("Seek To: '%s'\n", s.c_str() );
+//
+//	if ( s.size() > 0 )
+//	{
+//		long int addr, line;
+//
+//		addr = strtol( s.c_str(), NULL, 16 );
+//		
+//		line = asmView->getAsmLineFromAddr(addr);
+//
+//		asmView->setLine( line );
+//		vbar->setValue( line );
+//	}
+//}
 //----------------------------------------------------------------------------
 void ConsoleDebugger::seekPCCB (void)
 {
@@ -2600,7 +2644,7 @@ void  QAsmView::updateAssemblyView(void)
 
 	pxLineWidth = maxLineLen * pxCharWidth;
 
-	//setMinimumWidth( 50 * pxCharWidth );
+	//setMaximumWidth( pxLineWidth + 10 );
 
 	vbar->setMaximum( asmEntry.size() );
 }
@@ -2734,34 +2778,27 @@ void  ConsoleDebugger::updateRegisterView(void)
 
 	sprintf( stmp, "Stack: $%04X", stackPtr );
 	stackFrame->setTitle( tr(stmp) );
-   stackText->updateText();
+	stackText->updateText();
 
 	// update counters
-	int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
-	if (counter_value < 0)	// sanity check
+	int64 counter_value1 = timestampbase + (uint64)timestamp - total_cycles_base;
+	int64 counter_value2 = timestampbase + (uint64)timestamp - delta_cycles_base;
+
+	if (counter_value1 < 0)	// sanity check
 	{
 		ResetDebugStatisticsCounters();
-		counter_value = 0;
+		counter_value1 = 0;
 	}
-	sprintf( stmp, "CPU Cycles: %llu", counter_value);
-
-	cpuCyclesLbl1->setText( tr(stmp) );
-
-	counter_value = timestampbase + (uint64)timestamp - delta_cycles_base;
-	if (counter_value < 0)	// sanity check
+	if (counter_value2 < 0)	// sanity check
 	{
 		ResetDebugStatisticsCounters();
-		counter_value = 0;
+		counter_value2 = 0;
 	}
-	sprintf(stmp, "(+%llu)", counter_value);
+	sprintf(stmp, "%10llu  (+%llu)", counter_value1, counter_value2);
+	cpuCyclesVal->setText( tr(stmp) );
 
-	cpuCyclesLbl2->setText( tr(stmp) );
-
-	sprintf(stmp, "Instructions: %llu", total_instructions);
-	cpuInstrsLbl1->setText( tr(stmp) );
-
-	sprintf(stmp, "(+%llu)", delta_instructions);
-	cpuInstrsLbl2->setText( tr(stmp) );
+	sprintf(stmp, "%10llu  (+%llu)", total_instructions, delta_instructions);
+	cpuInstrsVal->setText( tr(stmp) );
 
 	// PPU Labels
 	sprintf(stmp, "PPU: 0x%04X", (int)FCEUPPU_PeekAddress());

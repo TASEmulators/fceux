@@ -243,7 +243,7 @@ class ConsoleDebugger : public QDialog
 		QScrollBar  *hbar;
 		QAsmView    *asmView;
 		DebuggerStackDisplay *stackText;
-		QLineEdit *seekEntry;
+		//QLineEdit *seekEntry;
 		QLineEdit *pcEntry;
 		QLineEdit *regAEntry;
 		QLineEdit *regXEntry;
@@ -251,6 +251,8 @@ class ConsoleDebugger : public QDialog
 		QLineEdit *cpuCycExdVal;
 		QLineEdit *instrExdVal;
 		QLineEdit *selBmAddr;
+		QLineEdit *cpuCyclesVal;
+		QLineEdit *cpuInstrsVal;
 		QGroupBox *stackFrame;
 		QGroupBox *bpFrame;
 		QGroupBox *sfFrame;
@@ -273,7 +275,7 @@ class ConsoleDebugger : public QDialog
 		QLabel    *scanLineLbl;
 		QLabel    *pixLbl;
 		QLabel    *cpuCyclesLbl1;
-		QLabel    *cpuCyclesLbl2;
+		//QLabel    *cpuCyclesLbl2;
 		QLabel    *cpuInstrsLbl1;
 		QLabel    *cpuInstrsLbl2;
 		QTimer    *periodicTimer;
@@ -307,7 +309,7 @@ class ConsoleDebugger : public QDialog
 		void debugRunLine128CB(void);
 		void openGotoAddrDialog(void);
 		void openChangePcDialog(void);
-		void seekToCB(void);
+		//void seekToCB(void);
 		void seekPCCB(void);
 		void add_BP_CB(void);
 		void edit_BP_CB(void);
