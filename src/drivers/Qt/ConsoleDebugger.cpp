@@ -35,6 +35,7 @@
 #include <QGridLayout>
 #include <QRadioButton>
 #include <QInputDialog>
+#include <QMessageBox>
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
@@ -1816,8 +1817,19 @@ void ConsoleDebugger::debugStepOutCB(void)
 		setRegsFromEntry();
 		if (dbgstate.stepout)
 		{
-			printf("Step Out is currently in process.\n");
-			return;
+			int ret;
+			QMessageBox msgBox(QMessageBox::Question, tr("Step Out Already Active"),
+					tr("Step Out is currently in process. Cancel it and setup a new Step Out watch?"),
+					QMessageBox::No | QMessageBox::Yes, this);
+
+			ret = msgBox.exec();
+
+			if ( ret != QMessageBox::Yes )
+			{
+				//printf("Step out cancelled\n");
+				return;
+			}
+			//printf("Step out reset\n");
 		}
 		if (GetMem(X.PC) == 0x20)
 		{
