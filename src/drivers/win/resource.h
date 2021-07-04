@@ -122,7 +122,6 @@
 #define COMBO_FAM                       110
 #define IDB_TE_ARROW                    110
 #define IDC_CHECK_LOG_REGISTERS         110
-#define IDC_DEBUGGER_BREAK_ON_BAD_OP    110
 #define IDC_ROMPATCHER_BTN_APPLY        110
 #define LBL_CDLOGGER_RENDERCOUNT        110
 #define IDC_VIDEOCONFIG_SQUARE_PIXELS   110
@@ -131,7 +130,6 @@
 #define CB_DISABLE_SCREEN_SAVER         111
 #define BTN_FAM                         111
 #define IDC_CHECK_LOG_PROCESSOR_STATUS  111
-#define IDC_DEBUGGER_RELOAD_SYMS        111
 #define IDC_ROMPATCHER_BTN_SAVE         111
 #define IDC_CHEAT_COM                   111
 #define IDC_VIDEOCONFIG_DIRECTDRAW_FS   111
@@ -277,11 +275,9 @@
 #define BUTTON_MOVIE                    206
 #define IDC_DEBUGGER_FLAG_C             207
 #define BUTTON_MEMWATCH                 207
-#define IDC_DEBUGGER_ENABLE_SYMBOLIC    208
 #define IDB_TE_GREEN_BLUE_ARROW         208
 #define BUTTON_BOT                      208
 #define IDB_PIANO_0                     209
-#define IDC_DEBUGGER_ROM_OFFSETS        209
 #define BUTTON_MACRO                    209
 #define IDB_PIANO_1                     210
 #define BUTTON_PRESET                   210
@@ -463,7 +459,6 @@
 #define IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT 506
 #define IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT2 507
 #define IDC_VIDEOCONFIG_NO8LIM          600
-#define IDC_DEBUGGER_ROM_PATCHER        602
 #define LIST_DEBUGGER_BOOKMARKS         701
 #define BTN_CANCEL                      800
 #define IDC_GAME_GENIE_CODE             1000
@@ -603,7 +598,6 @@
 #define MW_VAL15                        1047
 #define IDC_DEBUGGER_TEXT_INSTRUCTIONS_COUNT 1047
 #define MW_NAME16                       1048
-#define IDC_DEBUGGER_VAL_S3             1048
 #define MW_ADDR16                       1049
 #define IDC_MAPPER_TEXT                 1049
 #define IDC_DEBUGGER_TEXT_A             1049
@@ -772,7 +766,6 @@
 #define IDC_MOVIE_SUGGEST_READONLY      1201
 #define ID_SOUND_QUALITYNOTIFY          1202
 #define CB_ENABLECONTEXTMENU            1203
-#define DEBUGAUTOLOAD                   1203
 #define IDC_CHEAT_PAUSEWHENACTIVE       1203
 #define IDC_FULLSAVESTATES              1203
 #define IDC_SUPERIMPOSE                 1203
@@ -792,7 +785,6 @@
 #define IDC_COPY_MARKERS                1204
 #define IDC_AUTOSAVECDL                 1204
 #define IDC_INVERT_THE_MASK             1204
-#define IDC_DEBUGGER_PREDEFINED_REGS    1204
 #define IDC_RAMLIST                     1205
 #define IDC_CHECK_BOOKMARKS             1205
 #define IDC_RUN_AUTO                    1205
@@ -855,7 +847,6 @@
 #define IDC_LUACONSOLE_CHOOSEFONT       1255
 #define IDC_EDIT_LUAARGS                1256
 #define CB_PARTIALVISUALTHEME           1257
-#define DEBUGLOADDEB                    1258
 #define IDC_C_SEARCHROM                 1258
 #define IDC_SINGLEINSTANCE              1258
 #define IDC_MOVIE_CLOSEAFTERPLAYBACK    1258
@@ -899,7 +890,6 @@
 #define STATIC_CONTRASTVALUE            1300
 #define CTL_PALBRIGHT_TRACKBAR          1301
 #define STATIC_BRIGHTVALUE              1302
-#define DEBUGIDAFONT                    1305
 #define IDC_AUTOSAVE_PERIOD_EVERY_TEXT  1306
 #define IDC_AUTOSAVE_PERIOD_MINUTES_TEXT 1307
 #define IDC_VBLANK_SCANLINES_TEXT       1308

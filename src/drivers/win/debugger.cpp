@@ -1379,7 +1379,6 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 		case IDC_DEBUGGER_BP_ADD:
 		case IDC_DEBUGGER_BP_DEL:
 		case IDC_DEBUGGER_BP_EDIT:
-		case IDC_DEBUGGER_BREAK_ON_BAD_OP:
 		case IDC_DEBUGGER_STATUSFLAGS:
 		case IDC_DEBUGGER_FLAG_N:
 		case IDC_DEBUGGER_FLAG_V:
@@ -1415,20 +1414,6 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 		case IDC_DEBUGGER_RESET_COUNTERS:
 			// no stretch, move up and down half length, move left and right full length
 			crect.top += dy_r / 2;
-			crect.left += dx;
-			SetWindowPos(hwnd, 0, crect.left, crect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-			break;
-		case IDC_DEBUGGER_VAL_S3:
-		case IDC_DEBUGGER_ROM_OFFSETS:
-		case IDC_DEBUGGER_ENABLE_SYMBOLIC:
-		case IDC_DEBUGGER_PREDEFINED_REGS:
-		case IDC_DEBUGGER_RELOAD_SYMS:
-		case IDC_DEBUGGER_ROM_PATCHER:
-		case DEBUGAUTOLOAD:
-		case DEBUGLOADDEB:
-		case DEBUGIDAFONT:
-			// no stretch, move up and down full length, move left and right full length
-			crect.top += dy_r;
 			crect.left += dx;
 			SetWindowPos(hwnd, 0, crect.left, crect.top, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 			break;
@@ -1621,7 +1606,6 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 					if (!symbDebugEnabled)
 					{
 						symbDebugEnabled = true;
-						CheckDlgButton(hDebug, IDC_DEBUGGER_ENABLE_SYMBOLIC, BST_CHECKED);
 					}
 					UpdateDebugger(false);
 				} else
@@ -1777,15 +1761,6 @@ void DebuggerInitDialog(HWND hwndDlg)
 	SetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str);
 	sprintf(str, "%u", (unsigned)break_instructions_limit);
 	SetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str);
-
-	CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_BAD_OP, FCEUI_Debugger().badopbreak ? BST_CHECKED : BST_UNCHECKED);
-
-	CheckDlgButton(hwndDlg, DEBUGLOADDEB, debuggerSaveLoadDEBFiles ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, DEBUGIDAFONT, debuggerIDAFont ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, DEBUGAUTOLOAD, debuggerAutoload ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_DEBUGGER_ROM_OFFSETS, debuggerDisplayROMoffsets ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_DEBUGGER_PREDEFINED_REGS, symbRegNames ? BST_CHECKED : BST_UNCHECKED);
 
 	if (DbgPosX==-32000) DbgPosX=0; //Just in case
 	if (DbgPosY==-32000) DbgPosY=0;
@@ -1976,19 +1951,6 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 	// Buttons that don't need a rom loaded to do something, such as autoload
 	switch (btnId)
 	{
-		case DEBUGAUTOLOAD: // TODO: delete/merge with ID_DEBUGGER_AUTO_OPEN
-			debuggerAutoload ^= 1;
-			break;
-		case DEBUGLOADDEB: // TODO: delete/merge with ID_DEBUGGER_LOAD_DEB_FILE
-			debuggerSaveLoadDEBFiles = !debuggerSaveLoadDEBFiles;
-			break;
-		case DEBUGIDAFONT: // TODO: delete/merge with ID_DEBUGGER_IDA_FONT
-			debuggerIDAFont ^= 1;
-			debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
-			debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
-			SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
-			UpdateDebugger(false);
-			break;
 		case ID_DEBUGGER_DEFCOLOR:
 		{
 			if (!IsDebugColorDefault() && MessageBox(hwndDlg, "Do you want to restore all the colors to default?", "Restore default colors", MB_YESNO | MB_ICONINFORMATION) == IDYES)
@@ -2028,7 +1990,6 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 		}
 		break;
 		// Options menu
-		// TODO: Reuse/merge with the old IDs from the persistent buttons.
 		case ID_DEBUGGER_AUTO_OPEN:
 			debuggerAutoload ^= 1;
 			break;
@@ -2222,10 +2183,6 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 				}
 				break;
 			}
-			// TODO: delete/merge with ID_DEBUGGER_BREAK_BAD_OPCODES
-			case IDC_DEBUGGER_BREAK_ON_BAD_OP: //Break on bad opcode
-				FCEUI_Debugger().badopbreak ^= 1;
-				break;
 			case IDC_DEBUGGER_FLAG_N: X.P^=N_FLAG; UpdateDebugger(false); break;
 			case IDC_DEBUGGER_FLAG_V: X.P^=V_FLAG; UpdateDebugger(false); break;
 			case IDC_DEBUGGER_FLAG_U: X.P^=U_FLAG; UpdateDebugger(false); break;
@@ -2253,42 +2210,9 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 				CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, break_on_instructions);
 				break;
 			}
-			case IDC_DEBUGGER_RELOAD_SYMS:
-			{ // TODO: delete/merge with ID_DEBUGGER_RELOAD_SYMBOLS
-				ramBankNamesLoaded = false;
-				for(int i=0;i<ARRAYSIZE(pageNumbersLoaded);i++)
-					pageNumbersLoaded[i] = -1;
-				loadNameFiles();
-				UpdateDebugger(false);
-				break;
-			}
 			case IDC_DEBUGGER_BOOKMARK_ADD: AddDebuggerBookmark(hwndDlg); break;
 			case IDC_DEBUGGER_BOOKMARK_DEL: DeleteDebuggerBookmark(hwndDlg); break;
 			case IDC_DEBUGGER_BOOKMARK_EDIT: EditDebuggerBookmark(hwndDlg); break;
-			case IDC_DEBUGGER_ENABLE_SYMBOLIC:
-			{ // TODO: delete/merge with ID_DEBUGGER_SYMBOLIC_DEBUG
-				symbDebugEnabled ^= 1;
-				CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
-				UpdateDebugger(false);
-				break;
-			}
-			case IDC_DEBUGGER_PREDEFINED_REGS:
-			{ // TODO: delete/merge with ID_DEBUGGER_DEFAULT_REG_NAMES
-				symbRegNames ^= 1;
-				CheckDlgButton(hwndDlg, IDC_DEBUGGER_PREDEFINED_REGS, symbRegNames ? BST_CHECKED : BST_UNCHECKED);
-				UpdateDebugger(false);
-				break;
-			}
-							
-// ################################## End of SP CODE ###########################
-							
-			case IDC_DEBUGGER_ROM_OFFSETS:
-			{ // TODO: delete/merge with ID_DEBUGGER_SHOW_ROM_OFFSETS
-				debuggerDisplayROMoffsets ^= 1;
-				UpdateDebugger(false);
-				break;
-			}
-			case IDC_DEBUGGER_ROM_PATCHER: DoPatcher(-1,hwndDlg); break; // TODO: delete/merge with ID_DEBUGGER_ROM_PATCHER
 			// Double click the breakpoint list
 			case DEBUGGER_CONTEXT_TOGGLEBREAK: DebuggerLbnDblClk(hwndDlg, IDC_DEBUGGER_BP_LIST, hwndBtn); break;
 		}
