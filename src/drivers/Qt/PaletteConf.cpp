@@ -192,7 +192,11 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	sprintf(stmp, "Notch: %3i%%", palnotch);
 	notchFrame = new QGroupBox(tr(stmp));
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	notchFrame->setMinimumWidth( notchFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
+#else
+	notchFrame->setMinimumWidth( notchFrame->fontMetrics().width('2') * strlen(stmp) );
+#endif
 	hbox1 = new QHBoxLayout();
 	notchSlider = new QSlider(Qt::Horizontal);
 	notchSlider->setMinimumWidth(100);
@@ -205,7 +209,11 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	sprintf(stmp, "Saturation: %3i%%", palsaturation);
 	saturationFrame = new QGroupBox(tr(stmp));
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	saturationFrame->setMinimumWidth( saturationFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
+#else
+	saturationFrame->setMinimumWidth( saturationFrame->fontMetrics().width('2') * strlen(stmp) );
+#endif
 	hbox1 = new QHBoxLayout();
 	saturationSlider = new QSlider(Qt::Horizontal);
 	saturationSlider->setMinimumWidth(100);
@@ -218,7 +226,11 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	sprintf(stmp, "Sharpness: %3i%%", palsharpness*2);
 	sharpnessFrame = new QGroupBox(tr(stmp));
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	sharpnessFrame->setMinimumWidth( sharpnessFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
+#else
+	sharpnessFrame->setMinimumWidth( sharpnessFrame->fontMetrics().width('2') * strlen(stmp) );
+#endif
 	hbox1 = new QHBoxLayout();
 	sharpnessSlider = new QSlider(Qt::Horizontal);
 	sharpnessSlider->setMinimumWidth(50);
@@ -231,7 +243,11 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	sprintf(stmp, "Contrast: %3i%%", palcontrast);
 	contrastFrame = new QGroupBox(tr(stmp));
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	contrastFrame->setMinimumWidth( contrastFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
+#else
+	contrastFrame->setMinimumWidth( contrastFrame->fontMetrics().width('2') * strlen(stmp) );
+#endif
 	hbox1 = new QHBoxLayout();
 	contrastSlider = new QSlider(Qt::Horizontal);
 	contrastSlider->setMinimumWidth(100);
@@ -244,7 +260,11 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	sprintf(stmp, "Brightness: %3i%%", palbrightness);
 	brightnessFrame = new QGroupBox(tr(stmp));
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	brightnessFrame->setMinimumWidth( brightnessFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
+#else
+	brightnessFrame->setMinimumWidth( brightnessFrame->fontMetrics().width('2') * strlen(stmp) );
+#endif
 	hbox1 = new QHBoxLayout();
 	brightnessSlider = new QSlider(Qt::Horizontal);
 	brightnessSlider->setMinimumWidth(100);
