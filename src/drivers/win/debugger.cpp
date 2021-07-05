@@ -403,8 +403,6 @@ INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				else CheckDlgButton(hwndDlg, IDC_ADDBP_MEM_CPU, BST_CHECKED);
 
 				UpdateDialog(hwndDlg);
-				
-// ################################## Start of SP CODE ###########################
 
 				SendDlgItemMessage(hwndDlg,IDC_ADDBP_CONDITION,EM_SETLIMITTEXT,200,0);
 				SendDlgItemMessage(hwndDlg,IDC_ADDBP_NAME,EM_SETLIMITTEXT,200,0);
@@ -426,8 +424,6 @@ INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				{
 					SetDlgItemText(hwndDlg, IDC_ADDBP_NAME, "");
 				}
-				
-// ################################## End of SP CODE ###########################
 			} else
 			{
 				CheckDlgButton(hwndDlg, IDC_ADDBP_MEM_CPU, BST_CHECKED);
@@ -1233,11 +1229,9 @@ void DeleteBreak(int sel)
 		watchpoint[i].address = watchpoint[i+1].address;
 		watchpoint[i].endaddress = watchpoint[i+1].endaddress;
 		watchpoint[i].flags = watchpoint[i+1].flags;
-// ################################## Start of SP CODE ###########################
 		watchpoint[i].cond = watchpoint[i+1].cond;
 		watchpoint[i].condText = watchpoint[i+1].condText;
 		watchpoint[i].desc = watchpoint[i+1].desc;
-// ################################## End of SP CODE ###########################
 	}
 	// erase last BP item
 	watchpoint[numWPs].address = 0;
@@ -1247,9 +1241,7 @@ void DeleteBreak(int sel)
 	watchpoint[numWPs].condText = 0;
 	watchpoint[numWPs].desc = 0;
 	numWPs--;
-// ################################## Start of SP CODE ###########################
 	myNumWPs--;
-// ################################## End of SP CODE ###########################
 	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_DELETESTRING,sel,0);
 	// select next item in the list
 	if (numWPs)
@@ -1804,15 +1796,11 @@ void DebuggerInitDialog(HWND hwndDlg)
 	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETREADONLY,TRUE,0);
 	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETREADONLY,TRUE,0);
 
-// ################################## Start of SP CODE ###########################
-
 	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BOOKMARK,EM_SETLIMITTEXT,4,0);
 	
 	LoadGameDebuggerData(hwndDlg);
 
 	debuggerWasActive = 1;
-			
-// ################################## End of SP CODE ###########################
 
 	// Enable Context Sub-Menus
 	hDebugcontext = LoadMenu(fceu_hInstance,"DEBUGCONTEXTMENUS");
@@ -2098,7 +2086,6 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 				FCEUI_Debugger().step = true;
 				FCEUI_SetEmulationPaused(0);
 				UpdateOtherDebuggingDialogs();
-								
 				break;
 			case IDC_DEBUGGER_RUN_LINE:
 				if (FCEUI_EmulationPaused())
