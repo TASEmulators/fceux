@@ -248,11 +248,13 @@ class ConsoleDebugger : public QDialog
 		QLineEdit *regAEntry;
 		QLineEdit *regXEntry;
 		QLineEdit *regYEntry;
+		QLineEdit *regPEntry;
 		//QLineEdit *cpuCycExdVal;
 		//QLineEdit *instrExdVal;
 		QLineEdit *selBmAddr;
 		QLineEdit *cpuCyclesVal;
 		QLineEdit *cpuInstrsVal;
+		QGroupBox *cpuFrame;
 		QGroupBox *stackFrame;
 		QGroupBox *bpFrame;
 		QGroupBox *sfFrame;
