@@ -39,6 +39,7 @@ void UpdateDebugger(bool jump_to_pc = true);
 void DoDebug(uint8 halt);
 void DebuggerExit();
 void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int skiplines = 0);
+void DisassembleToWindow(HWND hWnd, int id, int scrollid);
 void PrintOffsetToSeekAndBookmarkFields(int offset);
 
 void LoadGameDebuggerData(HWND hwndDlg);

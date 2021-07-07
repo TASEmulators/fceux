@@ -131,7 +131,10 @@ std::vector<std::vector<uint16>> disassembly_operands;
 unsigned int PCLine = -1;
 // hack to help syntax highlighting find the PC
 int beginningOfPCPointerLine = -1;	// index of the first char within debug_str[] string, where the ">" line starts
-static int skipLinesStatic = 0;
+
+static int scrollAddress;
+static int commentOffset = 0; // rename to commentOffset
+static int linesPerComment; // Update in ScrollUp and ScrollDown when the address changes? How does that work with a hard jump?
 
 #define INVALID_START_OFFSET 1
 #define INVALID_END_OFFSET 2
@@ -254,6 +257,12 @@ unsigned int AddBreak(HWND hwndDlg)
 	return 0;
 }
 
+typedef struct
+{
+	int address;
+	int commentOffset;
+} AddrScrollInfo;
+
 // Tells you how many lines the comments and label name take for a given address.
 // Used for smoothly scrolling through comments.
 static int NumAnnotationLines(int addr)
@@ -321,35 +330,38 @@ int InstructionDown(int from)
 		return from + 1;		// this is data or undefined instruction
 }
 
-// Scroll up one visible line, respecting comments and labels.
-// skipLinesStatic will eventually tell the DisassembleToWindow function how many comment lines to skip.
-int ScrollUp(int from)
+// Updates the scroll address and comment offset, and sends that info to the debugger window.
+// TODO: Make this extern? DebuggerSetScroll or similar.
+inline void SetScroll(int addr, int offset)
 {
-	if (skipLinesStatic)
-	{
-		skipLinesStatic--;
-		return from;
-	}
-
-	int addr = InstructionUp(from);
-	skipLinesStatic = NumAnnotationLines(addr);
-	return addr;
+	scrollAddress = addr;
+	commentOffset = offset;
+	si.nPos = addr;
+	SetScrollInfo(GetDlgItem(hDebug, IDC_DEBUGGER_DISASSEMBLY_VSCR), SB_CTL, &si, TRUE);
 }
 
-// Can probably get rid of the parameters and let the static vars do the talking
-int ScrollDown(int from)
+// Scroll up one visible line, respecting comments and labels.
+// commentOffset will eventually tell the DisassembleToWindow function how many comment lines to skip.
+AddrScrollInfo ScrollUp()
+{
+	if (commentOffset)
+		SetScroll(scrollAddress, --commentOffset);
+	else
+		SetScroll(scrollAddress = InstructionUp(scrollAddress), NumAnnotationLines(scrollAddress));
+
+	return {scrollAddress, commentOffset};
+}
+
+
+AddrScrollInfo ScrollDown()
 {
 	// TODO: Store this annotationLines info so we can stop recomputing it!
-	if (skipLinesStatic == NumAnnotationLines(from))
-	{
-		skipLinesStatic = 0;
-		return InstructionDown(from);
-	}
+	if (commentOffset >= NumAnnotationLines(scrollAddress))
+		SetScroll(InstructionDown(scrollAddress), 0);
 	else
-	{
-		skipLinesStatic++;
-		return from;
-	}
+		SetScroll(scrollAddress, ++commentOffset);
+
+	return {scrollAddress, commentOffset};
 }
 
 static void UpdateDialog(HWND hwndDlg) {
@@ -625,19 +637,10 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 }
 
 /**
-* Starting at addr, disassembles code to the debugger window. The number of lines is automatically determined
-* by the window size. id and scrollid tell the function which dialog items to modify, although a hardcoded ID
-* is mixed in, so, eh.
-* skiplines is used so that large comments can appear/disappear line by line, as you would expect in a text file,
-* rather than jumping in all at once.
-*
-* @param hWnd Handle to the debugger window
-* @param id id of the disassembly textbox
-* @param scrollid id of the scrollbar
-* @param addr starting address for disassembly
-* @param skiplines how many comment/label lines to skip, used for smooth scrolling (default 0)
+* Disassembles to the debugger window using the existing address scroll info.
+* Assumes that either SetScroll or the overload that takes address and offset was called.
 */
-void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int skiplines)
+void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 {
 	// Why is this getting called twice per scroll?
 	wchar_t chr[40] = { 0 };
@@ -645,6 +648,8 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int
 	int size;
 	uint8 opcode[3];
 	unsigned int instruction_addr;
+	unsigned int addr = scrollAddress;
+	int skiplines = commentOffset;
 
 	disassembly_addresses.resize(0);
 	beginningOfPCPointerLine = -1;
@@ -654,10 +659,6 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int
 		loadNameFiles();
 		disassembly_operands.resize(0);
 	}
-
-	skipLinesStatic = skiplines;
-	si.nPos = addr;
-	SetScrollInfo(GetDlgItem(hWnd,scrollid),SB_CTL,&si,TRUE);
 
 	//figure out how many lines we can draw
 	RECT rect;
@@ -733,9 +734,8 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int
 			if (skiplines)
 			{
 				// We were told to skip more comment/name lines than exist.
-				skipLinesStatic -= skiplines;
+				commentOffset -= skiplines;
 				skiplines = 0;
-				continue;
 			}
 		}
 		
@@ -859,6 +859,26 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int
 	}
 	SetDlgItemText(hWnd, IDC_DEBUGGER_DISASSEMBLY_LEFT_PANEL, debug_cdl_str);
 }
+
+/**
+* Starting at addr, disassembles code to the debugger window. The number of lines is automatically determined
+* by the window size. id and scrollid tell the function which dialog items to modify, although a hardcoded ID
+* is mixed in, so, eh.
+* skiplines is used so that large comments can appear/disappear line by line, as you would expect in a text file,
+* rather than jumping in all at once.
+*
+* @param hWnd Handle to the debugger window
+* @param id id of the disassembly textbox
+* @param scrollid id of the scrollbar
+* @param addr starting address for disassembly
+* @param skiplines how many comment/label lines to skip, used for smooth scrolling (default 0)
+*/
+void DisassembleToWindow(HWND hWnd, int id, int scrollid, unsigned int addr, int skiplines)
+{
+	SetScroll(addr, skiplines);
+	DisassembleToWindow(hWnd, id, scrollid);
+}
+
 void PrintOffsetToSeekAndBookmarkFields(int offset)
 {
 	if (offset >= 0 && hDebug)
@@ -988,13 +1008,12 @@ void UpdateDebugger(bool jump_to_pc)
 	}
 
 	char str[512] = {0}, str2[512] = {0}, chr[8];
-	int tmp, ret, i, starting_address;
+	int tmp, ret, i;
 
 	if (jump_to_pc || disassembly_addresses.size() == 0)
 	{
 		// For relative positioning, we want start pos to be PC address with the comments scrolled offscreen.
-		starting_address = X.PC;
-		skipLinesStatic = NumAnnotationLines(starting_address);
+		SetScroll(X.PC, NumAnnotationLines(scrollAddress));
 
 		// ensure that PC pointer will be visible even after the window was resized
 		RECT rect;
@@ -1006,14 +1025,13 @@ void UpdateDebugger(bool jump_to_pc)
 		// keep the relative position of the ">" pointer inside the Disassembly window
 		for (int i = PCLine; i > 0; i--)
 		{
-			starting_address = ScrollUp(starting_address);
+			ScrollUp();
 		}
-		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address, skipLinesStatic);
+		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR);
 	}
 	else
 	{
-		starting_address = disassembly_addresses[0];
-		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, starting_address, skipLinesStatic);
+		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR);
 	}
 	
 
@@ -2274,19 +2292,19 @@ void DebuggerVScroll(HWND hwndDlg, uint16 eventType, uint16 scrollPos, HWND hwnd
 			case SB_BOTTOM: break;
 			case SB_LINEUP:
 			{
-				si.nPos = ScrollUp(si.nPos);
+				ScrollUp();
 				break;
 			}
 			case SB_LINEDOWN:
 			{
-				si.nPos = ScrollDown(si.nPos);
+				ScrollDown();
 				break;
 			}
 			case SB_PAGEUP:
 			{
 				for (int i = si.nPage; i > 0; i--)
 				{
-					si.nPos = ScrollUp(si.nPos);
+					si.nPos = ScrollUp().address;
 					if (si.nPos < si.nMin)
 					{
 						si.nPos = si.nMin;
@@ -2299,7 +2317,7 @@ void DebuggerVScroll(HWND hwndDlg, uint16 eventType, uint16 scrollPos, HWND hwnd
 			{
 				for (int i = si.nPage; i > 0; i--)
 				{
-					si.nPos = ScrollDown(si.nPos);
+					si.nPos = ScrollDown().address;
 					if ((si.nPos + (int)si.nPage) > si.nMax)
 					{
 						si.nPos = si.nMax - si.nPage;
@@ -2312,12 +2330,18 @@ void DebuggerVScroll(HWND hwndDlg, uint16 eventType, uint16 scrollPos, HWND hwnd
 			case SB_THUMBTRACK: si.nPos = si.nTrackPos; break;
 		}
 		if (si.nPos < si.nMin)
+		{
 			si.nPos = si.nMin;
+			commentOffset = 0;
+		}
 		if ((si.nPos + (int)si.nPage) > si.nMax)
+		{
 			si.nPos = si.nMax - si.nPage;
-		SetScrollInfo(hwndScrollBar, SB_CTL, &si, TRUE);
+			commentOffset = 0;
+		}
 
-		DisassembleToWindow(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos, skipLinesStatic);
+		DisassembleToWindow(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos, commentOffset);
+
 		// The address in the Add Bookmark textbox follows the scroll pos.
 		char str[16];
 		sprintf(str,"%04X", si.nPos);
@@ -2337,7 +2361,7 @@ void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 curso
 	{
 		for (i *= -(int)si.nPage; i > 0; i--)
 		{
-			si.nPos = ScrollDown(si.nPos);
+			si.nPos = ScrollDown().address;
 			if ((si.nPos + (int)si.nPage) > si.nMax)
 			{
 				si.nPos = si.nMax - si.nPage;
@@ -2348,7 +2372,7 @@ void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 curso
 	{
 		for (i *= si.nPage; i > 0; i--)
 		{
-			si.nPos = ScrollUp(si.nPos);
+			si.nPos = ScrollUp().address;
 			if (si.nPos < si.nMin)
 			{
 				si.nPos = si.nMin;
@@ -2358,7 +2382,7 @@ void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 curso
 	}
 
 	// This function calls UpdateScrollInfo. Don't worry!
-	DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos, skipLinesStatic);
+	DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos, commentOffset);
 	// The address in the Add Bookmark textbox follows the scroll pos.
 	char str[16];
 	sprintf(str,"%04X", si.nPos);
