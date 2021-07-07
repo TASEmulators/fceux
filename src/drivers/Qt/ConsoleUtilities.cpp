@@ -433,7 +433,9 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 {
 	std::string text;
 	const char *title = "";
+	const char *synopsis = NULL;
 	const char *addrMode = NULL;
+	const char *longDesc = NULL;
 	char stmp[32];
 
 	switch (opcode[0])
@@ -453,6 +455,7 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+			synopsis = "A,Z,C,N = A+M+C";
 		break;
 		// AND - Logical AND
 		case 0x29:
@@ -469,6 +472,7 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+			synopsis = "A,Z,N = A&M";
 		break;
 		// ASL - Arithmetic Shift Left
 		case 0x0A:
@@ -482,6 +486,7 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Accumulator";	
 			}
+			synopsis = "A,Z,C,N = M*2    or    M,Z,C,N = M*2";
 		break;
 		// BCC - Branch if Carry Clear
 		case 0x90:
@@ -514,6 +519,11 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x24:
 		case 0x2C:
 			title = "BIT - Bit Test";
+
+			synopsis = "A & M, N = M7, V = M6";
+
+			longDesc = "Bits 6 and 7 of the byte at the specified memory address are copied to the negative (N) and overflow (V) flags."
+				"If the accumulator's value ANDed with that byte is 0, the zero flag (Z) is set (otherwise it is cleared).";
 		break;
 		// BMI - Branch if Minus
 		case 0x30:
@@ -596,8 +606,290 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 				addrMode = "Immediate";	
 			}
 		break;
+		// CPX - Compare X Register
+		case 0xE0:
+		case 0xE4:
+		case 0xEC:
+			title = "CPX - Compare X Register";
+
+			if ( opcode[0] == 0xE0 )
+			{
+				addrMode = "Immediate";	
+			}
+		break;
+		// CPY - Compare Y Register
+		case 0xC0:
+		case 0xC4:
+		case 0xCC:
+			title = "CPY - Compare Y Register";
+
+			if ( opcode[0] == 0xE0 )
+			{
+				addrMode = "Immediate";	
+			}
+		break;
+		// DEC - Decrement Memory
+		case 0xC6:
+		case 0xD6:
+		case 0xCE:
+		case 0xDE:
+			title = "DEC - Decrement Memory";
+		break;
+		// DEX - Decrement X Register
+		case 0xCA:
+			title = "DEX - Decrement X Register";
+		break;
+		// DEY - Decrement Y Register
+		case 0x88:
+			title = "DEY - Decrement Y Register";
+		break;
+		// EOR - Exclusive OR
+		case 0x49:
+		case 0x45:
+		case 0x55:
+		case 0x4D:
+		case 0x5D:
+		case 0x59:
+		case 0x41:
+		case 0x51:
+			title = "EOR - Exclusive OR";
+
+			if ( opcode[0] == 0x49 )
+			{
+				addrMode = "Immediate";	
+			}
+		break;
+		// INC - Increment Memory
+		case 0xE6:
+		case 0xF6:
+		case 0xEE:
+		case 0xFE:
+			title = "INC - Decrement Memory";
+		break;
+		// INX - Increment X Register
+		case 0xE8:
+			title = "INX - Increment X Register";
+		break;
+		// INY - Increment Y Register
+		case 0xC8:
+			title = "INY - Increment Y Register";
+		break;
+		// JMP - Jump
+		case 0x4C:
+		case 0x6C:
+			title = "JMP - Jump";
+		break;
+		// JSR - Jump to Subroutine
+		case 0x20:
+			title = "JSR - Jump to Subroutine";
+		break;
+		// LDA - Load Accumulator
+		case 0xA9:
+		case 0xA5:
+		case 0xB5:
+		case 0xAD:
+		case 0xBD:
+		case 0xB9:
+		case 0xA1:
+		case 0xB1:
+			title = "LDA - Load Accumulator";
+
+			if ( opcode[0] == 0xA9 )
+			{
+				addrMode = "Immediate";	
+			}
+		break;
+		// LDX - Load X Register
+		case 0xA2:
+		case 0xA6:
+		case 0xB6:
+		case 0xAE:
+		case 0xBE:
+			title = "LDX - Load X Register";
+
+			if ( opcode[0] == 0xA2 )
+			{
+				addrMode = "Immediate";	
+			}
+		break;
+		// LDY - Load Y Register
+		case 0xA0:
+		case 0xA4:
+		case 0xB4:
+		case 0xAC:
+		case 0xBC:
+			title = "LDY - Load Y Register";
+
+			if ( opcode[0] == 0xA0 )
+			{
+				addrMode = "Immediate";	
+			}
+		break;
+		// LSR - Logical Shift Right
+		case 0x4A:
+		case 0x46:
+		case 0x56:
+		case 0x4E:
+		case 0x5E:
+			title = "LSR - Logical Shift Right";
+
+			if ( opcode[0] == 0x4A )
+			{
+				addrMode = "Accumulator";	
+			}
+			longDesc = "Shifts all the bits of the accumulator (or the byte at the specified memory address) by 1 bit to the right. Bit 7 will be set to 0 and the carry flag (C) will take the value of bit 0 (before the shift).";
+		break;
+		// NOP - No Operation
+		case 0xEA:
+			title = "NOP - No Operation";
+		break;
+		// ORA - Logical Inclusive OR
+		case 0x09:
+		case 0x05:
+		case 0x15:
+		case 0x0D:
+		case 0x1D:
+		case 0x19:
+		case 0x01:
+		case 0x11:
+			title = "ORA - Logical Inclusive OR";
+
+			if ( opcode[0] == 0x09 )
+			{
+				addrMode = "Immediate";	
+			}
+		break;
+		// PHA - Push Accumulator
+		case 0x48:
+			title = "PHA - Push Accumulator";
+		break;
+		// PHP - Push Processor Status
+		case 0x08:
+			title = "PHP - Push Processor Status";
+		break;
+		// PLA - Pull Accumulator
+		case 0x68:
+			title = "PLA - Pull Accumulator";
+		break;
+		// PLP - Pull Processor Status
+		case 0x28:
+			title = "PLP - Pull Processor Status";
+		break;
+		// ROL - Rotate Left
+		case 0x2A:
+		case 0x26:
+		case 0x36:
+		case 0x2E:
+		case 0x3E:
+			title = "ROL - Rotate Left";
+
+			if ( opcode[0] == 0x2A )
+			{
+				addrMode = "Accumulator";	
+			}
+		break;
+		// ROR - Rotate Right
+		case 0x6A:
+		case 0x66:
+		case 0x76:
+		case 0x6E:
+		case 0x7E:
+			title = "ROR - Rotate Right";
+
+			if ( opcode[0] == 0x6A )
+			{
+				addrMode = "Accumulator";	
+			}
+		break;
+		// RTI - Return from Interrupt
+		case 0x40:
+			title = "RTI - Return from Interrupt";
+		break;
+		// RTS - Return from Subroutine
+		case 0x60:
+			title = "RTS - Return from Subroutine";
+		break;
+		// SBC - Subtract with Carry
+		case 0xE9:
+		case 0xE5:
+		case 0xF5:
+		case 0xED:
+		case 0xFD:
+		case 0xF9:
+		case 0xE1:
+		case 0xF1:
+			title = "SBC - Subtract with Carry";
+
+			if ( opcode[0] == 0xE9 )
+			{
+				addrMode = "Immediate";	
+			}
+		break;
+		// SEC - Set Carry Flag
+		case 0x38:
+			title = "SEC - Set Carry Flag";
+		break;
+		// SED - Set Decimal Flag
+		case 0xF8:
+			title = "SED - Set Decimal Flag";
+		break;
+		// SEI - Set Interrupt Disable
+		case 0x78:
+			title = "SEI - Set Interrupt Disable";
+		break;
+		// STA - Store Accumulator
+		case 0x85:
+		case 0x95:
+		case 0x8D:
+		case 0x9D:
+		case 0x99:
+		case 0x81:
+		case 0x91:
+			title = "STA - Store Accumulator";
+
+			longDesc = "Stores the contents of the accumulator into memory.";
+		break;
+		// STX - Store X Register
+		case 0x86:
+		case 0x96:
+		case 0x8E:
+			title = "STX - Store X Register";
+		break;
+		// STY - Store Y Register
+		case 0x84:
+		case 0x94:
+		case 0x8C:
+			title = "STY - Store Y Register";
+		break;
+		// TAX - Transfer Accumulator to X Register
+		case 0xAA:
+			title = "TAX - Transfer Accumulator to X Register";
+
+			longDesc = "Copies the current contents of the accumulator into the X register"
+				   "and sets the zero and negative flags as appropriate.";
+		break;
+		// TAY - Transfer Accumulator to Y Register
+		case 0xA8:
+			title = "TAY - Transfer Accumulator to Y Register";
+		break;
+		// TSX - Transfer Stack Pointer to X Register
+		case 0xBA:
+			title = "TSX - Transfer Stack Pointer to X Register";
+		break;
+		// TXA - Transfer X Register to Accumulator
+		case 0x8A:
+			title = "TXA - Transfer X Register to Accumulator";
+		break;
+		// TXS - Transfer X Register to Stack Pointer
+		case 0x9A:
+			title = "TXS - Transfer X Register to Stack Pointer";
+		break;
+		// TYA - Transfer Y Register to Accumulator
+		case 0x98:
+			title = "TYA - Transfer Y Register to Accumulator";
+		break;
 		default:
-			title = "";
+			title = "Undefined";
 		break;
 	}
 
@@ -609,8 +901,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			case 0: //Implied\Accumulator\Immediate\Branch\NULL
 				addrMode = "Implied";
 			break;
-			case 1: // (Indirect,X)
-				addrMode = "(Indirect,X)";
+			case 1: // Indirect,X
+				addrMode = "Indirect,X";
 			break;
 			case 2: // Zero Page
 				addrMode = "Zero Page";
@@ -618,8 +910,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			case 3: // Absolute
 				addrMode = "Absolute";
 			break;
-			case 4: // (Indirect),Y
-				addrMode = "(Indirect),Y";
+			case 4: // Indirect,Y
+				addrMode = "Indirect,Y";
 			break;
 			case 5: // Zero Page,X
 				addrMode = "Zero Page,X";
@@ -637,6 +929,13 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 	}
 	text.assign( title );
 	text.append( "\n" );
+
+	if ( synopsis )
+	{
+		text.append( "\n" );
+		text.append( synopsis );
+		text.append( "\n" );
+	}
 	text.append( "\nByte Code:\t\t" );
 
 	for (int i=0; i<size; i++)
@@ -652,6 +951,35 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 	sprintf( stmp, "%i", X6502_GetOpcodeCycles( opcode[0] ) );
 	text.append( stmp );
 	text.append( "\n" );
+
+	if ( longDesc )
+	{
+		int i=0, len=0;
+		text.append( "\nDescription:\n\t" );
+
+		while ( longDesc[i] != 0 )
+		{
+			if ( longDesc[i] == '\n' )
+			{
+				len = 0;
+			}
+
+			// Check if a new line is needed
+			if ( (len > 50) && isspace(longDesc[i]) )
+			{
+				text.append( 1, '\n' ); len = 0;
+
+				while ( isspace(longDesc[i]) ) i++;
+
+				if ( longDesc[i] == 0 ) break;
+
+				text.append( 1, '\t' );
+			}
+			text.append( 1, longDesc[i] ); len++;
+
+			i++;
+		}
+	}
 
 	return QString::fromStdString( text );
 }
