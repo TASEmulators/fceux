@@ -355,6 +355,11 @@ static uint8 CycTable[256] =
 /*0xF0*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
 };
 
+int X6502_GetOpcodeCycles( int op )
+{
+	return CycTable[op];
+}
+
 void X6502_IRQBegin(int w)
 {
  _IRQlow|=w;

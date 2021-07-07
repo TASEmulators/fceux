@@ -37,6 +37,7 @@
 #endif
 
 #include "../../fceu.h"
+#include "../../x6502.h"
 #include "Qt/ConsoleUtilities.h"
 
 //---------------------------------------------------------------------------
@@ -327,35 +328,35 @@ QValidator::State fceuDecIntValidtor::validate(QString &input, int &pos) const
 		i++;
 	}
 	else if ( s[i] == '+' )
-   {
-      i++;
-   }
-
-   if ( s[i] == 0 )
-   {
-      return QValidator::Acceptable;
-   }
-
-   if ( isdigit(s[i]) )
-   {
-      while ( isdigit(s[i]) ) i++;
-
-      if ( s[i] == 0 )
-      {
+	{
+		i++;
+	}
+	
+	if ( s[i] == 0 )
+	{
+		return QValidator::Acceptable;
+	}
+	
+	if ( isdigit(s[i]) )
+	{
+		while ( isdigit(s[i]) ) i++;
+		
+		if ( s[i] == 0 )
+		{
 			v = strtol( s.c_str(), NULL, 0 );
-
+			
 			if ( v < min )
 			{
-   			return QValidator::Invalid;
+				return QValidator::Invalid;
 			}
 			else if ( v > max )
 			{
-   			return QValidator::Invalid;
+				return QValidator::Invalid;
 			}
-         return QValidator::Acceptable;
-      }
-   }
-   return QValidator::Invalid;
+			return QValidator::Acceptable;
+		}
+	}
+	return QValidator::Invalid;
 }
 //---------------------------------------------------------------------------
 // FCEU Data Entry Custom Validators
@@ -395,34 +396,263 @@ QValidator::State fceuHexIntValidtor::validate(QString &input, int &pos) const
 		i++;
 	}
 	else if ( s[i] == '+' )
-   {
-      i++;
-   }
+	{
+		i++;
+	}
 
-   if ( s[i] == 0 )
-   {
-      return QValidator::Acceptable;
-   }
+	if ( s[i] == 0 )
+	{
+		return QValidator::Acceptable;
+	}
+	
+	if ( isxdigit(s[i]) )
+	{
+		while ( isxdigit(s[i]) ) i++;
+		
+		if ( s[i] == 0 )
+		{
+		  	v = strtol( s.c_str(), NULL, 16 );
+		
+		  	if ( v < min )
+		  	{
+		  		return QValidator::Invalid;
+		  	}
+		  	else if ( v > max )
+		  	{
+		  		return QValidator::Invalid;
+		  	}
+			return QValidator::Acceptable;
+		}
+	}
+	return QValidator::Invalid;
+}
+//---------------------------------------------------------------------------
+//---  Opcode Tool Tip Description
+//---------------------------------------------------------------------------
+QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
+{
+	std::string text;
+	const char *title = "";
+	const char *addrMode = NULL;
+	char stmp[32];
 
-   if ( isxdigit(s[i]) )
-   {
-      while ( isxdigit(s[i]) ) i++;
+	switch (opcode[0])
+	{
+		// ADC - Add with Carry
+		case 0x69:
+		case 0x65:
+		case 0x75:
+		case 0x6D:
+		case 0x7D:
+		case 0x79:
+		case 0x61:
+		case 0x71:
+			title = "ADC - Add with Carry";
 
-      if ( s[i] == 0 )
-      {
-			v = strtol( s.c_str(), NULL, 16 );
-
-			if ( v < min )
+			if ( opcode[0] == 0x69 )
 			{
-   			return QValidator::Invalid;
+				addrMode = "Immediate";	
 			}
-			else if ( v > max )
+		break;
+		// AND - Logical AND
+		case 0x29:
+		case 0x25:
+		case 0x35:
+		case 0x2D:
+		case 0x3D:
+		case 0x39:
+		case 0x21:
+		case 0x31:
+			title = "AND - Logical AND";
+
+			if ( opcode[0] == 0x29 )
 			{
-   			return QValidator::Invalid;
+				addrMode = "Immediate";	
 			}
-         return QValidator::Acceptable;
-      }
-   }
-   return QValidator::Invalid;
+		break;
+		// ASL - Arithmetic Shift Left
+		case 0x0A:
+		case 0x06:
+		case 0x16:
+		case 0x0E:
+		case 0x1E:
+			title = "ASL - Arithmetic Shift Left";
+
+			if ( opcode[0] == 0x0A )
+			{
+				addrMode = "Accumulator";	
+			}
+		break;
+		// BCC - Branch if Carry Clear
+		case 0x90:
+			title = "BCC - Branch if Carry Clear";
+
+			if ( opcode[0] == 0x90 )
+			{
+				addrMode = "Relative";	
+			}
+		break;
+		// BCS - Branch if Carry Set
+		case 0xB0:
+			title = "BCC - Branch if Carry Set";
+
+			if ( opcode[0] == 0xB0 )
+			{
+				addrMode = "Relative";	
+			}
+		break;
+		// BEQ - Branch if Equal
+		case 0xF0:
+			title = "BCC - Branch if Equal";
+
+			if ( opcode[0] == 0xF0 )
+			{
+				addrMode = "Relative";	
+			}
+		break;
+		// BIT - Bit Test
+		case 0x24:
+		case 0x2C:
+			title = "BIT - Bit Test";
+		break;
+		// BMI - Branch if Minus
+		case 0x30:
+			title = "BMI - Branch if Minus";
+
+			if ( opcode[0] == 0x30 )
+			{
+				addrMode = "Relative";	
+			}
+		break;
+		// BNE - Branch if Not Equal
+		case 0xD0:
+			title = "BNE - Branch if Not Equal";
+
+			if ( opcode[0] == 0xD0 )
+			{
+				addrMode = "Relative";	
+			}
+		break;
+		// BPL - Branch if Positive
+		case 0x10:
+			title = "BPL - Branch if Positive";
+
+			if ( opcode[0] == 0x10 )
+			{
+				addrMode = "Relative";	
+			}
+		break;
+		// BRK - Force Interrupt
+		case 0x00:
+			title = "BRK - Force Interrupt";
+		break;
+		// BVC - Branch if Overflow Clear
+		case 0x50:
+			title = "BVC - Branch if Overflow Clear";
+
+			if ( opcode[0] == 0x50 )
+			{
+				addrMode = "Relative";	
+			}
+		break;
+		// BVS - Branch if Overflow Set
+		case 0x70:
+			title = "BVS - Branch if Overflow Set";
+
+			if ( opcode[0] == 0x70 )
+			{
+				addrMode = "Relative";	
+			}
+		break;
+		// CLC - Clear Carry Flag
+		case 0x18:
+			title = "CLC - Clear Carry Flag";
+		break;
+		// CLD - Clear Decimal Mode
+		case 0xD8:
+			title = "CLD - Clear Decimal Mode";
+		break;
+		// CLI - Clear Interrupt Disable
+		case 0x58:
+			title = "CLI - Clear Interrupt Disable";
+		break;
+		// CLV - Clear Overflow Flag
+		case 0xB8:
+			title = "CLV - Clear Overflow Flag";
+		break;
+		// CMP - Compare
+		case 0xC9:
+		case 0xC5:
+		case 0xD5:
+		case 0xCD:
+		case 0xDD:
+		case 0xD9:
+		case 0xC1:
+		case 0xD1:
+			title = "CMP - Compare";
+
+			if ( opcode[0] == 0xC9 )
+			{
+				addrMode = "Immediate";	
+			}
+		break;
+		default:
+			title = "";
+		break;
+	}
+
+	if ( addrMode == NULL )
+	{
+		switch ( optype[ opcode[0] ] )
+		{
+			default:
+			case 0: //Implied\Accumulator\Immediate\Branch\NULL
+				addrMode = "Implied";
+			break;
+			case 1: // (Indirect,X)
+				addrMode = "(Indirect,X)";
+			break;
+			case 2: // Zero Page
+				addrMode = "Zero Page";
+			break;
+			case 3: // Absolute
+				addrMode = "Absolute";
+			break;
+			case 4: // (Indirect),Y
+				addrMode = "(Indirect),Y";
+			break;
+			case 5: // Zero Page,X
+				addrMode = "Zero Page,X";
+			break;
+			case 6: // Absolute,Y
+				addrMode = "Absolute,Y";
+			break;
+			case 7: // Absolute,X
+				addrMode = "Absolute,X";
+			break;
+			case 8: // Zero Page,Y
+				addrMode = "Zero Page,Y";
+			break;
+		}
+	}
+	text.assign( title );
+	text.append( "\n" );
+	text.append( "\nByte Code:\t\t" );
+
+	for (int i=0; i<size; i++)
+	{
+		sprintf(stmp, "$%02X  ", opcode[i] );
+
+		text.append( stmp );
+	}
+	text.append( "\nAddressing Mode:\t" );
+	text.append( addrMode );
+
+	text.append( "\nCycle Count:\t\t" );
+	sprintf( stmp, "%i", X6502_GetOpcodeCycles( opcode[0] ) );
+	text.append( stmp );
+	text.append( "\n" );
+
+	return QString::fromStdString( text );
 }
 //---------------------------------------------------------------------------

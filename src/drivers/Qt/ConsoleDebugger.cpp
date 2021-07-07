@@ -42,6 +42,7 @@
 #include <QActionGroup>
 #include <QGuiApplication>
 #include <QSettings>
+#include <QToolTip>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -2548,7 +2549,8 @@ void  QAsmView::updateAssemblyView(void)
 		}
 		line.append(chr);
 
-		size = opsize[GetMem(addr)];
+		a->size = size = opsize[GetMem(addr)];
+
 		if (size == 0)
 		{
 			sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
@@ -2585,7 +2587,6 @@ void  QAsmView::updateAssemblyView(void)
 		{
 			a->opcode[j] = opcode[j];
 		}
-		a->size = size;
 
 		// special case: an RTS opcode
 		if (GetMem(instruction_addr) == 0x60)
@@ -3652,24 +3653,56 @@ void QAsmView::setRegisterNameEnable( bool value )
 //----------------------------------------------------------------------------
 void QAsmView::calcFontData(void)
 {
-	 this->setFont(font);
-    QFontMetrics metrics(font);
+	this->setFont(font);
+	QFontMetrics metrics(font);
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
-    pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+	pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
 #else
-    pxCharWidth = metrics.width(QLatin1Char('2'));
+	pxCharWidth = metrics.width(QLatin1Char('2'));
 #endif
-    pxCharHeight   = metrics.height();
-	 pxLineSpacing  = metrics.lineSpacing() * 1.25;
-    pxLineLead     = pxLineSpacing - pxCharHeight;
-    pxCursorHeight = pxCharHeight;
+	pxCharHeight   = metrics.height();
+	pxLineSpacing  = metrics.lineSpacing() * 1.25;
+	pxLineLead     = pxLineSpacing - pxCharHeight;
+	pxCursorHeight = pxCharHeight;
 
-	 viewLines   = (viewHeight / pxLineSpacing) + 1;
+	viewLines   = (viewHeight / pxLineSpacing) + 1;
 }
 //----------------------------------------------------------------------------
 void QAsmView::setScrollBars( QScrollBar *h, QScrollBar *v )
 {
 	hbar = h; vbar = v;
+}
+//----------------------------------------------------------------------------
+bool QAsmView::event(QEvent *event)
+{
+	if (event->type() == QEvent::ToolTip)
+	{
+		int line;
+		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+		bool showOpcodeDesc = false;
+
+		QPoint c = convPixToCursor(helpEvent->pos());
+
+		line = lineOffset + c.y();
+
+		showOpcodeDesc = (c.x() >= 22) && (c.x() < 25) && 
+			(line < asmEntry.size()) && (asmEntry[line]->type == dbg_asm_entry_t::ASM_TEXT);
+
+		if ( showOpcodeDesc )
+		{
+			QString qs = fceuGetOpcodeToolTip(asmEntry[line]->opcode, asmEntry[line]->size );
+
+			//QToolTip::setFont(font);
+			QToolTip::showText(helpEvent->globalPos(), qs, this );
+		}
+		else
+		{
+			QToolTip::hideText();
+			event->ignore();
+		}
+		return true;
+	}
+	return QWidget::event(event);
 }
 //----------------------------------------------------------------------------
 void QAsmView::resizeEvent(QResizeEvent *event)
@@ -3720,52 +3753,52 @@ void QAsmView::keyPressEvent(QKeyEvent *event)
 		event->accept();
 	}
 	else if (event->matches(QKeySequence::MoveToNextPage))
-   {
-      lineOffset += ( (3 * viewLines) / 4);
-
-      if ( lineOffset >= maxLineOffset )
-      {
-         lineOffset = maxLineOffset;
-      }
-      vbar->setValue( lineOffset );
+	{
+		lineOffset += ( (3 * viewLines) / 4);
+	
+		if ( lineOffset >= maxLineOffset )
+		{
+			lineOffset = maxLineOffset;
+		}
+		vbar->setValue( lineOffset );
 		event->accept();
-   }
-   else if (event->matches(QKeySequence::MoveToPreviousPage))
-   {
-      lineOffset -= ( (3 * viewLines) / 4);
-
-      if ( lineOffset < 0 )
-      {
-         lineOffset = 0;
-      }
-      vbar->setValue( lineOffset );
+	}
+	else if (event->matches(QKeySequence::MoveToPreviousPage))
+	{
+		lineOffset -= ( (3 * viewLines) / 4);
+		
+		if ( lineOffset < 0 )
+		{
+			lineOffset = 0;
+		}
+		vbar->setValue( lineOffset );
 		event->accept();
-   }
+	}
 	else if ( selAddrValue >= 0 )
 	{
 		ctxMenuAddr = selAddrValue;
 
 		if ( event->key() == Qt::Key_B )
-   	{
+		{
 			parent->asmViewCtxMenuAddBP();
 			event->accept();
-   	}
+		}
 		else if ( event->key() == Qt::Key_S )
-   	{
+		{
 			parent->asmViewCtxMenuAddSym();
 			event->accept();
-   	}
+		}
 		else if ( event->key() == Qt::Key_M )
-   	{
+		{
 			parent->asmViewCtxMenuAddBM();
 			event->accept();
-   	}
+		}
 		else if ( event->key() == Qt::Key_H )
-   	{
+		{
 			parent->asmViewCtxMenuOpenHexEdit();
 			event->accept();
-   	}
-   }
+		}
+	}
 }
 //----------------------------------------------------------------------------
 void QAsmView::keyReleaseEvent(QKeyEvent *event)
@@ -3783,7 +3816,7 @@ QPoint QAsmView::convPixToCursor( QPoint p )
 	}
 	else
 	{
-		float x = (float)p.x() / pxCharWidth;
+		float x = (float)(p.x() + pxLineXScroll) / pxCharWidth;
 
 		c.setX( (int)x );
 	}

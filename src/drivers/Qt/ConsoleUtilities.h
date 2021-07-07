@@ -41,3 +41,4 @@ class fceuHexIntValidtor : public QValidator
 		int  max;
 };
 
+QString fceuGetOpcodeToolTip( uint8_t *opcode, int size );

@@ -117,6 +117,7 @@ class QAsmView : public QWidget
 		void setPC_placement( int mode, int ofs = 0 );
 		void setBreakpointAtSelectedLine(void);
 	protected:
+		bool event(QEvent *event) override;
 		void paintEvent(QPaintEvent *event);
 		void keyPressEvent(QKeyEvent *event);
 		void keyReleaseEvent(QKeyEvent *event);
@@ -193,7 +194,7 @@ class DebuggerStackDisplay : public QPlainTextEdit
    Q_OBJECT
 
 	public:
-   DebuggerStackDisplay(QWidget *parent = 0);
+	DebuggerStackDisplay(QWidget *parent = 0);
 	~DebuggerStackDisplay(void);
 
       void updateText(void);
@@ -291,7 +292,7 @@ class ConsoleDebugger : public QDialog
 		void bpListUpdate( bool reset = false );
 		void bmListUpdate( bool reset = false );
 
-   public slots:
+	public slots:
 		void closeWindow(void);
 		void asmViewCtxMenuAddBP(void);
 		void asmViewCtxMenuAddBM(void);
