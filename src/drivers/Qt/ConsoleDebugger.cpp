@@ -3686,7 +3686,8 @@ bool QAsmView::event(QEvent *event)
 		line = lineOffset + c.y();
 
 		showOpcodeDesc = (c.x() >= 22) && (c.x() < 25) && 
-			(line < asmEntry.size()) && (asmEntry[line]->type == dbg_asm_entry_t::ASM_TEXT);
+			(line < asmEntry.size()) && (asmEntry[line]->size > 0) &&
+				(asmEntry[line]->type == dbg_asm_entry_t::ASM_TEXT);
 
 		if ( showOpcodeDesc )
 		{

@@ -456,6 +456,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 				addrMode = "Immediate";	
 			}
 			synopsis = "A,Z,C,N = A+M+C";
+
+			longDesc = "Add the value at the specified memory address to the accumulator + the carry bit. On overflow, the carry bit is set.";
 		break;
 		// AND - Logical AND
 		case 0x29:
@@ -473,6 +475,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 				addrMode = "Immediate";	
 			}
 			synopsis = "A,Z,N = A&M";
+
+			longDesc = "Perform an AND operation between the accumulator and the value at the specified memory address.";
 		break;
 		// ASL - Arithmetic Shift Left
 		case 0x0A:
@@ -487,6 +491,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 				addrMode = "Accumulator";	
 			}
 			synopsis = "A,Z,C,N = M*2    or    M,Z,C,N = M*2";
+
+			longDesc = "Shifts all the bits of the accumulator (or the byte at the specified memory address) by 1 bit to the left. Bit 0 will be set to 0 and the carry flag (C) will take the value of bit 7 (before the shift).";
 		break;
 		// BCC - Branch if Carry Clear
 		case 0x90:
@@ -496,24 +502,30 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Relative";	
 			}
+
+			longDesc = "If the carry flag (C) is clear, jump to location specified.";
 		break;
 		// BCS - Branch if Carry Set
 		case 0xB0:
-			title = "BCC - Branch if Carry Set";
+			title = "BCS - Branch if Carry Set";
 
 			if ( opcode[0] == 0xB0 )
 			{
 				addrMode = "Relative";	
 			}
+
+			longDesc = "If the carry flag (C) is set, jump to the location specified.";
 		break;
 		// BEQ - Branch if Equal
 		case 0xF0:
-			title = "BCC - Branch if Equal";
+			title = "BEQ - Branch if Equal";
 
 			if ( opcode[0] == 0xF0 )
 			{
 				addrMode = "Relative";	
 			}
+
+			longDesc = "If the zero flag (Z) is set, jump to the location specified.";
 		break;
 		// BIT - Bit Test
 		case 0x24:
@@ -529,66 +541,71 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x30:
 			title = "BMI - Branch if Minus";
 
-			if ( opcode[0] == 0x30 )
-			{
-				addrMode = "Relative";	
-			}
+			addrMode = "Relative";	
+
+			longDesc = "If the negative flag (N) is set, jump to the location specified.";
 		break;
 		// BNE - Branch if Not Equal
 		case 0xD0:
 			title = "BNE - Branch if Not Equal";
 
-			if ( opcode[0] == 0xD0 )
-			{
-				addrMode = "Relative";	
-			}
+			addrMode = "Relative";	
+
+			longDesc = "If the zero flag (Z) is clear, jump to the location specified.";
 		break;
 		// BPL - Branch if Positive
 		case 0x10:
 			title = "BPL - Branch if Positive";
 
-			if ( opcode[0] == 0x10 )
-			{
-				addrMode = "Relative";	
-			}
+			addrMode = "Relative";	
+
+			longDesc = "If the negative flag (N) is clear, jump to the location specified.";
 		break;
 		// BRK - Force Interrupt
 		case 0x00:
 			title = "BRK - Force Interrupt";
+
+			longDesc = "The BRK instruction causes the CPU to jump to its IRQ vector, as if an interrupt had occurred. The PC and status flags are pushed on the stack.";
 		break;
 		// BVC - Branch if Overflow Clear
 		case 0x50:
 			title = "BVC - Branch if Overflow Clear";
 
-			if ( opcode[0] == 0x50 )
-			{
-				addrMode = "Relative";	
-			}
+			addrMode = "Relative";	
+
+			longDesc = "If the overflow flag (V) is clear, jump to the location specified.";
 		break;
 		// BVS - Branch if Overflow Set
 		case 0x70:
 			title = "BVS - Branch if Overflow Set";
 
-			if ( opcode[0] == 0x70 )
-			{
-				addrMode = "Relative";	
-			}
+			addrMode = "Relative";	
+
+			longDesc = "If the overflow flag (V) is set then, jump to the location specified.";
 		break;
 		// CLC - Clear Carry Flag
 		case 0x18:
 			title = "CLC - Clear Carry Flag";
+
+			longDesc = "Clears the carry flag (C).";
 		break;
 		// CLD - Clear Decimal Mode
 		case 0xD8:
 			title = "CLD - Clear Decimal Mode";
+
+			longDesc = "Clears the decimal mode flag (D).";
 		break;
 		// CLI - Clear Interrupt Disable
 		case 0x58:
 			title = "CLI - Clear Interrupt Disable";
+
+			longDesc = "Clears the interrupt disable flag (I).";
 		break;
 		// CLV - Clear Overflow Flag
 		case 0xB8:
 			title = "CLV - Clear Overflow Flag";
+
+			longDesc = "Clears the overflow flag (V).";
 		break;
 		// CMP - Compare
 		case 0xC9:
@@ -605,6 +622,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+
+			longDesc = "Compares the accumulator with the byte at the specified memory address..";
 		break;
 		// CPX - Compare X Register
 		case 0xE0:
@@ -616,6 +635,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+
+			longDesc = "Compares the X register with the byte at the specified memory address.";
 		break;
 		// CPY - Compare Y Register
 		case 0xC0:
@@ -627,6 +648,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+
+			longDesc = "Compares the Y register with the byte at the specified memory address.";
 		break;
 		// DEC - Decrement Memory
 		case 0xC6:
@@ -634,14 +657,20 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xCE:
 		case 0xDE:
 			title = "DEC - Decrement Memory";
+
+			longDesc = "Subtracts one from the byte at the specified memory address.";
 		break;
 		// DEX - Decrement X Register
 		case 0xCA:
 			title = "DEX - Decrement X Register";
+
+			longDesc = "Subtracts one from the X register.";
 		break;
 		// DEY - Decrement Y Register
 		case 0x88:
 			title = "DEY - Decrement Y Register";
+
+			longDesc = "Subtracts one from the Y register.";
 		break;
 		// EOR - Exclusive OR
 		case 0x49:
@@ -658,6 +687,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+
+			longDesc = "Performs an exclusive OR operation between the accumulator and the byte at the specified memory address.";
 		break;
 		// INC - Increment Memory
 		case 0xE6:
@@ -665,23 +696,33 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xEE:
 		case 0xFE:
 			title = "INC - Decrement Memory";
+
+			longDesc = "Adds one to the the byte at the specified memory address.";
 		break;
 		// INX - Increment X Register
 		case 0xE8:
 			title = "INX - Increment X Register";
+
+			longDesc = "Adds one to the X register.";
 		break;
 		// INY - Increment Y Register
 		case 0xC8:
 			title = "INY - Increment Y Register";
+
+			longDesc = "Adds one to the Y register.";
 		break;
 		// JMP - Jump
 		case 0x4C:
 		case 0x6C:
 			title = "JMP - Jump";
+
+			longDesc = "Jumps to the specified location (alters the program counter)";
 		break;
 		// JSR - Jump to Subroutine
 		case 0x20:
 			title = "JSR - Jump to Subroutine";
+
+			longDesc = "Pushes the address (minus one) of the next instruction to the stack and then jumps to the target address.";
 		break;
 		// LDA - Load Accumulator
 		case 0xA9:
@@ -698,6 +739,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+
+			longDesc = "Loads a byte from the specified memory address into the accumulator.";
 		break;
 		// LDX - Load X Register
 		case 0xA2:
@@ -711,6 +754,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+
+			longDesc = "Loads a byte from the specified memory address into the X register.";
 		break;
 		// LDY - Load Y Register
 		case 0xA0:
@@ -724,6 +769,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+
+			longDesc = "Loads a byte from the specified memory address into the Y register.";
 		break;
 		// LSR - Logical Shift Right
 		case 0x4A:
@@ -742,6 +789,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		// NOP - No Operation
 		case 0xEA:
 			title = "NOP - No Operation";
+
+			longDesc = "Performs no operation other than delaying execution of the next instruction by 2 cycles.";
 		break;
 		// ORA - Logical Inclusive OR
 		case 0x09:
@@ -758,22 +807,32 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+
+			longDesc = "Performs an inclusive OR operation between the accumulator and the byte at the specified memory address.";
 		break;
 		// PHA - Push Accumulator
 		case 0x48:
 			title = "PHA - Push Accumulator";
+
+			longDesc = "Pushes the value of the accumulator to the stack.";
 		break;
 		// PHP - Push Processor Status
 		case 0x08:
 			title = "PHP - Push Processor Status";
+
+			longDesc = "Pushes the value of the status flags to the stack.";
 		break;
 		// PLA - Pull Accumulator
 		case 0x68:
 			title = "PLA - Pull Accumulator";
+
+			longDesc = "Pulls a byte from the stack and stores it into the accumulator.";
 		break;
 		// PLP - Pull Processor Status
 		case 0x28:
 			title = "PLP - Pull Processor Status";
+
+			longDesc = "Pulls a byte from the stack and stores it into the processor flags.  The flags will be modified based on the value pulled.";
 		break;
 		// ROL - Rotate Left
 		case 0x2A:
@@ -787,6 +846,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Accumulator";	
 			}
+
+			longDesc = "Shifts all bits 1 position to the left. The right-most bit takes the current value of the carry flag (C). The left-most bit is stored into the carry flag (C).";
 		break;
 		// ROR - Rotate Right
 		case 0x6A:
@@ -800,14 +861,20 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Accumulator";	
 			}
+
+			longDesc = "Shifts all bits 1 position to the right. The left-most bit takes the current value of the carry flag (C). The right-most bit is stored into the carry flag (C).";
 		break;
 		// RTI - Return from Interrupt
 		case 0x40:
 			title = "RTI - Return from Interrupt";
+
+			longDesc = "The RTI instruction is used at the end of the interrupt handler to return execution to its original location.  It pulls the status flags and program counter from the stack.";
 		break;
 		// RTS - Return from Subroutine
 		case 0x60:
 			title = "RTS - Return from Subroutine";
+
+			longDesc = "The RTS instruction is used at the end of a subroutine to return execution to the calling function. It pulls the status flags and program counter (minus 1) from the stack.";
 		break;
 		// SBC - Subtract with Carry
 		case 0xE9:
@@ -824,18 +891,26 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 			{
 				addrMode = "Immediate";	
 			}
+
+			longDesc = "Substracts the byte at the specified memory address from the value of the accumulator (affected by the carry flag (C)).";
 		break;
 		// SEC - Set Carry Flag
 		case 0x38:
 			title = "SEC - Set Carry Flag";
+
+			longDesc = "Sets the carry flag (C).";
 		break;
 		// SED - Set Decimal Flag
 		case 0xF8:
 			title = "SED - Set Decimal Flag";
+
+			longDesc = "Sets the decimal mode flag (D).";
 		break;
 		// SEI - Set Interrupt Disable
 		case 0x78:
 			title = "SEI - Set Interrupt Disable";
+
+			longDesc = "Sets the interrupt disable flag (I).";
 		break;
 		// STA - Store Accumulator
 		case 0x85:
@@ -854,39 +929,52 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x96:
 		case 0x8E:
 			title = "STX - Store X Register";
+
+			longDesc = "Stores the value of the X register into memory.";
 		break;
 		// STY - Store Y Register
 		case 0x84:
 		case 0x94:
 		case 0x8C:
 			title = "STY - Store Y Register";
+
+			longDesc = "Stores the value of the Y register into memory.";
 		break;
 		// TAX - Transfer Accumulator to X Register
 		case 0xAA:
 			title = "TAX - Transfer Accumulator to X Register";
 
-			longDesc = "Copies the current contents of the accumulator into the X register"
-				   "and sets the zero and negative flags as appropriate.";
+			longDesc = "Copies the accumulator into the X register.";
 		break;
 		// TAY - Transfer Accumulator to Y Register
 		case 0xA8:
 			title = "TAY - Transfer Accumulator to Y Register";
+
+			longDesc = "Copies the accumulator into the Y register.";
 		break;
 		// TSX - Transfer Stack Pointer to X Register
 		case 0xBA:
 			title = "TSX - Transfer Stack Pointer to X Register";
+
+			longDesc = "Copies the stack pointer into the X register.";
 		break;
 		// TXA - Transfer X Register to Accumulator
 		case 0x8A:
 			title = "TXA - Transfer X Register to Accumulator";
+
+			longDesc = "Copies the X register into the accumulator.";
 		break;
 		// TXS - Transfer X Register to Stack Pointer
 		case 0x9A:
 			title = "TXS - Transfer X Register to Stack Pointer";
+
+			longDesc = "Copies the X register into the stack pointer.";
 		break;
 		// TYA - Transfer Y Register to Accumulator
 		case 0x98:
 			title = "TYA - Transfer Y Register to Accumulator";
+
+			longDesc = "Copies the Y register into the accumulator.";
 		break;
 		default:
 			title = "Undefined";
