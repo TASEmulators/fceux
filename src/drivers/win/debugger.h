@@ -13,10 +13,9 @@
 #define TOO_MANY_BREAKPOINTS 1
 #define INVALID_BREAKPOINT_CONDITION 3
 
-//extern volatile int userpause; //mbg merge 7/18/06 removed for merging
 extern HWND hDebug;
 
-extern int childwnd,numWPs; //mbg merge 7/18/06 had to make extern
+extern int childwnd,numWPs;
 extern bool debuggerAutoload;
 extern bool debuggerSaveLoadDEBFiles;
 extern bool debuggerDisplayROMoffsets;
