@@ -80,6 +80,7 @@ bool debuggerSaveLoadDEBFiles = true;
 bool debuggerIDAFont = false;
 unsigned int IDAFontSize = 16;
 bool debuggerDisplayROMoffsets = false;
+bool debuggerShowTraceInfo = true;
 
 static wchar_t* debug_wstr;
 static char* debug_cdl_str;
@@ -754,7 +755,7 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 			disassembly_operands.resize(i + 1);
 
 		static char bufferForDisassemblyWithPlentyOfStuff[64+NL_MAX_NAME_LEN*10]; //"plenty"
-		char* _a = DisassembleLine(addr, true, debuggerDisplayROMoffsets); // TODO: menu parameter
+		char* _a = DisassembleLine(addr, debuggerShowTraceInfo, debuggerDisplayROMoffsets);
 		strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
 			
 		if (symbDebugEnabled)
@@ -991,12 +992,9 @@ void UpdateDebugger(bool jump_to_pc)
 		{
 			ScrollUp();
 		}
-		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR);
 	}
-	else
-	{
-		DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR);
-	}
+
+	DisassembleToWindow(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR);
 	
 
 	// The address in the Add Bookmark textbox follows the scroll pos.
@@ -1704,6 +1702,7 @@ inline void UpdateOptionsPopup(HMENU optionsPopup)
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_AUTO_OPEN, CheckedFlag(debuggerAutoload));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_IDA_FONT, CheckedFlag(debuggerIDAFont));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_SHOW_ROM_OFFSETS, CheckedFlag(debuggerDisplayROMoffsets));
+	CheckMenuItem(optionsPopup, ID_DEBUGGER_SHOW_TRACE_INFO, CheckedFlag(debuggerShowTraceInfo));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_BAD_OPCODES, CheckedFlag(FCEUI_Debugger().badopbreak));
 }
 
@@ -1960,7 +1959,6 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 		}
 		break;
 		// Options menu
-		// TODO: show trace info (new)
 		case ID_DEBUGGER_AUTO_OPEN:
 			debuggerAutoload ^= 1;
 			break;
@@ -1969,6 +1967,10 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			debugSystem->hDisasmFont = debuggerIDAFont ? debugSystem->hIDAFont : debugSystem->hFixedFont;
 			debugSystem->disasmFontHeight = debuggerIDAFont ? IDAFontSize : debugSystem->fixedFontHeight;
 			SendDlgItemMessage(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, WM_SETFONT, (WPARAM)debugSystem->hDisasmFont, FALSE);
+			UpdateDebugger(false);
+			break;
+		case ID_DEBUGGER_SHOW_TRACE_INFO:
+			debuggerShowTraceInfo ^= 1;
 			UpdateDebugger(false);
 			break;
 		case ID_DEBUGGER_SHOW_ROM_OFFSETS:
@@ -2013,8 +2015,8 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			break;
 		case IDOK:
 			// Make pressing Enter synonymous with the button you'd expect depending on the focus.
-			HWND focus;
-			switch (GetDlgCtrlID(focus = GetFocus()))
+			HWND focus = GetFocus();
+			switch (GetDlgCtrlID(focus))
 			{
 				case IDC_DEBUGGER_VAL_PCSEEK:
 					DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_SEEK_TO, NULL);

@@ -1215,6 +1215,7 @@
 #define ID_DUMPER_GO                    45551
 #define ID_DUMPER_NES_ADDR_TOGGLE       45552
 #define ID_DEBUGGER_BREAK_BAD_OPCODES   45553
+#define ID_DEBUGGER_SHOW_TRACE_INFO     45554
 #define MW_VALUELABEL2                  65423
 #define MW_VALUELABEL1                  65426
 #define IDC_STATIC_SLASHTEXT            65442
