@@ -977,7 +977,7 @@ void UpdateDebugger(bool jump_to_pc)
 	if (jump_to_pc || disassembly_addresses.size() == 0)
 	{
 		// For relative positioning, we want start pos to be PC address with the comments scrolled offscreen.
-		SetScroll(X.PC, NumAnnotationLines(scrollAddress));
+		SetScroll(X.PC, NumAnnotationLines(X.PC));
 
 		// ensure that PC pointer will be visible even after the window was resized
 		RECT rect;
