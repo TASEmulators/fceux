@@ -2613,7 +2613,7 @@ void  QAsmView::updateAssemblyView(void)
 
 					*d = *a;
 					d->type = dbg_asm_entry_t::SYMBOL_NAME;
-					d->text.assign( dbgSym->name );
+					d->text.assign( "   " + dbgSym->name );
 					d->text.append( ":");
 					d->line = asmEntry.size();
 					
@@ -2644,6 +2644,13 @@ void  QAsmView::updateAssemblyView(void)
 					}
 					else
 					{
+						if ( j == 0 )
+						{
+							while ( j < 3 )
+							{
+								stmp[j] = ' '; j++;
+							}
+						}
 						stmp[j] = c[i]; j++; i++;
 					}
 				}
@@ -3679,7 +3686,7 @@ bool QAsmView::event(QEvent *event)
 	{
 		int line;
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
-		bool opcodeValid, showOpcodeDesc = false;
+		bool opcodeValid = false, showOpcodeDesc = false, showSymHexDecode = false;
 
 		QPoint c = convPixToCursor(helpEvent->pos());
 
@@ -3690,12 +3697,37 @@ bool QAsmView::event(QEvent *event)
 
 		showOpcodeDesc = (c.x() >= 22) && (c.x() < 25) && opcodeValid;
 
+		if ( (c.x() > 25) && opcodeValid && (asmEntry[line]->sym.name.size() > 0) )
+		{
+			size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name, 25 );
+
+			if ( (subStrLoc != std::string::npos) && (subStrLoc > 25) )
+			{
+				//printf("Line:%i asmEntry DB Sym: %zi  '%s'\n", line, subStrLoc, asmEntry[line]->sym.name.c_str() );
+				int symTextStart = subStrLoc;
+				int symTextEnd   = subStrLoc + asmEntry[line]->sym.name.size();
+
+				if ( (c.x() >= symTextStart) && (c.x() < symTextEnd) )
+				{
+					showSymHexDecode = true;
+				}
+			}
+		}
+
 		if ( showOpcodeDesc )
 		{
 			QString qs = fceuGetOpcodeToolTip(asmEntry[line]->opcode, asmEntry[line]->size );
 
 			//QToolTip::setFont(font);
 			QToolTip::showText(helpEvent->globalPos(), qs, this );
+		}
+		else if ( showSymHexDecode )
+		{
+			char stmp[64];
+
+			sprintf( stmp, "$%04X", asmEntry[line]->sym.ofs );
+
+			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 		}
 		else
 		{
@@ -4097,9 +4129,9 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 
 				if ( asmEntry[line]->sym.name.size() > 0 )
 				{
-					size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name, 22 );
+					size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name, 25 );
 
-					if ( (subStrLoc != std::string::npos) && (subStrLoc > 22) )
+					if ( (subStrLoc != std::string::npos) && (subStrLoc > 25) )
 					{
 						//printf("Line:%i asmEntry DB Sym: %zi  '%s'\n", line, subStrLoc, asmEntry[line]->sym.name.c_str() );
 						symTextStart = subStrLoc;
