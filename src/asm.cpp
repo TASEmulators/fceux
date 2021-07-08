@@ -538,17 +538,33 @@ char *Disassemble(int addr, uint8 *opcode, bool showTrace) {
 	return str;
 }
 
-char *DisassembleLine(int addr, bool showTrace) {
+char *DisassembleLine(int addr, bool showTrace, bool showRomOffsets) {
 	uint8 instruction[] = {GetMem(addr), GetMem(addr + 1), GetMem(addr + 2)};
-	return DisassembleData(addr, instruction, showTrace);
+	return DisassembleData(addr, instruction, showTrace, showRomOffsets);
 }
 
-char *DisassembleData(int addr, uint8 *opcode, bool showTrace) {
+char *DisassembleData(int addr, uint8 *opcode, bool showTrace, bool showRomOffsets) {
 	static char str[64] = { 0 }, chr[25] = { 0 };
 	char *c;
 	int size, j;
 
-	sprintf(str, "%02X:%04X: ", getBank(addr), addr);
+	// TODO: Split out address formatter method
+	if (addr >= 0x8000)
+	{
+		if (showRomOffsets && GetNesFileAddress(addr) != -1)
+		{
+			sprintf(str, " %06X: ", GetNesFileAddress(addr));
+		}
+		else
+		{
+			sprintf(str, "%02X:%04X: ", getBank(addr), addr);
+		}
+	}
+	else
+	{
+		sprintf(str, "  :%04X: ", addr);
+	}
+
 	size = opsize[opcode[0]];
 	if (size == 0)
 	{

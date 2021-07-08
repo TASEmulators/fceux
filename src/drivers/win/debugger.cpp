@@ -643,7 +643,6 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 {
 	// Why is this getting called twice per scroll?
-	wchar_t chr[40] = { 0 };
 	wchar_t debug_wbuf[2048] = { 0 };
 	int size;
 	uint8 opcode[3];
@@ -748,86 +747,51 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 		{
 			wcscat(debug_wstr, L" ");
 		}
-
-		if (addr >= 0x8000)
-		{
-			if (debuggerDisplayROMoffsets && GetNesFileAddress(addr) != -1)
-			{
-				swprintf(chr, L" %06X: ", GetNesFileAddress(addr));
-			} else
-			{
-				swprintf(chr, L"%02X:%04X: ", getBank(addr), addr);
-			}
-		} else
-		{
-			swprintf(chr, L"  :%04X: ", addr);
-		}
 		
 		// Add address
-		wcscat(debug_wstr, chr);
 		disassembly_addresses.push_back(addr);
 		if (symbDebugEnabled)
 			disassembly_operands.resize(i + 1);
 
-		size = opsize[GetMem(addr)];
-		if (size == 0)
-		{
-			swprintf(chr, L"%02X        UNDEFINED", GetMem(addr++));
-			wcscat(debug_wstr, chr);
-		} else
-		{
-			if ((addr + size) > 0xFFFF)
-			{
-				while (addr < 0xFFFF)
-				{
-					swprintf(chr, L"%02X        OVERFLOW\n", GetMem(addr++));
-					wcscat(debug_wstr, chr);
-				}
-				break;
-			}
-			for (int j = 0; j < size; j++)
-			{
-				swprintf(chr, L"%02X ", opcode[j] = GetMem(addr++));
-				wcscat(debug_wstr, chr);
-			}
-			while (size < 3)
-			{
-				wcscat(debug_wstr, L"   "); //pad output to align ASM
-				size++;
-			}
+		static char bufferForDisassemblyWithPlentyOfStuff[64+NL_MAX_NAME_LEN*10]; //"plenty"
+		char* _a = DisassembleLine(addr, true, debuggerDisplayROMoffsets); // TODO: menu parameter
+		strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
 			
-			static char bufferForDisassemblyWithPlentyOfStuff[64+NL_MAX_NAME_LEN*10]; //"plenty"
-			char* _a = Disassemble(addr, opcode, true); // TODO: menu parameter
-			strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
-			
-			if (symbDebugEnabled)
-			{ // TODO: This will add in both the default name and custom name if you have inlineAddresses enabled.
-				if (symbRegNames)
-				    replaceRegNames(bufferForDisassemblyWithPlentyOfStuff);
-				replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
-				for(int p=0;p<ARRAY_SIZE(pageNames);p++)
-					if(pageNames[p] != NULL)
-						replaceNames(pageNames[p], bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
-			}
-
-            uint8 opCode = GetMem(instruction_addr);
-            
-			// special case: an RTS or RTI opcode
-			if (opCode == 0x60 || opCode == 0x40)
-			{
-				// add "----------" to emphasize the end of subroutine
-				strcat(bufferForDisassemblyWithPlentyOfStuff, " ");
-				for (int j = strlen(bufferForDisassemblyWithPlentyOfStuff); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
-					bufferForDisassemblyWithPlentyOfStuff[j] = '-';
-				bufferForDisassemblyWithPlentyOfStuff[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
-			}
-
-			// append the disassembly to current line
-			swprintf(debug_wbuf, L" %S", bufferForDisassemblyWithPlentyOfStuff);
-			wcscat(debug_wstr, debug_wbuf);
+		if (symbDebugEnabled)
+		{ // TODO: This will add in both the default name and custom name if you have inlineAddresses enabled.
+			if (symbRegNames)
+				replaceRegNames(bufferForDisassemblyWithPlentyOfStuff);
+			replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
+			for(int p=0;p<ARRAY_SIZE(pageNames);p++)
+				if(pageNames[p] != NULL)
+					replaceNames(pageNames[p], bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
 		}
+
+        uint8 opCode = GetMem(instruction_addr);
+            
+		// special case: an RTS or RTI opcode
+		if (opCode == 0x60 || opCode == 0x40)
+		{
+			// add "----------" to emphasize the end of subroutine
+			strcat(bufferForDisassemblyWithPlentyOfStuff, " ");
+			for (int j = strlen(bufferForDisassemblyWithPlentyOfStuff); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
+				bufferForDisassemblyWithPlentyOfStuff[j] = '-';
+			bufferForDisassemblyWithPlentyOfStuff[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+		}
+
+		// append the disassembly to current line
+		swprintf(debug_wbuf, L"%S", bufferForDisassemblyWithPlentyOfStuff);
+		wcscat(debug_wstr, debug_wbuf);
 		wcscat(debug_wstr, L"\n");
+
+		// Size of 0 means undefined, so treat it as 1 here.
+		size = opsize[GetMem(addr)];
+		addr += size ? size : 1;
 		line_count++;
+
+		// Break if we reached end of address space
+		if (addr > 0xFFFF)
+			break;
 	}
 	UpdateDisassembleView(hWnd, id, lines, true);
 

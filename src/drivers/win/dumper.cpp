@@ -171,6 +171,7 @@ void Dump(FILE *fout, unsigned int startAddr, unsigned int endAddr)
 			if (node)
 			{
 				// TODO: Instead of this ominous and confusing message, could print ".byte $XX $YY..."
+				// TODO: Work this logic into asm.cpp?
 				fprintf(fout, " INTERRUPTED");
 			}
 			else
