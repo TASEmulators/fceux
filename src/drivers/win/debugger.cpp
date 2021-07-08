@@ -797,7 +797,7 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 			}
 			
 			static char bufferForDisassemblyWithPlentyOfStuff[64+NL_MAX_NAME_LEN*10]; //"plenty"
-			char* _a = Disassemble(addr, opcode);
+			char* _a = Disassemble(addr, opcode, true); // TODO: menu parameter
 			strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
 			
 			if (symbDebugEnabled)
@@ -1996,6 +1996,7 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 		}
 		break;
 		// Options menu
+		// TODO: show trace info (new)
 		case ID_DEBUGGER_AUTO_OPEN:
 			debuggerAutoload ^= 1;
 			break;
