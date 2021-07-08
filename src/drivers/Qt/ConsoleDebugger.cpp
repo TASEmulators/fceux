@@ -3679,15 +3679,16 @@ bool QAsmView::event(QEvent *event)
 	{
 		int line;
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
-		bool showOpcodeDesc = false;
+		bool opcodeValid, showOpcodeDesc = false;
 
 		QPoint c = convPixToCursor(helpEvent->pos());
 
 		line = lineOffset + c.y();
 
-		showOpcodeDesc = (c.x() >= 22) && (c.x() < 25) && 
-			(line < asmEntry.size()) && (asmEntry[line]->size > 0) &&
+		opcodeValid = (line < asmEntry.size()) && (asmEntry[line]->size > 0) &&
 				(asmEntry[line]->type == dbg_asm_entry_t::ASM_TEXT);
+
+		showOpcodeDesc = (c.x() >= 22) && (c.x() < 25) && opcodeValid;
 
 		if ( showOpcodeDesc )
 		{

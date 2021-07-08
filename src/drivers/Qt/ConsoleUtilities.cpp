@@ -587,11 +587,15 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x18:
 			title = "CLC - Clear Carry Flag";
 
+			synopsis = "C = 0";
+
 			longDesc = "Clears the carry flag (C).";
 		break;
 		// CLD - Clear Decimal Mode
 		case 0xD8:
 			title = "CLD - Clear Decimal Mode";
+
+			synopsis = "D = 0";
 
 			longDesc = "Clears the decimal mode flag (D).";
 		break;
@@ -599,11 +603,15 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x58:
 			title = "CLI - Clear Interrupt Disable";
 
+			synopsis = "I = 0";
+
 			longDesc = "Clears the interrupt disable flag (I).";
 		break;
 		// CLV - Clear Overflow Flag
 		case 0xB8:
 			title = "CLV - Clear Overflow Flag";
+
+			synopsis = "V = 0";
 
 			longDesc = "Clears the overflow flag (V).";
 		break;
@@ -618,6 +626,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xD1:
 			title = "CMP - Compare";
 
+			synopsis = "Z,C,N = A-M";
+
 			if ( opcode[0] == 0xC9 )
 			{
 				addrMode = "Immediate";	
@@ -631,6 +641,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xEC:
 			title = "CPX - Compare X Register";
 
+			synopsis = "Z,C,N = X-M";
+
 			if ( opcode[0] == 0xE0 )
 			{
 				addrMode = "Immediate";	
@@ -643,6 +655,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xC4:
 		case 0xCC:
 			title = "CPY - Compare Y Register";
+
+			synopsis = "Z,C,N = Y-M";
 
 			if ( opcode[0] == 0xE0 )
 			{
@@ -658,17 +672,23 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xDE:
 			title = "DEC - Decrement Memory";
 
+			synopsis = "M,Z,N = M-1";
+
 			longDesc = "Subtracts one from the byte at the specified memory address.";
 		break;
 		// DEX - Decrement X Register
 		case 0xCA:
 			title = "DEX - Decrement X Register";
 
+			synopsis = "X,Z,N = X-1";
+
 			longDesc = "Subtracts one from the X register.";
 		break;
 		// DEY - Decrement Y Register
 		case 0x88:
 			title = "DEY - Decrement Y Register";
+
+			synopsis = "Y,Z,N = Y-1";
 
 			longDesc = "Subtracts one from the Y register.";
 		break;
@@ -683,6 +703,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x51:
 			title = "EOR - Exclusive OR";
 
+			synopsis = "A,Z,N = A^M";
+
 			if ( opcode[0] == 0x49 )
 			{
 				addrMode = "Immediate";	
@@ -695,7 +717,9 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xF6:
 		case 0xEE:
 		case 0xFE:
-			title = "INC - Decrement Memory";
+			title = "INC - Increment Memory";
+
+			synopsis = "M,Z,N = M+1";
 
 			longDesc = "Adds one to the the byte at the specified memory address.";
 		break;
@@ -703,11 +727,15 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xE8:
 			title = "INX - Increment X Register";
 
+			synopsis = "X,Z,N = X+1";
+
 			longDesc = "Adds one to the X register.";
 		break;
 		// INY - Increment Y Register
 		case 0xC8:
 			title = "INY - Increment Y Register";
+
+			synopsis = "Y,Z,N = Y+1";
 
 			longDesc = "Adds one to the Y register.";
 		break;
@@ -735,6 +763,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xB1:
 			title = "LDA - Load Accumulator";
 
+			synopsis = "A,Z,N = M";
+
 			if ( opcode[0] == 0xA9 )
 			{
 				addrMode = "Immediate";	
@@ -749,6 +779,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xAE:
 		case 0xBE:
 			title = "LDX - Load X Register";
+
+			synopsis = "X,Z,N = M";
 
 			if ( opcode[0] == 0xA2 )
 			{
@@ -765,6 +797,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xBC:
 			title = "LDY - Load Y Register";
 
+			synopsis = "Y,Z,N = M";
+
 			if ( opcode[0] == 0xA0 )
 			{
 				addrMode = "Immediate";	
@@ -779,6 +813,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x4E:
 		case 0x5E:
 			title = "LSR - Logical Shift Right";
+
+			synopsis = "A,C,Z,N = A/2    or    M,C,Z,N = M/2";
 
 			if ( opcode[0] == 0x4A )
 			{
@@ -802,6 +838,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x01:
 		case 0x11:
 			title = "ORA - Logical Inclusive OR";
+
+			synopsis = "A,Z,N = A|M";
 
 			if ( opcode[0] == 0x09 )
 			{
@@ -887,6 +925,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xF1:
 			title = "SBC - Subtract with Carry";
 
+			synopsis = "A,Z,C,N = A-M-(1-C)";
+
 			if ( opcode[0] == 0xE9 )
 			{
 				addrMode = "Immediate";	
@@ -898,17 +938,23 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x38:
 			title = "SEC - Set Carry Flag";
 
+			synopsis = "C = 1";
+
 			longDesc = "Sets the carry flag (C).";
 		break;
 		// SED - Set Decimal Flag
 		case 0xF8:
 			title = "SED - Set Decimal Flag";
 
+			synopsis = "D = 1";
+
 			longDesc = "Sets the decimal mode flag (D).";
 		break;
 		// SEI - Set Interrupt Disable
 		case 0x78:
 			title = "SEI - Set Interrupt Disable";
+
+			synopsis = "I = 1";
 
 			longDesc = "Sets the interrupt disable flag (I).";
 		break;
@@ -922,6 +968,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x91:
 			title = "STA - Store Accumulator";
 
+			synopsis = "M = A";
+
 			longDesc = "Stores the contents of the accumulator into memory.";
 		break;
 		// STX - Store X Register
@@ -929,6 +977,8 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x96:
 		case 0x8E:
 			title = "STX - Store X Register";
+
+			synopsis = "M = X";
 
 			longDesc = "Stores the value of the X register into memory.";
 		break;
@@ -938,11 +988,15 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x8C:
 			title = "STY - Store Y Register";
 
+			synopsis = "M = Y";
+
 			longDesc = "Stores the value of the Y register into memory.";
 		break;
 		// TAX - Transfer Accumulator to X Register
 		case 0xAA:
 			title = "TAX - Transfer Accumulator to X Register";
+
+			synopsis = "X = A";
 
 			longDesc = "Copies the accumulator into the X register.";
 		break;
@@ -950,11 +1004,15 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0xA8:
 			title = "TAY - Transfer Accumulator to Y Register";
 
+			synopsis = "Y = A";
+
 			longDesc = "Copies the accumulator into the Y register.";
 		break;
 		// TSX - Transfer Stack Pointer to X Register
 		case 0xBA:
 			title = "TSX - Transfer Stack Pointer to X Register";
+
+			synopsis = "X = S";
 
 			longDesc = "Copies the stack pointer into the X register.";
 		break;
@@ -962,17 +1020,23 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 		case 0x8A:
 			title = "TXA - Transfer X Register to Accumulator";
 
+			synopsis = "A = X";
+
 			longDesc = "Copies the X register into the accumulator.";
 		break;
 		// TXS - Transfer X Register to Stack Pointer
 		case 0x9A:
 			title = "TXS - Transfer X Register to Stack Pointer";
 
+			synopsis = "S = X";
+
 			longDesc = "Copies the X register into the stack pointer.";
 		break;
 		// TYA - Transfer Y Register to Accumulator
 		case 0x98:
 			title = "TYA - Transfer Y Register to Accumulator";
+
+			synopsis = "A = Y";
 
 			longDesc = "Copies the Y register into the accumulator.";
 		break;
