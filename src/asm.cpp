@@ -254,7 +254,7 @@ int Assemble(unsigned char *output, int addr, char *str) {
 	return 0;
 }
 
-///disassembles the opcodes in the buffer assuming the provided address. Uses GetMem() and 6502 current registers to query referenced values. returns a static string buffer.
+///Disassembles the instruction bytes in the buffer using the provided address for trace info. Uses GetMem() and 6502 current registers to query referenced values. Returns a static string buffer.
 char *Disassemble(int addr, uint8 *opcode, bool showTrace) {
 	static char str[64]={0},chr[5]={0};
 	uint16 tmp,tmp2;
@@ -538,38 +538,9 @@ char *Disassemble(int addr, uint8 *opcode, bool showTrace) {
 	return str;
 }
 
-// Need to clean up this interface.
 char *DisassembleLine(int addr, bool showTrace) {
-	static char str[64] = { 0 }, chr[25] = { 0 };
-	char *c;
-	int size, j;
-	uint8 opcode[3];
-
-	sprintf(str, "%02X:%04X: ", getBank(addr), addr);
-	size = opsize[GetMem(addr)];
-	if (size == 0)
-	{
-		sprintf(chr, "%02X        UNDEFINED", GetMem(addr++));
-		strcat(str, chr);
-	}
-	else {
-		if ((addr + size) > 0x10000) {
-			sprintf(chr, "%02X        OVERFLOW", GetMem(addr));
-			strcat(str, chr);
-		}
-		else {
-			for (j = 0; j < size; j++) {
-				sprintf(chr, "%02X ", opcode[j] = GetMem(addr++));
-				strcat(str, chr);
-			}
-			while (size < 3) {
-				strcat(str, "   "); //pad output to align ASM
-				size++;
-			}
-			strcat(strcat(str, " "), Disassemble(addr, opcode, showTrace));
-		}
-	}
-	return str;
+	uint8 instruction[] = {GetMem(addr), GetMem(addr + 1), GetMem(addr + 2)};
+	return DisassembleData(addr, instruction, showTrace);
 }
 
 char *DisassembleData(int addr, uint8 *opcode, bool showTrace) {
