@@ -121,6 +121,7 @@ class QAsmView : public QWidget
 		int  isBreakpointAtLine( int line );
 		int  isBreakpointAtAddr( int addr );
 		void determineLineBreakpoints(void);
+		void setFont( const QFont &font );
 	protected:
 		bool event(QEvent *event) override;
 		void paintEvent(QPaintEvent *event);
@@ -244,6 +245,8 @@ class ConsoleDebugger : public QDialog
 		void queueUpdate(void);
 
 		QLabel    *asmLineSelLbl;
+
+		void setCpuStatusFont( const QFont &font );
 	protected:
 		void closeEvent(QCloseEvent *event);
 		//void keyPressEvent(QKeyEvent *event);
@@ -355,6 +358,9 @@ class ConsoleDebugger : public QDialog
 		void pcSetPlaceLowerMid(void);
 		void pcSetPlaceBottom(void);
 		void pcSetPlaceCustom(void);
+		void changeAsmFontCB(void);
+		void changeStackFontCB(void);
+		void changeCpuFontCB(void);
 
 };
 

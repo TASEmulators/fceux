@@ -35,6 +35,7 @@
 #include <QGridLayout>
 #include <QRadioButton>
 #include <QInputDialog>
+#include <QFontDialog>
 #include <QMessageBox>
 #include <QMenuBar>
 #include <QMenu>
@@ -104,13 +105,28 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	int opt, useNativeMenuBar;
 	//fceuDecIntValidtor *validator;
 	QSettings settings;
+	QFont cpuFont;
+	std::string fontString;
+
+	g_config->getOption("SDL.DebuggerCpuStatusFont", &fontString);
+
+	if ( fontString.size() > 0 )
+	{
+		cpuFont.fromString( QString::fromStdString( fontString ) );
+	}
+	else
+	{
+		cpuFont.setFamily("Courier New");
+		cpuFont.setStyle( QFont::StyleNormal );
+		cpuFont.setStyleHint( QFont::Monospace );
+	}
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
 	QFontMetrics fm(font);
 
-	fontCharWidth = 1.00 * fm.averageCharWidth();
+	fontCharWidth = fm.averageCharWidth();
 
 	setWindowTitle("6502 Debugger");
 
@@ -153,7 +169,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	// View -> Go to PC
 	act = new QAction(tr("Go to &PC"), this);
-	act->setShortcut( QKeySequence(tr("Ctrl+P") ));
+	act->setShortcut( QKeySequence(tr("Ctrl+G") ));
 	act->setStatusTip(tr("Go to &PC"));
 	//act->setIcon( QIcon(":icons/JumpTarget.png") );
 	connect(act, SIGNAL(triggered()), this, SLOT(seekPCCB(void)) );
@@ -162,7 +178,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	// View -> Change PC
 	act = new QAction(tr("&Change PC"), this);
-	act->setShortcut( QKeySequence(tr("Ctrl+Shift+P") ));
+	act->setShortcut( QKeySequence(tr("Ctrl+Shift+G") ));
 	act->setStatusTip(tr("&Change PC"));
 	//act->setIcon( QIcon(":icons/JumpTarget.png") );
 	connect(act, SIGNAL(triggered()), this, SLOT(openChangePcDialog(void)) );
@@ -369,6 +385,37 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	actGroup->addAction(act);
 	subMenu->addAction(act);
 
+	optMenu->addSeparator();
+
+	// Options -> Font Selection
+	subMenu  = optMenu->addMenu(tr("&Font Selection"));
+
+	// Options -> Font Selection -> Assembly View
+	act = new QAction(tr("&Assembly View"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Set Assembly View Font"));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(changeAsmFontCB(void)) );
+
+	subMenu->addAction(act);
+
+	// Options -> Font Selection -> Stack View
+	act = new QAction(tr("&Stack View"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Set Stack View Font"));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(changeStackFontCB(void)) );
+
+	subMenu->addAction(act);
+
+	// Options -> Font Selection -> CPU Data View
+	act = new QAction(tr("&CPU Data View"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Set CPU View Font"));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(changeCpuFontCB(void)) );
+
+	subMenu->addAction(act);
+
+	optMenu->addSeparator();
+
 	// Symbols
 	symMenu = menuBar->addMenu(tr("&Symbols"));
 
@@ -560,43 +607,6 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox2->addLayout( grid  );
 	cpuFrame->setLayout( hbox1 );
 
-	//button = new QPushButton( tr("Run") );
-	//grid->addWidget( button, 0, 0, Qt::AlignLeft );
-	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunCB(void)) );
-
-	//button = new QPushButton( tr("Step Into") );
-	//grid->addWidget( button, 0, 1, Qt::AlignLeft );
-	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepIntoCB(void)) );
-
-	//button = new QPushButton( tr("Step Out") );
-	//grid->addWidget( button, 1, 0, Qt::AlignLeft );
-	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOutCB(void)) );
-
-	//button = new QPushButton( tr("Step Over") );
-	//grid->addWidget( button, 1, 1, Qt::AlignLeft );
-	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugStepOverCB(void)) );
-
-	//button = new QPushButton( tr("Run Line") );
-	//grid->addWidget( button, 2, 0, Qt::AlignLeft );
-	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLineCB(void)) );
-
-	//button = new QPushButton( tr("128 Lines") );
-	//grid->addWidget( button, 2, 1, Qt::AlignLeft );
-	//connect( button, SIGNAL(clicked(void)), this, SLOT(debugRunLine128CB(void)) );
-
-	//button = new QPushButton( tr("Seek To:") );
-	//grid->addWidget( button, 3, 0, Qt::AlignLeft );
-	//connect( button, SIGNAL(clicked(void)), this, SLOT(seekToCB(void)) );
-
-	//seekEntry = new QLineEdit();
-	//seekEntry->setFont( font );
-	//seekEntry->setText("0000");
-	//seekEntry->setMaxLength( 4 );
-	//seekEntry->setInputMask( ">HHHH;0" );
-	//seekEntry->setAlignment(Qt::AlignCenter);
-	//seekEntry->setMaximumWidth( 6 * fontCharWidth );
-	//grid->addWidget( seekEntry, 3, 1, Qt::AlignLeft );
-
 	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("PC:") );
 	lbl->setToolTip( tr("Program Counter Register") );
@@ -715,7 +725,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//vbox2->addWidget( stackFrame );
 	hbox1->addWidget( stackFrame, 10 );
 	stackFrame->setLayout( hbox );
-	stackText->setFont(font);
+	//stackText->setFont(font); // Stack font is now set in constructor
 	stackText->setReadOnly(true);
 	stackText->setWordWrapMode( QTextOption::NoWrap );
 	//stackText->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
@@ -963,6 +973,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	}
 
 	restoreGeometry(settings.value("debugger/geometry").toByteArray());
+
+	setCpuStatusFont( cpuFont );
 }
 //----------------------------------------------------------------------------
 ConsoleDebugger::~ConsoleDebugger(void)
@@ -1007,6 +1019,39 @@ void ConsoleDebugger::closeWindow(void)
 	settings.setValue("debugger/geometry", saveGeometry());
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::setCpuStatusFont( const QFont &font )
+{
+	QFontMetrics fm(font);
+	int fontCharWidth;
+
+	fontCharWidth = fm.averageCharWidth();
+
+	pcEntry->setFont( font );
+	pcEntry->setMinimumWidth( 6 * fontCharWidth );
+	pcEntry->setMaximumWidth( 6 * fontCharWidth );
+
+	regAEntry->setFont( font );
+	regAEntry->setMinimumWidth( 4 * fontCharWidth );
+	regAEntry->setMaximumWidth( 4 * fontCharWidth );
+
+	regXEntry->setFont( font );
+	regXEntry->setMinimumWidth( 4 * fontCharWidth );
+	regXEntry->setMaximumWidth( 4 * fontCharWidth );
+
+	regYEntry->setFont( font );
+	regYEntry->setMinimumWidth( 4 * fontCharWidth );
+	regYEntry->setMaximumWidth( 4 * fontCharWidth );
+
+	regPEntry->setFont( font );
+	regPEntry->setMinimumWidth( 4 * fontCharWidth );
+	regPEntry->setMaximumWidth( 4 * fontCharWidth );
+
+	cpuCyclesVal->setFont(font);
+	cpuCyclesVal->setMinimumWidth( 24 * fontCharWidth );
+	cpuInstrsVal->setFont(font);
+	cpuInstrsVal->setMinimumWidth( 24 * fontCharWidth );
 }
 //----------------------------------------------------------------------------
 void 	ConsoleDebugger::bpItemClicked( QTreeWidgetItem *item, int column)
@@ -1827,6 +1872,55 @@ void ConsoleDebugger::debFileAutoLoadCB( bool value )
 	if ( autoLoadDebug && (numWPs == 0) )
 	{
 		loadGameDebugBreakpoints();
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::changeAsmFontCB(void)
+{
+	bool ok = false;
+
+	QFont selFont = QFontDialog::getFont( &ok, asmView->QWidget::font(), this, tr("Select Font"), QFontDialog::MonospacedFonts );
+
+	if ( ok )
+	{
+		asmView->setFont( selFont );
+		asmView->updateAssemblyView();
+
+		//printf("Font Changed to: '%s'\n", font.toString().toStdString().c_str() );
+
+		g_config->setOption("SDL.DebuggerAsmFont", selFont.toString().toStdString().c_str() );
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::changeStackFontCB(void)
+{
+	bool ok = false;
+
+	QFont selFont = QFontDialog::getFont( &ok, stackText->QWidget::font(), this, tr("Select Font"), QFontDialog::MonospacedFonts );
+
+	if ( ok )
+	{
+		stackText->setFont( selFont );
+
+		//printf("Font Changed to: '%s'\n", font.toString().toStdString().c_str() );
+
+		g_config->setOption("SDL.DebuggerStackFont", selFont.toString().toStdString().c_str() );
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::changeCpuFontCB(void)
+{
+	bool ok = false;
+
+	QFont selFont = QFontDialog::getFont( &ok, pcEntry->QWidget::font(), this, tr("Select Font"), QFontDialog::MonospacedFonts );
+
+	if ( ok )
+	{
+		setCpuStatusFont( selFont );
+
+		//printf("Font Changed to: '%s'\n", font.toString().toStdString().c_str() );
+
+		g_config->setOption("SDL.DebuggerCpuStatusFont", selFont.toString().toStdString().c_str() );
 	}
 }
 //----------------------------------------------------------------------------
@@ -3565,12 +3659,22 @@ QAsmView::QAsmView(QWidget *parent)
 	QPalette pal;
 	QColor fg("black"), bg("white");
 	QColor c;
+	std::string fontString;
 
 	useDarkTheme = false;
 
-	font.setFamily("Courier New");
-	font.setStyle( QFont::StyleNormal );
-	font.setStyleHint( QFont::Monospace );
+	g_config->getOption("SDL.DebuggerAsmFont", &fontString);
+
+	if ( fontString.size() > 0 )
+	{
+		font.fromString( QString::fromStdString( fontString ) );
+	}
+	else
+	{
+		font.setFamily("Courier New");
+		font.setStyle( QFont::StyleNormal );
+		font.setStyleHint( QFont::Monospace );
+	}
 
 	pal = this->palette();
 
@@ -3780,9 +3884,18 @@ void QAsmView::setRegisterNameEnable( bool value )
 	}
 }
 //----------------------------------------------------------------------------
+void QAsmView::setFont( const QFont &newFont )
+{
+	font = newFont;
+
+	QWidget::setFont(newFont);
+
+	calcFontData();
+}
+//----------------------------------------------------------------------------
 void QAsmView::calcFontData(void)
 {
-	this->setFont(font);
+	QWidget::setFont(font);
 	QFontMetrics metrics(font);
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
@@ -4831,7 +4944,24 @@ debuggerBookmark_t *debuggerBookmarkManager_t::getAddr( int addr )
 DebuggerStackDisplay::DebuggerStackDisplay(QWidget *parent)
    : QPlainTextEdit(parent)
 {
-	QFontMetrics fm(font());
+	QFont font;
+	std::string fontString;
+
+	g_config->getOption("SDL.DebuggerStackFont", &fontString);
+
+	if ( fontString.size() > 0 )
+	{
+		font.fromString( QString::fromStdString( fontString ) );
+	}
+	else
+	{
+		font.setFamily("Courier New");
+		font.setStyle( QFont::StyleNormal );
+		font.setStyleHint( QFont::Monospace );
+	}
+	setFont( font );
+
+	QFontMetrics fm(font);
 
 	stackBytesPerLine = 4;
 	showAddrs = true;

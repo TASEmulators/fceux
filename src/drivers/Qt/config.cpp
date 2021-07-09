@@ -574,6 +574,9 @@ InitConfig()
 	config->addOption("autoOpenDebugger"       , "SDL.AutoOpenDebugger"  , 0);
 	config->addOption("debuggerPCPlacementMode", "SDL.DebuggerPCPlacement"  , 0);
 	config->addOption("debuggerPCDLineOffset"  , "SDL.DebuggerPCLineOffset" , 0);
+	config->addOption("SDL.DebuggerAsmFont"        , "");
+	config->addOption("SDL.DebuggerStackFont"      , "");
+	config->addOption("SDL.DebuggerCpuStatusFont"  , "");
 
 	// Code Data Logger Options
 	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);
