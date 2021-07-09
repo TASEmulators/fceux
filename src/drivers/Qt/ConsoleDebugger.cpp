@@ -1062,7 +1062,7 @@ void ConsoleDebugger::selBmAddrChanged(const QString &txt)
 	//printf("selBmAddrVal = %04X\n", selBmAddrVal );
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
+void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool forceAccept )
 {
 	int ret;
 	QDialog dialog(this);
@@ -1237,7 +1237,14 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp )
 
 	dialog.setLayout( mainLayout );
 
-	ret = dialog.exec();
+	if ( forceAccept )
+	{
+		ret = QDialog::Accepted;
+	}
+	else
+	{
+		ret = dialog.exec();
+	}
 
 	if ( ret == QDialog::Accepted )
 	{
@@ -2258,6 +2265,32 @@ void QAsmView::setPC_placement( int mode, int ofs )
 	g_config->setOption("SDL.DebuggerPCPlacement"  , pcLinePlacement);
 	g_config->setOption("SDL.DebuggerPCLineOffset" , pcLineOffset   );
 	g_config->save();
+}
+//----------------------------------------------------------------------------
+void QAsmView::toggleBreakpoint(int line)
+{
+	if ( line < asmEntry.size() )
+	{
+		int bpNum = isBreakpointAtLine(line);
+
+		if ( bpNum >= 0 )
+		{
+			DeleteBreak( bpNum );
+		}
+		else
+		{
+			watchpointinfo wp;
+
+			wp.address = asmEntry[line]->addr;
+			wp.endaddress = 0;
+			wp.flags   = WP_X | WP_E;
+			wp.condText = 0;
+			wp.desc = NULL;
+
+			dbgWin->openBpEditWindow( -1, &wp, true );
+		}
+		asmEntry[line]->bpNum = isBreakpointAtLine(line);
+	}
 }
 //----------------------------------------------------------------------------
 int QAsmView::isBreakpointAtAddr( int addr )
@@ -4192,6 +4225,13 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 		txtHlgtAnchorLine = line;
 
 		setHighlightEndCoord( c.x(), line );
+
+		if ( (c.x() >= 2) && (c.x() <= 3) )
+		{
+			//printf("Toggle BP!\n");
+			toggleBreakpoint(line);
+		}
+
 	}
 	
 	selAddrLine  = -1;

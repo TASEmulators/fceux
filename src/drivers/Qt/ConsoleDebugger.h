@@ -133,6 +133,7 @@ class QAsmView : public QWidget
 		void wheelEvent(QWheelEvent *event);
 		void contextMenuEvent(QContextMenuEvent *event);
 		void loadHighlightToClipboard(void);
+		void toggleBreakpoint(int line);
 
 		void calcFontData(void);
 		QPoint convPixToCursor( QPoint p );
@@ -230,7 +231,7 @@ class ConsoleDebugger : public QDialog
 		void updateWindowData(void);
 		void updateRegisterView(void);
 		void breakPointNotify(int bpNum);
-		void openBpEditWindow(int editIdx = -1, watchpointinfo *wp = NULL );
+		void openBpEditWindow(int editIdx = -1, watchpointinfo *wp = NULL, bool forceAccept = false );
 		void openDebugSymbolEditWindow( int addr );
 		void setBookmarkSelectedAddress( int addr );
 		int  getBookmarkSelectedAddress(void){ return selBmAddrVal; };
