@@ -52,6 +52,27 @@ static bool autoSaveArmedCDL = false;
 static char loadedcdfile[512] = {0};
 
 static int getDefaultCDLFile(char *filepath);
+
+static CodeDataLoggerDialog_t *cdlWin = NULL;
+//----------------------------------------------------
+int openCDLWindow( QWidget *parent )
+{
+	//printf("Open Code Data Logger Window\n");
+	
+	if ( cdlWin )
+	{
+		cdlWin->activateWindow();
+		cdlWin->raise();
+		cdlWin->setFocus();
+	}
+	else
+	{
+		cdlWin = new CodeDataLoggerDialog_t(parent);
+	
+		cdlWin->show();
+	}
+	return 0;
+}
 //----------------------------------------------------
 CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 	: QDialog(parent, Qt::Window)

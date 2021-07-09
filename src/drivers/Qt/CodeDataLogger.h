@@ -69,3 +69,4 @@ void RenameCDLog(const char *newName);
 void CDLoggerROMClosed(void);
 void CDLoggerROMChanged(void);
 void SaveCDLogFile(void);
+int  openCDLWindow( QWidget *parent );

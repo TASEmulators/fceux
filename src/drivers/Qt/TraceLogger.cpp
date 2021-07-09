@@ -1065,6 +1065,9 @@ void openTraceLoggerWindow(QWidget *parent)
 	// Only allow one trace logger window to be open
 	if (traceLogWindow != NULL)
 	{
+		traceLogWindow->activateWindow();
+		traceLogWindow->raise();
+		traceLogWindow->setFocus();
 		return;
 	}
 	//printf("Open Trace Logger Window\n");
