@@ -348,11 +348,13 @@ class ConsoleDebugger : public QDialog
 };
 
 bool debuggerWindowIsOpen(void);
+void debuggerWindowSetFocus(bool val = true);
 bool debuggerWaitingAtBreakpoint(void);
 void bpDebugSetEnable(bool val);
-void saveGameDebugBreakpoints(void);
+void saveGameDebugBreakpoints( bool force = false );
 void loadGameDebugBreakpoints(void);
 void debuggerClearAllBreakpoints(void);
+void debuggerClearAllBookmarks(void);
 void updateAllDebuggerWindows(void);
 
 extern debuggerBookmarkManager_t dbgBmMgr;

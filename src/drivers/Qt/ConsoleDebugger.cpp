@@ -76,7 +76,7 @@ extern int vblankScanLines;
 extern int vblankPixel;
 
 debuggerBookmarkManager_t dbgBmMgr;
-static std::list <ConsoleDebugger*> dbgWinList;
+static ConsoleDebugger* dbgWin = NULL;
 
 static void DeleteBreak(int sel);
 static bool waitingAtBp = false;
@@ -938,7 +938,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	windowUpdateReq   = true;
 
-	dbgWinList.push_back( this );
+	dbgWin = this;
 
 	periodicTimer  = new QTimer( this );
 
@@ -951,7 +951,6 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	periodicTimer->start( 100 ); // 10hz
 
 	// If this is the first debug window to open, load breakpoints fresh
-	if ( dbgWinList.size() == 1 )
 	{ 
 		int autoLoadDebug;
 
@@ -973,20 +972,21 @@ ConsoleDebugger::~ConsoleDebugger(void)
 	//printf("Destroy Debugger Window\n");
 	periodicTimer->stop();
 
-	for (it = dbgWinList.begin(); it != dbgWinList.end(); it++)
+	if ( dbgWin == this )
 	{
-		if ( (*it) == this )
-		{
-			dbgWinList.erase(it);
-			//printf("Removing Debugger Window\n");
-			break;
-		}
+		dbgWin = NULL;
 	}
 
-	if ( dbgWinList.size() == 0 )
+	if ( dbgWin == NULL )
 	{
 		saveGameDebugBreakpoints();
 		debuggerClearAllBreakpoints();
+		debuggerClearAllBookmarks();
+
+		if ( waitingAtBp )
+		{
+			FCEUI_SetEmulationPaused(0);
+		}
 	}
 }
 //----------------------------------------------------------------------------
@@ -1498,6 +1498,8 @@ void ConsoleDebugger::delete_BM_CB(void)
 	dbgBmMgr.deleteBookmark( addr );
 
 	bmListUpdate(true);
+
+	saveGameDebugBreakpoints(true);
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::edit_BM_name( int addr )
@@ -1646,6 +1648,11 @@ static void DeleteBreak(int sel)
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
+void debuggerClearAllBookmarks(void)
+{
+	dbgBmMgr.clear();
+}
+//----------------------------------------------------------------------------
 void debuggerClearAllBreakpoints(void)
 {
 	int i;
@@ -1697,6 +1704,8 @@ void ConsoleDebugger::delete_BP_CB(void)
 	delete item;
 	//delete bpTree->takeTopLevelItem(row);
 	//bpListUpdate( true );
+	
+	saveGameDebugBreakpoints(true);
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakOnBadOpcodeCB(bool value)
@@ -3042,9 +3051,9 @@ void FCEUD_DebugBreakpoint( int bpNum )
 
 	fceuWrapperUnLock();
 
-	for (it=dbgWinList.begin(); it!=dbgWinList.end(); it++)
+	if ( dbgWin )
 	{
-		(*it)->breakPointNotify( bpNum );
+		dbgWin->breakPointNotify( bpNum );
 	}
 
 	while ( nes_shm->runEmulator && bpDebugEnable &&
@@ -3077,7 +3086,17 @@ void FCEUD_DebugBreakpoint( int bpNum )
 //----------------------------------------------------------------------------
 bool debuggerWindowIsOpen(void)
 {
-	return (dbgWinList.size() > 0);
+	return dbgWin != NULL;
+}
+//----------------------------------------------------------------------------
+void debuggerWindowSetFocus(bool val)
+{
+	if ( dbgWin )
+	{
+		dbgWin->activateWindow();
+		dbgWin->raise();
+		dbgWin->setFocus();
+	}
 }
 //----------------------------------------------------------------------------
 bool debuggerWaitingAtBreakpoint(void)
@@ -3089,9 +3108,9 @@ void updateAllDebuggerWindows( void )
 {
 	std::list <ConsoleDebugger*>::iterator it;
 
-	for (it=dbgWinList.begin(); it!=dbgWinList.end(); it++)
+	if ( dbgWin )
 	{
-		(*it)->queueUpdate();
+		dbgWin->queueUpdate();
 	}
 }
 //----------------------------------------------------------------------------
@@ -3142,25 +3161,26 @@ static int getGameDebugBreakpointFileName(char *filepath)
 	return 0;
 }
 //----------------------------------------------------------------------------
-void saveGameDebugBreakpoints(void)
+void saveGameDebugBreakpoints( bool force )
 {
 	int i;
 	FILE *fp;
 	char stmp[512];
 	char flags[8];
-   debuggerBookmark_t *bm;
+	debuggerBookmark_t *bm;
 
 	// If no breakpoints are loaded, skip saving
-	if ( (numWPs == 0) && (dbgBmMgr.size() == 0) )
+	if ( !force && (numWPs == 0) && (dbgBmMgr.size() == 0) )
 	{
 		return;
 	}
 	if ( getGameDebugBreakpointFileName( stmp ) )
 	{
+		printf("Error: Failed to get save file name for debug\n");
 		return;
 	}
 
-	//printf("Debug Save File: '%s' \n", stmp );
+	printf("Debug Save File: '%s' \n", stmp );
 
 	fp = fopen( stmp, "w");
 
@@ -3199,14 +3219,14 @@ void saveGameDebugBreakpoints(void)
 			  		(watchpoint[i].desc != NULL) ? watchpoint[i].desc : "");
 	}
 
-   bm = dbgBmMgr.begin();
+	bm = dbgBmMgr.begin();
 
-   while ( bm != NULL )
-   {
+	while ( bm != NULL )
+	{
 		fprintf( fp, "Bookmark: addr=%04X  desc=\"%s\" \n", bm->addr, bm->name.c_str() );
 
-      bm = dbgBmMgr.next();
-   }
+		bm = dbgBmMgr.next();
+	}
 
 	fclose(fp);
 
@@ -3289,13 +3309,14 @@ void loadGameDebugBreakpoints(void)
 	char id[64], data[128];
 
 	// If no debug windows are open, skip loading breakpoints
-	if ( dbgWinList.size() == 0 )
+	if ( dbgWin == NULL )
 	{
 		printf("No Debug Windows Open: Skipping loading of breakpoint data\n");
 		return;
 	}
 	if ( getGameDebugBreakpointFileName( stmp ) )
 	{
+		printf("Error: Failed to get load file name for debug\n");
 		return;
 	}
 

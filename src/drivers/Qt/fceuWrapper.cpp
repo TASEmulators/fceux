@@ -436,6 +436,7 @@ CloseGame(void)
 	hexEditorSaveBookmarks();
 	saveGameDebugBreakpoints();
 	debuggerClearAllBreakpoints();
+	debuggerClearAllBookmarks();
 
 	debugSymbolTable.save();
 	debugSymbolTable.clear();

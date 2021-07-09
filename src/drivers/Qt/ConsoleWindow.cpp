@@ -2698,13 +2698,20 @@ void consoleWin_t::openRamSearch(void)
 
 void consoleWin_t::openDebugWindow(void)
 {
-	ConsoleDebugger *debugWin;
-
 	//printf("Open GUI 6502 Debugger Window\n");
 	
-   debugWin = new ConsoleDebugger(this);
+	if ( debuggerWindowIsOpen() )
+	{
+		debuggerWindowSetFocus();
+	}
+	else
+	{
+		ConsoleDebugger *debugWin;
+
+		debugWin = new ConsoleDebugger(this);
 	
-   debugWin->show();
+		debugWin->show();
+	}
 }
 
 void consoleWin_t::openHexEditor(void)
