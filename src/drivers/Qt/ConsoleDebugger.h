@@ -40,6 +40,7 @@ struct dbg_asm_entry_t
 	uint8  opcode[3];
 	std::string  text;
 	debugSymbol_t  sym;
+	int  bpNum;
 
 	enum
 	{
@@ -52,6 +53,7 @@ struct dbg_asm_entry_t
 	{
 		addr = 0; bank = -1; rom = -1; 
 		size = 0; line =  0; type = ASM_TEXT;
+		bpNum = -1;
 
 		for (int i=0; i<3; i++)
 		{
@@ -116,6 +118,9 @@ class QAsmView : public QWidget
 		int  getCursorAddr(void){ return cursorLineAddr; };
 		void setPC_placement( int mode, int ofs = 0 );
 		void setBreakpointAtSelectedLine(void);
+		int  isBreakpointAtLine( int line );
+		int  isBreakpointAtAddr( int addr );
+		void determineLineBreakpoints(void);
 	protected:
 		bool event(QEvent *event) override;
 		void paintEvent(QPaintEvent *event);

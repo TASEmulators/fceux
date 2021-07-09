@@ -1586,6 +1586,8 @@ void ConsoleDebugger::bmListUpdate( bool reset )
 void ConsoleDebugger::add_BP_CB(void)
 {
 	openBpEditWindow(-1);
+
+	asmView->determineLineBreakpoints();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::edit_BP_CB(void)
@@ -1603,6 +1605,8 @@ void ConsoleDebugger::edit_BP_CB(void)
 	int row = bpTree->indexOfTopLevelItem(item);
 
 	openBpEditWindow( row, &watchpoint[row] );
+
+	asmView->determineLineBreakpoints();
 }
 //----------------------------------------------------------------------------
 static void DeleteBreak(int sel)
@@ -1706,6 +1710,7 @@ void ConsoleDebugger::delete_BP_CB(void)
 	//bpListUpdate( true );
 	
 	saveGameDebugBreakpoints(true);
+	asmView->determineLineBreakpoints();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakOnBadOpcodeCB(bool value)
@@ -2171,6 +2176,7 @@ void ConsoleDebugger::asmViewCtxMenuRunToCursor(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 {
+	int bpNum;
 	watchpointinfo wp;
 
 	wp.address = asmView->getCtxMenuAddr();
@@ -2179,8 +2185,18 @@ void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 	wp.condText = 0;
 	wp.desc = NULL;
 
-	openBpEditWindow( -1, &wp );
+	bpNum = asmView->isBreakpointAtAddr( wp.address );
 
+	if ( bpNum >= 0 )
+	{
+		openBpEditWindow( bpNum, &watchpoint[bpNum] );
+	}
+	else
+	{
+		openBpEditWindow( -1, &wp );
+	}
+
+	asmView->determineLineBreakpoints();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddBM(void)
@@ -2242,6 +2258,57 @@ void QAsmView::setPC_placement( int mode, int ofs )
 	g_config->setOption("SDL.DebuggerPCPlacement"  , pcLinePlacement);
 	g_config->setOption("SDL.DebuggerPCLineOffset" , pcLineOffset   );
 	g_config->save();
+}
+//----------------------------------------------------------------------------
+int QAsmView::isBreakpointAtAddr( int addr )
+{
+	for (int i=0; i<numWPs; i++)
+	{
+		if ( (watchpoint[i].flags & WP_X) == 0 )
+		{
+			continue;
+		}
+		if ( (watchpoint[i].flags & (BT_P|BT_S) ) != 0 )
+		{
+			continue;
+		}
+		if ( watchpoint[i].endaddress )
+		{
+			if ( (addr >= watchpoint[i].address) && 
+				addr < watchpoint[i].endaddress )
+			{
+				return i;
+			}
+		}
+		else
+		{
+			if (addr == watchpoint[i].address)
+			{
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+//----------------------------------------------------------------------------
+int QAsmView::isBreakpointAtLine( int l )
+{
+	if ( l < asmEntry.size() )
+	{
+		if ( asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT )
+		{
+			return isBreakpointAtAddr( asmEntry[l]->addr );
+		}
+	}
+	return -1;
+}
+//----------------------------------------------------------------------------
+void QAsmView::determineLineBreakpoints(void)
+{
+	for (size_t i=0; i<asmEntry.size(); i++)
+	{
+		asmEntry[i]->bpNum = isBreakpointAtLine(i);
+	}
 }
 //----------------------------------------------------------------------------
 void QAsmView::setBreakpointAtSelectedLine(void)
@@ -2697,6 +2764,8 @@ void  QAsmView::updateAssemblyView(void)
 	//setMaximumWidth( pxLineWidth + 10 );
 
 	vbar->setMaximum( asmEntry.size() );
+
+	determineLineBreakpoints();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::setRegsFromEntry(void)
@@ -4348,7 +4417,14 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 			connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuRunToCursor(void)) );
 		}
 
-		act = new QAction(tr("Add &Breakpoint"), &menu);
+		if ( isBreakpointAtAddr( addr ) >= 0 )
+		{
+			act = new QAction(tr("Edit &Breakpoint"), &menu);
+		}
+		else
+		{
+			act = new QAction(tr("Add &Breakpoint"), &menu);
+		}
 		menu.addAction(act);
 		act->setShortcut( QKeySequence(tr("B")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
@@ -4391,6 +4467,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 {
 	int x,y,l, row, nrow, selAddr;
 	int cd_boundary, asm_start_boundary;
+	int pxCharWidth2, vOffset;
 	QPainter painter(this);
 	QColor white("white"), black("black"), blue("blue");
 	QColor hlgtFG("white"), hlgtBG("blue");
@@ -4429,6 +4506,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	}
 	selAddr = parent->getBookmarkSelectedAddress();
 
+	pxCharWidth2 = (pxCharWidth/2);
 	cd_boundary = (int)(2.5*pxCharWidth) - pxLineXScroll;
 	asm_start_boundary = cd_boundary + (10*pxCharWidth);
 	//asm_stop_boundary  = asm_start_boundary + (9*pxCharWidth);
@@ -4552,6 +4630,29 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	pen.setColor( this->palette().color(QPalette::WindowText));
 	painter.setPen( pen );
 	painter.drawLine( cd_boundary, 0, cd_boundary, viewHeight );
+
+	y = pxLineSpacing;
+
+	pen.setWidth(2);
+	painter.setPen( pen );
+	painter.setBrush(Qt::red);
+	vOffset = pxLineLead + (pxLineSpacing - pxLineLead - pxCharWidth)/2;
+
+	for (row=0; row < nrow; row++)
+	{
+		x = -pxLineXScroll;
+		l = lineOffset + row;
+
+		if ( l < asmEntry.size() )
+		{
+			if ( asmEntry[l]->bpNum >= 0 )
+			{
+				painter.drawEllipse( cd_boundary - pxCharWidth2, y - pxLineSpacing + pxLineLead + vOffset, pxCharWidth, pxCharWidth );
+			}
+		}
+
+		y += pxLineSpacing;
+	}
 }
 //----------------------------------------------------------------------------
 // Bookmark Manager Methods
