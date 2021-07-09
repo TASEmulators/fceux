@@ -88,6 +88,9 @@ int openPPUViewWindow( QWidget *parent )
 {
 	if ( ppuViewWindow != NULL )
 	{
+		ppuViewWindow->activateWindow();
+		ppuViewWindow->raise();
+		ppuViewWindow->setFocus();
 		return -1;
 	}
 	initPPUViewer();
@@ -103,6 +106,9 @@ int openOAMViewWindow( QWidget *parent )
 {
 	if ( spriteViewWindow != NULL )
 	{
+		spriteViewWindow->activateWindow();
+		spriteViewWindow->raise();
+		spriteViewWindow->setFocus();
 		return -1;
 	}
 	initPPUViewer();

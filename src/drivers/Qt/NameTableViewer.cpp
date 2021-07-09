@@ -105,6 +105,9 @@ int openNameTableViewWindow( QWidget *parent )
 {
 	if ( nameTableViewWindow != NULL )
 	{
+		nameTableViewWindow->activateWindow();
+		nameTableViewWindow->raise();
+		nameTableViewWindow->setFocus();
 		return -1;
 	}
 	initNameTableViewer();
