@@ -4831,8 +4831,23 @@ debuggerBookmark_t *debuggerBookmarkManager_t::getAddr( int addr )
 DebuggerStackDisplay::DebuggerStackDisplay(QWidget *parent)
    : QPlainTextEdit(parent)
 {
-   stackBytesPerLine = 4;
-   showAddrs = true;
+	QFontMetrics fm(font());
+
+	stackBytesPerLine = 4;
+	showAddrs = true;
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = fm.horizontalAdvance(QLatin1Char('2'));
+#else
+	pxCharWidth = fm.width(QLatin1Char('2'));
+#endif
+	pxLineSpacing = fm.lineSpacing();
+
+	recalcCharsPerLine();
+
+	setMinimumWidth( pxCharWidth * charsPerLine );
+	setMinimumHeight( pxLineSpacing *  5 );
+	setMaximumHeight( pxLineSpacing * 20 );
 }
 //----------------------------------------------------------------------------
 DebuggerStackDisplay::~DebuggerStackDisplay(void)
@@ -4840,20 +4855,46 @@ DebuggerStackDisplay::~DebuggerStackDisplay(void)
 
 }
 //----------------------------------------------------------------------------
+void DebuggerStackDisplay::setFont( const QFont &font )
+{
+	QFontMetrics fm(font);
+
+	QPlainTextEdit::setFont(font);
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = fm.horizontalAdvance(QLatin1Char('2'));
+#else
+	pxCharWidth = fm.width(QLatin1Char('2'));
+#endif
+	pxLineSpacing = fm.lineSpacing();
+	
+	setMinimumWidth( pxCharWidth * charsPerLine );
+	setMinimumHeight( pxLineSpacing * 5 );
+	setMaximumHeight( pxLineSpacing * 20 );
+}
+//----------------------------------------------------------------------------
+void DebuggerStackDisplay::recalcCharsPerLine(void)
+{
+	charsPerLine = (showAddrs ? 5 : 1) + (stackBytesPerLine*3);
+}
+//----------------------------------------------------------------------------
 void DebuggerStackDisplay::keyPressEvent(QKeyEvent *event)
 {
 	//printf("Debug Stack Window Key Press: 0x%x \n", event->key() );
 
-   if ( (event->key() >= Qt::Key_1) && ( (event->key() < Qt::Key_9) ) )
-   {
-      stackBytesPerLine = event->key() - Qt::Key_0;
-      updateText();
-   }
-   else if ( event->key() == Qt::Key_A )
-   {
-      showAddrs = !showAddrs;
-      updateText();
-   }
+	if ( (event->key() >= Qt::Key_1) && ( (event->key() < Qt::Key_9) ) )
+	{
+		stackBytesPerLine = event->key() - Qt::Key_0;
+		recalcCharsPerLine();
+	
+		updateText();
+	}
+	else if ( event->key() == Qt::Key_A )
+	{
+		showAddrs = !showAddrs;
+		recalcCharsPerLine();
+		updateText();
+	}
 }
 //----------------------------------------------------------------------------
 void DebuggerStackDisplay::contextMenuEvent(QContextMenuEvent *event)
@@ -4901,33 +4942,38 @@ void DebuggerStackDisplay::contextMenuEvent(QContextMenuEvent *event)
 //----------------------------------------------------------------------------
 void DebuggerStackDisplay::toggleShowAddr(void)
 {
-   showAddrs = !showAddrs;
+	showAddrs = !showAddrs;
+	recalcCharsPerLine();
 
-   updateText();
+	updateText();
 }
 //----------------------------------------------------------------------------
 void DebuggerStackDisplay::sel1BytePerLine(void)
 {
-   stackBytesPerLine = 1;
-   updateText();
+	stackBytesPerLine = 1;
+	recalcCharsPerLine();
+	updateText();
 }
 //----------------------------------------------------------------------------
 void DebuggerStackDisplay::sel2BytesPerLine(void)
 {
-   stackBytesPerLine = 2;
-   updateText();
+	stackBytesPerLine = 1;
+	recalcCharsPerLine();
+	updateText();
 }
 //----------------------------------------------------------------------------
 void DebuggerStackDisplay::sel3BytesPerLine(void)
 {
-   stackBytesPerLine = 3;
-   updateText();
+	stackBytesPerLine = 3;
+	recalcCharsPerLine();
+	updateText();
 }
 //----------------------------------------------------------------------------
 void DebuggerStackDisplay::sel4BytesPerLine(void)
 {
-   stackBytesPerLine = 4;
-   updateText();
+	stackBytesPerLine = 4;
+	recalcCharsPerLine();
+	updateText();
 }
 //----------------------------------------------------------------------------
 void DebuggerStackDisplay::updateText(void)
@@ -4946,7 +4992,7 @@ void DebuggerStackDisplay::updateText(void)
 		}
 		else
 		{
-			sprintf( stmp, " %02X", GetMem(stackPtr) );
+			sprintf( stmp, "%02X", GetMem(stackPtr) );
 		}
 
 		stackLine.assign( stmp );
@@ -4968,7 +5014,7 @@ void DebuggerStackDisplay::updateText(void)
 					}
 					else
 					{
-						sprintf( stmp, "\n %02X", GetMem(stackPtr) );
+						sprintf( stmp, "\n%02X", GetMem(stackPtr) );
 					}
 				}
 				else
@@ -4987,5 +5033,8 @@ void DebuggerStackDisplay::updateText(void)
 	}
 
 	setPlainText( tr(stackLine.c_str()) );
+
+	setMinimumWidth( pxCharWidth * charsPerLine );
+	setMinimumHeight( pxLineSpacing * 5 );
 }
 //----------------------------------------------------------------------------

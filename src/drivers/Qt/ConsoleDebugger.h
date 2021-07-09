@@ -204,15 +204,20 @@ class DebuggerStackDisplay : public QPlainTextEdit
 	~DebuggerStackDisplay(void);
 
       void updateText(void);
+      void setFont( const QFont &font );
 
    protected:
       void keyPressEvent(QKeyEvent *event);
       void contextMenuEvent(QContextMenuEvent *event);
+      void recalcCharsPerLine(void);
 
+      int  pxCharWidth;
+      int  pxLineSpacing;
+      int  charsPerLine;
       int  stackBytesPerLine;
       bool showAddrs;
 
-	private slots:
+	public slots:
       void toggleShowAddr(void);
       void sel1BytePerLine(void);
       void sel2BytesPerLine(void);
