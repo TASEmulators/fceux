@@ -1383,10 +1383,10 @@ guiColorPickerDialog_t::guiColorPickerDialog_t( QColor *c, QWidget *parent )
 
 	mainLayout->addWidget( colorDialog );
 
-	colorDialog->setCurrentColor( *c );
 	colorDialog->setWindowFlags(Qt::Widget);
 	colorDialog->setOption( QColorDialog::DontUseNativeDialog, true );
 	colorDialog->setOption( QColorDialog::NoButtons, true );
+	colorDialog->setCurrentColor( *c );
 	
 	connect( colorDialog, SIGNAL(colorSelected(const QColor &))      , this, SLOT(colorChanged( const QColor &)) );
 	connect( colorDialog, SIGNAL(currentColorChanged(const QColor &)), this, SLOT(colorChanged( const QColor &)) );

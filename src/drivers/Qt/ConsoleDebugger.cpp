@@ -2454,14 +2454,13 @@ void  QAsmView::updateAssemblyView(void)
 
 	if ( symbolicDebugEnable )
 	{
-		asmFlags |= ASM_DEBUG_SYMS;
+		asmFlags |= ASM_DEBUG_SYMS | ASM_DEBUG_REPLACE;
 
 		if ( registerNameEnable )
 		{
 			asmFlags |= ASM_DEBUG_REGS;
 		}
 	}
-	//asmText->clear();
 
 	for (int i=0; i < 0xFFFF; i++)
 	{
@@ -4370,6 +4369,7 @@ void QAsmView::drawText( QPainter *painter, int x, int y, const char *txt )
 void QAsmView::paintEvent(QPaintEvent *event)
 {
 	int x,y,l, row, nrow, selAddr;
+	int cd_boundary, asm_start_boundary;
 	QPainter painter(this);
 	QColor white("white"), black("black"), blue("blue");
 	QColor hlgtFG("white"), hlgtBG("blue");
@@ -4408,7 +4408,13 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	}
 	selAddr = parent->getBookmarkSelectedAddress();
 
+	cd_boundary = (int)(2.5*pxCharWidth) - pxLineXScroll;
+	asm_start_boundary = cd_boundary + (10*pxCharWidth);
+	//asm_stop_boundary  = asm_start_boundary + (9*pxCharWidth);
+
 	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window) );
+	painter.fillRect( 0, 0, cd_boundary, viewHeight, this->palette().color(QPalette::Mid) );
+	painter.fillRect( asm_start_boundary, 0, (9*pxCharWidth), viewHeight, this->palette().color(QPalette::AlternateBase) );
 
 	y = pxLineSpacing;
 
@@ -4425,7 +4431,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 		{
 			if ( l == asmPC->line )
 			{
-				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("pink") );
+				painter.fillRect( cd_boundary, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("pink") );
 				forceDarkColor = true;
 			}
 		}
@@ -4434,7 +4440,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 		{
 			if ( asmEntry[l]->type != dbg_asm_entry_t::ASM_TEXT )
 			{
-				painter.fillRect( 0, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
+				painter.fillRect( cd_boundary, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
 				forceDarkColor = true;
 			}
 
@@ -4520,12 +4526,11 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			y += pxLineSpacing;
 		}
 	}
-	l = (int)(2.5*pxCharWidth) - pxLineXScroll;
 	pen = painter.pen();
 	pen.setWidth(3);
 	pen.setColor( this->palette().color(QPalette::WindowText));
 	painter.setPen( pen );
-	painter.drawLine( l, 0, l, viewHeight );
+	painter.drawLine( cd_boundary, 0, cd_boundary, viewHeight );
 }
 //----------------------------------------------------------------------------
 // Bookmark Manager Methods
