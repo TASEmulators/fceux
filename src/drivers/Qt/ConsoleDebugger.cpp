@@ -419,34 +419,34 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	subMenu  = optMenu->addMenu(tr("&Color Selection"));
 
 	// Options -> Color Selection -> Opcodes
-	opcodeColorAct = new ColorMenuItem( tr("&Opcodes"), "SDL.DebuggerSyntaxColorOpcode", this);
+	opcodeColorAct = new ColorMenuItem( tr("&Opcodes"), "SDL.AsmSyntaxColorOpcode", this);
 
 	subMenu->addAction(opcodeColorAct);
 
 	// Options -> Color Selection -> Address Values
-	addressColorAct = new ColorMenuItem( tr("&Address Values"), "SDL.DebuggerSyntaxColorAddress", this);
+	addressColorAct = new ColorMenuItem( tr("&Address Values"), "SDL.AsmSyntaxColorAddress", this);
 
 	subMenu->addAction(addressColorAct);
 
 	// Options -> Color Selection -> Immediate Values
-	immediateColorAct = new ColorMenuItem( tr("&Immediate Values"), "SDL.DebuggerSyntaxColorImmediate", this);
+	immediateColorAct = new ColorMenuItem( tr("&Immediate Values"), "SDL.AsmSyntaxColorImmediate", this);
 
 	subMenu->addAction(immediateColorAct);
 
 	// Options -> Color Selection -> Labels
-	labelColorAct = new ColorMenuItem( tr("&Labels"), "SDL.DebuggerSyntaxColorLabel", this);
+	labelColorAct = new ColorMenuItem( tr("&Labels"), "SDL.AsmSyntaxColorLabel", this);
 
 	subMenu->addAction(labelColorAct);
 
 	// Options -> Color Selection -> Comments
-	commentColorAct = new ColorMenuItem( tr("&Comments"), "SDL.DebuggerSyntaxColorComment", this);
+	commentColorAct = new ColorMenuItem( tr("&Comments"), "SDL.AsmSyntaxColorComment", this);
 
 	subMenu->addAction(commentColorAct);
 
 	subMenu->addSeparator();
 
 	// Options -> Color Selection -> (PC) Active Statement
-	pcColorAct = new ColorMenuItem( tr("(&PC) Active Statement BG"), "SDL.DebuggerSyntaxColorPC", this);
+	pcColorAct = new ColorMenuItem( tr("(&PC) Active Statement BG"), "SDL.AsmSyntaxColorPC", this);
 
 	subMenu->addAction(pcColorAct);
 
@@ -3730,12 +3730,12 @@ QAsmView::QAsmView(QWidget *parent)
 	addressColor.setRgb( 106, 90, 205 );
 	immediateColor.setRgb( 255, 1, 255 );
 
-	fceuLoadConfigColor( "SDL.DebuggerSyntaxColorOpcode"   , &opcodeColor );
-	fceuLoadConfigColor( "SDL.DebuggerSyntaxColorAddress"  , &addressColor );
-	fceuLoadConfigColor( "SDL.DebuggerSyntaxColorImmediate", &immediateColor );
-	fceuLoadConfigColor( "SDL.DebuggerSyntaxColorLabel"    , &labelColor );
-	fceuLoadConfigColor( "SDL.DebuggerSyntaxColorComment"  , &commentColor );
-	fceuLoadConfigColor( "SDL.DebuggerSyntaxColorPC"       , &pcBgColor );
+	fceuLoadConfigColor( "SDL.AsmSyntaxColorOpcode"   , &opcodeColor );
+	fceuLoadConfigColor( "SDL.AsmSyntaxColorAddress"  , &addressColor );
+	fceuLoadConfigColor( "SDL.AsmSyntaxColorImmediate", &immediateColor );
+	fceuLoadConfigColor( "SDL.AsmSyntaxColorLabel"    , &labelColor );
+	fceuLoadConfigColor( "SDL.AsmSyntaxColorComment"  , &commentColor );
+	fceuLoadConfigColor( "SDL.AsmSyntaxColorPC"       , &pcBgColor );
 
 	g_config->getOption("SDL.DebuggerAsmFont", &fontString);
 

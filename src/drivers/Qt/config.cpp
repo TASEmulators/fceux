@@ -577,12 +577,12 @@ InitConfig()
 	config->addOption("SDL.DebuggerAsmFont"        , "");
 	config->addOption("SDL.DebuggerStackFont"      , "");
 	config->addOption("SDL.DebuggerCpuStatusFont"  , "");
-	config->addOption("SDL.DebuggerSyntaxColorOpcode", "");
-	config->addOption("SDL.DebuggerSyntaxColorAddress", "");
-	config->addOption("SDL.DebuggerSyntaxColorImmediate", "");
-	config->addOption("SDL.DebuggerSyntaxColorLabel", "");
-	config->addOption("SDL.DebuggerSyntaxColorComment", "");
-	config->addOption("SDL.DebuggerSyntaxColorPC", "");
+	config->addOption("SDL.AsmSyntaxColorOpcode", "");
+	config->addOption("SDL.AsmSyntaxColorAddress", "");
+	config->addOption("SDL.AsmSyntaxColorImmediate", "");
+	config->addOption("SDL.AsmSyntaxColorLabel", "");
+	config->addOption("SDL.AsmSyntaxColorComment", "");
+	config->addOption("SDL.AsmSyntaxColorPC", "");
 
 	// Code Data Logger Options
 	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);
