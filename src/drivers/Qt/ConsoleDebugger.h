@@ -157,6 +157,7 @@ class QAsmView : public QWidget
 		void drawAsmLine( QPainter *painter, int x, int y, const char *txt );
 		void drawLabelLine( QPainter *painter, int x, int y, const char *txt );
 		void drawCommentLine( QPainter *painter, int x, int y, const char *txt );
+		void drawPointerPC( QPainter *painter, int xl, int yl );
 
 	private:
 		ConsoleDebugger *parent;

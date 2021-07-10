@@ -3999,10 +3999,10 @@ void QAsmView::calcFontData(void)
 #else
 	pxCharWidth = metrics.width(QLatin1Char('2'));
 #endif
-	pxCharHeight   = metrics.height();
+	pxCharHeight   = metrics.capHeight();
 	pxLineSpacing  = metrics.lineSpacing() * 1.25;
-	pxLineLead     = pxLineSpacing - pxCharHeight;
-	pxCursorHeight = pxCharHeight;
+	pxLineLead     = pxLineSpacing - metrics.height();
+	pxCursorHeight = metrics.height();
 
 	viewLines   = (viewHeight / pxLineSpacing) + 1;
 
@@ -4712,6 +4712,39 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 	}
 }
 //----------------------------------------------------------------------------
+void QAsmView::drawPointerPC( QPainter *painter, int xl, int yl )
+{
+	int x, y, w, h, b, b2;
+	QPoint p[3];
+
+	b  = 2;
+	b2 = 2*b;
+
+	w =  pxCharWidth;
+	h = (pxCharHeight / 4);
+
+	x = xl + (pxCharWidth*2);
+	y = yl -  pxCharHeight + (pxCharHeight - h - b2)/2;
+
+	painter->fillRect( x, y, w, h+b2, Qt::black );
+
+	x = xl + (pxCharWidth*3);
+	y = yl;
+
+	p[0] = QPoint( x, y );
+	p[1] = QPoint( x, y-pxCharHeight );
+	p[2] = QPoint( x+pxCharWidth, y-(pxCharHeight/2) );
+
+	painter->setBrush(Qt::red);
+
+	painter->drawPolygon( p, 3 );
+
+	x = xl + (pxCharWidth*2);
+	y = yl -  pxCharHeight + (pxCharHeight - h)/2;
+
+	painter->fillRect( x+b, y, w, h, Qt::red );
+}
+//----------------------------------------------------------------------------
 void QAsmView::drawText( QPainter *painter, int x, int y, const char *txt )
 {
 	int i=0;
@@ -4877,6 +4910,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	QColor hlgtFG("white"), hlgtBG("blue");
 	bool forceDarkColor = false;
 	bool txtHlgtSet = false;
+	bool lineIsPC = false;
 	QPen pen;
 
 	painter.setFont(font);
@@ -4940,7 +4974,16 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			{
 				painter.fillRect( cd_boundary, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, pcBgColor );
 				forceDarkColor = true;
+				lineIsPC = true;
 			}
+			else
+			{
+				lineIsPC = false;
+			}
+		}
+		else
+		{
+			lineIsPC = false;
 		}
 
 		if ( l < asmEntry.size() )
@@ -5064,6 +5107,27 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 		if ( l < asmEntry.size() )
 		{
+			if ( asmPC != NULL )
+			{
+				if ( l == asmPC->line )
+				{
+					lineIsPC = true;
+				}
+				else
+				{
+					lineIsPC = false;
+				}
+			}
+			else
+			{
+				lineIsPC = false;
+			}
+
+			if ( lineIsPC )
+			{
+				drawPointerPC( &painter, x, y );
+			}
+
 			if ( asmEntry[l]->bpNum >= 0 )
 			{
 				painter.drawEllipse( cd_boundary - pxCharWidth2, y - pxLineSpacing + pxLineLead + vOffset, pxCharWidth, pxCharWidth );
