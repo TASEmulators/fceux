@@ -134,7 +134,12 @@ void ColorMenuItem::openColorPicker(void)
 	//printf("Open Color Picker\n");
 	if ( picker == NULL )
 	{
-		picker = new ColorMenuPickerDialog_t( colorPtr, title.toStdString().c_str(), parentWidget() );
+		QString qs;
+
+		qs = title;
+		qs.replace( "&", "", Qt::CaseInsensitive); // get rid of & accelerator characters
+
+		picker = new ColorMenuPickerDialog_t( colorPtr, qs.toStdString().c_str(), parentWidget() );
 
 		picker->show();
 
@@ -148,7 +153,7 @@ void ColorMenuItem::openColorPicker(void)
 //----------------------------------------------------------------------------
 //------ Color Menu Picker
 //----------------------------------------------------------------------------
-ColorMenuPickerDialog_t::ColorMenuPickerDialog_t( QColor *c, const char *txt, QWidget *parent )
+ColorMenuPickerDialog_t::ColorMenuPickerDialog_t( QColor *c, const char *titleText, QWidget *parent )
 	: QDialog( parent )
 {
 	QVBoxLayout *mainLayout;
@@ -161,7 +166,7 @@ ColorMenuPickerDialog_t::ColorMenuPickerDialog_t( QColor *c, const char *txt, QW
 
 	style = this->style();
 
-	sprintf( stmp, "Pick Color for %s", txt);
+	sprintf( stmp, "Pick Color for %s", titleText);
 
 	setWindowTitle( stmp );
 

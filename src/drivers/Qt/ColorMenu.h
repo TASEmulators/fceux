@@ -16,7 +16,7 @@ class ColorMenuPickerDialog_t : public QDialog
 	Q_OBJECT
 
 	public:
-		ColorMenuPickerDialog_t( QColor *c, const char *txt, QWidget *parent = 0);
+		ColorMenuPickerDialog_t( QColor *c, const char *titleText, QWidget *parent = 0);
 		~ColorMenuPickerDialog_t(void);
 
 	protected:
