@@ -559,7 +559,7 @@ static int emu_getdir(lua_State *L) {
 	return 1;
 #elif __linux__
 	char exePath[ 2048 ];
-   ssize_t count = ::readlink( "/proc/self/exe", exePath, sizeof(exePath)-1 );
+	ssize_t count = ::readlink( "/proc/self/exe", exePath, sizeof(exePath)-1 );
 
 	if ( count > 0 )
 	{
@@ -584,7 +584,7 @@ static int emu_getdir(lua_State *L) {
 	if ( result == 0 )
 	{
 		char *dir;
-		exePath[ bufSize ] = 0;
+		exePath[ sizeof(exePath)-1 ] = 0;
 		//printf("EXE Path: '%s' \n", exePath );
 
 		dir = ::dirname( exePath );
