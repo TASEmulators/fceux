@@ -46,7 +46,7 @@ ColorMenuItem::ColorMenuItem( QString txt, QWidget *parent)
 //----------------------------------------------------------------------------
 ColorMenuItem::~ColorMenuItem(void)
 {
-	printf("Destroy Color Menu Item\n");
+	//printf("Destroy Color Menu Item\n");
 }
 //----------------------------------------------------------------------------
 void ColorMenuItem::connectColor( QColor *c )

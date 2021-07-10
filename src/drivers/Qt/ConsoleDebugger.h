@@ -151,6 +151,8 @@ class QAsmView : public QWidget
 		void loadClipboard( const char *txt );
 		void drawText( QPainter *painter, int x, int y, const char *txt );
 		void drawAsmLine( QPainter *painter, int x, int y, const char *txt );
+		void drawLabelLine( QPainter *painter, int x, int y, const char *txt );
+		void drawCommentLine( QPainter *painter, int x, int y, const char *txt );
 
 	private:
 		ConsoleDebugger *parent;

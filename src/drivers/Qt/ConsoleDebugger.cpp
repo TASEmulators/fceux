@@ -3686,11 +3686,11 @@ QAsmView::QAsmView(QWidget *parent)
 
 	useDarkTheme = false;
 
-	opcodeColor.setRgb( 255, 0, 0 );
-	labelColor.setRgb( 255, 255, 0 );
-	commentColor.setRgb( 0, 255, 0 );
-	addressColor.setRgb( 0,  0, 255 );
-	immediateColor.setRgb( 255, 0, 255 );
+	opcodeColor.setRgb( 46, 139, 87 );
+	labelColor.setRgb( 165,  42, 42 );
+	commentColor.setRgb( 0, 0, 255 );
+	addressColor.setRgb( 106, 90, 205 );
+	immediateColor.setRgb( 255, 1, 255 );
 
 	g_config->getOption("SDL.DebuggerAsmFont", &fontString);
 
@@ -4745,6 +4745,50 @@ void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
 	}
 }
 //----------------------------------------------------------------------------
+void QAsmView::drawLabelLine( QPainter *painter, int x, int y, const char *txt )
+{
+	int i=0;
+	char c[2];
+
+	c[0] = 0; c[1] = 0;
+
+	// Label Text
+	painter->setPen( this->palette().color(QPalette::WindowText));
+
+	while ( (txt[i] != 0) )
+	{
+		if ( isalnum(txt[i]) || (txt[i] == '_') )
+		{
+			painter->setPen( labelColor );
+		}
+		else
+		{
+			painter->setPen( this->palette().color(QPalette::WindowText));
+		}
+		c[0] = txt[i];
+		painter->drawText( x, y, tr(c) );
+		i++; x += pxCharWidth;
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::drawCommentLine( QPainter *painter, int x, int y, const char *txt )
+{
+	int i=0;
+	char c[2];
+
+	c[0] = 0; c[1] = 0;
+
+	// Comment Text
+	painter->setPen( commentColor );
+
+	while ( (txt[i] != 0) )
+	{
+		c[0] = txt[i];
+		painter->drawText( x, y, tr(c) );
+		i++; x += pxCharWidth;
+	}
+}
+//----------------------------------------------------------------------------
 void QAsmView::paintEvent(QPaintEvent *event)
 {
 	int x,y,l, row, nrow, selAddr;
@@ -4819,11 +4863,11 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 		if ( l < asmEntry.size() )
 		{
-			if ( asmEntry[l]->type != dbg_asm_entry_t::ASM_TEXT )
-			{
-				painter.fillRect( cd_boundary, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
-				forceDarkColor = true;
-			}
+			//if ( asmEntry[l]->type != dbg_asm_entry_t::ASM_TEXT )
+			//{
+			//	painter.fillRect( cd_boundary, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
+			//	forceDarkColor = true;
+			//}
 
 			if ( forceDarkColor )
 			{
@@ -4837,9 +4881,13 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			{
 				drawAsmLine( &painter, x, y, asmEntry[l]->text.c_str() );
 			}
+			else if ( asmEntry[l]->type == dbg_asm_entry_t::SYMBOL_NAME )
+			{
+				drawLabelLine( &painter, x, y, asmEntry[l]->text.c_str() );
+			}
 			else
 			{
-				drawText( &painter, x, y, asmEntry[l]->text.c_str() );
+				drawCommentLine( &painter, x, y, asmEntry[l]->text.c_str() );
 			}
 
 			if ( (selAddrLine == l) )
