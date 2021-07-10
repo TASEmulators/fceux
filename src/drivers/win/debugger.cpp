@@ -1704,6 +1704,8 @@ inline void UpdateOptionsPopup(HMENU optionsPopup)
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_SHOW_ROM_OFFSETS, CheckedFlag(debuggerDisplayROMoffsets));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_SHOW_TRACE_INFO, CheckedFlag(debuggerShowTraceInfo));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_BAD_OPCODES, CheckedFlag(FCEUI_Debugger().badopbreak));
+	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_UNLOGGED_CODE, CheckedFlag(break_on_unlogged_code));
+	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_UNLOGGED_DATA, CheckedFlag(break_on_unlogged_data));
 }
 
 inline void UpdateSymbolsPopup(HMENU symbolsPopup)
@@ -1979,6 +1981,12 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			break;
 		case ID_DEBUGGER_BREAK_BAD_OPCODES:
 			FCEUI_Debugger().badopbreak ^= 1;
+			break;
+		case ID_DEBUGGER_BREAK_UNLOGGED_CODE:
+			break_on_unlogged_code ^= 1;
+			break;
+		case ID_DEBUGGER_BREAK_UNLOGGED_DATA:
+			break_on_unlogged_data ^= 1;
 			break;
 		case ID_DEBUGGER_RESTORE_SIZE:
 			RestoreSize(hwndDlg);
