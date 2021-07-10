@@ -1430,7 +1430,11 @@ GamePadView_t::GamePadView_t(QWidget *parent)
 #else
 	pxCharWidth = fm.width(QLatin1Char('2'));
 #endif
-	pxCharHeight = fm.lineSpacing();
+	pxCharHeight  = fm.capHeight();
+	pxLineSpacing = fm.lineSpacing();
+	pxLineLead    = fm.leading();
+	pxLineLead2   = pxLineLead / 2;
+	pxLeftBearing = fm.leftBearing(QLatin1Char('A'));
 
 	portNum = 0;
 }
@@ -1482,7 +1486,25 @@ void GamePadView_t::drawLetterOnButton(QPainter &painter, QRect &rect, QColor &c
 	y = rect.y() + (rect.height() - pxCharHeight) / 2;
 
 	painter.setPen(color);
-	painter.drawText(x, y + pxCharHeight, tr(c));
+	painter.setFont(font);
+	painter.drawText(x + pxLeftBearing, y + pxCharHeight - pxLineLead2, tr(c));
+}
+//----------------------------------------------------
+void GamePadView_t::setFontPixelSize(int px)
+{
+	font.setPixelSize( px );
+	QFontMetrics fm(font);
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = fm.horizontalAdvance(QLatin1Char('2'));
+#else
+	pxCharWidth = fm.width(QLatin1Char('2'));
+#endif
+	pxCharHeight  = fm.capHeight();
+	pxLineSpacing = fm.lineSpacing();
+	pxLineLead    = fm.leading();
+	pxLineLead2   = pxLineLead / 2;
+	pxLeftBearing = fm.leftBearing(QLatin1Char('A'));
 }
 //----------------------------------------------------
 void GamePadView_t::paintEvent(QPaintEvent *event)
@@ -1611,8 +1633,10 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	//bw = w3 / 3;
 	bh = h / 3;
 	bw = bh;
+	setFontPixelSize( bh / 2 );
+	painter.setFont(font);
 
-	ht = pxCharHeight;
+	ht = pxLineSpacing;
 	bh = (h - ht) / 3;
 	bw = bh;
 	hs = (ht - pxCharHeight) / 2;

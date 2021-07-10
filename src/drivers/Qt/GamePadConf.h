@@ -135,6 +135,7 @@ protected:
 	void mousePressEvent(QMouseEvent *event);
 	//void contextMenuEvent(QContextMenuEvent *event);
 
+	void setFontPixelSize(int px);
 	void drawLetterOnButton(QPainter &painter, QRect &rect, QColor &color, int ch);
 
 	int portNum;
@@ -142,6 +143,10 @@ protected:
 	int viewHeight;
 	int pxCharWidth;
 	int pxCharHeight;
+	int pxLineSpacing;
+	int pxLineLead;
+	int pxLineLead2;
+	int pxLeftBearing;
 
 	QFont font;
 };
