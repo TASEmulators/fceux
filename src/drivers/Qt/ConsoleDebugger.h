@@ -115,6 +115,7 @@ class QAsmView : public QWidget
 		void setDisplayROMoffsets( bool value );
 		void setSymbolDebugEnable( bool value );
 		void setRegisterNameEnable( bool value );
+		void setDisplayByteCodes( bool value );
 		int  getCtxMenuAddr(void){ return ctxMenuAddr; };
 		int  getCursorAddr(void){ return cursorLineAddr; };
 		void setPC_placement( int mode, int ofs = 0 );
@@ -129,6 +130,7 @@ class QAsmView : public QWidget
 		QColor  immediateColor;
 		QColor  commentColor;
 		QColor  labelColor;
+		QColor  pcBgColor;
 
 	protected:
 		bool event(QEvent *event) override;
@@ -145,6 +147,8 @@ class QAsmView : public QWidget
 		void toggleBreakpoint(int line);
 
 		void calcFontData(void);
+		void calcMinimumWidth(void);
+		void calcLineOffsets(void);
 		QPoint convPixToCursor( QPoint p );
 		bool textIsHighlighted(void);
 		void setHighlightEndCoord( int x, int y );
@@ -208,6 +212,7 @@ class QAsmView : public QWidget
 		bool  symbolicDebugEnable;
 		bool  registerNameEnable;
 		bool  mouseLeftBtnDown;
+		bool  showByteCodes;
 
 };
 
@@ -314,8 +319,11 @@ class ConsoleDebugger : public QDialog
 		QFont      font;
 
 		ColorMenuItem *opcodeColorAct;
+		ColorMenuItem *addressColorAct;
+		ColorMenuItem *immediateColorAct;
 		ColorMenuItem *commentColorAct;
 		ColorMenuItem *labelColorAct;
+		ColorMenuItem *pcColorAct;
 
 		int   selBmAddrVal;
 		bool  windowUpdateReq;
@@ -355,6 +363,7 @@ class ConsoleDebugger : public QDialog
 		void delete_BM_CB(void);
 		void resetCountersCB (void);
 		void reloadSymbolsCB(void);
+		void displayByteCodesCB(bool value);
 		void displayROMoffsetCB(bool value);
 		void symbolDebugEnableCB(bool value);
 		void registerNameEnableCB(bool value);

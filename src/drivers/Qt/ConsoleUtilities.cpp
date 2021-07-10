@@ -38,6 +38,7 @@
 
 #include "../../fceu.h"
 #include "../../x6502.h"
+#include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleUtilities.h"
 
 //---------------------------------------------------------------------------
@@ -290,7 +291,19 @@ int fceuExecutablePath( char *outputPath, int outputSize )
 #endif
 	return -1;
 }
+//---------------------------------------------------------------------------
+int fceuLoadConfigColor( const char *confName, QColor *color )
+{
+	std::string colorString;
 
+	g_config->getOption(confName, &colorString);
+
+	if ( (color != NULL) && (colorString.size() > 0) )
+	{
+		color->setNamedColor( colorString.c_str() );
+	}
+	return 0;
+}
 //---------------------------------------------------------------------------
 // FCEU Data Entry Custom Validators
 //---------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <QColor>
 #include <QValidator>
 
 int  getDirFromFile( const char *path, char *dir );
@@ -14,6 +15,7 @@ int parseFilepath( const char *filepath, char *dir, char *base, char *suffix = N
 
 int fceuExecutablePath( char *outputPath, int outputSize );
 
+int fceuLoadConfigColor( const char *confName, QColor *color );
 
 class fceuDecIntValidtor : public QValidator
 { 

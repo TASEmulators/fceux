@@ -16,7 +16,7 @@ class ColorMenuPickerDialog_t : public QDialog
 	Q_OBJECT
 
 	public:
-		ColorMenuPickerDialog_t( QColor *c, QWidget *parent = 0);
+		ColorMenuPickerDialog_t( QColor *c, const char *txt, QWidget *parent = 0);
 		~ColorMenuPickerDialog_t(void);
 
 	protected:
@@ -41,7 +41,7 @@ class ColorMenuItem : public QAction
 	Q_OBJECT
 
 	public:
-		ColorMenuItem( QString txt, QWidget *parent = 0);
+		ColorMenuItem( QString txt, const char *confName, QWidget *parent = 0);
 		~ColorMenuItem(void);
 
 		void connectColor( QColor *c );
@@ -50,6 +50,7 @@ class ColorMenuItem : public QAction
 		QColor  *colorPtr;
 		QColor   lastColor;
 		ColorMenuPickerDialog_t *picker;
+		const char *confName;
 
 		void setImageColor( QColor c );
 	public slots:

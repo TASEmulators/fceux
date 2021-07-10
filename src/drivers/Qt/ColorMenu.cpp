@@ -31,13 +31,15 @@
 #include <QStyle>
 
 #include "Qt/ColorMenu.h"
+#include "Qt/fceuWrapper.h"
 //----------------------------------------------------------------------------
-ColorMenuItem::ColorMenuItem( QString txt, QWidget *parent)
+ColorMenuItem::ColorMenuItem( QString txt, const char *confNameConst, QWidget *parent)
 	: QAction( txt, parent)
 {
 	title = txt;
 	picker = NULL;
 	colorPtr = &lastColor;
+	confName = confNameConst;
 
 	setImageColor( Qt::red );
 
@@ -108,6 +110,22 @@ void ColorMenuItem::pickerClosed(int ret)
 	picker = NULL;
 
 	setImageColor( *colorPtr );
+
+	if ( ret )
+	{
+		if ( confName != NULL )
+		{
+			QString colorText;
+
+			colorText = colorPtr->name();
+
+			//printf("Saving '%s' = Color string '%s'\n", confName.c_str(), colorText.toStdString().c_str() );
+
+			g_config->setOption( confName, colorText.toStdString().c_str() );
+
+			g_config->save();
+		}
+	}
 	//printf("Picker Closed: %i\n", ret );
 }
 //----------------------------------------------------------------------------
@@ -116,7 +134,7 @@ void ColorMenuItem::openColorPicker(void)
 	//printf("Open Color Picker\n");
 	if ( picker == NULL )
 	{
-		picker = new ColorMenuPickerDialog_t( colorPtr, parentWidget() );
+		picker = new ColorMenuPickerDialog_t( colorPtr, title.toStdString().c_str(), parentWidget() );
 
 		picker->show();
 
@@ -130,7 +148,7 @@ void ColorMenuItem::openColorPicker(void)
 //----------------------------------------------------------------------------
 //------ Color Menu Picker
 //----------------------------------------------------------------------------
-ColorMenuPickerDialog_t::ColorMenuPickerDialog_t( QColor *c, QWidget *parent )
+ColorMenuPickerDialog_t::ColorMenuPickerDialog_t( QColor *c, const char *txt, QWidget *parent )
 	: QDialog( parent )
 {
 	QVBoxLayout *mainLayout;
@@ -143,7 +161,7 @@ ColorMenuPickerDialog_t::ColorMenuPickerDialog_t( QColor *c, QWidget *parent )
 
 	style = this->style();
 
-	sprintf( stmp, "Pick Color");
+	sprintf( stmp, "Pick Color for %s", txt);
 
 	setWindowTitle( stmp );
 
@@ -220,7 +238,7 @@ void ColorMenuPickerDialog_t::colorChanged( const QColor &color )
 void ColorMenuPickerDialog_t::colorAccepted(void)
 {
 	//printf("nesColorPicker Accepted: %zi\n", colorChangeHistory.size() );
-	done(0);
+	done(1);
 	deleteLater();
 }
 //----------------------------------------------------------------------------
