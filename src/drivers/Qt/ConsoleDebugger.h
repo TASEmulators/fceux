@@ -28,6 +28,7 @@
 
 #include "Qt/main.h"
 #include "Qt/SymbolicDebug.h"
+#include "Qt/ColorMenu.h"
 #include "../../debug.h"
 
 struct dbg_asm_entry_t
@@ -122,6 +123,13 @@ class QAsmView : public QWidget
 		int  isBreakpointAtAddr( int addr );
 		void determineLineBreakpoints(void);
 		void setFont( const QFont &font );
+
+		QColor  opcodeColor;
+		QColor  addressColor;
+		QColor  immediateColor;
+		QColor  commentColor;
+		QColor  labelColor;
+
 	protected:
 		bool event(QEvent *event) override;
 		void paintEvent(QPaintEvent *event);
@@ -142,6 +150,7 @@ class QAsmView : public QWidget
 		void setHighlightEndCoord( int x, int y );
 		void loadClipboard( const char *txt );
 		void drawText( QPainter *painter, int x, int y, const char *txt );
+		void drawAsmLine( QPainter *painter, int x, int y, const char *txt );
 
 	private:
 		ConsoleDebugger *parent;
@@ -169,6 +178,10 @@ class QAsmView : public QWidget
 		int cursorLineAddr;
 		int pcLinePlacement;
 		int pcLineOffset;
+		int pcLocLinePos;
+		int byteCodeLinePos;
+		int opcodeLinePos;
+		int operandLinePos;
 
 		int  selAddrLine;
 		int  selAddrChar;
@@ -297,6 +310,10 @@ class ConsoleDebugger : public QDialog
 		//QLabel    *cpuInstrsLbl2;
 		QTimer    *periodicTimer;
 		QFont      font;
+
+		ColorMenuItem *opcodeColorAct;
+		ColorMenuItem *commentColorAct;
+		ColorMenuItem *labelColorAct;
 
 		int   selBmAddrVal;
 		bool  windowUpdateReq;

@@ -71,6 +71,7 @@
 #include "Qt/HexEditor.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/ColorMenu.h"
 
 // Where are these defined?
 extern int vblankScanLines;
@@ -413,6 +414,24 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	connect( act, SIGNAL(triggered(void)), this, SLOT(changeCpuFontCB(void)) );
 
 	subMenu->addAction(act);
+
+	// Options -> Color Selection
+	subMenu  = optMenu->addMenu(tr("&Color Selection"));
+
+	// Options -> Color Selection -> Opcodes
+	opcodeColorAct = new ColorMenuItem( tr("&Opcodes"), this);
+
+	subMenu->addAction(opcodeColorAct);
+
+	// Options -> Color Selection -> Labels
+	labelColorAct = new ColorMenuItem( tr("&Labels"), this);
+
+	subMenu->addAction(labelColorAct);
+
+	// Options -> Color Selection -> Comments
+	commentColorAct = new ColorMenuItem( tr("&Comments"), this);
+
+	subMenu->addAction(commentColorAct);
 
 	optMenu->addSeparator();
 
@@ -975,6 +994,10 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	restoreGeometry(settings.value("debugger/geometry").toByteArray());
 
 	setCpuStatusFont( cpuFont );
+
+	 opcodeColorAct->connectColor( &asmView->opcodeColor );
+	  labelColorAct->connectColor( &asmView->labelColor  );
+	commentColorAct->connectColor( &asmView->commentColor);
 }
 //----------------------------------------------------------------------------
 ConsoleDebugger::~ConsoleDebugger(void)
@@ -3663,6 +3686,12 @@ QAsmView::QAsmView(QWidget *parent)
 
 	useDarkTheme = false;
 
+	opcodeColor.setRgb( 255, 0, 0 );
+	labelColor.setRgb( 255, 255, 0 );
+	commentColor.setRgb( 0, 255, 0 );
+	addressColor.setRgb( 0,  0, 255 );
+	immediateColor.setRgb( 255, 0, 255 );
+
 	g_config->getOption("SDL.DebuggerAsmFont", &fontString);
 
 	if ( fontString.size() > 0 )
@@ -3761,6 +3790,10 @@ QAsmView::QAsmView(QWidget *parent)
 	//printf("clipboard->supportsSelection() : '%i' \n", clipboard->supportsSelection() );
 	//printf("clipboard->supportsFindBuffer(): '%i' \n", clipboard->supportsFindBuffer() );
 
+	pcLocLinePos    = 4;
+	byteCodeLinePos = 12;
+	opcodeLinePos   = 22;
+	operandLinePos  = 25;
 }
 //----------------------------------------------------------------------------
 QAsmView::~QAsmView(void)
@@ -4616,6 +4649,102 @@ void QAsmView::drawText( QPainter *painter, int x, int y, const char *txt )
 	}
 }
 //----------------------------------------------------------------------------
+void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
+{
+	int i=0;
+	char c[2];
+
+	c[0] = 0; c[1] = 0;
+
+	// CD Log Area
+	painter->setPen( this->palette().color(QPalette::WindowText));
+
+	while ( (i<pcLocLinePos) && (txt[i] != 0) )
+	{
+		c[0] = txt[i];
+		painter->drawText( x, y, tr(c) );
+		i++; x += pxCharWidth;
+	}
+
+	// Address Area
+	painter->setPen( this->palette().color(QPalette::WindowText));
+
+	while ( (i<byteCodeLinePos) && (txt[i] != 0) )
+	{
+		c[0] = txt[i];
+		painter->drawText( x, y, tr(c) );
+		i++; x += pxCharWidth;
+	}
+
+	// Byte Code Area
+	painter->setPen( this->palette().color(QPalette::WindowText));
+
+	while ( (i<opcodeLinePos) && (txt[i] != 0) )
+	{
+		c[0] = txt[i];
+		painter->drawText( x, y, tr(c) );
+		i++; x += pxCharWidth;
+	}
+
+	// Opcode Area
+	painter->setPen( opcodeColor );
+
+	while ( (i<operandLinePos) && (txt[i] != 0) )
+	{
+		c[0] = txt[i];
+		painter->drawText( x, y, tr(c) );
+		i++; x += pxCharWidth;
+	}
+
+	// Operand Area
+	painter->setPen( this->palette().color(QPalette::WindowText));
+
+	while ( (txt[i] != 0) )
+	{
+		if ( (txt[i] == '$') && isxdigit( txt[i+1] ) )
+		{
+			painter->setPen( addressColor );
+
+			c[0] = txt[i];
+			painter->drawText( x, y, tr(c) );
+			i++; x += pxCharWidth;
+
+			while ( isxdigit( txt[i] ) )
+			{
+				c[0] = txt[i];
+				painter->drawText( x, y, tr(c) );
+				i++; x += pxCharWidth;
+			}
+		}
+		else if ( (txt[i] == '#') && (txt[i+1] == '$') && isxdigit( txt[i+2] ) )
+		{
+			painter->setPen( immediateColor );
+
+			c[0] = txt[i];
+			painter->drawText( x, y, tr(c) );
+			i++; x += pxCharWidth;
+
+			c[0] = txt[i];
+			painter->drawText( x, y, tr(c) );
+			i++; x += pxCharWidth;
+
+			while ( isxdigit( txt[i] ) )
+			{
+				c[0] = txt[i];
+				painter->drawText( x, y, tr(c) );
+				i++; x += pxCharWidth;
+			}
+		}
+		else
+		{
+			painter->setPen( this->palette().color(QPalette::WindowText));
+			c[0] = txt[i];
+			painter->drawText( x, y, tr(c) );
+			i++; x += pxCharWidth;
+		}
+	}
+}
+//----------------------------------------------------------------------------
 void QAsmView::paintEvent(QPaintEvent *event)
 {
 	int x,y,l, row, nrow, selAddr;
@@ -4704,7 +4833,14 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			{
 				painter.setPen( this->palette().color(QPalette::WindowText));
 			}
-			drawText( &painter, x, y, asmEntry[l]->text.c_str() );
+			if ( asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT )
+			{
+				drawAsmLine( &painter, x, y, asmEntry[l]->text.c_str() );
+			}
+			else
+			{
+				drawText( &painter, x, y, asmEntry[l]->text.c_str() );
+			}
 
 			if ( (selAddrLine == l) )
 			{	// Highlight ASM line for selected address.
