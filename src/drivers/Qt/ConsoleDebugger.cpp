@@ -90,21 +90,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 {
 	QVBoxLayout *mainLayoutv;
 	QHBoxLayout *mainLayouth;
-	QVBoxLayout *vbox, *vbox1, *vbox2, /* *vbox3,*/ *vbox4;
-	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3;
 	QGridLayout *grid;
-	QPushButton *button;
-	QFrame      *frame;
-	QLabel      *lbl;
 	QMenuBar    *menuBar;
-	QMenu       *fileMenu, *viewMenu, *debugMenu,
-		    *optMenu, *symMenu, *subMenu;
-	QActionGroup *actGroup;
-	QAction     *act;
-	float fontCharWidth;
-	QTreeWidgetItem * item;
-	int opt, useNativeMenuBar;
-	//fceuDecIntValidtor *validator;
 	QSettings settings;
 	QFont cpuFont;
 	std::string fontString;
@@ -127,14 +114,158 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	font.setStyleHint( QFont::Monospace );
 	QFontMetrics fm(font);
 
-	fontCharWidth = fm.averageCharWidth();
-
 	setWindowTitle("6502 Debugger");
 
 	//resize( 512, 512 );
 	
-	menuBar = new QMenuBar(this);
-	toolBar = new QToolBar(this);
+	menuBar = buildMenuBar();
+	toolBar = buildToolBar();
+
+	mainLayoutv = new QVBoxLayout();
+	mainLayouth = new QHBoxLayout();
+
+	mainLayoutv->setMenuBar( menuBar );
+	mainLayoutv->addWidget( toolBar );
+	mainLayoutv->addLayout( mainLayouth );
+
+	grid       = new QGridLayout();
+	asmView    = new QAsmView(this);
+	vbar       = new QScrollBar( Qt::Vertical, this );
+	hbar       = new QScrollBar( Qt::Horizontal, this );
+	asmLineSelLbl = new QLabel( tr("Line Select") );
+	emuStatLbl    = new QLabel( tr("Emulator is Running") );
+
+	asmLineSelLbl->setWordWrap( true );
+
+	asmView->setScrollBars( hbar, vbar );
+
+	grid->addWidget( asmView, 0, 0 );
+	grid->addWidget( vbar   , 0, 1 );
+	grid->addWidget( hbar   , 1, 0 );
+
+	 asmDpyVbox   = new QVBoxLayout();
+	dataDpyVbox   = new QVBoxLayout();
+
+	hbar->setMinimum(0);
+	hbar->setMaximum(100);
+	vbar->setMinimum(0);
+	vbar->setMaximum( 0x10000 );
+
+	asmDpyVbox->addLayout( grid, 100 );
+	asmDpyVbox->addWidget( asmLineSelLbl, 1 );
+	asmDpyVbox->addWidget( emuStatLbl   , 1 );
+	//asmText->setFont(font);
+	//asmText->setReadOnly(true);
+	//asmText->setOverwriteMode(true);
+	//asmText->setMinimumWidth( 20 * fontCharWidth );
+	//asmText->setLineWrapMode( QPlainTextEdit::NoWrap );
+
+	mainLayouth->addLayout(  asmDpyVbox, 5 );
+	mainLayouth->addLayout( dataDpyVbox, 4 );
+
+	buildCpuListDisplay();
+	buildPpuListDisplay();
+	buildBpListDisplay();
+	buildBmListDisplay();
+
+	dataDpyVbox->addWidget( cpuFrame, 10 );
+	dataDpyVbox->addWidget( ppuFrame, 10 );
+	dataDpyVbox->addWidget( bpFrame , 100);
+	dataDpyVbox->addWidget( bmFrame , 100);
+
+	setLayout( mainLayoutv );
+
+	windowUpdateReq   = true;
+
+	dbgWin = this;
+
+	periodicTimer  = new QTimer( this );
+
+	connect( periodicTimer, &QTimer::timeout, this, &ConsoleDebugger::updatePeriodic );
+	connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
+	connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
+
+	bpListUpdate( false );
+
+	periodicTimer->start( 100 ); // 10hz
+
+	// If this is the first debug window to open, load breakpoints fresh
+	{ 
+		int autoLoadDebug;
+
+		g_config->getOption( "SDL.AutoLoadDebugFiles", &autoLoadDebug );
+
+		if ( autoLoadDebug )
+		{
+			loadGameDebugBreakpoints();
+		}
+	}
+
+	restoreGeometry(settings.value("debugger/geometry").toByteArray());
+
+	setCpuStatusFont( cpuFont );
+
+	   opcodeColorAct->connectColor( &asmView->opcodeColor );
+	  addressColorAct->connectColor( &asmView->addressColor );
+	immediateColorAct->connectColor( &asmView->immediateColor );
+	    labelColorAct->connectColor( &asmView->labelColor  );
+	  commentColorAct->connectColor( &asmView->commentColor);
+	       pcColorAct->connectColor( &asmView->pcBgColor);
+}
+//----------------------------------------------------------------------------
+ConsoleDebugger::~ConsoleDebugger(void)
+{
+	std::list <ConsoleDebugger*>::iterator it;
+
+	//printf("Destroy Debugger Window\n");
+	periodicTimer->stop();
+
+	if ( dbgWin == this )
+	{
+		dbgWin = NULL;
+	}
+
+	if ( dbgWin == NULL )
+	{
+		saveGameDebugBreakpoints();
+		debuggerClearAllBreakpoints();
+		debuggerClearAllBookmarks();
+
+		if ( waitingAtBp )
+		{
+			FCEUI_SetEmulationPaused(0);
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::closeEvent(QCloseEvent *event)
+{
+	QSettings settings;
+	//printf("Debugger Close Window Event\n");
+	settings.setValue("debugger/geometry", saveGeometry());
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::closeWindow(void)
+{
+	QSettings settings;
+	//printf("Close Window\n");
+	settings.setValue("debugger/geometry", saveGeometry());
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+QMenuBar *ConsoleDebugger::buildMenuBar(void)
+{
+	QMenu       *fileMenu, *viewMenu, *debugMenu,
+		    *optMenu, *symMenu, *subMenu;
+	QActionGroup *actGroup;
+	QAction     *act;
+	int opt, useNativeMenuBar=0;
+
+	QMenuBar *menuBar = new QMenuBar(this);
 
 	// This is needed for menu bar to show up on MacOS
 	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
@@ -511,6 +642,15 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	// Menu End
 	//-----------------------------------------------------------------------
 	
+	return menuBar;
+}
+//----------------------------------------------------------------------------
+QToolBar *ConsoleDebugger::buildToolBar(void)
+{
+	QAction     *act;
+
+	QToolBar *toolBar = new QToolBar(this);
+
 	//-----------------------------------------------------------------------
 	// Tool Bar Setup Start
 	//-----------------------------------------------------------------------
@@ -601,58 +741,44 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	// Tool Bar Setup End
 	//-----------------------------------------------------------------------
 	
-	mainLayoutv = new QVBoxLayout();
-	mainLayouth = new QHBoxLayout();
+	return toolBar;
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::buildCpuListDisplay(void)
+{
+	QVBoxLayout *vbox1;
+	QHBoxLayout *hbox, *hbox1;
+	QGridLayout *grid;
+	QLabel      *lbl;
+	QFont        cpuFont;
+	std::string  fontString;
+	int          fontCharWidth;
 
-	mainLayoutv->setMenuBar( menuBar );
-	mainLayoutv->addWidget( toolBar );
-	mainLayoutv->addLayout( mainLayouth );
+	g_config->getOption("SDL.DebuggerCpuStatusFont", &fontString);
 
-	vbox4      = new QVBoxLayout();
-	grid       = new QGridLayout();
-	asmView    = new QAsmView(this);
-	vbar       = new QScrollBar( Qt::Vertical, this );
-	hbar       = new QScrollBar( Qt::Horizontal, this );
-	asmLineSelLbl = new QLabel( tr("Line Select") );
-	emuStatLbl    = new QLabel( tr("Emulator is Running") );
+	if ( fontString.size() > 0 )
+	{
+		cpuFont.fromString( QString::fromStdString( fontString ) );
+	}
+	else
+	{
+		cpuFont.setFamily("Courier New");
+		cpuFont.setStyle( QFont::StyleNormal );
+		cpuFont.setStyleHint( QFont::Monospace );
+	}
 
-	asmLineSelLbl->setWordWrap( true );
+	QFontMetrics fm(cpuFont);
 
-	asmView->setScrollBars( hbar, vbar );
-
-	grid->addWidget( asmView, 0, 0 );
-	grid->addWidget( vbar   , 0, 1 );
-	grid->addWidget( hbar   , 1, 0 );
+	fontCharWidth = fm.averageCharWidth();
 
 	vbox1   = new QVBoxLayout();
-	vbox2   = new QVBoxLayout();
 	hbox1   = new QHBoxLayout();
-
-	dataDpyVbox = vbox1;
-
-	hbar->setMinimum(0);
-	hbar->setMaximum(100);
-	vbar->setMinimum(0);
-	vbar->setMaximum( 0x10000 );
-
-	vbox4->addLayout( grid, 100 );
-	vbox4->addWidget( asmLineSelLbl, 1 );
-	vbox4->addWidget( emuStatLbl   , 1 );
-	//asmText->setFont(font);
-	//asmText->setReadOnly(true);
-	//asmText->setOverwriteMode(true);
-	//asmText->setMinimumWidth( 20 * fontCharWidth );
-	//asmText->setLineWrapMode( QPlainTextEdit::NoWrap );
-
-	mainLayouth->addLayout( vbox4, 5 );
-	mainLayouth->addLayout( vbox1, 4 );
 
 	cpuFrame = new QGroupBox( tr("CPU Status") );
 	grid     = new QGridLayout();
 
-	vbox1->addWidget( cpuFrame, 10 );
-	hbox1->addLayout( vbox2, 1 );
-	vbox2->addLayout( grid  );
+	hbox1->addLayout( vbox1, 1 );
+	vbox1->addLayout( grid  );
 	cpuFrame->setLayout( hbox1 );
 
 	hbox = new QHBoxLayout();
@@ -779,6 +905,82 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//stackText->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
 	//stackText->setMaximumWidth( 16 * fontCharWidth );
 
+	sfFrame = new QGroupBox(tr("Status Flags"));
+	grid    = new QGridLayout();
+	sfFrame->setLayout( grid );
+
+	N_chkbox = new QCheckBox( tr("N") );
+	V_chkbox = new QCheckBox( tr("V") );
+	U_chkbox = new QCheckBox( tr("U") );
+	B_chkbox = new QCheckBox( tr("B") );
+	D_chkbox = new QCheckBox( tr("D") );
+	I_chkbox = new QCheckBox( tr("I") );
+	Z_chkbox = new QCheckBox( tr("Z") );
+	C_chkbox = new QCheckBox( tr("C") );
+
+	N_chkbox->setToolTip( tr("Negative" ) );
+	V_chkbox->setToolTip( tr("Overflow" ) );
+	U_chkbox->setToolTip( tr("Unused"   ) );
+	B_chkbox->setToolTip( tr("Break"    ) );
+	D_chkbox->setToolTip( tr("Decimal"  ) );
+	I_chkbox->setToolTip( tr("Interrupt") );
+	Z_chkbox->setToolTip( tr("Zero"     ) );
+	C_chkbox->setToolTip( tr("Carry"    ) );
+
+	grid->addLayout( regPHbox, 0, 0, 2, 1);
+	grid->addWidget( N_chkbox, 0, 1, Qt::AlignLeft );
+	grid->addWidget( V_chkbox, 0, 2, Qt::AlignLeft );
+	grid->addWidget( U_chkbox, 0, 3, Qt::AlignLeft );
+	grid->addWidget( B_chkbox, 0, 4, Qt::AlignLeft );
+	grid->addWidget( D_chkbox, 1, 1, Qt::AlignLeft );
+	grid->addWidget( I_chkbox, 1, 2, Qt::AlignLeft );
+	grid->addWidget( Z_chkbox, 1, 3, Qt::AlignLeft );
+	grid->addWidget( C_chkbox, 1, 4, Qt::AlignLeft );
+
+	vbox1->addWidget( sfFrame);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::buildPpuListDisplay(void)
+{
+	QVBoxLayout *vbox;
+
+	ppuStatContainerWidget = new QWidget(this);
+
+	vbox        = new QVBoxLayout();
+	ppuFrame    = new QGroupBox( tr("PPU Status") );
+	ppuLbl      = new QLabel( tr("PPU:") );
+	spriteLbl   = new QLabel( tr("Sprite:") );
+	scanLineLbl = new QLabel( tr("Scanline:") );
+	pixLbl      = new QLabel( tr("Pixel:") );
+
+	ppuFrame->setCheckable(true);
+	ppuFrame->setChecked(true);
+	connect( ppuFrame, SIGNAL(toggled(bool)), this, SLOT(setPpuFrameVis(bool)) );
+
+	vbox->addWidget( ppuLbl );
+	vbox->addWidget( spriteLbl );
+	vbox->addWidget( scanLineLbl );
+	vbox->addWidget( pixLbl );
+
+	ppuStatContainerWidget->setLayout( vbox  );
+
+	ppuStatHideLbl = new QLabel( tr("Hidden") );
+	ppuStatHideLbl->setVisible(false);
+
+	vbox = new QVBoxLayout();
+	vbox->addWidget( ppuStatContainerWidget );
+	vbox->addWidget( ppuStatHideLbl );
+
+	ppuFrame->setLayout( vbox  );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::buildBpListDisplay(void)
+{
+	QVBoxLayout *vbox;
+	QHBoxLayout *hbox;
+	QPushButton *button;
+	QTreeWidgetItem *item;
+
 	bpFrame = new QGroupBox(tr("Breakpoints"));
 	vbox    = new QVBoxLayout();
 	bpTree  = new QTreeWidget();
@@ -829,120 +1031,33 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	vbox->addWidget( bpTree );
 	vbox->addLayout( hbox   );
+	bpTreeContainerWidget = new QWidget(this);
+	bpTreeContainerWidget->setLayout( vbox );
+	vbox    = new QVBoxLayout();
+	vbox->addWidget( bpTreeContainerWidget );
 	vbox->addWidget( bpTreeHideLbl );
 	bpFrame->setLayout( vbox );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::buildBmListDisplay(void)
+{
+	QVBoxLayout *vbox;
+	QHBoxLayout *hbox;
+	QPushButton *button;
+	QTreeWidgetItem *item;
 
-	sfFrame = new QGroupBox(tr("Status Flags"));
-	grid    = new QGridLayout();
-	sfFrame->setLayout( grid );
+	bmTreeContainerWidget = new QWidget(this);
 
-	N_chkbox = new QCheckBox( tr("N") );
-	V_chkbox = new QCheckBox( tr("V") );
-	U_chkbox = new QCheckBox( tr("U") );
-	B_chkbox = new QCheckBox( tr("B") );
-	D_chkbox = new QCheckBox( tr("D") );
-	I_chkbox = new QCheckBox( tr("I") );
-	Z_chkbox = new QCheckBox( tr("Z") );
-	C_chkbox = new QCheckBox( tr("C") );
-
-	N_chkbox->setToolTip( tr("Negative" ) );
-	V_chkbox->setToolTip( tr("Overflow" ) );
-	U_chkbox->setToolTip( tr("Unused"   ) );
-	B_chkbox->setToolTip( tr("Break"    ) );
-	D_chkbox->setToolTip( tr("Decimal"  ) );
-	I_chkbox->setToolTip( tr("Interrupt") );
-	Z_chkbox->setToolTip( tr("Zero"     ) );
-	C_chkbox->setToolTip( tr("Carry"    ) );
-
-	grid->addLayout( regPHbox, 0, 0, 2, 1);
-	grid->addWidget( N_chkbox, 0, 1, Qt::AlignLeft );
-	grid->addWidget( V_chkbox, 0, 2, Qt::AlignLeft );
-	grid->addWidget( U_chkbox, 0, 3, Qt::AlignLeft );
-	grid->addWidget( B_chkbox, 0, 4, Qt::AlignLeft );
-	grid->addWidget( D_chkbox, 1, 1, Qt::AlignLeft );
-	grid->addWidget( I_chkbox, 1, 2, Qt::AlignLeft );
-	grid->addWidget( Z_chkbox, 1, 3, Qt::AlignLeft );
-	grid->addWidget( C_chkbox, 1, 4, Qt::AlignLeft );
-
-	vbox1->addWidget( bpFrame, 100);
-	vbox2->addWidget( sfFrame);
-	//hbox1->addLayout( vbox3  );
-
-	hbox2       = new QHBoxLayout();
-	vbox        = new QVBoxLayout();
-	frame       = new QFrame();
-	ppuLbl      = new QLabel( tr("PPU:") );
-	spriteLbl   = new QLabel( tr("Sprite:") );
-	scanLineLbl = new QLabel( tr("Scanline:") );
-	pixLbl      = new QLabel( tr("Pixel:") );
-	vbox->addWidget( ppuLbl );
-	vbox->addWidget( spriteLbl );
-	vbox->addWidget( scanLineLbl );
-	vbox->addWidget( pixLbl );
-	vbox1->addLayout( hbox2, 10 );
-	hbox2->addWidget( frame );
-	frame->setLayout( vbox  );
-	frame->setFrameShape( QFrame::Box );
-
-	//vbox          = new QVBoxLayout();
-	//cpuCyclesLbl1 = new QLabel( tr("CPU Cycles:") );
-	//cpuCyclesLbl2 = new QLabel( tr("(+0):") );
-	//cpuInstrsLbl1 = new QLabel( tr("Instructions:") );
-	//cpuInstrsLbl2 = new QLabel( tr("(+0):") );
-	//brkCpuCycExd  = new QCheckBox( tr("Break when Exceed") );
-	//brkInstrsExd  = new QCheckBox( tr("Break when Exceed") );
-	//cpuCycExdVal  = new QLineEdit( tr("0") );
-	//instrExdVal   = new QLineEdit( tr("0") );
-	//hbox          = new QHBoxLayout();
-	//vbox->addLayout( hbox );
-	//hbox->addWidget( cpuCyclesLbl1 );
-	//hbox->addWidget( cpuCyclesLbl2 );
-	//hbox         = new QHBoxLayout();
-	//vbox->addLayout( hbox );
-	//hbox->addWidget( brkCpuCycExd );
-	//hbox->addWidget( cpuCycExdVal, 1, Qt::AlignLeft );
-
-	//hbox         = new QHBoxLayout();
-	//vbox->addLayout( hbox );
-	//hbox->addWidget( cpuInstrsLbl1 );
-	//hbox->addWidget( cpuInstrsLbl2 );
-	//hbox         = new QHBoxLayout();
-	//vbox->addLayout( hbox );
-	//hbox->addWidget( brkInstrsExd );
-	//hbox->addWidget( instrExdVal, 1, Qt::AlignLeft );
-	//hbox2->addLayout( vbox );
-
-	//validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
-	//cpuCycExdVal->setFont( font );
-	//cpuCycExdVal->setMaxLength( 16 );
-	//cpuCycExdVal->setValidator( validator );
-	//cpuCycExdVal->setAlignment(Qt::AlignLeft);
-	//cpuCycExdVal->setMaximumWidth( 18 * fontCharWidth );
-	//cpuCycExdVal->setCursorPosition(0);
-	//connect( cpuCycExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(cpuCycleThresChanged(const QString &)));
-
-	//validator = new fceuDecIntValidtor( 0, 0x3FFFFFFF, this );
-	//instrExdVal->setFont( font );
-	//instrExdVal->setMaxLength( 16 );
-	//instrExdVal->setValidator( validator );
-	//instrExdVal->setAlignment(Qt::AlignLeft);
-	//instrExdVal->setMaximumWidth( 18 * fontCharWidth );
-	//instrExdVal->setCursorPosition(0);
-	//connect( instrExdVal, SIGNAL(textEdited(const QString &)), this, SLOT(instructionsThresChanged(const QString &)));
-
-	//brkCpuCycExd->setChecked( break_on_cycles );
-	//connect( brkCpuCycExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnCyclesCB(int)) );
-
-	//brkInstrsExd->setChecked( break_on_instructions );
-	//connect( brkInstrsExd, SIGNAL(stateChanged(int)), this, SLOT(breakOnInstructionsCB(int)) );
-
-	hbox3     = new QHBoxLayout();
 	hbox      = new QHBoxLayout();
 	vbox      = new QVBoxLayout();
 	bmFrame   = new QGroupBox( tr("Address Bookmarks") );
 	bmTree    = new QTreeWidget();
 	selBmAddr = new QLineEdit();
 	selBmAddrVal = 0;
+
+	bmFrame->setCheckable(true);
+	bmFrame->setChecked(true);
+	connect( bmFrame, SIGNAL(toggled(bool)), this, SLOT(setBmFrameVis(bool)) );
 
 	connect( selBmAddr, SIGNAL(textChanged(const QString &)), this, SLOT(selBmAddrChanged(const QString &)));
 
@@ -984,105 +1099,18 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	hbox->addWidget( bmTree, 10 );
 	hbox->addLayout( vbox  ,  1 );
-	bmFrame->setLayout( hbox );
-	hbox3->addWidget( bmFrame );
-	vbox1->addLayout( hbox3, 100 );
 
-	//frame        = new QFrame();
-	//vbox         = new QVBoxLayout();
-	//button       = new QPushButton( tr("Reset Counters") );
-	//connect( button, SIGNAL(clicked(void)), this, SLOT(resetCountersCB(void)) );
-	//vbox->addWidget( button );
-	//vbox->addWidget( frame  );
-	//hbox3->addLayout( vbox  );
+	bmTreeContainerWidget->setLayout( hbox );
+	bmTreeHideLbl = new QLabel( tr("Hidden") );
 
-	// IDA font is just a monospace font, we are forcing this anyway. It is just easier to read the assembly.
-	// If a different font is desired, my thought is to open a QFontDialog and let the user pick a new font,
-	// rather than use a checkbox that selects between two. But for the moment, I have more important things
-	// to do.
+	bmTreeContainerWidget->setVisible(true);
+	bmTreeHideLbl->setVisible(false);
 
-	setLayout( mainLayoutv );
+	vbox = new QVBoxLayout();
+	vbox->addWidget( bmTreeContainerWidget );
+	vbox->addWidget( bmTreeHideLbl );
 
-	windowUpdateReq   = true;
-
-	dbgWin = this;
-
-	periodicTimer  = new QTimer( this );
-
-	connect( periodicTimer, &QTimer::timeout, this, &ConsoleDebugger::updatePeriodic );
-	connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
-	connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
-
-	bpListUpdate( false );
-
-	periodicTimer->start( 100 ); // 10hz
-
-	// If this is the first debug window to open, load breakpoints fresh
-	{ 
-		int autoLoadDebug;
-
-		g_config->getOption( "SDL.AutoLoadDebugFiles", &autoLoadDebug );
-
-		if ( autoLoadDebug )
-		{
-			loadGameDebugBreakpoints();
-		}
-	}
-
-	restoreGeometry(settings.value("debugger/geometry").toByteArray());
-
-	setCpuStatusFont( cpuFont );
-
-	   opcodeColorAct->connectColor( &asmView->opcodeColor );
-	  addressColorAct->connectColor( &asmView->addressColor );
-	immediateColorAct->connectColor( &asmView->immediateColor );
-	    labelColorAct->connectColor( &asmView->labelColor  );
-	  commentColorAct->connectColor( &asmView->commentColor);
-	       pcColorAct->connectColor( &asmView->pcBgColor);
-}
-//----------------------------------------------------------------------------
-ConsoleDebugger::~ConsoleDebugger(void)
-{
-	std::list <ConsoleDebugger*>::iterator it;
-
-	//printf("Destroy Debugger Window\n");
-	periodicTimer->stop();
-
-	if ( dbgWin == this )
-	{
-		dbgWin = NULL;
-	}
-
-	if ( dbgWin == NULL )
-	{
-		saveGameDebugBreakpoints();
-		debuggerClearAllBreakpoints();
-		debuggerClearAllBookmarks();
-
-		if ( waitingAtBp )
-		{
-			FCEUI_SetEmulationPaused(0);
-		}
-	}
-}
-//----------------------------------------------------------------------------
-void ConsoleDebugger::closeEvent(QCloseEvent *event)
-{
-	QSettings settings;
-	//printf("Debugger Close Window Event\n");
-	settings.setValue("debugger/geometry", saveGeometry());
-	done(0);
-	deleteLater();
-	event->accept();
-}
-//----------------------------------------------------------------------------
-void ConsoleDebugger::closeWindow(void)
-{
-	QSettings settings;
-	//printf("Close Window\n");
-	settings.setValue("debugger/geometry", saveGeometry());
-	done(0);
-	deleteLater();
+	bmFrame->setLayout( vbox );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::setCpuStatusFont( const QFont &font )
@@ -1699,12 +1727,24 @@ void ConsoleDebugger::bmListUpdate( bool reset )
 	bmTree->viewport()->update();
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::setPpuFrameVis(bool vis)
+{
+	ppuStatContainerWidget->setVisible(vis);
+	ppuStatHideLbl->setVisible(!vis);
+
+	if ( vis )
+	{
+		dataDpyVbox->setStretchFactor( ppuFrame, 10);
+	}
+	else
+	{
+		dataDpyVbox->setStretchFactor( ppuFrame,  1);
+	}
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::setBpFrameVis(bool vis)
 {
-	bpTree->setVisible(vis);
-	bpAddBtn->setVisible(vis);
-	bpEditBtn->setVisible(vis);
-	bpDelBtn->setVisible(vis);
+	bpTreeContainerWidget->setVisible(vis);
 	bpTreeHideLbl->setVisible(!vis);
 
 	if ( vis )
@@ -1714,6 +1754,21 @@ void ConsoleDebugger::setBpFrameVis(bool vis)
 	else
 	{
 		dataDpyVbox->setStretchFactor( bpFrame,   1);
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::setBmFrameVis(bool vis)
+{
+	bmTreeContainerWidget->setVisible(vis);
+	bmTreeHideLbl->setVisible(!vis);
+
+	if ( vis )
+	{
+		dataDpyVbox->setStretchFactor( bmFrame, 100);
+	}
+	else
+	{
+		dataDpyVbox->setStretchFactor( bmFrame,   1);
 	}
 }
 //----------------------------------------------------------------------------

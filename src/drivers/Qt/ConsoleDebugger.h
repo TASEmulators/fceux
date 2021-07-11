@@ -25,6 +25,7 @@
 #include <QClipboard>
 #include <QScrollBar>
 #include <QToolBar>
+#include <QMenuBar>
 
 #include "Qt/main.h"
 #include "Qt/SymbolicDebug.h"
@@ -291,6 +292,7 @@ class ConsoleDebugger : public QDialog
 		QLineEdit *cpuCyclesVal;
 		QLineEdit *cpuInstrsVal;
 		QGroupBox *cpuFrame;
+		QGroupBox *ppuFrame;
 		QGroupBox *stackFrame;
 		QGroupBox *bpFrame;
 		QGroupBox *sfFrame;
@@ -310,6 +312,9 @@ class ConsoleDebugger : public QDialog
 		QCheckBox *C_chkbox;
 		//QCheckBox *brkCpuCycExd;
 		//QCheckBox *brkInstrsExd;
+		QWidget   *bpTreeContainerWidget;
+		QWidget   *bmTreeContainerWidget;
+		QWidget   *ppuStatContainerWidget;
 		QLabel    *emuStatLbl;
 		QLabel    *ppuLbl;
 		QLabel    *spriteLbl;
@@ -320,9 +325,12 @@ class ConsoleDebugger : public QDialog
 		QLabel    *cpuInstrsLbl1;
 		//QLabel    *cpuInstrsLbl2;
 		QLabel    *bpTreeHideLbl;
+		QLabel    *bmTreeHideLbl;
+		QLabel    *ppuStatHideLbl;
 		QTimer    *periodicTimer;
 		QFont      font;
 
+		QVBoxLayout   *asmDpyVbox;
 		QVBoxLayout   *dataDpyVbox;
 
 		ColorMenuItem *opcodeColorAct;
@@ -339,6 +347,13 @@ class ConsoleDebugger : public QDialog
 		void setRegsFromEntry(void);
 		void bpListUpdate( bool reset = false );
 		void bmListUpdate( bool reset = false );
+		void buildCpuListDisplay(void);
+		void buildPpuListDisplay(void);
+		void buildBpListDisplay(void);
+		void buildBmListDisplay(void);
+
+		QMenuBar *buildMenuBar(void);
+		QToolBar *buildToolBar(void);
 
 	public slots:
 		void closeWindow(void);
@@ -368,7 +383,9 @@ class ConsoleDebugger : public QDialog
 		void add_BM_CB(void);
 		void edit_BM_CB(void);
 		void delete_BM_CB(void);
+		void setPpuFrameVis(bool);
 		void setBpFrameVis(bool);
+		void setBmFrameVis(bool);
 		void resetCountersCB (void);
 		void reloadSymbolsCB(void);
 		void displayByteCodesCB(bool value);
