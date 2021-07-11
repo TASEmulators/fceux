@@ -4032,9 +4032,11 @@ bool QAsmView::event(QEvent *event)
 {
 	if (event->type() == QEvent::ToolTip)
 	{
-		int line;
+		int i,j, line, addr = 0;
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 		bool opcodeValid = false, showOpcodeDesc = false, showSymHexDecode = false;
+		bool showAddrDesc = false, showOperandAddrDesc = false;
+		char stmp[256];
 
 		QPoint c = convPixToCursor(helpEvent->pos());
 
@@ -4044,6 +4046,8 @@ bool QAsmView::event(QEvent *event)
 				(asmEntry[line]->type == dbg_asm_entry_t::ASM_TEXT);
 
 		showOpcodeDesc = (c.x() >= opcodeLinePos) && (c.x() < operandLinePos) && opcodeValid;
+
+		showAddrDesc = (c.x() >= pcLocLinePos) && (c.x() < byteCodeLinePos) && opcodeValid;
 
 		if ( (c.x() > operandLinePos) && opcodeValid && (asmEntry[line]->sym.name.size() > 0) )
 		{
@@ -4062,6 +4066,51 @@ bool QAsmView::event(QEvent *event)
 			}
 		}
 
+		if ( (c.x() > operandLinePos) && opcodeValid )
+		{
+			i = c.x();
+
+			if ( isxdigit( asmEntry[line]->text[i] ) )
+			{
+				int addrClicked = 1;
+				int addrTextLoc = i;
+
+				while ( isxdigit( asmEntry[line]->text[i] ) )
+				{
+					addrTextLoc = i;
+					i--;
+				}
+				if ( asmEntry[line]->text[i] == '$' || asmEntry[line]->text[i] == ':' )
+				{
+					i--;
+				}
+				else
+				{
+					addrClicked = 0;
+				}
+				if ( asmEntry[line]->text[i] == '#' )
+				{
+					addrClicked = 0;
+				}
+				if ( addrClicked )
+				{
+					j=0; i = addrTextLoc;
+					
+					while ( isxdigit( asmEntry[line]->text[i] ) )
+					{
+						stmp[j] = asmEntry[line]->text[i]; i++; j++;
+					}
+					stmp[j] = 0;
+
+					//printf("Addr: '%s'\n", stmp );
+
+					addr = strtol( stmp, NULL, 16 );
+
+					showOperandAddrDesc = true;
+				}
+			}
+		}
+
 		if ( showOpcodeDesc )
 		{
 			QString qs = fceuGetOpcodeToolTip(asmEntry[line]->opcode, asmEntry[line]->size );
@@ -4071,9 +4120,43 @@ bool QAsmView::event(QEvent *event)
 		}
 		else if ( showSymHexDecode )
 		{
-			char stmp[64];
-
 			sprintf( stmp, "$%04X", asmEntry[line]->sym.ofs );
+
+			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
+		}
+		else if ( showAddrDesc )
+		{
+			if ( asmEntry[line]->bank < 0 )
+			{
+				sprintf( stmp, "ADDR:\t$%04X", asmEntry[line]->sym.ofs );
+			}
+			else
+			{
+				sprintf( stmp, "ADDR:\t$%04X\nBANK:\t$%02X\nROM:\t$%06X", 
+					asmEntry[line]->sym.ofs, asmEntry[line]->bank, asmEntry[line]->rom );
+			}
+
+			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
+		}
+		else if ( showOperandAddrDesc )
+		{
+			int bank = -1, romOfs = -1;
+
+			if (addr >= 0x8000)
+			{
+				bank   = getBank(addr);
+				romOfs = GetNesFileAddress(addr);
+			}
+
+			if ( bank < 0 )
+			{
+				sprintf( stmp, "ADDR:\t$%04X", addr );
+			}
+			else
+			{
+				sprintf( stmp, "ADDR:\t$%04X\nBANK:\t$%02X\nROM:\t$%06X", 
+					addr, bank, romOfs );
+			}
 
 			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 		}
