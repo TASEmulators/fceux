@@ -363,7 +363,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	act = new QAction(tr("&Left"), this);
 	act->setStatusTip(tr("Left"));
 	act->setCheckable(true);
-	act->setChecked(true);
+	act->setChecked( cpuStatDpyCol == 0 );
 	iPtr = &cpuStatDpyCol;
 	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 0 ); } );
 	actGroup->addAction(act);
@@ -373,7 +373,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	act = new QAction(tr("&Right"), this);
 	act->setStatusTip(tr("Right"));
 	act->setCheckable(true);
-	act->setChecked(false);
+	act->setChecked( cpuStatDpyCol == 1 );
 	iPtr = &cpuStatDpyCol;
 	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 1 ); } );
 	actGroup->addAction(act);
@@ -402,7 +402,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	act = new QAction(tr("&Left"), this);
 	act->setStatusTip(tr("Left"));
 	act->setCheckable(true);
-	act->setChecked(true);
+	act->setChecked( ppuStatDpyCol == 0 );
 	iPtr = &ppuStatDpyCol;
 	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 0 ); } );
 	actGroup->addAction(act);
@@ -412,7 +412,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	act = new QAction(tr("&Right"), this);
 	act->setStatusTip(tr("Right"));
 	act->setCheckable(true);
-	act->setChecked(false);
+	act->setChecked( ppuStatDpyCol == 1 );
 	iPtr = &ppuStatDpyCol;
 	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 1 ); } );
 	actGroup->addAction(act);
@@ -441,7 +441,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	act = new QAction(tr("&Left"), this);
 	act->setStatusTip(tr("Left"));
 	act->setCheckable(true);
-	act->setChecked(true);
+	act->setChecked( bpTreeDpyCol == 0 );
 	iPtr = &bpTreeDpyCol;
 	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 0 ); } );
 	actGroup->addAction(act);
@@ -451,7 +451,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	act = new QAction(tr("&Right"), this);
 	act->setStatusTip(tr("Right"));
 	act->setCheckable(true);
-	act->setChecked(false);
+	act->setChecked( bpTreeDpyCol == 1 );
 	iPtr = &bpTreeDpyCol;
 	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 1 ); } );
 	actGroup->addAction(act);
@@ -480,7 +480,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	act = new QAction(tr("&Left"), this);
 	act->setStatusTip(tr("Left"));
 	act->setCheckable(true);
-	act->setChecked(true);
+	act->setChecked( bmTreeDpyCol == 0 );
 	iPtr = &bmTreeDpyCol;
 	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 0 ); } );
 	actGroup->addAction(act);
@@ -490,7 +490,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	act = new QAction(tr("&Right"), this);
 	act->setStatusTip(tr("Right"));
 	act->setCheckable(true);
-	act->setChecked(false);
+	act->setChecked( bmTreeDpyCol == 1 );
 	iPtr = &bmTreeDpyCol;
 	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 1 ); } );
 	actGroup->addAction(act);
