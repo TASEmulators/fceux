@@ -4452,7 +4452,8 @@ bool QAsmView::event(QEvent *event)
 			}
 		}
 
-		if ( (c.x() > operandLinePos) && opcodeValid )
+		if ( opcodeValid && (c.x() > operandLinePos) &&
+				(c.x() < asmEntry[line]->text.size()) )
 		{
 			i = c.x();
 
