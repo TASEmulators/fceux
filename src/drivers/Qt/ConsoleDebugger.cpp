@@ -4515,12 +4515,12 @@ bool QAsmView::event(QEvent *event)
 		{
 			if ( asmEntry[line]->bank < 0 )
 			{
-				sprintf( stmp, "ADDR:\t$%04X", asmEntry[line]->sym.ofs );
+				sprintf( stmp, "ADDR:\t$%04X", asmEntry[line]->addr );
 			}
 			else
 			{
 				sprintf( stmp, "ADDR:\t$%04X\nBANK:\t$%02X\nROM:\t$%06X", 
-					asmEntry[line]->sym.ofs, asmEntry[line]->bank, asmEntry[line]->rom );
+					asmEntry[line]->addr, asmEntry[line]->bank, asmEntry[line]->rom );
 			}
 
 			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
