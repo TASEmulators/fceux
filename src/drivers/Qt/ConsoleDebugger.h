@@ -110,9 +110,12 @@ class QAsmView : public QWidget
 		void updateAssemblyView(void);
 		void asmClear(void);
 		int  getAsmLineFromAddr(int addr);
+		int  getAsmAddrFromLine(int line);
 		void setLine(int lineNum);
 		void setXScroll(int value);
 		void scrollToPC(void);
+		void scrollToLine( int line );
+		void setSelAddrToLine( int line );
 		void setDisplayROMoffsets( bool value );
 		void setSymbolDebugEnable( bool value );
 		void setRegisterNameEnable( bool value );
@@ -141,6 +144,7 @@ class QAsmView : public QWidget
 		void mousePressEvent(QMouseEvent * event);
 		void mouseReleaseEvent(QMouseEvent * event);
 		void mouseMoveEvent(QMouseEvent * event);
+		void mouseDoubleClickEvent(QMouseEvent * event);
 		void resizeEvent(QResizeEvent *event);
 		void wheelEvent(QWheelEvent *event);
 		void contextMenuEvent(QContextMenuEvent *event);
@@ -375,6 +379,7 @@ class ConsoleDebugger : public QDialog
 
 	public slots:
 		void closeWindow(void);
+		void asmViewCtxMenuGoTo(void);
 		void asmViewCtxMenuAddBP(void);
 		void asmViewCtxMenuAddBM(void);
 		void asmViewCtxMenuAddSym(void);

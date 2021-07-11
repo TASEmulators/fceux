@@ -2702,6 +2702,20 @@ void ConsoleDebugger::asmViewCtxMenuRunToCursor(void)
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::asmViewCtxMenuGoTo(void)
+{
+	int line;
+
+	line = asmView->getAsmLineFromAddr( asmView->getCtxMenuAddr() );
+
+	asmView->scrollToLine( line );
+
+	if ( asmView->getAsmAddrFromLine(line) == asmView->getCtxMenuAddr() )
+	{
+		asmView->setSelAddrToLine(line);
+	}
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 {
 	int bpNum;
@@ -2886,6 +2900,15 @@ void QAsmView::setBreakpointAtSelectedLine(void)
 		FCEUI_SetEmulationPaused(0);
 		fceuWrapperUnLock();
 	}
+}
+//----------------------------------------------------------------------------
+int  QAsmView::getAsmAddrFromLine(int line)
+{
+	if ( (line >= 0) && (line < asmEntry.size()) )
+	{
+		return asmEntry[line]->addr;
+	}
+	return -1;
 }
 //----------------------------------------------------------------------------
 int  QAsmView::getAsmLineFromAddr(int addr)
@@ -4266,53 +4289,72 @@ void QAsmView::scrollToPC(void)
 {
 	if ( asmPC != NULL )
 	{
-		int ofs = 0;
-		int maxOfs = (viewLines-3);
+		scrollToLine( asmPC->line );
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::scrollToLine( int line )
+{
+	int ofs = 0;
+	int maxOfs = (viewLines-3);
 
-		if ( maxOfs < 0 )
-		{
-			maxOfs = 0;
-		}
+	if ( maxOfs < 0 )
+	{
+		maxOfs = 0;
+	}
 
-		switch ( pcLinePlacement )
-		{
-			default:
-			case 0:
+	switch ( pcLinePlacement )
+	{
+		default:
+		case 0:
+			ofs = 0;
+		break;
+		case 1:
+			ofs = (viewLines / 4);
+		break;
+		case 2:
+			ofs = (viewLines / 2);
+		break;
+		case 3:
+			ofs = (viewLines*3) / 4;
+		break;
+		case 4:
+			ofs =  maxOfs;
+		break;
+		case 5:
+			ofs = pcLineOffset;
+
+			if ( ofs < 0 )
+			{
 				ofs = 0;
-			break;
-			case 1:
-				ofs = (viewLines / 4);
-			break;
-			case 2:
-				ofs = (viewLines / 2);
-			break;
-			case 3:
-				ofs = (viewLines*3) / 4;
-			break;
-			case 4:
-				ofs =  maxOfs;
-			break;
-			case 5:
-				ofs = pcLineOffset;
+			}
+			else if ( ofs > maxOfs )
+			{
+				ofs = maxOfs;
+			}
+		break;
+	}
 
-				if ( ofs < 0 )
-				{
-					ofs = 0;
-				}
-				else if ( ofs > maxOfs )
-				{
-					ofs = maxOfs;
-				}
-			break;
-		}
+	lineOffset = line - ofs;
 
-		lineOffset = asmPC->line - ofs;
-
-		if ( lineOffset < 0 )
-		{
-			lineOffset = 0;
-		}
-		vbar->setValue( lineOffset );
+	if ( lineOffset < 0 )
+	{
+		lineOffset = 0;
+	}
+	vbar->setValue( lineOffset );
+}
+//----------------------------------------------------------------------------
+void QAsmView::setSelAddrToLine( int line )
+{
+	if ( (line >= 0) && (line < asmEntry.size()) )
+	{
+		int addr = asmEntry[line]->addr;
+		selAddrLine  = line;
+		selAddrChar  = pcLocLinePos + 3;
+		selAddrWidth = 4;
+		selAddrValue = addr;
+		sprintf( selAddrText, "%04X", addr );
+		printf("Set Select ADDR:%04X\n", addr);
 	}
 }
 //----------------------------------------------------------------------------
@@ -4897,10 +4939,41 @@ void QAsmView::mouseReleaseEvent(QMouseEvent * event)
 	if ( event->button() == Qt::LeftButton )
 	{
 		//printf("Left Button Release: (%i,%i)\n", c.x(), c.y() );
-		mouseLeftBtnDown = false;
-		setHighlightEndCoord( c.x(), line );
 
-		loadHighlightToClipboard();
+		if ( mouseLeftBtnDown )
+		{
+			mouseLeftBtnDown = false;
+			setHighlightEndCoord( c.x(), line );
+
+			loadHighlightToClipboard();
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::mouseDoubleClickEvent(QMouseEvent * event)
+{
+	//printf("Double Click\n");
+
+	if ( selAddrValue >= 0 )
+	{
+		int line;
+
+		line = getAsmLineFromAddr(selAddrValue);
+
+		scrollToLine( line );
+
+		if ( getAsmAddrFromLine(line) == selAddrValue )
+		{
+			setSelAddrToLine(line);
+		}
+
+		mouseLeftBtnDown = false;
+		txtHlgtAnchorLine = -1;
+		txtHlgtAnchorChar = -1;
+		txtHlgtStartChar  = -1;
+		txtHlgtStartLine  = -1;
+		txtHlgtEndChar    = -1;
+		txtHlgtEndLine    = -1;
 	}
 }
 //----------------------------------------------------------------------------
@@ -5047,7 +5120,7 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 		{
 			addr = asmEntry[line]->addr;
 			selAddrLine  = line;
-			selAddrChar  = 4;
+			selAddrChar  = pcLocLinePos+3;
 			selAddrWidth = 4;
 			selAddrValue = addr;
 			sprintf( selAddrText, "%04X", addr );
@@ -5121,6 +5194,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 	QMenu menu(this);
 	QPoint c = convPixToCursor( event->pos() );
 	bool enableRunToCursor = false;
+	char stmp[128];
 
 	line = lineOffset + c.y();
 
@@ -5150,6 +5224,12 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 			//act->setShortcut( QKeySequence(tr("Ctrl+F10")));
 			connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuRunToCursor(void)) );
 		}
+
+		sprintf( stmp, "Go to $%04X\tDouble+Click", ctxMenuAddr );
+		act = new QAction(tr(stmp), &menu);
+		menu.addAction(act);
+		//act->setShortcut( QKeySequence(tr("Ctrl+F10")));
+		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuGoTo(void)) );
 
 		if ( isBreakpointAtAddr( addr ) >= 0 )
 		{
