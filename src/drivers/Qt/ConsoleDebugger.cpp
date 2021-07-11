@@ -343,12 +343,12 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	// View -> CPU Status
 	visMenu = viewMenu->addMenu( tr("&CPU Status") );
 
-	// View -> CPU Status -> Visibility
-	act = new QAction(tr("&Visibility"), this);
+	// View -> CPU Status -> Visible
+	act = new QAction(tr("&Visible"), this);
 	act->setCheckable(true);
 	act->setChecked(cpuStatDpyVis);
 	//act->setShortcut( QKeySequence(tr("Ctrl+Shift+G") ));
-	act->setStatusTip(tr("&Visibility"));
+	act->setStatusTip(tr("&Visible"));
 	bPtr = &cpuStatDpyVis;
 	connect( act, &QAction::triggered, [ this, act, bPtr ] { setDisplayVisibility( act, bPtr ); } );
 
@@ -382,12 +382,12 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	// View -> PPU Status
 	visMenu = viewMenu->addMenu( tr("&PPU Status") );
 
-	// View -> PPU Status -> Visibility
-	act = new QAction(tr("&Visibility"), this);
+	// View -> PPU Status -> Visible
+	act = new QAction(tr("&Visible"), this);
 	act->setCheckable(true);
 	act->setChecked(ppuStatDpyVis);
 	//act->setShortcut( QKeySequence(tr("Ctrl+Shift+G") ));
-	act->setStatusTip(tr("&Visibility"));
+	act->setStatusTip(tr("&Visible"));
 	bPtr = &ppuStatDpyVis;
 	connect( act, &QAction::triggered, [ this, act, bPtr ] { setDisplayVisibility( act, bPtr ); } );
 
@@ -421,12 +421,12 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	// View -> Breakpoint List
 	visMenu = viewMenu->addMenu( tr("&Breakpoint List") );
 
-	// View -> Breakpoint List -> Visibility
-	act = new QAction(tr("&Visibility"), this);
+	// View -> Breakpoint List -> Visible
+	act = new QAction(tr("&Visible"), this);
 	act->setCheckable(true);
 	act->setChecked(bpTreeDpyVis);
 	//act->setShortcut( QKeySequence(tr("Ctrl+Shift+G") ));
-	act->setStatusTip(tr("&Visibility"));
+	act->setStatusTip(tr("&Visible"));
 	bPtr = &bpTreeDpyVis;
 	connect( act, &QAction::triggered, [ this, act, bPtr ] { setDisplayVisibility( act, bPtr ); } );
 
@@ -460,12 +460,12 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	// View -> Bookmark List
 	visMenu = viewMenu->addMenu( tr("Book&mark List") );
 
-	// View -> Bookmark List -> Visibility
-	act = new QAction(tr("&Visibility"), this);
+	// View -> Bookmark List -> Visible
+	act = new QAction(tr("&Visible"), this);
 	act->setCheckable(true);
 	act->setChecked(bmTreeDpyVis);
 	//act->setShortcut( QKeySequence(tr("Ctrl+Shift+G") ));
-	act->setStatusTip(tr("&Visibility"));
+	act->setStatusTip(tr("&Visible"));
 	bPtr = &bmTreeDpyVis;
 	connect( act, &QAction::triggered, [ this, act, bPtr ] { setDisplayVisibility( act, bPtr ); } );
 
