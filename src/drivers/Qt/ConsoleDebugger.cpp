@@ -4004,6 +4004,8 @@ void QAsmView::calcFontData(void)
 	pxLineLead     = pxLineSpacing - metrics.height();
 	pxCursorHeight = metrics.height();
 
+	printf("W:%i  H:%i  LS:%i  \n", pxCharWidth, pxCharHeight, pxLineSpacing );
+
 	viewLines   = (viewHeight / pxLineSpacing) + 1;
 
 	calcMinimumWidth();
@@ -4477,7 +4479,6 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 		{
 			if ( selChar < (int)asmEntry[line]->text.size() )
 			{
-
 				i = selChar;
 
 				if ( asmEntry[line]->sym.name.size() > 0 )
@@ -4554,22 +4555,21 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 		else if ( asmEntry[line]->type == dbg_asm_entry_t::SYMBOL_NAME )
 		{
 			selAddrLine  = line;
-			selAddrChar  = 0;
+			selAddrChar  = 3;
 			selAddrValue = addr = asmEntry[line]->addr;
 
-			if ( asmEntry[line]->text.size() > 0 )
+			i=selAddrChar; j=0;
+			while ( asmEntry[line]->text[i] != 0 )
 			{
-				selAddrWidth = asmEntry[line]->text.size()-1;
+				if ( j >= (int)sizeof(selAddrText) )
+				{
+					j=sizeof(selAddrText)-1;
+					break;
+				}
+				selAddrText[j] = asmEntry[line]->text[i]; i++; j++;
 			}
-			else
-			{
-				selAddrWidth = 0;
-			}
-			if ( selAddrWidth >= (int)sizeof(selAddrText) )
-			{
-				selAddrWidth = sizeof(selAddrText)-1;
-			}
-			strncpy( selAddrText, asmEntry[line]->text.c_str(), selAddrWidth );
+			selAddrText[j] = 0;
+			selAddrWidth = j-1;
 			selAddrText[ selAddrWidth ] = 0;
 		}
 
@@ -4721,7 +4721,13 @@ void QAsmView::drawPointerPC( QPainter *painter, int xl, int yl )
 	b2 = 2*b;
 
 	w =  pxCharWidth;
+
 	h = (pxCharHeight / 4);
+
+	if ( h < 1 )
+	{
+		h = 1;
+	}
 
 	x = xl + (pxCharWidth*2);
 	y = yl -  pxCharHeight + (pxCharHeight - h - b2)/2;
@@ -4733,7 +4739,7 @@ void QAsmView::drawPointerPC( QPainter *painter, int xl, int yl )
 
 	p[0] = QPoint( x, y );
 	p[1] = QPoint( x, y-pxCharHeight );
-	p[2] = QPoint( x+pxCharWidth, y-(pxCharHeight/2) );
+	p[2] = QPoint( x+pxCharWidth-1, y-(pxCharHeight/2) );
 
 	painter->setBrush(Qt::red);
 
@@ -4904,7 +4910,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 {
 	int x,y,l, row, nrow, selAddr;
 	int cd_boundary, asm_start_boundary;
-	int pxCharWidth2, vOffset;
+	int pxCharWidth2, vOffset, vlineOffset;
 	QPainter painter(this);
 	QColor white("white"), black("black"), blue("blue");
 	QColor hlgtFG("white"), hlgtBG("blue");
@@ -4948,6 +4954,8 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	cd_boundary = (int)(2.5*pxCharWidth) - pxLineXScroll;
 	asm_start_boundary = cd_boundary + (10*pxCharWidth);
 	//asm_stop_boundary  = asm_start_boundary + (9*pxCharWidth);
+	
+	vlineOffset = -pxLineSpacing + (pxLineSpacing - pxCharHeight)/2;
 
 	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window) );
 	painter.fillRect( 0, 0, cd_boundary, viewHeight, this->palette().color(QPalette::Mid) );
@@ -4972,7 +4980,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 		{
 			if ( l == asmPC->line )
 			{
-				painter.fillRect( cd_boundary, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, pcBgColor );
+				painter.fillRect( cd_boundary, y + vlineOffset, viewWidth, pxLineSpacing, pcBgColor );
 				forceDarkColor = true;
 				lineIsPC = true;
 			}
@@ -5025,7 +5033,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 					ax = x + selAddrChar*pxCharWidth;
 
-					painter.fillRect( ax, y - pxLineSpacing + pxLineLead, selAddrWidth*pxCharWidth, pxLineSpacing, blue );
+					painter.fillRect( ax, y + vlineOffset, selAddrWidth*pxCharWidth, pxLineSpacing, blue );
 
 					painter.setPen( white );
 
@@ -5080,7 +5088,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 				ax = x + (hlgtXs * pxCharWidth);
 
-				painter.fillRect( ax, y - pxLineSpacing + pxLineLead, hlgtXd * pxCharWidth, pxLineSpacing, hlgtBG );
+				painter.fillRect( ax, y + vlineOffset, hlgtXd * pxCharWidth, pxLineSpacing, hlgtBG );
 
 				drawText( &painter, ax, y, s.c_str() );
 			}
@@ -5130,7 +5138,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 			if ( asmEntry[l]->bpNum >= 0 )
 			{
-				painter.drawEllipse( cd_boundary - pxCharWidth2, y - pxLineSpacing + pxLineLead + vOffset, pxCharWidth, pxCharWidth );
+				painter.drawEllipse( cd_boundary - pxCharWidth2, y + vlineOffset + vOffset, pxCharWidth, pxCharWidth );
 			}
 		}
 
