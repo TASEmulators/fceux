@@ -330,9 +330,13 @@ class ConsoleDebugger : public QDialog
 		QTimer    *periodicTimer;
 		QFont      font;
 
+		QVBoxLayout   *mainLayoutv;
+		QHBoxLayout   *mainLayouth;
 		QVBoxLayout   *asmDpyVbox;
 		QVBoxLayout   *dataDpyVbox1;
 		QVBoxLayout   *dataDpyVbox2;
+		QVBoxLayout   *cpuStatDpyVbox;
+		QVBoxLayout   *ppuStatDpyVbox;
 		QVBoxLayout   *bpDataDpyVbox;
 		QVBoxLayout   *bmDataDpyVbox;
 
@@ -346,6 +350,15 @@ class ConsoleDebugger : public QDialog
 		int   selBmAddrVal;
 		bool  windowUpdateReq;
 
+		int   cpuStatDpyCol;
+		int   ppuStatDpyCol;
+		int   bpTreeDpyCol;
+		int   bmTreeDpyCol;
+
+		bool  cpuStatDpyVis;
+		bool  ppuStatDpyVis;
+		bool  bpTreeDpyVis;
+		bool  bmTreeDpyVis;
 	private:
 		void setRegsFromEntry(void);
 		void bpListUpdate( bool reset = false );
@@ -354,6 +367,8 @@ class ConsoleDebugger : public QDialog
 		void buildPpuListDisplay(void);
 		void buildBpListDisplay(void);
 		void buildBmListDisplay(void);
+		void loadDisplayViews(void);
+		void saveDisplayViews(void);
 
 		QMenuBar *buildMenuBar(void);
 		QToolBar *buildToolBar(void);
@@ -389,6 +404,9 @@ class ConsoleDebugger : public QDialog
 		void setPpuFrameVis(bool);
 		void setBpFrameVis(bool);
 		void setBmFrameVis(bool);
+		void setDisplayVisibility( QAction *act, bool *ptr);
+		void setViewDpyCol(int *viewPtr, int col);
+		void resizeToMinimumSizeHint(void);
 		void resetCountersCB (void);
 		void reloadSymbolsCB(void);
 		void displayByteCodesCB(bool value);

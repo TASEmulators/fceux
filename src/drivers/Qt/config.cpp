@@ -583,6 +583,14 @@ InitConfig()
 	config->addOption("SDL.AsmSyntaxColorLabel", "");
 	config->addOption("SDL.AsmSyntaxColorComment", "");
 	config->addOption("SDL.AsmSyntaxColorPC", "");
+	config->addOption("SDL.DebuggerCpuDpyVis", 1);
+	config->addOption("SDL.DebuggerPpuDpyVis", 1);
+	config->addOption("SDL.DebuggerBpDpyVis" , 1);
+	config->addOption("SDL.DebuggerBmDpyVis" , 1);
+	config->addOption("SDL.DebuggerCpuDpyCol", 0);
+	config->addOption("SDL.DebuggerPpuDpyCol", 0);
+	config->addOption("SDL.DebuggerBpDpyCol" , 0);
+	config->addOption("SDL.DebuggerBmDpyCol" , 0);
 
 	// Code Data Logger Options
 	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);
