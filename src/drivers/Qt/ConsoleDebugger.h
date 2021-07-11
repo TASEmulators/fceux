@@ -331,7 +331,10 @@ class ConsoleDebugger : public QDialog
 		QFont      font;
 
 		QVBoxLayout   *asmDpyVbox;
-		QVBoxLayout   *dataDpyVbox;
+		QVBoxLayout   *dataDpyVbox1;
+		QVBoxLayout   *dataDpyVbox2;
+		QVBoxLayout   *bpDataDpyVbox;
+		QVBoxLayout   *bmDataDpyVbox;
 
 		ColorMenuItem *opcodeColorAct;
 		ColorMenuItem *addressColorAct;

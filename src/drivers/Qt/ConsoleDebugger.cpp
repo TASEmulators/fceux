@@ -144,7 +144,11 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	grid->addWidget( hbar   , 1, 0 );
 
 	 asmDpyVbox   = new QVBoxLayout();
-	dataDpyVbox   = new QVBoxLayout();
+	dataDpyVbox1  = new QVBoxLayout();
+	dataDpyVbox2  = new QVBoxLayout();
+
+	bpDataDpyVbox = dataDpyVbox1;
+	bmDataDpyVbox = dataDpyVbox2;
 
 	hbar->setMinimum(0);
 	hbar->setMaximum(100);
@@ -160,18 +164,19 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//asmText->setMinimumWidth( 20 * fontCharWidth );
 	//asmText->setLineWrapMode( QPlainTextEdit::NoWrap );
 
-	mainLayouth->addLayout(  asmDpyVbox, 5 );
-	mainLayouth->addLayout( dataDpyVbox, 4 );
+	mainLayouth->addLayout(  asmDpyVbox , 5 );
+	mainLayouth->addLayout( dataDpyVbox1, 4 );
+	mainLayouth->addLayout( dataDpyVbox2, 4 );
 
 	buildCpuListDisplay();
 	buildPpuListDisplay();
 	buildBpListDisplay();
 	buildBmListDisplay();
 
-	dataDpyVbox->addWidget( cpuFrame, 10 );
-	dataDpyVbox->addWidget( ppuFrame, 10 );
-	dataDpyVbox->addWidget( bpFrame , 100);
-	dataDpyVbox->addWidget( bmFrame , 100);
+	dataDpyVbox1->addWidget( cpuFrame, 10 );
+	dataDpyVbox1->addWidget( ppuFrame, 10 );
+	bpDataDpyVbox->addWidget( bpFrame , 100);
+	bmDataDpyVbox->addWidget( bmFrame , 100);
 
 	setLayout( mainLayoutv );
 
@@ -1740,11 +1745,11 @@ void ConsoleDebugger::setPpuFrameVis(bool vis)
 
 	if ( vis )
 	{
-		dataDpyVbox->setStretchFactor( ppuFrame, 10);
+		dataDpyVbox1->setStretchFactor( ppuFrame, 10);
 	}
 	else
 	{
-		dataDpyVbox->setStretchFactor( ppuFrame,  1);
+		dataDpyVbox1->setStretchFactor( ppuFrame,  1);
 	}
 }
 //----------------------------------------------------------------------------
@@ -1755,11 +1760,11 @@ void ConsoleDebugger::setBpFrameVis(bool vis)
 
 	if ( vis )
 	{
-		dataDpyVbox->setStretchFactor( bpFrame, 100);
+		bpDataDpyVbox->setStretchFactor( bpFrame, 100);
 	}
 	else
 	{
-		dataDpyVbox->setStretchFactor( bpFrame,   1);
+		bpDataDpyVbox->setStretchFactor( bpFrame,   1);
 	}
 }
 //----------------------------------------------------------------------------
@@ -1770,11 +1775,11 @@ void ConsoleDebugger::setBmFrameVis(bool vis)
 
 	if ( vis )
 	{
-		dataDpyVbox->setStretchFactor( bmFrame, 100);
+		bmDataDpyVbox->setStretchFactor( bmFrame, 100);
 	}
 	else
 	{
-		dataDpyVbox->setStretchFactor( bmFrame,   1);
+		bmDataDpyVbox->setStretchFactor( bmFrame,   1);
 	}
 }
 //----------------------------------------------------------------------------
