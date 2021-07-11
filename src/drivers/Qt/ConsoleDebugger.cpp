@@ -980,6 +980,7 @@ void ConsoleDebugger::buildBpListDisplay(void)
 	QHBoxLayout *hbox;
 	QPushButton *button;
 	QTreeWidgetItem *item;
+	QFontMetrics fm(font);
 
 	bpFrame = new QGroupBox(tr("Breakpoints"));
 	vbox    = new QVBoxLayout();
@@ -991,6 +992,8 @@ void ConsoleDebugger::buildBpListDisplay(void)
 
 	bpTree->setColumnCount(2);
 	bpTree->setSelectionMode( QAbstractItemView::SingleSelection );
+	bpTree->setMinimumHeight( 3 * fm.lineSpacing() );
+	bpTree->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Ignored );
 
 	item = new QTreeWidgetItem();
 	item->setFont( 0, font );
@@ -1045,6 +1048,7 @@ void ConsoleDebugger::buildBmListDisplay(void)
 	QHBoxLayout *hbox;
 	QPushButton *button;
 	QTreeWidgetItem *item;
+	QFontMetrics fm(font);
 
 	bmTreeContainerWidget = new QWidget(this);
 
@@ -1062,6 +1066,8 @@ void ConsoleDebugger::buildBmListDisplay(void)
 	connect( selBmAddr, SIGNAL(textChanged(const QString &)), this, SLOT(selBmAddrChanged(const QString &)));
 
 	bmTree->setColumnCount(2);
+	bmTree->setMinimumHeight( 3 * fm.lineSpacing() );
+	bmTree->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Ignored );
 
 	item = new QTreeWidgetItem();
 	item->setFont( 0, font );
