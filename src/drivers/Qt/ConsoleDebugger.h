@@ -297,6 +297,9 @@ class ConsoleDebugger : public QDialog
 		QGroupBox *bmFrame;
 		QTreeWidget *bpTree;
 		QTreeWidget *bmTree;
+		QPushButton *bpAddBtn;
+		QPushButton *bpEditBtn;
+		QPushButton *bpDelBtn;
 		QCheckBox *N_chkbox;
 		QCheckBox *V_chkbox;
 		QCheckBox *U_chkbox;
@@ -316,8 +319,11 @@ class ConsoleDebugger : public QDialog
 		//QLabel    *cpuCyclesLbl2;
 		QLabel    *cpuInstrsLbl1;
 		//QLabel    *cpuInstrsLbl2;
+		QLabel    *bpTreeHideLbl;
 		QTimer    *periodicTimer;
 		QFont      font;
+
+		QVBoxLayout   *dataDpyVbox;
 
 		ColorMenuItem *opcodeColorAct;
 		ColorMenuItem *addressColorAct;
@@ -362,6 +368,7 @@ class ConsoleDebugger : public QDialog
 		void add_BM_CB(void);
 		void edit_BM_CB(void);
 		void delete_BM_CB(void);
+		void setBpFrameVis(bool);
 		void resetCountersCB (void);
 		void reloadSymbolsCB(void);
 		void displayByteCodesCB(bool value);

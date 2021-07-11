@@ -628,6 +628,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox2   = new QVBoxLayout();
 	hbox1   = new QHBoxLayout();
 
+	dataDpyVbox = vbox1;
+
 	hbar->setMinimum(0);
 	hbar->setMaximum(100);
 	vbar->setMinimum(0);
@@ -648,7 +650,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	cpuFrame = new QGroupBox( tr("CPU Status") );
 	grid     = new QGridLayout();
 
-	vbox1->addWidget( cpuFrame );
+	vbox1->addWidget( cpuFrame, 10 );
 	hbox1->addLayout( vbox2, 1 );
 	vbox2->addLayout( grid  );
 	cpuFrame->setLayout( hbox1 );
@@ -657,7 +659,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	lbl  = new QLabel( tr("PC:") );
 	lbl->setToolTip( tr("Program Counter Register") );
 	pcEntry = new QLineEdit();
-	pcEntry->setFont( font );
+	pcEntry->setFont( cpuFont );
 	pcEntry->setMaxLength( 4 );
 	pcEntry->setInputMask( ">HHHH;0" );
 	pcEntry->setAlignment(Qt::AlignCenter);
@@ -676,7 +678,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	lbl  = new QLabel( tr("A:") );
 	lbl->setToolTip( tr("Accumulator Register") );
 	regAEntry = new QLineEdit();
-	regAEntry->setFont( font );
+	regAEntry->setFont( cpuFont );
 	regAEntry->setMaxLength( 2 );
 	regAEntry->setInputMask( ">HH;0" );
 	regAEntry->setAlignment(Qt::AlignCenter);
@@ -691,7 +693,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	lbl  = new QLabel( tr("X:") );
 	lbl->setToolTip( tr("X Index Register") );
 	regXEntry = new QLineEdit();
-	regXEntry->setFont( font );
+	regXEntry->setFont( cpuFont );
 	regXEntry->setMaxLength( 2 );
 	regXEntry->setInputMask( ">HH;0" );
 	regXEntry->setAlignment(Qt::AlignCenter);
@@ -706,7 +708,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	lbl  = new QLabel( tr("Y:") );
 	lbl->setToolTip( tr("Y Index Register") );
 	regYEntry = new QLineEdit();
-	regYEntry->setFont( font );
+	regYEntry->setFont( cpuFont );
 	regYEntry->setMaxLength( 2 );
 	regYEntry->setInputMask( ">HH;0" );
 	regYEntry->setAlignment(Qt::AlignCenter);
@@ -721,7 +723,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	lbl  = new QLabel( tr("P:") );
 	lbl->setToolTip( tr("Status Register") );
 	regPEntry = new QLineEdit();
-	regPEntry->setFont( font );
+	regPEntry->setFont( cpuFont );
 	regPEntry->setMaxLength( 2 );
 	regPEntry->setInputMask( ">HH;0" );
 	regPEntry->setAlignment(Qt::AlignCenter);
@@ -743,10 +745,10 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//cpuCycExdVal  = new QLineEdit( tr("0") );
 	//instrExdVal   = new QLineEdit( tr("0") );
 
-	cpuCyclesVal->setFont(font);
+	cpuCyclesVal->setFont(cpuFont);
 	cpuCyclesVal->setReadOnly(true);
 	cpuCyclesVal->setMinimumWidth( 24 * fontCharWidth );
-	cpuInstrsVal->setFont(font);
+	cpuInstrsVal->setFont(cpuFont);
 	cpuInstrsVal->setReadOnly(true);
 	cpuInstrsVal->setMinimumWidth( 24 * fontCharWidth );
 
@@ -778,9 +780,12 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	//stackText->setMaximumWidth( 16 * fontCharWidth );
 
 	bpFrame = new QGroupBox(tr("Breakpoints"));
-	//vbox3   = new QVBoxLayout();
 	vbox    = new QVBoxLayout();
 	bpTree  = new QTreeWidget();
+
+	bpFrame->setCheckable(true);
+	bpFrame->setChecked(true);
+	connect( bpFrame, SIGNAL(toggled(bool)), this, SLOT(setBpFrameVis(bool)) );
 
 	bpTree->setColumnCount(2);
 	bpTree->setSelectionMode( QAbstractItemView::SingleSelection );
@@ -807,20 +812,24 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 			   this, SLOT(bpItemClicked( QTreeWidgetItem*, int)) );
 
 	hbox   = new QHBoxLayout();
-	button = new QPushButton( tr("Add") );
+	bpAddBtn = button = new QPushButton( tr("Add") );
 	hbox->addWidget( button );
 	connect( button, SIGNAL(clicked(void)), this, SLOT(add_BP_CB(void)) );
 
-	button = new QPushButton( tr("Delete") );
-	hbox->addWidget( button );
-	connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BP_CB(void)) );
-
-	button = new QPushButton( tr("Edit") );
+	bpEditBtn = button = new QPushButton( tr("Edit") );
 	hbox->addWidget( button );
 	connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BP_CB(void)) );
 
+	bpDelBtn = button = new QPushButton( tr("Delete") );
+	hbox->addWidget( button );
+	connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BP_CB(void)) );
+
+	bpTreeHideLbl = new QLabel( tr("Hidden") );
+	bpTreeHideLbl->setVisible(false);
+
 	vbox->addWidget( bpTree );
 	vbox->addLayout( hbox   );
+	vbox->addWidget( bpTreeHideLbl );
 	bpFrame->setLayout( vbox );
 
 	sfFrame = new QGroupBox(tr("Status Flags"));
@@ -855,7 +864,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	grid->addWidget( Z_chkbox, 1, 3, Qt::AlignLeft );
 	grid->addWidget( C_chkbox, 1, 4, Qt::AlignLeft );
 
-	vbox1->addWidget( bpFrame);
+	vbox1->addWidget( bpFrame, 100);
 	vbox2->addWidget( sfFrame);
 	//hbox1->addLayout( vbox3  );
 
@@ -870,7 +879,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	vbox->addWidget( spriteLbl );
 	vbox->addWidget( scanLineLbl );
 	vbox->addWidget( pixLbl );
-	vbox1->addLayout( hbox2 );
+	vbox1->addLayout( hbox2, 10 );
 	hbox2->addWidget( frame );
 	frame->setLayout( vbox  );
 	frame->setFrameShape( QFrame::Box );
@@ -957,25 +966,27 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	connect( bmTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
 			   this, SLOT(bmItemDoubleClicked( QTreeWidgetItem*, int)) );
 
-	vbox->addWidget( selBmAddr );
+	vbox->addWidget( selBmAddr, 1 );
 
 	button    = new QPushButton( tr("Add") );
-	vbox->addWidget( button );
+	vbox->addWidget( button, 1 );
 	connect( button, SIGNAL(clicked(void)), this, SLOT(add_BM_CB(void)) );
 
 	button    = new QPushButton( tr("Delete") );
-	vbox->addWidget( button );
+	vbox->addWidget( button, 1 );
 	connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BM_CB(void)) );
 
 	button    = new QPushButton( tr("Name") );
-	vbox->addWidget( button );
+	vbox->addWidget( button, 1 );
 	connect( button, SIGNAL(clicked(void)), this, SLOT(edit_BM_CB(void)) );
+
+	vbox->addStretch( 10 );
 
 	hbox->addWidget( bmTree, 10 );
 	hbox->addLayout( vbox  ,  1 );
 	bmFrame->setLayout( hbox );
 	hbox3->addWidget( bmFrame );
-	vbox1->addLayout( hbox3 );
+	vbox1->addLayout( hbox3, 100 );
 
 	//frame        = new QFrame();
 	//vbox         = new QVBoxLayout();
@@ -1686,6 +1697,24 @@ void ConsoleDebugger::bmListUpdate( bool reset )
 	}
 
 	bmTree->viewport()->update();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::setBpFrameVis(bool vis)
+{
+	bpTree->setVisible(vis);
+	bpAddBtn->setVisible(vis);
+	bpEditBtn->setVisible(vis);
+	bpDelBtn->setVisible(vis);
+	bpTreeHideLbl->setVisible(!vis);
+
+	if ( vis )
+	{
+		dataDpyVbox->setStretchFactor( bpFrame, 100);
+	}
+	else
+	{
+		dataDpyVbox->setStretchFactor( bpFrame,   1);
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::add_BP_CB(void)
@@ -3181,6 +3210,9 @@ void ConsoleDebugger::queueUpdate(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::updatePeriodic(void)
 {
+	bool buttonEnable;
+	QTreeWidgetItem *item;
+
 	//printf("Update Periodic\n");
 
 	if ( windowUpdateReq )
@@ -3231,6 +3263,20 @@ void ConsoleDebugger::updatePeriodic(void)
 		//printf("Bookmark Tree Update\n");
 		bmListUpdate( true );
 	}
+
+	item = bpTree->currentItem();
+
+	if ( item == NULL )
+	{
+		buttonEnable = false;
+	}
+	else
+	{
+		buttonEnable = true;
+	}
+	bpAddBtn->setEnabled(true);
+	bpEditBtn->setEnabled(buttonEnable);
+	bpDelBtn->setEnabled(buttonEnable);
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakPointNotify( int bpNum )
