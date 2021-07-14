@@ -291,7 +291,7 @@ static void CheckHInfo(void) {
 		0x2b7103b7a27bd72fULL,	/* AD&D Pool of Radiance */
 		0x498c10dc463cfe95ULL,	/* Battle Fleet */
 		0x854d7947a3177f57ULL,	/* Crystalis */
-		0xfad22d265cd70820ULL,  /* Downtown Special: Kunio-kun no Jidaigeki Dayo Zenin Shuugou! */
+		0xfad22d265cd70820ULL,	/* Downtown Special: Kunio-kun no Jidaigeki Dayo Zenin Shuugou! */
 		0x4a1f5336b86851b6ULL,	/* DW */
 		0xb0bcc02c843c1b79ULL,	/* DW */
 		0x2dcf3a98c7937c22ULL,	/* DW 2 */
