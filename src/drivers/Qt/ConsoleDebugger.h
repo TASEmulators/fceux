@@ -64,6 +64,16 @@ struct dbg_asm_entry_t
 	}
 };
 
+struct dbg_nav_entry_t
+{
+	int  addr;
+
+	dbg_nav_entry_t(void)
+	{
+		addr = 0;
+	}
+};
+
 class debuggerBookmark_t
 {
 	public:
@@ -115,6 +125,10 @@ class QAsmView : public QWidget
 		void setXScroll(int value);
 		void scrollToPC(void);
 		void scrollToLine( int line );
+		void scrollToAddr( int addr );
+		void gotoLine( int line );
+		void gotoAddr( int addr );
+		void gotoPC(void);
 		void setSelAddrToLine( int line );
 		void setDisplayROMoffsets( bool value );
 		void setSymbolDebugEnable( bool value );
@@ -128,6 +142,9 @@ class QAsmView : public QWidget
 		int  isBreakpointAtAddr( int addr );
 		void determineLineBreakpoints(void);
 		void setFont( const QFont &font );
+		void pushAddrHist(void);
+		void navHistBack(void);
+		void navHistForward(void);
 
 		QColor  opcodeColor;
 		QColor  addressColor;
@@ -170,6 +187,10 @@ class QAsmView : public QWidget
 		QScrollBar *vbar;
 		QScrollBar *hbar;
 		QClipboard *clipboard;
+
+		std::vector <dbg_nav_entry_t> navBckHist;
+		std::vector <dbg_nav_entry_t> navFwdHist;
+		dbg_nav_entry_t  curNavLoc;
 
 		int ctxMenuAddr;
 		int maxLineLen;
@@ -227,29 +248,29 @@ class DebuggerStackDisplay : public QPlainTextEdit
    Q_OBJECT
 
 	public:
-	DebuggerStackDisplay(QWidget *parent = 0);
-	~DebuggerStackDisplay(void);
+		DebuggerStackDisplay(QWidget *parent = 0);
+		~DebuggerStackDisplay(void);
 
-      void updateText(void);
-      void setFont( const QFont &font );
+		void updateText(void);
+		void setFont( const QFont &font );
 
-   protected:
-      void keyPressEvent(QKeyEvent *event);
-      void contextMenuEvent(QContextMenuEvent *event);
-      void recalcCharsPerLine(void);
-
-      int  pxCharWidth;
-      int  pxLineSpacing;
-      int  charsPerLine;
-      int  stackBytesPerLine;
-      bool showAddrs;
+	protected:
+		void keyPressEvent(QKeyEvent *event);
+		void contextMenuEvent(QContextMenuEvent *event);
+		void recalcCharsPerLine(void);
+		
+		int  pxCharWidth;
+		int  pxLineSpacing;
+		int  charsPerLine;
+		int  stackBytesPerLine;
+		bool showAddrs;
 
 	public slots:
-      void toggleShowAddr(void);
-      void sel1BytePerLine(void);
-      void sel2BytesPerLine(void);
-      void sel3BytesPerLine(void);
-      void sel4BytesPerLine(void);
+		void toggleShowAddr(void);
+		void sel1BytePerLine(void);
+		void sel2BytesPerLine(void);
+		void sel3BytesPerLine(void);
+		void sel4BytesPerLine(void);
 };
 
 class ConsoleDebugger : public QDialog
@@ -440,6 +461,8 @@ class ConsoleDebugger : public QDialog
 		void changeAsmFontCB(void);
 		void changeStackFontCB(void);
 		void changeCpuFontCB(void);
+		void navHistBackCB(void);
+		void navHistForwardCB(void);
 
 };
 

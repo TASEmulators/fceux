@@ -340,6 +340,26 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	viewMenu->addSeparator();
 
+	// View -> Navigate Back
+	act = new QAction(tr("Navigate &Back"), this);
+	act->setShortcut( QKeySequence(tr("Ctrl+Left") ));
+	act->setStatusTip(tr("Navigate Back"));
+	//act->setIcon( QIcon(":icons/JumpTarget.png") );
+	connect(act, SIGNAL(triggered()), this, SLOT(navHistBackCB(void)) );
+
+	viewMenu->addAction(act);
+
+	// View -> Navigate Forward
+	act = new QAction(tr("Navigate &Forward"), this);
+	act->setShortcut( QKeySequence(tr("Ctrl+Right") ));
+	act->setStatusTip(tr("Navigate Forward"));
+	//act->setIcon( QIcon(":icons/JumpTarget.png") );
+	connect(act, SIGNAL(triggered()), this, SLOT(navHistForwardCB(void)) );
+
+	viewMenu->addAction(act);
+
+	viewMenu->addSeparator();
+
 	// View -> CPU Status
 	visMenu = viewMenu->addMenu( tr("&CPU Status") );
 
@@ -2559,6 +2579,16 @@ void ConsoleDebugger::debugRunLine128CB(void)
 //	}
 //}
 //----------------------------------------------------------------------------
+void ConsoleDebugger::navHistBackCB (void)
+{
+	asmView->navHistBack();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::navHistForwardCB (void)
+{
+	asmView->navHistForward();
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::seekPCCB (void)
 {
 	if (FCEUI_EmulationPaused())
@@ -2674,14 +2704,11 @@ void ConsoleDebugger::openGotoAddrDialog(void)
 
 	if ( QDialog::Accepted == ret )
 	{
-		int addr, line;
+		int addr;
 	
 		addr = sbox->value();
 	
-		line = asmView->getAsmLineFromAddr(addr);
-
-		asmView->setLine( line );
-		vbar->setValue( line );
+		asmView->gotoAddr(addr);
 	}
 }
 //----------------------------------------------------------------------------
@@ -2704,16 +2731,7 @@ void ConsoleDebugger::asmViewCtxMenuRunToCursor(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuGoTo(void)
 {
-	int line;
-
-	line = asmView->getAsmLineFromAddr( asmView->getCtxMenuAddr() );
-
-	asmView->scrollToLine( line );
-
-	if ( asmView->getAsmAddrFromLine(line) == asmView->getCtxMenuAddr() )
-	{
-		asmView->setSelAddrToLine(line);
-	}
+	asmView->gotoAddr( asmView->getCtxMenuAddr() );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddBP(void)
@@ -2919,7 +2937,7 @@ int  QAsmView::getAsmLineFromAddr(int addr)
 
 	if ( asmEntry.size() <= 0 )
 	{
-      return -1;
+		return -1;
 	}
 	incr = asmEntry.size() / 2;
 
@@ -3016,11 +3034,17 @@ int  QAsmView::getAsmLineFromAddr(int addr)
 		}
 	}
 
+	// Don't stop on an symbol name or comment line, search for next assembly line
+	while ( (line < asmEntry.size()) && (asmEntry[line]->type != dbg_asm_entry_t::ASM_TEXT) )
+	{
+		line++;
+	}
+
 	//for (size_t i=0; i<asmEntry.size(); i++)
 	//{
 	//	if ( asmEntry[i]->addr >= addr )
 	//	{
-   //      line = i; break;
+	//      line = i; break;
 	//	}
 	//}
 
@@ -4289,8 +4313,19 @@ void QAsmView::scrollToPC(void)
 {
 	if ( asmPC != NULL )
 	{
+		curNavLoc.addr = asmPC->addr;
+
 		scrollToLine( asmPC->line );
 	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::scrollToAddr( int addr )
+{
+	int line = getAsmLineFromAddr(addr);
+
+	curNavLoc.addr = asmPC->addr;
+
+	scrollToLine( line );
 }
 //----------------------------------------------------------------------------
 void QAsmView::scrollToLine( int line )
@@ -4344,6 +4379,88 @@ void QAsmView::scrollToLine( int line )
 	vbar->setValue( lineOffset );
 }
 //----------------------------------------------------------------------------
+void QAsmView::gotoPC(void)
+{
+	if ( asmPC != NULL )
+	{
+		gotoLine( asmPC->line );
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::gotoAddr( int addr )
+{
+	int line = getAsmLineFromAddr(addr);
+
+	gotoLine( line );
+}
+//----------------------------------------------------------------------------
+void QAsmView::gotoLine( int line )
+{
+	if ( (line >= 0) && (line < asmEntry.size()) )
+	{
+		if ( curNavLoc.addr != asmEntry[line]->addr )
+		{	// Don't push back to back duplicates into the navigation history
+			pushAddrHist();
+		}
+		curNavLoc.addr = asmEntry[line]->addr;
+
+		scrollToLine( line );
+
+		setSelAddrToLine(line);
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::pushAddrHist(void)
+{
+	if ( navBckHist.size() > 0)
+	{
+		if ( navBckHist.back().addr == curNavLoc.addr )
+		{
+			//printf("Address is Same\n");
+			return;
+		}
+	}
+	navBckHist.push_back(curNavLoc);
+
+	navFwdHist.clear();
+
+	//printf("Push Address: $%04X   %zi\n", curNavLoc.addr, navBckHist.size() );
+}
+//----------------------------------------------------------------------------
+void QAsmView::navHistBack(void)
+{
+	if ( navBckHist.size() > 0)
+	{
+		navFwdHist.push_back(curNavLoc);
+
+		curNavLoc = navBckHist.back();
+
+		navBckHist.pop_back();
+
+		int line = getAsmLineFromAddr( curNavLoc.addr );
+
+		scrollToLine( line );
+		setSelAddrToLine( line );
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::navHistForward(void)
+{
+	if ( navFwdHist.size() > 0 )
+	{
+		navBckHist.push_back(curNavLoc);
+
+		curNavLoc = navFwdHist.back();
+
+		navFwdHist.pop_back();
+
+		int line = getAsmLineFromAddr( curNavLoc.addr );
+
+		scrollToLine( line );
+		setSelAddrToLine( line );
+	}
+}
+//----------------------------------------------------------------------------
 void QAsmView::setSelAddrToLine( int line )
 {
 	if ( (line >= 0) && (line < asmEntry.size()) )
@@ -4354,7 +4471,17 @@ void QAsmView::setSelAddrToLine( int line )
 		selAddrWidth = 4;
 		selAddrValue = addr;
 		sprintf( selAddrText, "%04X", addr );
-		printf("Set Select ADDR:%04X\n", addr);
+
+		parent->setBookmarkSelectedAddress( addr );
+
+		//printf("Selected ADDR:  $%04X   '%s'  '%s'\n", addr, selAddrText, asmEntry[line]->text.c_str() );
+
+		txtHlgtAnchorLine = -1;
+		txtHlgtAnchorChar = -1;
+		txtHlgtStartChar  = -1;
+		txtHlgtStartLine  = -1;
+		txtHlgtEndChar    = -1;
+		txtHlgtEndLine    = -1;
 	}
 }
 //----------------------------------------------------------------------------
@@ -4956,16 +5083,7 @@ void QAsmView::mouseDoubleClickEvent(QMouseEvent * event)
 
 	if ( selAddrValue >= 0 )
 	{
-		int line;
-
-		line = getAsmLineFromAddr(selAddrValue);
-
-		scrollToLine( line );
-
-		if ( getAsmAddrFromLine(line) == selAddrValue )
-		{
-			setSelAddrToLine(line);
-		}
+		gotoAddr( selAddrValue );
 
 		mouseLeftBtnDown = false;
 		txtHlgtAnchorLine = -1;
