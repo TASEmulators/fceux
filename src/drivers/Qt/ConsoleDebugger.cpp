@@ -44,6 +44,8 @@
 #include <QGuiApplication>
 #include <QSettings>
 #include <QToolTip>
+#include <QWindow>
+#include <QScreen>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -1144,10 +1146,16 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 void ConsoleDebugger::buildPpuListDisplay(void)
 {
 	QVBoxLayout *vbox;
+	QHBoxLayout *hbox, *hbox1;
+	QGridLayout *grid, *grid1;
+	QGroupBox   *ctlFrame;
+	QLabel      *bgAddrLbl, *sprAddrLbl;
+	QFont        lblFont;
 
 	ppuStatContainerWidget = new QWidget(this);
 
 	vbox        = new QVBoxLayout();
+	hbox1       = new QHBoxLayout();
 	ppuFrame    = new QGroupBox( tr("PPU Status") );
 	ppuLbl      = new QLabel( tr("PPU:") );
 	spriteLbl   = new QLabel( tr("Sprite:") );
@@ -1159,12 +1167,59 @@ void ConsoleDebugger::buildPpuListDisplay(void)
 	ppuFrame->setChecked(true);
 	connect( ppuFrame, SIGNAL(toggled(bool)), this, SLOT(setPpuFrameVis(bool)) );
 
+	hbox1->addLayout( vbox );
 	vbox->addWidget( ppuLbl );
 	vbox->addWidget( spriteLbl );
 	vbox->addWidget( scanLineLbl );
 	vbox->addWidget( pixLbl );
 
-	ppuStatContainerWidget->setLayout( vbox  );
+	 bgAddrLbl = new QLabel( tr("BG Addr") );
+	sprAddrLbl = new QLabel( tr("Spr Addr") );
+
+	ctlFrame = new QGroupBox( tr("Control / Mask") );
+	grid1    = new QGridLayout();
+	grid     = new QGridLayout();
+
+	hbox1->addWidget( ctlFrame );
+	ctlFrame->setLayout( grid1 );
+
+	//ppuBgAddr   = new QLineEdit();
+	ppuBgAddr   = new ppuCtrlRegDpy();
+	ppuSprAddr  = new QLineEdit();
+
+	grid->addWidget( bgAddrLbl, 0, 0 );
+	grid->addWidget( sprAddrLbl, 1, 0 );
+	grid->addWidget( ppuBgAddr, 0, 1 );
+	grid->addWidget( ppuSprAddr, 1, 1 );
+
+	grid1->addLayout( grid, 0, 0, 3, 1 );
+
+	bgEnabled_cbox  = new QCheckBox( tr("BG Enabled") );
+	sprites_cbox    = new QCheckBox( tr("Sprites Enabled") );
+	drawLeftBg_cbox = new QCheckBox( tr("Draw Left BG (8px)") );
+	drawLeftFg_cbox = new QCheckBox( tr("Draw Left Sprites (8px)") );
+	vwrite_cbox     = new QCheckBox( tr("Vertical Write") );
+	nmiBlank_cbox   = new QCheckBox( tr("NMI on vBlank") );
+	sprite8x16_cbox = new QCheckBox( tr("8x16 Sprites") );
+	grayscale_cbox  = new QCheckBox( tr("Grayscale") );
+	iRed_cbox       = new QCheckBox( tr("Intensify Red") );
+	iGrn_cbox       = new QCheckBox( tr("Intensify Green") );
+	iBlu_cbox       = new QCheckBox( tr("Intensify Blue") );
+
+	grid1->addWidget( bgEnabled_cbox , 3, 0 );
+	grid1->addWidget( sprites_cbox   , 4, 0 );
+	grid1->addWidget( drawLeftBg_cbox, 5, 0 );
+	grid1->addWidget( drawLeftFg_cbox, 6, 0 );
+
+	grid1->addWidget( vwrite_cbox    , 0, 1 );
+	grid1->addWidget( nmiBlank_cbox  , 1, 1 );
+	grid1->addWidget( sprite8x16_cbox, 2, 1 );
+	grid1->addWidget( grayscale_cbox , 3, 1 );
+	grid1->addWidget( iRed_cbox      , 4, 1 );
+	grid1->addWidget( iGrn_cbox      , 5, 1 );
+	grid1->addWidget( iBlu_cbox      , 6, 1 );
+
+	ppuStatContainerWidget->setLayout( hbox1  );
 
 	ppuStatHideLbl = new QLabel( tr("Hidden") );
 	ppuStatHideLbl->setVisible(false);
@@ -1174,6 +1229,27 @@ void ConsoleDebugger::buildPpuListDisplay(void)
 	vbox->addWidget( ppuStatHideLbl );
 
 	ppuFrame->setLayout( vbox  );
+
+	lblFont = bgAddrLbl->font();
+	printf("Point Size: %i \n", lblFont.pointSize() );
+	lblFont.setPointSize(9);
+
+	 bgAddrLbl->setFont( lblFont );
+	sprAddrLbl->setFont( lblFont );
+	bgEnabled_cbox->setFont( lblFont );
+	sprites_cbox->setFont( lblFont );
+	drawLeftBg_cbox->setFont( lblFont );
+	drawLeftFg_cbox->setFont( lblFont );
+	vwrite_cbox->setFont( lblFont );
+	nmiBlank_cbox->setFont( lblFont );
+	sprite8x16_cbox->setFont( lblFont );
+	grayscale_cbox->setFont( lblFont );
+	iRed_cbox->setFont( lblFont );
+	iGrn_cbox->setFont( lblFont );
+	iBlu_cbox->setFont( lblFont );
+
+	//printf("Grid vspc:%i \n", grid1->verticalSpacing() );
+	grid1->setVerticalSpacing( grid1->verticalSpacing() / 2 );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::buildBpListDisplay(void)
@@ -4593,6 +4669,8 @@ bool QAsmView::event(QEvent *event)
 		bool showAddrDesc = false, showOperandAddrDesc = false;
 		char stmp[256];
 
+		printf("QEvent::ToolTip\n");
+
 		QPoint c = convPixToCursor(helpEvent->pos());
 
 		line = lineOffset + c.y();
@@ -4718,10 +4796,15 @@ bool QAsmView::event(QEvent *event)
 		}
 		else
 		{
+			printf("Tool Tip Hide\n");
 			QToolTip::hideText();
 			event->ignore();
 		}
 		return true;
+	}
+	else if (event->type() == QEvent::Leave)
+	{
+		printf("QEvent::Leave\n");
 	}
 	return QWidget::event(event);
 }
@@ -6172,5 +6255,161 @@ void DebuggerStackDisplay::updateText(void)
 
 	setMinimumWidth( pxCharWidth * charsPerLine );
 	setMinimumHeight( pxLineSpacing * 5 );
+}
+//----------------------------------------------------------------------------
+//--  PPU Control Register Widget
+//----------------------------------------------------------------------------
+ppuCtrlRegDpy::ppuCtrlRegDpy( QWidget *parent )
+	: QLineEdit( parent )
+{
+	popup = NULL;
+	setReadOnly(true);
+}
+//----------------------------------------------------------------------------
+ppuCtrlRegDpy::~ppuCtrlRegDpy( void )
+{
+	if ( popup != NULL )
+	{
+		popup->close();
+	}
+}
+//----------------------------------------------------------------------------
+bool ppuCtrlRegDpy::event(QEvent *event)
+{
+	if (event->type() == QEvent::ToolTip)
+	{
+		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+		if ( popup == NULL )
+		{
+			printf("Tool Tip Show\n");
+			popup = static_cast<ppuRegPopup*>(fceuCustomToolTipShow( helpEvent, new ppuRegPopup(this) ));
+		}
+		QToolTip::hideText();
+		event->ignore();
+		return true;
+	}
+	else if (event->type() == QEvent::MouseMove)
+	{
+		printf("QEvent::MouseMove\n");
+	}
+	else if (event->type() == QEvent::Leave)
+	{
+		printf("QEvent::Leave\n");
+		if ( popup )
+		{
+			popup->done(0);
+			popup->deleteLater();
+			popup = NULL;
+		}
+	}
+	return QWidget::event(event);
+}
+//----------------------------------------------------------------------------
+//--  PPU Register Tool Tip Popup
+//----------------------------------------------------------------------------
+ppuRegPopup::ppuRegPopup( QWidget *parent )
+	: QDialog( parent, Qt::ToolTip )
+{
+	QVBoxLayout *vbox, *vbox1;
+	QGridLayout *grid, *grid1;
+	QGroupBox *ctlFrame;
+	QFrame    *winFrame;
+	QLabel    *bgAddrLbl, *sprAddrLbl;
+	QLineEdit *ppuBgAddr;
+	QLineEdit *ppuSprAddr;
+	QCheckBox *bgEnabled_cbox;
+	QCheckBox *sprites_cbox;
+	QCheckBox *drawLeftBg_cbox;
+	QCheckBox *drawLeftFg_cbox;
+	QCheckBox *vwrite_cbox;
+	QCheckBox *nmiBlank_cbox;
+	QCheckBox *sprite8x16_cbox;
+	QCheckBox *grayscale_cbox;
+	QCheckBox *iRed_cbox;
+	QCheckBox *iGrn_cbox;
+	QCheckBox *iBlu_cbox;
+	char stmp[32];
+
+	QPalette pal = this->palette();
+	pal.setColor( QPalette::Window    , pal.color(QPalette::ToolTipBase) );
+	pal.setColor( QPalette::WindowText, pal.color(QPalette::ToolTipText) );
+	setPalette(pal);
+
+	vbox1    = new QVBoxLayout();
+	vbox     = new QVBoxLayout();
+	winFrame = new QFrame();
+	ctlFrame = new QGroupBox( tr("PPU Control / Mask") );
+	grid1    = new QGridLayout();
+	grid     = new QGridLayout();
+
+	winFrame->setFrameShape(QFrame::Box);
+
+	vbox1->addWidget( winFrame );
+	winFrame->setLayout( vbox );
+	vbox->addWidget( ctlFrame );
+	ctlFrame->setLayout( grid1 );
+
+	 bgAddrLbl = new QLabel( tr("BG Addr") );
+	sprAddrLbl = new QLabel( tr("Spr Addr") );
+
+	ppuBgAddr   = new QLineEdit();
+	ppuSprAddr  = new QLineEdit();
+
+	grid->addWidget( bgAddrLbl, 0, 0 );
+	grid->addWidget( sprAddrLbl, 1, 0 );
+	grid->addWidget( ppuBgAddr, 0, 1 );
+	grid->addWidget( ppuSprAddr, 1, 1 );
+
+	grid1->addLayout( grid, 0, 0, 3, 1 );
+
+	bgEnabled_cbox  = new QCheckBox( tr("BG Enabled") );
+	sprites_cbox    = new QCheckBox( tr("Sprites Enabled") );
+	drawLeftBg_cbox = new QCheckBox( tr("Draw Left BG (8px)") );
+	drawLeftFg_cbox = new QCheckBox( tr("Draw Left Sprites (8px)") );
+	vwrite_cbox     = new QCheckBox( tr("Vertical Write") );
+	nmiBlank_cbox   = new QCheckBox( tr("NMI on vBlank") );
+	sprite8x16_cbox = new QCheckBox( tr("8x16 Sprites") );
+	grayscale_cbox  = new QCheckBox( tr("Grayscale") );
+	iRed_cbox       = new QCheckBox( tr("Intensify Red") );
+	iGrn_cbox       = new QCheckBox( tr("Intensify Green") );
+	iBlu_cbox       = new QCheckBox( tr("Intensify Blue") );
+
+	sprintf( stmp, "$%04X", 0x2000 + (0x400*(PPU[0] & 0x03)));
+	ppuBgAddr->setText( tr(stmp) );
+
+	sprintf( stmp, "$%04X", (PPU[0] & 0x08) ? 0x1000 : 0x0000 );
+	ppuSprAddr->setText( tr(stmp) );
+
+	  nmiBlank_cbox->setChecked( PPU[0] & 0x80 );
+	sprite8x16_cbox->setChecked( PPU[0] & 0x20 );
+
+	 grayscale_cbox->setChecked( PPU[1] & 0x01 );
+	drawLeftBg_cbox->setChecked( PPU[1] & 0x02 );
+	drawLeftFg_cbox->setChecked( PPU[1] & 0x04 );
+	 bgEnabled_cbox->setChecked( PPU[1] & 0x08 );
+	   sprites_cbox->setChecked( PPU[1] & 0x10 );
+	      iRed_cbox->setChecked( PPU[1] & 0x20 );
+	      iGrn_cbox->setChecked( PPU[1] & 0x40 );
+	      iBlu_cbox->setChecked( PPU[1] & 0x80 );
+
+	grid1->addWidget( bgEnabled_cbox , 3, 0 );
+	grid1->addWidget( sprites_cbox   , 4, 0 );
+	grid1->addWidget( drawLeftBg_cbox, 5, 0 );
+	grid1->addWidget( drawLeftFg_cbox, 6, 0 );
+
+	grid1->addWidget( vwrite_cbox    , 0, 1 );
+	grid1->addWidget( nmiBlank_cbox  , 1, 1 );
+	grid1->addWidget( sprite8x16_cbox, 2, 1 );
+	grid1->addWidget( grayscale_cbox , 3, 1 );
+	grid1->addWidget( iRed_cbox      , 4, 1 );
+	grid1->addWidget( iGrn_cbox      , 5, 1 );
+	grid1->addWidget( iBlu_cbox      , 6, 1 );
+
+	setLayout( vbox1 );
+}
+//----------------------------------------------------------------------------
+ppuRegPopup::~ppuRegPopup( void )
+{
+	//printf("Popup Deleted\n");
 }
 //----------------------------------------------------------------------------

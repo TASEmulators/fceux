@@ -4,6 +4,8 @@
 
 #include <QColor>
 #include <QValidator>
+#include <QDialog>
+#include <QHelpEvent>
 
 int  getDirFromFile( const char *path, char *dir );
 
@@ -44,3 +46,5 @@ class fceuHexIntValidtor : public QValidator
 };
 
 QString fceuGetOpcodeToolTip( uint8_t *opcode, int size );
+
+QDialog *fceuCustomToolTipShow( QHelpEvent *helpEvent, QDialog *popup );

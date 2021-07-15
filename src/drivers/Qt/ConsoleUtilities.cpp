@@ -22,6 +22,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <QWindow>
+#include <QScreen>
+
 #if WIN32
 #include <Windows.h>
 #include <direct.h>
@@ -303,6 +306,51 @@ int fceuLoadConfigColor( const char *confName, QColor *color )
 		color->setNamedColor( colorString.c_str() );
 	}
 	return 0;
+}
+//---------------------------------------------------------------------------
+// FCEU Custom Tool Tip Helper Functions
+//---------------------------------------------------------------------------
+QDialog *fceuCustomToolTipShow( QHelpEvent *helpEvent, QDialog *popup )
+{
+	int xo = 32, yo = 32;
+	QPoint pos;
+	QScreen *scr = NULL;
+	QWidget *parent = static_cast<QWidget*>(popup->parent());
+
+	if ( parent != NULL )
+	{
+		if ( parent->window() )
+		{
+			if ( parent->window()->windowHandle() )
+			{
+				scr = parent->window()->windowHandle()->screen();
+			}
+		}
+	}
+
+	popup->show();
+
+	pos.setX( helpEvent->globalPos().x() + xo );
+	pos.setY( helpEvent->globalPos().y() + yo );
+
+	if ( scr )
+	{
+
+		if ( ( (pos.x() + popup->width()) > scr->virtualSize().width() ) )
+		{
+			pos.setX( helpEvent->globalPos().x() - popup->width() - xo );
+		}
+		if ( ( (pos.y() + popup->height()) > scr->virtualSize().height() ) )
+		{
+			pos.setY( helpEvent->globalPos().y() - popup->height() - yo );
+		}
+		popup->move( pos );
+	}
+	else
+	{
+		popup->move( pos );
+	}
+	return popup;
 }
 //---------------------------------------------------------------------------
 // FCEU Data Entry Custom Validators

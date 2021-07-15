@@ -273,6 +273,33 @@ class DebuggerStackDisplay : public QPlainTextEdit
 		void sel4BytesPerLine(void);
 };
 
+class ppuRegPopup : public QDialog
+{
+   Q_OBJECT
+	public:
+	   ppuRegPopup( QWidget *parent = nullptr );
+	   ~ppuRegPopup(void);
+
+	private:
+};
+
+class ppuCtrlRegDpy : public QLineEdit
+{
+   Q_OBJECT
+
+	public:
+	   ppuCtrlRegDpy( QWidget *parent = nullptr );
+	   ~ppuCtrlRegDpy(void);
+
+	protected:
+		bool event(QEvent *event) override;
+
+	private:
+		ppuRegPopup  *popup;
+
+	public slots:
+};
+
 class ConsoleDebugger : public QDialog
 {
    Q_OBJECT
@@ -316,6 +343,8 @@ class ConsoleDebugger : public QDialog
 		QLineEdit *selBmAddr;
 		QLineEdit *cpuCyclesVal;
 		QLineEdit *cpuInstrsVal;
+		QLineEdit *ppuBgAddr;
+		QLineEdit *ppuSprAddr;
 		QGroupBox *cpuFrame;
 		QGroupBox *ppuFrame;
 		QGroupBox *stackFrame;
@@ -335,6 +364,19 @@ class ConsoleDebugger : public QDialog
 		QCheckBox *I_chkbox;
 		QCheckBox *Z_chkbox;
 		QCheckBox *C_chkbox;
+
+		QCheckBox *bgEnabled_cbox;
+		QCheckBox *sprites_cbox;
+		QCheckBox *drawLeftBg_cbox;
+		QCheckBox *drawLeftFg_cbox;
+		QCheckBox *vwrite_cbox;
+		QCheckBox *nmiBlank_cbox;
+		QCheckBox *sprite8x16_cbox;
+		QCheckBox *grayscale_cbox;
+		QCheckBox *iRed_cbox;
+		QCheckBox *iGrn_cbox;
+		QCheckBox *iBlu_cbox;
+
 		//QCheckBox *brkCpuCycExd;
 		//QCheckBox *brkInstrsExd;
 		QWidget   *bpTreeContainerWidget;
