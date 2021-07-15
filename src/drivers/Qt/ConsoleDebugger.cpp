@@ -4295,15 +4295,16 @@ QAsmView::QAsmView(QWidget *parent)
 	this->setPalette(pal);
 	this->setMouseTracking(true);
 
+	showByteCodes = false;
+	displayROMoffsets = false;
+	symbolicDebugEnable = true;
+	registerNameEnable = true;
+
 	calcFontData();
 
 	vbar = NULL;
 	hbar = NULL;
 	asmPC = NULL;
-	displayROMoffsets = false;
-	symbolicDebugEnable = true;
-	registerNameEnable = true;
-	showByteCodes = false;
 	maxLineLen = 0;
 	pxLineWidth = 0;
 	lineOffset = 0;
@@ -4796,16 +4797,16 @@ bool QAsmView::event(QEvent *event)
 		}
 		else
 		{
-			printf("Tool Tip Hide\n");
+			//printf("Tool Tip Hide\n");
 			QToolTip::hideText();
 			event->ignore();
 		}
 		return true;
 	}
-	else if (event->type() == QEvent::Leave)
-	{
-		printf("QEvent::Leave\n");
-	}
+	//else if (event->type() == QEvent::Leave)
+	//{
+	//	printf("QEvent::Leave\n");
+	//}
 	return QWidget::event(event);
 }
 //----------------------------------------------------------------------------
@@ -6268,10 +6269,10 @@ ppuCtrlRegDpy::ppuCtrlRegDpy( QWidget *parent )
 //----------------------------------------------------------------------------
 ppuCtrlRegDpy::~ppuCtrlRegDpy( void )
 {
-	if ( popup != NULL )
-	{
-		popup->close();
-	}
+	//if ( popup != NULL )
+	//{
+	//	popup->close();
+	//}
 }
 //----------------------------------------------------------------------------
 bool ppuCtrlRegDpy::event(QEvent *event)
@@ -6279,28 +6280,15 @@ bool ppuCtrlRegDpy::event(QEvent *event)
 	if (event->type() == QEvent::ToolTip)
 	{
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
-		if ( popup == NULL )
-		{
-			printf("Tool Tip Show\n");
-			popup = static_cast<ppuRegPopup*>(fceuCustomToolTipShow( helpEvent, new ppuRegPopup(this) ));
-		}
+		//if ( popup == NULL )
+		//{
+		//	printf("Tool Tip Show\n");
+		//}
+		popup = static_cast<ppuRegPopup*>(fceuCustomToolTipShow( helpEvent, new ppuRegPopup(this) ));
+
 		QToolTip::hideText();
 		event->ignore();
 		return true;
-	}
-	else if (event->type() == QEvent::MouseMove)
-	{
-		printf("QEvent::MouseMove\n");
-	}
-	else if (event->type() == QEvent::Leave)
-	{
-		printf("QEvent::Leave\n");
-		if ( popup )
-		{
-			popup->done(0);
-			popup->deleteLater();
-			popup = NULL;
-		}
 	}
 	return QWidget::event(event);
 }
@@ -6308,7 +6296,7 @@ bool ppuCtrlRegDpy::event(QEvent *event)
 //--  PPU Register Tool Tip Popup
 //----------------------------------------------------------------------------
 ppuRegPopup::ppuRegPopup( QWidget *parent )
-	: QDialog( parent, Qt::ToolTip )
+	: fceuCustomToolTip( parent )
 {
 	QVBoxLayout *vbox, *vbox1;
 	QGridLayout *grid, *grid1;
@@ -6330,10 +6318,10 @@ ppuRegPopup::ppuRegPopup( QWidget *parent )
 	QCheckBox *iBlu_cbox;
 	char stmp[32];
 
-	QPalette pal = this->palette();
-	pal.setColor( QPalette::Window    , pal.color(QPalette::ToolTipBase) );
-	pal.setColor( QPalette::WindowText, pal.color(QPalette::ToolTipText) );
-	setPalette(pal);
+	//QPalette pal = this->palette();
+	//pal.setColor( QPalette::Window    , pal.color(QPalette::ToolTipBase) );
+	//pal.setColor( QPalette::WindowText, pal.color(QPalette::ToolTipText) );
+	//setPalette(pal);
 
 	vbox1    = new QVBoxLayout();
 	vbox     = new QVBoxLayout();

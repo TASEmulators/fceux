@@ -29,6 +29,7 @@
 
 #include "Qt/main.h"
 #include "Qt/SymbolicDebug.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/ColorMenu.h"
 #include "../../debug.h"
 
@@ -273,7 +274,7 @@ class DebuggerStackDisplay : public QPlainTextEdit
 		void sel4BytesPerLine(void);
 };
 
-class ppuRegPopup : public QDialog
+class ppuRegPopup : public fceuCustomToolTip
 {
    Q_OBJECT
 	public:
