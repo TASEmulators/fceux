@@ -1211,7 +1211,7 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 void ConsoleDebugger::buildPpuListDisplay(void)
 {
 	QVBoxLayout *vbox;
-	QHBoxLayout *hbox, *hbox1;
+	QHBoxLayout /**hbox,*/ *hbox1;
 	QGridLayout *grid, *grid1;
 	QGroupBox   *ctlFrame;
 	QLabel      *bgAddrLbl, *sprAddrLbl;
@@ -6591,34 +6591,6 @@ void DebuggerTabWidget::mouseMoveEvent(QMouseEvent * e)
 void DebuggerTabWidget::popPage(QWidget *page)
 {
 	printf("Pop Page: %p\n", page);
-//	takeNormalPage(page);
-//	//Here set a window with a custom title bar to page
-//	MyTabPopup *pop=new MyTabPopup(this);
-//	pop->setAttribute(Qt::WA_DeleteOnClose);
-//	pop->setContentWidget(page);
-//	pop->setWindowTitle(page->windowTitle());
-//	pop->resize(page->size());
-//	     //The dragged position is a bit offset
-//	pop->move(QCursor::pos()-QPoint(10,10));
-//	
-//	     //Determine whether the independent window is dragged back to tab
-//	connect(pop,&MyTabPopup::dragRelease,this,[=](const QPoint &pos){
-//	    const QPoint bar_pos=tabBar()->mapFromGlobal(pos);
-//	             //If you drag it back into the tabbar range, remove the widget and put it back into the tab
-//	    if(tabBar()->contentsRect().contains(bar_pos))
-//	    {
-//	        QWidget *content=pop->getContentWidget();
-//	        this->appendNormalPage(content);
-//	        pop->disconnect();
-//	                     //It will flash in the original position when it is closed?
-//	        pop->close();
-//	        //this->activateWindow();
-//	    }
-//	});
-//	pop->show();
-//	page->show();
-//	pop->activateWindow();
-//	pop->setFocus();
 }
 //----------------------------------------------------------------------------
 //--- Debugger Tabbed Data Display
@@ -6635,51 +6607,6 @@ DebuggerTabBar::DebuggerTabBar( QWidget *parent )
 DebuggerTabBar::~DebuggerTabBar(void)
 {
 }
-//----------------------------------------------------------------------------
-//void DebuggerTabBar::beginDragOut(int idx)
-//{
-//	printf("BeginDragOut:%i\n",idx);
-//}
-//----------------------------------------------------------------------------
-//void DebuggerTabBar::dragEnterEvent(QDragEnterEvent *event)
-//{
-//	QWidget *w = qobject_cast<QWidget*>(event->source());
-//	printf("Bar Drag Enter Event: %p\n", w);
-//
-//	if ( (w != NULL) && (event->dropAction() == Qt::MoveAction) )
-//	{
-//		printf("Drag Action Accepted\n");
-//		event->acceptProposedAction();
-//	}
-//	//if (event->mimeData()->hasUrls() )
-//	//{
-//	//	event->acceptProposedAction();
-//	//}
-//}
-//
-//void DebuggerTabBar::dropEvent(QDropEvent *event)
-//{
-//	QWidget *w = qobject_cast<QWidget*>(event->source());
-//	printf("Bar Drop Event: %p\n", w);
-//
-//	if ( (w != NULL) && (event->dropAction() == Qt::MoveAction) )
-//	{
-//		DebuggerTabWidget *p = qobject_cast<DebuggerTabWidget*>(w->parent());
-//
-//		if ( p )
-//		{
-//			int idx = p->indexOf(w);
-//			printf("Removing Widget from Parent:%p  %i\n", p, idx);
-//			p->removeTab(idx);
-//		}
-//	}
-//	//if (event->mimeData()->hasUrls() )
-//	//{
-//	//	QList<QUrl> urls = event->mimeData()->urls();
-//
-//	//	event->accept();
-//	//}
-//}
 //----------------------------------------------------------------------------
 void DebuggerTabBar::mouseMoveEvent( QMouseEvent *event)
 {
@@ -6715,7 +6642,6 @@ void DebuggerTabBar::mousePressEvent( QMouseEvent *event)
 	if ( (event->button() == Qt::LeftButton) && (currentIndex() >= 0) )
 	{
 		//Save state
-		//pressPos=event->pos();
 		theDragPress = true;
 	}
 }
