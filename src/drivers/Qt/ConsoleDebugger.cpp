@@ -41,11 +41,14 @@
 #include <QMenu>
 #include <QAction>
 #include <QActionGroup>
+#include <QApplication>
 #include <QGuiApplication>
 #include <QSettings>
 #include <QToolTip>
 #include <QWindow>
 #include <QScreen>
+#include <QMimeData>
+#include <QDrag>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -90,7 +93,8 @@ static int  lastBpIdx   = 0;
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	: QDialog( parent, Qt::Window )
 {
-	QGridLayout *grid;
+	QWidget     *vw[2];
+	QVBoxLayout *vbox[2];
 	QMenuBar    *menuBar;
 	QSettings settings;
 	QFont cpuFont;
@@ -141,56 +145,82 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	toolBar = buildToolBar();
 
 	mainLayoutv = new QVBoxLayout();
-	mainLayouth = new QHBoxLayout();
+	//mainLayouth = new QHBoxLayout();
+	mainLayouth = new QSplitter();
+	mainLayouth->setOpaqueResize(true);
 
 	mainLayoutv->setMenuBar( menuBar );
 	mainLayoutv->addWidget( toolBar );
-	mainLayoutv->addLayout( mainLayouth );
+	//mainLayoutv->addLayout( mainLayouth );
+	mainLayoutv->addWidget( mainLayouth );
 
-	grid       = new QGridLayout();
-	asmView    = new QAsmView(this);
-	vbar       = new QScrollBar( Qt::Vertical, this );
-	hbar       = new QScrollBar( Qt::Horizontal, this );
-	asmLineSelLbl = new QLabel( tr("Line Select") );
-	emuStatLbl    = new QLabel( tr("Emulator is Running") );
+	//grid       = new QGridLayout();
+	//asmView    = new QAsmView(this);
+	//vbar       = new QScrollBar( Qt::Vertical, this );
+	//hbar       = new QScrollBar( Qt::Horizontal, this );
+	//asmLineSelLbl = new QLabel( tr("Line Select") );
+	//emuStatLbl    = new QLabel( tr("Emulator is Running") );
 
-	asmLineSelLbl->setWordWrap( true );
+	//asmLineSelLbl->setWordWrap( true );
 
-	asmView->setScrollBars( hbar, vbar );
+	//asmView->setScrollBars( hbar, vbar );
 
-	grid->addWidget( asmView, 0, 0 );
-	grid->addWidget( vbar   , 0, 1 );
-	grid->addWidget( hbar   , 1, 0 );
+	//grid->addWidget( asmView, 0, 0 );
+	//grid->addWidget( vbar   , 0, 1 );
+	//grid->addWidget( hbar   , 1, 0 );
 
-	 asmDpyVbox   = new QVBoxLayout();
-	dataDpyVbox1  = new QVBoxLayout();
-	dataDpyVbox2  = new QVBoxLayout();
+	tabView11 = new DebuggerTabWidget();
+	tabView12 = new DebuggerTabWidget();
 
-	bpDataDpyVbox = dataDpyVbox1;
-	bmDataDpyVbox = dataDpyVbox2;
+	tabView11->setMovable(true);
+	tabView12->setMovable(true);
+	tabView11->setUsesScrollButtons(true);
+	tabView12->setUsesScrollButtons(true);
 
-	hbar->setMinimum(0);
-	hbar->setMaximum(100);
-	vbar->setMinimum(0);
-	vbar->setMaximum( 0x10000 );
+	for (int i=0; i<2; i++)
+	{
+		vbox[i] = new QVBoxLayout();
 
-	asmDpyVbox->addLayout( grid, 100 );
-	asmDpyVbox->addWidget( asmLineSelLbl, 1 );
-	asmDpyVbox->addWidget( emuStatLbl   , 1 );
+		vw[i] = new QWidget();
+
+		vw[i]->setLayout( vbox[i] );
+	}
+	vbox[0]->addWidget( tabView11 );
+	vbox[1]->addWidget( tabView12 );
+
+	// asmDpyVbox   = new QVBoxLayout();
+	//dataDpyVbox1  = new QVBoxLayout();
+	//dataDpyVbox2  = new QVBoxLayout();
+
+	//bpDataDpyVbox = dataDpyVbox1;
+	//bmDataDpyVbox = dataDpyVbox2;
+
+	//hbar->setMinimum(0);
+	//hbar->setMaximum(100);
+	//vbar->setMinimum(0);
+	//vbar->setMaximum( 0x10000 );
+
+	//asmDpyVbox->addLayout( grid, 100 );
+	//asmDpyVbox->addWidget( asmLineSelLbl, 1 );
+	//asmDpyVbox->addWidget( emuStatLbl   , 1 );
 	//asmText->setFont(font);
 	//asmText->setReadOnly(true);
 	//asmText->setOverwriteMode(true);
 	//asmText->setMinimumWidth( 20 * fontCharWidth );
 	//asmText->setLineWrapMode( QPlainTextEdit::NoWrap );
 
-	mainLayouth->addLayout(  asmDpyVbox , 50 );
-	mainLayouth->addLayout( dataDpyVbox1, 40 );
-	mainLayouth->addLayout( dataDpyVbox2, 40 );
-
+	buildAsmViewDisplay();
 	buildCpuListDisplay();
 	buildPpuListDisplay();
 	buildBpListDisplay();
 	buildBmListDisplay();
+
+	//mainLayouth->addWidget(  asmViewContainerWidget , 50 );
+	//mainLayouth->addWidget( vw[0], 40 );
+	//mainLayouth->addWidget( vw[1], 40 );
+	mainLayouth->addWidget(  asmViewContainerWidget );
+	mainLayouth->addWidget( vw[0] );
+	mainLayouth->addWidget( vw[1] );
 
 	loadDisplayViews();
 
@@ -945,6 +975,41 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	return toolBar;
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::buildAsmViewDisplay(void)
+{
+	QGridLayout *grid;
+
+	grid       = new QGridLayout();
+	asmView    = new QAsmView(this);
+	vbar       = new QScrollBar( Qt::Vertical, this );
+	hbar       = new QScrollBar( Qt::Horizontal, this );
+	asmLineSelLbl = new QLabel( tr("Line Select") );
+	emuStatLbl    = new QLabel( tr("Emulator is Running") );
+
+	asmLineSelLbl->setWordWrap( true );
+
+	asmView->setScrollBars( hbar, vbar );
+
+	grid->addWidget( asmView, 0, 0 );
+	grid->addWidget( vbar   , 0, 1 );
+	grid->addWidget( hbar   , 1, 0 );
+
+	 asmDpyVbox   = new QVBoxLayout();
+
+	hbar->setMinimum(0);
+	hbar->setMaximum(100);
+	vbar->setMinimum(0);
+	vbar->setMaximum( 0x10000 );
+
+	asmDpyVbox->addLayout( grid, 100 );
+	asmDpyVbox->addWidget( asmLineSelLbl, 1 );
+	asmDpyVbox->addWidget( emuStatLbl   , 1 );
+	
+	asmViewContainerWidget = new QWidget();
+	asmViewContainerWidget->setLayout( asmDpyVbox );
+
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::buildCpuListDisplay(void)
 {
 	QVBoxLayout *vbox1;
@@ -1401,63 +1466,69 @@ void ConsoleDebugger::buildBmListDisplay(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::loadDisplayViews(void)
 {
-	bool hasVisibleWidgets = false;
 
-	for (int i=0; i<dataDpyVbox1->count(); i++)
-	{
-		dataDpyVbox1->takeAt(i);
-	}
-	for (int i=0; i<dataDpyVbox2->count(); i++)
-	{
-		dataDpyVbox2->takeAt(i);
-	}
+	tabView11->addTab( cpuFrame, tr("CPU") );
+	tabView11->addTab( ppuFrame, tr("PPU") );
+	tabView12->addTab(  bpFrame, tr("Breakpoints") );
+	tabView12->addTab(  bmFrame, tr("Bookmarks") );
 
-	cpuFrame->setVisible(cpuStatDpyVis);
-	ppuFrame->setVisible(ppuStatDpyVis);
-	 bpFrame->setVisible(bpTreeDpyVis);
-	 bmFrame->setVisible(bmTreeDpyVis);
-
-	cpuStatDpyVbox = cpuStatDpyCol ? dataDpyVbox2 : dataDpyVbox1;
-	ppuStatDpyVbox = ppuStatDpyCol ? dataDpyVbox2 : dataDpyVbox1;
-	bpDataDpyVbox  =  bpTreeDpyCol ? dataDpyVbox2 : dataDpyVbox1;
-	bmDataDpyVbox  =  bmTreeDpyCol ? dataDpyVbox2 : dataDpyVbox1;
-
-	cpuStatDpyVbox->addWidget( cpuFrame, 10 );
-	ppuStatDpyVbox->addWidget( ppuFrame, 10 );
-	 bpDataDpyVbox->addWidget( bpFrame , 100);
-	 bmDataDpyVbox->addWidget( bmFrame , 100);
-
-	hasVisibleWidgets = false;
-
-	for (int i=0; i<dataDpyVbox1->count(); i++)
-	{
-		QWidget *w = dataDpyVbox1->itemAt(i)->widget();
-
-		if ( w )
-		{
-			if ( w->isVisible() )
-			{
-				hasVisibleWidgets = true;
-			}
-		}
-	}
-	mainLayouth->setStretchFactor( dataDpyVbox1, hasVisibleWidgets ? 40 : 1 );
-
-	hasVisibleWidgets = false;
-
-	for (int i=0; i<dataDpyVbox2->count(); i++)
-	{
-		QWidget *w = dataDpyVbox2->itemAt(i)->widget();
-
-		if ( w )
-		{
-			if ( w->isVisible() )
-			{
-				hasVisibleWidgets = true;
-			}
-		}
-	}
-	mainLayouth->setStretchFactor( dataDpyVbox2, hasVisibleWidgets ? 40 : 1 );
+//	bool hasVisibleWidgets = false;
+//
+//	for (int i=0; i<dataDpyVbox1->count(); i++)
+//	{
+//		dataDpyVbox1->takeAt(i);
+//	}
+//	for (int i=0; i<dataDpyVbox2->count(); i++)
+//	{
+//		dataDpyVbox2->takeAt(i);
+//	}
+//
+//	cpuFrame->setVisible(cpuStatDpyVis);
+//	ppuFrame->setVisible(ppuStatDpyVis);
+//	 bpFrame->setVisible(bpTreeDpyVis);
+//	 bmFrame->setVisible(bmTreeDpyVis);
+//
+//	cpuStatDpyVbox = cpuStatDpyCol ? dataDpyVbox2 : dataDpyVbox1;
+//	ppuStatDpyVbox = ppuStatDpyCol ? dataDpyVbox2 : dataDpyVbox1;
+//	bpDataDpyVbox  =  bpTreeDpyCol ? dataDpyVbox2 : dataDpyVbox1;
+//	bmDataDpyVbox  =  bmTreeDpyCol ? dataDpyVbox2 : dataDpyVbox1;
+//
+//	cpuStatDpyVbox->addWidget( cpuFrame, 10 );
+//	ppuStatDpyVbox->addWidget( ppuFrame, 10 );
+//	 bpDataDpyVbox->addWidget( bpFrame , 100);
+//	 bmDataDpyVbox->addWidget( bmFrame , 100);
+//
+//	hasVisibleWidgets = false;
+//
+//	for (int i=0; i<dataDpyVbox1->count(); i++)
+//	{
+//		QWidget *w = dataDpyVbox1->itemAt(i)->widget();
+//
+//		if ( w )
+//		{
+//			if ( w->isVisible() )
+//			{
+//				hasVisibleWidgets = true;
+//			}
+//		}
+//	}
+//	mainLayouth->setStretchFactor( dataDpyVbox1, hasVisibleWidgets ? 40 : 1 );
+//
+//	hasVisibleWidgets = false;
+//
+//	for (int i=0; i<dataDpyVbox2->count(); i++)
+//	{
+//		QWidget *w = dataDpyVbox2->itemAt(i)->widget();
+//
+//		if ( w )
+//		{
+//			if ( w->isVisible() )
+//			{
+//				hasVisibleWidgets = true;
+//			}
+//		}
+//	}
+//	mainLayouth->setStretchFactor( dataDpyVbox2, hasVisibleWidgets ? 40 : 1 );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::saveDisplayViews(void)
@@ -2092,14 +2163,14 @@ void ConsoleDebugger::setPpuFrameVis(bool vis)
 	ppuStatContainerWidget->setVisible(vis);
 	ppuStatHideLbl->setVisible(!vis);
 
-	if ( vis )
-	{
-		dataDpyVbox1->setStretchFactor( ppuFrame, 10);
-	}
-	else
-	{
-		dataDpyVbox1->setStretchFactor( ppuFrame,  1);
-	}
+	//if ( vis )
+	//{
+	//	dataDpyVbox1->setStretchFactor( ppuFrame, 10);
+	//}
+	//else
+	//{
+	//	dataDpyVbox1->setStretchFactor( ppuFrame,  1);
+	//}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::setBpFrameVis(bool vis)
@@ -2107,14 +2178,14 @@ void ConsoleDebugger::setBpFrameVis(bool vis)
 	bpTreeContainerWidget->setVisible(vis);
 	bpTreeHideLbl->setVisible(!vis);
 
-	if ( vis )
-	{
-		bpDataDpyVbox->setStretchFactor( bpFrame, 100);
-	}
-	else
-	{
-		bpDataDpyVbox->setStretchFactor( bpFrame,   1);
-	}
+	//if ( vis )
+	//{
+	//	bpDataDpyVbox->setStretchFactor( bpFrame, 100);
+	//}
+	//else
+	//{
+	//	bpDataDpyVbox->setStretchFactor( bpFrame,   1);
+	//}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::setBmFrameVis(bool vis)
@@ -2122,14 +2193,14 @@ void ConsoleDebugger::setBmFrameVis(bool vis)
 	bmTreeContainerWidget->setVisible(vis);
 	bmTreeHideLbl->setVisible(!vis);
 
-	if ( vis )
-	{
-		bmDataDpyVbox->setStretchFactor( bmFrame, 100);
-	}
-	else
-	{
-		bmDataDpyVbox->setStretchFactor( bmFrame,   1);
-	}
+	//if ( vis )
+	//{
+	//	bmDataDpyVbox->setStretchFactor( bmFrame, 100);
+	//}
+	//else
+	//{
+	//	bmDataDpyVbox->setStretchFactor( bmFrame,   1);
+	//}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::resizeToMinimumSizeHint(void) 
@@ -6399,5 +6470,261 @@ ppuRegPopup::ppuRegPopup( QWidget *parent )
 ppuRegPopup::~ppuRegPopup( void )
 {
 	//printf("Popup Deleted\n");
+}
+//----------------------------------------------------------------------------
+//--- Debugger Tabbed Data Display
+//----------------------------------------------------------------------------
+DebuggerTabWidget::DebuggerTabWidget( QWidget *parent )
+	: QTabWidget(parent)
+{
+	DebuggerTabBar *bar = new DebuggerTabBar(this);
+	setTabBar( bar );
+	bar->setAcceptDrops(true);
+	bar->setChangeCurrentOnDrag(true);
+	setMouseTracking(true);
+	setAcceptDrops(true);
+
+	connect( bar, &DebuggerTabBar::beginDragOut, this,[this,bar](int index)
+	{
+		if (!this->indexValid(index))
+		{
+		    return;
+		}
+		QWidget *drag_tab=this->widget(index);
+		//Fixed tab will not be dragged out
+		if (!drag_tab /*||fixedPage.contains(drag_tab)*/)
+		{
+		    return;
+		}
+		//Drag and drop the current page as a snapshot
+		//The size adds the title bar and border
+		QPixmap pixmap(drag_tab->size()+QSize(2,31));
+		pixmap.fill(Qt::transparent);
+
+		QPainter painter(&pixmap);
+
+		if (painter.isActive())
+		{
+			//I want to make the title bar pasted on the content
+			//But you can't get the image of the default title bar, just draw a rectangular box
+			//If the external theme color is set, you need to change it
+			QRect title_rect{0,0,pixmap.width(),30};
+			painter.fillRect(title_rect,Qt::white);
+			painter.drawText(title_rect,Qt::AlignLeft|Qt::AlignVCenter,"  "+drag_tab->windowTitle());
+			painter.drawRect(pixmap.rect().adjusted(0,0,-1,-1));
+		}
+		painter.end();
+		drag_tab->render(&pixmap,QPoint(1,30));
+		
+		QMimeData *mime=new QMimeData;
+		QDrag *drag=new QDrag(bar);
+		drag->setMimeData(mime);
+		drag->setPixmap(pixmap);
+		drag->setHotSpot(QPoint(10,0));
+		
+		//Drag is released after the mouse bounces up, at this time to judge whether it is dragged to the outside
+		connect(drag,&QDrag::destroyed,this,[=]{
+		    QPoint bar_point=bar->mapFromGlobal(QCursor::pos());
+		                 //Out of range, drag out
+		    if (!bar->contentsRect().contains(bar_point))
+		    {
+		        popPage(drag_tab);
+		    }
+		});
+		
+		drag->exec(Qt::MoveAction);
+	});
+}
+//----------------------------------------------------------------------------
+DebuggerTabWidget::~DebuggerTabWidget(void)
+{
+
+}
+//----------------------------------------------------------------------------
+bool DebuggerTabWidget::indexValid(int idx)
+{
+	return ( (idx >= 0) && (idx < count()) );
+}
+//----------------------------------------------------------------------------
+void DebuggerTabWidget::dragEnterEvent(QDragEnterEvent *event)
+{
+	DebuggerTabBar *w = qobject_cast<DebuggerTabBar*>(event->source());
+	printf("Tab Widget Drag Enter Event: %p\n", w);
+
+	if ( (w != NULL) && (event->dropAction() == Qt::MoveAction) )
+	{
+		printf("Drag Action Accepted\n");
+		event->acceptProposedAction();
+	}
+}
+
+void DebuggerTabWidget::dropEvent(QDropEvent *event)
+{
+	DebuggerTabBar *bar = qobject_cast<DebuggerTabBar*>(event->source());
+	printf("Tab Widget Drop Event: %p\n", bar);
+
+	if ( (bar != NULL) && (event->dropAction() == Qt::MoveAction) )
+	{
+		int idx = bar->currentIndex();
+
+		DebuggerTabWidget *p = qobject_cast<DebuggerTabWidget*>(bar->parent());
+		if ( p == NULL )
+		{
+			return;
+		}
+		QWidget *w = p->widget(idx);
+
+		if ( w )
+		{
+			QString txt = bar->tabText(idx);
+			printf("Removing Widget from Parent:%p  %p  %p  %i\n", bar, p, w, idx);
+			p->removeTab( idx );
+			addTab(w, txt);
+		}
+	}
+}
+void DebuggerTabWidget::mouseMoveEvent(QMouseEvent * e)
+{
+	//printf("TabWidget: (%i,%i) \n", e->pos().x(), e->pos().y() );;
+}
+//----------------------------------------------------------------------------
+void DebuggerTabWidget::popPage(QWidget *page)
+{
+	printf("Pop Page: %p\n", page);
+//	takeNormalPage(page);
+//	//Here set a window with a custom title bar to page
+//	MyTabPopup *pop=new MyTabPopup(this);
+//	pop->setAttribute(Qt::WA_DeleteOnClose);
+//	pop->setContentWidget(page);
+//	pop->setWindowTitle(page->windowTitle());
+//	pop->resize(page->size());
+//	     //The dragged position is a bit offset
+//	pop->move(QCursor::pos()-QPoint(10,10));
+//	
+//	     //Determine whether the independent window is dragged back to tab
+//	connect(pop,&MyTabPopup::dragRelease,this,[=](const QPoint &pos){
+//	    const QPoint bar_pos=tabBar()->mapFromGlobal(pos);
+//	             //If you drag it back into the tabbar range, remove the widget and put it back into the tab
+//	    if(tabBar()->contentsRect().contains(bar_pos))
+//	    {
+//	        QWidget *content=pop->getContentWidget();
+//	        this->appendNormalPage(content);
+//	        pop->disconnect();
+//	                     //It will flash in the original position when it is closed?
+//	        pop->close();
+//	        //this->activateWindow();
+//	    }
+//	});
+//	pop->show();
+//	page->show();
+//	pop->activateWindow();
+//	pop->setFocus();
+}
+//----------------------------------------------------------------------------
+//--- Debugger Tabbed Data Display
+//----------------------------------------------------------------------------
+DebuggerTabBar::DebuggerTabBar( QWidget *parent )
+	: QTabBar(parent)
+{
+	setMouseTracking(true);
+	setAcceptDrops(true);
+	theDragPress = false;
+	theDragOut = false;
+}
+//----------------------------------------------------------------------------
+DebuggerTabBar::~DebuggerTabBar(void)
+{
+}
+//----------------------------------------------------------------------------
+//void DebuggerTabBar::beginDragOut(int idx)
+//{
+//	printf("BeginDragOut:%i\n",idx);
+//}
+//----------------------------------------------------------------------------
+//void DebuggerTabBar::dragEnterEvent(QDragEnterEvent *event)
+//{
+//	QWidget *w = qobject_cast<QWidget*>(event->source());
+//	printf("Bar Drag Enter Event: %p\n", w);
+//
+//	if ( (w != NULL) && (event->dropAction() == Qt::MoveAction) )
+//	{
+//		printf("Drag Action Accepted\n");
+//		event->acceptProposedAction();
+//	}
+//	//if (event->mimeData()->hasUrls() )
+//	//{
+//	//	event->acceptProposedAction();
+//	//}
+//}
+//
+//void DebuggerTabBar::dropEvent(QDropEvent *event)
+//{
+//	QWidget *w = qobject_cast<QWidget*>(event->source());
+//	printf("Bar Drop Event: %p\n", w);
+//
+//	if ( (w != NULL) && (event->dropAction() == Qt::MoveAction) )
+//	{
+//		DebuggerTabWidget *p = qobject_cast<DebuggerTabWidget*>(w->parent());
+//
+//		if ( p )
+//		{
+//			int idx = p->indexOf(w);
+//			printf("Removing Widget from Parent:%p  %i\n", p, idx);
+//			p->removeTab(idx);
+//		}
+//	}
+//	//if (event->mimeData()->hasUrls() )
+//	//{
+//	//	QList<QUrl> urls = event->mimeData()->urls();
+//
+//	//	event->accept();
+//	//}
+//}
+//----------------------------------------------------------------------------
+void DebuggerTabBar::mouseMoveEvent( QMouseEvent *event)
+{
+	//printf("TabBar Mouse Move: (%i,%i) \n", event->pos().x(), event->pos().y() );;
+	QTabBar::mouseMoveEvent(event);
+
+	if ( theDragPress && event->buttons())
+	{
+		//Is it out of the scope of tabbar
+		if ( !theDragOut && !contentsRect().contains(event->pos()) )
+		{
+			theDragOut=true;
+			emit beginDragOut(this->currentIndex());
+			
+			//The release will not be triggered after QDrag.exec, manually trigger it yourself
+			//But he still seems to animate after the mouse is up, to be resolved
+			QMouseEvent *e=new QMouseEvent(QEvent::MouseButtonRelease,
+			                                  this->mapFromGlobal(QCursor::pos()),
+			                                   Qt::LeftButton,
+			                                   Qt::LeftButton,
+			                                   Qt::NoModifier);
+			//mouseReleaseEvent(event);
+			QApplication::postEvent(this,e);
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void DebuggerTabBar::mousePressEvent( QMouseEvent *event)
+{
+	printf("TabBar Mouse Press: (%i,%i) \n", event->pos().x(), event->pos().y() );;
+	QTabBar::mousePressEvent(event);
+
+	if ( (event->button() == Qt::LeftButton) && (currentIndex() >= 0) )
+	{
+		//Save state
+		//pressPos=event->pos();
+		theDragPress = true;
+	}
+}
+//----------------------------------------------------------------------------
+void DebuggerTabBar::mouseReleaseEvent( QMouseEvent *event)
+{
+	printf("TabBar Mouse Release: (%i,%i) \n", event->pos().x(), event->pos().y() );;
+	QTabBar::mouseReleaseEvent(event);
+	theDragPress = false;
+	theDragOut = false;
 }
 //----------------------------------------------------------------------------

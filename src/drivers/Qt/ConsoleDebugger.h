@@ -24,8 +24,13 @@
 #include <QPlainTextEdit>
 #include <QClipboard>
 #include <QScrollBar>
+#include <QTabBar>
+#include <QTabWidget>
+#include <QSplitter>
 #include <QToolBar>
 #include <QMenuBar>
+#include <QDropEvent>
+#include <QDragEnterEvent>
 
 #include "Qt/main.h"
 #include "Qt/SymbolicDebug.h"
@@ -301,6 +306,49 @@ class ppuCtrlRegDpy : public QLineEdit
 	public slots:
 };
 
+class DebuggerTabBar : public QTabBar
+{
+	Q_OBJECT
+
+	public:
+		DebuggerTabBar( QWidget *parent = nullptr );
+		~DebuggerTabBar( void );
+
+	public slots:
+
+	signals:
+		void beginDragOut(int);
+	protected:
+		void mousePressEvent(QMouseEvent * event);
+		void mouseReleaseEvent(QMouseEvent * event);
+		void mouseMoveEvent(QMouseEvent * event);
+		//void dragEnterEvent(QDragEnterEvent *event);
+		//void dropEvent(QDropEvent *event);
+	private:
+		bool theDragPress;
+		bool theDragOut;
+
+	private slots:
+};
+
+class DebuggerTabWidget : public QTabWidget
+{
+   Q_OBJECT
+
+	public:
+		DebuggerTabWidget( QWidget *parent = nullptr );
+		~DebuggerTabWidget( void );
+
+		void popPage(QWidget *page);
+		bool indexValid(int idx);
+	protected:
+		void mouseMoveEvent(QMouseEvent * event);
+		void dragEnterEvent(QDragEnterEvent *event);
+		void dropEvent(QDropEvent *event);
+	private:
+		DebuggerTabBar  *bar;
+};
+
 class ConsoleDebugger : public QDialog
 {
    Q_OBJECT
@@ -380,6 +428,9 @@ class ConsoleDebugger : public QDialog
 
 		//QCheckBox *brkCpuCycExd;
 		//QCheckBox *brkInstrsExd;
+		DebuggerTabWidget *tabView11;
+		DebuggerTabWidget *tabView12;
+		QWidget   *asmViewContainerWidget;
 		QWidget   *bpTreeContainerWidget;
 		QWidget   *bmTreeContainerWidget;
 		QWidget   *ppuStatContainerWidget;
@@ -399,14 +450,15 @@ class ConsoleDebugger : public QDialog
 		QFont      font;
 
 		QVBoxLayout   *mainLayoutv;
-		QHBoxLayout   *mainLayouth;
+		//QHBoxLayout   *mainLayouth;
+		QSplitter     *mainLayouth;
 		QVBoxLayout   *asmDpyVbox;
-		QVBoxLayout   *dataDpyVbox1;
-		QVBoxLayout   *dataDpyVbox2;
-		QVBoxLayout   *cpuStatDpyVbox;
-		QVBoxLayout   *ppuStatDpyVbox;
-		QVBoxLayout   *bpDataDpyVbox;
-		QVBoxLayout   *bmDataDpyVbox;
+		//QVBoxLayout   *dataDpyVbox1;
+		//QVBoxLayout   *dataDpyVbox2;
+		//QVBoxLayout   *cpuStatDpyVbox;
+		//QVBoxLayout   *ppuStatDpyVbox;
+		//QVBoxLayout   *bpDataDpyVbox;
+		//QVBoxLayout   *bmDataDpyVbox;
 
 		ColorMenuItem *opcodeColorAct;
 		ColorMenuItem *addressColorAct;
@@ -431,6 +483,7 @@ class ConsoleDebugger : public QDialog
 		void setRegsFromEntry(void);
 		void bpListUpdate( bool reset = false );
 		void bmListUpdate( bool reset = false );
+		void buildAsmViewDisplay(void);
 		void buildCpuListDisplay(void);
 		void buildPpuListDisplay(void);
 		void buildBpListDisplay(void);
