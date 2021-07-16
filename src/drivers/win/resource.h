@@ -914,6 +914,7 @@
 #define IDC_BINARY                      1317
 #define IDC_GAME_GENIE_ADDR             1501
 #define IDC_EDIT_SYMBOLIC_INIT          1502
+#define BTN_SAVE                        1503
 #define MENU_INESHEADEREDITOR           40001
 #define MENU_INPUT_BARCODE              40004
 #define ID_BOOKMARKS_IMPORT             40005
