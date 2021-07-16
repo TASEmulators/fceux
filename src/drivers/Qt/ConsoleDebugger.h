@@ -394,12 +394,12 @@ class ConsoleDebugger : public QDialog
 		QLineEdit *cpuInstrsVal;
 		QLineEdit *ppuBgAddr;
 		QLineEdit *ppuSprAddr;
-		QGroupBox *cpuFrame;
-		QGroupBox *ppuFrame;
+		QFrame    *cpuFrame;
+		QFrame    *ppuFrame;
 		QGroupBox *stackFrame;
-		QGroupBox *bpFrame;
+		QFrame    *bpFrame;
 		QGroupBox *sfFrame;
-		QGroupBox *bmFrame;
+		QFrame    *bmFrame;
 		QTreeWidget *bpTree;
 		QTreeWidget *bmTree;
 		QPushButton *bpAddBtn;
@@ -426,10 +426,10 @@ class ConsoleDebugger : public QDialog
 		QCheckBox *iGrn_cbox;
 		QCheckBox *iBlu_cbox;
 
-		//QCheckBox *brkCpuCycExd;
-		//QCheckBox *brkInstrsExd;
 		DebuggerTabWidget *tabView11;
 		DebuggerTabWidget *tabView12;
+		DebuggerTabWidget *tabView21;
+		DebuggerTabWidget *tabView22;
 		QWidget   *asmViewContainerWidget;
 		QWidget   *bpTreeContainerWidget;
 		QWidget   *bmTreeContainerWidget;
@@ -440,25 +440,16 @@ class ConsoleDebugger : public QDialog
 		QLabel    *scanLineLbl;
 		QLabel    *pixLbl;
 		QLabel    *cpuCyclesLbl1;
-		//QLabel    *cpuCyclesLbl2;
 		QLabel    *cpuInstrsLbl1;
-		//QLabel    *cpuInstrsLbl2;
-		QLabel    *bpTreeHideLbl;
-		QLabel    *bmTreeHideLbl;
-		QLabel    *ppuStatHideLbl;
+		//QLabel    *bpTreeHideLbl;
+		//QLabel    *bmTreeHideLbl;
 		QTimer    *periodicTimer;
 		QFont      font;
 
 		QVBoxLayout   *mainLayoutv;
-		//QHBoxLayout   *mainLayouth;
 		QSplitter     *mainLayouth;
+		QSplitter     *vsplitter[2];
 		QVBoxLayout   *asmDpyVbox;
-		//QVBoxLayout   *dataDpyVbox1;
-		//QVBoxLayout   *dataDpyVbox2;
-		//QVBoxLayout   *cpuStatDpyVbox;
-		//QVBoxLayout   *ppuStatDpyVbox;
-		//QVBoxLayout   *bpDataDpyVbox;
-		//QVBoxLayout   *bmDataDpyVbox;
 
 		ColorMenuItem *opcodeColorAct;
 		ColorMenuItem *addressColorAct;
