@@ -138,7 +138,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 		{
 			char stmp[64];
 
-			tabView[i][j] = new DebuggerTabWidget();
+			tabView[i][j] = new DebuggerTabWidget(i,j);
 
 			sprintf( stmp, "debuggerTabView%i%i\n", i+1, j+1 );
 
@@ -329,45 +329,37 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	viewMenu->addSeparator();
 
 	// View -> Layout
-	visMenu = viewMenu->addMenu( tr("&Layout") );
+	visMenu = viewMenu->addMenu( tr("&Layout Presets") );
 
 	g_config->getOption( "SDL.DebuggerLayoutOpt", &opt );
 
 	actGroup = new QActionGroup(this);
 	actGroup->setExclusive(true);
 
-	// View -> Layout -> 1
-	act = new QAction(tr("&1"), this);
-	act->setStatusTip(tr("1 Tabbed Vertical Column"));
-	act->setCheckable(true);
-	act->setChecked( opt == 1 );
+	// View -> Layout -> Compact View
+	act = new QAction(tr("&Compact View"), this);
+	//act->setStatusTip(tr("Compact View"));
 	connect( act, &QAction::triggered, [this]{ setLayoutOption(1); } );
 	actGroup->addAction(act);
 	visMenu->addAction(act);
 
-	// View -> Layout -> 2
-	act = new QAction(tr("&2"), this);
-	act->setStatusTip(tr("1 Tabbed Vertical Column with 2 Sections"));
-	act->setCheckable(true);
-	act->setChecked( opt == 2 );
+	// View -> Layout -> Compact View Split
+	act = new QAction(tr("Compact View &Split"), this);
+	//act->setStatusTip(tr("1 Tabbed Vertical Column with 2 Sections"));
 	connect( act, &QAction::triggered, [this]{ setLayoutOption(2); } );
 	actGroup->addAction(act);
 	visMenu->addAction(act);
 
-	// View -> Layout -> 3
-	act = new QAction(tr("&3"), this);
-	act->setStatusTip(tr("2 Tabbed Vertical Columns with 3 Sections"));
-	act->setCheckable(true);
-	act->setChecked( opt == 3 );
+	// View -> Layout -> Wide View
+	act = new QAction(tr("&Wide View"), this);
+	//act->setStatusTip(tr("2 Tabbed Vertical Columns with 3 Sections"));
 	connect( act, &QAction::triggered, [this]{ setLayoutOption(3); } );
 	actGroup->addAction(act);
 	visMenu->addAction(act);
 
-	// View -> Layout -> 4
-	act = new QAction(tr("&4"), this);
-	act->setStatusTip(tr("2 Tabbed Vertical Columns with 4 Sections"));
-	act->setCheckable(true);
-	act->setChecked( opt == 4 );
+	// View -> Layout -> Wide View Quad
+	act = new QAction(tr("Wide View &Quad"), this);
+	//act->setStatusTip(tr("2 Tabbed Vertical Columns with 4 Sections"));
 	connect( act, &QAction::triggered, [this]{ setLayoutOption(4); } );
 	actGroup->addAction(act);
 	visMenu->addAction(act);
@@ -1344,6 +1336,8 @@ void ConsoleDebugger::loadDisplayViews(void)
 		sprintf( key, "debugger/vPanelState%i", i+1);
 		vsplitter[i]->restoreState( settings.value(key).toByteArray() );
 	}
+
+	updateTabVisibility();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::saveDisplayViews(void)
@@ -1385,6 +1379,61 @@ void ConsoleDebugger::saveDisplayViews(void)
 
 	// Save Window Geometry
 	settings.setValue("debugger/geometry", saveGeometry());
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::updateTabVisibility(void)
+{
+	for (int i=0; i<2; i++)
+	{
+		for (int j=0; j<4; j++)
+		{
+			if ( tabView[i][j]->count() > 0 )
+			{
+				if ( !tabView[i][j]->isVisible() )
+				{
+					QList<int> s = vsplitter[i]->sizes();
+
+					s[j] = tabView[i][j]->minimumSizeHint().height();
+					
+					vsplitter[i]->setSizes(s);
+				}
+				tabView[i][j]->setVisible( true );
+			}
+			else
+			{
+				tabView[i][j]->setVisible( false );
+			}
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::moveTab( QWidget *w, int row, int column)
+{
+	int idx = -1;
+	DebuggerTabWidget *p = NULL;
+
+	for (int i=0; i<2; i++)
+	{
+		for (int j=0; j<4; j++)
+		{
+			idx = tabView[i][j]->indexOf(w);
+
+			if ( idx >= 0 )
+			{
+				p = tabView[i][j]; break;
+			}
+		}
+		if (p) break;
+	}
+
+	if ( p )
+	{
+		QString txt = p->tabBar()->tabText( idx );
+		p->removeTab( idx );
+		tabView[column][row]->addTab(w, txt);
+		//printf("Move Widget %p to (%i,%i) %s\n", w, row, column, txt.toStdString().c_str() ); 
+	}
+	updateTabVisibility();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::setCpuStatusFont( const QFont &font )
@@ -2520,7 +2569,96 @@ void ConsoleDebugger::navHistForwardCB (void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::setLayoutOption( int opt )
 {
+	for (int i=0; i<2; i++)
+	{
+		for (int j=0; j<4; j++)
+		{
+			for (int k=0; k<tabView[i][j]->count(); k++)
+			{
+				tabView[i][j]->removeTab(k);
+			}
+		}
+	}
 
+	switch ( opt )
+	{
+		default:
+		case 1:
+		{
+			tabView[0][0]->addTab( cpuFrame, tr("CPU") );
+			tabView[0][0]->addTab( ppuFrame, tr("PPU") );
+			tabView[0][0]->addTab(  bpFrame, tr("Breakpoints") );
+			tabView[0][0]->addTab(  bmFrame, tr("BookMarks") );
+			tabView[0][0]->setVisible(true);
+		}
+		break;
+		case 2:
+		{
+			tabView[0][0]->addTab( cpuFrame, tr("CPU") );
+			tabView[0][0]->addTab( ppuFrame, tr("PPU") );
+			tabView[0][1]->addTab(  bpFrame, tr("Breakpoints") );
+			tabView[0][1]->addTab(  bmFrame, tr("BookMarks") );
+
+			tabView[0][0]->setVisible(true);
+			tabView[0][1]->setVisible(true);
+
+			QList <int> s = vsplitter[0]->sizes();
+
+			s[0] = tabView[0][0]->minimumSizeHint().height();
+			s[1] = vsplitter[0]->height() - s[0];
+			s[2] = 0;
+			s[3] = 0;
+
+			vsplitter[0]->setSizes(s);
+		}
+		break;
+		case 3:
+		{
+			tabView[0][0]->addTab( cpuFrame, tr("CPU") );
+			tabView[0][1]->addTab( ppuFrame, tr("PPU") );
+			tabView[1][0]->addTab(  bpFrame, tr("Breakpoints") );
+			tabView[1][0]->addTab(  bmFrame, tr("BookMarks") );
+
+			tabView[0][0]->setVisible(true);
+			tabView[0][1]->setVisible(true);
+			tabView[1][0]->setVisible(true);
+
+			QList <int> s = vsplitter[0]->sizes();
+
+			s[0] = vsplitter[0]->height() / 2;
+			s[1] = s[0];
+			s[2] = 0;
+			s[3] = 0;
+
+			vsplitter[0]->setSizes(s);
+		}
+		break;
+		case 4:
+		{
+			tabView[0][0]->addTab( cpuFrame, tr("CPU") );
+			tabView[0][1]->addTab( ppuFrame, tr("PPU") );
+			tabView[1][0]->addTab(  bpFrame, tr("Breakpoints") );
+			tabView[1][1]->addTab(  bmFrame, tr("BookMarks") );
+
+			tabView[0][0]->setVisible(true);
+			tabView[0][1]->setVisible(true);
+			tabView[1][0]->setVisible(true);
+			tabView[1][1]->setVisible(true);
+
+			QList <int> s = vsplitter[0]->sizes();
+
+			s[0] = vsplitter[0]->height() / 2;
+			s[1] = s[0];
+			s[2] = 0;
+			s[3] = 0;
+
+			vsplitter[0]->setSizes(s);
+			vsplitter[1]->setSizes(s);
+		}
+		break;
+	}
+
+	updateTabVisibility();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::seekPCCB (void)
@@ -6261,7 +6399,7 @@ ppuRegPopup::~ppuRegPopup( void )
 //----------------------------------------------------------------------------
 //--- Debugger Tabbed Data Display
 //----------------------------------------------------------------------------
-DebuggerTabWidget::DebuggerTabWidget( QWidget *parent )
+DebuggerTabWidget::DebuggerTabWidget( int row, int col, QWidget *parent )
 	: QTabWidget(parent)
 {
 	DebuggerTabBar *bar = new DebuggerTabBar(this);
@@ -6270,6 +6408,9 @@ DebuggerTabWidget::DebuggerTabWidget( QWidget *parent )
 	bar->setChangeCurrentOnDrag(true);
 	setMouseTracking(true);
 	setAcceptDrops(true);
+
+	_row = row;
+	_col = col;
 
 	setMovable(true);
 	setUsesScrollButtons(true);
@@ -6339,19 +6480,20 @@ bool DebuggerTabWidget::indexValid(int idx)
 void DebuggerTabWidget::dragEnterEvent(QDragEnterEvent *event)
 {
 	DebuggerTabBar *w = qobject_cast<DebuggerTabBar*>(event->source());
-	printf("Tab Widget Drag Enter Event: %p\n", w);
+	//printf("Tab Widget Drag Enter Event: %p\n", w);
 
 	if ( (w != NULL) && (event->dropAction() == Qt::MoveAction) )
 	{
-		printf("Drag Action Accepted\n");
+		//printf("Drag Action Accepted\n");
 		event->acceptProposedAction();
 	}
 }
 
+//----------------------------------------------------------------------------
 void DebuggerTabWidget::dropEvent(QDropEvent *event)
 {
 	DebuggerTabBar *bar = qobject_cast<DebuggerTabBar*>(event->source());
-	printf("Tab Widget Drop Event: %p\n", bar);
+	//printf("Tab Widget Drop Event: %p\n", bar);
 
 	if ( (bar != NULL) && (event->dropAction() == Qt::MoveAction) )
 	{
@@ -6367,15 +6509,78 @@ void DebuggerTabWidget::dropEvent(QDropEvent *event)
 		if ( w )
 		{
 			QString txt = bar->tabText(idx);
-			printf("Removing Widget from Parent:%p  %p  %p  %i\n", bar, p, w, idx);
+			//printf("Removing Widget from Parent:%p  %p  %p  %i\n", bar, p, w, idx);
 			p->removeTab( idx );
 			addTab(w, txt);
+
+			dbgWin->updateTabVisibility();
 		}
 	}
 }
+//----------------------------------------------------------------------------
 void DebuggerTabWidget::mouseMoveEvent(QMouseEvent * e)
 {
 	//printf("TabWidget: (%i,%i) \n", e->pos().x(), e->pos().y() );;
+}
+//----------------------------------------------------------------------------
+void DebuggerTabWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+	buildContextMenu(event);
+}
+//----------------------------------------------------------------------------
+void DebuggerTabWidget::buildContextMenu(QContextMenuEvent *event)
+{
+	int i,j;
+	QAction *act;
+	QActionGroup *group;
+	QMenu menu(this);
+	QMenu *moveMenu, *subMenu;
+
+	//printf("TabWidget Context\n");
+
+	moveMenu = menu.addMenu( tr("Move To") );
+
+	group = new QActionGroup(moveMenu);
+	group->setExclusive(true);
+
+	for (j=0; j<4; j++)
+	{
+		const char *vertText;
+
+		switch (j)
+		{
+			default:
+			case 0:
+				vertText = "Upper";
+			break;
+			case 1:
+				vertText = "Mid-Upper";
+			break;
+			case 2:
+				vertText = "Mid-Lower";
+			break;
+			case 3:
+				vertText = "Lower";
+			break;
+		}
+		subMenu = moveMenu->addMenu( tr(vertText) );
+
+		for (i=0; i<2; i++)
+		{
+			const char *horzText = i ? "Right" : "Left";
+
+			act = new QAction(tr(horzText), &menu);
+
+			subMenu->addAction(act);
+			group->addAction(act);
+
+			QWidget *w = widget( currentIndex() );
+
+			connect( act, &QAction::triggered, [w, j, i]{ dbgWin->ConsoleDebugger::moveTab( w, j, i ); } );
+		}
+	}
+
+	menu.exec(event->globalPos());
 }
 //----------------------------------------------------------------------------
 void DebuggerTabWidget::popPage(QWidget *page)
@@ -6426,7 +6631,7 @@ void DebuggerTabBar::mouseMoveEvent( QMouseEvent *event)
 //----------------------------------------------------------------------------
 void DebuggerTabBar::mousePressEvent( QMouseEvent *event)
 {
-	//printf("TabBar Mouse Press: (%i,%i) \n", event->pos().x(), event->pos().y() );;
+	printf("TabBar Mouse Press: (%i,%i) \n", event->pos().x(), event->pos().y() );;
 	QTabBar::mousePressEvent(event);
 
 	if ( (event->button() == Qt::LeftButton) && (currentIndex() >= 0) )
@@ -6442,5 +6647,28 @@ void DebuggerTabBar::mouseReleaseEvent( QMouseEvent *event)
 	QTabBar::mouseReleaseEvent(event);
 	theDragPress = false;
 	theDragOut = false;
+}
+//----------------------------------------------------------------------------
+void DebuggerTabBar::contextMenuEvent(QContextMenuEvent *event)
+{
+	int idx;
+
+	idx = tabAt(event->pos());
+
+	if ( idx < 0 )
+	{
+		idx = currentIndex();
+	}
+
+	if ( idx != currentIndex() )
+	{
+		setCurrentIndex(idx);
+	}
+	DebuggerTabWidget *p = qobject_cast<DebuggerTabWidget*>(parent());
+
+	if ( p )
+	{
+		p->buildContextMenu(event);
+	}
 }
 //----------------------------------------------------------------------------

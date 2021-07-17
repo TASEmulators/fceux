@@ -322,8 +322,7 @@ class DebuggerTabBar : public QTabBar
 		void mousePressEvent(QMouseEvent * event);
 		void mouseReleaseEvent(QMouseEvent * event);
 		void mouseMoveEvent(QMouseEvent * event);
-		//void dragEnterEvent(QDragEnterEvent *event);
-		//void dropEvent(QDropEvent *event);
+		void contextMenuEvent(QContextMenuEvent *event);
 	private:
 		bool theDragPress;
 		bool theDragOut;
@@ -336,17 +335,25 @@ class DebuggerTabWidget : public QTabWidget
    Q_OBJECT
 
 	public:
-		DebuggerTabWidget( QWidget *parent = nullptr );
+		DebuggerTabWidget( int row, int col, QWidget *parent = nullptr );
 		~DebuggerTabWidget( void );
 
 		void popPage(QWidget *page);
 		bool indexValid(int idx);
+
+		void buildContextMenu(QContextMenuEvent *event);
+
+		int  row(void){ return _row; }
+		int  col(void){ return _col; }
 	protected:
 		void mouseMoveEvent(QMouseEvent * event);
 		void dragEnterEvent(QDragEnterEvent *event);
 		void dropEvent(QDropEvent *event);
+		void contextMenuEvent(QContextMenuEvent *event);
 	private:
 		DebuggerTabBar  *bar;
+		int  _row;
+		int  _col;
 };
 
 class ConsoleDebugger : public QDialog
@@ -359,6 +366,7 @@ class ConsoleDebugger : public QDialog
 
 		void updateWindowData(void);
 		void updateRegisterView(void);
+		void updateTabVisibility(void);
 		void breakPointNotify(int bpNum);
 		void openBpEditWindow(int editIdx = -1, watchpointinfo *wp = NULL, bool forceAccept = false );
 		void openDebugSymbolEditWindow( int addr );
@@ -481,6 +489,7 @@ class ConsoleDebugger : public QDialog
 		void asmViewCtxMenuAddSym(void);
 		void asmViewCtxMenuOpenHexEdit(void);
 		void asmViewCtxMenuRunToCursor(void);
+		void moveTab( QWidget *w, int row, int column);
 	private slots:
 		void updatePeriodic(void);
 		void hbarChanged(int value);
