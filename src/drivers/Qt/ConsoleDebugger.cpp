@@ -334,29 +334,29 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	actGroup = new QActionGroup(this);
 	actGroup->setExclusive(true);
 
-	// View -> Layout -> Compact View
-	act = new QAction(tr("&Compact View"), this);
-	//act->setStatusTip(tr("Compact View"));
+	// View -> Layout -> Compact
+	act = new QAction(tr("&Compact"), this);
+	//act->setStatusTip(tr("Compact"));
 	connect( act, &QAction::triggered, [this]{ setLayoutOption(1); } );
 	actGroup->addAction(act);
 	visMenu->addAction(act);
 
-	// View -> Layout -> Compact View Split
-	act = new QAction(tr("Compact View &Split"), this);
+	// View -> Layout -> Compact Split
+	act = new QAction(tr("Compact &Split"), this);
 	//act->setStatusTip(tr("1 Tabbed Vertical Column with 2 Sections"));
 	connect( act, &QAction::triggered, [this]{ setLayoutOption(2); } );
 	actGroup->addAction(act);
 	visMenu->addAction(act);
 
-	// View -> Layout -> Wide View
-	act = new QAction(tr("&Wide View"), this);
+	// View -> Layout -> Wide
+	act = new QAction(tr("&Wide"), this);
 	//act->setStatusTip(tr("2 Tabbed Vertical Columns with 3 Sections"));
 	connect( act, &QAction::triggered, [this]{ setLayoutOption(3); } );
 	actGroup->addAction(act);
 	visMenu->addAction(act);
 
-	// View -> Layout -> Wide View Quad
-	act = new QAction(tr("Wide View &Quad"), this);
+	// View -> Layout -> Wide Quad
+	act = new QAction(tr("Wide &Quad"), this);
 	//act->setStatusTip(tr("2 Tabbed Vertical Columns with 4 Sections"));
 	connect( act, &QAction::triggered, [this]{ setLayoutOption(4); } );
 	actGroup->addAction(act);
@@ -6563,7 +6563,7 @@ void DebuggerTabWidget::buildContextMenu(QContextMenuEvent *event)
 
 	//printf("TabWidget Context\n");
 
-	moveMenu = menu.addMenu( tr("Move To") );
+	moveMenu = menu.addMenu( tr("Move Tab To...") );
 
 	group = new QActionGroup(moveMenu);
 	group->setExclusive(true);
