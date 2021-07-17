@@ -426,10 +426,7 @@ class ConsoleDebugger : public QDialog
 		QCheckBox *iGrn_cbox;
 		QCheckBox *iBlu_cbox;
 
-		DebuggerTabWidget *tabView11;
-		DebuggerTabWidget *tabView12;
-		DebuggerTabWidget *tabView21;
-		DebuggerTabWidget *tabView22;
+		DebuggerTabWidget *tabView[2][4];
 		QWidget   *asmViewContainerWidget;
 		QWidget   *bpTreeContainerWidget;
 		QWidget   *bmTreeContainerWidget;
@@ -461,15 +458,6 @@ class ConsoleDebugger : public QDialog
 		int   selBmAddrVal;
 		bool  windowUpdateReq;
 
-		int   cpuStatDpyCol;
-		int   ppuStatDpyCol;
-		int   bpTreeDpyCol;
-		int   bmTreeDpyCol;
-
-		bool  cpuStatDpyVis;
-		bool  ppuStatDpyVis;
-		bool  bpTreeDpyVis;
-		bool  bmTreeDpyVis;
 	private:
 		void setRegsFromEntry(void);
 		void bpListUpdate( bool reset = false );
@@ -514,11 +502,7 @@ class ConsoleDebugger : public QDialog
 		void add_BM_CB(void);
 		void edit_BM_CB(void);
 		void delete_BM_CB(void);
-		void setPpuFrameVis(bool);
-		void setBpFrameVis(bool);
-		void setBmFrameVis(bool);
-		void setDisplayVisibility( QAction *act, bool *ptr);
-		void setViewDpyCol(int *viewPtr, int col);
+		void setLayoutOption(int layout);
 		void resizeToMinimumSizeHint(void);
 		void resetCountersCB (void);
 		void reloadSymbolsCB(void);

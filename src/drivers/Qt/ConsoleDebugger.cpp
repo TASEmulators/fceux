@@ -98,25 +98,6 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QFont cpuFont;
 	std::string fontString;
 
-	cpuStatDpyVis = 1;
-	ppuStatDpyVis = 1;
-	bpTreeDpyVis  = 1;
-	bmTreeDpyVis  = 1;
-
-	cpuStatDpyCol = 0;
-	ppuStatDpyCol = 0;
-	bpTreeDpyCol  = 0;
-	bmTreeDpyCol  = 0;
-
-	g_config->getOption( "SDL.DebuggerCpuDpyVis", &cpuStatDpyVis);
-	g_config->getOption( "SDL.DebuggerPpuDpyVis", &ppuStatDpyVis);
-	g_config->getOption( "SDL.DebuggerBpDpyVis" ,  &bpTreeDpyVis);
-	g_config->getOption( "SDL.DebuggerBmDpyVis" ,  &bmTreeDpyVis);
-	g_config->getOption( "SDL.DebuggerCpuDpyCol", &cpuStatDpyCol);
-	g_config->getOption( "SDL.DebuggerPpuDpyCol", &ppuStatDpyCol);
-	g_config->getOption( "SDL.DebuggerBpDpyCol" ,  &bpTreeDpyCol);
-	g_config->getOption( "SDL.DebuggerBmDpyCol" ,  &bmTreeDpyCol);
-
 	g_config->getOption("SDL.DebuggerCpuStatusFont", &fontString);
 
 	if ( fontString.size() > 0 )
@@ -148,19 +129,24 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	mainLayoutv->addWidget( toolBar );
 	mainLayoutv->addWidget( mainLayouth );
 
-	tabView11 = new DebuggerTabWidget();
-	tabView12 = new DebuggerTabWidget();
-	tabView21 = new DebuggerTabWidget();
-	tabView22 = new DebuggerTabWidget();
 
 	for (int i=0; i<2; i++)
 	{
 		vsplitter[i] = new QSplitter( Qt::Vertical );
+
+		for (int j=0; j<4; j++)
+		{
+			char stmp[64];
+
+			tabView[i][j] = new DebuggerTabWidget();
+
+			sprintf( stmp, "debuggerTabView%i%i\n", i+1, j+1 );
+
+			tabView[i][j]->setObjectName( tr(stmp) );
+
+			vsplitter[i]->addWidget( tabView[i][j] );
+		}
 	}
-	vsplitter[0]->addWidget( tabView11 );
-	vsplitter[0]->addWidget( tabView21 );
-	vsplitter[1]->addWidget( tabView12 );
-	vsplitter[1]->addWidget( tabView22 );
 
 	buildAsmViewDisplay();
 	buildCpuListDisplay();
@@ -172,9 +158,9 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	mainLayouth->addWidget( vsplitter[0] );
 	mainLayouth->addWidget( vsplitter[1] );
 
-	loadDisplayViews();
-
 	setLayout( mainLayoutv );
+
+	loadDisplayViews();
 
 	windowUpdateReq   = true;
 
@@ -202,7 +188,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 		}
 	}
 
-	restoreGeometry(settings.value("debugger/geometry").toByteArray());
+	//restoreGeometry(settings.value("debugger/geometry").toByteArray());
 
 	setCpuStatusFont( cpuFont );
 
@@ -220,6 +206,8 @@ ConsoleDebugger::~ConsoleDebugger(void)
 
 	//printf("Destroy Debugger Window\n");
 	periodicTimer->stop();
+
+	saveDisplayViews();
 
 	if ( dbgWin == this )
 	{
@@ -265,8 +253,6 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	QActionGroup *actGroup;
 	QAction     *act;
 	int opt, useNativeMenuBar=0;
-	int *iPtr;
-	bool *bPtr;
 
 	QMenuBar *menuBar = new QMenuBar(this);
 
@@ -342,161 +328,49 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	viewMenu->addSeparator();
 
-	// View -> CPU Status
-	visMenu = viewMenu->addMenu( tr("&CPU Status") );
+	// View -> Layout
+	visMenu = viewMenu->addMenu( tr("&Layout") );
 
-	// View -> CPU Status -> Visible
-	act = new QAction(tr("&Visible"), this);
-	act->setCheckable(true);
-	act->setChecked(cpuStatDpyVis);
-	//act->setShortcut( QKeySequence(tr("Ctrl+Shift+G") ));
-	act->setStatusTip(tr("&Visible"));
-	bPtr = &cpuStatDpyVis;
-	connect( act, &QAction::triggered, [ this, act, bPtr ] { setDisplayVisibility( act, bPtr ); } );
+	g_config->getOption( "SDL.DebuggerLayoutOpt", &opt );
 
-	visMenu->addAction(act);
-
-	subMenu  = visMenu->addMenu( tr("&Column") );
 	actGroup = new QActionGroup(this);
-
 	actGroup->setExclusive(true);
 
-	// View -> CPU Status List -> Left
-	act = new QAction(tr("&Left"), this);
-	act->setStatusTip(tr("Left"));
+	// View -> Layout -> 1
+	act = new QAction(tr("&1"), this);
+	act->setStatusTip(tr("1 Tabbed Vertical Column"));
 	act->setCheckable(true);
-	act->setChecked( cpuStatDpyCol == 0 );
-	iPtr = &cpuStatDpyCol;
-	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 0 ); } );
+	act->setChecked( opt == 1 );
+	connect( act, &QAction::triggered, [this]{ setLayoutOption(1); } );
 	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// View -> CPU Status -> Right
-	act = new QAction(tr("&Right"), this);
-	act->setStatusTip(tr("Right"));
-	act->setCheckable(true);
-	act->setChecked( cpuStatDpyCol == 1 );
-	iPtr = &cpuStatDpyCol;
-	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 1 ); } );
-	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// View -> PPU Status
-	visMenu = viewMenu->addMenu( tr("&PPU Status") );
-
-	// View -> PPU Status -> Visible
-	act = new QAction(tr("&Visible"), this);
-	act->setCheckable(true);
-	act->setChecked(ppuStatDpyVis);
-	//act->setShortcut( QKeySequence(tr("Ctrl+Shift+G") ));
-	act->setStatusTip(tr("&Visible"));
-	bPtr = &ppuStatDpyVis;
-	connect( act, &QAction::triggered, [ this, act, bPtr ] { setDisplayVisibility( act, bPtr ); } );
-
 	visMenu->addAction(act);
 
-	subMenu  = visMenu->addMenu( tr("&Column") );
-	actGroup = new QActionGroup(this);
-
-	actGroup->setExclusive(true);
-
-	// View -> PPU Status List -> Left
-	act = new QAction(tr("&Left"), this);
-	act->setStatusTip(tr("Left"));
+	// View -> Layout -> 2
+	act = new QAction(tr("&2"), this);
+	act->setStatusTip(tr("1 Tabbed Vertical Column with 2 Sections"));
 	act->setCheckable(true);
-	act->setChecked( ppuStatDpyCol == 0 );
-	iPtr = &ppuStatDpyCol;
-	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 0 ); } );
+	act->setChecked( opt == 2 );
+	connect( act, &QAction::triggered, [this]{ setLayoutOption(2); } );
 	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// View -> PPU Status -> Right
-	act = new QAction(tr("&Right"), this);
-	act->setStatusTip(tr("Right"));
-	act->setCheckable(true);
-	act->setChecked( ppuStatDpyCol == 1 );
-	iPtr = &ppuStatDpyCol;
-	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 1 ); } );
-	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// View -> Breakpoint List
-	visMenu = viewMenu->addMenu( tr("&Breakpoint List") );
-
-	// View -> Breakpoint List -> Visible
-	act = new QAction(tr("&Visible"), this);
-	act->setCheckable(true);
-	act->setChecked(bpTreeDpyVis);
-	//act->setShortcut( QKeySequence(tr("Ctrl+Shift+G") ));
-	act->setStatusTip(tr("&Visible"));
-	bPtr = &bpTreeDpyVis;
-	connect( act, &QAction::triggered, [ this, act, bPtr ] { setDisplayVisibility( act, bPtr ); } );
-
 	visMenu->addAction(act);
 
-	subMenu  = visMenu->addMenu( tr("&Column") );
-	actGroup = new QActionGroup(this);
-
-	actGroup->setExclusive(true);
-
-	// View -> Breakpoint List -> Left
-	act = new QAction(tr("&Left"), this);
-	act->setStatusTip(tr("Left"));
+	// View -> Layout -> 3
+	act = new QAction(tr("&3"), this);
+	act->setStatusTip(tr("2 Tabbed Vertical Columns with 3 Sections"));
 	act->setCheckable(true);
-	act->setChecked( bpTreeDpyCol == 0 );
-	iPtr = &bpTreeDpyCol;
-	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 0 ); } );
+	act->setChecked( opt == 3 );
+	connect( act, &QAction::triggered, [this]{ setLayoutOption(3); } );
 	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// View -> Breakpoint List -> Right
-	act = new QAction(tr("&Right"), this);
-	act->setStatusTip(tr("Right"));
-	act->setCheckable(true);
-	act->setChecked( bpTreeDpyCol == 1 );
-	iPtr = &bpTreeDpyCol;
-	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 1 ); } );
-	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// View -> Bookmark List
-	visMenu = viewMenu->addMenu( tr("Book&mark List") );
-
-	// View -> Bookmark List -> Visible
-	act = new QAction(tr("&Visible"), this);
-	act->setCheckable(true);
-	act->setChecked(bmTreeDpyVis);
-	//act->setShortcut( QKeySequence(tr("Ctrl+Shift+G") ));
-	act->setStatusTip(tr("&Visible"));
-	bPtr = &bmTreeDpyVis;
-	connect( act, &QAction::triggered, [ this, act, bPtr ] { setDisplayVisibility( act, bPtr ); } );
-
 	visMenu->addAction(act);
 
-	subMenu  = visMenu->addMenu( tr("&Column") );
-	actGroup = new QActionGroup(this);
-
-	actGroup->setExclusive(true);
-
-	// View -> Bookmark List -> Left
-	act = new QAction(tr("&Left"), this);
-	act->setStatusTip(tr("Left"));
+	// View -> Layout -> 4
+	act = new QAction(tr("&4"), this);
+	act->setStatusTip(tr("2 Tabbed Vertical Columns with 4 Sections"));
 	act->setCheckable(true);
-	act->setChecked( bmTreeDpyCol == 0 );
-	iPtr = &bmTreeDpyCol;
-	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 0 ); } );
+	act->setChecked( opt == 4 );
+	connect( act, &QAction::triggered, [this]{ setLayoutOption(4); } );
 	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// View -> Bookmark List -> Right
-	act = new QAction(tr("&Right"), this);
-	act->setStatusTip(tr("Right"));
-	act->setCheckable(true);
-	act->setChecked( bmTreeDpyCol == 1 );
-	iPtr = &bmTreeDpyCol;
-	connect( act, &QAction::triggered, [ this, iPtr ] { setViewDpyCol( iPtr, 1 ); } );
-	actGroup->addAction(act);
-	subMenu->addAction(act);
+	visMenu->addAction(act);
 
 	// Debug
 	debugMenu = menuBar->addMenu(tr("&Debug"));
@@ -991,11 +865,10 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	vbox1   = new QVBoxLayout();
 	hbox1   = new QHBoxLayout();
 
-	//cpuFrame = new QGroupBox( tr("CPU Status") );
 	cpuFrame = new QFrame();
 	grid     = new QGridLayout();
 
-	cpuFrame->setVisible(cpuStatDpyVis);
+	cpuFrame->setObjectName( tr("debuggerStatusCPU") );
 	cpuFrame->setSizePolicy( QSizePolicy::Maximum, QSizePolicy::Maximum );
 
 	hbox1->addLayout( vbox, 1 );
@@ -1185,10 +1058,7 @@ void ConsoleDebugger::buildPpuListDisplay(void)
 	scanLineLbl = new QLabel( tr("Scanline:") );
 	pixLbl      = new QLabel( tr("Pixel:") );
 
-	//ppuFrame->setVisible(ppuStatDpyVis);
-	//ppuFrame->setCheckable(true);
-	//ppuFrame->setChecked(true);
-	//connect( ppuFrame, SIGNAL(toggled(bool)), this, SLOT(setPpuFrameVis(bool)) );
+	ppuFrame->setObjectName( tr("debuggerStatusPPU") );
 
 	hbox1->addLayout( vbox );
 	vbox->addWidget( ppuLbl );
@@ -1284,11 +1154,7 @@ void ConsoleDebugger::buildBpListDisplay(void)
 	vbox    = new QVBoxLayout();
 	bpTree  = new QTreeWidget();
 
-	//bpFrame->setVisible(bpTreeDpyVis);
-	//bpFrame->setCheckable(true);
-	//bpFrame->setChecked(true);
-	//connect( bpFrame, SIGNAL(toggled(bool)), this, SLOT(setBpFrameVis(bool)) );
-
+	bpFrame->setObjectName( tr("debuggerBreakpointList") );
 	bpTree->setColumnCount(2);
 	bpTree->setSelectionMode( QAbstractItemView::SingleSelection );
 	bpTree->setMinimumHeight( 3 * fm.lineSpacing() );
@@ -1328,16 +1194,12 @@ void ConsoleDebugger::buildBpListDisplay(void)
 	hbox->addWidget( button );
 	connect( button, SIGNAL(clicked(void)), this, SLOT(delete_BP_CB(void)) );
 
-	//bpTreeHideLbl = new QLabel( tr("Hidden") );
-	//bpTreeHideLbl->setVisible(false);
-
 	vbox->addWidget( bpTree );
 	vbox->addLayout( hbox   );
 	bpTreeContainerWidget = new QWidget(this);
 	bpTreeContainerWidget->setLayout( vbox );
 	vbox    = new QVBoxLayout();
 	vbox->addWidget( bpTreeContainerWidget );
-	//vbox->addWidget( bpTreeHideLbl );
 	bpFrame->setLayout( vbox );
 }
 //----------------------------------------------------------------------------
@@ -1358,13 +1220,9 @@ void ConsoleDebugger::buildBmListDisplay(void)
 	selBmAddr = new QLineEdit();
 	selBmAddrVal = 0;
 
-	//bmFrame->setVisible(bmTreeDpyVis);
-	//bmFrame->setCheckable(true);
-	//bmFrame->setChecked(true);
-	//connect( bmFrame, SIGNAL(toggled(bool)), this, SLOT(setBmFrameVis(bool)) );
-
 	connect( selBmAddr, SIGNAL(textChanged(const QString &)), this, SLOT(selBmAddrChanged(const QString &)));
 
+	bmFrame->setObjectName( tr("debuggerBookmarkList") );
 	bmTree->setColumnCount(2);
 	bmTree->setMinimumHeight( 3 * fm.lineSpacing() );
 	bmTree->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Ignored );
@@ -1407,100 +1265,126 @@ void ConsoleDebugger::buildBmListDisplay(void)
 	hbox->addLayout( vbox  ,  1 );
 
 	bmTreeContainerWidget->setLayout( hbox );
-	//bmTreeHideLbl = new QLabel( tr("Hidden") );
 
 	bmTreeContainerWidget->setVisible(true);
-	//bmTreeHideLbl->setVisible(false);
 
 	vbox = new QVBoxLayout();
 	vbox->addWidget( bmTreeContainerWidget );
-	//vbox->addWidget( bmTreeHideLbl );
 
 	bmFrame->setLayout( vbox );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::loadDisplayViews(void)
 {
+	char key[128];
+	QSettings  settings;
 
-	tabView11->addTab( cpuFrame, tr("CPU") );
-	tabView11->addTab( ppuFrame, tr("PPU") );
-	tabView12->addTab(  bpFrame, tr("Breakpoints") );
-	tabView12->addTab(  bmFrame, tr("Bookmarks") );
-
-	if ( tabView22->count() == 0 )
+	for (int i=0; i<2; i++)
 	{
-		tabView22->hide();
+		for (int j=0; j<4; j++)
+		{
+			QString tabListVal;
+			sprintf( key, "debugger/tabView%i%i", i+1, j+1 );
+			tabListVal = settings.value(key).toString();
+
+			QStringList tabList = tabListVal.split(',');
+			for (int k=0; k<tabList.size(); k++)
+			{
+				if ( tabList[k].size() > 0 )
+				{
+					//printf("   %i: %s\n", k, tabList[k].toStdString().c_str() );
+
+					if ( tabList[k].compare( cpuFrame->objectName() ) == 0 )
+					{
+						tabView[i][j]->addTab( cpuFrame, tr("CPU") );
+					}
+					else if ( tabList[k].compare( ppuFrame->objectName() ) == 0 )
+					{
+						tabView[i][j]->addTab( ppuFrame, tr("PPU") );
+					}
+					else if ( tabList[k].compare( bpFrame->objectName() ) == 0 )
+					{
+						tabView[i][j]->addTab( bpFrame, tr("Breakpoints") );
+					}
+					else if ( tabList[k].compare( bmFrame->objectName() ) == 0 )
+					{
+						tabView[i][j]->addTab( bmFrame, tr("Bookmarks") );
+					}
+				}
+			}
+		}
 	}
-//	bool hasVisibleWidgets = false;
-//
-//	for (int i=0; i<dataDpyVbox1->count(); i++)
-//	{
-//		dataDpyVbox1->takeAt(i);
-//	}
-//	for (int i=0; i<dataDpyVbox2->count(); i++)
-//	{
-//		dataDpyVbox2->takeAt(i);
-//	}
-//
-//	cpuFrame->setVisible(cpuStatDpyVis);
-//	ppuFrame->setVisible(ppuStatDpyVis);
-//	 bpFrame->setVisible(bpTreeDpyVis);
-//	 bmFrame->setVisible(bmTreeDpyVis);
-//
-//	cpuStatDpyVbox = cpuStatDpyCol ? dataDpyVbox2 : dataDpyVbox1;
-//	ppuStatDpyVbox = ppuStatDpyCol ? dataDpyVbox2 : dataDpyVbox1;
-//	bpDataDpyVbox  =  bpTreeDpyCol ? dataDpyVbox2 : dataDpyVbox1;
-//	bmDataDpyVbox  =  bmTreeDpyCol ? dataDpyVbox2 : dataDpyVbox1;
-//
-//	cpuStatDpyVbox->addWidget( cpuFrame, 10 );
-//	ppuStatDpyVbox->addWidget( ppuFrame, 10 );
-//	 bpDataDpyVbox->addWidget( bpFrame , 100);
-//	 bmDataDpyVbox->addWidget( bmFrame , 100);
-//
-//	hasVisibleWidgets = false;
-//
-//	for (int i=0; i<dataDpyVbox1->count(); i++)
-//	{
-//		QWidget *w = dataDpyVbox1->itemAt(i)->widget();
-//
-//		if ( w )
-//		{
-//			if ( w->isVisible() )
-//			{
-//				hasVisibleWidgets = true;
-//			}
-//		}
-//	}
-//	mainLayouth->setStretchFactor( dataDpyVbox1, hasVisibleWidgets ? 40 : 1 );
-//
-//	hasVisibleWidgets = false;
-//
-//	for (int i=0; i<dataDpyVbox2->count(); i++)
-//	{
-//		QWidget *w = dataDpyVbox2->itemAt(i)->widget();
-//
-//		if ( w )
-//		{
-//			if ( w->isVisible() )
-//			{
-//				hasVisibleWidgets = true;
-//			}
-//		}
-//	}
-//	mainLayouth->setStretchFactor( dataDpyVbox2, hasVisibleWidgets ? 40 : 1 );
+
+	if ( cpuFrame->parent() == nullptr )
+	{
+		tabView[0][0]->addTab( cpuFrame, tr("CPU") );
+	}
+	if ( ppuFrame->parent() == nullptr )
+	{
+		tabView[0][0]->addTab( ppuFrame, tr("PPU") );
+	}
+	if ( bpFrame->parent() == nullptr )
+	{
+		tabView[0][0]->addTab( bpFrame, tr("Breakpoints") );
+	}
+	if ( bmFrame->parent() == nullptr )
+	{
+		tabView[0][0]->addTab( bmFrame, tr("Bookmarks") );
+	}
+
+	// Restore Window Geometry
+	restoreGeometry(settings.value("debugger/geometry").toByteArray());
+
+	// Restore Horizontal Panel State
+	mainLayouth->restoreState( settings.value("debugger/hPanelState").toByteArray() );
+
+	// Save Vertical Panel State
+	for (int i=0; i<2; i++)
+	{
+		sprintf( key, "debugger/vPanelState%i", i+1);
+		vsplitter[i]->restoreState( settings.value(key).toByteArray() );
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::saveDisplayViews(void)
 {
-	g_config->setOption( "SDL.DebuggerCpuDpyVis",  cpuStatDpyVis);
-	g_config->setOption( "SDL.DebuggerPpuDpyVis",  ppuStatDpyVis);
-	g_config->setOption( "SDL.DebuggerBpDpyVis" ,   bpTreeDpyVis);
-	g_config->setOption( "SDL.DebuggerBmDpyVis" ,   bmTreeDpyVis);
-	g_config->setOption( "SDL.DebuggerCpuDpyCol", cpuStatDpyCol);
-	g_config->setOption( "SDL.DebuggerPpuDpyCol", ppuStatDpyCol);
-	g_config->setOption( "SDL.DebuggerBpDpyCol" ,  bpTreeDpyCol);
-	g_config->setOption( "SDL.DebuggerBmDpyCol" ,  bmTreeDpyCol);
-	g_config->save();
+	char key[128];
+	QSettings  settings;
+
+	// Save Tab Placement
+	for (int i=0; i<2; i++)
+	{
+		for (int j=0; j<4; j++)
+		{
+			QString tabListVal;
+			sprintf( key, "debugger/tabView%i%i", i+1, j+1 );
+
+			for (int k=0; k<tabView[i][j]->count(); k++)
+			{
+				QWidget *w = tabView[i][j]->widget(k);
+
+				//printf("(%i,%i,%i)   %s\n", i, j, k, w->objectName().toStdString().c_str() );
+
+				tabListVal += w->objectName() + ",";
+			}
+
+			//printf("(%i,%i) %s\n", i, j, tabListVal.toStdString().c_str() );
+			settings.setValue( key, tabListVal );
+		}
+	}
+
+	// Save Horizontal Panel State
+	settings.setValue("debugger/hPanelState", mainLayouth->saveState());
+
+	// Save Vertical Panel State
+	for (int i=0; i<2; i++)
+	{
+		sprintf( key, "debugger/vPanelState%i", i+1);
+		settings.setValue( key, vsplitter[i]->saveState());
+	}
+
+	// Save Window Geometry
+	settings.setValue("debugger/geometry", saveGeometry());
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::setCpuStatusFont( const QFont &font )
@@ -2117,70 +2001,9 @@ void ConsoleDebugger::bmListUpdate( bool reset )
 	bmTree->viewport()->update();
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::setPpuFrameVis(bool vis)
-{
-	ppuStatContainerWidget->setVisible(vis);
-	//ppuStatHideLbl->setVisible(!vis);
-
-	//if ( vis )
-	//{
-	//	dataDpyVbox1->setStretchFactor( ppuFrame, 10);
-	//}
-	//else
-	//{
-	//	dataDpyVbox1->setStretchFactor( ppuFrame,  1);
-	//}
-}
-//----------------------------------------------------------------------------
-void ConsoleDebugger::setBpFrameVis(bool vis)
-{
-	bpTreeContainerWidget->setVisible(vis);
-	//bpTreeHideLbl->setVisible(!vis);
-
-	//if ( vis )
-	//{
-	//	bpDataDpyVbox->setStretchFactor( bpFrame, 100);
-	//}
-	//else
-	//{
-	//	bpDataDpyVbox->setStretchFactor( bpFrame,   1);
-	//}
-}
-//----------------------------------------------------------------------------
-void ConsoleDebugger::setBmFrameVis(bool vis)
-{
-	bmTreeContainerWidget->setVisible(vis);
-	//bmTreeHideLbl->setVisible(!vis);
-
-	//if ( vis )
-	//{
-	//	bmDataDpyVbox->setStretchFactor( bmFrame, 100);
-	//}
-	//else
-	//{
-	//	bmDataDpyVbox->setStretchFactor( bmFrame,   1);
-	//}
-}
-//----------------------------------------------------------------------------
 void ConsoleDebugger::resizeToMinimumSizeHint(void) 
 {
 	resize( minimumSizeHint() );
-}
-//----------------------------------------------------------------------------
-void ConsoleDebugger::setDisplayVisibility( QAction *act, bool *ptr)
-{
-	*ptr = act->isChecked();
-	loadDisplayViews();
-	saveDisplayViews();
-	QTimer::singleShot( 100, Qt::CoarseTimer, this, SLOT(resizeToMinimumSizeHint(void)) );
-}
-//----------------------------------------------------------------------------
-void ConsoleDebugger::setViewDpyCol(int *ptr, int col) 
-{
-	*ptr = col;
-	loadDisplayViews();
-	saveDisplayViews();
-	QTimer::singleShot( 100, Qt::CoarseTimer, this, SLOT(resizeToMinimumSizeHint(void)) );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::add_BP_CB(void)
@@ -2693,6 +2516,11 @@ void ConsoleDebugger::navHistBackCB (void)
 void ConsoleDebugger::navHistForwardCB (void)
 {
 	asmView->navHistForward();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::setLayoutOption( int opt )
+{
+
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::seekPCCB (void)
@@ -6598,7 +6426,7 @@ void DebuggerTabBar::mouseMoveEvent( QMouseEvent *event)
 //----------------------------------------------------------------------------
 void DebuggerTabBar::mousePressEvent( QMouseEvent *event)
 {
-	printf("TabBar Mouse Press: (%i,%i) \n", event->pos().x(), event->pos().y() );;
+	//printf("TabBar Mouse Press: (%i,%i) \n", event->pos().x(), event->pos().y() );;
 	QTabBar::mousePressEvent(event);
 
 	if ( (event->button() == Qt::LeftButton) && (currentIndex() >= 0) )
@@ -6610,7 +6438,7 @@ void DebuggerTabBar::mousePressEvent( QMouseEvent *event)
 //----------------------------------------------------------------------------
 void DebuggerTabBar::mouseReleaseEvent( QMouseEvent *event)
 {
-	printf("TabBar Mouse Release: (%i,%i) \n", event->pos().x(), event->pos().y() );;
+	//printf("TabBar Mouse Release: (%i,%i) \n", event->pos().x(), event->pos().y() );;
 	QTabBar::mouseReleaseEvent(event);
 	theDragPress = false;
 	theDragOut = false;
