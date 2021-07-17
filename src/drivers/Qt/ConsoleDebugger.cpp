@@ -229,9 +229,8 @@ ConsoleDebugger::~ConsoleDebugger(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::closeEvent(QCloseEvent *event)
 {
-	QSettings settings;
 	//printf("Debugger Close Window Event\n");
-	settings.setValue("debugger/geometry", saveGeometry());
+	saveDisplayViews();
 	done(0);
 	deleteLater();
 	event->accept();
@@ -239,9 +238,8 @@ void ConsoleDebugger::closeEvent(QCloseEvent *event)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::closeWindow(void)
 {
-	QSettings settings;
+	saveDisplayViews();
 	//printf("Close Window\n");
-	settings.setValue("debugger/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 }
@@ -1270,6 +1268,14 @@ void ConsoleDebugger::loadDisplayViews(void)
 {
 	char key[128];
 	QSettings  settings;
+	bool prevStateSaved;
+
+	prevStateSaved = settings.value("debugger/prevStateSaved", false).toBool();
+
+	if ( !prevStateSaved )
+	{
+		setLayoutOption(2);
+	}
 
 	for (int i=0; i<2; i++)
 	{
@@ -1379,6 +1385,9 @@ void ConsoleDebugger::saveDisplayViews(void)
 
 	// Save Window Geometry
 	settings.setValue("debugger/geometry", saveGeometry());
+
+	// Set Window 
+	settings.setValue("debugger/prevStateSaved", true);
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::updateTabVisibility(void)
