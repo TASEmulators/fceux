@@ -446,8 +446,6 @@ class ConsoleDebugger : public QDialog
 		QLabel    *pixLbl;
 		QLabel    *cpuCyclesLbl1;
 		QLabel    *cpuInstrsLbl1;
-		//QLabel    *bpTreeHideLbl;
-		//QLabel    *bmTreeHideLbl;
 		QTimer    *periodicTimer;
 		QFont      font;
 

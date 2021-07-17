@@ -2640,6 +2640,14 @@ void ConsoleDebugger::setLayoutOption( int opt )
 			s[3] = 0;
 
 			vsplitter[0]->setSizes(s);
+
+			s = mainLayouth->sizes();
+
+			if ( s[2] == 0 )
+			{
+				s[0] = s[1] = s[2] = mainLayouth->width() / 3;
+				mainLayouth->setSizes(s);
+			}
 		}
 		break;
 		case 4:
@@ -2663,6 +2671,14 @@ void ConsoleDebugger::setLayoutOption( int opt )
 
 			vsplitter[0]->setSizes(s);
 			vsplitter[1]->setSizes(s);
+
+			s = mainLayouth->sizes();
+
+			if ( s[2] == 0 )
+			{
+				s[0] = s[1] = s[2] = mainLayouth->width() / 3;
+				mainLayouth->setSizes(s);
+			}
 		}
 		break;
 	}
