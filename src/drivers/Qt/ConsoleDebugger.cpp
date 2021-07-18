@@ -3459,10 +3459,21 @@ void  QAsmView::updateAssemblyView(void)
 		asmEntry.push_back(a);
 	}
 
-	pxLineWidth = maxLineLen * pxCharWidth;
+	pxLineWidth = (maxLineLen+1) * pxCharWidth;
 
-	//setMaximumWidth( pxLineWidth + 10 );
+	if ( viewWidth >= pxLineWidth )
+	{
+		hbar->hide();
+	}
+	else
+	{
+		hbar->setPageStep( viewWidth );
+		hbar->setMaximum( pxLineWidth - viewWidth );
+		hbar->show();
+	}
+	//setMaximumWidth( pxLineWidth );
 
+	vbar->setPageStep( (3*viewLines)/4 );
 	vbar->setMaximum( asmEntry.size() );
 
 	determineLineBreakpoints();
@@ -3809,12 +3820,14 @@ void ConsoleDebugger::hbarChanged(int value)
 {
 	//printf("HBar Changed: %i\n", value);
 	asmView->setXScroll( value );
+	asmView->update();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::vbarChanged(int value)
 {
 	//printf("VBar Changed: %i\n", value);
 	asmView->setLine( value );
+	asmView->update();
 }
 //----------------------------------------------------------------------------
 void bpDebugSetEnable(bool val)
@@ -4403,7 +4416,7 @@ void QAsmView::setXScroll(int value)
 	}
 	else
 	{
-		pxLineXScroll = (int)(0.010f * (float)value * (float)(pxLineWidth - viewWidth) );
+		pxLineXScroll = value;
 	}
 }
 //----------------------------------------------------------------------------
@@ -4845,12 +4858,16 @@ void QAsmView::resizeEvent(QResizeEvent *event)
 	if ( viewWidth >= pxLineWidth )
 	{
 		pxLineXScroll = 0;
+		hbar->hide();
 	}
 	else
 	{
-		pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
+		hbar->setPageStep( viewWidth );
+		hbar->setMaximum( pxLineWidth - viewWidth );
+		hbar->show();
+		pxLineXScroll = hbar->value();
 	}
-
+	vbar->setPageStep( (3*viewLines)/4 );
 }
 //----------------------------------------------------------------------------
 void QAsmView::keyPressEvent(QKeyEvent *event)
