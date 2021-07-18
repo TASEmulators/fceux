@@ -765,9 +765,17 @@ void consoleWin_t::createMainMenu(void)
 
 	menubar->setNativeMenuBar( useNativeMenuBar ? true : false );
 
+	// Top Level Menu Iterms
+	fileMenu  = menubar->addMenu(tr("&File"));
+	movieMenu = menubar->addMenu(tr("&Movie"));
+	optMenu   = menubar->addMenu(tr("&Options"));
+	emuMenu   = menubar->addMenu(tr("&Emulation"));
+	toolsMenu = menubar->addMenu(tr("&Tools"));
+	debugMenu = menubar->addMenu(tr("&Debug"));
+	helpMenu  = menubar->addMenu(tr("&Help"));
+
 	//-----------------------------------------------------------------------
 	// File
-	fileMenu = menubar->addMenu(tr("&File"));
 	
 	connect( fileMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
 	connect( fileMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
@@ -955,7 +963,6 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Options
-	optMenu = menubar->addMenu(tr("&Options"));
 
 	connect( optMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
 	connect( optMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
@@ -1079,7 +1086,6 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Emulation
-	emuMenu = menubar->addMenu(tr("&Emulation"));
 
 	connect( emuMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
 	connect( emuMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
@@ -1403,7 +1409,6 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Tools
-	toolsMenu = menubar->addMenu(tr("&Tools"));
 
 	connect( toolsMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
 	connect( toolsMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
@@ -1453,7 +1458,6 @@ void consoleWin_t::createMainMenu(void)
 
 	 //-----------------------------------------------------------------------
 	 // Debug
-	debugMenu = menubar->addMenu(tr("&Debug"));
 
 	connect( debugMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
 	connect( debugMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
@@ -1532,7 +1536,6 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Movie
-	movieMenu = menubar->addMenu(tr("&Movie"));
 
 	connect( movieMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
 	connect( movieMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
@@ -1713,7 +1716,6 @@ void consoleWin_t::createMainMenu(void)
 
 	//-----------------------------------------------------------------------
 	// Help
-	helpMenu = menubar->addMenu(tr("&Help"));
  
 	connect( helpMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
 	connect( helpMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );

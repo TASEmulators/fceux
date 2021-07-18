@@ -161,16 +161,16 @@ class QAsmView : public QWidget
 
 	protected:
 		bool event(QEvent *event) override;
-		void paintEvent(QPaintEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void keyReleaseEvent(QKeyEvent *event);
-		void mousePressEvent(QMouseEvent * event);
-		void mouseReleaseEvent(QMouseEvent * event);
-		void mouseMoveEvent(QMouseEvent * event);
-		void mouseDoubleClickEvent(QMouseEvent * event);
-		void resizeEvent(QResizeEvent *event);
-		void wheelEvent(QWheelEvent *event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void keyReleaseEvent(QKeyEvent *event) override;
+		void mousePressEvent(QMouseEvent * event) override;
+		void mouseReleaseEvent(QMouseEvent * event) override;
+		void mouseMoveEvent(QMouseEvent * event) override;
+		void mouseDoubleClickEvent(QMouseEvent * event) override;
+		void resizeEvent(QResizeEvent *event) override;
+		void wheelEvent(QWheelEvent *event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 		void loadHighlightToClipboard(void);
 		void toggleBreakpoint(int line);
 
@@ -261,8 +261,8 @@ class DebuggerStackDisplay : public QPlainTextEdit
 		void setFont( const QFont &font );
 
 	protected:
-		void keyPressEvent(QKeyEvent *event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void keyPressEvent(QKeyEvent *event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 		void recalcCharsPerLine(void);
 		
 		int  pxCharWidth;
@@ -319,10 +319,10 @@ class DebuggerTabBar : public QTabBar
 	signals:
 		void beginDragOut(int);
 	protected:
-		void mousePressEvent(QMouseEvent * event);
-		void mouseReleaseEvent(QMouseEvent * event);
-		void mouseMoveEvent(QMouseEvent * event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void mousePressEvent(QMouseEvent * event) override;
+		void mouseReleaseEvent(QMouseEvent * event) override;
+		void mouseMoveEvent(QMouseEvent * event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 	private:
 		bool theDragPress;
 		bool theDragOut;
@@ -346,10 +346,10 @@ class DebuggerTabWidget : public QTabWidget
 		int  row(void){ return _row; }
 		int  col(void){ return _col; }
 	protected:
-		void mouseMoveEvent(QMouseEvent * event);
-		void dragEnterEvent(QDragEnterEvent *event);
-		void dropEvent(QDropEvent *event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void mouseMoveEvent(QMouseEvent * event) override;
+		void dragEnterEvent(QDragEnterEvent *event) override;
+		void dropEvent(QDropEvent *event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 	private:
 		DebuggerTabBar  *bar;
 		int  _row;
@@ -379,9 +379,9 @@ class ConsoleDebugger : public QDialog
 
 		void setCpuStatusFont( const QFont &font );
 	protected:
-		void closeEvent(QCloseEvent *event);
-		//void keyPressEvent(QKeyEvent *event);
-		//void keyReleaseEvent(QKeyEvent *event);
+		void closeEvent(QCloseEvent *event) override;
+		//void keyPressEvent(QKeyEvent *event) override;
+		//void keyReleaseEvent(QKeyEvent *event) override;
 
 		//QTreeWidget *tree;
 		QToolBar    *toolBar;
