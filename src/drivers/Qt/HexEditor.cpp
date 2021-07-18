@@ -3676,6 +3676,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	int x, y, w, h, row, col, nrow, addr;
 	int c, cx, cy, ca, l, recty;
 	int pxCharWidth3;
+	int colHlgtStart = -1, colHlgtEnd = -1;
 	char txt[32];
        	QString asciiTxt;
 	QPainter painter(this);
@@ -3788,6 +3789,8 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 	for ( row=0; row < nrow; row++)
 	{
+		colHlgtStart = -1; colHlgtEnd = -1;
+
 		l = lineOffset + row;
 		x = pxXoffset - pxLineXScroll;
 
@@ -3806,19 +3809,23 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 			if ( l == txtHlgtStartLine )
 			{
 				hlgtXs = txtHlgtStartChar*3;
+				colHlgtStart = txtHlgtStartChar;
 			}
 			else
 			{
 				hlgtXs = 0;
+				colHlgtStart = 0;
 			}
 
 			if ( l == txtHlgtEndLine )
 			{
 				hlgtXe = (txtHlgtEndChar+1)*3;
+				colHlgtEnd = txtHlgtEndChar+1;
 			}
 			else
 			{
 				hlgtXe = 16*3;
+				colHlgtEnd = 16;
 			}
 			hlgtXd = hlgtXe - hlgtXs;
 
@@ -3906,7 +3913,12 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 				} 
 				else
 				{
-					if ( viewMode == MODE_NES_ROM )
+					if ( txtHlgtSet && (col >= colHlgtStart) && (col < colHlgtEnd) )
+					{
+						// Background is already colored by highlight
+						painter.setPen( fgColor );
+					}
+					else if ( viewMode == MODE_NES_ROM )
 					{
 						QColor romBgColor, romFgColor;
 					  
