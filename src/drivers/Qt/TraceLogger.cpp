@@ -107,6 +107,7 @@ static int oldcodecount = 0, olddatacount = 0;
 static traceRecord_t *recBuf = NULL;
 static int recBufMax = 0;
 static int recBufHead = 0;
+static int recBufNum = 0;
 static traceRecord_t *logBuf = NULL;
 static int logBufMax = 3000000;
 static int logBufHead = 0;
@@ -203,8 +204,9 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	hbar->setMinimum(0);
 	hbar->setMaximum(100);
 	vbar->setMinimum(0);
-	vbar->setMaximum(recBufMax);
-	vbar->setValue(recBufMax);
+	vbar->setMaximum(0);
+	vbar->setValue(0);
+	vbar->setInvertedAppearance(true);
 
 	grid->addWidget(traceView, 0, 0);
 	grid->addWidget(vbar, 0, 1);
@@ -455,8 +457,8 @@ void TraceLoggerDialog_t::logMaxLinesChanged(int index)
 
 	initTraceLogBuffer(maxLines);
 
-	vbar->setMaximum(recBufMax);
-	vbar->setValue(recBufMax);
+	vbar->setMaximum(0);
+	vbar->setValue(0);
 
 	logging = logPrev;
 }
@@ -569,6 +571,7 @@ void TraceLoggerDialog_t::hbarChanged(int val)
 //----------------------------------------------------
 void TraceLoggerDialog_t::vbarChanged(int val)
 {
+	//printf("VBAR: %i \n", val );
 	traceView->update();
 }
 //----------------------------------------------------
@@ -1055,7 +1058,7 @@ int initTraceLogBuffer(int maxRecs)
 		{
 			recBufMax = 0;
 		}
-		recBufHead = 0;
+		recBufNum = recBufHead = 0;
 	}
 	return recBuf == NULL;
 }
@@ -1082,6 +1085,11 @@ static void pushToLogBuffer(traceRecord_t &rec)
 
 	recBuf[recBufHead] = rec;
 	recBufHead = (recBufHead + 1) % recBufMax;
+
+	if ( recBufNum < recBufMax )
+	{
+		recBufNum++;
+	}
 
 	if ( logBuf )
 	{
@@ -1356,7 +1364,7 @@ void QTraceLogView::calcFontData(void)
 	pxLineSpacing = metrics.lineSpacing() * 1.25;
 	pxLineLead = pxLineSpacing - pxCharHeight;
 	pxCursorHeight = pxCharHeight;
-	pxLineWidth = pxCharWidth * LOG_LINE_MAX_LEN;
+	pxLineWidth = pxCharWidth * 20;
 
 	viewLines = (viewHeight / pxLineSpacing) + 1;
 }
@@ -1672,10 +1680,14 @@ void QTraceLogView::resizeEvent(QResizeEvent *event)
 	if (viewWidth >= pxLineWidth)
 	{
 		pxLineXScroll = 0;
+		hbar->hide();
 	}
 	else
 	{
-		pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth));
+		hbar->setPageStep( viewWidth );
+		hbar->setMaximum( pxLineWidth - viewWidth );
+		hbar->show();
+		pxLineXScroll = hbar->value();
 	}
 }
 //----------------------------------------------------------------------------
@@ -2071,7 +2083,7 @@ void QTraceLogView::drawText(QPainter *painter, int x, int y, const char *txt, i
 //----------------------------------------------------
 void QTraceLogView::paintEvent(QPaintEvent *event)
 {
-	int i, x, y, v, ofs, row, start, end, nrow, lineLen;
+	int i, x, y, v, row, start, end, nrow, lineLen;
 	QPainter painter(this);
 	char line[256];
 	QColor hlgtFG("white"), hlgtBG("blue");
@@ -2093,12 +2105,31 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 
 	v = vbar->value();
 
-	if (v < viewLines)
-		v = viewLines;
+	if ( viewLines >= recBufNum )
+	{
+		vbar->hide();
+	}
+	else
+	{
+		vbar->setMaximum( recBufNum - viewLines );
+		vbar->setPageStep( viewLines );
+		vbar->show();
+	}
 
-	ofs = recBufMax - v;
+	if (viewWidth >= pxLineWidth)
+	{
+		pxLineXScroll = 0;
+		hbar->hide();
+	}
+	else
+	{
+		hbar->setPageStep( viewWidth );
+		hbar->setMaximum( pxLineWidth - viewWidth );
+		hbar->show();
+		pxLineXScroll = hbar->value();
+	}
 
-	end = recBufHead - ofs;
+	end = recBufHead - v;
 
 	if (end < 0)
 		end += recBufMax;
@@ -2127,8 +2158,6 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 		hlgtText.clear();
 	}
 
-	pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth));
-
 	x = -pxLineXScroll;
 	y = pxLineSpacing;
 
@@ -2139,6 +2168,11 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 		rec[row].convToText(line, &lineLen);
 
 		lineText[row].assign(line);
+
+		if ( (lineLen*pxCharWidth) > pxLineWidth )
+		{
+			pxLineWidth = (lineLen*pxCharWidth);
+		}
 		//printf("Line %i: '%s'\n", row, line );
 
 		drawText(&painter, x, y, line, 256);
