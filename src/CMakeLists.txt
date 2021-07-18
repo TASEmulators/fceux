@@ -101,12 +101,13 @@ else(WIN32)
   pkg_search_module( LUA lua5.1 lua-5.1 )
 
   add_definitions( -DHAVE_ASPRINTF ) # What system wouldn't have this?
+  add_definitions( -DLUA_USE_LINUX ) # This needs to be set when link LUA internally for linux and macosx
 
   if(APPLE)
 	set( OPENGL_LDFLAGS  "-framework OpenGL" )
   else()
 	set( OPENGL_LDFLAGS  ${OPENGL_LIBRARIES} )
-  	set( SYS_LIBS  -lrt  -lpthread )
+  	set( SYS_LIBS  -lrt  -lpthread  -ldl)
   endif()
 
 endif(WIN32)
