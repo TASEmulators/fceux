@@ -1084,7 +1084,8 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	QMenuBar *menuBar;
 	QMenu *fileMenu, *editMenu, *viewMenu, *colorMenu, *subMenu;
 	QAction *saveROM, *closeAct;
-	QAction *act, *actHlgt, *actHlgtRV, *actColorFG, *actColorBG;
+	QAction *act, *actHlgt, *actHlgtRV;
+	ColorMenuItem *actColorFG, *actColorBG, *actRowColColor, *actAltColColor;
 	QActionGroup *group;
 	int useNativeMenuBar;
 	QSettings settings;
@@ -1345,37 +1346,43 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	colorMenu->addAction(altColHlgtAct);
 
+	colorMenu->addSeparator();
+
 	// Color -> ForeGround Color
-	actColorFG = new QAction(tr("&ForeGround Color"), this);
+	actColorFG = new ColorMenuItem( tr("&ForeGround Color"), "SDL.HexEditFgColor", this);
+	//actColorFG = new QAction(tr("&ForeGround Color"), this);
 	//actColorFG->setShortcuts(QKeySequence::Open);
-	actColorFG->setStatusTip(tr("ForeGround Color"));
-	connect(actColorFG, SIGNAL(triggered(void)), this, SLOT(pickForeGroundColor(void)) );
+	//actColorFG->setStatusTip(tr("ForeGround Color"));
+	//connect(actColorFG, SIGNAL(triggered(void)), this, SLOT(pickForeGroundColor(void)) );
 	
 	colorMenu->addAction(actColorFG);
 
 	// Color -> BackGround Color
-	actColorBG = new QAction(tr("&BackGround Color"), this);
+	actColorBG = new ColorMenuItem( tr("&BackGround Color"), "SDL.HexEditBgColor", this);
+	//actColorBG = new QAction(tr("&BackGround Color"), this);
 	//actColorBG->setShortcuts(QKeySequence::Open);
-	actColorBG->setStatusTip(tr("BackGround Color"));
-	connect(actColorBG, SIGNAL(triggered(void)), this, SLOT(pickBackGroundColor(void)) );
+	//actColorBG->setStatusTip(tr("BackGround Color"));
+	//connect(actColorBG, SIGNAL(triggered(void)), this, SLOT(pickBackGroundColor(void)) );
 	
 	colorMenu->addAction(actColorBG);
 
 	// Color -> Cursor Row/Column Color
-	act = new QAction(tr("&Cursor Row/Column Color"), this);
+	actRowColColor = new ColorMenuItem( tr("&Cursor Row/Column Color"), "SDL.HexEditCursorColorRC", this);
+	//act = new QAction(tr("&Cursor Row/Column Color"), this);
 	//act->setShortcuts(QKeySequence::Open);
-	act->setStatusTip(tr("Cursor Row/Column Color"));
-	connect(act, SIGNAL(triggered(void)), this, SLOT(pickCursorRowColumnColor(void)) );
+	//act->setStatusTip(tr("Cursor Row/Column Color"));
+	//connect(act, SIGNAL(triggered(void)), this, SLOT(pickCursorRowColumnColor(void)) );
 	
-	colorMenu->addAction(act);
+	colorMenu->addAction(actRowColColor);
 
 	// Color -> Alternate Column Color
-	act = new QAction(tr("&Alternate Column Color"), this);
+	actAltColColor = new ColorMenuItem( tr("&Alternate Column Color"), "SDL.HexEditAltColColor", this);
+	//act = new QAction(tr("&Alternate Column Color"), this);
 	//act->setShortcuts(QKeySequence::Open);
-	act->setStatusTip(tr("Alternate Column Color"));
-	connect(act, SIGNAL(triggered(void)), this, SLOT(pickAlternateColumnColor(void)) );
+	//act->setStatusTip(tr("Alternate Column Color"));
+	//connect(act, SIGNAL(triggered(void)), this, SLOT(pickAlternateColumnColor(void)) );
 	
-	colorMenu->addAction(act);
+	colorMenu->addAction(actAltColColor);
 
 	// Bookmarks Menu
 	bookmarkMenu = menuBar->addMenu(tr("&Bookmarks"));
@@ -1406,6 +1413,11 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	editor->setScrollBars( hbar, vbar );
 	
+	   actColorFG->connectColor( &editor->fgColor );
+	   actColorBG->connectColor( &editor->bgColor );
+	actRowColColor->connectColor( &editor->rowColHlgtColor );
+	actAltColColor->connectColor( &editor->altColHlgtColor );
+
 	//connect( vbar, SIGNAL(sliderMoved(int)), this, SLOT(vbarMoved(int)) );
 	connect( hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)) );
 	connect( vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)) );
