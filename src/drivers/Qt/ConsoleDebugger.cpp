@@ -362,6 +362,152 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	actGroup->addAction(act);
 	visMenu->addAction(act);
 
+	// View -> Font Selection
+	subMenu  = viewMenu->addMenu(tr("&Font Selection"));
+
+	// Options -> Font Selection -> Assembly View
+	act = new QAction(tr("&Assembly View"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Set Assembly View Font"));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(changeAsmFontCB(void)) );
+
+	subMenu->addAction(act);
+
+	// View -> Font Selection -> Stack View
+	act = new QAction(tr("&Stack View"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Set Stack View Font"));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(changeStackFontCB(void)) );
+
+	subMenu->addAction(act);
+
+	// View -> Font Selection -> CPU Data View
+	act = new QAction(tr("&CPU Data View"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Set CPU View Font"));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(changeCpuFontCB(void)) );
+
+	subMenu->addAction(act);
+
+	// View -> Color Selection
+	subMenu  = viewMenu->addMenu(tr("&Color Selection"));
+
+	// View -> Color Selection -> Opcodes
+	opcodeColorAct = new ColorMenuItem( tr("&Opcodes"), "SDL.AsmSyntaxColorOpcode", this);
+
+	subMenu->addAction(opcodeColorAct);
+
+	// View -> Color Selection -> Address Values
+	addressColorAct = new ColorMenuItem( tr("&Address Values"), "SDL.AsmSyntaxColorAddress", this);
+
+	subMenu->addAction(addressColorAct);
+
+	// View -> Color Selection -> Immediate Values
+	immediateColorAct = new ColorMenuItem( tr("&Immediate Values"), "SDL.AsmSyntaxColorImmediate", this);
+
+	subMenu->addAction(immediateColorAct);
+
+	// View -> Color Selection -> Labels
+	labelColorAct = new ColorMenuItem( tr("&Labels"), "SDL.AsmSyntaxColorLabel", this);
+
+	subMenu->addAction(labelColorAct);
+
+	// View -> Color Selection -> Comments
+	commentColorAct = new ColorMenuItem( tr("&Comments"), "SDL.AsmSyntaxColorComment", this);
+
+	subMenu->addAction(commentColorAct);
+
+	subMenu->addSeparator();
+
+	// View -> Color Selection -> (PC) Active Statement
+	pcColorAct = new ColorMenuItem( tr("(&PC) Active Statement BG"), "SDL.AsmSyntaxColorPC", this);
+
+	subMenu->addAction(pcColorAct);
+
+	viewMenu->addSeparator();
+
+	// View -> PC Position
+	subMenu  = viewMenu->addMenu(tr("&PC Line Positioning"));
+	actGroup = new QActionGroup(this);
+
+	actGroup->setExclusive(true);
+
+	g_config->getOption( "SDL.DebuggerPCPlacement", &opt );
+
+	// View -> PC Position -> Top Line
+	act = new QAction(tr("&Top Line"), this);
+	act->setStatusTip(tr("Top Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 0 );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceTop(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> PC Position -> Upper Mid-Line
+	act = new QAction(tr("&Upper Mid-Line"), this);
+	act->setStatusTip(tr("Upper Mid-Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 1 );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceUpperMid(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> PC Position -> Center Line
+	act = new QAction(tr("&Center Line"), this);
+	act->setStatusTip(tr("Center Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 2 );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCenter(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> PC Position -> Lower Mid-Line
+	act = new QAction(tr("&Lower Mid-Line"), this);
+	act->setStatusTip(tr("Lower Mid-Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 3 );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceLowerMid(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> PC Position -> Bottom
+	act = new QAction(tr("&Bottom Line"), this);
+	act->setStatusTip(tr("Bottom Line"));
+	act->setCheckable(true);
+	act->setChecked( opt == 4 );
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceBottom(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> PC Position -> Custom Line 
+	act = new QAction(tr("Custom Line &Offset"), this);
+	act->setStatusTip(tr("Custom Line Offset"));
+	act->setChecked( opt == 5 );
+	act->setCheckable(true);
+	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCustom(void)) );
+	actGroup->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> Show Byte Codes
+	act = new QAction(tr("Show &Byte Codes"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Show &Byte Codes"));
+	act->setCheckable(true);
+	act->setChecked(false);
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(displayByteCodesCB(bool)) );
+
+	viewMenu->addAction(act);
+
+	// View -> Display ROM Offsets
+	act = new QAction(tr("Show ROM &Offsets"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Show ROM &Offsets"));
+	act->setCheckable(true);
+	act->setChecked(false);
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(displayROMoffsetCB(bool)) );
+
+	viewMenu->addAction(act);
+
 	// Debug
 	debugMenu = menuBar->addMenu(tr("&Debug"));
 
@@ -500,134 +646,6 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	optMenu->addSeparator();
 
-	// Options -> PC Position
-	subMenu  = optMenu->addMenu(tr("&PC Line Positioning"));
-	actGroup = new QActionGroup(this);
-
-	actGroup->setExclusive(true);
-
-	g_config->getOption( "SDL.DebuggerPCPlacement", &opt );
-
-	// Options -> PC Position -> Top Line
-	act = new QAction(tr("&Top Line"), this);
-	act->setStatusTip(tr("Top Line"));
-	act->setCheckable(true);
-	act->setChecked( opt == 0 );
-	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceTop(void)) );
-	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// Options -> PC Position -> Upper Mid-Line
-	act = new QAction(tr("&Upper Mid-Line"), this);
-	act->setStatusTip(tr("Upper Mid-Line"));
-	act->setCheckable(true);
-	act->setChecked( opt == 1 );
-	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceUpperMid(void)) );
-	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// Options -> PC Position -> Center Line
-	act = new QAction(tr("&Center Line"), this);
-	act->setStatusTip(tr("Center Line"));
-	act->setCheckable(true);
-	act->setChecked( opt == 2 );
-	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCenter(void)) );
-	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// Options -> PC Position -> Lower Mid-Line
-	act = new QAction(tr("&Lower Mid-Line"), this);
-	act->setStatusTip(tr("Lower Mid-Line"));
-	act->setCheckable(true);
-	act->setChecked( opt == 3 );
-	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceLowerMid(void)) );
-	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// Options -> PC Position -> Bottom
-	act = new QAction(tr("&Bottom Line"), this);
-	act->setStatusTip(tr("Bottom Line"));
-	act->setCheckable(true);
-	act->setChecked( opt == 4 );
-	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceBottom(void)) );
-	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	// Options -> PC Position -> Custom Line 
-	act = new QAction(tr("Custom Line &Offset"), this);
-	act->setStatusTip(tr("Custom Line Offset"));
-	act->setChecked( opt == 5 );
-	act->setCheckable(true);
-	connect( act, SIGNAL(triggered()), this, SLOT(pcSetPlaceCustom(void)) );
-	actGroup->addAction(act);
-	subMenu->addAction(act);
-
-	optMenu->addSeparator();
-
-	// Options -> Font Selection
-	subMenu  = optMenu->addMenu(tr("&Font Selection"));
-
-	// Options -> Font Selection -> Assembly View
-	act = new QAction(tr("&Assembly View"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("Set Assembly View Font"));
-	connect( act, SIGNAL(triggered(void)), this, SLOT(changeAsmFontCB(void)) );
-
-	subMenu->addAction(act);
-
-	// Options -> Font Selection -> Stack View
-	act = new QAction(tr("&Stack View"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("Set Stack View Font"));
-	connect( act, SIGNAL(triggered(void)), this, SLOT(changeStackFontCB(void)) );
-
-	subMenu->addAction(act);
-
-	// Options -> Font Selection -> CPU Data View
-	act = new QAction(tr("&CPU Data View"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("Set CPU View Font"));
-	connect( act, SIGNAL(triggered(void)), this, SLOT(changeCpuFontCB(void)) );
-
-	subMenu->addAction(act);
-
-	// Options -> Color Selection
-	subMenu  = optMenu->addMenu(tr("&Color Selection"));
-
-	// Options -> Color Selection -> Opcodes
-	opcodeColorAct = new ColorMenuItem( tr("&Opcodes"), "SDL.AsmSyntaxColorOpcode", this);
-
-	subMenu->addAction(opcodeColorAct);
-
-	// Options -> Color Selection -> Address Values
-	addressColorAct = new ColorMenuItem( tr("&Address Values"), "SDL.AsmSyntaxColorAddress", this);
-
-	subMenu->addAction(addressColorAct);
-
-	// Options -> Color Selection -> Immediate Values
-	immediateColorAct = new ColorMenuItem( tr("&Immediate Values"), "SDL.AsmSyntaxColorImmediate", this);
-
-	subMenu->addAction(immediateColorAct);
-
-	// Options -> Color Selection -> Labels
-	labelColorAct = new ColorMenuItem( tr("&Labels"), "SDL.AsmSyntaxColorLabel", this);
-
-	subMenu->addAction(labelColorAct);
-
-	// Options -> Color Selection -> Comments
-	commentColorAct = new ColorMenuItem( tr("&Comments"), "SDL.AsmSyntaxColorComment", this);
-
-	subMenu->addAction(commentColorAct);
-
-	subMenu->addSeparator();
-
-	// Options -> Color Selection -> (PC) Active Statement
-	pcColorAct = new ColorMenuItem( tr("(&PC) Active Statement BG"), "SDL.AsmSyntaxColorPC", this);
-
-	subMenu->addAction(pcColorAct);
-
-	optMenu->addSeparator();
-
 	// Symbols
 	symMenu = menuBar->addMenu(tr("&Symbols"));
 
@@ -642,26 +660,6 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	symMenu->addAction(act);
 
 	symMenu->addSeparator();
-
-	// Symbols -> Show Byte Codes
-	act = new QAction(tr("Show &Byte Codes"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("Show &Byte Codes"));
-	act->setCheckable(true);
-	act->setChecked(false);
-	connect( act, SIGNAL(triggered(bool)), this, SLOT(displayByteCodesCB(bool)) );
-
-	symMenu->addAction(act);
-
-	// Symbols -> Display ROM Offsets
-	act = new QAction(tr("Show ROM &Offsets"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("Show ROM &Offsets"));
-	act->setCheckable(true);
-	act->setChecked(false);
-	connect( act, SIGNAL(triggered(bool)), this, SLOT(displayROMoffsetCB(bool)) );
-
-	symMenu->addAction(act);
 
 	// Symbols -> Symbolic Debug
 	act = new QAction(tr("&Symbolic Debug"), this);
