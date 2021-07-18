@@ -165,6 +165,7 @@ class  consoleWin_t : public QMainWindow
 		Qt::CursorShape getViewerCursor(void);
 
 		void setMenuAccessPauseEnable(bool enable);
+		void setContextMenuEnable(bool enable);
 	protected:
 		consoleMenuBar *menubar;
 
@@ -249,6 +250,7 @@ class  consoleWin_t : public QMainWindow
 		bool        mainMenuEmuWasPaused;
 		bool        mainMenuPauseWhenActv;
 		bool        scrHandlerConnected;
+		bool        contextMenuEnable;
 
 		std::list <std::string*> romList;
 		std::vector <autoFireMenuAction*> afActList;
@@ -256,13 +258,14 @@ class  consoleWin_t : public QMainWindow
 
 		unsigned int updateCounter;
 	protected:
-		void resizeEvent(QResizeEvent *event);
-		void closeEvent(QCloseEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void keyReleaseEvent(QKeyEvent *event);
-		void dragEnterEvent(QDragEnterEvent *event);
-		void dropEvent(QDropEvent *event);
-		void showEvent(QShowEvent *event);
+		void resizeEvent(QResizeEvent *event) override;
+		void closeEvent(QCloseEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void keyReleaseEvent(QKeyEvent *event) override;
+		void dragEnterEvent(QDragEnterEvent *event) override;
+		void dropEvent(QDropEvent *event) override;
+		void showEvent(QShowEvent *event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 		void syncActionConfig( QAction *act, const char *property );
 		void showErrorMsgWindow(void);
 
@@ -333,6 +336,7 @@ class  consoleWin_t : public QMainWindow
 		void consolePause(void);
 		void toggleGameGenie(bool checked);
 		void loadGameGenieROM(void);
+		void loadMostRecentROM(void);
 		void setRegionNTSC(void);
 		void setRegionPAL(void);
 		void setRegionDendy(void);

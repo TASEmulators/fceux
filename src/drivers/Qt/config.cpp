@@ -657,6 +657,7 @@ InitConfig()
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
 	config->addOption("SDL.PauseOnMainMenuAccess", false);
+	config->addOption("SDL.ContextMenuEnable", true);
 	config->addOption("SDL.GuiStyle", "");
 	config->addOption("SDL.QtStyleSheet", "");
 	config->addOption("SDL.QPaletteFile", "");

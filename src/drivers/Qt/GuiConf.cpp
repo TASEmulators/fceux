@@ -50,7 +50,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 {
 	int useNativeFileDialogVal;
 	int useNativeMenuBarVal, pauseOnMenuAccessVal;
-	int useCustomQssVal, useCustomQPalVal;
+	int useCustomQssVal, useCustomQPalVal, contextMenuEnable;
 	QVBoxLayout *mainLayout, *vbox1, *vbox2;
 	QHBoxLayout *hbox, *hbox1;
 	QPushButton *closeButton, *button;
@@ -75,6 +75,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	g_config->getOption("SDL.UseCustomQss", &useCustomQssVal);
 	g_config->getOption("SDL.UseCustomQPal", &useCustomQPalVal);
 	g_config->getOption("SDL.PauseOnMainMenuAccess", &pauseOnMenuAccessVal);
+	g_config->getOption("SDL.ContextMenuEnable", &contextMenuEnable);
 
 	setWindowTitle(tr("GUI Config"));
 
@@ -124,16 +125,19 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	mainLayout->setMenuBar( menuBar );
 
 	useNativeFileDialog = new QCheckBox(tr("Use Native OS File Dialog"));
-	useNativeMenuBar = new QCheckBox(tr("Use Native OS Menu Bar"));
-	pauseOnMenuAccess = new QCheckBox(tr("Pause On Main Menu Access"));
+	useNativeMenuBar    = new QCheckBox(tr("Use Native OS Menu Bar"));
+	pauseOnMenuAccess   = new QCheckBox(tr("Pause On Main Menu Access"));
+	ctxMenuEnable       = new QCheckBox(tr("Context Menu Enable"));
 
 	useNativeFileDialog->setChecked(useNativeFileDialogVal);
 	useNativeMenuBar->setChecked(useNativeMenuBarVal);
 	pauseOnMenuAccess->setChecked(pauseOnMenuAccessVal);
+	ctxMenuEnable->setChecked(contextMenuEnable);
 
 	connect(useNativeFileDialog, SIGNAL(stateChanged(int)), this, SLOT(useNativeFileDialogChanged(int)));
-	connect(useNativeMenuBar, SIGNAL(stateChanged(int)), this, SLOT(useNativeMenuBarChanged(int)));
-	connect(pauseOnMenuAccess, SIGNAL(stateChanged(int)), this, SLOT(pauseOnMenuAccessChanged(int)));
+	connect(useNativeMenuBar   , SIGNAL(stateChanged(int)), this, SLOT(useNativeMenuBarChanged(int)));
+	connect(pauseOnMenuAccess  , SIGNAL(stateChanged(int)), this, SLOT(pauseOnMenuAccessChanged(int)));
+	connect(ctxMenuEnable      , SIGNAL(stateChanged(int)), this, SLOT(contextMenuEnableChanged(int)));
 
 	styleComboBox = new QComboBox();
 
@@ -234,6 +238,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	vbox1->addWidget(useNativeFileDialog, 1);
 	vbox1->addWidget(useNativeMenuBar, 1);
 	vbox1->addWidget(pauseOnMenuAccess, 1);
+	vbox1->addWidget(ctxMenuEnable, 1);
 	vbox1->addStretch(10);
 
 	closeButton = new QPushButton( tr("Close") );
@@ -294,6 +299,15 @@ void GuiConfDialog_t::pauseOnMenuAccessChanged(int state)
 	g_config->setOption("SDL.PauseOnMainMenuAccess", value);
 
 	consoleWindow->setMenuAccessPauseEnable( value );
+}
+//----------------------------------------------------
+void GuiConfDialog_t::contextMenuEnableChanged(int state)
+{
+	int value = (state == Qt::Unchecked) ? 0 : 1;
+
+	g_config->setOption("SDL.ContextMenuEnable", value);
+
+	consoleWindow->setContextMenuEnable( value );
 }
 //----------------------------------------------------
 void GuiConfDialog_t::useCustomStyleChanged(int state)

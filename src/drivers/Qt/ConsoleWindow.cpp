@@ -122,6 +122,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	mainMenuPauseWhenActv = false;
 
 	g_config->getOption( "SDL.PauseOnMainMenuAccess", &mainMenuPauseWhenActv );
+	g_config->getOption( "SDL.ContextMenuEnable", &contextMenuEnable );
 	g_config->getOption ("SDL.VideoDriver", &use_SDL_video);
 
 	if ( use_SDL_video )
@@ -498,6 +499,11 @@ void consoleWin_t::setMenuAccessPauseEnable( bool enable )
 	mainMenuPauseWhenActv = enable;
 }
 
+void consoleWin_t::setContextMenuEnable( bool enable )
+{
+	contextMenuEnable = enable;
+}
+
 void consoleWin_t::loadCursor(void)
 {
 	int cursorVis;
@@ -691,6 +697,47 @@ void consoleWin_t::showEvent(QShowEvent *event)
 	initScreenHandler();
 }
 
+void consoleWin_t::contextMenuEvent(QContextMenuEvent *event)
+{
+	QAction *act;
+	QMenu menu(this);
+
+	if ( !contextMenuEnable )
+	{
+		return;
+	}
+
+	act = new QAction(tr("Open ROM"), &menu);
+	connect( act, SIGNAL(triggered(void)), this, SLOT(openROMFile(void)) );
+
+	menu.addAction( act );
+
+	act = new QAction(tr("Last ROM Used"), &menu);
+	act->setEnabled( romList.size() > 0 );
+	connect( act, SIGNAL(triggered(void)), this, SLOT(loadMostRecentROM(void)) );
+
+	menu.addAction( act );
+
+	menu.addSeparator();
+
+	act = new QAction(tr("Online Help"), &menu);
+	connect( act, SIGNAL(triggered(void)), this, SLOT(openOnlineDocs(void)) );
+
+	menu.addAction( act );
+
+	menu.addSeparator();
+
+	act = new QAction(tr("Disable Context Menu via Options -> GUI Config"), &menu);
+	connect( act, SIGNAL(triggered(void)), this, SLOT(openGuiConfWin(void)) );
+
+	menu.addAction( act );
+
+	menu.addSeparator();
+
+	menu.exec(event->globalPos());
+
+	event->accept();
+}
 //---------------------------------------------------------------------------
 void consoleWin_t::initHotKeys(void)
 {
@@ -3913,6 +3960,18 @@ void consoleWin_t::syncActionConfig( QAction *act, const char *property )
 
 		act->setChecked( enable ? true : false );
 	}
+}
+
+void consoleWin_t::loadMostRecentROM(void)
+{
+	if ( romList.size() <= 0 )
+	{
+		return;
+	}
+	fceuWrapperLock();
+	CloseGame ();
+	LoadGame ( (romList.back())->c_str() );
+	fceuWrapperUnLock();
 }
 
 void consoleWin_t::updatePeriodic(void)

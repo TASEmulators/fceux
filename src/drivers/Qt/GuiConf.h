@@ -143,6 +143,7 @@ protected:
 	QCheckBox *useNativeFileDialog;
 	QCheckBox *useNativeMenuBar;
 	QCheckBox *pauseOnMenuAccess;
+	QCheckBox *ctxMenuEnable;
 	QCheckBox *useCustomStyle;
 	QCheckBox *useCustomPalette;
 	QComboBox *styleComboBox;
@@ -156,6 +157,7 @@ private slots:
 	void useNativeFileDialogChanged(int v);
 	void useNativeMenuBarChanged(int v);
 	void pauseOnMenuAccessChanged(int v);
+	void contextMenuEnableChanged(int v);
 	void useCustomQPaletteChanged(int v);
 	void useCustomStyleChanged(int v);
 	void styleChanged(int index);
