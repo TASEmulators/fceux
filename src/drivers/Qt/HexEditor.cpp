@@ -1402,7 +1402,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	hbar->setMinimum(0);
 	hbar->setMaximum(100);
 	vbar->setMinimum(0);
-	vbar->setMaximum( 0x10000 / 16 );
+	vbar->setMaximum( 0x1000 / 16 );
 
 	editor->setScrollBars( hbar, vbar );
 	
@@ -2175,11 +2175,18 @@ void QHexEdit::resizeEvent(QResizeEvent *event)
 	if ( viewWidth >= pxLineWidth )
 	{
 		pxLineXScroll = 0;
+		hbar->setMaximum(0);
+		hbar->hide();
 	}
 	else
 	{
-		pxLineXScroll = (int)(0.010f * (float)hbar->value() * (float)(pxLineWidth - viewWidth) );
+		hbar->setPageStep(viewWidth);
+		hbar->setMaximum(pxLineWidth - viewWidth);
+		hbar->show();
+		pxLineXScroll = hbar->value();
 	}
+	vbar->setMaximum( maxLineOffset );
+	vbar->setPageStep( (3*viewLines)/4 );
 
 }
 //----------------------------------------------------------------------------
@@ -3646,7 +3653,9 @@ void QHexEdit::memModeUpdate(void)
 		}
 		maxLineOffset = mb.numLines() - viewLines + 1;
 
-		vbar->setMaximum( memSize / 16 );
+		//vbar->setMaximum( memSize / 16 );
+		vbar->setMaximum( maxLineOffset );
+		vbar->setPageStep( (3*viewLines)/4 );
 	}
 }
 //----------------------------------------------------------------------------
