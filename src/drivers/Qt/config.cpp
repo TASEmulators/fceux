@@ -691,6 +691,8 @@ InitConfig()
 	config->addOption("SDL.NT_TileFocusPolicy", 0);
 	config->addOption("SDL.PPU_TileFocusPolicy", 0);
 	config->addOption("SDL.OAM_TileFocusPolicy", 0);
+	config->addOption("SDL.PPU_MaskUnused", 0);
+	config->addOption("SDL.PPU_InvertMask", 0);
 
 	// quit when a+b+select+start is pressed
 	config->addOption("4buttonexit", "SDL.ABStartSelectExit", 0);

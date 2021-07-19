@@ -54,6 +54,7 @@
 #include "Qt/HexEditor.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/PaletteEditor.h"
 
 #define PATTERNWIDTH          128
@@ -264,9 +265,14 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	maskUnusedCbox = new QCheckBox( tr("Mask unused Graphics (Code/Data Logger)") );
 	invertMaskCbox = new QCheckBox( tr("Invert the Mask (Code/Data Logger)") );
 
+	g_config->getOption("SDL.PPU_MaskUnused", &PPUView_maskUnusedGraphics);
+	g_config->getOption("SDL.PPU_InvertMask", &PPUView_invertTheMask);
+
 	maskUnusedCbox->setChecked( PPUView_maskUnusedGraphics );
 	invertMaskCbox->setChecked( PPUView_invertTheMask );
 
+	connect( maskUnusedCbox   , SIGNAL(stateChanged(int)), this, SLOT(maskUnusedGraphicsChanged(int)));
+	connect( invertMaskCbox   , SIGNAL(stateChanged(int)), this, SLOT(invertMaskChanged(int)));
 	connect( sprite8x16Cbox[0], SIGNAL(stateChanged(int)), this, SLOT(sprite8x16Changed0(int)));
 	connect( sprite8x16Cbox[1], SIGNAL(stateChanged(int)), this, SLOT(sprite8x16Changed1(int)));
 
@@ -499,6 +505,20 @@ void ppuViewerDialog_t::scanLineChanged(int value)
 {
 	PPUViewScanline = value;
 	//printf("ScanLine: %i\n", PPUViewScanline );
+}
+//----------------------------------------------------
+void ppuViewerDialog_t::invertMaskChanged(int state)
+{
+	PPUView_invertTheMask = (state == Qt::Unchecked) ? 0 : 1;
+
+	g_config->setOption("SDL.PPU_InvertMask", PPUView_invertTheMask);
+}
+//----------------------------------------------------
+void ppuViewerDialog_t::maskUnusedGraphicsChanged(int state)
+{
+	PPUView_maskUnusedGraphics = (state == Qt::Unchecked) ? 0 : 1;
+
+	g_config->setOption("SDL.PPU_MaskUnused", PPUView_maskUnusedGraphics);
 }
 //----------------------------------------------------
 void ppuViewerDialog_t::sprite8x16Changed0(int state)

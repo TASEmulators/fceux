@@ -291,6 +291,8 @@ class ppuViewerDialog_t : public QDialog
 		void periodicUpdate(void);
 		void sprite8x16Changed0(int state);
 		void sprite8x16Changed1(int state);
+		void invertMaskChanged(int state);
+		void maskUnusedGraphicsChanged(int state);
 		void refreshSliderChanged(int value);
 		void scanLineChanged(int value);
 		void setClickFocus(void);
