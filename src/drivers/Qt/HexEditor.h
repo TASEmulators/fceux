@@ -111,32 +111,6 @@ class HexEditorCharTable_t
 		int   loadFromFile( const char *filepath );
 };
 
-class hexEditColorPickerDialog_t : public QDialog
-{
-	Q_OBJECT
-
-	public:
-		hexEditColorPickerDialog_t( QColor *c, const char *title, const char *configName, QWidget *parent = 0);
-		~hexEditColorPickerDialog_t(void);
-
-	protected:
-		void closeEvent(QCloseEvent *event);
-
-	private:
-		QColorDialog *colorDialog;
-		QColor *colorPtr;
-		QColor  origColor;
-		std::string confName;
-
-	public slots:
-		void closeWindow(void);
-	private slots:
-		void colorChanged( const QColor &color );
-		void colorAccepted(void);
-		void colorRejected(void);
-		void resetColor(void);
-};
-
 class HexEditorDialog_t;
 
 class QHexEdit : public QWidget
@@ -364,10 +338,6 @@ class HexEditorDialog_t : public QDialog
 		void actvHighlightRVCB(bool value); 
 		void rolColHlgtChanged(bool);
 		void altColHlgtChanged(bool);
-		void pickForeGroundColor(void);
-		void pickBackGroundColor(void);
-		void pickCursorRowColumnColor(void);
-		void pickAlternateColumnColor(void);
 		void removeAllBookmarks(void);
 		void openGotoAddrDialog(void);
 		void copyToClipboard(void);

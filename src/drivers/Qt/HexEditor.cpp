@@ -69,7 +69,7 @@
 static bool memNeedsCheck = false;
 static HexBookMarkManager_t hbm;
 static std::list <HexEditorDialog_t*> winList;
-static const char *memViewNames[] = { "RAM", "PPU", "OAM", "ROM", NULL };
+static const char *memViewNames[] = { "CPU", "PPU", "OAM", "ROM", NULL };
 
 static int getROM( unsigned int offset);
 static int writeMem( int mode, unsigned int addr, int value );
@@ -1207,9 +1207,9 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	group->setExclusive(true);
 
 	// View -> RAM
-	viewRAM = new QAction(tr("&RAM"), this);
+	viewRAM = new QAction(tr("&CPU"), this);
 	//viewRAM->setShortcuts(QKeySequence::Open);
-	viewRAM->setStatusTip(tr("View RAM"));
+	viewRAM->setStatusTip(tr("View CPU"));
 	viewRAM->setCheckable(true);
 	connect(viewRAM, SIGNAL(triggered()), this, SLOT(setViewRAM(void)) );
 
@@ -1373,37 +1373,21 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	// Color -> ForeGround Color
 	actColorFG = new ColorMenuItem( tr("&ForeGround Color"), "SDL.HexEditFgColor", this);
-	//actColorFG = new QAction(tr("&ForeGround Color"), this);
-	//actColorFG->setShortcuts(QKeySequence::Open);
-	//actColorFG->setStatusTip(tr("ForeGround Color"));
-	//connect(actColorFG, SIGNAL(triggered(void)), this, SLOT(pickForeGroundColor(void)) );
 	
 	colorMenu->addAction(actColorFG);
 
 	// Color -> BackGround Color
 	actColorBG = new ColorMenuItem( tr("&BackGround Color"), "SDL.HexEditBgColor", this);
-	//actColorBG = new QAction(tr("&BackGround Color"), this);
-	//actColorBG->setShortcuts(QKeySequence::Open);
-	//actColorBG->setStatusTip(tr("BackGround Color"));
-	//connect(actColorBG, SIGNAL(triggered(void)), this, SLOT(pickBackGroundColor(void)) );
 	
 	colorMenu->addAction(actColorBG);
 
 	// Color -> Cursor Row/Column Color
 	actRowColColor = new ColorMenuItem( tr("&Cursor Row/Column Color"), "SDL.HexEditCursorColorRC", this);
-	//act = new QAction(tr("&Cursor Row/Column Color"), this);
-	//act->setShortcuts(QKeySequence::Open);
-	//act->setStatusTip(tr("Cursor Row/Column Color"));
-	//connect(act, SIGNAL(triggered(void)), this, SLOT(pickCursorRowColumnColor(void)) );
 	
 	colorMenu->addAction(actRowColColor);
 
 	// Color -> Alternate Column Color
 	actAltColColor = new ColorMenuItem( tr("&Alternate Column Color"), "SDL.HexEditAltColColor", this);
-	//act = new QAction(tr("&Alternate Column Color"), this);
-	//act->setShortcuts(QKeySequence::Open);
-	//act->setStatusTip(tr("Alternate Column Color"));
-	//connect(act, SIGNAL(triggered(void)), this, SLOT(pickAlternateColumnColor(void)) );
 	
 	colorMenu->addAction(actAltColColor);
 
@@ -1472,7 +1456,7 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 {
 	std::list <HexEditorDialog_t*>::iterator it;
 	  
-	printf("Hex Editor Deleted\n");
+	//printf("Hex Editor Deleted\n");
 	periodicTimer->stop();
 
 	// Lock the emulation thread mutex to ensure
@@ -1574,42 +1558,6 @@ void HexEditorDialog_t::closeWindow(void)
 	settings.setValue("hexEditor/geometry", saveGeometry());
 	done(0);
 	deleteLater();
-}
-//----------------------------------------------------------------------------
-void HexEditorDialog_t::pickForeGroundColor(void)
-{
-	hexEditColorPickerDialog_t *dialog;
-
-	dialog = new hexEditColorPickerDialog_t( &editor->fgColor, "Pick Foreground Color", "SDL.HexEditFgColor", editor );
-
-	dialog->show();
-}
-//----------------------------------------------------------------------------
-void HexEditorDialog_t::pickBackGroundColor(void)
-{
-	hexEditColorPickerDialog_t *dialog;
-
-	dialog = new hexEditColorPickerDialog_t( &editor->bgColor, "Pick Background Color", "SDL.HexEditBgColor", editor );
-
-	dialog->show();
-}
-//----------------------------------------------------------------------------
-void HexEditorDialog_t::pickCursorRowColumnColor(void)
-{
-	hexEditColorPickerDialog_t *dialog;
-
-	dialog = new hexEditColorPickerDialog_t( &editor->rowColHlgtColor, "Pick Cursor Row/Column Color", "SDL.HexEditCursorColorRC", editor );
-
-	dialog->show();
-}
-//----------------------------------------------------------------------------
-void HexEditorDialog_t::pickAlternateColumnColor(void)
-{
-	hexEditColorPickerDialog_t *dialog;
-
-	dialog = new hexEditColorPickerDialog_t( &editor->altColHlgtColor, "Pick Alternate Column Color", "SDL.HexEditAltColColor", editor );
-
-	dialog->show();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::vbarMoved(int value)
@@ -3148,7 +3096,7 @@ void QHexEdit::addBookMarkCB(void)
 	{
 		default:
 		case MODE_NES_RAM:
-			sprintf( stmp, "RAM %04X", ctxAddr );
+			sprintf( stmp, "CPU %04X", ctxAddr );
 		break;
 		case MODE_NES_PPU:
 			sprintf( stmp, "PPU %04X", ctxAddr );
@@ -4152,135 +4100,5 @@ void hexEditorUpdateMemoryValues(void)
 		(*it)->editor->checkMemActivity();
 	}
 	memNeedsCheck = false;
-}
-//----------------------------------------------------------------------------
-// Hed Editor Color Picker
-//----------------------------------------------------------------------------
-hexEditColorPickerDialog_t::hexEditColorPickerDialog_t( QColor *c, const char *title, const char *configName, QWidget *parent )
-	: QDialog( parent )
-{
-	QVBoxLayout *mainLayout;
-	QHBoxLayout *hbox;
-	QPushButton *okButton;
-	QPushButton *cancelButton;
-	QPushButton *resetButton;
-	QStyle *style;
-	//char stmp[128];
-
-	style = this->style();
-
-	setWindowTitle( title );
-
-	colorPtr = c;
-	origColor = *c;
-
-	if ( configName )
-	{
-		confName.assign( configName );
-	}
-
-	mainLayout = new QVBoxLayout();
-
-	setLayout( mainLayout );
-
-	colorDialog = new QColorDialog(this);
-
-	mainLayout->addWidget( colorDialog );
-
-	colorDialog->setWindowFlags(Qt::Widget);
-	colorDialog->setOption( QColorDialog::DontUseNativeDialog, true );
-	colorDialog->setOption( QColorDialog::NoButtons, true );
-	colorDialog->setCurrentColor( *c );
-	
-	connect( colorDialog, SIGNAL(colorSelected(const QColor &))      , this, SLOT(colorChanged( const QColor &)) );
-	connect( colorDialog, SIGNAL(currentColorChanged(const QColor &)), this, SLOT(colorChanged( const QColor &)) );
-
-	connect( colorDialog, SIGNAL(accepted(void)), this, SLOT(colorAccepted(void)) );
-	connect( colorDialog, SIGNAL(rejected(void)), this, SLOT(colorRejected(void)) );
-
-	hbox = new QHBoxLayout();
-	mainLayout->addLayout( hbox );
-
-	okButton     = new QPushButton( tr("OK") );
-	cancelButton = new QPushButton( tr("Cancel") );
-	resetButton  = new QPushButton( tr("Reset") );
-
-	okButton->setIcon( style->standardIcon( QStyle::SP_DialogApplyButton ) );
-	cancelButton->setIcon( style->standardIcon( QStyle::SP_DialogCancelButton ) );
-	resetButton->setIcon( style->standardIcon( QStyle::SP_DialogResetButton ) );
-
-	hbox->addWidget( resetButton, 1  );
-	hbox->addStretch( 10 );
-	hbox->addWidget( okButton, 1     );
-	hbox->addWidget( cancelButton, 1 );
-
-	connect( okButton    , SIGNAL(clicked(void)), this, SLOT(colorAccepted(void)) );
-	connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(colorRejected(void)) );
-	connect( resetButton , SIGNAL(clicked(void)), this, SLOT(resetColor(void)) );
-}
-//----------------------------------------------------------------------------
-hexEditColorPickerDialog_t::~hexEditColorPickerDialog_t(void)
-{
-	//printf("nesColorPicker Destroyed\n");
-}
-//----------------------------------------------------------------------------
-void hexEditColorPickerDialog_t::closeEvent(QCloseEvent *event)
-{
-	//printf("nesColorPicker Close Window Event\n");
-	done(0);
-	deleteLater();
-	event->accept();
-}
-//----------------------------------------------------------------------------
-void hexEditColorPickerDialog_t::closeWindow(void)
-{
-	//printf("Close Window\n");
-	done(0);
-	deleteLater();
-}
-//----------------------------------------------------------------------------
-void hexEditColorPickerDialog_t::colorChanged( const QColor &color )
-{
-	//printf("Color Changed: R:%i  G%i  B%i \n", color.red(), color.green(), color.blue() );
-
-	*colorPtr = color;
-}
-//----------------------------------------------------------------------------
-void hexEditColorPickerDialog_t::colorAccepted(void)
-{
-	if ( confName.size() > 0 )
-	{
-		QString colorText;
-
-		colorText = colorPtr->name();
-
-		//printf("Saving '%s' = Color string '%s'\n", confName.c_str(), colorText.toStdString().c_str() );
-
-		g_config->setOption( confName.c_str(), colorText.toStdString().c_str() );
-
-		g_config->save();
-	}
-
-	//printf("hexColorPicker Accepted\n");
-	deleteLater();
-
-}
-//----------------------------------------------------------------------------
-void hexEditColorPickerDialog_t::colorRejected(void)
-{
-	//printf("hexColorPicker Rejected\n");
-
-	// Reset to original color
-	*colorPtr = origColor;
-
-	deleteLater();
-}
-//----------------------------------------------------------------------------
-void hexEditColorPickerDialog_t::resetColor(void)
-{
-	// Reset to original color
-	*colorPtr = origColor;
-
-	colorDialog->setCurrentColor( origColor );
 }
 //----------------------------------------------------------------------------
