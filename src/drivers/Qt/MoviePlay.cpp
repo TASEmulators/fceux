@@ -29,6 +29,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QGridLayout>
+#include <QSettings>
 
 #include "../../fceu.h"
 #include "../../movie.h"
@@ -53,6 +54,7 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	QLabel *lbl;
 	QPushButton *okButton, *cancelButton;
 	bool replayReadOnlySetting;
+	QSettings settings;
 
 	setWindowTitle("Movie Play");
 
@@ -166,16 +168,19 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	doScan();
 
 	updateMovieText();
+
+	restoreGeometry(settings.value("moviePlayWindow/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 MoviePlayDialog_t::~MoviePlayDialog_t(void)
 {
-	printf("Destroy Movie Play Window\n");
+	//printf("Destroy Movie Play Window\n");
 }
 //----------------------------------------------------------------------------
 void MoviePlayDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Movie Play Close Window Event\n");
+	QSettings settings;
+	settings.setValue("moviePlayWindow/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 	event->accept();
@@ -183,7 +188,8 @@ void MoviePlayDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------------------------------
 void MoviePlayDialog_t::closeWindow(void)
 {
-	//printf("Close Window\n");
+	QSettings settings;
+	settings.setValue("moviePlayWindow/geometry", saveGeometry());
 	done(0);
 	deleteLater();
 }
