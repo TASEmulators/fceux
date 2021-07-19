@@ -568,6 +568,11 @@ InitConfig()
 	config->addOption("SDL.HexEditCursorColorRC", "#000080");
 	config->addOption("SDL.HexEditAltColColor"  , "#545454");
 	config->addOption("SDL.HexEditFont"  , "");
+	config->addOption("SDL.HexEditActivityHlgt", true);
+	config->addOption("SDL.HexEditReverseVideo", true);
+	config->addOption("SDL.HexEditRowColumnHlgt", false);
+	config->addOption("SDL.HexEditAltnColumnColor", false);
+	config->addOption("SDL.HexEditRefreshRate", 10);
     
 	// Debugger Options
 	config->addOption("autoLoadDebugFiles"     , "SDL.AutoLoadDebugFiles", 1);
