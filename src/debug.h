@@ -15,6 +15,7 @@
 #define BT_C       0x00  //break type, cpu mem
 #define BT_P       0x20  //break type, ppu mem
 #define BT_S       0x40  //break type, sprite mem
+#define BT_R       0x80  //break type, rom mem
 
 #define BREAK_TYPE_STEP -1
 #define BREAK_TYPE_BADOP -2
@@ -48,9 +49,9 @@ static const uint8 opbrktype[256] = {
 
 
 typedef struct {
-	uint16 address;
-	uint16 endaddress;
-	uint8 flags;
+	uint32 address;
+	uint32 endaddress;
+	uint16 flags;
 
 	Condition* cond;
 	char* condText;

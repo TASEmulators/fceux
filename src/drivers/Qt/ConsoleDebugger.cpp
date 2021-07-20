@@ -1542,7 +1542,7 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 	QFrame *frame;
 	QGroupBox *gbox;
 	QPushButton *okButton, *cancelButton;
-	QRadioButton *cpu_radio, *ppu_radio, *sprite_radio;
+	QRadioButton *cpu_radio, *ppu_radio, *oam_radio, *rom_radio;
 
 	if ( editIdx >= 0 )
 	{
@@ -1595,15 +1595,17 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 	hbox->addWidget( ebp );
 	
 	hbox         = new QHBoxLayout();
-	cpu_radio    = new QRadioButton( tr("CPU Mem") );
-	ppu_radio    = new QRadioButton( tr("PPU Mem") );
-	sprite_radio = new QRadioButton( tr("Sprite Mem") );
+	cpu_radio    = new QRadioButton( tr("CPU") );
+	ppu_radio    = new QRadioButton( tr("PPU") );
+	oam_radio    = new QRadioButton( tr("OAM") );
+	rom_radio    = new QRadioButton( tr("ROM") );
 	cpu_radio->setChecked(true);
 
 	gbox->setLayout( hbox );
 	hbox->addWidget( cpu_radio );
 	hbox->addWidget( ppu_radio );
-	hbox->addWidget( sprite_radio );
+	hbox->addWidget( oam_radio );
+	hbox->addWidget( rom_radio );
 
 	grid  = new QGridLayout();
 
@@ -1643,7 +1645,11 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 		}
 		else if ( wp->flags & BT_S )
 		{
-			sprite_radio->setChecked(true);
+			oam_radio->setChecked(true);
+		}
+		else if ( wp->flags & BT_R )
+		{
+			rom_radio->setChecked(true);
 		}
 
 		sprintf( stmp, "%04X", wp->address );
@@ -1689,9 +1695,21 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 				// If new breakpoint, suggest condition if in ROM Mapping area of memory.
 				if ( wp->address >= 0x8000 )
 				{
-					char str[64];
-					sprintf(str, "K==#%02X", getBank(wp->address));
-					cond->setText( tr(str) );
+					int romAddr = GetNesFileAddress(wp->address);
+
+					if ( romAddr >= 0 )
+					{
+						wp->address = romAddr;
+						sprintf( stmp, "%X", wp->address );
+						addr1->setText( tr(stmp) );
+						rom_radio->setChecked(true);
+					}
+					else
+					{
+						char str[64];
+						sprintf(str, "K==#%02X", getBank(wp->address));
+						cond->setText( tr(str) );
+					}
 				}
 			}
 		}
@@ -1728,9 +1746,13 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 		{
 			type |= BT_P;
 		}
-		else if ( sprite_radio->isChecked() ) 
+		else if ( oam_radio->isChecked() ) 
 		{
 			type |= BT_S;
+		}
+		else if ( rom_radio->isChecked() )
+		{
+			type |= BT_R;
 		}
 
 		s = addr1->text().toStdString();
@@ -1874,6 +1896,10 @@ void ConsoleDebugger::bpListUpdate( bool reset )
 		else if ( watchpoint[i].flags & BT_S )
 		{
 			flags[1] = 'S';
+		}
+		else if ( watchpoint[i].flags & BT_R )
+		{
+			flags[1] = 'R';
 		}
 		else
 		{
@@ -3999,6 +4025,10 @@ void saveGameDebugBreakpoints( bool force )
 		{
 			flags[1] = 'S';
 		}
+		else if ( watchpoint[i].flags & BT_R )
+		{
+			flags[1] = 'R';
+		}
 		else
 		{
 			flags[1] = 'C';
@@ -4010,7 +4040,7 @@ void saveGameDebugBreakpoints( bool force )
 		flags[5] = (watchpoint[i].flags & WP_F) ? 'F' : '-';
 		flags[6] = 0;
 
-		fprintf( fp, "BreakPoint: startAddr=%04X  endAddr=%04X  flags=%s  condition=\"%s\"  desc=\"%s\" \n",
+		fprintf( fp, "BreakPoint: startAddr=%08X  endAddr=%08X  flags=%s  condition=\"%s\"  desc=\"%s\" \n",
 			  	watchpoint[i].address, watchpoint[i].endaddress, flags,
 			  		(watchpoint[i].condText != NULL) ? watchpoint[i].condText : "",
 			  		(watchpoint[i].desc != NULL) ? watchpoint[i].desc : "");
@@ -4182,6 +4212,10 @@ void loadGameDebugBreakpoints(void)
 					else if ( data[1] == 'S' )
 					{
 						type |= BT_S;
+					}
+					else if ( data[1] == 'R' )
+					{
+						type |= BT_R;
 					}
 					else 
 					{

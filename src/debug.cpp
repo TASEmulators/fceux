@@ -22,7 +22,7 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 {
 	int offset = -1;
 
-	if (sscanf(offsetBuffer,"%4X",(unsigned int *)&offset) == EOF)
+	if (sscanf(offsetBuffer,"%7X",(unsigned int *)&offset) == EOF)
 	{
 		return -1;
 	}
@@ -34,6 +34,10 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 	else if (type & BT_S)
 	{
 		return offset & 0x00FF;
+	}
+	else if (type & BT_R)
+	{
+		return offset;
 	}
 	else // BT_C
 	{
@@ -62,7 +66,7 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 		}
 	}
 
-	return offset;
+	return offset & 0xFFFF;
 }
 
 // Returns the value of a given type or register
@@ -199,6 +203,9 @@ unsigned int NewBreak(const char* name, int start, int end, unsigned int type, c
 	if (type & BT_S) {
 		watchpoint[num].flags|=BT_S;
 		watchpoint[num].flags&=~WP_X; //disable execute flag!
+	}
+	if (type & BT_R) {
+		watchpoint[num].flags|=BT_R;
 	}
 
 	if (watchpoint[num].desc)
@@ -635,7 +642,7 @@ uint16 StackNextIgnorePC = 0xFFFF;
 
 ///fires a breakpoint
 static void breakpoint(uint8 *opcode, uint16 A, int size) {
-	int i, j;
+	int i, j, romAddrPC;
 	uint8 brk_type;
 	uint8 stackop=0;
 	uint8 stackopstartaddr=0,stackopendaddr=0;
@@ -699,6 +706,8 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 		BreakHit(BREAK_TYPE_STEP);
 		return;
 	}
+
+	romAddrPC = GetNesFileAddress(_PC);
 
 	brk_type = opbrktype[opcode[0]] | WP_X;
 
@@ -769,11 +778,31 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 						if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address <= A) && (watchpoint[i].endaddress >= A)) ||
 							((watchpoint[i].flags & WP_X) && (watchpoint[i].address <= _PC) && (watchpoint[i].endaddress >= _PC)))
 							BREAKHIT(i);
-					} else
+					}
+					else
 					{
-						if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address == A)) ||
-							((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC)))
-							BREAKHIT(i);
+						if (watchpoint[i].flags & BT_R)
+						{
+							if ( (watchpoint[i].flags & WP_X) && (watchpoint[i].address == romAddrPC) )
+							{
+								BREAKHIT(i);
+							}
+							//else if ( (watchpoint[i].flags & WP_R) && (watchpoint[i].address == A) )
+							//{
+							//	BREAKHIT(i);
+							//}	
+						}
+						else
+						{
+							if ( (watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address == A)) 
+							{
+								BREAKHIT(i);
+							}
+							else if ( (watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC) )
+							{
+								BREAKHIT(i);
+							}
+						}
 					}
 				} else
 				{
