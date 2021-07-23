@@ -2866,7 +2866,7 @@ void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 	wp.condText = 0;
 	wp.desc = NULL;
 
-	bpNum = asmView->isBreakpointAtAddr( wp.address );
+	bpNum = asmView->isBreakpointAtAddr( wp.address, GetNesFileAddress(wp.address) );
 
 	if ( bpNum >= 0 )
 	{
@@ -2967,7 +2967,7 @@ void QAsmView::toggleBreakpoint(int line)
 	}
 }
 //----------------------------------------------------------------------------
-int QAsmView::isBreakpointAtAddr( int addr )
+int QAsmView::isBreakpointAtAddr( int cpuAddr, int romAddr )
 {
 	for (int i=0; i<numWPs; i++)
 	{
@@ -2979,19 +2979,40 @@ int QAsmView::isBreakpointAtAddr( int addr )
 		{
 			continue;
 		}
-		if ( watchpoint[i].endaddress )
+		if ( watchpoint[i].flags & BT_R )
 		{
-			if ( (addr >= watchpoint[i].address) && 
-				addr < watchpoint[i].endaddress )
+			if ( watchpoint[i].endaddress )
 			{
-				return i;
+				if ( (romAddr >= watchpoint[i].address) && 
+					romAddr < watchpoint[i].endaddress )
+				{
+					return i;
+				}
+			}
+			else
+			{
+				if (romAddr == watchpoint[i].address)
+				{
+					return i;
+				}
 			}
 		}
 		else
 		{
-			if (addr == watchpoint[i].address)
+			if ( watchpoint[i].endaddress )
 			{
-				return i;
+				if ( (cpuAddr >= watchpoint[i].address) && 
+					cpuAddr < watchpoint[i].endaddress )
+				{
+					return i;
+				}
+			}
+			else
+			{
+				if (cpuAddr == watchpoint[i].address)
+				{
+					return i;
+				}
 			}
 		}
 	}
@@ -3004,7 +3025,7 @@ int QAsmView::isBreakpointAtLine( int l )
 	{
 		if ( asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT )
 		{
-			return isBreakpointAtAddr( asmEntry[l]->addr );
+			return isBreakpointAtAddr( asmEntry[l]->addr, asmEntry[l]->rom );
 		}
 	}
 	return -1;
@@ -5474,7 +5495,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 
 	if ( line < asmEntry.size() )
 	{
-		int addr;
+		int addr, romAddr;
 
 		if ( selAddrValue < 0 )
 		{
@@ -5488,6 +5509,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 
 			enableRunToCursor = (selAddrValue == asmEntry[line]->addr);
 		}
+		romAddr = GetNesFileAddress(addr);
 
 		if ( enableRunToCursor )
 		{
@@ -5503,7 +5525,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 		//act->setShortcut( QKeySequence(tr("Ctrl+F10")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuGoTo(void)) );
 
-		if ( isBreakpointAtAddr( addr ) >= 0 )
+		if ( isBreakpointAtAddr( addr, romAddr ) >= 0 )
 		{
 			act = new QAction(tr("Edit &Breakpoint"), &menu);
 		}

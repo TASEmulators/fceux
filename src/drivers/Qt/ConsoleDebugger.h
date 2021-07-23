@@ -145,7 +145,7 @@ class QAsmView : public QWidget
 		void setPC_placement( int mode, int ofs = 0 );
 		void setBreakpointAtSelectedLine(void);
 		int  isBreakpointAtLine( int line );
-		int  isBreakpointAtAddr( int addr );
+		int  isBreakpointAtAddr( int cpuAddr, int romAddr );
 		void determineLineBreakpoints(void);
 		void setFont( const QFont &font );
 		void pushAddrHist(void);
