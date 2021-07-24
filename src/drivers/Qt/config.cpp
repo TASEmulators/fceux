@@ -590,6 +590,8 @@ InitConfig()
 	config->addOption("SDL.AsmSyntaxColorPC", "");
 	config->addOption("SDL.AsmShowByteCodes", 0);
 	config->addOption("SDL.AsmShowRomOffsets", 0);
+	config->addOption("SDL.DebuggerShowSymNames", 1);
+	config->addOption("SDL.DebuggerShowRegNames", 1);
 
 	// Code Data Logger Options
 	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);

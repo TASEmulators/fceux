@@ -666,21 +666,25 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	symMenu->addSeparator();
 
 	// Symbols -> Symbolic Debug
+	g_config->getOption( "SDL.DebuggerShowSymNames", &opt );
+
 	act = new QAction(tr("&Symbolic Debug"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("&Symbolic Debug"));
 	act->setCheckable(true);
-	act->setChecked(true);
+	act->setChecked(opt);
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(symbolDebugEnableCB(bool)) );
 
 	symMenu->addAction(act);
 
-	// Symbols -> Symbolic Debug
+	// Symbols -> Register Names
+	g_config->getOption( "SDL.DebuggerShowRegNames", &opt );
+
 	act = new QAction(tr("&Register Names"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("&Register Names"));
 	act->setCheckable(true);
-	act->setChecked(true);
+	act->setChecked(opt);
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(registerNameEnableCB(bool)) );
 
 	symMenu->addAction(act);
@@ -2316,11 +2320,15 @@ void ConsoleDebugger::displayROMoffsetCB( bool value )
 //----------------------------------------------------------------------------
 void ConsoleDebugger::symbolDebugEnableCB( bool value )
 {
+	g_config->setOption( "SDL.DebuggerShowSymNames", value );
+
 	asmView->setSymbolDebugEnable(value);
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::registerNameEnableCB( bool value )
 {
+	g_config->setOption( "SDL.DebuggerShowRegNames", value );
+
 	asmView->setRegisterNameEnable(value);
 }
 //----------------------------------------------------------------------------
@@ -4402,6 +4410,8 @@ QAsmView::QAsmView(QWidget *parent)
 
 	g_config->getOption( "SDL.AsmShowByteCodes" , &showByteCodes );
 	g_config->getOption( "SDL.AsmShowRomOffsets", &displayROMoffsets );
+	g_config->getOption( "SDL.DebuggerShowSymNames", &symbolicDebugEnable );
+	g_config->getOption( "SDL.DebuggerShowRegNames", &registerNameEnable );
 
 	calcFontData();
 
