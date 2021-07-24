@@ -52,6 +52,7 @@ class fceuCustomToolTip : public QDialog
 		fceuCustomToolTip( QWidget *parent = nullptr );
 		~fceuCustomToolTip( void );
 
+		void setHideOnMouseMove(bool);
 	protected:
 		bool eventFilter(QObject *obj, QEvent *event) override;
 		void mouseMoveEvent( QMouseEvent *event ) override;
@@ -61,6 +62,7 @@ class fceuCustomToolTip : public QDialog
 	private:
 		QWidget *w;
 		QTimer  *hideTimer;
+		bool     hideOnMouseMode;
 
 		static fceuCustomToolTip *instance;
 

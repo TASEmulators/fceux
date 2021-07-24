@@ -375,6 +375,8 @@ fceuCustomToolTip::fceuCustomToolTip( QWidget *parent )
 	setBackgroundRole( QPalette::ToolTipBase );
 	setPalette( QToolTip::palette() );
 
+	hideOnMouseMode = false;
+
 	setMouseTracking(true);
 
 	//printf("Create Tool Tip\n");
@@ -392,6 +394,11 @@ fceuCustomToolTip::~fceuCustomToolTip( void )
 	{
 		instance = 0;
 	}
+}
+//---------------------------------------------------------------------------
+void fceuCustomToolTip::setHideOnMouseMove(bool val)
+{
+	hideOnMouseMode = val;
 }
 //---------------------------------------------------------------------------
 void fceuCustomToolTip::hideTip(void)
@@ -455,9 +462,18 @@ bool fceuCustomToolTip::eventFilter( QObject *obj, QEvent *event)
 			hideTipImmediately();
 			break;
 
+		case QEvent::KeyPress:
+		case QEvent::KeyRelease:
+			hideTipImmediately();
+			break;
+
 		case QEvent::MouseMove:
 		{
-			if ( (obj == w) && !rect().isNull() && 
+			if ( hideOnMouseMode )
+			{
+				hideTip();
+			}
+			else if ( (obj == w) && !rect().isNull() && 
 					!rect().contains(static_cast<QMouseEvent*>(event)->pos()))
 			{
 				hideTip();

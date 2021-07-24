@@ -489,21 +489,25 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	subMenu->addAction(act);
 
 	// View -> Show Byte Codes
+	g_config->getOption( "SDL.AsmShowByteCodes", &opt );
+
 	act = new QAction(tr("Show &Byte Codes"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Show &Byte Codes"));
 	act->setCheckable(true);
-	act->setChecked(false);
+	act->setChecked(opt);
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(displayByteCodesCB(bool)) );
 
 	viewMenu->addAction(act);
 
 	// View -> Display ROM Offsets
+	g_config->getOption( "SDL.AsmShowRomOffsets", &opt );
+
 	act = new QAction(tr("Show ROM &Offsets"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Show ROM &Offsets"));
 	act->setCheckable(true);
-	act->setChecked(false);
+	act->setChecked(opt);
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(displayROMoffsetCB(bool)) );
 
 	viewMenu->addAction(act);
@@ -2298,11 +2302,15 @@ void ConsoleDebugger::instructionsThresChanged(const QString &txt)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::displayByteCodesCB( bool value )
 {
+	g_config->setOption( "SDL.AsmShowByteCodes", value );
+
 	asmView->setDisplayByteCodes(value);
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::displayROMoffsetCB( bool value )
 {
+	g_config->setOption( "SDL.AsmShowRomOffsets", value );
+
 	asmView->setDisplayROMoffsets(value);
 }
 //----------------------------------------------------------------------------
@@ -3107,7 +3115,7 @@ int  QAsmView::getAsmLineFromAddr(int addr)
 			if ( asmEntry[line]->addr < addr )
 			{
 				nextLine = line + 1;
-				if ( asmEntry[line]->addr > nextLine )
+				if ( asmEntry[line]->addr > asmEntry[nextLine]->addr )
 				{
 					break;
 				}
@@ -3116,7 +3124,7 @@ int  QAsmView::getAsmLineFromAddr(int addr)
 			else if ( asmEntry[line]->addr > addr )
 			{
 				nextLine = line - 1;
-				if ( asmEntry[line]->addr < nextLine )
+				if ( asmEntry[line]->addr < asmEntry[nextLine]->addr )
 				{
 					break;
 				}
@@ -4317,6 +4325,9 @@ QAsmView::QAsmView(QWidget *parent)
 	QColor c;
 	std::string fontString;
 
+	viewWidth  = 512;
+	viewHeight = 512;
+
 	useDarkTheme = false;
 
 	pcBgColor.setRgb( 255, 255, 0 );
@@ -4378,14 +4389,19 @@ QAsmView::QAsmView(QWidget *parent)
 		pal.setColor(QPalette::WindowText, fg );
 	}
 
-	this->parent = (ConsoleDebugger*)parent;
+	//this->parent = (ConsoleDebugger*)parent;
+	this->parent = qobject_cast <ConsoleDebugger*>( parent );
 	this->setPalette(pal);
 	this->setMouseTracking(true);
 
+	isPopUp = false;
 	showByteCodes = false;
 	displayROMoffsets = false;
 	symbolicDebugEnable = true;
 	registerNameEnable = true;
+
+	g_config->getOption( "SDL.AsmShowByteCodes" , &showByteCodes );
+	g_config->getOption( "SDL.AsmShowRomOffsets", &displayROMoffsets );
 
 	calcFontData();
 
@@ -4437,6 +4453,11 @@ QAsmView::QAsmView(QWidget *parent)
 QAsmView::~QAsmView(void)
 {
 	asmClear();
+}
+//----------------------------------------------------------------------------
+void QAsmView::setIsPopUp(bool val)
+{
+	isPopUp = val;
 }
 //----------------------------------------------------------------------------
 void QAsmView::asmClear(void)
@@ -4636,7 +4657,11 @@ void QAsmView::setSelAddrToLine( int line )
 		selAddrValue = addr;
 		sprintf( selAddrText, "%04X", addr );
 
-		parent->setBookmarkSelectedAddress( addr );
+
+		if ( parent )
+		{
+			parent->setBookmarkSelectedAddress( addr );
+		}
 
 		//printf("Selected ADDR:  $%04X   '%s'  '%s'\n", addr, selAddrText, asmEntry[line]->text.c_str() );
 
@@ -4858,7 +4883,10 @@ bool QAsmView::event(QEvent *event)
 					asmEntry[line]->addr, asmEntry[line]->bank, asmEntry[line]->rom );
 			}
 
-			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
+			static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent, new asmLookAheadPopup(asmEntry[line]->addr, this) ));
+			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
+			QToolTip::hideText();
+			event->ignore();
 		}
 		else if ( showOperandAddrDesc )
 		{
@@ -4880,7 +4908,10 @@ bool QAsmView::event(QEvent *event)
 					addr, bank, romOfs );
 			}
 
-			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
+			static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent, new asmLookAheadPopup(addr, this) ));
+			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
+			QToolTip::hideText();
+			event->ignore();
 		}
 		else
 		{
@@ -4902,11 +4933,16 @@ void QAsmView::resizeEvent(QResizeEvent *event)
 	viewWidth  = event->size().width();
 	viewHeight = event->size().height();
 
-	//printf("QAsmView Resize: %ix%i\n", viewWidth, viewHeight );
+	//printf("QAsmView Resize: %ix%i  $%04X\n", viewWidth, viewHeight );
 
 	viewLines = (viewHeight / pxLineSpacing) + 1;
 
-	maxLineOffset = 0; // mb.numLines() - viewLines + 1;
+	maxLineOffset = asmEntry.size() - viewLines + 1;
+
+	if ( maxLineOffset < 0 )
+	{
+		maxLineOffset = 0;
+	}
 
 	if ( viewWidth >= pxLineWidth )
 	{
@@ -4976,22 +5012,34 @@ void QAsmView::keyPressEvent(QKeyEvent *event)
 
 		if ( event->key() == Qt::Key_B )
 		{
-			parent->asmViewCtxMenuAddBP();
+			if ( parent )
+			{
+				parent->asmViewCtxMenuAddBP();
+			}
 			event->accept();
 		}
 		else if ( event->key() == Qt::Key_S )
 		{
-			parent->asmViewCtxMenuAddSym();
+			if ( parent )
+			{
+				parent->asmViewCtxMenuAddSym();
+			}
 			event->accept();
 		}
 		else if ( event->key() == Qt::Key_M )
 		{
-			parent->asmViewCtxMenuAddBM();
+			if ( parent )
+			{
+				parent->asmViewCtxMenuAddBM();
+			}
 			event->accept();
 		}
 		else if ( event->key() == Qt::Key_H )
 		{
-			parent->asmViewCtxMenuOpenHexEdit();
+			if ( parent )
+			{
+				parent->asmViewCtxMenuOpenHexEdit();
+			}
 			event->accept();
 		}
 	}
@@ -5422,7 +5470,10 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 
 		if ( addr >= 0 )
 		{
-			parent->setBookmarkSelectedAddress( addr );
+			if ( parent )
+			{
+				parent->setBookmarkSelectedAddress( addr );
+			}
 		}
 
 		if ( selAddrText[0] != 0 )
@@ -5489,6 +5540,10 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 	bool enableRunToCursor = false;
 	char stmp[128];
 
+	if ( parent == NULL )
+	{
+		return;
+	}
 	line = lineOffset + c.y();
 
 	ctxMenuAddr = -1;
@@ -5763,6 +5818,10 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	bool lineIsPC = false;
 	QPen pen;
 
+	//if ( isPopUp )
+	//{
+	//	printf("Is PopUp\n");
+	//}
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
@@ -5792,7 +5851,14 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	{
 		lineOffset = maxLineOffset;
 	}
-	selAddr = parent->getBookmarkSelectedAddress();
+	if ( parent )
+	{
+		selAddr = parent->getBookmarkSelectedAddress();
+	}
+	else
+	{
+		selAddr = selAddrValue;
+	}
 
 	pxCharWidth2 = (pxCharWidth/2);
 	cd_boundary = (int)(2.5*pxCharWidth) - pxLineXScroll;
@@ -6383,6 +6449,68 @@ bool ppuCtrlRegDpy::event(QEvent *event)
 		return true;
 	}
 	return QWidget::event(event);
+}
+//----------------------------------------------------------------------------
+//--  PPU Register Tool Tip Popup
+//----------------------------------------------------------------------------
+asmLookAheadPopup::asmLookAheadPopup( int addr, QWidget *parent )
+	: fceuCustomToolTip( parent )
+{
+	int line;
+	QVBoxLayout *vbox, *vbox1;
+	QGridLayout *grid;
+	QScrollBar  *hbar, *vbar;
+	QFrame      *winFrame;
+
+	vbox    = new QVBoxLayout();
+	vbox1   = new QVBoxLayout();
+
+	winFrame   = new QFrame();
+	grid       = new QGridLayout();
+	asmView    = new QAsmView(this);
+	vbar       = new QScrollBar( Qt::Vertical, this );
+	hbar       = new QScrollBar( Qt::Horizontal, this );
+
+	setHideOnMouseMove(true);
+	asmView->setIsPopUp(true);
+
+	winFrame->setLayout( vbox );
+	vbox1->addWidget( winFrame );
+	winFrame->setFrameShape(QFrame::Box);
+
+	hbar->setMinimum(0);
+	hbar->setMaximum(100);
+	vbar->setMinimum(0);
+	vbar->setMaximum( 0x10000 );
+
+	asmView->setScrollBars( hbar, vbar );
+
+	grid->addWidget( asmView, 0, 0 );
+	grid->addWidget( vbar   , 0, 1 );
+	grid->addWidget( hbar   , 1, 0 );
+
+	vbox->addLayout( grid );
+
+	setLayout( vbox1 );
+
+	resize(512, 512);
+
+	fceuWrapperLock();
+	asmView->updateAssemblyView();
+	fceuWrapperUnLock();
+
+	hbar->hide();
+	vbar->hide();
+
+	line = asmView->getAsmLineFromAddr(addr);
+	asmView->gotoLine(line);
+
+	//printf("PopUp: Addr: $%04X   %i\n", addr, line );
+}
+//----------------------------------------------------------------------------
+asmLookAheadPopup::~asmLookAheadPopup( void )
+{
+	//printf("Popup Deleted\n");
 }
 //----------------------------------------------------------------------------
 //--  PPU Register Tool Tip Popup

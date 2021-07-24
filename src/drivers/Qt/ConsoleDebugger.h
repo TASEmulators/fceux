@@ -148,6 +148,7 @@ class QAsmView : public QWidget
 		int  isBreakpointAtAddr( int cpuAddr, int romAddr );
 		void determineLineBreakpoints(void);
 		void setFont( const QFont &font );
+		void setIsPopUp(bool value);
 		void pushAddrHist(void);
 		void navHistBack(void);
 		void navHistForward(void);
@@ -246,6 +247,7 @@ class QAsmView : public QWidget
 		bool  registerNameEnable;
 		bool  mouseLeftBtnDown;
 		bool  showByteCodes;
+		bool  isPopUp;
 
 };
 
@@ -277,6 +279,17 @@ class DebuggerStackDisplay : public QPlainTextEdit
 		void sel2BytesPerLine(void);
 		void sel3BytesPerLine(void);
 		void sel4BytesPerLine(void);
+};
+
+class asmLookAheadPopup : public fceuCustomToolTip
+{
+   Q_OBJECT
+	public:
+	   asmLookAheadPopup( int line, QWidget *parent = nullptr );
+	   ~asmLookAheadPopup(void);
+
+		QAsmView    *asmView;
+	private:
 };
 
 class ppuRegPopup : public fceuCustomToolTip
