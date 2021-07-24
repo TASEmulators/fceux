@@ -3115,7 +3115,7 @@ int  QAsmView::getAsmLineFromAddr(int addr)
 			if ( asmEntry[line]->addr < addr )
 			{
 				nextLine = line + 1;
-				if ( asmEntry[line]->addr > asmEntry[nextLine]->addr )
+				if ( asmEntry[nextLine]->addr > addr )
 				{
 					break;
 				}
@@ -3124,7 +3124,7 @@ int  QAsmView::getAsmLineFromAddr(int addr)
 			else if ( asmEntry[line]->addr > addr )
 			{
 				nextLine = line - 1;
-				if ( asmEntry[line]->addr < asmEntry[nextLine]->addr )
+				if ( asmEntry[nextLine]->addr < addr )
 				{
 					break;
 				}
@@ -4883,10 +4883,10 @@ bool QAsmView::event(QEvent *event)
 					asmEntry[line]->addr, asmEntry[line]->bank, asmEntry[line]->rom );
 			}
 
-			static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent, new asmLookAheadPopup(asmEntry[line]->addr, this) ));
-			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
-			QToolTip::hideText();
-			event->ignore();
+			//static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent, new asmLookAheadPopup(asmEntry[line]->addr, this) ));
+			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
+			//QToolTip::hideText();
+			//event->ignore();
 		}
 		else if ( showOperandAddrDesc )
 		{
@@ -5705,11 +5705,14 @@ void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
 	// Opcode Area
 	painter->setPen( opcodeColor );
 
-	while ( (i<operandLinePos) && (txt[i] != 0) )
+	if ( txt[i] != ' ' ) // Skip over undefined opcodes
 	{
-		c[0] = txt[i];
-		painter->drawText( x, y, tr(c) );
-		i++; x += pxCharWidth;
+		while ( (i<operandLinePos) && (txt[i] != 0) )
+		{
+			c[0] = txt[i];
+			painter->drawText( x, y, tr(c) );
+			i++; x += pxCharWidth;
+		}
 	}
 
 	// Operand Area
