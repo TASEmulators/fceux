@@ -11,10 +11,12 @@
 #include <QCheckBox>
 #include <QGroupBox>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QFont>
 #include <QLabel>
 #include <QTimer>
 #include <QFrame>
+#include <QSpinBox>
 #include <QGroupBox>
 #include <QTreeView>
 #include <QTreeWidget>
@@ -369,6 +371,41 @@ class DebuggerTabWidget : public QTabWidget
 		int  _col;
 };
 
+class DebugBreakOnDialog : public QDialog
+{
+   Q_OBJECT
+
+	public:
+		DebugBreakOnDialog(int type, QWidget *parent = 0);
+		~DebugBreakOnDialog(void);
+
+		unsigned long long int getThreshold(void){ return threshold; }
+
+	protected:
+		void closeEvent(QCloseEvent *event) override;
+		void updateLabel(void);
+
+		int           type;
+		QRadioButton *oneShotBtn;
+		QRadioButton *contBtn;
+		QRadioButton *absBtn;
+		QRadioButton *relBtn;
+		QLineEdit    *countEntryBox;
+		QLabel       *currLbl;
+		QLabel       *descLbl;
+		int           prevPauseState;
+		long long int  totalCount;
+		long long int  deltaCount;
+		unsigned long long int threshold;
+
+	public slots:
+		void closeWindow(void);
+		void setThreshold( unsigned long long int val );
+		void setThreshold( const QString &text );
+		void refModeChanged(bool);
+
+};
+
 class ConsoleDebugger : public QDialog
 {
    Q_OBJECT
@@ -446,6 +483,9 @@ class ConsoleDebugger : public QDialog
 		QCheckBox *iRed_cbox;
 		QCheckBox *iGrn_cbox;
 		QCheckBox *iBlu_cbox;
+
+		QAction   *brkOnCycleExcAct;
+		QAction   *brkOnInstrExcAct;
 
 		DebuggerTabWidget *tabView[2][4];
 		QWidget   *asmViewContainerWidget;
@@ -535,8 +575,8 @@ class ConsoleDebugger : public QDialog
 		void breakOnBadOpcodeCB(bool value);
 		void breakOnNewCodeCB(bool value);
 		void breakOnNewDataCB(bool value);
-		void breakOnCyclesCB( int value );
-		void breakOnInstructionsCB( int value );
+		void breakOnCyclesCB( bool value );
+		void breakOnInstructionsCB( bool value );
 		void bpItemClicked( QTreeWidgetItem *item, int column);
 		void bmItemClicked( QTreeWidgetItem *item, int column);
 		void bmItemDoubleClicked( QTreeWidgetItem *item, int column);

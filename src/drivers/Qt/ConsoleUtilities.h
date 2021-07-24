@@ -23,27 +23,27 @@ int fceuLoadConfigColor( const char *confName, QColor *color );
 class fceuDecIntValidtor : public QValidator
 { 
    public:
-   	fceuDecIntValidtor( int min, int max, QObject *parent);
+   	fceuDecIntValidtor( long long int min, long long int max, QObject *parent);
 
 		QValidator::State validate(QString &input, int &pos) const;
 
-		void  setMinMax( int min, int max );
+		void  setMinMax( long long int min, long long int max );
 	private:
-		int  min;
-		int  max;
+		long long int  min;
+		long long int  max;
 };
 
 class fceuHexIntValidtor : public QValidator
 { 
 	public:
-		fceuHexIntValidtor( int min, int max, QObject *parent);
+		fceuHexIntValidtor( long long int min, long long int max, QObject *parent);
 
 		QValidator::State validate(QString &input, int &pos) const;
 
-		void  setMinMax( int min, int max );
+		void  setMinMax( long long int min, long long int max );
 	private:
-		int  min;
-		int  max;
+		long long int  min;
+		long long int  max;
 };
 
 class fceuCustomToolTip : public QDialog

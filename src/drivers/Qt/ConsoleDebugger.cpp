@@ -89,6 +89,10 @@ static void DeleteBreak(int sel);
 static bool waitingAtBp = false;
 static bool bpDebugEnable = true;
 static int  lastBpIdx   = 0;
+static bool breakOnCycleOneShot = 0;
+static bool breakOnInstrOneShot = 0;
+static int  breakOnCycleMode    = 0;
+static int  breakOnInstrMode    = 0;
 //----------------------------------------------------------------------------
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	: QDialog( parent, Qt::Window )
@@ -581,35 +585,59 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	debugMenu->addSeparator();
 
-	// Debug -> Break on Bad Opcodes
-	act = new QAction(tr("Break on Bad &Opcodes"), this);
+	subMenu = debugMenu->addMenu(tr("&Break On..."));
+
+	// Debug -> Break on -> Bad Opcodes
+	act = new QAction(tr("Bad &Opcodes"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("Break on Bad Opcodes"));
+	act->setStatusTip(tr("Bad Opcodes"));
 	act->setCheckable(true);
 	act->setChecked( FCEUI_Debugger().badopbreak );
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnBadOpcodeCB(bool)) );
 
-	debugMenu->addAction(act);
+	subMenu->addAction(act);
 
-	// Debug -> Break on Unlogged Code
-	act = new QAction(tr("Break on Unlogged &Code"), this);
+	// Debug -> Break on -> Unlogged Code
+	act = new QAction(tr("Unlogged &Code"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("Break on Unlogged Code"));
+	act->setStatusTip(tr("Unlogged Code"));
 	act->setCheckable(true);
 	act->setChecked( break_on_unlogged_code );
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnNewCodeCB(bool)) );
 
-	debugMenu->addAction(act);
+	subMenu->addAction(act);
 
-	// Debug -> Break on Unlogged Data
-	act = new QAction(tr("Break on Unlogged &Data"), this);
+	// Debug -> Break on -> Unlogged Data
+	act = new QAction(tr("Unlogged &Data"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("Break on Unlogged Data"));
+	act->setStatusTip(tr("Unlogged Data"));
 	act->setCheckable(true);
 	act->setChecked( break_on_unlogged_data );
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnNewDataCB(bool)) );
 
-	debugMenu->addAction(act);
+	subMenu->addAction(act);
+
+	// Debug -> Break on -> Cycle Count Exceeded
+	act = new QAction(tr("&Cycle Count Exceeded"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("CPU Cycle Count Exceeded"));
+	act->setCheckable(true);
+	act->setChecked( break_on_cycles );
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnCyclesCB(bool)) );
+
+	subMenu->addAction(act);
+
+	// Debug -> Break on -> Instruction Count Exceeded
+	act = new QAction(tr("&Instruction Count Exceeded"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("CPU Instruction Count Exceeded"));
+	act->setCheckable(true);
+	act->setChecked( break_on_instructions );
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(breakOnInstructionsCB(bool)) );
+
+	subMenu->addAction(act);
+
+	debugMenu->addSeparator();
 
 	// Debug -> Reset Counters
 	act = new QAction(tr("Reset &Counters"), this);
@@ -2244,11 +2272,16 @@ void ConsoleDebugger::breakOnNewDataCB(bool value)
 	break_on_unlogged_data = value;
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::breakOnCyclesCB( int value )
+void ConsoleDebugger::breakOnCyclesCB( bool value )
 {
 	std::string s;
 
-	break_on_cycles = (value != Qt::Unchecked);
+	if ( value )
+	{
+		DebugBreakOnDialog *win = new DebugBreakOnDialog(0, this);
+		win->exec();
+	}
+	break_on_cycles = value;
 
 	//s = cpuCycExdVal->text().toStdString();
 
@@ -2274,11 +2307,16 @@ void ConsoleDebugger::cpuCycleThresChanged(const QString &txt)
 	}
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::breakOnInstructionsCB( int value )
+void ConsoleDebugger::breakOnInstructionsCB( bool value )
 {
 	std::string s;
 
-	break_on_instructions = (value != Qt::Unchecked);
+	if ( value )
+	{
+		DebugBreakOnDialog *win = new DebugBreakOnDialog(1, this);
+		win->exec();
+	}
+	break_on_instructions = value;
 
 	//s = instrExdVal->text().toStdString();
 
@@ -6907,5 +6945,268 @@ void DebuggerTabBar::contextMenuEvent(QContextMenuEvent *event)
 	{
 		p->buildContextMenu(event);
 	}
+}
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//---  Break On Count Setup Dialog
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+DebugBreakOnDialog::DebugBreakOnDialog(int type, QWidget *parent )
+	: QDialog(parent)
+{
+	
+	QVBoxLayout *mainLayout, *vbox;
+	QHBoxLayout *hbox;
+	QGroupBox   *gbox;
+	QGridLayout *grid;
+	fceuDecIntValidtor *validator;
+	int  refMode;
+	bool oneShotMode;
+	char stmp[128];
+	QPushButton *btn;
+	
+	fceuWrapperLock();
+
+	prevPauseState = FCEUI_EmulationPaused();
+
+	if (prevPauseState == 0)
+	{
+		FCEUI_ToggleEmulationPause();
+	}
+	fceuWrapperUnLock();
+
+	currLbl = new QLabel();
+
+	this->type = type;
+
+	if ( type )
+	{
+		totalCount = total_instructions;
+		deltaCount = delta_instructions;
+
+		setWindowTitle( tr("Break on CPU Instruction Exceedance") );
+		oneShotMode = breakOnInstrOneShot;
+		refMode     = breakOnInstrMode;
+		threshold   = break_instructions_limit;
+
+		if (totalCount < 0)	// sanity check
+		{
+			ResetDebugStatisticsCounters();
+			totalCount = 0;
+		}
+		if (deltaCount < 0)	// sanity check
+		{
+			ResetDebugStatisticsCounters();
+			deltaCount = 0;
+		}
+		sprintf(stmp, "Current Instruction Count: %10llu  (+%llu)", totalCount, deltaCount);
+		currLbl->setText( tr(stmp) );
+
+	}
+	else
+	{
+		totalCount = timestampbase + (uint64)timestamp - total_cycles_base;
+		deltaCount = timestampbase + (uint64)timestamp - delta_cycles_base;
+
+		setWindowTitle( tr("Break on CPU Cycle Exceedance") );
+		oneShotMode = breakOnCycleOneShot;
+		refMode     = breakOnCycleMode;
+		threshold   = break_cycles_limit;
+
+		sprintf(stmp, "Current Cycle Count: %10llu  (+%llu)", totalCount, deltaCount);
+		currLbl->setText( tr(stmp) );
+	}
+
+	mainLayout = new QVBoxLayout();
+	hbox       = new QHBoxLayout();
+
+	mainLayout->addLayout(hbox);
+
+	gbox       = new QGroupBox( tr("Mode") );
+	vbox       = new QVBoxLayout();
+	oneShotBtn = new QRadioButton( tr("One-Shot") );
+	contBtn    = new QRadioButton( tr("Continuous") );
+
+	oneShotBtn->setChecked(  oneShotMode );
+	   contBtn->setChecked( !oneShotMode );
+
+	hbox->addWidget(gbox);
+	gbox->setLayout(vbox);
+	vbox->addWidget( oneShotBtn );
+	vbox->addWidget( contBtn    );
+
+	gbox       = new QGroupBox( tr("Reference") );
+	vbox       = new QVBoxLayout();
+	absBtn     = new QRadioButton( tr("Absolute") );
+	relBtn     = new QRadioButton( tr("Relative") );
+
+	absBtn->setChecked( refMode == 0 );
+	relBtn->setChecked( refMode == 1 );
+
+	hbox->addWidget(gbox);
+	gbox->setLayout(vbox);
+	vbox->addWidget( absBtn );
+	vbox->addWidget( relBtn );
+
+	mainLayout->addWidget(currLbl);
+
+	hbox       = new QHBoxLayout();
+	mainLayout->addLayout(hbox);
+
+	validator = new fceuDecIntValidtor( 0, 0x7FFFFFFFFFFFFFFFLL, this);
+
+	countEntryBox = new QLineEdit();
+	countEntryBox->setValidator( validator );
+	countEntryBox->setAlignment(Qt::AlignCenter);
+
+	hbox->addWidget( new QLabel( tr("Threshold:") ), 1 );
+	hbox->addWidget( countEntryBox, 100 );
+
+	grid = new QGridLayout();
+	mainLayout->addLayout( grid );
+
+	for (int row=0; row<2; row++)
+	{
+		int b = row == 0 ? 1 : -1;
+
+		for (int col=0; col<5; col++)
+		{
+			btn = new QPushButton();
+
+			grid->addWidget( btn, row, col );
+
+			sprintf( stmp, "%+i", b);
+
+			b = b * 10;
+
+			btn->setText( tr(stmp) );
+		}
+	}
+
+	descLbl = new QLabel();
+	mainLayout->addWidget( descLbl );
+
+	setLayout( mainLayout );
+
+	setThreshold( threshold );
+
+	connect( countEntryBox, SIGNAL(textChanged(const QString &)), this, SLOT(setThreshold(const QString &)) );
+
+	connect( absBtn, SIGNAL(clicked(bool)), this, SLOT(refModeChanged(bool)) );
+	connect( relBtn, SIGNAL(clicked(bool)), this, SLOT(refModeChanged(bool)) );
+}
+//----------------------------------------------------------------------------
+DebugBreakOnDialog::~DebugBreakOnDialog(void)
+{
+	FCEUI_SetEmulationPaused(prevPauseState);
+}
+//----------------------------------------------------------------------------
+void DebugBreakOnDialog::closeEvent(QCloseEvent *event)
+{
+	//printf("Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void DebugBreakOnDialog::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void DebugBreakOnDialog::setThreshold( unsigned long long int val )
+{
+	char stmp[64];
+
+	threshold = val;
+
+	sprintf( stmp, "%llu", threshold );
+
+	countEntryBox->setText( tr(stmp) );
+
+	updateLabel();
+}
+//----------------------------------------------------------------------------
+void DebugBreakOnDialog::setThreshold( const QString &text )
+{
+	threshold = strtoull( text.toStdString().c_str(), NULL, 10 );
+
+	updateLabel();
+}
+//----------------------------------------------------------------------------
+void DebugBreakOnDialog::refModeChanged(bool val)
+{
+	updateLabel();
+}
+//----------------------------------------------------------------------------
+void DebugBreakOnDialog::updateLabel(void)
+{
+	long long delta;
+	char stmp[256];
+
+	stmp[0] = 0;
+
+	if ( type )
+	{
+		if ( absBtn->isChecked() )
+		{
+			delta = threshold - total_instructions;
+
+			if ( delta > 0 )
+			{
+				sprintf( stmp, "Will break in %lli CPU Instruction%s", delta, (delta > 1) ? "s":"" );
+			}
+			else
+			{
+				sprintf( stmp, "Will break immediately, CPU instruction count already exceeds value.");
+			}
+		}
+		else
+		{
+			delta = threshold - delta_instructions;
+
+			if ( delta > 0 )
+			{
+				sprintf( stmp, "Will break in %lli CPU Instruction%s", delta, (delta > 1) ? "s":"" );
+			}
+			else
+			{
+				sprintf( stmp, "Will break immediately, CPU instruction count already exceeds value.");
+			}
+		}
+	}
+	else
+	{
+		if ( absBtn->isChecked() )
+		{
+			delta = threshold - totalCount;
+
+			if ( delta > 0 )
+			{
+				sprintf( stmp, "Will break in %lli CPU cycle%s", delta, (delta > 1) ? "s":"" );
+			}
+			else
+			{
+				sprintf( stmp, "Will break immediately, CPU cycle count already exceeds value.");
+			}
+		}
+		else
+		{
+			delta = threshold - deltaCount;
+
+			if ( delta > 0 )
+			{
+				sprintf( stmp, "Will break in %lli CPU cycle%s", delta, (delta > 1) ? "s":"" );
+			}
+			else
+			{
+				sprintf( stmp, "Will break immediately, CPU cycle count already exceeds value.");
+			}
+		}
+	}
+	descLbl->setText( tr(stmp) );
+
 }
 //----------------------------------------------------------------------------
