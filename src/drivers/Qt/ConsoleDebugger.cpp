@@ -715,7 +715,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	toolBar->addSeparator();
 
 	// Debug -> Run
-	act = new QAction(tr("&Run"), this);
+	act = new QAction(tr("&Run (F5)"), this);
 	//act->setShortcut(QKeySequence( tr("F5") ) );
 	act->setStatusTip(tr("Run"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
@@ -725,7 +725,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	toolBar->addAction(act);
 
 	// Debug -> Step Into
-	act = new QAction(tr("Step &Into"), this);
+	act = new QAction(tr("Step &Into (F11)"), this);
 	//act->setShortcut(QKeySequence( tr("F11") ) );
 	act->setStatusTip(tr("Step Into"));
 	act->setIcon( QIcon(":icons/StepInto.png") );
@@ -734,7 +734,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	toolBar->addAction(act);
 
 	// Debug -> Step Out
-	act = new QAction(tr("&Step Out"), this);
+	act = new QAction(tr("&Step Out (Shift+F11)"), this);
 	//act->setShortcut(QKeySequence( tr("Shift+F11") ) );
 	act->setStatusTip(tr("Step Out"));
 	act->setIcon( QIcon(":icons/StepOut.png") );
@@ -743,7 +743,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	toolBar->addAction(act);
 
 	// Debug -> Step Over
-	act = new QAction(tr("Step &Over"), this);
+	act = new QAction(tr("Step &Over (F10)"), this);
 	//act->setShortcut(QKeySequence( tr("F10") ) );
 	act->setStatusTip(tr("Step Over"));
 	act->setIcon( QIcon(":icons/StepOver.png") );
@@ -754,7 +754,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	toolBar->addSeparator();
 
 	// Debug -> Run Line
-	act = new QAction(tr("Run &Line"), this);
+	act = new QAction(tr("Run &Line (F6)"), this);
 	//act->setShortcut(QKeySequence( tr("F6") ) );
 	act->setStatusTip(tr("Run Line"));
 	act->setIcon( QIcon(":icons/RunPpuScanline.png") );
@@ -763,7 +763,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	toolBar->addAction(act);
 
 	// Debug -> Run 128 Lines
-	act = new QAction(tr("Run &128 Lines"), this);
+	act = new QAction(tr("Run &128 Lines (F7)"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Run 128 Lines"));
 	act->setIcon( QIcon(":icons/RunPpuFrame.png") );
