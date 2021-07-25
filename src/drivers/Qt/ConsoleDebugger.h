@@ -384,6 +384,7 @@ class DebugBreakOnDialog : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *event) override;
 		void updateLabel(void);
+		void updateCurrent(void);
 
 		int           type;
 		QRadioButton *oneShotBtn;
@@ -399,11 +400,14 @@ class DebugBreakOnDialog : public QDialog
 		unsigned long long int threshold;
 
 	public slots:
-		void closeWindow(void);
+		void closeWindow(int ret);
 		void setThreshold( unsigned long long int val );
 		void setThreshold( const QString &text );
+		void incrThreshold(int);
 		void refModeChanged(bool);
-
+		void syncToCurrent(void);
+		void resetCounters(void);
+		void resetDeltas(void);
 };
 
 class ConsoleDebugger : public QDialog
