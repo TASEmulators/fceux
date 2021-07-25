@@ -626,7 +626,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	subMenu->addAction(act);
 
 	// Debug -> Break on -> Cycle Count Exceeded
-	brkOnCycleExcAct = act = new QAction(tr("&Cycle Count Exceeded"), this);
+	brkOnCycleExcAct = act = new QAction(tr("C&ycle Count Exceeded"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("CPU Cycle Count Exceeded"));
 	act->setCheckable(true);
