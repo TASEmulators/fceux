@@ -592,6 +592,9 @@ InitConfig()
 	config->addOption("SDL.AsmShowRomOffsets", 0);
 	config->addOption("SDL.DebuggerShowSymNames", 1);
 	config->addOption("SDL.DebuggerShowRegNames", 1);
+	config->addOption("SDL.DebuggerBreakOnBadOpcodes", 0);
+	config->addOption("SDL.DebuggerBreakOnUnloggedCode", 0);
+	config->addOption("SDL.DebuggerBreakOnUnloggedData", 0);
 
 	// Code Data Logger Options
 	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);

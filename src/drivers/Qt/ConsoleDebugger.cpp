@@ -596,6 +596,8 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	subMenu = debugMenu->addMenu(tr("&Break On..."));
 
 	// Debug -> Break on -> Bad Opcodes
+	g_config->getOption("SDL.DebuggerBreakOnBadOpcodes", &FCEUI_Debugger().badopbreak );
+
 	act = new QAction(tr("Bad &Opcodes"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Bad Opcodes"));
@@ -606,6 +608,8 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	subMenu->addAction(act);
 
 	// Debug -> Break on -> Unlogged Code
+	g_config->getOption("SDL.DebuggerBreakOnUnloggedCode", &break_on_unlogged_code );
+
 	act = new QAction(tr("Unlogged &Code"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Unlogged Code"));
@@ -616,6 +620,8 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	subMenu->addAction(act);
 
 	// Debug -> Break on -> Unlogged Data
+	g_config->getOption("SDL.DebuggerBreakOnUnloggedData", &break_on_unlogged_data );
+
 	act = new QAction(tr("Unlogged &Data"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Unlogged Data"));
@@ -2266,18 +2272,24 @@ void ConsoleDebugger::breakOnBadOpcodeCB(bool value)
 {
 	//printf("Value:%i\n", value);
 	FCEUI_Debugger().badopbreak = value;
+
+	g_config->setOption("SDL.DebuggerBreakOnBadOpcodes", value );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakOnNewCodeCB(bool value)
 {
 	//printf("Code Value:%i\n", value);
 	break_on_unlogged_code = value;
+
+	g_config->setOption("SDL.DebuggerBreakOnUnloggedCode", value );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakOnNewDataCB(bool value)
 {
 	//printf("Data Value:%i\n", value);
 	break_on_unlogged_data = value;
+
+	g_config->setOption("SDL.DebuggerBreakOnUnloggedData", value );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::breakOnCyclesCB( bool value )
