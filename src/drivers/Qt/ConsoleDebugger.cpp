@@ -204,6 +204,8 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	    labelColorAct->connectColor( &asmView->labelColor  );
 	  commentColorAct->connectColor( &asmView->commentColor);
 	       pcColorAct->connectColor( &asmView->pcBgColor);
+
+	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
 }
 //----------------------------------------------------------------------------
 ConsoleDebugger::~ConsoleDebugger(void)

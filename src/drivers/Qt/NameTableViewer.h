@@ -187,7 +187,6 @@ class ppuNameTableViewerDialog_t : public QDialog
 	protected:
 		void closeEvent(QCloseEvent *bar);
 
-		void openColorPicker( QColor *c );
 		void changeRate( int divider );
 
 		ppuNameTableView_t *ntView;
@@ -238,9 +237,6 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void menuAttrGridLinesChanged( bool checked ); 
 		void menuAttributesChanged( bool checked );
 		void menuIgnPalChanged( bool checked );
-		void setTileSelectorColor(void);
-		void setTileGridColor(void);
-		void setAttrGridColor(void);
 		void setClickFocus(void);
 		void setHoverFocus(void);
 		void changeZoom1x(void);
@@ -253,6 +249,8 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void changeRate8(void);
 		void changeRate16(void);
 		void forceRefresh(void);
+		void zoomIn(void);
+		void zoomOut(void);
 };
 
 int openNameTableViewWindow( QWidget *parent );

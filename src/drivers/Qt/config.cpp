@@ -700,6 +700,15 @@ InitConfig()
 	config->addOption("SDL.OAM_TileFocusPolicy", 0);
 	config->addOption("SDL.PPU_MaskUnused", 0);
 	config->addOption("SDL.PPU_InvertMask", 0);
+	config->addOption("SDL.NT_TileSelColor", "#FFFFFF");
+	config->addOption("SDL.NT_TileGridColor", "#FF0000");
+	config->addOption("SDL.NT_AttrGridColor", "#0000FF");
+	config->addOption("SDL.NT_DrawScrollLines", 1);
+	config->addOption("SDL.NT_DrawTileGridLines", 1);
+	config->addOption("SDL.NT_DrawAttrGridLines", 0);
+	config->addOption("SDL.NT_DrawAttrbView", 0);
+	config->addOption("SDL.NT_IgnoreHidePal", 0);
+	config->addOption("SDL.NT_RefreshFrames", 1);
 
 	// quit when a+b+select+start is pressed
 	config->addOption("4buttonexit", "SDL.ABStartSelectExit", 0);
