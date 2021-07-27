@@ -344,6 +344,9 @@ class oamPatternView_t : public QWidget
 		bool getHoverFocus(void){ return hover2Focus; };
 		void setGridVisibility(bool val);
 		bool getGridVisibility(void){ return showGrid; };
+
+		QColor gridColor;
+		QColor selTileColor;
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);
@@ -362,7 +365,6 @@ class oamPatternView_t : public QWidget
 		bool hover2Focus;
 		bool showGrid;
 
-		QColor selSpriteBoxColor;
 		QPoint selSprite;
 		int    spriteIdx;
 	private:
@@ -428,6 +430,8 @@ class oamPreview_t : public QWidget
 
 		void setIndex(int val);
 		void setMinScale(int val);
+
+		QColor  boxColor;
 	protected:
 		void paintEvent(QPaintEvent *event);
 		void resizeEvent(QResizeEvent *event);

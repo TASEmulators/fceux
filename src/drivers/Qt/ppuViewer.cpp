@@ -583,11 +583,13 @@ ppuPatternView_t::ppuPatternView_t( int patternIndexID, QWidget *parent)
 	{
 		fceuLoadConfigColor("SDL.PPU_TileSelColor1"  , &selTileColor  );
 		fceuLoadConfigColor("SDL.PPU_TileGridColor1" , &gridColor     );
+		g_config->getOption("SDL.PPU_TileShowGrid1"  , &drawTileGrid );
 	}
 	else
 	{
 		fceuLoadConfigColor("SDL.PPU_TileSelColor0"  , &selTileColor  );
 		fceuLoadConfigColor("SDL.PPU_TileGridColor0" , &gridColor     );
+		g_config->getOption("SDL.PPU_TileShowGrid0"  , &drawTileGrid );
 	}
 
 	g_config->getOption("SDL.PPU_TileFocusPolicy", &hover2Focus );
@@ -1010,7 +1012,16 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 //----------------------------------------------------
 void ppuPatternView_t::toggleTileGridLines(void)
 {
-   drawTileGrid = !drawTileGrid;
+	drawTileGrid = !drawTileGrid;
+	
+	if ( patternIndex )
+	{
+	     g_config->setOption( "SDL.PPU_TileShowGrid1", drawTileGrid );
+	}
+	else
+	{
+	     g_config->setOption( "SDL.PPU_TileShowGrid0", drawTileGrid );
+	}
 }
 //----------------------------------------------------
 void ppuPatternView_t::showTileMode(void)
@@ -2825,11 +2836,12 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	QGroupBox   *frame;
 	QLabel      *lbl;
 	QActionGroup *group;
-	QMenu *fileMenu, *viewMenu, *optMenu, *subMenu;
+	QMenu *fileMenu, *viewMenu, *colorMenu, *optMenu, *subMenu;
 	QAction *act;
 	QFont font;
 	//char stmp[64];
-	int useNativeMenuBar, pxCharWidth;
+	int useNativeMenuBar, pxCharWidth, opt;
+	ColorMenuItem *selTileColorAct, *gridColorAct, *locColorAct;
 
 	spriteViewWindow = this;
 
@@ -2869,6 +2881,26 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	connect(act, SIGNAL(triggered()), this, SLOT(toggleGridVis(void)) );
 	
 	viewMenu->addAction(act);
+
+	colorMenu = menuBar->addMenu(tr("&Color"));
+
+	// Color -> Selector
+	selTileColorAct = new ColorMenuItem(tr("&Selector"), "SDL.OAM_TileSelColor", this);
+	selTileColorAct->connectColor( &oamView->selTileColor );
+	
+	colorMenu->addAction(selTileColorAct);
+
+	// Color -> Grid
+	gridColorAct = new ColorMenuItem(tr("&Grid"), "SDL.OAM_TileGridColor", this);
+	gridColorAct->connectColor( &oamView->gridColor );
+	
+	colorMenu->addAction(gridColorAct);
+
+	// Color -> Locator
+	locColorAct = new ColorMenuItem(tr("&Locator Box"), "SDL.OAM_LocatorColor", this);
+	locColorAct->connectColor( &preView->boxColor );
+	
+	colorMenu->addAction(locColorAct);
 
 	// View -> Show Preview
 	//act = new QAction(tr("Show &Preview"), this);
@@ -2947,6 +2979,8 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	useSprRam = new QRadioButton( tr("Sprite RAM") );
 	useCpuPag = new QRadioButton( tr("CPU Page #") );
 	cpuPagIdx = new QSpinBox(this);
+
+	g_config->getOption("SDL.PPU_ViewScanLine", &PPUViewScanline);
 
 	scanLineEdit = new QSpinBox(this);
 	scanLineEdit->setRange( 0, 255 );
@@ -3087,6 +3121,11 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	resize( minimumSizeHint() );
 
 	restoreGeometry(settings.value("spriteViewer/geometry").toByteArray());
+
+	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
+
+	g_config->getOption("SDL.OAM_ShowPosHex", &opt);
+	showPosHex->setChecked( opt );
 }
 //----------------------------------------------------
 spriteViewerDialog_t::~spriteViewerDialog_t(void)
@@ -3095,6 +3134,7 @@ spriteViewerDialog_t::~spriteViewerDialog_t(void)
 	{
 		spriteViewWindow = NULL;
 	}
+	g_config->setOption("SDL.OAM_ShowPosHex", showPosHex->isChecked() );
 }
 //----------------------------------------------------
 void spriteViewerDialog_t::closeEvent(QCloseEvent *event)
@@ -3135,6 +3175,7 @@ void spriteViewerDialog_t::scanLineChanged(int value)
 {
 	PPUViewScanline = value;
 	//printf("ScanLine: %i\n", PPUViewScanline );
+	g_config->setOption("SDL.PPU_ViewScanLine", PPUViewScanline);
 }
 //----------------------------------------------------
 void spriteViewerDialog_t::periodicUpdate(void)
@@ -3202,14 +3243,17 @@ oamPatternView_t::oamPatternView_t( QWidget *parent )
 	hover2Focus  = false;
 	showGrid = false;
 
-	//selTileColor.setRgb(255,255,255);
-	//gridColor.setRgb(128,128,128);
-	selSpriteBoxColor.setRgb(255,0,0);
+	selTileColor.setRgb(255,255,255);
+	gridColor.setRgb(128,128,128);
 	
 	selSprite.setX(0);
 	selSprite.setY(0);
 	spriteIdx = 0;
 
+	fceuLoadConfigColor("SDL.OAM_TileSelColor"  , &selTileColor  );
+	fceuLoadConfigColor("SDL.OAM_TileGridColor" , &gridColor  );
+
+	g_config->getOption("SDL.OAM_TileShowGrid", &showGrid);
 	g_config->getOption("SDL.OAM_TileFocusPolicy", &hover2Focus );
 }
 //----------------------------------------------------
@@ -3225,7 +3269,11 @@ void oamPatternView_t::setHover2Focus(bool val)
 	g_config->setOption("SDL.OAM_TileFocusPolicy", hover2Focus );
 }
 //----------------------------------------------------
-void oamPatternView_t::setGridVisibility(bool val){ showGrid = val; }
+void oamPatternView_t::setGridVisibility(bool val)
+{
+	showGrid = val;
+	g_config->setOption("SDL.OAM_TileShowGrid", showGrid);
+}
 //----------------------------------------------------
 int oamPatternView_t::getSpriteIndex(void){ return spriteIdx; }
 //----------------------------------------------------
@@ -3463,7 +3511,7 @@ void oamPatternView_t::paintEvent(QPaintEvent *event)
 	{
 		int tw, th;
 		pen.setWidth( 1 );
-		pen.setColor( QColor(128,128,128) );
+		pen.setColor( gridColor );
 		painter.setPen( pen );
 
 		tw=  8*w;
@@ -3492,18 +3540,16 @@ void oamPatternView_t::paintEvent(QPaintEvent *event)
 		yy = (spriteIdx / 8) * (h*16);
 
 		pen.setWidth( 3 );
-		pen.setColor( QColor(  0,  0,  0) );
+		pen.setColor( QColor(0, 0, 0) );
 		painter.setPen( pen );
 
 		painter.drawRect( xx, yy, w*8, h*16 );
 
 		pen.setWidth( 1 );
-		pen.setColor( QColor(255,255,255) );
+		pen.setColor( selTileColor );
 		painter.setPen( pen );
 
 		painter.drawRect( xx, yy, w*8, h*16 );
-
-		//painter.fillRect( ii, jj, w*8, h*16, selSpriteBoxColor );
 	}
 }
 //----------------------------------------------------
@@ -3726,6 +3772,10 @@ oamPreview_t::oamPreview_t(QWidget *parent)
 	setMinimumHeight( viewHeight );
 	selSprite = 0;
 	cx = cy = 0;
+
+	boxColor.setRgb( 128, 128, 128 );
+
+	fceuLoadConfigColor("SDL.OAM_LocatorColor", &boxColor  );
 }
 //----------------------------------------------------
 oamPreview_t::~oamPreview_t(void)
@@ -3856,7 +3906,7 @@ void oamPreview_t::paintEvent(QPaintEvent *event)
 		spr = &oamPattern.sprite[selSprite];
 
 		pen.setWidth( 1 );
-		pen.setColor( QColor(128,128,128) );
+		pen.setColor( boxColor );
 		painter.setPen( pen );
 
 		yy = (spr->y * h) + cy;

@@ -718,6 +718,13 @@ InitConfig()
 	config->addOption("SDL.PPU_TileGridColor0", "#7F7F7F");
 	config->addOption("SDL.PPU_TileSelColor1", "#FFFFFF");
 	config->addOption("SDL.PPU_TileGridColor1", "#7F7F7F");
+	config->addOption("SDL.PPU_TileShowGrid0", 1);
+	config->addOption("SDL.PPU_TileShowGrid1", 1);
+	config->addOption("SDL.OAM_TileShowGrid", 0);
+	config->addOption("SDL.OAM_TileSelColor", "#FFFFFF");
+	config->addOption("SDL.OAM_TileGridColor", "#7F7F7F");
+	config->addOption("SDL.OAM_LocatorColor", "#7F7F7F");
+	config->addOption("SDL.OAM_ShowPosHex", 0);
 
 	// quit when a+b+select+start is pressed
 	config->addOption("4buttonexit", "SDL.ABStartSelectExit", 0);
