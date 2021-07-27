@@ -542,6 +542,8 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	hbox     = new QHBoxLayout();
 
+	g_config->getOption("SDL.NT_ViewScanLine", &NTViewScanline);
+
 	scanLineEdit = new QSpinBox();
 	scanLineEdit->setRange( 0, 255 );
 	scanLineEdit->setValue( NTViewScanline );
@@ -833,6 +835,7 @@ void ppuNameTableViewerDialog_t::scanLineChanged(int val)
 {
 	NTViewScanline = val;
 	//printf("ScanLine:  %i\n", NTViewScanline );
+	g_config->setOption("SDL.NT_ViewScanLine", NTViewScanline);
 }
 //----------------------------------------------------
 void ppuNameTableViewerDialog_t::menuScrollLinesChanged(bool checked)

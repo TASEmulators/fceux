@@ -245,6 +245,9 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	tileLabel[0]      = new QLabel( tr("Tile:") );
 	tileLabel[1]      = new QLabel( tr("Tile:") );
 
+	g_config->getOption("SDL.PPU_View1_8x16", &PPUView_sprite16Mode[0]);
+	g_config->getOption("SDL.PPU_View2_8x16", &PPUView_sprite16Mode[1]);
+
 	sprite8x16Cbox[0]->setChecked( PPUView_sprite16Mode[0] );
 	sprite8x16Cbox[1]->setChecked( PPUView_sprite16Mode[1] );
 
@@ -328,10 +331,14 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	patternView[0]->setTileLabel( tileLabel[0] );
 	patternView[1]->setTileLabel( tileLabel[1] );
 
+	g_config->getOption("SDL.PPU_ViewScanLine", &PPUViewScanline);
+
 	scanLineEdit->setRange( 0, 255 );
 	scanLineEdit->setValue( PPUViewScanline );
 
 	connect( scanLineEdit, SIGNAL(valueChanged(int)), this, SLOT(scanLineChanged(int)));
+
+	g_config->getOption("SDL.PPU_ViewRefreshFrames", &PPUViewRefresh);
 
 	refreshSlider->setMinimum( 0);
 	refreshSlider->setMaximum(25);
@@ -501,6 +508,7 @@ void ppuViewerDialog_t::scanLineChanged(int value)
 {
 	PPUViewScanline = value;
 	//printf("ScanLine: %i\n", PPUViewScanline );
+	g_config->setOption("SDL.PPU_ViewScanLine", PPUViewScanline);
 }
 //----------------------------------------------------
 void ppuViewerDialog_t::invertMaskChanged(int state)
@@ -520,16 +528,22 @@ void ppuViewerDialog_t::maskUnusedGraphicsChanged(int state)
 void ppuViewerDialog_t::sprite8x16Changed0(int state)
 {
 	PPUView_sprite16Mode[0] = (state == Qt::Unchecked) ? 0 : 1;
+
+	g_config->setOption("SDL.PPU_View1_8x16", PPUView_sprite16Mode[0]);
 }
 //----------------------------------------------------
 void ppuViewerDialog_t::sprite8x16Changed1(int state)
 {
 	PPUView_sprite16Mode[1] = (state == Qt::Unchecked) ? 0 : 1;
+
+	g_config->setOption("SDL.PPU_View2_8x16", PPUView_sprite16Mode[1]);
 }
 //----------------------------------------------------
 void ppuViewerDialog_t::refreshSliderChanged(int value)
 {
 	PPUViewRefresh = value;
+
+	g_config->setOption("SDL.PPU_ViewRefreshFrames", PPUViewRefresh);
 }
 //----------------------------------------------------
 void ppuViewerDialog_t::setClickFocus(void)
