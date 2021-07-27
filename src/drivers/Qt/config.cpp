@@ -709,6 +709,10 @@ InitConfig()
 	config->addOption("SDL.NT_DrawAttrbView", 0);
 	config->addOption("SDL.NT_IgnoreHidePal", 0);
 	config->addOption("SDL.NT_RefreshFrames", 1);
+	config->addOption("SDL.PPU_TileSelColor0", "#FFFFFF");
+	config->addOption("SDL.PPU_TileGridColor0", "#7F7F7F");
+	config->addOption("SDL.PPU_TileSelColor1", "#FFFFFF");
+	config->addOption("SDL.PPU_TileGridColor1", "#7F7F7F");
 
 	// quit when a+b+select+start is pressed
 	config->addOption("4buttonexit", "SDL.ABStartSelectExit", 0);
