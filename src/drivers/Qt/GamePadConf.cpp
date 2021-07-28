@@ -348,6 +348,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	connect(button[7], SIGNAL(clicked()), this, SLOT(changeButton7(void)));
 	connect(button[8], SIGNAL(clicked()), this, SLOT(changeButton8(void)));
 	connect(button[9], SIGNAL(clicked()), this, SLOT(changeButton9(void)));
+	connect(button[10], SIGNAL(clicked()), this, SLOT(changeButton10(void)));
+	connect(button[11], SIGNAL(clicked()), this, SLOT(changeButton11(void)));
 
 	connect(clearButton[0], SIGNAL(clicked()), this, SLOT(clearButton0(void)));
 	connect(clearButton[1], SIGNAL(clicked()), this, SLOT(clearButton1(void)));
@@ -359,6 +361,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	connect(clearButton[7], SIGNAL(clicked()), this, SLOT(clearButton7(void)));
 	connect(clearButton[8], SIGNAL(clicked()), this, SLOT(clearButton8(void)));
 	connect(clearButton[9], SIGNAL(clicked()), this, SLOT(clearButton9(void)));
+	connect(clearButton[10], SIGNAL(clicked()), this, SLOT(clearButton10(void)));
+	connect(clearButton[11], SIGNAL(clicked()), this, SLOT(clearButton11(void)));
 
 	connect(newProfileButton, SIGNAL(clicked()), this, SLOT(newProfileCallback(void)));
 	connect(applyProfileButton, SIGNAL(clicked()), this, SLOT(loadProfileCallback(void)));
@@ -933,6 +937,16 @@ void GamePadConfDialog_t::changeButton9(void)
 	changeButton(portNum, 9);
 }
 //----------------------------------------------------
+void GamePadConfDialog_t::changeButton10(void)
+{
+	changeButton(portNum, 10);
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::changeButton11(void)
+{
+	changeButton(portNum, 11);
+}
+//----------------------------------------------------
 void GamePadConfDialog_t::clearButton0(void)
 {
 	clearButton(portNum, 0);
@@ -981,6 +995,16 @@ void GamePadConfDialog_t::clearButton8(void)
 void GamePadConfDialog_t::clearButton9(void)
 {
 	clearButton(portNum, 9);
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::clearButton10(void)
+{
+	clearButton(portNum, 10);
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::clearButton11(void)
+{
+	clearButton(portNum, 11);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::clearAllCallback(void)

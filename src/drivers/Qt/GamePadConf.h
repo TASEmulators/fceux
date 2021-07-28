@@ -219,6 +219,8 @@ private slots:
 	void changeButton7(void);
 	void changeButton8(void);
 	void changeButton9(void);
+	void changeButton10(void);
+	void changeButton11(void);
 	void clearButton0(void);
 	void clearButton1(void);
 	void clearButton2(void);
@@ -229,6 +231,8 @@ private slots:
 	void clearButton7(void);
 	void clearButton8(void);
 	void clearButton9(void);
+	void clearButton10(void);
+	void clearButton11(void);
 	void clearAllCallback(void);
 	void ena4score(int state);
 	void oppDirEna(int state);

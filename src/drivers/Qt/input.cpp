@@ -1476,6 +1476,18 @@ UpdateGamepad(void)
 				}
 			}
 		}
+		if (DTestButton(&GamePad[wg].bmap[10])) {
+		  // reset
+		  fceuWrapperLock();
+		  fceuWrapperSoftReset();
+		  fceuWrapperUnLock();
+		}
+		if (DTestButton(&GamePad[wg].bmap[11])) {
+		  // power cycle
+		  fceuWrapperLock();
+		  fceuWrapperHardReset();
+		  fceuWrapperUnLock();
+		}
 	}
 
 	//  for(x=0;x<32;x+=8)      /* Now, test to see if anything weird(up+down at same time)
@@ -2763,15 +2775,15 @@ void UpdateInput(Config *config)
 // Definitions from main.h:
 // GamePad defaults
 const char *GamePadNames[GAMEPAD_NUM_BUTTONS] = {"A", "B", "Select", "Start",
-												 "Up", "Down", "Left", "Right", "TurboA", "TurboB"};
+						 "Up", "Down", "Left", "Right", "TurboA", "TurboB", "Reset", "PowerCycle"};
 const char *DefaultGamePadDevice[GAMEPAD_NUM_DEVICES] =
 	{"Keyboard", "None", "None", "None"};
 const int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS] =
 	{{SDLK_f, SDLK_d, SDLK_s, SDLK_RETURN,
-	  SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, -1, -1},
-	 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-	 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-	 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1}};
+	  SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, -1, -1, -1, -1},
+	 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+	 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+	 {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}};
 
 // PowerPad defaults
 const char *PowerPadNames[POWERPAD_NUM_BUTTONS] =

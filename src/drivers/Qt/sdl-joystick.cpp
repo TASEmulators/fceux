@@ -46,7 +46,7 @@ static const char *buttonNames[GAMEPAD_NUM_BUTTONS] =
 	{
 		"a", "b", "back", "start",
 		"dpup", "dpdown", "dpleft", "dpright",
-		"turboA", "turboB"};
+		"turboA", "turboB", "reset", "powerCycle"};
 
 //********************************************************************************
 // Joystick Device

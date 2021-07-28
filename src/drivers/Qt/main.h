@@ -49,7 +49,7 @@ int CLImain(int argc, char *argv[]);
 
 // GamePad defaults
 #define GAMEPAD_NUM_DEVICES 4
-#define GAMEPAD_NUM_BUTTONS 10
+#define GAMEPAD_NUM_BUTTONS 12
 extern const char *GamePadNames[GAMEPAD_NUM_BUTTONS];
 extern const char *DefaultGamePadDevice[GAMEPAD_NUM_DEVICES];
 extern const int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS];
