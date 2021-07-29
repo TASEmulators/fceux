@@ -63,7 +63,7 @@ static int buttonConfigInProgress = 0;
 extern int gametype;
 static int DTestButton(ButtConfig *bc);
 
-std::list<gamepad_function_key_t *> gpKeySeqList;
+//std::list<gamepad_function_key_t *> gpKeySeqList;
 
 /**
  * Necessary for proper GUI functioning (configuring when a game isn't loaded).
@@ -463,6 +463,8 @@ gamepad_function_key_t::gamepad_function_key_t(void)
 	}
 	for (int i = 0; i < 2; i++)
 	{
+		bmap[i].ButtType = -1;
+		bmap[i].DeviceNum = -1;
 		bmap[i].ButtonNum = -1;
 		bmap[i].state = 0;
 	}
@@ -1537,14 +1539,17 @@ static void updateGamePadKeyMappings(void)
 {
 	std::list<gamepad_function_key_t *>::iterator it;
 
-	if (gpKeySeqList.size() == 0)
+	for (int i=0; i<4; i++)
 	{
-		return;
-	}
+		if (GamePad[i].gpKeySeqList.size() == 0)
+		{
+			continue;
+		}
 
-	for (it = gpKeySeqList.begin(); it != gpKeySeqList.end(); it++)
-	{
-		(*it)->updateStatus();
+		for (it = GamePad[i].gpKeySeqList.begin(); it != GamePad[i].gpKeySeqList.end(); it++)
+		{
+			(*it)->updateStatus();
+		}
 	}
 }
 

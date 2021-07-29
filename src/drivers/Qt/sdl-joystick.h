@@ -78,6 +78,7 @@ public:
 	int saveCurrentMapToFile(const char *filename);
 	int deleteMapping(const char *name);
 
+	std::list <gamepad_function_key_t*> gpKeySeqList;
 private:
 	int devIdx;
 	int portNum;

@@ -645,7 +645,7 @@ void GamePadConfDialog_t::refreshKeyBindTree( bool reset )
 
 	i=0;
 
-	for (it=gpKeySeqList.begin(); it!=gpKeySeqList.end(); it++)
+	for (it=GamePad[portNum].gpKeySeqList.begin(); it!=GamePad[portNum].gpKeySeqList.end(); it++)
 	{
 		binding = *it;
 
@@ -747,6 +747,8 @@ void GamePadConfDialog_t::portSelect(int index)
 	}
 
 	loadMapList();
+
+	refreshKeyBindTree(true);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::deviceSelect(int index)
@@ -1199,7 +1201,7 @@ void GamePadConfDialog_t::promptToSave(void)
 //----------------------------------------------------
 void GamePadConfDialog_t::newKeyBindingCallback(void)
 {
-	GamePadFuncConfigDialog *dialog = new GamePadFuncConfigDialog( NULL, this );
+	GamePadFuncConfigDialog *dialog = new GamePadFuncConfigDialog( portNum, NULL, this );
 
 	dialog->show();
 }
@@ -1222,14 +1224,14 @@ void GamePadConfDialog_t::editKeyBindingCallback(void)
 	row = keyBindTree->indexOfTopLevelItem(item);
 
 	i=0;
-	for (it=gpKeySeqList.begin(); it!=gpKeySeqList.end(); it++)
+	for (it=GamePad[portNum].gpKeySeqList.begin(); it!=GamePad[portNum].gpKeySeqList.end(); it++)
 	{
 		if ( i == row )
 		{
 			k = *it; break;
 		}
 	}
-	GamePadFuncConfigDialog *dialog = new GamePadFuncConfigDialog( k, this );
+	GamePadFuncConfigDialog *dialog = new GamePadFuncConfigDialog( portNum, k, this );
 
 	dialog->show();
 }
@@ -1252,12 +1254,12 @@ void GamePadConfDialog_t::delKeyBindingCallback(void)
 	row = keyBindTree->indexOfTopLevelItem(item);
 
 	i=0;
-	for (it=gpKeySeqList.begin(); it!=gpKeySeqList.end(); it++)
+	for (it=GamePad[portNum].gpKeySeqList.begin(); it!=GamePad[portNum].gpKeySeqList.end(); it++)
 	{
 		if ( i == row )
 		{
 			k = *it;
-			gpKeySeqList.erase(it);
+			GamePad[portNum].gpKeySeqList.erase(it);
 			delete k;
 			break;
 		}
@@ -1725,7 +1727,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 //----------------------------------------------------
 // Game Pad Function Config
 //----------------------------------------------------
-GamePadFuncConfigDialog::GamePadFuncConfigDialog( gamepad_function_key_t *fk, QWidget *parent )
+GamePadFuncConfigDialog::GamePadFuncConfigDialog( int portNumIn, gamepad_function_key_t *fk, QWidget *parent )
 	: QDialog(parent)
 {
 	QHBoxLayout *hbox;
@@ -1736,6 +1738,8 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( gamepad_function_key_t *fk, QW
 	QPushButton *okButton, *cancelButton;
 	QPushButton *clearButton[4];
 	const char *keyNameStr;
+
+	portNum = portNumIn;
 
 	if ( fk == NULL )
 	{
@@ -1877,7 +1881,7 @@ GamePadFuncConfigDialog::~GamePadFuncConfigDialog(void)
 	{
 		if ( !editMode )
 		{
-			gpKeySeqList.push_back( k );
+			GamePad[portNum].gpKeySeqList.push_back( k );
 		}
 	}
 	else

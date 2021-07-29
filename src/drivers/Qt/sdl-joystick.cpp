@@ -25,6 +25,7 @@
 #include <QDir>
 #include "Qt/sdl.h"
 #include "Qt/sdl-joystick.h"
+#include "Qt/config.h"
 
 #include <cstdlib>
 //#include <unistd.h>
@@ -727,10 +728,11 @@ int GamePad_t::loadProfile(const char *name, const char *guid)
 int GamePad_t::saveCurrentMapToFile(const char *name)
 {
 	int i;
-	char stmp[64];
+	char stmp[256];
 	const char *guid = NULL;
 	const char *baseDir = FCEUI_GetBaseDirectory();
 	std::string path, output;
+	std::list <gamepad_function_key_t*>::iterator it;
 	QDir dir;
 
 	if (devIdx >= 0)
@@ -787,6 +789,77 @@ int GamePad_t::saveCurrentMapToFile(const char *name)
 		output.append(":");
 		output.append(stmp);
 		output.append(",");
+	}
+
+	for (it=gpKeySeqList.begin(); it!=gpKeySeqList.end(); it++)
+	{
+		gamepad_function_key_t *fk = *it;
+
+		printf("hk[0]=%i   hk[1]=%i   keySeq[0]=%s   keySeq[1]=%s  bmap[0].buttType=%i  bmap[1].buttType=%i\n", 
+				fk->hk[0], fk->hk[1], fk->keySeq[0].name.c_str(), fk->keySeq[1].name.c_str(),
+		     			fk->bmap[0].ButtType, fk->bmap[1].ButtType );
+
+		if ( fk->bmap[1].ButtType >= 0 )
+		{
+			output.append("\nhotkey,");
+
+			for (i = 0; i < 2; i++)
+			{
+				if ( fk->bmap[i].ButtType >= 0 )
+				{
+					if (fk->bmap[i].ButtType == BUTTC_KEYBOARD)
+					{
+						sprintf(stmp, "k%s", SDL_GetKeyName(fk->bmap[i].ButtonNum));
+					}
+					else
+					{
+						if (fk->bmap[i].ButtonNum & 0x2000)
+						{
+							/* Hat "button" */
+							sprintf(stmp, "h%i.%i",
+									(fk->bmap[i].ButtonNum >> 8) & 0x1F, fk->bmap[i].ButtonNum & 0xFF);
+						}
+						else if (fk->bmap[i].ButtonNum & 0x8000)
+						{
+							/* Axis "button" */
+							sprintf(stmp, "%ca%i",
+									(fk->bmap[i].ButtonNum & 0x4000) ? '-' : '+', fk->bmap[i].ButtonNum & 0x3FFF);
+						}
+						else
+						{
+							/* Button */
+							sprintf(stmp, "b%i", fk->bmap[i].ButtonNum);
+						}
+					}
+					if ( i == 0 )
+					{
+						output.append("modifier:");
+						output.append(stmp);
+						output.append(",");
+					}
+					else
+					{
+						output.append("button:");
+						output.append(stmp);
+						output.append(",");
+					}
+				}
+			}
+			for (i = 0; i < 2; i++)
+			{
+				const char *nameStr, *keySeqStr;
+
+				if ( fk->hk[i] >= 0 )
+				{
+					getHotKeyConfig( fk->hk[i], &nameStr, &keySeqStr );
+
+					output.append( i ? "release" : "press");
+					output.append(":");
+					output.append(nameStr);
+					output.append(",");
+				}
+			}
+		}
 	}
 
 	return saveMappingToFile(path.c_str(), output.c_str());

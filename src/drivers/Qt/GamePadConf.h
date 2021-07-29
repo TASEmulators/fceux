@@ -83,7 +83,7 @@ class GamePadFuncConfigDialog : public QDialog
 	Q_OBJECT
 
 public:
-	GamePadFuncConfigDialog( gamepad_function_key_t *fk, QWidget *parent = 0);
+	GamePadFuncConfigDialog( int portNum, gamepad_function_key_t *fk, QWidget *parent = 0);
 	~GamePadFuncConfigDialog(void);
 
 protected:
@@ -98,6 +98,7 @@ protected:
 	GamePadConfigHotKey_t  *hk[2];
 	gamepad_function_key_t *k;
 
+	int  portNum;
 	int  buttonConfigStatus;
 	bool editMode;
 
