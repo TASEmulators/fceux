@@ -43,6 +43,7 @@ struct GamePadConfigLocalData_t
 {
 	std::string guid;
 	std::string profile;
+	bool advBindNeedsSave;
 
 	struct
 	{
@@ -57,7 +58,9 @@ struct GamePadConfigLocalData_t
 		{
 			btn[i].needsSave = 0;
 		}
+		advBindNeedsSave = 0;
 	}
+
 };
 
 static GamePadConfigLocalData_t lcl[GAMEPAD_NUM_DEVICES];
@@ -1017,6 +1020,8 @@ void GamePadConfDialog_t::saveConfig(void)
 	{
 		lcl[portNum].btn[i].needsSave = 0;
 	}
+	lcl[portNum].advBindNeedsSave = 0;
+
 	g_config->save();
 }
 //----------------------------------------------------
@@ -1153,7 +1158,7 @@ void GamePadConfDialog_t::promptToSave(void)
 
 		for (j = 0; j < GAMEPAD_NUM_BUTTONS; j++)
 		{
-			if (lcl[i].btn[j].needsSave)
+			if (lcl[i].btn[j].needsSave || lcl[i].advBindNeedsSave)
 			{
 				padNeedsSave[i] = 1;
 				saveRequired = 1;
@@ -1901,6 +1906,7 @@ GamePadFuncConfigDialog::~GamePadFuncConfigDialog(void)
 		{
 			GamePad[portNum].gpKeySeqList.push_back( k );
 		}
+		lcl[portNum].advBindNeedsSave = 1;
 	}
 	else
 	{
