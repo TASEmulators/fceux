@@ -1271,7 +1271,9 @@ void GamePadConfDialog_t::delKeyBindingCallback(void)
 //----------------------------------------------------
 void GamePadConfDialog_t::updatePeriodic(void)
 {
+	bool buttonEnable;
 	char jsFound[ MAX_JOYSTICKS ];
+	QTreeWidgetItem *item;
 
 	memset( jsFound, 0, sizeof(jsFound) );
 
@@ -1354,10 +1356,24 @@ void GamePadConfDialog_t::updatePeriodic(void)
 		efs_chkbox->setChecked(fourScore);
 	}
 
+
 	gpView->setPort(portNum);
 	gpView->update();
 
 	refreshKeyBindTree();
+
+	item = keyBindTree->currentItem();
+
+	if ( item == NULL )
+	{
+		buttonEnable = false;
+	}
+	else
+	{
+		buttonEnable = true;
+	}
+	editKeyBindBtn->setEnabled(buttonEnable);
+	 delKeyBindBtn->setEnabled(buttonEnable);
 }
 
 //----------------------------------------------------
