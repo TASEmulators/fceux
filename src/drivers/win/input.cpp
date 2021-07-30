@@ -213,7 +213,14 @@ uint32 GetGamepadPressedImmediate()
 	return JSButtons;
 }
 
-int DTestButton(ButtConfig *bc, uint8_t just_down)
+
+// Function to check if key/button/combination is pressed/held
+// bc: button mapping structure
+// just_down: indicates that only new button presses should be logged, not held down
+// block_meta: indicates that key can't be pressed in combination with meta keys
+//             if it's not set explicitly,
+//             e.g. do not trigger "F1" if "Ctrl+F1" is pressed
+int DTestButton(ButtConfig *bc, uint8_t just_down, uint8_t block_meta)
 {
 	static unsigned int *keys_data = !just_down ? GetKeyboard_nr() : GetKeyboard_jd();
 
@@ -230,10 +237,10 @@ int DTestButton(ButtConfig *bc, uint8_t just_down)
 				int ctlstate = (cmd & CMD_KEY_LALT) ? keys_data[SCAN_LEFTALT] : 0;
 				ctlstate |= (cmd & CMD_KEY_RALT) ? keys_data[SCAN_RIGHTALT] : 0;
 				if (!ctlstate)
-					return 0;
+					continue;
 			}
-			else if ((cmdmask != SCAN_LEFTALT && keys_data[SCAN_LEFTALT]) || (cmdmask != SCAN_RIGHTALT && keys_data[SCAN_RIGHTALT]))
-				return 0;
+			else if (block_meta && ((cmdmask != SCAN_LEFTALT && keys_data[SCAN_LEFTALT]) || (cmdmask != SCAN_RIGHTALT && keys_data[SCAN_RIGHTALT])))
+				continue;
 
 			if (cmd & CMD_KEY_CTRL)
 			{
@@ -242,7 +249,7 @@ int DTestButton(ButtConfig *bc, uint8_t just_down)
 				if (!ctlstate)
 					continue;
 			}
-			else if ((cmdmask != SCAN_LEFTCONTROL && keys_data[SCAN_LEFTCONTROL]) || (cmdmask != SCAN_RIGHTCONTROL && keys_data[SCAN_RIGHTCONTROL]))
+			else if (block_meta && ((cmdmask != SCAN_LEFTCONTROL && keys_data[SCAN_LEFTCONTROL]) || (cmdmask != SCAN_RIGHTCONTROL && keys_data[SCAN_RIGHTCONTROL])))
 				continue;
 
 			if (cmd & CMD_KEY_SHIFT)
@@ -252,7 +259,7 @@ int DTestButton(ButtConfig *bc, uint8_t just_down)
 				if (!ctlstate)
 					continue;
 			}
-			else if ((cmdmask != SCAN_LEFTSHIFT && keys_data[SCAN_LEFTSHIFT]) || (cmdmask != SCAN_RIGHTSHIFT && keys_data[SCAN_RIGHTSHIFT]))
+			else if (block_meta && ((cmdmask != SCAN_LEFTSHIFT && keys_data[SCAN_LEFTSHIFT]) || (cmdmask != SCAN_RIGHTSHIFT && keys_data[SCAN_RIGHTSHIFT])))
 				continue;
 
 			if (cmd & CMD_KEY_WIN)
@@ -262,7 +269,7 @@ int DTestButton(ButtConfig *bc, uint8_t just_down)
 				if (!ctlstate)
 					continue;
 			}
-			else if ((cmdmask != SCAN_LEFTWIN && keys_data[SCAN_LEFTWIN]) || (cmdmask != SCAN_RIGHTWIN && keys_data[SCAN_RIGHTWIN]))
+			else if (block_meta && ((cmdmask != SCAN_LEFTWIN && keys_data[SCAN_LEFTWIN]) || (cmdmask != SCAN_RIGHTWIN && keys_data[SCAN_RIGHTWIN])))
 				continue;
 
 			if(keys_data[cmdmask])
@@ -1841,9 +1848,12 @@ int FCEUD_TestCommandState(int c)
 	case EMUCMD_FRAME_ADVANCE:
 	case EMUCMD_SPEED_TURBO:
 	case EMUCMD_TASEDITOR_REWIND:
+		// Check that key/button is held down
 		return DTestButton(&FCEUD_CommandMapping[c], 0);
 	default:
-		return DTestButton(&FCEUD_CommandMapping[c], 1);
+		// Check that key/button is just pressed, not held down
+		// Register only if no additional meta keys are pressed
+		return DTestButton(&FCEUD_CommandMapping[c], 1, 1);
 	}
 }
 
