@@ -17,10 +17,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * CoolBoy 400-in-1 FK23C-mimic mapper 16Mb/32Mb PROM + 128K/256K CHR RAM, optional SRAM, optional battery
- * only MMC3 mode
+ * SMD132 and SMD133 ASICs, MMC3 clones that can address up to 32 MiB of PRG-ROM, 256 KiB of CHR-RAM, and 8 KiB of WRAM.
  *
- * $6000
+ * COOLBOY cartridges use registers at address $6xxx
+ * MINDKIDS cartridges use a solder pad labelled "5/6K" to select between $5000 and $6000
+ *  
+ * $xxx0
  * 7  bit  0
  * ---- ----
  * ABCC DEEE
@@ -31,7 +33,7 @@
  * |+--------- PRG mask (PRG A17 from 0: MMC3; 1: offset)
  * +---------- CHR mask (CHR A17 from 0: MMC3; 1: alternate)
  *
- * $6001
+ * $xxx1
  *
  * 7  bit  0
  * ---- ----
@@ -43,14 +45,14 @@
  * |+--------- PRG mask (PRG A19 from 0: offset; 1: MMC3)
  * +---------- PRG mask (PRG A18 from 0: MMC3; 1: offset)
  *
- * $6002
+ * $xxx2
  * 7  bit  0
  * ---- ----
  * xxxx MMMM
  *      ||||
  *      ++++-- CHR offset for GNROM mode (CHR A16, A15, A14, A13)
  *
- * $6003
+ * $xxx3
  * 7  bit  0
  * ---- ----
  * NPxP QQRx
@@ -62,9 +64,6 @@
  * |+-+------- Banking mode
  * |+--------- "Weird MMC3 mode"
  * +---------- Lockout (prevent further writes to these four registers, only works in MMC3 mode)
- *
- * There is also alternative version from MINDKIDS,
- * the only difference is register addresses - 500x instead of 600x
  *
  * Also some new cartridges from MINDKIDS have /WE and /OE pins connected to mapper,
  * which allows you to rewrite flash memory without soldering.
@@ -177,6 +176,7 @@ static void MINDKIDSPower(void) {
 	SetWriteHandler(0x5000, 0x5fff, COOLBOYWrite);
 }
 
+// Registers at $6xxx
 void COOLBOY_Init(CartInfo *info) {
 	GenMMC3_Init(info, 2048, 256, 8, 1);
 	pwrap = COOLBOYPW;
@@ -186,6 +186,7 @@ void COOLBOY_Init(CartInfo *info) {
 	AddExState(EXPREGS, 4, 0, "EXPR");
 }
 
+// Registers at $5xxx
 void MINDKIDS_Init(CartInfo *info) {
 	GenMMC3_Init(info, 2048, 256, 8, 1);
 	pwrap = COOLBOYPW;
@@ -193,4 +194,20 @@ void MINDKIDS_Init(CartInfo *info) {
 	info->Power = MINDKIDSPower;
 	info->Reset = COOLBOYReset;
 	AddExState(EXPREGS, 4, 0, "EXPR");
+}
+
+// For NES 2.0 loader
+void SMD132_SMD133_Init(CartInfo *info) {
+	switch (info->submapper)
+	{
+	case 0:
+		COOLBOY_Init(info);
+		break;
+	case 1:
+		MINDKIDS_Init(info);
+		break;
+	default:
+		FCEU_PrintError("Unknown submapper: #%d.", info->submapper);
+		break;
+	}
 }
