@@ -77,6 +77,9 @@ public:
 	int saveMappingToFile(const char *filename, const char *txtMap);
 	int saveCurrentMapToFile(const char *filename);
 	int deleteMapping(const char *name);
+	int loadHotkeyMapFromFile(const char *name);
+	int convText2ButtConfig( const char *txt, ButtConfig *bmap );
+	int deleteHotKeyMappings(void);
 
 	std::list <gamepad_function_key_t*> gpKeySeqList;
 private:

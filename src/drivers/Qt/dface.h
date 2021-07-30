@@ -20,6 +20,7 @@ int InitJoysticks(void);
 int KillJoysticks(void);
 int AddJoystick( int which );
 int RemoveJoystick( int which );
+int FindJoystickByInstanceID( int which );
 uint32 *GetJSOr(void);
 
 int InitVideo(FCEUGI *gi);

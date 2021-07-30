@@ -62,5 +62,7 @@ enum HOTKEY {
 
 int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const char **titleOut = NULL );
 
+int getHotKeyIndexByName( const char *name );
+
 #endif
 

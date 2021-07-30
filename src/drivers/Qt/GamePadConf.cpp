@@ -437,8 +437,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	item = new QTreeWidgetItem();
 	item->setText(0, QString::fromStdString("GP Button"));
-	item->setText(1, QString::fromStdString("Press Key"));
-	item->setText(2, QString::fromStdString("Release Key"));
+	item->setText(1, QString::fromStdString("Press Func"));
+	item->setText(2, QString::fromStdString("Release Func"));
 	item->setTextAlignment(0, Qt::AlignLeft);
 	item->setTextAlignment(1, Qt::AlignLeft);
 	item->setTextAlignment(2, Qt::AlignLeft);
@@ -1087,6 +1087,8 @@ void GamePadConfDialog_t::loadProfileCallback(void)
 	mapMsg->setText(tr(stmp));
 
 	updateCntrlrDpy();
+
+	refreshKeyBindTree(true);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::saveProfileCallback(void)

@@ -330,6 +330,7 @@ GamePad_t::GamePad_t(void)
 //********************************************************************************
 GamePad_t::~GamePad_t(void)
 {
+	deleteHotKeyMappings();
 }
 //********************************************************************************
 int GamePad_t::init(int port, const char *guid, const char *profile)
@@ -453,6 +454,93 @@ static int sdlButton2NesGpIdx(const char *id)
 	return idx;
 }
 //********************************************************************************
+int GamePad_t::convText2ButtConfig( const char *txt, ButtConfig *bmap )
+{
+	bmap->ButtType  = -1;
+	bmap->DeviceNum = -1;
+	bmap->ButtonNum = -1;
+
+	if (txt[0] == 'k')
+	{
+		SDL_Keycode key;
+
+		bmap->ButtType = BUTTC_KEYBOARD;
+		bmap->DeviceNum = -1;
+
+		key = SDL_GetKeyFromName(&txt[1]);
+
+		if (key != SDLK_UNKNOWN)
+		{
+			bmap->ButtonNum = key;
+		}
+		else
+		{
+			bmap->ButtonNum = -1;
+		}
+	}
+	else if ((txt[0] == 'b') && isdigit(txt[1]))
+	{
+		bmap->ButtType = BUTTC_JOYSTICK;
+		bmap->DeviceNum = devIdx;
+		bmap->ButtonNum = atoi(&txt[1]);
+	}
+	else if ((txt[0] == 'h') && isdigit(txt[1]) &&
+			 (txt[2] == '.') && isdigit(txt[3]))
+	{
+		int hatIdx, hatVal;
+
+		hatIdx = txt[1] - '0';
+		hatVal = atoi(&txt[3]);
+
+		bmap->ButtType = BUTTC_JOYSTICK;
+		bmap->DeviceNum = devIdx;
+		bmap->ButtonNum = 0x2000 | ((hatIdx & 0x1F) << 8) | (hatVal & 0xFF);
+	}
+	else if ((txt[0] == 'a') || (txt[1] == 'a'))
+	{
+		int l = 0, axisIdx = 0, axisSign = 0;
+
+		l = 0;
+		if (txt[l] == '-')
+		{
+			axisSign = 1;
+			l++;
+		}
+		else if (txt[l] == '+')
+		{
+			axisSign = 0;
+			l++;
+		}
+
+		if (txt[l] == 'a')
+		{
+			l++;
+		}
+		if (isdigit(txt[l]))
+		{
+			axisIdx = atoi(&txt[l]);
+
+			while (isdigit(txt[l]))
+				l++;
+		}
+		if (txt[l] == '-')
+		{
+			axisSign = 1;
+			l++;
+		}
+		else if (txt[l] == '+')
+		{
+			axisSign = 0;
+			l++;
+		}
+		bmap->ButtType = BUTTC_JOYSTICK;
+		bmap->DeviceNum = devIdx;
+		bmap->ButtonNum = 0x8000 | (axisSign ? 0x4000 : 0) | (axisIdx & 0xFF);
+	}
+
+	return 0;
+}
+//********************************************************************************
 int GamePad_t::setMapping(nesGamePadMap_t *gpm)
 {
 	for (int i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
@@ -465,83 +553,85 @@ int GamePad_t::setMapping(nesGamePadMap_t *gpm)
 		{
 			continue;
 		}
-		if (gpm->btn[i][0] == 'k')
-		{
-			SDL_Keycode key;
+		convText2ButtConfig( gpm->btn[i], &bmap[i] );
 
-			bmap[i].ButtType = BUTTC_KEYBOARD;
-			bmap[i].DeviceNum = -1;
+		//if (gpm->btn[i][0] == 'k')
+		//{
+		//	SDL_Keycode key;
 
-			key = SDL_GetKeyFromName(&gpm->btn[i][1]);
+		//	bmap[i].ButtType = BUTTC_KEYBOARD;
+		//	bmap[i].DeviceNum = -1;
 
-			if (key != SDLK_UNKNOWN)
-			{
-				bmap[i].ButtonNum = key;
-			}
-			else
-			{
-				bmap[i].ButtonNum = -1;
-			}
-		}
-		else if ((gpm->btn[i][0] == 'b') && isdigit(gpm->btn[i][1]))
-		{
-			bmap[i].ButtType = BUTTC_JOYSTICK;
-			bmap[i].DeviceNum = devIdx;
-			bmap[i].ButtonNum = atoi(&gpm->btn[i][1]);
-		}
-		else if ((gpm->btn[i][0] == 'h') && isdigit(gpm->btn[i][1]) &&
-				 (gpm->btn[i][2] == '.') && isdigit(gpm->btn[i][3]))
-		{
-			int hatIdx, hatVal;
+		//	key = SDL_GetKeyFromName(&gpm->btn[i][1]);
 
-			hatIdx = gpm->btn[i][1] - '0';
-			hatVal = atoi(&gpm->btn[i][3]);
+		//	if (key != SDLK_UNKNOWN)
+		//	{
+		//		bmap[i].ButtonNum = key;
+		//	}
+		//	else
+		//	{
+		//		bmap[i].ButtonNum = -1;
+		//	}
+		//}
+		//else if ((gpm->btn[i][0] == 'b') && isdigit(gpm->btn[i][1]))
+		//{
+		//	bmap[i].ButtType = BUTTC_JOYSTICK;
+		//	bmap[i].DeviceNum = devIdx;
+		//	bmap[i].ButtonNum = atoi(&gpm->btn[i][1]);
+		//}
+		//else if ((gpm->btn[i][0] == 'h') && isdigit(gpm->btn[i][1]) &&
+		//		 (gpm->btn[i][2] == '.') && isdigit(gpm->btn[i][3]))
+		//{
+		//	int hatIdx, hatVal;
 
-			bmap[i].ButtType = BUTTC_JOYSTICK;
-			bmap[i].DeviceNum = devIdx;
-			bmap[i].ButtonNum = 0x2000 | ((hatIdx & 0x1F) << 8) | (hatVal & 0xFF);
-		}
-		else if ((gpm->btn[i][0] == 'a') || (gpm->btn[i][1] == 'a'))
-		{
-			int l = 0, axisIdx = 0, axisSign = 0;
+		//	hatIdx = gpm->btn[i][1] - '0';
+		//	hatVal = atoi(&gpm->btn[i][3]);
 
-			l = 0;
-			if (gpm->btn[i][l] == '-')
-			{
-				axisSign = 1;
-				l++;
-			}
-			else if (gpm->btn[i][l] == '+')
-			{
-				axisSign = 0;
-				l++;
-			}
+		//	bmap[i].ButtType = BUTTC_JOYSTICK;
+		//	bmap[i].DeviceNum = devIdx;
+		//	bmap[i].ButtonNum = 0x2000 | ((hatIdx & 0x1F) << 8) | (hatVal & 0xFF);
+		//}
+		//else if ((gpm->btn[i][0] == 'a') || (gpm->btn[i][1] == 'a'))
+		//{
+		//	int l = 0, axisIdx = 0, axisSign = 0;
 
-			if (gpm->btn[i][l] == 'a')
-			{
-				l++;
-			}
-			if (isdigit(gpm->btn[i][l]))
-			{
-				axisIdx = atoi(&gpm->btn[i][l]);
+		//	l = 0;
+		//	if (gpm->btn[i][l] == '-')
+		//	{
+		//		axisSign = 1;
+		//		l++;
+		//	}
+		//	else if (gpm->btn[i][l] == '+')
+		//	{
+		//		axisSign = 0;
+		//		l++;
+		//	}
 
-				while (isdigit(gpm->btn[i][l]))
-					l++;
-			}
-			if (gpm->btn[i][l] == '-')
-			{
-				axisSign = 1;
-				l++;
-			}
-			else if (gpm->btn[i][l] == '+')
-			{
-				axisSign = 0;
-				l++;
-			}
-			bmap[i].ButtType = BUTTC_JOYSTICK;
-			bmap[i].DeviceNum = devIdx;
-			bmap[i].ButtonNum = 0x8000 | (axisSign ? 0x4000 : 0) | (axisIdx & 0xFF);
-		}
+		//	if (gpm->btn[i][l] == 'a')
+		//	{
+		//		l++;
+		//	}
+		//	if (isdigit(gpm->btn[i][l]))
+		//	{
+		//		axisIdx = atoi(&gpm->btn[i][l]);
+
+		//		while (isdigit(gpm->btn[i][l]))
+		//			l++;
+		//	}
+		//	if (gpm->btn[i][l] == '-')
+		//	{
+		//		axisSign = 1;
+		//		l++;
+		//	}
+		//	else if (gpm->btn[i][l] == '+')
+		//	{
+		//		axisSign = 0;
+		//		l++;
+		//	}
+		//	bmap[i].ButtType = BUTTC_JOYSTICK;
+		//	bmap[i].DeviceNum = devIdx;
+		//	bmap[i].ButtonNum = 0x8000 | (axisSign ? 0x4000 : 0) | (axisIdx & 0xFF);
+		//}
 	}
 	return 0;
 }
@@ -610,6 +700,143 @@ int GamePad_t::getMapFromFile(const char *filename, char *out)
 	return (j < 34);
 }
 //********************************************************************************
+int GamePad_t::deleteHotKeyMappings(void)
+{
+	while ( !gpKeySeqList.empty() )
+	{
+		delete gpKeySeqList.back();
+
+		gpKeySeqList.pop_back();
+	}
+	return 0;
+}
+//********************************************************************************
+int GamePad_t::loadHotkeyMapFromFile(const char *filename)
+{
+	int i = 0, j = 0;
+	FILE *fp;
+	char line[256];
+	char id[128];
+	char val[128];
+	bool lineIsHotKey;
+	char modBtn[32], priBtn[32];
+	char onPressAct[64], onReleaseAct[64];
+
+	//printf("Loading HotKey Map From File: %s\n", filename );
+
+	fp = ::fopen(filename, "r");
+
+	if (fp == NULL)
+	{
+		return -1;
+	}
+	deleteHotKeyMappings();
+
+	while (fgets(line, sizeof(line), fp) != 0)
+	{
+		i = 0; j = 0;
+		while (line[i] != 0)
+		{
+			if (line[i] == '#')
+			{
+				line[i] = 0;
+				break;
+			}
+			i++;
+		}
+		lineIsHotKey = false;
+		modBtn[0] = 0; priBtn[0] = 0;
+		onPressAct[0] = 0; onReleaseAct[0] = 0;
+
+		i=0; j=0;
+		while (line[i])
+		{
+			j=0;
+
+			while ((line[i] != 0) && (line[i] != ',') && (line[i] != ':'))
+			{
+				id[j] = line[i];
+				i++;
+				j++;
+			}
+			id[j] = 0;
+			val[0] = 0;
+
+			if (line[i] == ':')
+			{
+				i++;
+				j = 0;
+
+				while ((line[i] != 0) && (line[i] != ','))
+				{
+					val[j] = line[i];
+					i++;
+					j++;
+				}
+				val[j] = 0;
+			}
+
+			if ( strcmp( id, "hotkey" ) == 0 )
+			{
+				lineIsHotKey = true;
+			}
+			else if ( strcmp( id, "modifier" ) == 0 )
+			{
+				strcpy( modBtn, val );
+			}
+			else if ( strcmp( id, "button" ) == 0 )
+			{
+				strcpy( priBtn, val );
+			}
+			else if ( strcmp( id, "press" ) == 0 )
+			{
+				strcpy( onPressAct, val );
+			}
+			else if ( strcmp( id, "release" ) == 0 )
+			{
+				strcpy( onReleaseAct, val );
+			}
+
+
+			if (line[i] == ',')
+			{
+				i++;
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		if ( lineIsHotKey && (priBtn[0] != 0) && 
+			( (onPressAct[0] != 0) || (onReleaseAct[0] != 0) ) )
+		{
+			gamepad_function_key_t *fk = new gamepad_function_key_t();
+
+			convText2ButtConfig( modBtn, &fk->bmap[0] );
+			convText2ButtConfig( priBtn, &fk->bmap[1] );
+
+			fk->hk[0] = getHotKeyIndexByName( onPressAct   );
+			fk->hk[1] = getHotKeyIndexByName( onReleaseAct );
+
+			if ( fk->hk[0] >= 0 )
+			{
+				fk->keySeq[0].name.assign( onPressAct );
+			}
+
+			if ( fk->hk[1] >= 0 )
+			{
+				fk->keySeq[1].name.assign( onReleaseAct );
+			}
+			gpKeySeqList.push_back( fk );
+		}
+
+	}
+	::fclose(fp);
+
+	return 0;
+}
+//********************************************************************************
 int GamePad_t::getDefaultMap(char *out, const char *guid)
 {
 	char txtMap[256];
@@ -640,6 +867,7 @@ int GamePad_t::getDefaultMap(char *out, const char *guid)
 	{
 		printf("Using Mapping From File: %s\n", path.c_str());
 		strcpy(out, txtMap);
+		loadHotkeyMapFromFile( path.c_str() );
 		return 0;
 	}
 
@@ -719,6 +947,7 @@ int GamePad_t::loadProfile(const char *name, const char *guid)
 	if (getMapFromFile(path.c_str(), txtMap) == 0)
 	{
 		setMapping(txtMap);
+		loadHotkeyMapFromFile( path.c_str() );
 		return 0;
 	}
 
@@ -1078,6 +1307,7 @@ int KillJoysticks(void)
 //********************************************************************************
 int AddJoystick(int which)
 {
+	//printf("Add Joystick: %i \n", which );
 	if (jsDev[which].isConnected())
 	{
 		//printf("Error: Joystick already exists at device index %i \n", which );
@@ -1143,6 +1373,21 @@ int RemoveJoystick(int which)
 	return -1;
 }
 
+//********************************************************************************
+int FindJoystickByInstanceID( int which )
+{
+	for (int i = 0; i < MAX_JOYSTICKS; i++)
+	{
+		if (jsDev[i].isConnected())
+		{
+			if (SDL_JoystickInstanceID(jsDev[i].getJS()) == which)
+			{
+				return i;
+			}
+		}
+	}
+	return -1;
+}
 //********************************************************************************
 /**
  * Initialize the SDL joystick subsystem.

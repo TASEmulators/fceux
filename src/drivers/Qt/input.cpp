@@ -2044,7 +2044,7 @@ int DWaitButton(const uint8_t *text, ButtConfig *bc, int *buttonConfigStatus)
 				return (1);
 			case SDL_JOYBUTTONDOWN:
 				bc->ButtType = BUTTC_JOYSTICK;
-				bc->DeviceNum = event.jbutton.which;
+				bc->DeviceNum = FindJoystickByInstanceID(event.jbutton.which);
 				bc->ButtonNum = event.jbutton.button;
 				return (1);
 			case SDL_JOYHATMOTION:
@@ -2053,7 +2053,7 @@ int DWaitButton(const uint8_t *text, ButtConfig *bc, int *buttonConfigStatus)
 				else
 				{
 					bc->ButtType = BUTTC_JOYSTICK;
-					bc->DeviceNum = event.jhat.which;
+					bc->DeviceNum = FindJoystickByInstanceID(event.jhat.which);
 					bc->ButtonNum =
 						(0x2000 | ((event.jhat.hat & 0x1F) << 8) | event.jhat.value);
 					return (1);
@@ -2075,7 +2075,7 @@ int DWaitButton(const uint8_t *text, ButtConfig *bc, int *buttonConfigStatus)
 							event.jaxis.value) >= 8192)
 					{
 						bc->ButtType = BUTTC_JOYSTICK;
-						bc->DeviceNum = event.jaxis.which;
+						bc->DeviceNum = FindJoystickByInstanceID(event.jaxis.which);
 						bc->ButtonNum = (0x8000 | event.jaxis.axis |
 										 ((event.jaxis.value < 0)
 											  ? 0x4000

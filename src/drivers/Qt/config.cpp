@@ -326,6 +326,27 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 	return 0;
 }
 
+
+int getHotKeyIndexByName( const char *name )
+{
+	const char *nameOut;
+
+	if ( name[0] == 0 )
+	{
+		return -1;
+	}
+	for (int i=0; i<HK_MAX; i++)
+	{
+		getHotKeyConfig( i, &nameOut, NULL );
+
+		if ( strcmp( name, nameOut ) == 0 )
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
 /**
  * Read a custom pallete from a file and load it into the core.
  */
