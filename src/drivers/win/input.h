@@ -66,7 +66,7 @@ void ParseGIInput(FCEUGI *GameInfo);
 int FCEUD_TestCommandState(int c);
 void FCEUD_UpdateInput();
 int DWaitButton(HWND hParent, const char *text, ButtConfig *bc);
-int DTestButton(ButtConfig *bc, uint8_t just_down = 0);
+int DTestButton(ButtConfig *bc, uint8_t just_down = 0, uint8_t block_meta = 0);
 char *MakeButtString(ButtConfig *bc, int appendKB = 1);
 
 extern CFGSTRUCT HotkeyConfig[];
