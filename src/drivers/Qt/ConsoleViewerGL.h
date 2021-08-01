@@ -80,5 +80,6 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 
 	private slots:
 		void cleanupGL(void);
+		void renderFinished(void);
 };
 

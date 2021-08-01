@@ -86,6 +86,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	frameTimeWorkPct = new QTreeWidgetItem();
 	frameTimeIdlePct = new QTreeWidgetItem();
 	frameLateCount = new QTreeWidgetItem();
+	videoTimeAbs = new QTreeWidgetItem();
 
 	tree->addTopLevelItem(frameTimeAbs);
 	tree->addTopLevelItem(frameTimeDel);
@@ -93,6 +94,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	tree->addTopLevelItem(frameTimeIdle);
 	tree->addTopLevelItem(frameTimeWorkPct);
 	tree->addTopLevelItem(frameTimeIdlePct);
+	tree->addTopLevelItem(videoTimeAbs);
 	tree->addTopLevelItem(frameLateCount);
 
 	frameTimeAbs->setFlags(Qt::ItemIsEnabled | Qt::ItemNeverHasChildren);
@@ -105,6 +107,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	frameTimeWorkPct->setText(0, tr("Frame Work %"));
 	frameTimeIdlePct->setText(0, tr("Frame Idle %"));
 	frameLateCount->setText(0, tr("Frame Late Count"));
+	videoTimeAbs->setText(0, tr("Video Period ms"));
 
 	frameTimeAbs->setTextAlignment(0, Qt::AlignLeft);
 	frameTimeDel->setTextAlignment(0, Qt::AlignLeft);
@@ -113,6 +116,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	frameTimeWorkPct->setTextAlignment(0, Qt::AlignLeft);
 	frameTimeIdlePct->setTextAlignment(0, Qt::AlignLeft);
 	frameLateCount->setTextAlignment(0, Qt::AlignLeft);
+	videoTimeAbs->setTextAlignment(0, Qt::AlignLeft);
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -123,6 +127,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 		frameTimeWorkPct->setTextAlignment(i + 1, Qt::AlignCenter);
 		frameTimeIdlePct->setTextAlignment(i + 1, Qt::AlignCenter);
 		frameLateCount->setTextAlignment(i + 1, Qt::AlignCenter);
+		videoTimeAbs->setTextAlignment(i + 1, Qt::AlignCenter);
 	}
 
 	hbox = new QHBoxLayout();
@@ -267,6 +272,19 @@ void FrameTimingDialog_t::updateTimingStats(void)
 
 	sprintf(stmp, "%.1f", 100.0 * stats.frameTimeIdle.max / stats.frameTimeAbs.tgt);
 	frameTimeIdlePct->setText(4, tr(stmp));
+
+	// Video
+	sprintf(stmp, "%.3f", stats.videoTimeDel.tgt * 1e3);
+	videoTimeAbs->setText(1, tr(stmp));
+
+	sprintf(stmp, "%.3f", stats.videoTimeDel.cur * 1e3);
+	videoTimeAbs->setText(2, tr(stmp));
+
+	sprintf(stmp, "%.3f", stats.videoTimeDel.min * 1e3);
+	videoTimeAbs->setText(3, tr(stmp));
+
+	sprintf(stmp, "%.3f", stats.videoTimeDel.max * 1e3);
+	videoTimeAbs->setText(4, tr(stmp));
 
 	// Late Count
 	sprintf(stmp, "%u", stats.lateCount);

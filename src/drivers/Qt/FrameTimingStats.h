@@ -39,6 +39,7 @@ protected:
 	QTreeWidgetItem *frameTimeIdle;
 	QTreeWidgetItem *frameTimeIdlePct;
 	QTreeWidgetItem *frameLateCount;
+	QTreeWidgetItem *videoTimeAbs;
 	QGroupBox *statFrame;
 
 	QTreeWidget *tree;

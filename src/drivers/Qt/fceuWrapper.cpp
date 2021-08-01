@@ -1242,6 +1242,10 @@ int  fceuWrapperUpdate( void )
 	
 		hexEditorUpdateMemoryValues();
 
+		if ( consoleWindow )
+		{
+			consoleWindow->emulatorThread->signalFrameFinished();
+		}
 		fceuWrapperUnLock();
 
 		emulatorHasMutux = 0;

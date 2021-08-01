@@ -38,6 +38,7 @@
 #endif
 
 #include "Qt/nes_shm.h"
+#include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleViewerGL.h"
 
@@ -100,6 +101,8 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 
 		g_config->getOption ("SDL.ForceAspect", &forceAspect);
 	}
+
+	connect( this, SIGNAL(frameSwapped(void)), this, SLOT(renderFinished(void)) );
 }
 
 ConsoleViewGL_t::~ConsoleViewGL_t(void)
@@ -494,6 +497,11 @@ void  ConsoleViewGL_t::getNormalizedCursorPos( double &x, double &y )
 		y = 1.0;
 	}
 	//printf("Normalized Cursor (%f,%f) \n", x, y );
+}
+
+void ConsoleViewGL_t::renderFinished(void)
+{
+	videoBufferSwapMark();
 }
 
 void ConsoleViewGL_t::paintGL(void)

@@ -490,6 +490,7 @@ InitConfig()
 	config->addOption("pal", "SDL.PAL", 0);
 	config->addOption("autoPal", "SDL.AutoDetectPAL", 1);
 	config->addOption("frameskip", "SDL.Frameskip", 0);
+	config->addOption("intFrameRate", "SDL.IntFrameRate", 0);
 	config->addOption("clipsides", "SDL.ClipSides", 0);
 	config->addOption("nospritelim", "SDL.DisableSpriteLimit", 1);
 	config->addOption("swapduty", "SDL.SwapDuty", 0);
@@ -922,6 +923,7 @@ UpdateEMUCore(Config *config)
 	config->getOption("SDL.Hue", &ntschue);
 	FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
 
+	config->getOption("SDL.IntFrameRate"  , &useIntFrameRate);
 	config->getOption("SDL.ForceGrayScale", &force_grayscale);
 	config->getOption("SDL.DeempBitSwap"  , &paldeemphswap);
 	config->getOption("SDL.PalNotch"      , &palnotch);

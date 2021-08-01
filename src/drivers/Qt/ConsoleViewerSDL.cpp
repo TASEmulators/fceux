@@ -26,6 +26,7 @@
 //#include <unistd.h>
 
 #include "Qt/nes_shm.h"
+#include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleViewerSDL.h"
 
@@ -649,6 +650,8 @@ void ConsoleViewSDL_t::render(void)
 	SDL_RenderCopy(sdlRenderer, sdlTexture, &source, &dest);
 
 	SDL_RenderPresent(sdlRenderer);
+
+	videoBufferSwapMark();
 
 	nes_shm->render_count++;
 }

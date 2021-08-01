@@ -36,6 +36,13 @@ struct frameTimingStat_t
 		double max;
 	} frameTimeIdle;
 
+	struct {
+		double tgt;
+		double cur;
+		double min;
+		double max;
+	} videoTimeDel;
+
 	unsigned int lateCount;
 
 	bool enabled;
@@ -44,3 +51,7 @@ struct frameTimingStat_t
 void resetFrameTiming(void);
 void setFrameTimingEnable( bool enable );
 int  getFrameTimingStats( struct frameTimingStat_t *stats );
+void videoBufferSwapMark(void);
+double getHighPrecTimeStamp(void);
+
+extern bool useIntFrameRate;
