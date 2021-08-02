@@ -1686,6 +1686,8 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
 #define HKEY_STEP_ONE_ID 0
 #define HKEY_STEP_OUT_ID 1
+#define HKEY_STEP_OVER_ID 2
+#define HKEY_RUN_ID 3
 #define HKEY_SEEK_ADDR_ID 4
 #define HKEY_SEEK_PC_ID 5
 #define HKEY_SET_PC_ID 6
@@ -1817,6 +1819,8 @@ void DebuggerInitDialog(HWND hwndDlg)
 	// TODO: Be sure to unregister all these!!
 	RegisterHotKey(hwndDlg, HKEY_STEP_ONE_ID, 0, VK_F11);
 	RegisterHotKey(hwndDlg, HKEY_STEP_OUT_ID, MOD_SHIFT, VK_F11);
+	RegisterHotKey(hwndDlg, HKEY_STEP_OVER_ID, 0, VK_F10);
+	RegisterHotKey(hwndDlg, HKEY_RUN_ID, 0, VK_F5);
 
 	RegisterHotKey(hwndDlg, HKEY_SEEK_ADDR_ID, MOD_CONTROL, 0x41); // A
 	RegisterHotKey(hwndDlg, HKEY_SEEK_PC_ID, MOD_CONTROL, 0x50); // P
@@ -2522,6 +2526,11 @@ void DebuggerHotKey(HWND hwndDlg, UINT hotkeyId, uint16 keycode, uint16 mods)
 			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_STEP_OUT, NULL);
 			printf("Step out\n");
 			break;
+		case HKEY_STEP_OVER_ID:
+			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_STEP_OVER, NULL);
+			break;
+		case HKEY_RUN_ID:
+			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_RUN, NULL);
 		case HKEY_SEEK_ADDR_ID:
 			printf("Seek to address\n");
 			SetFocus(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PCSEEK));
