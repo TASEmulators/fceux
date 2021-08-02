@@ -2515,16 +2515,18 @@ void DebuggerEnChange(HWND hwndDlg, uint16 textBoxId, HWND hwndTextbox)
 
 void DebuggerHotKey(HWND hwndDlg, UINT hotkeyId, uint16 keycode, uint16 mods)
 {
+	// No idea if this is good programming. Should we use accelerators instead?
+	if (GetForegroundWindow() != hwndDlg)
+		return;
+
 	switch (hotkeyId)
 	{
 		// Do we want autorepeat on these? MOD_NOREPEAT doesn't seem to exist so idk what to do.
 		case HKEY_STEP_ONE_ID:
-			printf("Step one\n");
 			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_STEP_IN, NULL);
 			break;
 		case HKEY_STEP_OUT_ID:
 			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_STEP_OUT, NULL);
-			printf("Step out\n");
 			break;
 		case HKEY_STEP_OVER_ID:
 			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_STEP_OVER, NULL);
@@ -2532,12 +2534,10 @@ void DebuggerHotKey(HWND hwndDlg, UINT hotkeyId, uint16 keycode, uint16 mods)
 		case HKEY_RUN_ID:
 			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_RUN, NULL);
 		case HKEY_SEEK_ADDR_ID:
-			printf("Seek to address\n");
 			SetFocus(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PCSEEK));
 			SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PCSEEK, "");
 			break;
 		case HKEY_SEEK_PC_ID:
-			printf("Seek to PC\n");
 			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_SEEK_PC, NULL);
 			break;
 	}
