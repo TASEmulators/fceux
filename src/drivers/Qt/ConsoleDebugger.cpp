@@ -1092,7 +1092,6 @@ void ConsoleDebugger::buildPpuListDisplay(void)
 	ppuStatContainerWidget = new QWidget(this);
 	ppuStatContainerWidget->setSizePolicy( QSizePolicy::Maximum, QSizePolicy::Maximum );
 
-	vbox1       = new QVBoxLayout();
 	ppuFrame    = new QFrame();
 	grid        = new QGridLayout();
 

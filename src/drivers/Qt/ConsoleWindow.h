@@ -152,6 +152,8 @@ class  consoleWin_t : public QMainWindow
 
 		int loadVideoDriver( int driverId );
 
+		double getRefreshRate(void){ return refreshRate; }
+
 		emulatorThread_t *emulatorThread;
 		AviRecordDiskThread_t *aviDiskThread;
 
@@ -258,6 +260,7 @@ class  consoleWin_t : public QMainWindow
 		std::vector <autoFireMenuAction*> afActList;
 		autoFireMenuAction *afActCustom;
 
+		double       refreshRate;
 		unsigned int updateCounter;
 	protected:
 		void resizeEvent(QResizeEvent *event) override;

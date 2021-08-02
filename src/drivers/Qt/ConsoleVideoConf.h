@@ -59,6 +59,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QSpinBox       *pal_end;
 		QLineEdit      *winSizeReadout;
 		QLineEdit      *vpSizeReadout;
+		QLineEdit      *scrRateReadout;
 
 		void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
 		void  setComboBoxFromProperty( QComboBox *cbx, const char *property );

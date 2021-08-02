@@ -214,6 +214,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		this->showFullScreen();
 	}
 
+	refreshRate = 0.0;
 	updateCounter = 0;
 	recentRomMenuReset = false;
 
@@ -369,6 +370,7 @@ void consoleWin_t::winScreenChanged(QScreen *scr)
 	{
 		return;
 	}
+	refreshRate = scr->refreshRate();
 	//printf("Screen Refresh Rate: %f\n", scr->refreshRate() );
 
 	//printf("Screen Changed: %p\n", scr );

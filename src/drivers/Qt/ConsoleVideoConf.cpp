@@ -37,8 +37,8 @@
 ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
-	QVBoxLayout *main_vbox, *vbox1, *vbox2;
-	QHBoxLayout *main_hbox, *hbox1;
+	QVBoxLayout *main_vbox, *vbox1, *vbox2, *vbox;
+	QHBoxLayout *main_hbox, *hbox1, *hbox;
 	QLabel *lbl;
 	QPushButton *button;
 	QStyle *style;
@@ -46,6 +46,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	QGridLayout *grid;
 	QFont font;
 	int opt, fontCharWidth;
+	char stmp[128];
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -412,10 +413,25 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	setCheckBoxFromProperty( cursorVisCbx, "SDL.CursorVis" );
 	grid->addWidget( cursorVisCbx, 1, 0, 2, 1, Qt::AlignLeft);
 
-	//grid->addWidget( drawInputAidsCbx, 2, 0, 2, 1, Qt::AlignLeft);
-
 	connect(cursorVisCbx    , SIGNAL(stateChanged(int)), this, SLOT(cursorVisChanged(int)) );
 
+	vbox  = new QVBoxLayout();
+	hbox  = new QHBoxLayout();
+	gbox  = new QGroupBox( tr("Screen") );
+	gbox->setLayout( vbox );
+
+	scrRateReadout = new QLineEdit();
+	scrRateReadout->setFont( font );
+	scrRateReadout->setReadOnly(true);
+	scrRateReadout->setAlignment(Qt::AlignCenter);
+	sprintf( stmp, "%.3f", consoleWindow->getRefreshRate() );
+	scrRateReadout->setText( tr(stmp) );
+
+	hbox->addWidget( new QLabel( tr("Refresh Rate (Hz):") ) );
+	hbox->addWidget( scrRateReadout );
+	vbox->addLayout( hbox );
+
+	vbox2->addWidget( gbox );
 	vbox2->addStretch( 5 );
 
 	setLayout( main_vbox );

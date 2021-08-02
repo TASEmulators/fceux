@@ -460,6 +460,11 @@ int GamePad_t::convText2ButtConfig( const char *txt, ButtConfig *bmap )
 	bmap->DeviceNum = -1;
 	bmap->ButtonNum = -1;
 
+	if (txt[0] == 0 )
+	{
+		return 0;
+	}
+
 	if (txt[0] == 'k')
 	{
 		SDL_Keycode key;
@@ -718,7 +723,7 @@ int GamePad_t::loadHotkeyMapFromFile(const char *filename)
 	char line[256];
 	char id[128];
 	char val[128];
-	bool lineIsHotKey;
+	bool lineIsHotKey = false;
 	char modBtn[32], priBtn[32];
 	char onPressAct[64], onReleaseAct[64];
 
