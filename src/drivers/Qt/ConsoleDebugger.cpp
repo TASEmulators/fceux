@@ -6774,6 +6774,9 @@ ppuRegPopup::ppuRegPopup( QWidget *parent )
 	QCheckBox *iRed_cbox;
 	QCheckBox *iGrn_cbox;
 	QCheckBox *iBlu_cbox;
+	QCheckBox *vblank_cbox;
+	QCheckBox *sprite0hit_cbox;
+	QCheckBox *spriteOvrflw_cbox;
 	char stmp[32];
 
 	//QPalette pal = this->palette();
@@ -6784,7 +6787,7 @@ ppuRegPopup::ppuRegPopup( QWidget *parent )
 	vbox1    = new QVBoxLayout();
 	vbox     = new QVBoxLayout();
 	winFrame = new QFrame();
-	ctlFrame = new QGroupBox( tr("PPU Control / Mask") );
+	ctlFrame = new QGroupBox( tr("PPU Control / Mask / Status") );
 	grid1    = new QGridLayout();
 	grid     = new QGridLayout();
 
@@ -6808,17 +6811,20 @@ ppuRegPopup::ppuRegPopup( QWidget *parent )
 
 	grid1->addLayout( grid, 0, 0, 3, 1 );
 
-	bgEnabled_cbox  = new QCheckBox( tr("BG Enabled") );
-	sprites_cbox    = new QCheckBox( tr("Sprites Enabled") );
-	drawLeftBg_cbox = new QCheckBox( tr("Draw Left BG (8px)") );
-	drawLeftFg_cbox = new QCheckBox( tr("Draw Left Sprites (8px)") );
-	vwrite_cbox     = new QCheckBox( tr("Vertical Write") );
-	nmiBlank_cbox   = new QCheckBox( tr("NMI on vBlank") );
-	sprite8x16_cbox = new QCheckBox( tr("8x16 Sprites") );
-	grayscale_cbox  = new QCheckBox( tr("Grayscale") );
-	iRed_cbox       = new QCheckBox( tr("Intensify Red") );
-	iGrn_cbox       = new QCheckBox( tr("Intensify Green") );
-	iBlu_cbox       = new QCheckBox( tr("Intensify Blue") );
+	bgEnabled_cbox    = new QCheckBox( tr("BG Enabled") );
+	sprites_cbox      = new QCheckBox( tr("Sprites Enabled") );
+	drawLeftBg_cbox   = new QCheckBox( tr("Draw Left BG (8px)") );
+	drawLeftFg_cbox   = new QCheckBox( tr("Draw Left Sprites (8px)") );
+	vwrite_cbox       = new QCheckBox( tr("Vertical Write") );
+	nmiBlank_cbox     = new QCheckBox( tr("NMI on vBlank") );
+	sprite8x16_cbox   = new QCheckBox( tr("8x16 Sprites") );
+	grayscale_cbox    = new QCheckBox( tr("Grayscale") );
+	iRed_cbox         = new QCheckBox( tr("Intensify Red") );
+	iGrn_cbox         = new QCheckBox( tr("Intensify Green") );
+	iBlu_cbox         = new QCheckBox( tr("Intensify Blue") );
+	vblank_cbox       = new QCheckBox( tr("V-Blank") );
+	sprite0hit_cbox   = new QCheckBox( tr("Sprite 0 Hit") );
+	spriteOvrflw_cbox = new QCheckBox( tr("Sprite Overflow") );
 
 	sprintf( stmp, "$%04X", 0x2000 + (0x400*(PPU[0] & 0x03)));
 	ppuBgAddr->setText( tr(stmp) );
@@ -6838,10 +6844,16 @@ ppuRegPopup::ppuRegPopup( QWidget *parent )
 	      iGrn_cbox->setChecked( PPU[1] & 0x40 );
 	      iBlu_cbox->setChecked( PPU[1] & 0x80 );
 
-	grid1->addWidget( bgEnabled_cbox , 3, 0 );
-	grid1->addWidget( sprites_cbox   , 4, 0 );
-	grid1->addWidget( drawLeftBg_cbox, 5, 0 );
-	grid1->addWidget( drawLeftFg_cbox, 6, 0 );
+	      vblank_cbox->setChecked( PPU[2] & 0x80 );
+	  sprite0hit_cbox->setChecked( PPU[2] & 0x40 );
+	spriteOvrflw_cbox->setChecked( PPU[2] & 0x20 );
+
+	grid1->addWidget( bgEnabled_cbox   , 3, 0 );
+	grid1->addWidget( sprites_cbox     , 4, 0 );
+	grid1->addWidget( drawLeftBg_cbox  , 5, 0 );
+	grid1->addWidget( drawLeftFg_cbox  , 6, 0 );
+	grid1->addWidget( sprite0hit_cbox  , 7, 0 );
+	grid1->addWidget( spriteOvrflw_cbox, 8, 0 );
 
 	grid1->addWidget( vwrite_cbox    , 0, 1 );
 	grid1->addWidget( nmiBlank_cbox  , 1, 1 );
@@ -6850,6 +6862,7 @@ ppuRegPopup::ppuRegPopup( QWidget *parent )
 	grid1->addWidget( iRed_cbox      , 4, 1 );
 	grid1->addWidget( iGrn_cbox      , 5, 1 );
 	grid1->addWidget( iBlu_cbox      , 6, 1 );
+	grid1->addWidget( vblank_cbox    , 7, 1 );
 
 	setLayout( vbox1 );
 }
@@ -7093,7 +7106,7 @@ void DebuggerTabBar::mouseMoveEvent( QMouseEvent *event)
 //----------------------------------------------------------------------------
 void DebuggerTabBar::mousePressEvent( QMouseEvent *event)
 {
-	printf("TabBar Mouse Press: (%i,%i) \n", event->pos().x(), event->pos().y() );;
+	//printf("TabBar Mouse Press: (%i,%i) \n", event->pos().x(), event->pos().y() );;
 	QTabBar::mousePressEvent(event);
 
 	if ( (event->button() == Qt::LeftButton) && (currentIndex() >= 0) )
