@@ -607,7 +607,8 @@ QStyle *fceuStyle::styleBase(QStyle *style) const
 	{
 		int i, idx = -1;
 #ifdef WIN32
-		QString defaultStyle("windows");
+		//QString defaultStyle("windows"); // fusion is much more stable and consistent.
+		QString defaultStyle("fusion");
 #elif __APPLE__
 		QString defaultStyle("fusion");
 #else
