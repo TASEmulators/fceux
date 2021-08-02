@@ -1745,6 +1745,9 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
 	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
 
+	    okButton->setIcon( style()->standardIcon( QStyle::SP_DialogOkButton ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
 	okButton->setDefault(true);
 
 	if ( wp != NULL )
