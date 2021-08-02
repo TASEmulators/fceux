@@ -432,6 +432,7 @@ class ConsoleDebugger : public QDialog
 		QLabel    *asmLineSelLbl;
 
 		void setCpuStatusFont( const QFont &font );
+		void setPpuStatusFont( const QFont &font );
 	protected:
 		void closeEvent(QCloseEvent *event) override;
 		//void keyPressEvent(QKeyEvent *event) override;
@@ -476,17 +477,16 @@ class ConsoleDebugger : public QDialog
 		QCheckBox *Z_chkbox;
 		QCheckBox *C_chkbox;
 
-		QCheckBox *bgEnabled_cbox;
-		QCheckBox *sprites_cbox;
-		QCheckBox *drawLeftBg_cbox;
-		QCheckBox *drawLeftFg_cbox;
-		QCheckBox *vwrite_cbox;
-		QCheckBox *nmiBlank_cbox;
-		QCheckBox *sprite8x16_cbox;
-		QCheckBox *grayscale_cbox;
-		QCheckBox *iRed_cbox;
-		QCheckBox *iGrn_cbox;
-		QCheckBox *iBlu_cbox;
+		ppuCtrlRegDpy *ppuCtrlReg;
+		ppuCtrlRegDpy *ppuMaskReg;
+		ppuCtrlRegDpy *ppuStatReg;
+		QLineEdit     *ppuAddrDsp;
+		QLineEdit     *oamAddrDsp;
+		QLineEdit     *ppuScanLineDsp;
+		QLineEdit     *ppuPixelDsp;
+		QLineEdit     *ppuScrollX;
+		QLineEdit     *ppuScrollY;
+		QGridLayout   *ppuDataGrid;
 
 		QAction   *brkOnCycleExcAct;
 		QAction   *brkOnInstrExcAct;
@@ -497,14 +497,11 @@ class ConsoleDebugger : public QDialog
 		QWidget   *bmTreeContainerWidget;
 		QWidget   *ppuStatContainerWidget;
 		QLabel    *emuStatLbl;
-		QLabel    *ppuLbl;
-		QLabel    *spriteLbl;
-		QLabel    *scanLineLbl;
-		QLabel    *pixLbl;
 		QLabel    *cpuCyclesLbl1;
 		QLabel    *cpuInstrsLbl1;
 		QTimer    *periodicTimer;
 		QFont      font;
+		QFont      cpuFont;
 
 		QVBoxLayout   *mainLayoutv;
 		QSplitter     *mainLayouth;

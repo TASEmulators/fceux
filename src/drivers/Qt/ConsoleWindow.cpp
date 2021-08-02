@@ -369,6 +369,7 @@ void consoleWin_t::winScreenChanged(QScreen *scr)
 	{
 		return;
 	}
+	//printf("Screen Refresh Rate: %f\n", scr->refreshRate() );
 
 	//printf("Screen Changed: %p\n", scr );
 	if ( viewport_GL != NULL )
