@@ -1679,9 +1679,10 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
 // Need to coordinate these with res.rc
 #define MENU_OPTIONS_POS 0
-#define MENU_COLORS_POS 1
-#define MENU_SYMBOLS_POS 2
-#define MENU_TOOLS_POS 3
+#define MENU_SYMBOLS_POS 1
+#define MENU_TOOLS_POS 2
+
+#define MENU_OPTIONS_COLORS_POS 2
 
 #define HKEY_STEP_ONE_ID 0
 #define HKEY_STEP_OUT_ID 1
@@ -1803,13 +1804,14 @@ void DebuggerInitDialog(HWND hwndDlg)
 
 	// prepare menu
 	HMENU hdbgmenu = GetMenu(hwndDlg);
-	HMENU hcolorpopupmenu = GetSubMenu(hdbgmenu, MENU_COLORS_POS);
-	for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
-		InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
 
 	UpdateOptionsPopup(optionsPopup = GetSubMenu(hdbgmenu, MENU_OPTIONS_POS));
 	UpdateSymbolsPopup(symbolsPopup = GetSubMenu(hdbgmenu, MENU_SYMBOLS_POS));
 	UpdateToolsPopup(toolsPopup = GetSubMenu(hdbgmenu, MENU_TOOLS_POS));
+
+	HMENU hcolorpopupmenu = GetSubMenu(optionsPopup, MENU_OPTIONS_COLORS_POS);
+	for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
+		InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
 
 	// Register default hotkeys
 	// TODO: Be sure to unregister all these!!
@@ -1944,7 +1946,7 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 				RECT rect;
 				GetClientRect(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), &rect);
 				UpdateDisassembleView(hwndDlg, IDC_DEBUGGER_DISASSEMBLY, (rect.bottom - rect.top) / debugSystem->disasmFontHeight);
-				HMENU hcolorpopupmenu = GetSubMenu(GetMenu(hwndDlg), 1);
+				HMENU hcolorpopupmenu = GetSubMenu(optionsPopup, MENU_OPTIONS_COLORS_POS);
 				for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 					ModifyColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
 			}

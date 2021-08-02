@@ -3037,6 +3037,11 @@ BEGIN
     BEGIN
         MENUITEM "Auto Open on ROM Load",       ID_DEBUGGER_AUTO_OPEN, CHECKED
 		MENUITEM SEPARATOR
+		POPUP "Colors..."
+		BEGIN
+			MENUITEM SEPARATOR
+			MENUITEM "Restore Defaults", ID_DEBUGGER_DEFCOLOR
+		END
         MENUITEM "IDA Font",                    ID_DEBUGGER_IDA_FONT, CHECKED
         MENUITEM "ROM Offsets",                 ID_DEBUGGER_SHOW_ROM_OFFSETS, CHECKED
 		MENUITEM "Show Trace Info",             ID_DEBUGGER_SHOW_TRACE_INFO, CHECKED
@@ -3046,11 +3051,6 @@ BEGIN
 		MENUITEM "Break on Unlogged Data",      ID_DEBUGGER_BREAK_UNLOGGED_DATA, CHECKED
         MENUITEM SEPARATOR
         MENUITEM "Reset Window Size",           ID_DEBUGGER_RESTORE_SIZE
-    END
-    POPUP "Colors"
-    BEGIN
-        MENUITEM SEPARATOR
-        MENUITEM "Restore Defaults",            ID_DEBUGGER_DEFCOLOR
     END
     POPUP "Symbols"
     BEGIN
