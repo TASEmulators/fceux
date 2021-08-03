@@ -253,6 +253,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	mapSel = new QComboBox();
 	hbox->addWidget(mapSel);
 
+	mapSel->setToolTip(tr("Selected button mapping profile for use with Load/Save/Delete operations"));
 	mapSel->setWhatsThis(tr("Combo box for selection of a saved button mapping profile for the selected device"));
 	mapSel->addItem(tr("default"), 0);
 
@@ -261,11 +262,13 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	applyProfileButton = new QPushButton(tr("Load"));
 	applyProfileButton->setWhatsThis(tr("Sets Current Active Map to the Selected Profile"));
+	applyProfileButton->setToolTip( tr("Load selected configuration profile into current active mapping") );
 	applyProfileButton->setIcon(style->standardIcon(QStyle::SP_DialogApplyButton));
 	hbox->addWidget(applyProfileButton);
 
 	saveProfileButton = new QPushButton(tr("Save"));
 	saveProfileButton->setWhatsThis(tr("Stores Current Active Map to the Selected Profile"));
+	saveProfileButton->setToolTip( tr("Save current active mapping to selected configuration profile") );
 	saveProfileButton->setIcon(style->standardIcon(QStyle::SP_DialogSaveButton));
 	hbox->addWidget(saveProfileButton);
 
@@ -274,11 +277,13 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	newProfileButton = new QPushButton(tr("New"));
 	newProfileButton->setWhatsThis(tr("Create a New Map Profile"));
+	newProfileButton->setToolTip( tr("Create a new named configuration profile") );
 	newProfileButton->setIcon(style->standardIcon(QStyle::SP_FileIcon));
 	hbox->addWidget(newProfileButton);
 
 	removeProfileButton = new QPushButton(tr("Delete"));
 	removeProfileButton->setWhatsThis(tr("Deletes the Selected Map Profile"));
+	removeProfileButton->setToolTip( tr("Delete selected configuration profile") );
 	removeProfileButton->setIcon(style->standardIcon(QStyle::SP_TrashIcon));
 	hbox->addWidget(removeProfileButton);
 
