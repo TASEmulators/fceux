@@ -436,20 +436,20 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	mainWidget->setLayout(mainLayoutH);
 	mainWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+	vbox1 = new QVBoxLayout();
 	hbox1 = new QHBoxLayout();
-	vbox  = new QVBoxLayout();
+	hbox  = new QHBoxLayout();
 
 	advOptLayout->setLayout(hbox1);
-	hbox1->addLayout(vbox);
+	hbox1->addLayout(vbox1);
 
 	newKeyBindBtn  = new QPushButton( tr("New") );
 	editKeyBindBtn = new QPushButton( tr("Edit") );
 	delKeyBindBtn  = new QPushButton( tr("Delete") );
 
-	vbox->addWidget( newKeyBindBtn , 1 );
-	vbox->addWidget( editKeyBindBtn, 1 );
-	vbox->addWidget( delKeyBindBtn , 1 );
-	vbox->addStretch(5);
+	hbox->addWidget( newKeyBindBtn  );
+	hbox->addWidget( editKeyBindBtn );
+	hbox->addWidget( delKeyBindBtn  );
 
 	keyBindTree = new QTreeWidget();
 
@@ -468,7 +468,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	keyBindTree->header()->setSectionResizeMode(QHeaderView::Interactive);
 	keyBindTree->setMinimumWidth( 256 );
 
-	hbox1->addWidget(keyBindTree);
+	vbox1->addWidget(keyBindTree);
+	vbox1->addLayout(hbox);
 
 	connect( newKeyBindBtn, SIGNAL(clicked()), this, SLOT(newKeyBindingCallback(void)));
 	connect(editKeyBindBtn, SIGNAL(clicked()), this, SLOT(editKeyBindingCallback(void)));
