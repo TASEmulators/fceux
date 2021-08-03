@@ -338,6 +338,10 @@ GamePad_t::GamePad_t(void)
 			bmap[c][i].state = 0;
 		}
 	}
+	for (int i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
+	{
+		bmapState[i] = 0;
+	}
 }
 //********************************************************************************
 GamePad_t::~GamePad_t(void)
