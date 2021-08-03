@@ -13,6 +13,7 @@
 #include <QLabel>
 #include <QFrame>
 #include <QTimer>
+#include <QTabBar>
 #include <QGroupBox>
 #include <QPainter>
 #include <QTreeView>
@@ -178,6 +179,7 @@ protected:
 	QLabel *keyState[GAMEPAD_NUM_BUTTONS];
 	GamePadConfigButton_t *button[GAMEPAD_NUM_BUTTONS];
 	GamePadView_t *gpView;
+	QTabBar *confTabBar;
 
 	QPushButton *newKeyBindBtn;
 	QPushButton *editKeyBindBtn;
@@ -185,6 +187,7 @@ protected:
 	QTreeWidget *keyBindTree;
 
 	int portNum;
+	int configIndex;
 	int buttonConfigStatus;
 	int changeSeqStatus; // status of sequentally changing buttons mechanism
 						 //    0 - we can start new change process
@@ -231,6 +234,7 @@ private slots:
 	void clearButton8(void);
 	void clearButton9(void);
 	void clearAllCallback(void);
+	void btnConfigChanged(int index);
 	void ena4score(int state);
 	void oppDirEna(int state);
 	void portSelect(int index);

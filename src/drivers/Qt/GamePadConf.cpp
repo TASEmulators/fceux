@@ -137,6 +137,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	mainWidget = new QWidget();
 
 	portNum = 0;
+	configIndex = 0;
 	buttonConfigStatus = 1;
 
 	inputTimer = new QTimer(this);
@@ -295,8 +296,23 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &opposite_dirs);
 	udlr_chkbox->setChecked(opposite_dirs);
 
+	confTabBar = new QTabBar();
 	frame2 = new QGroupBox(tr("Current Active Button Mappings:"));
 	grid = new QGridLayout();
+
+	confTabBar->addTab( tr("Pri") );
+	confTabBar->addTab( tr("Alt 1") );
+	confTabBar->addTab( tr("Alt 2") );
+	confTabBar->addTab( tr("Alt 3") );
+
+	confTabBar->setTabToolTip( 0, tr("Primary Button Map") );
+	confTabBar->setTabToolTip( 1, tr("Alternate Button Map #1") );
+	confTabBar->setTabToolTip( 2, tr("Alternate Button Map #2") );
+	confTabBar->setTabToolTip( 3, tr("Alternate Button Map #3") );
+
+	confTabBar->setCurrentIndex(0);
+
+	connect( confTabBar, SIGNAL(currentChanged(int)), this, SLOT(btnConfigChanged(int)) );
 
 	//grid-> setHorizontalSpacing(10);
 
@@ -391,6 +407,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	vbox1->addWidget(frame1);
 	vbox1->addLayout(hbox2);
 
+	vbox2->addWidget(confTabBar);
 	vbox2->addWidget(frame2);
 	vbox2->addLayout(hbox1);
 
@@ -705,14 +722,14 @@ void GamePadConfDialog_t::updateCntrlrDpy(void)
 
 	for (int i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
 	{
-		if (GamePad[portNum].bmap[i].ButtType == BUTTC_KEYBOARD)
+		if (GamePad[portNum].bmap[configIndex][i].ButtType == BUTTC_KEYBOARD)
 		{
 			snprintf(keyNameStr, sizeof(keyNameStr), "%s",
-					 SDL_GetKeyName(GamePad[portNum].bmap[i].ButtonNum));
+					 SDL_GetKeyName(GamePad[portNum].bmap[configIndex][i].ButtonNum));
 		}
 		else
 		{
-			strcpy(keyNameStr, ButtonName(&GamePad[portNum].bmap[i]));
+			strcpy(keyNameStr, ButtonName(&GamePad[portNum].bmap[configIndex][i]));
 		}
 
 		keyName[i]->setText(tr(keyNameStr));
@@ -819,14 +836,14 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 	button[x]->setText("Waiting");
 	button[x]->setStyleSheet("background-color: green; color: white;");
 
-	DWaitButton(NULL, &GamePad[padNo].bmap[x], &buttonConfigStatus);
+	DWaitButton(NULL, &GamePad[padNo].bmap[configIndex][x], &buttonConfigStatus);
 
 	button[x]->setText("Change");
 	button[x]->setStyleSheet(NULL);
 
 	if (buttonConfigStatus != 0)
 	{
-		keyNameStr = ButtonName(&GamePad[padNo].bmap[x]);
+		keyNameStr = ButtonName(&GamePad[padNo].bmap[configIndex][x]);
 		keyName[x]->setText( tr(keyNameStr) );
 		lcl[padNo].btn[x].needsSave = 1;
 	}
@@ -838,7 +855,7 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 //----------------------------------------------------
 void GamePadConfDialog_t::clearButton(int padNo, int x)
 {
-	GamePad[padNo].bmap[x].ButtonNum = -1;
+	GamePad[padNo].bmap[configIndex][x].ButtonNum = -1;
 
 	//keyName[x]->setText( tr("") );
 	keyName[x]->clear();
@@ -994,6 +1011,13 @@ void GamePadConfDialog_t::clearAllCallback(void)
 	{
 		clearButton(portNum, i);
 	}
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::btnConfigChanged(int idx)
+{
+	configIndex = idx;
+
+	updateCntrlrDpy();
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::saveConfig(void)
@@ -1592,7 +1616,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 
 	painter.fillRect(cBtn, black);
 
-	if (GamePad[portNum].bmap[4].state)
+	if (GamePad[portNum].bmapState[4])
 	{
 		painter.fillRect(upBtn, green);
 	}
@@ -1601,7 +1625,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 		painter.fillRect(upBtn, black);
 	}
 
-	if (GamePad[portNum].bmap[5].state)
+	if (GamePad[portNum].bmapState[5])
 	{
 		painter.fillRect(dnBtn, green);
 	}
@@ -1610,7 +1634,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 		painter.fillRect(dnBtn, black);
 	}
 
-	if (GamePad[portNum].bmap[6].state)
+	if (GamePad[portNum].bmapState[6])
 	{
 		painter.fillRect(lBtn, green);
 	}
@@ -1619,7 +1643,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 		painter.fillRect(lBtn, black);
 	}
 
-	if (GamePad[portNum].bmap[7].state)
+	if (GamePad[portNum].bmapState[7])
 	{
 		painter.fillRect(rBtn, green);
 	}
@@ -1637,7 +1661,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	selBtn.setRect(x + (bw / 3), y, bw, bh);
 	stBtn.setRect(x + (5 * bw) / 3, y, bw, bh);
 
-	if (GamePad[portNum].bmap[2].state)
+	if (GamePad[portNum].bmapState[2])
 	{
 		painter.fillRect(selBtn, green);
 	}
@@ -1646,7 +1670,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 		painter.fillRect(selBtn, gray);
 	}
 
-	if (GamePad[portNum].bmap[3].state)
+	if (GamePad[portNum].bmapState[3])
 	{
 		painter.fillRect(stBtn, green);
 	}
@@ -1689,7 +1713,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	bBtn.setRect(x + ws, y, bw, bh);
 	aBtn.setRect(x + bw + (2 * ws), y, bw, bh);
 
-	if (GamePad[portNum].bmap[9].state)
+	if (GamePad[portNum].bmapState[9])
 	{
 		painter.setBrush(Qt::green);
 	}
@@ -1701,7 +1725,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	painter.drawEllipse(tbBtn);
 	drawLetterOnButton(painter, tbBtn, black, 'B');
 
-	if (GamePad[portNum].bmap[8].state)
+	if (GamePad[portNum].bmapState[8])
 	{
 		painter.setBrush(Qt::green);
 	}
@@ -1713,7 +1737,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	painter.drawEllipse(taBtn);
 	drawLetterOnButton(painter, taBtn, black, 'A');
 
-	if (GamePad[portNum].bmap[1].state)
+	if (GamePad[portNum].bmapState[1])
 	{
 		painter.setBrush(Qt::green);
 	}
@@ -1725,7 +1749,7 @@ void GamePadView_t::paintEvent(QPaintEvent *event)
 	painter.drawEllipse(bBtn);
 	drawLetterOnButton(painter, bBtn, black, 'B');
 
-	if (GamePad[portNum].bmap[0].state)
+	if (GamePad[portNum].bmapState[0])
 	{
 		painter.setBrush(Qt::green);
 	}

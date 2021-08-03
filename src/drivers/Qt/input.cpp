@@ -1412,9 +1412,10 @@ UpdateGamepad(void)
 	}
 
 	uint32 JS = 0;
-	int x;
+	int x,c;
 	int wg;
 	bool fire;
+	char btns[GAMEPAD_NUM_BUTTONS];
 
 	int opposite_dirs;
 	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &opposite_dirs);
@@ -1424,59 +1425,71 @@ UpdateGamepad(void)
 	{
 		bool left = false;
 		bool up = false;
-		// a, b, select, start, up, down, left, right
-		for (x = 0; x < 8; x++)
+		memset( btns, 0, sizeof(btns) );
+
+		for (c = 0; c < GamePad_t::NUM_CONFIG; c++)
 		{
-			if (DTestButton(&GamePad[wg].bmap[x]))
+			// a, b, select, start, up, down, left, right
+			for (x = 0; x < 8; x++)
 			{
-				//printf("GamePad%i Button Hit: %i \n", wg, x );
-				if (opposite_dirs == 0)
+				if (DTestButton(&GamePad[wg].bmap[c][x]))
 				{
-					// test for left+right and up+down
-					if (x == 4)
+					btns[x] = 1;
+					//printf("GamePad%i Button Hit: %i \n", wg, x );
+					if (opposite_dirs == 0)
 					{
-						up = true;
+						// test for left+right and up+down
+						if (x == 4)
+						{
+							up = true;
+						}
+						if ((x == 5) && (up == true))
+						{
+							continue;
+						}
+						if (x == 6)
+						{
+							left = true;
+						}
+						if ((x == 7) && (left == true))
+						{
+							continue;
+						}
 					}
-					if ((x == 5) && (up == true))
-					{
-						continue;
-					}
-					if (x == 6)
-					{
-						left = true;
-					}
-					if ((x == 7) && (left == true))
-					{
-						continue;
-					}
-				}
-				JS |= (1 << x) << (wg << 3);
-			}
-		}
-
-		int four_button_exit;
-		g_config->getOption("SDL.ABStartSelectExit", &four_button_exit);
-		// if a+b+start+select is pressed, exit
-		if (four_button_exit && JS == 15)
-		{
-			FCEUI_printf("all buttons pressed, exiting\n");
-			CloseGame();
-			FCEUI_Kill();
-			exit(0);
-		}
-
-		// rapid-fire a, rapid-fire b
-		for (x = 0; x < 2; x++)
-		{
-			if (DTestButton(&GamePad[wg].bmap[8 + x]))
-			{
-				fire = GetAutoFireState(x);
-
-				if (fire)
-				{
 					JS |= (1 << x) << (wg << 3);
 				}
 			}
+
+			int four_button_exit;
+			g_config->getOption("SDL.ABStartSelectExit", &four_button_exit);
+			// if a+b+start+select is pressed, exit
+			if (four_button_exit && JS == 15)
+			{
+				FCEUI_printf("all buttons pressed, exiting\n");
+				CloseGame();
+				FCEUI_Kill();
+				exit(0);
+			}
+
+			// rapid-fire a, rapid-fire b
+			for (x = 0; x < 2; x++)
+			{
+				if (DTestButton(&GamePad[wg].bmap[c][8 + x]))
+				{
+					fire = GetAutoFireState(x);
+
+					if (fire)
+					{
+						JS |= (1 << x) << (wg << 3);
+					}
+					btns[8+x] = 1;
+				}
+			}
+		}
+
+		for (x = 0; x < GAMEPAD_NUM_BUTTONS; x++)
+		{
+			GamePad[wg].bmapState[x] = btns[x];
 		}
 	}
 
@@ -2768,7 +2781,7 @@ void UpdateInput(Config *config)
 // Definitions from main.h:
 // GamePad defaults
 const char *GamePadNames[GAMEPAD_NUM_BUTTONS] = {"A", "B", "Select", "Start",
-												 "Up", "Down", "Left", "Right", "TurboA", "TurboB"};
+						 "Up", "Down", "Left", "Right", "TurboA", "TurboB"};
 const char *DefaultGamePadDevice[GAMEPAD_NUM_DEVICES] =
 	{"Keyboard", "None", "None", "None"};
 const int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS] =

@@ -15,8 +15,11 @@ struct nesGamePadMap_t
 {
 	char guid[64];
 	char name[128];
-	char btn[GAMEPAD_NUM_BUTTONS][32];
 	char os[64];
+
+	struct {
+		char btn[GAMEPAD_NUM_BUTTONS][32];
+	} conf[4];
 
 	nesGamePadMap_t(void);
 	~nesGamePadMap_t(void);
@@ -55,7 +58,11 @@ private:
 class GamePad_t
 {
 public:
-	ButtConfig bmap[GAMEPAD_NUM_BUTTONS];
+	static const int NUM_CONFIG = 4;
+
+	ButtConfig bmap[NUM_CONFIG][GAMEPAD_NUM_BUTTONS];
+
+	char bmapState[GAMEPAD_NUM_BUTTONS];
 
 	GamePad_t(void);
 	~GamePad_t(void);
@@ -72,8 +79,8 @@ public:
 	int setMapping(nesGamePadMap_t *map);
 
 	int createProfile(const char *name);
-	int getMapFromFile(const char *filename, char *out);
-	int getDefaultMap(char *out, const char *guid = NULL);
+	int getMapFromFile(const char *filename, nesGamePadMap_t *gpm);
+	int getDefaultMap(const char *guid = NULL);
 	int saveMappingToFile(const char *filename, const char *txtMap);
 	int saveCurrentMapToFile(const char *filename);
 	int deleteMapping(const char *name);
