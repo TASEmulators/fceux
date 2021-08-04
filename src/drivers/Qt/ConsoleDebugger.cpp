@@ -1811,7 +1811,7 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 				ebp->setChecked(true);
 
 				// If new breakpoint, suggest condition if in ROM Mapping area of memory.
-				if ( wp->address >= 0x8000 )
+				if ( cpu_radio->isChecked() && (wp->address >= 0x8000) )
 				{
 					int romAddr = GetNesFileAddress(wp->address);
 
@@ -3021,6 +3021,11 @@ void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 	wp.condText = 0;
 	wp.desc = NULL;
 
+	if ( asmView->getCtxMenuAddrType() )
+	{
+		wp.flags |= BT_R;
+	}
+
 	bpNum = asmView->isBreakpointAtAddr( wp.address, GetNesFileAddress(wp.address) );
 
 	if ( bpNum >= 0 )
@@ -3037,7 +3042,7 @@ void ConsoleDebugger::asmViewCtxMenuAddBP(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddBM(void)
 {
-	int addr = asmView->getCtxMenuAddr();
+	int addr = asmView->getAsmAddrFromLine( asmView->getCtxMenuLine() );
 
 	dbgBmMgr.addBookmark( addr );
 
@@ -3051,9 +3056,16 @@ void ConsoleDebugger::asmViewCtxMenuOpenHexEdit(void)
 	int romAddr = -1;
 	int addr = asmView->getCtxMenuAddr();
 
-	if (addr >= 0x8000)
+	if ( asmView->getCtxMenuAddrType() )
 	{
-		romAddr  = GetNesFileAddress(addr);
+		romAddr = addr;
+	}
+	else
+	{
+		if (addr >= 0x8000)
+		{
+			romAddr  = GetNesFileAddress(addr);
+		}
 	}
 
 	if ( romAddr >= 0 )
@@ -3079,7 +3091,9 @@ void ConsoleDebugger::setBookmarkSelectedAddress( int addr )
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuAddSym(void)
 {
-	openDebugSymbolEditWindow( asmView->getCtxMenuAddr() );
+	int addr = asmView->getAsmAddrFromLine( asmView->getCtxMenuLine() );
+
+	openDebugSymbolEditWindow( addr );
 }
 //----------------------------------------------------------------------------
 void QAsmView::setPC_placement( int mode, int ofs )
@@ -4658,6 +4672,8 @@ QAsmView::QAsmView(QWidget *parent)
 	lineOffset = 0;
 	maxLineOffset = 0;
 	ctxMenuAddr = -1;
+	ctxMenuAddrType = 0;
+	ctxMenuLine = 0;
 	cursorPosX = 0;
 	cursorPosY = 0;
 
@@ -4679,6 +4695,7 @@ QAsmView::QAsmView(QWidget *parent)
 	selAddrChar  =  0;
 	selAddrWidth =  0;
 	selAddrValue = -1;
+	selAddrType  =  0;
 	memset( selAddrText, 0, sizeof(selAddrText) );
 
 	cursorLineAddr    = -1;
@@ -4900,6 +4917,7 @@ void QAsmView::setSelAddrToLine( int line )
 		selAddrChar  = pcLocLinePos + 3;
 		selAddrWidth = 4;
 		selAddrValue = addr;
+		selAddrType  =  0;
 		sprintf( selAddrText, "%04X", addr );
 
 
@@ -5254,6 +5272,8 @@ void QAsmView::keyPressEvent(QKeyEvent *event)
 	else if ( selAddrValue >= 0 )
 	{
 		ctxMenuAddr = selAddrValue;
+		ctxMenuAddrType = selAddrType;
+		ctxMenuLine = selAddrLine;
 
 		if ( event->key() == Qt::Key_B )
 		{
@@ -5549,7 +5569,7 @@ void QAsmView::mouseDoubleClickEvent(QMouseEvent * event)
 {
 	//printf("Double Click\n");
 
-	if ( selAddrValue >= 0 )
+	if ( (selAddrType == 0) && (selAddrValue >= 0) )
 	{
 		gotoAddr( selAddrValue );
 
@@ -5593,6 +5613,7 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 	selAddrChar  =  0;
 	selAddrWidth =  0;
 	selAddrValue = -1;
+	selAddrType  =  0;
 	selAddrText[0] = 0;
 
 	if ( line < asmEntry.size() )
@@ -5628,6 +5649,7 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 					selAddrChar  = symTextStart;
 					selAddrWidth = symTextEnd - symTextStart;
 					selAddrValue = addr = asmEntry[line]->sym.ofs;
+					selAddrType  = 0;
 
 					if ( selAddrWidth >= (int)sizeof(selAddrText) )
 					{
@@ -5646,7 +5668,7 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 						addrTextLoc = i;
 						i--;
 					}
-					if ( asmEntry[line]->text[i] == '$' || asmEntry[line]->text[i] == ':' )
+					if ( asmEntry[line]->text[i] == '$' || asmEntry[line]->text[i] == ':' || asmEntry[line]->text[i] == ' ' )
 					{
 						i--;
 					}
@@ -5676,6 +5698,7 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 						selAddrChar  = addrTextLoc;
 						selAddrWidth = j;
 						selAddrValue = addr;
+						selAddrType  = displayROMoffsets && (addrTextLoc < byteCodeLinePos) && (asmEntry[line]->rom >= 0);
 						strcpy( selAddrText, stmp );
 					}
 				}
@@ -5705,11 +5728,31 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 		if ( addr < 0 )
 		{
 			addr = asmEntry[line]->addr;
+			selAddrType = 0;
+
+			if ( displayROMoffsets )
+			{
+				if ( asmEntry[line]->rom >= 0 )
+				{
+					addr = asmEntry[line]->rom;
+					selAddrType = 1;
+				}
+			}
+
+			if ( selAddrType )
+			{
+				sprintf( selAddrText, "%06X", addr );
+				selAddrWidth = 6;
+				selAddrChar  = pcLocLinePos+1;
+			}
+			else
+			{
+				sprintf( selAddrText, "%04X", addr );
+				selAddrWidth = 4;
+				selAddrChar  = pcLocLinePos+3;
+			}
 			selAddrLine  = line;
-			selAddrChar  = pcLocLinePos+3;
-			selAddrWidth = 4;
 			selAddrValue = addr;
-			sprintf( selAddrText, "%04X", addr );
 		}
 		//printf("Line: '%s'\n", asmEntry[line]->text.c_str() );
 
@@ -5800,12 +5843,16 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 		if ( selAddrValue < 0 )
 		{
 			ctxMenuAddr = addr = asmEntry[line]->addr;
+			ctxMenuAddrType = 0;
+			ctxMenuLine = line;;
 
 			enableRunToCursor = true;
 		}
 		else
 		{
 			ctxMenuAddr = addr = selAddrValue;
+			ctxMenuAddrType = selAddrType;
+			ctxMenuLine = selAddrLine;
 
 			enableRunToCursor = (selAddrValue == asmEntry[line]->addr);
 		}
@@ -5819,11 +5866,14 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 			connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuRunToCursor(void)) );
 		}
 
-		sprintf( stmp, "Go to $%04X\tDouble+Click", ctxMenuAddr );
-		act = new QAction(tr(stmp), &menu);
-		menu.addAction(act);
-		//act->setShortcut( QKeySequence(tr("Ctrl+F10")));
-		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuGoTo(void)) );
+		if ( ctxMenuAddrType == 0 )
+		{
+			sprintf( stmp, "Go to $%04X\tDouble+Click", ctxMenuAddr );
+			act = new QAction(tr(stmp), &menu);
+			menu.addAction(act);
+			//act->setShortcut( QKeySequence(tr("Ctrl+F10")));
+			connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuGoTo(void)) );
+		}
 
 		if ( isBreakpointAtAddr( addr, romAddr ) >= 0 )
 		{

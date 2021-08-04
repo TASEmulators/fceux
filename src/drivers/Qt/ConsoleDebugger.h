@@ -142,7 +142,9 @@ class QAsmView : public QWidget
 		void setSymbolDebugEnable( bool value );
 		void setRegisterNameEnable( bool value );
 		void setDisplayByteCodes( bool value );
+		int  getCtxMenuLine(void){ return ctxMenuLine; };
 		int  getCtxMenuAddr(void){ return ctxMenuAddr; };
+		int  getCtxMenuAddrType(void){ return ctxMenuAddrType; };
 		int  getCursorAddr(void){ return cursorLineAddr; };
 		void setPC_placement( int mode, int ofs = 0 );
 		void setBreakpointAtSelectedLine(void);
@@ -201,7 +203,9 @@ class QAsmView : public QWidget
 		std::vector <dbg_nav_entry_t> navFwdHist;
 		dbg_nav_entry_t  curNavLoc;
 
+		int ctxMenuLine;
 		int ctxMenuAddr;
+		int ctxMenuAddrType;
 		int maxLineLen;
 		int pxCharWidth;
 		int pxCharHeight;
@@ -230,6 +234,7 @@ class QAsmView : public QWidget
 		int  selAddrWidth;
 		int  selAddrValue;
 		char selAddrText[128];
+		char selAddrType;
 
 		int  txtHlgtAnchorChar;
 		int  txtHlgtAnchorLine;
