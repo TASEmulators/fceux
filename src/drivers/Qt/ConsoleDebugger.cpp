@@ -1807,6 +1807,9 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 		{
 			if ( editIdx < 0 )
 			{
+				// If new breakpoint, default enable checkbox to true
+				ebp->setChecked(true);
+
 				// If new breakpoint, suggest condition if in ROM Mapping area of memory.
 				if ( wp->address >= 0x8000 )
 				{
@@ -1833,6 +1836,11 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 		{
 			name->setText( tr(wp->desc) );
 		}
+	}
+	else
+	{
+		// If new breakpoint, default enable checkbox to true
+		ebp->setChecked(true);
 	}
 
 	dialog.setLayout( mainLayout );
