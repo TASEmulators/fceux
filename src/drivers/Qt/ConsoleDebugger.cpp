@@ -5011,7 +5011,7 @@ void QAsmView::calcFontData(void)
 	pxLineLead     = pxLineSpacing - metrics.height();
 	pxCursorHeight = metrics.height();
 
-	printf("W:%i  H:%i  LS:%i  \n", pxCharWidth, pxCharHeight, pxLineSpacing );
+	//printf("W:%i  H:%i  LS:%i  \n", pxCharWidth, pxCharHeight, pxLineSpacing );
 
 	viewLines   = (viewHeight / pxLineSpacing) + 1;
 
@@ -5045,7 +5045,7 @@ bool QAsmView::event(QEvent *event)
 		bool showAddrDesc = false, showOperandAddrDesc = false;
 		char stmp[256];
 
-		printf("QEvent::ToolTip\n");
+		//printf("QEvent::ToolTip\n");
 
 		QPoint c = convPixToCursor(helpEvent->pos());
 
@@ -6754,27 +6754,135 @@ bool ppuCtrlRegDpy::event(QEvent *event)
 asmLookAheadPopup::asmLookAheadPopup( int addr, QWidget *parent )
 	: fceuCustomToolTip( parent )
 {
-	int line;
+	int line, bank = -1, romOfs = -1;
+	int pxCharWidth;
 	QVBoxLayout *vbox, *vbox1;
+	QHBoxLayout *hbox;
 	QGridLayout *grid;
 	QScrollBar  *hbar, *vbar;
-	QFrame      *winFrame;
+	QFrame      *asmFrame, *dataFrame;
+	QLineEdit   *cpuAddr, *cpuVal, *romAddr;
+	QLabel      *lbl;
+	QFont        font;
+	char stmp[128];
+
+	fceuWrapperLock();
 
 	vbox    = new QVBoxLayout();
 	vbox1   = new QVBoxLayout();
 
-	winFrame   = new QFrame();
-	grid       = new QGridLayout();
+	asmFrame   = new QFrame();
+	dataFrame  = new QFrame();
 	asmView    = new QAsmView(this);
 	vbar       = new QScrollBar( Qt::Vertical, this );
 	hbar       = new QScrollBar( Qt::Horizontal, this );
 
+	font = asmView->getFont();
+	QFontMetrics fm(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = fm.horizontalAdvance(QLatin1Char('2'));
+#else
+	pxCharWidth = fm.width(QLatin1Char('2'));
+#endif
 	setHideOnMouseMove(true);
 	asmView->setIsPopUp(true);
 
-	winFrame->setLayout( vbox );
-	vbox1->addWidget( winFrame );
-	winFrame->setFrameShape(QFrame::Box);
+	if (addr >= 0x8000)
+	{
+		bank   = getBank(addr);
+		romOfs = GetNesFileAddress(addr);
+	}
+	dataFrame->setLayout( vbox );
+
+	cpuAddr = new QLineEdit();
+	cpuVal  = new QLineEdit();
+	romAddr = NULL;
+
+	if ( bank >= 0 )
+	{
+		romAddr = new QLineEdit();
+		hbox = new QHBoxLayout();
+		vbox->addLayout( hbox );
+
+		sprintf( stmp, "%02X : $%04X", bank, addr );
+		cpuAddr->setText( tr(stmp) );
+		sprintf( stmp, "#$%02X", GetMem(addr) );
+		cpuVal->setText( tr(stmp) );
+		sprintf( stmp, "$%06X", romOfs );
+		romAddr->setText( tr(stmp) );
+
+		lbl = new QLabel( tr("CPU ADDR:") );
+		lbl->setFont(font);
+		hbox->addWidget( lbl, 1 );
+		hbox->addWidget( cpuAddr, 1 );
+
+		lbl = new QLabel( tr(" = ") );
+		lbl->setFont(font);
+		hbox->addWidget( lbl, 1 );
+		hbox->addWidget( cpuVal, 1 );
+		hbox->addStretch(5);
+
+		hbox = new QHBoxLayout();
+		vbox->addLayout( hbox );
+		lbl = new QLabel( tr("ROM ADDR:") );
+		lbl->setFont(font);
+		hbox->addWidget( lbl, 1 );
+		hbox->addWidget( romAddr, 1 );
+		hbox->addStretch(5);
+	}
+	else
+	{
+		hbox = new QHBoxLayout();
+		vbox->addLayout( hbox );
+
+		sprintf( stmp, "$%04X", addr );
+		cpuAddr->setText( tr(stmp) );
+		sprintf( stmp, "#$%02X", GetMem(addr) );
+		cpuVal->setText( tr(stmp) );
+
+		lbl = new QLabel( tr("CPU ADDR:") );
+		lbl->setFont(font);
+		hbox->addWidget( lbl, 1 );
+		hbox->addWidget( cpuAddr, 1 );
+
+		lbl = new QLabel( tr(" = ") );
+		lbl->setFont(font);
+		hbox->addWidget( lbl, 1 );
+		hbox->addWidget( cpuVal, 1 );
+		hbox->addStretch(5);
+	}
+
+	cpuAddr->setFont(font);
+	 cpuVal->setFont(font);
+	cpuAddr->setAlignment( Qt::AlignCenter );
+	 cpuVal->setAlignment( Qt::AlignCenter );
+
+	cpuAddr->setMinimumWidth( pxCharWidth * (cpuAddr->text().size()+2) );
+	 cpuVal->setMinimumWidth( pxCharWidth * ( cpuVal->text().size()+2) );
+
+	cpuAddr->setMaximumWidth( cpuAddr->minimumWidth() );
+	 cpuVal->setMaximumWidth(  cpuVal->minimumWidth() );
+
+	if ( romAddr )
+	{
+		romAddr->setFont(font);
+		romAddr->setAlignment( Qt::AlignCenter );
+		romAddr->setMinimumWidth( pxCharWidth * (romAddr->text().size()+2) );
+		romAddr->setMaximumWidth( romAddr->minimumWidth() );
+
+		if ( romAddr->minimumWidth() < cpuAddr->minimumWidth() )
+		{
+			romAddr->setMinimumWidth( cpuAddr->minimumWidth() );
+			romAddr->setMaximumWidth( cpuAddr->minimumWidth() );
+		}
+	}
+
+	vbox    = new QVBoxLayout();
+	asmFrame->setLayout( vbox );
+	vbox1->addWidget( dataFrame, 1 );
+	vbox1->addWidget( asmFrame, 100 );
+	dataFrame->setFrameShape(QFrame::Box);
+	asmFrame->setFrameShape(QFrame::Box);
 
 	hbar->setMinimum(0);
 	hbar->setMaximum(100);
@@ -6783,6 +6891,7 @@ asmLookAheadPopup::asmLookAheadPopup( int addr, QWidget *parent )
 
 	asmView->setScrollBars( hbar, vbar );
 
+	grid = new QGridLayout();
 	grid->addWidget( asmView, 0, 0 );
 	grid->addWidget( vbar   , 0, 1 );
 	grid->addWidget( hbar   , 1, 0 );
@@ -6793,7 +6902,6 @@ asmLookAheadPopup::asmLookAheadPopup( int addr, QWidget *parent )
 
 	resize(512, 512);
 
-	fceuWrapperLock();
 	asmView->updateAssemblyView();
 	fceuWrapperUnLock();
 

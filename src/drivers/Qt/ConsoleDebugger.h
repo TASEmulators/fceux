@@ -164,6 +164,8 @@ class QAsmView : public QWidget
 		QColor  labelColor;
 		QColor  pcBgColor;
 
+		QFont getFont(void){ return font; };
+
 	protected:
 		bool event(QEvent *event) override;
 		void paintEvent(QPaintEvent *event) override;
