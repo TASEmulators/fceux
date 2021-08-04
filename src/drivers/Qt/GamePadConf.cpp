@@ -826,9 +826,10 @@ void GamePadConfDialog_t::oppDirEna(int state)
 //----------------------------------------------------
 void GamePadConfDialog_t::changeButton(int padNo, int x)
 {
-	//char buf[256];
-	//std::string prefix;
+	int devIdx;
+	ButtConfig bmap;
 	const char *keyNameStr;
+	bool mappingValid = true;
 
 	if (buttonConfigStatus == 2)
 	{
@@ -837,21 +838,67 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 	}
 	buttonConfigStatus = 2;
 
+	devIdx = GamePad[padNo].getDeviceIndex();
+
+	bmap = GamePad[padNo].bmap[configIndex][x];
+
 	ButtonConfigBegin();
 
 	button[x]->setText("Waiting");
 	button[x]->setStyleSheet("background-color: green; color: white;");
 
-	DWaitButton(NULL, &GamePad[padNo].bmap[configIndex][x], &buttonConfigStatus);
+	DWaitButton(NULL, &bmap, &buttonConfigStatus);
 
 	button[x]->setText("Change");
 	button[x]->setStyleSheet(NULL);
 
+	if ( devIdx < 0 )
+	{  // keyboard
+		if ( bmap.ButtType == BUTTC_JOYSTICK )
+		{
+			QMessageBox::warning( this, tr("Mapping Error"),
+					tr("Keyboard devices cannot accept joystick button mappings."),
+					QMessageBox::Cancel, QMessageBox::Cancel );
+
+			mappingValid = false;
+		}
+	}
+	else
+	{   // Joystick/Gamepad
+		if ( bmap.ButtType == BUTTC_JOYSTICK )
+		{
+			jsDev_t *js1 = getJoystickDevice(devIdx);
+			jsDev_t *js2 = getJoystickDevice(bmap.DeviceNum);
+
+			if ( (js1 == NULL) || (js2 == NULL) )
+			{
+				mappingValid = false;
+			}
+			else
+			{
+				if ( (devIdx != bmap.DeviceNum) &&
+					( strcmp( js1->getGUID(), js2->getGUID() ) != 0 ) )
+				{
+					char stmp[256];
+					sprintf( stmp, "Joystick device GUID MisMatch\n\nSelected device is: \n\t%s\n\nbut button mapping is from: \n\t%s",
+							js1->getName(), js2->getName() );
+					QMessageBox::warning( this, tr("Mapping Error"), tr(stmp),
+						QMessageBox::Cancel, QMessageBox::Cancel );
+					mappingValid = false;
+				}
+			}
+		}
+	}
+
 	if (buttonConfigStatus != 0)
 	{
-		keyNameStr = ButtonName(&GamePad[padNo].bmap[configIndex][x]);
-		keyName[x]->setText( tr(keyNameStr) );
-		lcl[padNo].btn[x].needsSave = 1;
+		if ( mappingValid )
+		{
+			GamePad[padNo].bmap[configIndex][x] = bmap;
+			keyNameStr = ButtonName(&GamePad[padNo].bmap[configIndex][x]);
+			keyName[x]->setText( tr(keyNameStr) );
+			lcl[padNo].btn[x].needsSave = 1;
+		}
 	}
 
 	ButtonConfigEnd();
@@ -882,7 +929,11 @@ void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
 		event->ignore();
 		return;
 	}
-	promptToSave();
+	if ( promptToSave() == QMessageBox::Cancel )
+	{
+		event->ignore();
+		return;
+	}
 
 	printf("GamePad Close Window Event\n");
 	buttonConfigStatus = 0;
@@ -903,7 +954,10 @@ void GamePadConfDialog_t::closeWindow(void)
 		return;
 	}
 
-	promptToSave();
+	if ( promptToSave() == QMessageBox::Cancel )
+	{
+		return;
+	}
 
 	printf("Close Window\n");
 	buttonConfigStatus = 0;
@@ -1024,6 +1078,19 @@ void GamePadConfDialog_t::btnConfigChanged(int idx)
 	configIndex = idx;
 
 	updateCntrlrDpy();
+}
+//----------------------------------------------------
+void GamePadConfDialog_t::saveAll(void)
+{
+	int prevPort = portNum;
+
+	for (int i=0; i<4; i++)
+	{
+		portSelect(i);
+
+		saveProfileCallback();
+	}
+	portSelect(prevPort);
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::saveConfig(void)
@@ -1172,9 +1239,9 @@ void GamePadConfDialog_t::deleteProfileCallback(void)
 	loadMapList();
 }
 //----------------------------------------------------
-void GamePadConfDialog_t::promptToSave(void)
+int GamePadConfDialog_t::promptToSave(void)
 {
-	int i, j, n;
+	int i, j, n, ret;
 	std::string msg;
 	QMessageBox msgBox(this);
 	char saveRequired = 0;
@@ -1200,7 +1267,7 @@ void GamePadConfDialog_t::promptToSave(void)
 
 	if (!saveRequired)
 	{
-		return;
+		return 0;
 	}
 	sprintf(stmp, "Warning: Gamepad mappings have not been saved for port%c ", (n > 1) ? 's' : ' ');
 
@@ -1233,7 +1300,16 @@ void GamePadConfDialog_t::promptToSave(void)
 	msgBox.setIcon(QMessageBox::Warning);
 	msgBox.setText(tr(msg.c_str()));
 
-	msgBox.exec();
+	msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
+	msgBox.setDefaultButton( QMessageBox::Save );
+
+	ret = msgBox.exec();
+
+	if ( ret == QMessageBox::Save )
+	{
+		saveAll();
+	}
+	return ret;
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::newKeyBindingCallback(void)

@@ -207,7 +207,7 @@ private:
 	void createNewProfile(const char *name);
 	void loadMapList(void);
 	void saveConfig(void);
-	void promptToSave(void);
+	int  promptToSave(void);
 	void openFuncEditWindow( int mode, gamepad_function_key_t *k );
 
 public slots:
@@ -251,6 +251,7 @@ private slots:
 	void advBindingViewChanged(bool state);
 	void advOptResizeDone(void);
 	void advOptWidthChange(const QVariant &value);
+	void saveAll(void);
 };
 
 int openGamePadConfWindow(QWidget *parent);
