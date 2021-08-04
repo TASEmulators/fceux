@@ -88,6 +88,7 @@ static ConsoleDebugger* dbgWin = NULL;
 static void DeleteBreak(int sel);
 static bool waitingAtBp = false;
 static bool bpDebugEnable = true;
+static bool bpNotifyReq = false;
 static int  lastBpIdx   = 0;
 static bool breakOnCycleOneShot = 0;
 static bool breakOnInstrOneShot = 0;
@@ -3939,6 +3940,14 @@ void ConsoleDebugger::updatePeriodic(void)
 
 	//printf("Update Periodic\n");
 
+	if ( bpNotifyReq )
+	{
+		fceuWrapperLock();
+		breakPointNotify( lastBpIdx );
+		fceuWrapperUnLock();
+		bpNotifyReq = false;
+	}
+
 	if ( windowUpdateReq )
 	{
 		fceuWrapperLock();
@@ -4110,7 +4119,6 @@ void bpDebugSetEnable(bool val)
 //----------------------------------------------------------------------------
 void FCEUD_DebugBreakpoint( int bpNum )
 {
-	std::list <ConsoleDebugger*>::iterator it;
 
 	if ( !nes_shm->runEmulator || !bpDebugEnable )
 	{
@@ -4118,6 +4126,7 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	}
 	lastBpIdx   = bpNum;
 	waitingAtBp = true;
+	bpNotifyReq = true;
 
 	if (bpNum == BREAK_TYPE_CYCLES_EXCEED)
 	{
@@ -4159,11 +4168,6 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	printf("Breakpoint Hit: %i \n", bpNum );
 
 	fceuWrapperUnLock();
-
-	if ( dbgWin )
-	{
-		dbgWin->breakPointNotify( bpNum );
-	}
 
 	while ( nes_shm->runEmulator && bpDebugEnable &&
 			FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
@@ -4215,8 +4219,6 @@ bool debuggerWaitingAtBreakpoint(void)
 //----------------------------------------------------------------------------
 void updateAllDebuggerWindows( void )
 {
-	std::list <ConsoleDebugger*>::iterator it;
-
 	if ( dbgWin )
 	{
 		dbgWin->queueUpdate();
