@@ -909,7 +909,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 	}
 
 	// Input Device:
-	int input = header->reserved[1] & 0x1F;
+	int input = header->reserved[1] & 0x3F;
 	if (SendDlgItemMessage(hwnd, IDC_INPUT_DEVICE_COMBO, CB_SETCURSEL, input, 0) == CB_ERR)
 	{
 		sprintf(buf, "$%02X", input);
