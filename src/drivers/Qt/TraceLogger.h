@@ -182,6 +182,7 @@ protected:
 
 	QPushButton *selLogFileButton;
 	QPushButton *startStopButton;
+	QPushButton *clearButton;
 
 	QTraceLogView *traceView;
 	QScrollBar *hbar;
@@ -215,6 +216,7 @@ private slots:
 	void hbarChanged(int value);
 	void vbarChanged(int value);
 	void openLogFile(void);
+	void clearLog(void);
 };
 
 int initTraceLogBuffer(int maxRecs);

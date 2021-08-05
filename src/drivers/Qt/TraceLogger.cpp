@@ -242,15 +242,24 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	selLogFileButton = new QPushButton(tr("Browse..."));
 	startStopButton = new QPushButton(tr("Start Logging"));
 	autoUpdateCbox = new QCheckBox(tr("Automatically update this window while logging"));
+	clearButton = new QPushButton(tr("Clear Log"));
 
 	autoUpdateCbox->setChecked(true);
 
 	if (logging)
 	{
 		startStopButton->setText(tr("Stop Logging"));
+		startStopButton->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
 	}
-	connect(startStopButton, SIGNAL(clicked(void)), this, SLOT(toggleLoggingOnOff(void)));
+	else
+	{
+		startStopButton->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
+	}
+	clearButton->setIcon( style()->standardIcon( QStyle::SP_DialogResetButton ) );
+
+	connect( startStopButton, SIGNAL(clicked(void)), this, SLOT(toggleLoggingOnOff(void)));
 	connect(selLogFileButton, SIGNAL(clicked(void)), this, SLOT(openLogFile(void)));
+	connect(     clearButton, SIGNAL(clicked(void)), this, SLOT(clearLog(void)));
 
 	hbox = new QHBoxLayout();
 	hbox->addWidget(logLastCbox);
@@ -258,14 +267,15 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	hbox->addWidget(lbl);
 
 	grid->addLayout(hbox, 0, 0, Qt::AlignLeft);
-	grid->addWidget(startStopButton, 0, 1, Qt::AlignCenter);
+	grid->addWidget(startStopButton, 0, 1, Qt::AlignLeft);
+	grid->addWidget(    clearButton, 0, 2, Qt::AlignLeft);
 
 	hbox = new QHBoxLayout();
 	hbox->addWidget(logFileCbox);
 	hbox->addWidget(selLogFileButton);
 
 	grid->addLayout(hbox, 1, 0, Qt::AlignLeft);
-	grid->addWidget(autoUpdateCbox, 1, 1, Qt::AlignCenter);
+	grid->addWidget(autoUpdateCbox, 1, 1, Qt::AlignLeft);
 
 	grid = new QGridLayout();
 	frame = new QGroupBox(tr("Log Options"));
@@ -463,6 +473,23 @@ void TraceLoggerDialog_t::logMaxLinesChanged(int index)
 	logging = logPrev;
 }
 //----------------------------------------------------
+void TraceLoggerDialog_t::clearLog(void)
+{
+	int logPrev;
+
+	logPrev = logging;
+	logging = 0;
+
+	msleep(1);
+
+	recBufNum = recBufHead = 0;
+
+	vbar->setMaximum(0);
+	vbar->setValue(0);
+
+	logging = logPrev;
+}
+//----------------------------------------------------
 void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 {
 	if (logging)
@@ -471,6 +498,7 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 		msleep(1);
 		pushMsgToLogBuffer("Logging Finished");
 		startStopButton->setText(tr("Start Logging"));
+		startStopButton->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
 
 		diskThread->requestInterruption();
 		diskThread->quit();
@@ -489,6 +517,7 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 		}
 		pushMsgToLogBuffer("Log Start");
 		startStopButton->setText(tr("Stop Logging"));
+		startStopButton->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
 		logging = 1;
 	}
 }
