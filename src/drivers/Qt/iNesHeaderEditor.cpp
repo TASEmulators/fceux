@@ -1170,7 +1170,7 @@ void iNesHeaderEditor_t::setHeaderData(iNES_HEADER* header)
 	}
 
 	// Input Device:
-	int input = header->reserved[1] & 0x1F;
+	int input = header->reserved[1] & 0x3F;
 	for (i=0; i<inputDevBox->count(); i++)
 	{
 		if ( inputDevBox->itemData(i).toInt() == input )
