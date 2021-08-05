@@ -32,6 +32,7 @@
 
 #include "Qt/sdl.h"
 #include "Qt/sdl-video.h"
+#include "Qt/AviRecord.h"
 #include "Qt/unix-netplay.h"
 
 #ifdef WIN32
@@ -582,7 +583,14 @@ InitConfig()
 	config->addOption("pauseframe", "SDL.PauseFrame", 0);
 	config->addOption("recordhud", "SDL.RecordHUD", 1);
 	config->addOption("moviemsg", "SDL.MovieMsg", 1);
-	config->addOption("SDL.AviVideoFormat", 0);
+
+#ifdef _USE_X264
+	config->addOption("SDL.AviVideoFormat", AVI_X264);
+#elif  WIN32
+	config->addOption("SDL.AviVideoFormat", AVI_VFW);
+#else
+	config->addOption("SDL.AviVideoFormat", AVI_RGB24);
+#endif
 
 	// Hex Editor Options
 	config->addOption("hexEditBgColor", "SDL.HexEditBgColor", "#000000");

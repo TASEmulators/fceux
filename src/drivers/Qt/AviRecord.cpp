@@ -709,7 +709,7 @@ int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList )
 				s.assign("Unknown");
 			break;
 			case AVI_RGB24:
-				s.assign("RGB 24");
+				s.assign("RGB24 (Uncompressed)");
 			break;
 			case AVI_I420:
 				s.assign("I420 (YUV 4:2:0)");

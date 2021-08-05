@@ -914,8 +914,8 @@ void consoleWin_t::createMainMenu(void)
 	Hotkeys[ HK_SAVE_STATE ].setAction( quickSaveAct );
 	connect( Hotkeys[ HK_SAVE_STATE ].getShortcut(), SIGNAL(activated()), this, SLOT(quickSave(void)) );
 	
-	// File -> Change State
-	subMenu = fileMenu->addMenu(tr("Change &State"));
+	// File -> Change State Slot
+	subMenu = fileMenu->addMenu(tr("Change &State Slot"));
 	group   = new QActionGroup(this);
 
 	group->setExclusive(true);
@@ -924,7 +924,7 @@ void consoleWin_t::createMainMenu(void)
 	{
 	        char stmp[8];
 
-	        sprintf( stmp, "&%i", i );
+	        sprintf( stmp, "Slot &%i", i );
 
 	        state[i] = new QAction(tr(stmp), this);
 	        state[i]->setCheckable(true);
@@ -3473,6 +3473,7 @@ void consoleWin_t::recordMovieAs(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setDefaultSuffix( tr(".fm2") );
 
 	g_config->getOption ("SDL.LastOpenMovie", &last );
 
@@ -4042,8 +4043,8 @@ void consoleWin_t::updatePeriodic(void)
 		openMovAct->setEnabled( FCEU_IsValidUI( FCEUI_PLAYMOVIE ) );
 		recMovAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
 		recAsMovAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
-		recAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
-		recAsAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
+		recAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEU_IsValidUI( FCEUI_STOPAVI ) );
+		recAsAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEU_IsValidUI( FCEUI_STOPAVI ) );
 		stopAviAct->setEnabled( FCEU_IsValidUI( FCEUI_STOPAVI ) );
 		recWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
 		recAsWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
