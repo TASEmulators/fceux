@@ -530,12 +530,22 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	debugMenu = menuBar->addMenu(tr("&Debug"));
 
 	// Debug -> Run
-	act = new QAction(tr("&Run"), this);
+	dbgRunAct[0] = act = new QAction(tr("&Run"), this);
 	act->setShortcut(QKeySequence( tr("F5") ) );
 	act->setStatusTip(tr("Run"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
 	act->setIcon( QIcon(":icons/debug-run.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunCB(void)) );
+
+	debugMenu->addAction(act);
+
+	// Debug -> Pause
+	dbgPauseAct[0] = act = new QAction(tr("&Pause"), this);
+	act->setShortcut(QKeySequence( tr("F6") ) );
+	act->setStatusTip(tr("Pause"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPause ) );
+	act->setIcon( QIcon(":icons/debug-pause.png") );
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
 
 	debugMenu->addAction(act);
 
@@ -577,7 +587,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Run Line
 	act = new QAction(tr("Run &Line"), this);
-	act->setShortcut(QKeySequence( tr("F6") ) );
+	act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Run Line"));
 	act->setIcon( QIcon(":icons/RunPpuScanline.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
@@ -586,7 +596,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Run 128 Lines
 	act = new QAction(tr("Run &128 Lines"), this);
-	act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setShortcut(QKeySequence( tr("F8") ) );
 	act->setStatusTip(tr("Run 128 Lines"));
 	act->setIcon( QIcon(":icons/RunPpuFrame.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
@@ -763,12 +773,22 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	toolBar->addSeparator();
 
 	// Debug -> Run
-	act = new QAction(tr("&Run (F5)"), this);
+	dbgRunAct[1] = act = new QAction(tr("&Run (F5)"), this);
 	//act->setShortcut(QKeySequence( tr("F5") ) );
 	act->setStatusTip(tr("Run"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
 	act->setIcon( QIcon(":icons/debug-run.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunCB(void)) );
+
+	toolBar->addAction(act);
+
+	// Debug -> Pause
+	dbgPauseAct[1] = act = new QAction(tr("&Pause (F6)"), this);
+	//act->setShortcut(QKeySequence( tr("F6") ) );
+	act->setStatusTip(tr("Pause"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPause ) );
+	act->setIcon( QIcon(":icons/debug-pause.png") );
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
 
 	toolBar->addAction(act);
 
@@ -802,8 +822,8 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	toolBar->addSeparator();
 
 	// Debug -> Run Line
-	act = new QAction(tr("Run &Line (F6)"), this);
-	//act->setShortcut(QKeySequence( tr("F6") ) );
+	act = new QAction(tr("Run &Line (F7)"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
 	act->setStatusTip(tr("Run Line"));
 	act->setIcon( QIcon(":icons/RunPpuScanline.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
@@ -811,8 +831,8 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	toolBar->addAction(act);
 
 	// Debug -> Run 128 Lines
-	act = new QAction(tr("Run &128 Lines (F7)"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act = new QAction(tr("Run &128 Lines (F8)"), this);
+	//act->setShortcut(QKeySequence( tr("F8") ) );
 	act->setStatusTip(tr("Run 128 Lines"));
 	act->setIcon( QIcon(":icons/RunPpuFrame.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
@@ -4007,6 +4027,21 @@ void ConsoleDebugger::updatePeriodic(void)
 	{
 		emuStatLbl->setText( tr(" Emulator is Running") );
 		emuStatLbl->setStyleSheet("background-color: green; color: white;");
+	}
+
+	if ( FCEUI_EmulationPaused() )
+	{
+		dbgRunAct[0]->setEnabled(true);
+		dbgRunAct[1]->setEnabled(true);
+		dbgPauseAct[0]->setEnabled(false);
+		dbgPauseAct[1]->setEnabled(false);
+	}
+	else
+	{
+		dbgRunAct[0]->setEnabled(false);
+		dbgRunAct[1]->setEnabled(false);
+		dbgPauseAct[0]->setEnabled(true);
+		dbgPauseAct[1]->setEnabled(true);
 	}
 
 	if ( waitingAtBp && (lastBpIdx == BREAK_TYPE_CYCLES_EXCEED) )

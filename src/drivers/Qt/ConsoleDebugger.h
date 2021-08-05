@@ -446,6 +446,8 @@ class ConsoleDebugger : public QDialog
 		//void keyReleaseEvent(QKeyEvent *event) override;
 
 		//QTreeWidget *tree;
+		QAction     *dbgRunAct[2];
+		QAction     *dbgPauseAct[2];
 		QToolBar    *toolBar;
 		QScrollBar  *vbar;
 		QScrollBar  *hbar;
