@@ -149,6 +149,12 @@ static const char* inputDevList[] = {
 	"RacerMate Bicycle",
 	"U-Force",
 	"R.O.B. Stack-Up",
+	"City Patrolman Lightgun",
+	"Sharp C1 Cassette Interface",
+	"Standard Controller with swapped Left-Right/Up-Down/B-A",
+	"Excalibor Sudoku Pad",
+	"ABL Pinball",
+	"Golden Nugget Casino extra buttons",
 	0
 };
 //----------------------------------------------------------------------------
