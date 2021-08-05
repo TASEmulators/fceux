@@ -471,6 +471,8 @@ void TraceLoggerDialog_t::logMaxLinesChanged(int index)
 	vbar->setValue(0);
 
 	logging = logPrev;
+
+	traceView->update();
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::clearLog(void)
@@ -488,6 +490,8 @@ void TraceLoggerDialog_t::clearLog(void)
 	vbar->setValue(0);
 
 	logging = logPrev;
+
+	traceView->update();
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::toggleLoggingOnOff(void)
