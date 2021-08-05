@@ -142,6 +142,7 @@ class QAsmView : public QWidget
 		void setSymbolDebugEnable( bool value );
 		void setRegisterNameEnable( bool value );
 		void setDisplayByteCodes( bool value );
+		void setDisplayTraceData( bool value );
 		int  getCtxMenuLine(void){ return ctxMenuLine; };
 		int  getCtxMenuAddr(void){ return ctxMenuAddr; };
 		int  getCtxMenuAddrType(void){ return ctxMenuAddrType; };
@@ -256,6 +257,7 @@ class QAsmView : public QWidget
 		bool  registerNameEnable;
 		bool  mouseLeftBtnDown;
 		bool  showByteCodes;
+		bool  showTraceData;
 		bool  isPopUp;
 
 };
@@ -577,6 +579,7 @@ class ConsoleDebugger : public QDialog
 		void resetCountersCB (void);
 		void reloadSymbolsCB(void);
 		void displayByteCodesCB(bool value);
+		void displayTraceDataCB(bool value);
 		void displayROMoffsetCB(bool value);
 		void symbolDebugEnableCB(bool value);
 		void registerNameEnableCB(bool value);

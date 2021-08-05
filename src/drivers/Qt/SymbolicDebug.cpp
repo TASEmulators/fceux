@@ -794,6 +794,10 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 	static char chr[8]={0};
 	uint16_t tmp,tmp2;
 	char stmp[128], stmp2[128];
+	bool symDebugEnable, showTrace;
+
+	symDebugEnable = (flags & ASM_DEBUG_SYMS  ) ? true : false;
+	showTrace      = (flags & ASM_DEBUG_TRACES) ? true : false;
 
 	//these may be replaced later with passed-in values to make a lighter-weight disassembly mode that may not query the referenced values
 	#define RX (X.X)
@@ -871,14 +875,18 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		_indirectx:
 			indirectX(tmp);
 
-			if ( flags )
+			if ( symDebugEnable )
 			{
 				sym = replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s ($%02X,X) @ %s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+				showTrace
+					? sprintf(str,"%s ($%02X,X) @ %s = #$%02X", chr,opcode[1],stmp,GetMem(tmp))
+					: sprintf(str,"%s ($%02X,X)", chr,opcode[1]);
 			}
 			else
 			{
-				sprintf(str,"%s ($%02X,X) @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+				showTrace
+					? sprintf(str,"%s ($%02X,X) @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp))
+					: sprintf(str,"%s ($%02X,X)", chr,opcode[1]);
 			}
 			break;
 
@@ -907,14 +915,18 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		_zeropage:
 		// ################################## Start of SP CODE ###########################
 		// Change width to %04X // don't!
-			if ( flags )
+			if ( symDebugEnable )
 			{
 				sym = replaceSymbols( flags | ASM_DEBUG_ADDR_02X, opcode[1], stmp );
-				sprintf(str,"%s %s = #$%02X", chr,stmp,GetMem(opcode[1]));
+				showTrace
+					? sprintf(str,"%s %s = #$%02X", chr,stmp,GetMem(opcode[1]))
+					: sprintf(str,"%s %s", chr,stmp);
 			}
 			else
 			{
-				sprintf(str,"%s $%02X = #$%02X", chr,opcode[1],GetMem(opcode[1]));
+				showTrace
+					? sprintf(str,"%s $%02X = #$%02X", chr,opcode[1],GetMem(opcode[1]))
+					: sprintf(str,"%s $%02X", chr,opcode[1]);
 			}
 		// ################################## End of SP CODE ###########################
 			break;
@@ -961,14 +973,18 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		_absolute:
 			absolute(tmp);
 
-			if ( flags )
+			if ( symDebugEnable )
 			{
 				sym = replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s %s = #$%02X", chr,stmp,GetMem(tmp));
+				showTrace
+					? sprintf(str,"%s %s = #$%02X", chr,stmp,GetMem(tmp))
+					: sprintf(str,"%s %s", chr,stmp);
 			}
 			else
 			{
-				sprintf(str,"%s $%04X = #$%02X", chr,tmp,GetMem(tmp));
+				showTrace
+					? sprintf(str,"%s $%04X = #$%02X", chr,tmp,GetMem(tmp))
+					: sprintf(str,"%s $%04X", chr,tmp);
 			}
 			break;
 
@@ -984,7 +1000,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		_branch:
 			relative(tmp);
 
-			if ( flags )
+			if ( symDebugEnable )
 			{
 				sym = replaceSymbols( flags, tmp, stmp );
 				sprintf(str,"%s %s", chr,stmp);
@@ -1007,14 +1023,18 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		_indirecty:
 			indirectY(tmp);
 
-			if ( flags )
+			if ( symDebugEnable )
 			{
 				sym = replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s ($%02X),Y @ %s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+				showTrace
+					? sprintf(str,"%s ($%02X),Y @ %s = #$%02X", chr,opcode[1],stmp,GetMem(tmp))
+					: sprintf(str,"%s ($%02X),Y", chr,opcode[1]);
 			}
 			else
 			{
-				sprintf(str,"%s ($%02X),Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+				showTrace
+					? sprintf(str,"%s ($%02X),Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp))
+					: sprintf(str,"%s ($%02X),Y", chr,opcode[1]);
 			}
 			break;
 
@@ -1039,14 +1059,18 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 			zpIndex(tmp,RX);
 		// ################################## Start of SP CODE ###########################
 		// Change width to %04X // don't!
-			if ( flags )
+			if ( symDebugEnable )
 			{
 				sym = replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%02X,X @ %s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+				showTrace
+					? sprintf(str,"%s $%02X,X @ %s = #$%02X", chr,opcode[1],stmp,GetMem(tmp))
+					: sprintf(str,"%s $%02X,X", chr,opcode[1]);
 			}
 			else
 			{
-				sprintf(str,"%s $%02X,X @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+				showTrace
+					? sprintf(str,"%s $%02X,X @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp))
+					: sprintf(str,"%s $%02X,X", chr,opcode[1]);
 			}
 		// ################################## End of SP CODE ###########################
 			break;
@@ -1064,15 +1088,19 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		_absolutey:
 			absolute(tmp);
 			tmp2=(tmp+RY);
-			if ( flags )
+			if ( symDebugEnable )
 			{
 				sym  = replaceSymbols( flags, tmp , stmp  );
 				sym2 = replaceSymbols( flags, tmp2, stmp2 );
-				sprintf(str,"%s %s,Y @ %s = #$%02X", chr,stmp,stmp2,GetMem(tmp2));
+				showTrace
+					? sprintf(str,"%s %s,Y @ %s = #$%02X", chr,stmp,stmp2,GetMem(tmp2))
+					: sprintf(str,"%s %s,Y", chr,stmp);
 			}
 			else
 			{
-				sprintf(str,"%s $%04X,Y @ $%04X = #$%02X", chr,tmp,tmp2,GetMem(tmp2));
+				showTrace
+					? sprintf(str,"%s $%04X,Y @ $%04X = #$%02X", chr,tmp,tmp2,GetMem(tmp2))
+					: sprintf(str,"%s $%04X,Y", chr,tmp);
 			}
 			break;
 
@@ -1095,15 +1123,19 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		_absolutex:
 			absolute(tmp);
 			tmp2=(tmp+RX);
-			if ( flags )
+			if ( symDebugEnable )
 			{
 				sym  = replaceSymbols( flags, tmp , stmp  );
 				sym2 = replaceSymbols( flags, tmp2, stmp2 );
-				sprintf(str,"%s %s,X @ %s = #$%02X", chr,stmp,stmp2,GetMem(tmp2));
+				showTrace
+					? sprintf(str,"%s %s,X @ %s = #$%02X", chr,stmp,stmp2,GetMem(tmp2))
+					: sprintf(str,"%s %s,X", chr,stmp);
 			}
 			else
 			{
-				sprintf(str,"%s $%04X,X @ $%04X = #$%02X", chr,tmp,tmp2,GetMem(tmp2));
+				showTrace
+					? sprintf(str,"%s $%04X,X @ $%04X = #$%02X", chr,tmp,tmp2,GetMem(tmp2))
+					: sprintf(str,"%s $%04X,X", chr,tmp);
 			}
 			break;
 
@@ -1114,7 +1146,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		_jump:
 			absolute(tmp);
 
-			if ( flags )
+			if ( symDebugEnable )
 			{
 				sym = replaceSymbols( flags, tmp, stmp );
 				sprintf(str,"%s %s", chr,stmp);
@@ -1132,14 +1164,18 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 			zpIndex(tmp,RY);
 		// ################################## Start of SP CODE ###########################
 		// Change width to %04X // don't!
-			if ( flags )
+			if ( symDebugEnable )
 			{
 				sym = replaceSymbols( flags, tmp, stmp );
-				sprintf(str,"%s $%02X,Y @ %s = #$%02X", chr,opcode[1],stmp,GetMem(tmp));
+				showTrace
+					? sprintf(str,"%s $%02X,Y @ %s = #$%02X", chr,opcode[1],stmp,GetMem(tmp))
+					: sprintf(str,"%s $%02X,Y", chr,opcode[1]);
 			}
 			else
 			{
-				sprintf(str,"%s $%02X,Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+				showTrace
+					? sprintf(str,"%s $%02X,Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp))
+					: sprintf(str,"%s $%02X,Y", chr,opcode[1]);
 			}
 		// ################################## End of SP CODE ###########################
 			break;

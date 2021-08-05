@@ -514,6 +514,18 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	viewMenu->addAction(act);
 
+	// View -> Show Trace Data
+	g_config->getOption( "SDL.AsmShowTraceData", &opt );
+
+	act = new QAction(tr("Show &Trace Data"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Show &Trace Data"));
+	act->setCheckable(true);
+	act->setChecked(opt);
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(displayTraceDataCB(bool)) );
+
+	viewMenu->addAction(act);
+
 	// View -> Display ROM Offsets
 	g_config->getOption( "SDL.AsmShowRomOffsets", &opt );
 
@@ -2469,6 +2481,13 @@ void ConsoleDebugger::displayByteCodesCB( bool value )
 	asmView->setDisplayByteCodes(value);
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::displayTraceDataCB( bool value )
+{
+	g_config->setOption( "SDL.AsmShowTraceData", value );
+
+	asmView->setDisplayTraceData(value);
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::displayROMoffsetCB( bool value )
 {
 	g_config->setOption( "SDL.AsmShowRomOffsets", value );
@@ -3469,6 +3488,11 @@ void  QAsmView::updateAssemblyView(void)
 		{
 			asmFlags |= ASM_DEBUG_REGS;
 		}
+	}
+
+	if ( showTraceData )
+	{
+		asmFlags |= ASM_DEBUG_TRACES;
 	}
 
 	for (int i=0; i < 0xFFFF; i++)
@@ -4690,11 +4714,13 @@ QAsmView::QAsmView(QWidget *parent)
 
 	isPopUp = false;
 	showByteCodes = false;
+	showTraceData = false;
 	displayROMoffsets = false;
 	symbolicDebugEnable = true;
 	registerNameEnable = true;
 
 	g_config->getOption( "SDL.AsmShowByteCodes" , &showByteCodes );
+	g_config->getOption( "SDL.AsmShowTraceData" , &showTraceData );
 	g_config->getOption( "SDL.AsmShowRomOffsets", &displayROMoffsets );
 	g_config->getOption( "SDL.DebuggerShowSymNames", &symbolicDebugEnable );
 	g_config->getOption( "SDL.DebuggerShowRegNames", &registerNameEnable );
@@ -4982,6 +5008,18 @@ void QAsmView::setDisplayByteCodes( bool value )
 
 		calcLineOffsets();
 		calcMinimumWidth();
+
+		fceuWrapperLock();
+		updateAssemblyView();
+		fceuWrapperUnLock();
+	}
+}
+//----------------------------------------------------------------------------
+void QAsmView::setDisplayTraceData( bool value )
+{
+	if ( value != showTraceData )
+	{
+		showTraceData = value;
 
 		fceuWrapperLock();
 		updateAssemblyView();

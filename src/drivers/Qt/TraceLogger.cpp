@@ -1148,7 +1148,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 	char asmTxt[256];
 	unsigned int addr = X.PC;
 	static int unloggedlines = 0;
-	int asmFlags = 0;
+	int asmFlags = ASM_DEBUG_TRACES;
 
 	rec.cpu.PC = X.PC;
 	rec.cpu.A = X.A;
@@ -1178,7 +1178,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 
 	if (logging_options & LOG_SYMBOLIC)
 	{
-		asmFlags = ASM_DEBUG_SYMS | ASM_DEBUG_REGS;
+		asmFlags |= ASM_DEBUG_SYMS | ASM_DEBUG_REGS;
 	}
 
 	// if instruction executed from the RAM, skip this, log all instead
