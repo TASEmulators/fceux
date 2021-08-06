@@ -19,6 +19,7 @@
  */
 
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QApplication>
 
 #include "Qt/main.h"
@@ -645,24 +646,26 @@ static std::string GetFilename(const char *title, int mode, const char *filter)
 }
 
 /**
- * This function opens a text entry dialog and returns the user's input
- */
-std::string GetUserText(const char *title)
-{
-	return "";
-}
-
-/**
 * Lets the user start a new .fm2 movie file
 **/
 void FCEUD_MovieRecordTo(void)
 {
-	std::string fname = GetFilename("Save FM2 movie for recording", 2, "FM2 movies|*.fm2");
-	if (!fname.size())
-		return;													// no filename selected, quit the whole thing
-	std::wstring author = mbstowcs(GetUserText("Author Name")); // the author can be empty, so no need to check here
+	//bool ok = false;
+	//std::string fname = GetFilename("Save FM2 movie for recording", 2, "FM2 movies|*.fm2");
+	//if (!fname.size())
+	//{
+	//	return;													// no filename selected, quit the whole thing
+	//}
+	//std::string s = QInputDialog::getText( consoleWindow, QObject::tr("Movie Recording"), 
+	//			QObject::tr("Enter Author Name"), QLineEdit::Normal, QObject::tr(""), &ok ).toStdString();
 
-	FCEUI_SaveMovie(fname.c_str(), MOVIE_FLAG_FROM_POWERON, author);
+	//std::wstring author (s.begin (), s.end ());
+
+	//FCEUI_SaveMovie(fname.c_str(), MOVIE_FLAG_FROM_POWERON, author);
+	if ( consoleWindow )
+	{
+		consoleWindow->recordMovie();
+	}
 }
 
 /**

@@ -233,7 +233,6 @@ class  consoleWin_t : public QMainWindow
 		QAction *playMovBeginAct;
 		QAction *stopMovAct;
 		QAction *recMovAct;
-		QAction *recAsMovAct;
 		QAction *region[3];
 		QAction *ramInit[4];
 		QAction *recAviAct;
@@ -294,6 +293,7 @@ class  consoleWin_t : public QMainWindow
 		void openGamePadConfWin(void);
 		void toggleFullscreen(void);
 		void toggleMenuVis(void);
+		void recordMovie(void);
 	private slots:
 		void closeApp(void);
 		void openROMFile(void);
@@ -371,8 +371,6 @@ class  consoleWin_t : public QMainWindow
 		void openRamSearch(void);
 		void openMovie(void);
 		void stopMovie(void);
-		void recordMovie(void);
-		void recordMovieAs(void);
 		void playMovieFromBeginning(void);
 		void setCustomAutoFire(void);
 		void incrSoundVolume(void);

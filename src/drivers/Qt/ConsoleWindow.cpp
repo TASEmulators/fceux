@@ -71,6 +71,7 @@
 #include "Qt/GuiConf.h"
 #include "Qt/AviRecord.h"
 #include "Qt/MoviePlay.h"
+#include "Qt/MovieRecord.h"
 #include "Qt/MovieOptions.h"
 #include "Qt/TimingConf.h"
 #include "Qt/FrameTimingStats.h"
@@ -1636,18 +1637,10 @@ void consoleWin_t::createMainMenu(void)
 	recMovAct->setIcon( QIcon(":icons/media-record.png") );
 	connect(recMovAct, SIGNAL(triggered()), this, SLOT(recordMovie(void)) );
 	
+	Hotkeys[ HK_RECORD_MOVIE_TO ].setAction( recMovAct );
+	connect( Hotkeys[ HK_RECORD_MOVIE_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(recordMovie(void)) );
+
 	movieMenu->addAction(recMovAct);
-
-	// Movie -> Record As
-	recAsMovAct = new QAction(tr("Record &As"), this);
-	//recAsMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
-	recAsMovAct->setStatusTip(tr("Record Movie"));
-	connect(recAsMovAct, SIGNAL(triggered()), this, SLOT(recordMovieAs(void)) );
-	
-	Hotkeys[ HK_RECORD_MOVIE_TO ].setAction( recAsMovAct );
-	connect( Hotkeys[ HK_RECORD_MOVIE_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(recordMovieAs(void)) );
-
-	movieMenu->addAction(recAsMovAct);
 
 	movieMenu->addSeparator();
 
@@ -3450,74 +3443,10 @@ void consoleWin_t::recordMovie(void)
 	fceuWrapperLock();
 	if (fceuWrapperGameLoaded())
 	{
-		std::string name = FCEU_MakeFName (FCEUMKF_MOVIE, 0, 0);
-		FCEUI_printf ("Recording movie to %s\n", name.c_str ());
-		FCEUI_SaveMovie (name.c_str (), MOVIE_FLAG_NONE, L"");
+		MovieRecordDialog_t dialog(this);
+		dialog.exec();
 	}
 	fceuWrapperUnLock();
-   return;
-}
-
-void consoleWin_t::recordMovieAs(void)
-{
-	int ret, useNativeFileDialogVal;
-	QString filename;
-	std::string last;
-	char dir[512];
-	QFileDialog  dialog(this, tr("Save FM2 Movie for Recording") );
-
-	dialog.setFileMode(QFileDialog::AnyFile);
-
-	dialog.setNameFilter(tr("FM2 Movies (*.fm2) ;; All files (*)"));
-
-	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
-	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
-	dialog.setDefaultSuffix( tr(".fm2") );
-
-	g_config->getOption ("SDL.LastOpenMovie", &last );
-
-	getDirFromFile( last.c_str(), dir );
-
-	dialog.setDirectory( tr(dir) );
-
-	// Check config option to use native file dialog or not
-	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
-
-	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
-
-	ret = dialog.exec();
-
-	if ( ret )
-	{
-		QStringList fileList;
-		fileList = dialog.selectedFiles();
-
-		if ( fileList.size() > 0 )
-		{
-			filename = fileList[0];
-		}
-	}
-
-	if ( filename.isNull() )
-	{
-	   return;
-	}
-	qDebug() << "selected file path : " << filename.toUtf8();
-
-	int pauseframe;
-	g_config->getOption ("SDL.PauseFrame", &pauseframe);
-	g_config->setOption ("SDL.PauseFrame", 0);
-
-	FCEUI_printf ("Recording movie to %s\n", filename.toStdString().c_str() );
-
-	fceuWrapperLock();
-	std::string s = GetUserText ("Author name");
-	std::wstring author (s.begin (), s.end ());
-
-	FCEUI_SaveMovie ( filename.toStdString().c_str(), MOVIE_FLAG_NONE, author);
-	fceuWrapperUnLock();
-
 	return;
 }
 
@@ -4042,7 +3971,6 @@ void consoleWin_t::updatePeriodic(void)
 		saveStateAct->setEnabled( FCEU_IsValidUI( FCEUI_SAVESTATE ) );
 		openMovAct->setEnabled( FCEU_IsValidUI( FCEUI_PLAYMOVIE ) );
 		recMovAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
-		recAsMovAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) );
 		recAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEU_IsValidUI( FCEUI_STOPAVI ) );
 		recAsAviAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEU_IsValidUI( FCEUI_STOPAVI ) );
 		stopAviAct->setEnabled( FCEU_IsValidUI( FCEUI_STOPAVI ) );
