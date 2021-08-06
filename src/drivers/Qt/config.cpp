@@ -486,6 +486,7 @@ InitConfig()
 	config->addOption("soundrecord", "SDL.Sound.RecordFile", "");
 	config->addOption("soundbufsize", "SDL.Sound.BufSize", 128);
 	config->addOption("lowpass", "SDL.Sound.LowPass", 0);
+	config->addOption("SDL.Sound.MuteOnDefocus", 0);
     
 	config->addOption('g', "gamegenie", "SDL.GameGenie", 0);
 	config->addOption("pal", "SDL.PAL", 0);

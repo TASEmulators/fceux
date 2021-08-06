@@ -124,6 +124,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	g_config->getOption( "SDL.PauseOnMainMenuAccess", &mainMenuPauseWhenActv );
 	g_config->getOption( "SDL.ContextMenuEnable", &contextMenuEnable );
+	g_config->getOption( "SDL.Sound.MuteOnDefocus", &muteSoundOnDefocus );
 	g_config->getOption ("SDL.VideoDriver", &use_SDL_video);
 
 	if ( use_SDL_video )
@@ -359,6 +360,8 @@ void consoleWin_t::initScreenHandler(void)
 				scrHandlerConnected = true;
 
 				winScreenChanged( hdl->screen() );
+
+				connect( hdl, SIGNAL(activeChanged(void)), this, SLOT(winActiveChanged(void)) );
 			}
 		}
 	}
@@ -378,6 +381,37 @@ void consoleWin_t::winScreenChanged(QScreen *scr)
 	if ( viewport_GL != NULL )
 	{
 		viewport_GL->screenChanged( scr );
+	}
+}
+
+void consoleWin_t::winActiveChanged(void)
+{
+	QWidget *w;
+
+	w = this->window();
+
+	if ( w != NULL)
+	{
+		QWindow *hdl = w->windowHandle();
+
+		if (hdl != NULL)
+		{
+			if ( muteSoundOnDefocus )
+			{
+				fceuWrapperLock();
+				if ( hdl->isActive() )
+				{
+					int vol;
+					g_config->getOption("SDL.Sound.Volume", &vol);
+					FCEUI_SetSoundVolume(vol);
+				}
+				else
+				{
+					FCEUI_SetSoundVolume(0);
+				}
+				fceuWrapperUnLock();
+			}
+		}
 	}
 }
 

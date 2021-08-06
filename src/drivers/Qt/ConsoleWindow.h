@@ -254,6 +254,7 @@ class  consoleWin_t : public QMainWindow
 		bool        mainMenuPauseWhenActv;
 		bool        scrHandlerConnected;
 		bool        contextMenuEnable;
+		bool        muteSoundOnDefocus;
 
 		std::list <std::string*> romList;
 		std::vector <autoFireMenuAction*> afActList;
@@ -417,6 +418,7 @@ class  consoleWin_t : public QMainWindow
 		void wavRecordAsStart(void);
 		void wavRecordStop(void);
 		void winScreenChanged( QScreen *scr );
+		void winActiveChanged(void);
 		void emuFrameFinish(void);
 
 };
