@@ -23,6 +23,7 @@
 
 #include "../../fceu.h"
 #include "../../driver.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -129,6 +130,15 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	vbox1->addWidget(bufSizeSlider);
 
 	connect(bufSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(bufSizeChanged(int)));
+
+	// Use Global Focus
+	useGlobalFocus = new QCheckBox(tr("Use Global Focus"));
+	useGlobalFocus->setToolTip( tr("Mute sound when window is not in focus") );
+	vbox1->addWidget(useGlobalFocus);
+
+	setCheckBoxFromProperty(useGlobalFocus, "SDL.Sound.UseGlobalFocus");
+
+	connect(useGlobalFocus, SIGNAL(stateChanged(int)), this, SLOT(useGlobalFocusChanged(int)));
 
 	// Swap Duty Cycles
 	swapDutyChkbox = new QCheckBox(tr("Swap Duty Cycles"));
@@ -497,6 +507,20 @@ void ConsoleSndConfDialog_t::enaSoundLowPassChange(int value)
 		fceuWrapperUnLock();
 	}
 	g_config->save();
+}
+//----------------------------------------------------
+void ConsoleSndConfDialog_t::useGlobalFocusChanged(int value)
+{
+	bool bval = value != Qt::Unchecked;
+
+	//printf("SDL.Sound.UseGlobalFocus = %i\n", bval);
+	g_config->setOption("SDL.Sound.UseGlobalFocus", bval);
+	g_config->save();
+
+	if ( consoleWindow )
+	{
+		consoleWindow->setSoundUseGlobalFocus(bval);
+	}
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::swapDutyCallback(int value)

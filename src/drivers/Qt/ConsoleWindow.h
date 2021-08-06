@@ -170,6 +170,7 @@ class  consoleWin_t : public QMainWindow
 
 		void setMenuAccessPauseEnable(bool enable);
 		void setContextMenuEnable(bool enable);
+		void setSoundUseGlobalFocus(bool enable);
 	protected:
 		consoleMenuBar *menubar;
 
@@ -254,7 +255,7 @@ class  consoleWin_t : public QMainWindow
 		bool        mainMenuPauseWhenActv;
 		bool        scrHandlerConnected;
 		bool        contextMenuEnable;
-		bool        muteSoundOnDefocus;
+		bool        soundUseGlobalFocus;
 
 		std::list <std::string*> romList;
 		std::vector <autoFireMenuAction*> afActList;

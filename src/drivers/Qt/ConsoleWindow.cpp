@@ -124,7 +124,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	g_config->getOption( "SDL.PauseOnMainMenuAccess", &mainMenuPauseWhenActv );
 	g_config->getOption( "SDL.ContextMenuEnable", &contextMenuEnable );
-	g_config->getOption( "SDL.Sound.MuteOnDefocus", &muteSoundOnDefocus );
+	g_config->getOption( "SDL.Sound.UseGlobalFocus", &soundUseGlobalFocus );
 	g_config->getOption ("SDL.VideoDriver", &use_SDL_video);
 
 	if ( use_SDL_video )
@@ -390,13 +390,15 @@ void consoleWin_t::winActiveChanged(void)
 
 	w = this->window();
 
+	//printf("Active Changed\n");
+
 	if ( w != NULL)
 	{
 		QWindow *hdl = w->windowHandle();
 
 		if (hdl != NULL)
 		{
-			if ( muteSoundOnDefocus )
+			if ( !soundUseGlobalFocus )
 			{
 				fceuWrapperLock();
 				if ( hdl->isActive() )
@@ -541,6 +543,13 @@ void consoleWin_t::setMenuAccessPauseEnable( bool enable )
 void consoleWin_t::setContextMenuEnable( bool enable )
 {
 	contextMenuEnable = enable;
+}
+
+void consoleWin_t::setSoundUseGlobalFocus( bool enable )
+{
+	soundUseGlobalFocus = enable;
+
+	winActiveChanged();
 }
 
 void consoleWin_t::loadCursor(void)
