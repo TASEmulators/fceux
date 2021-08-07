@@ -36,6 +36,9 @@ extern Config *g_config;
 
 static volatile int *s_Buffer = 0;
 static unsigned int s_BufferSize;
+static unsigned int s_BufferSize25;
+static unsigned int s_BufferSize50;
+static unsigned int s_BufferSize75;
 static unsigned int s_BufferRead;
 static unsigned int s_BufferWrite;
 static volatile unsigned int s_BufferIn;
@@ -194,6 +197,12 @@ InitSound()
 	{
 		s_BufferSize = spec.samples * 2;
 	}
+	s_BufferSize25 =    s_BufferSize/4;
+	s_BufferSize50 =    s_BufferSize/2;
+	s_BufferSize75 = (3*s_BufferSize)/4;
+
+	//printf("Audio Buffer: %i  %i \n", spec.samples, s_BufferSize );
+
 	noiseGate = 0.0;
 	noiseGateRate = 1.0 / (double)spec.samples;
 	noiseGateActive = true;
@@ -277,7 +286,7 @@ WriteSound(int32 *buf,
 		{
 			ovrFlowSkip = 1;
 		}
-		if ( s_BufferIn >= (s_BufferSize/2) )
+		if ( s_BufferIn >= s_BufferSize50 )
 		{
 			ovrFlowSkip++;
 		}
@@ -290,9 +299,13 @@ WriteSound(int32 *buf,
 		{
 			udrFlowDup = 1;
 		}
-		if ( s_BufferIn <= (s_BufferSize/2) )
+		if ( s_BufferIn < s_BufferSize50 )
 		{
 			udrFlowDup++;
+		}
+		else if ( s_BufferIn > s_BufferSize75 )
+		{
+			udrFlowDup--;
 		}
 		uflowMode = (udrFlowDup > 1);
 	}

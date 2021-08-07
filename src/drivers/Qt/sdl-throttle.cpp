@@ -253,7 +253,7 @@ RefreshThrottleFPS(void)
 
 		frmRateAdjRatio = (1.0 / ( hz * g_fpsScale )) / desired_frametime;
 
-		printf("frameAdjRatio:%f \n", frmRateAdjRatio );
+		//printf("frameAdjRatio:%f \n", frmRateAdjRatio );
 	}
 	else
 	{
