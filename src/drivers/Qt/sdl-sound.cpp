@@ -48,6 +48,7 @@ static int s_mute = 0;
 
 extern int EmulationPaused;
 extern double frmRateAdjRatio;
+extern double g_fpsScale;
 
 /**
  * Callback from the SDL to get and play audio data.
@@ -261,33 +262,136 @@ void
 WriteSound(int32 *buf,
            int Count)
 {
+
+	int uflowMode = 0;
+	int ovrFlowSkip = 1;
+	int udrFlowDup  = 1;
+	static int skipCounter = 0;
+
+	if ( g_fpsScale >= 0.90 )
+	{
+		uflowMode = 0;
+		ovrFlowSkip = (int)(g_fpsScale);
+
+		if ( ovrFlowSkip < 1 )
+		{
+			ovrFlowSkip = 1;
+		}
+		if ( s_BufferIn >= (s_BufferSize/2) )
+		{
+			ovrFlowSkip++;
+		}
+	}
+	else
+	{
+		udrFlowDup = (int)(1.0 / g_fpsScale);
+
+		if ( udrFlowDup < 1 )
+		{
+			udrFlowDup = 1;
+		}
+		if ( s_BufferIn <= (s_BufferSize/2) )
+		{
+			udrFlowDup++;
+		}
+		uflowMode = (udrFlowDup > 1);
+	}
 	extern int EmulationPaused;
 	if (EmulationPaused == 0)
 	{
 		int waitCount = 0;
 
-		while(Count)
-		{
-			while(s_BufferIn == s_BufferSize) 
+		if ( uflowMode )
+		{	// Underflow mode
+			while (Count)
 			{
-				SDL_Delay(1); waitCount++;
-
-				if ( waitCount > 1000 )
+				while (s_BufferIn == s_BufferSize) 
 				{
-					printf("Error: Sound sink is not draining... Breaking out of audio loop to prevent lockup.\n");
-					return;
+					SDL_Delay(1); waitCount++;
+
+					if ( waitCount > 1000 )
+					{
+						printf("Error: Sound sink is not draining... Breaking out of audio loop to prevent lockup.\n");
+						return;
+					}
+				}
+
+				for (int i=0; i<udrFlowDup; i++)
+				{
+					s_Buffer[s_BufferWrite] = *buf;
+					s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
+            
+					SDL_LockAudio();
+					s_BufferIn++;
+					SDL_UnlockAudio();
+				}
+            
+				Count--;
+				buf++;
+			}
+		}
+		else
+		{
+			if ( ovrFlowSkip == 1 )
+			{	// Perfect one to one realtime
+				skipCounter = 0;
+
+				while (Count)
+				{
+					while (s_BufferIn == s_BufferSize) 
+					{
+						SDL_Delay(1); waitCount++;
+
+						if ( waitCount > 1000 )
+						{
+							printf("Error: Sound sink is not draining... Breaking out of audio loop to prevent lockup.\n");
+							return;
+						}
+					}
+
+					s_Buffer[s_BufferWrite] = *buf;
+					Count--;
+					s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
+            
+					SDL_LockAudio();
+					s_BufferIn++;
+					SDL_UnlockAudio();
+            
+					buf++;
 				}
 			}
+			else
+			{	// Overflow mode
+				while (Count)
+				{
+					while (s_BufferIn == s_BufferSize) 
+					{
+						SDL_Delay(1); waitCount++;
 
-			s_Buffer[s_BufferWrite] = *buf;
-			Count--;
-			s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
+						if ( waitCount > 1000 )
+						{
+							printf("Error: Sound sink is not draining... Breaking out of audio loop to prevent lockup.\n");
+							return;
+						}
+					}
+
+					if ( skipCounter == 0 )
+					{
+						s_Buffer[s_BufferWrite] = *buf;
+						s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
             
-			SDL_LockAudio();
-			s_BufferIn++;
-			SDL_UnlockAudio();
+						SDL_LockAudio();
+						s_BufferIn++;
+						SDL_UnlockAudio();
+					}
+					skipCounter = (skipCounter+1) % ovrFlowSkip;
             
-			buf++;
+					Count--;
+					buf++;
+				}
+
+			}
+
 		}
 	}
 }
