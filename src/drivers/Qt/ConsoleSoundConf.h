@@ -44,6 +44,7 @@ protected:
 	QLabel *sqr2Lbl;
 	QLabel *nseLbl;
 	QLabel *pcmLbl;
+	QLabel *starveLbl;
 	QSlider *sqr2Slider;
 	QSlider *nseSlider;
 	QSlider *pcmSlider;
@@ -57,6 +58,7 @@ protected:
 
 private slots:
 	void closeWindow(void);
+	void resetCounters(void);
 	void periodicUpdate(void);
 	void bufSizeChanged(int value);
 	void volumeChanged(int value);

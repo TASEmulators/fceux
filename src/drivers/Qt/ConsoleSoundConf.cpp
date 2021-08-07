@@ -28,6 +28,7 @@
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/config.h"
+#include "Qt/nes_shm.h"
 #include "Qt/fceuWrapper.h"
 
 //----------------------------------------------------
@@ -38,6 +39,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	QHBoxLayout *hbox, *hbox1, *hbox2;
 	QVBoxLayout *mainLayout, *vbox1, *vbox2;
 	QPushButton *closeButton;
+	QPushButton *resetCountBtn;
 	QLabel *lbl;
 	QGroupBox *frame;
 	QSlider *vslider;
@@ -132,6 +134,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	connect(bufSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(bufSizeChanged(int)));
 
 	bufUsage = new QProgressBar();
+	bufUsage->setToolTip( tr("% use of audio samples FIFO buffer.\n\nThe emulation thread fills the buffer and the audio thread drains it.") );
 	bufUsage->setOrientation( Qt::Horizontal );
 	bufUsage->setMinimum(   0 );
 	bufUsage->setMaximum( 100 );
@@ -258,7 +261,15 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
 	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
 
+	starveLbl = new QLabel( tr("Sink Starve Count:") );
+	starveLbl->setToolTip( tr("Running count of the number of samples that the audio sink is starved of.") );
+	resetCountBtn = new QPushButton( tr("Reset") );
+	resetCountBtn->setIcon(style()->standardIcon(QStyle::SP_DialogResetButton));
+	connect(resetCountBtn, SIGNAL(clicked(void)), this, SLOT(resetCounters(void)));
+
 	hbox = new QHBoxLayout();
+	hbox->addWidget(resetCountBtn, 1);
+	hbox->addWidget(starveLbl,1);
 	hbox->addStretch(5);
 	hbox->addWidget( closeButton, 1 );
 
@@ -296,10 +307,18 @@ void ConsoleSndConfDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------
+void ConsoleSndConfDialog_t::resetCounters(void)
+{
+	nes_shm->sndBuf.starveCounter = 0;
+
+	periodicUpdate();
+}
+//----------------------------------------------------
 void ConsoleSndConfDialog_t::periodicUpdate(void)
 {
 	uint32_t c, m;
 	double percBufUse;
+	char stmp[64];
 
 	c = GetWriteSound();
 	m = GetMaxSound();
@@ -308,6 +327,9 @@ void ConsoleSndConfDialog_t::periodicUpdate(void)
 
 	bufUsage->setValue( (int)(percBufUse) );
 
+	sprintf( stmp, "Sink Starve Count: %u", nes_shm->sndBuf.starveCounter );
+
+	starveLbl->setText( tr(stmp) );
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::setSliderEnables(void)
