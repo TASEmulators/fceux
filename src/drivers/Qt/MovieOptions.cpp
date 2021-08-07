@@ -55,8 +55,8 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	pauseAfterPlay = new QCheckBox(tr("Pause After Playback"));
 	closeAfterPlay = new QCheckBox(tr("Close After Playback"));
 	bindSaveStates = new QCheckBox(tr("Bind Save-States to Movies"));
-	dpySubTitles = new QCheckBox(tr("Display Movie Sub Titles"));
-	putSubTitlesAvi = new QCheckBox(tr("Put Movie Sub Titles in AVI"));
+	dpySubTitles = new QCheckBox(tr("Display Movie Subtitles"));
+	putSubTitlesAvi = new QCheckBox(tr("Put Movie Subtitles in AVI"));
 	autoBackUp = new QCheckBox(tr("Automatically Backup Movies"));
 	loadFullStates = new QCheckBox(tr("Load Full Save-State Movies:"));
 
