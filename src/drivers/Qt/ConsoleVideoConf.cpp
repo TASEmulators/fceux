@@ -721,6 +721,8 @@ void ConsoleVideoConfDialog_t::intFrameRate_changed( int value )
 
 	fceuWrapperLock();
 	RefreshThrottleFPS();
+	KillSound();
+	InitSound();
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------

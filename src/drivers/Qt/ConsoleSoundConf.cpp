@@ -131,6 +131,13 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	connect(bufSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(bufSizeChanged(int)));
 
+	bufUsage = new QProgressBar();
+	bufUsage->setOrientation( Qt::Horizontal );
+	bufUsage->setMinimum(   0 );
+	bufUsage->setMaximum( 100 );
+	bufUsage->setValue( 0 );
+	vbox1->addWidget(bufUsage);
+
 	// Use Global Focus
 	useGlobalFocus = new QCheckBox(tr("Use Global Focus"));
 	useGlobalFocus->setToolTip( tr("Mute sound when window is not in focus") );
@@ -262,11 +269,16 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	setLayout(mainLayout);
 
 	setSliderEnables();
+
+	updateTimer = new QTimer(this);
+	connect( updateTimer, &QTimer::timeout, this, &ConsoleSndConfDialog_t::periodicUpdate );
+	updateTimer->start(1000);
 }
 //----------------------------------------------------
 ConsoleSndConfDialog_t::~ConsoleSndConfDialog_t(void)
 {
 	printf("Destroy Sound Config Window\n");
+	updateTimer->stop();
 }
 //----------------------------------------------------------------------------
 void ConsoleSndConfDialog_t::closeEvent(QCloseEvent *event)
@@ -282,6 +294,20 @@ void ConsoleSndConfDialog_t::closeWindow(void)
 	//printf("Sound Close Window\n");
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------
+void ConsoleSndConfDialog_t::periodicUpdate(void)
+{
+	uint32_t c, m;
+	double percBufUse;
+
+	c = GetWriteSound();
+	m = GetMaxSound();
+
+	percBufUse = 100.0f - (100.0f * (double)c / (double)m );
+
+	bufUsage->setValue( (int)(percBufUse) );
+
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::setSliderEnables(void)

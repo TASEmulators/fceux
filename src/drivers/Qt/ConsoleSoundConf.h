@@ -15,6 +15,8 @@
 #include <QSlider>
 #include <QFrame>
 #include <QGroupBox>
+#include <QProgressBar>
+#include <QTimer>
 
 class ConsoleSndConfDialog_t : public QDialog
 {
@@ -45,6 +47,8 @@ protected:
 	QSlider *sqr2Slider;
 	QSlider *nseSlider;
 	QSlider *pcmSlider;
+	QProgressBar *bufUsage;
+	QTimer       *updateTimer;
 
 	void setCheckBoxFromProperty(QCheckBox *cbx, const char *property);
 	void setComboBoxFromProperty(QComboBox *cbx, const char *property);
@@ -53,6 +57,7 @@ protected:
 
 private slots:
 	void closeWindow(void);
+	void periodicUpdate(void);
 	void bufSizeChanged(int value);
 	void volumeChanged(int value);
 	void triangleChanged(int value);

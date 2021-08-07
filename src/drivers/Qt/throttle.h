@@ -53,5 +53,8 @@ void setFrameTimingEnable( bool enable );
 int  getFrameTimingStats( struct frameTimingStat_t *stats );
 void videoBufferSwapMark(void);
 double getHighPrecTimeStamp(void);
+double getFrameRate(void);
+double getFrameRateAdjustmentRatio(void);
+double getBaseFrameRate(void);
 
 extern bool useIntFrameRate;

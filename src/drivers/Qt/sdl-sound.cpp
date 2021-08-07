@@ -25,7 +25,8 @@
 
 #include "common/configSys.h"
 #include "utils/memory.h"
-#include "nes_shm.h"
+#include "Qt/nes_shm.h"
+#include "Qt/throttle.h"
 
 #include <cstdio>
 #include <cstring>
@@ -38,47 +39,106 @@ static unsigned int s_BufferSize;
 static unsigned int s_BufferRead;
 static unsigned int s_BufferWrite;
 static volatile unsigned int s_BufferIn;
+static unsigned int s_SampleRate = 44100;
+static double noiseGate = 0.0;
+static double noiseGateRate = 0.010;
+static bool   noiseGateActive = true;
 
 static int s_mute = 0;
 
+extern int EmulationPaused;
+extern double frmRateAdjRatio;
 
 /**
  * Callback from the SDL to get and play audio data.
  */
 static void
 fillaudio(void *udata,
-			uint8 *stream,
-			int len)
+		uint8 *stream,
+		int len)
 {
 	char bufStarveDetected = 0;
 	static int16_t sample = 0;
+	//unsigned int starve_lp = nes_shm->sndBuf.starveCounter;
 	int16 *tmps = (int16*)stream;
 	len >>= 1;
-	while (len) 
+
+	if ( EmulationPaused || noiseGateActive )
 	{
-		//int16 sample = 0;
-		if (s_BufferIn) 
+		// This noise gate helps avoid abrupt snaps in audio
+		// when pausing emulation.
+		while (len) 
 		{
-			sample = s_Buffer[s_BufferRead];
-			s_BufferRead = (s_BufferRead + 1) % s_BufferSize;
-			s_BufferIn--;
-		} else {
-         		// Retain last known sample value, helps avoid clicking
-         		// noise when sound system is starved of audio data.
-			//sample = 0; 
-			bufStarveDetected = 1;
-			nes_shm->sndBuf.starveCounter++;
+			if (EmulationPaused)
+			{
+				noiseGate -= noiseGateRate;
+
+				if ( noiseGate < 0.0 )
+				{
+					noiseGate = 0.0;
+				}
+				noiseGateActive = 1;
+			}
+			else
+			{
+				if ( s_BufferIn )
+				{	
+					noiseGate += noiseGateRate;
+
+					if ( noiseGate > 1.0 )
+					{
+						noiseGate = 1.0;
+						noiseGateActive = 0;
+					}
+				}
+			}
+			if (s_BufferIn) 
+			{
+				sample = s_Buffer[s_BufferRead] * noiseGate;
+				s_BufferRead = (s_BufferRead + 1) % s_BufferSize;
+				s_BufferIn--;
+
+				*tmps = sample;
+			}
+			else
+			{
+         			// Retain last known sample value, helps avoid clicking
+         			// noise when sound system is starved of audio data.
+				*tmps = sample * noiseGate;
+			}
+
+			tmps++;
+			len--;
 		}
+	}
+	else
+	{
+		while (len) 
+		{
+			if (s_BufferIn) 
+			{
+				sample = s_Buffer[s_BufferRead];
+				s_BufferRead = (s_BufferRead + 1) % s_BufferSize;
+				s_BufferIn--;
+			} else {
+        	 		// Retain last known sample value, helps avoid clicking
+        	 		// noise when sound system is starved of audio data.
+				//sample = 0; 
+				bufStarveDetected = 1;
+				nes_shm->sndBuf.starveCounter++;
+			}
 
-		nes_shm->push_sound_sample( sample );
+			nes_shm->push_sound_sample( sample );
 
-		*tmps = sample;
-		tmps++;
-		len--;
+			*tmps = sample;
+			tmps++;
+			len--;
+		}
 	}
 	if ( bufStarveDetected )
 	{
-      //printf("Starve:%u\n", nes_shm->sndBuf.starveCounter );
+		//s_StarveCounter = nes_shm->sndBuf.starveCounter - starve_lp;
+		//printf("Starve:%u\n", s_StarveCounter );
 	}
 }
 
@@ -91,6 +151,7 @@ InitSound()
 	int sound, soundrate, soundbufsize, soundvolume, soundtrianglevolume, soundsquare1volume, soundsquare2volume, soundnoisevolume, soundpcmvolume, soundq;
 	SDL_AudioSpec spec;
 	const char *driverName;
+	int frmRateSampleAdj = 0;
 
 	g_config->getOption("SDL.Sound", &sound);
 	if (!sound) 
@@ -117,10 +178,11 @@ InitSound()
 	g_config->getOption("SDL.Sound.NoiseVolume", &soundnoisevolume);
 	g_config->getOption("SDL.Sound.PCMVolume", &soundpcmvolume);
 
-	spec.freq = soundrate;
+	spec.freq = s_SampleRate = soundrate;
 	spec.format = AUDIO_S16SYS;
 	spec.channels = 1;
-	spec.samples = 512;
+	//spec.samples = 512;
+	spec.samples = (int)( ( (double)s_SampleRate / getBaseFrameRate() ) );
 	spec.callback = fillaudio;
 	spec.userdata = 0;
 
@@ -131,6 +193,9 @@ InitSound()
 	{
 		s_BufferSize = spec.samples * 2;
 	}
+	noiseGate = 0.0;
+	noiseGateRate = 1.0 / (double)spec.samples;
+	noiseGateActive = true;
 
 	s_Buffer = (int *)FCEU_dmalloc(sizeof(int) * s_BufferSize);
 
@@ -145,7 +210,7 @@ InitSound()
 		puts(SDL_GetError());
 		KillSound();
 		return 0;
-   }
+	}
 	SDL_PauseAudio(0);
 
 	driverName = SDL_GetCurrentAudioDriver();
@@ -154,10 +219,14 @@ InitSound()
 	{
 		fprintf(stderr, "Loading SDL sound with %s driver...\n", driverName);
 	}
+ 
+	frmRateSampleAdj = (int)( ( ((double)soundrate) * getFrameRateAdjustmentRatio()) - ((double)soundrate) );
+	//frmRateSampleAdj = 0;
+	//printf("Sample Rate Adjustment: %+i\n", frmRateSampleAdj );
 
 	FCEUI_SetSoundVolume(soundvolume);
 	FCEUI_SetSoundQuality(soundq);
-	FCEUI_Sound(soundrate);
+	FCEUI_Sound(soundrate + frmRateSampleAdj);
 	FCEUI_SetTriangleVolume(soundtrianglevolume);
 	FCEUI_SetSquare1Volume(soundsquare1volume);
 	FCEUI_SetSquare2Volume(soundsquare2volume);
