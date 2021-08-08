@@ -277,18 +277,14 @@ WriteSound(int32 *buf,
 	int udrFlowDup  = 1;
 	static int skipCounter = 0;
 
-	if ( g_fpsScale >= 0.90 )
+	if ( g_fpsScale >= 0.99995 )
 	{
 		uflowMode = 0;
-		ovrFlowSkip = (int)(g_fpsScale);
+		ovrFlowSkip = (int)(g_fpsScale * 1000);
 
-		if ( ovrFlowSkip < 1 )
-		{
-			ovrFlowSkip = 1;
-		}
 		if ( s_BufferIn >= s_BufferSize50 )
 		{
-			ovrFlowSkip++;
+			ovrFlowSkip += 1000;
 		}
 	}
 	else
@@ -345,7 +341,7 @@ WriteSound(int32 *buf,
 		}
 		else
 		{
-			if ( ovrFlowSkip == 1 )
+			if ( ovrFlowSkip <= 1000 )
 			{	// Perfect one to one realtime
 				skipCounter = 0;
 
@@ -388,7 +384,7 @@ WriteSound(int32 *buf,
 						}
 					}
 
-					if ( skipCounter == 0 )
+					if ( skipCounter >= ovrFlowSkip )
 					{
 						s_Buffer[s_BufferWrite] = *buf;
 						s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
@@ -396,8 +392,10 @@ WriteSound(int32 *buf,
 						SDL_LockAudio();
 						s_BufferIn++;
 						SDL_UnlockAudio();
+
+						skipCounter -= ovrFlowSkip;
 					}
-					skipCounter = (skipCounter+1) % ovrFlowSkip;
+					skipCounter = (skipCounter+1000);
             
 					Count--;
 					buf++;
