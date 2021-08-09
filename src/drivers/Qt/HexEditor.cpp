@@ -2277,9 +2277,10 @@ void QHexEdit::loadClipboard( const char *txt )
 //----------------------------------------------------------------------------
 void QHexEdit::pasteFromClipboard(void)
 {
-	int i, val, addr;
+	int i, nbytes=0, val, addr;
 	std::string s = clipboard->text().toStdString();
 	const char *c;
+	unsigned char *buf;
 
 	fceuWrapperLock();
 
@@ -2289,7 +2290,19 @@ void QHexEdit::pasteFromClipboard(void)
 
 	c = s.c_str();
 
-	i=0;
+	if ( s.size() == 0 )
+	{
+		return;
+	}
+	buf = (unsigned char*)malloc( s.size() );
+
+	if ( buf == NULL )
+	{
+		return;
+	}
+	memset( buf, 0, s.size() );
+
+	i=0; nbytes = 0;
 	while ( c[i] != 0 )
 	{
 		while ( isspace(c[i]) ) i++;
@@ -2313,15 +2326,23 @@ void QHexEdit::pasteFromClipboard(void)
 		{
 			break;
 		}
+		buf[ nbytes ] = val;
 
+		nbytes++;
+	}
+	if ( nbytes > 0 )
+	{
 		if ( viewMode == QHexEdit::MODE_NES_ROM )
 		{
-			romEditList.applyPatch( addr, val );
+			romEditList.applyPatch( addr, buf, nbytes );
 		}
-		writeMem( viewMode, addr, val );
-
-		addr++;
+		for (i=0; i<nbytes; i++)
+		{
+			writeMem( viewMode, addr+i, buf[i] );
+		}
 	}
+	free(buf);
+
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
