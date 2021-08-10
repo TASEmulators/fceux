@@ -194,7 +194,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	inputDisplaySel->addItem( tr("None"), 0 );
 	inputDisplaySel->addItem( tr("GP 1"), 1 );
 	inputDisplaySel->addItem( tr("GPs 1 & 2"), 2 );
-	inputDisplaySel->addItem( tr("GPs 1, 2, & 4"), 4 );
+	inputDisplaySel->addItem( tr("GPs 1, 2, 3 & 4"), 4 );
 
 	setComboBoxFromProperty( inputDisplaySel , "SDL.InputDisplay");
 
