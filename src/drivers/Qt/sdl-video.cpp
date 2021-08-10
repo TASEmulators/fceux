@@ -27,6 +27,7 @@
 #include "../../fceu.h"
 #include "../../version.h"
 #include "../../video.h"
+#include "../../input.h"
 
 #include "utils/memory.h"
 
@@ -71,6 +72,9 @@ static int initBlitToHighDone = 0;
 static int s_paletterefresh = 1;
 
 extern bool MaxSpeed;
+extern int input_display;
+extern int frame_display;
+extern int rerecord_display;
 
 /**
  * Attempts to destroy the graphical video display.  Returns 0 on
@@ -199,7 +203,8 @@ void CalcVideoDimensions(void)
 
 int InitVideo(FCEUGI *gi)
 {
-	int doublebuf, xstretch, ystretch, xres, yres, show_fps;
+	int doublebuf, xstretch, ystretch, xres, yres;
+	int show_fps;
 	int startNTSC, endNTSC, startPAL, endPAL;
 
 	FCEUI_printf("Initializing video...");
@@ -215,6 +220,9 @@ int InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.ClipSides", &s_clipSides);
 	g_config->getOption("SDL.NoFrame", &noframe);
 	g_config->getOption("SDL.ShowFPS", &show_fps);
+	g_config->getOption("SDL.ShowFrameCount", &frame_display);
+	g_config->getOption("SDL.ShowLagCount", &lagCounterDisplay);
+	g_config->getOption("SDL.ShowRerecordCount", &rerecord_display);
 	//g_config->getOption("SDL.XScale", &s_exs);
 	//g_config->getOption("SDL.YScale", &s_eys);
 	g_config->getOption("SDL.ScanLineStartNTSC", &startNTSC);

@@ -545,6 +545,9 @@ InitConfig()
 	config->addOption("cursorType", "SDL.CursorType", 0);
 	config->addOption("cursorVis" , "SDL.CursorVis", 1);
 	config->addOption("SDL.DrawInputAids", 1);
+	config->addOption("SDL.ShowFrameCount", 0);
+	config->addOption("SDL.ShowLagCount", 0);
+	config->addOption("SDL.ShowRerecordCount", 0);
 
 	// OpenGL options
 	config->addOption("opengl", "SDL.OpenGL", 1);
