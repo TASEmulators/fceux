@@ -527,6 +527,12 @@ void ConsoleVideoConfDialog_t::periodicUpdate(void)
 		regionSelect->setCurrentIndex(actRegion); 
 	}
 
+	setComboBoxFromValue( inputDisplaySel, input_display );
+
+	   showFrameCount_cbx->setChecked( frame_display );
+	     showLagCount_cbx->setChecked( lagCounterDisplay );
+	showRerecordCount_cbx->setChecked( rerecord_display );
+
 	// Update Window Size Readouts
 	updateReadouts();
 }
@@ -660,6 +666,17 @@ void  ConsoleVideoConfDialog_t::setComboBoxFromProperty( QComboBox *cbx, const c
 	g_config->getOption (property, &pval);
 
 	for (i=0; i<cbx->count(); i++)
+	{
+		if ( pval == cbx->itemData(i).toInt() )
+		{
+			cbx->setCurrentIndex(i); break;
+		}
+	}
+}
+//----------------------------------------------------
+void  ConsoleVideoConfDialog_t::setComboBoxFromValue( QComboBox *cbx, int pval )
+{
+	for (int i=0; i<cbx->count(); i++)
 	{
 		if ( pval == cbx->itemData(i).toInt() )
 		{

@@ -67,6 +67,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 
 		void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
 		void  setComboBoxFromProperty( QComboBox *cbx, const char *property );
+		void  setComboBoxFromValue( QComboBox *cbx, int pval );
 		//void  setSliderFromProperty( QSlider *slider, QLabel *lbl, const char *property );
 
 		void  resetVideo(void);
