@@ -2491,6 +2491,23 @@ void DebuggerEnChange(HWND hwndDlg, uint16 textBoxId, HWND hwndTextbox)
 	}
 }
 
+void DebuggerAccelerator(HWND hwndDlg, uint16 accId)
+{
+	switch (accId)
+	{
+		case IDC_DEBUGGER_STEP_IN:
+		case IDC_DEBUGGER_STEP_OUT:
+		case IDC_DEBUGGER_STEP_OVER:
+		case IDC_DEBUGGER_RUN:
+		case IDC_DEBUGGER_SEEK_PC:
+			DebuggerBnClicked(hwndDlg, accId, NULL);
+			break;
+		case IDC_DEBUGGER_VAL_PCSEEK:
+			SetFocus(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PCSEEK));
+			SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PCSEEK, "");
+	}
+}
+
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -2511,10 +2528,10 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			DebuggerMoveWindow(hwndDlg, LOWORD(lParam), HIWORD(lParam));
 			break;
 		case WM_COMMAND:
-			// I know you can cleverly ignore this difference and have all your menu messages come through as BN_CLICKED messagse.
+			// I know you can cleverly ignore lParam and have all your menu messages come through as BN_CLICKED messages.
 			// But then your accelerators come through as LBN_SELCHANGE messages, which makes absolutely no sense.
 			if (lParam)
-				// Normal messages
+			{   // Normal messages
 				switch (HIWORD(wParam))
 				{
 					case BN_CLICKED:
@@ -2533,7 +2550,9 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						DebuggerEnChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
 						break;
 				}
+			}
 			else
+			{
 				switch (HIWORD(wParam))
 				{
 					case 0:
@@ -2542,9 +2561,10 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						break;
 					case 1:
 						// Accelerators
-						DebuggerBnClicked(hwndDlg, LOWORD(wParam), (HWND)lParam);
+						DebuggerAccelerator(hwndDlg, LOWORD(wParam));
 						break;
 				}
+			}
 		case WM_INITMENUPOPUP:
 			DebuggerInitMenuPopup(hwndDlg, (HMENU)wParam, LOWORD(lParam), HIWORD(lParam));
 			break;
