@@ -250,7 +250,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	aspectSelect = new QComboBox();
 
-	aspectSelect->addItem( tr("Default (1:1)"), 0 );
+	aspectSelect->addItem( tr("Square Pixels (1:1)"), 0 );
 	aspectSelect->addItem( tr("NTSC (8:7)"), 1 );
 	aspectSelect->addItem( tr("PAL (11:8)"), 2 );
 	aspectSelect->addItem( tr("Standard (4:3)"), 3 );

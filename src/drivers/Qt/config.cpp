@@ -531,7 +531,7 @@ InitConfig()
 	config->addOption("doublebuf", "SDL.DoubleBuffering", 1);
 	config->addOption("autoscale", "SDL.AutoScale", 1);
 	config->addOption("forceAspect", "SDL.ForceAspect", 0);
-	config->addOption("aspectSelect", "SDL.AspectSelect", 0);
+	config->addOption("aspectSelect", "SDL.AspectSelect", 3); // Standard (4:3)
 	config->addOption("aspectX", "SDL.AspectX", 1.000);
 	config->addOption("aspectY", "SDL.AspectY", 1.000);
 	config->addOption("xscale", "SDL.XScale", 2.000);
