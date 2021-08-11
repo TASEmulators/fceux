@@ -41,9 +41,6 @@
 #include "assembler.h"
 #include "patcher.h"
 #include "dumper.h"
-
-// ################################## Start of SP CODE ###########################
-
 #include "debuggersp.h"
 
 extern Name* pageNames[32];
@@ -51,8 +48,6 @@ extern Name* ramBankNames;
 extern bool ramBankNamesLoaded;
 extern int pageNumbersLoaded[32];
 extern int myNumWPs;
-
-// ################################## End of SP CODE ###########################
 
 extern int vblankScanLines;
 extern int vblankPixel;
@@ -583,7 +578,7 @@ void HighlightSyntax(HWND hWnd, int lines)
 				SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgComm));
 			else
 			{
-				if (debug_wstr[opbreak] == L'-')
+				if (debug_wstr[opbreak] == L'-') // TODO: Gets confused if dashes in label name!
 					SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION,
 						(LPARAM)PPCF(DbgRts));
 				else
@@ -1803,6 +1798,7 @@ void DebuggerInitDialog(HWND hwndDlg)
 	UpdateSymbolsPopup(symbolsPopup = GetSubMenu(hdbgmenu, MENU_SYMBOLS_POS));
 	UpdateToolsPopup(toolsPopup = GetSubMenu(hdbgmenu, MENU_TOOLS_POS));
 
+	// Preprocessor nonsense to dynamically generate the colors menu
 	HMENU hcolorpopupmenu = GetSubMenu(optionsPopup, MENU_OPTIONS_COLORS_POS);
 	for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 		InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);

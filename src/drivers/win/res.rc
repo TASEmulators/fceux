@@ -3037,7 +3037,7 @@ BEGIN
     BEGIN
         MENUITEM "Auto Open on ROM Load",       ID_DEBUGGER_AUTO_OPEN, CHECKED
 		MENUITEM SEPARATOR
-		POPUP "Colors..."
+		POPUP "Syntax Highlighting"
 		BEGIN
 			MENUITEM SEPARATOR
 			MENUITEM "Restore Defaults", ID_DEBUGGER_DEFCOLOR
