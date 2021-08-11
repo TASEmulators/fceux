@@ -1684,14 +1684,6 @@ BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
 #define MENU_OPTIONS_COLORS_POS 2
 
-#define HKEY_STEP_ONE_ID 0
-#define HKEY_STEP_OUT_ID 1
-#define HKEY_STEP_OVER_ID 2
-#define HKEY_RUN_ID 3
-#define HKEY_SEEK_ADDR_ID 4
-#define HKEY_SEEK_PC_ID 5
-#define HKEY_SET_PC_ID 6
-
 HMENU toolsPopup, symbolsPopup, optionsPopup;
 
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -1814,16 +1806,6 @@ void DebuggerInitDialog(HWND hwndDlg)
 	HMENU hcolorpopupmenu = GetSubMenu(optionsPopup, MENU_OPTIONS_COLORS_POS);
 	for (int i = 0; i < sizeof(dbgcolormenu) / sizeof(DBGCOLORMENU); ++i)
 		InsertColorMenu(hwndDlg, hcolorpopupmenu, &dbgcolormenu[i].menu, i, ID_COLOR_DEBUGGER + i);
-
-	// Register default hotkeys
-	// TODO: Be sure to unregister all these!!
-	RegisterHotKey(hwndDlg, HKEY_STEP_ONE_ID, 0, VK_F11);
-	RegisterHotKey(hwndDlg, HKEY_STEP_OUT_ID, MOD_SHIFT, VK_F11);
-	RegisterHotKey(hwndDlg, HKEY_STEP_OVER_ID, 0, VK_F10);
-	RegisterHotKey(hwndDlg, HKEY_RUN_ID, 0, VK_F5);
-
-	RegisterHotKey(hwndDlg, HKEY_SEEK_ADDR_ID, MOD_CONTROL, 0x41); // A
-	RegisterHotKey(hwndDlg, HKEY_SEEK_PC_ID, MOD_CONTROL, 0x50); // P
 
 	debugger_open = 1;
 	inDebugger = true;
@@ -2513,36 +2495,6 @@ void DebuggerEnChange(HWND hwndDlg, uint16 textBoxId, HWND hwndTextbox)
 	}
 }
 
-void DebuggerHotKey(HWND hwndDlg, UINT hotkeyId, uint16 keycode, uint16 mods)
-{
-	// No idea if this is good programming. Should we use accelerators instead?
-	if (GetForegroundWindow() != hwndDlg)
-		return;
-
-	switch (hotkeyId)
-	{
-		// Do we want autorepeat on these? MOD_NOREPEAT doesn't seem to exist so idk what to do.
-		case HKEY_STEP_ONE_ID:
-			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_STEP_IN, NULL);
-			break;
-		case HKEY_STEP_OUT_ID:
-			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_STEP_OUT, NULL);
-			break;
-		case HKEY_STEP_OVER_ID:
-			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_STEP_OVER, NULL);
-			break;
-		case HKEY_RUN_ID:
-			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_RUN, NULL);
-		case HKEY_SEEK_ADDR_ID:
-			SetFocus(GetDlgItem(hwndDlg, IDC_DEBUGGER_VAL_PCSEEK));
-			SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PCSEEK, "");
-			break;
-		case HKEY_SEEK_PC_ID:
-			DebuggerBnClicked(hwndDlg, IDC_DEBUGGER_SEEK_PC, NULL);
-			break;
-	}
-}
-
 INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -2563,24 +2515,40 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			DebuggerMoveWindow(hwndDlg, LOWORD(lParam), HIWORD(lParam));
 			break;
 		case WM_COMMAND:
-			switch (HIWORD(wParam))
-			{
-				case BN_CLICKED:
-					DebuggerBnClicked(hwndDlg, LOWORD(wParam), (HWND)lParam);
-					break;
-				case LBN_DBLCLK:
-					DebuggerLbnDblClk(hwndDlg, LOWORD(wParam), (HWND)lParam);
-					break;
-				case LBN_SELCANCEL:
-					DebuggerLbnSelCancel(hwndDlg, LOWORD(wParam), (HWND)lParam);
-					break;
-				case LBN_SELCHANGE:
-					DebuggerLbnSelChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
-					break;
-				case EN_CHANGE:
-					DebuggerEnChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
-					break;
-			}
+			// I know you can cleverly ignore this difference and have all your menu messages come through as BN_CLICKED messagse.
+			// But then your accelerators come through as LBN_SELCHANGE messages, which makes absolutely no sense.
+			if (lParam)
+				// Normal messages
+				switch (HIWORD(wParam))
+				{
+					case BN_CLICKED:
+						DebuggerBnClicked(hwndDlg, LOWORD(wParam), (HWND)lParam);
+						break;
+					case LBN_DBLCLK:
+						DebuggerLbnDblClk(hwndDlg, LOWORD(wParam), (HWND)lParam);
+						break;
+					case LBN_SELCANCEL:
+						DebuggerLbnSelCancel(hwndDlg, LOWORD(wParam), (HWND)lParam);
+						break;
+					case LBN_SELCHANGE:
+						DebuggerLbnSelChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
+						break;
+					case EN_CHANGE:
+						DebuggerEnChange(hwndDlg, LOWORD(wParam), (HWND)lParam);
+						break;
+				}
+			else
+				switch (HIWORD(wParam))
+				{
+					case 0:
+						// Menu items
+						DebuggerBnClicked(hwndDlg, LOWORD(wParam), (HWND)lParam);
+						break;
+					case 1:
+						// Accelerators
+						DebuggerBnClicked(hwndDlg, LOWORD(wParam), (HWND)lParam);
+						break;
+				}
 		case WM_INITMENUPOPUP:
 			DebuggerInitMenuPopup(hwndDlg, (HMENU)wParam, LOWORD(lParam), HIWORD(lParam));
 			break;
@@ -2607,9 +2575,6 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			break;
 		case WM_MBUTTONDOWN:
 			DebuggerMButtonDown(hwndDlg, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), wParam);
-			break;
-		case WM_HOTKEY:
-			DebuggerHotKey(hwndDlg, wParam, HIWORD(lParam), LOWORD(lParam));
 			break;
 		case WM_KEYDOWN:
 			MessageBox(hwndDlg, "Die!", "I'm dead!", MB_YESNO | MB_ICONINFORMATION);

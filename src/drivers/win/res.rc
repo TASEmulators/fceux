@@ -3129,6 +3129,16 @@ BEGIN
     "R",            IDC_C_WATCH_REMOVE,     VIRTKEY 
 END
 
+IDR_DEBUGGER_ACCELERATOR ACCELERATORS
+BEGIN
+	VK_F11,         IDC_DEBUGGER_STEP_IN,    VIRTKEY
+	VK_F11,         IDC_DEBUGGER_STEP_OUT,   VIRTKEY, SHIFT
+	VK_F10,         IDC_DEBUGGER_STEP_OVER,  VIRTKEY
+	VK_F5,          IDC_DEBUGGER_RUN,        VIRTKEY
+	"A",            IDC_DEBUGGER_VAL_PCSEEK, VIRTKEY, CONTROL
+	"P",            IDC_DEBUGGER_SEEK_PC,    VIRTKEY, CONTROL
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
