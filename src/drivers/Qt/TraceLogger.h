@@ -199,6 +199,8 @@ public slots:
 private slots:
 	void updatePeriodic(void);
 	void toggleLoggingOnOff(void);
+	void autoUpdateStateChanged(int state);
+	void logToFileStateChanged(int state);
 	void logRegStateChanged(int state);
 	void logFrameStateChanged(int state);
 	void logEmuMsgStateChanged(int state);

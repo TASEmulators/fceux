@@ -639,6 +639,9 @@ InitConfig()
 	config->addOption("autoResumeCDL", "SDL.AutoResumeCDL", 0);
 
 	// Trace Logger Options
+	config->addOption("SDL.TraceLogSaveToFile", 0);
+	config->addOption("SDL.TraceLogSaveFilePath", "");
+	config->addOption("SDL.TraceLogPeriodicWindowUpdate", 1);
 	config->addOption("SDL.TraceLogRegisterState", 1);
 	config->addOption("SDL.TraceLogProcessorState", 1);
 	config->addOption("SDL.TraceLogNewInstructions", 0);

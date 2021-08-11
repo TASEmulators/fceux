@@ -121,7 +121,7 @@ static HANDLE logFile = INVALID_HANDLE_VALUE;
 #else
 static int logFile = -1;
 #endif
-static char  logFilePath[512] = { 0 };
+static std::string  logFilePath;
 //----------------------------------------------------
 static void initLogOption( const char *name, int bitmask )
 {
@@ -151,7 +151,7 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	QMenu *fileMenu;
 	QAction *act;
 	QLabel *lbl;
-	int useNativeMenuBar;
+	int opt, useNativeMenuBar;
 
 	if (recBufMax == 0)
 	{
@@ -244,7 +244,15 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	autoUpdateCbox = new QCheckBox(tr("Automatically update this window while logging"));
 	clearButton = new QPushButton(tr("Clear Log"));
 
-	autoUpdateCbox->setChecked(true);
+	g_config->getOption("SDL.TraceLogSaveFilePath", &logFilePath);
+
+	g_config->getOption("SDL.TraceLogSaveToFile", &opt );
+	logFileCbox->setChecked( opt );
+	connect(logFileCbox, SIGNAL(stateChanged(int)), this, SLOT(logToFileStateChanged(int)));
+
+	g_config->getOption("SDL.TraceLogPeriodicWindowUpdate", &opt );
+	autoUpdateCbox->setChecked( opt );
+	connect(autoUpdateCbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateStateChanged(int)));
 
 	if (logging)
 	{
@@ -512,7 +520,7 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 	{
 		if (logFileCbox->isChecked())
 		{
-			if ( logFilePath[0] == 0 )
+			if ( logFilePath.size() == 0 )
 			{
 				openLogFile();
 			}
@@ -563,8 +571,15 @@ void TraceLoggerDialog_t::openLogFile(void)
 
 	if (romFile != NULL)
 	{
-		char dir[512];
+		char dir[1024];
 		getDirFromFile(romFile, dir);
+		dialog.setDirectory(tr(dir));
+	}
+
+	if ( logFilePath.size() != 0 )
+	{
+		char dir[1024];
+		getDirFromFile(logFilePath.c_str(), dir);
 		dialog.setDirectory(tr(dir));
 	}
 
@@ -592,7 +607,9 @@ void TraceLoggerDialog_t::openLogFile(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	strcpy( logFilePath, filename.toStdString().c_str() );
+	logFilePath = filename.toStdString();
+
+	g_config->setOption("SDL.TraceLogSaveFilePath", logFilePath);
 
 	return;
 }
@@ -606,6 +623,16 @@ void TraceLoggerDialog_t::vbarChanged(int val)
 {
 	//printf("VBAR: %i \n", val );
 	traceView->update();
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::logToFileStateChanged(int state)
+{
+	g_config->setOption("SDL.TraceLogSaveToFile", state != Qt::Unchecked );
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::autoUpdateStateChanged(int state)
+{
+	g_config->setOption("SDL.TraceLogPeriodicWindowUpdate", state != Qt::Unchecked );
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logRegStateChanged(int state)
@@ -2337,24 +2364,24 @@ void TraceLogDiskThread_t::run(void)
 	setPriority( QThread::HighestPriority );
 
 #ifdef WIN32
-	logFile = CreateFileA( logFilePath, GENERIC_WRITE, 
+	logFile = CreateFileA( logFilePath.c_str(), GENERIC_WRITE, 
 			0, NULL, OPEN_ALWAYS, FILE_FLAG_WRITE_THROUGH | FILE_FLAG_NO_BUFFERING, NULL );
 
 	if ( logFile == INVALID_HANDLE_VALUE )
 	{
 		char stmp[1024];
-		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath );
+		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath.c_str() );
 		consoleWindow->QueueErrorMsgWindow(stmp);
 		return;
 	}
 #else
-	logFile = open( logFilePath, O_CREAT | O_WRONLY | O_TRUNC, 
+	logFile = open( logFilePath.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 
 			S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
 
 	if ( logFile == -1 )
 	{
 		char stmp[1024];
-		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath );
+		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath.c_str() );
 		consoleWindow->QueueErrorMsgWindow(stmp);
 		return;
 	}
