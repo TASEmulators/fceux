@@ -203,6 +203,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *timingConfig;
 		QAction *movieConfig;
 		QAction *autoResume;
+		QAction *winSizeAct[4];
 		QAction *fullscreen;
 		QAction *aboutAct;
 		QAction *aboutActQt;
@@ -296,6 +297,7 @@ class  consoleWin_t : public QMainWindow
 		void toggleFullscreen(void);
 		void toggleMenuVis(void);
 		void recordMovie(void);
+		void winResizeIx(int iScale);
 	private slots:
 		void closeApp(void);
 		void openROMFile(void);

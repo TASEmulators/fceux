@@ -1155,6 +1155,22 @@ void consoleWin_t::createMainMenu(void)
 	
 	optMenu->addSeparator();
 
+	// Options -> Window Resize
+	subMenu = optMenu->addMenu( tr("Window Resi&ze") );
+
+	for (int i=0; i<4; i++)
+	{
+	        char stmp[8];
+
+	        sprintf( stmp, "&%ix", i+1 );
+
+	        winSizeAct[i] = new QAction(tr(stmp), this);
+
+		subMenu->addAction(winSizeAct[i]);
+
+		connect( winSizeAct[i], &QAction::triggered, [ this, i ]{ consoleWin_t::winResizeIx(i+1); } );
+	}
+
 	// Options -> Full Screen
 	fullscreen = new QAction(tr("&Fullscreen"), this);
 	//fullscreen->setShortcut( QKeySequence(tr("Alt+Return")));
@@ -2881,6 +2897,70 @@ void consoleWin_t::toggleAutoResume(void)
 	g_config->setOption ("SDL.AutoResume", (int) autoResume->isChecked() );
 
 	AutoResumePlay = autoResume->isChecked();
+}
+
+void consoleWin_t::winResizeIx(int iscale)
+{
+	QSize w, v;
+	double xscale = 1.0, yscale = 1.0, aspectRatio = 1.0;
+	int texture_width  = nes_shm->video.ncol;
+	int texture_height = nes_shm->video.nrow;
+	int l=0, r=texture_width;
+	int t=0, b=texture_height;
+	int dw=0, dh=0, rw, rh;
+	bool forceAspect = false;
+
+	xscale = (double)iscale;
+	yscale = (double)iscale;
+
+	w = size();
+
+	if ( viewport_GL )
+	{
+		v = viewport_GL->size();
+		aspectRatio = viewport_GL->getAspectRatio();
+		forceAspect = viewport_GL->getForceAspectOpt();
+	}
+	else if ( viewport_SDL )
+	{
+		v = viewport_SDL->size();
+		aspectRatio = viewport_SDL->getAspectRatio();
+		forceAspect = viewport_SDL->getForceAspectOpt();
+	}
+
+	dw = w.width()  - v.width();
+	dh = w.height() - v.height();
+
+	if ( forceAspect )
+	{
+		xscale = xscale / nes_shm->video.xscale;
+		yscale = xscale * (double)nes_shm->video.xyRatio;
+	}
+	else
+	{
+		xscale = xscale / nes_shm->video.xscale;
+		yscale = yscale / nes_shm->video.yscale;
+	}
+	rw=(int)((r-l)*xscale);
+	rh=(int)((b-t)*yscale);
+
+	if ( forceAspect )
+	{
+		double rr;
+
+		rr = (double)rh / (double)rw;
+
+		if ( rr > aspectRatio )
+		{
+			rw = (int)( (((double)rh) / aspectRatio) + 0.50);
+		}
+		else
+		{
+			rh = (int)( (((double)rw) * aspectRatio) + 0.50);
+		}
+	}
+
+	resize( rw + dw, rh + dh );
 }
 
 void consoleWin_t::toggleFullscreen(void)
