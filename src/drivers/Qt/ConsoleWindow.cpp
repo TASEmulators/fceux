@@ -99,7 +99,7 @@
 consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
-	int opt, xWinSize = 256, yWinSize = 240;
+	int opt, xWinPos = -1, yWinPos = -1, xWinSize = 256, yWinSize = 240;
 	int use_SDL_video = false;
 	int setFullScreen = false;
 
@@ -181,12 +181,19 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	}
 
 
+	g_config->getOption( "SDL.WinPosX" , &xWinPos );
+	g_config->getOption( "SDL.WinPosY" , &yWinPos );
 	g_config->getOption( "SDL.WinSizeX", &xWinSize );
 	g_config->getOption( "SDL.WinSizeY", &yWinSize );
 
 	if ( (xWinSize >= 256) && (yWinSize >= 224) )
 	{
 		this->resize( xWinSize, yWinSize );
+
+		if ( (xWinPos >= 0) && (yWinPos >= 0) )
+		{
+			this->move( xWinPos, yWinPos );
+		}
 	}
 	else
 	{
@@ -235,10 +242,10 @@ consoleWin_t::~consoleWin_t(void)
 	QClipboard *clipboard;
 
 	// Save window size and image scaling parameters at app exit.
-	w = consoleWindow->size();
+	w = size();
 
 	// Only Save window size if not fullscreen and not maximized
-	if ( !consoleWindow->isFullScreen() && !consoleWindow->isMaximized() )
+	if ( !isFullScreen() && !isMaximized() )
 	{
 		// Scaling is only saved when applying video settings
 		//if ( viewport_GL != NULL )
@@ -252,8 +259,22 @@ consoleWin_t::~consoleWin_t(void)
 		//	g_config->setOption( "SDL.YScale", viewport_SDL->getScaleY() );
 		//}
 
+		g_config->setOption( "SDL.WinPosX" , pos().x() );
+		g_config->setOption( "SDL.WinPosY" , pos().y() );
 		g_config->setOption( "SDL.WinSizeX", w.width() );
 		g_config->setOption( "SDL.WinSizeY", w.height() );
+	}
+	else
+	{
+		QRect rect = normalGeometry();
+
+		if ( rect.isValid() )
+		{
+			g_config->setOption( "SDL.WinPosX" , rect.x() );
+			g_config->setOption( "SDL.WinPosY" , rect.y() );
+			g_config->setOption( "SDL.WinSizeX", rect.width() );
+			g_config->setOption( "SDL.WinSizeY", rect.height() );
+		}
 	}
 	g_config->save();
 

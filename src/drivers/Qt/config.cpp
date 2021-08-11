@@ -526,6 +526,8 @@ InitConfig()
 	config->addOption('y', "yres", "SDL.YResolution", 0);
 	config->addOption("SDL.LastXRes", 0);
 	config->addOption("SDL.LastYRes", 0);
+	config->addOption("SDL.WinPosX" , 0);
+	config->addOption("SDL.WinPosY" , 0);
 	config->addOption("SDL.WinSizeX", 0);
 	config->addOption("SDL.WinSizeY", 0);
 	config->addOption("doublebuf", "SDL.DoubleBuffering", 1);
