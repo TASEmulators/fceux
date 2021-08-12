@@ -30,6 +30,9 @@
 #include <vfw.h>
 #endif
 
+#include <QObject>
+#include <QMessageBox>
+
 #include "driver.h"
 #include "common/os_utils.h"
 
@@ -487,6 +490,28 @@ int aviRecordOpenFile( const char *filepath )
 		else
 		{
 			return -1;
+		}
+	}
+
+	if ( fileName[0] != 0 )
+	{
+		QFile file(fileName);
+
+		if ( file.exists() )
+		{
+			int ret;
+			std::string msg;
+
+			msg = "Pre-existing AVI file will be overwritten:\n\n" +
+				std::string(fileName) +	"\n\nReplace file?";
+
+			ret = QMessageBox::warning( consoleWindow, QObject::tr("Overwrite Warning"),
+					QString::fromStdString(msg), QMessageBox::Yes | QMessageBox::No );
+
+			if ( ret == QMessageBox::No )
+			{
+				return -1;
+			}
 		}
 	}
 
