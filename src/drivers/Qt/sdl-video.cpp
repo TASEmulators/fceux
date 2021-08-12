@@ -428,13 +428,10 @@ static void WriteTestPattern(void)
 		}
 	}
 }
-/**
- * Pushes the given buffer of bits to the screen.
- */
-void
-BlitScreen(uint8 *XBuf)
+
+static void
+doBlitScreen(uint8_t *XBuf, uint8_t *dest)
 {
-	uint8 *dest;
 	int w, h, pitch, bw, ixScale, iyScale;
 
 	// refresh the palette if required
@@ -447,7 +444,7 @@ BlitScreen(uint8 *XBuf)
 	// XXX soules - not entirely sure why this is being done yet
 	XBuf += s_srendline * 256;
 
-	dest    = (uint8*)nes_shm->pixbuf;
+	//dest    = (uint8*)nes_shm->pixbuf;
 	ixScale = nes_shm->video.xscale;
 	iyScale = nes_shm->video.yscale;
 
@@ -486,11 +483,28 @@ BlitScreen(uint8 *XBuf)
 	{
 		Blit8ToHigh(XBuf + NOFFSET, dest, bw, s_tlines, pitch, ixScale, iyScale);
 	}
+}
+/**
+ * Pushes the given buffer of bits to the screen.
+ */
+void
+BlitScreen(uint8 *XBuf)
+{
+	doBlitScreen(XBuf, (uint8_t*)nes_shm->pixbuf);
+
 	nes_shm->blit_count++;
 	nes_shm->blitUpdated = 1;
+}
+
+void FCEUI_AviVideoUpdate(const unsigned char* buffer)
+{	// This is not used by Qt Emulator, avi recording pulls from the post processed video buffer
+	// instead of emulation core video buffer. This allows for the video scaler effects
+	// and higher resolution to be seen in recording.
+	doBlitScreen( (uint8_t*)buffer, (uint8_t*)nes_shm->avibuf);
 
 	aviRecordAddFrame();
 
+	return;
 }
 
 /**

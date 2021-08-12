@@ -587,8 +587,8 @@ InitConfig()
     
 	// pause movie playback at frame x
 	config->addOption("pauseframe", "SDL.PauseFrame", 0);
-	config->addOption("recordhud", "SDL.RecordHUD", 1);
-	config->addOption("moviemsg", "SDL.MovieMsg", 1);
+	config->addOption("recordhud", "SDL.RecordHUD", 0);
+	config->addOption("moviemsg", "SDL.MovieMsg", 0);
 
 #ifdef _USE_X264
 	config->addOption("SDL.AviVideoFormat", AVI_X264);

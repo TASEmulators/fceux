@@ -243,6 +243,8 @@ class  consoleWin_t : public QMainWindow
 		QAction *recWavAct;
 		QAction *recAsWavAct;
 		QAction *stopWavAct;
+		QAction *aviHudAct;
+		QAction *aviMsgAct;
 
 		QTimer  *gameTimer;
 
@@ -417,6 +419,8 @@ class  consoleWin_t : public QMainWindow
 		void aviRecordStop(void);
 		void aviAudioEnableChange(bool);
 		void aviVideoFormatChanged(int idx);
+		void setAviHudEnable(bool);
+		void setAviMsgEnable(bool);
 		void wavRecordStart(void);
 		void wavRecordAsStart(void);
 		void wavRecordStop(void);

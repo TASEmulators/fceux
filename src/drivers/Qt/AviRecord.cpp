@@ -588,7 +588,7 @@ int aviRecordAddFrame( void )
 
 	while ( i < numPixels )
 	{
-		rawVideoBuf[ head ] = nes_shm->pixbuf[i]; i++;
+		rawVideoBuf[ head ] = nes_shm->avibuf[i]; i++;
 
 		head = (head + 1) % vbufSize;
 	}
@@ -677,12 +677,11 @@ void FCEUD_AviStop(void)
 	return;
 }
 //**************************************************************************************
-void FCEUI_AviVideoUpdate(const unsigned char* buffer)
-{	// This is not used by Qt Emulator, avi recording pulls from the post processed video buffer
-	// instead of emulation core video buffer. This allows for the video scaler effects
-	// and higher resolution to be seen in recording.
-	return;
-}
+// // This function is implemented in sdl-video.cpp
+//void FCEUI_AviVideoUpdate(const unsigned char* buffer)
+//{
+//	return;
+//}
 //**************************************************************************************
 int aviGetSelVideoFormat(void)
 {

@@ -35,10 +35,12 @@ struct  nes_shm_t
 	char  blitUpdated;
 
 	uint32_t  pixbuf[1048576]; // 1024 x 1024
+	uint32_t  avibuf[1048576]; // 1024 x 1024
 
 	void clear_pixbuf(void)
 	{
 		memset( pixbuf, 0, sizeof(pixbuf) );
+		memset( avibuf, 0, sizeof(avibuf) );
 	}
 
 	struct sndBuf_t

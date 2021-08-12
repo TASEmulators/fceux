@@ -756,7 +756,7 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	// check to see if recording HUD to AVI is enabled
 	int rh;
 	g_config->getOption("SDL.RecordHUD", &rh);
-	if( rh == 0)
+	if( rh )
 		FCEUI_SetAviEnableHUDrecording(true);
 	else
 		FCEUI_SetAviEnableHUDrecording(false);

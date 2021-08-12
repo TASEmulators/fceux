@@ -1799,6 +1799,26 @@ void consoleWin_t::createMainMenu(void)
 	connect(act, SIGNAL(triggered(bool)), this, SLOT(aviAudioEnableChange(bool)) );
 	aviMenu->addAction(act);
 
+	aviMenu->addSeparator();
+
+	// Movie -> Avi Recording -> Enable HUD Recording
+	aviHudAct = new QAction(tr("Enable &HUD Recording"), this);
+	aviHudAct->setCheckable(true);
+	aviHudAct->setChecked( FCEUI_AviEnableHUDrecording() );
+	aviHudAct->setStatusTip(tr("Enable HUD Recording"));
+	connect(aviHudAct, SIGNAL(triggered(bool)), this, SLOT(setAviHudEnable(bool)) );
+
+	aviMenu->addAction(aviHudAct);
+
+	// Movie -> Avi Recording -> Enable Message Recording
+	aviMsgAct = new QAction(tr("Enable &Msg Recording"), this);
+	aviMsgAct->setCheckable(true);
+	aviMsgAct->setChecked( !FCEUI_AviDisableMovieMessages() );
+	aviMsgAct->setStatusTip(tr("Enable Msg Recording"));
+	connect(aviMsgAct, SIGNAL(triggered(bool)), this, SLOT(setAviMsgEnable(bool)) );
+
+	aviMenu->addAction(aviMsgAct);
+
 	// Movie -> WAV Recording
 	subMenu = movieMenu->addMenu( tr("&WAV Recording") );
 
@@ -3699,6 +3719,20 @@ void consoleWin_t::aviAudioEnableChange(bool checked)
 	aviSetAudioEnable( checked );
 
 	return;
+}
+
+void consoleWin_t::setAviHudEnable(bool checked)
+{
+	FCEUI_SetAviEnableHUDrecording( checked );
+
+	g_config->setOption("SDL.RecordHUD", checked );
+}
+
+void consoleWin_t::setAviMsgEnable(bool checked)
+{
+	FCEUI_SetAviDisableMovieMessages( !checked );
+
+	g_config->setOption("SDL.MovieMsg", checked );
 }
 
 void consoleWin_t::aviVideoFormatChanged(int idx)
