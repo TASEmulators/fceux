@@ -58,6 +58,7 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 
 	tree->setColumnCount(2);
 	tree->setSelectionMode( QAbstractItemView::SingleSelection );
+	tree->setAlternatingRowColors(true);
 
 	item = new QTreeWidgetItem();
 	item->setText(0, QString::fromStdString("Command"));
