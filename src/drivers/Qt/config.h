@@ -60,7 +60,7 @@ enum HOTKEY {
 	HK_FKB_ENABLE,
 	HK_MAX};
 
-int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const char **titleOut = NULL );
+int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const char **titleOut = NULL, const char **groupOut = NULL );
 
 int getHotKeyIndexByName( const char *name );
 

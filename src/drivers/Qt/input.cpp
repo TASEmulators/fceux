@@ -234,6 +234,7 @@ int hotkey_t::readConfig(void)
 	g_config->getOption(prefix + configName, &keyText);
 
 	//printf("Config: '%s' = '%s'\n", configName, keyText.c_str() );
+	keySeq = QKeySequence( QString::fromStdString(keyText) );
 
 	if (shortcut)
 	{

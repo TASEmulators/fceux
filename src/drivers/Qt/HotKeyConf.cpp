@@ -27,6 +27,7 @@
 #include <SDL.h>
 #include <QHeaderView>
 #include <QCloseEvent>
+#include <QMessageBox>
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -45,6 +46,7 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 	QPushButton *closeButton, *resetDefaults;
 	QTreeWidgetItem *item;
 	std::string prefix = "SDL.Hotkeys.";
+	const char *hkName, *hkKeySeq, *hkTitle, *hkGroup;
 
 	setWindowTitle("Hotkey Configuration");
 
@@ -69,26 +71,13 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 
 	for (int i = 0; i < HK_MAX; i++)
 	{
-		char keyName[128];
-		std::string optionName = prefix + Hotkeys[i].getConfigName();
+		getHotKeyConfig( i, &hkName, &hkKeySeq, &hkTitle, &hkGroup );
 
-		//g_config->getOption (optionName.c_str (), &keycode);
-		Hotkeys[i].getString(keyName);
+		tree->addGroup( hkGroup );
 
-		item = new QTreeWidgetItem();
-
-		tree->addTopLevelItem(item);
-
-		//item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemNeverHasChildren );
-		//item->setCheckState( 0, Qt::Checked );
-
-		item->setText(0, QString::fromStdString(optionName));
-		item->setText(1, QString::fromStdString(keyName));
-
-		item->setTextAlignment(0, Qt::AlignLeft);
-		item->setTextAlignment(1, Qt::AlignCenter);
-
+		tree->addItem( hkGroup, i );
 	}
+	tree->finalize();
 
 	//connect( tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(hotKeyDoubleClicked(QTreeWidgetItem*,int) ) );
 	connect( tree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(hotKeyActivated(QTreeWidgetItem*,int) ) );
@@ -132,25 +121,124 @@ void HotKeyConfDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------------------------------
-void HotKeyConfDialog_t::resetDefaultsCB(void)
+void HotKeyConfTree_t::finalize(void)
 {
 	QTreeWidgetItem *item;
+	std::map <std::string, QTreeWidgetItem*>::iterator it;
+
+	for (it=groupMap.begin(); it!=groupMap.end(); it++)
+	{
+		item = it->second;
+
+		addTopLevelItem(item);
+
+		item->setExpanded(true);
+	}
+}
+//----------------------------------------------------------------------------
+QTreeWidgetItem *HotKeyConfTree_t::addItem( const char *group, int hkIdx )
+{
+	QTreeWidgetItem *itemGroup;
+	HotKeyConfTreeItem_t *item;
+	const char *hkName, *hkKeySeq, *hkTitle, *hkGroup;
+
+	itemGroup = findGroup(group);
+
+	if ( itemGroup == NULL )
+	{
+		return NULL;
+	}
+	getHotKeyConfig( hkIdx, &hkName, &hkKeySeq, &hkTitle, &hkGroup );
+
+	item = new HotKeyConfTreeItem_t(hkIdx);
+
+	item->setText(0, tr(hkTitle));
+	item->setText(1, Hotkeys[hkIdx].getKeySeq().toString());
+
+	item->setTextAlignment(0, Qt::AlignLeft);
+	item->setTextAlignment(1, Qt::AlignCenter);
+
+	itemGroup->addChild(item);
+	return NULL;
+}
+//----------------------------------------------------------------------------
+QTreeWidgetItem *HotKeyConfTree_t::addGroup( const char *group)
+{
+	std::string s = group;
+
+	return addGroup(s);
+}
+//----------------------------------------------------------------------------
+QTreeWidgetItem *HotKeyConfTree_t::addGroup(std::string group)
+{
+	QTreeWidgetItem *item;
+
+	item = findGroup(group);
+
+	if ( item == NULL )
+	{
+		item = new QTreeWidgetItem( this, 0);
+
+		item->setText(0, QString::fromStdString(group));
+
+		groupMap[group] = item;
+	}
+	return item;
+}
+//----------------------------------------------------------------------------
+QTreeWidgetItem *HotKeyConfTree_t::findGroup( const char *group)
+{
+	std::string s = group;
+
+	return findGroup(s);
+}
+//----------------------------------------------------------------------------
+QTreeWidgetItem *HotKeyConfTree_t::findGroup( std::string group)
+{
+	std::map <std::string, QTreeWidgetItem*>::iterator it;
+
+	it = groupMap.find(group);
+
+	if ( it != groupMap.end() )
+	{
+		return it->second;
+	}
+	return NULL;
+}
+//----------------------------------------------------------------------------
+HotKeyConfTreeItem_t::HotKeyConfTreeItem_t(int idx, QTreeWidgetItem *parent)
+	: QTreeWidgetItem(parent,1)
+{
+	hkIdx = idx;
+}
+//----------------------------------------------------------------------------
+HotKeyConfTreeItem_t::~HotKeyConfTreeItem_t(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void HotKeyConfDialog_t::resetDefaultsCB(void)
+{
+	QTreeWidgetItem *groupItem;
+	HotKeyConfTreeItem_t *item;
 	std::string confName;
 	std::string prefix = "SDL.Hotkeys.";
 	const char *name, *keySeq;
 
-	for (int i=0; i<HK_MAX; i++)
+	for (int i=0; i<tree->topLevelItemCount(); i++)
 	{
-		getHotKeyConfig( i, &name, &keySeq );
+		groupItem = tree->topLevelItem(i);
 
-		confName = prefix + name;
-
-		g_config->setOption( confName, keySeq );
-
-		item = tree->topLevelItem(i);
-
-		if ( item )
+		for (int j=0; j<groupItem->childCount(); j++)
 		{
+			item = static_cast<HotKeyConfTreeItem_t*>(groupItem->child(j));
+
+			getHotKeyConfig( item->hkIdx, &name, &keySeq );
+
+			confName = prefix + name;
+
+			g_config->setOption( confName, keySeq );
+
 			item->setText(1, tr(keySeq));
 		}
 	}
@@ -172,18 +260,26 @@ void HotKeyConfDialog_t::keyReleaseEvent(QKeyEvent *event)
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::hotKeyActivated(QTreeWidgetItem *item, int column)
 {
-	int row = tree->indexOfTopLevelItem( item );
+	HotKeyConfTreeItem_t *hkItem = static_cast<HotKeyConfTreeItem_t*>(item);
 
-	HotKeyConfSetDialog_t *win = new HotKeyConfSetDialog_t( row, 1, item, this );
+	if ( hkItem->type() == 0 )
+	{
+		return;
+	}
+	HotKeyConfSetDialog_t *win = new HotKeyConfSetDialog_t( 1, hkItem, this );
 
 	win->exec();
 }
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::hotKeyDoubleClicked(QTreeWidgetItem *item, int column)
 {
-	int row = tree->indexOfTopLevelItem( item );
+	HotKeyConfTreeItem_t *hkItem = static_cast<HotKeyConfTreeItem_t*>(item);
 
-	HotKeyConfSetDialog_t *win = new HotKeyConfSetDialog_t( row, 0, item, this );
+	if ( hkItem->type() == 0 )
+	{
+		return;
+	}
+	HotKeyConfSetDialog_t *win = new HotKeyConfSetDialog_t( 0, hkItem, this );
 
 	win->exec();
 }
@@ -211,14 +307,13 @@ void HotKeyConfTree_t::keyReleaseEvent(QKeyEvent *event)
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-HotKeyConfSetDialog_t::HotKeyConfSetDialog_t( int hkIndex, int discardNum, QTreeWidgetItem *itemIn, QWidget *parent )
+HotKeyConfSetDialog_t::HotKeyConfSetDialog_t( int discardNum, HotKeyConfTreeItem_t *itemIn, QWidget *parent )
 	: QDialog(parent)
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
 	QPushButton *clearButton, *okButton;
 
-	idx = hkIndex;
 	item = itemIn;
 	discardCount = discardNum;
 
@@ -299,6 +394,39 @@ void HotKeyConfSetDialog_t::keyReleaseEvent(QKeyEvent *event)
 	event->accept();
 }
 //----------------------------------------------------------------------------
+void HotKeyConfSetDialog_t::checkForConflicts(int hkIdx)
+{
+	for (int i=0; i<HK_MAX; i++)
+	{
+		if ( hkIdx == i )
+		{
+			continue;
+		}
+		if ( Hotkeys[hkIdx].getKeySeq().matches( Hotkeys[i].getKeySeq() ) )
+		{
+			std::string msg;
+			const char *hkName1, *hkKeySeq1, *hkTitle1, *hkGroup1;
+			const char *hkName2, *hkKeySeq2, *hkTitle2, *hkGroup2;
+
+			getHotKeyConfig(     i, &hkName1, &hkKeySeq1, &hkTitle1, &hkGroup1 );
+			getHotKeyConfig( hkIdx, &hkName2, &hkKeySeq2, &hkTitle2, &hkGroup2 );
+
+			msg.append(hkGroup2);
+			msg.append(" :: ");
+			msg.append(hkTitle2);
+			msg.append("\n\n");
+			msg.append("Conflicts with:\n\n");
+			msg.append(hkGroup1);
+			msg.append(" :: ");
+			msg.append(hkTitle1);
+
+			QMessageBox::warning( this, 
+						tr("Hotkey Conflict Warning"), tr(msg.c_str()) );
+			//printf("Warning Key Conflict: %i and %i \n", hkIdx, i );
+		}
+	}
+}
+//----------------------------------------------------------------------------
 void HotKeyConfSetDialog_t::assignHotkey(QKeyEvent *event)
 {
 	bool keyIsModifier;
@@ -321,13 +449,15 @@ void HotKeyConfSetDialog_t::assignHotkey(QKeyEvent *event)
 		std::string prefix = "SDL.Hotkeys.";
 		std::string confName;
 
-		confName = prefix + Hotkeys[idx].getConfigName();
+		confName = prefix + Hotkeys[item->hkIdx].getConfigName();
 
 		keyText = ks.toString().toStdString();
 
 		g_config->setOption( confName, keyText);
 
 		setHotKeys();
+
+		checkForConflicts(item->hkIdx);
 
 		if ( item )
 		{
@@ -344,7 +474,7 @@ void HotKeyConfSetDialog_t::cleanButtonCB(void)
 	std::string prefix = "SDL.Hotkeys.";
 	std::string confName;
 
-	confName = prefix + Hotkeys[idx].getConfigName();
+	confName = prefix + Hotkeys[item->hkIdx].getConfigName();
 
 	g_config->setOption( confName, "");
 

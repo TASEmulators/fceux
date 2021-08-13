@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include <string>
+#include <list>
+#include <map>
+
 #include <QWidget>
 #include <QDialog>
 #include <QVBoxLayout>
@@ -16,15 +20,27 @@
 #include <QGroupBox>
 #include <QTreeView>
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 #include "Qt/main.h"
 
+class HotKeyConfTreeItem_t : public QTreeWidgetItem
+{
+	//Q_OBJECT
+
+	public:
+		HotKeyConfTreeItem_t(int idx, QTreeWidgetItem *parent = nullptr);
+		~HotKeyConfTreeItem_t(void);
+
+		int  hkIdx;
+};
+
 class HotKeyConfSetDialog_t : public QDialog
 {
-		Q_OBJECT
+	Q_OBJECT
 
 public:
-	HotKeyConfSetDialog_t( int hkIndex, int discardNum, QTreeWidgetItem *itemIn = 0, QWidget *parent = 0);
+	HotKeyConfSetDialog_t( int discardNum, HotKeyConfTreeItem_t *itemIn = 0, QWidget *parent = 0);
 	~HotKeyConfSetDialog_t(void);
 
 protected:
@@ -32,11 +48,11 @@ protected:
 	void keyPressEvent(QKeyEvent *event);
 	void keyReleaseEvent(QKeyEvent *event);
 	void assignHotkey(QKeyEvent *event);
+	void checkForConflicts(int hkIdx);
 
 	QLineEdit *keySeqText;
-	QTreeWidgetItem *item;
+	HotKeyConfTreeItem_t *item;
 
-	int  idx;
 	int  discardCount;
 
 public slots:
@@ -52,6 +68,18 @@ class HotKeyConfTree_t : public QTreeWidget
 public:
 	HotKeyConfTree_t(QWidget *parent = 0);
 	~HotKeyConfTree_t(void);
+
+	void finalize(void);
+
+	QTreeWidgetItem *addGroup( const char *group);
+	QTreeWidgetItem *addGroup( std::string group);
+	QTreeWidgetItem *findGroup( const char *group);
+	QTreeWidgetItem *findGroup( std::string group);
+
+	QTreeWidgetItem *addItem(const char *group, int i );
+
+protected:
+	std::map <std::string, QTreeWidgetItem*>  groupMap;
 
 protected:
 	void keyPressEvent(QKeyEvent *event);
