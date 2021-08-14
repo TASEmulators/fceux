@@ -29,6 +29,7 @@
 #include <QFileDialog>
 #include <QScreen>
 #include <QGuiApplication>
+#include <QMessageBox>
 #include <QSettings>
 
 #include "../../types.h"
@@ -95,6 +96,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	pauseWhileActive = false;
 	wasPausedByCheats = false;
+
+	g_config->getOption("SDL.CheatsWindowPause", &pauseWhileActive);
 
 	//resize( 512, 512 );
 
@@ -418,6 +421,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	hbox = new QHBoxLayout();
 
 	pauseBox = new QCheckBox(tr("Pause emulation when this window is active"));
+	pauseBox->setChecked(pauseWhileActive);
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
 
@@ -1029,8 +1033,13 @@ void GuiCheatsDialog_t::actvCheatItemClicked(QTreeWidgetItem *item, int column)
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::globalEnableCheats(int state)
 {
+	int val = state != Qt::Unchecked;
+
+	g_config->setOption("SDL.CheatsDisabled", !val);
+	g_config->save();
+
 	fceuWrapperLock();
-	FCEUI_GlobalToggleCheat(state != Qt::Unchecked);
+	FCEUI_GlobalToggleCheat(val);
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
@@ -1038,18 +1047,35 @@ void GuiCheatsDialog_t::autoLoadSaveCheats(int state)
 {
 	if (state == Qt::Unchecked)
 	{
-		printf("If this option is unchecked, you must manually save the cheats by yourself, or all the changes you made to the cheat list would be discarded silently without any asking once you close the game!\nDo you really want to do it in this way?");
-		disableAutoLSCheats = 2;
+		int ret;
+		const char *msg = "If this option is unchecked, you must manually save the cheats by yourself, or all the changes you made to the cheat list would be discarded silently without any asking once you close the game!\nDo you really want to do it in this way?";
+
+		ret = QMessageBox::warning( this, QObject::tr("Cheat Manual Save Warning"),
+			QString::fromStdString(msg), QMessageBox::Yes | QMessageBox::No );
+
+		if ( ret == QMessageBox::Yes )
+		{
+			disableAutoLSCheats = 2;
+		}
+		else
+		{
+			autoSave->setCheckState( Qt::Checked );
+		}
 	}
 	else
 	{
 		disableAutoLSCheats = 0;
 	}
+	g_config->setOption("SDL.CheatsDisableAutoLS", disableAutoLSCheats);
+	g_config->save();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::pauseWindowState(int state)
 {
 	pauseWhileActive = (state != Qt::Unchecked);
+
+	g_config->setOption("SDL.CheatsWindowPause", pauseWhileActive);
+	g_config->save();
 
 	if (pauseWhileActive)
 	{

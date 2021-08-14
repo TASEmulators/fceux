@@ -603,9 +603,14 @@ InitConfig()
 	config->addOption("SDL.AviVideoFormat", AVI_RGB24);
 #endif
 
+	// Cheat Options
+	config->addOption("SDL.CheatsDisabled", 0);
+	config->addOption("SDL.CheatsDisableAutoLS", 0);
+	config->addOption("SDL.CheatsWindowPause", 0);
+
 	// Hex Editor Options
-	config->addOption("hexEditBgColor", "SDL.HexEditBgColor", "#000000");
-	config->addOption("hexEditFgColor", "SDL.HexEditFgColor", "#FFFFFF");
+	config->addOption("SDL.HexEditBgColor", "#000000");
+	config->addOption("SDL.HexEditFgColor", "#FFFFFF");
 	config->addOption("SDL.HexEditCursorColorRC", "#000080");
 	config->addOption("SDL.HexEditAltColColor"  , "#545454");
 	config->addOption("SDL.HexEditFont"  , "");

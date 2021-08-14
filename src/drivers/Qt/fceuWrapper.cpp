@@ -47,6 +47,7 @@
 
 #include "common/cheat.h"
 #include "../../fceu.h"
+#include "../../cheat.h"
 #include "../../movie.h"
 #include "../../version.h"
 
@@ -743,6 +744,10 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	{
 		AutoResumePlay = false;
 	}
+
+	// Cheats
+	g_config->getOption ("SDL.CheatsDisabled"     , &globalCheatDisabled);
+	g_config->getOption ("SDL.CheatsDisableAutoLS", &disableAutoLSCheats);
 
 	g_config->getOption ("SDL.DrawInputAids", &drawInputAidsEnable);
 
