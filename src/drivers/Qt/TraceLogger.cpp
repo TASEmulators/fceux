@@ -216,10 +216,9 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	mainLayout->addLayout(grid, 1);
 
 	lbl = new QLabel(tr("Lines"));
-	logLastCbox = new QCheckBox(tr("Log Last"));
+	logLastLbl = new QLabel(tr("Log Last"));
 	logMaxLinesComboBox = new QComboBox();
 
-	logLastCbox->setChecked(true);
 	logMaxLinesComboBox->addItem(tr("3,000,000"), 3000000);
 	logMaxLinesComboBox->addItem(tr("1,000,000"), 1000000);
 	logMaxLinesComboBox->addItem(tr("300,000"), 300000);
@@ -270,7 +269,7 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	connect(     clearButton, SIGNAL(clicked(void)), this, SLOT(clearLog(void)));
 
 	hbox = new QHBoxLayout();
-	hbox->addWidget(logLastCbox);
+	hbox->addWidget(logLastLbl);
 	hbox->addWidget(logMaxLinesComboBox);
 	hbox->addWidget(lbl);
 
@@ -425,20 +424,13 @@ void TraceLoggerDialog_t::updatePeriodic(void)
 {
 	char traceViewDrawEnable;
 
-	if (logLastCbox->isChecked())
+	if (FCEUI_EmulationPaused())
 	{
-		if (FCEUI_EmulationPaused())
-		{
-			traceViewDrawEnable = 1;
-		}
-		else
-		{
-			traceViewDrawEnable = autoUpdateCbox->isChecked();
-		}
+		traceViewDrawEnable = 1;
 	}
 	else
 	{
-		traceViewDrawEnable = 0;
+		traceViewDrawEnable = autoUpdateCbox->isChecked();
 	}
 
 	if ( !logging || !logFileCbox->isChecked())
@@ -515,6 +507,8 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 		diskThread->requestInterruption();
 		diskThread->quit();
 		diskThread->wait(1000);
+
+		traceView->update();
 	}
 	else
 	{

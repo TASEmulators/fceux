@@ -161,7 +161,7 @@ public:
 	void showBufferWarning(void);
 protected:
 	QTimer *updateTimer;
-	QCheckBox *logLastCbox;
+	QLabel    *logLastLbl;
 	QCheckBox *logFileCbox;
 	QComboBox *logMaxLinesComboBox;
 
