@@ -311,13 +311,17 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 RamWatchDialog_t::~RamWatchDialog_t(void)
 {
+	QSettings settings;
+
 	updateTimer->stop();
 
 	if ( ramWatchMainWin == this )
 	{
 	   ramWatchMainWin = NULL;
 	}
-	printf("Destroy RAM Watch Config Window\n");
+	settings.setValue("ramWatch/geometry", saveGeometry());
+
+	//printf("Destroy RAM Watch Config Window\n");
 }
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::closeEvent(QCloseEvent *event)

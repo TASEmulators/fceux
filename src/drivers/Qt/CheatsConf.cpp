@@ -456,12 +456,16 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
 {
+	QSettings settings;
+
 	if (EmulationPaused && wasPausedByCheats)
 	{
 		EmulationPaused = 0;
 		FCEU_printf("Emulation paused: %d\n", EmulationPaused);
 	}
 	wasPausedByCheats = false;
+
+	settings.setValue("cheatsWindow/geometry", saveGeometry());
 
 	win = NULL;
 	//printf("Destroy Cheat Window Event\n");

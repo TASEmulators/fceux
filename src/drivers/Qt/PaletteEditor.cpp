@@ -185,12 +185,15 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 PaletteEditorDialog_t::~PaletteEditorDialog_t(void)
 {
+	QSettings settings;
 	//printf("Destroy Palette Editor Config Window\n");
 
 	updateTimer->stop();
 
 	undoColorHistory.clear();
 	redoColorHistory.clear();
+
+	settings.setValue("paletteEditor/geometry", saveGeometry());
 }
 //----------------------------------------------------------------------------
 void PaletteEditorDialog_t::closeEvent(QCloseEvent *event)

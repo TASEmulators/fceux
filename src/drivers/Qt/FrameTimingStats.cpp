@@ -27,6 +27,7 @@
 #include <SDL.h>
 #include <QHeaderView>
 #include <QCloseEvent>
+#include <QSettings>
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -46,6 +47,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	QTreeWidgetItem *item;
 	QPushButton *resetBtn, *closeButton;
 	struct frameTimingStat_t stats;
+	QSettings settings;
 
 	getFrameTimingStats(&stats);
 
@@ -165,17 +167,23 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	connect(updateTimer, &QTimer::timeout, this, &FrameTimingDialog_t::updatePeriodic);
 
 	updateTimer->start(200); // 5hz
+
+	restoreGeometry(settings.value("frameTimingWindow/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 FrameTimingDialog_t::~FrameTimingDialog_t(void)
 {
-	printf("Destroy Frame Timing Window\n");
+	QSettings settings;
+
+	//printf("Destroy Frame Timing Window\n");
 	updateTimer->stop();
+
+	settings.setValue("frameTimingWindow/geometry", saveGeometry());
 }
 //----------------------------------------------------------------------------
 void FrameTimingDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Frame Timing Close Window Event\n");
+	//printf("Frame Timing Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

@@ -40,6 +40,7 @@
 #include <QFileDialog>
 #include <QValidator>
 #include <QPainter>
+#include <QSettings>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -210,6 +211,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	QMenu *fileMenu;
 	QAction *act;
 	int useNativeMenuBar;
+	QSettings settings;
 
 	setWindowTitle("RAM Search");
 
@@ -483,12 +485,16 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	connect(updateTimer, &QTimer::timeout, this, &RamSearchDialog_t::periodicUpdate);
 
 	updateTimer->start(8); // ~120hz
+
+	restoreGeometry(settings.value("ramSearchWindow/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 RamSearchDialog_t::~RamSearchDialog_t(void)
 {
+	QSettings settings;
+
 	updateTimer->stop();
-	printf("Destroy RAM Search Window\n");
+	//printf("Destroy RAM Search Window\n");
 	ramSearchWin = NULL;
 
 	actvSrchList.clear();
@@ -499,6 +505,7 @@ RamSearchDialog_t::~RamSearchDialog_t(void)
 	{
 		memLoc[addr].hist.clear();
 	}
+	settings.setValue("ramSearchWindow/geometry", saveGeometry());
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::closeEvent(QCloseEvent *event)
