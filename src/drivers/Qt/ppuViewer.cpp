@@ -461,10 +461,13 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 //----------------------------------------------------
 ppuViewerDialog_t::~ppuViewerDialog_t(void)
 {
+	QSettings settings;
+
 	updateTimer->stop();
 	ppuViewWindow = NULL;
 
-	printf("PPU Viewer Window Deleted\n");
+	//printf("PPU Viewer Window Deleted\n");
+	settings.setValue("ppuViewer/geometry", saveGeometry());
 }
 //----------------------------------------------------
 void ppuViewerDialog_t::closeEvent(QCloseEvent *event)
@@ -2004,6 +2007,7 @@ ppuTileEditor_t::ppuTileEditor_t(int patternIndex, QWidget *parent)
 	QMenuBar *menuBar;
 	QMenu *fileMenu, *helpMenu;
 	QAction *act;
+	QSettings settings;
 	int useNativeMenuBar;
 
 	this->setFocusPolicy(Qt::StrongFocus);
@@ -2108,18 +2112,22 @@ ppuTileEditor_t::ppuTileEditor_t(int patternIndex, QWidget *parent)
 	connect( updateTimer, &QTimer::timeout, this, &ppuTileEditor_t::periodicUpdate );
 
 	updateTimer->start( 100 ); // 10hz
+
+	restoreGeometry(settings.value("ppuTileEditorWindow/geometry").toByteArray());
 }
 //----------------------------------------------------
 ppuTileEditor_t::~ppuTileEditor_t(void)
 {
+	QSettings settings;
 	updateTimer->stop();
 
-	printf("PPU Tile Editor Window Deleted\n");
+	//printf("PPU Tile Editor Window Deleted\n");
+	settings.setValue("ppuTileEditorWindow/geometry", saveGeometry());
 }
 //----------------------------------------------------
 void ppuTileEditor_t::closeEvent(QCloseEvent *event)
 {
-	printf("PPU Tile Editor Close Window Event\n");
+	//printf("PPU Tile Editor Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();
@@ -2127,14 +2135,13 @@ void ppuTileEditor_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------
 void ppuTileEditor_t::closeWindow(void)
 {
-	printf("Close Window\n");
+	//printf("Close Window\n");
 	done(0);
 	deleteLater();
 }
 //----------------------------------------------------
 void ppuTileEditor_t::periodicUpdate(void)
 {
-
 	tileView->update();
 	colorPicker->update();
 }

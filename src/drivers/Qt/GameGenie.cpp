@@ -26,6 +26,7 @@
 
 #include <QHeaderView>
 #include <QCloseEvent>
+#include <QSettings>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -104,6 +105,7 @@ GameGenieDialog_t::GameGenieDialog_t(QWidget *parent)
 	QFont font;
 	QPushButton *closeButton;
 	fceuGGCodeValidtor *ggCodeValidator;
+	QSettings settings;
 
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
@@ -228,25 +230,29 @@ GameGenieDialog_t::GameGenieDialog_t(QWidget *parent)
 	connect( tree, SIGNAL(itemActivated(QTreeWidgetItem*, int)), this, SLOT(romAddrDoubleClicked(QTreeWidgetItem*, int)) );
 
 	addCheatBtn->setEnabled( false );
+
+	restoreGeometry(settings.value("GameGenieWindow/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 GameGenieDialog_t::~GameGenieDialog_t(void)
 {
-	printf("Destroy Game Genie Window\n");
+	QSettings settings;
+	//printf("Destroy Game Genie Window\n");
+	settings.setValue("GameGenieWindow/geometry", saveGeometry());
 }
 //----------------------------------------------------------------------------
 void GameGenieDialog_t::closeEvent(QCloseEvent *event)
 {
-   printf("Game Genie Close Window Event\n");
-   done(0);
+	printf("Game Genie Close Window Event\n");
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void GameGenieDialog_t::closeWindow(void)
 {
-   //printf("Close Window\n");
-   done(0);
+	//printf("Close Window\n");
+	done(0);
 	deleteLater();
 }
 //----------------------------------------------------------------------------

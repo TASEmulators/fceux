@@ -30,6 +30,7 @@
 #include <QTextEdit>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QSettings>
 
 #include "../../fceu.h"
 
@@ -114,6 +115,7 @@ LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
 	QPushButton *closeButton;
 	QLabel *lbl;
 	std::string filename;
+	QSettings settings;
 
 	resize(512, 512);
 
@@ -193,11 +195,14 @@ LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
 	connect(periodicTimer, &QTimer::timeout, this, &LuaControlDialog_t::updatePeriodic);
 
 	periodicTimer->start(200); // 5hz
+
+	restoreGeometry(settings.value("LuaWindow/geometry").toByteArray());
 }
 
 //----------------------------------------------------
 LuaControlDialog_t::~LuaControlDialog_t(void)
 {
+	QSettings settings;
 	std::list<LuaControlDialog_t *>::iterator it;
 
 	//printf("Destroy Lua Control Window\n");
@@ -213,6 +218,7 @@ LuaControlDialog_t::~LuaControlDialog_t(void)
 			break;
 		}
 	}
+	settings.setValue("LuaWindow/geometry", saveGeometry());
 }
 //----------------------------------------------------
 void LuaControlDialog_t::closeEvent(QCloseEvent *event)

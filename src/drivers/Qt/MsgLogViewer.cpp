@@ -31,6 +31,7 @@
 #include <SDL.h>
 #include <QHeaderView>
 #include <QCloseEvent>
+#include <QSettings>
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -191,6 +192,7 @@ MsgLogViewDialog_t::MsgLogViewDialog_t(QWidget *parent)
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
 	QPushButton *clearBtn, *closeBtn;
+	QSettings settings;
 
 	setWindowTitle("Message Log Viewer");
 
@@ -233,17 +235,21 @@ MsgLogViewDialog_t::MsgLogViewDialog_t(QWidget *parent)
 	totalLines = msgLog.getTotalLineCount();
 
 	txtView->moveCursor(QTextCursor::End);
+
+	restoreGeometry(settings.value("MsgLogWindow/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 MsgLogViewDialog_t::~MsgLogViewDialog_t(void)
 {
-	printf("Destroy Msg Log Key Config Window\n");
+	QSettings settings;
+	//printf("Destroy Msg Log Config Window\n");
 	updateTimer->stop();
+	settings.setValue("MsgLogWindow/geometry", saveGeometry());
 }
 //----------------------------------------------------------------------------
 void MsgLogViewDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Msg Log Key Close Window Event\n");
+	//printf("Msg Log Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

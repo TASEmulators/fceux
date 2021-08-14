@@ -29,6 +29,7 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QSettings>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -170,6 +171,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	QGroupBox *box, *hdrBox;
 	QGridLayout *grid;
 	QStyle      *style;
+	QSettings    settings;
 	char stmp[128];
 
 	style = this->style();
@@ -529,24 +531,28 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	setHeaderData( iNesHdr );
 
 	initOK = true;
+
+	restoreGeometry(settings.value("iNesHeaderWindow/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 iNesHeaderEditor_t::~iNesHeaderEditor_t(void)
 {
-	printf("Destroy Header Editor Config Window\n");
+	QSettings settings;
+	//printf("Destroy Header Editor Config Window\n");
 
 	if ( iNesHdr )
 	{
 		free( iNesHdr ); iNesHdr = NULL;
 	}
+	settings.setValue("iNesHeaderWindow/geometry", saveGeometry());
 }
 //----------------------------------------------------------------------------
 void iNesHeaderEditor_t::closeEvent(QCloseEvent *event)
 {
-   printf("iNES Header Editor Close Window Event\n");
-   done(0);
+	//printf("iNES Header Editor Close Window Event\n");
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void iNesHeaderEditor_t::closeWindow(void)
