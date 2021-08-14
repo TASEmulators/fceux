@@ -2993,13 +2993,13 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 	cpuPagIdx->setEnabled(false);
 	useCpuPag->setEnabled(false);
 
-	hFlipBox = new QCheckBox( tr("Horizontal Flip") );
+	hFlipBox = new QCheckBoxRO( tr("Horizontal Flip") );
 	hFlipBox->setFocusPolicy(Qt::NoFocus);
 
-	vFlipBox = new QCheckBox( tr("Vertical Flip") );
+	vFlipBox = new QCheckBoxRO( tr("Vertical Flip") );
 	vFlipBox->setFocusPolicy(Qt::NoFocus);
 
-	bgPrioBox = new QCheckBox( tr("Background Priority") );
+	bgPrioBox = new QCheckBoxRO( tr("Background Priority") );
 	bgPrioBox->setFocusPolicy(Qt::NoFocus);
 
 	spriteIndexBox = new QLineEdit();

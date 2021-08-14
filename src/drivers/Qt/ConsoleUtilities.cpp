@@ -641,6 +641,28 @@ QValidator::State fceuHexIntValidtor::validate(QString &input, int &pos) const
 	return QValidator::Invalid;
 }
 //---------------------------------------------------------------------------
+//---  Read Only Checkbox
+//---------------------------------------------------------------------------
+QCheckBoxRO::QCheckBoxRO( const QString &text, QWidget *parent )
+	: QCheckBox( text, parent )
+{
+}
+//---------------------------------------------------------------------------
+QCheckBoxRO::QCheckBoxRO( QWidget *parent )
+	: QCheckBox( parent )
+{
+}
+//---------------------------------------------------------------------------
+// Hijack mouse events so that the checkbox is not clickable
+void QCheckBoxRO::mousePressEvent( QMouseEvent *event )
+{
+	event->accept();
+}
+void QCheckBoxRO::mouseReleaseEvent( QMouseEvent *event )
+{
+	event->accept();
+}
+//---------------------------------------------------------------------------
 //---  Opcode Tool Tip Description
 //---------------------------------------------------------------------------
 QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )

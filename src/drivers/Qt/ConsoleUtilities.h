@@ -7,6 +7,7 @@
 #include <QValidator>
 #include <QDialog>
 #include <QHelpEvent>
+#include <QCheckBox>
 
 int  getDirFromFile( const char *path, char *dir );
 
@@ -48,6 +49,8 @@ class fceuHexIntValidtor : public QValidator
 
 class fceuCustomToolTip : public QDialog
 {
+	Q_OBJECT
+
 	public:
 		fceuCustomToolTip( QWidget *parent = nullptr );
 		~fceuCustomToolTip( void );
@@ -68,6 +71,21 @@ class fceuCustomToolTip : public QDialog
 
 	private slots:
 		void  hideTimerExpired(void);
+};
+
+// Read Only Checkbox for state display only.
+class QCheckBoxRO : public QCheckBox
+{
+	Q_OBJECT
+
+	public:
+		QCheckBoxRO( const QString &text, QWidget *parent = nullptr );
+		QCheckBoxRO( QWidget *parent = nullptr );
+
+	protected:
+		void mousePressEvent( QMouseEvent *event ) override;
+		void mouseReleaseEvent( QMouseEvent *event ) override;
+
 };
 
 QString fceuGetOpcodeToolTip( uint8_t *opcode, int size );

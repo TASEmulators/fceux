@@ -22,6 +22,7 @@
 #include <QPropertyAnimation>
 
 #include "Qt/main.h"
+#include "Qt/ConsoleUtilities.h"
 
 struct ppuPatternTable_t
 {
@@ -475,9 +476,9 @@ class spriteViewerDialog_t : public QDialog
 		QLineEdit    *tileAddrBox;
 		QLineEdit    *palAddrBox;
 		QLineEdit    *posBox;
-		QCheckBox    *hFlipBox;
-		QCheckBox    *vFlipBox;
-		QCheckBox    *bgPrioBox;
+		QCheckBoxRO  *hFlipBox;
+		QCheckBoxRO  *vFlipBox;
+		QCheckBoxRO  *bgPrioBox;
 		QCheckBox    *showPosHex;
 		QGroupBox    *previewFrame;
 
