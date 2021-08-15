@@ -610,7 +610,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	act = new QAction(tr("Run &128 Lines"), this);
 	act->setShortcut(QKeySequence( tr("F8") ) );
 	act->setStatusTip(tr("Run 128 Lines"));
-	act->setIcon( QIcon(":icons/RunPpuFrame.png") );
+	act->setIcon( QIcon(":icons/RunPpuHalfFrame.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
 
 	debugMenu->addAction(act);
@@ -846,7 +846,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	act = new QAction(tr("Run &128 Lines (F8)"), this);
 	//act->setShortcut(QKeySequence( tr("F8") ) );
 	act->setStatusTip(tr("Run 128 Lines"));
-	act->setIcon( QIcon(":icons/RunPpuFrame.png") );
+	act->setIcon( QIcon(":icons/RunPpuHalfFrame.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
 
 	toolBar->addAction(act);

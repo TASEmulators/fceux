@@ -20,6 +20,7 @@
         <file>icons/StepOver.png</file>
         <file>icons/StepOut.png</file>
         <file>icons/RunPpuFrame.png</file>
+        <file>icons/RunPpuHalfFrame.png</file>
         <file>icons/RunPpuScanline.png</file>
         <file>icons/arrow-cursor.png</file>
         <file>icons/JumpTarget.png</file>
