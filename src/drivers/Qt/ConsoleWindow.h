@@ -312,6 +312,7 @@ class  consoleWin_t : public QMainWindow
 		void aboutFCEUX(void);
 		void aboutQt(void);
 		void openOnlineDocs(void);
+		void openOfflineDocs(void);
 		void openMsgLogWin(void);
 		void openInputConfWin(void);
 		void openGameSndConfWin(void);

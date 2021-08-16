@@ -68,6 +68,7 @@
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
 #include "Qt/PaletteEditor.h"
+#include "Qt/HelpPages.h"
 #include "Qt/GuiConf.h"
 #include "Qt/AviRecord.h"
 #include "Qt/MoviePlay.h"
@@ -1888,13 +1889,23 @@ void consoleWin_t::createMainMenu(void)
 	
 	helpMenu->addAction(msgLogAct);
 
-	// Help -> Documentation
+	// Help -> Documentation Online
 	act = new QAction(tr("&Docs (Online)"), this);
 	act->setStatusTip(tr("Documentation"));
 	act->setIcon( style()->standardIcon( QStyle::SP_DialogHelpButton ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(openOnlineDocs(void)) );
 	
 	helpMenu->addAction(act);
+
+#ifdef WIN32
+	// Help -> Documentation Offline
+	act = new QAction(tr("&Docs (Offline)"), this);
+	act->setStatusTip(tr("Documentation"));
+	act->setIcon( style()->standardIcon( QStyle::SP_DialogHelpButton ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(openOfflineDocs(void)) );
+
+	helpMenu->addAction(act);
+#endif
 };
 //---------------------------------------------------------------------------
 int consoleWin_t::loadVideoDriver( int driverId )
@@ -3905,6 +3916,12 @@ void consoleWin_t::openOnlineDocs(void)
 	{
 		QueueErrorMsgWindow("Error: Failed to open link to: http://fceux.com/web/help/fceux.html");
 	}
+	return;
+}
+
+void consoleWin_t::openOfflineDocs(void)
+{
+	OpenHelpWindow();
 	return;
 }
 
