@@ -734,6 +734,10 @@ InitConfig()
 	config->addOption("_guiSchedNice"       , "SDL.GuiSchedNice"  , 0);
 	config->addOption("_guiSchedPrioRt"     , "SDL.GuiSchedPrioRt", 40);
 	config->addOption("_emuTimingMech"      , "SDL.EmuTimingMech" , 0);
+	config->addOption("SDL.OverClockEnable"     , 0);
+	config->addOption("SDL.PostRenderScanlines" , 0);
+	config->addOption("SDL.VBlankScanlines"     , 0);
+	config->addOption("SDL.Skip7bitOverClocking", 1);
 
 	// fcm -> fm2 conversion
 	config->addOption("fcmconvert", "SDL.FCMConvert", "");
@@ -967,6 +971,10 @@ UpdateEMUCore(Config *config)
 	}
 
 	config->getOption("SDL.NewPPU", &newppu);
+	config->getOption("SDL.OverClockEnable"     , &overclock_enabled      );
+	config->getOption("SDL.PostRenderScanlines" , &postrenderscanlines    );
+	config->getOption("SDL.VBlankScanlines"     , &vblankscanlines        );
+	config->getOption("SDL.Skip7bitOverClocking", &skip_7bit_overclocking );
 
 	config->getOption("SDL.PAL", &region);
 	FCEUI_SetRegion(region);

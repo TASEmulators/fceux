@@ -707,6 +707,7 @@ void TimingConfDialog_t::overclockingToggled(bool on)
 	if ( !newppu )
 	{
 		overclock_enabled = on;
+		g_config->setOption("SDL.OverClockEnable", overclock_enabled );
 	}
 	fceuWrapperUnLock();
 }
@@ -715,6 +716,7 @@ void TimingConfDialog_t::postRenderChanged(int value)
 {
 	fceuWrapperLock();
 	postrenderscanlines = value;
+	g_config->setOption("SDL.PostRenderScanlines", postrenderscanlines );
 	fceuWrapperUnLock();
 	//printf("Post Render %i\n", postrenderscanlines );
 }
@@ -723,6 +725,7 @@ void TimingConfDialog_t::vblankScanlinesChanged(int value)
 {
 	fceuWrapperLock();
 	vblankscanlines = value;
+	g_config->setOption("SDL.VBlankScanlines", vblankscanlines );
 	fceuWrapperUnLock();
 	//printf("Vblank Scanlines %i\n", vblankscanlines );
 }
@@ -731,6 +734,7 @@ void TimingConfDialog_t::no7bitChanged(int value)
 {
 	fceuWrapperLock();
 	skip_7bit_overclocking = (value != Qt::Unchecked);
+	g_config->setOption("SDL.Skip7bitOverClocking", skip_7bit_overclocking );
 	fceuWrapperUnLock();
 	//printf("Skip 7-bit: %i\n", skip_7bit_overclocking );
 }

@@ -766,6 +766,7 @@ void ConsoleVideoConfDialog_t::use_new_PPU_changed( bool value )
 	}
 
 	g_config->setOption("SDL.NewPPU", newppu );
+	g_config->setOption("SDL.OverClockEnable", overclock_enabled );
 	g_config->save ();
 
 	UpdateEMUCore (g_config);
