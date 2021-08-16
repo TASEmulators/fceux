@@ -707,6 +707,12 @@ InitConfig()
 	config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", savPath );
 	config->addOption("_lastopenmovie", "SDL.LastOpenMovie", movPath);
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
+	config->addOption("SDL.HelpFilePath", "");
+#ifdef WIN32
+	config->addOption("SDL.HelpFileViewer", "");
+#else
+	config->addOption("SDL.HelpFileViewer", "/usr/bin/xchm");
+#endif
 
 	for (unsigned int i=0; i<10; i++)
 	{

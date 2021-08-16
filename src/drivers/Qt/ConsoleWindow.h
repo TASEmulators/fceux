@@ -171,6 +171,9 @@ class  consoleWin_t : public QMainWindow
 		void setMenuAccessPauseEnable(bool enable);
 		void setContextMenuEnable(bool enable);
 		void setSoundUseGlobalFocus(bool enable);
+
+		void OpenHelpWindow(std::string subpage = "");
+
 	protected:
 		consoleMenuBar *menubar;
 
@@ -266,6 +269,11 @@ class  consoleWin_t : public QMainWindow
 
 		double       refreshRate;
 		unsigned int updateCounter;
+#ifdef WIN32
+		HWND   helpWin;
+#else
+		int    helpWin;
+#endif
 	protected:
 		void resizeEvent(QResizeEvent *event) override;
 		void closeEvent(QCloseEvent *event) override;
@@ -291,6 +299,9 @@ class  consoleWin_t : public QMainWindow
 		void loadState(int slot);
 		void transferVideoBuffer(void);
 		void syncAutoFirePatternMenu(void);
+		void helpPageMaint(void);
+
+		std::string find_chm(void);
 
 	public slots:
 		void openDebugWindow(void);

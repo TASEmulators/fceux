@@ -227,6 +227,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	refreshRate = 0.0;
 	updateCounter = 0;
 	recentRomMenuReset = false;
+	helpWin = 0;
 
 	// Viewport Cursor Type and Visibility
 	loadCursor();
@@ -1890,22 +1891,24 @@ void consoleWin_t::createMainMenu(void)
 	helpMenu->addAction(msgLogAct);
 
 	// Help -> Documentation Online
-	act = new QAction(tr("&Docs (Online)"), this);
+	subMenu = helpMenu->addMenu( tr("&Documentation") );
+	subMenu->setIcon( style()->standardIcon( QStyle::SP_DialogHelpButton ) );
+
+	// Help -> Documentation Online
+	act = new QAction(tr("&Online"), this);
 	act->setStatusTip(tr("Documentation"));
-	act->setIcon( style()->standardIcon( QStyle::SP_DialogHelpButton ) );
+	//act->setIcon( style()->standardIcon( QStyle::SP_DialogHelpButton ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(openOnlineDocs(void)) );
 	
-	helpMenu->addAction(act);
+	subMenu->addAction(act);
 
-#ifdef WIN32
 	// Help -> Documentation Offline
-	act = new QAction(tr("&Docs (Offline)"), this);
+	act = new QAction(tr("&Local"), this);
 	act->setStatusTip(tr("Documentation"));
-	act->setIcon( style()->standardIcon( QStyle::SP_DialogHelpButton ) );
+	//act->setIcon( style()->standardIcon( QStyle::SP_DialogHelpButton ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(openOfflineDocs(void)) );
 
-	helpMenu->addAction(act);
-#endif
+	subMenu->addAction(act);
 };
 //---------------------------------------------------------------------------
 int consoleWin_t::loadVideoDriver( int driverId )
@@ -4172,6 +4175,8 @@ void consoleWin_t::updatePeriodic(void)
 		recWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
 		recAsWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
 		stopWavAct->setEnabled( FCEUI_WaveRecordRunning() );
+
+		helpPageMaint();
 	}
 
 	if ( errorMsgValid )
