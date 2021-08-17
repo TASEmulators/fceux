@@ -23,6 +23,12 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
+#include <QHelpEngine>
+#include <QHelpIndexModel>
+#include <QHelpContentWidget>
 
 #include "driver.h"
 #include "Qt/HelpPages.h"
@@ -92,7 +98,12 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 	std::string helpFileViewer;
 	g_config->getOption ("SDL.HelpFileViewer", &helpFileViewer );
 
-	helpWin = forkHelpFileViewer( helpFileViewer.c_str(), helpFileName.c_str() );
+	//helpWin = forkHelpFileViewer( helpFileViewer.c_str(), helpFileName.c_str() );
+
+	HelpDialog *win = new HelpDialog(this);
+
+	win->show();
+
 #endif
 }
 
@@ -203,3 +214,112 @@ static int forkHelpFileViewer( const char *chmViewer, const char *filepath )
 	return pid;
 }
 #endif
+
+//-----------------------------------------------------------------------------------------------
+//---  Help Page Dialog
+//-----------------------------------------------------------------------------------------------
+HelpDialog::HelpDialog(QWidget *parent)
+	: QDialog(parent, Qt::Window)
+{
+	int useNativeMenuBar;
+	QMenu *fileMenu;
+	QMenuBar *menuBar;
+	QAction *act;
+	QVBoxLayout *mainLayoutv;
+
+	mainLayoutv = new QVBoxLayout();
+
+	setLayout( mainLayoutv );
+
+	menuBar = new QMenuBar(this);
+	mainLayoutv->setMenuBar( menuBar );
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+
+	fileMenu->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Menu End
+	//-----------------------------------------------------------------------
+	
+	helpEngine = new QHelpEngine(
+		QApplication::applicationDirPath() +
+		"/fceux.qhc", this);
+	helpEngine->setupData();
+
+	hsplitter  = new QSplitter( Qt::Horizontal );
+	tabWgt     = new QTabWidget();
+	textViewer = new HelpBrowser( helpEngine );
+
+	textViewer->setSource(
+                QUrl("qthelp://TasVideos.fceux/doc/../web/help/fceux.html"));
+
+	tabWgt->addTab( helpEngine->contentWidget(), tr("Contents") );
+	tabWgt->addTab( helpEngine->indexWidget()  , tr("Index")    );
+
+	hsplitter->addWidget( tabWgt );
+	hsplitter->addWidget( textViewer );
+
+	mainLayoutv->addWidget( hsplitter );
+
+	connect(helpEngine->contentWidget(),
+		SIGNAL(linkActivated(QUrl)),
+		textViewer, SLOT(setSource(QUrl)));
+
+	connect(helpEngine->indexWidget(),
+		SIGNAL(linkActivated(QUrl, QString)),
+		textViewer, SLOT(setSource(QUrl)));
+	
+}
+//-----------------------------------------------------------------------------------------------
+HelpDialog::~HelpDialog(void)
+{
+
+}
+//-----------------------------------------------------------------------------------------------
+void HelpDialog::closeEvent(QCloseEvent *event)
+{
+	//printf("Help Dialog Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//-----------------------------------------------------------------------------------------------
+void HelpDialog::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//-----------------------------------------------------------------------------------------------
+//---- Help Browser Class
+//-----------------------------------------------------------------------------------------------
+HelpBrowser::HelpBrowser(QHelpEngine* helpEngine,
+                         QWidget* parent):QTextBrowser(parent),
+                         helpEngine(helpEngine)
+{
+}
+//-----------------------------------------------------------------------------------------------
+QVariant HelpBrowser::loadResource(int type, const QUrl &name)
+{
+    if (name.scheme() == "qthelp")
+        return QVariant(helpEngine->fileData(name));
+    else
+        return QTextBrowser::loadResource(type, name);
+}
+//-----------------------------------------------------------------------------------------------

@@ -13,13 +13,13 @@ else()
 endif()
 
 if ( ${QT6} )
-  	find_package( Qt6 COMPONENTS Widgets OpenGL OpenGLWidgets REQUIRED)
-  	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
-  	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
+	find_package( Qt6 COMPONENTS Widgets Help OpenGL OpenGLWidgets REQUIRED)
+  	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
+  	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
 else()
-  	find_package( Qt5 COMPONENTS Widgets OpenGL REQUIRED)
-  	add_definitions( ${Qt5Widgets_DEFINITIONS}  )
-  	include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
+	find_package( Qt5 COMPONENTS Widgets OpenGL Help REQUIRED)
+	add_definitions( ${Qt5Widgets_DEFINITIONS} ${Qt5Help_DEFINITIONS} )
+	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Help_INCLUDE_DIRS} )
 endif()
 
 if(WIN32)
@@ -534,6 +534,7 @@ endif()
 
 target_link_libraries( ${APP_NAME}  
    ${${Qt}Widgets_LIBRARIES}
+   ${${Qt}Help_LIBRARIES}
    ${${Qt}OpenGL_LIBRARIES}
    ${${Qt}OpenGLWidgets_LIBRARIES}
    ${OPENGL_LDFLAGS}  
