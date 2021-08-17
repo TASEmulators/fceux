@@ -76,6 +76,7 @@ echo '****************************************'
 echo 'Install Dependency Qt5'
 echo '****************************************'
 sudo apt-get --assume-yes  install qt5-default
+sudo apt-get --assume-yes  install qttools5-dev
 
 # Install x264 
 echo '****************************************'
