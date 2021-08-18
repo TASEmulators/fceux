@@ -76,7 +76,7 @@ echo '****************************************'
 echo 'Install Dependency Qt5'
 echo '****************************************'
 sudo apt-get --assume-yes  install qt5-default
-sudo apt-get --assume-yes  install qttools5-dev
+sudo apt-get --assume-yes  install qttools5-dev  # For Qt Help
 
 # Install x264 
 echo '****************************************'
@@ -102,6 +102,8 @@ echo '**************************'
 mkdir -p $INSTALL_PREFIX/usr;
 
 echo "Num CPU: `nproc`";
+./scripts/unix_make_docs.sh
+
 mkdir buildQT; cd buildQT;
 cmake  \
    -DCMAKE_BUILD_TYPE=Release  \

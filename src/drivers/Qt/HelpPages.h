@@ -2,6 +2,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QAction>
 #include <QSplitter>
 #include <QTabWidget>
 #include <QTextBrowser>
@@ -22,7 +23,7 @@ class HelpDialog : public QDialog
 	Q_OBJECT
 
 	public:
-		HelpDialog( QWidget *parent = 0);
+		HelpDialog( const char *helpFileName, QWidget *parent = 0);
 		~HelpDialog(void);
 
 	protected:
@@ -32,7 +33,11 @@ class HelpDialog : public QDialog
 		QSplitter    *hsplitter;
 		QTabWidget   *tabWgt;
 		HelpBrowser  *textViewer;
+		QAction      *backButton;
+		QAction      *forwardButton;
 
 	public slots:
 		void closeWindow(void);
+		void navBackwardAvailable(bool);
+		void navForwardAvailable(bool);
 };

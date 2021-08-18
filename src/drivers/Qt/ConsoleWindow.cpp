@@ -4175,8 +4175,6 @@ void consoleWin_t::updatePeriodic(void)
 		recWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
 		recAsWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
 		stopWavAct->setEnabled( FCEUI_WaveRecordRunning() );
-
-		helpPageMaint();
 	}
 
 	if ( errorMsgValid )

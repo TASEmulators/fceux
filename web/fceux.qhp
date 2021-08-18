@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+    <namespace>TasVideos.fceux</namespace>
+    <virtualFolder>doc</virtualFolder>
+    <customFilter name="FCEUX Application 1.0">
+        <filterAttribute>fceux</filterAttribute>
+        <filterAttribute>1.0</filterAttribute>
+    </customFilter>
+    <filterSection>
+        <filterAttribute>fceux</filterAttribute>
+        <filterAttribute>1.0</filterAttribute>
+        <toc>
+		<section title="FCEUX Manual" ref="help/fceux.html">
+		<section title="Introduction" ref="help/Intro.html"/>
+            </section>
+        </toc>
+        <keywords>
+            <keyword name="foo" id="MyApplication::foo" ref="doc.html#foo"/>
+            <keyword name="bar" ref="doc.html#bar"/>
+        </keywords>
+        <files>
+		<file>help/*</file>
+		<file>help/img/*</file>
+		<file>help/taseditor-ru/*</file>
+		<file>help/taseditor-ru/img/*</file>
+		<file>help/taseditor-ru/js/*</file>
+		<file>help/taseditor-ru/lib/*</file>
+		<file>help/taseditor-ru/css/*</file>
+		<file>help/taseditor-ru/css/silver-theme/*</file>
+		<file>help/taseditor-ru/css/silver-theme/images/*</file>
+		<file>help/taseditor-ru/css/dynatree/chm/*</file>
+		<file>help/taseditor-ru/css/dynatree/folder/*</file>
+		<file>help/taseditor-ru/css/dynatree/vista/*</file>
+		<file>help/context/*</file>
+		<file>help/vendors/bootstrap-3.4.1/js/*</file>
+		<file>help/vendors/bootstrap-3.4.1/css/*</file>
+		<file>help/vendors/bootstrap-3.4.1/fonts/*</file>
+		<file>help/vendors/jstree-3.3.10/*</file>
+		<file>help/vendors/jstree-3.3.10/themes/default-dark/*</file>
+		<file>help/vendors/jstree-3.3.10/themes/default/*</file>
+		<file>help/vendors/interactjs-1.9.22/*</file>
+		<file>help/vendors/html5shiv-3.7.3/*</file>
+		<file>help/vendors/imageMapResizer-1.0.10/*</file>
+		<file>help/vendors/respond-1.4.2/*</file>
+		<file>help/vendors/headroom-0.11.0/*</file>
+		<file>help/vendors/markjs-8.11.1/*</file>
+		<file>help/vendors/jquery-3.5.1/*</file>
+		<file>help/vendors/uri-1.19.2/*</file>
+		<file>help/vendors/helpndoc-5/icons/*</file>
+		<file>help/taseditor/*</file>
+		<file>help/taseditor/img/*</file>
+		<file>help/taseditor/context/*</file>
+		<file>help/taseditor/vendors/bootstrap-3.4.1/js/*</file>
+		<file>help/taseditor/vendors/bootstrap-3.4.1/css/*</file>
+		<file>help/taseditor/vendors/bootstrap-3.4.1/fonts/*</file>
+		<file>help/taseditor/vendors/jstree-3.3.10/*</file>
+		<file>help/taseditor/vendors/jstree-3.3.10/themes/default-dark/*</file>
+		<file>help/taseditor/vendors/jstree-3.3.10/themes/default/*</file>
+		<file>help/taseditor/vendors/interactjs-1.9.22/*</file>
+		<file>help/taseditor/vendors/html5shiv-3.7.3/*</file>
+		<file>help/taseditor/vendors/imageMapResizer-1.0.10/*</file>
+		<file>help/taseditor/vendors/respond-1.4.2/*</file>
+		<file>help/taseditor/vendors/headroom-0.11.0/*</file>
+		<file>help/taseditor/vendors/markjs-8.11.1/*</file>
+		<file>help/taseditor/vendors/jquery-3.5.1/*</file>
+		<file>help/taseditor/vendors/uri-1.19.2/*</file>
+		<file>help/taseditor/vendors/helpndoc-5/icons/*</file>
+		<file>help/taseditor/js/*</file>
+		<file>help/taseditor/lib/*</file>
+		<file>help/taseditor/css/*</file>
+		<file>help/taseditor/css/silver-theme/*</file>
+		<file>help/taseditor/css/silver-theme/images/*</file>
+		<file>help/taseditor/css/dynatree/chm/*</file>
+		<file>help/taseditor/css/dynatree/folder/*</file>
+		<file>help/taseditor/css/dynatree/vista/*</file>
+		<file>help/js/*</file>
+		<file>help/js/context/*</file>
+		<file>help/css/*</file>
+		<file>help/css/silver-theme/*</file>
+		<file>help/css/silver-theme/images/*</file>
+		<file>help/css/dynatree/chm/*</file>
+		<file>help/css/dynatree/folder/*</file>
+		<file>help/css/dynatree/vista/*</file>
+        </files>
+    </filterSection>
+</QtHelpProject>

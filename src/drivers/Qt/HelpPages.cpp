@@ -24,8 +24,10 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QMenuBar>
+#include <QToolBar>
 #include <QMenu>
 #include <QAction>
+#include <QSettings>
 #include <QHelpEngine>
 #include <QHelpIndexModel>
 #include <QHelpContentWidget>
@@ -39,15 +41,15 @@
 #ifdef WIN32
 #include <Windows.h>
 #include <htmlhelp.h>
-#else // Linux or Unix or APPLE
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+//#else // Linux or Unix or APPLE
+//#include <unistd.h>
+//#include <sys/types.h>
+//#include <sys/wait.h>
 #endif
 
-#if  defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-static int forkHelpFileViewer( const char *chmViewer, const char *filepath );
-#endif
+//#if  defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+//static int forkHelpFileViewer( const char *chmViewer, const char *filepath );
+//#endif
 
 void consoleWin_t::OpenHelpWindow(std::string subpage)
 {
@@ -57,13 +59,25 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 
 	if ( helpFileName.length() == 0 )
 	{
-		std::string helpFileName = FCEUI_GetBaseDirectory();
+		#ifdef WIN32
+		helpFileName = FCEUI_GetBaseDirectory();
 		helpFileName += "\\..\\doc\\fceux.chm";
+		#else
+		helpFileName = "/usr/share/fceux/fceux.qhc";
+		#endif
+
+		#ifdef __APPLE__
+		if ( !QFile( QString::fromStdString(helpFileName) ).exists() )
+		{
+			// Search for MacOSX DragNDrop Resources
+			helpFileName = QApplication::applicationDirPath().toStdString() + "/../Resources/fceux.qhc";
+		}
+		#endif
 	}
 
 	if ( !QFile( QString::fromStdString(helpFileName) ).exists() )
 	{
-		helpFileName = find_chm();
+		helpFileName = findHelpFile();
 	}
 
 	if ( helpFileName.length() == 0 )
@@ -95,40 +109,37 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 		printf("There is already a CHM Viewer open somewhere...\n");
 		return;
 	}
-	std::string helpFileViewer;
-	g_config->getOption ("SDL.HelpFileViewer", &helpFileViewer );
-
 	//helpWin = forkHelpFileViewer( helpFileViewer.c_str(), helpFileName.c_str() );
 
-	HelpDialog *win = new HelpDialog(this);
+	HelpDialog *win = new HelpDialog( helpFileName.c_str(), this);
 
 	win->show();
 
 #endif
 }
 
-void consoleWin_t::helpPageMaint(void)
-{
-#ifdef WIN32
-	// Does any help page cleanup need to be done in windows?
-#else
-	if ( helpWin > 0 )
-	{	// Calling waitpid is important to ensure that CHM viewer process is cleaned up
-		// in the event that it exits. Otherwise zombie processes will be left.
-		int pid, wstat=0;
-
-		pid = waitpid( -1, &wstat, WNOHANG );
-
-		if ( pid == helpWin )
-		{
-			//printf("Help CHM Viewer Closed\n");
-			helpWin = 0;
-		}
-	}
-
-#endif
-}
-std::string consoleWin_t::find_chm(void)
+//void consoleWin_t::helpPageMaint(void)
+//{
+//#ifdef WIN32
+//	// Does any help page cleanup need to be done in windows?
+//#else
+//	if ( helpWin > 0 )
+//	{	// Calling waitpid is important to ensure that CHM viewer process is cleaned up
+//		// in the event that it exits. Otherwise zombie processes will be left.
+//		int pid, wstat=0;
+//
+//		pid = waitpid( -1, &wstat, WNOHANG );
+//
+//		if ( pid == helpWin )
+//		{
+//			//printf("Help CHM Viewer Closed\n");
+//			helpWin = 0;
+//		}
+//	}
+//
+//#endif
+//}
+std::string consoleWin_t::findHelpFile(void)
 {
 	int ret, useNativeFileDialogVal;
 	QString filename;
@@ -145,7 +156,11 @@ std::string consoleWin_t::find_chm(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
+#ifdef WIN32
 	dialog.setNameFilter(tr("Compiled HTML Files (*.chm *.CHM) ;; All files (*)"));
+#else
+	dialog.setNameFilter(tr("QHelp Files (*.qhc *.QHC) ;; All files (*)"));
+#endif
 
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
@@ -194,43 +209,46 @@ std::string consoleWin_t::find_chm(void)
 	return filename.toStdString();
 }
 
-#if  defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-static int forkHelpFileViewer( const char *chmViewer, const char *filepath )
-{
-	int pid = 0;
-
-	if ( chmViewer[0] == 0 )
-	{
-		return -1;
-	}
-
-	pid = fork();
-
-	if ( pid == 0 )
-	{  // Child process
-		execl( chmViewer, chmViewer, filepath, NULL );
-		exit(0);	
-	}
-	return pid;
-}
-#endif
+//#if  defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+//static int forkHelpFileViewer( const char *chmViewer, const char *filepath )
+//{
+//	int pid = 0;
+//
+//	if ( chmViewer[0] == 0 )
+//	{
+//		return -1;
+//	}
+//
+//	pid = fork();
+//
+//	if ( pid == 0 )
+//	{  // Child process
+//		execl( chmViewer, chmViewer, filepath, NULL );
+//		exit(0);	
+//	}
+//	return pid;
+//}
+//#endif
 
 //-----------------------------------------------------------------------------------------------
 //---  Help Page Dialog
 //-----------------------------------------------------------------------------------------------
-HelpDialog::HelpDialog(QWidget *parent)
+HelpDialog::HelpDialog( const char *helpFileName, QWidget *parent)
 	: QDialog(parent, Qt::Window)
 {
 	int useNativeMenuBar;
 	QMenu *fileMenu;
 	QMenuBar *menuBar;
+	QToolBar *toolBar;
 	QAction *act;
 	QVBoxLayout *mainLayoutv;
+	QSettings settings;
 
 	mainLayoutv = new QVBoxLayout();
 
 	setLayout( mainLayoutv );
 
+	toolBar = new QToolBar(this);
 	menuBar = new QMenuBar(this);
 	mainLayoutv->setMenuBar( menuBar );
 
@@ -238,6 +256,16 @@ HelpDialog::HelpDialog(QWidget *parent)
 	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
 
 	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	helpEngine = new QHelpEngine( helpFileName, this );
+	helpEngine->setupData();
+
+	hsplitter  = new QSplitter( Qt::Horizontal );
+	tabWgt     = new QTabWidget();
+	textViewer = new HelpBrowser( helpEngine );
+
+	textViewer->setSource(
+                QUrl("qthelp://TasVideos.fceux/doc/help/fceux.html"));
 
 	//-----------------------------------------------------------------------
 	// Menu Start
@@ -257,17 +285,32 @@ HelpDialog::HelpDialog(QWidget *parent)
 	// Menu End
 	//-----------------------------------------------------------------------
 	
-	helpEngine = new QHelpEngine(
-		QApplication::applicationDirPath() +
-		"/fceux.qhc", this);
-	helpEngine->setupData();
+	//-----------------------------------------------------------------------
+	// Tool Bar Setup Start
+	//-----------------------------------------------------------------------
+	
+	backButton = act = new QAction(tr("&Backward"), this);
+	//act->setShortcut( QKeySequence(tr("Ctrl+A") ));
+	act->setToolTip(tr("Navigate Backward"));
+	act->setIcon( style()->standardIcon(QStyle::SP_ArrowBack) );
+	connect(act, SIGNAL(triggered(void)), textViewer, SLOT(backward(void)) );
 
-	hsplitter  = new QSplitter( Qt::Horizontal );
-	tabWgt     = new QTabWidget();
-	textViewer = new HelpBrowser( helpEngine );
+	toolBar->addAction(act);
 
-	textViewer->setSource(
-                QUrl("qthelp://TasVideos.fceux/doc/../web/help/fceux.html"));
+	forwardButton = act = new QAction(tr("&Forward"), this);
+	//act->setShortcut( QKeySequence(tr("Ctrl+A") ));
+	act->setToolTip(tr("Navigate Forward"));
+	act->setIcon( style()->standardIcon(QStyle::SP_ArrowForward) );
+	connect(act, SIGNAL(triggered(void)), textViewer, SLOT(forward(void)) );
+
+	toolBar->addAction(act);
+
+	//-----------------------------------------------------------------------
+	// Tool Bar Setup End
+	//-----------------------------------------------------------------------
+
+	   backButton->setEnabled(false);
+	forwardButton->setEnabled(false);
 
 	tabWgt->addTab( helpEngine->contentWidget(), tr("Contents") );
 	tabWgt->addTab( helpEngine->indexWidget()  , tr("Index")    );
@@ -275,6 +318,7 @@ HelpDialog::HelpDialog(QWidget *parent)
 	hsplitter->addWidget( tabWgt );
 	hsplitter->addWidget( textViewer );
 
+	mainLayoutv->addWidget( toolBar   );
 	mainLayoutv->addWidget( hsplitter );
 
 	connect(helpEngine->contentWidget(),
@@ -284,12 +328,27 @@ HelpDialog::HelpDialog(QWidget *parent)
 	connect(helpEngine->indexWidget(),
 		SIGNAL(linkActivated(QUrl, QString)),
 		textViewer, SLOT(setSource(QUrl)));
+
+	connect( textViewer, SIGNAL(backwardAvailable(bool)), this, SLOT(navBackwardAvailable(bool)) );
+	connect( textViewer, SIGNAL(forwardAvailable(bool)) , this, SLOT(navForwardAvailable(bool)) );
 	
+	// Restore Window Geometry
+	restoreGeometry(settings.value("HelpPage/geometry").toByteArray());
+
+	// Restore Horizontal Panel State
+	hsplitter->restoreState( settings.value("HelpPage/hPanelState").toByteArray() );
+
 }
 //-----------------------------------------------------------------------------------------------
 HelpDialog::~HelpDialog(void)
 {
+	QSettings settings;
 
+	// Save Horizontal Panel State
+	settings.setValue("HelpPage/hPanelState", hsplitter->saveState());
+
+	// Save Window Geometry
+	settings.setValue("HelpPage/geometry", saveGeometry());
 }
 //-----------------------------------------------------------------------------------------------
 void HelpDialog::closeEvent(QCloseEvent *event)
@@ -305,6 +364,16 @@ void HelpDialog::closeWindow(void)
 	//printf("Close Window\n");
 	done(0);
 	deleteLater();
+}
+//-----------------------------------------------------------------------------------------------
+void HelpDialog::navBackwardAvailable(bool avail)
+{
+	backButton->setEnabled( avail );
+}
+//-----------------------------------------------------------------------------------------------
+void HelpDialog::navForwardAvailable(bool avail)
+{
+	forwardButton->setEnabled( avail );
 }
 //-----------------------------------------------------------------------------------------------
 //---- Help Browser Class

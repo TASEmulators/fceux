@@ -95,6 +95,7 @@ fi
 echo '**************************'
 echo '***  Building Project  ***'
 echo '**************************'
+./scripts/unix_make_docs.sh;
 mkdir build;
 cd build;
 cmake \

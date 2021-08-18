@@ -299,9 +299,8 @@ class  consoleWin_t : public QMainWindow
 		void loadState(int slot);
 		void transferVideoBuffer(void);
 		void syncAutoFirePatternMenu(void);
-		void helpPageMaint(void);
 
-		std::string find_chm(void);
+		std::string findHelpFile(void);
 
 	public slots:
 		void openDebugWindow(void);
