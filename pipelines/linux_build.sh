@@ -102,7 +102,7 @@ echo '**************************'
 mkdir -p $INSTALL_PREFIX/usr;
 
 echo "Num CPU: `nproc`";
-./scripts/unix_make_docs.sh
+./scripts/unix_make_docs.sh;
 
 mkdir buildQT; cd buildQT;
 cmake  \

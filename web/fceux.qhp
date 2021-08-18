@@ -11,12 +11,87 @@
         <filterAttribute>1.0</filterAttribute>
         <toc>
 		<section title="FCEUX Manual" ref="help/fceux.html">
-		<section title="Introduction" ref="help/Intro.html"/>
-            </section>
+			<section title="Introduction" ref="help/Intro.html">
+				<section title="Introduction" ref="help/Introduction.html"/>
+				<section title="Overview" ref="help/Overview.html"/>
+			</section>
+			<section title="General" ref="help/General.html">
+				<section title="Getting Started" ref="help/Gettingstarted.html"/>
+				<section title="Command Line Options" ref="help/CommandLineOptions.html"/>
+				<section title="Famicom Disk System" ref="help/FamicomDiskSystem.html"/>
+				<section title="Movie Recording" ref="help/MovieRecording.html"/>
+				<section title="AVI Capturing" ref="help/AVICapturing.html"/>
+			</section>
+			<section title="Config" ref="help/Config.html">
+				<section title="Menu Items" ref="help/ToggleSwitchesHideMenuetc.html"/>
+				<section title="Directories" ref="help/Directories.html"/>
+				<section title="GUI" ref="help/GUI.html"/>
+				<section title="Input" ref="help/Input.html"/>
+				<section title="Palette" ref="help/Palette.html"/>
+				<section title="Sound" ref="help/SoundOptions.html"/>
+				<section title="Timing" ref="help/Timing.html"/>
+				<section title="Video" ref="help/Video.html"/>
+				<section title="Movie Options" ref="help/MovieOptions.html"/>
+				<section title="Map Hot Keys" ref="help/MapHotkeys.html"/>
+				<section title="Context Menu Items" ref="help/ContextMenuItems.html"/>
+			</section>
+			<section title="Tools" ref="help/Tools2.html">
+				<section title="Cheat Search" ref="help/CheatSearch.html"/>
+				<section title="RAM Search" ref="help/RAMSearch.html"/>
+				<section title="RAM Watch" ref="help/RAMWatch.html"/>
+				<section title="Memory Watch" ref="help/MemoryWatch.html"/>
+				<section title="TAS Editor" ref="help/TASEditor.html">
+					<section title="Index" ref="help/taseditor/index.html"/>
+				</section>
+				<section title="Convert FCM" ref="help/Covertfcm.html"/>
+				<section title="Auto Fire Settings" ref="help/AutoFireConfigurations.html"/>
+				<section title="Text Hooker" ref="help/TextHooker.html"/>
+			</section>
+			<section title="Debug" ref="help/Debug.html">
+				<section title="Debugger" ref="help/Debugger.html"/>
+				<section title="PPU Viewer" ref="help/PPUViewer.html"/>
+				<section title="Name Table Viewer" ref="help/NameTableViewer.html"/>
+				<section title="Hex Editor" ref="help/HexEditor.html"/>
+				<section title="Trace Logger" ref="help/TraceLogger.html"/>
+				<section title="Code Data Logger" ref="help/CodeDataLogger.html"/>
+				<section title="Game Genie Encoder/Decoder" ref="help/GameGenieEncoderDecoder.html"/>
+				<section title="INES Header Editor" ref="help/InesHeaderEditor.html"/>
+			</section>
+			<section title="Lua Scripting" ref="help/LuaScripting.html">
+				<section title="Getting Started" ref="help/LuaGettingStarted.html"/>
+				<section title="Using Lua" ref="help/Commands.html"/>
+				<section title="Lua Functions List" ref="help/LuaFunctionsList.html"/>
+				<section title="Lua Perks" ref="help/LuaPerks.html"/>
+				<section title="Lua Bot" ref="help/LuaBot.html"/>
+				<section title="Overview of Include Scripts" ref="help/OverviewofIncludedScripts.html"/>
+			</section>
+			<section title="FAQ / Guides" ref="help/FAQGuides.html">
+				<section title="Troubleshooting" ref="help/Troubleshooting.html"/>
+				<section title="Tool Assisted Speedruns" ref="help/ToolAssistedSpeedruns.html"/>
+				<section title="ROM Hacking" ref="help/ROMHacking.html"/>
+				<section title="NES RAM Mapping Finding Values" ref="help/NESRAMMappingFindingValues.html"/>
+			</section>
+			<section title="Technical Information" ref="help/Technicalinformation.html">
+				<section title="Movie &amp; Save State Formats" ref="help/Movieformats.html">
+					<section title=".fm2" ref="help/fm2.html"/>
+					<section title=".fcm" ref="help/fcm.html"/>
+					<section title="Save State (.fcs)" ref="help/fcs.html"/>
+				</section>
+				<section title="Sound" ref="help/Sound.html">
+					<section title="NSF Format" ref="help/NSFFormat.html"/>
+					<section title="NES Sound" ref="help/NESSound.html"/>
+				</section>
+				<section title="NES Processing" ref="help/NESProcessor.html">
+					<section title="CPU - 6502" ref="help/6502CPU.html"/>
+					<section title="PPU - 2C02" ref="help/PPU.html"/>
+					<section title="NES Scrolling 1" ref="help/NESScrolling1.html"/>
+					<section title="NES Scrolling 2" ref="help/NESScrolling2.html"/>
+				</section>
+				<section title=".nl File Format" ref="help/NLFilesFormat.html"/>
+			</section>
+		</section>
         </toc>
         <keywords>
-            <keyword name="foo" id="MyApplication::foo" ref="doc.html#foo"/>
-            <keyword name="bar" ref="doc.html#bar"/>
         </keywords>
         <files>
 		<file>help/*</file>

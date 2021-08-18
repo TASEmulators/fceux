@@ -290,7 +290,7 @@ HelpDialog::HelpDialog( const char *helpFileName, QWidget *parent)
 	//-----------------------------------------------------------------------
 	
 	backButton = act = new QAction(tr("&Backward"), this);
-	//act->setShortcut( QKeySequence(tr("Ctrl+A") ));
+	act->setShortcut( QKeySequence(tr("Alt+Left") ));
 	act->setToolTip(tr("Navigate Backward"));
 	act->setIcon( style()->standardIcon(QStyle::SP_ArrowBack) );
 	connect(act, SIGNAL(triggered(void)), textViewer, SLOT(backward(void)) );
@@ -298,7 +298,7 @@ HelpDialog::HelpDialog( const char *helpFileName, QWidget *parent)
 	toolBar->addAction(act);
 
 	forwardButton = act = new QAction(tr("&Forward"), this);
-	//act->setShortcut( QKeySequence(tr("Ctrl+A") ));
+	act->setShortcut( QKeySequence(tr("Alt+Right") ));
 	act->setToolTip(tr("Navigate Forward"));
 	act->setIcon( style()->standardIcon(QStyle::SP_ArrowForward) );
 	connect(act, SIGNAL(triggered(void)), textViewer, SLOT(forward(void)) );
