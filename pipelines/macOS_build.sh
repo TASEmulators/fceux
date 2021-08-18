@@ -92,6 +92,7 @@ USE_QT6=0;
 fi
 #ls $Qt_DIR;
 
+PATH=$PATH:$Qt_DIR/bin
 echo '**************************'
 echo '***  Building Project  ***'
 echo '**************************'
