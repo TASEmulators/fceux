@@ -42,6 +42,37 @@
 				<section title="Memory Watch" ref="help/MemoryWatch.html"/>
 				<section title="TAS Editor" ref="help/TASEditor.html">
 					<section title="Index" ref="help/taseditor/index.html"/>
+					<section title="Title" ref="help/taseditor/Title.html"/>
+					<section title="Beginner's Guide" ref="help/taseditor/BeginnersGuide.html">
+						<section title="Introduction" ref="help/taseditor/Introduction.html"/>
+						<section title="Program Interface" ref="help/taseditor/ProgramInterface.html">
+							<section title="Piano Roll" ref="help/taseditor/PianoRoll.html"/>
+							<section title="Tool Box" ref="help/taseditor/Toolbox.html"/>
+						</section>
+						<section title="TASing Process" ref="help/taseditor/TASingProcess.html"/>
+						<section title="TASing Methodology" ref="help/taseditor/TASingMethodology.html">
+							<section title="Traditional TASing" ref="help/taseditor/TraditionalTASing.html"/>
+							<section title="Nonlinear TASing" ref="help/taseditor/NonlinearTASing.html"/>
+							<section title="Semiautomatic TASing" ref="help/taseditor/SemiautomaticTASing.html"/>
+						</section>
+						<section title="Program Customization" ref="help/taseditor/ProgramCustomization.html"/>
+						<section title="Advanced Features" ref="help/taseditor/AdvancedFeatures.html"/>
+					</section>
+					<section title="Reference" ref="help/taseditor/Reference.html">
+						<section title="Glossary" ref="help/taseditor/Glossary.html"/>
+						<section title="Controls" ref="help/taseditor/Controls.html"/>
+						<section title="Navigation" ref="help/taseditor/Navigation.html"/>
+						<section title="Operations" ref="help/taseditor/Operations.html"/>
+						<section title="Lua API" ref="help/taseditor/LuaAPI.html"/>
+						<section title="FAQ" ref="help/taseditor/FAQ.html"/>
+						<section title="Speedrunning Synopsis" ref="help/taseditor/SpeedrunningSynopsis.html"/>
+					</section>
+					<section title="TAS Editor Inside" ref="help/taseditor/TASEditorInside.html">
+						<section title="Ideas" ref="help/taseditor/Ideas.html"/>
+						<section title="Implementation" ref="help/taseditor/Implementation.html"/>
+						<section title="Mistake Proofing" ref="help/taseditor/MistakeProofing.html"/>
+						<section title="FM3 Format" ref="help/taseditor/FM3format.html"/>
+					</section>
 				</section>
 				<section title="Convert FCM" ref="help/Covertfcm.html"/>
 				<section title="Auto Fire Settings" ref="help/AutoFireConfigurations.html"/>
