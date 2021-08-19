@@ -207,6 +207,9 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	       pcColorAct->connectColor( &asmView->pcBgColor);
 
 	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
+
+	// Start Trace Logger for Step Back Function 
+	FCEUD_TraceLoggerStart();
 }
 //----------------------------------------------------------------------------
 ConsoleDebugger::~ConsoleDebugger(void)
@@ -2750,7 +2753,10 @@ void ConsoleDebugger::debugStepBackCB(void)
 {
 	if (FCEUI_EmulationPaused()) 
 	{
-
+		fceuWrapperLock();
+		FCEUD_TraceLoggerBackUpInstruction();
+		updateWindowData();
+		fceuWrapperUnLock();
 	}
 }
 //----------------------------------------------------------------------------

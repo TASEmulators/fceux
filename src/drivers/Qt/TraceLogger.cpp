@@ -1191,6 +1191,19 @@ static void pushMsgToLogBuffer(const char *msg)
 	pushToLogBuffer(rec);
 }
 //----------------------------------------------------
+int FCEUD_TraceLoggerStart(void)
+{
+	if ( !logging )
+	{
+		if (recBufMax == 0)
+		{
+			initTraceLogBuffer(1000000);
+		}
+		logging = 1;
+	}
+	return logging;
+}
+//----------------------------------------------------
 int FCEUD_TraceLoggerRunning(void)
 {
 	return logging;
@@ -2457,5 +2470,45 @@ void TraceLogDiskThread_t::run(void)
 	
 	printf("Trace Log Disk Exit\n");
 	emit finished();
+}
+//----------------------------------------------------
+//---  Trace Logger BackUp (Undo) Instruction
+//----------------------------------------------------
+static int undoInstruction( traceRecord_t &rec )
+{
+	// TODO Undo memory writes
+	//printf("BackUp (Undo) Instruction\n");
+	X.PC = rec.cpu.PC;
+	X.A  = rec.cpu.A;
+	X.X  = rec.cpu.X;
+	X.Y  = rec.cpu.Y;
+	X.S  = rec.cpu.S;
+	X.P  = rec.cpu.P;
+
+	return 0;
+}
+//----------------------------------------------------
+int FCEUD_TraceLoggerBackUpInstruction(void)
+{
+	int ret, idx;
+
+	if ( recBufNum <= 0 )
+	{
+		return -1;
+	}
+	idx = recBufHead - 1;
+
+	if ( idx < 0 )
+	{
+		idx += recBufMax;
+	}
+	ret = undoInstruction( recBuf[idx] );
+
+	if ( ret == 0 )
+	{
+		recBufNum--;
+		recBufHead = idx;
+	}
+	return ret;
 }
 //----------------------------------------------------

@@ -226,4 +226,6 @@ int initTraceLogBuffer(int maxRecs);
 
 void openTraceLoggerWindow(QWidget *parent);
 
+int FCEUD_TraceLoggerStart(void);
 int FCEUD_TraceLoggerRunning(void);
+int FCEUD_TraceLoggerBackUpInstruction(void);
