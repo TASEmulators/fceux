@@ -18,6 +18,7 @@
         <file>icons/debug-pause.png</file>
         <file>icons/StepInto.png</file>
         <file>icons/StepOver.png</file>
+        <file>icons/StepBack.png</file>
         <file>icons/StepOut.png</file>
         <file>icons/RunPpuFrame.png</file>
         <file>icons/RunPpuHalfFrame.png</file>

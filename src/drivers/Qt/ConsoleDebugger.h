@@ -501,6 +501,8 @@ class ConsoleDebugger : public QDialog
 
 		QAction   *brkOnCycleExcAct;
 		QAction   *brkOnInstrExcAct;
+		QAction   *stepBackMenuAct;
+		QAction   *stepBackToolAct;
 
 		DebuggerTabWidget *tabView[2][4];
 		QWidget   *asmViewContainerWidget;
@@ -561,6 +563,7 @@ class ConsoleDebugger : public QDialog
 		void debugStepIntoCB(void);
 		void debugStepOutCB(void);
 		void debugStepOverCB(void);
+		void debugStepBackCB(void);
 		void debugRunToCursorCB(void);
 		void debugRunLineCB(void);
 		void debugRunLine128CB(void);

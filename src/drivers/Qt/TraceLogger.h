@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QFrame>
 #include <QTimer>
+#include <QThread>
 #include <QGroupBox>
 #include <QScrollBar>
 #include <QCloseEvent>
@@ -224,3 +225,5 @@ private slots:
 int initTraceLogBuffer(int maxRecs);
 
 void openTraceLoggerWindow(QWidget *parent);
+
+int FCEUD_TraceLoggerRunning(void);

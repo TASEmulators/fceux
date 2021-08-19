@@ -76,6 +76,7 @@
 #include "Qt/HexEditor.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/TraceLogger.h"
 #include "Qt/ColorMenu.h"
 
 // Where are these defined?
@@ -588,6 +589,16 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	debugMenu->addAction(act);
 
+	// Debug -> Step Back
+	stepBackMenuAct = act = new QAction(tr("Step &Back"), this);
+	act->setShortcut(QKeySequence( tr("F9") ) );
+	act->setStatusTip(tr("Step Back"));
+	act->setIcon( QIcon(":icons/StepBack.png") );
+	act->setEnabled(false);
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepBackCB(void)) );
+
+	debugMenu->addAction(act);
+
 	// Debug -> Run to Selected Line
 	act = new QAction(tr("Run to S&elected Line"), this);
 	act->setShortcut(QKeySequence( tr("F1") ) );
@@ -828,6 +839,16 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	act->setStatusTip(tr("Step Over"));
 	act->setIcon( QIcon(":icons/StepOver.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
+
+	toolBar->addAction(act);
+
+	// Debug -> Step Back
+	stepBackToolAct = act = new QAction(tr("Step &Back (F9)"), this);
+	//act->setShortcut(QKeySequence( tr("F9") ) );
+	act->setStatusTip(tr("Step Back"));
+	act->setIcon( QIcon(":icons/StepBack.png") );
+	act->setEnabled(false);
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepBackCB(void)) );
 
 	toolBar->addAction(act);
 
@@ -2725,6 +2746,14 @@ void ConsoleDebugger::debugStepOverCB(void)
 	}
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::debugStepBackCB(void)
+{
+	if (FCEUI_EmulationPaused()) 
+	{
+
+	}
+}
+//----------------------------------------------------------------------------
 void ConsoleDebugger::debugRunToCursorCB(void)
 {
 	asmView->setBreakpointAtSelectedLine();
@@ -4067,6 +4096,9 @@ void ConsoleDebugger::updatePeriodic(void)
 		dbgPauseAct[0]->setEnabled(true);
 		dbgPauseAct[1]->setEnabled(true);
 	}
+
+	stepBackMenuAct->setEnabled( FCEUD_TraceLoggerRunning() );
+	stepBackToolAct->setEnabled( FCEUD_TraceLoggerRunning() );
 
 	if ( waitingAtBp && (lastBpIdx == BREAK_TYPE_CYCLES_EXCEED) )
 	{

@@ -390,7 +390,7 @@ TraceLoggerDialog_t::~TraceLoggerDialog_t(void)
 {
 	updateTimer->stop();
 
-	logging = 0;
+	//logging = 0;
 	msleep(1);
 	diskThread->requestInterruption();
 	diskThread->quit();
@@ -1189,6 +1189,11 @@ static void pushMsgToLogBuffer(const char *msg)
 	rec.asmTxt[sizeof(rec.asmTxt) - 1] = 0;
 
 	pushToLogBuffer(rec);
+}
+//----------------------------------------------------
+int FCEUD_TraceLoggerRunning(void)
+{
+	return logging;
 }
 //----------------------------------------------------
 //todo: really speed this up
