@@ -39,6 +39,7 @@ struct traceRecord_t
 	uint8_t opCode[3];
 	uint8_t opSize;
 	uint8_t asmTxtSize;
+	uint8_t preWriteVal;
 	char asmTxt[64];
 
 	uint64_t frameCount;
@@ -50,6 +51,8 @@ struct traceRecord_t
 	int32_t romAddr;
 	int32_t bank;
 	int32_t skippedLines;
+
+	int32_t writeAddr;
 
 	traceRecord_t(void);
 

@@ -818,6 +818,16 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 
 	toolBar->addAction(act);
 
+	// Debug -> Step Back
+	stepBackToolAct = act = new QAction(tr("Step &Back (F9)"), this);
+	//act->setShortcut(QKeySequence( tr("F9") ) );
+	act->setStatusTip(tr("Step Back"));
+	act->setIcon( QIcon(":icons/StepBack.png") );
+	act->setEnabled(false);
+	connect( act, SIGNAL(triggered()), this, SLOT(debugStepBackCB(void)) );
+
+	toolBar->addAction(act);
+
 	// Debug -> Step Into
 	act = new QAction(tr("Step &Into (F11)"), this);
 	//act->setShortcut(QKeySequence( tr("F11") ) );
@@ -842,16 +852,6 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 	act->setStatusTip(tr("Step Over"));
 	act->setIcon( QIcon(":icons/StepOver.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
-
-	toolBar->addAction(act);
-
-	// Debug -> Step Back
-	stepBackToolAct = act = new QAction(tr("Step &Back (F9)"), this);
-	//act->setShortcut(QKeySequence( tr("F9") ) );
-	act->setStatusTip(tr("Step Back"));
-	act->setIcon( QIcon(":icons/StepBack.png") );
-	act->setEnabled(false);
-	connect( act, SIGNAL(triggered()), this, SLOT(debugStepBackCB(void)) );
 
 	toolBar->addAction(act);
 
@@ -4103,8 +4103,16 @@ void ConsoleDebugger::updatePeriodic(void)
 		dbgPauseAct[1]->setEnabled(true);
 	}
 
-	stepBackMenuAct->setEnabled( FCEUD_TraceLoggerRunning() );
-	stepBackToolAct->setEnabled( FCEUD_TraceLoggerRunning() );
+	if ( FCEUD_TraceLoggerRunning() && FCEUI_EmulationPaused() )
+	{
+		stepBackMenuAct->setEnabled(true);
+		stepBackToolAct->setEnabled(true);
+	}
+	else
+	{
+		stepBackMenuAct->setEnabled(false);
+		stepBackToolAct->setEnabled(false);
+	}
 
 	if ( waitingAtBp && (lastBpIdx == BREAK_TYPE_CYCLES_EXCEED) )
 	{

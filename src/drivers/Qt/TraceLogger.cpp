@@ -1333,6 +1333,59 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		}
 	}
 
+	switch ( opcode[0] )
+	{
+		// Zero page
+		case 0x85: // STA - Store Accumulator
+		case 0x86: // STX - Store X Register
+		case 0x84: // STY - Store Y Register
+		case 0xC6: // DEC - Decrement Memory
+		case 0xE6: // INC - Increment Memory
+			rec.writeAddr = opcode[1];
+		break;
+		// Absolute
+		case 0x8D: // STA - Store Accumulator
+		case 0x8E: // STX - Store X Register
+		case 0x8C: // STY - Store Y Register
+		case 0xCE: // DEC - Decrement Memory
+		case 0xEE: // INC - Increment Memory
+			rec.writeAddr = opcode[1] | opcode[2] << 8;
+		break;
+		// Indirect X
+		case 0x81: // STA - Store A Register
+			rec.writeAddr = (opcode[1] + X.X) & 0xFF;
+			rec.writeAddr = GetMem((rec.writeAddr)) | (GetMem(((rec.writeAddr)+1)&0xff))<<8;
+		break;
+		// Indirect Y
+		case 0x91: // STA - Store A Register
+			rec.writeAddr  = GetMem(opcode[1]) | (GetMem((opcode[1]+1)&0xff))<<8;
+			rec.writeAddr += X.Y;
+		break;
+		// Zero Page X
+		case 0x95: // STA - Store Accumulator
+		case 0x94: // STY - Store Y Register
+		case 0xD6: // DEC - Decrement Memory
+		case 0xF6: // INC - Increment Memory
+			rec.writeAddr = (opcode[1]+ X.X) & 0xFF;
+		break;
+		// Zero Page Y
+		case 0x96: // STX - Store X Register
+			rec.writeAddr = (opcode[1]+ X.Y) & 0xFF;
+		break;
+		default:
+			rec.writeAddr = -1;
+		break;
+	}
+
+	if ( rec.writeAddr >= 0 )
+	{
+		rec.preWriteVal = GetMem( rec.writeAddr );
+	}
+	else
+	{
+		rec.preWriteVal = 0;
+	}
+
 	pushToLogBuffer(rec);
 
 	return; // TEST
@@ -2485,6 +2538,21 @@ static int undoInstruction( traceRecord_t &rec )
 	X.S  = rec.cpu.S;
 	X.P  = rec.cpu.P;
 
+	if ( rec.writeAddr >= 0 )
+	{
+		if ( rec.writeAddr < 0x8000 )
+		{
+			writefunc wfunc;
+        
+			wfunc = GetWriteHandler (rec.writeAddr);
+        
+			if (wfunc)
+			{
+				wfunc ((uint32) rec.writeAddr,
+				       (uint8) (rec.preWriteVal & 0x000000ff));
+			}
+		}
+	}
 	return 0;
 }
 //----------------------------------------------------
