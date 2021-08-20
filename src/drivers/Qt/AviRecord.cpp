@@ -444,7 +444,7 @@ int aviRecordOpenFile( const char *filepath )
 {
 	char fourcc[8];
 	gwavi_audio_t  audioConfig;
-	unsigned int fps;
+	double fps;
 	char fileName[1024];
 
 #ifdef WIN32
@@ -519,7 +519,7 @@ int aviRecordOpenFile( const char *filepath )
 	{
 		delete gwavi; gwavi = NULL;
 	}
-	fps = FCEUI_GetDesiredFPS() >> 24;
+	fps = ((double)FCEUI_GetDesiredFPS()) / 16777216.0;
 
 	g_config->getOption("SDL.Sound.Rate", &audioSampleRate);
 
@@ -770,7 +770,8 @@ AviRecordDiskThread_t::~AviRecordDiskThread_t(void)
 void AviRecordDiskThread_t::run(void)
 {
 	int numPixels, width, height, numPixelsReady = 0;
-	int fps = 60, numSamples = 0;
+	int numSamples = 0;
+	double fps = 60.0;
 	unsigned char *rgb24;
 	int16_t *audioOut;
 	uint32_t *videoOut;
@@ -781,9 +782,9 @@ void AviRecordDiskThread_t::run(void)
 
 	setPriority( QThread::HighestPriority );
 
-	fps = FCEUI_GetDesiredFPS() >> 24;
+	fps = ((double)FCEUI_GetDesiredFPS()) / 16777216.0;
 
-	avgAudioPerFrame = (audioSampleRate / fps) + 1;
+	avgAudioPerFrame = ( audioSampleRate / fps) + 1;
 
 	printf("Avg Audio Rate per Frame: %i \n", avgAudioPerFrame );
 

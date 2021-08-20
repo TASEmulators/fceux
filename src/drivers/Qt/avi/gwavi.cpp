@@ -91,9 +91,11 @@ gwavi_t::~gwavi_t(void)
 
 int
 gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
-	   const char *fourcc, unsigned int fps, struct gwavi_audio_t *audio)
+	   const char *fourcc, double fps, struct gwavi_audio_t *audio)
 {
 	int size = 0;
+	unsigned int usec;
+
 	memset( this->fourcc, 0, sizeof(this->fourcc) );
 	strcpy( this->fourcc, fourcc );
 
@@ -112,10 +114,12 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 		perror("gwavi_open: failed to open file for writing");
 		return -1;
 	}
+	usec = (unsigned int)(1000000.0 / fps);
+	printf("FPS: %f  %u\n", fps, usec );
 
 	/* set avi header */
-	avi_header.time_delay= 1000000 / fps;
-	avi_header.data_rate = width * height * 3;
+	avi_header.time_delay= usec;
+	avi_header.data_rate = width * height * 3 * (((unsigned int)fps)+1);
 	avi_header.flags = 0x10;
 
 	if (audio)
@@ -156,8 +160,8 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	/* set stream header */
 	(void)strcpy(stream_header_v.data_type, "vids");
 	(void)memcpy(stream_header_v.codec, fourcc, 4);
-	stream_header_v.time_scale = 1;
-	stream_header_v.data_rate = fps;
+	stream_header_v.time_scale = usec;
+	stream_header_v.data_rate = 1000000;
 	stream_header_v.buffer_size = size;
 	stream_header_v.data_length = 0;
 
@@ -498,10 +502,15 @@ fseek_failed:
  * @return 0 on success, -1 on error.
  */
 int
-gwavi_t::set_framerate(unsigned int fps)
+gwavi_t::set_framerate(double fps)
 {
-	stream_header_v.data_rate = fps;
-	avi_header.time_delay = (10000000 / fps);
+	unsigned int usec;
+
+	usec = (unsigned int)(1000000.0 / fps);
+
+	stream_header_v.time_scale = usec;
+	stream_header_v.data_rate = 1000000;
+	avi_header.time_delay = usec;
 
 	return 0;
 }

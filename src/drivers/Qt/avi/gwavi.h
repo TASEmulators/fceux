@@ -118,7 +118,7 @@ class gwavi_t
 	~gwavi_t(void);
 
 	int open(const char *filename, unsigned int width,
-		   unsigned int height, const char *fourcc, unsigned int fps,
+		   unsigned int height, const char *fourcc, double fps,
 			   struct gwavi_audio_t *audio);
 
 	int close(void);
@@ -131,7 +131,7 @@ class gwavi_t
 
 	int set_size( unsigned int width, unsigned int height);
 
-	int set_framerate(unsigned int fps);
+	int set_framerate(double fps);
 
 	private:
 	FILE *out;
