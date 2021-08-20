@@ -4107,11 +4107,11 @@ int hexEditorOpenFromDebugger( int mode, int addr )
 }
 //----------------------------------------------------------------------------
 // This function must be called from within the emulation thread
-void hexEditorUpdateMemoryValues(void)
+void hexEditorUpdateMemoryValues( bool force )
 {
 	std::list <HexEditorDialog_t*>::iterator it;
 
-	if ( !memNeedsCheck )
+	if ( !memNeedsCheck && !force )
 	{
 		return;
 	}

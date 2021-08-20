@@ -2756,6 +2756,9 @@ void ConsoleDebugger::debugStepBackCB(void)
 		fceuWrapperLock();
 		FCEUD_TraceLoggerBackUpInstruction();
 		updateWindowData();
+		hexEditorUpdateMemoryValues(true);
+		hexEditorRequestUpdateAll();
+		lastBpIdx = BREAK_TYPE_STEP;
 		fceuWrapperUnLock();
 	}
 }
@@ -4269,6 +4272,8 @@ void FCEUD_DebugBreakpoint( int bpNum )
 			}
 		}
 	}
+	hexEditorUpdateMemoryValues(true);
+	hexEditorRequestUpdateAll();
 
 	printf("Breakpoint Hit: %i \n", bpNum );
 

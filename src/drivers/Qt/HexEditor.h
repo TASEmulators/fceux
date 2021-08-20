@@ -354,7 +354,7 @@ class HexEditorDialog_t : public QDialog
 
 int hexEditorNumWindows(void);
 void hexEditorRequestUpdateAll(void);
-void hexEditorUpdateMemoryValues(void);
+void hexEditorUpdateMemoryValues(bool force = false);
 void hexEditorLoadBookmarks(void);
 void hexEditorSaveBookmarks(void);
 int hexEditorOpenFromDebugger( int mode, int addr );
