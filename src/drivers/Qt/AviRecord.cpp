@@ -543,7 +543,11 @@ int aviRecordOpenFile( const char *filepath )
 	else if ( videoFormat == AVI_VFW )
 	{
 		memcpy( fourcc, &VFW::cmpvars.fccHandler, 4);
-		printf("Set VFW FourCC: %s", fourcc);
+		for (int i=0; i<4; i++)
+		{
+			fourcc[i] = toupper(fourcc[i]);
+		}
+		printf("Set VFW FourCC: %s\n", fourcc);
 	}
 	#endif 
 
