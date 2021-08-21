@@ -277,6 +277,12 @@ WriteSound(int32 *buf,
 	int udrFlowDup  = 1;
 	static int skipCounter = 0;
 
+	if ( NoWaiting & 0x01 )
+	{	// During Turbo mode, don't bother with sound as
+		// overflowing the audio buffer can cause delays.
+		return;
+	}
+
 	if ( g_fpsScale >= 0.99995 )
 	{
 		uflowMode = 0;
