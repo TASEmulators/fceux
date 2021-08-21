@@ -43,6 +43,7 @@
 #include "Qt/AviRecord.h"
 #include "Qt/avi/gwavi.h"
 #include "Qt/nes_shm.h"
+#include "Qt/throttle.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/fceuWrapper.h"
@@ -519,7 +520,7 @@ int aviRecordOpenFile( const char *filepath )
 	{
 		delete gwavi; gwavi = NULL;
 	}
-	fps = ((double)FCEUI_GetDesiredFPS()) / 16777216.0;
+	fps = getBaseFrameRate();
 
 	g_config->getOption("SDL.Sound.Rate", &audioSampleRate);
 
@@ -786,7 +787,7 @@ void AviRecordDiskThread_t::run(void)
 
 	setPriority( QThread::HighestPriority );
 
-	fps = ((double)FCEUI_GetDesiredFPS()) / 16777216.0;
+	fps = getBaseFrameRate();
 
 	avgAudioPerFrame = ( audioSampleRate / fps) + 1;
 

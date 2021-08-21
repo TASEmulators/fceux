@@ -114,7 +114,7 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 		perror("gwavi_open: failed to open file for writing");
 		return -1;
 	}
-	usec = (unsigned int)(1000000.0 / fps);
+	usec = (unsigned int)((1000000.0 / fps)+0.50);
 	printf("FPS: %f  %u\n", fps, usec );
 
 	/* set avi header */
@@ -506,7 +506,7 @@ gwavi_t::set_framerate(double fps)
 {
 	unsigned int usec;
 
-	usec = (unsigned int)(1000000.0 / fps);
+	usec = (unsigned int)((1000000.0 / fps)+0.50);
 
 	stream_header_v.time_scale = usec;
 	stream_header_v.data_rate = 1000000;
