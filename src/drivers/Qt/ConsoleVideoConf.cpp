@@ -192,9 +192,9 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	inputDisplaySel = new QComboBox();
 
 	inputDisplaySel->addItem( tr("None"), 0 );
-	inputDisplaySel->addItem( tr("GP 1"), 1 );
-	inputDisplaySel->addItem( tr("GPs 1 & 2"), 2 );
-	inputDisplaySel->addItem( tr("GPs 1, 2, 3 & 4"), 4 );
+	inputDisplaySel->addItem( tr("1"), 1 );
+	inputDisplaySel->addItem( tr("1 & 2"), 2 );
+	inputDisplaySel->addItem( tr("1, 2, 3 & 4"), 4 );
 
 	setComboBoxFromProperty( inputDisplaySel , "SDL.InputDisplay");
 
@@ -351,7 +351,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	vbox->addWidget( showLagCount_cbx );
 	vbox->addWidget( showRerecordCount_cbx );
 
-	gbox  = new QGroupBox( tr("Input Display:") );
+	gbox  = new QGroupBox( tr("Show Controllers:") );
 	gbox->setLayout( vbox4 );
 	vbox->addWidget( gbox  );
 	vbox4->addWidget( inputDisplaySel );
