@@ -67,7 +67,7 @@
 
 gwavi_t::gwavi_t(void)
 {
-	out = NULL;
+	in = out = NULL;
 	memset( &avi_header     , 0, sizeof(struct gwavi_header_t) );
 	memset( &stream_header_v, 0, sizeof(struct gwavi_stream_header_t) );
 	memset( &stream_format_v, 0, sizeof(struct gwavi_stream_format_v_t) );
@@ -85,7 +85,26 @@ gwavi_t::gwavi_t(void)
 
 gwavi_t::~gwavi_t(void)
 {
+	if ( in != NULL )
+	{
+		fclose(in); in = NULL;
+	}
+	if ( out != NULL )
+	{
+		fclose(out); out = NULL;
+	}
 
+}
+
+int
+gwavi_t::openIn(const char *filename)
+{
+	if ((in = fopen(filename, "rb")) == NULL) 
+	{
+		perror("gwavi_open: failed to open file for reading");
+		return -1;
+	}
+	return 0;
 }
 
 
@@ -478,6 +497,7 @@ gwavi_t::close(void)
 		perror("gwavi_close (fclose)");
 		return -1;
 	}
+	out = NULL;
 
 	return 0;
 
@@ -576,3 +596,339 @@ gwavi_t::set_size( unsigned int width, unsigned int height)
 	return 0;
 }
 
+int gwavi_t::printHeaders(void)
+{
+	char fourcc[8];
+	int  ret, fileSize, size;
+
+	if ( in == NULL )
+	{
+		return -1;
+	}
+
+	if (read_chars_bin(in, fourcc, 4) == -1)
+		return -1;
+
+	fourcc[4] = 0;
+	printf("RIFF Begin: '%s'\n", fourcc );
+
+	if (read_int(in, fileSize) == -1)
+	{
+		(void)fprintf(stderr, "gwavi_info: read_int() failed\n");
+		return -1;
+	}
+	size = fileSize;
+	printf("FileSize: %i\n", fileSize );
+
+	if (read_chars_bin(in, fourcc, 4) == -1)
+		return -1;
+
+	size -= 4;
+	fourcc[4] = 0;
+	printf("FileType: '%s'\n", fourcc );
+
+	while ( size > 0 )
+	{
+		if (read_chars_bin(in, fourcc, 4) == -1)
+			return -1;
+
+
+		fourcc[4] = 0;
+		printf("Block: '%s'  %i\n", fourcc, size );
+
+		size -= 4;
+
+		if ( strcmp( fourcc, "LIST") == 0 )
+		{
+			ret = readList(0);
+
+			if ( ret < 0 )
+			{
+				return -1;
+			}
+			size      -= ret;
+		}
+		else
+		{
+			ret = readChunk( fourcc, 0 );
+
+			if ( ret < 0 )
+			{
+				return -1;
+			}
+			size      -= ret;
+		}
+	}
+
+	return 0;
+}
+
+int gwavi_t::readList(int lvl)
+{
+	char fourcc[8], listType[8], pad[4];
+	int size, ret, listSize=0;
+	int bytesRead=0;
+	char indent[256];
+
+	memset( indent, ' ', lvl*3);
+	indent[lvl*3] = 0;
+
+	if (read_int(in, listSize) == -1)
+	{
+		(void)fprintf(stderr, "readList: read_int() failed\n");
+		return -1;
+	}
+	size = listSize;
+
+	if (read_chars_bin(in, listType, 4) == -1)
+		return -1;
+
+	listType[4] = 0;
+	size -= 4;
+	bytesRead += 4;
+
+	printf("%sList Start: '%s'  %i\n", indent, listType, listSize );
+
+	while ( size >= 4 )
+	{
+		if (read_chars_bin(in, fourcc, 4) == -1)
+			return -1;
+
+		size -= 4;
+		bytesRead += 4;
+
+		fourcc[4] = 0;
+		//printf("Block: '%s'\n", fourcc );
+
+		if ( strcmp( fourcc, "LIST") == 0 )
+		{
+			ret = readList(lvl+1);
+
+			if ( ret < 0 )
+			{
+				return -1;
+			}
+			size      -= ret;
+			bytesRead += ret;
+		}
+		else
+		{
+			ret = readChunk( fourcc, lvl+1 );
+
+			if ( ret < 0 )
+			{
+				return -1;
+			}
+			size      -= ret;
+			bytesRead += ret;
+		}
+	}
+
+	if ( size > 0 )
+	{
+		int r = size % 4;
+
+		if (read_chars_bin(in, pad, r) == -1)
+		{
+			(void)fprintf(stderr, "readChunk: read_int() failed\n");
+			return -1;
+		}
+		size -= r;
+		bytesRead += r;
+	}
+	printf("%sList End: %s   %i\n", indent, listType, bytesRead);
+
+	return bytesRead;
+}
+
+int gwavi_t::readChunk(const char *id, int lvl)
+{
+	int ret, size, chunkSize, dataWord, bytesRead=0;
+	char indent[256];
+
+	memset( indent, ' ', lvl*3);
+	indent[lvl*3] = 0;
+
+	if (read_int(in, chunkSize) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_int() failed\n");
+		return -1;
+	}
+	printf("%sChunk Start: %s   %i\n", indent, id, chunkSize);
+
+	size = chunkSize;
+
+	if ( strcmp( id, "strh") == 0 )
+	{
+		ret = readStreamHeader();
+
+		if ( ret < 0 )
+		{
+			return -1;
+		}
+		size -= ret;
+		bytesRead += ret;
+	}
+
+	while ( size >= 4 )
+	{
+		if (read_int(in, dataWord) == -1)
+		{
+			(void)fprintf(stderr, "readChunk: read_int() failed\n");
+			return -1;
+		}
+		size -= 4;
+		bytesRead += 4;
+	}
+
+	if ( size > 0 )
+	{
+		char pad[4];
+		int r = size % 4;
+
+		if (read_chars_bin(in, pad, r) == -1)
+		{
+			(void)fprintf(stderr, "readChunk: read_int() failed\n");
+			return -1;
+		}
+		size -= r;
+		bytesRead += r;
+	}
+
+	printf("%sChunk End: %s   %i\n", indent, id, bytesRead);
+
+	return bytesRead+4;
+}
+
+int gwavi_t::readStreamHeader(void)
+{
+	gwavi_AVIStreamHeader hdr;
+	
+	printf("HDR Size: '%zi'\n", sizeof(hdr) );
+
+	if (read_chars_bin(in, hdr.fccType, 4) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_chars_bin() failed\n");
+		return -1;
+	}
+
+	if (read_chars_bin(in, hdr.fccHandler, 4) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_chars_bin() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.dwFlags) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_ushort(in, hdr.wPriority) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
+		return -1;
+	}
+
+	if (read_ushort(in, hdr.wLanguage) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.dwInitialFrames) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.dwScale) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.dwRate) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.dwStart) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.dwLength) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.dwSuggestedBufferSize) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.dwQuality) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.dwSampleSize) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_short(in, hdr.rcFrame.left) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
+		return -1;
+	}
+
+	if (read_short(in, hdr.rcFrame.top) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
+		return -1;
+	}
+
+	if (read_short(in, hdr.rcFrame.right) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
+		return -1;
+	}
+
+	if (read_short(in, hdr.rcFrame.bottom) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
+		return -1;
+	}
+
+	printf("fccType   : '%c%c%c%c'\n",
+			hdr.fccType[0], hdr.fccType[1],
+				hdr.fccType[2], hdr.fccType[3] );
+	printf("fccHandler: '%c%c%c%c'\n",
+			hdr.fccHandler[0], hdr.fccHandler[1],
+				hdr.fccHandler[2], hdr.fccHandler[3] );
+	printf("dwFlags              : '%u'\n", hdr.dwFlags );
+	printf("wPriority            : '%u'\n", hdr.wPriority );
+	printf("wLanguage            : '%u'\n", hdr.wLanguage );
+	printf("dwInitialFrames      : '%u'\n", hdr.dwInitialFrames );
+	printf("dwScale              : '%u'\n", hdr.dwScale );
+	printf("dwRate               : '%u'\n", hdr.dwRate  );
+	printf("dwStart              : '%u'\n", hdr.dwStart );
+	printf("dwLength             : '%u'\n", hdr.dwLength );
+	printf("dwSuggestedBufferSize: '%u'\n", hdr.dwSuggestedBufferSize );
+	printf("dwQuality            : '%u'\n", hdr.dwQuality );
+	printf("dwSampleSize         : '%u'\n", hdr.dwSampleSize );
+	printf("rcFrame.left         : '%i'\n", hdr.rcFrame.left   );
+	printf("rcFrame.top          : '%i'\n", hdr.rcFrame.top    );
+	printf("rcFrame.right        : '%i'\n", hdr.rcFrame.right  );
+	printf("rcFrame.bottom       : '%i'\n", hdr.rcFrame.bottom );
+
+	return sizeof(gwavi_AVIStreamHeader);
+}

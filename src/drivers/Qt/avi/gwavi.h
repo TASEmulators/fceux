@@ -36,23 +36,53 @@
 #include <stdint.h> /* for size_t */
 #include <stddef.h> /* for size_t */
 
+#pragma pack( push, 4 )
+
 /* structures */
 struct gwavi_header_t
 {
-	unsigned int time_delay;	/* dwMicroSecPerFrame */
-	unsigned int data_rate;		/* dwMaxBytesPerSec */
-	unsigned int reserved;
-	unsigned int flags;		/* dwFlags */
-	unsigned int number_of_frames;	/* dwTotalFrames */
-	unsigned int initial_frames;	/* dwInitialFrames */
-	unsigned int data_streams;	/* dwStreams */
-	unsigned int buffer_size;	/* dwSuggestedBufferSize */
-	unsigned int width;		/* dwWidth */
-	unsigned int height;		/* dwHeight */
-	unsigned int time_scale;
-	unsigned int playback_data_rate;
-	unsigned int starting_time;
-	unsigned int data_length;
+	char  fcc[4];
+	uint32_t  cb;
+	uint32_t time_delay;	/* dwMicroSecPerFrame */
+	uint32_t data_rate;	/* dwMaxBytesPerSec */
+	uint32_t reserved;
+	uint32_t flags;		/* dwFlags */
+	uint32_t number_of_frames;	/* dwTotalFrames */
+	uint32_t initial_frames;	/* dwInitialFrames */
+	uint32_t data_streams;	/* dwStreams */
+	uint32_t buffer_size;	/* dwSuggestedBufferSize */
+	uint32_t width;		/* dwWidth */
+	uint32_t height;	/* dwHeight */
+	uint32_t time_scale;
+	uint32_t playback_data_rate;
+	uint32_t starting_time;
+	uint32_t data_length;
+};
+
+
+struct gwavi_AVIStreamHeader
+{
+	char fccType[4];
+	char fccHandler[4];
+	uint32_t  dwFlags;
+	uint16_t  wPriority;
+	uint16_t  wLanguage;
+	uint32_t  dwInitialFrames;
+	uint32_t  dwScale;
+	uint32_t  dwRate;
+	uint32_t  dwStart;
+	uint32_t  dwLength;
+	uint32_t  dwSuggestedBufferSize;
+	uint32_t  dwQuality;
+	uint32_t  dwSampleSize;
+
+	struct
+	{
+		int16_t  left;
+		int16_t  top;
+		int16_t  right;
+		int16_t  bottom;
+	} rcFrame;
 };
 
 struct gwavi_stream_header_t
@@ -111,6 +141,8 @@ struct gwavi_audio_t
 	unsigned int samples_per_second;
 };
 
+#pragma pack( pop )
+
 class gwavi_t
 {
 	public:
@@ -133,7 +165,12 @@ class gwavi_t
 
 	int set_framerate(double fps);
 
+	int openIn(const char *filename);
+
+	int printHeaders(void);
+
 	private:
+	FILE *in;
 	FILE *out;
 	struct gwavi_header_t avi_header;
 	struct gwavi_stream_header_t stream_header_v;
@@ -165,6 +202,15 @@ class gwavi_t
 	int write_chars(FILE *out, const char *s);
 	int write_chars_bin(FILE *out, const char *s, int count);
 
+	int read_int(FILE *out, int &n);
+	int read_uint(FILE *out, unsigned int &n);
+	int read_short(FILE *in, int16_t &n);
+	int read_short(FILE *out, int &n);
+	int read_ushort(FILE *in, uint16_t &n);
+	int read_chars_bin(FILE *in, char *s, int count);
+	int readList(int lvl);
+	int readChunk(const char *id, int lvl);
+	int readStreamHeader(void);
 };
 
 #endif /* ndef H_GWAVI */

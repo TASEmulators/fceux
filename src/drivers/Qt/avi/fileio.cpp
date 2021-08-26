@@ -89,3 +89,78 @@ gwavi_t::write_chars_bin(FILE *out, const char *s, int count)
 	return 0;
 }
 
+int
+gwavi_t::read_int(FILE *in, int &n)
+{
+	unsigned char buffer[4];
+
+	if (fread(buffer, 1, 4, in) != 4)
+		return -1;
+
+	n = (buffer[3] << 24) | (buffer[2] << 16) | 
+	    (buffer[1] <<  8) | (buffer[0]);
+
+	return 0;
+}
+
+int
+gwavi_t::read_uint(FILE *in, unsigned int &n)
+{
+	unsigned char buffer[4];
+
+	if (fread(buffer, 1, 4, in) != 4)
+		return -1;
+
+	n = (buffer[3] << 24) | (buffer[2] << 16) | 
+	    (buffer[1] <<  8) | (buffer[0]);
+
+	return 0;
+}
+
+int
+gwavi_t::read_short(FILE *in, int16_t &n)
+{
+	unsigned char buffer[2];
+
+	if (fread(buffer, 1, 2, in) != 2)
+		return -1;
+
+	n = (buffer[1] << 8) | (buffer[0]);
+
+	return 0;
+}
+
+int
+gwavi_t::read_ushort(FILE *in, uint16_t &n)
+{
+	unsigned char buffer[2];
+
+	if (fread(buffer, 1, 2, in) != 2)
+		return -1;
+
+	n = (buffer[1] << 8) | (buffer[0]);
+
+	return 0;
+}
+
+int
+gwavi_t::read_short(FILE *in, int &n)
+{
+	unsigned char buffer[2];
+
+	if (fread(buffer, 1, 2, in) != 2)
+		return -1;
+
+	n = (buffer[1] << 8) | (buffer[0]);
+
+	return 0;
+}
+
+int
+gwavi_t::read_chars_bin(FILE *in, char *s, int count)
+{
+	if (fread(s, 1, count, in) != count)
+		return -1;
+
+	return 0;
+}

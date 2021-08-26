@@ -44,6 +44,8 @@ void aviSetSelVideoFormat(int idx);
 
 int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList );
 
+int aviDebugOpenFile( const char *filepath );
+
 class  AviRecordDiskThread_t : public QThread
 {
 	Q_OBJECT

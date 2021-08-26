@@ -428,6 +428,7 @@ class  consoleWin_t : public QMainWindow
 		void aviRecordStart(void);
 		void aviRecordAsStart(void);
 		void aviRecordStop(void);
+		void aviDebugFile(void);
 		void aviAudioEnableChange(bool);
 		void aviVideoFormatChanged(int idx);
 		void setAviHudEnable(bool);
