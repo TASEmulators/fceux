@@ -41,8 +41,6 @@
 /* structures */
 struct gwavi_header_t
 {
-	char  fcc[4];
-	uint32_t  cb;
 	uint32_t time_delay;	/* dwMicroSecPerFrame */
 	uint32_t data_rate;	/* dwMaxBytesPerSec */
 	uint32_t reserved;
@@ -210,6 +208,7 @@ class gwavi_t
 	int read_chars_bin(FILE *in, char *s, int count);
 	int readList(int lvl);
 	int readChunk(const char *id, int lvl);
+	int readAviHeader(void);
 	int readStreamHeader(void);
 };
 

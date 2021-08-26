@@ -758,7 +758,18 @@ int gwavi_t::readChunk(const char *id, int lvl)
 
 	size = chunkSize;
 
-	if ( strcmp( id, "strh") == 0 )
+	if ( strcmp( id, "avih") == 0 )
+	{
+		ret = readAviHeader();
+
+		if ( ret < 0 )
+		{
+			return -1;
+		}
+		size -= ret;
+		bytesRead += ret;
+	}
+	else if ( strcmp( id, "strh") == 0 )
 	{
 		ret = readStreamHeader();
 
@@ -798,6 +809,110 @@ int gwavi_t::readChunk(const char *id, int lvl)
 	printf("%sChunk End: %s   %i\n", indent, id, bytesRead);
 
 	return bytesRead+4;
+}
+
+int gwavi_t::readAviHeader(void)
+{
+	gwavi_header_t hdr;
+
+	printf("HDR Size: '%zi'\n", sizeof(hdr) );
+
+	if (read_uint(in, hdr.time_delay) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.data_rate) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.reserved) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.flags) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.number_of_frames) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.initial_frames) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.data_streams) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.buffer_size) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.width) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.height) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.time_scale) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.playback_data_rate) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.starting_time) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	if (read_uint(in, hdr.data_length) == -1)
+	{
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return -1;
+	}
+
+	printf("dwMicroSecPerFrame    : '%u'\n", hdr.time_delay );
+	printf("dwMaxBytesPerSec      : '%u'\n", hdr.data_rate );
+	printf("dwPaddingGranularity  : '%u'\n", hdr.reserved );
+	printf("dwFlags               : '%u'\n", hdr.flags );
+	printf("dwTotalFrames         : '%u'\n", hdr.number_of_frames );
+	printf("dwInitialFrames       : '%u'\n", hdr.initial_frames   );
+	printf("dwStreams             : '%u'\n", hdr.data_streams );
+	printf("dwSuggestedBufferSize : '%u'\n", hdr.buffer_size );
+	printf("dwWidth               : '%u'\n", hdr.width  );
+	printf("dwHeight              : '%u'\n", hdr.height );
+
+	return sizeof(gwavi_header_t);
 }
 
 int gwavi_t::readStreamHeader(void)
