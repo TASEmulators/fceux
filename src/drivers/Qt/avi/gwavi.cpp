@@ -331,7 +331,7 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 		}
 	}
 
-	offsets[offsets_ptr++] = (unsigned int)(len + maxi_pad);
+	offsets[offsets_ptr++] = (unsigned int)(len);
 
 	if (write_chars_bin(out, "00dc", 4) == -1) {
 		(void)fprintf(stderr, "gwavi_add_frame: write_chars_bin() "
@@ -406,7 +406,7 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 	}
 
 	offsets[offsets_ptr++] =
-		(unsigned int)((len + maxi_pad) | 0x80000000);
+		(unsigned int)((len) | 0x80000000);
 
 	if (write_chars_bin(out,"01wb",4) == -1) {
 		(void)fprintf(stderr, "gwavi_add_audio: write_chars_bin() "

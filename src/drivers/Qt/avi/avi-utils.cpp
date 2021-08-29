@@ -436,6 +436,7 @@ gwavi_t::write_index(FILE *out, int count, unsigned int *offsets)
 {
 	long marker, t;
 	unsigned int offset = 4;
+	unsigned int r;
 
 	if (offsets == 0)
 		return -1;
@@ -465,7 +466,14 @@ gwavi_t::write_index(FILE *out, int count, unsigned int *offsets)
 		if (write_int(out, offsets[t]) == -1)
 			goto write_int_failed;
 
-		offset = offset + offsets[t] + 8;
+		r = offsets[t] % WORD_SIZE;
+
+		if ( r > 0 )
+		{
+			r = WORD_SIZE - r;
+		}
+
+		offset = offset + offsets[t] + 8 + r;
 	}
 
 	if ((t = ftell(out)) == -1) {
