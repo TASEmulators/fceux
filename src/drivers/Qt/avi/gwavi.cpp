@@ -307,9 +307,9 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 	offset_count++;
 	stream_header_v.data_length++;
 
-	maxi_pad = len % 4;
+	maxi_pad = len % WORD_SIZE;
 	if (maxi_pad > 0)
-		maxi_pad = 4 - maxi_pad;
+		maxi_pad = WORD_SIZE - maxi_pad;
 
 	if (offset_count >= offsets_len)
 	{
@@ -380,10 +380,10 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 
 	offset_count++;
 
-	maxi_pad = len % 4;
+	maxi_pad = len % WORD_SIZE;
 	if (maxi_pad > 0)
 	{
-		maxi_pad = 4 - maxi_pad;
+		maxi_pad = WORD_SIZE - maxi_pad;
 	}
 
 	if (offset_count >= offsets_len)
@@ -599,7 +599,7 @@ gwavi_t::set_size( unsigned int width, unsigned int height)
 int gwavi_t::printHeaders(void)
 {
 	char fourcc[8];
-	int  ret, fileSize, size;
+	unsigned int ret, fileSize, size;
 
 	if ( in == NULL )
 	{
@@ -612,13 +612,13 @@ int gwavi_t::printHeaders(void)
 	fourcc[4] = 0;
 	printf("RIFF Begin: '%s'\n", fourcc );
 
-	if (read_int(in, fileSize) == -1)
+	if (read_uint(in, fileSize) == -1)
 	{
 		(void)fprintf(stderr, "gwavi_info: read_int() failed\n");
 		return -1;
 	}
 	size = fileSize;
-	printf("FileSize: %i\n", fileSize );
+	printf("FileSize: %u\n", fileSize );
 
 	if (read_chars_bin(in, fourcc, 4) == -1)
 		return -1;
@@ -627,22 +627,21 @@ int gwavi_t::printHeaders(void)
 	fourcc[4] = 0;
 	printf("FileType: '%s'\n", fourcc );
 
-	while ( size > 0 )
+	while ( size >= 4 )
 	{
 		if (read_chars_bin(in, fourcc, 4) == -1)
 			return -1;
 
-
 		fourcc[4] = 0;
-		printf("Block: '%s'  %i\n", fourcc, size );
+		printf("Block: '%s'  %u  0x%X\n", fourcc, size, size );
 
 		size -= 4;
 
 		if ( strcmp( fourcc, "LIST") == 0 )
 		{
-			ret = readList(0);
+			ret = readList(1);
 
-			if ( ret < 0 )
+			if ( ret == 0 )
 			{
 				return -1;
 			}
@@ -650,9 +649,9 @@ int gwavi_t::printHeaders(void)
 		}
 		else
 		{
-			ret = readChunk( fourcc, 0 );
+			ret = readChunk( fourcc, 1 );
 
-			if ( ret < 0 )
+			if ( ret == 0 )
 			{
 				return -1;
 			}
@@ -663,50 +662,50 @@ int gwavi_t::printHeaders(void)
 	return 0;
 }
 
-int gwavi_t::readList(int lvl)
+unsigned int gwavi_t::readList(int lvl)
 {
+	unsigned int ret=0, bytesRead=0;
 	char fourcc[8], listType[8], pad[4];
-	int size, ret, listSize=0;
-	int bytesRead=0;
+	unsigned int size, listSize=0;
 	char indent[256];
 
 	memset( indent, ' ', lvl*3);
 	indent[lvl*3] = 0;
 
-	if (read_int(in, listSize) == -1)
+	if (read_uint(in, listSize) == -1)
 	{
 		(void)fprintf(stderr, "readList: read_int() failed\n");
-		return -1;
+		return 0;
 	}
 	size = listSize;
 
 	if (read_chars_bin(in, listType, 4) == -1)
-		return -1;
+		return 0;
 
 	listType[4] = 0;
 	size -= 4;
 	bytesRead += 4;
 
-	printf("%sList Start: '%s'  %i\n", indent, listType, listSize );
+	printf("%sList Start: '%s'  %u\n", indent, listType, listSize );
 
 	while ( size >= 4 )
 	{
 		if (read_chars_bin(in, fourcc, 4) == -1)
-			return -1;
+			return 0;
 
 		size -= 4;
 		bytesRead += 4;
 
 		fourcc[4] = 0;
-		//printf("Block: '%s'\n", fourcc );
+		printf("%sBlock: '%s  %u'  0x%X\n", indent, fourcc, size, size );
 
 		if ( strcmp( fourcc, "LIST") == 0 )
 		{
 			ret = readList(lvl+1);
 
-			if ( ret < 0 )
+			if ( ret == 0 )
 			{
-				return -1;
+				return 0;
 			}
 			size      -= ret;
 			bytesRead += ret;
@@ -715,9 +714,9 @@ int gwavi_t::readList(int lvl)
 		{
 			ret = readChunk( fourcc, lvl+1 );
 
-			if ( ret < 0 )
+			if ( ret == 0 )
 			{
-				return -1;
+				return 0;
 			}
 			size      -= ret;
 			bytesRead += ret;
@@ -726,45 +725,57 @@ int gwavi_t::readList(int lvl)
 
 	if ( size > 0 )
 	{
-		int r = size % 4;
+		int r = size % WORD_SIZE;
 
 		if (read_chars_bin(in, pad, r) == -1)
 		{
-			(void)fprintf(stderr, "readChunk: read_int() failed\n");
-			return -1;
+			(void)fprintf(stderr, "readList: read_int() failed\n");
+			return 0;
 		}
 		size -= r;
 		bytesRead += r;
 	}
-	printf("%sList End: %s   %i\n", indent, listType, bytesRead);
+	printf("%sList End: %s   %u\n", indent, listType, bytesRead);
 
-	return bytesRead;
+	return bytesRead+4;
 }
 
-int gwavi_t::readChunk(const char *id, int lvl)
+unsigned int gwavi_t::readChunk(const char *id, int lvl)
 {
-	int ret, size, chunkSize, dataWord, bytesRead=0;
+	unsigned int r, ret, size, chunkSize, bytesRead=0;
+	unsigned short dataWord;
 	char indent[256];
 
 	memset( indent, ' ', lvl*3);
 	indent[lvl*3] = 0;
 
-	if (read_int(in, chunkSize) == -1)
+	if (read_uint(in, chunkSize) == -1)
 	{
-		(void)fprintf(stderr, "readChunk: read_int() failed\n");
-		return -1;
+		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+		return 0;
 	}
-	printf("%sChunk Start: %s   %i\n", indent, id, chunkSize);
+	printf("%sChunk Start: %s   %u\n", indent, id, chunkSize);
 
+	if ( chunkSize == 0 )
+	{
+		return 0;
+	}
 	size = chunkSize;
+
+	r = size % WORD_SIZE;
+
+	if ( r > 0 )
+	{
+		size += r;
+	}
 
 	if ( strcmp( id, "avih") == 0 )
 	{
 		ret = readAviHeader();
 
-		if ( ret < 0 )
+		if ( ret == 0 )
 		{
-			return -1;
+			return 0;
 		}
 		size -= ret;
 		bytesRead += ret;
@@ -773,45 +784,45 @@ int gwavi_t::readChunk(const char *id, int lvl)
 	{
 		ret = readStreamHeader();
 
-		if ( ret < 0 )
+		if ( ret == 0 )
 		{
-			return -1;
+			return 0;
 		}
 		size -= ret;
 		bytesRead += ret;
 	}
 
-	while ( size >= 4 )
+	while ( size >= WORD_SIZE )
 	{
-		if (read_int(in, dataWord) == -1)
+		if (read_ushort(in, dataWord) == -1)
 		{
 			(void)fprintf(stderr, "readChunk: read_int() failed\n");
-			return -1;
+			return 0;
 		}
-		size -= 4;
-		bytesRead += 4;
+		size -= WORD_SIZE;
+		bytesRead += WORD_SIZE;
 	}
 
 	if ( size > 0 )
 	{
 		char pad[4];
-		int r = size % 4;
+		int r = size % WORD_SIZE;
 
 		if (read_chars_bin(in, pad, r) == -1)
 		{
 			(void)fprintf(stderr, "readChunk: read_int() failed\n");
-			return -1;
+			return 0;
 		}
 		size -= r;
 		bytesRead += r;
 	}
 
-	printf("%sChunk End: %s   %i\n", indent, id, bytesRead);
+	printf("%sChunk End: %s   %u\n", indent, id, bytesRead);
 
 	return bytesRead+4;
 }
 
-int gwavi_t::readAviHeader(void)
+unsigned int gwavi_t::readAviHeader(void)
 {
 	gwavi_header_t hdr;
 
@@ -820,85 +831,85 @@ int gwavi_t::readAviHeader(void)
 	if (read_uint(in, hdr.time_delay) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.data_rate) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.reserved) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.flags) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.number_of_frames) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.initial_frames) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.data_streams) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.buffer_size) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.width) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.height) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.time_scale) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.playback_data_rate) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.starting_time) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.data_length) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	printf("dwMicroSecPerFrame    : '%u'\n", hdr.time_delay );
@@ -915,7 +926,7 @@ int gwavi_t::readAviHeader(void)
 	return sizeof(gwavi_header_t);
 }
 
-int gwavi_t::readStreamHeader(void)
+unsigned int gwavi_t::readStreamHeader(void)
 {
 	gwavi_AVIStreamHeader hdr;
 	
@@ -924,103 +935,103 @@ int gwavi_t::readStreamHeader(void)
 	if (read_chars_bin(in, hdr.fccType, 4) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_chars_bin() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_chars_bin(in, hdr.fccHandler, 4) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_chars_bin() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.dwFlags) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_ushort(in, hdr.wPriority) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_ushort(in, hdr.wLanguage) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.dwInitialFrames) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.dwScale) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.dwRate) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.dwStart) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.dwLength) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.dwSuggestedBufferSize) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.dwQuality) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_uint(in, hdr.dwSampleSize) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_uint() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_short(in, hdr.rcFrame.left) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_short(in, hdr.rcFrame.top) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_short(in, hdr.rcFrame.right) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
-		return -1;
+		return 0;
 	}
 
 	if (read_short(in, hdr.rcFrame.bottom) == -1)
 	{
 		(void)fprintf(stderr, "readChunk: read_ushort() failed\n");
-		return -1;
+		return 0;
 	}
 
 	printf("fccType   : '%c%c%c%c'\n",

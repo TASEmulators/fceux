@@ -36,7 +36,7 @@
 #include <stdint.h> /* for size_t */
 #include <stddef.h> /* for size_t */
 
-#pragma pack( push, 4 )
+#pragma pack( push, 2 )
 
 /* structures */
 struct gwavi_header_t
@@ -167,6 +167,8 @@ class gwavi_t
 
 	int printHeaders(void);
 
+	static const int WORD_SIZE = 2;
+
 	private:
 	FILE *in;
 	FILE *out;
@@ -206,10 +208,10 @@ class gwavi_t
 	int read_short(FILE *out, int &n);
 	int read_ushort(FILE *in, uint16_t &n);
 	int read_chars_bin(FILE *in, char *s, int count);
-	int readList(int lvl);
-	int readChunk(const char *id, int lvl);
-	int readAviHeader(void);
-	int readStreamHeader(void);
+	unsigned int readList(int lvl);
+	unsigned int readChunk(const char *id, int lvl);
+	unsigned int readAviHeader(void);
+	unsigned int readStreamHeader(void);
 };
 
 #endif /* ndef H_GWAVI */
