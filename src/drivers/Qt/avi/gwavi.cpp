@@ -309,7 +309,9 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 
 	maxi_pad = len % WORD_SIZE;
 	if (maxi_pad > 0)
+	{
 		maxi_pad = WORD_SIZE - maxi_pad;
+	}
 
 	if (offset_count >= offsets_len)
 	{
@@ -336,7 +338,7 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 			      "failed\n");
 		return -1;
 	}
-	if (write_int(out, (unsigned int)(len + maxi_pad)) == -1) {
+	if (write_int(out, (unsigned int)(len)) == -1) {
 		(void)fprintf(stderr, "gwavi_add_frame: write_int() failed\n");
 		return -1;
 	}
@@ -411,7 +413,7 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 			      "failed\n");
 		return -1;
 	}
-	if (write_int(out,(unsigned int)(len + maxi_pad)) == -1) {
+	if (write_int(out,(unsigned int)(len)) == -1) {
 		(void)fprintf(stderr, "gwavi_add_audio: write_int() failed\n");
 		return -1;
 	}
