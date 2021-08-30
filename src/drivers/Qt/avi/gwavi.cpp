@@ -259,7 +259,8 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 		goto write_chars_bin_failed;
 
 	// Reserve space for about 4 hours of offsets
-	offsets.reserve( 2 * 4 * 3600 ); 
+	// 2 streams * 4 hours * 60 fps * 3600 seconds per hour.
+	offsets.reserve( 2 * 4 * 60 * 3600 ); 
 
 	return 0;
 
