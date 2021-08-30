@@ -1765,14 +1765,14 @@ void consoleWin_t::createMainMenu(void)
 
 	aviMenu->addAction(stopAviAct);
 
-	// Movie -> Avi Recording -> Debug
-	act = new QAction(tr("&Debug"), this);
-	//act->setShortcut( QKeySequence(tr("Shift+F5")));
-	act->setStatusTip(tr("AVI Debug"));
-	//act->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
-	connect(act, SIGNAL(triggered()), this, SLOT(aviDebugFile(void)) );
-	
-	aviMenu->addAction(act);
+	//// Movie -> Avi Recording -> Debug
+	//act = new QAction(tr("&Debug"), this);
+	////act->setShortcut( QKeySequence(tr("Shift+F5")));
+	//act->setStatusTip(tr("AVI Debug"));
+	////act->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(aviDebugFile(void)) );
+	//
+	//aviMenu->addAction(act);
 
 	// Movie -> Avi Recording -> Video Format
 	subMenu = aviMenu->addMenu( tr("Video Format") );
