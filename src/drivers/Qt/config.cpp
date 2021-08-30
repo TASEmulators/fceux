@@ -603,6 +603,10 @@ InitConfig()
 	config->addOption("SDL.AviVideoFormat", AVI_RGB24);
 #endif
 
+#ifdef  WIN32
+	config->addOption("SDL.AviVfwFccHandler", "");
+#endif
+
 	// Cheat Options
 	config->addOption("SDL.CheatsDisabled", 0);
 	config->addOption("SDL.CheatsDisableAutoLS", 0);

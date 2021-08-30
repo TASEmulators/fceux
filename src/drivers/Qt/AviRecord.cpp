@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <string>
 
 #ifdef WIN32
 #include <windows.h>
@@ -326,16 +327,32 @@ static LPVOID outBuf = NULL;
 static int chooseConfig(int width, int height)
 {
 	bool ret;
+	char fccHandler[8];
+	std::string fccHandlerString;
 
 	if ( cmpSet )
 	{
 		ICCompressorFree( &cmpvars );
 		cmpSet = false;
 	}
+	memset( fccHandler, 0, sizeof(fccHandler));
 	memset( &cmpvars, 0, sizeof(COMPVARS));
 	cmpvars.cbSize = sizeof(COMPVARS);
+
+	g_config->getOption("SDL.AviVfwFccHandler", &fccHandlerString);
+
+	if ( fccHandlerString.size() > 0 )
+	{
+		strcpy( fccHandler, fccHandlerString.c_str() );
+		memcpy( &cmpvars.fccHandler, fccHandler, 4 );
+		cmpvars.dwFlags = ICMF_COMPVARS_VALID;
+	}
+
 	ret = ICCompressorChoose( HWND(consoleWindow->winId()), ICMF_CHOOSE_ALLCOMPRESSORS,
 			0, NULL, &cmpvars, 0);
+
+	memcpy( fccHandler, &cmpvars.fccHandler, 4 );
+	fccHandler[4] = 0;
 
 	printf("FCC:%08X  %c%c%c%c \n", cmpvars.fccHandler,
 	    (cmpvars.fccHandler & 0x000000FF) ,
@@ -345,6 +362,7 @@ static int chooseConfig(int width, int height)
 
 	if ( ret )
 	{
+		g_config->setOption("SDL.AviVfwFccHandler", fccHandler);
 		cmpSet = true;
 	}
 	return (cmpSet == false) ? -1 : 0;
