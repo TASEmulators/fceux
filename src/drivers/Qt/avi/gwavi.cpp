@@ -75,6 +75,7 @@ gwavi_t::gwavi_t(void)
 	memset( &stream_format_a, 0, sizeof(struct gwavi_stream_format_a_t) );
 	memset(  fourcc, 0, sizeof(fourcc) );
 	marker = 0;
+	movi_fpos = 0;
 	offsets_ptr = 0;
 	offsets_len = 0;
 	offsets_start = 0;
@@ -240,7 +241,7 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	if (write_chars_bin(out, "AVI ", 4) == -1)
 		goto write_chars_bin_failed;
 
-	if (write_avi_header_chunk() == -1) {
+	if (write_avi_header_chunk(out) == -1) {
 		(void)fprintf(stderr, "gwavi_info: write_avi_header_chunk "
 			      "failed\n");
 		return -1;
@@ -256,6 +257,8 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 		(void)fprintf(stderr, "gwavi_info: write_int() failed\n");
 		return -1;
 	}
+	movi_fpos = ftell(out);
+
 	if (write_chars_bin(out, "movi", 4) == -1)
 		goto write_chars_bin_failed;
 
@@ -331,6 +334,8 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 		}
 	}
 
+	//printf("Frame Offset: %li\n", ftell(out) - movi_fpos );
+
 	offsets[offsets_ptr++] = (unsigned int)(len);
 
 	if (write_chars_bin(out, "00dc", 4) == -1) {
@@ -374,7 +379,8 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 	size_t maxi_pad;  /* in case audio bleeds over the 4 byte boundary  */
 	size_t t;
 
-	if ( !buffer) {
+	if ( !buffer)
+	{
 		(void)fputs("gwavi and/or buffer argument cannot be NULL",
 			    stderr);
 		return -1;
@@ -408,26 +414,32 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 	offsets[offsets_ptr++] =
 		(unsigned int)((len) | 0x80000000);
 
-	if (write_chars_bin(out,"01wb",4) == -1) {
+	if (write_chars_bin(out,"01wb",4) == -1)
+	{
 		(void)fprintf(stderr, "gwavi_add_audio: write_chars_bin() "
 			      "failed\n");
 		return -1;
 	}
-	if (write_int(out,(unsigned int)(len)) == -1) {
+	if (write_int(out,(unsigned int)(len)) == -1)
+	{
 		(void)fprintf(stderr, "gwavi_add_audio: write_int() failed\n");
 		return -1;
 	}
 
-	if ((t = fwrite(buffer, 1, len, out)) != len ) {
+	if ((t = fwrite(buffer, 1, len, out)) != len )
+	{
 		(void)fprintf(stderr, "gwavi_add_audio: fwrite() failed\n");
 		return -1;
 	}
 
 	for (t = 0; t < maxi_pad; t++)
-		if (fputc(0,out) == EOF) {
+	{
+		if (fputc(0,out) == EOF)
+		{
 			(void)fprintf(stderr, "gwavi_add_audio: fputc() failed\n");
 			return -1;
 		}
+	}
 
 	stream_header_a.data_length += (unsigned int)(len + maxi_pad);
 
@@ -452,14 +464,16 @@ gwavi_t::close(void)
 		goto ftell_failed;
 	if (fseek(out, marker, SEEK_SET) == -1)
 		goto fseek_failed;
-	if (write_int(out, (unsigned int)(t - marker - 4)) == -1) {
+	if (write_int(out, (unsigned int)(t - marker - 4)) == -1)
+	{
 		(void)fprintf(stderr, "gwavi_close: write_int() failed\n");
 		return -1;
 	}
 	if (fseek(out,t,SEEK_SET) == -1)
 		goto fseek_failed;
 
-	if (write_index(out, offset_count, offsets) == -1) {
+	if (write_index(out, offset_count, offsets) == -1)
+	{
 		(void)fprintf(stderr, "gwavi_close: write_index() failed\n");
 		return -1;
 	}
@@ -473,7 +487,7 @@ gwavi_t::close(void)
 		goto ftell_failed;
 	if (fseek(out, 12, SEEK_SET) == -1)
 		goto fseek_failed;
-	if (write_avi_header_chunk() == -1) {
+	if (write_avi_header_chunk(out) == -1) {
 		(void)fprintf(stderr, "gwavi_close: write_avi_header_chunk() "
 			      "failed\n");
 		return -1;
@@ -485,7 +499,8 @@ gwavi_t::close(void)
 		goto ftell_failed;
 	if (fseek(out, 4, SEEK_SET) == -1)
 		goto fseek_failed;
-	if (write_int(out, (unsigned int)(t - 8)) == -1) {
+	if (write_int(out, (unsigned int)(t - 8)) == -1)
+	{
 		(void)fprintf(stderr, "gwavi_close: write_int() failed\n");
 		return -1;
 	}
@@ -682,9 +697,17 @@ unsigned int gwavi_t::readList(int lvl)
 	size = listSize;
 
 	if (read_chars_bin(in, listType, 4) == -1)
+	{
 		return 0;
+	}
 
 	listType[4] = 0;
+
+	if ( strcmp( listType, "movi") == 0 )
+	{
+		movi_fpos = ftell(in) - 4;
+	}
+
 	size -= 4;
 	bytesRead += 4;
 
@@ -785,6 +808,17 @@ unsigned int gwavi_t::readChunk(const char *id, int lvl)
 	else if ( strcmp( id, "strh") == 0 )
 	{
 		ret = readStreamHeader();
+
+		if ( ret == 0 )
+		{
+			return 0;
+		}
+		size -= ret;
+		bytesRead += ret;
+	}
+	else if ( strcmp( id, "idx1") == 0 )
+	{
+		ret = readIndexBlock( chunkSize );
 
 		if ( ret == 0 )
 		{
@@ -1059,4 +1093,50 @@ unsigned int gwavi_t::readStreamHeader(void)
 	printf("rcFrame.bottom       : '%i'\n", hdr.rcFrame.bottom );
 
 	return sizeof(gwavi_AVIStreamHeader);
+}
+
+unsigned int gwavi_t::readIndexBlock( unsigned int chunkSize )
+{
+	char chunkId[8];
+	unsigned int size, flags, ofs, ckSize, bytesRead=0;
+
+	size = chunkSize;
+
+	while ( size >= 4 )
+	{
+		if (read_chars_bin(in, chunkId, 4) == -1)
+		{
+			(void)fprintf(stderr, "readChunk: read_chars_bin() failed\n");
+			return 0;
+		}
+		chunkId[4] = 0;
+
+		if (read_uint(in, flags) == -1)
+		{
+			(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+			return 0;
+		}
+
+		if (read_uint(in, ofs) == -1)
+		{
+			(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+			return 0;
+		}
+
+		if (read_uint(in, ckSize) == -1)
+		{
+			(void)fprintf(stderr, "readChunk: read_uint() failed\n");
+			return 0;
+		}
+
+		printf("     Index: %s  0x%X  ofs:%u  size:%u\n", chunkId, flags, ofs, ckSize );
+
+		peak_chunk( in, ofs, chunkId, &ckSize );
+
+		printf("Peak Index: %s  0x%X  ofs:%u  size:%u\n", chunkId, flags, ofs, ckSize );
+
+		size      -= 16;
+		bytesRead += 16;
+	}
+	return bytesRead;
 }

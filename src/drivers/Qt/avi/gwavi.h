@@ -182,36 +182,39 @@ class gwavi_t
 	int offsets_len;
 	long offsets_start;
 	unsigned int *offsets;
+	long movi_fpos;
 	int offset_count;
 	int bits_per_pixel;
 	char fourcc[8];
 
 	// helper functions
-	int write_avi_header(FILE *out, struct gwavi_header_t *avi_header);
-	int write_stream_header(FILE *out,
+	int write_avi_header(FILE *fp, struct gwavi_header_t *avi_header);
+	int write_stream_header(FILE *fp,
 			struct gwavi_stream_header_t *stream_header);
-	int write_stream_format_v(FILE *out,
+	int write_stream_format_v(FILE *fp,
 			  struct gwavi_stream_format_v_t *stream_format_v);
-	int write_stream_format_a(FILE *out,
+	int write_stream_format_a(FILE *fp,
 			  struct gwavi_stream_format_a_t *stream_format_a);
-	int write_avi_header_chunk(void);
-	int write_index(FILE *out, int count, unsigned int *offsets);
+	int write_avi_header_chunk( FILE *fp );
+	int write_index(FILE *fp, int count, unsigned int *offsets);
 	int check_fourcc(const char *fourcc);
-	int write_int(FILE *out, unsigned int n);
-	int write_short(FILE *out, unsigned int n);
-	int write_chars(FILE *out, const char *s);
-	int write_chars_bin(FILE *out, const char *s, int count);
+	int write_int(FILE *fp, unsigned int n);
+	int write_short(FILE *fp, unsigned int n);
+	int write_chars(FILE *fp, const char *s);
+	int write_chars_bin(FILE *fp, const char *s, int count);
+	int peak_chunk( FILE *fp, long int idx, char *fourcc, unsigned int *size );
 
-	int read_int(FILE *out, int &n);
-	int read_uint(FILE *out, unsigned int &n);
-	int read_short(FILE *in, int16_t &n);
-	int read_short(FILE *out, int &n);
-	int read_ushort(FILE *in, uint16_t &n);
-	int read_chars_bin(FILE *in, char *s, int count);
+	int read_int(FILE *fp, int &n);
+	int read_uint(FILE *fp, unsigned int &n);
+	int read_short(FILE *fp, int16_t &n);
+	int read_short(FILE *fp, int &n);
+	int read_ushort(FILE *fp, uint16_t &n);
+	int read_chars_bin(FILE *fp, char *s, int count);
 	unsigned int readList(int lvl);
 	unsigned int readChunk(const char *id, int lvl);
 	unsigned int readAviHeader(void);
 	unsigned int readStreamHeader(void);
+	unsigned int readIndexBlock( unsigned int chunkSize );
 };
 
 #endif /* ndef H_GWAVI */
