@@ -460,15 +460,17 @@ int gwavi_t::peak_chunk( FILE *fp, long int idx, char *fourcc, unsigned int *siz
 }	
 
 int
-gwavi_t::write_index(FILE *fp, int count, unsigned int *offsets)
+gwavi_t::write_index(FILE *fp)
 {
 	long marker, t;
 	unsigned int offset = 4;
 	unsigned int r;
 	char fourcc[8];
 
-	if (offsets == 0)
+	if (offsets.size() == 0 )
+	{
 		return -1;
+	}
 
 	if (write_chars_bin(fp, "idx1", 4) == -1) {
 		(void)fprintf(stderr, "write_index: write_chars_bin) failed\n");
@@ -481,11 +483,11 @@ gwavi_t::write_index(FILE *fp, int count, unsigned int *offsets)
 	if (write_int(fp, 0) == -1)
 		goto write_int_failed;
 
-	for (t = 0; t < count; t++)
+	for (size_t i = 0; i < offsets.size(); i++)
 	{
-		peak_chunk( fp, offset, fourcc, &r );
+		//peak_chunk( fp, offset, fourcc, &r );
 
-		if ((offsets[t] & 0x80000000) == 0)
+		if ((offsets[i] & 0x80000000) == 0)
 		{
 			write_chars(fp, "00dc");
 			//printf("Index: %u \n", offset );
@@ -493,23 +495,23 @@ gwavi_t::write_index(FILE *fp, int count, unsigned int *offsets)
 		else
 		{
 			write_chars(fp, "01wb");
-			offsets[t] &= 0x7fffffff;
+			offsets[i] &= 0x7fffffff;
 		}
 		if (write_int(fp, 0x10) == -1)
 			goto write_int_failed;
 		if (write_int(fp, offset) == -1)
 			goto write_int_failed;
-		if (write_int(fp, offsets[t]) == -1)
+		if (write_int(fp, offsets[i]) == -1)
 			goto write_int_failed;
 
-		r = offsets[t] % WORD_SIZE;
+		r = offsets[i] % WORD_SIZE;
 
 		if ( r > 0 )
 		{
 			r = WORD_SIZE - r;
 		}
 
-		offset = offset + offsets[t] + 8 + r;
+		offset = offset + offsets[i] + 8 + r;
 	}
 
 	if ((t = ftell(fp)) == -1) {

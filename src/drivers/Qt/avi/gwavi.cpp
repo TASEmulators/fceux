@@ -76,12 +76,8 @@ gwavi_t::gwavi_t(void)
 	memset(  fourcc, 0, sizeof(fourcc) );
 	marker = 0;
 	movi_fpos = 0;
-	offsets_ptr = 0;
-	offsets_len = 0;
-	offsets_start = 0;
-	offsets = 0;
-	offset_count = 0;
 	bits_per_pixel = 24;
+
 }
 
 gwavi_t::~gwavi_t(void)
@@ -262,16 +258,8 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	if (write_chars_bin(out, "movi", 4) == -1)
 		goto write_chars_bin_failed;
 
-	offsets_len = 1024;
-	if ((offsets = (unsigned int *)malloc((size_t)offsets_len *
-				      sizeof(unsigned int)))
-			== NULL) {
-		(void)fprintf(stderr, "gwavi_info: could not allocate memory "
-			      "for gwavi offsets table\n");
-		return -1;
-	}
-
-	offsets_ptr = 0;
+	// Reserve space for about 4 hours of offsets
+	offsets.reserve( 2 * 4 * 3600 ); 
 
 	return 0;
 
@@ -307,7 +295,6 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 	//		      (int)len);
 	//}
 
-	offset_count++;
 	stream_header_v.data_length++;
 
 	maxi_pad = len % WORD_SIZE;
@@ -316,27 +303,9 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 		maxi_pad = WORD_SIZE - maxi_pad;
 	}
 
-	if (offset_count >= offsets_len)
-	{
-		void *tmpPtr;
-		offsets_len += 1024;
-		tmpPtr = realloc( offsets,
-				(size_t)offsets_len *
-					sizeof(unsigned int));
-
-		if ( tmpPtr )
-		{
-			offsets = (unsigned int *)tmpPtr;
-		}
-		else
-		{
-			fprintf(stderr, "gwavi_add_frame: realloc() failed\n");
-		}
-	}
-
 	//printf("Frame Offset: %li\n", ftell(out) - movi_fpos );
 
-	offsets[offsets_ptr++] = (unsigned int)(len);
+	offsets.push_back( (unsigned int)(len) );
 
 	if (write_chars_bin(out, "00dc", 4) == -1) {
 		(void)fprintf(stderr, "gwavi_add_frame: write_chars_bin() "
@@ -386,33 +355,13 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 		return -1;
 	}
 
-	offset_count++;
-
 	maxi_pad = len % WORD_SIZE;
 	if (maxi_pad > 0)
 	{
 		maxi_pad = WORD_SIZE - maxi_pad;
 	}
 
-	if (offset_count >= offsets_len)
-	{
-		void *tmpPtr;
-		offsets_len += 1024;
-		tmpPtr = realloc( offsets,
-				(size_t)offsets_len *
-				sizeof(unsigned int));
-		if ( tmpPtr )
-		{
-			offsets = (unsigned int *)tmpPtr;
-		}
-		else
-		{
-			fprintf(stderr, "gwavi_add_audio: realloc() failed\n");
-		}
-	}
-
-	offsets[offsets_ptr++] =
-		(unsigned int)((len) | 0x80000000);
+	offsets.push_back( (unsigned int)((len) | 0x80000000) );
 
 	if (write_chars_bin(out,"01wb",4) == -1)
 	{
@@ -472,13 +421,14 @@ gwavi_t::close(void)
 	if (fseek(out,t,SEEK_SET) == -1)
 		goto fseek_failed;
 
-	if (write_index(out, offset_count, offsets) == -1)
+	if (write_index(out) == -1)
 	{
 		(void)fprintf(stderr, "gwavi_close: write_index() failed\n");
 		return -1;
 	}
 
-	free(offsets);
+	//free(offsets);
+	offsets.clear();
 
 	/* reset some avi header fields */
 	avi_header.number_of_frames = stream_header_v.data_length;

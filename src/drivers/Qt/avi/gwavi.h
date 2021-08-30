@@ -35,6 +35,7 @@
 
 #include <stdint.h> /* for size_t */
 #include <stddef.h> /* for size_t */
+#include <vector>
 
 #pragma pack( push, 2 )
 
@@ -178,12 +179,8 @@ class gwavi_t
 	struct gwavi_stream_header_t stream_header_a;
 	struct gwavi_stream_format_a_t stream_format_a;
 	long marker;
-	int offsets_ptr;
-	int offsets_len;
-	long offsets_start;
-	unsigned int *offsets;
+	std::vector <unsigned int> offsets;
 	long movi_fpos;
-	int offset_count;
 	int bits_per_pixel;
 	char fourcc[8];
 
@@ -196,7 +193,7 @@ class gwavi_t
 	int write_stream_format_a(FILE *fp,
 			  struct gwavi_stream_format_a_t *stream_format_a);
 	int write_avi_header_chunk( FILE *fp );
-	int write_index(FILE *fp, int count, unsigned int *offsets);
+	int write_index(FILE *fp);
 	int check_fourcc(const char *fourcc);
 	int write_int(FILE *fp, unsigned int n);
 	int write_short(FILE *fp, unsigned int n);
