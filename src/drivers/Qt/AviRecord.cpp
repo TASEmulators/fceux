@@ -317,11 +317,13 @@ namespace VFW
 {
 static bool cmpSet = false;
 static COMPVARS  cmpvars;
-static DWORD dwFlags = 0;
+//static DWORD dwFlags = 0;
 static BITMAPINFOHEADER   bmapIn;
 static LPBITMAPINFOHEADER bmapOut = NULL;
 static DWORD frameNum = 0;
 static DWORD dwQuality = 0;
+static DWORD icErrCount = 0;
+static DWORD flagsOut = 0;
 static LPVOID outBuf = NULL;
 
 static int chooseConfig(int width, int height)
@@ -371,7 +373,9 @@ static int chooseConfig(int width, int height)
 static int init( int width, int height )
 {
 	void *h;
+	ICINFO icInfo;
 	DWORD dwFormatSize, dwCompressBufferSize;
+	bool qualitySupported = false;
 
 	memset( &bmapIn, 0, sizeof(bmapIn));
 	bmapIn.biSize = sizeof(BITMAPINFOHEADER);
@@ -383,6 +387,45 @@ static int init( int width, int height )
 	bmapIn.biSizeImage = width * height * 3;
 
 	dwFormatSize = ICCompressGetFormatSize( cmpvars.hic, &bmapIn );
+
+	if ( ICGetInfo( cmpvars.hic, &icInfo, sizeof(icInfo) ) )
+	{
+		printf("Name : %ls\n" , icInfo.szName );
+		printf("Flags: 0x%08X", icInfo.dwFlags );
+
+		if ( icInfo.dwFlags & VIDCF_CRUNCH )
+		{
+			printf("  VIDCF_CRUNCH  ");
+		}
+
+		if ( icInfo.dwFlags & VIDCF_TEMPORAL )
+		{
+			printf("  VIDCF_TEMPORAL  ");
+		}
+
+		if ( icInfo.dwFlags & VIDCF_TEMPORAL )
+		{
+			printf("  VIDCF_TEMPORAL  ");
+		}
+
+		if ( icInfo.dwFlags & VIDCF_QUALITY )
+		{
+			printf("  VIDCF_QUALITY  ");
+			qualitySupported = true;
+		}
+
+		if ( icInfo.dwFlags & VIDCF_FASTTEMPORALC )
+		{
+			printf("  VIDCF_FASTTEMPORALC  ");
+		}
+
+		if ( icInfo.dwFlags & VIDCF_FASTTEMPORALD )
+		{
+			printf("  VIDCF_FASTTEMPORALD  ");
+		}
+		printf("\n");
+
+	}
 
 	//printf("Format Size:%i  %zi\n", dwFormatSize, sizeof(BITMAPINFOHEADER));
 
@@ -402,12 +445,23 @@ static int init( int width, int height )
 	outBuf = (LPVOID)GlobalLock(h);
 
 	//dwQuality = ICGetDefaultQuality( cmpvars.hic ); 
-	dwQuality = cmpvars.lQ; 
+	if ( qualitySupported )
+	{
+		dwQuality = cmpvars.lQ; 
+	}
+	else
+	{
+		dwQuality = 0;
+	}
 
 	//printf("Quality Setting: %i\n", dwQuality );
 
 	ICCompressBegin( cmpvars.hic, &bmapIn, bmapOut );
 	
+	frameNum   = 0;
+	flagsOut   = 0;
+	icErrCount = 0;
+
 	return 0;
 }
 
@@ -429,12 +483,17 @@ static int close(void)
 static int encode_frame( unsigned char *inBuf, int width, int height )
 {
 	DWORD ret;
-	DWORD flagsOut = 0, reserved = 0;
+	DWORD reserved = 0;
 	int bytesWritten = 0;
+
+	if ( icErrCount > 10 )
+	{
+		return -1;
+	}
 
 	ret = ICCompress( 
 		cmpvars.hic, 
-		dwFlags, 
+		0, 
 		bmapOut,
 		outBuf,
 		&bmapIn, 
@@ -448,9 +507,15 @@ static int encode_frame( unsigned char *inBuf, int width, int height )
 
 	if ( ret == ICERR_OK )
 	{
-		//printf("Compressing Frame:%i   Size:%i\n", frameNum, bmapOut->biSizeImage);
+		//printf("Compressing Frame:%i   Size:%i  Flags:%08X\n",
+		//		frameNum, bmapOut->biSizeImage, flagsOut );
 		bytesWritten = bmapOut->biSizeImage;
-		gwavi->add_frame( (unsigned char*)outBuf, bytesWritten );
+		gwavi->add_frame( (unsigned char*)outBuf, bytesWritten, flagsOut );
+	}
+	else
+	{
+		printf("Compression Error Frame:%i\n", frameNum);
+		icErrCount++;
 	}
 
 	return bytesWritten;

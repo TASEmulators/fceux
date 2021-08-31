@@ -140,11 +140,24 @@ struct gwavi_audio_t
 	unsigned int samples_per_second;
 };
 
+struct gwavi_index_rec_t
+{
+	unsigned int  len;
+	unsigned char type;
+	unsigned char keyFrame;
+	unsigned char resv[2];
+};
+
 #pragma pack( pop )
 
 class gwavi_t
 {
 	public:
+	static const int WORD_SIZE = 2;
+	static const unsigned int IF_LIST     = 0x00000001;
+	static const unsigned int IF_KEYFRAME = 0x00000010;
+	static const unsigned int IF_NO_TIME  = 0x00000100;
+
 	gwavi_t(void);
 	~gwavi_t(void);
 
@@ -154,7 +167,7 @@ class gwavi_t
 
 	int close(void);
 
-	int add_frame( unsigned char *buffer, size_t len);
+	int add_frame( unsigned char *buffer, size_t len, unsigned int flags = IF_KEYFRAME);
 
 	int add_audio( unsigned char *buffer, size_t len);
 
@@ -168,8 +181,6 @@ class gwavi_t
 
 	int printHeaders(void);
 
-	static const int WORD_SIZE = 2;
-
 	private:
 	FILE *in;
 	FILE *out;
@@ -179,7 +190,7 @@ class gwavi_t
 	struct gwavi_stream_header_t stream_header_a;
 	struct gwavi_stream_format_a_t stream_format_a;
 	long marker;
-	std::vector <unsigned int> offsets;
+	std::vector <gwavi_index_rec_t> offsets;
 	long movi_fpos;
 	int bits_per_pixel;
 	char fourcc[8];

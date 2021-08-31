@@ -279,10 +279,10 @@ write_chars_bin_failed:
  * @return 0 on success, -1 on error.
  */
 int
-gwavi_t::add_frame( unsigned char *buffer, size_t len)
+gwavi_t::add_frame( unsigned char *buffer, size_t len, unsigned int flags)
 {
-	size_t maxi_pad;  /* if your frame is raggin, give it some paddin' */
-	size_t t;
+	size_t t, maxi_pad;  /* if your frame is raggin, give it some paddin' */
+	gwavi_index_rec_t idx;
 
 	if ( !buffer) {
 		(void)fputs("gwavi and/or buffer argument cannot be NULL",
@@ -306,7 +306,11 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 
 	//printf("Frame Offset: %li\n", ftell(out) - movi_fpos );
 
-	offsets.push_back( (unsigned int)(len) );
+	idx.len      = len;
+	idx.type     = 0;
+	idx.keyFrame = (flags & IF_KEYFRAME) ? 1 : 0;
+
+	offsets.push_back( idx );
 
 	if (write_chars_bin(out, "00dc", 4) == -1) {
 		(void)fprintf(stderr, "gwavi_add_frame: write_chars_bin() "
@@ -346,8 +350,8 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len)
 int
 gwavi_t::add_audio( unsigned char *buffer, size_t len)
 {
-	size_t maxi_pad;  /* in case audio bleeds over the 4 byte boundary  */
-	size_t t;
+	size_t t, maxi_pad;  /* in case audio bleeds over the 4 byte boundary  */
+	gwavi_index_rec_t idx;
 
 	if ( !buffer)
 	{
@@ -362,7 +366,11 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 		maxi_pad = WORD_SIZE - maxi_pad;
 	}
 
-	offsets.push_back( (unsigned int)((len) | 0x80000000) );
+	idx.len      = len;
+	idx.type     = 1;
+	idx.keyFrame = 0;
+
+	offsets.push_back( idx );
 
 	if (write_chars_bin(out,"01wb",4) == -1)
 	{
