@@ -180,6 +180,8 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	stream_header_v.data_rate = 1000000;
 	stream_header_v.buffer_size = size;
 	stream_header_v.data_length = 0;
+	stream_header_v.image_width  = width;
+	stream_header_v.image_height = height;
 
 	/* set stream format */
 	stream_format_v.header_size = 40;
@@ -370,7 +372,7 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 
 	idx.len      = len;
 	idx.type     = 1;
-	idx.keyFrame = 0;
+	idx.keyFrame = 1;
 
 	offsets.push_back( idx );
 

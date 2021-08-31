@@ -103,6 +103,8 @@ struct gwavi_stream_header_t
 	 */
 	int audio_quality;
 	unsigned int sample_size;   /* dwSampleSize */
+	int image_width;
+	int image_height;
 };
 
 struct gwavi_stream_format_v_t

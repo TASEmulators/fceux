@@ -152,9 +152,13 @@ gwavi_t::write_stream_header(FILE *fp, struct gwavi_stream_header_t *stream_head
 		goto write_int_failed;
 	if (write_int(fp, stream_header->sample_size) == -1)
 		goto write_int_failed;
-	if (write_int(fp, 0) == -1)
+	if (write_short(fp, 0) == -1)
 		goto write_int_failed;
-	if (write_int(fp, 0) == -1)
+	if (write_short(fp, 0) == -1)
+		goto write_int_failed;
+	if (write_short(fp, stream_header->image_width) == -1)
+		goto write_int_failed;
+	if (write_short(fp, stream_header->image_height) == -1)
 		goto write_int_failed;
 
 	if ((t = ftell(fp)) == -1) {
@@ -464,7 +468,7 @@ gwavi_t::write_index(FILE *fp)
 {
 	long marker, t;
 	unsigned int offset = 4;
-	unsigned int r;
+	unsigned int r, flags;
 	//char fourcc[8];
 
 	if (offsets.size() == 0 )
@@ -486,6 +490,7 @@ gwavi_t::write_index(FILE *fp)
 	for (size_t i = 0; i < offsets.size(); i++)
 	{
 		//peak_chunk( fp, offset, fourcc, &r );
+		flags = 0;
 
 		if ( offsets[i].type == 0)
 		{
@@ -499,14 +504,10 @@ gwavi_t::write_index(FILE *fp)
 
 		if ( offsets[i].keyFrame )
 		{
-			if (write_int(fp, 0x10) == -1)
-				goto write_int_failed;
+			flags |= IF_KEYFRAME;
 		}
-		else
-		{
-			if (write_int(fp, 0x00) == -1)
-				goto write_int_failed;
-		}
+		if (write_int(fp, flags) == -1)
+			goto write_int_failed;
 		if (write_int(fp, offset) == -1)
 			goto write_int_failed;
 		if (write_int(fp, offsets[i].len) == -1)
