@@ -443,6 +443,7 @@ static int init( int width, int height )
 	// Allocate a buffer and get lpOutput to point to it. 
 	h = GlobalAlloc(GHND, dwCompressBufferSize); 
 	outBuf = (LPVOID)GlobalLock(h);
+	memset( outBuf, 0, dwCompressBufferSize);
 
 	//dwQuality = ICGetDefaultQuality( cmpvars.hic ); 
 	if ( qualitySupported )
@@ -456,7 +457,12 @@ static int init( int width, int height )
 
 	//printf("Quality Setting: %i\n", dwQuality );
 
-	ICCompressBegin( cmpvars.hic, &bmapIn, bmapOut );
+	if ( ICCompressBegin( cmpvars.hic, &bmapIn, bmapOut ) != ICERR_OK )
+	{
+		printf("Error: ICCompressBegin\n");
+		icErrCount = 9999;
+		return -1;
+	}
 	
 	frameNum   = 0;
 	flagsOut   = 0;
@@ -531,16 +537,6 @@ int aviRecordOpenFile( const char *filepath )
 	double fps;
 	char fileName[1024];
 
-#ifdef WIN32
-	if ( videoFormat == AVI_VFW )
-	{
-		if ( VFW::chooseConfig( nes_shm->video.ncol, nes_shm->video.nrow ) )
-		{
-			return -1;
-		}
-	}
-#endif
-
 	if ( filepath != NULL )
 	{
 		strcpy( fileName, filepath );
@@ -598,6 +594,16 @@ int aviRecordOpenFile( const char *filepath )
 			}
 		}
 	}
+
+#ifdef WIN32
+	if ( videoFormat == AVI_VFW )
+	{
+		if ( VFW::chooseConfig( nes_shm->video.ncol, nes_shm->video.nrow ) )
+		{
+			return -1;
+		}
+	}
+#endif
 
 	if ( gwavi != NULL )
 	{
