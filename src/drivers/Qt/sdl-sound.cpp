@@ -46,6 +46,7 @@ static unsigned int s_SampleRate = 44100;
 static double noiseGate = 0.0;
 static double noiseGateRate = 0.010;
 static bool   noiseGateActive = true;
+static bool   muteSoundOutput = false;
 
 static int s_mute = 0;
 
@@ -63,17 +64,20 @@ fillaudio(void *udata,
 {
 	char bufStarveDetected = 0;
 	static int16_t sample = 0;
+	char mute;
 	//unsigned int starve_lp = nes_shm->sndBuf.starveCounter;
 	int16 *tmps = (int16*)stream;
 	len >>= 1;
 
-	if ( EmulationPaused || noiseGateActive )
+	mute = EmulationPaused || muteSoundOutput;
+
+	if ( mute || noiseGateActive )
 	{
 		// This noise gate helps avoid abrupt snaps in audio
 		// when pausing emulation.
 		while (len) 
 		{
-			if (EmulationPaused)
+			if (mute)
 			{
 				noiseGate -= noiseGateRate;
 
@@ -505,4 +509,9 @@ FCEUD_SoundToggle(void)
 		FCEUI_SetSoundVolume(0);
 		FCEU_DispMessage("Sound mute on.",0);
 	}
+}
+
+void FCEUD_MuteSoundOutput( bool value )
+{
+	muteSoundOutput = value;
 }

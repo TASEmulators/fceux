@@ -423,18 +423,14 @@ void consoleWin_t::winActiveChanged(void)
 		{
 			if ( !soundUseGlobalFocus )
 			{
-				fceuWrapperLock();
 				if ( hdl->isActive() )
 				{
-					int vol;
-					g_config->getOption("SDL.Sound.Volume", &vol);
-					FCEUI_SetSoundVolume(vol);
+					FCEUD_MuteSoundOutput(false);
 				}
 				else
 				{
-					FCEUI_SetSoundVolume(0);
+					FCEUD_MuteSoundOutput(true);
 				}
-				fceuWrapperUnLock();
 			}
 		}
 	}
