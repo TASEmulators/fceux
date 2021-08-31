@@ -262,6 +262,7 @@ static int encode_frame( unsigned char *inBuf, int width, int height )
 	int chroma_size = luma_size / 4;
 	int i_frame_size = 0;
 	int ofs;
+	unsigned int flags = 0;
 
 	ofs = 0;
 	memcpy( pic.img.plane[0], &inBuf[ofs], luma_size   ); ofs += luma_size;
@@ -278,7 +279,11 @@ static int encode_frame( unsigned char *inBuf, int width, int height )
 	}
 	else if ( i_frame_size )
 	{
-		gwavi->add_frame( nal->p_payload, i_frame_size );
+		if ( pic_out.b_keyframe )
+		{
+			flags |= gwavi_t::IF_KEYFRAME;
+		}
+		gwavi->add_frame( nal->p_payload, i_frame_size, flags );
 	}
 	return i_frame_size;
 }
@@ -286,6 +291,7 @@ static int encode_frame( unsigned char *inBuf, int width, int height )
 static int close(void)
 {
 	int i_frame_size;
+	unsigned int flags = 0;
 
 	/* Flush delayed frames */
 	while( x264_encoder_delayed_frames( hdl ) )
@@ -296,9 +302,15 @@ static int close(void)
 	    {
 	        break;
 	    }
-	    else if( i_frame_size )
+	    else if ( i_frame_size )
 	    {
-		gwavi->add_frame( nal->p_payload, i_frame_size );
+		flags = 0;
+
+		if ( pic_out.b_keyframe )
+		{
+			flags |= gwavi_t::IF_KEYFRAME;
+		}
+		gwavi->add_frame( nal->p_payload, i_frame_size, flags );
 	    }
 	}
 	

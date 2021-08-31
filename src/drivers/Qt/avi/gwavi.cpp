@@ -310,6 +310,8 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len, unsigned int flags)
 	idx.type     = 0;
 	idx.keyFrame = (flags & IF_KEYFRAME) ? 1 : 0;
 
+	//printf("Frame: %zu  %i \n", len, idx.keyFrame );
+
 	offsets.push_back( idx );
 
 	if (write_chars_bin(out, "00dc", 4) == -1) {
