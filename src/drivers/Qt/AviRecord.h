@@ -18,6 +18,9 @@ enum aviEncoderList
 	#ifdef _USE_X264
 	AVI_X264,
 	#endif
+	#ifdef _USE_X265
+	AVI_X265,
+	#endif
 	#ifdef WIN32
 	AVI_VFW,
 	#endif

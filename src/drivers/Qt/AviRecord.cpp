@@ -40,6 +40,9 @@
 #ifdef _USE_X264
 #include "x264.h"
 #endif
+#ifdef _USE_X265
+#include "x265.h"
+#endif
 
 #include "Qt/AviRecord.h"
 #include "Qt/avi/gwavi.h"
@@ -321,6 +324,149 @@ static int close(void)
 }
 
 }; // End X264 namespace
+#endif
+//**************************************************************************************
+#ifdef _USE_X265
+
+namespace X265
+{
+static x265_param param;
+static x265_picture *pic = NULL;
+static x265_picture pic_out;
+static x265_encoder *hdl = NULL;
+static x265_nal *nal = NULL;
+static unsigned int i_nal = 0;
+static int i_frame = 0;
+
+static int init( int width, int height )
+{
+	double fps;
+	unsigned int usec;
+
+	/* Get default params for preset/tuning */
+	//if( x265_param_default_preset( &param, "medium", NULL ) < 0 )
+	//{
+	//    goto x265_init_fail;
+	//}
+	
+	fps = getBaseFrameRate();
+
+	usec = (unsigned int)((1000000.0 / fps)+0.50);
+	
+	x265_param_default( &param);
+
+	/* Configure non-default params */
+	param.internalCsp = X265_CSP_I420;
+	param.sourceWidth  = width;
+	param.sourceHeight = height;
+	param.bRepeatHeaders = 1;
+	param.fpsNum   = 1000000;
+	param.fpsDenom = usec;
+	
+	/* Apply profile restrictions. */
+	//if( x265_param_apply_profile( &param, "high" ) < 0 )
+	//{
+	//    goto x265_init_fail;
+	//}
+	
+	if( (pic = x265_picture_alloc()) == NULL )
+	{
+	    goto x265_init_fail;
+	}
+	x265_picture_init( &param, pic );
+
+	hdl = x265_encoder_open( &param );
+	if ( hdl == NULL )
+	{
+		goto x265_init_fail;
+	}
+	i_frame = 0;
+
+	return 0;
+
+x265_init_fail:
+	return -1;
+}
+
+static int encode_frame( unsigned char *inBuf, int width, int height )
+{
+	int luma_size = width * height;
+	int chroma_size = luma_size / 4;
+	int ret = 0;
+	int ofs;
+	unsigned int flags = 0, totalPayload = 0;
+
+	ofs = 0;
+	pic->planes[0] = &inBuf[ofs]; ofs += luma_size;
+	pic->planes[1] = &inBuf[ofs]; ofs += chroma_size;
+	pic->planes[2] = &inBuf[ofs]; ofs += chroma_size;
+	pic->stride[0] = width;
+	pic->stride[1] = width/2;
+	pic->stride[2] = width/2;
+
+	ret = x265_encoder_encode( hdl, &nal, &i_nal, pic, &pic_out );
+
+	if ( ret <= 0 )
+	{
+		return -1;
+	}
+	else if ( i_nal > 0 )
+	{
+		flags = 0;
+		totalPayload = 0;
+
+		if ( IS_X265_TYPE_I(pic_out.sliceType) )
+		{
+			flags |= gwavi_t::IF_KEYFRAME;
+		}
+
+		for (unsigned int i=0; i<i_nal; i++)
+		{
+			totalPayload += nal[i].sizeBytes;
+		}
+		gwavi->add_frame( nal[0].payload, totalPayload, flags );
+	}
+	return ret;
+}
+
+static int close(void)
+{
+	int ret;
+	unsigned int flags = 0, totalPayload = 0;
+
+	/* Flush delayed frames */
+	while( hdl != NULL )
+	{
+	    ret = x265_encoder_encode( hdl, &nal, &i_nal, NULL, &pic_out );
+
+	    if ( ret <= 0 )
+	    {
+	        break;
+	    }
+	    else if ( i_nal > 0 )
+	    {
+		totalPayload = 0;
+		flags = 0;
+
+		if ( IS_X265_TYPE_I(pic_out.sliceType) )
+		{
+			flags |= gwavi_t::IF_KEYFRAME;
+		}
+		for (unsigned int i=0; i<i_nal; i++)
+		{
+			totalPayload += nal[i].sizeBytes;
+		}
+		gwavi->add_frame( nal[0].payload, totalPayload, flags );
+	    }
+	}
+	
+	x265_encoder_close( hdl );
+	x265_picture_free( pic ); 
+
+	return 0;
+}
+
+}; // End X265 namespace
 #endif
 //**************************************************************************************
 // Windows VFW Interface
@@ -641,6 +787,12 @@ int aviRecordOpenFile( const char *filepath )
 		strcpy( fourcc, "X264");
 	}
 	#endif 
+	#ifdef _USE_X265
+	else if ( videoFormat == AVI_X265 )
+	{
+		strcpy( fourcc, "H265");
+	}
+	#endif
 	#ifdef WIN32
 	else if ( videoFormat == AVI_VFW )
 	{
@@ -864,6 +1016,11 @@ int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList )
 				s.assign("X264 (H.264)");
 			break;
 			#endif
+			#ifdef _USE_X265
+			case AVI_X265:
+				s.assign("X265 (H.265)");
+			break;
+			#endif
 			#ifdef WIN32
 			case AVI_VFW:
 				s.assign("VfW (Video for Windows)");
@@ -932,6 +1089,12 @@ void AviRecordDiskThread_t::run(void)
 		X264::init( width, height );
 	}
 #endif
+#ifdef _USE_X265
+	if ( localVideoFormat == AVI_X265)
+	{
+		X265::init( width, height );
+	}
+#endif
 #ifdef WIN32
 	if ( localVideoFormat == AVI_VFW)
 	{
@@ -968,6 +1131,13 @@ void AviRecordDiskThread_t::run(void)
 			{
 				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
 				X264::encode_frame( rgb24, width, height );
+			}
+			#endif
+			#ifdef _USE_X265
+			else if ( localVideoFormat == AVI_X265)
+			{
+				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
+				X265::encode_frame( rgb24, width, height );
 			}
 			#endif
 			#ifdef WIN32
@@ -1024,6 +1194,12 @@ void AviRecordDiskThread_t::run(void)
 	if ( localVideoFormat == AVI_X264)
 	{
 		X264::close();
+	}
+#endif
+#ifdef _USE_X265
+	if ( localVideoFormat == AVI_X265)
+	{
+		X265::close();
 	}
 #endif
 #ifdef WIN32

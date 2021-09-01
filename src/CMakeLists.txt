@@ -83,6 +83,13 @@ else(WIN32)
 	  add_definitions( -D_USE_X264 ${X264_CFLAGS} )
   endif()
 
+  pkg_check_modules( X265 x265)
+
+  if ( ${X265_FOUND} )
+	  message( STATUS "Using System X265 Encoder Library ${X265_VERSION}" )
+	  add_definitions( -D_USE_X265 ${X265_CFLAGS} )
+  endif()
+
   #pkg_check_modules( GL gl) # Use built in find package instead for OpenGL
 
   # Check for OpenGL
@@ -540,7 +547,7 @@ target_link_libraries( ${APP_NAME}
    ${OPENGL_LDFLAGS}  
  	${SDL2_LDFLAGS}
 	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
-	${LUA_LDFLAGS} ${X264_LDFLAGS}
+	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS}
  	${SYS_LIBS}
 )
 

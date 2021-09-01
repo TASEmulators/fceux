@@ -155,6 +155,10 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	{  // X264   H.264
 		bits_per_pixel = 12;
 	}
+	else if ( strcmp( fourcc, "H265" ) == 0 )
+	{  // X265   H.265
+		bits_per_pixel = 12;
+	}
 	else
 	{	// Plain RGB24
 		bits_per_pixel = 24;

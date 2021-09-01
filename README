@@ -27,6 +27,7 @@ Table of Contents
 * qt5 OR qt6  - (qt version >= 5.11 recommended)
 * liblua5.1 (optional) - Will statically link internally if the system cannot provide this.
 * libx264 (optional) - H.264 video encoder for avi recording (recommended)
+* libx265 (optional) - H.265 video encoder for avi recording (recommended)
 * minizip  
 * zlib  
 * openGL
