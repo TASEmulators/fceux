@@ -330,41 +330,42 @@ static int close(void)
 
 namespace X265
 {
-static x265_param param;
+static x265_param *param = NULL;
 static x265_picture *pic = NULL;
 static x265_picture pic_out;
 static x265_encoder *hdl = NULL;
 static x265_nal *nal = NULL;
 static unsigned int i_nal = 0;
-static int i_frame = 0;
 
 static int init( int width, int height )
 {
 	double fps;
 	unsigned int usec;
 
-	/* Get default params for preset/tuning */
-	//if( x265_param_default_preset( &param, "medium", NULL ) < 0 )
-	//{
-	//    goto x265_init_fail;
-	//}
-	
 	fps = getBaseFrameRate();
 
 	usec = (unsigned int)((1000000.0 / fps)+0.50);
 	
-	x265_param_default( &param);
+	param = x265_param_alloc();
 
+	x265_param_default( param);
+
+	/* Get default params for preset/tuning */
+	//if( x265_param_default_preset( param, "medium", NULL ) < 0 )
+	//{
+	//    goto x265_init_fail;
+	//}
+	
 	/* Configure non-default params */
-	param.internalCsp = X265_CSP_I420;
-	param.sourceWidth  = width;
-	param.sourceHeight = height;
-	param.bRepeatHeaders = 1;
-	param.fpsNum   = 1000000;
-	param.fpsDenom = usec;
+	param->internalCsp = X265_CSP_I420;
+	param->sourceWidth  = width;
+	param->sourceHeight = height;
+	param->bRepeatHeaders = 1;
+	param->fpsNum   = 1000000;
+	param->fpsDenom = usec;
 	
 	/* Apply profile restrictions. */
-	//if( x265_param_apply_profile( &param, "high" ) < 0 )
+	//if( x265_param_apply_profile( param, "high" ) < 0 )
 	//{
 	//    goto x265_init_fail;
 	//}
@@ -373,14 +374,13 @@ static int init( int width, int height )
 	{
 	    goto x265_init_fail;
 	}
-	x265_picture_init( &param, pic );
+	x265_picture_init( param, pic );
 
-	hdl = x265_encoder_open( &param );
+	hdl = x265_encoder_open( param );
 	if ( hdl == NULL )
 	{
 		goto x265_init_fail;
 	}
-	i_frame = 0;
 
 	return 0;
 
@@ -462,6 +462,7 @@ static int close(void)
 	
 	x265_encoder_close( hdl );
 	x265_picture_free( pic ); 
+	x265_param_free( param );
 
 	return 0;
 }
