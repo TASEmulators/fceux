@@ -84,6 +84,12 @@ echo 'Install Optional Dependency libx264-dev'
 echo '****************************************'
 sudo apt-get --assume-yes  install libx264-dev
 
+# Install x265 
+echo '****************************************'
+echo 'Install Optional Dependency libx265-dev'
+echo '****************************************'
+sudo apt-get --assume-yes  install libx265-dev
+
 # Install scons
 #echo '****************************************'
 #echo 'Install Build Dependency scons'
