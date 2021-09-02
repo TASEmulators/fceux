@@ -31,12 +31,30 @@
  */
 
 /*
- * Usefull IO functions.
+ * Useful IO functions.
  */
 
 #include <stdio.h>
 
 #include "gwavi.h"
+
+long long gwavi_t::ftell(FILE *fp)
+{
+#ifdef WIN32
+	return ::_ftelli64(fp);
+#else
+	return ::ftell(fp);
+#endif
+}
+
+int gwavi_t::fseek(FILE *fp, long long offset, int whence)
+{
+#ifdef WIN32
+	return ::_fseeki64( fp, offset, whence );
+#else
+	return ::fseek( fp, offset, whence );
+#endif
+}
 
 int
 gwavi_t::write_int(FILE *out, unsigned int n)

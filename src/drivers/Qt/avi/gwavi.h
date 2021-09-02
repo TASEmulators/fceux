@@ -191,13 +191,15 @@ class gwavi_t
 	struct gwavi_stream_format_v_t stream_format_v;
 	struct gwavi_stream_header_t stream_header_a;
 	struct gwavi_stream_format_a_t stream_format_a;
-	long marker;
+	long long marker;
 	std::vector <gwavi_index_rec_t> offsets;
-	long movi_fpos;
+	long long movi_fpos;
 	int bits_per_pixel;
 	char fourcc[8];
 
 	// helper functions
+	long long ftell(FILE *fp);
+	int fseek(FILE *stream, long long offset, int whence);
 	int write_avi_header(FILE *fp, struct gwavi_header_t *avi_header);
 	int write_stream_header(FILE *fp,
 			struct gwavi_stream_header_t *stream_header);
