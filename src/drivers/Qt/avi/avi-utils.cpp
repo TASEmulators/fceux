@@ -43,7 +43,7 @@
 int
 gwavi_t::write_avi_header(FILE *fp, struct gwavi_header_t *avi_header)
 {
-	long marker, t;
+	long long marker, t;
 
 	if (write_chars_bin(fp, "avih", 4) == -1) {
 		(void)fprintf(stderr, "write_avi_header: write_chars_bin() "
@@ -117,7 +117,7 @@ write_int_failed:
 int
 gwavi_t::write_stream_header(FILE *fp, struct gwavi_stream_header_t *stream_header)
 {
-	long marker, t;
+	long long marker, t;
 
 	if (write_chars_bin(fp, "strh", 4) == -1)
 		goto write_chars_bin_failed;
@@ -191,7 +191,7 @@ write_chars_bin_failed:
 int
 gwavi_t::write_stream_format_v(FILE *fp, struct gwavi_stream_format_v_t *stream_format_v)
 {
-	long marker,t;
+	long long marker,t;
 	unsigned int i;
 
 	if (write_chars_bin(fp, "strf", 4) == -1) {
@@ -279,7 +279,7 @@ fputc_failed:
 int
 gwavi_t::write_stream_format_a(FILE *fp, struct gwavi_stream_format_a_t *stream_format_a)
 {
-	long marker, t;
+	long long marker, t;
 
 	if (write_chars_bin(fp, "strf", 4) == -1) {
 		(void)fprintf(stderr, "write_stream_format_a: write_chars_bin()"
@@ -337,8 +337,8 @@ write_short_failed:
 int
 gwavi_t::write_avi_header_chunk(FILE *fp)
 {
-	long marker, t;
-	long sub_marker;
+	long long marker, t;
+	long long sub_marker;
 
 	if (write_chars_bin(fp, "LIST", 4) == -1)
 		goto write_chars_bin_failed;
@@ -466,7 +466,7 @@ int gwavi_t::peak_chunk( FILE *fp, long int idx, char *fourcc, unsigned int *siz
 int
 gwavi_t::write_index(FILE *fp)
 {
-	long marker, t;
+	long long marker, t;
 	unsigned int offset = 4;
 	unsigned int r, flags;
 	//char fourcc[8];
