@@ -342,13 +342,18 @@ gwavi_t::write_avi_header_chunk(FILE *fp)
 
 	if (write_chars_bin(fp, "LIST", 4) == -1)
 		goto write_chars_bin_failed;
+
 	if ((marker = ftell(fp)) == -1)
 		goto ftell_failed;
+
 	if (write_int(fp, 0) == -1)
 		goto write_int_failed;
+
 	if (write_chars_bin(fp, "hdrl", 4) == -1)
 		goto write_chars_bin_failed;
-	if (write_avi_header(fp, &avi_header) == -1) {
+
+	if (write_avi_header(fp, &avi_header) == -1)
+	{
 		(void)fprintf(stderr, "write_avi_header_chunk: "
 			      "write_avi_header() failed\n");
 		return -1;
@@ -356,21 +361,36 @@ gwavi_t::write_avi_header_chunk(FILE *fp)
 
 	if (write_chars_bin(fp, "LIST", 4) == -1)
 		goto write_chars_bin_failed;
+
 	if ((sub_marker = ftell(fp)) == -1)
 		goto ftell_failed;
+
 	if (write_int(fp, 0) == -1)
 		goto write_int_failed;
+
 	if (write_chars_bin(fp, "strl", 4) == -1)
 		goto write_chars_bin_failed;
-	if (write_stream_header(fp, &stream_header_v) == -1) {
+
+	if (write_stream_header(fp, &stream_header_v) == -1)
+	{
 		(void)fprintf(stderr, "write_avi_header_chunk: "
 			      "write_stream_header failed\n");
 		return -1;
 	}
-	if (write_stream_format_v(fp, &stream_format_v) == -1) {
+	if (write_stream_format_v(fp, &stream_format_v) == -1)
+	{
 		(void)fprintf(stderr, "write_avi_header_chunk: "
 			      "write_stream_format_v failed\n");
 		return -1;
+	}
+	if ( avi_std >= 2 )
+	{
+		stream_index_v.fpos = ftell(fp);
+
+		if ( write_stream_super_indx(fp, &stream_index_v ) == -1 )
+		{
+			return -1;
+		}
 	}
 
 	if ((t = ftell(fp)) == -1)
@@ -378,47 +398,71 @@ gwavi_t::write_avi_header_chunk(FILE *fp)
 
 	if (fseek(fp, sub_marker, SEEK_SET) == -1)
 		goto fseek_failed;
+
 	if (write_int(fp, (unsigned int)(t - sub_marker - 4)) == -1)
 		goto write_int_failed;
+
 	if (fseek(fp, t, SEEK_SET) == -1)
 		goto fseek_failed;
 
-	if (avi_header.data_streams == 2) {
+	if (avi_header.data_streams == 2)
+	{
 		if (write_chars_bin(fp, "LIST", 4) == -1)
 			goto write_chars_bin_failed;
+
 		if ((sub_marker = ftell(fp)) == -1)
 			goto ftell_failed;
+
 		if (write_int(fp, 0) == -1)
 			goto write_int_failed;
+
 		if (write_chars_bin(fp, "strl", 4) == -1)
 			goto write_chars_bin_failed;
-		if (write_stream_header(fp, &stream_header_a) == -1) {
+
+		if (write_stream_header(fp, &stream_header_a) == -1)
+		{
 			(void)fprintf(stderr, "write_avi_header_chunk: "
 				      "write_stream_header failed\n");
 			return -1;
 		}
-		if (write_stream_format_a(fp, &stream_format_a) == -1) {
+		if (write_stream_format_a(fp, &stream_format_a) == -1)
+		{
 			(void)fprintf(stderr, "write_avi_header_chunk: "
 				      "write_stream_format_a failed\n");
 			return -1;
 		}
+		if ( avi_std >= 2 )
+		{
+			stream_index_a.fpos = ftell(fp);
+
+			if ( write_stream_super_indx(fp, &stream_index_a ) == -1 )
+			{
+				return -1;
+			}
+		}
 
 		if ((t = ftell(fp)) == -1)
 			goto ftell_failed;
+
 		if (fseek(fp, sub_marker, SEEK_SET) == -1)
 			goto fseek_failed;
+
 		if (write_int(fp, (unsigned int)(t - sub_marker - 4)) == -1)
 			goto write_int_failed;
+
 		if (fseek(fp, t, SEEK_SET) == -1)
 			goto fseek_failed;
 	}
 
 	if ((t = ftell(fp)) == -1)
 		goto ftell_failed;
+
 	if (fseek(fp, marker, SEEK_SET) == -1)
 		goto fseek_failed;
+
 	if (write_int(fp, (unsigned int)(t - marker - 4)) == -1)
 		goto write_int_failed;
+
 	if (fseek(fp, t, SEEK_SET) == -1)
 		goto fseek_failed;
 
@@ -463,8 +507,223 @@ int gwavi_t::peak_chunk( FILE *fp, long int idx, char *fourcc, unsigned int *siz
 	return 0;
 }	
 
+int gwavi_t::write_stream_super_indx(FILE *fp, struct gwavi_super_indx_t *indx)
+{
+	long long t, sizeMarker;
+
+	if (write_chars_bin(fp, "indx", 4) == -1) // FCC
+	{
+		(void)fprintf(stderr, "write_index: write_chars_bin) failed\n");
+		return -1;
+	}
+	if ((sizeMarker = ftell(fp)) == -1)  // size of this chunk
+	{
+		perror("write_index (ftell)");
+		return -1;
+	}
+	if (write_int(fp, 0) == -1)
+		return -1;
+
+	if (write_short(fp, 4) == -1)  // wLongsPerEntry; // must be 4 (size of each entry in aIndex array)
+		return -1;
+
+	if (write_byte(fp, 0) == -1)  // bIndexSubType;  // must be 0 or AVI_INDEX_2FIELD
+		return -1;
+
+	if (write_byte(fp, 0) == -1)  // bIndexType;     // must be AVI_INDEX_OF_INDEXES
+		return -1;
+
+	if (write_int(fp, indx->nEntriesInUse) == -1)  // nEntriesInUse;  // number of entries in aIndex array that
+		return -1;
+
+	if (write_chars_bin(fp, indx->chunkId, 4) == -1)  // dwChunkId;      // ’##dc’ or ’##db’ or ’##wb’, etc
+		return -1;
+
+	for (int i=0; i<3; i++)
+	{
+		if (write_int(fp, 0) == -1)  // dwReserved[3];  // must be 0
+			return -1;
+	}
+
+	for (int i=0; i<32; i++)
+	{
+		if (write_int64(fp, indx->aIndex[i].qwOffset) == -1)  //qwOffset;   // absolute file offset, offset 0 is
+			return -1;
+		
+		if (write_int(fp, indx->aIndex[i].dwSize) == -1)  // dwSize;     // size of index chunk at this offset
+			return -1;
+
+		if (write_int(fp, indx->aIndex[i].dwDuration) == -1)  // dwDuration; // time span in stream ticks
+			return -1;
+	}
+
+	if ((t = ftell(fp)) == -1)
+	{
+		perror("write_index (ftell)");
+		return -1;
+	}
+	if (fseek(fp, sizeMarker, SEEK_SET) == -1)
+	{
+		perror("write_index (fseek)");
+		return -1;
+	}
+	if (write_int(fp, (unsigned int)(t - sizeMarker - 4)) == -1)
+		return -1;
+
+	if (fseek(fp, t, SEEK_SET) == -1)
+	{
+		perror("write_index (fseek)");
+		return -1;
+	}
+	return 0;
+}
+
+int gwavi_t::write_stream_std_indx(FILE *fp, struct gwavi_super_indx_t *indx)
+{
+	char fcc[8];
+	long long t, sizeMarker, std_indx_ofs, qwBaseOffset = 0;
+	unsigned int chunkSize = 0, numEntries = 0;
+
+	std_indx_ofs = ftell(fp);
+
+	sprintf( fcc, "ix%02i", indx->streamId );
+
+	if (write_chars_bin(fp, fcc, 4) == -1) // FCC
+	{
+		(void)fprintf(stderr, "write_index: write_chars_bin) failed\n");
+		return -1;
+	}
+	if ((sizeMarker = ftell(fp)) == -1)  // size of this chunk
+	{
+		perror("write_index (ftell)");
+		return -1;
+	}
+	if (write_int(fp, chunkSize) == -1)
+		return -1;
+
+	if (write_short(fp, 2) == -1)  // wLongsPerEntry; // must be 2 (sizeof(aIndex[0])/sizeof(DWORD))
+		return -1;
+
+	if (write_byte(fp, 0) == -1)  // bIndexSubType;  // must be 0
+		return -1;
+
+	if (write_byte(fp, 0x01) == -1)  // bIndexType;     // must be AVI_INDEX_OF_CHUNKS
+		return -1;
+
+	if (write_int(fp, numEntries) == -1)  // nEntriesInUse;  // number of entries in aIndex array that
+		return -1;
+
+	if (write_chars_bin(fp, indx->chunkId, 4) == -1)  // dwChunkId;      // ’##dc’ or ’##db’ or ’##wb’, etc
+		return -1;
+
+	if (write_int64(fp, qwBaseOffset) == -1)  //qwBaseOffset;   // all dwOffsets in aIndex array are relative to this
+		return -1;
+
+	if (write_int(fp, 0) == -1)  // dwReserved3;  // must be 0
+		return -1;
+
+	for (size_t i=0; i<offsets.size(); i++)
+	{
+		unsigned int dwOffset, dwSize;
+		
+		if ( offsets[i].type != indx->streamId )
+		{
+			continue;
+		}
+		if ( qwBaseOffset == 0 )
+		{
+			qwBaseOffset = offsets[i].fofs;
+		}
+		dwOffset = offsets[i].fofs - qwBaseOffset + 8;
+
+		if (write_int(fp, dwOffset) == -1)  // qwBaseOffset + this is absolute file offset
+			return -1;
+
+		dwSize = offsets[i].len;
+
+		if ( !offsets[i].keyFrame )
+		{
+			dwSize |= 0x80000000;
+		}
+
+		if (write_int(fp, dwSize) == -1)  // bit 31 is set if this is NOT a keyframe
+			return -1;
+
+		numEntries++;
+	}
+
+	if ((t = ftell(fp)) == -1)
+	{
+		perror("write_index (ftell)");
+		return -1;
+	}
+	if (fseek(fp, sizeMarker, SEEK_SET) == -1)
+	{
+		perror("write_index (fseek)");
+		return -1;
+	}
+	chunkSize = t - sizeMarker - 4;
+
+	if (write_int(fp, chunkSize) == -1)
+		return -1;
+
+	if (write_short(fp, 2) == -1)  // wLongsPerEntry; // must be 2 (sizeof(aIndex[0])/sizeof(DWORD))
+		return -1;
+
+	if (write_byte(fp, 0) == -1)  // bIndexSubType;  // must be 0
+		return -1;
+
+	if (write_byte(fp, 0x01) == -1)  // bIndexType;     // must be AVI_INDEX_OF_CHUNKS
+		return -1;
+
+	if (write_int(fp, numEntries) == -1)  // nEntriesInUse;  // number of entries in aIndex array that
+		return -1;
+
+	if (write_chars_bin(fp, indx->chunkId, 4) == -1)  // dwChunkId;      // ’##dc’ or ’##db’ or ’##wb’, etc
+		return -1;
+
+	if (write_int64(fp, qwBaseOffset) == -1)  //qwBaseOffset;   // all dwOffsets in aIndex array are relative to this
+		return -1;
+
+	if (fseek(fp, t, SEEK_SET) == -1)
+	{
+		perror("write_index (fseek)");
+		return -1;
+	}
+
+	if ( indx->nEntriesInUse < 32 )
+	{
+		int i = indx->nEntriesInUse;
+
+		indx->aIndex[i].qwOffset   = std_indx_ofs;
+		indx->aIndex[i].dwSize     = chunkSize;
+		indx->aIndex[i].dwDuration = 0;
+
+		indx->nEntriesInUse++;
+	}
+
+	if (fseek(fp, indx->fpos, SEEK_SET) == -1)
+	{
+		perror("write_index (fseek)");
+		return -1;
+	}
+
+	if ( write_stream_super_indx( fp, indx ) == -1 )
+	{
+		return -1;
+	}
+
+	if (fseek(fp, t, SEEK_SET) == -1)
+	{
+		perror("write_index (fseek)");
+		return -1;
+	}
+
+	return 0;
+}
+
 int
-gwavi_t::write_index(FILE *fp)
+gwavi_t::write_index1(FILE *fp)
 {
 	long long marker, t;
 	unsigned int offset = 4;

@@ -142,8 +142,23 @@ struct gwavi_audio_t
 	unsigned int samples_per_second;
 };
 
+struct gwavi_super_indx_t
+{
+	unsigned long long fpos;
+	unsigned int nEntriesInUse;
+	char         chunkId[7];
+	char         streamId;
+
+	struct {
+	   unsigned long long qwOffset;
+	   unsigned int       dwSize;
+	   unsigned int       dwDuration;
+	} aIndex[32];
+};
+
 struct gwavi_index_rec_t
 {
+	long long     fofs;
 	unsigned int  len;
 	unsigned char type;
 	unsigned char keyFrame;
@@ -189,12 +204,15 @@ class gwavi_t
 	struct gwavi_header_t avi_header;
 	struct gwavi_stream_header_t stream_header_v;
 	struct gwavi_stream_format_v_t stream_format_v;
+	struct gwavi_super_indx_t stream_index_v;
 	struct gwavi_stream_header_t stream_header_a;
 	struct gwavi_stream_format_a_t stream_format_a;
+	struct gwavi_super_indx_t stream_index_a;
 	long long marker;
 	std::vector <gwavi_index_rec_t> offsets;
 	long long movi_fpos;
 	int bits_per_pixel;
+	int avi_std;
 	char fourcc[8];
 
 	// helper functions
@@ -207,10 +225,14 @@ class gwavi_t
 			  struct gwavi_stream_format_v_t *stream_format_v);
 	int write_stream_format_a(FILE *fp,
 			  struct gwavi_stream_format_a_t *stream_format_a);
+	int write_stream_std_indx(FILE *fp, struct gwavi_super_indx_t *indx);
+	int write_stream_super_indx(FILE *fp, struct gwavi_super_indx_t *indx);
 	int write_avi_header_chunk( FILE *fp );
-	int write_index(FILE *fp);
+	int write_index1(FILE *fp);
 	int check_fourcc(const char *fourcc);
 	int write_int(FILE *fp, unsigned int n);
+	int write_int64(FILE *out, unsigned long long int n);
+	int write_byte(FILE *fp, unsigned char n);
 	int write_short(FILE *fp, unsigned int n);
 	int write_chars(FILE *fp, const char *s);
 	int write_chars_bin(FILE *fp, const char *s, int count);

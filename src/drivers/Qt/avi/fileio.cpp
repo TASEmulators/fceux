@@ -61,12 +61,45 @@ gwavi_t::write_int(FILE *out, unsigned int n)
 {
 	unsigned char buffer[4];
 
-	buffer[0] = n;
-	buffer[1] = n >> 8;
-	buffer[2] = n >> 16;
-	buffer[3] = n >> 24;
+	for (int i=0; i<4; i++)
+	{
+		buffer[i] = (n & 0x000000FF);
+		
+		n = n >> 8;
+	}
+	//buffer[0] = n;
+	//buffer[1] = n >> 8;
+	//buffer[2] = n >> 16;
+	//buffer[3] = n >> 24;
 
 	if (fwrite(buffer, 1, 4, out) != 4)
+		return -1;
+
+	return 0;
+}
+
+int
+gwavi_t::write_int64(FILE *out, unsigned long long int n)
+{
+	unsigned char buffer[8];
+
+	for (int i=0; i<8; i++)
+	{
+		buffer[i] = (n & 0x000000FFllu);
+		
+		n = n >> 8;
+	}
+
+	if (fwrite(buffer, 1, 8, out) != 8)
+		return -1;
+
+	return 0;
+}
+
+int
+gwavi_t::write_byte(FILE *out, unsigned char n)
+{
+	if (fwrite( &n, 1, 1, out) != 1)
 		return -1;
 
 	return 0;
@@ -77,8 +110,14 @@ gwavi_t::write_short(FILE *out, unsigned int n)
 {
 	unsigned char buffer[2];
 
-	buffer[0] = n;
-	buffer[1] = n >> 8;
+	for (int i=0; i<2; i++)
+	{
+		buffer[i] = (n & 0x000000FF);
+		
+		n = n >> 8;
+	}
+	//buffer[0] = n;
+	//buffer[1] = n >> 8;
 
 	if (fwrite(buffer, 1, 2, out) != 2)
 		return -1;

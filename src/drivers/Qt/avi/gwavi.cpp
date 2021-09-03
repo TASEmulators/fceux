@@ -73,11 +73,13 @@ gwavi_t::gwavi_t(void)
 	memset( &stream_format_v, 0, sizeof(struct gwavi_stream_format_v_t) );
 	memset( &stream_header_a, 0, sizeof(struct gwavi_stream_header_t) );
 	memset( &stream_format_a, 0, sizeof(struct gwavi_stream_format_a_t) );
+	memset( &stream_index_v , 0, sizeof(struct gwavi_super_indx_t) );
+	memset( &stream_index_a , 0, sizeof(struct gwavi_super_indx_t) );
 	memset(  fourcc, 0, sizeof(fourcc) );
 	marker = 0;
 	movi_fpos = 0;
 	bits_per_pixel = 24;
-
+	avi_std = 2;
 }
 
 gwavi_t::~gwavi_t(void)
@@ -205,6 +207,9 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	stream_format_v.palette = 0;
 	stream_format_v.palette_count = 0;
 
+	strcpy( stream_index_v.chunkId, "00dc");
+	stream_index_v.streamId = 0;
+
 	if (audio) 
 	{
 		/* set stream header */
@@ -232,6 +237,9 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 			audio->channels * (audio->bits / 8);
 		stream_format_a.bits_per_sample = audio->bits;
 		stream_format_a.size = 0;
+
+		strcpy( stream_index_a.chunkId, "01wb");
+		stream_index_a.streamId = 1;
 	}
 
 	if (write_chars_bin(out, "RIFF", 4) == -1)
@@ -312,6 +320,7 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len, unsigned int flags)
 
 	//printf("Frame Offset: %li\n", ftell(out) - movi_fpos );
 
+	idx.fofs     = ftell(out);
 	idx.len      = len;
 	idx.type     = 0;
 	idx.keyFrame = (flags & IF_KEYFRAME) ? 1 : 0;
@@ -374,6 +383,7 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 		maxi_pad = WORD_SIZE - maxi_pad;
 	}
 
+	idx.fofs     = ftell(out);
 	idx.len      = len;
 	idx.type     = 1;
 	idx.keyFrame = 1;
@@ -438,13 +448,26 @@ gwavi_t::close(void)
 	if (fseek(out,t,SEEK_SET) == -1)
 		goto fseek_failed;
 
-	if (write_index(out) == -1)
+	if ( avi_std < 2 )
 	{
-		(void)fprintf(stderr, "gwavi_close: write_index() failed\n");
-		return -1;
+		if (write_index1(out) == -1)
+		{
+			(void)fprintf(stderr, "gwavi_close: write_index() failed\n");
+			return -1;
+		}
+	}
+	else
+	{
+		if ( write_stream_std_indx( out, &stream_index_v ) == -1 )
+		{
+			return -1;
+		}
+		if ( write_stream_std_indx( out, &stream_index_a ) == -1 )
+		{
+			return -1;
+		}
 	}
 
-	//free(offsets);
 	offsets.clear();
 
 	/* reset some avi header fields */
