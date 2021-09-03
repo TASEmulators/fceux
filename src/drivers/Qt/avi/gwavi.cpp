@@ -76,6 +76,8 @@ gwavi_t::gwavi_t(void)
 	memset( &stream_index_v , 0, sizeof(struct gwavi_super_indx_t) );
 	memset( &stream_index_a , 0, sizeof(struct gwavi_super_indx_t) );
 	memset(  fourcc, 0, sizeof(fourcc) );
+	std_index_base_ofs_v = 0;
+	std_index_base_ofs_a = 0;
 	marker = 0;
 	movi_fpos = 0;
 	bits_per_pixel = 24;
@@ -241,6 +243,8 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 		strcpy( stream_index_a.chunkId, "01wb");
 		stream_index_a.streamId = 1;
 	}
+	std_index_base_ofs_v = 0;
+	std_index_base_ofs_a = 0;
 
 	if (write_chars_bin(out, "RIFF", 4) == -1)
 		goto write_chars_bin_failed;
@@ -297,19 +301,42 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len, unsigned int flags)
 {
 	size_t t, maxi_pad;  /* if your frame is raggin, give it some paddin' */
 	gwavi_index_rec_t idx;
+	long long fpos;
 
-	if ( !buffer) {
+	if ( !buffer)
+	{
 		(void)fputs("gwavi and/or buffer argument cannot be NULL",
 			    stderr);
 		return -1;
 	}
-	//if (len < 256)
-	//{
-	//	(void)fprintf(stderr, "WARNING: specified buffer len seems "
-	//		      "rather small: %d. Are you sure about this?\n",
-	//		      (int)len);
-	//}
+	fpos = ftell(out);
 
+	if ( std_index_base_ofs_v == 0 )
+	{
+		std_index_base_ofs_v = fpos;
+	}
+	fpos = fpos - std_index_base_ofs_v;
+
+	if ( fpos > 0x7FFFFFFF)
+	{
+		//printf("STD Index Page Reset\n");
+		if ( avi_std >= 2 )
+		{
+			if ( write_stream_std_indx( out, &stream_index_v ) == -1 )
+			{
+				return -1;
+			}
+			if ( write_stream_std_indx( out, &stream_index_a ) == -1 )
+			{
+				return -1;
+			}
+			offsets.clear();
+
+			std_index_base_ofs_v = 0;
+			std_index_base_ofs_a = 0;
+		}
+	}
+	
 	stream_header_v.data_length++;
 
 	maxi_pad = len % WORD_SIZE;
@@ -367,6 +394,7 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len, unsigned int flags)
 int
 gwavi_t::add_audio( unsigned char *buffer, size_t len)
 {
+	long long fpos;
 	size_t t, maxi_pad;  /* in case audio bleeds over the 4 byte boundary  */
 	gwavi_index_rec_t idx;
 
@@ -375,6 +403,12 @@ gwavi_t::add_audio( unsigned char *buffer, size_t len)
 		(void)fputs("gwavi and/or buffer argument cannot be NULL",
 			    stderr);
 		return -1;
+	}
+	fpos = ftell(out);
+
+	if ( std_index_base_ofs_a == 0 )
+	{
+		std_index_base_ofs_a = fpos;
 	}
 
 	maxi_pad = len % WORD_SIZE;
@@ -469,6 +503,9 @@ gwavi_t::close(void)
 	}
 
 	offsets.clear();
+
+	std_index_base_ofs_v = 0;
+	std_index_base_ofs_a = 0;
 
 	/* reset some avi header fields */
 	avi_header.number_of_frames = stream_header_v.data_length;

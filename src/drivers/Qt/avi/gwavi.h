@@ -209,6 +209,8 @@ class gwavi_t
 	struct gwavi_stream_format_a_t stream_format_a;
 	struct gwavi_super_indx_t stream_index_a;
 	long long marker;
+	long long std_index_base_ofs_v;
+	long long std_index_base_ofs_a;
 	std::vector <gwavi_index_rec_t> offsets;
 	long long movi_fpos;
 	int bits_per_pixel;
