@@ -43,6 +43,16 @@
 #ifdef _USE_X265
 #include "x265.h"
 #endif
+#ifdef _USE_LIBAV
+#ifdef __cplusplus
+extern "C"
+{
+#include "libavutil/opt.h"
+#include "libavformat/avformat.h"
+#include "libavresample/avresample.h"
+}
+#endif
+#endif
 
 #include "Qt/AviRecord.h"
 #include "Qt/avi/gwavi.h"
@@ -689,6 +699,318 @@ static int encode_frame( unsigned char *inBuf, int width, int height )
 } // End namespace VFW
 #endif
 //**************************************************************************************
+// LIBAV Interface
+#ifdef _USE_LIBAV
+namespace LIBAV
+{
+static  AVFormatContext *oc = NULL;
+
+struct OutputStream
+{
+	AVStream  *st;
+	AVCodecContext *enc;
+	AVFrame *frame;
+	AVFrame *tmp_frame;
+	AVAudioResampleContext *avr;
+
+	OutputStream(void)
+	{
+		st  = NULL;
+		enc = NULL;
+		frame = tmp_frame = NULL;
+		avr = NULL;
+	}
+};
+static  OutputStream  video_st;
+static  OutputStream  audio_st;
+
+static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
+{
+	AVFrame *picture;
+	int ret;
+	picture = av_frame_alloc();
+	if (!picture)
+		return NULL;
+	picture->format = pix_fmt;
+	picture->width  = width;
+	picture->height = height;
+	/* allocate the buffers for the frame data */
+	ret = av_frame_get_buffer(picture, 32);
+	if (ret < 0)
+	{
+		fprintf(stderr, "Could not allocate frame data.\n");
+		return NULL;
+	}
+	return picture;
+}
+
+static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
+{
+	int ret;
+	AVCodec *codec;
+	AVCodecContext *c;
+
+	/* find the video encoder */
+	codec = avcodec_find_encoder(codec_id);
+
+	if (codec == NULL)
+	{
+		fprintf(stderr, "codec not found\n");
+		return -1;
+	}
+
+	ost->st = avformat_new_stream(oc, NULL);
+
+	if (ost->st == NULL)
+	{
+		fprintf(stderr, "Could not alloc stream\n");
+		return -1;
+	}
+
+	c = avcodec_alloc_context3(codec);
+
+	if (c == NULL)
+	{
+		fprintf(stderr, "Could not alloc an encoding context\n");
+		return -1;
+	}
+	ost->enc = c;
+
+	/* Put sample parameters. */
+	c->bit_rate = 400000;
+	/* Resolution must be a multiple of two. */
+	c->width    = nes_shm->video.ncol;
+	c->height   = nes_shm->video.nrow;
+
+	/* timebase: This is the fundamental unit of time (in seconds) in terms
+	 * of which frame timestamps are represented. For fixed-fps content,
+	 * timebase should be 1/framerate and timestamp increments should be
+	 * identical to 1. */
+	ost->st->time_base = (AVRational){ 1, 60 };
+	c->time_base       = ost->st->time_base;
+	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
+	c->pix_fmt       = AV_PIX_FMT_YUV420P;
+
+	if (c->codec_id == AV_CODEC_ID_MPEG2VIDEO)
+	{
+		/* just for testing, we also add B-frames */
+		c->max_b_frames = 2;
+	}
+	if (c->codec_id == AV_CODEC_ID_MPEG1VIDEO)
+	{
+		/* Needed to avoid using macroblocks in which some coeffs overflow.
+		 * This does not happen with normal video, it just happens here as
+		 * the motion of the chroma plane does not match the luma plane. */
+		c->mb_decision = 2;
+	}
+	/* Some formats want stream headers to be separate. */
+	if (oc->oformat->flags & AVFMT_GLOBALHEADER)
+	{
+		c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+	}
+
+	/* open the codec */
+	if (avcodec_open2(c, NULL, NULL) < 0)
+	{
+		fprintf(stderr, "could not open codec\n");
+		return -1;
+	}
+
+	/* Allocate the encoded raw picture. */
+	ost->frame = alloc_picture(c->pix_fmt, c->width, c->height);
+
+	if (!ost->frame)
+	{
+		fprintf(stderr, "Could not allocate picture\n");
+		return -1;
+	}
+
+	/* If the output format is not YUV420P, then a temporary YUV420P
+	 * picture is needed too. It is then converted to the required
+	 * output format. */
+	ost->tmp_frame = NULL;
+
+	if (c->pix_fmt != AV_PIX_FMT_YUV420P)
+	{
+		ost->tmp_frame = alloc_picture(AV_PIX_FMT_YUV420P, c->width, c->height);
+
+		if (!ost->tmp_frame)
+		{
+			fprintf(stderr, "Could not allocate temporary picture\n");
+			return -1;
+		}
+	}
+
+	/* copy the stream parameters to the muxer */
+	ret = avcodec_parameters_from_context(ost->st->codecpar, c);
+
+	if (ret < 0)
+	{
+		fprintf(stderr, "Could not copy the stream parameters\n");
+		return -1;
+	}
+	return 0;
+}
+
+static int initAudioStream( enum AVCodecID codec_id, OutputStream *ost )
+{
+	int ret;
+	AVCodec *codec;
+	AVCodecContext *c;
+
+	/* find the audio encoder */
+	codec = avcodec_find_encoder(codec_id);
+
+	if (codec == NULL)
+	{
+		fprintf(stderr, "codec not found\n");
+		return -1;
+	}
+
+	ost->st = avformat_new_stream(oc, NULL);
+
+	if (ost->st == NULL)
+	{
+		fprintf(stderr, "Could not alloc stream\n");
+		return -1;
+	}
+
+	c = avcodec_alloc_context3(codec);
+
+	if (c == NULL)
+	{
+		fprintf(stderr, "Could not alloc an encoding context\n");
+		return -1;
+	}
+	ost->enc = c;
+
+	/* put sample parameters */
+	c->sample_fmt     = codec->sample_fmts           ? codec->sample_fmts[0]           : AV_SAMPLE_FMT_S16;
+	c->sample_rate    = codec->supported_samplerates ? codec->supported_samplerates[0] : audioSampleRate;
+	c->channel_layout = codec->channel_layouts       ? codec->channel_layouts[0]       : AV_CH_LAYOUT_STEREO;
+	c->channels       = av_get_channel_layout_nb_channels(c->channel_layout);
+	c->bit_rate       = 64000;
+	ost->st->time_base = (AVRational){ 1, c->sample_rate };
+	// some formats want stream headers to be separate
+	if (oc->oformat->flags & AVFMT_GLOBALHEADER)
+	{
+		c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+	}
+	/* initialize sample format conversion;
+	 * to simplify the code, we always pass the data through lavr, even
+	 * if the encoder supports the generated format directly -- the price is
+	 * some extra data copying;
+	 */
+	ost->avr = avresample_alloc_context();
+	if (!ost->avr)
+	{
+		fprintf(stderr, "Error allocating the resampling context\n");
+		return -1;
+	}
+	av_opt_set_int(ost->avr, "in_sample_fmt",      AV_SAMPLE_FMT_S16,   0);
+	av_opt_set_int(ost->avr, "in_sample_rate",     audioSampleRate,     0);
+	av_opt_set_int(ost->avr, "in_channel_layout",  AV_CH_LAYOUT_MONO,   0);
+	av_opt_set_int(ost->avr, "out_sample_fmt",     c->sample_fmt,       0);
+	av_opt_set_int(ost->avr, "out_sample_rate",    c->sample_rate,      0);
+	av_opt_set_int(ost->avr, "out_channel_layout", c->channel_layout,   0);
+
+	ret = avresample_open(ost->avr);
+	if (ret < 0)
+	{
+		fprintf(stderr, "Error opening the resampling context\n");
+		return -1;
+	}
+
+	/* open it */
+	if (avcodec_open2(c, NULL, NULL) < 0)
+	{
+		fprintf(stderr, "could not open codec\n");
+		return -1;
+	}
+	return 0;
+}
+
+static int initMedia( const char *filename )
+{
+	AVOutputFormat *fmt;
+
+	/* Initialize libavcodec, and register all codecs and formats. */
+	av_register_all();
+
+	/* Autodetect the output format from the name. default is MPEG. */
+	fmt = av_guess_format(NULL, filename, NULL);
+
+	if (fmt == NULL)
+	{
+		printf("Could not deduce output format from file extension: using MPEG.\n");
+		fmt = av_guess_format("mpeg", NULL, NULL);
+	}
+	if (fmt == NULL)
+	{
+		fprintf(stderr, "Could not find suitable output format\n");
+		return -1;
+	}
+
+	/* Allocate the output media context. */
+	oc = avformat_alloc_context();
+	if (oc == NULL)
+	{
+		fprintf(stderr, "Memory error\n");
+		return -1;
+	}
+	oc->oformat = fmt;
+
+	//strncpy(oc->filename, filename, sizeof(oc->filename));
+
+	if ( initVideoStream( fmt->video_codec, &video_st ) )
+	{
+		return -1;
+	}
+	if ( fmt->audio_codec == AV_CODEC_ID_NONE )
+	{
+		fmt->audio_codec = AV_CODEC_ID_PCM_S16LE;
+	}
+	if ( initAudioStream( fmt->audio_codec, &audio_st ) )
+	{
+		return -1;
+	}
+
+	av_dump_format(oc, 0, filename, 1);
+
+	/* open the output file, if needed */
+	if ( !(fmt->flags & AVFMT_NOFILE))
+	{
+		if (avio_open( &oc->pb, filename, AVIO_FLAG_WRITE) < 0)
+		{
+			fprintf(stderr, "Could not open '%s'\n", filename);
+			return -1;
+		}
+		else
+		{
+			printf("Opened: %s\n", filename);
+		}
+	}
+
+	/* Write the stream header, if any. */
+	avformat_write_header(oc, NULL);
+
+	return 0;
+}
+
+static int init( int width, int height )
+{
+	return 0;
+}
+
+static int close(void)
+{
+
+	return 0;
+}
+
+} // End namespace LIBAV
+#endif
+//**************************************************************************************
 int aviRecordOpenFile( const char *filepath )
 {
 	char fourcc[8];
@@ -806,14 +1128,29 @@ int aviRecordOpenFile( const char *filepath )
 	}
 	#endif 
 
-	gwavi = new gwavi_t();
-
-	if ( gwavi->open( fileName, nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, &audioConfig ) )
+#ifdef _USE_LIBAV
+	if ( videoFormat == AVI_LIBAV )
 	{
-		printf("Error: Failed to open AVI file.\n");
-		recordEnable = false;
-		return -1;
+		if ( LIBAV::initMedia( fileName ) )
+		{
+			printf("Error: Failed to open AVI file.\n");
+			recordEnable = false;
+			return -1;
+		}
 	}
+	else
+#else
+	{
+		gwavi = new gwavi_t();
+
+		if ( gwavi->open( fileName, nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, &audioConfig ) )
+		{
+			printf("Error: Failed to open AVI file.\n");
+			recordEnable = false;
+			return -1;
+		}
+	}
+#endif
 
 	vbufSize    = 1024 * 1024 * 60;
 	rawVideoBuf = (uint32_t*)malloc( vbufSize * sizeof(uint32_t) );
@@ -1022,6 +1359,11 @@ int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList )
 				s.assign("X265 (H.265)");
 			break;
 			#endif
+			#ifdef _USE_LIBAV
+			case AVI_LIBAV:
+				s.assign("libav (ffmpeg)");
+			break;
+			#endif
 			#ifdef WIN32
 			case AVI_VFW:
 				s.assign("VfW (Video for Windows)");
@@ -1094,6 +1436,12 @@ void AviRecordDiskThread_t::run(void)
 	if ( localVideoFormat == AVI_X265)
 	{
 		X265::init( width, height );
+	}
+#endif
+#ifdef _USE_LIBAV
+	if ( localVideoFormat == AVI_LIBAV)
+	{
+		LIBAV::init( width, height );
 	}
 #endif
 #ifdef WIN32
@@ -1201,6 +1549,12 @@ void AviRecordDiskThread_t::run(void)
 	if ( localVideoFormat == AVI_X265)
 	{
 		X265::close();
+	}
+#endif
+#ifdef _USE_LIBAV
+	if ( localVideoFormat == AVI_LIBAV)
+	{
+		LIBAV::close();
 	}
 #endif
 #ifdef WIN32

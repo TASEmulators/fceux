@@ -90,6 +90,13 @@ else(WIN32)
 	  add_definitions( -D_USE_X265 ${X265_CFLAGS} )
   endif()
 
+  pkg_check_modules( LIBAV  libavcodec  libavformat  libavutil  libavresample  libswresample)
+
+  if ( ${LIBAV_FOUND} )
+	  message( STATUS "Using System Libav Library ${LIBAV_VERSION}" )
+	  add_definitions( -D_USE_LIBAV ${LIBAV_CFLAGS} )
+  endif()
+
   #pkg_check_modules( GL gl) # Use built in find package instead for OpenGL
 
   # Check for OpenGL
@@ -547,7 +554,7 @@ target_link_libraries( ${APP_NAME}
    ${OPENGL_LDFLAGS}  
  	${SDL2_LDFLAGS}
 	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
-	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS}
+	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS} ${LIBAV_LDFLAGS}
  	${SYS_LIBS}
 )
 
