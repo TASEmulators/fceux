@@ -720,6 +720,22 @@ struct OutputStream
 		frame = tmp_frame = NULL;
 		avr = NULL;
 	}
+
+	void close(void)
+	{
+		if ( enc != NULL )
+		{
+			avcodec_free_context(&enc); enc = NULL;
+		}
+		if ( frame != NULL )
+		{
+			av_frame_free(&frame); frame = NULL;
+		}
+		if ( tmp_frame != NULL )
+		{
+			av_frame_free(&tmp_frame); tmp_frame = NULL;
+		}
+	}
 };
 static  OutputStream  video_st;
 static  OutputStream  audio_st;
@@ -730,17 +746,21 @@ static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
 	int ret;
 	picture = av_frame_alloc();
 	if (!picture)
+	{
 		return NULL;
+	}
 	picture->format = pix_fmt;
 	picture->width  = width;
 	picture->height = height;
+	picture->pts    = 0;
 	/* allocate the buffers for the frame data */
-	ret = av_frame_get_buffer(picture, 32);
+	ret = av_frame_get_buffer(picture, 0);
 	if (ret < 0)
 	{
 		fprintf(stderr, "Could not allocate frame data.\n");
 		return NULL;
 	}
+
 	return picture;
 }
 
@@ -758,6 +778,7 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 		fprintf(stderr, "codec not found\n");
 		return -1;
 	}
+	printf("CODEC: %s\n", codec->name );
 
 	ost->st = avformat_new_stream(oc, NULL);
 
@@ -790,6 +811,8 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	c->time_base       = ost->st->time_base;
 	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
 	c->pix_fmt       = AV_PIX_FMT_YUV420P;
+
+	printf("PIX_FMT:%i\n", c->pix_fmt );
 
 	if (c->codec_id == AV_CODEC_ID_MPEG2VIDEO)
 	{
@@ -830,16 +853,16 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	 * output format. */
 	ost->tmp_frame = NULL;
 
-	if (c->pix_fmt != AV_PIX_FMT_YUV420P)
-	{
-		ost->tmp_frame = alloc_picture(AV_PIX_FMT_YUV420P, c->width, c->height);
+	//if (c->pix_fmt != AV_PIX_FMT_RGB24)
+	//{
+	//	ost->tmp_frame = alloc_picture(AV_PIX_FMT_RGB24, c->width, c->height);
 
-		if (!ost->tmp_frame)
-		{
-			fprintf(stderr, "Could not allocate temporary picture\n");
-			return -1;
-		}
-	}
+	//	if (ost->tmp_frame == NULL)
+	//	{
+	//		fprintf(stderr, "Could not allocate temporary picture\n");
+	//		return -1;
+	//	}
+	//}
 
 	/* copy the stream parameters to the muxer */
 	ret = avcodec_parameters_from_context(ost->st->codecpar, c);
@@ -852,9 +875,37 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	return 0;
 }
 
+static AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,
+                                  uint64_t channel_layout,
+                                  int sample_rate, int nb_samples)
+{
+	AVFrame *frame = av_frame_alloc();
+	int ret;
+	if (!frame)
+	{
+		fprintf(stderr, "Error allocating an audio frame\n");
+		return NULL;
+	}
+	frame->format = sample_fmt;
+	frame->channel_layout = channel_layout;
+	frame->sample_rate = sample_rate;
+	frame->nb_samples = nb_samples;
+
+	if (nb_samples)
+	{
+		ret = av_frame_get_buffer(frame, 0);
+		if (ret < 0)
+		{
+			fprintf(stderr, "Error allocating an audio buffer\n");
+			return NULL;
+		}
+	}
+	return frame;
+}
+
 static int initAudioStream( enum AVCodecID codec_id, OutputStream *ost )
 {
-	int ret;
+	int ret, nb_samples;
 	AVCodec *codec;
 	AVCodecContext *c;
 
@@ -927,6 +978,26 @@ static int initAudioStream( enum AVCodecID codec_id, OutputStream *ost )
 		fprintf(stderr, "could not open codec\n");
 		return -1;
 	}
+
+	if (c->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE)
+	{
+		nb_samples = 10000;
+	}
+	else
+	{
+		nb_samples = c->frame_size;
+	}
+
+	ost->frame     = alloc_audio_frame(c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples);
+	ost->tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_MONO, audioSampleRate, nb_samples);
+
+	/* copy the stream parameters to the muxer */
+	ret = avcodec_parameters_from_context(ost->st->codecpar, c);
+	if (ret < 0)
+	{
+		fprintf(stderr, "Could not copy the stream parameters\n");
+		return -1;
+	}
 	return 0;
 }
 
@@ -966,10 +1037,10 @@ static int initMedia( const char *filename )
 	{
 		return -1;
 	}
-	if ( fmt->audio_codec == AV_CODEC_ID_NONE )
-	{
-		fmt->audio_codec = AV_CODEC_ID_PCM_S16LE;
-	}
+	//if ( fmt->audio_codec == AV_CODEC_ID_NONE )
+	//{
+	//	fmt->audio_codec = AV_CODEC_ID_PCM_S16LE;
+	//}
 	if ( initAudioStream( fmt->audio_codec, &audio_st ) )
 	{
 		return -1;
@@ -992,7 +1063,10 @@ static int initMedia( const char *filename )
 	}
 
 	/* Write the stream header, if any. */
-	avformat_write_header(oc, NULL);
+	if ( avformat_write_header(oc, NULL) )
+	{
+		return -1;
+	}
 
 	return 0;
 }
@@ -1002,8 +1076,116 @@ static int init( int width, int height )
 	return 0;
 }
 
+static int encode_video_frame( unsigned char *inBuf )
+{
+	int ret, w2, h2, x, y, ofs;
+	//int luma_size, chroma_size;
+	AVCodecContext *c = video_st.enc;
+
+	ret = av_frame_make_writable( video_st.frame );
+
+	if ( ret < 0 )
+	{
+		return -1;
+	}
+
+	//luma_size = c->width * c->height;
+	//chroma_size = luma_size / 4;
+
+	//printf("Luma:%i  Chroma:%i \n", luma_size, chroma_size );
+
+	//for (int i=0; i<3; i++)
+	//{
+	//	printf("linesize[%i] = %i \n", i, video_st.frame->linesize[i] );
+	//}
+	ofs = 0;
+	//  Y
+	for (y = 0; y < c->height; y++)
+	{
+        	for (x = 0; x < c->width; x++)
+		{
+            		video_st.frame->data[0][y * video_st.frame->linesize[0] + x] = inBuf[ofs]; ofs++;
+		}
+	}
+	w2 = c->width / 2;
+	h2 = c->height / 2;
+
+	/* Cb and Cr */
+	for (y = 0; y < h2; y++)
+	{
+		for (x = 0; x < w2; x++)
+		{
+			video_st.frame->data[1][y * video_st.frame->linesize[1] + x] = inBuf[ofs]; ofs++;
+		}
+	}
+	for (y = 0; y < h2; y++)
+	{
+		for (x = 0; x < w2; x++)
+		{
+			video_st.frame->data[2][y * video_st.frame->linesize[2] + x] = inBuf[ofs]; ofs++;
+		}
+	}
+	//memcpy( video_st.frame->data[0], &inBuf[ofs], luma_size   ); ofs += luma_size;
+	//memcpy( video_st.frame->data[1], &inBuf[ofs], chroma_size ); ofs += chroma_size;
+	//memcpy( video_st.frame->data[2], &inBuf[ofs], chroma_size ); ofs += chroma_size;
+
+	video_st.frame->pts++;
+	
+	//printf("Write Frame: %li\n", video_st.frame->pts);
+
+	/* encode the image */
+	ret = avcodec_send_frame(c, video_st.frame);
+	if (ret < 0)
+	{
+		fprintf(stderr, "Error submitting a frame for encoding\n");
+		return -1;
+	}
+
+	while (ret >= 0)
+	{
+		AVPacket pkt = { 0 };
+
+		av_init_packet(&pkt);
+
+		ret = avcodec_receive_packet(c, &pkt);
+
+		if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
+		{
+			fprintf(stderr, "Error encoding a video frame\n");
+			return -1;
+		}
+		else if (ret >= 0)
+		{
+			av_packet_rescale_ts(&pkt, c->time_base, video_st.st->time_base);
+			pkt.stream_index = video_st.st->index;
+			/* Write the compressed frame to the media file. */
+			ret = av_interleaved_write_frame(oc, &pkt);
+			if (ret < 0)
+			{
+				fprintf(stderr, "Error while writing video frame\n");
+				return -1;
+			}
+		}
+	}
+
+	return ret == AVERROR_EOF;
+}
+
 static int close(void)
 {
+	/* Write the trailer, if any. The trailer must be written before you
+	 * close the CodecContexts open when you wrote the header; otherwise
+	 * av_write_trailer() may try to use memory that was freed on
+	 * av_codec_close(). */
+	av_write_trailer(oc);
+
+	/* Close the output file. */
+	avio_close(oc->pb);
+
+	/* free the stream */
+	avformat_free_context(oc);
+
+	oc = NULL;
 
 	return 0;
 }
@@ -1139,7 +1321,7 @@ int aviRecordOpenFile( const char *filepath )
 		}
 	}
 	else
-#else
+#endif
 	{
 		gwavi = new gwavi_t();
 
@@ -1150,7 +1332,6 @@ int aviRecordOpenFile( const char *filepath )
 			return -1;
 		}
 	}
-#endif
 
 	vbufSize    = 1024 * 1024 * 60;
 	rawVideoBuf = (uint32_t*)malloc( vbufSize * sizeof(uint32_t) );
@@ -1174,10 +1355,10 @@ int aviRecordAddFrame( void )
 		return -1;
 	}
 
-	if ( gwavi == NULL )
-	{
-		return -1;
-	}
+	//if ( gwavi == NULL )
+	//{
+	//	return -1;
+	//}
 	if ( FCEUI_EmulationPaused() )
 	{
 		return 0;
@@ -1225,10 +1406,10 @@ int aviRecordAddAudioFrame( int32_t *buf, int numSamples )
 		return -1;
 	}
 
-	if ( gwavi == NULL )
-	{
-		return -1;
-	}
+	//if ( gwavi == NULL )
+	//{
+	//	return -1;
+	//}
 	if ( !recordAudio )
 	{
 		return -1;
@@ -1497,6 +1678,13 @@ void AviRecordDiskThread_t::run(void)
 				writeAudio = VFW::encode_frame( rgb24, width, height ) > 0;
 			}
 			#endif
+			#ifdef _USE_LIBAV
+			else if ( localVideoFormat == AVI_LIBAV)
+			{
+				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
+				LIBAV::encode_video_frame( rgb24 );
+			}
+			#endif
 			else
 			{
 				convertRgb_32_to_24( (const unsigned char*)videoOut, rgb24,
@@ -1525,7 +1713,16 @@ void AviRecordDiskThread_t::run(void)
 				if ( numSamples > 0 )
 				{
 					//printf("NUM Audio Samples: %i \n", numSamples );
-					gwavi->add_audio( (unsigned char *)audioOut, numSamples*2);
+					#ifdef _USE_LIBAV
+					if ( localVideoFormat == AVI_LIBAV)
+					{
+
+					}
+					else
+					#endif
+					{
+						gwavi->add_audio( (unsigned char *)audioOut, numSamples*2);
+					}
 
 					numSamples = 0;
 				}
