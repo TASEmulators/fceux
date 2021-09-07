@@ -50,6 +50,7 @@ extern "C"
 #include "libavutil/opt.h"
 #include "libavformat/avformat.h"
 #include "libavresample/avresample.h"
+#include "libswscale/swscale.h"
 }
 #endif
 #endif
@@ -711,6 +712,7 @@ struct OutputStream
 	AVCodecContext *enc;
 	AVFrame *frame;
 	AVFrame *tmp_frame;
+	struct SwsContext *sws_ctx;
 	AVAudioResampleContext *avr;
 
 	OutputStream(void)
@@ -718,6 +720,7 @@ struct OutputStream
 		st  = NULL;
 		enc = NULL;
 		frame = tmp_frame = NULL;
+		sws_ctx = NULL;
 		avr = NULL;
 	}
 
@@ -734,6 +737,10 @@ struct OutputStream
 		if ( tmp_frame != NULL )
 		{
 			av_frame_free(&tmp_frame); tmp_frame = NULL;
+		}
+		if ( avr != NULL )
+		{
+			avresample_free(&avr); avr = NULL;
 		}
 	}
 };
@@ -853,16 +860,22 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	 * output format. */
 	ost->tmp_frame = NULL;
 
-	//if (c->pix_fmt != AV_PIX_FMT_RGB24)
-	//{
-	//	ost->tmp_frame = alloc_picture(AV_PIX_FMT_RGB24, c->width, c->height);
+	if (c->pix_fmt != AV_PIX_FMT_BGRA)
+	{
+		ost->tmp_frame = alloc_picture(AV_PIX_FMT_BGRA, c->width, c->height);
 
-	//	if (ost->tmp_frame == NULL)
-	//	{
-	//		fprintf(stderr, "Could not allocate temporary picture\n");
-	//		return -1;
-	//	}
-	//}
+		if (ost->tmp_frame == NULL)
+		{
+			fprintf(stderr, "Could not allocate temporary picture\n");
+			return -1;
+		}
+	}
+	
+	ost->sws_ctx = sws_getContext(c->width, c->height,
+					AV_PIX_FMT_BGRA,
+					c->width, c->height,
+					c->pix_fmt,
+					SWS_BICUBIC, NULL, NULL, NULL);
 
 	/* copy the stream parameters to the muxer */
 	ret = avcodec_parameters_from_context(ost->st->codecpar, c);
@@ -1034,13 +1047,10 @@ static int initMedia( const char *filename )
 	//strncpy(oc->filename, filename, sizeof(oc->filename));
 
 	if ( initVideoStream( fmt->video_codec, &video_st ) )
+	//if ( initVideoStream( AV_CODEC_ID_H264, &video_st ) )
 	{
 		return -1;
 	}
-	//if ( fmt->audio_codec == AV_CODEC_ID_NONE )
-	//{
-	//	fmt->audio_codec = AV_CODEC_ID_PCM_S16LE;
-	//}
 	if ( initAudioStream( fmt->audio_codec, &audio_st ) )
 	{
 		return -1;
@@ -1078,9 +1088,10 @@ static int init( int width, int height )
 
 static int encode_video_frame( unsigned char *inBuf )
 {
-	int ret, w2, h2, x, y, ofs;
-	//int luma_size, chroma_size;
+	int ret, y, ofs, inLineSize;
+	OutputStream *ost = &video_st;
 	AVCodecContext *c = video_st.enc;
+	unsigned char *outBuf;
 
 	ret = av_frame_make_writable( video_st.frame );
 
@@ -1089,50 +1100,25 @@ static int encode_video_frame( unsigned char *inBuf )
 		return -1;
 	}
 
-	//luma_size = c->width * c->height;
-	//chroma_size = luma_size / 4;
-
-	//printf("Luma:%i  Chroma:%i \n", luma_size, chroma_size );
-
-	//for (int i=0; i<3; i++)
-	//{
-	//	printf("linesize[%i] = %i \n", i, video_st.frame->linesize[i] );
-	//}
 	ofs = 0;
-	//  Y
-	for (y = 0; y < c->height; y++)
-	{
-        	for (x = 0; x < c->width; x++)
-		{
-            		video_st.frame->data[0][y * video_st.frame->linesize[0] + x] = inBuf[ofs]; ofs++;
-		}
-	}
-	w2 = c->width / 2;
-	h2 = c->height / 2;
 
-	/* Cb and Cr */
-	for (y = 0; y < h2; y++)
+	inLineSize = c->width * 4;
+
+	outBuf = ost->tmp_frame->data[0];
+
+	for (y=0; y < c->height; y++)
 	{
-		for (x = 0; x < w2; x++)
-		{
-			video_st.frame->data[1][y * video_st.frame->linesize[1] + x] = inBuf[ofs]; ofs++;
-		}
+		memcpy( outBuf, &inBuf[ofs], inLineSize ); ofs += inLineSize;
+
+		outBuf += ost->tmp_frame->linesize[0];
 	}
-	for (y = 0; y < h2; y++)
-	{
-		for (x = 0; x < w2; x++)
-		{
-			video_st.frame->data[2][y * video_st.frame->linesize[2] + x] = inBuf[ofs]; ofs++;
-		}
-	}
-	//memcpy( video_st.frame->data[0], &inBuf[ofs], luma_size   ); ofs += luma_size;
-	//memcpy( video_st.frame->data[1], &inBuf[ofs], chroma_size ); ofs += chroma_size;
-	//memcpy( video_st.frame->data[2], &inBuf[ofs], chroma_size ); ofs += chroma_size;
+
+	sws_scale(ost->sws_ctx, (const uint8_t * const *) ost->tmp_frame->data,
+			ost->tmp_frame->linesize, 0, c->height, ost->frame->data,
+			ost->frame->linesize);
 
 	video_st.frame->pts++;
 	
-	//printf("Write Frame: %li\n", video_st.frame->pts);
-
 	/* encode the image */
 	ret = avcodec_send_frame(c, video_st.frame);
 	if (ret < 0)
@@ -1178,6 +1164,9 @@ static int close(void)
 	 * av_write_trailer() may try to use memory that was freed on
 	 * av_codec_close(). */
 	av_write_trailer(oc);
+
+	video_st.close();
+	audio_st.close();
 
 	/* Close the output file. */
 	avio_close(oc->pb);
@@ -1681,8 +1670,11 @@ void AviRecordDiskThread_t::run(void)
 			#ifdef _USE_LIBAV
 			else if ( localVideoFormat == AVI_LIBAV)
 			{
-				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
-				LIBAV::encode_video_frame( rgb24 );
+				//Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
+				//convertRgb_32_to_24( (const unsigned char*)videoOut, rgb24,
+				//		width, height, numPixels, true );
+				//LIBAV::encode_video_frame( rgb24 );
+				LIBAV::encode_video_frame( (unsigned char*)videoOut );
 			}
 			#endif
 			else

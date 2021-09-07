@@ -90,7 +90,7 @@ else(WIN32)
 	  add_definitions( -D_USE_X265 ${X265_CFLAGS} )
   endif()
 
-  pkg_check_modules( LIBAV  libavcodec  libavformat  libavutil  libavresample  libswresample)
+  pkg_check_modules( LIBAV  libavcodec  libavformat  libavutil  libavresample  libswresample  libswscale)
 
   if ( ${LIBAV_FOUND} )
 	  message( STATUS "Using System Libav Library ${LIBAV_VERSION}" )
