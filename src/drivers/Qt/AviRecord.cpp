@@ -714,6 +714,7 @@ struct OutputStream
 	AVFrame *tmp_frame;
 	struct SwsContext *sws_ctx;
 	AVAudioResampleContext *avr;
+	int64_t next_pts;
 
 	OutputStream(void)
 	{
@@ -722,6 +723,7 @@ struct OutputStream
 		frame = tmp_frame = NULL;
 		sws_ctx = NULL;
 		avr = NULL;
+		next_pts = 0;
 	}
 
 	void close(void)
@@ -742,6 +744,7 @@ struct OutputStream
 		{
 			avresample_free(&avr); avr = NULL;
 		}
+		next_pts = 0;
 	}
 };
 static  OutputStream  video_st;
@@ -776,6 +779,9 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	int ret;
 	AVCodec *codec;
 	AVCodecContext *c;
+	double fps;
+
+	fps = getBaseFrameRate();
 
 	/* find the video encoder */
 	codec = avcodec_find_encoder(codec_id);
@@ -814,12 +820,12 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	 * of which frame timestamps are represented. For fixed-fps content,
 	 * timebase should be 1/framerate and timestamp increments should be
 	 * identical to 1. */
-	ost->st->time_base = (AVRational){ 1, 60 };
+	ost->st->time_base = (AVRational){ 1000, fps * 1000 };
 	c->time_base       = ost->st->time_base;
 	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
 	c->pix_fmt       = AV_PIX_FMT_YUV420P;
 
-	printf("PIX_FMT:%i\n", c->pix_fmt );
+	//printf("PIX_FMT:%i\n", c->pix_fmt );
 
 	if (c->codec_id == AV_CODEC_ID_MPEG2VIDEO)
 	{
@@ -1086,6 +1092,117 @@ static int init( int width, int height )
 	return 0;
 }
 
+static int encode_audio_frame( int16_t *audioOut, int numSamples)
+{
+	int i,j, ret;
+	OutputStream *ost = &audio_st;
+	AVFrame *frame = NULL;
+	
+	if ( audioOut )
+	{
+		frame = ost->tmp_frame;
+
+		int16_t *q = (int16_t*)frame->data[0];
+
+		for (j = 0; j < numSamples; j++)
+		{
+			for (i = 0; i < ost->enc->channels; i++)
+			{
+        			*q++ = audioOut[j];
+			}
+		}
+		frame->nb_samples = numSamples;
+
+		ret = avresample_convert(ost->avr, NULL, 0, 0,
+						frame->extended_data, frame->linesize[0],
+						frame->nb_samples);
+		if (ret < 0)
+		{
+			fprintf(stderr, "Error feeding audio data to the resampler\n");
+			return -1;
+		}
+	}
+
+	while ( ( frame && (avresample_available(ost->avr) >= ost->frame->nb_samples)) ||
+		(!frame	&& (avresample_get_out_samples(ost->avr, 0) > 0) ) )
+	{
+		/* when we pass a frame to the encoder, it may keep a reference to it
+		 * internally;
+		 * make sure we do not overwrite it here
+		 */
+		ret = av_frame_make_writable(ost->frame);
+		if (ret < 0)
+		{
+		    return -1;
+		}
+		/* the difference between the two avresample calls here is that the
+		 * first one just reads the already converted data that is buffered in
+		 * the lavr output buffer, while the second one also flushes the
+		 * resampler */
+		if ( frame )
+		{
+			ret = avresample_read(ost->avr, ost->frame->extended_data,
+		        	              ost->frame->nb_samples);
+		}
+		else
+		{
+			ret = avresample_convert(ost->avr, ost->frame->extended_data,
+						 ost->frame->linesize[0], ost->frame->nb_samples,
+						 NULL, 0, 0);
+		}
+		if (ret < 0)
+		{
+			fprintf(stderr, "Error while resampling\n");
+			return -1;
+		}
+		else if ( frame && (ret != ost->frame->nb_samples) )
+		{
+			fprintf(stderr, "Too few samples returned from lavr\n");
+			return -1;
+		}
+		ost->frame->nb_samples = ret;
+		ost->frame->pts        = ost->next_pts;
+		ost->next_pts         += ost->frame->nb_samples;
+		//got_output |= encode_audio_frame(oc, ost, ret ? ost->frame : NULL);
+
+		if ( ret == 0 )
+		{
+			fprintf(stderr, "Last Audio Frame\n");
+		}
+		ret = avcodec_send_frame(ost->enc, (ret > 0) ? ost->frame : NULL);
+		if (ret < 0)
+		{
+			fprintf(stderr, "Error submitting a frame for encoding\n");
+			return -1;
+		}
+		while (ret >= 0)
+		{
+			AVPacket pkt = { 0 }; // data and size must be 0;
+			av_init_packet(&pkt);
+			ret = avcodec_receive_packet(ost->enc, &pkt);
+			if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
+			{
+				fprintf(stderr, "Error encoding a video frame\n");
+				return -1;
+			}
+			else if (ret >= 0)
+			{
+				av_packet_rescale_ts(&pkt, ost->enc->time_base, ost->st->time_base);
+				pkt.stream_index = ost->st->index;
+				/* Write the compressed frame to the media file. */
+				ret = av_interleaved_write_frame(oc, &pkt);
+				if (ret < 0)
+				{
+					fprintf(stderr, "Error while writing video frame\n");
+					return -1;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
 static int encode_video_frame( unsigned char *inBuf )
 {
 	int ret, y, ofs, inLineSize;
@@ -1117,7 +1234,7 @@ static int encode_video_frame( unsigned char *inBuf )
 			ost->tmp_frame->linesize, 0, c->height, ost->frame->data,
 			ost->frame->linesize);
 
-	video_st.frame->pts++;
+	video_st.frame->pts = video_st.next_pts++;
 	
 	/* encode the image */
 	ret = avcodec_send_frame(c, video_st.frame);
@@ -1159,6 +1276,8 @@ static int encode_video_frame( unsigned char *inBuf )
 
 static int close(void)
 {
+	encode_audio_frame( NULL, 0 );
+
 	/* Write the trailer, if any. The trailer must be written before you
 	 * close the CodecContexts open when you wrote the header; otherwise
 	 * av_write_trailer() may try to use memory that was freed on
@@ -1708,7 +1827,7 @@ void AviRecordDiskThread_t::run(void)
 					#ifdef _USE_LIBAV
 					if ( localVideoFormat == AVI_LIBAV)
 					{
-
+						LIBAV::encode_audio_frame( audioOut, numSamples );
 					}
 					else
 					#endif
