@@ -1024,12 +1024,39 @@ static int initAudioStream( enum AVCodecID codec_id, OutputStream *ost )
 	return 0;
 }
 
+static void print_Codecs(void)
+{
+	void *it = NULL;
+	const AVCodec *c;
+
+	c = av_codec_iterate( &it );
+
+	while ( c != NULL )
+	{
+		if ( av_codec_is_encoder(c) )
+		{
+			if ( c->type == AVMEDIA_TYPE_VIDEO )
+			{
+				printf("Video Encoder: %i  %s   %s\n", c->id, c->name, c->long_name);
+			}
+			else if ( c->type == AVMEDIA_TYPE_AUDIO )
+			{
+				printf("Audio Encoder: %i  %s   %s\n", c->id, c->name, c->long_name);
+			}
+		}
+
+		c = av_codec_iterate( &it );
+	}
+}
+
 static int initMedia( const char *filename )
 {
 	AVOutputFormat *fmt;
 
 	/* Initialize libavcodec, and register all codecs and formats. */
 	//av_register_all();
+
+	print_Codecs();
 
 	/* Autodetect the output format from the name. default is MPEG. */
 	fmt = av_guess_format(NULL, filename, NULL);
