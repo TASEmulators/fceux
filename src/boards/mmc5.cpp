@@ -102,6 +102,7 @@ static uint32 WRAMSIZE = 0;
 static uint8 *WRAM = NULL;
 static uint8 *MMC5fill = NULL;
 static uint8 *ExRAM = NULL;
+static uint8 MMC5battery = 0;
 
 const int MMC5WRAMMAX = 1<<7; // 7 bits in register interface (real MMC5 has only 4 pins, however)
 static uint8 MMC5WRAMsize; //configuration, not state
@@ -924,9 +925,11 @@ static void GenMMC5Power(void) {
 	FCEU_dwmemset(MMC5fill + 0x000, nval | (nval<<8) | (nval<<16) | (nval<<24), 0x3C0);
 	FCEU_dwmemset(MMC5fill + 0x3C0, aval | (aval<<8) | (aval<<16) | (aval<<24), 0x040);
 
-	FCEU_MemoryRand(WRAM, MMC5WRAMsize * 8 * 1024);
-	FCEU_MemoryRand(MMC5fill,1024);
-	FCEU_MemoryRand(ExRAM,1024);
+	if(MMC5battery == 0) {
+		FCEU_MemoryRand(WRAM, MMC5WRAMsize * 8 * 1024);
+		FCEU_MemoryRand(MMC5fill,1024);
+		FCEU_MemoryRand(ExRAM,1024);
+	}
 
 	MMC5Synco();
 
@@ -1000,6 +1003,9 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 	MMC5fill = (uint8*)FCEU_malloc(1024);
 	ExRAM = (uint8*)FCEU_malloc(1024);
 
+	FCEU_MemoryRand(WRAM, MMC5WRAMsize * 8 * 1024);
+	FCEU_MemoryRand(MMC5fill,1024);
+	FCEU_MemoryRand(ExRAM,1024);
 
 	AddExState(ExRAM, 1024, 0, "ERAM");
 	AddExState(&MMC5HackSPMode, 1, 0, "SPLM");
@@ -1013,6 +1019,7 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 	GameStateRestore = MMC5_StateRestore;
 	info->Power = GenMMC5Power;
 
+	MMC5battery = battery;
 	if (battery) {
 		info->SaveGame[0] = WRAM;
 		if (info->ines2)
