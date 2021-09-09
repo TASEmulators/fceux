@@ -814,6 +814,8 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	}
 	ost->enc = c;
 
+	av_opt_show2( (void*)c, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
+
 	/* Put sample parameters. */
 	c->bit_rate = 400000;
 	/* Resolution must be a multiple of two. */
@@ -828,6 +830,26 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	c->time_base       = ost->st->time_base;
 	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
 	c->pix_fmt       = AV_PIX_FMT_YUV420P;
+
+	if ( codec->pix_fmts )
+	{
+		int i=0, formatOk=0;
+		while (codec->pix_fmts[i] != -1)
+		{
+			printf("Codec PIX_FMT: %i\n", codec->pix_fmts[i]);
+			if ( codec->pix_fmts[i] == c->pix_fmt )
+			{
+				printf("CODEC Supports PIX_FMT:%i\n", c->pix_fmt );
+				formatOk = 1;
+			}
+			i++;
+		}
+		if ( !formatOk )
+		{
+			printf("CODEC Does Not Support PIX_FMT:%i  Changing to:%i\n", c->pix_fmt, codec->pix_fmts[0] );
+			c->pix_fmt = codec->pix_fmts[0];
+		}
+	}
 
 	//printf("PIX_FMT:%i\n", c->pix_fmt );
 
@@ -1085,6 +1107,8 @@ static int initMedia( const char *filename )
 
 	if ( initVideoStream( fmt->video_codec, &video_st ) )
 	//if ( initVideoStream( AV_CODEC_ID_H264, &video_st ) )
+	//if ( initVideoStream( AV_CODEC_ID_FFV1, &video_st ) )
+	//if ( initVideoStream( AV_CODEC_ID_RAWVIDEO, &video_st ) )
 	{
 		return -1;
 	}
