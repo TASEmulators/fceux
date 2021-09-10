@@ -764,6 +764,8 @@ static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
 	picture->width  = width;
 	picture->height = height;
 	picture->pts    = 0;
+	//picture->sample_aspect_ratio = (AVRational){ 4, 3 };
+
 	/* allocate the buffers for the frame data */
 	ret = av_frame_get_buffer(picture, 0);
 	if (ret < 0)
@@ -830,6 +832,11 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	c->time_base       = ost->st->time_base;
 	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
 	c->pix_fmt       = AV_PIX_FMT_YUV420P;
+	//c->pix_fmt       = AV_PIX_FMT_BGR24;
+
+	//c->sample_aspect_ratio =  (AVRational){ 4, 3 };
+	//printf("compression_level:%i\n", c->compression_level);
+	//printf("TAG:0x%08X\n", c->codec_tag);
 
 	if ( codec->pix_fmts )
 	{
@@ -1108,6 +1115,7 @@ static int initMedia( const char *filename )
 	if ( initVideoStream( fmt->video_codec, &video_st ) )
 	//if ( initVideoStream( AV_CODEC_ID_H264, &video_st ) )
 	//if ( initVideoStream( AV_CODEC_ID_FFV1, &video_st ) )
+	//if ( initVideoStream( AV_CODEC_ID_RV20, &video_st ) )
 	//if ( initVideoStream( AV_CODEC_ID_RAWVIDEO, &video_st ) )
 	{
 		return -1;
