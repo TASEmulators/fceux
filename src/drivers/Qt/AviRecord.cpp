@@ -49,6 +49,7 @@ extern "C"
 {
 #include "libavutil/opt.h"
 #include "libavformat/avformat.h"
+#include "libavcodec/avcodec.h"
 //#include "libavresample/avresample.h"
 #include "libswscale/swscale.h"
 #include "libswresample/swresample.h"
@@ -809,7 +810,7 @@ static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
 static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 {
 	int ret;
-	AVCodec *codec;
+	const AVCodec *codec;
 	AVCodecContext *c;
 	double fps;
 	int fps1000;
@@ -857,7 +858,9 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	 * of which frame timestamps are represented. For fixed-fps content,
 	 * timebase should be 1/framerate and timestamp increments should be
 	 * identical to 1. */
-	ost->st->time_base = (AVRational){ 1000, fps1000 };
+	//ost->st->time_base = (AVRational){ 1000, fps1000 };
+	ost->st->time_base.num = 1000;
+	ost->st->time_base.den = fps1000;
 	c->time_base       = ost->st->time_base;
 	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
 	c->pix_fmt       = AV_PIX_FMT_YUV420P;
@@ -987,7 +990,7 @@ static AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,
 static int initAudioStream( enum AVCodecID codec_id, OutputStream *ost )
 {
 	int ret, nb_samples;
-	AVCodec *codec;
+	const AVCodec *codec;
 	AVCodecContext *c;
 
 	/* find the audio encoder */
@@ -1022,7 +1025,9 @@ static int initAudioStream( enum AVCodecID codec_id, OutputStream *ost )
 	c->channel_layout = codec->channel_layouts       ? codec->channel_layouts[0]       : AV_CH_LAYOUT_STEREO;
 	c->channels       = av_get_channel_layout_nb_channels(c->channel_layout);
 	c->bit_rate       = 64000;
-	ost->st->time_base = (AVRational){ 1, c->sample_rate };
+	//ost->st->time_base = (AVRational){ 1, c->sample_rate };
+	ost->st->time_base.num = 1;
+	ost->st->time_base.den = c->sample_rate;
 	// some formats want stream headers to be separate
 	if (oc->oformat->flags & AVFMT_GLOBALHEADER)
 	{
@@ -1109,7 +1114,7 @@ static void print_Codecs(void)
 
 static int initMedia( const char *filename )
 {
-	AVOutputFormat *fmt;
+	const AVOutputFormat *fmt;
 
 	/* Initialize libavcodec, and register all codecs and formats. */
 	//av_register_all();
@@ -1248,6 +1253,8 @@ static int encode_audio_frame( int16_t *audioOut, int numSamples)
 			}
 		}
 		frame->nb_samples = numSamples;
+
+		printf("numSamples: %i\n", numSamples);
 	}
 
 	ret = av_frame_make_writable(ost->frame);

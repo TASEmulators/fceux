@@ -36,6 +36,13 @@ if(WIN32)
      set( SDL2_LDFLAGS  ${SDL_INSTALL_PREFIX}/SDL2/lib/x64/SDL2.lib )
      set( SYS_LIBS  wsock32 ws2_32 vfw32 Htmlhelp )
      set(APP_ICON_RESOURCES_WINDOWS  ${CMAKE_SOURCE_DIR}/icons/fceux.rc )
+     add_definitions( -D_USE_LIBAV ${LIBAV_CFLAGS} )
+     include_directories( ${FFMPEG_INSTALL_PREFIX}/FFmpeg )
+     set( LIBAV_LDFLAGS  ${FFMPEG_INSTALL_PREFIX}/FFmpeg/libavcodec/avcodec.lib
+                         ${FFMPEG_INSTALL_PREFIX}/FFmpeg/libavformat/avformat.lib
+                         ${FFMPEG_INSTALL_PREFIX}/FFmpeg/libavutil/avutil.lib
+                         ${FFMPEG_INSTALL_PREFIX}/FFmpeg/libswscale/swscale.lib
+                         ${FFMPEG_INSTALL_PREFIX}/FFmpeg/libswresample/swresample.lib )
 else(WIN32)
   # Non Windows System
   # UNIX (Linux or Mac OSX)
