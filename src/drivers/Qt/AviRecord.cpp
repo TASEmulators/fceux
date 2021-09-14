@@ -122,19 +122,61 @@ static void convertRgb_32_to_24( const unsigned char *src, unsigned char *dest, 
 //**************************************************************************************
 /* For RGB2YUV: */
 
-static const int RGB2YUV_SHIFT = 15; /* highest value where [RGB][YUV] fit in signed short */
+//static const int RGB2YUV_SHIFT = 15; // highest value where [RGB][YUV] fit in signed short
 
-static const int RY = 8414;  //  ((int)(( 65.738/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
-static const int RV = 14392; //  ((int)((112.439/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
-static const int RU = -4856; //  ((int)((-37.945/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+//static const int RY = 8414;  //  ((int)(( 65.738/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+//static const int RV = 14392; //  ((int)((112.439/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+//static const int RU = -4856; //  ((int)((-37.945/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+//
+//static const int GY = 16519; //  ((int)((129.057/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+//static const int GV = -12051;//  ((int)((-94.154/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+//static const int GU = -9534; //  ((int)((-74.494/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+//
+//static const int BY = 3208;  //  ((int)(( 25.064/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+//static const int BV = -2339; //  ((int)((-18.285/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+//static const int BU = 14392; //  ((int)((112.439/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
 
-static const int GY = 16519; //  ((int)((129.057/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
-static const int GV = -12051;//  ((int)((-94.154/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
-static const int GU = -9534; //  ((int)((-74.494/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+#define  RGB2YUV_SHIFT  15  // highest value where [RGB][YUV] fit in signed short
 
-static const int BY = 3208;  //  ((int)(( 25.064/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
-static const int BV = -2339; //  ((int)((-18.285/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
-static const int BU = 14392; //  ((int)((112.439/256.0)*(1<<RGB2YUV_SHIFT)+0.5));
+//#define BY ((int)( 0.098 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define BV ((int)(-0.071 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define BU ((int)( 0.439 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define GY ((int)( 0.504 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define GV ((int)(-0.368 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define GU ((int)(-0.291 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define RY ((int)( 0.257 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define RV ((int)( 0.439 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define RU ((int)(-0.148 * (1 << RGB2YUV_SHIFT) + 0.5))
+
+//#define BY ((int)( 0.114 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define BV ((int)(-0.100 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define BU ((int)( 0.436 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define GY ((int)( 0.587 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define GV ((int)(-0.515 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define GU ((int)(-0.289 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define RY ((int)( 0.299 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define RV ((int)( 0.615 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define RU ((int)(-0.148 * (1 << RGB2YUV_SHIFT) + 0.5))
+
+//#define BY ((int)( 0.11400 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define BV ((int)(-0.08131 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define BU ((int)( 0.50000 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define GY ((int)( 0.58700 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define GV ((int)(-0.41869 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define GU ((int)(-0.33126 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define RY ((int)( 0.29900 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define RV ((int)( 0.50000 * (1 << RGB2YUV_SHIFT) + 0.5))
+//#define RU ((int)(-0.16874 * (1 << RGB2YUV_SHIFT) + 0.5))
+
+#define BY ( (int)(0.114 * 219 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
+#define BV (-(int)(0.081 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
+#define BU ( (int)(0.500 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
+#define GY ( (int)(0.587 * 219 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
+#define GV (-(int)(0.419 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
+#define GU (-(int)(0.331 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
+#define RY ( (int)(0.299 * 219 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
+#define RV ( (int)(0.500 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
+#define RU (-(int)(0.169 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
 
 static const int Y_ADD = 16;
 static const int U_ADD = 128;
@@ -151,6 +193,7 @@ void Convert_4byte_To_I420Frame(const void* data, unsigned char* dest, unsigned 
     unsigned vpos = npixels;
     unsigned upos = vpos + npixels / 4;
     unsigned stride = width*PixStride;
+    int Y, U, V;
 
     /*fprintf(stderr, "npixels=%u, width=%u, height=%u, ypos=%u,upos=%u,vpos=%u",
         npixels,width,height, ypos,upos,vpos);*/
@@ -162,22 +205,6 @@ void Convert_4byte_To_I420Frame(const void* data, unsigned char* dest, unsigned 
     {
         for(unsigned x=0; x<width; x += 2)
         {
-        //#ifdef __MMX__
-        //  if(PixStride == 4)
-        //  {
-        //    c64_MMX p0_1; p0_1.Get(&src[pos]);        // two 32-bit pixels (4*8)
-        //    c64_MMX p2_3; p2_3.Get(&src[pos+stride]); // two 32-bit pixels
-
-        //    pos += PixStride*2;
-        //    
-        //    Convert_I420_MMX_Common(p0_1, p2_3,
-        //        dest+ypos,
-        //        dest+ypos+width,
-        //        dest+upos++,
-        //        dest+vpos++);
-        //  }
-        //  else
-        //#endif
           {
             int c[3], rgb[3][4];
             
@@ -193,15 +220,21 @@ void Convert_4byte_To_I420Frame(const void* data, unsigned char* dest, unsigned 
             unsigned destpos[4] = { ypos, ypos+width, ypos+1, ypos+width+1 };
             for(int n=0; n<4; ++n)
             {
-                dest[destpos[n]]
-                    = Y_ADD + ((RY * rgb[0][n]
+                 Y = Y_ADD + ((RY * rgb[0][n]
                               + GY * rgb[1][n]
                               + BY * rgb[2][n]
                                ) >> RGB2YUV_SHIFT);  // y
+
+		 dest[destpos[n]] = Y;
             }
             
-            dest[upos++] = (U_ADD + ((RU * c[0] + GU * c[1] + BU * c[2]) >> (RGB2YUV_SHIFT+2)) );
-            dest[vpos++] = (V_ADD + ((RV * c[0] + GV * c[1] + BV * c[2]) >> (RGB2YUV_SHIFT+2)) ); 
+            U = (U_ADD + ((RU * c[0] + GU * c[1] + BU * c[2]) >> (RGB2YUV_SHIFT+2)) );
+            V = (V_ADD + ((RV * c[0] + GV * c[1] + BV * c[2]) >> (RGB2YUV_SHIFT+2)) ); 
+
+	    //printf("%i,%i = rgb( %i, %i, %i ) = yuv( %i, %i, %i )\n", x,y,
+	    //    	    rgb[0][3], rgb[1][3], rgb[2][3], Y, U, V );
+            dest[upos++] = U;
+            dest[vpos++] = V;
           }
             
             ypos += 2;
@@ -212,10 +245,6 @@ void Convert_4byte_To_I420Frame(const void* data, unsigned char* dest, unsigned 
     
     /*fprintf(stderr, ",yr=%u,ur=%u,vr=%u\n",
         ypos,upos,vpos);*/
-    
-    //#ifdef __MMX__
-    // MMX_clear();
-    //#endif
 }
 //**************************************************************************************
 #ifdef _USE_X264
