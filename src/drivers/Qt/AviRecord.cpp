@@ -1125,12 +1125,11 @@ static void print_Codecs(void)
 
 static int initMedia( const char *filename )
 {
-#ifdef ff_const59
-	ff_const59 AVOutputFormat *fmt;
+#if  LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT( 59, 0, 0 )
+	const AVOutputFormat *fmt;
 #else
 	AVOutputFormat *fmt;
 #endif
-
 	/* Initialize libavcodec, and register all codecs and formats. */
 	//av_register_all();
 
