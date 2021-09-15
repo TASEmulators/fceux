@@ -746,6 +746,7 @@ struct OutputStream
 	struct SwsContext *sws_ctx;
 	struct SwrContext *swr_ctx;
 	int64_t next_pts;
+	int      bytesPerSample;
 
 	OutputStream(void)
 	{
@@ -754,6 +755,7 @@ struct OutputStream
 		frame = tmp_frame = NULL;
 		sws_ctx = NULL;
 		swr_ctx = NULL;
+		bytesPerSample = 0;
 		next_pts = 0;
 	}
 
@@ -775,6 +777,7 @@ struct OutputStream
 		{
 			swr_free(&swr_ctx); swr_ctx = NULL;
 		}
+		bytesPerSample = 0;
 		next_pts = 0;
 	}
 };
@@ -1074,8 +1077,14 @@ static int initAudioStream( enum AVCodecID codec_id, OutputStream *ost )
 		nb_samples = c->frame_size;
 	}
 
+	ost->bytesPerSample  = av_get_bytes_per_sample( c->sample_fmt );
+
 	ost->frame     = alloc_audio_frame(c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples);
-	ost->tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_MONO, audioSampleRate, nb_samples);
+	ost->tmp_frame = alloc_audio_frame(c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples);
+	//ost->tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_MONO, audioSampleRate, nb_samples);
+
+	printf("Audio: FMT:%i  ChanLayout:%li  Rate:%i  FrameSize:%i  bytesPerSample:%i \n",
+			c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples, ost->bytesPerSample );
 
 	/* copy the stream parameters to the muxer */
 	ret = avcodec_parameters_from_context(ost->st->codecpar, c);
@@ -1084,6 +1093,8 @@ static int initAudioStream( enum AVCodecID codec_id, OutputStream *ost )
 		fprintf(stderr, "Could not copy the stream parameters\n");
 		return -1;
 	}
+	ost->frame->nb_samples = 0;
+
 	return 0;
 }
 
@@ -1114,7 +1125,8 @@ static void print_Codecs(void)
 
 static int initMedia( const char *filename )
 {
-	const AVOutputFormat *fmt;
+	//const AVOutputFormat *fmt;
+	AVOutputFormat *fmt;
 
 	/* Initialize libavcodec, and register all codecs and formats. */
 	//av_register_all();
@@ -1199,6 +1211,7 @@ static int write_audio_frame( AVFrame *frame )
 		frame->pts        = ost->next_pts;
 		ost->next_pts    += frame->nb_samples;
 	}
+	//printf("Encoding Audio: %i\n", frame->nb_samples );
 
 	ret = avcodec_send_frame(ost->enc, frame);
 
@@ -1235,54 +1248,105 @@ static int write_audio_frame( AVFrame *frame )
 
 static int encode_audio_frame( int16_t *audioOut, int numSamples)
 {
-	int i,j, ret;
+	int i,ret;
 	OutputStream *ost = &audio_st;
-	AVFrame *frame = NULL;
+	const uint8_t *inData[AV_NUM_DATA_POINTERS];
 	
-	if ( audioOut )
+	for (i=0; i<AV_NUM_DATA_POINTERS; i++)
 	{
-		frame = ost->tmp_frame;
-
-		int16_t *q = (int16_t*)frame->data[0];
-
-		for (j = 0; j < numSamples; j++)
-		{
-			for (i = 0; i < ost->enc->channels; i++)
-			{
-        			*q++ = audioOut[j];
-			}
-		}
-		frame->nb_samples = numSamples;
-
-		printf("numSamples: %i\n", numSamples);
+		inData[i] = 0;
 	}
 
-	ret = av_frame_make_writable(ost->frame);
+	if ( audioOut )
+	{
+		inData[0] = (const uint8_t*)audioOut;
+
+		//printf("Audio NumSamplesIn: %i\n", numSamples);
+	}
+
+	ret = av_frame_make_writable(ost->tmp_frame);
 
 	if (ret < 0)
 	{
 	    return -1;
 	}
-	ret = swr_convert_frame( ost->swr_ctx, ost->frame, audioOut ? ost->tmp_frame : NULL );
-	//ret = avresample_convert(ost->swr_ctx, NULL, 0, 0,
-	//				frame->extended_data, frame->linesize[0],
-	//				frame->nb_samples);
+	
+	if ( audioOut )
+	{
+		ret = swr_convert( ost->swr_ctx, ost->tmp_frame->data, ost->tmp_frame->linesize[0], inData, numSamples );
+	}
+	else
+	{
+		ret = swr_convert( ost->swr_ctx, ost->tmp_frame->data, ost->tmp_frame->linesize[0], NULL, 0 );
+	}
+
 	if (ret < 0)
 	{
 		fprintf(stderr, "Error feeding audio data to the resampler\n");
 		return -1;
 	}
-	if (ret == 0)
+	if (ret > 0)
 	{
-		//printf("IN:%i  OUT:%i\n", ost->tmp_frame->nb_samples, ost->frame->nb_samples );
-		if ( write_audio_frame( ost->frame ) )
+		int spaceAvail, samplesLeft, copySize, srcOffset = 0;
+
+		samplesLeft = ost->tmp_frame->nb_samples = ret;
+
+		spaceAvail  = ost->enc->frame_size - ost->frame->nb_samples;
+
+		while ( samplesLeft > 0 )
 		{
-			return -1;
+			if ( spaceAvail >= samplesLeft )
+			{
+				copySize = samplesLeft;
+			}
+			else
+			{
+				copySize = spaceAvail;
+			}
+			//printf("Audio: Space:%i  Data:%i  Copy:%i\n", spaceAvail, samplesLeft, copySize );
+
+			ret = av_frame_make_writable(ost->frame);
+
+			if (ret < 0)
+			{
+				fprintf(stderr, "Error audio av_frame_make_writable\n");
+				return -1;
+			}
+
+			ret = av_samples_copy( ost->frame->data, ost->tmp_frame->data,
+					ost->frame->nb_samples, srcOffset, copySize, 
+						ost->frame->channels, ost->enc->sample_fmt );
+
+			if ( ret < 0 )
+			{
+				return -1;
+			}
+			ost->frame->nb_samples += copySize;
+			srcOffset              += copySize;
+			samplesLeft            -= copySize;
+
+			if ( ost->frame->nb_samples >= ost->enc->frame_size )
+			{
+				if ( write_audio_frame( ost->frame ) )
+				{
+					return -1;
+				}
+				ost->frame->nb_samples = 0;
+			}
+			spaceAvail = ost->enc->frame_size - ost->frame->nb_samples;
 		}
 	}
 
 	if ( audioOut == NULL )
 	{
+		if ( ost->frame->nb_samples > 0 )
+		{
+			if ( write_audio_frame( ost->frame ) )
+			{
+				return -1;
+			}
+			ost->frame->nb_samples = 0;
+		}
 		if ( write_audio_frame( NULL ) )
 		{
 			return -1;
