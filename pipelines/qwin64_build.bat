@@ -2,8 +2,8 @@
 set PROJECT_ROOT=%~dp0..
 set CWD=%CD%
 
-call "C:\Qt\5.15\msvc2019_64\bin\qtenv2.bat"
-REM call "C:\Qt\6.0\msvc2019_64\bin\qtenv2.bat"
+call "C:\Qt\5.15.0\msvc2019_64\bin\qtenv2.bat"
+::call "C:\Qt\6.0\msvc2019_64\bin\qtenv2.bat"
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 cd /d %CWD%
@@ -48,9 +48,33 @@ set LIBARCHIVE_INSTALL_PREFIX=%CD%
 set PUBLIC_RELEASE=0
 IF DEFINED FCEU_RELEASE_VERSION (set PUBLIC_RELEASE=1)
 
+if exist curl\ (
+  goto skipCURL
+)
+
+curl -s -LO https://curl.se/download/curl-7.79.0.zip
+
+REM rmdir /q /s curl
+
+powershell -command "Expand-Archive" curl-7.79.0.zip .
+
+cd curl-7.79.0/winbuild
+set RTLIBCFG=static
+nmake /f Makefile.vc mode=static debug=no
+cd ../..
+
+mkdir curl
+xcopy "curl-7.79.0/builds/libcurl-vc-x64-release-static-ipv6-sspi-schannel/include" "curl/include" /E /I
+xcopy "curl-7.79.0/builds/libcurl-vc-x64-release-static-ipv6-sspi-schannel/lib" "curl/lib" /E /I
+rmdir curl-7.79.0 /S /Q
+
+:skipCURL
+
+set CURL_INSTALL_PREFIX=%CD%
+
 REM cmake -h
 REM cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
-cmake -DQT6=0 -DPUBLIC_RELEASE=%PUBLIC_RELEASE% -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX% -DLIBARCHIVE_INSTALL_PREFIX=%LIBARCHIVE_INSTALL_PREFIX% -DUSE_LIBAV=1 -DFFMPEG_INSTALL_PREFIX=%FFMPEG_INSTALL_PREFIX% -G"Visual Studio 16" -T"v142" ..
+cmake -DQT6=0 -DPUBLIC_RELEASE=%PUBLIC_RELEASE% -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX% -DLIBARCHIVE_INSTALL_PREFIX=%LIBARCHIVE_INSTALL_PREFIX% -DUSE_LIBAV=1 -DFFMPEG_INSTALL_PREFIX=%FFMPEG_INSTALL_PREFIX% -DCURL_INSTALL_PREFIX=%CURL_INSTALL_PREFIX% -G"Visual Studio 16" -T"v142" ..
 
 REM nmake
 msbuild /m fceux.sln /p:Configuration=Release

@@ -424,7 +424,7 @@ int FCEUPPU_GetAttr(int ntnum, int xt, int yt) {
 }
 
 //new ppu-----
-inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
+void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 	uint32 tmp = A;
 
 	if (PPU_hook) PPU_hook(A);

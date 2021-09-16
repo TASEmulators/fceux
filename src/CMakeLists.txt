@@ -52,11 +52,14 @@ if(WIN32)
      #add_definitions( /wd4018 ) # Integer comparison sign mismatch warnings
      include_directories( ${SDL_INSTALL_PREFIX}/SDL2/include )
      include_directories( ${LIBARCHIVE_INSTALL_PREFIX}/libarchive/include )
+     include_directories( ${CURL_INSTALL_PREFIX}/curl/include )
      include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
      set( OPENGL_LDFLAGS  OpenGL::GL )
      set( SDL2_LDFLAGS  ${SDL_INSTALL_PREFIX}/SDL2/lib/x64/SDL2.lib )
      set( LIBARCHIVE_LDFLAGS  ${LIBARCHIVE_INSTALL_PREFIX}/libarchive/lib/archive.lib )
+     set( CURL_LIBRARIES  ${CURL_INSTALL_PREFIX}/curl/lib/libcurl_a.lib )
      set( SYS_LIBS  wsock32 ws2_32 vfw32 Htmlhelp )
+     set( CURL_SYS_LIBS Normaliz Wldap32 Crypt32 advapi32 ) #ws2_32
      set(APP_ICON_RESOURCES_WINDOWS  ${CMAKE_SOURCE_DIR}/icons/fceux.rc )
 
      if ( ${USE_LIBAV} )
@@ -86,6 +89,7 @@ else(WIN32)
   find_package(PkgConfig REQUIRED)
   find_package(OpenGL REQUIRED)
   find_package(ZLIB REQUIRED)
+  find_package(CURL REQUIRED)
 
   add_definitions( -Wall  -Wno-write-strings  -Wno-parentheses  -Wno-unused-local-typedefs  -fPIC )
   #add_definitions( -Wno-sign-compare )  # Integer comparison sign mismatch warnings
@@ -201,6 +205,7 @@ else(WIN32)
           	set( SYS_LIBS  -lrt  -lpthread  -ldl)
         endif()
   endif()
+  set( CURL_SYS_LIBS )
 
 endif(WIN32)
 
@@ -498,6 +503,11 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/vrc7p.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/yoko.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/inx007t.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/boards/easywsclient.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/boards/mongoose.c
+  	${CMAKE_CURRENT_SOURCE_DIR}/boards/pping.c
+  	${CMAKE_CURRENT_SOURCE_DIR}/boards/rainbow_esp.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/boards/rainbow13.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/arkanoid.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/bworld.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/cursor.cpp
@@ -671,7 +681,9 @@ target_link_libraries( ${APP_NAME}
    ${OPENGL_LDFLAGS}  
  	${SDL2_LDFLAGS}
 	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES} ${LIBARCHIVE_LDFLAGS}
+	${CURL_LIBRARIES}
 	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS} ${LIBAV_LDFLAGS}
+	${CURL_SYS_LIBS}
  	${SYS_LIBS}
 )
 

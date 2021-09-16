@@ -36,7 +36,7 @@ void PPU_ResetHooks();
 extern uint8 (FASTCALL *FFCEUX_PPURead)(uint32 A);
 extern void (*FFCEUX_PPUWrite)(uint32 A, uint8 V);
 extern uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A);
-void FFCEUX_PPUWrite_Default(uint32 A, uint8 V);
+extern void FFCEUX_PPUWrite_Default(uint32 A, uint8 V);
 
 extern int g_rasterpos;
 extern uint8 PPU[4];
