@@ -10,6 +10,8 @@
 #include <list>
 
 #include <QThread>
+#include <QLabel>
+#include <QComboBox>
 
 enum aviEncoderList
 {
@@ -68,4 +70,27 @@ class  AviRecordDiskThread_t : public QThread
 	signals:
 		void finished(void);
 };
+
+#ifdef _USE_LIBAV
+class  LibavOptionsPage : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		LibavOptionsPage(QWidget *parent = nullptr);
+		~LibavOptionsPage(void);
+
+	protected:
+		QComboBox  *videoEncSel;
+		QComboBox  *audioEncSel;
+
+		void initCodecLists(void);
+
+	private slots:
+		void videoCodecChanged(int idx);
+		void audioCodecChanged(int idx);
+};
+
+#endif
+
 #endif

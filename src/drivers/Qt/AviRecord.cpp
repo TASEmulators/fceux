@@ -747,6 +747,8 @@ struct OutputStream
 	struct SwrContext *swr_ctx;
 	int64_t next_pts;
 	int      bytesPerSample;
+	int      frameSize;
+	AVCodecID  selEnc;
 
 	OutputStream(void)
 	{
@@ -756,7 +758,9 @@ struct OutputStream
 		sws_ctx = NULL;
 		swr_ctx = NULL;
 		bytesPerSample = 0;
+		frameSize = 0;
 		next_pts = 0;
+		selEnc = AV_CODEC_ID_NONE;
 	}
 
 	void close(void)
@@ -1077,6 +1081,7 @@ static int initAudioStream( enum AVCodecID codec_id, OutputStream *ost )
 		nb_samples = c->frame_size;
 	}
 
+	ost->frameSize = nb_samples;
 	ost->bytesPerSample  = av_get_bytes_per_sample( c->sample_fmt );
 
 	ost->frame     = alloc_audio_frame(c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples);
@@ -1160,16 +1165,27 @@ static int initMedia( const char *filename )
 
 	//strncpy(oc->filename, filename, sizeof(oc->filename));
 
-	if ( initVideoStream( fmt->video_codec, &video_st ) )
+	if ( video_st.selEnc == AV_CODEC_ID_NONE )
+	{
+		video_st.selEnc = fmt->video_codec;
+	}
+	if ( audio_st.selEnc == AV_CODEC_ID_NONE )
+	{
+		audio_st.selEnc = fmt->audio_codec;
+	}
+
+	if ( initVideoStream( video_st.selEnc, &video_st ) )
 	//if ( initVideoStream( AV_CODEC_ID_H264, &video_st ) )
 	//if ( initVideoStream( AV_CODEC_ID_FFV1, &video_st ) )
 	//if ( initVideoStream( AV_CODEC_ID_RV20, &video_st ) )
 	//if ( initVideoStream( AV_CODEC_ID_RAWVIDEO, &video_st ) )
 	{
+		printf("Video Stream Init Failed\n");
 		return -1;
 	}
-	if ( initAudioStream( fmt->audio_codec, &audio_st ) )
+	if ( initAudioStream( audio_st.selEnc, &audio_st ) )
 	{
+		printf("Audio Stream Init Failed\n");
 		return -1;
 	}
 
@@ -1192,6 +1208,7 @@ static int initMedia( const char *filename )
 	/* Write the stream header, if any. */
 	if ( avformat_write_header(oc, NULL) )
 	{
+		printf("Error: Failed to write avformat header\n");
 		return -1;
 	}
 
@@ -1289,11 +1306,13 @@ static int encode_audio_frame( int16_t *audioOut, int numSamples)
 	}
 	if (ret > 0)
 	{
-		int spaceAvail, samplesLeft, copySize, srcOffset = 0;
+		int spaceAvail, samplesLeft, copySize, srcOffset = 0, frameSize;
+
+		frameSize = ost->frameSize;
 
 		samplesLeft = ost->tmp_frame->nb_samples = ret;
 
-		spaceAvail  = ost->enc->frame_size - ost->frame->nb_samples;
+		spaceAvail  = frameSize - ost->frame->nb_samples;
 
 		while ( samplesLeft > 0 )
 		{
@@ -1327,7 +1346,7 @@ static int encode_audio_frame( int16_t *audioOut, int numSamples)
 			srcOffset              += copySize;
 			samplesLeft            -= copySize;
 
-			if ( ost->frame->nb_samples >= ost->enc->frame_size )
+			if ( ost->frame->nb_samples >= frameSize )
 			{
 				if ( write_audio_frame( ost->frame ) )
 				{
@@ -1335,7 +1354,7 @@ static int encode_audio_frame( int16_t *audioOut, int numSamples)
 				}
 				ost->frame->nb_samples = 0;
 			}
-			spaceAvail = ost->enc->frame_size - ost->frame->nb_samples;
+			spaceAvail = frameSize - ost->frame->nb_samples;
 		}
 	}
 
@@ -2034,4 +2053,97 @@ void AviRecordDiskThread_t::run(void)
 	emit finished();
 }
 //----------------------------------------------------
+//**************************************************************************************
+//**************************************************************************************
+//*****************************  Options Pages *****************************************
+//**************************************************************************************
+//**************************************************************************************
+#ifdef _USE_LIBAV
+LibavOptionsPage::LibavOptionsPage(QWidget *parent)
+	: QWidget(parent)
+{
+	QLabel *lbl;
+	QVBoxLayout *vbox1;
+	QHBoxLayout *hbox;
+
+	vbox1 = new QVBoxLayout();
+
+	videoEncSel = new QComboBox();
+	audioEncSel = new QComboBox();
+
+	hbox  = new QHBoxLayout();
+	vbox1->addLayout(hbox);
+	lbl  = new QLabel( tr("Video Encoder:") );
+	hbox->addWidget( lbl );
+	hbox->addWidget( videoEncSel );
+
+	hbox  = new QHBoxLayout();
+	vbox1->addLayout(hbox);
+	lbl  = new QLabel( tr("Audio Encoder:") );
+	hbox->addWidget( lbl );
+	hbox->addWidget( audioEncSel );
+
+	initCodecLists();
+
+	setLayout(vbox1);
+
+	connect(videoEncSel, SIGNAL(currentIndexChanged(int)), this, SLOT(videoCodecChanged(int)));
+	connect(audioEncSel, SIGNAL(currentIndexChanged(int)), this, SLOT(audioCodecChanged(int)));
+}
+//-----------------------------------------------------
+LibavOptionsPage::~LibavOptionsPage(void)
+{
+
+}
+//-----------------------------------------------------
+void LibavOptionsPage::initCodecLists(void)
+{
+	void *it = NULL;
+	const AVCodec *c;
+	const AVOutputFormat *ofmt;
+	int compatible;
+
+	ofmt = av_guess_format("avi", NULL, NULL);
+
+	c = av_codec_iterate( &it );
+
+	while ( c != NULL )
+	{
+		if ( av_codec_is_encoder(c) )
+		{
+			if ( c->type == AVMEDIA_TYPE_VIDEO )
+			{
+				compatible = avformat_query_codec( ofmt, c->id, FF_COMPLIANCE_NORMAL );
+				printf("Video Encoder: %i  %s   %s\t:%i\n", c->id, c->name, c->long_name, compatible);
+				if ( compatible )
+				{
+					videoEncSel->addItem( tr(c->name), c->id );
+				}
+			}
+			else if ( c->type == AVMEDIA_TYPE_AUDIO )
+			{
+				compatible = avformat_query_codec( ofmt, c->id, FF_COMPLIANCE_NORMAL );
+				printf("Audio Encoder: %i  %s   %s\t:%i\n", c->id, c->name, c->long_name, compatible);
+				if ( compatible )
+				{
+					audioEncSel->addItem( tr(c->name), c->id );
+				}
+			}
+		}
+
+		c = av_codec_iterate( &it );
+	}
+}
+//-----------------------------------------------------
+void LibavOptionsPage::videoCodecChanged(int idx)
+{
+	LIBAV::video_st.selEnc = (AVCodecID)videoEncSel->itemData(idx).toInt();
+}
+//-----------------------------------------------------
+void LibavOptionsPage::audioCodecChanged(int idx)
+{
+	LIBAV::audio_st.selEnc = (AVCodecID)audioEncSel->itemData(idx).toInt();
+}
+//-----------------------------------------------------
+#endif
 //**************************************************************************************
