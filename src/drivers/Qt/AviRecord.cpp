@@ -821,8 +821,11 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	AVCodecContext *c;
 	double fps;
 	int fps1000;
+	unsigned int usec;
 
 	fps = getBaseFrameRate();
+
+	usec = (unsigned int)((1.0e6 / fps)+0.50);
 
 	fps1000 = (int)(fps * 1000.0);
 
@@ -866,8 +869,16 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	 * timebase should be 1/framerate and timestamp increments should be
 	 * identical to 1. */
 	//ost->st->time_base = (AVRational){ 1000, fps1000 };
-	ost->st->time_base.num = 1000;
-	ost->st->time_base.den = fps1000;
+	if ( codec_id == AV_CODEC_ID_MPEG4 )
+	{   // MPEG4 max num/den is 65535 each
+		ost->st->time_base.num = 1000;
+		ost->st->time_base.den = fps1000;
+	}
+	else
+	{
+		ost->st->time_base.num =    usec;
+		ost->st->time_base.den = 1000000u;
+	}
 	c->time_base       = ost->st->time_base;
 	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
 	c->pix_fmt       = AV_PIX_FMT_YUV420P;
