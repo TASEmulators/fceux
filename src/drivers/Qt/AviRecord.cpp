@@ -949,17 +949,12 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 	/* If the output format is not YUV420P, then a temporary YUV420P
 	 * picture is needed too. It is then converted to the required
 	 * output format. */
-	ost->tmp_frame = NULL;
+	ost->tmp_frame = alloc_picture(AV_PIX_FMT_BGRA, c->width, c->height);
 
-	if (c->pix_fmt != AV_PIX_FMT_BGRA)
+	if (ost->tmp_frame == NULL)
 	{
-		ost->tmp_frame = alloc_picture(AV_PIX_FMT_BGRA, c->width, c->height);
-
-		if (ost->tmp_frame == NULL)
-		{
-			fprintf(stderr, "Could not allocate temporary picture\n");
-			return -1;
-		}
+		fprintf(stderr, "Could not allocate temporary picture\n");
+		return -1;
 	}
 	
 	ost->sws_ctx = sws_getContext(c->width, c->height,
