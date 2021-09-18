@@ -35,21 +35,29 @@
 #include "Qt/input.h"
 #include "Qt/config.h"
 #include "Qt/keyscan.h"
+#include "Qt/AviRecord.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/MovieOptions.h"
 
 //----------------------------------------------------------------------------
 MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Window)
 {
 	QLabel *lbl;
-	QVBoxLayout *mainLayout;
+	QGroupBox   *gbox;
+	QHBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
+	QVBoxLayout *vbox1, *vbox2;
 	QPushButton *closeButton;
+	std::vector <std::string> aviDriverList;
 
 	setWindowTitle("Movie Options");
 
-	mainLayout = new QVBoxLayout();
+	mainLayout = new QHBoxLayout();
+	vbox1      = new QVBoxLayout();
+	vbox2      = new QVBoxLayout();
+
+	mainLayout->addLayout(vbox1);
 
 	readOnlyReplay = new QCheckBox(tr("Always Suggest Read-Only Replay"));
 	pauseAfterPlay = new QCheckBox(tr("Pause After Playback"));
@@ -63,15 +71,15 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	lbl = new QLabel(tr("Loading states in record mode will not immediately truncate movie, next frame input will. (VBA-rr and SNES9x style)"));
 	lbl->setWordWrap(true);
 
-	mainLayout->addWidget(readOnlyReplay);
-	mainLayout->addWidget(pauseAfterPlay);
-	mainLayout->addWidget(closeAfterPlay);
-	mainLayout->addWidget(bindSaveStates);
-	mainLayout->addWidget(dpySubTitles);
-	mainLayout->addWidget(putSubTitlesAvi);
-	mainLayout->addWidget(autoBackUp);
-	mainLayout->addWidget(loadFullStates);
-	mainLayout->addWidget(lbl);
+	vbox1->addWidget(readOnlyReplay);
+	vbox1->addWidget(pauseAfterPlay);
+	vbox1->addWidget(closeAfterPlay);
+	vbox1->addWidget(bindSaveStates);
+	vbox1->addWidget(dpySubTitles);
+	vbox1->addWidget(putSubTitlesAvi);
+	vbox1->addWidget(autoBackUp);
+	vbox1->addWidget(loadFullStates);
+	vbox1->addWidget(lbl);
 
 	readOnlyReplay->setChecked(suggestReadOnlyReplay);
 	pauseAfterPlay->setChecked(pauseAfterPlayback);
@@ -89,8 +97,46 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	hbox = new QHBoxLayout();
 	hbox->addStretch(5);
 	hbox->addWidget( closeButton, 1 );
-	mainLayout->addLayout( hbox );
+	vbox1->addLayout( hbox );
 
+	FCEUD_AviGetFormatOpts( aviDriverList );
+
+	gbox = new QGroupBox( tr("AVI Recording Options") );
+	gbox->setLayout(vbox2);
+	mainLayout->addWidget(gbox);
+	hbox = new QHBoxLayout();
+	aviBackend = new QComboBox();
+	aviPageStack = new QStackedWidget();
+	lbl = new QLabel(tr("AVI Backend Driver:"));
+	hbox->addWidget( lbl );
+	hbox->addWidget( aviBackend );
+	vbox2->addLayout( hbox );
+	vbox2->addWidget( aviPageStack );
+
+	for (size_t i=0; i<aviDriverList.size(); i++)
+	{
+		aviBackend->addItem(tr(aviDriverList[i].c_str()), (unsigned int)i);
+
+		switch (i)
+		{
+			#ifdef _USE_LIBAV
+			case AVI_LIBAV:
+			{
+				aviPageStack->addWidget( new LibavOptionsPage() );
+			}
+			break;
+			#endif
+			default:
+				aviPageStack->addWidget( new QWidget() );
+			break;
+		}
+
+		if ( i == aviGetSelVideoFormat() )
+		{
+			aviBackend->setCurrentIndex(i);
+			aviPageStack->setCurrentIndex(i);
+		}
+	}
 	setLayout(mainLayout);
 
 	connect(readOnlyReplay, SIGNAL(stateChanged(int)), this, SLOT(readOnlyReplayChanged(int)));
@@ -101,6 +147,9 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	connect(putSubTitlesAvi, SIGNAL(stateChanged(int)), this, SLOT(putSubTitlesAviChanged(int)));
 	connect(autoBackUp, SIGNAL(stateChanged(int)), this, SLOT(autoBackUpChanged(int)));
 	connect(loadFullStates, SIGNAL(stateChanged(int)), this, SLOT(loadFullStatesChanged(int)));
+
+	connect(aviBackend, SIGNAL(currentIndexChanged(int)), this, SLOT(aviBackendChanged(int)));
+
 }
 //----------------------------------------------------------------------------
 MovieOptionsDialog_t::~MovieOptionsDialog_t(void)
@@ -163,5 +212,10 @@ void MovieOptionsDialog_t::autoBackUpChanged(int state)
 void MovieOptionsDialog_t::loadFullStatesChanged(int state)
 {
 	fullSaveStateLoads = (state != Qt::Unchecked);
+}
+//----------------------------------------------------------------------------
+void MovieOptionsDialog_t::aviBackendChanged(int idx)
+{
+	aviPageStack->setCurrentIndex(idx);
 }
 //----------------------------------------------------------------------------

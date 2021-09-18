@@ -10,6 +10,9 @@
 #include <list>
 
 #include <QThread>
+#include <QLabel>
+#include <QComboBox>
+#include <QGroupBox>
 
 enum aviEncoderList
 {
@@ -20,6 +23,9 @@ enum aviEncoderList
 	#endif
 	#ifdef _USE_X265
 	AVI_X265,
+	#endif
+	#ifdef _USE_LIBAV
+	AVI_LIBAV,
 	#endif
 	#ifdef WIN32
 	AVI_VFW,
@@ -65,4 +71,30 @@ class  AviRecordDiskThread_t : public QThread
 	signals:
 		void finished(void);
 };
+
+#ifdef _USE_LIBAV
+class  LibavOptionsPage : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		LibavOptionsPage(QWidget *parent = nullptr);
+		~LibavOptionsPage(void);
+
+	protected:
+		QComboBox  *videoEncSel;
+		QComboBox  *audioEncSel;
+		QGroupBox  *videoGbox;
+		QGroupBox  *audioGbox;
+
+		void initCodecLists(void);
+		void initPixelFormatSelect(const char *codec_name);
+
+	private slots:
+		void videoCodecChanged(int idx);
+		void audioCodecChanged(int idx);
+};
+
+#endif
+
 #endif

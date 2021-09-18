@@ -15,6 +15,7 @@
 #include <QGroupBox>
 #include <QTreeView>
 #include <QTreeWidget>
+#include <QStackedWidget>
 
 #include "Qt/main.h"
 
@@ -37,6 +38,8 @@ protected:
 	QCheckBox *putSubTitlesAvi;
 	QCheckBox *autoBackUp;
 	QCheckBox *loadFullStates;
+	QComboBox *aviBackend;
+	QStackedWidget *aviPageStack;
 
 private:
 public slots:
@@ -50,4 +53,5 @@ private slots:
 	void putSubTitlesAviChanged(int state);
 	void autoBackUpChanged(int state);
 	void loadFullStatesChanged(int state);
+	void aviBackendChanged(int idx);
 };

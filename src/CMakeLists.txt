@@ -36,6 +36,17 @@ if(WIN32)
      set( SDL2_LDFLAGS  ${SDL_INSTALL_PREFIX}/SDL2/lib/x64/SDL2.lib )
      set( SYS_LIBS  wsock32 ws2_32 vfw32 Htmlhelp )
      set(APP_ICON_RESOURCES_WINDOWS  ${CMAKE_SOURCE_DIR}/icons/fceux.rc )
+
+     if ( ${USE_LIBAV} )
+        add_definitions( -D_USE_LIBAV ${LIBAV_CFLAGS} )
+        include_directories( ${FFMPEG_INSTALL_PREFIX}/ffmpeg/include )
+        set( LIBAV_LDFLAGS  ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/avcodec.lib
+        	                 ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/avformat.lib
+                	         ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/avutil.lib
+                        	 ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/swscale.lib
+                        	 ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/swresample.lib )
+     endif()
+
 else(WIN32)
   # Non Windows System
   # UNIX (Linux or Mac OSX)
@@ -88,6 +99,13 @@ else(WIN32)
   if ( ${X265_FOUND} )
 	  message( STATUS "Using System X265 Encoder Library ${X265_VERSION}" )
 	  add_definitions( -D_USE_X265 ${X265_CFLAGS} )
+  endif()
+
+  pkg_check_modules( LIBAV  libavcodec  libavformat  libavutil  libswresample  libswscale)
+
+  if ( ${LIBAV_FOUND} )
+	  message( STATUS "Using System Libav Library ${LIBAV_VERSION}" )
+	  add_definitions( -D_USE_LIBAV ${LIBAV_CFLAGS} )
   endif()
 
   #pkg_check_modules( GL gl) # Use built in find package instead for OpenGL
@@ -547,7 +565,7 @@ target_link_libraries( ${APP_NAME}
    ${OPENGL_LDFLAGS}  
  	${SDL2_LDFLAGS}
 	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
-	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS}
+	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS} ${LIBAV_LDFLAGS}
  	${SYS_LIBS}
 )
 
