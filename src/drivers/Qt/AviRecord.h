@@ -12,6 +12,7 @@
 #include <QThread>
 #include <QLabel>
 #include <QComboBox>
+#include <QGroupBox>
 
 enum aviEncoderList
 {
@@ -83,8 +84,11 @@ class  LibavOptionsPage : public QWidget
 	protected:
 		QComboBox  *videoEncSel;
 		QComboBox  *audioEncSel;
+		QGroupBox  *videoGbox;
+		QGroupBox  *audioGbox;
 
 		void initCodecLists(void);
+		void initPixelFormatSelect(int codec_id);
 
 	private slots:
 		void videoCodecChanged(int idx);

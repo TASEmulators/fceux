@@ -41,7 +41,7 @@
 
 //----------------------------------------------------------------------------
 MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Window)
 {
 	QLabel *lbl;
 	QGroupBox   *gbox;
@@ -129,6 +129,12 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 			default:
 				aviPageStack->addWidget( new QWidget() );
 			break;
+		}
+
+		if ( i == aviGetSelVideoFormat() )
+		{
+			aviBackend->setCurrentIndex(i);
+			aviPageStack->setCurrentIndex(i);
 		}
 	}
 	setLayout(mainLayout);

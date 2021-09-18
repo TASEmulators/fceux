@@ -48,6 +48,7 @@
 extern "C"
 {
 #include "libavutil/opt.h"
+#include "libavutil/pixdesc.h"
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
 //#include "libavresample/avresample.h"
@@ -882,7 +883,7 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	c->time_base       = ost->st->time_base;
 	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
 	c->pix_fmt       = AV_PIX_FMT_YUV420P;
-	//c->pix_fmt       = AV_PIX_FMT_BGR24;
+	c->pix_fmt       = AV_PIX_FMT_BGR24;
 
 	//c->sample_aspect_ratio =  (AVRational){ 4, 3 };
 	//printf("compression_level:%i\n", c->compression_level);
@@ -1139,8 +1140,59 @@ static void print_Codecs(void)
 	}
 }
 
+static int setCodecFromConfig(void)
+{
+	std::string s;
+	const AVCodec *c;
+#if  LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT( 59, 0, 0 )
+	const AVOutputFormat *fmt;
+#else
+	AVOutputFormat *fmt;
+#endif
+
+	fmt = av_guess_format("avi", NULL, NULL);
+
+	g_config->getOption("SDL.AviFFmpegVideoCodec", &s);	
+
+	if ( s.size() > 0 )
+	{
+		c = avcodec_find_encoder_by_name(s.c_str());
+
+		if ( c )
+		{
+			video_st.selEnc = c->id;	
+		}
+	}
+
+	g_config->getOption("SDL.AviFFmpegAudioCodec", &s);	
+
+	if ( s.size() > 0 )
+	{
+		c = avcodec_find_encoder_by_name(s.c_str());
+
+		if ( c )
+		{
+			audio_st.selEnc = c->id;	
+		}
+	}
+
+	if ( fmt )
+	{
+		if ( video_st.selEnc == AV_CODEC_ID_NONE )
+		{
+			video_st.selEnc = fmt->video_codec;
+		}
+		if ( audio_st.selEnc == AV_CODEC_ID_NONE )
+		{
+			audio_st.selEnc = fmt->audio_codec;
+		}
+	}
+	return 0;
+}
+
 static int initMedia( const char *filename )
 {
+
 #if  LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT( 59, 0, 0 )
 	const AVOutputFormat *fmt;
 #else
@@ -1156,8 +1208,8 @@ static int initMedia( const char *filename )
 
 	if (fmt == NULL)
 	{
-		printf("Could not deduce output format from file extension: using MPEG.\n");
-		fmt = av_guess_format("mpeg", NULL, NULL);
+		printf("Could not deduce output format from file extension: using AVI.\n");
+		fmt = av_guess_format("avi", NULL, NULL);
 	}
 	if (fmt == NULL)
 	{
@@ -1174,22 +1226,9 @@ static int initMedia( const char *filename )
 	}
 	oc->oformat = fmt;
 
-	//strncpy(oc->filename, filename, sizeof(oc->filename));
-
-	if ( video_st.selEnc == AV_CODEC_ID_NONE )
-	{
-		video_st.selEnc = fmt->video_codec;
-	}
-	if ( audio_st.selEnc == AV_CODEC_ID_NONE )
-	{
-		audio_st.selEnc = fmt->audio_codec;
-	}
+	setCodecFromConfig();
 
 	if ( initVideoStream( video_st.selEnc, &video_st ) )
-	//if ( initVideoStream( AV_CODEC_ID_H264, &video_st ) )
-	//if ( initVideoStream( AV_CODEC_ID_FFV1, &video_st ) )
-	//if ( initVideoStream( AV_CODEC_ID_RV20, &video_st ) )
-	//if ( initVideoStream( AV_CODEC_ID_RAWVIDEO, &video_st ) )
 	{
 		printf("Video Stream Init Failed\n");
 		return -1;
@@ -2074,25 +2113,41 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	: QWidget(parent)
 {
 	QLabel *lbl;
-	QVBoxLayout *vbox1;
+	QVBoxLayout *vbox, *vbox1;
 	QHBoxLayout *hbox;
 
+	LIBAV::setCodecFromConfig();
+
 	vbox1 = new QVBoxLayout();
+
+	videoGbox = new QGroupBox( tr("Video:") );
+	audioGbox = new QGroupBox( tr("Audio:") );
+
+	audioGbox->setCheckable(true);
 
 	videoEncSel = new QComboBox();
 	audioEncSel = new QComboBox();
 
-	hbox  = new QHBoxLayout();
-	vbox1->addLayout(hbox);
-	lbl  = new QLabel( tr("Video Encoder:") );
-	hbox->addWidget( lbl );
-	hbox->addWidget( videoEncSel );
+	vbox1->addWidget( videoGbox );
+	vbox1->addWidget( audioGbox );
+
+	vbox = new QVBoxLayout();
+	videoGbox->setLayout(vbox);
+
+	hbox = new QHBoxLayout();
+	vbox->addLayout(hbox);
+	lbl  = new QLabel( tr("Encoder:") );
+	hbox->addWidget( lbl, 1 );
+	hbox->addWidget( videoEncSel, 5 );
+
+	vbox = new QVBoxLayout();
+	audioGbox->setLayout(vbox);
 
 	hbox  = new QHBoxLayout();
-	vbox1->addLayout(hbox);
-	lbl  = new QLabel( tr("Audio Encoder:") );
-	hbox->addWidget( lbl );
-	hbox->addWidget( audioEncSel );
+	vbox->addLayout(hbox);
+	lbl  = new QLabel( tr("Encoder:") );
+	hbox->addWidget( lbl, 1 );
+	hbox->addWidget( audioEncSel, 5 );
 
 	initCodecLists();
 
@@ -2104,6 +2159,56 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 //-----------------------------------------------------
 LibavOptionsPage::~LibavOptionsPage(void)
 {
+
+}
+//-----------------------------------------------------
+void LibavOptionsPage::initPixelFormatSelect(int codec_id)
+{
+	const AVCodec *c;
+	const AVPixFmtDescriptor *desc;
+
+	c = avcodec_find_encoder( (AVCodecID)codec_id);
+
+	if ( c == NULL )
+	{
+		return;
+	}
+	if ( c->pix_fmts )
+	{
+		int i=0, formatOk=0;
+		while (c->pix_fmts[i] != -1)
+		{
+			desc = av_pix_fmt_desc_get( c->pix_fmts[i] );
+
+			if ( desc )
+			{
+				printf("Codec PIX_FMT: %i: %s 0x%04X\t-  %s\n", c->pix_fmts[i],
+						desc->name, av_get_pix_fmt_loss(c->pix_fmts[i], AV_PIX_FMT_BGRA, 0), desc->alias);
+			}
+			i++;
+		}
+		//if ( !formatOk )
+		//{
+		//	printf("CODEC Does Not Support PIX_FMT:%i  Changing to:%i\n", c->pix_fmt, codec->pix_fmts[0] );
+		//	c->pix_fmt = codec->pix_fmts[0];
+		//}
+	}
+	else
+	{
+		desc = av_pix_fmt_desc_next( NULL );
+
+		while ( desc != NULL )
+		{
+			AVPixelFormat pf;
+
+			pf = av_pix_fmt_desc_get_id(desc);
+
+			printf("Codec PIX_FMT: %i: %s  0x%04X\t-  %s\n", 
+					pf, desc->name, av_get_pix_fmt_loss(pf, AV_PIX_FMT_BGRA, 0), desc->alias);
+
+			desc = av_pix_fmt_desc_next( desc );
+		}
+	}
 
 }
 //-----------------------------------------------------
@@ -2129,6 +2234,11 @@ void LibavOptionsPage::initCodecLists(void)
 				if ( compatible )
 				{
 					videoEncSel->addItem( tr(c->name), c->id );
+
+					if ( LIBAV::video_st.selEnc == c->id )
+					{
+						videoEncSel->setCurrentIndex( videoEncSel->count() - 1 );
+					}
 				}
 			}
 			else if ( c->type == AVMEDIA_TYPE_AUDIO )
@@ -2138,22 +2248,48 @@ void LibavOptionsPage::initCodecLists(void)
 				if ( compatible )
 				{
 					audioEncSel->addItem( tr(c->name), c->id );
+
+					if ( LIBAV::audio_st.selEnc == c->id )
+					{
+						audioEncSel->setCurrentIndex( audioEncSel->count() - 1 );
+					}
 				}
 			}
 		}
 
 		c = av_codec_iterate( &it );
 	}
+
+	initPixelFormatSelect( LIBAV::video_st.selEnc );
 }
 //-----------------------------------------------------
 void LibavOptionsPage::videoCodecChanged(int idx)
 {
+	const AVCodec *c;
+
 	LIBAV::video_st.selEnc = (AVCodecID)videoEncSel->itemData(idx).toInt();
+
+	c = avcodec_find_encoder( LIBAV::video_st.selEnc );
+
+	if ( c )
+	{
+		g_config->setOption("SDL.AviFFmpegVideoCodec", c->name);	
+	}
+	initPixelFormatSelect( LIBAV::video_st.selEnc );
 }
 //-----------------------------------------------------
 void LibavOptionsPage::audioCodecChanged(int idx)
 {
+	const AVCodec *c;
+
 	LIBAV::audio_st.selEnc = (AVCodecID)audioEncSel->itemData(idx).toInt();
+
+	c = avcodec_find_encoder( LIBAV::audio_st.selEnc );
+
+	if ( c )
+	{
+		g_config->setOption("SDL.AviFFmpegAudioCodec", c->name);	
+	}
 }
 //-----------------------------------------------------
 #endif

@@ -595,14 +595,20 @@ InitConfig()
 	config->addOption("recordhud", "SDL.RecordHUD", 0);
 	config->addOption("moviemsg", "SDL.MovieMsg", 0);
 
-#ifdef _USE_X264
-	config->addOption("SDL.AviVideoFormat", AVI_X264);
+#ifdef _USE_LIBAV
+	config->addOption("SDL.AviVideoFormat", AVI_LIBAV);
 #elif  WIN32
 	config->addOption("SDL.AviVideoFormat", AVI_VFW);
+#elif _USE_X264
+	config->addOption("SDL.AviVideoFormat", AVI_X264);
 #else
 	config->addOption("SDL.AviVideoFormat", AVI_RGB24);
 #endif
 
+#ifdef _USE_LIBAV
+	config->addOption("SDL.AviFFmpegVideoCodec", "");
+	config->addOption("SDL.AviFFmpegAudioCodec", "");
+#endif
 #ifdef  WIN32
 	config->addOption("SDL.AviVfwFccHandler", "");
 #endif
