@@ -1018,7 +1018,7 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 
 	if (codec == NULL)
 	{
-		fprintf(stderr, "codec not found\n");
+		fprintf(stderr, "codec not found: '%s'\n", codec_name);
 		return -1;
 	}
 
@@ -1181,11 +1181,21 @@ static int setCodecFromConfig(void)
 	{
 		if ( video_st.selEnc.size() == 0 )
 		{
-			video_st.selEnc = avcodec_get_name(fmt->video_codec);
+			c = avcodec_find_encoder( fmt->video_codec );
+
+			if ( c )
+			{
+				video_st.selEnc = c->name;
+			}
 		}
 		if ( audio_st.selEnc.size() == 0 )
 		{
-			audio_st.selEnc = avcodec_get_name(fmt->audio_codec);
+			c = avcodec_find_encoder( fmt->audio_codec );
+
+			if ( c )
+			{
+				audio_st.selEnc = c->name;
+			}
 		}
 	}
 	return 0;
