@@ -749,7 +749,7 @@ struct OutputStream
 	int64_t next_pts;
 	int      bytesPerSample;
 	int      frameSize;
-	AVCodecID  selEnc;
+	std::string selEnc;
 
 	OutputStream(void)
 	{
@@ -761,7 +761,6 @@ struct OutputStream
 		bytesPerSample = 0;
 		frameSize = 0;
 		next_pts = 0;
-		selEnc = AV_CODEC_ID_NONE;
 	}
 
 	void close(void)
@@ -815,7 +814,7 @@ static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
 	return picture;
 }
 
-static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
+static int initVideoStream( const char *codec_name, OutputStream *ost )
 {
 	int ret;
 	const AVCodec *codec;
@@ -831,7 +830,7 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	fps1000 = (int)(fps * 1000.0);
 
 	/* find the video encoder */
-	codec = avcodec_find_encoder(codec_id);
+	codec = avcodec_find_encoder_by_name(codec_name);
 
 	if (codec == NULL)
 	{
@@ -870,7 +869,7 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	 * timebase should be 1/framerate and timestamp increments should be
 	 * identical to 1. */
 	//ost->st->time_base = (AVRational){ 1000, fps1000 };
-	if ( codec_id == AV_CODEC_ID_MPEG4 )
+	if ( codec->id == AV_CODEC_ID_MPEG4 )
 	{   // MPEG4 max num/den is 65535 each
 		ost->st->time_base.num = 1000;
 		ost->st->time_base.den = fps1000;
@@ -882,8 +881,7 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 	}
 	c->time_base       = ost->st->time_base;
 	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
-	c->pix_fmt       = AV_PIX_FMT_YUV420P;
-	c->pix_fmt       = AV_PIX_FMT_BGR24;
+	c->pix_fmt       = AV_PIX_FMT_YUV420P; // Every video encoder seems to accept this
 
 	//c->sample_aspect_ratio =  (AVRational){ 4, 3 };
 	//printf("compression_level:%i\n", c->compression_level);
@@ -891,6 +889,9 @@ static int initVideoStream( enum AVCodecID codec_id, OutputStream *ost )
 
 	if ( codec->pix_fmts )
 	{
+		// Auto select least lossy format to comvert to.
+		c->pix_fmt = avcodec_find_best_pix_fmt_of_list( codec->pix_fmts, AV_PIX_FMT_BGRA, 0, NULL);
+
 		int i=0, formatOk=0;
 		while (codec->pix_fmts[i] != -1)
 		{
@@ -1006,14 +1007,14 @@ static AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,
 	return frame;
 }
 
-static int initAudioStream( enum AVCodecID codec_id, OutputStream *ost )
+static int initAudioStream( const char *codec_name, OutputStream *ost )
 {
 	int ret, nb_samples;
 	const AVCodec *codec;
 	AVCodecContext *c;
 
 	/* find the audio encoder */
-	codec = avcodec_find_encoder(codec_id);
+	codec = avcodec_find_encoder_by_name(codec_name);
 
 	if (codec == NULL)
 	{
@@ -1160,7 +1161,7 @@ static int setCodecFromConfig(void)
 
 		if ( c )
 		{
-			video_st.selEnc = c->id;	
+			video_st.selEnc = c->name;	
 		}
 	}
 
@@ -1172,19 +1173,19 @@ static int setCodecFromConfig(void)
 
 		if ( c )
 		{
-			audio_st.selEnc = c->id;	
+			audio_st.selEnc = c->name;	
 		}
 	}
 
 	if ( fmt )
 	{
-		if ( video_st.selEnc == AV_CODEC_ID_NONE )
+		if ( video_st.selEnc.size() == 0 )
 		{
-			video_st.selEnc = fmt->video_codec;
+			video_st.selEnc = avcodec_get_name(fmt->video_codec);
 		}
-		if ( audio_st.selEnc == AV_CODEC_ID_NONE )
+		if ( audio_st.selEnc.size() == 0 )
 		{
-			audio_st.selEnc = fmt->audio_codec;
+			audio_st.selEnc = avcodec_get_name(fmt->audio_codec);
 		}
 	}
 	return 0;
@@ -1228,12 +1229,12 @@ static int initMedia( const char *filename )
 
 	setCodecFromConfig();
 
-	if ( initVideoStream( video_st.selEnc, &video_st ) )
+	if ( initVideoStream( video_st.selEnc.c_str(), &video_st ) )
 	{
 		printf("Video Stream Init Failed\n");
 		return -1;
 	}
-	if ( initAudioStream( audio_st.selEnc, &audio_st ) )
+	if ( initAudioStream( audio_st.selEnc.c_str(), &audio_st ) )
 	{
 		printf("Audio Stream Init Failed\n");
 		return -1;
@@ -2162,12 +2163,12 @@ LibavOptionsPage::~LibavOptionsPage(void)
 
 }
 //-----------------------------------------------------
-void LibavOptionsPage::initPixelFormatSelect(int codec_id)
+void LibavOptionsPage::initPixelFormatSelect(const char *codec_name)
 {
 	const AVCodec *c;
 	const AVPixFmtDescriptor *desc;
 
-	c = avcodec_find_encoder( (AVCodecID)codec_id);
+	c = avcodec_find_encoder_by_name( codec_name );
 
 	if ( c == NULL )
 	{
@@ -2235,7 +2236,7 @@ void LibavOptionsPage::initCodecLists(void)
 				{
 					videoEncSel->addItem( tr(c->name), c->id );
 
-					if ( LIBAV::video_st.selEnc == c->id )
+					if ( strcmp( LIBAV::video_st.selEnc.c_str(), c->name ) == 0 )
 					{
 						videoEncSel->setCurrentIndex( videoEncSel->count() - 1 );
 					}
@@ -2249,7 +2250,7 @@ void LibavOptionsPage::initCodecLists(void)
 				{
 					audioEncSel->addItem( tr(c->name), c->id );
 
-					if ( LIBAV::audio_st.selEnc == c->id )
+					if ( strcmp( LIBAV::audio_st.selEnc.c_str(), c->name ) == 0 )
 					{
 						audioEncSel->setCurrentIndex( audioEncSel->count() - 1 );
 					}
@@ -2260,31 +2261,31 @@ void LibavOptionsPage::initCodecLists(void)
 		c = av_codec_iterate( &it );
 	}
 
-	initPixelFormatSelect( LIBAV::video_st.selEnc );
+	initPixelFormatSelect( videoEncSel->currentText().toStdString().c_str() );
 }
 //-----------------------------------------------------
 void LibavOptionsPage::videoCodecChanged(int idx)
 {
 	const AVCodec *c;
 
-	LIBAV::video_st.selEnc = (AVCodecID)videoEncSel->itemData(idx).toInt();
+	LIBAV::video_st.selEnc = videoEncSel->currentText().toStdString().c_str();
 
-	c = avcodec_find_encoder( LIBAV::video_st.selEnc );
+	c = avcodec_find_encoder_by_name( LIBAV::video_st.selEnc.c_str() );
 
 	if ( c )
 	{
 		g_config->setOption("SDL.AviFFmpegVideoCodec", c->name);	
+		initPixelFormatSelect( c->name );
 	}
-	initPixelFormatSelect( LIBAV::video_st.selEnc );
 }
 //-----------------------------------------------------
 void LibavOptionsPage::audioCodecChanged(int idx)
 {
 	const AVCodec *c;
 
-	LIBAV::audio_st.selEnc = (AVCodecID)audioEncSel->itemData(idx).toInt();
+	LIBAV::audio_st.selEnc = audioEncSel->currentText().toStdString().c_str();
 
-	c = avcodec_find_encoder( LIBAV::audio_st.selEnc );
+	c = avcodec_find_encoder_by_name( LIBAV::audio_st.selEnc.c_str() );
 
 	if ( c )
 	{

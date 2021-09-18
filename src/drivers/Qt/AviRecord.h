@@ -88,7 +88,7 @@ class  LibavOptionsPage : public QWidget
 		QGroupBox  *audioGbox;
 
 		void initCodecLists(void);
-		void initPixelFormatSelect(int codec_id);
+		void initPixelFormatSelect(const char *codec_name);
 
 	private slots:
 		void videoCodecChanged(int idx);
