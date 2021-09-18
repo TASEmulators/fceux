@@ -217,5 +217,7 @@ void MovieOptionsDialog_t::loadFullStatesChanged(int state)
 void MovieOptionsDialog_t::aviBackendChanged(int idx)
 {
 	aviPageStack->setCurrentIndex(idx);
+
+	aviSetSelVideoFormat(idx);
 }
 //----------------------------------------------------------------------------
