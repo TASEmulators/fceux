@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <string.h>
 #include <string>
 
@@ -66,6 +67,8 @@ extern "C"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/fceuWrapper.h"
 
+#define  AV_LOG_FILE_NAME  "fceuxAV.log"
+
 static gwavi_t  *gwavi = NULL;
 static bool      recordEnable = false;
 static bool      recordAudio  = true;
@@ -79,6 +82,7 @@ static uint32_t *rawVideoBuf = NULL;
 static int16_t  *rawAudioBuf = NULL;
 static int       videoFormat = AVI_RGB24;
 static int       audioSampleRate = 48000;
+static FILE     *avLogFp = NULL;
 //**************************************************************************************
 
 static void convertRgb_32_to_24( const unsigned char *src, unsigned char *dest, int w, int h, int nPix, bool verticalFlip )
@@ -749,6 +753,8 @@ struct OutputStream
 	int64_t next_pts;
 	int      bytesPerSample;
 	int      frameSize;
+	bool     isAudio;
+	bool     writeError;
 	std::string selEnc;
 
 	OutputStream(void)
@@ -761,10 +767,19 @@ struct OutputStream
 		bytesPerSample = 0;
 		frameSize = 0;
 		next_pts = 0;
+		writeError = false;
+		isAudio = false;
 	}
 
 	void close(void)
 	{
+		if ( writeError )
+		{
+			char msg[512];
+			sprintf( msg, "%s Stream Write Errors Detected.\nOutput may be incomplete or corrupt.\nSee log file '%s' for details\n",
+				       isAudio ? "Audio" : "Video", AV_LOG_FILE_NAME);
+			FCEUD_PrintError(msg);
+		}
 		if ( enc != NULL )
 		{
 			avcodec_free_context(&enc); enc = NULL;
@@ -777,16 +792,37 @@ struct OutputStream
 		{
 			av_frame_free(&tmp_frame); tmp_frame = NULL;
 		}
+		if ( sws_ctx != NULL )
+		{
+			sws_freeContext(sws_ctx); sws_ctx = NULL;
+		}
 		if ( swr_ctx != NULL )
 		{
 			swr_free(&swr_ctx); swr_ctx = NULL;
 		}
+		writeError = false;
 		bytesPerSample = 0;
 		next_pts = 0;
 	}
 };
 static  OutputStream  video_st;
 static  OutputStream  audio_st;
+
+static void log_callback( void *avcl, int level, const char *fmt, va_list vl)
+{
+	if ( avLogFp != NULL )
+	{
+		va_list vl2;
+
+		va_copy( vl2, vl );
+
+		vfprintf( avLogFp, fmt, vl2 );
+	}
+
+	av_log_default_callback( avcl, level, fmt, vl );
+
+	//FCEUD_Message( stmp );
+}
 
 static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
 {
@@ -834,16 +870,16 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 
 	if (codec == NULL)
 	{
-		fprintf(stderr, "codec not found\n");
+		fprintf( avLogFp, "Video codec not found: %s\n", codec_name);
 		return -1;
 	}
-	printf("CODEC: %s\n", codec->name );
+	//printf("CODEC: %s\n", codec->name );
 
 	ost->st = avformat_new_stream(oc, NULL);
 
 	if (ost->st == NULL)
 	{
-		fprintf(stderr, "Could not alloc stream\n");
+		fprintf( avLogFp, "Error: Could not alloc video stream\n");
 		return -1;
 	}
 
@@ -851,12 +887,12 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 
 	if (c == NULL)
 	{
-		fprintf(stderr, "Could not alloc an encoding context\n");
+		fprintf( avLogFp, "Error: Could not alloc an video encoding context\n");
 		return -1;
 	}
 	ost->enc = c;
 
-	av_opt_show2( (void*)c, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
+	//av_opt_show2( (void*)c, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
 
 	/* Put sample parameters. */
 	c->bit_rate = 400000;
@@ -895,7 +931,7 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 		int i=0, formatOk=0;
 		while (codec->pix_fmts[i] != -1)
 		{
-			printf("Codec PIX_FMT: %i\n", codec->pix_fmts[i]);
+			//printf("Codec PIX_FMT: %i\n", codec->pix_fmts[i]);
 			if ( codec->pix_fmts[i] == c->pix_fmt )
 			{
 				printf("CODEC Supports PIX_FMT:%i\n", c->pix_fmt );
@@ -933,7 +969,7 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 	/* open the codec */
 	if (avcodec_open2(c, NULL, NULL) < 0)
 	{
-		fprintf(stderr, "could not open codec\n");
+		fprintf( avLogFp, "Error: Could not open codec: %s\n", codec_name);
 		return -1;
 	}
 
@@ -942,7 +978,7 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 
 	if (!ost->frame)
 	{
-		fprintf(stderr, "Could not allocate picture\n");
+		fprintf( avLogFp, "Error: Could not allocate picture\n");
 		return -1;
 	}
 
@@ -953,7 +989,7 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 
 	if (ost->tmp_frame == NULL)
 	{
-		fprintf(stderr, "Could not allocate temporary picture\n");
+		fprintf( avLogFp, "Error: Could not allocate temporary picture\n");
 		return -1;
 	}
 	
@@ -963,14 +999,22 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 					c->pix_fmt,
 					SWS_BICUBIC, NULL, NULL, NULL);
 
+	if ( ost->sws_ctx == NULL )
+	{
+		fprintf( avLogFp, "Error: Video sws_getContext Failed. Video conversion not possible\n");
+		return -1;
+	}
+
 	/* copy the stream parameters to the muxer */
 	ret = avcodec_parameters_from_context(ost->st->codecpar, c);
 
 	if (ret < 0)
 	{
-		fprintf(stderr, "Could not copy the stream parameters\n");
+		fprintf( avLogFp, "Error: Video avcodec_parameters_from_context Failed. Could not copy the stream parameters\n");
 		return -1;
 	}
+	ost->writeError = false;
+
 	return 0;
 }
 
@@ -1008,12 +1052,14 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 	const AVCodec *codec;
 	AVCodecContext *c;
 
+	ost->isAudio = true;
+
 	/* find the audio encoder */
 	codec = avcodec_find_encoder_by_name(codec_name);
 
 	if (codec == NULL)
 	{
-		fprintf(stderr, "codec not found: '%s'\n", codec_name);
+		fprintf( avLogFp, "Audio codec not found: '%s'\n", codec_name);
 		return -1;
 	}
 
@@ -1021,7 +1067,7 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 
 	if (ost->st == NULL)
 	{
-		fprintf(stderr, "Could not alloc stream\n");
+		fprintf( avLogFp, "Could not alloc audio stream\n");
 		return -1;
 	}
 
@@ -1029,7 +1075,7 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 
 	if (c == NULL)
 	{
-		fprintf(stderr, "Could not alloc an encoding context\n");
+		fprintf( avLogFp, "Could not alloc an audio encoding context\n");
 		return -1;
 	}
 	ost->enc = c;
@@ -1056,7 +1102,7 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 	ost->swr_ctx = swr_alloc();
 	if (!ost->swr_ctx)
 	{
-		fprintf(stderr, "Error allocating the resampling context\n");
+		fprintf( avLogFp, "Error allocating the audio resampling context\n");
 		return -1;
 	}
 	av_opt_set_sample_fmt(ost->swr_ctx, "in_sample_fmt",      AV_SAMPLE_FMT_S16,   0);
@@ -1069,14 +1115,14 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 	ret = swr_init(ost->swr_ctx);
 	if (ret < 0)
 	{
-		fprintf(stderr, "Error opening the resampling context\n");
+		fprintf( avLogFp, "Error: Could not init the audio resampling context\n");
 		return -1;
 	}
 
 	/* open it */
 	if (avcodec_open2(c, NULL, NULL) < 0)
 	{
-		fprintf(stderr, "could not open codec\n");
+		fprintf( avLogFp, "Error: Could not open codec: %s\n", codec_name);
 		return -1;
 	}
 
@@ -1096,17 +1142,18 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 	ost->tmp_frame = alloc_audio_frame(c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples);
 	//ost->tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_MONO, audioSampleRate, nb_samples);
 
-	printf("Audio: FMT:%i  ChanLayout:%li  Rate:%i  FrameSize:%i  bytesPerSample:%i \n",
-			c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples, ost->bytesPerSample );
+	//printf("Audio: FMT:%i  ChanLayout:%li  Rate:%i  FrameSize:%i  bytesPerSample:%i \n",
+	//		c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples, ost->bytesPerSample );
 
 	/* copy the stream parameters to the muxer */
 	ret = avcodec_parameters_from_context(ost->st->codecpar, c);
 	if (ret < 0)
 	{
-		fprintf(stderr, "Could not copy the stream parameters\n");
+		fprintf( avLogFp, "Error: Audio avcodec_parameters_from_context Failed. Could not copy the stream parameters\n");
 		return -1;
 	}
 	ost->frame->nb_samples = 0;
+	ost->writeError = false;
 
 	return 0;
 }
@@ -1207,6 +1254,8 @@ static int initMedia( const char *filename )
 	/* Initialize libavcodec, and register all codecs and formats. */
 	//av_register_all();
 
+	av_log_set_callback( log_callback );
+
 	print_Codecs();
 
 	/* Autodetect the output format from the name. default is MPEG. */
@@ -1214,21 +1263,21 @@ static int initMedia( const char *filename )
 
 	if (fmt == NULL)
 	{
-		printf("Could not deduce output format from file extension: using AVI.\n");
+		fprintf( avLogFp, "Could not deduce output format from file extension: using AVI.\n");
 		fmt = av_guess_format("avi", NULL, NULL);
 	}
 	if (fmt == NULL)
 	{
-		fprintf(stderr, "Could not find suitable output format\n");
-		return -1;
+		fprintf( avLogFp, "Error: Could not find suitable output format\n");
+		goto LIBAV_INIT_MEDIA_ERROR_EXIT;
 	}
 
 	/* Allocate the output media context. */
 	oc = avformat_alloc_context();
 	if (oc == NULL)
 	{
-		fprintf(stderr, "Memory error\n");
-		return -1;
+		fprintf( avLogFp, "Memory error: avformat_alloc_context failed\n");
+		goto LIBAV_INIT_MEDIA_ERROR_EXIT;
 	}
 	oc->oformat = fmt;
 
@@ -1236,13 +1285,13 @@ static int initMedia( const char *filename )
 
 	if ( initVideoStream( video_st.selEnc.c_str(), &video_st ) )
 	{
-		printf("Video Stream Init Failed\n");
-		return -1;
+		fprintf( avLogFp, "Video Stream Init Failed\n");
+		goto LIBAV_INIT_MEDIA_ERROR_EXIT;
 	}
 	if ( initAudioStream( audio_st.selEnc.c_str(), &audio_st ) )
 	{
-		printf("Audio Stream Init Failed\n");
-		return -1;
+		fprintf( avLogFp, "Audio Stream Init Failed\n");
+		goto LIBAV_INIT_MEDIA_ERROR_EXIT;
 	}
 
 	av_dump_format(oc, 0, filename, 1);
@@ -1252,23 +1301,39 @@ static int initMedia( const char *filename )
 	{
 		if (avio_open( &oc->pb, filename, AVIO_FLAG_WRITE) < 0)
 		{
-			fprintf(stderr, "Could not open '%s'\n", filename);
-			return -1;
+			fprintf( avLogFp, "Error: Could not open file: '%s'\n", filename);
+			goto LIBAV_INIT_MEDIA_ERROR_EXIT;
 		}
 		else
 		{
-			printf("Opened: %s\n", filename);
+			fprintf( avLogFp, "Opened file for writing: %s\n", filename);
 		}
 	}
 
 	/* Write the stream header, if any. */
 	if ( avformat_write_header(oc, NULL) )
 	{
-		printf("Error: Failed to write avformat header\n");
-		return -1;
+		fprintf( avLogFp, "Error: avformat_write_header Failed: Could not write avformat header\n");
+		goto LIBAV_INIT_MEDIA_ERROR_EXIT;
 	}
 
 	return 0;
+
+LIBAV_INIT_MEDIA_ERROR_EXIT:
+
+	video_st.close();
+	audio_st.close();
+
+	/* Close the output file. */
+
+	/* free the stream */
+	if ( oc )
+	{
+		avio_close(oc->pb);
+
+		avformat_free_context(oc); oc = NULL;
+	}
+	return -1;
 }
 
 static int init( int width, int height )
@@ -1281,6 +1346,10 @@ static int write_audio_frame( AVFrame *frame )
 	int ret;
 	OutputStream *ost = &audio_st;
 
+	if ( ost->writeError )
+	{
+		return -1;
+	}
 	if ( frame )
 	{
 		frame->pts        = ost->next_pts;
@@ -1292,7 +1361,8 @@ static int write_audio_frame( AVFrame *frame )
 
 	if (ret < 0)
 	{
-		fprintf(stderr, "Error submitting a frame for encoding\n");
+		fprintf( avLogFp, "Error submitting audio frame for encoding\n");
+		ost->writeError = true;
 		return -1;
 	}
 	while (ret >= 0)
@@ -1302,7 +1372,8 @@ static int write_audio_frame( AVFrame *frame )
 		ret = avcodec_receive_packet(ost->enc, &pkt);
 		if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
 		{
-			fprintf(stderr, "Error encoding a video frame\n");
+			fprintf( avLogFp, "Error encoding audio frame\n");
+			ost->writeError = true;
 			return -1;
 		}
 		else if (ret >= 0)
@@ -1313,7 +1384,8 @@ static int write_audio_frame( AVFrame *frame )
 			ret = av_interleaved_write_frame(oc, &pkt);
 			if (ret < 0)
 			{
-				fprintf(stderr, "Error while writing video frame\n");
+				fprintf( avLogFp, "Error while writing audio frame\n");
+				ost->writeError = true;
 				return -1;
 			}
 		}
@@ -1326,6 +1398,11 @@ static int encode_audio_frame( int16_t *audioOut, int numSamples)
 	int i,ret;
 	OutputStream *ost = &audio_st;
 	const uint8_t *inData[AV_NUM_DATA_POINTERS];
+
+	if ( ost->writeError )
+	{
+		return -1;
+	}
 	
 	for (i=0; i<AV_NUM_DATA_POINTERS; i++)
 	{
@@ -1439,6 +1516,10 @@ static int encode_video_frame( unsigned char *inBuf )
 	AVCodecContext *c = video_st.enc;
 	unsigned char *outBuf;
 
+	if ( ost->writeError )
+	{
+		return -1;
+	}
 	ret = av_frame_make_writable( video_st.frame );
 
 	if ( ret < 0 )
@@ -1469,7 +1550,8 @@ static int encode_video_frame( unsigned char *inBuf )
 	ret = avcodec_send_frame(c, video_st.frame);
 	if (ret < 0)
 	{
-		fprintf(stderr, "Error submitting a frame for encoding\n");
+		fprintf( avLogFp, "Error submitting a video frame for encoding\n");
+		ost->writeError = true;
 		return -1;
 	}
 
@@ -1483,7 +1565,8 @@ static int encode_video_frame( unsigned char *inBuf )
 
 		if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
 		{
-			fprintf(stderr, "Error encoding a video frame\n");
+			fprintf( avLogFp, "Error encoding a video frame\n");
+			ost->writeError = true;
 			return -1;
 		}
 		else if (ret >= 0)
@@ -1494,7 +1577,8 @@ static int encode_video_frame( unsigned char *inBuf )
 			ret = av_interleaved_write_frame(oc, &pkt);
 			if (ret < 0)
 			{
-				fprintf(stderr, "Error while writing video frame\n");
+				fprintf( avLogFp, "Error while writing video frame\n");
+				ost->writeError = true;
 				return -1;
 			}
 		}
@@ -1530,12 +1614,52 @@ static int close(void)
 } // End namespace LIBAV
 #endif
 //**************************************************************************************
+int aviRecordLogClose(void)
+{
+	if ( avLogFp != NULL )
+	{
+		if ( avLogFp != stdout )
+		{
+			fclose(avLogFp);
+		}
+		avLogFp = NULL;
+	}
+	return 0;
+}
+//**************************************************************************************
+int aviRecordLogOpen(void)
+{
+	if ( avLogFp != NULL )
+	{
+		aviRecordLogClose();	
+	}
+	if ( avLogFp == NULL )
+	{
+		avLogFp = fopen( AV_LOG_FILE_NAME, "w");
+
+		if ( avLogFp == NULL )
+		{
+			char msg[512];
+			sprintf( msg, "Error: Failed to open AV Recording log file for writing: %s\n", AV_LOG_FILE_NAME);
+			FCEUD_PrintError(msg);
+			avLogFp = stdout;
+		}
+	}
+	return avLogFp == NULL;
+}
+//**************************************************************************************
 int aviRecordOpenFile( const char *filepath )
 {
 	char fourcc[8];
 	gwavi_audio_t  audioConfig;
 	double fps;
 	char fileName[1024];
+
+	if ( aviRecordLogOpen() )
+	{
+		// Log Error
+		return -1;
+	}
 
 	if ( filepath != NULL )
 	{
@@ -1643,7 +1767,7 @@ int aviRecordOpenFile( const char *filepath )
 		{
 			fourcc[i] = toupper(fourcc[i]);
 		}
-		printf("Set VFW FourCC: %s\n", fourcc);
+		//printf("Set VFW FourCC: %s\n", fourcc);
 	}
 	#endif 
 
@@ -1652,8 +1776,11 @@ int aviRecordOpenFile( const char *filepath )
 	{
 		if ( LIBAV::initMedia( fileName ) )
 		{
-			printf("Error: Failed to open AVI file.\n");
+			char msg[512];
+			fprintf( avLogFp, "Error: Failed to open AVI file.\n");
 			recordEnable = false;
+			sprintf( msg, "Error: AV Recording Initialization Failed.\nSee %s for details...\n", AV_LOG_FILE_NAME);
+			FCEUD_PrintError(msg);
 			return -1;
 		}
 	}
@@ -1664,8 +1791,11 @@ int aviRecordOpenFile( const char *filepath )
 
 		if ( gwavi->open( fileName, nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, &audioConfig ) )
 		{
-			printf("Error: Failed to open AVI file.\n");
+			char msg[512];
+			fprintf( avLogFp, "Error: Failed to open AVI file.\n");
 			recordEnable = false;
+			sprintf( msg, "Error: AV Recording Initialization Failed.\nSee %s for details...\n", AV_LOG_FILE_NAME);
+			FCEUD_PrintError(msg);
 			return -1;
 		}
 	}
@@ -1917,7 +2047,7 @@ void AviRecordDiskThread_t::run(void)
 	char writeAudio = 1;
 	int  avgAudioPerFrame, localVideoFormat;
 
-	printf("AVI Record Disk Start\n");
+	fprintf( avLogFp, "AVI Record Disk Thread Start\n");
 
 	setPriority( QThread::HighestPriority );
 
@@ -1925,7 +2055,7 @@ void AviRecordDiskThread_t::run(void)
 
 	avgAudioPerFrame = ( audioSampleRate / fps) + 1;
 
-	printf("Avg Audio Rate per Frame: %i \n", avgAudioPerFrame );
+	fprintf( avLogFp, "Avg Audio Sample Rate per Frame: %i \n", avgAudioPerFrame );
 
 	width     = nes_shm->video.ncol;
 	height    = nes_shm->video.nrow;
@@ -2105,8 +2235,17 @@ void AviRecordDiskThread_t::run(void)
 	free(audioOut);
 	free(videoOut);
 
-	printf("AVI Record Disk Exit\n");
+	fprintf( avLogFp, "AVI Record Disk Thread Exit\n");
 	emit finished();
+
+	if ( avLogFp != NULL )
+	{
+		if ( avLogFp != stdout )
+		{
+			fclose(avLogFp);
+		}
+		avLogFp = NULL;
+	}
 }
 //----------------------------------------------------
 //**************************************************************************************

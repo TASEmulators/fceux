@@ -3641,8 +3641,10 @@ void consoleWin_t::aviRecordStart(void)
 	if ( !aviRecordRunning() )
 	{
 		fceuWrapperLock();
-		aviRecordOpenFile(NULL);
-		aviDiskThread->start();
+		if ( aviRecordOpenFile(NULL) == 0 )
+		{
+			aviDiskThread->start();
+		}
 		fceuWrapperUnLock();
 	}
 }
@@ -3719,8 +3721,10 @@ void consoleWin_t::aviRecordAsStart(void)
 	FCEUI_printf ("AVI Recording movie to %s\n", filename.toStdString().c_str() );
 
 	fceuWrapperLock();
-	aviRecordOpenFile( filename.toStdString().c_str() );
-	aviDiskThread->start();
+	if ( aviRecordOpenFile( filename.toStdString().c_str() ) == 0 )
+	{
+		aviDiskThread->start();
+	}
 	fceuWrapperUnLock();
 }
 
