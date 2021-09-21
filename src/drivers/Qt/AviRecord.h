@@ -83,6 +83,7 @@ class  LibavOptionsPage : public QWidget
 
 	protected:
 		QComboBox  *videoEncSel;
+		QComboBox  *videoPixfmt;
 		QComboBox  *audioEncSel;
 		QGroupBox  *videoGbox;
 		QGroupBox  *audioGbox;
@@ -93,6 +94,7 @@ class  LibavOptionsPage : public QWidget
 	private slots:
 		void videoCodecChanged(int idx);
 		void audioCodecChanged(int idx);
+		void videoPixelFormatChanged(int idx);
 };
 
 #endif

@@ -753,6 +753,7 @@ struct OutputStream
 	int64_t next_pts;
 	int      bytesPerSample;
 	int      frameSize;
+	int      pixelFormat;
 	bool     isAudio;
 	bool     writeError;
 	std::string selEnc;
@@ -769,6 +770,7 @@ struct OutputStream
 		next_pts = 0;
 		writeError = false;
 		isAudio = false;
+		pixelFormat = -1;
 	}
 
 	void close(void)
@@ -917,7 +919,8 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 	}
 	c->time_base       = ost->st->time_base;
 	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
-	c->pix_fmt       = AV_PIX_FMT_YUV420P; // Every video encoder seems to accept this
+	//c->pix_fmt       = AV_PIX_FMT_YUV420P; // Every video encoder seems to accept this
+	c->pix_fmt       = (AVPixelFormat)ost->pixelFormat;
 
 	//c->sample_aspect_ratio =  (AVRational){ 4, 3 };
 	//printf("compression_level:%i\n", c->compression_level);
@@ -925,8 +928,11 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 
 	if ( codec->pix_fmts )
 	{
-		// Auto select least lossy format to comvert to.
-		c->pix_fmt = avcodec_find_best_pix_fmt_of_list( codec->pix_fmts, AV_PIX_FMT_BGRA, 0, NULL);
+		if ( ost->pixelFormat == -1 )
+		{
+			// Auto select least lossy format to comvert to.
+			c->pix_fmt = avcodec_find_best_pix_fmt_of_list( codec->pix_fmts, AV_PIX_FMT_BGRA, 0, NULL);
+		}
 
 		int i=0, formatOk=0;
 		while (codec->pix_fmts[i] != -1)
@@ -941,8 +947,18 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 		}
 		if ( !formatOk )
 		{
-			printf("CODEC Does Not Support PIX_FMT:%i  Changing to:%i\n", c->pix_fmt, codec->pix_fmts[0] );
-			c->pix_fmt = codec->pix_fmts[0];
+			printf("CODEC Does Not Support PIX_FMT:%i\n", c->pix_fmt);
+
+			c->pix_fmt = avcodec_find_best_pix_fmt_of_list( codec->pix_fmts, AV_PIX_FMT_BGRA, 0, NULL);
+
+			printf("Changing to:%i\n", c->pix_fmt);
+		}
+	}
+	else
+	{
+		if ( ost->pixelFormat == -1 )
+		{
+			c->pix_fmt = AV_PIX_FMT_YUV420P; // Every video encoder seems to accept this
 		}
 	}
 
@@ -1240,6 +1256,9 @@ static int setCodecFromConfig(void)
 			}
 		}
 	}
+
+	g_config->getOption("SDL.AviFFmpegVideoPixFmt", &video_st.pixelFormat);	
+
 	return 0;
 }
 
@@ -2260,6 +2279,7 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	QLabel *lbl;
 	QVBoxLayout *vbox, *vbox1;
 	QHBoxLayout *hbox;
+	QGridLayout *grid;
 
 	LIBAV::setCodecFromConfig();
 
@@ -2272,6 +2292,7 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 
 	videoEncSel = new QComboBox();
 	audioEncSel = new QComboBox();
+	videoPixfmt = new QComboBox();
 
 	vbox1->addWidget( videoGbox );
 	vbox1->addWidget( audioGbox );
@@ -2279,11 +2300,14 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	vbox = new QVBoxLayout();
 	videoGbox->setLayout(vbox);
 
-	hbox = new QHBoxLayout();
-	vbox->addLayout(hbox);
+	grid = new QGridLayout();
+	vbox->addLayout(grid);
 	lbl  = new QLabel( tr("Encoder:") );
-	hbox->addWidget( lbl, 1 );
-	hbox->addWidget( videoEncSel, 5 );
+	grid->addWidget( lbl, 0, 0);
+	grid->addWidget( videoEncSel, 0, 1);
+	lbl  = new QLabel( tr("Pixel Format:") );
+	grid->addWidget( lbl, 1, 0);
+	grid->addWidget( videoPixfmt, 1, 1);
 
 	vbox = new QVBoxLayout();
 	audioGbox->setLayout(vbox);
@@ -2300,6 +2324,8 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 
 	connect(videoEncSel, SIGNAL(currentIndexChanged(int)), this, SLOT(videoCodecChanged(int)));
 	connect(audioEncSel, SIGNAL(currentIndexChanged(int)), this, SLOT(audioCodecChanged(int)));
+
+	connect(videoPixfmt, SIGNAL(currentIndexChanged(int)), this, SLOT(videoPixelFormatChanged(int)));
 }
 //-----------------------------------------------------
 LibavOptionsPage::~LibavOptionsPage(void)
@@ -2311,8 +2337,12 @@ void LibavOptionsPage::initPixelFormatSelect(const char *codec_name)
 {
 	const AVCodec *c;
 	const AVPixFmtDescriptor *desc;
+	bool formatOk = false;
 
 	c = avcodec_find_encoder_by_name( codec_name );
+
+	videoPixfmt->clear();
+	videoPixfmt->addItem( tr("Auto"), -1);
 
 	if ( c == NULL )
 	{
@@ -2329,6 +2359,14 @@ void LibavOptionsPage::initPixelFormatSelect(const char *codec_name)
 			{
 				printf("Codec PIX_FMT: %i: %s 0x%04X\t-  %s\n", c->pix_fmts[i],
 						desc->name, av_get_pix_fmt_loss(c->pix_fmts[i], AV_PIX_FMT_BGRA, 0), desc->alias);
+
+				videoPixfmt->addItem( tr(desc->name), c->pix_fmts[i]);
+
+				if ( LIBAV::video_st.pixelFormat == c->pix_fmts[i] )
+				{
+					videoPixfmt->setCurrentIndex( videoPixfmt->count() - 1 );
+					formatOk = true;
+				}
 			}
 			i++;
 		}
@@ -2340,6 +2378,7 @@ void LibavOptionsPage::initPixelFormatSelect(const char *codec_name)
 	}
 	else
 	{
+		// List More Common Raw Video Formats Only
 		desc = av_pix_fmt_desc_next( NULL );
 
 		while ( desc != NULL )
@@ -2351,8 +2390,48 @@ void LibavOptionsPage::initPixelFormatSelect(const char *codec_name)
 			printf("Codec PIX_FMT: %i: %s  0x%04X\t-  %s\n", 
 					pf, desc->name, av_get_pix_fmt_loss(pf, AV_PIX_FMT_BGRA, 0), desc->alias);
 
+			switch ( pf )
+			{
+				default:
+
+				break;
+				case  AV_PIX_FMT_YUV420P:   ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
+				case  AV_PIX_FMT_YUYV422:   ///< packed YUV 4:2:2, 16bpp, Y0 Cb Y1 Cr
+				case  AV_PIX_FMT_RGB24:     ///< packed RGB 8:8:8, 24bpp, RGBRGB...
+				case  AV_PIX_FMT_BGR24:     ///< packed RGB 8:8:8, 24bpp, BGRBGR...
+				case  AV_PIX_FMT_YUV422P:   ///< planar YUV 4:2:2, 16bpp, (1 Cr & Cb sample per 2x1 Y samples)
+				case  AV_PIX_FMT_YUV444P:   ///< planar YUV 4:4:4, 24bpp, (1 Cr & Cb sample per 1x1 Y samples)
+				case  AV_PIX_FMT_YUV410P:   ///< planar YUV 4:1:0,  9bpp, (1 Cr & Cb sample per 4x4 Y samples)
+				case  AV_PIX_FMT_YUV411P:   ///< planar YUV 4:1:1, 12bpp, (1 Cr & Cb sample per 4x1 Y samples)
+				case  AV_PIX_FMT_PAL8:      ///< 8 bits with AV_PIX_FMT_RGB32 palette
+				case  AV_PIX_FMT_YUVJ420P:  ///< planar YUV 4:2:0, 12bpp, full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV420P and setting color_range
+				case  AV_PIX_FMT_YUVJ422P:  ///< planar YUV 4:2:2, 16bpp, full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV422P and setting color_range
+				case  AV_PIX_FMT_YUVJ444P:  ///< planar YUV 4:4:4, 24bpp, full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV444P and setting color_range
+				case  AV_PIX_FMT_UYVY422:   ///< packed YUV 4:2:2, 16bpp, Cb Y0 Cr Y1
+				case  AV_PIX_FMT_UYYVYY411: ///< packed YUV 4:1:1, 12bpp, Cb Y0 Y1 Cr Y2 Y3
+				case  AV_PIX_FMT_NV12:      ///< planar YUV 4:2:0, 12bpp, 1 plane for Y and 1 plane for the UV components, which are interleaved (first byte U and the following byte V)
+				case  AV_PIX_FMT_NV21:      ///< as above, but U and V bytes are swapped
+				case  AV_PIX_FMT_ARGB:      ///< packed ARGB 8:8:8:8, 32bpp, ARGBARGB...
+				case  AV_PIX_FMT_RGBA:      ///< packed RGBA 8:8:8:8, 32bpp, RGBARGBA...
+				case  AV_PIX_FMT_ABGR:      ///< packed ABGR 8:8:8:8, 32bpp, ABGRABGR...
+				case  AV_PIX_FMT_BGRA:      ///< packed BGRA 8:8:8:8, 32bpp, BGRABGRA...
+					videoPixfmt->addItem( tr(desc->name), pf);
+
+					if ( LIBAV::video_st.pixelFormat == pf )
+					{
+						videoPixfmt->setCurrentIndex( videoPixfmt->count() - 1 );
+						formatOk = true;
+					}
+				break;
+			}
+
 			desc = av_pix_fmt_desc_next( desc );
 		}
+	}
+
+	if ( !formatOk )
+	{
+		LIBAV::video_st.pixelFormat = -1;
 	}
 
 }
@@ -2435,6 +2514,15 @@ void LibavOptionsPage::audioCodecChanged(int idx)
 	{
 		g_config->setOption("SDL.AviFFmpegAudioCodec", c->name);	
 	}
+}
+//-----------------------------------------------------
+void LibavOptionsPage::videoPixelFormatChanged(int idx)
+{
+	LIBAV::video_st.pixelFormat = videoPixfmt->itemData(idx).toInt();
+
+	printf("Selected Pixel Format: %i\n", LIBAV::video_st.pixelFormat );
+	
+	g_config->setOption("SDL.AviFFmpegVideoPixFmt", LIBAV::video_st.pixelFormat);	
 }
 //-----------------------------------------------------
 #endif

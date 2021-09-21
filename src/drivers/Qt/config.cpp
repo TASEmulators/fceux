@@ -608,6 +608,7 @@ InitConfig()
 #ifdef _USE_LIBAV
 	config->addOption("SDL.AviFFmpegVideoCodec", "");
 	config->addOption("SDL.AviFFmpegAudioCodec", "");
+	config->addOption("SDL.AviFFmpegVideoPixFmt", -1);
 #endif
 #ifdef  WIN32
 	config->addOption("SDL.AviVfwFccHandler", "");
