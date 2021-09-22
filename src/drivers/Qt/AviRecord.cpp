@@ -33,6 +33,7 @@
 #endif
 
 #include <QObject>
+#include <QHeaderView>
 #include <QMessageBox>
 
 #include "driver.h"
@@ -824,6 +825,34 @@ static void log_callback( void *avcl, int level, const char *fmt, va_list vl)
 	av_log_default_callback( avcl, level, fmt, vl );
 
 	//FCEUD_Message( stmp );
+}
+
+int saveCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
+{
+	char *buffer = NULL;
+	int opt_flags;
+
+	if ( type )
+	{
+		opt_flags = AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_AUDIO_PARAM;
+	}
+	else
+	{
+		opt_flags = AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_VIDEO_PARAM;
+	}
+
+	if ( av_opt_serialize( ctx, opt_flags, 0, &buffer, '=', '\n') >= 0 )
+	{
+		if ( buffer )
+		{
+			printf("%s\n", buffer );
+		}
+	}
+	if ( buffer )
+	{
+		av_free(buffer);
+	}
+	return 0;
 }
 
 static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
@@ -2280,6 +2309,7 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	QVBoxLayout *vbox, *vbox1;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
+	QPushButton *videoConfBtn, *audioConfBtn;
 
 	LIBAV::setCodecFromConfig();
 
@@ -2308,6 +2338,8 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	lbl  = new QLabel( tr("Pixel Format:") );
 	grid->addWidget( lbl, 1, 0);
 	grid->addWidget( videoPixfmt, 1, 1);
+	videoConfBtn = new QPushButton( tr("Options...") );
+	grid->addWidget( videoConfBtn, 2, 1);
 
 	vbox = new QVBoxLayout();
 	audioGbox->setLayout(vbox);
@@ -2326,6 +2358,8 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	connect(audioEncSel, SIGNAL(currentIndexChanged(int)), this, SLOT(audioCodecChanged(int)));
 
 	connect(videoPixfmt, SIGNAL(currentIndexChanged(int)), this, SLOT(videoPixelFormatChanged(int)));
+
+	connect(videoConfBtn, SIGNAL(clicked(void)), this, SLOT(openVideoCodecOptions(void)));
 }
 //-----------------------------------------------------
 LibavOptionsPage::~LibavOptionsPage(void)
@@ -2523,6 +2557,289 @@ void LibavOptionsPage::videoPixelFormatChanged(int idx)
 	printf("Selected Pixel Format: %i\n", LIBAV::video_st.pixelFormat );
 	
 	g_config->setOption("SDL.AviFFmpegVideoPixFmt", LIBAV::video_st.pixelFormat);	
+}
+//----------------------------------------------------------------------------
+void LibavOptionsPage::openVideoCodecOptions(void)
+{
+	LibavEncOptWin *win = new LibavEncOptWin(0,this);
+
+	win->show();
+}
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+LibavEncOptItem::LibavEncOptItem(QTreeWidgetItem *parent)
+	: QTreeWidgetItem(parent)
+{
+	opt = NULL;
+}
+//----------------------------------------------------------------------------
+LibavEncOptItem::~LibavEncOptItem(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void LibavEncOptItem::setValueText(void *obj)
+{
+	char stmp[256];
+	uint8_t *s;
+
+	stmp[0] = 0;
+
+	s = NULL;
+
+	if ( av_opt_get( obj, opt->name, 0, &s ) >= 0 )
+	{
+		if ( s != NULL )
+		{
+			strcpy( stmp, (char*)s );
+		}
+	}
+	if ( s != NULL )
+	{
+		av_free(s);
+	}
+
+	if ( units.size() > 0 )
+	{
+		switch ( opt->type )
+		{
+			case AV_OPT_TYPE_FLAGS:
+			{
+				int64_t i,j;
+
+				j=0;
+				if ( av_opt_get_int( obj, opt->name, 0, &i ) >= 0 )
+				{
+					for (size_t x=0; x<units.size(); x++)
+					{
+						if ( units[x]->default_val.i64 & i )
+						{
+							char stmp2[128];
+							sprintf( stmp2, "%s", units[x]->name );
+							if (j>0)
+							{
+								strcat( stmp, ",");
+							}
+							else
+							{
+								strcat( stmp, " (");
+							}
+							strcat( stmp, stmp2 );
+							j++;
+						}
+					}
+					if ( j > 0 )
+					{
+						strcat( stmp, ")");
+					}
+				}
+			}
+			break;
+			case AV_OPT_TYPE_INT:
+			case AV_OPT_TYPE_INT64:
+			case AV_OPT_TYPE_UINT64:
+			{
+				int64_t i;
+
+				if ( av_opt_get_int( obj, opt->name, 0, &i ) >= 0 )
+				{
+					for (size_t x=0; x<units.size(); x++)
+					{
+						if ( units[x]->default_val.i64 == i )
+						{
+							char stmp2[128];
+							sprintf( stmp2, " (%s)", units[x]->name );
+							strcat( stmp, stmp2 );
+							break;
+						}
+					}
+				}
+			}
+			break;
+			default:
+				// Nothing to add
+			break;
+		}
+	}
+	setText(1, QString::fromStdString(stmp));
+}
+//----------------------------------------------------------------------------
+LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
+	: QDialog(parent)
+{
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QPushButton *closeButton, *resetDefaults;
+	QTreeWidgetItem *itemHdr = NULL;
+	LibavEncOptItem *item = NULL;
+	const AVCodec *codec;
+	const AVOption *opt;
+	bool useOpt, newOpt;
+
+	this->type = type;
+
+	if ( type )
+	{
+		setWindowTitle("Audio Encoder Configuration");
+		codec_name = LIBAV::audio_st.selEnc.c_str();
+	}
+	else
+	{
+		setWindowTitle("Video Encoder Configuration");
+		codec_name = LIBAV::video_st.selEnc.c_str();
+	}
+	resize(512, 512);
+
+	/* find the video encoder */
+	codec = avcodec_find_encoder_by_name(codec_name);
+
+	ctx = NULL;
+	if (codec != NULL)
+	{
+		//printf("CODEC: %s\n", codec->name );
+
+		ctx = avcodec_alloc_context3(codec);
+	}
+
+	mainLayout = new QVBoxLayout();
+
+	tree = new QTreeWidget(this);
+
+	tree->setColumnCount(3);
+	tree->setSelectionMode( QAbstractItemView::SingleSelection );
+	tree->setAlternatingRowColors(true);
+
+	itemHdr = new QTreeWidgetItem();
+	itemHdr->setText(0, QString::fromStdString("Option"));
+	itemHdr->setText(1, QString::fromStdString("Value"));
+	itemHdr->setText(2, QString::fromStdString("Desc"));
+	itemHdr->setTextAlignment(0, Qt::AlignLeft);
+	itemHdr->setTextAlignment(1, Qt::AlignLeft);
+	itemHdr->setTextAlignment(2, Qt::AlignLeft);
+
+	tree->setHeaderItem(itemHdr);
+
+	tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+	opt = av_opt_next( ctx, NULL );
+
+	while ( opt != NULL )
+	{
+		useOpt = (opt->name != NULL) &&
+				(opt->type != AV_OPT_TYPE_BINARY) &&
+				(opt->type != AV_OPT_TYPE_DICT);
+
+		if ( type )
+		{
+			useOpt = useOpt &&
+					(opt->flags & AV_OPT_FLAG_ENCODING_PARAM) &&
+					(opt->flags & AV_OPT_FLAG_AUDIO_PARAM);
+		}
+		else
+		{
+			useOpt = useOpt &&
+					(opt->flags & AV_OPT_FLAG_ENCODING_PARAM) &&
+					(opt->flags & AV_OPT_FLAG_VIDEO_PARAM);
+		}
+		newOpt = true;
+
+		if ( item )
+		{
+			if ( opt->unit && item->opt->unit )
+			{
+				if ( strcmp( opt->unit, item->opt->unit ) == 0 )
+				{
+					newOpt = false;
+				}
+			}
+		}
+
+		if ( useOpt )
+		{
+			if ( newOpt )
+			{
+				item = new LibavEncOptItem();
+
+				item->opt = opt;
+				item->setText(0, QString::fromStdString(opt->name));
+				//item->setText(1, QString::fromStdString("Value"));
+				if ( opt->help )
+				{
+					item->setText(2, QString::fromStdString(opt->help));
+				}
+
+				item->setValueText( ctx );
+				item->setTextAlignment(0, Qt::AlignLeft);
+				item->setTextAlignment(1, Qt::AlignLeft);
+				item->setTextAlignment(2, Qt::AlignLeft);
+
+				tree->addTopLevelItem(item);
+			}
+			else
+			{
+				if ( item )
+				{
+					item->units.push_back(opt);
+					item->setValueText( ctx );
+				}
+			}
+			printf("Option: %s - %i - %s - %s\n", opt->name, opt->type, opt->unit, opt->help);
+
+			if ( opt->type == AV_OPT_TYPE_FLAGS )
+			{
+				printf("   Value: %llx \n", (unsigned long long)opt->default_val.i64 );
+			}
+			else if ( opt->type == AV_OPT_TYPE_CONST )
+			{
+				printf("   Value: %llx \n", (unsigned long long)opt->default_val.i64 );
+			}
+		}
+		opt = av_opt_next( ctx, opt );
+	}
+
+	//connect( tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(hotKeyDoubleClicked(QTreeWidgetItem*,int) ) );
+	//connect( tree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(hotKeyActivated(QTreeWidgetItem*,int) ) );
+
+	mainLayout->addWidget(tree);
+
+	resetDefaults = new QPushButton( tr("Restore Defaults") );
+	resetDefaults->setIcon(style()->standardIcon(QStyle::SP_DialogResetButton));
+	connect(resetDefaults, SIGNAL(clicked(void)), this, SLOT(resetDefaultsCB(void)));
+
+	closeButton = new QPushButton( tr("Close") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
+	hbox = new QHBoxLayout();
+	hbox->addWidget( resetDefaults, 1 );
+	hbox->addStretch(5);
+	hbox->addWidget( closeButton, 1 );
+	mainLayout->addLayout( hbox );
+
+	setLayout(mainLayout);
+}
+//----------------------------------------------------------------------------
+LibavEncOptWin::~LibavEncOptWin(void)
+{
+	printf("Destroy Encoder Options Config Window\n");
+
+	LIBAV::saveCodecConfig(type, codec_name, ctx);
+}
+//----------------------------------------------------------------------------
+void LibavEncOptWin::closeEvent(QCloseEvent *event)
+{
+	printf("Encoder Options Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void LibavEncOptWin::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
 }
 //-----------------------------------------------------
 #endif

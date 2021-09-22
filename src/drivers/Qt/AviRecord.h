@@ -11,8 +11,12 @@
 
 #include <QThread>
 #include <QLabel>
+#include <QDialog>
 #include <QComboBox>
 #include <QGroupBox>
+#include <QPushButton>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 enum aviEncoderList
 {
@@ -73,6 +77,48 @@ class  AviRecordDiskThread_t : public QThread
 };
 
 #ifdef _USE_LIBAV
+
+struct AVOption;
+struct AVCodecContext;
+
+class LibavEncOptItem : public QTreeWidgetItem
+{
+	//Q_OBJECT
+
+	public:
+		LibavEncOptItem(QTreeWidgetItem *parent = nullptr);
+		~LibavEncOptItem(void);
+
+		void setValueText(void *obj);
+
+		const AVOption *opt;
+
+		std::vector <const AVOption*> units;
+};
+
+class LibavEncOptWin : public QDialog
+{
+	Q_OBJECT
+
+public:
+	LibavEncOptWin(int type, QWidget *parent = 0);
+	~LibavEncOptWin(void);
+
+protected:
+	void closeEvent(QCloseEvent *event);
+
+	int type;
+	QTreeWidget *tree;
+	AVCodecContext *ctx;
+	const char *codec_name;
+
+public slots:
+	void closeWindow(void);
+private slots:
+	//void hotKeyActivated(QTreeWidgetItem *item, int column);
+	//void hotKeyDoubleClicked(QTreeWidgetItem *item, int column);
+};
+
 class  LibavOptionsPage : public QWidget
 {
 	Q_OBJECT
@@ -92,6 +138,7 @@ class  LibavOptionsPage : public QWidget
 		void initPixelFormatSelect(const char *codec_name);
 
 	private slots:
+		void openVideoCodecOptions(void);
 		void videoCodecChanged(int idx);
 		void audioCodecChanged(int idx);
 		void videoPixelFormatChanged(int idx);
