@@ -139,6 +139,7 @@ class  LibavOptionsPage : public QWidget
 
 	private slots:
 		void openVideoCodecOptions(void);
+		void openAudioCodecOptions(void);
 		void videoCodecChanged(int idx);
 		void audioCodecChanged(int idx);
 		void videoPixelFormatChanged(int idx);

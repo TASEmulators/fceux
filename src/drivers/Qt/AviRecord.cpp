@@ -850,7 +850,7 @@ int saveCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 	}
 	if ( buffer )
 	{
-		av_free(buffer);
+		av_free(buffer); buffer = NULL;
 	}
 	return 0;
 }
@@ -2307,7 +2307,7 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 {
 	QLabel *lbl;
 	QVBoxLayout *vbox, *vbox1;
-	QHBoxLayout *hbox;
+	//QHBoxLayout *hbox;
 	QGridLayout *grid;
 	QPushButton *videoConfBtn, *audioConfBtn;
 
@@ -2344,11 +2344,13 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	vbox = new QVBoxLayout();
 	audioGbox->setLayout(vbox);
 
-	hbox  = new QHBoxLayout();
-	vbox->addLayout(hbox);
+	grid = new QGridLayout();
+	vbox->addLayout(grid);
 	lbl  = new QLabel( tr("Encoder:") );
-	hbox->addWidget( lbl, 1 );
-	hbox->addWidget( audioEncSel, 5 );
+	grid->addWidget( lbl, 0, 0);
+	grid->addWidget( audioEncSel, 0, 1 );
+	audioConfBtn = new QPushButton( tr("Options...") );
+	grid->addWidget( audioConfBtn, 1, 1);
 
 	initCodecLists();
 
@@ -2360,6 +2362,7 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	connect(videoPixfmt, SIGNAL(currentIndexChanged(int)), this, SLOT(videoPixelFormatChanged(int)));
 
 	connect(videoConfBtn, SIGNAL(clicked(void)), this, SLOT(openVideoCodecOptions(void)));
+	connect(audioConfBtn, SIGNAL(clicked(void)), this, SLOT(openAudioCodecOptions(void)));
 }
 //-----------------------------------------------------
 LibavOptionsPage::~LibavOptionsPage(void)
@@ -2566,6 +2569,13 @@ void LibavOptionsPage::openVideoCodecOptions(void)
 	win->show();
 }
 //----------------------------------------------------------------------------
+void LibavOptionsPage::openAudioCodecOptions(void)
+{
+	LibavEncOptWin *win = new LibavEncOptWin(1,this);
+
+	win->show();
+}
+//----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 LibavEncOptItem::LibavEncOptItem(QTreeWidgetItem *parent)
@@ -2597,7 +2607,7 @@ void LibavEncOptItem::setValueText(void *obj)
 	}
 	if ( s != NULL )
 	{
-		av_free(s);
+		av_free(s); s = NULL;
 	}
 
 	if ( units.size() > 0 )
@@ -2676,19 +2686,21 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 	const AVCodec *codec;
 	const AVOption *opt;
 	bool useOpt, newOpt;
+	char title[128];
 
 	this->type = type;
 
 	if ( type )
 	{
-		setWindowTitle("Audio Encoder Configuration");
 		codec_name = LIBAV::audio_st.selEnc.c_str();
+		sprintf( title, "%s Audio Encoder Configuration", codec_name );
 	}
 	else
 	{
-		setWindowTitle("Video Encoder Configuration");
 		codec_name = LIBAV::video_st.selEnc.c_str();
+		sprintf( title, "%s Video Encoder Configuration", codec_name );
 	}
+	setWindowTitle( title );
 	resize(512, 512);
 
 	/* find the video encoder */
