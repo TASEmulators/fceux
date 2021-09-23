@@ -12,6 +12,9 @@
 #include <QThread>
 #include <QLabel>
 #include <QDialog>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
+#include <QLineEdit>
 #include <QComboBox>
 #include <QGroupBox>
 #include <QPushButton>
@@ -89,11 +92,41 @@ class LibavEncOptItem : public QTreeWidgetItem
 		LibavEncOptItem(QTreeWidgetItem *parent = nullptr);
 		~LibavEncOptItem(void);
 
-		void setValueText(void *obj);
+		void setValueText(void);
 
+		void *obj;
 		const AVOption *opt;
 
 		std::vector <const AVOption*> units;
+};
+
+class LibavEncOptInputWin : public QDialog
+{
+	Q_OBJECT
+
+public:
+	LibavEncOptInputWin( LibavEncOptItem *item, QWidget *parent = 0);
+	~LibavEncOptInputWin(void);
+
+protected:
+	void closeEvent(QCloseEvent *event);
+
+	LibavEncOptItem *item;
+	QComboBox       *combo;
+	QSpinBox        *intEntry;
+	QDoubleSpinBox  *floatEntry;
+	QSpinBox        *numEntry;
+	QSpinBox        *denEntry;
+	QLineEdit       *strEntry;
+	QPushButton     *okButton;
+        QPushButton     *cancelButton;
+        QPushButton     *resetDefaults;
+
+public slots:
+	void closeWindow(void);
+private slots:
+	void applyChanges(void);
+	void resetDefaultsCB(void);
 };
 
 class LibavEncOptWin : public QDialog
@@ -106,6 +139,7 @@ public:
 
 protected:
 	void closeEvent(QCloseEvent *event);
+	void updateItems(void);
 
 	int type;
 	QTreeWidget *tree;
@@ -115,6 +149,9 @@ protected:
 public slots:
 	void closeWindow(void);
 private slots:
+	void resetDefaultsCB(void);
+	void editWindowFinished(int);
+	void itemChangeActivated( QTreeWidgetItem *item, int col);
 	//void hotKeyActivated(QTreeWidgetItem *item, int column);
 	//void hotKeyDoubleClicked(QTreeWidgetItem *item, int column);
 };

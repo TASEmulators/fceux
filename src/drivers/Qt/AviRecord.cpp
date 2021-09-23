@@ -35,6 +35,7 @@
 #include <QObject>
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QInputDialog>
 
 #include "driver.h"
 #include "common/os_utils.h"
@@ -827,31 +828,207 @@ static void log_callback( void *avcl, int level, const char *fmt, va_list vl)
 	//FCEUD_Message( stmp );
 }
 
-int saveCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
+int loadCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 {
-	char *buffer = NULL;
-	int opt_flags;
+	int i,j;
+	char filename[512];
+	char line[512];
+	char section[256], id[256], val[256];
+	void *obj, *child;
+	FILE *fp;
 
-	if ( type )
-	{
-		opt_flags = AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_AUDIO_PARAM;
-	}
-	else
-	{
-		opt_flags = AV_OPT_FLAG_ENCODING_PARAM | AV_OPT_FLAG_VIDEO_PARAM;
-	}
+	sprintf( filename, "%s.conf", codec_name );
 
-	if ( av_opt_serialize( ctx, opt_flags, 0, &buffer, '=', '\n') >= 0 )
+	fp = fopen( filename, "r");
+
+	if ( fp == NULL )
 	{
-		if ( buffer )
+		printf("Error: Failed to open file '%s' for reading\n", filename );
+		return -1;
+	}
+	section[0] = 0;
+
+	obj = ctx;
+
+	while ( fgets( line, sizeof(line), fp ) != 0 )
+	{
+		i=0;
+
+		while ( line[i] != 0 )
 		{
-			printf("%s\n", buffer );
+			if ( line[i] == '#' )
+			{
+				line[i] = 0; break;
+			}
+			i++;
+		}
+		i=0;
+
+		while ( isspace(line[i]) ) i++;
+
+		if ( line[i] == '[' )
+		{
+			i++;
+			while ( isspace(line[i]) ) i++;
+
+			j=0;
+			while ( (line[i] != 0) && (line[i] != ']') )
+			{
+				section[j] = line[i]; i++; j++;
+			}
+			section[j] = 0; j--;
+			
+			while ( (j >= 0) && isspace(section[j]) )
+			{
+				section[j] = 0; j--;
+			}
+			//printf("Section: '%s'\n", section);
+
+			continue;
+		}
+
+		j=0;
+		while ( (line[i] != 0) && (line[i] != '=') )
+		{
+			id[j] = line[i]; i++; j++;
+		}
+		id[j] = 0; j--;
+		
+		while ( (j >= 0) && isspace(id[j]) )
+		{
+			id[j] = 0; j--;
+		}
+		//printf("ID: '%s'\n", id);
+
+		if (id[0] == 0)
+		{
+			continue;
+		}
+
+		if (line[i] != '=')
+		{
+			continue;
+		}
+		i++;
+
+		j=0;
+		while ( (line[i] != 0) )
+		{
+			val[j] = line[i]; i++; j++;
+		}
+		val[j] = 0; j--;
+		
+		while ( (j >= 0) && isspace(val[j]) )
+		{
+			val[j] = 0; j--;
+		}
+		//printf("VAL: '%s'\n", val);
+
+		if ( section[0] == 0 )
+		{
+			continue;
+		}
+		//printf("'%s.%s' = '%s'\n", section, id, val);
+
+		obj = ctx;
+		child = NULL;
+
+		while ( obj != NULL )
+		{
+			const char *groupName = (*static_cast<AVClass**>(obj))->class_name;
+
+			if ( strcmp( groupName, section ) == 0 )
+			{
+				break;
+			}
+			obj = child = av_opt_child_next( ctx, child );
+		}
+
+		if ( obj != NULL )
+		{
+			if ( av_opt_set( obj, id, val, 0 ) < 0 )
+			{
+				printf("Error: Failed to set option %s.%s = %s\n", section, id, val );
+			}
 		}
 	}
-	if ( buffer )
+	fclose(fp);
+
+	return 0;
+}
+
+int saveCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
+{
+	void *obj, *child = NULL;
+	FILE *fp;
+	uint8_t *str;
+	char filename[512];
+	const AVOption *opt;
+	bool useOpt;
+
+	sprintf( filename, "%s.conf", codec_name );
+
+	fp = fopen( filename, "w");
+
+	if ( fp == NULL )
 	{
-		av_free(buffer); buffer = NULL;
+		printf("Error: Failed to open file '%s' for writing\n", filename );
+		return -1;
 	}
+
+	obj = ctx;
+
+	while ( obj != NULL )
+	{
+		const char *groupName = (*static_cast<AVClass**>(obj))->class_name;
+
+		fprintf( fp, "\n[ %s ]\n", groupName );
+
+		//printf("OBJ Class: %s\n", groupName);
+
+		opt = av_opt_next( obj, NULL );
+
+		while ( opt != NULL )
+		{
+			useOpt = (opt->name != NULL) &&
+					(opt->type != AV_OPT_TYPE_BINARY) &&
+					(opt->type != AV_OPT_TYPE_DICT);
+
+			if ( type )
+			{
+				useOpt = useOpt &&
+						(opt->flags & AV_OPT_FLAG_ENCODING_PARAM) &&
+						(opt->flags & AV_OPT_FLAG_AUDIO_PARAM);
+			}
+			else
+			{
+				useOpt = useOpt &&
+						(opt->flags & AV_OPT_FLAG_ENCODING_PARAM) &&
+						(opt->flags & AV_OPT_FLAG_VIDEO_PARAM);
+			}
+
+			if ( useOpt )
+			{
+				str = NULL;
+
+				av_opt_get( obj, opt->name, 0, &str);
+
+				if ( str )
+				{
+					if ( true /*av_opt_is_set_to_default( obj, opt ) == 0*/ )
+					{
+						fprintf( fp, "%s=%s   # %s\n", opt->name, str, 
+								opt->help ? opt->help : "" );
+					}
+					av_free(str); str = NULL;
+				}
+			}
+			opt = av_opt_next( obj, opt );
+		}
+		obj = child = av_opt_child_next( ctx, child );
+	}
+	fclose(fp);
+
 	return 0;
 }
 
@@ -921,6 +1098,8 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 		fprintf( avLogFp, "Error: Could not alloc an video encoding context\n");
 		return -1;
 	}
+	loadCodecConfig( 0, codec_name, c );
+
 	ost->enc = c;
 
 	//av_opt_show2( (void*)c, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
@@ -1123,6 +1302,8 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 		fprintf( avLogFp, "Could not alloc an audio encoding context\n");
 		return -1;
 	}
+	loadCodecConfig( 1, codec_name, c );
+
 	ost->enc = c;
 
 	/* put sample parameters */
@@ -2589,7 +2770,7 @@ LibavEncOptItem::~LibavEncOptItem(void)
 
 }
 //----------------------------------------------------------------------------
-void LibavEncOptItem::setValueText(void *obj)
+void LibavEncOptItem::setValueText(void)
 {
 	char stmp[256];
 	uint8_t *s;
@@ -2682,11 +2863,13 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 	QHBoxLayout *hbox;
 	QPushButton *closeButton, *resetDefaults;
 	QTreeWidgetItem *itemHdr = NULL;
+	QTreeWidgetItem *groupItem = NULL;
 	LibavEncOptItem *item = NULL;
 	const AVCodec *codec;
 	const AVOption *opt;
 	bool useOpt, newOpt;
 	char title[128];
+	void *obj = NULL, *ctx_child = NULL;
 
 	this->type = type;
 
@@ -2712,7 +2895,21 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 		//printf("CODEC: %s\n", codec->name );
 
 		ctx = avcodec_alloc_context3(codec);
+
+		LIBAV::loadCodecConfig( type, codec_name, ctx );
+
+		//av_opt_show2( (void*)ctx, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
+
+		//ctx_child = av_opt_child_next( ctx, ctx_child );
+
+		//while ( ctx_child != NULL )
+		//{
+		//	av_opt_show2( ctx_child, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
+
+		//	ctx_child = av_opt_child_next( ctx, ctx_child );
+		//}
 	}
+	obj = ctx;
 
 	mainLayout = new QVBoxLayout();
 
@@ -2734,84 +2931,103 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 
 	tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-	opt = av_opt_next( ctx, NULL );
+	//printf("CTX Class: %s\n", ctx->av_class->class_name );
+	obj = ctx;
+	ctx_child = NULL;
 
-	while ( opt != NULL )
+	while ( obj != NULL )
 	{
-		useOpt = (opt->name != NULL) &&
-				(opt->type != AV_OPT_TYPE_BINARY) &&
-				(opt->type != AV_OPT_TYPE_DICT);
+		const char *groupName = (*static_cast<AVClass**>(obj))->class_name;
 
-		if ( type )
-		{
-			useOpt = useOpt &&
-					(opt->flags & AV_OPT_FLAG_ENCODING_PARAM) &&
-					(opt->flags & AV_OPT_FLAG_AUDIO_PARAM);
-		}
-		else
-		{
-			useOpt = useOpt &&
-					(opt->flags & AV_OPT_FLAG_ENCODING_PARAM) &&
-					(opt->flags & AV_OPT_FLAG_VIDEO_PARAM);
-		}
-		newOpt = true;
+		printf("OBJ Class: %s\n", groupName);
 
-		if ( item )
+		groupItem = new QTreeWidgetItem();
+		tree->addTopLevelItem(groupItem);
+
+		groupItem->setText(0, QString::fromStdString(groupName));
+
+		opt = av_opt_next( obj, NULL );
+
+		while ( opt != NULL )
 		{
-			if ( opt->unit && item->opt->unit )
+			useOpt = (opt->name != NULL) &&
+					(opt->type != AV_OPT_TYPE_BINARY) &&
+					(opt->type != AV_OPT_TYPE_DICT);
+
+			if ( type )
 			{
-				if ( strcmp( opt->unit, item->opt->unit ) == 0 )
-				{
-					newOpt = false;
-				}
-			}
-		}
-
-		if ( useOpt )
-		{
-			if ( newOpt )
-			{
-				item = new LibavEncOptItem();
-
-				item->opt = opt;
-				item->setText(0, QString::fromStdString(opt->name));
-				//item->setText(1, QString::fromStdString("Value"));
-				if ( opt->help )
-				{
-					item->setText(2, QString::fromStdString(opt->help));
-				}
-
-				item->setValueText( ctx );
-				item->setTextAlignment(0, Qt::AlignLeft);
-				item->setTextAlignment(1, Qt::AlignLeft);
-				item->setTextAlignment(2, Qt::AlignLeft);
-
-				tree->addTopLevelItem(item);
+				useOpt = useOpt &&
+						(opt->flags & AV_OPT_FLAG_ENCODING_PARAM) &&
+						(opt->flags & AV_OPT_FLAG_AUDIO_PARAM);
 			}
 			else
 			{
-				if ( item )
+				useOpt = useOpt &&
+						(opt->flags & AV_OPT_FLAG_ENCODING_PARAM) &&
+						(opt->flags & AV_OPT_FLAG_VIDEO_PARAM);
+			}
+			newOpt = true;
+
+			if ( item )
+			{
+				if ( opt->unit && item->opt->unit )
 				{
-					item->units.push_back(opt);
-					item->setValueText( ctx );
+					if ( strcmp( opt->unit, item->opt->unit ) == 0 )
+					{
+						newOpt = false;
+					}
 				}
 			}
-			printf("Option: %s - %i - %s - %s\n", opt->name, opt->type, opt->unit, opt->help);
 
-			if ( opt->type == AV_OPT_TYPE_FLAGS )
+			if ( useOpt )
 			{
-				printf("   Value: %llx \n", (unsigned long long)opt->default_val.i64 );
+				if ( newOpt )
+				{
+					item = new LibavEncOptItem();
+
+					item->obj = obj;
+					item->opt = opt;
+					item->setText(0, QString::fromStdString(opt->name));
+					//item->setText(1, QString::fromStdString("Value"));
+					if ( opt->help )
+					{
+						item->setText(2, QString::fromStdString(opt->help));
+					}
+
+					item->setValueText();
+					item->setTextAlignment(0, Qt::AlignLeft);
+					item->setTextAlignment(1, Qt::AlignLeft);
+					item->setTextAlignment(2, Qt::AlignLeft);
+
+					//tree->addTopLevelItem(item);
+					groupItem->addChild(item);
+				}
+				else
+				{
+					if ( item )
+					{
+						item->units.push_back(opt);
+						item->setValueText();
+					}
+				}
+				//printf("Option: %s - %i - %s - %s\n", opt->name, opt->type, opt->unit, opt->help);
+
+				//if ( opt->type == AV_OPT_TYPE_FLAGS )
+				//{
+				//	printf("   Value: %llx \n", (unsigned long long)opt->default_val.i64 );
+				//}
+				//else if ( opt->type == AV_OPT_TYPE_CONST )
+				//{
+				//	printf("   Value: %llx \n", (unsigned long long)opt->default_val.i64 );
+				//}
 			}
-			else if ( opt->type == AV_OPT_TYPE_CONST )
-			{
-				printf("   Value: %llx \n", (unsigned long long)opt->default_val.i64 );
-			}
+			opt = av_opt_next( obj, opt );
 		}
-		opt = av_opt_next( ctx, opt );
+		obj = ctx_child = av_opt_child_next( ctx, ctx_child );
 	}
 
 	//connect( tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(hotKeyDoubleClicked(QTreeWidgetItem*,int) ) );
-	//connect( tree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(hotKeyActivated(QTreeWidgetItem*,int) ) );
+	connect( tree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(itemChangeActivated(QTreeWidgetItem*,int) ) );
 
 	mainLayout->addWidget(tree);
 
@@ -2852,6 +3068,436 @@ void LibavEncOptWin::closeWindow(void)
 	//printf("Close Window\n");
 	done(0);
 	deleteLater();
+}
+//-----------------------------------------------------
+void LibavEncOptWin::resetDefaultsCB(void)
+{
+	void *obj = NULL;
+
+	av_opt_set_defaults(ctx);
+
+	obj = av_opt_child_next( ctx, obj );
+
+	while (obj != NULL)
+	{
+		av_opt_set_defaults(obj);
+
+		obj = av_opt_child_next( ctx, obj );
+	}
+	updateItems();
+}
+//-----------------------------------------------------
+void LibavEncOptWin::updateItems(void)
+{
+	QTreeWidgetItem *groupItem;
+	LibavEncOptItem *item = NULL;
+
+	for (int i=0; i<tree->topLevelItemCount(); i++)
+	{
+		groupItem = tree->topLevelItem(i);
+
+		for (int j=0; j<groupItem->childCount(); j++)
+		{
+			item = static_cast<LibavEncOptItem*>(groupItem->child(j));
+			item->setValueText();
+		}
+	}
+	tree->viewport()->update();
+}
+//-----------------------------------------------------
+void LibavEncOptWin::itemChangeActivated( QTreeWidgetItem *itemBase, int col)
+{
+	LibavEncOptItem *item = NULL;
+	LibavEncOptInputWin *win;
+
+	if ( itemBase->childCount() > 0 )
+	{
+		return;
+	}
+
+	item = static_cast<LibavEncOptItem*>(itemBase);
+
+	if ( item->opt == NULL )
+	{
+		return;
+	}
+	win = new LibavEncOptInputWin( item, this );
+
+	win->show();
+
+	connect( win, SIGNAL(finished(int)), this, SLOT(editWindowFinished(int)) );
+}
+//-----------------------------------------------------
+void LibavEncOptWin::editWindowFinished(int result)
+{
+	updateItems();
+}
+//-----------------------------------------------------
+//-----------------------------------------------------
+//-----------------------------------------------------
+//----------------------------------------------------------------------------
+LibavEncOptInputWin::LibavEncOptInputWin( LibavEncOptItem *itemIn, QWidget *parent )
+	: QDialog(parent)
+{
+	const AVOption *opt;
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QGridLayout *grid;
+	QLabel *lbl;
+	char stmp[128];
+	void *obj;
+
+	item = itemIn;
+	opt  = item->opt;
+	obj  = item->obj;
+
+	setWindowTitle("Set Value");
+
+	mainLayout = new QVBoxLayout();
+	grid       = new QGridLayout();
+
+	setLayout( mainLayout );
+	mainLayout->addLayout(grid);
+	grid->addWidget( new QLabel( tr("Name:")   ), 0, 0 );
+	grid->addWidget( new QLabel( tr(opt->name) ), 0, 1 );
+
+	if ( opt->help )
+	{
+		lbl = new QLabel( tr(opt->help) );
+		lbl->setWordWrap(true);
+
+		grid->addWidget( new QLabel( tr("Desc:")   ), 1, 0 );
+		grid->addWidget( lbl, 1, 1 );
+	}
+	combo = NULL;
+	intEntry = NULL;
+	floatEntry = NULL;
+	numEntry = NULL;
+	denEntry = NULL;
+	strEntry = NULL;
+
+	switch ( opt->type )
+	{
+		case AV_OPT_TYPE_INT:
+		case AV_OPT_TYPE_INT64:
+		case AV_OPT_TYPE_UINT64:
+		{
+			int64_t val;
+
+			av_opt_get_int( obj, opt->name, 0, &val );
+
+			grid->addWidget( new QLabel( tr("Range:")   ), 2, 0 );
+
+			sprintf( stmp, "[ %.0f, %.0f ]", opt->min, opt->max );
+
+			grid->addWidget( new QLabel( tr(stmp)   ), 2, 1 );
+
+			grid->addWidget( new QLabel( tr("Default:")   ), 3, 0 );
+
+			sprintf( stmp, "%lli", (long long)opt->default_val.i64 );
+
+			grid->addWidget( new QLabel( tr(stmp)   ), 3, 1 );
+
+			grid->addWidget( new QLabel( tr("Value:")   ), 4, 0 );
+
+			if ( item->units.size() > 0 )
+			{
+				combo = new QComboBox();
+
+				grid->addWidget( combo, 4, 1 );
+
+				for (size_t i=0; i<item->units.size(); i++)
+				{
+					if ( item->units[i]->help )
+					{
+						sprintf( stmp, "%3lli:  %s  -  %s", (long long)item->units[i]->default_val.i64,
+							item->units[i]->name, item->units[i]->help );
+					}
+					else
+					{
+						sprintf( stmp, "%3lli:  %s", (long long)item->units[i]->default_val.i64,
+							item->units[i]->name );
+					}
+
+					combo->addItem( tr(stmp), (const long long)item->units[i]->default_val.i64 );
+
+					if ( val == item->units[i]->default_val.i64 )
+					{
+						combo->setCurrentIndex( combo->count() - 1 );
+					}
+				}
+			}
+			else
+			{
+				intEntry = new QSpinBox();
+				intEntry->setValue( val );
+				intEntry->setRange( (int)(opt->min), (int)(opt->max) );
+
+				grid->addWidget( intEntry, 4, 1 );
+			}
+		}
+		break;
+		case AV_OPT_TYPE_FLOAT:
+		case AV_OPT_TYPE_DOUBLE:
+		{
+			double val;
+
+			av_opt_get_double( obj, opt->name, 0, &val );
+
+			grid->addWidget( new QLabel( tr("Range:")   ), 2, 0 );
+
+			sprintf( stmp, "[ %e, %e ]", opt->min, opt->max );
+
+			grid->addWidget( new QLabel( tr(stmp)   ), 2, 1 );
+
+			grid->addWidget( new QLabel( tr("Default:")   ), 3, 0 );
+
+			sprintf( stmp, "%f", opt->default_val.dbl );
+
+			grid->addWidget( new QLabel( tr(stmp)   ), 3, 1 );
+
+			grid->addWidget( new QLabel( tr("Value:")   ), 4, 0 );
+
+			floatEntry = new QDoubleSpinBox();
+			floatEntry->setValue( val );
+			floatEntry->setRange( opt->min, opt->max );
+
+			grid->addWidget( floatEntry, 4, 1 );
+		}
+		break;
+		case AV_OPT_TYPE_STRING:
+		{
+			uint8_t *val = NULL;
+
+			av_opt_get( obj, opt->name, 0, &val );
+
+			grid->addWidget( new QLabel( tr("Default:")   ), 2, 0 );
+
+			stmp[0] = 0;
+
+			if ( opt->default_val.str )
+			{
+				sprintf( stmp, "%s", opt->default_val.str );
+			}
+			grid->addWidget( new QLabel( tr(stmp)   ), 2, 1 );
+
+			grid->addWidget( new QLabel( tr("Value:")   ), 3, 0 );
+
+			strEntry = new QLineEdit();
+
+			if ( val )
+			{
+				strEntry->setText( tr( (const char*)val ) );
+				av_free(val); val = NULL;
+			}
+			grid->addWidget( strEntry, 3, 1 );
+		}
+		break;
+		case AV_OPT_TYPE_RATIONAL:
+		{
+			AVRational val;
+
+			av_opt_get_q( obj, opt->name, 0, &val );
+
+			grid->addWidget( new QLabel( tr("Default:")   ), 2, 0 );
+
+			sprintf( stmp, "%i/%i", opt->default_val.q.num, opt->default_val.q.den );
+
+			grid->addWidget( new QLabel( tr(stmp)   ), 2, 1 );
+
+			grid->addWidget( new QLabel( tr("Numerator:")   ), 3, 0 );
+
+			numEntry = new QSpinBox();
+			numEntry->setValue( val.num );
+			numEntry->setRange( 0, 0x7FFFFFFF );
+
+			grid->addWidget( numEntry, 3, 1 );
+
+			grid->addWidget( new QLabel( tr("Denominator:")   ), 4, 0 );
+
+			denEntry = new QSpinBox();
+			denEntry->setValue( val.den );
+			denEntry->setRange( 1, 0x7FFFFFFF );
+
+			grid->addWidget( denEntry, 4, 1 );
+		}
+		break;
+		default:
+
+		break;
+	}
+
+	    okButton  = new QPushButton( tr("Apply") );
+	cancelButton  = new QPushButton( tr("Cancel") );
+	resetDefaults = new QPushButton( tr("Reset") );
+
+	     okButton->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
+	 cancelButton->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
+	resetDefaults->setIcon(style()->standardIcon(QStyle::SP_DialogResetButton));
+
+	hbox = new QHBoxLayout();
+	hbox->addWidget( resetDefaults, 1 );
+	hbox->addWidget(  cancelButton, 1 );
+	hbox->addStretch(5);
+	hbox->addWidget(      okButton, 1 );
+	mainLayout->addLayout(hbox);
+
+	connect(      okButton, SIGNAL(clicked(void)), this, SLOT(applyChanges(void))    );
+	connect(  cancelButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void))     );
+	connect( resetDefaults, SIGNAL(clicked(void)), this, SLOT(resetDefaultsCB(void)) );
+}
+//-----------------------------------------------------
+LibavEncOptInputWin::~LibavEncOptInputWin(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void LibavEncOptInputWin::closeEvent(QCloseEvent *event)
+{
+	printf("Encoder Options Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void LibavEncOptInputWin::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//-----------------------------------------------------
+void LibavEncOptInputWin::applyChanges(void)
+{
+	switch ( item->opt->type )
+	{
+		case AV_OPT_TYPE_INT:
+		case AV_OPT_TYPE_INT64:
+		case AV_OPT_TYPE_UINT64:
+		{
+			if ( intEntry )
+			{
+				av_opt_set_int( item->obj, item->opt->name, intEntry->value(), 0 );
+			}
+
+			if ( combo )
+			{
+				av_opt_set_int( item->obj, item->opt->name, 
+						combo->currentData().toInt(), 0 );
+			}
+		}
+		break;
+		case AV_OPT_TYPE_FLOAT:
+		case AV_OPT_TYPE_DOUBLE:
+		{
+			if ( floatEntry )
+			{
+				av_opt_set_double( item->obj, item->opt->name, floatEntry->value(), 0 );
+			}
+		}
+		break;
+		case AV_OPT_TYPE_STRING:
+		{
+			if ( strEntry )
+			{
+				av_opt_set( item->obj, item->opt->name, strEntry->text().toStdString().c_str(), 0 );
+			}
+		}
+		break;
+		case AV_OPT_TYPE_RATIONAL:
+		{
+			AVRational q;
+
+			q.num = 0;
+			q.den = 1;
+
+			if ( numEntry )
+			{
+				q.num = numEntry->value();
+			}
+
+			if ( denEntry )
+			{
+				q.den = denEntry->value();
+			}
+
+			av_opt_set_q( item->obj, item->opt->name, q, 0 );
+		}
+		break;
+		default:
+		break;
+	}
+
+	done(0);
+	deleteLater();
+}
+//-----------------------------------------------------
+void LibavEncOptInputWin::resetDefaultsCB(void)
+{
+	switch ( item->opt->type )
+	{
+		case AV_OPT_TYPE_INT:
+		case AV_OPT_TYPE_INT64:
+		case AV_OPT_TYPE_UINT64:
+		{
+			if ( intEntry )
+			{
+				intEntry->setValue( item->opt->default_val.i64 );
+			}
+
+			if ( combo )
+			{
+				for (int i=0; i<combo->count(); i++)
+				{
+					if ( combo->itemData(i).toInt() == item->opt->default_val.i64 )
+					{
+						combo->setCurrentIndex(i);
+					}
+				}
+			}
+		}
+		break;
+		case AV_OPT_TYPE_FLOAT:
+		case AV_OPT_TYPE_DOUBLE:
+		{
+			if ( floatEntry )
+			{
+				floatEntry->setValue( item->opt->default_val.dbl );
+			}
+		}
+		break;
+		case AV_OPT_TYPE_STRING:
+		{
+			if ( strEntry )
+			{
+				if ( item->opt->default_val.str )
+				{
+					strEntry->setText( tr(item->opt->default_val.str) );
+				}
+				else
+				{
+					strEntry->clear();
+				}
+			}
+		}
+		break;
+		case AV_OPT_TYPE_RATIONAL:
+		{
+			if ( numEntry )
+			{
+				numEntry->setValue( item->opt->default_val.q.num );
+			}
+
+			if ( denEntry )
+			{
+				denEntry->setValue( item->opt->default_val.q.den );
+			}
+		}
+		break;
+		default:
+
+		break;
+	}
 }
 //-----------------------------------------------------
 #endif
