@@ -756,6 +756,9 @@ struct OutputStream
 	int      bytesPerSample;
 	int      frameSize;
 	int      pixelFormat;
+	int      sampleFormat;
+	int      sampleRate;
+	int      chanLayout;
 	bool     isAudio;
 	bool     writeError;
 	std::string selEnc;
@@ -773,6 +776,9 @@ struct OutputStream
 		writeError = false;
 		isAudio = false;
 		pixelFormat = -1;
+		sampleFormat = -1;
+		sampleRate = -1;
+		chanLayout = -1;
 	}
 
 	void close(void)
@@ -1315,9 +1321,87 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 	ost->enc = c;
 
 	/* put sample parameters */
-	c->sample_fmt     = codec->sample_fmts           ? codec->sample_fmts[0]           : AV_SAMPLE_FMT_S16;
-	c->sample_rate    = codec->supported_samplerates ? codec->supported_samplerates[0] : audioSampleRate;
-	c->channel_layout = codec->channel_layouts       ? codec->channel_layouts[0]       : AV_CH_LAYOUT_STEREO;
+
+	// Sample Format Selection
+	if ( ost->sampleFormat > 0 )
+	{
+		c->sample_fmt  = (AVSampleFormat)ost->sampleFormat;
+
+		if ( codec->sample_fmts )
+		{
+			int i=0, formatOk=0;
+			while ( codec->sample_fmts[i] != -1 )
+			{
+				if ( c->sample_fmt == codec->sample_fmts[i] )
+				{
+					formatOk = true; break;
+				}
+				i++;
+			}
+			if ( !formatOk )
+			{
+				c->sample_fmt = codec->sample_fmts  ? codec->sample_fmts[0] : AV_SAMPLE_FMT_S16;
+			}
+		}
+	}
+	else
+	{
+		c->sample_fmt = codec->sample_fmts ? codec->sample_fmts[0] : AV_SAMPLE_FMT_S16;
+	}
+
+	// Sample Rate Selection
+	if ( ost->sampleRate > 0 )
+	{
+		c->sample_rate = ost->sampleRate;
+
+		if ( codec->supported_samplerates )
+		{
+			int i=0, formatOk=0;
+			while ( codec->supported_samplerates[i] != 0 )
+			{
+				if ( c->sample_rate == codec->supported_samplerates[i] )
+				{
+					formatOk = true; break;
+				}
+				i++;
+			}
+			if ( !formatOk )
+			{
+				c->sample_rate    = codec->supported_samplerates ? codec->supported_samplerates[0] : audioSampleRate;
+			}
+		}
+	}
+	else
+	{
+		c->sample_rate    = codec->supported_samplerates ? codec->supported_samplerates[0] : audioSampleRate;
+	}
+
+	// Channel Layout Selection
+	if ( ost->chanLayout > 0 )
+	{
+		c->channel_layout = ost->chanLayout;
+
+		if ( codec->channel_layouts )
+		{
+			int i=0, formatOk=0;
+			while ( codec->channel_layouts[i] != 0 )
+			{
+				if ( c->channel_layout == codec->channel_layouts[i] )
+				{
+					formatOk = true; break;
+				}
+				i++;
+			}
+			if ( !formatOk )
+			{
+				c->channel_layout = codec->channel_layouts       ? codec->channel_layouts[0]       : AV_CH_LAYOUT_STEREO;
+			}
+		}
+	}
+	else
+	{
+		c->channel_layout = codec->channel_layouts       ? codec->channel_layouts[0]       : AV_CH_LAYOUT_STEREO;
+	}
 	c->channels       = av_get_channel_layout_nb_channels(c->channel_layout);
 	c->bit_rate       = 64000;
 	//ost->st->time_base = (AVRational){ 1, c->sample_rate };
@@ -1475,7 +1559,10 @@ static int setCodecFromConfig(void)
 		}
 	}
 
-	g_config->getOption("SDL.AviFFmpegVideoPixFmt", &video_st.pixelFormat);	
+	g_config->getOption("SDL.AviFFmpegVideoPixFmt"    , &video_st.pixelFormat);	
+	g_config->getOption("SDL.AviFFmpegAudioSmpFmt"    , &audio_st.sampleFormat);	
+	g_config->getOption("SDL.AviFFmpegAudioSmpRate"   , &audio_st.sampleRate);	
+	g_config->getOption("SDL.AviFFmpegAudioChanLayout", &audio_st.chanLayout);	
 
 	return 0;
 }
@@ -2509,9 +2596,12 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 
 	audioGbox->setCheckable(true);
 
-	videoEncSel = new QComboBox();
-	audioEncSel = new QComboBox();
-	videoPixfmt = new QComboBox();
+	videoEncSel     = new QComboBox();
+	audioEncSel     = new QComboBox();
+	videoPixfmt     = new QComboBox();
+	audioSamplefmt  = new QComboBox();
+	audioSampleRate = new QComboBox();
+	audioChanLayout = new QComboBox();
 
 	vbox1->addWidget( videoGbox );
 	vbox1->addWidget( audioGbox );
@@ -2538,8 +2628,17 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	lbl  = new QLabel( tr("Encoder:") );
 	grid->addWidget( lbl, 0, 0);
 	grid->addWidget( audioEncSel, 0, 1 );
+	lbl  = new QLabel( tr("Sample Format:") );
+	grid->addWidget( lbl, 1, 0);
+	grid->addWidget( audioSamplefmt, 1, 1);
+	lbl  = new QLabel( tr("Sample Rate:") );
+	grid->addWidget( lbl, 2, 0);
+	grid->addWidget( audioSampleRate, 2, 1);
+	lbl  = new QLabel( tr("Channel Layout:") );
+	grid->addWidget( lbl, 3, 0);
+	grid->addWidget( audioChanLayout, 3, 1);
 	audioConfBtn = new QPushButton( tr("Options...") );
-	grid->addWidget( audioConfBtn, 1, 1);
+	grid->addWidget( audioConfBtn, 4, 1);
 
 	initCodecLists();
 
@@ -2548,7 +2647,10 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	connect(videoEncSel, SIGNAL(currentIndexChanged(int)), this, SLOT(videoCodecChanged(int)));
 	connect(audioEncSel, SIGNAL(currentIndexChanged(int)), this, SLOT(audioCodecChanged(int)));
 
-	connect(videoPixfmt, SIGNAL(currentIndexChanged(int)), this, SLOT(videoPixelFormatChanged(int)));
+	connect(videoPixfmt    , SIGNAL(currentIndexChanged(int)), this, SLOT(videoPixelFormatChanged(int)));
+	connect(audioSamplefmt , SIGNAL(currentIndexChanged(int)), this, SLOT(audioSampleFormatChanged(int)));
+	connect(audioSampleRate, SIGNAL(currentIndexChanged(int)), this, SLOT(audioSampleRateChanged(int)));
+	connect(audioChanLayout, SIGNAL(currentIndexChanged(int)), this, SLOT(audioChannelLayoutChanged(int)));
 
 	connect(videoConfBtn, SIGNAL(clicked(void)), this, SLOT(openVideoCodecOptions(void)));
 	connect(audioConfBtn, SIGNAL(clicked(void)), this, SLOT(openAudioCodecOptions(void)));
@@ -2591,7 +2693,7 @@ void LibavOptionsPage::initPixelFormatSelect(const char *codec_name)
 				if ( LIBAV::video_st.pixelFormat == c->pix_fmts[i] )
 				{
 					videoPixfmt->setCurrentIndex( videoPixfmt->count() - 1 );
-					//formatOk = true;
+					formatOk = true;
 				}
 			}
 			i++;
@@ -2662,6 +2764,129 @@ void LibavOptionsPage::initPixelFormatSelect(const char *codec_name)
 
 }
 //-----------------------------------------------------
+void LibavOptionsPage::initSampleFormatSelect( const char *codec_name )
+{
+
+	const AVCodec *c;
+	bool formatOk = false;
+
+	c = avcodec_find_encoder_by_name( codec_name );
+
+	audioSamplefmt->clear();
+	audioSamplefmt->addItem( tr("Auto"), -1);
+
+	if ( c == NULL )
+	{
+		return;
+	}
+	if ( c->sample_fmts )
+	{
+		int i=0;
+		const char *fmtName;
+
+		while ( c->sample_fmts[i] != -1 )
+		{
+			fmtName = av_get_sample_fmt_name( c->sample_fmts[i] );
+
+			if ( fmtName )
+			{
+				audioSamplefmt->addItem( tr(fmtName), c->sample_fmts[i] );
+
+				if ( LIBAV::audio_st.sampleFormat == c->sample_fmts[i] )
+				{
+					audioSamplefmt->setCurrentIndex( audioSamplefmt->count() - 1 );
+					formatOk = true;
+				}
+			}
+			i++;
+		}
+	}
+	if ( !formatOk )
+	{
+		LIBAV::audio_st.sampleFormat = -1;
+	}
+}
+//-----------------------------------------------------
+void LibavOptionsPage::initSampleRateSelect( const char *codec_name )
+{
+
+	const AVCodec *c;
+	bool formatOk = false;
+
+	c = avcodec_find_encoder_by_name( codec_name );
+
+	audioSampleRate->clear();
+	audioSampleRate->addItem( tr("Auto"), -1);
+
+	if ( c == NULL )
+	{
+		return;
+	}
+	if ( c->supported_samplerates )
+	{
+		int i=0;
+		char rateName[64];
+
+		while ( c->supported_samplerates[i] != 0 )
+		{
+			sprintf( rateName, "%i", c->supported_samplerates[i] );
+
+			audioSampleRate->addItem( tr(rateName), c->supported_samplerates[i] );
+
+			if ( LIBAV::audio_st.sampleRate == c->supported_samplerates[i] )
+			{
+				audioSampleRate->setCurrentIndex( audioSampleRate->count() - 1 );
+				formatOk = true;
+			}
+			i++;
+		}
+	}
+	if ( !formatOk )
+	{
+		LIBAV::audio_st.sampleRate = -1;
+	}
+}
+//-----------------------------------------------------
+void LibavOptionsPage::initChannelLayoutSelect( const char *codec_name )
+{
+
+	const AVCodec *c;
+	bool formatOk = false;
+
+	c = avcodec_find_encoder_by_name( codec_name );
+
+	audioChanLayout->clear();
+	audioChanLayout->addItem( tr("Auto"), -1);
+
+	if ( c == NULL )
+	{
+		return;
+	}
+	if ( c->channel_layouts )
+	{
+		int i=0;
+		char layoutDesc[256];
+
+		while ( c->channel_layouts[i] != 0 )
+		{
+			av_get_channel_layout_string( layoutDesc, sizeof(layoutDesc), -1, c->channel_layouts[i] );
+
+			audioChanLayout->addItem( tr(layoutDesc), (unsigned long long)c->channel_layouts[i] );
+
+			if ( LIBAV::audio_st.chanLayout == c->channel_layouts[i] )
+			{
+				audioChanLayout->setCurrentIndex( audioChanLayout->count() - 1 );
+				formatOk = true;
+			}
+			i++;
+		}
+	}
+	if ( !formatOk )
+	{
+		LIBAV::audio_st.chanLayout = -1;
+	}
+}
+//-----------------------------------------------------
 void LibavOptionsPage::initCodecLists(void)
 {
 	void *it = NULL;
@@ -2711,6 +2936,9 @@ void LibavOptionsPage::initCodecLists(void)
 	}
 
 	initPixelFormatSelect( videoEncSel->currentText().toStdString().c_str() );
+	initSampleFormatSelect( audioEncSel->currentText().toStdString().c_str() );
+	initSampleRateSelect( audioEncSel->currentText().toStdString().c_str() );
+	initChannelLayoutSelect( audioEncSel->currentText().toStdString().c_str() );
 }
 //-----------------------------------------------------
 void LibavOptionsPage::videoCodecChanged(int idx)
@@ -2739,6 +2967,10 @@ void LibavOptionsPage::audioCodecChanged(int idx)
 	if ( c )
 	{
 		g_config->setOption("SDL.AviFFmpegAudioCodec", c->name);	
+
+		initSampleFormatSelect( c->name );
+		initSampleRateSelect( c->name );
+		initChannelLayoutSelect( c->name );
 	}
 }
 //-----------------------------------------------------
@@ -2749,6 +2981,33 @@ void LibavOptionsPage::videoPixelFormatChanged(int idx)
 	printf("Selected Pixel Format: %i\n", LIBAV::video_st.pixelFormat );
 	
 	g_config->setOption("SDL.AviFFmpegVideoPixFmt", LIBAV::video_st.pixelFormat);	
+}
+//-----------------------------------------------------
+void LibavOptionsPage::audioSampleFormatChanged(int idx)
+{
+	LIBAV::audio_st.sampleFormat = audioSamplefmt->itemData(idx).toInt();
+
+	printf("Selected Sample Format: %i\n", LIBAV::audio_st.sampleFormat );
+	
+	g_config->setOption("SDL.AviFFmpegAudioSmpFmt", LIBAV::audio_st.sampleFormat);	
+}
+//-----------------------------------------------------
+void LibavOptionsPage::audioSampleRateChanged(int idx)
+{
+	LIBAV::audio_st.sampleRate = audioSampleRate->itemData(idx).toInt();
+
+	printf("Selected Sample Rate: %i\n", LIBAV::audio_st.sampleRate );
+	
+	g_config->setOption("SDL.AviFFmpegAudioSmpRate", LIBAV::audio_st.sampleRate);	
+}
+//-----------------------------------------------------
+void LibavOptionsPage::audioChannelLayoutChanged(int idx)
+{
+	LIBAV::audio_st.chanLayout = audioChanLayout->itemData(idx).toInt();
+
+	printf("Selected Channel Layout: 0x%X\n", LIBAV::audio_st.chanLayout );
+	
+	g_config->setOption("SDL.AviFFmpegAudioChanLayout", LIBAV::audio_st.chanLayout);	
 }
 //----------------------------------------------------------------------------
 void LibavOptionsPage::openVideoCodecOptions(void)

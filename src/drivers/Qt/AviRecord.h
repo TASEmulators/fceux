@@ -170,11 +170,17 @@ class  LibavOptionsPage : public QWidget
 		QComboBox  *videoEncSel;
 		QComboBox  *videoPixfmt;
 		QComboBox  *audioEncSel;
+		QComboBox  *audioSamplefmt;
+		QComboBox  *audioSampleRate;
+		QComboBox  *audioChanLayout;
 		QGroupBox  *videoGbox;
 		QGroupBox  *audioGbox;
 
 		void initCodecLists(void);
 		void initPixelFormatSelect(const char *codec_name);
+		void initSampleFormatSelect(const char *codec_name);
+		void initSampleRateSelect(const char *codec_name);
+		void initChannelLayoutSelect(const char *codec_name);
 
 	private slots:
 		void openVideoCodecOptions(void);
@@ -182,6 +188,9 @@ class  LibavOptionsPage : public QWidget
 		void videoCodecChanged(int idx);
 		void audioCodecChanged(int idx);
 		void videoPixelFormatChanged(int idx);
+		void audioSampleFormatChanged(int idx);
+		void audioSampleRateChanged(int idx);
+		void audioChannelLayoutChanged(int idx);
 };
 
 #endif
