@@ -17,6 +17,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QGroupBox>
+#include <QCheckBox>
 #include <QPushButton>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
@@ -121,6 +122,7 @@ protected:
 	QPushButton     *okButton;
         QPushButton     *cancelButton;
         QPushButton     *resetDefaults;
+	std::vector <QCheckBox*> chkBox;
 
 public slots:
 	void closeWindow(void);

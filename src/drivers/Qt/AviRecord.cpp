@@ -3322,6 +3322,30 @@ LibavEncOptInputWin::LibavEncOptInputWin( LibavEncOptItem *itemIn, QWidget *pare
 			grid->addWidget( denEntry, 4, 1 );
 		}
 		break;
+		case AV_OPT_TYPE_BOOL:
+		{
+			int64_t val;
+			QCheckBox *c;
+
+			av_opt_get_int( obj, opt->name, 0, &val );
+
+			grid->addWidget( new QLabel( tr("Default:")   ), 2, 0 );
+
+			sprintf( stmp, "%s", opt->default_val.i64 ? "true" : "false" );
+
+			grid->addWidget( new QLabel( tr(stmp)   ), 2, 1 );
+
+			grid->addWidget( new QLabel( tr("Value:")   ), 3, 0 );
+
+			c = new QCheckBox( tr("Checked=true") );
+
+			c->setChecked( val != 0 );
+
+			chkBox.push_back(c);
+
+			grid->addWidget( c, 3, 1 );
+		}
+		break;
 		default:
 
 		break;
@@ -3424,6 +3448,14 @@ void LibavEncOptInputWin::applyChanges(void)
 			av_opt_set_q( item->obj, item->opt->name, q, 0 );
 		}
 		break;
+		case AV_OPT_TYPE_BOOL:
+		{
+			if ( chkBox.size() > 0 )
+			{
+				av_opt_set_int( item->obj, item->opt->name, chkBox[0]->isChecked(), 0 );
+			}
+		}
+		break;
 		default:
 		break;
 	}
@@ -3491,6 +3523,14 @@ void LibavEncOptInputWin::resetDefaultsCB(void)
 			if ( denEntry )
 			{
 				denEntry->setValue( item->opt->default_val.q.den );
+			}
+		}
+		break;
+		case AV_OPT_TYPE_BOOL:
+		{
+			if ( chkBox.size() > 0 )
+			{
+				chkBox[0]->setChecked( item->opt->default_val.i64 != 0 );
 			}
 		}
 		break;
