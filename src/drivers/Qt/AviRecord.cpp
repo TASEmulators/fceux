@@ -2906,16 +2906,16 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 
 		LIBAV::loadCodecConfig( type, codec_name, ctx );
 
-		av_opt_show2( (void*)ctx, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
+		//av_opt_show2( (void*)ctx, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
 
-		ctx_child = av_opt_child_next( ctx, ctx_child );
+		//ctx_child = av_opt_child_next( ctx, ctx_child );
 
-		while ( ctx_child != NULL )
-		{
-			av_opt_show2( ctx_child, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
+		//while ( ctx_child != NULL )
+		//{
+		//	av_opt_show2( ctx_child, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
 
-			ctx_child = av_opt_child_next( ctx, ctx_child );
-		}
+		//	ctx_child = av_opt_child_next( ctx, ctx_child );
+		//}
 	}
 	obj = ctx;
 
@@ -3354,6 +3354,54 @@ LibavEncOptInputWin::LibavEncOptInputWin( LibavEncOptItem *itemIn, QWidget *pare
 			grid->addWidget( c, 3, 1 );
 		}
 		break;
+		case AV_OPT_TYPE_FLAGS:
+		{
+			int64_t val;
+			QCheckBox *c;
+
+			av_opt_get_int( obj, opt->name, 0, &val );
+
+			grid->addWidget( new QLabel( tr("Default:")   ), 2, 0 );
+
+			sprintf( stmp, "0x%08llX", (unsigned long long)opt->default_val.i64 );
+
+			grid->addWidget( new QLabel( tr(stmp)   ), 2, 1 );
+
+			if ( item->units.size() > 0 )
+			{
+				int row, col;
+
+				for (size_t i=0; i<item->units.size(); i++)
+				{
+					sprintf( stmp, "%s", item->units[i]->name );
+
+					c = new QCheckBox( tr(stmp) );
+
+					if ( item->units[i]->help )
+					{
+						c->setToolTip( tr(item->units[i]->help) );
+					}
+
+					c->setChecked( (val & item->units[i]->default_val.i64) ? true : false );
+
+					chkBox.push_back(c);
+				}
+
+				row = col = 0;
+				for (size_t i=0; i<chkBox.size(); i++)
+				{
+					grid->addWidget( chkBox[i], row+3, col );
+					
+					row++;
+					if ( row >= 8 )
+					{
+						row = 0;
+						col++;
+					}
+				}
+			}
+		}
+		break;
 		default:
 
 		break;
@@ -3464,6 +3512,23 @@ void LibavEncOptInputWin::applyChanges(void)
 			}
 		}
 		break;
+		case AV_OPT_TYPE_FLAGS:
+		{
+			if ( chkBox.size() > 0 )
+			{
+				int64_t i64=0;
+
+				for (size_t i=0; i<chkBox.size(); i++)
+				{
+					if ( chkBox[i]->isChecked() )
+					{
+						i64 |= item->units[i]->default_val.i64;
+					}
+				}
+				av_opt_set_int( item->obj, item->opt->name, i64, 0 );
+			}
+		}
+		break;
 		default:
 		break;
 	}
@@ -3539,6 +3604,17 @@ void LibavEncOptInputWin::resetDefaultsCB(void)
 			if ( chkBox.size() > 0 )
 			{
 				chkBox[0]->setChecked( item->opt->default_val.i64 != 0 );
+			}
+		}
+		break;
+		case AV_OPT_TYPE_FLAGS:
+		{
+			if ( chkBox.size() > 0 )
+			{
+				for (size_t i=0; i<chkBox.size(); i++)
+				{
+					chkBox[i]->setChecked( (item->opt->default_val.i64 & item->units[i]->default_val.i64) ? true : false );
+				}
 			}
 		}
 		break;
