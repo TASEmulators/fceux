@@ -810,6 +810,7 @@ struct OutputStream
 		{
 			swr_free(&swr_ctx); swr_ctx = NULL;
 		}
+		st = NULL;
 		writeError = false;
 		bytesPerSample = 0;
 		next_pts = 0;
@@ -1612,10 +1613,13 @@ static int initMedia( const char *filename )
 		fprintf( avLogFp, "Video Stream Init Failed\n");
 		goto LIBAV_INIT_MEDIA_ERROR_EXIT;
 	}
-	if ( initAudioStream( audio_st.selEnc.c_str(), &audio_st ) )
+	if ( recordAudio )
 	{
-		fprintf( avLogFp, "Audio Stream Init Failed\n");
-		goto LIBAV_INIT_MEDIA_ERROR_EXIT;
+		if ( initAudioStream( audio_st.selEnc.c_str(), &audio_st ) )
+		{
+			fprintf( avLogFp, "Audio Stream Init Failed\n");
+			goto LIBAV_INIT_MEDIA_ERROR_EXIT;
+		}
 	}
 
 	av_dump_format(oc, 0, filename, 1);
@@ -1723,6 +1727,10 @@ static int encode_audio_frame( int16_t *audioOut, int numSamples)
 	OutputStream *ost = &audio_st;
 	const uint8_t *inData[AV_NUM_DATA_POINTERS];
 
+	if ( ost->st == NULL )
+	{
+		return -1;
+	}
 	if ( ost->writeError )
 	{
 		return -1;
@@ -1984,6 +1992,7 @@ int aviRecordOpenFile( const char *filepath )
 		// Log Error
 		return -1;
 	}
+	g_config->getOption("SDL.AviRecordAudio", &recordAudio);
 
 	if ( filepath != NULL )
 	{
@@ -2264,6 +2273,8 @@ bool aviGetAudioEnable(void)
 void aviSetAudioEnable(bool val)
 {
 	recordAudio = val;
+
+	g_config->setOption("SDL.AviRecordAudio", val);
 }
 //**************************************************************************************
 bool aviRecordRunning(void)
@@ -2369,6 +2380,7 @@ void AviRecordDiskThread_t::run(void)
 	int16_t *audioOut;
 	uint32_t *videoOut;
 	char writeAudio = 1;
+	char localRecordAudio = 0;
 	int  avgAudioPerFrame, localVideoFormat;
 
 	fprintf( avLogFp, "AVI Record Disk Thread Start\n");
@@ -2397,6 +2409,7 @@ void AviRecordDiskThread_t::run(void)
 		return;
 	}
 	localVideoFormat = videoFormat;
+	localRecordAudio = recordAudio;
 
 #ifdef _USE_X264
 	if ( localVideoFormat == AVI_X264)
@@ -2488,7 +2501,7 @@ void AviRecordDiskThread_t::run(void)
 
 			numPixelsReady = 0;
 
-			if ( writeAudio && recordAudio )
+			if ( writeAudio && localRecordAudio )
 			{
 				numSamples = 0;
 
@@ -2587,6 +2600,8 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	QGridLayout *grid;
 	QPushButton *videoConfBtn, *audioConfBtn;
 
+	g_config->getOption("SDL.AviRecordAudio", &recordAudio);
+
 	LIBAV::setCodecFromConfig();
 
 	vbox1 = new QVBoxLayout();
@@ -2595,6 +2610,7 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	audioGbox = new QGroupBox( tr("Audio:") );
 
 	audioGbox->setCheckable(true);
+	audioGbox->setChecked( aviGetAudioEnable() );
 
 	videoEncSel     = new QComboBox();
 	audioEncSel     = new QComboBox();
@@ -2654,6 +2670,8 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 
 	connect(videoConfBtn, SIGNAL(clicked(void)), this, SLOT(openVideoCodecOptions(void)));
 	connect(audioConfBtn, SIGNAL(clicked(void)), this, SLOT(openAudioCodecOptions(void)));
+
+	connect(audioGbox, SIGNAL(clicked(bool)), this, SLOT(includeAudioChanged(bool)));
 }
 //-----------------------------------------------------
 LibavOptionsPage::~LibavOptionsPage(void)
@@ -2939,6 +2957,11 @@ void LibavOptionsPage::initCodecLists(void)
 	initSampleFormatSelect( audioEncSel->currentText().toStdString().c_str() );
 	initSampleRateSelect( audioEncSel->currentText().toStdString().c_str() );
 	initChannelLayoutSelect( audioEncSel->currentText().toStdString().c_str() );
+}
+//-----------------------------------------------------
+void LibavOptionsPage::includeAudioChanged(bool checked)
+{
+	aviSetAudioEnable( checked );
 }
 //-----------------------------------------------------
 void LibavOptionsPage::videoCodecChanged(int idx)

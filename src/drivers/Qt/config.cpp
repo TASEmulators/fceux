@@ -604,6 +604,7 @@ InitConfig()
 #else
 	config->addOption("SDL.AviVideoFormat", AVI_RGB24);
 #endif
+	config->addOption("SDL.AviRecordAudio", 1);
 
 #ifdef _USE_LIBAV
 	config->addOption("SDL.AviFFmpegVideoCodec", "");

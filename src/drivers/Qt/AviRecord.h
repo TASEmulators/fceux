@@ -183,6 +183,7 @@ class  LibavOptionsPage : public QWidget
 		void initChannelLayoutSelect(const char *codec_name);
 
 	private slots:
+		void includeAudioChanged(bool);
 		void openVideoCodecOptions(void);
 		void openAudioCodecOptions(void);
 		void videoCodecChanged(int idx);
