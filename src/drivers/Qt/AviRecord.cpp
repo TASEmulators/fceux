@@ -836,8 +836,9 @@ int loadCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 	char section[256], id[256], val[256];
 	void *obj, *child;
 	FILE *fp;
+	const char *baseDir = FCEUI_GetBaseDirectory();
 
-	sprintf( filename, "%s.conf", codec_name );
+	sprintf( filename, "%s/avi/%s.conf", baseDir, codec_name );
 
 	fp = fopen( filename, "r");
 
@@ -965,8 +966,9 @@ int saveCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 	char filename[512];
 	const AVOption *opt;
 	bool useOpt;
+	const char *baseDir = FCEUI_GetBaseDirectory();
 
-	sprintf( filename, "%s.conf", codec_name );
+	sprintf( filename, "%s/avi/%s.conf", baseDir, codec_name );
 
 	fp = fopen( filename, "w");
 
@@ -1384,30 +1386,30 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 	return 0;
 }
 
-static void print_Codecs(void)
-{
-	void *it = NULL;
-	const AVCodec *c;
-
-	c = av_codec_iterate( &it );
-
-	while ( c != NULL )
-	{
-		if ( av_codec_is_encoder(c) )
-		{
-			if ( c->type == AVMEDIA_TYPE_VIDEO )
-			{
-				printf("Video Encoder: %i  %s   %s\n", c->id, c->name, c->long_name);
-			}
-			else if ( c->type == AVMEDIA_TYPE_AUDIO )
-			{
-				printf("Audio Encoder: %i  %s   %s\n", c->id, c->name, c->long_name);
-			}
-		}
-
-		c = av_codec_iterate( &it );
-	}
-}
+//static void print_Codecs(void)
+//{
+//	void *it = NULL;
+//	const AVCodec *c;
+//
+//	c = av_codec_iterate( &it );
+//
+//	while ( c != NULL )
+//	{
+//		if ( av_codec_is_encoder(c) )
+//		{
+//			if ( c->type == AVMEDIA_TYPE_VIDEO )
+//			{
+//				printf("Video Encoder: %i  %s   %s\n", c->id, c->name, c->long_name);
+//			}
+//			else if ( c->type == AVMEDIA_TYPE_AUDIO )
+//			{
+//				printf("Audio Encoder: %i  %s   %s\n", c->id, c->name, c->long_name);
+//			}
+//		}
+//
+//		c = av_codec_iterate( &it );
+//	}
+//}
 
 static int setCodecFromConfig(void)
 {
@@ -1485,7 +1487,7 @@ static int initMedia( const char *filename )
 
 	av_log_set_callback( log_callback );
 
-	print_Codecs();
+	//print_Codecs();
 
 	/* Autodetect the output format from the name. default is MPEG. */
 	fmt = av_guess_format(NULL, filename, NULL);
@@ -2568,22 +2570,22 @@ void LibavOptionsPage::initPixelFormatSelect(const char *codec_name)
 	}
 	if ( c->pix_fmts )
 	{
-		int i=0, formatOk=0;
+		int i=0; //, formatOk=0;
 		while (c->pix_fmts[i] != -1)
 		{
 			desc = av_pix_fmt_desc_get( c->pix_fmts[i] );
 
 			if ( desc )
 			{
-				printf("Codec PIX_FMT: %i: %s 0x%04X\t-  %s\n", c->pix_fmts[i],
-						desc->name, av_get_pix_fmt_loss(c->pix_fmts[i], AV_PIX_FMT_BGRA, 0), desc->alias);
+				//printf("Codec PIX_FMT: %i: %s 0x%04X\t-  %s\n", c->pix_fmts[i],
+				//		desc->name, av_get_pix_fmt_loss(c->pix_fmts[i], AV_PIX_FMT_BGRA, 0), desc->alias);
 
 				videoPixfmt->addItem( tr(desc->name), c->pix_fmts[i]);
 
 				if ( LIBAV::video_st.pixelFormat == c->pix_fmts[i] )
 				{
 					videoPixfmt->setCurrentIndex( videoPixfmt->count() - 1 );
-					formatOk = true;
+					//formatOk = true;
 				}
 			}
 			i++;
@@ -2605,8 +2607,8 @@ void LibavOptionsPage::initPixelFormatSelect(const char *codec_name)
 
 			pf = av_pix_fmt_desc_get_id(desc);
 
-			printf("Codec PIX_FMT: %i: %s  0x%04X\t-  %s\n", 
-					pf, desc->name, av_get_pix_fmt_loss(pf, AV_PIX_FMT_BGRA, 0), desc->alias);
+			//printf("Codec PIX_FMT: %i: %s  0x%04X\t-  %s\n", 
+			//		pf, desc->name, av_get_pix_fmt_loss(pf, AV_PIX_FMT_BGRA, 0), desc->alias);
 
 			switch ( pf )
 			{
@@ -2672,7 +2674,7 @@ void LibavOptionsPage::initCodecLists(void)
 			if ( c->type == AVMEDIA_TYPE_VIDEO )
 			{
 				compatible = avformat_query_codec( ofmt, c->id, FF_COMPLIANCE_NORMAL );
-				printf("Video Encoder: %i  %s   %s\t:%i\n", c->id, c->name, c->long_name, compatible);
+				//printf("Video Encoder: %i  %s   %s\t:%i\n", c->id, c->name, c->long_name, compatible);
 				if ( compatible )
 				{
 					videoEncSel->addItem( tr(c->name), c->id );
@@ -2686,7 +2688,7 @@ void LibavOptionsPage::initCodecLists(void)
 			else if ( c->type == AVMEDIA_TYPE_AUDIO )
 			{
 				compatible = avformat_query_codec( ofmt, c->id, FF_COMPLIANCE_NORMAL );
-				printf("Audio Encoder: %i  %s   %s\t:%i\n", c->id, c->name, c->long_name, compatible);
+				//printf("Audio Encoder: %i  %s   %s\t:%i\n", c->id, c->name, c->long_name, compatible);
 				if ( compatible )
 				{
 					audioEncSel->addItem( tr(c->name), c->id );
@@ -2939,7 +2941,7 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 	{
 		const char *groupName = (*static_cast<AVClass**>(obj))->class_name;
 
-		printf("OBJ Class: %s\n", groupName);
+		//printf("OBJ Class: %s\n", groupName);
 
 		groupItem = new QTreeWidgetItem();
 		tree->addTopLevelItem(groupItem);
