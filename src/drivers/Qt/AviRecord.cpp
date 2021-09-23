@@ -912,6 +912,8 @@ int loadCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 		}
 		i++;
 
+		while ( isspace(line[i]) ) i++;
+
 		j=0;
 		while ( (line[i] != 0) )
 		{
@@ -929,7 +931,11 @@ int loadCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 		{
 			continue;
 		}
-		//printf("'%s.%s' = '%s'\n", section, id, val);
+		//if ( val[0] == 0 )
+		//{
+		//	continue;
+		//}
+		printf("'%s.%s' = '%s'\n", section, id, val);
 
 		obj = ctx;
 		child = NULL;
@@ -1017,7 +1023,7 @@ int saveCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 
 				if ( str )
 				{
-					if ( true /*av_opt_is_set_to_default( obj, opt ) == 0*/ )
+					if ( av_opt_is_set_to_default( obj, opt ) == 0 )
 					{
 						fprintf( fp, "%s=%s   # %s\n", opt->name, str, 
 								opt->help ? opt->help : "" );
@@ -2900,16 +2906,16 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 
 		LIBAV::loadCodecConfig( type, codec_name, ctx );
 
-		//av_opt_show2( (void*)ctx, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
+		av_opt_show2( (void*)ctx, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
 
-		//ctx_child = av_opt_child_next( ctx, ctx_child );
+		ctx_child = av_opt_child_next( ctx, ctx_child );
 
-		//while ( ctx_child != NULL )
-		//{
-		//	av_opt_show2( ctx_child, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
+		while ( ctx_child != NULL )
+		{
+			av_opt_show2( ctx_child, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
 
-		//	ctx_child = av_opt_child_next( ctx, ctx_child );
-		//}
+			ctx_child = av_opt_child_next( ctx, ctx_child );
+		}
 	}
 	obj = ctx;
 
