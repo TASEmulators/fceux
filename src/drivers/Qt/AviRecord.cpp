@@ -3999,8 +3999,6 @@ LibgwaviOptionsPage::LibgwaviOptionsPage(QWidget *parent)
 
 	g_config->getOption("SDL.AviRecordAudio", &recordAudio);
 
-	LIBAV::setCodecFromConfig();
-
 	vbox1 = new QVBoxLayout();
 
 	videoGbox = new QGroupBox( tr("Video:") );
