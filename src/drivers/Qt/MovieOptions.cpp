@@ -50,6 +50,7 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	QVBoxLayout *vbox1, *vbox2;
 	QPushButton *closeButton;
 	std::vector <std::string> aviDriverList;
+	int aviDriver;
 
 	setWindowTitle("Movie Options");
 
@@ -67,6 +68,9 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	putSubTitlesAvi = new QCheckBox(tr("Put Movie Subtitles in AVI"));
 	autoBackUp = new QCheckBox(tr("Automatically Backup Movies"));
 	loadFullStates = new QCheckBox(tr("Load Full Save-State Movies:"));
+	aviEnableHUD = new QCheckBox(tr("AVI Enable HUD Recording"));
+	aviEnableMsg = new QCheckBox(tr("AVI Enable Msg Recording"));
+	aviEnableAudio = new QCheckBox(tr("AVI Enable Audio Recording"));
 
 	lbl = new QLabel(tr("Loading states in record mode will not immediately truncate movie, next frame input will. (VBA-rr and SNES9x style)"));
 	lbl->setWordWrap(true);
@@ -79,6 +83,9 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	vbox1->addWidget(putSubTitlesAvi);
 	vbox1->addWidget(autoBackUp);
 	vbox1->addWidget(loadFullStates);
+	vbox1->addWidget(aviEnableHUD);
+	vbox1->addWidget(aviEnableMsg);
+	vbox1->addWidget(aviEnableAudio);
 	vbox1->addWidget(lbl);
 
 	readOnlyReplay->setChecked(suggestReadOnlyReplay);
@@ -89,6 +96,9 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	putSubTitlesAvi->setChecked(subtitlesOnAVI);
 	autoBackUp->setChecked(autoMovieBackup);
 	loadFullStates->setChecked(fullSaveStateLoads);
+	aviEnableHUD->setChecked(FCEUI_AviEnableHUDrecording());
+	aviEnableMsg->setChecked(!FCEUI_AviDisableMovieMessages());
+	aviEnableAudio->setChecked(aviGetAudioEnable());
 
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
@@ -99,7 +109,7 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	hbox->addWidget( closeButton, 1 );
 	vbox1->addLayout( hbox );
 
-	FCEUD_AviGetFormatOpts( aviDriverList );
+	FCEUD_AviGetDriverList( aviDriverList );
 
 	gbox = new QGroupBox( tr("AVI Recording Options") );
 	gbox->setLayout(vbox2);
@@ -113,6 +123,8 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	vbox2->addLayout( hbox );
 	vbox2->addWidget( aviPageStack );
 
+	g_config->getOption("SDL.AviDriver", &aviDriver );
+
 	for (size_t i=0; i<aviDriverList.size(); i++)
 	{
 		aviBackend->addItem(tr(aviDriverList[i].c_str()), (unsigned int)i);
@@ -120,18 +132,21 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 		switch (i)
 		{
 			#ifdef _USE_LIBAV
-			case AVI_LIBAV:
+			case AVI_DRIVER_LIBAV:
 			{
 				aviPageStack->addWidget( new LibavOptionsPage() );
 			}
 			break;
 			#endif
+			case AVI_DRIVER_LIBGWAVI:
+				aviPageStack->addWidget( new LibgwaviOptionsPage() );
+			break;
 			default:
 				aviPageStack->addWidget( new QWidget() );
 			break;
 		}
 
-		if ( i == aviGetSelVideoFormat() )
+		if ( i == aviDriver )
 		{
 			aviBackend->setCurrentIndex(i);
 			aviPageStack->setCurrentIndex(i);
@@ -143,10 +158,13 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	connect(pauseAfterPlay, SIGNAL(stateChanged(int)), this, SLOT(pauseAfterPlayChanged(int)));
 	connect(closeAfterPlay, SIGNAL(stateChanged(int)), this, SLOT(closeAfterPlayChanged(int)));
 	connect(bindSaveStates, SIGNAL(stateChanged(int)), this, SLOT(bindSaveStatesChanged(int)));
-	connect(dpySubTitles, SIGNAL(stateChanged(int)), this, SLOT(dpySubTitlesChanged(int)));
+	connect(dpySubTitles  , SIGNAL(stateChanged(int)), this, SLOT(dpySubTitlesChanged(int)));
 	connect(putSubTitlesAvi, SIGNAL(stateChanged(int)), this, SLOT(putSubTitlesAviChanged(int)));
 	connect(autoBackUp, SIGNAL(stateChanged(int)), this, SLOT(autoBackUpChanged(int)));
 	connect(loadFullStates, SIGNAL(stateChanged(int)), this, SLOT(loadFullStatesChanged(int)));
+	connect(aviEnableHUD  , SIGNAL(stateChanged(int)), this, SLOT(setAviHudEnable(int)));
+	connect(aviEnableMsg  , SIGNAL(stateChanged(int)), this, SLOT(setAviMsgEnable(int)));
+	connect(aviEnableAudio, SIGNAL(stateChanged(int)), this, SLOT(setAviAudioEnable(int)));
 
 	connect(aviBackend, SIGNAL(currentIndexChanged(int)), this, SLOT(aviBackendChanged(int)));
 
@@ -204,6 +222,31 @@ void MovieOptionsDialog_t::putSubTitlesAviChanged(int state)
 	subtitlesOnAVI = (state != Qt::Unchecked);
 }
 //----------------------------------------------------------------------------
+void MovieOptionsDialog_t::setAviHudEnable(int state)
+{
+	bool checked = (state != Qt::Unchecked);
+
+	FCEUI_SetAviEnableHUDrecording( checked );
+
+	g_config->setOption("SDL.RecordHUD", checked );
+}
+//----------------------------------------------------------------------------
+void MovieOptionsDialog_t::setAviMsgEnable(int state)
+{
+	bool checked = (state != Qt::Unchecked);
+
+	FCEUI_SetAviDisableMovieMessages( !checked );
+
+	g_config->setOption("SDL.MovieMsg", checked );
+}
+//----------------------------------------------------------------------------
+void MovieOptionsDialog_t::setAviAudioEnable(int state)
+{
+	bool checked = (state != Qt::Unchecked);
+
+	aviSetAudioEnable( checked );
+}
+//----------------------------------------------------------------------------
 void MovieOptionsDialog_t::autoBackUpChanged(int state)
 {
 	autoMovieBackup = (state != Qt::Unchecked);
@@ -218,6 +261,6 @@ void MovieOptionsDialog_t::aviBackendChanged(int idx)
 {
 	aviPageStack->setCurrentIndex(idx);
 
-	aviSetSelVideoFormat(idx);
+	aviSetSelDriver(idx);
 }
 //----------------------------------------------------------------------------

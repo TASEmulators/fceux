@@ -22,6 +22,15 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 
+enum aviDriverList
+{
+	#ifdef _USE_LIBAV
+	AVI_DRIVER_LIBAV,
+	#endif
+	AVI_DRIVER_LIBGWAVI,
+	AVI_NUM_DRIVERS
+};
+
 enum aviEncoderList
 {
 	AVI_RGB24 = 0,
@@ -41,6 +50,8 @@ enum aviEncoderList
 	AVI_NUM_ENC
 };
 
+int aviRecordInit(void);
+
 int aviRecordOpenFile( const char *filepath );
 
 int aviRecordAddFrame( void );
@@ -55,9 +66,15 @@ bool aviGetAudioEnable(void);
 
 void aviSetAudioEnable(bool val);
 
+int aviGetSelDriver(void);
+
+void aviSetSelDriver(int idx);
+
 int aviGetSelVideoFormat(void);
 
 void aviSetSelVideoFormat(int idx);
+
+int FCEUD_AviGetDriverList( std::vector <std::string> &formatList );
 
 int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList );
 
@@ -175,6 +192,7 @@ class  LibavOptionsPage : public QWidget
 		QComboBox  *audioChanLayout;
 		QGroupBox  *videoGbox;
 		QGroupBox  *audioGbox;
+		QTimer     *updateTimer;
 
 		void initCodecLists(void);
 		void initPixelFormatSelect(const char *codec_name);
@@ -183,6 +201,7 @@ class  LibavOptionsPage : public QWidget
 		void initChannelLayoutSelect(const char *codec_name);
 
 	private slots:
+		void periodicUpdate(void);
 		void includeAudioChanged(bool);
 		void openVideoCodecOptions(void);
 		void openAudioCodecOptions(void);
@@ -195,5 +214,42 @@ class  LibavOptionsPage : public QWidget
 };
 
 #endif
+
+class  LibgwaviOptionsPage : public QWidget
+{
+	Q_OBJECT
+
+	public:
+		LibgwaviOptionsPage(QWidget *parent = nullptr);
+		~LibgwaviOptionsPage(void);
+
+	protected:
+		QComboBox  *videoEncSel;
+		QComboBox  *videoPixfmt;
+		QComboBox  *audioEncSel;
+		QComboBox  *audioSamplefmt;
+		QComboBox  *audioSampleRate;
+		QComboBox  *audioChanLayout;
+		QGroupBox  *videoGbox;
+		QGroupBox  *audioGbox;
+		QTimer     *updateTimer;
+
+		void initCodecLists(void);
+		void initPixelFormatSelect(int encoder);
+		void initSampleFormatSelect(int encoder);
+		void initSampleRateSelect(int encoder);
+		void initChannelLayoutSelect(int encoder);
+
+	private slots:
+		void periodicUpdate(void);
+		void openVideoCodecOptions(void);
+		void openAudioCodecOptions(void);
+		void videoCodecChanged(int idx);
+		void audioCodecChanged(int idx);
+		void videoPixelFormatChanged(int idx);
+		void audioSampleFormatChanged(int idx);
+		void audioSampleRateChanged(int idx);
+		void audioChannelLayoutChanged(int idx);
+};
 
 #endif

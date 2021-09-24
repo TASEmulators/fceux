@@ -82,6 +82,7 @@ static int       abufTail = 0;
 static int       abufSize = 0;
 static uint32_t *rawVideoBuf = NULL;
 static int16_t  *rawAudioBuf = NULL;
+static int       aviDriver = 0;
 static int       videoFormat = AVI_RGB24;
 static int       audioSampleRate = 48000;
 static FILE     *avLogFp = NULL;
@@ -1113,14 +1114,16 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 		fprintf( avLogFp, "Error: Could not alloc an video encoding context\n");
 		return -1;
 	}
+	/* Put sample parameters. */
+	c->bit_rate = 400000;
+	c->gop_size = 12; /* emit one intra frame every twelve frames at most */
+
 	loadCodecConfig( 0, codec_name, c );
 
 	ost->enc = c;
 
 	//av_opt_show2( (void*)c, NULL, AV_OPT_FLAG_VIDEO_PARAM, 0 );
 
-	/* Put sample parameters. */
-	c->bit_rate = 400000;
 	/* Resolution must be a multiple of two. */
 	c->width    = nes_shm->video.ncol;
 	c->height   = nes_shm->video.nrow;
@@ -1141,7 +1144,6 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 		ost->st->time_base.den = 1000000u;
 	}
 	c->time_base       = ost->st->time_base;
-	c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
 	//c->pix_fmt       = AV_PIX_FMT_YUV420P; // Every video encoder seems to accept this
 	c->pix_fmt       = (AVPixelFormat)ost->pixelFormat;
 
@@ -1946,6 +1948,25 @@ static int close(void)
 } // End namespace LIBAV
 #endif
 //**************************************************************************************
+int aviRecordInit(void)
+{
+	g_config->getOption("SDL.AviDriver", &aviDriver);
+	g_config->getOption("SDL.AviVideoFormat", &videoFormat);
+	g_config->getOption("SDL.AviRecordAudio", &recordAudio);
+	g_config->getOption("SDL.Sound.Rate", &audioSampleRate);
+
+	// LIBAV has its own internal video format configs,
+	// it does not use this videoFormat symbol.
+	if ( videoFormat == AVI_LIBAV )
+	{
+		aviSetSelVideoFormat( AVI_RGB24 );
+	}
+#ifdef _USE_LIBAV
+	LIBAV::setCodecFromConfig();
+#endif
+	return 0;
+}
+//**************************************************************************************
 int aviRecordLogClose(void)
 {
 	if ( avLogFp != NULL )
@@ -2052,8 +2073,10 @@ int aviRecordOpenFile( const char *filepath )
 		}
 	}
 
+	g_config->getOption("SDL.AviVideoFormat", &videoFormat);
+
 #ifdef WIN32
-	if ( videoFormat == AVI_VFW )
+	if ( (aviDriver == AVI_DRIVER_LIBGWAVI) && (videoFormat == AVI_VFW) )
 	{
 		if ( VFW::chooseConfig( nes_shm->video.ncol, nes_shm->video.nrow ) )
 		{
@@ -2105,7 +2128,7 @@ int aviRecordOpenFile( const char *filepath )
 	#endif 
 
 #ifdef _USE_LIBAV
-	if ( videoFormat == AVI_LIBAV )
+	if ( aviDriver == AVI_DRIVER_LIBAV )
 	{
 		if ( LIBAV::initMedia( fileName ) )
 		{
@@ -2302,6 +2325,19 @@ void FCEUD_AviStop(void)
 //	return;
 //}
 //**************************************************************************************
+int aviGetSelDriver(void)
+{
+	return aviDriver;
+}
+//**************************************************************************************
+void aviSetSelDriver(int idx)
+{
+	aviDriver = idx;
+	//printf("AVI Driver Changed:%i\n", aviDriver );
+
+	g_config->setOption("SDL.AviDriver", aviDriver);
+}
+//**************************************************************************************
 int aviGetSelVideoFormat(void)
 {
 	return videoFormat;
@@ -2313,6 +2349,31 @@ void aviSetSelVideoFormat(int idx)
 	//printf("AVI Video Format Changed:%i\n", videoFormat );
 
 	g_config->setOption("SDL.AviVideoFormat", videoFormat);
+}
+//**************************************************************************************
+int FCEUD_AviGetDriverList( std::vector <std::string> &formatList )
+{
+	std::string s;
+
+	for (int i=0; i<AVI_NUM_DRIVERS; i++)
+	{
+		switch ( i )
+		{
+			default:
+				s.assign("Unknown");
+			break;
+			case AVI_DRIVER_LIBGWAVI:
+				s.assign("libgwavi");
+			break;
+			#ifdef _USE_LIBAV
+			case AVI_DRIVER_LIBAV:
+				s.assign("libav (ffmpeg)");
+			break;
+			#endif
+		}
+		formatList.push_back(s);
+	}
+	return AVI_NUM_DRIVERS;
 }
 //**************************************************************************************
 int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList )
@@ -2408,7 +2469,16 @@ void AviRecordDiskThread_t::run(void)
 		// Error allocating buffer.
 		return;
 	}
-	localVideoFormat = videoFormat;
+#ifdef _USE_LIBAV
+	if ( aviDriver == AVI_DRIVER_LIBAV )
+	{
+		localVideoFormat = AVI_LIBAV;
+	}
+	else
+#endif
+	{
+		localVideoFormat = videoFormat;
+	}
 	localRecordAudio = recordAudio;
 
 #ifdef _USE_X264
@@ -2488,7 +2558,6 @@ void AviRecordDiskThread_t::run(void)
 				//Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
 				//convertRgb_32_to_24( (const unsigned char*)videoOut, rgb24,
 				//		width, height, numPixels, true );
-				//LIBAV::encode_video_frame( rgb24 );
 				LIBAV::encode_video_frame( (unsigned char*)videoOut );
 			}
 			#endif
@@ -2609,8 +2678,8 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	videoGbox = new QGroupBox( tr("Video:") );
 	audioGbox = new QGroupBox( tr("Audio:") );
 
-	audioGbox->setCheckable(true);
-	audioGbox->setChecked( aviGetAudioEnable() );
+	audioGbox->setCheckable(false);
+	//audioGbox->setChecked( aviGetAudioEnable() );
 
 	videoEncSel     = new QComboBox();
 	audioEncSel     = new QComboBox();
@@ -2671,12 +2740,23 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	connect(videoConfBtn, SIGNAL(clicked(void)), this, SLOT(openVideoCodecOptions(void)));
 	connect(audioConfBtn, SIGNAL(clicked(void)), this, SLOT(openAudioCodecOptions(void)));
 
-	connect(audioGbox, SIGNAL(clicked(bool)), this, SLOT(includeAudioChanged(bool)));
+	//connect(audioGbox, SIGNAL(clicked(bool)), this, SLOT(includeAudioChanged(bool)));
+	
+	updateTimer = new QTimer(this);
+
+	connect( updateTimer, &QTimer::timeout, this, &LibavOptionsPage::periodicUpdate );
+
+	updateTimer->start(200);
 }
 //-----------------------------------------------------
 LibavOptionsPage::~LibavOptionsPage(void)
 {
-
+	updateTimer->stop();
+}
+//-----------------------------------------------------
+void LibavOptionsPage::periodicUpdate(void)
+{
+	audioGbox->setEnabled( recordAudio );
 }
 //-----------------------------------------------------
 void LibavOptionsPage::initPixelFormatSelect(const char *codec_name)
@@ -3907,4 +3987,225 @@ void LibavEncOptInputWin::resetDefaultsCB(void)
 }
 //-----------------------------------------------------
 #endif
+//**************************************************************************************
+LibgwaviOptionsPage::LibgwaviOptionsPage(QWidget *parent)
+	: QWidget(parent)
+{
+	QLabel *lbl;
+	QVBoxLayout *vbox, *vbox1;
+	//QHBoxLayout *hbox;
+	QGridLayout *grid;
+	QPushButton *videoConfBtn, *audioConfBtn;
+
+	g_config->getOption("SDL.AviRecordAudio", &recordAudio);
+
+	LIBAV::setCodecFromConfig();
+
+	vbox1 = new QVBoxLayout();
+
+	videoGbox = new QGroupBox( tr("Video:") );
+	audioGbox = new QGroupBox( tr("Audio:") );
+
+	audioGbox->setCheckable(false);
+	//audioGbox->setChecked( aviGetAudioEnable() );
+
+	videoEncSel     = new QComboBox();
+	audioEncSel     = new QComboBox();
+	videoPixfmt     = new QComboBox();
+	audioSamplefmt  = new QComboBox();
+	audioSampleRate = new QComboBox();
+	audioChanLayout = new QComboBox();
+
+	vbox1->addWidget( videoGbox );
+	vbox1->addWidget( audioGbox );
+
+	vbox = new QVBoxLayout();
+	videoGbox->setLayout(vbox);
+
+	grid = new QGridLayout();
+	vbox->addLayout(grid);
+	lbl  = new QLabel( tr("Encoder:") );
+	grid->addWidget( lbl, 0, 0);
+	grid->addWidget( videoEncSel, 0, 1);
+	lbl  = new QLabel( tr("Pixel Format:") );
+	grid->addWidget( lbl, 1, 0);
+	grid->addWidget( videoPixfmt, 1, 1);
+	videoConfBtn = new QPushButton( tr("Options...") );
+	grid->addWidget( videoConfBtn, 2, 1);
+
+	vbox = new QVBoxLayout();
+	audioGbox->setLayout(vbox);
+
+	grid = new QGridLayout();
+	vbox->addLayout(grid);
+	lbl  = new QLabel( tr("Encoder:") );
+	grid->addWidget( lbl, 0, 0);
+	grid->addWidget( audioEncSel, 0, 1 );
+	lbl  = new QLabel( tr("Sample Format:") );
+	grid->addWidget( lbl, 1, 0);
+	grid->addWidget( audioSamplefmt, 1, 1);
+	lbl  = new QLabel( tr("Sample Rate:") );
+	grid->addWidget( lbl, 2, 0);
+	grid->addWidget( audioSampleRate, 2, 1);
+	lbl  = new QLabel( tr("Channel Layout:") );
+	grid->addWidget( lbl, 3, 0);
+	grid->addWidget( audioChanLayout, 3, 1);
+	audioConfBtn = new QPushButton( tr("Options...") );
+	grid->addWidget( audioConfBtn, 4, 1);
+
+	initCodecLists();
+
+	setLayout(vbox1);
+
+	connect(videoEncSel, SIGNAL(currentIndexChanged(int)), this, SLOT(videoCodecChanged(int)));
+	connect(audioEncSel, SIGNAL(currentIndexChanged(int)), this, SLOT(audioCodecChanged(int)));
+
+	connect(videoPixfmt    , SIGNAL(currentIndexChanged(int)), this, SLOT(videoPixelFormatChanged(int)));
+	connect(audioSamplefmt , SIGNAL(currentIndexChanged(int)), this, SLOT(audioSampleFormatChanged(int)));
+	connect(audioSampleRate, SIGNAL(currentIndexChanged(int)), this, SLOT(audioSampleRateChanged(int)));
+	connect(audioChanLayout, SIGNAL(currentIndexChanged(int)), this, SLOT(audioChannelLayoutChanged(int)));
+
+	connect(videoConfBtn, SIGNAL(clicked(void)), this, SLOT(openVideoCodecOptions(void)));
+	connect(audioConfBtn, SIGNAL(clicked(void)), this, SLOT(openAudioCodecOptions(void)));
+
+	updateTimer = new QTimer(this);
+
+	connect( updateTimer, &QTimer::timeout, this, &LibgwaviOptionsPage::periodicUpdate );
+
+	updateTimer->start(200);
+}
+//-----------------------------------------------------
+LibgwaviOptionsPage::~LibgwaviOptionsPage(void)
+{
+	updateTimer->stop();
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::periodicUpdate(void)
+{
+	audioGbox->setEnabled( recordAudio );
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::initCodecLists(void)
+{
+	int videoEncoder = aviGetSelVideoFormat();
+
+	videoEncSel->addItem( tr("RGB24 (Uncompressed)"), AVI_RGB24 );
+	videoEncSel->addItem( tr("I420  (YUV 4:2:0)")   , AVI_I420  );
+	#ifdef _USE_X264
+	videoEncSel->addItem( tr("X264  (H.264)")   , AVI_X264  );
+	#endif
+	#ifdef _USE_X265
+	videoEncSel->addItem( tr("X265  (H.265)")   , AVI_X265  );
+	#endif
+	#ifdef WIN32
+	videoEncSel->addItem( tr("VfW (Video for Windows)"), AVI_VFW);
+	#endif
+
+	for (int i=0; i<videoEncSel->count(); i++)
+	{
+		if ( videoEncoder == videoEncSel->itemData(i).toInt() )
+		{
+			videoEncSel->setCurrentIndex(i); break;
+		}
+	}
+	audioEncSel->addItem( tr("Raw PCM (Uncompressed)"), 0 );
+
+	int audioEncoder = audioEncSel->currentData().toInt();
+
+	initPixelFormatSelect(videoFormat);
+	initSampleFormatSelect(audioEncoder);
+	initSampleRateSelect(audioEncoder);
+	initChannelLayoutSelect(audioEncoder);
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::initPixelFormatSelect( int encoder )
+{
+	videoPixfmt->clear();
+	videoPixfmt->addItem( tr("Auto"), -1 );
+
+	switch ( encoder )
+	{
+		default:
+		case AVI_I420:
+			videoPixfmt->addItem( tr("YUV 420"), AVI_I420 );
+		break;
+		case AVI_X264:
+		case AVI_X265:
+			videoPixfmt->addItem( tr("YUV 420"), AVI_I420 );
+		break;
+#ifdef WIN32
+		case AVI_VFW:
+#endif
+		case AVI_RGB24:
+			videoPixfmt->addItem( tr("RGB24"), AVI_RGB24 );
+		break;
+	}
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::initSampleFormatSelect( int encoder )
+{
+	audioSamplefmt->clear();
+	audioSamplefmt->addItem( tr("Auto"), -1 );
+	audioSamplefmt->addItem( tr("S16 - Signed 16 Bit") ,  0 );
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::initSampleRateSelect( int encoder )
+{
+	audioSampleRate->clear();
+	audioSampleRate->addItem( tr("Auto"), -1 );
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::initChannelLayoutSelect( int encoder )
+{
+	audioChanLayout->clear();
+	audioChanLayout->addItem( tr("Auto"), -1 );
+	audioChanLayout->addItem( tr("Mono"),  0 );
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::videoCodecChanged(int idx)
+{
+	aviSetSelVideoFormat( videoEncSel->currentData().toInt() );
+
+	initPixelFormatSelect(videoFormat);
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::audioCodecChanged(int idx)
+{
+	int audioEncoder = audioEncSel->currentData().toInt();
+
+	initSampleFormatSelect(audioEncoder);
+	initSampleRateSelect(audioEncoder);
+	initChannelLayoutSelect(audioEncoder);
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::openVideoCodecOptions(void)
+{
+
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::openAudioCodecOptions(void)
+{
+
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::videoPixelFormatChanged(int idx)
+{
+
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::audioSampleFormatChanged(int idx)
+{
+
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::audioSampleRateChanged(int idx)
+{
+
+}
+//-----------------------------------------------------
+void LibgwaviOptionsPage::audioChannelLayoutChanged(int idx)
+{
+
+}
+//-----------------------------------------------------
 //**************************************************************************************

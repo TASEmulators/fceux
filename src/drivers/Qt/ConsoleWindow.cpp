@@ -1774,60 +1774,60 @@ void consoleWin_t::createMainMenu(void)
 #endif
 
 	// Movie -> Avi Recording -> Video Format
-	subMenu = aviMenu->addMenu( tr("Video Format") );
+	//subMenu = aviMenu->addMenu( tr("Video Format") );
 
-	{
-		std::vector <std::string> formatList;
-		group   = new QActionGroup(this);
+	//{
+	//	std::vector <std::string> formatList;
+	//	group   = new QActionGroup(this);
 
-		group->setExclusive(true);
+	//	group->setExclusive(true);
 
-		FCEUD_AviGetFormatOpts( formatList );
+	//	FCEUD_AviGetFormatOpts( formatList );
 
-		for (size_t i=0; i<formatList.size(); i++)
-		{
-			act = new QAction(tr( formatList[i].c_str() ), this);
+	//	for (size_t i=0; i<formatList.size(); i++)
+	//	{
+	//		act = new QAction(tr( formatList[i].c_str() ), this);
 
-			//printf("%s\n", formatList[i].c_str() );
+	//		//printf("%s\n", formatList[i].c_str() );
 
-	        	act->setCheckable(true);
-	        	group->addAction(act);
-			subMenu->addAction(act);
+	//        	act->setCheckable(true);
+	//        	group->addAction(act);
+	//		subMenu->addAction(act);
 
-			act->setChecked( aviGetSelVideoFormat() == i );
+	//		act->setChecked( aviGetSelVideoFormat() == i );
 
-			// Use Lambda Function to set callback
-			connect( act, &QAction::triggered, [ this, i ] { aviVideoFormatChanged( i ); } );
-		}
+	//		// Use Lambda Function to set callback
+	//		connect( act, &QAction::triggered, [ this, i ] { aviVideoFormatChanged( i ); } );
+	//	}
 
-	}
+	//}
 
-	// Movie -> Avi Recording -> Include Audio
-	act = new QAction(tr("Include Audio"), this);
-       	act->setCheckable(true);
-	act->setChecked( aviGetAudioEnable() );
-	connect(act, SIGNAL(triggered(bool)), this, SLOT(aviAudioEnableChange(bool)) );
-	aviMenu->addAction(act);
+	//// Movie -> Avi Recording -> Include Audio
+	//act = new QAction(tr("Include Audio"), this);
+       	//act->setCheckable(true);
+	//act->setChecked( aviGetAudioEnable() );
+	//connect(act, SIGNAL(triggered(bool)), this, SLOT(aviAudioEnableChange(bool)) );
+	//aviMenu->addAction(act);
 
-	aviMenu->addSeparator();
+	//aviMenu->addSeparator();
 
-	// Movie -> Avi Recording -> Enable HUD Recording
-	aviHudAct = new QAction(tr("Enable &HUD Recording"), this);
-	aviHudAct->setCheckable(true);
-	aviHudAct->setChecked( FCEUI_AviEnableHUDrecording() );
-	aviHudAct->setStatusTip(tr("Enable HUD Recording"));
-	connect(aviHudAct, SIGNAL(triggered(bool)), this, SLOT(setAviHudEnable(bool)) );
+	//// Movie -> Avi Recording -> Enable HUD Recording
+	//aviHudAct = new QAction(tr("Enable &HUD Recording"), this);
+	//aviHudAct->setCheckable(true);
+	//aviHudAct->setChecked( FCEUI_AviEnableHUDrecording() );
+	//aviHudAct->setStatusTip(tr("Enable HUD Recording"));
+	//connect(aviHudAct, SIGNAL(triggered(bool)), this, SLOT(setAviHudEnable(bool)) );
 
-	aviMenu->addAction(aviHudAct);
+	//aviMenu->addAction(aviHudAct);
 
-	// Movie -> Avi Recording -> Enable Message Recording
-	aviMsgAct = new QAction(tr("Enable &Msg Recording"), this);
-	aviMsgAct->setCheckable(true);
-	aviMsgAct->setChecked( !FCEUI_AviDisableMovieMessages() );
-	aviMsgAct->setStatusTip(tr("Enable Msg Recording"));
-	connect(aviMsgAct, SIGNAL(triggered(bool)), this, SLOT(setAviMsgEnable(bool)) );
+	//// Movie -> Avi Recording -> Enable Message Recording
+	//aviMsgAct = new QAction(tr("Enable &Msg Recording"), this);
+	//aviMsgAct->setCheckable(true);
+	//aviMsgAct->setChecked( !FCEUI_AviDisableMovieMessages() );
+	//aviMsgAct->setStatusTip(tr("Enable Msg Recording"));
+	//connect(aviMsgAct, SIGNAL(triggered(bool)), this, SLOT(setAviMsgEnable(bool)) );
 
-	aviMenu->addAction(aviMsgAct);
+	//aviMenu->addAction(aviMsgAct);
 
 	// Movie -> WAV Recording
 	subMenu = movieMenu->addMenu( tr("&WAV Recording") );

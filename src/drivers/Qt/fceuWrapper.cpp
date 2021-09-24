@@ -907,6 +907,8 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		g_config->save();
 	}
 
+	aviRecordInit();
+
 	// movie playback
 	g_config->getOption("SDL.Movie", &s);
 	g_config->setOption("SDL.Movie", "");
