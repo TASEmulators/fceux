@@ -4129,10 +4129,16 @@ void LibgwaviOptionsPage::initPixelFormatSelect( int encoder )
 		case AVI_I420:
 			videoPixfmt->addItem( tr("YUV 420"), AVI_I420 );
 		break;
+#ifdef _USE_X264
 		case AVI_X264:
+			videoPixfmt->addItem( tr("YUV 420"), AVI_I420 );
+		break;
+#endif
+#ifdef _USE_X265
 		case AVI_X265:
 			videoPixfmt->addItem( tr("YUV 420"), AVI_I420 );
 		break;
+#endif
 #ifdef WIN32
 		case AVI_VFW:
 #endif
