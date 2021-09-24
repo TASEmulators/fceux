@@ -90,11 +90,15 @@ echo 'Install Optional Dependency libx265-dev'
 echo '****************************************'
 sudo apt-get --assume-yes  install libx265-dev
 
-# Install scons
-#echo '****************************************'
-#echo 'Install Build Dependency scons'
-#echo '****************************************'
-#sudo apt-get --assume-yes  install scons
+# Install libav (ffmpeg) 
+echo '****************************************'
+echo 'Install Optional Dependency libav (ffmpeg)'
+echo '****************************************'
+sudo apt-get --assume-yes  install libavcodec-dev
+sudo apt-get --assume-yes  install libavformat-dev
+sudo apt-get --assume-yes  install libavutil-dev
+sudo apt-get --assume-yes  install libswscale-dev
+sudo apt-get --assume-yes  install libavresample-dev
 
 # Install cppcheck
 echo '****************************************'
