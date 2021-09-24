@@ -1955,13 +1955,13 @@ int aviRecordInit(void)
 	g_config->getOption("SDL.AviRecordAudio", &recordAudio);
 	g_config->getOption("SDL.Sound.Rate", &audioSampleRate);
 
+#ifdef _USE_LIBAV
 	// LIBAV has its own internal video format configs,
 	// it does not use this videoFormat symbol.
 	if ( videoFormat == AVI_LIBAV )
 	{
 		aviSetSelVideoFormat( AVI_RGB24 );
 	}
-#ifdef _USE_LIBAV
 	LIBAV::setCodecFromConfig();
 #endif
 	return 0;
