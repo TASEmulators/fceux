@@ -72,6 +72,11 @@ echo 'Install Optional Dependency x265'
 echo '****************************************'
 brew  install  x265
 
+echo '****************************************'
+echo 'Install Optional Dependency ffmpeg'
+echo '****************************************'
+brew  install  ffmpeg
+
 #brew  install  zlib  # Already installed in appveyor macOS
 
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:
