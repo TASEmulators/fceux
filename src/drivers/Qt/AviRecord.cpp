@@ -943,7 +943,7 @@ int loadCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 		//{
 		//	continue;
 		//}
-		printf("'%s.%s' = '%s'\n", section, id, val);
+		//printf("'%s.%s' = '%s'\n", section, id, val);
 
 		obj = ctx;
 		child = NULL;
@@ -3299,6 +3299,10 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 
 	tree->setHeaderItem(itemHdr);
 
+	tree->horizontalScrollBar()->setEnabled(true);
+	tree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+	tree->header()->setStretchLastSection(true);
 	tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
 	//printf("CTX Class: %s\n", ctx->av_class->class_name );
@@ -3362,6 +3366,8 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 					if ( opt->help )
 					{
 						item->setText(2, QString::fromStdString(opt->help));
+						item->setToolTip( 0, tr(opt->help) );
+						item->setToolTip( 1, tr(opt->help) );
 					}
 
 					item->setValueText();
@@ -3369,7 +3375,6 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 					item->setTextAlignment(1, Qt::AlignLeft);
 					item->setTextAlignment(2, Qt::AlignLeft);
 
-					//tree->addTopLevelItem(item);
 					groupItem->addChild(item);
 				}
 				else
@@ -3396,6 +3401,8 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 		obj = ctx_child = av_opt_child_next( ctx, ctx_child );
 	}
 
+	tree->resizeColumnToContents(2);
+
 	//connect( tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(hotKeyDoubleClicked(QTreeWidgetItem*,int) ) );
 	connect( tree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(itemChangeActivated(QTreeWidgetItem*,int) ) );
 
@@ -3420,14 +3427,14 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 //----------------------------------------------------------------------------
 LibavEncOptWin::~LibavEncOptWin(void)
 {
-	printf("Destroy Encoder Options Config Window\n");
+	//printf("Destroy Encoder Options Config Window\n");
 
 	LIBAV::saveCodecConfig(type, codec_name, ctx);
 }
 //----------------------------------------------------------------------------
 void LibavEncOptWin::closeEvent(QCloseEvent *event)
 {
-	printf("Encoder Options Close Window Event\n");
+	//printf("Encoder Options Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();
@@ -3796,7 +3803,7 @@ LibavEncOptInputWin::~LibavEncOptInputWin(void)
 //----------------------------------------------------------------------------
 void LibavEncOptInputWin::closeEvent(QCloseEvent *event)
 {
-	printf("Encoder Options Close Window Event\n");
+	//printf("Encoder Options Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

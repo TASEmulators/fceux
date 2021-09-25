@@ -19,6 +19,7 @@
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QScrollBar>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 
