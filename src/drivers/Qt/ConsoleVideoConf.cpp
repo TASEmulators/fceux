@@ -64,6 +64,10 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
     fontCharWidth = fm.width(QLatin1Char('2'));
 #endif
 
+	g_config->getOption("SDL.ShowFrameCount", &frame_display);
+	g_config->getOption("SDL.ShowLagCount", &lagCounterDisplay);
+	g_config->getOption("SDL.ShowRerecordCount", &rerecord_display);
+	
 	style = this->style();
 
 	setWindowTitle( tr("Video Config") );
