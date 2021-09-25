@@ -3038,8 +3038,8 @@ void LibavOptionsPage::initCodecLists(void)
 	initSampleRateSelect( audioEncSel->currentText().toStdString().c_str() );
 	initChannelLayoutSelect( audioEncSel->currentText().toStdString().c_str() );
 
-	videoEncSel->model()->sort(0);
-	audioEncSel->model()->sort(0);
+	videoEncSel->model()->sort(0, Qt::AscendingOrder);
+	audioEncSel->model()->sort(0, Qt::AscendingOrder);
 }
 //-----------------------------------------------------
 void LibavOptionsPage::includeAudioChanged(bool checked)
@@ -3403,6 +3403,7 @@ LibavEncOptWin::LibavEncOptWin(int type, QWidget *parent)
 		}
 		obj = ctx_child = av_opt_child_next( ctx, ctx_child );
 	}
+	sortItems();
 
 	tree->resizeColumnToContents(2);
 
@@ -3465,6 +3466,19 @@ void LibavEncOptWin::resetDefaultsCB(void)
 		obj = av_opt_child_next( ctx, obj );
 	}
 	updateItems();
+}
+//-----------------------------------------------------
+void LibavEncOptWin::sortItems(void)
+{
+	QTreeWidgetItem *groupItem;
+
+	for (int i=0; i<tree->topLevelItemCount(); i++)
+	{
+		groupItem = tree->topLevelItem(i);
+
+		groupItem->sortChildren(0, Qt::AscendingOrder);
+	}
+	tree->viewport()->update();
 }
 //-----------------------------------------------------
 void LibavEncOptWin::updateItems(void)

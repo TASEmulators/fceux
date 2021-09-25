@@ -160,6 +160,7 @@ public:
 protected:
 	void closeEvent(QCloseEvent *event);
 	void updateItems(void);
+	void sortItems(void);
 
 	int type;
 	QTreeWidget *tree;
