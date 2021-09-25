@@ -832,7 +832,6 @@ void ConsoleVideoConfDialog_t::showFPSChanged( int value )
 
 	fceuWrapperLock();
 	FCEUI_SetShowFPS( (value == Qt::Checked) );
-	UpdateEMUCore (g_config);
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------
