@@ -3039,6 +3039,7 @@ void LibavOptionsPage::initCodecLists(void)
 	initChannelLayoutSelect( audioEncSel->currentText().toStdString().c_str() );
 
 	videoEncSel->model()->sort(0);
+	audioEncSel->model()->sort(0);
 }
 //-----------------------------------------------------
 void LibavOptionsPage::includeAudioChanged(bool checked)
