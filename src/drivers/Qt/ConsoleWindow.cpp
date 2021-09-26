@@ -3598,9 +3598,10 @@ void consoleWin_t::aviRecordAsStart(void)
 	{
 		return;
 	}
+	std::string last;
 	int ret, useNativeFileDialogVal;
 	QString filename;
-	std::string last;
+	std::string lastPath;
 	//char dir[512];
 	const char *base;
 	QFileDialog  dialog(this, tr("Save AVI Movie for Recording") );
@@ -3636,6 +3637,12 @@ void consoleWin_t::aviRecordAsStart(void)
 	}
 	dialog.setDefaultSuffix( tr(".avi") );
 
+	g_config->getOption ("SDL.AviFilePath", &lastPath);
+	if ( lastPath.size() > 0 )
+	{
+		dialog.setDirectory( QString::fromStdString(lastPath) );
+	}
+
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
@@ -3662,6 +3669,13 @@ void consoleWin_t::aviRecordAsStart(void)
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	FCEUI_printf ("AVI Recording movie to %s\n", filename.toStdString().c_str() );
+
+	lastPath = QFileInfo(filename).absolutePath().toStdString();
+
+	if ( lastPath.size() > 0 )
+	{
+		g_config->setOption ("SDL.AviFilePath", lastPath);
+	}
 
 	fceuWrapperLock();
 	if ( aviRecordOpenFile( filename.toStdString().c_str() ) == 0 )
@@ -3792,10 +3806,18 @@ void consoleWin_t::wavRecordStart(void)
 		{
 			char base[512];
 			const char *baseDir = FCEUI_GetBaseDirectory();
+			std::string lastPath;
 
 			getFileBaseName( romFile, base );
 
-			if ( baseDir )
+			g_config->getOption ("SDL.WavFilePath", &lastPath);
+
+			if ( lastPath.size() > 0 )
+			{
+				strcpy( fileName, lastPath.c_str() );
+				strcat( fileName, "/" );
+			}
+			else if ( baseDir )
 			{
 				strcpy( fileName, baseDir );
 				strcat( fileName, "/wav/" );
@@ -3826,7 +3848,7 @@ void consoleWin_t::wavRecordAsStart(void)
 	}
 	int ret, useNativeFileDialogVal;
 	QString filename;
-	std::string last;
+	std::string lastPath;
 	//char dir[512];
 	const char *base;
 	QFileDialog  dialog(this, tr("Save WAV Movie for Recording") );
@@ -3862,6 +3884,12 @@ void consoleWin_t::wavRecordAsStart(void)
 	}
 	dialog.setDefaultSuffix( tr(".wav") );
 
+	g_config->getOption ("SDL.WavFilePath", &lastPath);
+	if ( lastPath.size() > 0 )
+	{
+		dialog.setDirectory( QString::fromStdString(lastPath) );
+	}
+
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
 
@@ -3888,6 +3916,13 @@ void consoleWin_t::wavRecordAsStart(void)
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	FCEUI_printf ("WAV Recording movie to %s\n", filename.toStdString().c_str() );
+
+	lastPath = QFileInfo(filename).absolutePath().toStdString();
+
+	if ( lastPath.size() > 0 )
+	{
+		g_config->setOption ("SDL.WavFilePath", lastPath);
+	}
 
 	fceuWrapperLock();
 	FCEUI_BeginWaveRecord( filename.toStdString().c_str() );

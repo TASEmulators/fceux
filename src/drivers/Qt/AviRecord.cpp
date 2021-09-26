@@ -2029,10 +2029,18 @@ int aviRecordOpenFile( const char *filepath )
 		{
 			char base[512];
 			const char *baseDir = FCEUI_GetBaseDirectory();
+			std::string lastPath;
 
 			getFileBaseName( romFile, base );
 
-			if ( baseDir )
+			g_config->getOption ("SDL.AviFilePath", &lastPath);
+
+			if ( lastPath.size() > 0 )
+			{
+				strcpy( fileName, lastPath.c_str() );
+				strcat( fileName, "/" );
+			}
+			else if ( baseDir )
 			{
 				strcpy( fileName, baseDir );
 				strcat( fileName, "/avi/" );

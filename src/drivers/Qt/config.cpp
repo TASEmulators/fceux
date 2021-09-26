@@ -727,6 +727,8 @@ InitConfig()
 	config->addOption("_lastopenmovie", "SDL.LastOpenMovie", movPath);
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
 	config->addOption("SDL.HelpFilePath", "");
+	config->addOption("SDL.AviFilePath", "");
+	config->addOption("SDL.WavFilePath", "");
 
 	for (unsigned int i=0; i<10; i++)
 	{
