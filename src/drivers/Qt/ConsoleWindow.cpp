@@ -864,7 +864,7 @@ void consoleWin_t::initHotKeys(void)
 void consoleWin_t::createMainMenu(void)
 {
 	QAction *act;
-	QMenu *subMenu, *aviMenu;
+	QMenu *subMenu;
 	QActionGroup *group;
 	int useNativeMenuBar;
 	int customAutofireOnFrames, customAutofireOffFrames;
@@ -1723,10 +1723,9 @@ void consoleWin_t::createMainMenu(void)
 	movieMenu->addSeparator();
 
 	// Movie -> Avi Recording
-	aviMenu = movieMenu->addMenu( tr("A&VI Recording") );
 
 	// Movie -> Avi Recording -> Record
-	recAviAct = new QAction(tr("&Record"), this);
+	recAviAct = new QAction(tr("AVI &Record"), this);
 	//recAviAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	recAviAct->setStatusTip(tr("AVI Record Start"));
 	recAviAct->setIcon( QIcon(":icons/media-record.png") );
@@ -1735,10 +1734,10 @@ void consoleWin_t::createMainMenu(void)
 	Hotkeys[ HK_RECORD_AVI ].setAction( recAviAct );
 	connect( Hotkeys[ HK_RECORD_AVI ].getShortcut(), SIGNAL(activated()), this, SLOT(aviRecordStart(void)) );
 
-	aviMenu->addAction(recAviAct);
+	movieMenu->addAction(recAviAct);
 
-	// Movie -> Avi Recording -> Record
-	recAsAviAct = new QAction(tr("Record &As"), this);
+	// Movie -> Avi Recording -> Record As
+	recAsAviAct = new QAction(tr("AVI Record &As"), this);
 	//recAsAviAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	recAsAviAct->setStatusTip(tr("AVI Record As Start"));
 	//recAsAviAct->setIcon( QIcon(":icons/media-record.png") );
@@ -1747,10 +1746,10 @@ void consoleWin_t::createMainMenu(void)
 	Hotkeys[ HK_RECORD_AVI_TO ].setAction( recAsAviAct );
 	connect( Hotkeys[ HK_RECORD_AVI_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(aviRecordAsStart(void)) );
 
-	aviMenu->addAction(recAsAviAct);
+	movieMenu->addAction(recAsAviAct);
 
 	// Movie -> Avi Recording -> Stop
-	stopAviAct = new QAction(tr("&Stop"), this);
+	stopAviAct = new QAction(tr("AVI &Stop"), this);
 	//stopAviAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	stopAviAct->setStatusTip(tr("AVI Record Stop"));
 	stopAviAct->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
@@ -1759,7 +1758,7 @@ void consoleWin_t::createMainMenu(void)
 	Hotkeys[ HK_STOP_AVI ].setAction( stopAviAct );
 	connect( Hotkeys[ HK_STOP_AVI ].getShortcut(), SIGNAL(activated()), this, SLOT(aviRecordStop(void)) );
 
-	aviMenu->addAction(stopAviAct);
+	movieMenu->addAction(stopAviAct);
 
 //#define AVI_DEBUG
 #ifdef AVI_DEBUG
@@ -1770,70 +1769,14 @@ void consoleWin_t::createMainMenu(void)
 	//act->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(aviDebugFile(void)) );
 	
-	aviMenu->addAction(act);
+	movieMenu->addAction(act);
 #endif
-
-	// Movie -> Avi Recording -> Video Format
-	//subMenu = aviMenu->addMenu( tr("Video Format") );
-
-	//{
-	//	std::vector <std::string> formatList;
-	//	group   = new QActionGroup(this);
-
-	//	group->setExclusive(true);
-
-	//	FCEUD_AviGetFormatOpts( formatList );
-
-	//	for (size_t i=0; i<formatList.size(); i++)
-	//	{
-	//		act = new QAction(tr( formatList[i].c_str() ), this);
-
-	//		//printf("%s\n", formatList[i].c_str() );
-
-	//        	act->setCheckable(true);
-	//        	group->addAction(act);
-	//		subMenu->addAction(act);
-
-	//		act->setChecked( aviGetSelVideoFormat() == i );
-
-	//		// Use Lambda Function to set callback
-	//		connect( act, &QAction::triggered, [ this, i ] { aviVideoFormatChanged( i ); } );
-	//	}
-
-	//}
-
-	//// Movie -> Avi Recording -> Include Audio
-	//act = new QAction(tr("Include Audio"), this);
-       	//act->setCheckable(true);
-	//act->setChecked( aviGetAudioEnable() );
-	//connect(act, SIGNAL(triggered(bool)), this, SLOT(aviAudioEnableChange(bool)) );
-	//aviMenu->addAction(act);
-
-	//aviMenu->addSeparator();
-
-	//// Movie -> Avi Recording -> Enable HUD Recording
-	//aviHudAct = new QAction(tr("Enable &HUD Recording"), this);
-	//aviHudAct->setCheckable(true);
-	//aviHudAct->setChecked( FCEUI_AviEnableHUDrecording() );
-	//aviHudAct->setStatusTip(tr("Enable HUD Recording"));
-	//connect(aviHudAct, SIGNAL(triggered(bool)), this, SLOT(setAviHudEnable(bool)) );
-
-	//aviMenu->addAction(aviHudAct);
-
-	//// Movie -> Avi Recording -> Enable Message Recording
-	//aviMsgAct = new QAction(tr("Enable &Msg Recording"), this);
-	//aviMsgAct->setCheckable(true);
-	//aviMsgAct->setChecked( !FCEUI_AviDisableMovieMessages() );
-	//aviMsgAct->setStatusTip(tr("Enable Msg Recording"));
-	//connect(aviMsgAct, SIGNAL(triggered(bool)), this, SLOT(setAviMsgEnable(bool)) );
-
-	//aviMenu->addAction(aviMsgAct);
+	movieMenu->addSeparator();
 
 	// Movie -> WAV Recording
-	subMenu = movieMenu->addMenu( tr("&WAV Recording") );
 
-	// Movie -> Avi Recording -> Record
-	recWavAct = new QAction(tr("&Record"), this);
+	// Movie -> WAV Recording -> Record
+	recWavAct = new QAction(tr("WAV &Record"), this);
 	//recWavAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	recWavAct->setStatusTip(tr("WAV Record Start"));
 	recWavAct->setIcon( QIcon(":icons/media-record.png") );
@@ -1842,10 +1785,10 @@ void consoleWin_t::createMainMenu(void)
 	Hotkeys[ HK_RECORD_WAV ].setAction( recWavAct );
 	connect( Hotkeys[ HK_RECORD_WAV ].getShortcut(), SIGNAL(activated()), this, SLOT(wavRecordStart(void)) );
 
-	subMenu->addAction(recWavAct);
+	movieMenu->addAction(recWavAct);
 
-	// Movie -> WAV Recording -> Record
-	recAsWavAct = new QAction(tr("Record &As"), this);
+	// Movie -> WAV Recording -> Record As
+	recAsWavAct = new QAction(tr("WAV Record &As"), this);
 	//recAsWavAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	recAsWavAct->setStatusTip(tr("WAV Record As Start"));
 	//recAsWavAct->setIcon( QIcon(":icons/media-record.png") );
@@ -1854,10 +1797,10 @@ void consoleWin_t::createMainMenu(void)
 	Hotkeys[ HK_RECORD_WAV_TO ].setAction( recAsWavAct );
 	connect( Hotkeys[ HK_RECORD_WAV_TO ].getShortcut(), SIGNAL(activated()), this, SLOT(wavRecordAsStart(void)) );
 
-	subMenu->addAction(recAsWavAct);
+	movieMenu->addAction(recAsWavAct);
 
 	// Movie -> WAV Recording -> Stop
-	stopWavAct = new QAction(tr("&Stop"), this);
+	stopWavAct = new QAction(tr("WAV &Stop"), this);
 	//stopWavAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	stopWavAct->setStatusTip(tr("WAV Record Stop"));
 	stopWavAct->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
@@ -1866,7 +1809,7 @@ void consoleWin_t::createMainMenu(void)
 	Hotkeys[ HK_STOP_WAV ].setAction( stopWavAct );
 	connect( Hotkeys[ HK_STOP_WAV ].getShortcut(), SIGNAL(activated()), this, SLOT(wavRecordStop(void)) );
 
-	subMenu->addAction(stopWavAct);
+	movieMenu->addAction(stopWavAct);
 
 	//-----------------------------------------------------------------------
 	// Help
