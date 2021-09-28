@@ -715,6 +715,12 @@ void AutoFire(void)
 
 void UpdateAutosave(void);
 
+
+#ifdef __QT_DRIVER__
+double getFrameRate(void);
+double getBaseFrameRate(void);
+#endif
+
 ///Emulates a single frame.
 
 ///Skip may be passed in, if FRAMESKIP is #defined, to cause this to emulate more than one frame
@@ -726,10 +732,25 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	if (frameAdvanceRequested)
 	{
+#ifdef __QT_DRIVER__
+		double baseFrameRatio = getFrameRate() / getBaseFrameRate();
+
+		int32_t frameAdvanceDelayScaled = (int32_t)( (double)frameAdvance_Delay * baseFrameRatio);
+
+		if ( frameAdvanceDelayScaled < 1 )
+		{
+			frameAdvanceDelayScaled = 1;
+		}
+		if (frameAdvance_Delay_count == 0 || frameAdvance_Delay_count >= frameAdvanceDelayScaled)
+			EmulationPaused = EMULATIONPAUSED_FA;
+		if (frameAdvance_Delay_count < frameAdvanceDelayScaled)
+			frameAdvance_Delay_count++;
+#else
 		if (frameAdvance_Delay_count == 0 || frameAdvance_Delay_count >= frameAdvance_Delay)
 			EmulationPaused = EMULATIONPAUSED_FA;
 		if (frameAdvance_Delay_count < frameAdvance_Delay)
 			frameAdvance_Delay_count++;
+#endif
 	}
 
 	if (EmulationPaused & EMULATIONPAUSED_FA)
