@@ -2153,7 +2153,7 @@ int aviRecordOpenFile( const char *filepath )
 	{
 		gwavi = new gwavi_t();
 
-		if ( gwavi->open( fileName, nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, &audioConfig ) )
+		if ( gwavi->open( fileName, nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, recordAudio ? &audioConfig : NULL ) )
 		{
 			char msg[512];
 			fprintf( avLogFp, "Error: Failed to open AVI file.\n");

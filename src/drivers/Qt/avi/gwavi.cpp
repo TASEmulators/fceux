@@ -82,6 +82,7 @@ gwavi_t::gwavi_t(void)
 	movi_fpos = 0;
 	bits_per_pixel = 24;
 	avi_std = 2;
+	audioEnabled = false;
 }
 
 gwavi_t::~gwavi_t(void)
@@ -212,6 +213,8 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	strcpy( stream_index_v.chunkId, "00dc");
 	stream_index_v.streamId = 0;
 
+	audioEnabled = false;
+
 	if (audio) 
 	{
 		/* set stream header */
@@ -242,6 +245,7 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 
 		strcpy( stream_index_a.chunkId, "01wb");
 		stream_index_a.streamId = 1;
+		audioEnabled = true;
 	}
 	std_index_base_ofs_v = 0;
 	std_index_base_ofs_a = 0;
@@ -326,9 +330,13 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len, unsigned int flags)
 			{
 				return -1;
 			}
-			if ( write_stream_std_indx( out, &stream_index_a ) == -1 )
+
+			if ( audioEnabled )
 			{
-				return -1;
+				if ( write_stream_std_indx( out, &stream_index_a ) == -1 )
+				{
+					return -1;
+				}
 			}
 			offsets.clear();
 
@@ -496,9 +504,12 @@ gwavi_t::close(void)
 		{
 			return -1;
 		}
-		if ( write_stream_std_indx( out, &stream_index_a ) == -1 )
+		if ( audioEnabled )
 		{
-			return -1;
+			if ( write_stream_std_indx( out, &stream_index_a ) == -1 )
+			{
+				return -1;
+			}
 		}
 	}
 

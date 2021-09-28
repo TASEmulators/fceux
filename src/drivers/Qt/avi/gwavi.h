@@ -216,6 +216,7 @@ class gwavi_t
 	int bits_per_pixel;
 	int avi_std;
 	char fourcc[8];
+	char audioEnabled;
 
 	// helper functions
 	long long ftell(FILE *fp);
