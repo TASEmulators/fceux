@@ -695,6 +695,14 @@ InitConfig()
 	config->addOption("playmov", "SDL.Movie", "");
 	config->addOption("subtitles", "SDL.SubtitleDisplay", 1);
 	config->addOption("movielength", "SDL.MovieLength", 0);
+
+	config->addOption("SDL.SuggestReadOnlyReplay"  , 1 );
+	config->addOption("SDL.PauseAfterMoviePlayback", 0 );
+	config->addOption("SDL.CloseFinishedMovie"     , 0 );
+	config->addOption("SDL.MovieBindSavestate"     , 1 );
+	config->addOption("SDL.SubtitlesOnAVI"         , 0 );
+	config->addOption("SDL.AutoMovieBackup"        , 0 );
+	config->addOption("SDL.MovieFullSaveStateLoads", 0 );
 	
 	config->addOption("fourscore", "SDL.FourScore", 0);
 

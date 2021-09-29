@@ -193,21 +193,29 @@ void MovieOptionsDialog_t::closeWindow(void)
 void MovieOptionsDialog_t::readOnlyReplayChanged(int state)
 {
 	suggestReadOnlyReplay = (state != Qt::Unchecked);
+
+	g_config->setOption("SDL.SuggestReadOnlyReplay"  , suggestReadOnlyReplay);
 }
 //----------------------------------------------------------------------------
 void MovieOptionsDialog_t::pauseAfterPlayChanged(int state)
 {
 	pauseAfterPlayback = (state != Qt::Unchecked);
+
+	g_config->setOption("SDL.PauseAfterMoviePlayback", pauseAfterPlayback);
 }
 //----------------------------------------------------------------------------
 void MovieOptionsDialog_t::closeAfterPlayChanged(int state)
 {
 	closeFinishedMovie = (state != Qt::Unchecked);
+
+	g_config->setOption("SDL.CloseFinishedMovie", closeFinishedMovie);
 }
 //----------------------------------------------------------------------------
 void MovieOptionsDialog_t::bindSaveStatesChanged(int state)
 {
 	bindSavestate = (state != Qt::Unchecked);
+
+	g_config->setOption("SDL.MovieBindSavestate", bindSavestate);
 }
 //----------------------------------------------------------------------------
 void MovieOptionsDialog_t::dpySubTitlesChanged(int state)
@@ -220,6 +228,8 @@ void MovieOptionsDialog_t::dpySubTitlesChanged(int state)
 void MovieOptionsDialog_t::putSubTitlesAviChanged(int state)
 {
 	subtitlesOnAVI = (state != Qt::Unchecked);
+
+	g_config->setOption("SDL.SubtitlesOnAVI", subtitlesOnAVI);
 }
 //----------------------------------------------------------------------------
 void MovieOptionsDialog_t::setAviHudEnable(int state)
@@ -250,11 +260,15 @@ void MovieOptionsDialog_t::setAviAudioEnable(int state)
 void MovieOptionsDialog_t::autoBackUpChanged(int state)
 {
 	autoMovieBackup = (state != Qt::Unchecked);
+
+	g_config->setOption("SDL.AutoMovieBackup", autoMovieBackup);
 }
 //----------------------------------------------------------------------------
 void MovieOptionsDialog_t::loadFullStatesChanged(int state)
 {
 	fullSaveStateLoads = (state != Qt::Unchecked);
+
+	g_config->setOption("SDL.MovieFullSaveStateLoads", fullSaveStateLoads);
 }
 //----------------------------------------------------------------------------
 void MovieOptionsDialog_t::aviBackendChanged(int idx)

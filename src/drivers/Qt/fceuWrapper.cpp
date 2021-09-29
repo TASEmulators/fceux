@@ -766,6 +766,14 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	else
 		FCEUI_SetAviEnableHUDrecording(false);
 
+	g_config->getOption("SDL.SuggestReadOnlyReplay"  , &suggestReadOnlyReplay);
+	g_config->getOption("SDL.PauseAfterMoviePlayback", &pauseAfterPlayback);
+	g_config->getOption("SDL.CloseFinishedMovie"     , &closeFinishedMovie);
+	g_config->getOption("SDL.MovieBindSavestate"     , &bindSavestate);
+	g_config->getOption("SDL.SubtitlesOnAVI"         , &subtitlesOnAVI);
+	g_config->getOption("SDL.AutoMovieBackup"        , &autoMovieBackup);
+	g_config->getOption("SDL.MovieFullSaveStateLoads", &fullSaveStateLoads);
+
 	// check to see if movie messages are disabled
 	int mm;
 	g_config->getOption("SDL.MovieMsg", &mm);
