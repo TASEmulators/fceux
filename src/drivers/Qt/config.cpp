@@ -480,7 +480,7 @@ InitConfig()
 
 	// sound options
 	config->addOption('s', "sound", "SDL.Sound", 1);
-	config->addOption("volume", "SDL.Sound.Volume", 150);
+	config->addOption("volume", "SDL.Sound.Volume", 255);
 	config->addOption("trianglevol", "SDL.Sound.TriangleVolume", 255);
 	config->addOption("square1vol", "SDL.Sound.Square1Volume", 255);
 	config->addOption("square2vol", "SDL.Sound.Square2Volume", 255);
