@@ -125,6 +125,7 @@ void ColorMenuItem::pickerClosed(int ret)
 
 			g_config->save();
 		}
+		emit colorChanged( *colorPtr );
 	}
 	//printf("Picker Closed: %i\n", ret );
 }

@@ -4,6 +4,7 @@
 #pragma  once
 
 #include <QWidget>
+#include <QColor>
 #include <QCursor>
 #include <QPaintEvent>
 #include <QResizeEvent>
@@ -41,6 +42,7 @@ class ConsoleViewSDL_t : public QWidget
 
 		void   setCursor(const QCursor &c);
 		void   setCursor( Qt::CursorShape s );
+		void   setBgColor( QColor &c );
 	protected:
 
 	//void paintEvent(QPaintEvent *event);
@@ -69,6 +71,7 @@ class ConsoleViewSDL_t : public QWidget
 	bool linearFilter;
 	bool forceAspect;
 	bool autoScaleEna;
+	QColor  bgColor;
 
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;

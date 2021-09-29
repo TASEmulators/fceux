@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 
+#include <QColor>
 #include <QScreen>
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -38,6 +39,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 		double getAspectRatio(void);
 
 		void   screenChanged(QScreen *scr);
+		void   setBgColor( QColor &c );
 
 	protected:
 	void initializeGL(void);
@@ -74,6 +76,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 
 	unsigned int  textureType;
 	unsigned int  mouseButtonMask;
+	QColor  bgColor;
 
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;

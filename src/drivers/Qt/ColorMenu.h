@@ -56,4 +56,7 @@ class ColorMenuItem : public QAction
 	public slots:
 		void openColorPicker(void);
 		void pickerClosed(int ret);
+
+	signals:
+		void colorChanged( QColor &c );
 };

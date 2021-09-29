@@ -22,6 +22,7 @@
 #include <QThread>
 #include <QCursor>
 #include <QMutex>
+#include <QColor>
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 #include <QRecursiveMutex>
 #endif
@@ -250,6 +251,7 @@ class  consoleWin_t : public QMainWindow
 		//QAction *aviMsgAct;
 
 		QTimer  *gameTimer;
+		QColor   videoBgColor;
 
 		std::string errorMsg;
 		bool        errorMsgValid;
@@ -439,6 +441,7 @@ class  consoleWin_t : public QMainWindow
 		void winScreenChanged( QScreen *scr );
 		void winActiveChanged(void);
 		void emuFrameFinish(void);
+		void videoBgColorChanged( QColor &c );
 
 };
 

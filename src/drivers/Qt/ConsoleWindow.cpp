@@ -62,6 +62,7 @@
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/input.h"
+#include "Qt/ColorMenu.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/InputConf.h"
 #include "Qt/GamePadConf.h"
@@ -868,6 +869,7 @@ void consoleWin_t::createMainMenu(void)
 	QActionGroup *group;
 	int useNativeMenuBar;
 	int customAutofireOnFrames, customAutofireOffFrames;
+	ColorMenuItem *bgColorItem;
 	//QShortcut *shortcut;
 
 	menubar = new consoleMenuBar(this);
@@ -1214,6 +1216,15 @@ void consoleWin_t::createMainMenu(void)
 	Hotkeys[ HK_MAIN_MENU_HIDE ].setAction( act );
 	connect( Hotkeys[ HK_MAIN_MENU_HIDE ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMenuVis(void)) );
 
+	// Options -> Video BG Color
+	fceuLoadConfigColor( "SDL.VideoBgColor", &videoBgColor );
+
+	bgColorItem = new ColorMenuItem( tr("BG Side Panel Color"), "SDL.VideoBgColor", this );
+	bgColorItem->connectColor( &videoBgColor );
+
+	optMenu->addAction(bgColorItem);
+
+	connect( bgColorItem, SIGNAL(colorChanged(QColor&)), this, SLOT(videoBgColorChanged(QColor&)) );
 	//-----------------------------------------------------------------------
 	// Emulation
 
@@ -2067,6 +2078,22 @@ void consoleWin_t::closeApp(void)
 
 	//qApp::quit();
 	qApp->quit();
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::videoBgColorChanged( QColor &c )
+{
+	//printf("Color Changed\n");
+
+	if ( viewport_GL )
+	{
+		viewport_GL->setBgColor(c);
+		viewport_GL->update();
+	}
+	else if ( viewport_SDL )
+	{
+		viewport_SDL->setBgColor(c);
+		viewport_SDL->render();
+	}
 }
 //---------------------------------------------------------------------------
 int  consoleWin_t::showListSelectDialog( const char *title, std::vector <std::string> &l )
