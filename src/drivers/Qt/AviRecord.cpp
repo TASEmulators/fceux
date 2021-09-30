@@ -4062,6 +4062,7 @@ LibgwaviOptionsPage::LibgwaviOptionsPage(QWidget *parent)
 	grid->addWidget( videoPixfmt, 1, 1);
 	videoConfBtn = new QPushButton( tr("Options...") );
 	grid->addWidget( videoConfBtn, 2, 1);
+	videoConfBtn->setEnabled(false);
 
 	vbox = new QVBoxLayout();
 	audioGbox->setLayout(vbox);
@@ -4082,6 +4083,7 @@ LibgwaviOptionsPage::LibgwaviOptionsPage(QWidget *parent)
 	grid->addWidget( audioChanLayout, 3, 1);
 	audioConfBtn = new QPushButton( tr("Options...") );
 	grid->addWidget( audioConfBtn, 4, 1);
+	audioConfBtn->setEnabled(false);
 
 	initCodecLists();
 
