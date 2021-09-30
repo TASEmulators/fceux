@@ -24,10 +24,12 @@ Table of Contents
 ----------------
 * sdl2  - Version >= 2.0  (sdl2 >= 2.8 recommended)
 * cmake - Required to build fceux.
-* qt5 OR qt6  - (qt version >= 5.11 recommended)
+* qt5 OR qt6  - (qt version >= 5.11 recommended) (Qt Modules Used: Widgets, OpenGL, and Help)
 * liblua5.1 (optional) - Will statically link internally if the system cannot provide this.
 * libx264 (optional) - H.264 video encoder for avi recording (recommended)
 * libx265 (optional) - H.265 video encoder for avi recording (recommended)
+* ffmpeg libraries (optional) - for avi recording (recommended)
+*	- ffmpeg libraries used: libavcodec  libavformat  libavutil  libswresample  libswscale
 * minizip  
 * zlib  
 * openGL
