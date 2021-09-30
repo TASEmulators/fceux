@@ -738,10 +738,11 @@ void ShowFPS(void)
 {
 	if(Show_FPS == false)
 		return;
-	uint64 da = FCEUD_GetTime() - boop[boopcount];
+	uint64 ts = FCEUD_GetTime();
+	uint64 da = ts - boop[boopcount];
 	char fpsmsg[16];
 	int booplimit = PAL?50:60;
-	boop[boopcount] = FCEUD_GetTime();
+	boop[boopcount] = ts;
 
 	sprintf(fpsmsg, "%.1f", (double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
 	DrawTextTrans(XBuf + ((256 - ClipSidesOffset) - 40) + (FSettings.FirstSLine + 4) * 256, 256, (uint8*)fpsmsg, 0xA0);
