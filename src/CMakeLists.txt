@@ -132,7 +132,13 @@ else(WIN32)
 	set( OPENGL_LDFLAGS  "-framework OpenGL" )
   else()
 	set( OPENGL_LDFLAGS  ${OPENGL_LIBRARIES} )
-  	set( SYS_LIBS  -lrt  -lpthread  -ldl)
+	# OpenBSD  refuses  to  implement  the POSIX  realtime  interface  and
+	# refuses to provide a stub library for -ldl
+	if(${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD")
+	  	set( SYS_LIBS  -lpthread)
+        else()
+          	set( SYS_LIBS  -lrt  -lpthread  -ldl)
+        endif()
   endif()
 
 endif(WIN32)

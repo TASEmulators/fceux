@@ -4086,7 +4086,7 @@ int consoleWin_t::getSchedParam( int &policy, int &priority )
 {
 	int ret = 0;
 
-#if defined(__linux__) || defined(__unix__)
+#if defined(__linux__) || defined(__unix__) && !defined(__OpenBSD__)
 	struct sched_param  p;
 
 	policy = sched_getscheduler( getpid() );
@@ -4122,7 +4122,7 @@ int consoleWin_t::getSchedParam( int &policy, int &priority )
 int consoleWin_t::setSchedParam( int policy, int priority )
 {
 	int ret = 0;
-#if defined(__linux__) || defined(__unix__)
+#if defined(__linux__) || defined(__unix__) && !defined(__OpenBSD__)
 	struct sched_param  p;
 	int minPrio, maxPrio;
 
