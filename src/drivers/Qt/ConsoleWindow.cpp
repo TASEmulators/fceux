@@ -1682,7 +1682,7 @@ void consoleWin_t::createMainMenu(void)
 	connect( movieMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
 
 	// Movie -> Play
-	openMovAct = new QAction(tr("&Play"), this);
+	openMovAct = new QAction(tr("&Play Movie"), this);
 	//openMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	openMovAct->setStatusTip(tr("Play Movie File"));
 	openMovAct->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
@@ -1694,7 +1694,7 @@ void consoleWin_t::createMainMenu(void)
 	movieMenu->addAction(openMovAct);
 
 	// Movie -> Play From Beginning
-	playMovBeginAct = new QAction(tr("Play From &Beginning"), this);
+	playMovBeginAct = new QAction(tr("Play Movie From &Beginning"), this);
 	//playMovBeginAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	playMovBeginAct->setStatusTip(tr("Play Movie From Beginning"));
 	//playMovBeginAct->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
@@ -1706,7 +1706,7 @@ void consoleWin_t::createMainMenu(void)
 	movieMenu->addAction(playMovBeginAct);
 
 	// Movie -> Stop
-	stopMovAct = new QAction(tr("&Stop"), this);
+	stopMovAct = new QAction(tr("&Stop Movie"), this);
 	//stopMovAct->setShortcut( QKeySequence(tr("Shift+F7")));
 	stopMovAct->setStatusTip(tr("Stop Movie Recording"));
 	stopMovAct->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
@@ -1720,7 +1720,7 @@ void consoleWin_t::createMainMenu(void)
 	movieMenu->addSeparator();
 
 	// Movie -> Record
-	recMovAct = new QAction(tr("&Record"), this);
+	recMovAct = new QAction(tr("&Record Movie"), this);
 	//recMovAct->setShortcut( QKeySequence(tr("Shift+F5")));
 	recMovAct->setStatusTip(tr("Record Movie"));
 	recMovAct->setIcon( QIcon(":icons/media-record.png") );
