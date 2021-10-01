@@ -2167,7 +2167,7 @@ int aviRecordOpenFile( const char *filepath )
 	vbufSize    = 1024 * 1024 * 60;
 	rawVideoBuf = (uint32_t*)malloc( vbufSize * sizeof(uint32_t) );
 
-	abufSize    = 48000;
+	abufSize    = 96000;
 	rawAudioBuf = (int16_t*)malloc( abufSize * sizeof(uint16_t) );
 
 	vbufHead = 0;
@@ -2450,7 +2450,8 @@ void AviRecordDiskThread_t::run(void)
 	uint32_t *videoOut;
 	char writeAudio = 1;
 	char localRecordAudio = 0;
-	int  avgAudioPerFrame, localVideoFormat;
+	int  avgAudioPerFrame, audioChunkSize, audioSamplesAvail=0;
+	int  localVideoFormat;
 
 	fprintf( avLogFp, "AVI Record Disk Thread Start\n");
 
@@ -2459,6 +2460,7 @@ void AviRecordDiskThread_t::run(void)
 	fps = getBaseFrameRate();
 
 	avgAudioPerFrame = ( audioSampleRate / fps) + 1;
+	audioChunkSize   = ( audioSampleRate / 4 );
 
 	fprintf( avLogFp, "Avg Audio Sample Rate per Frame: %i \n", avgAudioPerFrame );
 
@@ -2514,9 +2516,10 @@ void AviRecordDiskThread_t::run(void)
 	}
 #endif
 
-	audioOut = (int16_t *)malloc(48000);
+	audioOut = (int16_t *)malloc(96000);
 	videoOut = (uint32_t*)malloc(1048576);
 
+	// Main Disk Record Loop
 	while ( !isInterruptionRequested() )
 	{
 		
@@ -2578,6 +2581,14 @@ void AviRecordDiskThread_t::run(void)
 
 			numPixelsReady = 0;
 
+			audioSamplesAvail = abufHead - abufTail;
+
+			if ( audioSamplesAvail < 0 )
+			{
+				audioSamplesAvail += abufSize;
+			}
+			writeAudio = (audioSamplesAvail >= audioChunkSize);
+
 			if ( writeAudio && localRecordAudio )
 			{
 				numSamples = 0;
@@ -2588,7 +2599,7 @@ void AviRecordDiskThread_t::run(void)
 
 					abufTail = (abufTail + 1) % abufSize;
 
-					if ( numSamples > avgAudioPerFrame )
+					if ( numSamples >= audioChunkSize )
 					{
 						break;
 					}
@@ -2618,6 +2629,46 @@ void AviRecordDiskThread_t::run(void)
 		}
 	}
 
+	// Write Leftover Audio Samples
+	audioSamplesAvail = abufHead - abufTail;
+
+	if ( audioSamplesAvail < 0 )
+	{
+		audioSamplesAvail += abufSize;
+	}
+	writeAudio = (audioSamplesAvail > 0);
+
+	if ( writeAudio && localRecordAudio )
+	{
+		//printf("Writing Last %i Audio Samples\n", audioSamplesAvail );
+		numSamples = 0;
+
+		while ( abufHead != abufTail )
+		{
+			audioOut[ numSamples ] = rawAudioBuf[ abufTail ]; numSamples++;
+
+			abufTail = (abufTail + 1) % abufSize;
+		}
+
+		if ( numSamples > 0 )
+		{
+			//printf("NUM Audio Samples: %i \n", numSamples );
+			#ifdef _USE_LIBAV
+			if ( localVideoFormat == AVI_LIBAV)
+			{
+				LIBAV::encode_audio_frame( audioOut, numSamples );
+			}
+			else
+			#endif
+			{
+				gwavi->add_audio( (unsigned char *)audioOut, numSamples*2);
+			}
+
+			numSamples = 0;
+		}
+	}
+
+	// Start of Disk Thread Cleanup
 	free(rgb24);
 
 #ifdef _USE_X264
