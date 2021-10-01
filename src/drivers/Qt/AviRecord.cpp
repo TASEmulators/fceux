@@ -1142,6 +1142,8 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 	{
 		ost->st->time_base.num =    usec;
 		ost->st->time_base.den = 1000000u;
+		//ost->st->time_base.num = (16*1024*1024) >> 3;
+		//ost->st->time_base.den = FCEUI_GetDesiredFPS() >> 3;
 	}
 	c->time_base       = ost->st->time_base;
 	//c->pix_fmt       = AV_PIX_FMT_YUV420P; // Every video encoder seems to accept this
@@ -1449,7 +1451,12 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 
 	if (c->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE)
 	{
-		nb_samples = 10000;
+		nb_samples = audioSampleRate / 4;
+
+		if ( nb_samples < 10000 )
+		{
+			nb_samples = 10000;
+		}
 	}
 	else
 	{
@@ -2507,6 +2514,8 @@ void AviRecordDiskThread_t::run(void)
 	if ( localVideoFormat == AVI_LIBAV)
 	{
 		LIBAV::init( width, height );
+
+		audioChunkSize = avgAudioPerFrame;
 	}
 #endif
 #ifdef WIN32
