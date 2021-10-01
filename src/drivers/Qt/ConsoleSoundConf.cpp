@@ -263,7 +263,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	starveLbl = new QLabel( tr("Sink Starve Count:") );
 	starveLbl->setToolTip( tr("Running count of the number of samples that the audio sink is starved of.") );
-	resetCountBtn = new QPushButton( tr("Reset") );
+	resetCountBtn = new QPushButton( tr("Reset Counter") );
 	resetCountBtn->setIcon(style()->standardIcon(QStyle::SP_DialogResetButton));
 	connect(resetCountBtn, SIGNAL(clicked(void)), this, SLOT(resetCounters(void)));
 
