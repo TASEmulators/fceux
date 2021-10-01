@@ -3630,7 +3630,7 @@ void consoleWin_t::aviRecordAsStart(void)
 	QString filename;
 	std::string lastPath;
 	//char dir[512];
-	const char *base;
+	const char *base, *rom;
 	QFileDialog  dialog(this, tr("Save AVI Movie for Recording") );
 	QList<QUrl> urls;
 	QDir d;
@@ -3668,6 +3668,19 @@ void consoleWin_t::aviRecordAsStart(void)
 	if ( lastPath.size() > 0 )
 	{
 		dialog.setDirectory( QString::fromStdString(lastPath) );
+	}
+
+	rom = getRomFile();
+
+	if ( rom )
+	{
+		char baseName[512];
+		getFileBaseName( rom, baseName );
+
+		if ( baseName[0] != 0 )
+		{
+			dialog.selectFile(baseName);
+		}
 	}
 
 	// Check config option to use native file dialog or not
@@ -3877,7 +3890,7 @@ void consoleWin_t::wavRecordAsStart(void)
 	QString filename;
 	std::string lastPath;
 	//char dir[512];
-	const char *base;
+	const char *base, *rom;
 	QFileDialog  dialog(this, tr("Save WAV Movie for Recording") );
 	QList<QUrl> urls;
 	QDir d;
@@ -3915,6 +3928,19 @@ void consoleWin_t::wavRecordAsStart(void)
 	if ( lastPath.size() > 0 )
 	{
 		dialog.setDirectory( QString::fromStdString(lastPath) );
+	}
+
+	rom = getRomFile();
+
+	if ( rom )
+	{
+		char baseName[512];
+		getFileBaseName( rom, baseName );
+
+		if ( baseName[0] != 0 )
+		{
+			dialog.selectFile(baseName);
+		}
 	}
 
 	// Check config option to use native file dialog or not
