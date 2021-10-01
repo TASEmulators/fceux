@@ -2557,7 +2557,7 @@ void AviRecordDiskThread_t::run(void)
 			{
 				convertRgb_32_to_24( (const unsigned char*)videoOut, rgb24,
 						width, height, numPixels, true );
-				writeAudio = VFW::encode_frame( rgb24, width, height ) > 0;
+				VFW::encode_frame( rgb24, width, height );
 			}
 			#endif
 			#ifdef _USE_LIBAV

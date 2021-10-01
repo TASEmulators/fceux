@@ -374,9 +374,12 @@ gwavi_t::add_frame( unsigned char *buffer, size_t len, unsigned int flags)
 		return -1;
 	}
 
-	if ((t = fwrite(buffer, 1, len, out)) != len) {
-		(void)fprintf(stderr, "gwavi_add_frame: fwrite() failed\n");
-		return -1;
+	if ( len > 0 )
+	{
+		if ((t = fwrite(buffer, 1, len, out)) != len) {
+			(void)fprintf(stderr, "gwavi_add_frame: fwrite() failed\n");
+			return -1;
+		}
 	}
 
 	for (t = 0; t < maxi_pad; t++)
