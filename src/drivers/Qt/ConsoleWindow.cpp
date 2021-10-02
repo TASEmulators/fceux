@@ -3506,6 +3506,7 @@ void consoleWin_t::toggleLagCounterDisplay(void)
 {
 	fceuWrapperLock();
 	lagCounterDisplay = !lagCounterDisplay;
+	g_config->setOption("SDL.ShowLagCount", lagCounterDisplay);
 	fceuWrapperUnLock();
 }
 
@@ -3521,14 +3522,17 @@ void consoleWin_t::toggleMovieBindSaveState(void)
 {
 	fceuWrapperLock();
 	bindSavestate = !bindSavestate;
+	g_config->setOption("SDL.MovieBindSavestate", bindSavestate);
 	FCEUI_DispMessage ("Savestate binding to movie %sabled.", 0, bindSavestate ? "en" : "dis");
 	fceuWrapperUnLock();
 }
 
 void consoleWin_t::toggleMovieFrameDisplay(void)
 {
+	extern int frame_display;
 	fceuWrapperLock();
 	FCEUI_MovieToggleFrameDisplay();
+	g_config->setOption("SDL.ShowFrameCount", frame_display );
 	fceuWrapperUnLock();
 }
 
