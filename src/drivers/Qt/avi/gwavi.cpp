@@ -83,6 +83,7 @@ gwavi_t::gwavi_t(void)
 	bits_per_pixel = 24;
 	avi_std = 2;
 	audioEnabled = false;
+	riffWalkCallback = NULL;
 }
 
 gwavi_t::~gwavi_t(void)
@@ -660,11 +661,13 @@ int gwavi_t::printHeaders(void)
 {
 	char fourcc[8];
 	unsigned int ret, fileSize, size;
+	long long int fpos;
 
 	if ( in == NULL )
 	{
 		return -1;
 	}
+	fpos = ftell(in);
 
 	if (read_chars_bin(in, fourcc, 4) == -1)
 		return -1;
@@ -686,6 +689,11 @@ int gwavi_t::printHeaders(void)
 	size -= 4;
 	fourcc[4] = 0;
 	printf("FileType: '%s'\n", fourcc );
+
+	if ( riffWalkCallback )
+	{
+		riffWalkCallback( RIFF_START, fpos, fourcc, fileSize, riffWalkUserData );
+	}
 
 	while ( size >= 4 )
 	{
@@ -728,9 +736,12 @@ unsigned int gwavi_t::readList(int lvl)
 	char fourcc[8], listType[8], pad[4];
 	unsigned int size, listSize=0;
 	char indent[256];
+	long long int fpos;
 
 	memset( indent, ' ', lvl*3);
 	indent[lvl*3] = 0;
+
+	fpos = ftell(in);
 
 	if (read_uint(in, listSize) == -1)
 	{
@@ -754,6 +765,10 @@ unsigned int gwavi_t::readList(int lvl)
 	size -= 4;
 	bytesRead += 4;
 
+	if ( riffWalkCallback )
+	{
+		riffWalkCallback( LIST_START, fpos-4, listType, listSize, riffWalkUserData );
+	}
 	printf("%sList Start: '%s'  %u\n", indent, listType, listSize );
 
 	while ( size >= 4 )
@@ -805,6 +820,12 @@ unsigned int gwavi_t::readList(int lvl)
 	}
 	printf("%sList End: %s   %u\n", indent, listType, bytesRead);
 
+	if ( riffWalkCallback )
+	{
+		fpos = ftell(in);
+
+		riffWalkCallback( LIST_END, fpos, listType, listSize, riffWalkUserData );
+	}
 	return bytesRead+4;
 }
 
@@ -813,9 +834,12 @@ unsigned int gwavi_t::readChunk(const char *id, int lvl)
 	unsigned int r, ret, size, chunkSize, bytesRead=0;
 	unsigned short dataWord;
 	char indent[256];
+	long long int fpos;
 
 	memset( indent, ' ', lvl*3);
 	indent[lvl*3] = 0;
+
+	fpos = ftell(in);
 
 	if (read_uint(in, chunkSize) == -1)
 	{
@@ -824,9 +848,14 @@ unsigned int gwavi_t::readChunk(const char *id, int lvl)
 	}
 	printf("%sChunk Start: %s   %u\n", indent, id, chunkSize);
 
+	if ( riffWalkCallback )
+	{
+		riffWalkCallback( CHUNK_START, fpos-4, id, chunkSize, riffWalkUserData );
+	}
+
 	if ( chunkSize == 0 )
 	{
-		return 0;
+		return 4;
 	}
 	size = chunkSize;
 

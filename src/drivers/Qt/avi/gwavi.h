@@ -175,6 +175,15 @@ class gwavi_t
 	static const unsigned int IF_KEYFRAME = 0x00000010;
 	static const unsigned int IF_NO_TIME  = 0x00000100;
 
+	enum 
+	{
+		RIFF_START,
+		RIFF_END,
+		LIST_START,
+		LIST_END,
+		CHUNK_START
+	};
+
 	gwavi_t(void);
 	~gwavi_t(void);
 
@@ -197,6 +206,12 @@ class gwavi_t
 	int openIn(const char *filename);
 
 	int printHeaders(void);
+
+	void setRiffWalkCallback( int (*cb)( int type, long long int fpos, const char *fourcc, size_t size, void *userData ), void *userData )
+	{
+		riffWalkCallback = cb;
+		riffWalkUserData = userData;
+	};
 
 	private:
 	FILE *in;
@@ -252,6 +267,9 @@ class gwavi_t
 	unsigned int readAviHeader(void);
 	unsigned int readStreamHeader(void);
 	unsigned int readIndexBlock( unsigned int chunkSize );
+
+	void *riffWalkUserData;
+	int (*riffWalkCallback)( int type, long long int fpos, const char *fourcc, size_t size, void *userData );
 };
 
 #endif /* ndef H_GWAVI */

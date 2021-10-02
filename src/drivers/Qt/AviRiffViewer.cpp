@@ -1,0 +1,419 @@
+/* FCE Ultra - NES/Famicom Emulator
+ *
+ * Copyright notice for this file:
+ *  Copyright (C) 2020 mjbudd77
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+// AviRiffViewer.cpp
+//
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+
+#include <QHeaderView>
+#include <QCloseEvent>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QStandardPaths>
+
+#include "Qt/main.h"
+#include "Qt/config.h"
+#include "Qt/fceuWrapper.h"
+#include "Qt/AviRiffViewer.h"
+#include "Qt/ConsoleUtilities.h"
+
+static AviRiffViewerDialog *win = NULL;
+//----------------------------------------------------------------------------
+static int riffWalkCallback( int type, long long int fpos, const char *fourcc, size_t size, void *userData )
+{
+	int ret = 0;
+
+	if ( win )
+	{
+		ret = win->riffWalkCallback( type, fpos, fourcc, size );
+	}
+	return ret;
+}
+//----------------------------------------------------------------------------
+//--- AVI RIFF Viewer Dialog
+//----------------------------------------------------------------------------
+AviRiffViewerDialog::AviRiffViewerDialog(QWidget *parent)
+	: QDialog(parent)
+{
+	QMenuBar    *menuBar;
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QPushButton *closeButton;
+	QTreeWidgetItem *item;
+
+	win = this;
+	avi = NULL;
+
+	setWindowTitle("AVI RIFF Viewer");
+
+	resize(512, 512);
+
+	menuBar = buildMenuBar();
+	mainLayout = new QVBoxLayout();
+	setLayout(mainLayout);
+	mainLayout->setMenuBar( menuBar );
+
+	riffTree = new AviRiffTree();
+
+	riffTree->setColumnCount(4);
+	riffTree->setSelectionMode( QAbstractItemView::SingleSelection );
+	riffTree->setAlternatingRowColors(true);
+
+	item = new QTreeWidgetItem();
+	item->setText(0, QString::fromStdString("Block"));
+	item->setText(1, QString::fromStdString("FCC"));
+	item->setText(2, QString::fromStdString("Size"));
+	item->setText(3, QString::fromStdString("FilePos"));
+	item->setTextAlignment(0, Qt::AlignLeft);
+	item->setTextAlignment(1, Qt::AlignLeft);
+	item->setTextAlignment(2, Qt::AlignLeft);
+	item->setTextAlignment(3, Qt::AlignLeft);
+
+	riffTree->setHeaderItem(item);
+
+	riffTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+	//connect( riffTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(hotKeyActivated(QTreeWidgetItem*,int) ) );
+
+	mainLayout->addWidget(riffTree);
+
+	closeButton = new QPushButton( tr("Close") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
+	hbox = new QHBoxLayout();
+	hbox->addStretch(5);
+	hbox->addWidget( closeButton, 1 );
+	mainLayout->addLayout( hbox );
+
+}
+//----------------------------------------------------------------------------
+AviRiffViewerDialog::~AviRiffViewerDialog(void)
+{
+	printf("Destroy AVI RIFF Viewer Window\n");
+
+	if ( avi )
+	{
+		delete avi; avi = NULL;
+	}
+	win = NULL;
+}
+//----------------------------------------------------------------------------
+void AviRiffViewerDialog::closeEvent(QCloseEvent *event)
+{
+	printf("AVI RIFF Viewer Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void AviRiffViewerDialog::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+QMenuBar *AviRiffViewerDialog::buildMenuBar(void)
+{
+	QMenu       *fileMenu;
+	//QActionGroup *actGroup;
+	QAction     *act;
+	int opt, useNativeMenuBar=0;
+
+	QMenuBar *menuBar = new QMenuBar();
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Open
+	act = new QAction(tr("&Open"), this);
+	act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Open AVI File"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openAviFileDialog(void)) );
+
+	fileMenu->addAction(act);
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+
+	fileMenu->addAction(act);
+
+	return menuBar;
+}
+//----------------------------------------------------------------------------
+void AviRiffViewerDialog::openAviFileDialog(void)
+{
+	std::string last;
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string lastPath;
+	//char dir[512];
+	const char *base, *rom;
+	QFileDialog  dialog(this, tr("Open AVI Movie for Inspection") );
+	QList<QUrl> urls;
+	QDir d;
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("AVI Movies (*.avi) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/avi");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		dialog.setDirectory( d.absolutePath() );
+	}
+	dialog.setDefaultSuffix( tr(".avi") );
+
+	g_config->getOption ("SDL.AviFilePath", &lastPath);
+	if ( lastPath.size() > 0 )
+	{
+		dialog.setDirectory( QString::fromStdString(lastPath) );
+	}
+
+	rom = getRomFile();
+
+	if ( rom )
+	{
+		char baseName[512];
+		getFileBaseName( rom, baseName );
+
+		if ( baseName[0] != 0 )
+		{
+			dialog.selectFile(baseName);
+		}
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	printf( "AVI Debug movie %s\n", filename.toStdString().c_str() );
+
+	lastPath = QFileInfo(filename).absolutePath().toStdString();
+
+	if ( lastPath.size() > 0 )
+	{
+		g_config->setOption ("SDL.AviFilePath", lastPath);
+	}
+
+	openFile( filename.toStdString().c_str() );
+}
+//----------------------------------------------------------------------------
+int AviRiffViewerDialog::openFile( const char *filepath )
+{
+	if ( avi )
+	{
+		closeFile();
+	}
+
+	avi = new gwavi_t();
+
+	if ( avi->openIn( filepath ) )
+	{
+		return -1;
+	}
+
+	itemStack.clear();
+
+	avi->setRiffWalkCallback( ::riffWalkCallback, this );
+	avi->printHeaders();
+
+	return 0;
+}
+//----------------------------------------------------------------------------
+int AviRiffViewerDialog::closeFile(void)
+{
+	if ( avi )
+	{
+		delete avi; avi = NULL;
+	}
+	riffTree->clear();
+	itemStack.clear();
+
+	return 0;
+}
+//----------------------------------------------------------------------------
+int AviRiffViewerDialog::riffWalkCallback( int type, long long int fpos, const char *fourcc, size_t size )
+{
+	AviRiffTreeItem *item, *groupItem;
+
+	switch ( type )
+	{
+		case gwavi_t::RIFF_START:
+		{
+			item = new AviRiffTreeItem(type, fpos, fourcc, size);
+
+			itemStack.push_back(item);
+
+			riffTree->addTopLevelItem(item);
+		}
+		break;
+		case gwavi_t::RIFF_END:
+		{
+			itemStack.pop_back();
+		}
+		break;
+		case gwavi_t::LIST_START:
+		{
+			item = new AviRiffTreeItem(type, fpos, fourcc, size);
+
+			groupItem = itemStack.back();
+
+			itemStack.push_back(item);
+
+			groupItem->addChild(item);
+		}
+		break;
+		case gwavi_t::LIST_END:
+		{
+			itemStack.pop_back();
+		}
+		break;
+		case gwavi_t::CHUNK_START:
+		{
+			item = new AviRiffTreeItem(type, fpos, fourcc, size);
+
+			groupItem = itemStack.back();
+
+			groupItem->addChild(item);
+		}
+		break;
+		default:
+			// UnHandled Type
+		break;
+	}
+
+	return 0;
+}
+//----------------------------------------------------------------------------
+//--- AVI RIFF Tree View
+//----------------------------------------------------------------------------
+AviRiffTree::AviRiffTree(QWidget *parent)
+	: QTreeWidget(parent)
+{
+
+}
+//----------------------------------------------------------------------------
+AviRiffTree::~AviRiffTree(void)
+{
+
+}
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//--- AVI RIFF Viewer Dialog
+//----------------------------------------------------------------------------
+AviRiffTreeItem::AviRiffTreeItem(int typeIn, long long int fposIn, const char *fourccIn, size_t sizeIn, QTreeWidgetItem *parent)
+	: QTreeWidgetItem(parent)
+{
+	char stmp[64];
+
+	type = typeIn;
+	fpos = fposIn;
+	size = sizeIn;
+
+	strcpy( fourcc, fourccIn );
+
+	//sprintf( stmp, "0x%08llX", fposIn );
+	
+	switch ( type )
+	{
+		case gwavi_t::RIFF_START:
+		case gwavi_t::RIFF_END:
+			setText( 0, QString("RIFF") );
+		break;
+		case gwavi_t::LIST_START:
+		case gwavi_t::LIST_END:
+			setText( 0, QString("LIST") );
+		break;
+		default:
+		case gwavi_t::CHUNK_START:
+			setText( 0, QString("CHUNK") );
+		break;
+	}
+
+	setText( 1, QString(fourcc) );
+
+	sprintf( stmp, "%zu", size );
+
+	setText( 2, QString(stmp) );
+
+	sprintf( stmp, "0x%08llX", fposIn );
+
+	setText( 3, QString(stmp) );
+}
+//----------------------------------------------------------------------------
+AviRiffTreeItem::~AviRiffTreeItem(void)
+{
+
+}
+//----------------------------------------------------------------------------

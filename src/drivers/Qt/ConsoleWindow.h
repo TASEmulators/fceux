@@ -334,6 +334,7 @@ class  consoleWin_t : public QMainWindow
 		void openGuiConfWin(void);
 		void openTimingConfWin(void);
 		void openPaletteEditorWin(void);
+		void openAviRiffViewer(void);
 		void openTimingStatWin(void);
 		void openMovieOptWin(void);
 		void openCodeDataLogger(void);

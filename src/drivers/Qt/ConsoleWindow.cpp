@@ -72,6 +72,7 @@
 #include "Qt/HelpPages.h"
 #include "Qt/GuiConf.h"
 #include "Qt/AviRecord.h"
+#include "Qt/AviRiffViewer.h"
 #include "Qt/MoviePlay.h"
 #include "Qt/MovieRecord.h"
 #include "Qt/MovieOptions.h"
@@ -1597,6 +1598,14 @@ void consoleWin_t::createMainMenu(void)
 
 	toolsMenu->addAction(act);
 
+	// Tools -> AVI RIFF Viewer
+	act = new QAction(tr("&AVI RIFF Viewer ..."), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Open AVI RIFF Viewer Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openAviRiffViewer(void)) );
+
+	toolsMenu->addAction(act);
+
 	 //-----------------------------------------------------------------------
 	 // Debug
 
@@ -2797,6 +2806,17 @@ void consoleWin_t::openPaletteEditorWin(void)
    win = new PaletteEditorDialog_t(this);
 	
    win->show();
+}
+
+void consoleWin_t::openAviRiffViewer(void)
+{
+	AviRiffViewerDialog *win;
+
+	//printf("Open AVI RIFF Viewer Window\n");
+	
+	win = new AviRiffViewerDialog(this);
+	
+	win->show();
 }
 
 void consoleWin_t::openMovieOptWin(void)
