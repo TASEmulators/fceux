@@ -136,7 +136,7 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 		return -1;
 	}
 	usec = (unsigned int)((1000000.0 / fps)+0.50);
-	printf("FPS: %f  %u\n", fps, usec );
+	//printf("FPS: %f  %u\n", fps, usec );
 
 	/* set avi header */
 	avi_header.time_delay= usec;
@@ -191,6 +191,8 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 	stream_header_v.data_length = 0;
 	stream_header_v.image_width  = width;
 	stream_header_v.image_height = height;
+
+	printf("AVI Encoded Video FPS: %.12lf\n", (double)stream_header_v.data_rate / (double)stream_header_v.time_scale );
 
 	/* set stream format */
 	stream_format_v.header_size = 40;

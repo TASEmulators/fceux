@@ -1149,6 +1149,8 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 	//c->pix_fmt       = AV_PIX_FMT_YUV420P; // Every video encoder seems to accept this
 	c->pix_fmt       = (AVPixelFormat)ost->pixelFormat;
 
+	printf("AVI Encoded Video FPS: %.12lf\n", (double)ost->st->time_base.den / (double)ost->st->time_base.num );
+
 	//c->sample_aspect_ratio =  (AVRational){ 4, 3 };
 	//printf("compression_level:%i\n", c->compression_level);
 	//printf("TAG:0x%08X\n", c->codec_tag);
