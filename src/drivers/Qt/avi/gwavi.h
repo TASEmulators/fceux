@@ -178,6 +178,7 @@ class gwavi_dataBuffer
 		int16_t   readI16( int ofs );
 		uint16_t  readU16( int ofs );
 
+		int32_t   readI32( int ofs );
 		uint32_t  readU32( int ofs );
 
 		unsigned char *buf;

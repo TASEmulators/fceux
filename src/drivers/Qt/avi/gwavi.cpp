@@ -1273,6 +1273,16 @@ uint16_t gwavi_dataBuffer::readU16( int ofs )
 	return out;
 }
 
+int32_t gwavi_dataBuffer::readI32( int ofs )
+{
+	int32_t out = 0;
+
+	out = (buf[3+ofs] << 24) | (buf[2+ofs] << 16) | 
+	      (buf[1+ofs] <<  8) | (buf[0+ofs]);
+
+	return out;
+}
+
 uint32_t gwavi_dataBuffer::readU32( int ofs )
 {
 	uint32_t out = 0;

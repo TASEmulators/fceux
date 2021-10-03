@@ -64,6 +64,7 @@ AviRiffViewerDialog::AviRiffViewerDialog(QWidget *parent)
 	win = this;
 	avi = NULL;
 	lastChunk = NULL;
+	memset( strhType, 0, sizeof(strhType) );
 
 	setWindowTitle("AVI RIFF Viewer");
 
@@ -140,7 +141,7 @@ QMenuBar *AviRiffViewerDialog::buildMenuBar(void)
 	QMenu       *fileMenu;
 	//QActionGroup *actGroup;
 	QAction     *act;
-	int opt, useNativeMenuBar=0;
+	int useNativeMenuBar=0;
 
 	QMenuBar *menuBar = new QMenuBar();
 
@@ -156,7 +157,7 @@ QMenuBar *AviRiffViewerDialog::buildMenuBar(void)
 	fileMenu = menuBar->addMenu(tr("&File"));
 
 	// File -> Open
-	act = new QAction(tr("&Open"), this);
+	act = new QAction(tr("&Open AVI File"), this);
 	act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Open AVI File"));
 	connect(act, SIGNAL(triggered()), this, SLOT(openAviFileDialog(void)) );
@@ -164,7 +165,17 @@ QMenuBar *AviRiffViewerDialog::buildMenuBar(void)
 	fileMenu->addAction(act);
 
 	// File -> Close
-	act = new QAction(tr("&Close"), this);
+	act = new QAction(tr("&Close File"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+C")));
+	act->setStatusTip(tr("Close File"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeFile(void)) );
+
+	fileMenu->addAction(act);
+
+	fileMenu->addSeparator();
+
+	// File -> Quit
+	act = new QAction(tr("&Quit Window"), this);
 	act->setShortcut(QKeySequence::Close);
 	act->setStatusTip(tr("Close Window"));
 	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
@@ -181,7 +192,7 @@ void AviRiffViewerDialog::openAviFileDialog(void)
 	QString filename;
 	std::string lastPath;
 	//char dir[512];
-	const char *base, *rom;
+	const char *base;
 	QFileDialog  dialog(this, tr("Open AVI Movie for Inspection") );
 	QList<QUrl> urls;
 	QDir d;
@@ -219,19 +230,6 @@ void AviRiffViewerDialog::openAviFileDialog(void)
 	if ( lastPath.size() > 0 )
 	{
 		dialog.setDirectory( QString::fromStdString(lastPath) );
-	}
-
-	rom = getRomFile();
-
-	if ( rom )
-	{
-		char baseName[512];
-		getFileBaseName( rom, baseName );
-
-		if ( baseName[0] != 0 )
-		{
-			dialog.selectFile(baseName);
-		}
 	}
 
 	// Check config option to use native file dialog or not
@@ -287,6 +285,7 @@ int AviRiffViewerDialog::openFile( const char *filepath )
 
 	itemStack.clear();
 	lastChunk = NULL;
+	memset( strhType, 0, sizeof(strhType) );
 
 	avi->setRiffWalkCallback( ::riffWalkCallback, this );
 	avi->riffwalk();
@@ -294,7 +293,7 @@ int AviRiffViewerDialog::openFile( const char *filepath )
 	return 0;
 }
 //----------------------------------------------------------------------------
-int AviRiffViewerDialog::closeFile(void)
+void AviRiffViewerDialog::closeFile(void)
 {
 	if ( avi )
 	{
@@ -302,8 +301,6 @@ int AviRiffViewerDialog::closeFile(void)
 	}
 	riffTree->clear();
 	itemStack.clear();
-
-	return 0;
 }
 //----------------------------------------------------------------------------
 int AviRiffViewerDialog::riffWalkCallback( int type, long long int fpos, const char *fourcc, size_t size )
@@ -488,6 +485,329 @@ int  AviRiffViewerDialog::processChunk( AviRiffTreeItem *item )
 		twi->setText( 0, tr("dwLength") );
 		twi->setText( 2, tr(stmp) );
 		item->addChild(twi);
+	}
+	else if ( strcmp( item->getFourcc(), "strh" ) == 0 )
+	{
+		data.malloc( item->getSize()+8 );
+
+		avi->getChunkData( item->filePos(), data.buf, item->getSize()+8 );
+
+		sprintf( stmp, "%c%c%c%c", data.buf[0], data.buf[1], data.buf[2], data.buf[3] );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("fcc") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU32(4) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("cb") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%c%c%c%c", data.buf[8], data.buf[9], data.buf[10], data.buf[11] );
+		strcpy( strhType, stmp );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("fccType") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		if ( isalnum(data.buf[12]) )
+		{
+			sprintf( stmp, "%c%c%c%c", data.buf[12], data.buf[13], data.buf[14], data.buf[15] );
+		}
+		else
+		{
+			sprintf( stmp, "0x%X", data.readU32(12) );
+		}
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("fccHandler") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "0x%X", data.readU32(16) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("dwFlags") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU16(20) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("wPriority") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU16(22) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("wLanguage") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU32(24) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("dwInitialFrames") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU32(28) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("dwScale") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU32(32) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("dwRate") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU32(36) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("dwStart") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU32(40) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("dwLength") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU32(44) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("dwSuggestedBufferSize") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%i", data.readI32(48) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("dwQuality") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU32(52) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("dwSampleSize") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU16(56) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("rcFrame.left") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU16(58) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("rcFrame.top") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU16(60) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("rcFrame.right") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU16(62) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("rcFrame.bottom") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+	}
+	else if ( strcmp( item->getFourcc(), "strf" ) == 0 )
+	{
+		if ( strcmp( strhType, "vids" ) == 0 )
+		{
+			data.malloc( item->getSize()+8 );
+
+			avi->getChunkData( item->filePos(), data.buf, item->getSize()+8 );
+
+			sprintf( stmp, "%c%c%c%c", data.buf[0], data.buf[1], data.buf[2], data.buf[3] );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("fcc") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU32(4) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("cb") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU32(8) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biSize") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%i", data.readI32(12) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biWidth") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%i", data.readI32(16) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biHeight") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU16(20) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biPlanes") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU16(22) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biBitCount") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			if ( isalnum(data.buf[24]) )
+			{
+				sprintf( stmp, "%c%c%c%c", data.buf[24], data.buf[25], data.buf[26], data.buf[27] );
+			}
+			else
+			{
+				sprintf( stmp, "0x%X", data.readU32(24) );
+			}
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biCompression") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU32(28) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biSizeImage") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%i", data.readI32(32) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biXPelsPerMeter") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%i", data.readI32(36) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biYPelsPerMeter") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU32(40) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biClrUsed") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU32(44) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("biClrImportant") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+		}
+		else if ( strcmp( strhType, "auds" ) == 0 )
+		{
+			data.malloc( item->getSize()+8 );
+
+			avi->getChunkData( item->filePos(), data.buf, item->getSize()+8 );
+
+			sprintf( stmp, "%c%c%c%c", data.buf[0], data.buf[1], data.buf[2], data.buf[3] );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("fcc") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU32(4) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("cb") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU16(8) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("wFormatTag") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU16(10) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("nChannels") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU32(12) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("nSamplesPerSec") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU32(16) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("nAvgBytesPerSec") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU16(20) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("nBlockAlign") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU16(22) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("nBitsPerSample") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+
+			sprintf( stmp, "%u", data.readU16(24) );
+
+			twi = new QTreeWidgetItem();
+			twi->setText( 0, tr("cbSize") );
+			twi->setText( 2, tr(stmp) );
+			item->addChild(twi);
+		}
 	}
 
 	return 0;

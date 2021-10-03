@@ -72,18 +72,19 @@ protected:
 	QMenuBar *buildMenuBar(void);
 
 	int  openFile( const char *filepath );
-	int  closeFile(void);
 	int  processChunk( AviRiffTreeItem *item );
 
 	gwavi_t     *avi;
 	AviRiffTree *riffTree;
 	AviRiffTreeItem *lastChunk;
 	std::list <AviRiffTreeItem*> itemStack;
+	char strhType[8];
 
 private:
 public slots:
 	void closeWindow(void);
 private slots:
+	void closeFile(void);
 	void openAviFileDialog(void);
 	//void ItemActivated(QTreeWidgetItem *item, int column);
 };
