@@ -837,7 +837,7 @@ unsigned int gwavi_t::readList(int lvl)
 
 unsigned int gwavi_t::readChunk(const char *id, int lvl)
 {
-	unsigned int r, ret, size, chunkSize, bytesRead=0;
+	unsigned int r, size, chunkSize, bytesRead=0;
 	unsigned short dataWord;
 	char indent[256];
 	long long int fpos;
