@@ -37,15 +37,14 @@
 #include "Qt/ConsoleUtilities.h"
 
 static bool showSizeHex = true;
-static AviRiffViewerDialog *win = NULL;
 //----------------------------------------------------------------------------
 static int riffWalkCallback( int type, long long int fpos, const char *fourcc, size_t size, void *userData )
 {
 	int ret = 0;
 
-	if ( win )
+	if ( userData )
 	{
-		ret = win->riffWalkCallback( type, fpos, fourcc, size );
+		ret = static_cast <AviRiffViewerDialog*>(userData)->riffWalkCallback( type, fpos, fourcc, size );
 	}
 	return ret;
 }
@@ -61,7 +60,6 @@ AviRiffViewerDialog::AviRiffViewerDialog(QWidget *parent)
 	QPushButton *closeButton;
 	QTreeWidgetItem *item;
 
-	win = this;
 	avi = NULL;
 	lastChunk = NULL;
 	memset( strhType, 0, sizeof(strhType) );
@@ -121,7 +119,6 @@ AviRiffViewerDialog::~AviRiffViewerDialog(void)
 	{
 		delete avi; avi = NULL;
 	}
-	win = NULL;
 }
 //----------------------------------------------------------------------------
 void AviRiffViewerDialog::closeEvent(QCloseEvent *event)
