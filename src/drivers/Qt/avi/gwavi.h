@@ -167,6 +167,23 @@ struct gwavi_index_rec_t
 
 #pragma pack( pop )
 
+class gwavi_dataBuffer
+{
+	public:
+		gwavi_dataBuffer(void);
+		~gwavi_dataBuffer(void);
+
+		int       malloc( size_t s );
+
+		int16_t   readI16( int ofs );
+		uint16_t  readU16( int ofs );
+
+		uint32_t  readU32( int ofs );
+
+		unsigned char *buf;
+		size_t size;
+};
+
 class gwavi_t
 {
 	public:
@@ -205,13 +222,15 @@ class gwavi_t
 
 	int openIn(const char *filename);
 
-	int printHeaders(void);
+	int riffwalk(void);
 
 	void setRiffWalkCallback( int (*cb)( int type, long long int fpos, const char *fourcc, size_t size, void *userData ), void *userData )
 	{
 		riffWalkCallback = cb;
 		riffWalkUserData = userData;
 	};
+
+	int  getChunkData( long long int fpos, unsigned char *buf, size_t size );
 
 	private:
 	FILE *in;

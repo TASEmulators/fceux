@@ -34,6 +34,10 @@ class AviRiffTreeItem : public QTreeWidgetItem
 		AviRiffTreeItem(int type, long long int fpos, const char *fourcc, size_t size, QTreeWidgetItem *parent = nullptr);
 		~AviRiffTreeItem(void);
 
+		size_t filePos(void){ return fpos; }
+		size_t getSize(void){ return size; }
+		const char *getFourcc(void){ return fourcc; }
+
 	private:
 		int type;
 		char fourcc[8];
@@ -69,9 +73,11 @@ protected:
 
 	int  openFile( const char *filepath );
 	int  closeFile(void);
+	int  processChunk( AviRiffTreeItem *item );
 
 	gwavi_t     *avi;
 	AviRiffTree *riffTree;
+	AviRiffTreeItem *lastChunk;
 	std::list <AviRiffTreeItem*> itemStack;
 
 private:

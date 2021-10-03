@@ -79,7 +79,7 @@ int FCEUD_AviGetDriverList( std::vector <std::string> &formatList );
 
 int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList );
 
-int aviDebugOpenFile( const char *filepath );
+//int aviDebugOpenFile( const char *filepath );
 
 class  AviRecordDiskThread_t : public QThread
 {

@@ -1780,17 +1780,6 @@ void consoleWin_t::createMainMenu(void)
 
 	movieMenu->addAction(stopAviAct);
 
-//#define AVI_DEBUG
-#ifdef AVI_DEBUG
-	// Movie -> Avi Recording -> Debug
-	act = new QAction(tr("&Debug"), this);
-	//act->setShortcut( QKeySequence(tr("Shift+F5")));
-	act->setStatusTip(tr("AVI Debug"));
-	//act->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
-	connect(act, SIGNAL(triggered()), this, SLOT(aviDebugFile(void)) );
-	
-	movieMenu->addAction(act);
-#endif
 	movieMenu->addSeparator();
 
 	// Movie -> WAV Recording
@@ -3759,76 +3748,6 @@ void consoleWin_t::aviRecordStop(void)
 		aviDiskThread->wait(10000);
 		fceuWrapperUnLock();
 	}
-}
-
-void consoleWin_t::aviDebugFile(void)
-{
-	int ret, useNativeFileDialogVal;
-	QString filename;
-	std::string last;
-	//char dir[512];
-	const char *base;
-	QFileDialog  dialog(this, tr("Select AVI Movie for Debug") );
-	QList<QUrl> urls;
-	QDir d;
-
-	dialog.setFileMode(QFileDialog::AnyFile);
-
-	dialog.setNameFilter(tr("AVI Movies (*.avi) ;; All files (*)"));
-
-	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
-	dialog.setLabelText( QFileDialog::Accept, tr("Select") );
-
-	base = FCEUI_GetBaseDirectory();
-
-	urls << QUrl::fromLocalFile( QDir::rootPath() );
-	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
-	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
-
-	if ( base )
-	{
-		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
-
-		d.setPath( QString(base) + "/avi");
-
-		if ( d.exists() )
-		{
-			urls << QUrl::fromLocalFile( d.absolutePath() );
-		}
-
-		dialog.setDirectory( d.absolutePath() );
-	}
-	dialog.setDefaultSuffix( tr(".avi") );
-
-	// Check config option to use native file dialog or not
-	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
-
-	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
-	dialog.setSidebarUrls(urls);
-
-	ret = dialog.exec();
-
-	if ( ret )
-	{
-		QStringList fileList;
-		fileList = dialog.selectedFiles();
-
-		if ( fileList.size() > 0 )
-		{
-			filename = fileList[0];
-		}
-	}
-
-	if ( filename.isNull() )
-	{
-	   return;
-	}
-	qDebug() << "selected file path : " << filename.toUtf8();
-
-	FCEUI_printf ("AVI Debug movie to %s\n", filename.toStdString().c_str() );
-
-	aviDebugOpenFile( filename.toStdString().c_str() );
 }
 
 void consoleWin_t::aviAudioEnableChange(bool checked)

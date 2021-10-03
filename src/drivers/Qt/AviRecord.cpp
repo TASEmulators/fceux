@@ -2290,21 +2290,6 @@ int aviRecordClose(void)
 	return 0;
 }
 //**************************************************************************************
-int aviDebugOpenFile( const char *filepath )
-{
-	gwavi_t inAvi;
-
-	if ( inAvi.openIn( filepath ) )
-	{
-		printf("Failed to open AVI File: '%s'\n", filepath);
-		return -1;
-	}
-
-	inAvi.printHeaders();
-
-	return 0;
-}
-//**************************************************************************************
 bool aviGetAudioEnable(void)
 {
 	return recordAudio;
