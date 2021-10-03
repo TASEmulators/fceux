@@ -37,6 +37,39 @@
 #include "Qt/ConsoleUtilities.h"
 
 static bool showSizeHex = true;
+
+static const char *riff_tags[] = {
+    "IARL", "IART", "IAS1", "IAS2", "IAS3", "IAS4", "IAS5", "IAS6", "IAS7",
+    "IAS8", "IAS9", "ICMS", "ICMT", "ICOP", "ICRD", "ICRP", "IDIM", "IDPI",
+    "IENG", "IGNR", "IKEY", "ILGT", "ILNG", "IMED", "INAM", "IPLT", "IPRD",
+    "IPRT", "ITRK", "ISBJ", "ISFT", "ISHP", "ISMP", "ISRC", "ISRF", "ITCH",
+     NULL
+};
+
+static const char *riff_info_conv[] = {
+    "IARL", "Archival Location",
+    "IART", "Artist"    ,
+    "ICMS", "Commissioned",
+    "ICMT", "Comments"  ,
+    "ICOP", "Copyright" ,
+    "ICRD", "Date"      ,
+    "IENG", "Engineer"  ,
+    "IGNR", "Genre"     ,
+    "IKEY", "KeyWords"  ,
+    "IMED", "Medium"    ,
+    "ILNG", "Language"  ,
+    "INAM", "Title"     ,
+    "IPRD", "Album"     ,
+    "IPRT", "Track"     ,
+    "ITRK", "Track"     ,
+    "ISFT", "Software"  ,
+    "ISMP", "Timecode"  ,
+    "ISBJ", "Subject"   ,
+    "ISRC", "Source"    ,
+    "ISRF", "Source Form",
+    "ITCH", "Technician",
+     NULL , NULL        ,
+};
 //----------------------------------------------------------------------------
 static int riffWalkCallback( int type, long long int fpos, const char *fourcc, size_t size, void *userData )
 {
@@ -409,8 +442,28 @@ int AviRiffViewerDialog::riffWalkCallback( int type, long long int fpos, const c
 	return 0;
 }
 //----------------------------------------------------------------------------
+static bool isRiffTag( const char *fcc, int *matchIdx )
+{
+	int i=0;
+
+	while ( riff_tags[i] != NULL )
+	{
+		if ( strcmp( fcc, riff_tags[i] ) == 0 )
+		{
+			if ( matchIdx )
+			{
+				*matchIdx = i;
+			}
+			return true;
+		}
+		i++;
+	}
+	return false;
+}
+//----------------------------------------------------------------------------
 int  AviRiffViewerDialog::processChunk( AviRiffTreeItem *item )
 {
+	int i, riffIdx;
 	QTreeWidgetItem *twi;
 	char stmp[256];
 	gwavi_dataBuffer data;
@@ -855,6 +908,55 @@ int  AviRiffViewerDialog::processChunk( AviRiffTreeItem *item )
 			twi->setText( 2, tr(stmp) );
 			item->addChild(twi);
 		}
+	}
+	else if ( isRiffTag( item->getFourcc(), &riffIdx ) )
+	{
+		int j=0;
+		const char *name = "MetaData";
+
+		while ( riff_info_conv[j] != NULL )
+		{
+			if ( strcmp( item->getFourcc(), riff_info_conv[j] ) == 0 )
+			{
+				name = riff_info_conv[j+1]; break;
+			}
+			j += 2;
+		}
+
+		data.malloc( item->getSize()+8 );
+
+		avi->getChunkData( item->filePos(), data.buf, item->getSize()+8 );
+
+		sprintf( stmp, "%c%c%c%c", data.buf[0], data.buf[1], data.buf[2], data.buf[3] );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("fcc") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU32(4) );
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr("cb") );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
+
+		sprintf( stmp, "%u", data.readU32(8) );
+
+		for (i=0; i<item->getSize(); i++)
+		{
+			if ( i >= ( sizeof(stmp)-1 ) )
+			{
+				i = sizeof(stmp)-1; break;
+			}
+			stmp[i] = data.buf[i+8];
+		}
+		stmp[i] = 0;
+
+		twi = new QTreeWidgetItem();
+		twi->setText( 0, tr(name) );
+		twi->setText( 2, tr(stmp) );
+		item->addChild(twi);
 	}
 
 	return 0;
