@@ -84,6 +84,8 @@ gwavi_t::gwavi_t(void)
 	avi_std = 2;
 	audioEnabled = false;
 	riffWalkCallback = NULL;
+	readBuf = NULL;
+	readBufSize = 0;
 }
 
 gwavi_t::~gwavi_t(void)
@@ -96,7 +98,11 @@ gwavi_t::~gwavi_t(void)
 	{
 		fclose(out); out = NULL;
 	}
-
+	if ( readBuf )
+	{
+		free(readBuf); readBuf = NULL;
+		readBufSize = 0;
+	}
 }
 
 int
@@ -667,6 +673,12 @@ int gwavi_t::riffwalk(void)
 	{
 		return -1;
 	}
+
+	if ( readBuf == NULL )
+	{
+		readBufSize = 64 * 1024;
+		readBuf = (unsigned char*)malloc( readBufSize );
+	}
 	fpos = ftell(in);
 
 	if (read_chars_bin(in, fourcc, 4) == -1)
@@ -851,7 +863,7 @@ unsigned int gwavi_t::readList(int lvl)
 
 unsigned int gwavi_t::readChunk(const char *id, int lvl)
 {
-	unsigned int r, size, chunkSize, bytesRead=0;
+	unsigned int r, ret, size, chunkSize, bytesRead=0;
 	unsigned short dataWord;
 	char indent[256];
 	long long int fpos;
@@ -889,6 +901,23 @@ unsigned int gwavi_t::readChunk(const char *id, int lvl)
 		size += r;
 	}
 
+	while ( size > 0 )
+	{
+		if ( size > readBufSize )
+		{
+			ret = fread( readBuf, 1, readBufSize, in );
+		}
+		else
+		{
+			ret = fread( readBuf, 1, size, in );
+		}
+		if ( ret == 0 )
+		{
+			return 0;
+		}
+		size -= ret;
+		bytesRead += ret;
+	}
 	//if ( strcmp( id, "avih") == 0 )
 	//{
 	//	ret = readAviHeader();
@@ -923,30 +952,30 @@ unsigned int gwavi_t::readChunk(const char *id, int lvl)
 	//	bytesRead += ret;
 	//}
 
-	while ( size >= WORD_SIZE )
-	{
-		if (read_ushort(in, dataWord) == -1)
-		{
-			(void)fprintf(stderr, "readChunk: read_int() failed\n");
-			return 0;
-		}
-		size -= WORD_SIZE;
-		bytesRead += WORD_SIZE;
-	}
+	//while ( size >= WORD_SIZE )
+	//{
+	//	if (read_ushort(in, dataWord) == -1)
+	//	{
+	//		(void)fprintf(stderr, "readChunk: read_int() failed\n");
+	//		return 0;
+	//	}
+	//	size -= WORD_SIZE;
+	//	bytesRead += WORD_SIZE;
+	//}
 
-	if ( size > 0 )
-	{
-		char pad[4];
-		int r = size % WORD_SIZE;
+	//if ( size > 0 )
+	//{
+	//	char pad[4];
+	//	int r = size % WORD_SIZE;
 
-		if (read_chars_bin(in, pad, r) == -1)
-		{
-			(void)fprintf(stderr, "readChunk: read_int() failed\n");
-			return 0;
-		}
-		size -= r;
-		bytesRead += r;
-	}
+	//	if (read_chars_bin(in, pad, r) == -1)
+	//	{
+	//		(void)fprintf(stderr, "readChunk: read_int() failed\n");
+	//		return 0;
+	//	}
+	//	size -= r;
+	//	bytesRead += r;
+	//}
 
 	//printf("%sChunk End: %s   %u\n", indent, id, bytesRead);
 

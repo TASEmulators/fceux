@@ -252,6 +252,8 @@ class gwavi_t
 	int avi_std;
 	char fourcc[8];
 	char audioEnabled;
+	unsigned char *readBuf;
+	size_t         readBufSize;
 
 	// helper functions
 	long long ftell(FILE *fp);
