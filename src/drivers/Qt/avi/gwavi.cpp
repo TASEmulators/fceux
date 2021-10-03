@@ -673,6 +673,11 @@ int gwavi_t::riffwalk(void)
 		return -1;
 
 	fourcc[4] = 0;
+
+	if ( strcmp( fourcc, "RIFF") != 0 )
+	{
+		return -1;
+	}
 	//printf("RIFF Begin: '%s'\n", fourcc );
 
 	if (read_uint(in, fileSize) == -1)
@@ -692,7 +697,10 @@ int gwavi_t::riffwalk(void)
 
 	if ( riffWalkCallback )
 	{
-		riffWalkCallback( RIFF_START, fpos, fourcc, fileSize, riffWalkUserData );
+		if ( riffWalkCallback( RIFF_START, fpos, fourcc, fileSize, riffWalkUserData ) )
+		{
+			return -1;
+		}
 	}
 
 	while ( size >= 4 )
@@ -731,7 +739,10 @@ int gwavi_t::riffwalk(void)
 
 	if ( riffWalkCallback )
 	{
-		riffWalkCallback( RIFF_END, fpos, fourcc, fileSize, riffWalkUserData );
+		if ( riffWalkCallback( RIFF_END, fpos, fourcc, fileSize, riffWalkUserData ) )
+		{
+			return -1;
+		}
 	}
 	return 0;
 }
@@ -830,7 +841,10 @@ unsigned int gwavi_t::readList(int lvl)
 	{
 		fpos = ftell(in);
 
-		riffWalkCallback( LIST_END, fpos, listType, listSize, riffWalkUserData );
+		if ( riffWalkCallback( LIST_END, fpos, listType, listSize, riffWalkUserData ) )
+		{
+			return 0;
+		}
 	}
 	return bytesRead+4;
 }
@@ -856,7 +870,10 @@ unsigned int gwavi_t::readChunk(const char *id, int lvl)
 
 	if ( riffWalkCallback )
 	{
-		riffWalkCallback( CHUNK_START, fpos-4, id, chunkSize, riffWalkUserData );
+		if ( riffWalkCallback( CHUNK_START, fpos-4, id, chunkSize, riffWalkUserData ) )
+		{
+			return 0;
+		}
 	}
 
 	if ( chunkSize == 0 )

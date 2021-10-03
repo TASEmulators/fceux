@@ -62,6 +62,8 @@ AviRiffViewerDialog::AviRiffViewerDialog(QWidget *parent)
 
 	avi = NULL;
 	lastChunk = NULL;
+	riffSize = 0;
+	progressDialog = NULL;
 	memset( strhType, 0, sizeof(strhType) );
 
 	setWindowTitle("AVI RIFF Viewer");
@@ -274,6 +276,8 @@ void AviRiffViewerDialog::openAviFileDialog(void)
 //----------------------------------------------------------------------------
 int AviRiffViewerDialog::openFile( const char *filepath )
 {
+	int ret;
+
 	if ( avi )
 	{
 		closeFile();
@@ -286,12 +290,31 @@ int AviRiffViewerDialog::openFile( const char *filepath )
 		return -1;
 	}
 
+	progressDialog = new QProgressDialog( tr("Loading AVI File"), tr("Cancel"), 0, 1000, this );
+	progressDialog->setWindowModality(Qt::WindowModal);
+
 	itemStack.clear();
 	lastChunk = NULL;
 	memset( strhType, 0, sizeof(strhType) );
 
+	riffSize = 0;
 	avi->setRiffWalkCallback( ::riffWalkCallback, this );
-	avi->riffwalk();
+	ret = avi->riffwalk();
+
+	if ( ret )
+	{
+		if ( progressDialog->wasCanceled() )
+		{
+			QMessageBox::information( this, tr("AVI Load Canceled"), tr("AVI Load Canceled By User.") );
+		}
+		else
+		{
+			progressDialog->reset();
+			QMessageBox::critical( this, tr("AVI Load Error"), tr("AVI format errors detected. Unable to load file.") );
+		}
+		closeFile();
+	}
+	delete progressDialog; progressDialog = NULL;
 
 	return 0;
 }
@@ -310,11 +333,32 @@ int AviRiffViewerDialog::riffWalkCallback( int type, long long int fpos, const c
 {
 	AviRiffTreeItem *item, *groupItem;
 
+	if ( riffSize > 0 )
+	{
+		int prog;
+
+		prog = (1000llu * fpos) / riffSize;
+
+		if ( prog > 1000 )
+		{
+			prog = 1000;
+		}
+		if ( progressDialog )
+		{
+			if (progressDialog->wasCanceled())
+			{
+				return -1;
+			}
+			progressDialog->setValue( prog );
+		}
+	}
 	switch ( type )
 	{
 		case gwavi_t::RIFF_START:
 		{
 			item = new AviRiffTreeItem(type, fpos, fourcc, size);
+
+			riffSize = size;
 
 			itemStack.push_back(item);
 

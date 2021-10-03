@@ -21,6 +21,7 @@
 #include <QTreeView>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
+#include <QProgressDialog>
 #include <QTabWidget>
 #include <QMenuBar>
 #include <QAction>
@@ -80,8 +81,10 @@ protected:
 	AviRiffTreeItem *lastChunk;
 	std::list <AviRiffTreeItem*> itemStack;
 	char strhType[8];
+	size_t       riffSize;
 
 	QTabWidget *tabs;
+	QProgressDialog *progressDialog;
 
 private:
 public slots:
