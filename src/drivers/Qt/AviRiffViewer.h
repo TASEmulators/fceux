@@ -21,6 +21,7 @@
 #include <QTreeView>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
+#include <QTabWidget>
 #include <QMenuBar>
 #include <QAction>
 
@@ -79,6 +80,8 @@ protected:
 	AviRiffTreeItem *lastChunk;
 	std::list <AviRiffTreeItem*> itemStack;
 	char strhType[8];
+
+	QTabWidget *tabs;
 
 private:
 public slots:

@@ -75,7 +75,10 @@ AviRiffViewerDialog::AviRiffViewerDialog(QWidget *parent)
 	setLayout(mainLayout);
 	mainLayout->setMenuBar( menuBar );
 
+	tabs     = new QTabWidget();
 	riffTree = new AviRiffTree();
+
+	tabs->addTab( riffTree, tr("RIFF TREE") );
 
 	riffTree->setColumnCount(4);
 	riffTree->setSelectionMode( QAbstractItemView::SingleSelection );
@@ -97,7 +100,7 @@ AviRiffViewerDialog::AviRiffViewerDialog(QWidget *parent)
 
 	//connect( riffTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(hotKeyActivated(QTreeWidgetItem*,int) ) );
 
-	mainLayout->addWidget(riffTree);
+	mainLayout->addWidget(tabs);
 
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
@@ -160,14 +163,16 @@ QMenuBar *AviRiffViewerDialog::buildMenuBar(void)
 	act = new QAction(tr("&Open AVI File"), this);
 	act->setShortcut(QKeySequence::Open);
 	act->setStatusTip(tr("Open AVI File"));
+	act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(openAviFileDialog(void)) );
 
 	fileMenu->addAction(act);
 
 	// File -> Close
-	act = new QAction(tr("&Close File"), this);
+	act = new QAction(tr("&Close AVI File"), this);
 	act->setShortcut(QKeySequence(tr("Ctrl+C")));
-	act->setStatusTip(tr("Close File"));
+	act->setStatusTip(tr("Close AVI File"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_BrowserStop ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(closeFile(void)) );
 
 	fileMenu->addAction(act);
@@ -178,6 +183,7 @@ QMenuBar *AviRiffViewerDialog::buildMenuBar(void)
 	act = new QAction(tr("&Quit Window"), this);
 	act->setShortcut(QKeySequence::Close);
 	act->setStatusTip(tr("Close Window"));
+	act->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
 	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 
 	fileMenu->addAction(act);
@@ -846,15 +852,15 @@ AviRiffTreeItem::AviRiffTreeItem(int typeIn, long long int fposIn, const char *f
 	{
 		case gwavi_t::RIFF_START:
 		case gwavi_t::RIFF_END:
-			setText( 0, QString("RIFF") );
+			setText( 0, QString("<RIFF>") );
 		break;
 		case gwavi_t::LIST_START:
 		case gwavi_t::LIST_END:
-			setText( 0, QString("LIST") );
+			setText( 0, QString("<LIST>") );
 		break;
 		default:
 		case gwavi_t::CHUNK_START:
-			setText( 0, QString("CHUNK") );
+			setText( 0, QString("<CHUNK>") );
 		break;
 	}
 
