@@ -668,6 +668,12 @@ int  AviRiffViewerDialog::processChunk( AviRiffTreeItem *item )
 		twi = new QTreeWidgetItem();
 		twi->setText( 0, tr("dwRate") );
 		twi->setText( 2, tr(stmp) );
+
+		if ( strcmp( strhType, "vids" ) == 0 )
+		{
+			sprintf( stmp, "(%13.10f Hz)", (double)data.readU32(32) / (double)data.readU32(28) );
+			twi->setText( 3, tr(stmp) );
+		}
 		item->addChild(twi);
 
 		sprintf( stmp, "%u", data.readU32(36) );
