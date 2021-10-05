@@ -34,6 +34,7 @@
 
 #include <QDate>
 #include <QLocale>
+#include <QSysInfo>
 #include <QObject>
 #include <QHeaderView>
 #include <QMessageBox>
@@ -2116,6 +2117,8 @@ int aviRecordOpenFile( const char *filepath )
 	avi_info.add_pair( "ILNG", QLocale::languageToString( locale.language() ).toStdString().c_str() );
 
 	avi_info.add_pair( "IARL", QLocale::countryToString( locale.country() ).toStdString().c_str() );
+
+	avi_info.add_pair( "IMED", QSysInfo::prettyProductName().toStdString().c_str() );
 
 	sprintf( txt, "FCEUX %s", FCEU_VERSION_STRING );
 	avi_info.add_pair( "ITCH", txt );
