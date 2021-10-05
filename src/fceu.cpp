@@ -717,8 +717,7 @@ void UpdateAutosave(void);
 
 
 #ifdef __QT_DRIVER__
-double getFrameRate(void);
-double getBaseFrameRate(void);
+extern unsigned int frameAdvHoldTimer;
 #endif
 
 ///Emulates a single frame.
@@ -733,18 +732,20 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	if (frameAdvanceRequested)
 	{
 #ifdef __QT_DRIVER__
-		double baseFrameRatio = getFrameRate() / getBaseFrameRate();
-
-		int32_t frameAdvanceDelayScaled = (int32_t)( (double)frameAdvance_Delay * baseFrameRatio);
+		uint32_t frameAdvanceDelayScaled = frameAdvance_Delay * (PAL ? 20 : 16);
 
 		if ( frameAdvanceDelayScaled < 1 )
 		{
 			frameAdvanceDelayScaled = 1;
 		}
-		if (frameAdvance_Delay_count == 0 || frameAdvance_Delay_count >= frameAdvanceDelayScaled)
+		if ( (frameAdvance_Delay_count == 0) || (frameAdvHoldTimer >= frameAdvanceDelayScaled) )
+		{
 			EmulationPaused = EMULATIONPAUSED_FA;
+		}
 		if (frameAdvance_Delay_count < frameAdvanceDelayScaled)
+		{
 			frameAdvance_Delay_count++;
+		}
 #else
 		if (frameAdvance_Delay_count == 0 || frameAdvance_Delay_count >= frameAdvance_Delay)
 			EmulationPaused = EMULATIONPAUSED_FA;

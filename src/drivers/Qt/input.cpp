@@ -52,6 +52,7 @@
 int NoWaiting = 0;
 extern Config *g_config;
 extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
+unsigned int frameAdvHoldTimer = 0;
 
 /* UsrInputType[] is user-specified.  CurInputType[] is current
         (game loading can override user settings)
@@ -989,9 +990,14 @@ static void KeyboardCommands(void)
 	{
 		if (frameAdvancing == false)
 		{
+			frameAdvHoldTimer = 0;
 			FCEUI_FrameAdvance();
 			frameAdvancing = true;
 			//printf("Frame Advance Start\n");
+		}
+		if ( consoleWindow )
+		{
+			frameAdvHoldTimer += consoleWindow->getPeriodicInterval();
 		}
 	}
 	else
@@ -1000,6 +1006,7 @@ static void KeyboardCommands(void)
 		{
 			FCEUI_FrameAdvanceEnd();
 			frameAdvancing = false;
+			frameAdvHoldTimer = 0;
 			//printf("Frame Advance End\n");
 		}
 	}

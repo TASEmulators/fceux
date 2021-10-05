@@ -4162,6 +4162,11 @@ void consoleWin_t::loadMostRecentROM(void)
 	fceuWrapperUnLock();
 }
 
+int consoleWin_t::getPeriodicInterval(void)
+{
+	return gameTimer->interval();
+}
+
 void consoleWin_t::transferVideoBuffer(void)
 {
 	if ( nes_shm->blitUpdated )

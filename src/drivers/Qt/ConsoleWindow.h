@@ -175,6 +175,8 @@ class  consoleWin_t : public QMainWindow
 
 		void OpenHelpWindow(std::string subpage = "");
 
+		int  getPeriodicInterval(void);
+
 	protected:
 		consoleMenuBar *menubar;
 
