@@ -133,6 +133,7 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 		(void)fprintf(stderr, "WARNING: given fourcc does not seem to "
 			      "be valid: %s\n", fourcc);
 	}
+	avi_info.add_pair("ISFT", "fceux libgwavi");
 
 	if (fps < 1)
 	{
@@ -273,6 +274,56 @@ gwavi_t::open(const char *filename, unsigned int width, unsigned int height,
 		(void)fprintf(stderr, "gwavi_info: write_avi_header_chunk "
 			      "failed\n");
 		return -1;
+	}
+
+	if ( avi_info.kvmap.size() > 0 )
+	{
+		long long t, infoMarker;
+		if (write_chars_bin(out, "LIST", 4) == -1)
+			goto write_chars_bin_failed;
+		if ((infoMarker = ftell(out)) == -1) {
+			perror("gwavi_info (ftell)");
+			return -1;
+		}
+		if (write_int(out, 0) == -1) {
+			(void)fprintf(stderr, "gwavi_info: write_int() failed\n");
+			return -1;
+		}
+		if (write_chars_bin(out, "INFO", 4) == -1)
+			goto write_chars_bin_failed;
+
+		for ( auto it = avi_info.kvmap.begin(); it != avi_info.kvmap.end(); it++)
+		{
+			if (write_chars_bin(out, it->first.c_str(), 4) == -1)
+				goto write_chars_bin_failed;
+
+			if (write_int(out, it->second.size()+1) == -1) {
+				(void)fprintf(stderr, "gwavi_info: write_int() failed\n");
+				return -1;
+			}
+
+			if (write_chars_bin(out, it->second.c_str(), it->second.size()) == -1)
+				goto write_chars_bin_failed;
+
+			write_byte(out, 0);
+
+			if ( (it->second.size()+1) % WORD_SIZE )
+			{
+				write_byte(out, 0);
+			}
+		}
+
+		if ((t = ftell(out)) == -1)
+			goto write_chars_bin_failed;
+
+		if (fseek(out, infoMarker, SEEK_SET) == -1)
+			goto write_chars_bin_failed;
+	
+		if (write_int(out, (unsigned int)(t - infoMarker - 4)) == -1)
+			goto write_chars_bin_failed;
+	
+		if (fseek(out, t, SEEK_SET) == -1)
+			goto write_chars_bin_failed;
 	}
 
 	if (write_chars_bin(out, "LIST", 4) == -1)
@@ -865,7 +916,7 @@ unsigned int gwavi_t::readList(int lvl)
 unsigned int gwavi_t::readChunk(const char *id, int lvl)
 {
 	unsigned int r, ret, size, chunkSize, bytesRead=0;
-	unsigned short dataWord;
+	//unsigned short dataWord;
 	char indent[256];
 	long long int fpos;
 
