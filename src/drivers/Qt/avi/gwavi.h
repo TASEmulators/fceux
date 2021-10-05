@@ -36,6 +36,8 @@
 #include <stdint.h> /* for size_t */
 #include <stddef.h> /* for size_t */
 #include <vector>
+#include <string>
+#include <map>
 
 #pragma pack( push, 2 )
 
@@ -184,6 +186,26 @@ class gwavi_dataBuffer
 		unsigned char *buf;
 		size_t size;
 };
+
+class gwavi_info_list_t
+{
+	public:
+
+	void add_pair( const char *key, const char *value )
+	{
+		std::string k = key, v = value;
+
+		kvmap[k] = v;
+	}
+
+	void clear(void)
+	{
+		kvmap.clear();
+	}
+
+	std::map <std::string, std::string> kvmap;
+};
+extern gwavi_info_list_t avi_info;
 
 class gwavi_t
 {

@@ -32,12 +32,16 @@
 #include <vfw.h>
 #endif
 
+#include <QDate>
+#include <QLocale>
 #include <QObject>
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QInputDialog>
 
+#include "fceu.h"
 #include "driver.h"
+#include "version.h"
 #include "common/os_utils.h"
 
 #ifdef _USE_X264
@@ -86,6 +90,7 @@ static int       aviDriver = 0;
 static int       videoFormat = AVI_RGB24;
 static int       audioSampleRate = 48000;
 static FILE     *avLogFp = NULL;
+
 //**************************************************************************************
 
 static void convertRgb_32_to_24( const unsigned char *src, unsigned char *dest, int w, int h, int nPix, bool verticalFlip )
@@ -1581,6 +1586,7 @@ static int setCodecFromConfig(void)
 
 static int initMedia( const char *filename )
 {
+	//AVDictionaryEntry *dictEntry = NULL;
 
 #if  LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT( 59, 0, 0 )
 	const AVOutputFormat *fmt;
@@ -1648,6 +1654,16 @@ static int initMedia( const char *filename )
 			fprintf( avLogFp, "Opened file for writing: %s\n", filename);
 		}
 	}
+
+	for ( auto it = avi_info.kvmap.begin(); it != avi_info.kvmap.end(); it++)
+	{
+		av_dict_set( &oc->metadata, it->first.c_str(), it->second.c_str(), 0 );
+	}
+
+	//while ( dictEntry = av_dict_get( oc->metadata, "", dictEntry, AV_DICT_IGNORE_SUFFIX ) )
+	//{
+	//	printf("Entry: %s = %s \n", dictEntry->key, dictEntry->value );
+	//}
 
 	/* Write the stream header, if any. */
 	if ( avformat_write_header(oc, NULL) )
@@ -2012,10 +2028,14 @@ int aviRecordLogOpen(void)
 //**************************************************************************************
 int aviRecordOpenFile( const char *filepath )
 {
+	QDate date;
+	QLocale locale;
 	char fourcc[8];
 	gwavi_audio_t  audioConfig;
 	double fps;
 	char fileName[1024];
+	char txt[512];
+	const char *romFile;
 
 	if ( aviRecordLogOpen() )
 	{
@@ -2030,7 +2050,6 @@ int aviRecordOpenFile( const char *filepath )
 	}
 	else
 	{
-		const char *romFile;
 
 		romFile = getRomFile();
 
@@ -2087,6 +2106,33 @@ int aviRecordOpenFile( const char *filepath )
 			{
 				return -1;
 			}
+		}
+	}
+
+	date = QDate::currentDate();
+
+	avi_info.add_pair( "ICRD", date.toString(Qt::ISODate).toStdString().c_str() ); 
+
+	avi_info.add_pair( "ILNG", QLocale::languageToString( locale.language() ).toStdString().c_str() );
+
+	avi_info.add_pair( "IARL", QLocale::countryToString( locale.country() ).toStdString().c_str() );
+
+	sprintf( txt, "FCEUX %s", FCEU_VERSION_STRING );
+	avi_info.add_pair( "ITCH", txt );
+
+	romFile = getRomFile();
+
+	if ( romFile )
+	{
+		getFileBaseName( romFile, txt );
+
+		if ( txt[0] != 0 )
+		{
+			avi_info.add_pair( "ISRC", txt );
+		}
+		if ( GameInfo )
+		{
+			avi_info.add_pair( "ISRF", md5_asciistr(GameInfo->MD5) );
 		}
 	}
 

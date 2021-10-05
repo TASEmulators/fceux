@@ -64,6 +64,7 @@
  * @return Structure containing required information in order to create the AVI
  * file. If an error occured, NULL is returned.
  */
+gwavi_info_list_t avi_info;
 
 gwavi_t::gwavi_t(void)
 {
