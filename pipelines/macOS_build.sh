@@ -77,6 +77,9 @@ echo 'Install Optional Dependency ffmpeg'
 echo '****************************************'
 brew  install  ffmpeg
 
+# Fix homebrew ffmpeg libraries so that they work in the bundle.
+sudo $SCRIPT_DIR/macOS_BundleFFmpegFix.pl
+
 #brew  install  zlib  # Already installed in appveyor macOS
 
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:
