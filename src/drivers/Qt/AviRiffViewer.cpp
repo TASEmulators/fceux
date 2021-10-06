@@ -178,7 +178,7 @@ QMenuBar *AviRiffViewerDialog::buildMenuBar(void)
 	QAction     *act;
 	int useNativeMenuBar=0;
 
-	QMenuBar *menuBar = new QMenuBar();
+	QMenuBar *menuBar = new QMenuBar(this);
 
 	// This is needed for menu bar to show up on MacOS
 	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
