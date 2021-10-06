@@ -59,7 +59,6 @@ extern "C"
 #include "libavutil/pixdesc.h"
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
-//#include "libavresample/avresample.h"
 #include "libswscale/swscale.h"
 #include "libswresample/swresample.h"
 }

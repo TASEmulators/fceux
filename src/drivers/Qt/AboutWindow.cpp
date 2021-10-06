@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <unzip.h>
 
 #ifdef _S9XLUA_H
 #include <lua.h>
@@ -31,6 +32,20 @@
 #ifdef _USE_X264
 #include "x264.h"
 #endif
+
+#ifdef _USE_LIBAV
+#ifdef __cplusplus
+extern "C"
+{
+#include "libavutil/version.h"
+#include "libavformat/version.h"
+#include "libavcodec/version.h"
+#include "libswscale/version.h"
+#include "libswresample/version.h"
+}
+#endif
+#endif
+
 
 #include <QPixmap>
 #include <QUrl>
@@ -181,8 +196,28 @@ AboutWindow::AboutWindow(QWidget *parent)
 	sprintf( stmp, "	Linked with SDL version %d.%d.%d\n", v.major, v.minor, v.patch);
 	credits->insertPlainText( stmp );
 
+#ifdef ZLIB_VERSION
+	sprintf( stmp, "	Compiled with zlib %s\n", ZLIB_VERSION );
+	credits->insertPlainText( stmp );
+#endif
+
 #ifdef _S9XLUA_H
 	sprintf( stmp, "	Compiled with %s\n", LUA_RELEASE );
+	credits->insertPlainText( stmp );
+#endif
+
+#ifdef _USE_LIBAV
+	sprintf( stmp, "	Compiled with ffmpeg libraries:\n");
+	credits->insertPlainText( stmp );
+	sprintf( stmp, "		libavutil    %i.%i.%i\n", LIBAVUTIL_VERSION_MAJOR, LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO);
+	credits->insertPlainText( stmp );
+	sprintf( stmp, "		libavformat  %i.%i.%i\n", LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
+	credits->insertPlainText( stmp );
+	sprintf( stmp, "		libavcodec   %i.%i.%i\n", LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
+	credits->insertPlainText( stmp );
+	sprintf( stmp, "		libswscale   %i.%i.%i\n", LIBSWSCALE_VERSION_MAJOR, LIBSWSCALE_VERSION_MINOR, LIBSWSCALE_VERSION_MICRO);
+	credits->insertPlainText( stmp );
+	sprintf( stmp, "		libswresample  %i.%i.%i\n", LIBSWRESAMPLE_VERSION_MAJOR, LIBSWRESAMPLE_VERSION_MINOR, LIBSWRESAMPLE_VERSION_MICRO);
 	credits->insertPlainText( stmp );
 #endif
 
