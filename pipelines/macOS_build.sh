@@ -123,7 +123,7 @@ cmake \
    -DQT6=$USE_QT6 \
 	.. || exit 1
 make -j $NPROC || exit 1
-sudo make install || exit 1
+#sudo make install || exit 1 # make install is already run by cpack
 sudo cpack -G DragNDrop || exit 1
 
 echo 'Pushing DMG Package to Build Artifacts'
