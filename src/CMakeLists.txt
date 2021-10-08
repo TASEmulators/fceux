@@ -605,9 +605,14 @@ if(NOT MACDEPLOYQT)
 	message(FATAL_ERROR "Could not find macdeployqt executable")
 endif()
 
+find_package(Perl REQUIRED)
+
 install( CODE "
 	message(STATUS \"Deploying and fixing up dependencies in app: ${APP}\")
 	execute_process(COMMAND \"${MACDEPLOYQT}\" \"${APP}\" -verbose=1)
+	execute_process(COMMAND \"${PERL_EXECUTABLE}\"
+	                        \"${CMAKE_SOURCE_DIR}/scripts/macOSX_BundleFix.pl\"
+	                        \"${CMAKE_BINARY_DIR}/_CPack_Packages\")
 		"
 	COMPONENT Runtime
 	)
