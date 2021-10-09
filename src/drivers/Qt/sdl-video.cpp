@@ -494,8 +494,17 @@ void FCEUI_AviVideoUpdate(const unsigned char* buffer)
 uint32 PtoV(double nx, double ny)
 {
 	int x, y;
+
 	y = (int)( ny * (double)nes_shm->video.nrow );
-	x = (int)( nx * (double)nes_shm->video.ncol );
+
+	if ( nes_shm->video.preScaler == 3 )
+	{
+		x = (int)( nx * (double)nes_shm->video.ncol * (256.0/301.0) );
+	}
+	else
+	{
+		x = (int)( nx * (double)nes_shm->video.ncol );
+	}
 
 	//printf("Scaled (%i,%i) \n", x, y);
 
