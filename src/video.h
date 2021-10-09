@@ -37,6 +37,7 @@ void FCEUI_SetSnapshotAsName(std::string name);
 bool FCEUI_ShowFPS();
 void FCEUI_SetShowFPS(bool showFPS);
 void FCEUI_ToggleShowFPS();
-void ShowFPS();
-void snapAVI();
+void ShowFPS(void);
+void ResetFPS(void);
+void snapAVI(void);
 #endif

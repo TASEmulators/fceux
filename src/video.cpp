@@ -724,28 +724,52 @@ bool FCEUI_ShowFPS()
 }
 void FCEUI_SetShowFPS(bool showFPS)
 {
+	if ( Show_FPS != showFPS )
+	{
+		ResetFPS();
+	}
 	Show_FPS = showFPS;
 }
 void FCEUI_ToggleShowFPS()
 {
 	Show_FPS ^= 1;
+
+	ResetFPS();
 }
 
-static uint64 boop[60];
-static int boopcount = 0;
+static uint64 boop_ts = 0;
+static unsigned int boopcount = 0;
+
+void ResetFPS(void)
+{
+	boop_ts = 0;
+	boopcount = 0;
+}
 
 void ShowFPS(void)
 {
-	if(Show_FPS == false)
+	if (Show_FPS == false)
+	{
 		return;
+	}
+	static char fpsmsg[16] = { 0 };
 	uint64 ts = FCEUD_GetTime();
-	uint64 da = ts - boop[boopcount];
-	char fpsmsg[16];
-	int booplimit = PAL?50:60;
-	boop[boopcount] = ts;
+	uint64 da;
 
-	sprintf(fpsmsg, "%.1f", (double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
+	if ( boop_ts == 0 )
+	{
+		boop_ts = ts;
+	}
+	da = ts - boop_ts;
+
+	if ( da > FCEUD_GetTimeFreq() )
+	{
+		sprintf(fpsmsg, "%.1f", (double)boopcount / ((double)da / FCEUD_GetTimeFreq()));
+
+		boopcount = 0;
+		boop_ts = ts;
+	}
+	boopcount++;
+
 	DrawTextTrans(XBuf + ((256 - ClipSidesOffset) - 40) + (FSettings.FirstSLine + 4) * 256, 256, (uint8*)fpsmsg, 0xA0);
-	// It's not averaging FPS over exactly 1 second, but it's close enough.
-	boopcount = (boopcount + 1) % booplimit;
 }
