@@ -76,7 +76,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 
 	unsigned int  textureType;
 	unsigned int  mouseButtonMask;
-	QColor  bgColor;
+	QColor *bgColor;
 
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;

@@ -177,6 +177,8 @@ class  consoleWin_t : public QMainWindow
 
 		int  getPeriodicInterval(void);
 
+		QColor *getVideoBgColorPtr(void){ return &videoBgColor; }
+
 	protected:
 		consoleMenuBar *menubar;
 

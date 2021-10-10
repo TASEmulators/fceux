@@ -71,7 +71,7 @@ class ConsoleViewSDL_t : public QWidget
 	bool linearFilter;
 	bool forceAspect;
 	bool autoScaleEna;
-	QColor  bgColor;
+	QColor *bgColor;
 
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;
