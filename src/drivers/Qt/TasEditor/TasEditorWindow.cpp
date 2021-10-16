@@ -26,14 +26,17 @@
 
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QFontMetrics>
 
 #include "Qt/config.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
 //----------------------------------------------------------------------------
+//----  Main TAS Editor Window
+//----------------------------------------------------------------------------
 TasEditorWindow::TasEditorWindow(QWidget *parent)
-	: QDialog(parent)
+	: QDialog( parent, Qt::Window )
 {
 	QVBoxLayout *mainLayout;
 	//QHBoxLayout *hbox;
@@ -44,8 +47,12 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	resize(512, 512);
 
 	mainLayout = new QVBoxLayout();
+	mainHBox   = new QSplitter( Qt::Horizontal );
 
-	//mainLayout->addWidget(tree);
+	buildPianoRollDisplay();
+
+	mainHBox->addWidget( pianoRollContainerWidget );
+	mainLayout->addWidget(mainHBox);
 
 	menuBar = buildMenuBar();
 
@@ -175,5 +182,111 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	fileMenu->addAction(act);
 
 	return menuBar;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::buildPianoRollDisplay(void)
+{
+	QVBoxLayout *vbox;
+	QHBoxLayout *hbox;
+	QGridLayout *grid;
+
+	grid             = new QGridLayout();
+	pianoRoll        = new QPianoRoll(this);
+	pianoRollVBar    = new QScrollBar( Qt::Vertical, this );
+	pianoRollHBar    = new QScrollBar( Qt::Horizontal, this );
+	upperMarkerLabel = new QLabel( tr("Marker 0") );
+	lowerMarkerLabel = new QLabel( tr("Marker 1") );
+	upperMarkerName  = new QLineEdit();
+	lowerMarkerName  = new QLineEdit();
+
+	pianoRoll->setScrollBars( pianoRollHBar, pianoRollVBar );
+
+	grid->addWidget( pianoRoll    , 0, 0 );
+	grid->addWidget( pianoRollVBar, 0, 1 );
+	grid->addWidget( pianoRollHBar, 1, 0 );
+
+	vbox = new QVBoxLayout();
+
+	pianoRollHBar->setMinimum(0);
+	pianoRollHBar->setMaximum(100);
+	pianoRollVBar->setMinimum(0);
+	pianoRollVBar->setMaximum(100);
+
+	hbox = new QHBoxLayout();
+	hbox->addWidget( upperMarkerLabel, 1 );
+	hbox->addWidget( upperMarkerName, 10 );
+
+	vbox->addLayout( hbox, 1 );
+	vbox->addLayout( grid, 100 );
+
+	hbox = new QHBoxLayout();
+	hbox->addWidget( lowerMarkerLabel, 1 );
+	hbox->addWidget( lowerMarkerName, 10 );
+
+	vbox->addLayout( hbox, 1 );
+	
+	pianoRollContainerWidget = new QWidget();
+	pianoRollContainerWidget->setLayout( vbox );
+}
+//----------------------------------------------------------------------------
+//----  TAS Piano Roll Widget
+//----------------------------------------------------------------------------
+QPianoRoll::QPianoRoll(QWidget *parent)
+	: QWidget( parent )
+{
+	std::string fontString;
+
+	viewWidth  = 512;
+	viewHeight = 512;
+
+	g_config->getOption("SDL.TasPianoRollFont", &fontString);
+
+	if ( fontString.size() > 0 )
+	{
+		font.fromString( QString::fromStdString( fontString ) );
+	}
+	else
+	{
+		font.setFamily("Courier New");
+		font.setStyle( QFont::StyleNormal );
+		font.setStyleHint( QFont::Monospace );
+	}
+
+	this->parent = qobject_cast <TasEditorWindow*>( parent );
+	this->setMouseTracking(true);
+
+	calcFontData();
+
+	vbar = NULL;
+	hbar = NULL;
+}
+//----------------------------------------------------------------------------
+QPianoRoll::~QPianoRoll(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::setScrollBars( QScrollBar *h, QScrollBar *v )
+{
+	hbar = h; vbar = v;
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::calcFontData(void)
+{
+	QWidget::setFont(font);
+	QFontMetrics metrics(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+#else
+	pxCharWidth = metrics.width(QLatin1Char('2'));
+#endif
+	pxCharHeight   = metrics.capHeight();
+	pxLineSpacing  = metrics.lineSpacing() * 1.25;
+	pxLineLead     = pxLineSpacing - metrics.height();
+	pxCursorHeight = metrics.height();
+
+	//printf("W:%i  H:%i  LS:%i  \n", pxCharWidth, pxCharHeight, pxLineSpacing );
+
+	viewLines   = (viewHeight / pxLineSpacing) + 1;
 }
 //----------------------------------------------------------------------------
