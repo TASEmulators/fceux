@@ -98,6 +98,7 @@
 #include "Qt/RamSearch.h"
 #include "Qt/keyscan.h"
 #include "Qt/nes_shm.h"
+#include "Qt/TasEditor/TasEditorWindow.h"
 
 consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
@@ -1606,6 +1607,14 @@ void consoleWin_t::createMainMenu(void)
 
 	toolsMenu->addAction(act);
 
+	// Tools -> TAS Editor
+	act = new QAction(tr("&TAS Editor ..."), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Open TAS Editor Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openTasEditor(void)) );
+
+	toolsMenu->addAction(act);
+
 	 //-----------------------------------------------------------------------
 	 // Debug
 
@@ -2804,6 +2813,17 @@ void consoleWin_t::openAviRiffViewer(void)
 	//printf("Open AVI RIFF Viewer Window\n");
 	
 	win = new AviRiffViewerDialog(this);
+	
+	win->show();
+}
+
+void consoleWin_t::openTasEditor(void)
+{
+	TasEditorWindow *win;
+
+	//printf("Open TAS Editor Window\n");
+	
+	win = new TasEditorWindow(this);
 	
 	win->show();
 }

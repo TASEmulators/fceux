@@ -329,6 +329,7 @@ class  consoleWin_t : public QMainWindow
 		void aboutQt(void);
 		void openOnlineDocs(void);
 		void openOfflineDocs(void);
+		void openTasEditor(void);
 		void openMsgLogWin(void);
 		void openInputConfWin(void);
 		void openGameSndConfWin(void);
