@@ -77,17 +77,39 @@ class TasEditorWindow : public QDialog
 
 		QMenuBar  *buildMenuBar(void);
 		void buildPianoRollDisplay(void);
+		void buildSideControlPanel(void);
 
 		QMenu     *recentMenu;
 
 		QSplitter  *mainHBox;
 		QWidget    *pianoRollContainerWidget;
+		QWidget    *controlPanelContainerWidget;
 		QScrollBar *pianoRollHBar;
 		QScrollBar *pianoRollVBar;
 		QLabel     *upperMarkerLabel;
 		QLabel     *lowerMarkerLabel;
 		QLineEdit  *upperMarkerName;
 		QLineEdit  *lowerMarkerName;
+
+		QVBoxLayout *ctlPanelMainVbox;
+		QGroupBox  *playbackGBox;
+		QGroupBox  *recorderGBox;
+		QGroupBox  *splicerGBox;
+		QGroupBox  *luaGBox;
+		QGroupBox  *bookmarksGBox;
+		QGroupBox  *historyGBox;
+
+		QPushButton *rewindMkrBtn;
+		QPushButton *rewindFrmBtn;
+		QPushButton *playPauseBtn;
+		QPushButton *advFrmBtn;
+		QPushButton *advMkrBtn;
+		QCheckBox   *followCursorCbox;
+		QCheckBox   *turboSeekCbox;
+		QCheckBox   *autoRestoreCbox;
+
+		QPushButton *runLuaBtn;
+		QCheckBox   *autoLuaCBox;
 	private:
 
 	public slots:

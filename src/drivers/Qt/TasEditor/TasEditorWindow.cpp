@@ -50,8 +50,10 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	mainHBox   = new QSplitter( Qt::Horizontal );
 
 	buildPianoRollDisplay();
+	buildSideControlPanel();
 
 	mainHBox->addWidget( pianoRollContainerWidget );
+	mainHBox->addWidget( controlPanelContainerWidget );
 	mainLayout->addWidget(mainHBox);
 
 	menuBar = buildMenuBar();
@@ -227,6 +229,75 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	
 	pianoRollContainerWidget = new QWidget();
 	pianoRollContainerWidget->setLayout( vbox );
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::buildSideControlPanel(void)
+{
+	QVBoxLayout *vbox;
+	QHBoxLayout *hbox;
+
+	ctlPanelMainVbox = new QVBoxLayout();
+
+	playbackGBox  = new QGroupBox( tr("Playback") );
+	recorderGBox  = new QGroupBox( tr("Recorder") );
+	splicerGBox   = new QGroupBox( tr("Splicer") );
+	luaGBox       = new QGroupBox( tr("Lua") );
+	bookmarksGBox = new QGroupBox( tr("BookMarks/Branches") );
+	historyGBox   = new QGroupBox( tr("History") );
+
+	rewindMkrBtn  = new QPushButton();
+	rewindFrmBtn  = new QPushButton();
+	playPauseBtn  = new QPushButton();
+	advFrmBtn     = new QPushButton();
+	advMkrBtn     = new QPushButton();
+
+	rewindMkrBtn->setIcon( style()->standardIcon( QStyle::SP_MediaSkipBackward ) );
+	rewindFrmBtn->setIcon( style()->standardIcon( QStyle::SP_MediaSeekBackward ) );
+	playPauseBtn->setIcon( style()->standardIcon( QStyle::SP_MediaPause ) );
+	   advFrmBtn->setIcon( style()->standardIcon( QStyle::SP_MediaSeekForward ) );
+	   advMkrBtn->setIcon( style()->standardIcon( QStyle::SP_MediaSkipForward ) );
+
+	followCursorCbox = new QCheckBox( tr("Follow Cursor") );
+	   turboSeekCbox = new QCheckBox( tr("Turbo Seek") );
+	 autoRestoreCbox = new QCheckBox( tr("Auto-Restore Last Position") );
+
+	runLuaBtn   = new QPushButton( tr("Run Function") );
+	autoLuaCBox = new QCheckBox( tr("Auto Function") );
+	runLuaBtn->setEnabled(false);
+	autoLuaCBox->setChecked(true);
+
+	vbox = new QVBoxLayout();
+	hbox = new QHBoxLayout();
+	vbox->addLayout( hbox );
+	hbox->addWidget( rewindMkrBtn );
+	hbox->addWidget( rewindFrmBtn );
+	hbox->addWidget( playPauseBtn );
+	hbox->addWidget( advFrmBtn    );
+	hbox->addWidget( advMkrBtn    );
+
+	hbox = new QHBoxLayout();
+	vbox->addLayout( hbox );
+	hbox->addWidget( followCursorCbox );
+	hbox->addWidget( turboSeekCbox    );
+
+	vbox->addWidget( autoRestoreCbox );
+
+	playbackGBox->setLayout( vbox );
+
+	hbox = new QHBoxLayout();
+	hbox->addWidget( runLuaBtn );
+	hbox->addWidget( autoLuaCBox );
+	luaGBox->setLayout( hbox );
+
+	ctlPanelMainVbox->addWidget( playbackGBox  );
+	ctlPanelMainVbox->addWidget( recorderGBox  );
+	ctlPanelMainVbox->addWidget( splicerGBox   );
+	ctlPanelMainVbox->addWidget( luaGBox       );
+	ctlPanelMainVbox->addWidget( bookmarksGBox );
+	ctlPanelMainVbox->addWidget( historyGBox   );
+
+	controlPanelContainerWidget = new QWidget();
+	controlPanelContainerWidget->setLayout( ctlPanelMainVbox );
 }
 //----------------------------------------------------------------------------
 //----  TAS Piano Roll Widget
