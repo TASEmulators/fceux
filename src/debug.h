@@ -64,7 +64,9 @@ extern watchpointinfo watchpoint[65]; //64 watchpoints, + 1 reserved for step ov
 
 extern unsigned int debuggerPageSize;
 int getBank(int offs);
+int bzk_getBank(int offs);
 int GetNesFileAddress(int A);
+int bzk_GetNesFileAddress(int A);
 int GetPRGAddress(int A);
 int GetRomAddress(int A);
 //int GetEditHex(HWND hwndDlg, int id);

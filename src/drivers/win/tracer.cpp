@@ -109,7 +109,9 @@ int log_optn_intlst[LOG_OPTION_SIZE]  = {3000000, 1000000, 300000, 100000, 30000
 char *log_optn_strlst[LOG_OPTION_SIZE] = {"3 000 000", "1 000 000", "300 000", "100 000", "30 000", "10 000", "3000", "1000", "300", "100"};
 int log_lines_option = 5;	// 10000 lines by default
 char *logfilename = 0;
-int oldcodecount, olddatacount;
+char bzk_filename[2100] = {0};
+char bzk_newfilename[2100] = { 0 };
+// int oldcodecount, olddatacount;
 
 SCROLLINFO tracesi;
 
@@ -121,6 +123,9 @@ int tracelogbufusedsize = 0;
 char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX_LEN] = {0};
 char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
 char str_result[LOG_LINE_MAX_LEN] = {0};
+char bzk_string[200] = {0};
+int bzk_writes_counter = 0;
+int bzk_files_counter = 0;
 char str_temp[LOG_LINE_MAX_LEN] = {0};
 char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
@@ -419,9 +424,9 @@ INT_PTR CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG_SIZE, CB_INSERTSTRING, -1, (LPARAM)(LPSTR)log_optn_strlst[i]);
 			}
 			SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG_SIZE, CB_SETCURSEL, (WPARAM)log_lines_option, 0);
-			strcpy(trace_str, "Welcome to the Trace Logger.");
+			strcpy(trace_str, "1 - delete all .log files, 2 - start logging, 3 - launch BZK script, 4 - stop logging before exit.");
 			SetDlgItemText(hwndDlg, IDC_TRACER_LOG, trace_str);
-			logtofile = 0;
+			logtofile = 1;
 
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, (logging_options & LOG_REGISTERS) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS, (logging_options & LOG_PROCESSOR_STATUS) ? BST_CHECKED : BST_UNCHECKED);
@@ -532,7 +537,7 @@ INT_PTR CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							EnableTracerMenuItems();
 							break;
 						case IDC_RADIO_LOG_LAST:
-							logtofile = 0;
+							logtofile = 1;
 							EnableTracerMenuItems();
 							break;
 						case IDC_RADIO_LOG_TO_FILE:
@@ -685,15 +690,47 @@ void BeginLoggingSequence(void)
 	if (logtofile)
 	{
 		if(logfilename == NULL) ShowLogDirDialog();
-		if (!logfilename) return;
-		LOG_FP = fopen(logfilename,"w");
+		//if (!logfilename) return;
+        
+        // I've tried to make a "for" loop, but that doesn't work for some reason
+        //for (int k = 99999; k == -1; k--) {
+        //    sprintf(bzk_filename, "z%05d_fceux.log", k);
+        //    LOG_FP = fopen(bzk_filename, "r");
+        //    if (LOG_FP != NULL) {
+        //        fclose(LOG_FP);
+        //        bzk_files_counter = k + 1;
+        //        break;
+        //    }
+        //}
+        
+        //so fuck it, I'm sticking with what's actually working
+        int k = 99999;
+        while (true) {
+            sprintf(bzk_filename, "z%05d_fceux.log", k);
+            LOG_FP = fopen(bzk_filename, "r");
+            if (LOG_FP != NULL) {
+                fclose(LOG_FP);
+                bzk_files_counter = k + 1;
+                break;
+            }
+            k--;
+            if (k == -1) {
+                bzk_files_counter = 0;
+                break;
+            }
+        }
+        
+        if (bzk_files_counter >= 100000) bzk_files_counter = 0;
+        sprintf(bzk_filename, "z%05d.log", bzk_files_counter);
+        LOG_FP = fopen(bzk_filename, "w");
+        
 		if (LOG_FP == NULL)
 		{
-			sprintf(trace_str, "Error Opening File %s", logfilename);
+			sprintf(trace_str, "Error Opening File %s", bzk_filename);
 			MessageBox(hTracer, trace_str, "File Error", MB_OK);
 			return;
 		}
-		fprintf(LOG_FP,FCEU_NAME_AND_VERSION" - Trace Log File\n"); //mbg merge 7/19/06 changed string
+//		fprintf(LOG_FP,FCEU_NAME_AND_VERSION" - Trace Log File\n"); //mbg merge 7/19/06 changed string
 	} else
 	{
 		ClearTraceLogBuf();
@@ -724,8 +761,8 @@ void BeginLoggingSequence(void)
 		tracelogbufpos = tracelogbufusedsize = 0;
 	}
 	
-	oldcodecount = codecount;
-	olddatacount = datacount;
+//	oldcodecount = codecount;
+//	olddatacount = datacount;
 
 	logging=1;
 	SetDlgItemText(hTracer, IDC_BTN_START_STOP_LOGGING,"Stop Logging");
@@ -739,232 +776,258 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		return;
 
 	unsigned int addr = X.PC;
-	uint8 tmp;
-	static int unloggedlines;
+//	uint8 tmp;
+//	static int unloggedlines;
 
-	// if instruction executed from the RAM, skip this, log all instead
-	// TODO: loops folding mame-lyke style
-	if (GetPRGAddress(addr) != -1)
-	{
-		if(((logging_options & LOG_NEW_INSTRUCTIONS) && (oldcodecount != codecount)) ||
-		   ((logging_options & LOG_NEW_DATA) && (olddatacount != datacount)))
-		{
-			//something new was logged
-			oldcodecount = codecount;
-			olddatacount = datacount;
-			if(unloggedlines > 0)
-			{
-				sprintf(str_result, "(%d lines skipped)", unloggedlines);
-				OutputLogLine(str_result);
-				unloggedlines = 0;
-			}
-		} else
-		{
-			if((logging_options & LOG_NEW_INSTRUCTIONS) ||
-				(logging_options & LOG_NEW_DATA))
-			{
-				if(FCEUI_GetLoggingCD())
-					unloggedlines++;
-				return;
-			}
-		}
-	}
+//	// if instruction executed from the RAM, skip this, log all instead
+//	// TODO: loops folding mame-lyke style
+//	if (GetPRGAddress(addr) != -1)
+//	{
+//		if(((logging_options & LOG_NEW_INSTRUCTIONS) && (oldcodecount != codecount)) ||
+//		   ((logging_options & LOG_NEW_DATA) && (olddatacount != datacount)))
+//		{
+//			//something new was logged
+//			oldcodecount = codecount;
+//			olddatacount = datacount;
+//			if(unloggedlines > 0)
+//			{
+//				sprintf(str_result, "(%d lines skipped)", unloggedlines);
+//				OutputLogLine(str_result);
+//				unloggedlines = 0;
+//			}
+//		} else
+//		{
+//			if((logging_options & LOG_NEW_INSTRUCTIONS) ||
+//				(logging_options & LOG_NEW_DATA))
+//			{
+//				if(FCEUI_GetLoggingCD())
+//					unloggedlines++;
+//				return;
+//			}
+//		}
+//	}
+//
+//	if ((addr + size) > 0xFFFF)
+//	{
+//		sprintf(str_data, "%02X        ", opcode[0]);
+//		sprintf(str_disassembly, "OVERFLOW");
+//	} else
+//	{
+//		char* a = 0;
+//		switch (size)
+//		{
+//			case 0:
+//				sprintf(str_data, "%02X        ", opcode[0]);
+//				sprintf(str_disassembly,"UNDEFINED");
+//				break;
+//			case 1:
+//			{
+//				sprintf(str_data, "%02X        ", opcode[0]);
+//				a = Disassemble(addr + 1, opcode);
+//				// special case: an RTS opcode
+//				if (opcode[0] == 0x60)
+//				{
+//					// add the beginning address of the subroutine that we exit from
+//					unsigned int caller_addr = GetMem(((X.S) + 1)|0x0100) + (GetMem(((X.S) + 2)|0x0100) << 8) - 0x2;
+//					if (GetMem(caller_addr) == 0x20)
+//					{
+//						// this was a JSR instruction - take the subroutine address from it
+//						unsigned int call_addr = GetMem(caller_addr + 1) + (GetMem(caller_addr + 2) << 8);
+//						sprintf(str_decoration, " (from $%04X)", call_addr);
+//						strcat(a, str_decoration);
+//					}
+//				}
+//				break;
+//			}
+//			case 2:
+//				sprintf(str_data, "%02X %02X     ", opcode[0],opcode[1]);
+//				a = Disassemble(addr + 2, opcode);
+//				break;
+//			case 3:
+//				sprintf(str_data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
+//				a = Disassemble(addr + 3, opcode);
+//				break;
+//		}
+//
+//		if (a)
+//		{
+//			if (logging_options & LOG_SYMBOLIC)
+//			{
+//				loadNameFiles();
+//				tempAddressesLog.resize(0);
+//				// Insert Name and Comment lines if needed
+//				Name* node = findNode(getNamesPointerForAddress(addr), addr);
+//				if (node)
+//				{
+//					if (node->name)
+//					{
+//						strcpy(str_decoration, node->name);
+//						strcat(str_decoration, ":");
+//						tempAddressesLog.push_back(addr);
+//						OutputLogLine(str_decoration, &tempAddressesLog);
+//					}
+//					if (node->comment)
+//					{
+//						// make a copy
+//						strcpy(str_decoration_comment, node->comment);
+//						strcat(str_decoration_comment, "\r\n");
+//						tracer_decoration_comment = str_decoration_comment;
+//						// divide the str_decoration_comment into strings (Comment1, Comment2, ...)
+//						char* tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment, "\r\n");
+//						while (tracer_decoration_comment_end_pos)
+//						{
+//							tracer_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
+//							strcpy(str_decoration, "; ");
+//							strcat(str_decoration, tracer_decoration_comment);
+//							OutputLogLine(str_decoration, &tempAddressesLog);
+//							tracer_decoration_comment_end_pos += 2;
+//							tracer_decoration_comment = tracer_decoration_comment_end_pos;
+//							tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment_end_pos, "\r\n");
+//						}
+//					}
+//				}
+//				
+//				replaceNames(ramBankNames, a, &tempAddressesLog);
+//				for(int i=0;i<ARRAY_SIZE(pageNames);i++)
+//					replaceNames(pageNames[i], a, &tempAddressesLog);
+//			}
+//			strncpy(str_disassembly, a, LOG_DISASSEMBLY_MAX_LEN);
+//			str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+//		}
+//	}
+//
+//	if (size == 1 && GetMem(addr) == 0x60)
+//	{
+//		// special case: an RTS opcode
+//		// add "----------" to emphasize the end of subroutine
+//		static const char* emphasize = " -------------------------------------------------------------------------------------------------------------------------";
+//		strncat(str_disassembly, emphasize, LOG_DISASSEMBLY_MAX_LEN - strlen(str_disassembly) - 1);
+//	}
+//	// stretch the disassembly string out if we have to output other stuff.
+//	if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
+//	{
+//		for (int i = strlen(str_disassembly); i < (LOG_DISASSEMBLY_MAX_LEN - 1); ++i)
+//			str_disassembly[i] = ' ';
+//		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+//	}
+//
+//	// Start filling the str_temp line: Frame count, Cycles count, Instructions count, AXYS state, Processor status, Tabs, Address, Data, Disassembly
+//	if (logging_options & LOG_FRAMES_COUNT)
+//	{
+//		sprintf(str_result, "f%-6u ", currFrameCounter);
+//	} else
+//	{
+//		str_result[0] = 0;
+//	}
+//	if (logging_options & LOG_CYCLES_COUNT)
+//	{
+//		int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
+//		if (counter_value < 0)	// sanity check
+//		{
+//			ResetDebugStatisticsCounters();
+//			counter_value = 0;
+//		}
+//		sprintf(str_temp, "c%-11llu ", counter_value);
+//		strcat(str_result, str_temp);
+//	}
+//	if (logging_options & LOG_INSTRUCTIONS_COUNT)
+//	{
+//		sprintf(str_temp, "i%-11llu ", total_instructions);
+//		strcat(str_result, str_temp);
+//	}
+//	
+//	if (logging_options & LOG_REGISTERS)
+//	{
+//		sprintf(str_axystate,"A:%02X X:%02X Y:%02X S:%02X ",(X.A),(X.X),(X.Y),(X.S));
+//	}
+//	
+//	if (logging_options & LOG_PROCESSOR_STATUS)
+//	{
+//		tmp = X.P^0xFF;
+//		sprintf(str_procstatus,"P:%c%c%c%c%c%c%c%c ",
+//			'N'|(tmp&0x80)>>2,
+//			'V'|(tmp&0x40)>>1,
+//			'U'|(tmp&0x20),
+//			'B'|(tmp&0x10)<<1,
+//			'D'|(tmp&0x08)<<2,
+//			'I'|(tmp&0x04)<<3,
+//			'Z'|(tmp&0x02)<<4,
+//			'C'|(tmp&0x01)<<5
+//			);
+//	}
+//	if (logging_options & LOG_TO_THE_LEFT)
+//	{
+//		if (logging_options & LOG_REGISTERS)
+//			strcat(str_result, str_axystate);
+//		if (logging_options & LOG_PROCESSOR_STATUS)
+//			strcat(str_result, str_procstatus);
+//	}
+//
+//	if (logging_options & LOG_CODE_TABBING)
+//	{
+//		// add spaces at the beginning of the line according to stack pointer
+//		int spaces = (0xFF - X.S) & LOG_TABS_MASK;
+//		for (int i = 0; i < spaces; i++)
+//			str_tabs[i] = ' ';
+//		str_tabs[spaces] = 0;
+//		strcat(str_result, str_tabs);
+//	} else if (logging_options & LOG_TO_THE_LEFT)
+//	{
+//		strcat(str_result, " ");
+//	}
+//
+//	if (logging_options & LOG_BANK_NUMBER)
+//	{
+//		if (addr >= 0x8000)
+//			sprintf(str_address, "$%02X:%04X: ", getBank(addr), addr);
+//		else
+//			sprintf(str_address, "  $%04X: ", addr);
+//	} else
+//	{
+//		sprintf(str_address, "$%04X: ", addr);
+//	}
+//
+//	strcat(str_result, str_address);
+//	strcat(str_result, str_data);
+//	strcat(str_result, str_disassembly);
+//
+//	if (!(logging_options & LOG_TO_THE_LEFT))
+//	{
+//		if (logging_options & LOG_REGISTERS)
+//			strcat(str_result, str_axystate);
+//		if (logging_options & LOG_PROCESSOR_STATUS)
+//			strcat(str_result, str_procstatus);
+//	}
+//
+//	OutputLogLine(str_result, &tempAddressesLog);
 
-	if ((addr + size) > 0xFFFF)
-	{
-		sprintf(str_data, "%02X        ", opcode[0]);
-		sprintf(str_disassembly, "OVERFLOW");
-	} else
-	{
-		char* a = 0;
-		switch (size)
-		{
-			case 0:
-				sprintf(str_data, "%02X        ", opcode[0]);
-				sprintf(str_disassembly,"UNDEFINED");
-				break;
-			case 1:
-			{
-				sprintf(str_data, "%02X        ", opcode[0]);
-				a = Disassemble(addr + 1, opcode);
-				// special case: an RTS opcode
-				if (opcode[0] == 0x60)
-				{
-					// add the beginning address of the subroutine that we exit from
-					unsigned int caller_addr = GetMem(((X.S) + 1)|0x0100) + (GetMem(((X.S) + 2)|0x0100) << 8) - 0x2;
-					if (GetMem(caller_addr) == 0x20)
-					{
-						// this was a JSR instruction - take the subroutine address from it
-						unsigned int call_addr = GetMem(caller_addr + 1) + (GetMem(caller_addr + 2) << 8);
-						sprintf(str_decoration, " (from $%04X)", call_addr);
-						strcat(a, str_decoration);
-					}
-				}
-				break;
-			}
-			case 2:
-				sprintf(str_data, "%02X %02X     ", opcode[0],opcode[1]);
-				a = Disassemble(addr + 2, opcode);
-				break;
-			case 3:
-				sprintf(str_data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
-				a = Disassemble(addr + 3, opcode);
-				break;
-		}
 
-		if (a)
-		{
-			if (logging_options & LOG_SYMBOLIC)
-			{
-				loadNameFiles();
-				tempAddressesLog.resize(0);
-				// Insert Name and Comment lines if needed
-				Name* node = findNode(getNamesPointerForAddress(addr), addr);
-				if (node)
-				{
-					if (node->name)
-					{
-						strcpy(str_decoration, node->name);
-						strcat(str_decoration, ":");
-						tempAddressesLog.push_back(addr);
-						OutputLogLine(str_decoration, &tempAddressesLog);
-					}
-					if (node->comment)
-					{
-						// make a copy
-						strcpy(str_decoration_comment, node->comment);
-						strcat(str_decoration_comment, "\r\n");
-						tracer_decoration_comment = str_decoration_comment;
-						// divide the str_decoration_comment into strings (Comment1, Comment2, ...)
-						char* tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment, "\r\n");
-						while (tracer_decoration_comment_end_pos)
-						{
-							tracer_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
-							strcpy(str_decoration, "; ");
-							strcat(str_decoration, tracer_decoration_comment);
-							OutputLogLine(str_decoration, &tempAddressesLog);
-							tracer_decoration_comment_end_pos += 2;
-							tracer_decoration_comment = tracer_decoration_comment_end_pos;
-							tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment_end_pos, "\r\n");
-						}
-					}
-				}
-				
-				replaceNames(ramBankNames, a, &tempAddressesLog);
-				for(int i=0;i<ARRAY_SIZE(pageNames);i++)
-					replaceNames(pageNames[i], a, &tempAddressesLog);
-			}
-			strncpy(str_disassembly, a, LOG_DISASSEMBLY_MAX_LEN);
-			str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
-		}
-	}
 
-	if (size == 1 && GetMem(addr) == 0x60)
-	{
-		// special case: an RTS opcode
-		// add "----------" to emphasize the end of subroutine
-		static const char* emphasize = " -------------------------------------------------------------------------------------------------------------------------";
-		strncat(str_disassembly, emphasize, LOG_DISASSEMBLY_MAX_LEN - strlen(str_disassembly) - 1);
-	}
-	// stretch the disassembly string out if we have to output other stuff.
-	if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
-	{
-		for (int i = strlen(str_disassembly); i < (LOG_DISASSEMBLY_MAX_LEN - 1); ++i)
-			str_disassembly[i] = ' ';
-		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
-	}
+    //sprintf(str_address, "%X ", GetNesFileAddress(addr));
+    //sprintf(str_axystate, "%X %X %X %X %X ", X.A, X.X, X.Y, X.S, X.P);
+    //sprintf(bzk_string, "%X %X %X %X %X %X %X %X %X %X \n", addr, bzk_GetNesFileAddress(addr), bzk_getBank(0x8000), bzk_getBank(0xA000), bzk_getBank(0xC000), bzk_getBank(0xE000), X.A, X.X, X.Y, X.P);
+    //sprintf(bzk_string, "%u|%u|%u|%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(0x8000), bzk_getBank(0xA000), bzk_getBank(0xC000), bzk_getBank(0xE000), X.A, X.X, X.Y, bzk_Disassemble(opcode));
+    sprintf(bzk_string, "%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(addr), X.A, X.X, X.Y, bzk_Disassemble(addr, opcode));
 
-	// Start filling the str_temp line: Frame count, Cycles count, Instructions count, AXYS state, Processor status, Tabs, Address, Data, Disassembly
-	if (logging_options & LOG_FRAMES_COUNT)
-	{
-		sprintf(str_result, "f%-6u ", currFrameCounter);
-	} else
-	{
-		str_result[0] = 0;
-	}
-	if (logging_options & LOG_CYCLES_COUNT)
-	{
-		int64 counter_value = timestampbase + (uint64)timestamp - total_cycles_base;
-		if (counter_value < 0)	// sanity check
-		{
-			ResetDebugStatisticsCounters();
-			counter_value = 0;
-		}
-		sprintf(str_temp, "c%-11llu ", counter_value);
-		strcat(str_result, str_temp);
-	}
-	if (logging_options & LOG_INSTRUCTIONS_COUNT)
-	{
-		sprintf(str_temp, "i%-11llu ", total_instructions);
-		strcat(str_result, str_temp);
-	}
-	
-	if (logging_options & LOG_REGISTERS)
-	{
-		sprintf(str_axystate,"A:%02X X:%02X Y:%02X S:%02X ",(X.A),(X.X),(X.Y),(X.S));
-	}
-	
-	if (logging_options & LOG_PROCESSOR_STATUS)
-	{
-		tmp = X.P^0xFF;
-		sprintf(str_procstatus,"P:%c%c%c%c%c%c%c%c ",
-			'N'|(tmp&0x80)>>2,
-			'V'|(tmp&0x40)>>1,
-			'U'|(tmp&0x20),
-			'B'|(tmp&0x10)<<1,
-			'D'|(tmp&0x08)<<2,
-			'I'|(tmp&0x04)<<3,
-			'Z'|(tmp&0x02)<<4,
-			'C'|(tmp&0x01)<<5
-			);
-	}
+	fputs(bzk_string, LOG_FP);
+	bzk_writes_counter++;
 
-	if (logging_options & LOG_TO_THE_LEFT)
+	if (bzk_writes_counter == 4999999)
 	{
-		if (logging_options & LOG_REGISTERS)
-			strcat(str_result, str_axystate);
-		if (logging_options & LOG_PROCESSOR_STATUS)
-			strcat(str_result, str_procstatus);
+		bzk_writes_counter = 0;
+		fflush(LOG_FP);
+		fclose(LOG_FP);
+
+		sprintf(bzk_newfilename, "z%05d_fceux.log", bzk_files_counter);
+        remove(bzk_newfilename); //delete file if exists
+		rename(bzk_filename, bzk_newfilename);
+
+		bzk_files_counter++;
+        if (bzk_files_counter >= 100000) bzk_files_counter = 0;
+		sprintf(bzk_filename, "z%05d.log", bzk_files_counter);
+		LOG_FP = fopen(bzk_filename, "w");
 	}
-
-	if (logging_options & LOG_CODE_TABBING)
-	{
-		// add spaces at the beginning of the line according to stack pointer
-		int spaces = (0xFF - X.S) & LOG_TABS_MASK;
-		for (int i = 0; i < spaces; i++)
-			str_tabs[i] = ' ';
-		str_tabs[spaces] = 0;
-		strcat(str_result, str_tabs);
-	} else if (logging_options & LOG_TO_THE_LEFT)
-	{
-		strcat(str_result, " ");
-	}
-
-	if (logging_options & LOG_BANK_NUMBER)
-	{
-		if (addr >= 0x8000)
-			sprintf(str_address, "$%02X:%04X: ", getBank(addr), addr);
-		else
-			sprintf(str_address, "  $%04X: ", addr);
-	} else
-	{
-		sprintf(str_address, "$%04X: ", addr);
-	}
-
-	strcat(str_result, str_address);
-	strcat(str_result, str_data);
-	strcat(str_result, str_disassembly);
-
-	if (!(logging_options & LOG_TO_THE_LEFT))
-	{
-		if (logging_options & LOG_REGISTERS)
-			strcat(str_result, str_axystate);
-		if (logging_options & LOG_PROCESSOR_STATUS)
-			strcat(str_result, str_procstatus);
-	}
-
-	OutputLogLine(str_result, &tempAddressesLog);
-	
+    
 	return;
 }
 
@@ -1020,7 +1083,15 @@ void EndLoggingSequence()
 {
 	if (logtofile)
 	{
+		fflush(LOG_FP);
 		fclose(LOG_FP);
+
+		sprintf(bzk_newfilename, "z%05d", bzk_files_counter);
+		strcat(bzk_newfilename, "_fceux.log");
+		rename(bzk_filename, bzk_newfilename);
+
+		bzk_files_counter++;
+        bzk_writes_counter = 0;
 	} else
 	{
 		strcpy(str_result, "Logging finished.");

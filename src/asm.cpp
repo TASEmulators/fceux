@@ -527,3 +527,199 @@ char *Disassemble(int addr, uint8 *opcode) {
 
 	return str;
 }
+
+
+
+///disassembles the opcodes in the buffer assuming the provided address. Uses GetMem() and 6502 current registers to query referenced values. returns a static string buffer.
+char *bzk_Disassemble(int addr, uint8 *opcode) {
+	static char str[64] = {0};
+	uint16 tmp;
+    
+	switch (opcode[0]) {
+		//Zero Page
+		case 0x05: goto _zeropage; //ORA
+		case 0x06: goto _zeropage; //ASL
+		case 0x24: goto _zeropage; //BIT
+		case 0x25: goto _zeropage; //AND
+		case 0x26: goto _zeropage; //ROL
+		case 0x45: goto _zeropage; //EOR
+		case 0x46: goto _zeropage; //LSR
+		case 0x65: goto _zeropage; //ADC
+		case 0x66: goto _zeropage; //ROR
+		case 0x84: goto _zeropage; //STY
+		case 0x85: goto _zeropage; //STA
+		case 0x86: goto _zeropage; //STX
+		case 0xA4: goto _zeropage; //LDY
+		case 0xA5: goto _zeropage; //LDA
+		case 0xA6: goto _zeropage; //LDX
+		case 0xC4: goto _zeropage; //CPY
+		case 0xC5: goto _zeropage; //CMP
+		case 0xC6: goto _zeropage; //DEC
+		case 0xE4: goto _zeropage; //CPX
+		case 0xE5: goto _zeropage; //SBC
+		case 0xE6: goto _zeropage; //INC
+		_zeropage:
+            tmp = opcode[1];
+			sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+			break;
+        
+		//Zero Page,X
+		case 0x15: goto _zeropagex; //ORA
+		case 0x16: goto _zeropagex; //ASL
+		case 0x35: goto _zeropagex; //AND
+		case 0x36: goto _zeropagex; //ROL
+		case 0x55: goto _zeropagex; //EOR
+		case 0x56: goto _zeropagex; //LSR
+		case 0x75: goto _zeropagex; //ADC
+		case 0x76: goto _zeropagex; //ROR
+		case 0x94: goto _zeropagex; //STY
+		case 0x95: goto _zeropagex; //STA
+		case 0xB4: goto _zeropagex; //LDY
+		case 0xB5: goto _zeropagex; //LDA
+		case 0xD5: goto _zeropagex; //CMP
+		case 0xD6: goto _zeropagex; //DEC
+		case 0xF5: goto _zeropagex; //SBC
+		case 0xF6: goto _zeropagex; //INC
+		_zeropagex:
+			tmp = (opcode[1] + X.X) & 0xFF;
+            sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+			break;
+        
+		//Zero Page,Y
+		case 0x96: goto _zeropagey; //STX
+		case 0xB6: goto _zeropagey; //LDX
+		_zeropagey:
+			tmp = (opcode[1] + X.Y) & 0xFF;
+            sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+			break;
+        
+		//Absolute
+		case 0x0D: goto _absolute; //ORA
+		case 0x0E: goto _absolute; //ASL
+		case 0x2C: goto _absolute; //BIT
+		case 0x2D: goto _absolute; //AND
+		case 0x2E: goto _absolute; //ROL
+		case 0x4D: goto _absolute; //EOR
+		case 0x4E: goto _absolute; //LSR
+		case 0x6D: goto _absolute; //ADC
+		case 0x6E: goto _absolute; //ROR
+		case 0x8C: goto _absolute; //STY
+		case 0x8D: goto _absolute; //STA
+		case 0x8E: goto _absolute; //STX
+		case 0xAC: goto _absolute; //LDY
+		case 0xAD: goto _absolute; //LDA
+		case 0xAE: goto _absolute; //LDX
+		case 0xCC: goto _absolute; //CPY
+		case 0xCD: goto _absolute; //CMP
+		case 0xCE: goto _absolute; //DEC
+		case 0xEC: goto _absolute; //CPX
+		case 0xED: goto _absolute; //SBC
+		case 0xEE: goto _absolute; //INC
+		_absolute:
+			tmp = opcode[1] | opcode[2] << 8;
+			sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+			break;
+        
+		//Absolute,X
+		case 0x1D: goto _absolutex; //ORA
+		case 0x1E: goto _absolutex; //ASL
+		case 0x3D: goto _absolutex; //AND
+		case 0x3E: goto _absolutex; //ROL
+		case 0x5D: goto _absolutex; //EOR
+		case 0x5E: goto _absolutex; //LSR
+		case 0x7D: goto _absolutex; //ADC
+		case 0x7E: goto _absolutex; //ROR
+		case 0x9D: goto _absolutex; //STA
+		case 0xBC: goto _absolutex; //LDY
+		case 0xBD: goto _absolutex; //LDA
+		case 0xDD: goto _absolutex; //CMP
+		case 0xDE: goto _absolutex; //DEC
+		case 0xFD: goto _absolutex; //SBC
+		case 0xFE: goto _absolutex; //INC
+		_absolutex:
+			tmp = (opcode[1] | opcode[2] << 8) + X.X;
+			sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+			break;
+        
+		//Absolute,Y
+		case 0x19: goto _absolutey; //ORA
+		case 0x39: goto _absolutey; //AND
+		case 0x59: goto _absolutey; //EOR
+		case 0x79: goto _absolutey; //ADC
+		case 0x99: goto _absolutey; //STA
+		case 0xB9: goto _absolutey; //LDA
+		case 0xBE: goto _absolutey; //LDX
+		case 0xD9: goto _absolutey; //CMP
+		case 0xF9: goto _absolutey; //SBC
+		_absolutey:
+			tmp = (opcode[1] | opcode[2] << 8) + X.Y;
+			sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+			break;
+        
+		//branches
+		case 0x10: goto _branch; //BPL
+		case 0x30: goto _branch; //BMI
+		case 0x50: goto _branch; //BVC
+		case 0x70: goto _branch; //BVS
+		case 0x90: goto _branch; //BCC
+		case 0xB0: goto _branch; //BCS
+		case 0xD0: goto _branch; //BNE
+		case 0xF0: goto _branch; //BEQ
+		_branch:
+            tmp = addr + opcode[1] + 0x02;
+			if (opcode[1] >= 0x80) tmp -= 0x100;
+			sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+			break;
+        
+		//(Indirect,X)
+		case 0x01: goto _indirectx; //ORA
+		case 0x21: goto _indirectx; //AND
+		case 0x41: goto _indirectx; //EOR
+		case 0x61: goto _indirectx; //ADC
+		case 0x81: goto _indirectx; //STA
+		case 0xA1: goto _indirectx; //LDA
+		case 0xC1: goto _indirectx; //CMP
+		case 0xE1: goto _indirectx; //SBC
+		_indirectx:
+            tmp = (opcode[1] + X.X) & 0xFF;
+            tmp = GetMem((tmp)) | (GetMem(((tmp) + 1) & 0xFF)) << 8;
+			sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+			break;
+        
+		//(Indirect),Y
+		case 0x11: goto _indirecty; //ORA
+		case 0x31: goto _indirecty; //AND
+		case 0x51: goto _indirecty; //EOR
+		case 0x71: goto _indirecty; //ADC
+		case 0x91: goto _indirecty; //STA
+		case 0xB1: goto _indirecty; //LDA
+		case 0xD1: goto _indirecty; //CMP
+		case 0xF1: goto _indirecty; //SBC
+		_indirecty:
+            tmp = (GetMem(opcode[1]) | (GetMem((opcode[1] + 1) & 0xFF)) << 8) + X.Y;
+			sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+			break;
+        
+		//absolute jumps
+		case 0x20: goto _jump; //JSR
+		case 0x4C: goto _jump; //JMP
+		_jump:
+            tmp = opcode[1] | opcode[2] << 8;
+            sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+			break;
+        
+        //indirect jump
+		case 0x6C: //JMP
+            tmp = opcode[1] | opcode[2] << 8;
+            tmp = GetMem(tmp) | GetMem(tmp + 1) << 8;
+            sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
+            break;
+            
+        //for all other other opcodes, which are immediate and 1-byte instructions
+		default:
+            strcpy(str, "?|?");
+            break;
+	}
+
+	return str;
+}

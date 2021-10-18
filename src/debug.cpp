@@ -265,12 +265,22 @@ int getBank(int offs)
 	return addr != -1 ? addr / (1<<debuggerPageSize) : -1; //formerly, dividing by 0x4000
 }
 
+int bzk_getBank(int offs)
+{
+	return bzk_GetNesFileAddress(offs) / 0x2000;
+}
+
 int GetNesFileAddress(int A){
 	int result;
 	if((A < 0x6000) || (A > 0xFFFF))return -1;
 	result = &Page[A>>11][A]-PRGptr[0];
 	if((result > (int)(PRGsize[0])) || (result < 0))return -1;
 	else return result+16; //16 bytes for the header remember
+}
+
+int bzk_GetNesFileAddress(int A){
+    if (A >= 0x6000) return &Page[A>>11][A]-PRGptr[0]; //for 6000-FFFF
+    return A + 0x80000; //for 0000-5FFF
 }
 
 int GetRomAddress(int A){
