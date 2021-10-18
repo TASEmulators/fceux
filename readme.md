@@ -4,7 +4,7 @@ A hacked Trace Logger to produce special log files for my disassembler.
 
 ## Download latest Windows 32 version
 
-https://ci.appveyor.com/project/cyneprepou4uk/fceux
+https://ci.appveyor.com/project/cyneprepou4uk/fceux/build/artifacts
 
 ## Changed files
 * [asm.cpp](https://github.com/cyneprepou4uk/fceux/blob/master/src/asm.cpp)
