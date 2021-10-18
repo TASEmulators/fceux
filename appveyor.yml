@@ -6,18 +6,18 @@ environment:
   - job_name: Windows 32
     appveyor_build_worker_image: Visual Studio 2019
 
-  - job_name: Windows 64
-    appveyor_build_worker_image: Visual Studio 2019
-
-  - job_name: Win64 Qt
-    appveyor_build_worker_image: Visual Studio 2019
-
-  - job_name: Ubuntu
-    appveyor_build_worker_image: Ubuntu2004
-    #appveyor_build_worker_image: Ubuntu1804
-
-  - job_name: MacOS
-    appveyor_build_worker_image: macOS
+#  - job_name: Windows 64
+#    appveyor_build_worker_image: Visual Studio 2019
+#
+#  - job_name: Win64 Qt
+#    appveyor_build_worker_image: Visual Studio 2019
+#
+#  - job_name: Ubuntu
+#    appveyor_build_worker_image: Ubuntu2004
+#    #appveyor_build_worker_image: Ubuntu1804
+#
+#  - job_name: MacOS
+#    appveyor_build_worker_image: macOS
 
 for:
 
@@ -29,35 +29,35 @@ for:
     build_script:
     - cmd: pipelines/win32_build.bat
 
-  -
-    matrix:
-      only:
-        - job_name: Windows 64
-
-    build_script:
-    - cmd: pipelines/win64_build.bat
-
-  -
-    matrix:
-      only:
-        - job_name: Win64 Qt
-
-    build_script:
-    - cmd: pipelines/qwin64_build.bat
-
-  -
-    matrix:
-      only:
-        - job_name: Ubuntu
-
-    build_script:
-    - sh: ./pipelines/linux_build.sh
-
-  -
-    matrix:
-      only:
-        - job_name: MacOS
-
-    build_script:
-    - sh: ./pipelines/macOS_build.sh
+#  -
+#    matrix:
+#      only:
+#        - job_name: Windows 64
+#
+#    build_script:
+#    - cmd: pipelines/win64_build.bat
+#
+#  -
+#    matrix:
+#      only:
+#        - job_name: Win64 Qt
+#
+#    build_script:
+#    - cmd: pipelines/qwin64_build.bat
+#
+#  -
+#    matrix:
+#      only:
+#        - job_name: Ubuntu
+#
+#    build_script:
+#    - sh: ./pipelines/linux_build.sh
+#
+#  -
+#    matrix:
+#      only:
+#        - job_name: MacOS
+#
+#    build_script:
+#    - sh: ./pipelines/macOS_build.sh
 
