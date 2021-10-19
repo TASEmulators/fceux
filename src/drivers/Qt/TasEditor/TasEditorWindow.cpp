@@ -235,6 +235,7 @@ void TasEditorWindow::buildSideControlPanel(void)
 {
 	QVBoxLayout *vbox;
 	QHBoxLayout *hbox;
+	QGridLayout *grid;
 
 	ctlPanelMainVbox = new QVBoxLayout();
 
@@ -261,10 +262,33 @@ void TasEditorWindow::buildSideControlPanel(void)
 	   turboSeekCbox = new QCheckBox( tr("Turbo Seek") );
 	 autoRestoreCbox = new QCheckBox( tr("Auto-Restore Last Position") );
 
+	recRecordingCbox   = new QCheckBox( tr("Recording") );
+	recSuperImposeCbox = new QCheckBox( tr("Superimpose") );
+	recUsePatternCbox  = new QCheckBox( tr("Use Pattern") );
+	recAllBtn          = new QRadioButton( tr("All") );
+	rec1PBtn           = new QRadioButton( tr("1P") );
+	rec2PBtn           = new QRadioButton( tr("2P") );
+	rec3PBtn           = new QRadioButton( tr("3P") );
+	rec4PBtn           = new QRadioButton( tr("4P") );
+
+	selectionLbl = new QLabel( tr("Empty") );
+	clipboardLbl = new QLabel( tr("Empty") );
+
 	runLuaBtn   = new QPushButton( tr("Run Function") );
 	autoLuaCBox = new QCheckBox( tr("Auto Function") );
 	runLuaBtn->setEnabled(false);
 	autoLuaCBox->setChecked(true);
+
+	bkbrTree = new QTreeWidget();
+	histTree = new QTreeWidget();
+
+	prevMkrBtn = new QPushButton();
+	nextMkrBtn = new QPushButton();
+	similarBtn = new QPushButton( tr("Similar") );
+	moreBtn    = new QPushButton( tr("More") );
+
+	prevMkrBtn->setIcon( style()->standardIcon( QStyle::SP_MediaSkipBackward ) );
+	nextMkrBtn->setIcon( style()->standardIcon( QStyle::SP_MediaSkipForward  ) );
 
 	vbox = new QVBoxLayout();
 	hbox = new QHBoxLayout();
@@ -284,10 +308,36 @@ void TasEditorWindow::buildSideControlPanel(void)
 
 	playbackGBox->setLayout( vbox );
 
+	grid = new QGridLayout();
+	grid->addWidget( recRecordingCbox, 0, 0, 1, 2 );
+	grid->addWidget( recAllBtn       , 0, 3, 1, 1 );
+	grid->addWidget( rec1PBtn        , 1, 0, 1, 1 );
+	grid->addWidget( rec2PBtn        , 1, 1, 1, 1 );
+	grid->addWidget( rec3PBtn        , 1, 2, 1, 1 );
+	grid->addWidget( rec4PBtn        , 1, 3, 1, 1 );
+	grid->addWidget( recSuperImposeCbox, 2, 0, 1, 2 );
+	grid->addWidget( recUsePatternCbox , 2, 2, 1, 2 );
+	recorderGBox->setLayout( grid );
+
+	grid = new QGridLayout();
+	grid->addWidget( new QLabel( tr("Selection:") ), 0, 0, 1, 1 );
+	grid->addWidget( new QLabel( tr("Clipboard:") ), 1, 0, 1, 1 );
+	grid->addWidget( selectionLbl, 0, 1, 1, 3 );
+	grid->addWidget( clipboardLbl, 1, 1, 1, 3 );
+	splicerGBox->setLayout( grid );
+
 	hbox = new QHBoxLayout();
 	hbox->addWidget( runLuaBtn );
 	hbox->addWidget( autoLuaCBox );
 	luaGBox->setLayout( hbox );
+
+	vbox = new QVBoxLayout();
+	vbox->addWidget( bkbrTree );
+	bookmarksGBox->setLayout( vbox );
+
+	vbox = new QVBoxLayout();
+	vbox->addWidget( histTree );
+	historyGBox->setLayout( vbox );
 
 	ctlPanelMainVbox->addWidget( playbackGBox  );
 	ctlPanelMainVbox->addWidget( recorderGBox  );
@@ -295,6 +345,13 @@ void TasEditorWindow::buildSideControlPanel(void)
 	ctlPanelMainVbox->addWidget( luaGBox       );
 	ctlPanelMainVbox->addWidget( bookmarksGBox );
 	ctlPanelMainVbox->addWidget( historyGBox   );
+
+	hbox = new QHBoxLayout();
+	hbox->addWidget( prevMkrBtn );
+	hbox->addWidget( similarBtn );
+	hbox->addWidget( moreBtn    );
+	hbox->addWidget( nextMkrBtn );
+	ctlPanelMainVbox->addLayout( hbox );
 
 	controlPanelContainerWidget = new QWidget();
 	controlPanelContainerWidget->setLayout( ctlPanelMainVbox );

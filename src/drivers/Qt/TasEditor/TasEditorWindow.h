@@ -15,6 +15,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QLineEdit>
 #include <QLabel>
 #include <QFrame>
@@ -108,8 +109,28 @@ class TasEditorWindow : public QDialog
 		QCheckBox   *turboSeekCbox;
 		QCheckBox   *autoRestoreCbox;
 
+		QCheckBox    *recRecordingCbox;
+		QCheckBox    *recSuperImposeCbox;
+		QCheckBox    *recUsePatternCbox;
+		QRadioButton *recAllBtn;
+		QRadioButton *rec1PBtn;
+		QRadioButton *rec2PBtn;
+		QRadioButton *rec3PBtn;
+		QRadioButton *rec4PBtn;
+
+		QLabel      *selectionLbl;
+		QLabel      *clipboardLbl;
+
 		QPushButton *runLuaBtn;
 		QCheckBox   *autoLuaCBox;
+
+		QTreeWidget *bkbrTree;
+		QTreeWidget *histTree;
+
+		QPushButton *prevMkrBtn;
+		QPushButton *nextMkrBtn;
+		QPushButton *similarBtn;
+		QPushButton *moreBtn;
 	private:
 
 	public slots:
