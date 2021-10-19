@@ -28,12 +28,46 @@
 #include <QMessageBox>
 #include <QFontMetrics>
 
+#include "fceu.h"
+#include "movie.h"
+#include "driver.h"
+
 #include "Qt/config.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
+TasEditorWindow *tasWin = NULL;
+
 //----------------------------------------------------------------------------
 //----  Main TAS Editor Window
+//----------------------------------------------------------------------------
+bool tasWindowIsOpen(void)
+{
+	return tasWin != NULL;
+}
+//----------------------------------------------------------------------------
+void tasWindowSetFocus(bool val)
+{
+	if ( tasWin )
+	{
+		tasWin->activateWindow();
+		tasWin->raise();
+		tasWin->setFocus();
+	}
+}
+// this getter contains formula to decide whether to record or replay movie
+bool isTaseditorRecording(void)
+{
+	//if (movie_readonly || playback.getPauseFrame() >= 0 || (taseditorConfig.oldControlSchemeForBranching && !recorder.stateWasLoadedInReadWriteMode))
+	//	return false;		// replay
+	return true;			// record
+}
+
+bool recordInputByTaseditor(void)
+{
+	//recorder.recordInput();
+	return 0;
+}
 //----------------------------------------------------------------------------
 TasEditorWindow::TasEditorWindow(QWidget *parent)
 	: QDialog( parent, Qt::Window )
@@ -41,6 +75,8 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	QVBoxLayout *mainLayout;
 	//QHBoxLayout *hbox;
 	QMenuBar    *menuBar;
+
+	tasWin = this;
 
 	setWindowTitle("TAS Editor");
 
@@ -60,11 +96,23 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 
 	setLayout(mainLayout);
 	mainLayout->setMenuBar( menuBar );
+
+	initModules();
 }
 //----------------------------------------------------------------------------
 TasEditorWindow::~TasEditorWindow(void)
 {
 	printf("Destroy Tas Editor Window\n");
+
+	if ( tasWin == this )
+	{
+		tasWin = NULL;
+	}
+
+	// switch off TAS Editor mode
+	movieMode = MOVIEMODE_INACTIVE;
+	FCEU_DispMessage("TAS Editor disengaged", 0);
+	FCEUMOV_CreateCleanMovie();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::closeEvent(QCloseEvent *event)
@@ -355,6 +403,65 @@ void TasEditorWindow::buildSideControlPanel(void)
 
 	controlPanelContainerWidget = new QWidget();
 	controlPanelContainerWidget->setLayout( ctlPanelMainVbox );
+}
+//----------------------------------------------------------------------------
+int TasEditorWindow::initModules(void)
+{
+	// init modules
+	//editor.init();
+	//pianoRoll.init();
+	//selection.init();
+	//splicer.init();
+	//playback.init();
+	//greenzone.init();
+	//recorder.init();
+	//markersManager.init();
+	//project.init();
+	//bookmarks.init();
+	//branches.init();
+	//popupDisplay.init();
+	//history.init();
+	//taseditor_lua.init();
+	// either start new movie or use current movie
+	if (!FCEUMOV_Mode(MOVIEMODE_RECORD|MOVIEMODE_PLAY) || currMovieData.savestate.size() != 0)
+	{
+		if (currMovieData.savestate.size() != 0)
+		{
+			FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
+		}
+		// create new movie
+		FCEUI_StopMovie();
+		movieMode = MOVIEMODE_TASEDITOR;
+		FCEUMOV_CreateCleanMovie();
+		//playback.restartPlaybackFromZeroGround();
+	} else
+	{
+		// use current movie to create a new project
+		FCEUI_StopMovie();
+		movieMode = MOVIEMODE_TASEDITOR;
+	}
+	// if movie length is less or equal to currFrame, pad it with empty frames
+	if (((int)currMovieData.records.size() - 1) < currFrameCounter)
+	{
+		currMovieData.insertEmpty(-1, currFrameCounter - ((int)currMovieData.records.size() - 1));
+	}
+	// ensure that movie has correct set of ports/fourscore
+	//setInputType(currMovieData, getInputType(currMovieData));
+	// force the input configuration stored in the movie to apply to FCEUX config
+	//applyMovieInputConfig();
+	// reset some modules that need MovieData info
+	//pianoRoll.reset();
+	//recorder.reset();
+	// create initial snapshot in history
+	//history.reset();
+	// reset Taseditor variables
+	//mustCallManualLuaFunction = false;
+	
+	//SetFocus(history.hwndHistoryList);		// set focus only once, to show blue selection cursor
+	//SetFocus(pianoRoll.hwndList);
+	FCEU_DispMessage("TAS Editor engaged", 0);
+	//taseditorWindow.redraw();
+	return 0;
 }
 //----------------------------------------------------------------------------
 //----  TAS Piano Roll Widget

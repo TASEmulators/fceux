@@ -133,7 +133,18 @@ class TasEditorWindow : public QDialog
 		QPushButton *moreBtn;
 	private:
 
+		int initModules(void);
+
 	public slots:
 		void closeWindow(void);
 	private slots:
 };
+
+bool tasWindowIsOpen(void);
+
+void tasWindowSetFocus(bool val);
+
+bool isTaseditorRecording(void);
+bool recordInputByTaseditor(void);
+
+extern TasEditorWindow *tasWin;

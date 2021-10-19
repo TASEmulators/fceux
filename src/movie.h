@@ -269,6 +269,7 @@ private:
 	}
 };
 
+extern EMOVIEMODE movieMode;
 extern MovieData currMovieData;
 extern int currFrameCounter;
 extern char curMovieFilename[512];

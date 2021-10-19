@@ -529,6 +529,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/fileio.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/gwavi.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/TasEditorWindow.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/laglog.cpp
 )
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})

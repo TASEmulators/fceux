@@ -2819,13 +2819,21 @@ void consoleWin_t::openAviRiffViewer(void)
 
 void consoleWin_t::openTasEditor(void)
 {
-	TasEditorWindow *win;
+	fceuWrapperLock();
 
-	//printf("Open TAS Editor Window\n");
-	
-	win = new TasEditorWindow(this);
-	
-	win->show();
+	if ( tasWindowIsOpen() )
+	{
+		tasWindowSetFocus(true);
+	}
+	else if (FCEU_IsValidUI(FCEUI_TASEDITOR))
+	{
+		TasEditorWindow *win;
+
+		win = new TasEditorWindow(this);
+		
+		win->show();
+	}
+	fceuWrapperUnLock();
 }
 
 void consoleWin_t::openMovieOptWin(void)
