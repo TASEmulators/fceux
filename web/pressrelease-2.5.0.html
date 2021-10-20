@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<link href="fceux.css" rel="stylesheet" type="text/css" />
+<title>Press Release 2.5.0</title>
+</head>
+
+<body>
+<div id="masthead">
+	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom/Dendy Emulator
+</div>
+<div id="top_nav">
+  <a href="home.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="documentation.html">Documentation</a>
+  <a href="version.html">Versions</a>
+  <a href="contact.html">Contact</a>
+  <a href="links.html">Links</a>
+</div>
+<div id="container">
+	<div id="left_col">
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	 		style="display:inline-block;width:180px;height:150px"
+	 		data-ad-client="ca-pub-0764229755985190"
+	 		data-ad-slot="7648866201"></ins>
+		<script>
+	     (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>	
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	    	 style="display:inline-block;width:180px;height:150px"
+	     	data-ad-client="ca-pub-0764229755985190"
+	     	data-ad-slot="7648866201"></ins>
+		<script>
+	    	 (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
+<div id="page_content">
+<h1>FCEUX 2.5.0 Release</h1>
+<p>31 October 2021</p>
+<p>
+The 2.5.0 release features significant enhancements and improvements to the Qt/SDL port. Specifically the debug tools and AVI recording capabilities.
+</p>
+<h2>Common</h2>
+
+<h3>Emulation Core</h3>
+Fixed SYA and SXA opcodes in CPU. Blargg's NES CPU TEST #5 now passes.<br>
+
+<h2>Qt/SDL</h2>
+
+<h3>New Tools</h3>
+Added built-in AVI RIFF Tree Viewer.<br>
+
+<h3>Debugger</h3>
+Redesigned debugger layout to optimize space usage.<br>
+Window layout uses relocatable tabbed viewports to allow for layout customization.<br>
+Added a tool bar for commonly used debugger buttons.<br>
+Moved many configuration options to debugger window menu to save space.<br>
+Added syntax coloring options to assembly code viewer.<br>
+Added opcode description popups to assembly code viewer.<br>
+Added assembly code custom font selection option.<br>
+Added symbol tool tips and address look ahead popups for assembly code viewer.<br>
+Added navigate backwards/forwards line history to assembly code viewer.<br>
+Added breakpoint on unlogged code/data feature.<br>
+Added breakpoint on execution of a specified PRG-ROM address.<br>
+Added step back one instruction feature (experimental)<br>
+
+<h3>Hex Editor</h3>
+Fixed draw logic to ensure that highlighted text coloring takes precidence over activity coloring.<br>
+Fixed crash in hex editor when searching with Ctrl+A<br>
+
+<h3>Input Control</h3>
+User can now save up to 3 alternate sets of gamepad button bindings in addition to the primary set.<br>
+Advanced gamepad bindings (to hot key functions) are now stored for each individual gamepad by GUID.<br>
+
+<h3>Lua</h3>
+Build fix for static linking of lua. Ensure proper compiler flags are set for linux and mac OS to enable lua plugin functionality.<br>
+
+<h3>Movies</h3>
+Added optional linking of ffmpeg (libav) libraries for AVI recording. Provides full use of available encoders and options.<br>
+Implemented AVI 2.0 Indexing Specification. This new indexing scheme eliminates 2GB AVI file recording limitation.<br>
+Fixed video messages and HUD presentation AVI display options.<br>
+
+<h3>GUI Improvements and Bug Fixes</h3>
+Went through all debug tool windows and made sure that all configuration options are saved (persist on application restart).<br>
+The position and size of all debug/tool windows is now saved at window close and restored at window open.<br>
+For debug windows, if attempting to open a window that is already open, that window is raised to top and focused.<br>
+Bug fixes for scroll bar presentation on custom viewport widgets in debug tools windows (debugger, hex editor, trace logger).<br>
+Added main window context menu to Qt GUI.<br>
+Various color customization options for debugger and hex editor.<br>
+Changed hot key config window tree layout to sort keys into logical groups.<br>
+Added offline help documentation viewer feature. (chm viewer for windows and Qt help engine for unix)<br>
+
+<h3>Video Improvements and Bug Fixes</h3>
+Fixed video message positioning so that it is not clipped when 8 pixel side clipping is active.<br>
+Added integer frame rate option to better sync video with monitor refresh.<br>
+Changed update rate of video frames per second display so that it is more readable.<br>
+
+<h3>Sound Improvements and Bug Fixes</h3>
+Added option to mute sound when main window is not in focus.<br>
+Improved sound sample underflow/overflow algorithm to allow for better scaling with running the emulation at faster/slower speeds.<br>
+Sound sample processing efficiency updates.<br>
+Added an audio buffer percent usage indication and
+an audio sink starve counter to sound config window for debug purposes.<br> 
+
+<h3>Build Improvements</h3>
+OpenBSD OS build fixes.<br>
+
+</div>
+
+<p>
+<hr>
+
+<div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
+		<br/>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc.
+</div>
+</div>
+</body>
+</html>
