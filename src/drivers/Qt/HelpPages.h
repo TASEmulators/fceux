@@ -5,8 +5,10 @@
 #include <QAction>
 #include <QSplitter>
 #include <QTabWidget>
-#include <QTextBrowser>
 #include <QCloseEvent>
+
+#ifdef _USE_QHELP
+#include <QTextBrowser>
 #include <QHelpEngine>
 
 class HelpBrowser : public QTextBrowser
@@ -41,3 +43,5 @@ class HelpDialog : public QDialog
 		void navBackwardAvailable(bool);
 		void navForwardAvailable(bool);
 };
+
+#endif

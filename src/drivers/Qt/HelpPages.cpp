@@ -28,9 +28,12 @@
 #include <QMenu>
 #include <QAction>
 #include <QSettings>
+
+#ifdef _USE_QHELP
 #include <QHelpEngine>
 #include <QHelpIndexModel>
 #include <QHelpContentWidget>
+#endif
 
 #include "driver.h"
 #include "Qt/HelpPages.h"
@@ -111,9 +114,11 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 	}
 	//helpWin = forkHelpFileViewer( helpFileViewer.c_str(), helpFileName.c_str() );
 
+	#ifdef _USE_QHELP
 	HelpDialog *win = new HelpDialog( helpFileName.c_str(), this);
 
 	win->show();
+	#endif
 
 #endif
 }
@@ -230,6 +235,7 @@ std::string consoleWin_t::findHelpFile(void)
 //}
 //#endif
 
+#ifdef _USE_QHELP
 //-----------------------------------------------------------------------------------------------
 //---  Help Page Dialog
 //-----------------------------------------------------------------------------------------------
@@ -392,3 +398,4 @@ QVariant HelpBrowser::loadResource(int type, const QUrl &name)
         return QTextBrowser::loadResource(type, name);
 }
 //-----------------------------------------------------------------------------------------------
+#endif // _USE_QHELP
