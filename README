@@ -1,4 +1,4 @@
-FCEUX SDL 2.4.0 SDL README
+FCEUX SDL 2.5.0 SDL README
 ==========================
 Originally By Lukas Sabota (sf: punkrockguy318)
 Updated By mjbudd77
@@ -96,11 +96,8 @@ For Linux builds, the OpenGL library preference can be either GLVND or LEGACY (d
 To use GLVND OpenGL, add a -DGLVND=1 on the cmake command line.
 
 Qt Styling Options:
-The Qt GUI can use custom Qt widget styling by providing it a Qt stylesheet file. At startup, the GUI will look
-for an environment variable named FCEUX_QT_STYLESHEET that must contain the full path to the file. If the variable
-is defined and the file is readable by the program, then the styling settings will be used by the GUI.
-Bash Shell Setup Example:
-export FCEUX_QT_STYLESHEET=/home/me/myQt.stylesheet
+The Qt GUI can use custom Qt widget styling by providing it a Qt stylesheet file.
+Use the GUI config window to set style options.
 
 5 - LUA Scripting
 -----------------
