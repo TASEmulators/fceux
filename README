@@ -24,7 +24,9 @@ Table of Contents
 ----------------
 * sdl2  - Version >= 2.0  (sdl2 >= 2.8 recommended)
 * cmake - Required to build fceux.
-* qt5 OR qt6  - (qt version >= 5.11 recommended) (Qt Modules Used: Widgets, OpenGL, and Help)
+* qt5 OR qt6  - (qt version >= 5.11 recommended)
+	- Required Qt Modules: Widgets and OpenGL
+	- Optional Qt Modules: Help
 * liblua5.1 (optional) - Will statically link internally if the system cannot provide this.
 * libx264 (optional) - H.264 video encoder for avi recording (recommended)
 * libx265 (optional) - H.265 video encoder for avi recording (recommended)
@@ -94,6 +96,14 @@ See above build instructions.
 OpenGL options:
 For Linux builds, the OpenGL library preference can be either GLVND or LEGACY (default). 
 To use GLVND OpenGL, add a -DGLVND=1 on the cmake command line.
+
+Qt Help Engine options:
+The GUI supports both online and offline documentation options.
+Online documentation requires an internet connection and a browser.
+Qt supports an help engine that can read compiled html files (made via the Qt qhelpgenerator tool),
+these files can reside locally on ones computer and be accessed by the GUI using the Qt help engine module.
+The Qt help engine is an optional dependency and can be enabled in the build by
+adding a -DQHELP=1 on the cmake command line.
 
 Qt Styling Options:
 The Qt GUI can use custom Qt widget styling by providing it a Qt stylesheet file.
