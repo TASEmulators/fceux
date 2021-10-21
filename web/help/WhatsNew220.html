@@ -188,183 +188,183 @@
 <p class="rvps2"><span class="rvts6">Released -- 27 November 2012</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">The 2.2.0 release fixes a lot of bugs and adds many new features to prior releases, </span><span class="rvts32">increasing game compatibility and enhancing usability of both Windows and SDL ports</span><span class="rvts6">. The Windows version also includes major improvement of debugging tools and introduces the new powerful toolset – TAS Editor v1.0 – created to boost efficiency and ease of Tool-Assisted Speedrunning.</span></p>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts33">Common&nbsp;</span></p>
+<p class="rvps2"><span class="rvts6">The 2.2.0 release fixes a lot of bugs and adds many new features to prior releases, </span><span class="rvts34">increasing game compatibility and enhancing usability of both Windows and SDL ports</span><span class="rvts6">. The Windows version also includes major improvement of debugging tools and introduces the new powerful toolset – TAS Editor v1.0 – created to boost efficiency and ease of Tool-Assisted Speedrunning.</span></p>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts35">Common&nbsp;</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">Fixed crash when using machine with no sound card</span></li>
- <li class="rvps2"><span class="rvts32">Fixed long savestate messages containing path</span></li>
- <li class="rvps2"><span class="rvts32">Soft reset and power switch messages</span></li>
- <li class="rvps2"><span class="rvts32">All onscreen messages are now logged to Message Log</span></li>
- <li class="rvps2"><span class="rvts32">Fixed wrong default palette entry</span></li>
- <li class="rvps2"><span class="rvts32">Fixed bug when loading UNIF games</span></li>
- <li class="rvps2"><span class="rvts32">Improved HUD text rendering wrapping</span></li>
- <li class="rvps2"><span class="rvts32">"Display FPS" option</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed crash when using machine with no sound card</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed long savestate messages containing path</span></li>
+ <li class="rvps2"><span class="rvts34">Soft reset and power switch messages</span></li>
+ <li class="rvps2"><span class="rvts34">All onscreen messages are now logged to Message Log</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed wrong default palette entry</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed bug when loading UNIF games</span></li>
+ <li class="rvps2"><span class="rvts34">Improved HUD text rendering wrapping</span></li>
+ <li class="rvps2"><span class="rvts34">"Display FPS" option</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts36">Emulation</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">PAL/NTSC noise channel bug fixed</span></li>
+ <li class="rvps2"><span class="rvts34">All latest mapper changes from fceu-mm</span></li>
+ <li class="rvps2"><span class="rvts34">Also added mappers 176, 116, 156, 252, 28</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed mappers 242, 227, 115, 248, 12, 164, 15, 253, 23, 178, 90, 73 and many others</span></li>
+ <li class="rvps2"><span class="rvts34">Straighten out bandai m159/m016 handling and add valid null-EEPROM emulation to get those games booting.</span></li>
+ <li class="rvps2"><span class="rvts34">Add ability for CNROM games to choose whether they have bus conflicts (fixes Colorful Dragon (Unl) (Sachen), since it flakes out if bus conflicts are emulated)</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed bus conflict emulation, no kage no densetsu bug anymore</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed newppu bug which prevented metroid from booting, CHR RAM was not getting initialized to anything</span></li>
+ <li class="rvps2"><span class="rvts34">Newppu - fix bug in scroll reg logic causing mis-scrolls in p'radikus conflict</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts36">Movies</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">Fixed old bug in "Play Movie From Beginning"</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed replay engine bug that doubles the last input of the movie</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed movie savestates logic, loading post-movie savestates from different timeline is not allowed in read-only</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed savestates filenaming bug when working with a movie</span></li>
+ <li class="rvps2"><span class="rvts34">Added support for HUD recording in AVI dumping</span></li>
+ <li class="rvps2"><span class="rvts34">Rerecords counter display</span></li>
+ <li class="rvps2"><span class="rvts34">Config-&gt;Movie options-&gt;Always suggest Read-Only replay (for Replay dialog). No more accidental rewrites!</span></li>
+ <li class="rvps2"><span class="rvts34">Removed "Lag Counter Reset" hotkey, as it was obsolete since FCEUX 2.0.2</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts36">Lua</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">Fixed lua drawing alpha blending</span></li>
+ <li class="rvps2"><span class="rvts34">Auto-clearing previous frame drawings (same behaviour as other emulators)</span></li>
+ <li class="rvps2"><span class="rvts34">New library: taseditor (Windows-only) - contains 24 functions, see taseditor.chm</span></li>
 </ul>
 <p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34">Emulation</span></p>
+<p class="rvps2"><span class="rvts34">New Lua functions:</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">PAL/NTSC noise channel bug fixed</span></li>
- <li class="rvps2"><span class="rvts32">All latest mapper changes from fceu-mm</span></li>
- <li class="rvps2"><span class="rvts32">Also added mappers 176, 116, 156, 252, 28</span></li>
- <li class="rvps2"><span class="rvts32">Fixed mappers 242, 227, 115, 248, 12, 164, 15, 253, 23, 178, 90, 73 and many others</span></li>
- <li class="rvps2"><span class="rvts32">Straighten out bandai m159/m016 handling and add valid null-EEPROM emulation to get those games booting.</span></li>
- <li class="rvps2"><span class="rvts32">Add ability for CNROM games to choose whether they have bus conflicts (fixes Colorful Dragon (Unl) (Sachen), since it flakes out if bus conflicts are emulated)</span></li>
- <li class="rvps2"><span class="rvts32">Fixed bus conflict emulation, no kage no densetsu bug anymore</span></li>
- <li class="rvps2"><span class="rvts32">Fixed newppu bug which prevented metroid from booting, CHR RAM was not getting initialized to anything</span></li>
- <li class="rvps2"><span class="rvts32">Newppu - fix bug in scroll reg logic causing mis-scrolls in p'radikus conflict</span></li>
+ <li class="rvps2"><span class="rvts34">emu.paused()</span></li>
+ <li class="rvps2"><span class="rvts34">emu.setlagflag()</span></li>
+ <li class="rvps2"><span class="rvts34">joypad.getimmediate()</span></li>
 </ul>
 <p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34">Movies</span></p>
+<p class="rvps2"><span class="rvts34">New scripts:</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">Fixed old bug in "Play Movie From Beginning"</span></li>
- <li class="rvps2"><span class="rvts32">Fixed replay engine bug that doubles the last input of the movie</span></li>
- <li class="rvps2"><span class="rvts32">Fixed movie savestates logic, loading post-movie savestates from different timeline is not allowed in read-only</span></li>
- <li class="rvps2"><span class="rvts32">Fixed savestates filenaming bug when working with a movie</span></li>
- <li class="rvps2"><span class="rvts32">Added support for HUD recording in AVI dumping</span></li>
- <li class="rvps2"><span class="rvts32">Rerecords counter display</span></li>
- <li class="rvps2"><span class="rvts32">Config-&gt;Movie options-&gt;Always suggest Read-Only replay (for Replay dialog). No more accidental rewrites!</span></li>
- <li class="rvps2"><span class="rvts32">Removed "Lag Counter Reset" hotkey, as it was obsolete since FCEUX 2.0.2</span></li>
+ <li class="rvps2"><span class="rvts34">BoulderDash_AmoebaAI.lua</span></li>
+ <li class="rvps2"><span class="rvts34">ButtonCount.lua</span></li>
+ <li class="rvps2"><span class="rvts34">CustomLagIndicator_RvT.lua</span></li>
+ <li class="rvps2"><span class="rvts34">RBIBaseball.lua</span></li>
+ <li class="rvps2"><span class="rvts34">SoundDisplay.lua</span></li>
+ <li class="rvps2"><span class="rvts34">SoundDisplay2.lua</span></li>
+ <li class="rvps2"><span class="rvts34">taseditor\InputDisplay_for_Selection.lua</span></li>
+ <li class="rvps2"><span class="rvts34">taseditor\InvertSelection.lua</span></li>
+ <li class="rvps2"><span class="rvts34">taseditor\RecordBackwards.lua</span></li>
+ <li class="rvps2"><span class="rvts34">taseditor\ShowNotes.lua</span></li>
+ <li class="rvps2"><span class="rvts34">taseditor\Swap1P2P.lua</span></li>
+ <li class="rvps2"><span class="rvts34">taseditor\TrackNoise.lua</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts36">Win32</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">Total revamp of fulscreen support</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed graphic tearing with vertical sync enabled</span></li>
+ <li class="rvps2"><span class="rvts34">Added "Maintain aspect ratio" option to Video config</span></li>
+ <li class="rvps2"><span class="rvts34">Added "Hide mouse cursor" and "Use console BG color for empty areas" options to Video config</span></li>
+ <li class="rvps2"><span class="rvts34">Added "Switch fullscreen by double-click" option to GUI config</span></li>
+ <li class="rvps2"><span class="rvts34">Added "Force Grayscale" option to Palette config</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed crashes and bugs caused by 2.1.5 allowing hotkeys without ROM loaded</span></li>
+ <li class="rvps2"><span class="rvts34">Lua console now gets proper file path when selecting a file from the recent menu</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed context menus to use rightclicks in context menus correctly</span></li>
+ <li class="rvps2"><span class="rvts34">Reload hotkey now also supports removing invalid filenames in Recent ROMs</span></li>
+ <li class="rvps2"><span class="rvts34">Replay dialog speedup, it doesn't search for movies in fceux root folder anymore</span></li>
+ <li class="rvps2"><span class="rvts34">Support multibyte languages for opening files through drag&amp;drop (except for Lua files)</span></li>
+ <li class="rvps2"><span class="rvts34">Loading TAS Editor projects (*.fm3) by drag&amp;drop</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed bug with Input Config not displaying some key names</span></li>
+ <li class="rvps2"><span class="rvts34">Launch tools hotkeys shown in menu; general cleanup of menu/settings, changed some checkboxes to radiobuttons</span></li>
+ <li class="rvps2"><span class="rvts34">Added "Clear" button to Message Log</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts35">TAS Editor</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">Completely rewritten tool with brand new architecture and design. Too many changes to enlist, see taseditor.chm</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts35">Debugger</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">General window layout cleanup; different font; ".DEB files" can be switched off; etc</span></li>
+ <li class="rvps2"><span class="rvts34">Deleting a breakpoint/bookmark leaves selection in the list</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed mysterious out of bounds condition while editing breakpoints</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed RAM peek by a rightclick on left pane</span></li>
+ <li class="rvps2"><span class="rvts34">Allow Frame Advancing when Debugger is in breakpoint state</span></li>
+ <li class="rvps2"><span class="rvts34">Disabled breakpoints now don't impose slowdown</span></li>
+ <li class="rvps2"><span class="rvts34">When a breakpoint is hit, it becomes highlighed (selected) in the breakpoints list</span></li>
+ <li class="rvps2"><span class="rvts34">Show the number of breakpoints (enabled and total) above the breakpoints list</span></li>
+ <li class="rvps2"><span class="rvts34">"&gt;" points at current line in disassembly</span></li>
+ <li class="rvps2"><span class="rvts34">Improved stack display</span></li>
+ <li class="rvps2"><span class="rvts34">Added "CPU cycles" and "Instructions" counters (cumulative and delta)</span></li>
+ <li class="rvps2"><span class="rvts34">Added "Cycles counter exceeds N" and "Instructions counter exceeds N" type of breakpoints</span></li>
+ <li class="rvps2"><span class="rvts34">Single click on any address copies this address to the "Seek To" field and "Bookmark Add" field</span></li>
+ <li class="rvps2"><span class="rvts34">Double-click on any address prompts "Add Breakpoint here" dialog</span></li>
+ <li class="rvps2"><span class="rvts34">"ROM offsets" option displays real ROM addresses in the Disassembly window</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed conditional breakpoints bug: the error message didn't appear when editing a breakpoint</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed and improved Symbolic debug (Names and Comments display)</span></li>
+ <li class="rvps2"><span class="rvts34">Added Bookmarks naming</span></li>
+ <li class="rvps2"><span class="rvts34">Cleaned up and vastly improved debugging documentation</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts35">Trace Logger</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">Added "Symbolic trace" option</span></li>
+ <li class="rvps2"><span class="rvts34">"RTS" instructions now output the subroutine address/name</span></li>
+ <li class="rvps2"><span class="rvts34">Added "Use Stack Pointer for code tabbing (nesting visualization)" option</span></li>
+ <li class="rvps2"><span class="rvts34">Added "To the left from disassembly text" option for log format customization</span></li>
+ <li class="rvps2"><span class="rvts34">Added "Log current Frame number" option</span></li>
+ <li class="rvps2"><span class="rvts34">Added "Log emulator messages" option</span></li>
+ <li class="rvps2"><span class="rvts34">Added "Log breakpoint hits" option</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed bug with trying to log to file without choosing a filename</span></li>
+ <li class="rvps2"><span class="rvts34">Tracer now also updates its window when user pauses the game, not just when Debugger snaps</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts35">Code/Data Logger</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">Now can log data access from RAM code</span></li>
+ <li class="rvps2"><span class="rvts34">"Save Unused Data" button complements "Save Stripped iNes Rom" feature</span></li>
+ <li class="rvps2"><span class="rvts34">Now can log VROM access (CHR banks of the ROM) when NewPPU is enabled</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts35">Hex Editor</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">Display 0x5000-0x5FFF contents</span></li>
+ <li class="rvps2"><span class="rvts34">Ctrl+F opens Find dialog</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts35">RAM Watch / RAM Search</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">Updating list when emulator is paused (on Power or when resetting search)</span></li>
+ <li class="rvps2"><span class="rvts34">Fixed loading Data Size and Data Type from a .wch, now corrupted .wch won't crash</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts35">Cheats</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">Added Compare box to the Cheats window</span></li>
+ <li class="rvps2"><span class="rvts34">Don't lose cheat compare value when toggle cheat enables through UI</span></li>
+ <li class="rvps2"><span class="rvts34">Parse cheat files with non-ASCII characters properly</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts36">SDL</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts34">gtk 2.24 now recommended</span></li>
+ <li class="rvps2"><span class="rvts34">added gtk hotkey configuration dialog</span></li>
+ <li class="rvps2"><span class="rvts34">updated/added various gui elements for options</span></li>
+ <li class="rvps2"><span class="rvts34">new option: SDL.ShowFPS</span></li>
+ <li class="rvps2"><span class="rvts34">new option: SDL.Input..EnableOppositeDirectional - allow/disallow simultaneous right+left/up+down input</span></li>
+ <li class="rvps2"><span class="rvts34">fixed various build issues</span></li>
+ <li class="rvps2"><span class="rvts34">fixed segfault occuring during particular sequences in the cheat menu</span></li>
+ <li class="rvps2"><span class="rvts34">fixed potential segfault with gui</span></li>
+ <li class="rvps2"><span class="rvts34">fixed segfault issue on debian/ubuntu with proprietary nvidia drivers</span></li>
+ <li class="rvps2"><span class="rvts34">now compatible with llvm/clang++&nbsp;</span></li>
+ <li class="rvps2"><span class="rvts34">added build option to dynamically link lua</span></li>
+ <li class="rvps2"><span class="rvts34">updated default server configuration file to "fceux-server.conf" (from "fceu-server.conf")</span></li>
+ <li class="rvps2"><span class="rvts34">updated manpage and documentation</span></li>
 </ul>
 <p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34">Lua</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">Fixed lua drawing alpha blending</span></li>
- <li class="rvps2"><span class="rvts32">Auto-clearing previous frame drawings (same behaviour as other emulators)</span></li>
- <li class="rvps2"><span class="rvts32">New library: taseditor (Windows-only) - contains 24 functions, see taseditor.chm</span></li>
-</ul>
-<p class="rvps2"><span class="rvts32"><br/></span></p>
-<p class="rvps2"><span class="rvts32">New Lua functions:</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">emu.paused()</span></li>
- <li class="rvps2"><span class="rvts32">emu.setlagflag()</span></li>
- <li class="rvps2"><span class="rvts32">joypad.getimmediate()</span></li>
-</ul>
-<p class="rvps2"><span class="rvts32"><br/></span></p>
-<p class="rvps2"><span class="rvts32">New scripts:</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">BoulderDash_AmoebaAI.lua</span></li>
- <li class="rvps2"><span class="rvts32">ButtonCount.lua</span></li>
- <li class="rvps2"><span class="rvts32">CustomLagIndicator_RvT.lua</span></li>
- <li class="rvps2"><span class="rvts32">RBIBaseball.lua</span></li>
- <li class="rvps2"><span class="rvts32">SoundDisplay.lua</span></li>
- <li class="rvps2"><span class="rvts32">SoundDisplay2.lua</span></li>
- <li class="rvps2"><span class="rvts32">taseditor\InputDisplay_for_Selection.lua</span></li>
- <li class="rvps2"><span class="rvts32">taseditor\InvertSelection.lua</span></li>
- <li class="rvps2"><span class="rvts32">taseditor\RecordBackwards.lua</span></li>
- <li class="rvps2"><span class="rvts32">taseditor\ShowNotes.lua</span></li>
- <li class="rvps2"><span class="rvts32">taseditor\Swap1P2P.lua</span></li>
- <li class="rvps2"><span class="rvts32">taseditor\TrackNoise.lua</span></li>
-</ul>
 <p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34">Win32</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">Total revamp of fulscreen support</span></li>
- <li class="rvps2"><span class="rvts32">Fixed graphic tearing with vertical sync enabled</span></li>
- <li class="rvps2"><span class="rvts32">Added "Maintain aspect ratio" option to Video config</span></li>
- <li class="rvps2"><span class="rvts32">Added "Hide mouse cursor" and "Use console BG color for empty areas" options to Video config</span></li>
- <li class="rvps2"><span class="rvts32">Added "Switch fullscreen by double-click" option to GUI config</span></li>
- <li class="rvps2"><span class="rvts32">Added "Force Grayscale" option to Palette config</span></li>
- <li class="rvps2"><span class="rvts32">Fixed crashes and bugs caused by 2.1.5 allowing hotkeys without ROM loaded</span></li>
- <li class="rvps2"><span class="rvts32">Lua console now gets proper file path when selecting a file from the recent menu</span></li>
- <li class="rvps2"><span class="rvts32">Fixed context menus to use rightclicks in context menus correctly</span></li>
- <li class="rvps2"><span class="rvts32">Reload hotkey now also supports removing invalid filenames in Recent ROMs</span></li>
- <li class="rvps2"><span class="rvts32">Replay dialog speedup, it doesn't search for movies in fceux root folder anymore</span></li>
- <li class="rvps2"><span class="rvts32">Support multibyte languages for opening files through drag&amp;drop (except for Lua files)</span></li>
- <li class="rvps2"><span class="rvts32">Loading TAS Editor projects (*.fm3) by drag&amp;drop</span></li>
- <li class="rvps2"><span class="rvts32">Fixed bug with Input Config not displaying some key names</span></li>
- <li class="rvps2"><span class="rvts32">Launch tools hotkeys shown in menu; general cleanup of menu/settings, changed some checkboxes to radiobuttons</span></li>
- <li class="rvps2"><span class="rvts32">Added "Clear" button to Message Log</span></li>
-</ul>
 <p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts33">TAS Editor</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">Completely rewritten tool with brand new architecture and design. Too many changes to enlist, see taseditor.chm</span></li>
-</ul>
 <p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts33">Debugger</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">General window layout cleanup; different font; ".DEB files" can be switched off; etc</span></li>
- <li class="rvps2"><span class="rvts32">Deleting a breakpoint/bookmark leaves selection in the list</span></li>
- <li class="rvps2"><span class="rvts32">Fixed mysterious out of bounds condition while editing breakpoints</span></li>
- <li class="rvps2"><span class="rvts32">Fixed RAM peek by a rightclick on left pane</span></li>
- <li class="rvps2"><span class="rvts32">Allow Frame Advancing when Debugger is in breakpoint state</span></li>
- <li class="rvps2"><span class="rvts32">Disabled breakpoints now don't impose slowdown</span></li>
- <li class="rvps2"><span class="rvts32">When a breakpoint is hit, it becomes highlighed (selected) in the breakpoints list</span></li>
- <li class="rvps2"><span class="rvts32">Show the number of breakpoints (enabled and total) above the breakpoints list</span></li>
- <li class="rvps2"><span class="rvts32">"&gt;" points at current line in disassembly</span></li>
- <li class="rvps2"><span class="rvts32">Improved stack display</span></li>
- <li class="rvps2"><span class="rvts32">Added "CPU cycles" and "Instructions" counters (cumulative and delta)</span></li>
- <li class="rvps2"><span class="rvts32">Added "Cycles counter exceeds N" and "Instructions counter exceeds N" type of breakpoints</span></li>
- <li class="rvps2"><span class="rvts32">Single click on any address copies this address to the "Seek To" field and "Bookmark Add" field</span></li>
- <li class="rvps2"><span class="rvts32">Double-click on any address prompts "Add Breakpoint here" dialog</span></li>
- <li class="rvps2"><span class="rvts32">"ROM offsets" option displays real ROM addresses in the Disassembly window</span></li>
- <li class="rvps2"><span class="rvts32">Fixed conditional breakpoints bug: the error message didn't appear when editing a breakpoint</span></li>
- <li class="rvps2"><span class="rvts32">Fixed and improved Symbolic debug (Names and Comments display)</span></li>
- <li class="rvps2"><span class="rvts32">Added Bookmarks naming</span></li>
- <li class="rvps2"><span class="rvts32">Cleaned up and vastly improved debugging documentation</span></li>
-</ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts33">Trace Logger</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">Added "Symbolic trace" option</span></li>
- <li class="rvps2"><span class="rvts32">"RTS" instructions now output the subroutine address/name</span></li>
- <li class="rvps2"><span class="rvts32">Added "Use Stack Pointer for code tabbing (nesting visualization)" option</span></li>
- <li class="rvps2"><span class="rvts32">Added "To the left from disassembly text" option for log format customization</span></li>
- <li class="rvps2"><span class="rvts32">Added "Log current Frame number" option</span></li>
- <li class="rvps2"><span class="rvts32">Added "Log emulator messages" option</span></li>
- <li class="rvps2"><span class="rvts32">Added "Log breakpoint hits" option</span></li>
- <li class="rvps2"><span class="rvts32">Fixed bug with trying to log to file without choosing a filename</span></li>
- <li class="rvps2"><span class="rvts32">Tracer now also updates its window when user pauses the game, not just when Debugger snaps</span></li>
-</ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts33">Code/Data Logger</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">Now can log data access from RAM code</span></li>
- <li class="rvps2"><span class="rvts32">"Save Unused Data" button complements "Save Stripped iNes Rom" feature</span></li>
- <li class="rvps2"><span class="rvts32">Now can log VROM access (CHR banks of the ROM) when NewPPU is enabled</span></li>
-</ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts33">Hex Editor</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">Display 0x5000-0x5FFF contents</span></li>
- <li class="rvps2"><span class="rvts32">Ctrl+F opens Find dialog</span></li>
-</ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts33">RAM Watch / RAM Search</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">Updating list when emulator is paused (on Power or when resetting search)</span></li>
- <li class="rvps2"><span class="rvts32">Fixed loading Data Size and Data Type from a .wch, now corrupted .wch won't crash</span></li>
-</ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts33">Cheats</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">Added Compare box to the Cheats window</span></li>
- <li class="rvps2"><span class="rvts32">Don't lose cheat compare value when toggle cheat enables through UI</span></li>
- <li class="rvps2"><span class="rvts32">Parse cheat files with non-ASCII characters properly</span></li>
-</ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34">SDL</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts32">gtk 2.24 now recommended</span></li>
- <li class="rvps2"><span class="rvts32">added gtk hotkey configuration dialog</span></li>
- <li class="rvps2"><span class="rvts32">updated/added various gui elements for options</span></li>
- <li class="rvps2"><span class="rvts32">new option: SDL.ShowFPS</span></li>
- <li class="rvps2"><span class="rvts32">new option: SDL.Input..EnableOppositeDirectional - allow/disallow simultaneous right+left/up+down input</span></li>
- <li class="rvps2"><span class="rvts32">fixed various build issues</span></li>
- <li class="rvps2"><span class="rvts32">fixed segfault occuring during particular sequences in the cheat menu</span></li>
- <li class="rvps2"><span class="rvts32">fixed potential segfault with gui</span></li>
- <li class="rvps2"><span class="rvts32">fixed segfault issue on debian/ubuntu with proprietary nvidia drivers</span></li>
- <li class="rvps2"><span class="rvts32">now compatible with llvm/clang++&nbsp;</span></li>
- <li class="rvps2"><span class="rvts32">added build option to dynamically link lua</span></li>
- <li class="rvps2"><span class="rvts32">updated default server configuration file to "fceux-server.conf" (from "fceu-server.conf")</span></li>
- <li class="rvps2"><span class="rvts32">updated manpage and documentation</span></li>
-</ul>
-<p class="rvps2"><span class="rvts32"><br/></span></p>
-<p class="rvps2"><span class="rvts32"><br/></span></p>
-<p class="rvps2"><span class="rvts32"><br/></span></p>
-<p class="rvps2"><span class="rvts32"><br/></span></p>
-<p class="rvps2"><span class="rvts32"></span><span class="rvts6"></span></p>
+<p class="rvps2"><span class="rvts34"></span><span class="rvts6"></span></p>
 <p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com">Free HTML Help documentation generator</a></p>
 
             </div>
