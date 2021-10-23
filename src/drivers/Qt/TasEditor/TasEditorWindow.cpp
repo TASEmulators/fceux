@@ -37,6 +37,7 @@
 #include "Qt/TasEditor/TasEditorWindow.h"
 
 TasEditorWindow *tasWin = NULL;
+MARKERS_MANAGER *markersManager = NULL;
 
 //----------------------------------------------------------------------------
 //----  Main TAS Editor Window
@@ -77,6 +78,9 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	QMenuBar    *menuBar;
 
 	tasWin = this;
+	::taseditorConfig = &this->taseditorConfig;
+	::markersManager  = &this->markersManager;
+	::splicer         = &this->splicer;
 
 	setWindowTitle("TAS Editor");
 
