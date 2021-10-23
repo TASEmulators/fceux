@@ -15,9 +15,9 @@ Markers - Snapshot of Markers state
 * stores resources: max length of a Note
 ------------------------------------------------------------------------------------ */
 
-#include "../common.h"
-#include "markers.h"
-#include "zlib.h"
+#include <zlib.h>
+
+#include "Qt/TasEditor/markers.h"
 
 MARKERS::MARKERS()
 {

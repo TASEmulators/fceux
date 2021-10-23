@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 
+#include "fceu.h"
 #define MAX_NOTE_LEN 100
 
 class MARKERS

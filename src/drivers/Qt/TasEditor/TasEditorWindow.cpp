@@ -36,8 +36,10 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
-TasEditorWindow *tasWin = NULL;
-MARKERS_MANAGER *markersManager = NULL;
+TasEditorWindow  *tasWin = NULL;
+TASEDITOR_CONFIG *taseditorConfig = NULL;
+MARKERS_MANAGER  *markersManager = NULL;
+SPLICER          *splicer = NULL;
 
 //----------------------------------------------------------------------------
 //----  Main TAS Editor Window

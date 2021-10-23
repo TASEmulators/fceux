@@ -535,9 +535,12 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/gwavi.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/TasEditorWindow.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/taseditor_config.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/markers_manager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/selection.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/splicer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/inputlog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/laglog.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/markers.cpp
 )
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
