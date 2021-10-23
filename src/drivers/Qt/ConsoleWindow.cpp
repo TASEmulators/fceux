@@ -1871,6 +1871,7 @@ void consoleWin_t::createMainMenu(void)
 	
 	subMenu->addAction(act);
 
+#if  defined(WIN32) || defined(_USE_QHELP)
 	// Help -> Documentation Offline
 	act = new QAction(tr("&Local"), this);
 	act->setStatusTip(tr("Documentation"));
@@ -1878,6 +1879,7 @@ void consoleWin_t::createMainMenu(void)
 	connect(act, SIGNAL(triggered()), this, SLOT(openOfflineDocs(void)) );
 
 	subMenu->addAction(act);
+#endif
 };
 //---------------------------------------------------------------------------
 int consoleWin_t::loadVideoDriver( int driverId )
