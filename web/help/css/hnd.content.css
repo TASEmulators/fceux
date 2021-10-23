@@ -152,61 +152,58 @@ span.rvts26
 }
 span.rvts27
 {
- color: #000000;
+ font-size: 20pt;
+ font-weight: bold;
 }
 span.rvts28
 {
  font-size: 16pt;
- color: #000000;
+ font-weight: bold;
 }
 span.rvts29
 {
- font-size: 14pt;
  color: #000000;
 }
 span.rvts30
 {
- font-size: 12pt;
+ font-size: 16pt;
  color: #000000;
 }
 span.rvts31
+{
+ font-size: 14pt;
+ color: #000000;
+}
+span.rvts32
+{
+ font-size: 12pt;
+ color: #000000;
+}
+span.rvts33
 {
  font-size: 12pt;
  font-family: 'Times New Roman', 'Times', serif;
  color: #000000;
 }
-span.rvts32
+span.rvts34
 {
 }
-span.rvts33
+span.rvts35
 {
  font-size: 14pt;
 }
-span.rvts34
+span.rvts36
 {
  font-size: 16pt;
 }
-a.rvts35, span.rvts35
+a.rvts37, span.rvts37
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts35:hover
+a.rvts37:hover
 {
  color: #0000ff;
-}
-a.rvts36, span.rvts36
-{
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts36:hover
-{
- color: #0000ff;
-}
-span.rvts37
-{
- font-size: 16pt;
 }
 a.rvts38, span.rvts38
 {
@@ -219,42 +216,42 @@ a.rvts38:hover
 }
 span.rvts39
 {
- font-family: 'Lucida Console', 'Monaco', monospace;
+ font-size: 16pt;
 }
-span.rvts40
-{
- font-style: italic;
-}
-a.rvts41, span.rvts41
+a.rvts40, span.rvts40
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts41:hover
+a.rvts40:hover
 {
  color: #0000ff;
+}
+span.rvts41
+{
+ font-family: 'Lucida Console', 'Monaco', monospace;
 }
 span.rvts42
 {
- font-family: 'Times New Roman', 'Times', serif;
+ font-style: italic;
 }
-span.rvts43
-{
- font-size: 11pt;
- font-family: 'Courier New', 'Courier', monospace;
-}
-a.rvts44, span.rvts44
+a.rvts43, span.rvts43
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts44:hover
+a.rvts43:hover
 {
  color: #0000ff;
 }
+span.rvts44
+{
+ font-family: 'Times New Roman', 'Times', serif;
+}
 span.rvts45
 {
- font-weight: bold;
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
 }
 a.rvts46, span.rvts46
 {
@@ -265,19 +262,18 @@ a.rvts46:hover
 {
  color: #0000ff;
 }
-a.rvts47, span.rvts47
+span.rvts47
+{
+ font-weight: bold;
+}
+a.rvts48, span.rvts48
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts47:hover
+a.rvts48:hover
 {
  color: #0000ff;
-}
-span.rvts48
-{
- font-size: 16pt;
- text-decoration: underline;
 }
 a.rvts49, span.rvts49
 {
@@ -290,7 +286,8 @@ a.rvts49:hover
 }
 span.rvts50
 {
- font-size: 24pt;
+ font-size: 16pt;
+ text-decoration: underline;
 }
 a.rvts51, span.rvts51
 {
@@ -303,33 +300,33 @@ a.rvts51:hover
 }
 span.rvts52
 {
- font-size: 14pt;
+ font-size: 24pt;
+}
+a.rvts53, span.rvts53
+{
+ color: #0000ff;
  text-decoration: underline;
 }
-span.rvts53
+a.rvts53:hover
 {
- font-family: 'Courier New', 'Courier', monospace;
+ color: #0000ff;
 }
 span.rvts54
 {
- font-size: 9pt;
-}
-a.rvts55, span.rvts55
-{
- font-size: 9pt;
- color: #0000ff;
+ font-size: 14pt;
  text-decoration: underline;
 }
-a.rvts55:hover
-{
- color: #0000ff;
-}
-span.rvts56
+span.rvts55
 {
  font-family: 'Courier New', 'Courier', monospace;
 }
+span.rvts56
+{
+ font-size: 9pt;
+}
 a.rvts57, span.rvts57
 {
+ font-size: 9pt;
  color: #0000ff;
  text-decoration: underline;
 }
@@ -337,14 +334,9 @@ a.rvts57:hover
 {
  color: #0000ff;
 }
-a.rvts58, span.rvts58
+span.rvts58
 {
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts58:hover
-{
- color: #0000ff;
+ font-family: 'Courier New', 'Courier', monospace;
 }
 a.rvts59, span.rvts59
 {
@@ -355,10 +347,14 @@ a.rvts59:hover
 {
  color: #0000ff;
 }
-span.rvts60
+a.rvts60, span.rvts60
 {
- font-size: 12pt;
- font-weight: bold;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts60:hover
+{
+ color: #0000ff;
 }
 a.rvts61, span.rvts61
 {
@@ -369,14 +365,10 @@ a.rvts61:hover
 {
  color: #0000ff;
 }
-a.rvts62, span.rvts62
+span.rvts62
 {
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts62:hover
-{
- color: #0000ff;
+ font-size: 12pt;
+ font-weight: bold;
 }
 a.rvts63, span.rvts63
 {
@@ -401,6 +393,10 @@ a.rvts65, span.rvts65
  color: #0000ff;
  text-decoration: underline;
 }
+a.rvts65:hover
+{
+ color: #0000ff;
+}
 a.rvts66, span.rvts66
 {
  color: #0000ff;
@@ -415,10 +411,6 @@ a.rvts67, span.rvts67
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts67:hover
-{
- color: #0000ff;
-}
 a.rvts68, span.rvts68
 {
  color: #0000ff;
@@ -428,11 +420,14 @@ a.rvts68:hover
 {
  color: #0000ff;
 }
-span.rvts69
+a.rvts69, span.rvts69
 {
- font-size: 12pt;
- font-weight: bold;
+ color: #0000ff;
  text-decoration: underline;
+}
+a.rvts69:hover
+{
+ color: #0000ff;
 }
 a.rvts70, span.rvts70
 {
@@ -443,14 +438,11 @@ a.rvts70:hover
 {
  color: #0000ff;
 }
-a.rvts71, span.rvts71
+span.rvts71
 {
- color: #0000ff;
+ font-size: 12pt;
+ font-weight: bold;
  text-decoration: underline;
-}
-a.rvts71:hover
-{
- color: #0000ff;
 }
 a.rvts72, span.rvts72
 {
@@ -461,99 +453,99 @@ a.rvts72:hover
 {
  color: #0000ff;
 }
-span.rvts73
+a.rvts73, span.rvts73
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts73:hover
+{
+ color: #0000ff;
+}
+a.rvts74, span.rvts74
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts74:hover
+{
+ color: #0000ff;
+}
+span.rvts75
 {
  font-size: 11pt;
  font-weight: bold;
 }
-span.rvts74
+span.rvts76
 {
  font-size: 8pt;
 }
-span.rvts75
+span.rvts77
 {
  color: #000000;
 }
-a.rvts76, span.rvts76
+a.rvts78, span.rvts78
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts76:hover
+a.rvts78:hover
 {
  color: #0000ff;
 }
-a.rvts77, span.rvts77
+a.rvts79, span.rvts79
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts77:hover
+a.rvts79:hover
 {
  color: #0000ff;
-}
-span.rvts78
-{
- color: #0000ff;
-}
-span.rvts79
-{
- color: #00cc00;
 }
 span.rvts80
 {
- color: #ff0000;
+ color: #0000ff;
 }
 span.rvts81
 {
- color: #00be00;
+ color: #00cc00;
 }
 span.rvts82
 {
- color: #a08c00;
+ color: #ff0000;
 }
 span.rvts83
 {
- color: #0000c3;
+ color: #00be00;
 }
 span.rvts84
 {
- color: #0082a0;
+ color: #a08c00;
 }
 span.rvts85
 {
- color: #d2be00;
+ color: #0000c3;
 }
 span.rvts86
 {
- color: #0a0aff;
+ color: #0082a0;
 }
 span.rvts87
 {
- color: #05ff05;
+ color: #d2be00;
 }
 span.rvts88
 {
+ color: #0a0aff;
+}
+span.rvts89
+{
+ color: #05ff05;
+}
+span.rvts90
+{
  font-size: 22pt;
  text-decoration: underline;
-}
-a.rvts89, span.rvts89
-{
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts89:hover
-{
- color: #0000ff;
-}
-a.rvts90, span.rvts90
-{
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts90:hover
-{
- color: #0000ff;
 }
 a.rvts91, span.rvts91
 {
@@ -564,163 +556,181 @@ a.rvts91:hover
 {
  color: #0000ff;
 }
-span.rvts92
+a.rvts92, span.rvts92
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts92:hover
+{
+ color: #0000ff;
+}
+a.rvts93, span.rvts93
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts93:hover
+{
+ color: #0000ff;
+}
+span.rvts94
 {
  font-weight: bold;
  color: #ff0000;
 }
-span.rvts93
+span.rvts95
 {
  font-weight: bold;
  color: #ff0000;
  background-color: #ffffff;
 }
-span.rvts94
+span.rvts96
 {
  font-size: 18pt;
  font-weight: bold;
 }
-a.rvts95, span.rvts95
+a.rvts97, span.rvts97
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts95:hover
+a.rvts97:hover
 {
  color: #0000ff;
 }
-a.rvts96, span.rvts96
+a.rvts98, span.rvts98
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts96:hover
+a.rvts98:hover
 {
  color: #0000ff;
-}
-span.rvts97
-{
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
-}
-span.rvts98
-{
- font-size: 14pt;
- font-weight: bold;
 }
 span.rvts99
 {
  font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
- color: #000080;
+ font-weight: bold;
 }
 span.rvts100
 {
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- color: #333399;
+ font-size: 14pt;
+ font-weight: bold;
 }
 span.rvts101
 {
+ font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
  color: #000080;
 }
 span.rvts102
 {
- font-size: 16pt;
+ font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
+ color: #333399;
 }
 span.rvts103
 {
- font-size: 11pt;
  font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
+ color: #000080;
 }
 span.rvts104
 {
+ font-size: 16pt;
  font-family: 'Courier New', 'Courier', monospace;
  font-weight: bold;
 }
 span.rvts105
 {
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts106
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+}
+span.rvts107
+{
  font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
  color: #000080;
 }
-a.rvts106, span.rvts106
+a.rvts108, span.rvts108
 {
  font-family: 'Courier New', 'Courier', monospace;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts106:hover
+a.rvts108:hover
 {
  color: #0000ff;
-}
-span.rvts107
-{
- font-size: 14pt;
- font-weight: bold;
-}
-span.rvts108
-{
- font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
- text-decoration: underline;
 }
 span.rvts109
 {
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- color: #00007f;
+ font-size: 14pt;
+ font-weight: bold;
 }
 span.rvts110
 {
- font-size: 14pt;
  font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+ text-decoration: underline;
 }
 span.rvts111
 {
  font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
+ color: #00007f;
 }
 span.rvts112
+{
+ font-size: 14pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts113
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts114
 {
  font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
  color: #00007f;
 }
-span.rvts113
+span.rvts115
 {
  font-family: 'Courier New', 'Courier', monospace;
  color: ;
 }
-span.rvts114
+span.rvts116
 {
  color: ;
 }
-span.rvts115
+span.rvts117
 {
  font-family: 'Lucida Console', 'Monaco', monospace;
  text-decoration: underline;
 }
-span.rvts116
+span.rvts118
 {
  font-weight: bold;
  text-decoration: underline;
 }
-span.rvts117
+span.rvts119
 {
  font-size: 11pt;
  text-decoration: underline;
 }
-span.rvts118
+span.rvts120
 {
  font-size: 5pt;
 }
-span.rvts119
+span.rvts121
 {
  font-size: 5pt;
  font-weight: bold;
@@ -770,10 +780,10 @@ p,ul,ol /* Paragraph Style */
 }
 /* ========== Lists ========== */
 .list0 {text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;}
-.list1 {text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: circle;}
-.list2 {text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: square;}
-.list3 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: circle;}
-.list4 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: square;}
-.list5 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: disc;}
+.list1 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: circle;}
+.list2 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: square;}
+.list3 {text-indent: 0px; padding: 0; margin: 0 0 0 48px; list-style-position: outside; list-style-type: disc;}
+.list4 {text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: circle;}
+.list5 {text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: square;}
 .list6 {text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside;}
 .list7 {text-indent: 0px; padding: 0; margin: 0 0 0 36px; list-style-position: outside; list-style-type: circle;}

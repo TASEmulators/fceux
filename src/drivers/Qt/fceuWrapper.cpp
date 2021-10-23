@@ -25,6 +25,7 @@
 #include <limits.h>
 #include <unzip.h>
 
+#include <QFileInfo>
 #include <QStyleFactory>
 #include "Qt/main.h"
 #include "Qt/throttle.h"
@@ -961,18 +962,27 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	// load lua script if option passed
 	g_config->getOption("SDL.LuaScript", &s);
 	g_config->setOption("SDL.LuaScript", "");
-	if (s != "")
+	if (s.size() > 0)
 	{
-#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+		QFileInfo fi( s.c_str() );
 
 		// Resolve absolute path to file
-		char fullpath[2048];
-		if ( realpath( s.c_str(), fullpath ) != NULL )
+		if ( fi.exists() )
 		{
-			//printf("Fullpath: '%s'\n", fullpath );
-			s.assign( fullpath );
+			//printf("FI: '%s'\n", fi.absoluteFilePath().toStdString().c_str() );
+			//printf("FI: '%s'\n", fi.canonicalFilePath().toStdString().c_str() );
+			s = fi.canonicalFilePath().toStdString();
 		}
-#endif
+//#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+//
+//		// Resolve absolute path to file
+//		char fullpath[2048];
+//		if ( realpath( s.c_str(), fullpath ) != NULL )
+//		{
+//			printf("Fullpath: '%s'\n", fullpath );
+//			s.assign( fullpath );
+//		}
+//#endif
 		FCEU_LoadLuaCode(s.c_str());
 	}
 #endif
