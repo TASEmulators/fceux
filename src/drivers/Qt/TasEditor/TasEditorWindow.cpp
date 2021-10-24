@@ -36,10 +36,19 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
-TasEditorWindow  *tasWin = NULL;
-TASEDITOR_CONFIG *taseditorConfig = NULL;
-MARKERS_MANAGER  *markersManager = NULL;
-SPLICER          *splicer = NULL;
+TasEditorWindow   *tasWin = NULL;
+TASEDITOR_PROJECT *project = NULL;
+TASEDITOR_CONFIG  *taseditorConfig = NULL;
+TASEDITOR_LUA     *taseditor_lua = NULL;
+MARKERS_MANAGER   *markersManager = NULL;
+SELECTION         *selection = NULL;
+GREENZONE         *greenzone = NULL;
+BOOKMARKS         *bookmarks = NULL;
+BRANCHES          *branches = NULL;
+PLAYBACK          *playback = NULL;
+RECORDER          *recorder = NULL;
+HISTORY           *history = NULL;
+SPLICER           *splicer = NULL;
 
 //----------------------------------------------------------------------------
 //----  Main TAS Editor Window
@@ -80,8 +89,17 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	QMenuBar    *menuBar;
 
 	tasWin = this;
+	::project         = &this->project;
 	::taseditorConfig = &this->taseditorConfig;
+	::taseditor_lua   = &this->taseditor_lua;
 	::markersManager  = &this->markersManager;
+	::selection       = &this->selection;
+	::greenzone       = &this->greenzone;
+	::bookmarks       = &this->bookmarks;
+	::playback        = &this->playback;
+	::recorder        = &this->recorder;
+	::history         = &this->history;
+	::branches        = &this->branches;
 	::splicer         = &this->splicer;
 
 	setWindowTitle("TAS Editor");

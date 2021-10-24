@@ -25,7 +25,6 @@ InputLog - Log of Input
 #include "Qt/TasEditor/taseditor_project.h"
 
 extern SELECTION selection;
-//extern int getInputType(MovieData& md);
 
 int joysticksPerFrame[INPUT_TYPES_TOTAL] = {1, 2, 4};
 
@@ -36,9 +35,9 @@ INPUTLOG::INPUTLOG()
 void INPUTLOG::init(MovieData& md, bool hotchanges, int force_input_type)
 {
 	hasHotChanges = hotchanges;
-	//if (force_input_type < 0)
-	//	inputType = getInputType(md);
-	//else
+	if (force_input_type < 0)
+		inputType = getInputType(md);
+	else
 		inputType = force_input_type;
 	int num_joys = joysticksPerFrame[inputType];
 	// retrieve Input data from movie data

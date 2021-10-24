@@ -20,18 +20,22 @@ Greenzone - Access zone
 * stores resources: save id, properties of gradual cleaning, timing of cleaning
 ------------------------------------------------------------------------------------ */
 
-#include "taseditor_project.h"
-#include "state.h"
-#include "zlib.h"
+#include <zlib.h>
 
-extern TASEDITOR_CONFIG taseditorConfig;
-extern TASEDITOR_PROJECT project;
-extern PLAYBACK playback;
-extern HISTORY history;
-extern BOOKMARKS bookmarks;
-extern MARKERS_MANAGER markersManager;
-extern PIANO_ROLL pianoRoll;
-extern SELECTION selection;
+#include "fceu.h"
+#include "state.h"
+#include "driver.h"
+#include "Qt/TasEditor/taseditor_project.h"
+#include "Qt/TasEditor/TasEditorWindow.h"
+
+//extern TASEDITOR_CONFIG taseditorConfig;
+//extern TASEDITOR_PROJECT project;
+//extern PLAYBACK playback;
+//extern HISTORY history;
+//extern BOOKMARKS bookmarks;
+//extern MARKERS_MANAGER markersManager;
+//extern PIANO_ROLL pianoRoll;
+//extern SELECTION selection;
 
 extern char lagFlag;
 
@@ -60,7 +64,7 @@ void GREENZONE::reset()
 void GREENZONE::update()
 {
 	// keep collecting savestates, this code must be executed at the end of every frame
-	if (taseditorConfig.enableGreenzoning)
+	if (taseditorConfig->enableGreenzoning)
 	{
 		collectCurrentState();
 	} else
@@ -80,7 +84,7 @@ void GREENZONE::update()
 		// lagFlag indicates that lag was in previous frame
 		int old_lagFlag = lagLog.getLagInfoAtFrame(currFrameCounter - 1);
 		// Auto-adjust Input according to lag
-		if (taseditorConfig.autoAdjustInputAccordingToLag && old_lagFlag != LAGGED_UNKNOWN)
+		if (taseditorConfig->autoAdjustInputAccordingToLag && old_lagFlag != LAGGED_UNKNOWN)
 		{
 			if ((old_lagFlag == LAGGED_YES) && !lagFlag)
 			{
@@ -97,12 +101,12 @@ void GREENZONE::update()
 			{
 				lagLog.setLagInfo(currFrameCounter - 1, true);
 				// keep current snapshot laglog in touch
-				history.getCurrentSnapshot().laglog.setLagInfo(currFrameCounter - 1, true);
+				history->getCurrentSnapshot().laglog.setLagInfo(currFrameCounter - 1, true);
 			} else if (!lagFlag && old_lagFlag != LAGGED_NO)
 			{
 				lagLog.setLagInfo(currFrameCounter - 1, false);
 				// keep current snapshot laglog in touch
-				history.getCurrentSnapshot().laglog.setLagInfo(currFrameCounter - 1, false);
+				history->getCurrentSnapshot().laglog.setLagInfo(currFrameCounter - 1, false);
 			}
 		}
 	}
@@ -134,11 +138,11 @@ bool GREENZONE::loadSavestateOfFrame(unsigned int frame)
 void GREENZONE::runGreenzoneCleaning()
 {
 	bool changed = false;
-	int i = currFrameCounter - taseditorConfig.greenzoneCapacity;
+	int i = currFrameCounter - taseditorConfig->greenzoneCapacity;
 	if (i <= 0) goto finish;	// zeroth frame should not be cleaned
 	int limit;
 	// 2x of 1/2
-	limit = i - 2 * taseditorConfig.greenzoneCapacity;
+	limit = i - 2 * taseditorConfig->greenzoneCapacity;
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
@@ -147,7 +151,7 @@ void GREENZONE::runGreenzoneCleaning()
 	}
 	if (i < 0) goto finish;
 	// 4x of 1/4
-	limit = i - 4 * taseditorConfig.greenzoneCapacity;
+	limit = i - 4 * taseditorConfig->greenzoneCapacity;
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
@@ -156,7 +160,7 @@ void GREENZONE::runGreenzoneCleaning()
 	}
 	if (i < 0) goto finish;
 	// 8x of 1/8
-	limit = i - 8 * taseditorConfig.greenzoneCapacity;
+	limit = i - 8 * taseditorConfig->greenzoneCapacity;
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
@@ -165,7 +169,7 @@ void GREENZONE::runGreenzoneCleaning()
 	}
 	if (i < 0) goto finish;
 	// 16x of 1/16
-	limit = i - 16 * taseditorConfig.greenzoneCapacity;
+	limit = i - 16 * taseditorConfig->greenzoneCapacity;
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
@@ -180,8 +184,8 @@ void GREENZONE::runGreenzoneCleaning()
 finish:
 	if (changed)
 	{
-		pianoRoll.redraw();
-		bookmarks.redrawBookmarksList();
+		//pianoRoll.redraw();
+		bookmarks->redrawBookmarksList();
 	}
 	// shedule next cleaning
 	nextCleaningTime = clock() + TIME_BETWEEN_CLEANINGS;
@@ -203,7 +207,7 @@ bool GREENZONE::clearSavestateAndFreeMemory(unsigned int frame)
 {
 	if (frame < savestates.size() && savestates[frame].size())
 	{
-	    savestates[frame].swap(std::vector<uint8>());
+		//savestates[frame].swap(std::vector<uint8_t>()); FIXME
 		return true;
 	} else
 	{
@@ -213,7 +217,7 @@ bool GREENZONE::clearSavestateAndFreeMemory(unsigned int frame)
 
 void GREENZONE::ungreenzoneSelectedFrames()
 {
-	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
+	RowsSelection* current_selection = selection->getCopyOfCurrentRowsSelection();
 	if (current_selection->size() == 0) return;
 	bool changed = false;
 	int size = savestates.size();
@@ -225,8 +229,8 @@ void GREENZONE::ungreenzoneSelectedFrames()
 		changed = changed | clearSavestateAndFreeMemory(*it);
 	if (changed)
 	{
-		pianoRoll.redraw();
-		bookmarks.redrawBookmarksList();
+		//pianoRoll.redraw();
+		bookmarks->redrawBookmarksList();
 	}
 }
 
@@ -260,7 +264,7 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 				// update TASEditor progressbar from time to time
 				if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 				{
-					playback.setProgressbar(frame, greenzoneSize);
+					playback->setProgressbar(frame, greenzoneSize);
 					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 				}
 				if (!savestates[frame].size()) continue;
@@ -284,7 +288,7 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 					// update TASEditor progressbar from time to time
 					if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 					{
-						playback.setProgressbar(frame, greenzoneSize);
+						playback->setProgressbar(frame, greenzoneSize);
 						last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 					}
 					if (!savestates[frame].size()) continue;
@@ -304,12 +308,12 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 			// write savestates
 			for (frame = 0; frame < greenzoneSize; ++frame)
 			{
-				if (markersManager.getMarkerAtFrame(frame) || frame == currFrameCounter)
+				if (markersManager->getMarkerAtFrame(frame) || frame == currFrameCounter)
 				{
 					// update TASEditor progressbar from time to time
 					if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 					{
-						playback.setProgressbar(frame, greenzoneSize);
+						playback->setProgressbar(frame, greenzoneSize);
 						last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 					}
 					if (!savestates[frame].size()) continue;
@@ -347,6 +351,10 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 // returns true if couldn't load
 bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 {
+	int frame = 0, prev_frame = -1, size = 0;
+	int last_tick = 0;
+	char save_id[GREENZONE_ID_LEN];
+
 	free();
 	if (offset)
 	{
@@ -354,13 +362,10 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 	} else
 	{
 		reset();
-		playback.restartPlaybackFromZeroGround();		// reset Playback cursor to frame 0
+		playback->restartPlaybackFromZeroGround();		// reset Playback cursor to frame 0
 		return false;
 	}
-	int frame = 0, prev_frame = -1, size = 0;
-	int last_tick = 0;
 	// read "GREENZONE" string
-	char save_id[GREENZONE_ID_LEN];
 	if ((int)is->fread(save_id, GREENZONE_ID_LEN) < GREENZONE_ID_LEN) goto error;
 	if (!strcmp(greenzone_skipsave_id, save_id))
 	{
@@ -392,7 +397,7 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 			{
 				// literally no Greenzone in the file, but this is still not a error
 				reset();
-				playback.restartPlaybackFromZeroGround();		// reset Playback cursor to frame 0
+				playback->restartPlaybackFromZeroGround();		// reset Playback cursor to frame 0
 				FCEU_printf("No Greenzone in the file, Playback at frame 0\n");
 				return false;
 			}
@@ -411,11 +416,11 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 		if (read32le(&frame, is))
 		{
 			currFrameCounter = frame;
-			int greenzone_tail_frame = currFrameCounter - taseditorConfig.greenzoneCapacity;
-			int greenzone_tail_frame2 = greenzone_tail_frame - 2 * taseditorConfig.greenzoneCapacity;
-			int greenzone_tail_frame4 = greenzone_tail_frame - 4 * taseditorConfig.greenzoneCapacity;
-			int greenzone_tail_frame8 = greenzone_tail_frame - 8 * taseditorConfig.greenzoneCapacity;
-			int greenzone_tail_frame16 = greenzone_tail_frame - 16 * taseditorConfig.greenzoneCapacity;
+			int greenzone_tail_frame = currFrameCounter - taseditorConfig->greenzoneCapacity;
+			int greenzone_tail_frame2 = greenzone_tail_frame - 2 * taseditorConfig->greenzoneCapacity;
+			int greenzone_tail_frame4 = greenzone_tail_frame - 4 * taseditorConfig->greenzoneCapacity;
+			int greenzone_tail_frame8 = greenzone_tail_frame - 8 * taseditorConfig->greenzoneCapacity;
+			int greenzone_tail_frame16 = greenzone_tail_frame - 16 * taseditorConfig->greenzoneCapacity;
 			// read savestates
 			while(1)
 			{
@@ -424,7 +429,7 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 				// update TASEditor progressbar from time to time
 				if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 				{
-					playback.setProgressbar(frame, greenzoneSize);
+					playback->setProgressbar(frame, greenzoneSize);
 					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 				}
 				// read savestate
@@ -478,7 +483,7 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 error:
 	FCEU_printf("Error loading Greenzone\n");
 	reset();
-	playback.restartPlaybackFromZeroGround();		// reset Playback cursor to frame 0
+	playback->restartPlaybackFromZeroGround();		// reset Playback cursor to frame 0
 	return true;
 }
 // -------------------------------------------------------------------------------------------------
@@ -496,9 +501,9 @@ void GREENZONE::adjustUp()
 		// delete these frames of lag
 		currMovieData.eraseRecords(currFrameCounter - 1, num_frames_to_erase);
 		lagLog.eraseFrame(currFrameCounter - 1, num_frames_to_erase);
-		if (taseditorConfig.bindMarkersToInput)
+		if (taseditorConfig->bindMarkersToInput)
 		{
-			if (markersManager.eraseMarker(currFrameCounter - 1, num_frames_to_erase))
+			if (markersManager->eraseMarker(currFrameCounter - 1, num_frames_to_erase))
 				markers_changed = true;
 		}
 		// update movie data size, because Playback cursor must always be inside the movie
@@ -506,9 +511,9 @@ void GREENZONE::adjustUp()
 		if (((int)currMovieData.records.size() - 1) <= currFrameCounter)
 			currMovieData.insertEmpty(-1, currFrameCounter - ((int)currMovieData.records.size() - 1));
 		// update Piano Roll (reduce it if needed)
-		pianoRoll.updateLinesCount();
+		//pianoRoll.updateLinesCount();
 		// register changes
-		int first_input_changes = history.registerAdjustLag(currFrameCounter - 1, 0 - num_frames_to_erase);
+		int first_input_changes = history->registerAdjustLag(currFrameCounter - 1, 0 - num_frames_to_erase);
 		// if Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
 		// also if the frame above currFrameCounter is lag frame then rewind 1 frame (invalidate Greenzone), because maybe this frame also needs lag removal
 		if ((first_input_changes >= 0 && first_input_changes < currFrameCounter) || (lagLog.getLagInfoAtFrame(currFrameCounter - 1) != LAGGED_NO))
@@ -516,19 +521,21 @@ void GREENZONE::adjustUp()
 			// custom invalidation procedure, not retriggering LostPosition/PauseFrame
 			invalidate(first_input_changes);
 			bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
-			int saved_pause_frame = playback.getPauseFrame();
-			playback.ensurePlaybackIsInsideGreenzone();
+			int saved_pause_frame = playback->getPauseFrame();
+			playback->ensurePlaybackIsInsideGreenzone();
 			if (saved_pause_frame >= 0)
-				playback.startSeekingToFrame(saved_pause_frame);
+				playback->startSeekingToFrame(saved_pause_frame);
 			if (emu_was_paused)
-				playback.pauseEmulation();
+				playback->pauseEmulation();
 		} else
 		{
 			// just invalidate Greenzone after currFrameCounter (this is necessary in order to force user to re-emulate everything after the point, because the lag log data after the currFrameCounter is now in unknown state and it should be collected again)
 			invalidate(currFrameCounter);
 		}
 		if (markers_changed)
-			selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
+		{
+			selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
+		}
 	}
 }
 void GREENZONE::adjustDown()
@@ -538,13 +545,13 @@ void GREENZONE::adjustDown()
 	// clone frame and insert lag
 	currMovieData.cloneRegion(at, 1);
 	lagLog.insertFrame(at, true, 1);
-	if (taseditorConfig.bindMarkersToInput)
+	if (taseditorConfig->bindMarkersToInput)
 	{
-		if (markersManager.insertEmpty(at, 1))
+		if (markersManager->insertEmpty(at, 1))
 			markers_changed = true;
 	}
 	// register changes
-	int first_input_changes = history.registerAdjustLag(at, +1);
+	int first_input_changes = history->registerAdjustLag(at, +1);
 	// If Input in the frame above currFrameCounter has changed then invalidate Greenzone (rewind 1 frame back)
 	// This should never actually happen, because we clone the frame, so the Input doesn't change
 	// But the check should remain, in case we decide to insert blank frame instead of cloning
@@ -553,19 +560,21 @@ void GREENZONE::adjustDown()
 		// custom invalidation procedure, not retriggering LostPosition/PauseFrame
 		invalidate(first_input_changes);
 		bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
-		int saved_pause_frame = playback.getPauseFrame();
-		playback.ensurePlaybackIsInsideGreenzone();
+		int saved_pause_frame = playback->getPauseFrame();
+		playback->ensurePlaybackIsInsideGreenzone();
 		if (saved_pause_frame >= 0)
-			playback.startSeekingToFrame(saved_pause_frame);
+			playback->startSeekingToFrame(saved_pause_frame);
 		if (emu_was_paused)
-			playback.pauseEmulation();
+			playback->pauseEmulation();
 	} else
 	{
 		// just invalidate Greenzone after currFrameCounter
 		invalidate(currFrameCounter);
 	}
 	if (markers_changed)
-		selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
+	{
+		selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
+	}
 }
 // -------------------------------------------------------------------------------------------------
 // This version doesn't restore playback, may be used only by Branching, Recording and AdjustLag functions!
@@ -585,8 +594,8 @@ void GREENZONE::invalidate(int after)
 		}
 	}
 	// redraw Piano Roll even if Greenzone didn't change
-	pianoRoll.redraw();
-	bookmarks.redrawBookmarksList();
+	//pianoRoll.redraw();
+	bookmarks->redrawBookmarksList();
 }
 // invalidate and restore playback
 void GREENZONE::invalidateAndUpdatePlayback(int after)
@@ -605,25 +614,25 @@ void GREENZONE::invalidateAndUpdatePlayback(int after)
 			// either set Playback cursor to be inside the Greenzone or run seeking to restore Playback cursor position
 			if (currFrameCounter >= greenzoneSize)
 			{
-				if (playback.getPauseFrame() >= 0 && !FCEUI_EmulationPaused())
+				if (playback->getPauseFrame() >= 0 && !FCEUI_EmulationPaused())
 				{
 					// emulator was running, so continue seeking, but don't follow the Playback cursor
-					playback.jump(playback.getPauseFrame(), false, true, false);
+					playback->jump(playback->getPauseFrame(), false, true, false);
 				} else
 				{
-					playback.setLastPosition(currFrameCounter);
-					if (taseditorConfig.autoRestoreLastPlaybackPosition)
+					playback->setLastPosition(currFrameCounter);
+					if (taseditorConfig->autoRestoreLastPlaybackPosition)
 						// start seeking to the green arrow, but don't follow the Playback cursor
-						playback.jump(playback.getLastPosition(), false, true, false);
+						playback->jump(playback->getLastPosition(), false, true, false);
 					else
-						playback.ensurePlaybackIsInsideGreenzone();
+						playback->ensurePlaybackIsInsideGreenzone();
 				}
 			}
 		}
 	}
 	// redraw Piano Roll even if Greenzone didn't change
-	pianoRoll.redraw();
-	bookmarks.redrawBookmarksList();
+	//pianoRoll.redraw();
+	bookmarks->redrawBookmarksList();
 }
 // -------------------------------------------------------------------------------------------------
 int GREENZONE::findFirstGreenzonedFrame(int starting_index)

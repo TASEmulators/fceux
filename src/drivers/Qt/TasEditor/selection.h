@@ -2,6 +2,7 @@
 #pragma once
 
 #include <set>
+#include <vector>
 typedef std::set<int> RowsSelection;
 
 #define SELECTION_ID_LEN 10

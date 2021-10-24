@@ -1,4 +1,5 @@
 // Specification file for Markers_manager class
+#pragma once
 
 #include "markers.h"
 

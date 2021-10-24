@@ -1,4 +1,7 @@
 // Specification file for LagLog class
+#pragma once
+#include <stdint.h>
+#include <vector>
 
 enum LAG_FLAG_VALUES
 {
@@ -34,9 +37,9 @@ public:
 
 private:
 	// saved data
-	std::vector<uint8> compressedLagLog;
+	std::vector<uint8_t> compressedLagLog;
 
 	// not saved data
-	std::vector<uint8> lagLog;
+	std::vector<uint8_t> lagLog;
 	bool alreadyCompressed;			// to compress only once
 };

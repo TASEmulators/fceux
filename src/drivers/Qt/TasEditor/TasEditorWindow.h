@@ -31,16 +31,17 @@
 #include <QFont>
 
 #include "Qt/TasEditor/taseditor_config.h"
-//#include "Qt/TasEditor/greenzone.h"
+#include "Qt/TasEditor/taseditor_project.h"
+#include "Qt/TasEditor/greenzone.h"
 #include "Qt/TasEditor/selection.h"
 #include "Qt/TasEditor/markers_manager.h"
-//#include "Qt/TasEditor/snapshot.h"
-//#include "Qt/TasEditor/bookmarks.h"
-//#include "Qt/TasEditor/branches.h"
-//#include "Qt/TasEditor/history.h"
-//#include "Qt/TasEditor/playback.h"
+#include "Qt/TasEditor/snapshot.h"
+#include "Qt/TasEditor/bookmarks.h"
+#include "Qt/TasEditor/branches.h"
+#include "Qt/TasEditor/history.h"
+#include "Qt/TasEditor/playback.h"
 #include "Qt/TasEditor/recorder.h"
-//#include "Qt/TasEditor/taseditor_lua.h"
+#include "Qt/TasEditor/taseditor_lua.h"
 #include "Qt/TasEditor/splicer.h"
 //#include "Qt/TasEditor/editor.h"
 //#include "Qt/TasEditor/popup_display.h"
@@ -89,12 +90,20 @@ class TasEditorWindow : public QDialog
 
 		QPianoRoll  *pianoRoll;
 
+		TASEDITOR_PROJECT project;
 		TASEDITOR_CONFIG taseditorConfig;
+		TASEDITOR_LUA taseditor_lua;
 		MARKERS_MANAGER markersManager;
+		BOOKMARKS bookmarks;
 		//PIANO_ROLL pianoRoll;
 		SPLICER splicer;
 		//EDITOR editor;
-		//GREENZONE greenzone;
+		GREENZONE greenzone;
+		SELECTION selection;
+		PLAYBACK  playback;
+		RECORDER  recorder;
+		HISTORY   history;
+		BRANCHES  branches;
 	protected:
 		void closeEvent(QCloseEvent *event);
 
@@ -162,9 +171,18 @@ class TasEditorWindow : public QDialog
 	private slots:
 };
 
+extern TASEDITOR_PROJECT *project;
 extern TASEDITOR_CONFIG *taseditorConfig;
+extern TASEDITOR_LUA *taseditor_lua;
 extern MARKERS_MANAGER *markersManager;
+extern BOOKMARKS *bookmarks;
+extern GREENZONE *greenzone;
+extern PLAYBACK *playback;
+extern RECORDER *recorder;
 extern SPLICER *splicer;
+extern HISTORY *history;
+extern SELECTION *selection;
+extern BRANCHES *branches;
 
 bool tasWindowIsOpen(void);
 

@@ -48,13 +48,18 @@ extern char FileBase[];
 #include "drivers/win/taseditor/snapshot.h"
 #include "drivers/win/taseditor/taseditor_lua.h"
 #include "drivers/win/cdlogger.h"
-extern TASEDITOR_LUA taseditor_lua;
 #endif
 
 #ifdef __SDL__
 
 #ifdef __QT_DRIVER__
 #include "drivers/Qt/fceuWrapper.h"
+#include "drivers/Qt/TasEditor/selection.h"
+#include "drivers/Qt/TasEditor/laglog.h"
+#include "drivers/Qt/TasEditor/markers.h"
+#include "drivers/Qt/TasEditor/snapshot.h"
+#include "drivers/Qt/TasEditor/taseditor_lua.h"
+extern TASEDITOR_LUA *taseditor_lua;
 #else
 int LoadGame(const char *path, bool silent = false);
 int reloadLastGame(void);
@@ -2325,6 +2330,18 @@ void TaseditorDisableManualFunctionIfNeeded()
 			taseditor_lua.disableRunFunction();
 		lua_pop(L, 1);
 	} else taseditor_lua.disableRunFunction();
+}
+#elif __QT_DRIVER__
+void TaseditorDisableManualFunctionIfNeeded()
+{
+	if (L)
+	{
+		// check if LUACALL_TASEDITOR_MANUAL function is not nil
+		lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
+		if (!lua_isfunction(L, -1))
+			taseditor_lua->disableRunFunction();
+		lua_pop(L, 1);
+	} else taseditor_lua->disableRunFunction();
 }
 #endif
 

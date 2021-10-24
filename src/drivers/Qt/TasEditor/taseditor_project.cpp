@@ -16,30 +16,32 @@ Project - Manager of working project
 * stores resources: autosave period scale, default filename, fm3 format offsets
 ------------------------------------------------------------------------------------ */
 
-#include "taseditor_project.h"
-#include "utils/xstring.h"
+#include "fceu.h"
+#include "movie.h"
+#include "driver.h"
 #include "version.h"
+#include "utils/xstring.h"
+#include "Qt/TasEditor/taseditor_project.h"
+#include "Qt/TasEditor/TasEditorWindow.h"
 
-extern TASEDITOR_CONFIG taseditorConfig;
-extern TASEDITOR_WINDOW taseditorWindow;
-extern MARKERS_MANAGER markersManager;
-extern BOOKMARKS bookmarks;
-extern POPUP_DISPLAY popupDisplay;
-extern GREENZONE greenzone;
-extern PLAYBACK playback;
-extern RECORDER recorder;
-extern HISTORY history;
-extern PIANO_ROLL pianoRoll;
-extern SELECTION selection;
-extern SPLICER splicer;
+//extern TASEDITOR_CONFIG taseditorConfig;
+//extern TASEDITOR_WINDOW taseditorWindow;
+//extern MARKERS_MANAGER markersManager;
+//extern BOOKMARKS bookmarks;
+//extern POPUP_DISPLAY popupDisplay;
+//extern GREENZONE greenzone;
+//extern PLAYBACK playback;
+//extern RECORDER recorder;
+//extern HISTORY history;
+//extern PIANO_ROLL pianoRoll;
+//extern SELECTION selection;
+//extern SPLICER splicer;
 
 extern FCEUGI *GameInfo;
 
 extern void FCEU_PrintError(const char *format, ...);
 extern bool saveProject(bool save_compact = false);
 extern bool saveProjectAs(bool save_compact = false);
-extern int getInputType(MovieData& md);
-extern void setInputType(MovieData& md, int new_input_type);
 
 TASEDITOR_PROJECT::TASEDITOR_PROJECT()
 {
@@ -60,12 +62,16 @@ void TASEDITOR_PROJECT::reset()
 void TASEDITOR_PROJECT::update()
 {
 	// if it's time to autosave - pop Save As dialog
-	if (changed && taseditorWindow.TASEditorIsInFocus && taseditorConfig.autosaveEnabled && !projectFile.empty() && clock() >= nextSaveShedule && pianoRoll.dragMode == DRAG_MODE_NONE)
+	if (changed && /*taseditorWindow.TASEditorIsInFocus &&*/ taseditorConfig->autosaveEnabled && !projectFile.empty() && clock() >= nextSaveShedule /*&& pianoRoll.dragMode == DRAG_MODE_NONE*/)
 	{
-		if (taseditorConfig.autosaveSilent)
-			saveProject();
-		else
-			saveProjectAs();
+		//if (taseditorConfig->autosaveSilent)
+		//{
+		//	saveProject();
+		//}
+		//else
+		//{
+		//	saveProjectAs();
+		//}
 		// in case user pressed Cancel, postpone saving to next time
 		sheduleNextAutosave();
 	}
@@ -101,17 +107,17 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 			strncat(message, "\nMD5: ", 2047 - strlen(message));
 			strncat(message, md5OfRom, 2047 - strlen(message));
 			strncat(message, "\n\nFix the movie header before saving? ", 2047 - strlen(message));
-			int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "ROM Checksum Mismatch", MB_YESNOCANCEL);
-			if (answer == IDCANCEL)
-			{
-				// cancel saving
-				return false;
-			} else if (answer == IDYES)
-			{
+			//int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "ROM Checksum Mismatch", MB_YESNOCANCEL);
+			//if (answer == IDCANCEL)
+			//{
+			//	// cancel saving
+			//	return false;
+			//} else if (answer == IDYES)
+			//{
 				// change ROM data in the movie to current ROM
 				currMovieData.romFilename = GameInfo->filename;
 				currMovieData.romChecksum = GameInfo->MD5;
-			}
+			//}
 		}
 	}
 	// open file for write
@@ -123,7 +129,7 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 	if (ofs)
 	{
 		// change cursor to hourglass
-		SetCursor(LoadCursor(0, IDC_WAIT));
+		//SetCursor(LoadCursor(0, IDC_WAIT));
 		// save fm2 data to the project file
 		currMovieData.loadFrameCount = currMovieData.records.size();
 		currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
@@ -146,17 +152,17 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 			write32le(0, ofs);
 		// save specified modules
 		unsigned int markersOffset = ofs->ftell();
-		markersManager.save(ofs, saveMarkers);
+		markersManager->save(ofs, saveMarkers);
 		unsigned int bookmarksOffset = ofs->ftell();
-		bookmarks.save(ofs, saveBookmarks);
+		bookmarks->save(ofs, saveBookmarks);
 		unsigned int greenzoneOffset = ofs->ftell();
-		greenzone.save(ofs, saveGreenzone);
+		greenzone->save(ofs, saveGreenzone);
 		unsigned int historyOffset = ofs->ftell();
-		history.save(ofs, saveHistory);
+		history->save(ofs, saveHistory);
 		unsigned int pianoRollOffset = ofs->ftell();
-		pianoRoll.save(ofs, savePianoRoll);
+		//pianoRoll.save(ofs, savePianoRoll);
 		unsigned int selectionOffset = ofs->ftell();
-		selection.save(ofs, saveSelection);
+		selection->save(ofs, saveSelection);
 		// now write offsets (pointers)
 		ofs->fseek(taseditorDataOffset + PROJECT_FILE_OFFSET_OF_POINTERS_DATA, SEEK_SET);
 		write32le(markersOffset, ofs);
@@ -167,12 +173,12 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 		write32le(selectionOffset, ofs);
 		// finish
 		delete ofs;
-		playback.updateProgressbar();
+		playback->updateProgressbar();
 		// also set project.changed to false, unless it was SaveCompact
 		if (!differentName)
 			reset();
 		// restore cursor
-		taseditorWindow.mustUpdateMouseCursor = true;
+		//taseditorWindow.mustUpdateMouseCursor = true;
 		return true;
 	} else
 	{
@@ -192,7 +198,7 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 	}
 
 	// change cursor to hourglass
-	SetCursor(LoadCursor(0, IDC_WAIT));
+	//SetCursor(LoadCursor(0, IDC_WAIT));
 	// load fm2 data from the project file
 	MovieData tempMovieData = MovieData();
 	extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
@@ -223,9 +229,9 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 				strncat(message, "\nMD5: ", 2047 - strlen(message));
 				strncat(message, md5OfCurrent, 2047 - strlen(message));
 				strncat(message, "\n\nLoad the project anyway?", 2047 - strlen(message));
-				int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "ROM Checksum Mismatch", MB_YESNO);
-				if (answer == IDNO)
-					return false;
+				//int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "ROM Checksum Mismatch", MB_YESNO);
+				//if (answer == IDNO)
+				//	return false;
 			}
 		}
 		taseditorDataOffset = ifs.ftell();
@@ -238,20 +244,20 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 				char message[2048] = {0};
 				strcpy(message, "This project was saved using different version of TAS Editor!\n\n");
 				strcat(message, "Original version: ");
-				char versionNum[11];
-				_itoa(projectFileVersion, versionNum, 10);
+				char versionNum[16];
+				sprintf( versionNum, "%i", projectFileVersion);
 				strncat(message, versionNum, 2047 - strlen(message));
 				strncat(message, "\nCurrent version: ", 2047 - strlen(message));
-				_itoa(PROJECT_FILE_CURRENT_VERSION, versionNum, 10);
+				sprintf( versionNum, "%i", PROJECT_FILE_CURRENT_VERSION);
 				strncat(message, versionNum, 2047 - strlen(message));
 				strncat(message, "\n\nClick Yes to try loading all data from the file (may crash).\n", 2047 - strlen(message));
 				strncat(message, "Click No to only load movie data.\n", 2047 - strlen(message));
 				strncat(message, "Click Cancel to abort loading.", 2047 - strlen(message));
-				int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "FM3 Version Mismatch", MB_YESNOCANCEL);
-				if (answer == IDCANCEL)
-					return false;
-				else if (answer == IDNO)
-					loadAll = false;
+				//int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "FM3 Version Mismatch", MB_YESNOCANCEL);
+				//if (answer == IDCANCEL)
+				//	return false;
+				//else if (answer == IDNO)
+				//	loadAll = false;
 			}
 		} else
 		{
@@ -259,9 +265,9 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 			loadAll = false;
 			char message[2048];
 			strcpy(message, "This file doesn't seem to be an FM3 project.\nIt only contains FM2 movie data. Load it anyway?");
-			int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "Opening FM2 file", MB_YESNO);
-			if (answer == IDNO)
-				return false;
+			//int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "Opening FM2 file", MB_YESNO);
+			//if (answer == IDNO)
+			//	return false;
 		}
 		// save data to currMovieData and continue loading
 		FCEU_printf("\nLoading TAS Editor project %s...\n", fullName);
@@ -289,56 +295,56 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 			pointerOffset += sizeof(unsigned int);
 		else
 			dataOffset = 0;
-		markersManager.load(&ifs, dataOffset);
+		markersManager->load(&ifs, dataOffset);
 
 		if (numberOfPointers-- && !(ifs.fseek(pointerOffset, SEEK_SET)) && read32le(&dataOffset, &ifs))
 			pointerOffset += sizeof(unsigned int);
 		else
 			dataOffset = 0;
-		bookmarks.load(&ifs, dataOffset);
+		bookmarks->load(&ifs, dataOffset);
 
 		if (numberOfPointers-- && !(ifs.fseek(pointerOffset, SEEK_SET)) && read32le(&dataOffset, &ifs))
 			pointerOffset += sizeof(unsigned int);
 		else
 			dataOffset = 0;
-		greenzone.load(&ifs, dataOffset);
+		greenzone->load(&ifs, dataOffset);
 
 		if (numberOfPointers-- && !(ifs.fseek(pointerOffset, SEEK_SET)) && read32le(&dataOffset, &ifs))
 			pointerOffset += sizeof(unsigned int);
 		else
 			dataOffset = 0;
-		history.load(&ifs, dataOffset);
+		history->load(&ifs, dataOffset);
 
 		if (numberOfPointers-- && !(ifs.fseek(pointerOffset, SEEK_SET)) && read32le(&dataOffset, &ifs))
 			pointerOffset += sizeof(unsigned int);
 		else
 			dataOffset = 0;
-		pianoRoll.load(&ifs, dataOffset);
+		//pianoRoll.load(&ifs, dataOffset);
 
 		if (numberOfPointers-- && !(ifs.fseek(pointerOffset, SEEK_SET)) && read32le(&dataOffset, &ifs))
 			pointerOffset += sizeof(unsigned int);
 		else
 			dataOffset = 0;
-		selection.load(&ifs, dataOffset);
+		selection->load(&ifs, dataOffset);
 	} else
 	{
 		// reset modules
-		markersManager.load(&ifs, 0);
-		bookmarks.load(&ifs, 0);
-		greenzone.load(&ifs, 0);
-		history.load(&ifs, 0);
-		pianoRoll.load(&ifs, 0);
-		selection.load(&ifs, 0);
+		markersManager->load(&ifs, 0);
+		bookmarks->load(&ifs, 0);
+		greenzone->load(&ifs, 0);
+		history->load(&ifs, 0);
+		//pianoRoll.load(&ifs, 0);
+		selection->load(&ifs, 0);
 	}
 	// reset other modules
-	playback.reset();
-	recorder.reset();
-	splicer.reset();
-	popupDisplay.reset();
+	playback->reset();
+	recorder->reset();
+	splicer->reset();
+	//popupDisplay.reset();
 	reset();
 	renameProject(fullName, loadAll);
 	// restore mouse cursor shape
-	taseditorWindow.mustUpdateMouseCursor = true;
+	//taseditorWindow.mustUpdateMouseCursor = true;
 	return true;
 }
 
@@ -374,7 +380,7 @@ void TASEDITOR_PROJECT::setProjectChanged()
 	if (!changed)
 	{
 		changed = true;
-		taseditorWindow.updateCaption();
+		//taseditorWindow.updateCaption();
 		sheduleNextAutosave();
 	}
 }
@@ -385,6 +391,43 @@ bool TASEDITOR_PROJECT::getProjectChanged()
 
 void TASEDITOR_PROJECT::sheduleNextAutosave()
 {
-	nextSaveShedule = clock() + taseditorConfig.autosavePeriod * AUTOSAVE_PERIOD_SCALE;
+	nextSaveShedule = clock() + taseditorConfig->autosavePeriod * AUTOSAVE_PERIOD_SCALE;
 }
 
+
+int getInputType(MovieData& md)
+{
+	if (md.fourscore)
+		return INPUT_TYPE_FOURSCORE;
+	else if (md.ports[0] == md.ports[1] == SI_GAMEPAD)
+		return INPUT_TYPE_2P;
+	else
+		return INPUT_TYPE_1P;
+}
+void setInputType(MovieData& md, int newInputType)
+{
+	switch (newInputType)
+	{
+		case INPUT_TYPE_1P:
+		{
+			md.fourscore = false;
+			md.ports[0] = SI_GAMEPAD;
+			md.ports[1] = SI_NONE;
+			break;
+		}
+		case INPUT_TYPE_2P:
+		{
+			md.fourscore = false;
+			md.ports[0] = SI_GAMEPAD;
+			md.ports[1] = SI_GAMEPAD;
+			break;
+		}
+		case INPUT_TYPE_FOURSCORE:
+		{
+			md.fourscore = true;
+			md.ports[0] = SI_GAMEPAD;
+			md.ports[1] = SI_GAMEPAD;
+			break;
+		}
+	}
+}

@@ -534,12 +534,22 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/fileio.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/gwavi.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/TasEditorWindow.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/taseditor_project.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/taseditor_config.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/taseditor_lua.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/markers_manager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/greenzone.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/selection.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/playback.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/recorder.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/history.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/splicer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/inputlog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/laglog.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/branches.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/bookmarks.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/bookmark.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/snapshot.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/markers.cpp
 )
 
