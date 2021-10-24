@@ -195,8 +195,8 @@ void SELECTION::redrawMarkerData()
 	char new_text[MAX_NOTE_LEN] = {0};
 	if (displayedMarkerNumber <= 9999)		// if there's too many digits in the number then don't show the word "Marker" before the number
 		strcpy(new_text, lowerMarkerText);
-	char num[11];
-	//_itoa(displayedMarkerNumber, num, 10);
+	char num[16];
+	sprintf( num, "%i", displayedMarkerNumber);
 	strcat(new_text, num);
 	strcat(new_text, " ");
 	//SetWindowText(hwndSelectionMarkerNumber, new_text);

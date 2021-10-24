@@ -413,8 +413,8 @@ void PLAYBACK::redrawMarkerData()
 	{
 		strcpy(new_text, upperMarkerText);
 	}
-	char num[11];
-	//_itoa(displayedMarkerNumber, num, 10);
+	char num[16];
+	sprintf( num, "%i", displayedMarkerNumber);
 	strcat(new_text, num);
 	strcat(new_text, " ");
 	//SetWindowText(hwndPlaybackMarkerNumber, new_text);
