@@ -1723,7 +1723,9 @@ static int write_audio_frame( AVFrame *frame )
 	while (ret >= 0)
 	{
 		AVPacket pkt = { 0 }; // data and size must be 0;
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT( 59, 0, 0 )
 		av_init_packet(&pkt);
+#endif
 		ret = avcodec_receive_packet(ost->enc, &pkt);
 		if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
 		{
@@ -1918,7 +1920,9 @@ static int encode_video_frame( unsigned char *inBuf )
 	{
 		AVPacket pkt = { 0 };
 
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT( 59, 0, 0 )
 		av_init_packet(&pkt);
+#endif
 
 		ret = avcodec_receive_packet(c, &pkt);
 
