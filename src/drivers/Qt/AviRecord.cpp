@@ -756,6 +756,7 @@ struct OutputStream
 	AVCodecContext *enc;
 	AVFrame *frame;
 	AVFrame *tmp_frame;
+	AVPacket *pkt;
 	struct SwsContext *sws_ctx;
 	struct SwrContext *swr_ctx;
 	int64_t next_pts;
@@ -774,6 +775,7 @@ struct OutputStream
 		st  = NULL;
 		enc = NULL;
 		frame = tmp_frame = NULL;
+		pkt = NULL;
 		sws_ctx = NULL;
 		swr_ctx = NULL;
 		bytesPerSample = 0;
@@ -799,6 +801,10 @@ struct OutputStream
 		if ( enc != NULL )
 		{
 			avcodec_free_context(&enc); enc = NULL;
+		}
+		if ( pkt != NULL )
+		{
+			av_packet_free(&pkt); pkt = NULL;
 		}
 		if ( frame != NULL )
 		{
@@ -1223,6 +1229,14 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 		return -1;
 	}
 
+	/* packet for holding encoded output */
+	ost->pkt = av_packet_alloc();
+	if (ost->pkt == NULL)
+	{
+	    fprintf( avLogFp, "Could not allocate the video packet\n");
+	    return -1;
+	}
+
 	/* Allocate the encoded raw picture. */
 	ost->frame = alloc_picture(c->pix_fmt, c->width, c->height);
 
@@ -1454,6 +1468,14 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 	{
 		fprintf( avLogFp, "Error: Could not open codec: %s\n", codec_name);
 		return -1;
+	}
+
+	/* packet for holding encoded output */
+	ost->pkt = av_packet_alloc();
+	if (ost->pkt == NULL)
+	{
+	    fprintf( avLogFp, "Could not allocate the audio packet\n");
+	    return -1;
 	}
 
 	if (c->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE)
@@ -1722,9 +1744,11 @@ static int write_audio_frame( AVFrame *frame )
 	}
 	while (ret >= 0)
 	{
-		AVPacket pkt = { 0 }; // data and size must be 0;
-		av_init_packet(&pkt);
-		ret = avcodec_receive_packet(ost->enc, &pkt);
+		//AVPacket pkt = { 0 }; // data and size must be 0;
+//#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT( 59, 0, 0 )
+//		av_init_packet(&pkt);
+//#endif
+		ret = avcodec_receive_packet(ost->enc, ost->pkt);
 		if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
 		{
 			fprintf( avLogFp, "Error encoding audio frame\n");
@@ -1733,16 +1757,17 @@ static int write_audio_frame( AVFrame *frame )
 		}
 		else if (ret >= 0)
 		{
-			av_packet_rescale_ts(&pkt, ost->enc->time_base, ost->st->time_base);
-			pkt.stream_index = ost->st->index;
+			av_packet_rescale_ts(ost->pkt, ost->enc->time_base, ost->st->time_base);
+			ost->pkt->stream_index = ost->st->index;
 			/* Write the compressed frame to the media file. */
-			ret = av_interleaved_write_frame(oc, &pkt);
+			ret = av_interleaved_write_frame(oc, ost->pkt);
 			if (ret < 0)
 			{
 				fprintf( avLogFp, "Error while writing audio frame\n");
 				ost->writeError = true;
 				return -1;
 			}
+			av_packet_unref(ost->pkt);
 		}
 	}
 	return 0;
@@ -1916,11 +1941,12 @@ static int encode_video_frame( unsigned char *inBuf )
 
 	while (ret >= 0)
 	{
-		AVPacket pkt = { 0 };
+		//AVPacket pkt = { 0 };
 
-		av_init_packet(&pkt);
-
-		ret = avcodec_receive_packet(c, &pkt);
+//#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT( 59, 0, 0 )
+//		av_init_packet(&pkt);
+//#endif
+		ret = avcodec_receive_packet(c, ost->pkt);
 
 		if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
 		{
@@ -1930,16 +1956,17 @@ static int encode_video_frame( unsigned char *inBuf )
 		}
 		else if (ret >= 0)
 		{
-			av_packet_rescale_ts(&pkt, c->time_base, video_st.st->time_base);
-			pkt.stream_index = video_st.st->index;
+			av_packet_rescale_ts(ost->pkt, c->time_base, video_st.st->time_base);
+			ost->pkt->stream_index = video_st.st->index;
 			/* Write the compressed frame to the media file. */
-			ret = av_interleaved_write_frame(oc, &pkt);
+			ret = av_interleaved_write_frame(oc, ost->pkt);
 			if (ret < 0)
 			{
 				fprintf( avLogFp, "Error while writing video frame\n");
 				ost->writeError = true;
 				return -1;
 			}
+			av_packet_unref(ost->pkt);
 		}
 	}
 
