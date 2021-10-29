@@ -24,16 +24,21 @@
 #include <string.h>
 #include <string>
 
+#include <QDir>
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QFontMetrics>
+#include <QFileDialog>
+#include <QStandardPaths>
 
 #include "fceu.h"
 #include "movie.h"
 #include "driver.h"
 
 #include "Qt/config.h"
+#include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
 TasEditorWindow   *tasWin = NULL;
@@ -70,15 +75,45 @@ void tasWindowSetFocus(bool val)
 // this getter contains formula to decide whether to record or replay movie
 bool isTaseditorRecording(void)
 {
-	//if (movie_readonly || playback.getPauseFrame() >= 0 || (taseditorConfig.oldControlSchemeForBranching && !recorder.stateWasLoadedInReadWriteMode))
-	//	return false;		// replay
+	if ( tasWin == NULL )
+	{
+		return false;
+	}
+	if (movie_readonly || playback->getPauseFrame() >= 0 || (taseditorConfig->oldControlSchemeForBranching && !recorder->stateWasLoadedInReadWriteMode))
+	{
+		return false;		// replay
+	}
 	return true;			// record
 }
 
-bool recordInputByTaseditor(void)
+void recordInputByTaseditor(void)
 {
-	//recorder.recordInput();
-	return 0;
+	if ( recorder )
+	{
+		recorder->recordInput();
+	}
+	return;
+}
+
+void applyMovieInputConfig(void)
+{
+	// update FCEUX input config
+	FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
+	// update PAL flag
+	pal_emulation = currMovieData.palFlag;
+	if (pal_emulation)
+	{
+		dendy = 0;
+	}
+	FCEUI_SetVidSystem(pal_emulation);
+	RefreshThrottleFPS();
+	//PushCurrentVideoSettings();
+	// update PPU type
+	newppu = currMovieData.PPUflag;
+	//SetMainWindowText();
+	// return focus to TAS Editor window
+	//SetFocus(taseditorWindow.hwndTASEditor);
+	RAMInitOption = currMovieData.RAMInitOption;
 }
 //----------------------------------------------------------------------------
 TasEditorWindow::TasEditorWindow(QWidget *parent)
@@ -128,20 +163,56 @@ TasEditorWindow::~TasEditorWindow(void)
 {
 	printf("Destroy Tas Editor Window\n");
 
-	if ( tasWin == this )
-	{
-		tasWin = NULL;
-	}
+	fceuWrapperLock();
+	//if (!askToSaveProject()) return false;
+
+	// destroy window
+	//taseditorWindow.exit();
+	//disableGeneralKeyboardInput();
+	// release memory
+	//editor.free();
+	//pianoRoll.free();
+	markersManager.free();
+	greenzone.free();
+	bookmarks.free();
+	branches.free();
+	//popupDisplay.free();
+	history.free();
+	playback.stopSeeking();
+	selection.free();
 
 	// switch off TAS Editor mode
 	movieMode = MOVIEMODE_INACTIVE;
 	FCEU_DispMessage("TAS Editor disengaged", 0);
 	FCEUMOV_CreateCleanMovie();
+
+	if ( tasWin == this )
+	{
+		tasWin = NULL;
+	}
+
+	::project         = NULL;
+	::taseditorConfig = NULL;
+	::taseditor_lua   = NULL;
+	::markersManager  = NULL;
+	::selection       = NULL;
+	::greenzone       = NULL;
+	::bookmarks       = NULL;
+	::playback        = NULL;
+	::recorder        = NULL;
+	::history         = NULL;
+	::branches        = NULL;
+	::splicer         = NULL;
+
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::closeEvent(QCloseEvent *event)
 {
 	printf("Tas Editor Close Window Event\n");
+
+	if (!askToSaveProject()) return;
+
 	done(0);
 	deleteLater();
 	event->accept();
@@ -149,6 +220,7 @@ void TasEditorWindow::closeEvent(QCloseEvent *event)
 //----------------------------------------------------------------------------
 void TasEditorWindow::closeWindow(void)
 {
+	if (!askToSaveProject()) return;
 	//printf("Close Window\n");
 	done(0);
 	deleteLater();
@@ -179,7 +251,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Open New Project"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(openAviFileDialog(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
 
 	fileMenu->addAction(act);
 
@@ -434,18 +506,18 @@ int TasEditorWindow::initModules(void)
 	// init modules
 	//editor.init();
 	//pianoRoll.init();
-	//selection.init();
-	//splicer.init();
-	//playback.init();
-	//greenzone.init();
-	//recorder.init();
-	//markersManager.init();
-	//project.init();
-	//bookmarks.init();
-	//branches.init();
+	selection.init();
+	splicer.init();
+	playback.init();
+	greenzone.init();
+	recorder.init();
+	markersManager.init();
+	project.init();
+	bookmarks.init();
+	branches.init();
 	//popupDisplay.init();
-	//history.init();
-	//taseditor_lua.init();
+	history.init();
+	taseditor_lua.init();
 	// either start new movie or use current movie
 	if (!FCEUMOV_Mode(MOVIEMODE_RECORD|MOVIEMODE_PLAY) || currMovieData.savestate.size() != 0)
 	{
@@ -470,22 +542,281 @@ int TasEditorWindow::initModules(void)
 		currMovieData.insertEmpty(-1, currFrameCounter - ((int)currMovieData.records.size() - 1));
 	}
 	// ensure that movie has correct set of ports/fourscore
-	//setInputType(currMovieData, getInputType(currMovieData));
+	setInputType(currMovieData, getInputType(currMovieData));
 	// force the input configuration stored in the movie to apply to FCEUX config
-	//applyMovieInputConfig();
+	applyMovieInputConfig();
 	// reset some modules that need MovieData info
 	//pianoRoll.reset();
-	//recorder.reset();
+	recorder.reset();
 	// create initial snapshot in history
-	//history.reset();
+	history.reset();
 	// reset Taseditor variables
 	//mustCallManualLuaFunction = false;
 	
 	//SetFocus(history.hwndHistoryList);		// set focus only once, to show blue selection cursor
 	//SetFocus(pianoRoll.hwndList);
 	FCEU_DispMessage("TAS Editor engaged", 0);
-	//taseditorWindow.redraw();
+	update();
 	return 0;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::frameUpdate(void)
+{
+	fceuWrapperLock();
+	//printf("TAS Frame Update\n");
+
+	//taseditorWindow.update();
+	greenzone.update();
+	recorder.update();
+	//pianoRoll.update();
+	markersManager.update();
+	playback.update();
+	bookmarks.update();
+	branches.update();
+	//popupDisplay.update();
+	selection.update();
+	splicer.update();
+	history.update();
+	project.update();
+	// run Lua functions if needed
+	if (taseditorConfig.enableLuaAutoFunction)
+	{
+		//TaseditorAutoFunction();
+	}
+	//if (mustCallManualLuaFunction)
+	//{
+	//	TaseditorManualFunction();
+	//	mustCallManualLuaFunction = false;
+	//}
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+bool TasEditorWindow::loadProject(const char* fullname)
+{
+	bool success = false;
+
+	fceuWrapperLock();
+
+	// try to load project
+	if (project.load(fullname))
+	{
+		// loaded successfully
+		applyMovieInputConfig();
+		// add new file to Recent menu
+		//taseditorWindow.updateRecentProjectsArray(fullname);
+		//taseditorWindow.updateCaption();
+		update();
+		success = true;
+	} else
+	{
+		// failed to load
+		//taseditorWindow.updateCaption();
+		update();
+	}
+	fceuWrapperUnLock();
+
+	return success;
+}
+bool TasEditorWindow::saveProject(bool save_compact)
+{
+	bool ret = true;
+
+	fceuWrapperLock();
+
+	if (project.getProjectFile().empty())
+	{
+		ret = saveProjectAs(save_compact);
+	} else
+	{
+		if (save_compact)
+		{
+			project.save(0, taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
+		}
+		else
+		{
+			project.save(0, taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
+		}
+		//taseditorWindow.updateCaption();
+	}
+
+	fceuWrapperUnLock();
+
+	return ret;
+}
+
+bool TasEditorWindow::saveProjectAs(bool save_compact)
+{
+	std::string last;
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string lastPath;
+	//char dir[512];
+	const char *base, *rom;
+	QFileDialog  dialog(this, tr("Save TAS Editor Project As") );
+	QList<QUrl> urls;
+	QDir d;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("TAS Project Files (*.fm3) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/movies");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		dialog.setDirectory( d.absolutePath() );
+	}
+	dialog.setDefaultSuffix( tr(".fm3") );
+
+	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
+	if ( lastPath.size() > 0 )
+	{
+		dialog.setDirectory( QString::fromStdString(lastPath) );
+	}
+
+	rom = getRomFile();
+
+	if ( rom )
+	{
+		char baseName[512];
+		getFileBaseName( rom, baseName );
+
+		if ( baseName[0] != 0 )
+		{
+			dialog.selectFile(baseName);
+		}
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return false;
+	}
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	project.renameProject( filename.toStdString().c_str(), true);
+	if (save_compact)
+	{
+		project.save( filename.toStdString().c_str(), taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
+	}
+	else
+	{
+		project.save( filename.toStdString().c_str(), taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
+	}
+	//taseditorWindow.updateRecentProjectsArray(nameo);
+	// saved successfully - remove * mark from caption
+	//taseditorWindow.updateCaption();
+	return true;
+}
+
+// returns false if user doesn't want to exit
+bool TasEditorWindow::askToSaveProject(void)
+{
+	bool changesFound = false;
+	if (project.getProjectChanged())
+	{
+		changesFound = true;
+	}
+
+	// ask saving project
+	if (changesFound)
+	{
+		int ans = QMessageBox::question( this, tr("TAS Editor"), tr("Save project changes?"),
+				QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes );
+
+		//int answer = MessageBox(taseditorWindow.hwndTASEditor, "Save Project changes?", "TAS Editor", MB_YESNOCANCEL);
+		if (ans == QMessageBox::Yes)
+		{
+			return saveProject();
+		}
+		return (ans != QMessageBox::No);
+	}
+	return true;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::createNewProject(void)
+{
+	//if (!askToSaveProject()) return;
+	
+	fceuWrapperLock();
+
+	static struct NewProjectParameters params;
+	//if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_NEWPROJECT), taseditorWindow.hwndTASEditor, newProjectProc, (LPARAM)&params) > 0)
+	//{
+		FCEUMOV_CreateCleanMovie();
+		// apply selected options
+		setInputType(currMovieData, params.inputType);
+		applyMovieInputConfig();
+		if (params.copyCurrentInput)
+		{
+			// copy Input from current snapshot (from history)
+			history.getCurrentSnapshot().inputlog.toMovie(currMovieData);
+		}
+		if (!params.copyCurrentMarkers)
+		{
+			markersManager.reset();
+		}
+		if (params.authorName != L"") currMovieData.comments.push_back(L"author " + params.authorName);
+		
+		// reset Taseditor
+		project.init();			// new project has blank name
+		greenzone.reset();
+		if (params.copyCurrentInput)
+		{
+			// copy LagLog from current snapshot (from history)
+			greenzone.lagLog = history.getCurrentSnapshot().laglog;
+		}
+		playback.reset();
+		playback.restartPlaybackFromZeroGround();
+		bookmarks.reset();
+		branches.reset();
+		history.reset();
+		//pianoRoll.reset();
+		selection.reset();
+		//editor.reset();
+		splicer.reset();
+		recorder.reset();
+		//popupDisplay.reset();
+		//taseditorWindow.redraw();
+		//taseditorWindow.updateCaption();
+		update();
+	//}
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 //----  TAS Piano Roll Widget

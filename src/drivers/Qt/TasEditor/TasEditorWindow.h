@@ -49,6 +49,14 @@
 
 class TasEditorWindow;
 
+struct NewProjectParameters
+{
+	int inputType;
+	bool copyCurrentInput;
+	bool copyCurrentMarkers;
+	std::wstring authorName;
+};
+
 class QPianoRoll : public QWidget
 {
 	Q_OBJECT
@@ -104,6 +112,8 @@ class TasEditorWindow : public QDialog
 		RECORDER  recorder;
 		HISTORY   history;
 		BRANCHES  branches;
+
+
 	protected:
 		void closeEvent(QCloseEvent *event);
 
@@ -165,10 +175,16 @@ class TasEditorWindow : public QDialog
 	private:
 
 		int initModules(void);
+		bool loadProject(const char* fullname);
+		bool saveProject(bool save_compact = false);
+		bool saveProjectAs(bool save_compact = false);
+		bool askToSaveProject(void);
 
 	public slots:
 		void closeWindow(void);
+		void frameUpdate(void);
 	private slots:
+		void createNewProject(void);
 };
 
 extern TASEDITOR_PROJECT *project;
@@ -189,6 +205,6 @@ bool tasWindowIsOpen(void);
 void tasWindowSetFocus(bool val);
 
 bool isTaseditorRecording(void);
-bool recordInputByTaseditor(void);
+void recordInputByTaseditor(void);
 
 extern TasEditorWindow *tasWin;

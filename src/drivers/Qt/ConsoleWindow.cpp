@@ -2834,6 +2834,8 @@ void consoleWin_t::openTasEditor(void)
 		win = new TasEditorWindow(this);
 		
 		win->show();
+
+		connect(emulatorThread, SIGNAL(frameFinished(void)), win, SLOT(frameUpdate(void)) );
 	}
 	fceuWrapperUnLock();
 }
