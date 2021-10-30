@@ -25,6 +25,8 @@
 #include <string>
 
 #include <QDir>
+#include <QPainter>
+#include <QSettings>
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QFontMetrics>
@@ -119,6 +121,7 @@ void applyMovieInputConfig(void)
 TasEditorWindow::TasEditorWindow(QWidget *parent)
 	: QDialog( parent, Qt::Window )
 {
+	QSettings  settings;
 	QVBoxLayout *mainLayout;
 	//QHBoxLayout *hbox;
 	QMenuBar    *menuBar;
@@ -157,10 +160,18 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	mainLayout->setMenuBar( menuBar );
 
 	initModules();
+
+	// Restore Window Geometry
+	restoreGeometry(settings.value("tasEditor/geometry").toByteArray());
+
+	// Restore Horizontal Panel State
+	mainHBox->restoreState( settings.value("tasEditor/hPanelState").toByteArray() );
 }
 //----------------------------------------------------------------------------
 TasEditorWindow::~TasEditorWindow(void)
 {
+	QSettings  settings;
+
 	printf("Destroy Tas Editor Window\n");
 
 	fceuWrapperLock();
@@ -205,6 +216,12 @@ TasEditorWindow::~TasEditorWindow(void)
 	::splicer         = NULL;
 
 	fceuWrapperUnLock();
+
+	// Save Horizontal Panel State
+	settings.setValue("tasEditor/hPanelState", mainHBox->saveState());
+
+	// Save Window Geometry
+	settings.setValue("tasEditor/geometry", saveGeometry());
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::closeEvent(QCloseEvent *event)
@@ -260,7 +277,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	act->setShortcut(QKeySequence(tr("Ctrl+O")));
 	act->setStatusTip(tr("Open Project"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_BrowserStop ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(closeFile(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(openProject(void)) );
 
 	fileMenu->addAction(act);
 
@@ -269,7 +286,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	act->setShortcut(QKeySequence(tr("Ctrl+S")));
 	act->setStatusTip(tr("Save Project"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_BrowserStop ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(closeFile(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(saveProjectCb(void)) );
 
 	fileMenu->addAction(act);
 
@@ -278,7 +295,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	act->setShortcut(QKeySequence(tr("Ctrl+Shift+S")));
 	act->setStatusTip(tr("Save Project As"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_BrowserStop ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(closeFile(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(saveProjectAsCb(void)) );
 
 	fileMenu->addAction(act);
 
@@ -287,7 +304,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+Shift+S")));
 	act->setStatusTip(tr("Save Compact"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_BrowserStop ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(closeFile(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(saveProjectCompactCb(void)) );
 
 	fileMenu->addAction(act);
 
@@ -563,7 +580,8 @@ int TasEditorWindow::initModules(void)
 void TasEditorWindow::frameUpdate(void)
 {
 	fceuWrapperLock();
-	//printf("TAS Frame Update\n");
+
+	//printf("TAS Frame Update: %zi\n", currMovieData.records.size());
 
 	//taseditorWindow.update();
 	greenzone.update();
@@ -769,6 +787,96 @@ bool TasEditorWindow::askToSaveProject(void)
 	return true;
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::openProject(void)
+{
+	std::string last;
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string lastPath;
+	//char dir[512];
+	const char *base, *rom;
+	QFileDialog  dialog(this, tr("Open TAS Editor Project") );
+	QList<QUrl> urls;
+	QDir d;
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("TAS Project Files (*.fm3) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/movies");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		dialog.setDirectory( d.absolutePath() );
+	}
+	dialog.setDefaultSuffix( tr(".fm3") );
+
+	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
+	if ( lastPath.size() > 0 )
+	{
+		dialog.setDirectory( QString::fromStdString(lastPath) );
+	}
+
+	rom = getRomFile();
+
+	if ( rom )
+	{
+		char baseName[512];
+		getFileBaseName( rom, baseName );
+
+		if ( baseName[0] != 0 )
+		{
+			dialog.selectFile(baseName);
+		}
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	loadProject( filename.toStdString().c_str());
+
+	return;
+}
+//----------------------------------------------------------------------------
 void TasEditorWindow::createNewProject(void)
 {
 	//if (!askToSaveProject()) return;
@@ -819,12 +927,31 @@ void TasEditorWindow::createNewProject(void)
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::saveProjectCb(void)
+{
+	saveProject();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::saveProjectAsCb(void)
+{
+	saveProjectAs();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::saveProjectCompactCb(void)
+{
+	saveProject(true);
+}
+//----------------------------------------------------------------------------
 //----  TAS Piano Roll Widget
 //----------------------------------------------------------------------------
 QPianoRoll::QPianoRoll(QWidget *parent)
 	: QWidget( parent )
 {
+	QPalette pal;
 	std::string fontString;
+	QColor fg("black"), bg("white"), c;
+
+	useDarkTheme = false;
 
 	viewWidth  = 512;
 	viewHeight = 512;
@@ -841,14 +968,44 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 		font.setStyle( QFont::StyleNormal );
 		font.setStyleHint( QFont::Monospace );
 	}
+	pal = this->palette();
 
+	windowColor = pal.color(QPalette::Window);
+
+	// Figure out if we are using a light or dark theme by checking the 
+	// default window text grayscale color. If more white, then we will
+	// use white text on black background, else we do the opposite.
+	c = pal.color(QPalette::WindowText);
+
+	if ( qGray( c.red(), c.green(), c.blue() ) > 128 )
+	{
+		useDarkTheme = true;
+	}
+	//printf("WindowText: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
+
+	if ( useDarkTheme )
+	{
+		pal.setColor(QPalette::Base      , fg );
+		pal.setColor(QPalette::Window    , fg );
+		pal.setColor(QPalette::WindowText, bg );
+	}
+	else 
+	{
+		pal.setColor(QPalette::Base      , bg );
+		pal.setColor(QPalette::Window    , bg );
+		pal.setColor(QPalette::WindowText, fg );
+	}
 	this->parent = qobject_cast <TasEditorWindow*>( parent );
 	this->setMouseTracking(true);
+	this->setPalette(pal);
 
 	calcFontData();
 
 	vbar = NULL;
 	hbar = NULL;
+
+	lineOffset = 0;
+	maxLineOffset = 0;
 }
 //----------------------------------------------------------------------------
 QPianoRoll::~QPianoRoll(void)
@@ -878,5 +1035,45 @@ void QPianoRoll::calcFontData(void)
 	//printf("W:%i  H:%i  LS:%i  \n", pxCharWidth, pxCharHeight, pxLineSpacing );
 
 	viewLines   = (viewHeight / pxLineSpacing) + 1;
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::paintEvent(QPaintEvent *event)
+{
+	int nrow;
+	QPainter painter(this);
+	QColor white("white"), black("black");
+
+	painter.setFont(font);
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
+
+	nrow = (viewHeight / pxLineSpacing) + 1;
+
+	if ( nrow < 1 ) nrow = 1;
+
+	viewLines = nrow;
+
+	maxLineOffset = currMovieData.records.size() - nrow + 1;
+
+	if ( maxLineOffset < 0 )
+	{
+		maxLineOffset = 0;
+	}
+
+	if ( lineOffset < 0 )
+	{
+		lineOffset = 0;
+	}
+	if ( lineOffset > maxLineOffset )
+	{
+		lineOffset = maxLineOffset;
+	}
+
+	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window) );
+
+	// Draw Title Bar
+	painter.fillRect( 0, 0, viewWidth, pxLineSpacing, windowColor );
+	painter.setPen( black );
+	painter.drawRect( 0, 0, viewWidth-1, pxLineSpacing );
 }
 //----------------------------------------------------------------------------
