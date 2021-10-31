@@ -71,6 +71,7 @@ class QPianoRoll : public QWidget
 
 	protected:
 		void calcFontData(void);
+		void resizeEvent(QResizeEvent *event);
 		void paintEvent(QPaintEvent *event);
 
 	private:
@@ -80,18 +81,33 @@ class QPianoRoll : public QWidget
 		QScrollBar *vbar;
 		QColor      windowColor;
 
+		int numCtlr;
 		int pxCharWidth;
 		int pxCharHeight;
 		int pxCursorHeight;
+		int pxLineXScroll;
+		int pxLineWidth;
 		int pxLineSpacing;
 		int pxLineLead;
+		int pxLineTextOfs;
+		int pxWidthCol1;
+		int pxWidthFrameCol;
+		int pxWidthCtlCol;
+		int pxWidthBtnCol;
+		int pxFrameColX;
+		int pxFrameCtlX[4];
 		int viewLines;
 		int viewWidth;
 		int viewHeight;
 		int lineOffset;
 		int maxLineOffset;
+		int numInputDevs;
 
 		bool useDarkTheme;
+
+	public slots:
+		void hbarChanged(int val);
+		void vbarChanged(int val);
 };
 
 class TasEditorWindow : public QDialog

@@ -363,6 +363,8 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	lowerMarkerName  = new QLineEdit();
 
 	pianoRoll->setScrollBars( pianoRollHBar, pianoRollVBar );
+	connect( pianoRollHBar, SIGNAL(valueChanged(int)), pianoRoll, SLOT(hbarChanged(int)) );
+	connect( pianoRollVBar, SIGNAL(valueChanged(int)), pianoRoll, SLOT(vbarChanged(int)) );
 
 	grid->addWidget( pianoRoll    , 0, 0 );
 	grid->addWidget( pianoRollVBar, 0, 1 );
@@ -999,6 +1001,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	this->setMouseTracking(true);
 	this->setPalette(pal);
 
+	numCtlr = 2;
 	calcFontData();
 
 	vbar = NULL;
@@ -1018,6 +1021,34 @@ void QPianoRoll::setScrollBars( QScrollBar *h, QScrollBar *v )
 	hbar = h; vbar = v;
 }
 //----------------------------------------------------------------------------
+void QPianoRoll::hbarChanged(int val)
+{
+	if ( viewWidth >= pxLineWidth )
+	{
+		pxLineXScroll = 0;
+	}
+	else
+	{
+		pxLineXScroll = val;
+	}
+	update();
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::vbarChanged(int val)
+{
+	lineOffset = val;
+
+	if ( lineOffset < 0 )
+	{
+		lineOffset = 0;
+	}
+	else if ( lineOffset > maxLineOffset )
+	{
+		lineOffset = maxLineOffset;
+	}
+	update();
+}
+//----------------------------------------------------------------------------
 void QPianoRoll::calcFontData(void)
 {
 	QWidget::setFont(font);
@@ -1031,17 +1062,63 @@ void QPianoRoll::calcFontData(void)
 	pxLineSpacing  = metrics.lineSpacing() * 1.25;
 	pxLineLead     = pxLineSpacing - metrics.height();
 	pxCursorHeight = metrics.height();
+	pxLineTextOfs  = pxCharHeight + (pxLineSpacing - pxCharHeight) / 2;
 
 	//printf("W:%i  H:%i  LS:%i  \n", pxCharWidth, pxCharHeight, pxLineSpacing );
 
 	viewLines   = (viewHeight / pxLineSpacing) + 1;
+
+	pxWidthCol1     =  2 * pxCharWidth;
+	pxWidthFrameCol = 12 * pxCharWidth;
+	pxWidthBtnCol   =  3 * pxCharWidth;
+	pxWidthCtlCol   =  8 * pxWidthBtnCol;
+
+	pxFrameColX     = pxWidthCol1;
+
+	for (int i=0; i<4; i++)
+	{
+		pxFrameCtlX[i] = pxFrameColX + pxWidthFrameCol + (i*pxWidthCtlCol);
+	}
+	pxLineWidth = pxFrameCtlX[ numCtlr-1 ] + pxWidthCtlCol;
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+
+	//printf("QPianoRoll Resize: %ix%i  $%04X\n", viewWidth, viewHeight );
+
+	viewLines = (viewHeight / pxLineSpacing) + 1;
+
+	maxLineOffset = currMovieData.records.size() - viewLines + 1;
+
+	if ( maxLineOffset < 0 )
+	{
+		maxLineOffset = 0;
+	}
+
+	if ( viewWidth >= pxLineWidth )
+	{
+		pxLineXScroll = 0;
+		hbar->hide();
+	}
+	else
+	{
+		hbar->setPageStep( viewWidth );
+		hbar->setMaximum( pxLineWidth - viewWidth );
+		hbar->show();
+		pxLineXScroll = hbar->value();
+	}
+	vbar->setPageStep( (3*viewLines)/4 );
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::paintEvent(QPaintEvent *event)
 {
-	int nrow;
+	int x, y, nrow;
 	QPainter painter(this);
 	QColor white("white"), black("black");
+	static const char *buttonNames[] = { "A", "B", "S", "T", "U", "D", "L", "R", NULL };
 
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
@@ -1072,8 +1149,45 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window) );
 
 	// Draw Title Bar
+	x = -pxLineXScroll; y = 0;
 	painter.fillRect( 0, 0, viewWidth, pxLineSpacing, windowColor );
 	painter.setPen( black );
-	painter.drawRect( 0, 0, viewWidth-1, pxLineSpacing );
+
+	x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 6*pxCharWidth) / 2;
+	painter.drawText( x, pxLineTextOfs, tr("Frame#") );
+
+	// Draw Grid
+	painter.drawLine( -pxLineXScroll, 0, -pxLineXScroll, viewHeight );
+
+	x = pxFrameColX - pxLineXScroll;
+	painter.drawLine( x, 0, x, viewHeight );
+
+	for (int i=0; i<numCtlr; i++)
+	{
+		x = pxFrameCtlX[i] - pxLineXScroll;
+
+		if ( i % 2 )
+		{
+			painter.fillRect( x, pxLineSpacing, pxWidthCtlCol, viewHeight, this->palette().color(QPalette::AlternateBase) );
+		}
+
+		for (int j=0; j<8; j++)
+		{
+			painter.drawLine( x, 0, x, viewHeight );
+
+			painter.drawText( x + pxCharWidth, pxLineTextOfs, tr(buttonNames[j]) );
+
+			x += pxWidthBtnCol;
+		}
+		painter.drawLine( x, 0, x, viewHeight );
+	}
+	y = 0;
+	for (int i=0; i<nrow; i++)
+	{
+		painter.drawLine( 0, y, viewWidth, y );
+		
+		y += pxLineSpacing;
+	}
+
 }
 //----------------------------------------------------------------------------
