@@ -212,6 +212,9 @@ class TasEditorWindow : public QDialog
 		void saveProjectCompactCb(void);
 		void createNewProject(void);
 		void recordingChanged(int);
+		void recordInputChanged(int);
+		void superImposedChanged(int);
+		void usePatternChanged(int);
 
 	friend class RECORDER;
 };

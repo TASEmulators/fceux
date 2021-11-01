@@ -608,6 +608,18 @@ void TasEditorWindow::buildSideControlPanel(void)
 
 	recRecordingCbox->setChecked( !movie_readonly );
 	connect( recRecordingCbox, SIGNAL(stateChanged(int)), this, SLOT(recordingChanged(int)) );
+
+	recUsePatternCbox->setChecked( taseditorConfig.recordingUsePattern );
+	connect( recUsePatternCbox, SIGNAL(stateChanged(int)), this, SLOT(usePatternChanged(int)) );
+
+	recSuperImposeCbox->setTristate(true);
+	connect( recSuperImposeCbox, SIGNAL(stateChanged(int)), this, SLOT(superImposedChanged(int)) );
+
+	connect( recAllBtn, &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_ALL ); } );
+	connect( rec1PBtn , &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_1P  ); } );
+	connect( rec2PBtn , &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_2P  ); } );
+	connect( rec3PBtn , &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_3P  ); } );
+	connect( rec4PBtn , &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_4P  ); } );
 }
 //----------------------------------------------------------------------------
 int TasEditorWindow::initModules(void)
@@ -1041,6 +1053,34 @@ void TasEditorWindow::saveProjectCompactCb(void)
 void TasEditorWindow::recordingChanged(int state)
 {
 	FCEUI_MovieToggleReadOnly();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::superImposedChanged(int state)
+{
+	if ( state == Qt::Checked )
+	{
+		taseditorConfig.superimpose = SUPERIMPOSE_CHECKED;
+	}
+	else if ( state == Qt::PartiallyChecked )
+	{
+		taseditorConfig.superimpose = SUPERIMPOSE_INDETERMINATE;
+	}
+	else
+	{
+		taseditorConfig.superimpose = SUPERIMPOSE_UNCHECKED;
+	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::usePatternChanged(int state)
+{
+	taseditorConfig.recordingUsePattern ^= 1;
+	recorder.patternOffset = 0;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::recordInputChanged(int input)
+{
+	//printf("Input Change: %i\n", input);
+	recorder.multitrackRecordingJoypadNumber = input;
 }
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
