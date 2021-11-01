@@ -211,6 +211,9 @@ class TasEditorWindow : public QDialog
 		void saveProjectAsCb(void);
 		void saveProjectCompactCb(void);
 		void createNewProject(void);
+		void recordingChanged(int);
+
+	friend class RECORDER;
 };
 
 extern TASEDITOR_PROJECT *project;

@@ -189,6 +189,12 @@ _keyonly(int a)
 	return 0;
 }
 
+uint32 GetGamepadPressedImmediate(void)
+{
+	//printf("JSreturn: 0x%08X\n", JSreturn);
+	return JSreturn;
+}
+
 #define keyonly(__a) _keyonly(MKK(__a))
 
 static bool g_fkbEnabled = false;

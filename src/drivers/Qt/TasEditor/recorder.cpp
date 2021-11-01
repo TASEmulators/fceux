@@ -177,7 +177,7 @@ void RECORDER::update()
 	oldJoyData[2] = currentJoypadData[2];
 	oldJoyData[3] = currentJoypadData[3];
 	// fill current_joy data for Piano Roll header lights
-	uint32 joypads = 0; //GetGamepadPressedImmediate();
+	uint32 joypads = GetGamepadPressedImmediate();
 	currentJoypadData[0] = (joypads & 0xFF);
 	currentJoypadData[1] = ((joypads >> 8) & 0xFF);
 	currentJoypadData[2] = ((joypads >> 16) & 0xFF);
@@ -224,6 +224,11 @@ void RECORDER::update()
 // ------------------------------------------------------------------------------------
 void RECORDER::uncheckRecordingRadioButtons()
 {
+	tasWin->recAllBtn->setChecked(false);
+	tasWin->rec1PBtn->setChecked(false);
+	tasWin->rec2PBtn->setChecked(false);
+	tasWin->rec3PBtn->setChecked(false);
+	tasWin->rec4PBtn->setChecked(false);
 	//Button_SetCheck(hwndRadioButtonRecordAll, BST_UNCHECKED);
 	//Button_SetCheck(hwndRadioButtonRecord1P, BST_UNCHECKED);
 	//Button_SetCheck(hwndRadioButtonRecord2P, BST_UNCHECKED);
@@ -232,29 +237,36 @@ void RECORDER::uncheckRecordingRadioButtons()
 }
 void RECORDER::recheckRecordingRadioButtons()
 {
-	//oldMultitrackRecordingJoypadNumber = multitrackRecordingJoypadNumber;
-	//switch(multitrackRecordingJoypadNumber)
-	//{
-	//case MULTITRACK_RECORDING_ALL:
-	//	Button_SetCheck(hwndRadioButtonRecordAll, BST_CHECKED);
-	//	break;
-	//case MULTITRACK_RECORDING_1P:
-	//	Button_SetCheck(hwndRadioButtonRecord1P, BST_CHECKED);
-	//	break;
-	//case MULTITRACK_RECORDING_2P:
-	//	Button_SetCheck(hwndRadioButtonRecord2P, BST_CHECKED);
-	//	break;
-	//case MULTITRACK_RECORDING_3P:
-	//	Button_SetCheck(hwndRadioButtonRecord3P, BST_CHECKED);
-	//	break;
-	//case MULTITRACK_RECORDING_4P:
-	//	Button_SetCheck(hwndRadioButtonRecord4P, BST_CHECKED);
-	//	break;
-	//default:
-	//	multitrackRecordingJoypadNumber = MULTITRACK_RECORDING_ALL;
-	//	Button_SetCheck(hwndRadioButtonRecordAll, BST_CHECKED);
-	//	break;
-	//}
+	oldMultitrackRecordingJoypadNumber = multitrackRecordingJoypadNumber;
+
+	switch(multitrackRecordingJoypadNumber)
+	{
+		case MULTITRACK_RECORDING_ALL:
+			//Button_SetCheck(hwndRadioButtonRecordAll, BST_CHECKED);
+			tasWin->recAllBtn->setChecked(true);
+			break;
+		case MULTITRACK_RECORDING_1P:
+			//Button_SetCheck(hwndRadioButtonRecord1P, BST_CHECKED);
+			tasWin->rec1PBtn->setChecked(true);
+			break;
+		case MULTITRACK_RECORDING_2P:
+			//Button_SetCheck(hwndRadioButtonRecord2P, BST_CHECKED);
+			tasWin->rec2PBtn->setChecked(true);
+			break;
+		case MULTITRACK_RECORDING_3P:
+			//Button_SetCheck(hwndRadioButtonRecord3P, BST_CHECKED);
+			tasWin->rec3PBtn->setChecked(true);
+			break;
+		case MULTITRACK_RECORDING_4P:
+			//Button_SetCheck(hwndRadioButtonRecord4P, BST_CHECKED);
+			tasWin->rec4PBtn->setChecked(true);
+			break;
+		default:
+			multitrackRecordingJoypadNumber = MULTITRACK_RECORDING_ALL;
+			//Button_SetCheck(hwndRadioButtonRecordAll, BST_CHECKED);
+			tasWin->recAllBtn->setChecked(true);
+			break;
+	}
 }
 
 void RECORDER::recordInput()
@@ -266,10 +278,11 @@ void RECORDER::recordInput()
 	for (int i = 0; i < num_joys; ++i)
 	{
 		oldJoyData[i] = history->getCurrentSnapshot().inputlog.getJoystickData(currFrameCounter, i);
-		//if (!taseditorConfig->recordingUsePattern || editor.patterns[oldCurrentPattern][patternOffset])
-		//	newJoyData[i] = currMovieData.records[currFrameCounter].joysticks[i];
-		//else
-		//	newJoyData[i] = 0;		// blank
+
+		if (!taseditorConfig->recordingUsePattern /*|| editor.patterns[oldCurrentPattern][patternOffset]*/)
+			newJoyData[i] = currMovieData.records[currFrameCounter].joysticks[i];
+		else
+			newJoyData[i] = 0;		// blank
 	}
 	if (taseditorConfig->recordingUsePattern)
 	{
@@ -283,7 +296,9 @@ void RECORDER::recordInput()
 		{
 			// superimpose (bitwise OR) if needed
 			if (taseditorConfig->superimpose == SUPERIMPOSE_CHECKED || (taseditorConfig->superimpose == SUPERIMPOSE_INDETERMINATE && newJoyData[i] == 0))
+			{
 				newJoyData[i] |= oldJoyData[i];
+			}
 			// change this joystick
 			currMovieData.records[currFrameCounter].joysticks[i] = newJoyData[i];
 			if (newJoyData[i] != oldJoyData[i])
@@ -300,18 +315,25 @@ void RECORDER::recordInput()
 				}
 			}
 		}
-	} else
+	}
+	else
 	{
 		int joy = multitrackRecordingJoypadNumber - 1;
 		// substitute target joypad with 1p joypad
 		if (multitrackRecordingJoypadNumber > MULTITRACK_RECORDING_1P && taseditorConfig->use1PKeysForAllSingleRecordings)
+		{
 			newJoyData[joy] = newJoyData[0];
+		}
 		// superimpose (bitwise OR) if needed
 		if (taseditorConfig->superimpose == SUPERIMPOSE_CHECKED || (taseditorConfig->superimpose == SUPERIMPOSE_INDETERMINATE && newJoyData[joy] == 0))
+		{
 			newJoyData[joy] |= oldJoyData[joy];
+		}
 		// other joysticks should not be changed
 		for (int i = num_joys-1; i >= 0; i--)
+		{
 			currMovieData.records[currFrameCounter].joysticks[i] = oldJoyData[i];	// revert to old
+		}
 		// change only this joystick
 		currMovieData.records[currFrameCounter].joysticks[joy] = newJoyData[joy];
 		if (newJoyData[joy] != oldJoyData[joy])

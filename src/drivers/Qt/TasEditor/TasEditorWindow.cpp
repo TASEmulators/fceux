@@ -57,6 +57,93 @@ RECORDER          *recorder = NULL;
 HISTORY           *history = NULL;
 SPLICER           *splicer = NULL;
 
+// Piano Roll Colors
+#define NORMAL_TEXT_COLOR 0x0
+#define NORMAL_BACKGROUND_COLOR 0xFFFFFF
+
+//#define NORMAL_FRAMENUM_COLOR 0xFFFFFF
+//#define NORMAL_INPUT_COLOR1   0xEDEDED
+//#define NORMAL_INPUT_COLOR2   0xE2E2E2
+
+#define NORMAL_FRAMENUM_COLOR 0xFF, 0xFF, 0xFF
+#define NORMAL_INPUT_COLOR1   0xED, 0xED, 0xED
+#define NORMAL_INPUT_COLOR2   0xE2, 0xE2, 0xE2
+
+//#define GREENZONE_FRAMENUM_COLOR 0xDDFFDD
+//#define GREENZONE_INPUT_COLOR1   0xC8F7C4
+//#define GREENZONE_INPUT_COLOR2   0xADE7AD
+
+#define GREENZONE_FRAMENUM_COLOR 0xDD, 0xFF, 0xDD
+#define GREENZONE_INPUT_COLOR1   0xC4, 0xF7, 0xC8
+#define GREENZONE_INPUT_COLOR2   0xAD, 0xE7, 0xAD
+
+//#define PALE_GREENZONE_FRAMENUM_COLOR 0xE4FFE4
+//#define PALE_GREENZONE_INPUT_COLOR1   0xD3F9D2
+//#define PALE_GREENZONE_INPUT_COLOR2   0xBAEBBA
+
+#define PALE_GREENZONE_FRAMENUM_COLOR 0xE4, 0xFF, 0xE4
+#define PALE_GREENZONE_INPUT_COLOR1   0xD2, 0xF9, 0xD3
+#define PALE_GREENZONE_INPUT_COLOR2   0xBA, 0xEB, 0xBA
+
+//#define VERY_PALE_GREENZONE_FRAMENUM_COLOR 0xF9FFF9
+//#define VERY_PALE_GREENZONE_INPUT_COLOR1 0xE0FBE0
+//#define VERY_PALE_GREENZONE_INPUT_COLOR2 0xD2F2D2
+
+#define VERY_PALE_GREENZONE_FRAMENUM_COLOR 0xF9, 0xFF, 0xF9
+#define VERY_PALE_GREENZONE_INPUT_COLOR1   0xE0, 0xFB, 0xE0
+#define VERY_PALE_GREENZONE_INPUT_COLOR2   0xD2, 0xF2, 0xD2
+
+//#define LAG_FRAMENUM_COLOR 0xDDDCFF
+//#define LAG_INPUT_COLOR1 0xD2D0F0
+//#define LAG_INPUT_COLOR2 0xC9C6E8
+
+#define LAG_FRAMENUM_COLOR 0xFF, 0xDC, 0xDD
+#define LAG_INPUT_COLOR1   0xF0, 0xD0, 0xD2
+#define LAG_INPUT_COLOR2   0xE8, 0xC6, 0xC9
+
+//#define PALE_LAG_FRAMENUM_COLOR 0xE3E3FF
+//#define PALE_LAG_INPUT_COLOR1 0xDADAF4
+//#define PALE_LAG_INPUT_COLOR2 0xCFCEEA
+
+#define PALE_LAG_FRAMENUM_COLOR 0xFF, 0xE3, 0xE3
+#define PALE_LAG_INPUT_COLOR1   0xF4, 0xDA, 0xDA
+#define PALE_LAG_INPUT_COLOR2   0xEA, 0xCE, 0xCF
+
+//#define VERY_PALE_LAG_FRAMENUM_COLOR 0xE9E9FF 
+//#define VERY_PALE_LAG_INPUT_COLOR1 0xE5E5F7
+//#define VERY_PALE_LAG_INPUT_COLOR2 0xE0E0F1
+
+#define VERY_PALE_LAG_FRAMENUM_COLOR 0xFF, 0xE9, 0xE9 
+#define VERY_PALE_LAG_INPUT_COLOR1   0xF7, 0xE5, 0xE5
+#define VERY_PALE_LAG_INPUT_COLOR2   0xF1, 0xE0, 0xE0
+
+//#define CUR_FRAMENUM_COLOR 0xFCEDCF
+//#define CUR_INPUT_COLOR1   0xF7E7B5
+//#define CUR_INPUT_COLOR2   0xE5DBA5
+
+#define CUR_FRAMENUM_COLOR 0xCF, 0xED, 0xFC
+#define CUR_INPUT_COLOR1   0xB5, 0xE7, 0xF7
+#define CUR_INPUT_COLOR2   0xA5, 0xDB, 0xE5
+
+//#define UNDOHINT_FRAMENUM_COLOR 0xF9DDE6
+//#define UNDOHINT_INPUT_COLOR1   0xF7D2E1
+//#define UNDOHINT_INPUT_COLOR2   0xE9BED1
+
+#define UNDOHINT_FRAMENUM_COLOR 0xE6, 0xDD, 0xF9
+#define UNDOHINT_INPUT_COLOR1   0xE1, 0xD2, 0xF7
+#define UNDOHINT_INPUT_COLOR2   0xD1, 0xBE, 0xE9
+
+#define MARKED_FRAMENUM_COLOR 0xAEF0FF
+#define CUR_MARKED_FRAMENUM_COLOR 0xCAEDEA
+#define MARKED_UNDOHINT_FRAMENUM_COLOR 0xDDE5E9
+
+#define BINDMARKED_FRAMENUM_COLOR 0xC9FFF7
+#define CUR_BINDMARKED_FRAMENUM_COLOR 0xD5F2EC
+#define BINDMARKED_UNDOHINT_FRAMENUM_COLOR 0xE1EBED
+
+#define PLAYBACK_MARKER_COLOR 0xC9AF00
+
+
 //----------------------------------------------------------------------------
 //----  Main TAS Editor Window
 //----------------------------------------------------------------------------
@@ -518,6 +605,9 @@ void TasEditorWindow::buildSideControlPanel(void)
 
 	controlPanelContainerWidget = new QWidget();
 	controlPanelContainerWidget->setLayout( ctlPanelMainVbox );
+
+	recRecordingCbox->setChecked( !movie_readonly );
+	connect( recRecordingCbox, SIGNAL(stateChanged(int)), this, SLOT(recordingChanged(int)) );
 }
 //----------------------------------------------------------------------------
 int TasEditorWindow::initModules(void)
@@ -548,8 +638,9 @@ int TasEditorWindow::initModules(void)
 		FCEUI_StopMovie();
 		movieMode = MOVIEMODE_TASEDITOR;
 		FCEUMOV_CreateCleanMovie();
-		//playback.restartPlaybackFromZeroGround();
-	} else
+		playback.restartPlaybackFromZeroGround();
+	}
+	else
 	{
 		// use current movie to create a new project
 		FCEUI_StopMovie();
@@ -608,6 +699,9 @@ void TasEditorWindow::frameUpdate(void)
 	//	TaseditorManualFunction();
 	//	mustCallManualLuaFunction = false;
 	//}
+	
+	pianoRoll->update();
+
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
@@ -944,6 +1038,12 @@ void TasEditorWindow::saveProjectCompactCb(void)
 	saveProject(true);
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::recordingChanged(int state)
+{
+	FCEUI_MovieToggleReadOnly();
+}
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 //----  TAS Piano Roll Widget
 //----------------------------------------------------------------------------
 QPianoRoll::QPianoRoll(QWidget *parent)
@@ -1097,6 +1197,8 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 	{
 		maxLineOffset = 0;
 	}
+	vbar->setMinimum(0);
+	vbar->setMaximum(maxLineOffset);
 
 	if ( viewWidth >= pxLineWidth )
 	{
@@ -1115,10 +1217,11 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------------------------------
 void QPianoRoll::paintEvent(QPaintEvent *event)
 {
-	int x, y, nrow;
+	int x, y, row, nrow, lineNum;
 	QPainter painter(this);
-	QColor white("white"), black("black");
+	QColor white("white"), black("black"), blkColor;
 	static const char *buttonNames[] = { "A", "B", "S", "T", "U", "D", "L", "R", NULL };
+	char stmp[32];
 
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
@@ -1145,6 +1248,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	{
 		lineOffset = maxLineOffset;
 	}
+	vbar->setMinimum(0);
+	vbar->setMaximum(maxLineOffset);
 
 	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window) );
 
@@ -1170,6 +1275,127 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		{
 			painter.fillRect( x, pxLineSpacing, pxWidthCtlCol, viewHeight, this->palette().color(QPalette::AlternateBase) );
 		}
+	}
+
+	y = pxLineSpacing;
+
+	for (row=0; row<nrow; row++)
+	{
+		uint8_t data;
+
+		lineNum = lineOffset + row;
+
+		if ( lineNum >= currMovieData.records.size() )
+		{
+			break;
+		}
+		int frame_lag = greenzone->lagLog.getLagInfoAtFrame(lineNum);
+
+		x = pxFrameCtlX[0] - pxLineXScroll;
+
+		if ( lineNum == history->getUndoHint())
+		{
+			// undo hint here
+			blkColor = QColor(UNDOHINT_INPUT_COLOR1);
+		}
+		else if ( lineNum == currFrameCounter ||  lineNum == (playback->getFlashingPauseFrame() - 1))
+		{
+			// this is current frame
+			blkColor = QColor(CUR_INPUT_COLOR1);
+		}
+		else if ( lineNum < greenzone->getSize() )
+		{
+			if (!greenzone->isSavestateEmpty(lineNum))
+			{
+				// the frame is normal Greenzone frame
+				if (frame_lag == LAGGED_YES)
+				{
+					blkColor = QColor(LAG_FRAMENUM_COLOR);
+				}
+				else
+				{
+					blkColor = QColor(GREENZONE_FRAMENUM_COLOR);
+				}
+			}
+			else if (  !greenzone->isSavestateEmpty(lineNum & EVERY16TH)
+				|| !greenzone->isSavestateEmpty(lineNum & EVERY8TH)
+				|| !greenzone->isSavestateEmpty(lineNum & EVERY4TH)
+				|| !greenzone->isSavestateEmpty(lineNum & EVERY2ND))
+			{
+				// the frame is in a gap (in Greenzone tail)
+				if (frame_lag == LAGGED_YES)
+				{
+					blkColor = QColor(PALE_LAG_FRAMENUM_COLOR);
+				}
+				else
+				{
+					blkColor = QColor(PALE_GREENZONE_FRAMENUM_COLOR);
+				}
+			}
+			else 
+			{
+				// the frame is above Greenzone tail
+				if (frame_lag == LAGGED_YES)
+				{
+					blkColor = QColor(VERY_PALE_LAG_FRAMENUM_COLOR);
+				}
+				else if (frame_lag == LAGGED_NO)
+				{
+					blkColor = QColor(VERY_PALE_GREENZONE_FRAMENUM_COLOR);
+				}
+				else
+				{
+					blkColor = QColor(NORMAL_FRAMENUM_COLOR);
+				}
+			}
+		}
+		else
+		{
+			// the frame is below Greenzone head
+			if (frame_lag == LAGGED_YES)
+			{
+				blkColor = QColor(VERY_PALE_LAG_FRAMENUM_COLOR);
+			}
+			else if (frame_lag == LAGGED_NO)
+			{
+				blkColor = QColor(VERY_PALE_GREENZONE_FRAMENUM_COLOR);
+			}
+			else
+			{
+				blkColor = QColor(NORMAL_FRAMENUM_COLOR);
+			}
+		}
+		painter.fillRect( x, y, pxWidthCtlCol, pxLineSpacing, blkColor );
+
+		for (int i=0; i<numCtlr; i++)
+		{
+			data = currMovieData.records[ lineNum ].joysticks[i];
+
+			x = pxFrameCtlX[i] - pxLineXScroll;
+
+			for (int j=0; j<8; j++)
+			{
+				if ( data & (0x01 << j) )
+				{
+					painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr(buttonNames[j]) );
+				}
+				x += pxWidthBtnCol;
+			}
+			painter.drawLine( x, 0, x, viewHeight );
+		}
+
+		x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 10*pxCharWidth) / 2;
+
+		sprintf( stmp, "%010i", lineNum );
+
+		painter.drawText( x, y+pxLineTextOfs, tr(stmp) );
+
+		y += pxLineSpacing;
+	}
+
+	for (int i=0; i<numCtlr; i++)
+	{
+		x = pxFrameCtlX[i] - pxLineXScroll;
 
 		for (int j=0; j<8; j++)
 		{
