@@ -490,6 +490,7 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::buildSideControlPanel(void)
 {
+	QShortcut   *shortcut;
 	QVBoxLayout *vbox;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
@@ -627,6 +628,28 @@ void TasEditorWindow::buildSideControlPanel(void)
 	connect( rec2PBtn , &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_2P  ); } );
 	connect( rec3PBtn , &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_3P  ); } );
 	connect( rec4PBtn , &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_4P  ); } );
+
+	connect( rewindMkrBtn, SIGNAL(clicked(void)), this, SLOT(playbackFrameRewindFull(void)) );
+	connect( rewindFrmBtn, SIGNAL(clicked(void)), this, SLOT(playbackFrameRewind(void))     );
+	connect( playPauseBtn, SIGNAL(clicked(void)), this, SLOT(playbackPauseCB(void))         );
+	connect( advFrmBtn   , SIGNAL(clicked(void)), this, SLOT(playbackFrameForward(void))    );
+	connect( advMkrBtn   , SIGNAL(clicked(void)), this, SLOT(playbackFrameForwardFull(void)));
+
+	shortcut = new QShortcut( QKeySequence("Pause"), this);
+	connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackPauseCB(void)) );
+
+	shortcut = new QShortcut( QKeySequence("Shift+Up"), this);
+	connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackFrameRewind(void)) );
+
+	shortcut = new QShortcut( QKeySequence("Shift+Down"), this);
+	connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackFrameForward(void)) );
+
+	shortcut = new QShortcut( QKeySequence("Shift+PgUp"), this);
+	connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackFrameRewindFull(void)) );
+
+	shortcut = new QShortcut( QKeySequence("Shift+PgDown"), this);
+	connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackFrameForwardFull(void)) );
+
 }
 //----------------------------------------------------------------------------
 int TasEditorWindow::initModules(void)
@@ -1088,6 +1111,46 @@ void TasEditorWindow::recordInputChanged(int input)
 {
 	//printf("Input Change: %i\n", input);
 	recorder.multitrackRecordingJoypadNumber = input;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::playbackPauseCB(void)
+{
+	fceuWrapperLock();
+	playback.toggleEmulationPause();
+	pianoRoll->update();
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::playbackFrameRewind(void)
+{
+	fceuWrapperLock();
+	playback.handleRewindFrame();
+	pianoRoll->update();
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::playbackFrameForward(void)
+{
+	fceuWrapperLock();
+	playback.handleForwardFrame();
+	pianoRoll->update();
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::playbackFrameRewindFull(void)
+{
+	fceuWrapperLock();
+	playback.handleRewindFull();
+	pianoRoll->update();
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::playbackFrameForwardFull(void)
+{
+	fceuWrapperLock();
+	playback.handleForwardFull();
+	pianoRoll->update();
+	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------

@@ -30,6 +30,7 @@
 #include <QAction>
 #include <QFont>
 #include <QPainter>
+#include <QShortcut>
 
 #include "Qt/TasEditor/taseditor_config.h"
 #include "Qt/TasEditor/taseditor_project.h"
@@ -197,6 +198,7 @@ class TasEditorWindow : public QDialog
 		QPushButton *nextMkrBtn;
 		QPushButton *similarBtn;
 		QPushButton *moreBtn;
+
 	private:
 
 		int initModules(void);
@@ -218,6 +220,11 @@ class TasEditorWindow : public QDialog
 		void recordInputChanged(int);
 		void superImposedChanged(int);
 		void usePatternChanged(int);
+		void playbackPauseCB(void);
+		void playbackFrameRewind(void);
+		void playbackFrameForward(void);
+		void playbackFrameRewindFull(void);
+		void playbackFrameForwardFull(void);
 
 	friend class RECORDER;
 };
