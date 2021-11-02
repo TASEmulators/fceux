@@ -29,6 +29,7 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QFont>
+#include <QPainter>
 
 #include "Qt/TasEditor/taseditor_config.h"
 #include "Qt/TasEditor/taseditor_project.h"
@@ -73,6 +74,8 @@ class QPianoRoll : public QWidget
 		void calcFontData(void);
 		void resizeEvent(QResizeEvent *event);
 		void paintEvent(QPaintEvent *event);
+
+		void drawArrow( QPainter *painter, int xl, int yl, int value );
 
 	private:
 		TasEditorWindow *parent;

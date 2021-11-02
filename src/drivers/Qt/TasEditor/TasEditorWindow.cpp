@@ -57,6 +57,13 @@ RECORDER          *recorder = NULL;
 HISTORY           *history = NULL;
 SPLICER           *splicer = NULL;
 
+// Piano Roll Definitions
+#define BOOKMARKS_WITH_BLUE_ARROW 20
+#define BOOKMARKS_WITH_GREEN_ARROW 40
+#define BLUE_ARROW_IMAGE_ID 60
+#define GREEN_ARROW_IMAGE_ID 61
+#define GREEN_BLUE_ARROW_IMAGE_ID 62
+
 // Piano Roll Colors
 #define NORMAL_TEXT_COLOR 0x0
 #define NORMAL_BACKGROUND_COLOR 0xFFFFFF
@@ -1208,7 +1215,7 @@ void QPianoRoll::calcFontData(void)
 
 	viewLines   = (viewHeight / pxLineSpacing) + 1;
 
-	pxWidthCol1     =  2 * pxCharWidth;
+	pxWidthCol1     =  3 * pxCharWidth;
 	pxWidthFrameCol = 12 * pxCharWidth;
 	pxWidthBtnCol   =  3 * pxCharWidth;
 	pxWidthCtlCol   =  8 * pxWidthBtnCol;
@@ -1220,6 +1227,36 @@ void QPianoRoll::calcFontData(void)
 		pxFrameCtlX[i] = pxFrameColX + pxWidthFrameCol + (i*pxWidthCtlCol);
 	}
 	pxLineWidth = pxFrameCtlX[ numCtlr-1 ] + pxWidthCtlCol;
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::drawArrow( QPainter *painter, int xl, int yl, int value )
+{
+	int x, y, w, h, b, b2;
+	QPoint p[3];
+
+	x = xl+(pxCharWidth/3);
+	y = yl+1;
+	w = pxCharWidth;
+	h = pxLineSpacing-2;
+
+	p[0] = QPoint( x, y );
+	p[1] = QPoint( x, y+h );
+	p[2] = QPoint( x+w, y+(h/2) );
+
+	if ( value == GREEN_BLUE_ARROW_IMAGE_ID )
+	{
+		painter->setBrush( QColor( 96, 192, 192) );
+	}
+	else if ( value == GREEN_ARROW_IMAGE_ID )
+	{
+		painter->setBrush( QColor(0, 192, 64) );
+	}
+	else if ( value == BLUE_ARROW_IMAGE_ID )
+	{
+		painter->setBrush( QColor(10, 36, 106) );
+	}
+
+	painter->drawPolygon( p, 3 );
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::resizeEvent(QResizeEvent *event)
@@ -1331,81 +1368,84 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		}
 		int frame_lag = greenzone->lagLog.getLagInfoAtFrame(lineNum);
 
-		x = pxFrameCtlX[0] - pxLineXScroll;
+		for (int i=0; i<numCtlr; i++)
+		{
+			x = pxFrameCtlX[i] - pxLineXScroll;
 
-		if ( lineNum == history->getUndoHint())
-		{
-			// undo hint here
-			blkColor = QColor(UNDOHINT_INPUT_COLOR1);
-		}
-		else if ( lineNum == currFrameCounter ||  lineNum == (playback->getFlashingPauseFrame() - 1))
-		{
-			// this is current frame
-			blkColor = QColor(CUR_INPUT_COLOR1);
-		}
-		else if ( lineNum < greenzone->getSize() )
-		{
-			if (!greenzone->isSavestateEmpty(lineNum))
+			if ( lineNum == history->getUndoHint())
 			{
-				// the frame is normal Greenzone frame
-				if (frame_lag == LAGGED_YES)
-				{
-					blkColor = QColor(LAG_FRAMENUM_COLOR);
-				}
-				else
-				{
-					blkColor = QColor(GREENZONE_FRAMENUM_COLOR);
-				}
+				// undo hint here
+				blkColor = (i%2) ? QColor(UNDOHINT_INPUT_COLOR2) : QColor(UNDOHINT_INPUT_COLOR1);
 			}
-			else if (  !greenzone->isSavestateEmpty(lineNum & EVERY16TH)
-				|| !greenzone->isSavestateEmpty(lineNum & EVERY8TH)
-				|| !greenzone->isSavestateEmpty(lineNum & EVERY4TH)
-				|| !greenzone->isSavestateEmpty(lineNum & EVERY2ND))
+			else if ( lineNum == currFrameCounter ||  lineNum == (playback->getFlashingPauseFrame() - 1))
 			{
-				// the frame is in a gap (in Greenzone tail)
-				if (frame_lag == LAGGED_YES)
-				{
-					blkColor = QColor(PALE_LAG_FRAMENUM_COLOR);
-				}
-				else
-				{
-					blkColor = QColor(PALE_GREENZONE_FRAMENUM_COLOR);
-				}
+				// this is current frame
+				blkColor = (i%2) ? QColor(CUR_INPUT_COLOR2) : QColor(CUR_INPUT_COLOR1);
 			}
-			else 
+			else if ( lineNum < greenzone->getSize() )
 			{
-				// the frame is above Greenzone tail
-				if (frame_lag == LAGGED_YES)
+				if (!greenzone->isSavestateEmpty(lineNum))
 				{
-					blkColor = QColor(VERY_PALE_LAG_FRAMENUM_COLOR);
+					// the frame is normal Greenzone frame
+					if (frame_lag == LAGGED_YES)
+					{
+						blkColor = (i%2) ? QColor(LAG_INPUT_COLOR2) : QColor(LAG_INPUT_COLOR1);
+					}
+					else
+					{
+						blkColor = (i%2) ? QColor(GREENZONE_INPUT_COLOR2) : QColor(GREENZONE_INPUT_COLOR1);
+					}
 				}
-				else if (frame_lag == LAGGED_NO)
+				else if (  !greenzone->isSavestateEmpty(lineNum & EVERY16TH)
+					|| !greenzone->isSavestateEmpty(lineNum & EVERY8TH)
+					|| !greenzone->isSavestateEmpty(lineNum & EVERY4TH)
+					|| !greenzone->isSavestateEmpty(lineNum & EVERY2ND))
 				{
-					blkColor = QColor(VERY_PALE_GREENZONE_FRAMENUM_COLOR);
+					// the frame is in a gap (in Greenzone tail)
+					if (frame_lag == LAGGED_YES)
+					{
+						blkColor = (i%2) ? QColor(PALE_LAG_INPUT_COLOR2) : QColor(PALE_LAG_INPUT_COLOR1);
+					}
+					else
+					{
+						blkColor = (i%2) ? QColor(PALE_GREENZONE_INPUT_COLOR2) : QColor(PALE_GREENZONE_INPUT_COLOR1);
+					}
 				}
-				else
+				else 
 				{
-					blkColor = QColor(NORMAL_FRAMENUM_COLOR);
+					// the frame is above Greenzone tail
+					if (frame_lag == LAGGED_YES)
+					{
+						blkColor = (i%2) ? QColor(VERY_PALE_LAG_INPUT_COLOR2) : QColor(VERY_PALE_LAG_INPUT_COLOR1);
+					}
+					else if (frame_lag == LAGGED_NO)
+					{
+						blkColor = (i%2) ? QColor(VERY_PALE_GREENZONE_INPUT_COLOR2) : QColor(VERY_PALE_GREENZONE_INPUT_COLOR1);
+					}
+					else
+					{
+						blkColor = (i%2) ? QColor(NORMAL_INPUT_COLOR2) : QColor(NORMAL_INPUT_COLOR1);
+					}
 				}
-			}
-		}
-		else
-		{
-			// the frame is below Greenzone head
-			if (frame_lag == LAGGED_YES)
-			{
-				blkColor = QColor(VERY_PALE_LAG_FRAMENUM_COLOR);
-			}
-			else if (frame_lag == LAGGED_NO)
-			{
-				blkColor = QColor(VERY_PALE_GREENZONE_FRAMENUM_COLOR);
 			}
 			else
 			{
-				blkColor = QColor(NORMAL_FRAMENUM_COLOR);
+				// the frame is below Greenzone head
+				if (frame_lag == LAGGED_YES)
+				{
+					blkColor = (i%2) ? QColor(VERY_PALE_LAG_INPUT_COLOR2) : QColor(VERY_PALE_LAG_INPUT_COLOR1);
+				}
+				else if (frame_lag == LAGGED_NO)
+				{
+					blkColor = (i%2) ? QColor(VERY_PALE_GREENZONE_INPUT_COLOR2) : QColor(VERY_PALE_GREENZONE_INPUT_COLOR1);
+				}
+				else
+				{
+					blkColor = (i%2) ? QColor(NORMAL_INPUT_COLOR2) : QColor(NORMAL_INPUT_COLOR1);
+				}
 			}
+			painter.fillRect( x, y, pxWidthCtlCol, pxLineSpacing, blkColor );
 		}
-		painter.fillRect( x, y, pxWidthCtlCol, pxLineSpacing, blkColor );
 
 		for (int i=0; i<numCtlr; i++)
 		{
@@ -1429,6 +1469,46 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		sprintf( stmp, "%010i", lineNum );
 
 		painter.drawText( x, y+pxLineTextOfs, tr(stmp) );
+
+		x = -pxLineXScroll;
+
+		int iImage = bookmarks->findBookmarkAtFrame(lineNum);
+		if (iImage < 0)
+		{
+			// no bookmark at this frame
+			if (lineNum == playback->getLastPosition())
+			{
+				if (lineNum == currFrameCounter)
+				{
+					iImage = GREEN_BLUE_ARROW_IMAGE_ID;
+				}
+				else
+				{
+					iImage = GREEN_ARROW_IMAGE_ID;
+				}
+			}
+			else if (lineNum == currFrameCounter)
+			{
+				iImage = BLUE_ARROW_IMAGE_ID;
+			}
+		}
+		else
+		{
+			// bookmark at this frame
+			if (lineNum == playback->getLastPosition())
+			{
+				iImage += BOOKMARKS_WITH_GREEN_ARROW;
+			}
+			else if (lineNum == currFrameCounter)
+			{
+				iImage += BOOKMARKS_WITH_BLUE_ARROW;
+			}
+		}
+
+		if ( iImage >= 0 )
+		{
+			drawArrow( &painter, x, y, iImage );
+		}
 
 		y += pxLineSpacing;
 	}
