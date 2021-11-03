@@ -296,6 +296,7 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	mainLayout = new QVBoxLayout();
 	mainHBox   = new QSplitter( Qt::Horizontal );
 
+	initPatterns();
 	buildPianoRollDisplay();
 	buildSideControlPanel();
 
@@ -543,18 +544,50 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	pianoRollContainerWidget->setLayout( vbox );
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::initPatterns(void)
+{
+	if (patterns.size() == 0)
+	{
+		FCEU_printf("Will be using default set of patterns...\n");
+		patterns.resize(4);
+		patternsNames.resize(4);
+		// Default Pattern 0: Alternating (1010...)
+		patternsNames[0] = "Alternating (1010...)";
+		patterns[0].resize(2);
+		patterns[0][0] = 1;
+		patterns[0][1] = 0;
+		// Default Pattern 1: Alternating at 30FPS (11001100...)
+		patternsNames[1] = "Alternating at 30FPS (11001100...)";
+		patterns[1].resize(4);
+		patterns[1][0] = 1;
+		patterns[1][1] = 1;
+		patterns[1][2] = 0;
+		patterns[1][3] = 0;
+		// Default Pattern 2: One Quarter (10001000...)
+		patternsNames[2] = "One Quarter (10001000...)";
+		patterns[2].resize(4);
+		patterns[2][0] = 1;
+		patterns[2][1] = 0;
+		patterns[2][2] = 0;
+		patterns[2][3] = 0;
+		// Default Pattern 3: Tap'n'Hold (1011111111111111111111111111111111111...)
+		patternsNames[3] = "Tap'n'Hold (101111111...)";
+		patterns[3].resize(1000);
+		patterns[3][0] = 1;
+		patterns[3][1] = 0;
+		for (int i = 2; i < 1000; ++i)
+		{
+			patterns[3][i] = 1;
+		}
+	}
+}
+//----------------------------------------------------------------------------
 void TasEditorWindow::buildSideControlPanel(void)
 {
 	QShortcut   *shortcut;
 	QVBoxLayout *vbox;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
-
-	patternsNames.resize(4);
-	patternsNames[0] = "Alternating (1010...)";
-	patternsNames[1] = "Alternating at 30FPS (11001100...)";
-	patternsNames[2] = "One Quarter (10001000...)";
-	patternsNames[3] = "Tap'n'Hold (101111111...)";
 
 	ctlPanelMainVbox = new QVBoxLayout();
 

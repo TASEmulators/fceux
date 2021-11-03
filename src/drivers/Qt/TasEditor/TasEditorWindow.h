@@ -173,6 +173,7 @@ class TasEditorWindow : public QDialog
 		QMenuBar  *buildMenuBar(void);
 		void buildPianoRollDisplay(void);
 		void buildSideControlPanel(void);
+		void initPatterns(void);
 
 		QMenu     *recentMenu;
 
