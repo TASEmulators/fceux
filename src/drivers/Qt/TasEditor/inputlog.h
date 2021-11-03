@@ -90,3 +90,4 @@ private:
 	bool alreadyCompressed;			// to compress only once
 };
 
+extern int joysticksPerFrame[INPUT_TYPES_TOTAL];

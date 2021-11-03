@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <string>
 
 #include <QDir>
@@ -32,6 +33,7 @@
 #include <QFontMetrics>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QApplication>
 
 #include "fceu.h"
 #include "movie.h"
@@ -58,6 +60,58 @@ HISTORY           *history = NULL;
 SPLICER           *splicer = NULL;
 
 // Piano Roll Definitions
+enum PIANO_ROLL_COLUMNS
+{
+	COLUMN_ICONS,
+	COLUMN_FRAMENUM,
+	COLUMN_JOYPAD1_A,
+	COLUMN_JOYPAD1_B,
+	COLUMN_JOYPAD1_S,
+	COLUMN_JOYPAD1_T,
+	COLUMN_JOYPAD1_U,
+	COLUMN_JOYPAD1_D,
+	COLUMN_JOYPAD1_L,
+	COLUMN_JOYPAD1_R,
+	COLUMN_JOYPAD2_A,
+	COLUMN_JOYPAD2_B,
+	COLUMN_JOYPAD2_S,
+	COLUMN_JOYPAD2_T,
+	COLUMN_JOYPAD2_U,
+	COLUMN_JOYPAD2_D,
+	COLUMN_JOYPAD2_L,
+	COLUMN_JOYPAD2_R,
+	COLUMN_JOYPAD3_A,
+	COLUMN_JOYPAD3_B,
+	COLUMN_JOYPAD3_S,
+	COLUMN_JOYPAD3_T,
+	COLUMN_JOYPAD3_U,
+	COLUMN_JOYPAD3_D,
+	COLUMN_JOYPAD3_L,
+	COLUMN_JOYPAD3_R,
+	COLUMN_JOYPAD4_A,
+	COLUMN_JOYPAD4_B,
+	COLUMN_JOYPAD4_S,
+	COLUMN_JOYPAD4_T,
+	COLUMN_JOYPAD4_U,
+	COLUMN_JOYPAD4_D,
+	COLUMN_JOYPAD4_L,
+	COLUMN_JOYPAD4_R,
+	COLUMN_FRAMENUM2,
+
+	TOTAL_COLUMNS
+};
+
+enum DRAG_MODES
+{
+	DRAG_MODE_NONE,
+	DRAG_MODE_OBSERVE,
+	DRAG_MODE_PLAYBACK,
+	DRAG_MODE_MARKER,
+	DRAG_MODE_SET,
+	DRAG_MODE_UNSET,
+	DRAG_MODE_SELECTION,
+	DRAG_MODE_DESELECTION,
+};
 #define BOOKMARKS_WITH_BLUE_ARROW 20
 #define BOOKMARKS_WITH_GREEN_ARROW 40
 #define BLUE_ARROW_IMAGE_ID 60
@@ -150,6 +204,7 @@ SPLICER           *splicer = NULL;
 
 #define PLAYBACK_MARKER_COLOR 0xC9AF00
 
+#define MARKER_DRAG_COUNTDOWN_MAX 14
 
 //----------------------------------------------------------------------------
 //----  Main TAS Editor Window
@@ -494,6 +549,12 @@ void TasEditorWindow::buildSideControlPanel(void)
 	QVBoxLayout *vbox;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
+
+	patternsNames.resize(4);
+	patternsNames[0] = "Alternating (1010...)";
+	patternsNames[1] = "Alternating at 30FPS (11001100...)";
+	patternsNames[2] = "One Quarter (10001000...)";
+	patternsNames[3] = "Tap'n'Hold (101111111...)";
 
 	ctlPanelMainVbox = new QVBoxLayout();
 
@@ -1152,6 +1213,75 @@ void TasEditorWindow::playbackFrameForwardFull(void)
 	pianoRoll->update();
 	fceuWrapperUnLock();
 }
+// ----------------------------------------------------------------------------------------------
+// following functions use function parameters to determine range of frames
+void TasEditorWindow::toggleInput(int start, int end, int joy, int button, int consecutivenessTag)
+{
+	if (joy < 0 || joy >= joysticksPerFrame[getInputType(currMovieData)]) return;
+
+	int check_frame = end;
+	if (start > end)
+	{
+		// swap
+		int temp_start = start;
+		start = end;
+		end = temp_start;
+	}
+	if (start < 0) start = end;
+	if (end >= currMovieData.getNumRecords())
+		return;
+
+	if (currMovieData.records[check_frame].checkBit(joy, button))
+	{
+		// clear range
+		for (int i = start; i <= end; ++i)
+			currMovieData.records[i].clearBit(joy, button);
+		greenzone.invalidateAndUpdatePlayback(history.registerChanges(MODTYPE_UNSET, start, end, 0, NULL, consecutivenessTag));
+	} else
+	{
+		// set range
+		for (int i = start; i <= end; ++i)
+			currMovieData.records[i].setBit(joy, button);
+		greenzone.invalidateAndUpdatePlayback(history.registerChanges(MODTYPE_SET, start, end, 0, NULL, consecutivenessTag));
+	}
+}
+void TasEditorWindow::setInputUsingPattern(int start, int end, int joy, int button, int consecutivenessTag)
+{
+	if (joy < 0 || joy >= joysticksPerFrame[getInputType(currMovieData)]) return;
+
+	if (start > end)
+	{
+		// swap
+		int temp_start = start;
+		start = end;
+		end = temp_start;
+	}
+	if (start < 0) start = end;
+	if (end >= currMovieData.getNumRecords())
+		return;
+
+	int pattern_offset = 0, current_pattern = taseditorConfig.currentPattern;
+	bool changes_made = false;
+	bool value;
+
+	for (int i = start; i <= end; ++i)
+	{
+		// skip lag frames
+		if (taseditorConfig.autofirePatternSkipsLag && greenzone.lagLog.getLagInfoAtFrame(i) == LAGGED_YES)
+			continue;
+		value = (patterns[current_pattern][pattern_offset] != 0);
+		if (currMovieData.records[i].checkBit(joy, button) != value)
+		{
+			changes_made = true;
+			currMovieData.records[i].setBitValue(joy, button, value);
+		}
+		pattern_offset++;
+		if (pattern_offset >= (int)patterns[current_pattern].size())
+			pattern_offset -= patterns[current_pattern].size();
+	}
+	if (changes_made)
+		greenzone.invalidateAndUpdatePlayback(history.registerChanges(MODTYPE_PATTERN, start, end, 0, patternsNames[current_pattern].c_str(), consecutivenessTag));
+}
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----  TAS Piano Roll Widget
@@ -1219,6 +1349,14 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 
 	lineOffset = 0;
 	maxLineOffset = 0;
+	dragMode = DRAG_MODE_NONE;
+	dragSelectionStartingFrame = 0;
+	dragSelectionEndingFrame = 0;
+	realRowUnderMouse = -1;
+	markerDragFrameNumber = 0;
+	markerDragCountdown = 0;
+	drawingStartTimestamp = 0;
+	mouse_x = mouse_y = -1;
 }
 //----------------------------------------------------------------------------
 QPianoRoll::~QPianoRoll(void)
@@ -1292,6 +1430,65 @@ void QPianoRoll::calcFontData(void)
 	pxLineWidth = pxFrameCtlX[ numCtlr-1 ] + pxWidthCtlCol;
 }
 //----------------------------------------------------------------------------
+QPoint QPianoRoll::convPixToCursor( QPoint p )
+{
+	QPoint c(0,0);
+
+	if ( p.x() < 0 )
+	{
+		c.setX(0);
+	}
+	else
+	{
+		float x = (float)(p.x() + pxLineXScroll) / pxCharWidth;
+
+		c.setX( (int)x );
+	}
+
+	if ( p.y() < 0 )
+	{
+		c.setY( -1 );
+	}
+	else 
+	{
+		float py = ( (float)p.y() ) /  (float)pxLineSpacing;
+
+		c.setY( (int)py - 1 );
+	}
+	return c;
+}
+//----------------------------------------------------------------------------
+int  QPianoRoll::calcColumn( int px )
+{
+	int col = -1;
+
+	px = px + pxLineXScroll;
+
+	if ( px < pxFrameColX )
+	{
+		col = COLUMN_ICONS;
+	}
+	else if ( px < pxFrameCtlX[0] )
+	{
+		col = COLUMN_FRAMENUM;
+	}
+	else
+	{
+		int i=0;
+
+		while ( px < pxFrameCtlX[i] )
+		{
+			if ( i >= 3 )
+			{
+				break;
+			}
+			i++;
+		}
+		col = COLUMN_JOYPAD1_A + (i*8) + ( (px - pxFrameCtlX[i]) / pxWidthBtnCol);
+	}
+	return col;
+}
+//----------------------------------------------------------------------------
 void QPianoRoll::drawArrow( QPainter *painter, int xl, int yl, int value )
 {
 	int x, y, w, h, b, b2;
@@ -1353,6 +1550,612 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 		pxLineXScroll = hbar->value();
 	}
 	vbar->setPageStep( (3*viewLines)/4 );
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::mousePressEvent(QMouseEvent * event)
+{
+	int col, line, row_index, column_index, kbModifiers, alt_pressed;
+	QPoint c = convPixToCursor( event->pos() );
+
+	mouse_x = event->pos().x();
+	mouse_y = event->pos().y();
+
+	line = lineOffset + c.y();
+	col  = calcColumn( event->pos().x() );
+
+	row_index = line;
+	rowUnderMouse = realRowUnderMouse = line;
+	columnUnderMouse = column_index = col;
+
+	kbModifiers = QApplication::keyboardModifiers();
+	alt_pressed = (kbModifiers & Qt::AltModifier) ? 1 : 0;
+
+	printf("Mouse Button Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	
+	if ( event->button() == Qt::LeftButton )
+	{
+		if (col == COLUMN_ICONS)
+		{
+			// clicked on the "icons" column
+			startDraggingPlaybackCursor();
+		}
+		else if ( (col == COLUMN_FRAMENUM) || (col == COLUMN_FRAMENUM2) )
+		{
+			// clicked on the "Frame#" column
+			if (row_index >= 0)
+			{
+				if (kbModifiers & Qt::ShiftModifier)
+				{
+					// select region from selection_beginning to row_index
+					int selection_beginning = selection->getCurrentRowsSelectionBeginning();
+					if (selection_beginning >= 0)
+					{
+						if (selection_beginning < row_index)
+						{
+							selection->setRegionOfRowsSelection(selection_beginning, row_index + 1);
+						}
+						else
+						{
+							selection->setRegionOfRowsSelection(row_index, selection_beginning + 1);
+						}
+					}
+					startSelectingDrag(row_index);
+				}
+				else if (kbModifiers & Qt::AltModifier)
+				{
+					// make Selection by Pattern
+					int selection_beginning = selection->getCurrentRowsSelectionBeginning();
+					if (selection_beginning >= 0)
+					{
+						selection->clearAllRowsSelection();
+						if (selection_beginning < row_index)
+						{
+							selection->setRegionOfRowsSelectionUsingPattern(selection_beginning, row_index);
+						}
+						else
+						{
+							selection->setRegionOfRowsSelectionUsingPattern(row_index, selection_beginning);
+						}
+					}
+					if (selection->isRowSelected(row_index))
+					{
+						startDeselectingDrag(row_index);
+					}
+					else
+					{
+						startSelectingDrag(row_index);
+					}
+				}
+				else if (kbModifiers & Qt::ControlModifier)
+				{
+					// clone current selection, so that user will be able to revert
+					if (selection->getCurrentRowsSelectionSize() > 0)
+					{
+						selection->addCurrentSelectionToHistory();
+					}
+					if (selection->isRowSelected(row_index))
+					{
+						selection->clearSingleRowSelection(row_index);
+						startDeselectingDrag(row_index);
+					}
+					else
+					{
+						selection->setRowSelection(row_index);
+						startSelectingDrag(row_index);
+					}
+				}
+				else	// just click
+				{
+					selection->clearAllRowsSelection();
+					selection->setRowSelection(row_index);
+					startSelectingDrag(row_index);
+				}
+			}
+		}
+		else if (column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+		{
+			// clicked on Input
+			if (row_index >= 0)
+			{
+				if (!alt_pressed && !(kbModifiers & Qt::ShiftModifier))
+				{
+					// clicked without Shift/Alt - bring Selection cursor to this row
+					selection->clearAllRowsSelection();
+					selection->setRowSelection(row_index);
+				}
+				// toggle Input
+				drawingStartTimestamp = clock();
+				int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+				int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+				int selection_beginning = selection->getCurrentRowsSelectionBeginning();
+				if (alt_pressed && selection_beginning >= 0)
+				{
+					tasWin->setInputUsingPattern(selection_beginning, row_index, joy, button, drawingStartTimestamp);
+				}
+				else if ((kbModifiers & Qt::ShiftModifier) && selection_beginning >= 0)
+				{
+					tasWin->toggleInput(selection_beginning, row_index, joy, button, drawingStartTimestamp);
+				}
+				else
+				{
+					tasWin->toggleInput(row_index, row_index, joy, button, drawingStartTimestamp);
+				}
+				// and start dragging/drawing
+				if (dragMode == DRAG_MODE_NONE)
+				{
+					if (taseditorConfig->drawInputByDragging)
+					{
+						// if clicked this click created buttonpress, then start painting, else start erasing
+						if (currMovieData.records[row_index].checkBit(joy, button))
+						{
+							dragMode = DRAG_MODE_SET;
+						}
+						else
+						{
+							dragMode = DRAG_MODE_UNSET;
+						}
+						//pianoRoll.drawingLastX = GET_X_LPARAM(lParam) + GetScrollPos(pianoRoll.hwndList, SB_HORZ);
+						//pianoRoll.drawingLastY = GET_Y_LPARAM(lParam) + GetScrollPos(pianoRoll.hwndList, SB_VERT) * pianoRoll.listRowHeight;
+					}
+					else
+					{
+						dragMode = DRAG_MODE_OBSERVE;
+					}
+				}
+			}
+		}
+		//updateDrag();
+	}
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::mouseReleaseEvent(QMouseEvent * event)
+{
+	int col, line;
+	QPoint c = convPixToCursor( event->pos() );
+
+	mouse_x = event->pos().x();
+	mouse_y = event->pos().y();
+
+	line = lineOffset + c.y();
+	col  = calcColumn( event->pos().x() );
+
+	rowUnderMouse = realRowUnderMouse = line;
+	columnUnderMouse = col;
+
+	printf("Mouse Button Released: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	
+	if ( event->button() == Qt::LeftButton )
+	{
+		if (dragMode != DRAG_MODE_NONE)
+		{
+			// check if user released left button
+			finishDrag();
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::mouseMoveEvent(QMouseEvent * event)
+{
+	int col, line;
+	QPoint c = convPixToCursor( event->pos() );
+
+	mouse_x = event->pos().x();
+	mouse_y = event->pos().y();
+
+	line = lineOffset + c.y();
+	col =  calcColumn( event->pos().x() );
+
+	rowUnderMouse = realRowUnderMouse = line;
+	columnUnderMouse = col;
+
+	printf("Mouse Move Event: 0x%x (%i,%i)  Col:%i\n", event->button(), c.x(), c.y(), col );
+	
+	if ( event->button() == Qt::LeftButton )
+	{
+
+	}
+	updateDrag();
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::updateDrag(void)
+{
+	int kbModifiers, altHeld;
+
+	if ( dragMode == DRAG_MODE_NONE )
+	{
+		return;
+	}
+	kbModifiers = QApplication::keyboardModifiers();
+
+	altHeld = (kbModifiers & Qt::AltModifier) ? 1 : 0;
+
+	// perform drag
+	switch (dragMode)
+	{
+		case DRAG_MODE_PLAYBACK:
+		{
+			handlePlaybackCursorDragging();
+			break;
+		}
+		case DRAG_MODE_MARKER:
+		{
+			// if suddenly source frame lost its Marker, abort drag
+			if (!markersManager->getMarkerAtFrame(markerDragFrameNumber))
+			{
+				//if (hwndMarkerDragBox)
+				//{
+				//	DestroyWindow(hwndMarkerDragBox);
+				//	hwndMarkerDragBox = 0;
+				//}
+				dragMode = DRAG_MODE_NONE;
+				break;
+			}
+			// when dragging, always show semi-transparent yellow rectangle under mouse
+			//POINT p = {0, 0};
+			//GetCursorPos(&p);
+			//markerDragBoxX = p.x - markerDragBoxDX;
+			//markerDragBoxY = p.y - markerDragBoxDY;
+			//if (!hwndMarkerDragBox)
+			//{
+			//	hwndMarkerDragBox = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, markerDragBoxClassName, markerDragBoxClassName, WS_POPUP, markerDragBoxX, markerDragBoxY, COLUMN_FRAMENUM_WIDTH, listRowHeight, taseditorWindow.hwndTASEditor, NULL, fceu_hInstance, NULL);
+			//	ShowWindow(hwndMarkerDragBox, SW_SHOWNA);
+			//} else
+			//{
+			//	SetWindowPos(hwndMarkerDragBox, 0, markerDragBoxX, markerDragBoxY, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+			//}
+			//SetLayeredWindowAttributes(hwndMarkerDragBox, 0, MARKER_DRAG_BOX_ALPHA, LWA_ALPHA);
+			//UpdateLayeredWindow(hwndMarkerDragBox, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
+			break;
+		}
+		case DRAG_MODE_SET:
+		case DRAG_MODE_UNSET:
+		{
+			//ScreenToClient(hwndList, &p);
+			//int drawing_current_x = p.x + GetScrollPos(hwndList, SB_HORZ);
+			//int drawing_current_y = p.y + GetScrollPos(hwndList, SB_VERT) * listRowHeight;
+			//// draw (or erase) line from [drawing_current_x, drawing_current_y] to (drawing_last_x, drawing_last_y)
+			//int total_dx = drawingLastX - drawing_current_x, total_dy = drawingLastY - drawing_current_y;
+			//if (!shiftHeld)
+			//{
+			//	// when user is not holding Shift, draw only vertical lines
+			//	total_dx = 0;
+			//	drawing_current_x = drawingLastX;
+			//	p.x = drawing_current_x - GetScrollPos(hwndList, SB_HORZ);
+			//}
+			//LVHITTESTINFO info;
+			int row_index, column_index, joy, bit;
+			int min_row_index = currMovieData.getNumRecords(), max_row_index = -1;
+			bool changes_made = false;
+			if (altHeld)
+			{
+				// special mode: draw pattern
+				int selection_beginning = selection->getCurrentRowsSelectionBeginning();
+				if (selection_beginning >= 0)
+				{
+					// perform hit test
+					//info.pt.x = p.x;
+					//info.pt.y = p.y;
+					//ListView_SubItemHitTest(hwndList, &info);
+					row_index = rowUnderMouse;
+					//if (row_index < 0)
+					//{
+					//	row_index = ListView_GetTopIndex(hwndList) + (info.pt.y - listTopMargin) / listRowHeight;
+					//}
+					// pad movie size if user tries to draw pattern below Piano Roll limit
+					if (row_index >= currMovieData.getNumRecords())
+					{
+						currMovieData.insertEmpty(-1, row_index + 1 - currMovieData.getNumRecords());
+					}
+					column_index = columnUnderMouse;
+
+					if (row_index >= 0 && column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+					{
+						joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+						bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+						tasWin->setInputUsingPattern(selection_beginning, row_index, joy, bit, drawingStartTimestamp);
+					}
+				}
+			}
+			else
+			{
+				//double total_len = sqrt((double)(total_dx * total_dx + total_dy * total_dy));
+				//int drawing_min_line_len = listRowHeight;		// = min(list_row_width, list_row_height) in pixels
+				//for (double len = 0; len < total_len; len += drawing_min_line_len)
+				//{
+					// perform hit test
+					//info.pt.x = p.x + (len / total_len) * total_dx;
+					//info.pt.y = p.y + (len / total_len) * total_dy;
+					//ListView_SubItemHitTest(hwndList, &info);
+					//row_index = info.iItem;
+					row_index = rowUnderMouse;
+					//if (row_index < 0)
+					//	row_index = ListView_GetTopIndex(hwndList) + (info.pt.y - listTopMargin) / listRowHeight;
+					// pad movie size if user tries to draw below Piano Roll limit
+					if (row_index >= currMovieData.getNumRecords())
+					{
+						currMovieData.insertEmpty(-1, row_index + 1 - currMovieData.getNumRecords());
+					}
+					column_index = columnUnderMouse;
+
+					if (row_index >= 0 && column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+					{
+						joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+						bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+						if (dragMode == DRAG_MODE_SET && !currMovieData.records[row_index].checkBit(joy, bit))
+						{
+							currMovieData.records[row_index].setBit(joy, bit);
+							changes_made = true;
+							if (min_row_index > row_index) min_row_index = row_index;
+							if (max_row_index < row_index) max_row_index = row_index;
+						}
+						else if (dragMode == DRAG_MODE_UNSET && currMovieData.records[row_index].checkBit(joy, bit))
+						{
+							currMovieData.records[row_index].clearBit(joy, bit);
+							changes_made = true;
+							if (min_row_index > row_index) min_row_index = row_index;
+							if (max_row_index < row_index) max_row_index = row_index;
+						}
+					}
+				//}
+				if (changes_made)
+				{
+					if (dragMode == DRAG_MODE_SET)
+					{
+						greenzone->invalidateAndUpdatePlayback(history->registerChanges(MODTYPE_SET, min_row_index, max_row_index, 0, NULL, drawingStartTimestamp));
+					}
+					else
+					{
+						greenzone->invalidateAndUpdatePlayback(history->registerChanges(MODTYPE_UNSET, min_row_index, max_row_index, 0, NULL, drawingStartTimestamp));
+					}
+				}
+			}
+			//drawingLastX = drawing_current_x;
+			//drawingLastY = drawing_current_y;
+			break;
+		}
+		case DRAG_MODE_SELECTION:
+		{
+			int new_drag_selection_ending_frame = realRowUnderMouse;
+			// if trying to select above Piano Roll, select from frame 0
+			if (new_drag_selection_ending_frame < 0)
+				new_drag_selection_ending_frame = 0;
+			else if (new_drag_selection_ending_frame >= currMovieData.getNumRecords())
+				new_drag_selection_ending_frame = currMovieData.getNumRecords() - 1;
+			if (new_drag_selection_ending_frame >= 0 && new_drag_selection_ending_frame != dragSelectionEndingFrame)
+			{
+				// change Selection shape
+				if (new_drag_selection_ending_frame >= dragSelectionStartingFrame)
+				{
+					// selecting from upper to lower
+					if (dragSelectionEndingFrame < dragSelectionStartingFrame)
+					{
+						selection->clearRegionOfRowsSelection(dragSelectionEndingFrame, dragSelectionStartingFrame);
+						selection->setRegionOfRowsSelection(dragSelectionStartingFrame, new_drag_selection_ending_frame + 1);
+					} else	// both ending_frame and new_ending_frame are >= starting_frame
+					{
+						if (dragSelectionEndingFrame > new_drag_selection_ending_frame)
+							selection->clearRegionOfRowsSelection(new_drag_selection_ending_frame + 1, dragSelectionEndingFrame + 1);
+						else
+							selection->setRegionOfRowsSelection(dragSelectionEndingFrame + 1, new_drag_selection_ending_frame + 1);
+					}
+				} else
+				{
+					// selecting from lower to upper
+					if (dragSelectionEndingFrame > dragSelectionStartingFrame)
+					{
+						selection->clearRegionOfRowsSelection(dragSelectionStartingFrame + 1, dragSelectionEndingFrame + 1);
+						selection->setRegionOfRowsSelection(new_drag_selection_ending_frame, dragSelectionStartingFrame);
+					} else	// both ending_frame and new_ending_frame are <= starting_frame
+					{
+						if (dragSelectionEndingFrame < new_drag_selection_ending_frame)
+							selection->clearRegionOfRowsSelection(dragSelectionEndingFrame, new_drag_selection_ending_frame);
+						else
+							selection->setRegionOfRowsSelection(new_drag_selection_ending_frame, dragSelectionEndingFrame);
+					}
+				}
+				dragSelectionEndingFrame = new_drag_selection_ending_frame;
+			}
+			break;
+		}
+		case DRAG_MODE_DESELECTION:
+		{
+			int new_drag_selection_ending_frame = realRowUnderMouse;
+			// if trying to deselect above Piano Roll, deselect from frame 0
+			if (new_drag_selection_ending_frame < 0)
+				new_drag_selection_ending_frame = 0;
+			else if (new_drag_selection_ending_frame >= currMovieData.getNumRecords())
+				new_drag_selection_ending_frame = currMovieData.getNumRecords() - 1;
+			if (new_drag_selection_ending_frame >= 0 && new_drag_selection_ending_frame != dragSelectionEndingFrame)
+			{
+				// change Deselection shape
+				if (new_drag_selection_ending_frame >= dragSelectionStartingFrame)
+					// deselecting from upper to lower
+					selection->clearRegionOfRowsSelection(dragSelectionStartingFrame, new_drag_selection_ending_frame + 1);
+				else
+					// deselecting from lower to upper
+					selection->clearRegionOfRowsSelection(new_drag_selection_ending_frame, dragSelectionStartingFrame + 1);
+				dragSelectionEndingFrame = new_drag_selection_ending_frame;
+			}
+			break;
+		}
+	}
+}
+//----------------------------------------------------------------------------
+
+void QPianoRoll::startDraggingPlaybackCursor(void)
+{
+	if (dragMode == DRAG_MODE_NONE)
+	{
+		dragMode = DRAG_MODE_PLAYBACK;
+		// call it once
+		handlePlaybackCursorDragging();
+	}
+}
+void QPianoRoll::startDraggingMarker(int mouseX, int mouseY, int rowIndex, int columnIndex)
+{
+	if (dragMode == DRAG_MODE_NONE)
+	{
+		// start dragging the Marker
+		dragMode = DRAG_MODE_MARKER;
+		markerDragFrameNumber = rowIndex;
+		markerDragCountdown = MARKER_DRAG_COUNTDOWN_MAX;
+		//RECT temp_rect;
+		//if (ListView_GetSubItemRect(hwndList, rowIndex, columnIndex, LVIR_BOUNDS, &temp_rect))
+		//{
+		//	markerDragBoxDX = mouseX - temp_rect.left;
+		//	markerDragBoxDY = mouseY - temp_rect.top;
+		//} else
+		//{
+		//	markerDragBoxDX = 0;
+		//	markerDragBoxDY = 0;
+		//}
+		//// redraw the row to show that Marker was lifted
+		//redrawRow(rowIndex);
+		update();
+	}
+}
+void QPianoRoll::startSelectingDrag(int start_frame)
+{
+	if (dragMode == DRAG_MODE_NONE)
+	{
+		dragMode = DRAG_MODE_SELECTION;
+		dragSelectionStartingFrame = start_frame;
+		dragSelectionEndingFrame = dragSelectionStartingFrame;	// assuming that start_frame is already selected
+	}
+}
+void QPianoRoll::startDeselectingDrag(int start_frame)
+{
+	if (dragMode == DRAG_MODE_NONE)
+	{
+		dragMode = DRAG_MODE_DESELECTION;
+		dragSelectionStartingFrame = start_frame;
+		dragSelectionEndingFrame = dragSelectionStartingFrame;	// assuming that start_frame is already deselected
+	}
+}
+
+void QPianoRoll::handlePlaybackCursorDragging(void)
+{
+	int target_frame = realRowUnderMouse;
+	if (target_frame < 0)
+	{
+		target_frame = 0;
+	}
+	if (currFrameCounter != target_frame)
+	{
+		playback->jump(target_frame);
+	}
+}
+
+void QPianoRoll::finishDrag(void)
+{
+	switch (dragMode)
+	{
+		case DRAG_MODE_MARKER:
+		{
+			// place Marker here
+			if (markersManager->getMarkerAtFrame(markerDragFrameNumber))
+			{
+				//POINT p = {0, 0};
+				//GetCursorPos(&p);
+				//int mouse_x = p.x, mouse_y = p.y;
+				//ScreenToClient(hwndList, &p);
+				//RECT wrect;
+				//GetClientRect(hwndList, &wrect);
+				if (mouse_x < 0 || mouse_x > viewWidth || mouse_y < 0 || mouse_y > viewHeight)
+				{
+					// user threw the Marker away
+					markersManager->removeMarkerFromFrame(markerDragFrameNumber);
+					//redrawRow(markerDragFrameNumber);
+					history->registerMarkersChange(MODTYPE_MARKER_REMOVE, markerDragFrameNumber);
+					selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
+					// calculate vector of movement
+					//POINT p = {0, 0};
+					//GetCursorPos(&p);
+					//markerDragBoxDX = (mouse_x - markerDragBoxDX) - markerDragBoxX;
+					//markerDragBoxDY = (mouse_y - markerDragBoxDY) - markerDragBoxY;
+					//if (markerDragBoxDX || markerDragBoxDY)
+					//{
+					//	// limit max speed
+					//	double marker_drag_box_speed = sqrt((double)(markerDragBoxDX * markerDragBoxDX + markerDragBoxDY * markerDragBoxDY));
+					//	if (marker_drag_box_speed > MARKER_DRAG_MAX_SPEED)
+					//	{
+					//		markerDragBoxDX *= MARKER_DRAG_MAX_SPEED / marker_drag_box_speed;
+					//		markerDragBoxDY *= MARKER_DRAG_MAX_SPEED / marker_drag_box_speed;
+					//	}
+					//}
+					//markerDragCountdown = MARKER_DRAG_COUNTDOWN_MAX;
+				}
+				else
+				{
+					if (rowUnderMouse >= 0 && (columnUnderMouse <= COLUMN_FRAMENUM || columnUnderMouse >= COLUMN_FRAMENUM2))
+					{
+						if (rowUnderMouse == markerDragFrameNumber)
+						{
+							// it was just double-click and release
+							// if Selection points at dragged Marker, set focus to lower Note edit field
+							int dragged_marker_id = markersManager->getMarkerAtFrame(markerDragFrameNumber);
+							int selection_marker_id = markersManager->getMarkerAboveFrame(selection->getCurrentRowsSelectionBeginning());
+							if (dragged_marker_id == selection_marker_id)
+							{
+								//SetFocus(selection.hwndSelectionMarkerEditField);
+								// select all text in case user wants to overwrite it
+								//SendMessage(selection.hwndSelectionMarkerEditField, EM_SETSEL, 0, -1); 
+							}
+						}
+						else if (markersManager->getMarkerAtFrame(rowUnderMouse))
+						{
+							int dragged_marker_id = markersManager->getMarkerAtFrame(markerDragFrameNumber);
+							int destination_marker_id = markersManager->getMarkerAtFrame(rowUnderMouse);
+							// swap Notes of these Markers
+							char dragged_marker_note[MAX_NOTE_LEN];
+							strcpy(dragged_marker_note, markersManager->getNoteCopy(dragged_marker_id).c_str());
+							if (strcmp(markersManager->getNoteCopy(destination_marker_id).c_str(), dragged_marker_note))
+							{
+								// notes are different, swap them
+								markersManager->setNote(dragged_marker_id, markersManager->getNoteCopy(destination_marker_id).c_str());
+								markersManager->setNote(destination_marker_id, dragged_marker_note);
+								history->registerMarkersChange(MODTYPE_MARKER_SWAP, markerDragFrameNumber, rowUnderMouse);
+								selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
+								//setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+							}
+						}
+						else
+						{
+							// move Marker
+							int new_marker_id = markersManager->setMarkerAtFrame(rowUnderMouse);
+							if (new_marker_id)
+							{
+								markersManager->setNote(new_marker_id, markersManager->getNoteCopy(markersManager->getMarkerAtFrame(markerDragFrameNumber)).c_str());
+								// and delete it from old frame
+								markersManager->removeMarkerFromFrame(markerDragFrameNumber);
+								history->registerMarkersChange(MODTYPE_MARKER_DRAG, markerDragFrameNumber, rowUnderMouse, markersManager->getNoteCopy(markersManager->getMarkerAtFrame(rowUnderMouse)).c_str());
+								selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
+								//setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+								//redrawRow(rowUnderMouse);
+							}
+						}
+					}
+					//redrawRow(markerDragFrameNumber);
+					//if (hwndMarkerDragBox)
+					//{
+					//	DestroyWindow(hwndMarkerDragBox);
+					//	hwndMarkerDragBox = 0;
+					//}
+				}
+			} else
+			{
+				// abort drag
+				//if (hwndMarkerDragBox)
+				//{
+				//	DestroyWindow(hwndMarkerDragBox);
+				//	hwndMarkerDragBox = 0;
+				//}
+			}
+			break;
+		}
+	}
+	dragMode = DRAG_MODE_NONE;
+	//mustCheckItemUnderMouse = true;
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::paintEvent(QPaintEvent *event)

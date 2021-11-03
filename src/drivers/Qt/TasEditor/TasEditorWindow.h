@@ -75,8 +75,22 @@ class QPianoRoll : public QWidget
 		void calcFontData(void);
 		void resizeEvent(QResizeEvent *event);
 		void paintEvent(QPaintEvent *event);
+		void mousePressEvent(QMouseEvent * event);
+		void mouseReleaseEvent(QMouseEvent * event);
+		void mouseMoveEvent(QMouseEvent * event);
+
+		void startDraggingPlaybackCursor(void);
+		void startDraggingMarker(int mouseX, int mouseY, int rowIndex, int columnIndex);
+		void startSelectingDrag(int start_frame);
+		void startDeselectingDrag(int start_frame);
+		void handlePlaybackCursorDragging(void);
+		void finishDrag(void);
+		void updateDrag(void);
 
 		void drawArrow( QPainter *painter, int xl, int yl, int value );
+
+		int    calcColumn( int px );
+		QPoint convPixToCursor( QPoint p );
 
 	private:
 		TasEditorWindow *parent;
@@ -106,6 +120,17 @@ class QPianoRoll : public QWidget
 		int lineOffset;
 		int maxLineOffset;
 		int numInputDevs;
+		int dragMode;
+		int dragSelectionStartingFrame;
+		int dragSelectionEndingFrame;
+		int realRowUnderMouse;
+		int rowUnderMouse;
+		int columnUnderMouse;
+		int markerDragFrameNumber;
+		int markerDragCountdown;
+		int drawingStartTimestamp;
+		int mouse_x;
+		int mouse_y;
 
 		bool useDarkTheme;
 
@@ -139,6 +164,8 @@ class TasEditorWindow : public QDialog
 		HISTORY   history;
 		BRANCHES  branches;
 
+		void toggleInput(int start, int end, int joy, int button, int consecutivenessTag);
+		void setInputUsingPattern(int start, int end, int joy, int button, int consecutivenessTag);
 
 	protected:
 		void closeEvent(QCloseEvent *event);
@@ -199,6 +226,8 @@ class TasEditorWindow : public QDialog
 		QPushButton *similarBtn;
 		QPushButton *moreBtn;
 
+		std::vector<std::string> patternsNames;
+		std::vector<std::vector<uint8_t>> patterns;
 	private:
 
 		int initModules(void);
