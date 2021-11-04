@@ -48,6 +48,7 @@ extern char FileBase[];
 #include "drivers/win/taseditor/snapshot.h"
 #include "drivers/win/taseditor/taseditor_lua.h"
 #include "drivers/win/cdlogger.h"
+extern TASEDITOR_LUA taseditor_lua;
 #endif
 
 #ifdef __SDL__
