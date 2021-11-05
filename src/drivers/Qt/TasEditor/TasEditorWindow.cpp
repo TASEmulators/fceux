@@ -34,6 +34,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QApplication>
+#include <QGuiApplication>
 
 #include "fceu.h"
 #include "movie.h"
@@ -288,6 +289,8 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	::history         = &this->history;
 	::branches        = &this->branches;
 	::splicer         = &this->splicer;
+
+	clipboard = QGuiApplication::clipboard();
 
 	setWindowTitle("TAS Editor");
 
@@ -1245,6 +1248,16 @@ void TasEditorWindow::playbackFrameForwardFull(void)
 	playback.handleForwardFull();
 	pianoRoll->update();
 	fceuWrapperUnLock();
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::loadClipboard(const char *txt)
+{
+	clipboard->setText( tr(txt), QClipboard::Clipboard );
+
+	if ( clipboard->supportsSelection() )
+	{
+		clipboard->setText( tr(txt), QClipboard::Selection );
+	}
 }
 // ----------------------------------------------------------------------------------------------
 // following functions use function parameters to determine range of frames

@@ -31,6 +31,7 @@
 #include <QFont>
 #include <QPainter>
 #include <QShortcut>
+#include <QClipboard>
 
 #include "Qt/TasEditor/taseditor_config.h"
 #include "Qt/TasEditor/taseditor_project.h"
@@ -164,6 +165,7 @@ class TasEditorWindow : public QDialog
 		HISTORY   history;
 		BRANCHES  branches;
 
+		void loadClipboard(const char *txt);
 		void toggleInput(int start, int end, int joy, int button, int consecutivenessTag);
 		void setInputUsingPattern(int start, int end, int joy, int button, int consecutivenessTag);
 
@@ -227,6 +229,8 @@ class TasEditorWindow : public QDialog
 		QPushButton *similarBtn;
 		QPushButton *moreBtn;
 
+		QClipboard *clipboard;
+
 		std::vector<std::string> patternsNames;
 		std::vector<std::vector<uint8_t>> patterns;
 	private:
@@ -257,6 +261,7 @@ class TasEditorWindow : public QDialog
 		void playbackFrameForwardFull(void);
 
 	friend class RECORDER;
+	friend class SPLICER;
 };
 
 extern TASEDITOR_PROJECT *project;
