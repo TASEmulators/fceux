@@ -425,20 +425,8 @@ void SELECTION::noteThatItemRangeChanged(int startItem, int endItem, int newValu
 }
 void SELECTION::noteThatItemChanged(int item, int newValue )
 {
-	int oldValue = 0;
-	std::map <int, int>::iterator it;
-
-	if ( selList.size() > 0 )
-	{
-		it = selList.find(item);
-
-		if ( it != selList.end() )
-		{
-			oldValue = it->second;
-		}
-	}
-	bool ON =  !oldValue &&  newValue;
-	bool OFF =  oldValue && !newValue;
+	bool ON =   newValue;
+	bool OFF = !newValue;
 
 	//if the item is -1, apply the change to all items
 	if (item == -1)
@@ -579,8 +567,11 @@ void SELECTION::clearSingleRowSelection(int index)
 
 	if ( it != selList.end() )
 	{
-		noteThatItemChanged(index, 1);
-		it->second = 0;
+		if ( it->second )
+		{
+			noteThatItemChanged(index, 0);
+		}
+		selList.erase(it);
 	}
 }
 void SELECTION::clearRegionOfRowsSelection(int start, int end)
@@ -596,6 +587,7 @@ void SELECTION::clearRegionOfRowsSelection(int start, int end)
 	{
 		selList[i] = 0;
 	}
+	noteThatItemRangeChanged(start, end, 0);
 }
 
 void SELECTION::selectAllRows(void)
@@ -610,10 +602,24 @@ void SELECTION::selectAllRows(void)
 }
 void SELECTION::setRowSelection(int index)
 {
-	noteThatItemChanged(index, 1);
-	selList[index] = 1;
+	std::map <int, int>::iterator it;
+
+	it = selList.find(index);
+
+	if ( it != selList.end() )
+	{
+		if ( !it->second )
+		{
+			noteThatItemChanged(index, 1);
+			it->second = 1;
+		}
+	}
+	else
+	{
+		noteThatItemChanged(index, 1);
+		selList[index] = 1;
+	}
 	//ListView_SetItemState(pianoRoll.hwndList, index, LVIS_SELECTED, LVIS_SELECTED);
-	printf("Set Row Selection:%i\n", index);
 }
 void SELECTION::setRegionOfRowsSelection(int start, int end)
 {

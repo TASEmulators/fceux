@@ -11,18 +11,18 @@ typedef std::set<int> RowsSelection;
 class SELECTION
 {
 public:
-	SELECTION();
-	void init();
-	void free();
-	void reset();
-	void reset_vars();
-	void update();
+	SELECTION(void);
+	void init(void);
+	void free(void);
+	void reset(void);
+	void reset_vars(void);
+	void update(void);
 
-	void updateSelectionSize();
+	void updateSelectionSize(void);
 
-	void updateHistoryLogSize();
+	void updateHistoryLogSize(void);
 
-	void redrawMarkerData();
+	void redrawMarkerData(void);
 
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is, unsigned int offset);
@@ -33,26 +33,26 @@ public:
 	void noteThatItemRangeChanged(int startItem, int endItem, int newValue);
 	void noteThatItemChanged(int itemIndex, int value);
 
-	void addNewSelectionToHistory();
-	void addCurrentSelectionToHistory();
+	void addNewSelectionToHistory(void);
+	void addCurrentSelectionToHistory(void);
 
-	void undo();
-	void redo();
+	void undo(void);
+	void redo(void);
 
 	bool isRowSelected(int index);
 
-	void clearAllRowsSelection();
+	void clearAllRowsSelection(void);
 	void clearSingleRowSelection(int index);
 	void clearRegionOfRowsSelection(int start, int end);
 
-	void selectAllRows();
+	void selectAllRows(void);
 	void setRowSelection(int index);
 	void setRegionOfRowsSelection(int start, int end);
 
 	void setRegionOfRowsSelectionUsingPattern(int start, int end);
-	void selectAllRowsBetweenMarkers();
+	void selectAllRowsBetweenMarkers(void);
 
-	void reselectClipboard();
+	void reselectClipboard(void);
 
 	void transposeVertically(int shift);
 
@@ -62,10 +62,10 @@ public:
 	void jumpToFrame(int frame);
 
 	// getters
-	int getCurrentRowsSelectionSize();
-	int getCurrentRowsSelectionBeginning();
-	int getCurrentRowsSelectionEnd();
-	RowsSelection* getCopyOfCurrentRowsSelection();
+	int getCurrentRowsSelectionSize(void);
+	int getCurrentRowsSelectionBeginning(void);
+	int getCurrentRowsSelectionEnd(void);
+	RowsSelection* getCopyOfCurrentRowsSelection(void);
 
 	bool mustFindCurrentMarker;
 	int displayedMarkerNumber;
