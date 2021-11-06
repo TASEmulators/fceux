@@ -2,6 +2,7 @@
 #pragma once
 
 #include <set>
+#include <map>
 #include <vector>
 typedef std::set<int> RowsSelection;
 
@@ -29,8 +30,8 @@ public:
 	bool loadSelection(RowsSelection& selection, EMUFILE *is);
 	bool skipLoadSelection(EMUFILE *is);
 
-	//void noteThatItemRangeChanged(NMLVODSTATECHANGE* info);
-	//void noteThatItemChanged(NMLISTVIEW* info);
+	void noteThatItemRangeChanged(int startItem, int endItem, int newValue);
+	void noteThatItemChanged(int itemIndex, int value);
 
 	void addNewSelectionToHistory();
 	void addCurrentSelectionToHistory();
@@ -95,4 +96,5 @@ private:
 
 	RowsSelection tempRowsSelection;
 
+	std::map <int, int> selList;
 };

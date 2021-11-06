@@ -165,7 +165,9 @@ void SELECTION::updateHistoryLogSize()
 	std::vector<RowsSelection> new_selections_history(new_history_size);
 	int pos = historyCursorPos, source_pos = historyCursorPos;
 	if (pos >= new_history_size)
+	{
 		pos = new_history_size - 1;
+	}
 	int new_history_cursor_pos = pos;
 	// copy old "undo" snapshots
 	while (pos >= 0)
@@ -180,7 +182,9 @@ void SELECTION::updateHistoryLogSize()
 	int i = (num_redo_snapshots <= space_available) ? num_redo_snapshots : space_available;
 	int new_history_total_items = new_history_cursor_pos + i + 1;
 	for (; i > 0; i--)
+	{
 		new_selections_history[new_history_cursor_pos + i] = rowsSelectionHistory[(historyStartPos + historyCursorPos + i) % historySize];
+	}
 	// finish
 	rowsSelectionHistory = new_selections_history;
 	historySize = new_history_size;
@@ -194,7 +198,9 @@ void SELECTION::redrawMarkerData()
 	// redraw Marker num
 	char new_text[MAX_NOTE_LEN] = {0};
 	if (displayedMarkerNumber <= 9999)		// if there's too many digits in the number then don't show the word "Marker" before the number
+	{
 		strcpy(new_text, lowerMarkerText);
+	}
 	char num[16];
 	sprintf( num, "%i", displayedMarkerNumber);
 	strcat(new_text, num);
@@ -214,13 +220,19 @@ void SELECTION::jumpToPreviousMarker(int speed)
 	while (speed > 0)
 	{
 		for (index--; index >= 0; index--)
+		{
 			if (markersManager->getMarkerAtFrame(index)) break;
+		}
 		speed--;
 	}
 	if (index >= 0)
+	{
 		jumpToFrame(index);							// jump to the Marker
+	}
 	else
+	{
 		jumpToFrame(0);								// jump to the beginning of Piano Roll
+	}
 }
 void SELECTION::jumpToNextMarker(int speed)
 {
@@ -232,19 +244,25 @@ void SELECTION::jumpToNextMarker(int speed)
 	while (speed > 0)
 	{
 		for (++index; index <= last_frame; ++index)
+		{
 			if (markersManager->getMarkerAtFrame(index)) break;
+		}
 		speed--;
 	}
 	if (index <= last_frame)
+	{
 		jumpToFrame(index);			// jump to Marker
+	}
 	else
+	{
 		jumpToFrame(last_frame);	// jump to the end of Piano Roll
+	}
 }
 void SELECTION::jumpToFrame(int frame)
 {
 	clearAllRowsSelection();
 	setRowSelection(frame);
-	//pianoRoll.followSelection();
+	//pianoRoll.followSelection(); FIXME
 }
 // ----------------------------------------------------------
 void SELECTION::save(EMUFILE *os, bool really_save)
@@ -345,7 +363,9 @@ void SELECTION::saveSelection(RowsSelection& selection, EMUFILE *os)
 	if (selection.size())
 	{
 		for(RowsSelection::iterator it(selection.begin()); it != selection.end(); it++)
+		{
 			write32le(*it, os);
+		}
 	}
 }
 bool SELECTION::loadSelection(RowsSelection& selection, EMUFILE *is)
@@ -369,51 +389,91 @@ bool SELECTION::skipLoadSelection(EMUFILE *is)
 }
 // ----------------------------------------------------------
 // used to track selection
-//void SELECTION::noteThatItemRangeChanged(NMLVODSTATECHANGE* info)
-//{
-//	bool ON = !(info->uOldState & LVIS_SELECTED) && (info->uNewState & LVIS_SELECTED);
-//	bool OFF = (info->uOldState & LVIS_SELECTED) && !(info->uNewState & LVIS_SELECTED);
-//
-//	if (ON)
-//		for(int i = info->iFrom; i <= info->iTo; ++i)
-//			getCurrentRowsSelection().insert(i);
-//	else
-//		for(int i = info->iFrom; i <= info->iTo; ++i)
-//			getCurrentRowsSelection().erase(i);
-//
-//	splicer->mustRedrawInfoAboutSelection = true;
-//}
-//void SELECTION::noteThatItemChanged(NMLISTVIEW* info)
-//{
-//	int item = info->iItem;
-//	
-//	bool ON = !(info->uOldState & LVIS_SELECTED) && (info->uNewState & LVIS_SELECTED);
-//	bool OFF = (info->uOldState & LVIS_SELECTED) && !(info->uNewState & LVIS_SELECTED);
-//
-//	//if the item is -1, apply the change to all items
-//	if (item == -1)
-//	{
-//		if (OFF)
-//		{
-//			// clear all (actually add new empty Selection to history)
-//			if (getCurrentRowsSelection().size() && trackSelectionChanges)
-//				addNewSelectionToHistory();
-//		} else if (ON)
-//		{
-//			// select all
-//			for(int i = currMovieData.getNumRecords() - 1; i >= 0; i--)
-//				getCurrentRowsSelection().insert(i);
-//		}
-//	} else
-//	{
-//		if (ON)
-//			getCurrentRowsSelection().insert(item);
-//		else if (OFF) 
-//			getCurrentRowsSelection().erase(item);
-//	}
-//
-//	splicer->mustRedrawInfoAboutSelection = true;
-//}
+void SELECTION::noteThatItemRangeChanged(int startItem, int endItem, int newValue )
+{
+	int oldValue = 0;
+	std::map <int, int>::iterator it;
+
+	if ( selList.size() > 0 )
+	{
+		it = selList.find(startItem);
+
+		if ( it != selList.end() )
+		{
+			oldValue = it->second;
+		}
+	}
+	bool ON =  !oldValue &&  newValue;
+	bool OFF =  oldValue && !newValue;
+
+	if (ON)
+	{
+		for(int i = startItem; i <= endItem; ++i)
+		{
+			getCurrentRowsSelection().insert(i);
+		}
+	}
+	else
+	{
+		for(int i = startItem; i <= endItem; ++i)
+		{
+			getCurrentRowsSelection().erase(i);
+		}
+	}
+
+	splicer->mustRedrawInfoAboutSelection = true;
+}
+void SELECTION::noteThatItemChanged(int item, int newValue )
+{
+	int oldValue = 0;
+	std::map <int, int>::iterator it;
+
+	if ( selList.size() > 0 )
+	{
+		it = selList.find(item);
+
+		if ( it != selList.end() )
+		{
+			oldValue = it->second;
+		}
+	}
+	bool ON =  !oldValue &&  newValue;
+	bool OFF =  oldValue && !newValue;
+
+	//if the item is -1, apply the change to all items
+	if (item == -1)
+	{
+		if (OFF)
+		{
+			// clear all (actually add new empty Selection to history)
+			if (getCurrentRowsSelection().size() && trackSelectionChanges)
+			{
+				addNewSelectionToHistory();
+			}
+		}
+		else if (ON)
+		{
+			// select all
+			for(int i = currMovieData.getNumRecords() - 1; i >= 0; i--)
+			{
+				getCurrentRowsSelection().insert(i);
+			}
+		}
+	}
+	else
+	{
+		if (ON)
+		{
+			getCurrentRowsSelection().insert(item);
+		}
+		else if (OFF) 
+		{
+			getCurrentRowsSelection().erase(item);
+		}
+	}
+
+	splicer->mustRedrawInfoAboutSelection = true;
+}
 // ----------------------------------------------------------
 void SELECTION::addNewSelectionToHistory()
 {
@@ -481,61 +541,118 @@ void SELECTION::redo()
 // ----------------------------------------------------------
 bool SELECTION::isRowSelected(int index)
 {
+	std::map <int, int>::iterator it;
 	/*
 	if (CurrentSelection().find(frame) == CurrentSelection().end())
 		return false;
 	return true;
 	*/
-	return false; // ListView_GetItemState(pianoRoll.hwndList, index, LVIS_SELECTED) != 0;
+	//return false; // ListView_GetItemState(pianoRoll.hwndList, index, LVIS_SELECTED) != 0;
+	it = selList.find(index);
+
+	if ( it != selList.end() )
+	{
+		return it->second ? true : false;
+	}
+	return false;
 }
 
 void SELECTION::clearAllRowsSelection()
 {
+	if ( selList.size() > 0 )
+	{
+		noteThatItemChanged(-1, 0);
+	}
 	//ListView_SetItemState(pianoRoll.hwndList, -1, 0, LVIS_SELECTED);
+	selList.clear();
 }
 void SELECTION::clearSingleRowSelection(int index)
 {
+	if ( selList.size() == 0 )
+	{
+		return;
+	}
+	std::map <int, int>::iterator it;
 	//ListView_SetItemState(pianoRoll.hwndList, index, 0, LVIS_SELECTED);
+	
+	it = selList.find(index);
+
+	if ( it != selList.end() )
+	{
+		noteThatItemChanged(index, 1);
+		it->second = 0;
+	}
 }
 void SELECTION::clearRegionOfRowsSelection(int start, int end)
 {
+	if ( selList.size() == 0 )
+	{
+		return;
+	}
 	//for (int i = start; i < end; ++i)
 	//	ListView_SetItemState(pianoRoll.hwndList, i, 0, LVIS_SELECTED);
+	
+	for (int i = start; i < end; ++i)
+	{
+		selList[i] = 0;
+	}
 }
 
-void SELECTION::selectAllRows()
+void SELECTION::selectAllRows(void)
 {
+	noteThatItemChanged(-1, 1);
+
+	for (size_t i = 0; i < currMovieData.records.size(); ++i)
+	{
+		selList[i] = 1;
+	}
 	//ListView_SetItemState(pianoRoll.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
 }
 void SELECTION::setRowSelection(int index)
 {
+	noteThatItemChanged(index, 1);
+	selList[index] = 1;
 	//ListView_SetItemState(pianoRoll.hwndList, index, LVIS_SELECTED, LVIS_SELECTED);
+	printf("Set Row Selection:%i\n", index);
 }
 void SELECTION::setRegionOfRowsSelection(int start, int end)
 {
 	//for (int i = start; i < end; ++i)
 	//	ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+	noteThatItemRangeChanged(start, end, 1);
+
+	for (int i = start; i < end; ++i)
+	{
+		selList[i] = 1;
+	}
 }
 
 void SELECTION::setRegionOfRowsSelectionUsingPattern(int start, int end)
 {
-	//int pattern_offset = 0, current_pattern = taseditorConfig.currentPattern;
-	//for (int i = start; i <= end; ++i)
-	//{
-	//	// skip lag frames
-	//	if (taseditorConfig.autofirePatternSkipsLag && greenzone.lagLog.getLagInfoAtFrame(i) == LAGGED_YES)
-	//		continue;
-	//	if (editor.patterns[current_pattern][pattern_offset])
-	//	{
-	//		ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
-	//	} else
-	//	{
-	//		ListView_SetItemState(pianoRoll.hwndList, i, 0, LVIS_SELECTED);
-	//	}
-	//	pattern_offset++;
-	//	if (pattern_offset >= (int)editor.patterns[current_pattern].size())
-	//		pattern_offset -= editor.patterns[current_pattern].size();
-	//}
+	int pattern_offset = 0, current_pattern = taseditorConfig->currentPattern;
+	for (int i = start; i <= end; ++i)
+	{
+		// skip lag frames
+		if (taseditorConfig->autofirePatternSkipsLag && greenzone->lagLog.getLagInfoAtFrame(i) == LAGGED_YES)
+		{
+			continue;
+		}
+		if (tasWin->patterns[current_pattern][pattern_offset])
+		{
+			selList[i] = 1;
+			//ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+		}
+		else
+		{
+			selList[i] = 0;
+			//ListView_SetItemState(pianoRoll.hwndList, i, 0, LVIS_SELECTED);
+		}
+		pattern_offset++;
+		if (pattern_offset >= (int)tasWin->patterns[current_pattern].size())
+		{
+			pattern_offset -= tasWin->patterns[current_pattern].size();
+		}
+	}
 }
 void SELECTION::selectAllRowsBetweenMarkers()
 {
@@ -548,15 +665,23 @@ void SELECTION::selectAllRowsBetweenMarkers()
 	{
 		upper_border = center = *getCurrentRowsSelection().begin();
 		lower_border = *getCurrentRowsSelection().rbegin();
-	} else lower_border = upper_border = center = currFrameCounter;
+	}
+	else
+	{
+		lower_border = upper_border = center = currFrameCounter;
+	}
 
 	// find Markers
 	// searching up starting from center-0
 	for (upper_marker = center; upper_marker >= 0; upper_marker--)
+	{
 		if (markersManager->getMarkerAtFrame(upper_marker)) break;
+	}
 	// searching down starting from center+1
 	for (lower_marker = center+1; lower_marker < movie_size; ++lower_marker)
+	{
 		if (markersManager->getMarkerAtFrame(lower_marker)) break;
+	}
 
 	clearAllRowsSelection();
 
@@ -568,47 +693,56 @@ void SELECTION::selectAllRowsBetweenMarkers()
 	}
 
 	// selecting circle: 1-2-3-4-1-2-3-4...
-	//if (upper_border > upper_marker+1 || lower_border < lower_marker-1 || lower_border > lower_marker)
-	//{
-	//	// 1 - default: select all between Markers, not including lower Marker
-	//	if (upper_marker < 0) upper_marker = 0;
-	//	for (int i = upper_marker; i < lower_marker; ++i)
-	//	{
-	//		ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
-	//	}
-	//} else if (upper_border == upper_marker && lower_border == lower_marker-1)
-	//{
-	//	// 2 - selected all between Markers and upper Marker selected too: select all between Markers, not including Markers
-	//	for (int i = upper_marker+1; i < lower_marker; ++i)
-	//	{
-	//		ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
-	//	}
-	//} else if (upper_border == upper_marker+1 && lower_border == lower_marker-1)
-	//{
-	//	// 3 - selected all between Markers, nut including Markers: select all between Markers, not including upper Marker
-	//	if (lower_marker >= movie_size) lower_marker = movie_size - 1;
-	//	for (int i = upper_marker+1; i <= lower_marker; ++i)
-	//	{
-	//		ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
-	//	}
-	//} else if (upper_border == upper_marker+1 && lower_border == lower_marker)
-	//{
-	//	// 4 - selected all between Markers and lower Marker selected too: select all bertween Markers, including Markers
-	//	if (upper_marker < 0) upper_marker = 0;
-	//	if (lower_marker >= movie_size) lower_marker = movie_size - 1;
-	//	for (int i = upper_marker; i <= lower_marker; ++i)
-	//	{
-	//		ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
-	//	}
-	//} else
-	//{
-	//	// return to 1
-	//	if (upper_marker < 0) upper_marker = 0;
-	//	for (int i = upper_marker; i < lower_marker; ++i)
-	//	{
-	//		ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
-	//	}
-	//}
+	if (upper_border > upper_marker+1 || lower_border < lower_marker-1 || lower_border > lower_marker)
+	{
+		// 1 - default: select all between Markers, not including lower Marker
+		if (upper_marker < 0) upper_marker = 0;
+		for (int i = upper_marker; i < lower_marker; ++i)
+		{
+			//ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			selList[i] = 1;
+		}
+	}
+	else if (upper_border == upper_marker && lower_border == lower_marker-1)
+	{
+		// 2 - selected all between Markers and upper Marker selected too: select all between Markers, not including Markers
+		for (int i = upper_marker+1; i < lower_marker; ++i)
+		{
+			//ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			selList[i] = 1;
+		}
+	}
+	else if (upper_border == upper_marker+1 && lower_border == lower_marker-1)
+	{
+		// 3 - selected all between Markers, nut including Markers: select all between Markers, not including upper Marker
+		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
+		for (int i = upper_marker+1; i <= lower_marker; ++i)
+		{
+			//ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			selList[i] = 1;
+		}
+	}
+	else if (upper_border == upper_marker+1 && lower_border == lower_marker)
+	{
+		// 4 - selected all between Markers and lower Marker selected too: select all bertween Markers, including Markers
+		if (upper_marker < 0) upper_marker = 0;
+		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
+		for (int i = upper_marker; i <= lower_marker; ++i)
+		{
+			//ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			selList[i] = 1;
+		}
+	}
+	else
+	{
+		// return to 1
+		if (upper_marker < 0) upper_marker = 0;
+		for (int i = upper_marker; i < lower_marker; ++i)
+		{
+			//ListView_SetItemState(pianoRoll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			selList[i] = 1;
+		}
+	}
 }
 void SELECTION::reselectClipboard()
 {
@@ -625,42 +759,50 @@ void SELECTION::reselectClipboard()
 void SELECTION::transposeVertically(int shift)
 {
 	if (!shift) return;
-	//RowsSelection* current_selection = getCopyOfCurrentRowsSelection();
-	//if (current_selection->size())
-	//{
-	//	clearAllRowsSelection();
-	//	int pos;
-	//	if (shift > 0)
-	//	{
-	//		int movie_size = currMovieData.getNumRecords();
-	//		RowsSelection::reverse_iterator current_selection_rend(current_selection->rend());
-	//		for(RowsSelection::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
-	//		{
-	//			pos = (*it) + shift;
-	//			if (pos < movie_size)
-	//				ListView_SetItemState(pianoRoll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
-	//		}
-	//	} else
-	//	{
-	//		RowsSelection::iterator current_selection_end(current_selection->end());
-	//		for(RowsSelection::iterator it(current_selection->begin()); it != current_selection_end; it++)
-	//		{
-	//			pos = (*it) + shift;
-	//			if (pos >= 0)
-	//				ListView_SetItemState(pianoRoll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
-	//		}
-	//	}
-	//}
+	RowsSelection* current_selection = getCopyOfCurrentRowsSelection();
+	if (current_selection->size())
+	{
+		clearAllRowsSelection();
+		int pos;
+		if (shift > 0)
+		{
+			int movie_size = currMovieData.getNumRecords();
+			RowsSelection::reverse_iterator current_selection_rend(current_selection->rend());
+			for(RowsSelection::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
+			{
+				pos = (*it) + shift;
+				if (pos < movie_size)
+				{
+					//ListView_SetItemState(pianoRoll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
+					selList[pos] = 1;
+				}
+			}
+		}
+		else
+		{
+			RowsSelection::iterator current_selection_end(current_selection->end());
+			for(RowsSelection::iterator it(current_selection->begin()); it != current_selection_end; it++)
+			{
+				pos = (*it) + shift;
+				if (pos >= 0)
+				{
+					//ListView_SetItemState(pianoRoll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
+					selList[pos] = 1;
+				}
+			}
+		}
+	}
 }
 
 void SELECTION::enforceRowsSelectionToList()
 {
 	trackSelectionChanges = false;
 	clearAllRowsSelection();
-	//for(RowsSelection::reverse_iterator it(getCurrentRowsSelection().rbegin()); it != getCurrentRowsSelection().rend(); it++)
-	//{
-	//	ListView_SetItemState(pianoRoll.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
-	//}
+	for(RowsSelection::reverse_iterator it(getCurrentRowsSelection().rbegin()); it != getCurrentRowsSelection().rend(); it++)
+	{
+		//ListView_SetItemState(pianoRoll.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
+		selList[*it] = 1;
+	}
 	trackSelectionChanges = true;
 }
 

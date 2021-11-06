@@ -262,6 +262,7 @@ class TasEditorWindow : public QDialog
 
 	friend class RECORDER;
 	friend class SPLICER;
+	friend class SELECTION;
 };
 
 extern TASEDITOR_PROJECT *project;

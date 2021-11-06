@@ -74,16 +74,19 @@ void SPLICER::update(void)
 		int size = selection->getCurrentRowsSelectionSize();
 		if (size)
 		{
-			char new_text[128];
-			strcpy(new_text, selectionText);
 			char num[16];
+			char new_text[128];
+			//strcpy(new_text, selectionText);
+
+			new_text[0] = 0;
 			// rows
 			if (size > 1)
 			{
 				sprintf( num, "%i", size);
 				strcat(new_text, num);
 				strcat(new_text, numTextRows);
-			} else
+			}
+			else
 			{
 				strcat(new_text, numTextRow);
 			}
