@@ -391,20 +391,8 @@ bool SELECTION::skipLoadSelection(EMUFILE *is)
 // used to track selection
 void SELECTION::noteThatItemRangeChanged(int startItem, int endItem, int newValue )
 {
-	int oldValue = 0;
-	std::map <int, int>::iterator it;
-
-	if ( selList.size() > 0 )
-	{
-		it = selList.find(startItem);
-
-		if ( it != selList.end() )
-		{
-			oldValue = it->second;
-		}
-	}
-	bool ON =  !oldValue &&  newValue;
-	bool OFF =  oldValue && !newValue;
+	bool ON =   newValue;
+	bool OFF = !newValue;
 
 	if (ON)
 	{
@@ -580,14 +568,33 @@ void SELECTION::clearRegionOfRowsSelection(int start, int end)
 	{
 		return;
 	}
+	std::map <int, int>::iterator start_it, end_it;
 	//for (int i = start; i < end; ++i)
 	//	ListView_SetItemState(pianoRoll.hwndList, i, 0, LVIS_SELECTED);
 	
-	for (int i = start; i < end; ++i)
+	start_it = selList.find(start);
+	  end_it = selList.find(end);
+
+	if ( (start_it != selList.end()) )
 	{
-		selList[i] = 0;
+		if ( (end_it != selList.end()) )
+		{
+			selList.erase( start_it, end_it );
+		}
+		else
+		{
+			while (start_it != selList.end())
+			{
+				start_it = selList.erase( start_it );
+			}
+		}
+		noteThatItemRangeChanged(start, end, 0);
 	}
-	noteThatItemRangeChanged(start, end, 0);
+	else
+	{
+		selList.clear();
+		noteThatItemChanged( -1, 0);
+	}
 }
 
 void SELECTION::selectAllRows(void)
@@ -781,6 +788,7 @@ void SELECTION::transposeVertically(int shift)
 				{
 					//ListView_SetItemState(pianoRoll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
 					selList[pos] = 1;
+					noteThatItemChanged(pos, 1);
 				}
 			}
 		}
@@ -794,6 +802,7 @@ void SELECTION::transposeVertically(int shift)
 				{
 					//ListView_SetItemState(pianoRoll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
 					selList[pos] = 1;
+					noteThatItemChanged(pos, 1);
 				}
 			}
 		}

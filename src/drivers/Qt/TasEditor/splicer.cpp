@@ -791,7 +791,8 @@ void SPLICER::redrawInfoAboutClipboard(void)
 		char num[16];
 		char new_text[128];
 
-		strcpy(new_text, clipboardText);
+		//strcpy(new_text, clipboardText);
+		new_text[0] = 0;
 		// rows
 		if (clipboardSelection.size() > 1)
 		{

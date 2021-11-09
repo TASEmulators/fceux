@@ -311,6 +311,7 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 
 	setLayout(mainLayout);
 	mainLayout->setMenuBar( menuBar );
+	pianoRoll->setFocus();
 
 	initModules();
 
@@ -398,7 +399,7 @@ void TasEditorWindow::closeWindow(void)
 //----------------------------------------------------------------------------
 QMenuBar *TasEditorWindow::buildMenuBar(void)
 {
-	QMenu       *fileMenu;
+	QMenu       *fileMenu, *editMenu;
 	//QActionGroup *actGroup;
 	QAction     *act;
 	int useNativeMenuBar=0;
@@ -490,12 +491,185 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 
 	// File -> Quit
 	act = new QAction(tr("&Quit Window"), this);
-	act->setShortcut(QKeySequence::Close);
+	act->setShortcut(QKeySequence(tr("Alt+F4")));
 	act->setStatusTip(tr("Close Window"));
 	act->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
 	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 
 	fileMenu->addAction(act);
+
+	// Edit
+	editMenu = menuBar->addMenu(tr("&Edit"));
+
+	// Edit -> Undo
+	act = new QAction(tr("&Undo"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+Z")));
+	act->setStatusTip(tr("Undo Changes"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editUndoCB(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Redo
+	act = new QAction(tr("&Redo"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+Y")));
+	act->setStatusTip(tr("Redo Changes"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editRedoCB(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Selection Undo
+	act = new QAction(tr("Selection &Undo"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+Q")));
+	act->setStatusTip(tr("Undo Selection"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editUndoSelCB(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Selection Redo
+	act = new QAction(tr("Selection &Redo"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+W")));
+	act->setStatusTip(tr("Redo Selection"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editRedoSelCB(void)) );
+
+	editMenu->addAction(act);
+
+	editMenu->addSeparator();
+
+	// Edit -> Deselect
+	act = new QAction(tr("Deselect"), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+W")));
+	act->setStatusTip(tr("Deselect"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editDeselectAll(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Select All
+	act = new QAction(tr("Select All"), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+W")));
+	act->setStatusTip(tr("Select All"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editSelectAll(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Select Between Markers
+	act = new QAction(tr("Select Between Markers"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+A")));
+	act->setStatusTip(tr("Select Between Markers"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editSelBtwMkrs(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Reselect Clipboard
+	act = new QAction(tr("Reselect Clipboard"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+B")));
+	act->setStatusTip(tr("Reselect Clipboard"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editReselectClipboard(void)) );
+
+	editMenu->addAction(act);
+
+	editMenu->addSeparator();
+
+	// Edit -> Copy
+	act = new QAction(tr("Copy"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+C")));
+	act->setStatusTip(tr("Copy"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editCopyCB(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Paste
+	act = new QAction(tr("Paste"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+V")));
+	act->setStatusTip(tr("Paste"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editPasteCB(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Paste Insert
+	act = new QAction(tr("Paste Insert"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+Shift+V")));
+	act->setStatusTip(tr("Paste Insert"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editPasteInsertCB(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Cut
+	act = new QAction(tr("Cut"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+X")));
+	act->setStatusTip(tr("Cut"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editCutCB(void)) );
+
+	editMenu->addAction(act);
+
+	editMenu->addSeparator();
+
+	// Edit -> Clear
+	act = new QAction(tr("Clear"), this);
+	act->setShortcut(QKeySequence(tr("Del")));
+	act->setStatusTip(tr("Clear"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editClearCB(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Delete
+	act = new QAction(tr("Delete"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+Del")));
+	act->setStatusTip(tr("Delete"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editDeleteCB(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Clone
+	act = new QAction(tr("Clone"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+Ins")));
+	act->setStatusTip(tr("Clone"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editCloneCB(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Insert
+	act = new QAction(tr("Insert"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+Shift+Ins")));
+	act->setStatusTip(tr("Insert"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editInsertCB(void)) );
+
+	editMenu->addAction(act);
+
+	// Edit -> Insert # of Frames
+	act = new QAction(tr("Insert # of Frames"), this);
+	act->setShortcut(QKeySequence(tr("Ins")));
+	act->setStatusTip(tr("Insert # of Frames"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editInsertNumFramesCB(void)) );
+
+	editMenu->addAction(act);
+
+	editMenu->addSeparator();
+
+	// Edit -> Truncate Movie
+	act = new QAction(tr("Truncate Movie"), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+Ins")));
+	act->setStatusTip(tr("Truncate Movie"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered()), this, SLOT(editTruncateMovieCB(void)) );
+
+	editMenu->addAction(act);
 
 	return menuBar;
 }
@@ -747,6 +921,11 @@ void TasEditorWindow::buildSideControlPanel(void)
 	shortcut = new QShortcut( QKeySequence("Shift+PgDown"), this);
 	connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackFrameForwardFull(void)) );
 
+	shortcut = new QShortcut( QKeySequence("Ctrl+Up"), this);
+	connect( shortcut, SIGNAL(activated(void)), this, SLOT(scrollSelectionUpOne(void)) );
+
+	shortcut = new QShortcut( QKeySequence("Ctrl+Down"), this);
+	connect( shortcut, SIGNAL(activated(void)), this, SLOT(scrollSelectionDnOne(void)) );
 }
 //----------------------------------------------------------------------------
 int TasEditorWindow::initModules(void)
@@ -1182,6 +1361,129 @@ void TasEditorWindow::recordingChanged(int state)
 	FCEUI_MovieToggleReadOnly();
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::editUndoCB(void)
+{
+	history.undo();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editRedoCB(void)
+{
+	history.redo();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editUndoSelCB(void)
+{
+	int dragMode = pianoRoll->getDragMode();
+
+	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
+	{
+		selection.undo();
+		pianoRoll->followSelection();
+	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editRedoSelCB(void)
+{
+	int dragMode = pianoRoll->getDragMode();
+
+	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
+	{
+		selection.redo();
+		pianoRoll->followSelection();
+	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editDeselectAll(void)
+{
+	int dragMode = pianoRoll->getDragMode();
+
+	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
+	{
+		selection.clearAllRowsSelection();
+	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editSelectAll(void)
+{
+	int dragMode = pianoRoll->getDragMode();
+
+	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
+	{
+		selection.selectAllRows();
+	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editSelBtwMkrs(void)
+{
+	int dragMode = pianoRoll->getDragMode();
+
+	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
+	{
+		selection.selectAllRowsBetweenMarkers();
+	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editReselectClipboard(void)
+{
+	int dragMode = pianoRoll->getDragMode();
+
+	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
+	{
+		selection.reselectClipboard();
+		pianoRoll->followSelection();
+	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editCutCB(void)
+{
+	splicer.cutSelectedInputToClipboard();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editCopyCB(void)
+{
+	splicer.copySelectedInputToClipboard();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editPasteCB(void)
+{
+	splicer.pasteInputFromClipboard();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editPasteInsertCB(void)
+{
+	splicer.pasteInsertInputFromClipboard();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editClearCB(void)
+{
+	splicer.clearSelectedFrames();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editDeleteCB(void)
+{
+	splicer.deleteSelectedFrames();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editCloneCB(void)
+{
+	splicer.cloneSelectedFrames();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editInsertCB(void)
+{
+	splicer.insertSelectedFrames();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editInsertNumFramesCB(void)
+{
+	splicer.insertNumberOfFrames();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::editTruncateMovieCB(void)
+{
+	splicer.truncateMovie();
+}
+//----------------------------------------------------------------------------
 void TasEditorWindow::superImposedChanged(int state)
 {
 	if ( state == Qt::Checked )
@@ -1247,6 +1549,48 @@ void TasEditorWindow::playbackFrameForwardFull(void)
 	fceuWrapperLock();
 	playback.handleForwardFull();
 	pianoRoll->update();
+	fceuWrapperUnLock();
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::scrollSelectionUpOne(void)
+{
+	int dragMode = pianoRoll->getDragMode();
+
+	fceuWrapperLock();
+
+	//printf("DragMode: %i\n", dragMode);
+
+	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
+	{
+		selection.transposeVertically(-1);
+		int selectionBeginning = selection.getCurrentRowsSelectionBeginning();
+		if (selectionBeginning >= 0)
+		{
+			pianoRoll->ensureTheLineIsVisible(selectionBeginning);
+		}
+		pianoRoll->update();
+	}
+	fceuWrapperUnLock();
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::scrollSelectionDnOne(void)
+{
+	int dragMode = pianoRoll->getDragMode();
+
+	fceuWrapperLock();
+
+	//printf("DragMode: %i\n", dragMode);
+
+	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
+	{
+		selection.transposeVertically(1);
+		int selectionEnd = selection.getCurrentRowsSelectionEnd();
+		if (selectionEnd >= 0)
+		{
+			pianoRoll->ensureTheLineIsVisible(selectionEnd);
+		}
+		pianoRoll->update();
+	}
 	fceuWrapperUnLock();
 }
 // ----------------------------------------------------------------------------------------------
@@ -1384,6 +1728,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 		pal.setColor(QPalette::WindowText, fg );
 	}
 	this->parent = qobject_cast <TasEditorWindow*>( parent );
+	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMouseTracking(true);
 	this->setPalette(pal);
 
@@ -1563,6 +1908,27 @@ void QPianoRoll::drawArrow( QPainter *painter, int xl, int yl, int value )
 	}
 
 	painter->drawPolygon( p, 3 );
+}
+//----------------------------------------------------------------------------
+bool QPianoRoll::lineIsVisible( int lineNum )
+{
+	int lineEnd = lineOffset + viewLines;
+
+	return ( (lineNum >= lineOffset) && (lineNum < lineEnd) );
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::ensureTheLineIsVisible( int lineNum )
+{
+	if ( !lineIsVisible( lineNum ) )
+	{
+		lineOffset = lineNum - 3;
+
+		if ( lineOffset < 0 )
+		{
+			lineOffset = 0;
+		}
+		update();
+	}
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::resizeEvent(QResizeEvent *event)
@@ -2027,6 +2393,81 @@ void QPianoRoll::updateDrag(void)
 	}
 }
 //----------------------------------------------------------------------------
+void QPianoRoll::followSelection(void)
+{
+	RowsSelection* current_selection = selection->getCopyOfCurrentRowsSelection();
+	if (current_selection->size() == 0) return;
+
+	int list_items = viewLines - 1;
+	int selection_start = *current_selection->begin();
+	int selection_end = *current_selection->rbegin();
+	int selection_items = 1 + selection_end - selection_start;
+	
+	if (selection_items <= list_items)
+	{
+		// selected region can fit in screen
+		int lower_border = (list_items - selection_items) / 2;
+		int upper_border = (list_items - selection_items) - lower_border;
+		int index = selection_end + lower_border;
+		if (index >= currMovieData.getNumRecords())
+		{
+			index = currMovieData.getNumRecords()-1;
+		}
+		ensureTheLineIsVisible(index);
+
+		index = selection_start - upper_border;
+		if (index < 0)
+		{
+			index = 0;
+		}
+		ensureTheLineIsVisible(index);
+	}
+	else
+	{
+		// selected region is too big to fit in screen
+		// oh well, just center at selection_start
+		centerListAroundLine(selection_start);
+	}
+}
+
+//----------------------------------------------------------------------------
+void QPianoRoll::followMarker(int markerID)
+{
+	if (markerID > 0)
+	{
+		int frame = markersManager->getMarkerFrameNumber(markerID);
+		if (frame >= 0)
+		{
+			centerListAroundLine(frame);
+		}
+	}
+	else
+	{
+		ensureTheLineIsVisible(0);
+	}
+}
+
+//----------------------------------------------------------------------------
+void QPianoRoll::centerListAroundLine(int rowIndex)
+{
+	int numItemsPerPage = viewLines - 1;
+	int lowerBorder = (numItemsPerPage - 1) / 2;
+	int upperBorder = (numItemsPerPage - 1) - lowerBorder;
+	int index = rowIndex + lowerBorder;
+	if (index >= currMovieData.getNumRecords())
+	{
+		index = currMovieData.getNumRecords()-1;
+	}
+	ensureTheLineIsVisible(index);
+
+	index = rowIndex - upperBorder;
+	if (index < 0)
+	{
+		index = 0;
+	}
+	ensureTheLineIsVisible(index);
+}
+//----------------------------------------------------------------------------
 
 void QPianoRoll::startDraggingPlaybackCursor(void)
 {
@@ -2211,6 +2652,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	QColor white("white"), black("black"), blkColor;
 	static const char *buttonNames[] = { "A", "B", "S", "T", "U", "D", "L", "R", NULL };
 	char stmp[32];
+	char rowIsSel=0;
 
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
@@ -2279,6 +2721,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			break;
 		}
 		int frame_lag = greenzone->lagLog.getLagInfoAtFrame(lineNum);
+
+		rowIsSel = selection->isRowSelected( lineNum );
 
 		for (int i=0; i<numCtlr; i++)
 		{
@@ -2359,6 +2803,17 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			painter.fillRect( x, y, pxWidthCtlCol, pxLineSpacing, blkColor );
 		}
 
+		if ( rowIsSel )
+		{
+			painter.fillRect( 0, y, viewWidth, pxLineSpacing, QColor( 10, 36, 106 ) );
+
+			painter.setPen( QColor( 255, 255, 255 ) );
+		}
+		else
+		{
+			painter.setPen( QColor(   0,   0,   0 ) );
+		}
+
 		for (int i=0; i<numCtlr; i++)
 		{
 			data = currMovieData.records[ lineNum ].joysticks[i];
@@ -2373,7 +2828,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 				}
 				x += pxWidthBtnCol;
 			}
-			painter.drawLine( x, 0, x, viewHeight );
+			//painter.drawLine( x, y, x, pxLineSpacing );
 		}
 
 		x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 10*pxCharWidth) / 2;
@@ -2431,12 +2886,18 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 		for (int j=0; j<8; j++)
 		{
-			painter.drawLine( x, 0, x, viewHeight );
+			painter.setPen( QColor( 128, 128, 128 ) );
+			painter.drawLine( x, 0, x, viewHeight ); x++;
+			painter.setPen( QColor(   0,   0,   0 ) );
+			painter.drawLine( x, 0, x, viewHeight ); x--;
 
 			painter.drawText( x + pxCharWidth, pxLineTextOfs, tr(buttonNames[j]) );
 
 			x += pxWidthBtnCol;
 		}
+		painter.setPen( QColor( 128, 128, 128 ) );
+		painter.drawLine( x, 0, x, viewHeight ); x++;
+		painter.setPen( QColor(   0,   0,   0 ) );
 		painter.drawLine( x, 0, x, viewHeight );
 	}
 	y = 0;

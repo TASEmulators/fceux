@@ -72,6 +72,15 @@ class QPianoRoll : public QWidget
 
 		QFont getFont(void){ return font; };
 
+		int   getDragMode(void){ return dragMode; };
+
+		bool  lineIsVisible( int lineNum );
+
+		void  centerListAroundLine(int rowIndex);
+		void  ensureTheLineIsVisible( int lineNum );
+		void  followMarker(int markerID);
+		void  followSelection(void);
+
 	protected:
 		void calcFontData(void);
 		void resizeEvent(QResizeEvent *event);
@@ -259,6 +268,26 @@ class TasEditorWindow : public QDialog
 		void playbackFrameForward(void);
 		void playbackFrameRewindFull(void);
 		void playbackFrameForwardFull(void);
+		void scrollSelectionUpOne(void);
+		void scrollSelectionDnOne(void);
+		void editUndoCB(void);
+		void editRedoCB(void);
+		void editUndoSelCB(void);
+		void editRedoSelCB(void);
+		void editDeselectAll(void);
+		void editSelectAll(void);
+		void editSelBtwMkrs(void);
+		void editReselectClipboard(void);
+		void editCutCB(void);
+		void editCopyCB(void);
+		void editPasteCB(void);
+		void editPasteInsertCB(void);
+		void editClearCB(void);
+		void editDeleteCB(void);
+		void editCloneCB(void);
+		void editInsertCB(void);
+		void editInsertNumFramesCB(void);
+		void editTruncateMovieCB(void);
 
 	friend class RECORDER;
 	friend class SPLICER;
