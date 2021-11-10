@@ -315,6 +315,8 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 
 	initModules();
 
+	updateCheckedItems();
+
 	// Restore Window Geometry
 	restoreGeometry(settings.value("tasEditor/geometry").toByteArray());
 
@@ -399,7 +401,7 @@ void TasEditorWindow::closeWindow(void)
 //----------------------------------------------------------------------------
 QMenuBar *TasEditorWindow::buildMenuBar(void)
 {
-	QMenu       *fileMenu, *editMenu;
+	QMenu       *fileMenu, *editMenu, *viewMenu, *confMenu, *helpMenu;
 	//QActionGroup *actGroup;
 	QAction     *act;
 	int useNativeMenuBar=0;
@@ -671,6 +673,275 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 
 	editMenu->addAction(act);
 
+	// View
+	viewMenu = menuBar->addMenu(tr("&View"));
+
+	// View -> Find Note Window
+	act = new QAction(tr("Find Note Window"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+F")));
+	act->setStatusTip(tr("Find Note Window"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	viewMenu->addAction(act);
+
+	viewMenu->addSeparator();
+	
+	// View -> Display Branch Screenshots
+	dpyBrnchScrnAct = act = new QAction(tr("Display Branch Screenshots"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
+	act->setStatusTip(tr("Display Branch Screenshots"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	viewMenu->addAction(act);
+
+	// View -> Display Branch Screenshots
+	dpyBrnchDescAct = act = new QAction(tr("Display Branch Descriptions"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
+	act->setStatusTip(tr("Display Branch Descriptions"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	viewMenu->addAction(act);
+
+	// View -> Enable Hot Changes
+	enaHotChgAct = act = new QAction(tr("Enable Hot Changes"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
+	act->setStatusTip(tr("Enable Hot Changes"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	viewMenu->addAction(act);
+
+	viewMenu->addSeparator();
+
+	// View -> Follow Undo Content
+	followUndoAct = act = new QAction(tr("Follow Undo Content"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
+	act->setStatusTip(tr("Follow Undo Content"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	viewMenu->addAction(act);
+
+	// View -> Follow Marker Note Content
+	followMkrAct = act = new QAction(tr("Follow Marker Note Content"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
+	act->setStatusTip(tr("Follow Marker Note Content"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	viewMenu->addAction(act);
+
+	// Config
+	confMenu = menuBar->addMenu(tr("&Config"));
+
+	// Config -> Project File Saving Options
+	act = new QAction(tr("Project File Saving Options"), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Project File Saving Options"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Config -> Set Max Undo Levels
+	act = new QAction(tr("Set Max Undo Levels"), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Set Max Undo History"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Config -> Set Greenzone Capacity
+	act = new QAction(tr("Set Greenzone Capacity"), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Set Greenzone Capacity"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	confMenu->addSeparator();
+
+	// Config -> Enable Greenzoneing
+	enaGrnznAct = act = new QAction(tr("Enable Greenzoning"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Enable Greenzoning"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Config -> Autofire Pattern skips Lag
+	afPtrnSkipLagAct = act = new QAction(tr("Autofire Pattern skips Lag"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Autofire Pattern skips Lag"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Config -> Auto Adjust Input According to Lag
+	adjInputLagAct = act = new QAction(tr("Auto Adjust Input According to Lag"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Auto Adjust Input According to Lag"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	confMenu->addSeparator();
+
+	// Config -> Draw Input by Dragging
+	drawInputDragAct = act = new QAction(tr("Draw Input by Dragging"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Draw Input by Dragging"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Config -> Combine Consecutive Recordings/Draws
+	cmbRecDrawAct = act = new QAction(tr("Combine Consecutive Recordings/Draws"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Combine Consecutive Recordings/Draws"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Config -> Use 1P Keys for all Single Recordings
+	use1PforRecAct = act = new QAction(tr("Use 1P Keys for all Single Recordings"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Use 1P Keys for all Single Recordings"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Config -> Use Input Keys for Column Set
+	useInputColSetAct = act = new QAction(tr("Use Input Keys for Column Set"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Use Input Keys for Column Set"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	confMenu->addSeparator();
+
+	// Config -> Bind Markers to Input
+	bindMkrInputAct = act = new QAction(tr("Bind Markers to Input"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Bind Markers to Input"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Config -> Empty New Marker Notes
+	emptyNewMkrNotesAct = act = new QAction(tr("Empty New Marker Notes"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Empty New Marker Notes"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	confMenu->addSeparator();
+
+	// Config -> Old Control Scheme for Branching
+	oldCtlBrnhSchemeAct = act = new QAction(tr("Old Control Scheme for Branching"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Old Control Scheme for Branching"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Config -> Branches Restore Entire Movie
+	brnchRestoreMovieAct = act = new QAction(tr("Branches Restore Entire Movie"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Branches Restore Entire Movie"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Config -> HUD in Branch Screenshots
+	hudInScrnBranchAct = act = new QAction(tr("HUD in Branch Screenshots"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("HUD in Branch Screenshots"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	confMenu->addSeparator();
+
+	// Config -> Autopause at End of Movie
+	pauseAtEndAct = act = new QAction(tr("Autopause at End of Movie"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Autopause at End of Movie"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	confMenu->addAction(act);
+
+	// Help
+	helpMenu = menuBar->addMenu(tr("&Help"));
+
+	// Help -> Open TAS Editor Manual
+	act = new QAction(tr("Open TAS Editor Manual"), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Open TAS Editor Manual"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	helpMenu->addAction(act);
+
+	// Help -> Enable Tool Tips
+	showToolTipsAct = act = new QAction(tr("Enable Tool Tips"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Enable Tool Tips"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	helpMenu->addAction(act);
+
+	helpMenu->addSeparator();
+
+	// Help -> About
+	act = new QAction(tr("About"), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("About"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	helpMenu->addAction(act);
+
 	return menuBar;
 }
 //----------------------------------------------------------------------------
@@ -686,8 +957,8 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	pianoRollHBar    = new QScrollBar( Qt::Horizontal, this );
 	upperMarkerLabel = new QLabel( tr("Marker 0") );
 	lowerMarkerLabel = new QLabel( tr("Marker 1") );
-	upperMarkerName  = new QLineEdit();
-	lowerMarkerName  = new QLineEdit();
+	upperMarkerNote  = new QLineEdit();
+	lowerMarkerNote  = new QLineEdit();
 
 	pianoRoll->setScrollBars( pianoRollHBar, pianoRollVBar );
 	connect( pianoRollHBar, SIGNAL(valueChanged(int)), pianoRoll, SLOT(hbarChanged(int)) );
@@ -706,14 +977,14 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 
 	hbox = new QHBoxLayout();
 	hbox->addWidget( upperMarkerLabel, 1 );
-	hbox->addWidget( upperMarkerName, 10 );
+	hbox->addWidget( upperMarkerNote, 10 );
 
 	vbox->addLayout( hbox, 1 );
 	vbox->addLayout( grid, 100 );
 
 	hbox = new QHBoxLayout();
 	hbox->addWidget( lowerMarkerLabel, 1 );
-	hbox->addWidget( lowerMarkerName, 10 );
+	hbox->addWidget( lowerMarkerNote, 10 );
 
 	vbox->addLayout( hbox, 1 );
 	
@@ -926,6 +1197,51 @@ void TasEditorWindow::buildSideControlPanel(void)
 
 	shortcut = new QShortcut( QKeySequence("Ctrl+Down"), this);
 	connect( shortcut, SIGNAL(activated(void)), this, SLOT(scrollSelectionDnOne(void)) );
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::updateCheckedItems(void)
+{
+
+	followCursorCbox->setChecked( taseditorConfig.followPlaybackCursor );
+	autoRestoreCbox->setChecked( taseditorConfig.autoRestoreLastPlaybackPosition );
+	turboSeekCbox->setChecked( taseditorConfig.turboSeek );
+
+	if ( taseditorConfig.superimpose == SUPERIMPOSE_CHECKED )
+	{
+		recSuperImposeCbox->setCheckState( Qt::Checked );
+	}
+	else if ( taseditorConfig.superimpose == SUPERIMPOSE_INDETERMINATE )
+	{
+		recSuperImposeCbox->setCheckState( Qt::PartiallyChecked );
+	}
+	else
+	{	//taseditorConfig.superimpose == SUPERIMPOSE_UNCHECKED;
+		recSuperImposeCbox->setCheckState( Qt::Unchecked );
+	}
+	recRecordingCbox->setChecked( !movie_readonly );
+	recUsePatternCbox->setChecked( taseditorConfig.recordingUsePattern );
+	dpyBrnchScrnAct->setChecked( taseditorConfig.displayBranchScreenshots );
+	dpyBrnchDescAct->setChecked( taseditorConfig.displayBranchDescriptions );
+	enaHotChgAct->setChecked( taseditorConfig.enableHotChanges );
+	followMkrAct->setChecked( taseditorConfig.followMarkerNoteContext );
+	followUndoAct->setChecked( taseditorConfig.followUndoContext );
+	autoLuaCBox->setChecked( taseditorConfig.enableLuaAutoFunction );
+	dpyBrnchScrnAct->setChecked( taseditorConfig.displayBranchScreenshots );
+	dpyBrnchDescAct->setChecked( taseditorConfig.displayBranchDescriptions );
+	enaGrnznAct->setChecked( taseditorConfig.enableGreenzoning );
+	afPtrnSkipLagAct->setChecked( taseditorConfig.autofirePatternSkipsLag );
+	adjInputLagAct->setChecked( taseditorConfig.autoAdjustInputAccordingToLag );
+	drawInputDragAct->setChecked( taseditorConfig.drawInputByDragging );
+	cmbRecDrawAct->setChecked( taseditorConfig.combineConsecutiveRecordingsAndDraws );
+	use1PforRecAct->setChecked( taseditorConfig.use1PKeysForAllSingleRecordings );
+	useInputColSetAct->setChecked( taseditorConfig.useInputKeysForColumnSet );
+	bindMkrInputAct->setChecked( taseditorConfig.bindMarkersToInput );
+	emptyNewMkrNotesAct->setChecked( taseditorConfig.emptyNewMarkerNotes );
+	oldCtlBrnhSchemeAct->setChecked( taseditorConfig.oldControlSchemeForBranching );
+	brnchRestoreMovieAct->setChecked( taseditorConfig.branchesRestoreEntireMovie );
+	hudInScrnBranchAct->setChecked( taseditorConfig.HUDInBranchScreenshots );
+	pauseAtEndAct->setChecked( taseditorConfig.autopauseAtTheEndOfMovie );
+	showToolTipsAct->setChecked( taseditorConfig.tooltipsEnabled );
 }
 //----------------------------------------------------------------------------
 int TasEditorWindow::initModules(void)

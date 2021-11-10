@@ -205,10 +205,11 @@ void SELECTION::redrawMarkerData()
 	sprintf( num, "%i", displayedMarkerNumber);
 	strcat(new_text, num);
 	strcat(new_text, " ");
-	//SetWindowText(hwndSelectionMarkerNumber, new_text);
+	tasWin->lowerMarkerLabel->setText( QObject::tr(new_text) );
+
 	// change Marker Note
 	strcpy(new_text, markersManager->getNoteCopy(displayedMarkerNumber).c_str());
-	//SetWindowText(hwndSelectionMarkerEditField, new_text);
+	tasWin->lowerMarkerNote->setText( QObject::tr(new_text) );
 }
 
 void SELECTION::jumpToPreviousMarker(int speed)

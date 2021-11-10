@@ -417,10 +417,10 @@ void PLAYBACK::redrawMarkerData()
 	sprintf( num, "%i", displayedMarkerNumber);
 	strcat(new_text, num);
 	strcat(new_text, " ");
-	//SetWindowText(hwndPlaybackMarkerNumber, new_text);
+	tasWin->upperMarkerLabel->setText( QObject::tr(new_text) );
 	// change Marker Note
 	strcpy(new_text, markersManager->getNoteCopy(displayedMarkerNumber).c_str());
-	//SetWindowText(hwndPlaybackMarkerEditField, new_text);
+	tasWin->upperMarkerNote->setText( QObject::tr(new_text) );
 	// reset search_similar_marker, because source Marker changed
 	markersManager->currentIterationOfFindSimilar = 0;
 }

@@ -187,6 +187,25 @@ class TasEditorWindow : public QDialog
 		void initPatterns(void);
 
 		QMenu     *recentMenu;
+		QAction   *followUndoAct;
+		QAction   *followMkrAct;
+		QAction   *enaHotChgAct;
+		QAction   *dpyBrnchDescAct;
+		QAction   *dpyBrnchScrnAct;
+		QAction   *enaGrnznAct;
+		QAction   *afPtrnSkipLagAct;
+		QAction   *adjInputLagAct;
+		QAction   *drawInputDragAct;
+		QAction   *cmbRecDrawAct;
+		QAction   *use1PforRecAct;
+		QAction   *useInputColSetAct;
+		QAction   *bindMkrInputAct;
+		QAction   *emptyNewMkrNotesAct;
+		QAction   *oldCtlBrnhSchemeAct;
+		QAction   *brnchRestoreMovieAct;
+		QAction   *hudInScrnBranchAct;
+		QAction   *pauseAtEndAct;
+		QAction   *showToolTipsAct;
 
 		QSplitter  *mainHBox;
 		QWidget    *pianoRollContainerWidget;
@@ -195,8 +214,8 @@ class TasEditorWindow : public QDialog
 		QScrollBar *pianoRollVBar;
 		QLabel     *upperMarkerLabel;
 		QLabel     *lowerMarkerLabel;
-		QLineEdit  *upperMarkerName;
-		QLineEdit  *lowerMarkerName;
+		QLineEdit  *upperMarkerNote;
+		QLineEdit  *lowerMarkerNote;
 
 		QVBoxLayout *ctlPanelMainVbox;
 		QGroupBox  *playbackGBox;
@@ -253,6 +272,7 @@ class TasEditorWindow : public QDialog
 	public slots:
 		void closeWindow(void);
 		void frameUpdate(void);
+		void updateCheckedItems(void);
 	private slots:
 		void openProject(void);
 		void saveProjectCb(void);
@@ -292,6 +312,7 @@ class TasEditorWindow : public QDialog
 	friend class RECORDER;
 	friend class SPLICER;
 	friend class SELECTION;
+	friend class PLAYBACK;
 };
 
 extern TASEDITOR_PROJECT *project;
