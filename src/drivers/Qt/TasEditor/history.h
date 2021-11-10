@@ -137,6 +137,8 @@ public:
 
 	bool isCursorOverHistoryList();
 
+	int  getNumItems(void){ return historyTotalItems; };
+
 	//HWND hwndHistoryList;
 
 private:

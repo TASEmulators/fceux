@@ -1036,6 +1036,7 @@ void TasEditorWindow::buildSideControlPanel(void)
 	QVBoxLayout *vbox;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
+	QTreeWidgetItem *item;
 
 	ctlPanelMainVbox = new QVBoxLayout();
 
@@ -1081,6 +1082,15 @@ void TasEditorWindow::buildSideControlPanel(void)
 
 	bkbrTree = new QTreeWidget();
 	histTree = new QTreeWidget();
+
+	histTree->setColumnCount(1);
+	histTree->setSelectionMode( QAbstractItemView::SingleSelection );
+	histTree->setAlternatingRowColors(true);
+
+	item = new QTreeWidgetItem();
+	item->setText(0, QString::fromStdString("Time / Description"));
+
+	histTree->setHeaderItem(item);
 
 	prevMkrBtn = new QPushButton();
 	nextMkrBtn = new QPushButton();
@@ -1197,6 +1207,9 @@ void TasEditorWindow::buildSideControlPanel(void)
 
 	shortcut = new QShortcut( QKeySequence("Ctrl+Down"), this);
 	connect( shortcut, SIGNAL(activated(void)), this, SLOT(scrollSelectionDnOne(void)) );
+
+	connect( histTree, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(histTreeItemActivated(QTreeWidgetItem*,int) ) );
+	connect( histTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(histTreeItemActivated(QTreeWidgetItem*,int) ) );
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::updateCheckedItems(void)
@@ -1242,6 +1255,50 @@ void TasEditorWindow::updateCheckedItems(void)
 	hudInScrnBranchAct->setChecked( taseditorConfig.HUDInBranchScreenshots );
 	pauseAtEndAct->setChecked( taseditorConfig.autopauseAtTheEndOfMovie );
 	showToolTipsAct->setChecked( taseditorConfig.tooltipsEnabled );
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::updateHistoryItems(void)
+{
+	int i;
+	QTreeWidgetItem *item;
+	const char *txt;
+
+	for (i=0; i<history.getNumItems(); i++)
+	{
+		txt = history.getItemDesc(i);
+
+		item = histTree->topLevelItem(i);
+
+		if (item == NULL)
+		{
+			item = new QTreeWidgetItem();
+
+			histTree->addTopLevelItem(item);
+
+			histTree->setCurrentItem(item);
+		}
+
+		if ( txt )
+		{
+			if ( item->text(0).compare( tr(txt) ) != 0 )
+			{
+				item->setText(0, tr(txt));
+
+				histTree->setCurrentItem(item);
+			}
+		}
+	}
+
+	while ( (histTree->topLevelItemCount() > 0) && (history.getNumItems() < histTree->topLevelItemCount()) )
+	{
+		item = histTree->takeTopLevelItem( histTree->topLevelItemCount()-1 );
+
+		if ( item )
+		{
+			delete item;
+		}
+	}
+	histTree->viewport()->update();
 }
 //----------------------------------------------------------------------------
 int TasEditorWindow::initModules(void)
@@ -1908,6 +1965,17 @@ void TasEditorWindow::scrollSelectionDnOne(void)
 		pianoRoll->update();
 	}
 	fceuWrapperUnLock();
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::histTreeItemActivated(QTreeWidgetItem *item, int col)
+{
+	int row = histTree->indexOfTopLevelItem(item);
+
+	if ( row < 0 )
+	{
+		return;
+	}
+	history.handleSingleClick(row);
 }
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::loadClipboard(const char *txt)

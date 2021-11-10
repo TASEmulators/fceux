@@ -1192,15 +1192,17 @@ void HISTORY::handleSingleClick(int row_index)
 void HISTORY::updateList()
 {
 	//update the number of items in the history list
-	//int currLVItemCount = ListView_GetItemCount(hwndHistoryList);
-	//if (currLVItemCount != historyTotalItems)
-	//{
-	//	ListView_SetItemCountEx(hwndHistoryList, historyTotalItems, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
-	//}
+	int currLVItemCount = tasWin->histTree->topLevelItemCount();
+
+	if (currLVItemCount != historyTotalItems)
+	{
+		tasWin->updateHistoryItems();
+	}
 }
 
 void HISTORY::redrawList()
 {
+	tasWin->updateHistoryItems();
 	//ListView_SetItemState(hwndHistoryList, historyCursorPos, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 	//ListView_EnsureVisible(hwndHistoryList, historyCursorPos, FALSE);
 	//InvalidateRect(hwndHistoryList, 0, FALSE);

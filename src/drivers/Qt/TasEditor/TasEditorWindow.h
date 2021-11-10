@@ -273,6 +273,7 @@ class TasEditorWindow : public QDialog
 		void closeWindow(void);
 		void frameUpdate(void);
 		void updateCheckedItems(void);
+		void updateHistoryItems(void);
 	private slots:
 		void openProject(void);
 		void saveProjectCb(void);
@@ -308,11 +309,13 @@ class TasEditorWindow : public QDialog
 		void editInsertCB(void);
 		void editInsertNumFramesCB(void);
 		void editTruncateMovieCB(void);
+		void histTreeItemActivated(QTreeWidgetItem*,int);
 
 	friend class RECORDER;
 	friend class SPLICER;
 	friend class SELECTION;
 	friend class PLAYBACK;
+	friend class HISTORY;
 };
 
 extern TASEDITOR_PROJECT *project;
