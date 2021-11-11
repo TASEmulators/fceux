@@ -1269,9 +1269,11 @@ void TasEditorWindow::updateCheckedItems(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::updateHistoryItems(void)
 {
-	int i;
+	int i, cursorPos;
 	QTreeWidgetItem *item;
 	const char *txt;
+
+	cursorPos = history.getCursorPos();
 
 	for (i=0; i<history.getNumItems(); i++)
 	{
@@ -1285,7 +1287,7 @@ void TasEditorWindow::updateHistoryItems(void)
 
 			histTree->addTopLevelItem(item);
 
-			histTree->setCurrentItem(item);
+			//histTree->setCurrentItem(item);
 		}
 
 		if ( txt )
@@ -1294,8 +1296,12 @@ void TasEditorWindow::updateHistoryItems(void)
 			{
 				item->setText(0, tr(txt));
 
-				histTree->setCurrentItem(item);
+				//histTree->setCurrentItem(item);
 			}
+		}
+		if ( cursorPos == i )
+		{
+			histTree->setCurrentItem(item);
 		}
 	}
 
@@ -3086,6 +3092,7 @@ void QPianoRoll::finishDrag(void)
 //----------------------------------------------------------------------------
 void QPianoRoll::paintEvent(QPaintEvent *event)
 {
+	fceuCriticalSection emuLock;
 	int x, y, row, nrow, lineNum;
 	QPainter painter(this);
 	QColor white(255,255,255), black(0,0,0), blkColor;

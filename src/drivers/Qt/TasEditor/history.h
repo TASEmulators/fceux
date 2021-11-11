@@ -128,8 +128,6 @@ public:
 	int getUndoHint();
 	char* getItemDesc(int pos);
 
-	//void getDispInfo(NMLVDISPINFO* nmlvDispInfo);
-	//LONG handleCustomDraw(NMLVCUSTOMDRAW* msg);
 	void handleSingleClick(int rowIndex);
 
 	void redrawList();
@@ -138,8 +136,7 @@ public:
 	bool isCursorOverHistoryList();
 
 	int  getNumItems(void){ return historyTotalItems; };
-
-	//HWND hwndHistoryList;
+	int  getCursorPos(void){ return historyCursorPos; };
 
 private:
 	int jumpInTime(int newPos);
