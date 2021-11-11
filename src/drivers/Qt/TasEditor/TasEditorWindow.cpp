@@ -694,7 +694,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
 	act->setStatusTip(tr("Display Branch Screenshots"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(dpyBrnchScrnChanged(bool)) );
 
 	viewMenu->addAction(act);
 
@@ -704,7 +704,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
 	act->setStatusTip(tr("Display Branch Descriptions"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(dpyBrnchDescChanged(bool)) );
 
 	viewMenu->addAction(act);
 
@@ -714,7 +714,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
 	act->setStatusTip(tr("Enable Hot Changes"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(enaHotChgChanged(bool)) );
 
 	viewMenu->addAction(act);
 
@@ -726,7 +726,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
 	act->setStatusTip(tr("Follow Undo Content"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(followUndoActChanged(bool)) );
 
 	viewMenu->addAction(act);
 
@@ -736,7 +736,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
 	act->setStatusTip(tr("Follow Marker Note Content"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(followMkrActChanged(bool)) );
 
 	viewMenu->addAction(act);
 
@@ -778,7 +778,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Enable Greenzoning"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(enaGrnznActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -788,7 +788,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Autofire Pattern skips Lag"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(afPtrnSkipLagActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -798,7 +798,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Auto Adjust Input According to Lag"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(adjInputLagActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -810,7 +810,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Draw Input by Dragging"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(drawInputDragActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -820,7 +820,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Combine Consecutive Recordings/Draws"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(cmbRecDrawActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -830,7 +830,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Use 1P Keys for all Single Recordings"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(use1PforRecActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -840,7 +840,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Use Input Keys for Column Set"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(useInputColSetActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -852,7 +852,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Bind Markers to Input"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(bindMkrInputActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -862,7 +862,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Empty New Marker Notes"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(emptyNewMkrNotesActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -874,7 +874,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Old Control Scheme for Branching"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(oldCtlBrnhSchemeActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -884,7 +884,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Branches Restore Entire Movie"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(brnchRestoreMovieActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -894,7 +894,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("HUD in Branch Screenshots"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(hudInScrnBranchActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -906,7 +906,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Autopause at End of Movie"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(pauseAtEndActChanged(bool)) );
 
 	confMenu->addAction(act);
 
@@ -928,7 +928,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Enable Tool Tips"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(showToolTipsActChanged(bool)) );
 
 	helpMenu->addAction(act);
 
@@ -1249,8 +1249,6 @@ void TasEditorWindow::updateCheckedItems(void)
 	followMkrAct->setChecked( taseditorConfig.followMarkerNoteContext );
 	followUndoAct->setChecked( taseditorConfig.followUndoContext );
 	autoLuaCBox->setChecked( taseditorConfig.enableLuaAutoFunction );
-	dpyBrnchScrnAct->setChecked( taseditorConfig.displayBranchScreenshots );
-	dpyBrnchDescAct->setChecked( taseditorConfig.displayBranchDescriptions );
 	enaGrnznAct->setChecked( taseditorConfig.enableGreenzoning );
 	afPtrnSkipLagAct->setChecked( taseditorConfig.autofirePatternSkipsLag );
 	adjInputLagAct->setChecked( taseditorConfig.autoAdjustInputAccordingToLag );
@@ -1899,6 +1897,101 @@ void TasEditorWindow::recordInputChanged(int input)
 {
 	//printf("Input Change: %i\n", input);
 	recorder.multitrackRecordingJoypadNumber = input;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::dpyBrnchScrnChanged(bool val)
+{
+	taseditorConfig.displayBranchScreenshots = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::dpyBrnchDescChanged(bool val)
+{
+	taseditorConfig.displayBranchDescriptions = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::enaHotChgChanged(bool val)
+{
+	taseditorConfig.enableHotChanges = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::followUndoActChanged(bool val)
+{
+	taseditorConfig.followUndoContext = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::followMkrActChanged(bool val)
+{
+	taseditorConfig.followMarkerNoteContext = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::enaGrnznActChanged(bool val)
+{
+	taseditorConfig.enableGreenzoning = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::afPtrnSkipLagActChanged(bool val)
+{
+	taseditorConfig.autofirePatternSkipsLag = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::adjInputLagActChanged(bool val)
+{
+	taseditorConfig.autoAdjustInputAccordingToLag = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::drawInputDragActChanged(bool val)
+{
+	taseditorConfig.drawInputByDragging = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::cmbRecDrawActChanged(bool val)
+{
+	taseditorConfig.combineConsecutiveRecordingsAndDraws = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::use1PforRecActChanged(bool val)
+{
+	taseditorConfig.use1PKeysForAllSingleRecordings = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::useInputColSetActChanged(bool val)
+{
+	taseditorConfig.useInputKeysForColumnSet = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::bindMkrInputActChanged(bool val)
+{
+	taseditorConfig.bindMarkersToInput = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::emptyNewMkrNotesActChanged(bool val)
+{
+	taseditorConfig.emptyNewMarkerNotes = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::oldCtlBrnhSchemeActChanged(bool val)
+{
+	taseditorConfig.oldControlSchemeForBranching = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::brnchRestoreMovieActChanged(bool val)
+{
+	taseditorConfig.branchesRestoreEntireMovie = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::hudInScrnBranchActChanged(bool val)
+{
+	taseditorConfig.HUDInBranchScreenshots = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::pauseAtEndActChanged(bool val)
+{
+	taseditorConfig.autopauseAtTheEndOfMovie = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::showToolTipsActChanged(bool val)
+{
+	taseditorConfig.tooltipsEnabled = val;
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::playbackPauseCB(void)

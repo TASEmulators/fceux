@@ -314,6 +314,25 @@ class TasEditorWindow : public QDialog
 		void editInsertCB(void);
 		void editInsertNumFramesCB(void);
 		void editTruncateMovieCB(void);
+		void dpyBrnchScrnChanged(bool);
+		void dpyBrnchDescChanged(bool);
+		void enaHotChgChanged(bool);
+		void followUndoActChanged(bool);
+		void followMkrActChanged(bool);
+		void enaGrnznActChanged(bool);
+		void afPtrnSkipLagActChanged(bool);
+		void adjInputLagActChanged(bool);
+		void drawInputDragActChanged(bool);
+		void cmbRecDrawActChanged(bool);
+		void use1PforRecActChanged(bool);
+		void useInputColSetActChanged(bool);
+		void bindMkrInputActChanged(bool);
+		void emptyNewMkrNotesActChanged(bool);
+		void oldCtlBrnhSchemeActChanged(bool);
+		void brnchRestoreMovieActChanged(bool);
+		void hudInScrnBranchActChanged(bool);
+		void pauseAtEndActChanged(bool);
+		void showToolTipsActChanged(bool);
 		void histTreeItemActivated(QTreeWidgetItem*,int);
 
 	friend class RECORDER;
