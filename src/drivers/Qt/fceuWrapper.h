@@ -43,3 +43,18 @@ int  fceuWrapperTogglePause(void);
 bool fceuWrapperGameLoaded(void);
 void fceuWrapperRequestAppExit(void);
 
+class  fceuCriticalSection
+{
+	public:
+		fceuCriticalSection(void)
+		{
+			//printf("Wrapper Lock\n");
+			fceuWrapperLock();
+		}
+
+		~fceuCriticalSection(void)
+		{
+			//printf("Wrapper UnLock\n");
+			fceuWrapperUnLock();
+		}
+};

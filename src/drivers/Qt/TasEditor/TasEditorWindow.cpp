@@ -41,6 +41,7 @@
 #include "driver.h"
 
 #include "Qt/config.h"
+#include "Qt/keyscan.h"
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleUtilities.h"
@@ -951,15 +952,22 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
 
+	pianoRollFrame   = new QFrame();
 	grid             = new QGridLayout();
 	pianoRoll        = new QPianoRoll(this);
 	pianoRollVBar    = new QScrollBar( Qt::Vertical, this );
 	pianoRollHBar    = new QScrollBar( Qt::Horizontal, this );
 	upperMarkerLabel = new QLabel( tr("Marker 0") );
-	lowerMarkerLabel = new QLabel( tr("Marker 1") );
+	lowerMarkerLabel = new QLabel( tr("Marker 0") );
 	upperMarkerNote  = new QLineEdit();
 	lowerMarkerNote  = new QLineEdit();
 
+	pianoRollFrame->setLineWidth(2);
+	pianoRollFrame->setMidLineWidth(1);
+	//pianoRollFrame->setFrameShape( QFrame::StyledPanel );
+	pianoRollFrame->setFrameShape( QFrame::Box );
+
+	pianoRollVBar->setInvertedAppearance(true);
 	pianoRoll->setScrollBars( pianoRollHBar, pianoRollVBar );
 	connect( pianoRollHBar, SIGNAL(valueChanged(int)), pianoRoll, SLOT(hbarChanged(int)) );
 	connect( pianoRollVBar, SIGNAL(valueChanged(int)), pianoRoll, SLOT(vbarChanged(int)) );
@@ -980,7 +988,9 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	hbox->addWidget( upperMarkerNote, 10 );
 
 	vbox->addLayout( hbox, 1 );
-	vbox->addLayout( grid, 100 );
+	vbox->addWidget( pianoRollFrame, 100 );
+	//vbox->addLayout( grid, 100 );
+	pianoRollFrame->setLayout( grid );
 
 	hbox = new QHBoxLayout();
 	hbox->addWidget( lowerMarkerLabel, 1 );
@@ -2159,7 +2169,7 @@ void QPianoRoll::hbarChanged(int val)
 //----------------------------------------------------------------------------
 void QPianoRoll::vbarChanged(int val)
 {
-	lineOffset = val;
+	lineOffset = maxLineOffset - val;
 
 	if ( lineOffset < 0 )
 	{
@@ -2311,6 +2321,8 @@ void QPianoRoll::ensureTheLineIsVisible( int lineNum )
 		{
 			lineOffset = 0;
 		}
+		vbar->setValue( lineOffset );
+
 		update();
 	}
 }
@@ -2324,14 +2336,20 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 
 	viewLines = (viewHeight / pxLineSpacing) + 1;
 
-	maxLineOffset = currMovieData.records.size() - viewLines + 1;
+	maxLineOffset = currMovieData.records.size() - viewLines + 5;
 
 	if ( maxLineOffset < 0 )
 	{
+		vbar->hide();
 		maxLineOffset = 0;
+	}
+	else
+	{
+		vbar->show();
 	}
 	vbar->setMinimum(0);
 	vbar->setMaximum(maxLineOffset);
+	vbar->setPageStep( (3*viewLines)/4 );
 
 	if ( viewWidth >= pxLineWidth )
 	{
@@ -2345,11 +2363,12 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 		hbar->show();
 		pxLineXScroll = hbar->value();
 	}
-	vbar->setPageStep( (3*viewLines)/4 );
+
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::mousePressEvent(QMouseEvent * event)
 {
+	fceuCriticalSection emuLock;
 	int col, line, row_index, column_index, kbModifiers, alt_pressed;
 	QPoint c = convPixToCursor( event->pos() );
 
@@ -2506,6 +2525,7 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QPianoRoll::mouseReleaseEvent(QMouseEvent * event)
 {
+	fceuCriticalSection emuLock;
 	int col, line;
 	QPoint c = convPixToCursor( event->pos() );
 
@@ -2532,6 +2552,7 @@ void QPianoRoll::mouseReleaseEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QPianoRoll::mouseMoveEvent(QMouseEvent * event)
 {
+	fceuCriticalSection emuLock;
 	int col, line;
 	QPoint c = convPixToCursor( event->pos() );
 
@@ -2544,13 +2565,47 @@ void QPianoRoll::mouseMoveEvent(QMouseEvent * event)
 	rowUnderMouse = realRowUnderMouse = line;
 	columnUnderMouse = col;
 
-	printf("Mouse Move Event: 0x%x (%i,%i)  Col:%i\n", event->button(), c.x(), c.y(), col );
+	//printf("Mouse Move Event: 0x%x (%i,%i)  Col:%i\n", event->button(), c.x(), c.y(), col );
 	
 	if ( event->button() == Qt::LeftButton )
 	{
 
 	}
 	updateDrag();
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::keyPressEvent(QKeyEvent *event)
+{
+	//printf("Key Press: 0x%x \n", event->key() );
+	pushKeyEvent( event, 1 );
+
+	event->accept();
+}
+
+void QPianoRoll::keyReleaseEvent(QKeyEvent *event)
+{
+	//printf("Key Release: 0x%x \n", event->key() );
+	pushKeyEvent( event, 0 );
+
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::focusInEvent(QFocusEvent *event)
+{
+	QWidget::focusInEvent(event);
+
+	printf("PianoRoll Focus In\n");
+
+	parent->pianoRollFrame->setStyleSheet("QFrame { border: 2px solid rgb(48,140,198); }");
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::focusOutEvent(QFocusEvent *event)
+{
+	QWidget::focusOutEvent(event);
+
+	printf("PianoRoll Focus Out\n");
+
+	parent->pianoRollFrame->setStyleSheet(NULL);
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::updateDrag(void)
@@ -3033,7 +3088,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 {
 	int x, y, row, nrow, lineNum;
 	QPainter painter(this);
-	QColor white("white"), black("black"), blkColor;
+	QColor white(255,255,255), black(0,0,0), blkColor;
 	static const char *buttonNames[] = { "A", "B", "S", "T", "U", "D", "L", "R", NULL };
 	char stmp[32];
 	char rowIsSel=0;
@@ -3048,12 +3103,19 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 	viewLines = nrow;
 
-	maxLineOffset = currMovieData.records.size() - nrow + 1;
+	maxLineOffset = currMovieData.records.size() - nrow + 5;
 
 	if ( maxLineOffset < 0 )
 	{
+		vbar->hide();
 		maxLineOffset = 0;
 	}
+	else
+	{
+		vbar->show();
+	}
+
+	lineOffset = maxLineOffset - vbar->value();
 
 	if ( lineOffset < 0 )
 	{

@@ -88,6 +88,10 @@ class QPianoRoll : public QWidget
 		void mousePressEvent(QMouseEvent * event);
 		void mouseReleaseEvent(QMouseEvent * event);
 		void mouseMoveEvent(QMouseEvent * event);
+		void keyPressEvent(QKeyEvent *event);
+		void keyReleaseEvent(QKeyEvent *event);
+		void focusInEvent(QFocusEvent *event);
+		void focusOutEvent(QFocusEvent *event);
 
 		void startDraggingPlaybackCursor(void);
 		void startDraggingMarker(int mouseX, int mouseY, int rowIndex, int columnIndex);
@@ -208,6 +212,7 @@ class TasEditorWindow : public QDialog
 		QAction   *showToolTipsAct;
 
 		QSplitter  *mainHBox;
+		QFrame     *pianoRollFrame;
 		QWidget    *pianoRollContainerWidget;
 		QWidget    *controlPanelContainerWidget;
 		QScrollBar *pianoRollHBar;
@@ -316,6 +321,7 @@ class TasEditorWindow : public QDialog
 	friend class SELECTION;
 	friend class PLAYBACK;
 	friend class HISTORY;
+	friend class QPianoRoll;
 };
 
 extern TASEDITOR_PROJECT *project;
