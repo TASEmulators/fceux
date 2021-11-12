@@ -56,7 +56,8 @@ char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Bran
 //	// deploy
 //	0x43171d, 0x541d21, 0x652325, 0x762929, 0x872f2c, 0x983530, 0xa93b34, 0xba4137, 0xcb463b, 0xdc4c3f, 0xed5243, 0xff5947 };
 
-BOOKMARKS::BOOKMARKS()
+BOOKMARKS::BOOKMARKS(QWidget *parent)
+	: QWidget(parent)
 {
 	// fill TrackMouseEvent struct
 	//tme.cbSize = sizeof(tme);
@@ -65,6 +66,10 @@ BOOKMARKS::BOOKMARKS()
 	//tmeList.cbSize = sizeof(tme);
 	//tmeList.dwFlags = TME_LEAVE;
 	//tmeList.hwndTrack = NULL;
+}
+
+BOOKMARKS::~BOOKMARKS(void)
+{
 }
 
 void BOOKMARKS::init()
@@ -590,6 +595,32 @@ void BOOKMARKS::redrawBookmark(int bookmarkNumber)
 void BOOKMARKS::redrawBookmarksListRow(int rowIndex)
 {
 	//ListView_RedrawItems(hwndBookmarksList, rowIndex, rowIndex);
+}
+
+void BOOKMARKS::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+}
+
+void BOOKMARKS::paintEvent(QPaintEvent *event)
+{
+
+}
+
+void BOOKMARKS::mousePressEvent(QMouseEvent * event)
+{
+
+}
+
+void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
+{
+
+}
+
+void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
+{
+
 }
 
 void BOOKMARKS::handleMouseMove(int newX, int newY)

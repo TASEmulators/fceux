@@ -31,6 +31,8 @@
 #include <QFont>
 #include <QPainter>
 #include <QShortcut>
+#include <QTabWidget>
+#include <QStackedWidget>
 #include <QClipboard>
 
 #include "Qt/TasEditor/taseditor_config.h"
@@ -221,14 +223,15 @@ class TasEditorWindow : public QDialog
 		QLabel     *lowerMarkerLabel;
 		QLineEdit  *upperMarkerNote;
 		QLineEdit  *lowerMarkerNote;
+		QTabWidget *bkmkBrnchStack;
 
 		QVBoxLayout *ctlPanelMainVbox;
 		QGroupBox  *playbackGBox;
 		QGroupBox  *recorderGBox;
 		QGroupBox  *splicerGBox;
 		QGroupBox  *luaGBox;
-		QGroupBox  *bookmarksGBox;
 		QGroupBox  *historyGBox;
+		QFrame     *bbFrame;
 
 		QPushButton *rewindMkrBtn;
 		QPushButton *rewindFrmBtn;
@@ -254,7 +257,6 @@ class TasEditorWindow : public QDialog
 		QPushButton *runLuaBtn;
 		QCheckBox   *autoLuaCBox;
 
-		QTreeWidget *bkbrTree;
 		QTreeWidget *histTree;
 
 		QPushButton *prevMkrBtn;

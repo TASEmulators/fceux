@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <vector>
 
+#include <QWidget>
+
 #define BRANCHES_ANIMATION_TICK 40		// animate at 25FPS
 #define BRANCHES_TRANSITION_MAX 12
 #define CURSOR_MIN_DISTANCE 1.0
@@ -96,10 +98,13 @@
 
 #define FIRST_DIFFERENCE_UNKNOWN -2
 
-class BRANCHES
+class BRANCHES : public QWidget
 {
+	Q_OBJECT
+
 public:
-	BRANCHES();
+	BRANCHES(QWidget *parent = 0);
+	~BRANCHES(void);
 	void init();
 	void free();
 	void reset();
@@ -132,6 +137,9 @@ public:
 	bool mustRedrawBranchesBitmap;
 	bool mustRecalculateBranchesTree;
 	int branchRightclicked;
+
+protected:
+	void paintEvent(QPaintEvent *event);
 
 private:
 	void setCurrentPosTimestamp();
@@ -177,11 +185,13 @@ private:
 	//TRIVERTEX vertex[2];
 	//GRADIENT_RECT gRect;
 	//RECT branchesBitmapRect;
+	
+	int  viewWidth;
+	int  viewHeight;
 
 	// temps
 	std::vector<int> gridX;				// measured in grid units, not in pixels
 	std::vector<int> gridY;
 	std::vector<int> gridHeight;
 	std::vector<std::vector<uint8_t>> children;
-
 };

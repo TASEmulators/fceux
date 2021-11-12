@@ -270,7 +270,7 @@ void applyMovieInputConfig(void)
 }
 //----------------------------------------------------------------------------
 TasEditorWindow::TasEditorWindow(QWidget *parent)
-	: QDialog( parent, Qt::Window )
+	: QDialog( parent, Qt::Window ), bookmarks(this), branches(this)
 {
 	QSettings  settings;
 	QVBoxLayout *mainLayout;
@@ -1054,8 +1054,10 @@ void TasEditorWindow::buildSideControlPanel(void)
 	recorderGBox  = new QGroupBox( tr("Recorder") );
 	splicerGBox   = new QGroupBox( tr("Splicer") );
 	luaGBox       = new QGroupBox( tr("Lua") );
-	bookmarksGBox = new QGroupBox( tr("BookMarks/Branches") );
 	historyGBox   = new QGroupBox( tr("History") );
+	bbFrame       = new QFrame();
+
+	bbFrame->setFrameShape( QFrame::StyledPanel );
 
 	rewindMkrBtn  = new QPushButton();
 	rewindFrmBtn  = new QPushButton();
@@ -1090,7 +1092,6 @@ void TasEditorWindow::buildSideControlPanel(void)
 	runLuaBtn->setEnabled(false);
 	autoLuaCBox->setChecked(true);
 
-	bkbrTree = new QTreeWidget();
 	histTree = new QTreeWidget();
 
 	histTree->setColumnCount(1);
@@ -1151,9 +1152,13 @@ void TasEditorWindow::buildSideControlPanel(void)
 	hbox->addWidget( autoLuaCBox );
 	luaGBox->setLayout( hbox );
 
+	bkmkBrnchStack = new QTabWidget();
+	bkmkBrnchStack->addTab( &bookmarks, tr("Bookmarks") );
+	bkmkBrnchStack->addTab( &branches , tr("Branches")  );
+
 	vbox = new QVBoxLayout();
-	vbox->addWidget( bkbrTree );
-	bookmarksGBox->setLayout( vbox );
+	vbox->addWidget( bkmkBrnchStack );
+	bbFrame->setLayout( vbox );
 
 	vbox = new QVBoxLayout();
 	vbox->addWidget( histTree );
@@ -1163,7 +1168,7 @@ void TasEditorWindow::buildSideControlPanel(void)
 	ctlPanelMainVbox->addWidget( recorderGBox  );
 	ctlPanelMainVbox->addWidget( splicerGBox   );
 	ctlPanelMainVbox->addWidget( luaGBox       );
-	ctlPanelMainVbox->addWidget( bookmarksGBox );
+	ctlPanelMainVbox->addWidget( bbFrame       );
 	ctlPanelMainVbox->addWidget( historyGBox   );
 
 	hbox = new QHBoxLayout();

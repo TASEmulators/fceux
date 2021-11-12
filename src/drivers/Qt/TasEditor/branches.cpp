@@ -48,7 +48,17 @@ Branches - Manager of Branches
 // corners cursor animation
 int corners_cursor_shift[BRANCHES_ANIMATION_FRAMES] = {0, 0, 1, 1, 2, 2, 2, 2, 1, 1, 0, 0 };
 
-BRANCHES::BRANCHES()
+BRANCHES::BRANCHES(QWidget *parent)
+	: QWidget(parent)
+{
+	//this->parent = qobject_cast <TasEditorWindow*>( parent );
+	this->setFocusPolicy(Qt::StrongFocus);
+	this->setMouseTracking(true);
+	this->setMinimumWidth(256);
+	this->setMinimumHeight(128);
+}
+
+BRANCHES::~BRANCHES(void)
 {
 }
 
@@ -461,32 +471,50 @@ error:
 // ----------------------------------------------------------
 void BRANCHES::redrawBranchesBitmap()
 {
+	QWidget::update();
+}
+
+void BRANCHES::paintEvent(QPaintEvent *event)
+{
+	QPainter painter(this);
+
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
+
 //	// draw background
-//	GradientFill(hBitmapDC, vertex, 2, &gRect, 1, GRADIENT_FILL_RECT_H);
+	QLinearGradient linearGrad(QPointF(0, 0), QPointF(viewWidth, viewHeight));
+    	linearGrad.setColorAt(0, QColor(0xBF,0xE2,0xEF));
+    	linearGrad.setColorAt(1, QColor(0xE5,0xFB,0xFF));
+
+	painter.fillRect( 0, 0, viewWidth, viewHeight, linearGrad );
+
 //	// lines
-//	int branch, tempBranchX, tempBranchY, parentX, parentY, childID;
-//	SelectObject(hBitmapDC, normalPen);
-//	for (int t = children.size() - 1; t >= 0; t--)
-//	{
-//		if (t > 0)
-//		{
-//			parentX = branchCurrentX[t-1];
-//			parentY = branchCurrentY[t-1];
-//		} else
-//		{
-//			parentX = cloudCurrentX;
-//			parentY = BRANCHES_CLOUD_Y;
-//		}
-//		for (int i = children[t].size() - 1; i >= 0; i--)
-//		{
-//			childID = children[t][i];
-//			if (childID < TOTAL_BOOKMARKS)
-//			{
-//				MoveToEx(hBitmapDC, parentX, parentY, 0);
-//				LineTo(hBitmapDC, branchCurrentX[childID], branchCurrentY[childID]);
-//			}
-//		}
-//	}
+	int branch, tempBranchX, tempBranchY, parentX, parentY, childID;
+	//SelectObject(hBitmapDC, normalPen);
+	painter.setPen( QColor( 0, 0, 0 ) );
+
+	for (int t = children.size() - 1; t >= 0; t--)
+	{
+		if (t > 0)
+		{
+			parentX = branchCurrentX[t-1];
+			parentY = branchCurrentY[t-1];
+		} else
+		{
+			parentX = cloudCurrentX;
+			parentY = BRANCHES_CLOUD_Y;
+		}
+		for (int i = children[t].size() - 1; i >= 0; i--)
+		{
+			childID = children[t][i];
+			if (childID < TOTAL_BOOKMARKS)
+			{
+				//MoveToEx(hBitmapDC, parentX, parentY, 0);
+				//LineTo(hBitmapDC, branchCurrentX[childID], branchCurrentY[childID]);
+				painter.drawLine( parentX, parentY, branchCurrentX[childID], branchCurrentY[childID] );
+			}
+		}
+	}
 //	// lines for current timeline
 //	if (currentBranch != ITEM_UNDER_MOUSE_CLOUD)
 //	{

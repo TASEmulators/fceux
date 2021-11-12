@@ -2,6 +2,8 @@
 #pragma once
 #include <vector>
 
+#include <QWidget>
+
 #include "fceu.h"
 #include "Qt/TasEditor/bookmark.h"
 
@@ -51,10 +53,13 @@ enum
 
 #define DEFAULT_SLOT 1
 
-class BOOKMARKS
+class BOOKMARKS : public QWidget
 {
+	Q_OBJECT
+
 public:
-	BOOKMARKS();
+	BOOKMARKS(QWidget *parent = 0);
+	~BOOKMARKS(void);
 	void init();
 	void free();
 	void reset();
@@ -100,6 +105,13 @@ public:
 
 	//HWND hwndBookmarksList, hwndBranchesBitmap, hwndBookmarks;
 
+protected:
+	void resizeEvent(QResizeEvent *event);
+	void paintEvent(QPaintEvent *event);
+	void mousePressEvent(QMouseEvent * event);
+	void mouseReleaseEvent(QMouseEvent * event);
+	void mouseMoveEvent(QMouseEvent * event);
+
 private:
 	void set(int slot);
 	void jump(int slot);
@@ -114,5 +126,7 @@ private:
 	// GDI stuff
 	//HFONT hBookmarksFont;
 	//HIMAGELIST hImgList;
+	int viewWidth;
+	int viewHeight;
 
 };
