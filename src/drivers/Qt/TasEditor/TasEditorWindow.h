@@ -212,6 +212,7 @@ class TasEditorWindow : public QDialog
 		QAction   *hudInScrnBranchAct;
 		QAction   *pauseAtEndAct;
 		QAction   *showToolTipsAct;
+		QAction   *autoLuaAct;
 
 		QSplitter  *mainHBox;
 		QFrame     *pianoRollFrame;
@@ -229,7 +230,7 @@ class TasEditorWindow : public QDialog
 		QGroupBox  *playbackGBox;
 		QGroupBox  *recorderGBox;
 		QGroupBox  *splicerGBox;
-		QGroupBox  *luaGBox;
+		//QGroupBox  *luaGBox;
 		QGroupBox  *historyGBox;
 		QFrame     *bbFrame;
 
@@ -254,8 +255,8 @@ class TasEditorWindow : public QDialog
 		QLabel      *selectionLbl;
 		QLabel      *clipboardLbl;
 
-		QPushButton *runLuaBtn;
-		QCheckBox   *autoLuaCBox;
+		//QPushButton *runLuaBtn;
+		//QCheckBox   *autoLuaCBox;
 
 		QTreeWidget *histTree;
 

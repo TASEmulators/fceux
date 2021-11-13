@@ -402,7 +402,8 @@ void TasEditorWindow::closeWindow(void)
 //----------------------------------------------------------------------------
 QMenuBar *TasEditorWindow::buildMenuBar(void)
 {
-	QMenu       *fileMenu, *editMenu, *viewMenu, *confMenu, *helpMenu;
+	QMenu       *fileMenu, *editMenu, *viewMenu,
+		    *confMenu, *luaMenu,  *helpMenu;
 	//QActionGroup *actGroup;
 	QAction     *act;
 	int useNativeMenuBar=0;
@@ -910,6 +911,30 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 
 	confMenu->addAction(act);
 
+	// Lua
+	luaMenu = menuBar->addMenu(tr("&Lua"));
+
+	// Lua -> Run Function
+	act = new QAction(tr("Run Function"), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Run Function"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	luaMenu->addAction(act);
+
+	luaMenu->addSeparator();
+
+	// Lua -> Auto Function
+	autoLuaAct = act = new QAction(tr("Auto Function"), this);
+	act->setCheckable(true);
+	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+	act->setStatusTip(tr("Auto Function"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+
+	luaMenu->addAction(act);
+
 	// Help
 	helpMenu = menuBar->addMenu(tr("&Help"));
 
@@ -1053,7 +1078,7 @@ void TasEditorWindow::buildSideControlPanel(void)
 	playbackGBox  = new QGroupBox( tr("Playback") );
 	recorderGBox  = new QGroupBox( tr("Recorder") );
 	splicerGBox   = new QGroupBox( tr("Splicer") );
-	luaGBox       = new QGroupBox( tr("Lua") );
+	//luaGBox       = new QGroupBox( tr("Lua") );
 	historyGBox   = new QGroupBox( tr("History") );
 	bbFrame       = new QFrame();
 
@@ -1087,10 +1112,10 @@ void TasEditorWindow::buildSideControlPanel(void)
 	selectionLbl = new QLabel( tr("Empty") );
 	clipboardLbl = new QLabel( tr("Empty") );
 
-	runLuaBtn   = new QPushButton( tr("Run Function") );
-	autoLuaCBox = new QCheckBox( tr("Auto Function") );
-	runLuaBtn->setEnabled(false);
-	autoLuaCBox->setChecked(true);
+	//runLuaBtn   = new QPushButton( tr("Run Function") );
+	//autoLuaCBox = new QCheckBox( tr("Auto Function") );
+	//runLuaBtn->setEnabled(false);
+	//autoLuaCBox->setChecked(true);
 
 	histTree = new QTreeWidget();
 
@@ -1147,10 +1172,10 @@ void TasEditorWindow::buildSideControlPanel(void)
 	grid->addWidget( clipboardLbl, 1, 1, 1, 3 );
 	splicerGBox->setLayout( grid );
 
-	hbox = new QHBoxLayout();
-	hbox->addWidget( runLuaBtn );
-	hbox->addWidget( autoLuaCBox );
-	luaGBox->setLayout( hbox );
+	//hbox = new QHBoxLayout();
+	//hbox->addWidget( runLuaBtn );
+	//hbox->addWidget( autoLuaCBox );
+	//luaGBox->setLayout( hbox );
 
 	bkmkBrnchStack = new QTabWidget();
 	bkmkBrnchStack->addTab( &bookmarks, tr("Bookmarks") );
@@ -1167,7 +1192,7 @@ void TasEditorWindow::buildSideControlPanel(void)
 	ctlPanelMainVbox->addWidget( playbackGBox  );
 	ctlPanelMainVbox->addWidget( recorderGBox  );
 	ctlPanelMainVbox->addWidget( splicerGBox   );
-	ctlPanelMainVbox->addWidget( luaGBox       );
+	//ctlPanelMainVbox->addWidget( luaGBox       );
 	ctlPanelMainVbox->addWidget( bbFrame       );
 	ctlPanelMainVbox->addWidget( historyGBox   );
 
@@ -1253,7 +1278,8 @@ void TasEditorWindow::updateCheckedItems(void)
 	enaHotChgAct->setChecked( taseditorConfig.enableHotChanges );
 	followMkrAct->setChecked( taseditorConfig.followMarkerNoteContext );
 	followUndoAct->setChecked( taseditorConfig.followUndoContext );
-	autoLuaCBox->setChecked( taseditorConfig.enableLuaAutoFunction );
+	//autoLuaCBox->setChecked( taseditorConfig.enableLuaAutoFunction );
+	autoLuaAct->setChecked( taseditorConfig.enableLuaAutoFunction );
 	enaGrnznAct->setChecked( taseditorConfig.enableGreenzoning );
 	afPtrnSkipLagAct->setChecked( taseditorConfig.autofirePatternSkipsLag );
 	adjInputLagAct->setChecked( taseditorConfig.autoAdjustInputAccordingToLag );
