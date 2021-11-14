@@ -21,6 +21,7 @@ Bookmarks/Branches - Manager of Bookmarks
 
 #include <zlib.h>
 #include "utils/xstring.h"
+#include "Qt/fceuWrapper.h"
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
@@ -59,13 +60,28 @@ char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Bran
 BOOKMARKS::BOOKMARKS(QWidget *parent)
 	: QWidget(parent)
 {
-	// fill TrackMouseEvent struct
-	//tme.cbSize = sizeof(tme);
-	//tme.dwFlags = TME_LEAVE;
-	//tme.hwndTrack = NULL;
-	//tmeList.cbSize = sizeof(tme);
-	//tmeList.dwFlags = TME_LEAVE;
-	//tmeList.hwndTrack = NULL;
+	std::string fontString;
+
+	viewWidth  = 256;
+	viewHeight = 256;
+
+	g_config->getOption("SDL.TasPianoRollFont", &fontString);
+
+	if ( fontString.size() > 0 )
+	{
+		font.fromString( QString::fromStdString( fontString ) );
+	}
+	else
+	{
+		font.setFamily("Courier New");
+		font.setStyle( QFont::StyleNormal );
+		font.setStyleHint( QFont::Monospace );
+	}
+
+	this->setFocusPolicy(Qt::StrongFocus);
+	this->setMouseTracking(true);
+
+	calcFontData();
 }
 
 BOOKMARKS::~BOOKMARKS(void)
@@ -284,6 +300,39 @@ void BOOKMARKS::reset_vars()
 	nextFlashUpdateTime = clock() + BOOKMARKS_FLASH_TICK;
 }
 
+void BOOKMARKS::calcFontData(void)
+{
+	QWidget::setFont(font);
+	QFontMetrics metrics(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+#else
+	pxCharWidth = metrics.width(QLatin1Char('2'));
+#endif
+	pxCharHeight   = metrics.capHeight();
+	pxLineSpacing  = metrics.lineSpacing() * 1.25;
+	pxLineLead     = pxLineSpacing - metrics.height();
+	pxCursorHeight = metrics.height();
+	pxLineTextOfs  = pxCharHeight + (pxLineSpacing - pxCharHeight) / 2;
+
+	//printf("W:%i  H:%i  LS:%i  \n", pxCharWidth, pxCharHeight, pxLineSpacing );
+
+	viewLines   = (viewHeight / pxLineSpacing) + 1;
+
+	pxWidthCol1     =  3 * pxCharWidth;
+	pxWidthFrameCol = 12 * pxCharWidth;
+	pxWidthTimeCol  = 12 * pxCharWidth;
+
+	pxLineWidth = pxWidthCol1 + pxWidthFrameCol + pxWidthTimeCol;
+
+	pxStartCol1 =  0;
+	pxStartCol2 =  pxWidthCol1;
+	pxStartCol3 =  pxWidthCol1 + pxWidthFrameCol;
+
+	setMinimumWidth( pxLineWidth );
+	setMinimumHeight( pxLineSpacing * TOTAL_BOOKMARKS );
+}
+
 void BOOKMARKS::update()
 {
 	// execute all commands accumulated during last frame
@@ -352,6 +401,8 @@ void BOOKMARKS::update()
 			itemUnderMouse = ITEM_UNDER_MOUSE_NONE;
 		mustCheckItemUnderMouse = false;
 	}
+
+	QWidget::update();
 }
 
 // stores commands in array for update() function
@@ -568,7 +619,9 @@ void BOOKMARKS::redrawBookmarksSectionCaption()
 		redrawBookmarksList();
 	}
 	if (prev_edit_mode != editMode)
+	{
 		mustCheckItemUnderMouse = true;
+	}
 	//SetWindowText(hwndBookmarks, bookmarksCaption[editMode]);
 }
 void BOOKMARKS::redrawBookmarksList(bool eraseBG)
@@ -605,22 +658,129 @@ void BOOKMARKS::resizeEvent(QResizeEvent *event)
 
 void BOOKMARKS::paintEvent(QPaintEvent *event)
 {
+	fceuCriticalSection emuLock;
+	QPainter painter(this);
+	int x, y, item;
+	QColor white(255,255,255), black(0,0,0), blkColor;
+	char txt[256];
 
+	painter.setFont(font);
+	viewWidth  = event->rect().width();
+	viewHeight = event->rect().height();
+
+	// Draw Background
+	painter.fillRect( 0, 0, viewWidth, viewHeight, white );
+
+	// Draw text
+	y = 0;
+	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+	{
+		item = (i+1) % TOTAL_BOOKMARKS;
+
+		x = pxStartCol1 + pxCharWidth;
+		sprintf( txt, "%i", item );
+
+		painter.drawText( x, y+pxLineTextOfs, tr(txt) );
+
+		if (bookmarksArray[item].notEmpty)
+		{
+			x = pxStartCol2 + pxCharWidth;
+
+			U32ToDecStr( txt, bookmarksArray[item].snapshot.keyFrame, 10);
+
+			painter.drawText( x, y+pxLineTextOfs, tr(txt) );
+
+			x = pxStartCol3 + pxCharWidth;
+
+			strcpy(txt, bookmarksArray[item].snapshot.description);
+
+			painter.drawText( x, y+pxLineTextOfs, tr(txt) );
+		}
+		y += pxLineSpacing;
+	}
+
+	// Draw Grid
+	painter.drawLine( pxStartCol1, 0, pxStartCol1, viewHeight );
+	painter.drawLine( pxStartCol2, 0, pxStartCol2, viewHeight );
+	painter.drawLine( pxStartCol3, 0, pxStartCol3, viewHeight );
+	painter.drawLine( pxLineWidth, 0, pxLineWidth, viewHeight );
+
+	y = 0;
+	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+	{
+		painter.drawLine( 0, y, viewWidth, y );
+
+		y += pxLineSpacing;
+	}
+}
+
+//----------------------------------------------------------------------------
+QPoint BOOKMARKS::convPixToCursor( QPoint p )
+{
+	QPoint c(0,0);
+
+	if ( p.x() < 0 )
+	{
+		c.setX(0);
+	}
+	else
+	{
+		float x = (float)(p.x()) / pxCharWidth;
+
+		c.setX( (int)x );
+	}
+
+	if ( p.y() < 0 )
+	{
+		c.setY( -1 );
+	}
+	else 
+	{
+		float py = ( (float)p.y() ) /  (float)pxLineSpacing;
+
+		c.setY( (int)py );
+	}
+	return c;
+}
+//----------------------------------------------------------------------------
+int  BOOKMARKS::calcColumn( int px )
+{
+	int col = -1;
+
+	if ( px < pxStartCol2 )
+	{
+		col = BOOKMARKSLIST_COLUMN_ICON;
+	}
+	else if ( px < pxStartCol3 )
+	{
+		col = BOOKMARKSLIST_COLUMN_FRAME;
+	}
+	else
+	{
+		col = BOOKMARKSLIST_COLUMN_TIME;
+	}
+	return col;
 }
 
 void BOOKMARKS::mousePressEvent(QMouseEvent * event)
 {
+	QPoint c = convPixToCursor( event->pos() );
 
+	printf("Mouse Button Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
 }
 
 void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 {
+	QPoint c = convPixToCursor( event->pos() );
 
+	printf("Mouse Button Released: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
 }
 
 void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
 {
+	QPoint c = convPixToCursor( event->pos() );
 
+	printf("Mouse Move: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
 }
 
 void BOOKMARKS::handleMouseMove(int newX, int newY)

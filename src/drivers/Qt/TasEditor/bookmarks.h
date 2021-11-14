@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <QWidget>
+#include <QScrollBar>
 
 #include "fceu.h"
 #include "Qt/TasEditor/bookmark.h"
@@ -112,10 +113,14 @@ protected:
 	void mouseReleaseEvent(QMouseEvent * event);
 	void mouseMoveEvent(QMouseEvent * event);
 
+	int    calcColumn( int px );
+	QPoint convPixToCursor( QPoint p );
+
 private:
 	void set(int slot);
 	void jump(int slot);
 	void deploy(int slot);
+	void calcFontData(void);
 
 	// not saved vars
 	std::vector<int> commands;
@@ -126,7 +131,26 @@ private:
 	// GDI stuff
 	//HFONT hBookmarksFont;
 	//HIMAGELIST hImgList;
+	QFont       font;
+	QScrollBar *hbar;
+	QScrollBar *vbar;
+
 	int viewWidth;
 	int viewHeight;
+	int viewLines;
 
+	int pxCharWidth;
+	int pxCharHeight;
+	int pxCursorHeight;
+	int pxLineXScroll;
+	int pxLineWidth;
+	int pxLineSpacing;
+	int pxLineLead;
+	int pxLineTextOfs;
+	int pxWidthCol1;
+	int pxWidthFrameCol;
+	int pxWidthTimeCol;
+	int pxStartCol1;
+	int pxStartCol2;
+	int pxStartCol3;
 };
