@@ -45,6 +45,7 @@
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/TasEditor/TasColors.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
 TasEditorWindow   *tasWin = NULL;
@@ -119,92 +120,6 @@ enum DRAG_MODES
 #define BLUE_ARROW_IMAGE_ID 60
 #define GREEN_ARROW_IMAGE_ID 61
 #define GREEN_BLUE_ARROW_IMAGE_ID 62
-
-// Piano Roll Colors
-#define NORMAL_TEXT_COLOR 0x0
-#define NORMAL_BACKGROUND_COLOR 0xFFFFFF
-
-//#define NORMAL_FRAMENUM_COLOR 0xFFFFFF
-//#define NORMAL_INPUT_COLOR1   0xEDEDED
-//#define NORMAL_INPUT_COLOR2   0xE2E2E2
-
-#define NORMAL_FRAMENUM_COLOR 0xFF, 0xFF, 0xFF
-#define NORMAL_INPUT_COLOR1   0xED, 0xED, 0xED
-#define NORMAL_INPUT_COLOR2   0xE2, 0xE2, 0xE2
-
-//#define GREENZONE_FRAMENUM_COLOR 0xDDFFDD
-//#define GREENZONE_INPUT_COLOR1   0xC8F7C4
-//#define GREENZONE_INPUT_COLOR2   0xADE7AD
-
-#define GREENZONE_FRAMENUM_COLOR 0xDD, 0xFF, 0xDD
-#define GREENZONE_INPUT_COLOR1   0xC4, 0xF7, 0xC8
-#define GREENZONE_INPUT_COLOR2   0xAD, 0xE7, 0xAD
-
-//#define PALE_GREENZONE_FRAMENUM_COLOR 0xE4FFE4
-//#define PALE_GREENZONE_INPUT_COLOR1   0xD3F9D2
-//#define PALE_GREENZONE_INPUT_COLOR2   0xBAEBBA
-
-#define PALE_GREENZONE_FRAMENUM_COLOR 0xE4, 0xFF, 0xE4
-#define PALE_GREENZONE_INPUT_COLOR1   0xD2, 0xF9, 0xD3
-#define PALE_GREENZONE_INPUT_COLOR2   0xBA, 0xEB, 0xBA
-
-//#define VERY_PALE_GREENZONE_FRAMENUM_COLOR 0xF9FFF9
-//#define VERY_PALE_GREENZONE_INPUT_COLOR1 0xE0FBE0
-//#define VERY_PALE_GREENZONE_INPUT_COLOR2 0xD2F2D2
-
-#define VERY_PALE_GREENZONE_FRAMENUM_COLOR 0xF9, 0xFF, 0xF9
-#define VERY_PALE_GREENZONE_INPUT_COLOR1   0xE0, 0xFB, 0xE0
-#define VERY_PALE_GREENZONE_INPUT_COLOR2   0xD2, 0xF2, 0xD2
-
-//#define LAG_FRAMENUM_COLOR 0xDDDCFF
-//#define LAG_INPUT_COLOR1 0xD2D0F0
-//#define LAG_INPUT_COLOR2 0xC9C6E8
-
-#define LAG_FRAMENUM_COLOR 0xFF, 0xDC, 0xDD
-#define LAG_INPUT_COLOR1   0xF0, 0xD0, 0xD2
-#define LAG_INPUT_COLOR2   0xE8, 0xC6, 0xC9
-
-//#define PALE_LAG_FRAMENUM_COLOR 0xE3E3FF
-//#define PALE_LAG_INPUT_COLOR1 0xDADAF4
-//#define PALE_LAG_INPUT_COLOR2 0xCFCEEA
-
-#define PALE_LAG_FRAMENUM_COLOR 0xFF, 0xE3, 0xE3
-#define PALE_LAG_INPUT_COLOR1   0xF4, 0xDA, 0xDA
-#define PALE_LAG_INPUT_COLOR2   0xEA, 0xCE, 0xCF
-
-//#define VERY_PALE_LAG_FRAMENUM_COLOR 0xE9E9FF 
-//#define VERY_PALE_LAG_INPUT_COLOR1 0xE5E5F7
-//#define VERY_PALE_LAG_INPUT_COLOR2 0xE0E0F1
-
-#define VERY_PALE_LAG_FRAMENUM_COLOR 0xFF, 0xE9, 0xE9 
-#define VERY_PALE_LAG_INPUT_COLOR1   0xF7, 0xE5, 0xE5
-#define VERY_PALE_LAG_INPUT_COLOR2   0xF1, 0xE0, 0xE0
-
-//#define CUR_FRAMENUM_COLOR 0xFCEDCF
-//#define CUR_INPUT_COLOR1   0xF7E7B5
-//#define CUR_INPUT_COLOR2   0xE5DBA5
-
-#define CUR_FRAMENUM_COLOR 0xCF, 0xED, 0xFC
-#define CUR_INPUT_COLOR1   0xB5, 0xE7, 0xF7
-#define CUR_INPUT_COLOR2   0xA5, 0xDB, 0xE5
-
-//#define UNDOHINT_FRAMENUM_COLOR 0xF9DDE6
-//#define UNDOHINT_INPUT_COLOR1   0xF7D2E1
-//#define UNDOHINT_INPUT_COLOR2   0xE9BED1
-
-#define UNDOHINT_FRAMENUM_COLOR 0xE6, 0xDD, 0xF9
-#define UNDOHINT_INPUT_COLOR1   0xE1, 0xD2, 0xF7
-#define UNDOHINT_INPUT_COLOR2   0xD1, 0xBE, 0xE9
-
-#define MARKED_FRAMENUM_COLOR 0xAEF0FF
-#define CUR_MARKED_FRAMENUM_COLOR 0xCAEDEA
-#define MARKED_UNDOHINT_FRAMENUM_COLOR 0xDDE5E9
-
-#define BINDMARKED_FRAMENUM_COLOR 0xC9FFF7
-#define CUR_BINDMARKED_FRAMENUM_COLOR 0xD5F2EC
-#define BINDMARKED_UNDOHINT_FRAMENUM_COLOR 0xE1EBED
-
-#define PLAYBACK_MARKER_COLOR 0xC9AF00
 
 #define MARKER_DRAG_COUNTDOWN_MAX 14
 
@@ -1071,6 +986,7 @@ void TasEditorWindow::buildSideControlPanel(void)
 	QVBoxLayout *vbox;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
+	QScrollArea *scrollArea;
 	QTreeWidgetItem *item;
 
 	ctlPanelMainVbox = new QVBoxLayout();
@@ -1176,9 +1092,17 @@ void TasEditorWindow::buildSideControlPanel(void)
 	//hbox->addWidget( runLuaBtn );
 	//hbox->addWidget( autoLuaCBox );
 	//luaGBox->setLayout( hbox );
+	
+	scrollArea = new QScrollArea();
+	scrollArea->setWidgetResizable(false);
+	scrollArea->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
+	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	scrollArea->setMinimumSize( QSize( 128, 128 ) );
+	scrollArea->setWidget( &bookmarks );
 
 	bkmkBrnchStack = new QTabWidget();
-	bkmkBrnchStack->addTab( &bookmarks, tr("Bookmarks") );
+	bkmkBrnchStack->addTab( scrollArea, tr("Bookmarks") );
 	bkmkBrnchStack->addTab( &branches , tr("Branches")  );
 
 	vbox = new QVBoxLayout();

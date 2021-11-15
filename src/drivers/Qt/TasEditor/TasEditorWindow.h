@@ -25,6 +25,7 @@
 #include <QTreeWidgetItem>
 #include <QCloseEvent>
 #include <QScrollBar>
+#include <QScrollArea>
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>

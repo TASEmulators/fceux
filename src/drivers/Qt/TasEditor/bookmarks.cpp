@@ -24,6 +24,7 @@ Bookmarks/Branches - Manager of Bookmarks
 #include "Qt/fceuWrapper.h"
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
+#include "Qt/TasEditor/TasColors.h"
 
 //#pragma comment(lib, "msimg32.lib")
 
@@ -329,8 +330,11 @@ void BOOKMARKS::calcFontData(void)
 	pxStartCol2 =  pxWidthCol1;
 	pxStartCol3 =  pxWidthCol1 + pxWidthFrameCol;
 
-	setMinimumWidth( pxLineWidth );
-	setMinimumHeight( pxLineSpacing * TOTAL_BOOKMARKS );
+	viewWidth  = pxLineWidth;
+	viewHeight = pxLineSpacing * TOTAL_BOOKMARKS;
+
+	setMinimumWidth( viewWidth );
+	setMinimumHeight( viewHeight );
 }
 
 void BOOKMARKS::update()
@@ -409,7 +413,9 @@ void BOOKMARKS::update()
 void BOOKMARKS::command(int command_id, int slot)
 {
 	if (slot < 0)
+	{
 		slot = selectedSlot;
+	}
 	if (slot >= 0 && slot < TOTAL_BOOKMARKS)
 	{
 		commands.push_back(command_id);
@@ -660,13 +666,14 @@ void BOOKMARKS::paintEvent(QPaintEvent *event)
 {
 	fceuCriticalSection emuLock;
 	QPainter painter(this);
-	int x, y, item;
+	int x, y, item, cell_y;
 	QColor white(255,255,255), black(0,0,0), blkColor;
 	char txt[256];
+	bool timeColBgDone = false;
 
 	painter.setFont(font);
-	viewWidth  = event->rect().width();
-	viewHeight = event->rect().height();
+	//viewWidth  = event->rect().width();
+	//viewHeight = event->rect().height();
 
 	// Draw Background
 	painter.fillRect( 0, 0, viewWidth, viewHeight, white );
@@ -675,7 +682,122 @@ void BOOKMARKS::paintEvent(QPaintEvent *event)
 	y = 0;
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
-		item = (i+1) % TOTAL_BOOKMARKS;
+		cell_y = item = (i+1) % TOTAL_BOOKMARKS;
+
+		timeColBgDone = taseditorConfig->oldControlSchemeForBranching && movie_readonly;
+
+		if (bookmarksArray[cell_y].notEmpty)
+		{
+			// frame number
+			//SelectObject(msg->nmcd.hdc, pianoRoll.hMainListFont);
+			int frame = bookmarksArray[cell_y].snapshot.keyFrame;
+			if (frame == currFrameCounter || frame == (playback->getFlashingPauseFrame() - 1))
+			{
+				// current frame
+				blkColor = QColor( CUR_FRAMENUM_COLOR );
+			}
+			else if (frame < greenzone->getSize())
+			{
+				if (!greenzone->isSavestateEmpty(frame))
+				{
+					if (greenzone->lagLog.getLagInfoAtFrame(frame) == LAGGED_YES)
+					{
+						blkColor = QColor( LAG_FRAMENUM_COLOR );
+					}
+					else
+					{
+						blkColor = QColor( GREENZONE_FRAMENUM_COLOR );
+					}
+				}
+				else if (!greenzone->isSavestateEmpty(cell_y & EVERY16TH)
+					|| !greenzone->isSavestateEmpty(cell_y & EVERY8TH)
+					|| !greenzone->isSavestateEmpty(cell_y & EVERY4TH)
+					|| !greenzone->isSavestateEmpty(cell_y & EVERY2ND))
+				{
+					if (greenzone->lagLog.getLagInfoAtFrame(frame) == LAGGED_YES)
+					{
+						blkColor = QColor( PALE_LAG_FRAMENUM_COLOR );
+					}
+					else
+					{
+						blkColor = QColor( PALE_GREENZONE_FRAMENUM_COLOR );
+					}
+				}
+				else
+				{
+					blkColor = QColor( NORMAL_FRAMENUM_COLOR );
+				}
+			}
+			else
+			{
+				blkColor = QColor( NORMAL_FRAMENUM_COLOR );
+			}
+		}
+		else
+		{
+			blkColor = QColor( NORMAL_BACKGROUND_COLOR );	// empty bookmark
+		}
+		painter.fillRect( pxStartCol2, y, pxWidthFrameCol, pxLineSpacing, blkColor );
+
+		if (timeColBgDone)
+		{
+			painter.fillRect( pxStartCol3, y, pxWidthTimeCol, pxLineSpacing, blkColor );
+		}
+		else
+		{
+			if (bookmarksArray[cell_y].notEmpty)
+			{
+				// frame number
+				//SelectObject(msg->nmcd.hdc, pianoRoll.hMainListFont);
+				int frame = bookmarksArray[cell_y].snapshot.keyFrame;
+				if (frame == currFrameCounter || frame == (playback->getFlashingPauseFrame() - 1))
+				{
+					// current frame
+					blkColor = QColor( CUR_INPUT_COLOR1 );
+				}
+				else if (frame < greenzone->getSize())
+				{
+					if (!greenzone->isSavestateEmpty(frame))
+					{
+						if (greenzone->lagLog.getLagInfoAtFrame(frame) == LAGGED_YES)
+						{
+							blkColor = QColor( LAG_INPUT_COLOR1 );
+						}
+						else
+						{
+							blkColor = QColor( GREENZONE_INPUT_COLOR1 );
+						}
+					}
+					else if (!greenzone->isSavestateEmpty(cell_y & EVERY16TH)
+						|| !greenzone->isSavestateEmpty(cell_y & EVERY8TH)
+						|| !greenzone->isSavestateEmpty(cell_y & EVERY4TH)
+						|| !greenzone->isSavestateEmpty(cell_y & EVERY2ND))
+					{
+						if (greenzone->lagLog.getLagInfoAtFrame(frame) == LAGGED_YES)
+						{
+							blkColor = QColor( PALE_LAG_INPUT_COLOR1 );
+						}
+						else
+						{
+							blkColor = QColor( PALE_GREENZONE_INPUT_COLOR1 );
+						}
+					}
+					else
+					{
+						blkColor = QColor( NORMAL_INPUT_COLOR1 );
+					}
+				}
+				else
+				{
+					blkColor = QColor( NORMAL_INPUT_COLOR1 );
+				}
+			}
+			else
+			{
+				blkColor = QColor( NORMAL_BACKGROUND_COLOR );	// empty bookmark
+			}
+			painter.fillRect( pxStartCol3, y, pxWidthTimeCol, pxLineSpacing, blkColor );
+		}
 
 		x = pxStartCol1 + pxCharWidth;
 		sprintf( txt, "%i", item );
@@ -703,7 +825,8 @@ void BOOKMARKS::paintEvent(QPaintEvent *event)
 	painter.drawLine( pxStartCol1, 0, pxStartCol1, viewHeight );
 	painter.drawLine( pxStartCol2, 0, pxStartCol2, viewHeight );
 	painter.drawLine( pxStartCol3, 0, pxStartCol3, viewHeight );
-	painter.drawLine( pxLineWidth, 0, pxLineWidth, viewHeight );
+
+	painter.drawLine( pxLineWidth-1, 0, pxLineWidth-1, viewHeight );
 
 	y = 0;
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
@@ -712,6 +835,7 @@ void BOOKMARKS::paintEvent(QPaintEvent *event)
 
 		y += pxLineSpacing;
 	}
+	painter.drawLine( 0, viewHeight-1, viewWidth, viewHeight-1);
 }
 
 //----------------------------------------------------------------------------
@@ -764,23 +888,67 @@ int  BOOKMARKS::calcColumn( int px )
 
 void BOOKMARKS::mousePressEvent(QMouseEvent * event)
 {
+	int item, row_under_mouse, item_valid;
 	QPoint c = convPixToCursor( event->pos() );
 
-	printf("Mouse Button Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	row_under_mouse = c.y();
+	columnClicked = calcColumn( event->pos().x() );
+
+	item = (row_under_mouse + 1) % TOTAL_BOOKMARKS;
+	item_valid = (item >= 0) && (item < TOTAL_BOOKMARKS);
+
+	if ( item_valid && (event->button() & Qt::LeftButton) )
+	{
+		bookmarkLeftclicked  = item;
+
+		if ( (columnClicked <= BOOKMARKSLIST_COLUMN_FRAME) || (taseditorConfig->oldControlSchemeForBranching && movie_readonly))
+		{
+			bookmarksArray[bookmarkLeftclicked].flashType = FLASH_TYPE_JUMP;
+		}
+		else if ( (columnClicked == BOOKMARKSLIST_COLUMN_TIME) && (!taseditorConfig->oldControlSchemeForBranching || !movie_readonly))
+		{
+			bookmarksArray[bookmarkLeftclicked].flashType = FLASH_TYPE_DEPLOY;
+		}
+	}
+
+	if ( item_valid && (event->button() & Qt::RightButton) )
+	{
+		bookmarkRightclicked  = item;
+		bookmarksArray[bookmarkRightclicked].flashType = FLASH_TYPE_SET;
+	}
+
+	//printf("Mouse Button Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
 }
 
 void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 {
-	QPoint c = convPixToCursor( event->pos() );
+	//QPoint c = convPixToCursor( event->pos() );
 
-	printf("Mouse Button Released: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	//printf("Mouse Button Released: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	if ( event->button() & Qt::LeftButton )
+	{
+		if (bookmarkLeftclicked >= 0)
+		{
+			handleLeftClick();
+		}
+		bookmarkLeftclicked = ITEM_UNDER_MOUSE_NONE;
+	}
+
+	if ( event->button() & Qt::RightButton )
+	{
+		if (bookmarkRightclicked >= 0)
+		{
+			handleRightClick();
+		}
+		bookmarkRightclicked = ITEM_UNDER_MOUSE_NONE;
+	}
 }
 
 void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
 {
-	QPoint c = convPixToCursor( event->pos() );
+	//QPoint c = convPixToCursor( event->pos() );
 
-	printf("Mouse Move: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	//printf("Mouse Move: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
 }
 
 void BOOKMARKS::handleMouseMove(int newX, int newY)
@@ -929,17 +1097,23 @@ int BOOKMARKS::getSelectedSlot()
 //	}
 //}
 
-void BOOKMARKS::handleLeftClick()
+void BOOKMARKS::handleLeftClick(void)
 {
 	if (columnClicked <= BOOKMARKSLIST_COLUMN_FRAME || (taseditorConfig->oldControlSchemeForBranching && movie_readonly))
+	{
 		command(COMMAND_JUMP, bookmarkLeftclicked);
+	}
 	else if (columnClicked == BOOKMARKSLIST_COLUMN_TIME && (!taseditorConfig->oldControlSchemeForBranching || !movie_readonly))
+	{
 		command(COMMAND_DEPLOY, bookmarkLeftclicked);
+	}
 }
-void BOOKMARKS::handleRightClick()
+void BOOKMARKS::handleRightClick(void)
 {
 	if (bookmarkRightclicked >= 0)
+	{
 		command(COMMAND_SET, bookmarkRightclicked);
+	}
 }
 
 int BOOKMARKS::findBookmarkAtFrame(int frame)
