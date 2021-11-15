@@ -54,8 +54,8 @@ BRANCHES::BRANCHES(QWidget *parent)
 	//this->parent = qobject_cast <TasEditorWindow*>( parent );
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMouseTracking(true);
-	this->setMinimumWidth(256);
-	this->setMinimumHeight(128);
+	this->setMinimumWidth(BRANCHES_BITMAP_WIDTH);
+	this->setMinimumHeight(BRANCHES_BITMAP_HEIGHT);
 }
 
 BRANCHES::~BRANCHES(void)
@@ -253,7 +253,9 @@ void BRANCHES::resetVars()
 void BRANCHES::update()
 {
 	if (mustRecalculateBranchesTree)
+	{
 		recalculateBranchesTree();
+	}
 
 	// once per 40 milliseconds update branches_bitmap
 	if (clock() > nextAnimationTime)
@@ -270,14 +272,19 @@ void BRANCHES::update()
 				if (!bookmarks->bookmarksArray[i].notEmpty)
 				{
 					if (i == bookmarks->itemUnderMouse)
+					{
 						floating_phase_target = MAX_FLOATING_PHASE;
+					}
 					else
+					{
 						floating_phase_target = 0;
+					}
 					if (bookmarks->bookmarksArray[i].floatingPhase > floating_phase_target)
 					{
 						bookmarks->bookmarksArray[i].floatingPhase--;
 						mustRedrawBranchesBitmap = true;
-					} else if (bookmarks->bookmarksArray[i].floatingPhase < floating_phase_target)
+					}
+					else if (bookmarks->bookmarksArray[i].floatingPhase < floating_phase_target)
 					{
 						bookmarks->bookmarksArray[i].floatingPhase++;
 						mustRedrawBranchesBitmap = true;
@@ -307,10 +314,12 @@ void BRANCHES::update()
 				cloudCurrentX = (cloudX * (BRANCHES_TRANSITION_MAX - transitionPhase) + cloudPreviousX * transitionPhase) / BRANCHES_TRANSITION_MAX;
 				mustRedrawBranchesBitmap = true;
 				bookmarks->mustCheckItemUnderMouse = true;
-			} else if (!mustRedrawBranchesBitmap)
+			}
+			else if (!mustRedrawBranchesBitmap)
 			{
 				// just update sprites
 				//InvalidateRect(bookmarks->hwndBranchesBitmap, 0, FALSE);
+				QWidget::update();
 			}
 			// calculate Playback cursor position
 			int branch, tempBranchX, tempBranchY, parent, parentX, parentY, upperFrame, lowerFrame;
@@ -320,11 +329,14 @@ void BRANCHES::update()
 				if (changesSinceCurrentBranch)
 				{
 					parent = ITEM_UNDER_MOUSE_FIREBALL;
-				} else
+				}
+				else
 				{
 					parent = findFullTimelineForBranch(currentBranch);
 					if (parent != currentBranch && bookmarks->bookmarksArray[parent].snapshot.keyFrame == bookmarks->bookmarksArray[currentBranch].snapshot.keyFrame)
+					{
 						parent = currentBranch;
+					}
 				}
 				do
 				{
@@ -338,6 +350,7 @@ void BRANCHES::update()
 					else
 						lowerFrame = bookmarks->bookmarksArray[parent].snapshot.keyFrame;
 				} while (parent != ITEM_UNDER_MOUSE_CLOUD && currFrameCounter < lowerFrame);
+
 				if (branch == ITEM_UNDER_MOUSE_FIREBALL)
 					upperFrame = currMovieData.getNumRecords() - 1;
 				else
@@ -348,7 +361,8 @@ void BRANCHES::update()
 				{
 					parentX = cloudCurrentX;
 					parentY = BRANCHES_CLOUD_Y;
-				} else
+				}
+				else
 				{
 	 				parentX = branchCurrentX[parent];
 					parentY = branchCurrentY[parent];
@@ -357,13 +371,15 @@ void BRANCHES::update()
 				{
 					distance = (double)(currFrameCounter - lowerFrame) / (double)(upperFrame - lowerFrame);
 					if (distance > 1.0) distance = 1.0;
-				} else
+				}
+				else
 				{
 					distance = 1.0;
 				}
 				playbackCursorX = parentX + distance * (tempBranchX - parentX);
 				playbackCursorY = parentY + distance * (tempBranchY - parentY);
-			} else
+			}
+			else
 			{
 				if (changesSinceCurrentBranch)
 				{
@@ -413,8 +429,15 @@ void BRANCHES::update()
 				lastItemUnderMouse = bookmarks->itemUnderMouse;
 			}
 			if (mustRedrawBranchesBitmap)
+			{
 				redrawBranchesBitmap();
+			}
 		}
+	}
+	if ( mustRedrawBranchesBitmap )
+	{
+		QWidget::update();
+		mustRedrawBranchesBitmap = false;
 	}
 }
 
@@ -425,20 +448,30 @@ void BRANCHES::save(EMUFILE *os)
 	// write current branch and flag of changes since it
 	write32le(currentBranch, os);
 	if (changesSinceCurrentBranch)
+	{
 		write8le((uint8)1, os);
+	}
 	else
+	{
 		write8le((uint8)0, os);
+	}
 	// write current_position time
 	os->fwrite(currentPosTimestamp, TIMESTAMP_LENGTH);
 	// write all 10 parents
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+	{
 		write32le(parents[i], os);
+	}
 	// write cached_timelines
 	os->fwrite(&cachedTimelines[0], TOTAL_BOOKMARKS);
 	// write cached_first_difference
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+	{
 		for (int t = 0; t < TOTAL_BOOKMARKS; ++t)
+		{
 			write32le(cachedFirstDifferences[i][t], os);
+		}
+	}
 }
 // returns true if couldn't load
 bool BRANCHES::load(EMUFILE *is)
@@ -454,13 +487,19 @@ bool BRANCHES::load(EMUFILE *is)
 	if ((int)is->fread(currentPosTimestamp, TIMESTAMP_LENGTH) < TIMESTAMP_LENGTH) goto error;
 	// read all 10 parents
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+	{
 		if (!read32le(&parents[i], is)) goto error;
+	}
 	// read cached_timelines
 	if ((int)is->fread(&cachedTimelines[0], TOTAL_BOOKMARKS) < TOTAL_BOOKMARKS) goto error;
 	// read cached_first_difference
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+	{
 		for (int t = 0; t < TOTAL_BOOKMARKS; ++t)
+		{
 			if (!read32le(&cachedFirstDifferences[i][t], is)) goto error;
+		}
+	}
 	// all ok
 	resetVars();
 	return false;
@@ -489,7 +528,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 	painter.fillRect( 0, 0, viewWidth, viewHeight, linearGrad );
 
 //	// lines
-	int branch, tempBranchX, tempBranchY, parentX, parentY, childID;
+	int branch, tempBranchX, tempBranchY, tempBranchX2, tempBranchY2, parentX, parentY, childID;
 	//SelectObject(hBitmapDC, normalPen);
 	painter.setPen( QColor( 0, 0, 0 ) );
 
@@ -515,61 +554,75 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			}
 		}
 	}
-//	// lines for current timeline
-//	if (currentBranch != ITEM_UNDER_MOUSE_CLOUD)
-//	{
-//		SelectObject(hBitmapDC, timelinePen);
-//		if (changesSinceCurrentBranch)
-//			branch = currentBranch;
-//		else
-//			branch = findFullTimelineForBranch(currentBranch);
-//		while (branch >= 0)
-//		{
-//			tempBranchX = branchCurrentX[branch];
-//			tempBranchY = branchCurrentY[branch];
-//			MoveToEx(hBitmapDC, tempBranchX, tempBranchY, 0);
-//			branch = parents[branch];
-//			if (branch == ITEM_UNDER_MOUSE_CLOUD)
-//			{
-//				tempBranchX = cloudCurrentX;
-//				tempBranchY = BRANCHES_CLOUD_Y;
-//			} else
-//			{
-//	 			tempBranchX = branchCurrentX[branch];
-//				tempBranchY = branchCurrentY[branch];
-//			}
-//			LineTo(hBitmapDC, tempBranchX, tempBranchY);
-//		}
-//	}
-//	if (isSafeToShowBranchesData())
-//	{
-//		// lines for item under mouse
-//		if (bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL || (bookmarks->itemUnderMouse >= 0 && bookmarks->itemUnderMouse < TOTAL_BOOKMARKS && bookmarks->bookmarksArray[bookmarks->itemUnderMouse].notEmpty))
-//		{
-//			SelectObject(hBitmapDC, selectPen);
-//			if (bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
-//				branch = currentBranch;
-//			else
-//				branch = findFullTimelineForBranch(bookmarks->itemUnderMouse);
-//			while (branch >= 0)
-//			{
-//				tempBranchX = branchCurrentX[branch];
-//				tempBranchY = branchCurrentY[branch];
-//				MoveToEx(hBitmapDC, tempBranchX, tempBranchY, 0);
-//				branch = parents[branch];
-//				if (branch == ITEM_UNDER_MOUSE_CLOUD)
-//				{
-//					tempBranchX = cloudCurrentX;
-//					tempBranchY = BRANCHES_CLOUD_Y;
-//				} else
-//				{
-//	 				tempBranchX = branchCurrentX[branch];
-//					tempBranchY = branchCurrentY[branch];
-//				}
-//				LineTo(hBitmapDC, tempBranchX, tempBranchY);
-//			}
-//		}
-//	}
+	// lines for current timeline
+	if (currentBranch != ITEM_UNDER_MOUSE_CLOUD)
+	{
+		painter.setPen( QColor( 0xE0, 0x20, 0x00 ) );
+
+		//SelectObject(hBitmapDC, timelinePen);
+		if (changesSinceCurrentBranch)
+		{
+			branch = currentBranch;
+		}
+		else
+		{
+			branch = findFullTimelineForBranch(currentBranch);
+		}
+		while (branch >= 0)
+		{
+			tempBranchX = branchCurrentX[branch];
+			tempBranchY = branchCurrentY[branch];
+			//MoveToEx(hBitmapDC, tempBranchX, tempBranchY, 0);
+			branch = parents[branch];
+			if (branch == ITEM_UNDER_MOUSE_CLOUD)
+			{
+				tempBranchX2 = cloudCurrentX;
+				tempBranchY2 = BRANCHES_CLOUD_Y;
+			} else
+			{
+	 			tempBranchX2 = branchCurrentX[branch];
+				tempBranchY2 = branchCurrentY[branch];
+			}
+			//LineTo(hBitmapDC, tempBranchX, tempBranchY);
+			painter.drawLine( tempBranchX, tempBranchY, tempBranchX2, tempBranchY2 );
+		}
+	}
+	if (isSafeToShowBranchesData())
+	{
+		// lines for item under mouse
+		if (bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL || (bookmarks->itemUnderMouse >= 0 && bookmarks->itemUnderMouse < TOTAL_BOOKMARKS && bookmarks->bookmarksArray[bookmarks->itemUnderMouse].notEmpty))
+		{
+			painter.setPen( QColor( 0x80, 0x90, 0xFF ) );
+
+			//SelectObject(hBitmapDC, selectPen);
+			if (bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
+			{
+				branch = currentBranch;
+			}
+			else
+			{
+				branch = findFullTimelineForBranch(bookmarks->itemUnderMouse);
+			}
+			while (branch >= 0)
+			{
+				tempBranchX = branchCurrentX[branch];
+				tempBranchY = branchCurrentY[branch];
+				//MoveToEx(hBitmapDC, tempBranchX, tempBranchY, 0);
+				branch = parents[branch];
+				if (branch == ITEM_UNDER_MOUSE_CLOUD)
+				{
+					tempBranchX2 = cloudCurrentX;
+					tempBranchY2 = BRANCHES_CLOUD_Y;
+				} else
+				{
+	 				tempBranchX2 = branchCurrentX[branch];
+					tempBranchY2 = branchCurrentY[branch];
+				}
+				//LineTo(hBitmapDC, tempBranchX, tempBranchY);
+				painter.drawLine( tempBranchX, tempBranchY, tempBranchX2, tempBranchY2 );
+			}
+		}
+	}
 //	if (changesSinceCurrentBranch)
 //	{
 //		if (isSafeToShowBranchesData() && bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
@@ -787,7 +840,9 @@ void BRANCHES::handleHistoryJump(int newCurrentBranch, bool newChangesSinceCurre
 	currentBranch = newCurrentBranch;
 	changesSinceCurrentBranch = newChangesSinceCurrentBranch;
 	if (newChangesSinceCurrentBranch)
+	{
 		setCurrentPosTimestamp();
+	}
 	mustRecalculateBranchesTree = true;
 }
 
@@ -909,12 +964,20 @@ int BRANCHES::findItemUnderMouse(int mouseX, int mouseY)
 {
 	int item = ITEM_UNDER_MOUSE_NONE;
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+	{
 		if (item == ITEM_UNDER_MOUSE_NONE && mouseX >= branchCurrentX[i] - DIGIT_RECT_HALFWIDTH_COLLISION && mouseX < branchCurrentX[i] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouseY >= branchCurrentY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouseY < branchCurrentY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
+		{
 			item = i;
+		}
+	}
 	if (item == ITEM_UNDER_MOUSE_NONE && mouseX >= cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH && mouseX < cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH + BRANCHES_CLOUD_WIDTH && mouseY >= BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT && mouseY < BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT + BRANCHES_CLOUD_HEIGHT)
+	{
 		item = ITEM_UNDER_MOUSE_CLOUD;
+	}
 	if (item == ITEM_UNDER_MOUSE_NONE && changesSinceCurrentBranch && mouseX >= branchCurrentX[ITEM_UNDER_MOUSE_FIREBALL] - DIGIT_RECT_HALFWIDTH_COLLISION && mouseX < branchCurrentX[ITEM_UNDER_MOUSE_FIREBALL] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouseY >= branchCurrentY[ITEM_UNDER_MOUSE_FIREBALL] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouseY < branchCurrentY[ITEM_UNDER_MOUSE_FIREBALL] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
+	{
 		item = ITEM_UNDER_MOUSE_FIREBALL;
+	}
 	return item;
 }
 

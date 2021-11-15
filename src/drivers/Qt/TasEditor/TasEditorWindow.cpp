@@ -1105,6 +1105,8 @@ void TasEditorWindow::buildSideControlPanel(void)
 	bkmkBrnchStack->addTab( scrollArea, tr("Bookmarks") );
 	bkmkBrnchStack->addTab( &branches , tr("Branches")  );
 
+	taseditorConfig.displayBranchesTree = 0;
+
 	vbox = new QVBoxLayout();
 	vbox->addWidget( bkmkBrnchStack );
 	bbFrame->setLayout( vbox );
@@ -1174,6 +1176,8 @@ void TasEditorWindow::buildSideControlPanel(void)
 
 	connect( histTree, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(histTreeItemActivated(QTreeWidgetItem*,int) ) );
 	connect( histTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(histTreeItemActivated(QTreeWidgetItem*,int) ) );
+
+	connect( bkmkBrnchStack, SIGNAL(currentChanged(int)), this, SLOT(tabViewChanged(int) ) );
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::updateCheckedItems(void)
@@ -2040,6 +2044,12 @@ void TasEditorWindow::histTreeItemActivated(QTreeWidgetItem *item, int col)
 		return;
 	}
 	history.handleSingleClick(row);
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::tabViewChanged(int idx)
+{
+	taseditorConfig.displayBranchesTree = (idx == 1);
+	bookmarks.redrawBookmarksSectionCaption();
 }
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::loadClipboard(const char *txt)

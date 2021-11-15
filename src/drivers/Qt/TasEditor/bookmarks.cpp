@@ -611,13 +611,15 @@ void BOOKMARKS::redrawBookmarksSectionCaption()
 		editMode = EDIT_MODE_BRANCHES;
 		//ShowWindow(hwndBookmarksList, SW_HIDE);
 		//ShowWindow(hwndBranchesBitmap, SW_SHOW);
-	} else if (taseditorConfig->oldControlSchemeForBranching && movie_readonly)
+	}
+	else if (taseditorConfig->oldControlSchemeForBranching && movie_readonly)
 	{
 		editMode = EDIT_MODE_BOOKMARKS;
 		//ShowWindow(hwndBranchesBitmap, SW_HIDE);
 		//ShowWindow(hwndBookmarksList, SW_SHOW);
 		redrawBookmarksList();
-	} else
+	}
+	else
 	{
 		editMode = EDIT_MODE_BOTH;
 		//ShowWindow(hwndBranchesBitmap, SW_HIDE);

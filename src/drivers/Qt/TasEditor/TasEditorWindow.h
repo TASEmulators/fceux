@@ -338,6 +338,7 @@ class TasEditorWindow : public QDialog
 		void pauseAtEndActChanged(bool);
 		void showToolTipsActChanged(bool);
 		void histTreeItemActivated(QTreeWidgetItem*,int);
+		void tabViewChanged(int);
 
 	friend class RECORDER;
 	friend class SPLICER;
