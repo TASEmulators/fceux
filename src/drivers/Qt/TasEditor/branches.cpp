@@ -23,9 +23,12 @@ Branches - Manager of Branches
 #include <math.h>
 #include <zlib.h>
 
+#include <QFontMetrics>
+
 #include "utils/xstring.h"
-#include <Qt/TasEditor/taseditor_project.h>
-#include <Qt/TasEditor/TasEditorWindow.h>
+#include "Qt/fceuWrapper.h"
+#include "Qt/TasEditor/taseditor_project.h"
+#include "Qt/TasEditor/TasEditorWindow.h"
 
 
 //LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -51,15 +54,49 @@ int corners_cursor_shift[BRANCHES_ANIMATION_FRAMES] = {0, 0, 1, 1, 2, 2, 2, 2, 1
 BRANCHES::BRANCHES(QWidget *parent)
 	: QWidget(parent)
 {
+	std::string fontString;
+
 	//this->parent = qobject_cast <TasEditorWindow*>( parent );
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMouseTracking(true);
 	this->setMinimumWidth(BRANCHES_BITMAP_WIDTH);
 	this->setMinimumHeight(BRANCHES_BITMAP_HEIGHT);
+
+	g_config->getOption("SDL.TasBranchFont", &fontString);
+
+	if ( fontString.size() > 0 )
+	{
+		font.fromString( QString::fromStdString( fontString ) );
+	}
+	else
+	{
+		font.setFamily("Courier New");
+		font.setStyle( QFont::StyleNormal );
+		font.setStyleHint( QFont::Monospace );
+	}
+
+	calcFontData();
 }
 
 BRANCHES::~BRANCHES(void)
 {
+}
+
+//----------------------------------------------------------------------------
+void BRANCHES::calcFontData(void)
+{
+	QWidget::setFont(font);
+	QFontMetrics metrics(font);
+#if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
+	pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+#else
+	pxCharWidth = metrics.width(QLatin1Char('2'));
+#endif
+	pxCharHeight   = metrics.capHeight();
+	pxLineSpacing  = metrics.lineSpacing();
+
+	pxBoxWidth  = pxLineSpacing;
+	pxBoxHeight = pxLineSpacing;
 }
 
 void BRANCHES::init()
@@ -120,7 +157,7 @@ void BRANCHES::init()
 	for (int i = TOTAL_BOOKMARKS; i >= 0; i--)
 	{
 		branchX[i] = branchPreviousX[i] = branchCurrentX[i] = EMPTY_BRANCHES_X_BASE;
-		branchY[i] = branchPreviousY[i] = branchCurrentY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+		branchY[i] = branchPreviousY[i] = branchCurrentY[i] = EMPTY_BRANCHES_Y_BASE + pxBoxHeight * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
 	}
 	reset();
 	cornersCursorX = cornersCursorY = 0;
@@ -227,7 +264,7 @@ void BRANCHES::reset()
 		branchPreviousX[i] = branchCurrentX[i];
 		branchPreviousY[i] = branchCurrentY[i];
 		branchX[i] = EMPTY_BRANCHES_X_BASE;
-		branchY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+		branchY[i] = EMPTY_BRANCHES_Y_BASE + pxBoxHeight * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
 	}
 	cloudPreviousX = cloudCurrentX;
 	cloudX = cloudCurrentX = BRANCHES_CLOUD_X;
@@ -515,6 +552,10 @@ void BRANCHES::redrawBranchesBitmap()
 
 void BRANCHES::paintEvent(QPaintEvent *event)
 {
+	int x,y;
+	char txt[4];
+	QPixmap cloud(":/icons/cloud.png");
+
 	QPainter painter(this);
 
 	viewWidth  = event->rect().width();
@@ -623,73 +664,112 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			}
 		}
 	}
-//	if (changesSinceCurrentBranch)
-//	{
-//		if (isSafeToShowBranchesData() && bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
-//			SelectObject(hBitmapDC, selectPen);
-//		else
-//			SelectObject(hBitmapDC, timelinePen);
-//		if (currentBranch == ITEM_UNDER_MOUSE_CLOUD)
-//		{
-//			parentX = cloudCurrentX;
-//			parentY = BRANCHES_CLOUD_Y;
-//		} else
-//		{
-//			parentX = branchCurrentX[currentBranch];
-//			parentY = branchCurrentY[currentBranch];
-//		}
-//		MoveToEx(hBitmapDC, parentX, parentY, 0);
-//		tempBranchX = branchCurrentX[ITEM_UNDER_MOUSE_FIREBALL];
-//		tempBranchY = branchCurrentY[ITEM_UNDER_MOUSE_FIREBALL];
-//		LineTo(hBitmapDC, tempBranchX, tempBranchY);
-//	}
+	if (changesSinceCurrentBranch)
+	{
+		if (isSafeToShowBranchesData() && bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
+		{
+			//SelectObject(hBitmapDC, selectPen);
+		}
+		else
+		{
+			//SelectObject(hBitmapDC, timelinePen);
+		}
+		if (currentBranch == ITEM_UNDER_MOUSE_CLOUD)
+		{
+			parentX = cloudCurrentX;
+			parentY = BRANCHES_CLOUD_Y;
+		}
+		else
+		{
+			parentX = branchCurrentX[currentBranch];
+			parentY = branchCurrentY[currentBranch];
+		}
+		//MoveToEx(hBitmapDC, parentX, parentY, 0);
+		tempBranchX = branchCurrentX[ITEM_UNDER_MOUSE_FIREBALL];
+		tempBranchY = branchCurrentY[ITEM_UNDER_MOUSE_FIREBALL];
+		//LineTo(hBitmapDC, tempBranchX, tempBranchY);
+		painter.drawLine( parentX, parentY, tempBranchX, tempBranchY );
+	}
 //	// cloud
 //	TransparentBlt(hBitmapDC, cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH, BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, hSpritesheetDC, BRANCHES_CLOUD_SPRITESHEET_X, BRANCHES_CLOUD_SPRITESHEET_Y, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, 0x00FF00);
+	painter.drawPixmap( cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH, BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, cloud );
+
 //	// branches rectangles
-//	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-//	{
-//		tempRect.left = branchCurrentX[i] - DIGIT_RECT_HALFWIDTH;
-//		tempRect.top = branchCurrentY[i] - DIGIT_RECT_HALFHEIGHT;
-//		tempRect.right = tempRect.left + DIGIT_RECT_WIDTH;
-//		tempRect.bottom = tempRect.top + DIGIT_RECT_HEIGHT;
-//		if (!bookmarks->bookmarksArray[i].notEmpty && bookmarks->bookmarksArray[i].floatingPhase > 0)
-//		{
-//			tempRect.left += bookmarks->bookmarksArray[i].floatingPhase;
-//			tempRect.right += bookmarks->bookmarksArray[i].floatingPhase;
-//		}
-//		if (bookmarks->bookmarksArray[i].flashPhase)
-//		{
-//			// draw colored rect
-//			HBRUSH color_brush = CreateSolidBrush(bookmark_flash_colors[bookmarks.bookmarksArray[i].flashType][bookmarks.bookmarksArray[i].flashPhase]);
-//			FrameRect(hBitmapDC, &tempRect, color_brush);
-//			DeleteObject(color_brush);
-//		} else
-//		{
-//			// draw black rect
-//			FrameRect(hBitmapDC, &tempRect, normalBrush);
-//		}
-//	}
-//	// digits
-//	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-//	{
-//		tempBranchX = branchCurrentX[i] - DIGIT_BITMAP_HALFWIDTH;
-//		tempBranchY = branchCurrentY[i] - DIGIT_BITMAP_HALFHEIGHT;
-//		if (i == currentBranch)
-//		{
-//			if (i == bookmarks.itemUnderMouse)
-//				BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
-//			else
-//				BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, 0, SRCCOPY);
-//		} else
-//		{
-//			if (!bookmarks.bookmarksArray[i].notEmpty && bookmarks.bookmarksArray[i].floatingPhase > 0)
-//				tempBranchX += bookmarks.bookmarksArray[i].floatingPhase;
-//			if (i == bookmarks.itemUnderMouse)
-//				BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
-//			else
-//				BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, 0, SRCCOPY);
-//		}
-//	}
+	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+	{
+		x = branchCurrentX[i] - pxBoxWidth/2;
+		y = branchCurrentY[i] - pxBoxHeight/2;
+		//tempRect.right = tempRect.left + DIGIT_RECT_WIDTH;
+		//tempRect.bottom = tempRect.top + DIGIT_RECT_HEIGHT;
+		if (!bookmarks->bookmarksArray[i].notEmpty && bookmarks->bookmarksArray[i].floatingPhase > 0)
+		{
+			//tempRect.left += bookmarks->bookmarksArray[i].floatingPhase;
+			//tempRect.right += bookmarks->bookmarksArray[i].floatingPhase;
+		}
+		if (bookmarks->bookmarksArray[i].flashPhase)
+		{
+			// draw colored rect
+			//HBRUSH color_brush = CreateSolidBrush(bookmark_flash_colors[bookmarks.bookmarksArray[i].flashType][bookmarks.bookmarksArray[i].flashPhase]);
+			//FrameRect(hBitmapDC, &tempRect, color_brush);
+			//DeleteObject(color_brush);
+		}
+		else
+		{
+			painter.setPen( QColor( 0x0, 0x0, 0x0 ) );
+			// draw black rect
+			//FrameRect(hBitmapDC, &tempRect, normalBrush);
+		}
+		if (i == bookmarks->itemUnderMouse)
+		{
+			painter.fillRect( x, y, pxBoxWidth, pxBoxHeight, QColor(255,235,154) );
+		}
+		else
+		{
+			painter.fillRect( x, y, pxBoxWidth, pxBoxHeight, QColor(255,255,255) );
+		}
+		painter.drawRect( x, y, pxBoxWidth, pxBoxHeight );
+	}
+	// digits
+	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+	{
+		txt[0] = i + '0';
+		txt[1] = 0;
+
+		tempBranchX = branchCurrentX[i] - pxCharWidth/2;
+		tempBranchY = branchCurrentY[i] + pxCharHeight/2;
+
+		if (i == currentBranch)
+		{
+			if (i == bookmarks->itemUnderMouse)
+			{
+				//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
+			}
+			else
+			{
+				//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, 0, SRCCOPY);
+			}
+			painter.setPen( QColor( 58, 179, 255 ) );
+			painter.drawText( tempBranchX, tempBranchY, tr(txt) );
+		}
+		else
+		{
+			painter.setPen( QColor( 0, 194, 64 ) );
+
+			if (!bookmarks->bookmarksArray[i].notEmpty && bookmarks->bookmarksArray[i].floatingPhase > 0)
+			{
+				tempBranchX += bookmarks->bookmarksArray[i].floatingPhase;
+			}
+			if (i == bookmarks->itemUnderMouse)
+			{
+				//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
+			}
+			else
+			{
+				//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, 0, SRCCOPY);
+			}
+			painter.drawText( tempBranchX, tempBranchY, tr(txt) );
+		}
+	}
 //	if (isSafeToShowBranchesData())
 //	{
 //		SetBkMode(hBitmapDC, TRANSPARENT);
@@ -1274,7 +1354,7 @@ void BRANCHES::recalculateBranchesTree()
 		} else
 		{
 			branchX[i] = EMPTY_BRANCHES_X_BASE;
-			branchY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+			branchY[i] = EMPTY_BRANCHES_Y_BASE + pxBoxHeight * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
 		}
 		if (max_x < branchX[i]) max_x = branchX[i];
 	}
@@ -1283,17 +1363,21 @@ void BRANCHES::recalculateBranchesTree()
 		// also set pixel position of "current_pos"
 		branchX[ITEM_UNDER_MOUSE_FIREBALL] = cloud_prefix + gridX[ITEM_UNDER_MOUSE_FIREBALL] * grid_width;
 		branchY[ITEM_UNDER_MOUSE_FIREBALL] = BRANCHES_CLOUD_Y + gridY[ITEM_UNDER_MOUSE_FIREBALL] * grid_halfheight;
-	} else if (currentBranch >= 0)
+	}
+	else if (currentBranch >= 0)
 	{
 		branchX[ITEM_UNDER_MOUSE_FIREBALL] = cloud_prefix + gridX[currentBranch] * grid_width;
 		branchY[ITEM_UNDER_MOUSE_FIREBALL] = BRANCHES_CLOUD_Y + gridY[currentBranch] * grid_halfheight;
-	} else
+	}
+	else
 	{
 		branchX[ITEM_UNDER_MOUSE_FIREBALL] = 0;
 		branchY[ITEM_UNDER_MOUSE_FIREBALL] = BRANCHES_CLOUD_Y;
 	}
 	if (max_x < branchX[ITEM_UNDER_MOUSE_FIREBALL])
+	{
 		max_x = branchX[ITEM_UNDER_MOUSE_FIREBALL];
+	}
 
 	// align whole tree horizontally
 	cloudX = (BRANCHES_BITMAP_WIDTH + BASE_HORIZONTAL_SHIFT - max_x) / 2;

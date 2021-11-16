@@ -27,5 +27,6 @@
         <file>icons/JumpTarget.png</file>
         <file>icons/Undo.png</file>
         <file>icons/find.png</file>
+        <file>icons/cloud.png</file>
     </qresource>
 </RCC>

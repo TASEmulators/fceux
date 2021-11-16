@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <vector>
 
+#include <QFont>
 #include <QWidget>
 
 #define BRANCHES_ANIMATION_TICK 40		// animate at 25FPS
@@ -142,6 +143,7 @@ protected:
 	void paintEvent(QPaintEvent *event);
 
 private:
+	void calcFontData(void);
 	void setCurrentPosTimestamp();
 
 	void recalculateParents();
@@ -186,8 +188,15 @@ private:
 	//GRADIENT_RECT gRect;
 	//RECT branchesBitmapRect;
 	
+	QFont font;
+
 	int  viewWidth;
 	int  viewHeight;
+	int  pxCharWidth;
+	int  pxCharHeight;
+	int  pxLineSpacing;
+	int  pxBoxWidth;
+	int  pxBoxHeight;
 
 	// temps
 	std::vector<int> gridX;				// measured in grid units, not in pixels

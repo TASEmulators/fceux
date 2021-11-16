@@ -606,6 +606,10 @@ error:
 void BOOKMARKS::redrawBookmarksSectionCaption()
 {
 	int prev_edit_mode = editMode;
+	if ( taseditorConfig == NULL )
+	{
+		return;
+	}
 	if (taseditorConfig->displayBranchesTree)
 	{
 		editMode = EDIT_MODE_BRANCHES;
