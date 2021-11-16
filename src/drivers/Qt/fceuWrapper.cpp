@@ -231,6 +231,17 @@ DriverKill()
 	inited=0;
 }
 
+int LoadGameFromLua( const char *path )
+{
+	//printf("Load From Lua: '%s'\n", path);
+	fceuWrapperUnLock();
+
+	consoleWindow->emulatorThread->signalRomLoad(path);
+
+	fceuWrapperLock();
+	return 0;
+}
+
 /**
  * Reloads last game
  */
@@ -249,23 +260,36 @@ int reloadLastGame(void)
  */
 int LoadGame(const char *path, bool silent)
 {
-	char fullpath[4096];
+	std::string fullpath;
 	int gg_enabled, autoLoadDebug, autoOpenDebugger, autoInputPreset;
 
 	if (isloaded){
 		CloseGame();
 	}
 
-#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+	QFileInfo fi( path );
 
 	// Resolve absolute path to file
-	if ( realpath( path, fullpath ) == NULL )
+	if ( fi.exists() )
 	{
-		strcpy( fullpath, path );
+		//printf("FI: '%s'\n", fi.absoluteFilePath().toStdString().c_str() );
+		//printf("FI: '%s'\n", fi.canonicalFilePath().toStdString().c_str() );
+		fullpath = fi.canonicalFilePath().toStdString();
 	}
-#else
-	strcpy( fullpath, path );
-#endif
+	else
+	{
+		fullpath.assign( path );
+	}
+//#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+//
+//	// Resolve absolute path to file
+//	if ( realpath( path, fullpath ) == NULL )
+//	{
+//		strcpy( fullpath, path );
+//	}
+//#else
+//	strcpy( fullpath, path );
+//#endif
 
 	//printf("Fullpath: %zi '%s'\n", sizeof(fullpath), fullpath );
 
@@ -280,13 +304,13 @@ int LoadGame(const char *path, bool silent)
 	g_config->getOption ("SDL.RamInitMethod", &RAMInitOption);
 
 	// Load the game
-	if(!FCEUI_LoadGame(fullpath, 1, silent)) {
+	if(!FCEUI_LoadGame(fullpath.c_str(), 1, silent)) {
 		return 0;
 	}
 
 	if ( consoleWindow )
 	{
-		consoleWindow->addRecentRom( fullpath );
+		consoleWindow->addRecentRom( fullpath.c_str() );
 	}
 
 	hexEditorLoadBookmarks();

@@ -609,6 +609,21 @@ static int emu_getdir(lua_State *L) {
 
 extern void ReloadRom(void);
 
+//#ifdef __QT_DRIVER__
+//static int emu_wait_for_rom_load(lua_State *L)
+//{
+//	fceuWrapperUnLock();
+//	printf("Waiting for ROM\n");
+//	#ifdef WIN32
+//	msleep(1000);
+//	#else
+//	usleep(1000000);
+//	#endif
+//	fceuWrapperLock();
+//
+//	return 0;
+//}
+//#endif
 
 // emu.loadrom(string filename)
 //
@@ -639,23 +654,22 @@ static int emu_loadrom(lua_State *L)
 		return 1;
 	}
 	return 0;
-#else
+#elif  defined(__QT_DRIVER__)
 	const char *nameo2 = luaL_checkstring(L,1);
 	char nameo[2048];
 
-	#ifndef WIN32
-	if ( realpath( nameo2, nameo ) == NULL )
-	{
-		strncpy(nameo, nameo2, sizeof(nameo));
-	}
-	#endif
+	strncpy(nameo, nameo2, sizeof(nameo));
+	nameo[sizeof(nameo)-1] = 0;
 
+	LoadGameFromLua( nameo );
+
+	//lua_cpcall(L, emu_wait_for_rom_load, NULL);
 	//printf("Attempting to Load ROM: '%s'\n", nameo );
-	if (!LoadGame(nameo, true)) 
-	{
-		//printf("Failed to Load ROM: '%s'\n", nameo );
-		reloadLastGame();
-	}
+	//if (!LoadGame(nameo, true)) 
+	//{
+	//	//printf("Failed to Load ROM: '%s'\n", nameo );
+	//	reloadLastGame();
+	//}
 	if ( GameInfo )
 	{
 		//printf("Currently Loaded ROM: '%s'\n", GameInfo->filename );

@@ -159,6 +159,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
 	connect(emulatorThread, SIGNAL(frameFinished(void)), this, SLOT(emuFrameFinish(void)) );
+	connect(emulatorThread, SIGNAL(loadRomRequest(QString)), this, SLOT(loadRomRequestCB(QString)) );
 
 	connect( gameTimer, &QTimer::timeout, this, &consoleWin_t::updatePeriodic );
 
@@ -2266,6 +2267,15 @@ void consoleWin_t::openROMFile(void)
 	fceuWrapperUnLock();
 
    return;
+}
+
+void consoleWin_t::loadRomRequestCB( QString s )
+{
+	printf("Load ROM Req: '%s'\n", s.toStdString().c_str() );
+	fceuWrapperLock();
+	CloseGame ();
+	LoadGame ( s.toStdString().c_str() );
+	fceuWrapperUnLock();
 }
 
 void consoleWin_t::closeROMCB(void)
@@ -4510,6 +4520,11 @@ void emulatorThread_t::run(void)
 void emulatorThread_t::signalFrameFinished(void)
 {
 	emit frameFinished();
+}
+
+void emulatorThread_t::signalRomLoad( const char *path )
+{
+	emit loadRomRequest( QString(path) );
 }
 
 //-----------------------------------------------------------------------------
