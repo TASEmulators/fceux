@@ -1,12 +1,13 @@
 // Specification file for Branches class
 #pragma once
 #include <stdint.h>
+#include <time.h>
 #include <vector>
 
 #include <QFont>
 #include <QWidget>
 
-#define BRANCHES_ANIMATION_TICK 40		// animate at 25FPS
+#define BRANCHES_ANIMATION_TICK (40 * CLOCKS_PER_SEC / 1000)	// animate at 25FPS
 #define BRANCHES_TRANSITION_MAX 12
 #define CURSOR_MIN_DISTANCE 1.0
 #define CURSOR_MAX_DISTANCE 256.0
