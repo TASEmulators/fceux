@@ -49,7 +49,7 @@ Branches - Manager of Branches
 
 // resources
 // corners cursor animation
-int corners_cursor_shift[BRANCHES_ANIMATION_FRAMES] = {0, 0, 1, 1, 2, 2, 2, 2, 1, 1, 0, 0 };
+static int corners_cursor_shift[BRANCHES_ANIMATION_FRAMES] = {0, 0, 1, 1, 2, 2, 2, 2, 1, 1, 0, 0 };
 
 BRANCHES::BRANCHES(QWidget *parent)
 	: QWidget(parent)
@@ -740,14 +740,14 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 
 		if (i == currentBranch)
 		{
-			if (i == bookmarks->itemUnderMouse)
-			{
-				//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
-			}
-			else
-			{
-				//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, 0, SRCCOPY);
-			}
+			//if (i == bookmarks->itemUnderMouse)
+			//{
+			//	//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
+			//}
+			//else
+			//{
+			//	//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, 0, SRCCOPY);
+			//}
 			painter.setPen( QColor( 58, 179, 255 ) );
 			painter.drawText( tempBranchX, tempBranchY, tr(txt) );
 		}
@@ -759,14 +759,14 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			{
 				tempBranchX += bookmarks->bookmarksArray[i].floatingPhase;
 			}
-			if (i == bookmarks->itemUnderMouse)
-			{
-				//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
-			}
-			else
-			{
-				//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, 0, SRCCOPY);
-			}
+			//if (i == bookmarks->itemUnderMouse)
+			//{
+			//	//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
+			//}
+			//else
+			//{
+			//	//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, 0, SRCCOPY);
+			//}
 			painter.drawText( tempBranchX, tempBranchY, tr(txt) );
 		}
 	}
@@ -812,6 +812,50 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 //			}
 //		}
 //	}
+
+	// blinking red frame on selected slot
+	if (taseditorConfig->oldControlSchemeForBranching && ((currentAnimationFrame + 1) % 6))
+	{
+		QPen pen = painter.pen();
+		int selected_slot = bookmarks->getSelectedSlot();
+		x = branchCurrentX[selected_slot] - pxBoxWidth/2;
+		y = branchCurrentY[selected_slot] - pxBoxHeight/2;
+		pen.setColor( QColor( 0xCA, 0x56, 0x56 ) );
+		pen.setWidth(3);
+		painter.setPen( pen );
+		painter.drawRect( x, y, pxBoxWidth, pxBoxHeight );
+		pen.setWidth(1);
+		painter.setPen( pen );
+	}
+
+	// corners cursor
+	painter.setPen( QColor( 0x0, 0x0, 0x0 ) );
+	int current_corners_cursor_shift = corners_cursor_shift[currentAnimationFrame];
+	int corner_x, corner_y;
+	// upper left
+	corner_x = cornersCursorX - current_corners_cursor_shift - pxBoxWidth;
+	corner_y = cornersCursorY - current_corners_cursor_shift - pxBoxHeight;
+	painter.drawLine( corner_x, corner_y, corner_x                      , corner_y+BRANCHES_CORNER_HEIGHT );
+	painter.drawLine( corner_x, corner_y, corner_x+BRANCHES_CORNER_WIDTH, corner_y   );
+	//TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER1_SPRITESHEET_X, BRANCHES_CORNER1_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
+	// upper right
+	corner_x = cornersCursorX + current_corners_cursor_shift + pxBoxWidth;
+	corner_y = cornersCursorY - current_corners_cursor_shift - pxBoxHeight;
+	painter.drawLine( corner_x, corner_y, corner_x                      , corner_y+BRANCHES_CORNER_HEIGHT );
+	painter.drawLine( corner_x, corner_y, corner_x-BRANCHES_CORNER_WIDTH, corner_y   );
+	//TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER2_SPRITESHEET_X, BRANCHES_CORNER2_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
+	// lower left
+	corner_x = cornersCursorX - current_corners_cursor_shift - pxBoxWidth;
+	corner_y = cornersCursorY + current_corners_cursor_shift + pxBoxHeight;
+	painter.drawLine( corner_x, corner_y, corner_x                      , corner_y-BRANCHES_CORNER_HEIGHT );
+	painter.drawLine( corner_x, corner_y, corner_x+BRANCHES_CORNER_WIDTH, corner_y   );
+	//TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER3_SPRITESHEET_X, BRANCHES_CORNER3_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
+	// lower right
+	corner_x = cornersCursorX + current_corners_cursor_shift + pxBoxWidth;
+	corner_y = cornersCursorY + current_corners_cursor_shift + pxBoxHeight;
+	painter.drawLine( corner_x, corner_y, corner_x                      , corner_y-BRANCHES_CORNER_HEIGHT );
+	painter.drawLine( corner_x, corner_y, corner_x-BRANCHES_CORNER_WIDTH, corner_y   );
+
 //	// draw border of canvas
 //	FrameRect(hBitmapDC, &branchesBitmapRect, borderBrush);
 //	// finished
