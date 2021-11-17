@@ -97,6 +97,8 @@ void BRANCHES::calcFontData(void)
 
 	pxBoxWidth  = pxLineSpacing;
 	pxBoxHeight = pxLineSpacing;
+	pxSelWidth  = (pxBoxWidth  * 7) / 8;
+	pxSelHeight = (pxBoxHeight * 7) / 8;
 }
 
 void BRANCHES::init()
@@ -550,11 +552,94 @@ void BRANCHES::redrawBranchesBitmap()
 	QWidget::update();
 }
 
+void BRANCHES::mousePressEvent(QMouseEvent * event)
+{
+	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
+
+	bookmarks->itemUnderMouse = item;
+
+	if (event->button() & Qt::LeftButton)
+	{
+		// single click on Branches Tree = send Playback to the Bookmark
+		int branchUnderMouse = item;
+		if (branchUnderMouse == ITEM_UNDER_MOUSE_CLOUD)
+		{
+			playback->jump(0);
+		}
+		else if ( (branchUnderMouse >= 0) && (branchUnderMouse < TOTAL_BOOKMARKS) && bookmarks->bookmarksArray[branchUnderMouse].notEmpty)
+		{
+			bookmarks->command(COMMAND_JUMP, branchUnderMouse);
+		}
+		else if (branchUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
+		{
+			playback->jump(currMovieData.getNumRecords() - 1);
+		}
+
+		// double click on Branches Tree = deploy the Branch
+//		int branchUnderMouse = bookmarks.itemUnderMouse;
+//		if (branchUnderMouse == ITEM_UNDER_MOUSE_CLOUD)
+//		{
+//			playback->jump(0);
+//		} else if (branchUnderMouse >= 0 && branchUnderMouse < TOTAL_BOOKMARKS && bookmarks.bookmarksArray[branchUnderMouse].notEmpty)
+//		{
+//			bookmarks->command(COMMAND_DEPLOY, branchUnderMouse);
+//		} else if (branchUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
+//		{
+//			playback->jump(currMovieData.getNumRecords() - 1);
+//		}
+
+	}
+	else if (event->button() & Qt::RightButton)
+	{
+		branchRightclicked = item;
+		//if (branches.branchRightclicked >= 0 && branches.branchRightclicked < TOTAL_BOOKMARKS)
+
+	}
+}
+
+void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
+{
+	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
+
+	bookmarks->itemUnderMouse = item;
+
+	if (event->button() & Qt::LeftButton)
+	{
+
+	}
+	else if (event->button() & Qt::RightButton)
+	{
+		if ( (branchRightclicked >= 0) && (branchRightclicked < TOTAL_BOOKMARKS) && (branchRightclicked == item) )
+		{
+			bookmarks->command(COMMAND_SET, branchRightclicked);
+		}
+		//ReleaseCapture();
+		branchRightclicked = ITEM_UNDER_MOUSE_NONE;
+	}
+}
+
+void BRANCHES::mouseMoveEvent(QMouseEvent * event)
+{
+	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
+
+	bookmarks->itemUnderMouse = item;
+
+	//if (event->button() & Qt::LeftButton)
+	//{
+
+	//}
+	//else if (event->button() & Qt::RightButton)
+	//{
+
+	//}
+
+}
+
 void BRANCHES::paintEvent(QPaintEvent *event)
 {
 	int x,y;
 	char txt[4];
-	QPixmap cloud(":/icons/cloud.png");
+	QPixmap spriteSheet(":/icons/branch_spritesheet.png");
 
 	QPainter painter(this);
 
@@ -692,7 +777,9 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 	}
 //	// cloud
 //	TransparentBlt(hBitmapDC, cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH, BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, hSpritesheetDC, BRANCHES_CLOUD_SPRITESHEET_X, BRANCHES_CLOUD_SPRITESHEET_Y, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, 0x00FF00);
-	painter.drawPixmap( cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH, BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, cloud );
+	//painter.drawPixmap( cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH, BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, cloud );
+	painter.drawPixmap( cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH, BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, 
+			spriteSheet, BRANCHES_CLOUD_SPRITESHEET_X, BRANCHES_CLOUD_SPRITESHEET_Y, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT );
 
 //	// branches rectangles
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
@@ -703,6 +790,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		//tempRect.bottom = tempRect.top + DIGIT_RECT_HEIGHT;
 		if (!bookmarks->bookmarksArray[i].notEmpty && bookmarks->bookmarksArray[i].floatingPhase > 0)
 		{
+			x += bookmarks->bookmarksArray[i].floatingPhase;
 			//tempRect.left += bookmarks->bookmarksArray[i].floatingPhase;
 			//tempRect.right += bookmarks->bookmarksArray[i].floatingPhase;
 		}
@@ -828,31 +916,50 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		painter.setPen( pen );
 	}
 
+	// fireball
+	if (fireballSize)
+	{
+		tempBranchX = branchCurrentX[ITEM_UNDER_MOUSE_FIREBALL] - BRANCHES_FIREBALL_HALFWIDTH;
+		tempBranchY = branchCurrentY[ITEM_UNDER_MOUSE_FIREBALL] - BRANCHES_FIREBALL_HALFHEIGHT;
+		if (fireballSize >= BRANCHES_FIREBALL_MAX_SIZE)
+		{
+			painter.drawPixmap( tempBranchX, tempBranchY, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT,
+				spriteSheet, currentAnimationFrame * BRANCHES_FIREBALL_WIDTH + BRANCHES_FIREBALL_SPRITESHEET_X, BRANCHES_FIREBALL_SPRITESHEET_Y, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT );
+			//TransparentBlt(hBufferDC, tempBranchX, tempBranchY, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT, hSpritesheetDC, currentAnimationFrame * BRANCHES_FIREBALL_WIDTH + BRANCHES_FIREBALL_SPRITESHEET_X, BRANCHES_FIREBALL_SPRITESHEET_Y, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT, 0x00FF00);
+		}
+		else
+		{
+			painter.drawPixmap( tempBranchX, tempBranchY, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT,
+				spriteSheet, BRANCHES_FIREBALL_SPRITESHEET_END_X - fireballSize * BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_SPRITESHEET_Y, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT );
+			//TransparentBlt(hBufferDC, tempBranchX, tempBranchY, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT, hSpritesheetDC, BRANCHES_FIREBALL_SPRITESHEET_END_X - fireballSize * BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_SPRITESHEET_Y, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT, 0x00FF00);
+		}
+	}
+
 	// corners cursor
 	painter.setPen( QColor( 0x0, 0x0, 0x0 ) );
 	int current_corners_cursor_shift = corners_cursor_shift[currentAnimationFrame];
 	int corner_x, corner_y;
 	// upper left
-	corner_x = cornersCursorX - current_corners_cursor_shift - pxBoxWidth;
-	corner_y = cornersCursorY - current_corners_cursor_shift - pxBoxHeight;
+	corner_x = cornersCursorX - current_corners_cursor_shift - pxSelWidth;
+	corner_y = cornersCursorY - current_corners_cursor_shift - pxSelHeight;
 	painter.drawLine( corner_x, corner_y, corner_x                      , corner_y+BRANCHES_CORNER_HEIGHT );
 	painter.drawLine( corner_x, corner_y, corner_x+BRANCHES_CORNER_WIDTH, corner_y   );
 	//TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER1_SPRITESHEET_X, BRANCHES_CORNER1_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
 	// upper right
-	corner_x = cornersCursorX + current_corners_cursor_shift + pxBoxWidth;
-	corner_y = cornersCursorY - current_corners_cursor_shift - pxBoxHeight;
+	corner_x = cornersCursorX + current_corners_cursor_shift + pxSelWidth;
+	corner_y = cornersCursorY - current_corners_cursor_shift - pxSelHeight;
 	painter.drawLine( corner_x, corner_y, corner_x                      , corner_y+BRANCHES_CORNER_HEIGHT );
 	painter.drawLine( corner_x, corner_y, corner_x-BRANCHES_CORNER_WIDTH, corner_y   );
 	//TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER2_SPRITESHEET_X, BRANCHES_CORNER2_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
 	// lower left
-	corner_x = cornersCursorX - current_corners_cursor_shift - pxBoxWidth;
-	corner_y = cornersCursorY + current_corners_cursor_shift + pxBoxHeight;
+	corner_x = cornersCursorX - current_corners_cursor_shift - pxSelWidth;
+	corner_y = cornersCursorY + current_corners_cursor_shift + pxSelHeight;
 	painter.drawLine( corner_x, corner_y, corner_x                      , corner_y-BRANCHES_CORNER_HEIGHT );
 	painter.drawLine( corner_x, corner_y, corner_x+BRANCHES_CORNER_WIDTH, corner_y   );
 	//TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER3_SPRITESHEET_X, BRANCHES_CORNER3_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
 	// lower right
-	corner_x = cornersCursorX + current_corners_cursor_shift + pxBoxWidth;
-	corner_y = cornersCursorY + current_corners_cursor_shift + pxBoxHeight;
+	corner_x = cornersCursorX + current_corners_cursor_shift + pxSelWidth;
+	corner_y = cornersCursorY + current_corners_cursor_shift + pxSelHeight;
 	painter.drawLine( corner_x, corner_y, corner_x                      , corner_y-BRANCHES_CORNER_HEIGHT );
 	painter.drawLine( corner_x, corner_y, corner_x-BRANCHES_CORNER_WIDTH, corner_y   );
 

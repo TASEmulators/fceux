@@ -142,6 +142,9 @@ public:
 
 protected:
 	void paintEvent(QPaintEvent *event);
+	void mousePressEvent(QMouseEvent * event);
+	void mouseReleaseEvent(QMouseEvent * event);
+	void mouseMoveEvent(QMouseEvent * event);
 
 private:
 	void calcFontData(void);
@@ -198,6 +201,8 @@ private:
 	int  pxLineSpacing;
 	int  pxBoxWidth;
 	int  pxBoxHeight;
+	int  pxSelWidth;
+	int  pxSelHeight;
 
 	// temps
 	std::vector<int> gridX;				// measured in grid units, not in pixels

@@ -28,5 +28,6 @@
         <file>icons/Undo.png</file>
         <file>icons/find.png</file>
         <file>icons/cloud.png</file>
+        <file>icons/branch_spritesheet.png</file>
     </qresource>
 </RCC>
