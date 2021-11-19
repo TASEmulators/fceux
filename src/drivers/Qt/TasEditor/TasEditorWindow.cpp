@@ -1645,13 +1645,123 @@ void TasEditorWindow::openProject(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::createNewProject(void)
 {
-	//if (!askToSaveProject()) return;
+	int ret;
+	QDialog dialog(this);
+	QGroupBox *gbox;
+	QVBoxLayout *mainLayout, *vbox;
+	QHBoxLayout *hbox;
+	QPushButton *okButton, *cancelButton;
+	QRadioButton *p1, *p2, *p4;
+	QCheckBox    *copyInput, *copyMarkers;
+	QLineEdit    *authorEdit;
+	static struct NewProjectParameters params;
+
+	if (!askToSaveProject())
+	{
+		return;
+	}
 	
+	params.inputType = getInputType(currMovieData);
+	params.copyCurrentInput = params.copyCurrentMarkers = false;
+	if (strlen(taseditorConfig.lastAuthorName) > 0)
+	{
+		int i=0;
+		// convert UTF8 char* string to Unicode wstring
+		wchar_t savedAuthorName[AUTHOR_NAME_MAX_LEN] = {0};
+
+		while ( taseditorConfig.lastAuthorName[i] != 0 )
+		{
+			savedAuthorName[i] = taseditorConfig.lastAuthorName[i]; i++;
+		}
+		savedAuthorName[i] = 0;
+		params.authorName = savedAuthorName;
+	}
+	else
+	{
+		params.authorName = L"";
+	}
+
+	mainLayout = new QVBoxLayout();
+	hbox       = new QHBoxLayout();
+	vbox       = new QVBoxLayout();
+	gbox       = new QGroupBox( tr("Input Type") );
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( gbox );
+	gbox->setLayout( vbox );
+
+	p1 = new QRadioButton( tr("1 Player") );
+	p2 = new QRadioButton( tr("2 Players") );
+	p4 = new QRadioButton( tr("4 Score") );
+
+	p1->setChecked( params.inputType == INPUT_TYPE_1P );
+	p2->setChecked( params.inputType == INPUT_TYPE_2P );
+	p4->setChecked( params.inputType == INPUT_TYPE_FOURSCORE );
+
+	vbox->addWidget( p1 );
+	vbox->addWidget( p2 );
+	vbox->addWidget( p4 );
+
+	vbox       = new QVBoxLayout();
+	hbox->addLayout( vbox );
+
+	copyInput   = new QCheckBox( tr("Copy Input") );
+	copyMarkers = new QCheckBox( tr("Copy Markers") );
+
+	vbox->addWidget( copyInput );
+	vbox->addWidget( copyMarkers );
+
+	hbox       = new QHBoxLayout();
+	mainLayout->addLayout( hbox );
+
+	authorEdit = new QLineEdit();
+	hbox->addWidget( new QLabel( tr("Author") ), 1 );
+	hbox->addWidget( authorEdit, 5 );
+
+	hbox       = new QHBoxLayout();
+	mainLayout->addLayout( hbox );
+
+	okButton     = new QPushButton( tr("Ok") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	hbox->addWidget( cancelButton, 1 );
+	hbox->addStretch( 5 );
+	hbox->addWidget( okButton    , 1 );
+
+	okButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	dialog.setLayout( mainLayout );
+
+	dialog.setWindowTitle( tr("Create New Project") );
+
+	okButton->setDefault(true);
+
+	ret = dialog.exec();
+	
+	if ( p4->isChecked() )
+	{
+		params.inputType = INPUT_TYPE_FOURSCORE;
+	}
+	else if ( p2->isChecked() )
+	{
+		params.inputType = INPUT_TYPE_2P;
+	}
+	else
+	{
+		params.inputType = INPUT_TYPE_1P;
+	}
+	params.copyCurrentInput   = copyInput->isChecked();
+	params.copyCurrentMarkers = copyMarkers->isChecked();
+	params.authorName = authorEdit->text().toStdWString();
+
 	fceuWrapperLock();
 
-	static struct NewProjectParameters params;
-	//if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_NEWPROJECT), taseditorWindow.hwndTASEditor, newProjectProc, (LPARAM)&params) > 0)
-	//{
+	if ( QDialog::Accepted == ret )
+	{
 		FCEUMOV_CreateCleanMovie();
 		// apply selected options
 		setInputType(currMovieData, params.inputType);
@@ -1689,7 +1799,7 @@ void TasEditorWindow::createNewProject(void)
 		//taseditorWindow.redraw();
 		//taseditorWindow.updateCaption();
 		update();
-	//}
+	}
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
