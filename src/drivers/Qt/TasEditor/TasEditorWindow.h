@@ -84,6 +84,9 @@ class QPianoRoll : public QWidget
 		void  ensureTheLineIsVisible( int lineNum );
 		void  followMarker(int markerID);
 		void  followSelection(void);
+		void  followPlaybackCursor(void);
+		void  followPauseframe(void);
+		void  followUndoHint(void);
 
 	protected:
 		void calcFontData(void);
@@ -229,8 +232,8 @@ class TasEditorWindow : public QDialog
 		QWidget    *controlPanelContainerWidget;
 		QScrollBar *pianoRollHBar;
 		QScrollBar *pianoRollVBar;
-		QLabel     *upperMarkerLabel;
-		QLabel     *lowerMarkerLabel;
+		QPushButton     *upperMarkerLabel;
+		QPushButton     *lowerMarkerLabel;
 		UpperMarkerNoteEdit  *upperMarkerNote;
 		LowerMarkerNoteEdit  *lowerMarkerNote;
 		QTabWidget *bkmkBrnchStack;
@@ -345,6 +348,8 @@ class TasEditorWindow : public QDialog
 		void hudInScrnBranchActChanged(bool);
 		void pauseAtEndActChanged(bool);
 		void showToolTipsActChanged(bool);
+		void upperMarkerLabelClicked(void);
+		void lowerMarkerLabelClicked(void);
 		void histTreeItemActivated(QTreeWidgetItem*,int);
 		void tabViewChanged(int);
 

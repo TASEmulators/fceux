@@ -897,10 +897,13 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	pianoRoll        = new QPianoRoll(this);
 	pianoRollVBar    = new QScrollBar( Qt::Vertical, this );
 	pianoRollHBar    = new QScrollBar( Qt::Horizontal, this );
-	upperMarkerLabel = new QLabel( tr("Marker 0") );
-	lowerMarkerLabel = new QLabel( tr("Marker 0") );
+	upperMarkerLabel = new QPushButton( tr("Marker 0") );
+	lowerMarkerLabel = new QPushButton( tr("Marker 0") );
 	upperMarkerNote  = new UpperMarkerNoteEdit();
 	lowerMarkerNote  = new LowerMarkerNoteEdit();
+
+	upperMarkerLabel->setFlat(true);
+	lowerMarkerLabel->setFlat(true);
 
 	pianoRollFrame->setLineWidth(2);
 	pianoRollFrame->setMidLineWidth(1);
@@ -940,6 +943,9 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	
 	pianoRollContainerWidget = new QWidget();
 	pianoRollContainerWidget->setLayout( vbox );
+
+	connect( upperMarkerLabel, SIGNAL(clicked(void)), this, SLOT(upperMarkerLabelClicked(void)) );
+	connect( lowerMarkerLabel, SIGNAL(clicked(void)), this, SLOT(lowerMarkerLabelClicked(void)) );
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::initPatterns(void)
@@ -2359,6 +2365,21 @@ void TasEditorWindow::removeMarkers(void)
 	}
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::upperMarkerLabelClicked(void)
+{
+	pianoRoll->followPlaybackCursor();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::lowerMarkerLabelClicked(void)
+{
+	int dragMode = pianoRoll->getDragMode();
+
+	if (dragMode != DRAG_MODE_SELECTION && dragMode != DRAG_MODE_DESELECTION)
+	{
+		pianoRoll->followSelection();
+	}
+}
+//----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----  TAS Piano Roll Widget
 //----------------------------------------------------------------------------
@@ -3260,6 +3281,31 @@ void QPianoRoll::followMarker(int markerID)
 	}
 }
 
+//----------------------------------------------------------------------------
+void QPianoRoll::followPlaybackCursor(void)
+{
+	centerListAroundLine(currFrameCounter);
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::followPauseframe(void)
+{
+	if (playback->getPauseFrame() >= 0)
+	{
+		centerListAroundLine(playback->getPauseFrame());
+	}
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::followUndoHint(void)
+{
+	int keyframe = history->getUndoHint();
+	if (taseditorConfig->followUndoContext && keyframe >= 0)
+	{
+		if (!lineIsVisible(keyframe))
+		{
+			centerListAroundLine(keyframe);
+		}
+	}
+}
 //----------------------------------------------------------------------------
 void QPianoRoll::centerListAroundLine(int rowIndex)
 {
