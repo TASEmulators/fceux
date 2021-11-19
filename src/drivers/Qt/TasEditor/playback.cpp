@@ -638,3 +638,31 @@ void PLAYBACK::cancelSeeking()
 //	return CallWindowProc(playbackMarkerEdit_oldWndproc, hWnd, msg, wParam, lParam);
 //}
 
+// -------------------------------------------------------------------------
+UpperMarkerNoteEdit::UpperMarkerNoteEdit( QWidget *parent )
+	: QLineEdit(parent)
+{
+	setEchoMode( QLineEdit::Normal );
+}
+// -------------------------------------------------------------------------
+UpperMarkerNoteEdit::~UpperMarkerNoteEdit(void)
+{
+}
+// -------------------------------------------------------------------------
+void UpperMarkerNoteEdit::focusInEvent(QFocusEvent *event)
+{
+	markersManager->markerNoteEditMode = MARKER_NOTE_EDIT_UPPER;
+	QLineEdit::focusInEvent(event);
+}
+// -------------------------------------------------------------------------
+void UpperMarkerNoteEdit::focusOutEvent(QFocusEvent *event)
+{
+	// if we were editing, save and finish editing
+	if (markersManager->markerNoteEditMode == MARKER_NOTE_EDIT_UPPER)
+	{
+		markersManager->updateEditedMarkerNote();
+		markersManager->markerNoteEditMode = MARKER_NOTE_EDIT_NONE;
+	}
+	QLineEdit::focusOutEvent(event);
+}
+// -------------------------------------------------------------------------

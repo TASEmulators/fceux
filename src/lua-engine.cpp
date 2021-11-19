@@ -3436,11 +3436,11 @@ static void gui_prepare() {
 #define LUA_PIXEL_G(PIX) (((PIX) >> 8) & 0xff)
 #define LUA_PIXEL_B(PIX) ((PIX) & 0xff)
 
-template <class T> static void swap(T &one, T &two) {
-	T temp = one;
-	one = two;
-	two = temp;
-}
+//template <class T> static void swap(T &one, T &two) {
+//	T temp = one;
+//	one = two;
+//	two = temp;
+//}
 
 // write a pixel to buffer
 static inline void blend32(uint32 *dstPixel, uint32 colour)
@@ -3564,9 +3564,9 @@ static void gui_drawline_internal(int x1, int y1, int x2, int y2, bool lastPixel
 static void gui_drawbox_internal(int x1, int y1, int x2, int y2, uint32 colour) {
 
 	if (x1 > x2)
-		swap<int>(x1, x2);
+		std::swap<int>(x1, x2);
 	if (y1 > y2)
-		swap<int>(y1, y2);
+		std::swap<int>(y1, y2);
 	if (x1 < 0)
 		x1 = -1;
 	if (y1 < 0)

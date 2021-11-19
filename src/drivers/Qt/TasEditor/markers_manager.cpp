@@ -584,41 +584,65 @@ void MARKERS_MANAGER::findNextSimilarNote()
 // ------------------------------------------------------------------------------------
 void MARKERS_MANAGER::updateEditedMarkerNote()
 {
-//	if (!markerNoteEditMode) return;
-//	char new_text[MAX_NOTE_LEN];
-//	if (markerNoteEditMode == MARKER_NOTE_EDIT_UPPER)
-//	{
-//		int len = SendMessage(playback.hwndPlaybackMarkerEditField, WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)new_text);
-//		new_text[len] = 0;
-//		// check changes
-//		if (strcmp(getNoteCopy(playback.displayedMarkerNumber).c_str(), new_text))
-//		{
-//			setNote(playback.displayedMarkerNumber, new_text);
-//			if (playback.displayedMarkerNumber)
-//				history.registerMarkersChange(MODTYPE_MARKER_RENAME, getMarkerFrameNumber(playback.displayedMarkerNumber), -1, new_text);
-//			else
-//				// zeroth Marker - just assume it's set on frame 0
-//				history.registerMarkersChange(MODTYPE_MARKER_RENAME, 0, -1, new_text);
-//			// notify Selection to change text in the lower Marker (in case both are showing same Marker)
-//			selection.mustFindCurrentMarker = true;
-//		}
-//	} else if (markerNoteEditMode == MARKER_NOTE_EDIT_LOWER)
-//	{
-//		int len = SendMessage(selection.hwndSelectionMarkerEditField, WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)new_text);
-//		new_text[len] = 0;
-//		// check changes
-//		if (strcmp(getNoteCopy(selection.displayedMarkerNumber).c_str(), new_text))
-//		{
-//			setNote(selection.displayedMarkerNumber, new_text);
-//			if (selection.displayedMarkerNumber)
-//				history.registerMarkersChange(MODTYPE_MARKER_RENAME, getMarkerFrameNumber(selection.displayedMarkerNumber), -1, new_text);
-//			else
-//				// zeroth Marker - just assume it's set on frame 0
-//				history.registerMarkersChange(MODTYPE_MARKER_RENAME, 0, -1, new_text);
-//			// notify Playback to change text in upper Marker (in case both are showing same Marker)
-//			playback.mustFindCurrentMarker = true;
-//		}
-//	}
+	if (!markerNoteEditMode)
+	{
+		return;
+	}
+	int len=0;
+	char new_text[MAX_NOTE_LEN];
+	if (markerNoteEditMode == MARKER_NOTE_EDIT_UPPER)
+	{
+		len = tasWin->upperMarkerLabel->text().size();
+		if ( len >= MAX_NOTE_LEN )
+		{
+			len = MAX_NOTE_LEN-1;
+		}
+		strncpy( new_text, tasWin->upperMarkerLabel->text().toStdString().c_str(), MAX_NOTE_LEN );
+		new_text[len] = 0;
+		// check changes
+		if (strcmp(getNoteCopy(playback->displayedMarkerNumber).c_str(), new_text))
+		{
+			setNote(playback->displayedMarkerNumber, new_text);
+			if (playback->displayedMarkerNumber)
+			{
+				history->registerMarkersChange(MODTYPE_MARKER_RENAME, getMarkerFrameNumber(playback->displayedMarkerNumber), -1, new_text);
+			}
+			else
+			{
+				// zeroth Marker - just assume it's set on frame 0
+				history->registerMarkersChange(MODTYPE_MARKER_RENAME, 0, -1, new_text);
+			}
+			// notify Selection to change text in the lower Marker (in case both are showing same Marker)
+			selection->mustFindCurrentMarker = true;
+		}
+	}
+	else if (markerNoteEditMode == MARKER_NOTE_EDIT_LOWER)
+	{
+		len = tasWin->lowerMarkerLabel->text().size();
+		if ( len >= MAX_NOTE_LEN )
+		{
+			len = MAX_NOTE_LEN-1;
+		}
+		strncpy( new_text, tasWin->lowerMarkerLabel->text().toStdString().c_str(), MAX_NOTE_LEN );
+		new_text[len] = 0;
+
+		// check changes
+		if (strcmp(getNoteCopy(selection->displayedMarkerNumber).c_str(), new_text))
+		{
+			setNote(selection->displayedMarkerNumber, new_text);
+			if (selection->displayedMarkerNumber)
+			{
+				history->registerMarkersChange(MODTYPE_MARKER_RENAME, getMarkerFrameNumber(selection->displayedMarkerNumber), -1, new_text);
+			}
+			else
+			{
+				// zeroth Marker - just assume it's set on frame 0
+				history->registerMarkersChange(MODTYPE_MARKER_RENAME, 0, -1, new_text);
+			}
+			// notify Playback to change text in upper Marker (in case both are showing same Marker)
+			playback->mustFindCurrentMarker = true;
+		}
+	}
 }
 // ------------------------------------------------------------------------------------
 //INT_PTR CALLBACK findNoteWndProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)

@@ -79,6 +79,7 @@ class QPianoRoll : public QWidget
 
 		bool  lineIsVisible( int lineNum );
 
+		void  handleColumnSet(int column, bool altPressed);
 		void  centerListAroundLine(int rowIndex);
 		void  ensureTheLineIsVisible( int lineNum );
 		void  followMarker(int markerID);
@@ -91,6 +92,7 @@ class QPianoRoll : public QWidget
 		void mousePressEvent(QMouseEvent * event);
 		void mouseReleaseEvent(QMouseEvent * event);
 		void mouseMoveEvent(QMouseEvent * event);
+		void mouseDoubleClickEvent(QMouseEvent * event);
 		void keyPressEvent(QKeyEvent *event);
 		void keyReleaseEvent(QKeyEvent *event);
 		void focusInEvent(QFocusEvent *event);
@@ -184,6 +186,12 @@ class TasEditorWindow : public QDialog
 		void loadClipboard(const char *txt);
 		void toggleInput(int start, int end, int joy, int button, int consecutivenessTag);
 		void setInputUsingPattern(int start, int end, int joy, int button, int consecutivenessTag);
+		bool handleColumnSet(void);
+		bool handleColumnSetUsingPattern(void);
+		bool handleInputColumnSet(int joy, int button);
+		bool handleInputColumnSetUsingPattern(int joy, int button);
+		void setMarkers(void);
+		void removeMarkers(void);
 
 	protected:
 		void closeEvent(QCloseEvent *event);
@@ -223,8 +231,8 @@ class TasEditorWindow : public QDialog
 		QScrollBar *pianoRollVBar;
 		QLabel     *upperMarkerLabel;
 		QLabel     *lowerMarkerLabel;
-		QLineEdit  *upperMarkerNote;
-		QLineEdit  *lowerMarkerNote;
+		UpperMarkerNoteEdit  *upperMarkerNote;
+		LowerMarkerNoteEdit  *lowerMarkerNote;
 		QTabWidget *bkmkBrnchStack;
 
 		QVBoxLayout *ctlPanelMainVbox;
@@ -345,6 +353,7 @@ class TasEditorWindow : public QDialog
 	friend class SELECTION;
 	friend class PLAYBACK;
 	friend class HISTORY;
+	friend class MARKERS_MANAGER;
 	friend class QPianoRoll;
 };
 

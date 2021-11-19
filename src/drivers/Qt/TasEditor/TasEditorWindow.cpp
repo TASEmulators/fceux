@@ -899,8 +899,8 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	pianoRollHBar    = new QScrollBar( Qt::Horizontal, this );
 	upperMarkerLabel = new QLabel( tr("Marker 0") );
 	lowerMarkerLabel = new QLabel( tr("Marker 0") );
-	upperMarkerNote  = new QLineEdit();
-	lowerMarkerNote  = new QLineEdit();
+	upperMarkerNote  = new UpperMarkerNoteEdit();
+	lowerMarkerNote  = new LowerMarkerNoteEdit();
 
 	pianoRollFrame->setLineWidth(2);
 	pianoRollFrame->setMidLineWidth(1);
@@ -2130,6 +2130,234 @@ void TasEditorWindow::setInputUsingPattern(int start, int end, int joy, int butt
 	if (changes_made)
 		greenzone.invalidateAndUpdatePlayback(history.registerChanges(MODTYPE_PATTERN, start, end, 0, patternsNames[current_pattern].c_str(), consecutivenessTag));
 }
+
+// following functions use current Selection to determine range of frames
+bool TasEditorWindow::handleColumnSet(void)
+{
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
+	if (current_selection->size() == 0) return false;
+	RowsSelection::iterator current_selection_begin(current_selection->begin());
+	RowsSelection::iterator current_selection_end(current_selection->end());
+
+	// inspect the selected frames, if they are all set, then unset all, else set all
+	bool unset_found = false, changes_made = false;
+	for(RowsSelection::iterator it(current_selection_begin); it != current_selection_end; it++)
+	{
+		if (!markersManager.getMarkerAtFrame(*it))
+		{
+			unset_found = true;
+			break;
+		}
+	}
+	if (unset_found)
+	{
+		// set all
+		for(RowsSelection::iterator it(current_selection_begin); it != current_selection_end; it++)
+		{
+			if (!markersManager.getMarkerAtFrame(*it))
+			{
+				if (markersManager.setMarkerAtFrame(*it))
+				{
+					changes_made = true;
+					//pianoRoll.redrawRow(*it);
+					pianoRoll->update();
+				}
+			}
+		}
+		if (changes_made)
+		{
+			history.registerMarkersChange(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
+		}
+	}
+	else
+	{
+		// unset all
+		for(RowsSelection::iterator it(current_selection_begin); it != current_selection_end; it++)
+		{
+			if (markersManager.getMarkerAtFrame(*it))
+			{
+				markersManager.removeMarkerFromFrame(*it);
+				changes_made = true;
+				//pianoRoll.redrawRow(*it);
+				pianoRoll->update();
+			}
+		}
+		if (changes_made)
+		{
+			history.registerMarkersChange(MODTYPE_MARKER_REMOVE, *current_selection_begin, *current_selection->rbegin());
+		}
+	}
+	if (changes_made)
+	{
+		selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
+	}
+	return changes_made;
+}
+
+bool TasEditorWindow::handleColumnSetUsingPattern(void)
+{
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
+	if (current_selection->size() == 0) return false;
+	RowsSelection::iterator current_selection_begin(current_selection->begin());
+	RowsSelection::iterator current_selection_end(current_selection->end());
+	int pattern_offset = 0, current_pattern = taseditorConfig.currentPattern;
+	bool changes_made = false;
+
+	for(RowsSelection::iterator it(current_selection_begin); it != current_selection_end; it++)
+	{
+		// skip lag frames
+		if (taseditorConfig.autofirePatternSkipsLag && greenzone.lagLog.getLagInfoAtFrame(*it) == LAGGED_YES)
+			continue;
+		if (patterns[current_pattern][pattern_offset])
+		{
+			if (!markersManager.getMarkerAtFrame(*it))
+			{
+				if (markersManager.setMarkerAtFrame(*it))
+				{
+					changes_made = true;
+					pianoRoll->update();
+				}
+			}
+		}
+		else
+		{
+			if (markersManager.getMarkerAtFrame(*it))
+			{
+				markersManager.removeMarkerFromFrame(*it);
+				changes_made = true;
+				pianoRoll->update();
+			}
+		}
+		pattern_offset++;
+		if (pattern_offset >= (int)patterns[current_pattern].size())
+			pattern_offset -= patterns[current_pattern].size();
+	}
+	if (changes_made)
+	{
+		history.registerMarkersChange(MODTYPE_MARKER_PATTERN, *current_selection_begin, *current_selection->rbegin(), patternsNames[current_pattern].c_str());
+		selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
+		return true;
+	}
+	return false;
+}
+bool TasEditorWindow::handleInputColumnSetUsingPattern(int joy, int button)
+{
+	if (joy < 0 || joy >= joysticksPerFrame[getInputType(currMovieData)]) return false;
+
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
+	if (current_selection->size() == 0) return false;
+	RowsSelection::iterator current_selection_begin(current_selection->begin());
+	RowsSelection::iterator current_selection_end(current_selection->end());
+	int pattern_offset = 0, current_pattern = taseditorConfig.currentPattern;
+
+	for(RowsSelection::iterator it(current_selection_begin); it != current_selection_end; it++)
+	{
+		// skip lag frames
+		if (taseditorConfig.autofirePatternSkipsLag && greenzone.lagLog.getLagInfoAtFrame(*it) == LAGGED_YES)
+			continue;
+		currMovieData.records[*it].setBitValue(joy, button, patterns[current_pattern][pattern_offset] != 0);
+		pattern_offset++;
+		if (pattern_offset >= (int)patterns[current_pattern].size())
+			pattern_offset -= patterns[current_pattern].size();
+	}
+	int first_changes = history.registerChanges(MODTYPE_PATTERN, *current_selection_begin, *current_selection->rbegin(), 0, patternsNames[current_pattern].c_str());
+	if (first_changes >= 0)
+	{
+		greenzone.invalidateAndUpdatePlayback(first_changes);
+		return true;
+	} else
+		return false;
+}
+
+bool TasEditorWindow::handleInputColumnSet(int joy, int button)
+{
+	if (joy < 0 || joy >= joysticksPerFrame[getInputType(currMovieData)]) return false;
+
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
+	if (current_selection->size() == 0) return false;
+	RowsSelection::iterator current_selection_begin(current_selection->begin());
+	RowsSelection::iterator current_selection_end(current_selection->end());
+
+	//inspect the selected frames, if they are all set, then unset all, else set all
+	bool newValue = false;
+	for(RowsSelection::iterator it(current_selection_begin); it != current_selection_end; it++)
+	{
+		if (!(currMovieData.records[*it].checkBit(joy,button)))
+		{
+			newValue = true;
+			break;
+		}
+	}
+	// apply newValue
+	for(RowsSelection::iterator it(current_selection_begin); it != current_selection_end; it++)
+		currMovieData.records[*it].setBitValue(joy,button,newValue);
+
+	int first_changes;
+	if (newValue)
+	{
+		first_changes = history.registerChanges(MODTYPE_SET, *current_selection_begin, *current_selection->rbegin());
+	} else
+	{
+		first_changes = history.registerChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin());
+	}
+	if (first_changes >= 0)
+	{
+		greenzone.invalidateAndUpdatePlayback(first_changes);
+		return true;
+	}
+	return false;
+}
+
+void TasEditorWindow::setMarkers(void)
+{
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
+	if (current_selection->size())
+	{
+		RowsSelection::iterator current_selection_begin(current_selection->begin());
+		RowsSelection::iterator current_selection_end(current_selection->end());
+		bool changes_made = false;
+		for(RowsSelection::iterator it(current_selection_begin); it != current_selection_end; it++)
+		{
+			if (!markersManager.getMarkerAtFrame(*it))
+			{
+				if (markersManager.setMarkerAtFrame(*it))
+				{
+					changes_made = true;
+					pianoRoll->update();
+				}
+			}
+		}
+		if (changes_made)
+		{
+			selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
+			history.registerMarkersChange(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
+		}
+	}
+}
+void TasEditorWindow::removeMarkers(void)
+{
+	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
+	if (current_selection->size())
+	{
+		RowsSelection::iterator current_selection_begin(current_selection->begin());
+		RowsSelection::iterator current_selection_end(current_selection->end());
+		bool changes_made = false;
+		for(RowsSelection::iterator it(current_selection_begin); it != current_selection_end; it++)
+		{
+			if (markersManager.getMarkerAtFrame(*it))
+			{
+				markersManager.removeMarkerFromFrame(*it);
+				changes_made = true;
+				pianoRoll->update();
+			}
+		}
+		if (changes_made)
+		{
+			selection.mustFindCurrentMarker = playback.mustFindCurrentMarker = true;
+			history.registerMarkersChange(MODTYPE_MARKER_REMOVE, *current_selection_begin, *current_selection->rbegin());
+		}
+	}
+}
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----  TAS Piano Roll Widget
@@ -2430,6 +2658,34 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 
 }
 //----------------------------------------------------------------------------
+void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
+{
+	fceuCriticalSection emuLock;
+	int col, line, row_index, column_index, kbModifiers, alt_pressed;
+	QPoint c = convPixToCursor( event->pos() );
+
+	mouse_x = event->pos().x();
+	mouse_y = event->pos().y();
+
+	line = lineOffset + c.y();
+	col  = calcColumn( event->pos().x() );
+
+	row_index = line;
+	rowUnderMouse = realRowUnderMouse = line;
+	columnUnderMouse = column_index = col;
+
+	kbModifiers = QApplication::keyboardModifiers();
+	alt_pressed = (kbModifiers & Qt::AltModifier) ? 1 : 0;
+
+	if ( event->button() == Qt::LeftButton )
+	{
+		if ( (col == COLUMN_FRAMENUM) || (col == COLUMN_FRAMENUM2) )
+		{
+			handleColumnSet( col, alt_pressed );
+		}
+	}
+}
+//----------------------------------------------------------------------------
 void QPianoRoll::mousePressEvent(QMouseEvent * event)
 {
 	fceuCriticalSection emuLock;
@@ -2585,6 +2841,14 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 		}
 		//updateDrag();
 	}
+	else if ( event->button() == Qt::MiddleButton )
+	{
+		playback->handleMiddleButtonClick();
+	}
+	else if ( event->button() == Qt::RightButton )
+	{
+		//rightButtonDragMode = true;
+	}
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::mouseReleaseEvent(QMouseEvent * event)
@@ -2611,6 +2875,10 @@ void QPianoRoll::mouseReleaseEvent(QMouseEvent * event)
 			// check if user released left button
 			finishDrag();
 		}
+	}
+	else if ( event->button() == Qt::RightButton )
+	{
+		//rightButtonDragMode = true;
 	}
 }
 //----------------------------------------------------------------------------
@@ -2892,6 +3160,48 @@ void QPianoRoll::updateDrag(void)
 				dragSelectionEndingFrame = new_drag_selection_ending_frame;
 			}
 			break;
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::handleColumnSet(int column, bool altPressed)
+{
+	if (column == COLUMN_FRAMENUM || column == COLUMN_FRAMENUM2)
+	{
+		// user clicked on "Frame#" - apply ColumnSet to Markers
+		if (altPressed)
+		{
+			if (parent->handleColumnSetUsingPattern())
+			{
+				//setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+			}
+		}
+		else
+		{
+			if (parent->handleColumnSet())
+			{
+				//setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+			}
+		}
+	}
+	else
+	{
+		// user clicked on Input column - apply ColumnSet to Input
+		int joy = (column - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+		int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+		if (altPressed)
+		{
+			if (parent->handleInputColumnSetUsingPattern(joy, button))
+			{
+				//setLightInHeaderColumn(column, HEADER_LIGHT_MAX);
+			}
+		}
+		else
+		{
+			if (parent->handleInputColumnSet(joy, button))
+			{
+				//setLightInHeaderColumn(column, HEADER_LIGHT_MAX);
+			}
 		}
 	}
 }
@@ -3206,8 +3516,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	// Draw Grid
 	painter.drawLine( -pxLineXScroll, 0, -pxLineXScroll, viewHeight );
 
-	x = pxFrameColX - pxLineXScroll;
-	painter.drawLine( x, 0, x, viewHeight );
+	//x = pxFrameColX - pxLineXScroll;
+	//painter.drawLine( x, 0, x, viewHeight );
 
 	for (int i=0; i<numCtlr; i++)
 	{
@@ -3314,6 +3624,110 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			painter.fillRect( x, y, pxWidthCtlCol, pxLineSpacing, blkColor );
 		}
 
+		// Frame number column
+		// font
+		//if (markersManager.getMarkerAtFrame(lineNum))
+		//	SelectObject(msg->nmcd.hdc, hMainListSelectFont);
+		//else
+		//	SelectObject(msg->nmcd.hdc, hMainListFont);
+		// bg
+		// frame number
+		if (lineNum == history->getUndoHint())
+		{
+			// undo hint here
+			if (markersManager->getMarkerAtFrame(lineNum) && (dragMode != DRAG_MODE_MARKER || markerDragFrameNumber != lineNum))
+			{
+				blkColor = (taseditorConfig->bindMarkersToInput) ? QColor( BINDMARKED_UNDOHINT_FRAMENUM_COLOR ) : QColor( MARKED_UNDOHINT_FRAMENUM_COLOR );
+			}
+			else
+			{
+				blkColor = QColor( UNDOHINT_FRAMENUM_COLOR );
+			}
+		}
+		else if (lineNum == currFrameCounter || lineNum == (playback->getFlashingPauseFrame() - 1))
+		{
+			// this is current frame
+			if (markersManager->getMarkerAtFrame(lineNum) && (dragMode != DRAG_MODE_MARKER || markerDragFrameNumber != lineNum))
+			{
+				blkColor = (taseditorConfig->bindMarkersToInput) ? QColor( CUR_BINDMARKED_FRAMENUM_COLOR ) : QColor( CUR_MARKED_FRAMENUM_COLOR );
+			}
+			else
+			{
+				blkColor = QColor( CUR_FRAMENUM_COLOR );
+			}
+		}
+		else if (markersManager->getMarkerAtFrame(lineNum) && (dragMode != DRAG_MODE_MARKER || markerDragFrameNumber != lineNum))
+		{
+			// this is marked frame
+			blkColor = (taseditorConfig->bindMarkersToInput) ? QColor( BINDMARKED_FRAMENUM_COLOR ) : QColor( MARKED_FRAMENUM_COLOR );
+		}
+		else if (lineNum < greenzone->getSize())
+		{
+			if (!greenzone->isSavestateEmpty(lineNum))
+			{
+				// the frame is normal Greenzone frame
+				if (frame_lag == LAGGED_YES)
+				{
+					blkColor = QColor( LAG_FRAMENUM_COLOR );
+				}
+				else
+				{
+					blkColor = QColor( GREENZONE_FRAMENUM_COLOR );
+				}
+			}
+			else if (!greenzone->isSavestateEmpty(lineNum & EVERY16TH)
+				|| !greenzone->isSavestateEmpty(lineNum & EVERY8TH)
+				|| !greenzone->isSavestateEmpty(lineNum & EVERY4TH)
+				|| !greenzone->isSavestateEmpty(lineNum & EVERY2ND))
+			{
+				// the frame is in a gap (in Greenzone tail)
+				if (frame_lag == LAGGED_YES)
+				{
+					blkColor = QColor( PALE_LAG_FRAMENUM_COLOR );
+				}
+				else
+				{
+					blkColor = QColor( PALE_GREENZONE_FRAMENUM_COLOR );
+				}
+			}
+			else 
+			{
+				// the frame is above Greenzone tail
+				if (frame_lag == LAGGED_YES)
+				{
+					blkColor = QColor( VERY_PALE_LAG_FRAMENUM_COLOR );
+				}
+				else if (frame_lag == LAGGED_NO)
+				{
+					blkColor = QColor( VERY_PALE_GREENZONE_FRAMENUM_COLOR );
+				}
+				else
+				{
+					blkColor = QColor( NORMAL_FRAMENUM_COLOR );
+				}
+			}
+		}
+		else
+		{
+			// the frame is below Greenzone head
+			if (frame_lag == LAGGED_YES)
+			{
+				blkColor = QColor( VERY_PALE_LAG_FRAMENUM_COLOR );
+			}
+			else if (frame_lag == LAGGED_NO)
+			{
+				blkColor = QColor( VERY_PALE_GREENZONE_FRAMENUM_COLOR );
+			}
+			else
+			{
+				blkColor = QColor( NORMAL_FRAMENUM_COLOR );
+			}
+		}
+		x = -pxLineXScroll + pxFrameColX;
+
+		painter.fillRect( x, y, pxWidthFrameCol, pxLineSpacing, blkColor );
+
+		// Selected Line
 		if ( rowIsSel )
 		{
 			painter.fillRect( 0, y, viewWidth, pxLineSpacing, QColor( 10, 36, 106 ) );
@@ -3342,6 +3756,13 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			//painter.drawLine( x, y, x, pxLineSpacing );
 		}
 
+		// Frame number column
+		// font
+		//if (markersManager.getMarkerAtFrame(lineNum))
+		//	SelectObject(msg->nmcd.hdc, hMainListSelectFont);
+		//else
+		//	SelectObject(msg->nmcd.hdc, hMainListFont);
+		// bg
 		x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 10*pxCharWidth) / 2;
 
 		sprintf( stmp, "%010i", lineNum );
@@ -3391,6 +3812,9 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		y += pxLineSpacing;
 	}
 
+	x = pxFrameColX - pxLineXScroll;
+	painter.drawLine( x, 0, x, viewHeight );
+	
 	for (int i=0; i<numCtlr; i++)
 	{
 		x = pxFrameCtlX[i] - pxLineXScroll;

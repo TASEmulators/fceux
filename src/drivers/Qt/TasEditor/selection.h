@@ -4,9 +4,25 @@
 #include <set>
 #include <map>
 #include <vector>
+
+#include <QLineEdit>
+
 typedef std::set<int> RowsSelection;
 
 #define SELECTION_ID_LEN 10
+
+class LowerMarkerNoteEdit : public QLineEdit
+{
+	Q_OBJECT
+
+	public:
+		LowerMarkerNoteEdit(QWidget *parent = 0);
+		~LowerMarkerNoteEdit(void);	
+
+	protected:
+		void focusInEvent(QFocusEvent *event);
+		void focusOutEvent(QFocusEvent *event);
+};
 
 class SELECTION
 {

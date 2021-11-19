@@ -930,3 +930,30 @@ RowsSelection& SELECTION::getCurrentRowsSelection()
 //	return CallWindowProc(selectionMarkerEdit_oldWndproc, hWnd, msg, wParam, lParam);
 //}
 
+// -------------------------------------------------------------------------
+LowerMarkerNoteEdit::LowerMarkerNoteEdit( QWidget *parent )
+	: QLineEdit(parent)
+{
+	setEchoMode( QLineEdit::Normal );
+}
+// -------------------------------------------------------------------------
+LowerMarkerNoteEdit::~LowerMarkerNoteEdit(void)
+{
+}
+// -------------------------------------------------------------------------
+void LowerMarkerNoteEdit::focusInEvent(QFocusEvent *event)
+{
+	markersManager->markerNoteEditMode = MARKER_NOTE_EDIT_LOWER;
+	QLineEdit::focusInEvent(event);
+}
+// -------------------------------------------------------------------------
+void LowerMarkerNoteEdit::focusOutEvent(QFocusEvent *event)
+{
+	if (markersManager->markerNoteEditMode == MARKER_NOTE_EDIT_LOWER)
+	{
+		markersManager->updateEditedMarkerNote();
+		markersManager->markerNoteEditMode = MARKER_NOTE_EDIT_NONE;
+	}
+	QLineEdit::focusOutEvent(event);
+}
+// -------------------------------------------------------------------------

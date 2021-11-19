@@ -1,6 +1,8 @@
 // Specification file for Playback class
 #pragma once
 
+#include <QLineEdit>
+
 #define PROGRESSBAR_WIDTH 200
 
 #define PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING 100
@@ -8,6 +10,18 @@
 
 #define BUTTON_HOLD_REPEAT_DELAY 250			// in milliseconds
 
+class UpperMarkerNoteEdit : public QLineEdit
+{
+	Q_OBJECT
+
+	public:
+		UpperMarkerNoteEdit(QWidget *parent = 0);
+		~UpperMarkerNoteEdit(void);	
+
+	protected:
+		void focusInEvent(QFocusEvent *event);
+		void focusOutEvent(QFocusEvent *event);
+};
 
 class PLAYBACK
 {
