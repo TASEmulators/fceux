@@ -3923,6 +3923,15 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 		sprintf( stmp, "%010i", lineNum );
 
+		if (markersManager->getMarkerAtFrame(lineNum))
+		{
+			font.setBold(true);
+		}
+		else
+		{
+			font.setBold(false);
+		}
+		painter.setFont(font);
 		painter.drawText( x, y+pxLineTextOfs, tr(stmp) );
 
 		x = -pxLineXScroll;
