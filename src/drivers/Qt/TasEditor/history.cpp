@@ -886,7 +886,7 @@ void HISTORY::registerRecording(int frameOfChange, uint32 joypadDifferenceBits)
 	branches->setChangesMadeSinceBranch();
 	project->setProjectChanged();
 }
-int HISTORY::registerImport(MovieData& md, char* filename)
+int HISTORY::registerImport(MovieData& md, const char* filename)
 {
 	// create new snapshot
 	SNAPSHOT snap;

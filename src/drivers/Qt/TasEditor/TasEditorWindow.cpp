@@ -35,6 +35,7 @@
 #include <QStandardPaths>
 #include <QApplication>
 #include <QGuiApplication>
+#include <QDesktopServices>
 
 #include "fceu.h"
 #include "movie.h"
@@ -44,6 +45,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/TasEditor/TasColors.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
@@ -393,7 +395,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+Shift+S")));
 	act->setStatusTip(tr("Import Input"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_BrowserStop ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(closeFile(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(importMovieFile(void)) );
 
 	fileMenu->addAction(act);
 
@@ -402,7 +404,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+Shift+S")));
 	act->setStatusTip(tr("Export to fm2"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_BrowserStop ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(closeFile(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(exportMovieFile(void)) );
 
 	fileMenu->addAction(act);
 
@@ -858,7 +860,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Open TAS Editor Manual"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(openOnlineDocs(void)) );
 
 	helpMenu->addAction(act);
 
@@ -1803,6 +1805,241 @@ void TasEditorWindow::createNewProject(void)
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::importMovieFile(void)
+{
+	std::string last;
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string lastPath;
+	//char dir[512];
+	const char *base, *rom;
+	QFileDialog  dialog(this, tr("Import Movie File") );
+	QList<QUrl> urls;
+	QDir d;
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilter(tr("FCEUX Movie Files (*.fm2) ;; TAS Project Files (*.fm3) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Import") );
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/movies");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		dialog.setDirectory( d.absolutePath() );
+	}
+	dialog.setDefaultSuffix( tr(".fm3") );
+
+	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
+	if ( lastPath.size() > 0 )
+	{
+		dialog.setDirectory( QString::fromStdString(lastPath) );
+	}
+
+	rom = getRomFile();
+
+	if ( rom )
+	{
+		char baseName[512];
+		getFileBaseName( rom, baseName );
+
+		if ( baseName[0] != 0 )
+		{
+			dialog.selectFile(baseName);
+		}
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	EMUFILE_FILE ifs( filename.toStdString().c_str(), "rb");
+
+	// Load Input to temporary moviedata
+	MovieData md;
+	if (LoadFM2(md, &ifs, ifs.size(), false))
+	{
+		QFileInfo fi( filename );
+		// loaded successfully, now register Input changes
+		//char drv[512], dir[512], name[1024], ext[512];
+		//splitpath(filename.toStdString().c_str(), drv, dir, name, ext);
+		//strcat(name, ext);
+		int result = history.registerImport(md, fi.fileName().toStdString().c_str() );
+		if (result >= 0)
+		{
+			greenzone.invalidateAndUpdatePlayback(result);
+			greenzone.lagLog.invalidateFromFrame(result);
+			// keep current snapshot laglog in touch
+			history.getCurrentSnapshot().laglog.invalidateFromFrame(result);
+		}
+		else
+		{
+			//MessageBox(taseditorWindow.hwndTASEditor, "Imported movie has the same Input.\nNo changes were made.", "TAS Editor", MB_OK);
+		}
+	}
+	else
+	{
+		FCEUD_PrintError("Error loading movie data!");
+	}
+
+	return;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::exportMovieFile(void)
+{
+	std::string last;
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string lastPath;
+	//char dir[512];
+	const char *base, *rom;
+	QFileDialog  dialog(this, tr("Export to FM2 File") );
+	QList<QUrl> urls;
+	QDir d;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("FCEUX Movie File (*.fm2) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Export") );
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/movies");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		dialog.setDirectory( d.absolutePath() );
+	}
+	dialog.setDefaultSuffix( tr(".fm2") );
+
+	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
+	if ( lastPath.size() > 0 )
+	{
+		dialog.setDirectory( QString::fromStdString(lastPath) );
+	}
+
+	rom = getRomFile();
+
+	if ( rom )
+	{
+		char baseName[512];
+		getFileBaseName( rom, baseName );
+
+		if ( baseName[0] != 0 )
+		{
+			dialog.selectFile(baseName);
+		}
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+
+	EMUFILE* osRecordingMovie = FCEUD_UTF8_fstream( filename.toStdString().c_str(), "wb");
+	// create copy of current movie data
+	MovieData temp_md = currMovieData;
+	// modify the copy according to selected type of export
+	setInputType(temp_md, taseditorConfig.lastExportedInputType);
+	temp_md.loadFrameCount = -1;
+	// also add subtitles if needed
+	if (taseditorConfig.lastExportedSubtitlesStatus)
+	{
+		// convert Marker Notes to Movie Subtitles
+		char framenum[16];
+		std::string subtitle;
+		int markerID;
+		for (int i = 0; i < markersManager.getMarkersArraySize(); ++i)
+		{
+			markerID = markersManager.getMarkerAtFrame(i);
+			if (markerID)
+			{
+				sprintf( framenum, "%i ", i );
+				//_itoa(i, framenum, 10);
+				//strcat(framenum, " ");
+				subtitle = framenum;
+				subtitle.append(markersManager.getNoteCopy(markerID));
+				temp_md.subtitles.push_back(subtitle);
+			}
+		}
+	}
+	// dump to disk
+	temp_md.dump(osRecordingMovie, false);
+	delete osRecordingMovie;
+	osRecordingMovie = 0;
+
+}
+//----------------------------------------------------------------------------
 void TasEditorWindow::saveProjectCb(void)
 {
 	saveProject();
@@ -1816,6 +2053,16 @@ void TasEditorWindow::saveProjectAsCb(void)
 void TasEditorWindow::saveProjectCompactCb(void)
 {
 	saveProject(true);
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::openOnlineDocs(void)
+{
+	if ( QDesktopServices::openUrl( QUrl("https://fceux.com/web/help/taseditor/Title.html") ) == false )
+	{
+		QMessageBox::critical( this, tr("Error"), 
+		                        tr("Error: Failed to open link to: https://fceux.com/web/help/taseditor/Title.html") );
+	}
+	return;
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::recordingChanged(int state)

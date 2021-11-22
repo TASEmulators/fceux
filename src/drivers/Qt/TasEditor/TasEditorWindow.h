@@ -300,6 +300,9 @@ class TasEditorWindow : public QDialog
 		void saveProjectAsCb(void);
 		void saveProjectCompactCb(void);
 		void createNewProject(void);
+		void importMovieFile(void);
+		void exportMovieFile(void);
+		void openOnlineDocs(void);
 		void recordingChanged(int);
 		void recordInputChanged(int);
 		void superImposedChanged(int);

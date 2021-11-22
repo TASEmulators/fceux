@@ -118,7 +118,7 @@ public:
 	void registerBookmarkSet(int slot, BOOKMARK& backupCopy, int oldCurrentBranch);
 	int registerBranching(int slot, bool markersWereChanged);
 	void registerRecording(int frameOfChange, uint32 joypadDifferenceBits);
-	int registerImport(MovieData& md, char* filename);
+	int registerImport(MovieData& md, const char* filename);
 	int registerLuaChanges(const char* name, int start, bool insertionOrDeletionWasDone);
 
 	int getCategoryOfOperation(int modificationType);
