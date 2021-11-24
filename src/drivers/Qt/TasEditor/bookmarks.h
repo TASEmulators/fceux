@@ -112,6 +112,7 @@ protected:
 	void mousePressEvent(QMouseEvent * event);
 	void mouseReleaseEvent(QMouseEvent * event);
 	void mouseMoveEvent(QMouseEvent * event);
+	bool event(QEvent *event);
 
 	int    calcColumn( int px );
 	QPoint convPixToCursor( QPoint p );

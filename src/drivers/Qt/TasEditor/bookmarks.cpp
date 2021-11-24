@@ -19,6 +19,8 @@ Bookmarks/Branches - Manager of Bookmarks
 * stores resources: save id, ids of commands, captions for panel, gradients for flashings, id of default slot
 ------------------------------------------------------------------------------------ */
 
+#include <QToolTip>
+
 #include <zlib.h>
 #include "utils/xstring.h"
 #include "Qt/fceuWrapper.h"
@@ -955,6 +957,34 @@ void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
 	//QPoint c = convPixToCursor( event->pos() );
 
 	//printf("Mouse Move: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+}
+
+bool BOOKMARKS::event(QEvent *event)
+{
+	if (event->type() == QEvent::ToolTip)
+	{
+		int item, row_under_mouse, item_valid, column;
+		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+
+		QPoint c = convPixToCursor( helpEvent->pos() );
+
+		row_under_mouse = c.y();
+		column = calcColumn( helpEvent->pos().x() );
+
+		item = (row_under_mouse + 1) % TOTAL_BOOKMARKS;
+		item_valid = (item >= 0) && (item < TOTAL_BOOKMARKS);
+
+		if ( item_valid )
+		{
+			static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( helpEvent, new bookmarkPreviewPopup(item, this) ));
+			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
+			QToolTip::hideText();
+			event->ignore();
+		}
+
+		return true;
+	}
+	return QWidget::event(event);
 }
 
 void BOOKMARKS::handleMouseMove(int newX, int newY)

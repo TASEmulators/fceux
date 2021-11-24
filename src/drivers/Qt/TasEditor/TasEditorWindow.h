@@ -36,6 +36,7 @@
 #include <QStackedWidget>
 #include <QClipboard>
 
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/TasEditor/taseditor_config.h"
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/greenzone.h"
@@ -61,6 +62,19 @@ struct NewProjectParameters
 	bool copyCurrentInput;
 	bool copyCurrentMarkers;
 	std::wstring authorName;
+};
+
+class bookmarkPreviewPopup : public fceuCustomToolTip
+{
+   Q_OBJECT
+	public:
+	   bookmarkPreviewPopup( int index, QWidget *parent = nullptr );
+	   ~bookmarkPreviewPopup(void);
+
+	private:
+	   int loadImage(int index);
+
+	   unsigned char *screenShotRaster;
 };
 
 class QPianoRoll : public QWidget

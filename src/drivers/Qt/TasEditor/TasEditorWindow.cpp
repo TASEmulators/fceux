@@ -24,6 +24,7 @@
 #include <string.h>
 #include <math.h>
 #include <string>
+#include <zlib.h>
 
 #include <QDir>
 #include <QPainter>
@@ -42,6 +43,7 @@
 #include "movie.h"
 #include "driver.h"
 
+#include "common/vidblit.h"
 #include "Qt/config.h"
 #include "Qt/keyscan.h"
 #include "Qt/throttle.h"
@@ -4331,5 +4333,102 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		y += pxLineSpacing;
 	}
 
+}
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//---- Bookmark Preview Popup
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+bookmarkPreviewPopup::bookmarkPreviewPopup( int index, QWidget *parent )
+	: fceuCustomToolTip( parent )
+{
+	int p;
+	QVBoxLayout *vbox;
+	QLabel *imgLbl, *descLbl;
+	uint32_t *pixBuf;
+	uint32_t  pixel;
+	QPixmap pixmap;
+
+	fceuWrapperLock();
+
+	// retrieve info from the pointed bookmark's Markers
+	int frame = bookmarks->bookmarksArray[index].snapshot.keyFrame;
+	int markerID = markersManager->getMarkerAboveFrame(bookmarks->bookmarksArray[index].snapshot.markers, frame);
+
+	screenShotRaster = (unsigned char *)malloc( SCREENSHOT_SIZE );
+
+	if ( screenShotRaster == NULL )
+	{
+		printf("Error: Failed to allocate screenshot image memory\n");
+	}
+	// bookmarks.itemUnderMouse
+
+	pixBuf = (uint32_t *)malloc( SCREENSHOT_SIZE * sizeof(uint32_t) );
+
+	loadImage(index);
+
+	p=0;
+	for (int h=0; h<SCREENSHOT_HEIGHT; h++)
+	{
+		for (int w=0; w<SCREENSHOT_WIDTH; w++)
+		{
+			pixel = ModernDeemphColorMap( &screenShotRaster[p], screenShotRaster, 1 );
+			pixBuf[p]  = 0xFF000000;
+			pixBuf[p] |= (pixel & 0x000000FF) << 16;
+			pixBuf[p] |= (pixel & 0x00FF0000) >> 16;
+			pixBuf[p] |= (pixel & 0x0000FF00);
+			p++;
+		}
+	}
+	QImage img( (unsigned char*)pixBuf, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, SCREENSHOT_WIDTH*4, QImage::Format_RGBA8888 );
+	pixmap.convertFromImage( img );
+
+	vbox = new QVBoxLayout();
+
+	setLayout( vbox );
+
+	imgLbl  = new QLabel();
+	descLbl = new QLabel();
+
+	imgLbl->setPixmap( pixmap );
+
+	vbox->addWidget( imgLbl , 100 );
+	vbox->addWidget( descLbl, 1 );
+
+	descLbl->setText( tr(markersManager->getNoteCopy(bookmarks->bookmarksArray[index].snapshot.markers, markerID).c_str()) );
+
+	resize( 256, 256 );
+
+	if ( pixBuf )
+	{
+		free( pixBuf ); pixBuf = NULL;
+	}
+	fceuWrapperUnLock();
+}
+//----------------------------------------------------------------------------
+bookmarkPreviewPopup::~bookmarkPreviewPopup( void )
+{
+	if ( screenShotRaster != NULL )
+	{
+		free( screenShotRaster ); screenShotRaster = NULL;
+	}
+	//printf("Popup Deleted\n");
+}
+//----------------------------------------------------------------------------
+int bookmarkPreviewPopup::loadImage(int index)
+{
+	// uncompress
+	int ret = 0;
+	uLongf destlen = SCREENSHOT_SIZE;
+	int e = uncompress(screenShotRaster, &destlen, &bookmarks->bookmarksArray[index].savedScreenshot[0], bookmarks->bookmarksArray[index].savedScreenshot.size());
+	if (e != Z_OK && e != Z_BUF_ERROR)
+	{
+		// error decompressing
+		FCEU_printf("Error decompressing screenshot %d\n", index);
+		// at least fill bitmap with zeros
+		memset(screenShotRaster, 0, SCREENSHOT_SIZE);
+		ret = -1;
+	}
+	return ret;
 }
 //----------------------------------------------------------------------------
