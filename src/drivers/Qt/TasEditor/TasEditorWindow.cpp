@@ -32,6 +32,7 @@
 #include <QMessageBox>
 #include <QFontMetrics>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QStandardPaths>
 #include <QApplication>
 #include <QGuiApplication>
@@ -675,7 +676,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Set Max Undo History"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(setMaxUndoCapacity(void)) );
 
 	confMenu->addAction(act);
 
@@ -684,7 +685,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Set Greenzone Capacity"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(setGreenzoneCapacity(void)) );
 
 	confMenu->addAction(act);
 
@@ -2413,6 +2414,81 @@ void TasEditorWindow::tabViewChanged(int idx)
 {
 	taseditorConfig.displayBranchesTree = (idx == 1);
 	bookmarks.redrawBookmarksSectionCaption();
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::setGreenzoneCapacity(void)
+{
+	int ret;
+	int newValue = taseditorConfig.greenzoneCapacity;
+	QInputDialog dialog(this);
+	fceuCriticalSection emuLock;
+
+	dialog.setWindowTitle( tr("Greenzone Capacity") );
+	dialog.setInputMode( QInputDialog::IntInput );
+	dialog.setIntRange( GREENZONE_CAPACITY_MIN, GREENZONE_CAPACITY_MAX );
+	dialog.setLabelText( tr("Keep savestates for how many frames?\n(actual limit of savestates can be 5 times more than the number provided)") );
+	dialog.setIntValue( newValue );
+
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		newValue = dialog.intValue();
+
+		if (newValue < GREENZONE_CAPACITY_MIN)
+		{
+			newValue = GREENZONE_CAPACITY_MIN;
+		}
+		else if (newValue > GREENZONE_CAPACITY_MAX)
+		{
+			newValue = GREENZONE_CAPACITY_MAX;
+		}
+		if (newValue < taseditorConfig.greenzoneCapacity)
+		{
+			taseditorConfig.greenzoneCapacity = newValue;
+			greenzone.runGreenzoneCleaning();
+		}
+		else
+		{
+			taseditorConfig.greenzoneCapacity = newValue;
+		}
+	}
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::setMaxUndoCapacity(void)
+{
+	int ret;
+	int newValue = taseditorConfig.maxUndoLevels;
+	QInputDialog dialog(this);
+	fceuCriticalSection emuLock;
+
+	dialog.setWindowTitle( tr("Max undo levels") );
+	dialog.setInputMode( QInputDialog::IntInput );
+	dialog.setIntRange( UNDO_LEVELS_MIN, UNDO_LEVELS_MAX );
+	dialog.setLabelText( tr("Keep history of how many changes?") );
+	dialog.setIntValue( newValue );
+
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		newValue = dialog.intValue();
+
+		if (newValue < UNDO_LEVELS_MIN)
+		{
+			newValue = UNDO_LEVELS_MIN;
+		}
+		else if (newValue > UNDO_LEVELS_MAX)
+		{
+			newValue = UNDO_LEVELS_MAX;
+		}
+		if (newValue != taseditorConfig.maxUndoLevels)
+		{
+			taseditorConfig.maxUndoLevels = newValue;
+			history.updateHistoryLogSize();
+			selection.updateHistoryLogSize();
+		}
+	}
 }
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::loadClipboard(const char *txt)
