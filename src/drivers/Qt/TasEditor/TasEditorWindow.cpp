@@ -3146,6 +3146,7 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 {
 	fceuCriticalSection emuLock;
 	int col, line, row_index, column_index, kbModifiers, alt_pressed;
+	bool row_valid;
 	QPoint c = convPixToCursor( event->pos() );
 
 	mouse_x = event->pos().x();
@@ -3157,6 +3158,8 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 	row_index = line;
 	rowUnderMouse = realRowUnderMouse = line;
 	columnUnderMouse = column_index = col;
+
+	row_valid = (row_index >= 0) && ( (size_t)row_index < currMovieData.records.size() );
 
 	kbModifiers = QApplication::keyboardModifiers();
 	alt_pressed = (kbModifiers & Qt::AltModifier) ? 1 : 0;
@@ -3277,7 +3280,7 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 					if (taseditorConfig->drawInputByDragging)
 					{
 						// if clicked this click created buttonpress, then start painting, else start erasing
-						if (currMovieData.records[row_index].checkBit(joy, button))
+						if ( row_valid && currMovieData.records[row_index].checkBit(joy, button))
 						{
 							dragMode = DRAG_MODE_SET;
 						}
