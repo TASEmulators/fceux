@@ -269,7 +269,7 @@ void RECORDER::recheckRecordingRadioButtons()
 	}
 }
 
-void RECORDER::recordInput()
+void RECORDER::recordInput(void)
 {
 	bool changes_made = false;
 	uint32 joypad_diff_bits = 0;
@@ -280,9 +280,13 @@ void RECORDER::recordInput()
 		oldJoyData[i] = history->getCurrentSnapshot().inputlog.getJoystickData(currFrameCounter, i);
 
 		if (!taseditorConfig->recordingUsePattern /*|| editor.patterns[oldCurrentPattern][patternOffset]*/)
+		{
 			newJoyData[i] = currMovieData.records[currFrameCounter].joysticks[i];
+		}
 		else
+		{
 			newJoyData[i] = 0;		// blank
+		}
 	}
 	if (taseditorConfig->recordingUsePattern)
 	{

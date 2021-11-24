@@ -23,6 +23,7 @@ History - History of movie modifications
 
 #include "fceu.h"
 #include "driver.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
@@ -113,7 +114,7 @@ HISTORY::HISTORY()
 {
 }
 
-void HISTORY::init()
+void HISTORY::init(void)
 {
 	// prepare the history listview
 	//hwndHistoryList = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_HISTORYLIST);
@@ -826,14 +827,18 @@ void HISTORY::registerRecording(int frameOfChange, uint32 joypadDifferenceBits)
 		// add info if Commands were affected
 		uint32 current_mask = 1;
 		if ((snap->recordedJoypadDifferenceBits & current_mask))
+		{
 			strcat(snap->description, joypadCaptions[0]);
+		}
 		// add info which joypads were affected
 		int num = joysticksPerFrame[snap->inputlog.inputType];
 		current_mask <<= 1;
 		for (int i = 0; i < num; ++i)
 		{
 			if ((snap->recordedJoypadDifferenceBits & current_mask))
+			{
 				strcat(snap->description, joypadCaptions[i + 1]);
+			}
 			current_mask <<= 1;
 		}
 		// add upper and lower frame to description
@@ -861,7 +866,9 @@ void HISTORY::registerRecording(int frameOfChange, uint32 joypadDifferenceBits)
 		// add info if Commands were affected
 		uint32 current_mask = 1;
 		if ((snap.recordedJoypadDifferenceBits & current_mask))
+		{
 			strcat(snap.description, joypadCaptions[0]);
+		}
 		// add info which joypads were affected
 		int num = joysticksPerFrame[snap.inputlog.inputType];
 		current_mask <<= 1;
@@ -1189,8 +1196,13 @@ void HISTORY::handleSingleClick(int row_index)
 	}
 }
 
-void HISTORY::updateList()
+void HISTORY::updateList(void)
 {
+	// Emulation thread cannot update graphics
+	if ( QThread::currentThread() == consoleWindow->emulatorThread )
+	{
+		return;
+	}
 	//update the number of items in the history list
 	int currLVItemCount = tasWin->histTree->topLevelItemCount();
 
@@ -1200,8 +1212,13 @@ void HISTORY::updateList()
 	}
 }
 
-void HISTORY::redrawList()
+void HISTORY::redrawList(void)
 {
+	// Emulation thread cannot update graphics
+	if ( QThread::currentThread() == consoleWindow->emulatorThread )
+	{
+		return;
+	}
 	tasWin->updateHistoryItems();
 	//ListView_SetItemState(hwndHistoryList, historyCursorPos, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 	//ListView_EnsureVisible(hwndHistoryList, historyCursorPos, FALSE);
