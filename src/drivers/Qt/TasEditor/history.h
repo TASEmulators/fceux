@@ -1,16 +1,17 @@
 // Specification file for History class
 #pragma once
 #include <stdint.h>
+#include <time.h>
 #include <vector>
 
 #include "fceu.h"
 #include "Qt/TasEditor/bookmark.h"
 #include "Qt/TasEditor/snapshot.h"
 
-#define UNDO_HINT_TIME 200						// in milliseconds
+#define UNDO_HINT_TIME (200 * (CLOCKS_PER_SEC / 1000))	// in milliseconds
 
 #define SAVING_HISTORY_PROGRESSBAR_UPDATE_RATE 10
-#define TIME_BETWEEN_AUTOCOMPRESSIONS 500		// in milliseconds
+#define TIME_BETWEEN_AUTOCOMPRESSIONS (500 * (CLOCKS_PER_SEC / 1000))		// in milliseconds
 
 #define HISTORY_LIST_WIDTH 500
 

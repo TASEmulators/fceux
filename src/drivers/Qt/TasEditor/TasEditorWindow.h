@@ -371,6 +371,7 @@ class TasEditorWindow : public QDialog
 		void openProjectSaveOptions(void);
 		void setGreenzoneCapacity(void);
 		void setMaxUndoCapacity(void);
+		void setCurrentPattern(int);
 		void tabViewChanged(int);
 
 	friend class RECORDER;

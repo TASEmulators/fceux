@@ -329,8 +329,9 @@ void TasEditorWindow::closeWindow(void)
 QMenuBar *TasEditorWindow::buildMenuBar(void)
 {
 	QMenu       *fileMenu, *editMenu, *viewMenu,
-		    *confMenu, *luaMenu,  *helpMenu;
-	//QActionGroup *actGroup;
+		    *confMenu, *luaMenu,  *helpMenu,
+		    *patternMenu;
+	QActionGroup *actGroup;
 	QAction     *act;
 	int useNativeMenuBar=0;
 
@@ -860,6 +861,27 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
 
 	luaMenu->addAction(act);
+
+	// Pattern
+	patternMenu = menuBar->addMenu(tr("&Pattern"));
+
+	actGroup = new QActionGroup(this);
+
+	for (size_t i=0; i<patternsNames.size(); i++)
+	{
+		// Pattern -> Names
+		act = new QAction(tr(patternsNames[i].c_str()), this);
+		act->setCheckable(true);
+		//act->setShortcut(QKeySequence(tr("Ctrl+N")));
+		act->setStatusTip(tr(patternsNames[i].c_str()));
+		//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+		connect(act, &QAction::triggered, [this, i] { setCurrentPattern(i); } );
+
+		actGroup->addAction(act);
+		patternMenu->addAction(act);
+
+		act->setChecked( taseditorConfig.currentPattern == i );
+	}
 
 	// Help
 	helpMenu = menuBar->addMenu(tr("&Help"));
@@ -2074,6 +2096,20 @@ void TasEditorWindow::openOnlineDocs(void)
 	return;
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::setCurrentPattern(int idx)
+{
+	if ( idx < 0 )
+	{
+		return;
+	}
+	if ( (size_t)idx >= patternsNames.size() )
+	{
+		return;
+	}
+	//printf("Set Pattern: %i\n", idx);
+	taseditorConfig.currentPattern = idx;
+}
+//----------------------------------------------------------------------------
 void TasEditorWindow::recordingChanged(int state)
 {
 	FCEUI_MovieToggleReadOnly();
@@ -2705,7 +2741,9 @@ void TasEditorWindow::setInputUsingPattern(int start, int end, int joy, int butt
 	}
 	if (start < 0) start = end;
 	if (end >= currMovieData.getNumRecords())
+	{
 		return;
+	}
 
 	int pattern_offset = 0, current_pattern = taseditorConfig.currentPattern;
 	bool changes_made = false;
@@ -2715,7 +2753,9 @@ void TasEditorWindow::setInputUsingPattern(int start, int end, int joy, int butt
 	{
 		// skip lag frames
 		if (taseditorConfig.autofirePatternSkipsLag && greenzone.lagLog.getLagInfoAtFrame(i) == LAGGED_YES)
+		{
 			continue;
+		}
 		value = (patterns[current_pattern][pattern_offset] != 0);
 		if (currMovieData.records[i].checkBit(joy, button) != value)
 		{
@@ -2724,10 +2764,14 @@ void TasEditorWindow::setInputUsingPattern(int start, int end, int joy, int butt
 		}
 		pattern_offset++;
 		if (pattern_offset >= (int)patterns[current_pattern].size())
+		{
 			pattern_offset -= patterns[current_pattern].size();
+		}
 	}
 	if (changes_made)
+	{
 		greenzone.invalidateAndUpdatePlayback(history.registerChanges(MODTYPE_PATTERN, start, end, 0, patternsNames[current_pattern].c_str(), consecutivenessTag));
+	}
 }
 
 // following functions use current Selection to determine range of frames
