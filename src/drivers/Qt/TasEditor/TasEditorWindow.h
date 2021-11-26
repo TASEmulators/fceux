@@ -368,6 +368,7 @@ class TasEditorWindow : public QDialog
 		void upperMarkerLabelClicked(void);
 		void lowerMarkerLabelClicked(void);
 		void histTreeItemActivated(QTreeWidgetItem*,int);
+		void openProjectSaveOptions(void);
 		void setGreenzoneCapacity(void);
 		void setMaxUndoCapacity(void);
 		void tabViewChanged(int);

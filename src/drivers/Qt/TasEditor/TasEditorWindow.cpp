@@ -305,7 +305,10 @@ void TasEditorWindow::closeEvent(QCloseEvent *event)
 {
 	printf("Tas Editor Close Window Event\n");
 
-	if (!askToSaveProject()) return;
+	if (!askToSaveProject())
+	{
+		return;
+	}
 
 	done(0);
 	deleteLater();
@@ -314,7 +317,10 @@ void TasEditorWindow::closeEvent(QCloseEvent *event)
 //----------------------------------------------------------------------------
 void TasEditorWindow::closeWindow(void)
 {
-	if (!askToSaveProject()) return;
+	if (!askToSaveProject())
+	{
+		return;
+	}
 	//printf("Close Window\n");
 	done(0);
 	deleteLater();
@@ -669,7 +675,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Project File Saving Options"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(openProjectSaveOptions(void)) );
 
 	confMenu->addAction(act);
 
@@ -1546,14 +1552,14 @@ bool TasEditorWindow::askToSaveProject(void)
 	if (changesFound)
 	{
 		int ans = QMessageBox::question( this, tr("TAS Editor"), tr("Save project changes?"),
-				QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes );
+				QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes );
 
 		//int answer = MessageBox(taseditorWindow.hwndTASEditor, "Save Project changes?", "TAS Editor", MB_YESNOCANCEL);
 		if (ans == QMessageBox::Yes)
 		{
 			return saveProject();
 		}
-		return (ans != QMessageBox::No);
+		return (ans != QMessageBox::Cancel);
 	}
 	return true;
 }
@@ -2416,6 +2422,158 @@ void TasEditorWindow::tabViewChanged(int idx)
 {
 	taseditorConfig.displayBranchesTree = (idx == 1);
 	bookmarks.redrawBookmarksSectionCaption();
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::openProjectSaveOptions(void)
+{
+	int ret;
+	QDialog dialog(this);
+	fceuCriticalSection emuLock;
+	QGroupBox *settingsBox, *fileContentsBox, *greenZoneSaveBox;
+	QVBoxLayout *mainLayout, *vbox1, *vbox;
+	QHBoxLayout *hbox1, *hbox;
+	QCheckBox *autoSaveOpt, *saveSilentOpt;
+	QSpinBox  *autoSavePeriod;
+	QCheckBox *binaryInput, *saveMarkers, *saveBookmarks;
+	QCheckBox *saveHistory, *savePianoRoll, *saveSelection;
+	QRadioButton *allFrames, *every16thFrame, *markedFrames, *dontSave;
+	QPushButton  *okButton, *cancelButton;
+
+	dialog.setWindowTitle( tr("Project File Saving Options") );
+
+	mainLayout       = new QVBoxLayout();
+	settingsBox      = new QGroupBox( tr("Settings") );
+	fileContentsBox  = new QGroupBox( tr("File Contents") );
+	greenZoneSaveBox = new QGroupBox( tr("Greenzone Saving Options") );
+	hbox1            = new QHBoxLayout();
+
+	autoSaveOpt    = new QCheckBox( tr("Autosave project") );
+	saveSilentOpt  = new QCheckBox( tr("silently") );
+	autoSavePeriod = new QSpinBox();
+
+	binaryInput    = new QCheckBox( tr("Binary Input") );
+	saveMarkers    = new QCheckBox( tr("Markers") );
+	saveBookmarks  = new QCheckBox( tr("Bookmarks") );
+	saveHistory    = new QCheckBox( tr("History") );
+	savePianoRoll  = new QCheckBox( tr("Piano Roll") );
+	saveSelection  = new QCheckBox( tr("Selection") );
+
+	allFrames      = new QRadioButton( tr("All Frames") );
+	every16thFrame = new QRadioButton( tr("Every 16th Frame") );
+	markedFrames   = new QRadioButton( tr("Marked Frame") );
+	dontSave       = new QRadioButton( tr("Don't Save") );
+
+	okButton       = new QPushButton( tr("Ok") );
+	cancelButton   = new QPushButton( tr("Cancel") );
+
+	okButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	hbox1->addWidget( settingsBox );
+	hbox1->addWidget( fileContentsBox );
+
+	dialog.setLayout( mainLayout );
+	mainLayout->addLayout( hbox1 );
+
+	vbox = new QVBoxLayout();
+	hbox = new QHBoxLayout();
+	settingsBox->setLayout( vbox );
+
+	hbox->addWidget( new QLabel( tr("every") ) );
+	hbox->addWidget( autoSavePeriod );
+	hbox->addWidget( new QLabel( tr("minutes") ) );
+
+	vbox->addWidget( autoSaveOpt );
+	vbox->addLayout( hbox );
+	vbox->addWidget( saveSilentOpt );
+	vbox->addStretch( 10 );
+
+	vbox1 = new QVBoxLayout();
+	fileContentsBox->setLayout( vbox1 );
+
+	vbox1->addWidget( binaryInput    );
+	vbox1->addWidget( saveMarkers    );
+	vbox1->addWidget( saveBookmarks  );
+	vbox1->addWidget( saveHistory    );
+	vbox1->addWidget( savePianoRoll  );
+	vbox1->addWidget( saveSelection  );
+	vbox1->addWidget( greenZoneSaveBox );
+
+	vbox  = new QVBoxLayout();
+	greenZoneSaveBox->setLayout( vbox );
+
+	vbox->addWidget( allFrames      );
+	vbox->addWidget( every16thFrame );
+	vbox->addWidget( markedFrames   );
+	vbox->addWidget( dontSave       );
+
+	hbox1 = new QHBoxLayout();
+	mainLayout->addLayout( hbox1 );
+	hbox1->addStretch(5);
+	hbox1->addWidget( okButton );
+	hbox1->addWidget( cancelButton );
+
+	autoSavePeriod->setRange( AUTOSAVE_PERIOD_MIN, AUTOSAVE_PERIOD_MAX );
+
+	autoSaveOpt->setChecked( taseditorConfig.autosaveEnabled );
+	autoSavePeriod->setValue( taseditorConfig.autosavePeriod );
+	saveSilentOpt->setChecked( taseditorConfig.autosaveSilent );
+
+	autoSavePeriod->setEnabled( taseditorConfig.autosaveEnabled );
+	saveSilentOpt->setEnabled( taseditorConfig.autosaveEnabled );
+
+	binaryInput->setChecked( taseditorConfig.projectSavingOptions_SaveInBinary );
+	saveMarkers->setChecked( taseditorConfig.projectSavingOptions_SaveMarkers );
+	saveBookmarks->setChecked( taseditorConfig.projectSavingOptions_SaveBookmarks );
+	saveHistory->setChecked( taseditorConfig.projectSavingOptions_SaveHistory );
+	savePianoRoll->setChecked( taseditorConfig.projectSavingOptions_SavePianoRoll );
+	saveSelection->setChecked( taseditorConfig.projectSavingOptions_SaveSelection );
+
+	     allFrames->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_ALL );
+	every16thFrame->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_16TH );
+	  markedFrames->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_MARKED );
+	      dontSave->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_NO );
+
+	connect( autoSaveOpt, SIGNAL(clicked(bool)), autoSavePeriod, SLOT(setEnabled(bool)) );
+	connect( autoSaveOpt, SIGNAL(clicked(bool)), saveSilentOpt , SLOT(setEnabled(bool)) );
+
+	okButton->setDefault(true);
+
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		taseditorConfig.autosaveEnabled = autoSaveOpt->isChecked();
+		taseditorConfig.autosavePeriod  = autoSavePeriod->value();
+		taseditorConfig.autosaveSilent  = saveSilentOpt->isChecked();
+
+		taseditorConfig.projectSavingOptions_SaveInBinary  = binaryInput->isChecked();
+		taseditorConfig.projectSavingOptions_SaveMarkers   = saveMarkers->isChecked();
+		taseditorConfig.projectSavingOptions_SaveBookmarks = saveBookmarks->isChecked();
+		taseditorConfig.projectSavingOptions_SaveHistory   = saveHistory->isChecked();
+		taseditorConfig.projectSavingOptions_SavePianoRoll = savePianoRoll->isChecked();
+		taseditorConfig.projectSavingOptions_SaveSelection = saveSelection->isChecked();
+
+		if ( allFrames->isChecked() )
+		{
+			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_ALL;
+		}
+		else if ( every16thFrame->isChecked() )
+		{
+			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_16TH;
+		}
+		else if ( markedFrames->isChecked() )
+		{
+			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_MARKED;
+		}
+		else
+		{
+			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_NO;
+		}
+	}
 }
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::setGreenzoneCapacity(void)
