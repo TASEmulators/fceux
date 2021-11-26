@@ -76,38 +76,40 @@ void RECORDER::reset()
 	mustIncreasePatternOffset = false;
 	uncheckRecordingRadioButtons();
 	recheckRecordingRadioButtons();
-	//switch (getInputType(currMovieData))
-	//{
-	//	case INPUT_TYPE_FOURSCORE:
-	//	{
-	//		// enable all 4 radiobuttons
-	//		EnableWindow(hwndRadioButtonRecord1P, true);
-	//		EnableWindow(hwndRadioButtonRecord2P, true);
-	//		EnableWindow(hwndRadioButtonRecord3P, true);
-	//		EnableWindow(hwndRadioButtonRecord4P, true);
-	//		break;
-	//	}
-	//	case INPUT_TYPE_2P:
-	//	{
-	//		// enable radiobuttons 1 and 2
-	//		EnableWindow(hwndRadioButtonRecord1P, true);
-	//		EnableWindow(hwndRadioButtonRecord2P, true);
-	//		// disable radiobuttons 3 and 4
-	//		EnableWindow(hwndRadioButtonRecord3P, false);
-	//		EnableWindow(hwndRadioButtonRecord4P, false);
-	//		break;
-	//	}
-	//	case INPUT_TYPE_1P:
-	//	{
-	//		// enable radiobutton 1
-	//		EnableWindow(hwndRadioButtonRecord1P, true);
-	//		// disable radiobuttons 2, 3 and 4
-	//		EnableWindow(hwndRadioButtonRecord2P, false);
-	//		EnableWindow(hwndRadioButtonRecord3P, false);
-	//		EnableWindow(hwndRadioButtonRecord4P, false);
-	//		break;
-	//	}
-	//}
+
+	switch (getInputType(currMovieData))
+	{
+		case INPUT_TYPE_FOURSCORE:
+		{
+			// enable all 4 radiobuttons
+			tasWin->rec1PBtn->setEnabled(true);
+			tasWin->rec2PBtn->setEnabled(true);
+			tasWin->rec3PBtn->setEnabled(true);
+			tasWin->rec4PBtn->setEnabled(true);
+			break;
+		}
+		case INPUT_TYPE_2P:
+		{
+			// enable radiobuttons 1 and 2
+			// disable radiobuttons 3 and 4
+			tasWin->rec1PBtn->setEnabled(true);
+			tasWin->rec2PBtn->setEnabled(true);
+			tasWin->rec3PBtn->setEnabled(false);
+			tasWin->rec4PBtn->setEnabled(false);
+			break;
+		}
+		default:
+		case INPUT_TYPE_1P:
+		{
+			// enable radiobutton 1
+			// disable radiobuttons 2, 3 and 4
+			tasWin->rec1PBtn->setEnabled(true);
+			tasWin->rec2PBtn->setEnabled(false);
+			tasWin->rec3PBtn->setEnabled(false);
+			tasWin->rec4PBtn->setEnabled(false);
+			break;
+		}
+	}
 }
 void RECORDER::update()
 {
@@ -229,11 +231,6 @@ void RECORDER::uncheckRecordingRadioButtons()
 	tasWin->rec2PBtn->setChecked(false);
 	tasWin->rec3PBtn->setChecked(false);
 	tasWin->rec4PBtn->setChecked(false);
-	//Button_SetCheck(hwndRadioButtonRecordAll, BST_UNCHECKED);
-	//Button_SetCheck(hwndRadioButtonRecord1P, BST_UNCHECKED);
-	//Button_SetCheck(hwndRadioButtonRecord2P, BST_UNCHECKED);
-	//Button_SetCheck(hwndRadioButtonRecord3P, BST_UNCHECKED);
-	//Button_SetCheck(hwndRadioButtonRecord4P, BST_UNCHECKED);
 }
 void RECORDER::recheckRecordingRadioButtons()
 {
@@ -242,28 +239,22 @@ void RECORDER::recheckRecordingRadioButtons()
 	switch(multitrackRecordingJoypadNumber)
 	{
 		case MULTITRACK_RECORDING_ALL:
-			//Button_SetCheck(hwndRadioButtonRecordAll, BST_CHECKED);
 			tasWin->recAllBtn->setChecked(true);
 			break;
 		case MULTITRACK_RECORDING_1P:
-			//Button_SetCheck(hwndRadioButtonRecord1P, BST_CHECKED);
 			tasWin->rec1PBtn->setChecked(true);
 			break;
 		case MULTITRACK_RECORDING_2P:
-			//Button_SetCheck(hwndRadioButtonRecord2P, BST_CHECKED);
 			tasWin->rec2PBtn->setChecked(true);
 			break;
 		case MULTITRACK_RECORDING_3P:
-			//Button_SetCheck(hwndRadioButtonRecord3P, BST_CHECKED);
 			tasWin->rec3PBtn->setChecked(true);
 			break;
 		case MULTITRACK_RECORDING_4P:
-			//Button_SetCheck(hwndRadioButtonRecord4P, BST_CHECKED);
 			tasWin->rec4PBtn->setChecked(true);
 			break;
 		default:
 			multitrackRecordingJoypadNumber = MULTITRACK_RECORDING_ALL;
-			//Button_SetCheck(hwndRadioButtonRecordAll, BST_CHECKED);
 			tasWin->recAllBtn->setChecked(true);
 			break;
 	}

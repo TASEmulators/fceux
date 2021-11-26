@@ -430,4 +430,8 @@ void setInputType(MovieData& md, int newInputType)
 			break;
 		}
 	}
+	if ( taseditorConfig )
+	{
+		taseditorConfig->lastExportedInputType = newInputType;
+	}
 }
