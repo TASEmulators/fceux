@@ -237,6 +237,7 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	initModules();
 
 	updateCheckedItems();
+	updateToolTips();
 
 	// Restore Window Geometry
 	restoreGeometry(settings.value("tasEditor/geometry").toByteArray());
@@ -2372,6 +2373,34 @@ void TasEditorWindow::autoLuaRunChanged(bool val)
 void TasEditorWindow::showToolTipsActChanged(bool val)
 {
 	taseditorConfig.tooltipsEnabled = val;
+
+	updateToolTips();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::updateToolTips(void)
+{
+	if ( taseditorConfig.tooltipsEnabled )
+	{
+		recRecordingCbox->setToolTip( tr("Switch Input Recording on/off") );
+		recSuperImposeCbox->setToolTip( tr("Allows to superimpose old Input with new buttons, instead of overwriting") );
+		recUsePatternCbox->setToolTip( tr("Applies current Autofire Pattern to Input recording") );
+		recAllBtn->setToolTip( tr("Switch off Multitracking") );
+		rec1PBtn->setToolTip( tr("Select Joypad 1 as Current") );
+		rec2PBtn->setToolTip( tr("Select Joypad 2 as Current") );
+		rec3PBtn->setToolTip( tr("Select Joypad 3 as Current") );
+		rec4PBtn->setToolTip( tr("Select Joypad 4 as Current") );
+	}
+	else
+	{
+		recRecordingCbox->setToolTip( tr("") );
+		recSuperImposeCbox->setToolTip( tr("") );
+		recUsePatternCbox->setToolTip( tr("") );
+		recAllBtn->setToolTip( tr("") );
+		rec1PBtn->setToolTip( tr("") );
+		rec2PBtn->setToolTip( tr("") );
+		rec3PBtn->setToolTip( tr("") );
+		rec4PBtn->setToolTip( tr("") );
+	}
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::playbackPauseCB(void)
