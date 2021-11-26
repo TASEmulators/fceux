@@ -4655,6 +4655,8 @@ bookmarkPreviewPopup::bookmarkPreviewPopup( int index, QWidget *parent )
 	uint32_t  pixel;
 	QPixmap pixmap;
 
+	setHideOnMouseMove(true);
+
 	fceuWrapperLock();
 
 	// retrieve info from the pointed bookmark's Markers
