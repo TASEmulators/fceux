@@ -846,7 +846,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Run Function"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(manLuaRun(void)) );
 
 	luaMenu->addAction(act);
 
@@ -858,7 +858,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("Auto Function"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(autoLuaRunChanged(bool)) );
 
 	luaMenu->addAction(act);
 
@@ -1364,7 +1364,7 @@ int TasEditorWindow::initModules(void)
 	// create initial snapshot in history
 	history.reset();
 	// reset Taseditor variables
-	//mustCallManualLuaFunction = false;
+	mustCallManualLuaFunction = false;
 	
 	//SetFocus(history.hwndHistoryList);		// set focus only once, to show blue selection cursor
 	//SetFocus(pianoRoll.hwndList);
@@ -1392,16 +1392,19 @@ void TasEditorWindow::frameUpdate(void)
 	splicer.update();
 	history.update();
 	project.update();
+
+#ifdef _S9XLUA_H
 	// run Lua functions if needed
 	if (taseditorConfig.enableLuaAutoFunction)
 	{
-		//TaseditorAutoFunction();
+		TaseditorAutoFunction();
 	}
-	//if (mustCallManualLuaFunction)
-	//{
-	//	TaseditorManualFunction();
-	//	mustCallManualLuaFunction = false;
-	//}
+	if (mustCallManualLuaFunction)
+	{
+		TaseditorManualFunction();
+		mustCallManualLuaFunction = false;
+	}
+#endif
 	
 	pianoRoll->update();
 
@@ -2354,6 +2357,16 @@ void TasEditorWindow::hudInScrnBranchActChanged(bool val)
 void TasEditorWindow::pauseAtEndActChanged(bool val)
 {
 	taseditorConfig.autopauseAtTheEndOfMovie = val;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::manLuaRun(void)
+{
+	mustCallManualLuaFunction = true;
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::autoLuaRunChanged(bool val)
+{
+	taseditorConfig.enableLuaAutoFunction = val;
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::showToolTipsActChanged(bool val)

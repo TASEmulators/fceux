@@ -295,6 +295,8 @@ class TasEditorWindow : public QDialog
 
 		std::vector<std::string> patternsNames;
 		std::vector<std::vector<uint8_t>> patterns;
+
+		bool mustCallManualLuaFunction;
 	private:
 
 		int initModules(void);
@@ -373,6 +375,8 @@ class TasEditorWindow : public QDialog
 		void setMaxUndoCapacity(void);
 		void setCurrentPattern(int);
 		void tabViewChanged(int);
+		void autoLuaRunChanged(bool);
+		void manLuaRun(void);
 
 	friend class RECORDER;
 	friend class SPLICER;
