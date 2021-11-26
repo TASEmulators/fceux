@@ -263,7 +263,7 @@ void SELECTION::jumpToFrame(int frame)
 {
 	clearAllRowsSelection();
 	setRowSelection(frame);
-	//pianoRoll.followSelection(); FIXME
+	tasWin->pianoRoll->followSelection();
 }
 // ----------------------------------------------------------
 void SELECTION::save(EMUFILE *os, bool really_save)

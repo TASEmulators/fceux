@@ -198,7 +198,8 @@ bool GREENZONE::clearSavestateOfFrame(unsigned int frame)
 	{
 	    savestates[frame].resize(0);
 		return true;
-	} else
+	}
+	else
 	{
 		return false;
 	}
@@ -207,9 +208,12 @@ bool GREENZONE::clearSavestateAndFreeMemory(unsigned int frame)
 {
 	if (frame < savestates.size() && savestates[frame].size())
 	{
-		//savestates[frame].swap(std::vector<uint8_t>()); FIXME
+		//savestates[frame].swap(std::vector<uint8_t>()); //FIXME
+		savestates[frame].clear();
+		savestates[frame].shrink_to_fit();
 		return true;
-	} else
+	}
+	else
 	{
 		return false;
 	}
