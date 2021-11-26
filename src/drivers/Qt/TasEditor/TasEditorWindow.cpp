@@ -1193,6 +1193,10 @@ void TasEditorWindow::buildSideControlPanel(void)
 	connect( advFrmBtn   , SIGNAL(clicked(void)), this, SLOT(playbackFrameForward(void))    );
 	connect( advMkrBtn   , SIGNAL(clicked(void)), this, SLOT(playbackFrameForwardFull(void)));
 
+	connect( followCursorCbox, SIGNAL(clicked(bool)), this, SLOT(playbackFollowCursorCb(bool)));
+	connect( turboSeekCbox   , SIGNAL(clicked(bool)), this, SLOT(playbackTurboSeekCb(bool)));
+	connect( autoRestoreCbox , SIGNAL(clicked(bool)), this, SLOT(playbackAutoRestoreCb(bool)));
+
 	shortcut = new QShortcut( QKeySequence("Pause"), this);
 	connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackPauseCB(void)) );
 
@@ -2381,6 +2385,11 @@ void TasEditorWindow::updateToolTips(void)
 {
 	if ( taseditorConfig.tooltipsEnabled )
 	{
+		upperMarkerLabel->setToolTip( tr("Click here to scroll Piano Roll to Playback cursor") );
+		lowerMarkerLabel->setToolTip( tr("Click here to scroll Piano Roll to Selection") );
+		upperMarkerNote->setToolTip( tr("Click to edit text") );
+		lowerMarkerNote->setToolTip( tr("Click to edit text") );
+
 		recRecordingCbox->setToolTip( tr("Switch Input Recording on/off") );
 		recSuperImposeCbox->setToolTip( tr("Allows to superimpose old Input with new buttons, instead of overwriting") );
 		recUsePatternCbox->setToolTip( tr("Applies current Autofire Pattern to Input recording") );
@@ -2389,9 +2398,29 @@ void TasEditorWindow::updateToolTips(void)
 		rec2PBtn->setToolTip( tr("Select Joypad 2 as Current") );
 		rec3PBtn->setToolTip( tr("Select Joypad 3 as Current") );
 		rec4PBtn->setToolTip( tr("Select Joypad 4 as Current") );
+
+		rewindMkrBtn->setToolTip( tr("Send Playback to previous Marker (mouse: Shift+Wheel up) (hotkey: Shift+PageUp)") );
+		rewindFrmBtn->setToolTip( tr("Rewind 1 frame (mouse: Right button+Wheel up) (hotkey: Shift+Up)") );
+		playPauseBtn->setToolTip( tr("Pause/Unpause Emulation (mouse: Middle button)") );
+		   advFrmBtn->setToolTip( tr("Advance 1 frame (mouse: Right button+Wheel down) (hotkey: Shift+Down)") );
+		   advMkrBtn->setToolTip( tr("Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)") );
+
+		followCursorCbox->setToolTip( tr("The Piano Roll will follow Playback cursor movements") );
+		   turboSeekCbox->setToolTip( tr("Uncheck when you need to watch seeking in slow motion") );
+		 autoRestoreCbox->setToolTip( tr("Whenever you change Input above Playback cursor, the cursor returns to where it was before the change") );
+
+		 prevMkrBtn->setToolTip( tr("Send Selection to previous Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageUp)") );
+		 nextMkrBtn->setToolTip( tr("Send Selection to next Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageDown)") );
+		 similarBtn->setToolTip( tr("Auto-search for Marker Note") );
+		    moreBtn->setToolTip( tr("Continue Auto-search") );
 	}
 	else
 	{
+		upperMarkerLabel->setToolTip( tr("") );
+		lowerMarkerLabel->setToolTip( tr("") );
+		upperMarkerNote->setToolTip( tr("") );
+		lowerMarkerNote->setToolTip( tr("") );
+
 		recRecordingCbox->setToolTip( tr("") );
 		recSuperImposeCbox->setToolTip( tr("") );
 		recUsePatternCbox->setToolTip( tr("") );
@@ -2400,6 +2429,21 @@ void TasEditorWindow::updateToolTips(void)
 		rec2PBtn->setToolTip( tr("") );
 		rec3PBtn->setToolTip( tr("") );
 		rec4PBtn->setToolTip( tr("") );
+
+		rewindMkrBtn->setToolTip( tr("") );
+		rewindFrmBtn->setToolTip( tr("") );
+		playPauseBtn->setToolTip( tr("") );
+		   advFrmBtn->setToolTip( tr("") );
+		   advMkrBtn->setToolTip( tr("") );
+
+		followCursorCbox->setToolTip( tr("") );
+		   turboSeekCbox->setToolTip( tr("") );
+		 autoRestoreCbox->setToolTip( tr("") );
+
+		 prevMkrBtn->setToolTip( tr("") );
+		 nextMkrBtn->setToolTip( tr("") );
+		 similarBtn->setToolTip( tr("") );
+		    moreBtn->setToolTip( tr("") );
 	}
 }
 //----------------------------------------------------------------------------
@@ -2441,6 +2485,21 @@ void TasEditorWindow::playbackFrameForwardFull(void)
 	playback.handleForwardFull();
 	pianoRoll->update();
 	fceuWrapperUnLock();
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::playbackFollowCursorCb(bool val)
+{
+	taseditorConfig.followPlaybackCursor = val;
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::playbackTurboSeekCb(bool val)
+{
+	taseditorConfig.turboSeek = val;
+}
+// ----------------------------------------------------------------------------------------------
+void TasEditorWindow::playbackAutoRestoreCb(bool val)
+{
+	taseditorConfig.autoRestoreLastPlaybackPosition = val;
 }
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::scrollSelectionUpOne(void)
