@@ -120,11 +120,11 @@ enum DRAG_MODES
 	DRAG_MODE_SELECTION,
 	DRAG_MODE_DESELECTION,
 };
-#define BOOKMARKS_WITH_BLUE_ARROW 20
-#define BOOKMARKS_WITH_GREEN_ARROW 40
-#define BLUE_ARROW_IMAGE_ID 60
-#define GREEN_ARROW_IMAGE_ID 61
-#define GREEN_BLUE_ARROW_IMAGE_ID 62
+#define BOOKMARKS_WITH_BLUE_ARROW    0x00010000
+#define BOOKMARKS_WITH_GREEN_ARROW   0x00020000
+#define BLUE_ARROW_IMAGE_ID          0x00040000
+#define GREEN_ARROW_IMAGE_ID         0x00080000
+#define GREEN_BLUE_ARROW_IMAGE_ID   (BLUE_ARROW_IMAGE_ID | GREEN_ARROW_IMAGE_ID)
 
 #define MARKER_DRAG_COUNTDOWN_MAX 14
 
@@ -3335,30 +3335,86 @@ void QPianoRoll::drawArrow( QPainter *painter, int xl, int yl, int value )
 {
 	int x, y, w, h, b, b2;
 	QPoint p[3];
+	bool hasBookmark = false;
+	bool draw2ndArrow = false;
+	bool draw1stArrow = true;
+	QColor green( 0, 0xC0, 0x40 ), blue( 0x60, 0xC0, 0xC0 );
+	QColor arrowColor1 = green;
+	QColor arrowColor2 = blue;
 
 	x = xl+(pxCharWidth/3);
 	y = yl+1;
 	w = pxCharWidth;
 	h = pxLineSpacing-2;
 
+	if ( (value & BOOKMARKS_WITH_GREEN_ARROW) || (value & BOOKMARKS_WITH_BLUE_ARROW) )
+	{
+		char txt[4];
+		int bookmarkNum;
+
+		bookmarkNum = (value & 0x0000FFFF);
+
+		txt[0] = (bookmarkNum % TOTAL_BOOKMARKS) + '0';
+		txt[1] = 0;
+		
+		painter->drawText( x, y+pxLineTextOfs, tr(txt) );
+
+		draw2ndArrow = hasBookmark = true;
+		draw1stArrow = false;
+
+		x += pxCharWidth;
+	}
+
 	p[0] = QPoint( x, y );
 	p[1] = QPoint( x, y+h );
 	p[2] = QPoint( x+w, y+(h/2) );
 
-	if ( value == GREEN_BLUE_ARROW_IMAGE_ID )
+	if ( hasBookmark )
 	{
-		painter->setBrush( QColor( 96, 192, 192) );
+		if ( value & BOOKMARKS_WITH_GREEN_ARROW )
+		{
+			arrowColor1 = green;
+		}
+		else if ( value & BOOKMARKS_WITH_BLUE_ARROW )
+		{
+			arrowColor1 = blue;
+		}
 	}
-	else if ( value == GREEN_ARROW_IMAGE_ID )
+	else
 	{
-		painter->setBrush( QColor(0, 192, 64) );
+		if ( value & GREEN_ARROW_IMAGE_ID )
+		{
+			arrowColor1 = green;
+
+			if ( value & BLUE_ARROW_IMAGE_ID )
+			{
+				draw2ndArrow = true;
+				arrowColor2 = blue;
+			}
+		}
+		else if ( value & BLUE_ARROW_IMAGE_ID )
+		{
+			arrowColor1 = blue;
+		}
 	}
-	else if ( value == BLUE_ARROW_IMAGE_ID )
+	if ( draw1stArrow )
 	{
-		painter->setBrush( QColor(10, 36, 106) );
+		painter->setBrush( arrowColor1 );
+		painter->drawPolygon( p, 3 );
 	}
 
-	painter->drawPolygon( p, 3 );
+	if ( draw2ndArrow )
+	{
+		x += (pxCharWidth / 4);
+
+		p[0] = QPoint( x, y+1 );
+		p[1] = QPoint( x, y+h-1 );
+		p[2] = QPoint( x+w-1, y+(h/2) );
+
+		painter->setBrush( arrowColor2 );
+
+		painter->drawPolygon( p, 3 );
+	}
 }
 //----------------------------------------------------------------------------
 bool QPianoRoll::lineIsVisible( int lineNum )
@@ -4303,8 +4359,14 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	painter.fillRect( 0, 0, viewWidth, pxLineSpacing, windowColor );
 	painter.setPen( black );
 
+	font.setBold(true);
+	painter.setFont(font);
+
 	x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 6*pxCharWidth) / 2;
 	painter.drawText( x, pxLineTextOfs, tr("Frame#") );
+
+	font.setBold(false);
+	painter.setFont(font);
 
 	// Draw Grid
 	painter.drawLine( -pxLineXScroll, 0, -pxLineXScroll, viewHeight );
@@ -4598,11 +4660,11 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			// bookmark at this frame
 			if (lineNum == playback->getLastPosition())
 			{
-				iImage += BOOKMARKS_WITH_GREEN_ARROW;
+				iImage |= BOOKMARKS_WITH_GREEN_ARROW;
 			}
 			else if (lineNum == currFrameCounter)
 			{
-				iImage += BOOKMARKS_WITH_BLUE_ARROW;
+				iImage |= BOOKMARKS_WITH_BLUE_ARROW;
 			}
 		}
 
@@ -4617,6 +4679,9 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	x = pxFrameColX - pxLineXScroll;
 	painter.drawLine( x, 0, x, viewHeight );
 	
+	font.setBold(true);
+	painter.setFont(font);
+
 	for (int i=0; i<numCtlr; i++)
 	{
 		x = pxFrameCtlX[i] - pxLineXScroll;
@@ -4644,6 +4709,9 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		
 		y += pxLineSpacing;
 	}
+	font.setBold(false);
+	painter.setFont(font);
+
 
 }
 //----------------------------------------------------------------------------
