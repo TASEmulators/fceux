@@ -974,12 +974,16 @@ bool BOOKMARKS::event(QEvent *event)
 		item = (row_under_mouse + 1) % TOTAL_BOOKMARKS;
 		item_valid = (item >= 0) && (item < TOTAL_BOOKMARKS);
 
-		if ( item_valid && bookmarks->bookmarksArray[item].notEmpty)
+		if ( item_valid && (column == BOOKMARKSLIST_COLUMN_TIME) && bookmarks->bookmarksArray[item].notEmpty)
 		{
 			static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( helpEvent, new bookmarkPreviewPopup(item, this) ));
 			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 			QToolTip::hideText();
 			event->ignore();
+		}
+		else if ( taseditorConfig && taseditorConfig->tooltipsEnabled )
+		{
+			QToolTip::showText(helpEvent->globalPos(), tr("Right click = set Bookmark, Left click = jump to Bookmark or load Branch"), this );
 		}
 
 		return true;

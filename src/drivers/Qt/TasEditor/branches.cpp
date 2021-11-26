@@ -23,6 +23,7 @@ Branches - Manager of Branches
 #include <math.h>
 #include <zlib.h>
 
+#include <QToolTip>
 #include <QFontMetrics>
 
 #include "utils/xstring.h"
@@ -633,6 +634,33 @@ void BRANCHES::mouseMoveEvent(QMouseEvent * event)
 
 	//}
 
+}
+
+bool BRANCHES::event(QEvent *event)
+{
+	if (event->type() == QEvent::ToolTip)
+	{
+		int item, item_valid;
+		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+
+		item = findItemUnderMouse( helpEvent->pos().x(), helpEvent->pos().y() );
+
+		item_valid = (item >= 0) && (item < TOTAL_BOOKMARKS);
+
+		if ( item_valid && bookmarks->bookmarksArray[item].notEmpty)
+		{
+			static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( helpEvent, new bookmarkPreviewPopup(item, this) ));
+			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
+			QToolTip::hideText();
+			event->ignore();
+		}
+		else if ( taseditorConfig && taseditorConfig->tooltipsEnabled )
+		{
+			QToolTip::showText(helpEvent->globalPos(), tr("Right click = set Bookmark, single Left click = jump to Bookmark, double Left click = load Branch") );
+		}
+		return true;
+	}
+	return QWidget::event(event);
 }
 
 void BRANCHES::paintEvent(QPaintEvent *event)

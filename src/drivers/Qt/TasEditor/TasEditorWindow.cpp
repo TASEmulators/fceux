@@ -2409,6 +2409,9 @@ void TasEditorWindow::updateToolTips(void)
 		   turboSeekCbox->setToolTip( tr("Uncheck when you need to watch seeking in slow motion") );
 		 autoRestoreCbox->setToolTip( tr("Whenever you change Input above Playback cursor, the cursor returns to where it was before the change") );
 
+		 selectionLbl->setToolTip( tr("Current size of Selection") );
+		 clipboardLbl->setToolTip( tr("Current size of Input in the Clipboard") );
+
 		 prevMkrBtn->setToolTip( tr("Send Selection to previous Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageUp)") );
 		 nextMkrBtn->setToolTip( tr("Send Selection to next Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageDown)") );
 		 similarBtn->setToolTip( tr("Auto-search for Marker Note") );
@@ -2439,6 +2442,9 @@ void TasEditorWindow::updateToolTips(void)
 		followCursorCbox->setToolTip( tr("") );
 		   turboSeekCbox->setToolTip( tr("") );
 		 autoRestoreCbox->setToolTip( tr("") );
+
+		 selectionLbl->setToolTip( tr("") );
+		 clipboardLbl->setToolTip( tr("") );
 
 		 prevMkrBtn->setToolTip( tr("") );
 		 nextMkrBtn->setToolTip( tr("") );
