@@ -903,10 +903,12 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	//pianoRollFrame->setFrameShape( QFrame::StyledPanel );
 	pianoRollFrame->setFrameShape( QFrame::Box );
 
+	pianoRollVBar->setInvertedControls(true);
 	pianoRollVBar->setInvertedAppearance(true);
 	pianoRoll->setScrollBars( pianoRollHBar, pianoRollVBar );
 	connect( pianoRollHBar, SIGNAL(valueChanged(int)), pianoRoll, SLOT(hbarChanged(int)) );
 	connect( pianoRollVBar, SIGNAL(valueChanged(int)), pianoRoll, SLOT(vbarChanged(int)) );
+	connect( pianoRollVBar, SIGNAL(actionTriggered(int)), pianoRoll, SLOT(vbarActionTriggered(int)) );
 
 	grid->addWidget( pianoRoll    , 0, 0 );
 	grid->addWidget( pianoRollVBar, 0, 1 );
@@ -3209,6 +3211,33 @@ void QPianoRoll::hbarChanged(int val)
 	update();
 }
 //----------------------------------------------------------------------------
+void QPianoRoll::vbarActionTriggered(int act)
+{
+	int val = vbar->value();
+
+	if ( act == QAbstractSlider::SliderSingleStepAdd )
+	{
+		val = val - 1;
+
+		if ( val < 0 )
+		{
+			val = 0;
+		}
+		vbar->setSliderPosition(val);
+	}
+	else if ( act == QAbstractSlider::SliderSingleStepSub )
+	{
+		val = val + 1;
+
+		if ( val >= maxLineOffset )
+		{
+			val = maxLineOffset;
+		}
+		vbar->setSliderPosition(val);
+	}
+	//printf("ACT:%i\n", act);
+}
+//----------------------------------------------------------------------------
 void QPianoRoll::vbarChanged(int val)
 {
 	lineOffset = maxLineOffset - val;
@@ -3413,13 +3442,21 @@ void QPianoRoll::ensureTheLineIsVisible( int lineNum )
 {
 	if ( !lineIsVisible( lineNum ) )
 	{
+		int scrollOfs;
+
 		lineOffset = lineNum - 3;
 
 		if ( lineOffset < 0 )
 		{
 			lineOffset = 0;
 		}
-		vbar->setValue( lineOffset );
+		scrollOfs = maxLineOffset - lineOffset;
+
+		if ( scrollOfs < 0 )
+		{
+			scrollOfs = 0;
+		}
+		vbar->setValue( scrollOfs );
 
 		update();
 	}

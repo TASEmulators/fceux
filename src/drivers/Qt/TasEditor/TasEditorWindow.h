@@ -231,6 +231,7 @@ class QPianoRoll : public QWidget
 	public slots:
 		void hbarChanged(int val);
 		void vbarChanged(int val);
+		void vbarActionTriggered(int act);
 };
 
 class TasEditorWindow : public QDialog
