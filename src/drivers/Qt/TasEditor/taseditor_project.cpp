@@ -245,7 +245,7 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 				strcpy(message, "This project was saved using different version of TAS Editor!\n\n");
 				strcat(message, "Original version: ");
 				char versionNum[16];
-				sprintf( versionNum, "%i", projectFileVersion);
+				sprintf( versionNum, "%u", projectFileVersion);
 				strncat(message, versionNum, 2047 - strlen(message));
 				strncat(message, "\nCurrent version: ", 2047 - strlen(message));
 				sprintf( versionNum, "%i", PROJECT_FILE_CURRENT_VERSION);

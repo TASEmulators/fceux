@@ -796,7 +796,7 @@ void SPLICER::redrawInfoAboutClipboard(void)
 		// rows
 		if (clipboardSelection.size() > 1)
 		{
-			//_itoa(clipboardSelection.size(), num, 10);
+			sprintf( num, "%zi", clipboardSelection.size());
 			strcat(new_text, num);
 			strcat(new_text, numTextRows);
 		}
@@ -811,7 +811,8 @@ void SPLICER::redrawInfoAboutClipboard(void)
 			sprintf( num, "%i", columns);
 			strcat(new_text, num);
 			strcat(new_text, numTextColumns);
-		} else
+		}
+		else
 		{
 			strcat(new_text, numTextColumn);
 		}
