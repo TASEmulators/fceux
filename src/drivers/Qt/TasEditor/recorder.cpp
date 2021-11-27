@@ -305,7 +305,7 @@ void RECORDER::recordInput(void)
 				{
 					if ((newJoyData[i] & (1 << button)) && !(oldJoyData[i] & (1 << button)))
 					{
-						//pianoRoll.setLightInHeaderColumn(COLUMN_JOYPAD1_A + i * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
+						tasWin->pianoRoll->setLightInHeaderColumn(COLUMN_JOYPAD1_A + i * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
 					}
 				}
 			}
@@ -340,7 +340,7 @@ void RECORDER::recordInput(void)
 			{
 				if ((newJoyData[joy] & (1 << button)) && !(oldJoyData[joy] & (1 << button)))
 				{
-					//pianoRoll.setLightInHeaderColumn(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
+					tasWin->pianoRoll->setLightInHeaderColumn(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
 				}
 			}
 		}

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <time.h>
 #include <string>
 #include <list>
 #include <map>
@@ -56,6 +57,54 @@
 
 class TasEditorWindow;
 
+// Piano Roll Definitions
+enum PIANO_ROLL_COLUMNS
+{
+	COLUMN_ICONS,
+	COLUMN_FRAMENUM,
+	COLUMN_JOYPAD1_A,
+	COLUMN_JOYPAD1_B,
+	COLUMN_JOYPAD1_S,
+	COLUMN_JOYPAD1_T,
+	COLUMN_JOYPAD1_U,
+	COLUMN_JOYPAD1_D,
+	COLUMN_JOYPAD1_L,
+	COLUMN_JOYPAD1_R,
+	COLUMN_JOYPAD2_A,
+	COLUMN_JOYPAD2_B,
+	COLUMN_JOYPAD2_S,
+	COLUMN_JOYPAD2_T,
+	COLUMN_JOYPAD2_U,
+	COLUMN_JOYPAD2_D,
+	COLUMN_JOYPAD2_L,
+	COLUMN_JOYPAD2_R,
+	COLUMN_JOYPAD3_A,
+	COLUMN_JOYPAD3_B,
+	COLUMN_JOYPAD3_S,
+	COLUMN_JOYPAD3_T,
+	COLUMN_JOYPAD3_U,
+	COLUMN_JOYPAD3_D,
+	COLUMN_JOYPAD3_L,
+	COLUMN_JOYPAD3_R,
+	COLUMN_JOYPAD4_A,
+	COLUMN_JOYPAD4_B,
+	COLUMN_JOYPAD4_S,
+	COLUMN_JOYPAD4_T,
+	COLUMN_JOYPAD4_U,
+	COLUMN_JOYPAD4_D,
+	COLUMN_JOYPAD4_L,
+	COLUMN_JOYPAD4_R,
+	COLUMN_FRAMENUM2,
+
+	TOTAL_COLUMNS
+};
+
+#define HEADER_LIGHT_MAX 10
+#define HEADER_LIGHT_HOLD 5
+#define HEADER_LIGHT_MOUSEOVER_SEL 3
+#define HEADER_LIGHT_MOUSEOVER 0
+#define HEADER_LIGHT_UPDATE_TICK  (40 * (CLOCKS_PER_SEC / 1000))	// 25FPS
+
 struct NewProjectParameters
 {
 	int inputType;
@@ -85,6 +134,7 @@ class QPianoRoll : public QWidget
 		QPianoRoll(QWidget *parent = 0);
 		~QPianoRoll(void);
 
+		void reset(void);
 		void setScrollBars( QScrollBar *h, QScrollBar *v );
 
 		QFont getFont(void){ return font; };
@@ -101,6 +151,8 @@ class QPianoRoll : public QWidget
 		void  followPlaybackCursor(void);
 		void  followPauseframe(void);
 		void  followUndoHint(void);
+		void  setLightInHeaderColumn(int column, int level);
+		void  periodicUpdate(void);
 
 	protected:
 		void calcFontData(void);
@@ -134,8 +186,12 @@ class QPianoRoll : public QWidget
 		QScrollBar *hbar;
 		QScrollBar *vbar;
 		QColor      windowColor;
+		QColor      headerLightsColors[11];
+
+		int8_t headerColors[TOTAL_COLUMNS];
 
 		int numCtlr;
+		int numColumns;
 		int pxCharWidth;
 		int pxCharHeight;
 		int pxCursorHeight;
@@ -165,6 +221,8 @@ class QPianoRoll : public QWidget
 		int markerDragFrameNumber;
 		int markerDragCountdown;
 		int drawingStartTimestamp;
+		int headerItemUnderMouse;
+		int nextHeaderUpdateTime;
 		int mouse_x;
 		int mouse_y;
 

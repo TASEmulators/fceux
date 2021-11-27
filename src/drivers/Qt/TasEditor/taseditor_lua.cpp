@@ -144,12 +144,15 @@ int TASEDITOR_LUA::setmarker(int frame)
 				history->registerMarkersChange(MODTYPE_LUA_MARKER_SET, frame);
 				selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
 				//pianoRoll.redrawRow(frame);
-				//pianoRoll.setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+				tasWin->pianoRoll->setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 			}
 		}
 		return marker_id;
-	} else
+	}
+	else
+	{
 		return -1;
+	}
 }
 
 // taseditor.removemarker(int frame)
@@ -164,7 +167,7 @@ void TASEDITOR_LUA::removemarker(int frame)
 			history->registerMarkersChange(MODTYPE_LUA_MARKER_REMOVE, frame);
 			selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
 			//pianoRoll.redrawRow(frame);
-			//pianoRoll.setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+			tasWin->pianoRoll->setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 		}
 	}
 }

@@ -607,8 +607,8 @@ bool SPLICER::pasteInputFromClipboard()
 			for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
 			{
 				if (flash_joy[joy] & (1 << btn))
-				{	// FIXME
-					//pianoRoll.setLightInHeaderColumn(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
+				{	
+					tasWin->pianoRoll->setLightInHeaderColumn(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
 				}
 			}
 		}
@@ -732,7 +732,7 @@ bool SPLICER::pasteInsertInputFromClipboard(void)
 			{
 				if (flash_joy[joy] & (1 << btn))
 				{
-					//pianoRoll.setLightInHeaderColumn(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
+					tasWin->pianoRoll->setLightInHeaderColumn(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
 				}
 			}
 		}

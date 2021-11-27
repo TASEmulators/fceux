@@ -68,47 +68,6 @@ HISTORY           *history = NULL;
 SPLICER           *splicer = NULL;
 
 // Piano Roll Definitions
-enum PIANO_ROLL_COLUMNS
-{
-	COLUMN_ICONS,
-	COLUMN_FRAMENUM,
-	COLUMN_JOYPAD1_A,
-	COLUMN_JOYPAD1_B,
-	COLUMN_JOYPAD1_S,
-	COLUMN_JOYPAD1_T,
-	COLUMN_JOYPAD1_U,
-	COLUMN_JOYPAD1_D,
-	COLUMN_JOYPAD1_L,
-	COLUMN_JOYPAD1_R,
-	COLUMN_JOYPAD2_A,
-	COLUMN_JOYPAD2_B,
-	COLUMN_JOYPAD2_S,
-	COLUMN_JOYPAD2_T,
-	COLUMN_JOYPAD2_U,
-	COLUMN_JOYPAD2_D,
-	COLUMN_JOYPAD2_L,
-	COLUMN_JOYPAD2_R,
-	COLUMN_JOYPAD3_A,
-	COLUMN_JOYPAD3_B,
-	COLUMN_JOYPAD3_S,
-	COLUMN_JOYPAD3_T,
-	COLUMN_JOYPAD3_U,
-	COLUMN_JOYPAD3_D,
-	COLUMN_JOYPAD3_L,
-	COLUMN_JOYPAD3_R,
-	COLUMN_JOYPAD4_A,
-	COLUMN_JOYPAD4_B,
-	COLUMN_JOYPAD4_S,
-	COLUMN_JOYPAD4_T,
-	COLUMN_JOYPAD4_U,
-	COLUMN_JOYPAD4_D,
-	COLUMN_JOYPAD4_L,
-	COLUMN_JOYPAD4_R,
-	COLUMN_FRAMENUM2,
-
-	TOTAL_COLUMNS
-};
-
 enum DRAG_MODES
 {
 	DRAG_MODE_NONE,
@@ -1364,7 +1323,7 @@ int TasEditorWindow::initModules(void)
 	// force the input configuration stored in the movie to apply to FCEUX config
 	applyMovieInputConfig();
 	// reset some modules that need MovieData info
-	//pianoRoll.reset();
+	pianoRoll->reset();
 	recorder.reset();
 	// create initial snapshot in history
 	history.reset();
@@ -1387,7 +1346,7 @@ void TasEditorWindow::frameUpdate(void)
 	//taseditorWindow.update();
 	greenzone.update();
 	recorder.update();
-	//pianoRoll.update();
+	pianoRoll->periodicUpdate();
 	markersManager.update();
 	playback.update();
 	bookmarks.update();
@@ -1831,7 +1790,7 @@ void TasEditorWindow::createNewProject(void)
 		bookmarks.reset();
 		branches.reset();
 		history.reset();
-		//pianoRoll.reset();
+		pianoRoll->reset();
 		selection.reset();
 		//editor.reset();
 		splicer.reset();
@@ -3184,6 +3143,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	this->setPalette(pal);
 
 	numCtlr = 2;
+	numColumns = 2 + (NUM_JOYPAD_BUTTONS * numCtlr);
 	calcFontData();
 
 	vbar = NULL;
@@ -3198,11 +3158,36 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	markerDragFrameNumber = 0;
 	markerDragCountdown = 0;
 	drawingStartTimestamp = 0;
+	headerItemUnderMouse = 0;
+	nextHeaderUpdateTime = 0;
 	mouse_x = mouse_y = -1;
+	memset( headerColors, 0, sizeof(headerColors) );
+
+	headerLightsColors[ 0] = QColor( 0x00, 0x00, 0x00 );
+	headerLightsColors[ 1] = QColor( 0x13, 0x73, 0x00 );
+	headerLightsColors[ 2] = QColor( 0x00, 0x91, 0x00 );
+	headerLightsColors[ 3] = QColor( 0x00, 0xAF, 0x1D );
+	headerLightsColors[ 4] = QColor( 0x00, 0xC7, 0x42 );
+	headerLightsColors[ 5] = QColor( 0x00, 0xD9, 0x65 );
+	headerLightsColors[ 6] = QColor( 0x00, 0xE5, 0x91 );
+	headerLightsColors[ 7] = QColor( 0x00, 0xF0, 0xB0 );
+	headerLightsColors[ 8] = QColor( 0x00, 0xF7, 0xDA );
+	headerLightsColors[ 9] = QColor( 0x7C, 0xFC, 0xF0 );
+	headerLightsColors[10] = QColor( 0xBA, 0xFF, 0xFC );
 }
 //----------------------------------------------------------------------------
 QPianoRoll::~QPianoRoll(void)
 {
+
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::reset(void)
+{
+	int num_joysticks = joysticksPerFrame[getInputType(currMovieData)];
+
+	numCtlr = num_joysticks;
+
+	numColumns = 2 + (NUM_JOYPAD_BUTTONS * num_joysticks);
 
 }
 //----------------------------------------------------------------------------
@@ -3997,14 +3982,14 @@ void QPianoRoll::handleColumnSet(int column, bool altPressed)
 		{
 			if (parent->handleColumnSetUsingPattern())
 			{
-				//setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+				setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 			}
 		}
 		else
 		{
 			if (parent->handleColumnSet())
 			{
-				//setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+				setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 			}
 		}
 	}
@@ -4017,16 +4002,90 @@ void QPianoRoll::handleColumnSet(int column, bool altPressed)
 		{
 			if (parent->handleInputColumnSetUsingPattern(joy, button))
 			{
-				//setLightInHeaderColumn(column, HEADER_LIGHT_MAX);
+				setLightInHeaderColumn(column, HEADER_LIGHT_MAX);
 			}
 		}
 		else
 		{
 			if (parent->handleInputColumnSet(joy, button))
 			{
-				//setLightInHeaderColumn(column, HEADER_LIGHT_MAX);
+				setLightInHeaderColumn(column, HEADER_LIGHT_MAX);
 			}
 		}
+	}
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::periodicUpdate(void)
+{
+	// once per 40 milliseconds update colors alpha in the Header
+	if (clock() > nextHeaderUpdateTime)
+	{
+		nextHeaderUpdateTime = clock() + HEADER_LIGHT_UPDATE_TICK;
+		bool changes_made = false;
+		int light_value = 0;
+		// 1 - update Frame# columns' heads
+		//if (GetAsyncKeyState(VK_MENU) & 0x8000) light_value = HEADER_LIGHT_HOLD; else
+		if (dragMode == DRAG_MODE_NONE && (headerItemUnderMouse == COLUMN_FRAMENUM || headerItemUnderMouse == COLUMN_FRAMENUM2))
+		{
+			light_value = (selection->getCurrentRowsSelectionSize() > 0) ? HEADER_LIGHT_MOUSEOVER_SEL : HEADER_LIGHT_MOUSEOVER;
+		}
+		if (headerColors[COLUMN_FRAMENUM] < light_value)
+		{
+			headerColors[COLUMN_FRAMENUM]++;
+			changes_made = true;
+		}
+		else if (headerColors[COLUMN_FRAMENUM] > light_value)
+		{
+			headerColors[COLUMN_FRAMENUM]--;
+			changes_made = true;
+		}
+		headerColors[COLUMN_FRAMENUM2] = headerColors[COLUMN_FRAMENUM];
+		// 2 - update Input columns' heads
+		int i = numColumns-1;
+		if (i == COLUMN_FRAMENUM2) i--;
+		for (; i >= COLUMN_JOYPAD1_A; i--)
+		{
+			light_value = 0;
+			if (recorder->currentJoypadData[(i - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS] & (1 << ((i - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS)))
+			{
+				light_value = HEADER_LIGHT_HOLD;
+			}
+			else if (dragMode == DRAG_MODE_NONE && headerItemUnderMouse == i)
+			{
+				light_value = (selection->getCurrentRowsSelectionSize() > 0) ? HEADER_LIGHT_MOUSEOVER_SEL : HEADER_LIGHT_MOUSEOVER;
+			}
+
+			if (headerColors[i] < light_value)
+			{
+				headerColors[i]++;
+				changes_made = true;
+			}
+			else if (headerColors[i] > light_value)
+			{
+				headerColors[i]--;
+				changes_made = true;
+			}
+		}
+		// 3 - redraw
+		if (changes_made)
+		{
+			update();
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::setLightInHeaderColumn(int column, int level)
+{
+	if (column < COLUMN_FRAMENUM || column >= numColumns || level < 0 || level > HEADER_LIGHT_MAX)
+	{
+		return;
+	}
+
+	if (headerColors[column] != level)
+	{
+		headerColors[column] = level;
+		//redrawHeader();
+		nextHeaderUpdateTime = clock() + HEADER_LIGHT_UPDATE_TICK;
 	}
 }
 //----------------------------------------------------------------------------
@@ -4265,7 +4324,7 @@ void QPianoRoll::finishDrag(void)
 								markersManager->setNote(destination_marker_id, dragged_marker_note);
 								history->registerMarkersChange(MODTYPE_MARKER_SWAP, markerDragFrameNumber, rowUnderMouse);
 								selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
-								//setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+								setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 							}
 						}
 						else
@@ -4279,7 +4338,7 @@ void QPianoRoll::finishDrag(void)
 								markersManager->removeMarkerFromFrame(markerDragFrameNumber);
 								history->registerMarkersChange(MODTYPE_MARKER_DRAG, markerDragFrameNumber, rowUnderMouse, markersManager->getNoteCopy(markersManager->getMarkerAtFrame(rowUnderMouse)).c_str());
 								selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
-								//setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+								setLightInHeaderColumn(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 								//redrawRow(rowUnderMouse);
 							}
 						}
@@ -4693,6 +4752,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			painter.setPen( QColor(   0,   0,   0 ) );
 			painter.drawLine( x, 0, x, viewHeight ); x--;
 
+			painter.setPen( headerLightsColors[ headerColors[COLUMN_JOYPAD1_A + (i*8) + j] ] );
 			painter.drawText( x + pxCharWidth, pxLineTextOfs, tr(buttonNames[j]) );
 
 			x += pxWidthBtnCol;
