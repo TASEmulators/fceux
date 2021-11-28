@@ -135,6 +135,8 @@ class QPianoRoll : public QWidget
 		~QPianoRoll(void);
 
 		void reset(void);
+		void save(EMUFILE *os, bool really_save);
+		bool load(EMUFILE *is, unsigned int offset);
 		void setScrollBars( QScrollBar *h, QScrollBar *v );
 
 		QFont getFont(void){ return font; };
@@ -143,6 +145,7 @@ class QPianoRoll : public QWidget
 
 		bool  lineIsVisible( int lineNum );
 
+		void  updateLinesCount(void);
 		void  handleColumnSet(int column, bool altPressed);
 		void  centerListAroundLine(int rowIndex);
 		void  ensureTheLineIsVisible( int lineNum );
@@ -447,6 +450,7 @@ class TasEditorWindow : public QDialog
 	friend class PLAYBACK;
 	friend class HISTORY;
 	friend class MARKERS_MANAGER;
+	friend class TASEDITOR_PROJECT;
 	friend class QPianoRoll;
 };
 

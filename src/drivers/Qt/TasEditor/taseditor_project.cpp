@@ -64,14 +64,14 @@ void TASEDITOR_PROJECT::update()
 	// if it's time to autosave - pop Save As dialog
 	if (changed && /*taseditorWindow.TASEditorIsInFocus &&*/ taseditorConfig->autosaveEnabled && !projectFile.empty() && clock() >= nextSaveShedule /*&& pianoRoll.dragMode == DRAG_MODE_NONE*/)
 	{
-		//if (taseditorConfig->autosaveSilent)
-		//{
-		//	saveProject();
-		//}
-		//else
-		//{
-		//	saveProjectAs();
-		//}
+		if (taseditorConfig->autosaveSilent)
+		{
+			tasWin->saveProject();
+		}
+		else
+		{
+			tasWin->saveProjectAs();
+		}
 		// in case user pressed Cancel, postpone saving to next time
 		sheduleNextAutosave();
 	}
@@ -80,8 +80,10 @@ void TASEDITOR_PROJECT::update()
 bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool saveMarkers, bool saveBookmarks, int saveGreenzone, bool saveHistory, bool savePianoRoll, bool saveSelection)
 {
 	if (!differentName && getProjectFile().empty())
+	{
 		// no different name specified, and there's no current filename of the project
 		return false;
+	}
 	
 	// check MD5
 	char md5OfMovie[256];
@@ -160,7 +162,7 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 		unsigned int historyOffset = ofs->ftell();
 		history->save(ofs, saveHistory);
 		unsigned int pianoRollOffset = ofs->ftell();
-		//pianoRoll.save(ofs, savePianoRoll);
+		tasWin->pianoRoll->save(ofs, savePianoRoll);
 		unsigned int selectionOffset = ofs->ftell();
 		selection->save(ofs, saveSelection);
 		// now write offsets (pointers)
@@ -319,7 +321,7 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 			pointerOffset += sizeof(unsigned int);
 		else
 			dataOffset = 0;
-		//pianoRoll.load(&ifs, dataOffset);
+		tasWin->pianoRoll->load(&ifs, dataOffset);
 
 		if (numberOfPointers-- && !(ifs.fseek(pointerOffset, SEEK_SET)) && read32le(&dataOffset, &ifs))
 			pointerOffset += sizeof(unsigned int);

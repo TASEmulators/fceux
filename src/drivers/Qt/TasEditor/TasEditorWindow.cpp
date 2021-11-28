@@ -86,6 +86,11 @@ enum DRAG_MODES
 #define GREEN_BLUE_ARROW_IMAGE_ID   (BLUE_ARROW_IMAGE_ID | GREEN_ARROW_IMAGE_ID)
 
 #define MARKER_DRAG_COUNTDOWN_MAX 14
+#define PIANO_ROLL_ID_LEN 11
+
+// resources
+static char pianoRollSaveID[PIANO_ROLL_ID_LEN] = "PIANO_ROLL";
+static char pianoRollSkipSaveID[PIANO_ROLL_ID_LEN] = "PIANO_ROLX";
 
 //----------------------------------------------------------------------------
 //----  Main TAS Editor Window
@@ -173,6 +178,7 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	clipboard = QGuiApplication::clipboard();
 
 	setWindowTitle("TAS Editor");
+	//setWindowIcon( QIcon(":icons/taseditor-icon32.png") );
 
 	resize(512, 512);
 
@@ -3193,6 +3199,69 @@ void QPianoRoll::reset(void)
 
 }
 //----------------------------------------------------------------------------
+void QPianoRoll::save(EMUFILE *os, bool really_save)
+{
+	if (really_save)
+	{
+		updateLinesCount();
+		// write "PIANO_ROLL" string
+		os->fwrite(pianoRollSaveID, PIANO_ROLL_ID_LEN);
+		// write current top item
+		int top_item = lineOffset;
+		write32le(top_item, os);
+	}
+	else
+	{
+		// write "PIANO_ROLX" string
+		os->fwrite(pianoRollSkipSaveID, PIANO_ROLL_ID_LEN);
+	}
+}
+//----------------------------------------------------------------------------
+// returns true if couldn't load
+bool QPianoRoll::load(EMUFILE *is, unsigned int offset)
+{
+	reset();
+	updateLinesCount();
+	if (offset)
+	{
+		if (is->fseek(offset, SEEK_SET)) goto error;
+	}
+	else
+	{
+		// scroll to the beginning
+		//ListView_EnsureVisible(hwndList, 0, FALSE);
+		lineOffset = 0;
+		return false;
+	}
+	// read "PIANO_ROLL" string
+	char save_id[PIANO_ROLL_ID_LEN];
+	if ((int)is->fread(save_id, PIANO_ROLL_ID_LEN) < PIANO_ROLL_ID_LEN) goto error;
+	if (!strcmp(pianoRollSkipSaveID, save_id))
+	{
+		// string says to skip loading Piano Roll
+		FCEU_printf("No Piano Roll data in the file\n");
+		// scroll to the beginning
+		//ListView_EnsureVisible(hwndList, 0, FALSE);
+		lineOffset = 0;
+		return false;
+	}
+	if (strcmp(pianoRollSaveID, save_id)) goto error;		// string is not valid
+	// read current top item and scroll Piano Roll there
+	int top_item;
+	if (!read32le(&top_item, is)) goto error;
+	//ListView_EnsureVisible(hwndList, currMovieData.getNumRecords() - 1, FALSE);
+	//ListView_EnsureVisible(hwndList, top_item, FALSE);
+	ensureTheLineIsVisible( currMovieData.getNumRecords() - 1 );
+	ensureTheLineIsVisible( top_item );
+	return false;
+error:
+	FCEU_printf("Error loading Piano Roll data\n");
+	// scroll to the beginning
+	//ListView_EnsureVisible(hwndList, 0, FALSE);
+	lineOffset = 0;
+	return true;
+}
+//----------------------------------------------------------------------------
 void QPianoRoll::setScrollBars( QScrollBar *h, QScrollBar *v )
 {
 	hbar = h; vbar = v;
@@ -3431,9 +3500,22 @@ void QPianoRoll::drawArrow( QPainter *painter, int xl, int yl, int value )
 	}
 }
 //----------------------------------------------------------------------------
+void QPianoRoll::updateLinesCount(void)
+{
+	// update the number of items in the list
+	int movie_size = currMovieData.getNumRecords();
+
+	maxLineOffset = movie_size - viewLines + 5;
+
+	if ( maxLineOffset < 0 )
+	{
+		maxLineOffset = 0;
+	}
+}
+//----------------------------------------------------------------------------
 bool QPianoRoll::lineIsVisible( int lineNum )
 {
-	int lineEnd = lineOffset + viewLines;
+	int lineEnd = lineOffset + viewLines - 1;
 
 	return ( (lineNum >= lineOffset) && (lineNum < lineEnd) );
 }
@@ -3444,7 +3526,9 @@ void QPianoRoll::ensureTheLineIsVisible( int lineNum )
 	{
 		int scrollOfs;
 
-		lineOffset = lineNum - 3;
+		//printf("Seeking Frame %i\n", lineNum );
+
+		lineOffset = lineNum;
 
 		if ( lineOffset < 0 )
 		{
