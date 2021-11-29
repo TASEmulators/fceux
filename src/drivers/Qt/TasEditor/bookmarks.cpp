@@ -925,6 +925,10 @@ void BOOKMARKS::mousePressEvent(QMouseEvent * event)
 		bookmarksArray[bookmarkRightclicked].flashType = FLASH_TYPE_SET;
 	}
 
+	if ( event->button() & Qt::MiddleButton )
+	{
+		playback->handleMiddleButtonClick();
+	}
 	//printf("Mouse Button Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
 }
 

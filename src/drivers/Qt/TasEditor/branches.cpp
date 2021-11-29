@@ -596,6 +596,10 @@ void BRANCHES::mousePressEvent(QMouseEvent * event)
 		//if (branches.branchRightclicked >= 0 && branches.branchRightclicked < TOTAL_BOOKMARKS)
 
 	}
+	else if (event->button() & Qt::MiddleButton)
+	{
+		playback->handleMiddleButtonClick();
+	}
 }
 
 void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
