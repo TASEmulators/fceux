@@ -87,6 +87,7 @@ enum DRAG_MODES
 
 #define MARKER_DRAG_COUNTDOWN_MAX 14
 #define PIANO_ROLL_ID_LEN 11
+#define PLAYBACK_WHEEL_BOOST 2
 
 // resources
 static char pianoRollSaveID[PIANO_ROLL_ID_LEN] = "PIANO_ROLL";
@@ -3839,10 +3840,14 @@ void QPianoRoll::mouseMoveEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QPianoRoll::wheelEvent(QWheelEvent *event)
 {
-	int ofs;
+	fceuCriticalSection emuLock;
+	int ofs, kbModifiers, msButtons, zDelta;
 
 	QPoint numPixels = event->pixelDelta();
 	QPoint numDegrees = event->angleDelta();
+
+	msButtons   = QApplication::mouseButtons();
+	kbModifiers = QApplication::keyboardModifiers();
 
 	ofs = vbar->value();
 
@@ -3860,29 +3865,98 @@ void QPianoRoll::wheelEvent(QWheelEvent *event)
 	}
 	//printf("Wheel Event: %i\n", wheelPixelCounter);
 
-	if (wheelPixelCounter >= pxLineSpacing)
+	zDelta = 0;
+	if (wheelPixelCounter <= -pxLineSpacing)
 	{
-		ofs += (wheelPixelCounter / pxLineSpacing);
-
-		if (ofs > maxLineOffset)
-		{
-			ofs = maxLineOffset;
-		}
-		vbar->setValue(ofs);
+		zDelta = (wheelPixelCounter / pxLineSpacing);
 
 		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
 	}
-	else if (wheelPixelCounter <= -pxLineSpacing)
+	else if (wheelPixelCounter >= pxLineSpacing)
 	{
-		ofs += (wheelPixelCounter / pxLineSpacing);
-
-		if (ofs < 0)
-		{
-			ofs = 0;
-		}
-		vbar->setValue(ofs);
+		zDelta = (wheelPixelCounter / pxLineSpacing);
 
 		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+	printf("zDelta:%i\n", zDelta );
+
+	if ( kbModifiers & Qt::ShiftModifier )
+	{
+		// Shift + wheel = Playback rewind full(speed)/forward full(speed)
+		if (zDelta < 0)
+		{
+			playback->handleForwardFull( -zDelta );
+		}
+		else if (zDelta > 0)
+		{
+			playback->handleRewindFull( zDelta );
+		}
+	}
+	else if ( kbModifiers & Qt::ControlModifier )
+	{
+		// Ctrl + wheel = Selection rewind full(speed)/forward full(speed)
+		if (zDelta < 0)
+		{
+			selection->jumpToNextMarker( -zDelta );
+		}
+		else if (zDelta > 0)
+		{
+			selection->jumpToPreviousMarker( zDelta );
+		}
+	}
+	else if ( msButtons & Qt::RightButton )
+	{
+		// Right button + wheel = rewind/forward Playback
+		int delta = zDelta;
+		if (delta < -1 || delta > 1)
+		{
+			delta *= PLAYBACK_WHEEL_BOOST;
+		}
+		int destination_frame;
+		if (FCEUI_EmulationPaused() || playback->getPauseFrame() < 0)
+		{
+			destination_frame = currFrameCounter - delta;
+		}
+		else
+		{
+			destination_frame = playback->getPauseFrame() - delta;
+		}
+		if (destination_frame < 0)
+		{
+			destination_frame = 0;
+		}
+		playback->jump(destination_frame);
+	}
+	else if (kbModifiers & Qt::AltModifier)
+	{
+		// cross gaps in Input/Markers
+		if ( zDelta != 0 )
+		{
+			//crossGaps(zDelta); // TODO
+		}
+	}
+	else
+	{
+		if (zDelta > 0)
+		{
+			ofs += zDelta;
+
+			if (ofs > maxLineOffset)
+			{
+				ofs = maxLineOffset;
+			}
+			vbar->setValue(ofs);
+		}
+		else if (zDelta < 0)
+		{
+			ofs += zDelta;
+
+			if (ofs < 0)
+			{
+				ofs = 0;
+			}
+			vbar->setValue(ofs);
+		}
 	}
 
 	event->accept();
