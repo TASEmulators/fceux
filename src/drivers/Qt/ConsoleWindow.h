@@ -253,6 +253,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *recWavAct;
 		QAction *recAsWavAct;
 		QAction *stopWavAct;
+		QAction *tasEditorAct;
 		//QAction *aviHudAct;
 		//QAction *aviMsgAct;
 
