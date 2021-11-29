@@ -3166,6 +3166,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	markerDragFrameNumber = 0;
 	markerDragCountdown = 0;
 	drawingStartTimestamp = 0;
+	wheelPixelCounter = 0;
 	headerItemUnderMouse = 0;
 	nextHeaderUpdateTime = 0;
 	mouse_x = mouse_y = -1;
@@ -3834,6 +3835,57 @@ void QPianoRoll::mouseMoveEvent(QMouseEvent * event)
 
 	}
 	updateDrag();
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::wheelEvent(QWheelEvent *event)
+{
+	int ofs;
+
+	QPoint numPixels = event->pixelDelta();
+	QPoint numDegrees = event->angleDelta();
+
+	ofs = vbar->value();
+
+	if (!numPixels.isNull())
+	{
+		wheelPixelCounter -= numPixels.y();
+		//printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+	}
+	else if (!numDegrees.isNull())
+	{
+		//QPoint numSteps = numDegrees / 15;
+		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
+		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
+		wheelPixelCounter -= (pxLineSpacing * numDegrees.y()) / (15 * 8);
+	}
+	//printf("Wheel Event: %i\n", wheelPixelCounter);
+
+	if (wheelPixelCounter >= pxLineSpacing)
+	{
+		ofs += (wheelPixelCounter / pxLineSpacing);
+
+		if (ofs > maxLineOffset)
+		{
+			ofs = maxLineOffset;
+		}
+		vbar->setValue(ofs);
+
+		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+	else if (wheelPixelCounter <= -pxLineSpacing)
+	{
+		ofs += (wheelPixelCounter / pxLineSpacing);
+
+		if (ofs < 0)
+		{
+			ofs = 0;
+		}
+		vbar->setValue(ofs);
+
+		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+	}
+
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::keyPressEvent(QKeyEvent *event)

@@ -165,6 +165,7 @@ class QPianoRoll : public QWidget
 		void mouseReleaseEvent(QMouseEvent * event);
 		void mouseMoveEvent(QMouseEvent * event);
 		void mouseDoubleClickEvent(QMouseEvent * event);
+		void wheelEvent(QWheelEvent *event);
 		void keyPressEvent(QKeyEvent *event);
 		void keyReleaseEvent(QKeyEvent *event);
 		void focusInEvent(QFocusEvent *event);
@@ -224,6 +225,7 @@ class QPianoRoll : public QWidget
 		int markerDragFrameNumber;
 		int markerDragCountdown;
 		int drawingStartTimestamp;
+		int wheelPixelCounter;
 		int headerItemUnderMouse;
 		int nextHeaderUpdateTime;
 		int mouse_x;
