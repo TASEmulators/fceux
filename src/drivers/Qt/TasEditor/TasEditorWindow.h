@@ -144,6 +144,7 @@ class QPianoRoll : public QWidget
 		int   getDragMode(void){ return dragMode; };
 
 		bool  lineIsVisible( int lineNum );
+		bool  checkIfTheresAnIconAtFrame(int frame);
 
 		void  updateLinesCount(void);
 		void  handleColumnSet(int column, bool altPressed);
@@ -171,6 +172,7 @@ class QPianoRoll : public QWidget
 		void focusInEvent(QFocusEvent *event);
 		void focusOutEvent(QFocusEvent *event);
 
+		void crossGaps(int zDelta);
 		void startDraggingPlaybackCursor(void);
 		void startDraggingMarker(int mouseX, int mouseY, int rowIndex, int columnIndex);
 		void startSelectingDrag(int start_frame);
@@ -237,6 +239,35 @@ class QPianoRoll : public QWidget
 		void hbarChanged(int val);
 		void vbarChanged(int val);
 		void vbarActionTriggered(int act);
+};
+
+class TasFindNoteWindow : public QDialog
+{
+	Q_OBJECT
+
+	public:
+		TasFindNoteWindow(QWidget *parent = 0);
+		~TasFindNoteWindow(void);
+
+	protected:
+		void closeEvent(QCloseEvent *event);
+
+		QLineEdit     *searchPattern;
+		QCheckBox     *matchCase;
+		QRadioButton  *up;
+		QRadioButton  *down;
+		QPushButton   *nextBtn;
+		QPushButton   *closeBtn;
+
+	public slots:
+		void closeWindow(void);
+
+	private slots:
+		void matchCaseChanged(bool);
+		void upDirectionSelected(void);
+		void downDirectionSelected(void);
+		void findNextClicked(void);
+		void searchPatternChanged(const QString &);
 };
 
 class TasEditorWindow : public QDialog
@@ -413,6 +444,7 @@ class TasEditorWindow : public QDialog
 		void editInsertCB(void);
 		void editInsertNumFramesCB(void);
 		void editTruncateMovieCB(void);
+		void openFindNoteWindow(void);
 		void dpyBrnchScrnChanged(bool);
 		void dpyBrnchDescChanged(bool);
 		void enaHotChgChanged(bool);

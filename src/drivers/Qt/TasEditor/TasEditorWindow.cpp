@@ -92,6 +92,7 @@ enum DRAG_MODES
 // resources
 static char pianoRollSaveID[PIANO_ROLL_ID_LEN] = "PIANO_ROLL";
 static char pianoRollSkipSaveID[PIANO_ROLL_ID_LEN] = "PIANO_ROLX";
+static TasFindNoteWindow *findWin = NULL;
 
 //----------------------------------------------------------------------------
 //----  Main TAS Editor Window
@@ -577,7 +578,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	act->setShortcut(QKeySequence(tr("Ctrl+F")));
 	act->setStatusTip(tr("Find Note Window"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(openFindNoteWindow(void)) );
 
 	viewMenu->addAction(act);
 
@@ -2242,6 +2243,21 @@ void TasEditorWindow::recordInputChanged(int input)
 	recorder.multitrackRecordingJoypadNumber = input;
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::openFindNoteWindow(void)
+{
+	if ( findWin )
+	{
+		findWin->activateWindow();
+		findWin->raise();
+		findWin->setFocus();
+	}
+	else
+	{
+		findWin = new TasFindNoteWindow(this);
+		findWin->show();
+	}
+}
+//----------------------------------------------------------------------------
 void TasEditorWindow::dpyBrnchScrnChanged(bool val)
 {
 	taseditorConfig.displayBranchScreenshots = val;
@@ -3878,7 +3894,7 @@ void QPianoRoll::wheelEvent(QWheelEvent *event)
 
 		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
 	}
-	printf("zDelta:%i\n", zDelta );
+	//printf("zDelta:%i\n", zDelta );
 
 	if ( kbModifiers & Qt::ShiftModifier )
 	{
@@ -3932,7 +3948,7 @@ void QPianoRoll::wheelEvent(QWheelEvent *event)
 		// cross gaps in Input/Markers
 		if ( zDelta != 0 )
 		{
-			//crossGaps(zDelta); // TODO
+			crossGaps(zDelta);
 		}
 	}
 	else
@@ -3994,6 +4010,163 @@ void QPianoRoll::focusOutEvent(QFocusEvent *event)
 	printf("PianoRoll Focus Out\n");
 
 	parent->pianoRollFrame->setStyleSheet(NULL);
+}
+//----------------------------------------------------------------------------
+bool QPianoRoll::checkIfTheresAnIconAtFrame(int frame)
+{
+	if (frame == currFrameCounter)
+		return true;
+	if (frame == playback->getLastPosition())
+		return true;
+	if (frame == playback->getPauseFrame())
+		return true;
+	if (bookmarks->findBookmarkAtFrame(frame) >= 0)
+		return true;
+	return false;
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::crossGaps(int zDelta)
+{
+	int row_index = rowUnderMouse;
+	int column_index = columnUnderMouse;
+
+	if (row_index >= 0 && column_index >= COLUMN_ICONS && column_index <= COLUMN_FRAMENUM2)
+	{
+		if (column_index == COLUMN_ICONS)
+		{
+			// cross gaps in Icons
+			if (zDelta < 0)
+			{
+				// search down
+				int last_frame = currMovieData.getNumRecords() - 1;
+				if (row_index < last_frame)
+				{
+					int frame = row_index + 1;
+					bool result_of_closest_frame = checkIfTheresAnIconAtFrame(frame);
+					while ((++frame) <= last_frame)
+					{
+						if (checkIfTheresAnIconAtFrame(frame) != result_of_closest_frame)
+						{
+							// found different result, so we crossed the gap
+							//ListView_Scroll(hwndList, 0, listRowHeight * (frame - row_index));
+							centerListAroundLine(frame);
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				// search up
+				int first_frame = 0;
+				if (row_index > first_frame)
+				{
+					int frame = row_index - 1;
+					bool result_of_closest_frame = checkIfTheresAnIconAtFrame(frame);
+					while ((--frame) >= first_frame)
+					{
+						if (checkIfTheresAnIconAtFrame(frame) != result_of_closest_frame)
+						{
+							// found different result, so we crossed the gap
+							//ListView_Scroll(hwndList, 0, listRowHeight * (frame - row_index));
+							centerListAroundLine(frame);
+							break;
+						}
+					}
+				}
+			}
+		}
+		else if (column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
+		{
+			// cross gaps in Markers
+			if (zDelta < 0)
+			{
+				// search down
+				int last_frame = currMovieData.getNumRecords() - 1;
+				if (row_index < last_frame)
+				{
+					int frame = row_index + 1;
+					bool result_of_closest_frame = (markersManager->getMarkerAtFrame(frame) != 0);
+					while ((++frame) <= last_frame)
+					{
+						if ((markersManager->getMarkerAtFrame(frame) != 0) != result_of_closest_frame)
+						{
+							// found different result, so we crossed the gap
+							//ListView_Scroll(hwndList, 0, listRowHeight * (frame - row_index));
+							centerListAroundLine(frame);
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				// search up
+				int first_frame = 0;
+				if (row_index > first_frame)
+				{
+					int frame = row_index - 1;
+					bool result_of_closest_frame = (markersManager->getMarkerAtFrame(frame) != 0);
+					while ((--frame) >= first_frame)
+					{
+						if ((markersManager->getMarkerAtFrame(frame) != 0) != result_of_closest_frame)
+						{
+							// found different result, so we crossed the gap
+							//ListView_Scroll(hwndList, 0, listRowHeight * (frame - row_index));
+							centerListAroundLine(frame);
+							break;
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			// cross gaps in Input
+			int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+			int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+			if (zDelta < 0)
+			{
+				// search down
+				int last_frame = currMovieData.getNumRecords() - 1;
+				if (row_index < last_frame)
+				{
+					int frame = row_index + 1;
+					bool result_of_closest_frame = currMovieData.records[frame].checkBit(joy, button);
+					while ((++frame) <= last_frame)
+					{
+						if (currMovieData.records[frame].checkBit(joy, button) != result_of_closest_frame)
+						{
+							// found different result, so we crossed the gap
+							//ListView_Scroll(hwndList, 0, listRowHeight * (frame - row_index));
+							centerListAroundLine(frame);
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				// search up
+				int first_frame = 0;
+				if (row_index > first_frame)
+				{
+					int frame = row_index - 1;
+					bool result_of_closest_frame = currMovieData.records[frame].checkBit(joy, button);
+					while ((--frame) >= first_frame)
+					{
+						if (currMovieData.records[frame].checkBit(joy, button) != result_of_closest_frame)
+						{
+							// found different result, so we crossed the gap
+							//ListView_Scroll(hwndList, 0, listRowHeight * (frame - row_index));
+							centerListAroundLine(frame);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::updateDrag(void)
@@ -5119,5 +5292,175 @@ int bookmarkPreviewPopup::loadImage(int index)
 		ret = -1;
 	}
 	return ret;
+}
+//----------------------------------------------------------------------------
+//---- TAS Find Note Window
+//----------------------------------------------------------------------------
+TasFindNoteWindow::TasFindNoteWindow( QWidget *parent )
+	: QDialog( parent, Qt::Window )
+{
+	QVBoxLayout *mainLayout, *vbox;
+	QHBoxLayout *hbox, *hbox1;
+	QGroupBox   *gbox;
+
+	setWindowTitle( tr("Find Note") );
+
+	mainLayout = new QVBoxLayout();
+	hbox1      = new QHBoxLayout();
+	hbox       = new QHBoxLayout();
+	vbox       = new QVBoxLayout();
+
+	setLayout( mainLayout );
+
+	searchPattern = new QLineEdit();
+	matchCase     = new QCheckBox( tr("Match Case") );
+	up            = new QRadioButton( tr("Up") );
+	down          = new QRadioButton( tr("Down") );
+	nextBtn       = new QPushButton( tr("Next") );
+	closeBtn      = new QPushButton( tr("Close") );
+	gbox          = new QGroupBox( tr("Direction") );
+
+	mainLayout->addWidget( searchPattern );
+	mainLayout->addLayout( hbox1 );
+
+	hbox1->addWidget( matchCase );
+	hbox1->addWidget( gbox );
+	hbox1->addLayout( vbox );
+
+	gbox->setLayout( hbox );
+
+	hbox->addWidget( up );
+	hbox->addWidget( down );
+
+	vbox->addWidget( nextBtn );
+	vbox->addWidget( closeBtn );
+
+	findWin = this;
+
+	nextBtn->setDefault(true);
+
+	matchCase->setChecked( taseditorConfig->findnoteMatchCase );
+	up->setChecked( taseditorConfig->findnoteSearchUp );
+	down->setChecked( !taseditorConfig->findnoteSearchUp );
+
+	searchPattern->setText( QString(markersManager->findNoteString) );
+
+	nextBtn->setEnabled( searchPattern->text().size() > 0 );
+
+	connect( matchCase, SIGNAL(clicked(bool)), this, SLOT(matchCaseChanged(bool)) );
+	connect( up       , SIGNAL(clicked(void)), this, SLOT(upDirectionSelected(void)) );
+	connect( down     , SIGNAL(clicked(void)), this, SLOT(downDirectionSelected(void)) );
+	connect( closeBtn , SIGNAL(clicked(void)), this, SLOT(closeWindow(void)) );
+	connect( nextBtn  , SIGNAL(clicked(void)), this, SLOT(findNextClicked(void)) );
+
+	connect( searchPattern, SIGNAL(textChanged(const QString &)), this, SLOT(searchPatternChanged(const QString &)) );
+}
+//----------------------------------------------------------------------------
+TasFindNoteWindow::~TasFindNoteWindow(void)
+{
+	if ( findWin == this )
+	{
+		findWin = NULL;
+	}
+}
+//----------------------------------------------------------------------------
+void TasFindNoteWindow::closeEvent(QCloseEvent *event)
+{
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void TasFindNoteWindow::closeWindow(void)
+{
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void TasFindNoteWindow::matchCaseChanged(bool val)
+{
+	taseditorConfig->findnoteMatchCase = val;
+}
+//----------------------------------------------------------------------------
+void TasFindNoteWindow::upDirectionSelected(void)
+{
+	taseditorConfig->findnoteSearchUp = true;
+}
+//----------------------------------------------------------------------------
+void TasFindNoteWindow::downDirectionSelected(void)
+{
+	taseditorConfig->findnoteSearchUp = false;
+}
+//----------------------------------------------------------------------------
+void TasFindNoteWindow::searchPatternChanged(const QString &s)
+{
+	nextBtn->setEnabled( s.size() > 0 );
+}
+//----------------------------------------------------------------------------
+void TasFindNoteWindow::findNextClicked(void)
+{
+
+	if ( searchPattern->text().size() == 0 )
+	{
+		return;
+	}
+	strncpy( markersManager->findNoteString, searchPattern->text().toStdString().c_str(), MAX_NOTE_LEN );
+
+	// scan frames from current Selection to the border
+	int cur_marker = 0;
+	bool result;
+	int movie_size = currMovieData.getNumRecords();
+	int current_frame = selection->getCurrentRowsSelectionBeginning();
+	if ( (current_frame < 0) && taseditorConfig->findnoteSearchUp)
+	{
+		current_frame = movie_size;
+	}
+	while (true)
+	{
+		// move forward
+		if (taseditorConfig->findnoteSearchUp)
+		{
+			current_frame--;
+			if (current_frame < 0)
+			{
+				printf("Nothing was found\n");
+				//MessageBox(taseditorWindow.hwndFindNote, "Nothing was found.", "Find Note", MB_OK);
+				break;
+			}
+		}
+		else
+		{
+			current_frame++;
+			if (current_frame >= movie_size)
+			{
+				printf("Nothing was found\n");
+				//MessageBox(taseditorWindow.hwndFindNote, "Nothing was found!", "Find Note", MB_OK);
+				break;
+			}
+		}
+		// scan marked frames
+		cur_marker = markersManager->getMarkerAtFrame(current_frame);
+		if (cur_marker)
+		{
+			if (taseditorConfig->findnoteMatchCase)
+			{
+				result = (strstr(markersManager->getNoteCopy(cur_marker).c_str(), markersManager->findNoteString) != 0);
+			}
+			else
+			{
+#ifdef WIN32
+				result = (StrStrI(markersManager->getNoteCopy(cur_marker).c_str(), markersManager->findNoteString) != 0);
+#else
+				result = (strcasestr(markersManager->getNoteCopy(cur_marker).c_str(), markersManager->findNoteString) != 0);
+#endif
+			}
+			if (result)
+			{
+				// found note containing searched string - jump there
+				selection->jumpToFrame(current_frame);
+				break;
+			}
+		}
+	}
 }
 //----------------------------------------------------------------------------
