@@ -680,3 +680,28 @@ void UpperMarkerNoteEdit::focusOutEvent(QFocusEvent *event)
 	QLineEdit::focusOutEvent(event);
 }
 // -------------------------------------------------------------------------
+void UpperMarkerNoteEdit::keyPressEvent(QKeyEvent *event)
+{
+	//printf("Key Press: 0x%x \n", event->key() );
+
+	if ( event->key() == Qt::Key_Escape)
+	{
+		setText( QString::fromStdString(markersManager->getNoteCopy(playback->displayedMarkerNumber)) );
+		event->accept();
+	}
+	else if ( (event->key() == Qt::Key_Enter) || (event->key() == Qt::Key_Return) )
+	{
+		if (markersManager->markerNoteEditMode == MARKER_NOTE_EDIT_UPPER)
+		{
+			markersManager->updateEditedMarkerNote();
+			markersManager->markerNoteEditMode = MARKER_NOTE_EDIT_NONE;
+		}
+		tasWin->pianoRoll->setFocus();
+		event->accept();
+	}
+	else
+	{
+		QLineEdit::keyPressEvent(event);
+	}
+}
+// -------------------------------------------------------------------------

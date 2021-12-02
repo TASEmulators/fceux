@@ -118,7 +118,8 @@ void SELECTION::update()
 		{
 			buttonHoldTimer = clock();
 			jumpToNextMarker();
-		} else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+		}
+		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
 		{
 			jumpToNextMarker();
 		}
@@ -210,6 +211,8 @@ void SELECTION::redrawMarkerData()
 	// change Marker Note
 	strcpy(new_text, markersManager->getNoteCopy(displayedMarkerNumber).c_str());
 	tasWin->lowerMarkerNote->setText( QObject::tr(new_text) );
+
+	printf("Marker %i: '%s'\n", displayedMarkerNumber, new_text );
 }
 
 void SELECTION::jumpToPreviousMarker(int speed)
@@ -955,5 +958,30 @@ void LowerMarkerNoteEdit::focusOutEvent(QFocusEvent *event)
 		markersManager->markerNoteEditMode = MARKER_NOTE_EDIT_NONE;
 	}
 	QLineEdit::focusOutEvent(event);
+}
+// -------------------------------------------------------------------------
+void LowerMarkerNoteEdit::keyPressEvent(QKeyEvent *event)
+{
+	//printf("Key Press: 0x%x \n", event->key() );
+
+	if ( event->key() == Qt::Key_Escape)
+	{
+		setText( QString::fromStdString(markersManager->getNoteCopy(selection->displayedMarkerNumber)) );
+		event->accept();
+	}
+	else if ( (event->key() == Qt::Key_Enter) || (event->key() == Qt::Key_Return) )
+	{
+		if (markersManager->markerNoteEditMode == MARKER_NOTE_EDIT_LOWER)
+		{
+			markersManager->updateEditedMarkerNote();
+			markersManager->markerNoteEditMode = MARKER_NOTE_EDIT_NONE;
+		}
+		tasWin->pianoRoll->setFocus();
+		event->accept();
+	}
+	else
+	{
+		QLineEdit::keyPressEvent(event);
+	}
 }
 // -------------------------------------------------------------------------

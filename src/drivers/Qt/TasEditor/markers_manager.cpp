@@ -592,12 +592,12 @@ void MARKERS_MANAGER::updateEditedMarkerNote()
 	char new_text[MAX_NOTE_LEN];
 	if (markerNoteEditMode == MARKER_NOTE_EDIT_UPPER)
 	{
-		len = tasWin->upperMarkerLabel->text().size();
+		len = tasWin->upperMarkerNote->text().size();
 		if ( len >= MAX_NOTE_LEN )
 		{
 			len = MAX_NOTE_LEN-1;
 		}
-		strncpy( new_text, tasWin->upperMarkerLabel->text().toStdString().c_str(), MAX_NOTE_LEN );
+		strncpy( new_text, tasWin->upperMarkerNote->text().toStdString().c_str(), MAX_NOTE_LEN );
 		new_text[len] = 0;
 		// check changes
 		if (strcmp(getNoteCopy(playback->displayedMarkerNumber).c_str(), new_text))
@@ -618,12 +618,12 @@ void MARKERS_MANAGER::updateEditedMarkerNote()
 	}
 	else if (markerNoteEditMode == MARKER_NOTE_EDIT_LOWER)
 	{
-		len = tasWin->lowerMarkerLabel->text().size();
+		len = tasWin->lowerMarkerNote->text().size();
 		if ( len >= MAX_NOTE_LEN )
 		{
 			len = MAX_NOTE_LEN-1;
 		}
-		strncpy( new_text, tasWin->lowerMarkerLabel->text().toStdString().c_str(), MAX_NOTE_LEN );
+		strncpy( new_text, tasWin->lowerMarkerNote->text().toStdString().c_str(), MAX_NOTE_LEN );
 		new_text[len] = 0;
 
 		// check changes
