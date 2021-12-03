@@ -2900,7 +2900,8 @@ bool TasEditorWindow::handleColumnSet(void)
 				{
 					changes_made = true;
 					//pianoRoll.redrawRow(*it);
-					pianoRoll->update();
+					//pianoRoll->update();
+					lowerMarkerNote->setFocus(); // Piano roll will update at next periodic cycle
 				}
 			}
 		}
@@ -2919,7 +2920,7 @@ bool TasEditorWindow::handleColumnSet(void)
 				markersManager.removeMarkerFromFrame(*it);
 				changes_made = true;
 				//pianoRoll.redrawRow(*it);
-				pianoRoll->update();
+				//pianoRoll->update(); // Piano roll will update at next periodic cycle
 			}
 		}
 		if (changes_made)
@@ -5449,6 +5450,7 @@ void TasFindNoteWindow::findNextClicked(void)
 			current_frame--;
 			if (current_frame < 0)
 			{
+				QMessageBox::information( this, tr("Find Note"), tr("Nothing was found!") );
 				printf("Nothing was found\n");
 				//MessageBox(taseditorWindow.hwndFindNote, "Nothing was found.", "Find Note", MB_OK);
 				break;
@@ -5459,6 +5461,7 @@ void TasFindNoteWindow::findNextClicked(void)
 			current_frame++;
 			if (current_frame >= movie_size)
 			{
+				QMessageBox::information( this, tr("Find Note"), tr("Nothing was found!") );
 				printf("Nothing was found\n");
 				//MessageBox(taseditorWindow.hwndFindNote, "Nothing was found!", "Find Note", MB_OK);
 				break;
