@@ -27,6 +27,7 @@
 #include <zlib.h>
 
 #include <QDir>
+#include <QString>
 #include <QPainter>
 #include <QSettings>
 #include <QHeaderView>
@@ -5467,17 +5468,24 @@ void TasFindNoteWindow::findNextClicked(void)
 		cur_marker = markersManager->getMarkerAtFrame(current_frame);
 		if (cur_marker)
 		{
+			QString haystack, needle;
+
+			needle   = QString(markersManager->findNoteString);
+			haystack = QString::fromStdString(markersManager->getNoteCopy(cur_marker));
+
 			if (taseditorConfig->findnoteMatchCase)
 			{
-				result = (strstr(markersManager->getNoteCopy(cur_marker).c_str(), markersManager->findNoteString) != 0);
+				result = haystack.indexOf( needle, 0, Qt::CaseSensitive ) >= 0;
+				//result = (strstr(markersManager->getNoteCopy(cur_marker).c_str(), markersManager->findNoteString) != 0);
 			}
 			else
 			{
-#ifdef WIN32
-				result = (StrStrI(markersManager->getNoteCopy(cur_marker).c_str(), markersManager->findNoteString) != 0);
-#else
-				result = (strcasestr(markersManager->getNoteCopy(cur_marker).c_str(), markersManager->findNoteString) != 0);
-#endif
+				result = haystack.indexOf( needle, 0, Qt::CaseInsensitive ) >= 0;
+//#ifdef WIN32
+//				result = (StrStrI(markersManager->getNoteCopy(cur_marker).c_str(), markersManager->findNoteString) != 0);
+//#else
+//				result = (strcasestr(markersManager->getNoteCopy(cur_marker).c_str(), markersManager->findNoteString) != 0);
+//#endif
 			}
 			if (result)
 			{
