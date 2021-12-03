@@ -364,9 +364,10 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	fileMenu->addAction(act);
 
 	// File -> Recent
-	recentMenu = fileMenu->addMenu( tr("Recent") );
-	
-	recentMenu->setEnabled(false); // TODO: setup recent projects menu
+	recentProjectMenu = fileMenu->addMenu( tr("&Recent") );
+
+	buildRecentProjectMenu();
+	recentProjectMenuReset = false;
 
 	fileMenu->addSeparator();
 
@@ -1389,6 +1390,12 @@ void TasEditorWindow::frameUpdate(void)
 	
 	pianoRoll->update();
 
+	if ( recentProjectMenuReset )
+	{
+		buildRecentProjectMenu();
+		recentProjectMenuReset = false;
+	}
+
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
@@ -1404,6 +1411,7 @@ bool TasEditorWindow::loadProject(const char* fullname)
 		// loaded successfully
 		applyMovieInputConfig();
 		// add new file to Recent menu
+		addRecentProject( fullname );
 		//taseditorWindow.updateRecentProjectsArray(fullname);
 		//taseditorWindow.updateCaption();
 		update();
@@ -1539,6 +1547,7 @@ bool TasEditorWindow::saveProjectAs(bool save_compact)
 	{
 		project.save( filename.toStdString().c_str(), taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
 	}
+	addRecentProject( filename.toStdString().c_str() );
 	//taseditorWindow.updateRecentProjectsArray(nameo);
 	// saved successfully - remove * mark from caption
 	//taseditorWindow.updateCaption();
@@ -2053,6 +2062,121 @@ void TasEditorWindow::exportMovieFile(void)
 	delete osRecordingMovie;
 	osRecordingMovie = 0;
 
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::clearProjectList(void)
+{
+	std::list <std::string*>::iterator it;
+
+	for (it=projList.begin(); it != projList.end(); it++)
+	{
+		delete *it;
+	}
+	projList.clear();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::buildRecentProjectMenu(void)
+{
+	QAction *act;
+	std::string s;
+	std::string *sptr;
+	char buf[128];
+
+	clearProjectList();
+	recentProjectMenu->clear();
+
+	for (int i=0; i<10; i++)
+	{
+		sprintf(buf, "SDL.RecentTasProject%02i", i);
+
+		g_config->getOption( buf, &s);
+
+		//printf("Recent Rom:%i  '%s'\n", i, s.c_str() );
+
+		if ( s.size() > 0 )
+		{
+			act = new TasRecentProjectAction( tr(s.c_str()), recentProjectMenu);
+
+			recentProjectMenu->addAction( act );
+
+			connect(act, SIGNAL(triggered()), act, SLOT(activateCB(void)) );
+
+			sptr = new std::string();
+
+			sptr->assign( s.c_str() );
+
+			projList.push_front( sptr );
+		}
+	}
+	recentProjectMenu->setEnabled( !recentProjectMenu->isEmpty() );
+}
+//---------------------------------------------------------------------------
+void TasEditorWindow::saveRecentProjectMenu(void)
+{
+	int i;
+	std::string *s;
+	std::list <std::string*>::iterator it;
+	char buf[128];
+
+	i = projList.size() - 1;
+
+	for (it=projList.begin(); it != projList.end(); it++)
+	{
+		s = *it;
+		sprintf(buf, "SDL.RecentTasProject%02i", i);
+
+		g_config->setOption( buf, s->c_str() );
+
+		//printf("Recent Rom:%u  '%s'\n", i, s->c_str() );
+		i--;
+	}
+}
+//---------------------------------------------------------------------------
+void TasEditorWindow::addRecentProject( const char *proj )
+{
+	std::string *s;
+	std::list <std::string*>::iterator match_it;
+
+	for (match_it=projList.begin(); match_it != projList.end(); match_it++)
+	{
+		s = *match_it;
+
+		if ( s->compare( proj ) == 0 )
+		{
+			//printf("Found Match: %s\n", proj );
+			break;
+		}
+	}
+
+	if ( match_it != projList.end() )
+	{
+		s = *match_it;
+
+		projList.erase(match_it);
+
+		projList.push_back(s);
+	}
+	else
+	{
+		s = new std::string();
+
+		s->assign( proj );
+		
+		projList.push_back(s);
+
+		if ( projList.size() > 10 )
+		{
+			s = projList.front();
+
+			projList.pop_front();
+
+			delete s;
+		}
+	}
+
+	saveRecentProjectMenu();
+
+	recentProjectMenuReset = true;
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::saveProjectCb(void)
@@ -5550,6 +5674,29 @@ void TasFindNoteWindow::findNextClicked(void)
 				break;
 			}
 		}
+	}
+}
+//----------------------------------------------------------------------------
+//---- TAS Recent Project Menu Action
+//----------------------------------------------------------------------------
+TasRecentProjectAction::TasRecentProjectAction(QString desc, QWidget *parent)
+	: QAction( desc, parent )
+{
+	path = desc.toStdString();
+}
+//----------------------------------------------------------------------------
+TasRecentProjectAction::~TasRecentProjectAction(void)
+{
+	//printf("Recent TAS Project Menu Action Deleted\n");
+}
+//----------------------------------------------------------------------------
+void TasRecentProjectAction::activateCB(void)
+{
+	//printf("Activate Recent TAS Project: %s \n", path.c_str() );
+
+	if ( tasWin )
+	{
+		tasWin->loadProject( path.c_str() );
 	}
 }
 //----------------------------------------------------------------------------

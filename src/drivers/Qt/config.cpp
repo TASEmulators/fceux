@@ -747,6 +747,14 @@ InitConfig()
 		config->addOption( buf, "");
 	}
 
+	for (unsigned int i=0; i<10; i++)
+	{
+		char buf[128];
+		sprintf(buf, "SDL.RecentTasProject%02u", i);
+
+		config->addOption( buf, "");
+	}
+
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
 	config->addOption("SDL.PauseOnMainMenuAccess", false);

@@ -241,6 +241,21 @@ class QPianoRoll : public QWidget
 		void vbarActionTriggered(int act);
 };
 
+class  TasRecentProjectAction : public QAction
+{
+	Q_OBJECT
+
+	public:
+		TasRecentProjectAction( QString title, QWidget *parent = 0);
+		~TasRecentProjectAction(void);
+
+		std::string  path;
+
+	public slots:
+		void activateCB(void);
+
+};
+
 class TasFindNoteWindow : public QDialog
 {
 	Q_OBJECT
@@ -295,6 +310,7 @@ class TasEditorWindow : public QDialog
 		HISTORY   history;
 		BRANCHES  branches;
 
+		bool loadProject(const char* fullname);
 		void loadClipboard(const char *txt);
 		void toggleInput(int start, int end, int joy, int button, int consecutivenessTag);
 		void setInputUsingPattern(int start, int end, int joy, int button, int consecutivenessTag);
@@ -313,7 +329,7 @@ class TasEditorWindow : public QDialog
 		void buildSideControlPanel(void);
 		void initPatterns(void);
 
-		QMenu     *recentMenu;
+		QMenu     *recentProjectMenu;
 		QAction   *followUndoAct;
 		QAction   *followMkrAct;
 		QAction   *enaHotChgAct;
@@ -390,16 +406,22 @@ class TasEditorWindow : public QDialog
 
 		std::vector<std::string> patternsNames;
 		std::vector<std::vector<uint8_t>> patterns;
+		std::list <std::string*> projList;
 
 		bool mustCallManualLuaFunction;
+		bool recentProjectMenuReset;
 	private:
 
 		int initModules(void);
-		bool loadProject(const char* fullname);
 		bool saveProject(bool save_compact = false);
 		bool saveProjectAs(bool save_compact = false);
 		bool askToSaveProject(void);
 		void updateToolTips(void);
+
+		void clearProjectList(void);
+		void buildRecentProjectMenu(void);
+		void saveRecentProjectMenu(void);
+		void addRecentProject(const char *prog);
 
 	public slots:
 		void closeWindow(void);
