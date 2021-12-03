@@ -705,3 +705,19 @@ void UpperMarkerNoteEdit::keyPressEvent(QKeyEvent *event)
 	}
 }
 // -------------------------------------------------------------------------
+void UpperMarkerNoteEdit::mousePressEvent(QMouseEvent * event)
+{
+	if ( event->button() == Qt::MiddleButton )
+	{
+		playback->handleMiddleButtonClick();
+	}
+	else if ( (event->button() == Qt::LeftButton) || (event->button() == Qt::RightButton) )
+	{
+		// scroll to the Marker
+		if (taseditorConfig->followMarkerNoteContext)
+		{
+			tasWin->pianoRoll->followMarker(playback->displayedMarkerNumber);
+		}
+	}
+}
+// -------------------------------------------------------------------------
