@@ -40,7 +40,7 @@ typedef SSIZE_T ssize_t;
 
 using easywsclient::WebSocket;
 
-#define RAINBOW_DEBUG 1
+#define RAINBOW_DEBUG 0
 
 #if RAINBOW_DEBUG >= 1
 #define UDBG(...) FCEU_printf(__VA_ARGS__)
