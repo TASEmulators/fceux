@@ -30,6 +30,7 @@
 #include <QString>
 #include <QPainter>
 #include <QSettings>
+#include <QTextEdit>
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QFontMetrics>
@@ -881,7 +882,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	//act->setShortcut(QKeySequence(tr("Ctrl+N")));
 	act->setStatusTip(tr("About"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
-	//connect(act, SIGNAL(triggered()), this, SLOT(createNewProject(void)) );
+	connect(act, SIGNAL(triggered()), this, SLOT(openAboutWindow(void)) );
 
 	helpMenu->addAction(act);
 
@@ -2900,8 +2901,8 @@ bool TasEditorWindow::handleColumnSet(void)
 				{
 					changes_made = true;
 					//pianoRoll.redrawRow(*it);
-					//pianoRoll->update();
-					lowerMarkerNote->setFocus(); // Piano roll will update at next periodic cycle
+					//pianoRoll->update(); // Piano roll will update at next periodic cycle
+					lowerMarkerNote->setFocus();
 				}
 			}
 		}
@@ -3135,6 +3136,58 @@ void TasEditorWindow::findNextSimilarNote(void)
 	markersManager.findNextSimilarNote();
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::openAboutWindow(void)
+{
+	QDialog about(this);
+	QVBoxLayout *mainLayout, *vbox;
+	QHBoxLayout *hbox;
+	QPixmap pm(":icons/taseditor-icon32.png");
+	QPixmap pm2;
+	QLabel *imgLbl;
+	QTextEdit *txtEdit;
+	QPushButton *okButton;
+	const char *txt = "\
+Created by AnS\n\n\
+Originated from TASEdit\n\
+made by zeromus & adelikat\n\n\
+Ported to Qt by mjbudd77\n\
+";
+	
+	pm2 = pm.scaled( 64, 64 );
+
+	mainLayout = new QVBoxLayout();
+	vbox       = new QVBoxLayout();
+	hbox       = new QHBoxLayout();
+	txtEdit    = new QTextEdit();
+	okButton   = new QPushButton( tr("OK") );
+
+	about.setWindowTitle( tr("About") );
+	about.setLayout( mainLayout );
+
+	imgLbl = new QLabel();
+	imgLbl->setPixmap(pm2);
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( imgLbl, 2, Qt::AlignCenter );
+	hbox->addLayout( vbox, 2 );
+	vbox->addWidget( new QLabel( tr("TAS Editor") ), 1, Qt::AlignCenter );
+	vbox->addWidget( new QLabel( tr("Version 1.01") ), 1, Qt::AlignCenter );
+	mainLayout->addWidget( txtEdit );
+
+	hbox = new QHBoxLayout();
+	hbox->addStretch(5);
+	hbox->addWidget( okButton, 1 );
+	mainLayout->addLayout( hbox );
+
+	txtEdit->setText( tr(txt) );
+	txtEdit->setReadOnly(true);
+
+	okButton->setDefault(true);
+	okButton->setIcon(style()->standardIcon(QStyle::SP_DialogOkButton));
+	connect( okButton, SIGNAL(clicked(void)), &about, SLOT(accept(void)) );
+
+	about.exec();
+}
 //----------------------------------------------------------------------------
 //----  TAS Piano Roll Widget
 //----------------------------------------------------------------------------
@@ -4025,7 +4078,7 @@ void QPianoRoll::focusInEvent(QFocusEvent *event)
 {
 	QWidget::focusInEvent(event);
 
-	printf("PianoRoll Focus In\n");
+	//printf("PianoRoll Focus In\n");
 
 	parent->pianoRollFrame->setStyleSheet("QFrame { border: 2px solid rgb(48,140,198); }");
 }
@@ -4034,7 +4087,7 @@ void QPianoRoll::focusOutEvent(QFocusEvent *event)
 {
 	QWidget::focusOutEvent(event);
 
-	printf("PianoRoll Focus Out\n");
+	//printf("PianoRoll Focus Out\n");
 
 	parent->pianoRollFrame->setStyleSheet(NULL);
 }

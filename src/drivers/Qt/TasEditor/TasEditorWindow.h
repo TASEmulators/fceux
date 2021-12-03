@@ -479,6 +479,7 @@ class TasEditorWindow : public QDialog
 		void findNextSimilarNote(void);
 		void jumpToPreviousMarker(void);
 		void jumpToNextMarker(void);
+		void openAboutWindow(void);
 		void autoLuaRunChanged(bool);
 		void manLuaRun(void);
 
