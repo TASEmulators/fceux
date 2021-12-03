@@ -212,7 +212,7 @@ void SELECTION::redrawMarkerData()
 	strcpy(new_text, markersManager->getNoteCopy(displayedMarkerNumber).c_str());
 	tasWin->lowerMarkerNote->setText( QObject::tr(new_text) );
 
-	printf("Marker %i: '%s'\n", displayedMarkerNumber, new_text );
+	//printf("Marker %i: '%s'\n", displayedMarkerNumber, new_text );
 }
 
 void SELECTION::jumpToPreviousMarker(int speed)

@@ -475,6 +475,10 @@ class TasEditorWindow : public QDialog
 		void setMaxUndoCapacity(void);
 		void setCurrentPattern(int);
 		void tabViewChanged(int);
+		void findSimilarNote(void);
+		void findNextSimilarNote(void);
+		void jumpToPreviousMarker(void);
+		void jumpToNextMarker(void);
 		void autoLuaRunChanged(bool);
 		void manLuaRun(void);
 

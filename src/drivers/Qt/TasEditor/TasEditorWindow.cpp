@@ -1166,6 +1166,11 @@ void TasEditorWindow::buildSideControlPanel(void)
 	connect( turboSeekCbox   , SIGNAL(clicked(bool)), this, SLOT(playbackTurboSeekCb(bool)));
 	connect( autoRestoreCbox , SIGNAL(clicked(bool)), this, SLOT(playbackAutoRestoreCb(bool)));
 
+	connect( prevMkrBtn, SIGNAL(clicked(void)), this, SLOT(jumpToPreviousMarker(void)) );
+	connect( nextMkrBtn, SIGNAL(clicked(void)), this, SLOT(jumpToNextMarker(void)) );
+	connect( similarBtn, SIGNAL(clicked(void)), this, SLOT(findSimilarNote(void)) );
+	connect( moreBtn   , SIGNAL(clicked(void)), this, SLOT(findNextSimilarNote(void)) );
+
 	shortcut = new QShortcut( QKeySequence("Pause"), this);
 	connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackPauseCB(void)) );
 
@@ -3106,6 +3111,26 @@ void TasEditorWindow::lowerMarkerLabelClicked(void)
 	{
 		pianoRoll->followSelection();
 	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::jumpToPreviousMarker(void)
+{
+	selection.jumpToPreviousMarker();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::jumpToNextMarker(void)
+{
+	selection.jumpToNextMarker();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::findSimilarNote(void)
+{
+	markersManager.findSimilarNote();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::findNextSimilarNote(void)
+{
+	markersManager.findNextSimilarNote();
 }
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
