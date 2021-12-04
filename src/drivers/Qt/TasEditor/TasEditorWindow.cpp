@@ -1412,14 +1412,13 @@ bool TasEditorWindow::loadProject(const char* fullname)
 		applyMovieInputConfig();
 		// add new file to Recent menu
 		addRecentProject( fullname );
-		//taseditorWindow.updateRecentProjectsArray(fullname);
-		//taseditorWindow.updateCaption();
+		updateCaption();
 		update();
 		success = true;
 	} else
 	{
 		// failed to load
-		//taseditorWindow.updateCaption();
+		updateCaption();
 		update();
 	}
 	fceuWrapperUnLock();
@@ -1435,7 +1434,8 @@ bool TasEditorWindow::saveProject(bool save_compact)
 	if (project.getProjectFile().empty())
 	{
 		ret = saveProjectAs(save_compact);
-	} else
+	}
+	else
 	{
 		if (save_compact)
 		{
@@ -1445,7 +1445,7 @@ bool TasEditorWindow::saveProject(bool save_compact)
 		{
 			project.save(0, taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
 		}
-		//taseditorWindow.updateCaption();
+		updateCaption();
 	}
 
 	fceuWrapperUnLock();
@@ -1548,9 +1548,8 @@ bool TasEditorWindow::saveProjectAs(bool save_compact)
 		project.save( filename.toStdString().c_str(), taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
 	}
 	addRecentProject( filename.toStdString().c_str() );
-	//taseditorWindow.updateRecentProjectsArray(nameo);
 	// saved successfully - remove * mark from caption
-	//taseditorWindow.updateCaption();
+	updateCaption();
 	return true;
 }
 
@@ -1823,7 +1822,7 @@ void TasEditorWindow::createNewProject(void)
 		recorder.reset();
 		//popupDisplay.reset();
 		//taseditorWindow.redraw();
-		//taseditorWindow.updateCaption();
+		updateCaption();
 		update();
 	}
 	fceuWrapperUnLock();
@@ -2062,6 +2061,30 @@ void TasEditorWindow::exportMovieFile(void)
 	delete osRecordingMovie;
 	osRecordingMovie = 0;
 
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::updateCaption(void)
+{
+	char newCaption[300];
+	strcpy(newCaption, "TAS Editor");
+	if (!movie_readonly)
+	{
+		strcat(newCaption, recorder.getRecordingCaption());
+	}
+	// add project name
+	std::string projectname = project.getProjectName();
+	if (!projectname.empty())
+	{
+		strcat(newCaption, " - ");
+		strcat(newCaption, projectname.c_str());
+	}
+	// and * if project has unsaved changes
+	if (project.getProjectChanged())
+	{
+		strcat(newCaption, "*");
+	}
+	setWindowTitle( tr(newCaption) );
+	//SetWindowText(hwndTASEditor, newCaption);
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::clearProjectList(void)

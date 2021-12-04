@@ -382,7 +382,7 @@ void TASEDITOR_PROJECT::setProjectChanged()
 	if (!changed)
 	{
 		changed = true;
-		//taseditorWindow.updateCaption();
+		tasWin->updateCaption();
 		sheduleNextAutosave();
 	}
 }

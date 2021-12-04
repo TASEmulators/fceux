@@ -116,7 +116,7 @@ void RECORDER::update()
 	// update window caption if needed
 	if (oldStateOfMovieReadonly != movie_readonly || oldMultitrackRecordingJoypadNumber != multitrackRecordingJoypadNumber)
 	{
-		//taseditorWindow.updateCaption();
+		tasWin->updateCaption();
 	}
 	// update Bookmarks/Branches groupbox caption if needed
 	if (taseditorConfig->oldControlSchemeForBranching && oldStateOfMovieReadonly != movie_readonly)
