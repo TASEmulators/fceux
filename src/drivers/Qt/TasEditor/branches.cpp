@@ -117,45 +117,6 @@ void BRANCHES::init()
 	branchCurrentX.resize(TOTAL_BOOKMARKS+1);
 	branchCurrentY.resize(TOTAL_BOOKMARKS+1);
 
-	// init GDI stuff
-	//HDC win_hdc = GetWindowDC(bookmarks.hwndBranchesBitmap);
-	//hBitmapDC = CreateCompatibleDC(win_hdc);
-	//hBranchesBitmap = CreateCompatibleBitmap(win_hdc, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_HEIGHT);
-	//hOldBitmap = (HBITMAP)SelectObject(hBitmapDC, hBranchesBitmap);
-	//hBufferDC = CreateCompatibleDC(win_hdc);
-	//hBufferBitmap = CreateCompatibleBitmap(win_hdc, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_HEIGHT);
-	//hOldBitmap1 = (HBITMAP)SelectObject(hBufferDC, hBufferBitmap);
-	//normalBrush = CreateSolidBrush(0x000000);
-	//borderBrush = CreateSolidBrush(0xb99d7f);
-	//selectedSlotBrush = CreateSolidBrush(0x5656CA);
-	// prepare bg gradient
-	//vertex[0].x     = 0;
-	//vertex[0].y     = 0;
-	//vertex[0].Red   = 0xBF00;
-	//vertex[0].Green = 0xE200;
-	//vertex[0].Blue  = 0xEF00;
-	//vertex[0].Alpha = 0x0000;
-	//vertex[1].x     = BRANCHES_BITMAP_WIDTH;
-	//vertex[1].y     = BRANCHES_BITMAP_HEIGHT;
-	//vertex[1].Red   = 0xE500;
-	//vertex[1].Green = 0xFB00;
-	//vertex[1].Blue  = 0xFF00;
-	//vertex[1].Alpha = 0x0000;
-	//gRect.UpperLeft  = 0;
-	//gRect.LowerRight = 1;
-	//branchesBitmapRect.left = 0;
-	//branchesBitmapRect.top = 0;
-	//branchesBitmapRect.right = BRANCHES_BITMAP_WIDTH;
-	//branchesBitmapRect.bottom = BRANCHES_BITMAP_HEIGHT;
-	// prepare branches spritesheet
-	//hBranchesSpritesheet = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BRANCH_SPRITESHEET));
-	//hSpritesheetDC = CreateCompatibleDC(win_hdc);
-	//hOldBitmap2 = (HBITMAP)SelectObject(hSpritesheetDC, hBranchesSpritesheet);
-	//// create pens
-	//normalPen = CreatePen(PS_SOLID, 1, 0x0);
-	//timelinePen = CreatePen(PS_SOLID, 1, 0x0020E0);
-	//selectPen = CreatePen(PS_SOLID, 2, 0xFF9080);
-
 	// set positions of slots to default coordinates
 	for (int i = TOTAL_BOOKMARKS; i >= 0; i--)
 	{
@@ -179,70 +140,6 @@ void BRANCHES::free()
 	branchPreviousY.resize(0);
 	branchCurrentX.resize(0);
 	branchCurrentY.resize(0);
-	// free GDI stuff
-	//if (hOldBitmap && hBitmapDC)
-	//{
-	//	SelectObject(hBitmapDC, hOldBitmap);
-	//	DeleteDC(hBitmapDC);
-	//	hBitmapDC = NULL;
-	//}
-	//if (hBranchesBitmap)
-	//{
-	//	DeleteObject(hBranchesBitmap);
-	//	hBranchesBitmap = NULL;
-	//}
-	//if (hOldBitmap1 && hBufferDC)
-	//{
-	//	SelectObject(hBufferDC, hOldBitmap1);
-	//	DeleteDC(hBufferDC);
-	//	hBufferDC = NULL;
-	//}
-	//if (hBufferBitmap)
-	//{
-	//	DeleteObject(hBufferBitmap);
-	//	hBufferBitmap = NULL;
-	//}
-	//if (hOldBitmap2 && hSpritesheetDC)
-	//{
-	//	SelectObject(hSpritesheetDC, hOldBitmap2);
-	//	DeleteDC(hSpritesheetDC);
-	//	hSpritesheetDC = NULL;
-	//}
-	//if (hBranchesSpritesheet)
-	//{
-	//	DeleteObject(hBranchesSpritesheet);
-	//	hBranchesSpritesheet = NULL;
-	//}
-	//if (normalBrush)
-	//{
-	//	DeleteObject(normalBrush);
-	//	normalBrush = 0;
-	//}
-	//if (borderBrush)
-	//{
-	//	DeleteObject(borderBrush);
-	//	borderBrush = 0;
-	//}
-	//if (selectedSlotBrush)
-	//{
-	//	DeleteObject(selectedSlotBrush);
-	//	selectedSlotBrush = 0;
-	//}
-	//if (normalPen)
-	//{
-	//	DeleteObject(normalPen);
-	//	normalPen = 0;
-	//}
-	//if (timelinePen)
-	//{
-	//	DeleteObject(normalPen);
-	//	timelinePen = 0;
-	//}
-	//if (selectPen)
-	//{
-	//	DeleteObject(normalPen);
-	//	selectPen = 0;
-	//}
 }
 void BRANCHES::reset()
 {
@@ -890,48 +787,65 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			painter.drawText( tempBranchX, tempBranchY, tr(txt) );
 		}
 	}
-//	if (isSafeToShowBranchesData())
-//	{
-//		SetBkMode(hBitmapDC, TRANSPARENT);
-//		// keyframe of item under cursor (except cloud - it doesn't have particular frame)
-//		if (bookmarks.itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL || (bookmarks.itemUnderMouse >= 0 && bookmarks.itemUnderMouse < TOTAL_BOOKMARKS && bookmarks.bookmarksArray[bookmarks.itemUnderMouse].notEmpty))
-//		{
-//			char framenum_string[DIGITS_IN_FRAMENUM + 1] = {0};
-//			if (bookmarks.itemUnderMouse < TOTAL_BOOKMARKS)
-//				U32ToDecStr(framenum_string, bookmarks.bookmarksArray[bookmarks.itemUnderMouse].snapshot.keyFrame, DIGITS_IN_FRAMENUM);
-//			else
-//				U32ToDecStr(framenum_string, currFrameCounter, DIGITS_IN_FRAMENUM);
-//			SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
-//			TextOut(hBitmapDC, BRANCHES_BITMAP_FRAMENUM_X + 1, BRANCHES_BITMAP_FRAMENUM_Y + 1, (LPCSTR)framenum_string, DIGITS_IN_FRAMENUM);
-//			SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
-//			TextOut(hBitmapDC, BRANCHES_BITMAP_FRAMENUM_X, BRANCHES_BITMAP_FRAMENUM_Y, (LPCSTR)framenum_string, DIGITS_IN_FRAMENUM);
-//		}
-//		// time of item under cursor
-//		if (bookmarks.itemUnderMouse > ITEM_UNDER_MOUSE_NONE)
-//		{
-//			if (bookmarks.itemUnderMouse == ITEM_UNDER_MOUSE_CLOUD)
-//			{
-//				// draw shadow of text
-//				SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
-//				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)cloudTimestamp, TIMESTAMP_LENGTH-1);
-//				SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
-//				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)cloudTimestamp, TIMESTAMP_LENGTH-1);
-//			} else if (bookmarks.itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
-//			{
-//				// fireball - show current_pos_time
-//				SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
-//				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)currentPosTimestamp, TIMESTAMP_LENGTH-1);
-//				SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
-//				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)currentPosTimestamp, TIMESTAMP_LENGTH-1);
-//			} else if (bookmarks.bookmarksArray[bookmarks.itemUnderMouse].notEmpty)
-//			{
-//				SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
-//				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)bookmarks.bookmarksArray[bookmarks.itemUnderMouse].snapshot.description, TIMESTAMP_LENGTH-1);
-//				SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
-//				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)bookmarks.bookmarksArray[bookmarks.itemUnderMouse].snapshot.description, TIMESTAMP_LENGTH-1);
-//			}
-//		}
-//	}
+	if (isSafeToShowBranchesData())
+	{
+		// keyframe of item under cursor (except cloud - it doesn't have particular frame)
+		if (bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL || (bookmarks->itemUnderMouse >= 0 && bookmarks->itemUnderMouse < TOTAL_BOOKMARKS && bookmarks->bookmarksArray[bookmarks->itemUnderMouse].notEmpty))
+		{
+			int x,y;
+			char framenum_string[16] = {0};
+			if (bookmarks->itemUnderMouse < TOTAL_BOOKMARKS)
+			{
+				sprintf( framenum_string, "%08i", bookmarks->bookmarksArray[bookmarks->itemUnderMouse].snapshot.keyFrame );
+			}
+			else
+			{
+				sprintf( framenum_string, "%08i", currFrameCounter );
+			}
+			x = 2 * pxBoxWidth;
+			y = pxLineSpacing;
+
+			painter.setPen( QColor( BRANCHES_TEXT_SHADOW_COLOR ) );
+			painter.drawText( x+1, y+1, tr(framenum_string) );
+
+			painter.setPen( QColor( BRANCHES_TEXT_COLOR ) );
+			painter.drawText( x, y, tr(framenum_string) );
+		}
+		// time of item under cursor
+		if (bookmarks->itemUnderMouse > ITEM_UNDER_MOUSE_NONE)
+		{
+			int x,y;
+			x = 2 * pxBoxWidth;
+			y = viewHeight - (pxLineSpacing / 2);
+
+			if (bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_CLOUD)
+			{
+				// draw shadow of text
+				painter.setPen( QColor( BRANCHES_TEXT_SHADOW_COLOR ) );
+				painter.drawText( x+1, y+1, tr(cloudTimestamp) );
+
+				painter.setPen( QColor( BRANCHES_TEXT_COLOR ) );
+				painter.drawText( x, y, tr(cloudTimestamp) );
+			}
+			else if (bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
+			{
+				// fireball - show current_pos_time
+				painter.setPen( QColor( BRANCHES_TEXT_SHADOW_COLOR ) );
+				painter.drawText( x+1, y+1, tr(currentPosTimestamp) );
+
+				painter.setPen( QColor( BRANCHES_TEXT_COLOR ) );
+				painter.drawText( x, y, tr(currentPosTimestamp) );
+			}
+			else if (bookmarks->bookmarksArray[bookmarks->itemUnderMouse].notEmpty)
+			{
+				painter.setPen( QColor( BRANCHES_TEXT_SHADOW_COLOR ) );
+				painter.drawText( x+1, y+1, tr(bookmarks->bookmarksArray[bookmarks->itemUnderMouse].snapshot.description) );
+
+				painter.setPen( QColor( BRANCHES_TEXT_COLOR ) );
+				painter.drawText( x, y, tr(bookmarks->bookmarksArray[bookmarks->itemUnderMouse].snapshot.description) );
+			}
+		}
+	}
 
 	// blinking red frame on selected slot
 	if (taseditorConfig->oldControlSchemeForBranching && ((currentAnimationFrame + 1) % 6))
