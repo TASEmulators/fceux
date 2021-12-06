@@ -2243,21 +2243,29 @@ void TasEditorWindow::setCurrentPattern(int idx)
 //----------------------------------------------------------------------------
 void TasEditorWindow::recordingChanged(int state)
 {
+	fceuCriticalSection emuLock;
+
 	FCEUI_MovieToggleReadOnly();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editUndoCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	history.undo();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editRedoCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	history.redo();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editUndoSelCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	int dragMode = pianoRoll->getDragMode();
 
 	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
@@ -2269,6 +2277,8 @@ void TasEditorWindow::editUndoSelCB(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editRedoSelCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	int dragMode = pianoRoll->getDragMode();
 
 	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
@@ -2280,6 +2290,8 @@ void TasEditorWindow::editRedoSelCB(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editDeselectAll(void)
 {
+	fceuCriticalSection emuLock;
+
 	int dragMode = pianoRoll->getDragMode();
 
 	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
@@ -2290,6 +2302,8 @@ void TasEditorWindow::editDeselectAll(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editSelectAll(void)
 {
+	fceuCriticalSection emuLock;
+
 	int dragMode = pianoRoll->getDragMode();
 
 	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
@@ -2300,6 +2314,8 @@ void TasEditorWindow::editSelectAll(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editSelBtwMkrs(void)
 {
+	fceuCriticalSection emuLock;
+
 	int dragMode = pianoRoll->getDragMode();
 
 	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
@@ -2310,6 +2326,8 @@ void TasEditorWindow::editSelBtwMkrs(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editReselectClipboard(void)
 {
+	fceuCriticalSection emuLock;
+
 	int dragMode = pianoRoll->getDragMode();
 
 	if ( (dragMode != DRAG_MODE_SELECTION) && (dragMode != DRAG_MODE_DESELECTION) )
@@ -2321,51 +2339,71 @@ void TasEditorWindow::editReselectClipboard(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editCutCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	splicer.cutSelectedInputToClipboard();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editCopyCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	splicer.copySelectedInputToClipboard();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editPasteCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	splicer.pasteInputFromClipboard();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editPasteInsertCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	splicer.pasteInsertInputFromClipboard();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editClearCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	splicer.clearSelectedFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editDeleteCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	splicer.deleteSelectedFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editCloneCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	splicer.cloneSelectedFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editInsertCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	splicer.insertSelectedFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editInsertNumFramesCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	splicer.insertNumberOfFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editTruncateMovieCB(void)
 {
+	fceuCriticalSection emuLock;
+
 	splicer.truncateMovie();
 }
 //----------------------------------------------------------------------------
@@ -3199,6 +3237,8 @@ bool TasEditorWindow::handleInputColumnSet(int joy, int button)
 
 void TasEditorWindow::setMarkers(void)
 {
+	fceuCriticalSection emuLock;
+
 	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	if (current_selection->size())
 	{
@@ -3212,7 +3252,7 @@ void TasEditorWindow::setMarkers(void)
 				if (markersManager.setMarkerAtFrame(*it))
 				{
 					changes_made = true;
-					pianoRoll->update();
+					//pianoRoll->update();
 				}
 			}
 		}
@@ -3225,6 +3265,8 @@ void TasEditorWindow::setMarkers(void)
 }
 void TasEditorWindow::removeMarkers(void)
 {
+	fceuCriticalSection emuLock;
+
 	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	if (current_selection->size())
 	{
@@ -3237,7 +3279,7 @@ void TasEditorWindow::removeMarkers(void)
 			{
 				markersManager.removeMarkerFromFrame(*it);
 				changes_made = true;
-				pianoRoll->update();
+				//pianoRoll->update();
 			}
 		}
 		if (changes_made)
@@ -3246,6 +3288,13 @@ void TasEditorWindow::removeMarkers(void)
 			history.registerMarkersChange(MODTYPE_MARKER_REMOVE, *current_selection_begin, *current_selection->rbegin());
 		}
 	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::ungreenzoneSelectedFrames(void)
+{
+	fceuCriticalSection emuLock;
+
+	greenzone.ungreenzoneSelectedFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::upperMarkerLabelClicked(void)
@@ -3858,6 +3907,96 @@ void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
 	}
 }
 //----------------------------------------------------------------------------
+void QPianoRoll::contextMenuEvent(QContextMenuEvent *event)
+{
+	bool drawContext, rowIsSel;
+
+	rowIsSel = selection->isRowSelected( rowUnderMouse );
+
+	drawContext = rowIsSel && 
+		( (columnUnderMouse == COLUMN_ICONS) || (columnUnderMouse == COLUMN_FRAMENUM) || (columnUnderMouse == COLUMN_FRAMENUM2) );
+
+	if ( !drawContext )
+	{
+		return;
+	}
+	int mkr;
+	QAction *act;
+	QMenu menu(this);
+	fceuCriticalSection emuLock;
+
+	mkr = markersManager->getMarkerAtFrame( rowUnderMouse );
+
+	act = new QAction(tr("Set Markers"), &menu);
+	menu.addAction(act);
+	act->setEnabled( mkr == 0 );
+	act->setShortcut(QKeySequence(tr("Double Click")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(setMarkers(void)));
+
+	act = new QAction(tr("Remove Markers"), &menu);
+	menu.addAction(act);
+	act->setEnabled( mkr > 0 );
+	//act->setShortcut(QKeySequence(tr("Dbl-clk")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(removeMarkers(void)));
+
+	menu.addSeparator();
+
+	act = new QAction(tr("Deselect"), &menu);
+	menu.addAction(act);
+	//act->setShortcut(QKeySequence(tr("D")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(editDeselectAll(void)));
+
+	act = new QAction(tr("Select between markers"), &menu);
+	menu.addAction(act);
+	act->setShortcut(QKeySequence(tr("Ctrl-A")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(editSelBtwMkrs(void)));
+
+	menu.addSeparator();
+
+	act = new QAction(tr("Ungreenzone"), &menu);
+	menu.addAction(act);
+	//act->setShortcut(QKeySequence(tr("Ctrl-A")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(ungreenzoneSelectedFrames(void)));
+
+	menu.addSeparator();
+
+	act = new QAction(tr("Clear"), &menu);
+	menu.addAction(act);
+	act->setShortcut(QKeySequence(tr("Del")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(editClearCB(void)));
+
+	act = new QAction(tr("Delete"), &menu);
+	menu.addAction(act);
+	act->setShortcut(QKeySequence(tr("Ctrl+Del")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(editDeleteCB(void)));
+
+	act = new QAction(tr("Clone"), &menu);
+	menu.addAction(act);
+	act->setShortcut(QKeySequence(tr("Ctrl+Ins")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(editCloneCB(void)));
+
+	act = new QAction(tr("Insert"), &menu);
+	menu.addAction(act);
+	act->setShortcut(QKeySequence(tr("Ctrl+Shift+Ins")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(editInsertCB(void)));
+
+	act = new QAction(tr("Insert # of Frames"), &menu);
+	menu.addAction(act);
+	act->setShortcut(QKeySequence(tr("Ins")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(editInsertNumFramesCB(void)));
+
+	menu.addSeparator();
+
+	act = new QAction(tr("Truncate Movie"), &menu);
+	menu.addAction(act);
+	//act->setShortcut(QKeySequence(tr("Ins")));
+	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(editTruncateMovieCB(void)));
+
+	menu.exec(event->globalPos());
+
+	event->accept();
+}
+//----------------------------------------------------------------------------
 void QPianoRoll::mousePressEvent(QMouseEvent * event)
 {
 	fceuCriticalSection emuLock;
@@ -3880,7 +4019,7 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 	kbModifiers = QApplication::keyboardModifiers();
 	alt_pressed = (kbModifiers & Qt::AltModifier) ? 1 : 0;
 
-	printf("Mouse Button Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	//printf("Mouse Button Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
 	
 	if ( event->button() == Qt::LeftButton )
 	{
@@ -4041,7 +4180,7 @@ void QPianoRoll::mouseReleaseEvent(QMouseEvent * event)
 	rowUnderMouse = realRowUnderMouse = line;
 	columnUnderMouse = col;
 
-	printf("Mouse Button Released: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	//printf("Mouse Button Released: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
 	
 	if ( event->button() == Qt::LeftButton )
 	{
@@ -4053,7 +4192,7 @@ void QPianoRoll::mouseReleaseEvent(QMouseEvent * event)
 	}
 	else if ( event->button() == Qt::RightButton )
 	{
-		//rightButtonDragMode = true;
+		//rightButtonDragMode = false;
 	}
 }
 //----------------------------------------------------------------------------

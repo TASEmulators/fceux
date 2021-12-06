@@ -171,6 +171,7 @@ class QPianoRoll : public QWidget
 		void keyReleaseEvent(QKeyEvent *event);
 		void focusInEvent(QFocusEvent *event);
 		void focusOutEvent(QFocusEvent *event);
+		void contextMenuEvent(QContextMenuEvent *event);
 
 		void crossGaps(int zDelta);
 		void startDraggingPlaybackCursor(void);
@@ -319,8 +320,6 @@ class TasEditorWindow : public QDialog
 		bool handleColumnSetUsingPattern(void);
 		bool handleInputColumnSet(int joy, int button);
 		bool handleInputColumnSetUsingPattern(int joy, int button);
-		void setMarkers(void);
-		void removeMarkers(void);
 
 	protected:
 		void closeEvent(QCloseEvent *event);
@@ -505,6 +504,9 @@ class TasEditorWindow : public QDialog
 		void openAboutWindow(void);
 		void autoLuaRunChanged(bool);
 		void manLuaRun(void);
+		void setMarkers(void);
+		void removeMarkers(void);
+		void ungreenzoneSelectedFrames(void);
 
 	friend class RECORDER;
 	friend class SPLICER;
