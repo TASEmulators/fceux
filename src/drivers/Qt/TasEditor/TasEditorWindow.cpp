@@ -5665,6 +5665,7 @@ int bookmarkPreviewPopup::loadImage(int index)
 TasFindNoteWindow::TasFindNoteWindow( QWidget *parent )
 	: QDialog( parent, Qt::Window )
 {
+	QSettings  settings;
 	QVBoxLayout *mainLayout, *vbox;
 	QHBoxLayout *hbox, *hbox1;
 	QGroupBox   *gbox;
@@ -5720,14 +5721,22 @@ TasFindNoteWindow::TasFindNoteWindow( QWidget *parent )
 	connect( nextBtn  , SIGNAL(clicked(void)), this, SLOT(findNextClicked(void)) );
 
 	connect( searchPattern, SIGNAL(textChanged(const QString &)), this, SLOT(searchPatternChanged(const QString &)) );
+
+	// Restore Window Geometry
+	restoreGeometry(settings.value("tasEditorFindDialog/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 TasFindNoteWindow::~TasFindNoteWindow(void)
 {
+	QSettings  settings;
+
 	if ( findWin == this )
 	{
 		findWin = NULL;
 	}
+
+	// Save Window Geometry
+	settings.setValue("tasEditorFindDialog/geometry", saveGeometry());
 }
 //----------------------------------------------------------------------------
 void TasFindNoteWindow::closeEvent(QCloseEvent *event)
