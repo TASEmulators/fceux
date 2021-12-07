@@ -99,12 +99,12 @@ BrokeStudioFirmware::BrokeStudioFirmware() {
 
 	// Get default host/port
 	char const* hostname = ::getenv("RAINBOW_SERVER_ADDR");
-	if (hostname == nullptr) hostname = "localhost";
+	if (hostname == nullptr) hostname = "";
 	this->server_settings_address = hostname;
 	this->default_server_settings_address = hostname;
 
 	char const* port_cstr = ::getenv("RAINBOW_SERVER_PORT");
-	if (port_cstr == nullptr) port_cstr = "1235";
+	if (port_cstr == nullptr) port_cstr = "0";
 	std::istringstream port_iss(port_cstr);
 	port_iss >> this->server_settings_port;
 	this->default_server_settings_port = this->server_settings_port;
