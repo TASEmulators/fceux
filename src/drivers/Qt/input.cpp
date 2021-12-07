@@ -30,6 +30,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/CheatsConf.h"
+#include "Qt/TasEditor/TasEditorWindow.h"
 
 #include "Qt/sdl.h"
 #include "Qt/sdl-video.h"
@@ -454,6 +455,11 @@ void setHotKeys(void)
 	for (int i = 0; i < HK_MAX; i++)
 	{
 		Hotkeys[i].readConfig();
+	}
+
+	if ( tasWin != NULL )
+	{
+		tasWin->initHotKeys();
 	}
 	return;
 }

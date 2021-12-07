@@ -312,6 +312,7 @@ class TasEditorWindow : public QDialog
 		HISTORY   history;
 		BRANCHES  branches;
 
+		void initHotKeys(void);
 		void updateCaption(void);
 		bool loadProject(const char* fullname);
 		void loadClipboard(const char *txt);
@@ -328,7 +329,6 @@ class TasEditorWindow : public QDialog
 		QMenuBar  *buildMenuBar(void);
 		void buildPianoRollDisplay(void);
 		void buildSideControlPanel(void);
-		void initHotKeys(void);
 		void initPatterns(void);
 
 		QMenu     *recentProjectMenu;
