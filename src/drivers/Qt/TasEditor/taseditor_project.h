@@ -69,6 +69,7 @@ public:
 
 private:
 	bool changed;
+	bool updateCaptionFlag;
 	int nextSaveShedule;
 
 	std::string projectFile;	// full path

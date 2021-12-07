@@ -260,6 +260,9 @@ void RECORDER::recheckRecordingRadioButtons()
 	}
 }
 
+// The recordInput function can be called from the emulation thread, it is important that it does not 
+// attempt to alter the state of any Qt widgets from within itself or any functions that it calls (directly and indirectly).
+// Changing Qt widgets outside of the GUI thread may cause crashes.
 void RECORDER::recordInput(void)
 {
 	bool changes_made = false;

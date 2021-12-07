@@ -599,7 +599,7 @@ void GREENZONE::invalidate(int after)
 	}
 	// redraw Piano Roll even if Greenzone didn't change
 	//pianoRoll.redraw();
-	bookmarks->redrawBookmarksList();
+	//bookmarks->redrawBookmarksList();
 }
 // invalidate and restore playback
 void GREENZONE::invalidateAndUpdatePlayback(int after)

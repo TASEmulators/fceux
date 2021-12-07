@@ -58,6 +58,7 @@ void TASEDITOR_PROJECT::init()
 void TASEDITOR_PROJECT::reset()
 {
 	changed = false;
+	updateCaptionFlag = false;
 }
 void TASEDITOR_PROJECT::update()
 {
@@ -74,6 +75,12 @@ void TASEDITOR_PROJECT::update()
 		}
 		// in case user pressed Cancel, postpone saving to next time
 		sheduleNextAutosave();
+	}
+
+	if ( updateCaptionFlag )
+	{
+		updateCaptionFlag = false;
+		tasWin->updateCaption();
 	}
 }
 
@@ -381,8 +388,11 @@ void TASEDITOR_PROJECT::setProjectChanged()
 {
 	if (!changed)
 	{
+		// set updateCaptionFlag to ensure that the window caption is only
+		// updated in the GUI thread. Updating the GUI in the emulation thread
+		// may cause crashes.
 		changed = true;
-		tasWin->updateCaption();
+		updateCaptionFlag = true;
 		sheduleNextAutosave();
 	}
 }
