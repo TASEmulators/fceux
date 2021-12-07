@@ -3590,7 +3590,13 @@ void consoleWin_t::toggleMovieFrameDisplay(void)
 void consoleWin_t::toggleMovieReadWrite(void)
 {
 	fceuWrapperLock();
-	FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
+	//FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
+	FCEUI_MovieToggleReadOnly();
+
+	if ( tasWin != NULL )
+	{
+		tasWin->updateRecordStatus();
+	}
 	fceuWrapperUnLock();
 }
 

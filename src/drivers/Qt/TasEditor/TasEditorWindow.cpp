@@ -203,6 +203,11 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	mainLayout->setMenuBar( menuBar );
 	pianoRoll->setFocus();
 
+	for (int i=0; i<HK_MAX; i++)
+	{
+		hotkeyShortcut[i] = nullptr;	
+	}
+	initHotKeys();
 	initModules();
 
 	updateCheckedItems();
@@ -1174,8 +1179,8 @@ void TasEditorWindow::buildSideControlPanel(void)
 	connect( similarBtn, SIGNAL(clicked(void)), this, SLOT(findSimilarNote(void)) );
 	connect( moreBtn   , SIGNAL(clicked(void)), this, SLOT(findNextSimilarNote(void)) );
 
-	shortcut = new QShortcut( QKeySequence("Pause"), this);
-	connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackPauseCB(void)) );
+	//shortcut = new QShortcut( QKeySequence("Pause"), this);
+	//connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackPauseCB(void)) );
 
 	shortcut = new QShortcut( QKeySequence("Shift+Up"), this);
 	connect( shortcut, SIGNAL(activated(void)), this, SLOT(playbackFrameRewind(void)) );
@@ -1199,6 +1204,53 @@ void TasEditorWindow::buildSideControlPanel(void)
 	connect( histTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(histTreeItemActivated(QTreeWidgetItem*,int) ) );
 
 	connect( bkmkBrnchStack, SIGNAL(currentChanged(int)), this, SLOT(tabViewChanged(int) ) );
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::initHotKeys(void)
+{
+	for (int i=0; i<HK_MAX; i++)
+	{
+		QKeySequence ks = Hotkeys[i].getKeySeq();
+		QShortcut *shortcut = Hotkeys[i].getShortcut();
+
+		//printf("HotKey: %i   %s\n", i, ks.toString().toStdString().c_str() );
+
+		if ( hotkeyShortcut[i] == nullptr )
+		{
+			hotkeyShortcut[i] = new QShortcut( ks, this );
+
+			if ( shortcut != nullptr )
+			{
+				connect( hotkeyShortcut[i], &QShortcut::activated, [ this, i, shortcut ] { activateHotkey( i, shortcut ); } );
+			}
+		}
+		else
+		{
+			hotkeyShortcut[i]->setKey( ks );
+		}
+	}
+
+	// Frame Advance uses key state directly, disable shortcut events
+	hotkeyShortcut[HK_FRAME_ADVANCE]->setEnabled(false);
+	hotkeyShortcut[HK_TURBO        ]->setEnabled(false);
+
+	// Disable shortcuts that are not allowed with TAS Editor
+	hotkeyShortcut[HK_OPEN_ROM      ]->setEnabled(false);
+	hotkeyShortcut[HK_CLOSE_ROM     ]->setEnabled(false);
+	hotkeyShortcut[HK_QUIT          ]->setEnabled(false);
+	hotkeyShortcut[HK_FULLSCREEN    ]->setEnabled(false);
+	hotkeyShortcut[HK_MAIN_MENU_HIDE]->setEnabled(false);
+	hotkeyShortcut[HK_LOAD_LUA      ]->setEnabled(false);
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::activateHotkey( int hkIdx, QShortcut *shortcut )
+{
+	shortcut->activated();
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::updateRecordStatus(void)
+{
+	recRecordingCbox->setChecked( !movie_readonly );
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::updateCheckedItems(void)
@@ -1387,7 +1439,7 @@ void TasEditorWindow::frameUpdate(void)
 		mustCallManualLuaFunction = false;
 	}
 #endif
-	
+
 	pianoRoll->update();
 
 	if ( recentProjectMenuReset )
@@ -2241,11 +2293,15 @@ void TasEditorWindow::setCurrentPattern(int idx)
 	taseditorConfig.currentPattern = idx;
 }
 //----------------------------------------------------------------------------
-void TasEditorWindow::recordingChanged(int state)
+void TasEditorWindow::recordingChanged(int newState)
 {
 	fceuCriticalSection emuLock;
+	int oldState = !movie_readonly ? Qt::Checked : Qt::Unchecked;
 
-	FCEUI_MovieToggleReadOnly();
+	if ( newState != oldState )
+	{
+		FCEUI_MovieToggleReadOnly();
+	}
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editUndoCB(void)
@@ -3927,10 +3983,10 @@ void QPianoRoll::contextMenuEvent(QContextMenuEvent *event)
 
 	mkr = markersManager->getMarkerAtFrame( rowUnderMouse );
 
-	act = new QAction(tr("Set Markers"), &menu);
+	act = new QAction(tr("Set Markers\tDbl-Clk"), &menu);
 	menu.addAction(act);
 	act->setEnabled( mkr == 0 );
-	act->setShortcut(QKeySequence(tr("Double Click")));
+	//act->setShortcut(QKeySequence(tr("Double Click")));
 	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(setMarkers(void)));
 
 	act = new QAction(tr("Remove Markers"), &menu);

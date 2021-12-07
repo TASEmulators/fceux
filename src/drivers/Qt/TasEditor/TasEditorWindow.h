@@ -37,6 +37,7 @@
 #include <QStackedWidget>
 #include <QClipboard>
 
+#include "Qt/config.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/TasEditor/taseditor_config.h"
 #include "Qt/TasEditor/taseditor_project.h"
@@ -327,6 +328,7 @@ class TasEditorWindow : public QDialog
 		QMenuBar  *buildMenuBar(void);
 		void buildPianoRollDisplay(void);
 		void buildSideControlPanel(void);
+		void initHotKeys(void);
 		void initPatterns(void);
 
 		QMenu     *recentProjectMenu;
@@ -404,6 +406,8 @@ class TasEditorWindow : public QDialog
 
 		QClipboard *clipboard;
 
+		QShortcut  *hotkeyShortcut[HK_MAX];
+
 		std::vector<std::string> patternsNames;
 		std::vector<std::vector<uint8_t>> patterns;
 		std::list <std::string*> projList;
@@ -428,6 +432,7 @@ class TasEditorWindow : public QDialog
 		void frameUpdate(void);
 		void updateCheckedItems(void);
 		void updateHistoryItems(void);
+		void updateRecordStatus(void);
 	private slots:
 		void openProject(void);
 		void saveProjectCb(void);
@@ -507,6 +512,7 @@ class TasEditorWindow : public QDialog
 		void setMarkers(void);
 		void removeMarkers(void);
 		void ungreenzoneSelectedFrames(void);
+		void activateHotkey( int hkIdx, QShortcut *shortcut );
 
 	friend class RECORDER;
 	friend class SPLICER;
