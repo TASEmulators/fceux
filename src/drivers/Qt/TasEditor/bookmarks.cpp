@@ -68,7 +68,7 @@ BOOKMARKS::BOOKMARKS(QWidget *parent)
 	viewWidth  = 256;
 	viewHeight = 256;
 
-	g_config->getOption("SDL.TasPianoRollFont", &fontString);
+	g_config->getOption("SDL.TasBookmarksFont", &fontString);
 
 	if ( fontString.size() > 0 )
 	{
@@ -94,191 +94,15 @@ BOOKMARKS::~BOOKMARKS(void)
 void BOOKMARKS::init()
 {
 	free();
-//	hwndBookmarksList = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_BOOKMARKSLIST);
-//	hwndBranchesBitmap = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_BRANCHES_BITMAP);
-//	hwndBookmarks = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_BOOKMARKS_BOX);
-//
-//	// set a font which is overridden elsewhere and so really only used to calculate the row size
-//	SendMessage(hwndBookmarksList, WM_SETFONT, (WPARAM)pianoRoll.hItemMeasurementFont, 0);
-//	// prepare bookmarks listview
-//	ListView_SetExtendedListViewStyleEx(hwndBookmarksList, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
-//	// subclass the listview
-//	hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLongPtr(hwndBookmarksList, GWLP_WNDPROC, (LONG_PTR)BookmarksListWndProc);
-//	// setup images for the listview
-//	hImgList = ImageList_Create(11, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
-//	HBITMAP bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP0));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP1));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP3));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP4));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP5));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP6));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP7));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP8));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP9));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP10));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP11));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP12));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP13));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP14));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP15));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP16));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP17));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP18));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP19));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED0));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED1));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED2));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED3));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED4));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED5));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED6));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED7));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED8));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED9));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED10));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED11));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED12));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED13));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED14));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED15));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED16));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED17));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED18));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED19));
-//	ImageList_AddMasked(hImgList, bmp, 0xFFFFFF);
-//	DeleteObject(bmp);
-//	ListView_SetImageList(hwndBookmarksList, hImgList, LVSIL_SMALL);
-//	// setup columns
-//	LVCOLUMN lvc;
-//	// icons column
-//	lvc.mask = LVCF_WIDTH;
-//	lvc.cx = BOOKMARKSLIST_COLUMN_ICONS_WIDTH;
-//	ListView_InsertColumn(hwndBookmarksList, 0, &lvc);
-//	// keyframe column
-//	lvc.mask = LVCF_WIDTH | LVCF_FMT;
-//	lvc.fmt = LVCFMT_CENTER;
-//	lvc.cx = BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH;
-//	ListView_InsertColumn(hwndBookmarksList, 1, &lvc);
-//	// time column
-//	lvc.cx = BOOKMARKSLIST_COLUMN_TIMESTAMP_WIDTH;
-//	ListView_InsertColumn(hwndBookmarksList, 2, &lvc);
-//	// create 10 rows
-//	ListView_SetItemCountEx(hwndBookmarksList, TOTAL_BOOKMARKS, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 
 	reset();
 	selectedSlot = DEFAULT_SLOT;
-	// find the top/height of the "Time" cell of the 1st row (for mouseover hittest calculations)
-	//RECT temp_rect, wrect;
-	//if (ListView_GetSubItemRect(hwndBookmarksList, 0, 2, LVIR_BOUNDS, &temp_rect) && temp_rect.bottom != temp_rect.top)
-	//{
-	//	listTopMargin = temp_rect.top;
-	//	listRowLeft = temp_rect.left;
-	//	listRowHeight = temp_rect.bottom - temp_rect.top;
-	//} else
-	//{
-	//	// couldn't get rect, set default values
-	//	listTopMargin = 0;
-	//	listRowLeft = BOOKMARKSLIST_COLUMN_ICONS_WIDTH + BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH;
-	//	listRowHeight = 14;
-	//}
-	// calculate the needed height of client area (so that all 10 rows fir the screen)
-	//int total_list_height = listTopMargin + listRowHeight * TOTAL_BOOKMARKS;
-	// find the difference between Bookmarks List window and Bookmarks List client area
-	//GetWindowRect(hwndBookmarksList, &wrect);
-	//GetClientRect(hwndBookmarksList, &temp_rect);
-	//total_list_height += (wrect.bottom - wrect.top) - (temp_rect.bottom - temp_rect.top);
-	// change the height
-	//taseditorWindow.changeBookmarksListHeight(total_list_height);
 
 	redrawBookmarksSectionCaption();
 }
 void BOOKMARKS::free()
 {
 	bookmarksArray.resize(0);
-	//if (hImgList)
-	//{
-	//	ImageList_Destroy(hImgList);
-	//	hImgList = 0;
-	//}
 }
 void BOOKMARKS::reset()
 {
@@ -301,6 +125,13 @@ void BOOKMARKS::reset_vars()
 	mustCheckItemUnderMouse = true;
 	bookmarkLeftclicked = bookmarkRightclicked = ITEM_UNDER_MOUSE_NONE;
 	nextFlashUpdateTime = clock() + BOOKMARKS_FLASH_TICK;
+}
+
+void BOOKMARKS::setFont( QFont &newFont )
+{
+	font = newFont;
+	QWidget::setFont( newFont );
+	calcFontData();
 }
 
 void BOOKMARKS::calcFontData(void)

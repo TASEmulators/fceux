@@ -35,6 +35,7 @@
 #include <QMessageBox>
 #include <QFontMetrics>
 #include <QFileDialog>
+#include <QFontDialog>
 #include <QInputDialog>
 #include <QStandardPaths>
 #include <QApplication>
@@ -641,6 +642,35 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	act->setStatusTip(tr("Follow Marker Note Content"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
 	connect(act, SIGNAL(triggered(bool)), this, SLOT(followMkrActChanged(bool)) );
+
+	viewMenu->addAction(act);
+
+	viewMenu->addSeparator();
+
+	// View -> Piano Roll Font
+	act = new QAction(tr("Piano Roll Font..."), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
+	act->setStatusTip(tr("Select Piano Roll Font"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered(void)), this, SLOT(changePianoRollFontCB(void)) );
+
+	viewMenu->addAction(act);
+
+	// View -> Bookmarks Font
+	act = new QAction(tr("Bookmarks View Font..."), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
+	act->setStatusTip(tr("Select Bookmarks View Font"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered(void)), this, SLOT(changeBookmarksFontCB(void)) );
+
+	viewMenu->addAction(act);
+
+	// View -> Branches Font
+	act = new QAction(tr("Branches View Font..."), this);
+	//act->setShortcut(QKeySequence(tr("Ctrl+F")));
+	act->setStatusTip(tr("Select Branches View Font"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
+	connect(act, SIGNAL(triggered(void)), this, SLOT(changeBranchesFontCB(void)) );
 
 	viewMenu->addAction(act);
 
@@ -2685,6 +2715,54 @@ void TasEditorWindow::updateToolTips(void)
 	}
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::changePianoRollFontCB(void)
+{
+	bool ok = false;
+
+	QFont selFont = QFontDialog::getFont( &ok, pianoRoll->QWidget::font(), this, tr("Select Font"), QFontDialog::MonospacedFonts );
+
+	if ( ok )
+	{
+		pianoRoll->setFont( selFont );
+
+		//printf("Font Changed to: '%s'\n", selFont.toString().toStdString().c_str() );
+
+		g_config->setOption("SDL.TasPianoRollFont", selFont.toString().toStdString().c_str() );
+	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::changeBookmarksFontCB(void)
+{
+	bool ok = false;
+
+	QFont selFont = QFontDialog::getFont( &ok, bookmarks.QWidget::font(), this, tr("Select Font"), QFontDialog::MonospacedFonts );
+
+	if ( ok )
+	{
+		bookmarks.setFont( selFont );
+
+		//printf("Font Changed to: '%s'\n", selFont.toString().toStdString().c_str() );
+
+		g_config->setOption("SDL.TasBookmarksFont", selFont.toString().toStdString().c_str() );
+	}
+}
+//----------------------------------------------------------------------------
+void TasEditorWindow::changeBranchesFontCB(void)
+{
+	bool ok = false;
+
+	QFont selFont = QFontDialog::getFont( &ok, branches.QWidget::font(), this, tr("Select Font"), QFontDialog::MonospacedFonts );
+
+	if ( ok )
+	{
+		branches.setFont( selFont );
+
+		//printf("Font Changed to: '%s'\n", selFont.toString().toStdString().c_str() );
+
+		g_config->setOption("SDL.TasBranchesFont", selFont.toString().toStdString().c_str() );
+	}
+}
+//----------------------------------------------------------------------------
 void TasEditorWindow::playbackPauseCB(void)
 {
 	fceuWrapperLock();
@@ -3459,6 +3537,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 
 	if ( fontString.size() > 0 )
 	{
+		//printf("Font String: '%s'\n", fontString.c_str() );
 		font.fromString( QString::fromStdString( fontString ) );
 	}
 	else
@@ -3670,6 +3749,13 @@ void QPianoRoll::vbarChanged(int val)
 		lineOffset = maxLineOffset;
 	}
 	update();
+}
+//----------------------------------------------------------------------------
+void QPianoRoll::setFont( QFont &newFont )
+{
+	font = newFont;
+	QWidget::setFont( newFont );
+	calcFontData();
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::calcFontData(void)

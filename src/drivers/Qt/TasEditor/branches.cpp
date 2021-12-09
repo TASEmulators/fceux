@@ -63,7 +63,7 @@ BRANCHES::BRANCHES(QWidget *parent)
 	this->setMinimumWidth(BRANCHES_BITMAP_WIDTH);
 	this->setMinimumHeight(BRANCHES_BITMAP_HEIGHT);
 
-	g_config->getOption("SDL.TasBranchFont", &fontString);
+	g_config->getOption("SDL.TasBranchesFont", &fontString);
 
 	if ( fontString.size() > 0 )
 	{
@@ -84,6 +84,16 @@ BRANCHES::~BRANCHES(void)
 }
 
 //----------------------------------------------------------------------------
+void BRANCHES::setFont( QFont &newFont )
+{
+	font = newFont;
+	QWidget::setFont( newFont );
+	calcFontData();
+	reset();
+	recalculateParents();
+	recalculateBranchesTree();
+}
+
 void BRANCHES::calcFontData(void)
 {
 	QWidget::setFont(font);

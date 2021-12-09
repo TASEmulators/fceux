@@ -159,6 +159,7 @@ class QPianoRoll : public QWidget
 		void  setLightInHeaderColumn(int column, int level);
 		void  periodicUpdate(void);
 
+		void  setFont( QFont &font );
 	protected:
 		void calcFontData(void);
 		void resizeEvent(QResizeEvent *event);
@@ -513,6 +514,9 @@ class TasEditorWindow : public QDialog
 		void removeMarkers(void);
 		void ungreenzoneSelectedFrames(void);
 		void activateHotkey( int hkIdx, QShortcut *shortcut );
+		void changePianoRollFontCB(void);
+		void changeBookmarksFontCB(void);
+		void changeBranchesFontCB(void);
 
 	friend class RECORDER;
 	friend class SPLICER;

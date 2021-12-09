@@ -754,6 +754,9 @@ InitConfig()
 
 		config->addOption( buf, "");
 	}
+	config->addOption("SDL.TasPianoRollFont", "");
+	config->addOption("SDL.TasBookmarksFont", "");
+	config->addOption("SDL.TasBranchesFont" , "");
 
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);

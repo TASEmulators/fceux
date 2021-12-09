@@ -2,6 +2,7 @@
 #pragma once
 #include <vector>
 
+#include <QFont>
 #include <QWidget>
 #include <QScrollBar>
 
@@ -67,6 +68,7 @@ public:
 	void reset_vars();
 	void update();
 
+	void setFont( QFont &font );
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is, unsigned int offset);
 

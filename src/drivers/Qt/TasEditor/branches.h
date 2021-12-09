@@ -113,6 +113,7 @@ public:
 	void resetVars();
 	void update();
 
+	void setFont( QFont &font );
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
 
