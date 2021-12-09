@@ -32,12 +32,14 @@
 #define BRANCHES_CLOUD_X 14
 #define BRANCHES_CLOUD_Y 72
 #define BRANCHES_GRID_MIN_WIDTH 14
-#define BRANCHES_GRID_MAX_WIDTH 30
+//#define BRANCHES_GRID_MAX_WIDTH 30
+#define BRANCHES_GRID_MAX_WIDTH 40
 #define MIN_CLOUD_LINE_LENGTH 19
 #define MIN_CLOUD_X 12
 #define BASE_HORIZONTAL_SHIFT 10
 #define BRANCHES_GRID_MIN_HALFHEIGHT 8
-#define BRANCHES_GRID_MAX_HALFHEIGHT 12
+#define BRANCHES_GRID_MAX_HALFHEIGHT 32
+//#define BRANCHES_GRID_MAX_HALFHEIGHT 12
 #define EMPTY_BRANCHES_X_BASE 4
 #define EMPTY_BRANCHES_Y_BASE 9
 #define EMPTY_BRANCHES_Y_FACTOR 14
@@ -143,6 +145,7 @@ public:
 
 protected:
 	void paintEvent(QPaintEvent *event);
+	void resizeEvent(QResizeEvent *event);
 	void mousePressEvent(QMouseEvent * event);
 	void mouseReleaseEvent(QMouseEvent * event);
 	void mouseMoveEvent(QMouseEvent * event);
@@ -184,16 +187,6 @@ private:
 	int fireballSize;
 	int lastItemUnderMouse;
 
-	// GDI stuff
-	//HBRUSH normalBrush, borderBrush, selectedSlotBrush;
-	//RECT tempRect;
-	//HPEN normalPen, timelinePen, selectPen;
-	//HBITMAP hBranchesBitmap, hOldBitmap, hBufferBitmap, hOldBitmap1, hBranchesSpritesheet, hOldBitmap2;
-	//HDC hBitmapDC, hBufferDC, hSpritesheetDC;
-	//TRIVERTEX vertex[2];
-	//GRADIENT_RECT gRect;
-	//RECT branchesBitmapRect;
-	
 	QFont font;
 
 	int  viewWidth;
@@ -205,6 +198,8 @@ private:
 	int  pxBoxHeight;
 	int  pxSelWidth;
 	int  pxSelHeight;
+	int  pxMinGridWidth;
+	int  pxMaxGridWidth;
 
 	// temps
 	std::vector<int> gridX;				// measured in grid units, not in pixels

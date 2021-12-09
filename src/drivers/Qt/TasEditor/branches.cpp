@@ -96,6 +96,7 @@ void BRANCHES::setFont( QFont &newFont )
 
 void BRANCHES::calcFontData(void)
 {
+	int w,h;
 	QWidget::setFont(font);
 	QFontMetrics metrics(font);
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
@@ -110,6 +111,9 @@ void BRANCHES::calcFontData(void)
 	pxBoxHeight = pxLineSpacing;
 	pxSelWidth  = (pxBoxWidth  * 7) / 8;
 	pxSelHeight = (pxBoxHeight * 7) / 8;
+
+	pxMinGridWidth = pxBoxWidth * 1;
+	pxMaxGridWidth = pxBoxWidth * 2;
 }
 
 void BRANCHES::init()
@@ -572,6 +576,16 @@ bool BRANCHES::event(QEvent *event)
 		return true;
 	}
 	return QWidget::event(event);
+}
+
+void BRANCHES::resizeEvent(QResizeEvent *event)
+{
+	viewWidth  = event->size().width();
+	viewHeight = event->size().height();
+
+	//printf("BranchView: %i x %i\n", viewWidth, viewHeight );
+
+	recalculateBranchesTree();
 }
 
 void BRANCHES::paintEvent(QPaintEvent *event)
@@ -1351,14 +1365,33 @@ void BRANCHES::recalculateBranchesTree()
 	int grid_width, cloud_prefix = 0;
 	if (BranchesLevels.size()-1 > 0)
 	{
-		grid_width = BRANCHES_CANVAS_WIDTH / (BranchesLevels.size()-1);
-		if (grid_width < BRANCHES_GRID_MIN_WIDTH)
-			grid_width = BRANCHES_GRID_MIN_WIDTH;
-		else if (grid_width > BRANCHES_GRID_MAX_WIDTH)
-			grid_width = BRANCHES_GRID_MAX_WIDTH;
-	} else grid_width = BRANCHES_GRID_MAX_WIDTH;
+		//grid_width = BRANCHES_CANVAS_WIDTH / (BranchesLevels.size()-1);
+		grid_width = width() / (BranchesLevels.size()-1);
+		//if (grid_width < BRANCHES_GRID_MIN_WIDTH)
+		//{
+		//	grid_width = BRANCHES_GRID_MIN_WIDTH;
+		//}
+		//else if (grid_width > BRANCHES_GRID_MAX_WIDTH)
+		//{
+		//	grid_width = BRANCHES_GRID_MAX_WIDTH;
+		//}
+		if (grid_width < pxMinGridWidth)
+		{
+			grid_width = pxMinGridWidth;
+		}
+		else if (grid_width > pxMaxGridWidth)
+		{
+			grid_width = pxMaxGridWidth;
+		}
+	}
+	else
+	{
+		grid_width = pxMaxGridWidth;
+	}
 	if (grid_width < MIN_CLOUD_LINE_LENGTH)
+	{
 		cloud_prefix = MIN_CLOUD_LINE_LENGTH - grid_width;
+	}
 
 	// 2. Define GridY of branches
 	recursiveSetYPos(ITEM_UNDER_MOUSE_CLOUD, 0);
@@ -1366,15 +1399,26 @@ void BRANCHES::recalculateBranchesTree()
 	int grid_halfheight;
 	int totalHeight = 0;
 	for (int i = children[0].size()-1; i >= 0; i--)
+	{
 		totalHeight += gridHeight[children[0][i]];
+	}
 	if (totalHeight)
 	{
-		grid_halfheight = BRANCHES_CANVAS_HEIGHT / (2 * totalHeight);
+		//grid_halfheight = BRANCHES_CANVAS_HEIGHT / (2 * totalHeight);
+		grid_halfheight = height() / (2 * totalHeight);
 		if (grid_halfheight < BRANCHES_GRID_MIN_HALFHEIGHT)
+		{
 			grid_halfheight = BRANCHES_GRID_MIN_HALFHEIGHT;
+		}
 		else if (grid_halfheight > BRANCHES_GRID_MAX_HALFHEIGHT)
+		{
 			grid_halfheight = BRANCHES_GRID_MAX_HALFHEIGHT;
-	} else grid_halfheight = BRANCHES_GRID_MAX_HALFHEIGHT;
+		}
+	}
+	else
+	{
+		grid_halfheight = BRANCHES_GRID_MAX_HALFHEIGHT;
+	}
 	// special case 2: if chain of branches is too long, the last item (fireball) goes up
 	if (changesSinceCurrentBranch)
 	{
@@ -1488,9 +1532,13 @@ void BRANCHES::recalculateBranchesTree()
 
 	// align whole tree horizontally
 	cloudX = (BRANCHES_BITMAP_WIDTH + BASE_HORIZONTAL_SHIFT - max_x) / 2;
-	if (cloudX < MIN_CLOUD_X)
+	//if (cloudX < MIN_CLOUD_X)
+	//{
+	//	cloudX = MIN_CLOUD_X;
+	//}
+	if (cloudX < pxBoxWidth)
 	{
-		cloudX = MIN_CLOUD_X;
+		cloudX = pxBoxWidth;
 	}
 	for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
 	{
