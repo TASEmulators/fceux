@@ -3591,6 +3591,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 
 	lineOffset = 0;
 	maxLineOffset = 0;
+	playbackCursorPos = 0;
 	dragMode = DRAG_MODE_NONE;
 	dragSelectionStartingFrame = 0;
 	dragSelectionEndingFrame = 0;
@@ -5330,7 +5331,40 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		vbar->show();
 	}
 
-	lineOffset = maxLineOffset - vbar->value();
+	if ( taseditorConfig->followPlaybackCursor )
+	{
+		lineOffset = maxLineOffset - vbar->value();
+
+		if ( playbackCursorPos != currFrameCounter )
+		{
+			int lineOffsetLowerLim, lineOffsetUpperLim;
+
+			playbackCursorPos = currFrameCounter;
+
+			lineOffsetLowerLim = playbackCursorPos - nrow + 5;
+			lineOffsetUpperLim = playbackCursorPos + nrow;
+
+			//if ( !lineIsVisible( playbackCursorPos ) )
+			if ( lineOffset < lineOffsetLowerLim )
+			{
+				lineOffset = lineOffsetLowerLim;
+				vbar->setValue( maxLineOffset - lineOffset );
+			}
+			else if ( lineOffset > lineOffsetUpperLim )
+			{
+				lineOffset = lineOffsetUpperLim - nrow;
+				if ( lineOffset < 0 )
+				{
+					lineOffset = 0;
+				}
+				vbar->setValue( maxLineOffset - lineOffset );
+			}
+		}
+	}
+	else
+	{
+		vbar->setValue( maxLineOffset - lineOffset );
+	}
 
 	if ( lineOffset < 0 )
 	{

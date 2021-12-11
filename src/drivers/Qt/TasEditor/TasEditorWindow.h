@@ -236,6 +236,8 @@ class QPianoRoll : public QWidget
 		int mouse_x;
 		int mouse_y;
 
+		int playbackCursorPos;
+
 		bool useDarkTheme;
 
 	public slots:
