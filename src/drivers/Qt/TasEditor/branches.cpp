@@ -464,6 +464,31 @@ void BRANCHES::redrawBranchesBitmap()
 	QWidget::update();
 }
 
+void BRANCHES::mouseDoubleClickEvent(QMouseEvent * event)
+{
+	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
+
+	bookmarks->itemUnderMouse = item;
+
+	if (event->button() & Qt::LeftButton)
+	{
+		// double click on Branches Tree = deploy the Branch
+		int branchUnderMouse = bookmarks->itemUnderMouse;
+		if (branchUnderMouse == ITEM_UNDER_MOUSE_CLOUD)
+		{
+			playback->jump(0);
+		}
+		else if (branchUnderMouse >= 0 && branchUnderMouse < TOTAL_BOOKMARKS && bookmarks->bookmarksArray[branchUnderMouse].notEmpty)
+		{
+			bookmarks->command(COMMAND_DEPLOY, branchUnderMouse);
+		}
+		else if (branchUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
+		{
+			playback->jump(currMovieData.getNumRecords() - 1);
+		}
+	}
+}
+
 void BRANCHES::mousePressEvent(QMouseEvent * event)
 {
 	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
