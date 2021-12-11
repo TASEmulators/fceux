@@ -941,8 +941,8 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	upperMarkerNote  = new UpperMarkerNoteEdit();
 	lowerMarkerNote  = new LowerMarkerNoteEdit();
 
-	upperMarkerLabel->setFlat(true);
-	lowerMarkerLabel->setFlat(true);
+	//upperMarkerLabel->setFlat(true);
+	//lowerMarkerLabel->setFlat(true);
 
 	pianoRollFrame->setLineWidth(2);
 	pianoRollFrame->setMidLineWidth(1);
