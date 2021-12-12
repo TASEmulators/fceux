@@ -3744,6 +3744,23 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	headerLightsColors[ 8] = QColor( 0x00, 0xF7, 0xDA );
 	headerLightsColors[ 9] = QColor( 0x7C, 0xFC, 0xF0 );
 	headerLightsColors[10] = QColor( 0xBA, 0xFF, 0xFC );
+
+	hotChangesColors[ 0] = QColor( 0x00, 0x00, 0x00 );
+	hotChangesColors[ 1] = QColor( 0x35, 0x40, 0x00 );
+	hotChangesColors[ 2] = QColor( 0x18, 0x52, 0x18 );
+	hotChangesColors[ 3] = QColor( 0x34, 0x5C, 0x5E );
+	hotChangesColors[ 4] = QColor( 0x00, 0x4C, 0x80 );
+	hotChangesColors[ 5] = QColor( 0x00, 0x03, 0xBA );
+	hotChangesColors[ 6] = QColor( 0x38, 0x00, 0xD1 );
+	hotChangesColors[ 7] = QColor( 0x72, 0x12, 0xB2 );
+	hotChangesColors[ 8] = QColor( 0xAB, 0x00, 0xBA );
+	hotChangesColors[ 9] = QColor( 0xB0, 0x00, 0x6F );
+	hotChangesColors[10] = QColor( 0xC2, 0x00, 0x37 );
+	hotChangesColors[11] = QColor( 0xBA, 0x0C, 0x00 );
+	hotChangesColors[12] = QColor( 0xC9, 0x2C, 0x00 );
+	hotChangesColors[13] = QColor( 0xBF, 0x53, 0x00 );
+	hotChangesColors[14] = QColor( 0xCF, 0x72, 0x00 );
+	hotChangesColors[15] = QColor( 0xC7, 0x8B, 0x3C );
 }
 //----------------------------------------------------------------------------
 QPianoRoll::~QPianoRoll(void)
@@ -5502,7 +5519,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	fceuCriticalSection emuLock;
 	int x, y, row, nrow, lineNum;
 	QPainter painter(this);
-	QColor white(255,255,255), black(0,0,0), blkColor;
+	QColor white(255,255,255), black(0,0,0), blkColor, rowTextColor;
 	static const char *buttonNames[] = { "A", "B", "S", "T", "U", "D", "L", "R", NULL };
 	char stmp[32];
 	char rowIsSel=0;
@@ -5811,24 +5828,51 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		{
 			painter.fillRect( 0, y, viewWidth, pxLineSpacing, QColor( 10, 36, 106 ) );
 
-			painter.setPen( QColor( 255, 255, 255 ) );
+			rowTextColor = QColor( 255, 255, 255 );
 		}
 		else
 		{
-			painter.setPen( QColor(   0,   0,   0 ) );
+			rowTextColor = QColor( 0, 0, 0 );
 		}
+		painter.setPen( rowTextColor );
 
 		for (int i=0; i<numCtlr; i++)
 		{
+			int ctlrOfs, btnOfs, hotChangeVal;
 			data = currMovieData.records[ lineNum ].joysticks[i];
 
 			x = pxFrameCtlX[i] - pxLineXScroll;
 
+			ctlrOfs = i*8;
+
 			for (int j=0; j<8; j++)
 			{
+				btnOfs = ctlrOfs+j;
+
+				if (taseditorConfig->enableHotChanges)
+				{
+					hotChangeVal = history->getCurrentSnapshot().inputlog.getHotChangesInfo( lineNum, btnOfs );
+
+					if ( !rowIsSel && (hotChangeVal >= 0) && (hotChangeVal < 16) )
+					{
+						painter.setPen( hotChangesColors[hotChangeVal] );
+					}
+					else
+					{
+						painter.setPen( rowTextColor );
+					}
+				}
+				else
+				{
+					hotChangeVal = -1;
+				}
 				if ( data & (0x01 << j) )
 				{
 					painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr(buttonNames[j]) );
+				}
+				else if ( hotChangeVal > 0 )
+				{
+					painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr("-") );
 				}
 				x += pxWidthBtnCol;
 			}
@@ -5842,6 +5886,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		//else
 		//	SelectObject(msg->nmcd.hdc, hMainListFont);
 		// bg
+		painter.setPen( rowTextColor );
+
 		x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 10*pxCharWidth) / 2;
 
 		sprintf( stmp, "%010i", lineNum );
