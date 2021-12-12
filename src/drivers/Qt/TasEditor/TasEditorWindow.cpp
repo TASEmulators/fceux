@@ -82,10 +82,11 @@ enum DRAG_MODES
 	DRAG_MODE_SELECTION,
 	DRAG_MODE_DESELECTION,
 };
-#define BOOKMARKS_WITH_BLUE_ARROW    0x00010000
-#define BOOKMARKS_WITH_GREEN_ARROW   0x00020000
-#define BLUE_ARROW_IMAGE_ID          0x00040000
-#define GREEN_ARROW_IMAGE_ID         0x00080000
+#define BOOKMARKS_WITH_NO_ARROW      0x00010000
+#define BOOKMARKS_WITH_BLUE_ARROW    0x00020000
+#define BOOKMARKS_WITH_GREEN_ARROW   0x00040000
+#define BLUE_ARROW_IMAGE_ID          0x00080000
+#define GREEN_ARROW_IMAGE_ID         0x00100000
 #define GREEN_BLUE_ARROW_IMAGE_ID   (BLUE_ARROW_IMAGE_ID | GREEN_ARROW_IMAGE_ID)
 
 #define MARKER_DRAG_COUNTDOWN_MAX 14
@@ -3998,7 +3999,7 @@ void QPianoRoll::drawArrow( QPainter *painter, int xl, int yl, int value )
 	w = pxCharWidth;
 	h = pxLineSpacing-2;
 
-	if ( (value & BOOKMARKS_WITH_GREEN_ARROW) || (value & BOOKMARKS_WITH_BLUE_ARROW) )
+	if ( (value & BOOKMARKS_WITH_GREEN_ARROW) || (value & BOOKMARKS_WITH_BLUE_ARROW) || (value & BOOKMARKS_WITH_NO_ARROW) )
 	{
 		char txt[4];
 		int bookmarkNum;
@@ -4010,10 +4011,12 @@ void QPianoRoll::drawArrow( QPainter *painter, int xl, int yl, int value )
 		
 		painter->drawText( x, y+pxLineTextOfs, tr(txt) );
 
-		draw2ndArrow = hasBookmark = true;
+		hasBookmark  = true;
 		draw1stArrow = false;
+		draw2ndArrow = (value & BOOKMARKS_WITH_NO_ARROW) ? false : true;
 
 		x += pxCharWidth;
+
 	}
 
 	p[0] = QPoint( x, y );
@@ -4052,6 +4055,7 @@ void QPianoRoll::drawArrow( QPainter *painter, int xl, int yl, int value )
 	{
 		painter->setBrush( arrowColor1 );
 		painter->drawPolygon( p, 3 );
+		x += pxCharWidth;
 	}
 
 	if ( draw2ndArrow )
@@ -5887,6 +5891,10 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			else if (lineNum == currFrameCounter)
 			{
 				iImage |= BOOKMARKS_WITH_BLUE_ARROW;
+			}
+			else
+			{
+				iImage |= BOOKMARKS_WITH_NO_ARROW;
 			}
 		}
 
