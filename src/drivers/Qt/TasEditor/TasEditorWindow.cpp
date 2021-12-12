@@ -4152,13 +4152,22 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 {
 	fceuCriticalSection emuLock;
 	int col, line, row_index, column_index, kbModifiers, alt_pressed;
-	bool row_valid;
+	bool row_valid, headerClicked;
 	QPoint c = convPixToCursor( event->pos() );
 
 	mouse_x = event->pos().x();
 	mouse_y = event->pos().y();
 
-	line = lineOffset + c.y();
+	if ( c.y() >= 0 )
+	{
+		line = lineOffset + c.y();
+		headerClicked = false;
+	}
+	else
+	{
+		line = -1;
+		headerClicked = true;
+	}
 	col  = calcColumn( event->pos().x() );
 
 	row_index = line;
@@ -4255,7 +4264,20 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 		else if (column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 		{
 			// clicked on Input
-			if (row_index >= 0)
+			if (headerClicked)
+			{
+				drawingStartTimestamp = clock();
+				int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+				int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+				int selection_beginning = selection->getCurrentRowsSelectionBeginning();
+				int selection_end       = selection->getCurrentRowsSelectionEnd();
+
+				if ( (selection_beginning >= 0) && (selection_end >= 0) )
+				{
+					tasWin->toggleInput(selection_beginning, selection_end, joy, button, drawingStartTimestamp);
+				}
+			}
+			else if (row_index >= 0)
 			{
 				if (!alt_pressed && !(kbModifiers & Qt::ShiftModifier))
 				{
@@ -4325,7 +4347,14 @@ void QPianoRoll::mouseReleaseEvent(QMouseEvent * event)
 	mouse_x = event->pos().x();
 	mouse_y = event->pos().y();
 
-	line = lineOffset + c.y();
+	if ( c.y() >= 0 )
+	{
+		line = lineOffset + c.y();
+	}
+	else
+	{
+		line = lineOffset;
+	}
 	col  = calcColumn( event->pos().x() );
 
 	rowUnderMouse = realRowUnderMouse = line;
@@ -4356,7 +4385,14 @@ void QPianoRoll::mouseMoveEvent(QMouseEvent * event)
 	mouse_x = event->pos().x();
 	mouse_y = event->pos().y();
 
-	line = lineOffset + c.y();
+	if ( c.y() >= 0 )
+	{
+		line = lineOffset + c.y();
+	}
+	else
+	{
+		line = lineOffset;
+	}
 	col =  calcColumn( event->pos().x() );
 
 	rowUnderMouse = realRowUnderMouse = line;
