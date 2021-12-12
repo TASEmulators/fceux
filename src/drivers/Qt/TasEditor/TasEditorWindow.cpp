@@ -3596,6 +3596,10 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	dragSelectionStartingFrame = 0;
 	dragSelectionEndingFrame = 0;
 	realRowUnderMouse = -1;
+	rowUnderMouse = -1;
+	columnUnderMouse = 0;
+	rowUnderMouseAtPress = -1;
+	columnUnderMouseAtPress = 0;
 	markerDragFrameNumber = 0;
 	markerDragCountdown = 0;
 	drawingStartTimestamp = 0;
@@ -4158,8 +4162,8 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 	col  = calcColumn( event->pos().x() );
 
 	row_index = line;
-	rowUnderMouse = realRowUnderMouse = line;
-	columnUnderMouse = column_index = col;
+	rowUnderMouseAtPress = rowUnderMouse = realRowUnderMouse = line;
+	columnUnderMouseAtPress = columnUnderMouse = column_index = col;
 
 	row_valid = (row_index >= 0) && ( (size_t)row_index < currMovieData.records.size() );
 
@@ -4758,9 +4762,6 @@ void QPianoRoll::updateDrag(void)
 				if (selection_beginning >= 0)
 				{
 					// perform hit test
-					//info.pt.x = p.x;
-					//info.pt.y = p.y;
-					//ListView_SubItemHitTest(hwndList, &info);
 					row_index = rowUnderMouse;
 					//if (row_index < 0)
 					//{
@@ -4783,24 +4784,22 @@ void QPianoRoll::updateDrag(void)
 			}
 			else
 			{
-				//double total_len = sqrt((double)(total_dx * total_dx + total_dy * total_dy));
-				//int drawing_min_line_len = listRowHeight;		// = min(list_row_width, list_row_height) in pixels
-				//for (double len = 0; len < total_len; len += drawing_min_line_len)
-				//{
+				row_index = rowUnderMouseAtPress;
+
+				while (row_index != rowUnderMouse)
+				{
 					// perform hit test
-					//info.pt.x = p.x + (len / total_len) * total_dx;
-					//info.pt.y = p.y + (len / total_len) * total_dy;
-					//ListView_SubItemHitTest(hwndList, &info);
-					//row_index = info.iItem;
-					row_index = rowUnderMouse;
-					//if (row_index < 0)
-					//	row_index = ListView_GetTopIndex(hwndList) + (info.pt.y - listTopMargin) / listRowHeight;
+					//row_index = rowUnderMouse;
+					if ( row_index < 0 )
+					{
+						break;
+					}
 					// pad movie size if user tries to draw below Piano Roll limit
 					if (row_index >= currMovieData.getNumRecords())
 					{
 						currMovieData.insertEmpty(-1, row_index + 1 - currMovieData.getNumRecords());
 					}
-					column_index = columnUnderMouse;
+					column_index = columnUnderMouseAtPress;
 
 					if (row_index >= 0 && column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 					{
@@ -4821,7 +4820,41 @@ void QPianoRoll::updateDrag(void)
 							if (max_row_index < row_index) max_row_index = row_index;
 						}
 					}
-				//}
+					if ( row_index < rowUnderMouse )
+					{
+						row_index++;
+					}
+					else if ( row_index > rowUnderMouse )
+					{
+						row_index--;
+					}
+				}
+				// pad movie size if user tries to draw below Piano Roll limit
+				if (row_index >= currMovieData.getNumRecords())
+				{
+					currMovieData.insertEmpty(-1, row_index + 1 - currMovieData.getNumRecords());
+				}
+				column_index = columnUnderMouseAtPress;
+
+				if (row_index >= 0 && column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+				{
+					joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+					bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+					if (dragMode == DRAG_MODE_SET && !currMovieData.records[row_index].checkBit(joy, bit))
+					{
+						currMovieData.records[row_index].setBit(joy, bit);
+						changes_made = true;
+						if (min_row_index > row_index) min_row_index = row_index;
+						if (max_row_index < row_index) max_row_index = row_index;
+					}
+					else if (dragMode == DRAG_MODE_UNSET && currMovieData.records[row_index].checkBit(joy, bit))
+					{
+						currMovieData.records[row_index].clearBit(joy, bit);
+						changes_made = true;
+						if (min_row_index > row_index) min_row_index = row_index;
+						if (max_row_index < row_index) max_row_index = row_index;
+					}
+				}
 				if (changes_made)
 				{
 					if (dragMode == DRAG_MODE_SET)
@@ -4834,8 +4867,6 @@ void QPianoRoll::updateDrag(void)
 					}
 				}
 			}
-			//drawingLastX = drawing_current_x;
-			//drawingLastY = drawing_current_y;
 			break;
 		}
 		case DRAG_MODE_SELECTION:
@@ -4894,11 +4925,15 @@ void QPianoRoll::updateDrag(void)
 			{
 				// change Deselection shape
 				if (new_drag_selection_ending_frame >= dragSelectionStartingFrame)
+				{
 					// deselecting from upper to lower
 					selection->clearRegionOfRowsSelection(dragSelectionStartingFrame, new_drag_selection_ending_frame + 1);
+				}
 				else
+				{
 					// deselecting from lower to upper
 					selection->clearRegionOfRowsSelection(new_drag_selection_ending_frame, dragSelectionStartingFrame + 1);
+				}
 				dragSelectionEndingFrame = new_drag_selection_ending_frame;
 			}
 			break;

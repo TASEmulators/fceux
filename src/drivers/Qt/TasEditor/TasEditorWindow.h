@@ -227,6 +227,8 @@ class QPianoRoll : public QWidget
 		int realRowUnderMouse;
 		int rowUnderMouse;
 		int columnUnderMouse;
+		int rowUnderMouseAtPress;
+		int columnUnderMouseAtPress;
 		int markerDragFrameNumber;
 		int markerDragCountdown;
 		int drawingStartTimestamp;
