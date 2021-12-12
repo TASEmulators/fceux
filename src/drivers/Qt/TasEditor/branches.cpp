@@ -57,6 +57,12 @@ BRANCHES::BRANCHES(QWidget *parent)
 {
 	std::string fontString;
 
+	imageItem  = 0;
+	imageTimer = new QTimer(this);
+	imageTimer->setSingleShot(true);
+	imageTimer->setInterval(100);
+	connect( imageTimer, SIGNAL(timeout(void)), this, SLOT(showImage(void)) );
+
 	//this->parent = qobject_cast <TasEditorWindow*>( parent );
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMouseTracking(true);
@@ -559,11 +565,32 @@ void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
 	}
 }
 
+void BRANCHES::showImage(void)
+{
+	static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
+}
+
 void BRANCHES::mouseMoveEvent(QMouseEvent * event)
 {
-	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
+	int item, item_valid;
+
+	item = findItemUnderMouse( event->pos().x(), event->pos().y() );
+
+	item_valid = (item >= 0) && (item < TOTAL_BOOKMARKS);
 
 	bookmarks->itemUnderMouse = item;
+
+	if ( item_valid && bookmarks->bookmarksArray[item].notEmpty)
+	{
+		imageItem = item;
+		imagePos  = event->globalPos();
+		imageTimer->start();
+		QToolTip::hideText();
+	}
+	else
+	{
+		imageTimer->stop();
+	}
 
 	//if (event->button() & Qt::LeftButton)
 	//{
@@ -589,7 +616,7 @@ bool BRANCHES::event(QEvent *event)
 
 		if ( item_valid && bookmarks->bookmarksArray[item].notEmpty)
 		{
-			static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( helpEvent, new bookmarkPreviewPopup(item, this) ));
+			//static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( helpEvent->globalPos(), new bookmarkPreviewPopup(item, this) ));
 			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 			QToolTip::hideText();
 			event->ignore();

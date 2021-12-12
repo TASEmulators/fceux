@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <QFont>
+#include <QTimer>
 #include <QWidget>
 #include <QScrollBar>
 
@@ -74,8 +75,6 @@ public:
 
 	void command(int command_id, int slot = -1);
 
-	//void getDispInfo(NMLVDISPINFO* nmlvDispInfo);
-	//LONG handleCustomDraw(NMLVCUSTOMDRAW* msg);
 	void handleLeftClick();
 	void handleRightClick();
 
@@ -100,13 +99,10 @@ public:
 	bool mustCheckItemUnderMouse;
 	bool mouseOverBranchesBitmap, mouseOverBookmarksList;
 	int itemUnderMouse;
-	//TRACKMOUSEEVENT tme, tmeList;
 	int bookmarkLeftclicked, bookmarkRightclicked, columnClicked;
 	int listTopMargin;
 	int listRowLeft;
 	int listRowHeight;
-
-	//HWND hwndBookmarksList, hwndBranchesBitmap, hwndBookmarks;
 
 protected:
 	void resizeEvent(QResizeEvent *event);
@@ -131,13 +127,15 @@ private:
 	int nextFlashUpdateTime;
 	int mouseX, mouseY;
 
-	// GDI stuff
-	//HFONT hBookmarksFont;
-	//HIMAGELIST hImgList;
+	// GUI stuff
 	QFont       font;
 	QScrollBar *hbar;
 	QScrollBar *vbar;
+	QTimer     *imageTimer;
 
+	QPoint      imagePos;
+
+	int imageItem;
 	int viewWidth;
 	int viewHeight;
 	int viewLines;
@@ -156,4 +154,7 @@ private:
 	int pxStartCol1;
 	int pxStartCol2;
 	int pxStartCol3;
+
+	private slots:
+		void showImage(void);
 };

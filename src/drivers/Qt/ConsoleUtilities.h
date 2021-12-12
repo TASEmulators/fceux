@@ -90,4 +90,4 @@ class QCheckBoxRO : public QCheckBox
 
 QString fceuGetOpcodeToolTip( uint8_t *opcode, int size );
 
-QDialog *fceuCustomToolTipShow( QHelpEvent *helpEvent, QDialog *popup );
+QDialog *fceuCustomToolTipShow( const QPoint &globalPos, QDialog *popup );

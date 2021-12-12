@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <QFont>
+#include <QTimer>
 #include <QWidget>
 
 #define BRANCHES_ANIMATION_TICK (40 * CLOCKS_PER_SEC / 1000)	// animate at 25FPS
@@ -189,7 +190,10 @@ private:
 	int lastItemUnderMouse;
 
 	QFont font;
+	QPoint  imagePos;
+	QTimer *imageTimer;
 
+	int  imageItem;
 	int  viewWidth;
 	int  viewHeight;
 	int  pxCharWidth;
@@ -207,4 +211,7 @@ private:
 	std::vector<int> gridY;
 	std::vector<int> gridHeight;
 	std::vector<std::vector<uint8_t>> children;
+
+	private slots:
+		void showImage(void);
 };

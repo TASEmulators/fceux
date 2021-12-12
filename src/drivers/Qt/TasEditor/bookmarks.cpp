@@ -47,9 +47,9 @@ Bookmarks/Branches - Manager of Bookmarks
 //extern BRANCHES branches;
 
 // resources
-char bookmarks_save_id[BOOKMARKS_ID_LEN] = "BOOKMARKS";
-char bookmarks_skipsave_id[BOOKMARKS_ID_LEN] = "BOOKMARKX";
-char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Branches " };
+static char bookmarks_save_id[BOOKMARKS_ID_LEN] = "BOOKMARKS";
+static char bookmarks_skipsave_id[BOOKMARKS_ID_LEN] = "BOOKMARKX";
+//char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Branches " };
 // color tables for flashing when saving/loading bookmarks
 //COLORREF bookmark_flash_colors[TOTAL_BOOKMARK_COMMANDS][FLASH_PHASE_MAX+1] = {
 //	// set
@@ -67,6 +67,12 @@ BOOKMARKS::BOOKMARKS(QWidget *parent)
 
 	viewWidth  = 256;
 	viewHeight = 256;
+
+	imageItem  = 0;
+	imageTimer = new QTimer(this);
+	imageTimer->setSingleShot(true);
+	imageTimer->setInterval(100);
+	connect( imageTimer, SIGNAL(timeout(void)), this, SLOT(showImage(void)) );
 
 	g_config->getOption("SDL.TasBookmarksFont", &fontString);
 
@@ -97,6 +103,7 @@ void BOOKMARKS::init()
 
 	reset();
 	selectedSlot = DEFAULT_SLOT;
+	imageItem = 0;
 
 	redrawBookmarksSectionCaption();
 }
@@ -125,6 +132,7 @@ void BOOKMARKS::reset_vars()
 	mustCheckItemUnderMouse = true;
 	bookmarkLeftclicked = bookmarkRightclicked = ITEM_UNDER_MOUSE_NONE;
 	nextFlashUpdateTime = clock() + BOOKMARKS_FLASH_TICK;
+	imageItem = 0;
 }
 
 void BOOKMARKS::setFont( QFont &newFont )
@@ -727,6 +735,7 @@ int  BOOKMARKS::calcColumn( int px )
 
 void BOOKMARKS::mousePressEvent(QMouseEvent * event)
 {
+	fceuCriticalSection emuLock;
 	int item, row_under_mouse, item_valid;
 	QPoint c = convPixToCursor( event->pos() );
 
@@ -765,6 +774,7 @@ void BOOKMARKS::mousePressEvent(QMouseEvent * event)
 
 void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 {
+	fceuCriticalSection emuLock;
 	//QPoint c = convPixToCursor( event->pos() );
 
 	//printf("Mouse Button Released: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
@@ -787,11 +797,37 @@ void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 	}
 }
 
+void BOOKMARKS::showImage(void)
+{
+	static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
+}
+
 void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
 {
-	//QPoint c = convPixToCursor( event->pos() );
+	fceuCriticalSection emuLock;
+	int item, row_under_mouse, item_valid, column;
+
+	QPoint c = convPixToCursor( event->pos() );
 
 	//printf("Mouse Move: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	
+	row_under_mouse = c.y();
+	column = calcColumn( event->pos().x() );
+
+	item = (row_under_mouse + 1) % TOTAL_BOOKMARKS;
+	item_valid = (item >= 0) && (item < TOTAL_BOOKMARKS);
+
+	if ( item_valid && (column == BOOKMARKSLIST_COLUMN_TIME) && bookmarks->bookmarksArray[item].notEmpty)
+	{
+		imageItem = item;
+		imagePos = event->globalPos();
+		imageTimer->start();
+		QToolTip::hideText();
+	}
+	else
+	{
+		imageTimer->stop();
+	}
 }
 
 bool BOOKMARKS::event(QEvent *event)
@@ -811,7 +847,7 @@ bool BOOKMARKS::event(QEvent *event)
 
 		if ( item_valid && (column == BOOKMARKSLIST_COLUMN_TIME) && bookmarks->bookmarksArray[item].notEmpty)
 		{
-			static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( helpEvent, new bookmarkPreviewPopup(item, this) ));
+			//static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( helpEvent, new bookmarkPreviewPopup(item, this) ));
 			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 			QToolTip::hideText();
 			event->ignore();
@@ -820,7 +856,10 @@ bool BOOKMARKS::event(QEvent *event)
 		{
 			QToolTip::showText(helpEvent->globalPos(), tr("Right click = set Bookmark, Left click = jump to Bookmark or load Branch"), this );
 		}
-
+		else
+		{
+			QToolTip::hideText();
+		}
 		return true;
 	}
 	return QWidget::event(event);

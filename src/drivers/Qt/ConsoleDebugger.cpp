@@ -5272,7 +5272,7 @@ bool QAsmView::event(QEvent *event)
 					asmEntry[line]->addr, asmEntry[line]->bank, asmEntry[line]->rom );
 			}
 
-			//static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent, new asmLookAheadPopup(asmEntry[line]->addr, this) ));
+			//static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent->globalPos(), new asmLookAheadPopup(asmEntry[line]->addr, this) ));
 			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 			//QToolTip::hideText();
 			//event->ignore();
@@ -5297,7 +5297,7 @@ bool QAsmView::event(QEvent *event)
 					addr, bank, romOfs );
 			}
 
-			static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent, new asmLookAheadPopup(addr, this) ));
+			static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent->globalPos(), new asmLookAheadPopup(addr, this) ));
 			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 			QToolTip::hideText();
 			event->ignore();
@@ -6866,7 +6866,7 @@ bool ppuCtrlRegDpy::event(QEvent *event)
 		//{
 		//	printf("Tool Tip Show\n");
 		//}
-		popup = static_cast<ppuRegPopup*>(fceuCustomToolTipShow( helpEvent, new ppuRegPopup(this) ));
+		popup = static_cast<ppuRegPopup*>(fceuCustomToolTipShow( helpEvent->globalPos(), new ppuRegPopup(this) ));
 
 		QToolTip::hideText();
 		event->ignore();
