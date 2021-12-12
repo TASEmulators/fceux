@@ -28,28 +28,9 @@ Bookmarks/Branches - Manager of Bookmarks
 #include "Qt/TasEditor/TasEditorWindow.h"
 #include "Qt/TasEditor/TasColors.h"
 
-//#pragma comment(lib, "msimg32.lib")
-
-//LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-//WNDPROC hwndBookmarksList_oldWndProc;
-
-//extern TASEDITOR_CONFIG taseditorConfig;
-//extern TASEDITOR_WINDOW taseditorWindow;
-//extern POPUP_DISPLAY popupDisplay;
-//extern PLAYBACK playback;
-//extern RECORDER recorder;
-//extern SELECTION selection;
-//extern GREENZONE greenzone;
-//extern TASEDITOR_PROJECT project;
-//extern HISTORY history;
-//extern PIANO_ROLL pianoRoll;
-//extern MARKERS_MANAGER markersManager;
-//extern BRANCHES branches;
-
 // resources
 static char bookmarks_save_id[BOOKMARKS_ID_LEN] = "BOOKMARKS";
 static char bookmarks_skipsave_id[BOOKMARKS_ID_LEN] = "BOOKMARKX";
-//char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Branches " };
 // color tables for flashing when saving/loading bookmarks
 //COLORREF bookmark_flash_colors[TOTAL_BOOKMARK_COMMANDS][FLASH_PHASE_MAX+1] = {
 //	// set
@@ -144,6 +125,7 @@ void BOOKMARKS::setFont( QFont &newFont )
 
 void BOOKMARKS::calcFontData(void)
 {
+	int w,h;
 	QWidget::setFont(font);
 	QFontMetrics metrics(font);
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
@@ -171,11 +153,12 @@ void BOOKMARKS::calcFontData(void)
 	pxStartCol2 =  pxWidthCol1;
 	pxStartCol3 =  pxWidthCol1 + pxWidthFrameCol;
 
-	viewWidth  = pxLineWidth;
-	viewHeight = pxLineSpacing * TOTAL_BOOKMARKS;
+	w = pxLineWidth;
+	h = pxLineSpacing * TOTAL_BOOKMARKS;
 
-	setMinimumWidth( viewWidth );
-	setMinimumHeight( viewHeight );
+	setMinimumWidth( w );
+	setMinimumHeight( h );
+	resize(w,h);
 }
 
 void BOOKMARKS::update()
@@ -799,6 +782,7 @@ void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 
 void BOOKMARKS::showImage(void)
 {
+	fceuCriticalSection emuLock;
 	static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
 }
 

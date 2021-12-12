@@ -32,20 +32,6 @@ Branches - Manager of Branches
 #include "Qt/TasEditor/TasEditorWindow.h"
 
 
-//LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-//WNDPROC hwndBranchesBitmap_oldWndProc;
-
-//extern TASEDITOR_CONFIG taseditorConfig;
-//extern TASEDITOR_WINDOW taseditorWindow;
-//extern POPUP_DISPLAY popupDisplay;
-//extern PLAYBACK playback;
-//extern SELECTION selection;
-//extern GREENZONE greenzone;
-//extern TASEDITOR_PROJECT project;
-//extern HISTORY history;
-//extern PIANO_ROLL pianoRoll;
-//extern BOOKMARKS bookmarks;
-
 //extern COLORREF bookmark_flash_colors[TOTAL_BOOKMARK_COMMANDS][FLASH_PHASE_MAX+1];
 
 // resources
@@ -68,6 +54,9 @@ BRANCHES::BRANCHES(QWidget *parent)
 	this->setMouseTracking(true);
 	this->setMinimumWidth(BRANCHES_BITMAP_WIDTH);
 	this->setMinimumHeight(BRANCHES_BITMAP_HEIGHT);
+
+	viewWidth  = BRANCHES_BITMAP_WIDTH;
+	viewHeight = BRANCHES_BITMAP_HEIGHT;
 
 	g_config->getOption("SDL.TasBranchesFont", &fontString);
 
@@ -567,6 +556,7 @@ void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
 
 void BRANCHES::showImage(void)
 {
+	fceuCriticalSection emuLock;
 	static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
 }
 
@@ -648,8 +638,8 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 
 	QPainter painter(this);
 
-	viewWidth  = event->rect().width();
-	viewHeight = event->rect().height();
+	//viewWidth  = event->rect().width();
+	//viewHeight = event->rect().height();
 
 //	// draw background
 	QLinearGradient linearGrad(QPointF(0, 0), QPointF(viewWidth, viewHeight));
