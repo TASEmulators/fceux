@@ -5845,9 +5845,11 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		if (markersManager->getMarkerAtFrame(lineNum))
 		{
 			font.setItalic(true);
+			font.setBold(false);
 		}
 		else
 		{
+			font.setBold(true);
 			font.setItalic(false);
 		}
 		painter.setFont(font);
