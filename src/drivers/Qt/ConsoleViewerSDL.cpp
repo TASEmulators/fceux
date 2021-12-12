@@ -116,6 +116,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 		{
 			fceuLoadConfigColor( "SDL.VideoBgColor", bgColor );
 		}
+		g_config->getOption ("SDL.VideoVsync", &vsyncEnabled);
 	}
 }
 
@@ -143,6 +144,16 @@ void ConsoleViewSDL_t::setBgColor( QColor &c )
 	if ( bgColor )
 	{
 		*bgColor = c;
+	}
+}
+
+void ConsoleViewSDL_t::setVsyncEnable( bool ena )
+{
+	if ( vsyncEnabled != ena )
+	{
+		vsyncEnabled = ena;
+
+		reset();
 	}
 }
 
@@ -278,6 +289,10 @@ int ConsoleViewSDL_t::init(void)
 
 	SDL_ShowWindow( sdlWindow );
 
+	//if ( vsyncEnabled )
+	//{
+	//	printf("Vsync Enabled\n");
+	//}
 	uint32_t baseFlags = vsyncEnabled ? SDL_RENDERER_PRESENTVSYNC : 0;
 
 	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, baseFlags | SDL_RENDERER_ACCELERATED);

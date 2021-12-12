@@ -526,6 +526,7 @@ InitConfig()
 	config->addOption('f', "fullscreen", "SDL.Fullscreen", 0);
 	config->addOption("videoDriver", "SDL.VideoDriver", 0);
 	config->addOption("SDL.VideoBgColor", "#000000");
+	config->addOption("SDL.VideoVsync", 1);
 
 	// set x/y res to 0 for automatic fullscreen resolution detection (no change)
 	config->addOption('x', "xres", "SDL.XResolution", 0);

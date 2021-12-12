@@ -1883,13 +1883,26 @@ void consoleWin_t::createMainMenu(void)
 #endif
 };
 //---------------------------------------------------------------------------
-int consoleWin_t::loadVideoDriver( int driverId )
+int consoleWin_t::loadVideoDriver( int driverId, bool force )
 {
 	if ( driverId )
 	{  // SDL Driver
 		if ( viewport_SDL != NULL )
 		{  // Already Loaded
-			return 0;
+			if ( force )
+			{
+				if ( viewport_SDL == centralWidget() )
+				{
+					takeCentralWidget();
+				}
+				delete viewport_SDL;
+
+				viewport_SDL = NULL;
+			}
+			else
+			{
+				return 0;
+			}
 		}
 
 		if ( viewport_GL != NULL )
@@ -1916,7 +1929,20 @@ int consoleWin_t::loadVideoDriver( int driverId )
 	{  // OpenGL Driver
 		if ( viewport_GL != NULL )
 		{  // Already Loaded
-			return 0;
+			if ( force )
+			{
+				if ( viewport_GL == centralWidget() )
+				{
+					takeCentralWidget();
+				}
+				delete viewport_GL;
+
+				viewport_GL = NULL;
+			}
+			else
+			{
+				return 0;
+			}
 		}
 
 		if ( viewport_SDL != NULL )

@@ -94,6 +94,7 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 		memset( localBuf, 0, localBufSize );
 	}
 
+	vsyncEnabled = true;
 	linearFilter = false;
 
 	if ( g_config )
@@ -116,9 +117,20 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 		{
 			fceuLoadConfigColor( "SDL.VideoBgColor", bgColor );
 		}
+		g_config->getOption ("SDL.VideoVsync", &vsyncEnabled);
 	}
 
+	QSurfaceFormat fmt = format();
+
+	fmt.setSwapInterval( vsyncEnabled ? 1 : 0 );
+
+	setFormat(fmt);
+
 	connect( this, SIGNAL(frameSwapped(void)), this, SLOT(renderFinished(void)) );
+
+	//fmt = format();
+
+	//printf("Format Swap Interval: %i\n", fmt.swapInterval() );
 }
 
 ConsoleViewGL_t::~ConsoleViewGL_t(void)
@@ -384,6 +396,22 @@ void ConsoleViewGL_t::setBgColor( QColor &c )
 	if ( bgColor )
 	{
 		*bgColor = c;
+	}
+}
+
+void ConsoleViewGL_t::setVsyncEnable( bool ena )
+{
+	if ( vsyncEnabled != ena )
+	{
+		QSurfaceFormat fmt = format();
+
+		vsyncEnabled = ena;
+
+		fmt.setSwapInterval( vsyncEnabled ? 1 : 0 );
+
+		setFormat(fmt);
+
+		buildTextures();
 	}
 }
 

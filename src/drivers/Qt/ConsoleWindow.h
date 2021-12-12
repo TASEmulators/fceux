@@ -153,7 +153,7 @@ class  consoleWin_t : public QMainWindow
 		int getMaxSchedPriority(void);
 		#endif
 
-		int loadVideoDriver( int driverId );
+		int loadVideoDriver( int driverId, bool force = false );
 
 		double getRefreshRate(void){ return refreshRate; }
 

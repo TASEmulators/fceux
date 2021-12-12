@@ -38,6 +38,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QComboBox   *aspectSelect;
 		QComboBox   *inputDisplaySel;
 		QCheckBox   *autoRegion;
+		QCheckBox   *vsync_ena;
 		QCheckBox   *gl_LF_chkBox;
 		QCheckBox   *new_PPU_ena;
 		QCheckBox   *frmskipcbx;
@@ -85,6 +86,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  aspectEnableChanged( int value );
 		void  use_new_PPU_changed( bool value );
 		void  frameskip_changed( int value );
+		void  vsync_changed( int value );
 		void  intFrameRate_changed( int value );
 		void  useSpriteLimitChanged( int value );
 		void  clipSidesChanged( int value );
