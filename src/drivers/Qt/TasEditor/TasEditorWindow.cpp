@@ -5492,6 +5492,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	char stmp[32];
 	char rowIsSel=0;
 
+	font.setBold(true);
 	painter.setFont(font);
 	viewWidth  = event->rect().width();
 	viewHeight = event->rect().height();
@@ -5567,14 +5568,14 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	painter.fillRect( 0, 0, viewWidth, pxLineSpacing, windowColor );
 	painter.setPen( black );
 
-	font.setBold(true);
-	painter.setFont(font);
+	//font.setBold(true);
+	//painter.setFont(font);
 
 	x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 6*pxCharWidth) / 2;
 	painter.drawText( x, pxLineTextOfs, tr("Frame#") );
 
-	font.setBold(false);
-	painter.setFont(font);
+	//font.setBold(false);
+	//painter.setFont(font);
 
 	// Draw Grid
 	painter.drawLine( -pxLineXScroll, 0, -pxLineXScroll, viewHeight );
@@ -5832,11 +5833,11 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 		if (markersManager->getMarkerAtFrame(lineNum))
 		{
-			font.setBold(true);
+			font.setItalic(true);
 		}
 		else
 		{
-			font.setBold(false);
+			font.setItalic(false);
 		}
 		painter.setFont(font);
 		painter.drawText( x, y+pxLineTextOfs, tr(stmp) );
