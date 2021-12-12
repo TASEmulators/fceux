@@ -2300,7 +2300,117 @@ void TasEditorWindow::saveProjectAsCb(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::saveProjectCompactCb(void)
 {
-	saveProject(true);
+	int ret;
+	QDialog dialog(this);
+	fceuCriticalSection emuLock;
+	QGroupBox *fileContentsBox, *greenZoneSaveBox;
+	QVBoxLayout *mainLayout, *vbox1, *vbox;
+	QHBoxLayout *hbox;
+	QCheckBox *binaryInput, *saveMarkers, *saveBookmarks;
+	QCheckBox *saveHistory, *savePianoRoll, *saveSelection;
+	QRadioButton *allFrames, *every16thFrame, *markedFrames, *dontSave;
+	QPushButton  *okButton, *cancelButton;
+
+	dialog.setWindowTitle( tr("Save Compact") );
+
+	mainLayout       = new QVBoxLayout();
+	fileContentsBox  = new QGroupBox( tr("File Contents") );
+	greenZoneSaveBox = new QGroupBox( tr("Greenzone Saving Options") );
+
+	binaryInput    = new QCheckBox( tr("Binary Input") );
+	saveMarkers    = new QCheckBox( tr("Markers") );
+	saveBookmarks  = new QCheckBox( tr("Bookmarks") );
+	saveHistory    = new QCheckBox( tr("History") );
+	savePianoRoll  = new QCheckBox( tr("Piano Roll") );
+	saveSelection  = new QCheckBox( tr("Selection") );
+
+	allFrames      = new QRadioButton( tr("All Frames") );
+	every16thFrame = new QRadioButton( tr("Every 16th Frame") );
+	markedFrames   = new QRadioButton( tr("Marked Frame") );
+	dontSave       = new QRadioButton( tr("Don't Save") );
+
+	okButton       = new QPushButton( tr("Ok") );
+	cancelButton   = new QPushButton( tr("Cancel") );
+
+	okButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
+	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+
+	vbox1 = new QVBoxLayout();
+
+	dialog.setLayout( mainLayout );
+	mainLayout->addWidget( fileContentsBox );
+
+	fileContentsBox->setLayout( vbox1 );
+
+	vbox1->addWidget( binaryInput    );
+	vbox1->addWidget( saveMarkers    );
+	vbox1->addWidget( saveBookmarks  );
+	vbox1->addWidget( saveHistory    );
+	vbox1->addWidget( savePianoRoll  );
+	vbox1->addWidget( saveSelection  );
+	vbox1->addWidget( greenZoneSaveBox );
+
+	vbox  = new QVBoxLayout();
+	greenZoneSaveBox->setLayout( vbox );
+
+	vbox->addWidget( allFrames      );
+	vbox->addWidget( every16thFrame );
+	vbox->addWidget( markedFrames   );
+	vbox->addWidget( dontSave       );
+
+	hbox = new QHBoxLayout();
+	mainLayout->addLayout( hbox );
+	hbox->addStretch(5);
+	hbox->addWidget( okButton );
+	hbox->addWidget( cancelButton );
+
+	binaryInput->setChecked( taseditorConfig.projectSavingOptions_SaveInBinary );
+	saveMarkers->setChecked( taseditorConfig.projectSavingOptions_SaveMarkers );
+	saveBookmarks->setChecked( taseditorConfig.projectSavingOptions_SaveBookmarks );
+	saveHistory->setChecked( taseditorConfig.projectSavingOptions_SaveHistory );
+	savePianoRoll->setChecked( taseditorConfig.projectSavingOptions_SavePianoRoll );
+	saveSelection->setChecked( taseditorConfig.projectSavingOptions_SaveSelection );
+
+	     allFrames->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_ALL );
+	every16thFrame->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_16TH );
+	  markedFrames->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_MARKED );
+	      dontSave->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_NO );
+
+	okButton->setDefault(true);
+
+	ret = dialog.exec();
+
+	if ( ret == QDialog::Accepted )
+	{
+		taseditorConfig.projectSavingOptions_SaveInBinary  = binaryInput->isChecked();
+		taseditorConfig.projectSavingOptions_SaveMarkers   = saveMarkers->isChecked();
+		taseditorConfig.projectSavingOptions_SaveBookmarks = saveBookmarks->isChecked();
+		taseditorConfig.projectSavingOptions_SaveHistory   = saveHistory->isChecked();
+		taseditorConfig.projectSavingOptions_SavePianoRoll = savePianoRoll->isChecked();
+		taseditorConfig.projectSavingOptions_SaveSelection = saveSelection->isChecked();
+
+		if ( allFrames->isChecked() )
+		{
+			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_ALL;
+		}
+		else if ( every16thFrame->isChecked() )
+		{
+			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_16TH;
+		}
+		else if ( markedFrames->isChecked() )
+		{
+			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_MARKED;
+		}
+		else
+		{
+			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_NO;
+		}
+
+		saveProject(true);
+	}
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::openOnlineDocs(void)
