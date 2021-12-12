@@ -1042,7 +1042,7 @@ void TasEditorWindow::buildSideControlPanel(void)
 	recorderGBox  = new QGroupBox( tr("Recorder") );
 	splicerGBox   = new QGroupBox( tr("Splicer") );
 	//luaGBox       = new QGroupBox( tr("Lua") );
-	historyGBox   = new QGroupBox( tr("History") );
+	//historyGBox   = new QGroupBox( tr("History") );
 	bbFrame       = new QFrame();
 
 	bbFrame->setFrameShape( QFrame::StyledPanel );
@@ -1151,6 +1151,7 @@ void TasEditorWindow::buildSideControlPanel(void)
 	bkmkBrnchStack = new QTabWidget();
 	bkmkBrnchStack->addTab( scrollArea, tr("Bookmarks") );
 	bkmkBrnchStack->addTab( &branches , tr("Branches")  );
+	bkmkBrnchStack->addTab( histTree  , tr("History")   );
 
 	taseditorConfig.displayBranchesTree = 0;
 
@@ -1158,16 +1159,16 @@ void TasEditorWindow::buildSideControlPanel(void)
 	vbox->addWidget( bkmkBrnchStack );
 	bbFrame->setLayout( vbox );
 
-	vbox = new QVBoxLayout();
-	vbox->addWidget( histTree );
-	historyGBox->setLayout( vbox );
+	//vbox = new QVBoxLayout();
+	//vbox->addWidget( histTree );
+	//historyGBox->setLayout( vbox );
 
 	ctlPanelMainVbox->addWidget( playbackGBox  );
 	ctlPanelMainVbox->addWidget( recorderGBox  );
 	ctlPanelMainVbox->addWidget( splicerGBox   );
 	//ctlPanelMainVbox->addWidget( luaGBox       );
 	ctlPanelMainVbox->addWidget( bbFrame       );
-	ctlPanelMainVbox->addWidget( historyGBox   );
+	//ctlPanelMainVbox->addWidget( historyGBox   );
 
 	hbox = new QHBoxLayout();
 	hbox->addWidget( prevMkrBtn );
@@ -1271,6 +1272,7 @@ void TasEditorWindow::initHotKeys(void)
 	hotkeyShortcut[HK_FULLSCREEN    ]->setEnabled(false);
 	hotkeyShortcut[HK_MAIN_MENU_HIDE]->setEnabled(false);
 	hotkeyShortcut[HK_LOAD_LUA      ]->setEnabled(false);
+	hotkeyShortcut[HK_FA_LAG_SKIP   ]->setEnabled(false);
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::activateHotkey( int hkIdx, QShortcut *shortcut )

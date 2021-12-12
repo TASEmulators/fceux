@@ -375,7 +375,7 @@ class TasEditorWindow : public QDialog
 		QGroupBox  *recorderGBox;
 		QGroupBox  *splicerGBox;
 		//QGroupBox  *luaGBox;
-		QGroupBox  *historyGBox;
+		//QGroupBox  *historyGBox;
 		QFrame     *bbFrame;
 
 		QPushButton *rewindMkrBtn;
