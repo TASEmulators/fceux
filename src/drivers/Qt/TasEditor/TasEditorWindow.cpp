@@ -198,6 +198,9 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	mainHBox->addWidget( controlPanelContainerWidget );
 	mainLayout->addWidget(mainHBox);
 
+	mainHBox->setStretchFactor( 0, 5 );
+	mainHBox->setStretchFactor( 1, 1 );
+
 	menuBar = buildMenuBar();
 
 	setLayout(mainLayout);
@@ -1033,7 +1036,7 @@ void TasEditorWindow::buildSideControlPanel(void)
 	QVBoxLayout *vbox;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
-	QScrollArea *scrollArea;
+	QScrollArea *scrollArea1, *scrollArea2;
 	QTreeWidgetItem *item;
 
 	ctlPanelMainVbox = new QVBoxLayout();
@@ -1140,18 +1143,26 @@ void TasEditorWindow::buildSideControlPanel(void)
 	//hbox->addWidget( autoLuaCBox );
 	//luaGBox->setLayout( hbox );
 	
-	scrollArea = new QScrollArea();
-	scrollArea->setWidgetResizable(false);
-	scrollArea->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
-	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded );
-	scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
-	scrollArea->setMinimumSize( QSize( 128, 128 ) );
-	scrollArea->setWidget( &bookmarks );
+	scrollArea1 = new QScrollArea();
+	scrollArea1->setWidgetResizable(false);
+	scrollArea1->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
+	scrollArea1->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	scrollArea1->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	scrollArea1->setMinimumSize( QSize( 128, 128 ) );
+	scrollArea1->setWidget( &bookmarks );
+
+	scrollArea2 = new QScrollArea();
+	scrollArea2->setWidgetResizable(true);
+	scrollArea2->setSizeAdjustPolicy( QAbstractScrollArea::AdjustToContents );
+	scrollArea2->setHorizontalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	scrollArea2->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+	scrollArea2->setMinimumSize( QSize( 128, 128 ) );
+	scrollArea2->setWidget( &branches );
 
 	bkmkBrnchStack = new QTabWidget();
-	bkmkBrnchStack->addTab( scrollArea, tr("Bookmarks") );
-	bkmkBrnchStack->addTab( &branches , tr("Branches")  );
-	bkmkBrnchStack->addTab( histTree  , tr("History")   );
+	bkmkBrnchStack->addTab( scrollArea1, tr("Bookmarks") );
+	bkmkBrnchStack->addTab( scrollArea2, tr("Branches")  );
+	bkmkBrnchStack->addTab( histTree   , tr("History")   );
 
 	taseditorConfig.displayBranchesTree = 0;
 

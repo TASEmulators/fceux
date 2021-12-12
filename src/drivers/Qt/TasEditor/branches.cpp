@@ -107,8 +107,17 @@ void BRANCHES::calcFontData(void)
 	pxSelWidth  = (pxBoxWidth  * 7) / 8;
 	pxSelHeight = (pxBoxHeight * 7) / 8;
 
-	pxMinGridWidth = pxBoxWidth * 1;
-	pxMaxGridWidth = pxBoxWidth * 2;
+	pxMinGridWidth = (pxBoxWidth * 3) / 2;
+	pxMaxGridWidth = (pxBoxWidth * 2);
+
+	w = pxMaxGridWidth * 12;
+	h = pxMaxGridWidth * 10;
+
+	if (w < BRANCHES_BITMAP_WIDTH ) w = BRANCHES_BITMAP_WIDTH;
+	if (h < BRANCHES_BITMAP_HEIGHT) h = BRANCHES_BITMAP_HEIGHT;
+
+	this->setMinimumWidth(w);
+	this->setMinimumHeight(h);
 }
 
 void BRANCHES::init()
