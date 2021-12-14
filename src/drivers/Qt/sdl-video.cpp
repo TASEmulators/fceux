@@ -393,20 +393,34 @@ void LockConsole(){}
 ///Currently unimplemented.
 void UnlockConsole(){}
 
-static int testPattern = 0;
-
-static void WriteTestPattern(void)
+static void vsync_test(void)
 {
-	int i, j, k;
+	int i, j, k, l;
+	int cycleLen, halfCycleLen;
+	static int ofs = 0;
+
+	cycleLen = nes_shm->video.ncol / 4;
+
+	halfCycleLen = cycleLen / 2;
 
 	k=0;
-	for (i=0; i<GL_NES_WIDTH; i++)
+	for (j=0; j<nes_shm->video.nrow; j++)
 	{
-		for (j=0; j<GL_NES_HEIGHT; j++)
+		for (i=0; i<nes_shm->video.ncol; i++)
 		{
-			nes_shm->pixbuf[k] = 0xffffffff; k++;
+			l = ((i+ofs) % cycleLen);
+
+			if ( l < halfCycleLen )
+			{
+				nes_shm->pixbuf[k] = 0xffffffff; k++;
+			}
+			else
+			{
+				nes_shm->pixbuf[k] = 0x00000000; k++;
+			}
 		}
 	}
+	ofs = (ofs + 1) % nes_shm->video.ncol;
 }
 
 static void
@@ -455,9 +469,17 @@ doBlitScreen(uint8_t *XBuf, uint8_t *dest)
 
 	if ( dest == NULL ) return;
 
-	if ( testPattern )
+	if ( nes_shm->video.test )
 	{
-		WriteTestPattern();
+		switch ( nes_shm->video.test )
+		{
+			case 1:
+				vsync_test();
+			break;
+			default:
+				// Unknown Test Pattern
+			break;
+		}
 	}
 	else
 	{

@@ -29,6 +29,7 @@ struct  nes_shm_t
 		int   yscale;
 		int   xyRatio;
 		int   preScaler;
+		int   test;
 	} video;
 
 	char  runEmulator;

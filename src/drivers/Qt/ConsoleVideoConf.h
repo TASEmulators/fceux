@@ -37,6 +37,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QComboBox   *cursorSelect;
 		QComboBox   *aspectSelect;
 		QComboBox   *inputDisplaySel;
+		QComboBox   *videoTest;
 		QCheckBox   *autoRegion;
 		QCheckBox   *vsync_ena;
 		QCheckBox   *gl_LF_chkBox;
@@ -95,6 +96,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  regionChanged(int index);
 		void  driverChanged(int index);
 		void  scalerChanged(int index);
+		void  testPatternChanged(int index);
 		void  cursorShapeChanged(int index);
 		void  cursorVisChanged(int value);
 		void  drawInputAidsChanged(int value);

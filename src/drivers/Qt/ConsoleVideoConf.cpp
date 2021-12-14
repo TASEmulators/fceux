@@ -42,7 +42,7 @@ extern int rerecord_display;
 ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	: QDialog( parent )
 {
-	QVBoxLayout *main_vbox, *vbox1, *vbox2, *vbox3, *vbox4, *vbox;
+	QVBoxLayout *main_vbox, *vbox1, *vbox2, *vbox3, *vbox4, *vbox5, *vbox;
 	QHBoxLayout *main_hbox, *hbox1, *hbox;
 	QLabel *lbl;
 	QPushButton *button;
@@ -205,6 +205,16 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	setComboBoxFromProperty( inputDisplaySel , "SDL.InputDisplay");
 
+	// Input Display Select
+	videoTest = new QComboBox();
+
+	videoTest->addItem( tr("None")         , 0 );
+	videoTest->addItem( tr("Vertical Sync"), 1 );
+
+	videoTest->setCurrentIndex( nes_shm->video.test );
+
+	connect(videoTest, SIGNAL(currentIndexChanged(int)), this, SLOT(testPatternChanged(int)) );
+
 	setCheckBoxFromProperty( autoRegion      , "SDL.AutoDetectPAL");
 	setCheckBoxFromProperty( new_PPU_ena     , "SDL.NewPPU");
 	setCheckBoxFromProperty( frmskipcbx      , "SDL.Frameskip");
@@ -349,6 +359,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	gbox  = new QGroupBox( tr("Overlay Options") );
 	vbox3 = new QVBoxLayout();
 	vbox4 = new QVBoxLayout();
+	vbox5 = new QVBoxLayout();
 	vbox  = new QVBoxLayout();
 
 	vbox3->addWidget( gbox, 1 );
@@ -365,6 +376,11 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	gbox->setLayout( vbox4 );
 	vbox->addWidget( gbox  );
 	vbox4->addWidget( inputDisplaySel );
+
+	gbox  = new QGroupBox( tr("Test Pattern:") );
+	gbox->setLayout( vbox5 );
+	vbox->addWidget( gbox  );
+	vbox5->addWidget( videoTest );
 
 	gbox  = new QGroupBox( tr("Drawing Area") );
 	vbox2 = new QVBoxLayout();
@@ -950,6 +966,11 @@ void ConsoleVideoConfDialog_t::inputDisplayChanged(int index)
 
 	g_config->setOption ("SDL.InputDisplay", input_display);
 	g_config->save ();
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::testPatternChanged(int index)
+{
+	nes_shm->video.test = videoTest->itemData(index).toInt();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::aspectChanged(int index)
