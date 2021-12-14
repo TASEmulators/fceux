@@ -4253,16 +4253,16 @@ void consoleWin_t::transferVideoBuffer(void)
 {
 	if ( nes_shm->blitUpdated )
 	{
+		nes_shm->blitUpdated = 0;
+
 		if ( viewport_SDL )
 		{
 			viewport_SDL->transfer2LocalBuffer();
-			nes_shm->blitUpdated = 0;
 			viewport_SDL->render();
 		}
 		else if ( viewport_GL )
 		{
 			viewport_GL->transfer2LocalBuffer();
-			nes_shm->blitUpdated = 0;
 			viewport_GL->update();
 		}
 	}

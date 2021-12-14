@@ -11,6 +11,7 @@
 
 #define  GL_NES_WIDTH   256
 #define  GL_NES_HEIGHT  240
+#define  NES_VIDEO_BUFLEN   3
 #define  NES_AUDIO_BUFLEN   480000
 
 struct  nes_shm_t
@@ -35,7 +36,8 @@ struct  nes_shm_t
 	char  runEmulator;
 	char  blitUpdated;
 
-	uint32_t  pixbuf[1048576]; // 1024 x 1024
+	int   pixBufIdx;
+	uint32_t  pixbuf[NES_VIDEO_BUFLEN][1048576]; // 1024 x 1024
 	uint32_t  avibuf[1048576]; // 1024 x 1024
 
 	void clear_pixbuf(void)

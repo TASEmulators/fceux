@@ -398,6 +398,9 @@ static void vsync_test(void)
 	int i, j, k, l;
 	int cycleLen, halfCycleLen;
 	static int ofs = 0;
+	uint32_t *pixbuf;
+
+	pixbuf = nes_shm->pixbuf[nes_shm->pixBufIdx];
 
 	cycleLen = nes_shm->video.ncol / 4;
 
@@ -412,11 +415,11 @@ static void vsync_test(void)
 
 			if ( l < halfCycleLen )
 			{
-				nes_shm->pixbuf[k] = 0xffffffff; k++;
+				pixbuf[k] = 0xFFFFFFFF; k++;
 			}
 			else
 			{
-				nes_shm->pixbuf[k] = 0x00000000; k++;
+				pixbuf[k] = 0x00000000; k++;
 			}
 		}
 	}
@@ -492,8 +495,11 @@ doBlitScreen(uint8_t *XBuf, uint8_t *dest)
 void
 BlitScreen(uint8 *XBuf)
 {
-	doBlitScreen(XBuf, (uint8_t*)nes_shm->pixbuf);
+	int i = nes_shm->pixBufIdx;
 
+	doBlitScreen(XBuf, (uint8_t*)nes_shm->pixbuf[i]);
+
+	nes_shm->pixBufIdx = (i+1) % NES_VIDEO_BUFLEN;
 	nes_shm->blit_count++;
 	nes_shm->blitUpdated = 1;
 }
