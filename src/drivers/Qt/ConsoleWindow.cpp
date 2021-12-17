@@ -4270,6 +4270,12 @@ void consoleWin_t::transferVideoBuffer(void)
 
 void consoleWin_t::emuFrameFinish(void)
 {
+	// Process all events before attempting to render viewport
+	QCoreApplication::processEvents();
+
+	// Update Input Devices
+	FCEUD_UpdateInput();
+	
 	//printf("EMU Frame Finish\n");
 
 	transferVideoBuffer();

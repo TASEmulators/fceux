@@ -11,7 +11,7 @@
 
 #define  GL_NES_WIDTH   256
 #define  GL_NES_HEIGHT  240
-#define  NES_VIDEO_BUFLEN   3
+#define  NES_VIDEO_BUFLEN   5
 #define  NES_AUDIO_BUFLEN   480000
 
 struct  nes_shm_t
