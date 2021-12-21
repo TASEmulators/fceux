@@ -3949,7 +3949,7 @@ void QPianoRoll::calcFontData(void)
 	viewLines   = (viewHeight / pxLineSpacing) + 1;
 
 	pxWidthCol1     =  3 * pxCharWidth;
-	pxWidthFrameCol = 12 * pxCharWidth;
+	pxWidthFrameCol =  9 * pxCharWidth;
 	pxWidthBtnCol   =  3 * pxCharWidth;
 	pxWidthCtlCol   =  8 * pxWidthBtnCol;
 
@@ -5909,9 +5909,9 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		// bg
 		painter.setPen( rowTextColor );
 
-		x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 10*pxCharWidth) / 2;
+		x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 7*pxCharWidth) / 2;
 
-		sprintf( stmp, "%010i", lineNum );
+		sprintf( stmp, "%07i", lineNum );
 
 		if (markersManager->getMarkerAtFrame(lineNum))
 		{

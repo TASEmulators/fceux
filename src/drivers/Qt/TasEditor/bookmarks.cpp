@@ -144,8 +144,8 @@ void BOOKMARKS::calcFontData(void)
 	viewLines   = (viewHeight / pxLineSpacing) + 1;
 
 	pxWidthCol1     =  3 * pxCharWidth;
-	pxWidthFrameCol = 12 * pxCharWidth;
-	pxWidthTimeCol  = 12 * pxCharWidth;
+	pxWidthFrameCol =  9 * pxCharWidth;
+	pxWidthTimeCol  = 10 * pxCharWidth;
 
 	pxLineWidth = pxWidthCol1 + pxWidthFrameCol + pxWidthTimeCol;
 
@@ -638,7 +638,7 @@ void BOOKMARKS::paintEvent(QPaintEvent *event)
 		{
 			x = pxStartCol2 + pxCharWidth;
 
-			U32ToDecStr( txt, bookmarksArray[item].snapshot.keyFrame, 10);
+			U32ToDecStr( txt, bookmarksArray[item].snapshot.keyFrame, 7);
 
 			painter.drawText( x, y+pxLineTextOfs, tr(txt) );
 
