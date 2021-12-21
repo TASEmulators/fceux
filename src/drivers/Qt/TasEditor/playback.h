@@ -1,14 +1,15 @@
 // Specification file for Playback class
 #pragma once
 
+#include <time.h>
 #include <QLineEdit>
 
 #define PROGRESSBAR_WIDTH 200
 
-#define PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING 100
-#define PAUSEFRAME_BLINKING_PERIOD_WHEN_PAUSED 250
+#define PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING (100 * (CLOCKS_PER_SEC / 1000))
+#define PAUSEFRAME_BLINKING_PERIOD_WHEN_PAUSED (250 * (CLOCKS_PER_SEC / 1000))
 
-#define BUTTON_HOLD_REPEAT_DELAY 250			// in milliseconds
+#define BUTTON_HOLD_REPEAT_DELAY (250 * (CLOCKS_PER_SEC / 1000)) // in milliseconds
 
 class UpperMarkerNoteEdit : public QLineEdit
 {

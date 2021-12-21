@@ -92,54 +92,58 @@ void PLAYBACK::update()
 	// controls:
 	// update < and > buttons
 	rewindButtonOldState = rewindButtonState;
-	//rewindButtonState = ((Button_GetState(hwndRewind) & BST_PUSHED) != 0 || mustRewindNow);
+	rewindButtonState = tasWin->rewindFrmBtn->isDown();
 	if (rewindButtonState)
 	{
 		if (!rewindButtonOldState)
 		{
 			buttonHoldTimer = clock();
-			handleRewindFrame();
-		} else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+			//handleRewindFrame();
+		}
+		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
 		{
 			handleRewindFrame();
 		}
 	}
 	forwardButtonOldState = forwardButtonState;
-	//forwardButtonState = (Button_GetState(hwndForward) & BST_PUSHED) != 0;
+	forwardButtonState = tasWin->advFrmBtn->isDown();
 	if (forwardButtonState && !rewindButtonState)
 	{
 		if (!forwardButtonOldState)
 		{
 			buttonHoldTimer = clock();
-			handleForwardFrame();
-		} else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+			//handleForwardFrame();
+		}
+		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
 		{
 			handleForwardFrame();
 		}
 	}
 	// update << and >> buttons
 	rewindFullButtonOldState = rewindFullButtonState;
-	//rewindFullButtonState = ((Button_GetState(hwndRewindFull) & BST_PUSHED) != 0);
+	rewindFullButtonState = tasWin->rewindMkrBtn->isDown();
 	if (rewindFullButtonState && !rewindButtonState && !forwardButtonState)
 	{
 		if (!rewindFullButtonOldState)
 		{
 			buttonHoldTimer = clock();
-			handleRewindFull();
-		} else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+			//handleRewindFull();
+		}
+		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
 		{
 			handleRewindFull();
 		}
 	}
 	forwardFullButtonOldState = forwardFullButtonState;
-	//forwardFullButtonState = (Button_GetState(hwndForwardFull) & BST_PUSHED) != 0;
+	forwardFullButtonState = tasWin->advMkrBtn->isDown();
 	if (forwardFullButtonState && !rewindButtonState && !forwardButtonState && !rewindFullButtonState)
 	{
 		if (!forwardFullButtonOldState)
 		{
 			buttonHoldTimer = clock();
-			handleForwardFull();
-		} else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+			//handleForwardFull();
+		}
+		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
 		{
 			handleForwardFull();
 		}
@@ -179,10 +183,14 @@ void PLAYBACK::update()
 
 	// pause when seeking hits pause_frame
 	if (pauseFrame && currFrameCounter + 1 >= pauseFrame)
+	{
 		stopSeeking();
+	}
 	else if (currFrameCounter >= getLastPosition() && currFrameCounter >= currMovieData.getNumRecords() - 1 && mustAutopauseAtTheEnd && taseditorConfig->autopauseAtTheEndOfMovie && !isTaseditorRecording())
+	{
 		// pause at the end of the movie
 		pauseEmulation();
+	}
 
 	// update flashing pauseframe
 	if (oldPauseFrame != pauseFrame && oldPauseFrame)
@@ -199,7 +207,11 @@ void PLAYBACK::update()
 			showPauseFrame = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_WHEN_PAUSED) & 1;
 		else
 			showPauseFrame = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING) & 1;
-	} else showPauseFrame = false;
+	}
+	else
+	{
+		showPauseFrame = false;
+	}
 	if (oldStateOfShowPauseFrame != showPauseFrame)
 	{
 		// update pauseframe gfx
@@ -213,16 +225,20 @@ void PLAYBACK::update()
 	if (pauseFrame)
 	{
 		if (oldStateOfShowPauseFrame != showPauseFrame)		// update progressbar from time to time
+		{
 			// display seeking progress
 			setProgressbar(currFrameCounter - seekingBeginningFrame, pauseFrame - seekingBeginningFrame);
-	} else if (emuPausedOldState != emuPausedState)
+		}
+	}
+	else if (emuPausedOldState != emuPausedState)
 	{
 		// emulator got paused/unpaused externally
 		if (emuPausedOldState && !emuPausedState)
 		{
 			// externally unpaused - show empty progressbar
 			setProgressbar(0, 1);
-		} else
+		}
+		else
 		{
 			// externally paused - progressbar should be full
 			setProgressbar(1, 1);
@@ -233,15 +249,21 @@ void PLAYBACK::update()
 	if (emuPausedState)
 	{
 		if (currFrameCounter < currMovieData.getNumRecords() - 1)
+		{
 			mustAutopauseAtTheEnd = true;
+		}
 		else
+		{
 			mustAutopauseAtTheEnd = false;
+		}
 	}
 
 	// this little statement is very important for adequate work of the "green arrow" and "Restore last position"
 	if (!emuPausedState)
+	{
 		// when emulating, lost_position_frame becomes unstable (which means that it's probably not equal to the end of current segment anymore)
 		lastPositionIsStable = false;
+	}
 }
 
 // called after saving the project, because saving uses the progressbar for itself
