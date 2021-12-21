@@ -1208,11 +1208,11 @@ void TasEditorWindow::buildSideControlPanel(void)
 	connect( rec3PBtn , &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_3P  ); } );
 	connect( rec4PBtn , &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_4P  ); } );
 
-	connect( rewindMkrBtn, SIGNAL(clicked(void)), this, SLOT(playbackFrameRewindFull(void)) );
-	connect( rewindFrmBtn, SIGNAL(clicked(void)), this, SLOT(playbackFrameRewind(void))     );
-	connect( playPauseBtn, SIGNAL(clicked(void)), this, SLOT(playbackPauseCB(void))         );
-	connect( advFrmBtn   , SIGNAL(clicked(void)), this, SLOT(playbackFrameForward(void))    );
-	connect( advMkrBtn   , SIGNAL(clicked(void)), this, SLOT(playbackFrameForwardFull(void)));
+	connect( rewindMkrBtn, SIGNAL(pressed(void)), this, SLOT(playbackFrameRewindFull(void)) );
+	connect( rewindFrmBtn, SIGNAL(pressed(void)), this, SLOT(playbackFrameRewind(void))     );
+	connect( playPauseBtn, SIGNAL(pressed(void)), this, SLOT(playbackPauseCB(void))         );
+	connect( advFrmBtn   , SIGNAL(pressed(void)), this, SLOT(playbackFrameForward(void))    );
+	connect( advMkrBtn   , SIGNAL(pressed(void)), this, SLOT(playbackFrameForwardFull(void)));
 
 	connect( followCursorCbox, SIGNAL(clicked(bool)), this, SLOT(playbackFollowCursorCb(bool)));
 	connect( turboSeekCbox   , SIGNAL(clicked(bool)), this, SLOT(playbackTurboSeekCb(bool)));
