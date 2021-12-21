@@ -112,20 +112,12 @@ char joypadCaptions[5][11] = {"(Commands)", "(1P)", "(2P)", "(3P)", "(4P)"};
 
 HISTORY::HISTORY()
 {
+	updateScheduled = false;
 }
 
 void HISTORY::init(void)
 {
-	// prepare the history listview
-	//hwndHistoryList = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_HISTORYLIST);
-	//ListView_SetExtendedListViewStyleEx(hwndHistoryList, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_DOUBLEBUFFER|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
-	//// subclass the listview
-	//hwndHistoryList_oldWndProc = (WNDPROC)SetWindowLongPtr(hwndHistoryList, GWLP_WNDPROC, (LONG_PTR)historyListWndProc);
-	//LVCOLUMN lvc;
-	//lvc.mask = LVCF_WIDTH | LVCF_FMT;
-	//lvc.cx = HISTORY_LIST_WIDTH;
-	//lvc.fmt = LVCFMT_LEFT;
-	//ListView_InsertColumn(hwndHistoryList, 0, &lvc);
+	updateScheduled = false;
 	// shedule first autocompression
 	nextAutocompressTime = clock() + TIME_BETWEEN_AUTOCOMPRESSIONS;
 }
@@ -174,6 +166,12 @@ void HISTORY::update()
 			showUndoHint = true;
 		else
 			undoHintPos = -1;		// finished hinting
+	}
+
+	if ( updateScheduled )
+	{
+		redrawList();
+		updateScheduled = false;
 	}
 	//if (oldShowUndoHint != showUndoHint)
 	//	pianoRoll.redrawRow(undoHintPos);
@@ -1201,6 +1199,7 @@ void HISTORY::updateList(void)
 	// Emulation thread cannot update graphics
 	if ( QThread::currentThread() == consoleWindow->emulatorThread )
 	{
+		updateScheduled = true;
 		return;
 	}
 	//update the number of items in the history list
@@ -1217,6 +1216,7 @@ void HISTORY::redrawList(void)
 	// Emulation thread cannot update graphics
 	if ( QThread::currentThread() == consoleWindow->emulatorThread )
 	{
+		updateScheduled = true;
 		return;
 	}
 	tasWin->updateHistoryItems();

@@ -159,6 +159,7 @@ private:
 	int undoHintPos, oldUndoHintPos;
 	int undoHintTimer;
 	bool showUndoHint, oldShowUndoHint;
+	bool updateScheduled;
 	int nextAutocompressTime;
 
 };
