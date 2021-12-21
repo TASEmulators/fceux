@@ -3865,7 +3865,7 @@ void QPianoRoll::vbarActionTriggered(int act)
 
 	if ( act == QAbstractSlider::SliderSingleStepAdd )
 	{
-		val = val - 1;
+		val = val - vbar->singleStep();
 
 		if ( val < 0 )
 		{
@@ -3875,7 +3875,7 @@ void QPianoRoll::vbarActionTriggered(int act)
 	}
 	else if ( act == QAbstractSlider::SliderSingleStepSub )
 	{
-		val = val + 1;
+		val = val + vbar->singleStep();
 
 		if ( val >= maxLineOffset )
 		{
@@ -3883,6 +3883,26 @@ void QPianoRoll::vbarActionTriggered(int act)
 		}
 		vbar->setSliderPosition(val);
 	}
+        else if ( act == QAbstractSlider::SliderPageStepAdd )
+        {
+               	val = val - vbar->pageStep();
+
+		if ( val < 0 )
+		{
+			val = 0;
+		}
+		vbar->setSliderPosition(val);
+        }
+        else if ( act == QAbstractSlider::SliderPageStepSub )
+        {
+                val = val + vbar->pageStep();
+
+		if ( val >= maxLineOffset )
+		{
+			val = maxLineOffset;
+		}
+		vbar->setSliderPosition(val);
+        }
 	//printf("ACT:%i\n", act);
 }
 //----------------------------------------------------------------------------
@@ -4157,7 +4177,7 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 	}
 	vbar->setMinimum(0);
 	vbar->setMaximum(maxLineOffset);
-	vbar->setPageStep( (3*viewLines)/4 );
+	vbar->setPageStep( (7*viewLines)/8 );
 
 	if ( viewWidth >= pxLineWidth )
 	{
