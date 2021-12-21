@@ -287,6 +287,7 @@ void TasEditorWindow::closeEvent(QCloseEvent *event)
 
 	if (!askToSaveProject())
 	{
+	        event->ignore();
 		return;
 	}
 
@@ -301,7 +302,7 @@ void TasEditorWindow::closeWindow(void)
 	{
 		return;
 	}
-	//printf("Close Window\n");
+	printf("Tas Editor Close Window\n");
 	done(0);
 	deleteLater();
 }
