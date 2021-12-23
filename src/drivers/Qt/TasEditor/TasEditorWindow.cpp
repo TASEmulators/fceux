@@ -3661,6 +3661,8 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 
 	viewWidth  = 512;
 	viewHeight = 512;
+	setMinimumWidth( viewWidth );
+	setMinimumHeight( viewHeight );
 
 	g_config->getOption("SDL.TasPianoRollFont", &fontString);
 
@@ -3709,7 +3711,6 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 
 	numCtlr = 2;
 	numColumns = 2 + (NUM_JOYPAD_BUTTONS * numCtlr);
-	calcFontData();
 
 	vbar = NULL;
 	hbar = NULL;
@@ -3762,6 +3763,8 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	hotChangesColors[13] = QColor( 0xBF, 0x53, 0x00 );
 	hotChangesColors[14] = QColor( 0xCF, 0x72, 0x00 );
 	hotChangesColors[15] = QColor( 0xC7, 0x8B, 0x3C );
+
+	calcFontData();
 }
 //----------------------------------------------------------------------------
 QPianoRoll::~QPianoRoll(void)
@@ -3960,6 +3963,38 @@ void QPianoRoll::calcFontData(void)
 		pxFrameCtlX[i] = pxFrameColX + pxWidthFrameCol + (i*pxWidthCtlCol);
 	}
 	pxLineWidth = pxFrameCtlX[ numCtlr-1 ] + pxWidthCtlCol;
+
+	if ( vbar )
+	{
+		if ( maxLineOffset < 0 )
+		{
+			vbar->hide();
+			maxLineOffset = 0;
+		}
+		else
+		{
+			vbar->show();
+		}
+		vbar->setMinimum(0);
+		vbar->setMaximum(maxLineOffset);
+		vbar->setPageStep( (7*viewLines)/8 );
+	}
+
+	if ( hbar )
+	{
+		if ( viewWidth >= pxLineWidth )
+		{
+			pxLineXScroll = 0;
+			hbar->hide();
+		}
+		else
+		{
+			hbar->setPageStep( viewWidth );
+			hbar->setMaximum( pxLineWidth - viewWidth );
+			hbar->show();
+			pxLineXScroll = hbar->value();
+		}
+	}
 }
 //----------------------------------------------------------------------------
 QPoint QPianoRoll::convPixToCursor( QPoint p )
@@ -4198,28 +4233,111 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
 {
 	fceuCriticalSection emuLock;
-	int col, line, column_index, kbModifiers, alt_pressed;
+	int col, line, row_index, column_index, kbModifiers, alt_pressed;
+	bool headerClicked, row_valid;
 	QPoint c = convPixToCursor( event->pos() );
+
+	//printf("Mouse Double Click Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
 
 	mouse_x = event->pos().x();
 	mouse_y = event->pos().y();
 
-	line = lineOffset + c.y();
+	if ( c.y() >= 0 )
+	{
+		line = lineOffset + c.y();
+		headerClicked = false;
+	}
+	else
+	{
+		line = -1;
+		headerClicked = true;
+	}
 	col  = calcColumn( event->pos().x() );
 
-	rowUnderMouse = realRowUnderMouse = line;
-	columnUnderMouse = column_index = col;
+	rowUnderMouseAtPress = rowUnderMouse = realRowUnderMouse = row_index = line;
+	columnUnderMouseAtPress = columnUnderMouse = column_index = col;
+
+	row_valid = (row_index >= 0) && ( (size_t)row_index < currMovieData.records.size() );
 
 	kbModifiers = QApplication::keyboardModifiers();
 	alt_pressed = (kbModifiers & Qt::AltModifier) ? 1 : 0;
 
 	if ( event->button() == Qt::LeftButton )
 	{
-		if ( (col == COLUMN_FRAMENUM) || (col == COLUMN_FRAMENUM2) )
+		if (col == COLUMN_ICONS)
+		{
+			// clicked on the "icons" column
+			startDraggingPlaybackCursor();
+		}
+		else if ( (col == COLUMN_FRAMENUM) || (col == COLUMN_FRAMENUM2) )
 		{
 			handleColumnSet( col, alt_pressed );
 		}
+		else if (column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+		{
+			// clicked on Input
+			if (headerClicked)
+			{
+				drawingStartTimestamp = clock();
+				int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+				int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+				int selection_beginning = selection->getCurrentRowsSelectionBeginning();
+				int selection_end       = selection->getCurrentRowsSelectionEnd();
+
+				if ( (selection_beginning >= 0) && (selection_end >= 0) )
+				{
+					tasWin->toggleInput(selection_beginning, selection_end, joy, button, drawingStartTimestamp);
+				}
+			}
+			else if (row_index >= 0)
+			{
+				if (!alt_pressed && !(kbModifiers & Qt::ShiftModifier))
+				{
+					// clicked without Shift/Alt - bring Selection cursor to this row
+					selection->clearAllRowsSelection();
+					selection->setRowSelection(row_index);
+				}
+				// toggle Input
+				drawingStartTimestamp = clock();
+				int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+				int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+				int selection_beginning = selection->getCurrentRowsSelectionBeginning();
+				if (alt_pressed && selection_beginning >= 0)
+				{
+					tasWin->setInputUsingPattern(selection_beginning, row_index, joy, button, drawingStartTimestamp);
+				}
+				else if ((kbModifiers & Qt::ShiftModifier) && selection_beginning >= 0)
+				{
+					tasWin->toggleInput(selection_beginning, row_index, joy, button, drawingStartTimestamp);
+				}
+				else
+				{
+					tasWin->toggleInput(row_index, row_index, joy, button, drawingStartTimestamp);
+				}
+				// and start dragging/drawing
+				if (dragMode == DRAG_MODE_NONE)
+				{
+					if (taseditorConfig->drawInputByDragging)
+					{
+						// if clicked this click created buttonpress, then start painting, else start erasing
+						if ( row_valid && currMovieData.records[row_index].checkBit(joy, button))
+						{
+							dragMode = DRAG_MODE_SET;
+						}
+						else
+						{
+							dragMode = DRAG_MODE_UNSET;
+						}
+					}
+					else
+					{
+						dragMode = DRAG_MODE_OBSERVE;
+					}
+				}
+			}
+		}
 	}
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::contextMenuEvent(QContextMenuEvent *event)
@@ -4480,8 +4598,6 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 						{
 							dragMode = DRAG_MODE_UNSET;
 						}
-						//pianoRoll.drawingLastX = GET_X_LPARAM(lParam) + GetScrollPos(pianoRoll.hwndList, SB_HORZ);
-						//pianoRoll.drawingLastY = GET_Y_LPARAM(lParam) + GetScrollPos(pianoRoll.hwndList, SB_VERT) * pianoRoll.listRowHeight;
 					}
 					else
 					{
@@ -4490,7 +4606,6 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 				}
 			}
 		}
-		//updateDrag();
 	}
 	else if ( event->button() == Qt::MiddleButton )
 	{
