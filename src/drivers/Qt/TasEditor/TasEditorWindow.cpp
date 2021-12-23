@@ -954,7 +954,7 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	//pianoRollFrame->setFrameShape( QFrame::StyledPanel );
 	pianoRollFrame->setFrameShape( QFrame::Box );
 
-	pianoRollVBar->setInvertedControls(true);
+	pianoRollVBar->setInvertedControls(false);
 	pianoRollVBar->setInvertedAppearance(true);
 	pianoRoll->setScrollBars( pianoRollHBar, pianoRollVBar );
 	connect( pianoRollHBar, SIGNAL(valueChanged(int)), pianoRoll, SLOT(hbarChanged(int)) );
@@ -4023,7 +4023,7 @@ int  QPianoRoll::calcColumn( int px )
 //----------------------------------------------------------------------------
 void QPianoRoll::drawArrow( QPainter *painter, int xl, int yl, int value )
 {
-	int x, y, w, h, b, b2;
+	int x, y, w, h;
 	QPoint p[3];
 	bool hasBookmark = false;
 	bool draw2ndArrow = false;
@@ -4198,7 +4198,7 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
 {
 	fceuCriticalSection emuLock;
-	int col, line, row_index, column_index, kbModifiers, alt_pressed;
+	int col, line, column_index, kbModifiers, alt_pressed;
 	QPoint c = convPixToCursor( event->pos() );
 
 	mouse_x = event->pos().x();
@@ -4207,7 +4207,6 @@ void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
 	line = lineOffset + c.y();
 	col  = calcColumn( event->pos().x() );
 
-	row_index = line;
 	rowUnderMouse = realRowUnderMouse = line;
 	columnUnderMouse = column_index = col;
 
