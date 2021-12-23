@@ -4963,16 +4963,12 @@ void QPianoRoll::updateDrag(void)
 				{
 					// perform hit test
 					row_index = rowUnderMouse;
-					//if (row_index < 0)
-					//{
-					//	row_index = ListView_GetTopIndex(hwndList) + (info.pt.y - listTopMargin) / listRowHeight;
-					//}
 					// pad movie size if user tries to draw pattern below Piano Roll limit
 					if (row_index >= currMovieData.getNumRecords())
 					{
 						currMovieData.insertEmpty(-1, row_index + 1 - currMovieData.getNumRecords());
 					}
-					column_index = columnUnderMouse;
+					column_index = columnUnderMouseAtPress;
 
 					if (row_index >= 0 && column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 					{
