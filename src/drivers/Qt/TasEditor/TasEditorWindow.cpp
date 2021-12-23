@@ -4337,6 +4337,10 @@ void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
 			}
 		}
 	}
+	else if ( event->button() == Qt::MiddleButton )
+	{
+		playback->handleMiddleButtonClick();
+	}
 	event->accept();
 }
 //----------------------------------------------------------------------------
