@@ -27,6 +27,7 @@
 #include <zlib.h>
 
 #include <QDir>
+#include <QDrag>
 #include <QString>
 #include <QPainter>
 #include <QSettings>
@@ -1512,7 +1513,8 @@ bool TasEditorWindow::loadProject(const char* fullname)
 		updateCaption();
 		update();
 		success = true;
-	} else
+	}
+	else
 	{
 		// failed to load
 		updateCaption();
@@ -1927,6 +1929,38 @@ void TasEditorWindow::createNewProject(void)
 	fceuWrapperUnLock();
 }
 //----------------------------------------------------------------------------
+void TasEditorWindow::importMovieFile( const char *path )
+{
+	EMUFILE_FILE ifs( path, "rb");
+
+	// Load Input to temporary moviedata
+	MovieData md;
+	if (LoadFM2(md, &ifs, ifs.size(), false))
+	{
+		QFileInfo fi( path );
+		// loaded successfully, now register Input changes
+		//char drv[512], dir[512], name[1024], ext[512];
+		//splitpath(filename.toStdString().c_str(), drv, dir, name, ext);
+		//strcat(name, ext);
+		int result = history.registerImport(md, fi.fileName().toStdString().c_str() );
+		if (result >= 0)
+		{
+			greenzone.invalidateAndUpdatePlayback(result);
+			greenzone.lagLog.invalidateFromFrame(result);
+			// keep current snapshot laglog in touch
+			history.getCurrentSnapshot().laglog.invalidateFromFrame(result);
+		}
+		else
+		{
+			//MessageBox(taseditorWindow.hwndTASEditor, "Imported movie has the same Input.\nNo changes were made.", "TAS Editor", MB_OK);
+		}
+	}
+	else
+	{
+		FCEUD_PrintError("Error loading movie data!");
+	}
+}
+//----------------------------------------------------------------------------
 void TasEditorWindow::importMovieFile(void)
 {
 	std::string last;
@@ -1967,7 +2001,7 @@ void TasEditorWindow::importMovieFile(void)
 
 		dialog.setDirectory( d.absolutePath() );
 	}
-	dialog.setDefaultSuffix( tr(".fm3") );
+	dialog.setDefaultSuffix( tr(".fm2") );
 
 	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
 	if ( lastPath.size() > 0 )
@@ -2013,34 +2047,36 @@ void TasEditorWindow::importMovieFile(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	EMUFILE_FILE ifs( filename.toStdString().c_str(), "rb");
+	importMovieFile( filename.toStdString().c_str() );
 
-	// Load Input to temporary moviedata
-	MovieData md;
-	if (LoadFM2(md, &ifs, ifs.size(), false))
-	{
-		QFileInfo fi( filename );
-		// loaded successfully, now register Input changes
-		//char drv[512], dir[512], name[1024], ext[512];
-		//splitpath(filename.toStdString().c_str(), drv, dir, name, ext);
-		//strcat(name, ext);
-		int result = history.registerImport(md, fi.fileName().toStdString().c_str() );
-		if (result >= 0)
-		{
-			greenzone.invalidateAndUpdatePlayback(result);
-			greenzone.lagLog.invalidateFromFrame(result);
-			// keep current snapshot laglog in touch
-			history.getCurrentSnapshot().laglog.invalidateFromFrame(result);
-		}
-		else
-		{
-			//MessageBox(taseditorWindow.hwndTASEditor, "Imported movie has the same Input.\nNo changes were made.", "TAS Editor", MB_OK);
-		}
-	}
-	else
-	{
-		FCEUD_PrintError("Error loading movie data!");
-	}
+	//EMUFILE_FILE ifs( filename.toStdString().c_str(), "rb");
+
+	//// Load Input to temporary moviedata
+	//MovieData md;
+	//if (LoadFM2(md, &ifs, ifs.size(), false))
+	//{
+	//	QFileInfo fi( filename );
+	//	// loaded successfully, now register Input changes
+	//	//char drv[512], dir[512], name[1024], ext[512];
+	//	//splitpath(filename.toStdString().c_str(), drv, dir, name, ext);
+	//	//strcat(name, ext);
+	//	int result = history.registerImport(md, fi.fileName().toStdString().c_str() );
+	//	if (result >= 0)
+	//	{
+	//		greenzone.invalidateAndUpdatePlayback(result);
+	//		greenzone.lagLog.invalidateFromFrame(result);
+	//		// keep current snapshot laglog in touch
+	//		history.getCurrentSnapshot().laglog.invalidateFromFrame(result);
+	//	}
+	//	else
+	//	{
+	//		//MessageBox(taseditorWindow.hwndTASEditor, "Imported movie has the same Input.\nNo changes were made.", "TAS Editor", MB_OK);
+	//	}
+	//}
+	//else
+	//{
+	//	FCEUD_PrintError("Error loading movie data!");
+	//}
 
 	return;
 }
@@ -3663,6 +3699,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	viewHeight = 512;
 	setMinimumWidth( viewWidth );
 	setMinimumHeight( viewHeight );
+	setAcceptDrops(true);
 
 	g_config->getOption("SDL.TasPianoRollFont", &fontString);
 
@@ -4271,7 +4308,19 @@ void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
 		}
 		else if ( (col == COLUMN_FRAMENUM) || (col == COLUMN_FRAMENUM2) )
 		{
-			handleColumnSet( col, alt_pressed );
+			//handleColumnSet( col, alt_pressed );
+
+			// doubleclick - set Marker and start dragging it
+			if (!markersManager->getMarkerAtFrame(row_index))
+			{
+				if (markersManager->setMarkerAtFrame(row_index))
+				{
+					selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
+					history->registerMarkersChange(MODTYPE_MARKER_SET, row_index);
+					update();
+				}
+			}
+			startDraggingMarker( mouse_x, mouse_y, row_index, column_index);
 		}
 		else if (column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 		{
@@ -4848,6 +4897,55 @@ void QPianoRoll::focusOutEvent(QFocusEvent *event)
 	parent->pianoRollFrame->setStyleSheet(NULL);
 }
 //----------------------------------------------------------------------------
+void QPianoRoll::dragEnterEvent(QDragEnterEvent *event)
+{
+	if (event->mimeData()->hasUrls() )
+	{
+		QList<QUrl> urls = event->mimeData()->urls();
+		QFileInfo fi( urls[0].toString( QUrl::PreferLocalFile ) );
+
+		//printf("Suffix: '%s'\n", fi.suffix().toStdString().c_str() );
+
+		if ( fi.suffix().compare("fm3") == 0)
+		{
+			event->acceptProposedAction();
+		}
+		else if ( fi.suffix().compare("fm2") == 0 )
+		{
+			event->acceptProposedAction();
+		}
+	}
+	else
+	{
+		event->acceptProposedAction();
+	}
+}
+
+//----------------------------------------------------------------------------
+void QPianoRoll::dropEvent(QDropEvent *event)
+{
+	if (event->mimeData()->hasUrls() )
+	{
+		QList<QUrl> urls = event->mimeData()->urls();
+		QFileInfo fi( urls[0].toString( QUrl::PreferLocalFile ) );
+
+		if ( fi.suffix().compare("fm3") == 0 )
+		{
+			fceuWrapperLock();
+			tasWin->loadProject( fi.filePath().toStdString().c_str() );
+			fceuWrapperUnLock();
+			event->accept();
+		}
+		else if ( fi.suffix().compare("fm2") == 0 )
+		{
+			fceuWrapperLock();
+			tasWin->importMovieFile( fi.filePath().toStdString().c_str() );
+			fceuWrapperUnLock();
+			event->accept();
+		}
+	}
+}
+//----------------------------------------------------------------------------
 bool QPianoRoll::checkIfTheresAnIconAtFrame(int frame)
 {
 	if (frame == currFrameCounter)
@@ -5035,6 +5133,7 @@ void QPianoRoll::updateDrag(void)
 				//	DestroyWindow(hwndMarkerDragBox);
 				//	hwndMarkerDragBox = 0;
 				//}
+				setCursor( Qt::ArrowCursor );
 				dragMode = DRAG_MODE_NONE;
 				break;
 			}
@@ -5486,22 +5585,78 @@ void QPianoRoll::startDraggingMarker(int mouseX, int mouseY, int rowIndex, int c
 {
 	if (dragMode == DRAG_MODE_NONE)
 	{
+		QColor bgColor = (taseditorConfig->bindMarkersToInput) ? QColor( BINDMARKED_FRAMENUM_COLOR ) : QColor( MARKED_FRAMENUM_COLOR );
+
+		QSize iconSize(pxWidthFrameCol, pxLineSpacing);
+		QPixmap pixmap( iconSize );
+		pixmap.fill(Qt::transparent);
+
+		QPainter painter(&pixmap);
+
+		if (painter.isActive())
+		{
+			char txt[32];
+
+			sprintf( txt, "%07i", rowIndex );
+			font.setItalic(true);
+			font.setBold(false);
+
+			painter.setFont(font);
+			//I want to make the title bar pasted on the content
+			//But you can't get the image of the default title bar, just draw a rectangular box
+			//If the external theme color is set, you need to change it
+			QRect title_rect{0,0,pixmap.width(),pixmap.height()};
+			painter.fillRect(title_rect,bgColor);
+			painter.drawText(title_rect,Qt::AlignCenter, txt);
+			painter.drawRect(pixmap.rect().adjusted(0,0,-1,-1));
+
+			font.setItalic(false);
+			font.setBold(true);
+		}
+		painter.end();
+
+		QMimeData *mime =new QMimeData;
+
+		QDrag *drag = new QDrag(this);
+		drag->setMimeData(mime);
+		drag->setPixmap(pixmap);
+		drag->setHotSpot(QPoint(10,0));
+
 		// start dragging the Marker
 		dragMode = DRAG_MODE_MARKER;
 		markerDragFrameNumber = rowIndex;
 		markerDragCountdown = MARKER_DRAG_COUNTDOWN_MAX;
-		//RECT temp_rect;
-		//if (ListView_GetSubItemRect(hwndList, rowIndex, columnIndex, LVIR_BOUNDS, &temp_rect))
-		//{
-		//	markerDragBoxDX = mouseX - temp_rect.left;
-		//	markerDragBoxDY = mouseY - temp_rect.top;
-		//} else
-		//{
-		//	markerDragBoxDX = 0;
-		//	markerDragBoxDY = 0;
-		//}
-		//// redraw the row to show that Marker was lifted
-		//redrawRow(rowIndex);
+		setCursor( Qt::ClosedHandCursor );
+
+		//Drag is released after the mouse bounces up, at this time to judge whether it is dragged to the outside
+		connect(drag, &QDrag::destroyed, this,[=]
+		{
+			int line, col;
+			fceuCriticalSection emuLock;
+			QPoint pos = this->mapFromGlobal(QCursor::pos());
+			QPoint c = convPixToCursor( pos );
+
+			//printf("Drag Destroyed\n");
+
+			mouse_x = pos.x();
+			mouse_y = pos.y();
+
+			if ( c.y() >= 0 )
+			{
+				line = lineOffset + c.y();
+			}
+			else
+			{
+				line = -1;
+			}
+			col  = calcColumn( pos.x() );
+
+			rowUnderMouse = realRowUnderMouse = line;
+			columnUnderMouse = col;
+			finishDrag();
+		});
+		drag->exec(Qt::MoveAction);
+
 		update();
 	}
 }
@@ -5633,7 +5788,8 @@ void QPianoRoll::finishDrag(void)
 					//	hwndMarkerDragBox = 0;
 					//}
 				}
-			} else
+			}
+			else
 			{
 				// abort drag
 				//if (hwndMarkerDragBox)
@@ -5642,8 +5798,9 @@ void QPianoRoll::finishDrag(void)
 				//	hwndMarkerDragBox = 0;
 				//}
 			}
-			break;
+			setCursor( Qt::ArrowCursor );
 		}
+		break;
 	}
 	dragMode = DRAG_MODE_NONE;
 	//mustCheckItemUnderMouse = true;

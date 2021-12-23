@@ -162,18 +162,20 @@ class QPianoRoll : public QWidget
 		void  setFont( QFont &font );
 	protected:
 		void calcFontData(void);
-		void resizeEvent(QResizeEvent *event);
-		void paintEvent(QPaintEvent *event);
-		void mousePressEvent(QMouseEvent * event);
-		void mouseReleaseEvent(QMouseEvent * event);
-		void mouseMoveEvent(QMouseEvent * event);
-		void mouseDoubleClickEvent(QMouseEvent * event);
-		void wheelEvent(QWheelEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void keyReleaseEvent(QKeyEvent *event);
-		void focusInEvent(QFocusEvent *event);
-		void focusOutEvent(QFocusEvent *event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void resizeEvent(QResizeEvent *event) override;
+		void paintEvent(QPaintEvent *event) override;
+		void mousePressEvent(QMouseEvent * event) override;
+		void mouseReleaseEvent(QMouseEvent * event) override;
+		void mouseMoveEvent(QMouseEvent * event) override;
+		void mouseDoubleClickEvent(QMouseEvent * event) override;
+		void wheelEvent(QWheelEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void keyReleaseEvent(QKeyEvent *event) override;
+		void focusInEvent(QFocusEvent *event) override;
+		void focusOutEvent(QFocusEvent *event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
+		void dragEnterEvent(QDragEnterEvent *event) override;
+		void dropEvent(QDropEvent *event) override;
 
 		void crossGaps(int zDelta);
 		void startDraggingPlaybackCursor(void);
@@ -321,6 +323,7 @@ class TasEditorWindow : public QDialog
 		void initHotKeys(void);
 		void updateCaption(void);
 		bool loadProject(const char* fullname);
+		void importMovieFile( const char *path );
 		void loadClipboard(const char *txt);
 		void toggleInput(int start, int end, int joy, int button, int consecutivenessTag);
 		void setInputUsingPattern(int start, int end, int joy, int button, int consecutivenessTag);
