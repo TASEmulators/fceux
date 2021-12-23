@@ -645,12 +645,13 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 {
 	int x,y;
 	char txt[4];
+	int visHeight;
 	QPixmap spriteSheet(":/icons/branch_spritesheet.png");
 
 	QPainter painter(this);
 
 	//viewWidth  = event->rect().width();
-	//viewHeight = event->rect().height();
+	visHeight = event->rect().height();
 
 //	// draw background
 	QLinearGradient linearGrad(QPointF(0, 0), QPointF(viewWidth, viewHeight));
@@ -893,7 +894,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		{
 			int x,y;
 			x = 2 * pxBoxWidth;
-			y = viewHeight - (pxLineSpacing / 2);
+			y = visHeight - (pxLineSpacing / 2);
 
 			if (bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_CLOUD)
 			{

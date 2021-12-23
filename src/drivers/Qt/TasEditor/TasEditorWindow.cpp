@@ -3710,7 +3710,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 
 	useDarkTheme = false;
 
-	viewWidth  = 512;
+	viewWidth  = 256;
 	viewHeight = 512;
 	setMinimumWidth( viewWidth );
 	setMinimumHeight( viewHeight );
