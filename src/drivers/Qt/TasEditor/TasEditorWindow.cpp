@@ -5534,6 +5534,22 @@ void QPianoRoll::followPlaybackCursor(void)
 	centerListAroundLine(currFrameCounter);
 }
 //----------------------------------------------------------------------------
+void QPianoRoll::followPlaybackCursorIfNeeded(bool followPauseframe)
+{
+	if (taseditorConfig->followPlaybackCursor)
+	{
+		if (playback->getPauseFrame() < 0)
+		{
+			ensureTheLineIsVisible( currFrameCounter );
+		}
+		else if (followPauseframe)
+		{
+			ensureTheLineIsVisible( playback->getPauseFrame() );
+		}
+	}
+}
+
+//----------------------------------------------------------------------------
 void QPianoRoll::followPauseframe(void)
 {
 	if (playback->getPauseFrame() >= 0)

@@ -159,7 +159,7 @@ void PLAYBACK::update()
 		bookmarks->redrawChangedBookmarks(currFrameCounter);
 		lastCursorPos = currFrameCounter;
 		// follow the Playback cursor, but in case of seeking don't follow it
-		//pianoRoll.followPlaybackCursorIfNeeded(false);	//pianoRoll.updatePlaybackCursorPositionInPianoRoll();	// an unfinished experiment
+		tasWin->pianoRoll->followPlaybackCursorIfNeeded(false);	//pianoRoll.updatePlaybackCursorPositionInPianoRoll();	// an unfinished experiment
 		// enforce redrawing now
 		//UpdateWindow(pianoRoll.hwndList);
 		// lazy update of "Playback's Marker text"
@@ -396,10 +396,12 @@ void PLAYBACK::handleRewindFrame()
 	else
 	{
 		// cursor is at frame 0 - can't rewind, but still must make cursor visible if needed
-		//pianoRoll.followPlaybackCursorIfNeeded(true);
+		tasWin->pianoRoll->followPlaybackCursorIfNeeded(true);
 	}
 	if (!pauseFrame)
+	{
 		pauseEmulation();
+	}
 }
 void PLAYBACK::handleForwardFrame()
 {
@@ -478,11 +480,13 @@ void PLAYBACK::ensurePlaybackIsInsideGreenzone(bool executeLua)
 	{
 		// since the game state was changed by this jump, we must update possible Lua callbacks and other tools that would normally only update in FCEUI_Emulate
 		if (executeLua)
+		{
 			ForceExecuteLuaFrameFunctions();
+		}
 		//Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	}
 	// follow the Playback cursor, but in case of seeking don't follow it
-	//pianoRoll.followPlaybackCursorIfNeeded(false);
+	tasWin->pianoRoll->followPlaybackCursorIfNeeded(false);
 }
 
 // an interface for sending Playback cursor to any frame
@@ -515,7 +519,7 @@ void PLAYBACK::jump(int frame, bool forceStateReload, bool executeLua, bool foll
 	}
 
 	// follow the Playback cursor, and optionally follow pauseframe (if seeking was launched)
-	//pianoRoll.followPlaybackCursorIfNeeded(followPauseframe);
+	tasWin->pianoRoll->followPlaybackCursorIfNeeded(followPauseframe);
 
 	// redraw respective Piano Roll lines if needed
 	if (lastCursor != currFrameCounter)

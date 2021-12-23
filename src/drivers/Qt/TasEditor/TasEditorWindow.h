@@ -151,6 +151,7 @@ class QPianoRoll : public QWidget
 		void  handleColumnSet(int column, bool altPressed);
 		void  centerListAroundLine(int rowIndex);
 		void  ensureTheLineIsVisible( int lineNum );
+		void  followPlaybackCursorIfNeeded(bool followPauseframe);
 		void  followMarker(int markerID);
 		void  followSelection(void);
 		void  followPlaybackCursor(void);
