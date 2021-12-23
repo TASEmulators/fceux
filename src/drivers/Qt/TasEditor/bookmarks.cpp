@@ -67,6 +67,7 @@ BOOKMARKS::BOOKMARKS(QWidget *parent)
 		font.setStyle( QFont::StyleNormal );
 		font.setStyleHint( QFont::Monospace );
 	}
+	font.setBold(true);
 
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMouseTracking(true);
@@ -119,7 +120,8 @@ void BOOKMARKS::reset_vars()
 void BOOKMARKS::setFont( QFont &newFont )
 {
 	font = newFont;
-	QWidget::setFont( newFont );
+	font.setBold(true);
+	QWidget::setFont( font );
 	calcFontData();
 }
 

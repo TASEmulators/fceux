@@ -70,6 +70,7 @@ BRANCHES::BRANCHES(QWidget *parent)
 		font.setStyle( QFont::StyleNormal );
 		font.setStyleHint( QFont::Monospace );
 	}
+	font.setBold(true);
 
 	calcFontData();
 }
@@ -82,7 +83,8 @@ BRANCHES::~BRANCHES(void)
 void BRANCHES::setFont( QFont &newFont )
 {
 	font = newFont;
-	QWidget::setFont( newFont );
+	font.setBold(true);
+	QWidget::setFont( font );
 	calcFontData();
 	reset();
 	recalculateParents();

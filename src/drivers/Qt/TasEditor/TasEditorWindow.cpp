@@ -4921,9 +4921,9 @@ void QPianoRoll::dragEnterEvent(QDragEnterEvent *event)
 			event->acceptProposedAction();
 		}
 	}
-	else if (event->mimeData()->hasText() )
+	else
 	{
-		if ( event->mimeData()->text().compare("MARKER") == 0 )
+		if ( event->source() == this )
 		{
 			event->acceptProposedAction();
 		}
@@ -5649,7 +5649,7 @@ void QPianoRoll::startDraggingMarker(int mouseX, int mouseY, int rowIndex, int c
 		painter.end();
 
 		QMimeData *mime = new QMimeData;
-		mime->setText( QString("MARKER") );
+		//mime->setText( QString("MARKER") );
 
 		QDrag *drag = new QDrag(this);
 		drag->setMimeData(mime);
