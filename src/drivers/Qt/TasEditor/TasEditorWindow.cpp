@@ -182,6 +182,8 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	::branches        = &this->branches;
 	::splicer         = &this->splicer;
 
+	this->taseditorConfig.load();
+
 	clipboard = QGuiApplication::clipboard();
 
 	setWindowTitle("TAS Editor");
@@ -236,6 +238,7 @@ TasEditorWindow::~TasEditorWindow(void)
 	//if (!askToSaveProject()) return false;
 
 	// destroy window
+	taseditorConfig.save();
 	//taseditorWindow.exit();
 	//disableGeneralKeyboardInput();
 	// release memory

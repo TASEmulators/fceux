@@ -31,6 +31,9 @@ class TASEDITOR_CONFIG
 public:
 	TASEDITOR_CONFIG(void);
 
+	void load(void);
+	void save(void);
+
 	// vars saved in fceux.cfg file
 	int windowX;
 	int windowY;

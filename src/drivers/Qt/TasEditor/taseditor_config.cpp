@@ -16,6 +16,7 @@ Config - Current settings
 * stores resources: default values of all settings, min/max values of settings
 ------------------------------------------------------------------------------------ */
 
+#include "Qt/fceuWrapper.h"
 #include "Qt/TasEditor/recorder.h"
 #include "Qt/TasEditor/inputlog.h"
 #include "Qt/TasEditor/taseditor_config.h"
@@ -98,6 +99,116 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG(void)
 
 }
 
+void TASEDITOR_CONFIG::load(void)
+{
+	std::string s;
+	g_config->getOption("SDL.TasAutoSaveEnabled"                         , &autosaveEnabled );
+	g_config->getOption("SDL.TasAutoSavePeriod"                          , &autosavePeriod  );
+	g_config->getOption("SDL.TasAutoSaveSilent"                          , &autosaveSilent  );
+	g_config->getOption("SDL.TasTooltipsEnabled"                         , &tooltipsEnabled );
+	g_config->getOption("SDL.TasCurrentPattern"                          , &currentPattern  );
+	g_config->getOption("SDL.TasFollowPlaybackCursor"                    , &followPlaybackCursor  );
+	g_config->getOption("SDL.TasTurboSeek"                               , &turboSeek  );
+	g_config->getOption("SDL.TasAutoRestoreLastPlaybackPosition"         , &autoRestoreLastPlaybackPosition  );
+	g_config->getOption("SDL.TasSuperImpose"                             , &superimpose  );
+	g_config->getOption("SDL.TasRecordingUsePattern"                     , &recordingUsePattern  );
+	g_config->getOption("SDL.TasEnableLuaAutoFunction"                   , &enableLuaAutoFunction  );
+	g_config->getOption("SDL.TasDisplayBranchesTree"                     , &displayBranchesTree  );
+	g_config->getOption("SDL.TasDisplayBranchScreenshots"                , &displayBranchScreenshots  );
+	g_config->getOption("SDL.TasDisplayBranchDescriptions"               , &displayBranchDescriptions  );
+	g_config->getOption("SDL.TasEnableHotChanges"                        , &enableHotChanges  );
+	g_config->getOption("SDL.TasFollowUndoContext"                       , &followUndoContext  );
+	g_config->getOption("SDL.TasFollowMarkerNoteContext"                 , &followMarkerNoteContext  );
+	g_config->getOption("SDL.TasGreenzoneCapacity"                       , &greenzoneCapacity  );
+	g_config->getOption("SDL.TasMaxUndoLevels"                           , &maxUndoLevels  );
+	g_config->getOption("SDL.TasEnableGreenzoning"                       , &enableGreenzoning  );
+	g_config->getOption("SDL.TasAutofirePatternSkipsLag"                 , &autofirePatternSkipsLag  );
+	g_config->getOption("SDL.TasAutoAdjustInputAccordingToLag"           , &autoAdjustInputAccordingToLag  );
+	g_config->getOption("SDL.TasDrawInputByDragging"                     , &drawInputByDragging  );
+	g_config->getOption("SDL.TasCombineConsecutiveRecordingsAndDraws"    , &combineConsecutiveRecordingsAndDraws  );
+	g_config->getOption("SDL.TasUse1PKeysForAllSingleRecordings"         , &use1PKeysForAllSingleRecordings  );
+	g_config->getOption("SDL.TasUseInputKeysForColumnSet"                , &useInputKeysForColumnSet  );
+	g_config->getOption("SDL.TasBindMarkersToInput"                      , &bindMarkersToInput  );
+	g_config->getOption("SDL.TasEmptyNewMarkerNotes"                     , &emptyNewMarkerNotes  );
+	g_config->getOption("SDL.TasOldControlSchemeForBranching"            , &oldControlSchemeForBranching  );
+	g_config->getOption("SDL.TasBranchesRestoreEntireMovie"              , &branchesRestoreEntireMovie  );
+	g_config->getOption("SDL.TasHUDInBranchScreenshots"                  , &HUDInBranchScreenshots  );
+	g_config->getOption("SDL.TasAutopauseAtTheEndOfMovie"                , &autopauseAtTheEndOfMovie  );
+	g_config->getOption("SDL.TasLastExportedInputType"                   , &lastExportedInputType  );
+	g_config->getOption("SDL.TasLastExportedSubtitlesStatus"             , &lastExportedSubtitlesStatus  );
+	g_config->getOption("SDL.TasProjectSavingOptions_SaveInBinary"       , &projectSavingOptions_SaveInBinary  );
+	g_config->getOption("SDL.TasProjectSavingOptions_SaveMarkers"        , &projectSavingOptions_SaveMarkers  );
+	g_config->getOption("SDL.TasProjectSavingOptions_SaveBookmarks"      , &projectSavingOptions_SaveBookmarks  );
+	g_config->getOption("SDL.TasProjectSavingOptions_SaveHistory"        , &projectSavingOptions_SaveHistory  );
+	g_config->getOption("SDL.TasProjectSavingOptions_SavePianoRoll"      , &projectSavingOptions_SavePianoRoll  );
+	g_config->getOption("SDL.TasProjectSavingOptions_SaveSelection"      , &projectSavingOptions_SaveSelection  );
+	g_config->getOption("SDL.TasProjectSavingOptions_GreenzoneSavingMode", &projectSavingOptions_GreenzoneSavingMode  );
+	g_config->getOption("SDL.TasSaveCompact_SaveInBinary"                , &saveCompact_SaveInBinary  );
+	g_config->getOption("SDL.TasSaveCompact_SaveMarkers"                 , &saveCompact_SaveMarkers  );
+	g_config->getOption("SDL.TasSaveCompact_SaveBookmarks"               , &saveCompact_SaveBookmarks  );
+	g_config->getOption("SDL.TasSaveCompact_SaveHistory"                 , &saveCompact_SaveHistory  );
+	g_config->getOption("SDL.TasSaveCompact_SavePianoRoll"               , &saveCompact_SavePianoRoll  );
+	g_config->getOption("SDL.TasSaveCompact_SaveSelection"               , &saveCompact_SaveSelection  );
+	g_config->getOption("SDL.TasSaveCompact_GreenzoneSavingMode"         , &saveCompact_GreenzoneSavingMode  );
+	g_config->getOption("SDL.TasLastAuthorName" , &s);
 
+	strncpy( lastAuthorName, s.c_str(), AUTHOR_NAME_MAX_LEN );
+	lastAuthorName[AUTHOR_NAME_MAX_LEN-1] = 0;
+}
+
+void TASEDITOR_CONFIG::save(void)
+{
+	g_config->setOption("SDL.TasAutoSaveEnabled"                         , autosaveEnabled );
+	g_config->setOption("SDL.TasAutoSavePeriod"                          , autosavePeriod  );
+	g_config->setOption("SDL.TasAutoSaveSilent"                          , autosaveSilent  );
+	g_config->setOption("SDL.TasTooltipsEnabled"                         , tooltipsEnabled );
+	g_config->setOption("SDL.TasCurrentPattern"                          , currentPattern  );
+	g_config->setOption("SDL.TasFollowPlaybackCursor"                    , followPlaybackCursor  );
+	g_config->setOption("SDL.TasTurboSeek"                               , turboSeek  );
+	g_config->setOption("SDL.TasAutoRestoreLastPlaybackPosition"         , autoRestoreLastPlaybackPosition  );
+	g_config->setOption("SDL.TasSuperImpose"                             , superimpose  );
+	g_config->setOption("SDL.TasRecordingUsePattern"                     , recordingUsePattern  );
+	g_config->setOption("SDL.TasEnableLuaAutoFunction"                   , enableLuaAutoFunction  );
+	g_config->setOption("SDL.TasDisplayBranchesTree"                     , displayBranchesTree  );
+	g_config->setOption("SDL.TasDisplayBranchScreenshots"                , displayBranchScreenshots  );
+	g_config->setOption("SDL.TasDisplayBranchDescriptions"               , displayBranchDescriptions  );
+	g_config->setOption("SDL.TasEnableHotChanges"                        , enableHotChanges  );
+	g_config->setOption("SDL.TasFollowUndoContext"                       , followUndoContext  );
+	g_config->setOption("SDL.TasFollowMarkerNoteContext"                 , followMarkerNoteContext  );
+	g_config->setOption("SDL.TasGreenzoneCapacity"                       , greenzoneCapacity  );
+	g_config->setOption("SDL.TasMaxUndoLevels"                           , maxUndoLevels  );
+	g_config->setOption("SDL.TasEnableGreenzoning"                       , enableGreenzoning  );
+	g_config->setOption("SDL.TasAutofirePatternSkipsLag"                 , autofirePatternSkipsLag  );
+	g_config->setOption("SDL.TasAutoAdjustInputAccordingToLag"           , autoAdjustInputAccordingToLag  );
+	g_config->setOption("SDL.TasDrawInputByDragging"                     , drawInputByDragging  );
+	g_config->setOption("SDL.TasCombineConsecutiveRecordingsAndDraws"    , combineConsecutiveRecordingsAndDraws  );
+	g_config->setOption("SDL.TasUse1PKeysForAllSingleRecordings"         , use1PKeysForAllSingleRecordings  );
+	g_config->setOption("SDL.TasUseInputKeysForColumnSet"                , useInputKeysForColumnSet  );
+	g_config->setOption("SDL.TasBindMarkersToInput"                      , bindMarkersToInput  );
+	g_config->setOption("SDL.TasEmptyNewMarkerNotes"                     , emptyNewMarkerNotes  );
+	g_config->setOption("SDL.TasOldControlSchemeForBranching"            , oldControlSchemeForBranching  );
+	g_config->setOption("SDL.TasBranchesRestoreEntireMovie"              , branchesRestoreEntireMovie  );
+	g_config->setOption("SDL.TasHUDInBranchScreenshots"                  , HUDInBranchScreenshots  );
+	g_config->setOption("SDL.TasAutopauseAtTheEndOfMovie"                , autopauseAtTheEndOfMovie  );
+	g_config->setOption("SDL.TasLastExportedInputType"                   , lastExportedInputType  );
+	g_config->setOption("SDL.TasLastExportedSubtitlesStatus"             , lastExportedSubtitlesStatus  );
+	g_config->setOption("SDL.TasProjectSavingOptions_SaveInBinary"       , projectSavingOptions_SaveInBinary  );
+	g_config->setOption("SDL.TasProjectSavingOptions_SaveMarkers"        , projectSavingOptions_SaveMarkers  );
+	g_config->setOption("SDL.TasProjectSavingOptions_SaveBookmarks"      , projectSavingOptions_SaveBookmarks  );
+	g_config->setOption("SDL.TasProjectSavingOptions_SaveHistory"        , projectSavingOptions_SaveHistory  );
+	g_config->setOption("SDL.TasProjectSavingOptions_SavePianoRoll"      , projectSavingOptions_SavePianoRoll  );
+	g_config->setOption("SDL.TasProjectSavingOptions_SaveSelection"      , projectSavingOptions_SaveSelection  );
+	g_config->setOption("SDL.TasProjectSavingOptions_GreenzoneSavingMode", projectSavingOptions_GreenzoneSavingMode  );
+	g_config->setOption("SDL.TasSaveCompact_SaveInBinary"                , saveCompact_SaveInBinary  );
+	g_config->setOption("SDL.TasSaveCompact_SaveMarkers"                 , saveCompact_SaveMarkers  );
+	g_config->setOption("SDL.TasSaveCompact_SaveBookmarks"               , saveCompact_SaveBookmarks  );
+	g_config->setOption("SDL.TasSaveCompact_SaveHistory"                 , saveCompact_SaveHistory  );
+	g_config->setOption("SDL.TasSaveCompact_SavePianoRoll"               , saveCompact_SavePianoRoll  );
+	g_config->setOption("SDL.TasSaveCompact_SaveSelection"               , saveCompact_SaveSelection  );
+	g_config->setOption("SDL.TasSaveCompact_GreenzoneSavingMode"         , saveCompact_GreenzoneSavingMode  );
+	g_config->setOption("SDL.TasLastAuthorName" , lastAuthorName);
+
+	g_config->save();
+}
 
 

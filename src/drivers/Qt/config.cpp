@@ -34,6 +34,7 @@
 #include "Qt/sdl-video.h"
 #include "Qt/AviRecord.h"
 #include "Qt/unix-netplay.h"
+#include "Qt/TasEditor/taseditor_config.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -468,6 +469,7 @@ GetBaseDirectory(std::string &dir)
 Config *
 InitConfig()
 {
+	TASEDITOR_CONFIG  tasCfg;
 	std::string dir, prefix, savPath, movPath;
 	Config *config;
 
@@ -758,6 +760,56 @@ InitConfig()
 	config->addOption("SDL.TasPianoRollFont", "");
 	config->addOption("SDL.TasBookmarksFont", "");
 	config->addOption("SDL.TasBranchesFont" , "");
+
+	config->addOption("SDL.TasAutoSaveEnabled"                         , tasCfg.autosaveEnabled );
+	config->addOption("SDL.TasAutoSavePeriod"                          , tasCfg.autosavePeriod  );
+	config->addOption("SDL.TasAutoSaveSilent"                          , tasCfg.autosaveSilent  );
+	config->addOption("SDL.TasTooltipsEnabled"                         , tasCfg.tooltipsEnabled );
+	config->addOption("SDL.TasCurrentPattern"                          , tasCfg.currentPattern  );
+	config->addOption("SDL.TasFollowPlaybackCursor"                    , tasCfg.followPlaybackCursor  );
+	config->addOption("SDL.TasTurboSeek"                               , tasCfg.turboSeek  );
+	config->addOption("SDL.TasAutoRestoreLastPlaybackPosition"         , tasCfg.autoRestoreLastPlaybackPosition  );
+	config->addOption("SDL.TasSuperImpose"                             , tasCfg.superimpose  );
+	config->addOption("SDL.TasRecordingUsePattern"                     , tasCfg.recordingUsePattern  );
+	config->addOption("SDL.TasEnableLuaAutoFunction"                   , tasCfg.enableLuaAutoFunction  );
+	config->addOption("SDL.TasDisplayBranchesTree"                     , tasCfg.displayBranchesTree  );
+	config->addOption("SDL.TasDisplayBranchScreenshots"                , tasCfg.displayBranchScreenshots  );
+	config->addOption("SDL.TasDisplayBranchDescriptions"               , tasCfg.displayBranchDescriptions  );
+	config->addOption("SDL.TasEnableHotChanges"                        , tasCfg.enableHotChanges  );
+	config->addOption("SDL.TasFollowUndoContext"                       , tasCfg.followUndoContext  );
+	config->addOption("SDL.TasFollowMarkerNoteContext"                 , tasCfg.followMarkerNoteContext  );
+	config->addOption("SDL.TasGreenzoneCapacity"                       , tasCfg.greenzoneCapacity  );
+	config->addOption("SDL.TasMaxUndoLevels"                           , tasCfg.maxUndoLevels  );
+	config->addOption("SDL.TasEnableGreenzoning"                       , tasCfg.enableGreenzoning  );
+	config->addOption("SDL.TasAutofirePatternSkipsLag"                 , tasCfg.autofirePatternSkipsLag  );
+	config->addOption("SDL.TasAutoAdjustInputAccordingToLag"           , tasCfg.autoAdjustInputAccordingToLag  );
+	config->addOption("SDL.TasDrawInputByDragging"                     , tasCfg.drawInputByDragging  );
+	config->addOption("SDL.TasCombineConsecutiveRecordingsAndDraws"    , tasCfg.combineConsecutiveRecordingsAndDraws  );
+	config->addOption("SDL.TasUse1PKeysForAllSingleRecordings"         , tasCfg.use1PKeysForAllSingleRecordings  );
+	config->addOption("SDL.TasUseInputKeysForColumnSet"                , tasCfg.useInputKeysForColumnSet  );
+	config->addOption("SDL.TasBindMarkersToInput"                      , tasCfg.bindMarkersToInput  );
+	config->addOption("SDL.TasEmptyNewMarkerNotes"                     , tasCfg.emptyNewMarkerNotes  );
+	config->addOption("SDL.TasOldControlSchemeForBranching"            , tasCfg.oldControlSchemeForBranching  );
+	config->addOption("SDL.TasBranchesRestoreEntireMovie"              , tasCfg.branchesRestoreEntireMovie  );
+	config->addOption("SDL.TasHUDInBranchScreenshots"                  , tasCfg.HUDInBranchScreenshots  );
+	config->addOption("SDL.TasAutopauseAtTheEndOfMovie"                , tasCfg.autopauseAtTheEndOfMovie  );
+	config->addOption("SDL.TasLastExportedInputType"                   , tasCfg.lastExportedInputType  );
+	config->addOption("SDL.TasLastExportedSubtitlesStatus"             , tasCfg.lastExportedSubtitlesStatus  );
+	config->addOption("SDL.TasProjectSavingOptions_SaveInBinary"       , tasCfg.projectSavingOptions_SaveInBinary  );
+	config->addOption("SDL.TasProjectSavingOptions_SaveMarkers"        , tasCfg.projectSavingOptions_SaveMarkers  );
+	config->addOption("SDL.TasProjectSavingOptions_SaveBookmarks"      , tasCfg.projectSavingOptions_SaveBookmarks  );
+	config->addOption("SDL.TasProjectSavingOptions_SaveHistory"        , tasCfg.projectSavingOptions_SaveHistory  );
+	config->addOption("SDL.TasProjectSavingOptions_SavePianoRoll"      , tasCfg.projectSavingOptions_SavePianoRoll  );
+	config->addOption("SDL.TasProjectSavingOptions_SaveSelection"      , tasCfg.projectSavingOptions_SaveSelection  );
+	config->addOption("SDL.TasProjectSavingOptions_GreenzoneSavingMode", tasCfg.projectSavingOptions_GreenzoneSavingMode  );
+	config->addOption("SDL.TasSaveCompact_SaveInBinary"                , tasCfg.saveCompact_SaveInBinary  );
+	config->addOption("SDL.TasSaveCompact_SaveMarkers"                 , tasCfg.saveCompact_SaveMarkers  );
+	config->addOption("SDL.TasSaveCompact_SaveBookmarks"               , tasCfg.saveCompact_SaveBookmarks  );
+	config->addOption("SDL.TasSaveCompact_SaveHistory"                 , tasCfg.saveCompact_SaveHistory  );
+	config->addOption("SDL.TasSaveCompact_SavePianoRoll"               , tasCfg.saveCompact_SavePianoRoll  );
+	config->addOption("SDL.TasSaveCompact_SaveSelection"               , tasCfg.saveCompact_SaveSelection  );
+	config->addOption("SDL.TasSaveCompact_GreenzoneSavingMode"         , tasCfg.saveCompact_GreenzoneSavingMode  );
+	config->addOption("SDL.TasLastAuthorName" , "");
 
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
