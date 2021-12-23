@@ -161,6 +161,8 @@ class QPianoRoll : public QWidget
 		void  periodicUpdate(void);
 
 		void  setFont( QFont &font );
+
+		QColor      gridColor;
 	protected:
 		void calcFontData(void);
 		void resizeEvent(QResizeEvent *event) override;

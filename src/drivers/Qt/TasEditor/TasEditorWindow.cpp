@@ -52,6 +52,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ColorMenu.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/TasEditor/TasColors.h"
@@ -318,6 +319,7 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 		    *patternMenu;
 	QActionGroup *actGroup;
 	QAction     *act;
+	ColorMenuItem  *colorAct;
 	int useNativeMenuBar=0;
 
 	QMenuBar *menuBar = new QMenuBar(this);
@@ -682,6 +684,16 @@ QMenuBar *TasEditorWindow::buildMenuBar(void)
 	connect(act, SIGNAL(triggered(void)), this, SLOT(changeBranchesFontCB(void)) );
 
 	viewMenu->addAction(act);
+
+	viewMenu->addSeparator();
+
+	// View -> Piano Roll Grid Color
+	colorAct = new ColorMenuItem(tr("Piano Roll Grid Color..."), "SDL.TasPianoRollGridColor", this);
+	colorAct->setStatusTip(tr("Select Piano Roll Grid Color"));
+
+	colorAct->connectColor( &pianoRoll->gridColor );
+
+	viewMenu->addAction(colorAct);
 
 	// Config
 	confMenu = menuBar->addMenu(tr("&Config"));
@@ -3804,6 +3816,10 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	hotChangesColors[14] = QColor( 0xCF, 0x72, 0x00 );
 	hotChangesColors[15] = QColor( 0xC7, 0x8B, 0x3C );
 
+	gridColor = QColor( 0x00, 0x00, 0x00 );
+
+	fceuLoadConfigColor("SDL.TasPianoRollGridColor"   , &gridColor );
+
 	calcFontData();
 }
 //----------------------------------------------------------------------------
@@ -6292,7 +6308,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		{
 			painter.setPen( QColor( 128, 128, 128 ) );
 			painter.drawLine( x, 0, x, viewHeight ); x++;
-			painter.setPen( QColor(   0,   0,   0 ) );
+			painter.setPen( gridColor );
 			painter.drawLine( x, 0, x, viewHeight ); x--;
 
 			painter.setPen( headerLightsColors[ headerColors[COLUMN_JOYPAD1_A + (i*8) + j] ] );
@@ -6302,7 +6318,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		}
 		painter.setPen( QColor( 128, 128, 128 ) );
 		painter.drawLine( x, 0, x, viewHeight ); x++;
-		painter.setPen( QColor(   0,   0,   0 ) );
+		painter.setPen( gridColor );
 		painter.drawLine( x, 0, x, viewHeight );
 	}
 	y = 0;
