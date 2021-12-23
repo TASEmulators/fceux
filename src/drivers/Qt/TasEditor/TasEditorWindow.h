@@ -249,6 +249,7 @@ class QPianoRoll : public QWidget
 		void hbarChanged(int val);
 		void vbarChanged(int val);
 		void vbarActionTriggered(int act);
+		void setupMarkerDrag(void);
 };
 
 class  TasRecentProjectAction : public QAction

@@ -4320,7 +4320,10 @@ void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
 					update();
 				}
 			}
-			startDraggingMarker( mouse_x, mouse_y, row_index, column_index);
+			// Delay drag event by 100ms incase the button is quickly released
+			QTimer::singleShot( 100, this, SLOT(setupMarkerDrag(void)) );
+
+			//startDraggingMarker( mouse_x, mouse_y, row_index, column_index);
 		}
 		else if (column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 		{
@@ -5581,6 +5584,14 @@ void QPianoRoll::startDraggingPlaybackCursor(void)
 		handlePlaybackCursorDragging();
 	}
 }
+void QPianoRoll::setupMarkerDrag(void)
+{
+	if ( QApplication::mouseButtons() & Qt::LeftButton )
+	{
+		startDraggingMarker( mouse_x, mouse_y, rowUnderMouseAtPress, columnUnderMouseAtPress);
+	}
+}
+
 void QPianoRoll::startDraggingMarker(int mouseX, int mouseY, int rowIndex, int columnIndex)
 {
 	if (dragMode == DRAG_MODE_NONE)
