@@ -4862,7 +4862,7 @@ void QPianoRoll::wheelEvent(QWheelEvent *event)
 	{
 		if (zDelta > 0)
 		{
-			ofs += zDelta;
+			ofs += (zDelta*6);
 
 			if (ofs > maxLineOffset)
 			{
@@ -4872,7 +4872,7 @@ void QPianoRoll::wheelEvent(QWheelEvent *event)
 		}
 		else if (zDelta < 0)
 		{
-			ofs += zDelta;
+			ofs += (zDelta*6);
 
 			if (ofs < 0)
 			{
