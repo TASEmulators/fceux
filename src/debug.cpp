@@ -352,7 +352,7 @@ uint8 GetMem(uint16 A) {
 			case 6: return RawReg4016;
 			case 7: return IRQFrameMode;
 		}		
-	else if ((A >= 0x4018) && (A < 0x5000))	// AnS: changed the range, so MMC5 ExRAM can be watched in the Hexeditor
+	else if ((A >= 0x4018) && (A < 0x4800))	// AnS: changed the range, so MMC5 ExRAM can be watched in the Hexeditor | BrokeStudio: changed the range, so Rainbow FPGA-RAM can be watched in the Hexeditor
 		return 0xFF;
 	if (GameInfo) {							//adelikat: 11/17/09: Prevent crash if this is called with no game loaded.
 		uint32 ret;

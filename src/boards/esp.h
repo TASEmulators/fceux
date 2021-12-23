@@ -10,7 +10,7 @@ class EspFirmware {
 public:
 	virtual ~EspFirmware() = default;
 
-	// Communication pins (dont care about UART details, directly transmit bytes)
+	// Communication pins (don't care about UART details, directly transmit bytes)
 	virtual void rx(uint8 v) = 0;
 	virtual uint8 tx() = 0;
 

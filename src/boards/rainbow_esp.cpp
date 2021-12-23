@@ -197,10 +197,6 @@ uint8 BrokeStudioFirmware::tx() {
 	// Fill buffer with the next message (if needed)
 	if (this->tx_buffer.empty() && !this->tx_messages.empty()) {
 		std::deque<uint8> message = this->tx_messages.front();
-		// add last received byte first to match hardware behavior
-		// it's more of a mapper thing though ...
-		// needs a dummy $5000 read when reading data from buffer
-		this->tx_buffer.push_back(last_byte_read);
 		this->tx_buffer.insert(this->tx_buffer.end(), message.begin(), message.end());
 		this->tx_messages.pop_front();
 	}

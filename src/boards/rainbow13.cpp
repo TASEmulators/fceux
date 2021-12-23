@@ -57,17 +57,19 @@
 #define CHIP_TYPE_CHR			1
 
 static uint8 prg_mode, bootloader;
-static uint32 prg[3], wram_bank, fpga_wram_bank;
-static uint32 chr[8];
+static uint8 prg[3], wram_bank, wram_chip_select, fpga_wram_bank;
+static uint16 chr[8];
 static uint8 chr_chip, chr_mode, chr_upper_bank;
 static uint8 mirr_mode, nt_set;
-static uint8 mul_a, mul_b, mul_result;
+static uint8 mul_a, mul_b;
+static uint16 mul_result;
+static uint8 rx_address, tx_address;
 
 static uint8 *WRAM = NULL;
 const uint32 WRAMSIZE = 32 * 1024;
 
 static uint8 *FPGA_WRAM = NULL;
-const uint32 FPGA_WRAMSIZE = 9 * 1024;
+const uint32 FPGA_WRAMSIZE = 8 * 1024;
 
 static uint8 *DUMMY_CHRRAM = NULL;
 const uint32 DUMMY_CHRRAMSIZE = 4 * 1024;
@@ -130,13 +132,15 @@ static SFORMAT SStateRegs[] =
 
 static EspFirmware *esp = NULL;
 static bool esp_enable;
-static bool irq_enable;
-static uint8 last_byte_read;
+static bool esp_irq_enable;
+static bool esp_message_received;
+static bool esp_message_sent;
+std::thread esp_RX;
 
 static void Rainbow13EspMapIrq(int32) {
-	if (irq_enable)
+	if (esp_irq_enable)
 	{
-		if (esp->getGpio4())
+		if (esp_message_received)
 		{
 			X6502_IRQBegin(FCEU_IQEXT);
 		}
@@ -148,6 +152,22 @@ static void Rainbow13EspMapIrq(int32) {
 }
 
 // Mapper
+
+void esp_check_new_message(void) {
+	while (esp != NULL) {
+		// get new message if needed
+		if (esp_enable && esp->getGpio4() && !esp_message_received)
+		{
+			uint8 message_length = esp->tx();
+			FPGA_WRAM[rx_address << 8] = message_length;
+			for (uint8 i = 0; i < message_length; i++)
+			{
+				FPGA_WRAM[(rx_address << 8) + 1 + i] = esp->tx();
+			}
+			esp_message_received = true;
+		}
+	}
+}
 
 static void Sync(void) {
 	static uint8 *address;
@@ -195,28 +215,29 @@ static void Sync(void) {
 	setprg8r(0x11, 0xe000, ~0);
 
 	// $6000-$7fff
-	if (WRAM)
+	switch (wram_chip_select & 0x03)
 	{
-		switch (wram_bank & 0xC0)
-		{
-		case 0x00:
+	case 0x00: // PRG-RAM
+		if (WRAM)
 			setprg8r(0x10, 0x6000, wram_bank & 0x03);
-			break;
-		case 0x40:
-			setprg8r(0x12, 0x6000, 0x00);
-			break;
-		case 0x80:
-		case 0x81:
-			setprg8r(0x11, 0x6000, wram_bank & 0x7f);
-			break;
-		}
+		break;
+	case 0x01: // FPGA-RAM
+		setprg8r(0x12, 0x6000, 0x00);
+		break;
+	case 0x02: // PRG-ROM
+	case 0x03:
+		setprg8r(0x11, 0x6000, wram_bank & 0x3f);
+		break;
 	}
 
 	// $5000-$5fff
 	if (bootloader == 1)
-		setprg4r(0x11, 0x5000, 125);
+		setprg4r(0x11, 0x5000, 125); // todo: why 125 ?!
 	else
 		setprg4r(0x12, 0x5000, fpga_wram_bank & 0x01);
+
+	// $4800-$4fff
+	setprg2r(0x12, 0x4800, 0);
 
 	cart_chr_map = chr_chip + 0x10;
 	switch (chr_mode)
@@ -306,27 +327,81 @@ static DECLFW(Rainbow13SW) {
 	}
 }
 
+static DECLFW(WRAM_0x6000Wr)
+{
+	// $6000-$7fff
+	switch (wram_chip_select & 0x03)
+	{
+	case 0x00: // PRG-RAM
+		CartBW(A, V);
+		break;
+	case 0x01: // FPGA-RAM
+		FPGA_WRAM[A & 0x1fff] = V;
+		break;
+	case 0x02: //PRG-ROM
+	case 0x03:
+		CartBW(A, V);
+		break;
+	}
+}
+static DECLFR(WRAM_0x6000Rd)
+{
+	// $6000-$7fff
+	switch (wram_chip_select & 0x03)
+	{
+	case 0x00: // PRG-RAM
+		CartBR(A);
+		break;
+	case 0x01: // FPGA-RAM
+		return FPGA_WRAM[A & 0x1fff];
+		break;
+	case 0x02: //PRG-ROM
+	case 0x03:
+		CartBR(A);
+		break;
+	}
+}
+static DECLFW(WRAM_0x5000Wr)
+{
+	FPGA_WRAM[(A & 0xfff) | ((fpga_wram_bank & 0x01) << 12)] = V;
+}
+static DECLFR(WRAM_0x5000Rd)
+{
+	return FPGA_WRAM[(A & 0xfff) | ((fpga_wram_bank & 0x01) << 12)];
+}
+static DECLFW(FPGA_0x4800Wr)
+{
+	FPGA_WRAM[A & 0x7ff] = V;
+}
+static DECLFR(FPGA_0x4800Rd)
+{
+	return FPGA_WRAM[A & 0x7ff];
+}
+
 static DECLFR(Rainbow13Read) {
 	switch (A)
 	{
 	case 0x4100:
 	{
-		if (esp_enable) last_byte_read = esp->tx();
-		else FCEU_printf("RAINBOW warning: $4101.0 is not set\n");
-		return last_byte_read;
+		uint8 esp_enable_flag = esp_enable ? 0x01 : 0x00;
+		uint8 irq_enable_flag = esp_irq_enable ? 0x02 : 0x00;
+		UDBG("RAINBOW read flags %04x => %02xs\n", A, esp_enable_flag | irq_enable_flag);
+		return esp_enable_flag | irq_enable_flag;
 	}
 	case 0x4101:
 	{
-		uint8 esp_rts_flag = esp->getGpio4() ? 0x80 : 0x00;
-		uint8 esp_enable_flag = esp_enable ? 0x01 : 0x00;
-		uint8 irq_enable_flag = irq_enable ? 0x40 : 0x00;
-		UDBG("RAINBOW read flags %04x => %02x\n", A, esp_rts_flag | esp_enable_flag | irq_enable_flag);
-		return esp_rts_flag | esp_enable_flag | irq_enable_flag;
+		uint8 message_received = esp_message_received ? 1 << 7 : 0;
+		uint8 esp_rts_flag = esp->getGpio4() ? 0x40 : 0x00;
+		return message_received | esp_rts_flag;
+	}
+	case 0x4102:
+	{
+		return esp_message_sent << 7;
 	}
 	case 0x4110: return (nt_set << 6) | (mirr_mode << 4) | (chr_chip << 3) | (chr_mode << 1) | prg_mode;
 	case 0x4113: return MAPPER_VERSION;
-	case 0x4160: return (mul_result >> 8) & 0xff;
-	case 0x4161: return mul_result & 0xff;
+	case 0x4160: return mul_result & 0xff;
+	case 0x4161: return (mul_result >> 8) & 0xff;
 	default:
 		return 0;
 	}
@@ -336,18 +411,42 @@ static DECLFW(Rainbow13Write) {
 	switch (A)
 	{
 	case 0x4100:
-		if (esp_enable) esp->rx(V);
-		else FCEU_printf("RAINBOW warning: $4101.0 is not set\n");
+		esp_enable = V & 0x01;
+		esp_irq_enable = V & 0x02;
 		break;
 	case 0x4101:
-		esp_enable = V & 0x01;
-		irq_enable = V & 0x40;
+		if (esp_enable) esp_message_received = false;
+		else FCEU_printf("RAINBOW warning: $4100.0 is not set\n");
+		break;
+	case 0x4102:
+		if (esp_enable)
+		{
+			esp_message_sent = false;
+			uint8 message_length = FPGA_WRAM[tx_address << 8];
+			esp->rx(message_length);
+			for (uint8 i = 0; i < message_length; i++)
+			{
+				esp->rx(FPGA_WRAM[(tx_address << 8) + 1 + i]);
+			}
+			esp_message_sent = true;
+		}
+		else FCEU_printf("RAINBOW warning: $4100.0 is not set\n");
+		break;
+	case 0x4103:
+		rx_address = V & 0x03;
+		break;
+	case 0x4104:
+		tx_address = V & 0x03;
 		break;
 	case 0x4120: prg[0] = V; Sync(); break;
 	case 0x4121: prg[1] = V & 0x3f; Sync(); break;
 	case 0x4122: prg[2] = V & 0x3f; Sync(); break;
 	case 0x4123: fpga_wram_bank = V & 0x01; Sync(); break;
-	case 0x4124: wram_bank = V; Sync(); break;
+	case 0x4124:
+		wram_bank = V & 0x3f;
+		wram_chip_select = (V & 0xc0) >> 6;
+		Sync();
+		break;
 	case 0x4110:
 		prg_mode = V & 0x01;
 		chr_chip = (V & 0x08) >> 3;
@@ -366,12 +465,15 @@ static DECLFW(Rainbow13Write) {
 	case 0x4137:
 	{
 		int bank = A & 0x07;
-		chr[bank] = ( chr[bank] & 0x100 ) | ( V & 0xff );
+		if (chr_mode == CHR_MODE_1K)
+			chr[bank] = (chr_upper_bank << 8) | (V & 0xff);
+		else
+			chr[bank] = (chr[bank] & 0x100) | (V & 0xff);
 		Sync();
 		break;
 	}
 	case 0x4138: chr_upper_bank = V & 0x01; Sync(); break;
-
+/*
 	case 0x4170:
 	case 0x4171:
 	case 0x4172:
@@ -386,7 +488,7 @@ static DECLFW(Rainbow13Write) {
 		Sync();
 		break;
 	}
-
+*/
 	case 0x4140: IRQLatch = V; break;
 	case 0x4141: IRQReload = 1; break;
 	case 0x4142:
@@ -726,6 +828,14 @@ static void Rainbow13PPUWrite(uint32 A, uint8 V) {
 	FFCEUX_PPUWrite_Default(A, V);
 }
 
+static void Rainbow13Reset(void) {
+	esp_enable = false;
+	esp_message_received = false;
+	rx_address = 0;
+	tx_address = 0;
+	IRQa = 0;
+}
+
 static void Rainbow13Power(void) {
 
 	// mapper
@@ -740,15 +850,28 @@ static void Rainbow13Power(void) {
 	if (WRAM)
 		FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
 	FCEU_CheatAddRAM(FPGA_WRAMSIZE >> 10, 0x5000, FPGA_WRAM);
+	FCEU_CheatAddRAM(0x800 >> 10, 0x4800, FPGA_WRAM);
 
 	// mapper registers (writes)
-	SetWriteHandler(0x4100, 0x4177, Rainbow13Write); //0x4161
+	SetWriteHandler(0x4100, 0x4161, Rainbow13Write);
 
 	// mapper registers (reads)
 	SetReadHandler(0x4100, 0x4161, Rainbow13Read);
 
 	// audio expansion registers (writes)
 	SetWriteHandler(0x4150, 0x4158, Rainbow13SW);
+
+	// FPGA WRAM @ $4800-$4fff (reads/writes)
+	SetWriteHandler(0x4800, 0x4fff, FPGA_0x4800Wr);
+	SetReadHandler(0x4800, 0x4fff, FPGA_0x4800Rd);
+
+	// FPGA WRAM @ $5000-$5fff (reads/writes)
+	SetWriteHandler(0x5000, 0x5fff, WRAM_0x5000Wr);
+	SetReadHandler(0x5000, 0x5fff, WRAM_0x5000Rd);
+
+	// WRAM @ $6000-$7fff (reads/writes)
+	SetWriteHandler(0x6000, 0x7fff, WRAM_0x6000Wr);
+	SetReadHandler(0x6000, 0x7fff, WRAM_0x6000Rd);
 
 	// self-flashing
 	flash_mode[CHIP_TYPE_PRG] = 0;
@@ -778,8 +901,9 @@ static void Rainbow13Power(void) {
 	// ESP firmware
 	esp = new BrokeStudioFirmware;
 	esp_enable = false;
-	irq_enable = false;
-	last_byte_read = 0x00;
+	esp_irq_enable = false;
+	esp_message_received = false;
+	esp_RX = std::thread (esp_check_new_message);
 }
 
 static void Rainbow13Close(void)
@@ -820,6 +944,8 @@ static void Rainbow13Close(void)
 
 	if (esp)
 	{
+		esp_enable = false;
+		esp_RX.detach();
 		delete esp;
 		esp = NULL;
 	}
@@ -1051,6 +1177,7 @@ void NSFRainbow13_Init(void) {
 void RAINBOW13_Init(CartInfo *info) {
 	int save_game_index = 0;
 	info->Power = Rainbow13Power;
+	info->Reset = Rainbow13Reset;
 	info->Close = Rainbow13Close;
 
 	GameHBIRQHook = Rainbow13hb;
@@ -1076,6 +1203,12 @@ void RAINBOW13_Init(CartInfo *info) {
 	FPGA_WRAM = (uint8*)FCEU_gmalloc(FPGA_WRAMSIZE);
 	SetupCartPRGMapping(0x12, FPGA_WRAM, FPGA_WRAMSIZE, 1);
 	AddExState(FPGA_WRAM, FPGA_WRAMSIZE, 0, "FPGA_WRAM");
+	if (info->battery)
+	{
+		info->SaveGame[save_game_index] = FPGA_WRAM;
+		info->SaveGameLen[save_game_index] = FPGA_WRAMSIZE;
+		save_game_index++;
+	}
 
 	// PRG FLASH ROM
 	PRG_FLASHROM = (uint8*)FCEU_gmalloc(PRG_FLASHROMSIZE);

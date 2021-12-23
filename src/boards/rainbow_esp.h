@@ -70,6 +70,8 @@ private:
 		// AP CMDS
 		AP_GET_SSID,
 		AP_GET_IP,
+		AP_GET_CONFIG,
+		AP_SET_CONFIG,
 
 		// RND CMDS
 		RND_GET_BYTE,
@@ -126,6 +128,7 @@ private:
 		WIFI_STATUS,
 		SSID,
 		IP_ADDRESS,
+		AP_CONFIG,
 
 		// RND CMDS
 		RND_BYTE,
