@@ -2713,6 +2713,7 @@ void consoleWin_t::takeScreenShot(void)
 
 	if (screen == NULL)
 	{
+		FCEU_DispMessage("Error saving screen snapshot.",0);
 		return;
 	}
 
@@ -2741,6 +2742,8 @@ void consoleWin_t::takeScreenShot(void)
 	image.save( tr( FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str() ), "png" );
 
 	fceuWrapperUnLock();
+
+	FCEU_DispMessage("Screen snapshot %d saved.",0,u);
 }
 
 void consoleWin_t::loadLua(void)
