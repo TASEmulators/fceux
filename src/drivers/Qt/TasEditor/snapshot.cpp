@@ -20,14 +20,17 @@ Snapshot - Snapshot of all edited data
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
-//extern MARKERS_MANAGER markersManager;
-//extern SELECTION selection;
-//extern GREENZONE greenzone;
-
 extern int getInputType(MovieData& md);
 
 SNAPSHOT::SNAPSHOT()
 {
+	keyFrame = 0;
+	startFrame = 0;
+	endFrame = 0;
+	consecutivenessTag = 0;
+	recordedJoypadDifferenceBits = 0;
+	modificationType = 0;
+	description[0] = 0;
 }
 
 void SNAPSHOT::init(MovieData& md, LAGLOG& lagLog, bool hotchanges, int enforceInputType)

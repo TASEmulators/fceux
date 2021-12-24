@@ -277,6 +277,8 @@ TasEditorWindow::~TasEditorWindow(void)
 	::branches        = NULL;
 	::splicer         = NULL;
 
+	clearProjectList();
+
 	fceuWrapperUnLock();
 
 	// Save Horizontal Panel State

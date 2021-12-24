@@ -28,19 +28,10 @@ Greenzone - Access zone
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
-//extern TASEDITOR_CONFIG taseditorConfig;
-//extern TASEDITOR_PROJECT project;
-//extern PLAYBACK playback;
-//extern HISTORY history;
-//extern BOOKMARKS bookmarks;
-//extern MARKERS_MANAGER markersManager;
-//extern PIANO_ROLL pianoRoll;
-//extern SELECTION selection;
-
 extern char lagFlag;
 
-char greenzone_save_id[GREENZONE_ID_LEN] = "GREENZONE";
-char greenzone_skipsave_id[GREENZONE_ID_LEN] = "GREENZONX";
+static char greenzone_save_id[GREENZONE_ID_LEN] = "GREENZONE";
+static char greenzone_skipsave_id[GREENZONE_ID_LEN] = "GREENZONX";
 
 GREENZONE::GREENZONE()
 {
@@ -224,13 +215,15 @@ void GREENZONE::ungreenzoneSelectedFrames()
 	RowsSelection* current_selection = selection->getCopyOfCurrentRowsSelection();
 	if (current_selection->size() == 0) return;
 	bool changed = false;
-	int size = savestates.size();
-	int start_index = *current_selection->begin();
-	int end_index = *current_selection->rbegin();
+	//int size = savestates.size();
+	//int start_index = *current_selection->begin();
+	//int end_index = *current_selection->rbegin();
 	RowsSelection::reverse_iterator current_selection_rend = current_selection->rend();
 	// degreenzone frames, going backwards
 	for (RowsSelection::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
+	{
 		changed = changed | clearSavestateAndFreeMemory(*it);
+	}
 	if (changed)
 	{
 		//pianoRoll.redraw();

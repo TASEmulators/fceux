@@ -28,40 +28,30 @@ Selection - Manager of selections
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
-//extern TASEDITOR_CONFIG taseditorConfig;
-//extern TASEDITOR_WINDOW taseditorWindow;
-//extern MARKERS_MANAGER markersManager;
-//extern PIANO_ROLL pianoRoll;
-//extern SPLICER splicer;
-//extern EDITOR editor;
-//extern GREENZONE greenzone;
-
 extern int joysticksPerFrame[INPUT_TYPES_TOTAL];
 
-//LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-//WNDPROC selectionMarkerEdit_oldWndproc;
-
 // resources
-char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
-char selection_skipsave_id[SELECTION_ID_LEN] = "SELECTIOX";
-char lowerMarkerText[] = "Marker ";
+static char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
+static char selection_skipsave_id[SELECTION_ID_LEN] = "SELECTIOX";
+static char lowerMarkerText[] = "Marker ";
 
 SELECTION::SELECTION()
 {
+	trackSelectionChanges = true;
+	lastSelectionBeginning = -1;
+
+	previousMarkerButtonState = previousMarkerButtonOldState = false;
+	nextMarkerButtonState = nextMarkerButtonOldState = false;
+	buttonHoldTimer = 0;
+
+	historyCursorPos = -1;
+	historyStartPos = 0;
+	historySize = 1;
+	historyTotalItems = 0;
 }
 
 void SELECTION::init()
 {
-	//hwndPreviousMarkerButton = GetDlgItem(taseditorWindow.hwndTASEditor, TASEDITOR_PREV_MARKER);
-	//hwndNextMarkerButton = GetDlgItem(taseditorWindow.hwndTASEditor, TASEDITOR_NEXT_MARKER);
-	//hwndSelectionMarkerNumber = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_SELECTION_MARKER);
-	//SendMessage(hwndSelectionMarkerNumber, WM_SETFONT, (WPARAM)pianoRoll.hMarkersFont, 0);
-	//hwndSelectionMarkerEditField = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_SELECTION_MARKER_EDIT);
-	//SendMessage(hwndSelectionMarkerEditField, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
-	//SendMessage(hwndSelectionMarkerEditField, WM_SETFONT, (WPARAM)pianoRoll.hMarkersEditFont, 0);
-	// subclass the edit control
-	//selectionMarkerEdit_oldWndproc = (WNDPROC)SetWindowLongPtr(hwndSelectionMarkerEditField, GWLP_WNDPROC, (LONG_PTR)LowerMarkerEditWndProc);
-
 	reset();
 }
 void SELECTION::free()
@@ -396,7 +386,7 @@ bool SELECTION::skipLoadSelection(EMUFILE *is)
 void SELECTION::noteThatItemRangeChanged(int startItem, int endItem, int newValue )
 {
 	bool ON =   newValue;
-	bool OFF = !newValue;
+	//bool OFF = !newValue;
 
 	if (ON)
 	{

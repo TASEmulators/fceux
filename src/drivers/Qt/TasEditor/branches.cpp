@@ -43,6 +43,21 @@ BRANCHES::BRANCHES(QWidget *parent)
 {
 	std::string fontString;
 
+	mustRedrawBranchesBitmap = false;
+	mustRecalculateBranchesTree = false;
+	branchRightclicked = 0;
+	currentBranch = 0;
+	changesSinceCurrentBranch = false;
+	memset( cloudTimestamp, 0, sizeof(cloudTimestamp) );
+	memset( currentPosTimestamp, 0, sizeof(currentPosTimestamp) );
+	transitionPhase = 0;
+	currentAnimationFrame = 0;
+	nextAnimationTime = 0;
+	playbackCursorX = playbackCursorY = 0;
+	cornersCursorX = cornersCursorY = 0;
+	fireballSize = 0;
+	lastItemUnderMouse = -1;
+
 	imageItem  = 0;
 	imageTimer = new QTimer(this);
 	imageTimer->setSingleShot(true);
@@ -127,7 +142,6 @@ void BRANCHES::init()
 	free();
 
 	// subclass BranchesBitmap
-	//hwndBranchesBitmap_oldWndProc = (WNDPROC)SetWindowLongPtr(bookmarks.hwndBranchesBitmap, GWLP_WNDPROC, (LONG_PTR)BranchesBitmapWndProc);
 
 	// init arrays
 	branchX.resize(TOTAL_BOOKMARKS+1);
@@ -497,6 +511,7 @@ void BRANCHES::mouseDoubleClickEvent(QMouseEvent * event)
 
 void BRANCHES::mousePressEvent(QMouseEvent * event)
 {
+	fceuCriticalSection emuLock;
 	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
 
 	bookmarks->itemUnderMouse = item;
@@ -546,6 +561,7 @@ void BRANCHES::mousePressEvent(QMouseEvent * event)
 
 void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
 {
+	fceuCriticalSection emuLock;
 	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
 
 	bookmarks->itemUnderMouse = item;
@@ -573,6 +589,7 @@ void BRANCHES::showImage(void)
 
 void BRANCHES::mouseMoveEvent(QMouseEvent * event)
 {
+	fceuCriticalSection emuLock;
 	int item, item_valid;
 
 	item = findItemUnderMouse( event->pos().x(), event->pos().y() );
@@ -608,6 +625,7 @@ bool BRANCHES::event(QEvent *event)
 {
 	if (event->type() == QEvent::ToolTip)
 	{
+		fceuCriticalSection emuLock;
 		int item, item_valid;
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 
@@ -671,7 +689,8 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		{
 			parentX = branchCurrentX[t-1];
 			parentY = branchCurrentY[t-1];
-		} else
+		}
+		else
 		{
 			parentX = cloudCurrentX;
 			parentY = BRANCHES_CLOUD_Y;
@@ -679,7 +698,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		for (int i = children[t].size() - 1; i >= 0; i--)
 		{
 			childID = children[t][i];
-			if (childID < TOTAL_BOOKMARKS)
+			if ( (childID >= 0) && (childID < TOTAL_BOOKMARKS) )
 			{
 				//MoveToEx(hBitmapDC, parentX, parentY, 0);
 				//LineTo(hBitmapDC, branchCurrentX[childID], branchCurrentY[childID]);

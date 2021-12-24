@@ -49,6 +49,8 @@ BOOKMARKS::BOOKMARKS(QWidget *parent)
 	viewWidth  = 256;
 	viewHeight = 256;
 
+	editMode = EDIT_MODE_BOOKMARKS;
+
 	imageItem  = 0;
 	imageTimer = new QTimer(this);
 	imageTimer->setSingleShot(true);
@@ -86,6 +88,7 @@ void BOOKMARKS::init()
 	reset();
 	selectedSlot = DEFAULT_SLOT;
 	imageItem = 0;
+	editMode = EDIT_MODE_BOOKMARKS;
 
 	redrawBookmarksSectionCaption();
 }
@@ -820,6 +823,7 @@ bool BOOKMARKS::event(QEvent *event)
 {
 	if (event->type() == QEvent::ToolTip)
 	{
+		fceuCriticalSection emuLock;
 		int item, row_under_mouse, item_valid, column;
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 

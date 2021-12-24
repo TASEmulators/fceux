@@ -85,6 +85,7 @@ gwavi_t::gwavi_t(void)
 	avi_std = 2;
 	audioEnabled = false;
 	riffWalkCallback = NULL;
+	riffWalkUserData = NULL;
 	readBuf = NULL;
 	readBufSize = 0;
 }

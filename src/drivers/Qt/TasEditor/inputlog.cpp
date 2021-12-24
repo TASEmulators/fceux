@@ -30,6 +30,10 @@ int joysticksPerFrame[INPUT_TYPES_TOTAL] = {1, 2, 4};
 
 INPUTLOG::INPUTLOG()
 {
+	size = 0;
+	inputType = 0;
+	hasHotChanges = 0;
+	alreadyCompressed = false;
 }
 
 void INPUTLOG::init(MovieData& md, bool hotchanges, int force_input_type)
