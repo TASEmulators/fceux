@@ -291,17 +291,19 @@ consoleWin_t::~consoleWin_t(void)
 
 	closeGamePadConfWindow();
 
-	//printf("Thread Finished: %i \n", gameThread->isFinished() );
-	emulatorThread->quit();
-	emulatorThread->wait( 1000 );
+	// The closeApp function call stops all threads.
+	// Calling quit on threads should not happen here. 
+	//printf("Thread Finished: %i \n", emulatorThread->isFinished() );
+	//emulatorThread->quit();
+	//emulatorThread->wait( 1000 );
 
-	aviDiskThread->requestInterruption();
-	aviDiskThread->quit();
-	aviDiskThread->wait( 10000 );
+	//aviDiskThread->requestInterruption();
+	//aviDiskThread->quit();
+	//aviDiskThread->wait( 10000 );
 
-	fceuWrapperLock();
-	fceuWrapperClose();
-	fceuWrapperUnLock();
+	//fceuWrapperLock();
+	//fceuWrapperClose();
+	//fceuWrapperUnLock();
 
 	if ( viewport_GL != NULL )
 	{
@@ -315,8 +317,8 @@ consoleWin_t::~consoleWin_t(void)
 
 	// LoadGame() checks for an IP and if it finds one begins a network session
 	// clear the NetworkIP field so this doesn't happen unintentionally
-	g_config->setOption ("SDL.NetworkIP", "");
-	g_config->save ();
+	//g_config->setOption ("SDL.NetworkIP", "");
+	//g_config->save ();
 
 	// Clear Clipboard Contents on Program Exit
 	clipboard = QGuiApplication::clipboard();
@@ -2100,8 +2102,16 @@ void consoleWin_t::closeApp(void)
 {
 	nes_shm->runEmulator = 0;
 
+	gameTimer->stop();
+
+	closeGamePadConfWindow();
+
 	emulatorThread->quit();
 	emulatorThread->wait( 1000 );
+
+	aviDiskThread->requestInterruption();
+	aviDiskThread->quit();
+	aviDiskThread->wait( 10000 );
 
 	fceuWrapperLock();
 	fceuWrapperClose();
@@ -2112,8 +2122,8 @@ void consoleWin_t::closeApp(void)
 	g_config->setOption ("SDL.NetworkIP", "");
 	g_config->save ();
 
-	//qApp::quit();
-	qApp->quit();
+	// Delay Application Quit to allow event processing to complete
+	QTimer::singleShot( 250, qApp, SLOT(quit(void)) );
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::videoBgColorChanged( QColor &c )
