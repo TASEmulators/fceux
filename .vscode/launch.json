@@ -23,6 +23,17 @@
 				}
 			]
 		},
+        {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/src/Debug/fceux.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "console": "externalTerminal"
+        },
 		{
 			"name": "(lldb) Launch (MacOS)",
 			"type": "cppdbg",
