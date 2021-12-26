@@ -2122,6 +2122,8 @@ void consoleWin_t::closeApp(void)
 	g_config->setOption ("SDL.NetworkIP", "");
 	g_config->save ();
 
+	QApplication::closeAllWindows();
+
 	// Delay Application Quit to allow event processing to complete
 	QTimer::singleShot( 250, qApp, SLOT(quit(void)) );
 }
