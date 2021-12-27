@@ -131,6 +131,7 @@ static SFORMAT SStateRegs[] =
 // ESP interface
 
 static EspFirmware *esp = NULL;
+static bool esp_running;
 static bool esp_enable;
 static bool esp_irq_enable;
 static bool esp_message_received;
@@ -153,10 +154,10 @@ static void Rainbow13EspMapIrq(int32) {
 
 // Mapper
 
-void esp_check_new_message(void) {
-	while (esp != NULL) {
+void esp_check_new_message() {
+	while (esp_running) {
 		// get new message if needed
-		if (esp_enable && esp->getGpio4() && !esp_message_received)
+		if (esp_enable && esp->getDataReadyIO() && esp_message_received == false)
 		{
 			uint8 message_length = esp->tx();
 			FPGA_WRAM[rx_address << 8] = message_length;
@@ -391,7 +392,7 @@ static DECLFR(Rainbow13Read) {
 	case 0x4101:
 	{
 		uint8 message_received = esp_message_received ? 1 << 7 : 0;
-		uint8 esp_rts_flag = esp->getGpio4() ? 0x40 : 0x00;
+		uint8 esp_rts_flag = esp->getDataReadyIO() ? 0x40 : 0x00;
 		return message_received | esp_rts_flag;
 	}
 	case 0x4102:
@@ -903,6 +904,7 @@ static void Rainbow13Power(void) {
 	esp_enable = false;
 	esp_irq_enable = false;
 	esp_message_received = false;
+	esp_running = true;
 	esp_RX = std::thread (esp_check_new_message);
 }
 
@@ -945,7 +947,8 @@ static void Rainbow13Close(void)
 	if (esp)
 	{
 		esp_enable = false;
-		esp_RX.detach();
+		esp_running = false;
+		esp_RX.join();
 		delete esp;
 		esp = NULL;
 	}

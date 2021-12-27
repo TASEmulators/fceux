@@ -211,10 +211,7 @@ uint8 BrokeStudioFirmware::tx() {
 	return last_byte_read;
 }
 
-void BrokeStudioFirmware::setGpio4(bool /*v*/) {
-}
-
-bool BrokeStudioFirmware::getGpio4() {
+bool BrokeStudioFirmware::getDataReadyIO() {
 	this->receiveDataFromServer();
 	this->receivePingResult();
 	return !(this->tx_buffer.empty() && this->tx_messages.empty());
@@ -1928,7 +1925,7 @@ std::pair<uint8, uint8> BrokeStudioFirmware::curle_to_net_error(CURLcode curle) 
 
 void BrokeStudioFirmware::downloadFile(std::string const& url, uint8 path, uint8 file) {
 	UDBG("RAINBOW BrokeStudioFirmware download %s -> (%u,%u)\n", url.c_str(), (unsigned int)path, (unsigned int)file);
-	//TODO asynchronous download using curl_multi_* (and maybe a thread, or regular ticks on rx/tx/getGpio4)
+	//TODO asynchronous download using curl_multi_* (and maybe a thread, or regular ticks on rx/tx/getDataReadyIO)
 
 	// Directly fail if the curl handle was not properly initialized
 	if (this->curl_handle == nullptr) {

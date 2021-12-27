@@ -46,8 +46,7 @@ public:
 	void rx(uint8 v) override;
 	uint8 tx() override;
 
-	virtual void setGpio4(bool v) override;
-	virtual bool getGpio4() override;
+	virtual bool getDataReadyIO() override;
 
 private:
 	// Defined message types from CPU to ESP
