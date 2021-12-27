@@ -299,8 +299,8 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			this->tx_messages.push_back({ 7, static_cast<uint8>(fromesp_cmds_t::ESP_FIRMWARE_VERSION), 5, 'F', 'C', 'E', 'U', 'X' });
 			break;
 
-
 		// WIFI CMDS
+
 		case toesp_cmds_t::WIFI_GET_STATUS:
 			UDBG("RAINBOW BrokeStudioFirmware received message WIFI_GET_STATUS\n");
 			this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::WIFI_STATUS), 3 }); // Simple answer, wifi is ok
@@ -315,6 +315,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			break;
 
 		// AP CMDS
+		// GET/SET AP config commands are not relevant here, so we'll just use a fake variable
 		case toesp_cmds_t::AP_GET_SSID:
 			UDBG("RAINBOW BrokeStudioFirmware received message AP_GET_SSID\n");
 			this->tx_messages.push_back({ 12, static_cast<uint8>(fromesp_cmds_t::SSID), 10, 'F', 'C', 'E', 'U', 'X', '_', 'S', 'S', 'I', 'D' });
@@ -322,6 +323,14 @@ void BrokeStudioFirmware::processBufferedMessage() {
 		case toesp_cmds_t::AP_GET_IP:
 			UDBG("RAINBOW BrokeStudioFirmware received message AP_GET_ID\n");
 			this->tx_messages.push_back({ 16, static_cast<uint8>(fromesp_cmds_t::IP_ADDRESS), 14, '1', '2', '7', '.', '0', '.', '0', '.', '1', ':', '8', '0', '8', '0' });
+			break;
+		case toesp_cmds_t::AP_GET_CONFIG:
+			UDBG("RAINBOW BrokeStudioFirmware received message AP_GET_CONFIG\n");
+			this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::AP_CONFIG), this->ap_config });
+			break;
+		case toesp_cmds_t::AP_SET_CONFIG:
+			UDBG("RAINBOW BrokeStudioFirmware received message AP_SET_CONFIG\n");
+			this->ap_config = this->rx_buffer.at(2);
 			break;
 
 		// RND CMDS

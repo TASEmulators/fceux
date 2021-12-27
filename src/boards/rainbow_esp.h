@@ -256,6 +256,7 @@ private:
 	uint16_t server_settings_port = 0;
 
 	uint8 debug_config = 0;
+	uint8 ap_config = 3;
 
 	easywsclient::WebSocket::pointer socket = nullptr;
 	std::thread socket_close_thread;
