@@ -389,9 +389,9 @@ static DECLFR(Rainbow13Read) {
 	}
 	case 0x4101:
 	{
-		uint8 message_received = esp_message_received ? 1 << 7 : 0;
+		uint8 esp_message_received_flag = esp_message_received ? 1 << 7 : 0;
 		uint8 esp_rts_flag = esp->getDataReadyIO() ? 0x40 : 0x00;
-		return message_received | esp_rts_flag;
+		return esp_message_received_flag | esp_rts_flag;
 	}
 	case 0x4102:
 	{
