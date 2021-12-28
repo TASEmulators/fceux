@@ -474,22 +474,6 @@ static DECLFW(Rainbow13Write) {
 		break;
 	}
 	case 0x4138: chr_upper_bank = V & 0x01; Sync(); break;
-/*
-	case 0x4170:
-	case 0x4171:
-	case 0x4172:
-	case 0x4173:
-	case 0x4174:
-	case 0x4175:
-	case 0x4176:
-	case 0x4177:
-	{
-		int bank = A & 0x07;
-		chr[bank] = ( chr[bank] & 0xff ) | ( ( V & 0x01 ) << 8 );
-		Sync();
-		break;
-	}
-*/
 	case 0x4140: IRQLatch = V; break;
 	case 0x4141: IRQReload = 1; break;
 	case 0x4142:
@@ -1275,8 +1259,8 @@ void RAINBOW13_Init(CartInfo *info) {
 		}
 		SetupCartCHRMapping(0x10, CHR_FLASHROM, CHR_FLASHROMSIZE, 0);
 
-		FFCEUX_PPUWrite = Rainbow13PPUWrite;
 		FFCEUX_PPURead = Rainbow13PPURead;
+		FFCEUX_PPUWrite = Rainbow13PPUWrite;
 	}
 	else
 	{
