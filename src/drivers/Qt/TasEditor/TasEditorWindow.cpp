@@ -3786,7 +3786,9 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	wheelPixelCounter = 0;
 	headerItemUnderMouse = 0;
 	nextHeaderUpdateTime = 0;
+	rightButtonDragMode = false;
 	mouse_x = mouse_y = -1;
+	scroll_x = scroll_y = 0;
 	memset( headerColors, 0, sizeof(headerColors) );
 
 	headerLightsColors[ 0] = QColor( 0x00, 0x00, 0x00 );
@@ -4208,7 +4210,7 @@ void QPianoRoll::updateLinesCount(void)
 	// update the number of items in the list
 	int movie_size = currMovieData.getNumRecords();
 
-	maxLineOffset = movie_size - viewLines + 5;
+	maxLineOffset = movie_size - viewLines + 2;
 
 	if ( maxLineOffset < 0 )
 	{
@@ -4258,7 +4260,7 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 
 	viewLines = (viewHeight / pxLineSpacing) + 1;
 
-	maxLineOffset = currMovieData.records.size() - viewLines + 5;
+	maxLineOffset = currMovieData.records.size() - viewLines + 2;
 
 	if ( maxLineOffset < 0 )
 	{
@@ -5426,6 +5428,89 @@ void QPianoRoll::handleColumnSet(int column, bool altPressed)
 //----------------------------------------------------------------------------
 void QPianoRoll::periodicUpdate(void)
 {
+	// scroll Piano Roll if user is dragging cursor outside
+	if ( (dragMode != DRAG_MODE_NONE) || rightButtonDragMode)
+	{
+		int x, y, line, col, scroll_up_threshold, scroll_down_threshold;
+		QPoint p, c;
+
+		x = mouse_x;
+		y = mouse_y;
+
+		p.setX(x);
+		p.setY(y);
+
+		c = convPixToCursor(p);
+
+		if ( c.y() >= 0 )
+		{
+			line = lineOffset + c.y();
+		}
+		else
+		{
+			line = lineOffset;
+		}
+		col =  calcColumn( c.x() );
+
+		rowUnderMouse = realRowUnderMouse = line;
+		columnUnderMouse = col;
+
+		scroll_up_threshold = pxLineSpacing;
+		scroll_down_threshold = (viewHeight - pxLineSpacing/2);
+
+		//if (dragMode != DRAG_MODE_MARKER)		// in DRAG_MODE_MARKER user can't scroll Piano Roll horizontally
+		//{
+		//	if (p.x < DRAG_SCROLLING_BORDER_SIZE)
+		//		scroll_dx = p.x - DRAG_SCROLLING_BORDER_SIZE;
+		//	else if (p.x > (wrect.right - wrect.left - DRAG_SCROLLING_BORDER_SIZE))
+		//		scroll_dx = p.x - (wrect.right - wrect.left - DRAG_SCROLLING_BORDER_SIZE);
+		//}
+		if (y < scroll_up_threshold )
+		{
+			scroll_y += (scroll_up_threshold - y);
+			
+			if ( scroll_y > pxLineSpacing )
+			{
+				int d, v = vbar->value();
+				
+				d = scroll_y / pxLineSpacing;
+
+				v += d; scroll_y = 0;
+
+				if ( v > maxLineOffset )
+				{
+					v = maxLineOffset;
+				}
+				vbar->setValue(v);
+			}
+		}
+		else if (y > scroll_down_threshold)
+		{
+			scroll_y += (scroll_down_threshold - y);
+
+			if ( scroll_y < -pxLineSpacing )
+			{
+				int d, v = vbar->value();
+				
+				d = scroll_y / pxLineSpacing;
+
+				v += d; scroll_y = 0;
+
+				if ( v < 0 )
+				{
+					v = 0;
+				}
+				vbar->setValue(v);
+			}
+		}
+	}
+	else
+	{
+		scroll_x = scroll_y = 0;
+	}
+
+	updateDrag();
+
 	// once per 40 milliseconds update colors alpha in the Header
 	if (clock() > nextHeaderUpdateTime)
 	{
@@ -5481,6 +5566,7 @@ void QPianoRoll::periodicUpdate(void)
 			update();
 		}
 	}
+
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::setLightInHeaderColumn(int column, int level)
@@ -5879,7 +5965,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 	viewLines = nrow;
 
-	maxLineOffset = currMovieData.records.size() - nrow + 5;
+	maxLineOffset = currMovieData.records.size() - nrow + 2;
 
 	if ( maxLineOffset < 0 )
 	{

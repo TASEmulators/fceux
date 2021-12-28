@@ -241,12 +241,15 @@ class QPianoRoll : public QWidget
 		int wheelPixelCounter;
 		int headerItemUnderMouse;
 		int nextHeaderUpdateTime;
+		int scroll_x;
+		int scroll_y;
 		int mouse_x;
 		int mouse_y;
 
 		int playbackCursorPos;
 
 		bool useDarkTheme;
+		bool rightButtonDragMode;
 
 	public slots:
 		void hbarChanged(int val);
