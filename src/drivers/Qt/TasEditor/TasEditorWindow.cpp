@@ -3769,6 +3769,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	vbar = NULL;
 	hbar = NULL;
 
+	mkrDrag = NULL;
 	lineOffset = 0;
 	maxLineOffset = 0;
 	playbackCursorPos = 0;
@@ -5725,40 +5726,55 @@ void QPianoRoll::startDraggingMarker(int mouseX, int mouseY, int rowIndex, int c
 		QColor bgColor = (taseditorConfig->bindMarkersToInput) ? QColor( BINDMARKED_FRAMENUM_COLOR ) : QColor( MARKED_FRAMENUM_COLOR );
 
 		QSize iconSize(pxWidthFrameCol, pxLineSpacing);
-		QPixmap pixmap( iconSize );
-		pixmap.fill(Qt::transparent);
+		//QPixmap pixmap( iconSize );
+		//pixmap.fill(Qt::transparent);
 
-		QPainter painter(&pixmap);
+		//QPainter painter(&pixmap);
 
-		if (painter.isActive())
-		{
-			char txt[32];
+		//if (painter.isActive())
+		//{
+		//	char txt[32];
 
-			sprintf( txt, "%07i", rowIndex );
-			font.setItalic(true);
-			font.setBold(false);
+		//	sprintf( txt, "%07i", rowIndex );
+		//	font.setItalic(true);
+		//	font.setBold(false);
 
-			painter.setFont(font);
-			//I want to make the title bar pasted on the content
-			//But you can't get the image of the default title bar, just draw a rectangular box
-			//If the external theme color is set, you need to change it
-			QRect title_rect{0,0,pixmap.width(),pixmap.height()};
-			painter.fillRect(title_rect,bgColor);
-			painter.drawText(title_rect,Qt::AlignCenter, txt);
-			painter.drawRect(pixmap.rect().adjusted(0,0,-1,-1));
+		//	painter.setFont(font);
+		//	//I want to make the title bar pasted on the content
+		//	//But you can't get the image of the default title bar, just draw a rectangular box
+		//	//If the external theme color is set, you need to change it
+		//	QRect title_rect{0,0,pixmap.width(),pixmap.height()};
+		//	painter.fillRect(title_rect,bgColor);
+		//	painter.drawText(title_rect,Qt::AlignCenter, txt);
+		//	painter.drawRect(pixmap.rect().adjusted(0,0,-1,-1));
 
-			font.setItalic(false);
-			font.setBold(true);
-		}
-		painter.end();
+		//	font.setItalic(false);
+		//	font.setBold(true);
+		//}
+		//painter.end();
 
-		QMimeData *mime = new QMimeData;
+		//QMimeData *mime = new QMimeData;
 		//mime->setText( QString("MARKER") );
 
-		QDrag *drag = new QDrag(this);
-		drag->setMimeData(mime);
-		drag->setPixmap(pixmap);
-		drag->setHotSpot(QPoint(0,0));
+		mkrDrag = new markerDragPopup(this);
+		mkrDrag->resize( iconSize );
+		mkrDrag->setInitialPosition( QCursor::pos() );
+
+		mkrDrag->setBgColor( bgColor );
+		mkrDrag->setRowIndex( rowIndex );
+
+		font.setItalic(true);
+		font.setBold(false);
+		mkrDrag->setFont(font);
+		font.setItalic(false);
+		font.setBold(true);
+
+		//mkrDrag->setPixmap(pixmap);
+
+		//QDrag *drag = new QDrag(this);
+		//drag->setMimeData(mime);
+		//drag->setPixmap(pixmap);
+		//drag->setHotSpot(QPoint(0,0));
 
 		// start dragging the Marker
 		dragMode = DRAG_MODE_MARKER;
@@ -5766,34 +5782,45 @@ void QPianoRoll::startDraggingMarker(int mouseX, int mouseY, int rowIndex, int c
 		markerDragCountdown = MARKER_DRAG_COUNTDOWN_MAX;
 		setCursor( Qt::ClosedHandCursor );
 
-		//Drag is released after the mouse bounces up, at this time to judge whether it is dragged to the outside
-		connect(drag, &QDrag::destroyed, this,[=]
+		connect(mkrDrag, &QDialog::destroyed, this,[=]
 		{
-			int line, col;
-			fceuCriticalSection emuLock;
-			QPoint pos = this->mapFromGlobal(QCursor::pos());
-			QPoint c = convPixToCursor( pos );
-
-			//printf("Drag Destroyed\n");
-
-			mouse_x = pos.x();
-			mouse_y = pos.y();
-
-			if ( c.y() >= 0 )
+			if ( mkrDrag == sender() )
 			{
-				line = lineOffset + c.y();
+				//printf("Drag Destroyed\n");
+				mkrDrag = NULL;
 			}
-			else
-			{
-				line = -1;
-			}
-			col  = calcColumn( pos.x() );
-
-			rowUnderMouse = realRowUnderMouse = line;
-			columnUnderMouse = col;
-			finishDrag();
 		});
-		drag->exec(Qt::MoveAction);
+		
+		//Drag is released after the mouse bounces up, at this time to judge whether it is dragged to the outside
+		//connect(drag, &QDrag::destroyed, this,[=]
+		//{
+		//	int line, col;
+		//	fceuCriticalSection emuLock;
+		//	QPoint pos = this->mapFromGlobal(QCursor::pos());
+		//	QPoint c = convPixToCursor( pos );
+
+		//	//printf("Drag Destroyed\n");
+
+		//	mouse_x = pos.x();
+		//	mouse_y = pos.y();
+
+		//	if ( c.y() >= 0 )
+		//	{
+		//		line = lineOffset + c.y();
+		//	}
+		//	else
+		//	{
+		//		line = -1;
+		//	}
+		//	col  = calcColumn( pos.x() );
+
+		//	rowUnderMouse = realRowUnderMouse = line;
+		//	columnUnderMouse = col;
+		//	finishDrag();
+		//});
+		//drag->exec(Qt::MoveAction);
+
+		mkrDrag->show();
 
 		update();
 	}
@@ -5853,21 +5880,10 @@ void QPianoRoll::finishDrag(void)
 					history->registerMarkersChange(MODTYPE_MARKER_REMOVE, markerDragFrameNumber);
 					selection->mustFindCurrentMarker = playback->mustFindCurrentMarker = true;
 					// calculate vector of movement
-					//POINT p = {0, 0};
-					//GetCursorPos(&p);
-					//markerDragBoxDX = (mouse_x - markerDragBoxDX) - markerDragBoxX;
-					//markerDragBoxDY = (mouse_y - markerDragBoxDY) - markerDragBoxY;
-					//if (markerDragBoxDX || markerDragBoxDY)
-					//{
-					//	// limit max speed
-					//	double marker_drag_box_speed = sqrt((double)(markerDragBoxDX * markerDragBoxDX + markerDragBoxDY * markerDragBoxDY));
-					//	if (marker_drag_box_speed > MARKER_DRAG_MAX_SPEED)
-					//	{
-					//		markerDragBoxDX *= MARKER_DRAG_MAX_SPEED / marker_drag_box_speed;
-					//		markerDragBoxDY *= MARKER_DRAG_MAX_SPEED / marker_drag_box_speed;
-					//	}
-					//}
-					//markerDragCountdown = MARKER_DRAG_COUNTDOWN_MAX;
+					if ( mkrDrag )
+					{
+						mkrDrag->throwAway();
+					}
 				}
 				else
 				{
@@ -5918,7 +5934,19 @@ void QPianoRoll::finishDrag(void)
 								//redrawRow(rowUnderMouse);
 							}
 						}
+						if ( mkrDrag )
+						{
+							mkrDrag->dropAccept();
+						}
 					}
+					else
+					{
+						if ( mkrDrag )
+						{
+							mkrDrag->dropAbort();
+						}
+					}
+
 					//redrawRow(markerDragFrameNumber);
 					//if (hwndMarkerDragBox)
 					//{
@@ -5930,12 +5958,21 @@ void QPianoRoll::finishDrag(void)
 			else
 			{
 				// abort drag
+				if ( mkrDrag )
+				{
+					mkrDrag->dropAbort();
+				}
 				//if (hwndMarkerDragBox)
 				//{
 				//	DestroyWindow(hwndMarkerDragBox);
 				//	hwndMarkerDragBox = 0;
 				//}
 			}
+			//if ( mkrDrag )
+			//{
+			//	mkrDrag->done(0);
+			//	mkrDrag->deleteLater();
+			//}
 			setCursor( Qt::ArrowCursor );
 		}
 		break;
@@ -6730,5 +6767,204 @@ void TasRecentProjectAction::activateCB(void)
 	{
 		tasWin->loadProject( path.c_str() );
 	}
+}
+//----------------------------------------------------------------------------
+//---- Marker Drag
+//----------------------------------------------------------------------------
+markerDragPopup::markerDragPopup(QWidget *parent)
+	: QDialog( parent, Qt::ToolTip )
+{
+	rowIndex = 0;
+	alpha = 255;
+	bgColor = QColor( 255,255,255 );
+	liveCount = 30;
+
+	qApp->installEventFilter(this);
+
+	timer = new QTimer(this);
+
+	connect( timer, &QTimer::timeout, this, &markerDragPopup::fadeAway );
+
+	timer->start(33);
+
+	released = false;
+	thrownAway = false;
+	dropAborted = false;
+	dropAccepted = false;
+}
+//----------------------------------------------------------------------------
+markerDragPopup::~markerDragPopup(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void markerDragPopup::setRowIndex( int row )
+{
+	rowIndex = row;
+}
+//----------------------------------------------------------------------------
+void markerDragPopup::setBgColor( QColor c )
+{
+	bgColor = c;
+}
+//----------------------------------------------------------------------------
+void markerDragPopup::setInitialPosition( QPoint p )
+{
+	initialPos = p;
+
+	move( initialPos );
+}
+//----------------------------------------------------------------------------
+void markerDragPopup::throwAway(void)
+{
+	thrownAway = true;
+}
+//----------------------------------------------------------------------------
+void markerDragPopup::dropAccept(void)
+{
+	dropAccepted = true;
+}
+//----------------------------------------------------------------------------
+void markerDragPopup::dropAbort(void)
+{
+	dropAborted = true;
+}
+//----------------------------------------------------------------------------
+void markerDragPopup::fadeAway(void)
+{
+
+	if ( released )
+	{
+		if ( thrownAway )
+		{
+			QPoint p = pos();
+			//printf("Fade:%i\n", alpha);
+
+			p.setY( p.y() + 2 );
+
+			move(p);
+
+			if ( alpha > 0 )
+			{
+				alpha -= 10;
+
+				if ( alpha < 0 )
+				{
+					alpha = 0;
+				}
+			}
+			else
+			{
+				done(0);
+				deleteLater();
+			}
+			setWindowOpacity( alpha / 255.0f );
+
+			update();
+		}
+		else if ( dropAborted )
+		{
+			QPoint p = pos();
+			int vx, vy, vm = 10;
+
+			vx = initialPos.x() - p.x();
+
+			if ( vx < -vm )
+			{
+				vx = -vm;
+			}
+			else if ( vx > vm )
+			{
+				vx = vm;
+			}
+
+			vy = initialPos.y() - p.y();
+
+			if ( vy < -vm )
+			{
+				vy = -vm;
+			}
+			else if ( vy > vm )
+			{
+				vy = vm;
+			}
+
+			p.setX( p.x() + vx );
+			p.setY( p.y() + vy );
+
+			if ( (vx == 0) && (vy == 0) )
+			{
+				done(0);
+				deleteLater();
+			}
+			else
+			{
+				move(p);
+			}
+		}
+		else if ( dropAccepted )
+		{
+			done(0);
+			deleteLater();
+		}
+		else
+		{
+			if ( liveCount > 0 )
+			{
+				liveCount--;
+			}
+			if ( liveCount == 0 )
+			{
+				done(0);
+				deleteLater();
+			}
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void markerDragPopup::paintEvent(QPaintEvent *event)
+{
+	int w,h;
+	QPainter painter(this);
+	char txt[32];
+
+	w = event->rect().width();
+	h = event->rect().height();
+
+	sprintf( txt, "%07i", rowIndex );
+
+	//painter.setFont(font);
+	//I want to make the title bar pasted on the content
+	//But you can't get the image of the default title bar, just draw a rectangular box
+	//If the external theme color is set, you need to change it
+	QRect title_rect{0,0,w,h};
+	painter.fillRect(title_rect,bgColor);
+	painter.drawText(title_rect,Qt::AlignCenter, txt);
+	//painter.drawRect(pixmap.rect().adjusted(0,0,-1,-1));
+}
+//----------------------------------------------------------------------------
+bool markerDragPopup::eventFilter( QObject *obj, QEvent *event)
+{
+	//printf("Event:%i   %p\n", event->type(), obj);
+	switch (event->type() )
+	{
+		case QEvent::MouseMove:
+		{
+			if ( !released )
+			{
+				move( QCursor::pos() );
+			}
+			break;
+		}
+		case QEvent::MouseButtonRelease:
+		{
+			released = true;
+			break;
+		}
+		default:
+			// Ignore
+		break;
+	}
+	return false;
 }
 //----------------------------------------------------------------------------
