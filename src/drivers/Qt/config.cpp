@@ -760,7 +760,7 @@ InitConfig()
 	config->addOption("SDL.TasPianoRollFont", "");
 	config->addOption("SDL.TasBookmarksFont", "");
 	config->addOption("SDL.TasBranchesFont" , "");
-	config->addOption("SDL.TasPianoRollGridColor", "#000000");
+	config->addOption("SDL.TasPianoRollGridColor", "#808080");
 
 	config->addOption("SDL.TasAutoSaveEnabled"                         , tasCfg.autosaveEnabled );
 	config->addOption("SDL.TasAutoSavePeriod"                          , tasCfg.autosavePeriod  );
