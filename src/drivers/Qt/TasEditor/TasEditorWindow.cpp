@@ -5717,6 +5717,10 @@ void QPianoRoll::setupMarkerDrag(void)
 	{
 		startDraggingMarker( mouse_x, mouse_y, rowUnderMouseAtPress, columnUnderMouseAtPress);
 	}
+	else
+	{
+		tasWin->lowerMarkerNote->setFocus();
+	}
 }
 
 void QPianoRoll::startDraggingMarker(int mouseX, int mouseY, int rowIndex, int columnIndex)
@@ -5900,6 +5904,7 @@ void QPianoRoll::finishDrag(void)
 								//SetFocus(selection.hwndSelectionMarkerEditField);
 								// select all text in case user wants to overwrite it
 								//SendMessage(selection.hwndSelectionMarkerEditField, EM_SETSEL, 0, -1); 
+								tasWin->lowerMarkerNote->setFocus();
 							}
 						}
 						else if (markersManager->getMarkerAtFrame(rowUnderMouse))
