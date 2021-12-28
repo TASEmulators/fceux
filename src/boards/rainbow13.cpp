@@ -339,7 +339,7 @@ static DECLFW(WRAM_0x6000Wr)
 	case 0x01: // FPGA-RAM
 		FPGA_WRAM[A & 0x1fff] = V;
 		break;
-	case 0x02: //PRG-ROM
+	case 0x02: // PRG-ROM
 	case 0x03:
 		CartBW(A, V);
 		break;
@@ -351,16 +351,14 @@ static DECLFR(WRAM_0x6000Rd)
 	switch (wram_chip_select & 0x03)
 	{
 	case 0x00: // PRG-RAM
-		CartBR(A);
-		break;
+		return CartBR(A);
 	case 0x01: // FPGA-RAM
 		return FPGA_WRAM[A & 0x1fff];
-		break;
-	case 0x02: //PRG-ROM
+	case 0x02: // PRG-ROM
 	case 0x03:
-		CartBR(A);
-		break;
+		return CartBR(A);
 	}
+	return CartBR(A);
 }
 static DECLFW(WRAM_0x5000Wr)
 {
