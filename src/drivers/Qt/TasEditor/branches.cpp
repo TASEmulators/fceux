@@ -57,6 +57,7 @@ BRANCHES::BRANCHES(QWidget *parent)
 	cornersCursorX = cornersCursorY = 0;
 	fireballSize = 0;
 	lastItemUnderMouse = -1;
+	cloudX = cloudPreviousX = cloudCurrentX = BRANCHES_CLOUD_X;
 
 	imageItem  = 0;
 	imageTimer = new QTimer(this);
@@ -150,6 +151,7 @@ void BRANCHES::init()
 	branchPreviousY.resize(TOTAL_BOOKMARKS+1);
 	branchCurrentX.resize(TOTAL_BOOKMARKS+1);
 	branchCurrentY.resize(TOTAL_BOOKMARKS+1);
+	cloudPreviousX = BRANCHES_CLOUD_X;
 
 	// set positions of slots to default coordinates
 	for (int i = TOTAL_BOOKMARKS; i >= 0; i--)
