@@ -1286,16 +1286,16 @@ void fceuWrapperUnLock(void)
 {
 	if ( mutexLocks > 0 )
 	{
+		mutexLocks--;
 		if ( consoleWindow != NULL )
 		{
 			consoleWindow->mutex->unlock();
 		}
-		mutexLocks--;
 	}
 	else
 	{
 		printf("Error: Mutex is Already UnLocked\n");
-		abort();
+		//abort(); // Uncomment to catch a stack trace
 	}
 }
 

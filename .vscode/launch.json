@@ -11,7 +11,8 @@
 			"program": "${workspaceFolder}/build/src/fceux",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}"
+			"cwd": "${workspaceFolder}",
+			"coreDumpPath": "${workspaceFolder}/build/core-fceux",
 			"environment": [],
 			"externalConsole": false,
 			"MIMode": "gdb",
