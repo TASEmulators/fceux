@@ -529,9 +529,9 @@ void RamSearchDialog_t::periodicUpdate(void)
 
 	if (currFrameCounter != frameCounterLastPass)
 	{
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		copyRamToLocalBuffer();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 
 		//if ( currFrameCounter != (frameCounterLastPass+1) )
 		//{
@@ -1117,9 +1117,9 @@ void RamSearchDialog_t::resetSearch(void)
 {
 	memset(lclMemBuf, 0, sizeof(lclMemBuf));
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	copyRamToLocalBuffer();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	actvSrchList.clear();
 	deactvSrchList.clear();
@@ -1294,13 +1294,13 @@ void RamSearchDialog_t::addCheatClicked(void)
 	}
 	strcpy(desc, "Quick Cheat Add");
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	FCEUI_AddCheat(desc, addr, GetMem(addr), -1, 1);
 
 	updateCheatDialog();
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::addRamWatchClicked(void)

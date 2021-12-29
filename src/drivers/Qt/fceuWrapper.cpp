@@ -99,7 +99,7 @@ static int frameskip=0;
 static int periodic_saves = 0;
 static int   mutexLocks = 0;
 static int   mutexPending = 0;
-static bool  emulatorHasMutux = 0;
+static bool  emulatorHasMutex = 0;
 unsigned int emulatorCycleCount = 0;
 
 extern double g_fpsScale;
@@ -1212,6 +1212,26 @@ static void DoFun(int frameskip, int periodic_saves)
 	emulatorCycleCount++;
 }
 
+static std::string lockFile;
+
+void fceuWrapperLock(const char *filename, int line, const char *func)
+{
+	char txt[32];
+
+	fceuWrapperLock();
+
+	if ( mutexLocks > 1 )
+	{
+		printf("Recursive Lock:%i\n", mutexLocks );
+		printf("Already Locked By: %s\n", lockFile.c_str() );
+		printf("Requested By: %s:%i - %s\n", filename, line, func );
+	}
+	sprintf( txt, ":%i - ", line );
+	lockFile.assign(filename);
+	lockFile.append(txt);
+	lockFile.append(func);
+}
+
 void fceuWrapperLock(void)
 {
 	mutexPending++;
@@ -1220,7 +1240,28 @@ void fceuWrapperLock(void)
 		consoleWindow->mutex->lock();
 	}
 	mutexPending--;
+	if ( mutexLocks > 0 )
+	{
+		printf("Recursive Lock:%i\n", mutexLocks );
+	}
 	mutexLocks++;
+}
+
+bool fceuWrapperTryLock(const char *filename, int line, const char *func, int timeout)
+{
+	char txt[32];
+	bool lockAcq = false;
+
+	lockAcq = fceuWrapperTryLock( timeout );
+
+	if ( lockAcq )
+	{
+		sprintf( txt, ":%i - ", line );
+		lockFile.assign(filename);
+		lockFile.append(txt);
+		lockFile.append(func);
+	}
+	return lockAcq;
 }
 
 bool fceuWrapperTryLock(int timeout)
@@ -1254,6 +1295,7 @@ void fceuWrapperUnLock(void)
 	else
 	{
 		printf("Error: Mutex is Already UnLocked\n");
+		abort();
 	}
 }
 
@@ -1273,7 +1315,7 @@ int  fceuWrapperUpdate( void )
 		msleep( 100 );
 	}
 
-	lock_acq = fceuWrapperTryLock();
+	lock_acq = fceuWrapperTryLock( __FILE__, __LINE__, __func__ );
 
 	if ( !lock_acq )
 	{
@@ -1285,7 +1327,7 @@ int  fceuWrapperUpdate( void )
 
 		return -1;
 	}
-	emulatorHasMutux = 1;
+	emulatorHasMutex = 1;
  
 	if ( GameInfo )
 	{
@@ -1299,7 +1341,7 @@ int  fceuWrapperUpdate( void )
 		}
 		fceuWrapperUnLock();
 
-		emulatorHasMutux = 0;
+		emulatorHasMutex = 0;
 
 		while ( SpeedThrottle() )
 		{
@@ -1312,7 +1354,7 @@ int  fceuWrapperUpdate( void )
 	{
 		fceuWrapperUnLock();
 
-		emulatorHasMutux = 0;
+		emulatorHasMutex = 0;
 
 		msleep( 100 );
 	}

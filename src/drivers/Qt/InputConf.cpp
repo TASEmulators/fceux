@@ -478,9 +478,9 @@ void InputConfDialog_t::openLoadPresetFile(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	loadInputSettingsFromFile(filename.toStdString().c_str());
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	updatePortLabels();
 	updatePortComboBoxes();

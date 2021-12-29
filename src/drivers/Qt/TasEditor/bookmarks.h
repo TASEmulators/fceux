@@ -157,6 +157,8 @@ private:
 	int pxStartCol2;
 	int pxStartCol3;
 
+	bool redrawFlag;
+
 	private slots:
 		void showImage(void);
 

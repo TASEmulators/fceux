@@ -572,10 +572,10 @@ void ConsoleVideoConfDialog_t::closeWindow(void)
 //----------------------------------------------------
 void  ConsoleVideoConfDialog_t::resetVideo(void)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	KillVideo ();
 	InitVideo (GameInfo);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::updateReadouts(void)
@@ -782,7 +782,7 @@ void ConsoleVideoConfDialog_t::use_new_PPU_changed( bool value )
 	}
 
 	//printf("NEW PPU Value:%i \n", reqNewPPU );
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	newppu = reqNewPPU;
 
@@ -796,7 +796,7 @@ void ConsoleVideoConfDialog_t::use_new_PPU_changed( bool value )
 	g_config->save ();
 
 	UpdateEMUCore (g_config);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::frameskip_changed( int value )
@@ -805,9 +805,9 @@ void ConsoleVideoConfDialog_t::frameskip_changed( int value )
 	g_config->setOption("SDL.Frameskip", (value == Qt::Checked) );
 	g_config->save ();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	UpdateEMUCore (g_config);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::vsync_changed( int value )
@@ -839,11 +839,11 @@ void ConsoleVideoConfDialog_t::intFrameRate_changed( int value )
 	g_config->setOption("SDL.IntFrameRate", useIntFrameRate );
 	g_config->save ();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	RefreshThrottleFPS();
 	KillSound();
 	InitSound();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::useSpriteLimitChanged( int value )
@@ -852,9 +852,9 @@ void ConsoleVideoConfDialog_t::useSpriteLimitChanged( int value )
 	g_config->setOption("SDL.DisableSpriteLimit", (value == Qt::Checked) );
 	g_config->save ();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	UpdateEMUCore (g_config);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::clipSidesChanged( int value )
@@ -863,9 +863,9 @@ void ConsoleVideoConfDialog_t::clipSidesChanged( int value )
 	g_config->setOption("SDL.ClipSides", (value == Qt::Checked) );
 	g_config->save ();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	UpdateEMUCore (g_config);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showFPSChanged( int value )
@@ -874,9 +874,9 @@ void ConsoleVideoConfDialog_t::showFPSChanged( int value )
 	g_config->setOption("SDL.ShowFPS", (value == Qt::Checked) );
 	g_config->save ();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_SetShowFPS( (value == Qt::Checked) );
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::aspectEnableChanged( int value )
@@ -951,18 +951,18 @@ void ConsoleVideoConfDialog_t::regionChanged(int index)
 	// reset sound subsystem for changes to take effect
 	if ( actRegion != region )
 	{
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		FCEUI_SetRegion (region, true);
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::inputDisplayChanged(int index)
 {
 	//printf("Scaler: %i : %i \n", index, scalerSelect->itemData(index).toInt() );
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	input_display = inputDisplaySel->itemData(index).toInt();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	g_config->setOption ("SDL.InputDisplay", input_display);
 	g_config->save ();
@@ -1022,16 +1022,16 @@ void ConsoleVideoConfDialog_t::drawInputAidsChanged( int value )
 	g_config->setOption("SDL.DrawInputAids", draw );
 	g_config->save ();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	drawInputAidsEnable = draw;
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showFrameCountChanged( int value )
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	frame_display = (value != Qt::Unchecked);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	//printf("Value:%i \n", value );
 	g_config->setOption("SDL.ShowFrameCount", frame_display );
@@ -1041,9 +1041,9 @@ void ConsoleVideoConfDialog_t::showFrameCountChanged( int value )
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showLagCountChanged( int value )
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	lagCounterDisplay = (value != Qt::Unchecked);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	//printf("Value:%i \n", value );
 	g_config->setOption("SDL.ShowLagCount", lagCounterDisplay );
@@ -1053,9 +1053,9 @@ void ConsoleVideoConfDialog_t::showLagCountChanged( int value )
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showRerecordCountChanged( int value )
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	rerecord_display = (value != Qt::Unchecked);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	//printf("Value:%i \n", value );
 	g_config->setOption("SDL.ShowRerecordCount", rerecord_display );

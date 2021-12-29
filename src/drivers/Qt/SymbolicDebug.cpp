@@ -1477,7 +1477,7 @@ int SymbolEditWindow::exec(void)
 
 	if ( ret == QDialog::Accepted )
 	{
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		if ( isArrayBox->isChecked() )
 		{
 			size = atoi( arraySize->text().toStdString().c_str() );
@@ -1562,7 +1562,7 @@ int SymbolEditWindow::exec(void)
 			sym->trimTrailingSpaces();
 		}
 		debugSymbolTable.save(); // Save table to disk immediately after an add, edit, or delete
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 	return ret;
 }

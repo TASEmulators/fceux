@@ -513,7 +513,7 @@ void BRANCHES::mouseDoubleClickEvent(QMouseEvent * event)
 
 void BRANCHES::mousePressEvent(QMouseEvent * event)
 {
-	fceuCriticalSection emuLock;
+	FCEU_CRITICAL_SECTION( emuLock );
 	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
 
 	bookmarks->itemUnderMouse = item;
@@ -563,7 +563,7 @@ void BRANCHES::mousePressEvent(QMouseEvent * event)
 
 void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
 {
-	fceuCriticalSection emuLock;
+	FCEU_CRITICAL_SECTION( emuLock );
 	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
 
 	bookmarks->itemUnderMouse = item;
@@ -585,7 +585,7 @@ void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
 
 void BRANCHES::showImage(void)
 {
-	fceuCriticalSection emuLock;
+	FCEU_CRITICAL_SECTION( emuLock );
 	//static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
 	
 	bool item_valid = (imageItem >= 0) && (imageItem < TOTAL_BOOKMARKS);
@@ -602,7 +602,7 @@ void BRANCHES::showImage(void)
 
 void BRANCHES::mouseMoveEvent(QMouseEvent * event)
 {
-	fceuCriticalSection emuLock;
+	FCEU_CRITICAL_SECTION( emuLock );
 	int item, item_valid;
 
 	item = findItemUnderMouse( event->pos().x(), event->pos().y() );
@@ -672,7 +672,7 @@ bool BRANCHES::event(QEvent *event)
 {
 	if (event->type() == QEvent::ToolTip)
 	{
-		fceuCriticalSection emuLock;
+		FCEU_CRITICAL_SECTION( emuLock );
 		int item, item_valid;
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 

@@ -1071,9 +1071,9 @@ void HexEditorFindDialog_t::runSearch(void)
 			i++;
 		}
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	parent->editor->findPattern( varray, upBtn->isChecked() );
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
@@ -1439,9 +1439,9 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	// Lock the mutex before adding a new window to the list,
 	// we want to be sure that the emulator is not iterating the list
 	// when we change it.
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	winList.push_back(this);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	populateBookmarkMenu();
 
@@ -1462,7 +1462,7 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 	// Lock the emulation thread mutex to ensure
 	// that the emulator is not attempting to update memory values
 	// for window while we are destroying it or editing the window list.
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	for (it = winList.begin(); it != winList.end(); it++)
 	{
@@ -1473,7 +1473,7 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 			break;
 		}
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setWindowTitle(void)
@@ -1816,7 +1816,7 @@ void HexEditorDialog_t::updatePeriodic(void)
 
 		editor->checkMemActivity();
 
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 	else
 	{
@@ -2282,7 +2282,7 @@ void QHexEdit::pasteFromClipboard(void)
 	const char *c;
 	unsigned char *buf;
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	//printf("Paste: '%s'\n", s.c_str() );
 
@@ -2343,7 +2343,7 @@ void QHexEdit::pasteFromClipboard(void)
 	}
 	free(buf);
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::loadHighlightToClipboard(void)
@@ -2352,7 +2352,7 @@ void QHexEdit::loadHighlightToClipboard(void)
 	std::string s;
 	char c[8];
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	startAddr = (txtHlgtStartLine*16) + txtHlgtStartChar;
 	endAddr   = (txtHlgtEndLine  *16) + txtHlgtEndChar;
@@ -2363,7 +2363,7 @@ void QHexEdit::loadHighlightToClipboard(void)
 
 		s.append(c);
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	loadClipboard( s.c_str() );
 }
@@ -2732,13 +2732,13 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 
 					int offs = (cursorPosX-32);
 					int addr = 16*(lineOffset+cursorPosY) + offs;
-					fceuWrapperLock();
+					FCEU_WRAPPER_LOCK();
 					if ( viewMode == QHexEdit::MODE_NES_ROM )
 					{
 						romEditList.applyPatch( addr, key );
 					}
 					writeMem( viewMode, addr, key );
-					fceuWrapperUnLock();
+					FCEU_WRAPPER_UNLOCK();
 				
 					editAddr  = -1;
 					editValue =  0;
@@ -2767,13 +2767,13 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 			{
 				nibbleValue = editValue | nibbleValue;
 				
-				fceuWrapperLock();
+				FCEU_WRAPPER_LOCK();
 				if ( viewMode == QHexEdit::MODE_NES_ROM )
 				{
 					romEditList.applyPatch( editAddr, nibbleValue );
 				}
 				writeMem( viewMode, editAddr, nibbleValue );
-				fceuWrapperUnLock();
+				FCEU_WRAPPER_UNLOCK();
 				
 				editAddr  = -1;
 				editValue =  0;
@@ -3236,7 +3236,7 @@ void QHexEdit::frzRamSet(void)
 		return;
 	}
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_ListCheats( RamFreezeCB, this);
 
 	if ( (frzRamAddr >= 0) && (FrozenAddressCount < 256) )
@@ -3244,7 +3244,7 @@ void QHexEdit::frzRamSet(void)
 		FCEUI_AddCheat("", frzRamAddr, GetMem(frzRamAddr), -1, 1);
 	}
 	updateCheatDialog();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::frzRamUnset(void)
@@ -3257,10 +3257,10 @@ void QHexEdit::frzRamUnset(void)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_ListCheats( RamFreezeCB, this);
 	updateCheatDialog();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::frzRamUnsetAll(void)
@@ -3273,10 +3273,10 @@ void QHexEdit::frzRamUnsetAll(void)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEU_DeleteAllCheats();
 	updateCheatDialog();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::frzRamToggle(void)
@@ -3289,7 +3289,7 @@ void QHexEdit::frzRamToggle(void)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_ListCheats( RamFreezeCB, this);
 
 	if ( (frzRamAddr >= 0) && (FrozenAddressCount < 256) )
@@ -3297,7 +3297,7 @@ void QHexEdit::frzRamToggle(void)
 		FCEUI_AddCheat("", frzRamAddr, GetMem(frzRamAddr), -1, 1);
 	}
 	updateCheatDialog();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::addDebugSym(void)

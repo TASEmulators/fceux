@@ -276,9 +276,9 @@ void GameGenieDialog_t::addCheatClicked(void)
 		c = strtol( cmp->text().toStdString().c_str(), NULL, 16 );
 	}
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_AddCheat( name.c_str(), a, v, c, 1 );
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 }
 //----------------------------------------------------------------------------

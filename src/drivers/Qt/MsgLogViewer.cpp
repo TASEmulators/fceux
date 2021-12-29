@@ -264,26 +264,26 @@ void MsgLogViewDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void MsgLogViewDialog_t::clearLog(void)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	msgLog.clear();
 
 	txtView->clear();
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void MsgLogViewDialog_t::updatePeriodic(void)
 {
 	if (msgLog.getTotalLineCount() != totalLines)
 	{
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 
 		msgLog.loadTextViewer(txtView);
 
 		totalLines = msgLog.getTotalLineCount();
 
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 
 		txtView->moveCursor(QTextCursor::End);
 	}

@@ -470,13 +470,13 @@ void MoviePlayDialog_t::playMovie(void)
 		pauseframe = strtol(pauseAtFrameEntry->text().toStdString().c_str(), NULL, 0);
 	}
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	if (FCEUI_LoadMovie(path.c_str(),
 						replayReadOnlySetting, pauseframe ? pauseframe : false) == false)
 	{
 		movieLoadError = true;
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	if (movieLoadError)
 	{

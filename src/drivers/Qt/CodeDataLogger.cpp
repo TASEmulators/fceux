@@ -476,10 +476,10 @@ void CodeDataLoggerDialog_t::saveCdlFileAs(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	strcpy(loadedcdfile, filename.toStdString().c_str());
 	SaveCDLogFile();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void CodeDataLoggerDialog_t::loadCdlFile(void)
@@ -531,9 +531,9 @@ void CodeDataLoggerDialog_t::loadCdlFile(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	LoadCDLog(filename.toStdString().c_str());
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	return;
 }
@@ -754,7 +754,7 @@ static int getDefaultCDLFile(char *filepath)
 //----------------------------------------------------
 void FreeCDLog(void)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	if (cdloggerdata)
 	{
 		free(cdloggerdata);
@@ -767,14 +767,14 @@ void FreeCDLog(void)
 		cdloggervdata = NULL;
 		cdloggerVideoDataSize = 0;
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void InitCDLog(void)
 {
 	int rom_sel = 0;
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	if (GameInfo->type == GIT_FDS)
 	{
 		rom_sel = 1;
@@ -794,7 +794,7 @@ void InitCDLog(void)
 			cdloggervdata = (unsigned char *)malloc(8192);
 		}
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ResetCDLog(void)
@@ -803,7 +803,7 @@ void ResetCDLog(void)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	codecount = datacount = rendercount = vromreadcount = 0;
 	undefinedcount = cdloggerdataSize;
@@ -829,7 +829,7 @@ void ResetCDLog(void)
 			memset(cdloggervdata, 0, 8192);
 		}
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 bool LoadCDLog(const char *nameo)
@@ -882,12 +882,12 @@ bool LoadCDLog(const char *nameo)
 //----------------------------------------------------
 void StartCDLogging(void)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_SetLoggingCD(1);
 	//EnableTracerMenuItems();
 	//SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
 	autoSaveArmedCDL = true;
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 bool PauseCDLogging(void)
@@ -898,11 +898,11 @@ bool PauseCDLogging(void)
 	//	MessageBox(hCDLogger, "The Trace Logger is currently using this for some of its features.\nPlease turn the Trace Logger off and try again.","Unable to Pause Code/Data Logger", MB_OK);
 	//	return false;
 	//}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_SetLoggingCD(0);
 	//EnableTracerMenuItems();
 	//SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Start");
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 	return true;
 }
 //----------------------------------------------------

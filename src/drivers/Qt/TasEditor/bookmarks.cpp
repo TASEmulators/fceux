@@ -75,6 +75,8 @@ BOOKMARKS::BOOKMARKS(QWidget *parent)
 	this->setMouseTracking(true);
 
 	calcFontData();
+
+	redrawFlag = false;
 }
 
 BOOKMARKS::~BOOKMARKS(void)
@@ -227,15 +229,26 @@ void BOOKMARKS::update()
 	if (mustCheckItemUnderMouse)
 	{
 		if (editMode == EDIT_MODE_BRANCHES)
+		{
 			itemUnderMouse = branches->findItemUnderMouse(mouseX, mouseY);
+		}
 		else if (editMode == EDIT_MODE_BOTH)
+		{
 			itemUnderMouse = findItemUnderMouse();
+		}
 		else
+		{
 			itemUnderMouse = ITEM_UNDER_MOUSE_NONE;
+		}
 		mustCheckItemUnderMouse = false;
+		redrawFlag = true;
 	}
 
-	QWidget::update();
+	if ( redrawFlag )
+	{
+		QWidget::update();
+		redrawFlag = false;
+	}
 }
 
 // stores commands in array for update() function
@@ -471,6 +484,7 @@ void BOOKMARKS::redrawBookmarksList(bool eraseBG)
 	{
 		//InvalidateRect(hwndBookmarksList, 0, eraseBG);
 	}
+	redrawFlag = true;
 }
 void BOOKMARKS::redrawChangedBookmarks(int frame)
 {
@@ -484,11 +498,11 @@ void BOOKMARKS::redrawChangedBookmarks(int frame)
 }
 void BOOKMARKS::redrawBookmark(int bookmarkNumber)
 {
-	//redrawBookmarksListRow((bookmarkNumber + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+	redrawFlag = true;
 }
 void BOOKMARKS::redrawBookmarksListRow(int rowIndex)
 {
-	//ListView_RedrawItems(hwndBookmarksList, rowIndex, rowIndex);
+	redrawFlag = true;
 }
 
 void BOOKMARKS::resizeEvent(QResizeEvent *event)
@@ -499,7 +513,7 @@ void BOOKMARKS::resizeEvent(QResizeEvent *event)
 
 void BOOKMARKS::paintEvent(QPaintEvent *event)
 {
-	fceuCriticalSection emuLock;
+	FCEU_CRITICAL_SECTION( emuLock );
 	QPainter painter(this);
 	int x, y, item, cell_y;
 	QColor white(255,255,255), black(0,0,0), blkColor;
@@ -723,7 +737,7 @@ int  BOOKMARKS::calcColumn( int px )
 
 void BOOKMARKS::mousePressEvent(QMouseEvent * event)
 {
-	fceuCriticalSection emuLock;
+	FCEU_CRITICAL_SECTION( emuLock );
 	int item, row_under_mouse, item_valid;
 	QPoint c = convPixToCursor( event->pos() );
 
@@ -758,11 +772,13 @@ void BOOKMARKS::mousePressEvent(QMouseEvent * event)
 		playback->handleMiddleButtonClick();
 	}
 	//printf("Mouse Button Pressed: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
+	
+	redrawFlag = true;
 }
 
 void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 {
-	fceuCriticalSection emuLock;
+	FCEU_CRITICAL_SECTION( emuLock );
 	//QPoint c = convPixToCursor( event->pos() );
 
 	//printf("Mouse Button Released: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
@@ -783,11 +799,12 @@ void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 		}
 		bookmarkRightclicked = ITEM_UNDER_MOUSE_NONE;
 	}
+	redrawFlag = true;
 }
 
 void BOOKMARKS::showImage(void)
 {
-	fceuCriticalSection emuLock;
+	FCEU_CRITICAL_SECTION( emuLock ); 
 	//static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
 	bool item_valid = (imageItem >= 0) && (imageItem < TOTAL_BOOKMARKS);
 
@@ -803,7 +820,7 @@ void BOOKMARKS::showImage(void)
 
 void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
 {
-	fceuCriticalSection emuLock;
+	FCEU_CRITICAL_SECTION( emuLock );
 	int item, row_under_mouse, item_valid, column;
 
 	QPoint c = convPixToCursor( event->pos() );
@@ -863,7 +880,7 @@ bool BOOKMARKS::event(QEvent *event)
 {
 	if (event->type() == QEvent::ToolTip)
 	{
-		fceuCriticalSection emuLock;
+		FCEU_CRITICAL_SECTION( emuLock );
 		int item, row_under_mouse, item_valid, column;
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 
