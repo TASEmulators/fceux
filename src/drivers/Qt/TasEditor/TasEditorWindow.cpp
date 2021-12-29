@@ -6468,17 +6468,31 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 //---- Bookmark Preview Popup
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
+bookmarkPreviewPopup *bookmarkPreviewPopup::instance = 0;
+//----------------------------------------------------------------------------
 bookmarkPreviewPopup::bookmarkPreviewPopup( int index, QWidget *parent )
-	: fceuCustomToolTip( parent )
+	: QDialog( parent, Qt::ToolTip )
 {
 	int p;
+	QPoint pos;
 	QVBoxLayout *vbox;
 	QLabel *imgLbl, *descLbl;
 	uint32_t *pixBuf;
 	uint32_t  pixel;
 	QPixmap pixmap;
 
-	setHideOnMouseMove(true);
+	if ( instance )
+	{
+		//instance->done(0);
+		//instance->deleteLater();
+		instance->actv = false;
+		instance = 0;
+	}
+	instance = this;
+
+	imageIndex = index;
+
+	//qApp->installEventFilter(this);
 
 	fceuWrapperLock();
 
@@ -6534,16 +6548,101 @@ bookmarkPreviewPopup::bookmarkPreviewPopup( int index, QWidget *parent )
 	{
 		free( pixBuf ); pixBuf = NULL;
 	}
+
+	pos = parent->mapToGlobal(QPoint(0,0));
+
+	pos.setX( pos.x() - 300 );
+
+	move(pos);
+
 	fceuWrapperUnLock();
+
+	alpha = 0;
+	actv  = true;
+
+	setWindowOpacity(0.0f);
+
+	timer = new QTimer(this);
+
+	connect( timer, &QTimer::timeout, this, &bookmarkPreviewPopup::periodicUpdate );
+
+	timer->start(33);
+
 }
 //----------------------------------------------------------------------------
 bookmarkPreviewPopup::~bookmarkPreviewPopup( void )
 {
+	timer->stop();
+
 	if ( screenShotRaster != NULL )
 	{
 		free( screenShotRaster ); screenShotRaster = NULL;
 	}
 	//printf("Popup Deleted\n");
+}
+//----------------------------------------------------------------------------
+void bookmarkPreviewPopup::periodicUpdate(void)
+{
+	if ( actv )
+	{
+		if ( alpha < 255 )
+		{
+			alpha += 10;
+
+			if ( alpha > 255 )
+			{
+				alpha = 255;
+			}
+			setWindowOpacity( alpha / 255.0f );
+
+			update();
+		}
+	}
+	else
+	{
+		if ( alpha > 0 )
+		{
+			alpha -= 10;
+
+			if ( alpha < 0 )
+			{
+				alpha = 0;
+			}
+			setWindowOpacity( alpha / 255.0f );
+
+			update();
+		}
+		else
+		{
+			if ( instance == this )
+			{
+				instance = NULL;
+			}
+			done(0);
+			deleteLater();
+		}
+	}
+}
+//----------------------------------------------------------------------------
+int bookmarkPreviewPopup::currentIndex(void)
+{
+	if ( instance )
+	{
+		return instance->imageIndex;
+	}
+	return -1;
+}
+//----------------------------------------------------------------------------
+void bookmarkPreviewPopup::imageIndexChanged(int newIndex)
+{
+	//printf("newIndex:%i\n", newIndex );
+
+	actv = false;
+
+	if ( instance == this )
+	{
+		instance = NULL;
+	}
 }
 //----------------------------------------------------------------------------
 int bookmarkPreviewPopup::loadImage(int index)

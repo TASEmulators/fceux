@@ -586,7 +586,18 @@ void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
 void BRANCHES::showImage(void)
 {
 	fceuCriticalSection emuLock;
-	static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
+	//static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
+	
+	bool item_valid = (imageItem >= 0) && (imageItem < TOTAL_BOOKMARKS);
+
+	if ( item_valid && (imageItem != bookmarkPreviewPopup::currentIndex()) )
+	{
+		bookmarkPreviewPopup *popup = new bookmarkPreviewPopup(imageItem, this);
+
+		connect( this, SIGNAL(imageIndexChanged(int)), popup, SLOT(imageIndexChanged(int)) );
+
+		popup->show();
+	}
 }
 
 void BRANCHES::mouseMoveEvent(QMouseEvent * event)
@@ -602,6 +613,10 @@ void BRANCHES::mouseMoveEvent(QMouseEvent * event)
 
 	if ( item_valid && bookmarks->bookmarksArray[item].notEmpty)
 	{
+		if ( item != imageItem )
+		{
+			emit imageIndexChanged(item);
+		}
 		imageItem = item;
 		imagePos  = event->globalPos();
 		imageTimer->start();
@@ -609,6 +624,12 @@ void BRANCHES::mouseMoveEvent(QMouseEvent * event)
 	}
 	else
 	{
+		item = -1;
+		if ( item != imageItem )
+		{
+			emit imageIndexChanged(item);
+		}
+		imageItem = item;
 		imageTimer->stop();
 	}
 
@@ -621,6 +642,30 @@ void BRANCHES::mouseMoveEvent(QMouseEvent * event)
 
 	//}
 
+}
+
+void BRANCHES::focusOutEvent(QFocusEvent *event)
+{
+	int item = -1;
+	if ( item != imageItem )
+	{
+		emit imageIndexChanged(item);
+	}
+	imageItem = item;
+
+	bookmarks->itemUnderMouse = ITEM_UNDER_MOUSE_NONE;
+}
+
+void BRANCHES::leaveEvent(QEvent *event)
+{
+	int item = -1;
+	if ( item != imageItem )
+	{
+		emit imageIndexChanged(item);
+	}
+	imageItem = item;
+
+	bookmarks->itemUnderMouse = ITEM_UNDER_MOUSE_NONE;
 }
 
 bool BRANCHES::event(QEvent *event)

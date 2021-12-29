@@ -110,6 +110,8 @@ protected:
 	void mousePressEvent(QMouseEvent * event);
 	void mouseReleaseEvent(QMouseEvent * event);
 	void mouseMoveEvent(QMouseEvent * event);
+	void focusOutEvent(QFocusEvent *event);
+	void leaveEvent(QEvent *event);
 	bool event(QEvent *event);
 
 	int    calcColumn( int px );
@@ -157,4 +159,7 @@ private:
 
 	private slots:
 		void showImage(void);
+
+	signals:
+		void imageIndexChanged(int);
 };

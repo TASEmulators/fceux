@@ -114,17 +114,29 @@ struct NewProjectParameters
 	std::wstring authorName;
 };
 
-class bookmarkPreviewPopup : public fceuCustomToolTip
+class bookmarkPreviewPopup : public QDialog
 {
    Q_OBJECT
 	public:
 	   bookmarkPreviewPopup( int index, QWidget *parent = nullptr );
 	   ~bookmarkPreviewPopup(void);
 
-	private:
-	   int loadImage(int index);
+	   static int currentIndex(void);
 
-	   unsigned char *screenShotRaster;
+	private:
+	int loadImage(int index);
+
+		int alpha;
+		int imageIndex;
+		bool actv;
+		unsigned char *screenShotRaster;
+		QTimer *timer;
+
+		static bookmarkPreviewPopup *instance;
+
+	public slots:
+		void periodicUpdate(void);
+		void imageIndexChanged(int);
 };
 
 class markerDragPopup : public QDialog

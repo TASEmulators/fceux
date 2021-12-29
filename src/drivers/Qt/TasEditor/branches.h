@@ -151,6 +151,8 @@ protected:
 	void mouseReleaseEvent(QMouseEvent * event);
 	void mouseMoveEvent(QMouseEvent * event);
 	void mouseDoubleClickEvent(QMouseEvent * event);
+	void focusOutEvent(QFocusEvent *event);
+	void leaveEvent(QEvent *event);
 	bool event(QEvent *event);
 
 private:
@@ -214,4 +216,7 @@ private:
 
 	private slots:
 		void showImage(void);
+
+	signals:
+		void imageIndexChanged(int);
 };

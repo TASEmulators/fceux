@@ -788,7 +788,17 @@ void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 void BOOKMARKS::showImage(void)
 {
 	fceuCriticalSection emuLock;
-	static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
+	//static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
+	bool item_valid = (imageItem >= 0) && (imageItem < TOTAL_BOOKMARKS);
+
+	if ( item_valid && (imageItem != bookmarkPreviewPopup::currentIndex()) )
+	{
+		bookmarkPreviewPopup *popup = new bookmarkPreviewPopup(imageItem, this);
+
+		connect( this, SIGNAL(imageIndexChanged(int)), popup, SLOT(imageIndexChanged(int)) );
+
+		popup->show();
+	}
 }
 
 void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
@@ -808,6 +818,10 @@ void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
 
 	if ( item_valid && (column == BOOKMARKSLIST_COLUMN_TIME) && bookmarks->bookmarksArray[item].notEmpty)
 	{
+		if ( item != imageItem )
+		{
+			emit imageIndexChanged(item);
+		}
 		imageItem = item;
 		imagePos = event->globalPos();
 		imageTimer->start();
@@ -815,8 +829,34 @@ void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
 	}
 	else
 	{
+		item = -1;
+		if ( item != imageItem )
+		{
+			emit imageIndexChanged(item);
+		}
+		imageItem = item;
 		imageTimer->stop();
 	}
+}
+
+void BOOKMARKS::focusOutEvent(QFocusEvent *event)
+{
+	int item = -1;
+	if ( item != imageItem )
+	{
+		emit imageIndexChanged(item);
+	}
+	imageItem = item;
+}
+
+void BOOKMARKS::leaveEvent(QEvent *event)
+{
+	int item = -1;
+	if ( item != imageItem )
+	{
+		emit imageIndexChanged(item);
+	}
+	imageItem = item;
 }
 
 bool BOOKMARKS::event(QEvent *event)
