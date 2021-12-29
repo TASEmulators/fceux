@@ -12,6 +12,25 @@
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "(gdb) Core Dump (Linux)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/build/src/fceux",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
 			"coreDumpPath": "${workspaceFolder}/build/core-fceux",
 			"environment": [],
 			"externalConsole": false,
@@ -42,7 +61,7 @@
 			"program": "${workspaceFolder}/build/src/fceux.app/Contents/MacOS/fceux",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}"
+			"cwd": "${workspaceFolder}",
 			"environment": [],
 			"externalConsole": false,
 			"MIMode": "lldb"
