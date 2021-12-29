@@ -6587,7 +6587,7 @@ void bookmarkPreviewPopup::periodicUpdate(void)
 	{
 		if ( alpha < 255 )
 		{
-			alpha += 10;
+			alpha += 15;
 
 			if ( alpha > 255 )
 			{
@@ -6602,7 +6602,7 @@ void bookmarkPreviewPopup::periodicUpdate(void)
 	{
 		if ( alpha > 0 )
 		{
-			alpha -= 10;
+			alpha -= 15;
 
 			if ( alpha < 0 )
 			{
