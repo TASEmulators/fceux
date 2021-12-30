@@ -74,6 +74,8 @@ BRANCHES::BRANCHES(QWidget *parent)
 	viewWidth  = BRANCHES_BITMAP_WIDTH;
 	viewHeight = BRANCHES_BITMAP_HEIGHT;
 
+	viewRect = QRect( 0, 0, viewWidth, viewHeight );
+
 	g_config->getOption("SDL.TasBranchesFont", &fontString);
 
 	if ( fontString.size() > 0 )
@@ -715,6 +717,8 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 
 	QPainter painter(this);
 
+	viewRect = event->rect();
+
 	//viewWidth  = event->rect().width();
 	visHeight = event->rect().height();
 
@@ -940,13 +944,13 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			char framenum_string[16] = {0};
 			if (bookmarks->itemUnderMouse < TOTAL_BOOKMARKS)
 			{
-				sprintf( framenum_string, "%08i", bookmarks->bookmarksArray[bookmarks->itemUnderMouse].snapshot.keyFrame );
+				sprintf( framenum_string, "%07i", bookmarks->bookmarksArray[bookmarks->itemUnderMouse].snapshot.keyFrame );
 			}
 			else
 			{
-				sprintf( framenum_string, "%08i", currFrameCounter );
+				sprintf( framenum_string, "%07i", currFrameCounter );
 			}
-			x = 2 * pxBoxWidth;
+			x = viewRect.x() + (2 * pxBoxWidth);
 			y = pxLineSpacing;
 
 			painter.setPen( QColor( BRANCHES_TEXT_SHADOW_COLOR ) );
@@ -959,7 +963,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		if (bookmarks->itemUnderMouse > ITEM_UNDER_MOUSE_NONE)
 		{
 			int x,y;
-			x = 2 * pxBoxWidth;
+			x = viewRect.x() + (2 * pxBoxWidth);
 			y = visHeight - (pxLineSpacing / 2);
 
 			if (bookmarks->itemUnderMouse == ITEM_UNDER_MOUSE_CLOUD)
@@ -1053,69 +1057,8 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 	painter.drawLine( corner_x, corner_y, corner_x                      , corner_y-BRANCHES_CORNER_HEIGHT );
 	painter.drawLine( corner_x, corner_y, corner_x-BRANCHES_CORNER_WIDTH, corner_y   );
 
-//	// draw border of canvas
-//	FrameRect(hBitmapDC, &branchesBitmapRect, borderBrush);
-//	// finished
-//	mustRedrawBranchesBitmap = false;
-//	InvalidateRect(bookmarks.hwndBranchesBitmap, 0, FALSE);
 }
 
-// this is called by wndproc on WM_PAINT
-//void BRANCHES::paintBranchesBitmap(HDC hdc)
-//{
-//	int tempBranchX, tempBranchY;
-//	// "bg"
-//	BitBlt(hBufferDC, 0, 0, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_HEIGHT, hBitmapDC, 0, 0, SRCCOPY);
-//	// "sprites"
-//	// blinking red frame on selected slot
-//	if (taseditorConfig->oldControlSchemeForBranching && ((currentAnimationFrame + 1) % 6))
-//	{
-//		int selected_slot = bookmarks.getSelectedSlot();
-//		tempRect.left = branchCurrentX[selected_slot] + BRANCHES_SELECTED_SLOT_DX;
-//		tempRect.left += bookmarks.bookmarksArray[selected_slot].floatingPhase;
-//		tempRect.top = branchCurrentY[selected_slot] + BRANCHES_SELECTED_SLOT_DY;
-//		tempRect.right = tempRect.left + BRANCHES_SELECTED_SLOT_WIDTH;
-//		tempRect.bottom = tempRect.top + BRANCHES_SELECTED_SLOT_HEIGHT;
-//		FrameRect(hBufferDC, &tempRect, selectedSlotBrush);
-//	}
-//	// fireball
-//	if (fireballSize)
-//	{
-//		tempBranchX = branchCurrentX[ITEM_UNDER_MOUSE_FIREBALL] - BRANCHES_FIREBALL_HALFWIDTH;
-//		tempBranchY = branchCurrentY[ITEM_UNDER_MOUSE_FIREBALL] - BRANCHES_FIREBALL_HALFHEIGHT;
-//		if (fireballSize >= BRANCHES_FIREBALL_MAX_SIZE)
-//		{
-//			TransparentBlt(hBufferDC, tempBranchX, tempBranchY, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT, hSpritesheetDC, currentAnimationFrame * BRANCHES_FIREBALL_WIDTH + BRANCHES_FIREBALL_SPRITESHEET_X, BRANCHES_FIREBALL_SPRITESHEET_Y, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT, 0x00FF00);
-//		} else
-//		{
-//			TransparentBlt(hBufferDC, tempBranchX, tempBranchY, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT, hSpritesheetDC, BRANCHES_FIREBALL_SPRITESHEET_END_X - fireballSize * BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_SPRITESHEET_Y, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT, 0x00FF00);
-//		}
-//	}
-//	// blinking Playback cursor point
-//	if (currentAnimationFrame % 4)
-//		TransparentBlt(hBufferDC, playbackCursorX - BRANCHES_MINIARROW_HALFWIDTH, playbackCursorY - BRANCHES_MINIARROW_HALFHEIGHT, BRANCHES_MINIARROW_WIDTH, BRANCHES_MINIARROW_HEIGHT, hSpritesheetDC, BRANCHES_MINIARROW_SPRITESHEET_X, BRANCHES_MINIARROW_SPRITESHEET_Y, BRANCHES_MINIARROW_WIDTH, BRANCHES_MINIARROW_HEIGHT, 0x00FF00);
-//	// corners cursor
-//	int current_corners_cursor_shift = BRANCHES_CORNER_BASE_SHIFT + corners_cursor_shift[currentAnimationFrame];
-//	int corner_x, corner_y;
-//	// upper left
-//	corner_x = cornersCursorX - current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
-//	corner_y = cornersCursorY - current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
-//	TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER1_SPRITESHEET_X, BRANCHES_CORNER1_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
-//	// upper right
-//	corner_x = cornersCursorX + current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
-//	corner_y = cornersCursorY - current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
-//	TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER2_SPRITESHEET_X, BRANCHES_CORNER2_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
-//	// lower left
-//	corner_x = cornersCursorX - current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
-//	corner_y = cornersCursorY + current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
-//	TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER3_SPRITESHEET_X, BRANCHES_CORNER3_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
-//	// lower right
-//	corner_x = cornersCursorX + current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
-//	corner_y = cornersCursorY + current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
-//	TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER4_SPRITESHEET_X, BRANCHES_CORNER4_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
-//	// finish - paste buffer bitmap to screen
-//	BitBlt(hdc, 0, 0, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_HEIGHT, hBufferDC, 0, 0, SRCCOPY);
-//}
 // ----------------------------------------------------------------------------------------
 // getters
 int BRANCHES::getParentOf(int child)

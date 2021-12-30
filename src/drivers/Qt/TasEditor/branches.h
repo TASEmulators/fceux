@@ -194,6 +194,7 @@ private:
 	QFont font;
 	QPoint  imagePos;
 	QTimer *imageTimer;
+	QRect   viewRect;
 
 	int  imageItem;
 	int  viewWidth;
