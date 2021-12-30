@@ -730,7 +730,8 @@ void BRANCHES::paintEvent(QPaintEvent *event)
     	linearGrad.setColorAt(0, QColor(0xBF,0xE2,0xEF));
     	linearGrad.setColorAt(1, QColor(0xE5,0xFB,0xFF));
 
-	painter.fillRect( 0, 0, viewWidth, viewHeight, linearGrad );
+	//painter.fillRect( 0, 0, viewWidth, viewHeight, linearGrad );
+	painter.fillRect( viewRect, linearGrad );
 
 //	// lines
 	int branch, tempBranchX, tempBranchY, tempBranchX2, tempBranchY2, parentX, parentY, childID;
