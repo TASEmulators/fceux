@@ -61,6 +61,6 @@ private:
 	std::vector<std::vector<uint8_t>> savestates;
 
 	// not saved data
-	int nextCleaningTime;
+	clock_t nextCleaningTime;
 	
 };

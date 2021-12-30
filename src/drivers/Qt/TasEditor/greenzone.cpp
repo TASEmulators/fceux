@@ -35,6 +35,7 @@ static char greenzone_skipsave_id[GREENZONE_ID_LEN] = "GREENZONX";
 
 GREENZONE::GREENZONE()
 {
+	nextCleaningTime = 0;
 }
 
 void GREENZONE::init()

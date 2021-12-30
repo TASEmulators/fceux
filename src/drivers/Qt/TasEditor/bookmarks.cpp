@@ -77,6 +77,7 @@ BOOKMARKS::BOOKMARKS(QWidget *parent)
 	calcFontData();
 
 	redrawFlag = false;
+	nextFlashUpdateTime = 0;
 }
 
 BOOKMARKS::~BOOKMARKS(void)

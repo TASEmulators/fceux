@@ -157,10 +157,10 @@ private:
 	int historySize;
 
 	int undoHintPos, oldUndoHintPos;
-	int undoHintTimer;
+	clock_t undoHintTimer;
 	bool showUndoHint, oldShowUndoHint;
 	bool updateScheduled;
-	int nextAutocompressTime;
+	clock_t nextAutocompressTime;
 
 };
 

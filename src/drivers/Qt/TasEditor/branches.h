@@ -178,7 +178,7 @@ private:
 	// not saved vars
 	int transitionPhase;
 	int currentAnimationFrame;
-	int nextAnimationTime;
+	clock_t nextAnimationTime;
 	int playbackCursorX, playbackCursorY;
 	double cornersCursorX, cornersCursorY;
 	std::vector<int> branchX;				// in pixels

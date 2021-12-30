@@ -4,6 +4,7 @@
 #include <set>
 #include <map>
 #include <vector>
+#include <time.h>
 
 #include <QLineEdit>
 
@@ -103,7 +104,7 @@ private:
 
 	bool previousMarkerButtonState, previousMarkerButtonOldState;
 	bool nextMarkerButtonState, nextMarkerButtonOldState;
-	int buttonHoldTimer;
+	clock_t buttonHoldTimer;
 
 	std::vector<RowsSelection> rowsSelectionHistory;
 

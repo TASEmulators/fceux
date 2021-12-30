@@ -286,14 +286,14 @@ class QPianoRoll : public QWidget
 		int columnUnderMouseAtPress;
 		int markerDragFrameNumber;
 		int markerDragCountdown;
-		int drawingStartTimestamp;
 		int wheelPixelCounter;
 		int headerItemUnderMouse;
-		int nextHeaderUpdateTime;
 		int scroll_x;
 		int scroll_y;
 		int mouse_x;
 		int mouse_y;
+		clock_t drawingStartTimestamp;
+		clock_t nextHeaderUpdateTime;
 
 		int playbackCursorPos;
 

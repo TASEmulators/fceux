@@ -90,7 +90,7 @@ private:
 	bool forwardButtonState, forwardButtonOldState;
 	bool rewindFullButtonState, rewindFullButtonOldState;
 	bool forwardFullButtonState, forwardFullButtonOldState;
-	int buttonHoldTimer;
+	clock_t buttonHoldTimer;
 	int seekingBeginningFrame;
 
 };

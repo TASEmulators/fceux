@@ -1,6 +1,7 @@
 // Specification file for Bookmarks class
 #pragma once
 #include <vector>
+#include <time.h>
 
 #include <QFont>
 #include <QTimer>
@@ -41,7 +42,7 @@ enum BOOKMARK_COMMANDS
 #define ITEM_UNDER_MOUSE_CLOUD (-1)
 #define ITEM_UNDER_MOUSE_FIREBALL (TOTAL_BOOKMARKS)
 
-#define BOOKMARKS_FLASH_TICK 100		// in milliseconds
+#define BOOKMARKS_FLASH_TICK (100 * CLOCKS_PER_SEC / 1000) // in milliseconds
 
 // listview columns
 enum
@@ -126,8 +127,8 @@ private:
 	// not saved vars
 	std::vector<int> commands;
 	int selectedSlot;
-	int nextFlashUpdateTime;
 	int mouseX, mouseY;
+	clock_t nextFlashUpdateTime;
 
 	// GUI stuff
 	QFont       font;
