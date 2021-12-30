@@ -957,7 +957,7 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	pianoRollFrame   = new QFrame();
 	grid             = new QGridLayout();
 	pianoRoll        = new QPianoRoll(this);
-	pianoRollVBar    = new QScrollBar( Qt::Vertical, this );
+	pianoRollVBar    = new PianoRollScrollBar( this );
 	pianoRollHBar    = new QScrollBar( Qt::Horizontal, this );
 	upperMarkerLabel = new QPushButton( tr("Marker 0") );
 	lowerMarkerLabel = new QPushButton( tr("Marker 0") );
@@ -3709,6 +3709,77 @@ Ported to Qt by mjbudd77\n\
 	about.exec();
 }
 //----------------------------------------------------------------------------
+//------ Custom Vertical Scroll For Piano Roll
+//----------------------------------------------------------------------------
+PianoRollScrollBar::PianoRollScrollBar( QWidget *parent )
+	: QScrollBar( Qt::Vertical, parent )
+{
+	pxLineSpacing = 12;
+	wheelPixelCounter = 0;
+	wheelAngleCounter = 0;
+}
+//----------------------------------------------------------------------------
+PianoRollScrollBar::~PianoRollScrollBar(void)
+{
+}
+//----------------------------------------------------------------------------
+void PianoRollScrollBar::wheelEvent(QWheelEvent *event)
+{
+	int ofs, zDelta = 0;
+
+	//QScrollBar::wheelEvent(event);
+	QPoint numPixels = event->pixelDelta();
+	QPoint numDegrees = event->angleDelta();
+
+	ofs = value();
+
+	if (!numPixels.isNull())
+	{
+		wheelPixelCounter += numPixels.y();
+		//printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+
+		if ( wheelPixelCounter >= pxLineSpacing )
+		{
+			zDelta = wheelPixelCounter / pxLineSpacing;
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
+		else if ( wheelPixelCounter <= -pxLineSpacing )
+		{
+			zDelta = wheelPixelCounter / pxLineSpacing;
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
+	}
+	else if (!numDegrees.isNull())
+	{
+		int stepDeg = 120;
+		//QPoint numSteps = numDegrees / 15;
+		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
+		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
+		wheelAngleCounter += numDegrees.y();
+
+		if ( wheelAngleCounter <= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
+		else if ( wheelAngleCounter >= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
+	}
+
+	if ( zDelta != 0 )
+	{
+		setValue( ofs + (6 * zDelta) );
+	}
+	event->accept();
+}
+//----------------------------------------------------------------------------
 //----  TAS Piano Roll Widget
 //----------------------------------------------------------------------------
 QPianoRoll::QPianoRoll(QWidget *parent)
@@ -3793,6 +3864,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	markerDragCountdown = 0;
 	drawingStartTimestamp = 0;
 	wheelPixelCounter = 0;
+	wheelAngleCounter = 0;
 	headerItemUnderMouse = 0;
 	nextHeaderUpdateTime = 0;
 	rightButtonDragMode = false;
@@ -4777,7 +4849,7 @@ void QPianoRoll::mouseMoveEvent(QMouseEvent * event)
 void QPianoRoll::wheelEvent(QWheelEvent *event)
 {
 	FCEU_CRITICAL_SECTION( emuLock );
-	int ofs, kbModifiers, msButtons, zDelta;
+	int ofs, kbModifiers, msButtons, zDelta = 0;
 
 	QPoint numPixels = event->pixelDelta();
 	QPoint numDegrees = event->angleDelta();
@@ -4791,30 +4863,42 @@ void QPianoRoll::wheelEvent(QWheelEvent *event)
 	{
 		wheelPixelCounter += numPixels.y();
 		//printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+
+		if (wheelPixelCounter <= -pxLineSpacing)
+		{
+			zDelta = (wheelPixelCounter / pxLineSpacing);
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
+		else if (wheelPixelCounter >= pxLineSpacing)
+		{
+			zDelta = (wheelPixelCounter / pxLineSpacing);
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
 	}
 	else if (!numDegrees.isNull())
 	{
+		int stepDeg = 120;
 		//QPoint numSteps = numDegrees / 15;
 		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
 		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
-		wheelPixelCounter += (pxLineSpacing * numDegrees.y()) / (15 * 8);
+		wheelAngleCounter += numDegrees.y();
+
+		if ( wheelAngleCounter <= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
+		else if ( wheelAngleCounter >= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
 	}
 	//printf("Wheel Event: %i\n", wheelPixelCounter);
-
-	zDelta = 0;
-	if (wheelPixelCounter <= -pxLineSpacing)
-	{
-		zDelta = (wheelPixelCounter / pxLineSpacing);
-
-		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
-	}
-	else if (wheelPixelCounter >= pxLineSpacing)
-	{
-		zDelta = (wheelPixelCounter / pxLineSpacing);
-
-		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
-	}
-	//printf("zDelta:%i\n", zDelta );
 
 	if ( kbModifiers & Qt::ShiftModifier )
 	{

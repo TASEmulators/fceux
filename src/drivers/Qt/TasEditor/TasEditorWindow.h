@@ -292,6 +292,7 @@ class QPianoRoll : public QWidget
 		int markerDragFrameNumber;
 		int markerDragCountdown;
 		int wheelPixelCounter;
+		int wheelAngleCounter;
 		int headerItemUnderMouse;
 		int scroll_x;
 		int scroll_y;
@@ -310,6 +311,22 @@ class QPianoRoll : public QWidget
 		void vbarChanged(int val);
 		void vbarActionTriggered(int act);
 		void setupMarkerDrag(void);
+};
+
+class  PianoRollScrollBar : public QScrollBar
+{
+	Q_OBJECT
+
+	public:
+		PianoRollScrollBar( QWidget *parent );
+		~PianoRollScrollBar(void);
+
+	protected:
+		void wheelEvent(QWheelEvent *event) override;
+
+		int wheelPixelCounter;
+		int wheelAngleCounter;
+		int pxLineSpacing;
 };
 
 class  TasRecentProjectAction : public QAction
