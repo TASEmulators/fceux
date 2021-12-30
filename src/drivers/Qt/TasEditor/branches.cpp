@@ -597,11 +597,20 @@ void BRANCHES::showImage(void)
 
 	if ( item_valid && (imageItem != bookmarkPreviewPopup::currentIndex()) )
 	{
-		bookmarkPreviewPopup *popup = new bookmarkPreviewPopup(imageItem, this);
+		bookmarkPreviewPopup *popup = bookmarkPreviewPopup::currentInstance();
 
-		connect( this, SIGNAL(imageIndexChanged(int)), popup, SLOT(imageIndexChanged(int)) );
+		if ( popup == NULL )
+		{
+			popup = new bookmarkPreviewPopup(imageItem, this);
 
-		popup->show();
+			connect( this, SIGNAL(imageIndexChanged(int)), popup, SLOT(imageIndexChanged(int)) );
+
+			popup->show();
+		}
+		else
+		{
+			popup->reloadImage(imageItem);
+		}
 	}
 }
 

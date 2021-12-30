@@ -121,16 +121,21 @@ class bookmarkPreviewPopup : public QDialog
 	   bookmarkPreviewPopup( int index, QWidget *parent = nullptr );
 	   ~bookmarkPreviewPopup(void);
 
+	   int reloadImage(int index);
+
 	   static int currentIndex(void);
 
+	   static bookmarkPreviewPopup *currentInstance(void);
+
 	private:
-	int loadImage(int index);
+		int loadImage(int index);
 
 		int alpha;
 		int imageIndex;
 		bool actv;
 		unsigned char *screenShotRaster;
 		QTimer *timer;
+		QLabel *imgLbl, *descLbl;
 
 		static bookmarkPreviewPopup *instance;
 

@@ -6484,7 +6484,6 @@ bookmarkPreviewPopup::bookmarkPreviewPopup( int index, QWidget *parent )
 	int p;
 	QPoint pos;
 	QVBoxLayout *vbox;
-	QLabel *imgLbl, *descLbl;
 	uint32_t *pixBuf;
 	uint32_t  pixel;
 	QPixmap pixmap;
@@ -6632,6 +6631,11 @@ void bookmarkPreviewPopup::periodicUpdate(void)
 	}
 }
 //----------------------------------------------------------------------------
+bookmarkPreviewPopup *bookmarkPreviewPopup::currentInstance(void)
+{
+	return instance;
+}
+//----------------------------------------------------------------------------
 int bookmarkPreviewPopup::currentIndex(void)
 {
 	if ( instance )
@@ -6645,12 +6649,12 @@ void bookmarkPreviewPopup::imageIndexChanged(int newIndex)
 {
 	//printf("newIndex:%i\n", newIndex );
 
-	actv = false;
+	actv = ( newIndex >= 0 );
 
-	if ( instance == this )
-	{
-		instance = NULL;
-	}
+	//if ( instance == this )
+	//{
+	//	instance = NULL;
+	//}
 }
 //----------------------------------------------------------------------------
 int bookmarkPreviewPopup::loadImage(int index)
@@ -6667,6 +6671,54 @@ int bookmarkPreviewPopup::loadImage(int index)
 		memset(screenShotRaster, 0, SCREENSHOT_SIZE);
 		ret = -1;
 	}
+	return ret;
+}
+//----------------------------------------------------------------------------
+int bookmarkPreviewPopup::reloadImage(int index)
+{
+	int p, ret = 0;
+	uint32_t *pixBuf;
+	uint32_t  pixel;
+	QPixmap pixmap;
+
+	actv = true;
+	imageIndex = index;
+
+	// retrieve info from the pointed bookmark's Markers
+	int frame = bookmarks->bookmarksArray[index].snapshot.keyFrame;
+	int markerID = markersManager->getMarkerAboveFrame(bookmarks->bookmarksArray[index].snapshot.markers, frame);
+
+	pixBuf = (uint32_t *)malloc( SCREENSHOT_SIZE * sizeof(uint32_t) );
+
+	loadImage(index);
+
+	p=0;
+	for (int h=0; h<SCREENSHOT_HEIGHT; h++)
+	{
+		for (int w=0; w<SCREENSHOT_WIDTH; w++)
+		{
+			pixel = ModernDeemphColorMap( &screenShotRaster[p], screenShotRaster, 1 );
+			pixBuf[p]  = 0xFF000000;
+			pixBuf[p] |= (pixel & 0x000000FF) << 16;
+			pixBuf[p] |= (pixel & 0x00FF0000) >> 16;
+			pixBuf[p] |= (pixel & 0x0000FF00);
+			p++;
+		}
+	}
+	QImage img( (unsigned char*)pixBuf, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, SCREENSHOT_WIDTH*4, QImage::Format_RGBA8888 );
+	pixmap.convertFromImage( img );
+
+	if ( pixBuf )
+	{
+		free( pixBuf ); pixBuf = NULL;
+	}
+
+	imgLbl->setPixmap( pixmap );
+
+	descLbl->setText( tr(markersManager->getNoteCopy(bookmarks->bookmarksArray[index].snapshot.markers, markerID).c_str()) );
+
+	update();
+
 	return ret;
 }
 //----------------------------------------------------------------------------
