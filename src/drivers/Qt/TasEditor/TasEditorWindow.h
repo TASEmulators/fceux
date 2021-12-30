@@ -387,6 +387,7 @@ class TasEditorWindow : public QDialog
 		bool handleColumnSetUsingPattern(void);
 		bool handleInputColumnSet(int joy, int button);
 		bool handleInputColumnSetUsingPattern(int joy, int button);
+		bool updateHistoryItems(void);
 
 		QPoint getPreviewPopupCoordinates(void);
 
@@ -494,11 +495,11 @@ class TasEditorWindow : public QDialog
 		void saveRecentProjectMenu(void);
 		void addRecentProject(const char *prog);
 
+
 	public slots:
 		void closeWindow(void);
 		void frameUpdate(void);
 		void updateCheckedItems(void);
-		void updateHistoryItems(void);
 		void updateRecordStatus(void);
 	private slots:
 		void openProject(void);

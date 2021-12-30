@@ -1360,11 +1360,19 @@ void TasEditorWindow::updateCheckedItems(void)
 	showToolTipsAct->setChecked( taseditorConfig.tooltipsEnabled );
 }
 //----------------------------------------------------------------------------
-void TasEditorWindow::updateHistoryItems(void)
+bool TasEditorWindow::updateHistoryItems(void)
 {
 	int i, cursorPos;
 	QTreeWidgetItem *item;
 	const char *txt;
+	bool isVisible;
+
+	isVisible = histTree->isVisible();
+
+	if ( !isVisible )
+	{
+		return false;
+	}
 
 	cursorPos = history.getCursorPos();
 
@@ -1408,6 +1416,8 @@ void TasEditorWindow::updateHistoryItems(void)
 		}
 	}
 	histTree->viewport()->update();
+
+	return true;
 }
 //----------------------------------------------------------------------------
 QPoint TasEditorWindow::getPreviewPopupCoordinates(void)

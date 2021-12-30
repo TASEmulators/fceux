@@ -170,8 +170,8 @@ void HISTORY::update()
 
 	if ( updateScheduled )
 	{
-		redrawList();
 		updateScheduled = false;
+		redrawList();
 	}
 	//if (oldShowUndoHint != showUndoHint)
 	//	pianoRoll.redrawRow(undoHintPos);
@@ -1207,7 +1207,10 @@ void HISTORY::updateList(void)
 
 	if (currLVItemCount != historyTotalItems)
 	{
-		tasWin->updateHistoryItems();
+		if ( tasWin->updateHistoryItems() == false )
+		{
+			updateScheduled = true;
+		}
 	}
 }
 
@@ -1219,7 +1222,10 @@ void HISTORY::redrawList(void)
 		updateScheduled = true;
 		return;
 	}
-	tasWin->updateHistoryItems();
+	if ( tasWin->updateHistoryItems() == false )
+	{
+		updateScheduled = true;
+	}
 	//ListView_SetItemState(hwndHistoryList, historyCursorPos, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 	//ListView_EnsureVisible(hwndHistoryList, historyCursorPos, FALSE);
 	//InvalidateRect(hwndHistoryList, 0, FALSE);
