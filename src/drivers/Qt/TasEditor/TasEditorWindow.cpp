@@ -6003,6 +6003,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	static const char *buttonNames[] = { "A", "B", "S", "T", "U", "D", "L", "R", NULL };
 	char stmp[32];
 	char rowIsSel=0;
+	char rowSelArray[256];
+	int numSelRows=0;
 
 	font.setBold(true);
 	painter.setFont(font);
@@ -6012,6 +6014,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	nrow = (viewHeight / pxLineSpacing) + 1;
 
 	if ( nrow < 1 ) nrow = 1;
+
+	memset( rowSelArray, 0, nrow+1 );
 
 	viewLines = nrow;
 
@@ -6119,7 +6123,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		}
 		int frame_lag = greenzone->lagLog.getLagInfoAtFrame(lineNum);
 
-		rowIsSel = selection->isRowSelected( lineNum );
+		rowSelArray[row] = rowIsSel = selection->isRowSelected( lineNum );
 
 		for (int i=0; i<numCtlr; i++)
 		{
@@ -6309,6 +6313,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			painter.fillRect( 0, y, viewWidth, pxLineSpacing, QColor( 10, 36, 106 ) );
 
 			rowTextColor = QColor( 255, 255, 255 );
+
+			numSelRows++;
 		}
 		else
 		{
@@ -6432,6 +6438,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		y += pxLineSpacing;
 	}
 
+	// Draw Grid lines
+	painter.setPen( QPen(gridColor,2) );
 	x = pxFrameColX - pxLineXScroll;
 	painter.drawLine( x, 0, x, viewHeight );
 	
@@ -6444,21 +6452,23 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 		for (int j=0; j<8; j++)
 		{
-			painter.setPen( QColor( 128, 128, 128 ) );
-			painter.drawLine( x, 0, x, viewHeight ); x++;
-			painter.setPen( gridColor );
-			painter.drawLine( x, 0, x, viewHeight ); x--;
+			//painter.setPen( QColor( 128, 128, 128 ) );
+			//painter.drawLine( x, 0, x, viewHeight ); x++;
+			painter.setPen( QPen(gridColor,2) );
+			painter.drawLine( x, 0, x, viewHeight ); //x--;
 
-			painter.setPen( headerLightsColors[ headerColors[COLUMN_JOYPAD1_A + (i*8) + j] ] );
+			painter.setPen( QPen(headerLightsColors[ headerColors[COLUMN_JOYPAD1_A + (i*8) + j] ],1) );
 			painter.drawText( x + pxCharWidth, pxLineTextOfs, tr(buttonNames[j]) );
 
 			x += pxWidthBtnCol;
 		}
-		painter.setPen( QColor( 128, 128, 128 ) );
-		painter.drawLine( x, 0, x, viewHeight ); x++;
-		painter.setPen( gridColor );
+		//painter.setPen( QColor( 128, 128, 128 ) );
+		//painter.drawLine( x, 0, x, viewHeight ); x++;
+		painter.setPen( QPen(gridColor,2) );
 		painter.drawLine( x, 0, x, viewHeight );
 	}
+	painter.setPen( QPen(gridColor,2) );
+
 	y = 0;
 	for (int i=0; i<nrow; i++)
 	{
@@ -6466,10 +6476,59 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		
 		y += pxLineSpacing;
 	}
+
+	// Draw grid lines for selections
+	if ( numSelRows > 0 )
+	{
+		int inv;
+		QColor invGrid;
+
+		inv = gridColor.black();
+
+		if ( inv < 128 )
+		{
+			inv = 255 - inv;
+		}
+
+		invGrid.setRed( inv );
+		invGrid.setGreen( inv );
+		invGrid.setBlue( inv );
+
+		painter.setPen( QPen(invGrid,2) );
+
+		y = pxLineSpacing;
+
+		for (row=0; row<nrow; row++)
+		{
+			if ( rowSelArray[row] )
+			{
+				int yl = y + pxLineSpacing;
+
+				x = pxFrameColX - pxLineXScroll;
+				painter.drawLine( x, y, x, yl );
+
+				for (int i=0; i<numCtlr; i++)
+				{
+					x = pxFrameCtlX[i] - pxLineXScroll;
+
+					for (int j=0; j<8; j++)
+					{
+						painter.drawLine( x, y, x, yl );
+
+						x += pxWidthBtnCol;
+					}
+				}
+				painter.drawLine( x, y, x, yl );
+				painter.drawLine( 0, y , viewWidth, y  );
+				painter.drawLine( 0, yl, viewWidth, yl );
+			}
+			y += pxLineSpacing;
+		}
+		painter.setPen( QPen(gridColor,2) );
+	}
+
 	font.setBold(false);
 	painter.setFont(font);
-
-
 }
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
