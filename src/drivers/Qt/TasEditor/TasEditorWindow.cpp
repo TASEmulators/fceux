@@ -6005,6 +6005,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	char rowIsSel=0;
 	char rowSelArray[256];
 	int numSelRows=0;
+	QRect rect;
 
 	font.setBold(true);
 	painter.setFont(font);
@@ -6087,8 +6088,11 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	//font.setBold(true);
 	//painter.setFont(font);
 
-	x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 6*pxCharWidth) / 2;
-	painter.drawText( x, pxLineTextOfs, tr("Frame#") );
+	//x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 6*pxCharWidth) / 2;
+	//painter.drawText( x, pxLineTextOfs, tr("Frame#") );
+	
+	rect = QRect( -pxLineXScroll + pxFrameColX, 0, pxWidthFrameCol, pxLineSpacing );
+	painter.drawText( rect, Qt::AlignCenter, tr("Frame#") );
 
 	//font.setBold(false);
 	//painter.setFont(font);
@@ -6352,13 +6356,17 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 				{
 					hotChangeVal = -1;
 				}
+				rect = QRect( x, y, pxWidthBtnCol, pxLineSpacing );
+
 				if ( data & (0x01 << j) )
 				{
-					painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr(buttonNames[j]) );
+					//painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr(buttonNames[j]) );
+					painter.drawText( rect, Qt::AlignCenter, tr(buttonNames[j]) );
 				}
 				else if ( hotChangeVal > 0 )
 				{
-					painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr("-") );
+					//painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr("-") );
+					painter.drawText( rect, Qt::AlignCenter, tr("-") );
 				}
 				x += pxWidthBtnCol;
 			}
@@ -6374,7 +6382,9 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		// bg
 		painter.setPen( rowTextColor );
 
-		x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 7*pxCharWidth) / 2;
+		rect = QRect( -pxLineXScroll + pxFrameColX, y, pxWidthFrameCol, pxLineSpacing );
+
+		//x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 7*pxCharWidth) / 2;
 
 		sprintf( stmp, "%07i", lineNum );
 
@@ -6389,7 +6399,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			font.setItalic(false);
 		}
 		painter.setFont(font);
-		painter.drawText( x, y+pxLineTextOfs, tr(stmp) );
+		//painter.drawText( x, y+pxLineTextOfs, tr(stmp) );
+		painter.drawText( rect, Qt::AlignCenter, tr(stmp) );
 
 		x = -pxLineXScroll;
 
@@ -6457,8 +6468,10 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			painter.setPen( QPen(gridColor,2) );
 			painter.drawLine( x, 0, x, viewHeight ); //x--;
 
+			rect = QRect( x, 0, pxWidthBtnCol, pxLineSpacing );
 			painter.setPen( QPen(headerLightsColors[ headerColors[COLUMN_JOYPAD1_A + (i*8) + j] ],1) );
-			painter.drawText( x + pxCharWidth, pxLineTextOfs, tr(buttonNames[j]) );
+			//painter.drawText( x + pxCharWidth, pxLineTextOfs, tr(buttonNames[j]) );
+			painter.drawText( rect, Qt::AlignCenter, tr(buttonNames[j]) );
 
 			x += pxWidthBtnCol;
 		}
