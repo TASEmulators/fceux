@@ -1312,7 +1312,7 @@ int  fceuWrapperUpdate( void )
 	// sleep to allow request to be serviced.
 	if ( mutexPending > 0 )
 	{
-		msleep( 100 );
+		msleep( 16 );
 	}
 
 	lock_acq = fceuWrapperTryLock( __FILE__, __LINE__, __func__ );
@@ -1323,7 +1323,7 @@ int  fceuWrapperUpdate( void )
 		{
 			printf("Error: Emulator Failed to Acquire Mutex\n");
 		}
-		msleep( 100 );
+		msleep( 16 );
 
 		return -1;
 	}

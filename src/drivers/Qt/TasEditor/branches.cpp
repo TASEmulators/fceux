@@ -388,7 +388,8 @@ void BRANCHES::update()
 				// teleport
 				cornersCursorX = playbackCursorX;
 				cornersCursorY = playbackCursorY;
-			} else
+			}
+			else
 			{
 				// advance
 				double speed = sqrt(distance);
@@ -403,10 +404,12 @@ void BRANCHES::update()
 				mustRedrawBranchesBitmap = true;
 				lastItemUnderMouse = bookmarks->itemUnderMouse;
 			}
-			if (mustRedrawBranchesBitmap)
-			{
-				redrawBranchesBitmap();
-			}
+			//printf("Draw Clock: %lu \n", nextAnimationTime );
+			mustRedrawBranchesBitmap = true;
+			//if (mustRedrawBranchesBitmap)
+			//{
+			//	redrawBranchesBitmap();
+			//}
 		}
 	}
 	if ( mustRedrawBranchesBitmap )

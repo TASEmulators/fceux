@@ -8,7 +8,7 @@
 #include <QTimer>
 #include <QWidget>
 
-#define BRANCHES_ANIMATION_TICK (40 * CLOCKS_PER_SEC / 1000)	// animate at 25FPS
+#define BRANCHES_ANIMATION_TICK (CLOCKS_PER_SEC / 25)	// animate at 25FPS
 #define BRANCHES_TRANSITION_MAX 12
 #define CURSOR_MIN_DISTANCE 1.0
 #define CURSOR_MAX_DISTANCE 256.0
