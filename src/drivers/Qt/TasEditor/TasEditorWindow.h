@@ -388,6 +388,8 @@ class TasEditorWindow : public QDialog
 		bool handleInputColumnSet(int joy, int button);
 		bool handleInputColumnSetUsingPattern(int joy, int button);
 
+		QPoint getPreviewPopupCoordinates(void);
+
 	protected:
 		void closeEvent(QCloseEvent *event);
 

@@ -1410,6 +1410,11 @@ void TasEditorWindow::updateHistoryItems(void)
 	histTree->viewport()->update();
 }
 //----------------------------------------------------------------------------
+QPoint TasEditorWindow::getPreviewPopupCoordinates(void)
+{
+	return bkmkBrnchStack->mapToGlobal(QPoint(0,0));
+}
+//----------------------------------------------------------------------------
 int TasEditorWindow::initModules(void)
 {
 	// init modules
@@ -6542,7 +6547,7 @@ bookmarkPreviewPopup::bookmarkPreviewPopup( int index, QWidget *parent )
 		free( pixBuf ); pixBuf = NULL;
 	}
 
-	pos = parent->mapToGlobal(QPoint(0,0));
+	pos = tasWin->getPreviewPopupCoordinates();
 
 	pos.setX( pos.x() - 300 );
 
