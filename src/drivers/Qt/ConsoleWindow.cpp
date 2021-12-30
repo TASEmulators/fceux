@@ -4285,8 +4285,17 @@ void consoleWin_t::transferVideoBuffer(void)
 
 void consoleWin_t::emuFrameFinish(void)
 {
+	static bool eventProcessingInProg = false;
+
+	if ( eventProcessingInProg )
+	{   // Prevent recursion as processEvents function can double back on us
+		return;
+	}
+	eventProcessingInProg = true;
 	// Process all events before attempting to render viewport
 	QCoreApplication::processEvents();
+
+	eventProcessingInProg = false;
 
 	// Update Input Devices
 	FCEUD_UpdateInput();
@@ -4298,8 +4307,17 @@ void consoleWin_t::emuFrameFinish(void)
 
 void consoleWin_t::updatePeriodic(void)
 {
+	static bool eventProcessingInProg = false;
+
+	if ( eventProcessingInProg )
+	{   // Prevent recursion as processEvents function can double back on us
+		return;
+	}
+	eventProcessingInProg = true;
 	// Process all events before attempting to render viewport
 	QCoreApplication::processEvents();
+
+	eventProcessingInProg = false;
 
 	// Update Input Devices
 	FCEUD_UpdateInput();
