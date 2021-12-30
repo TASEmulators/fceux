@@ -1307,6 +1307,7 @@ bool fceuWrapperIsLocked(void)
 int  fceuWrapperUpdate( void )
 {
 	bool lock_acq;
+	static bool mutexLockFail = false;
 
 	// If a request is pending, 
 	// sleep to allow request to be serviced.
@@ -1321,12 +1322,17 @@ int  fceuWrapperUpdate( void )
 	{
 		if ( GameInfo )
 		{
-			printf("Error: Emulator Failed to Acquire Mutex\n");
+			if ( !mutexLockFail )
+			{
+				printf("Warning: Emulator Thread Failed to Acquire Mutex - GUI has Lock\n");
+			}
+			mutexLockFail = true;
 		}
 		msleep( 16 );
 
 		return -1;
 	}
+	mutexLockFail = false;
 	emulatorHasMutex = 1;
  
 	if ( GameInfo )
