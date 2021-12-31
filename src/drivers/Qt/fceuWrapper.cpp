@@ -1219,23 +1219,27 @@ static void DoFun(int frameskip, int periodic_saves)
 }
 
 static std::string lockFile;
+static bool debugMutexLock = false;
 
 void fceuWrapperLock(const char *filename, int line, const char *func)
 {
-	char txt[32];
-
 	fceuWrapperLock();
 
-	if ( mutexLocks > 1 )
+	if ( debugMutexLock )
 	{
-		printf("Recursive Lock:%i\n", mutexLocks );
-		printf("Already Locked By: %s\n", lockFile.c_str() );
-		printf("Requested By: %s:%i - %s\n", filename, line, func );
+		char txt[32];
+
+		if ( mutexLocks > 1 )
+		{
+			printf("Recursive Lock:%i\n", mutexLocks );
+			printf("Already Locked By: %s\n", lockFile.c_str() );
+			printf("Requested By: %s:%i - %s\n", filename, line, func );
+		}
+		sprintf( txt, ":%i - ", line );
+		lockFile.assign(filename);
+		lockFile.append(txt);
+		lockFile.append(func);
 	}
-	sprintf( txt, ":%i - ", line );
-	lockFile.assign(filename);
-	lockFile.append(txt);
-	lockFile.append(func);
 }
 
 void fceuWrapperLock(void)
@@ -1246,22 +1250,18 @@ void fceuWrapperLock(void)
 		consoleWindow->mutex->lock();
 	}
 	mutexPending--;
-	if ( mutexLocks > 0 )
-	{
-		printf("Recursive Lock:%i\n", mutexLocks );
-	}
 	mutexLocks++;
 }
 
 bool fceuWrapperTryLock(const char *filename, int line, const char *func, int timeout)
 {
-	char txt[32];
 	bool lockAcq = false;
 
 	lockAcq = fceuWrapperTryLock( timeout );
 
-	if ( lockAcq )
+	if ( lockAcq && debugMutexLock)
 	{
+		char txt[32];
 		sprintf( txt, ":%i - ", line );
 		lockFile.assign(filename);
 		lockFile.append(txt);
