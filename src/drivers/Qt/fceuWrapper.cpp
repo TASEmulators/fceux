@@ -44,6 +44,7 @@
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/TasEditor/TasEditorWindow.h"
 #include "Qt/fceux_git_info.h"
 
 #include "common/cheat.h"
@@ -481,6 +482,11 @@ CloseGame(void)
 	if ( autoInputPreset )
 	{
 		saveInputSettingsToFile();
+	}
+
+	if ( tasWin != NULL )
+	{
+		tasWin->requestWindowClose();
 	}
 
 	FCEUI_CloseGame();

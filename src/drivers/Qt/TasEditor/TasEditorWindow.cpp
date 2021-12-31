@@ -297,6 +297,7 @@ void TasEditorWindow::closeEvent(QCloseEvent *event)
 	        event->ignore();
 		return;
 	}
+	project.reset();
 
 	done(0);
 	deleteLater();
@@ -309,9 +310,24 @@ void TasEditorWindow::closeWindow(void)
 	{
 		return;
 	}
+	project.reset();
+
 	printf("Tas Editor Close Window\n");
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+int TasEditorWindow::requestWindowClose(void)
+{
+	askToSaveProject();
+
+	project.reset();
+
+	printf("Tas Editor Close Window\n");
+	done(0);
+	deleteLater();
+
+	return 0;
 }
 //----------------------------------------------------------------------------
 QMenuBar *TasEditorWindow::buildMenuBar(void)

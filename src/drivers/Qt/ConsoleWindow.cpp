@@ -2113,6 +2113,11 @@ void consoleWin_t::closeApp(void)
 	aviDiskThread->quit();
 	aviDiskThread->wait( 10000 );
 
+	if ( tasWin != NULL )
+	{
+		tasWin->requestWindowClose();
+	}
+
 	FCEU_WRAPPER_LOCK();
 	fceuWrapperClose();
 	FCEU_WRAPPER_UNLOCK();

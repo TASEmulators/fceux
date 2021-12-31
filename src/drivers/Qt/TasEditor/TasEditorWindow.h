@@ -411,6 +411,8 @@ class TasEditorWindow : public QDialog
 		bool handleInputColumnSetUsingPattern(int joy, int button);
 		bool updateHistoryItems(void);
 
+		int  requestWindowClose(void);
+
 		QPoint getPreviewPopupCoordinates(void);
 
 	protected:
