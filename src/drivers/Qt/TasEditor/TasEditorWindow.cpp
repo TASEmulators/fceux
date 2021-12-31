@@ -3901,6 +3901,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	hotChangesColors[14] = QColor( 0xCF, 0x72, 0x00 );
 	hotChangesColors[15] = QColor( 0xC7, 0x8B, 0x3C );
 
+	gridPixelWidth = 1;
 	gridColor = QColor( 0x00, 0x00, 0x00 );
 
 	fceuLoadConfigColor("SDL.TasPianoRollGridColor"   , &gridColor );
@@ -6534,7 +6535,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	}
 
 	// Draw Grid lines
-	painter.setPen( QPen(gridColor,2) );
+	painter.setPen( QPen(gridColor,gridPixelWidth) );
 	x = pxFrameColX - pxLineXScroll;
 	painter.drawLine( x, 0, x, viewHeight );
 	
@@ -6549,7 +6550,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		{
 			//painter.setPen( QColor( 128, 128, 128 ) );
 			//painter.drawLine( x, 0, x, viewHeight ); x++;
-			painter.setPen( QPen(gridColor,2) );
+			painter.setPen( QPen(gridColor,gridPixelWidth) );
 			painter.drawLine( x, 0, x, viewHeight ); //x--;
 
 			rect = QRect( x, 0, pxWidthBtnCol, pxLineSpacing );
@@ -6561,10 +6562,10 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		}
 		//painter.setPen( QColor( 128, 128, 128 ) );
 		//painter.drawLine( x, 0, x, viewHeight ); x++;
-		painter.setPen( QPen(gridColor,2) );
+		painter.setPen( QPen(gridColor,gridPixelWidth) );
 		painter.drawLine( x, 0, x, viewHeight );
 	}
-	painter.setPen( QPen(gridColor,2) );
+	painter.setPen( QPen(gridColor,gridPixelWidth) );
 
 	y = 0;
 	for (int i=0; i<nrow; i++)
@@ -6591,7 +6592,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		invGrid.setGreen( inv );
 		invGrid.setBlue( inv );
 
-		painter.setPen( QPen(invGrid,2) );
+		painter.setPen( QPen(invGrid,gridPixelWidth) );
 
 		y = pxLineSpacing;
 
@@ -6621,7 +6622,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			}
 			y += pxLineSpacing;
 		}
-		painter.setPen( QPen(gridColor,2) );
+		painter.setPen( QPen(gridColor,gridPixelWidth) );
 	}
 
 	font.setBold(false);

@@ -298,6 +298,7 @@ class QPianoRoll : public QWidget
 		int scroll_y;
 		int mouse_x;
 		int mouse_y;
+		int gridPixelWidth;
 		clock_t drawingStartTimestamp;
 		clock_t nextHeaderUpdateTime;
 
