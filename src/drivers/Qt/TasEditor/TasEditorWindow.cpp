@@ -1681,6 +1681,7 @@ bool TasEditorWindow::saveProjectAs(bool save_compact)
 	}
 	addRecentProject( filename.toStdString().c_str() );
 	// saved successfully - remove * mark from caption
+	project.reset();
 	updateCaption();
 	return true;
 }
