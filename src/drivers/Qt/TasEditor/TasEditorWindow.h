@@ -160,8 +160,7 @@ class markerDragPopup : public QDialog
 		void dropAbort(void);
 	protected:
 		bool eventFilter(QObject *obj, QEvent *event) override;
-
-		void paintEvent(QPaintEvent *event);
+		void paintEvent(QPaintEvent *event) override;
 
 		int alpha;
 		int rowIndex;

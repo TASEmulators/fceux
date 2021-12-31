@@ -464,7 +464,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 
 	FCEU_CloseGame();
 	GameInfo = new FCEUGI();
-	memset(GameInfo, 0, sizeof(FCEUGI));
+	memset( (void*)GameInfo, 0, sizeof(FCEUGI));
 
 	GameInfo->filename = strdup(fp->filename.c_str());
 	if (fp->archiveFilename != "")
@@ -1345,6 +1345,10 @@ bool FCEU_IsValidUI(EFCEUI ui) {
 	case FCEUI_INPUT_BARCODE:
 		if (!GameInfo) return false;
 		if (!FCEUMOV_Mode(MOVIEMODE_INACTIVE)) return false;
+		break;
+	default:
+		// Unhandled falls out to end of function
+		break;
 	}
 
 	return true;
@@ -1406,10 +1410,16 @@ virtual void Power() {
 }
 };
 
-void FCEUXGameInterface(GI command) {
-	switch (command) {
-	case GI_POWER:
-		cart->Power();
+void FCEUXGameInterface(GI command)
+{
+	switch (command)
+	{
+		case GI_POWER:
+			cart->Power();
+		break;
+		default:
+			// Unhandled cases
+		break;
 	}
 }
 

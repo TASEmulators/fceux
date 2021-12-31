@@ -144,8 +144,8 @@ static uint8 g_keyState[SDL_NUM_SCANCODES];
 static int keyModifier = 0;
 //static int DIPS = 0;
 
-static uint8 keyonce[SDL_NUM_SCANCODES];
-#define KEY(__a) g_keyState[MKK(__a)]
+//static uint8 keyonce[SDL_NUM_SCANCODES];
+//#define KEY(__a) g_keyState[MKK(__a)]
 
 int getKeyState(int k)
 {
@@ -157,38 +157,38 @@ int getKeyState(int k)
 	return 0;
 }
 
-static int
-_keyonly(int a)
-{
-	int sc;
-
-	if (a < 0)
-	{
-		return 0;
-	}
-
-	sc = SDL_GetScancodeFromKey(a);
-
-	// check for valid key
-	if (sc >= SDL_NUM_SCANCODES || sc < 0)
-	{
-		return 0;
-	}
-
-	if (g_keyState[sc])
-	{
-		if (!keyonce[sc])
-		{
-			keyonce[sc] = 1;
-			return 1;
-		}
-	}
-	else
-	{
-		keyonce[sc] = 0;
-	}
-	return 0;
-}
+//static int
+//_keyonly(int a)
+//{
+//	int sc;
+//
+//	if (a < 0)
+//	{
+//		return 0;
+//	}
+//
+//	sc = SDL_GetScancodeFromKey(a);
+//
+//	// check for valid key
+//	if (sc >= SDL_NUM_SCANCODES || sc < 0)
+//	{
+//		return 0;
+//	}
+//
+//	if (g_keyState[sc])
+//	{
+//		if (!keyonce[sc])
+//		{
+//			keyonce[sc] = 1;
+//			return 1;
+//		}
+//	}
+//	else
+//	{
+//		keyonce[sc] = 0;
+//	}
+//	return 0;
+//}
 
 uint32 GetGamepadPressedImmediate(void)
 {

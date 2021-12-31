@@ -3775,7 +3775,17 @@ void PianoRollScrollBar::wheelEvent(QWheelEvent *event)
 
 	if ( zDelta != 0 )
 	{
-		setValue( ofs + (6 * zDelta) );
+		ofs = ofs + (6 * zDelta);
+
+		if ( ofs < 0 )
+		{
+			ofs = 0;
+		}
+		else if ( ofs > maximum() )
+		{
+			ofs = maximum();
+		}
+		setValue( ofs );
 	}
 	event->accept();
 }

@@ -102,9 +102,15 @@ static uint8  mapperFDS_diskaccess;	// disk needs to be accessed at least once b
 #define DC_INC    1
 
 void FDSGI(GI h) {
-	switch (h) {
-	case GI_CLOSE: FDSClose(); break;
-	case GI_POWER: FDSInit(); break;
+	switch (h)
+	{
+		case GI_CLOSE: FDSClose(); break;
+		case GI_POWER: FDSInit(); break;
+
+		// Unhandled Cases
+		case GI_RESETM2:
+		case GI_RESETSAVE:
+			break;
 	}
 }
 
