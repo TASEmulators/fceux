@@ -27,26 +27,8 @@ History - History of movie modifications
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
-//LRESULT APIENTRY historyListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-//WNDPROC hwndHistoryList_oldWndProc;
-
-//extern TASEDITOR_CONFIG taseditorConfig;
-//extern TASEDITOR_WINDOW taseditorWindow;
-//extern MARKERS_MANAGER markersManager;
-//extern BOOKMARKS bookmarks;
-//extern BRANCHES branches;
-//extern PLAYBACK playback;
-//extern SELECTION selection;
-//extern GREENZONE greenzone;
-//extern TASEDITOR_PROJECT project;
-//extern PIANO_ROLL pianoRoll;
-//extern POPUP_DISPLAY popupDisplay;
-//extern TASEDITOR_LUA taseditor_lua;
-
 extern int joysticksPerFrame[INPUT_TYPES_TOTAL];
 extern int getInputType(MovieData& md);
-
-//extern WindowItemData windowItems[];
 
 char historySaveID[HISTORY_ID_LEN] = "HISTORY";
 char historySkipSaveID[HISTORY_ID_LEN] = "HISTORX";
@@ -1333,80 +1315,6 @@ int HISTORY::getUndoHint()
 }
 bool HISTORY::isCursorOverHistoryList()
 {
-//	POINT p;
-//	if (GetCursorPos(&p))
-//	{
-//		ScreenToClient(hwndHistoryList, &p);
-//		RECT wrect;
-//		GetWindowRect(hwndHistoryList, &wrect);
-//		if (p.x >= 0
-//			&& p.y >= 0
-//			&& p.x < (wrect.right - wrect.left)
-//			&& p.y < (wrect.bottom - wrect.top))
-//			return true;
-//	}
 	return false;
 }
 // ---------------------------------------------------------------------------------
-//LRESULT APIENTRY historyListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-//{
-//	extern HISTORY history;
-//	switch(msg)
-//	{
-//		case WM_CHAR:
-//		case WM_KEYDOWN:
-//		case WM_KEYUP:
-//		case WM_KILLFOCUS:
-//			return 0;
-//		case WM_LBUTTONDOWN:
-//		case WM_LBUTTONDBLCLK:
-//		{
-//			if (GetFocus() != hWnd)
-//				SetFocus(hWnd);
-//			// perform hit test
-//			LVHITTESTINFO info;
-//			info.pt.x = GET_X_LPARAM(lParam);
-//			info.pt.y = GET_Y_LPARAM(lParam);
-//			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
-//			history.handleSingleClick(info.iItem);
-//			return 0;
-//		}
-//		case WM_MBUTTONDOWN:
-//		case WM_MBUTTONDBLCLK:
-//		{
-//			if (GetFocus() != hWnd)
-//				SetFocus(hWnd);
-//			playback->handleMiddleButtonClick();
-//			return 0;
-//		}
-//		case WM_RBUTTONDOWN:
-//		case WM_RBUTTONDBLCLK:
-//			if (GetFocus() != hWnd)
-//				SetFocus(hWnd);
-//			return 0;
-//		case WM_MOUSEWHEEL:
-//		{
-//			if (!history.isCursorOverHistoryList())
-//			{
-//				return SendMessage(pianoRoll.hwndList, msg, wParam, lParam);
-//			}
-//			break;
-//		}
-//		case WM_MOUSEWHEEL_RESENT:
-//		{
-//			// this is message from Piano Roll
-//			// it means that cursor is currently over History List, and user scrolls the wheel (although focus may be on some other window)
-//			// ensure that wParam's low-order word is 0 (so fwKeys = 0)
-//			CallWindowProc(hwndHistoryList_oldWndProc, hWnd, WM_MOUSEWHEEL, wParam & ~(LOWORD(-1)), lParam);
-//			return 0;
-//		}
-//        case WM_MOUSEACTIVATE:
-//			if (GetFocus() != hWnd)
-//				SetFocus(hWnd);
-//            break;
-//
-//	}
-//	return CallWindowProc(hwndHistoryList_oldWndProc, hWnd, msg, wParam, lParam);
-//}
-
-

@@ -25,28 +25,20 @@ extern uint32 GetGamepadPressedImmediate();
 
 extern char lagFlag;
 
-//extern TASEDITOR_CONFIG taseditorConfig;
-//extern TASEDITOR_WINDOW taseditorWindow;
-//extern BOOKMARKS bookmarks;
-//extern HISTORY history;
-//extern GREENZONE greenzone;
-//extern PIANO_ROLL pianoRoll;
-//extern EDITOR editor;
-
 // resources
-const char recordingCheckbox[11] = " Recording";
-const char recordingCheckboxBlankPattern[17] = " Recording blank";
+static const char recordingCheckbox[11] = " Recording";
+static const char recordingCheckboxBlankPattern[17] = " Recording blank";
 
-const char recordingModes[5][4] = {	"All",
-					"1P",
-					"2P",
-					"3P",
-					"4P"};
-const char recordingCaptions[5][17] = {	" (Recording All)",
-					" (Recording 1P)",
-					" (Recording 2P)",
-					" (Recording 3P)",
-					" (Recording 4P)"};
+static const char recordingModes[5][4] = {	"All",
+						"1P",
+						"2P",
+						"3P",
+						"4P"};
+static const char recordingCaptions[5][17] = {	" (Recording All)",
+						" (Recording 1P)",
+						" (Recording 2P)",
+						" (Recording 3P)",
+						" (Recording 4P)"};
 RECORDER::RECORDER()
 {
 }

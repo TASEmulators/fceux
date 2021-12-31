@@ -15,7 +15,6 @@ LagLog - Log of Lag appearance
 * provides interface for reading and writing log data
 ------------------------------------------------------------------------------------ */
 
-//#include "taseditor_project.h"
 #include <zlib.h>
 
 #include "fceu.h"

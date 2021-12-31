@@ -23,15 +23,6 @@ Splicer - Tool for montage
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
-//extern TASEDITOR_WINDOW taseditorWindow;
-//extern TASEDITOR_CONFIG taseditorConfig;
-//extern HISTORY history;
-//extern MARKERS_MANAGER markersManager;
-//extern PLAYBACK playback;
-//extern GREENZONE greenzone;
-//extern PIANO_ROLL pianoRoll;
-//extern SELECTION selection;
-
 extern int joysticksPerFrame[INPUT_TYPES_TOTAL];
 //extern int getInputType(MovieData& md);
 

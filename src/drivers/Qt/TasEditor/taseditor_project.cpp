@@ -16,6 +16,8 @@ Project - Manager of working project
 * stores resources: autosave period scale, default filename, fm3 format offsets
 ------------------------------------------------------------------------------------ */
 
+#include <QMessageBox>
+
 #include "fceu.h"
 #include "movie.h"
 #include "driver.h"
@@ -23,19 +25,6 @@ Project - Manager of working project
 #include "utils/xstring.h"
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
-
-//extern TASEDITOR_CONFIG taseditorConfig;
-//extern TASEDITOR_WINDOW taseditorWindow;
-//extern MARKERS_MANAGER markersManager;
-//extern BOOKMARKS bookmarks;
-//extern POPUP_DISPLAY popupDisplay;
-//extern GREENZONE greenzone;
-//extern PLAYBACK playback;
-//extern RECORDER recorder;
-//extern HISTORY history;
-//extern PIANO_ROLL pianoRoll;
-//extern SELECTION selection;
-//extern SPLICER splicer;
 
 extern FCEUGI *GameInfo;
 
@@ -226,21 +215,26 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 			for(k = 0; k < strlen(md5OfCurrent); k++) count2 += md5OfCurrent[k] - '0';
 			if (count1 && count2)
 			{
+				int ret;
 				// ask user if he really wants to load the project
-				char message[2048] = {0};
-				strcpy(message, "This project was made using different ROM!\n\n");
-				strcat(message, "Original ROM:\n");
-				strncat(message, tempMovieData.romFilename.c_str(), 2047 - strlen(message));
-				strncat(message, "\nMD5: ", 2047 - strlen(message));
-				strncat(message, md5OfOriginal, 2047 - strlen(message));
-				strncat(message, "\n\nCurrent ROM:\n", 2047 - strlen(message));
-				strncat(message, GameInfo->filename, 2047 - strlen(message));
-				strncat(message, "\nMD5: ", 2047 - strlen(message));
-				strncat(message, md5OfCurrent, 2047 - strlen(message));
-				strncat(message, "\n\nLoad the project anyway?", 2047 - strlen(message));
-				//int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "ROM Checksum Mismatch", MB_YESNO);
-				//if (answer == IDNO)
-				//	return false;
+				std::string message;
+				message.assign("This project was made using different ROM!\n\n");
+				message.append("Original ROM:\n");
+				message.append(tempMovieData.romFilename.c_str());
+				message.append("\nMD5: ");
+				message.append(md5OfOriginal);
+				message.append("\n\nCurrent ROM:\n");
+				message.append(GameInfo->filename);
+				message.append("\nMD5: ");
+				message.append(md5OfCurrent);
+				message.append("\n\nLoad the project anyway?");
+				
+				ret = QMessageBox::warning( tasWin, QObject::tr("ROM Checksum Mismatch"), QObject::tr(message.c_str()), QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
+
+				if ( QMessageBox::No == ret )
+				{
+					return false;
+				}
 			}
 		}
 		taseditorDataOffset = ifs.ftell();
@@ -250,33 +244,46 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 		{
 			if (projectFileVersion != PROJECT_FILE_CURRENT_VERSION)
 			{
-				char message[2048] = {0};
-				strcpy(message, "This project was saved using different version of TAS Editor!\n\n");
-				strcat(message, "Original version: ");
+				int ret;
+				std::string message;
+				message.assign("This project was saved using different version of TAS Editor!\n\n");
+				message.append("Original version: ");
 				char versionNum[16];
 				sprintf( versionNum, "%u", projectFileVersion);
-				strncat(message, versionNum, 2047 - strlen(message));
-				strncat(message, "\nCurrent version: ", 2047 - strlen(message));
+				message.append(versionNum);
+				message.append("\nCurrent version: ");
 				sprintf( versionNum, "%i", PROJECT_FILE_CURRENT_VERSION);
-				strncat(message, versionNum, 2047 - strlen(message));
-				strncat(message, "\n\nClick Yes to try loading all data from the file (may crash).\n", 2047 - strlen(message));
-				strncat(message, "Click No to only load movie data.\n", 2047 - strlen(message));
-				strncat(message, "Click Cancel to abort loading.", 2047 - strlen(message));
-				//int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "FM3 Version Mismatch", MB_YESNOCANCEL);
-				//if (answer == IDCANCEL)
-				//	return false;
-				//else if (answer == IDNO)
-				//	loadAll = false;
+				message.append(versionNum);
+				message.append("\n\nClick Yes to try loading all data from the file (may crash).\n");
+				message.append("Click No to only load movie data.\n");
+				message.append("Click Cancel to abort loading.");
+				
+				ret = QMessageBox::warning( tasWin, QObject::tr("FM3 Version Mismatch"), QObject::tr(message.c_str()), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::No );
+
+				if ( QMessageBox::Cancel == ret )
+				{
+					return false;
+				}
+				else if ( QMessageBox::No == ret )
+				{
+					loadAll = false;
+				}
 			}
-		} else
+		}
+		else
 		{
+			int ret;
 			// couldn't even load header, this seems like an FM2
 			loadAll = false;
-			char message[2048];
-			strcpy(message, "This file doesn't seem to be an FM3 project.\nIt only contains FM2 movie data. Load it anyway?");
-			//int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "Opening FM2 file", MB_YESNO);
-			//if (answer == IDNO)
-			//	return false;
+			std::string message;
+			message.assign("This file doesn't seem to be an FM3 project.\nIt only contains FM2 movie data. Load it anyway?");
+
+			ret = QMessageBox::warning( tasWin, QObject::tr("Opening FM2 file"), QObject::tr(message.c_str()), QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
+
+			if ( QMessageBox::No == ret )
+			{
+				return false;
+			}
 		}
 		// save data to currMovieData and continue loading
 		FCEU_printf("\nLoading TAS Editor project %s...\n", fullName);
@@ -284,7 +291,8 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 		LoadSubtitles(currMovieData);
 		// ensure that movie has correct set of ports/fourscore
 		setInputType(currMovieData, getInputType(currMovieData));
-	} else
+	}
+	else
 	{
 		FCEU_PrintError("Error loading movie data from %s!", fullName);
 		// do not alter the project
@@ -335,21 +343,21 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 		else
 			dataOffset = 0;
 		selection->load(&ifs, dataOffset);
-	} else
+	}
+	else
 	{
 		// reset modules
 		markersManager->load(&ifs, 0);
 		bookmarks->load(&ifs, 0);
 		greenzone->load(&ifs, 0);
 		history->load(&ifs, 0);
-		//pianoRoll.load(&ifs, 0);
+		tasWin->pianoRoll->load(&ifs, 0);
 		selection->load(&ifs, 0);
 	}
 	// reset other modules
 	playback->reset();
 	recorder->reset();
 	splicer->reset();
-	//popupDisplay.reset();
 	reset();
 	renameProject(fullName, loadAll);
 	// restore mouse cursor shape

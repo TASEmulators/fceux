@@ -34,21 +34,8 @@ extern void ForceExecuteLuaFrameFunctions();
 extern bool mustRewindNow;
 extern bool turbo;
 
-//extern TASEDITOR_CONFIG taseditorConfig;
-//extern TASEDITOR_WINDOW taseditorWindow;
-//extern SELECTION selection;
-//extern MARKERS_MANAGER markersManager;
-//extern GREENZONE greenzone;
-//extern PIANO_ROLL pianoRoll;
-//extern BOOKMARKS bookmarks;
-
-//extern void Update_RAM_Search();
-
-//LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-//WNDPROC playbackMarkerEdit_oldWndproc;
-
 // resources
-char upperMarkerText[] = "Marker ";
+static char upperMarkerText[] = "Marker ";
 
 PLAYBACK::PLAYBACK()
 {
@@ -56,20 +43,6 @@ PLAYBACK::PLAYBACK()
 
 void PLAYBACK::init()
 {
-	//hwndProgressbar = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_PROGRESS1);
-	//SendMessage(hwndProgressbar, PBM_SETRANGE, 0, MAKELPARAM(0, PROGRESSBAR_WIDTH)); 
-	//hwndRewind = GetDlgItem(taseditorWindow.hwndTASEditor, TASEDITOR_REWIND);
-	//hwndForward = GetDlgItem(taseditorWindow.hwndTASEditor, TASEDITOR_FORWARD);
-	//hwndRewindFull = GetDlgItem(taseditorWindow.hwndTASEditor, TASEDITOR_REWIND_FULL);
-	//hwndForwardFull = GetDlgItem(taseditorWindow.hwndTASEditor, TASEDITOR_FORWARD_FULL);
-	//hwndPlaybackMarkerNumber = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_PLAYBACK_MARKER);
-	//SendMessage(hwndPlaybackMarkerNumber, WM_SETFONT, (WPARAM)pianoRoll.hMarkersFont, 0);
-	//hwndPlaybackMarkerEditField = GetDlgItem(taseditorWindow.hwndTASEditor, IDC_PLAYBACK_MARKER_EDIT);
-	//SendMessage(hwndPlaybackMarkerEditField, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
-	//SendMessage(hwndPlaybackMarkerEditField, WM_SETFONT, (WPARAM)pianoRoll.hMarkersEditFont, 0);
-	// subclass the edit control
-	//playbackMarkerEdit_oldWndproc = (WNDPROC)SetWindowLongPtr(hwndPlaybackMarkerEditField, GWLP_WNDPROC, (LONG_PTR)UpperMarkerEditWndProc);
-
 	reset();
 }
 void PLAYBACK::reset()
@@ -593,6 +566,7 @@ int PLAYBACK::getFlashingPauseFrame()
 
 void PLAYBACK::setProgressbar(int a, int b)
 {
+	// TODO
 	//SendMessage(hwndProgressbar, PBM_SETPOS, PROGRESSBAR_WIDTH * a / b, 0);
 }
 void PLAYBACK::cancelSeeking()
@@ -600,84 +574,6 @@ void PLAYBACK::cancelSeeking()
 	if (pauseFrame)
 		stopSeeking();
 }
-// -------------------------------------------------------------------------
-//LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-//{
-//	extern PLAYBACK playback;
-//	extern SELECTION selection;
-//	switch(msg)
-//	{
-//		case WM_SETFOCUS:
-//		{
-//			markersManager.markerNoteEditMode = MARKER_NOTE_EDIT_UPPER;
-//			// enable editing
-//			SendMessage(playback.hwndPlaybackMarkerEditField, EM_SETREADONLY, false, 0);
-//			// disable FCEUX keyboard
-//			disableGeneralKeyboardInput();
-//			break;
-//		}
-//		case WM_KILLFOCUS:
-//		{
-//			// if we were editing, save and finish editing
-//			if (markersManager.markerNoteEditMode == MARKER_NOTE_EDIT_UPPER)
-//			{
-//				markersManager.updateEditedMarkerNote();
-//				markersManager.markerNoteEditMode = MARKER_NOTE_EDIT_NONE;
-//			}
-//			// disable editing (make the bg grayed)
-//			SendMessage(playback.hwndPlaybackMarkerEditField, EM_SETREADONLY, true, 0);
-//			// enable FCEUX keyboard
-//			if (taseditorWindow.TASEditorIsInFocus)
-//				enableGeneralKeyboardInput();
-//			break;
-//		}
-//		case WM_CHAR:
-//		case WM_KEYDOWN:
-//		{
-//			if (markersManager.markerNoteEditMode == MARKER_NOTE_EDIT_UPPER)
-//			{
-//				switch(wParam)
-//				{
-//					case VK_ESCAPE:
-//						// revert text to original note text
-//						SetWindowText(playback.hwndPlaybackMarkerEditField, markersManager.getNoteCopy(playback.displayedMarkerNumber).c_str());
-//						SetFocus(pianoRoll.hwndList);
-//						return 0;
-//					case VK_RETURN:
-//						// exit and save text changes
-//						SetFocus(pianoRoll.hwndList);
-//						return 0;
-//					case VK_TAB:
-//					{
-//						// switch to lower edit control (also exit and save text changes)
-//						SetFocus(selection.hwndSelectionMarkerEditField);
-//						// scroll to the Marker
-//						if (taseditorConfig.followMarkerNoteContext)
-//							pianoRoll.followMarker(selection.displayedMarkerNumber);
-//						return 0;
-//					}
-//				}
-//			}
-//			break;
-//		}
-//		case WM_MBUTTONDOWN:
-//		case WM_MBUTTONDBLCLK:
-//		{
-//			playback.handleMiddleButtonClick();
-//			return 0;
-//		}
-//		case WM_LBUTTONDOWN:
-//		case WM_RBUTTONDOWN:
-//		{
-//			// scroll to the Marker
-//			if (taseditorConfig.followMarkerNoteContext)
-//				pianoRoll.followMarker(playback.displayedMarkerNumber);
-//			break;
-//		}
-//	}
-//	return CallWindowProc(playbackMarkerEdit_oldWndproc, hWnd, msg, wParam, lParam);
-//}
-
 // -------------------------------------------------------------------------
 UpperMarkerNoteEdit::UpperMarkerNoteEdit( QWidget *parent )
 	: QLineEdit(parent)

@@ -19,21 +19,9 @@ Lua - Manager of Lua features
 #include "Qt/TasEditor/taseditor_project.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
-//extern TASEDITOR_CONFIG taseditorConfig;
-//extern TASEDITOR_WINDOW taseditorWindow;
-//extern HISTORY history;
-//extern MARKERS_MANAGER markersManager;
-//extern BOOKMARKS bookmarks;
-//extern BRANCHES branches;
-//extern RECORDER recorder;
-//extern PLAYBACK playback;
-//extern GREENZONE greenzone;
-//extern PIANO_ROLL pianoRoll;
-//extern SELECTION selection;
-
 extern void TaseditorDisableManualFunctionIfNeeded();
 
-const char defaultRunFunctionCaption[] = "Run function";
+//const char defaultRunFunctionCaption[] = "Run function";
 
 TASEDITOR_LUA::TASEDITOR_LUA()
 {
@@ -42,7 +30,6 @@ TASEDITOR_LUA::TASEDITOR_LUA()
 void TASEDITOR_LUA::init()
 {
 	pending_changes.resize(0);
-	//hwndRunFunctionButton = GetDlgItem(taseditorWindow.hwndTASEditor, TASEDITOR_RUN_MANUAL);
 	reset();
 }
 void TASEDITOR_LUA::reset()
