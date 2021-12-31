@@ -247,6 +247,7 @@ class QAsmView : public QWidget
 		int  txtHlgtEndLine;
 
 		int  wheelPixelCounter;
+		int  wheelAngleCounter;
 
 		dbg_asm_entry_t  *asmPC;
 		std::vector <dbg_asm_entry_t*> asmEntry;

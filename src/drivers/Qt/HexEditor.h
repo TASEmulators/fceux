@@ -226,6 +226,7 @@ class QHexEdit : public QWidget
 		int frzRamMode;
 		int frzIdx;
 		int wheelPixelCounter;
+		int wheelAngleCounter;
 		int txtHlgtAnchorChar;
 		int txtHlgtAnchorLine;
 		int txtHlgtStartChar;

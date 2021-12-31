@@ -1963,6 +1963,7 @@ QHexEdit::QHexEdit(QWidget *parent)
 	frzIdx = 0;
 
 	wheelPixelCounter = 0;
+	wheelAngleCounter = 0;
 
 	highLightColor[ 0].setRgb( 0x00, 0x00, 0x00 );
 	highLightColor[ 1].setRgb( 0x35, 0x40, 0x00 );
@@ -2931,6 +2932,7 @@ void QHexEdit::mouseReleaseEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QHexEdit::wheelEvent(QWheelEvent *event)
 {
+	int zDelta = 0;
 
 	QPoint numPixels  = event->pixelDelta();
 	QPoint numDegrees = event->angleDelta();
@@ -2939,42 +2941,58 @@ void QHexEdit::wheelEvent(QWheelEvent *event)
 	{
 		wheelPixelCounter -= numPixels.y();
 	   //printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+		if ( wheelPixelCounter >= pxLineSpacing )
+		{
+			zDelta = (wheelPixelCounter / pxLineSpacing);
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
+		else if ( wheelPixelCounter <= -pxLineSpacing )
+		{
+			zDelta = (wheelPixelCounter / pxLineSpacing);
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
 	} 
 	else if (!numDegrees.isNull()) 
 	{
+		int stepDeg = 120;
 		//QPoint numSteps = numDegrees / 15;
 		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
 		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
-		wheelPixelCounter -= (pxLineSpacing * numDegrees.y()) / (15*8);
+		wheelAngleCounter -= numDegrees.y();
+
+		if ( wheelAngleCounter <= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
+		else if ( wheelAngleCounter >= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
 	}
 	//printf("Wheel Event: %i\n", wheelPixelCounter);
 
-	if ( wheelPixelCounter >= pxLineSpacing )
+	if ( zDelta != 0 )
 	{
-		lineOffset += (wheelPixelCounter / pxLineSpacing);
-
-		if ( lineOffset > maxLineOffset )
-		{
-			lineOffset = maxLineOffset;
-		}
-		vbar->setValue( lineOffset );
-
-		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
-	}
-	else if ( wheelPixelCounter <= -pxLineSpacing )
-	{
-		lineOffset += (wheelPixelCounter / pxLineSpacing);
+		lineOffset += zDelta;
 
 		if ( lineOffset < 0 )
 		{
 			lineOffset = 0;
 		}
+		else if ( lineOffset > maxLineOffset )
+		{
+			lineOffset = maxLineOffset;
+		}
 		vbar->setValue( lineOffset );
-
-		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
 	}
 
-	 event->accept();
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
