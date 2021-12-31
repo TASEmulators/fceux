@@ -132,7 +132,7 @@ void BRANCHES::calcFontData(void)
 	pxGridWidth    =  pxMinGridWidth;
 
 	w = pxMinGridWidth * 13;
-	h = pxMaxGridWidth * 10;
+	h = pxMinGridWidth * 10;
 
 	if (w < BRANCHES_BITMAP_WIDTH ) w = BRANCHES_BITMAP_WIDTH;
 	if (h < BRANCHES_BITMAP_HEIGHT) h = BRANCHES_BITMAP_HEIGHT;
