@@ -228,16 +228,20 @@ void BRANCHES::resetVars()
 
 void BRANCHES::update()
 {
+	clock_t currentTime;
+
 	if (mustRecalculateBranchesTree)
 	{
 		recalculateBranchesTree();
 	}
 
+	currentTime = clock();
+
 	// once per 40 milliseconds update branches_bitmap
-	if (clock() > nextAnimationTime)
+	if (currentTime > nextAnimationTime)
 	{
 		// animate branches_bitmap
-		nextAnimationTime = clock() + BRANCHES_ANIMATION_TICK;
+		nextAnimationTime = currentTime + BRANCHES_ANIMATION_TICK;
 		currentAnimationFrame = (currentAnimationFrame + 1) % BRANCHES_ANIMATION_FRAMES;
 		if (bookmarks->editMode == EDIT_MODE_BRANCHES)
 		{
@@ -1435,7 +1439,7 @@ void BRANCHES::recalculateBranchesTree()
 	if (BranchesLevels.size()-1 > 0)
 	{
 		//grid_width = BRANCHES_CANVAS_WIDTH / (BranchesLevels.size()-1);
-		grid_width = width() / (BranchesLevels.size());
+		grid_width = width() / (BranchesLevels.size()+1);
 		//if (grid_width < BRANCHES_GRID_MIN_WIDTH)
 		//{
 		//	grid_width = BRANCHES_GRID_MIN_WIDTH;
