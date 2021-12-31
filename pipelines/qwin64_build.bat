@@ -21,15 +21,15 @@ mkdir build
 cd    build
 mkdir bin
 
-curl -s -LO http://www.libsdl.org/release/SDL2-devel-2.0.14-VC.zip
+curl -s -LO http://www.libsdl.org/release/SDL2-devel-2.0.18-VC.zip
 curl -s -LO https://github.com/GyanD/codexffmpeg/releases/download/4.4/ffmpeg-4.4-full_build-shared.zip
 
 REM rmdir /q /s SDL2
 
-powershell -command "Expand-Archive" SDL2-devel-2.0.14-VC.zip .
+powershell -command "Expand-Archive" SDL2-devel-2.0.18-VC.zip .
 powershell -command "Expand-Archive" ffmpeg-4.4-full_build-shared.zip
 
-rename SDL2-2.0.14  SDL2
+rename SDL2-2.0.18  SDL2
 move   ffmpeg-4.4-full_build-shared\ffmpeg-4.4-full_build-shared   ffmpeg
 rmdir  ffmpeg-4.4-full_build-shared
 del    ffmpeg-4.4-full_build-shared.zip
