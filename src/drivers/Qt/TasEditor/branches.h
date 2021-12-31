@@ -44,7 +44,7 @@
 #define EMPTY_BRANCHES_X_BASE 4
 #define EMPTY_BRANCHES_Y_BASE 9
 #define EMPTY_BRANCHES_Y_FACTOR 14
-#define MAX_NUM_CHILDREN_ON_CANVAS_HEIGHT 9
+#define MAX_NUM_CHILDREN_ON_CANVAS_HEIGHT 12 // 9
 #define MAX_CHAIN_LEN 10
 #define MAX_GRID_Y_POS 8
 // spritesheet
@@ -208,6 +208,7 @@ private:
 	int  pxSelHeight;
 	int  pxMinGridWidth;
 	int  pxMaxGridWidth;
+	int  pxGridWidth;
 
 	// temps
 	std::vector<int> gridX;				// measured in grid units, not in pixels

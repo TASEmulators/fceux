@@ -127,10 +127,11 @@ void BRANCHES::calcFontData(void)
 	pxSelWidth  = (pxBoxWidth  * 7) / 8;
 	pxSelHeight = (pxBoxHeight * 7) / 8;
 
-	pxMinGridWidth = (pxBoxWidth * 3) / 2;
+	pxMinGridWidth = (pxBoxWidth + 2);
 	pxMaxGridWidth = (pxBoxWidth * 2);
+	pxGridWidth    =  pxMinGridWidth;
 
-	w = pxMaxGridWidth * 12;
+	w = pxMinGridWidth * 13;
 	h = pxMaxGridWidth * 10;
 
 	if (w < BRANCHES_BITMAP_WIDTH ) w = BRANCHES_BITMAP_WIDTH;
@@ -726,6 +727,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 	char txt[4];
 	int visHeight;
 	QPixmap spriteSheet(":/icons/branch_spritesheet.png");
+	QRect box[TOTAL_BOOKMARKS];
 
 	QPainter painter(this);
 
@@ -746,6 +748,13 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 	int branch, tempBranchX, tempBranchY, tempBranchX2, tempBranchY2, parentX, parentY, childID;
 	//SelectObject(hBitmapDC, normalPen);
 	painter.setPen( QColor( 0, 0, 0 ) );
+
+	//x = 0;
+	//while (x<viewWidth)
+	//{
+	//	painter.drawLine( x, 0, x, viewHeight );
+	//	x += pxGridWidth;
+	//}
 
 	for (int t = children.size() - 1; t >= 0; t--)
 	{
@@ -876,6 +885,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 	{
 		x = branchCurrentX[i] - pxBoxWidth/2;
 		y = branchCurrentY[i] - pxBoxHeight/2;
+
 		//tempRect.right = tempRect.left + DIGIT_RECT_WIDTH;
 		//tempRect.bottom = tempRect.top + DIGIT_RECT_HEIGHT;
 		if (!bookmarks->bookmarksArray[i].notEmpty && bookmarks->bookmarksArray[i].floatingPhase > 0)
@@ -897,6 +907,8 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			// draw black rect
 			//FrameRect(hBitmapDC, &tempRect, normalBrush);
 		}
+		box[i] = QRect( x, y, pxBoxWidth, pxBoxHeight );
+
 		if (i == bookmarks->itemUnderMouse)
 		{
 			painter.fillRect( x, y, pxBoxWidth, pxBoxHeight, QColor(255,235,154) );
@@ -913,21 +925,10 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		txt[0] = i + '0';
 		txt[1] = 0;
 
-		tempBranchX = branchCurrentX[i] - pxCharWidth/2;
-		tempBranchY = branchCurrentY[i] + pxCharHeight/2;
-
 		if (i == currentBranch)
 		{
-			//if (i == bookmarks->itemUnderMouse)
-			//{
-			//	//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
-			//}
-			//else
-			//{
-			//	//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, 0, SRCCOPY);
-			//}
 			painter.setPen( QColor( 58, 179, 255 ) );
-			painter.drawText( tempBranchX, tempBranchY, tr(txt) );
+			painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
 		}
 		else
 		{
@@ -937,15 +938,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			{
 				tempBranchX += bookmarks->bookmarksArray[i].floatingPhase;
 			}
-			//if (i == bookmarks->itemUnderMouse)
-			//{
-			//	//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
-			//}
-			//else
-			//{
-			//	//BitBlt(hBitmapDC, tempBranchX, tempBranchY, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, 0, SRCCOPY);
-			//}
-			painter.drawText( tempBranchX, tempBranchY, tr(txt) );
+			painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
 		}
 	}
 	if (isSafeToShowBranchesData())
@@ -1442,7 +1435,7 @@ void BRANCHES::recalculateBranchesTree()
 	if (BranchesLevels.size()-1 > 0)
 	{
 		//grid_width = BRANCHES_CANVAS_WIDTH / (BranchesLevels.size()-1);
-		grid_width = width() / (BranchesLevels.size()-1);
+		grid_width = width() / (BranchesLevels.size());
 		//if (grid_width < BRANCHES_GRID_MIN_WIDTH)
 		//{
 		//	grid_width = BRANCHES_GRID_MIN_WIDTH;
@@ -1464,6 +1457,8 @@ void BRANCHES::recalculateBranchesTree()
 	{
 		grid_width = pxMaxGridWidth;
 	}
+	pxGridWidth = grid_width;
+
 	if (grid_width < MIN_CLOUD_LINE_LENGTH)
 	{
 		cloud_prefix = MIN_CLOUD_LINE_LENGTH - grid_width;
@@ -1496,14 +1491,14 @@ void BRANCHES::recalculateBranchesTree()
 		grid_halfheight = BRANCHES_GRID_MAX_HALFHEIGHT;
 	}
 	// special case 2: if chain of branches is too long, the last item (fireball) goes up
-	if (changesSinceCurrentBranch)
-	{
-		if (gridX[ITEM_UNDER_MOUSE_FIREBALL] > MAX_CHAIN_LEN)
-		{
-			gridX[ITEM_UNDER_MOUSE_FIREBALL] = MAX_CHAIN_LEN;
-			gridY[ITEM_UNDER_MOUSE_FIREBALL] -= 2;
-		}
-	}
+	//if (changesSinceCurrentBranch)
+	//{
+	//	if (gridX[ITEM_UNDER_MOUSE_FIREBALL] > MAX_CHAIN_LEN)
+	//	{
+	//		gridX[ITEM_UNDER_MOUSE_FIREBALL] = MAX_CHAIN_LEN;
+	//		gridY[ITEM_UNDER_MOUSE_FIREBALL] -= 2;
+	//	}
+	//}
 	// special case 3: if some branch crosses upper or lower border of canvas
 	int parent;
 	for (int t = TOTAL_BOOKMARKS; t >= 0; t--)
@@ -1539,36 +1534,36 @@ void BRANCHES::recalculateBranchesTree()
 		}
 	}
 	// special case 4: if cloud has all 10 children, then one child will be out of canvas
-	if (children[0].size() == TOTAL_BOOKMARKS)
-	{
-		// find this child and move it to be visible
-		for (int t = TOTAL_BOOKMARKS - 1; t >= 0; t--)
-		{
-			if (gridY[t] > MAX_GRID_Y_POS)
-			{
-				gridY[t] = MAX_GRID_Y_POS;
-				gridX[t] -= 2;
-				// also move fireball to position near this branch
-				if (changesSinceCurrentBranch && currentBranch == t)
-				{
-					gridY[ITEM_UNDER_MOUSE_FIREBALL] = gridY[t];
-					gridX[ITEM_UNDER_MOUSE_FIREBALL] = gridX[t] + 1;
-				}
-				break;
-			} else if (gridY[t] < -MAX_GRID_Y_POS)
-			{
-				gridY[t] = -MAX_GRID_Y_POS;
-				gridX[t] -= 2;
-				// also move fireball to position near this branch
-				if (changesSinceCurrentBranch && currentBranch == t)
-				{
-					gridY[ITEM_UNDER_MOUSE_FIREBALL] = gridY[t];
-					gridX[ITEM_UNDER_MOUSE_FIREBALL] = gridX[t] + 1;
-				}
-				break;
-			}
-		}
-	}
+	//if (children[0].size() == TOTAL_BOOKMARKS)
+	//{
+	//	// find this child and move it to be visible
+	//	for (int t = TOTAL_BOOKMARKS - 1; t >= 0; t--)
+	//	{
+	//		if (gridY[t] > MAX_GRID_Y_POS)
+	//		{
+	//			gridY[t] = MAX_GRID_Y_POS;
+	//			gridX[t] -= 2;
+	//			// also move fireball to position near this branch
+	//			if (changesSinceCurrentBranch && currentBranch == t)
+	//			{
+	//				gridY[ITEM_UNDER_MOUSE_FIREBALL] = gridY[t];
+	//				gridX[ITEM_UNDER_MOUSE_FIREBALL] = gridX[t] + 1;
+	//			}
+	//			break;
+	//		} else if (gridY[t] < -MAX_GRID_Y_POS)
+	//		{
+	//			gridY[t] = -MAX_GRID_Y_POS;
+	//			gridX[t] -= 2;
+	//			// also move fireball to position near this branch
+	//			if (changesSinceCurrentBranch && currentBranch == t)
+	//			{
+	//				gridY[ITEM_UNDER_MOUSE_FIREBALL] = gridY[t];
+	//				gridX[ITEM_UNDER_MOUSE_FIREBALL] = gridX[t] + 1;
+	//			}
+	//			break;
+	//		}
+	//	}
+	//}
 
 	// 3. Set pixel positions of branches
 	int max_x = 0;
