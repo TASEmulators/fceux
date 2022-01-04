@@ -6778,7 +6778,7 @@ void bookmarkPreviewPopup::periodicUpdate(void)
 	{
 		if ( alpha < 255 )
 		{
-			alpha += 15;
+			alpha += 25;
 
 			if ( alpha > 255 )
 			{
@@ -6793,7 +6793,7 @@ void bookmarkPreviewPopup::periodicUpdate(void)
 	{
 		if ( alpha > 0 )
 		{
-			alpha -= 15;
+			alpha -= 25;
 
 			if ( alpha < 0 )
 			{
@@ -6831,9 +6831,18 @@ int bookmarkPreviewPopup::currentIndex(void)
 //----------------------------------------------------------------------------
 void bookmarkPreviewPopup::imageIndexChanged(int newIndex)
 {
+	FCEU_CRITICAL_SECTION(emuLock);
 	//printf("newIndex:%i\n", newIndex );
 
-	actv = ( newIndex >= 0 );
+	if ( newIndex >= 0 )
+	{
+		reloadImage(newIndex);
+		actv = true;
+	}
+	else
+	{
+		actv = false;
+	}
 
 	//if ( instance == this )
 	//{
@@ -6865,6 +6874,10 @@ int bookmarkPreviewPopup::reloadImage(int index)
 	uint32_t  pixel;
 	QPixmap pixmap;
 
+	if ( index == imageIndex )
+	{	// no change
+		return 0;
+	}
 	actv = true;
 	imageIndex = index;
 
