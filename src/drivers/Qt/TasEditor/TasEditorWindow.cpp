@@ -3015,6 +3015,11 @@ void TasEditorWindow::playbackFrameForwardFull(void)
 void TasEditorWindow::playbackFollowCursorCb(bool val)
 {
 	taseditorConfig.followPlaybackCursor = val;
+
+	if ( val )
+	{
+		pianoRoll->ensureTheLineIsVisible( currFrameCounter );
+	}
 }
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::playbackTurboSeekCb(bool val)
