@@ -989,11 +989,11 @@ void TasEditorWindow::buildPianoRollDisplay(void)
 	pianoRollFrame->setFrameShape( QFrame::Box );
 
 	pianoRollVBar->setInvertedControls(false);
-	pianoRollVBar->setInvertedAppearance(true);
+	pianoRollVBar->setInvertedAppearance(false);
 	pianoRoll->setScrollBars( pianoRollHBar, pianoRollVBar );
 	connect( pianoRollHBar, SIGNAL(valueChanged(int)), pianoRoll, SLOT(hbarChanged(int)) );
 	connect( pianoRollVBar, SIGNAL(valueChanged(int)), pianoRoll, SLOT(vbarChanged(int)) );
-	connect( pianoRollVBar, SIGNAL(actionTriggered(int)), pianoRoll, SLOT(vbarActionTriggered(int)) );
+	//connect( pianoRollVBar, SIGNAL(actionTriggered(int)), pianoRoll, SLOT(vbarActionTriggered(int)) );
 
 	grid->addWidget( pianoRoll    , 0, 0 );
 	grid->addWidget( pianoRollVBar, 0, 1 );
@@ -3752,7 +3752,7 @@ void PianoRollScrollBar::wheelEvent(QWheelEvent *event)
 
 	if (!numPixels.isNull())
 	{
-		wheelPixelCounter += numPixels.y();
+		wheelPixelCounter -= numPixels.y();
 		//printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
 
 		if ( wheelPixelCounter >= pxLineSpacing )
@@ -3774,7 +3774,7 @@ void PianoRollScrollBar::wheelEvent(QWheelEvent *event)
 		//QPoint numSteps = numDegrees / 15;
 		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
 		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
-		wheelAngleCounter += numDegrees.y();
+		wheelAngleCounter -= numDegrees.y();
 
 		if ( wheelAngleCounter <= stepDeg )
 		{
@@ -4032,56 +4032,56 @@ void QPianoRoll::hbarChanged(int val)
 	update();
 }
 //----------------------------------------------------------------------------
-void QPianoRoll::vbarActionTriggered(int act)
-{
-	int val = vbar->value();
-
-	if ( act == QAbstractSlider::SliderSingleStepAdd )
-	{
-		val = val - vbar->singleStep();
-
-		if ( val < 0 )
-		{
-			val = 0;
-		}
-		vbar->setSliderPosition(val);
-	}
-	else if ( act == QAbstractSlider::SliderSingleStepSub )
-	{
-		val = val + vbar->singleStep();
-
-		if ( val >= maxLineOffset )
-		{
-			val = maxLineOffset;
-		}
-		vbar->setSliderPosition(val);
-	}
-        else if ( act == QAbstractSlider::SliderPageStepAdd )
-        {
-               	val = val - vbar->pageStep();
-
-		if ( val < 0 )
-		{
-			val = 0;
-		}
-		vbar->setSliderPosition(val);
-        }
-        else if ( act == QAbstractSlider::SliderPageStepSub )
-        {
-                val = val + vbar->pageStep();
-
-		if ( val >= maxLineOffset )
-		{
-			val = maxLineOffset;
-		}
-		vbar->setSliderPosition(val);
-        }
-	//printf("ACT:%i\n", act);
-}
+//void QPianoRoll::vbarActionTriggered(int act)
+//{
+//	int val = vbar->value();
+//
+//	if ( act == QAbstractSlider::SliderSingleStepAdd )
+//	{
+//		val = val - vbar->singleStep();
+//
+//		if ( val < 0 )
+//		{
+//			val = 0;
+//		}
+//		vbar->setSliderPosition(val);
+//	}
+//	else if ( act == QAbstractSlider::SliderSingleStepSub )
+//	{
+//		val = val + vbar->singleStep();
+//
+//		if ( val >= maxLineOffset )
+//		{
+//			val = maxLineOffset;
+//		}
+//		vbar->setSliderPosition(val);
+//	}
+//        else if ( act == QAbstractSlider::SliderPageStepAdd )
+//        {
+//               	val = val - vbar->pageStep();
+//
+//		if ( val < 0 )
+//		{
+//			val = 0;
+//		}
+//		vbar->setSliderPosition(val);
+//        }
+//        else if ( act == QAbstractSlider::SliderPageStepSub )
+//        {
+//                val = val + vbar->pageStep();
+//
+//		if ( val >= maxLineOffset )
+//		{
+//			val = maxLineOffset;
+//		}
+//		vbar->setSliderPosition(val);
+//        }
+//	//printf("ACT:%i\n", act);
+//}
 //----------------------------------------------------------------------------
 void QPianoRoll::vbarChanged(int val)
 {
-	lineOffset = maxLineOffset - val;
+	lineOffset = val;
 
 	if ( lineOffset < 0 )
 	{
@@ -4338,8 +4338,6 @@ void QPianoRoll::ensureTheLineIsVisible( int lineNum )
 {
 	if ( !lineIsVisible( lineNum ) )
 	{
-		int scrollOfs;
-
 		//printf("Seeking Frame %i\n", lineNum );
 
 		lineOffset = lineNum;
@@ -4348,13 +4346,11 @@ void QPianoRoll::ensureTheLineIsVisible( int lineNum )
 		{
 			lineOffset = 0;
 		}
-		scrollOfs = maxLineOffset - lineOffset;
-
-		if ( scrollOfs < 0 )
+		else if ( lineOffset > maxLineOffset )
 		{
-			scrollOfs = 0;
+			lineOffset = maxLineOffset;
 		}
-		vbar->setValue( scrollOfs );
+		vbar->setValue( lineOffset );
 
 		update();
 	}
@@ -4987,7 +4983,7 @@ void QPianoRoll::wheelEvent(QWheelEvent *event)
 	{
 		if (zDelta > 0)
 		{
-			ofs += (zDelta*6);
+			ofs -= (zDelta*6);
 
 			if (ofs > maxLineOffset)
 			{
@@ -4997,7 +4993,7 @@ void QPianoRoll::wheelEvent(QWheelEvent *event)
 		}
 		else if (zDelta < 0)
 		{
-			ofs += (zDelta*6);
+			ofs -= (zDelta*6);
 
 			if (ofs < 0)
 			{
@@ -6134,6 +6130,9 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 	maxLineOffset = currMovieData.records.size() - nrow + 2;
 
+	vbar->setMinimum(0);
+	vbar->setMaximum(maxLineOffset);
+
 	if ( maxLineOffset < 0 )
 	{
 		vbar->hide();
@@ -6146,7 +6145,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 	if ( taseditorConfig->followPlaybackCursor )
 	{
-		lineOffset = maxLineOffset - vbar->value();
+		lineOffset = vbar->value();
 
 		if ( playbackCursorPos != currFrameCounter )
 		{
@@ -6154,29 +6153,28 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 			playbackCursorPos = currFrameCounter;
 
-			lineOffsetLowerLim = playbackCursorPos - nrow + 5;
-			lineOffsetUpperLim = playbackCursorPos + nrow;
+			lineOffsetLowerLim = lineOffset;
+			lineOffsetUpperLim = lineOffset + nrow - 2;
 
-			//if ( !lineIsVisible( playbackCursorPos ) )
-			if ( lineOffset < lineOffsetLowerLim )
+			if ( playbackCursorPos < lineOffsetLowerLim )
 			{
-				lineOffset = lineOffsetLowerLim;
-				vbar->setValue( maxLineOffset - lineOffset );
+				lineOffset = playbackCursorPos;
+				vbar->setValue( lineOffset );
 			}
-			else if ( lineOffset > lineOffsetUpperLim )
+			else if ( playbackCursorPos >= lineOffsetUpperLim )
 			{
-				lineOffset = lineOffsetUpperLim - nrow;
+				lineOffset = playbackCursorPos - nrow + 3;
 				if ( lineOffset < 0 )
 				{
 					lineOffset = 0;
 				}
-				vbar->setValue( maxLineOffset - lineOffset );
+				vbar->setValue( lineOffset );
 			}
 		}
 	}
 	else
 	{
-		vbar->setValue( maxLineOffset - lineOffset );
+		vbar->setValue( lineOffset );
 	}
 
 	if ( lineOffset < 0 )
@@ -6187,8 +6185,6 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	{
 		lineOffset = maxLineOffset;
 	}
-	vbar->setMinimum(0);
-	vbar->setMaximum(maxLineOffset);
 
 	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window) );
 
