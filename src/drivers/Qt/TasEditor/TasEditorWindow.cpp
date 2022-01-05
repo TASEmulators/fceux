@@ -4352,7 +4352,7 @@ void QPianoRoll::updateLinesCount(void)
 //----------------------------------------------------------------------------
 bool QPianoRoll::lineIsVisible( int lineNum )
 {
-	int lineEnd = lineOffset + viewLines - 1;
+	int lineEnd = lineOffset + viewLines - 2;
 
 	return ( (lineNum >= lineOffset) && (lineNum < lineEnd) );
 }
