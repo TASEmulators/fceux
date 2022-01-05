@@ -1684,6 +1684,24 @@ bool TasEditorWindow::saveProjectAs(bool save_compact)
 	{
 	   return false;
 	}
+	QFileInfo fi( filename );
+
+	if ( fi.exists() )
+	{
+		int ret;
+		std::string msg;
+
+		msg = "Pre-existing TAS project file will be overwritten:\n\n" +
+			fi.fileName().toStdString() + "\n\nReplace file?";
+
+		ret = QMessageBox::warning( this, QObject::tr("Overwrite Warning"),
+				QString::fromStdString(msg), QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
+
+		if ( ret == QMessageBox::No )
+		{
+			return false;
+		}
+	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
 	project.renameProject( filename.toStdString().c_str(), true);
