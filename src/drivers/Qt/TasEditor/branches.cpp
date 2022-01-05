@@ -938,10 +938,10 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		{
 			painter.setPen( QColor( 0, 194, 64 ) );
 
-			if (!bookmarks->bookmarksArray[i].notEmpty && bookmarks->bookmarksArray[i].floatingPhase > 0)
-			{
-				tempBranchX += bookmarks->bookmarksArray[i].floatingPhase;
-			}
+			//if (!bookmarks->bookmarksArray[i].notEmpty && bookmarks->bookmarksArray[i].floatingPhase > 0)
+			//{
+			//	tempBranchX += bookmarks->bookmarksArray[i].floatingPhase;
+			//}
 			painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
 		}
 	}
