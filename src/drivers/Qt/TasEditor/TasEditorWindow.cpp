@@ -2485,12 +2485,12 @@ void TasEditorWindow::saveProjectCompactCb(void)
 	hbox->addWidget( okButton );
 	hbox->addWidget( cancelButton );
 
-	binaryInput->setChecked( taseditorConfig.projectSavingOptions_SaveInBinary );
-	saveMarkers->setChecked( taseditorConfig.projectSavingOptions_SaveMarkers );
-	saveBookmarks->setChecked( taseditorConfig.projectSavingOptions_SaveBookmarks );
-	saveHistory->setChecked( taseditorConfig.projectSavingOptions_SaveHistory );
-	savePianoRoll->setChecked( taseditorConfig.projectSavingOptions_SavePianoRoll );
-	saveSelection->setChecked( taseditorConfig.projectSavingOptions_SaveSelection );
+	binaryInput->setChecked( taseditorConfig.saveCompact_SaveInBinary );
+	saveMarkers->setChecked( taseditorConfig.saveCompact_SaveMarkers );
+	saveBookmarks->setChecked( taseditorConfig.saveCompact_SaveBookmarks );
+	saveHistory->setChecked( taseditorConfig.saveCompact_SaveHistory );
+	savePianoRoll->setChecked( taseditorConfig.saveCompact_SavePianoRoll );
+	saveSelection->setChecked( taseditorConfig.saveCompact_SaveSelection );
 
 	     allFrames->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_ALL );
 	every16thFrame->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_16TH );
@@ -2503,12 +2503,12 @@ void TasEditorWindow::saveProjectCompactCb(void)
 
 	if ( ret == QDialog::Accepted )
 	{
-		taseditorConfig.projectSavingOptions_SaveInBinary  = binaryInput->isChecked();
-		taseditorConfig.projectSavingOptions_SaveMarkers   = saveMarkers->isChecked();
-		taseditorConfig.projectSavingOptions_SaveBookmarks = saveBookmarks->isChecked();
-		taseditorConfig.projectSavingOptions_SaveHistory   = saveHistory->isChecked();
-		taseditorConfig.projectSavingOptions_SavePianoRoll = savePianoRoll->isChecked();
-		taseditorConfig.projectSavingOptions_SaveSelection = saveSelection->isChecked();
+		taseditorConfig.saveCompact_SaveInBinary  = binaryInput->isChecked();
+		taseditorConfig.saveCompact_SaveMarkers   = saveMarkers->isChecked();
+		taseditorConfig.saveCompact_SaveBookmarks = saveBookmarks->isChecked();
+		taseditorConfig.saveCompact_SaveHistory   = saveHistory->isChecked();
+		taseditorConfig.saveCompact_SavePianoRoll = savePianoRoll->isChecked();
+		taseditorConfig.saveCompact_SaveSelection = saveSelection->isChecked();
 
 		if ( allFrames->isChecked() )
 		{
@@ -3215,10 +3215,10 @@ void TasEditorWindow::openProjectSaveOptions(void)
 	savePianoRoll->setChecked( taseditorConfig.projectSavingOptions_SavePianoRoll );
 	saveSelection->setChecked( taseditorConfig.projectSavingOptions_SaveSelection );
 
-	     allFrames->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_ALL );
-	every16thFrame->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_16TH );
-	  markedFrames->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_MARKED );
-	      dontSave->setChecked( taseditorConfig.saveCompact_GreenzoneSavingMode == GREENZONE_SAVING_MODE_NO );
+	     allFrames->setChecked( taseditorConfig.projectSavingOptions_GreenzoneSavingMode == GREENZONE_SAVING_MODE_ALL );
+	every16thFrame->setChecked( taseditorConfig.projectSavingOptions_GreenzoneSavingMode == GREENZONE_SAVING_MODE_16TH );
+	  markedFrames->setChecked( taseditorConfig.projectSavingOptions_GreenzoneSavingMode == GREENZONE_SAVING_MODE_MARKED );
+	      dontSave->setChecked( taseditorConfig.projectSavingOptions_GreenzoneSavingMode == GREENZONE_SAVING_MODE_NO );
 
 	connect( autoSaveOpt, SIGNAL(clicked(bool)), autoSavePeriod, SLOT(setEnabled(bool)) );
 	connect( autoSaveOpt, SIGNAL(clicked(bool)), saveSilentOpt , SLOT(setEnabled(bool)) );
@@ -3242,19 +3242,19 @@ void TasEditorWindow::openProjectSaveOptions(void)
 
 		if ( allFrames->isChecked() )
 		{
-			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_ALL;
+			taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_ALL;
 		}
 		else if ( every16thFrame->isChecked() )
 		{
-			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_16TH;
+			taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_16TH;
 		}
 		else if ( markedFrames->isChecked() )
 		{
-			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_MARKED;
+			taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_MARKED;
 		}
 		else
 		{
-			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_NO;
+			taseditorConfig.projectSavingOptions_GreenzoneSavingMode = GREENZONE_SAVING_MODE_NO;
 		}
 	}
 }
