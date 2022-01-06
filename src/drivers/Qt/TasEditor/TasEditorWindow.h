@@ -526,6 +526,7 @@ class TasEditorWindow : public QDialog
 		bool saveProject(bool save_compact = false);
 		bool saveProjectAs(bool save_compact = false);
 		bool askToSaveProject(void);
+		bool saveCompactGetFilename( QString &filepath );
 		void updateToolTips(void);
 
 		void clearProjectList(void);

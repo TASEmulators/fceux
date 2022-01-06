@@ -1657,6 +1657,8 @@ bool TasEditorWindow::saveProjectAs(bool save_compact)
 
 		if ( baseName[0] != 0 )
 		{
+			strcat( baseName, ".fm3");
+
 			dialog.selectFile(baseName);
 		}
 	}
@@ -2416,6 +2418,135 @@ void TasEditorWindow::saveProjectAsCb(void)
 	saveProjectAs();
 }
 //----------------------------------------------------------------------------
+bool TasEditorWindow::saveCompactGetFilename( QString &outputFilePath )
+{
+	std::string last;
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string lastPath;
+	//char dir[512];
+	const char *base, *rom;
+	QFileDialog  dialog(this, tr("Save Compact TAS Editor Project As") );
+	QList<QUrl> urls;
+	QDir d;
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("TAS Project Files (*.fm3) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/movies");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+
+		dialog.setDirectory( d.absolutePath() );
+	}
+	dialog.setDefaultSuffix( tr(".fm3") );
+
+	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
+	if ( lastPath.size() > 0 )
+	{
+		dialog.setDirectory( QString::fromStdString(lastPath) );
+	}
+
+	rom = getRomFile();
+
+	if (!project.getProjectName().empty())
+	{
+		char baseName[512];
+
+		strcpy(baseName, project.getProjectName().c_str());
+
+		if (strstr(baseName, "-compact") == NULL)
+		{
+			strcat(baseName, "-compact");
+		}
+		strcat( baseName, ".fm3");
+
+		dialog.selectFile(baseName);
+	}
+	else if ( rom )
+	{
+		char baseName[512];
+		getFileBaseName( rom, baseName );
+
+		if ( baseName[0] != 0 )
+		{
+			if (strstr(baseName, "-compact") == NULL)
+			{
+				strcat(baseName, "-compact");
+			}
+			strcat( baseName, ".fm3");
+
+			dialog.selectFile(baseName);
+		}
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return false;
+	}
+	QFileInfo fi( filename );
+
+	if ( fi.exists() )
+	{
+		int ret;
+		std::string msg;
+
+		msg = "Pre-existing TAS project file will be overwritten:\n\n" +
+			fi.fileName().toStdString() + "\n\nReplace file?";
+
+		ret = QMessageBox::warning( this, QObject::tr("Overwrite Warning"),
+				QString::fromStdString(msg), QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
+
+		if ( ret == QMessageBox::No )
+		{
+			return false;
+		}
+	}
+	outputFilePath = filename;
+
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	return true;
+}
+//----------------------------------------------------------------------------
 void TasEditorWindow::saveProjectCompactCb(void)
 {
 	int ret;
@@ -2503,6 +2634,8 @@ void TasEditorWindow::saveProjectCompactCb(void)
 
 	if ( ret == QDialog::Accepted )
 	{
+		QString filename;
+
 		taseditorConfig.saveCompact_SaveInBinary  = binaryInput->isChecked();
 		taseditorConfig.saveCompact_SaveMarkers   = saveMarkers->isChecked();
 		taseditorConfig.saveCompact_SaveBookmarks = saveBookmarks->isChecked();
@@ -2527,7 +2660,10 @@ void TasEditorWindow::saveProjectCompactCb(void)
 			taseditorConfig.saveCompact_GreenzoneSavingMode = GREENZONE_SAVING_MODE_NO;
 		}
 
-		saveProject(true);
+		if ( saveCompactGetFilename( filename ) )
+		{
+			project.save(filename.toStdString().c_str(), taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
+		}
 	}
 }
 //----------------------------------------------------------------------------
