@@ -373,6 +373,20 @@ class TasFindNoteWindow : public QDialog
 		void searchPatternChanged(const QString &);
 };
 
+class TasEditorSplitter : public QSplitter
+{
+	Q_OBJECT
+
+	public:
+		TasEditorSplitter(QWidget *parent = 0);
+		~TasEditorSplitter(void);
+
+	protected:
+		void resizeEvent(QResizeEvent *event);
+
+		bool panelInitDone;
+};
+
 class TasEditorWindow : public QDialog
 {
 	Q_OBJECT
@@ -445,7 +459,7 @@ class TasEditorWindow : public QDialog
 		QAction   *showToolTipsAct;
 		QAction   *autoLuaAct;
 
-		QSplitter  *mainHBox;
+		TasEditorSplitter  *mainHBox;
 		QFrame     *pianoRollFrame;
 		QWidget    *pianoRollContainerWidget;
 		QWidget    *controlPanelContainerWidget;

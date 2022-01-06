@@ -193,7 +193,7 @@ TasEditorWindow::TasEditorWindow(QWidget *parent)
 	resize(512, 512);
 
 	mainLayout = new QVBoxLayout();
-	mainHBox   = new QSplitter( Qt::Horizontal );
+	mainHBox   = new TasEditorSplitter();
 
 	initPatterns();
 	buildPianoRollDisplay();
@@ -7346,5 +7346,52 @@ bool markerDragPopup::eventFilter( QObject *obj, QEvent *event)
 		break;
 	}
 	return false;
+}
+//----------------------------------------------------------------------------
+//---- TAS Window Main Horizontal Splitter
+//----------------------------------------------------------------------------
+TasEditorSplitter::TasEditorSplitter( QWidget *parent )
+	: QSplitter( Qt::Horizontal, parent )
+{
+	panelInitDone = false;
+}
+//----------------------------------------------------------------------------
+TasEditorSplitter::~TasEditorSplitter(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void TasEditorSplitter::resizeEvent(QResizeEvent *event)
+{
+       	int minWidth;
+	//int widthDelta;
+	QList<int> panelWidth;
+
+	//printf("Panel Resize\n");
+	if ( !panelInitDone )
+	{
+		QSplitter::resizeEvent(event);
+		panelInitDone = true;
+		return;
+	}
+	//widthDelta = event->size().width() - event->oldSize().width();
+
+	panelWidth = sizes();
+
+
+	//for (int i=0; i<panelWidth.count(); i++)
+	//{
+	//	printf("Panel %i: %i\n", i, panelWidth[i] );
+	//}
+	panelWidth[0] = event->size().width() - panelWidth[1] - handleWidth();
+	//panelWidth[0] += widthDelta;
+
+	minWidth = widget(0)->minimumWidth();
+
+	if ( panelWidth[0] < minWidth )
+	{
+		panelWidth[0] = minWidth;
+	}
+	setSizes( panelWidth );
 }
 //----------------------------------------------------------------------------
