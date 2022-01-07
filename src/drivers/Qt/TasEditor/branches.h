@@ -209,6 +209,8 @@ private:
 	int  pxMinGridWidth;
 	int  pxMaxGridWidth;
 	int  pxGridWidth;
+	int  pxTextOffsetX;
+	int  pxTextOffsetY;
 
 	// temps
 	std::vector<int> gridX;				// measured in grid units, not in pixels

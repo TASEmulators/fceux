@@ -119,13 +119,17 @@ void BRANCHES::calcFontData(void)
 #else
 	pxCharWidth = metrics.width(QLatin1Char('2'));
 #endif
-	pxCharHeight   = metrics.capHeight();
+	//pxCharHeight   = metrics.capHeight();
+	pxCharHeight   = metrics.ascent();
 	pxLineSpacing  = metrics.lineSpacing();
 
 	pxBoxWidth  = pxLineSpacing;
 	pxBoxHeight = pxLineSpacing;
 	pxSelWidth  = (pxBoxWidth  * 7) / 8;
 	pxSelHeight = (pxBoxHeight * 7) / 8;
+
+	pxTextOffsetX  = -(pxBoxWidth/2 ) + (pxBoxWidth  - pxCharWidth)/2;
+	pxTextOffsetY  =  (pxBoxHeight/2) - (pxBoxHeight - pxCharHeight)/2;
 
 	pxMinGridWidth = (pxBoxWidth + 2);
 	pxMaxGridWidth = (pxBoxWidth * 2);
@@ -926,23 +930,26 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 	// digits
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
+		x = branchCurrentX[i] + pxTextOffsetX;
+		y = branchCurrentY[i] + pxTextOffsetY;
+
 		txt[0] = i + '0';
 		txt[1] = 0;
 
 		if (i == currentBranch)
 		{
 			painter.setPen( QColor( 58, 179, 255 ) );
-			painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
+			painter.drawText( x, y, tr(txt) );
 		}
 		else
 		{
 			painter.setPen( QColor( 0, 194, 64 ) );
 
-			//if (!bookmarks->bookmarksArray[i].notEmpty && bookmarks->bookmarksArray[i].floatingPhase > 0)
-			//{
-			//	tempBranchX += bookmarks->bookmarksArray[i].floatingPhase;
-			//}
-			painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
+			if (!bookmarks->bookmarksArray[i].notEmpty && bookmarks->bookmarksArray[i].floatingPhase > 0)
+			{
+				x += bookmarks->bookmarksArray[i].floatingPhase;
+			}
+			painter.drawText( x, y, tr(txt) );
 		}
 	}
 	if (isSafeToShowBranchesData())
