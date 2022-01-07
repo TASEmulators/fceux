@@ -111,25 +111,34 @@ void BRANCHES::setFont( QFont &newFont )
 
 void BRANCHES::calcFontData(void)
 {
-	int w,h;
+	int w,h,ch='0';
 	QWidget::setFont(font);
 	QFontMetrics metrics(font);
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
-	pxCharWidth = metrics.horizontalAdvance(QLatin1Char('2'));
+	pxCharWidth = metrics.horizontalAdvance(QLatin1Char(ch));
 #else
-	pxCharWidth = metrics.width(QLatin1Char('2'));
+	pxCharWidth = metrics.width(QLatin1Char(ch));
 #endif
+	printf("        Width: %i\n", metrics.width(ch) );
+	printf("      Advance: %i\n", metrics.horizontalAdvance(ch) );
+	printf(" Left Bearing: %i\n", metrics.leftBearing(ch) );
+	printf("Right Bearing: %i\n", metrics.rightBearing(ch) );
+	printf("       Ascent: %i\n", metrics.ascent() );
+	printf("      Descent: %i\n", metrics.descent() );
+	printf("       Height: %i\n", metrics.height() );
+	printf(" Line Spacing: %i\n", metrics.lineSpacing() );
+
 	//pxCharHeight   = metrics.capHeight();
 	pxCharHeight   = metrics.ascent();
 	pxLineSpacing  = metrics.lineSpacing();
 
-	pxBoxWidth  = pxLineSpacing;
+	pxBoxWidth  = 2*pxCharWidth;
 	pxBoxHeight = pxLineSpacing;
 	pxSelWidth  = (pxBoxWidth  * 7) / 8;
 	pxSelHeight = (pxBoxHeight * 7) / 8;
 
-	pxTextOffsetX  = -(pxBoxWidth/2 ) + (pxBoxWidth  - pxCharWidth)/2;
-	pxTextOffsetY  =  (pxBoxHeight/2) - (pxBoxHeight - pxCharHeight)/2;
+	pxTextOffsetX  = -(pxBoxWidth/2 ) + (pxBoxWidth  - metrics.width(ch) + metrics.leftBearing(ch) + metrics.rightBearing(ch))/2;
+	pxTextOffsetY  =  (pxBoxHeight/2) - (pxBoxHeight - pxCharHeight + metrics.descent())/2;
 
 	pxMinGridWidth = (pxBoxWidth + 2);
 	pxMaxGridWidth = (pxBoxWidth * 2);
@@ -735,7 +744,6 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 	char txt[4];
 	int visHeight;
 	QPixmap spriteSheet(":/icons/branch_spritesheet.png");
-	QRect box[TOTAL_BOOKMARKS];
 
 	QPainter painter(this);
 
@@ -1244,12 +1252,18 @@ void BRANCHES::setChangesMadeSinceBranch()
 int BRANCHES::findItemUnderMouse(int mouseX, int mouseY)
 {
 	int item = ITEM_UNDER_MOUSE_NONE;
+	QPoint mouse( mouseX, mouseY );
+
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
-		if (item == ITEM_UNDER_MOUSE_NONE && mouseX >= branchCurrentX[i] - DIGIT_RECT_HALFWIDTH_COLLISION && mouseX < branchCurrentX[i] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouseY >= branchCurrentY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouseY < branchCurrentY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
+		if ( box[i].contains( mouse ) )
 		{
 			item = i;
 		}
+		//if (item == ITEM_UNDER_MOUSE_NONE && mouseX >= branchCurrentX[i] - DIGIT_RECT_HALFWIDTH_COLLISION && mouseX < branchCurrentX[i] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouseY >= branchCurrentY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouseY < branchCurrentY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
+		//{
+		//	item = i;
+		//}
 	}
 	if (item == ITEM_UNDER_MOUSE_NONE && mouseX >= cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH && mouseX < cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH + BRANCHES_CLOUD_WIDTH && mouseY >= BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT && mouseY < BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT + BRANCHES_CLOUD_HEIGHT)
 	{

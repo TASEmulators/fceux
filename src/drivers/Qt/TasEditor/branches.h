@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <QFont>
+#include <QRect>
 #include <QTimer>
 #include <QWidget>
 
@@ -195,6 +196,7 @@ private:
 	QPoint  imagePos;
 	QTimer *imageTimer;
 	QRect   viewRect;
+	QRect   box[TOTAL_BOOKMARKS];
 
 	int  imageItem;
 	int  viewWidth;
