@@ -6266,7 +6266,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	FCEU_CRITICAL_SECTION( emuLock );
 	int x, y, row, nrow, lineNum;
 	QPainter painter(this);
-	QColor white(255,255,255), black(0,0,0), blkColor, rowTextColor;
+	QColor white(255,255,255), black(0,0,0), blkColor, rowTextColor, hdrGridColor;
 	static const char *buttonNames[] = { "A", "B", "S", "T", "U", "D", "L", "R", NULL };
 	char stmp[32];
 	char rowIsSel=0;
@@ -6716,13 +6716,25 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		y += pxLineSpacing;
 	}
 
+	int gridBlack = gridColor.black();
+	hdrGridColor = gridColor;
+
+	if ( gridBlack < 128 )
+	{
+		hdrGridColor = QColor(128,128,128);
+	}
+
 	// Draw Grid lines
 	painter.setPen( QPen(gridColor,gridPixelWidth) );
 	x = pxFrameColX - pxLineXScroll;
 	painter.drawLine( x, 0, x, viewHeight );
 	
+	painter.setPen( QPen(hdrGridColor,gridPixelWidth) );
+	painter.drawLine( x, 0, x, pxLineSpacing );
+
 	font.setBold(true);
 	painter.setFont(font);
+
 
 	for (int i=0; i<numCtlr; i++)
 	{
@@ -6735,6 +6747,9 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			painter.setPen( QPen(gridColor,gridPixelWidth) );
 			painter.drawLine( x, 0, x, viewHeight ); //x--;
 
+			painter.setPen( QPen(hdrGridColor,gridPixelWidth) );
+			painter.drawLine( x, 0, x, pxLineSpacing );
+
 			rect = QRect( x, 0, pxWidthBtnCol, pxLineSpacing );
 			painter.setPen( QPen(headerLightsColors[ headerColors[COLUMN_JOYPAD1_A + (i*8) + j] ],1) );
 			//painter.drawText( x + pxCharWidth, pxLineTextOfs, tr(buttonNames[j]) );
@@ -6746,6 +6761,10 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		//painter.drawLine( x, 0, x, viewHeight ); x++;
 		painter.setPen( QPen(gridColor,gridPixelWidth) );
 		painter.drawLine( x, 0, x, viewHeight );
+
+		painter.setPen( QPen(hdrGridColor,gridPixelWidth) );
+		painter.drawLine( x, 0, x, pxLineSpacing );
+
 	}
 	painter.setPen( QPen(gridColor,gridPixelWidth) );
 
@@ -6756,6 +6775,10 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		
 		y += pxLineSpacing;
 	}
+
+	painter.setPen( QPen(hdrGridColor,gridPixelWidth) );
+	painter.drawLine( 0, 0, viewWidth, 0 );
+	painter.drawLine( 0, pxLineSpacing, viewWidth, pxLineSpacing );
 
 	// Draw grid lines for selections
 	if ( numSelRows > 0 )
