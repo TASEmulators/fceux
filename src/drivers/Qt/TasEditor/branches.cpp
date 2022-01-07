@@ -127,6 +127,7 @@ void BRANCHES::calcFontData(void)
 	printf("      Descent: %i\n", metrics.descent() );
 	printf("       Height: %i\n", metrics.height() );
 	printf(" Line Spacing: %i\n", metrics.lineSpacing() );
+	printf(" Line Leading: %i\n", metrics.leading() );
 
 	//pxCharHeight   = metrics.capHeight();
 	pxCharHeight   = metrics.ascent();
@@ -138,7 +139,7 @@ void BRANCHES::calcFontData(void)
 	pxSelHeight = (pxBoxHeight * 7) / 8;
 
 	pxTextOffsetX  = -(pxBoxWidth/2 ) + (pxBoxWidth  - metrics.width(ch) + metrics.leftBearing(ch) + metrics.rightBearing(ch))/2;
-	pxTextOffsetY  =  (pxBoxHeight/2) - (pxBoxHeight - pxCharHeight + metrics.descent())/2;
+	pxTextOffsetY  =  (pxBoxHeight/2) - (pxBoxHeight - pxCharHeight)/2;
 
 	pxMinGridWidth = (pxBoxWidth + 2);
 	pxMaxGridWidth = (pxBoxWidth * 2);
@@ -938,16 +939,26 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 	// digits
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
+		//int xa, ya;
+		//QRect boundingRect;
+
 		x = branchCurrentX[i] + pxTextOffsetX;
 		y = branchCurrentY[i] + pxTextOffsetY;
 
 		txt[0] = i + '0';
 		txt[1] = 0;
 
+		//boundingRect = painter.boundingRect( box[i], Qt::AlignLeft | Qt::AlignTop, tr(txt) );
+
+		//xa = (box[i].width()  - boundingRect.width()) / 2;
+		//ya = (box[i].height() - boundingRect.height()) / 2;
+
 		if (i == currentBranch)
 		{
 			painter.setPen( QColor( 58, 179, 255 ) );
-			painter.drawText( x, y, tr(txt) );
+			//painter.drawText( x, y, tr(txt) );
+			painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
+			//painter.drawText( box[i].adjusted( xa, ya, xa, ya ), Qt::AlignLeft | Qt::AlignTop, tr(txt) );
 		}
 		else
 		{
@@ -957,7 +968,9 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			{
 				x += bookmarks->bookmarksArray[i].floatingPhase;
 			}
-			painter.drawText( x, y, tr(txt) );
+			//painter.drawText( x, y, tr(txt) );
+			painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
+			//painter.drawText( box[i].adjusted( xa, ya, xa, ya ), Qt::AlignLeft | Qt::AlignTop, tr(txt) );
 		}
 	}
 	if (isSafeToShowBranchesData())
