@@ -266,7 +266,7 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 				if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 				{
 					setTasProjectProgressBar( frame, greenzoneSize );
-					//playback->setProgressbar(frame, greenzoneSize);
+					playback->setProgressbar(frame, greenzoneSize);
 					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 				}
 				if (!savestates[frame].size()) continue;
@@ -291,7 +291,7 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 					if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 					{
 						setTasProjectProgressBar( frame, greenzoneSize );
-						//playback->setProgressbar(frame, greenzoneSize);
+						playback->setProgressbar(frame, greenzoneSize);
 						last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 					}
 					if (!savestates[frame].size()) continue;
@@ -317,7 +317,7 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 					if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 					{
 						setTasProjectProgressBar( frame, greenzoneSize );
-						//playback->setProgressbar(frame, greenzoneSize);
+						playback->setProgressbar(frame, greenzoneSize);
 						last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 					}
 					if (!savestates[frame].size()) continue;

@@ -246,14 +246,19 @@ void PLAYBACK::updateProgressbar()
 	if (pauseFrame)
 	{
 		setProgressbar(currFrameCounter - seekingBeginningFrame, pauseFrame - seekingBeginningFrame);
-	} else
+	}
+	else
 	{
 		if (emuPausedState)
+		{
 			// full progressbar
 			setProgressbar(1, 1);
+		}
 		else
+		{
 			// cleared progressbar
 			setProgressbar(0, 1);
+		}
 	}
 	//RedrawWindow(hwndProgressbar, NULL, NULL, RDW_INVALIDATE);
 }
@@ -576,7 +581,11 @@ int PLAYBACK::getFlashingPauseFrame()
 
 void PLAYBACK::setProgressbar(int a, int b)
 {
-	// TODO
+	if ( tasWin )
+	{
+		tasWin->progBar->setRange(0,b);
+		tasWin->progBar->setValue(a);
+	}
 	//SendMessage(hwndProgressbar, PBM_SETPOS, PROGRESSBAR_WIDTH * a / b, 0);
 }
 void PLAYBACK::cancelSeeking()

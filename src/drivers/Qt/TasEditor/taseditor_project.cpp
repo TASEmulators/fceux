@@ -188,10 +188,12 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 		write32le(selectionOffset, ofs);
 		// finish
 		delete ofs;
-		//playback->updateProgressbar();
+		playback->updateProgressbar();
 		// also set project.changed to false, unless it was SaveCompact
 		if (!differentName)
+		{
 			reset();
+		}
 		// restore cursor
 
 		if ( progressDialog )

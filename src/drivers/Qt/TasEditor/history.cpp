@@ -1009,7 +1009,7 @@ void HISTORY::save(EMUFILE *os, bool really_save)
 			if (i / SAVING_HISTORY_PROGRESSBAR_UPDATE_RATE > last_tick)
 			{
 				setTasProjectProgressBar( i, historyTotalItems );
-				//playback->setProgressbar(i, historyTotalItems);
+				playback->setProgressbar(i, historyTotalItems);
 				last_tick = i / PROGRESSBAR_UPDATE_RATE;
 			}
 		}

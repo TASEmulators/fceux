@@ -35,6 +35,7 @@
 #include <QPainter>
 #include <QShortcut>
 #include <QTabWidget>
+#include <QProgressBar>
 #include <QStackedWidget>
 #include <QClipboard>
 
@@ -480,14 +481,15 @@ class TasEditorWindow : public QDialog
 		//QGroupBox  *historyGBox;
 		QFrame     *bbFrame;
 
-		QPushButton *rewindMkrBtn;
-		QPushButton *rewindFrmBtn;
-		QPushButton *playPauseBtn;
-		QPushButton *advFrmBtn;
-		QPushButton *advMkrBtn;
-		QCheckBox   *followCursorCbox;
-		QCheckBox   *turboSeekCbox;
-		QCheckBox   *autoRestoreCbox;
+		QPushButton  *rewindMkrBtn;
+		QPushButton  *rewindFrmBtn;
+		QPushButton  *playPauseBtn;
+		QPushButton  *advFrmBtn;
+		QPushButton  *advMkrBtn;
+		QProgressBar *progBar;
+		QCheckBox    *followCursorCbox;
+		QCheckBox    *turboSeekCbox;
+		QCheckBox    *autoRestoreCbox;
 
 		QCheckBox    *recRecordingCbox;
 		QCheckBox    *recSuperImposeCbox;

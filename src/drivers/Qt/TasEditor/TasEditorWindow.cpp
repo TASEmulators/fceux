@@ -1104,6 +1104,9 @@ void TasEditorWindow::buildSideControlPanel(void)
 	   advFrmBtn->setIcon( style()->standardIcon( QStyle::SP_MediaSeekForward ) );
 	   advMkrBtn->setIcon( style()->standardIcon( QStyle::SP_MediaSkipForward ) );
 
+	progBar = new QProgressBar();
+	progBar->setRange( 0, 1 );
+
 	followCursorCbox = new QCheckBox( tr("Follow Cursor") );
 	   turboSeekCbox = new QCheckBox( tr("Turbo Seek") );
 	 autoRestoreCbox = new QCheckBox( tr("Auto-Restore Last Position") );
@@ -1152,6 +1155,7 @@ void TasEditorWindow::buildSideControlPanel(void)
 	hbox->addWidget( playPauseBtn );
 	hbox->addWidget( advFrmBtn    );
 	hbox->addWidget( advMkrBtn    );
+	vbox->addWidget( progBar );
 
 	hbox = new QHBoxLayout();
 	vbox->addLayout( hbox );
