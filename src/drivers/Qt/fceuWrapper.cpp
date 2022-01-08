@@ -1202,7 +1202,7 @@ static void DoFun(int frameskip, int periodic_saves)
 	fskipc = (fskipc + 1) % (frameskip + 1);
 #endif
 
-	if (NoWaiting) 
+	if (NoWaiting || turbo) 
 	{
 		gfx = 0;
 	}
@@ -1674,7 +1674,7 @@ bool FCEUD_ShouldDrawInputAids(void)
 	return drawInputAidsEnable;
 }
 
-void FCEUD_TurboOn	 (void) { /* TODO */ };
-void FCEUD_TurboOff   (void) { /* TODO */ };
-void FCEUD_TurboToggle(void) { /* TODO */ };
+void FCEUD_TurboOn (void) { turbo = true; };
+void FCEUD_TurboOff   (void) { turbo = false; };
+void FCEUD_TurboToggle(void) { turbo = !turbo; };
 

@@ -3178,7 +3178,15 @@ void TasEditorWindow::playbackFollowCursorCb(bool val)
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::playbackTurboSeekCb(bool val)
 {
+	FCEU_CRITICAL_SECTION( emuLock );
+
 	taseditorConfig.turboSeek = val;
+
+	// if currently seeking, apply this option immediately
+	if (playback.getPauseFrame() >= 0)
+	{
+		turbo = taseditorConfig.turboSeek;
+	}
 }
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::playbackAutoRestoreCb(bool val)

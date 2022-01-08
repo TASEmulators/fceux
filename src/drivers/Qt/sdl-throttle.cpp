@@ -56,6 +56,7 @@ double g_fpsScale = Normal; // used by sdl.cpp
 bool MaxSpeed = false;
 bool useIntFrameRate = false;
 static double frmRateAdjRatio = 1.000000f; // Frame Rate Adjustment Ratio
+extern bool turbo;
 
 double getHighPrecTimeStamp(void)
 {
@@ -316,7 +317,7 @@ int highPrecSleep( double timeSeconds )
 int
 SpeedThrottle(void)
 {
-	if ( (g_fpsScale >= 32) || (NoWaiting & 0x01) )
+	if ( (g_fpsScale >= 32) || (NoWaiting & 0x01) || turbo )
 	{
 		return 0; /* Done waiting */
 	}

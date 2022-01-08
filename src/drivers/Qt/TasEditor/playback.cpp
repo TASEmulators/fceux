@@ -59,6 +59,7 @@ void PLAYBACK::reset()
 	forwardFullButtonOldState = forwardFullButtonState = false;
 	emuPausedOldState = emuPausedState = true;
 	stopSeeking();
+	turbo = false;
 }
 void PLAYBACK::update()
 {
@@ -348,12 +349,19 @@ void PLAYBACK::startSeekingToFrame(int frame)
 		pauseFrame = frame + 1;
 	}
 	if (taseditorConfig->turboSeek)
+	{
+		//printf("Turbo seek on\n");
 		turbo = true;
+	}
 	unpauseEmulation();
 }
 void PLAYBACK::stopSeeking()
 {
 	pauseFrame = 0;
+	//if ( turbo )
+	//{
+	//	printf("Turbo seek off\n");
+	//}
 	turbo = false;
 	pauseEmulation();
 	setProgressbar(1, 1);
@@ -381,7 +389,9 @@ void PLAYBACK::handleForwardFrame()
 	if (pauseFrame && !emuPausedState) return;
 	jump(currFrameCounter + 1);
 	if (!pauseFrame)
+	{
 		pauseEmulation();
+	}
 	turbo = false;
 }
 void PLAYBACK::handleRewindFull(int speed)

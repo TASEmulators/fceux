@@ -33,6 +33,7 @@
 #include <cstdlib>
 
 extern Config *g_config;
+extern bool turbo;
 
 static volatile int *s_Buffer = 0;
 static unsigned int s_BufferSize;
@@ -311,7 +312,7 @@ WriteSound(int32 *buf,
 	int udrFlowDup  = 1;
 	static int skipCounter = 0;
 
-	if ( NoWaiting & 0x01 )
+	if ( (NoWaiting & 0x01) || turbo )
 	{	// During Turbo mode, don't bother with sound as
 		// overflowing the audio buffer can cause delays.
 		return;
