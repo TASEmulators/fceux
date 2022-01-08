@@ -4505,9 +4505,18 @@ void QPianoRoll::ensureTheLineIsVisible( int lineNum )
 {
 	if ( !lineIsVisible( lineNum ) )
 	{
+		//int lineEnd = lineOffset + viewLines - 2;
 		//printf("Seeking Frame %i\n", lineNum );
 
-		lineOffset = lineNum;
+		if ( lineNum < lineOffset )
+		{
+			lineOffset = lineNum;
+		}
+		else
+		{
+			//printf("Seeking View Frame %i\n", lineNum );
+			lineOffset = lineOffset - viewLines + 2;
+		}
 
 		if ( lineOffset < 0 )
 		{

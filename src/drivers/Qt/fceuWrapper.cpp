@@ -1188,9 +1188,9 @@ FCEUD_Update(uint8 *XBuf,
 
 static void DoFun(int frameskip, int periodic_saves)
 {
-	uint8 *gfx;
-	int32 *sound;
-	int32 ssize;
+	uint8 *gfx = 0;
+	int32 *sound = 0;
+	int32 ssize = 0;
 	static int fskipc = 0;
 	//static int opause = 0;
 
