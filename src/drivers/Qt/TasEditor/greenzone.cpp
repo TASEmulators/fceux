@@ -41,7 +41,7 @@ GREENZONE::GREENZONE()
 void GREENZONE::init()
 {
 	reset();
-	nextCleaningTime = clock() + TIME_BETWEEN_CLEANINGS;
+	nextCleaningTime = getTasEditorTime() + TIME_BETWEEN_CLEANINGS;
 }
 void GREENZONE::free()
 {
@@ -67,7 +67,7 @@ void GREENZONE::update()
 	}
 
 	// run cleaning from time to time
-	if (clock() > nextCleaningTime)
+	if (getTasEditorTime() > nextCleaningTime)
 		runGreenzoneCleaning();
 
 	// also log lag frames
@@ -180,7 +180,7 @@ finish:
 		bookmarks->redrawBookmarksList();
 	}
 	// shedule next cleaning
-	nextCleaningTime = clock() + TIME_BETWEEN_CLEANINGS;
+	nextCleaningTime = getTasEditorTime() + TIME_BETWEEN_CLEANINGS;
 }
 
 // returns true if actually cleared savestate data

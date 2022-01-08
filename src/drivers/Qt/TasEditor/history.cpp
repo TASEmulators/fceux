@@ -101,7 +101,7 @@ void HISTORY::init(void)
 {
 	updateScheduled = false;
 	// shedule first autocompression
-	nextAutocompressTime = clock() + TIME_BETWEEN_AUTOCOMPRESSIONS;
+	nextAutocompressTime = getTasEditorTime() + TIME_BETWEEN_AUTOCOMPRESSIONS;
 }
 void HISTORY::free()
 {
@@ -144,7 +144,7 @@ void HISTORY::update()
 	showUndoHint = false;
 	if (undoHintPos >= 0)
 	{
-		if ((int)clock() < undoHintTimer)
+		if (getTasEditorTime() < undoHintTimer)
 			showUndoHint = true;
 		else
 			undoHintPos = -1;		// finished hinting
@@ -159,7 +159,7 @@ void HISTORY::update()
 	//	pianoRoll.redrawRow(undoHintPos);
 
 	// When CPU is idle, compress items from time to time
-	if (clock() > nextAutocompressTime)
+	if (getTasEditorTime() > nextAutocompressTime)
 	{
 		if (FCEUI_EmulationPaused())
 		{
@@ -179,7 +179,7 @@ void HISTORY::update()
 				}
 			}
 		}
-		nextAutocompressTime = clock() + TIME_BETWEEN_AUTOCOMPRESSIONS;
+		nextAutocompressTime = getTasEditorTime() + TIME_BETWEEN_AUTOCOMPRESSIONS;
 	}
 }
 
@@ -347,7 +347,7 @@ int HISTORY::jumpInTime(int new_pos)
 		undoHintPos = getCurrentSnapshot().keyFrame;		// redo
 	else
 		undoHintPos = getNextToCurrentSnapshot().keyFrame;	// undo
-	undoHintTimer = clock() + UNDO_HINT_TIME;
+	undoHintTimer = getTasEditorTime() + UNDO_HINT_TIME;
 	showUndoHint = true;
 
 	real_pos = (historyStartPos + historyCursorPos) % historySize;

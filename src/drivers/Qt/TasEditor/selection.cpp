@@ -93,9 +93,9 @@ void SELECTION::update()
 	{
 		if (!previousMarkerButtonOldState)
 		{
-			buttonHoldTimer = clock();
+			buttonHoldTimer = getTasEditorTime();
 			jumpToPreviousMarker();
-		} else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+		} else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < getTasEditorTime())
 		{
 			jumpToPreviousMarker();
 		}
@@ -106,10 +106,10 @@ void SELECTION::update()
 	{
 		if (!nextMarkerButtonOldState)
 		{
-			buttonHoldTimer = clock();
+			buttonHoldTimer = getTasEditorTime();
 			jumpToNextMarker();
 		}
-		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < getTasEditorTime())
 		{
 			jumpToNextMarker();
 		}

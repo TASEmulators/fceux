@@ -9,7 +9,7 @@
 #include <QTimer>
 #include <QWidget>
 
-#define BRANCHES_ANIMATION_TICK (CLOCKS_PER_SEC / 25)	// animate at 25FPS
+#define BRANCHES_ANIMATION_TICK (40)	// animate at 25FPS
 #define BRANCHES_TRANSITION_MAX 12
 #define CURSOR_MIN_DISTANCE 1.0
 #define CURSOR_MAX_DISTANCE 256.0
@@ -179,7 +179,7 @@ private:
 	// not saved vars
 	int transitionPhase;
 	int currentAnimationFrame;
-	clock_t nextAnimationTime;
+	uint64_t nextAnimationTime;
 	int playbackCursorX, playbackCursorY;
 	double cornersCursorX, cornersCursorY;
 	std::vector<int> branchX;				// in pixels

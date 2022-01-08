@@ -52,7 +52,7 @@ void TASEDITOR_PROJECT::reset()
 void TASEDITOR_PROJECT::update()
 {
 	// if it's time to autosave - pop Save As dialog
-	if (changed && /*taseditorWindow.TASEditorIsInFocus &&*/ taseditorConfig->autosaveEnabled && !projectFile.empty() && clock() >= nextSaveShedule /*&& pianoRoll.dragMode == DRAG_MODE_NONE*/)
+	if (changed && /*taseditorWindow.TASEditorIsInFocus &&*/ taseditorConfig->autosaveEnabled && !projectFile.empty() && getTasEditorTime() >= nextSaveShedule /*&& pianoRoll.dragMode == DRAG_MODE_NONE*/)
 	{
 		if (taseditorConfig->autosaveSilent)
 		{
@@ -411,7 +411,7 @@ bool TASEDITOR_PROJECT::getProjectChanged()
 
 void TASEDITOR_PROJECT::sheduleNextAutosave()
 {
-	nextSaveShedule = clock() + taseditorConfig->autosavePeriod * AUTOSAVE_PERIOD_SCALE;
+	nextSaveShedule = getTasEditorTime() + taseditorConfig->autosavePeriod * AUTOSAVE_PERIOD_SCALE;
 }
 
 

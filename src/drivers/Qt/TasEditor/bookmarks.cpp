@@ -119,7 +119,7 @@ void BOOKMARKS::reset_vars()
 	mouseOverBranchesBitmap = false;
 	mustCheckItemUnderMouse = true;
 	bookmarkLeftclicked = bookmarkRightclicked = ITEM_UNDER_MOUSE_NONE;
-	nextFlashUpdateTime = clock() + BOOKMARKS_FLASH_TICK;
+	nextFlashUpdateTime = getTasEditorTime() + BOOKMARKS_FLASH_TICK;
 	imageItem = 0;
 }
 
@@ -201,9 +201,9 @@ void BOOKMARKS::update()
 	commands.resize(0);
 
 	// once per 100 milliseconds update bookmark flashes
-	if (clock() > nextFlashUpdateTime)
+	if (getTasEditorTime() > nextFlashUpdateTime)
 	{
-		nextFlashUpdateTime = clock() + BOOKMARKS_FLASH_TICK;
+		nextFlashUpdateTime = getTasEditorTime() + BOOKMARKS_FLASH_TICK;
 		for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 		{
 			if (bookmarkRightclicked == i || bookmarkLeftclicked == i)

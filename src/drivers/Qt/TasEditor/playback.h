@@ -6,10 +6,10 @@
 
 #define PROGRESSBAR_WIDTH 200
 
-#define PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING (CLOCKS_PER_SEC / 10)
-#define PAUSEFRAME_BLINKING_PERIOD_WHEN_PAUSED (CLOCKS_PER_SEC / 4)
+#define PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING (100)
+#define PAUSEFRAME_BLINKING_PERIOD_WHEN_PAUSED (250)
 
-#define BUTTON_HOLD_REPEAT_DELAY (CLOCKS_PER_SEC / 4) // in milliseconds
+#define BUTTON_HOLD_REPEAT_DELAY (250) // in milliseconds
 
 class UpperMarkerNoteEdit : public QLineEdit
 {
@@ -90,7 +90,7 @@ private:
 	bool forwardButtonState, forwardButtonOldState;
 	bool rewindFullButtonState, rewindFullButtonOldState;
 	bool forwardFullButtonState, forwardFullButtonOldState;
-	clock_t buttonHoldTimer;
+	uint64_t buttonHoldTimer;
 	int seekingBeginningFrame;
 
 };

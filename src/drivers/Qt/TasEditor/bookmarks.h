@@ -42,7 +42,7 @@ enum BOOKMARK_COMMANDS
 #define ITEM_UNDER_MOUSE_CLOUD (-1)
 #define ITEM_UNDER_MOUSE_FIREBALL (TOTAL_BOOKMARKS)
 
-#define BOOKMARKS_FLASH_TICK (CLOCKS_PER_SEC / 10) // 10 Hz
+#define BOOKMARKS_FLASH_TICK 100   // in milliseconds
 
 // listview columns
 enum
@@ -128,7 +128,7 @@ private:
 	std::vector<int> commands;
 	int selectedSlot;
 	int mouseX, mouseY;
-	clock_t nextFlashUpdateTime;
+	uint64_t nextFlashUpdateTime;
 
 	// GUI stuff
 	QFont       font;

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <stdint.h>
 #include <time.h>
 #include <string>
 #include <list>
@@ -104,7 +105,7 @@ enum PIANO_ROLL_COLUMNS
 #define HEADER_LIGHT_HOLD 5
 #define HEADER_LIGHT_MOUSEOVER_SEL 3
 #define HEADER_LIGHT_MOUSEOVER 0
-#define HEADER_LIGHT_UPDATE_TICK  (CLOCKS_PER_SEC / 25)	// 25FPS
+#define HEADER_LIGHT_UPDATE_TICK  (40)	// 25FPS
 
 struct NewProjectParameters
 {
@@ -298,8 +299,8 @@ class QPianoRoll : public QWidget
 		int mouse_x;
 		int mouse_y;
 		int gridPixelWidth;
-		clock_t drawingStartTimestamp;
-		clock_t nextHeaderUpdateTime;
+		uint64_t drawingStartTimestamp;
+		uint64_t nextHeaderUpdateTime;
 
 		int playbackCursorPos;
 
@@ -653,5 +654,7 @@ void tasWindowSetFocus(bool val);
 
 bool isTaseditorRecording(void);
 void recordInputByTaseditor(void);
+
+uint64_t getTasEditorTime(void);
 
 extern TasEditorWindow *tasWin;

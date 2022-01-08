@@ -237,19 +237,19 @@ void BRANCHES::resetVars()
 	playbackCursorX = playbackCursorY = 0;
 	branchRightclicked = lastItemUnderMouse = -1;
 	mustRecalculateBranchesTree = mustRedrawBranchesBitmap = true;
-	nextAnimationTime = clock() + BRANCHES_ANIMATION_TICK;
+	nextAnimationTime = getTasEditorTime() + BRANCHES_ANIMATION_TICK;
 }
 
 void BRANCHES::update()
 {
-	clock_t currentTime;
+	unsigned int currentTime;
 
 	if (mustRecalculateBranchesTree)
 	{
 		recalculateBranchesTree();
 	}
 
-	currentTime = clock();
+	currentTime = getTasEditorTime();
 
 	// once per 40 milliseconds update branches_bitmap
 	if (currentTime > nextAnimationTime)

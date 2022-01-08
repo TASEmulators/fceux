@@ -104,7 +104,7 @@ private:
 
 	bool previousMarkerButtonState, previousMarkerButtonOldState;
 	bool nextMarkerButtonState, nextMarkerButtonOldState;
-	clock_t buttonHoldTimer;
+	uint64_t buttonHoldTimer;
 
 	std::vector<RowsSelection> rowsSelectionHistory;
 

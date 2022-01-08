@@ -24,7 +24,7 @@
 #define LVS_EX_DOUBLEBUFFER     0x00010000
 #endif
 
-#define AUTOSAVE_PERIOD_SCALE  (60 * CLOCKS_PER_SEC)	// = 1 minute in milliseconds
+#define AUTOSAVE_PERIOD_SCALE  (60000)	// = 1 minute in milliseconds
 
 #define MARKERS_SAVED 1
 #define BOOKMARKS_SAVED 2
@@ -69,7 +69,7 @@ public:
 private:
 	bool changed;
 	bool updateCaptionFlag;
-	clock_t nextSaveShedule;
+	uint64_t nextSaveShedule;
 
 	std::string projectFile;	// full path
 	std::string projectName;	// file name only

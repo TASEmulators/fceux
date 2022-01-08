@@ -71,10 +71,10 @@ void PLAYBACK::update()
 	{
 		if (!rewindButtonOldState)
 		{
-			buttonHoldTimer = clock();
+			buttonHoldTimer = getTasEditorTime();
 			//handleRewindFrame();
 		}
-		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < getTasEditorTime())
 		{
 			handleRewindFrame();
 		}
@@ -85,10 +85,10 @@ void PLAYBACK::update()
 	{
 		if (!forwardButtonOldState)
 		{
-			buttonHoldTimer = clock();
+			buttonHoldTimer = getTasEditorTime();
 			//handleForwardFrame();
 		}
-		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < getTasEditorTime())
 		{
 			handleForwardFrame();
 		}
@@ -100,10 +100,10 @@ void PLAYBACK::update()
 	{
 		if (!rewindFullButtonOldState)
 		{
-			buttonHoldTimer = clock();
+			buttonHoldTimer = getTasEditorTime();
 			//handleRewindFull();
 		}
-		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < getTasEditorTime())
 		{
 			handleRewindFull();
 		}
@@ -114,10 +114,10 @@ void PLAYBACK::update()
 	{
 		if (!forwardFullButtonOldState)
 		{
-			buttonHoldTimer = clock();
+			buttonHoldTimer = getTasEditorTime();
 			//handleForwardFull();
 		}
-		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < clock())
+		else if (buttonHoldTimer + BUTTON_HOLD_REPEAT_DELAY < getTasEditorTime())
 		{
 			handleForwardFull();
 		}
@@ -178,9 +178,9 @@ void PLAYBACK::update()
 	if (pauseFrame)
 	{
 		if (emuPausedState)
-			showPauseFrame = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_WHEN_PAUSED) & 1;
+			showPauseFrame = (int)(getTasEditorTime() / PAUSEFRAME_BLINKING_PERIOD_WHEN_PAUSED) & 1;
 		else
-			showPauseFrame = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING) & 1;
+			showPauseFrame = (int)(getTasEditorTime() / PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING) & 1;
 	}
 	else
 	{

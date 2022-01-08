@@ -8,10 +8,10 @@
 #include "Qt/TasEditor/bookmark.h"
 #include "Qt/TasEditor/snapshot.h"
 
-#define UNDO_HINT_TIME (CLOCKS_PER_SEC / 5)	// in milliseconds
+#define UNDO_HINT_TIME (200)	// in milliseconds
 
 #define SAVING_HISTORY_PROGRESSBAR_UPDATE_RATE 10
-#define TIME_BETWEEN_AUTOCOMPRESSIONS (CLOCKS_PER_SEC / 2)		// in milliseconds
+#define TIME_BETWEEN_AUTOCOMPRESSIONS (500)		// in milliseconds
 
 #define HISTORY_LIST_WIDTH 500
 
@@ -157,10 +157,10 @@ private:
 	int historySize;
 
 	int undoHintPos, oldUndoHintPos;
-	clock_t undoHintTimer;
+	uint64_t undoHintTimer;
 	bool showUndoHint, oldShowUndoHint;
 	bool updateScheduled;
-	clock_t nextAutocompressTime;
+	uint64_t nextAutocompressTime;
 
 };
 

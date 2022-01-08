@@ -99,6 +99,7 @@ enum DRAG_MODES
 static char pianoRollSaveID[PIANO_ROLL_ID_LEN] = "PIANO_ROLL";
 static char pianoRollSkipSaveID[PIANO_ROLL_ID_LEN] = "PIANO_ROLX";
 static TasFindNoteWindow *findWin = NULL;
+static uint64_t tasEditorTimeStamp = 0;
 
 //----------------------------------------------------------------------------
 //----  Main TAS Editor Window
@@ -129,6 +130,11 @@ bool isTaseditorRecording(void)
 		return false;		// replay
 	}
 	return true;			// record
+}
+
+uint64_t getTasEditorTime(void)
+{
+	return tasEditorTimeStamp;
 }
 
 void recordInputByTaseditor(void)
@@ -1443,6 +1449,11 @@ QPoint TasEditorWindow::getPreviewPopupCoordinates(void)
 //----------------------------------------------------------------------------
 int TasEditorWindow::initModules(void)
 {
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+	tasEditorTimeStamp = SDL_GetTicks64();
+#else
+	tasEditorTimeStamp = SDL_GetTicks();
+#endif
 	// init modules
 	//editor.init();
 	//pianoRoll.init();
@@ -1505,7 +1516,13 @@ void TasEditorWindow::frameUpdate(void)
 {
 	FCEU_WRAPPER_LOCK();
 
-	//printf("TAS Frame Update: %zi\n", currMovieData.records.size());
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+	tasEditorTimeStamp = SDL_GetTicks64();
+#else
+	tasEditorTimeStamp = SDL_GetTicks();
+#endif
+
+	//printf("TAS Frame Update: %zi   %u\n", currMovieData.records.size(), tasEditorTimeStamp);
 
 	//taseditorWindow.update();
 	greenzone.update();
@@ -4634,7 +4651,7 @@ void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
 			// clicked on Input
 			if (headerClicked)
 			{
-				drawingStartTimestamp = clock();
+				drawingStartTimestamp = getTasEditorTime();
 				int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 				int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 				int selection_beginning = selection->getCurrentRowsSelectionBeginning();
@@ -4654,7 +4671,7 @@ void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
 					selection->setRowSelection(row_index);
 				}
 				// toggle Input
-				drawingStartTimestamp = clock();
+				drawingStartTimestamp = getTasEditorTime();
 				int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 				int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 				int selection_beginning = selection->getCurrentRowsSelectionBeginning();
@@ -4908,7 +4925,7 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 			// clicked on Input
 			if (headerClicked)
 			{
-				drawingStartTimestamp = clock();
+				drawingStartTimestamp = getTasEditorTime();
 				int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 				int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 				int selection_beginning = selection->getCurrentRowsSelectionBeginning();
@@ -4928,7 +4945,7 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 					selection->setRowSelection(row_index);
 				}
 				// toggle Input
-				drawingStartTimestamp = clock();
+				drawingStartTimestamp = getTasEditorTime();
 				int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 				int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 				int selection_beginning = selection->getCurrentRowsSelectionBeginning();
@@ -5805,9 +5822,9 @@ void QPianoRoll::periodicUpdate(void)
 	updateDrag();
 
 	// once per 40 milliseconds update colors alpha in the Header
-	if (clock() > nextHeaderUpdateTime)
+	if (getTasEditorTime() > nextHeaderUpdateTime)
 	{
-		nextHeaderUpdateTime = clock() + HEADER_LIGHT_UPDATE_TICK;
+		nextHeaderUpdateTime = getTasEditorTime() + HEADER_LIGHT_UPDATE_TICK;
 		bool changes_made = false;
 		int light_value = 0;
 		// 1 - update Frame# columns' heads
@@ -5873,7 +5890,7 @@ void QPianoRoll::setLightInHeaderColumn(int column, int level)
 	{
 		headerColors[column] = level;
 		//redrawHeader();
-		nextHeaderUpdateTime = clock() + HEADER_LIGHT_UPDATE_TICK;
+		nextHeaderUpdateTime = getTasEditorTime() + HEADER_LIGHT_UPDATE_TICK;
 	}
 }
 //----------------------------------------------------------------------------
