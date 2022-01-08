@@ -989,7 +989,11 @@ void HISTORY::save(EMUFILE *os, bool really_save)
 {
 	if (really_save)
 	{
-		int real_pos, last_tick = 0;
+		int real_pos, last_tick = -1;
+
+		setTasProjectProgressBarText("Saving History...");
+		setTasProjectProgressBar( 0, historyTotalItems );
+
 		// write "HISTORY" string
 		os->fwrite(historySaveID, HISTORY_ID_LEN);
 		// write vars
@@ -1004,11 +1008,14 @@ void HISTORY::save(EMUFILE *os, bool really_save)
 			os->fwrite(&currentBranchNumberBackups[real_pos], 1);
 			if (i / SAVING_HISTORY_PROGRESSBAR_UPDATE_RATE > last_tick)
 			{
-				playback->setProgressbar(i, historyTotalItems);
+				setTasProjectProgressBar( i, historyTotalItems );
+				//playback->setProgressbar(i, historyTotalItems);
 				last_tick = i / PROGRESSBAR_UPDATE_RATE;
 			}
 		}
-	} else
+		setTasProjectProgressBar( historyTotalItems, historyTotalItems );
+	}
+	else
 	{
 		// write "HISTORX" string
 		os->fwrite(historySkipSaveID, HISTORY_ID_LEN);

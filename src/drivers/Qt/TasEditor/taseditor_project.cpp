@@ -17,6 +17,7 @@ Project - Manager of working project
 ------------------------------------------------------------------------------------ */
 
 #include <QMessageBox>
+#include <QProgressDialog>
 
 #include "fceu.h"
 #include "movie.h"
@@ -31,6 +32,8 @@ extern FCEUGI *GameInfo;
 extern void FCEU_PrintError(const char *format, ...);
 extern bool saveProject(bool save_compact = false);
 extern bool saveProjectAs(bool save_compact = false);
+
+static QProgressDialog *progressDialog = NULL;
 
 TASEDITOR_PROJECT::TASEDITOR_PROJECT()
 {
@@ -95,37 +98,51 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 		if (count1 && count2)
 		{
 			// ask user if he wants to fix the checksum before saving
-			char message[2048] = {0};
-			strcpy(message, "Movie ROM:\n");
-			strncat(message, currMovieData.romFilename.c_str(), 2047 - strlen(message));
-			strncat(message, "\nMD5: ", 2047 - strlen(message));
-			strncat(message, md5OfMovie, 2047 - strlen(message));
-			strncat(message, "\n\nCurrent ROM:\n", 2047 - strlen(message));
-			strncat(message, GameInfo->filename, 2047 - strlen(message));
-			strncat(message, "\nMD5: ", 2047 - strlen(message));
-			strncat(message, md5OfRom, 2047 - strlen(message));
-			strncat(message, "\n\nFix the movie header before saving? ", 2047 - strlen(message));
-			//int answer = MessageBox(taseditorWindow.hwndTASEditor, message, "ROM Checksum Mismatch", MB_YESNOCANCEL);
-			//if (answer == IDCANCEL)
-			//{
-			//	// cancel saving
-			//	return false;
-			//} else if (answer == IDYES)
-			//{
+			std::string message;
+			message.assign("Movie ROM:\n");
+			message.append(currMovieData.romFilename.c_str());
+			message.append("\nMD5: ");
+			message.append(md5OfMovie);
+			message.append("\n\nCurrent ROM:\n");
+			message.append(GameInfo->filename);
+			message.append("\nMD5: ");
+			message.append(md5OfRom);
+			message.append("\n\nFix the movie header before saving? ");
+
+			int ans = QMessageBox::warning( tasWin, QObject::tr("ROM Checksum Mismatch"), QObject::tr(message.c_str()), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Cancel );
+
+			if ( QMessageBox::Cancel == ans )
+			{	// cancel saving
+				return false;
+			}
+			else if ( QMessageBox::Yes == ans )
+			{
 				// change ROM data in the movie to current ROM
 				currMovieData.romFilename = GameInfo->filename;
 				currMovieData.romChecksum = GameInfo->MD5;
-			//}
+			}
 		}
 	}
 	// open file for write
 	EMUFILE_FILE* ofs = 0;
 	if (differentName)
+	{
 		ofs = FCEUD_UTF8_fstream(differentName, "wb");
+	}
 	else
+	{
 		ofs = FCEUD_UTF8_fstream(getProjectFile().c_str(), "wb");
+	}
 	if (ofs)
 	{
+		progressDialog = new QProgressDialog( QObject::tr("Saving TAS Project"), QObject::tr("Cancel"), 0, 100, tasWin );
+		progressDialog->setWindowModality(Qt::WindowModal);
+		progressDialog->setWindowTitle( QObject::tr("Saving TAS Project") );
+		progressDialog->setAutoReset(false);
+		progressDialog->setAutoClose(false);
+		progressDialog->setMinimumDuration(500);
+		progressDialog->setValue(0);
+
 		// change cursor to hourglass
 		//SetCursor(LoadCursor(0, IDC_WAIT));
 		// save fm2 data to the project file
@@ -171,14 +188,20 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 		write32le(selectionOffset, ofs);
 		// finish
 		delete ofs;
-		playback->updateProgressbar();
+		//playback->updateProgressbar();
 		// also set project.changed to false, unless it was SaveCompact
 		if (!differentName)
 			reset();
 		// restore cursor
+
+		if ( progressDialog )
+		{
+			delete progressDialog; progressDialog = NULL;
+		}
 		//taseditorWindow.mustUpdateMouseCursor = true;
 		return true;
-	} else
+	}
+	else
 	{
 		return false;
 	}
@@ -453,5 +476,27 @@ void setInputType(MovieData& md, int newInputType)
 	if ( taseditorConfig )
 	{
 		taseditorConfig->lastExportedInputType = newInputType;
+	}
+}
+
+void setTasProjectProgressBarText( const char *txt )
+{
+	if ( progressDialog )
+	{
+		progressDialog->setLabelText( QObject::tr(txt) );
+	}
+}
+
+void setTasProjectProgressBar( int cur, int max )
+{
+	if ( progressDialog )
+	{
+		//printf("Set Progress %i / %i \n", cur, max );
+
+		if ( max != progressDialog->maximum() )
+		{
+			progressDialog->setMaximum(max);
+		}
+		progressDialog->setValue(cur);
 	}
 }

@@ -440,6 +440,9 @@ void BRANCHES::update()
 
 void BRANCHES::save(EMUFILE *os)
 {
+	setTasProjectProgressBarText("Saving Branches...");
+	setTasProjectProgressBar( 0, TOTAL_BOOKMARKS );
+
 	// write cloud time
 	os->fwrite(cloudTimestamp, TIMESTAMP_LENGTH);
 	// write current branch and flag of changes since it
@@ -469,6 +472,7 @@ void BRANCHES::save(EMUFILE *os)
 			write32le(cachedFirstDifferences[i][t], os);
 		}
 	}
+	setTasProjectProgressBar( TOTAL_BOOKMARKS, TOTAL_BOOKMARKS );
 }
 // returns true if couldn't load
 bool BRANCHES::load(EMUFILE *is)

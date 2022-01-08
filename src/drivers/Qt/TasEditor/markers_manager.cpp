@@ -64,11 +64,16 @@ void MARKERS_MANAGER::save(EMUFILE *os, bool really_save)
 {
 	if (really_save)
 	{
+		setTasProjectProgressBarText("Saving Markers...");
+		setTasProjectProgressBar( 0, 100 );
+
 		// write "MARKERS" string
 		os->fwrite(markers_save_id, MARKERS_ID_LEN);
 		markers.resetCompressedStatus();		// must recompress data, because most likely it has changed since last compression
 		markers.save(os);
-	} else
+		setTasProjectProgressBar( 100, 100 );
+	}
+       	else
 	{
 		// write "MARKERX" string, meaning that Markers are not saved
 		os->fwrite(markers_skipsave_id, MARKERS_ID_LEN);

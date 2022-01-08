@@ -393,11 +393,19 @@ void BOOKMARKS::save(EMUFILE *os, bool really_save)
 {
 	if (really_save)
 	{
+		setTasProjectProgressBarText("Saving Bookmarks...");
+		setTasProjectProgressBar( 0, TOTAL_BOOKMARKS );
+
 		// write "BOOKMARKS" string
 		os->fwrite(bookmarks_save_id, BOOKMARKS_ID_LEN);
 		// write all 10 bookmarks
 		for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+		{
+			setTasProjectProgressBar( i, TOTAL_BOOKMARKS );
 			bookmarksArray[i].save(os);
+		}
+		setTasProjectProgressBar( TOTAL_BOOKMARKS, TOTAL_BOOKMARKS );
+
 		// write branches
 		branches->save(os);
 	} else

@@ -79,3 +79,5 @@ private:
 
 int getInputType(MovieData& md);
 void setInputType(MovieData& md, int new_input_type);
+void setTasProjectProgressBar( int cur, int max );
+void setTasProjectProgressBarText( const char *txt );

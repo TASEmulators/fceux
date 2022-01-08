@@ -263,6 +263,11 @@ void SELECTION::save(EMUFILE *os, bool really_save)
 {
 	if (really_save)
 	{
+		int last_tick = -1;
+
+		setTasProjectProgressBarText("Saving Selection...");
+		setTasProjectProgressBar( 0, historyTotalItems );
+
 		// write "SELECTION" string
 		os->fwrite(selection_save_id, SELECTION_ID_LEN);
 		// write vars
@@ -272,10 +277,20 @@ void SELECTION::save(EMUFILE *os, bool really_save)
 		for (int i = 0; i < historyTotalItems; ++i)
 		{
 			saveSelection(rowsSelectionHistory[(historyStartPos + i) % historySize], os);
+
+			if (i / SAVING_HISTORY_PROGRESSBAR_UPDATE_RATE > last_tick)
+			{
+				setTasProjectProgressBar( i, historyTotalItems );
+				//playback->setProgressbar(i, historyTotalItems);
+				last_tick = i / PROGRESSBAR_UPDATE_RATE;
+			}
 		}
 		// write clipboard_selection
 		saveSelection(splicer->getClipboardSelection(), os);
-	} else
+
+		setTasProjectProgressBar( historyTotalItems, historyTotalItems );
+	}
+	else
 	{
 		// write "SELECTIOX" string
 		os->fwrite(selection_skipsave_id, SELECTION_ID_LEN);
