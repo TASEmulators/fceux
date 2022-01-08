@@ -282,6 +282,10 @@ int nesGamePadMap_t::parseMapping(const char *map)
 
 			while ((map[i] != 0) && (map[i] != ','))
 			{
+				if ( map[i] == '\\' )
+				{  // next character should be interpretted literally
+					i++;
+				}
 				val[k][j] = map[i];
 				i++;
 				j++;
@@ -924,7 +928,24 @@ int GamePad_t::saveCurrentMapToFile(const char *name)
 		{
 			if (bmap[c][i].ButtType == BUTTC_KEYBOARD)
 			{
-				sprintf(stmp, "k%s", SDL_GetKeyName(bmap[c][i].ButtonNum));
+				int j=0,k=0; const char *keyName;
+
+				keyName = SDL_GetKeyName(bmap[c][i].ButtonNum);
+
+				stmp[k] = 'k'; k++;
+
+				// Write keyname in with necessary escape characters.
+				while ( keyName[j] != 0 )
+				{
+					if ( (keyName[j] == '\\') || (keyName[j] == ',') )
+					{
+						stmp[k] = '\\'; k++;
+					}
+					stmp[k] = keyName[j]; k++; j++;
+				}
+				stmp[k] = 0;
+
+				//sprintf(stmp, "k%s", SDL_GetKeyName(bmap[c][i].ButtonNum));
 			}
 			else
 			{
