@@ -6686,6 +6686,13 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		//painter.drawText( x, y+pxLineTextOfs, tr(stmp) );
 		painter.drawText( rect, Qt::AlignCenter, tr(stmp) );
 
+		if ( font.italic() )
+		{
+			font.setBold(true);
+			font.setItalic(false);
+			painter.setFont(font);
+		}
+
 		x = -pxLineXScroll;
 
 		int iImage = bookmarks->findBookmarkAtFrame(lineNum);
@@ -6750,6 +6757,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	painter.drawLine( x, 0, x, pxLineSpacing );
 
 	font.setBold(true);
+	font.setItalic(false);
 	painter.setFont(font);
 
 
