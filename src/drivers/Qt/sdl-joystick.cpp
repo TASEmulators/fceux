@@ -706,6 +706,10 @@ int GamePad_t::loadHotkeyMapFromFile(const char *filename)
 
 				while ((line[i] != 0) && (line[i] != ','))
 				{
+					if ( line[i] == '\\' )
+					{  // next character should be interpretted literally
+						i++;
+					}
 					val[j] = line[i];
 					i++;
 					j++;
@@ -993,7 +997,23 @@ int GamePad_t::saveCurrentMapToFile(const char *name)
 				{
 					if (fk->bmap[i].ButtType == BUTTC_KEYBOARD)
 					{
-						sprintf(stmp, "k%s", SDL_GetKeyName(fk->bmap[i].ButtonNum));
+						int j=0,k=0; const char *keyName;
+
+						keyName = SDL_GetKeyName(fk->bmap[i].ButtonNum);
+
+						stmp[k] = 'k'; k++;
+
+						// Write keyname in with necessary escape characters.
+						while ( keyName[j] != 0 )
+						{
+							if ( (keyName[j] == '\\') || (keyName[j] == ',') )
+							{
+								stmp[k] = '\\'; k++;
+							}
+							stmp[k] = keyName[j]; k++; j++;
+						}
+						stmp[k] = 0;
+						//sprintf(stmp, "k%s", SDL_GetKeyName(fk->bmap[i].ButtonNum));
 					}
 					else
 					{
