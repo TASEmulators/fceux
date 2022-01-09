@@ -145,7 +145,7 @@ void BOOKMARKS::calcFontData(void)
 	pxLineSpacing  = metrics.lineSpacing() * 1.25;
 	pxLineLead     = pxLineSpacing - metrics.height();
 	pxCursorHeight = metrics.height();
-	pxLineTextOfs  = pxCharHeight + (pxLineSpacing - pxCharHeight) / 2;
+	pxLineTextOfs  = pxLineSpacing - ((pxLineSpacing - pxCharHeight) / 2) + (pxLineSpacing - pxCharHeight + 1) % 2;
 
 	//printf("W:%i  H:%i  LS:%i  \n", pxCharWidth, pxCharHeight, pxLineSpacing );
 

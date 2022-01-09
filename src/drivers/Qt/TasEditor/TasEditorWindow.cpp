@@ -4288,7 +4288,7 @@ void QPianoRoll::setFont( QFont &newFont )
 {
 	font = newFont;
 	font.setBold(true);
-	QWidget::setFont( newFont );
+	QWidget::setFont( font );
 	calcFontData();
 }
 //----------------------------------------------------------------------------
