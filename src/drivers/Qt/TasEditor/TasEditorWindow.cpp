@@ -6043,35 +6043,6 @@ void QPianoRoll::startDraggingMarker(int mouseX, int mouseY, int rowIndex, int c
 		QColor bgColor = (taseditorConfig->bindMarkersToInput) ? QColor( BINDMARKED_FRAMENUM_COLOR ) : QColor( MARKED_FRAMENUM_COLOR );
 
 		QSize iconSize(pxWidthFrameCol, pxLineSpacing);
-		//QPixmap pixmap( iconSize );
-		//pixmap.fill(Qt::transparent);
-
-		//QPainter painter(&pixmap);
-
-		//if (painter.isActive())
-		//{
-		//	char txt[32];
-
-		//	sprintf( txt, "%07i", rowIndex );
-		//	font.setItalic(true);
-		//	font.setBold(false);
-
-		//	painter.setFont(font);
-		//	//I want to make the title bar pasted on the content
-		//	//But you can't get the image of the default title bar, just draw a rectangular box
-		//	//If the external theme color is set, you need to change it
-		//	QRect title_rect{0,0,pixmap.width(),pixmap.height()};
-		//	painter.fillRect(title_rect,bgColor);
-		//	painter.drawText(title_rect,Qt::AlignCenter, txt);
-		//	painter.drawRect(pixmap.rect().adjusted(0,0,-1,-1));
-
-		//	font.setItalic(false);
-		//	font.setBold(true);
-		//}
-		//painter.end();
-
-		//QMimeData *mime = new QMimeData;
-		//mime->setText( QString("MARKER") );
 
 		mkrDrag = new markerDragPopup(this);
 		mkrDrag->resize( iconSize );
@@ -6085,13 +6056,6 @@ void QPianoRoll::startDraggingMarker(int mouseX, int mouseY, int rowIndex, int c
 		mkrDrag->setFont(font);
 		font.setItalic(false);
 		font.setBold(true);
-
-		//mkrDrag->setPixmap(pixmap);
-
-		//QDrag *drag = new QDrag(this);
-		//drag->setMimeData(mime);
-		//drag->setPixmap(pixmap);
-		//drag->setHotSpot(QPoint(0,0));
 
 		// start dragging the Marker
 		dragMode = DRAG_MODE_MARKER;
@@ -6108,35 +6072,6 @@ void QPianoRoll::startDraggingMarker(int mouseX, int mouseY, int rowIndex, int c
 			}
 		});
 		
-		//Drag is released after the mouse bounces up, at this time to judge whether it is dragged to the outside
-		//connect(drag, &QDrag::destroyed, this,[=]
-		//{
-		//	int line, col;
-		//	fceuCriticalSection emuLock;
-		//	QPoint pos = this->mapFromGlobal(QCursor::pos());
-		//	QPoint c = convPixToCursor( pos );
-
-		//	//printf("Drag Destroyed\n");
-
-		//	mouse_x = pos.x();
-		//	mouse_y = pos.y();
-
-		//	if ( c.y() >= 0 )
-		//	{
-		//		line = lineOffset + c.y();
-		//	}
-		//	else
-		//	{
-		//		line = -1;
-		//	}
-		//	col  = calcColumn( pos.x() );
-
-		//	rowUnderMouse = realRowUnderMouse = line;
-		//	columnUnderMouse = col;
-		//	finishDrag();
-		//});
-		//drag->exec(Qt::MoveAction);
-
 		mkrDrag->show();
 
 		update();
@@ -6397,7 +6332,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	//painter.drawText( x, pxLineTextOfs, tr("Frame#") );
 	
 	rect = QRect( -pxLineXScroll + pxFrameColX, 0, pxWidthFrameCol, pxLineSpacing );
-	painter.drawText( rect, Qt::AlignCenter, tr("Frame#") );
+	//painter.drawText( rect, Qt::AlignCenter, tr("Frame#") );
+	painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr("Frame#") );
 
 	//font.setBold(false);
 	//painter.setFont(font);
@@ -6666,12 +6602,14 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 				if ( data & (0x01 << j) )
 				{
 					//painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr(buttonNames[j]) );
-					painter.drawText( rect, Qt::AlignCenter, tr(buttonNames[j]) );
+					//painter.drawText( rect, Qt::AlignCenter, tr(buttonNames[j]) );
+					painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr(buttonNames[j]) );
 				}
 				else if ( hotChangeVal > 0 )
 				{
 					//painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr("-") );
-					painter.drawText( rect, Qt::AlignCenter, tr("-") );
+					//painter.drawText( rect, Qt::AlignCenter, tr("-") );
+					painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr("-") );
 				}
 				x += pxWidthBtnCol;
 			}
@@ -6705,7 +6643,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		}
 		painter.setFont(font);
 		//painter.drawText( x, y+pxLineTextOfs, tr(stmp) );
-		painter.drawText( rect, Qt::AlignCenter, tr(stmp) );
+		//painter.drawText( rect, Qt::AlignCenter, tr(stmp) );
+		painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr(stmp) );
 
 		if ( font.italic() )
 		{
@@ -6799,7 +6738,8 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			rect = QRect( x, 0, pxWidthBtnCol, pxLineSpacing );
 			painter.setPen( QPen(headerLightsColors[ headerColors[COLUMN_JOYPAD1_A + (i*8) + j] ],1) );
 			//painter.drawText( x + pxCharWidth, pxLineTextOfs, tr(buttonNames[j]) );
-			painter.drawText( rect, Qt::AlignCenter, tr(buttonNames[j]) );
+			//painter.drawText( rect, Qt::AlignCenter, tr(buttonNames[j]) );
+			painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr(buttonNames[j]) );
 
 			x += pxWidthBtnCol;
 		}
@@ -7524,7 +7464,8 @@ void markerDragPopup::paintEvent(QPaintEvent *event)
 	//If the external theme color is set, you need to change it
 	QRect title_rect{0,0,w,h};
 	painter.fillRect(title_rect,bgColor);
-	painter.drawText(title_rect,Qt::AlignCenter, txt);
+	//painter.drawText(title_rect,Qt::AlignCenter, txt);
+	painter.drawText(title_rect,Qt::AlignHCenter | Qt::AlignBottom, txt);
 	//painter.drawRect(pixmap.rect().adjusted(0,0,-1,-1));
 }
 //----------------------------------------------------------------------------

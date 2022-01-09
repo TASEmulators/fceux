@@ -119,16 +119,16 @@ void BRANCHES::calcFontData(void)
 #else
 	pxCharWidth = metrics.width(QLatin1Char(ch));
 #endif
-	printf("        Width: %i\n", metrics.width(ch) );
-	printf("      Advance: %i\n", metrics.horizontalAdvance(ch) );
-	printf(" Left Bearing: %i\n", metrics.leftBearing(ch) );
-	printf("Right Bearing: %i\n", metrics.rightBearing(ch) );
-	printf("       Ascent: %i\n", metrics.ascent() );
-	printf("      Descent: %i\n", metrics.descent() );
-	printf("       Height: %i\n", metrics.height() );
-	printf("   Cap Height: %i\n", metrics.capHeight() );
-	printf(" Line Spacing: %i\n", metrics.lineSpacing() );
-	printf(" Line Leading: %i\n", metrics.leading() );
+	//printf("        Width: %i\n", metrics.width(ch) );
+	//printf("      Advance: %i\n", metrics.horizontalAdvance(ch) );
+	//printf(" Left Bearing: %i\n", metrics.leftBearing(ch) );
+	//printf("Right Bearing: %i\n", metrics.rightBearing(ch) );
+	//printf("       Ascent: %i\n", metrics.ascent() );
+	//printf("      Descent: %i\n", metrics.descent() );
+	//printf("       Height: %i\n", metrics.height() );
+	//printf("   Cap Height: %i\n", metrics.capHeight() );
+	//printf(" Line Spacing: %i\n", metrics.lineSpacing() );
+	//printf(" Line Leading: %i\n", metrics.leading() );
 
 	//for (int i=0; i<TOTAL_BOOKMARKS; i++)
 	//{
