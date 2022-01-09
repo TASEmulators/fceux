@@ -119,26 +119,47 @@ void BRANCHES::calcFontData(void)
 #else
 	pxCharWidth = metrics.width(QLatin1Char(ch));
 #endif
-	printf("        Width: %i\n", metrics.width(ch) );
-	printf("      Advance: %i\n", metrics.horizontalAdvance(ch) );
-	printf(" Left Bearing: %i\n", metrics.leftBearing(ch) );
-	printf("Right Bearing: %i\n", metrics.rightBearing(ch) );
-	printf("       Ascent: %i\n", metrics.ascent() );
-	printf("      Descent: %i\n", metrics.descent() );
-	printf("       Height: %i\n", metrics.height() );
-	printf(" Line Spacing: %i\n", metrics.lineSpacing() );
-	printf(" Line Leading: %i\n", metrics.leading() );
+	//printf("        Width: %i\n", metrics.width(ch) );
+	//printf("      Advance: %i\n", metrics.horizontalAdvance(ch) );
+	//printf(" Left Bearing: %i\n", metrics.leftBearing(ch) );
+	//printf("Right Bearing: %i\n", metrics.rightBearing(ch) );
+	//printf("       Ascent: %i\n", metrics.ascent() );
+	//printf("      Descent: %i\n", metrics.descent() );
+	//printf("       Height: %i\n", metrics.height() );
+	//printf(" Line Spacing: %i\n", metrics.lineSpacing() );
+	//printf(" Line Leading: %i\n", metrics.leading() );
 
-	//pxCharHeight   = metrics.capHeight();
-	pxCharHeight   = metrics.ascent();
-	pxLineSpacing  = metrics.lineSpacing();
+	//for (int i=0; i<TOTAL_BOOKMARKS; i++)
+	//{
+	//	char txt[8];
+	//	QRect boundingRect;
 
-	pxBoxWidth  = 2*pxCharWidth;
+	//	txt[0] = i + '0';
+	//	txt[1] = 0;
+
+	//	boundingRect = metrics.boundingRect( txt[0] );
+
+	//	printf("Char:'%c'  x:%i   y:%i   w:%i   h:%i\n", txt[0], boundingRect.x(), boundingRect.y(), boundingRect.width(), boundingRect.height() );
+
+	//	boundingRect = metrics.boundingRect( tr(txt) );
+
+	//	printf("Char:'%c'  x:%i   y:%i   w:%i   h:%i\n", txt[0], boundingRect.x(), boundingRect.y(), boundingRect.width(), boundingRect.height() );
+
+	//	boundingRect = metrics.tightBoundingRect( tr(txt) );
+
+	//	printf("Char:'%c'  x:%i   y:%i   w:%i   h:%i\n", txt[0], boundingRect.x(), boundingRect.y(), boundingRect.width(), boundingRect.height() );
+	//}
+
+	pxCharHeight   = metrics.capHeight();
+	//pxCharHeight   = metrics.ascent();
+	pxLineSpacing  = metrics.height();
+
+	pxBoxWidth  = (2*pxCharWidth)+1;
 	pxBoxHeight = pxLineSpacing;
 	pxSelWidth  = (pxBoxWidth  * 7) / 8;
 	pxSelHeight = (pxBoxHeight * 7) / 8;
 
-	pxTextOffsetX  = -(pxBoxWidth/2 ) + (pxBoxWidth  - metrics.width(ch) + metrics.leftBearing(ch) + metrics.rightBearing(ch))/2;
+	pxTextOffsetX  = -(pxBoxWidth/2 ) + (pxBoxWidth  - pxCharWidth)/2;
 	pxTextOffsetY  =  (pxBoxHeight/2) - (pxBoxHeight - pxCharHeight)/2;
 
 	pxMinGridWidth = (pxBoxWidth + 2);
@@ -960,8 +981,10 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		if (i == currentBranch)
 		{
 			painter.setPen( QColor( 58, 179, 255 ) );
-			//painter.drawText( x, y, tr(txt) );
-			painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
+			painter.drawText( x, y, tr(txt) );
+			//painter.drawRect( txtBox[i].translated(x,y) );
+			//painter.drawText( txtBox[i].translated(x,y), Qt::AlignLeft | Qt::AlignTop, tr(txt) );
+			//painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
 			//painter.drawText( box[i].adjusted( xa, ya, xa, ya ), Qt::AlignLeft | Qt::AlignTop, tr(txt) );
 		}
 		else
@@ -972,8 +995,10 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			{
 				x += bookmarks->bookmarksArray[i].floatingPhase;
 			}
-			//painter.drawText( x, y, tr(txt) );
-			painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
+			painter.drawText( x, y, tr(txt) );
+			//painter.drawRect( txtBox[i].translated(x,y) );
+			//painter.drawText( txtBox[i].translated(x,y), Qt::AlignLeft | Qt::AlignTop, tr(txt) );
+			//painter.drawText( box[i], Qt::AlignCenter, tr(txt) );
 			//painter.drawText( box[i].adjusted( xa, ya, xa, ya ), Qt::AlignLeft | Qt::AlignTop, tr(txt) );
 		}
 	}
