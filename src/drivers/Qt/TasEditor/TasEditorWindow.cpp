@@ -4294,6 +4294,7 @@ void QPianoRoll::setFont( QFont &newFont )
 //----------------------------------------------------------------------------
 void QPianoRoll::calcFontData(void)
 {
+	QRect rect;
 	QWidget::setFont(font);
 	QFontMetrics metrics(font);
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
@@ -4315,6 +4316,14 @@ void QPianoRoll::calcFontData(void)
 	pxWidthFrameCol =  9 * pxCharWidth;
 	pxWidthBtnCol   =  3 * pxCharWidth;
 	pxWidthCtlCol   =  8 * pxWidthBtnCol;
+
+	rect = metrics.boundingRect( tr("000000000") );
+
+	//printf("FrameWidth:  %i   %i\n", pxWidthFrameCol, rect.width() );
+	if ( pxWidthFrameCol < rect.width() )
+	{
+		pxWidthFrameCol = rect.width();
+	}
 
 	pxFrameColX     = pxWidthCol1;
 
