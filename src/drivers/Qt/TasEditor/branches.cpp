@@ -111,7 +111,7 @@ void BRANCHES::setFont( QFont &newFont )
 
 void BRANCHES::calcFontData(void)
 {
-	int w,h,ch='0';
+	int w,h,ch='0',bs;
 	QWidget::setFont(font);
 	QFontMetrics metrics(font);
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
@@ -119,15 +119,16 @@ void BRANCHES::calcFontData(void)
 #else
 	pxCharWidth = metrics.width(QLatin1Char(ch));
 #endif
-	//printf("        Width: %i\n", metrics.width(ch) );
-	//printf("      Advance: %i\n", metrics.horizontalAdvance(ch) );
-	//printf(" Left Bearing: %i\n", metrics.leftBearing(ch) );
-	//printf("Right Bearing: %i\n", metrics.rightBearing(ch) );
-	//printf("       Ascent: %i\n", metrics.ascent() );
-	//printf("      Descent: %i\n", metrics.descent() );
-	//printf("       Height: %i\n", metrics.height() );
-	//printf(" Line Spacing: %i\n", metrics.lineSpacing() );
-	//printf(" Line Leading: %i\n", metrics.leading() );
+	printf("        Width: %i\n", metrics.width(ch) );
+	printf("      Advance: %i\n", metrics.horizontalAdvance(ch) );
+	printf(" Left Bearing: %i\n", metrics.leftBearing(ch) );
+	printf("Right Bearing: %i\n", metrics.rightBearing(ch) );
+	printf("       Ascent: %i\n", metrics.ascent() );
+	printf("      Descent: %i\n", metrics.descent() );
+	printf("       Height: %i\n", metrics.height() );
+	printf("   Cap Height: %i\n", metrics.capHeight() );
+	printf(" Line Spacing: %i\n", metrics.lineSpacing() );
+	printf(" Line Leading: %i\n", metrics.leading() );
 
 	//for (int i=0; i<TOTAL_BOOKMARKS; i++)
 	//{
@@ -149,6 +150,8 @@ void BRANCHES::calcFontData(void)
 
 	//	printf("Char:'%c'  x:%i   y:%i   w:%i   h:%i\n", txt[0], boundingRect.x(), boundingRect.y(), boundingRect.width(), boundingRect.height() );
 	//}
+	
+	bs = (metrics.leftBearing(ch) + metrics.rightBearing(ch)) / 2;
 
 	pxCharHeight   = metrics.capHeight();
 	//pxCharHeight   = metrics.ascent();
@@ -159,8 +162,10 @@ void BRANCHES::calcFontData(void)
 	pxSelWidth  = (pxBoxWidth  * 7) / 8;
 	pxSelHeight = (pxBoxHeight * 7) / 8;
 
-	pxTextOffsetX  = -(pxBoxWidth/2 ) + (pxBoxWidth  - pxCharWidth)/2;
-	pxTextOffsetY  =  (pxBoxHeight/2) - (pxBoxHeight - pxCharHeight)/2;
+	pxTextOffsetX  = -(pxBoxWidth/2 );
+	pxTextOffsetY  =  (pxBoxHeight/2);
+	pxTextOffsetX  = -(pxBoxWidth/2 ) + (pxBoxWidth  - pxCharWidth)/2 + bs;
+	pxTextOffsetY  =  (pxBoxHeight/2) - (pxBoxHeight - pxCharHeight)/2 + (pxBoxHeight - pxCharHeight + 1) % 2;
 
 	pxMinGridWidth = (pxBoxWidth + 2);
 	pxMaxGridWidth = (pxBoxWidth * 2);
