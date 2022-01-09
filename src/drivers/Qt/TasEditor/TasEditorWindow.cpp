@@ -4025,6 +4025,8 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 		font.setStyle( QFont::StyleNormal );
 		font.setStyleHint( QFont::Monospace );
 	}
+	font.setBold(true);
+
 	pal = this->palette();
 
 	windowColor = pal.color(QPalette::Window);
@@ -4285,6 +4287,7 @@ void QPianoRoll::vbarChanged(int val)
 void QPianoRoll::setFont( QFont &newFont )
 {
 	font = newFont;
+	font.setBold(true);
 	QWidget::setFont( newFont );
 	calcFontData();
 }
