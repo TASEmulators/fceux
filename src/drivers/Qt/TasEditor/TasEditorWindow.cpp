@@ -4302,7 +4302,7 @@ void QPianoRoll::calcFontData(void)
 	pxLineSpacing  = metrics.lineSpacing() * 1.25;
 	pxLineLead     = pxLineSpacing - metrics.height();
 	pxCursorHeight = metrics.height();
-	pxLineTextOfs  = pxCharHeight + (pxLineSpacing - pxCharHeight) / 2;
+	pxLineTextOfs  = pxLineSpacing - ((pxLineSpacing - pxCharHeight) / 2) + 1;
 
 	//printf("W:%i  H:%i  LS:%i  \n", pxCharWidth, pxCharHeight, pxLineSpacing );
 
@@ -6328,12 +6328,16 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	//font.setBold(true);
 	//painter.setFont(font);
 
+	rect = painter.fontMetrics().boundingRect( tr("Frame#") );
+
 	//x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 6*pxCharWidth) / 2;
-	//painter.drawText( x, pxLineTextOfs, tr("Frame#") );
+	x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - rect.width()) / 2;
+
+	painter.drawText( x, pxLineTextOfs, tr("Frame#") );
 	
-	rect = QRect( -pxLineXScroll + pxFrameColX, 0, pxWidthFrameCol, pxLineSpacing );
+	//rect = QRect( -pxLineXScroll + pxFrameColX, 0, pxWidthFrameCol, pxLineSpacing );
 	//painter.drawText( rect, Qt::AlignCenter, tr("Frame#") );
-	painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr("Frame#") );
+	//painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr("Frame#") );
 
 	//font.setBold(false);
 	//painter.setFont(font);
@@ -6601,15 +6605,15 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 				if ( data & (0x01 << j) )
 				{
-					//painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr(buttonNames[j]) );
+					painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr(buttonNames[j]) );
 					//painter.drawText( rect, Qt::AlignCenter, tr(buttonNames[j]) );
-					painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr(buttonNames[j]) );
+					//painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr(buttonNames[j]) );
 				}
 				else if ( hotChangeVal > 0 )
 				{
-					//painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr("-") );
+					painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr("-") );
 					//painter.drawText( rect, Qt::AlignCenter, tr("-") );
-					painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr("-") );
+					//painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr("-") );
 				}
 				x += pxWidthBtnCol;
 			}
@@ -6625,11 +6629,13 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 		// bg
 		painter.setPen( rowTextColor );
 
-		rect = QRect( -pxLineXScroll + pxFrameColX, y, pxWidthFrameCol, pxLineSpacing );
-
-		//x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - 7*pxCharWidth) / 2;
+		//rect = QRect( -pxLineXScroll + pxFrameColX, y, pxWidthFrameCol, pxLineSpacing );
 
 		sprintf( stmp, "%07i", lineNum );
+
+		rect = painter.fontMetrics().boundingRect( tr(stmp) );
+
+		x = -pxLineXScroll + pxFrameColX + (pxWidthFrameCol - rect.width()) / 2;
 
 		if (markersManager->getMarkerAtFrame(lineNum))
 		{
@@ -6642,9 +6648,9 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 			font.setItalic(false);
 		}
 		painter.setFont(font);
-		//painter.drawText( x, y+pxLineTextOfs, tr(stmp) );
+		painter.drawText( x, y+pxLineTextOfs, tr(stmp) );
 		//painter.drawText( rect, Qt::AlignCenter, tr(stmp) );
-		painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr(stmp) );
+		//painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr(stmp) );
 
 		if ( font.italic() )
 		{
@@ -6737,9 +6743,9 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 			rect = QRect( x, 0, pxWidthBtnCol, pxLineSpacing );
 			painter.setPen( QPen(headerLightsColors[ headerColors[COLUMN_JOYPAD1_A + (i*8) + j] ],1) );
-			//painter.drawText( x + pxCharWidth, pxLineTextOfs, tr(buttonNames[j]) );
+			painter.drawText( x + pxCharWidth, pxLineTextOfs, tr(buttonNames[j]) );
 			//painter.drawText( rect, Qt::AlignCenter, tr(buttonNames[j]) );
-			painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr(buttonNames[j]) );
+			//painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr(buttonNames[j]) );
 
 			x += pxWidthBtnCol;
 		}
@@ -7464,8 +7470,8 @@ void markerDragPopup::paintEvent(QPaintEvent *event)
 	//If the external theme color is set, you need to change it
 	QRect title_rect{0,0,w,h};
 	painter.fillRect(title_rect,bgColor);
-	//painter.drawText(title_rect,Qt::AlignCenter, txt);
-	painter.drawText(title_rect,Qt::AlignHCenter | Qt::AlignBottom, txt);
+	painter.drawText(title_rect,Qt::AlignCenter, txt);
+	//painter.drawText(title_rect,Qt::AlignHCenter | Qt::AlignBottom, txt);
 	//painter.drawRect(pixmap.rect().adjusted(0,0,-1,-1));
 }
 //----------------------------------------------------------------------------
