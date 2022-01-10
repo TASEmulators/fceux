@@ -158,6 +158,11 @@ void PLAYBACK::update()
 	// pause when seeking hits pause_frame
 	if (pauseFrame && currFrameCounter + 1 >= pauseFrame)
 	{
+		// force frame counter back to target pause frame,
+		// since Qt/SDL port is multithreaded, emulation thread sometimes overshoots target
+		// before GUI thread can shutoff seek.
+		//currFrameCounter = pauseFrame - 1;
+
 		stopSeeking();
 	}
 	else if (currFrameCounter >= getLastPosition() && currFrameCounter >= currMovieData.getNumRecords() - 1 && mustAutopauseAtTheEnd && taseditorConfig->autopauseAtTheEndOfMovie && !isTaseditorRecording())
@@ -363,6 +368,7 @@ void PLAYBACK::startSeekingToFrame(int frame)
 void PLAYBACK::stopSeeking()
 {
 	pauseFrame = 0;
+	//printf("Seek Finished\n");
 	//if ( turbo )
 	//{
 	//	printf("Turbo seek off\n");
@@ -567,6 +573,7 @@ int PLAYBACK::getLastPosition()
 	return lastPositionFrame - 1;
 }
 
+// getPauseFrame must be thread safe, it is called from both GUI and emulation threads.
 int PLAYBACK::getPauseFrame()
 {
 	return pauseFrame - 1;

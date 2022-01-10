@@ -1194,6 +1194,23 @@ static void DoFun(int frameskip, int periodic_saves)
 	static int fskipc = 0;
 	//static int opause = 0;
 
+	// If TAS editor is engaged, check whether a seek frame is set.
+	// If a seek is in progress, don't emulate past target frame.
+	if ( tasWindowIsOpen() )
+	{
+		int runToFrameTarget;
+	
+		runToFrameTarget = tasWin->playback.getPauseFrame();
+
+		if ( runToFrameTarget >= 0)
+		{
+			if ( currFrameCounter >= runToFrameTarget )
+			{
+				FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
+				return;
+			}
+		}
+	}
     //TODO peroidic saves, working on it right now
     if (periodic_saves && FCEUD_GetTime() % PERIODIC_SAVE_INTERVAL < 30){
         FCEUI_SaveState(NULL, false);
