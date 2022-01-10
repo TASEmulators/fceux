@@ -4139,6 +4139,7 @@ void QPianoRoll::reset(void)
 
 	numColumns = 2 + (NUM_JOYPAD_BUTTONS * num_joysticks);
 
+	calcFontData();
 }
 //----------------------------------------------------------------------------
 void QPianoRoll::save(EMUFILE *os, bool really_save)
