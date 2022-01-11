@@ -6,7 +6,7 @@ call "C:\Qt\5.15\msvc2019_64\bin\qtenv2.bat"
 REM call "C:\Qt\6.0\msvc2019_64\bin\qtenv2.bat"
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
-cd %CWD%
+cd /d %CWD%
 
 where cmake
 where nmake
@@ -39,7 +39,7 @@ set FFMPEG_INSTALL_PREFIX=%CD%
 
 REM cmake -h
 REM cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
-cmake -DQT6=0 -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  -DUSE_LIBAV=1 -DFFMPEG_INSTALL_PREFIX=%FFMPEG_INSTALL_PREFIX%  ..
+cmake -DQT6=0 -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX% -DUSE_LIBAV=1 -DFFMPEG_INSTALL_PREFIX=%FFMPEG_INSTALL_PREFIX% -G"Visual Studio 16" -T"v142" ..
 
 REM nmake
 msbuild /m fceux.sln /p:Configuration=Release
