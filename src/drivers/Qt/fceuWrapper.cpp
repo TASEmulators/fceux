@@ -1200,7 +1200,7 @@ static void DoFun(int frameskip, int periodic_saves)
 	{
 		int runToFrameTarget;
 	
-		runToFrameTarget = tasWin->playback.getPauseFrame();
+		runToFrameTarget = PLAYBACK::getPauseFrame();
 
 		if ( runToFrameTarget >= 0)
 		{

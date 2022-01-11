@@ -62,7 +62,7 @@ public:
 	int getLastPosition();		// actually returns lost_position_frame-1
 	void setLastPosition(int frame);
 
-	int getPauseFrame();
+	static int getPauseFrame();
 	int getFlashingPauseFrame();
 
 	void setProgressbar(int a, int b);
@@ -76,7 +76,7 @@ public:
 private:
 	bool setPlaybackAboveOrToFrame(int frame, bool forceStateReload = false);
 
-	int pauseFrame;
+	static int pauseFrame;
 	int lastPositionFrame;
 	bool lastPositionIsStable;	// for when Greenzone invalidates several times, but the end of current segment must remain the same
 

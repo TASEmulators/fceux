@@ -36,6 +36,7 @@ extern bool turbo;
 
 // resources
 static char upperMarkerText[] = "Marker ";
+int  PLAYBACK::pauseFrame = 0;
 
 PLAYBACK::PLAYBACK()
 {
