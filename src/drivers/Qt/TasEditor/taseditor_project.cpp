@@ -18,6 +18,7 @@ Project - Manager of working project
 
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QGuiApplication>
 
 #include "fceu.h"
 #include "movie.h"
@@ -144,6 +145,8 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 		progressDialog->setValue(0);
 
 		// change cursor to hourglass
+		QGuiApplication::setOverrideCursor( QCursor(Qt::BusyCursor) );
+
 		//SetCursor(LoadCursor(0, IDC_WAIT));
 		// save fm2 data to the project file
 		currMovieData.loadFrameCount = currMovieData.records.size();
@@ -200,6 +203,8 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 		{
 			delete progressDialog; progressDialog = NULL;
 		}
+		QGuiApplication::setOverrideCursor( QCursor(Qt::ArrowCursor) );
+
 		//taseditorWindow.mustUpdateMouseCursor = true;
 		return true;
 	}
@@ -324,6 +329,17 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 		return false;
 	}
 
+	progressDialog = new QProgressDialog( QObject::tr("Loading TAS Project"), QObject::tr("Cancel"), 0, 100, tasWin );
+	progressDialog->setWindowModality(Qt::WindowModal);
+	progressDialog->setWindowTitle( QObject::tr("Loading TAS Project") );
+	progressDialog->setAutoReset(false);
+	progressDialog->setAutoClose(false);
+	progressDialog->setMinimumDuration(500);
+	progressDialog->setValue(0);
+
+	// change cursor to hourglass
+	QGuiApplication::setOverrideCursor( QCursor(Qt::BusyCursor) );
+
 	unsigned int savedStuff = 0;
 	unsigned int numberOfPointers = 0;
 	unsigned int dataOffset = 0;
@@ -385,7 +401,13 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 	splicer->reset();
 	reset();
 	renameProject(fullName, loadAll);
+
+	if ( progressDialog )
+	{
+		delete progressDialog; progressDialog = NULL;
+	}
 	// restore mouse cursor shape
+	QGuiApplication::setOverrideCursor( QCursor(Qt::ArrowCursor) );
 	//taseditorWindow.mustUpdateMouseCursor = true;
 	return true;
 }
@@ -501,4 +523,5 @@ void setTasProjectProgressBar( int cur, int max )
 		}
 		progressDialog->setValue(cur);
 	}
+	//usleep(100000); // Uncomment to slow down save/load progress for debug purposes
 }

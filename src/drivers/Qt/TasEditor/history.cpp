@@ -1056,6 +1056,9 @@ bool HISTORY::load(EMUFILE *is, unsigned int offset)
 	if (!read32le(&historyTotalItems, is)) goto error;
 	if (historyCursorPos > historyTotalItems) goto error;
 	historyStartPos = 0;
+
+	setTasProjectProgressBarText("Loading History...");
+	setTasProjectProgressBar( 0, historySize );
 	// read items
 	total = historyTotalItems;
 	if (historyTotalItems > historySize)
@@ -1087,6 +1090,7 @@ bool HISTORY::load(EMUFILE *is, unsigned int offset)
 		if (snapshots[i].load(is)) goto error;
 		if (bookmarkBackups[i].load(is)) goto error;
 		if (is->fread(&currentBranchNumberBackups[i], 1) != 1) goto error;
+		setTasProjectProgressBar( i, historyTotalItems );
 		playback->setProgressbar(i, historyTotalItems);
 	}
 	// skip redo items if needed
@@ -1098,6 +1102,7 @@ bool HISTORY::load(EMUFILE *is, unsigned int offset)
 	}
 
 	// everything went well
+	setTasProjectProgressBar( historyTotalItems, historyTotalItems );
 	// init vars
 	undoHintPos = oldUndoHintPos = undoHintTimer = -1;
 	oldShowUndoHint = showUndoHint = false;

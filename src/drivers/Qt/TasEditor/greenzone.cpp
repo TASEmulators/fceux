@@ -360,7 +360,7 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 {
 	int frame = 0, prev_frame = -1, size = 0;
-	int last_tick = 0;
+	int last_tick = -1;
 	char save_id[GREENZONE_ID_LEN];
 
 	free();
@@ -414,6 +414,8 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 		goto error;
 	}
 	if (strcmp(greenzone_save_id, save_id)) goto error;		// string is not valid
+
+	setTasProjectProgressBarText("Loading Greenzone...");
 	// read LagLog
 	lagLog.load(is);
 	// read size
@@ -438,6 +440,7 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 				// update TASEditor progressbar from time to time
 				if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 				{
+					setTasProjectProgressBar( frame, greenzoneSize );
 					playback->setProgressbar(frame, greenzoneSize);
 					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 				}
@@ -488,6 +491,10 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 				}
 			}
 		}
+	}
+	if ( greenzoneSize > 0 )
+	{
+		setTasProjectProgressBar( greenzoneSize, greenzoneSize );
 	}
 error:
 	FCEU_printf("Error loading Greenzone\n");
