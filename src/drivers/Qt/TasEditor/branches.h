@@ -188,7 +188,8 @@ private:
 	std::vector<int> branchPreviousY;
 	std::vector<int> branchCurrentX;
 	std::vector<int> branchCurrentY;
-	int cloudX, cloudY, cloudPreviousX, cloudCurrentX;
+	int cloudX, cloudPreviousX, cloudCurrentX;
+	int cloudY, cloudPreviousY, cloudCurrentY;
 	int fireballSize;
 	int lastItemUnderMouse;
 
