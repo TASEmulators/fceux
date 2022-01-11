@@ -58,6 +58,7 @@ BRANCHES::BRANCHES(QWidget *parent)
 	fireballSize = 0;
 	lastItemUnderMouse = -1;
 	cloudX = cloudPreviousX = cloudCurrentX = BRANCHES_CLOUD_X;
+	cloudY = BRANCHES_CLOUD_Y;
 
 	imageItem  = 0;
 	imageTimer = new QTimer(this);
@@ -171,8 +172,12 @@ void BRANCHES::calcFontData(void)
 	pxMaxGridWidth = (pxBoxWidth * 2);
 	pxGridWidth    =  pxMinGridWidth;
 
+	pxMinGridHalfHeight = (pxBoxHeight + 2)/2;
+	pxMaxGridHalfHeight = (pxBoxHeight * 4)/2;
+	pxGridHalfHeight    =  pxMinGridHalfHeight;
+
 	w = pxMinGridWidth * 13;
-	h = pxMinGridWidth * 10;
+	h = pxMinGridHalfHeight * 12 * 2;
 
 	if (w < BRANCHES_BITMAP_WIDTH ) w = BRANCHES_BITMAP_WIDTH;
 	if (h < BRANCHES_BITMAP_HEIGHT) h = BRANCHES_BITMAP_HEIGHT;
@@ -247,6 +252,7 @@ void BRANCHES::reset()
 	}
 	cloudPreviousX = cloudCurrentX;
 	cloudX = cloudCurrentX = BRANCHES_CLOUD_X;
+	cloudY = BRANCHES_CLOUD_Y;
 	transitionPhase = BRANCHES_TRANSITION_MAX;
 
 	currentBranch = ITEM_UNDER_MOUSE_CLOUD;
@@ -380,7 +386,7 @@ void BRANCHES::update()
 				if (parent == ITEM_UNDER_MOUSE_CLOUD)
 				{
 					parentX = cloudCurrentX;
-					parentY = BRANCHES_CLOUD_Y;
+					parentY = cloudY;
 				}
 				else
 				{
@@ -407,7 +413,7 @@ void BRANCHES::update()
 					upperFrame = currMovieData.getNumRecords() - 1;
 					lowerFrame = 0;
 					parentX = cloudCurrentX;
-					parentY = BRANCHES_CLOUD_Y;
+					parentY = cloudY;
 					tempBranchX = branchCurrentX[ITEM_UNDER_MOUSE_FIREBALL];
 					tempBranchY = branchCurrentY[ITEM_UNDER_MOUSE_FIREBALL];
 					if (upperFrame != lowerFrame)
@@ -421,7 +427,7 @@ void BRANCHES::update()
 				{
 					// special case: there's only cloud
 					playbackCursorX = cloudCurrentX;
-					playbackCursorY = BRANCHES_CLOUD_Y;
+					playbackCursorY = cloudY;
 				}
 			}
 			// move corners cursor to Playback cursor position
@@ -813,7 +819,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		else
 		{
 			parentX = cloudCurrentX;
-			parentY = BRANCHES_CLOUD_Y;
+			parentY = cloudY;
 		}
 		for (int i = children[t].size() - 1; i >= 0; i--)
 		{
@@ -849,7 +855,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			if (branch == ITEM_UNDER_MOUSE_CLOUD)
 			{
 				tempBranchX2 = cloudCurrentX;
-				tempBranchY2 = BRANCHES_CLOUD_Y;
+				tempBranchY2 = cloudY;
 			} else
 			{
 	 			tempBranchX2 = branchCurrentX[branch];
@@ -884,7 +890,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 				if (branch == ITEM_UNDER_MOUSE_CLOUD)
 				{
 					tempBranchX2 = cloudCurrentX;
-					tempBranchY2 = BRANCHES_CLOUD_Y;
+					tempBranchY2 = cloudY;
 				} else
 				{
 	 				tempBranchX2 = branchCurrentX[branch];
@@ -908,7 +914,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 		if (currentBranch == ITEM_UNDER_MOUSE_CLOUD)
 		{
 			parentX = cloudCurrentX;
-			parentY = BRANCHES_CLOUD_Y;
+			parentY = cloudY;
 		}
 		else
 		{
@@ -924,7 +930,7 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 //	// cloud
 //	TransparentBlt(hBitmapDC, cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH, BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, hSpritesheetDC, BRANCHES_CLOUD_SPRITESHEET_X, BRANCHES_CLOUD_SPRITESHEET_Y, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, 0x00FF00);
 	//painter.drawPixmap( cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH, BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, cloud );
-	painter.drawPixmap( cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH, BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, 
+	painter.drawPixmap( cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH, cloudY - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, 
 			spriteSheet, BRANCHES_CLOUD_SPRITESHEET_X, BRANCHES_CLOUD_SPRITESHEET_Y, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT );
 
 //	// branches rectangles
@@ -1312,7 +1318,7 @@ int BRANCHES::findItemUnderMouse(int mouseX, int mouseY)
 		//	item = i;
 		//}
 	}
-	if (item == ITEM_UNDER_MOUSE_NONE && mouseX >= cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH && mouseX < cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH + BRANCHES_CLOUD_WIDTH && mouseY >= BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT && mouseY < BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT + BRANCHES_CLOUD_HEIGHT)
+	if (item == ITEM_UNDER_MOUSE_NONE && mouseX >= cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH && mouseX < cloudCurrentX - BRANCHES_CLOUD_HALFWIDTH + BRANCHES_CLOUD_WIDTH && mouseY >= cloudY - BRANCHES_CLOUD_HALFHEIGHT && mouseY < cloudY - BRANCHES_CLOUD_HALFHEIGHT + BRANCHES_CLOUD_HEIGHT)
 	{
 		item = ITEM_UNDER_MOUSE_CLOUD;
 	}
@@ -1549,19 +1555,31 @@ void BRANCHES::recalculateBranchesTree()
 	{
 		//grid_halfheight = BRANCHES_CANVAS_HEIGHT / (2 * totalHeight);
 		grid_halfheight = height() / (2 * totalHeight);
-		if (grid_halfheight < BRANCHES_GRID_MIN_HALFHEIGHT)
+		//if (grid_halfheight < BRANCHES_GRID_MIN_HALFHEIGHT)
+		//{
+		//	grid_halfheight = BRANCHES_GRID_MIN_HALFHEIGHT;
+		//}
+		//else if (grid_halfheight > BRANCHES_GRID_MAX_HALFHEIGHT)
+		//{
+		//	grid_halfheight = BRANCHES_GRID_MAX_HALFHEIGHT;
+		//}
+
+		if (grid_halfheight < pxMinGridHalfHeight)
 		{
-			grid_halfheight = BRANCHES_GRID_MIN_HALFHEIGHT;
+			grid_halfheight = pxMinGridHalfHeight;
 		}
-		else if (grid_halfheight > BRANCHES_GRID_MAX_HALFHEIGHT)
+		else if (grid_halfheight > pxMaxGridHalfHeight)
 		{
-			grid_halfheight = BRANCHES_GRID_MAX_HALFHEIGHT;
+			grid_halfheight = pxMaxGridHalfHeight;
 		}
 	}
 	else
 	{
-		grid_halfheight = BRANCHES_GRID_MAX_HALFHEIGHT;
+		//grid_halfheight = BRANCHES_GRID_MAX_HALFHEIGHT;
+		grid_halfheight = pxMaxGridHalfHeight;
 	}
+	pxGridHalfHeight = grid_halfheight;
+
 	// special case 2: if chain of branches is too long, the last item (fireball) goes up
 	//if (changesSinceCurrentBranch)
 	//{
@@ -1637,6 +1655,8 @@ void BRANCHES::recalculateBranchesTree()
 	//	}
 	//}
 
+	cloudY = height()/2;
+
 	// 3. Set pixel positions of branches
 	int max_x = 0;
 	for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
@@ -1644,8 +1664,9 @@ void BRANCHES::recalculateBranchesTree()
 		if (bookmarks->bookmarksArray[i].notEmpty)
 		{
 			branchX[i] = cloud_prefix + gridX[i] * grid_width;
-			branchY[i] = BRANCHES_CLOUD_Y + gridY[i] * grid_halfheight;
-		} else
+			branchY[i] = cloudY + gridY[i] * grid_halfheight;
+		}
+		else
 		{
 			branchX[i] = EMPTY_BRANCHES_X_BASE;
 			branchY[i] = EMPTY_BRANCHES_Y_BASE + pxBoxHeight * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
@@ -1656,17 +1677,17 @@ void BRANCHES::recalculateBranchesTree()
 	{
 		// also set pixel position of "current_pos"
 		branchX[ITEM_UNDER_MOUSE_FIREBALL] = cloud_prefix + gridX[ITEM_UNDER_MOUSE_FIREBALL] * grid_width;
-		branchY[ITEM_UNDER_MOUSE_FIREBALL] = BRANCHES_CLOUD_Y + gridY[ITEM_UNDER_MOUSE_FIREBALL] * grid_halfheight;
+		branchY[ITEM_UNDER_MOUSE_FIREBALL] = cloudY + gridY[ITEM_UNDER_MOUSE_FIREBALL] * grid_halfheight;
 	}
 	else if (currentBranch >= 0)
 	{
 		branchX[ITEM_UNDER_MOUSE_FIREBALL] = cloud_prefix + gridX[currentBranch] * grid_width;
-		branchY[ITEM_UNDER_MOUSE_FIREBALL] = BRANCHES_CLOUD_Y + gridY[currentBranch] * grid_halfheight;
+		branchY[ITEM_UNDER_MOUSE_FIREBALL] = cloudY + gridY[currentBranch] * grid_halfheight;
 	}
 	else
 	{
 		branchX[ITEM_UNDER_MOUSE_FIREBALL] = 0;
-		branchY[ITEM_UNDER_MOUSE_FIREBALL] = BRANCHES_CLOUD_Y;
+		branchY[ITEM_UNDER_MOUSE_FIREBALL] = cloudY;
 	}
 	if (max_x < branchX[ITEM_UNDER_MOUSE_FIREBALL])
 	{
@@ -1674,7 +1695,8 @@ void BRANCHES::recalculateBranchesTree()
 	}
 
 	// align whole tree horizontally
-	cloudX = (BRANCHES_BITMAP_WIDTH + BASE_HORIZONTAL_SHIFT - max_x) / 2;
+	//cloudX = (BRANCHES_BITMAP_WIDTH + BASE_HORIZONTAL_SHIFT - max_x) / 2;
+	cloudX = (width() + BASE_HORIZONTAL_SHIFT - max_x) / 2;
 	//if (cloudX < MIN_CLOUD_X)
 	//{
 	//	cloudX = MIN_CLOUD_X;

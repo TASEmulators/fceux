@@ -188,7 +188,7 @@ private:
 	std::vector<int> branchPreviousY;
 	std::vector<int> branchCurrentX;
 	std::vector<int> branchCurrentY;
-	int cloudX, cloudPreviousX, cloudCurrentX;
+	int cloudX, cloudY, cloudPreviousX, cloudCurrentX;
 	int fireballSize;
 	int lastItemUnderMouse;
 
@@ -211,6 +211,9 @@ private:
 	int  pxMinGridWidth;
 	int  pxMaxGridWidth;
 	int  pxGridWidth;
+	int  pxMinGridHalfHeight;
+	int  pxMaxGridHalfHeight;
+	int  pxGridHalfHeight;
 	int  pxTextOffsetX;
 	int  pxTextOffsetY;
 
