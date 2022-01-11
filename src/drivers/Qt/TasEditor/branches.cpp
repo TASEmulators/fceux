@@ -177,7 +177,7 @@ void BRANCHES::calcFontData(void)
 	pxGridHalfHeight    =  pxMinGridHalfHeight;
 
 	w = pxMinGridWidth * 13;
-	h = pxMinGridHalfHeight * 12 * 2;
+	h = pxMinGridHalfHeight * 13 * 2;
 
 	if (w < BRANCHES_BITMAP_WIDTH ) w = BRANCHES_BITMAP_WIDTH;
 	if (h < BRANCHES_BITMAP_HEIGHT) h = BRANCHES_BITMAP_HEIGHT;
@@ -1655,7 +1655,10 @@ void BRANCHES::recalculateBranchesTree()
 	//	}
 	//}
 
-	cloudY = height()/2;
+	int cloudYMin = EMPTY_BRANCHES_Y_BASE + (pxBoxHeight*4);
+	int cloudYMax = (height()/2) + grid_halfheight;
+
+	cloudY = cloudYMin + ( (cloudYMax - cloudYMin) * totalHeight ) / 10;
 
 	// 3. Set pixel positions of branches
 	int max_x = 0;
