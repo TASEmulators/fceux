@@ -5802,9 +5802,13 @@ void QPianoRoll::periodicUpdate(void)
 				
 				d = scroll_y / pxLineSpacing;
 
-				v += d; scroll_y = 0;
+				v -= d; scroll_y = 0;
 
-				if ( v > maxLineOffset )
+				if ( v < 0 )
+				{
+					v = 0;
+				}
+				else if ( v > maxLineOffset )
 				{
 					v = maxLineOffset;
 				}
@@ -5821,11 +5825,15 @@ void QPianoRoll::periodicUpdate(void)
 				
 				d = scroll_y / pxLineSpacing;
 
-				v += d; scroll_y = 0;
+				v -= d; scroll_y = 0;
 
 				if ( v < 0 )
 				{
 					v = 0;
+				}
+				else if ( v > maxLineOffset )
+				{
+					v = maxLineOffset;
 				}
 				vbar->setValue(v);
 			}
