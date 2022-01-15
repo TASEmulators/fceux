@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <QApplication>
+#include <QSplashScreen>
 //#include <QProxyStyle>
 
 #include "Qt/ConsoleWindow.h"
@@ -80,13 +81,24 @@ static void MessageOutput(QtMsgType type, const QMessageLogContext &context, con
 
 #undef main   // undef main in case SDL_Main
 
+//#define SPLASH_SCREEN_ENABLE
+
 int main( int argc, char *argv[] )
 {
 	int retval;
 	qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
-	//const char *styleSheetEnv = NULL;
+#ifdef SPLASH_SCREEN_ENABLE
+	QSplashScreen *splash;
+	QPixmap pixmap(":/fceux1.png");
 	
+	splash = new QSplashScreen( pixmap );
+	splash->show();
+
+	splash->showMessage("Initializing GUI...");
+	app.processEvents();
+#endif
+
 	QCoreApplication::setOrganizationName("TasVideos");
 	QCoreApplication::setOrganizationDomain("TasVideos.org");
 	QCoreApplication::setApplicationName("fceux");
@@ -135,6 +147,13 @@ int main( int argc, char *argv[] )
 	// https://doc.qt.io/qt-5/windows-issues.html#fullscreen-opengl-based-windows
 	QWindowsWindowFunctions::setHasBorderInFullScreen( consoleWindow->windowHandle(), true);
 #endif
+
+#ifdef SPLASH_SCREEN_ENABLE
+	splash->finish( consoleWindow );
+
+	delete splash;
+#endif
+
 	retval = app.exec();
 
 	//printf("App Return: %i \n", retval );
