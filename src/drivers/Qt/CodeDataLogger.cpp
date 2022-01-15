@@ -293,6 +293,7 @@ CodeDataLoggerDialog_t::~CodeDataLoggerDialog_t(void)
 	updateTimer->stop();
 
 	//printf("Code Data Logger Window Deleted\n");
+	cdlWin = NULL;
 }
 //----------------------------------------------------
 void CodeDataLoggerDialog_t::closeEvent(QCloseEvent *event)
@@ -303,6 +304,7 @@ void CodeDataLoggerDialog_t::closeEvent(QCloseEvent *event)
 	done(0);
 	deleteLater();
 	event->accept();
+	cdlWin = NULL;
 }
 //----------------------------------------------------
 void CodeDataLoggerDialog_t::closeWindow(void)
@@ -312,6 +314,7 @@ void CodeDataLoggerDialog_t::closeWindow(void)
 	settings.setValue("cdLogger/geometry", saveGeometry());
 	done(0);
 	deleteLater();
+	cdlWin = NULL;
 }
 //----------------------------------------------------
 void CodeDataLoggerDialog_t::autoSaveCdlStateChange(int state)
