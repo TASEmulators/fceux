@@ -7229,7 +7229,8 @@ void TasFindNoteWindow::findNextClicked(void)
 	{
 		return;
 	}
-	strncpy( markersManager->findNoteString, searchPattern->text().toStdString().c_str(), MAX_NOTE_LEN );
+	strncpy( markersManager->findNoteString, searchPattern->text().toStdString().c_str(), MAX_NOTE_LEN-1 );
+	markersManager->findNoteString[MAX_NOTE_LEN-1] = 0;
 
 	// scan frames from current Selection to the border
 	int cur_marker = 0;
