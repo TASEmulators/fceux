@@ -116,6 +116,8 @@ class RamSearchDialog_t : public QDialog
 		QLineEdit    *specAddrEdit;
 		QLineEdit    *numChangeEdit;
 
+		QCheckBox    *searchRAMCbox;
+		QCheckBox    *searchSRAMCbox;
 		QCheckBox    *searchROMCbox;
 		QCheckBox    *misalignedCbox;
 		QCheckBox    *autoSearchCbox;
@@ -148,6 +150,8 @@ class RamSearchDialog_t : public QDialog
 		void periodicUpdate(void);
 		void hbarChanged(int val);
 		void vbarChanged(int val);
+		void searchRAMChanged(int state);
+		void searchSRAMChanged(int state);
 		void searchROMChanged(int state);
 		void misalignedChanged(int state);
 		void ds1Clicked(void);
