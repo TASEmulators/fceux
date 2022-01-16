@@ -203,7 +203,7 @@ bool TASEDITOR_PROJECT::save(const char* differentName, bool inputInBinary, bool
 		{
 			delete progressDialog; progressDialog = NULL;
 		}
-		QGuiApplication::setOverrideCursor( QCursor(Qt::ArrowCursor) );
+		QGuiApplication::restoreOverrideCursor();
 
 		//taseditorWindow.mustUpdateMouseCursor = true;
 		return true;
@@ -407,7 +407,7 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 		delete progressDialog; progressDialog = NULL;
 	}
 	// restore mouse cursor shape
-	QGuiApplication::setOverrideCursor( QCursor(Qt::ArrowCursor) );
+	QGuiApplication::restoreOverrideCursor();
 	//taseditorWindow.mustUpdateMouseCursor = true;
 	return true;
 }

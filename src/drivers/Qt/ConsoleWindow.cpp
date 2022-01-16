@@ -3843,11 +3843,13 @@ void consoleWin_t::aviRecordStop(void)
 {
 	if ( aviRecordRunning() )
 	{
+		QGuiApplication::setOverrideCursor( QCursor(Qt::BusyCursor) );
 		FCEU_WRAPPER_LOCK();
 		aviDiskThread->requestInterruption();
 		aviDiskThread->quit();
 		aviDiskThread->wait(10000);
 		FCEU_WRAPPER_UNLOCK();
+		QGuiApplication::restoreOverrideCursor();
 	}
 }
 
