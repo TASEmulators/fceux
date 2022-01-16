@@ -42,7 +42,7 @@ void fceuSplashScreen::periodicUpdate(void)
 {
 	if ( alpha > 0 )
 	{
-		alpha -= 20;
+		alpha -= 10;
 
 		if ( alpha < 0 )
 		{
