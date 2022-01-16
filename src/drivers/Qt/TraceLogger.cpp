@@ -39,6 +39,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QShortcut>
 #include <QPainter>
 #include <QGuiApplication>
 
@@ -152,6 +153,7 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	QAction *act;
 	QLabel *lbl;
 	int opt, useNativeMenuBar;
+	QShortcut *shortcut;
 
 	if (recBufMax == 0)
 	{
@@ -198,6 +200,12 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 
 	connect(hbar, SIGNAL(valueChanged(int)), this, SLOT(hbarChanged(int)));
 	connect(vbar, SIGNAL(valueChanged(int)), this, SLOT(vbarChanged(int)));
+	connect(vbar, SIGNAL(actionTriggered(int)), this, SLOT(vbarActionTriggered(int)));
+
+	shortcut = new QShortcut( QKeySequence("Page Up"), this );
+	connect( shortcut, SIGNAL(activated(void)), this, SLOT(pageUpActivated(void)) );
+	shortcut = new QShortcut( QKeySequence("Page Down"), this );
+	connect( shortcut, SIGNAL(activated(void)), this, SLOT(pageDnActivated(void)) );
 
 	traceView->setScrollBars(hbar, vbar);
 	traceView->setMinimumHeight(256);
@@ -617,6 +625,81 @@ void TraceLoggerDialog_t::vbarChanged(int val)
 {
 	//printf("VBAR: %i \n", val );
 	traceView->update();
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::vbarActionTriggered(int act)
+{
+	int val = vbar->value();
+	int max = vbar->maximum();
+
+	if ( act == QAbstractSlider::SliderSingleStepAdd )
+	{
+		val = val - vbar->singleStep();
+
+		if ( val < 0 )
+		{
+			val = 0;
+		}
+		vbar->setSliderPosition(val);
+	}
+	else if ( act == QAbstractSlider::SliderSingleStepSub )
+	{
+		val = val + vbar->singleStep();
+
+		if ( val > max )
+		{
+			val = max;
+		}
+		vbar->setSliderPosition(val);
+	}
+        else if ( act == QAbstractSlider::SliderPageStepAdd )
+        {
+               	val = val - vbar->pageStep();
+
+		if ( val < 0 )
+		{
+			val = 0;
+		}
+		vbar->setSliderPosition(val);
+        }
+        else if ( act == QAbstractSlider::SliderPageStepSub )
+        {
+                val = val + vbar->pageStep();
+
+		if ( val > max )
+		{
+			val = max;
+		}
+		vbar->setSliderPosition(val);
+        }
+	//printf("ACT:%i\n", act);
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::pageUpActivated(void)
+{
+	int val = vbar->value();
+	int max = vbar->maximum();
+
+	val = val + vbar->pageStep();
+
+	if ( val > max )
+	{
+		val = max;
+	}
+	vbar->setSliderPosition(val);
+}
+//----------------------------------------------------
+void TraceLoggerDialog_t::pageDnActivated(void)
+{
+	int val = vbar->value();
+
+	val = val - vbar->pageStep();
+
+	if ( val < 0 )
+	{
+		val = 0;
+	}
+	vbar->setSliderPosition(val);
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::logToFileStateChanged(int state)
@@ -2220,7 +2303,9 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 	nrow = (viewHeight / pxLineSpacing);
 
 	if (nrow < 1)
+	{
 		nrow = 1;
+	}
 
 	viewLines = nrow;
 
@@ -2237,7 +2322,7 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 	else
 	{
 		vbar->setMaximum( recBufNum - viewLines );
-		vbar->setPageStep( viewLines );
+		vbar->setPageStep( (viewLines*7)/8 );
 		vbar->show();
 	}
 
