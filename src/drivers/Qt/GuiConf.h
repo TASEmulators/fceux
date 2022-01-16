@@ -144,6 +144,7 @@ protected:
 	QCheckBox *useNativeMenuBar;
 	QCheckBox *pauseOnMenuAccess;
 	QCheckBox *ctxMenuEnable;
+	QCheckBox *showSplashScreen;
 	QCheckBox *useCustomStyle;
 	QCheckBox *useCustomPalette;
 	QComboBox *styleComboBox;
@@ -158,6 +159,7 @@ private slots:
 	void useNativeMenuBarChanged(int v);
 	void pauseOnMenuAccessChanged(int v);
 	void contextMenuEnableChanged(int v);
+	void showSplashScreenChanged(int v);
 	void useCustomQPaletteChanged(int v);
 	void useCustomStyleChanged(int v);
 	void styleChanged(int index);

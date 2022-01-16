@@ -21,10 +21,12 @@
 #include <stdlib.h>
 #include <QApplication>
 #include <QSplashScreen>
+#include <QSettings>
 //#include <QProxyStyle>
 
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/SplashScreen.h"
 
 #ifdef WIN32
 #include <QtPlatformHeaders/QWindowsWindowFunctions>
@@ -81,27 +83,34 @@ static void MessageOutput(QtMsgType type, const QMessageLogContext &context, con
 
 #undef main   // undef main in case SDL_Main
 
-//#define SPLASH_SCREEN_ENABLE
+static bool showSplashScreen(void)
+{
+	bool show = false;
+	QSettings  settings;
+
+	show = settings.value("mainWindow/showSplashScreen", false).toBool();
+
+	return show;
+}
 
 int main( int argc, char *argv[] )
 {
 	int retval;
 	qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
-#ifdef SPLASH_SCREEN_ENABLE
-	QSplashScreen *splash;
-	QPixmap pixmap(":/fceux1.png");
-	
-	splash = new QSplashScreen( pixmap );
-	splash->show();
 
-	splash->showMessage("Initializing GUI...");
-	app.processEvents();
-#endif
-
-	QCoreApplication::setOrganizationName("TasVideos");
-	QCoreApplication::setOrganizationDomain("TasVideos.org");
+	QCoreApplication::setOrganizationName("TasEmulators");
+	QCoreApplication::setOrganizationDomain("TasEmulators.org");
 	QCoreApplication::setApplicationName("fceux");
+
+	fceuSplashScreen *splash = NULL;
+	
+	if ( showSplashScreen() )
+	{
+		splash = new fceuSplashScreen();
+		splash->show();
+		app.processEvents();
+	}
 
 	#ifdef WIN32
 	if (AttachConsole(ATTACH_PARENT_PROCESS))
@@ -148,11 +157,11 @@ int main( int argc, char *argv[] )
 	QWindowsWindowFunctions::setHasBorderInFullScreen( consoleWindow->windowHandle(), true);
 #endif
 
-#ifdef SPLASH_SCREEN_ENABLE
-	splash->finish( consoleWindow );
-
-	delete splash;
-#endif
+	if ( splash )
+	{
+		splash->finish( consoleWindow );
+		//delete splash; this is handled by Qt event loop
+	}
 
 	retval = app.exec();
 
