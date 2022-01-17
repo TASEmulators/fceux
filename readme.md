@@ -18,4 +18,4 @@ You should get releases from here: https://sourceforge.net/projects/fceultra/fil
 
 That's because github forces us to use tags we don't have for releases.
 
-2.6.0 is the most recent release but most people are using the autobuilds.
+2.6.1 is the most recent release but most people are using the autobuilds.

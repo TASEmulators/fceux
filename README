@@ -1,4 +1,4 @@
-FCEUX SDL 2.6.0 SDL README
+FCEUX SDL 2.6.1 SDL README
 ==========================
 Originally By Lukas Sabota (sf: punkrockguy318)
 Updated By mjbudd77
@@ -7,7 +7,7 @@ Updated By mjbudd77
 
 http://www.fceux.com
 
-Last Modified: January 12, 2022
+Last Modified: January 17, 2022
 
 Table of Contents
 -----------------
@@ -23,7 +23,7 @@ Table of Contents
 1 - Requirements
 ----------------
 * sdl2  - Version >= 2.0  (sdl2 >= 2.8 recommended)
-* cmake - Required to build fceux.
+* cmake - Required to build fceux. (cmake >= 3.8 recommended)
 * qt5 OR qt6  - (qt version >= 5.11 recommended)
 	- Required Qt Modules: Widgets and OpenGL
 	- Optional Qt Modules: Help
