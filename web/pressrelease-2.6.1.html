@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<link href="fceux.css" rel="stylesheet" type="text/css" />
+<title>Press Release 2.6.0</title>
+</head>
+
+<body>
+<div id="masthead">
+	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom/Dendy Emulator
+</div>
+<div id="top_nav">
+  <a href="home.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="documentation.html">Documentation</a>
+  <a href="version.html">Versions</a>
+  <a href="contact.html">Contact</a>
+  <a href="links.html">Links</a>
+</div>
+<div id="container">
+	<div id="left_col">
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	 		style="display:inline-block;width:180px;height:150px"
+	 		data-ad-client="ca-pub-0764229755985190"
+	 		data-ad-slot="7648866201"></ins>
+		<script>
+	     (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>	
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	    	 style="display:inline-block;width:180px;height:150px"
+	     	data-ad-client="ca-pub-0764229755985190"
+	     	data-ad-slot="7648866201"></ins>
+		<script>
+	    	 (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
+<div id="page_content">
+<h1>FCEUX 2.6.1 Maintenance Release</h1>
+<p>17 January 2022</p>
+<p>
+The 2.6.1 release fixes a few bugs that were found shortly after the 2.6.0 release.
+</p>
+
+<h2>Qt/SDL</h2>
+
+<h3>GUI Improvements and Bug Fixes</h3>
+Fixed Qt cursor override stack overflow issue. Code now properly calls QGuiApplication::restoreOverrideCursor following QGuiApplication::setOverrideCursor.<br>
+Fixed application crash when attempting to open/close the CDL window more than once.<br>
+Fixed inverted vertical scrollbar on Qt Trace logger. Added page up/down key shortcuts for Trace logger viewport.<br>
+Added an optional splash screen at startup. Splash screen defaults to off and can be enabled in GUI config dialog.<br>
+
+<h3>RAM Search Improvements and Bug Fixes</h3>
+Changed Qt RAM search logic to skip over RAM mirrors. Changed GUI to allow for searching of RAM, SRAM, and ROM regions to be individually selectable.<br>
+
+<h3>Build Improvements</h3>
+Applied cmake SOURCE_DATE_EPOCH patch for reproducible builds.<br>
+
+<h3>Qt/SDL Windows Build Dependency Upgrades</h3>
+Upgraded to SDL version 2.0.20<br>
+Upgraded to ffmpeg version 5.0<br>
+
+</div>
+
+<p>
+<hr>
+
+<div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
+		<br/>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc.
+</div>
+</div>
+</body>
+</html>
