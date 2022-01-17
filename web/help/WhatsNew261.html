@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="favicon.ico"/>
 
-  <title>What's New? 2.6.0 (changelog)</title>
+  <title>What's New? 2.6.1 (changelog)</title>
   <meta name="description" content="" /> 
   <meta name="keywords" content="">
 
@@ -21,11 +21,11 @@
 
   <!-- Twitter Card data -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="What's New? 2.6.0 (changelog)">
+  <meta name="twitter:title" content="What's New? 2.6.1 (changelog)">
   <meta name="twitter:description" content="">
 
   <!-- Open Graph data -->
-  <meta property="og:title" content="What's New? 2.6.0 (changelog)" />
+  <meta property="og:title" content="What's New? 2.6.1 (changelog)" />
   <meta property="og:type" content="article" />
   <meta property="og:description" content="" />
   <meta property="og:site_name" content="FCEUX Help" /> 
@@ -163,9 +163,9 @@
 
     <article>
         <div id="topic-content" class="container-fluid" 
-		  data-hnd-id="WhatsNew260"
-		  data-hnd-context="88"
-		  data-hnd-title="What's New? 2.6.0 (changelog)"
+		  data-hnd-id="WhatsNew261"
+		  data-hnd-context="89"
+		  data-hnd-title="What's New? 2.6.1 (changelog)"
 		>
             
                 <div class="navigation">
@@ -173,51 +173,48 @@
                         <li><a href="Intro.html">Introduction</a></li>
                     </ol>
                     <div class="nav-arrows">
-                        <div class="btn-group btn-group" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew261.html" title="What's New? 2.6.1 (changelog)" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew250.html" title="What's New? 2.5.0 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                        <div class="btn-group btn-group" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="FCEUltraVersionHistory.html" title="FCE Ultra Version History" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew260.html" title="What's New? 2.6.0 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
                     </div>
                 </div> 
             
 
             <a id="main-content"></a>
 
-            <h2>What's New? 2.6.0 (changelog)</h2>
+            <h2>What's New? 2.6.1 (changelog)</h2>
 
             <div class="main-content">
                 
-<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.6.0</span></p>
-<p class="rvps2"><span class="rvts6">Released -- 12 January 2022</span></p>
+<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.6.1</span></p>
+<p class="rvps2"><span class="rvts6">Released -- 17 January 2022</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">The 2.6.0 release features the addition of the TAS Editor to the Qt/SDL port. There are also a few other bug fixes.</span></p>
+<p class="rvps2"><span class="rvts6">The 2.6.1 release fixes a few bugs that were found shortly after the 2.6.0 release.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts27">Qt/SDL</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts28">TAS Editor</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">The full TAS editor has been ported over from the Win32 version. Other than minor layout changes, Win32 TAS users should find it familiar.</span></li>
-</ul>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts28">GUI Improvements and Bug Fixes</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">Fixed occasional stack overflow issue due to unintended recursion in Qt event loop.</span></li>
+ <li class="rvps2"><span class="rvts6">Fixed Qt cursor override stack overflow issue. Code now properly calls QGuiApplication::restoreOverrideCursor following QGuiApplication::setOverrideCursor.</span></li>
+ <li class="rvps2"><span class="rvts6">Fixed application crash when attempting to open/close the CDL window more than once.</span></li>
+ <li class="rvps2"><span class="rvts6">Fixed inverted vertical scrollbar on Qt Trace logger. Added page up/down key shortcuts for Trace logger viewport.</span></li>
+ <li class="rvps2"><span class="rvts6">Added an optional splash screen at startup. Splash screen defaults to off and can be enabled in GUI config dialog.</span></li>
 </ul>
 <p class="rvps2"><span class="rvts28"><br/></span></p>
-<p class="rvps2"><span class="rvts28">Video Improvements and Bug Fixes</span></p>
+<p class="rvps2"><span class="rvts28">RAM Search Improvements and Bug Fixes</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">Added video vertical sync config option.</span></li>
- <li class="rvps2"><span class="rvts6">Added built-in video vertical sync test pattern.</span></li>
-</ul>
-<p class="rvps2"><span class="rvts28"><br/></span></p>
-<p class="rvps2"><span class="rvts28">Input Improvements and Bug Fixes</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">Added escape characters to gamepad config files to fix keyboard binding issue for ',' and '\' keys.</span></li>
+ <li class="rvps2"><span class="rvts6">Changed Qt RAM search logic to skip over RAM mirrors. Changed GUI to allow for searching of RAM, SRAM, and ROM regions to be individually selectable.</span></li>
 </ul>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts28">Build Improvements</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">Replaced a few soon-to-be deprecated ffmpeg function calls.</span></li>
- <li class="rvps2"><span class="rvts6">Cleaned up a few compiler warnings.</span><span class="rvts6"></span></li>
+ <li class="rvps2"><span class="rvts6">Applied cmake SOURCE_DATE_EPOCH patch for reproducible builds.</span></li>
 </ul>
-<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpauthoringsoftware.com">What is a Help Authoring tool?</a></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts28">Windows Build Dependency Upgrades</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts6">Upgraded to SDL version 2.0.20</span></li>
+ <li class="rvps2"><span class="rvts6">Upgraded to ffmpeg version 5.0</span><span class="rvts6"></span></li>
+</ul>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour">Full-featured Help generator</a></p>
 
             </div>
             
