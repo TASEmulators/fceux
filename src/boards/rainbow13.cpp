@@ -389,13 +389,13 @@ static DECLFR(Rainbow13Read) {
 	}
 	case 0x4101:
 	{
-		uint8 esp_message_received_flag = esp_message_received ? 1 << 7 : 0;
+		uint8 esp_message_received_flag = esp_message_received ? 0x80 : 0;
 		uint8 esp_rts_flag = esp->getDataReadyIO() ? 0x40 : 0x00;
 		return esp_message_received_flag | esp_rts_flag;
 	}
 	case 0x4102:
 	{
-		return esp_message_sent << 7;
+		return esp_message_sent ? 0x80 : 0;
 	}
 	case 0x4110: return (nt_set << 6) | (mirr_mode << 4) | (chr_chip << 3) | (chr_mode << 1) | prg_mode;
 	case 0x4113: return MAPPER_VERSION;
@@ -814,6 +814,7 @@ static void Rainbow13PPUWrite(uint32 A, uint8 V) {
 static void Rainbow13Reset(void) {
 	esp_enable = false;
 	esp_message_received = false;
+	esp_message_sent = true;
 	rx_address = 0;
 	tx_address = 0;
 	IRQa = 0;
@@ -886,6 +887,7 @@ static void Rainbow13Power(void) {
 	esp_enable = false;
 	esp_irq_enable = false;
 	esp_message_received = false;
+	esp_message_sent = true;
 	esp_running = true;
 	esp_RX = std::thread (esp_check_new_message);
 }
