@@ -26,6 +26,8 @@
 #include "../ines.h"
 #include "rainbow_esp.h"
 
+#include <atomic>
+
 #undef RAINBOW_DEBUG
  //define RAINBOW_DEBUG
 
@@ -131,7 +133,7 @@ static SFORMAT SStateRegs[] =
 // ESP interface
 
 static EspFirmware *esp = NULL;
-static bool esp_running;
+static std::atomic<bool> esp_running;
 static bool esp_enable;
 static bool esp_irq_enable;
 static bool esp_message_received;
