@@ -26,8 +26,6 @@
 #include "../ines.h"
 #include "rainbow_esp.h"
 
-#include <atomic>
-
 #undef RAINBOW_DEBUG
  //define RAINBOW_DEBUG
 
@@ -130,44 +128,45 @@ static SFORMAT SStateRegs[] =
 	{ 0 }
 };
 
-// ESP interface
-
 static EspFirmware *esp = NULL;
-static std::atomic<bool> esp_running;
 static bool esp_enable;
 static bool esp_irq_enable;
-static bool esp_message_received;
+static bool has_esp_message_received;
 static bool esp_message_sent;
-std::thread esp_RX;
+
+static void esp_check_new_message() {
+	// get new message if needed
+	if (esp_enable && esp->getDataReadyIO() && has_esp_message_received == false)
+	{
+		uint8 message_length = esp->tx();
+		FPGA_WRAM[rx_address << 8] = message_length;
+		for (uint8 i = 0; i < message_length; i++)
+		{
+			FPGA_WRAM[(rx_address << 8) + 1 + i] = esp->tx();
+		}
+		has_esp_message_received = true;
+	}
+}
+
+static bool esp_message_received() {
+	esp_check_new_message();
+	return has_esp_message_received;
+}
+
+static void clear_esp_message_received() {
+	has_esp_message_received = false;
+}
 
 static void Rainbow13EspMapIrq(int32) {
 	if (esp_irq_enable)
 	{
-		if (esp_message_received)
+		if (esp_message_received())
 		{
 			X6502_IRQBegin(FCEU_IQEXT);
 		}
 		else
 		{
 			X6502_IRQEnd(FCEU_IQEXT);
-		}
-	}
-}
-
-// Mapper
-
-void esp_check_new_message() {
-	while (esp_running) {
-		// get new message if needed
-		if (esp_enable && esp->getDataReadyIO() && esp_message_received == false)
-		{
-			uint8 message_length = esp->tx();
-			FPGA_WRAM[rx_address << 8] = message_length;
-			for (uint8 i = 0; i < message_length; i++)
-			{
-				FPGA_WRAM[(rx_address << 8) + 1 + i] = esp->tx();
-			}
-			esp_message_received = true;
 		}
 	}
 }
@@ -391,7 +390,7 @@ static DECLFR(Rainbow13Read) {
 	}
 	case 0x4101:
 	{
-		uint8 esp_message_received_flag = esp_message_received ? 0x80 : 0;
+		uint8 esp_message_received_flag = esp_message_received() ? 0x80 : 0;
 		uint8 esp_rts_flag = esp->getDataReadyIO() ? 0x40 : 0x00;
 		return esp_message_received_flag | esp_rts_flag;
 	}
@@ -416,7 +415,7 @@ static DECLFW(Rainbow13Write) {
 		esp_irq_enable = V & 0x02;
 		break;
 	case 0x4101:
-		if (esp_enable) esp_message_received = false;
+		if (esp_enable) clear_esp_message_received();
 		else FCEU_printf("RAINBOW warning: $4100.0 is not set\n");
 		break;
 	case 0x4102:
@@ -815,7 +814,7 @@ static void Rainbow13PPUWrite(uint32 A, uint8 V) {
 
 static void Rainbow13Reset(void) {
 	esp_enable = false;
-	esp_message_received = false;
+	clear_esp_message_received();
 	esp_message_sent = true;
 	rx_address = 0;
 	tx_address = 0;
@@ -888,10 +887,8 @@ static void Rainbow13Power(void) {
 	esp = new BrokeStudioFirmware;
 	esp_enable = false;
 	esp_irq_enable = false;
-	esp_message_received = false;
+	clear_esp_message_received();
 	esp_message_sent = true;
-	esp_running = true;
-	esp_RX = std::thread (esp_check_new_message);
 }
 
 static void Rainbow13Close(void)
@@ -933,8 +930,6 @@ static void Rainbow13Close(void)
 	if (esp)
 	{
 		esp_enable = false;
-		esp_running = false;
-		esp_RX.join();
 		delete esp;
 		esp = NULL;
 	}
