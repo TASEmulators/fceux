@@ -63,7 +63,7 @@ static uint8 chr_chip, chr_mode, chr_upper_bank;
 static uint8 mirr_mode, nt_set;
 static uint8 mul_a, mul_b;
 static uint16 mul_result;
-static uint8 rx_address, tx_address;
+static uint8 rx_address, tx_address, rx_index;
 
 static uint8 *WRAM = NULL;
 const uint32 WRAMSIZE = 32 * 1024;
@@ -144,6 +144,7 @@ static void esp_check_new_message() {
 		{
 			FPGA_WRAM[(rx_address << 8) + 1 + i] = esp->tx();
 		}
+		rx_index = 0;
 		has_esp_message_received = true;
 	}
 }
@@ -394,16 +395,19 @@ static DECLFR(Rainbow13Read) {
 		uint8 esp_rts_flag = esp->getDataReadyIO() ? 0x40 : 0x00;
 		return esp_message_received_flag | esp_rts_flag;
 	}
-	case 0x4102:
+	case 0x4102: return esp_message_sent ? 0x80 : 0;
+	case 0x4105:
 	{
-		return esp_message_sent ? 0x80 : 0;
+		uint8 retval = FPGA_WRAM[(rx_address << 8) + rx_index];
+		rx_index++;
+		return retval;
 	}
 	case 0x4110: return (nt_set << 6) | (mirr_mode << 4) | (chr_chip << 3) | (chr_mode << 1) | prg_mode;
 	case 0x4113: return MAPPER_VERSION;
 	case 0x4160: return mul_result & 0xff;
 	case 0x4161: return (mul_result >> 8) & 0xff;
 	default:
-		return 0;
+		return CartBR(A);
 	}
 }
 
@@ -437,6 +441,9 @@ static DECLFW(Rainbow13Write) {
 		break;
 	case 0x4104:
 		tx_address = V & 0x03;
+		break;
+	case 0x4105:
+		rx_index = V;
 		break;
 	case 0x4120: prg[0] = V; Sync(); break;
 	case 0x4121: prg[1] = V & 0x3f; Sync(); break;
@@ -818,6 +825,7 @@ static void Rainbow13Reset(void) {
 	esp_message_sent = true;
 	rx_address = 0;
 	tx_address = 0;
+	rx_index = 0;
 	IRQa = 0;
 }
 
@@ -889,6 +897,9 @@ static void Rainbow13Power(void) {
 	esp_irq_enable = false;
 	clear_esp_message_received();
 	esp_message_sent = true;
+	rx_address = 0;
+	tx_address = 0;
+	rx_index = 0;
 }
 
 static void Rainbow13Close(void)
