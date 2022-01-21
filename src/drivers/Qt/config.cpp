@@ -25,6 +25,7 @@
 
 #include "fceu.h"
 #include "ppu.h"
+#include "video.h"
 #include "../common/cheat.h"
 
 #include "Qt/input.h"
@@ -559,6 +560,7 @@ InitConfig()
 	config->addOption("SDL.ShowFrameCount", 0);
 	config->addOption("SDL.ShowLagCount", 0);
 	config->addOption("SDL.ShowRerecordCount", 0);
+	config->addOption("SDL.ShowGuiMessages", 1);
 
 	// OpenGL options
 	config->addOption("opengl", "SDL.OpenGL", 1);
@@ -1071,6 +1073,7 @@ UpdateEMUCore(Config *config)
 	config->getOption("SDL.PostRenderScanlines" , &postrenderscanlines    );
 	config->getOption("SDL.VBlankScanlines"     , &vblankscanlines        );
 	config->getOption("SDL.Skip7bitOverClocking", &skip_7bit_overclocking );
+	config->getOption("SDL.ShowGuiMessages"     , &vidGuiMsgEna           );
 
 	config->getOption("SDL.PAL", &region);
 	FCEUI_SetRegion(region);

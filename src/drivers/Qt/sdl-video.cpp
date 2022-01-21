@@ -209,6 +209,7 @@ int InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.ShowFrameCount", &frame_display);
 	g_config->getOption("SDL.ShowLagCount", &lagCounterDisplay);
 	g_config->getOption("SDL.ShowRerecordCount", &rerecord_display);
+	g_config->getOption("SDL.ShowGuiMessages", &vidGuiMsgEna);
 	g_config->getOption("SDL.ScanLineStartNTSC", &startNTSC);
 	g_config->getOption("SDL.ScanLineEndNTSC", &endNTSC);
 	g_config->getOption("SDL.ScanLineStartPAL", &startPAL);

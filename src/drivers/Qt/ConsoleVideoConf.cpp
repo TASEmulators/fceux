@@ -67,6 +67,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	g_config->getOption("SDL.ShowFrameCount", &frame_display);
 	g_config->getOption("SDL.ShowLagCount", &lagCounterDisplay);
 	g_config->getOption("SDL.ShowRerecordCount", &rerecord_display);
+	g_config->getOption("SDL.ShowGuiMessages", &vidGuiMsgEna);
 	
 	style = this->style();
 
@@ -171,6 +172,10 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	// Clip Sides Checkbox
 	clipSidesCbx  = new QCheckBox( tr("Clip Left/Right Sides (8 px on each)") );
 
+	// Show GUI Messages Checkbox
+	showGuiMsgs_cbx  = new QCheckBox( tr("GUI Messages") );
+	showGuiMsgs_cbx->setChecked( vidGuiMsgEna );
+
 	// Show FPS Checkbox
 	showFPS_cbx  = new QCheckBox( tr("Frames Per Second") );
 
@@ -247,6 +252,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	connect(sprtLimCbx      , SIGNAL(stateChanged(int)), this, SLOT(useSpriteLimitChanged(int)) );
 	connect(clipSidesCbx    , SIGNAL(stateChanged(int)), this, SLOT(clipSidesChanged(int)) );
 	connect(showFPS_cbx     , SIGNAL(stateChanged(int)), this, SLOT(showFPSChanged(int)) );
+	connect(showGuiMsgs_cbx , SIGNAL(stateChanged(int)), this, SLOT(showGuiMsgsChanged(int)) );
 	connect(aspectCbx       , SIGNAL(stateChanged(int)), this, SLOT(aspectEnableChanged(int)) );
 	connect(autoScaleCbx    , SIGNAL(stateChanged(int)), this, SLOT(autoScaleChanged(int)) );
 	connect(drawInputAidsCbx, SIGNAL(stateChanged(int)), this, SLOT(drawInputAidsChanged(int)) );
@@ -366,6 +372,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	vbox3->addStretch(5);
 	 gbox->setLayout( vbox );
 
+	vbox->addWidget( showGuiMsgs_cbx );
 	vbox->addWidget( drawInputAidsCbx );
 	vbox->addWidget( showFPS_cbx );
 	vbox->addWidget( showFrameCount_cbx );
@@ -877,6 +884,14 @@ void ConsoleVideoConfDialog_t::showFPSChanged( int value )
 	FCEU_WRAPPER_LOCK();
 	FCEUI_SetShowFPS( (value == Qt::Checked) );
 	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::showGuiMsgsChanged( int value )
+{
+	//printf("Value:%i \n", value );
+	vidGuiMsgEna = (value == Qt::Checked);
+	g_config->setOption("SDL.ShowGuiMessages", vidGuiMsgEna );
+	g_config->save ();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::aspectEnableChanged( int value )

@@ -46,6 +46,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QCheckBox   *sprtLimCbx;
 		QCheckBox   *clipSidesCbx;
 		QCheckBox   *showFPS_cbx;
+		QCheckBox   *showGuiMsgs_cbx;
 		QCheckBox   *autoScaleCbx;
 		QCheckBox   *aspectCbx;
 		QCheckBox   *cursorVisCbx;
@@ -91,6 +92,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  intFrameRate_changed( int value );
 		void  useSpriteLimitChanged( int value );
 		void  clipSidesChanged( int value );
+		void  showGuiMsgsChanged( int value );
 		void  showFPSChanged( int value );
 		void  aspectChanged(int index);
 		void  regionChanged(int index);
