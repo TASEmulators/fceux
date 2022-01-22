@@ -1564,23 +1564,27 @@ void HexEditorDialog_t::vbarMoved(int value)
 {
 	//printf("VBar Moved: %i\n", value);
 	editor->setLine( value );
+	editor->update();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::vbarChanged(int value)
 {
 	//printf("VBar Changed: %i\n", value);
 	editor->setLine( value );
+	editor->update();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::hbarChanged(int value)
 {
 	//printf("HBar Changed: %i\n", value);
 	editor->setHorzScroll( value );
+	editor->update();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::gotoAddress( int newAddr )
 {
 	editor->setAddr( newAddr );
+	editor->update();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::saveRomFile(void)
@@ -3731,6 +3735,9 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	{
 		maxLineOffset = 0;
 	}
+	vbar->setMaximum( maxLineOffset );
+
+	lineOffset = vbar->value();
 
 	if ( lineOffset < 0 )
 	{
