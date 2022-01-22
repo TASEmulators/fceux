@@ -158,6 +158,14 @@ struct  romEditList_t
 			}
 			memset( modMem, 0, modMemSize );
 		}
+		if ( (addr + size) >= modMemSize )
+		{
+			size = modMemSize - addr;
+		}
+		if ( size <= 0 )
+		{
+			return;
+		}
 		entry = new romEditEntry_t();
 		entry->addr = addr;
 		entry->size = size;
@@ -167,11 +175,14 @@ struct  romEditList_t
 		{
 			ofs = addr+i;
 
-			entry->data[i] = getROM(ofs);
+			if ( ofs < modMemSize )
+			{
+				entry->data[i] = getROM(ofs);
 
-			writeMem( QHexEdit::MODE_NES_ROM, ofs, data[i] );
+				writeMem( QHexEdit::MODE_NES_ROM, ofs, data[i] );
 
-			modMem[ofs]++;
+				modMem[ofs]++;
+			}
 		}
 		undoList.push_back( entry );
 	}
@@ -316,7 +327,7 @@ static int writeMem( int mode, unsigned int addr, int value )
 	switch ( mode )
 	{
 		default:
-      case QHexEdit::MODE_NES_RAM:
+		case QHexEdit::MODE_NES_RAM:
 		{
 			if ( addr < 0x8000 )
 			{
@@ -336,7 +347,7 @@ static int writeMem( int mode, unsigned int addr, int value )
 			}
 		}
 		break;
-      case QHexEdit::MODE_NES_PPU:
+		case QHexEdit::MODE_NES_PPU:
 		{
 			addr &= 0x3FFF;
 			if (addr < 0x2000)
@@ -353,13 +364,13 @@ static int writeMem( int mode, unsigned int addr, int value )
 			}
 		}
 		break;
-      case QHexEdit::MODE_NES_OAM:
+		case QHexEdit::MODE_NES_OAM:
 		{
 			addr &= 0xFF;
 			SPRAM[addr] = value;
 		}
 		break;
-      case QHexEdit::MODE_NES_ROM:
+		case QHexEdit::MODE_NES_ROM:
 		{
 			if (addr < 16)
 			{
@@ -433,7 +444,7 @@ memBlock_t::~memBlock_t(void)
 		::free( buf ); buf = NULL;
 	}
 	_size = 0;
-   _maxLines = 0;
+	_maxLines = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -459,17 +470,19 @@ int memBlock_t::reAlloc( int newSize )
 
 	if ( buf != NULL )
 	{
+		memset( buf, 0, newSize * sizeof(struct memByte_t) );
+
 		_size = newSize;
 		init();
 
-      if ( (_size % 16) )
-	   {
-	   	_maxLines = (_size / 16) + 1;
-	   }
-	   else
-	   {
-	   	_maxLines = (_size / 16);
-	   }
+		if ( (_size % 16) )
+		{
+			_maxLines = (_size / 16) + 1;
+		}
+		else
+		{
+			_maxLines = (_size / 16);
+		}
 	}
 	return (buf == NULL);
 }
@@ -1409,10 +1422,10 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	setLayout( grid );
 
-	hbar->setMinimum(0);
-	hbar->setMaximum(100);
-	vbar->setMinimum(0);
-	vbar->setMaximum( 0x1000 / 16 );
+	hbar->setRange(0,100);
+	hbar->setValue(0);
+	vbar->setRange( 0, 0x1000 / 16 );
+	vbar->setValue(0);
 
 	editor->setScrollBars( hbar, vbar );
 	
@@ -1940,6 +1953,9 @@ QHexEdit::QHexEdit(QWidget *parent)
 
 	this->setPalette(pal);
 
+	viewWidth  = 512;
+	viewHeight = 512;
+
 	calcFontData();
 
 	setMinimumWidth( pxLineWidth );
@@ -1960,6 +1976,8 @@ QHexEdit::QHexEdit(QWidget *parent)
 	actvHighlightEnable = true;
 	total_instructions_lp = 0;
 	pxLineXScroll = 0;
+	jumpToRomValue = 0;
+	ctxAddr = 0;
 
 	frzRamAddr = -1;
 	frzRamVal = 0;
@@ -2745,6 +2763,27 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 					writeMem( viewMode, addr, key );
 					FCEU_WRAPPER_UNLOCK();
 				
+					cursorPosX++;
+		
+					if ( cursorPosX >= (32+16) )
+					{
+					   cursorPosY++;
+					   if ( cursorPosY >= viewLines )
+					   {
+						lineOffset++;
+						if ( lineOffset > maxLineOffset )
+						{
+						   lineOffset = maxLineOffset;
+						}
+						vbar->setValue(lineOffset);
+						cursorPosY = viewLines-1;
+					   }
+					   if ( cursorPosY < 0 )
+					   {
+						cursorPosY = 0;
+					   }
+					   cursorPosX = 32;
+					}
 					editAddr  = -1;
 					editValue =  0;
 					editMask  =  0;
@@ -2793,6 +2832,21 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		
 			if ( cursorPosX >= 32 )
 			{
+			   cursorPosY++;
+			   if ( cursorPosY >= viewLines )
+			   {
+				lineOffset++;
+				if ( lineOffset > maxLineOffset )
+				{
+				   lineOffset = maxLineOffset;
+				}
+				vbar->setValue(lineOffset);
+				cursorPosY = viewLines-1;
+			   }
+			   if ( cursorPosY < 0 )
+			   {
+				cursorPosY = 0;
+			   }
 			   cursorPosX = 0;
 			}
 			update();
