@@ -20,10 +20,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <QApplication>
+#include <QSplashScreen>
+#include <QSettings>
 //#include <QProxyStyle>
 
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/SplashScreen.h"
 
 #ifdef WIN32
 #include <QtPlatformHeaders/QWindowsWindowFunctions>
@@ -80,16 +83,34 @@ static void MessageOutput(QtMsgType type, const QMessageLogContext &context, con
 
 #undef main   // undef main in case SDL_Main
 
+static bool showSplashScreen(void)
+{
+	bool show = false;
+	QSettings  settings;
+
+	show = settings.value("mainWindow/showSplashScreen", false).toBool();
+
+	return show;
+}
+
 int main( int argc, char *argv[] )
 {
 	int retval;
 	qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
-	//const char *styleSheetEnv = NULL;
-	
-	QCoreApplication::setOrganizationName("TasVideos");
-	QCoreApplication::setOrganizationDomain("TasVideos.org");
+
+	QCoreApplication::setOrganizationName("TasEmulators");
+	QCoreApplication::setOrganizationDomain("TasEmulators.org");
 	QCoreApplication::setApplicationName("fceux");
+
+	fceuSplashScreen *splash = NULL;
+	
+	if ( showSplashScreen() )
+	{
+		splash = new fceuSplashScreen();
+		splash->show();
+		app.processEvents();
+	}
 
 	#ifdef WIN32
 	if (AttachConsole(ATTACH_PARENT_PROCESS))
@@ -135,6 +156,13 @@ int main( int argc, char *argv[] )
 	// https://doc.qt.io/qt-5/windows-issues.html#fullscreen-opengl-based-windows
 	QWindowsWindowFunctions::setHasBorderInFullScreen( consoleWindow->windowHandle(), true);
 #endif
+
+	if ( splash )
+	{
+		splash->finish( consoleWindow );
+		//delete splash; this is handled by Qt event loop
+	}
+
 	retval = app.exec();
 
 	//printf("App Return: %i \n", retval );

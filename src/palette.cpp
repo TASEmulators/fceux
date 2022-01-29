@@ -177,7 +177,7 @@ int bisqwit_wave(int p, int color) { return (color+p+8)%12 < 6; }
 static void ApplyDeemphasisBisqwit(int entry, u8& r, u8& g, u8& b)
 {
 	if(entry<64) return;
-	int myr, myg, myb;
+	int myr=0, myg=0, myb=0;
 	// The input value is a NES color index (with de-emphasis bits).
 	// We need RGB values. Convert the index into RGB.
 	// For most part, this process is described at:

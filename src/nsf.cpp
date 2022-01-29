@@ -134,25 +134,30 @@ void NSFGI(GI h)
 {
 	switch(h)
 	{
-	case GI_CLOSE:
-		if(NSFDATA) {free(NSFDATA);NSFDATA=0;}
-		if(ExWRAM) {free(ExWRAM);ExWRAM=0;}
-		if(NSFHeader.SoundChip&1) {
-			//   NSFVRC6_Init();
-		} else if(NSFHeader.SoundChip&2) {
-			//   NSFVRC7_Init();
-		} else if(NSFHeader.SoundChip&4) {
-			//   FDSSoundReset();
-		} else if(NSFHeader.SoundChip&8) {
-			NSFMMC5_Close();
-		} else if(NSFHeader.SoundChip&0x10) {
-			//   NSFN106_Init();
-		} else if(NSFHeader.SoundChip&0x20) {
-			//   NSFAY_Init();
-		}
+		case GI_CLOSE:
+			if(NSFDATA) {free(NSFDATA);NSFDATA=0;}
+			if(ExWRAM) {free(ExWRAM);ExWRAM=0;}
+			if(NSFHeader.SoundChip&1) {
+				//   NSFVRC6_Init();
+			} else if(NSFHeader.SoundChip&2) {
+				//   NSFVRC7_Init();
+			} else if(NSFHeader.SoundChip&4) {
+				//   FDSSoundReset();
+			} else if(NSFHeader.SoundChip&8) {
+				NSFMMC5_Close();
+			} else if(NSFHeader.SoundChip&0x10) {
+				//   NSFN106_Init();
+			} else if(NSFHeader.SoundChip&0x20) {
+				//   NSFAY_Init();
+			}
 		break;
-	case GI_RESETM2:
-	case GI_POWER: NSF_init();break;
+		case GI_RESETM2:
+		case GI_POWER:
+			NSF_init();
+		break;
+		default:
+			//Unhandled cases
+		break;
 	}
 }
 

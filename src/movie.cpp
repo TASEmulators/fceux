@@ -40,6 +40,10 @@ extern bool mustEngageTaseditor;
 
 #endif
 
+#ifdef __QT_DRIVER__
+#include "./drivers/Qt/TasEditor/TasEditorWindow.h"
+#endif
+
 extern int RAMInitOption;
 extern int RAMInitSeed;
 
@@ -928,7 +932,10 @@ void FCEUMOV_CreateCleanMovie()
 	currMovieData = MovieData();
 	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
 	currMovieData.romFilename = FileBase;
-	currMovieData.romChecksum = GameInfo->MD5;
+	if ( GameInfo )
+	{
+		currMovieData.romChecksum = GameInfo->MD5;
+	}
 	currMovieData.guid.newGuid();
 	currMovieData.fourscore = FCEUI_GetInputFourscore();
 	currMovieData.microphone = FCEUI_GetInputMicrophone();
@@ -1184,7 +1191,7 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 //either dumps the current joystick state or loads one state from the movie
 void FCEUMOV_AddInputState()
 {
-#ifdef __WIN_DRIVER__
+#if defined(__WIN_DRIVER__) || defined(__QT_DRIVER__)
 	if (movieMode == MOVIEMODE_TASEDITOR)
 	{
 		// if movie length is less or equal to currFrame, pad it with empty frames

@@ -33,6 +33,7 @@
 #include <cstdlib>
 
 extern Config *g_config;
+extern bool turbo;
 
 static volatile int *s_Buffer = 0;
 static unsigned int s_BufferSize;
@@ -189,6 +190,7 @@ InitSound()
 	SDL_AudioSpec spec;
 	const char *driverName;
 	int frmRateSampleAdj = 0;
+	int samplesPerFrame;
 
 	g_config->getOption("SDL.Sound", &sound);
 	if (!sound) 
@@ -218,17 +220,23 @@ InitSound()
 	spec.freq = s_SampleRate = soundrate;
 	spec.format = AUDIO_S16SYS;
 	spec.channels = 1;
-	//spec.samples = 512;
-	spec.samples = (int)( ( (double)s_SampleRate / getBaseFrameRate() ) );
+	spec.samples = 512; // This must stay a power of two per SDL documentation
 	spec.callback = fillaudio;
 	spec.userdata = 0;
+
+	samplesPerFrame = (int)( ( (double)s_SampleRate / getBaseFrameRate() ) );
+
+	if ( samplesPerFrame >= 1024 )
+	{
+		spec.samples = 1024;
+	}
 
 	s_BufferSize = soundbufsize * soundrate / 1000;
 
 	// For safety, set a bare minimum:
-	if (s_BufferSize < spec.samples * 2)
+	if (s_BufferSize < spec.samples * 4)
 	{
-		s_BufferSize = spec.samples * 2;
+		s_BufferSize = spec.samples * 4;
 	}
 	s_BufferSize25 =    s_BufferSize/4;
 	s_BufferSize50 =    s_BufferSize/2;
@@ -311,7 +319,7 @@ WriteSound(int32 *buf,
 	int udrFlowDup  = 1;
 	static int skipCounter = 0;
 
-	if ( NoWaiting & 0x01 )
+	if ( (NoWaiting & 0x01) || turbo )
 	{	// During Turbo mode, don't bother with sound as
 		// overflowing the audio buffer can cause delays.
 		return;

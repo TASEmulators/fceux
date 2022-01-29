@@ -291,6 +291,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	//urls = dialog.sidebarUrls();
 	urls << QUrl::fromLocalFile(QDir::rootPath());
 	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
 	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
 	urls << QUrl::fromLocalFile(QDir(FCEUI_GetBaseDirectory()).absolutePath());
 
@@ -418,23 +419,23 @@ void LuaControlDialog_t::startLuaScript(void)
 {
 #ifdef _S9XLUA_H
 	outBuf.clear();
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	if (0 == FCEU_LoadLuaCode(scriptPath->text().toStdString().c_str(), scriptArgs->text().toStdString().c_str()))
 	{
 		char error_msg[2048];
 		sprintf( error_msg, "Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toStdString().c_str());
 		FCEUD_PrintError(error_msg);
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------
 void LuaControlDialog_t::stopLuaScript(void)
 {
 #ifdef _S9XLUA_H
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEU_LuaStop();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------

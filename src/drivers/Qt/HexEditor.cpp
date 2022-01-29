@@ -158,6 +158,14 @@ struct  romEditList_t
 			}
 			memset( modMem, 0, modMemSize );
 		}
+		if ( (addr + size) >= modMemSize )
+		{
+			size = modMemSize - addr;
+		}
+		if ( size <= 0 )
+		{
+			return;
+		}
 		entry = new romEditEntry_t();
 		entry->addr = addr;
 		entry->size = size;
@@ -167,11 +175,14 @@ struct  romEditList_t
 		{
 			ofs = addr+i;
 
-			entry->data[i] = getROM(ofs);
+			if ( ofs < modMemSize )
+			{
+				entry->data[i] = getROM(ofs);
 
-			writeMem( QHexEdit::MODE_NES_ROM, ofs, data[i] );
+				writeMem( QHexEdit::MODE_NES_ROM, ofs, data[i] );
 
-			modMem[ofs]++;
+				modMem[ofs]++;
+			}
 		}
 		undoList.push_back( entry );
 	}
@@ -316,7 +327,7 @@ static int writeMem( int mode, unsigned int addr, int value )
 	switch ( mode )
 	{
 		default:
-      case QHexEdit::MODE_NES_RAM:
+		case QHexEdit::MODE_NES_RAM:
 		{
 			if ( addr < 0x8000 )
 			{
@@ -336,7 +347,7 @@ static int writeMem( int mode, unsigned int addr, int value )
 			}
 		}
 		break;
-      case QHexEdit::MODE_NES_PPU:
+		case QHexEdit::MODE_NES_PPU:
 		{
 			addr &= 0x3FFF;
 			if (addr < 0x2000)
@@ -353,13 +364,13 @@ static int writeMem( int mode, unsigned int addr, int value )
 			}
 		}
 		break;
-      case QHexEdit::MODE_NES_OAM:
+		case QHexEdit::MODE_NES_OAM:
 		{
 			addr &= 0xFF;
 			SPRAM[addr] = value;
 		}
 		break;
-      case QHexEdit::MODE_NES_ROM:
+		case QHexEdit::MODE_NES_ROM:
 		{
 			if (addr < 16)
 			{
@@ -433,7 +444,7 @@ memBlock_t::~memBlock_t(void)
 		::free( buf ); buf = NULL;
 	}
 	_size = 0;
-   _maxLines = 0;
+	_maxLines = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -459,17 +470,19 @@ int memBlock_t::reAlloc( int newSize )
 
 	if ( buf != NULL )
 	{
+		memset( buf, 0, newSize * sizeof(struct memByte_t) );
+
 		_size = newSize;
 		init();
 
-      if ( (_size % 16) )
-	   {
-	   	_maxLines = (_size / 16) + 1;
-	   }
-	   else
-	   {
-	   	_maxLines = (_size / 16);
-	   }
+		if ( (_size % 16) )
+		{
+			_maxLines = (_size / 16) + 1;
+		}
+		else
+		{
+			_maxLines = (_size / 16);
+		}
 	}
 	return (buf == NULL);
 }
@@ -1071,9 +1084,9 @@ void HexEditorFindDialog_t::runSearch(void)
 			i++;
 		}
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	parent->editor->findPattern( varray, upBtn->isChecked() );
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
@@ -1409,10 +1422,10 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	setLayout( grid );
 
-	hbar->setMinimum(0);
-	hbar->setMaximum(100);
-	vbar->setMinimum(0);
-	vbar->setMaximum( 0x1000 / 16 );
+	hbar->setRange(0,100);
+	hbar->setValue(0);
+	vbar->setRange( 0, 0x1000 / 16 );
+	vbar->setValue(0);
 
 	editor->setScrollBars( hbar, vbar );
 	
@@ -1439,9 +1452,9 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	// Lock the mutex before adding a new window to the list,
 	// we want to be sure that the emulator is not iterating the list
 	// when we change it.
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	winList.push_back(this);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	populateBookmarkMenu();
 
@@ -1462,7 +1475,7 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 	// Lock the emulation thread mutex to ensure
 	// that the emulator is not attempting to update memory values
 	// for window while we are destroying it or editing the window list.
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	for (it = winList.begin(); it != winList.end(); it++)
 	{
@@ -1473,7 +1486,7 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 			break;
 		}
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setWindowTitle(void)
@@ -1564,23 +1577,27 @@ void HexEditorDialog_t::vbarMoved(int value)
 {
 	//printf("VBar Moved: %i\n", value);
 	editor->setLine( value );
+	editor->update();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::vbarChanged(int value)
 {
 	//printf("VBar Changed: %i\n", value);
 	editor->setLine( value );
+	editor->update();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::hbarChanged(int value)
 {
 	//printf("HBar Changed: %i\n", value);
 	editor->setHorzScroll( value );
+	editor->update();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::gotoAddress( int newAddr )
 {
 	editor->setAddr( newAddr );
+	editor->update();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::saveRomFile(void)
@@ -1816,7 +1833,7 @@ void HexEditorDialog_t::updatePeriodic(void)
 
 		editor->checkMemActivity();
 
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 	else
 	{
@@ -1936,6 +1953,9 @@ QHexEdit::QHexEdit(QWidget *parent)
 
 	this->setPalette(pal);
 
+	viewWidth  = 512;
+	viewHeight = 512;
+
 	calcFontData();
 
 	setMinimumWidth( pxLineWidth );
@@ -1956,6 +1976,8 @@ QHexEdit::QHexEdit(QWidget *parent)
 	actvHighlightEnable = true;
 	total_instructions_lp = 0;
 	pxLineXScroll = 0;
+	jumpToRomValue = 0;
+	ctxAddr = 0;
 
 	frzRamAddr = -1;
 	frzRamVal = 0;
@@ -1963,6 +1985,7 @@ QHexEdit::QHexEdit(QWidget *parent)
 	frzIdx = 0;
 
 	wheelPixelCounter = 0;
+	wheelAngleCounter = 0;
 
 	highLightColor[ 0].setRgb( 0x00, 0x00, 0x00 );
 	highLightColor[ 1].setRgb( 0x35, 0x40, 0x00 );
@@ -2282,7 +2305,7 @@ void QHexEdit::pasteFromClipboard(void)
 	const char *c;
 	unsigned char *buf;
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	//printf("Paste: '%s'\n", s.c_str() );
 
@@ -2343,7 +2366,7 @@ void QHexEdit::pasteFromClipboard(void)
 	}
 	free(buf);
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::loadHighlightToClipboard(void)
@@ -2352,7 +2375,7 @@ void QHexEdit::loadHighlightToClipboard(void)
 	std::string s;
 	char c[8];
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	startAddr = (txtHlgtStartLine*16) + txtHlgtStartChar;
 	endAddr   = (txtHlgtEndLine  *16) + txtHlgtEndChar;
@@ -2363,7 +2386,7 @@ void QHexEdit::loadHighlightToClipboard(void)
 
 		s.append(c);
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	loadClipboard( s.c_str() );
 }
@@ -2732,14 +2755,35 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 
 					int offs = (cursorPosX-32);
 					int addr = 16*(lineOffset+cursorPosY) + offs;
-					fceuWrapperLock();
+					FCEU_WRAPPER_LOCK();
 					if ( viewMode == QHexEdit::MODE_NES_ROM )
 					{
 						romEditList.applyPatch( addr, key );
 					}
 					writeMem( viewMode, addr, key );
-					fceuWrapperUnLock();
+					FCEU_WRAPPER_UNLOCK();
 				
+					cursorPosX++;
+		
+					if ( cursorPosX >= (32+16) )
+					{
+					   cursorPosY++;
+					   if ( cursorPosY >= viewLines )
+					   {
+						lineOffset++;
+						if ( lineOffset > maxLineOffset )
+						{
+						   lineOffset = maxLineOffset;
+						}
+						vbar->setValue(lineOffset);
+						cursorPosY = viewLines-1;
+					   }
+					   if ( cursorPosY < 0 )
+					   {
+						cursorPosY = 0;
+					   }
+					   cursorPosX = 32;
+					}
 					editAddr  = -1;
 					editValue =  0;
 					editMask  =  0;
@@ -2767,13 +2811,13 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 			{
 				nibbleValue = editValue | nibbleValue;
 				
-				fceuWrapperLock();
+				FCEU_WRAPPER_LOCK();
 				if ( viewMode == QHexEdit::MODE_NES_ROM )
 				{
 					romEditList.applyPatch( editAddr, nibbleValue );
 				}
 				writeMem( viewMode, editAddr, nibbleValue );
-				fceuWrapperUnLock();
+				FCEU_WRAPPER_UNLOCK();
 				
 				editAddr  = -1;
 				editValue =  0;
@@ -2788,6 +2832,21 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		
 			if ( cursorPosX >= 32 )
 			{
+			   cursorPosY++;
+			   if ( cursorPosY >= viewLines )
+			   {
+				lineOffset++;
+				if ( lineOffset > maxLineOffset )
+				{
+				   lineOffset = maxLineOffset;
+				}
+				vbar->setValue(lineOffset);
+				cursorPosY = viewLines-1;
+			   }
+			   if ( cursorPosY < 0 )
+			   {
+				cursorPosY = 0;
+			   }
 			   cursorPosX = 0;
 			}
 			update();
@@ -2931,6 +2990,7 @@ void QHexEdit::mouseReleaseEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QHexEdit::wheelEvent(QWheelEvent *event)
 {
+	int zDelta = 0;
 
 	QPoint numPixels  = event->pixelDelta();
 	QPoint numDegrees = event->angleDelta();
@@ -2939,42 +2999,58 @@ void QHexEdit::wheelEvent(QWheelEvent *event)
 	{
 		wheelPixelCounter -= numPixels.y();
 	   //printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+		if ( wheelPixelCounter >= pxLineSpacing )
+		{
+			zDelta = (wheelPixelCounter / pxLineSpacing);
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
+		else if ( wheelPixelCounter <= -pxLineSpacing )
+		{
+			zDelta = (wheelPixelCounter / pxLineSpacing);
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
 	} 
 	else if (!numDegrees.isNull()) 
 	{
+		int stepDeg = 120;
 		//QPoint numSteps = numDegrees / 15;
 		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
 		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
-		wheelPixelCounter -= (pxLineSpacing * numDegrees.y()) / (15*8);
+		wheelAngleCounter -= numDegrees.y();
+
+		if ( wheelAngleCounter <= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
+		else if ( wheelAngleCounter >= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
 	}
 	//printf("Wheel Event: %i\n", wheelPixelCounter);
 
-	if ( wheelPixelCounter >= pxLineSpacing )
+	if ( zDelta != 0 )
 	{
-		lineOffset += (wheelPixelCounter / pxLineSpacing);
-
-		if ( lineOffset > maxLineOffset )
-		{
-			lineOffset = maxLineOffset;
-		}
-		vbar->setValue( lineOffset );
-
-		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
-	}
-	else if ( wheelPixelCounter <= -pxLineSpacing )
-	{
-		lineOffset += (wheelPixelCounter / pxLineSpacing);
+		lineOffset += zDelta;
 
 		if ( lineOffset < 0 )
 		{
 			lineOffset = 0;
 		}
+		else if ( lineOffset > maxLineOffset )
+		{
+			lineOffset = maxLineOffset;
+		}
 		vbar->setValue( lineOffset );
-
-		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
 	}
 
-	 event->accept();
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
@@ -3236,7 +3312,7 @@ void QHexEdit::frzRamSet(void)
 		return;
 	}
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_ListCheats( RamFreezeCB, this);
 
 	if ( (frzRamAddr >= 0) && (FrozenAddressCount < 256) )
@@ -3244,7 +3320,7 @@ void QHexEdit::frzRamSet(void)
 		FCEUI_AddCheat("", frzRamAddr, GetMem(frzRamAddr), -1, 1);
 	}
 	updateCheatDialog();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::frzRamUnset(void)
@@ -3257,10 +3333,10 @@ void QHexEdit::frzRamUnset(void)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_ListCheats( RamFreezeCB, this);
 	updateCheatDialog();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::frzRamUnsetAll(void)
@@ -3273,10 +3349,10 @@ void QHexEdit::frzRamUnsetAll(void)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEU_DeleteAllCheats();
 	updateCheatDialog();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::frzRamToggle(void)
@@ -3289,7 +3365,7 @@ void QHexEdit::frzRamToggle(void)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_ListCheats( RamFreezeCB, this);
 
 	if ( (frzRamAddr >= 0) && (FrozenAddressCount < 256) )
@@ -3297,7 +3373,7 @@ void QHexEdit::frzRamToggle(void)
 		FCEUI_AddCheat("", frzRamAddr, GetMem(frzRamAddr), -1, 1);
 	}
 	updateCheatDialog();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::addDebugSym(void)
@@ -3713,6 +3789,9 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	{
 		maxLineOffset = 0;
 	}
+	vbar->setMaximum( maxLineOffset );
+
+	lineOffset = vbar->value();
 
 	if ( lineOffset < 0 )
 	{

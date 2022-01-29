@@ -23,6 +23,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 
 		void transfer2LocalBuffer(void);
 
+		void setVsyncEnable( bool ena );
 		void setLinearFilterEnable( bool ena );
 
 		bool   getForceAspectOpt(void){ return forceAspect; };
@@ -73,6 +74,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 	bool   forceAspect;
 	bool   autoScaleEna;
 	bool   reqPwr2;
+	bool   vsyncEnabled;
 
 	unsigned int  textureType;
 	unsigned int  mouseButtonMask;

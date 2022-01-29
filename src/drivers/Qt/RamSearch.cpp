@@ -61,7 +61,9 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 
-static bool ShowROM = false;
+static bool ShowRAM  = true;
+static bool ShowSRAM = false;
+static bool ShowROM  = false;
 static RamSearchDialog_t *ramSearchWin = NULL;
 
 struct memoryState_t
@@ -203,7 +205,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox, *hbox1, *hbox2, *hbox3;
-	QVBoxLayout *vbox, *vbox1, *vbox2;
+	QVBoxLayout *vbox, *vbox1, *vbox2, *vbox3;
 	QGridLayout *grid;
 	QGroupBox *frame;
 	ramSearchInputValidator *inpValidator;
@@ -287,9 +289,27 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	connect(undoButton, SIGNAL(clicked(void)), this, SLOT(undoSearch(void)));
 	undoButton->setEnabled(false);
 
-	searchROMCbox = new QCheckBox(tr("Search ROM"));
-	vbox->addWidget(searchROMCbox);
+	frame = new QGroupBox( tr("Search Regions") );
+	vbox3 = new QVBoxLayout();
+	frame->setLayout(vbox3);
+	vbox->addWidget(frame);
+
+	searchRAMCbox = new QCheckBox(tr("RAM"));
+	vbox3->addWidget(searchRAMCbox);
+	searchRAMCbox->setChecked(ShowRAM);
+	searchRAMCbox->setToolTip( tr("Search RAM Address Range: 0x0000 - 0x07FF") );
+	connect(searchRAMCbox, SIGNAL(stateChanged(int)), this, SLOT(searchRAMChanged(int)));
+
+	searchSRAMCbox = new QCheckBox(tr("SRAM"));
+	vbox3->addWidget(searchSRAMCbox);
+	searchSRAMCbox->setChecked(ShowSRAM);
+	searchSRAMCbox->setToolTip( tr("Search SRAM Address Range: 0x6000 - 0x7FFF") );
+	connect(searchSRAMCbox, SIGNAL(stateChanged(int)), this, SLOT(searchSRAMChanged(int)));
+
+	searchROMCbox = new QCheckBox(tr("ROM"));
+	vbox3->addWidget(searchROMCbox);
 	searchROMCbox->setChecked(ShowROM);
+	searchROMCbox->setToolTip( tr("Search ROM Address Range: 0x8000 - 0xFFFF") );
 	connect(searchROMCbox, SIGNAL(stateChanged(int)), this, SLOT(searchROMChanged(int)));
 
 	elimButton = new QPushButton(tr("Eliminate"));
@@ -529,9 +549,9 @@ void RamSearchDialog_t::periodicUpdate(void)
 
 	if (currFrameCounter != frameCounterLastPass)
 	{
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		copyRamToLocalBuffer();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 
 		//if ( currFrameCounter != (frameCounterLastPass+1) )
 		//{
@@ -580,6 +600,16 @@ void RamSearchDialog_t::hbarChanged(int val)
 void RamSearchDialog_t::vbarChanged(int val)
 {
 	ramView->update();
+}
+//----------------------------------------------------
+void RamSearchDialog_t::searchRAMChanged(int state)
+{
+	ShowRAM = (state != Qt::Unchecked);
+}
+//----------------------------------------------------
+void RamSearchDialog_t::searchSRAMChanged(int state)
+{
+	ShowSRAM = (state != Qt::Unchecked);
 }
 //----------------------------------------------------
 void RamSearchDialog_t::searchROMChanged(int state)
@@ -1117,9 +1147,9 @@ void RamSearchDialog_t::resetSearch(void)
 {
 	memset(lclMemBuf, 0, sizeof(lclMemBuf));
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	copyRamToLocalBuffer();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	actvSrchList.clear();
 	deactvSrchList.clear();
@@ -1294,13 +1324,13 @@ void RamSearchDialog_t::addCheatClicked(void)
 	}
 	strcpy(desc, "Quick Cheat Add");
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	FCEUI_AddCheat(desc, addr, GetMem(addr), -1, 1);
 
 	updateCheatDialog();
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::addRamWatchClicked(void)
@@ -1467,9 +1497,30 @@ void RamSearchDialog_t::hexTypeClicked(void)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::calcRamList(void)
 {
-	int addr;
-	int dataSize = 1;
-	int endAddr = ShowROM ? 0x10000 : 0x8000;
+	int i, addr, startAddr, endAddr;
+	int numRegions = 0, dataSize = 1;
+	int regionStart[5], regionEnd[5];
+
+	if ( ShowRAM )
+	{
+		regionStart[ numRegions ] = 0x0000;		
+		  regionEnd[ numRegions ] = 0x0800;		
+		numRegions++;
+	}
+
+	if ( ShowSRAM )
+	{
+		regionStart[ numRegions ] = 0x6000;		
+		  regionEnd[ numRegions ] = 0x8000;		
+		numRegions++;
+	}
+
+	if ( ShowROM )
+	{
+		regionStart[ numRegions ] = 0x08000;		
+		  regionEnd[ numRegions ] = 0x10000;		
+		numRegions++;
+	}
 
 	if (chkMisAligned)
 	{
@@ -1490,39 +1541,45 @@ void RamSearchDialog_t::calcRamList(void)
 
 	actvSrchList.clear();
 
-	for (addr = 0; addr < endAddr; addr += dataSize)
+	for (i=0; i<numRegions; i++)
 	{
-		switch (dpySize)
+		startAddr = regionStart[i];
+		  endAddr = regionEnd[i];
+
+		for (addr = startAddr; addr < endAddr; addr += dataSize)
 		{
-		case 'd':
-			if ((addr + 3) < endAddr)
+			switch (dpySize)
 			{
-				if ((memLoc[addr].elimMask == 0) &&
-					(memLoc[addr + 1].elimMask == 0) &&
-					(memLoc[addr + 2].elimMask == 0) &&
-					(memLoc[addr + 3].elimMask == 0))
+			case 'd':
+				if ((addr + 3) < endAddr)
+				{
+					if ((memLoc[addr].elimMask == 0) &&
+						(memLoc[addr + 1].elimMask == 0) &&
+						(memLoc[addr + 2].elimMask == 0) &&
+						(memLoc[addr + 3].elimMask == 0))
+					{
+						actvSrchList.push_back(&memLoc[addr]);
+					}
+				}
+				break;
+			case 'w':
+				if ((addr + 1) < endAddr)
+				{
+					if ((memLoc[addr].elimMask == 0) &&
+						(memLoc[addr + 1].elimMask == 0))
+					{
+						actvSrchList.push_back(&memLoc[addr]);
+					}
+				}
+				break;
+			default:
+			case 'b':
+				if (memLoc[addr].elimMask == 0)
 				{
 					actvSrchList.push_back(&memLoc[addr]);
 				}
+				break;
 			}
-			break;
-		case 'w':
-			if ((addr + 1) < endAddr)
-			{
-				if ((memLoc[addr].elimMask == 0) &&
-					(memLoc[addr + 1].elimMask == 0))
-				{
-					actvSrchList.push_back(&memLoc[addr]);
-				}
-			}
-			break;
-		default:
-		case 'b':
-			if (memLoc[addr].elimMask == 0)
-			{
-				actvSrchList.push_back(&memLoc[addr]);
-			}
-			break;
 		}
 	}
 	vbar->setMaximum(actvSrchList.size());
@@ -1614,6 +1671,7 @@ QRamSearchView::QRamSearchView(QWidget *parent)
 	selLine = -1;
 
 	wheelPixelCounter = 0;
+	wheelAngleCounter = 0;
 
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 	setFocusPolicy(Qt::StrongFocus);
@@ -1772,6 +1830,7 @@ void QRamSearchView::mousePressEvent(QMouseEvent *event)
 //----------------------------------------------------------------------------
 void QRamSearchView::wheelEvent(QWheelEvent *event)
 {
+	int zDelta = 0;
 
 	QPoint numPixels = event->pixelDelta();
 	QPoint numDegrees = event->angleDelta();
@@ -1780,39 +1839,56 @@ void QRamSearchView::wheelEvent(QWheelEvent *event)
 	{
 		wheelPixelCounter -= numPixels.y();
 		//printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+		
+		if ( wheelPixelCounter >= pxLineSpacing )
+		{
+			zDelta = (wheelPixelCounter / pxLineSpacing);
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
+		else if ( wheelPixelCounter <= -pxLineSpacing )
+		{
+			zDelta = (wheelPixelCounter / pxLineSpacing);
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
 	}
 	else if (!numDegrees.isNull())
 	{
+		int stepDeg = 120;
 		//QPoint numSteps = numDegrees / 15;
 		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
 		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
-		wheelPixelCounter -= (pxLineSpacing * numDegrees.y()) / (15 * 8);
+		wheelAngleCounter -= numDegrees.y();
+
+		if ( wheelAngleCounter <= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
+		else if ( wheelAngleCounter >= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
 	}
 	//printf("Wheel Event: %i\n", wheelPixelCounter);
 
-	if (wheelPixelCounter >= pxLineSpacing)
+	if (zDelta != 0)
 	{
-		lineOffset += (wheelPixelCounter / pxLineSpacing);
-
-		if (lineOffset > maxLineOffset)
-		{
-			lineOffset = maxLineOffset;
-		}
-		vbar->setValue(lineOffset);
-
-		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
-	}
-	else if (wheelPixelCounter <= -pxLineSpacing)
-	{
-		lineOffset += (wheelPixelCounter / pxLineSpacing);
+		lineOffset += zDelta;
 
 		if (lineOffset < 0)
 		{
 			lineOffset = 0;
 		}
+		else if (lineOffset > maxLineOffset)
+		{
+			lineOffset = maxLineOffset;
+		}
 		vbar->setValue(lineOffset);
-
-		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
 	}
 
 	event->accept();

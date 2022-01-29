@@ -209,6 +209,7 @@ int InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.ShowFrameCount", &frame_display);
 	g_config->getOption("SDL.ShowLagCount", &lagCounterDisplay);
 	g_config->getOption("SDL.ShowRerecordCount", &rerecord_display);
+	g_config->getOption("SDL.ShowGuiMessages", &vidGuiMsgEna);
 	g_config->getOption("SDL.ScanLineStartNTSC", &startNTSC);
 	g_config->getOption("SDL.ScanLineEndNTSC", &endNTSC);
 	g_config->getOption("SDL.ScanLineStartPAL", &startPAL);
@@ -393,20 +394,37 @@ void LockConsole(){}
 ///Currently unimplemented.
 void UnlockConsole(){}
 
-static int testPattern = 0;
-
-static void WriteTestPattern(void)
+static void vsync_test(void)
 {
-	int i, j, k;
+	int i, j, k, l;
+	int cycleLen, halfCycleLen;
+	static int ofs = 0;
+	uint32_t *pixbuf;
+
+	pixbuf = nes_shm->pixbuf[nes_shm->pixBufIdx];
+
+	cycleLen = nes_shm->video.ncol / 4;
+
+	halfCycleLen = cycleLen / 2;
 
 	k=0;
-	for (i=0; i<GL_NES_WIDTH; i++)
+	for (j=0; j<nes_shm->video.nrow; j++)
 	{
-		for (j=0; j<GL_NES_HEIGHT; j++)
+		for (i=0; i<nes_shm->video.ncol; i++)
 		{
-			nes_shm->pixbuf[k] = 0xffffffff; k++;
+			l = ((i+ofs) % cycleLen);
+
+			if ( l < halfCycleLen )
+			{
+				pixbuf[k] = 0xFFFFFFFF; k++;
+			}
+			else
+			{
+				pixbuf[k] = 0x00000000; k++;
+			}
 		}
 	}
+	ofs = (ofs + 1) % nes_shm->video.ncol;
 }
 
 static void
@@ -455,9 +473,17 @@ doBlitScreen(uint8_t *XBuf, uint8_t *dest)
 
 	if ( dest == NULL ) return;
 
-	if ( testPattern )
+	if ( nes_shm->video.test )
 	{
-		WriteTestPattern();
+		switch ( nes_shm->video.test )
+		{
+			case 1:
+				vsync_test();
+			break;
+			default:
+				// Unknown Test Pattern
+			break;
+		}
 	}
 	else
 	{
@@ -470,8 +496,11 @@ doBlitScreen(uint8_t *XBuf, uint8_t *dest)
 void
 BlitScreen(uint8 *XBuf)
 {
-	doBlitScreen(XBuf, (uint8_t*)nes_shm->pixbuf);
+	int i = nes_shm->pixBufIdx;
 
+	doBlitScreen(XBuf, (uint8_t*)nes_shm->pixbuf[i]);
+
+	nes_shm->pixBufIdx = (i+1) % NES_VIDEO_BUFLEN;
 	nes_shm->blit_count++;
 	nes_shm->blitUpdated = 1;
 }

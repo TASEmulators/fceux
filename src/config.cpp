@@ -13,6 +13,10 @@
 
 static char *aboutString = 0;
 
+#ifndef FCEUX_BUILD_TIMESTAMP
+#define FCEUX_BUILD_TIMESTAMP  __TIME__ " " __DATE__
+#endif
+
 // returns a string suitable for use in an aboutbox
 const char *FCEUI_GetAboutString(void) 
 {
@@ -48,7 +52,8 @@ const char *FCEUI_GetAboutString(void)
 		"of NES emulation. In Memoriam --\n"
 		"ugetab\n"
 		"\n"
-		__TIME__ " " __DATE__ "\n";
+		"\n"
+		FCEUX_BUILD_TIMESTAMP "\n";
 
 	if (aboutString) return aboutString;
 

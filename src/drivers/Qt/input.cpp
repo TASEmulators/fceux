@@ -30,6 +30,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/CheatsConf.h"
+#include "Qt/TasEditor/TasEditorWindow.h"
 
 #include "Qt/sdl.h"
 #include "Qt/sdl-video.h"
@@ -143,8 +144,8 @@ static uint8 g_keyState[SDL_NUM_SCANCODES];
 static int keyModifier = 0;
 //static int DIPS = 0;
 
-static uint8 keyonce[SDL_NUM_SCANCODES];
-#define KEY(__a) g_keyState[MKK(__a)]
+//static uint8 keyonce[SDL_NUM_SCANCODES];
+//#define KEY(__a) g_keyState[MKK(__a)]
 
 int getKeyState(int k)
 {
@@ -156,37 +157,43 @@ int getKeyState(int k)
 	return 0;
 }
 
-static int
-_keyonly(int a)
+//static int
+//_keyonly(int a)
+//{
+//	int sc;
+//
+//	if (a < 0)
+//	{
+//		return 0;
+//	}
+//
+//	sc = SDL_GetScancodeFromKey(a);
+//
+//	// check for valid key
+//	if (sc >= SDL_NUM_SCANCODES || sc < 0)
+//	{
+//		return 0;
+//	}
+//
+//	if (g_keyState[sc])
+//	{
+//		if (!keyonce[sc])
+//		{
+//			keyonce[sc] = 1;
+//			return 1;
+//		}
+//	}
+//	else
+//	{
+//		keyonce[sc] = 0;
+//	}
+//	return 0;
+//}
+
+uint32 GetGamepadPressedImmediate(void)
 {
-	int sc;
-
-	if (a < 0)
-	{
-		return 0;
-	}
-
-	sc = SDL_GetScancodeFromKey(a);
-
-	// check for valid key
-	if (sc >= SDL_NUM_SCANCODES || sc < 0)
-	{
-		return 0;
-	}
-
-	if (g_keyState[sc])
-	{
-		if (!keyonce[sc])
-		{
-			keyonce[sc] = 1;
-			return 1;
-		}
-	}
-	else
-	{
-		keyonce[sc] = 0;
-	}
-	return 0;
+	//printf("JSreturn: 0x%08X\n", JSreturn);
+	return JSreturn;
 }
 
 #define keyonly(__a) _keyonly(MKK(__a))
@@ -449,6 +456,11 @@ void setHotKeys(void)
 	{
 		Hotkeys[i].readConfig();
 	}
+
+	if ( tasWin != NULL )
+	{
+		tasWin->initHotKeys();
+	}
 	return;
 }
 
@@ -592,6 +604,7 @@ static std::string GetFilename(const char *title, int mode, const char *filter)
 
 	urls << QUrl::fromLocalFile(QDir::rootPath());
 	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
 	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
 	urls << QUrl::fromLocalFile(QDir(FCEUI_GetBaseDirectory()).absolutePath());
 

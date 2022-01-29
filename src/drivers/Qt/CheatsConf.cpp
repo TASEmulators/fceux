@@ -545,13 +545,13 @@ void GuiCheatsDialog_t::showCheatSearchResults(void)
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::resetSearchCallback(void)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	FCEUI_CheatSearchBegin();
 
 	showCheatSearchResults();
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	knownValBtn->setEnabled(true);
 	eqValBtn->setEnabled(true);
@@ -573,7 +573,7 @@ void GuiCheatsDialog_t::knownValueCallback(void)
 {
 	int value;
 	//printf("Cheat Search Known!\n");
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	//printf("'%s'\n", knownValEntry->displayText().toStdString().c_str() );
 
@@ -583,19 +583,19 @@ void GuiCheatsDialog_t::knownValueCallback(void)
 
 	showCheatSearchResults();
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::equalValueCallback(void)
 {
 	//printf("Cheat Search Equal!\n");
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	FCEUI_CheatSearchEnd(FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, 0);
 
 	showCheatSearchResults();
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::notEqualValueCallback(void)
@@ -604,7 +604,7 @@ void GuiCheatsDialog_t::notEqualValueCallback(void)
 	int value;
 	int checked = useNeVal->checkState() != Qt::Unchecked;
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	if (checked)
 	{
@@ -619,7 +619,7 @@ void GuiCheatsDialog_t::notEqualValueCallback(void)
 
 	showCheatSearchResults();
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::greaterThanValueCallback(void)
@@ -628,7 +628,7 @@ void GuiCheatsDialog_t::greaterThanValueCallback(void)
 	int value;
 	int checked = useGrVal->checkState() != Qt::Unchecked;
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	if (checked)
 	{
@@ -643,7 +643,7 @@ void GuiCheatsDialog_t::greaterThanValueCallback(void)
 
 	showCheatSearchResults();
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::lessThanValueCallback(void)
@@ -652,7 +652,7 @@ void GuiCheatsDialog_t::lessThanValueCallback(void)
 	int value;
 	int checked = useLtVal->checkState() != Qt::Unchecked;
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	if (checked)
 	{
@@ -667,7 +667,7 @@ void GuiCheatsDialog_t::lessThanValueCallback(void)
 
 	showCheatSearchResults();
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 int GuiCheatsDialog_t::activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int type, void *data)
@@ -779,7 +779,7 @@ void GuiCheatsDialog_t::openCheatFile(void)
 
 	g_config->setOption("SDL.LastOpenFile", filename.toStdString().c_str());
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	fp = fopen(filename.toStdString().c_str(), "r");
 
@@ -788,7 +788,7 @@ void GuiCheatsDialog_t::openCheatFile(void)
 		FCEU_LoadGameCheats(fp, 0);
 		fclose(fp);
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	showActiveCheatList(true);
 
@@ -850,7 +850,7 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 
 	//g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	fp = FCEUD_UTF8fopen(filename.toStdString().c_str(), "wb");
 
@@ -859,7 +859,7 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 		FCEU_SaveGameCheats(fp);
 		fclose(fp);
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	showActiveCheatList(true);
 
@@ -890,9 +890,9 @@ void GuiCheatsDialog_t::addActvCheat(void)
 
 	name = cheatNameEntry->text().toStdString();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_AddCheat(name.c_str(), a, v, c, 1);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	showActiveCheatList(true);
 }
@@ -911,9 +911,9 @@ void GuiCheatsDialog_t::deleteActvCheat(void)
 
 	int row = actvCheatList->indexOfTopLevelItem(item);
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_DelCheat(row);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	showActiveCheatList(true);
 
@@ -969,11 +969,11 @@ void GuiCheatsDialog_t::updateCheatParameters(void)
 
 	//printf("Name: %s \n", name.c_str() );
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	FCEUI_SetCheat(row, name.c_str(), a, v, c, s, type);
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	showActiveCheatList(false);
 }
@@ -1038,9 +1038,9 @@ void GuiCheatsDialog_t::globalEnableCheats(int state)
 	g_config->setOption("SDL.CheatsDisabled", !val);
 	g_config->save();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	FCEUI_GlobalToggleCheat(val);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::autoLoadSaveCheats(int state)

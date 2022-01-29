@@ -27,5 +27,8 @@
         <file>icons/JumpTarget.png</file>
         <file>icons/Undo.png</file>
         <file>icons/find.png</file>
+        <file>icons/cloud.png</file>
+        <file>icons/branch_spritesheet.png</file>
+        <file>icons/taseditor-icon32.png</file>
     </qresource>
 </RCC>

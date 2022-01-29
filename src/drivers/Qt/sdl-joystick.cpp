@@ -31,6 +31,7 @@
 //#include <unistd.h>
 //#include <fcntl.h>
 #include <cerrno>
+#include <cstring>
 
 //#define MAX_JOYSTICKS	32
 
@@ -281,6 +282,10 @@ int nesGamePadMap_t::parseMapping(const char *map)
 
 			while ((map[i] != 0) && (map[i] != ','))
 			{
+				if ( map[i] == '\\' )
+				{  // next character should be interpretted literally
+					i++;
+				}
 				val[k][j] = map[i];
 				i++;
 				j++;
@@ -414,7 +419,7 @@ int GamePad_t::init(int port, const char *guid, const char *profile)
 
 	// If we get to this point and still have not found a
 	// game controller, then load default keyboard.
-	if ((portNum == 0) && (devIdx < 0))
+	if ((portNum == 0 || strnlen(profile, 1) > 0) && (devIdx < 0))
 	{
 		if (loadProfile(profile))
 		{
@@ -701,6 +706,10 @@ int GamePad_t::loadHotkeyMapFromFile(const char *filename)
 
 				while ((line[i] != 0) && (line[i] != ','))
 				{
+					if ( line[i] == '\\' )
+					{  // next character should be interpretted literally
+						i++;
+					}
 					val[j] = line[i];
 					i++;
 					j++;
@@ -923,7 +932,24 @@ int GamePad_t::saveCurrentMapToFile(const char *name)
 		{
 			if (bmap[c][i].ButtType == BUTTC_KEYBOARD)
 			{
-				sprintf(stmp, "k%s", SDL_GetKeyName(bmap[c][i].ButtonNum));
+				int j=0,k=0; const char *keyName;
+
+				keyName = SDL_GetKeyName(bmap[c][i].ButtonNum);
+
+				stmp[k] = 'k'; k++;
+
+				// Write keyname in with necessary escape characters.
+				while ( keyName[j] != 0 )
+				{
+					if ( (keyName[j] == '\\') || (keyName[j] == ',') )
+					{
+						stmp[k] = '\\'; k++;
+					}
+					stmp[k] = keyName[j]; k++; j++;
+				}
+				stmp[k] = 0;
+
+				//sprintf(stmp, "k%s", SDL_GetKeyName(bmap[c][i].ButtonNum));
 			}
 			else
 			{
@@ -971,7 +997,23 @@ int GamePad_t::saveCurrentMapToFile(const char *name)
 				{
 					if (fk->bmap[i].ButtType == BUTTC_KEYBOARD)
 					{
-						sprintf(stmp, "k%s", SDL_GetKeyName(fk->bmap[i].ButtonNum));
+						int j=0,k=0; const char *keyName;
+
+						keyName = SDL_GetKeyName(fk->bmap[i].ButtonNum);
+
+						stmp[k] = 'k'; k++;
+
+						// Write keyname in with necessary escape characters.
+						while ( keyName[j] != 0 )
+						{
+							if ( (keyName[j] == '\\') || (keyName[j] == ',') )
+							{
+								stmp[k] = '\\'; k++;
+							}
+							stmp[k] = keyName[j]; k++; j++;
+						}
+						stmp[k] = 0;
+						//sprintf(stmp, "k%s", SDL_GetKeyName(fk->bmap[i].ButtonNum));
 					}
 					else
 					{

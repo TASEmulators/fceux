@@ -269,6 +269,7 @@ private:
 	}
 };
 
+extern EMOVIEMODE movieMode;
 extern MovieData currMovieData;
 extern int currFrameCounter;
 extern char curMovieFilename[512];
@@ -313,6 +314,7 @@ void ProcessSubtitles(void);
 void FCEU_DisplaySubtitles(const char *format, ...);
 
 void poweron(bool shouldDisableBatteryLoading);
+bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 
 
 #endif //__MOVIE_H_

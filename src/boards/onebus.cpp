@@ -47,6 +47,9 @@ static int16 pcm_addr, pcm_size, pcm_latch, pcm_clock = 0xE1;
 static writefunc defapuwrite[64];
 static readfunc defapuread[64];
 
+static uint32 WRAMSIZE;
+static uint8 *WRAM = NULL;
+
 static SFORMAT StateRegs[] =
 {
 	{ cpu410x, 16, "REGC" },
@@ -265,6 +268,13 @@ static void UNLOneBusPower(void) {
 	SetWriteHandler(0x4100, 0x410f, UNLOneBusWriteCPU410X);
 	SetWriteHandler(0x8000, 0xffff, UNLOneBusWriteMMC3);
 
+	if (WRAMSIZE) {
+		FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
+		SetWriteHandler(0x6000, 0x6000 + ((WRAMSIZE - 1) & 0x1fff), CartBW);
+		SetReadHandler(0x6000, 0x6000 + ((WRAMSIZE - 1) & 0x1fff), CartBR);
+		setprg8r(0x10, 0x6000, 0);
+	}
+
 	Sync();
 }
 
@@ -282,9 +292,16 @@ static void StateRestore(int version) {
 	Sync();
 }
 
+void UNLOneBusClose(void) {
+	if (WRAM)
+		FCEU_gfree(WRAM);
+	WRAM = NULL;
+}
+
 void UNLOneBus_Init(CartInfo *info) {
 	info->Power = UNLOneBusPower;
 	info->Reset = UNLOneBusReset;
+	info->Close = UNLOneBusClose;
 
 	if (((*(uint32*)&(info->MD5)) == 0x305fcdc3) ||	// PowerJoy Supermax Carts
 		((*(uint32*)&(info->MD5)) == 0x6abfce8e))
@@ -294,4 +311,17 @@ void UNLOneBus_Init(CartInfo *info) {
 	MapIRQHook = UNLOneBusCpuHook;
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
+
+	WRAMSIZE = 8 * 1024;
+	if (info->ines2)
+		WRAMSIZE = info->wram_size + info->battery_wram_size;
+	if (WRAMSIZE) {
+		WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
+		SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
+		AddExState(WRAM, WRAMSIZE, 0, "WRAM");
+		if (info->battery) {
+			info->SaveGame[0] = WRAM;
+			info->SaveGameLen[0] = WRAMSIZE;
+		}
+	}
 }

@@ -63,6 +63,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	QGroupBox   *frame, *qssFrame;
 	QFrame      *hline;
 	std::string  qssFile, qpalFile;
+	QSettings    settings;
 
 	//resize( 512, 600 );
 	//printf("Style: %s \n", style()->objectName().toStdString().c_str() );
@@ -128,16 +129,19 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	useNativeMenuBar    = new QCheckBox(tr("Use Native OS Menu Bar"));
 	pauseOnMenuAccess   = new QCheckBox(tr("Pause On Main Menu Access"));
 	ctxMenuEnable       = new QCheckBox(tr("Context Menu Enable"));
+	showSplashScreen    = new QCheckBox(tr("Show Splash Screen at Startup"));
 
 	useNativeFileDialog->setChecked(useNativeFileDialogVal);
 	useNativeMenuBar->setChecked(useNativeMenuBarVal);
 	pauseOnMenuAccess->setChecked(pauseOnMenuAccessVal);
 	ctxMenuEnable->setChecked(contextMenuEnable);
+	showSplashScreen->setChecked( settings.value("mainWindow/showSplashScreen", false).toBool() );
 
 	connect(useNativeFileDialog, SIGNAL(stateChanged(int)), this, SLOT(useNativeFileDialogChanged(int)));
 	connect(useNativeMenuBar   , SIGNAL(stateChanged(int)), this, SLOT(useNativeMenuBarChanged(int)));
 	connect(pauseOnMenuAccess  , SIGNAL(stateChanged(int)), this, SLOT(pauseOnMenuAccessChanged(int)));
 	connect(ctxMenuEnable      , SIGNAL(stateChanged(int)), this, SLOT(contextMenuEnableChanged(int)));
+	connect(showSplashScreen   , SIGNAL(stateChanged(int)), this, SLOT(showSplashScreenChanged(int)));
 
 	styleComboBox = new QComboBox();
 
@@ -239,6 +243,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	vbox1->addWidget(useNativeMenuBar, 1);
 	vbox1->addWidget(pauseOnMenuAccess, 1);
 	vbox1->addWidget(ctxMenuEnable, 1);
+	vbox1->addWidget(showSplashScreen, 1);
 	vbox1->addStretch(10);
 
 	closeButton = new QPushButton( tr("Close") );
@@ -308,6 +313,15 @@ void GuiConfDialog_t::contextMenuEnableChanged(int state)
 	g_config->setOption("SDL.ContextMenuEnable", value);
 
 	consoleWindow->setContextMenuEnable( value );
+}
+//----------------------------------------------------
+void GuiConfDialog_t::showSplashScreenChanged(int state)
+{
+	QSettings settings;
+	bool value = (state == Qt::Unchecked) ? 0 : 1;
+
+	settings.setValue("mainWindow/showSplashScreen", value );
+	settings.sync();
 }
 //----------------------------------------------------
 void GuiConfDialog_t::useCustomStyleChanged(int state)

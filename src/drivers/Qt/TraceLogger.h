@@ -221,6 +221,9 @@ private slots:
 	void logMaxLinesChanged(int index);
 	void hbarChanged(int value);
 	void vbarChanged(int value);
+	void vbarActionTriggered(int value);
+	void pageUpActivated(void);
+	void pageDnActivated(void);
 	void openLogFile(void);
 	void clearLog(void);
 };

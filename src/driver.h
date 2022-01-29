@@ -183,6 +183,12 @@ void FCEUD_MovieRecordTo(void);
 void FCEUD_MovieReplayFrom(void);
 void FCEUD_LuaRunFrom(void);
 
+#ifdef _S9XLUA_H
+// lua engine
+void TaseditorAutoFunction(void);
+void TaseditorManualFunction(void);
+#endif
+
 int32 FCEUI_GetDesiredFPS(void);
 void FCEUI_SaveSnapshot(void);
 void FCEUI_SaveSnapshotAs(void);

@@ -336,7 +336,7 @@ void TimingConfDialog_t::emuSchedNiceChange(int val)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	if (consoleWindow->emulatorThread->setNicePriority(-val))
 	{
 		char msg[1024];
@@ -354,7 +354,7 @@ void TimingConfDialog_t::emuSchedNiceChange(int val)
 		consoleWindow->QueueErrorMsgWindow(msg);
 		updateSliderValues();
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------------------------------
@@ -366,13 +366,13 @@ void TimingConfDialog_t::emuSchedPrioChange(int val)
 	}
 #ifdef WIN32
 	printf("Setting EMU Thread to %i\n", val);
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	consoleWindow->emulatorThread->setPriority((QThread::Priority)val);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 #else
 	int policy, prio;
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	consoleWindow->emulatorThread->getSchedParam(policy, prio);
 
 	if (consoleWindow->emulatorThread->setSchedParam(policy, val))
@@ -392,7 +392,7 @@ void TimingConfDialog_t::emuSchedPrioChange(int val)
 		consoleWindow->QueueErrorMsgWindow(msg);
 		updateSliderValues();
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------------------------------
@@ -405,7 +405,7 @@ void TimingConfDialog_t::emuSchedPolicyChange(int index)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	consoleWindow->emulatorThread->getSchedParam(policy, prio);
 
 	policy = emuSchedPolicyBox->itemData(index).toInt();
@@ -430,7 +430,7 @@ void TimingConfDialog_t::emuSchedPolicyChange(int index)
 	updatePolicyBox();
 	updateSliderLimits();
 	updateSliderValues();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------------------------------
@@ -441,7 +441,7 @@ void TimingConfDialog_t::guiSchedNiceChange(int val)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	if (consoleWindow->setNicePriority(-val))
 	{
 		char msg[1024];
@@ -459,7 +459,7 @@ void TimingConfDialog_t::guiSchedNiceChange(int val)
 		consoleWindow->QueueErrorMsgWindow(msg);
 		updateSliderValues();
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------------------------------
@@ -475,7 +475,7 @@ void TimingConfDialog_t::guiSchedPrioChange(int val)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	consoleWindow->getSchedParam(policy, prio);
 
 	if (consoleWindow->setSchedParam(policy, val))
@@ -495,7 +495,7 @@ void TimingConfDialog_t::guiSchedPrioChange(int val)
 		consoleWindow->QueueErrorMsgWindow(msg);
 		updateSliderValues();
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------------------------------
@@ -508,7 +508,7 @@ void TimingConfDialog_t::guiSchedPolicyChange(int index)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	consoleWindow->getSchedParam(policy, prio);
 
 	policy = guiSchedPolicyBox->itemData(index).toInt();
@@ -533,7 +533,7 @@ void TimingConfDialog_t::guiSchedPolicyChange(int index)
 	updatePolicyBox();
 	updateSliderLimits();
 	updateSliderValues();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------------------------------
@@ -675,7 +675,7 @@ void TimingConfDialog_t::emuTimingMechChange(int index)
 	{
 		return;
 	}
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	mode = timingDevSelBox->itemData(index).toInt();
 
@@ -685,7 +685,7 @@ void TimingConfDialog_t::emuTimingMechChange(int index)
 
 	g_config->setOption("SDL.EmuTimingMech", mode);
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::updateTimingMech(void)
@@ -703,39 +703,39 @@ void TimingConfDialog_t::updateTimingMech(void)
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::overclockingToggled(bool on)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	if ( !newppu )
 	{
 		overclock_enabled = on;
 		g_config->setOption("SDL.OverClockEnable", overclock_enabled );
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::postRenderChanged(int value)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	postrenderscanlines = value;
 	g_config->setOption("SDL.PostRenderScanlines", postrenderscanlines );
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 	//printf("Post Render %i\n", postrenderscanlines );
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::vblankScanlinesChanged(int value)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	vblankscanlines = value;
 	g_config->setOption("SDL.VBlankScanlines", vblankscanlines );
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 	//printf("Vblank Scanlines %i\n", vblankscanlines );
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::no7bitChanged(int value)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	skip_7bit_overclocking = (value != Qt::Unchecked);
 	g_config->setOption("SDL.Skip7bitOverClocking", skip_7bit_overclocking );
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 	//printf("Skip 7-bit: %i\n", skip_7bit_overclocking );
 }
 //----------------------------------------------------------------------------

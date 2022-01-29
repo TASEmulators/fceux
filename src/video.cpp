@@ -72,6 +72,8 @@ static u8 *xbsave=NULL;
 GUIMESSAGE guiMessage;
 GUIMESSAGE subtitleMessage;
 
+bool vidGuiMsgEna = true;
+
 //for input display
 extern int input_display;
 extern uint32 cur_input_display;
@@ -406,7 +408,10 @@ void FCEU_DispMessageOnMovie(const char *format, ...)
 	vsnprintf(guiMessage.errmsg,sizeof(guiMessage.errmsg),format,ap);
 	va_end(ap);
 
-	guiMessage.howlong = 180;
+	if ( vidGuiMsgEna )
+	{
+		guiMessage.howlong = 180;
+	}
 	guiMessage.isMovieMessage = true;
 	guiMessage.linesFromBottom = 0;
 
@@ -429,7 +434,10 @@ void FCEU_DispMessage(const char *format, int disppos=0, ...)
 	strcat(temp, "\n");
 	FCEU_printf(temp);
 
-	guiMessage.howlong = 180;
+	if ( vidGuiMsgEna )
+	{
+		guiMessage.howlong = 180;
+	}
 	guiMessage.isMovieMessage = false;
 
 	guiMessage.linesFromBottom = disppos;

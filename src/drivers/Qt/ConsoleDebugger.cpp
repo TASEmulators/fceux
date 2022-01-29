@@ -2021,9 +2021,9 @@ void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 
 	if ( ret == QDialog::Accepted )
 	{
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		asmView->updateAssemblyView();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -2299,7 +2299,7 @@ static void DeleteBreak(int sel)
 	if(sel<0) return;
 	if(sel>=numWPs) return;
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	if (watchpoint[sel].cond)
 	{
@@ -2334,7 +2334,7 @@ static void DeleteBreak(int sel)
 	watchpoint[numWPs].desc = 0;
 	numWPs--;
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void debuggerClearAllBookmarks(void)
@@ -2346,7 +2346,7 @@ void debuggerClearAllBreakpoints(void)
 {
 	int i;
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	for (i=0; i<numWPs; i++)
 	{
@@ -2372,7 +2372,7 @@ void debuggerClearAllBreakpoints(void)
 	}
 	numWPs = 0;
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::delete_BP_CB(void)
@@ -2603,11 +2603,11 @@ void ConsoleDebugger::changeCpuFontCB(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::reloadSymbolsCB(void)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	debugSymbolTable.loadGameSymbols();
 
 	asmView->updateAssemblyView();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::pcSetPlaceTop(void)
@@ -2753,13 +2753,13 @@ void ConsoleDebugger::debugStepBackCB(void)
 {
 	if (FCEUI_EmulationPaused()) 
 	{
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		FCEUD_TraceLoggerBackUpInstruction();
 		updateWindowData();
 		hexEditorUpdateMemoryValues(true);
 		hexEditorRequestUpdateAll();
 		lastBpIdx = BREAK_TYPE_STEP;
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -3075,12 +3075,12 @@ void ConsoleDebugger::resetCountersCB (void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuRunToCursor(void)
 {
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 	watchpoint[64].address = asmView->getCtxMenuAddr();
 	watchpoint[64].flags   = WP_E|WP_X;
 
 	FCEUI_SetEmulationPaused(0);
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuGoTo(void)
@@ -3300,12 +3300,12 @@ void QAsmView::setBreakpointAtSelectedLine(void)
 
 	if ( addr >= 0 )
 	{
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		watchpoint[64].address = addr;
 		watchpoint[64].flags = WP_E|WP_X;
 		
 		FCEUI_SetEmulationPaused(0);
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -4024,17 +4024,17 @@ void ConsoleDebugger::updatePeriodic(void)
 
 	if ( bpNotifyReq )
 	{
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		breakPointNotify( lastBpIdx );
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 		bpNotifyReq = false;
 	}
 
 	if ( windowUpdateReq )
 	{
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		updateWindowData();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 	asmView->update();
 
@@ -4277,7 +4277,7 @@ void FCEUD_DebugBreakpoint( int bpNum )
 
 	printf("Breakpoint Hit: %i \n", bpNum );
 
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	while ( nes_shm->runEmulator && bpDebugEnable &&
 			FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
@@ -4302,7 +4302,7 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	// since we unfreezed emulation, reset delta_cycles counter
 	ResetDebugStatisticsDeltaCounters();
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	waitingAtBp = false;
 }
@@ -4814,6 +4814,7 @@ QAsmView::QAsmView(QWidget *parent)
 
 	cursorLineAddr    = -1;
 	wheelPixelCounter =  0;
+	wheelAngleCounter =  0;
 
 	//setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Expanding );
 	setFocusPolicy(Qt::StrongFocus);
@@ -5060,9 +5061,9 @@ void QAsmView::setDisplayByteCodes( bool value )
 		calcLineOffsets();
 		calcMinimumWidth();
 
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		updateAssemblyView();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -5072,9 +5073,9 @@ void QAsmView::setDisplayTraceData( bool value )
 	{
 		showTraceData = value;
 
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		updateAssemblyView();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -5084,9 +5085,9 @@ void QAsmView::setDisplayROMoffsets( bool value )
 	{
 		displayROMoffsets = value;
 
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		updateAssemblyView();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -5096,9 +5097,9 @@ void QAsmView::setSymbolDebugEnable( bool value )
 	{
 		symbolicDebugEnable = value;
 
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		updateAssemblyView();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -5108,9 +5109,9 @@ void QAsmView::setRegisterNameEnable( bool value )
 	{
 		registerNameEnable = value;
 
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		updateAssemblyView();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -5272,7 +5273,7 @@ bool QAsmView::event(QEvent *event)
 					asmEntry[line]->addr, asmEntry[line]->bank, asmEntry[line]->rom );
 			}
 
-			//static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent, new asmLookAheadPopup(asmEntry[line]->addr, this) ));
+			//static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent->globalPos(), new asmLookAheadPopup(asmEntry[line]->addr, this) ));
 			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 			//QToolTip::hideText();
 			//event->ignore();
@@ -5297,7 +5298,7 @@ bool QAsmView::event(QEvent *event)
 					addr, bank, romOfs );
 			}
 
-			static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent, new asmLookAheadPopup(addr, this) ));
+			static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent->globalPos(), new asmLookAheadPopup(addr, this) ));
 			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 			QToolTip::hideText();
 			event->ignore();
@@ -5899,6 +5900,7 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QAsmView::wheelEvent(QWheelEvent *event)
 {
+	int zDelta = 0;
 
 	QPoint numPixels = event->pixelDelta();
 	QPoint numDegrees = event->angleDelta();
@@ -5907,42 +5909,59 @@ void QAsmView::wheelEvent(QWheelEvent *event)
 	{
 		wheelPixelCounter -= numPixels.y();
 	   //printf("numPixels: (%i,%i) \n", numPixels.x(), numPixels.y() );
+
+		if ( wheelPixelCounter >= pxLineSpacing )
+		{
+			zDelta = (wheelPixelCounter / pxLineSpacing);
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
+		else if ( wheelPixelCounter <= -pxLineSpacing )
+		{
+			zDelta = (wheelPixelCounter / pxLineSpacing);
+
+			wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
+		}
 	} 
 	else if (!numDegrees.isNull()) 
 	{
+		int stepDeg = 120;
 		//QPoint numSteps = numDegrees / 15;
 		//printf("numSteps: (%i,%i) \n", numSteps.x(), numSteps.y() );
 		//printf("numDegrees: (%i,%i)  %i\n", numDegrees.x(), numDegrees.y(), pxLineSpacing );
-		wheelPixelCounter -= (pxLineSpacing * numDegrees.y()) / (15*8);
+		wheelAngleCounter -= numDegrees.y();
+
+		if ( wheelAngleCounter <= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
+		else if ( wheelAngleCounter >= stepDeg )
+		{
+			zDelta = wheelAngleCounter / stepDeg;
+
+			wheelAngleCounter = wheelAngleCounter % stepDeg;
+		}
 	}
 	//printf("Wheel Event: %i\n", wheelPixelCounter);
 
-	if ( wheelPixelCounter >= pxLineSpacing )
+	if ( zDelta != 0 )
 	{
-		lineOffset += (wheelPixelCounter / pxLineSpacing);
-
-		if ( lineOffset > maxLineOffset )
-		{
-			lineOffset = maxLineOffset;
-		}
-		vbar->setValue( lineOffset );
-
-		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
-	}
-	else if ( wheelPixelCounter <= -pxLineSpacing )
-	{
-		lineOffset += (wheelPixelCounter / pxLineSpacing);
+		lineOffset += zDelta;
 
 		if ( lineOffset < 0 )
 		{
 			lineOffset = 0;
 		}
+		else if ( lineOffset > maxLineOffset )
+		{
+			lineOffset = maxLineOffset;
+		}
 		vbar->setValue( lineOffset );
-
-		wheelPixelCounter = wheelPixelCounter % pxLineSpacing;
 	}
 
-	 event->accept();
+	event->accept();
 }
 //----------------------------------------------------------------------------
 void QAsmView::contextMenuEvent(QContextMenuEvent *event)
@@ -6866,7 +6885,7 @@ bool ppuCtrlRegDpy::event(QEvent *event)
 		//{
 		//	printf("Tool Tip Show\n");
 		//}
-		popup = static_cast<ppuRegPopup*>(fceuCustomToolTipShow( helpEvent, new ppuRegPopup(this) ));
+		popup = static_cast<ppuRegPopup*>(fceuCustomToolTipShow( helpEvent->globalPos(), new ppuRegPopup(this) ));
 
 		QToolTip::hideText();
 		event->ignore();
@@ -6892,7 +6911,7 @@ asmLookAheadPopup::asmLookAheadPopup( int addr, QWidget *parent )
 	QFont        font;
 	char stmp[128];
 
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	vbox    = new QVBoxLayout();
 	vbox1   = new QVBoxLayout();
@@ -7029,7 +7048,7 @@ asmLookAheadPopup::asmLookAheadPopup( int addr, QWidget *parent )
 	resize(512, 512);
 
 	asmView->updateAssemblyView();
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	hbar->hide();
 	vbar->hide();
@@ -7459,7 +7478,7 @@ DebugBreakOnDialog::DebugBreakOnDialog(int type, QWidget *parent )
 	char stmp[128];
 	QPushButton *btn;
 	
-	fceuWrapperLock();
+	FCEU_WRAPPER_LOCK();
 
 	prevPauseState = FCEUI_EmulationPaused();
 
@@ -7467,7 +7486,7 @@ DebugBreakOnDialog::DebugBreakOnDialog(int type, QWidget *parent )
 	{
 		FCEUI_ToggleEmulationPause();
 	}
-	fceuWrapperUnLock();
+	FCEU_WRAPPER_UNLOCK();
 
 	currLbl = new QLabel();
 

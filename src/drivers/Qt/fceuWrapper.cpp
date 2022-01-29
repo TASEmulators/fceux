@@ -44,6 +44,7 @@
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/TasEditor/TasEditorWindow.h"
 #include "Qt/fceux_git_info.h"
 
 #include "common/cheat.h"
@@ -99,7 +100,7 @@ static int frameskip=0;
 static int periodic_saves = 0;
 static int   mutexLocks = 0;
 static int   mutexPending = 0;
-static bool  emulatorHasMutux = 0;
+static bool  emulatorHasMutex = 0;
 unsigned int emulatorCycleCount = 0;
 
 extern double g_fpsScale;
@@ -231,6 +232,17 @@ DriverKill()
 	inited=0;
 }
 
+int LoadGameFromLua( const char *path )
+{
+	//printf("Load From Lua: '%s'\n", path);
+	fceuWrapperUnLock();
+
+	consoleWindow->emulatorThread->signalRomLoad(path);
+
+	fceuWrapperLock();
+	return 0;
+}
+
 /**
  * Reloads last game
  */
@@ -249,23 +261,36 @@ int reloadLastGame(void)
  */
 int LoadGame(const char *path, bool silent)
 {
-	char fullpath[4096];
+	std::string fullpath;
 	int gg_enabled, autoLoadDebug, autoOpenDebugger, autoInputPreset;
 
 	if (isloaded){
 		CloseGame();
 	}
 
-#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+	QFileInfo fi( path );
 
 	// Resolve absolute path to file
-	if ( realpath( path, fullpath ) == NULL )
+	if ( fi.exists() )
 	{
-		strcpy( fullpath, path );
+		//printf("FI: '%s'\n", fi.absoluteFilePath().toStdString().c_str() );
+		//printf("FI: '%s'\n", fi.canonicalFilePath().toStdString().c_str() );
+		fullpath = fi.canonicalFilePath().toStdString();
 	}
-#else
-	strcpy( fullpath, path );
-#endif
+	else
+	{
+		fullpath.assign( path );
+	}
+//#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+//
+//	// Resolve absolute path to file
+//	if ( realpath( path, fullpath ) == NULL )
+//	{
+//		strcpy( fullpath, path );
+//	}
+//#else
+//	strcpy( fullpath, path );
+//#endif
 
 	//printf("Fullpath: %zi '%s'\n", sizeof(fullpath), fullpath );
 
@@ -280,13 +305,13 @@ int LoadGame(const char *path, bool silent)
 	g_config->getOption ("SDL.RamInitMethod", &RAMInitOption);
 
 	// Load the game
-	if(!FCEUI_LoadGame(fullpath, 1, silent)) {
+	if(!FCEUI_LoadGame(fullpath.c_str(), 1, silent)) {
 		return 0;
 	}
 
 	if ( consoleWindow )
 	{
-		consoleWindow->addRecentRom( fullpath );
+		consoleWindow->addRecentRom( fullpath.c_str() );
 	}
 
 	hexEditorLoadBookmarks();
@@ -457,6 +482,11 @@ CloseGame(void)
 	if ( autoInputPreset )
 	{
 		saveInputSettingsToFile();
+	}
+
+	if ( tasWin != NULL )
+	{
+		tasWin->requestWindowClose();
 	}
 
 	FCEUI_CloseGame();
@@ -1158,12 +1188,29 @@ FCEUD_Update(uint8 *XBuf,
 
 static void DoFun(int frameskip, int periodic_saves)
 {
-	uint8 *gfx;
-	int32 *sound;
-	int32 ssize;
+	uint8 *gfx = 0;
+	int32 *sound = 0;
+	int32 ssize = 0;
 	static int fskipc = 0;
 	//static int opause = 0;
 
+	// If TAS editor is engaged, check whether a seek frame is set.
+	// If a seek is in progress, don't emulate past target frame.
+	if ( tasWindowIsOpen() )
+	{
+		int runToFrameTarget;
+	
+		runToFrameTarget = PLAYBACK::getPauseFrame();
+
+		if ( runToFrameTarget >= 0)
+		{
+			if ( currFrameCounter >= runToFrameTarget )
+			{
+				FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
+				return;
+			}
+		}
+	}
     //TODO peroidic saves, working on it right now
     if (periodic_saves && FCEUD_GetTime() % PERIODIC_SAVE_INTERVAL < 30){
         FCEUI_SaveState(NULL, false);
@@ -1172,7 +1219,7 @@ static void DoFun(int frameskip, int periodic_saves)
 	fskipc = (fskipc + 1) % (frameskip + 1);
 #endif
 
-	if (NoWaiting) 
+	if (NoWaiting || turbo) 
 	{
 		gfx = 0;
 	}
@@ -1188,6 +1235,30 @@ static void DoFun(int frameskip, int periodic_saves)
 	emulatorCycleCount++;
 }
 
+static std::string lockFile;
+static bool debugMutexLock = false;
+
+void fceuWrapperLock(const char *filename, int line, const char *func)
+{
+	fceuWrapperLock();
+
+	if ( debugMutexLock )
+	{
+		char txt[32];
+
+		if ( mutexLocks > 1 )
+		{
+			printf("Recursive Lock:%i\n", mutexLocks );
+			printf("Already Locked By: %s\n", lockFile.c_str() );
+			printf("Requested By: %s:%i - %s\n", filename, line, func );
+		}
+		sprintf( txt, ":%i - ", line );
+		lockFile.assign(filename);
+		lockFile.append(txt);
+		lockFile.append(func);
+	}
+}
+
 void fceuWrapperLock(void)
 {
 	mutexPending++;
@@ -1197,6 +1268,23 @@ void fceuWrapperLock(void)
 	}
 	mutexPending--;
 	mutexLocks++;
+}
+
+bool fceuWrapperTryLock(const char *filename, int line, const char *func, int timeout)
+{
+	bool lockAcq = false;
+
+	lockAcq = fceuWrapperTryLock( timeout );
+
+	if ( lockAcq && debugMutexLock)
+	{
+		char txt[32];
+		sprintf( txt, ":%i - ", line );
+		lockFile.assign(filename);
+		lockFile.append(txt);
+		lockFile.append(func);
+	}
+	return lockAcq;
 }
 
 bool fceuWrapperTryLock(int timeout)
@@ -1221,15 +1309,16 @@ void fceuWrapperUnLock(void)
 {
 	if ( mutexLocks > 0 )
 	{
+		mutexLocks--;
 		if ( consoleWindow != NULL )
 		{
 			consoleWindow->mutex->unlock();
 		}
-		mutexLocks--;
 	}
 	else
 	{
 		printf("Error: Mutex is Already UnLocked\n");
+		//abort(); // Uncomment to catch a stack trace
 	}
 }
 
@@ -1241,27 +1330,33 @@ bool fceuWrapperIsLocked(void)
 int  fceuWrapperUpdate( void )
 {
 	bool lock_acq;
+	static bool mutexLockFail = false;
 
 	// If a request is pending, 
 	// sleep to allow request to be serviced.
 	if ( mutexPending > 0 )
 	{
-		msleep( 100 );
+		msleep( 16 );
 	}
 
-	lock_acq = fceuWrapperTryLock();
+	lock_acq = fceuWrapperTryLock( __FILE__, __LINE__, __func__ );
 
 	if ( !lock_acq )
 	{
 		if ( GameInfo )
 		{
-			printf("Error: Emulator Failed to Acquire Mutex\n");
+			if ( !mutexLockFail )
+			{
+				printf("Warning: Emulator Thread Failed to Acquire Mutex - GUI has Lock\n");
+			}
+			mutexLockFail = true;
 		}
-		msleep( 100 );
+		msleep( 16 );
 
 		return -1;
 	}
-	emulatorHasMutux = 1;
+	mutexLockFail = false;
+	emulatorHasMutex = 1;
  
 	if ( GameInfo )
 	{
@@ -1275,7 +1370,7 @@ int  fceuWrapperUpdate( void )
 		}
 		fceuWrapperUnLock();
 
-		emulatorHasMutux = 0;
+		emulatorHasMutex = 0;
 
 		while ( SpeedThrottle() )
 		{
@@ -1288,7 +1383,7 @@ int  fceuWrapperUpdate( void )
 	{
 		fceuWrapperUnLock();
 
-		emulatorHasMutux = 0;
+		emulatorHasMutex = 0;
 
 		msleep( 100 );
 	}
@@ -1596,7 +1691,7 @@ bool FCEUD_ShouldDrawInputAids(void)
 	return drawInputAidsEnable;
 }
 
-void FCEUD_TurboOn	 (void) { /* TODO */ };
-void FCEUD_TurboOff   (void) { /* TODO */ };
-void FCEUD_TurboToggle(void) { /* TODO */ };
+void FCEUD_TurboOn (void) { turbo = true; };
+void FCEUD_TurboOff   (void) { turbo = false; };
+void FCEUD_TurboToggle(void) { turbo = !turbo; };
 

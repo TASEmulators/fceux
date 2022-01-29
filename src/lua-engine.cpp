@@ -55,6 +55,12 @@ extern TASEDITOR_LUA taseditor_lua;
 
 #ifdef __QT_DRIVER__
 #include "drivers/Qt/fceuWrapper.h"
+#include "drivers/Qt/TasEditor/selection.h"
+#include "drivers/Qt/TasEditor/laglog.h"
+#include "drivers/Qt/TasEditor/markers.h"
+#include "drivers/Qt/TasEditor/snapshot.h"
+#include "drivers/Qt/TasEditor/taseditor_lua.h"
+extern TASEDITOR_LUA *taseditor_lua;
 #else
 int LoadGame(const char *path, bool silent = false);
 int reloadLastGame(void);
@@ -603,6 +609,21 @@ static int emu_getdir(lua_State *L) {
 
 extern void ReloadRom(void);
 
+//#ifdef __QT_DRIVER__
+//static int emu_wait_for_rom_load(lua_State *L)
+//{
+//	fceuWrapperUnLock();
+//	printf("Waiting for ROM\n");
+//	#ifdef WIN32
+//	msleep(1000);
+//	#else
+//	usleep(1000000);
+//	#endif
+//	fceuWrapperLock();
+//
+//	return 0;
+//}
+//#endif
 
 // emu.loadrom(string filename)
 //
@@ -633,23 +654,22 @@ static int emu_loadrom(lua_State *L)
 		return 1;
 	}
 	return 0;
-#else
+#elif  defined(__QT_DRIVER__)
 	const char *nameo2 = luaL_checkstring(L,1);
 	char nameo[2048];
 
-	#ifndef WIN32
-	if ( realpath( nameo2, nameo ) == NULL )
-	{
-		strncpy(nameo, nameo2, sizeof(nameo));
-	}
-	#endif
+	strncpy(nameo, nameo2, sizeof(nameo));
+	nameo[sizeof(nameo)-1] = 0;
 
+	LoadGameFromLua( nameo );
+
+	//lua_cpcall(L, emu_wait_for_rom_load, NULL);
 	//printf("Attempting to Load ROM: '%s'\n", nameo );
-	if (!LoadGame(nameo, true)) 
-	{
-		//printf("Failed to Load ROM: '%s'\n", nameo );
-		reloadLastGame();
-	}
+	//if (!LoadGame(nameo, true)) 
+	//{
+	//	//printf("Failed to Load ROM: '%s'\n", nameo );
+	//	reloadLastGame();
+	//}
 	if ( GameInfo )
 	{
 		//printf("Currently Loaded ROM: '%s'\n", GameInfo->filename );
@@ -2326,6 +2346,18 @@ void TaseditorDisableManualFunctionIfNeeded()
 		lua_pop(L, 1);
 	} else taseditor_lua.disableRunFunction();
 }
+#elif __QT_DRIVER__
+void TaseditorDisableManualFunctionIfNeeded()
+{
+	if (L)
+	{
+		// check if LUACALL_TASEDITOR_MANUAL function is not nil
+		lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
+		if (!lua_isfunction(L, -1))
+			taseditor_lua->disableRunFunction();
+		lua_pop(L, 1);
+	} else taseditor_lua->disableRunFunction();
+}
 #endif
 
 static int memory_registerHook(lua_State* L, LuaMemHookType hookType, int defaultSize)
@@ -3404,10 +3436,13 @@ static void gui_prepare() {
 #define LUA_PIXEL_G(PIX) (((PIX) >> 8) & 0xff)
 #define LUA_PIXEL_B(PIX) ((PIX) & 0xff)
 
-template <class T> static void swap(T &one, T &two) {
-	T temp = one;
-	one = two;
-	two = temp;
+namespace fceu
+{
+	template <class T> static void swap(T &one, T &two) {
+		T temp = one;
+		one = two;
+		two = temp;
+	}
 }
 
 // write a pixel to buffer
@@ -3532,9 +3567,9 @@ static void gui_drawline_internal(int x1, int y1, int x2, int y2, bool lastPixel
 static void gui_drawbox_internal(int x1, int y1, int x2, int y2, uint32 colour) {
 
 	if (x1 > x2)
-		swap<int>(x1, x2);
+		fceu::swap<int>(x1, x2);
 	if (y1 > y2)
-		swap<int>(y1, y2);
+		fceu::swap<int>(y1, y2);
 	if (x1 < 0)
 		x1 = -1;
 	if (y1 < 0)

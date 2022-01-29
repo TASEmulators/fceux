@@ -400,11 +400,11 @@ void ConsoleSndConfDialog_t::bufSizeChanged(int value)
 
 	g_config->setOption("SDL.Sound.BufSize", value);
 	// reset sound subsystem for changes to take effect
-	if (fceuWrapperTryLock())
+	if (FCEU_WRAPPER_TRYLOCK(1000))
 	{
 		KillSound();
 		InitSound();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -418,10 +418,10 @@ void ConsoleSndConfDialog_t::volumeChanged(int value)
 
 	g_config->setOption("SDL.Sound.Volume", value);
 
-	if (fceuWrapperTryLock())
+	if (FCEU_WRAPPER_TRYLOCK(1000))
 	{
 		FCEUI_SetSoundVolume(value);
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -435,10 +435,10 @@ void ConsoleSndConfDialog_t::triangleChanged(int value)
 
 	g_config->setOption("SDL.Sound.TriangleVolume", value);
 
-	if (fceuWrapperTryLock())
+	if (FCEU_WRAPPER_TRYLOCK(1000))
 	{
 		FCEUI_SetTriangleVolume(value);
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -452,10 +452,10 @@ void ConsoleSndConfDialog_t::square1Changed(int value)
 
 	g_config->setOption("SDL.Sound.Square1Volume", value);
 
-	if (fceuWrapperTryLock())
+	if (FCEU_WRAPPER_TRYLOCK(1000))
 	{
 		FCEUI_SetSquare1Volume(value);
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -469,10 +469,10 @@ void ConsoleSndConfDialog_t::square2Changed(int value)
 
 	g_config->setOption("SDL.Sound.Square2Volume", value);
 
-	if (fceuWrapperTryLock())
+	if (FCEU_WRAPPER_TRYLOCK(1000))
 	{
 		FCEUI_SetSquare2Volume(value);
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -486,10 +486,10 @@ void ConsoleSndConfDialog_t::noiseChanged(int value)
 
 	g_config->setOption("SDL.Sound.NoiseVolume", value);
 
-	if (fceuWrapperTryLock())
+	if (FCEU_WRAPPER_TRYLOCK(1000))
 	{
 		FCEUI_SetNoiseVolume(value);
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -503,10 +503,10 @@ void ConsoleSndConfDialog_t::pcmChanged(int value)
 
 	g_config->setOption("SDL.Sound.PCMVolume", value);
 
-	if (fceuWrapperTryLock())
+	if (FCEU_WRAPPER_TRYLOCK(1000))
 	{
 		FCEUI_SetPCMVolume(value);
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -518,21 +518,21 @@ void ConsoleSndConfDialog_t::enaSoundStateChange(int value)
 		g_config->getOption("SDL.Sound", &last_soundopt);
 		g_config->setOption("SDL.Sound", 1);
 
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 
 		if (GameInfo && !last_soundopt)
 		{
 			InitSound();
 		}
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 	else
 	{
 		g_config->setOption("SDL.Sound", 0);
 
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		KillSound();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -542,17 +542,17 @@ void ConsoleSndConfDialog_t::enaSoundLowPassChange(int value)
 	{
 		g_config->setOption("SDL.Sound.LowPass", 1);
 
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		FCEUI_SetLowPass(1);
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 	else
 	{
 		g_config->setOption("SDL.Sound.LowPass", 0);
 
-		fceuWrapperLock();
+		FCEU_WRAPPER_LOCK();
 		FCEUI_SetLowPass(0);
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 	g_config->save();
 }
@@ -594,11 +594,11 @@ void ConsoleSndConfDialog_t::soundQualityChanged(int index)
 	g_config->getOption("SDL.Sound.Quality", &sndQuality );
 
 	// reset sound subsystem for changes to take effect
-	if (fceuWrapperTryLock())
+	if (FCEU_WRAPPER_TRYLOCK(1000))
 	{
 		KillSound();
 		InitSound();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 	g_config->save();
 
@@ -611,11 +611,11 @@ void ConsoleSndConfDialog_t::soundRateChanged(int index)
 
 	g_config->setOption("SDL.Sound.Rate", rateSelect->itemData(index).toInt());
 	// reset sound subsystem for changes to take effect
-	if (fceuWrapperTryLock())
+	if (FCEU_WRAPPER_TRYLOCK(1000))
 	{
 		KillSound();
 		InitSound();
-		fceuWrapperUnLock();
+		FCEU_WRAPPER_UNLOCK();
 	}
 	g_config->save();
 }

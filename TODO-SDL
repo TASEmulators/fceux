@@ -7,12 +7,11 @@ Priorities
    * The Qt GUI has by far exceeded the capabilities of the older GTK version. Below is a GUI capability 
      matrix showing the differences between the two. I HIGHLY RECOMMEND USING THE Qt GUI.
    * Code cleanup. Lots of compiler warnings with newer GCC. Maybe I'm OCD... but these warnings bother me.
-   * TODO Implement TAS Editor
 
 Features
 ========
    * Emulator no runs as a separate thread from the GUI. Much improved performance.
-   * Cross platform QT GUI is fully functional minus TAS Editor.
+   * Cross platform QT GUI is fully functional
   
 ---------------------------------------------------------------------------------|
 ----------------------  GUI Capability Matrix -----------------------------------|
@@ -44,7 +43,7 @@ Active Cheat window                                  |     YES     |     YES    
 RAM Search Window                                    |     YES     |     NO      |
 RAM Watch Window                                     |     YES     |     YES     |
 Memory Watch Window                                  |     NO      |     NO      |
-TAS Editor                                           |     NO      |     NO      |
+TAS Editor                                           |     YES     |     NO      |
 6502 Debugger Window                                 |     YES     |     YES     |
 PPU Viewer                                           |     YES     |     NO      |
 Name Table Viewer                                    |     YES     |     NO      |

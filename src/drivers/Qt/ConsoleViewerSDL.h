@@ -25,6 +25,7 @@ class ConsoleViewSDL_t : public QWidget
 
 		void transfer2LocalBuffer(void);
 
+		void setVsyncEnable( bool ena );
 		void setLinearFilterEnable( bool ena );
 
 		bool   getForceAspectOpt(void){ return forceAspect; };
