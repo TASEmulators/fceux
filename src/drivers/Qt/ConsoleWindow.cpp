@@ -114,19 +114,23 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	initHotKeys();
 
-	createMainMenu();
-
 	firstResize    = true;
 	closeRequested = false;
 	errorMsgValid  = false;
 	viewport_GL    = NULL;
 	viewport_SDL   = NULL;
 
-	mainMenuEmuPauseSet   = false;
-	mainMenuEmuWasPaused  = false;
-	mainMenuPauseWhenActv = false;
+	contextMenuEnable      = false;
+	soundUseGlobalFocus    = false;
+	mainMenuEmuPauseSet    = false;
+	mainMenuEmuWasPaused   = false;
+	mainMenuPauseWhenActv  = false;
+	autoHideMenuFullscreen = false;
+
+	createMainMenu();
 
 	g_config->getOption( "SDL.PauseOnMainMenuAccess", &mainMenuPauseWhenActv );
+	g_config->getOption( "SDL.AutoHideMenuFullsreen", &autoHideMenuFullscreen );
 	g_config->getOption( "SDL.ContextMenuEnable", &contextMenuEnable );
 	g_config->getOption( "SDL.Sound.UseGlobalFocus", &soundUseGlobalFocus );
 	g_config->getOption ("SDL.VideoDriver", &use_SDL_video);
@@ -225,6 +229,10 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	if ( setFullScreen )
 	{
+		if ( autoHideMenuFullscreen )
+		{
+			menubar->setVisible(false);
+		}
 		this->showFullScreen();
 	}
 
@@ -1221,6 +1229,19 @@ void consoleWin_t::createMainMenu(void)
 	Hotkeys[ HK_MAIN_MENU_HIDE ].setAction( act );
 	connect( Hotkeys[ HK_MAIN_MENU_HIDE ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleMenuVis(void)) );
 
+	// Options -> Auto Hide Menu on Fullscreen
+	g_config->getOption( "SDL.AutoHideMenuFullsreen", &autoHideMenuFullscreen );
+
+	act = new QAction(tr("&Auto Hide Menu on Fullscreen"), this);
+	//act->setShortcut( QKeySequence(tr("Alt+/")));
+	act->setCheckable(true);
+	act->setChecked( autoHideMenuFullscreen );
+	act->setStatusTip(tr("Auto Hide Menu on Fullscreen"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_TitleBarMaxButton ) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(toggleMenuAutoHide(bool)) );
+
+	optMenu->addAction(act);
+
 	// Options -> Video BG Color
 	fceuLoadConfigColor( "SDL.VideoBgColor", &videoBgColor );
 
@@ -2096,6 +2117,14 @@ void consoleWin_t::toggleMenuVis(void)
 	{
 		menubar->setVisible( true );
 	}
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::toggleMenuAutoHide(bool checked)
+{
+	autoHideMenuFullscreen = checked;
+
+	g_config->setOption( "SDL.AutoHideMenuFullsreen", autoHideMenuFullscreen );
+	g_config->save();
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::closeApp(void)
@@ -3102,9 +3131,18 @@ void consoleWin_t::toggleFullscreen(void)
 	if ( isFullScreen() )
 	{
 		showNormal();
+
+		if ( autoHideMenuFullscreen )
+		{
+			menubar->setVisible(true);
+		}
 	}
 	else
 	{
+		if ( autoHideMenuFullscreen )
+		{
+			menubar->setVisible(false);
+		}
 		showFullScreen();
 	}
 }
