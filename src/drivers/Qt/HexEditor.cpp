@@ -1100,7 +1100,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	QAction *act, *actHlgt, *actHlgtRV;
 	ColorMenuItem *actColorFG, *actColorBG, *actRowColColor, *actAltColColor;
 	QActionGroup *group;
-	int opt, useNativeMenuBar, refreshRateOpt;
+	int opt, useNativeMenuBar;
 	QSettings settings;
 
 	QDialog::setWindowTitle( tr("Hex Editor") );
@@ -1280,6 +1280,7 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	group->setExclusive(true);
 
+	refreshRateOpt = 10;
 	g_config->getOption("SDL.HexEditRefreshRate", &refreshRateOpt);
 
 	// View -> Refresh Rate -> 5 Hz
@@ -1314,6 +1315,15 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	act->setCheckable(true);
 	act->setChecked( refreshRateOpt == 30 );
 	connect(act, SIGNAL(triggered()), this, SLOT(setViewRefresh30Hz(void)) );
+
+	group->addAction(act);
+	subMenu->addAction(act);
+
+	// View -> Refresh Rate -> 50 Hz
+	act = new QAction(tr("50 Hz"), this);
+	act->setCheckable(true);
+	act->setChecked( refreshRateOpt == 50 );
+	connect(act, SIGNAL(triggered()), this, SLOT(setViewRefresh50Hz(void)) );
 
 	group->addAction(act);
 	subMenu->addAction(act);
@@ -1727,6 +1737,7 @@ void HexEditorDialog_t::changeFontRequest(void)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewRefresh5Hz(void)
 {
+	refreshRateOpt = 5;
 	g_config->setOption("SDL.HexEditRefreshRate", 5);
 	periodicTimer->stop();
 	periodicTimer->start(200);
@@ -1734,6 +1745,7 @@ void HexEditorDialog_t::setViewRefresh5Hz(void)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewRefresh10Hz(void)
 {
+	refreshRateOpt = 10;
 	g_config->setOption("SDL.HexEditRefreshRate", 10);
 	periodicTimer->stop();
 	periodicTimer->start(100);
@@ -1741,6 +1753,7 @@ void HexEditorDialog_t::setViewRefresh10Hz(void)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewRefresh20Hz(void)
 {
+	refreshRateOpt = 20;
 	g_config->setOption("SDL.HexEditRefreshRate", 20);
 	periodicTimer->stop();
 	periodicTimer->start(50);
@@ -1748,13 +1761,23 @@ void HexEditorDialog_t::setViewRefresh20Hz(void)
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewRefresh30Hz(void)
 {
+	refreshRateOpt = 30;
 	g_config->setOption("SDL.HexEditRefreshRate", 30);
 	periodicTimer->stop();
 	periodicTimer->start(33);
 }
 //----------------------------------------------------------------------------
+void HexEditorDialog_t::setViewRefresh50Hz(void)
+{
+	refreshRateOpt = 50;
+	g_config->setOption("SDL.HexEditRefreshRate", 50);
+	periodicTimer->stop();
+	periodicTimer->start(20);
+}
+//----------------------------------------------------------------------------
 void HexEditorDialog_t::setViewRefresh60Hz(void)
 {
+	refreshRateOpt = 60;
 	g_config->setOption("SDL.HexEditRefreshRate", 60);
 	periodicTimer->stop();
 	periodicTimer->start(16);
@@ -3804,7 +3827,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 	
 	painter.fillRect( 0, 0, w, h, bgColor );
 
-	if ( cursorBlinkCount >= 5 )
+	if ( cursorBlinkCount >= (parent->getRefreshRate()>>1) )
 	{
 		cursorBlink = !cursorBlink;
 		cursorBlinkCount = 0;
