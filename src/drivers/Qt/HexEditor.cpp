@@ -4008,8 +4008,12 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 						if ( reverseVideo )
 						{
 							painter.setPen( romFgColor );
-							painter.fillRect( x - (0.5*pxCharWidth) , recty, pxCharWidth3, pxLineSpacing, romBgColor );
-							painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, recty, pxCharWidth, pxLineSpacing, romBgColor );
+
+							if ( bgColor != romBgColor )
+							{
+								painter.fillRect( x - (0.5*pxCharWidth) , recty, pxCharWidth3, pxLineSpacing, romBgColor );
+								painter.fillRect( pxHexAscii + (col*pxCharWidth) - pxLineXScroll, recty, pxCharWidth, pxLineSpacing, romBgColor );
+							}
 						}
 						else
 						{
