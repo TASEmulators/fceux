@@ -1,3 +1,21 @@
+# Fork description
+
+A hacked Trace Logger to produce special log files for my disassembler.
+
+## Download latest Windows 32 version
+
+https://ci.appveyor.com/project/cyneprepou4uk/fceux/build/artifacts
+
+## Changed files
+* [src\asm.cpp](https://github.com/cyneprepou4uk/fceux/blob/master/src/asm.cpp)
+* [src\asm.h](https://github.com/cyneprepou4uk/fceux/blob/master/src/asm.h)
+* [src\debug.cpp](https://github.com/cyneprepou4uk/fceux/blob/master/src/debug.cpp)
+* [src\debug.h](https://github.com/cyneprepou4uk/fceux/blob/master/src/debug.h)
+* [src\drivers\win\tracer.cpp](https://github.com/cyneprepou4uk/fceux/blob/master/src/drivers/win/tracer.cpp)
+* [src\drivers\win\tracer.h](https://github.com/cyneprepou4uk/fceux/blob/master/src/drivers/win/tracer.h)
+
+
+
 # fceux [![Build status](https://ci.appveyor.com/api/projects/status/github/TASEmulators/fceux?branch=master&svg=true)](https://ci.appveyor.com/project/zeromus/fceux)
 
 An open source NES Emulator for Windows and Unix that features solid emulation accuracy and state of the art tools for power users. For some reason casual gamers use it too.
