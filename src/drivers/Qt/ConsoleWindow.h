@@ -271,6 +271,7 @@ class  consoleWin_t : public QMainWindow
 		bool        scrHandlerConnected;
 		bool        contextMenuEnable;
 		bool        soundUseGlobalFocus;
+		bool        autoHideMenuFullscreen;
 
 		std::list <std::string*> romList;
 		std::vector <autoFireMenuAction*> afActList;
@@ -449,6 +450,7 @@ class  consoleWin_t : public QMainWindow
 		void winScreenChanged( QScreen *scr );
 		void winActiveChanged(void);
 		void emuFrameFinish(void);
+		void toggleMenuAutoHide(bool);
 		void videoBgColorChanged( QColor &c );
 		void loadRomRequestCB( QString s );
 
