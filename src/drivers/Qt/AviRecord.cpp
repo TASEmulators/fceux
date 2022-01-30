@@ -32,6 +32,7 @@
 #include <vfw.h>
 #endif
 
+#include <QFile>
 #include <QDate>
 #include <QLocale>
 #include <QSysInfo>

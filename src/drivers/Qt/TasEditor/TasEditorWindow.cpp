@@ -39,6 +39,7 @@
 #include <QFontDialog>
 #include <QInputDialog>
 #include <QStandardPaths>
+#include <QActionGroup>
 #include <QApplication>
 #include <QGuiApplication>
 #include <QDesktopServices>

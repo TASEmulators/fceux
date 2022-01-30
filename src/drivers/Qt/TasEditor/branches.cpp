@@ -152,7 +152,7 @@ void BRANCHES::calcFontData(void)
 	//	printf("Char:'%c'  x:%i   y:%i   w:%i   h:%i\n", txt[0], boundingRect.x(), boundingRect.y(), boundingRect.width(), boundingRect.height() );
 	//}
 	
-	bs = (metrics.leftBearing(ch) + metrics.rightBearing(ch)) / 2;
+	bs = (metrics.leftBearing(QChar(ch)) + metrics.rightBearing(QChar(ch))) / 2;
 
 	pxCharHeight   = metrics.capHeight();
 	//pxCharHeight   = metrics.ascent();
