@@ -265,11 +265,19 @@ void hotkey_t::conv2SDL(void)
 	if (shortcut == nullptr)
 		return;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	qkey.value    = shortcut->key()[0].key();
+	qkey.modifier = shortcut->key()[0].keyboardModifiers();
+
+	SDL_Keycode k = convQtKey2SDLKeyCode(shortcut->key()[0].key());
+	SDL_Keymod m = convQtKey2SDLModifier(shortcut->key()[0].keyboardModifiers());
+#else
 	qkey.value    = (Qt::Key)(shortcut->key()[0] & 0x01FFFFFF);
 	qkey.modifier = (Qt::KeyboardModifier)(shortcut->key()[0] & 0xFE000000);
 
 	SDL_Keycode k = convQtKey2SDLKeyCode((Qt::Key)(shortcut->key()[0] & 0x01FFFFFF));
 	SDL_Keymod m = convQtKey2SDLModifier((Qt::KeyboardModifier)(shortcut->key()[0] & 0xFE000000));
+#endif
 
 	//printf("Key: '%s'  0x%08x\n", shortcut->key().toString().toStdString().c_str(), shortcut->key()[0] );
 
