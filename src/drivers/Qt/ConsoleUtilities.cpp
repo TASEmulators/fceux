@@ -492,7 +492,11 @@ void fceuCustomToolTip::mouseMoveEvent(QMouseEvent *event)
 
 	if (!w->rect().isNull()) 
 	{
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+		QPoint pos = event->globalPosition().toPoint();
+#else
 		QPoint pos = event->globalPos();
+#endif
 		pos = mapFromGlobal(pos);
 
 		//printf("QEvent::MouseMove:  (%i,%i)   (%i,%i)\n", 

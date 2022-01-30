@@ -858,7 +858,11 @@ void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
 			emit imageIndexChanged(item);
 		}
 		imageItem = item;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+		imagePos = event->globalPosition().toPoint();
+#else
 		imagePos = event->globalPos();
+#endif
 		imageTimer->start();
 		QToolTip::hideText();
 	}
