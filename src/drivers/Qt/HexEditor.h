@@ -297,6 +297,8 @@ class HexEditorDialog_t : public QDialog
 		void setWindowTitle(void);
 		void openDebugSymbolEditWindow( int addr );
 
+		int  getRefreshRate(void){ return refreshRateOpt; }
+
 		QHexEdit   *editor;
 		HexEditorFindDialog_t  *findDialog;
 
@@ -317,6 +319,8 @@ class HexEditorDialog_t : public QDialog
 		QAction    *unloadTableAct;
 		QAction    *rolColHlgtAct;
 		QAction    *altColHlgtAct;
+
+		int refreshRateOpt;
 
 	private:
 
@@ -349,6 +353,7 @@ class HexEditorDialog_t : public QDialog
 		void setViewRefresh10Hz(void);
 		void setViewRefresh20Hz(void);
 		void setViewRefresh30Hz(void);
+		void setViewRefresh50Hz(void);
 		void setViewRefresh60Hz(void);
 		void changeFontRequest(void);
 };
