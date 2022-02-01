@@ -895,6 +895,7 @@ void NSFMMC5_Close(void) {
 	if (WRAM)
 		FCEU_gfree(WRAM);
 	WRAM = NULL;
+	MMC5WRAMsize = 0;
 	FCEU_gfree(ExRAM);
 	ExRAM = NULL;
 }
