@@ -502,7 +502,7 @@ InitConfig()
 	config->addOption("frameskip", "SDL.Frameskip", 0);
 	config->addOption("intFrameRate", "SDL.IntFrameRate", 0);
 	config->addOption("clipsides", "SDL.ClipSides", 0);
-	config->addOption("nospritelim", "SDL.DisableSpriteLimit", 1);
+	config->addOption("nospritelim", "SDL.DisableSpriteLimit", 0);
 	config->addOption("swapduty", "SDL.SwapDuty", 0);
 	config->addOption("ramInit", "SDL.RamInitMethod", 0);
 
