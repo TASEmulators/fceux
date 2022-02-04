@@ -189,116 +189,116 @@
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">The 2.2.1 release fixes many bugs and adds a couple of new features. The most notable feature is "Auto-resume old play session", which is similar to "Suspending Play". Enable this option in the Config menu and now you can close ROMs or emulator anytime, next time the game state will be resumed from the closing point.</span></p>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts35">Common&nbsp;</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Common&nbsp;</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Speed up HUD text drawing</span></li>
+ <li class="rvps2"><span class="rvts36">Speed up HUD text drawing</span></li>
+</ul>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts38">Emulation</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts36">Finished mappers to boards conversion</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed mappers 99, 228, 18, 198, 24, 26, 69, 19</span></li>
+ <li class="rvps2"><span class="rvts36">Mapper 115 - redesign according to the hardware tests</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed "you ling xing dong" by assigning to mapper 192</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed crash when four-screen bit is set after CRC check</span></li>
+ <li class="rvps2"><span class="rvts36">UNIF: verbose/safe chunk loading, fixes some crashes</span></li>
+</ul>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts38">Lua</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts36">removed "shadow pixels" from gui.text()</span></li>
 </ul>
 <p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36">Emulation</span></p>
+<p class="rvps2"><span class="rvts36">New Lua functions:</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Finished mappers to boards conversion</span></li>
- <li class="rvps2"><span class="rvts34">Fixed mappers 99, 228, 18, 198, 24, 26, 69, 19</span></li>
- <li class="rvps2"><span class="rvts34">Mapper 115 - redesign according to the hardware tests</span></li>
- <li class="rvps2"><span class="rvts34">Fixed "you ling xing dong" by assigning to mapper 192</span></li>
- <li class="rvps2"><span class="rvts34">Fixed crash when four-screen bit is set after CRC check</span></li>
- <li class="rvps2"><span class="rvts34">UNIF: verbose/safe chunk loading, fixes some crashes</span></li>
+ <li class="rvps2"><span class="rvts36">gui.parsecolor()</span></li>
 </ul>
 <p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36">Lua</span></p>
+<p class="rvps2"><span class="rvts36">New scripts:</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">removed "shadow pixels" from gui.text()</span></li>
+ <li class="rvps2"><span class="rvts36">JumpingFCEUXWindow.lua</span></li>
 </ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34">New Lua functions:</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts38">Win32</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">gui.parsecolor()</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed "Enter New Input" dialog (Hotkeys mapping)</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed zapper and mouse positioning in fullscreen</span></li>
+ <li class="rvps2"><span class="rvts36">Remodel "Video config" dialog</span></li>
+ <li class="rvps2"><span class="rvts36">Added "TV Aspect (4:3)"</span></li>
+ <li class="rvps2"><span class="rvts36">Holding Shift when resizing FCEUX window inverts "Force integral factors" meaning</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed window regions redrawing</span></li>
+ <li class="rvps2"><span class="rvts36">Added the option to define custom emulation speed (NES-&gt;Emulation Speed-&gt;Set Custom Speed)</span></li>
+ <li class="rvps2"><span class="rvts36">Now Frame Advance timings (initial delay and speed) can be tweaked by user</span></li>
+ <li class="rvps2"><span class="rvts36">Added Config-&gt;Enable-&gt;Auto-resume old play session</span></li>
+ <li class="rvps2"><span class="rvts36">Moved "Config-&gt;Game Genie" to "Config-&gt;Enable-&gt;Game Genie ROM"</span></li>
+ <li class="rvps2"><span class="rvts36">Play movie dialog shows New PPU in red if the required setting does not match</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed NameTable Viewer crash when the corresponding nametable RAM is not available on the cart</span></li>
+ <li class="rvps2"><span class="rvts36">The number of active cheats is displayed on screen when a ROM is loaded</span></li>
+ <li class="rvps2"><span class="rvts36">PPU/PAL/Input type changing is disabled when a movie is playing</span></li>
 </ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34">New scripts:</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts37">TAS Editor</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">JumpingFCEUXWindow.lua</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed keyboard accelerators when editing Notes</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed Greenzone saving while emulator is unpaused</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed drawing bugs when the Playback cursor moves more than once within one update</span></li>
+ <li class="rvps2"><span class="rvts36">Changed "Compact save" dialog, added 4 options of Greenzone saving</span></li>
+ <li class="rvps2"><span class="rvts36">Added "Config-&gt;Project file saving options"</span></li>
+ <li class="rvps2"><span class="rvts36">Changed "Follow cursor" logic, now the Piano Roll doesn't follow Playback cursor while seeking</span></li>
+ <li class="rvps2"><span class="rvts36">No "Autopause at the end of the Movie" when Recording</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed bug when adding new item to History Log</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed Bookmarks List height on Windows 7</span></li>
 </ul>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36">Win32</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Trace Logger</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Fixed "Enter New Input" dialog (Hotkeys mapping)</span></li>
- <li class="rvps2"><span class="rvts34">Fixed zapper and mouse positioning in fullscreen</span></li>
- <li class="rvps2"><span class="rvts34">Remodel "Video config" dialog</span></li>
- <li class="rvps2"><span class="rvts34">Added "TV Aspect (4:3)"</span></li>
- <li class="rvps2"><span class="rvts34">Holding Shift when resizing FCEUX window inverts "Force integral factors" meaning</span></li>
- <li class="rvps2"><span class="rvts34">Fixed window regions redrawing</span></li>
- <li class="rvps2"><span class="rvts34">Added the option to define custom emulation speed (NES-&gt;Emulation Speed-&gt;Set Custom Speed)</span></li>
- <li class="rvps2"><span class="rvts34">Now Frame Advance timings (initial delay and speed) can be tweaked by user</span></li>
- <li class="rvps2"><span class="rvts34">Added Config-&gt;Enable-&gt;Auto-resume old play session</span></li>
- <li class="rvps2"><span class="rvts34">Moved "Config-&gt;Game Genie" to "Config-&gt;Enable-&gt;Game Genie ROM"</span></li>
- <li class="rvps2"><span class="rvts34">Play movie dialog shows New PPU in red if the required setting does not match</span></li>
- <li class="rvps2"><span class="rvts34">Fixed NameTable Viewer crash when the corresponding nametable RAM is not available on the cart</span></li>
- <li class="rvps2"><span class="rvts34">The number of active cheats is displayed on screen when a ROM is loaded</span></li>
- <li class="rvps2"><span class="rvts34">PPU/PAL/Input type changing is disabled when a movie is playing</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed RAM-located code logging when CDLogger options are enabled</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed automatic window update when a breakpoint is hit</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed RTS padding</span></li>
 </ul>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts35">TAS Editor</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Code/Data Logger</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Fixed keyboard accelerators when editing Notes</span></li>
- <li class="rvps2"><span class="rvts34">Fixed Greenzone saving while emulator is unpaused</span></li>
- <li class="rvps2"><span class="rvts34">Fixed drawing bugs when the Playback cursor moves more than once within one update</span></li>
- <li class="rvps2"><span class="rvts34">Changed "Compact save" dialog, added 4 options of Greenzone saving</span></li>
- <li class="rvps2"><span class="rvts34">Added "Config-&gt;Project file saving options"</span></li>
- <li class="rvps2"><span class="rvts34">Changed "Follow cursor" logic, now the Piano Roll doesn't follow Playback cursor while seeking</span></li>
- <li class="rvps2"><span class="rvts34">No "Autopause at the end of the Movie" when Recording</span></li>
- <li class="rvps2"><span class="rvts34">Fixed bug when adding new item to History Log</span></li>
- <li class="rvps2"><span class="rvts34">Fixed Bookmarks List height on Windows 7</span></li>
+ <li class="rvps2"><span class="rvts36">Added current CDL filename field and default CDL naming</span></li>
+ <li class="rvps2"><span class="rvts36">Added "Auto-save .CDL when closing ROMs" option</span></li>
+ <li class="rvps2"><span class="rvts36">Added "Auto-load .CDL when opening the window" option</span></li>
+ <li class="rvps2"><span class="rvts36">Added "Auto-resume logging when loading ROMs" option</span></li>
+ <li class="rvps2"><span class="rvts36">Improved CHR logging, now it also logs the data when using Old PPU</span></li>
 </ul>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts35">Trace Logger</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Hex Editor</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Fixed RAM-located code logging when CDLogger options are enabled</span></li>
- <li class="rvps2"><span class="rvts34">Fixed automatic window update when a breakpoint is hit</span></li>
- <li class="rvps2"><span class="rvts34">Fixed RTS padding</span></li>
+ <li class="rvps2"><span class="rvts36">Show symbolic names in the window caption when "Symbolic debug" is enabled</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed crash when trying to save ROM to an invalid path</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed ROM coloring when using CDLogger data</span></li>
 </ul>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts35">Code/Data Logger</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts37">RAM Search</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Added current CDL filename field and default CDL naming</span></li>
- <li class="rvps2"><span class="rvts34">Added "Auto-save .CDL when closing ROMs" option</span></li>
- <li class="rvps2"><span class="rvts34">Added "Auto-load .CDL when opening the window" option</span></li>
- <li class="rvps2"><span class="rvts34">Added "Auto-resume logging when loading ROMs" option</span></li>
- <li class="rvps2"><span class="rvts34">Improved CHR logging, now it also logs the data when using Old PPU</span></li>
+ <li class="rvps2"><span class="rvts36">Added "Search ROM" option</span></li>
 </ul>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts35">Hex Editor</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Cheats</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Show symbolic names in the window caption when "Symbolic debug" is enabled</span></li>
- <li class="rvps2"><span class="rvts34">Fixed crash when trying to save ROM to an invalid path</span></li>
- <li class="rvps2"><span class="rvts34">Fixed ROM coloring when using CDLogger data</span></li>
+ <li class="rvps2"><span class="rvts36">Added "Add from CHT file..." button</span></li>
+ <li class="rvps2"><span class="rvts36">Update the list of cheats when ROM is changed</span></li>
 </ul>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts35">RAM Search</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts38">SDL</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Added "Search ROM" option</span></li>
+ <li class="rvps2"><span class="rvts36">Use desktop resolution for fullscreen by setting SDL.XResolution and SDL.YResolution to 0 (new default is 0)</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed bug where "quit" hotkey would do nothing in '--nogui' mode</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed fullscreen zapper issues</span></li>
+ <li class="rvps2"><span class="rvts36">Display a message dialog on errors in addition to printing to stderr</span></li>
+ <li class="rvps2"><span class="rvts36">Added "Options-&gt;Auto-Resume Play"</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed build issues on various versions of OS X</span></li>
 </ul>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts35">Cheats</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Added "Add from CHT file..." button</span></li>
- <li class="rvps2"><span class="rvts34">Update the list of cheats when ROM is changed</span></li>
-</ul>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36">SDL</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Use desktop resolution for fullscreen by setting SDL.XResolution and SDL.YResolution to 0 (new default is 0)</span></li>
- <li class="rvps2"><span class="rvts34">Fixed bug where "quit" hotkey would do nothing in '--nogui' mode</span></li>
- <li class="rvps2"><span class="rvts34">Fixed fullscreen zapper issues</span></li>
- <li class="rvps2"><span class="rvts34">Display a message dialog on errors in addition to printing to stderr</span></li>
- <li class="rvps2"><span class="rvts34">Added "Options-&gt;Auto-Resume Play"</span></li>
- <li class="rvps2"><span class="rvts34">Fixed build issues on various versions of OS X</span></li>
-</ul>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36"></span><span class="rvts6"></span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts38"></span><span class="rvts6"></span></p>
 <p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/create-epub-ebooks">Full-featured EBook editor</a></p>
 
             </div>

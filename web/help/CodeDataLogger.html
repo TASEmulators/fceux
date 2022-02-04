@@ -189,17 +189,17 @@
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts21">Introduction</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">The Code/Data Logger makes it much easier to reverse-engineer NES ROMs. The basic idea behind it is that a normal NES disassembler cannot distinguish between code (which is executed) and data (which is read). The Code/Data Logger keeps track of what is executed and what is read while the game is played, and then you can save this information into a .cdl file, which is essentially a </span><span class="rvts47">mask</span><span class="rvts6"> that tells which bytes in the ROM are code and which are data. The file can be used in conjunction with a suitable disassembler to disassemble only the actual game code, resulting in a much cleaner source code where code and data are properly separated.</span></p>
+<p class="rvps2"><span class="rvts6">The Code/Data Logger makes it much easier to reverse-engineer NES ROMs. The basic idea behind it is that a normal NES disassembler cannot distinguish between code (which is executed) and data (which is read). The Code/Data Logger keeps track of what is executed and what is read while the game is played, and then you can save this information into a .cdl file, which is essentially a </span><span class="rvts49">mask</span><span class="rvts6"> that tells which bytes in the ROM are code and which are data. The file can be used in conjunction with a suitable disassembler to disassemble only the actual game code, resulting in a much cleaner source code where code and data are properly separated.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts21">Using the Code/Data Logger</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">The Code/Data Logger keeps track of every byte in the ROM and records whether it's code (is executed) or data (is read).</span></p>
 <p class="rvps2"><span class="rvts6">You can combine this logging feature with other tools to make them much more powerful:</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts92" href="Debugger.html">Debugger</a><span class="rvts6"> to see which branches of the game code were executed and which weren't yet</span></li>
- <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts92" href="TraceLogger.html">Trace Logger</a><span class="rvts6"> to let it log the code selectively</span></li>
- <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts92" href="PPUViewer.html">PPU Viewer</a><span class="rvts6"> to let it only display graphics that was drawn on screen at least once</span></li>
- <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts92" href="HexEditor.html">Hex Editor</a><span class="rvts6"> to enable smart coloring of bytes (so you can observe which bytes are used by the game and how/when they are used)</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts94" href="Debugger.html">Debugger</a><span class="rvts6"> to see which branches of the game code were executed and which weren't yet</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts94" href="TraceLogger.html">Trace Logger</a><span class="rvts6"> to let it log the code selectively</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts94" href="PPUViewer.html">PPU Viewer</a><span class="rvts6"> to let it only display graphics that was drawn on screen at least once</span></li>
+ <li class="rvps2"><span class="rvts6">combine with </span><a class="rvts94" href="HexEditor.html">Hex Editor</a><span class="rvts6"> to enable smart coloring of bytes (so you can observe which bytes are used by the game and how/when they are used)</span></li>
  <li class="rvps2"><span class="rvts6">combine with (an external) Tile Viewer to see which graphics was used during certain play session, and which was not</span></li>
  <li class="rvps2"><span class="rvts6">combine with (an external) ROM Corruptor to make it only corrupt data, but not code</span></li>
  <li class="rvps2"><span class="rvts6">combine with (an external) Disassembler to help it separate code from data</span></li>
@@ -207,22 +207,22 @@
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">See, it is very useful for finding certain types of data or code branches. It also makes debugging work more visual, since you can always see which lines of the disassembled code were executed and which weren't.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">Furthermore, while the Code/Data Logger is running, the </span><a class="rvts92" href="HexEditor.html">Hex Editor</a><span class="rvts6"> will color-code ROM bytes depending on whether they were logged as code or data:</span></p>
+<p class="rvps2"><span class="rvts6">Furthermore, while the Code/Data Logger is running, the </span><a class="rvts94" href="HexEditor.html">Hex Editor</a><span class="rvts6"> will color-code ROM bytes depending on whether they were logged as code or data:</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">For PRG ROM:</span></p>
-<p class="rvps2"><span class="rvts84">Dark-yellow</span><span class="rvts6"> - the byte is code</span></p>
-<p class="rvps2"><span class="rvts85">Blue</span><span class="rvts6"> - the byte is data</span></p>
-<p class="rvps2"><span class="rvts86">Cyan</span><span class="rvts6"> - the byte is PCM audio data</span></p>
-<p class="rvps2"><span class="rvts83">Green</span><span class="rvts6"> - the byte is both code and data</span></p>
+<p class="rvps2"><span class="rvts86">Dark-yellow</span><span class="rvts6"> - the byte is code</span></p>
+<p class="rvps2"><span class="rvts87">Blue</span><span class="rvts6"> - the byte is data</span></p>
+<p class="rvps2"><span class="rvts88">Cyan</span><span class="rvts6"> - the byte is PCM audio data</span></p>
+<p class="rvps2"><span class="rvts85">Green</span><span class="rvts6"> - the byte is both code and data</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">For CHR ROM:</span></p>
-<p class="rvps2"><span class="rvts87">Yellow</span><span class="rvts6"> - the byte was rendered</span></p>
-<p class="rvps2"><span class="rvts88">Light-blue</span><span class="rvts6"> - the byte was read programmatically</span></p>
-<p class="rvps2"><span class="rvts89">Light-green</span><span class="rvts6"> - the byte was both rendered and read programmatically</span></p>
+<p class="rvps2"><span class="rvts89">Yellow</span><span class="rvts6"> - the byte was rendered</span></p>
+<p class="rvps2"><span class="rvts90">Light-blue</span><span class="rvts6"> - the byte was read programmatically</span></p>
+<p class="rvps2"><span class="rvts91">Light-green</span><span class="rvts6"> - the byte was both rendered and read programmatically</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">The Code/Data Logger can also be used to generate a stripped NES ROM.</span></p>
 <p class="rvps2"><span class="rvts6">"Stripped" NES ROM is a ROM in which everything that was not logged by the Code/Data Logger is removed. It can be useful in many ways, for example, you can view the ROM in an external Hex Editor or a Tile Viewer, and you'll see only the parts that were used while playing. Furthermore, you could use it to create a demo ROM by only playing through the parts you would like others to see.</span></p>
-<p class="rvps2"><span class="rvts47">Example of such usage:</span></p>
+<p class="rvps2"><span class="rvts49">Example of such usage:</span></p>
 <p class="rvps2"><span class="rvts6">1. Open the Code/Data Logger, and press Start to begin logging.</span></p>
 <p class="rvps2"><span class="rvts6">2. Perform a soft and a hard reset while logging, in order to capture the ROM's startup sequence. If you don't do so, you can distribute a save-state file so they will start from within the game.</span></p>
 <p class="rvps2"><span class="rvts6">3. If the game has Save-RAM (e.g. Zelda), you will need to capture the game's Save-RAM initialization routines; you can try to do so by deleting the game's *.sav file and then perform a soft and hard reset again while logging.</span></p>

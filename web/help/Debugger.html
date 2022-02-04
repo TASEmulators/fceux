@@ -225,39 +225,39 @@
 <table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid; border-spacing: 2px;">
  <tr valign="top">
   <td width="305" height="46" style="border-color: #000000; border-style: solid; padding: 6px;">
-   <p class="rvps2"><span class="rvts76">HINT: When entering the address manually, these convenient strings may be used instead of the hexadecimal memory address:</span></p>
-   <p class="rvps2"><span class="rvts76">NES special addresses:</span></p>
+   <p class="rvps2"><span class="rvts78">HINT: When entering the address manually, these convenient strings may be used instead of the hexadecimal memory address:</span></p>
+   <p class="rvps2"><span class="rvts78">NES special addresses:</span></p>
    <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
-    <li class="rvps2"><span class="rvts76">NMI/VBL - non-maskable interrupt vector (at FFFA)</span></li>
-    <li class="rvps2"><span class="rvts76">RST &nbsp; &nbsp; - reset vector (at FFFC)</span></li>
-    <li class="rvps2"><span class="rvts76">IRQ &nbsp; &nbsp; - interrupt vector (at FFFE)</span></li>
+    <li class="rvps2"><span class="rvts78">NMI/VBL - non-maskable interrupt vector (at FFFA)</span></li>
+    <li class="rvps2"><span class="rvts78">RST &nbsp; &nbsp; - reset vector (at FFFC)</span></li>
+    <li class="rvps2"><span class="rvts78">IRQ &nbsp; &nbsp; - interrupt vector (at FFFE)</span></li>
    </ul>
-   <p class="rvps2"><span class="rvts76">FDS special addresses:</span></p>
+   <p class="rvps2"><span class="rvts78">FDS special addresses:</span></p>
    <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
-    <li class="rvps2"><span class="rvts76">NMI1 - non-maskable interrupt vector (at DFF6)</span></li>
-    <li class="rvps2"><span class="rvts76">NMI2 - non-maskable interrupt vector (at DFF8)</span></li>
-    <li class="rvps2"><span class="rvts76">NMI3 - non-maskable interrupt vector (at DFFA)</span></li>
-    <li class="rvps2"><span class="rvts76">RST &nbsp;- reset vector (at DFFC)</span></li>
-    <li class="rvps2"><span class="rvts76">IRQ &nbsp;- interrupt vector (at DFFE)</span></li>
+    <li class="rvps2"><span class="rvts78">NMI1 - non-maskable interrupt vector (at DFF6)</span></li>
+    <li class="rvps2"><span class="rvts78">NMI2 - non-maskable interrupt vector (at DFF8)</span></li>
+    <li class="rvps2"><span class="rvts78">NMI3 - non-maskable interrupt vector (at DFFA)</span></li>
+    <li class="rvps2"><span class="rvts78">RST &nbsp;- reset vector (at DFFC)</span></li>
+    <li class="rvps2"><span class="rvts78">IRQ &nbsp;- interrupt vector (at DFFE)</span></li>
    </ul>
-   <p class="rvps2"><span class="rvts76">NSF special addresses:</span></p>
+   <p class="rvps2"><span class="rvts78">NSF special addresses:</span></p>
    <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
-    <li class="rvps2"><span class="rvts76">LOAD - NSF LOAD address</span></li>
-    <li class="rvps2"><span class="rvts76">INIT - NSF INIT address</span></li>
-    <li class="rvps2"><span class="rvts76">PLAY - NSF PLAY address</span></li>
+    <li class="rvps2"><span class="rvts78">LOAD - NSF LOAD address</span></li>
+    <li class="rvps2"><span class="rvts78">INIT - NSF INIT address</span></li>
+    <li class="rvps2"><span class="rvts78">PLAY - NSF PLAY address</span></li>
    </ul>
   </td>
  </tr>
 </table>
 </div>
-<p class="rvps2"><span class="rvts56"><br/></span></p>
+<p class="rvps2"><span class="rvts58"><br/></span></p>
 <p class="rvps2"><span class="rvts6">While execution is broken (emulation is paused), the program counter (PC) can be edited, as well as the three registers A/X/Y, and the status flags. Normally they should be left as-is, but changing them at runtime can be useful for more advanced debugging.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">The contents of memory starting at the stack pointer (somewhere in the range $0100-01FF) is displayed in the Stack frame below the A/X/Y registers.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">The current PPU memory address, sprite memory address, scanline, and rendering pixel are displayed below the stack and status flags. </span><span class="rvts20">Examples of Scanline number:</span><span class="rvts6"> -1 means Prerender time, 240 is Idle scanline, 0-239 are visible scanlines, 241-260/310 are VBlank scanlines.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">To the right from the PPU section there's Cycles counter and Instructions counter that keep counting while the game is running. You can use the information for keeping statistics, for code profiling or writing PPU-synchronized code (e.g. raster effects). You can also make the debugger break automatically based on the counters values. The "Reset counters" button resets both counters to 0. You can also access the counters via </span><a class="rvts74" href="LuaFunctionsList.html">Lua</a><span class="rvts6">.</span></p>
+<p class="rvps2"><span class="rvts6">To the right from the PPU section there's Cycles counter and Instructions counter that keep counting while the game is running. You can use the information for keeping statistics, for code profiling or writing PPU-synchronized code (e.g. raster effects). You can also make the debugger break automatically based on the counters values. The "Reset counters" button resets both counters to 0. You can also access the counters via </span><a class="rvts76" href="LuaFunctionsList.html">Lua</a><span class="rvts6">.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts17">Disassembly</span></p>
@@ -272,8 +272,8 @@
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Memory contents are displayed in this form:</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts75">0F:C0A8:24 1F &nbsp; &nbsp; BIT $001F = #$80</span></p>
-<p class="rvps2"><span class="rvts75">bb:mmmm:dd dd dd &nbsp;iiiiiiiiiiiii...</span></p>
+<p class="rvps2"><span class="rvts77">0F:C0A8:24 1F &nbsp; &nbsp; BIT $001F = #$80</span></p>
+<p class="rvps2"><span class="rvts77">bb:mmmm:dd dd dd &nbsp;iiiiiiiiiiiii...</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
  <li class="rvps2"><span class="rvts6">bb - 16k iNES bank, designates which 16k bank from the iNES file is mapped here. Note that the number may be not the same as the actual hardware bank of the mapper.</span></li>
@@ -288,8 +288,8 @@
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Hovering the mouse over the disassembly will display at the bottom of the window more detailed information about the location of this code in the iNES file.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">There is narrow column to the left of the Disassembly window. Left clicking on this column will open the </span><span class="rvts47">Inline Assembler</span><span class="rvts6">, which allows you to patch the ROM at runtime. Right clicking on this column will open the </span><a class="rvts74" href="HexEditor.html">Hex Editor</a><span class="rvts6">, which allows you to directly edit the ROM. Middle-clicking on this column will bring up the </span><a class="rvts74" href="GameGenieEncoderDecoder.html">Game Genie Encoder</a><span class="rvts6"> at that address, so you can easily make Game Genie codes.</span></p>
-<p class="rvps2"><span class="rvts6">Also, when </span><a class="rvts74" href="CodeDataLogger.html">Code/Data Logger</a><span class="rvts6"> is running, this small column displays whether the respective line of the disassembled memory was executed ("c") or it was read as Data ("d"), or it wasn't logged yet (empty space). This way you can easily distinguish which branches of the game code were executed and which weren't.</span></p>
+<p class="rvps2"><span class="rvts6">There is narrow column to the left of the Disassembly window. Left clicking on this column will open the </span><span class="rvts49">Inline Assembler</span><span class="rvts6">, which allows you to patch the ROM at runtime. Right clicking on this column will open the </span><a class="rvts76" href="HexEditor.html">Hex Editor</a><span class="rvts6">, which allows you to directly edit the ROM. Middle-clicking on this column will bring up the </span><a class="rvts76" href="GameGenieEncoderDecoder.html">Game Genie Encoder</a><span class="rvts6"> at that address, so you can easily make Game Genie codes.</span></p>
+<p class="rvps2"><span class="rvts6">Also, when </span><a class="rvts76" href="CodeDataLogger.html">Code/Data Logger</a><span class="rvts6"> is running, this small column displays whether the respective line of the disassembled memory was executed ("c") or it was read as Data ("d"), or it wasn't logged yet (empty space). This way you can easily distinguish which branches of the game code were executed and which weren't.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts17">Symbolic Debugging</span></p>
@@ -307,7 +307,7 @@
 <p class="rvps2"><span class="rvts6">To delete a label, check the "Delete" checkbox and click OK.</span></p>
 <p class="rvps2"><span class="rvts6">The array size specified in delete mode indicates labels of how many bytes will be deleted. If you select $C000 and set array size to 0xF, all the labels form $C000 to $C00E are deleted.&nbsp;</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">The data for Symbolic Debugging is stored in </span><a class="rvts74" href="NLFilesFormat.html">NL files</a><span class="rvts6"> in the same folder as the ROM. You can edit the files in any text editor (to reload all NL files of the currently active ROM file press the "Reload Symbols" button), but it's more convenient to use right-clicks.</span></p>
+<p class="rvps2"><span class="rvts6">The data for Symbolic Debugging is stored in </span><a class="rvts76" href="NLFilesFormat.html">NL files</a><span class="rvts6"> in the same folder as the ROM. You can edit the files in any text editor (to reload all NL files of the currently active ROM file press the "Reload Symbols" button), but it's more convenient to use right-clicks.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">You can enable and disable symbolic debugging by clicking the checkbox "Symbolic debug" in the lower right corner. In general, there's no need to disable this feature. If you need to see the actual address which got substituted by a name, you can simply left-click the name and watch its address in the "Seek To" text field. This also works when clicking a name in the Trace Logger window.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
@@ -330,13 +330,13 @@
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Finally, you can make the debugger break after executing a certain number of instructions or CPU cycles.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">More advanced breakpoints conditions and full automation may be achieved through Lua script breakpoints. See the </span><a class="rvts74" href="LuaFunctionsList.html#LuaBreakpoints">Lua reference</a><span class="rvts6"> for more information.</span></p>
+<p class="rvps2"><span class="rvts6">More advanced breakpoints conditions and full automation may be achieved through Lua script breakpoints. See the </span><a class="rvts76" href="LuaFunctionsList.html#LuaBreakpoints">Lua reference</a><span class="rvts6"> for more information.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Breakpoints are listed in the following form:</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts75">aaaa EmRWXF nnnn cccc</span></p>
-<p class="rvps2"><span class="rvts75">or</span></p>
-<p class="rvps2"><span class="rvts75">aaaa-aaaa EmRWXF nnnn cccc</span></p>
+<p class="rvps2"><span class="rvts77">aaaa EmRWXF nnnn cccc</span></p>
+<p class="rvps2"><span class="rvts77">or</span></p>
+<p class="rvps2"><span class="rvts77">aaaa-aaaa EmRWXF nnnn cccc</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
  <li class="rvps2"><span class="rvts6">aaaa - address of breakpoint</span></li>
@@ -364,10 +364,10 @@
  <li class="rvps2"><span class="rvts6">Number &nbsp; &nbsp;-&gt; '#' [0123456789ABCDEF]*</span></li>
  <li class="rvps2"><span class="rvts6">Address &nbsp; -&gt; '$' [0123456789ABCDEF]* | '$' '[' Connect ']'</span></li>
  <li class="rvps2"><span class="rvts6">Register &nbsp;-&gt; 'A' | 'X' | 'Y' | 'P'</span></li>
- <li class="rvps2"><span class="rvts6">Flag &nbsp; &nbsp; &nbsp;-&gt; 'N' | 'C' | 'Z' | 'I' | 'B' | 'V' </span><span class="rvts77">| 'D' | 'U'</span></li>
+ <li class="rvps2"><span class="rvts6">Flag &nbsp; &nbsp; &nbsp;-&gt; 'N' | 'C' | 'Z' | 'I' | 'B' | 'V' </span><span class="rvts79">| 'D' | 'U'</span></li>
  <li class="rvps2"><span class="rvts6">PC Bank &nbsp; -&gt; 'K'</span></li>
  <li class="rvps2"><span class="rvts6">Data Bank &nbsp; -&gt; 'T'</span></li>
- <li class="rvps2"><span class="rvts77">Read/Write Value</span><span class="rvts6"> &nbsp; -&gt; </span><span class="rvts77">'R' | 'W'</span></li>
+ <li class="rvps2"><span class="rvts79">Read/Write Value</span><span class="rvts6"> &nbsp; -&gt; </span><span class="rvts79">'R' | 'W'</span></li>
 </ul>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">The parser is very strict. All numbers are hexadecimal. Always prefix a number with # for an immediate value, or $ for a memory address. If a memory address needs to be calculated use $[] with the calculation inside the brackets.</span></p>
@@ -381,16 +381,16 @@
 <p class="rvps2"><span class="rvts20">Example conditions:</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Break only if register A is less than value at memory address $0005:</span></p>
-<p class="rvps2"><span class="rvts75">A &lt; $0005</span></p>
+<p class="rvps2"><span class="rvts77">A &lt; $0005</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Break only if the value at the indirect address is not equal to FF:</span></p>
-<p class="rvps2"><span class="rvts75">#FF != $[$10+($11*#100)]</span></p>
+<p class="rvps2"><span class="rvts77">#FF != $[$10+($11*#100)]</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Break only if flag N is clear or A is not equal to 00:</span></p>
-<p class="rvps2"><span class="rvts75">(N==#0 || A!=#0)</span></p>
+<p class="rvps2"><span class="rvts77">(N==#0 || A!=#0)</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">Break only when accessing a data from bank 2 (the condiition is relevant when using with Read/Write-type breakpoints):</span></p>
-<p class="rvps2"><span class="rvts75">T==#2</span></p>
+<p class="rvps2"><span class="rvts77">T==#2</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts17">Bookmarks</span></p>
@@ -414,7 +414,7 @@
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">If the ".DEB files" checkbox in the lower right corner of the debugger window is checked, the emulator will automatically save debug settings such as breakpoints and bookmarks in a .deb file alongside the NES ROM, and load these settings next time you open the ROM.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">There is a "Rom Patcher" button that may be used to apply a small patch to a ROM, although </span><a class="rvts74" href="HexEditor.html">Hex Editor</a><span class="rvts6"> is more convenient in general.</span></p>
+<p class="rvps2"><span class="rvts6">There is a "Rom Patcher" button that may be used to apply a small patch to a ROM, although </span><a class="rvts76" href="HexEditor.html">Hex Editor</a><span class="rvts6"> is more convenient in general.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6">The "ROM offsets" option will display ROM offsets instead of CPU addresses in the Disassembly window.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
