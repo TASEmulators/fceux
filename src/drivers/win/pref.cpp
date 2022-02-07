@@ -284,16 +284,14 @@ int loadDebuggerPreferences(FILE* f)
 	// Read the breakpoints
 	for (i=0;i<65;i++)
 	{
-		uint16 start, end;
-		uint8 flags;
 		unsigned int len;
 		
 		// Read the start address of the BP
-		if (fread(&start, sizeof(start), 1, f) != 1) return 1;
+		if (fread(&watchpoint[myNumWPs].address, sizeof(watchpoint[myNumWPs].address), 1, f) != 1) return 1;
 		// Read the end address of the BP
-		if (fread(&end, sizeof(end), 1, f) != 1) return 1;
+		if (fread(&watchpoint[myNumWPs].endaddress, sizeof(watchpoint[myNumWPs].endaddress), 1, f) != 1) return 1;
 		// Read the flags of the BP
-		if (fread(&flags, sizeof(flags), 1, f) != 1) return 1;
+		if (fread(&watchpoint[myNumWPs].flags, sizeof(watchpoint[myNumWPs].flags), 1, f) != 1) return 1;
 		
 		// Read the length of the BP condition
 		if (fread(&len, sizeof(len), 1, f) != 1) return 1;
@@ -327,17 +325,8 @@ int loadDebuggerPreferences(FILE* f)
 			if (fread(watchpoint[myNumWPs].desc, 1, len, f) != len) return 1;
 		}
 		
-		watchpoint[i].address = 0;
-		watchpoint[i].endaddress = 0;
-		watchpoint[i].flags = 0;
-
-		// Activate breakpoint
-		if (start || end || flags)
+		if (watchpoint[myNumWPs].address || watchpoint[myNumWPs].endaddress || watchpoint[myNumWPs].flags)
 		{
-			watchpoint[myNumWPs].address = start;
-			watchpoint[myNumWPs].endaddress = end;
-			watchpoint[myNumWPs].flags = flags;
-
 			myNumWPs++;
 		}
 	}
