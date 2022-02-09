@@ -1696,35 +1696,47 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 		if (sel_end > sel_start)
 			return EOF;
 
-	// find the ":" or "$" before sel_start
-	int i = sel_start - 1;
-	for (; i > sel_start - 6; i--)
-		if ((i >= 0 && debug_wstr[i] == L':' || debug_wstr[i] == L'$') && debug_wstr[i+3] != L'\n')
-			break;
-	if (i > sel_start - 6)
+	// check for the hex address value
+	for (int i = sel_start - 1; (i > sel_start - 6) && (i >= 0); i--)
 	{
-		wchar_t offsetBuffer[5];
-		wcsncpy(offsetBuffer, debug_wstr + i + 1, 4);
-		offsetBuffer[4] = 0;
-		// invalidate the string if a space or \r is found in it
-		wchar_t* firstspace = wcsstr(offsetBuffer, L" ");
-		if (!firstspace)
-			firstspace = wcsstr(offsetBuffer, L"\r");
-		if (!firstspace)
+		// find the first character before hex value
+		if (!((debug_wstr[i] >= '0' && debug_wstr[i] <= '9') || (debug_wstr[i] >= 'A' && debug_wstr[i] <= 'F')))
 		{
+			int hex_pos = i + 1;
+			int hex_len = 0;
 			unsigned int offset;
-			int numend;
-			if (swscanf(offsetBuffer, L"%4X", &offset) != EOF)
-			{
-				if (debug_wstr[i + 3] == L',' || debug_wstr[i+3] == L')')
-					numend = 3;
-				else
-					numend = 5;
-				// select the text
-				SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(i + 1), (LPARAM)(i + numend));
-				PrintOffsetToSeekAndBookmarkFields(offset);
-				return (int)offset;
-			}
+
+			// find length of the hex string
+			while (
+					(debug_wstr[hex_pos + hex_len] >= '0' && debug_wstr[hex_pos + hex_len] <= '9') ||
+					(debug_wstr[hex_pos + hex_len] >= 'A' && debug_wstr[hex_pos + hex_len] <= 'F')
+				) hex_len++;
+			// validate length of the value
+			if ((hex_len != 2) && (hex_len != 4)) break;
+			// validate symbol before the hex value
+			if (
+					(debug_wstr[i] != L':') && // ":XX" or ":XXXX"
+					(debug_wstr[i] != L'$') // "$XX" or "$XXXX"
+				) break;
+			// block "#$XX" pattern
+			if (
+					(i > 0) &&
+					(debug_wstr[i] == L'$') &&
+					(debug_wstr[i - 1] == L'#')
+				) break;
+			// validate symbol after the hex value
+			if (
+					((debug_wstr[hex_pos + hex_len] != L':') || (hex_len != 4)) && // opcode address
+					(debug_wstr[hex_pos + hex_len] != L',') &&
+					(debug_wstr[hex_pos + hex_len] != L')') &&
+					(debug_wstr[hex_pos + hex_len] != L' ') &&
+				    (debug_wstr[hex_pos + hex_len] != L'\n')
+				) break;			
+			if (swscanf(&debug_wstr[hex_pos], (hex_len == 2) ? L"%2X" : L"%4X", &offset) == EOF) break;
+			// select the text
+			SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(hex_pos), (LPARAM)(hex_pos + hex_len));
+			PrintOffsetToSeekAndBookmarkFields(offset);
+			return (int)offset;
 		}
 	}
 	
@@ -1781,7 +1793,7 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 				{
 					// clicked on the operand name
 					// select the text
-					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_wstr), (LPARAM)((int)(pos - debug_wstr) + nameLen));
+					SendDlgItemMessage(hDebug, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)(int)(pos - debug_wstr), (LPARAM)((int)(pos - debug_wstr + nameLen - 1)));
 					PrintOffsetToSeekAndBookmarkFields(addr);
 					return (int)addr;
 				}
