@@ -1774,7 +1774,7 @@ int Debugger_CheckClickingOnAnAddressOrSymbolicName(unsigned int lineNumber, boo
 		}
 
 		// then, try finding the name of disassembly_operands
-		for (i = disassembly_operands[lineNumber].size() - 1; i >= 0; i--)
+		for (int i = disassembly_operands[lineNumber].size() - 1; i >= 0; i--)
 		{
 			addr = disassembly_operands[lineNumber][i];
 			node = findNode(getNamesPointerForAddress(addr), addr);
