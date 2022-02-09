@@ -465,6 +465,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	miscRomsEdit->setMaxLength( 1 );
 	miscRomsEdit->setValidator( validator );
 	miscRomsEdit->setAlignment(Qt::AlignCenter);
+	miscRomsEdit->setMinimumWidth( 3 * fontCharWidth );
 	miscRomsEdit->setMaximumWidth( 3 * fontCharWidth );
 
 	grid = new QGridLayout();
