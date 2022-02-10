@@ -194,7 +194,6 @@ private:
 	int lastItemUnderMouse;
 
 	QFont font;
-	QPoint  imagePos;
 	QTimer *imageTimer;
 	QRect   viewRect;
 	QRect   box[TOTAL_BOOKMARKS];

@@ -814,7 +814,7 @@ void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 void BOOKMARKS::showImage(void)
 {
 	FCEU_CRITICAL_SECTION( emuLock ); 
-	//static_cast<bookmarkPreviewPopup*>(fceuCustomToolTipShow( imagePos, new bookmarkPreviewPopup(imageItem, this) ));
+
 	bool item_valid = (imageItem >= 0) && (imageItem < TOTAL_BOOKMARKS);
 
 	if ( item_valid && (imageItem != bookmarkPreviewPopup::currentIndex()) )
@@ -858,11 +858,6 @@ void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
 			emit imageIndexChanged(item);
 		}
 		imageItem = item;
-#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-		imagePos = event->globalPosition().toPoint();
-#else
-		imagePos = event->globalPos();
-#endif
 		imageTimer->start();
 		QToolTip::hideText();
 	}

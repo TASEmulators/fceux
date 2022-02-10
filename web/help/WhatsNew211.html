@@ -190,85 +190,85 @@
 <p class="rvps2"><span class="rvts6">This release includes a multitude of new features, major fixes, and enhancements.</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts34">The 2.1 new release fixes some bugs of 2.1.0a, improves the accuracy of the sound core, and adds useability enhancements to the windows port.</span></p>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts35">Common - Bug fixes</span></p>
+<p class="rvps2"><span class="rvts36">The 2.1 new release fixes some bugs of 2.1.0a, improves the accuracy of the sound core, and adds useability enhancements to the windows port.</span></p>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Common - Bug fixes</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Fixed reported issue 2746924 (md5_asciistr() doesn't produce correct string)</span></li>
- <li class="rvps2"><span class="rvts34">Made default save slot 0 instead of 1</span></li>
-</ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts35">Improved Sound core/PPU</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Fixed the noise value, it seems that the noise logic was shifting the values to the left by 1 when reloading, but this doesn't work for PAL since one of the PAL reload value is odd, so fix the logic and used the old tables. Revert a stupid CPU ignore logic in PPU. Sorry about that.&nbsp;</span></li>
- <li class="rvps2"><span class="rvts34">Updated with the correct values for the noise and DMC table,&nbsp;</span></li>
- <li class="rvps2"><span class="rvts34">Fixed the CPU unofficial opcode ATX, ORing with correct constant $FF instead of $EE, as tested by blargg's. These fixes passes the IRQ flags test from blargg, and also one more &nbsp;opcode test from blargg's cpu.nes test.</span></li>
- <li class="rvps2"><span class="rvts34">Square 1 &amp; square 2 volume controls no longer backwards</span></li>
- <li class="rvps2"><span class="rvts34">Length counters for APU now correct variables</span></li>
-</ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts35">NewPPU</span><span class="rvts34"> (still experimental, enabled by setting newppu 1 in the config file)</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Added experimental $2004 reading support to play micro machines with (little) shakes, and fixed some timing in the new PPU.</span></li>
- <li class="rvps2"><span class="rvts34">Added palette reading cases for the new PPU.</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed reported issue 2746924 (md5_asciistr() doesn't produce correct string)</span></li>
+ <li class="rvps2"><span class="rvts36">Made default save slot 0 instead of 1</span></li>
 </ul>
 <p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts36">Win32</span></p>
+<p class="rvps2"><span class="rvts37">Improved Sound core/PPU</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts36">Fixed the noise value, it seems that the noise logic was shifting the values to the left by 1 when reloading, but this doesn't work for PAL since one of the PAL reload value is odd, so fix the logic and used the old tables. Revert a stupid CPU ignore logic in PPU. Sorry about that.&nbsp;</span></li>
+ <li class="rvps2"><span class="rvts36">Updated with the correct values for the noise and DMC table,&nbsp;</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed the CPU unofficial opcode ATX, ORing with correct constant $FF instead of $EE, as tested by blargg's. These fixes passes the IRQ flags test from blargg, and also one more &nbsp;opcode test from blargg's cpu.nes test.</span></li>
+ <li class="rvps2"><span class="rvts36">Square 1 &amp; square 2 volume controls no longer backwards</span></li>
+ <li class="rvps2"><span class="rvts36">Length counters for APU now correct variables</span></li>
+</ul>
 <p class="rvps2"><span class="rvts36"><br/></span></p>
-<p class="rvps2"><span class="rvts35">Minor Bug fixes</span></p>
+<p class="rvps2"><span class="rvts37">NewPPU</span><span class="rvts36"> (still experimental, enabled by setting newppu 1 in the config file)</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Replay movie dialog - Stop movie at frame x feature - fixed off by 1 error on the stop frame number</span></li>
- <li class="rvps2"><span class="rvts34">Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor</span></li>
- <li class="rvps2"><span class="rvts34">Fixed bug in memory watch that would make the first watch value drawn in the wrong place if watch file was full</span></li>
- <li class="rvps2"><span class="rvts34">Debugger - Step type functions now update other dialogs such as ppu, nametable, code/data, trace logger, etc.</span></li>
- <li class="rvps2"><span class="rvts34">"Disable screen saver" gui option now also diables the monitor powersave</span></li>
- <li class="rvps2"><span class="rvts34">Recent menus - no longer crash if item no longer exists, instead it ask the user if they want to remove the item from the list</span></li>
- <li class="rvps2"><span class="rvts34">Sound Config Dialog - When sound is off, all controls are grayed out</span></li>
- <li class="rvps2"><span class="rvts34">Memory Watch - fixed a regression made in 2.0.1 that broke the Save As menu item</span></li>
- <li class="rvps2"><span class="rvts34">Memory Watch - save menu item is grayed if file hasn't changed</span></li>
+ <li class="rvps2"><span class="rvts36">Added experimental $2004 reading support to play micro machines with (little) shakes, and fixed some timing in the new PPU.</span></li>
+ <li class="rvps2"><span class="rvts36">Added palette reading cases for the new PPU.</span></li>
 </ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts35">GUI/Enhancements</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts38">Win32</span></p>
+<p class="rvps2"><span class="rvts38"><br/></span></p>
+<p class="rvps2"><span class="rvts37">Minor Bug fixes</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Last save slot used is stored in the config file</span></li>
- <li class="rvps2"><span class="rvts34">Made fullscreen toggle (Alt+Enter) remappable</span></li>
- <li class="rvps2"><span class="rvts34">Hex editor - Reverted fixedFontHeight to 13 instead of 14. &nbsp;Gave the option of adjusting the height by modifying RowHeightBorder in the .cfg file</span></li>
- <li class="rvps2"><span class="rvts34">Hex Editor - allowed the user to customize the color scheme by use of RGB values stored in the .cfg file</span></li>
- <li class="rvps2"><span class="rvts34">Hex editor - freeze/unfreeze ram addresses now causes the colors to update immediately, but only with groups of addresses highlighted at once (single ones still don't yet update)</span></li>
- <li class="rvps2"><span class="rvts34">Hex Editor - Save Rom As... menu option enabled and implemented</span></li>
- <li class="rvps2"><span class="rvts34">Window caption shows the name of the ROM loaded</span></li>
- <li class="rvps2"><span class="rvts34">Recent Movie Menu added</span></li>
- <li class="rvps2"><span class="rvts34">Load Last Movie context menu item added</span></li>
- <li class="rvps2"><span class="rvts34">Save Movie As... context menu item (for when a movie is loaded in read+write mode)</span></li>
- <li class="rvps2"><span class="rvts34">Drag &amp; Drop support for all files related to FCEUX including:</span></li>
+ <li class="rvps2"><span class="rvts36">Replay movie dialog - Stop movie at frame x feature - fixed off by 1 error on the stop frame number</span></li>
+ <li class="rvps2"><span class="rvts36">Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor</span></li>
+ <li class="rvps2"><span class="rvts36">Fixed bug in memory watch that would make the first watch value drawn in the wrong place if watch file was full</span></li>
+ <li class="rvps2"><span class="rvts36">Debugger - Step type functions now update other dialogs such as ppu, nametable, code/data, trace logger, etc.</span></li>
+ <li class="rvps2"><span class="rvts36">"Disable screen saver" gui option now also diables the monitor powersave</span></li>
+ <li class="rvps2"><span class="rvts36">Recent menus - no longer crash if item no longer exists, instead it ask the user if they want to remove the item from the list</span></li>
+ <li class="rvps2"><span class="rvts36">Sound Config Dialog - When sound is off, all controls are grayed out</span></li>
+ <li class="rvps2"><span class="rvts36">Memory Watch - fixed a regression made in 2.0.1 that broke the Save As menu item</span></li>
+ <li class="rvps2"><span class="rvts36">Memory Watch - save menu item is grayed if file hasn't changed</span></li>
 </ul>
-<p class="rvps2"><span class="rvts34">&nbsp; &nbsp; .fcm (autoconverts to .fm2 and begins movie playback)</span></p>
-<p class="rvps2"><span class="rvts34">&nbsp; &nbsp; Savestates</span></p>
-<p class="rvps2"><span class="rvts34">&nbsp; &nbsp; Palette files (.pal)</span></p>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts37">GUI/Enhancements</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">Commandline - -palette commandline option</span></li>
- <li class="rvps2"><span class="rvts34">Memory Watch - option to bind to main window, if checked it gives GENS dialog style control, where there is no extra task bar item, and it minimizes when FCEUX is minimized</span></li>
+ <li class="rvps2"><span class="rvts36">Last save slot used is stored in the config file</span></li>
+ <li class="rvps2"><span class="rvts36">Made fullscreen toggle (Alt+Enter) remappable</span></li>
+ <li class="rvps2"><span class="rvts36">Hex editor - Reverted fixedFontHeight to 13 instead of 14. &nbsp;Gave the option of adjusting the height by modifying RowHeightBorder in the .cfg file</span></li>
+ <li class="rvps2"><span class="rvts36">Hex Editor - allowed the user to customize the color scheme by use of RGB values stored in the .cfg file</span></li>
+ <li class="rvps2"><span class="rvts36">Hex editor - freeze/unfreeze ram addresses now causes the colors to update immediately, but only with groups of addresses highlighted at once (single ones still don't yet update)</span></li>
+ <li class="rvps2"><span class="rvts36">Hex Editor - Save Rom As... menu option enabled and implemented</span></li>
+ <li class="rvps2"><span class="rvts36">Window caption shows the name of the ROM loaded</span></li>
+ <li class="rvps2"><span class="rvts36">Recent Movie Menu added</span></li>
+ <li class="rvps2"><span class="rvts36">Load Last Movie context menu item added</span></li>
+ <li class="rvps2"><span class="rvts36">Save Movie As... context menu item (for when a movie is loaded in read+write mode)</span></li>
+ <li class="rvps2"><span class="rvts36">Drag &amp; Drop support for all files related to FCEUX including:</span></li>
 </ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts36">SDL</span></p>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
+<p class="rvps2"><span class="rvts36">&nbsp; &nbsp; .fcm (autoconverts to .fm2 and begins movie playback)</span></p>
+<p class="rvps2"><span class="rvts36">&nbsp; &nbsp; Savestates</span></p>
+<p class="rvps2"><span class="rvts36">&nbsp; &nbsp; Palette files (.pal)</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts34">added --subtitles</span></li>
- <li class="rvps2"><span class="rvts34">fixed Four Score movie playback</span></li>
- <li class="rvps2"><span class="rvts34">added --ripsubs for converting fm2 movie subtitles to an srt file</span></li>
- <li class="rvps2"><span class="rvts34">Lua is optional again, fixed the real issue</span></li>
- <li class="rvps2"><span class="rvts34">Lua is NO longer optional, so the SConscripts have been updated to reflect that change. &nbsp;This fixes the mysterious non-working input issue.</span></li>
- <li class="rvps2"><span class="rvts34">implemented saving/loading a savestate from a specific file on Alt+S/L</span></li>
- <li class="rvps2"><span class="rvts34">implemented starting an FM2 movie on Alt+R</span></li>
- <li class="rvps2"><span class="rvts34">added --pauseframe to pause movie playback on frame x</span></li>
- <li class="rvps2"><span class="rvts34">dropped UTFConverter.c from SDL build</span></li>
- <li class="rvps2"><span class="rvts34">added hotkey Q for toggling read-only/read+write movie playback</span></li>
+ <li class="rvps2"><span class="rvts36">Commandline - -palette commandline option</span></li>
+ <li class="rvps2"><span class="rvts36">Memory Watch - option to bind to main window, if checked it gives GENS dialog style control, where there is no extra task bar item, and it minimizes when FCEUX is minimized</span></li>
 </ul>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts34"></span><span class="rvts6"></span></p>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts38">SDL</span></p>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts36">added --subtitles</span></li>
+ <li class="rvps2"><span class="rvts36">fixed Four Score movie playback</span></li>
+ <li class="rvps2"><span class="rvts36">added --ripsubs for converting fm2 movie subtitles to an srt file</span></li>
+ <li class="rvps2"><span class="rvts36">Lua is optional again, fixed the real issue</span></li>
+ <li class="rvps2"><span class="rvts36">Lua is NO longer optional, so the SConscripts have been updated to reflect that change. &nbsp;This fixes the mysterious non-working input issue.</span></li>
+ <li class="rvps2"><span class="rvts36">implemented saving/loading a savestate from a specific file on Alt+S/L</span></li>
+ <li class="rvps2"><span class="rvts36">implemented starting an FM2 movie on Alt+R</span></li>
+ <li class="rvps2"><span class="rvts36">added --pauseframe to pause movie playback on frame x</span></li>
+ <li class="rvps2"><span class="rvts36">dropped UTFConverter.c from SDL build</span></li>
+ <li class="rvps2"><span class="rvts36">added hotkey Q for toggling read-only/read+write movie playback</span></li>
+</ul>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps2"><span class="rvts36"></span><span class="rvts6"></span></p>
 <p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour/create-help-files-for-the-qt-help-framework">Create help files for the Qt Help Framework</a></p>
 
             </div>

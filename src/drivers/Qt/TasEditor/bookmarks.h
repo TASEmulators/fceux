@@ -136,8 +136,6 @@ private:
 	QScrollBar *vbar;
 	QTimer     *imageTimer;
 
-	QPoint      imagePos;
-
 	int imageItem;
 	int viewWidth;
 	int viewHeight;

@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="favicon.ico"/>
 
-  <title>iNES Header Editor</title>
+  <title>What's New? 2.6.2 (changelog)</title>
   <meta name="description" content="" /> 
   <meta name="keywords" content="">
 
@@ -21,11 +21,11 @@
 
   <!-- Twitter Card data -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="iNES Header Editor">
+  <meta name="twitter:title" content="What's New? 2.6.2 (changelog)">
   <meta name="twitter:description" content="">
 
   <!-- Open Graph data -->
-  <meta property="og:title" content="iNES Header Editor" />
+  <meta property="og:title" content="What's New? 2.6.2 (changelog)" />
   <meta property="og:type" content="article" />
   <meta property="og:description" content="" />
   <meta property="og:site_name" content="FCEUX Help" /> 
@@ -163,45 +163,74 @@
 
     <article>
         <div id="topic-content" class="container-fluid" 
-		  data-hnd-id="InesHeaderEditor"
-		  data-hnd-context="85"
-		  data-hnd-title="iNES Header Editor"
+		  data-hnd-id="WhatsNew262"
+		  data-hnd-context="90"
+		  data-hnd-title="What's New? 2.6.2 (changelog)"
 		>
             
                 <div class="navigation">
                     <ol class="breadcrumb">
-                        <li><a href="Debug.html">Debug</a></li>
+                        <li><a href="Intro.html">Introduction</a></li>
                     </ol>
                     <div class="nav-arrows">
-                        <div class="btn-group btn-group" role="group"><a class="btn btn-default" href="Debug.html" title="Debug" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="GameGenieEncoderDecoder.html" title="Game Genie Encoder/Decoder" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="LuaScripting.html" title="Lua Scripting" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                        <div class="btn-group btn-group" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="FCEUltraVersionHistory.html" title="FCE Ultra Version History" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew261.html" title="What's New? 2.6.1 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
                     </div>
                 </div> 
             
 
             <a id="main-content"></a>
 
-            <h2>iNES Header Editor</h2>
+            <h2>What's New? 2.6.2 (changelog)</h2>
 
             <div class="main-content">
                 
-<p class="rvps2"><span class="rvts22">iNES Header Editor</span></p>
+<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.6.2</span></p>
+<p class="rvps2"><span class="rvts6">Released -- 4 February 2022</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">As the name describes, this tool parses the iNES header of NES ROM file, which is called </span><a class="rvts69" href="https://wiki.nesdev.com/w/index.php/INES" target="_blank">iNES header</a><span class="rvts6">, to a human understandable information. You can change various settings of the ROM, such as Mapper#, CHR RAM Size, PRG RAM Size, mirroring type, region... etc.</span></p>
+<p class="rvps2"><span class="rvts29">The 2.6.2 release is a maintenance update that adds a couple minor features and fixes a few bugs for the Qt/SDL port.</span></p>
+<p class="rvps2"><span class="rvts29"><br/></span></p>
+<p class="rvps2"><span class="rvts27">Common</span></p>
+<p class="rvps2"><span class="rvts27"><br/></span></p>
+<p class="rvps2"><span class="rvts28">Core</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts29">Fixed VROM size calculation error from NES header.</span></li>
+</ul>
+<p class="rvps2"><span class="rvts29"><br/></span></p>
+<p class="rvps2"><span class="rvts28">Mappers</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts29">Added WRAM support for OneBus mapper (mapper 256).</span></li>
+</ul>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts96">This tool is experimental, and incorrect modification to the header may cause the ROM fail to run or some unpredictable </span><span class="rvts97">consequences. Use at your own risk.</span></p>
-<p class="rvps2"><span class="rvts97"><br/></span></p>
-<p class="rvps2"><span class="rvts21">About iNES Format</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">The first 16 bytes of each iNES format file store some important settings of the dumped ROM in binary. When NES Emulator loads the game, it will determine how to simulate based on these settings.</span></p>
-<p class="rvps2"><span class="rvts6">The iNES format currently has 2 versions, </span><a class="rvts69" href="https://wiki.nesdev.com/w/index.php/INES" target="_blank">1.0</a><span class="rvts6"> and </span><a class="rvts69" href="https://wiki.nesdev.com/w/index.php/NES_2.0" target="_blank">2.0</a><span class="rvts6">.&nbsp;</span></p>
-<p class="rvps2"><span class="rvts21"><br/></span></p>
-<p class="rvps2"><span class="rvts21">Modify The iNES Header</span></p>
+<p class="rvps2"><span class="rvts27">Qt/SDL</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">For historical reason, some ROM file has misinformed or malformed information in their header, they can't run normally or even fail to run in FCEUX or other emulators. This tool can help for diagnose and fix the problems. Sometimes ROM hacking also requires modifying the header.</span></p>
-<p class="rvps2"><span class="rvts6">To edit the header of a ROM file, just click the menu and select the file. If a ROM is already loaded, it will edit the current ROM. After modification, press "Save as..." button to save to a new file.</span></p>
-<p class="rvps2"><span class="rvts6">For safety purposes, we recommend you always save the header modified ROM to a new file, or backup the original ROM before editing.</span></p>
-<p class="rvps2"><span class="rvts6">If you regretted before saving, you can press "Restore" button, all the settings will back to the original.</span><span class="rvts6"></span></p>
-<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com">Easy EBook and documentation generator</a></p>
+<p class="rvps2"><span class="rvts28">GUI Improvements and Bug Fixes</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts30">Added an auto hide main menu on fullscreen option.</span></li>
+ <li class="rvps2"><span class="rvts30">Added an option to disable display of video overlayed GUI messages.</span></li>
+ <li class="rvps2"><span class="rvts30">Fixed default setting for max sprites per scanline to be 8 (matching win32 port).</span></li>
+</ul>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts28">Hex Editor Improvements and Bug Fixes</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts29">Fixed logic to move cursor to next line when editing hits end of line.</span></li>
+ <li class="rvps2"><span class="rvts29">Fixed inconsistent display behavior of vertical scroll bar. Viewport line offset and vertical scroll position are now always synchronized.</span></li>
+ <li class="rvps2"><span class="rvts29">Fixed draw layering of cursor row/column coloring when in ROM view.</span></li>
+ <li class="rvps2"><span class="rvts29">Added protections to prevent crash when editing addresses past the end of a ROM file.</span></li>
+ <li class="rvps2"><span class="rvts29">Improved cursor blink rate to be consistent regardless of viewport refresh rate.</span></li>
+</ul>
+<p class="rvps2"><span class="rvts29"><br/></span></p>
+<p class="rvps2"><span class="rvts28">SDL Sound</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts29">Fixed sound issue on FreeBSD 13. Force audio sample size to always be a power of 2 per SDL documentation</span></li>
+</ul>
+<p class="rvps2"><span class="rvts29"><br/></span></p>
+<p class="rvps2"><span class="rvts28">Build Improvements and Bug Fixes</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts29">Fixed a build errors when compiling against Qt6 (6.2.2).</span></li>
+ <li class="rvps2"><span class="rvts29">Removed usage of a few Qt6 deprecated function calls.</span><span class="rvts6"></span></li>
+</ul>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/help-authoring-tool">Free help authoring environment</a></p>
 
             </div>
             

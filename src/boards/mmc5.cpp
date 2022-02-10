@@ -105,7 +105,7 @@ static uint8 *ExRAM = NULL;
 static uint8 MMC5battery = 0;
 
 const int MMC5WRAMMAX = 1<<7; // 7 bits in register interface (real MMC5 has only 4 pins, however)
-static uint8 MMC5WRAMsize; //configuration, not state
+static uint8 MMC5WRAMsize=0; //configuration, not state
 static uint8 MMC5WRAMIndex[MMC5WRAMMAX]; //configuration, not state
 
 static std::array<uint8,4> MMC5ROMWrProtect;
@@ -895,6 +895,7 @@ void NSFMMC5_Close(void) {
 	if (WRAM)
 		FCEU_gfree(WRAM);
 	WRAM = NULL;
+	MMC5WRAMsize = 0;
 	FCEU_gfree(ExRAM);
 	ExRAM = NULL;
 }
@@ -996,6 +997,7 @@ static SFORMAT MMC5_StateRegs[] = {
 static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 	if (wsize) {
 		WRAM = (uint8*)FCEU_malloc(wsize * 1024);
+		FCEU_MemoryRand(WRAM, wsize * 1024);
 		SetupCartPRGMapping(0x10, WRAM, wsize * 1024, 1);
 		AddExState(WRAM, wsize * 1024, 0, "WRAM");
 	}
@@ -1003,7 +1005,6 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 	MMC5fill = (uint8*)FCEU_malloc(1024);
 	ExRAM = (uint8*)FCEU_malloc(1024);
 
-	FCEU_MemoryRand(WRAM, MMC5WRAMsize * 8 * 1024);
 	FCEU_MemoryRand(MMC5fill,1024);
 	FCEU_MemoryRand(ExRAM,1024);
 

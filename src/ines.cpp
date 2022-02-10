@@ -786,7 +786,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	VROM_size = uppow2(head.VROM_size | (iNES2?((head.Upper_ROM_VROM_size & 0xF0)<<4):0));
 	if (!iNES2)	{
-		VROM_size = head.VROM_size;
+		VROM_size = uppow2(head.VROM_size);
 	}
 	else {
 		if ((head.Upper_ROM_VROM_size & 0xF0) != 0xF0)

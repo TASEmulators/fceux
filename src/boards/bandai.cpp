@@ -303,7 +303,7 @@ static void BandaiPower(void) {
 	Sync();
 	SetReadHandler(0x6000, 0x7FFF, BandaiRead);
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
-	SetWriteHandler(0x8000, 0xFFFF, BandaiWrite);
+	SetWriteHandler(0x6000, 0xFFFF, BandaiWrite);
 }
 
 static void StateRestore(int version) {
