@@ -180,7 +180,7 @@ static void UNROMSync(void) {
 }
 
 void UNROM_Init(CartInfo *info) {
-	Latch_Init(info, UNROMSync, 0, 0x8000, 0xFFFF, 0, 1);
+	Latch_Init(info, UNROMSync, 0, 0x8000, 0xFFFF, 0, info->ines2 && info->submapper == 2);
 }
 
 //------------------ Map 3 ---------------------------
@@ -192,7 +192,7 @@ static void CNROMSync(void) {
 }
 
 void CNROM_Init(CartInfo *info) {
-	Latch_Init(info, CNROMSync, 0, 0x8000, 0xFFFF, 1, 1);
+	Latch_Init(info, CNROMSync, 0, 0x8000, 0xFFFF, 1, info->ines2 && info->submapper == 2);
 }
 
 //------------------ Map 7 ---------------------------
