@@ -222,57 +222,58 @@ uint32 GetGamepadPressedImmediate()
 //             e.g. do not trigger "F1" if "Ctrl+F1" is pressed
 int DTestButton(ButtConfig *bc, uint8_t just_down, uint8_t block_meta)
 {
-	static unsigned int *keys_data = !just_down ? GetKeyboard_nr() : GetKeyboard_jd();
+	unsigned int *keys_data = !just_down ? GetKeyboard_nr() : GetKeyboard_jd();
+	unsigned int *keys_data_nr = GetKeyboard_nr();
 
-	for(int x=0; x < bc->NumC; x++)
+	for (int x = 0; x < bc->NumC; x++)
 	{
-		if(bc->ButtType[x] == BUTTC_KEYBOARD)
+		if (bc->ButtType[x] == BUTTC_KEYBOARD)
 		{
 			int cmd = bc->ButtonNum[x];
 			int cmdmask = cmd&CMD_KEY_MASK;
 
-			/* test CTRL, SHIFT, ALT */
+			/* test CTRL, SHIFT, ALT, WIN */
 			if (cmd & CMD_KEY_ALT)
 			{
-				int ctlstate = (cmd & CMD_KEY_LALT) ? keys_data[SCAN_LEFTALT] : 0;
-				ctlstate |= (cmd & CMD_KEY_RALT) ? keys_data[SCAN_RIGHTALT] : 0;
+				int ctlstate = (cmd & CMD_KEY_LALT) ? keys_data_nr[SCAN_LEFTALT] : 0;
+				ctlstate |= (cmd & CMD_KEY_RALT) ? keys_data_nr[SCAN_RIGHTALT] : 0;
 				if (!ctlstate)
 					continue;
 			}
-			else if (block_meta && ((cmdmask != SCAN_LEFTALT && keys_data[SCAN_LEFTALT]) || (cmdmask != SCAN_RIGHTALT && keys_data[SCAN_RIGHTALT])))
+			else if (block_meta && ((cmdmask != SCAN_LEFTALT && keys_data_nr[SCAN_LEFTALT]) || (cmdmask != SCAN_RIGHTALT && keys_data_nr[SCAN_RIGHTALT])))
 				continue;
 
 			if (cmd & CMD_KEY_CTRL)
 			{
-				int ctlstate = (cmd & CMD_KEY_LCTRL) ? keys_data[SCAN_LEFTCONTROL] : 0;
-				ctlstate |= (cmd & CMD_KEY_RCTRL) ? keys_data[SCAN_RIGHTCONTROL] : 0;
+				int ctlstate = (cmd & CMD_KEY_LCTRL) ? keys_data_nr[SCAN_LEFTCONTROL] : 0;
+				ctlstate |= (cmd & CMD_KEY_RCTRL) ? keys_data_nr[SCAN_RIGHTCONTROL] : 0;
 				if (!ctlstate)
 					continue;
 			}
-			else if (block_meta && ((cmdmask != SCAN_LEFTCONTROL && keys_data[SCAN_LEFTCONTROL]) || (cmdmask != SCAN_RIGHTCONTROL && keys_data[SCAN_RIGHTCONTROL])))
+			else if (block_meta && ((cmdmask != SCAN_LEFTCONTROL && keys_data_nr[SCAN_LEFTCONTROL]) || (cmdmask != SCAN_RIGHTCONTROL && keys_data_nr[SCAN_RIGHTCONTROL])))
 				continue;
 
 			if (cmd & CMD_KEY_SHIFT)
 			{
-				int ctlstate = (cmd & CMD_KEY_LSHIFT) ? keys_data[SCAN_LEFTSHIFT] : 0;
-				ctlstate |= (cmd & CMD_KEY_RSHIFT) ? keys_data[SCAN_RIGHTSHIFT] : 0;
+				int ctlstate = (cmd & CMD_KEY_LSHIFT) ? keys_data_nr[SCAN_LEFTSHIFT] : 0;
+				ctlstate |= (cmd & CMD_KEY_RSHIFT) ? keys_data_nr[SCAN_RIGHTSHIFT] : 0;
 				if (!ctlstate)
 					continue;
 			}
-			else if (block_meta && ((cmdmask != SCAN_LEFTSHIFT && keys_data[SCAN_LEFTSHIFT]) || (cmdmask != SCAN_RIGHTSHIFT && keys_data[SCAN_RIGHTSHIFT])))
+			else if (block_meta && ((cmdmask != SCAN_LEFTSHIFT && keys_data_nr[SCAN_LEFTSHIFT]) || (cmdmask != SCAN_RIGHTSHIFT && keys_data_nr[SCAN_RIGHTSHIFT])))
 				continue;
 
 			if (cmd & CMD_KEY_WIN)
 			{
-				int ctlstate = (cmd & CMD_KEY_LWIN) ? keys_data[SCAN_LEFTWIN] : 0;
-				ctlstate |= (cmd & CMD_KEY_RWIN) ? keys_data[SCAN_RIGHTWIN] : 0;
+				int ctlstate = (cmd & CMD_KEY_LWIN) ? keys_data_nr[SCAN_LEFTWIN] : 0;
+				ctlstate |= (cmd & CMD_KEY_RWIN) ? keys_data_nr[SCAN_RIGHTWIN] : 0;
 				if (!ctlstate)
 					continue;
 			}
-			else if (block_meta && ((cmdmask != SCAN_LEFTWIN && keys_data[SCAN_LEFTWIN]) || (cmdmask != SCAN_RIGHTWIN && keys_data[SCAN_RIGHTWIN])))
+			else if (block_meta && ((cmdmask != SCAN_LEFTWIN && keys_data_nr[SCAN_LEFTWIN]) || (cmdmask != SCAN_RIGHTWIN && keys_data_nr[SCAN_RIGHTWIN])))
 				continue;
 
-			if(keys_data[cmdmask])
+			if (keys_data[cmdmask])
 			{
 				return 1;
 			}
