@@ -10,8 +10,8 @@ SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
 #echo $SCRIPT_DIR;
 
 gcc --version
-python2 --version
-python3 --version
+#python2 --version
+#python3 --version
 
 INSTALL_PREFIX=/tmp/fceux
 

@@ -19,7 +19,6 @@
  *
  * Super Game (Sugar Softec) protected mapper
  * Pocahontas 2 (Unl) [U][!], etc.
- * TODO: 9in1 LION KING HANGS!
  */
 
 #include "mapinc.h"
@@ -139,7 +138,7 @@ static DECLFW(UNL8237Write) {
 }
 
 static DECLFW(UNL8237ExWrite) {
-	switch (A) {
+	switch (A & 0xF007) {
 	case 0x5000: EXPREGS[0] = V; FixMMC3PRG(MMC3_cmd); break;
 	case 0x5001: EXPREGS[1] = V; FixMMC3PRG(MMC3_cmd); FixMMC3CHR(MMC3_cmd); break;
 	case 0x5007: EXPREGS[2] = V; break;
