@@ -717,12 +717,12 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
         
         //return from subroutine
         case 0x60: //RTS
-            tmp = GetMem(((X.S) + 1)|0x0100) + (GetMem(((X.S) + 2)|0x0100) << 8) + 0x01
+            tmp = GetMem(((X.S) + 1)|0x0100) + (GetMem(((X.S) + 2)|0x0100) << 8) + 0x01;
             sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
         
         //return from interrupt
         case 0x40: //RTI
-            tmp = GetMem(((X.S) + 2)|0x0100) + (GetMem(((X.S) + 3)|0x0100) << 8)
+            tmp = GetMem(((X.S) + 2)|0x0100) + (GetMem(((X.S) + 3)|0x0100) << 8);
             sprintf(str, "%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp));
         
         //for all other other opcodes, which are immediate and 1-byte instructions
