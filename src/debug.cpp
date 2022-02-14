@@ -267,7 +267,7 @@ int getBank(int offs)
 
 int bzk_getBank(int offs)
 {
-	return bzk_GetNesFileAddress(offs) / 0x2000;
+	return offs / 0x2000;
 }
 
 int GetNesFileAddress(int A){
