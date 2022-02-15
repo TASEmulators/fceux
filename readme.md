@@ -7,6 +7,7 @@ A hacked Trace Logger to produce special log files for my disassembler.
 https://ci.appveyor.com/project/cyneprepou4uk/fceux/build/artifacts
 
 ## Changed files
+* [appveyor.yml](https://github.com/cyneprepou4uk/fceux/blob/master/appveyor.yml)
 * [src\asm.cpp](https://github.com/cyneprepou4uk/fceux/blob/master/src/asm.cpp)
 * [src\asm.h](https://github.com/cyneprepou4uk/fceux/blob/master/src/asm.h)
 * [src\debug.cpp](https://github.com/cyneprepou4uk/fceux/blob/master/src/debug.cpp)
