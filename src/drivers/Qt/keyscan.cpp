@@ -1082,6 +1082,13 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 
 	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlev.key.keysym.sym);
 
+	if ( sdlev.key.keysym.scancode == SDL_SCANCODE_UNKNOWN )
+	{	// If scancode is unknown, the key may be dual function via the shift key.
+		//printf("Scancode: %08X \n", sdlev.key.keysym.scancode );
+
+		sdlev.key.keysym.scancode = convQtKey2SDLScanCode( (Qt::Key)event->key() );
+	}
+
 	sdlev.key.keysym.mod = convQtKey2SDLModifier(event->modifiers());
 	sdlev.key.repeat = 0;
 
