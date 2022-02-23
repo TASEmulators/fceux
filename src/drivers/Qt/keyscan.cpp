@@ -401,9 +401,9 @@ SDL_Scancode convQtKey2SDLScanCode(Qt::Key q)
 	case Key_BracketRight:
 		s = SDL_SCANCODE_RIGHTBRACKET;
 		break;
-	//case  Key_AsciiCircum:
-	//	s = SDL_SCANCODE_UNKNOWN;
-	//break;
+	case  Key_AsciiCircum:
+		s = SDL_SCANCODE_6;
+		break;
 	case Key_Underscore:
 		s = SDL_SCANCODE_MINUS;
 		break;

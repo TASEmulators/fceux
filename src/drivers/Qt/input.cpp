@@ -1838,11 +1838,13 @@ static void UpdateFKB()
 
 	for (x = 0; x < 0x48; x++)
 	{
-		fkbkeys[x] = 0;
-
 		if (DTestButton(&fkbmap[x]))
 		{
 			fkbkeys[x] = 1;
+		}
+		else
+		{
+			fkbkeys[x] = 0;
 		}
 	}
 }
