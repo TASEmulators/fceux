@@ -313,7 +313,6 @@ SDL_Scancode convQtKey2SDLScanCode(Qt::Key q)
 	case Key_At:
 		s = SDL_SCANCODE_2;
 		break;
-		break;
 	case Key_A:
 		s = SDL_SCANCODE_A;
 		break;
@@ -788,7 +787,6 @@ SDL_Keycode convQtKey2SDLKeyCode(Qt::Key q)
 	case Key_At:
 		s = SDLK_AT;
 		break;
-		break;
 	case Key_A:
 		s = SDLK_a;
 		break;
@@ -1082,11 +1080,23 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 
 	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlev.key.keysym.sym);
 
+	//printf("Native ScanCode: x%08X  %i \n", event->nativeScanCode(), event->nativeScanCode() );
+	//printf("Scancode: 0x%08X  %i \n", sdlev.key.keysym.scancode, sdlev.key.keysym.scancode );
+
+	// SDL Docs say this code should never happen, but it does... 
+	// so force it to alternative scancode algorithm if it occurs.
+	if ( (sdlev.key.keysym.scancode == SDL_SCANCODE_NONUSHASH      ) ||
+	     (sdlev.key.keysym.scancode == SDL_SCANCODE_NONUSBACKSLASH ) )
+	{
+		sdlev.key.keysym.scancode = SDL_SCANCODE_UNKNOWN;
+	}
+
 	if ( sdlev.key.keysym.scancode == SDL_SCANCODE_UNKNOWN )
 	{	// If scancode is unknown, the key may be dual function via the shift key.
-		//printf("Scancode: %08X \n", sdlev.key.keysym.scancode );
 
 		sdlev.key.keysym.scancode = convQtKey2SDLScanCode( (Qt::Key)event->key() );
+
+		//printf("Dual Scancode: 0x%08X  %i \n", sdlev.key.keysym.scancode, sdlev.key.keysym.scancode );
 	}
 
 	sdlev.key.keysym.mod = convQtKey2SDLModifier(event->modifiers());

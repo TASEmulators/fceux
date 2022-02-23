@@ -1835,17 +1835,29 @@ static ButtConfig fkbmap[0x48] = {
 static void UpdateFKB()
 {
 	int x;
+	//static char lp[0x48];
 
 	for (x = 0; x < 0x48; x++)
 	{
 		if (DTestButton(&fkbmap[x]))
 		{
 			fkbkeys[x] = 1;
+
+			//if ( !lp[x] )
+			//{
+			//	printf("FKB Key %i Down\n", x );
+			//}
 		}
 		else
 		{
 			fkbkeys[x] = 0;
+
+			//if ( lp[x] )
+			//{
+			//	printf("FKB Key %i Up\n", x );
+			//}
 		}
+		//lp[x] = fkbkeys[x];
 	}
 }
 
