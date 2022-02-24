@@ -1812,22 +1812,22 @@ void InitInputInterface()
 }
 
 static ButtConfig fkbmap[0x48] = {
-	MK(SDLK_F1), MK(SDLK_F2), MK(SDLK_F3), MK(SDLK_F4), MK(SDLK_F5), MK(SDLK_F6), MK(SDLK_F7), MK(SDLK_F8),
-	MK(SDLK_1), MK(SDLK_2), MK(SDLK_3), MK(SDLK_4), MK(SDLK_5), MK(SDLK_6), MK(SDLK_7), MK(SDLK_8), MK(SDLK_9),
-	MK(SDLK_0),
-	MK(SDLK_MINUS), MK(SDLK_EQUAL), MK(SDLK_BACKSLASH), MK(SDLK_BACKSPACE),
-	MK(SDLK_ESCAPE), MK(SDLK_Q), MK(SDLK_W), MK(SDLK_E), MK(SDLK_R), MK(SDLK_T), MK(SDLK_Y), MK(SDLK_U), MK(SDLK_I),
-	MK(SDLK_O),
-	MK(SDLK_P), MK(SDLK_GRAVE), MK(SDLK_BRACKET_LEFT), MK(SDLK_ENTER),
-	MK(SDLK_LEFTCONTROL), MK(SDLK_A), MK(SDLK_S), MK(SDLK_D), MK(SDLK_F), MK(SDLK_G), MK(SDLK_H), MK(SDLK_J),
-	MK(SDLK_K),
-	MK(SDLK_L), MK(SDLK_SEMICOLON), MK(SDLK_APOSTROPHE), MK(SDLK_BRACKET_RIGHT), MK(SDLK_INSERT),
-	MK(SDLK_LEFTSHIFT), MK(SDLK_Z), MK(SDLK_X), MK(SDLK_C), MK(SDLK_V), MK(SDLK_B), MK(SDLK_N), MK(SDLK_M),
-	MK(SDLK_COMMA),
-	MK(SDLK_PERIOD), MK(SDLK_SLASH), MK(SDLK_RIGHTALT), MK(SDLK_RIGHTSHIFT), MK(SDLK_LEFTALT),
-	MK(SDLK_SPACE),
-	MK(SDLK_DELETE), MK(SDLK_END), MK(SDLK_PAGEDOWN),
-	MK(SDLK_CURSORUP), MK(SDLK_CURSORLEFT), MK(SDLK_CURSORRIGHT), MK(SDLK_CURSORDOWN)};
+	/*  0 */ MK(SDLK_F1), MK(SDLK_F2), MK(SDLK_F3), MK(SDLK_F4), MK(SDLK_F5), MK(SDLK_F6), MK(SDLK_F7), MK(SDLK_F8),
+	/*  8 */ MK(SDLK_1), MK(SDLK_2), MK(SDLK_3), MK(SDLK_4), MK(SDLK_5), MK(SDLK_6), MK(SDLK_7), MK(SDLK_8), MK(SDLK_9),
+	/* 17 */ MK(SDLK_0),
+	/* 18 */ MK(SDLK_MINUS), MK(SDLK_EQUAL), MK(SDLK_BACKSLASH), MK(SDLK_BACKSPACE),
+	/* 22 */ MK(SDLK_ESCAPE), MK(SDLK_Q), MK(SDLK_W), MK(SDLK_E), MK(SDLK_R), MK(SDLK_T), MK(SDLK_Y), MK(SDLK_U), MK(SDLK_I),
+	/* 31 */ MK(SDLK_O),
+	/* 32 */ MK(SDLK_P), MK(SDLK_GRAVE), MK(SDLK_BRACKET_LEFT), MK(SDLK_ENTER),
+	/* 36 */ MK(SDLK_LEFTCONTROL), MK(SDLK_A), MK(SDLK_S), MK(SDLK_D), MK(SDLK_F), MK(SDLK_G), MK(SDLK_H), MK(SDLK_J),
+	/* 44 */ MK(SDLK_K),
+	/* 45 */ MK(SDLK_L), MK(SDLK_SEMICOLON), MK(SDLK_APOSTROPHE), MK(SDLK_BRACKET_RIGHT), MK(SDLK_INSERT),
+	/* 50 */ MK(SDLK_LEFTSHIFT), MK(SDLK_Z), MK(SDLK_X), MK(SDLK_C), MK(SDLK_V), MK(SDLK_B), MK(SDLK_N), MK(SDLK_M),
+	/* 58 */ MK(SDLK_COMMA),
+	/* 59 */ MK(SDLK_PERIOD), MK(SDLK_SLASH), MK(SDLK_RIGHTALT), MK(SDLK_RIGHTSHIFT), MK(SDLK_LEFTALT),
+	/* 64 */ MK(SDLK_SPACE),
+	/* 65 */ MK(SDLK_DELETE), MK(SDLK_END), MK(SDLK_PAGEDOWN),
+	/* 68 */ MK(SDLK_CURSORUP), MK(SDLK_CURSORLEFT), MK(SDLK_CURSORRIGHT), MK(SDLK_CURSORDOWN)};
 
 /**
  * Update the status of the Family KeyBoard.
@@ -1835,10 +1835,23 @@ static ButtConfig fkbmap[0x48] = {
 static void UpdateFKB()
 {
 	int x;
+	char leftShiftDown;
 	//static char lp[0x48];
+
+	leftShiftDown = DTestButton(&fkbmap[50]);
 
 	for (x = 0; x < 0x48; x++)
 	{
+		if ( leftShiftDown && (x == 62) )
+		{	// Family BASIC appears to not like when both shift keys are pressed at the
+			// same time. Since Qt key events do not differentiate between left and right
+			// shift this GUI sets both left and right shift scancodes when a shift modifier
+			// is detected. So to avoid having the FKB see both shift keys pressed at once,
+			// always skip the right shift key here if the left key is already detected down.
+			fkbkeys[x] = 0;
+			continue;
+		}
+
 		if (DTestButton(&fkbmap[x]))
 		{
 			fkbkeys[x] = 1;
