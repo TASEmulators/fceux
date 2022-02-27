@@ -1026,7 +1026,8 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
     {
         for (string line : bzk_list)
         {
-            fputs(line, LOG_FP);
+            bzk_string_converter = line;
+            fputs(bzk_string_converter, LOG_FP);
         }
         bzk_list.clear();
     }
