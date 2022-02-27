@@ -127,7 +127,6 @@ char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, st
 char str_result[LOG_LINE_MAX_LEN] = {0};
 
 char bzk_string[200] = {0};
-char bzk_string_2[200] = {0};
 list<string> bzk_list;
 int bzk_writes_counter = 0;
 int bzk_files_counter = 0;
@@ -1022,8 +1021,9 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
     {
         for (string line : bzk_list)
         {
-            sprintf(bzk_string_2, line);
-            fputs(bzk_string, LOG_FP);
+            char bzk_char_converter[200] = {0};
+            sprintf(bzk_char_converter, line);
+            fputs(bzk_char_converter, LOG_FP);
             //LOG_FP << line;
         }
         bzk_list.clear();
