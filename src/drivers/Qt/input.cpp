@@ -1322,12 +1322,31 @@ UpdatePhysicalInput()
 			//		event.type, event.key.keysym.sym, event.key.keysym.scancode );
 
 			keyModifier = event.key.keysym.mod;
-			g_keyState[SDL_SCANCODE_LSHIFT] = (event.key.keysym.mod & KMOD_LSHIFT) ? 1 : 0;
-			g_keyState[SDL_SCANCODE_RSHIFT] = (event.key.keysym.mod & KMOD_RSHIFT) ? 1 : 0;
-			g_keyState[SDL_SCANCODE_LALT] = (event.key.keysym.mod & KMOD_LALT) ? 1 : 0;
-			g_keyState[SDL_SCANCODE_RALT] = (event.key.keysym.mod & KMOD_RALT) ? 1 : 0;
-			g_keyState[SDL_SCANCODE_LCTRL] = (event.key.keysym.mod & KMOD_LCTRL) ? 1 : 0;
-			g_keyState[SDL_SCANCODE_RCTRL] = (event.key.keysym.mod & KMOD_RCTRL) ? 1 : 0;
+
+			if ( (event.key.keysym.mod & KMOD_LSHIFT) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_LSHIFT] = 0;
+			}
+			if ( (event.key.keysym.mod & KMOD_RSHIFT) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_RSHIFT] = 0;
+			}
+			if ( (event.key.keysym.mod & KMOD_LALT) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_LALT] = 0;
+			}
+			if ( (event.key.keysym.mod & KMOD_RALT) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_RALT] = 0;
+			}
+			if ( (event.key.keysym.mod & KMOD_LCTRL) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_LCTRL] = 0;
+			}
+			if ( (event.key.keysym.mod & KMOD_RCTRL) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_RCTRL] = 0;
+			}
 
 			g_keyState[event.key.keysym.scancode] = (event.type == SDL_KEYDOWN) ? 1 : 0;
 

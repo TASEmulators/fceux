@@ -110,6 +110,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	//QString libpath = QLibraryInfo::location(QLibraryInfo::PluginsPath);
 	//printf("LibPath: '%s'\n", libpath.toStdString().c_str() );
 
+	printf("Running on Platform: %s\n", QGuiApplication::platformName().toStdString().c_str() );
+
 	QApplication::setStyle( new fceuStyle() );
 
 	initHotKeys();
