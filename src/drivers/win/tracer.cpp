@@ -1012,9 +1012,9 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
     //sprintf(str_axystate, "%X %X %X %X %X ", X.A, X.X, X.Y, X.S, X.P);
     //sprintf(bzk_string, "%X %X %X %X %X %X %X %X %X %X \n", addr, bzk_GetNesFileAddress(addr), bzk_getBank(0x8000), bzk_getBank(0xA000), bzk_getBank(0xC000), bzk_getBank(0xE000), X.A, X.X, X.Y, X.P);
     //sprintf(bzk_string, "%u|%u|%u|%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(0x8000), bzk_getBank(0xA000), bzk_getBank(0xC000), bzk_getBank(0xE000), X.A, X.X, X.Y, bzk_Disassemble(opcode));
-    sprintf(bzk_string, "%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(addr), X.A, X.X, X.Y, bzk_Disassemble(addr, opcode));
+    //sprintf(bzk_string, "%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(addr), X.A, X.X, X.Y, bzk_Disassemble(addr, opcode));
     
-    bzk_list.push_back(bzk_string); //добавить в конец списка
+    bzk_list.push_back("%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(addr), X.A, X.X, X.Y, bzk_Disassemble(addr, opcode)); //добавить в конец списка
 	bzk_writes_counter++;
     
     if (bzk_writes_counter % 1000 == 0)
