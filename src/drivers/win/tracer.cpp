@@ -39,6 +39,8 @@
 #include "mapinput.h"
 #include "input.h"
 
+#include <list> // для возможности использовать bzk_list
+
 using namespace std;
 
 //#define LOG_SKIP_UNMAPPED 4
@@ -123,9 +125,12 @@ int tracelogbufusedsize = 0;
 char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX_LEN] = {0};
 char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
 char str_result[LOG_LINE_MAX_LEN] = {0};
+
 char bzk_string[200] = {0};
+list<string> bzk_list;
 int bzk_writes_counter = 0;
 int bzk_files_counter = 0;
+
 char str_temp[LOG_LINE_MAX_LEN] = {0};
 char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
@@ -1008,11 +1013,20 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
     //sprintf(bzk_string, "%X %X %X %X %X %X %X %X %X %X \n", addr, bzk_GetNesFileAddress(addr), bzk_getBank(0x8000), bzk_getBank(0xA000), bzk_getBank(0xC000), bzk_getBank(0xE000), X.A, X.X, X.Y, X.P);
     //sprintf(bzk_string, "%u|%u|%u|%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(0x8000), bzk_getBank(0xA000), bzk_getBank(0xC000), bzk_getBank(0xE000), X.A, X.X, X.Y, bzk_Disassemble(opcode));
     sprintf(bzk_string, "%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(addr), X.A, X.X, X.Y, bzk_Disassemble(addr, opcode));
-
-	fputs(bzk_string, LOG_FP);
+    
+    bzk_list.push_back(bzk_string); //добавить в конец списка
 	bzk_writes_counter++;
+    
+    if (bzk_writes_counter % 1000 == 0)
+    {
+        for (string line : bzk_list)
+        {
+            fputs(line, LOG_FP);
+        }
+        bzk_list.clear();
+    }
 
-	if (bzk_writes_counter == 4999999)
+	if (bzk_writes_counter == 5000000)
 	{
 		bzk_writes_counter = 0;
 		fflush(LOG_FP);
