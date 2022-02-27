@@ -127,6 +127,7 @@ char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, st
 char str_result[LOG_LINE_MAX_LEN] = {0};
 
 char bzk_string[200] = {0};
+string bzk_string_converter = " ";
 list<string> bzk_list;
 int bzk_writes_counter = 0;
 int bzk_files_counter = 0;
@@ -1012,12 +1013,13 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
     //sprintf(str_axystate, "%X %X %X %X %X ", X.A, X.X, X.Y, X.S, X.P);
     //sprintf(bzk_string, "%X %X %X %X %X %X %X %X %X %X \n", addr, bzk_GetNesFileAddress(addr), bzk_getBank(0x8000), bzk_getBank(0xA000), bzk_getBank(0xC000), bzk_getBank(0xE000), X.A, X.X, X.Y, X.P);
     //sprintf(bzk_string, "%u|%u|%u|%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(0x8000), bzk_getBank(0xA000), bzk_getBank(0xC000), bzk_getBank(0xE000), X.A, X.X, X.Y, bzk_Disassemble(opcode));
-    //sprintf(bzk_string, "%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(addr), X.A, X.X, X.Y, bzk_Disassemble(addr, opcode));
+    sprintf(bzk_string, "%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(addr), X.A, X.X, X.Y, bzk_Disassemble(addr, opcode));
     
     //bzk_list.push_back("%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(addr), X.A, X.X, X.Y, bzk_Disassemble(addr, opcode));
-    bzk_list.push_back(("%u|", bzk_GetNesFileAddress(addr)) + ("%u|", bzk_getBank(addr)) + ("%u|", X.A) + ("%u|", X.X) + ("%u|", X.Y) + ("%u|", bzk_Disassemble(addr, opcode)) + "\n"); //добавить в конец списка
+    //bzk_list.push_back(("%u|", bzk_GetNesFileAddress(addr)) + ("%u|", bzk_getBank(addr)) + ("%u|", X.A) + ("%u|", X.X) + ("%u|", X.Y) + ("%s|", bzk_Disassemble(addr, opcode)) + "\n"); //добавить в конец списка
     
-    
+    bzk_string_converter = bzk_string;
+    bzk_list.push_back(bzk_string_converter);
 	bzk_writes_counter++;
     
     if (bzk_writes_counter % 1000 == 0)
