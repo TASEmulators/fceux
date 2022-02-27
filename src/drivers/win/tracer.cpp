@@ -1022,7 +1022,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
     {
         for (string line : bzk_list)
         {
-            sprintf(bzk_string_2, line)
+            sprintf(bzk_string_2, line);
             fputs(bzk_string, LOG_FP);
             //LOG_FP << line;
         }
