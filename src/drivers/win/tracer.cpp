@@ -1014,7 +1014,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
     if (bzk_writes_counter % 1000 == 0)
     {
         fputs(bzk_total_string, LOG_FP);
-        bzk_total_string[20000] = {0}
+        bzk_total_string[20000] = {0};
     }
     
 	if (bzk_writes_counter == 5000000)
