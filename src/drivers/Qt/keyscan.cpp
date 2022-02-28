@@ -57,6 +57,12 @@ static uint32_t MetaKeyCodeR  = VK_RWIN;
 	static uint32_t MetaKeyCodeR  = 0xffe8;
    #endif
 
+#elif  defined(__APPLE__)
+static uint32_t ShiftKeyCodeR = 0x003C;
+static uint32_t CtrlKeyCodeR  = 0x0036;
+static uint32_t AltKeyCodeR   = 0x003D;
+static uint32_t MetaKeyCodeR  = 0x003B;
+
 #else
 static uint32_t ShiftKeyCodeR = 0xffe2;
 static uint32_t CtrlKeyCodeR  = 0xffe4;
@@ -1176,7 +1182,7 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 
 	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlev.key.keysym.sym);
 
-	//printf("Key %s\n", (sdlev.type == SDL_KEYUP) ? "UP" : "DOWN" );
+	//printf("Key %s: x%08X  %i\n", (sdlev.type == SDL_KEYUP) ? "UP" : "DOWN", event->key(), event->key() );
 	//printf("   Native ScanCode: x%08X  %i \n", event->nativeScanCode(), event->nativeScanCode() );
 	//printf("   Virtual ScanCode: x%08X  %i \n", event->nativeVirtualKey(), event->nativeVirtualKey() );
 	//printf("   Scancode: 0x%08X  %i \n", sdlev.key.keysym.scancode, sdlev.key.keysym.scancode );
