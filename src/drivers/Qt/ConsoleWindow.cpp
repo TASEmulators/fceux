@@ -100,6 +100,10 @@
 #include "Qt/nes_shm.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
+#ifdef __APPLE__
+void qt_set_sequence_auto_mnemonic(bool enable);
+#endif
+
 consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
@@ -109,6 +113,10 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	//QString libpath = QLibraryInfo::location(QLibraryInfo::PluginsPath);
 	//printf("LibPath: '%s'\n", libpath.toStdString().c_str() );
+
+#ifdef __APPLE__
+	qt_set_sequence_auto_mnemonic(true);
+#endif
 
 	printf("Running on Platform: %s\n", QGuiApplication::platformName().toStdString().c_str() );
 
@@ -4671,6 +4679,8 @@ void consoleMenuBar::keyPressEvent(QKeyEvent *event)
 {
 	QMenuBar::keyPressEvent(event);
 
+	pushKeyEvent( event, 1 );
+
 	// Force de-focus of menu bar when escape key is pressed.
 	// This prevents the menubar from hi-jacking keyboard input focus
 	// when using menu accelerators
@@ -4684,6 +4694,8 @@ void consoleMenuBar::keyPressEvent(QKeyEvent *event)
 void consoleMenuBar::keyReleaseEvent(QKeyEvent *event)
 {
 	QMenuBar::keyReleaseEvent(event);
+
+	pushKeyEvent( event, 0 );
 
 	event->accept();
 }

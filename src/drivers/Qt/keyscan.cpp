@@ -34,6 +34,7 @@ using namespace Qt;
 static uint32_t ShiftKeyCodeR = VK_RSHIFT;
 static uint32_t CtrlKeyCodeR  = VK_RCONTROL;
 static uint32_t AltKeyCodeR   = VK_RMENU;
+static uint32_t MetaKeyCodeR  = VK_RWIN;
 
 #elif  defined(__linux__)
 
@@ -42,21 +43,25 @@ static uint32_t AltKeyCodeR   = VK_RMENU;
 	static uint32_t ShiftKeyCodeR = XKB_KEY_Shift_R;
 	static uint32_t CtrlKeyCodeR  = XKB_KEY_Control_R;
 	static uint32_t AltKeyCodeR   = XKB_KEY_Alt_R;
+	static uint32_t MetaKeyCodeR  = XKB_KEY_Meta_R;
    #elif  defined(_HAS_X11)
         #include <X11/keysym.h>
 	static uint32_t ShiftKeyCodeR = XK_Shift_R;
 	static uint32_t CtrlKeyCodeR  = XK_Control_R;
 	static uint32_t AltKeyCodeR   = XK_Alt_R;
+	static uint32_t MetaKeyCodeR  = XK_Meta_R;
    #else
 	static uint32_t ShiftKeyCodeR = 0xffe2;
 	static uint32_t CtrlKeyCodeR  = 0xffe4;
 	static uint32_t AltKeyCodeR   = 0xffea;
+	static uint32_t MetaKeyCodeR  = 0xffe8;
    #endif
 
 #else
 static uint32_t ShiftKeyCodeR = 0xffe2;
 static uint32_t CtrlKeyCodeR  = 0xffe4;
 static uint32_t AltKeyCodeR   = 0xffea;
+static uint32_t MetaKeyCodeR  = 0xffe8;
 #endif
 
 SDL_Scancode convQtKey2SDLScanCode(Qt::Key q, uint32_t nativeVirtualKey)
@@ -142,7 +147,14 @@ SDL_Scancode convQtKey2SDLScanCode(Qt::Key q, uint32_t nativeVirtualKey)
 		}
 		break;
 	case Key_Meta:
-		s = SDL_SCANCODE_LGUI;
+		if ( nativeVirtualKey == MetaKeyCodeR )
+		{
+			s = SDL_SCANCODE_RGUI;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LGUI;
+		}
 		break;
 	case Key_Alt:
 		if ( nativeVirtualKey == AltKeyCodeR )
@@ -635,7 +647,14 @@ SDL_Keycode convQtKey2SDLKeyCode(Qt::Key q, uint32_t nativeVirtualKey)
 		}
 		break;
 	case Key_Meta:
-		s = SDLK_LGUI;
+		if ( nativeVirtualKey == MetaKeyCodeR )
+		{
+			s = SDLK_RGUI;
+		}
+		else
+		{
+			s = SDLK_LGUI;
+		}
 		break;
 	case Key_Alt:
 		if ( nativeVirtualKey == AltKeyCodeR )
@@ -1157,9 +1176,10 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 
 	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlev.key.keysym.sym);
 
-	printf("Native ScanCode: x%08X  %i \n", event->nativeScanCode(), event->nativeScanCode() );
-	printf("Virtual ScanCode: x%08X  %i \n", event->nativeVirtualKey(), event->nativeVirtualKey() );
-	printf("Scancode: 0x%08X  %i \n", sdlev.key.keysym.scancode, sdlev.key.keysym.scancode );
+	//printf("Key %s\n", (sdlev.type == SDL_KEYUP) ? "UP" : "DOWN" );
+	//printf("   Native ScanCode: x%08X  %i \n", event->nativeScanCode(), event->nativeScanCode() );
+	//printf("   Virtual ScanCode: x%08X  %i \n", event->nativeVirtualKey(), event->nativeVirtualKey() );
+	//printf("   Scancode: 0x%08X  %i \n", sdlev.key.keysym.scancode, sdlev.key.keysym.scancode );
 
 	// SDL Docs say this code should never happen, but it does... 
 	// so force it to alternative scancode algorithm if it occurs.
@@ -1172,7 +1192,7 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 	if ( sdlev.key.keysym.scancode == SDL_SCANCODE_UNKNOWN )
 	{	// If scancode is unknown, the key may be dual function via the shift key.
 
-		sdlev.key.keysym.scancode = convQtKey2SDLScanCode( (Qt::Key)event->key() );
+		sdlev.key.keysym.scancode = convQtKey2SDLScanCode( (Qt::Key)event->key(), vkey );
 
 		//printf("Dual Scancode: 0x%08X  %i \n", sdlev.key.keysym.scancode, sdlev.key.keysym.scancode );
 	}
