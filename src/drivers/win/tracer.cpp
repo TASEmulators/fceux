@@ -111,6 +111,7 @@ int log_lines_option = 5;	// 10000 lines by default
 char *logfilename = 0;
 char bzk_filename[2100] = {0};
 char bzk_newfilename[2100] = { 0 };
+char bzk_total_string[20000] = {0};
 // int oldcodecount, olddatacount;
 
 SCROLLINFO tracesi;
@@ -123,7 +124,7 @@ int tracelogbufusedsize = 0;
 char str_axystate[LOG_AXYSTATE_MAX_LEN] = {0}, str_procstatus[LOG_PROCSTATUS_MAX_LEN] = {0};
 char str_tabs[LOG_TABS_MASK+1] = {0}, str_address[LOG_ADDRESS_MAX_LEN] = {0}, str_data[LOG_DATA_MAX_LEN] = {0}, str_disassembly[LOG_DISASSEMBLY_MAX_LEN] = {0};
 char str_result[LOG_LINE_MAX_LEN] = {0};
-char bzk_string[20000] = {0};
+char bzk_string[200] = {0};
 int bzk_writes_counter = 0;
 int bzk_files_counter = 0;
 char str_temp[LOG_LINE_MAX_LEN] = {0};
@@ -1007,12 +1008,13 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
     //sprintf(str_axystate, "%X %X %X %X %X ", X.A, X.X, X.Y, X.S, X.P);
     //sprintf(bzk_string, "%X %X %X %X %X %X %X %X %X %X \n", addr, bzk_GetNesFileAddress(addr), bzk_getBank(0x8000), bzk_getBank(0xA000), bzk_getBank(0xC000), bzk_getBank(0xE000), X.A, X.X, X.Y, X.P);
     //sprintf(bzk_string, "%u|%u|%u|%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(0x8000), bzk_getBank(0xA000), bzk_getBank(0xC000), bzk_getBank(0xE000), X.A, X.X, X.Y, bzk_Disassemble(opcode));
-    sprintf(bzk_string, "%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(addr), X.A, X.X, X.Y, bzk_Disassemble(addr, opcode));
+    sprintf(bzk_total_string, "%u|%u|%u|%u|%u|%s|\n", bzk_GetNesFileAddress(addr), bzk_getBank(addr), X.A, X.X, X.Y, bzk_Disassemble(addr, opcode));
 	bzk_writes_counter++;
     
     if (bzk_writes_counter % 1000 == 0)
     {
-        fputs(bzk_string, LOG_FP);
+        fputs(bzk_total_string, LOG_FP);
+        bzk_total_string[20000] = {0}
     }
     
 	if (bzk_writes_counter == 5000000)
