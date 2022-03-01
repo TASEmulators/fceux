@@ -665,16 +665,7 @@ SDL_Keycode convQtKey2SDLKeyCode(Qt::Key q, uint32_t nativeVirtualKey)
 		}
 		break;
 	case Key_Control:
-		if ( nativeVirtualKey == CtrlKeyCodeR )
-		{
-			s = SDLK_RCTRL;
-		}
-		else
-		{
-			s = SDLK_LCTRL;
-		}
-		break;
-	case Key_Meta:
+		#ifdef  __APPLE__
 		if ( nativeVirtualKey == MetaKeyCodeR )
 		{
 			s = SDLK_RGUI;
@@ -683,6 +674,37 @@ SDL_Keycode convQtKey2SDLKeyCode(Qt::Key q, uint32_t nativeVirtualKey)
 		{
 			s = SDLK_LGUI;
 		}
+		#else
+		if ( nativeVirtualKey == CtrlKeyCodeR )
+		{
+			s = SDLK_RCTRL;
+		}
+		else
+		{
+			s = SDLK_LCTRL;
+		}
+		#endif
+		break;
+	case Key_Meta:
+		#ifdef  __APPLE__
+		if ( nativeVirtualKey == CtrlKeyCodeR )
+		{
+			s = SDLK_RCTRL;
+		}
+		else
+		{
+			s = SDLK_LCTRL;
+		}
+		#else
+		if ( nativeVirtualKey == MetaKeyCodeR )
+		{
+			s = SDLK_RGUI;
+		}
+		else
+		{
+			s = SDLK_LGUI;
+		}
+		#endif
 		break;
 	case Key_Alt:
 		if ( nativeVirtualKey == AltKeyCodeR )
