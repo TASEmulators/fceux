@@ -59,9 +59,9 @@ static uint32_t MetaKeyCodeR  = VK_RWIN;
 
 #elif  defined(__APPLE__)
 static uint32_t ShiftKeyCodeR = 0x003C;
-static uint32_t CtrlKeyCodeR  = 0x0036;
+static uint32_t CtrlKeyCodeR  = 0x003E;
 static uint32_t AltKeyCodeR   = 0x003D;
-static uint32_t MetaKeyCodeR  = 0x003B;
+static uint32_t MetaKeyCodeR  = 0x0036;
 
 #else
 static uint32_t ShiftKeyCodeR = 0xffe2;
@@ -143,16 +143,7 @@ SDL_Scancode convQtKey2SDLScanCode(Qt::Key q, uint32_t nativeVirtualKey)
 		}
 		break;
 	case Key_Control:
-		if ( nativeVirtualKey == CtrlKeyCodeR )
-		{
-			s = SDL_SCANCODE_RCTRL;
-		}
-		else
-		{
-			s = SDL_SCANCODE_LCTRL;
-		}
-		break;
-	case Key_Meta:
+		#ifdef  __APPLE__
 		if ( nativeVirtualKey == MetaKeyCodeR )
 		{
 			s = SDL_SCANCODE_RGUI;
@@ -161,6 +152,37 @@ SDL_Scancode convQtKey2SDLScanCode(Qt::Key q, uint32_t nativeVirtualKey)
 		{
 			s = SDL_SCANCODE_LGUI;
 		}
+		#else
+		if ( nativeVirtualKey == CtrlKeyCodeR )
+		{
+			s = SDL_SCANCODE_RCTRL;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LCTRL;
+		}
+		#endif
+		break;
+	case Key_Meta:
+		#ifdef  __APPLE__
+		if ( nativeVirtualKey == CtrlKeyCodeR )
+		{
+			s = SDL_SCANCODE_RCTRL;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LCTRL;
+		}
+		#else
+		if ( nativeVirtualKey == MetaKeyCodeR )
+		{
+			s = SDL_SCANCODE_RGUI;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LGUI;
+		}
+		#endif
 		break;
 	case Key_Alt:
 		if ( nativeVirtualKey == AltKeyCodeR )
