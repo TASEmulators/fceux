@@ -140,7 +140,7 @@ static void UpdateTopRider(void);
 static uint32 JSreturn = 0;
 
 #include "keyscan.h"
-static uint8 g_keyState[SDL_NUM_SCANCODES];
+static uint8_t g_keyState[SDL_NUM_SCANCODES];
 static int keyModifier = 0;
 //static int DIPS = 0;
 
@@ -1320,6 +1320,17 @@ UpdatePhysicalInput()
 		case SDL_KEYUP:
 			//printf("SDL_Event.type: %i  Keysym: %i  ScanCode: %i\n",
 			//		event.type, event.key.keysym.sym, event.key.keysym.scancode );
+
+			#ifdef WIN32
+			g_keyState[SDL_SCANCODE_LSHIFT] = win32GetKeyState( SDL_SCANCODE_LSHIFT );
+			g_keyState[SDL_SCANCODE_RSHIFT] = win32GetKeyState( SDL_SCANCODE_RSHIFT );
+			g_keyState[SDL_SCANCODE_LALT  ] = win32GetKeyState( SDL_SCANCODE_LALT   );
+			g_keyState[SDL_SCANCODE_RALT  ] = win32GetKeyState( SDL_SCANCODE_RALT   );
+			g_keyState[SDL_SCANCODE_LCTRL ] = win32GetKeyState( SDL_SCANCODE_LCTRL  );
+			g_keyState[SDL_SCANCODE_RCTRL ] = win32GetKeyState( SDL_SCANCODE_RCTRL  );
+			g_keyState[SDL_SCANCODE_LGUI  ] = win32GetKeyState( SDL_SCANCODE_LGUI   );
+			g_keyState[SDL_SCANCODE_RGUI  ] = win32GetKeyState( SDL_SCANCODE_RGUI   );
+			#endif
 
 			keyModifier = event.key.keysym.mod;
 

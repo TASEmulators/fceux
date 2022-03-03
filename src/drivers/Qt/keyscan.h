@@ -57,3 +57,7 @@ SDL_Keymod convQtKey2SDLModifier( Qt::KeyboardModifiers m );
 int  convKeyEvent2Sequence( QKeyEvent *event );
 
 int  pushKeyEvent( QKeyEvent *event, int pressDown );
+
+#ifdef WIN32
+uint8_t win32GetKeyState( unsigned int vkey );
+#endif

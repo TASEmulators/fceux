@@ -1294,6 +1294,45 @@ int convKeyEvent2Sequence( QKeyEvent *event )
 	return (m | k);
 }
 
+#ifdef WIN32
+uint8_t win32GetKeyState( unsigned int vkey )
+{
+	uint8_t state = 0;
+
+	switch ( vkey )
+	{
+		case SDL_SCANCODE_LSHIFT:
+			state = (keyBuf[VK_LSHIFT] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_RSHIFT:
+			state = (keyBuf[VK_RSHIFT] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_LALT:
+			state = (keyBuf[VK_LMENU] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_RALT:
+			state = (keyBuf[VK_RMENU] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_LCTRL:
+			state = (keyBuf[VK_LCONTROL] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_RCTRL:
+			state = (keyBuf[VK_RCONTROL] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_LGUI:
+			state = (keyBuf[VK_LWIN] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_RGUI:
+			state = (keyBuf[VK_RWIN] & 0x80) ? 1 : 0;
+		break;
+		default:
+			state = 0;
+		break;
+	}
+	return state;
+}
+#endif
+
 int pushKeyEvent(QKeyEvent *event, int pressDown)
 {
 	SDL_Event sdlev;
