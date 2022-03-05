@@ -38,9 +38,12 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/FamilyKeyboard.h"
 #include "Qt/InputConf.h"
 
 static InputConfDialog_t *win = NULL;
+static FKBConfigDialog *fkbCfgWin = NULL;
+
 //----------------------------------------------------------------------------
 void openInputConfWindow(QWidget *parent)
 {
@@ -244,6 +247,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 	connect(nesPortConfButton[0], SIGNAL(clicked(void)), this, SLOT(port1Configure(void)));
 	connect(nesPortConfButton[1], SIGNAL(clicked(void)), this, SLOT(port2Configure(void)));
+	connect(expPortConfButton   , SIGNAL(clicked(void)), this, SLOT(expPortConfigure(void)));
 
 	connect(loadConfigButton, SIGNAL(clicked(void)), this, SLOT(openLoadPresetFile(void)));
 	connect(saveConfigButton, SIGNAL(clicked(void)), this, SLOT(openSavePresetFile(void)));
@@ -329,6 +333,8 @@ void InputConfDialog_t::updatePortLabels(void)
 			expPortLabel->setText(expPortComboxBox->itemText(j));
 		}
 	}
+
+	expPortConfButton->setEnabled( curNesInput[2] == SIFC_FKB );
 }
 //----------------------------------------------------------------------------
 void InputConfDialog_t::updatePortComboBoxes(void)
@@ -426,6 +432,18 @@ void InputConfDialog_t::port1Configure(void)
 void InputConfDialog_t::port2Configure(void)
 {
 	openPortConfig(1);
+}
+//----------------------------------------------------------------------------
+void InputConfDialog_t::expPortConfigure(void)
+{
+	if ( curNesInput[2] == SIFC_FKB )
+	{
+		if ( fkbCfgWin == NULL )
+		{
+			fkbCfgWin = new FKBConfigDialog(this);
+			fkbCfgWin->show();
+		}
+	}
 }
 //----------------------------------------------------------------------------
 void InputConfDialog_t::openLoadPresetFile(void)
@@ -585,5 +603,111 @@ void InputConfDialog_t::updatePeriodic(void)
 	{
 		fourScoreEna->setChecked(fourScoreValue);
 	}
+}
+//----------------------------------------------------------------------------
+//--- Family Keyboard Config Dialog
+//----------------------------------------------------------------------------
+FKBConfigDialog::FKBConfigDialog(QWidget *parent)
+	: QDialog(parent)
+{
+	QVBoxLayout *mainVbox;
+	QHBoxLayout *hbox;
+	QPushButton *closeButton;
+	QTreeWidgetItem *item;
+
+	setWindowTitle( "Family Keyboard Config" );
+
+	mainVbox = new QVBoxLayout();
+
+	mainVbox->addWidget( new FamilyKeyboardWidget() );
+
+	setLayout( mainVbox );
+
+	keyTree = new QTreeWidget();
+
+	keyTree->setColumnCount(2);
+	keyTree->setSelectionMode( QAbstractItemView::SingleSelection );
+	keyTree->setAlternatingRowColors(true);
+
+	item = new QTreeWidgetItem();
+	item->setText(0, QString::fromStdString("FKB Key"));
+	item->setText(1, QString::fromStdString("SDL Binding"));
+	item->setTextAlignment(0, Qt::AlignLeft);
+	item->setTextAlignment(1, Qt::AlignCenter);
+
+	keyTree->setHeaderItem(item);
+
+	keyTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+	for (int i=0; i<FAMILYKEYBOARD_NUM_BUTTONS; i++)
+	{
+		item = new QTreeWidgetItem();
+
+		item->setText(0, tr(FamilyKeyBoardNames[i]));
+		//item->setText(1, tr(FamilyKeyBoardNames[i]));
+
+		item->setTextAlignment(0, Qt::AlignLeft);
+		item->setTextAlignment(1, Qt::AlignCenter);
+
+		keyTree->addTopLevelItem(item);
+	}
+	updateBindingList();
+
+	mainVbox->addWidget( keyTree );
+
+	hbox = new QHBoxLayout();
+
+	mainVbox->addLayout( hbox );
+
+	closeButton = new QPushButton( tr("Close") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+
+	hbox->addStretch(5);
+	hbox->addWidget( closeButton, 1);
+
+	connect(closeButton  , SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+}
+//----------------------------------------------------------------------------
+FKBConfigDialog::~FKBConfigDialog(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::updateBindingList(void)
+{
+	char keyNameStr[128];
+
+	for (int i=0; i<FAMILYKEYBOARD_NUM_BUTTONS; i++)
+	{
+		QTreeWidgetItem *item = keyTree->topLevelItem(i);
+
+		item->setText(0, tr(FamilyKeyBoardNames[i]));
+
+		if (fkbmap[i].ButtType == BUTTC_KEYBOARD)
+		{
+			snprintf(keyNameStr, sizeof(keyNameStr), "%s",
+					 SDL_GetKeyName(fkbmap[i].ButtonNum));
+		}
+		else
+		{
+			strcpy(keyNameStr, ButtonName(&fkbmap[i]));
+		}
+		item->setText(1, tr(keyNameStr));
+	}
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::closeEvent(QCloseEvent *event)
+{
+	printf("FKB Config Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
 }
 //----------------------------------------------------------------------------

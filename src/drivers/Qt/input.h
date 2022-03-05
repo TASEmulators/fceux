@@ -129,6 +129,7 @@ extern bool replaceP2StartWithMicrophone;
 //extern ButtConfig powerpadsc[2][12];
 //extern ButtConfig QuizKingButtons[6];
 //extern ButtConfig FTrainerButtons[12];
+extern ButtConfig fkbmap[FAMILYKEYBOARD_NUM_BUTTONS];
 
 void IncreaseEmulationSpeed(void);
 void DecreaseEmulationSpeed(void);

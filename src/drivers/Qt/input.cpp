@@ -1841,7 +1841,7 @@ void InitInputInterface()
 	FCEUI_SetInputFourscore((eoptions & EO_FOURSCORE) != 0);
 }
 
-static ButtConfig fkbmap[0x48] = {
+ButtConfig fkbmap[FAMILYKEYBOARD_NUM_BUTTONS] = {
 	/*  0 */ MK(SDLK_F1), MK(SDLK_F2), MK(SDLK_F3), MK(SDLK_F4), MK(SDLK_F5), MK(SDLK_F6), MK(SDLK_F7), MK(SDLK_F8),
 	/*  8 */ MK(SDLK_1), MK(SDLK_2), MK(SDLK_3), MK(SDLK_4), MK(SDLK_5), MK(SDLK_6), MK(SDLK_7), MK(SDLK_8), MK(SDLK_9),
 	/* 17 */ MK(SDLK_0),
@@ -1870,7 +1870,7 @@ static void UpdateFKB()
 
 	leftShiftDown = DTestButton(&fkbmap[50]);
 
-	for (x = 0; x < 0x48; x++)
+	for (x = 0; x < FAMILYKEYBOARD_NUM_BUTTONS; x++)
 	{
 		if ( leftShiftDown && (x == 62) )
 		{	// Family BASIC appears to not like when both shift keys are pressed at the
