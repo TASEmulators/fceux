@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="favicon.ico"/>
 
-  <title>What's New? 2.6.2 (changelog)</title>
+  <title>What's New? 2.6.3 (changelog)</title>
   <meta name="description" content="" /> 
   <meta name="keywords" content="">
 
@@ -21,11 +21,11 @@
 
   <!-- Twitter Card data -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="What's New? 2.6.2 (changelog)">
+  <meta name="twitter:title" content="What's New? 2.6.3 (changelog)">
   <meta name="twitter:description" content="">
 
   <!-- Open Graph data -->
-  <meta property="og:title" content="What's New? 2.6.2 (changelog)" />
+  <meta property="og:title" content="What's New? 2.6.3 (changelog)" />
   <meta property="og:type" content="article" />
   <meta property="og:description" content="" />
   <meta property="og:site_name" content="FCEUX Help" /> 
@@ -163,9 +163,9 @@
 
     <article>
         <div id="topic-content" class="container-fluid" 
-		  data-hnd-id="WhatsNew262"
-		  data-hnd-context="90"
-		  data-hnd-title="What's New? 2.6.2 (changelog)"
+		  data-hnd-id="WhatsNew263"
+		  data-hnd-context="91"
+		  data-hnd-title="What's New? 2.6.3 (changelog)"
 		>
             
                 <div class="navigation">
@@ -173,64 +173,59 @@
                         <li><a href="Intro.html">Introduction</a></li>
                     </ol>
                     <div class="nav-arrows">
-                        <div class="btn-group btn-group" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew263.html" title="What's New? 2.6.3 (changelog)" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew261.html" title="What's New? 2.6.1 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                        <div class="btn-group btn-group" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="FCEUltraVersionHistory.html" title="FCE Ultra Version History" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew262.html" title="What's New? 2.6.2 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
                     </div>
                 </div> 
             
 
             <a id="main-content"></a>
 
-            <h2>What's New? 2.6.2 (changelog)</h2>
+            <h2>What's New? 2.6.3 (changelog)</h2>
 
             <div class="main-content">
                 
-<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.6.2</span></p>
-<p class="rvps2"><span class="rvts6">Released -- 4 February 2022</span></p>
+<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.6.3</span></p>
+<p class="rvps2"><span class="rvts6">Released -- 6 March 2022</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts29">The 2.6.2 release is a maintenance update that adds a couple minor features and fixes a few bugs for the Qt/SDL port.</span></p>
+<p class="rvps2"><span class="rvts29">The 2.6.3 release is a maintenance update that fixes a few bugs for both the Win32 and Qt/SDL ports.</span></p>
 <p class="rvps2"><span class="rvts29"><br/></span></p>
 <p class="rvps2"><span class="rvts27">Common</span></p>
 <p class="rvps2"><span class="rvts27"><br/></span></p>
-<p class="rvps2"><span class="rvts28">Core</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Fixed VROM size calculation error from NES header.</span></li>
-</ul>
-<p class="rvps2"><span class="rvts29"><br/></span></p>
 <p class="rvps2"><span class="rvts28">Mappers</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Added WRAM support for OneBus mapper (mapper 256).</span></li>
+ <li class="rvps2"><span class="rvts30">Bug fix for mapper 16 submapper 4, allow writes to address range $6000 - $600D.</span></li>
+ <li class="rvps2"><span class="rvts30">Bug fix for mapper 3 bus conflict logic. Bus conflicts are now only enabled for submapper 2.</span></li>
 </ul>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts29"><br/></span></p>
+<p class="rvps2"><span class="rvts27">Win32</span></p>
+<p class="rvps2"><span class="rvts28"><br/></span></p>
+<p class="rvps2"><span class="rvts28">Debugger</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts29">Fixed loading of saved debugger breakpoint data from previous sessions. This bug started occurring when the saved binary file format changed due to the address fields changing from 16 to 32 bit values.</span></li>
+ <li class="rvps2"><span class="rvts29">Fixed bug in address validation logic.</span></li>
+</ul>
+<p class="rvps2"><span class="rvts29"><br/></span></p>
+<p class="rvps2"><span class="rvts28">Input</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts29">Fixed Meta keys combination issues.</span></li>
+</ul>
+<p class="rvps2"><span class="rvts29"><br/></span></p>
 <p class="rvps2"><span class="rvts27">Qt/SDL</span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts28">GUI Improvements and Bug Fixes</span></p>
+<p class="rvps2"><span class="rvts28"><br/></span></p>
+<p class="rvps2"><span class="rvts28">Input</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts30">Added an auto hide main menu on fullscreen option.</span></li>
- <li class="rvps2"><span class="rvts30">Added an option to disable display of video overlayed GUI messages.</span></li>
- <li class="rvps2"><span class="rvts30">Fixed default setting for max sprites per scanline to be 8 (matching win32 port).</span></li>
-</ul>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts28">Hex Editor Improvements and Bug Fixes</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Fixed logic to move cursor to next line when editing hits end of line.</span></li>
- <li class="rvps2"><span class="rvts29">Fixed inconsistent display behavior of vertical scroll bar. Viewport line offset and vertical scroll position are now always synchronized.</span></li>
- <li class="rvps2"><span class="rvts29">Fixed draw layering of cursor row/column coloring when in ROM view.</span></li>
- <li class="rvps2"><span class="rvts29">Added protections to prevent crash when editing addresses past the end of a ROM file.</span></li>
- <li class="rvps2"><span class="rvts29">Improved cursor blink rate to be consistent regardless of viewport refresh rate.</span></li>
+ <li class="rvps2"><span class="rvts29">Added code differentiate between left/right modifier key presses (shift, alt, ctrl, meta).&nbsp;</span></li>
+ <li class="rvps2"><span class="rvts29">Fixed keyboard bindings for Famicom family keyboard emulation.</span></li>
+ <li class="rvps2"><span class="rvts29">Fixed a couple bugs for some uncommonly used Qt to SDL key code conversions.</span></li>
 </ul>
 <p class="rvps2"><span class="rvts29"><br/></span></p>
-<p class="rvps2"><span class="rvts28">SDL Sound</span></p>
+<p class="rvps2"><span class="rvts28">GUI</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Fixed sound issue on FreeBSD 13. Force audio sample size to always be a power of 2 per SDL documentation</span></li>
+ <li class="rvps2"><span class="rvts29">Fixed keyboard menu accelerator functionality for Mac OSX (non-native menu bars only)</span></li>
 </ul>
-<p class="rvps2"><span class="rvts29"><br/></span></p>
-<p class="rvps2"><span class="rvts28">Build Improvements and Bug Fixes</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Fixed a build errors when compiling against Qt6 (6.2.2).</span></li>
- <li class="rvps2"><span class="rvts29">Removed usage of a few Qt6 deprecated function calls.</span><span class="rvts6"></span></li>
-</ul>
-<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/help-authoring-tool">Free help authoring environment</a></p>
+<p class="rvps2"><span class="rvts28"><br/></span></p>
+<p class="rvps2"><span class="rvts27"></span><span class="rvts6"></span></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/help-authoring-tool">Full-featured multi-format Help generator</a></p>
 
             </div>
             
