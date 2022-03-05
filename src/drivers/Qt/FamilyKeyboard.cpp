@@ -107,6 +107,8 @@ FamilyKeyboardWidget::FamilyKeyboardWidget( QWidget *parent )
 	QFont font;
 	std::string fontString;
 
+	setMouseTracking(true);
+
 	g_config->getOption("SDL.FamilyKeyboardFont", &fontString);
 
 	if ( fontString.size() > 0 )
@@ -125,10 +127,19 @@ FamilyKeyboardWidget::FamilyKeyboardWidget( QWidget *parent )
 
 	calcFontData();
 
+	keyPressed = -1;
+	keyUnderMouse = -1;
+
+	updateTimer = new QTimer(this);
+
+	connect(updateTimer, &QTimer::timeout, this, &FamilyKeyboardWidget::updatePeriodic);
+
+	updateTimer->start(50); // 20hz
 }
 //*********************************************************************************
 FamilyKeyboardWidget::~FamilyKeyboardWidget(void)
 {
+	updateTimer->stop();
 	
 }
 //*********************************************************************************
@@ -160,9 +171,104 @@ void FamilyKeyboardWidget::calcFontData(void)
 	setMinimumHeight( pxBtnGridY * 8 );
 }
 //*********************************************************************************
+void FamilyKeyboardWidget::updatePeriodic(void)
+{
+	update();
+}
+//*********************************************************************************
+int FamilyKeyboardWidget::getKeyAtPoint( QPoint p )
+{
+	for (int i=0; i<NUM_KEYS; i++)
+	{
+		if ( key[i].rect.contains(p) )
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::mousePressEvent(QMouseEvent * event)
+{
+	keyPressed = keyUnderMouse = getKeyAtPoint(event->pos());
+
+	if ( keyPressed >= 0 )
+	{
+		key[ keyPressed ].pressed();
+	}
+	update();
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::mouseReleaseEvent(QMouseEvent * event)
+{
+	keyUnderMouse = getKeyAtPoint(event->pos());
+
+	if ( keyPressed >= 0 )
+	{
+		key[ keyPressed ].released();
+
+		keyPressed = -1;
+	}
+	update();
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::mouseMoveEvent(QMouseEvent * event)
+{
+	int tmpKeyUnderMouse = getKeyAtPoint(event->pos());
+
+	//printf("Mouse Move: Key:%i \n", keyUnderMouse );
+
+	if ( tmpKeyUnderMouse != keyUnderMouse )
+	{
+		keyUnderMouse = tmpKeyUnderMouse;
+		update();
+	}
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::mouseDoubleClickEvent(QMouseEvent * event)
+{
+	keyUnderMouse = getKeyAtPoint(event->pos());
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::drawButton( QPainter &painter, int idx, int x, int y, int w, int h )
+{
+	int i = idx;
+	QColor bgColor;
+
+	key[i].rect = QRect( x, y, w, h );
+
+	if ( key[i].isDown() )
+	{
+		if ( keyUnderMouse == idx )
+		{
+			bgColor = QColor( Qt::darkGreen );
+		}
+		else
+		{
+			bgColor = QColor( Qt::green );
+		}
+	}
+	else
+	{
+		if ( keyUnderMouse == idx )
+		{
+			bgColor = QColor( Qt::gray );
+		}
+		else
+		{
+			bgColor = QColor( Qt::lightGray );
+		}
+	}
+
+	painter.fillRect( key[i].rect, bgColor );
+	painter.drawText( key[i].rect, Qt::AlignCenter, tr(keyNames[i]) );
+	painter.drawRect( key[i].rect );
+
+}
+//*********************************************************************************
 void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 {
-	int i, j, x, y, w, h, xs, ys;
+	int i, x, y, w, h, xs, ys;
 	QPainter painter(this);
 
 	// Row 1
@@ -177,12 +283,7 @@ void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 
 	for (i=0; i<8; i++)
 	{
-		j = i;
-
-		key[j].rect = QRect( x, y, w, h );
-
-		painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-		painter.drawRect( key[j].rect );
+		drawButton( painter, i, x, y, w, h );
 		
 		x += (w + xs);
 	}
@@ -197,13 +298,8 @@ void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 
 	for (i=8; i<22; i++)
 	{
-		j = i;
+		drawButton( painter, i, x, y, w, h );
 
-		key[j].rect = QRect( x, y, w, h );
-
-		painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-		painter.drawRect( key[j].rect );
-		
 		x += (w + xs);
 	}
 	
@@ -217,22 +313,14 @@ void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 
 	for (i=22; i<35; i++)
 	{
-		j = i;
-
-		key[j].rect = QRect( x, y, w, h );
-
-		painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-		painter.drawRect( key[j].rect );
+		drawButton( painter, i, x, y, w, h );
 		
 		x += (w + xs);
 	}
 
 	x += (xs);
 
-	j = 35;
-	key[j].rect = QRect( x, y, w*3, h );
-	painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-	painter.drawRect( key[j].rect );
+	drawButton( painter, 35, x, y, w*3, h );
 
 	// Row 4
 	x  = pxBtnGridX;
@@ -245,20 +333,12 @@ void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 
 	for (i=36; i<49; i++)
 	{
-		j = i;
-
-		key[j].rect = QRect( x, y, w, h );
-
-		painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-		painter.drawRect( key[j].rect );
+		drawButton( painter, i, x, y, w, h );
 		
 		x += (w + xs);
 	}
 
-	j = 49;
-	key[j].rect = QRect( x, y, w*2, h );
-	painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-	painter.drawRect( key[j].rect );
+	drawButton( painter, 49, x, y, w*2, h );
 
 	// Row 5
 	x  = pxBtnGridX / 2;
@@ -269,29 +349,18 @@ void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 	xs = w / 4;
 	//x -= xs;
 
-	j = 50;
-	key[j].rect = QRect( x, y, w*2, h );
-	painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-	painter.drawRect( key[j].rect );
+	drawButton( painter, 50, x, y, w*2, h );
 
 	x += ((w*2) + xs);
 
 	for (i=51; i<62; i++)
 	{
-		j = i;
-
-		key[j].rect = QRect( x, y, w, h );
-
-		painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-		painter.drawRect( key[j].rect );
+		drawButton( painter, i, x, y, w, h );
 		
 		x += (w + xs);
 	}
 
-	j = 62;
-	key[j].rect = QRect( x, y, w*2, h );
-	painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-	painter.drawRect( key[j].rect );
+	drawButton( painter, 62, x, y, w*2, h );
 
 	// Row 6
 	x  = (pxBtnGridX * 5) / 2;
@@ -302,17 +371,11 @@ void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 	xs = w / 4;
 	x += (2*xs);
 
-	j = 63;
-	key[j].rect = QRect( x, y, w*2, h );
-	painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-	painter.drawRect( key[j].rect );
+	drawButton( painter, 63, x, y, w*2, h );
 
 	x += ((w*2) + xs);
 
-	j = 64;
-	key[j].rect = QRect( x, y, (w*8) + (xs*7), h );
-	painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-	painter.drawRect( key[j].rect );
+	drawButton( painter, 64, x, y, (w*8) + (xs*7), h );
 
 	// Row 7
 	xs =  pxBtnGridX / 4;
@@ -327,12 +390,7 @@ void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 
 	for (i=65; i<68; i++)
 	{
-		j = i;
-
-		key[j].rect = QRect( x, y, w, h );
-
-		painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-		painter.drawRect( key[j].rect );
+		drawButton( painter, i, x, y, w, h );
 		
 		x += (w + xs);
 	}
@@ -341,32 +399,20 @@ void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 	x  = (pxBtnGridX+xs) * 17 + (pxBtnGridX)/2 + xs;
 	y += pxBtnGridY + ys;
 
-	j = 68;
-	key[j].rect = QRect( x, y, w*2, h );
-	painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-	painter.drawRect( key[j].rect );
+	drawButton( painter, 68, x, y, w*2, h );
 
 	x  = (pxBtnGridX+xs) * 17 - (pxBtnGridX)/2 + (xs/2);
 	y += pxBtnGridY + ys;
 
-	j = 69;
-	key[j].rect = QRect( x, y, w*2, h );
-	painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-	painter.drawRect( key[j].rect );
+	drawButton( painter, 69, x, y, w*2, h );
 
 	x += ((w*2) + xs);
 
-	j = 70;
-	key[j].rect = QRect( x, y, w*2, h );
-	painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-	painter.drawRect( key[j].rect );
+	drawButton( painter, 70, x, y, w*2, h );
 
 	x  = (pxBtnGridX+xs) * 17 + (pxBtnGridX)/2 + xs;
 	y += pxBtnGridY + ys;
 
-	j = 71;
-	key[j].rect = QRect( x, y, w*2, h );
-	painter.drawText( key[j].rect, Qt::AlignCenter, tr(keyNames[j]) );
-	painter.drawRect( key[j].rect );
+	drawButton( painter, 71, x, y, w*2, h );
 }
 //*********************************************************************************
