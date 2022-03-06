@@ -79,12 +79,14 @@ protected:
 	void mouseMoveEvent(QMouseEvent * event) override;
 	void mouseDoubleClickEvent(QMouseEvent * event) override;
 	void leaveEvent(QEvent *event) override;
+	void contextMenuEvent(QContextMenuEvent *event) override;
 
 	int  getKeyAtPoint( QPoint p );
 	void calcFontData(void);
 	void updateHardwareStatus(void);
 	void drawButton( QPainter &painter, int idx, int x, int y, int w, int h );
 
+	int  ctxMenuKey;
 	int  keyUnderMouse;
 	int  keyPressed;
 	int  pxCharWidth;
@@ -96,6 +98,8 @@ protected:
 
 private slots:
 	void updatePeriodic(void);
+	void ctxMapPhysicalKey(void);
+	void ctxChangeToggleOnPress(void);
 };
 
 class FKBConfigDialog : public QDialog

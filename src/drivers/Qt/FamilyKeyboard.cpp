@@ -41,79 +41,79 @@
 
 static const char *keyNames[] =
 {
-    "F1",
-    "F2",
-    "F3",
-    "F4",
-    "F5",
-    "F6",
-    "F7",
-    "F8",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "0",
-    "-",
-    "^",
-    "\\",
-    "STP",
-    "ESC",
-    "Q",
-    "W",
-    "E",
-    "R",
-    "T",
-    "Y",
-    "U",
-    "I",
-    "O",
-    "P",
-    "@",
-    "[",
-    "RETURN",
-    "CTR",
-    "A",
-    "S",
-    "D",
-    "F",
-    "G",
-    "H",
-    "J",
-    "K",
-    "L",
-    ";",
-    ":",
-    "]",
-    "KANA",
-    "SHIFT",
-    "Z",
-    "X",
-    "C",
-    "V",
-    "B",
-    "N",
-    "M",
-    ",",
-    ".",
-    "/",
-    "_",
-    "SHIFT",
-    "GRPH",
-    "SPACE",
-    "CLR",
-    "INS",
-    "DEL",
-    "UP",
-    "LEFT",
-    "RIGHT",
-    "DOWN",
-    NULL
+    "F1", "F1",
+    "F2", "F2",
+    "F3", "F3",
+    "F4", "F4",
+    "F5", "F5",
+    "F6", "F6",
+    "F7", "F7",
+    "F8", "F8",
+    "1", "!",
+    "2", "\"",
+    "3", "#",
+    "4", "$",
+    "5", "%",
+    "6", "&",
+    "7", "'",
+    "8", "(",
+    "9", ")",
+    "0", "0",
+    "-", "=",
+    "^", "^",
+    "¥", "¥",
+    "STOP", "STOP",
+    "ESC", "ESC",
+    "Q", "Q",
+    "W", "W",
+    "E", "E",
+    "R", "R",
+    "T", "T",
+    "Y", "Y",
+    "U", "U",
+    "I", "I",
+    "O", "O",
+    "P", "P",
+    "@", "@",
+    "[", "[",
+    "RETURN", "RETURN",
+    "CTR", "CTR",
+    "A", "A",
+    "S", "S",
+    "D", "D",
+    "F", "F",
+    "G", "G",
+    "H", "H",
+    "J", "J",
+    "K", "K",
+    "L", "L",
+    ";", "+",
+    ":", "*",
+    "]", "]",
+    "KANA", "KANA",
+    "SHIFT", "SHIFT",
+    "Z", "Z",
+    "X", "X",
+    "C", "C",
+    "V", "V",
+    "B", "B",
+    "N", "N",
+    "M", "M",
+    ",", "<",
+    ".", ">",
+    "/", "?",
+    "_", "_",
+    "SHIFT", "SHIFT",
+    "GRPH", "GRPH",
+    "SPACE", "SPACE",
+    "HOM", "CLR",
+    "INS", "INS",
+    "DEL", "DEL",
+    "UP", "UP",
+    "LEFT", "LEFT",
+    "RIGHT", "RIGHT",
+    "DOWN", "DOWN",
+     NULL, NULL
 };
 
 static FKBConfigDialog *fkbWin = NULL;
@@ -174,6 +174,7 @@ FamilyKeyboardWidget::FamilyKeyboardWidget( QWidget *parent )
 
 	keyPressed = -1;
 	keyUnderMouse = -1;
+	ctxMenuKey = -1;
 
 	// Set Shift Keys to Toggle State On Press
 	key[50].toggleOnPress = true;
@@ -260,7 +261,7 @@ void FamilyKeyboardWidget::mousePressEvent(QMouseEvent * event)
 {
 	keyPressed = keyUnderMouse = getKeyAtPoint(event->pos());
 
-	if ( keyPressed >= 0 )
+	if ( (keyPressed >= 0) && (event->button() == Qt::LeftButton) )
 	{
 		key[ keyPressed ].pressed();
 	}
@@ -304,6 +305,44 @@ void FamilyKeyboardWidget::leaveEvent(QEvent *event)
 	update();
 }
 //*********************************************************************************
+void FamilyKeyboardWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+	ctxMenuKey = keyUnderMouse = getKeyAtPoint(event->pos());
+
+	if ( keyUnderMouse < 0 )
+	{
+		return;
+	}
+
+	QAction *act;
+	QMenu menu(this);
+
+	act = new QAction(tr("Map Key"), &menu);
+	//act->setShortcut( QKeySequence(tr("E")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(ctxMapPhysicalKey(void)) );
+	menu.addAction( act );
+
+	act = new QAction(tr("Toggle State on Press"), &menu);
+	act->setCheckable(true);
+	act->setChecked( key[ ctxMenuKey ].toggleOnPress );
+	//act->setShortcut( QKeySequence(tr("E")));
+	connect( act, SIGNAL(triggered(void)), this, SLOT(ctxChangeToggleOnPress(void)) );
+	menu.addAction( act );
+
+	menu.exec(event->globalPos());
+
+	event->accept();
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::ctxMapPhysicalKey(void)
+{
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::ctxChangeToggleOnPress(void)
+{
+	key[ ctxMenuKey ].toggleOnPress = !key[ ctxMenuKey ].toggleOnPress;
+}
+//*********************************************************************************
 void FamilyKeyboardWidget::keyPressEvent(QKeyEvent *event)
 {
 	//printf("Key Press: 0x%x \n", event->key() );
@@ -322,7 +361,7 @@ void FamilyKeyboardWidget::keyReleaseEvent(QKeyEvent *event)
 //*********************************************************************************
 void FamilyKeyboardWidget::drawButton( QPainter &painter, int idx, int x, int y, int w, int h )
 {
-	int i = idx;
+	int i = idx, j;
 	QColor bgColor;
 
 	key[i].rect = QRect( x, y, w, h );
@@ -350,8 +389,15 @@ void FamilyKeyboardWidget::drawButton( QPainter &painter, int idx, int x, int y,
 		}
 	}
 
+	j = i*2;
+
+	if ( key[50].isDown() || key[62].isDown() )
+	{
+		j++;
+	}
+
 	painter.fillRect( key[i].rect, bgColor );
-	painter.drawText( key[i].rect, Qt::AlignCenter, tr(keyNames[i]) );
+	painter.drawText( key[i].rect, Qt::AlignCenter, tr(keyNames[j]) );
 	painter.drawRect( key[i].rect );
 
 }
@@ -386,13 +432,15 @@ void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 
 	xs = w / 4;
 
-	for (i=8; i<22; i++)
+	for (i=8; i<21; i++)
 	{
 		drawButton( painter, i, x, y, w, h );
 
 		x += (w + xs);
 	}
 	
+	drawButton( painter, 21, x, y, w*2, h );
+
 	// Row 3
 	x  = pxBtnGridX / 2;
 	y += pxBtnGridY + ys;
