@@ -154,6 +154,13 @@ protected:
 
 	QPropertyAnimation *keyTreeHgtAnimation;
 
+	std::string saveFileName;
+
+	int  getButtonIndexFromName( const char *buttonName );
+	int  convText2ButtConfig( const char *txt, ButtConfig *bmap );
+
+	void mappingLoad(const char *filepath);
+
 public slots:
 	void closeWindow(void);
 
@@ -161,6 +168,9 @@ private slots:
 	void updatePeriodic(void);
 	void updateStatusLabel(void);
 	void openFontDialog(void);
+	void mappingLoad(void);
+	void mappingSave(void);
+	void mappingSaveAs(void);
 	void toggleTreeView(bool);
 	void keyTreeResizeDone(void);
 	void keyTreeHeightChange(const QVariant &);

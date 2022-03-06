@@ -29,6 +29,7 @@
 #include <QHBoxLayout>
 #include <QFontDialog>
 #include <QSettings>
+#include <QDir>
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -704,9 +705,35 @@ QMenuBar *FKBConfigDialog::buildMenuBar(void)
 	// File
 	fileMenu = menuBar->addMenu(tr("File"));
 
+	// File -> Load
+	act = new QAction(tr("Load"), this);
+	//act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Load Mapping"));
+	connect(act, SIGNAL(triggered()), this, SLOT(mappingLoad(void)) );
+
+	fileMenu->addAction(act);
+
+	// File -> Save
+	act = new QAction(tr("Save"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Save Mapping"));
+	connect(act, SIGNAL(triggered()), this, SLOT(mappingSave(void)) );
+
+	fileMenu->addAction(act);
+
+	// File -> Save As
+	act = new QAction(tr("Save As"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Save Mapping As"));
+	connect(act, SIGNAL(triggered()), this, SLOT(mappingSaveAs(void)) );
+
+	fileMenu->addAction(act);
+
+	fileMenu->addSeparator();
+
 	// File -> Close
 	act = new QAction(tr("Close"), this);
-	act->setShortcut(QKeySequence::Close);
+	//act->setShortcut(QKeySequence::Close);
 	act->setStatusTip(tr("Close Window"));
 	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 
@@ -833,11 +860,11 @@ void FKBConfigDialog::updateStatusLabel(void)
 {
 	if ( fkbActv )
 	{
-		statLbl->setText( tr("Family Keyboard is enabled") );
+		statLbl->setText( tr("Family Keyboard is Enabled") );
 	}
 	else
 	{
-		statLbl->setText( tr("Family Keyboard is disabled") );
+		statLbl->setText( tr("Family Keyboard is Disabled") );
 	}
 }
 //----------------------------------------------------------------------------
@@ -870,6 +897,417 @@ void FKBConfigDialog::keyTreeItemActivated(QTreeWidgetItem *item, int column)
 	mapDialog->enterButtonLoop();
 
 	updateBindingList();
+}
+//----------------------------------------------------------------------------
+int FKBConfigDialog::getButtonIndexFromName( const char *buttonName )
+{
+	for (int j=0; j<FamilyKeyboardWidget::NUM_KEYS; j++)
+	{
+		if ( strcmp( buttonName, FamilyKeyBoardNames[j] ) == 0 )
+		{
+			return j;
+		}
+	}
+	return -1;
+}
+//----------------------------------------------------------------------------
+int FKBConfigDialog::convText2ButtConfig( const char *txt, ButtConfig *bmap )
+{
+	int devIdx = -1;
+
+	bmap->ButtType  = -1;
+	bmap->DeviceNum = -1;
+	bmap->ButtonNum = -1;
+
+	if (txt[0] == 0 )
+	{
+		return 0;
+	}
+
+	if (txt[0] == 'k')
+	{
+		SDL_Keycode key;
+
+		bmap->ButtType = BUTTC_KEYBOARD;
+		bmap->DeviceNum = -1;
+
+		key = SDL_GetKeyFromName(&txt[1]);
+
+		if (key != SDLK_UNKNOWN)
+		{
+			bmap->ButtonNum = key;
+		}
+		else
+		{
+			bmap->ButtonNum = -1;
+		}
+	}
+	else if ((txt[0] == 'b') && isdigit(txt[1]))
+	{
+		bmap->ButtType = BUTTC_JOYSTICK;
+		bmap->DeviceNum = devIdx;
+		bmap->ButtonNum = atoi(&txt[1]);
+	}
+	else if ((txt[0] == 'h') && isdigit(txt[1]) &&
+			 (txt[2] == '.') && isdigit(txt[3]))
+	{
+		int hatIdx, hatVal;
+
+		hatIdx = txt[1] - '0';
+		hatVal = atoi(&txt[3]);
+
+		bmap->ButtType = BUTTC_JOYSTICK;
+		bmap->DeviceNum = devIdx;
+		bmap->ButtonNum = 0x2000 | ((hatIdx & 0x1F) << 8) | (hatVal & 0xFF);
+	}
+	else if ((txt[0] == 'a') || (txt[1] == 'a'))
+	{
+		int l = 0, axisIdx = 0, axisSign = 0;
+
+		l = 0;
+		if (txt[l] == '-')
+		{
+			axisSign = 1;
+			l++;
+		}
+		else if (txt[l] == '+')
+		{
+			axisSign = 0;
+			l++;
+		}
+
+		if (txt[l] == 'a')
+		{
+			l++;
+		}
+		if (isdigit(txt[l]))
+		{
+			axisIdx = atoi(&txt[l]);
+
+			while (isdigit(txt[l]))
+				l++;
+		}
+		if (txt[l] == '-')
+		{
+			axisSign = 1;
+			l++;
+		}
+		else if (txt[l] == '+')
+		{
+			axisSign = 0;
+			l++;
+		}
+		bmap->ButtType = BUTTC_JOYSTICK;
+		bmap->DeviceNum = devIdx;
+		bmap->ButtonNum = 0x8000 | (axisSign ? 0x4000 : 0) | (axisIdx & 0xFF);
+	}
+
+	return 0;
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::mappingLoad(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	char dir[512];
+	QFileDialog  dialog(this, tr("Load Family Keyboard Mapping File") );
+	QList<QUrl> urls;
+	QDir d;
+
+	const QStringList filters(
+	{ "FKB Config Files (*.txt *.TXT)",
+           "Any files (*)"
+         });
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+	urls << QUrl::fromLocalFile( QDir( FCEUI_GetBaseDirectory() ).absolutePath() );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilters( filters );
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
+
+	strcpy( dir, FCEUI_GetBaseDirectory() );
+	strcat( dir, "/input/FamilyKeyboard");
+
+	dialog.setDirectory( tr(dir) );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	mappingLoad( filename.toStdString().c_str() );
+
+	return;
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::mappingLoad(const char *filepath)
+{
+	int i=0,j=0, idx;
+	FILE *fp;
+	char line[256];
+	char id[128];
+	char val[128];
+
+	fp = fopen( filepath, "r" );
+
+	if ( fp == NULL )
+	{
+		printf("Error: Failed to open file '%s' for reading\n", filepath );
+		return;
+	}
+
+	while (fgets(line, sizeof(line), fp) != 0)
+	{
+		i = 0;
+		while (line[i] != 0)
+		{
+			if (line[i] == '#')
+			{
+				line[i] = 0;
+				break;
+			}
+			i++;
+		}
+
+		i = 0;
+		while (isspace(line[i])) i++;
+
+		if ( line[i] == 0 )
+		{
+			continue;
+		}
+
+		j=0;
+		while ((line[i] != 0) && (line[i] != '\n') && (line[i] != '=') && !isspace(line[i]) )
+		{
+			id[j] = line[i];
+			i++;
+			j++;
+		}
+		id[j] = 0;
+
+		while (isspace(line[i])) i++;
+
+		if ( line[i] != '=' )
+		{
+			printf("Error: Invalid Line\n");
+			continue;
+		}
+		i++;
+
+		while (isspace(line[i])) i++;
+
+		j=0;
+		while ((line[i] != 0) && (line[i] != '\n') && !isspace(line[i]) )
+		{
+			if ( line[i] == '\\' )
+			{  // next character should be interpretted literally
+				i++;
+			}
+			val[j] = line[i];
+			i++;
+			j++;
+		}
+		val[j] = 0;
+
+		idx = getButtonIndexFromName( id );
+
+		if ( idx < 0 )
+		{
+			continue;
+		}
+
+		convText2ButtConfig( val, &fkbmap[idx] );
+	}
+
+	fclose(fp);
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::mappingSave(void)
+{
+	const char *guid = "keyboard";
+	const char *baseDir = FCEUI_GetBaseDirectory();
+	std::string path;
+	FILE *fp;
+	char stmp[64];
+	QDir dir;
+
+	path = std::string(baseDir) + std::string("/input/FamilyKeyboard/");
+
+	dir.mkpath(QString::fromStdString(path));
+
+	if ( saveFileName.size() == 0 )
+	{
+		mappingSaveAs();
+		return;
+	}
+	path = saveFileName;
+
+	fp = fopen( path.c_str(), "w" );
+
+	if ( fp == NULL )
+	{
+		printf("Error: Failed to open file '%s' for writing\n", path.c_str() );
+		return;
+	}
+
+	fprintf( fp, "# Family Keyboard Button Mapping File for Fceux (Qt version)\n");
+	fprintf( fp, "GUID=%s\n", guid );
+
+	for (unsigned int i=0; i<FamilyKeyboardWidget::NUM_KEYS; i++)
+	{
+		if ( fkbmap[i].ButtType == BUTTC_KEYBOARD)
+		{
+			int j=0,k=0; const char *keyName;
+
+			keyName = SDL_GetKeyName(fkbmap[i].ButtonNum);
+
+			stmp[k] = 'k'; k++;
+
+			// Write keyname in with necessary escape characters.
+			while ( keyName[j] != 0 )
+			{
+				if ( (keyName[j] == '\\') || (keyName[j] == ',') )
+				{
+					stmp[k] = '\\'; k++;
+				}
+				stmp[k] = keyName[j]; k++; j++;
+			}
+			stmp[k] = 0;
+
+			//sprintf(stmp, "k%s", SDL_GetKeyName(bmap[c][i].ButtonNum));
+		}
+		else
+		{
+			if (fkbmap[i].ButtonNum & 0x2000)
+			{
+				/* Hat "button" */
+				sprintf(stmp, "h%i.%i",
+						(fkbmap[i].ButtonNum >> 8) & 0x1F, fkbmap[i].ButtonNum & 0xFF);
+			}
+			else if (fkbmap[i].ButtonNum & 0x8000)
+			{
+				/* Axis "button" */
+				sprintf(stmp, "%ca%i",
+						(fkbmap[i].ButtonNum & 0x4000) ? '-' : '+', fkbmap[i].ButtonNum & 0x3FFF);
+			}
+			else
+			{
+				/* Button */
+				sprintf(stmp, "b%i", fkbmap[i].ButtonNum);
+			}
+		}
+		fprintf( fp, "%s=%s\n", FamilyKeyBoardNames[i], stmp );
+
+	}
+
+	fclose(fp);
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::mappingSaveAs(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	const char *base;
+	QFileDialog  dialog(this, tr("Save Mapping To File") );
+	QList<QUrl> urls;
+	QDir d;
+
+	base = FCEUI_GetBaseDirectory();
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+
+	if ( base )
+	{
+		urls << QUrl::fromLocalFile( QDir( base ).absolutePath() );
+
+		d.setPath( QString(base) + "/input/FamilyKeyboard");
+		d.mkpath( QString(base) + "/input/FamilyKeyboard");
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+		}
+	}
+
+	dialog.setFileMode(QFileDialog::AnyFile);
+
+	dialog.setNameFilter(tr("FKB Config Files (*.txt *.TXT) ;; All files (*)"));
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+	dialog.setDefaultSuffix( tr(".txt") );
+
+	if ( last.size() == 0 )
+	{
+		if ( base )
+		{
+			last = std::string(base) + "/input/FamilyKeyboard";
+			dialog.setDirectory( last.c_str() );
+		}
+	}
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+
+	saveFileName = filename.toStdString();
+
+	mappingSave();
 }
 //----------------------------------------------------------------------------
 //*********************************************************************************
