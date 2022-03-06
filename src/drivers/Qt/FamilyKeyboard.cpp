@@ -28,6 +28,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFontDialog>
+#include <QSettings>
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -516,6 +517,7 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 	QPushButton *closeButton;
 	QTreeWidgetItem *item;
 	QMenuBar    *menuBar;
+	QSettings    settings;
 
 	setWindowTitle( "Family Keyboard" );
 
@@ -585,13 +587,21 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 	updateTimer->start(500); // 2hz
 
 	updateStatusLabel();
+
+	// Restore Window Geometry
+	restoreGeometry(settings.value("familyKeyboard/geometry").toByteArray());
 }
 //----------------------------------------------------------------------------
 FKBConfigDialog::~FKBConfigDialog(void)
 {
+	QSettings  settings;
+
 	fkbWin = NULL;
 
 	updateTimer->stop();
+
+	// Save Window Geometry
+	settings.setValue("familyKeyboard/geometry", saveGeometry());
 }
 //----------------------------------------------------------------------------
 QMenuBar *FKBConfigDialog::buildMenuBar(void)
