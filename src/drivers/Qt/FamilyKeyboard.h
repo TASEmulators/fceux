@@ -4,6 +4,10 @@
 #include <QPushButton>
 #include <QMouseEvent>
 #include <QTreeWidget>
+#include <QAction>
+#include <QMenuBar>
+#include <QMenu>
+#include <QLabel>
 #include <QTimer>
 #include <QFont>
 
@@ -64,14 +68,17 @@ public:
 
 	FKB_Key_t  key[NUM_KEYS];
 
+	void setFont( const QFont &newFont );
+
 protected:
-	//void keyPressEvent(QKeyEvent *event);
-	//void kepaintEvent(QPaintEvent *event);
+	void keyPressEvent(QKeyEvent *event) override;
+	void keyReleaseEvent(QKeyEvent *event) override;
 	void paintEvent(QPaintEvent *event) override;
 	void mousePressEvent(QMouseEvent * event) override;
 	void mouseReleaseEvent(QMouseEvent * event) override;
 	void mouseMoveEvent(QMouseEvent * event) override;
 	void mouseDoubleClickEvent(QMouseEvent * event) override;
+	void leaveEvent(QEvent *event) override;
 
 	int  getKeyAtPoint( QPoint p );
 	void calcFontData(void);
@@ -105,11 +112,21 @@ protected:
 	void closeEvent(QCloseEvent *event);
 	void updateBindingList(void);
 
+	QMenuBar *buildMenuBar(void);
+
 	QTreeWidget *keyTree;
 
+	QLabel *statLbl;
+
+	QTimer *updateTimer;
 
 public slots:
 	void closeWindow(void);
+
+private slots:
+	void updatePeriodic(void);
+	void updateStatusLabel(void);
+	void openFontDialog(void);
 };
 
 int  openFamilyKeyboardDialog( QWidget *parent );

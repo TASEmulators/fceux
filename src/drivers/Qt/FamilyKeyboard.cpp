@@ -27,6 +27,7 @@
 #include <QFontMetrics>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QFontDialog>
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -34,6 +35,7 @@
 #include "Qt/config.h"
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/FamilyKeyboard.h"
 
 static const char *keyNames[] =
@@ -114,6 +116,7 @@ static const char *keyNames[] =
 };
 
 static FKBConfigDialog *fkbWin = NULL;
+static bool fkbActv = false;
 //*********************************************************************************
 int openFamilyKeyboardDialog(QWidget *parent)
 {
@@ -148,6 +151,7 @@ FamilyKeyboardWidget::FamilyKeyboardWidget( QWidget *parent )
 	std::string fontString;
 
 	setMouseTracking(true);
+	setFocusPolicy(Qt::StrongFocus);
 
 	g_config->getOption("SDL.FamilyKeyboardFont", &fontString);
 
@@ -170,6 +174,10 @@ FamilyKeyboardWidget::FamilyKeyboardWidget( QWidget *parent )
 	keyPressed = -1;
 	keyUnderMouse = -1;
 
+	// Set Shift Keys to Toggle State On Press
+	key[50].toggleOnPress = true;
+	key[62].toggleOnPress = true;
+
 	updateTimer = new QTimer(this);
 
 	connect(updateTimer, &QTimer::timeout, this, &FamilyKeyboardWidget::updatePeriodic);
@@ -181,6 +189,13 @@ FamilyKeyboardWidget::~FamilyKeyboardWidget(void)
 {
 	updateTimer->stop();
 	
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::setFont( const QFont &newFont )
+{
+	QWidget::setFont(newFont);
+
+	calcFontData();
 }
 //*********************************************************************************
 void FamilyKeyboardWidget::calcFontData(void)
@@ -280,6 +295,28 @@ void FamilyKeyboardWidget::mouseMoveEvent(QMouseEvent * event)
 void FamilyKeyboardWidget::mouseDoubleClickEvent(QMouseEvent * event)
 {
 	keyUnderMouse = getKeyAtPoint(event->pos());
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::leaveEvent(QEvent *event)
+{
+	keyUnderMouse = -1;
+	update();
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::keyPressEvent(QKeyEvent *event)
+{
+	//printf("Key Press: 0x%x \n", event->key() );
+	pushKeyEvent( event, 1 );
+
+	event->accept();
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::keyReleaseEvent(QKeyEvent *event)
+{
+	//printf("Key Release: 0x%x \n", event->key() );
+	pushKeyEvent( event, 0 );
+
+	event->accept();
 }
 //*********************************************************************************
 void FamilyKeyboardWidget::drawButton( QPainter &painter, int idx, int x, int y, int w, int h )
@@ -478,14 +515,19 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 	QHBoxLayout *hbox;
 	QPushButton *closeButton;
 	QTreeWidgetItem *item;
+	QMenuBar    *menuBar;
 
-	setWindowTitle( "Family Keyboard Config" );
+	setWindowTitle( "Family Keyboard" );
 
 	mainVbox = new QVBoxLayout();
-
-	mainVbox->addWidget( keyboard = new FamilyKeyboardWidget() );
-
 	setLayout( mainVbox );
+
+	menuBar  = buildMenuBar();
+	mainVbox->setMenuBar( menuBar );
+
+	keyboard = new FamilyKeyboardWidget();
+
+	mainVbox->addWidget( keyboard );
 
 	keyTree = new QTreeWidget();
 
@@ -519,22 +561,96 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 
 	mainVbox->addWidget( keyTree );
 
+	keyTree->hide();
+
 	hbox = new QHBoxLayout();
 
 	mainVbox->addLayout( hbox );
 
+	statLbl = new QLabel();
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+	closeButton->setAutoDefault(false);
 
+	hbox->addWidget(statLbl, 3);
 	hbox->addStretch(5);
 	hbox->addWidget( closeButton, 1);
 
 	connect(closeButton  , SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
+	updateTimer = new QTimer(this);
+
+	connect(updateTimer, &QTimer::timeout, this, &FKBConfigDialog::updatePeriodic);
+
+	updateTimer->start(500); // 2hz
+
+	updateStatusLabel();
 }
 //----------------------------------------------------------------------------
 FKBConfigDialog::~FKBConfigDialog(void)
 {
 	fkbWin = NULL;
+
+	updateTimer->stop();
+}
+//----------------------------------------------------------------------------
+QMenuBar *FKBConfigDialog::buildMenuBar(void)
+{
+	QMenu       *fileMenu, *confMenu;
+	//QActionGroup *actGroup;
+	QAction     *act;
+	int useNativeMenuBar=0;
+
+	QMenuBar *menuBar = new consoleMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("File"));
+
+	// File -> Close
+	act = new QAction(tr("Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+
+	fileMenu->addAction(act);
+
+	// Config
+	confMenu = menuBar->addMenu(tr("Config"));
+
+	// Config -> Font
+	act = new QAction(tr("Font"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Choose Font"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openFontDialog(void)) );
+
+	confMenu->addAction(act);
+
+	return menuBar;
+}
+//*********************************************************************************
+void FKBConfigDialog::openFontDialog(void)
+{
+	bool ok = false;
+
+	QFont selFont = QFontDialog::getFont( &ok, keyboard->QWidget::font(), this, tr("Select Font"), QFontDialog::MonospacedFonts );
+
+	if ( ok )
+	{
+		keyboard->setFont( selFont );
+		keyboard->update();
+
+		//printf("Font Changed to: '%s'\n", font.toString().toStdString().c_str() );
+
+		g_config->setOption("SDL.FamilyKeyboardFont", selFont.toString().toStdString().c_str() );
+	}
 }
 //----------------------------------------------------------------------------
 void FKBConfigDialog::updateBindingList(void)
@@ -557,6 +673,30 @@ void FKBConfigDialog::updateBindingList(void)
 			strcpy(keyNameStr, ButtonName(&fkbmap[i]));
 		}
 		item->setText(1, tr(keyNameStr));
+	}
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::updatePeriodic(void)
+{
+	bool tmpFkbActv = isFamilyKeyboardActv();
+
+	if ( tmpFkbActv != fkbActv )
+	{
+		fkbActv = tmpFkbActv;
+
+		updateStatusLabel();
+	}
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::updateStatusLabel(void)
+{
+	if ( fkbActv )
+	{
+		statLbl->setText( tr("Family Keyboard is enabled") );
+	}
+	else
+	{
+		statLbl->setText( tr("Family Keyboard is disabled") );
 	}
 }
 //----------------------------------------------------------------------------

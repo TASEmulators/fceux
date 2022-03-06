@@ -66,6 +66,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/InputConf.h"
 #include "Qt/GamePadConf.h"
+#include "Qt/FamilyKeyboard.h"
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
 #include "Qt/PaletteEditor.h"
@@ -1413,6 +1414,16 @@ void consoleWin_t::createMainMenu(void)
 	
 	emuMenu->addAction(loadGgROMAct);
 	
+	emuMenu->addSeparator();
+
+	// Emulation -> Virtual Family Keyboard
+	act = new QAction(tr("Virtual Family Keyboard"), this);
+	//act->setShortcut( QKeySequence(tr("Ctrl+G")));
+	act->setStatusTip(tr("Virtual Family Keyboard"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openFamilyKeyboard(void)) );
+
+	emuMenu->addAction(act);
+
 	emuMenu->addSeparator();
 
 	// Emulation -> Insert Coin
@@ -3375,6 +3386,12 @@ void consoleWin_t::loadGameGenieROM(void)
 	f2 << f1.rdbuf ();
 
    return;
+}
+
+void consoleWin_t::openFamilyKeyboard(void)
+{
+	openFamilyKeyboardDialog(this);
+	return;
 }
 
 void consoleWin_t::insertCoin(void)
