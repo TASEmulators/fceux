@@ -1,9 +1,13 @@
 #include <QRect>
 #include <QWidget>
-#include <QTimer>
+#include <QDialog>
+#include <QPushButton>
 #include <QMouseEvent>
+#include <QTreeWidget>
+#include <QTimer>
 #include <QFont>
 
+#include "Qt/main.h"
 
 class FKB_Key_t
 {
@@ -11,13 +15,13 @@ class FKB_Key_t
 	public:
 		FKB_Key_t(void)
 		{
-			vState = kState = 0;
+			vState = hwState = 0;
 			toggleOnPress = 0;
 		}
 
 		char isDown(void)
 		{
-			return vState || kState;
+			return vState || hwState;
 		}
 
 		char pressed(void)
@@ -44,7 +48,7 @@ class FKB_Key_t
 
 		QRect  rect;
 		char   vState;
-		char   kState;
+		char   hwState;
 		char   toggleOnPress;
 };
 
@@ -58,6 +62,8 @@ public:
 
 	static const unsigned int NUM_KEYS = 0x48;
 
+	FKB_Key_t  key[NUM_KEYS];
+
 protected:
 	//void keyPressEvent(QKeyEvent *event);
 	//void kepaintEvent(QPaintEvent *event);
@@ -69,6 +75,7 @@ protected:
 
 	int  getKeyAtPoint( QPoint p );
 	void calcFontData(void);
+	void updateHardwareStatus(void);
 	void drawButton( QPainter &painter, int idx, int x, int y, int w, int h );
 
 	int  keyUnderMouse;
@@ -78,10 +85,33 @@ protected:
 	int  pxBtnGridX;
 	int  pxBtnGridY;
 
-	FKB_Key_t  key[NUM_KEYS];
-
 	QTimer *updateTimer;
 
 private slots:
 	void updatePeriodic(void);
 };
+
+class FKBConfigDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+	FKBConfigDialog(QWidget *parent = 0);
+	~FKBConfigDialog(void);
+
+	FamilyKeyboardWidget *keyboard;
+
+protected:
+	void closeEvent(QCloseEvent *event);
+	void updateBindingList(void);
+
+	QTreeWidget *keyTree;
+
+
+public slots:
+	void closeWindow(void);
+};
+
+int  openFamilyKeyboardDialog( QWidget *parent );
+
+char getFamilyKeyboardVirtualKey( int idx );

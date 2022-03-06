@@ -30,6 +30,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/CheatsConf.h"
+#include "Qt/FamilyKeyboard.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
 #include "Qt/sdl.h"
@@ -1862,13 +1863,15 @@ ButtConfig fkbmap[FAMILYKEYBOARD_NUM_BUTTONS] = {
 /**
  * Update the status of the Family KeyBoard.
  */
-static void UpdateFKB()
+static void UpdateFKB(void)
 {
 	int x;
-	char leftShiftDown;
+	char leftShiftDown, vkeyDown;
 	//static char lp[0x48];
 
-	leftShiftDown = DTestButton(&fkbmap[50]);
+	vkeyDown = getFamilyKeyboardVirtualKey(50);
+
+	leftShiftDown = DTestButton(&fkbmap[50]) || vkeyDown;
 
 	for (x = 0; x < FAMILYKEYBOARD_NUM_BUTTONS; x++)
 	{
@@ -1882,7 +1885,9 @@ static void UpdateFKB()
 			continue;
 		}
 
-		if (DTestButton(&fkbmap[x]))
+		vkeyDown = getFamilyKeyboardVirtualKey(x);
+
+		if (DTestButton(&fkbmap[x]) || vkeyDown)
 		{
 			fkbkeys[x] = 1;
 
@@ -1902,6 +1907,11 @@ static void UpdateFKB()
 		}
 		//lp[x] = fkbkeys[x];
 	}
+}
+
+const uint8 *getFamilyKeyboardState(void)
+{
+	return fkbkeys;
 }
 
 static ButtConfig HyperShotButtons[4] = {

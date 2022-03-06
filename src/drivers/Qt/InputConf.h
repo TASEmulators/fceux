@@ -20,25 +20,6 @@
 
 #include "Qt/main.h"
 
-class FKBConfigDialog : public QDialog
-{
-	Q_OBJECT
-
-public:
-	FKBConfigDialog(QWidget *parent = 0);
-	~FKBConfigDialog(void);
-
-protected:
-	void closeEvent(QCloseEvent *event);
-	void updateBindingList(void);
-
-	QTreeWidget *keyTree;
-
-
-public slots:
-	void closeWindow(void);
-};
-
 class InputConfDialog_t : public QDialog
 {
 	Q_OBJECT

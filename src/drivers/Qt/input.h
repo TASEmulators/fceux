@@ -148,6 +148,7 @@ int saveInputSettingsToFile( const char *fileBase = NULL );
 int loadInputSettingsFromFile( const char *filename = NULL );
 void toggleFamilyKeyboardFunc(void);
 bool isFamilyKeyboardActv(void);
+const uint8 *getFamilyKeyboardState(void);
 
 #endif
 

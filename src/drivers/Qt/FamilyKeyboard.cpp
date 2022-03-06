@@ -18,10 +18,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 // FamilyKeyboard.cpp
+#include <SDL.h>
+#include <QHeaderView>
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <QGroupBox>
 #include <QPainter>
 #include <QFontMetrics>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
+#include "Qt/main.h"
+#include "Qt/dface.h"
+#include "Qt/input.h"
 #include "Qt/config.h"
+#include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/FamilyKeyboard.h"
 
@@ -101,6 +112,35 @@ static const char *keyNames[] =
     "DOWN",
     NULL
 };
+
+static FKBConfigDialog *fkbWin = NULL;
+//*********************************************************************************
+int openFamilyKeyboardDialog(QWidget *parent)
+{
+	if (fkbWin != NULL)
+	{
+		fkbWin->activateWindow();
+		fkbWin->raise();
+		fkbWin->setFocus();
+	}
+	else
+	{
+		fkbWin = new FKBConfigDialog(parent);
+		fkbWin->show();
+	}
+	return 0;
+}
+//*********************************************************************************
+char getFamilyKeyboardVirtualKey( int idx )
+{
+	char state = 0;
+
+	if (fkbWin != NULL)
+	{
+		state = fkbWin->keyboard->key[idx].vState;
+	}
+	return state;
+}
 //*********************************************************************************
 FamilyKeyboardWidget::FamilyKeyboardWidget( QWidget *parent )
 {
@@ -173,7 +213,19 @@ void FamilyKeyboardWidget::calcFontData(void)
 //*********************************************************************************
 void FamilyKeyboardWidget::updatePeriodic(void)
 {
+	updateHardwareStatus();
+
 	update();
+}
+//*********************************************************************************
+void FamilyKeyboardWidget::updateHardwareStatus(void)
+{
+	const uint8 *hwKeyState = getFamilyKeyboardState();
+
+	for (int i=0; i<FAMILYKEYBOARD_NUM_BUTTONS; i++)
+	{
+		key[i].hwState = hwKeyState[i];
+	}
 }
 //*********************************************************************************
 int FamilyKeyboardWidget::getKeyAtPoint( QPoint p )
@@ -415,4 +467,112 @@ void FamilyKeyboardWidget::paintEvent(QPaintEvent *event)
 
 	drawButton( painter, 71, x, y, w*2, h );
 }
+//*********************************************************************************
+//----------------------------------------------------------------------------
+//--- Family Keyboard Config Dialog
+//----------------------------------------------------------------------------
+FKBConfigDialog::FKBConfigDialog(QWidget *parent)
+	: QDialog(parent)
+{
+	QVBoxLayout *mainVbox;
+	QHBoxLayout *hbox;
+	QPushButton *closeButton;
+	QTreeWidgetItem *item;
+
+	setWindowTitle( "Family Keyboard Config" );
+
+	mainVbox = new QVBoxLayout();
+
+	mainVbox->addWidget( keyboard = new FamilyKeyboardWidget() );
+
+	setLayout( mainVbox );
+
+	keyTree = new QTreeWidget();
+
+	keyTree->setColumnCount(2);
+	keyTree->setSelectionMode( QAbstractItemView::SingleSelection );
+	keyTree->setAlternatingRowColors(true);
+
+	item = new QTreeWidgetItem();
+	item->setText(0, QString::fromStdString("FKB Key"));
+	item->setText(1, QString::fromStdString("SDL Binding"));
+	item->setTextAlignment(0, Qt::AlignLeft);
+	item->setTextAlignment(1, Qt::AlignCenter);
+
+	keyTree->setHeaderItem(item);
+
+	keyTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+	for (int i=0; i<FAMILYKEYBOARD_NUM_BUTTONS; i++)
+	{
+		item = new QTreeWidgetItem();
+
+		item->setText(0, tr(FamilyKeyBoardNames[i]));
+		//item->setText(1, tr(FamilyKeyBoardNames[i]));
+
+		item->setTextAlignment(0, Qt::AlignLeft);
+		item->setTextAlignment(1, Qt::AlignCenter);
+
+		keyTree->addTopLevelItem(item);
+	}
+	updateBindingList();
+
+	mainVbox->addWidget( keyTree );
+
+	hbox = new QHBoxLayout();
+
+	mainVbox->addLayout( hbox );
+
+	closeButton = new QPushButton( tr("Close") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+
+	hbox->addStretch(5);
+	hbox->addWidget( closeButton, 1);
+
+	connect(closeButton  , SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+}
+//----------------------------------------------------------------------------
+FKBConfigDialog::~FKBConfigDialog(void)
+{
+	fkbWin = NULL;
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::updateBindingList(void)
+{
+	char keyNameStr[128];
+
+	for (int i=0; i<FAMILYKEYBOARD_NUM_BUTTONS; i++)
+	{
+		QTreeWidgetItem *item = keyTree->topLevelItem(i);
+
+		item->setText(0, tr(FamilyKeyBoardNames[i]));
+
+		if (fkbmap[i].ButtType == BUTTC_KEYBOARD)
+		{
+			snprintf(keyNameStr, sizeof(keyNameStr), "%s",
+					 SDL_GetKeyName(fkbmap[i].ButtonNum));
+		}
+		else
+		{
+			strcpy(keyNameStr, ButtonName(&fkbmap[i]));
+		}
+		item->setText(1, tr(keyNameStr));
+	}
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::closeEvent(QCloseEvent *event)
+{
+	printf("FKB Config Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
 //*********************************************************************************
