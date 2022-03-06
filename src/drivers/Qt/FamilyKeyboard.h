@@ -164,6 +164,7 @@ private slots:
 	void toggleTreeView(bool);
 	void keyTreeResizeDone(void);
 	void keyTreeHeightChange(const QVariant &);
+	void keyTreeItemActivated(QTreeWidgetItem *item, int column);
 };
 
 int  openFamilyKeyboardDialog( QWidget *parent );

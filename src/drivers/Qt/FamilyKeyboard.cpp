@@ -317,7 +317,7 @@ void FamilyKeyboardWidget::contextMenuEvent(QContextMenuEvent *event)
 	QAction *act;
 	QMenu menu(this);
 
-	act = new QAction(tr("Map Key"), &menu);
+	act = new QAction(tr("Map Key Binding..."), &menu);
 	//act->setShortcut( QKeySequence(tr("E")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(ctxMapPhysicalKey(void)) );
 	menu.addAction( act );
@@ -575,6 +575,7 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 	QTreeWidgetItem *item;
 	QMenuBar    *menuBar;
 	QSettings    settings;
+	char stmp[64];
 
 	setWindowTitle( "Family Keyboard" );
 
@@ -598,7 +599,7 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 	item->setText(0, QString::fromStdString("FKB Key"));
 	item->setText(1, QString::fromStdString("SDL Binding"));
 	item->setTextAlignment(0, Qt::AlignLeft);
-	item->setTextAlignment(1, Qt::AlignCenter);
+	item->setTextAlignment(1, Qt::AlignLeft);
 
 	keyTree->setHeaderItem(item);
 
@@ -606,13 +607,23 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 
 	for (int i=0; i<FAMILYKEYBOARD_NUM_BUTTONS; i++)
 	{
+		int j = i*2;
+
 		item = new QTreeWidgetItem();
 
-		item->setText(0, tr(FamilyKeyBoardNames[i]));
-		//item->setText(1, tr(FamilyKeyBoardNames[i]));
+		if ( strcmp( keyNames[j], keyNames[j+1] ) == 0 )
+		{
+			sprintf( stmp, " %s     ", keyNames[j] );
+		}
+		else
+		{
+			sprintf( stmp, " %s  -  %s   ", keyNames[j], keyNames[j+1] );
+		}
+
+		item->setText(0, tr(stmp) );
 
 		item->setTextAlignment(0, Qt::AlignLeft);
-		item->setTextAlignment(1, Qt::AlignCenter);
+		item->setTextAlignment(1, Qt::AlignLeft);
 
 		keyTree->addTopLevelItem(item);
 	}
@@ -633,7 +644,8 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 	hbox->addStretch(5);
 	hbox->addWidget( closeButton, 1);
 
-	//keyTree->hide();
+	connect( keyTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(keyTreeItemActivated(QTreeWidgetItem*,int) ) );
+
 	keyTree->setMinimumHeight(0);
 	keyTree->setMaximumHeight(0);
 
@@ -790,7 +802,7 @@ void FKBConfigDialog::updateBindingList(void)
 	{
 		QTreeWidgetItem *item = keyTree->topLevelItem(i);
 
-		item->setText(0, tr(FamilyKeyBoardNames[i]));
+		//item->setText(0, tr(keyNames[i*2]));
 
 		if (fkbmap[i].ButtType == BUTTC_KEYBOARD)
 		{
@@ -842,6 +854,22 @@ void FKBConfigDialog::closeWindow(void)
 	//printf("Close Window\n");
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::keyTreeItemActivated(QTreeWidgetItem *item, int column)
+{
+	int itemIndex = keyTree->indexOfTopLevelItem( item );
+
+	if ( itemIndex < 0 )
+	{
+		return;
+	}
+	FKBKeyMapDialog *mapDialog = new FKBKeyMapDialog( itemIndex, this );
+
+	mapDialog->show();
+	mapDialog->enterButtonLoop();
+
+	updateBindingList();
 }
 //----------------------------------------------------------------------------
 //*********************************************************************************
