@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QTimer>
 #include <QFont>
+#include <QPropertyAnimation>
 
 #include "Qt/main.h"
 
@@ -102,6 +103,32 @@ private slots:
 	void ctxChangeToggleOnPress(void);
 };
 
+class FKBKeyMapDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+	FKBKeyMapDialog(int idx, QWidget *parent = 0);
+	~FKBKeyMapDialog(void);
+
+	int buttonConfigStatus;
+
+	void enterButtonLoop(void);
+
+protected:
+	void closeEvent(QCloseEvent *event) override;
+	void keyPressEvent(QKeyEvent *event) override;
+	void keyReleaseEvent(QKeyEvent *event) override;
+
+	int  keyIdx;
+
+	QLabel *msgLbl;
+	QLabel *curMapLbl;
+
+public slots:
+	void closeWindow(void);
+};
+
 class FKBConfigDialog : public QDialog
 {
 	Q_OBJECT
@@ -112,9 +139,10 @@ public:
 
 	FamilyKeyboardWidget *keyboard;
 
+	void updateBindingList(void);
+
 protected:
 	void closeEvent(QCloseEvent *event);
-	void updateBindingList(void);
 
 	QMenuBar *buildMenuBar(void);
 
@@ -124,6 +152,8 @@ protected:
 
 	QTimer *updateTimer;
 
+	QPropertyAnimation *keyTreeHgtAnimation;
+
 public slots:
 	void closeWindow(void);
 
@@ -131,6 +161,9 @@ private slots:
 	void updatePeriodic(void);
 	void updateStatusLabel(void);
 	void openFontDialog(void);
+	void toggleTreeView(bool);
+	void keyTreeResizeDone(void);
+	void keyTreeHeightChange(const QVariant &);
 };
 
 int  openFamilyKeyboardDialog( QWidget *parent );

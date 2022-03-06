@@ -224,7 +224,7 @@ void FamilyKeyboardWidget::calcFontData(void)
 	{
 		pxBtnGridY++;
 	}
-	setMinimumWidth( pxBtnGridX * 25 );
+	setMinimumWidth( pxBtnGridX * 26 );
 	setMinimumHeight( pxBtnGridY * 8 );
 }
 //*********************************************************************************
@@ -336,6 +336,15 @@ void FamilyKeyboardWidget::contextMenuEvent(QContextMenuEvent *event)
 //*********************************************************************************
 void FamilyKeyboardWidget::ctxMapPhysicalKey(void)
 {
+	FKBKeyMapDialog *mapDialog = new FKBKeyMapDialog( ctxMenuKey, this );
+
+	mapDialog->show();
+	mapDialog->enterButtonLoop();
+
+	if ( fkbWin )
+	{
+		fkbWin->updateBindingList();
+	}
 }
 //*********************************************************************************
 void FamilyKeyboardWidget::ctxChangeToggleOnPress(void)
@@ -611,8 +620,6 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 
 	mainVbox->addWidget( keyTree );
 
-	keyTree->hide();
-
 	hbox = new QHBoxLayout();
 
 	mainVbox->addLayout( hbox );
@@ -625,6 +632,19 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 	hbox->addWidget(statLbl, 3);
 	hbox->addStretch(5);
 	hbox->addWidget( closeButton, 1);
+
+	//keyTree->hide();
+	keyTree->setMinimumHeight(0);
+	keyTree->setMaximumHeight(0);
+
+	keyTreeHgtAnimation = new QPropertyAnimation( keyTree, "maximumHeight", this);
+	keyTreeHgtAnimation->setDuration(500);
+	keyTreeHgtAnimation->setStartValue(0);
+	keyTreeHgtAnimation->setEndValue(512);
+	keyTreeHgtAnimation->setEasingCurve( QEasingCurve::InOutCirc );
+
+	connect( keyTreeHgtAnimation, SIGNAL(valueChanged(const QVariant &)), this, SLOT(keyTreeHeightChange(const QVariant &)));
+	connect( keyTreeHgtAnimation, SIGNAL(finished(void)), this, SLOT(keyTreeResizeDone(void)) );
 
 	connect(closeButton  , SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
 
@@ -654,7 +674,7 @@ FKBConfigDialog::~FKBConfigDialog(void)
 //----------------------------------------------------------------------------
 QMenuBar *FKBConfigDialog::buildMenuBar(void)
 {
-	QMenu       *fileMenu, *confMenu;
+	QMenu       *fileMenu, *confMenu, *viewMenu;
 	//QActionGroup *actGroup;
 	QAction     *act;
 	int useNativeMenuBar=0;
@@ -691,6 +711,19 @@ QMenuBar *FKBConfigDialog::buildMenuBar(void)
 
 	confMenu->addAction(act);
 
+	// View
+	viewMenu = menuBar->addMenu(tr("View"));
+
+	// View -> Show Key Binding Tree
+	act = new QAction(tr("Show Key Binding Tree"), this);
+	act->setCheckable(true);
+	act->setChecked(false);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Show Key Binding Tree"));
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(toggleTreeView(bool)) );
+
+	viewMenu->addAction(act);
+
 	return menuBar;
 }
 //*********************************************************************************
@@ -709,6 +742,44 @@ void FKBConfigDialog::openFontDialog(void)
 
 		g_config->setOption("SDL.FamilyKeyboardFont", selFont.toString().toStdString().c_str() );
 	}
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::toggleTreeView(bool state)
+{
+	if ( state )
+	{
+		keyTreeHgtAnimation->setStartValue(0);
+		keyTreeHgtAnimation->setEndValue(512);
+		keyTreeHgtAnimation->start();
+	}
+	else
+	{
+		keyTree->setMinimumHeight( 0 );
+		keyTreeHgtAnimation->setStartValue( keyTree->height() );
+		keyTreeHgtAnimation->setEndValue(0);
+		keyTreeHgtAnimation->start();
+	}
+}
+//----------------------------------------------------
+void FKBConfigDialog::keyTreeHeightChange(const QVariant &value)
+{
+	int val = value.toInt();
+
+	if ( val > 256 )
+	{
+		keyTree->setMinimumHeight( 256 );
+	}
+	else
+	{
+		keyTree->setMinimumHeight( val );
+	}
+
+	resize( minimumSizeHint() );
+}
+//----------------------------------------------------
+void FKBConfigDialog::keyTreeResizeDone(void)
+{
+	resize( minimumSizeHint() );
 }
 //----------------------------------------------------------------------------
 void FKBConfigDialog::updateBindingList(void)
@@ -773,4 +844,116 @@ void FKBConfigDialog::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------------------------------
+//*********************************************************************************
+//******  Key Mapping Window
+//*********************************************************************************
+FKBKeyMapDialog::FKBKeyMapDialog( int idx, QWidget *parent )
+	: QDialog( parent )
+{
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QPushButton *cancelButton;
+	QLabel      *lbl;
+	char keyMapName[64];
+	char stmp[128];
+
+	setWindowTitle( tr("Family Keyboard Key Mapping") );
+	setModal(true);
+
+	keyIdx = idx;
+	buttonConfigStatus = 0;
+
+	mainLayout = new QVBoxLayout();
+	hbox       = new QHBoxLayout();
+
+	setLayout( mainLayout );
+
+	sprintf( stmp, "Press a key to set new physical mapping for the '%s' Key", keyNames[idx*2] );
+
+	msgLbl = new QLabel( tr(stmp) );
+
+	if (fkbmap[ keyIdx ].ButtType == BUTTC_KEYBOARD)
+	{
+		snprintf(keyMapName, sizeof(keyMapName), "%s",
+				 SDL_GetKeyName(fkbmap[ keyIdx ].ButtonNum));
+	}
+	else
+	{
+		strcpy(keyMapName, ButtonName(&fkbmap[ keyIdx ]));
+	}
+
+	lbl       = new QLabel( tr("Current Mapping is:") );
+	curMapLbl = new QLabel( tr(keyMapName) );
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( curMapLbl );
+
+	cancelButton = new QPushButton( tr("Cancel") );
+	cancelButton->setIcon(style()->standardIcon(QStyle::SP_DialogCancelButton));
+	cancelButton->setAutoDefault(false);
+
+	mainLayout->addWidget( msgLbl );
+	mainLayout->addLayout( hbox );
+
+	hbox       = new QHBoxLayout();
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( cancelButton, 1 );
+	hbox->addStretch( 4 );
+
+	connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)) );
+}
+//*********************************************************************************
+FKBKeyMapDialog::~FKBKeyMapDialog(void)
+{
+	buttonConfigStatus = 0;
+}
+//*********************************************************************************
+void FKBKeyMapDialog::enterButtonLoop(void)
+{
+	buttonConfigStatus = 2;
+
+	ButtonConfigBegin();
+
+	DWaitButton(NULL, &fkbmap[ keyIdx ], &buttonConfigStatus);
+
+	ButtonConfigEnd();
+
+	buttonConfigStatus = 1;
+
+	done(0);
+	deleteLater();
+}
+//*********************************************************************************
+void FKBKeyMapDialog::closeEvent(QCloseEvent *event)
+{
+	printf("FKB Key Map Close Window Event\n");
+	buttonConfigStatus = 0;
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//*********************************************************************************
+void FKBKeyMapDialog::closeWindow(void)
+{
+	printf("Close Window\n");
+	buttonConfigStatus = 0;
+	done(0);
+	deleteLater();
+}
+//*********************************************************************************
+void FKBKeyMapDialog::keyPressEvent(QKeyEvent *event)
+{
+	//printf("Key Press: 0x%x \n", event->key() );
+	pushKeyEvent( event, 1 );
+
+	event->accept();
+}
+//*********************************************************************************
+void FKBKeyMapDialog::keyReleaseEvent(QKeyEvent *event)
+{
+	//printf("Key Release: 0x%x \n", event->key() );
+	pushKeyEvent( event, 0 );
+
+	event->accept();
+}
 //*********************************************************************************
