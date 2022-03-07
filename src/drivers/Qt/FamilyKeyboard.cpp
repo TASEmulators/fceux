@@ -830,6 +830,14 @@ QMenuBar *FKBConfigDialog::buildMenuBar(void)
 
 	viewMenu->addAction(act);
 
+	// View -> Shrink Window to Minimum Size
+	act = new QAction(tr("Shrink Window to Minimum Size"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Shrink Window to Minimum Size"));
+	connect(act, SIGNAL(triggered(void)), this, SLOT(keyTreeResizeDone(void)) );
+
+	viewMenu->addAction(act);
+
 	return menuBar;
 }
 //*********************************************************************************
@@ -847,6 +855,8 @@ void FKBConfigDialog::openFontDialog(void)
 		//printf("Font Changed to: '%s'\n", font.toString().toStdString().c_str() );
 
 		g_config->setOption("SDL.FamilyKeyboardFont", selFont.toString().toStdString().c_str() );
+
+		QTimer::singleShot( 100, this, SLOT(keyTreeResizeDone(void)) );
 	}
 }
 //----------------------------------------------------------------------------
