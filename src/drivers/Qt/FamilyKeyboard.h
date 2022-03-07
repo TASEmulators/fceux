@@ -149,6 +149,7 @@ protected:
 	QTreeWidget *keyTree;
 
 	QLabel *statLbl;
+	QPushButton *fkbEnaBtn;
 
 	QTimer *updateTimer;
 
@@ -172,6 +173,9 @@ private slots:
 	void mappingSave(void);
 	void mappingSaveAs(void);
 	void toggleTreeView(bool);
+	void SaveCurrentMapping(void);
+	void resetDefaultMapping(void);
+	void toggleFamilyKeyboardEnable(void);
 	void keyTreeResizeDone(void);
 	void keyTreeHeightChange(const QVariant &);
 	void keyTreeItemActivated(QTreeWidgetItem *item, int column);

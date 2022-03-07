@@ -637,10 +637,12 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 	mainVbox->addLayout( hbox );
 
 	statLbl = new QLabel();
+	fkbEnaBtn = new QPushButton( tr("Enable") );
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
 	closeButton->setAutoDefault(false);
 
+	hbox->addWidget(fkbEnaBtn, 1);
 	hbox->addWidget(statLbl, 3);
 	hbox->addStretch(5);
 	hbox->addWidget( closeButton, 1);
@@ -660,6 +662,7 @@ FKBConfigDialog::FKBConfigDialog(QWidget *parent)
 	connect( keyTreeHgtAnimation, SIGNAL(finished(void)), this, SLOT(keyTreeResizeDone(void)) );
 
 	connect(closeButton  , SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+	connect(fkbEnaBtn    , SIGNAL(clicked(void)), this, SLOT(toggleFamilyKeyboardEnable(void)) );
 
 	updateTimer = new QTimer(this);
 
@@ -683,6 +686,60 @@ FKBConfigDialog::~FKBConfigDialog(void)
 
 	// Save Window Geometry
 	settings.setValue("familyKeyboard/geometry", saveGeometry());
+
+	SaveCurrentMapping();
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::SaveCurrentMapping(void)
+{
+	std::string prefix;
+
+	// FamilyKeyBoard
+	prefix = "SDL.Input.FamilyKeyBoard.";
+	g_config->setOption(prefix + "DeviceType", DefaultFamilyKeyBoardDevice);
+	g_config->setOption(prefix + "DeviceNum", 0);
+	for(unsigned int j = 0; j < FAMILYKEYBOARD_NUM_BUTTONS; j++)
+	{
+		g_config->setOption(prefix + FamilyKeyBoardNames[j], fkbmap[j].ButtonNum );
+	}
+	g_config->save();
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::resetDefaultMapping(void)
+{
+	std::string prefix, device;
+	int type = 0, devnum = 0;
+
+	// FamilyKeyBoard
+	prefix = "SDL.Input.FamilyKeyBoard.";
+	g_config->setOption(prefix + "DeviceType", DefaultFamilyKeyBoardDevice);
+	g_config->setOption(prefix + "DeviceNum", 0);
+
+	g_config->getOption(prefix + "DeviceType", &device);
+
+	if (device.find("Keyboard") != std::string::npos)
+	{
+		type = BUTTC_KEYBOARD;
+	}
+	else if (device.find("Joystick") != std::string::npos)
+	{
+		type = BUTTC_JOYSTICK;
+	}
+	else
+	{
+		type = 0;
+	}
+	g_config->getOption(prefix + "DeviceNum", &devnum);
+
+	for(unsigned int j = 0; j < FAMILYKEYBOARD_NUM_BUTTONS; j++)
+	{
+		g_config->setOption(prefix + FamilyKeyBoardNames[j], DefaultFamilyKeyBoard[j] );
+
+		fkbmap[j].ButtType = type;
+		fkbmap[j].DeviceNum = devnum;
+		fkbmap[j].ButtonNum = DefaultFamilyKeyBoard[j];
+	}
+	g_config->save();
 }
 //----------------------------------------------------------------------------
 QMenuBar *FKBConfigDialog::buildMenuBar(void)
@@ -747,6 +804,16 @@ QMenuBar *FKBConfigDialog::buildMenuBar(void)
 	//act->setShortcut(QKeySequence::Close);
 	act->setStatusTip(tr("Choose Font"));
 	connect(act, SIGNAL(triggered()), this, SLOT(openFontDialog(void)) );
+
+	confMenu->addAction(act);
+
+	confMenu->addSeparator();
+
+	// Config -> Reset to Defaults
+	act = new QAction(tr("Reset to Defaults"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Reset to Defaults Mappings"));
+	connect(act, SIGNAL(triggered()), this, SLOT(resetDefaultMapping(void)) );
 
 	confMenu->addAction(act);
 
@@ -861,11 +928,51 @@ void FKBConfigDialog::updateStatusLabel(void)
 	if ( fkbActv )
 	{
 		statLbl->setText( tr("Family Keyboard is Enabled") );
+		fkbEnaBtn->setText( tr("Disable") );
 	}
 	else
 	{
 		statLbl->setText( tr("Family Keyboard is Disabled") );
+		fkbEnaBtn->setText( tr("Enable") );
 	}
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::toggleFamilyKeyboardEnable(void)
+{
+	int curNesInput[3], usrNesInput[3];
+
+	getInputSelection(0, &curNesInput[0], &usrNesInput[0]);
+	getInputSelection(1, &curNesInput[1], &usrNesInput[1]);
+	getInputSelection(2, &curNesInput[2], &usrNesInput[2]);
+
+	if ( curNesInput[2] != SIFC_FKB )
+	{
+		ESI port[2];
+		ESIFC fcexp;
+		int fourscore = false, microphone = false;
+
+		curNesInput[2] = SIFC_FKB;
+
+		g_config->getOption("SDL.FourScore", &fourscore);
+
+		microphone = replaceP2StartWithMicrophone;
+
+		port[0] = (ESI)curNesInput[0];
+		port[1] = (ESI)curNesInput[1];
+		fcexp = (ESIFC)curNesInput[2];
+
+		FCEUD_SetInput(fourscore, microphone, port[0], port[1], fcexp);
+
+		if ( !isFamilyKeyboardActv() )
+		{
+			toggleFamilyKeyboardFunc();
+		}
+	}
+	else
+	{
+		toggleFamilyKeyboardFunc();
+	}
+	updateStatusLabel();
 }
 //----------------------------------------------------------------------------
 void FKBConfigDialog::closeEvent(QCloseEvent *event)
