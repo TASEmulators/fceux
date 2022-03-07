@@ -849,6 +849,10 @@ void FKBConfigDialog::openFontDialog(void)
 
 	if ( ok )
 	{
+		if ( selFont.pointSize() > 72 )
+		{
+			selFont.setPointSize(72);
+		}
 		keyboard->setFont( selFont );
 		keyboard->update();
 
