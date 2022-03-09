@@ -124,6 +124,7 @@ protected:
 
 	QLabel *msgLbl;
 	QLabel *curMapLbl;
+	bool    waitingForButton;
 
 public slots:
 	void closeWindow(void);

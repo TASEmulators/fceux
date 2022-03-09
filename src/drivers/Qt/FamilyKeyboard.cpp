@@ -1449,6 +1449,7 @@ FKBKeyMapDialog::FKBKeyMapDialog( int idx, QWidget *parent )
 
 	keyIdx = idx;
 	buttonConfigStatus = 0;
+	waitingForButton = false;
 
 	mainLayout = new QVBoxLayout();
 	hbox       = new QHBoxLayout();
@@ -1499,6 +1500,8 @@ void FKBKeyMapDialog::enterButtonLoop(void)
 {
 	buttonConfigStatus = 2;
 
+	waitingForButton = true;
+
 	ButtonConfigBegin();
 
 	DWaitButton(NULL, &fkbmap[ keyIdx ], &buttonConfigStatus);
@@ -1507,25 +1510,35 @@ void FKBKeyMapDialog::enterButtonLoop(void)
 
 	buttonConfigStatus = 1;
 
+	waitingForButton = false;
+
 	done(0);
 	deleteLater();
 }
 //*********************************************************************************
 void FKBKeyMapDialog::closeEvent(QCloseEvent *event)
 {
-	printf("FKB Key Map Close Window Event\n");
+	//printf("FKB Key Map Close Window Event\n");
 	buttonConfigStatus = 0;
-	done(0);
-	deleteLater();
+
+	if ( !waitingForButton )
+	{
+		done(0);
+		deleteLater();
+	}
 	event->accept();
 }
 //*********************************************************************************
 void FKBKeyMapDialog::closeWindow(void)
 {
-	printf("Close Window\n");
+	//printf("Close Window\n");
 	buttonConfigStatus = 0;
-	done(0);
-	deleteLater();
+
+	if ( !waitingForButton )
+	{
+		done(0);
+		deleteLater();
+	}
 }
 //*********************************************************************************
 void FKBKeyMapDialog::keyPressEvent(QKeyEvent *event)
