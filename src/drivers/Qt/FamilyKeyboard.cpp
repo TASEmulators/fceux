@@ -345,6 +345,9 @@ void FamilyKeyboardWidget::ctxMapPhysicalKey(void)
 	if ( fkbWin )
 	{
 		fkbWin->updateBindingList();
+		fkbWin->show();
+		fkbWin->activateWindow();
+		fkbWin->raise();
 	}
 }
 //*********************************************************************************
@@ -1018,6 +1021,10 @@ void FKBConfigDialog::keyTreeItemActivated(QTreeWidgetItem *item, int column)
 	mapDialog->enterButtonLoop();
 
 	updateBindingList();
+
+	show();
+	activateWindow();
+	raise();
 }
 //----------------------------------------------------------------------------
 int FKBConfigDialog::getButtonIndexFromName( const char *buttonName )
