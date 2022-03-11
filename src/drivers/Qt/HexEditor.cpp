@@ -1018,7 +1018,7 @@ HexEditorFindDialog_t::~HexEditorFindDialog_t(void)
 //----------------------------------------------------------------------------
 void HexEditorFindDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Hex Editor Close Window Event\n");
+	//printf("Hex Editor Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

@@ -254,7 +254,7 @@ AboutWindow::~AboutWindow(void)
 //----------------------------------------------------------------------------
 void AboutWindow::closeEvent(QCloseEvent *event)
 {
-	printf("About Window Close Event\n");
+	//printf("About Window Close Event\n");
 	done(0);
 	deleteLater();
 	event->accept();
