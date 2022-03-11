@@ -534,14 +534,14 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 //----------------------------------------------------
 ConsoleVideoConfDialog_t::~ConsoleVideoConfDialog_t(void)
 {
-	printf("Destroy Video Config Window\n");
+	//printf("Destroy Video Config Window\n");
 
 	updateTimer->stop();
 }
 //----------------------------------------------------------------------------
 void ConsoleVideoConfDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Video Config Close Window Event\n");
+	//printf("Video Config Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

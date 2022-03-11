@@ -172,12 +172,12 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 MovieOptionsDialog_t::~MovieOptionsDialog_t(void)
 {
-	printf("Destroy Movie Options Window\n");
+	//printf("Destroy Movie Options Window\n");
 }
 //----------------------------------------------------------------------------
 void MovieOptionsDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Movie Options Close Window Event\n");
+	//printf("Movie Options Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

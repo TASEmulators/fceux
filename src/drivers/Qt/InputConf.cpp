@@ -259,7 +259,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 InputConfDialog_t::~InputConfDialog_t(void)
 {
-	printf("Destroy Input Config Window\n");
+	//printf("Destroy Input Config Window\n");
 	inputTimer->stop();
 
 	if (win == this)
@@ -270,7 +270,7 @@ InputConfDialog_t::~InputConfDialog_t(void)
 //----------------------------------------------------------------------------
 void InputConfDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Input Config Close Window Event\n");
+	//printf("Input Config Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

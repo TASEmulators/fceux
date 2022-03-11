@@ -148,7 +148,7 @@ AviRiffViewerDialog::AviRiffViewerDialog(QWidget *parent)
 //----------------------------------------------------------------------------
 AviRiffViewerDialog::~AviRiffViewerDialog(void)
 {
-	printf("Destroy AVI RIFF Viewer Window\n");
+	//printf("Destroy AVI RIFF Viewer Window\n");
 
 	if ( avi )
 	{
@@ -158,7 +158,7 @@ AviRiffViewerDialog::~AviRiffViewerDialog(void)
 //----------------------------------------------------------------------------
 void AviRiffViewerDialog::closeEvent(QCloseEvent *event)
 {
-	printf("AVI RIFF Viewer Window Event\n");
+	//printf("AVI RIFF Viewer Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

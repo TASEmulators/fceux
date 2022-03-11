@@ -288,13 +288,13 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 //----------------------------------------------------
 ConsoleSndConfDialog_t::~ConsoleSndConfDialog_t(void)
 {
-	printf("Destroy Sound Config Window\n");
+	//printf("Destroy Sound Config Window\n");
 	updateTimer->stop();
 }
 //----------------------------------------------------------------------------
 void ConsoleSndConfDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Sound Config Close Window Event\n");
+	//printf("Sound Config Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

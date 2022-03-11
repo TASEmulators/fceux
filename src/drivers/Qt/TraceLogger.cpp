@@ -406,7 +406,7 @@ TraceLoggerDialog_t::~TraceLoggerDialog_t(void)
 
 	traceLogWindow = NULL;
 
-	printf("Trace Logger Window Deleted\n");
+	//printf("Trace Logger Window Deleted\n");
 }
 //----------------------------------------------------
 void TraceLoggerDialog_t::closeEvent(QCloseEvent *event)

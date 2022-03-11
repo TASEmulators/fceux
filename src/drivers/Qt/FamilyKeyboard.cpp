@@ -994,7 +994,7 @@ void FKBConfigDialog::toggleFamilyKeyboardEnable(void)
 //----------------------------------------------------------------------------
 void FKBConfigDialog::closeEvent(QCloseEvent *event)
 {
-	printf("FKB Config Close Window Event\n");
+	//printf("FKB Config Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

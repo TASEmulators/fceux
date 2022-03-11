@@ -326,13 +326,13 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 //----------------------------------------------------
 PaletteConfDialog_t::~PaletteConfDialog_t(void)
 {
-	printf("Destroy Palette Config Window\n");
+	//printf("Destroy Palette Config Window\n");
 	updateTimer->stop();
 }
 //----------------------------------------------------------------------------
 void PaletteConfDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Palette Config Close Window Event\n");
+	//printf("Palette Config Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

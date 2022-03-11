@@ -263,12 +263,12 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 //----------------------------------------------------
 GuiConfDialog_t::~GuiConfDialog_t(void)
 {
-	printf("Destroy GUI Config Close Window\n");
+	//printf("Destroy GUI Config Close Window\n");
 }
 //----------------------------------------------------------------------------
 void GuiConfDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("GUI Config Close Window Event\n");
+	//printf("GUI Config Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

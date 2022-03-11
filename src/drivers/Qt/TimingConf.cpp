@@ -265,14 +265,14 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 TimingConfDialog_t::~TimingConfDialog_t(void)
 {
-	printf("Destroy Timing Config Window\n");
+	//printf("Destroy Timing Config Window\n");
 	updateTimer->stop();
 	saveValues();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Timing Close Window Event\n");
+	//printf("Timing Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();
