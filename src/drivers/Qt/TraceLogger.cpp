@@ -558,7 +558,7 @@ void TraceLoggerDialog_t::openLogFile(void)
 	QString filename;
 	QFileDialog dialog(this, tr("Select Log File"));
 
-	printf("Log File Select\n");
+	//printf("Log File Select\n");
 
 	dialog.setFileMode(QFileDialog::AnyFile);
 
@@ -2481,7 +2481,7 @@ TraceLogDiskThread_t::TraceLogDiskThread_t( QObject *parent )
 //----------------------------------------------------
 TraceLogDiskThread_t::~TraceLogDiskThread_t(void)
 {
-	printf("Disk Thread Cleanup\n");
+	//printf("Disk Thread Cleanup\n");
 #ifdef WIN32
 	if (logFile != INVALID_HANDLE_VALUE)
 	{
@@ -2509,7 +2509,7 @@ void TraceLogDiskThread_t::run(void)
 	int i,idx=0;
 	int blockSize = 4 * 1024;
 
-	printf("Trace Log Disk Start\n");
+	//printf("Trace Log Disk Start\n");
 
 	setPriority( QThread::HighestPriority );
 
@@ -2606,7 +2606,7 @@ void TraceLogDiskThread_t::run(void)
 	}
 	#endif
 	
-	printf("Trace Log Disk Exit\n");
+	//printf("Trace Log Disk Exit\n");
 	emit finished();
 }
 //----------------------------------------------------

@@ -1362,7 +1362,7 @@ SymbolEditWindow::~SymbolEditWindow(void)
 //--------------------------------------------------------------
 void SymbolEditWindow::closeEvent(QCloseEvent *event)
 {
-   printf("Debugger Close Window Event\n");
+   //printf("Symbolic Debug Close Window Event\n");
    done(0);
 	deleteLater();
    event->accept();
