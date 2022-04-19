@@ -243,7 +243,7 @@ GameGenieDialog_t::~GameGenieDialog_t(void)
 //----------------------------------------------------------------------------
 void GameGenieDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Game Genie Close Window Event\n");
+	//printf("Game Genie Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

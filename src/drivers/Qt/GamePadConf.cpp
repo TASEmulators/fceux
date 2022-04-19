@@ -935,7 +935,7 @@ void GamePadConfDialog_t::closeEvent(QCloseEvent *event)
 		return;
 	}
 
-	printf("GamePad Close Window Event\n");
+	//printf("GamePad Close Window Event\n");
 	buttonConfigStatus = 0;
 	done(0);
 	deleteLater();
@@ -959,7 +959,7 @@ void GamePadConfDialog_t::closeWindow(void)
 		return;
 	}
 
-	printf("Close Window\n");
+	//printf("Close Window\n");
 	buttonConfigStatus = 0;
 	done(0);
 	deleteLater();

@@ -114,6 +114,22 @@ else(WIN32)
 	  add_definitions( -D_USE_LIBAV ${LIBAV_CFLAGS} )
   endif()
 
+  #find_package(X11)
+  pkg_check_modules( X11 x11)
+
+  if ( ${X11_FOUND} )
+	message( STATUS "Has X11 Library ${X11_VERSION}" )
+	add_definitions( -D_HAS_X11 )
+	include_directories( ${X11_INCLUDE_DIR} )
+  endif()
+
+  pkg_check_modules( XKB xkbcommon)
+
+  if ( ${XKB_FOUND} )
+	message( STATUS "Has XKB Library ${XKB_VERSION}" )
+        add_definitions( -D_HAS_XKB ${XKB_CFLAGS} )
+  endif()
+
   #pkg_check_modules( GL gl) # Use built in find package instead for OpenGL
 
   # Check for OpenGL
@@ -490,6 +506,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerSDL.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/InputConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/FamilyKeyboard.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/HotKeyConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TimingConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/FrameTimingStats.cpp  

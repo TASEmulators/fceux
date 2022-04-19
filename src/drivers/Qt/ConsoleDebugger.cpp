@@ -5298,7 +5298,10 @@ bool QAsmView::event(QEvent *event)
 					addr, bank, romOfs );
 			}
 
-			static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent->globalPos(), new asmLookAheadPopup(addr, this) ));
+			if ( static_cast<asmLookAheadPopup*>(fceuCustomToolTipShow( helpEvent->globalPos(), new asmLookAheadPopup(addr, this) )) == NULL )
+			{
+				printf("ASM Lookahead Popup Error\n");
+			}
 			//QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 			QToolTip::hideText();
 			event->ignore();

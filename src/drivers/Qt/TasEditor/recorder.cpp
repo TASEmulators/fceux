@@ -26,8 +26,8 @@ extern uint32 GetGamepadPressedImmediate();
 extern char lagFlag;
 
 // resources
-static const char recordingCheckbox[11] = " Recording";
-static const char recordingCheckboxBlankPattern[17] = " Recording blank";
+//static const char recordingCheckbox[11] = " Recording";
+//static const char recordingCheckboxBlankPattern[17] = " Recording blank";
 
 static const char recordingModes[5][4] = {	"All",
 						"1P",

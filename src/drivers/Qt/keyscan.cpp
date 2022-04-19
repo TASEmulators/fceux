@@ -27,7 +27,51 @@
 
 using namespace Qt;
 
-SDL_Scancode convQtKey2SDLScanCode(Qt::Key q)
+#if defined(WIN32)
+
+#include <windows.h>
+#include <winuser.h>
+static uint32_t ShiftKeyCodeR = VK_RSHIFT;
+static uint32_t CtrlKeyCodeR  = VK_RCONTROL;
+static uint32_t AltKeyCodeR   = VK_RMENU;
+static uint32_t MetaKeyCodeR  = VK_RWIN;
+static BYTE keyBuf[256];
+
+#elif  defined(__linux__)
+
+   #if  defined(_HAS_XKB)
+	#include <xkbcommon/xkbcommon.h>
+	static uint32_t ShiftKeyCodeR = XKB_KEY_Shift_R;
+	static uint32_t CtrlKeyCodeR  = XKB_KEY_Control_R;
+	static uint32_t AltKeyCodeR   = XKB_KEY_Alt_R;
+	static uint32_t MetaKeyCodeR  = XKB_KEY_Meta_R;
+   #elif  defined(_HAS_X11)
+        #include <X11/keysym.h>
+	static uint32_t ShiftKeyCodeR = XK_Shift_R;
+	static uint32_t CtrlKeyCodeR  = XK_Control_R;
+	static uint32_t AltKeyCodeR   = XK_Alt_R;
+	static uint32_t MetaKeyCodeR  = XK_Meta_R;
+   #else
+	static uint32_t ShiftKeyCodeR = 0xffe2;
+	static uint32_t CtrlKeyCodeR  = 0xffe4;
+	static uint32_t AltKeyCodeR   = 0xffea;
+	static uint32_t MetaKeyCodeR  = 0xffe8;
+   #endif
+
+#elif  defined(__APPLE__)
+static uint32_t ShiftKeyCodeR = 0x003C;
+static uint32_t CtrlKeyCodeR  = 0x003E;
+static uint32_t AltKeyCodeR   = 0x003D;
+static uint32_t MetaKeyCodeR  = 0x0036;
+
+#else
+static uint32_t ShiftKeyCodeR = 0xffe2;
+static uint32_t CtrlKeyCodeR  = 0xffe4;
+static uint32_t AltKeyCodeR   = 0xffea;
+static uint32_t MetaKeyCodeR  = 0xffe8;
+#endif
+
+SDL_Scancode convQtKey2SDLScanCode(Qt::Key q, uint32_t nativeVirtualKey)
 {
 	SDL_Scancode s = SDL_SCANCODE_UNKNOWN;
 
@@ -90,16 +134,106 @@ SDL_Scancode convQtKey2SDLScanCode(Qt::Key q)
 		s = SDL_SCANCODE_PAGEDOWN;
 		break;
 	case Key_Shift:
-		s = SDL_SCANCODE_LSHIFT;
+		#if defined(WIN32)
+		if ( keyBuf[ShiftKeyCodeR] & 0x80 )
+		{
+			s = SDL_SCANCODE_RSHIFT;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LSHIFT;
+		}
+		#else
+		if ( nativeVirtualKey == ShiftKeyCodeR )
+		{
+			s = SDL_SCANCODE_RSHIFT;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LSHIFT;
+		}
+		#endif
 		break;
 	case Key_Control:
-		s = SDL_SCANCODE_LCTRL;
+		#ifdef  __APPLE__
+		if ( nativeVirtualKey == MetaKeyCodeR )
+		{
+			s = SDL_SCANCODE_RGUI;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LGUI;
+		}
+		#elif defined(WIN32)
+		if ( keyBuf[CtrlKeyCodeR] & 0x80 )
+		{
+			s = SDL_SCANCODE_RCTRL;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LCTRL;
+		}
+		#else
+		if ( nativeVirtualKey == CtrlKeyCodeR )
+		{
+			s = SDL_SCANCODE_RCTRL;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LCTRL;
+		}
+		#endif
 		break;
 	case Key_Meta:
-		s = SDL_SCANCODE_LGUI;
+		#ifdef  __APPLE__
+		if ( nativeVirtualKey == CtrlKeyCodeR )
+		{
+			s = SDL_SCANCODE_RCTRL;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LCTRL;
+		}
+		#elif defined(WIN32)
+		if ( keyBuf[MetaKeyCodeR] & 0x80 )
+		{
+			s = SDL_SCANCODE_RGUI;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LGUI;
+		}
+		#else
+		if ( nativeVirtualKey == MetaKeyCodeR )
+		{
+			s = SDL_SCANCODE_RGUI;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LGUI;
+		}
+		#endif
 		break;
 	case Key_Alt:
-		s = SDL_SCANCODE_LALT;
+		#if defined(WIN32)
+		if ( keyBuf[AltKeyCodeR] & 0x80 )
+		{
+			s = SDL_SCANCODE_RALT;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LALT;
+		}
+		#else
+		if ( nativeVirtualKey == AltKeyCodeR )
+		{
+			s = SDL_SCANCODE_RALT;
+		}
+		else
+		{
+			s = SDL_SCANCODE_LALT;
+		}
+		#endif
 		break;
 	case Key_CapsLock:
 		s = SDL_SCANCODE_CAPSLOCK;
@@ -497,7 +631,7 @@ SDL_Scancode convQtKey2SDLScanCode(Qt::Key q)
 	return s;
 }
 
-SDL_Keycode convQtKey2SDLKeyCode(Qt::Key q)
+SDL_Keycode convQtKey2SDLKeyCode(Qt::Key q, uint32_t nativeVirtualKey)
 {
 	SDL_Keycode s = SDLK_UNKNOWN;
 
@@ -562,16 +696,115 @@ SDL_Keycode convQtKey2SDLKeyCode(Qt::Key q)
 		s = SDLK_PAGEDOWN;
 		break;
 	case Key_Shift:
-		s = SDLK_LSHIFT;
+		#if defined(WIN32)
+		if ( keyBuf[ShiftKeyCodeR] & 0x80)
+		{
+			s = SDLK_RSHIFT;
+		}
+		else
+		{
+			s = SDLK_LSHIFT;
+		}
+		#elif defined(WIN32)
+		if ( keyBuf[ShiftKeyCodeR] & 0x80 )
+		{
+			s = SDLK_RSHIFT;
+		}
+		else
+		{
+			s = SDLK_LSHIFT;
+		}
+		#else
+		if ( nativeVirtualKey == ShiftKeyCodeR )
+		{
+			s = SDLK_RSHIFT;
+		}
+		else
+		{
+			s = SDLK_LSHIFT;
+		}
+		#endif
 		break;
 	case Key_Control:
-		s = SDLK_LCTRL;
+		#ifdef  __APPLE__
+		if ( nativeVirtualKey == MetaKeyCodeR )
+		{
+			s = SDLK_RGUI;
+		}
+		else
+		{
+			s = SDLK_LGUI;
+		}
+		#elif defined(WIN32)
+		if ( keyBuf[CtrlKeyCodeR] & 0x80 )
+		{
+			s = SDLK_RCTRL;
+		}
+		else
+		{
+			s = SDLK_LCTRL;
+		}
+		#else
+		if ( nativeVirtualKey == CtrlKeyCodeR )
+		{
+			s = SDLK_RCTRL;
+		}
+		else
+		{
+			s = SDLK_LCTRL;
+		}
+		#endif
 		break;
 	case Key_Meta:
-		s = SDLK_LGUI;
+		#ifdef  __APPLE__
+		if ( nativeVirtualKey == CtrlKeyCodeR )
+		{
+			s = SDLK_RCTRL;
+		}
+		else
+		{
+			s = SDLK_LCTRL;
+		}
+		#elif defined(WIN32)
+		if ( keyBuf[MetaKeyCodeR] & 0x80 )
+		{
+			s = SDLK_RGUI;
+		}
+		else
+		{
+			s = SDLK_LGUI;
+		}
+		#else
+		if ( nativeVirtualKey == MetaKeyCodeR )
+		{
+			s = SDLK_RGUI;
+		}
+		else
+		{
+			s = SDLK_LGUI;
+		}
+		#endif
 		break;
 	case Key_Alt:
-		s = SDLK_LALT;
+		#if defined(WIN32)
+		if ( keyBuf[AltKeyCodeR] & 0x80 )
+		{
+			s = SDLK_RALT;
+		}
+		else
+		{
+			s = SDLK_LALT;
+		}
+		#else
+		if ( nativeVirtualKey == AltKeyCodeR )
+		{
+			s = SDLK_RALT;
+		}
+		else
+		{
+			s = SDLK_LALT;
+		}
+		#endif
 		break;
 	case Key_CapsLock:
 		s = SDLK_CAPSLOCK;
@@ -1061,9 +1294,49 @@ int convKeyEvent2Sequence( QKeyEvent *event )
 	return (m | k);
 }
 
+#ifdef WIN32
+uint8_t win32GetKeyState( unsigned int vkey )
+{
+	uint8_t state = 0;
+
+	switch ( vkey )
+	{
+		case SDL_SCANCODE_LSHIFT:
+			state = (keyBuf[VK_LSHIFT] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_RSHIFT:
+			state = (keyBuf[VK_RSHIFT] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_LALT:
+			state = (keyBuf[VK_LMENU] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_RALT:
+			state = (keyBuf[VK_RMENU] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_LCTRL:
+			state = (keyBuf[VK_LCONTROL] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_RCTRL:
+			state = (keyBuf[VK_RCONTROL] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_LGUI:
+			state = (keyBuf[VK_LWIN] & 0x80) ? 1 : 0;
+		break;
+		case SDL_SCANCODE_RGUI:
+			state = (keyBuf[VK_RWIN] & 0x80) ? 1 : 0;
+		break;
+		default:
+			state = 0;
+		break;
+	}
+	return state;
+}
+#endif
+
 int pushKeyEvent(QKeyEvent *event, int pressDown)
 {
 	SDL_Event sdlev;
+	uint32_t vkey;
 
 	if (pressDown)
 	{
@@ -1076,12 +1349,20 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 		sdlev.key.state = SDL_RELEASED;
 	}
 
-	sdlev.key.keysym.sym = convQtKey2SDLKeyCode((Qt::Key)event->key());
+#ifdef WIN32
+	GetKeyboardState( keyBuf );
+#endif
+
+	vkey = event->nativeVirtualKey();
+
+	sdlev.key.keysym.sym = convQtKey2SDLKeyCode((Qt::Key)event->key(), vkey);
 
 	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlev.key.keysym.sym);
 
-	//printf("Native ScanCode: x%08X  %i \n", event->nativeScanCode(), event->nativeScanCode() );
-	//printf("Scancode: 0x%08X  %i \n", sdlev.key.keysym.scancode, sdlev.key.keysym.scancode );
+	//printf("Key %s: x%08X  %i\n", (sdlev.type == SDL_KEYUP) ? "UP" : "DOWN", event->key(), event->key() );
+	//printf("   Native ScanCode: x%08X  %i \n", event->nativeScanCode(), event->nativeScanCode() );
+	//printf("   Virtual ScanCode: x%08X  %i \n", event->nativeVirtualKey(), event->nativeVirtualKey() );
+	//printf("   Scancode: 0x%08X  %i \n", sdlev.key.keysym.scancode, sdlev.key.keysym.scancode );
 
 	// SDL Docs say this code should never happen, but it does... 
 	// so force it to alternative scancode algorithm if it occurs.
@@ -1094,7 +1375,7 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 	if ( sdlev.key.keysym.scancode == SDL_SCANCODE_UNKNOWN )
 	{	// If scancode is unknown, the key may be dual function via the shift key.
 
-		sdlev.key.keysym.scancode = convQtKey2SDLScanCode( (Qt::Key)event->key() );
+		sdlev.key.keysym.scancode = convQtKey2SDLScanCode( (Qt::Key)event->key(), vkey );
 
 		//printf("Dual Scancode: 0x%08X  %i \n", sdlev.key.keysym.scancode, sdlev.key.keysym.scancode );
 	}

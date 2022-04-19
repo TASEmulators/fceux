@@ -348,6 +348,7 @@ class  consoleWin_t : public QMainWindow
 		void openMovieOptWin(void);
 		void openCodeDataLogger(void);
 		void openTraceLogger(void);
+		void openFamilyKeyboard(void);
 		void toggleAutoResume(void);
 		void updatePeriodic(void);
 		void changeState0(void);

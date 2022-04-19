@@ -6261,7 +6261,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	FCEU_CRITICAL_SECTION( emuLock );
 	int x, y, row, nrow, lineNum;
 	QPainter painter(this);
-	QColor white(255,255,255), black(0,0,0), blkColor, rowTextColor, hdrGridColor;
+	QColor /*white(255,255,255),*/ black(0,0,0), blkColor, rowTextColor, hdrGridColor;
 	static const char *buttonNames[] = { "A", "B", "S", "T", "U", "D", "L", "R", NULL };
 	char stmp[32];
 	char rowIsSel=0;

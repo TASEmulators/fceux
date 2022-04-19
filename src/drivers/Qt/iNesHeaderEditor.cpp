@@ -240,7 +240,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	{
 		sprintf(stmp, "%d %s", bmap[i].number, bmap[i].name);
 		
-		mapperComboBox->addItem( tr(stmp), i );
+		mapperComboBox->addItem( tr(stmp), bmap[i].number );
 	}
 	hdrLayout->addLayout( hbox1 );
 
@@ -904,7 +904,21 @@ void iNesHeaderEditor_t::setHeaderData(iNES_HEADER* header)
 	{
 		mapper |= (header->ROM_type3 & 0x0F) << 8;
 	}
-	mapperComboBox->setCurrentIndex( mapper );
+	for (i=0; i<mapperComboBox->count(); i++)
+	{
+		if ( mapperComboBox->itemData(i).toInt() > mapper )
+		{
+			sprintf( buf, "%i Unknown/unsupported", i);
+			mapperComboBox->insertItem( i, tr(buf), mapper);
+			mapperComboBox->setCurrentIndex(i);
+			break;
+		}
+		else if ( mapperComboBox->itemData(i).toInt() == mapper )
+		{
+			mapperComboBox->setCurrentIndex(i);
+			break;
+		}
+	}
 
 	// Sub Mapper
 	sprintf(buf, "%d", ines20 ? header->ROM_type3 >> 4 : 0);

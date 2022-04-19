@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<link href="fceux.css" rel="stylesheet" type="text/css" />
+<title>Press Release 2.6.3</title>
+</head>
+
+<body>
+<div id="masthead">
+	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom/Dendy Emulator
+</div>
+<div id="top_nav">
+  <a href="home.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="documentation.html">Documentation</a>
+  <a href="version.html">Versions</a>
+  <a href="contact.html">Contact</a>
+  <a href="links.html">Links</a>
+</div>
+<div id="container">
+	<div id="left_col">
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	 		style="display:inline-block;width:180px;height:150px"
+	 		data-ad-client="ca-pub-0764229755985190"
+	 		data-ad-slot="7648866201"></ins>
+		<script>
+	     (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>	
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	    	 style="display:inline-block;width:180px;height:150px"
+	     	data-ad-client="ca-pub-0764229755985190"
+	     	data-ad-slot="7648866201"></ins>
+		<script>
+	    	 (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
+<div id="page_content">
+<h1>FCEUX 2.6.3 Maintenance Release</h1>
+<p>07 March 2022</p>
+<p>
+The 2.6.3 release is a maintenance update that fixes a few bugs for both the Win32 and Qt/SDL ports.
+This release features significant family keyboard emulation improvements for the Qt GUI.
+</p>
+
+<h2>Common</h2>
+
+<h3>Core</h3>
+FDS IRQ emulation improvement.<br>
+
+<h3>Mappers</h3>
+Bug fix for mapper 16 submapper 4, allow writes to address range $6000 - $600D.<br>
+Bug fix for mapper 3 bus conflict logic. Bus conflicts are now only enabled for submapper 2.<br>
+Implemented extra RAM for mapper 225.<br>
+
+<h2>Win32</h2>
+
+<h3>Debugger</h3>
+Fixed loading of saved debugger breakpoint data from previous sessions. This bug started occurring when the saved binary file format changed due to the address fields changing from 16 to 32 bit values.<br>
+Fixed bug in address validation logic.<br>
+
+<h3>Input</h3>
+Fixed Meta keys combination issues.<br>
+
+<h2>Qt/SDL</h2>
+
+<h3>Input</h3>
+Added a virtual family keyboard dialog window. This allows functionality such as emulating key presses via mouse and remapping keys to physical keyboard.<br>
+Added code differentiate between left/right modifier key presses (shift, alt, ctrl, meta).<br>
+Fixed keyboard bindings for Famicom family keyboard emulation.<br>
+Fixed a couple bugs for some uncommonly used Qt to SDL key code conversions.<br>
+
+<h3>GUI</h3>
+Fixed keyboard menu accelerator functionality for Mac OSX (non-native menu bars only)<br>
+
+</div>
+
+<p>
+<hr>
+
+<div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
+		<br/>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc.
+</div>
+</div>
+</body>
+</html>

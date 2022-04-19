@@ -104,12 +104,12 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 HotKeyConfDialog_t::~HotKeyConfDialog_t(void)
 {
-	printf("Destroy Hot Key Config Window\n");
+	//printf("Destroy Hot Key Config Window\n");
 }
 //----------------------------------------------------------------------------
 void HotKeyConfDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Hot Key Close Window Event\n");
+	//printf("Hot Key Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();

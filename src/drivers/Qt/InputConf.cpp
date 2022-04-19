@@ -38,9 +38,11 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/FamilyKeyboard.h"
 #include "Qt/InputConf.h"
 
 static InputConfDialog_t *win = NULL;
+
 //----------------------------------------------------------------------------
 void openInputConfWindow(QWidget *parent)
 {
@@ -244,6 +246,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 	connect(nesPortConfButton[0], SIGNAL(clicked(void)), this, SLOT(port1Configure(void)));
 	connect(nesPortConfButton[1], SIGNAL(clicked(void)), this, SLOT(port2Configure(void)));
+	connect(expPortConfButton   , SIGNAL(clicked(void)), this, SLOT(expPortConfigure(void)));
 
 	connect(loadConfigButton, SIGNAL(clicked(void)), this, SLOT(openLoadPresetFile(void)));
 	connect(saveConfigButton, SIGNAL(clicked(void)), this, SLOT(openSavePresetFile(void)));
@@ -256,7 +259,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 InputConfDialog_t::~InputConfDialog_t(void)
 {
-	printf("Destroy Input Config Window\n");
+	//printf("Destroy Input Config Window\n");
 	inputTimer->stop();
 
 	if (win == this)
@@ -267,7 +270,7 @@ InputConfDialog_t::~InputConfDialog_t(void)
 //----------------------------------------------------------------------------
 void InputConfDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("Input Config Close Window Event\n");
+	//printf("Input Config Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();
@@ -329,6 +332,8 @@ void InputConfDialog_t::updatePortLabels(void)
 			expPortLabel->setText(expPortComboxBox->itemText(j));
 		}
 	}
+
+	expPortConfButton->setEnabled( curNesInput[2] == SIFC_FKB );
 }
 //----------------------------------------------------------------------------
 void InputConfDialog_t::updatePortComboBoxes(void)
@@ -381,7 +386,7 @@ void InputConfDialog_t::expSelect(int index)
 void InputConfDialog_t::fourScoreChanged(int state)
 {
 	int value = (state == Qt::Unchecked) ? 0 : 1;
-	printf("Set 'SDL.FourScore' = %i\n", value);
+	//printf("Set 'SDL.FourScore' = %i\n", value);
 	g_config->setOption("SDL.FourScore", value);
 
 	setInputs();
@@ -426,6 +431,14 @@ void InputConfDialog_t::port1Configure(void)
 void InputConfDialog_t::port2Configure(void)
 {
 	openPortConfig(1);
+}
+//----------------------------------------------------------------------------
+void InputConfDialog_t::expPortConfigure(void)
+{
+	if ( curNesInput[2] == SIFC_FKB )
+	{
+		openFamilyKeyboardDialog( consoleWindow );
+	}
 }
 //----------------------------------------------------------------------------
 void InputConfDialog_t::openLoadPresetFile(void)

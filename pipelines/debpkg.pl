@@ -2,7 +2,7 @@
 
 use strict;
 
-my $VERSION="2.6.3";
+my $VERSION="2.6.4";
 my $INSTALL_PREFIX="/tmp/fceux";
 my $CTL_FILENAME="$INSTALL_PREFIX/DEBIAN/control";
 my $ARCH="amd64";

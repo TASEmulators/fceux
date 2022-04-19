@@ -30,6 +30,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/CheatsConf.h"
+#include "Qt/FamilyKeyboard.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
 #include "Qt/sdl.h"
@@ -140,7 +141,7 @@ static void UpdateTopRider(void);
 static uint32 JSreturn = 0;
 
 #include "keyscan.h"
-static uint8 g_keyState[SDL_NUM_SCANCODES];
+static uint8_t g_keyState[SDL_NUM_SCANCODES];
 static int keyModifier = 0;
 //static int DIPS = 0;
 
@@ -1321,13 +1322,43 @@ UpdatePhysicalInput()
 			//printf("SDL_Event.type: %i  Keysym: %i  ScanCode: %i\n",
 			//		event.type, event.key.keysym.sym, event.key.keysym.scancode );
 
+			#ifdef WIN32
+			g_keyState[SDL_SCANCODE_LSHIFT] = win32GetKeyState( SDL_SCANCODE_LSHIFT );
+			g_keyState[SDL_SCANCODE_RSHIFT] = win32GetKeyState( SDL_SCANCODE_RSHIFT );
+			g_keyState[SDL_SCANCODE_LALT  ] = win32GetKeyState( SDL_SCANCODE_LALT   );
+			g_keyState[SDL_SCANCODE_RALT  ] = win32GetKeyState( SDL_SCANCODE_RALT   );
+			g_keyState[SDL_SCANCODE_LCTRL ] = win32GetKeyState( SDL_SCANCODE_LCTRL  );
+			g_keyState[SDL_SCANCODE_RCTRL ] = win32GetKeyState( SDL_SCANCODE_RCTRL  );
+			g_keyState[SDL_SCANCODE_LGUI  ] = win32GetKeyState( SDL_SCANCODE_LGUI   );
+			g_keyState[SDL_SCANCODE_RGUI  ] = win32GetKeyState( SDL_SCANCODE_RGUI   );
+			#endif
+
 			keyModifier = event.key.keysym.mod;
-			g_keyState[SDL_SCANCODE_LSHIFT] = (event.key.keysym.mod & KMOD_LSHIFT) ? 1 : 0;
-			g_keyState[SDL_SCANCODE_RSHIFT] = (event.key.keysym.mod & KMOD_RSHIFT) ? 1 : 0;
-			g_keyState[SDL_SCANCODE_LALT] = (event.key.keysym.mod & KMOD_LALT) ? 1 : 0;
-			g_keyState[SDL_SCANCODE_RALT] = (event.key.keysym.mod & KMOD_RALT) ? 1 : 0;
-			g_keyState[SDL_SCANCODE_LCTRL] = (event.key.keysym.mod & KMOD_LCTRL) ? 1 : 0;
-			g_keyState[SDL_SCANCODE_RCTRL] = (event.key.keysym.mod & KMOD_RCTRL) ? 1 : 0;
+
+			if ( (event.key.keysym.mod & KMOD_LSHIFT) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_LSHIFT] = 0;
+			}
+			if ( (event.key.keysym.mod & KMOD_RSHIFT) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_RSHIFT] = 0;
+			}
+			if ( (event.key.keysym.mod & KMOD_LALT) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_LALT] = 0;
+			}
+			if ( (event.key.keysym.mod & KMOD_RALT) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_RALT] = 0;
+			}
+			if ( (event.key.keysym.mod & KMOD_LCTRL) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_LCTRL] = 0;
+			}
+			if ( (event.key.keysym.mod & KMOD_RCTRL) == 0 )
+			{
+				g_keyState[SDL_SCANCODE_RCTRL] = 0;
+			}
 
 			g_keyState[event.key.keysym.scancode] = (event.type == SDL_KEYDOWN) ? 1 : 0;
 
@@ -1811,7 +1842,7 @@ void InitInputInterface()
 	FCEUI_SetInputFourscore((eoptions & EO_FOURSCORE) != 0);
 }
 
-static ButtConfig fkbmap[0x48] = {
+ButtConfig fkbmap[FAMILYKEYBOARD_NUM_BUTTONS] = {
 	/*  0 */ MK(SDLK_F1), MK(SDLK_F2), MK(SDLK_F3), MK(SDLK_F4), MK(SDLK_F5), MK(SDLK_F6), MK(SDLK_F7), MK(SDLK_F8),
 	/*  8 */ MK(SDLK_1), MK(SDLK_2), MK(SDLK_3), MK(SDLK_4), MK(SDLK_5), MK(SDLK_6), MK(SDLK_7), MK(SDLK_8), MK(SDLK_9),
 	/* 17 */ MK(SDLK_0),
@@ -1832,15 +1863,17 @@ static ButtConfig fkbmap[0x48] = {
 /**
  * Update the status of the Family KeyBoard.
  */
-static void UpdateFKB()
+static void UpdateFKB(void)
 {
 	int x;
-	char leftShiftDown;
+	char leftShiftDown, vkeyDown;
 	//static char lp[0x48];
 
-	leftShiftDown = DTestButton(&fkbmap[50]);
+	vkeyDown = getFamilyKeyboardVirtualKey(50);
 
-	for (x = 0; x < 0x48; x++)
+	leftShiftDown = DTestButton(&fkbmap[50]) || vkeyDown;
+
+	for (x = 0; x < FAMILYKEYBOARD_NUM_BUTTONS; x++)
 	{
 		if ( leftShiftDown && (x == 62) )
 		{	// Family BASIC appears to not like when both shift keys are pressed at the
@@ -1852,7 +1885,9 @@ static void UpdateFKB()
 			continue;
 		}
 
-		if (DTestButton(&fkbmap[x]))
+		vkeyDown = getFamilyKeyboardVirtualKey(x);
+
+		if (DTestButton(&fkbmap[x]) || vkeyDown)
 		{
 			fkbkeys[x] = 1;
 
@@ -1872,6 +1907,11 @@ static void UpdateFKB()
 		}
 		//lp[x] = fkbkeys[x];
 	}
+}
+
+const uint8 *getFamilyKeyboardState(void)
+{
+	return fkbkeys;
 }
 
 static ButtConfig HyperShotButtons[4] = {

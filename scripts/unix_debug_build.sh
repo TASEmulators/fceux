@@ -2,6 +2,7 @@
 
 CLEAN_BUILD=0;
 MAKE_ARGS="";
+QT_MAJOR_VERSION=5;
 
 while test $# -gt 0
 do
@@ -15,6 +16,9 @@ do
 			 ;;
 
 		 -j) shift; MAKE_ARGS+=" -j$1 ";
+			 ;;
+
+		 -qt) shift; QT_MAJOR_VERSION="$1";
 			 ;;
 	 esac
 	 shift;
@@ -45,9 +49,24 @@ CMAKE_ARGS="\
  -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ";
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-	export Qt5_DIR=`brew --prefix qt5`
-	echo "Qt5_DIR=$Qt5_DIR";
-	CMAKE_ARGS+=" -DCMAKE_PREFIX_PATH=`brew --prefix qt5` ";
+
+	if [ "$QT_MAJOR_VERSION" == "6" ]; then
+		export Qt6_DIR=`brew --prefix qt6`
+		echo "Qt6_DIR=$Qt6_DIR";
+		CMAKE_ARGS+=" -DCMAKE_PREFIX_PATH=`brew --prefix qt6` ";
+	else
+		export Qt5_DIR=`brew --prefix qt5`
+		echo "Qt5_DIR=$Qt5_DIR";
+		CMAKE_ARGS+=" -DCMAKE_PREFIX_PATH=`brew --prefix qt5` ";
+	fi
+fi
+
+if [ ! -z "$Qt_DIR" ]; then
+	CMAKE_ARGS+=" -DCMAKE_PREFIX_PATH=$Qt_DIR ";
+fi
+
+if [ "$QT_MAJOR_VERSION" == "6" ]; then
+	CMAKE_ARGS+=" -DQT6=1 ";
 fi
 
 #echo $CMAKE_ARGS;

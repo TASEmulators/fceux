@@ -58,6 +58,7 @@ public slots:
 private slots:
 	void port1Configure(void);
 	void port2Configure(void);
+	void expPortConfigure(void);
 	void port1Select(int index);
 	void port2Select(int index);
 	void expSelect(int index);

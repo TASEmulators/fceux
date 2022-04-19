@@ -2,8 +2,7 @@ Priorities
 ==========
    * Clean out old unused files - scons build system is dead, cmake is the way to go.
    * GTK GUI was not cross-platform. A Qt5 version of the GUI has been created to meet this need. 
-     I will keep the GTK GUI around for Linux users who prefer it, but when it comes to adding new features
-     the Qt GUI is where I plan to add them first (if at all).
+     The GTK GUI has been retired and is no longer supported.
    * The Qt GUI has by far exceeded the capabilities of the older GTK version. Below is a GUI capability 
      matrix showing the differences between the two. I HIGHLY RECOMMEND USING THE Qt GUI.
    * Code cleanup. Lots of compiler warnings with newer GCC. Maybe I'm OCD... but these warnings bother me.

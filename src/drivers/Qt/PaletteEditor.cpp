@@ -1369,7 +1369,7 @@ nesPalettePickerDialog::nesPalettePickerDialog( int idx, QWidget *parent)
 //----------------------------------------------------------------------------
 nesPalettePickerDialog::~nesPalettePickerDialog(void)
 {
-	printf("Destroy Palette Editor Config Window\n");
+	//printf("Destroy Palette Editor Config Window\n");
 }
 //----------------------------------------------------------------------------
 void nesPalettePickerDialog::closeEvent(QCloseEvent *event)

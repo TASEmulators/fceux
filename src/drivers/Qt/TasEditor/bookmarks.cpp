@@ -525,7 +525,7 @@ void BOOKMARKS::paintEvent(QPaintEvent *event)
 	FCEU_CRITICAL_SECTION( emuLock );
 	QPainter painter(this);
 	int x, y, item, cell_y;
-	QColor white(255,255,255), black(0,0,0), blkColor;
+	QColor white(255,255,255), /*black(0,0,0),*/ blkColor;
 	char txt[256];
 	bool timeColBgDone = false;
 

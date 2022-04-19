@@ -48,12 +48,16 @@
 #include <QKeySequence>
 #include <SDL.h>
 
-SDL_Keycode convQtKey2SDLKeyCode( Qt::Key q );
+SDL_Keycode convQtKey2SDLKeyCode( Qt::Key q, uint32_t nativeVirtualKey = 0 );
 
-SDL_Scancode convQtKey2SDLScanCode( Qt::Key q );
+SDL_Scancode convQtKey2SDLScanCode( Qt::Key q, uint32_t nativeVirtualKey = 0 );
 
 SDL_Keymod convQtKey2SDLModifier( Qt::KeyboardModifiers m );
 
 int  convKeyEvent2Sequence( QKeyEvent *event );
 
 int  pushKeyEvent( QKeyEvent *event, int pressDown );
+
+#ifdef WIN32
+uint8_t win32GetKeyState( unsigned int vkey );
+#endif

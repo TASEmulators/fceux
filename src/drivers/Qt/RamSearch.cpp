@@ -530,7 +530,7 @@ RamSearchDialog_t::~RamSearchDialog_t(void)
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::closeEvent(QCloseEvent *event)
 {
-	printf("RAM Search Close Window Event\n");
+	//printf("RAM Search Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();
