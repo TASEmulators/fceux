@@ -279,8 +279,8 @@ int GetNesFileAddress(int A){
 }
 
 int bzk_GetNesFileAddress(int A){
-    if (A >= 0x6000) return &Page[A>>11][A]-PRGptr[0]; //for 6000-FFFF
-    return A + 0x80000; //for 0000-5FFF
+    if (A >= 0x8000) return &Page[A>>11][A]-PRGptr[0]; //for 8000-FFFF
+    return A + 0x80000; //for 0000-7FFF
 }
 
 int GetRomAddress(int A){
@@ -337,6 +337,28 @@ uint8 GetMem(uint16 A) {
 		fceuindbg=0;
 		return ret;
 	} else return 0;
+}
+
+uint8 bzk_GetMem(uint16 A) {
+    uint32 ret;
+    fceuindbg = 1;
+    ret = ARead[A](A);
+    fceuindbg = 0;
+    return ret;
+}
+
+char *bzk_GetRAMopcodes(int A, uint8 *opcode) {
+//неиспользуемые опкоды (с индексами 1 и 2) будут записаны как 0
+    static char str[16] = {0};
+    if (A >= 0x8000)
+    {
+        strcpy(str, "?");
+    }
+    else
+    {
+        sprintf(str, "%u|%u|%u", opcode[0], opcode[1], opcode[2]);
+    }
+    return str;
 }
 
 uint8 GetPPUMem(uint8 A) {
