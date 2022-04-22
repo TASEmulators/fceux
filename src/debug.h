@@ -74,7 +74,6 @@ uint8 *GetNesPRGPointer(int A);
 uint8 *GetNesCHRPointer(int A);
 void KillDebugger();
 uint8 GetMem(uint16 A);
-uint8 bzk_GetMem(uint16 A);
 char *bzk_GetRAMopcodes(int A, uint8 *opcode);
 uint8 GetPPUMem(uint8 A);
 

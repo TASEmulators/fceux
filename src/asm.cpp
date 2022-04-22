@@ -560,7 +560,7 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
 		case 0xE6: goto _zeropage; //INC
 		_zeropage:
             tmp = opcode[1];
-			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
 			break;
         
 		//Zero Page,X
@@ -582,7 +582,7 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
 		case 0xF6: goto _zeropagex; //INC
 		_zeropagex:
 			tmp = (opcode[1] + X.X) & 0xFF;
-            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
 			break;
         
 		//Zero Page,Y
@@ -590,7 +590,7 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
 		case 0xB6: goto _zeropagey; //LDX
 		_zeropagey:
 			tmp = (opcode[1] + X.Y) & 0xFF;
-            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
 			break;
         
 		//Absolute
@@ -617,7 +617,7 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
 		case 0xEE: goto _absolute; //INC
 		_absolute:
 			tmp = opcode[1] | opcode[2] << 8;
-			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
 			break;
         
 		//Absolute,X
@@ -638,7 +638,7 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
 		case 0xFE: goto _absolutex; //INC
 		_absolutex:
 			tmp = (opcode[1] | opcode[2] << 8) + X.X;
-			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
 			break;
         
 		//Absolute,Y
@@ -653,7 +653,7 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
 		case 0xF9: goto _absolutey; //SBC
 		_absolutey:
 			tmp = (opcode[1] | opcode[2] << 8) + X.Y;
-			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
 			break;
         
 		//branches
@@ -668,7 +668,7 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
 		_branch:
             tmp = addr + opcode[1] + 0x02;
 			if (opcode[1] >= 0x80) tmp -= 0x100;
-			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
 			break;
         
 		//(Indirect,X)
@@ -682,8 +682,8 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
 		case 0xE1: goto _indirectx; //SBC
 		_indirectx:
             tmp = (opcode[1] + X.X) & 0xFF;
-            tmp = bzk_GetMem((tmp)) | (bzk_GetMem(((tmp) + 1) & 0xFF)) << 8;
-			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+            tmp = GetMem((tmp)) | (GetMem(((tmp) + 1) & 0xFF)) << 8;
+			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
 			break;
         
 		//(Indirect),Y
@@ -696,8 +696,8 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
 		case 0xD1: goto _indirecty; //CMP
 		case 0xF1: goto _indirecty; //SBC
 		_indirecty:
-            tmp = (bzk_GetMem(opcode[1]) | (bzk_GetMem((opcode[1] + 1) & 0xFF)) << 8) + X.Y;
-			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+            tmp = (GetMem(opcode[1]) | (GetMem((opcode[1] + 1) & 0xFF)) << 8) + X.Y;
+			sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
 			break;
         
 		//absolute jumps
@@ -705,26 +705,26 @@ char *bzk_Disassemble(int addr, uint8 *opcode) {
 		case 0x4C: goto _jump; //JMP
 		_jump:
             tmp = opcode[1] | opcode[2] << 8;
-            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
 			break;
         
         //indirect jump
 		case 0x6C: //JMP
             tmp = opcode[1] | opcode[2] << 8;
-            tmp = bzk_GetMem(tmp) | bzk_GetMem(tmp + 1) << 8;
-            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+            tmp = GetMem(tmp) | GetMem(tmp + 1) << 8;
+            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
             break;
         
         //return from subroutine
         case 0x60: //RTS
-            tmp = bzk_GetMem(((X.S) + 1)|0x0100) + (bzk_GetMem(((X.S) + 2)|0x0100) << 8) + 0x01;
-            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+            tmp = GetMem(((X.S) + 1)|0x0100) + (GetMem(((X.S) + 2)|0x0100) << 8) + 0x01;
+            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
             break;
         
         //return from interrupt
         case 0x40: //RTI
-            tmp = bzk_GetMem(((X.S) + 2)|0x0100) + (bzk_GetMem(((X.S) + 3)|0x0100) << 8);
-            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), bzk_GetMem(tmp));
+            tmp = GetMem(((X.S) + 2)|0x0100) + (GetMem(((X.S) + 3)|0x0100) << 8);
+            sprintf(str, "%u|%u|%u", bzk_GetNesFileAddress(tmp), bzk_getBank(tmp), GetMem(tmp));
             break;
         
         //for all other other opcodes, which are immediate and 1-byte instructions

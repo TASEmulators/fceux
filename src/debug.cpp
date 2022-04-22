@@ -339,14 +339,6 @@ uint8 GetMem(uint16 A) {
 	} else return 0;
 }
 
-uint8 bzk_GetMem(uint16 A) {
-    uint32 ret;
-    fceuindbg = 1;
-    ret = ARead[A](A);
-    fceuindbg = 0;
-    return ret;
-}
-
 char *bzk_GetRAMopcodes(int A, uint8 *opcode) {
 //неиспользуемые опкоды (с индексами 1 и 2) будут записаны как 0
     static char str[16] = {0};
