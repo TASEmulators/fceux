@@ -808,6 +808,9 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	if (skip != 2) ssize = FlushEmulateSound();  //If skip = 2 we are skipping sound processing
 
+	//flush tracer once a frame, since we're likely to end up back at a user interaction loop after this with emulation paused
+	FCEUD_FlushTrace();
+
 #ifdef _S9XLUA_H
 	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
 #endif
@@ -1228,12 +1231,16 @@ void FCEUI_ClearEmulationFrameStepped()
 //ideally maybe we shouldnt be using this, but i need it for quick merging
 void FCEUI_SetEmulationPaused(int val) {
 	EmulationPaused = val;
+	if(EmulationPaused)
+		FCEUD_FlushTrace();
 }
 
 void FCEUI_ToggleEmulationPause(void)
 {
 	EmulationPaused = (EmulationPaused & EMULATIONPAUSED_PAUSED) ^ EMULATIONPAUSED_PAUSED;
 	DebuggerWasUpdated = false;
+	if(EmulationPaused)
+		FCEUD_FlushTrace();
 }
 
 void FCEUI_FrameAdvanceEnd(void) {

@@ -732,6 +732,12 @@ void BeginLoggingSequence(void)
 	return;
 }
 
+void FCEUD_FlushTrace()
+{
+	if(LOG_FP)
+		fflush(LOG_FP);
+}
+
 //todo: really speed this up
 void FCEUD_TraceInstruction(uint8 *opcode, int size)
 {
@@ -975,7 +981,6 @@ void OutputLogLine(const char *str, std::vector<uint16>* addressesLog, bool add_
 		fputs(str, LOG_FP);
 		if (add_newline)
 			fputs("\n", LOG_FP);
-		fflush(LOG_FP);
 	} else
 	{
 		if (add_newline)

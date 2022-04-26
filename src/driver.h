@@ -330,6 +330,9 @@ void FCEUD_DebugBreakpoint(int bp_num);
 ///the driver should log the current instruction, if it wants (we should move the code in the win driver that does this to the shared area)
 void FCEUD_TraceInstruction(uint8 *opcode, int size);
 
+///the driver should flush its trace log
+void FCEUD_FlushTrace();
+
 ///the driver might should update its NTView (only used if debugging support is compiled in)
 void FCEUD_UpdateNTView(int scanline, bool drawall);
 
