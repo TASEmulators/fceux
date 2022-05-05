@@ -426,7 +426,7 @@ INT_PTR CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG_SIZE, CB_INSERTSTRING, -1, (LPARAM)(LPSTR)log_optn_strlst[i]);
 			}
 			SendDlgItemMessage(hwndDlg, IDC_TRACER_LOG_SIZE, CB_SETCURSEL, (WPARAM)log_lines_option, 0);
-			strcpy(trace_str, "1 - delete all .log files, 2 - start logging, 3 - launch BZK script, 4 - stop logging before exit.");
+			strcpy(trace_str, "Read the manual at https://github.com/cyneprepou4uk/BZK-6502-Disassembler");
 			SetDlgItemText(hwndDlg, IDC_TRACER_LOG, trace_str);
 			logtofile = 1;
 
