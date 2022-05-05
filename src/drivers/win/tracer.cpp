@@ -1096,6 +1096,7 @@ void EndLoggingSequence()
 
 		bzk_files_counter++;
         bzk_writes_counter = 0;
+        bzk_previous_address = 0x200000;
 	} else
 	{
 		strcpy(str_result, "Logging finished.");
