@@ -127,6 +127,7 @@ char bzk_string[200] = {0};
 int bzk_writes_counter = 0;
 int bzk_previous_address = 0x200000;
 int bzk_files_counter = 0;
+int bzk_log_files_counter = 0;
 char str_temp[LOG_LINE_MAX_LEN] = {0};
 char str_decoration[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
 char str_decoration_comment[NL_MAX_MULTILINE_COMMENT_LEN + 10] = {0};
@@ -731,6 +732,33 @@ void BeginLoggingSequence(void)
 			MessageBox(hTracer, trace_str, "File Error", MB_OK);
 			return;
 		}
+        
+        
+		ClearTraceLogBuf();
+		tracelogbufsize = j = 1000;
+		tracelogbuf = (char**)malloc(j * sizeof(char *));
+		for (i = 0;i < j;i++)
+		{
+			tracelogbuf[i] = (char*)malloc(LOG_LINE_MAX_LEN);
+			tracelogbuf[i][0] = 0;
+		}
+		tracelogbufAddressesLog.resize(0);
+		tracelogbufAddressesLog.resize(tracelogbufsize);
+		tracelogbufpos = tracelogbufusedsize = 0;   //возможно не обязательно
+        
+		strcpy(str_result, "Logging started.");
+		OutputLogLine(str_result);
+		ScrollLogWindowToLastLine();
+		UpdateLogText();
+        
+        bzk_log_files_counter++;
+        
+		sprintf(str_result, "z%05d.log (%d)", bzk_files_counter, bzk_log_files_counter);
+		OutputLogLine(str_result);
+		ScrollLogWindowToLastLine();
+		UpdateLogText();
+        
+        
 //		fprintf(LOG_FP,FCEU_NAME_AND_VERSION" - Trace Log File\n"); //mbg merge 7/19/06 changed string
 	} else
 	{
@@ -1036,6 +1064,13 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
         if (bzk_files_counter >= 100000) bzk_files_counter = 0;
 		sprintf(bzk_filename, "z%05d.log", bzk_files_counter);
 		LOG_FP = fopen(bzk_filename, "w");
+        
+        bzk_log_files_counter++;
+        
+		sprintf(str_result, "z%05d.log (%d)", bzk_files_counter, bzk_log_files_counter);
+		OutputLogLine(str_result);
+		ScrollLogWindowToLastLine();
+		UpdateLogText();
 	}
     
 	return;
@@ -1043,13 +1078,13 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 
 void OutputLogLine(const char *str, std::vector<uint16>* addressesLog, bool add_newline)
 {
-	if (logtofile)
-	{
-		fputs(str, LOG_FP);
-		if (add_newline)
-			fputs("\n", LOG_FP);
-	} else
-	{
+	//if (logtofile)
+	//{
+	//	fputs(str, LOG_FP);
+	//	if (add_newline)
+	//		fputs("\n", LOG_FP);
+	//} else
+	//{
 		if (add_newline)
 		{
 			strncpy(tracelogbuf[tracelogbufpos], str, LOG_LINE_MAX_LEN - 3);
@@ -1070,7 +1105,7 @@ void OutputLogLine(const char *str, std::vector<uint16>* addressesLog, bool add_
 		if (tracelogbufusedsize < tracelogbufsize)
 			tracelogbufusedsize++;
 		tracelogbufpos %= tracelogbufsize;
-	}
+	//}
 }
 
 void ClearTraceLogBuf(void)
@@ -1102,6 +1137,12 @@ void EndLoggingSequence()
 		bzk_files_counter++;
         bzk_writes_counter = 0;
         bzk_previous_address = 0x200000;
+        bzk_log_files_counter = 0;
+        
+		strcpy(str_result, "Logging finished.");
+		OutputLogLine(str_result);
+		ScrollLogWindowToLastLine();
+		UpdateLogText();
 	} else
 	{
 		strcpy(str_result, "Logging finished.");
