@@ -1291,6 +1291,13 @@ int FCEUD_TraceLoggerRunning(void)
 {
 	return logging;
 }
+
+void FCEUD_FlushTrace()
+{
+	//not needed, since it's doing something in a thread, i guess.
+	//seems weird that there's no way to rendezvous with it
+}
+
 //----------------------------------------------------
 //todo: really speed this up
 void FCEUD_TraceInstruction(uint8 *opcode, int size)
