@@ -443,11 +443,36 @@ INT_PTR CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			CheckDlgButton(hwndDlg, IDC_CHECK_SYMBOLIC_TRACING, (logging_options & LOG_SYMBOLIC) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_CODE_TABBING, (logging_options & LOG_CODE_TABBING) ? BST_CHECKED : BST_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_BANK_NUMBER, (logging_options & LOG_BANK_NUMBER) ? BST_CHECKED : BST_UNCHECKED);
-			
-			EnableWindow(GetDlgItem(hwndDlg, IDC_TRACER_LOG_SIZE), TRUE);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_BTN_LOG_BROWSE), FALSE);
 			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_UPDATE_WINDOW, log_update_window ? BST_CHECKED : BST_UNCHECKED);
-			EnableTracerMenuItems();
+			
+			EnableWindow(GetDlgItem(hwndDlg, IDC_TRACER_LOG_SIZE), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_BTN_LOG_BROWSE), TRUE);
+            
+            
+            
+            //выключение большинства кнопок
+            EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_LAST),FALSE);
+            EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_TO_FILE),FALSE);
+            
+            EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_UPDATE_WINDOW),FALSE);
+            
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_REGISTERS), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_FRAMES_COUNT), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_MESSAGES), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_SYMBOLIC_TRACING), FALSE);
+            
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_CYCLES_COUNT), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_BREAKPOINTS), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_CODE_TABBING), FALSE);
+            
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_STATUSES_TO_THE_LEFT), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_INSTRUCTIONS_COUNT), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_BANK_NUMBER), FALSE);
+            
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_NEW_INSTRUCTIONS), FALSE);
+			EnableWindow(GetDlgItem(hwndDlg, IDC_CHECK_LOG_NEW_DATA), FALSE);
+			//EnableTracerMenuItems();
 
 			// subclass editfield
 			IDC_TRACER_LOG_oldWndProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hwndDlg, IDC_TRACER_LOG), GWLP_WNDPROC, (LONG_PTR)IDC_TRACER_LOG_WndProc);
@@ -536,15 +561,15 @@ INT_PTR CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 								EndLoggingSequence();
 							else
 								BeginLoggingSequence();
-							EnableTracerMenuItems();
+							//EnableTracerMenuItems();
 							break;
 						case IDC_RADIO_LOG_LAST:
 							logtofile = 1;
-							EnableTracerMenuItems();
+							//EnableTracerMenuItems();
 							break;
 						case IDC_RADIO_LOG_TO_FILE:
 							logtofile = 1;
-							EnableTracerMenuItems();
+							//EnableTracerMenuItems();
 							break;
 						case IDC_CHECK_LOG_REGISTERS:
 							logging_options ^= LOG_REGISTERS;
