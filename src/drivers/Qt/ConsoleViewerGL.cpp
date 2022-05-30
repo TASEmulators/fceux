@@ -84,6 +84,7 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	setMinimumWidth( 256 );
 	setMinimumHeight( 224 );
 	setFocusPolicy(Qt::StrongFocus);
+	//setAttribute(Qt::WA_OpaquePaintEvent);
 
 	localBufSize = (4 * GL_NES_WIDTH) * (4 * GL_NES_HEIGHT) * sizeof(uint32_t);
 
@@ -272,6 +273,8 @@ void ConsoleViewGL_t::buildTextures(void)
 						GL_BGRA, GL_UNSIGNED_BYTE, 0 );
 	}
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//printf("Texture Built: %ix%i\n", w, h);
 }
 
@@ -347,7 +350,7 @@ void ConsoleViewGL_t::initializeGL(void)
 	initializeOpenGLFunctions();
 	// Set up the rendering context, load shaders and other resources, etc.:
 	//QOpenGLFunctions *gl = QOpenGLContext::currentContext()->functions();
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	chkExtnsGL();
 	 //printf("GL Init!\n");
@@ -666,6 +669,8 @@ void ConsoleViewGL_t::paintGL(void)
 	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	if ( textureType == GL_TEXTURE_RECTANGLE )
 	{
