@@ -101,6 +101,9 @@ void iNESGI(GI h) { //bbit edited: removed static keyword
 	case GI_POWER:
 		iNES_ExecPower();
 		break;
+	case GI_SAVE:
+		FCEU_SaveGameSave(&iNESCart);
+		break;
 	case GI_CLOSE:
 	{
 		FCEU_SaveGameSave(&iNESCart);
@@ -736,6 +739,53 @@ BMAPPINGLocal bmap[] = {
 	{"",					0, NULL}
 };
 
+int iNESDetectVidSys()
+{
+	if (!ROM) {
+		return 0;
+	}
+
+	// Extract Filename only. Should account for Windows/Unix this way.
+	char *basename = strrchr(LoadedRomFName, '/');
+	if (!basename) {
+		basename = strrchr(LoadedRomFName, '\\');
+	}
+	if (!basename) {
+		basename = LoadedRomFName;
+	} else {
+		++basename;
+	}
+
+	char name[1024];
+	int i;
+	for (i = 0; (i < 1023) && (basename[i] != '\0'); ++i) {
+		name[i] = tolower(basename[i]);
+	}
+	name[i] = '\0';
+
+	// since apparently the iNES format doesn't store this information,
+	// guess if the settings should be PAL or NTSC from the ROM name
+	// TODO: MD5 check against a list of all known PAL games instead?
+	if (strstr(name, "(pal)")
+			|| strstr(name, "(e)") || strstr(name, "(europe)")
+			|| strstr(name, "(d)")
+			|| strstr(name, "(f)")
+			|| strstr(name, "(g)")
+			|| strstr(name, "(gr)")
+			|| strstr(name, "(i)")
+			|| strstr(name, "(nl)")
+			|| strstr(name, "(no)")
+			|| strstr(name, "(r)")
+			|| strstr(name, "(s)")
+			|| strstr(name, "(sw)")
+			|| strstr(name, "(uk)")
+			) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	struct md5_context md5;
 
@@ -948,34 +998,38 @@ init_ok:
 
 	strcpy(LoadedRomFName, name); //bbit edited: line added
 
-	// Extract Filename only. Should account for Windows/Unix this way.
-	if (strrchr(name, '/')) {
-		name = strrchr(name, '/') + 1;
-	} else if (strrchr(name, '\\')) {
-		name = strrchr(name, '\\') + 1;
-	}
-
 	GameInterface = iNESGI;
 	currCartInfo = &iNESCart;
-	FCEU_printf("\n");
 
-	// since apparently the iNES format doesn't store this information,
-	// guess if the settings should be PAL or NTSC from the ROM name
-	// TODO: MD5 check against a list of all known PAL games instead?
 	if (iNES2) {
 		FCEUI_SetVidSystem(((head.TV_system & 3) == 1) ? 1 : 0);
 	} else if (OverwriteVidMode) {
-		if (strstr(name, "(E)") || strstr(name, "(e)")
-			|| strstr(name, "(Europe)") || strstr(name, "(PAL)")
-			|| strstr(name, "(F)") || strstr(name, "(f)")
-			|| strstr(name, "(G)") || strstr(name, "(g)")
-			|| strstr(name, "(I)") || strstr(name, "(i)"))
-			FCEUI_SetVidSystem(1);
-		else
-			FCEUI_SetVidSystem(0);
+		const int vidsys = iNESDetectVidSys();
+		FCEU_printf(" Video system: %s\n", vidsys ? "PAL" : "NTSC");
+		FCEUI_SetVidSystem(vidsys);
 	}
+
+	FCEU_printf("\n");
 	return LOADER_OK;
 }
+
+#ifdef __EMSCRIPTEN__
+
+void System_LoadGameSave()
+{
+    if (GameInterface == iNESGI) {
+		FCEU_LoadGameSave(&iNESCart);
+    }
+}
+
+void System_SaveGameSave()
+{
+    if (GameInterface == iNESGI) {
+		FCEU_SaveGameSave(&iNESCart);
+    }
+}
+
+#else
 
 // bbit edited: the whole function below was added
 int iNesSave(void) {
@@ -1022,6 +1076,7 @@ int iNesSaveAs(const char* name)
 	fclose(fp);
 	return 1;
 }
+#endif
 
 //para edit: added function below
 char *iNesShortFName(void) {

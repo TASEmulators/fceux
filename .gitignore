@@ -1,3 +1,5 @@
+.DS_Store
+.vscode
 /vc/defaultconfig/scmrev.h
 /vc/.vs
 /vc/vc14_bin_Debug
@@ -40,6 +42,14 @@ fceux-net-server
 /output/cheats
 /output/snaps
 /output/sav
+
+# emscripten build related
+node_modules
+src/drivers/em/build
+src/drivers/em/dist
+src/drivers/em/opsfuncs.inc
+src/drivers/em/API.md
+src/drivers/em/COPYING
 
 # typical CMake build directory
 /build

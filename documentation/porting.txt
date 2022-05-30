@@ -118,7 +118,7 @@ void FCEUI_SetBaseDirectory(void);
         Specifies the base FCE Ultra directory.  This should be called
         immediately after FCEUI_Initialize() and any time afterwards.
 
-void FCEUI_SetDirOverride(int which, char *n);
+void FCEUI_SetDirOverride(int which, const char *n);
 
         FCEUIOD_CHEATS  - Cheats
         FCEUIOD_MISC    - Miscellaneous stuff(custom game palettes)

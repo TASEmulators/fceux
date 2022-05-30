@@ -99,16 +99,31 @@ uint8 RawReg4016 = 0; // Joystick strobe (W)
 
 bool replaceP2StartWithMicrophone = false;
 
-//This function is a quick hack to get the NSF player to use emulated gamepad input.
-uint8 FCEU_GetJoyJoy(void)
-{
-	return(joy[0]|joy[1]|joy[2]|joy[3]);
-}
+#ifdef __EMSCRIPTEN__
+static int currFrameCounter = 0;
+#endif
 
 extern uint8 coinon;
 
 //set to true if the fourscore is attached
 static bool FSAttached = false;
+
+// Shorthand to get button bits of any connected gamepad (OR'd together).
+uint8 FCEU_GetJoyJoy(void)
+{
+	if (!FSAttached) {
+		int result = 0;
+		for (int i = 0; i < 2; ++i) {
+			if (joyports[i].type == SI_GAMEPAD) {
+				result |= joy[i];
+			}
+		}
+		return result;
+	} else {
+// TODO: tsone: verify this actually works w/ four score
+		return joy[0] | joy[1] | joy[2] | joy[3];
+	}
+}
 
 JOYPORT joyports[2] = { JOYPORT(0), JOYPORT(1) };
 FCPORT portFC;
@@ -431,7 +446,7 @@ void FCEU_UpdateInput(void)
 		portFC.driver->Update(portFC.ptr,portFC.attrib);
 	}
 
-	if(GameInfo->type==GIT_VSUNI)
+	if(GameInfo && GameInfo->type==GIT_VSUNI)
 		if(coinon) coinon--;
 
 	if(FCEUnetplay)
@@ -440,7 +455,7 @@ void FCEU_UpdateInput(void)
 	FCEUMOV_AddInputState();
 
 	//TODO - should this apply to the movie data? should this be displayed in the input hud?
-	if(GameInfo->type==GIT_VSUNI){
+	if(GameInfo && GameInfo->type==GIT_VSUNI){
 		FCEU_VSUniSwap(&joy[0],&joy[1]);
 	}
 }
@@ -618,7 +633,7 @@ void InitializeInput(void)
 	memset(joy,0,sizeof(joy));
 	LastStrobe = 0;
 
-	if(GameInfo->type==GIT_VSUNI)
+	if(GameInfo && GameInfo->type==GIT_VSUNI)
 	{
 		SetReadHandler(0x4016,0x4016,VSUNIRead0);
 		SetReadHandler(0x4017,0x4017,VSUNIRead1);
@@ -729,7 +744,9 @@ void FCEUI_VSUniCoin(void)
 //Resets the frame counter if movie inactive and rom is reset or power-cycle
 void ResetFrameCounter()
 {
+#ifndef __EMSCRIPTEN__
 extern EMOVIEMODE movieMode;
+#endif
 	if(movieMode == MOVIEMODE_INACTIVE)
 		currFrameCounter = 0;
 }
@@ -770,6 +787,7 @@ const char* FCEUI_CommandTypeNames[]=
 	"TAS Editor",
 };
 
+#ifndef __EMSCRIPTEN__
 //static void CommandUnImpl(void);
 static void CommandToggleDip(void);
 static void CommandStateLoad(void);
@@ -1387,3 +1405,5 @@ EMUCMDTABLE* GetEmuCommandById(int cmd)
 	}
 	return NULL;
 }
+
+#endif //__EMSCRIPTEN__

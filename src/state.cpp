@@ -41,6 +41,9 @@
 #ifdef _S9XLUA_H
 #include "fceulua.h"
 #endif
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 //TODO - we really need some kind of global platform-specific options api
 #ifdef __WIN_DRIVER__
@@ -70,17 +73,29 @@ static int StateShow;
 //tells the save system innards that we're loading the old format
 bool FCEU_state_loading_old_format = false;
 
+#ifndef __EMSCRIPTEN__
 char lastSavestateMade[2048]; //Stores the filename of the last savestate made (needed for UndoSavestate)
+#else
+char *lastSavestateMade = 0;
+#endif
 bool undoSS = false;		  //This will be true if there is lastSavestateMade, it was made since ROM was loaded, a backup state for lastSavestateMade exists
 bool redoSS = false;		  //This will be true if UndoSaveState is run, will turn false when a new savestate is made
 
+#ifndef __EMSCRIPTEN__
 char lastLoadstateMade[2048]; //Stores the filename of the last state loaded (needed for Undo/Redo loadstate)
+#else
+char *lastLoadstateMade = 0;
+#endif
 bool undoLS = false;		  //This will be true if a backupstate was made and it was made since ROM was loaded
 bool redoLS = false;		  //This will be true if a backupstate was loaded, meaning redoLoadState can be run
 
 bool internalSaveLoad = false;
 
+#ifndef __EMSCRIPTEN__
 bool backupSavestates = true;
+#else
+bool backupSavestates = false;
+#endif
 bool compressSavestates = true;  //By default FCEUX compresses savestates when a movie is inactive.
 
 // a temp memory stream. We'll be dumping some data here and then compress
@@ -306,7 +321,11 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 		case 8:
 			// load back buffer
 			{
+#ifndef __EMSCRIPTEN__
 				extern uint8 *XBackBuf;
+#else
+				uint8 *XBackBuf = XBuf;
+#endif
 				if(is->fread((char*)XBackBuf,size) != size)
 					ret = false;
 
@@ -403,7 +422,11 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 	}
 	// save back buffer
 	{
+#ifndef __EMSCRIPTEN__
 		extern uint8 *XBackBuf;
+#else
+		uint8 *XBackBuf = XBuf;
+#endif
 		uint32 size = 256 * 256 + 8;
 		os->fputc(8);
 		write32le(size, os);
@@ -478,6 +501,7 @@ void FCEUSS_Save(const char *fname, bool display_message)
 		if (CheckFileExists(fn) && backupSavestates)	//adelikat:  If the files exists and we are allowed to make backup savestates
 		{
 			CreateBackupSaveState(fn);		//Make a backup of previous savestate before overwriting it
+			FCEU_ARRAY_EM(lastSavestateMade, char, 2048);
 			strcpy(lastSavestateMade,fn);	//Remember what the last savestate filename was (for undoing later)
 			undoSS = true;					//Backup was created so undo is possible
 		}
@@ -736,6 +760,7 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	{
 		strcpy(fn, FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname).c_str());
 		st=FCEUD_UTF8_fstream(fn,"rb");
+		FCEU_ARRAY_EM(lastLoadstateMade, char, 2048);
         strcpy(lastLoadstateMade,fn);
 	}
 
@@ -799,11 +824,13 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 #endif
 
+#ifndef __EMSCRIPTEN__
 		//Update input display if movie is loaded
 		extern uint32 cur_input_display;
 		extern uint8 FCEU_GetJoyJoy(void);
 
 		cur_input_display = FCEU_GetJoyJoy(); //Input display should show the last buttons pressed (stored in the savestate)
+#endif
 
 		return true;
 	} else
@@ -1009,7 +1036,9 @@ void FCEUI_LoadState(const char *fname, bool display_message)
 			free(fn);
 		}
 #endif
+#ifndef __EMSCRIPTEN__
 		freshMovie = false;		//The movie has been altered so it is no longer fresh
+#endif // __EMSCRIPTEN__
 	} else
 	{
 		loadStateFailed = 1;
@@ -1056,7 +1085,11 @@ void SwapSaveState()
 	//Both files must exist
 	//--------------------------------------------------------------------------------------------
 
+#ifndef __EMSCRIPTEN__
 	if (!lastSavestateMade)
+#else
+	if (!lastSavestateMade || !lastSavestateMade[0])
+#endif
 	{
 		FCEUI_DispMessage("Can't Undo",0);
 		FCEUI_printf("Undo savestate was attempted but unsuccessful because there was not a recently used savestate.\n");
@@ -1161,7 +1194,11 @@ void LoadBackup()
 void RedoLoadState()
 {
 	if (!redoLS) return;
+#ifndef __EMSCRIPTEN__
 	if (lastLoadstateMade && redoLS)
+#else
+	if (lastLoadstateMade && lastLoadstateMade[0] && redoLS)
+#endif
 	{
 		FCEUSS_Load(lastLoadstateMade);
 		FCEUI_printf("Redoing %s\n",lastLoadstateMade);

@@ -63,9 +63,11 @@
 //128-195 is the palette with no emphasis
 //196-255 is the palette with all emphasis bits on
 u8 *XBuf=NULL; //used for current display
-u8 *XBackBuf=NULL; //ppu output is stashed here before drawing happens
 u8 *XDBuf=NULL; //corresponding to XBuf but with deemph bits
+#ifndef __EMSCRIPTEN__
+u8 *XBackBuf=NULL; //ppu output is stashed here before drawing happens
 u8 *XDBackBuf=NULL; //corresponding to XBackBuf but with deemph bits
+#endif
 int ClipSidesOffset=0;	//Used to move displayed messages when Clips left and right sides is checked
 static u8 *xbsave=NULL;
 
@@ -76,7 +78,11 @@ bool vidGuiMsgEna = true;
 
 //for input display
 extern int input_display;
+#ifndef __EMSCRIPTEN__
 extern uint32 cur_input_display;
+#else
+#define cur_input_display 0
+#endif
 
 bool oldInputDisplay = false;
 
@@ -93,18 +99,20 @@ void FCEU_KillVirtualVideo(void)
 	{
 		FCEU_free(XBuf); XBuf = NULL;
 	}
-	if ( XBackBuf )
-	{
-		FCEU_free(XBackBuf); XBackBuf = NULL;
-	}
 	if ( XDBuf )
 	{
 		FCEU_free(XDBuf); XDBuf = NULL;
+	}
+#ifndef __EMSCRIPTEN__
+	if ( XBackBuf )
+	{
+		FCEU_free(XBackBuf); XBackBuf = NULL;
 	}
 	if ( XDBackBuf )
 	{
 		FCEU_free(XDBackBuf); XDBackBuf = NULL;
 	}
+#endif
 	//printf("Video Core Cleanup\n");
 }
 
@@ -121,10 +129,14 @@ int FCEU_InitVirtualVideo(void)
 		return 1;
 	
 	XBuf = (u8*)FCEU_malloc(256 * 256 + 16);
-	XBackBuf = (u8*)FCEU_malloc(256 * 256 + 16);
 	XDBuf = (u8*)FCEU_malloc(256 * 256 + 16);
+#ifndef __EMSCRIPTEN__
+	XBackBuf = (u8*)FCEU_malloc(256 * 256 + 16);
 	XDBackBuf = (u8*)FCEU_malloc(256 * 256 + 16);
 	if(!XBuf || !XBackBuf || !XDBuf || !XDBackBuf)
+#else
+	if(!XBuf || !XDBuf)
+#endif
 	{
 		return 0;
 	}
@@ -138,10 +150,16 @@ int FCEU_InitVirtualVideo(void)
 		XBuf+=m;
 	}
 
+#ifndef __EMSCRIPTEN__
 	memset(XBuf,128,256*256);
+	memset(XDBuf,128,256*256);
 	memset(XBackBuf,128,256*256);
-	memset(XBuf,128,256*256);
-	memset(XBackBuf,128,256*256);
+	memset(XDBackBuf,128,256*256);
+#else
+	// TODO: tsone: why 0x1D and 32-bit?
+	memset(XBuf,0x1D1D1D1D,256*256);
+	memset(XDBuf,0x1D1D1D1D,256*256);
+#endif
 
 	return 1;
 }
@@ -171,6 +189,7 @@ void FCEUI_SaveSnapshotAs(void)
 	dosnapsave=2;
 }
 
+#ifndef __EMSCRIPTEN__
 static void ReallySnap(void)
 {
 	int x=SaveSnapshot();
@@ -179,6 +198,7 @@ static void ReallySnap(void)
 	else
 		FCEU_DispMessage("Screen snapshot %d saved.",0,x-1);
 }
+#endif
 
 static uint32 GetButtonColor(uint32 held, uint32 c, uint32 ci, int bit)
 {
@@ -207,6 +227,7 @@ static uint32 GetButtonColor(uint32 held, uint32 c, uint32 ci, int bit)
 
 void FCEU_PutImage(void)
 {
+#ifndef __EMSCRIPTEN__
 	if(dosnapsave==2)	//Save screenshot as, currently only flagged & run by the Win32 build. //TODO SDL: implement this?
 	{
 		char nameo[512];
@@ -218,6 +239,8 @@ void FCEU_PutImage(void)
 		}
 		dosnapsave=0;
 	}
+#endif
+
 	if(GameInfo->type==GIT_NSF)
 	{
 		DrawNSF(XBuf);
@@ -226,15 +249,19 @@ void FCEU_PutImage(void)
 		FCEU_LuaGui(XBuf);
 #endif
 
+#ifndef __EMSCRIPTEN__
 		//Save snapshot after NSF screen is drawn.  Why would we want to do it before?
 		if(dosnapsave==1)
 		{
 			ReallySnap();
 			dosnapsave=0;
 		}
+#endif //__EMSCRIPTEN__
 	}
 	else
 	{
+
+#ifndef __EMSCRIPTEN__
 		//Save backbuffer before overlay stuff is written.
 		if(!FCEUI_EmulationPaused())
 			memcpy(XBackBuf, XBuf, 256*256);
@@ -255,6 +282,7 @@ void FCEU_PutImage(void)
 		}
 
 		if (!FCEUI_AviEnableHUDrecording()) snapAVI();
+#endif //__EMSCRIPTEN__
 
 		if(GameInfo->type==GIT_VSUNI)
 			FCEU_VSUniDraw(XBuf);
@@ -270,6 +298,7 @@ void FCEU_PutImage(void)
 	if(FCEUD_ShouldDrawInputAids())
 		FCEU_DrawInput(XBuf);
 
+#ifndef __EMSCRIPTEN__
 	//Fancy input display code
 	if(input_display)
 	{
@@ -391,14 +420,19 @@ void FCEU_PutImage(void)
 			snapAVI();
 		}
 	} else DrawMessage(false);
-
+#else
+	DrawMessage(false);
+#endif //__EMSCRIPTEN__
 }
+
+#ifndef __EMSCRIPTEN__
 void snapAVI()
 {
 	//Update AVI
 	if(!FCEUI_EmulationPaused())
 		FCEUI_AviVideoUpdate(XBuf);
 }
+#endif
 
 void FCEU_DispMessageOnMovie(const char *format, ...)
 {
@@ -504,9 +538,11 @@ uint32 GetScreenPixel(int x, int y, bool usebackup) {
 	if (((x < 0) || (x > 255)) || ((y < 0) || (y > 255)))
 		return -1;
 
+#ifndef __EMSCRIPTEN__
 	if (usebackup)
 		FCEUD_GetPalette(XBackBuf[(y*256)+x],&r,&g,&b);
 	else
+#endif
 		FCEUD_GetPalette(XBuf[(y*256)+x],&r,&g,&b);
 
 
@@ -518,9 +554,11 @@ int GetScreenPixelPalette(int x, int y, bool usebackup) {
 	if (((x < 0) || (x > 255)) || ((y < 0) || (y > 255)))
 		return -1;
 
+#ifndef __EMSCRIPTEN__
 	if (usebackup)
 		return XBackBuf[(y*256)+x] & 0x3f;
 	else
+#endif
 		return XBuf[(y*256)+x] & 0x3f;
 
 }
@@ -748,6 +786,12 @@ void FCEUI_ToggleShowFPS()
 static uint64 boop_ts = 0;
 static unsigned int boopcount = 0;
 
+#ifndef __EMSCRIPTEN__
+#define COLOR_FPS 0xA0
+#else
+#define COLOR_FPS 0x20
+#endif
+
 void ResetFPS(void)
 {
 	boop_ts = 0;
@@ -779,5 +823,5 @@ void ShowFPS(void)
 	}
 	boopcount++;
 
-	DrawTextTrans(XBuf + ((256 - ClipSidesOffset) - 40) + (FSettings.FirstSLine + 4) * 256, 256, (uint8*)fpsmsg, 0xA0);
+	DrawTextTrans(XBuf + ((256 - ClipSidesOffset) - 40) + (FSettings.FirstSLine + 4) * 256, (uint8*)fpsmsg, COLOR_FPS);
 }

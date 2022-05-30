@@ -8,9 +8,11 @@ void ResetScreenshotsCounter();
 uint32 GetScreenPixel(int x, int y, bool usebackup);
 int GetScreenPixelPalette(int x, int y, bool usebackup);
 extern uint8 *XBuf;
-extern uint8 *XBackBuf;
 extern uint8 *XDBuf;
+#ifndef __EMSCRIPTEN__
+extern uint8 *XBackBuf;
 extern uint8 *XDBackBuf;
+#endif
 extern int ClipSidesOffset;
 
 struct GUIMESSAGE

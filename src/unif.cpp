@@ -108,9 +108,14 @@ static void ResetUNIF(void) {
 	UNIFchrrama = 0;
 }
 
+#ifndef __EMSCRIPTEN__
 static uint8 exntar[2048];
+#else
+static uint8* exntar = 0;
+#endif
 
 static void MooMirroring(void) {
+	FCEU_ARRAY_EM(exntar, uint8, 2048);
 	if (mirrortodo < 0x4)
 		SetupCartMirroring(mirrortodo, 1, 0);
 	else if (mirrortodo == 0x4) {
@@ -571,6 +576,9 @@ static void UNIFGI(GI h) {
 		if (UNIFCart.Power)
 			UNIFCart.Power();
 		if (UNIFchrrama) memset(UNIFchrrama, 0, 8192);
+		break;
+	case GI_SAVE:
+		FCEU_SaveGameSave(&UNIFCart);
 		break;
 	case GI_CLOSE:
 		FCEU_SaveGameSave(&UNIFCart);

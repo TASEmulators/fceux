@@ -38,6 +38,11 @@ typedef struct {
 	   void (*Kill)(void);
 } EXPSOUND;
 
+#define WAVE_NUM    (2048 + 512)
+#define WAVE_SIZE   (sizeof(int32) * WAVE_NUM)
+#define WAVEHI_NUM  40000
+#define WAVEHI_SIZE (sizeof(int32) * WAVEHI_NUM)
+
 extern EXPSOUND GameExpSound;
 
 extern int32 nesincsize;
@@ -46,9 +51,15 @@ void SetSoundVariables(void);
 
 int GetSoundBuffer(int32 **W);
 int FlushEmulateSound(void);
-extern int32 Wave[2048+512];
-extern int32 WaveFinal[2048+512];
-extern int32 WaveHi[];
+#ifndef __EMSCRIPTEN__
+extern int32 Wave[WAVE_NUM];
+extern int32 WaveFinal[WAVE_NUM];
+extern int32 WaveHi[WAVEHI_NUM];
+#else
+extern int32* Wave;
+extern int32* WaveFinal;
+extern int32* WaveHi;
+#endif
 extern uint32 soundtsinc;
 
 #ifdef WIN32
@@ -58,7 +69,11 @@ extern unsigned char *cdloggerdata;
 #endif
 
 extern uint32 soundtsoffs;
+#ifndef __EMSCRIPTEN__
 extern bool swapDuty;
+#else
+#define swapDuty false
+#endif
 #define SOUNDTS (soundtimestamp + soundtsoffs)
 
 void SetNESSoundMap(void);

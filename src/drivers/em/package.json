@@ -1,0 +1,54 @@
+{
+  "name": "fceux",
+  "version": "2.6.4",
+  "description": "FCEUX emulator",
+  "homepage": "https://fceux.com/",
+  "author": "Valtteri Heikkilä",
+  "license": "GPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TASEmulators/fceux.git",
+    "directory": "src/drivers/em"
+  },
+  "bugs": {
+    "url": "https://github.com/TASEmulators/fceux/issues"
+  },
+  "keywords": [
+    "emscripten",
+    "emulator",
+    "famicom",
+    "fceux",
+    "nes",
+    "nintendo",
+    "wasm",
+    "webassembly",
+    "webaudio",
+    "web audio",
+    "webgl"
+  ],
+  "files": [
+    "API.md",
+    "CHANGELOG.md",
+    "COPYING",
+    "dist/fceux.js",
+    "dist/fceux.wasm",
+    "index.d.ts",
+    "package.json",
+    "README.md"
+  ],
+  "main": "./dist/fceux.js",
+  "scripts": {
+    "build": "./scripts/build-emscripten.sh && npm run build:docs",
+    "build:debug": "./scripts/build-emscripten.sh --debug && npm run build:docs",
+    "build:docs": "./scripts/gen-api-doc.py > API.md && cp ../../../COPYING . && npm run prettier",
+    "build:shaders": "./scripts/build-shaders.sh",
+    "clean": "./scripts/build-emscripten.sh --clean ; rm -rf dist ; find . -name '*.o' -delete",
+    "prepack": "npm test",
+    "prettier": "prettier --prose-wrap always --write *.md && prettier --single-quote --print-width 999 --trailing-comma es5 --write *.d.ts *.{js,ts}",
+    "test": "[ -f API.md -a -f CHANGELOG.md -a -f COPYING -a -f README.md -a -f dist/fceux.js -a -f dist/fceux.wasm ]"
+  },
+  "devDependencies": {
+    "prettier": "1.19.1"
+  },
+  "dependencies": {}
+}

@@ -51,10 +51,17 @@ typedef struct
 } MOVIE_INFO;
 
 
+#ifndef __EMSCRIPTEN__
 void FCEUMOV_AddInputState();
 void FCEUMOV_AddCommand(int cmd);
 void FCEU_DrawMovies(uint8 *);
 void FCEU_DrawLagCounter(uint8 *);
+#else
+#define FCEUMOV_AddInputState()
+#define FCEUMOV_AddCommand(cmd_)
+#define FCEU_DrawMovies(ptr_)
+#define FCEU_DrawLagCounter(ptr_)
+#endif
 
 enum EMOVIEMODE
 {
@@ -84,9 +91,14 @@ enum EMOVIECMD
 	MOVIECMD_VS_INSERTCOIN = 16
 };
 
+#ifndef __EMSCRIPTEN__
 EMOVIEMODE FCEUMOV_Mode();
 bool FCEUMOV_Mode(EMOVIEMODE modemask);
 bool FCEUMOV_Mode(int modemask);
+#else
+#define FCEUMOV_Mode(a_) ((a_) & MOVIEMODE_INACTIVE)
+#define movieMode MOVIEMODE_INACTIVE
+#endif
 inline bool FCEUMOV_IsPlaying() { return (FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_FINISHED)); }
 inline bool FCEUMOV_IsRecording() { return FCEUMOV_Mode(MOVIEMODE_RECORD); }
 inline bool FCEUMOV_IsFinished() { return FCEUMOV_Mode(MOVIEMODE_FINISHED);}
@@ -99,9 +111,15 @@ bool FCEUI_GetLagged(void);
 void FCEUI_SetLagFlag(bool value);
 
 int FCEUMOV_WriteState(EMUFILE* os);
+#ifndef __EMSCRIPTEN__
 bool FCEUMOV_ReadState(EMUFILE* is, uint32 size);
 void FCEUMOV_PreLoad();
 bool FCEUMOV_PostLoad();
+#else
+#define FCEUMOV_ReadState(is_, size_) (true)
+#define FCEUMOV_PreLoad()
+#define FCEUMOV_PostLoad() (true)
+#endif
 void FCEUMOV_IncrementRerecordCount();
 
 bool FCEUMOV_FromPoweron();
@@ -269,25 +287,40 @@ private:
 	}
 };
 
+#ifndef __EMSCRIPTEN__
 extern EMOVIEMODE movieMode;
+#endif
 extern MovieData currMovieData;
+#ifndef __EMSCRIPTEN__
 extern int currFrameCounter;
+#endif
 extern char curMovieFilename[512];
 extern bool subtitlesOnAVI;
+extern bool fullSaveStateLoads;
+//--------------------------------------------------
+#ifndef __EMSCRIPTEN__
 extern bool freshMovie;
 extern bool movie_readonly;
 extern bool autoMovieBackup;
-extern bool fullSaveStateLoads;
 extern int movieRecordMode;
 extern int input_display;
-
-//--------------------------------------------------
 void FCEUI_MakeBackupMovie(bool dispMessage);
-void FCEUI_CreateMovieFile(std::string fn);
 void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author);
+#else
+#define freshMovie false
+#define movie_readonly true
+#define autoMovieBackup false
+#define FCEUI_MakeBackupMovie(dispMessage_)
+#define FCEUI_SaveMovie(fname_, flags_, author_)
+#endif
+void FCEUI_CreateMovieFile(std::string fn);
 bool FCEUI_LoadMovie(const char *fname, bool read_only, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
+#ifndef __EMSCRIPTEN__
 void FCEUI_StopMovie(void);
+#else
+#define FCEUI_StopMovie()
+#endif
 bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount = false);
 //char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
@@ -310,7 +343,11 @@ void FCEUI_MovieToggleRerecordDisplay();
 void FCEUI_ToggleInputDisplay(void);
 
 void LoadSubtitles(MovieData &);
+#ifndef __EMSCRIPTEN__
 void ProcessSubtitles(void);
+#else
+#define ProcessSubtitles()
+#endif
 void FCEU_DisplaySubtitles(const char *format, ...);
 
 void poweron(bool shouldDisableBatteryLoading);

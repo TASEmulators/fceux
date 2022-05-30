@@ -18,7 +18,9 @@ extern int vblankscanlines;
 
 extern bool AutoResumePlay;
 extern bool frameAdvanceLagSkip;
+#ifndef __EMSCRIPTEN__
 extern char romNameWhenClosingEmulator[];
+#endif
 
 #define DECLFR(x) uint8 x (uint32 A)
 #define DECLFW(x) void x (uint32 A, uint8 V)
@@ -78,14 +80,20 @@ extern int RAMInitOption;
 uint8 FCEU_ReadRomByte(uint32 i);
 void FCEU_WriteRomByte(uint32 i, uint8 value);
 
+#ifndef __EMSCRIPTEN__
 extern readfunc ARead[0x10000];
 extern writefunc BWrite[0x10000];
+#else
+extern readfunc* ARead;
+extern writefunc* BWrite;
+#endif
 
 enum GI {
 	GI_RESETM2	=1,
 	GI_POWER =2,
 	GI_CLOSE =3,
-	GI_RESETSAVE = 4
+	GI_RESETSAVE = 4,
+	GI_SAVE = 5
 };
 
 extern void (*GameInterface)(GI h);

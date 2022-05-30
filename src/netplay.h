@@ -1,6 +1,11 @@
 int InitNetplay(void);
+#ifndef __EMSCRIPTEN__
 void NetplayUpdate(uint8 *joyp);
 extern int FCEUnetplay;
+#else
+#define NetplayUpdate(...)
+#define FCEUnetplay (0) // 0 = no netplay
+#endif
 
 
 #define FCEUNPCMD_RESET   0x01
@@ -19,5 +24,9 @@ extern int FCEUnetplay;
 #define FCEUNPCMD_LOADCHEATS	0x82
 #define FCEUNPCMD_TEXT		0x90
 
+#ifndef __EMSCRIPTEN__
 int FCEUNET_SendCommand(uint8, uint32);
+#else
+#define FCEUNET_SendCommand(...) (0) // 0 = fail
+#endif
 int FCEUNET_SendFile(uint8 cmd, char *);

@@ -72,8 +72,6 @@ static uint32 ppulut3[128];
 
 static bool new_ppu_reset = false;
 
-int test = 0;
-
 template<typename T, int BITS>
 struct BITREVLUT {
 	T* lut;
@@ -354,6 +352,9 @@ uint8 PPUCHRRAM = 0;
 //Color deemphasis emulation.  Joy...
 static uint8 deemp = 0;
 static int deempcnt[8];
+#ifdef __EMSCRIPTEN__
+uint8 deempScan[240];
+#endif
 
 void (*GameHBIRQHook)(void), (*GameHBIRQHook2)(void);
 void (*PPU_hook)(uint32 A);
@@ -373,7 +374,12 @@ static uint32 scanlines_per_frame;
 
 uint8 PPU[4];
 uint8 PPUSPL;
+#ifdef __EMSCRIPTEN__
+uint8 NTARAM[0x800], PALRAM[0x20], SPRAM[0x100];
+uint32 SPRBUF[0x100 / 4];
+#else
 uint8 NTARAM[0x800], PALRAM[0x20], SPRAM[0x100], SPRBUF[0x100];
+#endif
 uint8 UPALRAM[0x03];//for 0x4/0x8/0xC addresses in palette, the ones in
 					//0x20 are 0 to not break fceu rendering.
 
@@ -851,8 +857,10 @@ static DECLFW(B2000) {
 
 static DECLFW(B2001) {
 	FCEUPPU_LineUpdate();
+#ifndef __EMSCRIPTEN__
 	if (paldeemphswap)
 		V = (V&0x9F)|((V&0x40)>>1)|((V&0x20)<<1);
+#endif
 	PPUGenLatch = V;
 	PPU[1] = V;
 	if (V & 0xE0)
@@ -1307,6 +1315,13 @@ static void DoLine(void) {
 		return;
 	}
 
+#ifdef __EMSCRIPTEN__
+	// Store the deemphasis bits per scanline.
+	if (scanline < 240) {
+		deempScan[scanline] = PPU[1] & 0xE0;
+	}
+#endif
+
 	int x;
 	uint8 *target = XBuf + ((scanline < 240 ? scanline : 240) << 8);
 	u8* dtarget = XDBuf + ((scanline < 240 ? scanline : 240) << 8);
@@ -1338,7 +1353,7 @@ static void DoLine(void) {
 				*(uint32*)&target[x << 2] = (*(uint32*)&target[x << 2]) & 0x30303030;
 		}
 	}
-
+#ifndef __EMSCRIPTEN__
 	//some pathetic attempts at deemph
 	if ((PPU[1] >> 5) == 0x7) {
 		for (x = 63; x >= 0; x--)
@@ -1354,6 +1369,12 @@ static void DoLine(void) {
 	for (x = 63; x >= 0; x--)
 		*(uint32*)&dtarget[x << 2] = ((PPU[1]>>5)<<0)|((PPU[1]>>5)<<8)|((PPU[1]>>5)<<16)|((PPU[1]>>5)<<24);
 
+#else
+	// Clear top 2 deemphasis flag bits.
+	for (x = 63; x >= 0; x--) {
+		*(uint32*)&target[x << 2] &= 0x3f3f3f3f;
+	}
+#endif
 	sphitx = 0x100;
 
 	if (ScreenON || SpriteON)
@@ -1465,7 +1486,11 @@ static void FetchSpriteData(void) {
 					dst.x = spr->x;
 					dst.atr = spr->atr;
 
+#ifdef __EMSCRIPTEN__
+					SPRBUF[ns] = *(uint32*)&dst;
+#else
 					*(uint32*)&SPRBUF[ns << 2] = *(uint32*)&dst;
+#endif
 				}
 
 				ns++;
@@ -1521,8 +1546,11 @@ static void FetchSpriteData(void) {
 					dst.x = spr->x;
 					dst.atr = spr->atr;
 
-
+#ifdef __EMSCRIPTEN__
+					SPRBUF[ns] = *(uint32*)&dst;
+#else
 					*(uint32*)&SPRBUF[ns << 2] = *(uint32*)&dst;
+#endif
 				}
 
 				ns++;
@@ -1551,7 +1579,13 @@ static void RefreshSprites(void) {
 	spork = 0;
 	if (!numsprites) return;
 
+#ifdef __EMSCRIPTEN__
+	for (int i = 256-1; i >= 0; --i) {
+		sprlinebuf[i] = 0x80;
+	}
+#else
 	FCEU_dwmemset(sprlinebuf, 0x80808080, 256);
+#endif
 	numsprites--;
 	spr = (SPRB*)SPRBUF + numsprites;
 
@@ -1669,7 +1703,7 @@ static void CopySprites(uint8 *target) {
 	if (!rendersprites) return;	//User asked to not display sprites.
 
 	if(!SpriteON) return;
-	
+
 	int start=8;
 	if(PPU[1] & 0x04)
 		start = 0;

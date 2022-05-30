@@ -94,11 +94,17 @@ static INLINE void setpageptr(int s, uint32 A, uint8 *p, int ram) {
 		}
 }
 
+#ifndef __EMSCRIPTEN__
 static uint8 nothing[8192];
+#else
+static uint8* nothing = 0;
+#endif
 void ResetCartMapping(void) {
 	int x;
 
 	PPU_ResetHooks();
+
+	FCEU_ARRAY_EM(nothing, uint8, 8192);
 
 	for (x = 0; x < 32; x++) {
 		Page[x] = nothing - x * 2048;

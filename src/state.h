@@ -67,10 +67,18 @@ void LoadBackup();					 //Loads the backupsavestate
 void RedoLoadState();				 //reloads a loadstate if backupsavestate was run
 void SwapSaveState();				 //Swaps a savestate with its backup state
 
+#ifndef __EMSCRIPTEN__
 extern char lastSavestateMade[2048]; //Filename of last savestate used
+#else
+extern char *lastSavestateMade; //Filename of last savestate used
+#endif
 extern bool undoSS;					 //undo savestate flag
 extern bool redoSS;					 //redo savestate flag
+#ifndef __EMSCRIPTEN__
 extern char lastLoadstateMade[2048]; //Filename of last state loaded
+#else
+extern char *lastLoadstateMade; //Filename of last state loaded
+#endif
 extern bool undoLS;					 //undo loadstate flag
 extern bool redoLS;					 //redo savestate flag
 extern bool backupSavestates;		 //Whether or not to make backups, true by default

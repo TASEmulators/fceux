@@ -23,9 +23,10 @@
 static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
 
-unsigned int *GetKeyboard(void);	// FIXME: 10/28 - now implemented in SDL as well.  should we rename this to a FCEUI_* function?
+const unsigned int* GetKeyboard();	// FIXME: 10/28 - now implemented in SDL as well.  should we rename this to a FCEUI_* function?
 
-static unsigned int *TransformerKeys, oldkeys[256];
+static const unsigned int *TransformerKeys;
+static unsigned int oldkeys[256];
 static int TransformerCycleCount, TransformerChar = 0;
 
 static void TransformerIRQHook(int a) {
@@ -42,7 +43,7 @@ static void TransformerIRQHook(int a) {
 				else
 					TransformerChar = i | 0x80;
 				X6502_IRQBegin(FCEU_IQEXT);
-				memcpy((void*)&oldkeys[0], (void*)TransformerKeys, sizeof(oldkeys));
+				memcpy((void*)&oldkeys[0], TransformerKeys, sizeof(oldkeys));
 				break;
 			}
 		}

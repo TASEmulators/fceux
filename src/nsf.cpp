@@ -35,6 +35,7 @@
 #include "input.h"
 #include "state.h"
 #include "driver.h"
+#include "drawing.h"
 #ifdef _S9XLUA_H
 #include "fceulua.h"
 #endif
@@ -482,6 +483,11 @@ uint8 FCEU_GetJoyJoy(void);
 
 static int special=0;
 
+
+#define COLOR_BG	0
+#define COLOR_STROBE	3
+#define COLOR_TEXT	1
+
 void DrawNSF(uint8 *XBuf)
 {
 	char snbuf[16];
@@ -489,8 +495,8 @@ void DrawNSF(uint8 *XBuf)
 
 	if(vismode==0) return;
 
-	memset(XBuf,0,256*240);
-	memset(XDBuf,0,256*240);
+	memset(XBuf, COLOR_BG, 256*240);
+	memset(XDBuf, COLOR_BG, 256*240);
 
 
 	{
@@ -509,7 +515,7 @@ void DrawNSF(uint8 *XBuf)
 				uint32 y;
 				y=142+((Bufpl[(x*l)>>8]*mul)>>14);
 				if(y<240)
-					XBuf[x+y*256]=3;
+					XBuf[x+y*256] = COLOR_STROBE;
 			}
 		}
 		else if(special==1)
@@ -526,7 +532,7 @@ void DrawNSF(uint8 *XBuf)
 				yp=120+r*sin(x*M_PI*2/256);
 				xp&=255;
 				yp%=240;
-				XBuf[xp+yp*256]=3;
+				XBuf[xp+yp*256] = COLOR_STROBE;
 			}
 		}
 		else if(special==2)
@@ -550,7 +556,7 @@ void DrawNSF(uint8 *XBuf)
 				n=120+r*sin(t);
 
 				if(m<256 && n<240)
-					XBuf[m+n*256]=3;
+					XBuf[m+n*256] = COLOR_STROBE;
 
 			}
 			for(x=128;x<256;x++)
@@ -569,21 +575,20 @@ void DrawNSF(uint8 *XBuf)
 				n=120+r*sin(t);
 
 				if(m<256 && n<240)
-					XBuf[m+n*256]=3;
+					XBuf[m+n*256] = COLOR_STROBE;
 
 			}
 			theta+=(double)M_PI/256;
 		}
 	}
 
-	static const int kFgColor = 1;
-	DrawTextTrans(ClipSidesOffset+XBuf+10*256+4+(((31-strlen((char*)NSFHeader.SongName))<<2)), 256, NSFHeader.SongName, kFgColor);
-	DrawTextTrans(ClipSidesOffset+XBuf+26*256+4+(((31-strlen((char*)NSFHeader.Artist))<<2)), 256,NSFHeader.Artist, kFgColor);
-	DrawTextTrans(ClipSidesOffset+XBuf+42*256+4+(((31-strlen((char*)NSFHeader.Copyright))<<2)), 256,NSFHeader.Copyright, kFgColor);
+	DrawTextTrans(ClipSidesOffset+XBuf+10*256+4+(((31-strlen((char*)NSFHeader.SongName))<<2)), NSFHeader.SongName, COLOR_TEXT);
+	DrawTextTrans(ClipSidesOffset+XBuf+26*256+4+(((31-strlen((char*)NSFHeader.Artist))<<2)), NSFHeader.Artist, COLOR_TEXT);
+	DrawTextTrans(ClipSidesOffset+XBuf+42*256+4+(((31-strlen((char*)NSFHeader.Copyright))<<2)), NSFHeader.Copyright, COLOR_TEXT);
 
-	DrawTextTrans(ClipSidesOffset+XBuf+70*256+4+(((31-strlen("Song:"))<<2)), 256, (uint8*)"Song:", kFgColor);
+	DrawTextTrans(ClipSidesOffset+XBuf+70*256+4+(((31-strlen("Song:"))<<2)), (uint8*)"Song:", COLOR_TEXT);
 	sprintf(snbuf,"<%d/%d>",CurrentSong,NSFHeader.TotalSongs);
-	DrawTextTrans(XBuf+82*256+4+(((31-strlen(snbuf))<<2)), 256, (uint8*)snbuf, kFgColor);
+	DrawTextTrans(XBuf+82*256+4+(((31-strlen(snbuf))<<2)), (uint8*)snbuf, COLOR_TEXT);
 
 	{
 		static uint8 last=0;

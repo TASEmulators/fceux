@@ -1,11 +1,15 @@
 include(GNUInstallDirs)
 
 set( APP_NAME fceux)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+if(NOT EMSCRIPTEN)
+	set(CMAKE_AUTOMOC ON)
+	set(CMAKE_AUTORCC ON)
+	set(CMAKE_AUTOUIC ON)
+endif()
 
-if ( ${QT6} )
+if(EMSCRIPTEN)
+	message( STATUS "GUI Frontend: None (Emscripten)")
+elseif ( ${QT6} )
 	message( STATUS "GUI Frontend: Qt6")
 	set( Qt Qt6 )
 else()
@@ -18,7 +22,8 @@ if ( ${QHELP} )
 	add_definitions( -D_USE_QHELP )
 endif()
 
-if ( ${QT6} )
+if(EMSCRIPTEN)
+elseif ( ${QT6} )
 	find_package( Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets ${QtHelpModule})
   	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
   	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
@@ -53,6 +58,52 @@ if(WIN32)
                         	 ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/swresample.lib )
      endif()
 
+elseif(EMSCRIPTEN)
+	set(COMMON_FLAGS
+		-fno-exceptions -fno-rtti -fno-c++-static-destructors
+		-sDISABLE_EXCEPTION_CATCHING=1
+		-sSTRICT=1
+		-sUSE_SDL_IMAGE=0
+		-sUSE_SDL_MIXER=0
+		-sUSE_SDL_NET=0
+		-sUSE_SDL_TTF=0
+		-sUSE_SDL=0
+	)
+	if("${CMAKE_BUILD_TYPE}" EQUAL "Debug")
+		list(APPEND COMMON_FLAGS -O0 -g)
+		add_definitions(-D_DEBUG)
+		add_link_options(
+			-sASSERTIONS=2
+			-sDEMANGLE_SUPPORT=1
+			-sSAFE_HEAP=1
+		)
+	else() # Release
+		list(APPEND COMMON_FLAGS -Os -flto=full)
+		add_link_options(
+			-strip-all
+			-sASSERTIONS=0
+			-sGL_TRACK_ERRORS=0
+		)
+	endif()
+
+	add_definitions(-DHAVE_ASPRINTF -DOPENGL -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0)
+	add_compile_options(${COMMON_FLAGS})
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib)
+
+	add_link_options(
+		--no-entry --embed-file ${CMAKE_SOURCE_DIR}/src/drivers/em/assets/data/@/data/
+		--bind --post-js ${CMAKE_SOURCE_DIR}/src/drivers/em/post.js
+		-sEXPORT_NAME=FCEUX
+		-sEXPORTED_FUNCTIONS=['_audioBufferCallback']
+		-sGL_EMULATE_GLES_VERSION_STRING_FORMAT=0
+		-sGL_EXTENSIONS_IN_PREFIXED_FORMAT=0
+		-sGL_SUPPORT_AUTOMATIC_ENABLE_EXTENSIONS=0
+		-sGL_SUPPORT_SIMPLE_ENABLE_EXTENSIONS=0
+		-sINVOKE_RUN=0
+		-sLLD_REPORT_UNDEFINED
+		-sMODULARIZE=1
+		${COMMON_FLAGS})
+	link_libraries(GL)
 else(WIN32)
   # Non Windows System
   # UNIX (Linux or Mac OSX)
@@ -165,7 +216,8 @@ else(WIN32)
 
 endif(WIN32)
 
-if ( ${LUA_FOUND} )
+if(EMSCRIPTEN)
+elseif ( ${LUA_FOUND} )
    # Use System LUA
         message( STATUS "Using System Lua ${LUA_VERSION}" )
 
@@ -224,6 +276,8 @@ else()
 
    message( STATUS "Using Internal zlib" )
 
+   add_compile_options(-Wno-deprecated-non-prototype)
+
    set( ZLIB_SOURCE 
        ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/adler32.c 
        ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/compress.c 
@@ -255,9 +309,7 @@ else(APPLE)
 endif(APPLE)
 
 set(SRC_CORE
-	${CMAKE_CURRENT_SOURCE_DIR}/asm.cpp
-  	${CMAKE_CURRENT_SOURCE_DIR}/cart.cpp
-  	${CMAKE_CURRENT_SOURCE_DIR}/cheat.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/cart.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/conddebug.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/config.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/debug.cpp
@@ -269,8 +321,6 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/filter.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/ines.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input.cpp
-  	${CMAKE_CURRENT_SOURCE_DIR}/movie.cpp
-  	${CMAKE_CURRENT_SOURCE_DIR}/netplay.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/nsf.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/oldmovie.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/palette.cpp
@@ -473,7 +523,6 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/input/virtualboy.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/lcdcompzapper.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/zapper.cpp
-  	${CMAKE_CURRENT_SOURCE_DIR}/utils/backward.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/xstring.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/crc32.cpp     
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/endian.cpp  
@@ -482,22 +531,34 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/md5.cpp  
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/memory.cpp
 )
-
+if(NOT EMSCRIPTEN)
+  list(APPEND SRC_CORE
+    ${CMAKE_CURRENT_SOURCE_DIR}/netplay.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/movie.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cheat.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/asm.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/utils/backward.cpp
+  )
+endif()
 
 set(SRC_DRIVERS_COMMON
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/args.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/cheat.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/config.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/configSys.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/hq2x.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/hq3x.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scale2x.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scale3x.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scalebit.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/vidblit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/os_utils.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/nes_ntsc.c
 )
+if(NOT EMSCRIPTEN)
+  list(APPEND SRC_DRIVERS_COMMON
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/args.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/cheat.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/config.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/configSys.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/hq2x.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/hq3x.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scale2x.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scale3x.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/scalebit.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/vidblit.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/nes_ntsc.c
+  )
+endif()
 
 set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/main.cpp  
@@ -572,7 +633,21 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TasEditor/markers.cpp
 )
 
-set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
+set(SRC_DRIVERS_EMSCRIPTEN
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/em/audio.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/em/em.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/em/es2.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/em/es2tv.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/em/es2util.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/em/ntsc.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/em/video.cpp
+)
+
+if(EMSCRIPTEN)
+  set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_EMSCRIPTEN})
+else()
+  set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
+endif()
 
 # Put build timestamp into BUILD_TS environment variable and from there into
 # the FCEUX_BUILD_TIMESTAMP preprocessor definition.

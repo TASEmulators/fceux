@@ -34,3 +34,13 @@ void FCEU_memmove(void *d, void *s, uint32 l);
 // normal malloc/free
 void *FCEU_dmalloc(uint32 size);
 void FCEU_dfree(void *ptr);
+
+#ifndef __EMSCRIPTEN__
+#define FCEU_ARRAY_EM(ptr_, type_, num_)
+#else
+#define FCEU_ARRAY_EM(ptr_, type_, num_) do { \
+    if (!(ptr_)) { \
+        (ptr_) = (type_*) FCEU_malloc(sizeof(type_) * (num_)); \
+    } \
+} while (0)
+#endif

@@ -88,7 +88,7 @@ int str_ltrim(char *str, int flags) {
 int str_rtrim(char *str, int flags) {
 	unsigned int i=0, strl; //mbg merge 7/17/06 changed to unsigned int
 
-	while (strl = strlen(str)) {
+	while ((strl = strlen(str))) {
 		if ((flags & STRIP_SP) && (str[0] == ' ')) {
 			i++;
 			str[strl] = 0;
@@ -750,11 +750,15 @@ namespace UtfConverter
 //convert a std::string to std::wstring
 std::wstring mbstowcs(std::string str) // UTF8->UTF32
 {
+#ifdef __EMSCRIPTEN__
+	return UtfConverter::FromUtf8(str);
+#else
 	try {
 		return UtfConverter::FromUtf8(str);
 	} catch(std::exception &e) {
 		return L"(failed UTF-8 conversion)";
 	}
+#endif
 }
 
 //convert a std::wstring to std::string

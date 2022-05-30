@@ -23,6 +23,7 @@
 #include "file.h"
 #include "fceu.h"
 #include "driver.h"
+#include "drawing.h"
 #include "boards/mapinc.h"
 #ifdef _S9XLUA_H
 #include "fceulua.h"
@@ -652,12 +653,12 @@ void FCEU_DrawNTSCControlBars(uint8 *XBuf)
 
 	if(controlselect==1)
 	{
-		DrawTextTrans(XBuf+128-12+180*256, 256, (uint8 *)"Hue", 0x85);
+		DrawTextTrans(XBuf+128-12+180*256, (uint8 *)"Hue", 0x85);
 		which=ntschue<<1;
 	}
 	else if(controlselect==2)
 	{
-		DrawTextTrans(XBuf+128-16+180*256, 256, (uint8 *)"Tint", 0x85);
+		DrawTextTrans(XBuf+128-16+180*256, (uint8 *)"Tint", 0x85);
 		which=ntsctint<<1;
 	}
 

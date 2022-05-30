@@ -304,36 +304,36 @@ static uint8 ZNTable[256];
    redundant) on the variable "x".
 */
 
-#define RMW_A(op) {uint8 x=_A; op; _A=x; break; } /* Meh... */
-#define RMW_AB(op) {unsigned int A; uint8 x; GetAB(A); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); break; }
-#define RMW_ABI(reg,op) {unsigned int A; uint8 x; GetABIWR(A,reg); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); break; }
+#define RMW_A(op) {uint8 x=_A; op; _A=x; } /* Meh... */
+#define RMW_AB(op) {unsigned int A; uint8 x; GetAB(A); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); }
+#define RMW_ABI(reg,op) {unsigned int A; uint8 x; GetABIWR(A,reg); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); }
 #define RMW_ABX(op)  RMW_ABI(_X,op)
 #define RMW_ABY(op)  RMW_ABI(_Y,op)
-#define RMW_IX(op)  {unsigned int A; uint8 x; GetIX(A); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); break; }
-#define RMW_IY(op)  {unsigned int A; uint8 x; GetIYWR(A); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); break; }
-#define RMW_ZP(op)  {uint8 A; uint8 x; GetZP(A); x=RdRAM(A); op; WrRAM(A,x); break; }
-#define RMW_ZPX(op) {uint8 A; uint8 x; GetZPI(A,_X); x=RdRAM(A); op; WrRAM(A,x); break;}
+#define RMW_IX(op)  {unsigned int A; uint8 x; GetIX(A); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); }
+#define RMW_IY(op)  {unsigned int A; uint8 x; GetIYWR(A); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); }
+#define RMW_ZP(op)  {uint8 A; uint8 x; GetZP(A); x=RdRAM(A); op; WrRAM(A,x); }
+#define RMW_ZPX(op) {uint8 A; uint8 x; GetZPI(A,_X); x=RdRAM(A); op; WrRAM(A,x);}
 
-#define LD_IM(op)  {uint8 x; x=RdMem(_PC); _PC++; op; break;}
-#define LD_ZP(op)  {uint8 A; uint8 x; GetZP(A); x=RdRAM(A); op; break;}
-#define LD_ZPX(op)  {uint8 A; uint8 x; GetZPI(A,_X); x=RdRAM(A); op; break;}
-#define LD_ZPY(op)  {uint8 A; uint8 x; GetZPI(A,_Y); x=RdRAM(A); op; break;}
-#define LD_AB(op)  {unsigned int A; uint8 x; GetAB(A); x=RdMem(A); op; break; }
-#define LD_ABI(reg,op)  {unsigned int A; uint8 x; GetABIRD(A,reg); x=RdMem(A); op; break;}
+#define LD_IM(op)  {uint8 x; x=RdMem(_PC); _PC++; op;}
+#define LD_ZP(op)  {uint8 A; uint8 x; GetZP(A); x=RdRAM(A); op;}
+#define LD_ZPX(op)  {uint8 A; uint8 x; GetZPI(A,_X); x=RdRAM(A); op;}
+#define LD_ZPY(op)  {uint8 A; uint8 x; GetZPI(A,_Y); x=RdRAM(A); op;}
+#define LD_AB(op)  {unsigned int A; uint8 x; GetAB(A); x=RdMem(A); op; }
+#define LD_ABI(reg,op)  {unsigned int A; uint8 x; GetABIRD(A,reg); x=RdMem(A); op;}
 #define LD_ABX(op)  LD_ABI(_X,op)
 #define LD_ABY(op)  LD_ABI(_Y,op)
-#define LD_IX(op)  {unsigned int A; uint8 x; GetIX(A); x=RdMem(A); op; break;}
-#define LD_IY(op)  {unsigned int A; uint8 x; GetIYRD(A); x=RdMem(A); op; break;}
+#define LD_IX(op)  {unsigned int A; uint8 x; GetIX(A); x=RdMem(A); op;}
+#define LD_IY(op)  {unsigned int A; uint8 x; GetIYRD(A); x=RdMem(A); op;}
 
-#define ST_ZP(r)  {uint8 A; GetZP(A); WrRAM(A,r); break;}
-#define ST_ZPX(r)  {uint8 A; GetZPI(A,_X); WrRAM(A,r); break;}
-#define ST_ZPY(r)  {uint8 A; GetZPI(A,_Y); WrRAM(A,r); break;}
-#define ST_AB(r)  {unsigned int A; GetAB(A); WrMem(A,r); break;}
-#define ST_ABI(reg,r)  {unsigned int A; GetABIWR(A,reg); WrMem(A,r); break; }
+#define ST_ZP(r)  {uint8 A; GetZP(A); WrRAM(A,r);}
+#define ST_ZPX(r)  {uint8 A; GetZPI(A,_X); WrRAM(A,r);}
+#define ST_ZPY(r)  {uint8 A; GetZPI(A,_Y); WrRAM(A,r);}
+#define ST_AB(r)  {unsigned int A; GetAB(A); WrMem(A,r);}
+#define ST_ABI(reg,r)  {unsigned int A; GetABIWR(A,reg); WrMem(A,r); }
 #define ST_ABX(r)  ST_ABI(_X,r)
 #define ST_ABY(r)  ST_ABI(_Y,r)
-#define ST_IX(r)  {unsigned int A; GetIX(A); WrMem(A,r); break; }
-#define ST_IY(r)  {unsigned int A; GetIYWR(A); WrMem(A,r); break; }
+#define ST_IX(r)  {unsigned int A; GetIX(A); WrMem(A,r); }
+#define ST_IY(r)  {unsigned int A; GetIYWR(A); WrMem(A,r); }
 
 static uint8 CycTable[256] =
 {
@@ -354,6 +354,10 @@ static uint8 CycTable[256] =
 /*0xE0*/ 2,6,3,8,3,3,5,5,2,2,2,2,4,4,6,6,
 /*0xF0*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
 };
+
+#ifdef __EMSCRIPTEN__
+#include "drivers/em/opsfuncs.inc"
+#endif
 
 int X6502_GetOpcodeCycles( int op )
 {
@@ -429,7 +433,6 @@ void X6502_Run(int32 cycles)
    cycles*=16;    // 16*4=64
 
   _count+=cycles;
-extern int test; test++;
   while(_count>0)
   {
    int32 temp;
@@ -509,10 +512,15 @@ extern int test; test++;
    CallRegisteredLuaMemHook(_PC, 1, 0, LUAMEMHOOK_EXEC);
    #endif
    _PC++;
+#ifndef __EMSCRIPTEN__
    switch(b1)
    {
     #include "ops.inc"
    }
+#else
+   // Call function table.
+   opstab[b1]();
+#endif
   }
 }
 

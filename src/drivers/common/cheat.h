@@ -19,5 +19,9 @@
  */
 #ifndef COMMON_CHEAT_H
 #define COMMON_CHEAT_H
+#ifndef __EMSCRIPTEN__
 void DoConsoleCheatConfig(void);
+#else
+#define DoConsoleCheatConfig()
+#endif
 #endif

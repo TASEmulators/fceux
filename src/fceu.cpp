@@ -74,6 +74,8 @@ extern void RefreshThrottleFPS();
 #include "drivers/win/ramwatch.h"
 #include "drivers/win/memwatch.h"
 #include "drivers/win/tracer.h"
+#elif __EMSCRIPTEN__
+#include "drivers/em/em.h"
 #else
 #ifdef __QT_DRIVER__
 #include "drivers/Qt/sdl.h"
@@ -110,13 +112,15 @@ int vblankscanlines = 0;
 
 int AFon = 1, AFoff = 1, AutoFireOffset = 0; //For keeping track of autofire settings
 bool justLagged = false;
+bool turbo = false;
 bool frameAdvanceLagSkip = false; //If this is true, frame advance will skip over lag frame (i.e. it will emulate 2 frames instead of 1)
 bool AutoSS = false;        //Flagged true when the first auto-savestate is made while a game is loaded, flagged false on game close
 bool movieSubtitles = true; //Toggle for displaying movie subtitles
 bool DebuggerWasUpdated = false; //To prevent the debugger from updating things without being updated.
 bool AutoResumePlay = false;
+#ifndef __EMSCRIPTEN__
 char romNameWhenClosingEmulator[2048] = {0};
-
+#endif
 
 FCEUGI::FCEUGI()
 	: filename(0),
@@ -216,20 +220,38 @@ static void FCEU_CloseGame(void)
 		//clear screen when game is closed
 		extern uint8 *XBuf;
 		if (XBuf)
+#ifndef __EMSCRIPTEN__
 			memset(XBuf, 0, 256 * 256);
+#else
+			memset(XBuf, 0x1D1D1D1D, 256 * 256);
+#endif
 
 		FCEU_CloseGenie();
 
 		delete GameInfo;
 		GameInfo = NULL;
 
+#ifndef __EMSCRIPTEN__
 		currFrameCounter = 0;
+#endif
 
 		//Reset flags for Undo/Redo/Auto Savestating //adelikat: TODO: maybe this stuff would be cleaner as a struct or class
+#ifndef __EMSCRIPTEN__
 		lastSavestateMade[0] = 0;
+#else
+		if (lastSavestateMade) {
+			lastSavestateMade[0] = 0;
+		}
+#endif
 		undoSS = false;
 		redoSS = false;
+#ifndef __EMSCRIPTEN__
 		lastLoadstateMade[0] = 0;
+#else
+		if (lastLoadstateMade) {
+			lastLoadstateMade[0] = 0;
+		}
+#endif
 		undoLS = false;
 		redoLS = false;
 		AutoSS = false;
@@ -245,8 +267,13 @@ FCEUGI *GameInfo = NULL;
 void (*GameInterface)(GI h);
 void (*GameStateRestore)(int version);
 
+#ifndef __EMSCRIPTEN__
 readfunc ARead[0x10000];
 writefunc BWrite[0x10000];
+#else
+readfunc* ARead = 0;
+writefunc* BWrite = 0;
+#endif
 static readfunc *AReadG;
 static writefunc *BWriteG;
 static int RWWrap = 0;
@@ -452,7 +479,11 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	// reset loaded game BEFORE it's loading.
 	ResetGameLoaded();
 	//file opened ok. start loading.
+#ifndef __EMSCRIPTEN__
 	FCEU_printf("Loading %s...\n\n", fullname);
+#else
+	FCEU_printf("Loading game...\n\n");
+#endif
 	GetFileBase(fp->filename.c_str());
 	//reset parameters so they're cleared just in case a format's loader doesn't know to do the clearing
 	MasterRomInfoParams = TMasterRomInfoParams();
@@ -780,8 +811,10 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 		if (EmulationPaused & EMULATIONPAUSED_PAUSED)
 		{
 			// emulator is paused
+#ifndef __EMSCRIPTEN__
 			memcpy(XBuf, XBackBuf, 256*256);
 			FCEU_PutImage();
+#endif
 			*pXBuf = XBuf;
 			*SoundBuf = WaveFinal;
 			*SoundBufSize = 0;
@@ -886,9 +919,11 @@ void ResetNES(void) {
 	FCEUPPU_Reset();
 	X6502_Reset();
 
+#ifndef __EMSCRIPTEN__
 	// clear back baffer
 	extern uint8 *XBackBuf;
 	memset(XBackBuf, 0, 256 * 256);
+#endif
 
 	FCEU_DispMessage("Reset", 0);
 }
@@ -976,6 +1011,9 @@ void hand(X6502 *X, int type, uint32 A) {
 }
 
 void PowerNES(void) {
+	FCEU_ARRAY_EM(ARead, readfunc, 0x10000);
+	FCEU_ARRAY_EM(BWrite, writefunc, 0x10000);
+
 	FCEUMOV_AddCommand(FCEUNPCMD_POWER);
 	if (!GameInfo) return;
 
@@ -1026,9 +1064,12 @@ void PowerNES(void) {
 #endif
 	FCEU_PowerCheats();
 	LagCounterReset();
+
+#ifndef __EMSCRIPTEN__
 	// clear back buffer
 	extern uint8 *XBackBuf;
 	memset(XBackBuf, 0, 256 * 256);
+#endif
 
 #ifdef __WIN_DRIVER__
 	Update_RAM_Search(); // Update_RAM_Watch() is also called.

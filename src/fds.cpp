@@ -110,6 +110,7 @@ void FDSGI(GI h) {
 		// Unhandled Cases
 		case GI_RESETM2:
 		case GI_RESETSAVE:
+		case GI_SAVE:
 			break;
 	}
 }

@@ -1,5 +1,8 @@
 #ifndef CHEAT_H
 #define CHEAT_H
+
+#ifndef __EMSCRIPTEN__
+
 void FCEU_CheatResetRAM(void);
 void FCEU_CheatAddRAM(int s, uint32 A, uint8 *p);
 
@@ -66,5 +69,20 @@ struct SEARCHPOSSIBLE {
 #define FCEU_SEARCH_NEWVAL_LT               6
 #define FCEU_SEARCH_NEWVAL_GT_KNOWN         7
 #define FCEU_SEARCH_NEWVAL_LT_KNOWN         8
+
+#else
+
+#define disableAutoLSCheats 2
+
+#define FCEU_CheatResetRAM(...)
+#define FCEU_CheatAddRAM(...)
+#define FCEU_LoadGameCheats(...)
+#define FCEU_FlushGameCheats(...)
+#define FCEU_ApplyPeriodicCheats(...)
+#define FCEU_PowerCheats(...)
+#define FCEU_CheatGetByte(...) (0)
+#define FCEU_CheatSetByte(...)
+
+#endif
 
 #endif

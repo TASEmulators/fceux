@@ -1,0 +1,91 @@
+#define _NUM_COLORS	(64 * 8)
+#define _NUM_PHASES	3
+#define _NUM_SUBPS	4
+#define _NUM_TAPS	5
+#define _LOOKUP_W	64
+#define _OVERSCAN_W	12
+#define _INPUT_W	256
+#define _INPUT_H	240
+#define _IDX_W		(_INPUT_W + 2*_OVERSCAN_W)
+#define _IDX_H		240
+#define _NOISE_W	256
+#define _NOISE_H	256
+#define _RGB_W		(_NUM_SUBPS * _IDX_W)
+#define _SCREEN_W	(_NUM_SUBPS * _INPUT_W)
+#define _SCREEN_H	(4 * _IDX_H)
+#define _YW2		6.0
+#define _CW2		12.0
+
+#define NUM_COLORS	float(_NUM_COLORS)
+#define NUM_PHASES	float(_NUM_PHASES)
+#define NUM_SUBPS	float(_NUM_SUBPS)
+#define NUM_TAPS	float(_NUM_TAPS)
+#define LOOKUP_W	float(_LOOKUP_W)
+#define OVERSCAN_W	float(_OVERSCAN_W)
+#define INPUT_W		float(_INPUT_W)
+#define INPUT_H		float(_INPUT_H)
+#define IDX_W		float(_IDX_W)
+#define IDX_H		float(_IDX_H)
+#define NOISE_W		float(_NOISE_W)
+#define NOISE_H		float(_NOISE_H)
+#define RGB_W		float(_RGB_W)
+#define SCREEN_W	float(_SCREEN_W)
+#define SCREEN_H	float(_SCREEN_H)
+#define YW2		float(_YW2)
+#define CW2		float(_CW2)
+
+#define M_PI		3.14159265359
+
+#define RESCALE(v_) ((v_) * (u_maxs-u_mins) + u_mins)
+
+uniform vec3 u_mouse;
+uniform vec3 u_mins;
+uniform vec3 u_maxs;
+uniform float u_brightness;
+uniform float u_contrast;
+uniform float u_color;
+uniform float u_gamma;
+uniform float u_noiseAmp;
+
+const mat3 c_convMat = mat3(
+	1.0,        1.0,        1.0,       // Y
+	0.946882,   -0.274788,  -1.108545, // I
+	0.623557,   -0.635691,  1.709007   // Q
+);
+
+vec3 yiq2rgb(in vec3 yiq)
+{
+	yiq.gb *= u_color;
+	vec3 result = clamp(c_convMat * yiq, 0.0, 1.0);
+	// Gamma convert RGB from NTSC space to space similar to sRGB.
+	result = pow(result, vec3(u_gamma));
+	// NOTE: While this seems to be wrong (after gamma), it works well in practice...?
+	return clamp(u_contrast * result + u_brightness, 0.0, 1.0);
+}
+
+float fakeShadow(const vec3 p, const vec4 shadowPlane)
+{
+// DEBUG: for finding proper shadow plane using the mouse...
+//	float ddiag = -0.9*u_mouse.y/256.0 + 0.9 + dot(normalize(cross(vec3(1.0, 0.0, 0.0), u_lightDir)), p);
+//	float dflat = 0.2*u_mouse.x/224.0 - 0.1 + p.z;
+//	float ddiag = -0.9*155.0/256.0 + 0.9 + dot(normalize(cross(vec3(1.0, 0.0, 0.0), u_lightDir)), p);
+//	float dflat = 0.2*88.0/224.0 - 0.1 + p.z;
+	float ddiag = dot(shadowPlane.xyz, p) - shadowPlane.w;
+	float dflat = p.z - 0.023;
+	return 0.21 + 0.79*clamp(38.0 * max(ddiag, dflat), 0.0, 1.0);
+}
+
+float shadeBlinn(const vec3 V, const vec3 N, const vec3 L, const vec3 fresnel, const vec4 mat)
+{
+	vec3 H = normalize(L + V);
+	float ndotl = dot(N, L);
+	if (ndotl > 0.0) {
+		// Front light.
+		float ndoth = max(dot(N, H), 0.0);
+		float fr = fresnel[0] + fresnel[1] * pow(1.0-ndotl, fresnel[2]);
+		return mix(mat[0], mat[1] * pow(ndoth, mat[2]), fr) * ndotl;
+	} else {
+		// Back light (bi-directional lighting).
+		return -ndotl * mat[3];
+	}
+}
