@@ -1027,7 +1027,7 @@ def generate_switch():
     print("case 0x%02X:\n{%sbreak;\n}" % (op, spec[op]))
 
 def main():
-  parser = argparse.ArgumentParser(description="generate fceux c++ source code for ricoh 2a03 opcode emulation")
+  parser = argparse.ArgumentParser(description="generate FCEUX source code for opcode emulation")
   parser.add_argument("-f", "--func", action='store_true', help="generate function table instead of switch-case")
   args = parser.parse_args()
   if args.func:

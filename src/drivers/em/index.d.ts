@@ -43,14 +43,14 @@ export class FceuxModule {
 
   /*
   Load and start a game from an Uint8Array.
-  Optional `filename` is for fceux NTSC/PAL region autodetection.
+  Optional `filename` is for FCEUX NTSC/PAL region autodetection.
   Supported file formats: NES, ZIP, NSF.
   Events: `'game-loaded'` when game is loaded.
   */
   loadGame: (array: Uint8Array, filename?: string) => void;
   /*
   Download game, then load and start it with loadGame().
-  Pass optional `filename` for fceux NTSC/PAL region autodetection,
+  Pass optional `filename` for FCEUX NTSC/PAL region autodetection,
   otherwise `url` filename is used.
   Uses `fetch()`.
   */

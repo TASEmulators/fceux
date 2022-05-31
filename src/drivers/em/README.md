@@ -1,21 +1,19 @@
 # em-fceux
 
-https://bitbucket.org/tsone/em-fceux/
+https://github.com/tsone/fceux/tree/master/src/drivers/em
 
 Web port of the [FCEUX](https://github.com/TASVideos/fceux/) Nintendo
 Entertainment System/Famicom (NES/FC) emulator. Powered by
-[Emscripten](https://emscripten.org/).
+[Emscripten](https://emscripten.org/) and WebAssembly.
 
 Try it at https://tsone.kapsi.fi/em-fceux/.
 
 ## Overview
 
-em-fceux enables the core features of the FCEUX emulator on the web browsers.
-The emulation runs at 60 FPS on modern computers, has low input latency and good
-audio quality. It also supports save states and battery-backed save RAM.
-
-It also incorporates a new shader-based NTSC composite video emulation
-technique.
+em-fceux enables many core FCEUX features on the web browsers through a
+convenient API and it is available on npm. It achieves high emulation
+performance by building the FCEUX source code to WebAssembly. It additionally
+incorporates NTSC composite video emulation shaders.
 
 ## Features
 
@@ -24,8 +22,8 @@ Primary addition is WebGL renderer which enables the use of shaders.
 
 Supported FCEUX features:
 
-- Both NTSC and PAL system emulation.
 - All mappers supported by FCEUX.
+- NTSC, PAL and Dendy system emulation.
 - Save states and battery-backed SRAM.
 - Speed throttling.
 - Support for two game controllers.
@@ -34,17 +32,16 @@ Supported FCEUX features:
 
 _Unsupported_ FCEUX features:
 
-- New PPU emulation (old PPU emulation used for performance).
+- New PPU emulation (old PPU is used for its performance).
 - FDS disk system.
 - VS system.
 - Special peripherals (Family Keyboard, Mahjong controller, etc.)
 - Screenshots and movie recording.
-- Cheats, debug, TAS and Lua scripting features.
+- Cheats, debugging, TAS and Lua scripting features.
 
 New features:
 
-- NTSC composite video emulation.
-- CRT TV emulation.
+- NTSC composite and CRT TV video shaders.
 
 ## Examples and API
 
@@ -54,21 +51,21 @@ For advanced usage (a full web emulator), see
 [em-fceux-site](https://bitbucket.org/tsone/em-fceux-site/).
 
 API documentation can be found in
-[API.md](https://bitbucket.org/tsone/em-fceux/src/master/API.md).
+[API.md](https://github.com/tsone/fceux/tree/master/src/drivers/em/API.md).
 
 ## Build
 
 Setup:
 
-1. [Install and activate Emscripten 2.0.6](https://emscripten.org/docs/getting_started/downloads.html).
-2. Have python 2.7.x.
-3. Install [scons](https://scons.org/pages/download.html).
-4. Run `source emsdk_env.sh` to setup the Emscripten env.
-   - Note, this also sets `npm` to env.
+1. Have python 3.x.
+2. Install cmake.
+3. [Install and activate Emscripten 3.1.12](https://emscripten.org/docs/getting_started/downloads.html).
+4. Run `source emsdk_env.sh` to add Emscripten in your shell env.
+   - This also adds `npm` in the env.
 5. Run `npm install`.
 
-Build for debug with `npm run build:debug` and for release with `npm run build`
-(results will be in `dist/`).
+Then build for debug with `npm run build:debug` and for release with
+`npm run build`. The build results will are under `dist/`.
 
 ### Building Shaders
 
@@ -104,6 +101,3 @@ Please submit bugs and feature requests in the
 ## License
 
 Licensed under [GNU GPL 2](https://www.gnu.org/licenses/gpl-2.0.txt).
-
-em-fceux is based on
-[FCEUX 2.2.2 source code release](http://sourceforge.net/projects/fceultra/files/Source%20Code/2.2.2%20src/fceux-2.2.2.src.tar.gz/download).

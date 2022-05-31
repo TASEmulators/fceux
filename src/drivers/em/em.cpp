@@ -30,7 +30,7 @@
 // Reason is async mouse events and game implementations.
 #define ZAPPER_HOLD_FRAMES 3
 
-// Global variables used by fceux but defined in drivers...
+// Global variables used by FCEUX but defined in drivers...
 int pal_emulation = 0;
 int dendy = 0;
 int KillFCEUXonFrame = 0;

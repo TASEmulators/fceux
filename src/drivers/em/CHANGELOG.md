@@ -1,11 +1,11 @@
-# Changelog for fceux
+# Changelog for em-fceux
 
-## [2.6.4] - 2022-05-30
+## [2.1.0] - 2022-06-01
 
 ### Changed
 
-- Renamed package as "fceux" and moved to official fceux fork on github.
-- (Repo https://bitbucket.org/tsone/em-fceux.git will be archived.)
+- Migrated to FCEUX 2.6.4 fork on github: https://github.com/tsone/fceux.git
+- (Bitbucket repo https://bitbucket.org/tsone/em-fceux.git will be archived.)
 
 ## [2.0.1] - 2020-10-09
 

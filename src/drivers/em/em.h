@@ -33,8 +33,8 @@ namespace emscripten
 #define AUDIO_HW_BUF_MAX	2048
 #define AUDIO_BUF_MASK		(AUDIO_BUF_MAX - 1)
 
-#define INPUT_W     256 // Width of input PPU image by fceux (in px).
-#define INPUT_H     240 // Height of input PPU image by fceux (in px).
+#define INPUT_W     256 // Width of input generated PPU image (in px).
+#define INPUT_H     240 // Height of input generated PPU image (in px).
 
 // For some reason required in a driver header...
 extern int pal_emulation;

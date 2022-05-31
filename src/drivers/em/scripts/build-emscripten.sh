@@ -24,7 +24,7 @@ echo "Emscripten root:$EMSCRIPTEN_ROOT"
 # Generate opcode table.
 "$SCRIPT_DIR/gen-ops.py" -f > "$PACKAGE_DIR/opsfuncs.inc"
 
-# Build fceux.
+# Build.
 BUILD_TYPE=`[ "${1-}" == "--debug" ] && echo Debug || echo Release`
 if [[ ! -d "$BUILD_DIR" ]] ; then
   mkdir -p "$BUILD_DIR"

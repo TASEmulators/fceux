@@ -1,17 +1,17 @@
 {
-  "name": "fceux",
-  "version": "2.6.4",
-  "description": "FCEUX emulator",
-  "homepage": "https://fceux.com/",
+  "name": "em-fceux",
+  "version": "2.1.0",
+  "description": "Emscripten port of FCEUX emulator.",
+  "homepage": "https://tsone.kapsi.fi/em-fceux/",
   "author": "Valtteri Heikkilä",
   "license": "GPL-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/TASEmulators/fceux.git",
+    "url": "https://github.com/tsone/fceux.git",
     "directory": "src/drivers/em"
   },
   "bugs": {
-    "url": "https://github.com/TASEmulators/fceux/issues"
+    "url": "https://bitbucket.org/tsone/em-fceux/issues?status=new&status=open"
   },
   "keywords": [
     "emscripten",
