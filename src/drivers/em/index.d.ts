@@ -15,7 +15,7 @@ interface ConfigMap {
 }
 
 interface EventMap {
-  'game-loaded': () => any;
+  'game-loaded': (filename: string) => any;
 }
 
 interface SaveFiles {

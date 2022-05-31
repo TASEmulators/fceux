@@ -210,9 +210,10 @@ static void Event_Dispatch(const char* name)
     EM_ASM({
         const name = UTF8ToString($0);
         if (Module.eventListeners.hasOwnProperty(name)) {
-            Module.eventListeners[name]();
+            const filename = UTF8ToString($1).split("/").pop() || "";
+            Module.eventListeners[name](filename);
         }
-    }, name);
+    }, name, GameInfo ? GameInfo->filename : "");
 }
 
 // System
