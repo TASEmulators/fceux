@@ -370,9 +370,9 @@ static bool System_LoadGame(const std::string &path)
     return true;
 }
 
-static bool System_StartGame()
+static bool System_StartGame(const std::string &path)
 {
-    return System_LoadGame("/tmp/rom");
+    return System_LoadGame(path);
 }
 
 static std::string System_GameMd5()

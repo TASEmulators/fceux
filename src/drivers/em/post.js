@@ -52,15 +52,17 @@
     }
   };
 
-  Module.loadGame = function(uint8Array) {
-    FS.writeFile('/tmp/rom', uint8Array);
-    Module._startGame();
+  Module.loadGame = function(uint8Array, filename) {
+    const path = '/tmp/' + (filename || 'rom');
+    FS.writeFile(path, uint8Array);
+    Module._startGame(path);
   };
-  Module.downloadGame = function(url, init) {
+  Module.downloadGame = function(url, init, filename) {
+    filename = filename || url.split('/').pop();
     fetch(url, init).then(response => {
       if (response.ok) {
         response.arrayBuffer().then(buffer => {
-          Module.loadGame(new Uint8Array(buffer));
+          Module.loadGame(new Uint8Array(buffer), filename);
         });
       } else {
         throw Error;
