@@ -30,10 +30,7 @@
 // Reason is async mouse events and game implementations.
 #define ZAPPER_HOLD_FRAMES 3
 
-extern bool replaceP2StartWithMicrophone; // From src/input.cpp.
-extern int CurrentState; // From src/state.cpp.
-
-// Global variables used by fceux but defined in drivers... WOT?
+// Global variables used by fceux but defined in drivers...
 int pal_emulation = 0;
 int dendy = 0;
 int KillFCEUXonFrame = 0;
@@ -86,7 +83,7 @@ const unsigned int *GetKeyboard()
     return keyboard;
 }
 
-// Mouse input is not given, so we now just returns Zapper state.
+// FIXME: tsone: Mouse input not given, so just returns Zapper state.
 void GetMouseData(uint32 (&d)[3])
 {
     d[0] = em_zapper[0];
@@ -123,55 +120,92 @@ static int CloseGame()
 
     FCEUI_CloseGame();
 
-    // DriverKill();
     GameInfo = 0;
     return 1;
 }
 
-static void EmulateFrame(int frameskipmode)
+static double EmulateFrame(int frameskipmode)
 {
     uint8 *gfx = 0;
     int32 *sound;
     int32 ssize;
-
     FCEUI_Emulate(&gfx, &sound, &ssize, frameskipmode);
     Audio_Write(sound, ssize);
+    return ssize;
 }
 
-static int DoFrame()
+static void UpdateZapper()
 {
-    if (em_throttling) {
-        for (int i = 0; i < THROTTLE_FRAMESKIPS; ++i) {
-            EmulateFrame(2);
+    if (em_zapper_hold_counter <= 0) {
+        em_zapper[2] = 0;
+    } else {
+        --em_zapper_hold_counter;
+    }
+}
+
+// Emulate and maintain frame timing.
+// Call in requestAnimationFrame() preferably at 60 Hz or more.
+// This works by synchronizing to the generated audio samples.
+// Returns true if video frame was generated (=needs call to Video_Render()).
+static bool DoFrame()
+{
+    // Safety threshold (=min expected sampling rate / max expected FPS).
+    const double SAMPLES_THR = 11025.0 / 1000;
+    // Duration for detecting inactive browser tab/window (ms).
+    const double INACTIVE_THR = 500;
+
+    static double frame_time; // Tracked frame time (ms).
+    static double frame_duration; // Duration of last frame (ms).
+
+    if (!Audio_TryInitWebAudioContext()) {
+        // Web audio context either missing or initialization failed.
+        return false;
+    }
+
+    bool rendered_video = false;
+    int frameskipmode = 0;
+
+    // Lock the now for deterministic behavior.
+    const double now = emscripten_get_now();
+
+    if (frame_time && now - frame_time > INACTIVE_THR) {
+        // Long delay detected. Likely tab/window was inactive.
+        frame_time = 0; // Force frame timing reset.
+    }
+
+    while (now >= frame_time + 0.5 * frame_duration) {
+        if (em_throttling) {
+            // This generates no video or audio, so we treat it as if
+            // the frames didn't happen.
+            for (int i = 0; i < THROTTLE_FRAMESKIPS; ++i) {
+                EmulateFrame(2);
+            }
         }
-    }
 
-    // Get the number of frames to fill the audio buffer.
-    int frames = (AUDIO_BUF_MAX - Audio_GetBufferCount()) / em_audio_frame_samples;
-
-    // It's possible audio to go ahead of visuals. If so, skip all emulation for this frame.
-    // NOTE: This is not a good solution as it may cause unnecessary skipping in emulation.
-    if (Audio_IsInitialized() && frames <= 0) {
-        return 0;
-    }
-
-    // Skip frames (video) to fill the audio buffer. Leave two frames free for next requestAnimationFrame in case they come too frequently.
-    if (Audio_IsInitialized() && (frames > 3)) {
-        // Skip only even numbers of frames to correctly display flickering sprites.
-        frames = (frames - 3) & (~1);
-        while (frames > 0) {
-            EmulateFrame(1);
-            --frames;
+        if (frame_time == 0) {
+            frame_time = now; // Reset frame timing.
         }
+
+        const double generated_audio_samples = EmulateFrame(frameskipmode);
+        if (generated_audio_samples >= SAMPLES_THR) {
+            // Emulation is paused if samples is 0. Additionally this
+            // safeguards from unexpected behavior.
+            frame_duration = 1000.0 * generated_audio_samples / em_audio_rate;
+            rendered_video = true;
+        }
+        frame_time = frame_time + frame_duration;
+
+        frameskipmode = 1;
+
+        UpdateZapper();
     }
 
-    EmulateFrame(0);
-    return 1;
+    return rendered_video;
 }
 
 // Event
 
-static void Event_dispatch(const char* name)
+static void Event_Dispatch(const char* name)
 {
     EM_ASM({
         const name = UTF8ToString($0);
@@ -284,18 +318,10 @@ static void UpdateFrameAdvance()
     }
 }
 
-static void UpdateZapper()
-{
-    if (em_zapper_hold_counter <= 0) {
-        em_zapper[2] = 0;
-    } else {
-        --em_zapper_hold_counter;
-    }
-}
-
 static void System_Update()
 {
     if (GameInfo) {
+        Video_ResizeCanvas();
         if (DoFrame()) {
             Video_Render();
         } else {
@@ -304,7 +330,6 @@ static void System_Update()
     }
 
     UpdateFrameAdvance();
-    UpdateZapper();
 }
 
 static bool System_SetConfig(const std::string& key, const emscripten::val& value)
@@ -341,7 +366,7 @@ static bool System_LoadGame(const std::string &path)
 
     EM_ASM({ Module.deleteSaveFiles(); });
     s_game_loaded = true;
-    Event_dispatch("game-loaded");
+    Event_Dispatch("game-loaded");
     return true;
 }
 

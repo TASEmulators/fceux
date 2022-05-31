@@ -101,7 +101,6 @@ static void Resize(int width, int height)
 void FCEUD_VideoChanged()
 {
     PAL = FSettings.PAL ? 1 : 0;
-    em_audio_frame_samples = em_audio_rate / (FSettings.PAL ? PAL_FPS : NTSC_FPS);
     em_scanlines = FSettings.PAL ? 240 : 224;
 
     ES2_VideoChanged();
@@ -112,12 +111,15 @@ void RefreshThrottleFPS()
     FCEUD_VideoChanged();
 }
 
-void Video_Render()
+void Video_ResizeCanvas()
 {
     int width = EM_ASM_INT({ return Module.ctx.canvas.parentElement.clientWidth; });
     int height = EM_ASM_INT({ return Module.ctx.canvas.parentElement.clientHeight; });
     Resize(width, height);
+}
 
+void Video_Render()
+{
     ES2_Render(XBuf, deempScan, PALRAM[0]);
 }
 
@@ -127,10 +129,6 @@ int Video_Init(const char* canvasQuerySelector)
     if (s_inited) {
         return 0;
     }
-
-#if FCEM_DEBUG == 1
-    // FCEUI_SetShowFPS(1);
-#endif
 
     FCEU_printf("Initializing WebGL.\n");
     if (!ES2_Init(canvasQuerySelector, GetAspect())) {

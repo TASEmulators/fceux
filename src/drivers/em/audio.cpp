@@ -29,7 +29,6 @@
 extern int EmulationPaused; // defined in fceu.cpp
 
 int em_audio_rate = 44100;
-double em_audio_frame_samples = em_audio_rate / NTSC_FPS;
 
 static float *s_buffer = 0;
 static int s_buffer_read = 0;
@@ -144,7 +143,6 @@ extern "C" void audioBufferCallback()
 static void SetSampleRate(int sample_rate)
 {
     em_audio_rate = sample_rate;
-    em_audio_frame_samples = em_audio_rate / (FSettings.PAL ? PAL_FPS : NTSC_FPS);
     FCEUI_Sound(em_audio_rate);
 }
 
@@ -169,7 +167,7 @@ static int ContextInit()
     }, AUDIO_HW_BUF_MAX);
 }
 
-bool Audio_IsInitialized()
+bool Audio_TryInitWebAudioContext()
 {
     static bool initialized = false;
 
@@ -209,11 +207,6 @@ bool Audio_Init()
     FCEUI_SetNoiseVolume(256);
     FCEUI_SetPCMVolume(256);
     return true;
-}
-
-int Audio_GetBufferCount()
-{
-    return s_buffer_count;
 }
 
 void Audio_Write(int32 *buf, int count)

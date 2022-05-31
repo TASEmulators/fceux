@@ -86,7 +86,8 @@ elseif(EMSCRIPTEN)
 		)
 	endif()
 
-	add_definitions(-DHAVE_ASPRINTF -DOPENGL -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0)
+	# TODO: tsone: Is FRAMESKIP needed for FCEUI_Emulate() frame skipping?
+	add_definitions(-DFRAMESKIP=1 -DHAVE_ASPRINTF -DOPENGL -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0)
 	add_compile_options(${COMMON_FLAGS})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib)
 
