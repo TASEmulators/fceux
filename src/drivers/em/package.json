@@ -48,7 +48,7 @@
     "test": "[ -f API.md -a -f CHANGELOG.md -a -f COPYING -a -f README.md -a -f dist/fceux.js -a -f dist/fceux.wasm ]"
   },
   "devDependencies": {
-    "prettier": "1.19.1"
+    "prettier": "^2.6.2"
   },
   "dependencies": {}
 }

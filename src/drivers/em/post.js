@@ -1,4 +1,4 @@
-(function() {
+(function () {
   Module._defaultConfig = {
     'video-system': 'auto',
     'video-ntsc': false,
@@ -15,12 +15,12 @@
     'system-port-2': 'zapper',
   };
 
-  Module.deleteSaveFiles = function() {
+  Module.deleteSaveFiles = function () {
     const dir = '/tmp/sav';
     FS.unmount(dir);
     FS.mount(MEMFS, {}, dir);
   };
-  Module.exportSaveFiles = function() {
+  Module.exportSaveFiles = function () {
     Module._saveGameSave();
     const dir = '/tmp/sav/';
     const result = {};
@@ -31,7 +31,7 @@
     }
     return result;
   };
-  Module.importSaveFiles = function(states) {
+  Module.importSaveFiles = function (states) {
     Module.deleteSaveFiles();
     const dir = '/tmp/sav/';
     for (let name in states) {
@@ -41,10 +41,10 @@
   };
 
   Module.eventListeners = {};
-  Module.addEventListener = function(name, listener) {
+  Module.addEventListener = function (name, listener) {
     Module.eventListeners[name] = listener;
   };
-  Module.removeEventListener = function(listener) {
+  Module.removeEventListener = function (listener) {
     for (let k in Module.eventListeners) {
       if (Module.eventListeners[k] == listener) {
         delete Module.eventListeners[k];
@@ -52,16 +52,16 @@
     }
   };
 
-  Module.loadGame = function(uint8Array, filename) {
+  Module.loadGame = function (uint8Array, filename) {
     const path = '/tmp/' + (filename || 'rom');
     FS.writeFile(path, uint8Array);
     Module._startGame(path);
   };
-  Module.downloadGame = function(url, init, filename) {
+  Module.downloadGame = function (url, init, filename) {
     filename = filename || url.split('/').pop();
-    fetch(url, init).then(response => {
+    fetch(url, init).then((response) => {
       if (response.ok) {
-        response.arrayBuffer().then(buffer => {
+        response.arrayBuffer().then((buffer) => {
           Module.loadGame(new Uint8Array(buffer), filename);
         });
       } else {
