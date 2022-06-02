@@ -534,9 +534,10 @@ static INLINE void DMCDMA(void)
      PrepDPCM();
     else
     {
-     SIRQStat|=0x80;
-     if(DMCFormat&0x80)
+     if(DMCFormat&0x80) {
+      SIRQStat|=0x80;
       X6502_IRQBegin(FCEU_IQDPCM);
+     }
     }
    }
  }

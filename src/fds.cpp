@@ -223,18 +223,18 @@ void FCEU_FDSSelect(void)
 	FCEU_DispMessage("Disk %d Side %c Selected", 0, SelectDisk >> 1, (SelectDisk & 1) ? 'B' : 'A');
 }
 
-#define IRQ_Repeat  (IRQa & 0x01)
-#define IRQ_Enabled (IRQa & 0x02)
+#define IRQ_REPEAT  0x01
+#define IRQ_ENABLED 0x02
+#define REG_ENABLED 0x01
 
 static void FDSFix(int a) {
-	if ((IRQa & IRQ_Enabled) && IRQCount) {
+	if ((IRQa & IRQ_ENABLED) && (FDSRegs[3] & REG_ENABLED)) {
 		IRQCount -= a;
 		if (IRQCount <= 0) {
 			IRQCount = IRQLatch;
 			X6502_IRQBegin(FCEU_IQEXT);
-			if (!(IRQa & IRQ_Repeat)) {
-				IRQa &= ~IRQ_Enabled;
-			}
+			if (!(IRQa & IRQ_REPEAT))
+				IRQa &= ~IRQ_ENABLED;
 		}
 	}
 	if (DiskSeekIRQ > 0) {
@@ -574,21 +574,26 @@ void FDSSoundReset(void) {
 static DECLFW(FDSWrite) {
 	switch (A) {
 	case 0x4020:
-		X6502_IRQEnd(FCEU_IQEXT);
 		IRQLatch &= 0xFF00;
 		IRQLatch |= V;
 		break;
 	case 0x4021:
-		X6502_IRQEnd(FCEU_IQEXT);
 		IRQLatch &= 0xFF;
 		IRQLatch |= V << 8;
 		break;
 	case 0x4022:
-		X6502_IRQEnd(FCEU_IQEXT);
-		IRQCount = IRQLatch;
-		IRQa = V & 3;
+		if (FDSRegs[3] & 0x01) {
+			IRQa = V;
+			if (IRQa & 0x02)
+				IRQCount = IRQLatch;
+			else
+				X6502_IRQEnd(FCEU_IQEXT);
+		}
 		break;
-	case 0x4023: break;
+	case 0x4023:
+		if (!(V & 0x01))
+			X6502_IRQEnd(FCEU_IQEXT);
+		break;
 	case 0x4024:
 		if (mapperFDS_diskinsert && ~mapperFDS_control & 0x04) {
 
