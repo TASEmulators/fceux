@@ -654,7 +654,7 @@ endif()
 # the FCEUX_BUILD_TIMESTAMP preprocessor definition.
 # Note: with CMake >= 3.8.0, this will respect SOURCE_DATE_EPOCH. For more info,
 #       see <https://reproducible-builds.org/docs/source-date-epoch/>.
-string(TIMESTAMP BUILD_TS "%H:%M:%S  %b %d %Y")
+string(TIMESTAMP BUILD_TS "%H:%M:%S  %b %d %Y" UTC)
 add_definitions( -DFCEUX_BUILD_TIMESTAMP=\"${BUILD_TS}\" )
 
 if (WIN32)

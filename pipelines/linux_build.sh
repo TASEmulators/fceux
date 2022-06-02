@@ -98,7 +98,7 @@ sudo apt-get --assume-yes  install libavcodec-dev
 sudo apt-get --assume-yes  install libavformat-dev
 sudo apt-get --assume-yes  install libavutil-dev
 sudo apt-get --assume-yes  install libswscale-dev
-sudo apt-get --assume-yes  install libavresample-dev
+sudo apt-get --assume-yes  install libswresample-dev
 
 # Install cppcheck
 echo '****************************************'

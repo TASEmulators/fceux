@@ -4205,6 +4205,12 @@ int hexEditorOpenFromDebugger( int mode, int addr )
 
 		win->show();
 	}
+	else
+	{
+		win->activateWindow();
+		win->raise();
+		win->setFocus();
+	}
 
 	win->editor->setMode( mode );
 	win->editor->setAddr( addr );
