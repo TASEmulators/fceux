@@ -83,7 +83,6 @@ int closeFinishedMovie = 0;
 int KillFCEUXonFrame = 0;
 
 bool swapDuty = 0;
-bool turbo = false;
 bool pauseAfterPlayback = false;
 bool suggestReadOnlyReplay = true;
 bool showStatusIconOpt = true;

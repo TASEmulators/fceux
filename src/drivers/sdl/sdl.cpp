@@ -58,7 +58,6 @@ extern bool MaxSpeed;
 
 int isloaded;
 
-bool turbo = false;
 bool gtk_gui_run = true;
 
 int closeFinishedMovie = 0;

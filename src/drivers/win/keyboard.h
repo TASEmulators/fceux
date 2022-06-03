@@ -1,7 +1,7 @@
 void KeyboardClose(void);
 int KeyboardInitialize(void);
 void KeyboardUpdateState(void);
-unsigned int *GetKeyboard(void);
+const unsigned int *GetKeyboard(void);
 unsigned int *GetKeyboard_nr(void);
 unsigned int *GetKeyboard_jd(void);
 #define KEYBACKACCESS_OLDSTYLE 1

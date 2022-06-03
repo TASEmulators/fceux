@@ -719,13 +719,13 @@ void FCEUD_LoadStateFrom(void)
 /**
 * Hook for transformer board
 */
-unsigned int *GetKeyboard(void)
+const unsigned int *GetKeyboard(void)
 {
 	int size = 256;
 
 	Uint8 *keystate = (Uint8 *)SDL_GetKeyboardState(&size);
 
-	return (unsigned int *)(keystate);
+	return (const unsigned int *)(keystate);
 }
 
 static void FKB_CheckShortcutConflicts(void)

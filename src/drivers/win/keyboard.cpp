@@ -119,7 +119,7 @@ void KeyboardUpdateState(void)
 	autoHoldReset = DTestButton(&autoHoldClearKeys); //autoHoldClearKey && keys[autoHoldClearKey] != 0;
 }
 
-unsigned int *GetKeyboard(void)
+const unsigned int *GetKeyboard(void)
 {
 	return(keys);
 }

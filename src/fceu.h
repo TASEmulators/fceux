@@ -154,7 +154,7 @@ void FCEU_DispMessageOnMovie(const char *format, ...);
 void FCEU_TogglePPU();
 
 void SetNESDeemph_OldHacky(uint8 d, int force);
-void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor);
+void DrawTextTrans(uint8 *dest, const uint8 *textmsg, uint8 fgcolor);
 void FCEU_PutImage(void);
 #ifdef FRAMESKIP
 void FCEU_PutImageDummy(void);

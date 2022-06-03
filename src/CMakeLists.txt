@@ -88,7 +88,7 @@ elseif(EMSCRIPTEN)
 
 	# TODO: tsone: Is FRAMESKIP needed for FCEUI_Emulate() frame skipping?
 	add_definitions(-DFRAMESKIP=1 -DHAVE_ASPRINTF -DOPENGL -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0)
-	add_compile_options(${COMMON_FLAGS})
+	add_compile_options(-Wno-deprecated-non-prototype ${COMMON_FLAGS})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib)
 
 	add_link_options(
@@ -276,8 +276,6 @@ if ( ${ZLIB_FOUND} )
 else()
 
    message( STATUS "Using Internal zlib" )
-
-   add_compile_options(-Wno-deprecated-non-prototype)
 
    set( ZLIB_SOURCE 
        ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/adler32.c 

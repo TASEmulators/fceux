@@ -1369,7 +1369,7 @@ void FCEU_DrawMovies(uint8 *XBuf)
 			sprintf(counterbuf,"%d (no movie)",currFrameCounter);
 
 		if (counterbuf[0])
-			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(30)+1, 256, (uint8*)counterbuf, color+0x80);
+			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(30)+1, (uint8*)counterbuf, color+0x80);
 	}
 	if (rerecord_display && movieMode != MOVIEMODE_INACTIVE)
 	{
@@ -1377,7 +1377,7 @@ void FCEU_DrawMovies(uint8 *XBuf)
 		sprintf(counterbuf, "%d", currMovieData.rerecordCount);
 
 		if (counterbuf[0])
-			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(50)+1, 256, (uint8*)counterbuf, 0x28+0x80);
+			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(50)+1, (uint8*)counterbuf, 0x28+0x80);
 	}
 }
 
@@ -1389,7 +1389,7 @@ void FCEU_DrawLagCounter(uint8 *XBuf)
 		uint8 color = (lagFlag) ? (0x16+0x80) : (0x2A+0x80);
 		sprintf(lagcounterbuf, "%d", lagCounter);
 		if(lagcounterbuf[0])
-			DrawTextTrans(ClipSidesOffset + XBuf + FCEU_TextScanlineOffsetFromBottom(40) + 1, 256, (uint8*)lagcounterbuf, color);
+			DrawTextTrans(ClipSidesOffset + XBuf + FCEU_TextScanlineOffsetFromBottom(40) + 1, (uint8*)lagcounterbuf, color);
 	}
 }
 

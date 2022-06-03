@@ -120,7 +120,6 @@ static void UpdateFamiNetSys(void);
 static uint32 snespad_return[4];
 static uint32 JSreturn=0;
 int NoWaiting=0;
-bool turbo = false;
 
 #include "keyscan.h"
 static int DIPS=0;
