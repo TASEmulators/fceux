@@ -186,6 +186,7 @@ int ffbskip = 32;              //Blit skips per blit when FF-ing
 
 HINSTANCE fceu_hInstance;
 HACCEL fceu_hAccel;
+HACCEL debugger_hAccel;
 
 HRESULT ddrval;
 
@@ -376,6 +377,11 @@ int BlockingCheck()
 			// TAS Editor -> Find Node
 			if(!handled && taseditorWindow.hwndFindNote && IsChild(taseditorWindow.hwndFindNote, msg.hwnd))
 				handled = IsDialogMessage(taseditorWindow.hwndFindNote, &msg);
+
+			// Debugger
+			if(!handled && hDebug)
+				if(!(handled = TranslateAccelerator(hDebug, debugger_hAccel, &msg)))
+					handled = IsDialogMessage(hDebug, &msg);
 
 			// Sound Config
 			extern HWND uug;
@@ -711,6 +717,7 @@ int main(int argc,char *argv[])
 
 	fceu_hInstance = GetModuleHandle(0);
 	fceu_hAccel = LoadAccelerators(fceu_hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
+	debugger_hAccel = LoadAccelerators(fceu_hInstance,MAKEINTRESOURCE(IDR_DEBUGGER_ACCELERATOR));
 
 	// Get the base directory
 	GetBaseDirectory();
