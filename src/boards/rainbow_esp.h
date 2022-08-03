@@ -36,6 +36,7 @@ struct NetworkInfo
 {
 	std::string ssid;
 	std::string pass;
+	bool active;
 };
 
 class BrokeStudioFirmware: public EspFirmware {
@@ -65,12 +66,12 @@ private:
 		WIFI_GET_STATUS,
 		WIFI_GET_SSID,
 		WIFI_GET_IP,
+		WIFI_GET_CONFIG,
+		WIFI_SET_CONFIG,
 
 		// AP CMDS
 		AP_GET_SSID,
 		AP_GET_IP,
-		AP_GET_CONFIG,
-		AP_SET_CONFIG,
 
 		// RND CMDS
 		RND_GET_BYTE,
@@ -97,6 +98,7 @@ private:
 		NETWORK_GET_REGISTERED_DETAILS,
 		NETWORK_REGISTER,
 		NETWORK_UNREGISTER,
+		NETWORK_SET_ACTIVE,
 
 		// FILE CMDS
 		FILE_OPEN,
@@ -127,7 +129,7 @@ private:
 		WIFI_STATUS,
 		SSID,
 		IP_ADDRESS,
-		AP_CONFIG,
+		WIFI_CONFIG,
 
 		// RND CMDS
 		RND_BYTE,
@@ -165,11 +167,18 @@ private:
 		UDP,
 	};
 
+	// WIFI_CONFIG 
+	enum class wifi_config_t : uint8 {
+		WIFI_ENABLE = 1,
+		AP_ENABLE = 2,
+		WEB_SERVER_ENABLE = 4
+	};
+
 	// FILE_CONFIG
 	enum class file_config_flags_t : uint8 {
 		ACCESS_MODE = 1,
-		AUTO_ACCESS_MODE = 0,
-		MANUAL_ACCESS_MODE = 1
+		ACCESS_MODE_AUTO = 0,
+		ACCESS_MODE_MANUAL = 1
 	};
 
 	enum class file_delete_results_t : uint8 {
@@ -255,7 +264,7 @@ private:
 	uint16_t server_settings_port = 0;
 
 	uint8 debug_config = 0;
-	uint8 ap_config = 3;
+	uint8 wifi_config = 3;
 
 	easywsclient::WebSocket::pointer socket = nullptr;
 	std::thread socket_close_thread;

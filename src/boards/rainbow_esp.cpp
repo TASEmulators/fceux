@@ -139,9 +139,9 @@ BrokeStudioFirmware::BrokeStudioFirmware() {
 
 	// Init fake registered networks
 	this->networks = { {
-		{"FCEUX_SSID", "FCEUX_PASS"},
-		{"", ""},
-		{"", ""},
+		{"FCEUX_SSID", "FCEUX_PASS", true},
+		{"", "", false},
+		{"", "", false},
 	} };
 
 	// Load file list from save file (if any)
@@ -310,6 +310,14 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			UDBG("RAINBOW BrokeStudioFirmware received message WIFI_GET_ID\n");
 			this->tx_messages.push_back({ 14, static_cast<uint8>(fromesp_cmds_t::IP_ADDRESS), 12, '1', '9', '2', '.', '1', '6', '8', '.', '1', '.', '1', '0' });
 			break;
+		case toesp_cmds_t::WIFI_GET_CONFIG:
+			UDBG("RAINBOW BrokeStudioFirmware received message WIFI_GET_CONFIG\n");
+			this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::WIFI_CONFIG), this->wifi_config });
+			break;
+		case toesp_cmds_t::WIFI_SET_CONFIG:
+			UDBG("RAINBOW BrokeStudioFirmware received message WIFI_SET_CONFIG\n");
+			this->wifi_config = this->rx_buffer.at(2);
+			break;
 
 		// AP CMDS
 		// GET/SET AP config commands are not relevant here, so we'll just use a fake variable
@@ -320,14 +328,6 @@ void BrokeStudioFirmware::processBufferedMessage() {
 		case toesp_cmds_t::AP_GET_IP:
 			UDBG("RAINBOW BrokeStudioFirmware received message AP_GET_ID\n");
 			this->tx_messages.push_back({ 16, static_cast<uint8>(fromesp_cmds_t::IP_ADDRESS), 14, '1', '2', '7', '.', '0', '.', '0', '.', '1', ':', '8', '0', '8', '0' });
-			break;
-		case toesp_cmds_t::AP_GET_CONFIG:
-			UDBG("RAINBOW BrokeStudioFirmware received message AP_GET_CONFIG\n");
-			this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::AP_CONFIG), this->ap_config });
-			break;
-		case toesp_cmds_t::AP_SET_CONFIG:
-			UDBG("RAINBOW BrokeStudioFirmware received message AP_SET_CONFIG\n");
-			this->ap_config = this->rx_buffer.at(2);
 			break;
 
 		// RND CMDS
@@ -454,10 +454,11 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				});
 			}else {
 				std::deque<uint8> message({
-					static_cast<uint8>(1 + 2 + this->server_settings_address.size()),
+					static_cast<uint8>(1 + 2 + 1 + this->server_settings_address.size()),
 					static_cast<uint8>(fromesp_cmds_t::SERVER_SETTINGS),
 					static_cast<uint8>(this->server_settings_port >> 8),
-					static_cast<uint8>(this->server_settings_port & 0xff)
+					static_cast<uint8>(this->server_settings_port & 0xff),
+					static_cast<uint8>(this->server_settings_address.size())
 				});
 				message.insert(message.end(), this->server_settings_address.begin(), this->server_settings_address.end());
 				this->tx_messages.push_back(message);
@@ -473,10 +474,11 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				});
 			}else {
 				std::deque<uint8> message({
-					static_cast<uint8>(1 + 2 + this->default_server_settings_address.size()),
+					static_cast<uint8>(1 + 2 + 1 + this->default_server_settings_address.size()),
 					static_cast<uint8>(fromesp_cmds_t::SERVER_SETTINGS),
 					static_cast<uint8>(this->default_server_settings_port >> 8),
-					static_cast<uint8>(this->default_server_settings_port & 0xff)
+					static_cast<uint8>(this->default_server_settings_port & 0xff),
+					static_cast<uint8>(this->server_settings_address.size())
 				});
 				message.insert(message.end(), this->default_server_settings_address.begin(), this->default_server_settings_address.end());
 				this->tx_messages.push_back(message);
@@ -488,9 +490,9 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			if (message_size >= 3) {
 				this->server_settings_port =
 					(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
-					(static_cast<uint16_t>(this->rx_buffer.at(3)))
-				;
-				this->server_settings_address = std::string(this->rx_buffer.begin()+4, this->rx_buffer.end());
+					(static_cast<uint16_t>(this->rx_buffer.at(3)));
+				uint8 len = this->rx_buffer.at(4);
+				this->server_settings_address = std::string(this->rx_buffer.begin()+4, this->rx_buffer.begin()+4+len);
 			}
 			break;
 		case toesp_cmds_t::SERVER_RESTORE_SETTINGS:
@@ -579,8 +581,9 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				uint8 networkItem = this->rx_buffer.at(2);
 				if (networkItem > NUM_NETWORKS - 1) networkItem = NUM_NETWORKS - 1;
 				std::deque<uint8> message({
-					static_cast<uint8>(2 + this->networks[networkItem].ssid.length() + 1 + this->networks[networkItem].pass.length()),
+					static_cast<uint8>(2 + 1 + this->networks[networkItem].ssid.length() + 1 + this->networks[networkItem].pass.length()),
 					static_cast<uint8>(fromesp_cmds_t::NETWORK_REGISTERED_DETAILS),
+					static_cast<uint8>(this->networks[networkItem].active ? 1 : 0),
 					static_cast<uint8>(this->networks[networkItem].ssid.length())
 				});
 				message.insert(message.end(), this->networks[networkItem].ssid.begin(), this->networks[networkItem].ssid.end());
@@ -591,13 +594,21 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			break;
 		case toesp_cmds_t::NETWORK_REGISTER:
 			UDBG("RAINBOW BrokeStudioFirmware received message NETWORK_REGISTER\n");
-			if (message_size > 6) {
+			if (message_size >= 8) {
 				uint8 const networkItem = this->rx_buffer.at(2);
 				if (networkItem > NUM_NETWORKS - 1) break;
-				uint8 SSIDlength = std::min(SSID_MAX_LENGTH, this->rx_buffer.at(3));
-				uint8 PASSlength = std::min(PASS_MAX_LENGTH, this->rx_buffer.at(4 + SSIDlength));
-				this->networks[networkItem].ssid = std::string(this->rx_buffer.begin() + 4, this->rx_buffer.begin() + 4 + SSIDlength);
-				this->networks[networkItem].pass = std::string(this->rx_buffer.begin() + 4 + SSIDlength + 1, this->rx_buffer.begin() + 4 + SSIDlength + 1 + PASSlength);
+				bool const networkActive = this->rx_buffer.at(3) == 0 ? false : true;
+				if (networkActive) {
+					for (size_t i = 0; i < NUM_NETWORKS; i++)
+					{
+						this->networks[i].active = false;
+					}
+				}
+				this->networks[networkItem].active = networkActive;
+				uint8 SSIDlength = std::min(SSID_MAX_LENGTH, this->rx_buffer.at(4));
+				uint8 PASSlength = std::min(PASS_MAX_LENGTH, this->rx_buffer.at(5 + SSIDlength));
+				this->networks[networkItem].ssid = std::string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + SSIDlength);
+				this->networks[networkItem].pass = std::string(this->rx_buffer.begin() + 5 + SSIDlength + 1, this->rx_buffer.begin() + 5 + SSIDlength + 1 + PASSlength);
 
 			}
 			break;
@@ -608,6 +619,24 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				if (networkItem > NUM_NETWORKS - 1) break;
 				this->networks[networkItem].ssid = "";
 				this->networks[networkItem].pass = "";
+				this->networks[networkItem].active = false;
+			}
+			break;
+		case toesp_cmds_t::NETWORK_SET_ACTIVE:
+			UDBG("RAINBOW BrokeStudioFirmware received message NETWORK_SET_ACTIVE: ");
+			if (message_size == 3) {
+				uint8 const networkItem = this->rx_buffer.at(2);
+				if (networkItem > NUM_NETWORKS - 1) break;
+				bool const networkActive = this->rx_buffer.at(3) == 0 ? false : true;
+				UDBG("%d (%s)\n", networkItem, networkActive ? "active" : "inactive");
+				if (this->networks[networkItem].ssid == "") break;
+				if (networkActive) {
+					for (size_t i = 0; i < NUM_NETWORKS; i++)
+					{
+						this->networks[i].active = false;
+					}
+				}
+				this->networks[networkItem].active = networkActive;
 			}
 			break;
 
@@ -619,7 +648,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				uint8 config = this->rx_buffer.at(2);
 				uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
 
-				if (access_mode == static_cast<uint8>(file_config_flags_t::AUTO_ACCESS_MODE)) {
+				if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 					uint8 const path = this->rx_buffer.at(3);
 					uint8 const file = this->rx_buffer.at(4);
 					if (path < NUM_FILE_PATHS && file < NUM_FILES) {
@@ -646,7 +675,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 
 			uint8 access_mode = this->working_file_config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::AUTO_ACCESS_MODE)) {
+			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (this->working_file == NO_WORKING_FILE) {
 					this->tx_messages.push_back({
 						2,
@@ -678,7 +707,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			uint8 config = this->rx_buffer.at(2);
 			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::AUTO_ACCESS_MODE)) {
+			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size == 4) {
 					uint8 const path = this->rx_buffer.at(3);
 					uint8 const file = this->rx_buffer.at(4);
@@ -704,7 +733,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			uint8 config = this->rx_buffer.at(2);
 			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::AUTO_ACCESS_MODE)) {
+			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size == 4) {
 					uint8 const path = this->rx_buffer.at(3);
 					uint8 const file = this->rx_buffer.at(4);
@@ -790,7 +819,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			uint8 config = this->rx_buffer.at(2);
 			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::AUTO_ACCESS_MODE)) {
+			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size == 3) {
 					uint8 const path = this->rx_buffer.at(3);
 					if (path >= NUM_FILE_PATHS) {
@@ -828,7 +857,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			uint8 config = this->rx_buffer.at(2);
 			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::AUTO_ACCESS_MODE)) {
+			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size >= 3) {
 					std::vector<uint8> existing_files;
 					uint8 const path = this->rx_buffer.at(3);
@@ -895,7 +924,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			uint8 config = this->rx_buffer.at(2);
 			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::AUTO_ACCESS_MODE)) {
+			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size == 4) {
 					uint8 const path = this->rx_buffer.at(3);
 					uint8 const file = this->rx_buffer.at(4);
@@ -944,7 +973,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			uint8 config = this->rx_buffer.at(2);
 			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::AUTO_ACCESS_MODE)) {
+			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size > 6) {
 					// Parse
 					uint8 const urlLength = this->rx_buffer.at(3);
