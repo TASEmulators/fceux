@@ -110,7 +110,7 @@ SFORMAT SFCPU[]={
 	{ &X.Y, 1, "Y\0\0"},
 	{ &X.S, 1, "S\0\0"},
 	{ &X.P, 1, "P\0\0"},
-	{ &X.DB, 1, "DB"},
+	{ &X.DB, 1, "DB\0"},
 	{ &RAM, 0x800 | FCEUSTATE_INDIRECT, "RAM", },
 	{ 0 }
 };
