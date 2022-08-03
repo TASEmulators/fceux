@@ -909,18 +909,6 @@ int  AviRiffViewerDialog::processChunk( AviRiffTreeItem *item )
 			twi->setText( 0, tr("nBitsPerSample") );
 			twi->setText( 2, tr(stmp) );
 			item->addChild(twi);
-
-			// ffmpeg does not write out this element.
-			// Check chunk size to ensure it is there to avoid heap read overflow.
-			if ( dataSize >= 26 )
-			{
-				sprintf( stmp, "%u", data.readU16(24) );
-
-				twi = new QTreeWidgetItem();
-				twi->setText( 0, tr("cbSize") );
-				twi->setText( 2, tr(stmp) );
-				item->addChild(twi);
-			}
 		}
 	}
 	else if ( isRiffTag( item->getFourcc(), &riffIdx ) )
