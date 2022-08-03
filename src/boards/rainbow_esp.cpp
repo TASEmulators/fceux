@@ -3,7 +3,7 @@
 #include "../fceu.h"
 #include "../utils/crc32.h"
 
-#include "pping.h"
+#include "RNBW/pping.h"
 
 #include <algorithm>
 #include <chrono>

@@ -479,7 +479,6 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\boards\coolboy.cpp" />
     <ClCompile Include="..\src\boards\coolgirl.cpp" />
     <ClCompile Include="..\src\boards\dance2000.cpp" />
-    <ClCompile Include="..\src\boards\easywsclient.cpp" />
     <ClCompile Include="..\src\boards\eh8813a.cpp" />
     <ClCompile Include="..\src\boards\et-100.cpp" />
     <ClCompile Include="..\src\boards\et-4320.cpp" />
@@ -504,12 +503,13 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\boards\lh53.cpp" />
     <ClCompile Include="..\src\boards\mihunche.cpp" />
     <ClCompile Include="..\src\boards\mmc2and4.cpp" />
-    <ClCompile Include="..\src\boards\mongoose.c" />
     <ClCompile Include="..\src\boards\onebus.cpp" />
     <ClCompile Include="..\src\boards\pec-586.cpp" />
-    <ClCompile Include="..\src\boards\pping.c" />
     <ClCompile Include="..\src\boards\rainbow_esp.cpp" />
     <ClCompile Include="..\src\boards\rainbow13.cpp" />
+    <ClCompile Include="..\src\boards\RNBW\easywsclient.cpp" />
+    <ClCompile Include="..\src\boards\RNBW\mongoose.c" />
+    <ClCompile Include="..\src\boards\RNBW\pping.c" />
     <ClCompile Include="..\src\boards\rt-01.cpp" />
     <ClCompile Include="..\src\boards\sa-9602b.cpp" />
     <ClCompile Include="..\src\boards\sb-2000.cpp" />
@@ -1025,6 +1025,10 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="..\src\asm.h" />
     <ClInclude Include="..\src\boards\easywsclient.hpp" />
+    <ClInclude Include="..\src\boards\RNBW\easywsclient.hpp" />
+    <ClInclude Include="..\src\boards\RNBW\esp.h" />
+    <ClInclude Include="..\src\boards\RNBW\mongoose.h" />
+    <ClInclude Include="..\src\boards\RNBW\pping.h" />
     <ClInclude Include="..\src\cart.h" />
     <ClInclude Include="..\src\cheat.h" />
     <ClInclude Include="..\src\conddebug.h" />

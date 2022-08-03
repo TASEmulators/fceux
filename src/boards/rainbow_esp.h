@@ -3,8 +3,8 @@
 
 #include "../types.h"
 
-#include "easywsclient.hpp"
-#include "mongoose.h"
+#include "RNBW/easywsclient.hpp"
+#include "RNBW/mongoose.h"
 
 #define CURL_STATICLIB
 #include "curl/curl.h"

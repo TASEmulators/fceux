@@ -1127,19 +1127,19 @@
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\debugsymboltable.cpp" />
-    <ClCompile Include="..\src\boards\easywsclient.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\rainbow_esp.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\mongoose.c">
-      <Filter>boards</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\boards\pping.c">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\rainbow13.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\RNBW\easywsclient.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\RNBW\mongoose.c">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\RNBW\pping.c">
       <Filter>boards</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1652,6 +1652,18 @@
       <Filter>drivers\win</Filter>
     </ClInclude>
     <ClInclude Include="..\src\boards\easywsclient.hpp" />
+    <ClInclude Include="..\src\boards\RNBW\esp.h">
+      <Filter>boards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\boards\RNBW\easywsclient.hpp">
+      <Filter>boards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\boards\RNBW\mongoose.h">
+      <Filter>boards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\boards\RNBW\pping.h">
+      <Filter>boards</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">
