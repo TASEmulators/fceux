@@ -26,6 +26,7 @@
 #ifdef WIN32
 #include <windows.h>
 #else
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -111,8 +112,11 @@ static int recBufHead = 0;
 static int recBufNum = 0;
 static traceRecord_t *logBuf = NULL;
 static int logBufMax = 3000000;
-static int logBufHead = 0;
-static int logBufTail = 0;
+// logBufHead and logBufTail are volatile because they are shared use by both the emulation and disk logger threads.
+// Ensure that the compiler doesn't do any thread caching optimizations on them so that changes to these
+// variables are immediately visible by the other thread.
+static volatile int logBufHead = 0;
+static volatile int logBufTail = 0;
 static bool overrunWarningArmed = true;
 static TraceLoggerDialog_t *traceLogWindow = NULL;
 static void pushMsgToLogBuffer(const char *msg);
@@ -2515,6 +2519,8 @@ void TraceLogDiskThread_t::run(void)
 	char buf[8192];
 	int i,idx=0;
 	int blockSize = 4 * 1024;
+	bool dataNeedsFlush = true;
+	bool isPaused = false;
 
 	//printf("Trace Log Disk Start\n");
 
@@ -2557,6 +2563,8 @@ void TraceLogDiskThread_t::run(void)
 
 	while ( !isInterruptionRequested() )
 	{
+		isPaused = FCEUI_EmulationPaused() ? true : false;
+
 		while (logBufHead != logBufTail)
 		{
 			logBuf[logBufTail].convToText(line);
@@ -2582,6 +2590,41 @@ void TraceLogDiskThread_t::run(void)
 				}
 				idx = 0;
 				#endif
+				dataNeedsFlush = true;
+			}
+		}
+
+		if (isPaused)
+		{
+			// If paused, the user might be at a breakpoint or doing some
+			// debugging. So make sure all data is flushed to disk for viewing.
+			// Only flush data when paused, to keep write efficiency up.
+			if ( idx > 0 )
+			{
+				#ifdef WIN32
+				DWORD bytesWritten;
+				WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
+				#else
+				if ( write( logFile, buf, idx ) < 0 )
+				{
+					// HANDLE ERROR TODO
+				}
+				idx = 0;
+				#endif
+				dataNeedsFlush = true;
+			}
+			if (dataNeedsFlush)
+			{
+				//printf("Flushing Trace Log Disk Buffers\n");
+				#ifdef WIN32
+				FlushFileBuffers( logFile );
+				#else
+				if ( fsync( logFile ) )
+				{
+					printf("Trace Log fsync error\n");
+				}
+				#endif
+				dataNeedsFlush = false;
 			}
 		}
 		SDL_Delay(1);
