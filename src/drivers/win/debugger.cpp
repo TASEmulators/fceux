@@ -1471,7 +1471,7 @@ INT_PTR CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 							else
 								iapoffset = GetNesFileAddress(GetEditHex(hwndDlg,IDC_ROMPATCHER_OFFSET));
 							if((iapoffset < 16) && (iapoffset != -1)){
-								MessageBox(hDebug, "Sorry, iNES Header editing isn't supported by this tool. If you want to edit the header, please use iNES Header Editor", "Error", MB_OK | MB_ICONASTERISK);
+								MessageBox(hDebug, "Sorry, NES Header editing isn't supported by this tool. If you want to edit the header, please use NES Header Editor", "Error", MB_OK | MB_ICONASTERISK);
 								iapoffset = -1;
 							}
 							if((iapoffset > PRGsize[0]) && (iapoffset != -1)){

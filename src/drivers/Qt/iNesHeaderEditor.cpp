@@ -189,7 +189,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
     fontCharWidth = fm.width(QLatin1Char('2'));
 #endif
 
-	setWindowTitle("iNES Header Editor");
+	setWindowTitle("NES Header Editor");
 
 	//resize( 512, 512 );
 
@@ -197,7 +197,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	hdrLayout  = new QVBoxLayout();
 	hbox1      = new QHBoxLayout();
 	hbox       = new QHBoxLayout();
-	hdrBox     = new QGroupBox( tr("iNES Header") );
+	hdrBox     = new QGroupBox( tr("NES Header") );
 	box        = new QGroupBox( tr("Version:") );
 
 	mainLayout->addWidget( hdrBox );
@@ -550,7 +550,7 @@ iNesHeaderEditor_t::~iNesHeaderEditor_t(void)
 //----------------------------------------------------------------------------
 void iNesHeaderEditor_t::closeEvent(QCloseEvent *event)
 {
-	//printf("iNES Header Editor Close Window Event\n");
+	//printf("NES Header Editor Close Window Event\n");
 	done(0);
 	deleteLater();
 	event->accept();
@@ -701,21 +701,21 @@ bool iNesHeaderEditor_t::loadHeader(iNES_HEADER* header)
 				break;
 			}
 			case errors::INVALID_HEADER:
-				//MessageBox(parent, "Invalid iNES header.", "iNES Header Editor", MB_OK | MB_ICONERROR);
-				showErrorMsgWindow( "Invalid iNES header." );
+				//MessageBox(parent, "Invalid NES header.", "NES Header Editor", MB_OK | MB_ICONERROR);
+				showErrorMsgWindow( "Invalid NES header." );
 				break;
 			case errors::FDS_HEADER:
-				//MessageBox(parent, "Editing header of an FDS file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+				//MessageBox(parent, "Editing header of an FDS file is not supported.", "NES Header Editor", MB_OK | MB_ICONERROR);
 				showErrorMsgWindow("Editing header of an FDS file is not supported.");
 				break;
 			case errors::UNIF_HEADER:
-				//MessageBox(parent, "Editing header of a UNIF file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+				//MessageBox(parent, "Editing header of a UNIF file is not supported.", "NES Header Editor", MB_OK | MB_ICONERROR);
 				showErrorMsgWindow("Editing header of a UNIF file is not supported.");
 				break;
 			case errors::NSF_HEADER:
 //			case errors::NSF2_HEADER:
 //			case errors::NSFE_HEADER:
-				//MessageBox(parent, "Editing header of an NSF file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+				//MessageBox(parent, "Editing header of an NSF file is not supported.", "NES Header Editor", MB_OK | MB_ICONERROR);
 				showErrorMsgWindow("Editing header of an NSF file is not supported.");
 				break;
 		}

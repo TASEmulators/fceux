@@ -404,7 +404,7 @@ void updateGameDependentMenus()
 	for (unsigned int i = 0; i < sizeof(menu_ids) / sizeof(*menu_ids); i++)
 		EnableMenuItem(fceumenu, menu_ids[i], MF_BYCOMMAND | enable ? MF_ENABLED : MF_GRAYED | MF_DISABLED);
 
-	// Special treatment for the iNES head editor, only when no game is loaded or an NES game is loaded
+	// Special treatment for the NES header editor, only when no game is loaded or an NES game is loaded
 	extern iNES_HEADER head;
 	enable = GameInfo == 0 || !strncmp((const char*)&head, "NES\x1A", 4);
 	EnableMenuItem(fceumenu, MENU_INESHEADEREDITOR, MF_BYCOMMAND | enable ? MF_ENABLED : MF_GRAYED | MF_DISABLED);
@@ -3394,7 +3394,7 @@ bool inline (*GetIsLetterLegal(UINT id))(char letter)
 		case IDC_CHEAT_TEXT:
 			return IsLetterLegalCheat;
 
-		// PRG ROM, PRG RAM, PRG NVRAM, CHR ROM, CHR RAM and CHR NVRAM in iNES Header Editor
+		// PRG ROM, PRG RAM, PRG NVRAM, CHR ROM, CHR RAM and CHR NVRAM in NES Header Editor
 		case IDC_PRGROM_EDIT: case IDC_PRGRAM_EDIT: case IDC_PRGNVRAM_EDIT:
 		case IDC_CHRROM_EDIT: case IDC_CHRRAM_EDIT: case IDC_CHRNVRAM_EDIT:
 			return IsLetterLegalSize;

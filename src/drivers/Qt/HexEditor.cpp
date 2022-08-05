@@ -374,7 +374,7 @@ static int writeMem( int mode, unsigned int addr, int value )
 		{
 			if (addr < 16)
 			{
-				fprintf( stdout, "You can't edit ROM header here, however you can use iNES Header Editor to edit the header if it's an iNES format file.");
+				fprintf( stdout, "You can't edit ROM header here, however you can use NES Header Editor to edit the header if it's an iNES or NES2.0 format file.");
 			}
 			else if ( (addr >= 16) && (addr < PRGsize[0]+16) )
 			{

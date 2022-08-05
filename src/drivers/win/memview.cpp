@@ -346,7 +346,7 @@ static int GetFileData(uint32 offset){
 }
 
 static int WriteFileData(uint32 addr,int data){
-	if (addr < 16) MessageBox(hMemView, "You can't edit ROM header here, however you can use iNES Header Editor to edit the header if it's an iNES format file.", "Sorry", MB_OK | MB_ICONERROR);
+	if (addr < 16) MessageBox(hMemView, "You can't edit ROM header here, however you can use NES Header Editor to edit the header if it's an iNES format file.", "Sorry", MB_OK | MB_ICONERROR);
 	if((addr >= 16) && (addr < PRGsize[0]+16)) *(uint8 *)(GetNesPRGPointer(addr-16)) = data;
 	if((addr >= PRGsize[0]+16) && (addr < CHRsize[0]+PRGsize[0]+16)) *(uint8 *)(GetNesCHRPointer(addr-16-PRGsize[0])) = data;
 
@@ -736,7 +736,7 @@ void UpdateColorTable()
 				int temp_offset;
 				for (i = 0; i < DataAmount; i++)
 				{
-					temp_offset = CurOffset + i - 16;	// (minus iNES header)
+					temp_offset = CurOffset + i - 16;	// (minus NES header)
 					if (temp_offset >= 0)
 					{
 						if ((unsigned int)temp_offset < cdloggerdataSize)

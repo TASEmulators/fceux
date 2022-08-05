@@ -1730,10 +1730,10 @@ void consoleWin_t::createMainMenu(void)
 	
 	debugMenu->addAction(ggEncodeAct);
 
-	// Debug -> iNES Header Editor
-	iNesEditAct = new QAction(tr("&iNES Header Editor..."), this);
+	// Debug -> NES Header Editor
+	iNesEditAct = new QAction(tr("NES Header Edito&r..."), this);
 	//iNesEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
-	iNesEditAct->setStatusTip(tr("Open iNES Header Editor"));
+	iNesEditAct->setStatusTip(tr("Open NES Header Editor"));
 	connect(iNesEditAct, SIGNAL(triggered()), this, SLOT(openNesHeaderEditor(void)) );
 	
 	debugMenu->addAction(iNesEditAct);
@@ -3055,7 +3055,7 @@ void consoleWin_t::openNesHeaderEditor(void)
 {
 	iNesHeaderEditor_t *win;
 
-	//printf("Open iNES Header Editor Window\n");
+	//printf("Open NES Header Editor Window\n");
 	
 	win = new iNesHeaderEditor_t(this);
 	
