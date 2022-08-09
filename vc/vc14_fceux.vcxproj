@@ -146,7 +146,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
+      <Command>"%windir%\system32\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -186,7 +186,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
+      <Command>"%windir%\system32\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
       <Message>write current revision number to placeholders</Message>
     </PreBuildEvent>
     <ClCompile>
@@ -229,7 +229,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='PublicRelease|Win32'">
     <PreBuildEvent>
-      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
+      <Command>"%windir%\system32\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
       <Message>write current revision number to placeholders</Message>
     </PreBuildEvent>
     <ClCompile>
@@ -298,7 +298,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
       <DelayLoadDLLs>lua51.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
-      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
+      <Command>"%windir%\system32\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z.dll" "$(OutDir)"
@@ -335,7 +335,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
       <DelayLoadDLLs>lua51.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
-      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
+      <Command>"%windir%\system32\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z.dll" "$(OutDir)"
@@ -372,7 +372,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
       <DelayLoadDLLs>lua51.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
-      <Command>"%windir%\Sysnative\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
+      <Command>"%windir%\system32\cscript" /nologo /E:JScript "defaultconfig\make_scmrev.h.js"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z.dll" "$(OutDir)"
