@@ -15,6 +15,7 @@ typedef struct {
 					// to help support games like "Karnov"
 					// that are not really MMC3 but are
 					// set to mapper 4.
+	int mirrorAs2Bits;
 	int battery;	// Presence of an actual battery.
 	int ines2;
 	int submapper;	// Submappers as defined by NES 2.0

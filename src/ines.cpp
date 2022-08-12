@@ -54,6 +54,7 @@ iNES_HEADER head;
 static CartInfo iNESCart;
 
 uint8 Mirroring = 0;
+uint8 MirroringAs2bits = 0;
 uint32 ROM_size = 0;
 uint32 VROM_size = 0;
 char LoadedRomFName[2048]; //mbg merge 7/17/06 added
@@ -673,7 +674,7 @@ BMAPPINGLocal bmap[] = {
 	{"",					215, UNL8237_Init},
 	{"",					216, Mapper216_Init},
 	{"",					217, Mapper217_Init},	// Redefined to a new Discrete BMC mapper
-//	{"",					218, Mapper218_Init},
+	{"",					218, Mapper218_Init},
 	{"UNLA9746",			219, UNLA9746_Init},
 	{"Debug Mapper",		220, QTAi_Init},
 	{"UNLN625092",			221, UNLN625092_Init},
@@ -765,6 +766,9 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		Mirroring = 2;
 	} else
 		Mirroring = (head.ROM_type & 1);
+
+	MirroringAs2bits = head.ROM_type & 1;
+	if (head.ROM_type & 8) MirroringAs2bits |= 2;
 
 	int not_round_size;
 	if (!iNES2)	{
@@ -918,6 +922,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	iNESCart.battery = (head.ROM_type & 2) ? 1 : 0;
 	iNESCart.mirror = Mirroring;
+	iNESCart.mirrorAs2Bits = MirroringAs2bits;
 
 	int result = iNES_Init(MapperNo);
 	switch(result)
