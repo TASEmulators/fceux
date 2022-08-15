@@ -642,6 +642,7 @@ static const char *DriverUsage =
 static void ShowUsage(const char *prog)
 {
 	int i,j;
+	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
 	puts(DriverUsage);
 #ifdef _S9XLUA_H
@@ -681,11 +682,9 @@ static void ShowUsage(const char *prog)
 	
 }
 
-int  fceuWrapperInit( int argc, char *argv[] )
+// Pre-GUI initialization.
+int  fceuWrapperPreInit( int argc, char *argv[] )
 {
-	int opt, error;
-	std::string s;
-
 	for (int i=0; i<argc; i++)
 	{
 		if ( (strcmp(argv[i], "--help") == 0) || (strcmp(argv[i],"-h") == 0) )
@@ -693,7 +692,24 @@ int  fceuWrapperInit( int argc, char *argv[] )
 			ShowUsage(argv[0]);
 			exit(0);
 		}
+		else if ( strcmp(argv[i], "--no-gui") == 0)
+		{
+			printf("Error: Qt/SDL version does not support --no-gui option.\n");
+			exit(1);
+		}
+		else if ( strcmp(argv[i], "--version") == 0)
+		{
+			printf("%i.%i.%i\n", FCEU_VERSION_MAJOR, FCEU_VERSION_MINOR, FCEU_VERSION_PATCH);
+			exit(0);
+		}
 	}
+	return 0;
+}
+
+int  fceuWrapperInit( int argc, char *argv[] )
+{
+	int opt, error;
+	std::string s;
 
 	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
 

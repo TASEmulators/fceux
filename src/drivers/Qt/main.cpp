@@ -95,7 +95,10 @@ static bool showSplashScreen(void)
 
 int main( int argc, char *argv[] )
 {
-	int retval;
+	int retval = 0;
+
+	fceuWrapperPreInit(argc, argv);
+
 	qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
 
