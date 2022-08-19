@@ -108,7 +108,7 @@ char *U8ToStr(uint8 a)
 }
 
 //int RedoCheatsCallB(char *name, uint32 a, uint8 v, int s) { //bbit edited: this commented out line was changed to the below for the new fceud
-int RedoCheatsCallB(char *name, uint32 a, uint8 v, int c, int s, int type, void* data)
+int RedoCheatsCallB(const char *name, uint32 a, uint8 v, int c, int s, int type, void* data)
 {
 	char str[256] = { 0 };
 	GetCheatStr(str, a, v, c);
@@ -123,7 +123,7 @@ int RedoCheatsCallB(char *name, uint32 a, uint8 v, int c, int s, int type, void*
 	else
 		lvi.iItem = SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LVM_INSERTITEM, 0, (LPARAM)&lvi);
 	lvi.iSubItem = 1;
-	lvi.pszText = name;
+	lvi.pszText = (LPSTR)name;
 	SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LVM_SETITEM, 0, (LPARAM)&lvi);
 
 	lvi.mask = LVIF_STATE;
@@ -483,11 +483,12 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 							lvi.stateMask = LVIS_STATEIMAGEMASK;
 							int tmpsel = SendDlgItemMessage(hCheat, IDC_LIST_CHEATS, LVM_GETNEXTITEM, -1, LVNI_ALL | LVNI_SELECTED);
 
-							char* name = ""; int s;
+							std::string name;
+							int s;
 							while (tmpsel != -1)
 							{
 								FCEUI_GetCheat(tmpsel, &name, NULL, NULL, NULL, &s, NULL);
-								FCEUI_SetCheat(tmpsel, name, -1, -1, -2, s ^= 1, 1);
+								FCEUI_SetCheat(tmpsel, &name, -1, -1, -2, s ^= 1, 1);
 
 								lvi.iItem = tmpsel;
 								lvi.state = INDEXTOSTATEIMAGEMASK(s ? 2 : 1);
@@ -645,12 +646,14 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 							if (selcheat < 0)
 								break;
 
-							char name[256]; uint32 a; uint8 v; int s; int c;
-							GetUICheatInfo(hwndDlg, name, &a, &v, &c);
+							std::string name; uint32 a; uint8 v; int s; int c;
+							char namebuf[256] = {0};
+							GetUICheatInfo(hwndDlg, namebuf, &a, &v, &c);
+							name = namebuf;
 
-							FCEUI_SetCheat(selcheat, name, a, v, c, -1, 1);
-							FCEUI_GetCheat(selcheat, NULL, &a, &v, &c, &s, NULL);
-							RedoCheatsCallB(name, a, v, c, s, 1, &selcheat);
+							FCEUI_SetCheat(selcheat, &name, a, v, c, -1, 1);
+							FCEUI_GetCheat(selcheat, nullptr, &a, &v, &c, &s, NULL);
+							RedoCheatsCallB(name.c_str(), a, v, c, s, 1, &selcheat);
 							SendDlgItemMessage(hwndDlg, IDC_LIST_CHEATS, LVM_SETSELECTIONMARK, 0, selcheat);
 
 							SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPCSTR)U16ToStr(a));
@@ -902,9 +905,9 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 									selcheat = pNMListView->iItem;
 									if (selcheat >= 0)
 									{
-										char* name = ""; uint32 a; uint8 v; int s; int c;
+										std::string name; uint32 a; uint8 v; int s; int c;
 										FCEUI_GetCheat(selcheat, &name, &a, &v, &c, &s, NULL);
-										SetDlgItemText(hwndDlg, IDC_CHEAT_NAME, (LPCSTR)name);
+										SetDlgItemText(hwndDlg, IDC_CHEAT_NAME, (LPCSTR)name.c_str());
 										SetDlgItemText(hwndDlg, IDC_CHEAT_ADDR, (LPCSTR)U16ToStr(a));
 										SetDlgItemText(hwndDlg, IDC_CHEAT_VAL, (LPCSTR)U8ToStr(v));
 										SetDlgItemText(hwndDlg, IDC_CHEAT_COM, (LPCSTR)(c == -1 ? "" : U8ToStr(c)));
@@ -930,11 +933,11 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 										pNMListView->uNewState & INDEXTOSTATEIMAGEMASK(2))
 									{
 										int tmpsel = pNMListView->iItem;
-										char* name = ""; int s;
+										std::string name; int s;
 										FCEUI_GetCheat(tmpsel, &name, NULL, NULL, NULL, &s, NULL);
 										if (!s)
 										{
-											FCEUI_SetCheat(tmpsel, name, -1, -1, -2, s ^= 1, 1);
+											FCEUI_SetCheat(tmpsel, &name, -1, -1, -2, s ^= 1, 1);
 											UpdateCheatRelatedWindow();
 											UpdateCheatListGroupBoxUI();
 										}
@@ -944,11 +947,11 @@ INT_PTR CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 										pNMListView->uNewState & INDEXTOSTATEIMAGEMASK(1))
 									{
 										int tmpsel = pNMListView->iItem;
-										char* name = ""; int s;
+										std::string name; int s;
 										FCEUI_GetCheat(tmpsel, &name, NULL, NULL, NULL, &s, NULL);
 										if (s)
 										{
-											FCEUI_SetCheat(tmpsel, name, -1, -1, -2, s ^= 1, 1);
+											FCEUI_SetCheat(tmpsel, &name, -1, -1, -2, s ^= 1, 1);
 
 											UpdateCheatRelatedWindow();
 											UpdateCheatListGroupBoxUI();

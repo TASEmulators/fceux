@@ -773,7 +773,7 @@ static int emu_delgamegenie(lua_State *L) {
 	int GGaddr, GGcomp, GGval;
 	uint32 i=0;
 
-	char * Cname;
+	std::string Cname;
 	uint32 Caddr;
 	uint8 Cval;
 	int Ccompare, Ctype;
@@ -786,7 +786,7 @@ static int emu_delgamegenie(lua_State *L) {
 
 	while (FCEUI_GetCheat(i,&Cname,&Caddr,&Cval,&Ccompare,NULL,&Ctype)) {
 
-		if ((!strcmp(msg,Cname)) && (GGaddr == Caddr) && (GGval == Cval) && (GGcomp == Ccompare) && (Ctype == 1)) {
+		if ((Cname == msg) && (GGaddr == Caddr) && (GGval == Cval) && (GGcomp == Ccompare) && (Ctype == 1)) {
 			// Delete cheat code
 			if (FCEUI_DelCheat(i)) {
 				lua_pushboolean(L, true);

@@ -822,7 +822,7 @@ void UpdateColorTable()
 
 int addrtodelete;    // This is a very ugly hackish method of doing this
 int cheatwasdeleted; // but it works and that is all that matters here.
-int DeleteCheatCallB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data){  //mbg merge 6/29/06 - added arg
+int DeleteCheatCallB(const char *name, uint32 a, uint8 v, int compare,int s,int type, void *data){  //mbg merge 6/29/06 - added arg
 	if(cheatwasdeleted == -1)return 1;
 	cheatwasdeleted++;
 	if(a == addrtodelete){
@@ -901,7 +901,7 @@ void UnfreezeAllRam() {
 
 	int i=0;
 
-	char * Cname;
+	std::string Cname;
 	uint32 Caddr;
 	int Ctype;
 
@@ -919,7 +919,7 @@ void UnfreezeAllRam() {
 		// would be added by the freeze command. Manual unfreeze should let them
 		// make that mistake once or twice, in case they like it that way.
 		FCEUI_GetCheat(i,&Cname,&Caddr,NULL,NULL,NULL,&Ctype);
-		if ((Cname[0] == '\0') && ((Caddr < 0x2000) || ((Caddr >= 0x6000) && (Caddr < 0x8000))) && (Ctype == 1)) {
+		if ((Cname.empty()) && ((Caddr < 0x2000) || ((Caddr >= 0x6000) && (Caddr < 0x8000))) && (Ctype == 1)) {
 			// Already Added, so consider it a success
 			FreezeRam(Caddr,-1,1);
 

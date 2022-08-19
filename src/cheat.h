@@ -42,7 +42,7 @@ typedef struct {
 
 struct CHEATF {
 	struct CHEATF *next;
-	char *name;
+	std::string name;
 	uint16 addr;
 	uint8 val;
 	int compare;	/* -1 for no compare. */
