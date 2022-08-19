@@ -3243,7 +3243,7 @@ void QHexEdit::addBookMarkCB(void)
 	}
 }
 //----------------------------------------------------------------------------
-static int RamFreezeCB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data)
+static int RamFreezeCB(const char *name, uint32 a, uint8 v, int compare,int s,int type, void *data)
 {
 	return ((QHexEdit*)data)->FreezeRam( name, a, v, compare, s, type );
 }	

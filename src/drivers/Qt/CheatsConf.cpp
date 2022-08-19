@@ -670,7 +670,7 @@ void GuiCheatsDialog_t::lessThanValueCallback(void)
 	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
-int GuiCheatsDialog_t::activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int type, void *data)
+int GuiCheatsDialog_t::activeCheatListCB(const char *name, uint32 a, uint8 v, int c, int s, int type, void *data)
 {
 	QTreeWidgetItem *item;
 	char codeStr[32];
@@ -710,7 +710,7 @@ int GuiCheatsDialog_t::activeCheatListCB(char *name, uint32 a, uint8 v, int c, i
 	return 1;
 }
 //----------------------------------------------------------------------------
-static int activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int type, void *data)
+static int activeCheatListCB(const char *name, uint32 a, uint8 v, int c, int s, int type, void *data)
 {
 	return win->activeCheatListCB(name, a, v, c, s, type, data);
 }
@@ -971,7 +971,7 @@ void GuiCheatsDialog_t::updateCheatParameters(void)
 
 	FCEU_WRAPPER_LOCK();
 
-	FCEUI_SetCheat(row, name.c_str(), a, v, c, s, type);
+	FCEUI_SetCheat(row, &name, a, v, c, s, type);
 
 	FCEU_WRAPPER_UNLOCK();
 
@@ -983,7 +983,7 @@ void GuiCheatsDialog_t::actvCheatItemClicked(QTreeWidgetItem *item, int column)
 	uint32 a = 0;
 	uint8 v = 0;
 	int c = -1, s = 0, type = 0;
-	char *name = NULL;
+	std::string name;
 	char stmp[64];
 
 	int row = actvCheatList->indexOfTopLevelItem(item);
@@ -1021,14 +1021,7 @@ void GuiCheatsDialog_t::actvCheatItemClicked(QTreeWidgetItem *item, int column)
 		cheatCmpEntry->setText(tr(""));
 	}
 
-	if (name != NULL)
-	{
-		cheatNameEntry->setText(tr(name));
-	}
-	else
-	{
-		cheatNameEntry->setText(tr(""));
-	}
+	cheatNameEntry->setText(tr(name.c_str()));
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::globalEnableCheats(int state)

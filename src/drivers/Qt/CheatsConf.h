@@ -30,7 +30,7 @@ public:
 
 	int addSearchResult(uint32_t a, uint8_t last, uint8_t current);
 
-	int activeCheatListCB(char *name, uint32 a, uint8 v, int c, int s, int type, void *data);
+	int activeCheatListCB(const char *name, uint32 a, uint8 v, int c, int s, int type, void *data);
 
 	void showActiveCheatList(bool redraw);
 
