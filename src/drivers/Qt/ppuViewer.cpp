@@ -1133,7 +1133,7 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 
 	xx = 0; yy = 0;
 
-	showSelector = (cycleCount < 20);
+	showSelector = (cycleCount < 20) && (selTile.x() >= 0) && (selTile.y() >= 0);
 
 	if ( mode == 1 )
 	{

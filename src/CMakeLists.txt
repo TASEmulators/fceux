@@ -87,6 +87,7 @@ else(WIN32)
 
   if ( ${ASAN_ENABLE} )
 	add_definitions( -fsanitize=address -fsanitize=bounds-strict )
+	add_definitions( -fsanitize=undefined -fno-sanitize=vptr )
 	set( ASAN_LDFLAGS  -lasan -lubsan)
 	message( STATUS "Address Sanitizer Enabled" )
   else()
