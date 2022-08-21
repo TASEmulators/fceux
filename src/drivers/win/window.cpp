@@ -3523,9 +3523,10 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 
 		case WM_CHAR:
 			{
-				int len = GetWindowTextLength(hwnd);
+				DWORD cpBegin, cpEnd;
+				SendMessage(hwnd, EM_GETSEL, (LPARAM)&cpBegin, (LPARAM)&cpEnd);
 				IsLetterLegalProc isLetterLegal = GetIsLetterLegalProc(GetDlgCtrlID(hwnd));
-				through = IsInputLegal(isLetterLegal, len, wP);
+				through = IsInputLegal(isLetterLegal, (int)cpBegin, wP);
 				if (!through)
 					ShowLetterIllegalBalloonTip(hwnd, isLetterLegal);
 			}
