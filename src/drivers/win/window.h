@@ -128,19 +128,9 @@ struct HOTKEYMENUINDEX {
 void UpdateMenuHotkeys(FCEUMENU_INDEX index);
 int GetCurrentContextIndex();
 
-inline bool (*GetIsLetterLegal(UINT id))(char letter);
-inline wchar_t* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter));
-void ShowLetterIllegalBalloonTip(HWND hwnd, bool(*IsLetterLegal)(char letter));
-inline bool IsInputLegal(bool(*IsLetterLegal)(char letter), char letter);
-inline bool IsLetterLegalGG(char letter);
-inline bool IsLetterLegalHex(char letter);
-inline bool IsLetterLegalHexList(char letter);
-inline bool IsLetterLegalCheat(char letter);
-inline bool IsLetterLegalDec(char letter);
-inline bool IsLetterLegalSize(char letter);
-inline bool IsLetterLegalFloat(char letter);
-inline bool IsLetterLegalDecHexMixed(char letter);
-inline bool IsLetterLegalUnsignedDecHexMixed(char letter);
+typedef bool (*IsLetterLegalProc)(char);
+bool IsLetterLegalHex(char letter);
+void ShowLetterIllegalBalloonTip(HWND hwnd, IsLetterLegalProc);
 
 extern WNDPROC DefaultEditCtrlProc;
 extern LRESULT APIENTRY FilterEditCtrlProc(HWND hDlg, UINT msg, WPARAM wP, LPARAM lP);

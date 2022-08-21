@@ -3283,6 +3283,198 @@ POINT CalcSubWindowPos(HWND hDlg, POINT* conf)
 	return pt;
 }
 
+bool IsInputLegal(bool (*IsLetterLegal)(char letter), char letter)
+{
+	return !IsLetterLegal || letter == VK_BACK || GetKeyState(VK_CONTROL) & 0x8000 || IsLetterLegal(letter);
+}
+
+bool IsLetterLegalGG(char letter)
+{
+	char ch = toupper(letter);
+	for (int i = 0; GameGenieLetters[i]; ++i)
+		if (GameGenieLetters[i] == ch)
+			return true;
+	return false;
+}
+
+bool IsLetterLegalHex(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f';
+}
+
+bool IsLetterLegalMemwatchAddress(char letter)
+{
+	//accept normal hex stuff
+	if(letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f')
+		return true;
+	
+	//accept prefixes
+	if(letter == 'x' || letter == 'X' || letter == '!')
+		return true;
+
+	return false;
+}
+
+bool IsLetterLegalHexList(char letter)
+{
+	return IsLetterLegalHex(letter) || letter == ',' || letter == ' ';
+}
+
+bool IsLetterLegalCheat(char letter)
+{
+	return letter >= '0' && letter <= ':' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '?';
+}
+
+bool IsLetterLegalSize(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter == 'm' || letter == 'M' || letter == 'k' || letter == 'K' || letter == 'b' || letter == 'B';
+}
+
+bool IsLetterLegalDec(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter == '-' || letter == '+';
+}
+
+bool IsLetterLegalFloat(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter == '.' || letter == '-' || letter == '+';
+}
+
+bool IsLetterLegalDecHexMixed(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$' || letter == '-' || letter == '+';
+}
+
+bool IsLetterLegalUnsignedDecHexMixed(char letter)
+{
+	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$';
+}
+
+wchar_t* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
+{
+	if (IsLetterLegal == &IsLetterLegalGG)
+		return L"You can only type Game Genie characters:\nA P Z L G I T Y E O X U K S V N";
+	if (IsLetterLegal == &IsLetterLegalHex)
+		return L"You can only type characters for hexadecimal number (0-9,A-F).";
+	if (IsLetterLegal == &IsLetterLegalHexList)
+		return L"You can only type characters for hexademical number (0-9,A-F), each number is separated by a comma (,)";
+	if (IsLetterLegal == &IsLetterLegalCheat)
+		return
+		L"The cheat code comes into the following 2 formats:\n"
+		"AAAA:VV freezes the value in Address $AAAA to $VV.\n"
+		"AAAA?CC:VV changes the value in Address $AAAA to $VV only when it's $CC.\n"
+		"All the characters are hexadecimal number (0-9,A-F).\n";
+	if (IsLetterLegal == &IsLetterLegalFloat)
+		return L"You can only type decimal number (decimal point is acceptable).";
+	if (IsLetterLegal == &IsLetterLegalSize)
+		return L"You can only type decimal number followed with B, KB or MB.";
+	if (IsLetterLegal == &IsLetterLegalDec)
+		return L"You can only type decimal number (sign character is acceptable).";
+	if (IsLetterLegal == &IsLetterLegalDecHexMixed)
+		return
+		L"You can only type decimal or hexademical number\n"
+		"(sign character is acceptable).\n\n"
+		"When your number contains letter A-F,\n"
+		"it is regarded as hexademical number,\n"
+		"however, if you want to express a heademical number\n"
+		"but all the digits are in 0-9,\n"
+		"you must add a $ prefix to prevent ambiguous.\n"
+		"eg. 10 is a decimal number,\n"
+		"$10 means a hexademical number that is 16 in decimal.";
+	if (IsLetterLegal == &IsLetterLegalUnsignedDecHexMixed)
+		return
+		L"You can only type decimal or hexademical number.\n\n"
+		"When your number contains letter A-F,\n"
+		"it is regarded as hexademical number,\n"
+		"however, if you want to express a heademical number\n"
+		"but all the digits are in 0-9,\n"
+		"you must add a $ prefix to prevent ambiguous.\n"
+		"eg. 10 is a decimal number,\n"
+		"$10 means a hexademical number that is 16 in decimal.";
+
+	return L"Your input contains invalid characters.";
+}
+
+// return a letter legal checking function for the specified control with the given id
+IsLetterLegalProc GetIsLetterLegalProc(UINT id)
+{
+	switch (id)
+	{
+		// Game genie text in Cheat and Game Genie Encoder/Decoder
+		case IDC_CHEAT_GAME_GENIE_TEXT:
+		case IDC_GAME_GENIE_CODE:
+			return &IsLetterLegalGG;
+
+			// Addresses in Debugger
+		case IDC_DEBUGGER_VAL_PCSEEK:
+		case IDC_DEBUGGER_VAL_PC:
+		case IDC_DEBUGGER_VAL_A:
+		case IDC_DEBUGGER_VAL_X:
+		case IDC_DEBUGGER_VAL_Y:
+		case IDC_DEBUGGER_BOOKMARK:
+
+			// Debugger -> Add breakpoint
+		case IDC_ADDBP_ADDR_START: case IDC_ADDBP_ADDR_END:
+
+			// Array Size, Init value in Symbolic Name in Debugger
+		case IDC_EDIT_SYMBOLIC_ARRAY: case IDC_EDIT_SYMBOLIC_INIT:
+
+			// Address, Value, Compare, Known Value, Note equal, Greater than and Less than in Cheat
+		case IDC_CHEAT_ADDR: case IDC_CHEAT_VAL: case IDC_CHEAT_COM:
+		case IDC_CHEAT_VAL_KNOWN: case IDC_CHEAT_VAL_NE_BY:
+		case IDC_CHEAT_VAL_GT_BY: case IDC_CHEAT_VAL_LT_BY:
+
+			// Address, Value and Compare in Game Genie Encoder/Decoder
+		case IDC_GAME_GENIE_ADDR: case IDC_GAME_GENIE_VAL: case IDC_GAME_GENIE_COMP:
+
+			// Address controls in Memory watch
+		case MW_ADDR00: case MW_ADDR01: case MW_ADDR02: case MW_ADDR03:
+		case MW_ADDR04: case MW_ADDR05: case MW_ADDR06: case MW_ADDR07:
+		case MW_ADDR08: case MW_ADDR09: case MW_ADDR10: case MW_ADDR11:
+		case MW_ADDR12: case MW_ADDR13: case MW_ADDR14: case MW_ADDR15:
+		case MW_ADDR16: case MW_ADDR17: case MW_ADDR18: case MW_ADDR19:
+		case MW_ADDR20: case MW_ADDR21: case MW_ADDR22: case MW_ADDR23:
+			return &IsLetterLegalMemwatchAddress;
+
+		case IDC_EDIT_COMPAREADDRESS:
+			return &IsLetterLegalHex;
+
+			// Specific Address in RAM Search
+			// RAM Watch / RAM Search / Cheat -> Add watch (current only in adding watch operation)
+		case IDC_EDIT_COMPAREADDRESSES:
+			return &IsLetterLegalHexList;
+
+			// Size multiplier and TV Aspect in Video Config
+		case IDC_WINSIZE_MUL_X: case IDC_WINSIZE_MUL_Y:
+		case IDC_TVASPECT_X: case IDC_TVASPECT_Y:
+			return &IsLetterLegalFloat;
+
+			// Cheat code in Cheat
+		case IDC_CHEAT_TEXT:
+			return &IsLetterLegalCheat;
+
+			// PRG ROM, PRG RAM, PRG NVRAM, CHR ROM, CHR RAM and CHR NVRAM in NES Header Editor
+		case IDC_PRGROM_EDIT: case IDC_PRGRAM_EDIT: case IDC_PRGNVRAM_EDIT:
+		case IDC_CHRROM_EDIT: case IDC_CHRRAM_EDIT: case IDC_CHRNVRAM_EDIT:
+			return &IsLetterLegalSize;
+
+			// Specific value, Different by and Modulo in RAM search
+		case IDC_EDIT_COMPAREVALUE:
+		case IDC_EDIT_DIFFBY:
+		case IDC_EDIT_MODBY:
+			{
+				extern char rs_t;
+				switch (rs_t)
+				{
+					case 's': return &IsLetterLegalDecHexMixed;
+					case 'u': return &IsLetterLegalUnsignedDecHexMixed;
+					case 'h': return &IsLetterLegalHex;
+				}
+			}
+	}
+	return NULL;
+}
+
 LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 {
 	bool through = true;
@@ -3291,129 +3483,51 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 	switch (msg)
 	{
 		case WM_PASTE:
-		{
-
-			bool (*IsLetterLegal)(char) = GetIsLetterLegal(GetDlgCtrlID(hwnd));
-
-			if (IsLetterLegal)
 			{
-				if (OpenClipboard(hwnd))
+
+				bool (*IsLetterLegal)(char) = GetIsLetterLegalProc(GetDlgCtrlID(hwnd));
+
+				if (IsLetterLegal)
 				{
-					HANDLE handle = GetClipboardData(CF_TEXT);
-					if (handle)
+					if (OpenClipboard(hwnd))
 					{
-
-						// get the original clipboard string
-						char* clipStr = (char*)GlobalLock(handle);
-
-						// check if the text in clipboard has illegal characters
-						int len = strlen(clipStr);
-						for (int i = 0; i < len; ++i)
+						HANDLE handle = GetClipboardData(CF_TEXT);
+						if (handle)
 						{
-							if (!IsLetterLegal(clipStr[i]))
+
+							// get the original clipboard string
+							char* clipStr = (char*)GlobalLock(handle);
+
+							// check if the text in clipboard has illegal characters
+							int len = strlen(clipStr);
+							for (int i = 0; i < len; ++i)
 							{
-								through = false;
-								// Show Edit control tip, just like the control with ES_NUMBER do
-								ShowLetterIllegalBalloonTip(hwnd, IsLetterLegal);
-								break;
+								if (!IsLetterLegal(clipStr[i]))
+								{
+									through = false;
+									// Show Edit control tip, just like the control with ES_NUMBER do
+									ShowLetterIllegalBalloonTip(hwnd, IsLetterLegal);
+									break;
+								}
 							}
+							GlobalUnlock(handle);
+							CloseClipboard();
 						}
-						GlobalUnlock(handle);
-						CloseClipboard();
 					}
 				}
 			}
-		}
-		break;
+			break;
+
 		case WM_CHAR:
-		{
-			bool(*IsLetterLegal)(char) = GetIsLetterLegal(GetDlgCtrlID(hwnd));
-			through = IsInputLegal(IsLetterLegal, wP);
-			if (!through)
-				ShowLetterIllegalBalloonTip(hwnd, IsLetterLegal);
-		}
+			{
+				IsLetterLegalProc isLetterLegal = GetIsLetterLegalProc(GetDlgCtrlID(hwnd));
+				through = IsInputLegal(isLetterLegal, wP);
+				if (!through)
+					ShowLetterIllegalBalloonTip(hwnd, isLetterLegal);
+			}
 	}
 
 	return through ? CallWindowProc(DefaultEditCtrlProc, hwnd, msg, wP, lP) : result;
-}
-
-// return a letter legal checking function for the specified control with the given id
-bool inline (*GetIsLetterLegal(UINT id))(char letter)
-{
-	switch (id)
-	{
-
-		// Game genie text in Cheat and Game Genie Encoder/Decoder
-		case IDC_CHEAT_GAME_GENIE_TEXT:
-		case IDC_GAME_GENIE_CODE:
-			return IsLetterLegalGG;
-		
-		// Addresses in Debugger
-		case IDC_DEBUGGER_VAL_PCSEEK:
-		case IDC_DEBUGGER_VAL_PC:
-		case IDC_DEBUGGER_VAL_A:
-		case IDC_DEBUGGER_VAL_X:
-		case IDC_DEBUGGER_VAL_Y:
-		case IDC_DEBUGGER_BOOKMARK:
-
-		// Debugger -> Add breakpoint
-		case IDC_ADDBP_ADDR_START: case IDC_ADDBP_ADDR_END:
-
-		// Array Size, Init value in Symbolic Name in Debugger
-		case IDC_EDIT_SYMBOLIC_ARRAY: case IDC_EDIT_SYMBOLIC_INIT:
-
-		// Address, Value, Compare, Known Value, Note equal, Greater than and Less than in Cheat
-		case IDC_CHEAT_ADDR: case IDC_CHEAT_VAL: case IDC_CHEAT_COM:
-		case IDC_CHEAT_VAL_KNOWN: case IDC_CHEAT_VAL_NE_BY:
-		case IDC_CHEAT_VAL_GT_BY: case IDC_CHEAT_VAL_LT_BY:
-
-		// Address, Value and Compare in Game Genie Encoder/Decoder
-		case IDC_GAME_GENIE_ADDR: case IDC_GAME_GENIE_VAL: case IDC_GAME_GENIE_COMP:
-
-		// Address controls in Memory watch
-		case MW_ADDR00: case MW_ADDR01: case MW_ADDR02: case MW_ADDR03:
-		case MW_ADDR04: case MW_ADDR05: case MW_ADDR06: case MW_ADDR07:
-		case MW_ADDR08: case MW_ADDR09: case MW_ADDR10: case MW_ADDR11:
-		case MW_ADDR12: case MW_ADDR13: case MW_ADDR14: case MW_ADDR15:
-		case MW_ADDR16: case MW_ADDR17: case MW_ADDR18: case MW_ADDR19:
-		case MW_ADDR20: case MW_ADDR21: case MW_ADDR22: case MW_ADDR23:
-		case IDC_EDIT_COMPAREADDRESS:
-			return IsLetterLegalHex;
-
-		// Specific Address in RAM Search
-		// RAM Watch / RAM Search / Cheat -> Add watch (current only in adding watch operation)
-		case IDC_EDIT_COMPAREADDRESSES:
-			return IsLetterLegalHexList;
-
-		// Size multiplier and TV Aspect in Video Config
-		case IDC_WINSIZE_MUL_X: case IDC_WINSIZE_MUL_Y:
-		case IDC_TVASPECT_X: case IDC_TVASPECT_Y:
-			return IsLetterLegalFloat;
-
-		// Cheat code in Cheat
-		case IDC_CHEAT_TEXT:
-			return IsLetterLegalCheat;
-
-		// PRG ROM, PRG RAM, PRG NVRAM, CHR ROM, CHR RAM and CHR NVRAM in NES Header Editor
-		case IDC_PRGROM_EDIT: case IDC_PRGRAM_EDIT: case IDC_PRGNVRAM_EDIT:
-		case IDC_CHRROM_EDIT: case IDC_CHRRAM_EDIT: case IDC_CHRNVRAM_EDIT:
-			return IsLetterLegalSize;
-
-		// Specific value, Different by and Modulo in RAM search
-		case IDC_EDIT_COMPAREVALUE:
-		case IDC_EDIT_DIFFBY:
-		case IDC_EDIT_MODBY:
-		{
-			extern char rs_t;
-			switch (rs_t)
-            {
-				case 's': return IsLetterLegalDecHexMixed;
-				case 'u': return IsLetterLegalUnsignedDecHexMixed;
-				case 'h': return IsLetterLegalHex;
-			}
-		}
-	}
-	return NULL;
 }
 
 void ShowLetterIllegalBalloonTip(HWND hwnd, bool(*IsLetterLegal)(char letter))
@@ -3430,103 +3544,4 @@ void ShowLetterIllegalBalloonTip(HWND hwnd, bool(*IsLetterLegal)(char letter))
 
 	// make a sound
 	MessageBeep(0xFFFFFFFF);
-}
-
-inline wchar_t* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
-{
-	if (IsLetterLegal == IsLetterLegalGG)
-		return L"You can only type Game Genie characters:\nA P Z L G I T Y E O X U K S V N";
-	if (IsLetterLegal == IsLetterLegalHex)
-		return L"You can only type characters for hexadecimal number (0-9,A-F).";
-	if (IsLetterLegal == IsLetterLegalHexList)
-		return L"You can only type characters for hexademical number (0-9,A-F), each number is separated by a comma (,)";
-	if (IsLetterLegal == IsLetterLegalCheat)
-		return
-		L"The cheat code comes into the following 2 formats:\n"
-		"AAAA:VV freezes the value in Address $AAAA to $VV.\n"
-		"AAAA?CC:VV changes the value in Address $AAAA to $VV only when it's $CC.\n"
-		"All the characters are hexadecimal number (0-9,A-F).\n";
-	if (IsLetterLegal == IsLetterLegalFloat)
-		return L"You can only type decimal number (decimal point is acceptable).";
-	if (IsLetterLegal == IsLetterLegalSize)
-		return L"You can only type decimal number followed with B, KB or MB.";
-	if (IsLetterLegal == IsLetterLegalDec)
-		return L"You can only type decimal number (sign character is acceptable).";
-	if (IsLetterLegal == IsLetterLegalDecHexMixed)
-		return
-		L"You can only type decimal or hexademical number\n"
-		"(sign character is acceptable).\n\n"
-		"When your number contains letter A-F,\n"
-		"it is regarded as hexademical number,\n"
-		"however, if you want to express a heademical number\n"
-		"but all the digits are in 0-9,\n"
-		"you must add a $ prefix to prevent ambiguous.\n"
-		"eg. 10 is a decimal number,\n"
-		"$10 means a hexademical number that is 16 in decimal.";
-	if (IsLetterLegal == IsLetterLegalUnsignedDecHexMixed)
-		return
-		L"You can only type decimal or hexademical number.\n\n"
-		"When your number contains letter A-F,\n"
-		"it is regarded as hexademical number,\n"
-		"however, if you want to express a heademical number\n"
-		"but all the digits are in 0-9,\n"
-		"you must add a $ prefix to prevent ambiguous.\n"
-		"eg. 10 is a decimal number,\n"
-		"$10 means a hexademical number that is 16 in decimal.";
-
-	return L"Your input contains invalid characters.";
-}
-
-inline bool IsInputLegal(bool (*IsLetterLegal)(char letter), char letter)
-{
-	return !IsLetterLegal || letter == VK_BACK || GetKeyState(VK_CONTROL) & 0x8000 || IsLetterLegal(letter);
-}
-
-inline bool IsLetterLegalGG(char letter)
-{
-	char ch = toupper(letter);
-	for (int i = 0; GameGenieLetters[i]; ++i)
-		if (GameGenieLetters[i] == ch)
-			return true;
-	return false;
-}
-
-inline bool IsLetterLegalHex(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f';
-}
-
-inline bool IsLetterLegalHexList(char letter)
-{
-	return IsLetterLegalHex(letter) || letter == ',' || letter == ' ';
-}
-
-inline bool IsLetterLegalCheat(char letter)
-{
-	return letter >= '0' && letter <= ':' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '?';
-}
-
-inline bool IsLetterLegalSize(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter == 'm' || letter == 'M' || letter == 'k' || letter == 'K' || letter == 'b' || letter == 'B';
-}
-
-inline bool IsLetterLegalDec(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter == '-' || letter == '+';
-}
-
-inline bool IsLetterLegalFloat(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter == '.' || letter == '-' || letter == '+';
-}
-
-inline bool IsLetterLegalDecHexMixed(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$' || letter == '-' || letter == '+';
-}
-
-inline bool IsLetterLegalUnsignedDecHexMixed(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$';
 }
