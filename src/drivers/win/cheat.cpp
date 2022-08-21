@@ -1084,6 +1084,8 @@ void UpdateCheatListGroupBoxUI()
 	SetDlgItemText(hCheat, IDC_GROUPBOX_CHEATLIST, temp);
 
 	EnableWindow(GetDlgItem(hCheat, IDC_BTN_CHEAT_EXPORTTOFILE), cheats != 0);
+
+	CheckDlgButton(hCheat,IDC_CHEAT_GLOBAL_SWITCH,globalCheatDisabled?BST_UNCHECKED:BST_CHECKED);
 }
 
 //Used by cheats and external dialogs such as hex editor to update items in the cheat search dialog

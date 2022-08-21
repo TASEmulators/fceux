@@ -798,6 +798,7 @@ static void RamSearchOpLTE(void);
 static void RamSearchOpGTE(void);
 static void RamSearchOpEQ(void);
 static void RamSearchOpNE(void);
+static void ToggleCheats(void);
 static void DebuggerStepInto(void);
 static void FA_SkipLag(void);
 static void OpenRom(void);
@@ -945,6 +946,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TOOL_RAMSEARCHGTE,				EMUCMDTYPE_TOOL,	RamSearchOpGTE,					0, 0, "Ram Search - Greater Than or Equal", 0},
 	{ EMUCMD_TOOL_RAMSEARCHEQ,				EMUCMDTYPE_TOOL,	RamSearchOpEQ,					0, 0, "Ram Search - Equal",	  0},
 	{ EMUCMD_TOOL_RAMSEARCHNE,				EMUCMDTYPE_TOOL,	RamSearchOpNE,					0, 0, "Ram Search - Not Equal", 0},
+	{ EMUCMD_TOOL_TOGGLECHEATS,				EMUCMDTYPE_TOOL,	ToggleCheats,					0, 0, "Toggle Cheats", 0},
 	{ EMUCMD_RERECORD_DISPLAY_TOGGLE,		EMUCMDTYPE_MISC,   FCEUI_MovieToggleRerecordDisplay,0, 0, "Toggle Rerecord Display", EMUCMDFLAG_TASEDITOR },
 
 	{ EMUCMD_TASEDITOR_REWIND,				EMUCMDTYPE_TASEDITOR,	TaseditorRewindOn,			TaseditorRewindOff, 0, "Frame Rewind", EMUCMDFLAG_TASEDITOR },
@@ -1266,6 +1268,17 @@ static void RamSearchOpNE(void) {
 		DoRamSearchOperation();
 	}
 #endif
+}
+
+extern int globalCheatDisabled;
+static void ToggleCheats()
+{
+	FCEUI_GlobalToggleCheat(globalCheatDisabled);
+	FCEU_DispMessage("%d cheats active", 0, FrozenAddressCount);
+	#ifdef __WIN_DRIVER__
+	UpdateCheatRelatedWindow();
+	UpdateCheatListGroupBoxUI();
+	#endif
 }
 
 static void DebuggerStepInto()
