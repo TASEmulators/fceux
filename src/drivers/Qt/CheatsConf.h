@@ -67,6 +67,7 @@ protected:
 	QLineEdit *neValEntry;
 	QLineEdit *grValEntry;
 	QLineEdit *ltValEntry;
+	QComboBox *typeEntry;
 	QFont font;
 
 	int fontCharWidth;

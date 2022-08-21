@@ -83,6 +83,9 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 		case HK_CHEAT_MENU:
 			name = "CheatMenu"; keySeq = ""; title = "Open Cheat Window"; group = "Tools";
 		break;
+		case HK_TOGGLE_ALL_CHEATS:
+			name = "ToggleCheats"; keySeq = ""; title = "Toggle Global Cheat Enable"; group = "Tools";
+		break;
 		case HK_BIND_STATE:
 			name = "BindState"; keySeq = ""; title = "Bind Save State to Movie"; group = "Movie";
 		break;

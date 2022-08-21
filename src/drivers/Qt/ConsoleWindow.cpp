@@ -862,6 +862,7 @@ void consoleWin_t::initHotKeys(void)
 	connect( Hotkeys[ HK_TOGGLE_BG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleBackground(void))        );
 	connect( Hotkeys[ HK_TOGGLE_FG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleForeground(void))        );
 	connect( Hotkeys[ HK_FKB_ENABLE           ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleFamKeyBrdEnable(void))   );
+	connect( Hotkeys[ HK_TOGGLE_ALL_CHEATS    ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleGlobalCheatEnable(void)) );
 
 	connect( Hotkeys[ HK_SAVE_STATE_0         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState0(void))        );
 	connect( Hotkeys[ HK_SAVE_STATE_1         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState1(void))        );
@@ -3171,6 +3172,20 @@ void consoleWin_t::toggleFullscreen(void)
 void consoleWin_t::toggleFamKeyBrdEnable(void)
 {
 	toggleFamilyKeyboardFunc();
+}
+
+extern int globalCheatDisabled;
+
+void consoleWin_t::toggleGlobalCheatEnable(void)
+{
+	FCEU_WRAPPER_LOCK();
+	FCEUI_GlobalToggleCheat(globalCheatDisabled);
+	FCEU_WRAPPER_UNLOCK();
+
+	g_config->setOption("SDL.CheatsDisabled", globalCheatDisabled);
+	g_config->save();
+
+	updateCheatDialog();
 }
 
 void consoleWin_t::warnAmbiguousShortcut( QShortcut *shortcut)

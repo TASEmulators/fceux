@@ -39,6 +39,7 @@
 #include "Qt/unix-netplay.h"
 #include "Qt/AviRecord.h"
 #include "Qt/HexEditor.h"
+#include "Qt/CheatsConf.h"
 #include "Qt/SymbolicDebug.h"
 #include "Qt/CodeDataLogger.h"
 #include "Qt/ConsoleDebugger.h"
@@ -351,6 +352,8 @@ int LoadGame(const char *path, bool silent)
 	}
 
 	debugSymbolTable.loadGameSymbols();
+
+	updateCheatDialog();
 
 	CDLoggerROMChanged();
 

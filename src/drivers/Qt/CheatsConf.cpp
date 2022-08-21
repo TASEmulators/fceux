@@ -52,6 +52,9 @@ void openCheatDialog(QWidget *parent)
 {
 	if (win != NULL)
 	{
+		win->activateWindow();
+		win->raise();
+		win->setFocus();
 		return;
 	}
 	win = new GuiCheatsDialog_t(parent);
@@ -195,6 +198,18 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	hbox->addWidget(lbl);
 	hbox->addWidget(cheatCmpEntry);
+
+	vbox1->addLayout(hbox);
+
+	hbox = new QHBoxLayout();
+	lbl = new QLabel(tr("Type:"));
+	typeEntry = new QComboBox();
+	typeEntry->addItem(tr("0: Periodic Set (Every Frame)"), 0 );
+	typeEntry->addItem(tr("1: Substitute/Freeze"), 1 );
+	typeEntry->setCurrentIndex(1);
+
+	hbox->addWidget(lbl,1);
+	hbox->addWidget(typeEntry,10);
 
 	vbox1->addLayout(hbox);
 
@@ -434,6 +449,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	mainLayout->addLayout(vbox);
 
 	setLayout(mainLayout);
+
+	modCheatBtn->setDefault(true);
 
 	connect(srchResetBtn, SIGNAL(clicked(void)), this, SLOT(resetSearchCallback(void)));
 	connect(knownValBtn, SIGNAL(clicked(void)), this, SLOT(knownValueCallback(void)));
@@ -719,6 +736,8 @@ void GuiCheatsDialog_t::showActiveCheatList(bool redraw)
 {
 	win = this;
 
+	enaCheats->setChecked(!globalCheatDisabled);
+
 	actvCheatRedraw = redraw;
 
 	if (redraw)
@@ -871,6 +890,7 @@ void GuiCheatsDialog_t::addActvCheat(void)
 	uint32 a = 0;
 	uint8 v = 0;
 	int c = -1;
+	int t = 1;
 	std::string name, cmpStr;
 
 	a = strtoul(cheatAddrEntry->displayText().toStdString().c_str(), NULL, 16);
@@ -890,8 +910,10 @@ void GuiCheatsDialog_t::addActvCheat(void)
 
 	name = cheatNameEntry->text().toStdString();
 
+	t = typeEntry->currentData().toInt();
+
 	FCEU_WRAPPER_LOCK();
-	FCEUI_AddCheat(name.c_str(), a, v, c, 1);
+	FCEUI_AddCheat(name.c_str(), a, v, c, t);
 	FCEU_WRAPPER_UNLOCK();
 
 	showActiveCheatList(true);
@@ -921,6 +943,7 @@ void GuiCheatsDialog_t::deleteActvCheat(void)
 	cheatAddrEntry->setText(tr(""));
 	cheatValEntry->setText(tr(""));
 	cheatCmpEntry->setText(tr(""));
+	typeEntry->setCurrentIndex(0);
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::updateCheatParameters(void)
@@ -968,6 +991,8 @@ void GuiCheatsDialog_t::updateCheatParameters(void)
 	name = cheatNameEntry->text().toStdString();
 
 	//printf("Name: %s \n", name.c_str() );
+
+	type = typeEntry->currentData().toInt();
 
 	FCEU_WRAPPER_LOCK();
 
@@ -1022,6 +1047,8 @@ void GuiCheatsDialog_t::actvCheatItemClicked(QTreeWidgetItem *item, int column)
 	}
 
 	cheatNameEntry->setText(tr(name.c_str()));
+
+	typeEntry->setCurrentIndex(type);
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::globalEnableCheats(int state)
