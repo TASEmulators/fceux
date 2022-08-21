@@ -1271,6 +1271,7 @@ static void RamSearchOpNE(void) {
 }
 
 extern int globalCheatDisabled;
+extern unsigned int FrozenAddressCount;
 static void ToggleCheats()
 {
 	FCEUI_GlobalToggleCheat(globalCheatDisabled);
