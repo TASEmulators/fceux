@@ -3283,12 +3283,12 @@ POINT CalcSubWindowPos(HWND hDlg, POINT* conf)
 	return pt;
 }
 
-bool IsInputLegal(bool (*IsLetterLegal)(char letter), char letter)
+static bool IsInputLegal(IsLetterLegalProc proc, int index, char letter)
 {
-	return !IsLetterLegal || letter == VK_BACK || GetKeyState(VK_CONTROL) & 0x8000 || IsLetterLegal(letter);
+	return !proc || letter == VK_BACK || GetKeyState(VK_CONTROL) & 0x8000 || proc(index,letter);
 }
 
-bool IsLetterLegalGG(char letter)
+bool IsLetterLegalGG(int index, char letter)
 {
 	char ch = toupper(letter);
 	for (int i = 0; GameGenieLetters[i]; ++i)
@@ -3297,80 +3297,83 @@ bool IsLetterLegalGG(char letter)
 	return false;
 }
 
-bool IsLetterLegalHex(char letter)
+bool IsLetterLegalHex(int index, char letter)
 {
 	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f';
 }
 
-bool IsLetterLegalMemwatchAddress(char letter)
+bool IsLetterLegalMemwatchAddress(int index, char letter)
 {
 	//accept normal hex stuff
 	if(letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f')
 		return true;
 	
 	//accept prefixes
-	if(letter == 'x' || letter == 'X' || letter == '!')
-		return true;
+	if(index == 0)
+	{
+		if(letter == 'x' || letter == 'X' || letter == '!')
+			return true;
+	}
 
 	return false;
 }
 
-bool IsLetterLegalHexList(char letter)
+bool IsLetterLegalHexList(int index, char letter)
 {
-	return IsLetterLegalHex(letter) || letter == ',' || letter == ' ';
+	return IsLetterLegalHex(index,letter) || letter == ',' || letter == ' ';
 }
 
-bool IsLetterLegalCheat(char letter)
+bool IsLetterLegalCheat(int index, char letter)
 {
 	return letter >= '0' && letter <= ':' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '?';
 }
 
-bool IsLetterLegalSize(char letter)
+bool IsLetterLegalSize(int index, char letter)
 {
 	return letter >= '0' && letter <= '9' || letter == 'm' || letter == 'M' || letter == 'k' || letter == 'K' || letter == 'b' || letter == 'B';
 }
 
-bool IsLetterLegalDec(char letter)
+bool IsLetterLegalDec(int index, char letter)
 {
 	return letter >= '0' && letter <= '9' || letter == '-' || letter == '+';
 }
 
-bool IsLetterLegalFloat(char letter)
+bool IsLetterLegalFloat(int index, char letter)
 {
 	return letter >= '0' && letter <= '9' || letter == '.' || letter == '-' || letter == '+';
 }
 
-bool IsLetterLegalDecHexMixed(char letter)
+bool IsLetterLegalDecHexMixed(int index, char letter)
 {
 	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$' || letter == '-' || letter == '+';
 }
 
-bool IsLetterLegalUnsignedDecHexMixed(char letter)
+bool IsLetterLegalUnsignedDecHexMixed(int index, char letter)
 {
 	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$';
 }
 
-wchar_t* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
+wchar_t* GetLetterIllegalErrMsg(IsLetterLegalProc proc)
 {
-	if (IsLetterLegal == &IsLetterLegalGG)
+	if (proc == &IsLetterLegalGG)
 		return L"You can only type Game Genie characters:\nA P Z L G I T Y E O X U K S V N";
-	if (IsLetterLegal == &IsLetterLegalHex)
+	if (proc == &IsLetterLegalHex)
 		return L"You can only type characters for hexadecimal number (0-9,A-F).";
-	if (IsLetterLegal == &IsLetterLegalHexList)
+	if (proc == &IsLetterLegalHexList)
 		return L"You can only type characters for hexademical number (0-9,A-F), each number is separated by a comma (,)";
-	if (IsLetterLegal == &IsLetterLegalCheat)
+	if (proc == &IsLetterLegalCheat)
 		return
 		L"The cheat code comes into the following 2 formats:\n"
 		"AAAA:VV freezes the value in Address $AAAA to $VV.\n"
 		"AAAA?CC:VV changes the value in Address $AAAA to $VV only when it's $CC.\n"
 		"All the characters are hexadecimal number (0-9,A-F).\n";
-	if (IsLetterLegal == &IsLetterLegalFloat)
+	if (proc == &IsLetterLegalFloat)
 		return L"You can only type decimal number (decimal point is acceptable).";
-	if (IsLetterLegal == &IsLetterLegalSize)
+	if (proc == &IsLetterLegalSize)
 		return L"You can only type decimal number followed with B, KB or MB.";
-	if (IsLetterLegal == &IsLetterLegalDec)
+	if (proc == &IsLetterLegalDec)
 		return L"You can only type decimal number (sign character is acceptable).";
-	if (IsLetterLegal == &IsLetterLegalDecHexMixed)
+	if (proc == &IsLetterLegalDecHexMixed)
 		return
 		L"You can only type decimal or hexademical number\n"
 		"(sign character is acceptable).\n\n"
@@ -3381,7 +3384,7 @@ wchar_t* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
 		"you must add a $ prefix to prevent ambiguous.\n"
 		"eg. 10 is a decimal number,\n"
 		"$10 means a hexademical number that is 16 in decimal.";
-	if (IsLetterLegal == &IsLetterLegalUnsignedDecHexMixed)
+	if (proc == &IsLetterLegalUnsignedDecHexMixed)
 		return
 		L"You can only type decimal or hexademical number.\n\n"
 		"When your number contains letter A-F,\n"
@@ -3485,9 +3488,9 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 		case WM_PASTE:
 			{
 
-				bool (*IsLetterLegal)(char) = GetIsLetterLegalProc(GetDlgCtrlID(hwnd));
+				IsLetterLegalProc isLetterLegal = GetIsLetterLegalProc(GetDlgCtrlID(hwnd));
 
-				if (IsLetterLegal)
+				if (isLetterLegal)
 				{
 					if (OpenClipboard(hwnd))
 					{
@@ -3502,11 +3505,11 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 							int len = strlen(clipStr);
 							for (int i = 0; i < len; ++i)
 							{
-								if (!IsLetterLegal(clipStr[i]))
+								if (!isLetterLegal(i,clipStr[i]))
 								{
 									through = false;
 									// Show Edit control tip, just like the control with ES_NUMBER do
-									ShowLetterIllegalBalloonTip(hwnd, IsLetterLegal);
+									ShowLetterIllegalBalloonTip(hwnd, isLetterLegal);
 									break;
 								}
 							}
@@ -3520,8 +3523,9 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 
 		case WM_CHAR:
 			{
+				int len = GetWindowTextLength(hwnd);
 				IsLetterLegalProc isLetterLegal = GetIsLetterLegalProc(GetDlgCtrlID(hwnd));
-				through = IsInputLegal(isLetterLegal, wP);
+				through = IsInputLegal(isLetterLegal, len, wP);
 				if (!through)
 					ShowLetterIllegalBalloonTip(hwnd, isLetterLegal);
 			}
@@ -3530,10 +3534,10 @@ LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 	return through ? CallWindowProc(DefaultEditCtrlProc, hwnd, msg, wP, lP) : result;
 }
 
-void ShowLetterIllegalBalloonTip(HWND hwnd, bool(*IsLetterLegal)(char letter))
+void ShowLetterIllegalBalloonTip(HWND hwnd, IsLetterLegalProc proc)
 {
 	wchar_t* title = L"Unacceptable Character";
-	wchar_t* msg = GetLetterIllegalErrMsg(IsLetterLegal);
+	wchar_t* msg = GetLetterIllegalErrMsg(proc);
 
 	EDITBALLOONTIP tip;
 	tip.cbStruct = sizeof(EDITBALLOONTIP);

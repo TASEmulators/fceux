@@ -21,6 +21,7 @@
 #include "common.h"
 #include "utils/xstring.h"
 #include "debuggersp.h"
+#include "window.h"
 #include "../../fceu.h"
 #include "../../debug.h"
 #include "../../conddebug.h"
@@ -60,6 +61,7 @@ bool symbRegNames = true;
 int debuggerWasActive = 0;
 char temp_chr[40] = {0};
 char delimiterChar[2] = "#";
+
 
 INT_PTR CALLBACK nameDebuggerBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 extern WNDPROC DefaultEditCtrlProc;
@@ -153,10 +155,10 @@ int parseLine(char* line, Name* n)
 	if (llen == 5) // Offset size of normal lines of the form $XXXX
 	{
 		if (line[0] != '$'
-			|| !IsLetterLegalHex(line[1])
-			|| !IsLetterLegalHex(line[2])
-			|| !IsLetterLegalHex(line[3])
-			|| !IsLetterLegalHex(line[4])
+			|| !IsLetterLegalHex(0,line[1])
+			|| !IsLetterLegalHex(1,line[2])
+			|| !IsLetterLegalHex(2,line[3])
+			|| !IsLetterLegalHex(3,line[4])
 		)
 		{
 			return 4;
@@ -166,10 +168,10 @@ int parseLine(char* line, Name* n)
 	{
 		int i;
 		if (line[0] != '$'
-			|| !IsLetterLegalHex(line[1])
-			|| !IsLetterLegalHex(line[2])
-			|| !IsLetterLegalHex(line[3])
-			|| !IsLetterLegalHex(line[4])
+			|| !IsLetterLegalHex(0,line[1])
+			|| !IsLetterLegalHex(1,line[2])
+			|| !IsLetterLegalHex(2,line[3])
+			|| !IsLetterLegalHex(3,line[4])
 			|| line[5] != '/'
 		)
 		{
@@ -178,7 +180,7 @@ int parseLine(char* line, Name* n)
 		
 		for (i=6;line[i];i++)
 		{
-			if (!IsLetterLegalHex(line[i]))
+			if (!IsLetterLegalHex(i,line[i]))
 			{
 				return 6;
 			}

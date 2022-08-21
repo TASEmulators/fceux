@@ -128,8 +128,8 @@ struct HOTKEYMENUINDEX {
 void UpdateMenuHotkeys(FCEUMENU_INDEX index);
 int GetCurrentContextIndex();
 
-typedef bool (*IsLetterLegalProc)(char);
-bool IsLetterLegalHex(char letter);
+typedef bool (*IsLetterLegalProc)(int index, char ch);
+bool IsLetterLegalHex(int index, char letter);
 void ShowLetterIllegalBalloonTip(HWND hwnd, IsLetterLegalProc);
 
 extern WNDPROC DefaultEditCtrlProc;

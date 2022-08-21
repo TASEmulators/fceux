@@ -3,6 +3,7 @@
 #include "debugger.h"
 #include "debuggersp.h"
 #include "memwatch.h"
+#include "window.h"
 #include "../../fceu.h"
 #include "../../debug.h"
 #include "../../conddebug.h"
@@ -120,7 +121,7 @@ BOOL updateResults(HWND hwndDlg, int rule)
 			
 			for (unsigned int j=0;j<len;j++)
 			{
-				if (IsLetterLegalHex(input_buff[j]) == FALSE)
+				if (IsLetterLegalHex(j,input_buff[j]) == FALSE)
 				{
 					return FALSE;
 				}
