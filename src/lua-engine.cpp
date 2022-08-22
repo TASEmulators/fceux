@@ -54,6 +54,9 @@ extern TASEDITOR_LUA taseditor_lua;
 #ifdef __SDL__
 
 #ifdef __QT_DRIVER__
+#include "drivers/Qt/sdl.h"
+#include "drivers/Qt/main.h"
+#include "drivers/Qt/input.h"
 #include "drivers/Qt/fceuWrapper.h"
 #include "drivers/Qt/TasEditor/selection.h"
 #include "drivers/Qt/TasEditor/laglog.h"
@@ -2634,6 +2637,113 @@ static int input_get(lua_State *L) {
 						lua_pushboolean(L, true);
 						lua_setfield(L, -2, name);
 					}
+				}
+			}
+		}
+	}
+#elif defined(__QT_DRIVER__)
+	// Qt/SDL
+	{
+		const uint8_t *keyBuf = QtSDL_getKeyboardState(nullptr);
+
+		if (keyBuf)
+		{
+			int i=0;
+			char keyName[64];
+			const char *keyOut = nullptr;
+
+			for (int i=0; i<SDL_NUM_SCANCODES; i++)
+			{
+				if (keyBuf[i])
+				{
+					SDL_Keycode k = SDL_GetKeyFromScancode( static_cast<SDL_Scancode>(i) );
+
+					const char* name = SDL_GetKeyName(k);
+
+					//printf("Key:%i  '%s'\n", i, name);
+
+					if ( isalpha(name[0]) || isdigit(name[0]) )
+					{	// If name starts with letters or number, copy name without spaces
+						int ii=0, jj=0;
+						while (name[ii] != 0)
+						{
+							if ( isalpha(name[ii]) || isdigit(name[ii]) || (name[ii] == '_') )
+							{
+								keyName[jj] = name[ii]; jj++;
+							}
+							ii++;
+						}
+						keyName[jj] = 0;
+
+						keyOut = keyName;
+					}
+					else
+					{	// Handle special char names
+						switch (name[0])
+						{
+							case '[':
+								keyOut = "LeftBracket";
+							break;
+							case ']':
+								keyOut = "RightBracket";
+							break;
+							case '{':
+								keyOut = "LeftBrace";
+							break;
+							case '}':
+								keyOut = "RightBrace";
+							break;
+							case ',':
+								keyOut = "Comma";
+							break;
+							case '.':
+								keyOut = "Period";
+							break;
+							case '~':
+								keyOut = "Tilde";
+							break;
+							case '`':
+								keyOut = "Backtick";
+							break;
+							case '|':
+								keyOut = "VerticalBar";
+							break;
+							case '/':
+								keyOut = "Slash";
+							break;
+							case '\\':
+								keyOut = "BackSlash";
+							break;
+							case '+':
+								keyOut = "Plus";
+							break;
+							case '=':
+								keyOut = "Equals";
+							break;
+							case '_':
+								keyOut = "Underscore";
+							break;
+							case '-':
+								keyOut = "Minus";
+							break;
+							case ';':
+								keyOut = "SemiColon";
+							break;
+							case ':':
+								keyOut = "Colon";
+							break;
+							case '\'':
+							case '\"':
+								keyOut = "Quote";
+							break;
+							default:
+								keyOut = name;
+							break;
+						}
+
+					}
+					lua_pushboolean(L, true);
+					lua_setfield(L, -2, keyOut);
 				}
 			}
 		}
