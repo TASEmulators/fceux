@@ -583,6 +583,7 @@ void HighlightSyntax(HWND hWnd, int lines)
 		wordbreak = SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDWORDBREAK, (WPARAM)WB_RIGHT, (LPARAM)newline.chrg.cpMin + 21);
 		for (int ch = newline.chrg.cpMin; ; ch++)
 		{
+			// Lots of highlighting glitches for labels like @loop or table-1. Need to forbid these characters in labels or interlace this with the disassembly process.
 			if (debug_wstr[ch] == L'=' || debug_wstr[ch] == L'@' || debug_wstr[ch] == L'\n' || debug_wstr[ch] == L'-' || debug_wstr[ch] == L';')
 			{
 				opbreak = ch;
@@ -597,24 +598,28 @@ void HighlightSyntax(HWND hWnd, int lines)
 		if(newline.chrg.cpMin == 0) break;
         if (!commentline)
         {
-            // symbolic address
+			// We checked for semicolons first because otherwise this would detect comments ending in a colon.
             if (debug_wstr[newline.chrg.cpMin - 2] == L':')
 		    {
+				// Named label line.
 			    SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)oldline, (LPARAM)newline.chrg.cpMin);
 			    SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgSym));
 			    continue;
 		    }
             SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgMnem));
         }
-		// comment
+		// Comment or code. NOT label.
 		if (opbreak < newline.chrg.cpMin)
 		{
 			SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETSEL, (WPARAM)opbreak, (LPARAM)newline.chrg.cpMin);
 			if (commentline)
-				SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgComm));
-			else
 			{
-				if (debug_wstr[opbreak] == L'-') // TODO: Gets confused if dashes in label name!
+				SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION, (LPARAM)PPCF(DbgComm));
+				continue;
+			} else
+			{
+				// RTS/RTI dash. Gets confused by dashes in label names!
+				if (debug_wstr[opbreak] == L'-')
 					SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_SETCHARFORMAT, (WPARAM)SCF_SELECTION,
 						(LPARAM)PPCF(DbgRts));
 				else
@@ -630,8 +635,6 @@ void HighlightSyntax(HWND hWnd, int lines)
 				}
 			}
 		}
-		if (commentline)
-			continue;
 		// operand
 		num.chrg.cpMin = wordbreak;
 		num.chrg.cpMax = wordbreak + 6;
