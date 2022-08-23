@@ -634,21 +634,16 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 
 bool IsData(unsigned int addr)
 {
-	printf("Checking CDL for $%04X...\n", addr);
 	if (cdloggerdataSize)
 	{
 		unsigned int romAddr = GetNesFileAddress(addr) - 16; // minus iNES header
-		printf("ROM[%04X], CDL[%04X]\n", romAddr + 16, romAddr);
-
 		if (romAddr >= 0 && romAddr < cdloggerdataSize)
-		{
-			printf("CDL data: %02X\n", cdloggerdata[romAddr]);
 			return (cdloggerdata[romAddr] & 3) == 2; // Data only
-		}
 	}
-	printf("CDL inactive.\n");
 	return false;
 }
+
+#define MAX_DB_LEN 8
 
 /**
 * Disassembles to the debugger window using the existing address scroll info.
@@ -764,50 +759,31 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 		
 		// Add address
 		disassembly_addresses.push_back(addr);
+		if (symbDebugEnabled)
+			disassembly_operands.resize(i + 1);
+
+		static char bufferForDisassemblyWithPlentyOfStuff[64 + NL_MAX_NAME_LEN * 10]; //"plenty"
 
 		if (IsData(addr))
 		{
+			// TOOD: Label-respecting logic. But then the whole "array" naming convetion gets obnoxious.
 
-			// TODO: Split out address formatter method
-			if (addr >= 0x8000)
-			{
-				/*if (showRomOffsets && GetNesFileAddress(addr) != -1)
-				{
-					sprintf(str, " %06X: ", GetNesFileAddress(addr));
-				}
-				else*/
-				//{
-				swprintf(debug_wbuf, L"%02X:%04X: ", getBank(addr), addr);
-				//}
-			}
-			else
-			{
-				swprintf(debug_wbuf, L"  :%04X: ", addr);
-			}
-
-			wcscat(debug_wstr, debug_wbuf);
-
-			swprintf(debug_wbuf, L".db $%02X", GetMem(addr));
-			wcscat(debug_wstr, debug_wbuf);
-
+			// Determine data block length
 			int db = 1;
-			for (; db < 8 && IsData(addr + db); db++)
-			{ // TOOD: Label-respecting logic. But then the whole "array" naming convetion gets obnoxious.
-				// append data bytes to current line
-				swprintf(debug_wbuf, L", $%02X", GetMem(addr + db));
-				wcscat(debug_wstr, debug_wbuf);
-			}
+			for (; db < MAX_DB_LEN && IsData(addr + db); db++);
 
-			// MEGA jank
-			if (symbDebugEnabled)
-				disassembly_operands.resize(i + 1);
+			char *_a = DisassembleDataBlock(addr, db, debuggerShowTraceInfo, debuggerDisplayROMoffsets);
+			strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
 
-			// TODO: Move this to a function so we can fall back to the existing copy of this junk.
-			// Although, we couldn't just grab size from opsize anymore.
+			// Everything in this block below this point is mostly copied from belower.
+			// There's got to be some way to merge the executions flows.
+
+			// append the disassembly to current line
+			swprintf(debug_wbuf, L"%S\n", bufferForDisassemblyWithPlentyOfStuff);
+			wcscat(debug_wstr, debug_wbuf);
+
 			line_count++;
 			addr += db;
-
-			wcscat(debug_wstr, L"\n");
 
 			// Break if we reached end of address space
 			if (addr > 0xFFFF)
@@ -816,10 +792,6 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 			continue;
 		}
 
-		if (symbDebugEnabled)
-			disassembly_operands.resize(i + 1);
-
-		static char bufferForDisassemblyWithPlentyOfStuff[64+NL_MAX_NAME_LEN*10]; //"plenty"
 		char* _a = DisassembleLine(addr, debuggerShowTraceInfo, debuggerDisplayROMoffsets);
 		strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
 			
@@ -859,7 +831,6 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 		if (addr > 0xFFFF)
 			break;
 	}
-	printf("\nUpdating view...\n");
 	UpdateDisassembleView(hWnd, id, lines, true);
 
 	// fill the left panel data

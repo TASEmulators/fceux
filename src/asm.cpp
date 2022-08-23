@@ -596,3 +596,37 @@ char *DisassembleData(int addr, uint8 *opcode, bool showTrace, bool showRomOffse
 	}
 	return str;
 }
+
+/// Disassembles a data block of the given length, regardless of any cdlogger info.
+char *DisassembleDataBlock(int addr, int length, bool showTrace, bool showRomOffsets) {
+	static char str[64] = { 0 }, chr[25] = { 0 };
+	int size;
+
+	// TODO: Split out address formatter method
+	if (addr >= 0x8000)
+	{
+		if (showRomOffsets && GetNesFileAddress(addr) != -1)
+		{
+			sprintf(str, " %06X: ", GetNesFileAddress(addr));
+		}
+		else
+		{
+			sprintf(str, "%02X:%04X: ", getBank(addr), addr);
+		}
+	}
+	else
+	{
+		sprintf(str, "  :%04X: ", addr);
+	}
+
+
+	sprintf(chr, ".db $%02X", GetMem(addr));
+	strcat(str, chr);
+
+	for (int i = addr + 1; i < addr + length && i < 0x10000; i++) {
+		sprintf(chr, ", $%02X", GetMem(i));
+		strcat(str, chr);
+	}
+
+	return str;
+}
