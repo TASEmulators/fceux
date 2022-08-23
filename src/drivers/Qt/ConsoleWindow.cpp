@@ -1282,16 +1282,16 @@ void consoleWin_t::createMainMenu(void)
 	connect( Hotkeys[ HK_POWER ].getShortcut(), SIGNAL(activated()), this, SLOT(powerConsoleCB(void)) );
 
 	// Emulation -> Reset
-	resetAct = new QAction(tr("&Reset"), this);
+	resetAct = new QAction(tr("Hard &Reset"), this);
 	//resetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
-	resetAct->setStatusTip(tr("Reset Console"));
+	resetAct->setStatusTip(tr("Hard Reset of Console"));
 	resetAct->setIcon( style()->standardIcon( QStyle::SP_DialogResetButton ) );
 	connect(resetAct, SIGNAL(triggered()), this, SLOT(consoleHardReset(void)) );
 	
 	emuMenu->addAction(resetAct);
 
-	Hotkeys[ HK_RESET ].setAction( resetAct );
-	connect( Hotkeys[ HK_RESET ].getShortcut(), SIGNAL(activated()), this, SLOT(consoleHardReset(void)) );
+	Hotkeys[ HK_HARD_RESET ].setAction( resetAct );
+	connect( Hotkeys[ HK_HARD_RESET ].getShortcut(), SIGNAL(activated()), this, SLOT(consoleHardReset(void)) );
 
 	// Emulation -> Soft Reset
 	sresetAct = new QAction(tr("&Soft Reset"), this);
@@ -1301,6 +1301,9 @@ void consoleWin_t::createMainMenu(void)
 	connect(sresetAct, SIGNAL(triggered()), this, SLOT(consoleSoftReset(void)) );
 	
 	emuMenu->addAction(sresetAct);
+
+	Hotkeys[ HK_SOFT_RESET ].setAction( sresetAct );
+	connect( Hotkeys[ HK_SOFT_RESET ].getShortcut(), SIGNAL(activated()), this, SLOT(consoleSoftReset(void)) );
 
 	// Emulation -> Pause
 	pauseAct = new QAction(tr("&Pause"), this);

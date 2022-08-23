@@ -14,7 +14,7 @@ enum HOTKEY {
 	HK_OPEN_ROM=0, HK_CLOSE_ROM, 
 
 	// Emulation power, reset, pause, quit
-	HK_POWER, HK_RESET, HK_PAUSE, HK_QUIT,
+	HK_POWER, HK_SOFT_RESET, HK_HARD_RESET, HK_PAUSE, HK_QUIT,
 
 	// Emulation Execution Control
 	HK_FRAME_ADVANCE, HK_DECREASE_SPEED, HK_INCREASE_SPEED, HK_TURBO,
