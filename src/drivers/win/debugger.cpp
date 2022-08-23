@@ -287,6 +287,7 @@ static int NumAnnotationLines(int addr)
 // This function is for "smart" scrolling.
 // It attempts to scroll up by a whole instruction heuristically.
 // Should we add the label-respecting logic from dumper.cpp?
+// TOOD: Check IsData and scroll by up to 8.
 int InstructionUp(int from)
 {
 	int i = std::min(16, from), j;
@@ -315,6 +316,7 @@ int InstructionUp(int from)
 	return 0;	// of course, if we can't scroll up, just return 0!
 }
 
+// TOOD: Check IsData and scroll by up to 8.
 int InstructionDown(int from)
 {
 	int tmp = opsize[GetMem(si.nPos)];
@@ -630,6 +632,24 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 	SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, eventMask);
 }
 
+bool IsData(unsigned int addr)
+{
+	printf("Checking CDL for $%04X...\n", addr);
+	if (cdloggerdataSize)
+	{
+		unsigned int romAddr = GetNesFileAddress(addr) - 16; // minus iNES header
+		printf("ROM[%04X], CDL[%04X]\n", romAddr + 16, romAddr);
+
+		if (romAddr >= 0 && romAddr < cdloggerdataSize)
+		{
+			printf("CDL data: %02X\n", cdloggerdata[romAddr]);
+			return (cdloggerdata[romAddr] & 3) == 2; // Data only
+		}
+	}
+	printf("CDL inactive.\n");
+	return false;
+}
+
 /**
 * Disassembles to the debugger window using the existing address scroll info.
 * Assumes that either SetScroll or the overload that takes address and offset was called.
@@ -744,6 +764,58 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 		
 		// Add address
 		disassembly_addresses.push_back(addr);
+
+		if (IsData(addr))
+		{
+
+			// TODO: Split out address formatter method
+			if (addr >= 0x8000)
+			{
+				/*if (showRomOffsets && GetNesFileAddress(addr) != -1)
+				{
+					sprintf(str, " %06X: ", GetNesFileAddress(addr));
+				}
+				else*/
+				//{
+				swprintf(debug_wbuf, L"%02X:%04X: ", getBank(addr), addr);
+				//}
+			}
+			else
+			{
+				swprintf(debug_wbuf, L"  :%04X: ", addr);
+			}
+
+			wcscat(debug_wstr, debug_wbuf);
+
+			swprintf(debug_wbuf, L".db $%02X", GetMem(addr));
+			wcscat(debug_wstr, debug_wbuf);
+
+			int db = 1;
+			for (; db < 8 && IsData(addr + db); db++)
+			{ // TOOD: Label-respecting logic. But then the whole "array" naming convetion gets obnoxious.
+				// append data bytes to current line
+				swprintf(debug_wbuf, L", $%02X", GetMem(addr + db));
+				wcscat(debug_wstr, debug_wbuf);
+			}
+
+			// MEGA jank
+			if (symbDebugEnabled)
+				disassembly_operands.resize(i + 1);
+
+			// TODO: Move this to a function so we can fall back to the existing copy of this junk.
+			// Although, we couldn't just grab size from opsize anymore.
+			line_count++;
+			addr += db;
+
+			wcscat(debug_wstr, L"\n");
+
+			// Break if we reached end of address space
+			if (addr > 0xFFFF)
+				break;
+
+			continue;
+		}
+
 		if (symbDebugEnabled)
 			disassembly_operands.resize(i + 1);
 
@@ -787,6 +859,7 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 		if (addr > 0xFFFF)
 			break;
 	}
+	printf("\nUpdating view...\n");
 	UpdateDisassembleView(hWnd, id, lines, true);
 
 	// fill the left panel data
