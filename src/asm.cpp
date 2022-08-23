@@ -543,27 +543,30 @@ char *DisassembleLine(int addr, bool showTrace, bool showRomOffsets) {
 	return DisassembleData(addr, instruction, showTrace, showRomOffsets);
 }
 
+int formatAddress(char *str, int addr, bool showRomOffsets) {
+	if (addr >= 0x8000)
+	{
+		if (showRomOffsets && GetNesFileAddress(addr) != -1)
+		{
+			return sprintf(str, " %06X: ", GetNesFileAddress(addr));
+		}
+		else
+		{
+			return sprintf(str, "%02X:%04X: ", getBank(addr), addr);
+		}
+	}
+	else
+	{
+		return sprintf(str, "  :%04X: ", addr);
+	}
+}
+
 char *DisassembleData(int addr, uint8 *opcode, bool showTrace, bool showRomOffsets) {
 	static char str[64] = { 0 }, chr[25] = { 0 };
 	char *c;
 	int size, j;
 
-	// TODO: Split out address formatter method
-	if (addr >= 0x8000)
-	{
-		if (showRomOffsets && GetNesFileAddress(addr) != -1)
-		{
-			sprintf(str, " %06X: ", GetNesFileAddress(addr));
-		}
-		else
-		{
-			sprintf(str, "%02X:%04X: ", getBank(addr), addr);
-		}
-	}
-	else
-	{
-		sprintf(str, "  :%04X: ", addr);
-	}
+	formatAddress(str, addr, showRomOffsets);
 
 	size = opsize[opcode[0]];
 	if (size == 0)
@@ -602,23 +605,7 @@ char *DisassembleDataBlock(int addr, int length, bool showTrace, bool showRomOff
 	static char str[64] = { 0 }, chr[25] = { 0 };
 	int size;
 
-	// TODO: Split out address formatter method
-	if (addr >= 0x8000)
-	{
-		if (showRomOffsets && GetNesFileAddress(addr) != -1)
-		{
-			sprintf(str, " %06X: ", GetNesFileAddress(addr));
-		}
-		else
-		{
-			sprintf(str, "%02X:%04X: ", getBank(addr), addr);
-		}
-	}
-	else
-	{
-		sprintf(str, "  :%04X: ", addr);
-	}
-
+	formatAddress(str, addr, showRomOffsets);
 
 	sprintf(chr, ".db $%02X", GetMem(addr));
 	strcat(str, chr);

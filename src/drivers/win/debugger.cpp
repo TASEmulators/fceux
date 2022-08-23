@@ -769,62 +769,47 @@ void DisassembleToWindow(HWND hWnd, int id, int scrollid)
 			// TOOD: Label-respecting logic. But then the whole "array" naming convetion gets obnoxious.
 
 			// Determine data block length
-			int db = 1;
-			for (; db < MAX_DB_LEN && IsData(addr + db); db++);
+			for (size = 1; size < MAX_DB_LEN && IsData(addr + size); size++);
 
-			char *_a = DisassembleDataBlock(addr, db, debuggerShowTraceInfo, debuggerDisplayROMoffsets);
+			char *_a = DisassembleDataBlock(addr, size, debuggerShowTraceInfo, debuggerDisplayROMoffsets);
+			strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
+		} else
+		{
+			char* _a = DisassembleLine(addr, debuggerShowTraceInfo, debuggerDisplayROMoffsets);
 			strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
 
-			// Everything in this block below this point is mostly copied from belower.
-			// There's got to be some way to merge the executions flows.
+			if (symbDebugEnabled)
+			{ // TODO: This will add in both the default name and custom name if you have inlineAddresses enabled.
+				if (symbRegNames)
+					replaceRegNames(bufferForDisassemblyWithPlentyOfStuff);
+				replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
+				for (int p = 0; p<ARRAY_SIZE(pageNames); p++)
+					if (pageNames[p] != NULL)
+						replaceNames(pageNames[p], bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
+			}
 
-			// append the disassembly to current line
-			swprintf(debug_wbuf, L"%S\n", bufferForDisassemblyWithPlentyOfStuff);
-			wcscat(debug_wstr, debug_wbuf);
+			uint8 opCode = GetMem(instruction_addr);
 
-			line_count++;
-			addr += db;
+			// special case: an RTS or RTI opcode
+			if (opCode == 0x60 || opCode == 0x40)
+			{
+				// add "----------" to emphasize the end of subroutine
+				strcat(bufferForDisassemblyWithPlentyOfStuff, " ");
+				for (int j = strlen(bufferForDisassemblyWithPlentyOfStuff); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
+					bufferForDisassemblyWithPlentyOfStuff[j] = '-';
+				bufferForDisassemblyWithPlentyOfStuff[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+			}
 
-			// Break if we reached end of address space
-			if (addr > 0xFFFF)
-				break;
-
-			continue;
-		}
-
-		char* _a = DisassembleLine(addr, debuggerShowTraceInfo, debuggerDisplayROMoffsets);
-		strcpy(bufferForDisassemblyWithPlentyOfStuff, _a);
-			
-		if (symbDebugEnabled)
-		{ // TODO: This will add in both the default name and custom name if you have inlineAddresses enabled.
-			if (symbRegNames)
-				replaceRegNames(bufferForDisassemblyWithPlentyOfStuff);
-			replaceNames(ramBankNames, bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
-			for(int p=0;p<ARRAY_SIZE(pageNames);p++)
-				if(pageNames[p] != NULL)
-					replaceNames(pageNames[p], bufferForDisassemblyWithPlentyOfStuff, &disassembly_operands[i]);
-		}
-
-        uint8 opCode = GetMem(instruction_addr);
-            
-		// special case: an RTS or RTI opcode
-		if (opCode == 0x60 || opCode == 0x40)
-		{
-			// add "----------" to emphasize the end of subroutine
-			strcat(bufferForDisassemblyWithPlentyOfStuff, " ");
-			for (int j = strlen(bufferForDisassemblyWithPlentyOfStuff); j < (LOG_DISASSEMBLY_MAX_LEN - 1); ++j)
-				bufferForDisassemblyWithPlentyOfStuff[j] = '-';
-			bufferForDisassemblyWithPlentyOfStuff[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+			// Size of 0 means undefined, so treat it as 1 here.
+			size = opsize[GetMem(addr)];
+			size += !size;
 		}
 
 		// append the disassembly to current line
-		swprintf(debug_wbuf, L"%S", bufferForDisassemblyWithPlentyOfStuff);
+		swprintf(debug_wbuf, L"%S\n", bufferForDisassemblyWithPlentyOfStuff);
 		wcscat(debug_wstr, debug_wbuf);
-		wcscat(debug_wstr, L"\n");
 
-		// Size of 0 means undefined, so treat it as 1 here.
-		size = opsize[GetMem(addr)];
-		addr += size ? size : 1;
+		addr += size;
 		line_count++;
 
 		// Break if we reached end of address space
