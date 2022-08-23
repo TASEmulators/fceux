@@ -76,6 +76,7 @@ bool debuggerIDAFont = false;
 unsigned int IDAFontSize = 16;
 bool debuggerDisplayROMoffsets = false;
 bool debuggerShowTraceInfo = true;
+bool debuggerUnloggedBytesAsData = false;
 
 static wchar_t* debug_wstr;
 static char* debug_cdl_str;
@@ -638,7 +639,12 @@ bool IsData(unsigned int addr)
 	{
 		unsigned int romAddr = GetNesFileAddress(addr) - 16; // minus iNES header
 		if (romAddr >= 0 && romAddr < cdloggerdataSize)
-			return (cdloggerdata[romAddr] & 3) == 2; // Data only
+		{
+			uint8 cdlData = cdloggerdata[romAddr] & 3;
+			return cdlData == 0
+				? debuggerUnloggedBytesAsData
+				: cdlData == 2; // Only data, not code
+		}
 	}
 	return false;
 }
@@ -1726,6 +1732,7 @@ inline void UpdateOptionsPopup(HMENU optionsPopup)
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_IDA_FONT, CheckedFlag(debuggerIDAFont));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_SHOW_ROM_OFFSETS, CheckedFlag(debuggerDisplayROMoffsets));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_SHOW_TRACE_INFO, CheckedFlag(debuggerShowTraceInfo));
+	CheckMenuItem(optionsPopup, ID_DEBUGGER_UNLOGGED_AS_DATA, CheckedFlag(debuggerUnloggedBytesAsData));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_BAD_OPCODES, CheckedFlag(FCEUI_Debugger().badopbreak));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_UNLOGGED_CODE, CheckedFlag(break_on_unlogged_code));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_UNLOGGED_DATA, CheckedFlag(break_on_unlogged_data));
@@ -1998,6 +2005,10 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			break;
 		case ID_DEBUGGER_SHOW_TRACE_INFO:
 			debuggerShowTraceInfo ^= 1;
+			UpdateDebugger(false);
+			break;
+		case ID_DEBUGGER_UNLOGGED_AS_DATA:
+			debuggerUnloggedBytesAsData ^= 1;
 			UpdateDebugger(false);
 			break;
 		case ID_DEBUGGER_SHOW_ROM_OFFSETS:
