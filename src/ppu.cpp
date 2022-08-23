@@ -57,6 +57,7 @@
 
 #define PPU_status  (PPU[2])
 
+#define READPALNOGS(ofs)    (PALRAM[(ofs)])
 #define READPAL(ofs)    (PALRAM[(ofs)] & (GRAYSCALE ? 0x30 : 0xFF))
 #define READUPAL(ofs)   (UPALRAM[(ofs)] & (GRAYSCALE ? 0x30 : 0xFF))
 
@@ -1987,6 +1988,7 @@ void runppu(int x) {
 struct BGData {
 	struct Record {
 		uint8 nt, pecnt, at, pt[2], qtnt;
+		uint8 ppu1[8];
 
 		INLINE void Read() {
 			NTRefreshAddr = RefreshAddr = ppur.get_ntread();
@@ -1998,7 +2000,12 @@ struct BGData {
 			}
 			pecnt = (RefreshAddr & 1) << 3;
 			nt = CALL_PPUREAD(RefreshAddr);
-			runppu(kFetchTime);
+			ppu1[0] = PPU[1];
+			runppu(1);
+			ppu1[1] = PPU[1];
+			runppu(1);
+
+
 
 			RefreshAddr = ppur.get_atread();
 			at = CALL_PPUREAD(RefreshAddr);
@@ -2010,37 +2017,57 @@ struct BGData {
 			at <<= 2;
 			//horizontal scroll clocked at cycle 3 and then
 			//vertical scroll at 251
+			ppu1[2] = PPU[1];
 			runppu(1);
 			if (PPUON) {
 				ppur.increment_hsc();
 				if (ppur.status.cycle == 251)
 					ppur.increment_vs();
 			}
+			ppu1[3] = PPU[1];
 			runppu(1);
 
 			ppur.par = nt;
 			RefreshAddr = ppur.get_ptread();
 			if (PEC586Hack) {
 				pt[0] = CALL_PPUREAD(RefreshAddr | pecnt);
-				runppu(kFetchTime);
+				ppu1[4] = PPU[1];
+				runppu(1);
+				ppu1[5] = PPU[1];
+				runppu(1);
 				pt[1] = CALL_PPUREAD(RefreshAddr | pecnt);
-				runppu(kFetchTime);
+				ppu1[6] = PPU[1];
+				runppu(1);
+				ppu1[7] = PPU[1];
+				runppu(1);
 			} else if (QTAIHack && (qtnt & 0x40)) {
 				pt[0] = *(CHRptr[0] + RefreshAddr);
-				runppu(kFetchTime);
+				ppu1[4] = PPU[1];
+				runppu(1);
+				ppu1[5] = PPU[1];
+				runppu(1);
 				RefreshAddr |= 8;
 				pt[1] = *(CHRptr[0] + RefreshAddr);
-				runppu(kFetchTime);
+				ppu1[6] = PPU[1];
+				runppu(1);
+				ppu1[7] = PPU[1];
+				runppu(1);
 			} else {
 				if (ScreenON)
 					RENDER_LOG(RefreshAddr);
 				pt[0] = CALL_PPUREAD(RefreshAddr);
-				runppu(kFetchTime);
+				ppu1[4] = PPU[1];
+				runppu(1);
+				ppu1[5] = PPU[1];
+				runppu(1);
 				RefreshAddr |= 8;
 				if (ScreenON)
 					RENDER_LOG(RefreshAddr);
 				pt[1] = CALL_PPUREAD(RefreshAddr);
-				runppu(kFetchTime);
+				ppu1[6] = PPU[1];
+				runppu(1);
+				ppu1[7] = PPU[1];
+				runppu(1);
 			}
 		}
 	};
@@ -2216,7 +2243,7 @@ int FCEUX_PPU_Loop(int skip) {
 							pixel = ((pt[0] >> (7 - bgpx)) & 1) | (((pt[1] >> (7 - bgpx)) & 1) << 1) | bgdata.main[bgtile].at;
 						}
 						if (renderbg)
-							pixelcolor = READPAL(pixel);
+							pixelcolor = READPALNOGS(pixel);
 
 						//look for a sprite to be drawn
 						bool havepixel = false;
@@ -2261,12 +2288,25 @@ int FCEUX_PPU_Loop(int skip) {
 								spixel |= (oam[2] & 3) << 2;
 
 								if (rendersprites)
-									pixelcolor = READPAL(0x10 + spixel);
+									pixelcolor = READPALNOGS(0x10 + spixel);
 							}
 						}
 
-						*ptr++ = PaletteAdjustPixel(pixelcolor);
-						*dptr++= PPU[1]>>5; //grab deemph
+						//apply grayscale.. kind of clunky
+						//really we need to read the entire palette instead of just ppu1
+						//this will be needed for special color effects probably (very fine rainbows and whatnot?)
+						//are you allowed to chang the palette mid-line anyway? well you can definitely change the grayscale flag as we know from the FF1 "polygon" effect
+						if(bgdata.main[xt+2].ppu1[xp]&1)
+							pixelcolor &= 0x30;
+
+						//this does deemph stuff inside it.. which is probably wrong...
+						*ptr = PaletteAdjustPixel(pixelcolor);
+
+						ptr++;
+
+						//grab deemph..
+						//I guess this works the same way as the grayscale, ideally?
+						*dptr++ = bgdata.main[xt+2].ppu1[xp]>>5;
 					}
 				}
 			}
