@@ -52,7 +52,7 @@ static void _FCEU_free(void* ptr)
 	#ifdef _MSC_VER
 	_aligned_free(ptr);
 	#else
-	aligned_free(ptr);
+	free(ptr);
 	#endif
 }
 
