@@ -310,10 +310,8 @@ int InstructionUp(int from)
 	}
 
 	// if we get here, no suitable instruction was found
-	if ((from >= 2) && (GetMem(from - 2) == 0x00))
-		return (from - 2);	// if a BRK instruction is possible, use that
 	if (from)
-		return (from - 1);	// else, scroll up one byte
+		return (from - 1);	// scroll up one byte
 	return 0;	// of course, if we can't scroll up, just return 0!
 }
 
