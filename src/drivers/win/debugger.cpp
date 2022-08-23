@@ -254,11 +254,29 @@ unsigned int AddBreak(HWND hwndDlg)
 	return 0;
 }
 
+#define MAX_DB_LEN 8
+
 typedef struct
 {
 	int address;
 	int commentOffset;
 } AddrScrollInfo;
+
+bool IsData(unsigned int addr)
+{
+	if (cdloggerdataSize)
+	{
+		unsigned int romAddr = GetNesFileAddress(addr) - 16; // minus iNES header
+		if (romAddr >= 0 && romAddr < cdloggerdataSize)
+		{
+			uint8 cdlData = cdloggerdata[romAddr] & 3;
+			return cdlData == 0
+				? debuggerUnloggedBytesAsData
+				: cdlData == 2; // Only data, not code
+		}
+	}
+	return false;
+}
 
 // Tells you how many lines the comments and label name take for a given address.
 // Used for smoothly scrolling through comments.
@@ -288,9 +306,18 @@ static int NumAnnotationLines(int addr)
 // This function is for "smart" scrolling.
 // It attempts to scroll up by a whole instruction heuristically.
 // Should we add the label-respecting logic from dumper.cpp?
-// TOOD: Check IsData and scroll by up to 8.
+// Always attempting the full data block size can lead to weird results. Maybe cut it on multiples of 8?
 int InstructionUp(int from)
 {
+	if (IsData(from - 1))
+	{
+		// Scroll past the beginning of the data block, up to MAX_DB_LEN bytes.
+		int i = from - 2;
+		for (; i >= from - MAX_DB_LEN && IsData(i); i--);
+
+		return i + 1;
+	}
+
 	int i = std::min(16, from), j;
 
 	while (i > 0)
@@ -317,14 +344,22 @@ int InstructionUp(int from)
 	return 0;	// of course, if we can't scroll up, just return 0!
 }
 
-// TOOD: Check IsData and scroll by up to 8.
 int InstructionDown(int from)
 {
+	if (IsData(from))
+	{
+		// Scroll past the end of the data block, up to MAX_DB_LEN bytes.
+		int i = from + 1;
+		for (; i < from + MAX_DB_LEN && IsData(i); i++);
+
+		return i;
+	}
+
 	int tmp = opsize[GetMem(si.nPos)];
 	if ((tmp))
 		return from + tmp;
 	else
-		return from + 1;		// this is data or undefined instruction
+		return from + 1;		// this is an undefined instruction
 }
 
 // Updates the scroll address and comment offset, and sends that info to the debugger window.
@@ -632,24 +667,6 @@ void UpdateDisassembleView(HWND hWnd, UINT id, int lines, bool text = false)
 	InvalidateRect(GetDlgItem(hWnd, id), 0, true);
 	SendDlgItemMessage(hWnd, id, EM_SETEVENTMASK, 0, eventMask);
 }
-
-bool IsData(unsigned int addr)
-{
-	if (cdloggerdataSize)
-	{
-		unsigned int romAddr = GetNesFileAddress(addr) - 16; // minus iNES header
-		if (romAddr >= 0 && romAddr < cdloggerdataSize)
-		{
-			uint8 cdlData = cdloggerdata[romAddr] & 3;
-			return cdlData == 0
-				? debuggerUnloggedBytesAsData
-				: cdlData == 2; // Only data, not code
-		}
-	}
-	return false;
-}
-
-#define MAX_DB_LEN 8
 
 /**
 * Disassembles to the debugger window using the existing address scroll info.
