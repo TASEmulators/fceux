@@ -2560,6 +2560,8 @@ void DebuggerAccelerator(HWND hwndDlg, uint16 accId)
 		case IDC_DEBUGGER_STEP_OVER:
 		case IDC_DEBUGGER_RUN:
 		case IDC_DEBUGGER_SEEK_PC:
+		case ID_DEBUGGER_UNLOGGED_AS_DATA:
+		case ID_DEBUGGER_SHOW_ROM_OFFSETS:
 			DebuggerBnClicked(hwndDlg, accId, NULL);
 			break;
 		case IDC_DEBUGGER_VAL_PCSEEK:
