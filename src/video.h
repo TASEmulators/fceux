@@ -7,10 +7,20 @@ int SaveSnapshot(char[]);
 void ResetScreenshotsCounter();
 uint32 GetScreenPixel(int x, int y, bool usebackup);
 int GetScreenPixelPalette(int x, int y, bool usebackup);
+
+//in case we need more flags in the future we can change the size here
+//bit0 : monochrome bit
+//bit5 : emph red
+//bit6 : emph green
+//bit7 : emph blue
+typedef uint8 xfbuf_t;
+
 extern uint8 *XBuf;
 extern uint8 *XBackBuf;
 extern uint8 *XDBuf;
 extern uint8 *XDBackBuf;
+extern xfbuf_t *XFBuf;
+
 extern int ClipSidesOffset;
 
 struct GUIMESSAGE

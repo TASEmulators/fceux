@@ -108,11 +108,11 @@ void iNESGI(GI h) { //bbit edited: removed static keyword
 		if (iNESCart.Close)
 			iNESCart.Close();
 		if (ROM) {
-			free(ROM);
+			FCEU_free(ROM);
 			ROM = NULL;
 		}
 		if (VROM) {
-			free(VROM);
+			FCEU_free(VROM);
 			VROM = NULL;
 		}
 		if (trainerpoo) {
@@ -813,17 +813,11 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		}
 	}
 
-	if ((ROM = (uint8*)FCEU_malloc(ROM_size << 14)) == NULL)
-		return 0;
+	ROM = (uint8*)FCEU_malloc(ROM_size << 14);
 	memset(ROM, 0xFF, ROM_size << 14);
 
 	if (VROM_size) {
-		if ((VROM = (uint8*)FCEU_malloc(VROM_size << 13)) == NULL) {
-			free(ROM);
-			ROM = NULL;
-			FCEU_PrintError("Unable to allocate memory.");
-			return LOADER_HANDLED_ERROR;
-		}
+		VROM = (uint8*)FCEU_malloc(VROM_size << 13);
 		memset(VROM, 0xFF, VROM_size << 13);
 	}
 

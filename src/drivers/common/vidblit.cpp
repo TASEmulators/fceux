@@ -238,18 +238,18 @@ void KillBlitToHigh(void)
 {
 	if(palettetranslate)
 	{
-		free(palettetranslate);
+		FCEU_free(palettetranslate);
 		palettetranslate=NULL;
 	}
 	
 	if(specbuf8bpp)
 	{
-		free(specbuf8bpp);
+		FCEU_free(specbuf8bpp);
 		specbuf8bpp = NULL;
 	}
 	if(specbuf32bpp)
 	{
-		free(specbuf32bpp);
+		FCEU_free(specbuf32bpp);
 		specbuf32bpp = NULL;
 	}
 	if(specbuf)
@@ -259,11 +259,11 @@ void KillBlitToHigh(void)
 			hq3x_Kill();
 		else
 			hq2x_Kill();
-		free(specbuf);
+		FCEU_free(specbuf);
 		specbuf=NULL;
 	}
 	if (nes_ntsc) {
-		free(nes_ntsc);
+		FCEU_free(nes_ntsc);
 		nes_ntsc = NULL;
 	}
 	if (ntscblit) {

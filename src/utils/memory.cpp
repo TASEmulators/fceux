@@ -28,53 +28,70 @@
 #include "../fceu.h"
 #include "memory.h"
 
+static void *_FCEU_malloc(uint32 size)
+{
+	#ifdef _MSC_VER
+	void *ret = _aligned_malloc(size,32);
+	#else
+	void *ret = aligned_alloc(32,size);
+	#endif
+
+	if(!ret)
+	{
+		FCEU_PrintError("Error allocating memory!  Doing a hard exit.");
+		exit(1);
+	}
+
+	memset(ret, 0, size);
+
+	return ret;
+}
+
+static void _FCEU_free(void* ptr)
+{
+	#ifdef _MSC_VER
+	_aligned_free(ptr);
+	#else
+	aligned_free(ptr);
+	#endif
+}
+
 ///allocates the specified number of bytes. exits process if this fails
 void *FCEU_gmalloc(uint32 size)
 {
-	
- void *ret;
- ret=malloc(size);
- if(!ret)  
- {
-  FCEU_PrintError("Error allocating memory!  Doing a hard exit.");
-  exit(1);
- }
- FCEU_MemoryRand((uint8*)ret,size,true); // initialize according to RAMInitOption, default zero
+ void *ret = _FCEU_malloc(size);
+ 
+ // initialize according to RAMInitOption, default zero
+ FCEU_MemoryRand((uint8*)ret,size,true);
+
  return ret;
 }
 
-///allocates the specified number of bytes. returns null if this fails
 void *FCEU_malloc(uint32 size)
 {
- void *ret;
- ret=malloc(size);
- if(!ret)
- {
-  FCEU_PrintError("Error allocating memory!");
-  return(0);
- }
- memset(ret,0,size); // initialize to 0
- return ret;
+	void *ret = _FCEU_malloc(size);
+	memset(ret, 0, size);
+	return ret;
 }
 
 ///frees memory allocated with FCEU_gmalloc
 void FCEU_gfree(void *ptr)
 {
- free(ptr);
+	_FCEU_free(ptr);
 }
 
 ///frees memory allocated with FCEU_malloc
-void FCEU_free(void *ptr)    // Might do something with this and FCEU_malloc later...
+void FCEU_free(void *ptr)
 {
- free(ptr);
+	_FCEU_free(ptr);
 }
 
 void *FCEU_dmalloc(uint32 size)
 {
-    return malloc(size);
+	return FCEU_malloc(size);
 }
 
 void FCEU_dfree(void *ptr)
 {
-    free(ptr);
+	return FCEU_free(ptr);
 }
