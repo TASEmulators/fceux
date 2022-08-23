@@ -2625,6 +2625,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						break;
 				}
 			}
+			break;
 		case WM_INITMENUPOPUP:
 			DebuggerInitMenuPopup(hwndDlg, (HMENU)wParam, LOWORD(lParam), HIWORD(lParam));
 			break;
