@@ -1753,6 +1753,11 @@ inline void UpdateOptionsPopup(HMENU optionsPopup)
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_BAD_OPCODES, CheckedFlag(FCEUI_Debugger().badopbreak));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_UNLOGGED_CODE, CheckedFlag(break_on_unlogged_code));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_UNLOGGED_DATA, CheckedFlag(break_on_unlogged_data));
+
+	// Gray out potentially irrelavant options
+	EnableMenuItem(optionsPopup, ID_DEBUGGER_UNLOGGED_AS_DATA, EnabledFlag(cdloggerdataSize));
+	EnableMenuItem(optionsPopup, ID_DEBUGGER_BREAK_UNLOGGED_CODE, EnabledFlag(cdloggerdataSize));
+	EnableMenuItem(optionsPopup, ID_DEBUGGER_BREAK_UNLOGGED_DATA, EnabledFlag(cdloggerdataSize));
 }
 
 inline void UpdateSymbolsPopup(HMENU symbolsPopup)
