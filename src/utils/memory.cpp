@@ -30,10 +30,15 @@
 
 static void *_FCEU_malloc(uint32 size)
 {
+	//do not add an aligned allocation function. if a larger alignment is needed, change this constant to use it for all allocations.
+	static const int alignment = 32;
+	
+	size = (size + alignment - 1) & ~(alignment-1);
+
 	#ifdef _MSC_VER
-	void *ret = _aligned_malloc(size,32);
+	void *ret = _aligned_malloc(size,alignment);
 	#else
-	void *ret = aligned_alloc(32,size);
+	void *ret = aligned_alloc(alignment,size);
 	#endif
 
 	if(!ret)
@@ -74,13 +79,13 @@ void *FCEU_malloc(uint32 size)
 	return ret;
 }
 
-///frees memory allocated with FCEU_gmalloc
+//frees memory allocated with FCEU_gmalloc
 void FCEU_gfree(void *ptr)
 {
 	_FCEU_free(ptr);
 }
 
-///frees memory allocated with FCEU_malloc
+//frees memory allocated with FCEU_malloc
 void FCEU_free(void *ptr)
 {
 	_FCEU_free(ptr);
