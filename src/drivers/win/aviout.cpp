@@ -291,6 +291,8 @@ static void do_video_conversion(const unsigned char* buffer)
 {
 //	memset(avi_file->convert_buffer, 0, VIDEO_WIDTH*(avi_file->end_scanline-avi_file->start_scanline)*3);
 
+	const unsigned char* mybuffer = buffer;
+
 	buffer += avi_file->start_scanline * VIDEO_WIDTH;
 
 	for(int y=avi_file->start_scanline; y<avi_file->end_scanline; ++y)
@@ -300,10 +302,11 @@ static void do_video_conversion(const unsigned char* buffer)
 
 		for(int x=0; x<VIDEO_WIDTH; ++x)
 		{
-			uint8 *cp = (uint8*)(color_palette + *buffer++)+2;
-			*pix++ = *cp--;
-			*pix++ = *cp--;
-			*pix++ = *cp;
+			u32 color = ModernDeemphColorMap(buffer,mybuffer,1);
+			*pix++=(color>>0x00)&0xFF;
+			*pix++=(color>>0x08)&0xFF;
+			*pix++=(color>>0x10)&0xFF;
+			buffer++;
 		}
 
 		buffer = prevbuf + VIDEO_WIDTH;
