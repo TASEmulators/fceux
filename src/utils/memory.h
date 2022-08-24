@@ -42,3 +42,6 @@ void *FCEU_dmalloc(uint32 size);
 
 //don't use these. change them if you find them.
 void FCEU_dfree(void *ptr);
+
+//aborts the process for fatal errors
+void FCEU_abort(const char* message = nullptr);

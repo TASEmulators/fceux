@@ -42,10 +42,7 @@ static void *_FCEU_malloc(uint32 size)
 	#endif
 
 	if(!ret)
-	{
-		FCEU_PrintError("Error allocating memory!  Doing a hard exit.");
-		exit(1);
-	}
+		FCEU_abort("Error allocating memory!");
 
 	return ret;
 }
@@ -97,4 +94,10 @@ void *FCEU_dmalloc(uint32 size)
 void FCEU_dfree(void *ptr)
 {
 	return FCEU_free(ptr);
+}
+
+void FCEU_abort(const char* message)
+{
+	if(message) FCEU_PrintError(message);
+	abort();
 }
