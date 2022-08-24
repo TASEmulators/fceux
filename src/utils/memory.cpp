@@ -47,8 +47,6 @@ static void *_FCEU_malloc(uint32 size)
 		exit(1);
 	}
 
-	memset(ret, 0, size);
-
 	return ret;
 }
 
