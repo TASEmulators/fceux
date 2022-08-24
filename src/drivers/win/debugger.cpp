@@ -307,7 +307,7 @@ static int NumAnnotationLines(int addr)
 // This function is for "smart" scrolling.
 // It attempts to scroll up by a whole instruction heuristically.
 // Should we add the label-respecting logic from dumper.cpp?
-// Always attempting the full data block size can lead to weird results. Maybe cut it on multiples of 8?
+// Always attempting the full data block size can lead to weird results. Maybe cut it when address is a multiple of 8?
 int InstructionUp(int from)
 {
 	if (IsData(from - 1))
