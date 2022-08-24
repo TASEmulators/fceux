@@ -2390,7 +2390,7 @@ void DebuggerVScroll(HWND hwndDlg, uint16 eventType, uint16 scrollPos, HWND hwnd
 	}
 }
 
-void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 cursorY, uint16 vkeyFlags, LPARAM jankyHandle)
+void DebuggerMouseWheel(HWND hwndDlg, int16 rotAmt, uint16 cursorX, uint16 cursorY, uint16 vkeyFlags)
 {
 	// None of these events can be processed without a game loaded.
 	if (!GameInfo)
@@ -2647,7 +2647,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			DebuggerVScroll(hwndDlg, LOWORD(wParam), HIWORD(wParam), (HWND)lParam);
 			break;
 		case WM_MOUSEWHEEL:
-			DebuggerMouseWheel(hwndDlg, HIWORD(wParam), LOWORD(lParam), HIWORD(lParam), LOWORD(wParam), lParam);
+			DebuggerMouseWheel(hwndDlg, HIWORD(wParam), LOWORD(lParam), HIWORD(lParam), LOWORD(wParam));
 			break;
 		case WM_CONTEXTMENU:
 			DebuggerContextMenu(hwndDlg, (HWND)wParam, LOWORD(lParam), HIWORD(lParam));
