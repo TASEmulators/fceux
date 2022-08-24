@@ -77,6 +77,7 @@ unsigned int IDAFontSize = 16;
 bool debuggerDisplayROMoffsets = false;
 bool debuggerShowTraceInfo = true;
 bool debuggerUnloggedBytesAsData = false;
+bool debuggerFollowPc = true;
 
 static wchar_t* debug_wstr;
 static char* debug_cdl_str;
@@ -1756,6 +1757,7 @@ inline void UpdateOptionsPopup(HMENU optionsPopup)
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_BAD_OPCODES, CheckedFlag(FCEUI_Debugger().badopbreak));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_UNLOGGED_CODE, CheckedFlag(break_on_unlogged_code));
 	CheckMenuItem(optionsPopup, ID_DEBUGGER_BREAK_UNLOGGED_DATA, CheckedFlag(break_on_unlogged_data));
+	CheckMenuItem(optionsPopup, ID_DEBUGGER_FOLLOW_PC, CheckedFlag(debuggerFollowPc));
 
 	// Gray out potentially irrelavant options
 	EnableMenuItem(optionsPopup, ID_DEBUGGER_UNLOGGED_AS_DATA, EnabledFlag(cdloggerdataSize));
@@ -2048,6 +2050,9 @@ void DebuggerBnClicked(HWND hwndDlg, uint16 btnId, HWND hwndBtn)
 			break;
 		case ID_DEBUGGER_BREAK_UNLOGGED_DATA:
 			break_on_unlogged_data ^= 1;
+			break;
+		case ID_DEBUGGER_FOLLOW_PC:
+			debuggerFollowPc ^= 1;
 			break;
 		case ID_DEBUGGER_RESTORE_SIZE:
 			RestoreSize(hwndDlg);
@@ -2565,6 +2570,7 @@ void DebuggerAccelerator(HWND hwndDlg, uint16 accId)
 		case IDC_DEBUGGER_SEEK_PC:
 		case ID_DEBUGGER_UNLOGGED_AS_DATA:
 		case ID_DEBUGGER_SHOW_ROM_OFFSETS:
+		case ID_DEBUGGER_FOLLOW_PC:
 			DebuggerBnClicked(hwndDlg, accId, NULL);
 			break;
 		case IDC_DEBUGGER_VAL_PCSEEK:
@@ -2717,7 +2723,7 @@ void DoDebug(uint8 halt)
 		updateGameDependentMenusDebugger();
 
 		if (GameInfo)
-			UpdateDebugger(true);
+			UpdateDebugger(debuggerFollowPc);
 	}
 }
 
