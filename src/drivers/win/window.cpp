@@ -38,6 +38,9 @@
 #include "video.h"
 #include "input.h"
 #include "fceu.h"
+#include "types.h"
+#include "cart.h"
+#include "ines.h"
 
 #include "cheat.h"
 #include "ram_search.h"
@@ -1075,6 +1078,37 @@ void CloseGame()
 
 bool ALoad(const char *nameo, char* innerFilename, bool silent)
 {
+	FCEUFILE* patchTrial = FCEU_fopen(nameo,nullptr,"rb",nullptr,-1);
+	if(patchTrial)
+	{
+		char sig[10] = {0};
+		FCEU_fread(sig,1,5,patchTrial);
+		FCEU_fclose(patchTrial);
+		if(!strcmp(sig,"PATCH"))
+		{
+			//assuming it's a patch:
+
+			//if nothing's loaded, we can't load this
+			if(!LoadedRomFName[0])
+				return false;
+
+			//ok, set this as a patch and load it
+			//use a temp std::string to avoid problems copying from LoadedRomFName, to LoadedRomFName
+			//pass nullptr as innerFilename -- see, it's not used here anyway
+			strcpy(LoadedRomFNamePatchToUse,nameo);
+			std::string tmp_LoadedRomFName = LoadedRomFName;
+			bool ret = ALoad(tmp_LoadedRomFName.c_str(),nullptr,silent);
+
+			//clear the patch file. FCEUX doesn't seem to ever reload the roms (?) so it can't need to reuse it
+			//and if it does.. well.. it won't be patched.
+			//there's only so much we can do with this old framework
+			LoadedRomFNamePatchToUse[0] = 0;
+
+			return ret;
+		}
+	}
+
+
 	int oldPaused = EmulationPaused;
 
 	// loading is not started yet, so the game can continue;
