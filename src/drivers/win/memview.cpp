@@ -960,14 +960,14 @@ void FreezeRam(int address, int mode, int final){
 //input is expected to be an ASCII string
 void InputData(char *input){
 	//CursorEndAddy = -1;
-	int addr, i, j, datasize = 0;
+	int addr, datasize = 0;
 	unsigned char *data;
 	char inputc;
 	//char str[100];
 	//mbg merge 7/18/06 added cast:
 	data = (uint8 *)malloc(strlen(input) + 1); //it can't be larger than the input string, so use that as the size
 
-	for(i = 0;input[i] != 0;i++){
+	for(int i = 0;input[i] != 0;i++){
 		if(!EditingText){
 			inputc = -1;
 			if((input[i] >= 'a') && (input[i] <= 'f')) inputc = input[i]-('a'-0xA);
@@ -983,9 +983,15 @@ void InputData(char *input){
 			{
 				TempData = inputc;
 			}
-		} else {
-			for(j = 0;j < 256;j++)if(chartable[j] == input[i])break;
-			if(j == 256)continue;
+		}
+		else
+		{
+			int j;
+			for(j = 0; j < 256; j++)
+				if(chartable[j] == input[i])
+					break;
+			if(j == 256)
+				continue;
 			data[datasize++] = j;
 		}
 	}
@@ -1003,35 +1009,43 @@ void InputData(char *input){
 	//sprintf(str,"datasize = %d",datasize);
 	//MessageBox(hMemView,str, "debug", MB_OK);
 
-	for(i = 0;i < datasize;i++){
-		addr = CursorStartAddy+i;
-
-		if (addr >= MaxSize) continue;
-
-		switch(EditingMode)
+	if(EditingMode == MODE_NES_FILE)
+	{
+		ApplyPatch(CursorStartAddy, datasize, data);
+	}
+	else
+	{
+		for(int i = 0;i < datasize;i++)
 		{
-			case MODE_NES_MEMORY:
-				// RAM (system bus)
-				BWrite[addr](addr, data[i]);
-				break;
-			case MODE_NES_PPU:
-				// PPU
-				addr &= 0x3FFF;
-				if (addr < 0x2000)
-					VPage[addr >> 10][addr] = data[i]; //todo: detect if this is vrom and turn it red if so
-				if ((addr >= 0x2000) && (addr < 0x3F00))
-					vnapage[(addr >> 10) & 0x3][addr & 0x3FF] = data[i]; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
-				if ((addr >= 0x3F00) && (addr < 0x3FFF))
-					PalettePoke(addr, data[i]);
-				break;
-			case MODE_NES_OAM:
-				addr &= 0xFF;
-				SPRAM[addr] = data[i];
-				break;
-			case MODE_NES_FILE:
-				// ROM
-				ApplyPatch(addr, 1, &data[i]);
-				break;
+			addr = CursorStartAddy+i;
+
+			if (addr >= MaxSize) continue;
+
+			switch(EditingMode)
+			{
+				case MODE_NES_MEMORY:
+					// RAM (system bus)
+					BWrite[addr](addr, data[i]);
+					break;
+				case MODE_NES_PPU:
+					// PPU
+					addr &= 0x3FFF;
+					if (addr < 0x2000)
+						VPage[addr >> 10][addr] = data[i]; //todo: detect if this is vrom and turn it red if so
+					if ((addr >= 0x2000) && (addr < 0x3F00))
+						vnapage[(addr >> 10) & 0x3][addr & 0x3FF] = data[i]; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
+					if ((addr >= 0x3F00) && (addr < 0x3FFF))
+						PalettePoke(addr, data[i]);
+					break;
+				case MODE_NES_OAM:
+					addr &= 0xFF;
+					SPRAM[addr] = data[i];
+					break;
+				case MODE_NES_FILE:
+					// ROM
+					ApplyPatch(addr, 1, &data[i]);
+					break;
+			}
 		}
 	}
 	CursorStartAddy+=datasize;
