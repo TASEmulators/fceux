@@ -130,6 +130,7 @@ void ApplyIPS(FILE *ips, FCEUFILE* fp)
 				char *newbuf=(char *)FCEU_realloc(buf,offset+size);
 				buf=newbuf;
 				memset(buf+fp->size,0,offset+size-fp->size);
+				fp->size=offset+size;
 			}
 			fread(buf+offset,1,size,ips);
 		}
