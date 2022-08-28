@@ -91,19 +91,19 @@ void FCEU_KillVirtualVideo(void)
 {
 	if ( XBuf )
 	{
-		FCEU_free(XBuf); XBuf = NULL;
+		FCEU_afree(XBuf); XBuf = NULL;
 	}
 	if ( XBackBuf )
 	{
-		FCEU_free(XBackBuf); XBackBuf = NULL;
+		FCEU_afree(XBackBuf); XBackBuf = NULL;
 	}
 	if ( XDBuf )
 	{
-		FCEU_free(XDBuf); XDBuf = NULL;
+		FCEU_afree(XDBuf); XDBuf = NULL;
 	}
 	if ( XDBackBuf )
 	{
-		FCEU_free(XDBackBuf); XDBackBuf = NULL;
+		FCEU_afree(XDBackBuf); XDBackBuf = NULL;
 	}
 	//printf("Video Core Cleanup\n");
 }
@@ -120,10 +120,10 @@ int FCEU_InitVirtualVideo(void)
 	if(XBuf)
 		return 1;
 	
-	XBuf = (u8*)FCEU_malloc(256 * 256);
-	XBackBuf = (u8*)FCEU_malloc(256 * 256);
-	XDBuf = (u8*)FCEU_malloc(256 * 256);
-	XDBackBuf = (u8*)FCEU_malloc(256 * 256);
+	XBuf = (u8*)FCEU_amalloc(256 * 256);
+	XBackBuf = (u8*)FCEU_amalloc(256 * 256);
+	XDBuf = (u8*)FCEU_amalloc(256 * 256);
+	XDBackBuf = (u8*)FCEU_amalloc(256 * 256);
 
 
 	xbsave = XBuf;
