@@ -322,6 +322,8 @@ static void PalettePoke(uint32 addr, uint8 data)
 //----------------------------------------------------------------------------
 static int writeMem( int mode, unsigned int addr, int value )
 {
+	bool updateDebugger = false;
+
 	value = value & 0x000000ff;
 
 	switch ( mode )
@@ -339,6 +341,8 @@ static int writeMem( int mode, unsigned int addr, int value )
 				{
 					wfunc ((uint32) addr,
 					       (uint8) (value & 0x000000ff));
+
+					updateDebugger = true;
 				}
 			}
 			else
@@ -384,23 +388,32 @@ static int writeMem( int mode, unsigned int addr, int value )
 			{
 				*(uint8 *)(GetNesCHRPointer(addr-16-PRGsize[0])) = value;
 			}
+			updateDebugger = true;
 		}
 		break;
 	}
 
 	hexEditorRequestUpdateAll();
 
-   return 0;
+	if ( updateDebugger )
+	{
+		if (debuggerWindowIsOpen())
+		{
+			updateAllDebuggerWindows();
+		}
+	}
+
+	return 0;
 }
 //----------------------------------------------------------------------------
 
 static int convToXchar( int i )
 {
-   int c = 0;
+	int c = 0;
 
 	if ( (i >= 0) && (i < 10) )
 	{
-      c = i + '0';
+		c = i + '0';
 	}
 	else if ( i < 16 )
 	{
