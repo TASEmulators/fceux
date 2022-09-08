@@ -415,6 +415,7 @@ class  consoleWin_t : public QMainWindow
 		void toggleBackground(void);
 		void toggleForeground(void);
 		void toggleFamKeyBrdEnable(void);
+		void toggleGlobalCheatEnable(void);
 		void saveState0(void);
 		void saveState1(void);
 		void saveState2(void);

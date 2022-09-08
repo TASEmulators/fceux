@@ -24,13 +24,34 @@
 
 #define FCEU_dwmemset(d,c,n) {int _x; for(_x=n-4;_x>=0;_x-=4) *(uint32 *)&(d)[_x]=c;}
 
-void *FCEU_malloc(uint32 size); // initialized to 0
-void *FCEU_gmalloc(uint32 size); // used by boards for WRAM etc, initialized to 0 (default) or other via RAMInitOption
-void FCEU_gfree(void *ptr);
-void FCEU_free(void *ptr);
-void FCEU_memmove(void *d, void *s, uint32 l);
+//returns a buffer initialized to 0
+void *FCEU_malloc(uint32 size);
 
-// wrapper for debugging when its needed, otherwise act like
-// normal malloc/free
+//returns a buffer, with jumbled initial contents
+//used by boards for WRAM etc, initialized to 0 (default) or other via RAMInitOption
+void *FCEU_gmalloc(uint32 size);
+
+//free memory allocated with FCEU_gmalloc
+void FCEU_gfree(void *ptr);
+
+//returns an aligned buffer, initialized to 0
+//the alignment will default to the largest thing you could ever sensibly want for massively aligned cache friendly buffers
+void *FCEU_amalloc(size_t size, size_t alignment = 256);
+
+//frees memory allocated with FCEU_amalloc
+void FCEU_afree(void* ptr);
+
+//free memory allocated with FCEU_malloc
+void FCEU_free(void *ptr);
+
+//reallocate memory allocated with FCEU_malloc
+void* FCEU_realloc(void* ptr, size_t size);
+
+//don't use these. change them if you find them.
 void *FCEU_dmalloc(uint32 size);
+
+//don't use these. change them if you find them.
 void FCEU_dfree(void *ptr);
+
+//aborts the process for fatal errors
+void FCEU_abort(const char* message = nullptr);

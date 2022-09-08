@@ -110,7 +110,7 @@ SFORMAT SFCPU[]={
 	{ &X.Y, 1, "Y\0\0"},
 	{ &X.S, 1, "S\0\0"},
 	{ &X.P, 1, "P\0\0"},
-	{ &X.DB, 1, "DB"},
+	{ &X.DB, 1, "DB\0"},
 	{ &RAM, 0x800 | FCEUSTATE_INDIRECT, "RAM", },
 	{ 0 }
 };
@@ -307,13 +307,24 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 			// load back buffer
 			{
 				extern uint8 *XBackBuf;
-				if(is->fread((char*)XBackBuf,size) != size)
-					ret = false;
+				//ignore 8 garbage bytes, whose idea was it to write these or even have them there in the first place
+				if(size == 256*256+8)
+				{
+					if(is->fread((char*)XBackBuf,256*256) != 256*256)
+						ret = false;
+					is->fseek(8,SEEK_CUR);
+				}
+				else
+				{
+					if(is->fread((char*)XBackBuf,size) != size)
+						ret = false;
+				}
+
 
 				//MBG TODO - can this be moved to a better place?
 				//does it even make sense, displaying XBuf when its XBackBuf we just loaded?
 #ifdef __WIN_DRIVER__
-				else
+				if(ret)
 				{
 					FCEUD_BlitScreen(XBuf);
 					UpdateFCEUWindow();
@@ -404,7 +415,7 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 	// save back buffer
 	{
 		extern uint8 *XBackBuf;
-		uint32 size = 256 * 256 + 8;
+		uint32 size = 256 * 256;
 		os->fputc(8);
 		write32le(size, os);
 		os->fwrite((char*)XBackBuf,size);
@@ -848,7 +859,7 @@ void ResetExState(void (*PreSave)(void), void (*PostSave)(void))
 	for(x=0;x<SFEXINDEX;x++)
 	{
 		if(SFMDATA[x].desc)
-			free( (void*)SFMDATA[x].desc);
+			FCEU_free( (void*)SFMDATA[x].desc);
 	}
 	// adelikat, 3/14/09:  had to add this to clear out the size parameter.  NROM(mapper 0) games were having savestate crashes if loaded after a non NROM game	because the size variable was carrying over and causing savestates to save too much data
 	SFMDATA[0].s = 0;
@@ -1103,7 +1114,7 @@ string GetBackupFileName()
 	string filename;
 	int x;
 
-	filename = strdup(FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());	//Generate normal savestate filename
+	filename = FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0);	//Generate normal savestate filename
 	x = filename.find_last_of(".");		//Find last dot
 	filename = filename.substr(0,x);	//Chop off file extension
 	filename.append(".bak.fc0");		//add .bak

@@ -58,7 +58,7 @@ public:
 		Buffer(int size) { length = 0; this->size = size; data = OAKRA_Module::malloc(size); }
 		int getRemaining() { return size-length; }
 		void *data;
-		~Buffer() { delete data; }
+		~Buffer() { if (data){ OAKRA_Module::free(data); data = nullptr; } }
 	};
 
 	std::vector<Buffer*> liveBuffers;

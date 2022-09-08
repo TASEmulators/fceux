@@ -841,6 +841,8 @@ static void log_callback( void *avcl, int level, const char *fmt, va_list vl)
 		va_copy( vl2, vl );
 
 		vfprintf( avLogFp, fmt, vl2 );
+
+		va_end(vl2);
 	}
 
 	av_log_default_callback( avcl, level, fmt, vl );

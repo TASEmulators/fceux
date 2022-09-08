@@ -186,22 +186,22 @@ bool LoadHeader(HWND parent, iNES_HEADER* header)
 		{
 			char buf[1024];
 			sprintf(buf, "Error opening %s!", LoadedRomFName);
-			MessageBox(parent, buf, "iNES Header Editor", MB_OK | MB_ICONERROR);
+			MessageBox(parent, buf, "NES Header Editor", MB_OK | MB_ICONERROR);
 			break;
 		}
 		case errors::INVALID_HEADER:
-			MessageBox(parent, "Invalid iNES header.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+			MessageBox(parent, "Invalid NES header.", "NES Header Editor", MB_OK | MB_ICONERROR);
 			break;
 		case errors::FDS_HEADER:
-			MessageBox(parent, "Editing header of an FDS file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+			MessageBox(parent, "Editing header of an FDS file is not supported.", "NES Header Editor", MB_OK | MB_ICONERROR);
 			break;
 		case errors::UNIF_HEADER:
-			MessageBox(parent, "Editing header of a UNIF file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+			MessageBox(parent, "Editing header of a UNIF file is not supported.", "NES Header Editor", MB_OK | MB_ICONERROR);
 			break;
 		case errors::NSF_HEADER:
 			//			case errors::NSF2_HEADER:
 			//			case errors::NSFE_HEADER:
-			MessageBox(parent, "Editing header of an NSF file is not supported.", "iNES Header Editor", MB_OK | MB_ICONERROR);
+			MessageBox(parent, "Editing header of an NSF file is not supported.", "NES Header Editor", MB_OK | MB_ICONERROR);
 			break;
 		}
 		return false;
@@ -1735,7 +1735,7 @@ int GetComboBoxByteSize(HWND hwnd, UINT id, int* value, iNES_HEADER* header)
 					sprintf(buf, "The unit of %s size you entered is invalid, it must be B, KB or MB", name);
 					break;
 				case errors::MINUS_ERR:
-					sprintf(buf, "Negative value of %s is not supported by iNES header.", name);
+					sprintf(buf, "Negative value of %s is not supported by NES header.", name);
 					break;
 			}
 
@@ -1880,7 +1880,7 @@ bool SaveINESFile(HWND hwnd, char* path, iNES_HEADER* header)
 	if (!source)
 	{
 		sprintf(buf, "Opening source file %s failed.", LoadedRomFName);
-		MessageBox(hwnd, buf, "iNES Header Editor", MB_OK | MB_ICONERROR);
+		MessageBox(hwnd, buf, "NES Header Editor", MB_OK | MB_ICONERROR);
 		return false;
 	}
 
@@ -1889,7 +1889,7 @@ bool SaveINESFile(HWND hwnd, char* path, iNES_HEADER* header)
 	if (!target)
 	{
 		sprintf(buf, "Creating target file %s failed.", path);
-		MessageBox(hwnd, buf, "iNES Header Editor", MB_OK | MB_ICONERROR);
+		MessageBox(hwnd, buf, "NES Header Editor", MB_OK | MB_ICONERROR);
 		FCEU_fclose(source);
 		return false;
 	}

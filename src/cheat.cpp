@@ -152,28 +152,23 @@ int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size) {
 	return count;
 }
 
-static int AddCheatEntry(const char *name, uint32 addr, uint8 val, int compare, int status, int type);
+static void AddCheatEntry(const char *name, uint32 addr, uint8 val, int compare, int status, int type);
 static void CheatMemErr(void)
 {
 	FCEUD_PrintError("Error allocating memory for cheat data.");
 }
 
-static int AddCheatEntry(const char *name, uint32 addr, uint8 val, int compare, int status, int type)
+static void AddCheatEntry(const char *name, uint32 addr, uint8 val, int compare, int status, int type)
 {
-	struct CHEATF *temp;
-	if(!(temp = (struct CHEATF *)FCEU_dmalloc(sizeof(struct CHEATF))))
-	{
-		CheatMemErr();
-		return(0);
-	}
+	CHEATF *temp = new CHEATF();
 
-	temp->name = strcpy((char*) FCEU_dmalloc(strlen(name) + 1), name);
+	temp->name = name;
 	temp->addr = addr;
 	temp->val = val;
 	temp->status = status;
 	temp->compare = compare;
 	temp->type = type;
-	temp->next = 0;
+	temp->next = nullptr;
 
 	if(cheats)
 	{
@@ -182,8 +177,6 @@ static int AddCheatEntry(const char *name, uint32 addr, uint8 val, int compare, 
 	}
 	else
 		cheats = cheatsl = temp;
-
-	return (1);
 }
 
 /* The "override_existing" parameter is used only in cheat dialog import.
@@ -306,14 +299,13 @@ void FCEU_SaveGameCheats(FILE* fp, int release)
 			fputc(':', fp);
 
 		if (next->compare >= 0)
-			fprintf(fp, "%04x:%02x:%02x:%s\n", next->addr, next->val, next->compare, next->name);
+			fprintf(fp, "%04x:%02x:%02x:%s\n", next->addr, next->val, next->compare, next->name.c_str());
 		else
-			fprintf(fp, "%04x:%02x:%s\n", next->addr, next->val, next->name);
+			fprintf(fp, "%04x:%02x:%s\n", next->addr, next->val, next->name.c_str());
 
-		if (release) free(next->name);
 		struct CHEATF *t = next;
 		next = next->next;
-		if (release) free(t);
+		if (release) delete t;
 	}
 }
 
@@ -333,8 +325,7 @@ void FCEU_FlushGameCheats(FILE *override, int nosave)
 			{
 				struct CHEATF *last=next;
 				next=next->next;
-				free(last->name);
-				free(last);
+				delete last;
 				if(!next) break;
 			}
 			cheats=cheatsl=0;
@@ -379,9 +370,7 @@ void FCEU_FlushGameCheats(FILE *override, int nosave)
 
 int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int type)
 {
-
-	if(!AddCheatEntry(name, addr, val, compare, 1, type))
-		return 0;
+	AddCheatEntry(name, addr, val, compare, 1, type);
 	savecheats = 1;
 	RebuildSubCheats();
 
@@ -415,8 +404,7 @@ int FCEUI_DelCheat(uint32 which)
 				else
 					cheats=cheatsl=0;  // No (more) cheats.
 			}
-			free(cur->name);     // Now that all references to this cheat are removed,
-			free(cur);           // free the memory.
+			delete cur;           // free the memory.
 			break;
 		}                     // *END REMOVE THIS CHEAT*
 
@@ -451,18 +439,18 @@ void FCEU_ApplyPeriodicCheats(void)
 }
 
 
-void FCEUI_ListCheats(int (*callb)(char *name, uint32 a, uint8 v, int compare, int s, int type, void *data), void *data)
+void FCEUI_ListCheats(int (*callb)(const char *name, uint32 a, uint8 v, int compare, int s, int type, void *data), void *data)
 {
 	struct CHEATF *next=cheats;
 
 	while(next)
 	{
-		if(!callb(next->name,next->addr,next->val,next->compare,next->status,next->type,data)) break;
+		if(!callb(next->name.c_str(),next->addr,next->val,next->compare,next->status,next->type,data)) break;
 		next=next->next;
 	}
 }
 
-int FCEUI_GetCheat(uint32 which, char **name, uint32 *a, uint8 *v, int *compare, int *s, int *type)
+int FCEUI_GetCheat(uint32 which, std::string *name, uint32 *a, uint8 *v, int *compare, int *s, int *type)
 {
 	struct CHEATF *next=cheats;
 	uint32 x=0;
@@ -600,7 +588,7 @@ int FCEUI_DecodePAR(const char *str, int *a, int *v, int *c, int *type)
 /* name can be NULL if the name isn't going to be changed. */
 /* same goes for a, v, and s(except the values of each one must be <0) */
 
-int FCEUI_SetCheat(uint32 which, const char *name, int32 a, int32 v, int c, int s, int type)
+int FCEUI_SetCheat(uint32 which, const std::string *name, int32 a, int32 v, int c, int s, int type)
 {
 	struct CHEATF *next = cheats;
 	uint32 x = 0;
@@ -610,13 +598,7 @@ int FCEUI_SetCheat(uint32 which, const char *name, int32 a, int32 v, int c, int 
 		if(x == which)
 		{
 			if(name)
-			{
-				char *t;
-				if((t = (char *)realloc(next->name, strlen(name) + 1)))
-					strcpy(next->name = t, name);
-				else
-					return 0;
-			}
+				next->name = *name;
 			if(a >= 0)
 				next->addr = a;
 			if(v >= 0)
@@ -911,11 +893,7 @@ int FCEU_DeleteAllCheats(void)
 	while (cur)
 	{
 		next = cur->next;
-		if ( cur->name )
-		{
-			free(cur->name);
-		}
-		free(cur);
+		delete cur;
 		cur = next;
 	}
 	cheats = cheatsl = 0;

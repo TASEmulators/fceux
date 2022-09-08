@@ -38,6 +38,9 @@
 #include "video.h"
 #include "input.h"
 #include "fceu.h"
+#include "types.h"
+#include "cart.h"
+#include "ines.h"
 
 #include "cheat.h"
 #include "ram_search.h"
@@ -404,7 +407,7 @@ void updateGameDependentMenus()
 	for (unsigned int i = 0; i < sizeof(menu_ids) / sizeof(*menu_ids); i++)
 		EnableMenuItem(fceumenu, menu_ids[i], MF_BYCOMMAND | enable ? MF_ENABLED : MF_GRAYED | MF_DISABLED);
 
-	// Special treatment for the iNES head editor, only when no game is loaded or an NES game is loaded
+	// Special treatment for the NES header editor, only when no game is loaded or an NES game is loaded
 	extern iNES_HEADER head;
 	enable = GameInfo == 0 || !strncmp((const char*)&head, "NES\x1A", 4);
 	EnableMenuItem(fceumenu, MENU_INESHEADEREDITOR, MF_BYCOMMAND | enable ? MF_ENABLED : MF_GRAYED | MF_DISABLED);
@@ -1075,6 +1078,37 @@ void CloseGame()
 
 bool ALoad(const char *nameo, char* innerFilename, bool silent)
 {
+	FCEUFILE* patchTrial = FCEU_fopen(nameo,nullptr,"rb",nullptr,-1);
+	if(patchTrial)
+	{
+		char sig[10] = {0};
+		FCEU_fread(sig,1,5,patchTrial);
+		FCEU_fclose(patchTrial);
+		if(!strcmp(sig,"PATCH"))
+		{
+			//assuming it's a patch:
+
+			//if nothing's loaded, we can't load this
+			if(!LoadedRomFName[0])
+				return false;
+
+			//ok, set this as a patch and load it
+			//use a temp std::string to avoid problems copying from LoadedRomFName, to LoadedRomFName
+			//pass nullptr as innerFilename -- see, it's not used here anyway
+			strcpy(LoadedRomFNamePatchToUse,nameo);
+			std::string tmp_LoadedRomFName = LoadedRomFName;
+			bool ret = ALoad(tmp_LoadedRomFName.c_str(),nullptr,silent);
+
+			//clear the patch file. FCEUX doesn't seem to ever reload the roms (?) so it can't need to reuse it
+			//and if it does.. well.. it won't be patched.
+			//there's only so much we can do with this old framework
+			LoadedRomFNamePatchToUse[0] = 0;
+
+			return ret;
+		}
+	}
+
+
 	int oldPaused = EmulationPaused;
 
 	// loading is not started yet, so the game can continue;
@@ -3283,176 +3317,97 @@ POINT CalcSubWindowPos(HWND hDlg, POINT* conf)
 	return pt;
 }
 
-LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
+static bool IsInputLegal(IsLetterLegalProc proc, int index, char letter)
 {
-	bool through = true;
-	INT_PTR result = 0;
+	return !proc || letter == VK_BACK || GetKeyState(VK_CONTROL) & 0x8000 || proc(index,letter);
+}
 
-	switch (msg)
+bool IsLetterLegalGG(int index, char letter)
+{
+	char ch = toupper(letter);
+	for (int i = 0; GameGenieLetters[i]; ++i)
+		if (GameGenieLetters[i] == ch)
+			return true;
+	return false;
+}
+
+bool IsLetterLegalHex(int index, char letter)
+{
+	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f';
+}
+
+bool IsLetterLegalMemwatchAddress(int index, char letter)
+{
+	//accept normal hex stuff
+	if(letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f')
+		return true;
+	
+	//accept prefixes
+	if(index == 0)
 	{
-		case WM_PASTE:
-		{
-
-			bool (*IsLetterLegal)(char) = GetIsLetterLegal(GetDlgCtrlID(hwnd));
-
-			if (IsLetterLegal)
-			{
-				if (OpenClipboard(hwnd))
-				{
-					HANDLE handle = GetClipboardData(CF_TEXT);
-					if (handle)
-					{
-
-						// get the original clipboard string
-						char* clipStr = (char*)GlobalLock(handle);
-
-						// check if the text in clipboard has illegal characters
-						int len = strlen(clipStr);
-						for (int i = 0; i < len; ++i)
-						{
-							if (!IsLetterLegal(clipStr[i]))
-							{
-								through = false;
-								// Show Edit control tip, just like the control with ES_NUMBER do
-								ShowLetterIllegalBalloonTip(hwnd, IsLetterLegal);
-								break;
-							}
-						}
-						GlobalUnlock(handle);
-						CloseClipboard();
-					}
-				}
-			}
-		}
-		break;
-		case WM_CHAR:
-		{
-			bool(*IsLetterLegal)(char) = GetIsLetterLegal(GetDlgCtrlID(hwnd));
-			through = IsInputLegal(IsLetterLegal, wP);
-			if (!through)
-				ShowLetterIllegalBalloonTip(hwnd, IsLetterLegal);
-		}
+		if(letter == 'x' || letter == 'X' || letter == '!')
+			return true;
 	}
 
-	return through ? CallWindowProc(DefaultEditCtrlProc, hwnd, msg, wP, lP) : result;
+	return false;
 }
 
-// return a letter legal checking function for the specified control with the given id
-bool inline (*GetIsLetterLegal(UINT id))(char letter)
+bool IsLetterLegalHexList(int index, char letter)
 {
-	switch (id)
-	{
-
-		// Game genie text in Cheat and Game Genie Encoder/Decoder
-		case IDC_CHEAT_GAME_GENIE_TEXT:
-		case IDC_GAME_GENIE_CODE:
-			return IsLetterLegalGG;
-		
-		// Addresses in Debugger
-		case IDC_DEBUGGER_VAL_PCSEEK:
-		case IDC_DEBUGGER_VAL_PC:
-		case IDC_DEBUGGER_VAL_A:
-		case IDC_DEBUGGER_VAL_X:
-		case IDC_DEBUGGER_VAL_Y:
-		case IDC_DEBUGGER_BOOKMARK:
-
-		// Debugger -> Add breakpoint
-		case IDC_ADDBP_ADDR_START: case IDC_ADDBP_ADDR_END:
-
-		// Array Size, Init value in Symbolic Name in Debugger
-		case IDC_EDIT_SYMBOLIC_ARRAY: case IDC_EDIT_SYMBOLIC_INIT:
-
-		// Address, Value, Compare, Known Value, Note equal, Greater than and Less than in Cheat
-		case IDC_CHEAT_ADDR: case IDC_CHEAT_VAL: case IDC_CHEAT_COM:
-		case IDC_CHEAT_VAL_KNOWN: case IDC_CHEAT_VAL_NE_BY:
-		case IDC_CHEAT_VAL_GT_BY: case IDC_CHEAT_VAL_LT_BY:
-
-		// Address, Value and Compare in Game Genie Encoder/Decoder
-		case IDC_GAME_GENIE_ADDR: case IDC_GAME_GENIE_VAL: case IDC_GAME_GENIE_COMP:
-
-		// Address controls in Memory watch
-		case MW_ADDR00: case MW_ADDR01: case MW_ADDR02: case MW_ADDR03:
-		case MW_ADDR04: case MW_ADDR05: case MW_ADDR06: case MW_ADDR07:
-		case MW_ADDR08: case MW_ADDR09: case MW_ADDR10: case MW_ADDR11:
-		case MW_ADDR12: case MW_ADDR13: case MW_ADDR14: case MW_ADDR15:
-		case MW_ADDR16: case MW_ADDR17: case MW_ADDR18: case MW_ADDR19:
-		case MW_ADDR20: case MW_ADDR21: case MW_ADDR22: case MW_ADDR23:
-		case IDC_EDIT_COMPAREADDRESS:
-			return IsLetterLegalHex;
-
-		// Specific Address in RAM Search
-		// RAM Watch / RAM Search / Cheat -> Add watch (current only in adding watch operation)
-		case IDC_EDIT_COMPAREADDRESSES:
-			return IsLetterLegalHexList;
-
-		// Size multiplier and TV Aspect in Video Config
-		case IDC_WINSIZE_MUL_X: case IDC_WINSIZE_MUL_Y:
-		case IDC_TVASPECT_X: case IDC_TVASPECT_Y:
-			return IsLetterLegalFloat;
-
-		// Cheat code in Cheat
-		case IDC_CHEAT_TEXT:
-			return IsLetterLegalCheat;
-
-		// PRG ROM, PRG RAM, PRG NVRAM, CHR ROM, CHR RAM and CHR NVRAM in iNES Header Editor
-		case IDC_PRGROM_EDIT: case IDC_PRGRAM_EDIT: case IDC_PRGNVRAM_EDIT:
-		case IDC_CHRROM_EDIT: case IDC_CHRRAM_EDIT: case IDC_CHRNVRAM_EDIT:
-			return IsLetterLegalSize;
-
-		// Specific value, Different by and Modulo in RAM search
-		case IDC_EDIT_COMPAREVALUE:
-		case IDC_EDIT_DIFFBY:
-		case IDC_EDIT_MODBY:
-		{
-			extern char rs_t;
-			switch (rs_t)
-            {
-				case 's': return IsLetterLegalDecHexMixed;
-				case 'u': return IsLetterLegalUnsignedDecHexMixed;
-				case 'h': return IsLetterLegalHex;
-			}
-		}
-	}
-	return NULL;
+	return IsLetterLegalHex(index,letter) || letter == ',' || letter == ' ';
 }
 
-void ShowLetterIllegalBalloonTip(HWND hwnd, bool(*IsLetterLegal)(char letter))
+bool IsLetterLegalCheat(int index, char letter)
 {
-	wchar_t* title = L"Unacceptable Character";
-	wchar_t* msg = GetLetterIllegalErrMsg(IsLetterLegal);
-
-	EDITBALLOONTIP tip;
-	tip.cbStruct = sizeof(EDITBALLOONTIP);
-	tip.pszText = msg;
-	tip.pszTitle = title;
-	tip.ttiIcon = TTI_ERROR;
-	SendMessage(hwnd, EM_SHOWBALLOONTIP, 0, (LPARAM)&tip);
-
-	// make a sound
-	MessageBeep(0xFFFFFFFF);
+	return letter >= '0' && letter <= ':' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '?';
 }
 
-inline wchar_t* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
+bool IsLetterLegalSize(int index, char letter)
 {
-	if (IsLetterLegal == IsLetterLegalGG)
+	return letter >= '0' && letter <= '9' || letter == 'm' || letter == 'M' || letter == 'k' || letter == 'K' || letter == 'b' || letter == 'B';
+}
+
+bool IsLetterLegalDec(int index, char letter)
+{
+	return letter >= '0' && letter <= '9' || letter == '-' || letter == '+';
+}
+
+bool IsLetterLegalFloat(int index, char letter)
+{
+	return letter >= '0' && letter <= '9' || letter == '.' || letter == '-' || letter == '+';
+}
+
+bool IsLetterLegalDecHexMixed(int index, char letter)
+{
+	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$' || letter == '-' || letter == '+';
+}
+
+bool IsLetterLegalUnsignedDecHexMixed(int index, char letter)
+{
+	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$';
+}
+
+wchar_t* GetLetterIllegalErrMsg(IsLetterLegalProc proc)
+{
+	if (proc == &IsLetterLegalGG)
 		return L"You can only type Game Genie characters:\nA P Z L G I T Y E O X U K S V N";
-	if (IsLetterLegal == IsLetterLegalHex)
+	if (proc == &IsLetterLegalHex)
 		return L"You can only type characters for hexadecimal number (0-9,A-F).";
-	if (IsLetterLegal == IsLetterLegalHexList)
+	if (proc == &IsLetterLegalHexList)
 		return L"You can only type characters for hexademical number (0-9,A-F), each number is separated by a comma (,)";
-	if (IsLetterLegal == IsLetterLegalCheat)
+	if (proc == &IsLetterLegalCheat)
 		return
 		L"The cheat code comes into the following 2 formats:\n"
 		"AAAA:VV freezes the value in Address $AAAA to $VV.\n"
 		"AAAA?CC:VV changes the value in Address $AAAA to $VV only when it's $CC.\n"
 		"All the characters are hexadecimal number (0-9,A-F).\n";
-	if (IsLetterLegal == IsLetterLegalFloat)
+	if (proc == &IsLetterLegalFloat)
 		return L"You can only type decimal number (decimal point is acceptable).";
-	if (IsLetterLegal == IsLetterLegalSize)
+	if (proc == &IsLetterLegalSize)
 		return L"You can only type decimal number followed with B, KB or MB.";
-	if (IsLetterLegal == IsLetterLegalDec)
+	if (proc == &IsLetterLegalDec)
 		return L"You can only type decimal number (sign character is acceptable).";
-	if (IsLetterLegal == IsLetterLegalDecHexMixed)
+	if (proc == &IsLetterLegalDecHexMixed)
 		return
 		L"You can only type decimal or hexademical number\n"
 		"(sign character is acceptable).\n\n"
@@ -3463,7 +3418,7 @@ inline wchar_t* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
 		"you must add a $ prefix to prevent ambiguous.\n"
 		"eg. 10 is a decimal number,\n"
 		"$10 means a hexademical number that is 16 in decimal.";
-	if (IsLetterLegal == IsLetterLegalUnsignedDecHexMixed)
+	if (proc == &IsLetterLegalUnsignedDecHexMixed)
 		return
 		L"You can only type decimal or hexademical number.\n\n"
 		"When your number contains letter A-F,\n"
@@ -3477,56 +3432,155 @@ inline wchar_t* GetLetterIllegalErrMsg(bool(*IsLetterLegal)(char letter))
 	return L"Your input contains invalid characters.";
 }
 
-inline bool IsInputLegal(bool (*IsLetterLegal)(char letter), char letter)
+// return a letter legal checking function for the specified control with the given id
+IsLetterLegalProc GetIsLetterLegalProc(UINT id)
 {
-	return !IsLetterLegal || letter == VK_BACK || GetKeyState(VK_CONTROL) & 0x8000 || IsLetterLegal(letter);
+	switch (id)
+	{
+		// Game genie text in Cheat and Game Genie Encoder/Decoder
+		case IDC_CHEAT_GAME_GENIE_TEXT:
+		case IDC_GAME_GENIE_CODE:
+			return &IsLetterLegalGG;
+
+			// Addresses in Debugger
+		case IDC_DEBUGGER_VAL_PCSEEK:
+		case IDC_DEBUGGER_VAL_PC:
+		case IDC_DEBUGGER_VAL_A:
+		case IDC_DEBUGGER_VAL_X:
+		case IDC_DEBUGGER_VAL_Y:
+		case IDC_DEBUGGER_BOOKMARK:
+
+			// Debugger -> Add breakpoint
+		case IDC_ADDBP_ADDR_START: case IDC_ADDBP_ADDR_END:
+
+			// Array Size, Init value in Symbolic Name in Debugger
+		case IDC_EDIT_SYMBOLIC_ARRAY: case IDC_EDIT_SYMBOLIC_INIT:
+
+			// Address, Value, Compare, Known Value, Note equal, Greater than and Less than in Cheat
+		case IDC_CHEAT_ADDR: case IDC_CHEAT_VAL: case IDC_CHEAT_COM:
+		case IDC_CHEAT_VAL_KNOWN: case IDC_CHEAT_VAL_NE_BY:
+		case IDC_CHEAT_VAL_GT_BY: case IDC_CHEAT_VAL_LT_BY:
+
+			// Address, Value and Compare in Game Genie Encoder/Decoder
+		case IDC_GAME_GENIE_ADDR: case IDC_GAME_GENIE_VAL: case IDC_GAME_GENIE_COMP:
+
+			// Address controls in Memory watch
+		case MW_ADDR00: case MW_ADDR01: case MW_ADDR02: case MW_ADDR03:
+		case MW_ADDR04: case MW_ADDR05: case MW_ADDR06: case MW_ADDR07:
+		case MW_ADDR08: case MW_ADDR09: case MW_ADDR10: case MW_ADDR11:
+		case MW_ADDR12: case MW_ADDR13: case MW_ADDR14: case MW_ADDR15:
+		case MW_ADDR16: case MW_ADDR17: case MW_ADDR18: case MW_ADDR19:
+		case MW_ADDR20: case MW_ADDR21: case MW_ADDR22: case MW_ADDR23:
+			return &IsLetterLegalMemwatchAddress;
+
+		case IDC_EDIT_COMPAREADDRESS:
+			return &IsLetterLegalHex;
+
+			// Specific Address in RAM Search
+			// RAM Watch / RAM Search / Cheat -> Add watch (current only in adding watch operation)
+		case IDC_EDIT_COMPAREADDRESSES:
+			return &IsLetterLegalHexList;
+
+			// Size multiplier and TV Aspect in Video Config
+		case IDC_WINSIZE_MUL_X: case IDC_WINSIZE_MUL_Y:
+		case IDC_TVASPECT_X: case IDC_TVASPECT_Y:
+			return &IsLetterLegalFloat;
+
+			// Cheat code in Cheat
+		case IDC_CHEAT_TEXT:
+			return &IsLetterLegalCheat;
+
+			// PRG ROM, PRG RAM, PRG NVRAM, CHR ROM, CHR RAM and CHR NVRAM in NES Header Editor
+		case IDC_PRGROM_EDIT: case IDC_PRGRAM_EDIT: case IDC_PRGNVRAM_EDIT:
+		case IDC_CHRROM_EDIT: case IDC_CHRRAM_EDIT: case IDC_CHRNVRAM_EDIT:
+			return &IsLetterLegalSize;
+
+			// Specific value, Different by and Modulo in RAM search
+		case IDC_EDIT_COMPAREVALUE:
+		case IDC_EDIT_DIFFBY:
+		case IDC_EDIT_MODBY:
+			{
+				extern char rs_t;
+				switch (rs_t)
+				{
+					case 's': return &IsLetterLegalDecHexMixed;
+					case 'u': return &IsLetterLegalUnsignedDecHexMixed;
+					case 'h': return &IsLetterLegalHex;
+				}
+			}
+	}
+	return NULL;
 }
 
-inline bool IsLetterLegalGG(char letter)
+LRESULT APIENTRY FilterEditCtrlProc(HWND hwnd, UINT msg, WPARAM wP, LPARAM lP)
 {
-	char ch = toupper(letter);
-	for (int i = 0; GameGenieLetters[i]; ++i)
-		if (GameGenieLetters[i] == ch)
-			return true;
-	return false;
+	bool through = true;
+	INT_PTR result = 0;
+
+	switch (msg)
+	{
+		case WM_PASTE:
+			{
+
+				IsLetterLegalProc isLetterLegal = GetIsLetterLegalProc(GetDlgCtrlID(hwnd));
+
+				if (isLetterLegal)
+				{
+					if (OpenClipboard(hwnd))
+					{
+						HANDLE handle = GetClipboardData(CF_TEXT);
+						if (handle)
+						{
+
+							// get the original clipboard string
+							char* clipStr = (char*)GlobalLock(handle);
+
+							// check if the text in clipboard has illegal characters
+							int len = strlen(clipStr);
+							for (int i = 0; i < len; ++i)
+							{
+								if (!isLetterLegal(i,clipStr[i]))
+								{
+									through = false;
+									// Show Edit control tip, just like the control with ES_NUMBER do
+									ShowLetterIllegalBalloonTip(hwnd, isLetterLegal);
+									break;
+								}
+							}
+							GlobalUnlock(handle);
+							CloseClipboard();
+						}
+					}
+				}
+			}
+			break;
+
+		case WM_CHAR:
+			{
+				DWORD cpBegin, cpEnd;
+				SendMessage(hwnd, EM_GETSEL, (LPARAM)&cpBegin, (LPARAM)&cpEnd);
+				IsLetterLegalProc isLetterLegal = GetIsLetterLegalProc(GetDlgCtrlID(hwnd));
+				through = IsInputLegal(isLetterLegal, (int)cpBegin, wP);
+				if (!through)
+					ShowLetterIllegalBalloonTip(hwnd, isLetterLegal);
+			}
+	}
+
+	return through ? CallWindowProc(DefaultEditCtrlProc, hwnd, msg, wP, lP) : result;
 }
 
-inline bool IsLetterLegalHex(char letter)
+void ShowLetterIllegalBalloonTip(HWND hwnd, IsLetterLegalProc proc)
 {
-	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f';
-}
+	wchar_t* title = L"Unacceptable Character";
+	wchar_t* msg = GetLetterIllegalErrMsg(proc);
 
-inline bool IsLetterLegalHexList(char letter)
-{
-	return IsLetterLegalHex(letter) || letter == ',' || letter == ' ';
-}
+	EDITBALLOONTIP tip;
+	tip.cbStruct = sizeof(EDITBALLOONTIP);
+	tip.pszText = msg;
+	tip.pszTitle = title;
+	tip.ttiIcon = TTI_ERROR;
+	SendMessage(hwnd, EM_SHOWBALLOONTIP, 0, (LPARAM)&tip);
 
-inline bool IsLetterLegalCheat(char letter)
-{
-	return letter >= '0' && letter <= ':' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '?';
-}
-
-inline bool IsLetterLegalSize(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter == 'm' || letter == 'M' || letter == 'k' || letter == 'K' || letter == 'b' || letter == 'B';
-}
-
-inline bool IsLetterLegalDec(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter == '-' || letter == '+';
-}
-
-inline bool IsLetterLegalFloat(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter == '.' || letter == '-' || letter == '+';
-}
-
-inline bool IsLetterLegalDecHexMixed(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$' || letter == '-' || letter == '+';
-}
-
-inline bool IsLetterLegalUnsignedDecHexMixed(char letter)
-{
-	return letter >= '0' && letter <= '9' || letter >= 'A' && letter <= 'F' || letter >= 'a' && letter <= 'f' || letter == '$';
+	// make a sound
+	MessageBeep(0xFFFFFFFF);
 }

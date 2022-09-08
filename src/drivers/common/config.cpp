@@ -145,6 +145,11 @@ static void GetValueR(FILE *fp, char *str, void *v, int c)
 		{
 			if(!c)	// String, allocate some memory.
 			{
+				// Windows enforces a 32767 character limit for text boxes by default
+				// If a string exceeds this length, it's probably a corrupt file
+				if (s > 32768)
+					goto gogl;
+
 				if(!(*(char **)v=(char*)malloc(s)))
 					goto gogl;
 				

@@ -30,6 +30,7 @@ int CloseGame(void);
 int reloadLastGame(void);
 int LoadGameFromLua( const char *path );
 
+int  fceuWrapperPreInit( int argc, char *argv[] );
 int  fceuWrapperInit( int argc, char *argv[] );
 int  fceuWrapperMemoryCleanup( void );
 int  fceuWrapperClose( void );

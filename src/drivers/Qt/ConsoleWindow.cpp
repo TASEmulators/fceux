@@ -862,6 +862,7 @@ void consoleWin_t::initHotKeys(void)
 	connect( Hotkeys[ HK_TOGGLE_BG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleBackground(void))        );
 	connect( Hotkeys[ HK_TOGGLE_FG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleForeground(void))        );
 	connect( Hotkeys[ HK_FKB_ENABLE           ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleFamKeyBrdEnable(void))   );
+	connect( Hotkeys[ HK_TOGGLE_ALL_CHEATS    ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleGlobalCheatEnable(void)) );
 
 	connect( Hotkeys[ HK_SAVE_STATE_0         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState0(void))        );
 	connect( Hotkeys[ HK_SAVE_STATE_1         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState1(void))        );
@@ -1281,16 +1282,16 @@ void consoleWin_t::createMainMenu(void)
 	connect( Hotkeys[ HK_POWER ].getShortcut(), SIGNAL(activated()), this, SLOT(powerConsoleCB(void)) );
 
 	// Emulation -> Reset
-	resetAct = new QAction(tr("&Reset"), this);
+	resetAct = new QAction(tr("Hard &Reset"), this);
 	//resetAct->setShortcut( QKeySequence(tr("Ctrl+R")));
-	resetAct->setStatusTip(tr("Reset Console"));
+	resetAct->setStatusTip(tr("Hard Reset of Console"));
 	resetAct->setIcon( style()->standardIcon( QStyle::SP_DialogResetButton ) );
 	connect(resetAct, SIGNAL(triggered()), this, SLOT(consoleHardReset(void)) );
 	
 	emuMenu->addAction(resetAct);
 
-	Hotkeys[ HK_RESET ].setAction( resetAct );
-	connect( Hotkeys[ HK_RESET ].getShortcut(), SIGNAL(activated()), this, SLOT(consoleHardReset(void)) );
+	Hotkeys[ HK_HARD_RESET ].setAction( resetAct );
+	connect( Hotkeys[ HK_HARD_RESET ].getShortcut(), SIGNAL(activated()), this, SLOT(consoleHardReset(void)) );
 
 	// Emulation -> Soft Reset
 	sresetAct = new QAction(tr("&Soft Reset"), this);
@@ -1300,6 +1301,9 @@ void consoleWin_t::createMainMenu(void)
 	connect(sresetAct, SIGNAL(triggered()), this, SLOT(consoleSoftReset(void)) );
 	
 	emuMenu->addAction(sresetAct);
+
+	Hotkeys[ HK_SOFT_RESET ].setAction( sresetAct );
+	connect( Hotkeys[ HK_SOFT_RESET ].getShortcut(), SIGNAL(activated()), this, SLOT(consoleSoftReset(void)) );
 
 	// Emulation -> Pause
 	pauseAct = new QAction(tr("&Pause"), this);
@@ -1730,10 +1734,10 @@ void consoleWin_t::createMainMenu(void)
 	
 	debugMenu->addAction(ggEncodeAct);
 
-	// Debug -> iNES Header Editor
-	iNesEditAct = new QAction(tr("&iNES Header Editor..."), this);
+	// Debug -> NES Header Editor
+	iNesEditAct = new QAction(tr("NES Header Edito&r..."), this);
 	//iNesEditAct->setShortcut( QKeySequence(tr("Shift+F7")));
-	iNesEditAct->setStatusTip(tr("Open iNES Header Editor"));
+	iNesEditAct->setStatusTip(tr("Open NES Header Editor"));
 	connect(iNesEditAct, SIGNAL(triggered()), this, SLOT(openNesHeaderEditor(void)) );
 	
 	debugMenu->addAction(iNesEditAct);
@@ -3055,7 +3059,7 @@ void consoleWin_t::openNesHeaderEditor(void)
 {
 	iNesHeaderEditor_t *win;
 
-	//printf("Open iNES Header Editor Window\n");
+	//printf("Open NES Header Editor Window\n");
 	
 	win = new iNesHeaderEditor_t(this);
 	
@@ -3171,6 +3175,20 @@ void consoleWin_t::toggleFullscreen(void)
 void consoleWin_t::toggleFamKeyBrdEnable(void)
 {
 	toggleFamilyKeyboardFunc();
+}
+
+extern int globalCheatDisabled;
+
+void consoleWin_t::toggleGlobalCheatEnable(void)
+{
+	FCEU_WRAPPER_LOCK();
+	FCEUI_GlobalToggleCheat(globalCheatDisabled);
+	FCEU_WRAPPER_UNLOCK();
+
+	g_config->setOption("SDL.CheatsDisabled", globalCheatDisabled);
+	g_config->save();
+
+	updateCheatDialog();
 }
 
 void consoleWin_t::warnAmbiguousShortcut( QShortcut *shortcut)

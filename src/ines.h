@@ -43,9 +43,11 @@ extern uint8 *VROM;
 extern uint32 VROM_size;
 extern uint32 ROM_size;
 extern uint8 *ExtraNTARAM;
+extern uint8 **VPageR;
 extern int iNesSave(void); //bbit Edited: line added
 extern int iNesSaveAs(const char* name);
 extern char LoadedRomFName[2048]; //bbit Edited: line added
+extern char LoadedRomFNamePatchToUse[2048];
 extern char *iNesShortFName(void);
 extern const TMasterRomInfo* MasterRomInfo;
 extern TMasterRomInfoParams MasterRomInfoParams;
@@ -242,6 +244,7 @@ void Mapper213_Init(CartInfo *);
 void Mapper214_Init(CartInfo *);
 void Mapper216_Init(CartInfo *);
 void Mapper217_Init(CartInfo *);
+void Mapper218_Init(CartInfo *);
 void Mapper220_Init(CartInfo *);
 void Mapper222_Init(CartInfo *);
 void Mapper225_Init(CartInfo *);

@@ -148,7 +148,8 @@ int saveInputSettingsToFile( const char *fileBase = NULL );
 int loadInputSettingsFromFile( const char *filename = NULL );
 void toggleFamilyKeyboardFunc(void);
 bool isFamilyKeyboardActv(void);
-const uint8 *getFamilyKeyboardState(void);
+const uint8_t *getFamilyKeyboardState(void);
+const uint8_t *QtSDL_getKeyboardState( int *bufSize );
 
 #endif
 

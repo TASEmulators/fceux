@@ -91,19 +91,19 @@ void FCEU_KillVirtualVideo(void)
 {
 	if ( XBuf )
 	{
-		FCEU_free(XBuf); XBuf = NULL;
+		FCEU_afree(XBuf); XBuf = NULL;
 	}
 	if ( XBackBuf )
 	{
-		FCEU_free(XBackBuf); XBackBuf = NULL;
+		FCEU_afree(XBackBuf); XBackBuf = NULL;
 	}
 	if ( XDBuf )
 	{
-		FCEU_free(XDBuf); XDBuf = NULL;
+		FCEU_afree(XDBuf); XDBuf = NULL;
 	}
 	if ( XDBackBuf )
 	{
-		FCEU_free(XDBackBuf); XDBackBuf = NULL;
+		FCEU_afree(XDBackBuf); XDBackBuf = NULL;
 	}
 	//printf("Video Core Cleanup\n");
 }
@@ -116,27 +116,17 @@ void FCEU_KillVirtualVideo(void)
 int FCEU_InitVirtualVideo(void)
 {
 	//Some driver code may allocate XBuf externally.
-	//256 bytes per scanline, * 240 scanline maximum, +16 for alignment,
+	//256 bytes per scanline, * 240 scanline maximum
 	if(XBuf)
 		return 1;
 	
-	XBuf = (u8*)FCEU_malloc(256 * 256 + 16);
-	XBackBuf = (u8*)FCEU_malloc(256 * 256 + 16);
-	XDBuf = (u8*)FCEU_malloc(256 * 256 + 16);
-	XDBackBuf = (u8*)FCEU_malloc(256 * 256 + 16);
-	if(!XBuf || !XBackBuf || !XDBuf || !XDBackBuf)
-	{
-		return 0;
-	}
+	XBuf = (u8*)FCEU_amalloc(256 * 256);
+	XBackBuf = (u8*)FCEU_amalloc(256 * 256);
+	XDBuf = (u8*)FCEU_amalloc(256 * 256);
+	XDBackBuf = (u8*)FCEU_amalloc(256 * 256);
+
 
 	xbsave = XBuf;
-
-	if( sizeof(uint8*) == 4 )
-	{
-		uintptr_t m = (uintptr_t)XBuf;
-		m = ( 8 - m) & 7;
-		XBuf+=m;
-	}
 
 	memset(XBuf,128,256*256);
 	memset(XBackBuf,128,256*256);

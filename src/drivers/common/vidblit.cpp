@@ -238,18 +238,18 @@ void KillBlitToHigh(void)
 {
 	if(palettetranslate)
 	{
-		free(palettetranslate);
+		FCEU_free(palettetranslate);
 		palettetranslate=NULL;
 	}
 	
 	if(specbuf8bpp)
 	{
-		free(specbuf8bpp);
+		FCEU_free(specbuf8bpp);
 		specbuf8bpp = NULL;
 	}
 	if(specbuf32bpp)
 	{
-		free(specbuf32bpp);
+		FCEU_free(specbuf32bpp);
 		specbuf32bpp = NULL;
 	}
 	if(specbuf)
@@ -259,11 +259,11 @@ void KillBlitToHigh(void)
 			hq3x_Kill();
 		else
 			hq2x_Kill();
-		free(specbuf);
+		FCEU_free(specbuf);
 		specbuf=NULL;
 	}
 	if (nes_ntsc) {
-		free(nes_ntsc);
+		FCEU_free(nes_ntsc);
 		nes_ntsc = NULL;
 	}
 	if (ntscblit) {
@@ -466,7 +466,7 @@ void Blit8To8(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, in
 /* Todo:  Make sure 24bpp code works right with big-endian cpus */
 
 //takes a pointer to XBuf and applies fully modern deemph palettizing
-template<int SCALE> static u32 _ModernDeemphColorMap(u8* src, u8* srcbuf)
+template<int SCALE> static u32 _ModernDeemphColorMap(const u8* src, const u8* srcbuf)
 {
 	u8 pixel = *src;
 	
@@ -492,7 +492,7 @@ template<int SCALE> static u32 _ModernDeemphColorMap(u8* src, u8* srcbuf)
 	return color;
 }
 
-u32 ModernDeemphColorMap(u8* src, u8* srcbuf, int scale)
+u32 ModernDeemphColorMap(const u8* src, const u8* srcbuf, int scale)
 {
 	if(scale == 1) return _ModernDeemphColorMap<1>(src,srcbuf);
 	else if(scale == 2) return _ModernDeemphColorMap<2>(src,srcbuf);
@@ -503,14 +503,14 @@ u32 ModernDeemphColorMap(u8* src, u8* srcbuf, int scale)
 	else if(scale == 7) return _ModernDeemphColorMap<7>(src,srcbuf);
 	else if(scale == 8) return _ModernDeemphColorMap<8>(src,srcbuf);
 	else if(scale == 9) return _ModernDeemphColorMap<9>(src,srcbuf);
-	else { abort(); return 0; }
+	else { FCEU_abort("unhandled ModernDeemphColorMap scale"); return 0; }
 }
 
-typedef u32 (*ModernDeemphColorMapFuncPtr)( u8*, u8* );
+typedef u32 (*ModernDeemphColorMapFuncPtr)( const u8*, const u8* );
 
 static ModernDeemphColorMapFuncPtr getModernDeemphColorMapFunc(int scale)
 {
-	ModernDeemphColorMapFuncPtr ptr = NULL;
+	ModernDeemphColorMapFuncPtr ptr;
 
 	if(scale == 1) ptr = &_ModernDeemphColorMap<1>;
 	else if(scale == 2) ptr = &_ModernDeemphColorMap<2>;
@@ -521,7 +521,7 @@ static ModernDeemphColorMapFuncPtr getModernDeemphColorMapFunc(int scale)
 	else if(scale == 7) ptr = &_ModernDeemphColorMap<7>;
 	else if(scale == 8) ptr = &_ModernDeemphColorMap<8>;
 	else if(scale == 9) ptr = &_ModernDeemphColorMap<9>;
-	else { abort(); ptr = NULL; }
+	else { FCEU_abort("unhandled ModernDeemphColorMap scale"); ptr = nullptr; }
 
 	return ptr;
 }

@@ -199,7 +199,8 @@ static void ToggleCheat(int num)
 
 static void ModifyCheat(int num)
 {
- char *name;
+ std::string name;
+ std::string *pName;
  char buf[256];
  uint32 A;
  uint8 V;
@@ -211,7 +212,7 @@ static void ModifyCheat(int num)
 
  FCEUI_GetCheat(num, &name, &A, &V, &compare, &s, &type);
 
- printf("Name [%s]: ",name);
+ printf("Name [%s]: ",name.c_str());
  GetString(buf,256);
 
  /* This obviously doesn't allow for cheats with no names.  Bah.  Who wants
@@ -219,9 +220,9 @@ static void ModifyCheat(int num)
  */
 
  if(buf[0])
-  name=buf;	// Change name when FCEUI_SetCheat() is called.
+	 pName=&name;	// Change name when FCEUI_SetCheat() is called.
  else
-  name=0;	// Don't change name when FCEUI_SetCheat() is called.
+  pName=nullptr;	// Don't change name when FCEUI_SetCheat() is called.
 
  printf("Address [$%04x]: ",(unsigned int)A);
  A=GetH16(A);
@@ -240,7 +241,7 @@ static void ModifyCheat(int num)
  if(t=='Y' || t=='y') s=1;
  else if(t=='N' || t=='n') s=0;
 
- FCEUI_SetCheat(num,name,A,V,compare,s,type);
+ FCEUI_SetCheat(num,pName,A,V,compare,s,type);
 }
 
 
@@ -320,7 +321,7 @@ static void AddCheat(void)
 }
 
 static int lid;
-static int clistcallb(char *name, uint32 a, uint8 v, int compare, int s, int type, void *data)
+static int clistcallb(const char *name, uint32 a, uint8 v, int compare, int s, int type, void *data)
 {
  char tmp[512];
  int ret;

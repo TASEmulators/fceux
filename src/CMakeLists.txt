@@ -85,6 +85,15 @@ else(WIN32)
   #endif()
   add_definitions( -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
 
+  if ( ${ASAN_ENABLE} )
+	add_definitions( -fsanitize=address -fsanitize=bounds-strict )
+	add_definitions( -fsanitize=undefined -fno-sanitize=vptr )
+	set( ASAN_LDFLAGS  -lasan -lubsan)
+	message( STATUS "Address Sanitizer Enabled" )
+  else()
+	message( STATUS "Address Sanitizer Disabled" )
+  endif()
+
   # Check for libminizip
   pkg_check_modules( MINIZIP REQUIRED minizip)
 
@@ -578,7 +587,7 @@ set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
 # the FCEUX_BUILD_TIMESTAMP preprocessor definition.
 # Note: with CMake >= 3.8.0, this will respect SOURCE_DATE_EPOCH. For more info,
 #       see <https://reproducible-builds.org/docs/source-date-epoch/>.
-string(TIMESTAMP BUILD_TS "%H:%M:%S  %b %d %Y")
+string(TIMESTAMP BUILD_TS "%H:%M:%S  %b %d %Y" UTC)
 add_definitions( -DFCEUX_BUILD_TIMESTAMP=\"${BUILD_TS}\" )
 
 if (WIN32)
@@ -613,7 +622,7 @@ add_executable(  ${APP_NAME}  ${SOURCES} ../resources.qrc
 	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
 endif()
 
-target_link_libraries( ${APP_NAME}  
+target_link_libraries( ${APP_NAME}  ${ASAN_LDFLAGS}
    ${${Qt}Widgets_LIBRARIES}
    ${${Qt}Help_LIBRARIES}
    ${${Qt}OpenGL_LIBRARIES}

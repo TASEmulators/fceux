@@ -474,6 +474,39 @@ void Mapper203_Init(CartInfo *info) {
 	Latch_Init(info, M203Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
+//------------------ Map 218 ---------------------------
+
+static void Mapper218_Power()
+{
+	//doesn't really matter
+	SetReadHandler(0x6000, 0xFFFF, &CartBROB);
+}
+
+void Mapper218_Init(CartInfo *info)
+{
+	info->Power = &Mapper218_Power;
+
+	//fixed PRG mapping
+	setprg32(0x8000, 0);
+
+	//this mapper is supposed to interpret the iNES header bits specially
+	static const uint8 mirrorings[] = {MI_V,MI_H,MI_0,MI_1};
+	SetupCartMirroring(mirrorings[info->mirrorAs2Bits],1,nullptr);
+
+	//cryptic logic to effect the CHR RAM mappings by mapping 1k blocks to NTARAM according to how the pins are wired
+	//this could be done by bit logic, but this is self-documenting
+	static const uint8 mapping[] = {
+		0,1,0,1,0,1,0,1, //mirrorAs2Bits==0
+		0,0,1,1,0,0,1,1, //mirrorAs2Bits==1
+		0,0,0,0,1,1,1,1, //mirrorAs2Bits==2
+		0,0,0,0,0,0,0,0  //mirrorAs2Bits==3
+	};
+	for(int i=0;i<8;i++)
+		VPageR[i] = &NTARAM[mapping[info->mirrorAs2Bits*8+i]];
+
+	PPUCHRRAM = 0xFF;
+}
+
 //------------------ Map 240 ---------------------------
 
 static void M240Sync(void) {

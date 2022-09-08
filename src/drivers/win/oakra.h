@@ -90,7 +90,7 @@ public:
 		ptr = ::realloc(ptr,len);
 		return ptr;
 	}
-	void free(void *ptr) {
+	static void free(void *ptr) {
 		::free(ptr);
 	}
 	

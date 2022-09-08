@@ -158,6 +158,15 @@ int getKeyState(int k)
 	return 0;
 }
 
+const uint8_t *QtSDL_getKeyboardState( int *bufSize )
+{
+	if (bufSize != nullptr)
+	{
+		*bufSize = SDL_NUM_SCANCODES;
+	}
+	return g_keyState;
+}
+
 //static int
 //_keyonly(int a)
 //{
@@ -1909,7 +1918,7 @@ static void UpdateFKB(void)
 	}
 }
 
-const uint8 *getFamilyKeyboardState(void)
+const uint8_t *getFamilyKeyboardState(void)
 {
 	return fkbkeys;
 }
