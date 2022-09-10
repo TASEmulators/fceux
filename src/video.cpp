@@ -130,8 +130,8 @@ int FCEU_InitVirtualVideo(void)
 
 	memset(XBuf,128,256*256);
 	memset(XBackBuf,128,256*256);
-	memset(XBuf,128,256*256);
-	memset(XBackBuf,128,256*256);
+	memset(XDBuf,0,256*256);
+	memset(XDBackBuf,0,256*256);
 
 	return 1;
 }
