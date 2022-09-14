@@ -724,6 +724,9 @@ InitConfig()
 	// load lua script
 	config->addOption("loadlua", "SDL.LuaScript", "");
     #endif
+
+	// load python script
+	config->addOption("loadpython", "SDL.PythonScript", "");
     
     #ifdef CREATE_AVI
 	config->addOption("videolog",  "SDL.VideoLog",  "");
