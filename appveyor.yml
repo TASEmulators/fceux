@@ -68,7 +68,7 @@ deploy:
     release: interim-build
     description: 'Interim Builds - Latest auto builds off master branch - commit: $(APPVEYOR_REPO_COMMIT)\nDate: $(APPVEYOR_REPO_COMMIT_TIMESTAMP)'
     auth_token:
-      secure: 5kNj/zZ1RD5gCBq0Q4my9dBgSTYL7JVvcjv93T9i6FjYA6SAds3/Dmlz8wrRMN8E
+      secure: pYXqhuxNn7vivsJ6cnWCHlORrTtaWO7fyGOvGFUNKtM2apSY44gjbAhGIlD+OdtF
     artifact: $(WIN32_ARTIFACT), $(WIN64_ARTIFACT), $(WIN64_QTSDL_ARTIFACT), $(MACOS_ARTIFACT), $(LINUX_ARTIFACT)
     draft: false
     prerelease: true
@@ -80,7 +80,7 @@ deploy:
   - provider: GitHub
     description: 'Release Builds - commit: $(APPVEYOR_REPO_COMMIT)'
     auth_token:
-      secure: 5kNj/zZ1RD5gCBq0Q4my9dBgSTYL7JVvcjv93T9i6FjYA6SAds3/Dmlz8wrRMN8E
+      secure: pYXqhuxNn7vivsJ6cnWCHlORrTtaWO7fyGOvGFUNKtM2apSY44gjbAhGIlD+OdtF
     artifact: $(WIN32_ARTIFACT), $(WIN64_ARTIFACT), $(WIN64_QTSDL_ARTIFACT), $(MACOS_ARTIFACT)
     draft: false
     prerelease: false
