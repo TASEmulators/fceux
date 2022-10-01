@@ -5,6 +5,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+if (${PUBLIC_RELEASE})
+	add_definitions( -DPUBLIC_RELEASE=1 )
+endif()
+
 if ( ${QT6} )
 	message( STATUS "GUI Frontend: Qt6")
 	set( Qt Qt6 )
@@ -27,6 +31,7 @@ else()
 	add_definitions( ${Qt5Widgets_DEFINITIONS} ${Qt5Help_DEFINITIONS} )
 	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Help_INCLUDE_DIRS} )
 endif()
+
 
 if(WIN32)
      find_package(OpenGL REQUIRED)

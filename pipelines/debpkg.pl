@@ -1,8 +1,11 @@
 #!/usr/bin/perl
 
 use strict;
+use File::Basename;
 
-my $VERSION="2.6.4";
+my $dirname = dirname(__FILE__);
+
+my $VERSION=`perl $dirname/../scripts/fceuVersion.pl`;
 my $INSTALL_PREFIX="/tmp/fceux";
 my $CTL_FILENAME="$INSTALL_PREFIX/DEBIAN/control";
 my $ARCH="amd64";

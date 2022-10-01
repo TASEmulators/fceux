@@ -4,6 +4,7 @@ id
 pwd
 uname -a
 cat /etc/os-release
+env
 
 SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
 
@@ -19,6 +20,10 @@ echo '****************************************'
 echo "APPVEYOR_SSH_KEY=$APPVEYOR_SSH_KEY";
 echo "APPVEYOR_SSH_BLOCK=$APPVEYOR_SSH_BLOCK";
 echo '****************************************'
+
+if [ ! -z $FCEU_RELEASE_VERSION ]; then
+	APPVEYOR_CMAKE_FLAGS=" -DPUBLIC_RELEASE=1 ";
+fi
 
 echo '****************************************'
 echo '****************************************'
@@ -119,6 +124,7 @@ cmake  \
    -DCMAKE_BUILD_TYPE=Release  \
    -DCMAKE_INSTALL_PREFIX=/usr \
    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+   $APPVEYOR_CMAKE_FLAGS \
 	..
 make -j `nproc`
 make  install  DESTDIR=$INSTALL_PREFIX
@@ -191,5 +197,13 @@ echo 'Testing Install of Package'
 echo '**************************************************************'
 sudo dpkg -i /tmp/fceux-*.deb
 
-echo 'Pushing Debian Package to Build Artifacts'
-appveyor PushArtifact /tmp/fceux-*.deb
+if [ ! -z $APPVEYOR ]; then
+	echo 'Pushing Debian Package to Build Artifacts'
+	if [ -z $FCEU_RELEASE_VERSION ]; then
+		cp /tmp/fceux-*.deb /tmp/fceux-ubuntu-x64.deb
+		appveyor PushArtifact /tmp/fceux-ubuntu-x64.deb
+		appveyor SetVariable  -Name  LINUX_ARTIFACT  -Value  fceux-ubuntu-x64.deb
+	else
+		appveyor PushArtifact /tmp/fceux-*.deb
+	fi
+fi

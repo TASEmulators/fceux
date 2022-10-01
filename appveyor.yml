@@ -27,7 +27,7 @@ for:
         - job_name: Windows 32
 
     build_script:
-    - cmd: pipelines/win32_build.bat
+    - cmd: perl pipelines/build.pl win32
 
   -
     matrix:
@@ -35,7 +35,7 @@ for:
         - job_name: Windows 64
 
     build_script:
-    - cmd: pipelines/win64_build.bat
+    - cmd: perl pipelines/build.pl win64
 
   -
     matrix:
@@ -43,7 +43,7 @@ for:
         - job_name: Win64 Qt
 
     build_script:
-    - cmd: pipelines/qwin64_build.bat
+    - cmd: perl pipelines/build.pl win64-QtSDL
 
   -
     matrix:
@@ -51,7 +51,7 @@ for:
         - job_name: Ubuntu
 
     build_script:
-    - sh: ./pipelines/linux_build.sh
+    - sh: perl pipelines/build.pl linux
 
   -
     matrix:
@@ -59,5 +59,31 @@ for:
         - job_name: MacOS
 
     build_script:
-    - sh: ./pipelines/macOS_build.sh
+    - sh: perl pipelines/build.pl macOS
 
+deploy:
+
+  - provider: GitHub
+    tag: interim-build
+    release: interim-build
+    description: 'Interim Builds - Latest auto builds off master branch - commit: $(APPVEYOR_REPO_COMMIT)\nDate: $(APPVEYOR_REPO_COMMIT_TIMESTAMP)'
+    auth_token:
+      secure: 5kNj/zZ1RD5gCBq0Q4my9dBgSTYL7JVvcjv93T9i6FjYA6SAds3/Dmlz8wrRMN8E
+    artifact: $(WIN32_ARTIFACT), $(WIN64_ARTIFACT), $(WIN64_QTSDL_ARTIFACT), $(MACOS_ARTIFACT), $(LINUX_ARTIFACT)
+    draft: false
+    prerelease: true
+    force_update: true
+    on:
+      branch: master                 # release from master branch only
+      APPVEYOR_REPO_TAG: false       # never deploy on tag push
+
+  - provider: GitHub
+    description: 'Release Builds - commit: $(APPVEYOR_REPO_COMMIT)'
+    auth_token:
+      secure: 5kNj/zZ1RD5gCBq0Q4my9dBgSTYL7JVvcjv93T9i6FjYA6SAds3/Dmlz8wrRMN8E
+    artifact: $(WIN32_ARTIFACT), $(WIN64_ARTIFACT), $(WIN64_QTSDL_ARTIFACT), $(MACOS_ARTIFACT)
+    draft: false
+    prerelease: false
+    force_update: false
+    on:
+      APPVEYOR_REPO_TAG: true       # deploy on tag push only
