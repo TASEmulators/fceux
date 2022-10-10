@@ -49,6 +49,9 @@ msbuild /m fceux.sln /p:Configuration=Release
 @if ERRORLEVEL 1 goto end
 
 copy src\Release\fceux.exe bin\qfceux.exe
+copy %PROJECT_ROOT%\src\auxlib.lua bin\.
+copy %PROJECT_ROOT%\src\drivers\win\lua\x64\lua51.dll  bin\.
+copy %PROJECT_ROOT%\src\drivers\win\lua\x64\lua5.1.dll  bin\.
 copy %SDL_INSTALL_PREFIX%\SDL2\lib\x64\SDL2.dll  bin\.
 copy %FFMPEG_INSTALL_PREFIX%\ffmpeg\bin\*.dll  bin\.
 
