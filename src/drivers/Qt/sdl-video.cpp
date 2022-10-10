@@ -37,6 +37,7 @@
 #include "Qt/sdl-video.h"
 #include "Qt/AviRecord.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleWindow.h"
 
 #ifdef CREATE_AVI
 #include "../videolog/nesvideos-piece.h"
@@ -74,6 +75,7 @@ extern bool MaxSpeed;
 extern int input_display;
 extern int frame_display;
 extern int rerecord_display;
+extern uint8 PALRAM[0x20];
 
 /**
  * Attempts to destroy the graphical video display.  Returns 0 on
@@ -497,6 +499,19 @@ void
 BlitScreen(uint8 *XBuf)
 {
 	int i = nes_shm->pixBufIdx;
+
+	if (usePaletteForVideoBg)
+	{
+		unsigned char r, g, b;
+		FCEUD_GetPalette(0x80 | PALRAM[0], &r, &g, &b);
+
+		if (consoleWindow)
+		{
+			QColor *bgColor = consoleWindow->getVideoBgColorPtr();
+
+			*bgColor = QColor::fromRgb(r,g,b);
+		}
+	}
 
 	doBlitScreen(XBuf, (uint8_t*)nes_shm->pixbuf[i]);
 

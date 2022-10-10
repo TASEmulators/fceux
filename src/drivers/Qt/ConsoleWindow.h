@@ -27,6 +27,7 @@
 #include <QRecursiveMutex>
 #endif
 
+#include "Qt/ColorMenu.h"
 #include "Qt/ConsoleViewerGL.h"
 #include "Qt/ConsoleViewerSDL.h"
 #include "Qt/GamePadConf.h"
@@ -259,6 +260,7 @@ class  consoleWin_t : public QMainWindow
 
 		QTimer  *gameTimer;
 		QColor   videoBgColor;
+		ColorMenuItem *bgColorMenuItem;
 
 		std::string errorMsg;
 		bool        errorMsgValid;
@@ -453,6 +455,7 @@ class  consoleWin_t : public QMainWindow
 		void winActiveChanged(void);
 		void emuFrameFinish(void);
 		void toggleMenuAutoHide(bool);
+		void toggleUseBgPaletteForVideo(bool);
 		void videoBgColorChanged( QColor &c );
 		void loadRomRequestCB( QString s );
 
