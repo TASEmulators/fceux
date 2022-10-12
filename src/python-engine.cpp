@@ -75,12 +75,27 @@ static py::dict joy_get_internal(int player, bool reportUp, bool reportDown)
 	return input;
 }
 
-static py::dict joypad_get(int player) {
+static py::dict joypad_get(int player) 
+{
 	return joy_get_internal(player, true, true);
 }
 
+// joypad.getdown(player)
+// returns a dict of every game button that is currently held
+static py::dict joypad_getdown(int player)
+{
+	return joy_get_internal(player, false, true);
+}
+
+// joypad.getup(player)
+// returns a dict of every game button that is not currently held
+static py::dict joypad_getup(int player) 
+{
+	return joy_get_internal(player, true, false);
+}
+
 // static void joypad_set(int player, py::dict input) {
-	
+
 // }
 
 PYBIND11_EMBEDDED_MODULE(emu, m) 
@@ -93,6 +108,10 @@ PYBIND11_EMBEDDED_MODULE(joypad, m)
 {
 	m.def("get", joypad_get);
 	m.def("read", joypad_get);
+	m.def("getdown", joypad_getdown);
+	m.def("readdown", joypad_getdown);
+	m.def("getup", joypad_getup);
+	m.def("readup", joypad_getup);
 }
 
 void FCEU_PythonFrameBoundary() 
