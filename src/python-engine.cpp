@@ -10,6 +10,7 @@ namespace py = pybind11;
 #include "fceupython.h"
 
 #include "movie.h"
+#include "state.h"
 
 // Are we running any code right now?
 static char* pythonScriptName = NULL; 
@@ -23,6 +24,12 @@ static std::atomic_bool inFrameBoundry = false;
 
 std::mutex mtx; 
 std::condition_variable cv;
+
+
+// Look in fceu.h for macros named like JOY_UP to determine the order.
+static const char *button_mappings[] = {
+	"A", "B", "select", "start", "up", "down", "left", "right"
+};
 
 
 static void emu_frameadvance() 
@@ -47,10 +54,44 @@ static int emu_framecount()
 	return FCEUMOV_GetFrame(); 
 }
 
+// dict joypad.read(int which = 1)
+//
+// Reads the joypads as inputted by the user.
+static py::dict joy_get_internal(int player, bool reportUp, bool reportDown) {
+	// Use the OS-specific code to do the reading.
+	extern SFORMAT FCEUCTRL_STATEINFO[];
+	uint8 buttons = ((uint8*) FCEUCTRL_STATEINFO[1].v)[player - 1];
+
+	py::dict input;
+	
+	for (int i = 0; i < 8; i++) {
+		bool pressed = (buttons & (1<<i)) != 0;
+		if ((pressed && reportDown) || (!pressed && reportUp)) {
+			input[button_mappings[i]] = py::bool_(pressed);
+		}
+	}
+
+	return input;
+}
+
+static py::dict joypad_get(int player) {
+	return joy_get_internal(player, true, true);
+}
+
+// static void joypad_set(int player, py::dict input) {
+	
+// }
+
 PYBIND11_EMBEDDED_MODULE(emu, m) 
 {
 	m.def("frameadvance", emu_frameadvance);
 	m.def("framecount", emu_framecount);
+}
+
+PYBIND11_EMBEDDED_MODULE(joypad, m)
+{
+	m.def("get", joypad_get);
+	m.def("read", joypad_get);
 }
 
 void FCEU_PythonFrameBoundary() 
