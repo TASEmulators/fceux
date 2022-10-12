@@ -224,6 +224,11 @@ else ()
    )
 endif()
 
+# Python and pybind11 configuration
+find_package(pybind11 REQUIRED)
+set(PYTHON_LIBS pybind11::embed)
+set(PYTHON_ENGINE_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/python-engine.cpp)
+
 if ( ${ZLIB_FOUND} )
 
   message( STATUS "Using System zlib ${ZLIB_VERSION_STRING}" )
@@ -292,6 +297,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/wave.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/x6502.cpp
 	${LUA_ENGINE_SOURCE}
+	${PYTHON_ENGINE_SOURCE}
 	${ZLIB_SOURCE}
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/01-222.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/09-034a.cpp
@@ -632,6 +638,7 @@ target_link_libraries( ${APP_NAME}  ${ASAN_LDFLAGS}
 	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
 	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS} ${LIBAV_LDFLAGS}
  	${SYS_LIBS}
+	${PYTHON_LIBS}
 )
 
 if (WIN32)

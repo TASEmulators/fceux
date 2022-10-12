@@ -58,6 +58,8 @@
 #include "../../fceulua.h"
 #endif
 
+#include "../../fceupython.h"
+
 #include "common/os_utils.h"
 #include "common/configSys.h"
 #include "../../oldmovie.h"
@@ -1068,6 +1070,8 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		{
 			s = fi.canonicalFilePath().toStdString();
 		}
+
+		FCEU_LoadPythonCode(s.c_str());
 	}
 	
 	g_config->getOption("SDL.NewPPU", &newppu);

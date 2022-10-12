@@ -64,6 +64,8 @@ extern void RefreshThrottleFPS();
 #include "fceulua.h"
 #endif
 
+#include "fceupython.h"
+
 //TODO - we really need some kind of global platform-specific options api
 #ifdef __WIN_DRIVER__
 #include "drivers/win/main.h"
@@ -795,6 +797,8 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 #ifdef _S9XLUA_H
 	FCEU_LuaFrameBoundary();
 #endif
+
+	FCEU_PythonFrameBoundary();
 
 	FCEU_UpdateInput();
 	lagFlag = 1;
