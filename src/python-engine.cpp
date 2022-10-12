@@ -57,7 +57,8 @@ static int emu_framecount()
 // dict joypad.read(int which = 1)
 //
 // Reads the joypads as inputted by the user.
-static py::dict joy_get_internal(int player, bool reportUp, bool reportDown) {
+static py::dict joy_get_internal(int player, bool reportUp, bool reportDown) 
+{
 	// Use the OS-specific code to do the reading.
 	extern SFORMAT FCEUCTRL_STATEINFO[];
 	uint8 buttons = ((uint8*) FCEUCTRL_STATEINFO[1].v)[player - 1];
@@ -96,8 +97,6 @@ PYBIND11_EMBEDDED_MODULE(joypad, m)
 
 void FCEU_PythonFrameBoundary() 
 {
-	std::cout << "in FCEU_PythonFrameBoundary" << std::endl;
-
 	if(!pythonRunning)
 		return; 
 	
@@ -145,6 +144,7 @@ void FCEU_LoadPythonCode(const char* filename)
 
 	// gil_scoped_release created on heap to not be destroyed on leaving FCEU_LoadPythonCode scope
 	py::gil_scoped_release* release = new py::gil_scoped_release;
+	(void)release; // supress unused variable warning on release
 
 	std::thread(pythonStart, std::string(filename)).detach();
 
