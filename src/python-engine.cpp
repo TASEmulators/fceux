@@ -3,12 +3,13 @@
 #include <mutex>
 #include <condition_variable>
 #include <iostream>
-#include <functional>
 
 #include <pybind11/embed.h> 
 namespace py = pybind11;
 
 #include "fceupython.h"
+
+#include "movie.h"
 
 // Are we running any code right now?
 static char* pythonScriptName = NULL; 
@@ -23,11 +24,6 @@ static std::atomic_bool inFrameBoundry = false;
 std::mutex mtx; 
 std::condition_variable cv;
 
-
-typedef struct pythonL_Reg {
-	const char* name; 
-	void (*func)(); 
-} pythonL_Reg;
 
 static void emu_frameadvance() 
 {
@@ -46,15 +42,15 @@ static void emu_frameadvance()
 	cv.wait(lock, [] { return bool(inFrameBoundry); });
 }
 
-static const struct pythonL_Reg emulib [] = {
-	{"frameadvance", &emu_frameadvance}
-};
+static int emu_framecount()
+{
+	return FCEUMOV_GetFrame(); 
+}
 
 PYBIND11_EMBEDDED_MODULE(emu, m) 
 {
-	for (pythonL_Reg libReg : emulib) {
-		m.def(libReg.name, libReg.func);
-	}
+	m.def("frameadvance", emu_frameadvance);
+	m.def("framecount", emu_framecount);
 }
 
 void FCEU_PythonFrameBoundary() 

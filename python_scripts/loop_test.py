@@ -1,5 +1,5 @@
 import emu
 
 while True:
-    print("PY: Frame")
+    print(f"PY: Frame {emu.framecount()}")
     emu.frameadvance()
