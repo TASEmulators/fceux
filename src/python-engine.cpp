@@ -3,13 +3,12 @@
 #include <mutex>
 #include <condition_variable>
 #include <iostream>
+#include <functional>
 
 #include <pybind11/embed.h> 
 namespace py = pybind11;
 
 #include "fceupython.h"
-
-#define SetCurrentDir chdir
 
 // Are we running any code right now?
 static char* pythonScriptName = NULL; 
@@ -24,28 +23,13 @@ static std::atomic_bool inFrameBoundry = false;
 std::mutex mtx; 
 std::condition_variable cv;
 
-// Python thread object
-// std::thread python_thread;
 
+typedef struct pythonL_Reg {
+	const char* name; 
+	void (*func)(); 
+} pythonL_Reg;
 
-void FCEU_PythonFrameBoundary() 
-{
-	std::cout << "in FCEU_PythonFrameBoundary" << std::endl;
-
-	if(!pythonRunning)
-		return; 
-	
-	// Notify Python thread the main thread is in the frame boundry
-	inFrameBoundry = true;
-	cv.notify_all();
-
-
-	std::unique_lock<std::mutex> lock(mtx);
-	cv.wait(lock, [] { return bool(frameAdvanceWaiting); });
-	frameAdvanceWaiting = false;
-}
-
-void emu_frameadvance() 
+static void emu_frameadvance() 
 {
 	// Can't call if a frameAdvance is already waiting
 	if (frameAdvanceWaiting)
@@ -62,10 +46,32 @@ void emu_frameadvance()
 	cv.wait(lock, [] { return bool(inFrameBoundry); });
 }
 
+static const struct pythonL_Reg emulib [] = {
+	{"frameadvance", &emu_frameadvance}
+};
+
 PYBIND11_EMBEDDED_MODULE(emu, m) 
 {
-	m.def("frameadvance", &emu_frameadvance);
-	// m.def("framecount", [] { return emu_framecount; });
+	for (pythonL_Reg libReg : emulib) {
+		m.def(libReg.name, libReg.func);
+	}
+}
+
+void FCEU_PythonFrameBoundary() 
+{
+	std::cout << "in FCEU_PythonFrameBoundary" << std::endl;
+
+	if(!pythonRunning)
+		return; 
+	
+	// Notify Python thread the main thread is in the frame boundry
+	inFrameBoundry = true;
+	cv.notify_all();
+
+
+	std::unique_lock<std::mutex> lock(mtx);
+	cv.wait(lock, [] { return bool(frameAdvanceWaiting); });
+	frameAdvanceWaiting = false;
 }
 
 void pythonStart(std::string filename) 
