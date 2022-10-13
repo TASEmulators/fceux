@@ -22,18 +22,21 @@ mkdir build
 cd    build
 mkdir bin
 
-curl -s -LO http://www.libsdl.org/release/SDL2-devel-2.0.20-VC.zip
-curl -s -LO https://github.com/GyanD/codexffmpeg/releases/download/5.0/ffmpeg-5.0-full_build-shared.zip
+set SDL_VERSION=2.24.1
+set FFMPEG_VERSION=5.1.2
+
+curl -s -LO https://github.com/libsdl-org/SDL/releases/download/release-%SDL_VERSION%/SDL2-devel-%SDL_VERSION%-VC.zip
+curl -s -LO https://github.com/GyanD/codexffmpeg/releases/download/%FFMPEG_VERSION%/ffmpeg-%FFMPEG_VERSION%-full_build-shared.zip
 
 REM rmdir /q /s SDL2
 
-powershell -command "Expand-Archive" SDL2-devel-2.0.20-VC.zip .
-powershell -command "Expand-Archive" ffmpeg-5.0-full_build-shared.zip
+powershell -command "Expand-Archive" SDL2-devel-%SDL_VERSION%-VC.zip .
+powershell -command "Expand-Archive" ffmpeg-%FFMPEG_VERSION%-full_build-shared.zip
 
-rename SDL2-2.0.20  SDL2
-move   ffmpeg-5.0-full_build-shared\ffmpeg-5.0-full_build-shared   ffmpeg
-rmdir  ffmpeg-5.0-full_build-shared
-del    ffmpeg-5.0-full_build-shared.zip
+rename SDL2-%SDL_VERSION%  SDL2
+move   ffmpeg-%FFMPEG_VERSION%-full_build-shared\ffmpeg-%FFMPEG_VERSION%-full_build-shared   ffmpeg
+rmdir  ffmpeg-%FFMPEG_VERSION%-full_build-shared
+del    ffmpeg-%FFMPEG_VERSION%-full_build-shared.zip
 
 set SDL_INSTALL_PREFIX=%CD%
 set FFMPEG_INSTALL_PREFIX=%CD%
