@@ -31,6 +31,7 @@
 #ifdef _S9XLUA_H
 #include "fceulua.h"
 #endif
+#include "fceupython.h"
 #include "input.h"
 #include "vsuni.h"
 #include "fds.h"
@@ -245,6 +246,11 @@ static void UpdateGP(int w, void *data, int arg)
 		joy[0] = *(uint32 *)joyports[0].ptr;;
 		joy[2] = *(uint32 *)joyports[0].ptr >> 16;
 		#endif
+
+		joy[0]= *(uint32 *)joyports[0].ptr;
+		joy[0]= FCEU_PythonReadJoypad(0,joy[0]);
+		joy[2]= *(uint32 *)joyports[0].ptr >> 16;
+		joy[2]= FCEU_PythonReadJoypad(2,joy[2]);
 	}
 	else
 	{
@@ -257,6 +263,11 @@ static void UpdateGP(int w, void *data, int arg)
 		joy[1] = *(uint32 *)joyports[1].ptr >> 8;
 		joy[3] = *(uint32 *)joyports[1].ptr >> 24;
 		#endif
+
+		joy[1]= *(uint32 *)joyports[1].ptr >> 8;
+		joy[1]= FCEU_PythonReadJoypad(1,joy[1]);
+		joy[3]= *(uint32 *)joyports[1].ptr >> 24;
+		joy[3]= FCEU_PythonReadJoypad(3,joy[3]);
 	}
 
 }

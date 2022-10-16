@@ -7,10 +7,11 @@
 #include <pybind11/embed.h> 
 namespace py = pybind11;
 
-#include "fceupython.h"
 
 #include "movie.h"
 #include "state.h"
+#include "types.h"
+#include "fceupython.h"
 
 // Are we running any code right now?
 static char* pythonScriptName = NULL; 
@@ -30,6 +31,13 @@ std::condition_variable cv;
 static const char *button_mappings[] = {
 	"A", "B", "select", "start", "up", "down", "left", "right"
 };
+
+// Our joypads.
+static uint8 pythonjoypads1[4]= { 0xFF, 0xFF, 0xFF, 0xFF }; //x1
+static uint8 pythonjoypads2[4]= { 0x00, 0x00, 0x00, 0x00 }; //0x
+/* Crazy logic stuff.
+	11 - true		01 - pass-through (default)
+	00 - false		10 - invert					*/
 
 
 static void emu_frameadvance() 
@@ -94,9 +102,35 @@ static py::dict joypad_getup(int player)
 	return joy_get_internal(player, true, false);
 }
 
-// static void joypad_set(int player, py::dict input) {
+static void joypad_set(int player, py::dict input) 
+{
+	// Set up for taking control of the indicated controller
+	pythonjoypads1[player-1] = 0xFF; // .1  Reset right bit
+	pythonjoypads2[player-1] = 0x00; // 0.  Reset left bit
 
-// }
+	for (int i=0; i < 8; i++) {
+		if (input.contains<std::string>(button_mappings[i])) {
+			auto buttonIn = input[button_mappings[i]];
+			auto buttonInType = py::type::of(buttonIn);
+
+			bool buttonBool = false;
+			bool buttonIsString = false;
+
+			if (py::isinstance<py::bool_>(buttonIn)) {
+				buttonBool = buttonIn.cast<bool>();
+			} else if (py::isinstance<py::str>(buttonIn)) {
+				buttonIsString = true;
+			} else {
+				continue;
+			}
+
+			if (buttonBool)
+				pythonjoypads2[player-1] |= 1 << i;
+			if (!buttonBool || buttonIsString)
+				pythonjoypads1[player-1] &= ~(1 << i);
+		}
+	}
+}
 
 PYBIND11_EMBEDDED_MODULE(emu, m) 
 {
@@ -112,6 +146,8 @@ PYBIND11_EMBEDDED_MODULE(joypad, m)
 	m.def("readdown", joypad_getdown);
 	m.def("getup", joypad_getup);
 	m.def("readup", joypad_getup);
+	m.def("set", joypad_set);
+	m.def("write", joypad_set);
 }
 
 void FCEU_PythonFrameBoundary() 
@@ -168,7 +204,25 @@ void FCEU_LoadPythonCode(const char* filename)
 	std::thread(pythonStart, std::string(filename)).detach();
 
 	FCEU_PythonFrameBoundary();
-}	
+}
+
+/**
+ * Reads the buttons Python is feeding for the given joypad, in the same
+ * format as the OS-specific code.
+ *
+ * It may force set or force clear the buttons. It may also simply
+ * pass the input along or invert it. The act of calling this
+ * function will reset everything back to pass-through, though.
+ * Generally means don't call it more than once per frame!
+ */
+uint8 FCEU_PythonReadJoypad(int player, uint8 joyl)
+{
+	joyl = (joyl & pythonjoypads1[player]) | (~joyl & pythonjoypads2[player]);
+	pythonjoypads1[player] = 0xFF;
+	pythonjoypads2[player] = 0x00;
+	return joyl;
+}
+
 
 /** 
  * Terminates a running Python scripts by killing the whole Python Interpretor.
