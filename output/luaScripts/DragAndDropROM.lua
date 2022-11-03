@@ -1,8 +1,8 @@
 --Written by Steven Phang
 --EmuGators
+--This script is a draft of the realistic disk loading system. 
 
---You can change the number of controllers tracked here.
-require 'lfs' --Lua File Syayem, useful for searching file directories
+require 'lfs' --Lua File System, useful for searching file directories
 
 local roms = {}
 local framecount = 0
