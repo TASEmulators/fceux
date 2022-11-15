@@ -15,9 +15,9 @@ function loadRom(index)
 
 end
 
-function unloadRom(dummyPath)
+function unloadRom()
 	--Load ROM file into emulator
-	emu.loadrom(dummyPath)
+	emu.unloadROM()
     emu.message('Disk Ejected')
 
 end

@@ -2748,14 +2748,10 @@ int CreateMainWindow()
 	if (MainWindow_wndx==-32000) MainWindow_wndx=0; //Just in case
 	if (MainWindow_wndy==-32000) MainWindow_wndy=0;
 
-	//Added Emugators name to window title
-	string title = FCEU_NAME_AND_VERSION;
-	title.append(" (Emugators)");
-
 	hAppWnd = CreateWindowEx(
 		0,
 		"FCEUXWindowClass",
-		title.c_str(),
+		FCEU_NAME_AND_VERSION,
 		WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS,  /* Style */
 		MainWindow_wndx,
 		MainWindow_wndy,

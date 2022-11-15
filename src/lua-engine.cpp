@@ -5442,6 +5442,18 @@ static int cdl_resetcdlog(lua_State *L)
 	return 0;
 }
 
+bool yieldFlag = false;
+
+static int emugator_yieldwithflag(lua_State* L)
+{
+	yieldFlag = true;
+
+	return lua_yield(L, 0);
+
+
+	// It's actually rather disappointing...
+}
+
 
 
 static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
@@ -6284,6 +6296,12 @@ static const struct luaL_reg cdloglib[] = {
 	{ NULL,NULL }
 };
 
+static const struct luaL_reg emugatorlib[] = {
+	{"yieldwithflag", emugator_yieldwithflag},
+	{NULL,NULL}
+};
+
+
 void CallExitFunction() 
 {
 	if (!L)
@@ -6446,8 +6464,12 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 		luaL_register(L, "bit", bit_funcs); // LuaBitOp library
 		lua_settop(L, 0);
 
+		luaL_register(L, "emugator", emugatorlib); // LuaBitOp library
+		lua_settop(L, 0);
+
 		// register a few utility functions outside of libraries (in the global namespace)
 		lua_register(L, "print", print);
+		lua_register(L, "soup", print); //emugatordebug
 		lua_register(L, "gethash", gethash),
 		lua_register(L, "tostring", tostring);
 		lua_register(L, "tobitstring", tobitstring);
