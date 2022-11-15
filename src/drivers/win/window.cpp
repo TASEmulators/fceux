@@ -196,6 +196,7 @@ string gettingstartedhelp = "Gettingstarted";//Getting Started
 void SetMainWindowText()
 {
 	string str = FCEU_NAME_AND_VERSION;
+
 	if (newppu)
 		str.append(" (New PPU)");
 	if (GameInfo)
@@ -2746,10 +2747,15 @@ int CreateMainWindow()
 	updateGameDependentMenusDebugger();
 	if (MainWindow_wndx==-32000) MainWindow_wndx=0; //Just in case
 	if (MainWindow_wndy==-32000) MainWindow_wndy=0;
+
+	//Added Emugators name to window title
+	string title = FCEU_NAME_AND_VERSION;
+	title.append(" (Emugators)");
+
 	hAppWnd = CreateWindowEx(
 		0,
 		"FCEUXWindowClass",
-		FCEU_NAME_AND_VERSION,
+		title.c_str(),
 		WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS,  /* Style */
 		MainWindow_wndx,
 		MainWindow_wndy,
