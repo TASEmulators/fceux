@@ -1,0 +1,26 @@
+Emugators Log - Steven Phang
+11/15/2022
+If a lua script is ran without emu.frameadvance(), the whole program hangs, not just the game that is currently being played. For an unknwn reason, the text that is supposed to be displayed with the Emugators_HelloWorld.lua script is only displayed when a ROM is loaded. It disapears after the ROM is closed as well... I spoke with Carsten, and we discussed the idea of using a ROM to represent the DnD GUI. Automatically load this ROM at startup, and this would work nicely. Problem - I dont know how I would go about making the ROM... Regardless, I want to figure out what mechanism is responsible for clearing the screen and pausing the lua script on startup/when a ROM is closed. This may be the key to running the script without a ROM...
+
+This is the mechanism for clearing the screen when the ROM is closed...
+See fceu.cpp > FCEU_CloseGame(void)
+		//clear screen when game is closed
+		extern uint8 *XBuf;
+		if (XBuf)
+			memset(XBuf, 0, 256 * 256);
+
+lua-engine.cpp is the most important file in our universe. It containes the bindings
+
+interesting... lua_yeild and lua_resume in ldo.c may be useful
+
+search emugatordebug comment for things that maybe should be removed for release
+
+steps to implement lua callable c++ function...
+add new library (needs to be registered) or simply register new function with existing library (ex. emulib) contained in lua-engine.cpp
+
+ITS RUNNING BUT THERE IS NO FRAME TO ADVANCE!!!!!
+emu.frameadvance causes the lua script to yield to main until another emulator frame is processed. Then, something hands control back to the script. But if no game is running (No ROM Loaded), main just updates the display then sleeps for a little bit. Question of the day is What is normally handing control back to the script? It has been staring me in the face all day...FCEU_LuaFrameBoundary()
+	
+adding FCEU_LuaFrameBoundary(); to main before it sleeps will allow the lua script to keep running. So we could have a function like emu.frameadvanceAlways() or something that sets a flag that enables FCEU_LuaFrameBoundary() to be called in main (since we dont really want this behavior for ALL lus scripts)... OR maybe add an emu.updateDisplay() function that will allow the display to refresh without yeilding control to main. I think I prefer this option...
+*Note: the script still cant draw images on the GUI unless a ROM is loaded with this current method...why?
+
