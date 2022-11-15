@@ -71,7 +71,7 @@
   <!-- change toolset if it doesnt exist, so people can use 2017 for now -->
   <!-- I can't figure out how to detect if v140_xp is installed in 2017. I would like to use it if possible, but I guess not today -->
   <PropertyGroup Label="Globals" Condition="!Exists('$(VCTargetsPath)\Platforms\$(Platform)\PlatformToolsets\v140_xp\Toolset.props')">
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Globals" Condition="'$(v141_xp_Installed)'=='true'">
     <PlatformToolset>v141_xp</PlatformToolset>
