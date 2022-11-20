@@ -5446,6 +5446,7 @@ bool yieldFlag = false;
 
 static int emugator_yieldwithflag(lua_State* L)
 {
+	frameAdvanceWaiting = TRUE;
 	yieldFlag = true;
 
 	return lua_yield(L, 0);

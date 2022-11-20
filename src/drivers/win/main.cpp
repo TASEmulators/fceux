@@ -968,14 +968,15 @@ doloopy:
 
 	extern bool yieldFlag;
 	if (yieldFlag) {
+		yieldFlag = false;
+		//extern uint8* XBuf;
+		//memset(XBuf, -1, 256 * 256);
 		FCEU_LuaFrameBoundary();
 
-		extern uint8* XBuf;
-		int32* sound = 0; ///contains sound data buffer
-		int32 ssize = 0; ///contains sound samples count
-		//if (XBuf)
-		//	memset(XBuf, 0, 256 * 256);
-		FCEUD_Update(XBuf, sound, ssize);
+		u8 dog[256*257];
+		memset(dog, -1, 256 * 256);//128
+		FCEU_LuaGui(dog);
+		FCEUD_BlitScreen(dog);
 	}
 	
 	Sleep(50);

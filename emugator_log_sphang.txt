@@ -23,4 +23,10 @@ emu.frameadvance causes the lua script to yield to main until another emulator f
 	
 adding FCEU_LuaFrameBoundary(); to main before it sleeps will allow the lua script to keep running. So we could have a function like emu.frameadvanceAlways() or something that sets a flag that enables FCEU_LuaFrameBoundary() to be called in main (since we dont really want this behavior for ALL lus scripts)... OR maybe add an emu.updateDisplay() function that will allow the display to refresh without yeilding control to main. I think I prefer this option...
 *Note: the script still cant draw images on the GUI unless a ROM is loaded with this current method...why?
+TODO: figure out how to get draw functions reflected on GUI with no ROM loaded. Come up with better function names, maybe plan out the organization a bit better. Add unload ROM function.
+
+11/18/2022
+Looks like the control is not properly being handed back to the lua scrip as I thought it was. I think there is another flag that is checked that is preventing it from returning.
+
+Indeed there was, it works now!frameAdvanceWaiting must be set to true to indicate a thread is waiting to run after a frame is emulated.
 
