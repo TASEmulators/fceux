@@ -383,6 +383,11 @@ void FCEU_PutImage(void)
 	} else DrawMessage(false);
 
 }
+
+void FCEU_DrawLuaGui(void) {
+	FCEU_LuaGui(XBuf);
+}
+
 void snapAVI()
 {
 	//Update AVI

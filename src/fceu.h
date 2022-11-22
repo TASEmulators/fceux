@@ -72,6 +72,8 @@ extern uint8 qtaintramreg;
 
 extern  uint8  *RAM;            //shared memory modifications
 extern int EmulationPaused;
+//Lua-engine (emugators)
+extern bool luaYieldFlag;
 extern int frameAdvance_Delay;
 extern int RAMInitOption;
 
@@ -148,6 +150,10 @@ void FCEU_TogglePPU();
 void SetNESDeemph_OldHacky(uint8 d, int force);
 void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor);
 void FCEU_PutImage(void);
+
+void FCEUI_AdvanceNoFrame(uint8** pXBuf); // - emugator
+void FCEU_ClearScreen(void); // -emugator
+
 #ifdef FRAMESKIP
 void FCEU_PutImageDummy(void);
 #endif

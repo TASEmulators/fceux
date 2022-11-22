@@ -236,6 +236,13 @@ static void FCEU_CloseGame(void)
 	}
 }
 
+void FCEU_ClearScreen(void) {
+	//clear screen when game is closed
+	extern uint8* XBuf;
+	if (XBuf)
+		memset(XBuf, 0, 256 * 256);
+}
+
 
 uint64 timestampbase;
 
@@ -254,6 +261,7 @@ static int RWWrap = 0;
 //mbg merge 7/18/06 docs
 //bit0 indicates whether emulation is paused
 //bit1 indicates whether emulation is in frame step mode
+bool luaYieldFlag = false;
 int EmulationPaused = 0;
 bool frameAdvanceRequested=false;
 int frameAdvance_Delay_count = 0;
@@ -869,6 +877,13 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	if (movieSubtitles)
 		ProcessSubtitles();
+}
+
+void FCEUI_AdvanceNoFrame(uint8** pXBuf) {
+	FCEU_ClearScreen();
+	FCEU_LuaFrameBoundary();
+	FCEU_DrawLuaGui();
+	*pXBuf = XBuf;
 }
 
 void FCEUI_CloseGame(void) {

@@ -5442,12 +5442,10 @@ static int cdl_resetcdlog(lua_State *L)
 	return 0;
 }
 
-bool yieldFlag = false;
-
 static int emugator_yieldwithflag(lua_State* L)
 {
 	frameAdvanceWaiting = TRUE;
-	yieldFlag = true;
+	luaYieldFlag = true;
 
 	return lua_yield(L, 0);
 
@@ -6400,6 +6398,7 @@ void FCEU_LuaFrameBoundary()
  *
  * Returns true on success, false on failure.
  */
+
 int FCEU_LoadLuaCode(const char *filename, const char *arg) 
 {
 	if (!DemandLua())

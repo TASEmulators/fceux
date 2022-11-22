@@ -30,3 +30,13 @@ Looks like the control is not properly being handed back to the lua scrip as I t
 
 Indeed there was, it works now!frameAdvanceWaiting must be set to true to indicate a thread is waiting to run after a frame is emulated.
 
+11/20/2022
+I am going to fix this graphics bug today. I suspect that the buffer I am editing and the buffer that is actually being drawn are two seperate entities, which is causing it to look like my changes to the display buffer are not going through.
+
+From wikipedia "Bit blit (also written BITBLT, BIT BLT, BitBLT, Bit BLT, Bit Blt etc., which stands for bit block transfer) is a data operation commonly used in computer graphics in which several bitmaps are combined into one using a boolean function.[1]"... So that's what the blit function called in FCEUD_Update is doing.
+
+The call to RedrawWindow() after a game is closed in main() has the flags RDW_ERASE and RDW_INVALIDATE. The erase flag clears the window, and the invalidate flag seems to prevent the window from being edited (drawn over). The window must be in a "validated" state for the lua gui to show up. Aditionally, it appears that the screen must be cleared manually after the lua gui is drawn if no frame is emulated.
+
+11/21/2022
+I added a function to clear the screen to fceu.cpp. This is not necessary while a game is running (presumeably because game frame data overwrites what was previously there), but is necessary for drawing lua gui with nothing running. With this addition, this aspect of the project (being able to run lua + draw to the gui without a ROM loaded) is functional...but only if a ROM is first opened then closed. Even though I am drawing a new window when lua is loaded, it does not seem to work if loading a script before a game is initially loaded. Again, the script IS running properly... I need to investigate loading a ROM as well as how the main window is being drawn at launch...
+

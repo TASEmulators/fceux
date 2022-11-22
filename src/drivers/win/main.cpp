@@ -919,6 +919,7 @@ int main(int argc,char *argv[])
 	if (PauseAfterLoad) FCEUI_ToggleEmulationPause();
 	SetAutoFirePattern(AFon, AFoff);
 	UpdateCheckedMenuItems();
+
 doloopy:
 	UpdateFCEUWindow();
 	if(GameInfo)
@@ -963,24 +964,27 @@ doloopy:
 		//xbsave = NULL;
 		RedrawWindow(hAppWnd,0,0,RDW_ERASE|RDW_INVALIDATE);
 	}
-  else
-    UpdateRawInputAndHotkeys();
+	else if (luaYieldFlag) {
+		RedrawWindow(hAppWnd, 0, 0, RDW_ERASE | RDW_VALIDATE);
 
-	extern bool yieldFlag;
-	if (yieldFlag) {
-		yieldFlag = false;
-		//extern uint8* XBuf;
-		//memset(XBuf, -1, 256 * 256);
-		FCEU_LuaFrameBoundary();
+		while (luaYieldFlag && !exiting) {
+			UpdateFCEUWindow();
+			luaYieldFlag = false;
+			UpdateRawInputAndHotkeys();
 
-		u8 dog[256*257];
-		memset(dog, -1, 256 * 256);//128
-		FCEU_LuaGui(dog);
-		FCEUD_BlitScreen(dog);
+			uint8* gfx = 0;
+			FCEUI_AdvanceNoFrame(&gfx);
+			FCEUD_BlitScreen(gfx);
+
+			Sleep(50);
+		}
 	}
-	
+	else {
+		UpdateRawInputAndHotkeys();
+	}
+
 	Sleep(50);
-	if(!exiting)
+	if (!exiting)
 		goto doloopy;
 
 	DriverKill();

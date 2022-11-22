@@ -7,6 +7,8 @@ int SaveSnapshot(char[]);
 void ResetScreenshotsCounter();
 uint32 GetScreenPixel(int x, int y, bool usebackup);
 int GetScreenPixelPalette(int x, int y, bool usebackup);
+void FCEU_DrawLuaGui(void);
+
 
 //in case we need more flags in the future we can change the size here
 //bit0 : monochrome bit
