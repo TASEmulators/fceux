@@ -478,7 +478,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	if (fp->archiveFilename != "")
 		GameInfo->archiveFilename = strdup(fp->archiveFilename.c_str());
 	GameInfo->archiveCount = fp->archiveCount;
-
+	
 	GameInfo->soundchan = 0;
 	GameInfo->soundrate = 0;
 	GameInfo->name = 0;
@@ -487,7 +487,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	GameInfo->input[0] = GameInfo->input[1] = SI_UNSET;
 	GameInfo->inputfc = SIFC_UNSET;
 	GameInfo->cspecial = SIS_NONE;
-
+	
 	//try to load each different format
 	bool FCEUXLoad(const char *name, FCEUFILE * fp);
 
@@ -556,7 +556,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 		}
 
 		if (GameInfo->type != GIT_NSF && !disableAutoLSCheats)
-			FCEU_LoadGameCheats(0);
+			//FCEU_LoadGameCheats(0);
 
 		if (AutoResumePlay)
 		{
@@ -884,6 +884,10 @@ void FCEUI_AdvanceNoFrame(uint8** pXBuf) {
 	FCEU_LuaFrameBoundary();
 	FCEU_DrawLuaGui();
 	*pXBuf = XBuf;
+}
+
+void FCEUI_ResetPalette(void) {
+	FCEU_ResetPalette();
 }
 
 void FCEUI_CloseGame(void) {

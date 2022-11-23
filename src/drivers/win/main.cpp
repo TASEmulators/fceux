@@ -965,18 +965,17 @@ doloopy:
 		RedrawWindow(hAppWnd,0,0,RDW_ERASE|RDW_INVALIDATE);
 	}
 	else if (luaYieldFlag) {
-		RedrawWindow(hAppWnd, 0, 0, RDW_ERASE | RDW_VALIDATE);
-
-		while (luaYieldFlag && !exiting) {
-			UpdateFCEUWindow();
+		FCEUI_ResetPalette();
+		while (luaYieldFlag && !exiting && !GameInfo) {
 			luaYieldFlag = false;
+			UpdateFCEUWindow();
 			UpdateRawInputAndHotkeys();
 
 			uint8* gfx = 0;
 			FCEUI_AdvanceNoFrame(&gfx);
 			FCEUD_BlitScreen(gfx);
 
-			Sleep(50);
+			Sleep(25);
 		}
 	}
 	else {

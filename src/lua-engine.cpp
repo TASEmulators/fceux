@@ -6469,7 +6469,6 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 
 		// register a few utility functions outside of libraries (in the global namespace)
 		lua_register(L, "print", print);
-		lua_register(L, "soup", print); //emugatordebug
 		lua_register(L, "gethash", gethash),
 		lua_register(L, "tostring", tostring);
 		lua_register(L, "tobitstring", tobitstring);

@@ -151,8 +151,10 @@ void SetNESDeemph_OldHacky(uint8 d, int force);
 void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor);
 void FCEU_PutImage(void);
 
-void FCEUI_AdvanceNoFrame(uint8** pXBuf); // - emugator
-void FCEU_ClearScreen(void); // -emugator
+// - emugator
+void FCEUI_AdvanceNoFrame(uint8** pXBuf); 
+void FCEU_ClearScreen(void);
+void FCEUI_ResetPalette(void);
 
 #ifdef FRAMESKIP
 void FCEU_PutImageDummy(void);

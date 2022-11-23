@@ -940,9 +940,9 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	trainerpoo = NULL;
 	ExtraNTARAM = NULL;
 	return LOADER_HANDLED_ERROR;
-
+	
 init_ok:
-
+	
 	GameInfo->mappernum = MapperNo;
 	FCEU_LoadGameSave(&iNESCart);
 

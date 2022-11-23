@@ -1167,6 +1167,7 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 	updateGameDependentMenus();
 	updateGameDependentMenusDebugger();
 	EmulationPaused = oldPaused;
+
 	return true;
 }
 
@@ -2703,7 +2704,7 @@ void ByebyeWindow()
 	DestroyWindow(hAppWnd);
 }
 
-/// reates the main window.
+/// Creates the main window.
 /// @return Flag that indicates failure (0) or success (1)
 int CreateMainWindow()
 {
