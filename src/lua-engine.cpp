@@ -5442,6 +5442,17 @@ static int cdl_resetcdlog(lua_State *L)
 	return 0;
 }
 
+static int emugator_yieldwithflag(lua_State* L)
+{
+	frameAdvanceWaiting = TRUE;
+	luaYieldFlag = true;
+
+	return lua_yield(L, 0);
+
+
+	// It's actually rather disappointing...
+}
+
 
 
 static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
@@ -6284,6 +6295,12 @@ static const struct luaL_reg cdloglib[] = {
 	{ NULL,NULL }
 };
 
+static const struct luaL_reg emugatorlib[] = {
+	{"yieldwithflag", emugator_yieldwithflag},
+	{NULL,NULL}
+};
+
+
 void CallExitFunction() 
 {
 	if (!L)
@@ -6381,6 +6398,7 @@ void FCEU_LuaFrameBoundary()
  *
  * Returns true on success, false on failure.
  */
+
 int FCEU_LoadLuaCode(const char *filename, const char *arg) 
 {
 	if (!DemandLua())
@@ -6444,6 +6462,9 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 		luaL_register(L, "cdlog", cdloglib);
 		luaL_register(L, "taseditor", taseditorlib);
 		luaL_register(L, "bit", bit_funcs); // LuaBitOp library
+		lua_settop(L, 0);
+
+		luaL_register(L, "emugator", emugatorlib); // LuaBitOp library
 		lua_settop(L, 0);
 
 		// register a few utility functions outside of libraries (in the global namespace)
