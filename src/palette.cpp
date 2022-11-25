@@ -71,6 +71,7 @@ static pal *default_palette[8]=
 static void CalculatePalette(void);
 static void ChoosePalette(void);
 static void WritePalette(void);
+static void UseDefaultPalette(void);
 
 //points to the actually selected current palette
 pal *palo = NULL;
@@ -500,6 +501,11 @@ void FCEU_ResetPalette(void)
 		ChoosePalette();
 		WritePalette();
 	}
+	else if (luaYieldFlag) {
+		UseDefaultPalette();
+		WritePalette();
+	}
+
 }
 
 static void ChoosePalette(void)
@@ -550,6 +556,12 @@ static void ChoosePalette(void)
 		free(grayscaled_palo);
 		grayscaled_palo = NULL;
 	}
+}
+
+static void UseDefaultPalette(void) {
+	palo = default_palette[default_palette_selection];
+	//need to calcualte a deemph on the fly.. sorry. maybe support otherwise later
+	ApplyDeemphasisComplete(palo);
 }
 
 void WritePalette(void)

@@ -1,0 +1,42 @@
+Emugators Log - Steven Phang
+11/15/2022
+If a lua script is ran without emu.frameadvance(), the whole program hangs, not just the game that is currently being played. For an unknwn reason, the text that is supposed to be displayed with the Emugators_HelloWorld.lua script is only displayed when a ROM is loaded. It disapears after the ROM is closed as well... I spoke with Carsten, and we discussed the idea of using a ROM to represent the DnD GUI. Automatically load this ROM at startup, and this would work nicely. Problem - I dont know how I would go about making the ROM... Regardless, I want to figure out what mechanism is responsible for clearing the screen and pausing the lua script on startup/when a ROM is closed. This may be the key to running the script without a ROM...
+
+This is the mechanism for clearing the screen when the ROM is closed...
+See fceu.cpp > FCEU_CloseGame(void)
+		//clear screen when game is closed
+		extern uint8 *XBuf;
+		if (XBuf)
+			memset(XBuf, 0, 256 * 256);
+
+lua-engine.cpp is the most important file in our universe. It containes the bindings
+
+interesting... lua_yeild and lua_resume in ldo.c may be useful
+
+search emugatordebug comment for things that maybe should be removed for release
+
+steps to implement lua callable c++ function...
+add new library (needs to be registered) or simply register new function with existing library (ex. emulib) contained in lua-engine.cpp
+
+ITS RUNNING BUT THERE IS NO FRAME TO ADVANCE!!!!!
+emu.frameadvance causes the lua script to yield to main until another emulator frame is processed. Then, something hands control back to the script. But if no game is running (No ROM Loaded), main just updates the display then sleeps for a little bit. Question of the day is What is normally handing control back to the script? It has been staring me in the face all day...FCEU_LuaFrameBoundary()
+	
+adding FCEU_LuaFrameBoundary(); to main before it sleeps will allow the lua script to keep running. So we could have a function like emu.frameadvanceAlways() or something that sets a flag that enables FCEU_LuaFrameBoundary() to be called in main (since we dont really want this behavior for ALL lus scripts)... OR maybe add an emu.updateDisplay() function that will allow the display to refresh without yeilding control to main. I think I prefer this option...
+*Note: the script still cant draw images on the GUI unless a ROM is loaded with this current method...why?
+TODO: figure out how to get draw functions reflected on GUI with no ROM loaded. Come up with better function names, maybe plan out the organization a bit better. Add unload ROM function.
+
+11/18/2022
+Looks like the control is not properly being handed back to the lua scrip as I thought it was. I think there is another flag that is checked that is preventing it from returning.
+
+Indeed there was, it works now!frameAdvanceWaiting must be set to true to indicate a thread is waiting to run after a frame is emulated.
+
+11/20/2022
+I am going to fix this graphics bug today. I suspect that the buffer I am editing and the buffer that is actually being drawn are two seperate entities, which is causing it to look like my changes to the display buffer are not going through.
+
+From wikipedia "Bit blit (also written BITBLT, BIT BLT, BitBLT, Bit BLT, Bit Blt etc., which stands for bit block transfer) is a data operation commonly used in computer graphics in which several bitmaps are combined into one using a boolean function.[1]"... So that's what the blit function called in FCEUD_Update is doing.
+
+The call to RedrawWindow() after a game is closed in main() has the flags RDW_ERASE and RDW_INVALIDATE. The erase flag clears the window, and the invalidate flag seems to prevent the window from being edited (drawn over). The window must be in a "validated" state for the lua gui to show up. Aditionally, it appears that the screen must be cleared manually after the lua gui is drawn if no frame is emulated.
+
+11/21/2022
+I added a function to clear the screen to fceu.cpp. This is not necessary while a game is running (presumeably because game frame data overwrites what was previously there), but is necessary for drawing lua gui with nothing running. With this addition, this aspect of the project (being able to run lua + draw to the gui without a ROM loaded) is functional...but only if a ROM is first opened then closed. Even though I am drawing a new window when lua is loaded, it does not seem to work if loading a script before a game is initially loaded. Again, the script IS running properly... I need to investigate loading a ROM as well as how the main window is being drawn at launch...
+

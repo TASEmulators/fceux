@@ -383,6 +383,11 @@ void FCEU_PutImage(void)
 	} else DrawMessage(false);
 
 }
+
+void FCEU_DrawLuaGui(void) {
+	FCEU_LuaGui(XBuf);
+}
+
 void snapAVI()
 {
 	//Update AVI
@@ -487,7 +492,7 @@ static int WritePNGChunk(FILE *fp, uint32 size, const char *type, uint8 *data)
 	return 1;
 }
 
-uint32 GetScreenPixel(int x, int y, bool usebackup) {
+uint32  GetScreenPixel(int x, int y, bool usebackup) {
 
 	uint8 r,g,b;
 

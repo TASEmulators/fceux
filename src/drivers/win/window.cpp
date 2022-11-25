@@ -196,6 +196,7 @@ string gettingstartedhelp = "Gettingstarted";//Getting Started
 void SetMainWindowText()
 {
 	string str = FCEU_NAME_AND_VERSION;
+
 	if (newppu)
 		str.append(" (New PPU)");
 	if (GameInfo)
@@ -1166,6 +1167,7 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 	updateGameDependentMenus();
 	updateGameDependentMenusDebugger();
 	EmulationPaused = oldPaused;
+
 	return true;
 }
 
@@ -2702,7 +2704,7 @@ void ByebyeWindow()
 	DestroyWindow(hAppWnd);
 }
 
-/// reates the main window.
+/// Creates the main window.
 /// @return Flag that indicates failure (0) or success (1)
 int CreateMainWindow()
 {
@@ -2746,6 +2748,7 @@ int CreateMainWindow()
 	updateGameDependentMenusDebugger();
 	if (MainWindow_wndx==-32000) MainWindow_wndx=0; //Just in case
 	if (MainWindow_wndy==-32000) MainWindow_wndy=0;
+
 	hAppWnd = CreateWindowEx(
 		0,
 		"FCEUXWindowClass",
