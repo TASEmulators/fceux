@@ -632,7 +632,7 @@ extern void ReloadRom(void);
 // Switches the side of the disk that is currently ejected
 static int emu_switchDisk(lua_State* L)
 {
-	extern void FCEUI_FDSSelect();
+	FCEUI_FDSSelect();
 	return 0;
 }
 
@@ -641,9 +641,10 @@ static int emu_switchDisk(lua_State* L)
 // If the disk is currently inserted into the FDS, eject it
 static int emu_insertOrEjectDisk(lua_State* L)
 {
-	extern void FCEUI_FDSInsert();
+	FCEUI_FDSInsert();
 	return 0;
 }
+
 
 // emu.loadrom(string filename)
 //
