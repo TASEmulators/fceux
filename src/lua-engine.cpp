@@ -628,6 +628,24 @@ extern void ReloadRom(void);
 //}
 //#endif
 
+// emu.switchDisk()
+// Switches the side of the disk that is currently ejected
+static int emu_switchDisk(lua_State* L)
+{
+	FCEUI_FDSSelect();
+	return 0;
+}
+
+// emu.insertOrEjectDisk()
+// If the disk is currently ejected, then insert it back into the FDS
+// If the disk is currently inserted into the FDS, eject it
+static int emu_insertOrEjectDisk(lua_State* L)
+{
+	FCEUI_FDSInsert();
+	return 0;
+}
+
+
 // emu.loadrom(string filename)
 //
 //  Loads the rom from the directory relative to the lua script or from the absolute path.
@@ -6069,6 +6087,8 @@ static const struct luaL_reg emulib [] = {
 	{"readonly", movie_getreadonly},
 	{"setreadonly", movie_setreadonly},
 	{"getdir", emu_getdir},
+	{"switchDisk", emu_switchDisk},
+	{"insertOrEjectDisk", emu_insertOrEjectDisk},
 	{"loadrom", emu_loadrom},
 	{"print", print}, // sure, why not
 	{"exit", emu_exit}, // useful for run-and-close scripts
