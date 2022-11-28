@@ -5473,9 +5473,6 @@ static int emugator_yieldwithflag(lua_State* L)
 	luaYieldFlag = true;
 
 	return lua_yield(L, 0);
-
-
-	// It's actually rather disappointing...
 }
 
 
