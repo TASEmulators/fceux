@@ -55,13 +55,13 @@ while(true) do
 			emugator.yieldwithflag()
 		elseif ((inpt.xmouse > switchButton.x1) and (inpt.xmouse < switchButton.x2) and (inpt.ymouse > switchButton.y1) and (inpt.ymouse < switchButton.y2) and inpt.leftclick) then
 			if (wasClicked == false) then
-			emu.switchDisk()
+			  emu.switchDisk()
 			end
 			wasClicked = true
 			emu.frameadvance()
 		elseif ((inpt.xmouse > ejectInsertButton.x1) and (inpt.xmouse < ejectInsertButton.x2) and (inpt.ymouse > ejectInsertButton.y1) and (inpt.ymouse < ejectInsertButton.y2) and inpt.leftclick) then
 			if (wasClicked == false) then
-			emu.insertOrEjectDisk()
+			  emu.insertOrEjectDisk()
 			end
 			wasClicked = true
 			emu.frameadvance()
