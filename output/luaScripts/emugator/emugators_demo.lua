@@ -9,10 +9,9 @@ while(true) do
 	--need gd for this
 		--local gdstr = gd.createFromPng("C:\Users\Super\Emugators\fceux\output\luaScripts\emugator\nesRomGeneric.png"):gdStr()
 		--gui.gdoverlay(gdstr) 
-	
-	if(emu.emulating() == false) then
-		local inpt = input.read()
+	local inpt = input.read()
 
+	if(emu.emulating() == false) then
 		if (inpt.leftclick == nil) then
 			if ((inpt.xmouse > console.x1) and (inpt.xmouse < console.x2) and (inpt.ymouse > console.y1) and (inpt.ymouse < console.y2) and isDrag) then
 				emu.loadrom("superMario.nes")
@@ -39,9 +38,11 @@ while(true) do
 		gui.text(unloadButton.x1+2, unloadButton.y1+2, "Unload")
 
 		if ((inpt.xmouse > unloadButton.x1) and (inpt.xmouse < unloadButton.x2) and (inpt.ymouse > unloadButton.y1) and (inpt.ymouse < unloadButton.y2) and inpt.leftclick) then
-			--emu.
+			emu.closeRom()
+			emugator.yieldwithflag()
+		else
+			emu.frameadvance()
 		end
-		emu.frameadvance()
 	end
 
 	--emu.frameadvance()

@@ -1,2 +1,7 @@
+while true do
+local inpt = input.read()
+emu.frameadvance()
 emu.closeRom()
-emu.print("ROM Unloaded")
+emugator.yieldwithflag()
+end
+

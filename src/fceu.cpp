@@ -804,6 +804,9 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	FCEU_LuaFrameBoundary();
 #endif
 
+	if (!GameInfo)
+		return;
+
 	FCEU_UpdateInput();
 	lagFlag = 1;
 
