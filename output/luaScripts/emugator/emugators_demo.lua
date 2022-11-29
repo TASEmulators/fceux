@@ -25,7 +25,7 @@ while(true) do
 
 		if isDrag then
 			gui.rect(inpt.xmouse, inpt.ymouse, inpt.xmouse+50, inpt.ymouse+50, "red", "white")
-			gui.text(inpt.xmouse + 12, inpt.ymouse+12, "Legend\nOf\nZelda")
+			gui.text(inpt.xmouse + 12, inpt.ymouse+12, "Legend\nOf\nZelda\n2")
 		elseif ((inpt.xmouse > cart.x1) and (inpt.xmouse < cart.x2) and (inpt.ymouse > cart.y1) and (inpt.ymouse < cart.y2) and inpt.leftclick) then
 			isDrag = true
 		else
