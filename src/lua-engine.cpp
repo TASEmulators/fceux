@@ -644,7 +644,7 @@ static int emu_insertOrEjectDisk(lua_State* L)
 	FCEUI_FDSInsert();
 	return 0;
 }
-
+	
 
 // emu.loadrom(string filename)
 //

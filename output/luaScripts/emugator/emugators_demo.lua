@@ -1,6 +1,7 @@
 	emu.print("Go Gators!")
 	local cart = {x1=50, y1=50, x2=100, y2=100}
 	local console = {x1=150, y1=50, x2=200, y2=100}
+	local unloadButton = {x1 = 220, y1 = 220, x2 = 250, y2 = 230}
 	local isDrag = false
 	--local gd = require("gd")
 
@@ -34,6 +35,12 @@ while(true) do
 
 		emugator.yieldwithflag() -- call this if you want the script to run without emulation (game running)
 	else
+		gui.rect(unloadButton.x1, unloadButton.y1, unloadButton.x2, unloadButton.y2, "blue", "white")
+		gui.text(unloadButton.x1+2, unloadButton.y1+2, "Unload")
+
+		if ((inpt.xmouse > unloadButton.x1) and (inpt.xmouse < unloadButton.x2) and (inpt.ymouse > unloadButton.y1) and (inpt.ymouse < unloadButton.y2) and inpt.leftclick) then
+			--emu.
+		end
 		emu.frameadvance()
 	end
 
