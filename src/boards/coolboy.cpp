@@ -126,7 +126,7 @@ static void COOLBOYCW(uint32 A, uint8 V) {
 			case 0x0C00: V &= 0x7F; break;
 			}
 		}
-		// Highest bit goes from MMC3 registers when EXPREGS[3]&0x80==0 or from EXPREGS[0]&0x08 otherwise
+		// Highest bit goes from MMC3 registers when EXPREGS[0]&0x80==0 or from EXPREGS[0]&0x08 otherwise
 		setchr1(A,
 			(V & 0x80 & mask) | ((((EXPREGS[0] & 0x08) << 4) & ~mask)) // 7th bit
 			| ((EXPREGS[2] & 0x0F) << 3) // 6-3 bits
@@ -144,14 +144,18 @@ static void COOLBOYCW(uint32 A, uint8 V) {
 			}
 		}
 		// Simple MMC3 mode
-		// Highest bit goes from MMC3 registers when EXPREGS[3]&0x80==0 or from EXPREGS[0]&0x08 otherwise
+		// Highest bit goes from MMC3 registers when EXPREGS[0]&0x80==0 or from EXPREGS[0]&0x08 otherwise
 		setchr1(A, (V & mask) | (((EXPREGS[0] & 0x08) << 4) & ~mask));
 	}
 }
 
 static void COOLBOYPW(uint32 A, uint8 V) {
-	uint32 mask = ((0x3F | (EXPREGS[1] & 0x40) | ((EXPREGS[1] & 0x20) << 2)) ^ ((EXPREGS[0] & 0x40) >> 2)) ^ ((EXPREGS[1] & 0x80) >> 2);
-	uint32 base = ((EXPREGS[0] & 0x07) >> 0) | ((EXPREGS[1] & 0x10) >> 1) | ((EXPREGS[1] & 0x0C) << 2) | ((EXPREGS[0] & 0x30) << 2);
+	uint8 CREGS[] = {EXPREGS[0], EXPREGS[1], EXPREGS[2], EXPREGS[3]};
+	if (flag23)
+		CREGS[1] = (CREGS[1] & 0b11100000) | ((CREGS[1] & 0b11100) >> 1) | (((CREGS[1] & 0b10) ^ 0b10) << 3);
+
+	uint32 mask = ((0x3F | (CREGS[1] & 0x40) | ((CREGS[1] & 0x20) << 2)) ^ ((CREGS[0] & 0x40) >> 2)) ^ ((CREGS[1] & 0x80) >> 2);
+	uint32 base = ((CREGS[0] & 0x07) >> 0) | ((CREGS[1] & 0x10) >> 1) | ((CREGS[1] & 0x0C) << 2) | ((CREGS[0] & 0x30) << 2);
 
 	if (cfi_mode)
 	{
@@ -162,7 +166,7 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 
 	// Very weird mode
 	// Last banks are first in this mode, ignored when MMC3_cmd&0x40
-	if ((EXPREGS[3] & 0x40) && (V >= 0xFE) && !((MMC3_cmd & 0x40) != 0)) {
+	if ((CREGS[3] & 0x40) && (V >= 0xFE) && !((MMC3_cmd & 0x40) != 0)) {
 		switch (A & 0xE000) {
 		case 0xC000:
 		case 0xE000:
@@ -171,7 +175,7 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 		}
 	}
 
-	if (!(EXPREGS[3] & 0x10)) {
+	if (!(CREGS[3] & 0x10)) {
 		// Regular MMC3 mode but can be extended to 2MByte
 		setprg8r(chip, A, (((base << 4) & ~mask)) | (V & mask));
 	}
@@ -179,19 +183,15 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 		// NROM mode
 		mask &= 0xF0;
 		uint8 emask;
-		if ((((EXPREGS[1] & 2) != 0))) // 32kb mode
-			emask = (EXPREGS[3] & 0x0C) | ((A & 0x4000) >> 13);
+		if ((((CREGS[1] & 2) != 0))) // 32kb mode
+			emask = (CREGS[3] & 0x0C) | ((A & 0x4000) >> 13);
 		else // 16kb mode
-			emask = EXPREGS[3] & 0x0E;
+			emask = CREGS[3] & 0x0E;
 		setprg8r(chip, A, ((base << 4) & ~mask) // 7-4 bits are from base (see below)
 			| (V & mask)                 // ... or from MM3 internal regs, depends on mask
 			| emask                      // 3-1 (or 3-2 when (EXPREGS[3]&0x0C is set) from EXPREGS[3]
 			| ((A & 0x2000) >> 13));     // 0th just as is
 	}
-}
-
-static void Submapper23Flip() {
-	EXPREGS[1] = (EXPREGS[1] & 0b11100000) | ((EXPREGS[1] & 0b11100) >> 1) | (((EXPREGS[1] & 0b10) ^ 0b10) << 3);
 }
 
 static DECLFW(COOLBOYWrite) {
@@ -201,7 +201,6 @@ static DECLFW(COOLBOYWrite) {
 	// Deny any further writes when 7th bit is 1 AND 4th is 0
 	if ((EXPREGS[3] & 0x90) != 0x80) {
 		EXPREGS[A & 3] = V;
-		if (flag23 && (A & 3) == 1) Submapper23Flip();
 		FixMMC3PRG(MMC3_cmd);
 		FixMMC3CHR(MMC3_cmd);
 	}
@@ -217,7 +216,6 @@ static DECLFW(MINDKIDSWrite) {
 	// Deny any further writes when 7th bit is 1 AND 4th is 0
 	if ((EXPREGS[3] & 0x90) != 0x80) {
 		EXPREGS[A & 3] = V;
-		if (flag23 && (A & 3) == 1) Submapper23Flip();
 		FixMMC3PRG(MMC3_cmd);
 		FixMMC3CHR(MMC3_cmd);
 	}
@@ -356,9 +354,11 @@ void CommonInit(CartInfo* info, int submapper)
 	{
 	case 0:
 		info->Power = COOLBOYPower;
+		flag23 = 0;
 		break;
 	case 1:
 		info->Power = MINDKIDSPower;
+		flag23 = 0;
 		break;
 	case 2:
 		info->Power = COOLBOYPower;
