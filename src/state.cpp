@@ -88,7 +88,7 @@ EMUFILE_MEMORY memory_savestate;
 // temporary buffer for compressed data of a savestate
 std::vector<uint8> compressed_buf;
 
-#define SFMDATA_SIZE (64)
+#define SFMDATA_SIZE (128)
 static SFORMAT SFMDATA[SFMDATA_SIZE];
 static int SFEXINDEX;
 

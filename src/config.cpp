@@ -26,7 +26,7 @@ const char *FCEUI_GetAboutString(void)
 		"zeromus, feos\n"
 		"\n"
 		"Current Contributors:\n"
-		"CaH4e3, rainwarrior, owomomo, punkrockguy318\n"
+		"CaH4e3, rainwarrior, owomomo, punkrockguy318, Cluster\n"
 		"\n"
 		"Past Contributors:\n"
 		"xhainingx, gocha, AnS, mjbudd77\n"

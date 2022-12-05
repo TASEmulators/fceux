@@ -281,17 +281,19 @@ static DECLFW(COOLBOYFlashWrite) {
 				flash_state = 0;
 			}
 
-			// not a command
-			if (((A & 0xFFF) != 0x0AAA) && ((A & 0xFFF) != 0x0555)) {
-				flash_state = 0;
-			}
 
-			// reset
-			if (V == 0xF0) {
-				flash_state = 0;
-				cfi_mode = 0;
-				FixMMC3PRG(MMC3_cmd);
-			}
+		}
+
+		// not a command
+		if (((A & 0xFFF) != 0x0AAA) && ((A & 0xFFF) != 0x0555)) {
+			flash_state = 0;
+		}
+
+		// reset
+		if (V == 0xF0) {
+			flash_state = 0;
+			cfi_mode = 0;
+			FixMMC3PRG(MMC3_cmd);
 		}
 	}
 }
