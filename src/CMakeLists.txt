@@ -396,6 +396,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/cheapocabra.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/cityfighter.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/coolboy.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/boards/coolgirl.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/dance2000.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/datalatch.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/dream.cpp
