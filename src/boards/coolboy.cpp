@@ -201,7 +201,7 @@ static DECLFW(COOLBOYWrite) {
 	// Deny any further writes when 7th bit is 1 AND 4th is 0
 	if ((EXPREGS[3] & 0x90) != 0x80) {
 		EXPREGS[A & 3] = V;
-		if (flag23) Submapper23Flip();
+		if (flag23 && (A & 3) == 1) Submapper23Flip();
 		FixMMC3PRG(MMC3_cmd);
 		FixMMC3CHR(MMC3_cmd);
 	}
@@ -217,7 +217,7 @@ static DECLFW(MINDKIDSWrite) {
 	// Deny any further writes when 7th bit is 1 AND 4th is 0
 	if ((EXPREGS[3] & 0x90) != 0x80) {
 		EXPREGS[A & 3] = V;
-		if (flag23) Submapper23Flip();
+		if (flag23 && (A & 3) == 1) Submapper23Flip();
 		FixMMC3PRG(MMC3_cmd);
 		FixMMC3CHR(MMC3_cmd);
 	}
