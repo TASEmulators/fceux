@@ -93,6 +93,8 @@ static uint16 flash_buffer_a[10];
 static uint8 flash_buffer_v[10];
 static uint8 cfi_mode = 0;
 
+static uint8 flag23 = 0;
+
 // Macronix 256-mbit memory CFI data
 const uint8 cfi_data[] =
 { 
@@ -188,6 +190,10 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 	}
 }
 
+static void Submapper23Flip() {
+	EXPREGS[1] = (EXPREGS[1] & 0b11100000) | ((EXPREGS[1] & 0b11100) >> 1) | (((EXPREGS[1] & 0b10) ^ 0b10) << 3);
+}
+
 static DECLFW(COOLBOYWrite) {
 	if (A001B & 0x80)
 		CartBW(A, V);
@@ -195,6 +201,7 @@ static DECLFW(COOLBOYWrite) {
 	// Deny any further writes when 7th bit is 1 AND 4th is 0
 	if ((EXPREGS[3] & 0x90) != 0x80) {
 		EXPREGS[A & 3] = V;
+		if (flag23) Submapper23Flip();
 		FixMMC3PRG(MMC3_cmd);
 		FixMMC3CHR(MMC3_cmd);
 	}
@@ -210,6 +217,7 @@ static DECLFW(MINDKIDSWrite) {
 	// Deny any further writes when 7th bit is 1 AND 4th is 0
 	if ((EXPREGS[3] & 0x90) != 0x80) {
 		EXPREGS[A & 3] = V;
+		if (flag23) Submapper23Flip();
 		FixMMC3PRG(MMC3_cmd);
 		FixMMC3CHR(MMC3_cmd);
 	}
@@ -346,11 +354,22 @@ void CommonInit(CartInfo* info, int submapper)
 
 	switch (submapper)
 	{
-	case 1:
-		info->Power = MINDKIDSPower;
-	default:
+	case 0:
 		info->Power = COOLBOYPower;
 		break;
+	case 1:
+		info->Power = MINDKIDSPower;
+		break;
+	case 2:
+		info->Power = COOLBOYPower;
+		flag23 = 1;
+		break;
+	case 3:
+		info->Power = MINDKIDSPower;
+		flag23 = 1;
+		break;
+	default:
+		FCEU_PrintError("Submapper #%d is not supported", submapper);
 	}
 	info->Reset = CommonReset;
 	info->Close = CommonClose;
@@ -396,15 +415,5 @@ void MINDKIDS_Init(CartInfo* info) {
 
 // For NES 2.0 loader
 void SMD132_SMD133_Init(CartInfo* info) {
-
-	switch (info->submapper)
-	{
-	case 0:
-	case 1:
-		CommonInit(info, info->submapper);
-		break;
-	default:
-		FCEU_PrintError("Submapper #%d is not supported", info->submapper);
-		break;
-	}
+	CommonInit(info, info->submapper);
 }
