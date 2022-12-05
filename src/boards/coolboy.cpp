@@ -94,6 +94,7 @@ static uint8 flash_buffer_v[10];
 static uint8 cfi_mode = 0;
 
 static uint8 flag23 = 0;
+static uint8 flag45 = 0;
 
 // Macronix 256-mbit memory CFI data
 const uint8 cfi_data[] =
@@ -151,15 +152,20 @@ static void COOLBOYCW(uint32 A, uint8 V) {
 
 static void COOLBOYPW(uint32 A, uint8 V) {
 	uint8 CREGS[] = {EXPREGS[0], EXPREGS[1], EXPREGS[2], EXPREGS[3]};
-	if (flag23)
+	if (flag23) {
 		CREGS[1] = (CREGS[1] & 0b11100000) | ((CREGS[1] & 0b11100) >> 1) | (((CREGS[1] & 0b10) ^ 0b10) << 3);
+	}
+	if (flag45) {
+		CREGS[1] = (CREGS[1] & 0b11101011) | ((CREGS[0] & 0b00100000) >> 3) | (CREGS[0] & 0b00010000);
+		CREGS[0] &= 0b11001111;
+	}
 
 	uint32 mask = ((0x3F | (CREGS[1] & 0x40) | ((CREGS[1] & 0x20) << 2)) ^ ((CREGS[0] & 0x40) >> 2)) ^ ((CREGS[1] & 0x80) >> 2);
 	uint32 base = ((CREGS[0] & 0x07) >> 0) | ((CREGS[1] & 0x10) >> 1) | ((CREGS[1] & 0x0C) << 2) | ((CREGS[0] & 0x30) << 2);
 
-	if (cfi_mode)
-	{
+	if (flash_save && cfi_mode) {
 		setprg32r(CFI_CHIP, 0x8000, 0);
+		return;
 	}
 
 	int chip = !flash_save ? ROM_CHIP : FLASH_CHIP;
@@ -355,18 +361,32 @@ void CommonInit(CartInfo* info, int submapper)
 	case 0:
 		info->Power = COOLBOYPower;
 		flag23 = 0;
+		flag45 = 0;
 		break;
 	case 1:
 		info->Power = MINDKIDSPower;
 		flag23 = 0;
+		flag45 = 0;
 		break;
 	case 2:
 		info->Power = COOLBOYPower;
 		flag23 = 1;
+		flag45 = 0;
 		break;
 	case 3:
 		info->Power = MINDKIDSPower;
 		flag23 = 1;
+		flag45 = 0;
+		break;
+	case 4:
+		info->Power = COOLBOYPower;
+		flag23 = 0;
+		flag45 = 1;
+		break;
+	case 5:
+		info->Power = MINDKIDSPower;
+		flag23 = 0;
+		flag45 = 1;
 		break;
 	default:
 		FCEU_PrintError("Submapper #%d is not supported", submapper);
