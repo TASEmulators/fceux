@@ -219,7 +219,6 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 
 	uint32 mask = ((0b00111111 | (CREGS[1] & 0b01000000) | ((CREGS[1] & 0b00100000) << 2)) ^ ((CREGS[0] & 0b01000000) >> 2)) ^ ((CREGS[1] & 0b10000000) >> 2);
 	uint32 base = ((CREGS[0] & 0b00000111) >> 0) | ((CREGS[1] & 0b00010000) >> 1) | ((CREGS[1] & 0b00001100) << 2) | ((CREGS[0] & 0b00110000) << 2);
-	FCEU_printf("mask=%04x base=%04x r0=%02x r1=%02x r2=%02x r3=%02x\n", mask, base, CREGS[0], CREGS[1], CREGS[2], CREGS[3]);
 
 	if (flash_save && cfi_mode) {
 		setprg32r(CFI_CHIP, 0x8000, 0);
