@@ -55,15 +55,16 @@
  * $xxx3
  * 7  bit  0
  * ---- ----
- * NPxP QQRx
- * || | |||
- * || | +++--- PRG offset for GNROM mode (PRG A16, A15, A14)
- * || +------- 1: GNROM mode; 0: MMC3 mode
- * || |         (1: PRG A16...13 from QQ, L, R, CPU A14, A13 + CHR A16...10 from MMMM, PPU A12...10;
- * || |          0: PRG A16...13 from MMC3 + CHR A16...A10 from MMC3 )
+ * NPZP QQRx
+ * |||| |||
+ * |||| +++--- PRG offset for GNROM mode (PRG A16, A15, A14)
+ * |||+------- 1: GNROM mode; 0: MMC3 mode
+ * ||||         (1: PRG A16...13 from QQ, L, R, CPU A14, A13 + CHR A16...10 from MMMM, PPU A12...10;
+ * ||||          0: PRG A16...13 from MMC3 + CHR A16...A10 from MMC3 )
+ * ||+-------- 1: Also enable PRG RAM in $5000-$5FFF
  * |+-+------- Banking mode
  * |+--------- "Weird MMC3 mode"
- * +---------- Lockout (prevent further writes to these four registers, only works in MMC3 mode)
+ * +---------- Lockout (prevent further writes to all registers but the one at $xxx2, only works in MMC3 mode)
  *
  * Also some new cartridges from MINDKIDS have /WE and /OE pins connected to mapper,
  * which allows you to rewrite flash memory without soldering.
@@ -95,6 +96,7 @@ static uint8 cfi_mode = 0;
 
 static uint8 flag23 = 0;
 static uint8 flag45 = 0;
+static uint8 flag89 = 0;
 
 // Macronix 256-mbit memory CFI data
 const uint8 cfi_data[] =
@@ -118,9 +120,9 @@ const uint8 cfi_data[] =
 };
 
 static void COOLBOYCW(uint32 A, uint8 V) {
-	uint32 mask = 0xFF ^ (EXPREGS[0] & 0x80);
-	if (EXPREGS[3] & 0x10) {
-		if (EXPREGS[3] & 0x40) { // Weird mode
+	uint32 mask = 0xFF ^ (EXPREGS[0] & 0b10000000);
+	if (EXPREGS[3] & 0b00010000) {
+		if (EXPREGS[3] & 0b01000000) { // Weird mode
 			int cbase = (MMC3_cmd & 0x80) << 5;
 			switch (cbase ^ A) { // Don't even try do understand
 			case 0x0400:
@@ -129,13 +131,13 @@ static void COOLBOYCW(uint32 A, uint8 V) {
 		}
 		// Highest bit goes from MMC3 registers when EXPREGS[0]&0x80==0 or from EXPREGS[0]&0x08 otherwise
 		setchr1(A,
-			(V & 0x80 & mask) | ((((EXPREGS[0] & 0x08) << 4) & ~mask)) // 7th bit
+			(V & 0x80 & mask) | ((((EXPREGS[0] & 0b00001000) << 4) & ~mask)) // 7th bit
 			| ((EXPREGS[2] & 0x0F) << 3) // 6-3 bits
 			| ((A >> 10) & 7) // 2-0 bits
 		);
 	}
 	else {
-		if (EXPREGS[3] & 0x40) { // Weird mode, again
+		if (EXPREGS[3] & 0b01000000) { // Weird mode, again
 			int cbase = (MMC3_cmd & 0x80) << 5;
 			switch (cbase ^ A) { // Don't even try do understand
 			case 0x0000: V = DRegBuf[0]; break;
@@ -152,16 +154,72 @@ static void COOLBOYCW(uint32 A, uint8 V) {
 
 static void COOLBOYPW(uint32 A, uint8 V) {
 	uint8 CREGS[] = {EXPREGS[0], EXPREGS[1], EXPREGS[2], EXPREGS[3]};
+	// Submappers has scrambled bits
 	if (flag23) {
-		CREGS[1] = (CREGS[1] & 0b11100000) | ((CREGS[1] & 0b11100) >> 1) | (((CREGS[1] & 0b10) ^ 0b10) << 3);
+		/*
+			$xxx1
+			7  bit  0
+			---- ----
+			GHIL JKKx
+			|||| |||
+			|||| +++--- PRG offset (in order: PRG A20, A22, A21)
+			|||+------- GNROM mode bank PRG size (0: 32 KiB bank, PRG A14=CPU A14; 1: 16 KiB bank, PRG A14=offset A14)
+			||+-------- PRG mask (PRG A20 from 0: offset; 1: MMC3)
+			|+--------- PRG mask (PRG A19 from 0: offset; 1: MMC3)
+			+---------- PRG mask (PRG A18 from 0: MMC3; 1: offset)
+		*/
+		CREGS[1] = (CREGS[1] & 0b11100000)
+			| ((CREGS[1] & 0b00001110) << 1) // PRG A20, A22, A21
+			| (((CREGS[1] & 0b00010000) ^ 0b00010000) >> 3); // GNROM mode bank PRG size
 	}
 	if (flag45) {
-		CREGS[1] = (CREGS[1] & 0b11101011) | ((CREGS[0] & 0b00100000) >> 3) | (CREGS[0] & 0b00010000);
-		CREGS[0] &= 0b11001111;
+		/*
+			$xxx0
+			7  bit  0
+			---- ----
+			ABCC DEEE
+			|||| ||||
+			|||| |+++-- PRG offset (PRG A19, A18, A17)
+			|||| +----- Alternate CHR A17
+			||++------- PRG offset (PRG A21, A20)
+			|+--------- PRG mask (PRG A17 from 0: MMC3; 1: offset)
+			+---------- CHR mask (CHR A17 from 0: MMC3; 1: alternate)
+			$xxx1
+			7  bit  0
+			---- ----
+			GHIx xxLx
+			|||    |
+			|||    +--- GNROM mode bank PRG size (1: 32 KiB bank, PRG A14=CPU A14; 0: 16 KiB bank, PRG A14=offset A14)
+			||+-------- PRG mask (PRG A20 from 0: offset; 1: MMC3)
+			|+--------- PRG mask (PRG A19 from 0: offset; 1: MMC3)
+			+---------- PRG mask (PRG A18 from 0: MMC3; 1: offset)
+		*/
+		CREGS[1] = (CREGS[1] & 0b11101011)
+			| ((CREGS[0] & 0b00100000) >> 3) // PRG A21
+			| (CREGS[0] & 0b00010000); // PRG A20
+	}
+	if (flag89) {
+		/*
+			$xxx1
+			7  bit  0
+			---- ----
+			GHIL JKKx
+			|||| |||
+			|||| +++--- PRG offset (in order: A20, A21, A22)
+			|||+------- GNROM mode bank PRG size (0: 32 KiB bank, PRG A14=CPU A14; 1: 16 KiB bank, PRG A14=offset A14)
+			||+-------- PRG mask (PRG A20 from 0: offset; 1: MMC3)
+			|+--------- PRG mask (PRG A19 from 0: offset; 1: MMC3)
+			+---------- PRG mask (PRG A18 from 0: MMC3; 1: offset)
+		*/
+		CREGS[1] = (CREGS[1] & 0b11100101)
+			| ((CREGS[1] & 0b00001000) << 1) // PRG A20
+			| ((CREGS[1] & 0b00000010) << 2) // PRG A22
+			| ((((CREGS[1] ^ 0b00010000) & 0b00010000) >> 3)); // GNROM mode bank PRG size
 	}
 
-	uint32 mask = ((0x3F | (CREGS[1] & 0x40) | ((CREGS[1] & 0x20) << 2)) ^ ((CREGS[0] & 0x40) >> 2)) ^ ((CREGS[1] & 0x80) >> 2);
-	uint32 base = ((CREGS[0] & 0x07) >> 0) | ((CREGS[1] & 0x10) >> 1) | ((CREGS[1] & 0x0C) << 2) | ((CREGS[0] & 0x30) << 2);
+	uint32 mask = ((0b00111111 | (CREGS[1] & 0b01000000) | ((CREGS[1] & 0b00100000) << 2)) ^ ((CREGS[0] & 0b01000000) >> 2)) ^ ((CREGS[1] & 0b10000000) >> 2);
+	uint32 base = ((CREGS[0] & 0b00000111) >> 0) | ((CREGS[1] & 0b00010000) >> 1) | ((CREGS[1] & 0b00001100) << 2) | ((CREGS[0] & 0b00110000) << 2);
+	FCEU_printf("mask=%04x base=%04x r0=%02x r1=%02x r2=%02x r3=%02x\n", mask, base, CREGS[0], CREGS[1], CREGS[2], CREGS[3]);
 
 	if (flash_save && cfi_mode) {
 		setprg32r(CFI_CHIP, 0x8000, 0);
@@ -172,7 +230,7 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 
 	// Very weird mode
 	// Last banks are first in this mode, ignored when MMC3_cmd&0x40
-	if ((CREGS[3] & 0x40) && (V >= 0xFE) && !((MMC3_cmd & 0x40) != 0)) {
+	if ((CREGS[3] & 0b01000000) && (V >= 0xFE) && !((MMC3_cmd & 0x40) != 0)) {
 		switch (A & 0xE000) {
 		case 0xC000:
 		case 0xE000:
@@ -189,11 +247,11 @@ static void COOLBOYPW(uint32 A, uint8 V) {
 		// NROM mode
 		mask &= 0xF0;
 		uint8 emask;
-		if ((((CREGS[1] & 2) != 0))) // 32kb mode
-			emask = (CREGS[3] & 0x0C) | ((A & 0x4000) >> 13);
+		if (CREGS[1] & 0b00000010) // 32kb mode
+			emask = (CREGS[3] & 0b00001100) | ((A & 0x4000) >> 13);
 		else // 16kb mode
-			emask = CREGS[3] & 0x0E;
-		setprg8r(chip, A, ((base << 4) & ~mask) // 7-4 bits are from base (see below)
+			emask = CREGS[3] & 0b00001110;
+		setprg8r(chip, A, ((base << 4) & ~mask) // 7-4 bits are from base
 			| (V & mask)                 // ... or from MM3 internal regs, depends on mask
 			| emask                      // 3-1 (or 3-2 when (EXPREGS[3]&0x0C is set) from EXPREGS[3]
 			| ((A & 0x2000) >> 13));     // 0th just as is
@@ -207,9 +265,9 @@ static DECLFW(COOLBOYWrite) {
 	// Deny any further writes when 7th bit is 1 AND 4th is 0
 	if ((EXPREGS[3] & 0x90) != 0x80) {
 		EXPREGS[A & 3] = V;
-		FixMMC3PRG(MMC3_cmd);
-		FixMMC3CHR(MMC3_cmd);
 	}
+	FixMMC3PRG(MMC3_cmd);
+	FixMMC3CHR(MMC3_cmd);
 }
 
 static DECLFW(MINDKIDSWrite) {
@@ -222,9 +280,9 @@ static DECLFW(MINDKIDSWrite) {
 	// Deny any further writes when 7th bit is 1 AND 4th is 0
 	if ((EXPREGS[3] & 0x90) != 0x80) {
 		EXPREGS[A & 3] = V;
-		FixMMC3PRG(MMC3_cmd);
-		FixMMC3CHR(MMC3_cmd);
 	}
+	FixMMC3PRG(MMC3_cmd);
+	FixMMC3CHR(MMC3_cmd);
 }
 
 static DECLFR(COOLBOYFlashRead) {
@@ -359,38 +417,23 @@ void CommonInit(CartInfo* info, int submapper)
 	switch (submapper)
 	{
 	case 0:
+	case 2:
+	case 4:
+	case 8:
 		info->Power = COOLBOYPower;
-		flag23 = 0;
-		flag45 = 0;
 		break;
 	case 1:
-		info->Power = MINDKIDSPower;
-		flag23 = 0;
-		flag45 = 0;
-		break;
-	case 2:
-		info->Power = COOLBOYPower;
-		flag23 = 1;
-		flag45 = 0;
-		break;
 	case 3:
-		info->Power = MINDKIDSPower;
-		flag23 = 1;
-		flag45 = 0;
-		break;
-	case 4:
-		info->Power = COOLBOYPower;
-		flag23 = 0;
-		flag45 = 1;
-		break;
 	case 5:
+	case 9:
 		info->Power = MINDKIDSPower;
-		flag23 = 0;
-		flag45 = 1;
 		break;
 	default:
 		FCEU_PrintError("Submapper #%d is not supported", submapper);
 	}
+	flag23 = (submapper == 2) || (submapper == 3);
+	flag45 = (submapper == 4) || (submapper == 5);
+	flag89 = (submapper == 8) || (submapper == 9);
 	info->Reset = CommonReset;
 	info->Close = CommonClose;
 
