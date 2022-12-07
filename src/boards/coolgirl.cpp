@@ -419,9 +419,7 @@ static DECLFW(COOLGIRL_Flash_Write) {
 			(flash_buffer_a[0] == 0x0AAA) && (flash_buffer_v[0] == 0x98))
 		{
 			cfi_mode = 1;
-			COOLGIRL_Sync_PRG();
 			flash_state = 0;
-			return;
 		}
 
 		// sector erase
@@ -437,7 +435,7 @@ static DECLFW(COOLGIRL_Flash_Write) {
 			uint32 sector_address = sector * FLASH_SECTOR_SIZE;
 			for (uint32 i = sector_address; i < sector_address + FLASH_SECTOR_SIZE; i++)
 				SAVE_FLASH[i % SAVE_FLASH_SIZE] = 0xFF;
-			FCEU_printf("Flash sector #%d is erased: 0x%08x - 0x%08x\n", sector, sector_address, sector_address + FLASH_SECTOR_SIZE - 1);
+			FCEU_printf("Flash sector #%d is erased: 0x%08x - 0x%08x.\n", sector, sector_address, sector_address + FLASH_SECTOR_SIZE - 1);
 			flash_state = 0;
 		}	
 
@@ -451,12 +449,10 @@ static DECLFW(COOLGIRL_Flash_Write) {
 			uint32 sector_address = sector * FLASH_SECTOR_SIZE;
 			uint32 flash_addr = prg_bank_a_mapped * 0x2000 + (A % 0x8000);
 			if (SAVE_FLASH[flash_addr % SAVE_FLASH_SIZE] != 0xFF) {
-				FCEU_PrintError("Error: can't write to 0x%08x, flash sector is not erased\n", flash_addr);
+				FCEU_PrintError("Error: can't write to 0x%08x, flash sector is not erased.\n", flash_addr);
 			}
 			else {
 				SAVE_FLASH[flash_addr % SAVE_FLASH_SIZE] = V;
-				if (A % 0x2000 == 0)
-					FCEU_printf("Flash sector #%d is written: 0x%08x\n", sector, flash_addr);
 			}
 			flash_state = 0;
 		}
@@ -472,6 +468,8 @@ static DECLFW(COOLGIRL_Flash_Write) {
 		flash_state = 0;
 		cfi_mode = 0;
 	}
+
+	COOLGIRL_Sync_PRG();
 }
 
 static DECLFW(COOLGIRL_WRITE) {

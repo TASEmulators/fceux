@@ -294,77 +294,76 @@ static DECLFW(COOLBOYFlashWrite) {
 	else
 		MMC3_IRQWrite(A, V);
 
-	if (flash_save) {
-		if (flash_state < sizeof(flash_buffer_a) / sizeof(flash_buffer_a[0])) {
-			flash_buffer_a[flash_state] = A & 0xFFF;
-			flash_buffer_v[flash_state] = V;
-			flash_state++;
+	if (!flash_save) return;
+	if (flash_state < sizeof(flash_buffer_a) / sizeof(flash_buffer_a[0])) {
+		flash_buffer_a[flash_state] = A & 0xFFF;
+		flash_buffer_v[flash_state] = V;
+		flash_state++;
 
-			// enter CFI mode
-			if ((flash_state == 1) &&
-				(flash_buffer_a[0] == 0x0AAA) && (flash_buffer_v[0] == 0x98)) {
-				cfi_mode = 1;
-				flash_state = 0;
-				FixMMC3PRG(MMC3_cmd);
-			}
-
-			// erase sector
-			if ((flash_state == 6) &&
-				(flash_buffer_a[0] == 0x0AAA) && (flash_buffer_v[0] == 0xAA) &&
-				(flash_buffer_a[1] == 0x0555) && (flash_buffer_v[1] == 0x55) &&
-				(flash_buffer_a[2] == 0x0AAA) && (flash_buffer_v[2] == 0x80) &&
-				(flash_buffer_a[3] == 0x0AAA) && (flash_buffer_v[3] == 0xAA) &&
-				(flash_buffer_a[4] == 0x0555) && (flash_buffer_v[4] == 0x55) &&
-				(flash_buffer_v[5] == 0x30)) {
-				int offset = &Page[A >> 11][A] - Flash;
-				int sector = offset / FLASH_SECTOR_SIZE;
-				for (uint32 i = sector * FLASH_SECTOR_SIZE; i < (sector + 1) * FLASH_SECTOR_SIZE; i++)
-					Flash[i % PRGsize[ROM_CHIP]] = 0xFF;
-				FCEU_printf("Flash sector #%d is erased (0x%08x - 0x%08x)\n", sector, offset, offset + FLASH_SECTOR_SIZE);
-			}
-
-			// erase chip, lol
-			if ((flash_state == 6) &&
-				(flash_buffer_a[0] == 0x0AAA) && (flash_buffer_v[0] == 0xAA) &&
-				(flash_buffer_a[1] == 0x0555) && (flash_buffer_v[1] == 0x55) &&
-				(flash_buffer_a[2] == 0x0AAA) && (flash_buffer_v[2] == 0x80) &&
-				(flash_buffer_a[3] == 0x0AAA) && (flash_buffer_v[3] == 0xAA) &&
-				(flash_buffer_a[4] == 0x0555) && (flash_buffer_v[4] == 0x55) &&
-				(flash_buffer_v[5] == 0x10)) {
-				memset(Flash, 0xFF, PRGsize[ROM_CHIP]);
-				FCEU_printf("Flash chip erased.\n");
-			}
-
-			// write byte
-			if ((flash_state == 4) &&
-				(flash_buffer_a[0] == 0x0AAA) && (flash_buffer_v[0] == 0xAA) &&
-				(flash_buffer_a[1] == 0x0555) && (flash_buffer_v[1] == 0x55) &&
-				(flash_buffer_a[2] == 0x0AAA) && (flash_buffer_v[2] == 0xA0)) {
-				int offset = &Page[A >> 11][A] - Flash;
-				if (CartBR(A) != 0xFF) {
-					FCEU_PrintError("Error: can't write to 0x%08x, flash sector is not erased\n", offset);
-				}
-				else {
-					CartBW(A, V);
-				}
-				flash_state = 0;
-			}
-
-
-		}
-
-		// not a command
-		if (((A & 0xFFF) != 0x0AAA) && ((A & 0xFFF) != 0x0555)) {
+		// enter CFI mode
+		if ((flash_state == 1) &&
+			(flash_buffer_a[0] == 0x0AAA) && (flash_buffer_v[0] == 0x98)) {
+			cfi_mode = 1;
 			flash_state = 0;
 		}
 
-		// reset
-		if (V == 0xF0) {
+		// erase sector
+		if ((flash_state == 6) &&
+			(flash_buffer_a[0] == 0x0AAA) && (flash_buffer_v[0] == 0xAA) &&
+			(flash_buffer_a[1] == 0x0555) && (flash_buffer_v[1] == 0x55) &&
+			(flash_buffer_a[2] == 0x0AAA) && (flash_buffer_v[2] == 0x80) &&
+			(flash_buffer_a[3] == 0x0AAA) && (flash_buffer_v[3] == 0xAA) &&
+			(flash_buffer_a[4] == 0x0555) && (flash_buffer_v[4] == 0x55) &&
+			(flash_buffer_v[5] == 0x30)) {
+			int offset = &Page[A >> 11][A] - Flash;
+			int sector = offset / FLASH_SECTOR_SIZE;
+			for (uint32 i = sector * FLASH_SECTOR_SIZE; i < (sector + 1) * FLASH_SECTOR_SIZE; i++)
+				Flash[i % PRGsize[ROM_CHIP]] = 0xFF;
+			FCEU_printf("Flash sector #%d is erased (0x%08x - 0x%08x).\n", sector, offset, offset + FLASH_SECTOR_SIZE);
 			flash_state = 0;
-			cfi_mode = 0;
-			FixMMC3PRG(MMC3_cmd);
+		}
+
+		// erase chip, lol
+		if ((flash_state == 6) &&
+			(flash_buffer_a[0] == 0x0AAA) && (flash_buffer_v[0] == 0xAA) &&
+			(flash_buffer_a[1] == 0x0555) && (flash_buffer_v[1] == 0x55) &&
+			(flash_buffer_a[2] == 0x0AAA) && (flash_buffer_v[2] == 0x80) &&
+			(flash_buffer_a[3] == 0x0AAA) && (flash_buffer_v[3] == 0xAA) &&
+			(flash_buffer_a[4] == 0x0555) && (flash_buffer_v[4] == 0x55) &&
+			(flash_buffer_v[5] == 0x10)) {
+			memset(Flash, 0xFF, PRGsize[ROM_CHIP]);
+			FCEU_printf("Flash chip erased.\n");
+			flash_state = 0;
+		}
+
+		// write byte
+		if ((flash_state == 4) &&
+			(flash_buffer_a[0] == 0x0AAA) && (flash_buffer_v[0] == 0xAA) &&
+			(flash_buffer_a[1] == 0x0555) && (flash_buffer_v[1] == 0x55) &&
+			(flash_buffer_a[2] == 0x0AAA) && (flash_buffer_v[2] == 0xA0)) {
+			int offset = &Page[A >> 11][A] - Flash;
+			if (CartBR(A) != 0xFF) {
+				FCEU_PrintError("Error: can't write to 0x%08x, flash sector is not erased.\n", offset);
+			}
+			else {
+				CartBW(A, V);
+			}
+			flash_state = 0;
 		}
 	}
+
+	// not a command
+	if (((A & 0xFFF) != 0x0AAA) && ((A & 0xFFF) != 0x0555)) {
+		flash_state = 0;
+	}
+
+	// reset
+	if (V == 0xF0) {
+		flash_state = 0;
+		cfi_mode = 0;
+	}
+
+	FixMMC3PRG(MMC3_cmd);
 }
 
 static void CommonReset(void) {
