@@ -729,7 +729,7 @@ BMAPPINGLocal bmap[] = {
 	{"F-15 MMC3 Based",		259, BMCF15_Init},
 	{"HP10xx/H20xx Boards",	260, BMCHPxx_Init},
 	{"810544-CA-1",			261, BMC810544CA1_Init},
-	{"SMD132/SMD133",		268, SMD132_SMD133_Init},
+	{"AA6023/AA6023B",		268, AA6023_Init},
 	{"COOLGIRL",			342, COOLGIRL_Init },
 
 	{"Impact Soft MMC3 Flash Board",	406, Mapper406_Init },

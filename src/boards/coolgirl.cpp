@@ -26,7 +26,7 @@
 #include "mapinc.h"
 
 const uint32 SAVE_FLASH_SIZE = 1024 * 1024 * 8;
-const int FLASH_SECTOR_SIZE = 128 * 1024;
+const uint32 FLASH_SECTOR_SIZE = 128 * 1024;
 const int ROM_CHIP = 0x00;
 const int WRAM_CHIP = 0x10;
 const int FLASH_CHIP = 0x11;
