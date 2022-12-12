@@ -29,7 +29,7 @@
  * |||| ||||
  * |||| |+++-- PRG offset (PRG A19, A18, A17)
  * |||| +----- Alternate CHR A17
- * ||++------- PRG offset (PRG A24, A23)
+ * ||++------- PRG offset (PRG A24, A23), CHR offset (CHR A19, A18)
  * |+--------- PRG mask (PRG A17 from 0: MMC3; 1: offset)
  * +---------- CHR mask (CHR A17 from 0: MMC3; 1: alternate)
  *
@@ -134,6 +134,7 @@ static void AA6023CW(uint32 A, uint8 V) {
 			(V & 0x80 & mask) | ((((EXPREGS[0] & 0b00001000) << 4) & ~mask)) // 7th bit
 			| ((EXPREGS[2] & 0x0F) << 3) // 6-3 bits
 			| ((A >> 10) & 7) // 2-0 bits
+			| ((EXPREGS[0] & 0b00110000) << 4) // There are some ROMs with 1 MiB CHR-ROM
 		);
 	}
 	else {
@@ -148,7 +149,10 @@ static void AA6023CW(uint32 A, uint8 V) {
 		}
 		// Simple MMC3 mode
 		// Highest bit goes from MMC3 registers when EXPREGS[0]&0x80==0 or from EXPREGS[0]&0x08 otherwise
-		setchr1(A, (V & mask) | (((EXPREGS[0] & 0x08) << 4) & ~mask));
+		setchr1(A, 
+			(V & mask)
+			| (((EXPREGS[0] & 0x08) << 4) & ~mask)
+			| ((EXPREGS[0] & 0b00110000) << 4)); // There are some ROMs with 1 MiB CHR-ROM
 	}
 }
 
@@ -223,7 +227,7 @@ static void AA6023PW(uint32 A, uint8 V) {
 	}
 
 	if (!(CREGS[3] & 0x10)) {
-		// Regular MMC3 mode but can be extended to 2MByte
+		// Regular MMC3 mode but can be extended to 2MiB
 		setprg8r(chip, A, (((base << 4) & ~mask)) | (V & mask));
 	}
 	else {
