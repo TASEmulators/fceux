@@ -76,6 +76,7 @@
 
 #include "mapinc.h"
 #include "mmc3.h"
+#include "../ines.h"
 
 const int ROM_CHIP = 0x00;
 const int WRAM_CHIP = 0x10;
@@ -97,6 +98,7 @@ static uint8 cfi_mode = 0;
 static uint16 regs_base = 0;
 static uint8 flag23 = 0;
 static uint8 flag45 = 0;
+static uint8 flag67 = 0;
 
 // Macronix 256-mbit memory CFI data
 const uint8 cfi_data[] =
@@ -214,6 +216,11 @@ static void AA6023PW(uint32 A, uint8 V) {
 	}
 
 	int chip = !flash_save ? ROM_CHIP : FLASH_CHIP;
+	// There are ROMs with multiple PRG ROM chips
+	int chip_offset = 0;
+	if (flag67 && EXPREGS[0] & 0b00001000) {
+		chip_offset += ROM_size;
+	}
 
 	// Very weird mode
 	// Last banks are first in this mode, ignored when MMC3_cmd&0x40
@@ -228,7 +235,7 @@ static void AA6023PW(uint32 A, uint8 V) {
 
 	if (!(CREGS[3] & 0x10)) {
 		// Regular MMC3 mode but can be extended to 2MiB
-		setprg8r(chip, A, (((base << 4) & ~mask)) | (V & mask));
+		setprg8r(chip, A, ((((base << 4) & ~mask)) | (V & mask)) + chip_offset);
 	}
 	else {
 		// NROM mode
@@ -238,10 +245,12 @@ static void AA6023PW(uint32 A, uint8 V) {
 			emask = (CREGS[3] & 0b00001100) | ((A & 0x4000) >> 13);
 		else // 16kb mode
 			emask = CREGS[3] & 0b00001110;
-		setprg8r(chip, A, ((base << 4) & ~mask) // 7-4 bits are from base
-			| (V & mask)                 // ... or from MM3 internal regs, depends on mask
-			| emask                      // 3-1 (or 3-2 when (EXPREGS[3]&0x0C is set) from EXPREGS[3]
-			| ((A & 0x2000) >> 13));     // 0th just as is
+		setprg8r(chip, A, (
+			((base << 4) & ~mask)	// 7-4 bits are from base
+			| (V & mask)			// ... or from MM3 internal regs, depends on mask
+			| emask					// 3-1 (or 3-2 when (EXPREGS[3]&0x0C is set) from EXPREGS[3]
+			| ((A & 0x2000) >> 13)	// 0th just as is
+			) + chip_offset);       // For multi-chip ROMs
 	}
 }
 
@@ -391,11 +400,13 @@ void CommonInit(CartInfo* info, int submapper)
 		break;
 	case 0:
 	case 4:
+	case 6:
 		regs_base = 0x6000;
 		break;
 	case 1:
 	case 3:
 	case 5:
+	case 7:
 		regs_base = 0x5000;
 		break;
 	default:
@@ -403,6 +414,7 @@ void CommonInit(CartInfo* info, int submapper)
 	}
 	flag23 = (submapper == 2) || (submapper == 3);
 	flag45 = (submapper == 4) || (submapper == 5);
+	flag67 = (submapper == 6) || (submapper == 7);
 	info->Power = AA6023Power;
 	info->Reset = AA6023Reset;
 	info->Close = AA6023Close;
@@ -415,7 +427,6 @@ void CommonInit(CartInfo* info, int submapper)
 			CFI[i * 2] = CFI[i * 2 + 1] = cfi_data[i];
 		}
 		SetupCartPRGMapping(CFI_CHIP, CFI, sizeof(cfi_data) * 2, 0);
-
 		Flash = (uint8*)FCEU_gmalloc(PRGsize[ROM_CHIP]);
 		for (int i = 0; i < PRGsize[ROM_CHIP]; i++) {
 			Flash[i] = PRGptr[ROM_CHIP][i % PRGsize[ROM_CHIP]];
