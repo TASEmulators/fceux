@@ -99,6 +99,7 @@ static uint16 regs_base = 0;
 static uint8 flag23 = 0;
 static uint8 flag45 = 0;
 static uint8 flag67 = 0;
+static uint8 flag89 = 0;
 
 // Macronix 256-mbit memory CFI data
 const uint8 cfi_data[] =
@@ -122,6 +123,25 @@ const uint8 cfi_data[] =
 };
 
 static void AA6023CW(uint32 A, uint8 V) {
+	if (flag89) {
+		/*
+			$xxx0
+			7  bit  0
+			---- ----
+			AB.C DEEE
+			|| | ||||
+			|| | |+++-- PRG offset (PRG A19, A18, A17)
+			|| | +----- Alternate CHR A17
+			|| +------- 1=Write-protect CHR-RAM
+			|+--------- PRG mask (PRG A17 from 0: MMC3; 1: offset)
+			+---------- CHR mask (CHR A17 from 0: MMC3; 1: alternate)
+		*/
+		if (EXPREGS[0] & 0b00010000)
+			SetupCartCHRMapping(0, VROM, CHRsize[0], 0); // write-protect CHR-RAM
+		else
+			SetupCartCHRMapping(0, VROM, CHRsize[0], 1); // allow CHR writes
+	}
+
 	uint32 mask = 0xFF ^ (EXPREGS[0] & 0b10000000);
 	if (EXPREGS[3] & 0b00010000) {
 		if (EXPREGS[3] & 0b01000000) { // Weird mode
@@ -401,12 +421,14 @@ void CommonInit(CartInfo* info, int submapper)
 	case 0:
 	case 4:
 	case 6:
+	case 8:
 		regs_base = 0x6000;
 		break;
 	case 1:
 	case 3:
 	case 5:
 	case 7:
+	case 9:
 		regs_base = 0x5000;
 		break;
 	default:
@@ -415,6 +437,7 @@ void CommonInit(CartInfo* info, int submapper)
 	flag23 = (submapper == 2) || (submapper == 3);
 	flag45 = (submapper == 4) || (submapper == 5);
 	flag67 = (submapper == 6) || (submapper == 7);
+	flag89 = (submapper == 8) || (submapper == 9);
 	info->Power = AA6023Power;
 	info->Reset = AA6023Reset;
 	info->Close = AA6023Close;
