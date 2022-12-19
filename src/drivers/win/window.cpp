@@ -1078,12 +1078,12 @@ void CloseGame()
 
 bool ALoad(const char *nameo, char* innerFilename, bool silent)
 {
-	FCEUFILE* patchTrial = FCEU_fopen(nameo,nullptr,"rb",nullptr,-1);
+	FILE* patchTrial = fopen(nameo, "rb");
 	if(patchTrial)
 	{
 		char sig[10] = {0};
-		FCEU_fread(sig,1,5,patchTrial);
-		FCEU_fclose(patchTrial);
+		fread(sig,1,5,patchTrial);
+		fclose(patchTrial);
 		if(!strcmp(sig,"PATCH"))
 		{
 			//assuming it's a patch:
