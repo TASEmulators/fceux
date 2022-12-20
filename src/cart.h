@@ -86,7 +86,7 @@ void FCEU_SaveGameSave(CartInfo *LocalHWInfo);
 void FCEU_LoadGameSave(CartInfo *LocalHWInfo);
 void FCEU_ClearGameSave(CartInfo *LocalHWInfo);
 
-extern uint8 *Page[32], *VPage[8], *MMC5SPRVPage[8], *MMC5BGVPage[8];
+extern uint8 *Page[32], *VPage[16], *MMC5SPRVPage[16], *MMC5BGVPage[16];
 
 void ResetCartMapping(void);
 void SetupCartPRGMapping(int chip, uint8 *p, uint32 size, int ram);
@@ -129,6 +129,7 @@ void setprg8r(int r, unsigned int A, unsigned int V);
 void setprg16r(int r, unsigned int A, unsigned int V);
 void setprg32r(int r, unsigned int A, unsigned int V);
 
+void setchr512r(int r, unsigned int A, unsigned int V);
 void setchr1r(int r, unsigned int A, unsigned int V);
 void setchr2r(int r, unsigned int A, unsigned int V);
 void setchr4r(int r, unsigned int A, unsigned int V);

@@ -63,6 +63,7 @@ void QTAi_Init(CartInfo *info);
 void NROM_Init(CartInfo *info);
 void Novel_Init(CartInfo *info);
 void RAINBOW13_Init(CartInfo *info);
+void RAINBOW2_Init(CartInfo *info);
 void S74LS374NA_Init(CartInfo *info);
 void S74LS374N_Init(CartInfo *info);
 void S8259A_Init(CartInfo *info);

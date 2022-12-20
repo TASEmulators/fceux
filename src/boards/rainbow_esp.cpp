@@ -40,7 +40,7 @@ typedef SSIZE_T ssize_t;
 
 using easywsclient::WebSocket;
 
-#define RAINBOW_DEBUG 0
+#define RAINBOW_DEBUG 1
 
 #if RAINBOW_DEBUG >= 1
 #define UDBG(...) FCEU_printf(__VA_ARGS__)
@@ -1955,9 +1955,9 @@ std::pair<uint8, uint8> BrokeStudioFirmware::curle_to_net_error(CURLcode curle) 
 void BrokeStudioFirmware::downloadFile(std::string const& url, uint8 path, uint8 file) {
 	UDBG("RAINBOW BrokeStudioFirmware download %s -> (%u,%u)\n", url.c_str(), (unsigned int)path, (unsigned int)file);
 	//TODO asynchronous download using curl_multi_* (and maybe a thread, or regular ticks on rx/tx/getDataReadyIO)
-
-	// Directly fail if the curl handle was not properly initialized
-	if (this->curl_handle == nullptr) {
+	/*
+	// Directly fail if the curl handle was not properly initialized or if WiFi is not enabled (wifiConfig bit 0)
+	if ((this->curl_handle == nullptr) || (wifiConfig & wifi_config_t::WIFI_ENABLED == 0)) {
 		UDBG("RAINBOW BrokeStudioFirmware download failed: no handle\n");
 		this->tx_messages.push_back({
 			2,
@@ -1968,6 +1968,7 @@ void BrokeStudioFirmware::downloadFile(std::string const& url, uint8 path, uint8
 		});
 		return;
 	}
+	*/
 
 	// Download file
 	std::vector<uint8> data;

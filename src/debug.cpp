@@ -366,7 +366,7 @@ uint8 GetMem(uint16 A) {
 uint8 GetPPUMem(uint8 A) {
 	uint16 tmp = FCEUPPU_PeekAddress() & 0x3FFF;
 
-	if (tmp<0x2000) return VPage[tmp>>10][tmp];
+	if (tmp<0x2000) return VPage[tmp>>9][tmp];
 	if (tmp>=0x3F00) return PALRAM[tmp&0x1F];
 	return vnapage[(tmp>>10)&0x3][tmp&0x3FF];
 }

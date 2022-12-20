@@ -27,7 +27,7 @@
 
 HWND hPPUView;
 
-extern uint8 *VPage[8];
+extern uint8 *VPage[16];
 extern uint8 PALRAM[0x20];
 extern uint8 UPALRAM[3];
 
@@ -158,16 +158,16 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 	{
 		for (i = 0, x=0x1000; i < 0x1000; i++, x++)
 		{
-			chrcache0[i] = VPage[i>>10][i];
-			chrcache1[i] = VPage[x>>10][x];
+			chrcache0[i] = VPage[i>>9][i];
+			chrcache1[i] = VPage[x>>9][x];
 			if (debug_loggingCD) {
 				if (cdloggerVideoDataSize)
 				{
 					int addr;
-					addr = &VPage[i >> 10][i] - CHRptr[0];
+					addr = &VPage[i >> 9][i] - CHRptr[0];
 					if ((addr >= 0) && (addr < (int)cdloggerVideoDataSize))
 						logcache0[i] = cdloggervdata[addr];
-					addr = &VPage[x >> 10][x] - CHRptr[0];
+					addr = &VPage[x >> 9][x] - CHRptr[0];
 					if ((addr >= 0) && (addr < (int)cdloggerVideoDataSize))
 						logcache1[i] = cdloggervdata[addr];
 				} else {

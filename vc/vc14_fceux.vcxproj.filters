@@ -1142,6 +1142,9 @@
     <ClCompile Include="..\src\boards\RNBW\pping.c">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\boards\rainbow2.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">

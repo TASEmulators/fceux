@@ -799,6 +799,7 @@ BMAPPINGLocal bmap[] = {
 	{"KONAMI QTAi Board",	547, QTAi_Init },
 
 	{"RAINBOW13",          3872, RAINBOW13_Init },
+	{"RAINBOW2",           3873, RAINBOW2_Init },
 
 	{"",					0, NULL}
 };
@@ -1182,7 +1183,7 @@ static int iNES_Init(int num) {
 				}
 				if (CHRRAMSize > 0)
 				{
-					int mCHRRAMSize = (CHRRAMSize < 1024) ? 1024 : CHRRAMSize; // VPage has a resolution of 1k banks, ensure minimum allocation to prevent malicious access from NES software
+					int mCHRRAMSize = (CHRRAMSize < 512) ? 512 : CHRRAMSize; // VPage has a resolution of 512B banks, ensure minimum allocation to prevent malicious access from NES software
 					if ((UNIFchrrama = VROM = (uint8*)FCEU_dmalloc(mCHRRAMSize)) == NULL) return 2;
 					FCEU_MemoryRand(VROM, CHRRAMSize);
 					SetupCartCHRMapping(0, VROM, CHRRAMSize, 1);

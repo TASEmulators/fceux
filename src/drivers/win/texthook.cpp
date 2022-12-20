@@ -52,7 +52,7 @@ extern void FCEUD_BlitScreen(uint8 *XBuf); //needed for pause, not sure where th
 extern uint8 PALRAM[0x20];
 extern uint8 PPU[4];
 extern uint8 *vnapage[4];
-extern uint8 *VPage[8];
+extern uint8 *VPage[16];
 //------------------------------
 HWND hTextHooker;
 
@@ -303,14 +303,14 @@ void UpdateTextHooker() {
 			if ( EmulationPaused == 1 ) {
 				//if the selection has changed since we paused
 				if ( tileToggles[x][y] != pausedTileToggles[x][y] ) {
-					DrawTextHookerChr(pbitmap,&VPage[(ptable+chr)>>10][ptable+chr],tileattr,1);
+					DrawTextHookerChr(pbitmap,&VPage[(ptable+chr)>>9][ptable+chr],tileattr,1);
 				} else { //nothing has changed since we paused
-					DrawTextHookerChr(pbitmap,&VPage[(ptable+chr)>>10][ptable+chr],tileattr,0);
+					DrawTextHookerChr(pbitmap,&VPage[(ptable+chr)>>9][ptable+chr],tileattr,0);
 				}
 				//after updates have been made to tileToggles, reset pausedTileToggles
 				pausedTileToggles[x][y] = tileToggles[x][y];
 			} else { //we aren't paused, do a normal call
-				DrawTextHookerChr(pbitmap,&VPage[(ptable+chr)>>10][ptable+chr],tileattr,tileToggles[x][y]);
+				DrawTextHookerChr(pbitmap,&VPage[(ptable+chr)>>9][ptable+chr],tileattr,tileToggles[x][y]);
 			}
 			pbitmap += (8*3);
 		}

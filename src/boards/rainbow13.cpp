@@ -82,8 +82,16 @@ const uint32 CHRRAMSIZE = 32 * 1024;
 
 extern uint8 *ExtraNTARAM;
 
-extern uint8 IRQCount, IRQLatch, IRQa;
-extern uint8 IRQReload;
+// Scanline IRQ
+static uint8 S_IRQCount, S_IRQLatch, S_IRQa, S_IRQp;
+static uint8 S_IRQReload;
+
+// CPU Cycle IRQ
+static bool C_IRQa, C_IRQr, C_IRQp;
+static int32 C_IRQLatch, C_IRQCount;
+
+// ESP message IRQ
+static uint8 ESP_IRQp;
 
 static uint8 flash_mode[2];
 static uint8 flash_sequence[2];
@@ -106,11 +114,22 @@ static SFORMAT FlashRegs[] =
 static SFORMAT Rainbow13StateRegs[] =
 {
 	{ prg, 3, "PRG" },
-	{ chr, 8, "CHR" },
-	{ &IRQReload, 1, "IRQR" },
-	{ &IRQCount, 1, "IRQC" },
-	{ &IRQLatch, 1, "IRQL" },
-	{ &IRQa, 1, "IRQA" },
+	{ chr, 16, "CHR" },
+	
+	{ &S_IRQReload, 1, "SCAR" },
+	{ &S_IRQCount, 1, "SCAC" },
+	{ &S_IRQLatch, 1, "SCAL" },
+	{ &S_IRQa, 1, "SCAA" },
+	{ &S_IRQp, 1, "SCAP" },
+
+	{ &C_IRQa, 1, "CPUA" },
+	{ &C_IRQp, 1, "CPUP" },
+	{ &C_IRQr, 1, "CPUR" },
+	{ &C_IRQLatch, 4, "CPUL" },
+	{ &C_IRQCount, 4, "CPUC" },
+
+	{ &ESP_IRQp, 1, "ESPP" },
+
 	{ 0 }
 };
 
@@ -158,18 +177,58 @@ static void clear_esp_message_received() {
 	has_esp_message_received = false;
 }
 
-static void Rainbow13EspMapIrq(int32) {
+static void Rainbow13hb() {
+	int count = S_IRQCount;
+	if (!count || S_IRQReload)
+	{
+		S_IRQCount = S_IRQLatch;
+		S_IRQReload = 0;
+	}
+	else
+		S_IRQCount--;
+
+	if ((count | 1) && !S_IRQCount)
+	{
+		if (S_IRQa)
+			X6502_IRQBegin(FCEU_IQEXT);
+	}
+}
+
+static void IRQEnd() {
+	if (!C_IRQp && !S_IRQp && !ESP_IRQp)
+	{
+		X6502_IRQEnd(FCEU_IQEXT);
+	}
+}
+
+static void Rainbow13IRQ(int a) {
+
+	// Cycle Counter IRQ
+	if (C_IRQa) {
+		C_IRQCount -= a;
+		if (C_IRQCount <= 0) {
+			C_IRQa = C_IRQr;
+			C_IRQp = true;
+			C_IRQCount = C_IRQLatch;
+			X6502_IRQBegin(FCEU_IQEXT);
+		}
+	}
+
+	// ESP / new message IRQ
 	if (esp_irq_enable)
 	{
 		if (esp_message_received())
 		{
 			X6502_IRQBegin(FCEU_IQEXT);
+			ESP_IRQp = 1;
 		}
 		else
 		{
-			X6502_IRQEnd(FCEU_IQEXT);
+			ESP_IRQp = 0;
 		}
 	}
+
+	IRQEnd();
 }
 
 static void Sync(void) {
@@ -414,6 +473,7 @@ static DECLFR(Rainbow13Read) {
 static DECLFW(Rainbow13Write) {
 	switch (A)
 	{
+	// ESP
 	case 0x4100:
 		esp_enable = V & 0x01;
 		esp_irq_enable = V & 0x02;
@@ -445,15 +505,7 @@ static DECLFW(Rainbow13Write) {
 	case 0x4105:
 		rx_index = V;
 		break;
-	case 0x4120: prg[0] = V; Sync(); break;
-	case 0x4121: prg[1] = V & 0x3f; Sync(); break;
-	case 0x4122: prg[2] = V & 0x3f; Sync(); break;
-	case 0x4123: fpga_wram_bank = V & 0x01; Sync(); break;
-	case 0x4124:
-		wram_bank = V & 0x3f;
-		wram_chip_select = (V & 0xc0) >> 6;
-		Sync();
-		break;
+	// Mapper configuration
 	case 0x4110:
 		prg_mode = V & 0x01;
 		chr_chip = (V & 0x08) >> 3;
@@ -462,6 +514,17 @@ static DECLFW(Rainbow13Write) {
 		nt_set = (V & 0xC0) >> 6;
 		Sync();
 		break;
+	// PRG banking
+	case 0x4120: prg[0] = V & 0xbf; Sync(); break;
+	case 0x4121: prg[1] = V & 0xbf; Sync(); break;
+	case 0x4122: prg[2] = V & 0xbf; Sync(); break;
+	case 0x4123: fpga_wram_bank = V & 0x01; Sync(); break;
+	case 0x4124:
+		wram_bank = V & 0x3f;
+		wram_chip_select = (V & 0xc0) >> 6;
+		Sync();
+		break;
+	// CHR banking
 	case 0x4130:
 	case 0x4131:
 	case 0x4132:
@@ -480,37 +543,32 @@ static DECLFW(Rainbow13Write) {
 		break;
 	}
 	case 0x4138: chr_upper_bank = V & 0x01; Sync(); break;
-	case 0x4140: IRQLatch = V; break;
-	case 0x4141: IRQReload = 1; break;
+	// Scanline IRQ
+	case 0x4140: S_IRQLatch = V; break;
+	case 0x4141: S_IRQReload = 1; break;
 	case 0x4142:
-		X6502_IRQEnd(FCEU_IQEXT);
-		IRQa = 0;
+		S_IRQa = 0;
+		S_IRQp = 0;
+		IRQEnd();
 		break;
-	case 0x4143: IRQa = 1; break;
+	case 0x4143: S_IRQa = 1; break;
+	// CPU Cycle IRQ
+	case 0x4144: C_IRQLatch &= 0xFF00; C_IRQLatch |= V;		 C_IRQCount = C_IRQLatch; break;
+	case 0x4145: C_IRQLatch &= 0x00FF; C_IRQLatch |= V << 8; C_IRQCount = C_IRQLatch; break;
+	case 0x4146:
+		C_IRQa = V & 0x01;
+		C_IRQr = (V & 0x02) >> 1;
+		if (C_IRQa)
+			C_IRQCount = C_IRQLatch;
+		break;
+	case 0x4147:
+		C_IRQp = false;
+		IRQEnd();
+		break;
+	// Multiplier
 	case 0x4160: mul_a = V; mul_result = mul_a * mul_b; break;
 	case 0x4161: mul_b = V; mul_result = mul_a * mul_b; break;
 	}
-}
-
-static void ClockRainbow13Counter(void) {
-	int count = IRQCount;
-	if (!count || IRQReload)
-	{
-		IRQCount = IRQLatch;
-		IRQReload = 0;
-	}
-	else
-		IRQCount--;
-
-	if ((count | 1) && !IRQCount)
-	{
-		if (IRQa)
-			X6502_IRQBegin(FCEU_IQEXT);
-	}
-}
-
-static void Rainbow13hb() {
-	ClockRainbow13Counter();
 }
 
 uint8 FASTCALL Rainbow13PPURead(uint32 A) {
@@ -583,7 +641,7 @@ void Rainbow13FlashIDEnter(uint8 chip)
 		if (flash_id[chip])
 			return;
 		flash_id[chip] = 1;
-		if(bootloader)
+		if (bootloader)
 			SetReadHandler(0x8000, 0xDFFF, Rainbow13FlashPrgID);
 		else
 			SetReadHandler(0x8000, 0xFFFF, Rainbow13FlashPrgID);
@@ -826,13 +884,17 @@ static void Rainbow13Reset(void) {
 	rx_address = 0;
 	tx_address = 0;
 	rx_index = 0;
-	IRQa = 0;
+	S_IRQa = S_IRQp = 0;
+	C_IRQa = C_IRQp = C_IRQr = 0;
+	ESP_IRQp = 0;
 }
 
 static void Rainbow13Power(void) {
 
 	// mapper
-	IRQCount = IRQLatch = IRQa = 0;
+	S_IRQCount = S_IRQLatch = S_IRQa = 0;
+	C_IRQCount = C_IRQLatch = C_IRQa = C_IRQr = 0;
+	S_IRQp = C_IRQp = ESP_IRQp = 0;
 	chr_mode &= 0x03;
 	prg_mode &= 0x01;
 	chr_upper_bank &= 0x01;
@@ -1282,5 +1344,5 @@ void RAINBOW13_Init(CartInfo *info) {
 	AddExState(&Rainbow13StateRegs, ~0, 0, 0);
 
 	// set a hook on hblank to be able periodically check if we have to send an interupt
-	MapIRQHook = Rainbow13EspMapIrq;
+	MapIRQHook = Rainbow13IRQ;
 }

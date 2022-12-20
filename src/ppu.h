@@ -16,7 +16,7 @@ void newppu_hacky_emergency_reset();
 /* For cart.c and banksw.h, mostly */
 extern uint8 NTARAM[0x800], *vnapage[4];
 extern uint8 PPUNTARAM;
-extern uint8 PPUCHRRAM;
+extern uint16 PPUCHRRAM;
 
 void FCEUPPU_SaveState(void);
 void FCEUPPU_LoadState(int version);

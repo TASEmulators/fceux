@@ -119,7 +119,7 @@ extern void IncrementInstructionsCounters();
 //-------------
 
 //internal variables that debuggers will want access to
-extern uint8 *vnapage[4],*VPage[8];
+extern uint8 *vnapage[4],*VPage[16];
 extern uint8 PPU[4],PALRAM[0x20],UPALRAM[3],SPRAM[0x100],VRAMBuffer,PPUGenLatch,XOffset;
 extern uint32 FCEUPPU_PeekAddress();
 extern uint8 READPAL_MOTHEROFALL(uint32 A);

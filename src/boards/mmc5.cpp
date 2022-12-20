@@ -40,46 +40,50 @@ void MMC5RunSoundHQ(void);
 static INLINE void MMC5SPRVROM_BANK1(uint32 A, uint32 V) {
 	if (CHRptr[0]) {
 		V &= CHRmask1[0];
-		MMC5SPRVPage[(A) >> 10] = &CHRptr[0][(V) << 10] - (A);
+		MMC5SPRVPage[(A) >> 9] = MMC5SPRVPage[((A) >> 9) + 1] = &CHRptr[0][(V) << 10] - (A);
 	}
 }
 
 static INLINE void MMC5BGVROM_BANK1(uint32 A, uint32 V) {
 	if (CHRptr[0]) {
-		V &= CHRmask1[0]; MMC5BGVPage[(A) >> 10] = &CHRptr[0][(V) << 10] - (A);
+		V &= CHRmask1[0]; MMC5BGVPage[(A) >> 9] = MMC5BGVPage[((A) >> 9) + 1] = &CHRptr[0][(V) << 10] - (A);
 	}
 }
 
 static INLINE void MMC5SPRVROM_BANK2(uint32 A, uint32 V) {
 	if (CHRptr[0]) {
-		V &= CHRmask2[0]; MMC5SPRVPage[(A) >> 10] = MMC5SPRVPage[((A) >> 10) + 1] = &CHRptr[0][(V) << 11] - (A);
+		V &= CHRmask2[0]; MMC5SPRVPage[(A) >> 9] = MMC5SPRVPage[((A) >> 9) + 1] = MMC5SPRVPage[((A) >> 9) + 2] = MMC5SPRVPage[((A) >> 9) + 3] = &CHRptr[0][(V) << 11] - (A);
 	}
 }
 static INLINE void MMC5BGVROM_BANK2(uint32 A, uint32 V) {
 	if (CHRptr[0]) {
-		V &= CHRmask2[0]; MMC5BGVPage[(A) >> 10] = MMC5BGVPage[((A) >> 10) + 1] = &CHRptr[0][(V) << 11] - (A);
+		V &= CHRmask2[0]; MMC5BGVPage[(A) >> 9] = MMC5BGVPage[((A) >> 9) + 1] = MMC5BGVPage[((A) >> 9) + 2] = MMC5BGVPage[((A) >> 9) + 3] = &CHRptr[0][(V) << 11] - (A);
 	}
 }
 
 static INLINE void MMC5SPRVROM_BANK4(uint32 A, uint32 V) {
 	if (CHRptr[0]) {
-		V &= CHRmask4[0]; MMC5SPRVPage[(A) >> 10] = MMC5SPRVPage[((A) >> 10) + 1] = MMC5SPRVPage[((A) >> 10) + 2] = MMC5SPRVPage[((A) >> 10) + 3] = &CHRptr[0][(V) << 12] - (A);
+		V &= CHRmask4[0]; MMC5SPRVPage[(A) >> 9] = MMC5SPRVPage[((A) >> 9) + 1] = MMC5SPRVPage[((A) >> 9) + 2] = MMC5SPRVPage[((A) >> 9) + 3] = 
+											MMC5SPRVPage[((A) >> 9) + 4] = MMC5SPRVPage[((A) >> 9) + 5] = MMC5SPRVPage[((A) >> 9) + 6] = MMC5SPRVPage[((A) >> 9) + 7] = &CHRptr[0][(V) << 12] - (A);
 	}
 }
 static INLINE void MMC5BGVROM_BANK4(uint32 A, uint32 V) {
 	if (CHRptr[0]) {
-		V &= CHRmask4[0]; MMC5BGVPage[(A) >> 10] = MMC5BGVPage[((A) >> 10) + 1] = MMC5BGVPage[((A) >> 10) + 2] = MMC5BGVPage[((A) >> 10) + 3] = &CHRptr[0][(V) << 12] - (A);
+		V &= CHRmask4[0]; MMC5BGVPage[(A) >> 9] = MMC5BGVPage[((A) >> 9) + 1] = MMC5BGVPage[((A) >> 9) + 2] = MMC5BGVPage[((A) >> 9) + 3] = 
+											MMC5BGVPage[((A) >> 9) + 4] = MMC5BGVPage[((A) >> 9) + 5] = MMC5BGVPage[((A) >> 9) + 6] = MMC5BGVPage[((A) >> 9) + 7] = &CHRptr[0][(V) << 12] - (A);
 	}
 }
 
 static INLINE void MMC5SPRVROM_BANK8(uint32 V) {
 	if (CHRptr[0]) {
-		V &= CHRmask8[0]; MMC5SPRVPage[0] = MMC5SPRVPage[1] = MMC5SPRVPage[2] = MMC5SPRVPage[3] = MMC5SPRVPage[4] = MMC5SPRVPage[5] = MMC5SPRVPage[6] = MMC5SPRVPage[7] = &CHRptr[0][(V) << 13];
+		V &= CHRmask8[0]; MMC5SPRVPage[0] = MMC5SPRVPage[1] = MMC5SPRVPage[2] = MMC5SPRVPage[3] = MMC5SPRVPage[4] = MMC5SPRVPage[5] = MMC5SPRVPage[6] = MMC5SPRVPage[7] = 
+											MMC5SPRVPage[8] = MMC5SPRVPage[9] = MMC5SPRVPage[10] = MMC5SPRVPage[11] = MMC5SPRVPage[12] = MMC5SPRVPage[13] = MMC5SPRVPage[14] = MMC5SPRVPage[15] = &CHRptr[0][(V) << 13];
 	}
 }
 static INLINE void MMC5BGVROM_BANK8(uint32 V) {
 	if (CHRptr[0]) {
-		V &= CHRmask8[0]; MMC5BGVPage[0] = MMC5BGVPage[1] = MMC5BGVPage[2] = MMC5BGVPage[3] = MMC5BGVPage[4] = MMC5BGVPage[5] = MMC5BGVPage[6] = MMC5BGVPage[7] = &CHRptr[0][(V) << 13];
+		V &= CHRmask8[0]; MMC5BGVPage[0] = MMC5BGVPage[1] = MMC5BGVPage[2] = MMC5BGVPage[3] = MMC5BGVPage[4] = MMC5BGVPage[5] = MMC5BGVPage[6] = MMC5BGVPage[7] = 
+											MMC5BGVPage[8] = MMC5BGVPage[9] = MMC5BGVPage[10] = MMC5BGVPage[11] = MMC5BGVPage[12] = MMC5BGVPage[13] = MMC5BGVPage[14] = MMC5BGVPage[15] = &CHRptr[0][(V) << 13];
 	}
 }
 
@@ -119,7 +123,7 @@ typedef struct __cartdata {
 	uint8 size;
 } cartdata;
 
-#define MMC5SPRVRAMADR(V)   &MMC5SPRVPage[(V) >> 10][(V)]
+#define MMC5SPRVRAMADR(V)   &MMC5SPRVPage[(V) >> 9][(V)]
 
 uint8* MMC5BGVRAMADR(uint32 A)
 {
@@ -129,23 +133,23 @@ uint8* MMC5BGVRAMADR(uint32 A)
 		{
 			bool isPattern = PPUON != 0;
 			if (ppuphase == PPUPHASE_OBJ && isPattern)
-				return &ABANKS[(A) >> 10][(A)];
+				return &ABANKS[(A) >> 9][(A)];
 			if (ppuphase == PPUPHASE_BG && isPattern)
-				return &BBANKS[(A) >> 10][(A)];
+				return &BBANKS[(A) >> 9][(A)];
 			else if(mmc5ABMode == 0)
-				return &ABANKS[(A) >> 10][(A)];
+				return &ABANKS[(A) >> 9][(A)];
 			else 
-				return &BBANKS[(A) >> 10][(A)];
+				return &BBANKS[(A) >> 9][(A)];
 		}
-		else return &ABANKS[(A) >> 10][(A)];;
+		else return &ABANKS[(A) >> 9][(A)];;
 	}
 
 	if (!Sprite16) {
 		if (mmc5ABMode == 0)
-			return &ABANKS[(A) >> 10][(A)];
+			return &ABANKS[(A) >> 9][(A)];
 		else
-			return &BBANKS[(A) >> 10][(A)];
-	} else return &BBANKS[(A) >> 10][(A)];
+			return &BBANKS[(A) >> 9][(A)];
+	} else return &BBANKS[(A) >> 9][(A)];
 }
 
 static void mmc5_PPUWrite(uint32 A, uint8 V) {
@@ -164,8 +168,8 @@ static void mmc5_PPUWrite(uint32 A, uint8 V) {
 		} else
 			PALRAM[tmp & 0x1F] = V & 0x3F;
 	} else if (tmp < 0x2000) {
-		if (PPUCHRRAM & (1 << (tmp >> 10)))
-			VPage[tmp >> 10][tmp] = V;
+		if (PPUCHRRAM & (3 << (tmp >> 9)))
+			VPage[tmp >> 9][tmp] = V;
 	} else {
 		if (PPUNTARAM & (1 << ((tmp & 0xF00) >> 10)))
 			vnapage[((tmp & 0xF00) >> 10)][tmp & 0x3FF] = V;
@@ -201,7 +205,7 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 		{
 			bool isPattern = !!PPUON;
 			if (ppuphase == PPUPHASE_OBJ && isPattern)
-				return ABANKS[(A) >> 10][(A)];
+				return ABANKS[(A) >> 9][(A)];
 			if (ppuphase == PPUPHASE_BG && isPattern)
 			{
 				if(split)
@@ -212,12 +216,12 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 				if (MMC5HackCHRMode == 1)
 					return *FCEUPPU_GetCHR(A,NTRefreshAddr);
 
-				return BBANKS[(A) >> 10][(A)];
+				return BBANKS[(A) >> 9][(A)];
 			}
 			else if(mmc5ABMode == 0)
-				return ABANKS[(A) >> 10][(A)];
+				return ABANKS[(A) >> 9][(A)];
 			else 
-				return BBANKS[(A) >> 10][(A)];
+				return BBANKS[(A) >> 9][(A)];
 		}
 		else 
 		{
@@ -232,7 +236,7 @@ uint8 FASTCALL mmc5_PPURead(uint32 A)
 					return *FCEUPPU_GetCHR(A,NTRefreshAddr);
 			}
 
-			return ABANKS[(A) >> 10][(A)];
+			return ABANKS[(A) >> 9][(A)];
 		}
 	}
 	else

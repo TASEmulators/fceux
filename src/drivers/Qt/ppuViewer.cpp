@@ -1323,7 +1323,7 @@ void ppuPatternView_t::paintEvent(QPaintEvent *event)
 static int getPPU( unsigned int i )
 {
 	i &= 0x3FFF;
-	if (i < 0x2000)return VPage[(i) >> 10][(i)];
+	if (i < 0x2000)return VPage[(i) >> 9][(i)];
 	//NSF PPU Viewer crash here (UGETAB) (Also disabled by 'MaxSize = 0x2000')
 	if (GameInfo->type == GIT_NSF)
 		return 0;
@@ -1363,7 +1363,7 @@ static int writeMemPPU( unsigned int addr, int value )
 	addr &= 0x3FFF;
 	if (addr < 0x2000)
 	{
-		VPage[addr >> 10][addr] = value; //todo: detect if this is vrom and turn it red if so
+		VPage[addr >> 9][addr] = value; //todo: detect if this is vrom and turn it red if so
 	}
 	if ((addr >= 0x2000) && (addr < 0x3F00))
 	{
@@ -1626,8 +1626,8 @@ void FCEUD_UpdatePPUView(int scanline, int refreshchr)
 		int i10, x10;
 		for (i = 0, x=0x1000; i < 0x1000; i++, x++)
 		{
-			i10 = i>>10;
-			x10 = x>>10;
+			i10 = i>>9;
+			x10 = x>>9;
 
 			if ( VPage[i10] == NULL )
 			{

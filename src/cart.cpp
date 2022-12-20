@@ -38,11 +38,11 @@
 #include <cstdio>
 #include <climits>
 
-uint8 *Page[32], *VPage[8];
+uint8 *Page[32], *VPage[16];
 uint8 **VPageR = VPage;
-uint8 *VPageG[8];
-uint8 *MMC5SPRVPage[8];
-uint8 *MMC5BGVPage[8];
+uint8 *VPageG[16];
+uint8 *MMC5SPRVPage[16];
+uint8 *MMC5BGVPage[16];
 
 static uint8 PRGIsRAM[32];  /* This page is/is not PRG RAM. */
 
@@ -62,6 +62,7 @@ uint32 PRGmask8[32];
 uint32 PRGmask16[32];
 uint32 PRGmask32[32];
 
+uint32 CHRmask512[32];
 uint32 CHRmask1[32];
 uint32 CHRmask2[32];
 uint32 CHRmask4[32];
@@ -105,8 +106,8 @@ void ResetCartMapping(void) {
 		PRGptr[x] = CHRptr[x] = 0;
 		PRGsize[x] = CHRsize[x] = 0;
 	}
-	for (x = 0; x < 8; x++) {
-		MMC5SPRVPage[x] = MMC5BGVPage[x] = VPageR[x] = nothing - 0x400 * x;
+	for (x = 0; x < 16; x++) {
+		MMC5SPRVPage[x] = MMC5BGVPage[x] = VPageR[x] = nothing - 0x200 * x;
 	}
 }
 
@@ -127,11 +128,13 @@ void SetupCartCHRMapping(int chip, uint8 *p, uint32 size, int ram) {
 	CHRptr[chip] = p;
 	CHRsize[chip] = size;
 
+	CHRmask512[chip] = (size >> 9) - 1;
 	CHRmask1[chip] = (size >> 10) - 1;
 	CHRmask2[chip] = (size >> 11) - 1;
 	CHRmask4[chip] = (size >> 12) - 1;
 	CHRmask8[chip] = (size >> 13) - 1;
 
+	if (CHRmask512[chip] >= (unsigned int)(-1)) CHRmask512[chip] = 0;
 	if (CHRmask1[chip] >= (unsigned int)(-1)) CHRmask1[chip] = 0;
 	if (CHRmask2[chip] >= (unsigned int)(-1)) CHRmask2[chip] = 0;
 	if (CHRmask4[chip] >= (unsigned int)(-1)) CHRmask4[chip] = 0;
@@ -225,38 +228,51 @@ void setprg32(uint32 A, uint32 V) {
 	setprg32r(0, A, V);
 }
 
+void setchr512r(int r, uint32 A, uint32 V) {
+	if (!CHRptr[r]) return;
+	FCEUPPU_LineUpdate();
+	V &= CHRmask512[r];
+	if (CHRram[r])
+		PPUCHRRAM |= (1 << (A >> 9));
+	else
+		PPUCHRRAM &= ~(1 << (A >> 9));
+	VPageR[(A) >> 9] = &CHRptr[r][(V) << 9] - (A);
+}
+
 void setchr1r(int r, uint32 A, uint32 V) {
 	if (!CHRptr[r]) return;
 	FCEUPPU_LineUpdate();
 	V &= CHRmask1[r];
 	if (CHRram[r])
-		PPUCHRRAM |= (1 << (A >> 10));
+		PPUCHRRAM |= (3 << (A >> 9));
 	else
-		PPUCHRRAM &= ~(1 << (A >> 10));
-	VPageR[(A) >> 10] = &CHRptr[r][(V) << 10] - (A);
+		PPUCHRRAM &= ~(3 << (A >> 9));
+	VPageR[(A) >> 9] = VPageR[((A) >> 9) + 1] = &CHRptr[r][(V) << 10] - (A);
 }
 
 void setchr2r(int r, uint32 A, uint32 V) {
 	if (!CHRptr[r]) return;
 	FCEUPPU_LineUpdate();
 	V &= CHRmask2[r];
-	VPageR[(A) >> 10] = VPageR[((A) >> 10) + 1] = &CHRptr[r][(V) << 11] - (A);
+	VPageR[(A) >> 9] = VPageR[((A) >> 9) + 1] = VPageR[((A) >> 9) + 2] = VPageR[((A) >> 9) + 3] = &CHRptr[r][(V) << 11] - (A);
 	if (CHRram[r])
-		PPUCHRRAM |= (3 << (A >> 10));
+		PPUCHRRAM |= (15 << (A >> 9));
 	else
-		PPUCHRRAM &= ~(3 << (A >> 10));
+		PPUCHRRAM &= ~(15 << (A >> 9));
 }
 
 void setchr4r(int r, unsigned int A, unsigned int V) {
 	if (!CHRptr[r]) return;
 	FCEUPPU_LineUpdate();
 	V &= CHRmask4[r];
-	VPageR[(A) >> 10] = VPageR[((A) >> 10) + 1] =
-							VPageR[((A) >> 10) + 2] = VPageR[((A) >> 10) + 3] = &CHRptr[r][(V) << 12] - (A);
+	VPageR[(A) >> 9] = VPageR[((A) >> 9) + 1] =
+		VPageR[((A) >> 9) + 2] = VPageR[((A) >> 9) + 3] = 
+		VPageR[((A) >> 9) + 4] = VPageR[((A) >> 9) + 5] = 
+		VPageR[((A) >> 9) + 6] = VPageR[((A) >> 9) + 7] = &CHRptr[r][(V) << 12] - (A);
 	if (CHRram[r])
-		PPUCHRRAM |= (15 << (A >> 10));
+		PPUCHRRAM |= (255 << (A >> 9));
 	else
-		PPUCHRRAM &= ~(15 << (A >> 10));
+		PPUCHRRAM &= ~(255 << (A >> 9));
 }
 
 void setchr8r(int r, uint32 V) {
@@ -265,10 +281,10 @@ void setchr8r(int r, uint32 V) {
 	if (!CHRptr[r]) return;
 	FCEUPPU_LineUpdate();
 	V &= CHRmask8[r];
-	for (x = 7; x >= 0; x--)
+	for (x = 15; x >= 0; x--)
 		VPageR[x] = &CHRptr[r][V << 13];
 	if (CHRram[r])
-		PPUCHRRAM |= (255);
+		PPUCHRRAM |= (65535);
 	else
 		PPUCHRRAM = 0;
 }
@@ -495,7 +511,7 @@ void FixGenieMap(void) {
 
 	geniestage = 2;
 
-	for (x = 0; x < 8; x++)
+	for (x = 0; x < 16; x++)
 		VPage[x] = VPageG[x];
 
 	VPageR = VPage;
@@ -526,8 +542,8 @@ void FCEU_GeniePower(void) {
 	SetWriteHandler(0x8000, 0xFFFF, GenieWrite);
 	SetReadHandler(0x8000, 0xFFFF, GenieRead);
 
-	for (x = 0; x < 8; x++)
-		VPage[x] = GENIEROM + 4096 - 0x400 * x;
+	for (x = 0; x < 16; x++)
+		VPage[x] = GENIEROM + 4096 - 0x200 * x;
 
 	if (AllocGenieRW())
 		VPageR = VPageG;

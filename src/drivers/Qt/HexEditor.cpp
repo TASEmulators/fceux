@@ -259,7 +259,7 @@ static int getPPU( unsigned int i )
 		return 0;
 	}
 	i &= 0x3FFF;
-	if (i < 0x2000)return VPage[(i) >> 10][(i)];
+	if (i < 0x2000)return VPage[(i) >> 9][(i)];
 	//NSF PPU Viewer crash here (UGETAB) (Also disabled by 'MaxSize = 0x2000')
 	if (GameInfo->type == GIT_NSF)
 		return 0;
@@ -356,7 +356,7 @@ static int writeMem( int mode, unsigned int addr, int value )
 			addr &= 0x3FFF;
 			if (addr < 0x2000)
 			{
-				VPage[addr >> 10][addr] = value; //todo: detect if this is vrom and turn it red if so
+				VPage[addr >> 9][addr] = value; //todo: detect if this is vrom and turn it red if so
 			}
 			if ((addr >= 0x2000) && (addr < 0x3F00))
 			{
