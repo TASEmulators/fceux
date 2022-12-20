@@ -89,6 +89,7 @@ bool pauseAfterPlayback = false;
 bool suggestReadOnlyReplay = true;
 bool showStatusIconOpt = true;
 bool drawInputAidsEnable = true;
+bool usePaletteForVideoBg = false;
 unsigned int gui_draw_area_width   = 256;
 unsigned int gui_draw_area_height  = 256;
 

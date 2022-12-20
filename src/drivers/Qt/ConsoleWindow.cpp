@@ -894,7 +894,6 @@ void consoleWin_t::createMainMenu(void)
 	QActionGroup *group;
 	int useNativeMenuBar;
 	int customAutofireOnFrames, customAutofireOffFrames;
-	ColorMenuItem *bgColorItem;
 	//QShortcut *shortcut;
 
 	menubar = new consoleMenuBar(this);
@@ -1254,15 +1253,32 @@ void consoleWin_t::createMainMenu(void)
 
 	optMenu->addAction(act);
 
+	optMenu->addSeparator();
+
 	// Options -> Video BG Color
 	fceuLoadConfigColor( "SDL.VideoBgColor", &videoBgColor );
 
-	bgColorItem = new ColorMenuItem( tr("BG Side Panel Color"), "SDL.VideoBgColor", this );
-	bgColorItem->connectColor( &videoBgColor );
+	bgColorMenuItem = new ColorMenuItem( tr("BG Side Panel Color"), "SDL.VideoBgColor", this );
+	bgColorMenuItem->connectColor( &videoBgColor );
 
-	optMenu->addAction(bgColorItem);
+	optMenu->addAction(bgColorMenuItem);
 
-	connect( bgColorItem, SIGNAL(colorChanged(QColor&)), this, SLOT(videoBgColorChanged(QColor&)) );
+	connect( bgColorMenuItem, SIGNAL(colorChanged(QColor&)), this, SLOT(videoBgColorChanged(QColor&)) );
+
+	// Options -> Use BG Palette for Video BG Color
+	g_config->getOption( "SDL.UseBgPaletteForVideo", &usePaletteForVideoBg );
+
+	act = new QAction(tr("Use BG Palette for Video BG Color"), this);
+	//act->setShortcut( QKeySequence(tr("Alt+/")));
+	act->setCheckable(true);
+	act->setChecked( usePaletteForVideoBg );
+	act->setStatusTip(tr("Use BG Palette for Video BG Color"));
+	//act->setIcon( style()->standardIcon( QStyle::SP_TitleBarMaxButton ) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(toggleUseBgPaletteForVideo(bool)) );
+
+	optMenu->addAction(act);
+
+	bgColorMenuItem->setEnabled( !usePaletteForVideoBg );
 	//-----------------------------------------------------------------------
 	// Emulation
 
@@ -2150,6 +2166,20 @@ void consoleWin_t::toggleMenuAutoHide(bool checked)
 
 	g_config->setOption( "SDL.AutoHideMenuFullsreen", autoHideMenuFullscreen );
 	g_config->save();
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::toggleUseBgPaletteForVideo(bool checked)
+{
+	usePaletteForVideoBg = checked;
+
+	g_config->setOption( "SDL.UseBgPaletteForVideo", usePaletteForVideoBg );
+	g_config->save();
+
+	if ( !usePaletteForVideoBg )
+	{
+		fceuLoadConfigColor( "SDL.VideoBgColor", &videoBgColor );
+	}
+	bgColorMenuItem->setEnabled( !usePaletteForVideoBg );
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::closeApp(void)

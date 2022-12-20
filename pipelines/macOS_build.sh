@@ -5,15 +5,19 @@ id
 pwd
 uname -a
 sw_vers
+env
+
+SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
 
 QT_MAJOR=5;
 QT_PKGNAME=qt$QT_MAJOR;
-FCEUX_VERSION_MAJOR=2
-FCEUX_VERSION_MINOR=6
-FCEUX_VERSION_PATCH=4
+FCEUX_VERSION_MAJOR=`perl $SCRIPT_DIR/../scripts/fceuVersion.pl -major`;
+FCEUX_VERSION_MINOR=`perl $SCRIPT_DIR/../scripts/fceuVersion.pl -minor`;
+FCEUX_VERSION_PATCH=`perl $SCRIPT_DIR/../scripts/fceuVersion.pl -patch`;
+FCEUX_VERSION="$FCEUX_VERSION_MAJOR.$FCEUX_VERSION_MINOR.$FCEUX_VERSION_PATCH";
 SDL2_VERSION=2.0.20
 
-SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
+echo "Building Version: $FCEUX_VERSION";
 
 NPROC=`getconf _NPROCESSORS_ONLN`;
 echo "Number of Processors: $NPROC";
@@ -33,6 +37,10 @@ echo '****************************************'
 echo "APPVEYOR_SSH_KEY=$APPVEYOR_SSH_KEY";
 echo "APPVEYOR_SSH_BLOCK=$APPVEYOR_SSH_BLOCK";
 echo '****************************************'
+
+if [ ! -z $FCEU_RELEASE_VERSION ]; then
+	APPVEYOR_CMAKE_FLAGS=" -DPUBLIC_RELEASE=1 ";
+fi
 
 echo '****************************************'
 echo 'Install Dependency sdl2'
@@ -121,13 +129,23 @@ cmake \
    -DCPACK_PACKAGE_VERSION_MINOR=$FCEUX_VERSION_MINOR \
    -DCPACK_PACKAGE_VERSION_PATCH=$FCEUX_VERSION_PATCH \
    -DQT6=$USE_QT6 \
+   $APPVEYOR_CMAKE_FLAGS \
 	.. || exit 1
 make -j $NPROC || exit 1
 #sudo make install || exit 1 # make install is already run by cpack
 sudo cpack -G DragNDrop || exit 1
 
-echo 'Pushing DMG Package to Build Artifacts'
-appveyor PushArtifact fceux-*.dmg
+if [ ! -z $APPVEYOR ]; then
+	echo 'Pushing DMG Package to Build Artifacts'
+	if [ -z $FCEU_RELEASE_VERSION ]; then
+		cp fceux-*.dmg fceux-Darwin.dmg
+		appveyor PushArtifact fceux-Darwin.dmg
+		appveyor SetVariable  -Name  MACOS_ARTIFACT  -Value  fceux-Darwin.dmg
+	else
+		appveyor PushArtifact fceux-*.dmg
+		appveyor SetVariable  -Name  MACOS_ARTIFACT  -Value  `ls fceux-*.dmg`
+	fi
+fi
 
 # Debug via ssh if necessary
 if [ ! -z $APPVEYOR_SSH_BLOCK ]; then

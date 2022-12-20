@@ -65,7 +65,7 @@ static int cspec = 0;
 static int buttonConfigInProgress = 0;
 
 extern int gametype;
-static int DTestButton(ButtConfig *bc);
+static int DTestButton(ButtConfig *bc, bool isFKB = false);
 
 //std::list<gamepad_function_key_t *> gpKeySeqList;
 
@@ -1416,12 +1416,18 @@ void ButtonConfigEnd()
  * Tests to see if a specified button is currently pressed.
  */
 static int
-DTestButton(ButtConfig *bc)
+DTestButton(ButtConfig *bc, bool isFKB)
 {
-
 	if (bc->ButtType == BUTTC_KEYBOARD)
 	{
-		if (g_keyState[SDL_GetScancodeFromKey(bc->ButtonNum)])
+		bool ignoreKB = false;
+		bool fkbActv  = g_fkbEnabled && (CurInputType[2] == SIFC_FKB);
+
+		if (fkbActv)
+		{
+			ignoreKB = !isFKB;	
+		}
+		if (!ignoreKB && g_keyState[SDL_GetScancodeFromKey(bc->ButtonNum)])
 		{
 			bc->state = 1;
 			return 1;
@@ -1753,6 +1759,10 @@ void FCEUD_SetInput(bool fourscore, bool microphone, ESI port0, ESI port1,
 		CurInputType[1] = port1;
 		CurInputType[2] = fcexp;
 	}
+	if (CurInputType[2] != SIFC_FKB)
+	{
+		g_fkbEnabled = false;
+	}
 
 	replaceP2StartWithMicrophone = microphone;
 
@@ -1880,7 +1890,7 @@ static void UpdateFKB(void)
 
 	vkeyDown = getFamilyKeyboardVirtualKey(50);
 
-	leftShiftDown = DTestButton(&fkbmap[50]) || vkeyDown;
+	leftShiftDown = DTestButton(&fkbmap[50], true) || vkeyDown;
 
 	for (x = 0; x < FAMILYKEYBOARD_NUM_BUTTONS; x++)
 	{
@@ -1896,7 +1906,7 @@ static void UpdateFKB(void)
 
 		vkeyDown = getFamilyKeyboardVirtualKey(x);
 
-		if (DTestButton(&fkbmap[x]) || vkeyDown)
+		if (DTestButton(&fkbmap[x], true) || vkeyDown)
 		{
 			fkbkeys[x] = 1;
 
