@@ -35,39 +35,44 @@
 #define UDBG(...)
 #endif
 
-#define MAPPER_VERSION			0b01000001
+#define MAPPER_VERSION		0b01000001
 
-#define MIRR_VERTICAL				0b00 // VRAM
-#define MIRR_HORIZONTAL			0b01 // VRAM
-#define MIRR_ONE_SCREEN			0b10 // VRAM [+ CHR-RAM]
-#define MIRR_FOUR_SCREEN		0b11 // CHR-RAM
+#define MIRR_VERTICAL		0b00 // VRAM
+#define MIRR_HORIZONTAL		0b01 // VRAM
+#define MIRR_ONE_SCREEN		0b10 // VRAM [+ CHR-RAM]
+#define MIRR_FOUR_SCREEN	0b11 // CHR-RAM
 
-#define PRG_ROM_MODE_0			0b000	// 32K
-#define PRG_ROM_MODE_1			0b001	// 16K + 16K
-#define PRG_ROM_MODE_2			0b010	// 16K + 8K + 8K
-#define PRG_ROM_MODE_3			0b011	// 8K + 8K + 8K + 8K
-#define PRG_ROM_MODE_4			0b100	// 4K + 4K + 4K + 4K + 4K + 4K + 4K + 4K
+#define PRG_ROM_MODE_0		0b000	// 32K
+#define PRG_ROM_MODE_1		0b001	// 16K + 16K
+#define PRG_ROM_MODE_2		0b010	// 16K + 8K + 8K
+#define PRG_ROM_MODE_3		0b011	// 8K + 8K + 8K + 8K
+#define PRG_ROM_MODE_4		0b100	// 4K + 4K + 4K + 4K + 4K + 4K + 4K + 4K
 
-#define PRG_RAM_MODE_0			0b0	// 8K
-#define PRG_RAM_MODE_1			0b1	// 4K
+#define PRG_RAM_MODE_0		0b0	// 8K
+#define PRG_RAM_MODE_1		0b1	// 4K
 
-#define CHR_CHIP_ROM				0b00  // CHR-ROM
-#define CHR_CHIP_RAM				0b01  // CHR-RAM
-#define CHR_CHIP_FPGA_RAM		0b10  // FPGA-RAM
+#define CHR_CHIP_ROM		0b00  // CHR-ROM
+#define CHR_CHIP_RAM		0b01  // CHR-RAM
+#define CHR_CHIP_FPGA_RAM	0b10  // FPGA-RAM
 
-#define CHR_MODE_0				0b000 // 8K mode
-#define CHR_MODE_1				0b001 // 4K mode
-#define CHR_MODE_2				0b010 // 2K mode
-#define CHR_MODE_3				0b011 // 1K mode
-#define CHR_MODE_4				0b100 // 512B mode
+#define CHR_MODE_0			0b000 // 8K mode
+#define CHR_MODE_1			0b001 // 4K mode
+#define CHR_MODE_2			0b010 // 2K mode
+#define CHR_MODE_3			0b011 // 1K mode
+#define CHR_MODE_4			0b100 // 512B mode
 
-#define CHIP_TYPE_PRG			0
-#define CHIP_TYPE_CHR			1
+#define CHIP_TYPE_PRG		0
+#define CHIP_TYPE_CHR		1
 
-#define NT_CIRAM				0b00
-#define NT_CHR_RAM				0b01
-#define NT_FPGA_RAM				0b10
-#define NT_CHR_ROM				0b11
+#define NT_CIRAM			0b00
+#define NT_CHR_RAM			0b01
+#define NT_FPGA_RAM			0b10
+#define NT_CHR_ROM			0b11
+
+#define SpriteON			(PPU[1] & 0x10)	//Show Sprite
+#define ScreenON			(PPU[1] & 0x08)	//Show screen
+#define PPUON				(PPU[1] & 0x18)	//PPU should operate
+#define Sprite16			(PPU[0] & 0x20)	//Sprites 8x16/8x8
 
 static uint8 prg_rom_mode, prg_ram_mode, bootloader;
 static uint16 prg[11]; // 0: $5000, 1: $6000, 2: $7000, 3: $8000, etc
@@ -76,7 +81,7 @@ static uint8 chr_chip, chr_spr_ext_mode, chr_mode;
 static uint16 chr[16];
 
 static uint8 NT_bank[4];
-static uint8 NT_control[4];
+static uint16 SPR_bank[64];
 
 static uint8 mul_a, mul_b;
 static uint16 mul_result;
@@ -98,6 +103,8 @@ static uint8 *CHRRAM = NULL;
 const uint32 CHRRAMSIZE = 32 * 1024;
 
 extern uint8 *ExtraNTARAM;
+
+static uint8 RNBWbattery = 0;
 
 // Scanline IRQ
 static uint8 S_IRQcontrol, S_IRQlatch, S_IRQoffset; // matches hardware register
@@ -203,12 +210,7 @@ static void IRQEnd() {
 		X6502_IRQEnd(FCEU_IQEXT);
 	}
 }
-/*
-static void Rainbow2hb() {
 
-
-}
-*/
 static void Rainbow2IRQ(int a) {
 
 	// Scanline IRQ
@@ -435,6 +437,19 @@ static void Sync(void) {
 	// $4800-$4fff
 	setprg2r(0x12, 0x4800, 3);
 
+	// CHR
+	switch (chr_chip)
+	{
+		case CHR_CHIP_ROM:
+			RNBWHackVROMPtr = PRG_FLASHROM;
+			break;
+		case CHR_CHIP_RAM:
+			RNBWHackVROMPtr = CHRRAM;
+			break;
+		case CHR_CHIP_FPGA_RAM:
+			RNBWHackVROMPtr = FPGA_RAM;
+			break;
+	}
 	if(chr_chip == CHR_CHIP_FPGA_RAM)
 	{
 		setchr4r(0x12, 0x0000, 0);
@@ -474,9 +489,9 @@ static void Sync(void) {
 	for (int i = 0; i < 4; i++)
 	{
 		uint8 cur_NT_bank = NT_bank[i];
-		uint8 cur_NT_chip = NT_control[i] >> 6;
-		uint8 cur_NT_1K_dest = (NT_control[i] & 0x0C) >> 2;
-		uint8 cur_NT_ext_mode = NT_control[i] & 0x03;
+		uint8 cur_NT_chip = RNBWHackNTcontrol[i] >> 6;
+		uint8 cur_NT_1K_dest = (RNBWHackNTcontrol[i] & 0x0C) >> 2;
+		uint8 cur_NT_ext_mode = RNBWHackNTcontrol[i] & 0x03;
 
 		switch (cur_NT_chip)
 		{
@@ -495,50 +510,6 @@ static void Sync(void) {
 		}
 	}
 
-/*
-	switch (mirr_mode)
-	{
-	case MIRR_VERTICAL:
-		setmirror(MI_V);
-		break;
-	case MIRR_HORIZONTAL:
-		setmirror(MI_H);
-		break;
-	case MIRR_ONE_SCREEN:
-		FCEUPPU_LineUpdate();
-		switch (nt_set)
-		{
-		case 0: address = NTARAM; break;
-		case 1: address = NTARAM + 0x400; break;
-		case 2: address = ExtraNTARAM; break;
-		case 3: address = ExtraNTARAM + 0x400; break;
-		}
-		vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = address;
-		PPUNTARAM = 0x0F;
-		break;
-	case MIRR_FOUR_SCREEN:
-		FCEUPPU_LineUpdate();
-		if (CHRRAM != NULL)
-		{
-			for (int i = 0; i < 4; i++)
-			{
-				uint8 t = nt_set ^ 0x03;
-				start = (16 + t * 4) * 1024;
-				offset = i * 0x400;
-				vnapage[i] = CHRRAM + start + offset;
-			}
-			PPUNTARAM = 0x0F;
-		}
-		else
-		{
-			for (int i = 0; i < 4; i++)
-			{
-				offset = i * 0x400;
-				vnapage[i] = DUMMY_CHRRAM + offset;
-			}
-		}
-	}
-*/
 }
 
 static DECLFW(Rainbow2SW) {
@@ -732,10 +703,10 @@ static DECLFW(Rainbow2Write) {
 	case 0x4128: NT_bank[2] = V; Sync(); break;
 	case 0x4129: NT_bank[3] = V; Sync(); break;
 		// Nametables control
-	case 0x412A: NT_control[0] = V; Sync(); break;
-	case 0x412B: NT_control[1] = V; Sync(); break;
-	case 0x412C: NT_control[2] = V; Sync(); break;
-	case 0x412D: NT_control[3] = V; Sync(); break;
+	case 0x412A: RNBWHackNTcontrol[0] = V; Sync(); break;
+	case 0x412B: RNBWHackNTcontrol[1] = V; Sync(); break;
+	case 0x412C: RNBWHackNTcontrol[2] = V; Sync(); break;
+	case 0x412D: RNBWHackNTcontrol[3] = V; Sync(); break;
 		// CHR banking
 	case 0x4130:
 	case 0x4131:
@@ -834,8 +805,18 @@ static DECLFW(Rainbow2Write) {
 		rx_index = V;
 		break;
 	}
+
+	// $4200-$423F Sprite 4K bank upper bits
+	if ((A >= 0x4200) & (A <= 0x423f))
+		SPR_bank[A & 0x3f] = (SPR_bank[A & 0x3f] & 0x00ff) | (V << 8);
+
+	// $4240-$427F Sprite 4K bank lower bits
+	if ((A >= 0x4240) & (A <= 0x427f))
+		SPR_bank[A & 0x3f] = (SPR_bank[A & 0x3f] & 0xff00) | (V);
+
 }
 
+extern uint32 NTRefreshAddr;
 uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 	// if CHR-RAM, check if CHR-RAM exists, if not return data bus cache
 	if (chr_chip == CHR_CHIP_RAM && CHRRAM == NULL)
@@ -851,7 +832,46 @@ uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 		return X.DB;
 	}
 
-	return FFCEUX_PPURead_Default(A);
+	if (A < 0x2000)
+	{
+		if (ppuphase == PPUPHASE_OBJ && ScreenON)
+		{
+			if (chr_spr_ext_mode)
+				if(Sprite16)
+					return RNBWHackVROMPtr[(SPR_bank[RNBWHackCurSprite] << 13) + (A)];
+				else
+					return RNBWHackVROMPtr[(SPR_bank[RNBWHackCurSprite] << 12) + (A)];
+			else
+			{
+				return VPage[A >> 9][A]; // FIXME
+			}
+		}
+
+		if (ppuphase == PPUPHASE_BG && ScreenON)
+			return *FCEUPPU_GetCHR(A, NTRefreshAddr);
+
+		// default
+		return FFCEUX_PPURead_Default(A);
+	}
+	else
+	{
+		if(( A & 0x3FF ) >= 0x3C0)
+		{
+			// Attributes
+			uint8 NT = (A >> 10) & 0x03;
+			uint8 NT_1K_dest = (RNBWHackNTcontrol[NT] & 0x0C) >> 2;
+			uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
+			if (NT_ext_mode & 0x01)
+			{
+				uint8 byte = FPGA_RAM[NT_1K_dest * 0x200 + (NTRefreshAddr & 0x3ff)];
+				//get attribute part and paste it 4x across the byte
+				byte >>= 6;
+				byte *= 0x55;
+				return byte;
+			}
+		}
+		return vnapage[(A >> 10) & 0x3][A & 0x3FF];
+	}
 }
 
 uint8 Rainbow2FlashID(uint8 chip, uint32 A) {
@@ -1248,7 +1268,8 @@ static void Rainbow2Reset(void) {
 	prg_rom_mode = PRG_ROM_MODE_0;
 	prg[3] = 0x7FFF;
 
-	// CHR - 8K banks mapped to first bank
+	// CHR - 8K banks mapped to first bank of CHR-ROM
+	// extended sprite mode disabled
 	chr_chip = CHR_CHIP_ROM;
 	chr_spr_ext_mode = 0;
 	chr_mode = CHR_MODE_0;
@@ -1259,10 +1280,10 @@ static void Rainbow2Reset(void) {
 	NT_bank[1] = 0;
 	NT_bank[2] = 1;
 	NT_bank[3] = 1;
-	NT_control[0] = 0;
-	NT_control[1] = 0;
-	NT_control[2] = 0;
-	NT_control[3] = 0;
+	RNBWHackNTcontrol[0] = 0;
+	RNBWHackNTcontrol[1] = 0;
+	RNBWHackNTcontrol[2] = 0;
+	RNBWHackNTcontrol[3] = 0;
 
 	// Scanline IRQ
 	S_IRQcontrol = 0;
@@ -1326,13 +1347,13 @@ static void Rainbow2Power(void) {
 	SetWriteHandler(0x8000, 0xFFFF, Rainbow2PrgFlash);
 
 	// fill WRAM/FPGA_RAM/CHRRAM/DUMMY_CHRRAM/DUMMY_CHRROM with random values
-	if (WRAM)
+	if (WRAM && RNBWbattery)
 		FCEU_MemoryRand(WRAM, WRAMSIZE, false);
 
-	if (FPGA_RAM)
+	if (FPGA_RAM && RNBWbattery)
 		FCEU_MemoryRand(FPGA_RAM, FPGA_RAMSIZE, false);
 
-	if (CHRRAM)
+	if (CHRRAM && RNBWbattery)
 		FCEU_MemoryRand(CHRRAM, CHRRAMSIZE, false);
 
 	if (DUMMY_CHRRAM)
@@ -1394,6 +1415,9 @@ static void Rainbow2Close(void)
 		delete esp;
 		esp = NULL;
 	}
+
+	RNBWHackVROMPtr = NULL;
+	RNBWHack = 0;
 }
 
 static void StateRestore(int version) {
@@ -1625,10 +1649,7 @@ void RAINBOW2_Init(CartInfo *info) {
 	info->Reset = Rainbow2Reset;
 	info->Close = Rainbow2Close;
 
-	//GameHBIRQHook = Rainbow2hb;
-	MapIRQHook = Rainbow2IRQ;
-	Rainbow2ESI();
-	GameStateRestore = StateRestore;
+	RNBWbattery = info->battery;
 
 	// WRAM
 	if (info->wram_size != 0)
@@ -1729,6 +1750,13 @@ void RAINBOW2_Init(CartInfo *info) {
 		DUMMY_CHRROM = (uint8*)FCEU_gmalloc(DUMMY_CHRROMSIZE);
 		SetupCartCHRMapping(0x10, DUMMY_CHRROM, DUMMY_CHRROMSIZE, 0);
 	}
+
+	//GameHBIRQHook = Rainbow2hb;
+	MapIRQHook = Rainbow2IRQ;
+	RNBWHack = 1;
+	RNBWHackExNTARAMPtr = FPGA_RAM;
+	Rainbow2ESI();
+	GameStateRestore = StateRestore;
 
 	AddExState(&FlashRegs, ~0, 0, 0);
 	AddExState(&Rainbow2StateRegs, ~0, 0, 0);

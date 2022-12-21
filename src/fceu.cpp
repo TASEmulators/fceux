@@ -407,6 +407,7 @@ void ResetGameLoaded(void) {
 	memset(&GameExpSound, 0, sizeof(GameExpSound));
 	MapIRQHook = NULL;
 	MMC5Hack = 0;
+	RNBWHack = 0;
 	PEC586Hack = 0;
 	QTAIHack = 0;
 	PAL &= 1;

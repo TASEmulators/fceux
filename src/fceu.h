@@ -61,6 +61,13 @@ extern uint8 MMC50x5130;
 extern uint8 MMC5HackSPScroll;
 extern uint8 MMC5HackSPPage;
 
+// Rainbow external shared buffers/vars
+extern int RNBWHack;
+extern uint8 *RNBWHackExNTARAMPtr;
+extern uint8 *RNBWHackVROMPtr;
+extern uint8 RNBWHackNTcontrol[4];
+extern uint8 RNBWHackCurSprite;
+
 extern int PEC586Hack;
 
 // VRCV extarnal shared buffers/vars

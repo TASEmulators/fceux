@@ -369,6 +369,12 @@ uint8 MMC50x5130 = 0;
 uint8 MMC5HackSPScroll = 0;
 uint8 MMC5HackSPPage = 0;
 
+int RNBWHack = 0;
+uint8 *RNBWHackExNTARAMPtr = 0;
+uint8 *RNBWHackVROMPtr = 0;
+uint8 RNBWHackNTcontrol[4];
+uint8 RNBWHackCurSprite;
+
 int PEC586Hack = 0;
 
 int QTAIHack = 0;
@@ -444,8 +450,19 @@ uint8 *FCEUPPU_GetCHR(uint32 vadr, uint32 refreshaddr)
 			return MMC5BGVRAMADR(vadr);
 		}
 	}
-	else
-		return VRAMADR(vadr);
+	else if (RNBWHack)
+	{
+		uint8 NT = (NTRefreshAddr >> 10) & 0x03;
+		uint8 NT_1K_dest = (RNBWHackNTcontrol[NT] & 0x0C) >> 2;
+		uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
+		if (NT_ext_mode & 0x02)
+		{
+			uint8 *C = RNBWHackVROMPtr;
+			C += ((RNBWHackExNTARAMPtr[NT_1K_dest * 0x200 + (NTRefreshAddr & 0x3ff)] & 0x3f) << 12) + (vadr & 0xfff);
+			return C;
+		}
+	}
+	return VRAMADR(vadr);
 }
 
 // likewise for ATTR
@@ -456,8 +473,15 @@ int FCEUPPU_GetAttr(int ntnum, int xt, int yt)
 	int refreshaddr = xt + yt * 32;
 	if (MMC5Hack && MMC5HackCHRMode == 1)
 		return (MMC5HackExNTARAMPtr[refreshaddr & 0x3ff] & 0xC0) >> 6;
-	else
-		return (vnapage[ntnum][attraddr] & (3 << temp)) >> temp;
+	else if (RNBWHack)
+	{
+		uint8 NT = (NTRefreshAddr >> 10) & 0x03;
+		uint8 NT_1K_dest = (RNBWHackNTcontrol[NT] & 0x0C) >> 2;
+		uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
+		if (NT_ext_mode & 0x01)
+			return (RNBWHackExNTARAMPtr[NT_1K_dest * 0x200 + (NTRefreshAddr & 0x3ff)] & 0xC0) >> 6;
+	}
+	return (vnapage[ntnum][attraddr] & (3 << temp)) >> temp;
 }
 
 // new ppu-----
@@ -2869,6 +2893,7 @@ int FCEUX_PPU_Loop(int skip)
 					runppu(kFetchTime);
 
 				// pattern table fetches
+				RNBWHackCurSprite = oam[6];
 				RefreshAddr = patternAddress;
 				if (SpriteON)
 					RENDER_LOG(RefreshAddr);
