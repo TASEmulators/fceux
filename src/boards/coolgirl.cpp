@@ -310,8 +310,9 @@ static void COOLGIRL_Sync_PRG(void) {
 
 static void COOLGIRL_Sync_CHR(void) {
 	// calculate CHR shift
-	// wire shift_chr = ENABLE_MAPPER_021_022_023_025 && ENABLE_MAPPER_022 && (mapper == 6'b011000) && flags[1];
-	int chr_shift = ((mapper == 0b011000) && (flags & 0b010)) ? 1 : 0;
+	// wire shift_chr_right = ENABLE_MAPPER_021_022_023_025 && ENABLE_MAPPER_022 && (mapper == 6'b011000) && flags[1];
+	int chr_shift_right = ((mapper == 0b011000) && (flags & 0b010)) ? 1 : 0;
+	int chr_shift_left = 0;
 
 	// enable or disable writes to CHR RAM, setup CHR mask
 	SetupCartCHRMapping(CHR_RAM_CHIP, CHR_RAM, ((((~(chr_mask >> 13) & 0x3F) + 1) * 0x2000 - 1) & (CHR_RAM_SIZE - 1)) + 1, can_write_chr);
@@ -320,69 +321,69 @@ static void COOLGIRL_Sync_CHR(void) {
 	{
 	default:
 	case 0:
-		setchr8r(0x12, chr_bank_a >> 3 >> chr_shift);
+		setchr8r(0x12, chr_bank_a >> 3 >> chr_shift_right << chr_shift_left);
 		break;
 	case 1:
-		setchr4r(0x12, 0x0000, mapper_163_latch >> chr_shift);
-		setchr4r(0x12, 0x1000, mapper_163_latch >> chr_shift);
+		setchr4r(0x12, 0x0000, mapper_163_latch >> chr_shift_right << chr_shift_left);
+		setchr4r(0x12, 0x1000, mapper_163_latch >> chr_shift_right << chr_shift_left);
 		break;
 	case 2:
-		setchr2r(0x12, 0x0000, chr_bank_a >> 1 >> chr_shift);
+		setchr2r(0x12, 0x0000, chr_bank_a >> 1 >> chr_shift_right << chr_shift_left);
 		TKSMIR[0] = TKSMIR[1] = chr_bank_a;
-		setchr2r(0x12, 0x0800, chr_bank_c >> 1 >> chr_shift);
+		setchr2r(0x12, 0x0800, chr_bank_c >> 1 >> chr_shift_right << chr_shift_left);
 		TKSMIR[2] = TKSMIR[3] = chr_bank_c;
-		setchr1r(0x12, 0x1000, chr_bank_e >> chr_shift);
+		setchr1r(0x12, 0x1000, chr_bank_e >> chr_shift_right << chr_shift_left);
 		TKSMIR[4] = chr_bank_e;
-		setchr1r(0x12, 0x1400, chr_bank_f >> chr_shift);
+		setchr1r(0x12, 0x1400, chr_bank_f >> chr_shift_right << chr_shift_left);
 		TKSMIR[5] = chr_bank_f;
-		setchr1r(0x12, 0x1800, chr_bank_g >> chr_shift);
+		setchr1r(0x12, 0x1800, chr_bank_g >> chr_shift_right << chr_shift_left);
 		TKSMIR[6] = chr_bank_g;
-		setchr1r(0x12, 0x1C00, chr_bank_h >> chr_shift);
+		setchr1r(0x12, 0x1C00, chr_bank_h >> chr_shift_right << chr_shift_left);
 		TKSMIR[7] = chr_bank_h;
 		break;
 	case 3:
-		setchr1r(0x12, 0x0000, chr_bank_e >> chr_shift);
+		setchr1r(0x12, 0x0000, chr_bank_e >> chr_shift_right << chr_shift_left);
 		TKSMIR[0] = chr_bank_e;
-		setchr1r(0x12, 0x0400, chr_bank_f >> chr_shift);
+		setchr1r(0x12, 0x0400, chr_bank_f >> chr_shift_right << chr_shift_left);
 		TKSMIR[1] = chr_bank_f;
-		setchr1r(0x12, 0x0800, chr_bank_g >> chr_shift);
+		setchr1r(0x12, 0x0800, chr_bank_g >> chr_shift_right << chr_shift_left);
 		TKSMIR[2] = chr_bank_g;
-		setchr1r(0x12, 0x0C00, chr_bank_h >> chr_shift);
+		setchr1r(0x12, 0x0C00, chr_bank_h >> chr_shift_right << chr_shift_left);
 		TKSMIR[3] = chr_bank_h;
-		setchr2r(0x12, 0x1000, chr_bank_a >> 1 >> chr_shift);
+		setchr2r(0x12, 0x1000, chr_bank_a >> 1 >> chr_shift_right << chr_shift_left);
 		TKSMIR[4] = TKSMIR[5] = chr_bank_a;
-		setchr2r(0x12, 0x1800, chr_bank_c >> 1 >> chr_shift);
+		setchr2r(0x12, 0x1800, chr_bank_c >> 1 >> chr_shift_right << chr_shift_left);
 		TKSMIR[6] = TKSMIR[7] = chr_bank_c;
 		break;
 	case 4:
-		setchr4r(0x12, 0x0000, chr_bank_a >> 2 >> chr_shift);
-		setchr4r(0x12, 0x1000, chr_bank_e >> 2 >> chr_shift);
+		setchr4r(0x12, 0x0000, chr_bank_a >> 2 >> chr_shift_right << chr_shift_left);
+		setchr4r(0x12, 0x1000, chr_bank_e >> 2 >> chr_shift_right << chr_shift_left);
 		break;
 	case 5:
 		if (!ppu_latch0)
-			setchr4r(0x12, 0x0000, chr_bank_a >> 2 >> chr_shift);
+			setchr4r(0x12, 0x0000, chr_bank_a >> 2 >> chr_shift_right << chr_shift_left);
 		else
-			setchr4r(0x12, 0x0000, chr_bank_b >> 2 >> chr_shift);
+			setchr4r(0x12, 0x0000, chr_bank_b >> 2 >> chr_shift_right << chr_shift_left);
 		if (!ppu_latch1)
-			setchr4r(0x12, 0x1000, chr_bank_e >> 2 >> chr_shift);
+			setchr4r(0x12, 0x1000, chr_bank_e >> 2 >> chr_shift_right << chr_shift_left);
 		else
-			setchr4r(0x12, 0x1000, chr_bank_f >> 2 >> chr_shift);
+			setchr4r(0x12, 0x1000, chr_bank_f >> 2 >> chr_shift_right << chr_shift_left);
 		break;
 	case 6:
-		setchr2r(0x12, 0x0000, chr_bank_a >> 1 >> chr_shift);
-		setchr2r(0x12, 0x0800, chr_bank_c >> 1 >> chr_shift);
-		setchr2r(0x12, 0x1000, chr_bank_e >> 1 >> chr_shift);
-		setchr2r(0x12, 0x1800, chr_bank_g >> 1 >> chr_shift);
+		setchr2r(0x12, 0x0000, chr_bank_a >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2r(0x12, 0x0800, chr_bank_c >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2r(0x12, 0x1000, chr_bank_e >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2r(0x12, 0x1800, chr_bank_g >> 1 >> chr_shift_right << chr_shift_left);
 		break;
 	case 7:
-		setchr1r(0x12, 0x0000, chr_bank_a >> chr_shift);
-		setchr1r(0x12, 0x0400, chr_bank_b >> chr_shift);
-		setchr1r(0x12, 0x0800, chr_bank_c >> chr_shift);
-		setchr1r(0x12, 0x0C00, chr_bank_d >> chr_shift);
-		setchr1r(0x12, 0x1000, chr_bank_e >> chr_shift);
-		setchr1r(0x12, 0x1400, chr_bank_f >> chr_shift);
-		setchr1r(0x12, 0x1800, chr_bank_g >> chr_shift);
-		setchr1r(0x12, 0x1C00, chr_bank_h >> chr_shift);
+		setchr1r(0x12, 0x0000, chr_bank_a >> chr_shift_right << chr_shift_left);
+		setchr1r(0x12, 0x0400, chr_bank_b >> chr_shift_right << chr_shift_left);
+		setchr1r(0x12, 0x0800, chr_bank_c >> chr_shift_right << chr_shift_left);
+		setchr1r(0x12, 0x0C00, chr_bank_d >> chr_shift_right << chr_shift_left);
+		setchr1r(0x12, 0x1000, chr_bank_e >> chr_shift_right << chr_shift_left);
+		setchr1r(0x12, 0x1400, chr_bank_f >> chr_shift_right << chr_shift_left);
+		setchr1r(0x12, 0x1800, chr_bank_g >> chr_shift_right << chr_shift_left);
+		setchr1r(0x12, 0x1C00, chr_bank_h >> chr_shift_right << chr_shift_left);
 		break;
 	}
 }
@@ -1175,22 +1176,27 @@ static DECLFW(COOLGIRL_WRITE) {
 			switch ((A >> 12) & 7)
 			{
 			case 2:  // $A000-$AFFF
-				if (!(flags & 1)) // MMC2
-					prg_bank_a = (prg_bank_a & 0xF0) | (V & 0x0F); // prg_bank_a[3:0] = cpu_data_in[3:0];
-				else // MMC4
-					prg_bank_a = (prg_bank_a & 0xE1) | ((V & 0x0F) << 1); // prg_bank_a[4:0] = { cpu_data_in[3:0], 1'b0};
+				if (!(flags & 1)) {
+					// MMC2
+					SET_BITS(prg_bank_a, "3:0", V, "3:0");
+				}
+				else {
+					// MMC4
+					SET_BITS(prg_bank_a, "4:1", V, "3:0"); // prg_bank_a[4:0] = { cpu_data_in[3:0], 1'b0};
+					prg_bank_a &= ~1;
+				}
 				break;
 			case 3: // $B000-$BFFF
-				chr_bank_a = (chr_bank_a & 0x83) | ((V & 0x1F) << 2); // chr_bank_a[6:2] = cpu_data_in[4:0];
+				SET_BITS(chr_bank_a, "6:2", V, "4:0"); // chr_bank_a[6:2] = cpu_data_in[4:0];
 				break;
 			case 4: // $C000-$CFFF
-				chr_bank_b = (chr_bank_b & 0x83) | ((V & 0x1F) << 2); // chr_bank_b[6:2] = cpu_data_in[4:0];
+				SET_BITS(chr_bank_b, "6:2", V, "4:0"); // chr_bank_b[6:2] = cpu_data_in[4:0];
 				break;
 			case 5: // $D000-$DFFF
-				chr_bank_e = (chr_bank_e & 0x83) | ((V & 0x1F) << 2); // chr_bank_b[6:2] = cpu_data_in[4:0];
+				SET_BITS(chr_bank_e, "6:2", V, "4:0"); // chr_bank_e[6:2] = cpu_data_in[4:0];
 				break;
 			case 6: // $E000-$EFFF
-				chr_bank_f = (chr_bank_f & 0x83) | ((V & 0x1F) << 2); // chr_bank_b[6:2] = cpu_data_in[4:0];
+				SET_BITS(chr_bank_f, "6:2", V, "4:0"); // chr_bank_f[6:2] = cpu_data_in[4:0];
 				break;
 			case 7: // $F000-$FFFF
 				mirroring = V & 1;
@@ -1201,9 +1207,12 @@ static DECLFW(COOLGIRL_WRITE) {
 		// Mapper #152
 		if (mapper == 0b010010)
 		{
-			chr_bank_a = (chr_bank_a & 0x87) | ((V & 0x0F) << 3); // chr_bank_a[6:3] = cpu_data_in[3:0];
-			prg_bank_a = (prg_bank_a & 0xF1) | ((V & 0x70) >> 3); // prg_bank_a[3:1] = cpu_data_in[6:4];
-			mirroring = 2 | (V >> 7); // mirroring = {1'b1, cpu_data_in[7]};
+			SET_BITS(chr_bank_a, "6:3", V, "3:0"); // chr_bank_a[6:3] = cpu_data_in[3:0];
+			SET_BITS(prg_bank_a, "3:1", V, "6:4"); // prg_bank_a[3:1] = cpu_data_in[6:4];
+			if (flags & 1)
+				mirroring = 2 | get_bits(V, "7"); // mirroring = {1'b1, cpu_data_in[7]}; // Mapper #152
+			else
+				SET_BITS(prg_bank_a, "4", V, "7"); //prg_bank_a[4] <= cpu_data_in[7]; // Mapper #70
 		}
 
 		// Mapper #73 - VRC3
@@ -1677,8 +1686,13 @@ static DECLFW(COOLGIRL_WRITE) {
 			// case (cpu_addr_in[9:8])
 			switch (get_bits(A, "9:8"))
 			{
+			case 0b00: // $80xx
+				SET_BITS(prg_bank_a, "4:1", V, "3:0");
+				break;
 			case 0b01: // $81xx
 				mirroring = get_bits(V, "1:0"); // mirroring <= cpu_data_in[1:0];
+				SET_BITS(prg_mode, "2", V, "4"); // prg_mode[2] <= cpu_data_in[4];
+				map_rom_on_6000 = get_bits(V, "5"); // map_rom_on_6000 <= cpu_data_in[5];
 				mapper83_irq_enabled_latch = get_bits(V, "7"); // mapper83_irq_enabled_latch <= cpu_data_in[7];
 				break;
 			case 0b10: // 82xx
@@ -1700,20 +1714,36 @@ static DECLFW(COOLGIRL_WRITE) {
 					case 0b00: SET_BITS(prg_bank_a, "7:0", V, "7:0"); break; // 2'b00: prg_bank_a[7:0] <= cpu_data_in[7:0];
 					case 0b01: SET_BITS(prg_bank_b, "7:0", V, "7:0"); break; // 2'b01: prg_bank_b[7:0] <= cpu_data_in[7:0];
 					case 0b10: SET_BITS(prg_bank_b, "7:0", V, "7:0"); break; // 2'b10: prg_bank_c[7:0] <= cpu_data_in[7:0];
-					//case 0b11: SET_BITS(prg_bank_6000, "7:0", V, "7:0"); break; //2'b11: prg_bank_6000[7:0] <= cpu_data_in[7:0];
+					case 0b11: SET_BITS(prg_bank_6000, "7:0", V, "7:0"); break; //2'b11: prg_bank_6000[7:0] <= cpu_data_in[7:0];
 					}
 				}
 				else {
-					switch (get_bits(A, "2:0")) // case (cpu_addr_in[2:0])
+					if (!(flags & 0b100))
 					{
-					case 0b000: SET_BITS(chr_bank_a, "7:0", V, "7:0"); break; // 3'b000: chr_bank_a[7:0] <= cpu_data_in[7:0];
-					case 0b001: SET_BITS(chr_bank_b, "7:0", V, "7:0"); break; // 3'b001: chr_bank_b[7:0] <= cpu_data_in[7:0];
-					case 0b010: SET_BITS(chr_bank_c, "7:0", V, "7:0"); break; // 3'b010: chr_bank_c[7:0] <= cpu_data_in[7:0];
-					case 0b011: SET_BITS(chr_bank_d, "7:0", V, "7:0"); break; // 3'b011: chr_bank_d[7:0] <= cpu_data_in[7:0];
-					case 0b100: SET_BITS(chr_bank_e, "7:0", V, "7:0"); break; // 3'b100: chr_bank_e[7:0] <= cpu_data_in[7:0];
-					case 0b101: SET_BITS(chr_bank_f, "7:0", V, "7:0"); break; // 3'b101: chr_bank_f[7:0] <= cpu_data_in[7:0];
-					case 0b110: SET_BITS(chr_bank_g, "7:0", V, "7:0"); break; // 3'b110: chr_bank_g[7:0] <= cpu_data_in[7:0];
-					case 0b111: SET_BITS(chr_bank_h, "7:0", V, "7:0"); break; // 3'b111: chr_bank_h[7:0] <= cpu_data_in[7:0];
+						switch (get_bits(A, "2:0")) // case (cpu_addr_in[2:0])
+						{
+						case 0b000: SET_BITS(chr_bank_a, "7:0", V, "7:0"); break; // 3'b000: chr_bank_a[7:0] <= cpu_data_in[7:0];
+						case 0b001: SET_BITS(chr_bank_b, "7:0", V, "7:0"); break; // 3'b001: chr_bank_b[7:0] <= cpu_data_in[7:0];
+						case 0b010: SET_BITS(chr_bank_c, "7:0", V, "7:0"); break; // 3'b010: chr_bank_c[7:0] <= cpu_data_in[7:0];
+						case 0b011: SET_BITS(chr_bank_d, "7:0", V, "7:0"); break; // 3'b011: chr_bank_d[7:0] <= cpu_data_in[7:0];
+						case 0b100: SET_BITS(chr_bank_e, "7:0", V, "7:0"); break; // 3'b100: chr_bank_e[7:0] <= cpu_data_in[7:0];
+						case 0b101: SET_BITS(chr_bank_f, "7:0", V, "7:0"); break; // 3'b101: chr_bank_f[7:0] <= cpu_data_in[7:0];
+						case 0b110: SET_BITS(chr_bank_g, "7:0", V, "7:0"); break; // 3'b110: chr_bank_g[7:0] <= cpu_data_in[7:0];
+						case 0b111: SET_BITS(chr_bank_h, "7:0", V, "7:0"); break; // 3'b111: chr_bank_h[7:0] <= cpu_data_in[7:0];
+						}
+					}
+					else {
+						switch (get_bits(A, "2:0")) // case (cpu_addr_in[2:0])
+						{
+						case 0b000:
+							SET_BITS(chr_bank_a, "8:1", V, "7:0"); break; // 3'b000: chr_bank_a[8:1] <= cpu_data_in[7:0];
+						case 0b001:
+							SET_BITS(chr_bank_c, "8:1", V, "7:0"); break; // 3'b001: chr_bank_c[8:1] <= cpu_data_in[7:0];
+						case 0b110:
+							SET_BITS(chr_bank_e, "8:1", V, "7:0"); break; // 3'b110: chr_bank_e[8:1] <= cpu_data_in[7:0];
+						case 0b111: 
+							SET_BITS(chr_bank_g, "8:1", V, "7:0"); break; // 3'b111: chr_bank_g[8:1] <= cpu_data_in[7:0];
+						}
 					}
 				}
 				break;

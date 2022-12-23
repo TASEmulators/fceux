@@ -34,7 +34,6 @@
  * +---------- CHR mask (CHR A17 from 0: MMC3; 1: alternate)
  *
  * $xxx1
- *
  * 7  bit  0
  * ---- ----
  * GHIJ KKLx
