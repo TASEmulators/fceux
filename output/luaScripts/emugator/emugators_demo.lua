@@ -20,11 +20,11 @@ PAGE_RIGHT = {x = DRAWER_OFFSET_X + CART_WIDTH + DRAWER_BUFFER_X + 16, y = DRAWE
 
 local currPage = 1
 local cart = {x1=50, y1=50, x2=100, y2=100}
-local console = {x1=150, y1=75, x2=200, y2=125}
+local console = {x1=DRAWER_WIDTH + 2*DRAWER_OFFSET_X, y1=DRAWER_OFFSET_Y, x2=MAX_SCREEN_WIDTH - DRAWER_OFFSET_X, y2=DRAWER_OFFSET_Y + DRAWER_HEIGHT/2}
 local unloadButton = {x1 = 220, y1 = 220, x2 = 250, y2 = 230}
 local ejectInsertButton = {x1 = 5, y1 = 220, x2 = 64, y2 = 230}
 local switchButton = {x1 = 180, y1 = 220, x2 = 210, y2 = 230}
-local selectedRom = nil
+local selectedRom = {selected = nil, x = 0, y = 0}
 local wasClicked = false
 local lmbWasPressed = false
 
@@ -100,7 +100,7 @@ while(true) do
 
 		--draw gui background
 		gui.rect(0, 0, MAX_SCREEN_WIDTH-1, MAX_SCREEN_HEIGHT-1,"grey")   
-		local srcImg = gd.createFromPng("gui/DrjMicroMusuem.png"):gdStr()
+		local srcImg = gd.createFromPng("gui/DrJMicroMuseum.png"):gdStr()
 		gui.gdoverlay(20, 20, srcImg)
 
 		gui.rect(DRAWER_OFFSET_X, DRAWER_OFFSET_Y, DRAWER_OFFSET_X + DRAWER_WIDTH, DRAWER_OFFSET_Y + DRAWER_HEIGHT + 5,"blue", "white")   
@@ -113,23 +113,30 @@ while(true) do
 		gui.gdoverlay(PAGE_RIGHT.x, PAGE_RIGHT.y, rightArrow:gdStr())
 		gui.gdoverlay(PAGE_LEFT.x, PAGE_LEFT.y, leftArrow:gdStr())
 
+		--Draw console
+		--gui.rect(console.x1, console.y1, console.x2, console.y2, "blue", "white")
+		--gui.text(console.x1 + 9, console.y1 + 16, "Famicom\n/NES")
+		local im = gd.createFromPng("gui/famicom.png")
+		gui.rect(console.x1 + 10, console.y1 + 30, console.x1 + 10 + im:sizeX(), console.y1 + 30 + im:sizeY(), "grey", "white")
+		gui.gdoverlay(console.x1 + 10, console.y1 + 30, im:gdStr())  --doesnt actually line up quite right with hitbox, needs to be adjusted when image is finalized
+
 		--Load Cartridge if dropped on Console
 		if (inpt.leftclick == nil) then
-			if((inpt.xmouse > console.x1) and (inpt.xmouse < console.x2) and (inpt.ymouse > console.y1) and (inpt.ymouse < console.y2) and selectedRom ~= nil) then
-				emu.loadrom(romDir ..FAMICOM_Roms[currPage][selectedRom].rom)
-			elseif((inpt.xmouse > PAGE_LEFT.x) and (inpt.xmouse < PAGE_LEFT.x + leftArrow:sizeX()) and (inpt.ymouse > PAGE_LEFT.y) and (inpt.ymouse < PAGE_LEFT.y + leftArrow:sizeY()) and selectedRom == nil and lmbWasPressed) then
+			if((inpt.xmouse > console.x1) and (inpt.xmouse < console.x2) and (inpt.ymouse > console.y1) and (inpt.ymouse < console.y2) and selectedRom.selected ~= nil) then
+				emu.loadrom(romDir ..FAMICOM_Roms[currPage][selectedRom.selected].rom)
+			elseif((inpt.xmouse > PAGE_LEFT.x) and (inpt.xmouse < PAGE_LEFT.x + leftArrow:sizeX()) and (inpt.ymouse > PAGE_LEFT.y) and (inpt.ymouse < PAGE_LEFT.y + leftArrow:sizeY()) and selectedRom.selected == nil and lmbWasPressed) then
 				if(currPage > 1) then
 					currPage = currPage - 1
 				end
-			elseif((inpt.xmouse > PAGE_RIGHT.x) and (inpt.xmouse < PAGE_RIGHT.x + rightArrow:sizeX()) and (inpt.ymouse > PAGE_RIGHT.y) and (inpt.ymouse < PAGE_RIGHT.y + rightArrow:sizeY()) and selectedRom == nil and lmbWasPressed) then
+			elseif((inpt.xmouse > PAGE_RIGHT.x) and (inpt.xmouse < PAGE_RIGHT.x + rightArrow:sizeX()) and (inpt.ymouse > PAGE_RIGHT.y) and (inpt.ymouse < PAGE_RIGHT.y + rightArrow:sizeY()) and selectedRom.selected == nil and lmbWasPressed) then
 				if(currPage < pageNumber) then
 					currPage = currPage + 1
 				end
 			end
 
-			if(selectedRom ~= nil) then
-				FAMICOM_Roms[currPage][selectedRom].isSelected = false
-				selectedRom = nil
+			if(selectedRom.selected ~= nil) then
+				FAMICOM_Roms[currPage][selectedRom.selected].isSelected = false
+				selectedRom.selected = nil
 			end
 		end
 
@@ -141,25 +148,30 @@ while(true) do
 			end
 		end
 
-		if (selectedRom == nil) then
+		if (selectedRom.selected == nil) then
 			local index = 0
 			for _, rom in pairs(FAMICOM_Roms[currPage]) do
-				if ((inpt.xmouse > rom.x) and (inpt.xmouse < (rom.x+CART_WIDTH)) and (inpt.ymouse > rom.y) and (inpt.ymouse < (rom.y+CART_HEIGHT)) and inpt.leftclick) then
-					selectedRom = rom.slot
-					rom.isSelected = true
-					break
+				if ((inpt.xmouse > rom.x) and (inpt.xmouse < (rom.x+CART_WIDTH)) and (inpt.ymouse > rom.y) and (inpt.ymouse < (rom.y+CART_HEIGHT))) then
+					gui.text(inpt.xmouse, inpt.ymouse, rom.name)
+					if(inpt.leftclick and lmbWasPressed == false) then
+						selectedRom.selected = rom.slot
+						selectedRom.x = inpt.xmouse
+						selectedRom.y = inpt.ymouse
+						rom.isSelected = true
+						break
+					end
 				end
 			end
 		else
 			--gui.rect(inpt.xmouse, inpt.ymouse, inpt.xmouse+50, inpt.ymouse+50, "red", "white")
 			--gui.text(inpt.xmouse + 12, inpt.ymouse+12, "Legend\nOf\nZelda\nII")
-			local gdstr = FAMICOM_Roms[currPage][selectedRom].image:gdStr()
-			gui.gdoverlay(inpt.xmouse, inpt.ymouse, gdstr)
+			local gdstr = FAMICOM_Roms[currPage][selectedRom.selected].image:gdStr()
+			gui.gdoverlay(inpt.xmouse + (FAMICOM_Roms[currPage][selectedRom.selected].x - selectedRom.x), inpt.ymouse + (FAMICOM_Roms[currPage][selectedRom.selected].y - selectedRom.y), gdstr)
 		end
 
-		--Draw console
-		gui.rect(console.x1, console.y1, console.x2, console.y2, "blue", "white")
-		gui.text(console.x1 + 9, console.y1 + 16, "Famicom\n/NES")
+		if(selectedRom.selected ~= nil) then
+			gui.text(inpt.xmouse, inpt.ymouse, FAMICOM_Roms[currPage][selectedRom.selected].name)
+		end
 
 		lmbWasPressed = inpt.leftclick ~= nil
 
