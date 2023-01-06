@@ -800,6 +800,10 @@ BMAPPINGLocal bmap[] = {
 
 int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	int result;
+	struct md5_context md5;
+	uint64 partialmd5 = 0;
+	const char* mappername = "Not Listed";
+
 	if (FCEU_fread(&head, 1, 16, fp) != 16 || memcmp(&head, "NES\x1A", 4))
 		return LOADER_INVALID_FORMAT;
 	
@@ -946,8 +950,6 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	if (VROM_size)
 		FCEU_fread(VROM, 0x2000, VROM_size, fp);
 
-	struct md5_context md5;
-	uint64 partialmd5 = 0;
 	md5_starts(&md5); 
 	md5_update(&md5, ROM, ROM_size << 14);
 
@@ -974,8 +976,6 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 			FCEU_printf("%02x",iNESCart.MD5[x]);
 		FCEU_printf("\n");
 	}
-
-	const char* mappername = "Not Listed";
 
 	for (int mappertest = 0; mappertest < (sizeof bmap / sizeof bmap[0]) - 1; mappertest++) {
 		if (bmap[mappertest].number == MapperNo) {
