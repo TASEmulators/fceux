@@ -2422,7 +2422,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				int mouse_x = GET_X_LPARAM(lParam);
 				int mouse_y = GET_Y_LPARAM(lParam);
 				//mbg merge 7/18/06 changed pausing check
-				if (FCEUI_EmulationPaused() && (mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
+				if ((mouse_x > 6) && (mouse_x < 30) && (mouse_y > 10))
 				{
 					int tmp = (mouse_y - 10) / debugSystem->disasmFontHeight;
 					if (tmp < (int)disassembly_addresses.size())

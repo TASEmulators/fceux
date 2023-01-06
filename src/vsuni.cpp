@@ -319,9 +319,11 @@ void FCEU_VSUniCheck(uint64 md5partial, int *MapperNo, uint8 *Mirroring) {
 				tofix |= 32;
 				GameInfo->input[0] = SI_ZAPPER;
 				GameInfo->input[1] = SI_NONE;
+				GameInfo->inputfc = SIFC_NONE;
 			}
-			else if (!head.expansion == 0) {
+			else if (!head.expansion) {
 				GameInfo->input[0] = GameInfo->input[1] = SI_GAMEPAD;
+				GameInfo->inputfc = SIFC_NONE;
 			}
 			if ((vs->ioption & VS_OPTION_SWAPDIRAB) && !GameInfo->vs_cswitch) {
 				tofix |= 64;
