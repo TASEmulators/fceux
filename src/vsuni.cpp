@@ -32,15 +32,17 @@
 #include <cstring>
 #include <cstdio>
 
-static uint8 show_dips = 0;
+static int DIPS_howlong = 0;
 uint8 vsdip = 0;
 
-void FCEUI_VSUniToggleDIPView(void) {
-	show_dips = !show_dips;
-}
-
 void FCEU_VSUniToggleDIP(int w) {
+	if (GameInfo->type != GIT_VSUNI) {
+		FCEU_DispMessage("Not Vs. System; toggle DIP switch.", 0);
+		return;
+	}
 	vsdip ^= 1 << w;
+	DIPS_howlong = 180;
+	FCEU_DispMessage("DIP switch %d is %s.", 0, w, vsdip & (1 << w) ? "on" : "off");
 }
 
 void FCEUI_VSUniSetDIP(int w, int state) {
@@ -81,7 +83,10 @@ static DECLFR(VSSecRead) {
 uint8 coinon = 0;
 
 void FCEU_VSUniCoin(void) {
-	coinon = 6;
+	if (GameInfo->type != GIT_VSUNI) 
+		FCEU_DispMessage("Not Vs. System; can't insert coin.", 0);
+	else
+		coinon = 6;
 }
 
 static readfunc OldReadPPU;
@@ -369,7 +374,7 @@ void FCEU_VSUniDraw(uint8 *XBuf) {
 	uint32 *dest;
 	int y, x;
 
-	if (!show_dips) return;
+	if (DIPS_howlong-- <= 0) return;
 
 	dest = (uint32*)(XBuf + 256 * 12 + 164);
 	for (y = 24; y; y--, dest += (256 - 72) >> 2) {
