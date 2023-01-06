@@ -798,6 +798,7 @@ BMAPPINGLocal bmap[] = {
 };
 
 int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
+	int result;
 	if (FCEU_fread(&head, 1, 16, fp) != 16 || memcmp(&head, "NES\x1A", 4))
 		return LOADER_INVALID_FORMAT;
 	
@@ -1025,7 +1026,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	iNESCart.mirror = Mirroring;
 	iNESCart.mirrorAs2Bits = MirroringAs2bits;
 
-	int result = iNES_Init(MapperNo);
+	result = iNES_Init(MapperNo);
 	switch(result)
 	{
 	case 0:
