@@ -279,7 +279,8 @@ static void SetInputNes20(uint8 expansion) {
 
 	int x = 0;
 
-	if (expansion == 0x02) eoptions |= 32768; // dirty hack to enable Four-Score
+	if (expansion == 0x02) 
+		eoptions |= 32768; // dirty hack to enable Four-Score
 	GameInfo->vs_cswitch = expansion == 0x05;		
 
 	while (moo[x].expansion_id) {

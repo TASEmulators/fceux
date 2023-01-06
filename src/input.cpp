@@ -106,6 +106,8 @@ uint8 FCEU_GetJoyJoy(void)
 }
 
 extern uint8 coinon;
+extern uint8 coinon2;
+extern uint8 service;
 
 //set to true if the fourscore is attached
 static bool FSAttached = false;
@@ -431,8 +433,11 @@ void FCEU_UpdateInput(void)
 		portFC.driver->Update(portFC.ptr,portFC.attrib);
 	}
 
-	if(GameInfo->type==GIT_VSUNI)
-		if(coinon) coinon--;
+	if (GameInfo->type == GIT_VSUNI) {
+		if (coinon) coinon--;
+		if (coinon2) coinon2--;
+		if (service) service--;
+	}
 
 	if(FCEUnetplay)
 		NetplayUpdate(joy);
@@ -454,7 +459,11 @@ static DECLFR(VSUNIRead0)
 
 	ret|=(vsdip&3)<<3;
 	if(coinon)
-		ret|=0x4;
+		ret |= 0x20;
+	if (coinon2)
+		ret |= 0x40;
+	if (service)
+		ret |= 0x04;
 	return ret;
 }
 
@@ -668,7 +677,9 @@ void FCEU_DoSimpleCommand(int cmd)
 	{
 	case FCEUNPCMD_FDSINSERT: FCEU_FDSInsert();break;
 	case FCEUNPCMD_FDSSELECT: FCEU_FDSSelect();break;
-	case FCEUNPCMD_VSUNICOIN: FCEU_VSUniCoin(); break;
+	case FCEUNPCMD_VSUNICOIN: FCEU_VSUniCoin(0); break;
+	case FCEUNPCMD_VSUNICOIN2: FCEU_VSUniCoin(1); break;
+	case FCEUNPCMD_VSUNISERVICE: FCEU_VSUniService(); break;
 	case FCEUNPCMD_VSUNIDIP0:
 	case FCEUNPCMD_VSUNIDIP0+1:
 	case FCEUNPCMD_VSUNIDIP0+2:
@@ -724,6 +735,22 @@ void FCEUI_VSUniCoin(void)
 		return;
 
 	FCEU_QSimpleCommand(FCEUNPCMD_VSUNICOIN);
+}
+
+void FCEUI_VSUniCoin2(void)
+{
+	if (!FCEU_IsValidUI(FCEUI_INSERT_COIN))
+		return;
+
+	FCEU_QSimpleCommand(FCEUNPCMD_VSUNICOIN2);
+}
+
+void FCEUI_VSUniService(void)
+{
+	if (!FCEU_IsValidUI(FCEUI_INSERT_COIN))
+		return;
+
+	FCEU_QSimpleCommand(FCEUNPCMD_VSUNISERVICE);
 }
 
 //Resets the frame counter if movie inactive and rom is reset or power-cycle
@@ -901,17 +928,17 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_FDS_EJECT_INSERT,				EMUCMDTYPE_FDS,		FCEUI_FDSInsert,				0, 0, "Eject or Insert FDS Disk", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_FDS_SIDE_SELECT,				EMUCMDTYPE_FDS,		FCEUI_FDSSelect,				0, 0, "Switch FDS Disk Side", EMUCMDFLAG_TASEDITOR },
 
-	{ EMUCMD_VSUNI_COIN,					EMUCMDTYPE_VSUNI,	FCEUI_VSUniCoin,				0, 0, "Insert Coin", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_VSUNI_TOGGLE_DIP_0,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 0", 0 },
-	{ EMUCMD_VSUNI_TOGGLE_DIP_1,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 1", 0 },
-	{ EMUCMD_VSUNI_TOGGLE_DIP_2,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 2", 0 },
-	{ EMUCMD_VSUNI_TOGGLE_DIP_3,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 3", 0 },
-	{ EMUCMD_VSUNI_TOGGLE_DIP_4,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 4", 0 },
-	{ EMUCMD_VSUNI_TOGGLE_DIP_5,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 5", 0 },
-	{ EMUCMD_VSUNI_TOGGLE_DIP_6,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 6", 0 },
-	{ EMUCMD_VSUNI_TOGGLE_DIP_7,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 7", 0 },
-	{ EMUCMD_VSUNI_TOGGLE_DIP_8,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 8", 0 },
-	{ EMUCMD_VSUNI_TOGGLE_DIP_9,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dipswitch 9", 0 },
+	{ EMUCMD_VSUNI_COIN,					EMUCMDTYPE_VSUNI,	FCEUI_VSUniCoin,				0, 0, "Insert Coin #1", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_VSUNI_COIN_2,					EMUCMDTYPE_VSUNI,	FCEUI_VSUniCoin2,				0, 0, "Insert Coin #2", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_VSUNI_SERVICE_BUTTON,			EMUCMDTYPE_VSUNI,	FCEUI_VSUniService,				0, 0, "Service Button", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_VSUNI_TOGGLE_DIP_0,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dip Switch 0", 0 },
+	{ EMUCMD_VSUNI_TOGGLE_DIP_1,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dip Switch 1", 0 },
+	{ EMUCMD_VSUNI_TOGGLE_DIP_2,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dip Switch 2", 0 },
+	{ EMUCMD_VSUNI_TOGGLE_DIP_3,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dip Switch 3", 0 },
+	{ EMUCMD_VSUNI_TOGGLE_DIP_4,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dip Switch 4", 0 },
+	{ EMUCMD_VSUNI_TOGGLE_DIP_5,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dip Switch 5", 0 },
+	{ EMUCMD_VSUNI_TOGGLE_DIP_6,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dip Switch 6", 0 },
+	{ EMUCMD_VSUNI_TOGGLE_DIP_7,			EMUCMDTYPE_VSUNI,	CommandToggleDip,				0, 0, "Toggle Dip Switch 7", 0 },
 
 	{ EMUCMD_MISC_AUTOSAVE,					EMUCMDTYPE_MISC,	FCEUI_RewindToLastAutosave,		0, 0, "Load Last Auto-save", 0},
 	{ EMUCMD_MISC_SHOWSTATES,				EMUCMDTYPE_MISC,	ViewSlots,						0, 0, "View save slots", 0 },

@@ -254,6 +254,8 @@ void FCEUI_VSUniToggleDIP(int w);
 uint8 FCEUI_VSUniGetDIPs(void);
 void FCEUI_VSUniSetDIP(int w, int state);
 void FCEUI_VSUniCoin(void);
+void FCEUI_VSUniCoin2(void);
+void FCEUI_VSUniService(void);
 
 void FCEUI_FDSInsert(void); //mbg merge 7/17/06 changed to void fn(void) to make it an EMUCMDFN
 //int FCEUI_FDSEject(void);

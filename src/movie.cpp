@@ -1221,7 +1221,11 @@ void FCEUMOV_AddInputState()
 		if (mr->command_fds_select())
 			FCEU_FDSSelect();
 		if (mr->command_vs_insertcoin())
-			FCEU_VSUniCoin();
+			FCEU_VSUniCoin(0);
+		if (mr->command_vs_insertcoin2())
+			FCEU_VSUniCoin(1);
+		if (mr->command_vs_service())
+			FCEU_VSUniService();
 		_currCommand = 0;
 	} else
 #endif
@@ -1249,7 +1253,11 @@ void FCEUMOV_AddInputState()
 			if(mr->command_fds_select())
 				FCEU_FDSSelect();
 			if (mr->command_vs_insertcoin())
-				FCEU_VSUniCoin();
+				FCEU_VSUniCoin(0);
+			if (mr->command_vs_insertcoin2())
+				FCEU_VSUniCoin(1);
+			if (mr->command_vs_service())
+				FCEU_VSUniService();
 
 			joyports[0].load(mr);
 			joyports[1].load(mr);
@@ -1327,6 +1335,8 @@ void FCEUMOV_AddCommand(int cmd)
 		case FCEUNPCMD_FDSINSERT: cmd = MOVIECMD_FDS_INSERT; break;
 		case FCEUNPCMD_FDSSELECT: cmd = MOVIECMD_FDS_SELECT; break;
 		case FCEUNPCMD_VSUNICOIN: cmd = MOVIECMD_VS_INSERTCOIN; break;
+		case FCEUNPCMD_VSUNICOIN2: cmd = MOVIECMD_VS_INSERTCOIN2; break;
+		case FCEUNPCMD_VSUNISERVICE: cmd = MOVIECMD_VS_SERVICE; break;
 		// all other netplay commands (e.g. FCEUNPCMD_VSUNIDIP0) are not supported by movie recorder for now
 		default: return;
 	}

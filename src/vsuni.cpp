@@ -80,13 +80,29 @@ static DECLFR(VSSecRead) {
 	}
 	return(0x00);
 }
-uint8 coinon = 0;
 
-void FCEU_VSUniCoin(void) {
+uint8 coinon = 0;
+uint8 coinon2 = 0;
+uint8 service = 0;
+
+void FCEU_VSUniCoin(uint8 slot) {
 	if (GameInfo->type != GIT_VSUNI) 
 		FCEU_DispMessage("Not Vs. System; can't insert coin.", 0);
+	else {
+		switch (slot) {
+		case 0:
+			coinon = 6; break;
+		case 1:
+			coinon2 = 6; break;
+		}
+	}
+}
+
+void FCEU_VSUniService() {
+	if (GameInfo->type != GIT_VSUNI)
+		FCEU_DispMessage("Not Vs. System; can't press service button.", 0);
 	else
-		coinon = 6;
+		service = 6;
 }
 
 static readfunc OldReadPPU;
@@ -131,7 +147,7 @@ void FCEU_VSUniSwap(uint8 *j0, uint8 *j1) {
 }
 
 void FCEU_VSUniPower(void) {
-	coinon = 0;
+	coinon = coinon2 = service = 0;
 	VSindex = 0;
 
 	if (secptr)
@@ -404,6 +420,8 @@ void FCEU_VSUniDraw(uint8 *XBuf) {
 SFORMAT FCEUVSUNI_STATEINFO[] = {
 	{ &vsdip, 1, "vsdp" },
 	{ &coinon, 1, "vscn" },
+	{ &coinon2, 1, "vsc2" },
+	{ &service, 1, "vssv" },
 	{ &VSindex, 1, "vsin" },
 	{ 0 }
 };

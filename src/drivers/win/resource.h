@@ -924,6 +924,10 @@
 #define ID_HEXEDITOR_DEFCOLOR           40009
 #define ID_CDLOGGER_DEFCOLOR            40010
 #define ID_DEBUGGER_DEFCOLOR            40011
+#define ID_Menu                         40012
+#define MENU_INSERT_COIN2               40013
+#define MENU_SERVICE                    40014
+#define MENU_SERVICE_BUTTON             40015
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1226,7 +1230,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        313
-#define _APS_NEXT_COMMAND_VALUE         40012
+#define _APS_NEXT_COMMAND_VALUE         40016
 #define _APS_NEXT_CONTROL_VALUE         1050
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
