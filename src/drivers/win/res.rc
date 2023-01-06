@@ -7,7 +7,8 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -294,7 +295,7 @@ BEGIN
     CTEXT           "1",IDC_STATIC,18,105,8,8
     CTEXT           "2",IDC_STATIC,18,116,8,8
     CTEXT           "3",IDC_STATIC,18,128,8,8
-    CONTROL         "Attach four-score (implies four gamepads)",CHECK_ENABLE_FOURSCORE,
+    CONTROL         "Attach four-score (four gamepads)",CHECK_ENABLE_FOURSCORE,
                     "Button",BS_AUTOCHECKBOX,18,18,142,12
     CONTROL         "Replace Port 2 Start With Microphone",CHECK_ENABLE_MICROPHONE,
                     "Button",BS_AUTOCHECKBOX,174,18,142,12
@@ -3311,7 +3312,8 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
