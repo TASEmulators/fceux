@@ -25,7 +25,7 @@
 
 static uint8 is26;
 static uint8 prg[2], chr[8], mirr;
-static uint8 IRQLatch, IRQa, IRQd;
+static uint8 IRQLatch, IRQa, IRQd, IRQMode;
 static int32 IRQCount, CycleCount;
 static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE;
@@ -40,6 +40,7 @@ static SFORMAT StateRegs[] =
 	{ &IRQLatch, 1, "IRQL" },
 	{ &IRQCount, 4, "IRQC" },
 	{ &CycleCount, 4, "CYCC" },
+	{ &IRQMode, 1, "IRQM" },
 	{ 0 }
 };
 
@@ -109,6 +110,7 @@ static DECLFW(VRC6Write) {
 	case 0xE003: chr[7] = V; Sync(); break;
 	case 0xF000: IRQLatch = V; X6502_IRQEnd(FCEU_IQEXT); break;
 	case 0xF001:
+		IRQMode = V & 4;
 		IRQa = V & 2;
 		IRQd = V & 1;
 		if (V & 2)
@@ -132,13 +134,25 @@ static void VRC6Power(void) {
 
 static void VRC6IRQHook(int a) {
 	if (IRQa) {
-		CycleCount += a * 3;
-		while(CycleCount >= 341) {
-			CycleCount -= 341;
-			IRQCount++;
-			if (IRQCount == 0x100) {
-				IRQCount = IRQLatch;
-				X6502_IRQBegin(FCEU_IQEXT);
+		if (IRQMode) {
+			CycleCount += a;
+			while (CycleCount > 0) {
+				CycleCount--;
+				IRQCount++;
+				if (IRQCount & 0x100) {
+					X6502_IRQBegin(FCEU_IQEXT);
+					IRQCount = IRQLatch;
+				}
+			}
+		} else {
+			CycleCount += a * 3;
+			while(CycleCount >= 341) {
+				CycleCount -= 341;
+				IRQCount++;
+				if (IRQCount == 0x100) {
+					IRQCount = IRQLatch;
+					X6502_IRQBegin(FCEU_IQEXT);
+				}
 			}
 		}
 	}

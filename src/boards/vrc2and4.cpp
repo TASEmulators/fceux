@@ -23,7 +23,7 @@
 static bool isPirate;
 static uint8 is22, reg1mask, reg2mask;
 static uint16 IRQCount;
-static uint8 IRQLatch, IRQa;
+static uint8 IRQLatch, IRQa, IRQMode;
 static uint8 prgreg[2], chrreg[8];
 static uint16 chrhi[8];
 static uint8 regcmd, irqcmd, mirr, big_bank;
@@ -45,6 +45,7 @@ static SFORMAT StateRegs[] =
 	{ &IRQCount, 2, "IRQC" },
 	{ &IRQLatch, 1, "IRQL" },
 	{ &IRQa, 1, "IRQA" },
+	{ &IRQMode, 1, "IRQM" },
 	{ 0 }
 };
 
@@ -115,7 +116,7 @@ static DECLFW(VRC24Write) {
 		case 0x9003: regcmd = V; Sync(); break;
 		case 0xF000: X6502_IRQEnd(FCEU_IQEXT); IRQLatch &= 0xF0; IRQLatch |= V & 0xF; break;
 		case 0xF001: X6502_IRQEnd(FCEU_IQEXT); IRQLatch &= 0x0F; IRQLatch |= V << 4; break;
-		case 0xF002: X6502_IRQEnd(FCEU_IQEXT); acount = 0; IRQCount = IRQLatch; IRQa = V & 2; irqcmd = V & 1; break;
+		case 0xF002: X6502_IRQEnd(FCEU_IQEXT); acount = 0; IRQCount = IRQLatch; IRQMode = V & 4; IRQa = V & 2; irqcmd = V & 1; break;
 		case 0xF003: X6502_IRQEnd(FCEU_IQEXT); IRQa = irqcmd; break;
 		}
 }
@@ -136,14 +137,26 @@ static void VRC24Power(void) {
 void VRC24IRQHook(int a) {
 	#define LCYCS 341
 	if (IRQa) {
-		acount += a * 3;
-		if (acount >= LCYCS) {
-			while (acount >= LCYCS) {
-				acount -= LCYCS;
+		if (IRQMode) {
+			acount += a;
+			while (acount > 0) {
+				acount--;
 				IRQCount++;
 				if (IRQCount & 0x100) {
 					X6502_IRQBegin(FCEU_IQEXT);
 					IRQCount = IRQLatch;
+				}
+			}
+		} else {
+			acount += a * 3;
+			if (acount >= LCYCS) {
+				while (acount >= LCYCS) {
+					acount -= LCYCS;
+					IRQCount++;
+					if (IRQCount & 0x100) {
+						X6502_IRQBegin(FCEU_IQEXT);
+						IRQCount = IRQLatch;
+					}
 				}
 			}
 		}
