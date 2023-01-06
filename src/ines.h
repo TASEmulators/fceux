@@ -54,18 +54,19 @@ extern TMasterRomInfoParams MasterRomInfoParams;
 
 //mbg merge 7/19/06 changed to c++ decl format
 struct iNES_HEADER {
-	char ID[4]; /*NES^Z*/        // 0-3
-	uint8 ROM_size;              // 4
-	uint8 VROM_size;             // 5
-	uint8 ROM_type;              // 6
-	uint8 ROM_type2;             // 7
-	uint8 ROM_type3;             // 8
-	uint8 Upper_ROM_VROM_size;   // 9
-	uint8 RAM_size;              // 10
-	uint8 VRAM_size;             // 11
-	uint8 TV_system;             // 12
-	uint8 VS_hardware;           // 13
-	uint8 reserved[2];           // 14, 15
+	char ID[4]; /*NES^Z*/		// 0-3
+	uint8 ROM_size;				// 4
+	uint8 VROM_size;			// 5
+	uint8 ROM_type;				// 6
+	uint8 ROM_type2;			// 7
+	uint8 ROM_type3;			// 8
+	uint8 Upper_ROM_VROM_size;	// 9
+	uint8 RAM_size;				// 10
+	uint8 VRAM_size;			// 11
+	uint8 TV_system;			// 12
+	uint8 VS_hardware;			// 13
+	uint8 misc_roms;			// 14
+	uint8 expansion;			// 15
 
 	void cleanup()
 	{

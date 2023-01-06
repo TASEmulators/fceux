@@ -525,7 +525,7 @@ INT_PTR CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP)
 		SetDlgItemText(hDlg, IDC_ROM_FILE_EDIT, LoadedRomFName);
 
 		char textHeader[16 * 3];
-		sprintf(textHeader, "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", header->ID[0], header->ID[1], header->ID[2], header->ID[3], header->ROM_size, header->VROM_size, header->ROM_size, header->ROM_type2, header->ROM_type3, header->Upper_ROM_VROM_size, header->RAM_size, header->VRAM_size, header->TV_system, header->VS_hardware, header->reserved[0], header->reserved[1]);
+		sprintf(textHeader, "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", header->ID[0], header->ID[1], header->ID[2], header->ID[3], header->ROM_size, header->VROM_size, header->ROM_size, header->ROM_type2, header->ROM_type3, header->Upper_ROM_VROM_size, header->RAM_size, header->VRAM_size, header->TV_system, header->VS_hardware, header->misc_roms, header->expansion);
 		SetDlgItemText(hDlg, IDC_HEX_HEADER_EDIT, textHeader);
 
 		hFont = (HFONT)SendMessage(hDlg, WM_GETFONT, 0, 0);
@@ -602,7 +602,7 @@ INT_PTR CALLBACK HeaderEditorProc(HWND hDlg, UINT uMsg, WPARAM wP, LPARAM lP)
 					case IDC_RESTORE_BUTTON:
 						SetHeaderData(hDlg, header);
 						char textHeader[16 * 3];
-						sprintf(textHeader, "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", header->ID[0], header->ID[1], header->ID[2], header->ID[3], header->ROM_size, header->VROM_size, header->ROM_size, header->ROM_type2, header->ROM_type3, header->Upper_ROM_VROM_size, header->RAM_size, header->VRAM_size, header->TV_system, header->VS_hardware, header->reserved[0], header->reserved[1]);
+						sprintf(textHeader, "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", header->ID[0], header->ID[1], header->ID[2], header->ID[3], header->ROM_size, header->VROM_size, header->ROM_size, header->ROM_type2, header->ROM_type3, header->Upper_ROM_VROM_size, header->RAM_size, header->VRAM_size, header->TV_system, header->VS_hardware, header->misc_roms, header->expansion);
 						SetDlgItemText(hDlg, IDC_HEX_HEADER_EDIT, textHeader);
 						break;
 					case IDSAVE:
@@ -915,7 +915,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 	}
 
 	// Input Device:
-	int input = header->reserved[1] & 0x3F;
+	int input = header->expansion & 0x3F;
 	if (SendDlgItemMessage(hwnd, IDC_INPUT_DEVICE_COMBO, CB_SETCURSEL, input, 0) == CB_ERR)
 	{
 		sprintf(buf, "$%02X", input);
@@ -923,7 +923,7 @@ void SetHeaderData(HWND hwnd, iNES_HEADER* header) {
 	}
 
 	// Miscellaneous ROM Area(s)
-	sprintf(buf, "%d", header->reserved[0] & 3);
+	sprintf(buf, "%d", header->misc_roms & 3);
 	SetDlgItemText(hwnd, IDC_MISCELLANEOUS_ROMS_EDIT, buf);
 
 	// Trainer
@@ -1578,7 +1578,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 	{
 		int input;
 		if (GetComboBoxListItemData(hwnd, IDC_INPUT_DEVICE_COMBO, &input, buf, header) && input <= 0x3F)
-			_header.reserved[1] |= input & 0x3F;
+			_header.expansion |= input & 0x3F;
 		else
 		{
 			if (header)
@@ -1625,7 +1625,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 
 			return false;
 		}
-		_header.reserved[0] |= misc_roms & 3;
+		_header.misc_roms |= misc_roms & 3;
 	}
 
 	// iNES 1.0 unofficial properties
@@ -1673,7 +1673,7 @@ bool WriteHeaderData(HWND hwnd, iNES_HEADER* header)
 		memcpy(header, &_header, sizeof(iNES_HEADER));
 	else
 	{
-		sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", _header.ID[0], _header.ID[1], _header.ID[2], _header.ID[3], _header.ROM_size, _header.VROM_size, _header.ROM_type, _header.ROM_type2, _header.ROM_type3, _header.Upper_ROM_VROM_size, _header.RAM_size, _header.VRAM_size, _header.TV_system, _header.VS_hardware, _header.reserved[0], _header.reserved[1]);
+		sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", _header.ID[0], _header.ID[1], _header.ID[2], _header.ID[3], _header.ROM_size, _header.VROM_size, _header.ROM_type, _header.ROM_type2, _header.ROM_type3, _header.Upper_ROM_VROM_size, _header.RAM_size, _header.VRAM_size, _header.TV_system, _header.VS_hardware, _header.misc_roms, _header.expansion);
 		SetDlgItemText(hwnd, IDC_HEX_HEADER_EDIT, buf);
 	}
 
@@ -1834,7 +1834,7 @@ bool ShowINESFileBox(HWND parent, char* buf, iNES_HEADER* header)
 				strcpy(filename, _filename);
 			}
 			char header_str[32];
-			sprintf(header_str, " [%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X].nes", header->ROM_size, header->VROM_size, header->ROM_size, header->ROM_type2, header->ROM_type3, header->Upper_ROM_VROM_size, header->RAM_size, header->VRAM_size, header->TV_system, header->VS_hardware, header->reserved[0], header->reserved[1]);
+			sprintf(header_str, " [%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X].nes", header->ROM_size, header->VROM_size, header->ROM_size, header->ROM_type2, header->ROM_type3, header->Upper_ROM_VROM_size, header->RAM_size, header->VRAM_size, header->TV_system, header->VS_hardware, header->misc_roms, header->expansion);
 			strcat(filename, header_str);
 			strcpy(path, GetRomPath(true).c_str());
 		}

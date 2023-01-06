@@ -16,12 +16,34 @@ enum EGIV
 	GIV_USER	= 2,  //What was set by FCEUI_SetVidSys().
 };
 
+enum EGIPPU
+{
+	GIPPU_USER			= 0,
+	GIPPU_RP2C04_0001	= 1,
+	GIPPU_RP2C04_0002	= 2,
+	GIPPU_RP2C04_0003	= 3,
+	GIPPU_RP2C04_0004	= 4,
+	GIPPU_RC2C03B		= 5,
+	GIPPU_RC2C05_01		= 6,
+	GIPPU_RC2C05_02		= 7,
+	GIPPU_RC2C05_03		= 8,
+	GIPPU_RC2C05_04		= 9,
+};
+
+enum EGIVS
+{
+	EGIVS_NORMAL	= 0,
+	EGIVS_RBI		= 1, // RBI Baseball protection
+	EGIVS_TKO		= 2, // TKO Boxing protection
+	EGIVS_XEVIOUS	= 3, // Super Xevious protection
+};
+
 enum ESIS
 {
 	SIS_NONE		= 0,
 	SIS_DATACH		= 1,
 	SIS_NWC			= 2,
-	SIS_VSUNISYSTEM	= 3,
+	SIS_VSUNISYSTEM	= 3, // Is it used?
 	SIS_NSF			= 4,
 };
 
@@ -43,6 +65,8 @@ enum ESI
 
 	SI_COUNT = SI_LCDCOMP_ZAPPER
 };
+
+
 
 inline const char* ESI_Name(ESI esi)
 {
@@ -137,6 +161,9 @@ struct FCEUGI
 	ESI input[2];   //Desired input for emulated input ports 1 and 2; -1 for unknown desired input.
 	ESIFC inputfc;  //Desired Famicom expansion port device. -1 for unknown desired input.
 	ESIS cspecial;  //Special cart expansion: DIP switches, barcode reader, etc.
+	EGIPPU vs_ppu;	//PPU type for Vs. System
+	EGIVS vs_type;	//Vs. System type
+	uint8 vs_cswitch; // Switch first and second controllers for Vs. System
 
 	MD5DATA MD5;
 

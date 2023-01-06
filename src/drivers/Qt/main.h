@@ -29,12 +29,12 @@ extern int eoptions;
 #define EO_SUBASE      2
 #define EO_CLIPSIDES   8
 #define EO_SNAPNAME    16
-#define EO_FOURSCORE	32
 #define EO_NOTHROTTLE	64
 #define EO_GAMEGENIE	128
 #define EO_PAL		256
 #define EO_LOWPASS	512
 #define EO_AUTOHIDE	1024
+#define EO_FOURSCORE	32768 // for compatibility with non-Qt
 
 extern int _sound;
 extern long soundrate;

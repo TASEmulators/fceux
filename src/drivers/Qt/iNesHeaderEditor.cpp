@@ -1197,7 +1197,7 @@ void iNesHeaderEditor_t::setHeaderData(iNES_HEADER* header)
 	}
 
 	// Input Device:
-	int input = header->reserved[1] & 0x3F;
+	int input = header->expansion & 0x3F;
 	for (i=0; i<inputDevBox->count(); i++)
 	{
 		if ( inputDevBox->itemData(i).toInt() == input )
@@ -1207,7 +1207,7 @@ void iNesHeaderEditor_t::setHeaderData(iNES_HEADER* header)
 	}
 
 	// Miscellaneous ROM Area(s)
-	sprintf(buf, "%d", header->reserved[0] & 3);
+	sprintf(buf, "%d", header->misc_roms & 3);
 	miscRomsEdit->setText( tr(buf) );
 
 	// Trainer
@@ -1920,7 +1920,7 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 		int input = inputDevBox->itemData(idx).toInt();
 		if (input <= 0x3F)
 		{
-			_header.reserved[1] |= input & 0x3F;
+			_header.expansion |= input & 0x3F;
 		}
 		else
 		{
@@ -1944,7 +1944,7 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 			showErrorMsgWindow("Miscellaneous ROM(s) count has exceeded the limit of iNES 2.0 (3)");
 			return false;
 		}
-		_header.reserved[0] |= misc_roms & 3;
+		_header.misc_roms |= misc_roms & 3;
 	}
 
 	// iNES 1.0 unofficial properties
@@ -2022,7 +2022,7 @@ void iNesHeaderEditor_t::printHeader(iNES_HEADER* _header)
 	printf("%02X ", _header->VRAM_size);
 	printf("%02X ", _header->TV_system);
 	printf("%02X ", _header->VS_hardware);
-	printf("%02X ", _header->reserved[0]);
-	printf("%02X\n", _header->reserved[1]);
+	printf("%02X ", _header->misc_roms);
+	printf("%02X\n", _header->expansion);
 }
 //----------------------------------------------------------------------------
