@@ -1105,7 +1105,7 @@ int iNesSaveAs(const char* name)
 	//caitsith2: done. iNesSave() now gets filename and calls iNesSaveAs with that filename.
 	FILE *fp;
 
-	if (GameInfo->type != GIT_CART) return 0;
+	if ((GameInfo->type != GIT_CART) && (GameInfo->type != GIT_VSUNI)) return 0;
 	if (GameInterface != iNESGI) return 0;
 
 	fp = fopen(name, "wb");
