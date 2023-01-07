@@ -495,12 +495,12 @@ void PaletteConfDialog_t::openPaletteFile(void)
 	QString filename;
 	std::string last, iniPath;
 	char dir[512];
-	char exePath[512];
+	const char *exePath = nullptr;
 	QFileDialog dialog(this, tr("Open NES Palette"));
 	QList<QUrl> urls;
 	QDir d;
 
-	fceuExecutablePath(exePath, sizeof(exePath));
+	exePath = fceuExecutablePath();
 
 	//urls = dialog.sidebarUrls();
 	urls << QUrl::fromLocalFile(QDir::rootPath());

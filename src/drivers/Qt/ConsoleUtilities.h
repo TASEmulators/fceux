@@ -17,7 +17,7 @@ int getFileBaseName( const char *filepath, char *base, char *suffix = NULL );
 
 int parseFilepath( const char *filepath, char *dir, char *base, char *suffix = NULL );
 
-int fceuExecutablePath( char *outputPath, size_t outputSize );
+const char *fceuExecutablePath(void);
 
 int fceuLoadConfigColor( const char *confName, QColor *color );
 

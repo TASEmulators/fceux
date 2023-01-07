@@ -370,12 +370,12 @@ void GuiConfDialog_t::openQss(void)
 	QString filename;
 	std::string last, iniPath;
 	char dir[512];
-	char exePath[512];
+	const char *exePath = nullptr;
 	QFileDialog dialog(this, tr("Open Qt Stylesheet (QSS)"));
 	QList<QUrl> urls;
 	QDir d;
 
-	fceuExecutablePath(exePath, sizeof(exePath));
+	exePath = fceuExecutablePath();
 
 	//urls = dialog.sidebarUrls();
 	urls << QUrl::fromLocalFile(QDir::rootPath());
@@ -474,12 +474,12 @@ void GuiConfDialog_t::openQPal(void)
 	QString filename;
 	std::string last, iniPath;
 	char dir[512];
-	char exePath[512];
+	const char *exePath = nullptr;
 	QFileDialog dialog(this, tr("Open Qt QPalette File (QPAL)"));
 	QList<QUrl> urls;
 	QDir d;
 
-	fceuExecutablePath(exePath, sizeof(exePath));
+	exePath = fceuExecutablePath();
 
 	//urls = dialog.sidebarUrls();
 	urls << QUrl::fromLocalFile(QDir::rootPath());
@@ -1177,13 +1177,13 @@ void GuiPaletteEditDialog_t::paletteSaveAs(void)
 	QString filename;
 	std::string last, iniPath;
 	char dir[512];
-	char exePath[512];
+	const char *exePath = nullptr;
 	QFileDialog dialog(this, tr("Save QPalette (qpal)"));
 	QList<QUrl> urls;
 	QDir d;
 	QPalette pal = this->palette();
 
-	fceuExecutablePath(exePath, sizeof(exePath));
+	exePath = fceuExecutablePath();
 
 	//urls = dialog.sidebarUrls();
 	urls << QUrl::fromLocalFile(QDir::rootPath());

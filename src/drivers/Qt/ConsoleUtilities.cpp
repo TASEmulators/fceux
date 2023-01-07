@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 
 #include <QWindow>
 #include <QScreen>
@@ -47,6 +48,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleUtilities.h"
 
+static std::string fceuExecPath;
 //---------------------------------------------------------------------------
 int  getDirFromFile( const char *path, char *dir, size_t bufSize )
 {
@@ -229,13 +231,9 @@ int parseFilepath( const char *filepath, char *dir, char *base, char *suffix )
 }
 //---------------------------------------------------------------------------
 //  Returns the path of fceux.exe as a string.
-int fceuExecutablePath( char *outputPath, size_t outputSize )
+static int _fceuExecutablePath( std::string &outputPath )
 {
-	if ( (outputPath == NULL) || (outputSize <= 0) )
-	{
-		return -1;
-	}
-	outputPath[0] = 0;
+	outputPath.clear();
 
 #ifdef WIN32
 	char fullPath[2048];
@@ -246,8 +244,7 @@ int fceuExecutablePath( char *outputPath, size_t outputSize )
 	GetModuleFileNameA(NULL, fullPath, 2048);
 	_splitpath(fullPath, driveLetter, directory, NULL, NULL);
 	snprintf(finalPath, sizeof(finalPath), "%s%s", driveLetter, directory);
-	strncpy( outputPath, finalPath, outputSize );
-	outputPath[outputSize-1] = 0;
+	outputPath.assign( finalPath );
 
 	return 0;
 #elif __linux__ || __unix__
@@ -265,8 +262,7 @@ int fceuExecutablePath( char *outputPath, size_t outputSize )
 		if ( dir )
 		{
 			//printf("DIR Path: '%s' \n", dir );
-			strncpy( outputPath, dir, outputSize );
-			outputPath[outputSize-1] = 0;
+			outputPath.assign( dir );
 			return 0;
 		}
 	}
@@ -286,13 +282,21 @@ int fceuExecutablePath( char *outputPath, size_t outputSize )
 		if ( dir )
 		{
 			//printf("DIR Path: '%s' \n", dir );
-			strncpy( outputPath, dir, outputSize );
-			outputPath[outputSize-1] = 0;
+			outputPath.assign( dir );
 			return 0;
 		}
 	}
 #endif
 	return -1;
+}
+//---------------------------------------------------------------------------
+const char *fceuExecutablePath(void)
+{
+	if (fceuExecPath.size() == 0)
+	{
+		_fceuExecutablePath( fceuExecPath );
+	}
+	return fceuExecPath.c_str();
 }
 //---------------------------------------------------------------------------
 int fceuLoadConfigColor( const char *confName, QColor *color )

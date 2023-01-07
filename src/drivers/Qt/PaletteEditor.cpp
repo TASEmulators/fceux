@@ -315,13 +315,13 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	char dir[512];
-	char exePath[512];
+	const char *exePath = nullptr;
 	std::string  last, iniPath;
 	QFileDialog  dialog(this, tr("Open Palette From File") );
 	QList<QUrl> urls;
 	QDir  d;
 
-	fceuExecutablePath( exePath, sizeof(exePath) );
+	exePath = fceuExecutablePath();
 
 	//urls = dialog.sidebarUrls();
 	urls << QUrl::fromLocalFile( QDir::rootPath() );
