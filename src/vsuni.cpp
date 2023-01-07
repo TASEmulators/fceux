@@ -373,9 +373,9 @@ void FCEU_VSUniCheck(uint64 md5partial, int *MapperNo, uint8 *Mirroring) {
 					sprintf(gigastr + strlen(gigastr), "Vs. System PPU should be set to \"%s\".  ", mstr[vs->ppu]);
 				}
 				if (tofix & 32)
-					sprintf(gigastr + strlen(gigastr), "The controller type should be set to zapper.  ", MapperNo);
+					sprintf(gigastr + strlen(gigastr), "The controller type should be set to zapper.  ");
 				if (tofix & 64)
-					sprintf(gigastr + strlen(gigastr), "The controllers should be swapped.  ", MapperNo);
+					sprintf(gigastr + strlen(gigastr), "The controllers should be swapped.  ");
 				strcat(gigastr, "\n");
 				FCEU_printf("%s", gigastr);
 			}
