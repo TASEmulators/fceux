@@ -171,7 +171,7 @@ void FCEU_VSUniPower(void) {
 		OldReadPPU = GetReadHandler(0x2002);
 		SetReadHandler(0x2002, 0x2002, A2002_MBJ);
 	}
-	if (GameInfo->vs_ppu == GameInfo->vs_ppu == GIPPU_RC2C05_01 || GameInfo->vs_ppu == GIPPU_RC2C05_02 || GameInfo->vs_ppu == GIPPU_RC2C05_03 || GameInfo->vs_ppu == GIPPU_RC2C05_04) {
+	if (GameInfo->vs_ppu == GIPPU_RC2C05_01 || GameInfo->vs_ppu == GIPPU_RC2C05_02 || GameInfo->vs_ppu == GIPPU_RC2C05_03 || GameInfo->vs_ppu == GIPPU_RC2C05_04) {
 		OldWritePPU[0] = GetWriteHandler(0x2000);
 		OldWritePPU[1] = GetWriteHandler(0x2001);
 		SetWriteHandler(0x2000, 0x2001, B2000_2001_2C05);
