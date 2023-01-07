@@ -4374,9 +4374,9 @@ static int getGameDebugBreakpointFileName(char *filepath)
 	}
 
 	filepath[i] = '.'; i++;
+	filepath[i] = 'f'; i++;
 	filepath[i] = 'd'; i++;
 	filepath[i] = 'b'; i++;
-	filepath[i] = 'g'; i++;
 	filepath[i] =  0;
 
 	return 0;
