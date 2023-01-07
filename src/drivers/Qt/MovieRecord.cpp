@@ -222,7 +222,7 @@ void MovieRecordDialog_t::setLoadState(void)
 
 	g_config->getOption ("SDL.LastLoadStateFrom", &last );
 
-	getDirFromFile( last.c_str(), dir );
+	getDirFromFile( last.c_str(), dir, sizeof(dir) );
 
 	dialog.setDirectory( tr(dir) );
 
@@ -330,7 +330,7 @@ void MovieRecordDialog_t::browseFiles(void)
 
 	g_config->getOption ("SDL.LastOpenMovie", &last );
 
-	getDirFromFile( last.c_str(), dir );
+	getDirFromFile( last.c_str(), dir, sizeof(dir) );
 
 	dialog.setDirectory( tr(dir) );
 

@@ -768,7 +768,7 @@ void GuiCheatsDialog_t::openCheatFile(void)
 
 	g_config->getOption("SDL.LastOpenFile", &last);
 
-	getDirFromFile(last.c_str(), dir);
+	getDirFromFile(last.c_str(), dir, sizeof(dir));
 
 	dialog.setDirectory(tr(dir));
 

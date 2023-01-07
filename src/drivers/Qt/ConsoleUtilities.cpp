@@ -25,6 +25,7 @@
 #include <QWindow>
 #include <QScreen>
 #include <QToolTip>
+#include <QFileInfo>
 #include <QApplication>
 
 #if WIN32
@@ -47,31 +48,28 @@
 #include "Qt/ConsoleUtilities.h"
 
 //---------------------------------------------------------------------------
-int  getDirFromFile( const char *path, char *dir )
+int  getDirFromFile( const char *path, char *dir, size_t bufSize )
 {
-	int i, lastSlash = -1, lastPeriod = -1;
+	dir[0] = 0;
 
-	i=0; 
-	while ( path[i] != 0 )
+	if (path[0] != 0)
 	{
-		if ( path[i] == '/' )
-		{
-			lastSlash = i;
-		}
-		else if ( path[i] == '.' )
-		{
-			lastPeriod = i;
-		}
-		dir[i] = path[i]; i++;
-	}
-	dir[i] = 0;
+		QFileInfo fi;
 
-	if ( lastPeriod >= 0 )
-	{
-		if ( lastPeriod > lastSlash )
+		fi.setFile( QString(path) );
+
+		if (fi.exists())
 		{
-			dir[lastSlash] = 0;
+			strncpy( dir, fi.canonicalPath().toStdString().c_str(), bufSize );
 		}
+		else
+		{
+			strncpy( dir, fi.absolutePath().toStdString().c_str(), bufSize );
+		}
+
+		dir[bufSize-1] = 0;
+
+		//printf("Dir: '%s'\n", dir);
 	}
 
 	return 0;
@@ -231,7 +229,7 @@ int parseFilepath( const char *filepath, char *dir, char *base, char *suffix )
 }
 //---------------------------------------------------------------------------
 //  Returns the path of fceux.exe as a string.
-int fceuExecutablePath( char *outputPath, int outputSize )
+int fceuExecutablePath( char *outputPath, size_t outputSize )
 {
 	if ( (outputPath == NULL) || (outputSize <= 0) )
 	{

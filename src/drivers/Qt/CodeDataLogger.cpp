@@ -505,7 +505,7 @@ void CodeDataLoggerDialog_t::loadCdlFile(void)
 
 	if (romFile)
 	{
-		getDirFromFile(romFile, dir);
+		getDirFromFile(romFile, dir, sizeof(dir));
 
 		dialog.setDirectory(tr(dir));
 	}

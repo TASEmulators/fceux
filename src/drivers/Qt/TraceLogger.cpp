@@ -578,14 +578,14 @@ void TraceLoggerDialog_t::openLogFile(void)
 	if (romFile != NULL)
 	{
 		char dir[1024];
-		getDirFromFile(romFile, dir);
+		getDirFromFile(romFile, dir, sizeof(dir));
 		dialog.setDirectory(tr(dir));
 	}
 
 	if ( logFilePath.size() != 0 )
 	{
 		char dir[1024];
-		getDirFromFile(logFilePath.c_str(), dir);
+		getDirFromFile(logFilePath.c_str(), dir, sizeof(dir));
 		dialog.setDirectory(tr(dir));
 	}
 

@@ -9,7 +9,7 @@
 #include <QHelpEvent>
 #include <QCheckBox>
 
-int  getDirFromFile( const char *path, char *dir );
+int  getDirFromFile( const char *path, char *dir, size_t bufSize );
 
 const char *getRomFile( void );
 
@@ -17,7 +17,7 @@ int getFileBaseName( const char *filepath, char *base, char *suffix = NULL );
 
 int parseFilepath( const char *filepath, char *dir, char *base, char *suffix = NULL );
 
-int fceuExecutablePath( char *outputPath, int outputSize );
+int fceuExecutablePath( char *outputPath, size_t outputSize );
 
 int fceuLoadConfigColor( const char *confName, QColor *color );
 

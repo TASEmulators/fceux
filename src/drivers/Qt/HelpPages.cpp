@@ -175,7 +175,7 @@ std::string consoleWin_t::findHelpFile(void)
 
 	if ( last.size() > 0 )
 	{
-		getDirFromFile( last.c_str(), dir );
+		getDirFromFile( last.c_str(), dir, sizeof(dir) );
 
 		dialog.setDirectory( tr(dir) );
 	}

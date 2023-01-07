@@ -443,7 +443,7 @@ void MoviePlayDialog_t::doScan(void)
 
 	g_config->getOption("SDL.LastOpenMovie", &last);
 
-	getDirFromFile(last.c_str(), dir);
+	getDirFromFile(last.c_str(), dir, sizeof(dir));
 
 	scanDirectory(dir, md5);
 }
@@ -509,7 +509,7 @@ void MoviePlayDialog_t::openMovie(void)
 
 	g_config->getOption("SDL.LastOpenMovie", &last);
 
-	getDirFromFile(last.c_str(), dir);
+	getDirFromFile(last.c_str(), dir, sizeof(dir));
 
 	dialog.setDirectory(tr(dir));
 

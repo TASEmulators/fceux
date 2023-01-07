@@ -379,7 +379,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 #endif
 	}
 
-	getDirFromFile(last.c_str(), dir);
+	getDirFromFile(last.c_str(), dir, sizeof(dir));
 
 	dialog.setDirectory(tr(dir));
 

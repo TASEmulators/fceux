@@ -419,7 +419,7 @@ void GuiConfDialog_t::openQss(void)
 		last.assign(iniPath);
 	}
 
-	getDirFromFile(last.c_str(), dir);
+	getDirFromFile(last.c_str(), dir, sizeof(dir));
 
 	dialog.setDirectory(tr(dir));
 
@@ -523,7 +523,7 @@ void GuiConfDialog_t::openQPal(void)
 		last.assign(iniPath);
 	}
 
-	getDirFromFile(last.c_str(), dir);
+	getDirFromFile(last.c_str(), dir, sizeof(dir));
 
 	dialog.setDirectory(tr(dir));
 
@@ -1228,7 +1228,7 @@ void GuiPaletteEditDialog_t::paletteSaveAs(void)
 		last.assign(iniPath);
 	}
 
-	getDirFromFile(last.c_str(), dir);
+	getDirFromFile(last.c_str(), dir, sizeof(dir));
 
 	dialog.setDirectory(tr(dir));
 

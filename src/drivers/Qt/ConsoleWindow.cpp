@@ -2358,7 +2358,7 @@ void consoleWin_t::openROMFile(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	getDirFromFile( last.c_str(), dir );
+	getDirFromFile( last.c_str(), dir, sizeof(dir) );
 
 	dialog.setDirectory( tr(dir) );
 
@@ -2451,7 +2451,7 @@ void consoleWin_t::loadNSF(void)
 
 	g_config->getOption ("SDL.LastOpenNSF", &last );
 
-	getDirFromFile( last.c_str(), dir );
+	getDirFromFile( last.c_str(), dir, sizeof(dir) );
 
 	dialog.setDirectory( tr(dir) );
 
@@ -2535,7 +2535,7 @@ void consoleWin_t::loadStateFrom(void)
 
 	g_config->getOption ("SDL.LastLoadStateFrom", &last );
 
-	getDirFromFile( last.c_str(), dir );
+	getDirFromFile( last.c_str(), dir, sizeof(dir) );
 
 	dialog.setDirectory( tr(dir) );
 
@@ -2626,7 +2626,7 @@ void consoleWin_t::saveStateAs(void)
 			last = std::string(base) + "/sav";
 		}
 	}
-	getDirFromFile( last.c_str(), dir );
+	getDirFromFile( last.c_str(), dir, sizeof(dir) );
 
 	dialog.setDirectory( tr(dir) );
 
@@ -3395,7 +3395,7 @@ void consoleWin_t::loadGameGenieROM(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	getDirFromFile( last.c_str(), dir );
+	getDirFromFile( last.c_str(), dir, sizeof(dir) );
 
 	dialog.setDirectory( tr(dir) );
 
@@ -3490,7 +3490,7 @@ void consoleWin_t::fdsLoadBiosFile(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	getDirFromFile( last.c_str(), dir );
+	getDirFromFile( last.c_str(), dir, sizeof(dir) );
 
 	dialog.setDirectory( tr(dir) );
 

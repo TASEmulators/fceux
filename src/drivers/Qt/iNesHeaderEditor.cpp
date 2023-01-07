@@ -795,7 +795,7 @@ bool iNesHeaderEditor_t::openFile(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	getDirFromFile( last.c_str(), dir );
+	getDirFromFile( last.c_str(), dir, sizeof(dir) );
 
 	dialog.setDirectory( tr(dir) );
 
@@ -848,7 +848,7 @@ void iNesHeaderEditor_t::saveFileAs(void)
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 	dialog.setDefaultSuffix( tr(".nes") );
 
-	getDirFromFile( LoadedRomFName, dir );
+	getDirFromFile( LoadedRomFName, dir, sizeof(dir) );
 
 	dialog.setDirectory( tr(dir) );
 

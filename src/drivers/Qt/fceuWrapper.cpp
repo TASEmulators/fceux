@@ -974,16 +974,29 @@ int  fceuWrapperInit( int argc, char *argv[] )
 
 	if (romIndex >= 0)
 	{
-		// load the specified game
-		error = LoadGame(argv[romIndex]);
-		if (error != 1) 
+		QFileInfo fi( argv[romIndex] );
+
+		// Resolve absolute path to file
+		if ( fi.exists() )
 		{
-			DriverKill();
-			SDL_Quit();
+			std::string fullpath = fi.canonicalFilePath().toStdString().c_str();
+
+			error = LoadGame( fullpath.c_str() );
+
+			if (error != 1)
+			{
+				DriverKill();
+				SDL_Quit();
+				return -1;
+			}
+			g_config->setOption("SDL.LastOpenFile", fullpath.c_str() );
+			g_config->save();
+		}
+		else
+		{
+			// File was not found
 			return -1;
 		}
-		g_config->setOption("SDL.LastOpenFile", argv[romIndex]);
-		g_config->save();
 	}
 
 	aviRecordInit();

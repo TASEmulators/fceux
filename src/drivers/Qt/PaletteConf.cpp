@@ -575,7 +575,7 @@ void PaletteConfDialog_t::openPaletteFile(void)
 		last.assign(iniPath);
 	}
 
-	getDirFromFile(last.c_str(), dir);
+	getDirFromFile(last.c_str(), dir, sizeof(dir));
 
 	dialog.setDirectory(tr(dir));
 
