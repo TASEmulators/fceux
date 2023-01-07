@@ -78,7 +78,6 @@
 #include "../ines.h"
 
 const int ROM_CHIP = 0x00;
-const int WRAM_CHIP = 0x10;
 const int CFI_CHIP = 0x11;
 const int FLASH_CHIP = 0x12;
 
@@ -391,7 +390,7 @@ static void AA6023Power(void) {
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 }
 
-static void AA6023Restore(void) {
+static void AA6023Restore(int version) {
 	FixMMC3PRG(MMC3_cmd);
 	FixMMC3CHR(MMC3_cmd);
 }
@@ -440,6 +439,7 @@ void CommonInit(CartInfo* info, int submapper)
 	info->Power = AA6023Power;
 	info->Reset = AA6023Reset;
 	info->Close = AA6023Close;
+	GameStateRestore = AA6023Restore;
 
 	flash_save = info->battery;
 

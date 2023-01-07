@@ -447,7 +447,6 @@ static DECLFW(COOLGIRL_Flash_Write) {
 			(flash_buffer_a[2] == 0x0AAA) && (flash_buffer_v[2] == 0xA0))
 		{
 			int sector = prg_bank_a_mapped * 0x2000 / FLASH_SECTOR_SIZE;
-			uint32 sector_address = sector * FLASH_SECTOR_SIZE;
 			uint32 flash_addr = prg_bank_a_mapped * 0x2000 + (A % 0x8000);
 			if (SAVE_FLASH[flash_addr % SAVE_FLASH_SIZE] != 0xFF) {
 				FCEU_PrintError("Error: can't write to 0x%08x, flash sector is not erased.\n", flash_addr);
