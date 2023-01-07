@@ -21,6 +21,79 @@
 * The code is so obscured and weird because it's ported from Verilog CPLD source code: 
 * https://github.com/ClusterM/coolgirl-famicom-multicart/blob/master/CoolGirl_mappers.vh
 * 
+* Range: $5000-$5FFF
+*
+* Mask: $5007
+*
+* All registers are $00 on power-on and reset.
+*
+* $5xx0
+* 7  bit  0
+* ---- ----
+* PPPP PPPP
+* |||| ||||
+* ++++-++++-- PRG base offset (A29-A22)
+*
+* $5xx1
+* 7  bit  0
+* ---- ----
+* PPPP PPPP
+* |||| ||||
+* ++++-++++-- PRG base offset (A21-A14)
+*
+* $5xx2
+* 7  bit  0
+* ---- ----
+* AMMM MMMM
+* |||| ||||
+* |+++-++++-- PRG mask (A20-A14, inverted+anded with PRG address)
+* +---------- CHR mask (A18, inverted+anded with CHR address)
+*
+* $5xx3
+* 7  bit  0
+* ---- ----
+* BBBC CCCC
+* |||| ||||
+* |||+-++++-- CHR bank A (bits 7-3)
+* +++-------- PRG banking mode (see below)
+*
+* $5xx4
+* 7  bit  0
+* ---- ----
+* DDDE EEEE
+* |||| ||||
+* |||+-++++-- CHR mask (A17-A13, inverted+anded with CHR address)
+* +++-------- CHR banking mode (see below)
+*
+* $5xx5
+* 7  bit  0
+* ---- ----
+* CDDE EEWW
+* |||| ||||
+* |||| ||++-- 8KiB WRAM page at $6000-$7FFF
+* |+++-++---- PRG bank A (bits 5-1)
+* +---------- CHR bank A (bit 8)
+*
+* $5xx6
+* 7  bit  0
+* ---- ----
+* FFFM MMMM
+* |||| ||||
+* |||+ ++++-- Mapper code (bits 4-0, see below)
+* +++-------- Flags 2-0, functionality depends on selected mapper
+*
+* $5xx7
+* 7  bit  0
+* ---- ----
+* LMTR RSNO
+* |||| |||+-- Enable WRAM (read and write) at $6000-$7FFF
+* |||| ||+--- Allow writes to CHR RAM
+* |||| |+---- Allow writes to flash chip
+* |||+-+----- Mirroring (00=vertical, 01=horizontal, 10=1Sa, 11=1Sb)
+* ||+-------- Enable four-screen mode
+* |+-- ------ Mapper code (bit 5, see below)
+* +---------- Lockout bit (prevent further writes to all registers)
+*
 */
 
 #include "mapinc.h"
