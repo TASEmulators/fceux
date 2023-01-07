@@ -17,7 +17,7 @@ environment:
     #appveyor_build_worker_image: Ubuntu1804
 
   - job_name: MacOS
-    appveyor_build_worker_image: macOS
+    appveyor_build_worker_image: macos-bigsur
 
 for:
 
