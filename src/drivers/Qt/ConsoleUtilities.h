@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <QColor>
 #include <QTimer>
 #include <QValidator>
@@ -9,7 +11,7 @@
 #include <QHelpEvent>
 #include <QCheckBox>
 
-int  getDirFromFile( const char *path, char *dir, size_t bufSize );
+int  getDirFromFile( const char *path, std::string &dir );
 
 const char *getRomFile( void );
 

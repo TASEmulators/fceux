@@ -776,7 +776,7 @@ bool iNesHeaderEditor_t::openFile(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
+	std::string dir;
 	QFileDialog  dialog(this, tr("Open NES File") );
 
 	const QStringList filters(
@@ -795,9 +795,9 @@ bool iNesHeaderEditor_t::openFile(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	getDirFromFile( last.c_str(), dir, sizeof(dir) );
+	getDirFromFile( last.c_str(), dir );
 
-	dialog.setDirectory( tr(dir) );
+	dialog.setDirectory( tr(dir.c_str()) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -836,7 +836,7 @@ void iNesHeaderEditor_t::saveFileAs(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
+	std::string dir;
 	QFileDialog  dialog(this, tr("Save iNES File") );
 
 	dialog.setFileMode(QFileDialog::AnyFile);
@@ -848,9 +848,9 @@ void iNesHeaderEditor_t::saveFileAs(void)
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
 	dialog.setDefaultSuffix( tr(".nes") );
 
-	getDirFromFile( LoadedRomFName, dir, sizeof(dir) );
+	getDirFromFile( LoadedRomFName, dir );
 
-	dialog.setDirectory( tr(dir) );
+	dialog.setDirectory( tr(dir.c_str()) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);

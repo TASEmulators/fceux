@@ -369,7 +369,7 @@ void GuiConfDialog_t::openQss(void)
 	int ret, useNativeFileDialogVal; //, useCustom;
 	QString filename;
 	std::string last, iniPath;
-	char dir[512];
+	std::string dir;
 	const char *exePath = nullptr;
 	QFileDialog dialog(this, tr("Open Qt Stylesheet (QSS)"));
 	QList<QUrl> urls;
@@ -419,9 +419,9 @@ void GuiConfDialog_t::openQss(void)
 		last.assign(iniPath);
 	}
 
-	getDirFromFile(last.c_str(), dir, sizeof(dir));
+	getDirFromFile(last.c_str(), dir);
 
-	dialog.setDirectory(tr(dir));
+	dialog.setDirectory(tr(dir.c_str()));
 
 	// Check config option to use native file dialog or not
 	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -473,7 +473,7 @@ void GuiConfDialog_t::openQPal(void)
 	int ret, useNativeFileDialogVal; //, useCustom;
 	QString filename;
 	std::string last, iniPath;
-	char dir[512];
+	std::string dir;
 	const char *exePath = nullptr;
 	QFileDialog dialog(this, tr("Open Qt QPalette File (QPAL)"));
 	QList<QUrl> urls;
@@ -523,9 +523,9 @@ void GuiConfDialog_t::openQPal(void)
 		last.assign(iniPath);
 	}
 
-	getDirFromFile(last.c_str(), dir, sizeof(dir));
+	getDirFromFile(last.c_str(), dir);
 
-	dialog.setDirectory(tr(dir));
+	dialog.setDirectory(tr(dir.c_str()));
 
 	// Check config option to use native file dialog or not
 	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -1176,7 +1176,7 @@ void GuiPaletteEditDialog_t::paletteSaveAs(void)
 	int ret, useNativeFileDialogVal; //, useCustom;
 	QString filename;
 	std::string last, iniPath;
-	char dir[512];
+	std::string dir;
 	const char *exePath = nullptr;
 	QFileDialog dialog(this, tr("Save QPalette (qpal)"));
 	QList<QUrl> urls;
@@ -1228,9 +1228,9 @@ void GuiPaletteEditDialog_t::paletteSaveAs(void)
 		last.assign(iniPath);
 	}
 
-	getDirFromFile(last.c_str(), dir, sizeof(dir));
+	getDirFromFile(last.c_str(), dir);
 
-	dialog.setDirectory(tr(dir));
+	dialog.setDirectory(tr(dir.c_str()));
 
 	// Check config option to use native file dialog or not
 	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);

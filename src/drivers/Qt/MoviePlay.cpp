@@ -416,8 +416,8 @@ void MoviePlayDialog_t::doScan(void)
 	std::string path, last;
 	const char *romFile;
 	const char *baseDir = FCEUI_GetBaseDirectory();
+	std::string lastDir;
 	char md5[256];
-	char dir[512], base[256];
 
 	md5[0] = 0;
 
@@ -434,6 +434,8 @@ void MoviePlayDialog_t::doScan(void)
 
 	if (romFile != NULL)
 	{
+		char dir[512], base[256];
+
 		parseFilepath(romFile, dir, base);
 
 		path = std::string(dir);
@@ -443,9 +445,9 @@ void MoviePlayDialog_t::doScan(void)
 
 	g_config->getOption("SDL.LastOpenMovie", &last);
 
-	getDirFromFile(last.c_str(), dir, sizeof(dir));
+	getDirFromFile(last.c_str(), lastDir);
 
-	scanDirectory(dir, md5);
+	scanDirectory(lastDir.c_str(), md5);
 }
 //----------------------------------------------------------------------------
 void MoviePlayDialog_t::playMovie(void)
@@ -495,7 +497,7 @@ void MoviePlayDialog_t::openMovie(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
+	std::string dir;
 	char md5Match = 0;
 	QFileDialog dialog(this, tr("Open FM2 Movie"));
 
@@ -509,9 +511,9 @@ void MoviePlayDialog_t::openMovie(void)
 
 	g_config->getOption("SDL.LastOpenMovie", &last);
 
-	getDirFromFile(last.c_str(), dir, sizeof(dir));
+	getDirFromFile(last.c_str(), dir);
 
-	dialog.setDirectory(tr(dir));
+	dialog.setDirectory(tr(dir.c_str()));
 
 	// Check config option to use native file dialog or not
 	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);

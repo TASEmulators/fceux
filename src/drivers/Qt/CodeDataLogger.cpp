@@ -489,7 +489,7 @@ void CodeDataLoggerDialog_t::loadCdlFile(void)
 {
 	int ret, useNativeFileDialogVal;
 	QString filename;
-	char dir[512];
+	std::string dir;
 	const char *romFile;
 	QFileDialog dialog(this, tr("Load CDL File"));
 
@@ -505,9 +505,9 @@ void CodeDataLoggerDialog_t::loadCdlFile(void)
 
 	if (romFile)
 	{
-		getDirFromFile(romFile, dir, sizeof(dir));
+		getDirFromFile(romFile, dir);
 
-		dialog.setDirectory(tr(dir));
+		dialog.setDirectory(tr(dir.c_str()));
 	}
 
 	// Check config option to use native file dialog or not

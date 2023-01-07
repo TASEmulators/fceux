@@ -50,9 +50,9 @@
 
 static std::string fceuExecPath;
 //---------------------------------------------------------------------------
-int  getDirFromFile( const char *path, char *dir, size_t bufSize )
+int  getDirFromFile( const char *path, std::string &dir )
 {
-	dir[0] = 0;
+	dir.clear();
 
 	if (path[0] != 0)
 	{
@@ -62,16 +62,13 @@ int  getDirFromFile( const char *path, char *dir, size_t bufSize )
 
 		if (fi.exists())
 		{
-			strncpy( dir, fi.canonicalPath().toStdString().c_str(), bufSize );
+			dir = fi.canonicalPath().toStdString();
 		}
 		else
 		{
-			strncpy( dir, fi.absolutePath().toStdString().c_str(), bufSize );
+			dir = fi.absolutePath().toStdString();
 		}
-
-		dir[bufSize-1] = 0;
-
-		//printf("Dir: '%s'\n", dir);
+		//printf("Dir: '%s'\n", dir.c_str());
 	}
 
 	return 0;

@@ -2315,8 +2315,8 @@ void consoleWin_t::openROMFile(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
-	char *romDir;
+	std::string dir;
+	const char *romDir;
 	QFileDialog  dialog(this, tr("Open ROM File") );
 	QList<QUrl> urls;
 	QDir d;
@@ -2358,9 +2358,9 @@ void consoleWin_t::openROMFile(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	getDirFromFile( last.c_str(), dir, sizeof(dir) );
+	getDirFromFile( last.c_str(), dir);
 
-	dialog.setDirectory( tr(dir) );
+	dialog.setDirectory( tr(dir.c_str()) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -2418,8 +2418,8 @@ void consoleWin_t::loadNSF(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
-	char *romDir;
+	std::string dir;
+	const char *romDir;
 	QFileDialog  dialog(this, tr("Load NSF File") );
 	QList<QUrl> urls;
 	QDir d;
@@ -2451,9 +2451,9 @@ void consoleWin_t::loadNSF(void)
 
 	g_config->getOption ("SDL.LastOpenNSF", &last );
 
-	getDirFromFile( last.c_str(), dir, sizeof(dir) );
+	getDirFromFile( last.c_str(), dir );
 
-	dialog.setDirectory( tr(dir) );
+	dialog.setDirectory( tr(dir.c_str()) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -2492,7 +2492,7 @@ void consoleWin_t::loadStateFrom(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
+	std::string dir;
 	const char *base;
 	QFileDialog  dialog(this, tr("Load State From File") );
 	QList<QUrl> urls;
@@ -2535,9 +2535,9 @@ void consoleWin_t::loadStateFrom(void)
 
 	g_config->getOption ("SDL.LastLoadStateFrom", &last );
 
-	getDirFromFile( last.c_str(), dir, sizeof(dir) );
+	getDirFromFile( last.c_str(), dir );
 
-	dialog.setDirectory( tr(dir) );
+	dialog.setDirectory( tr(dir.c_str()) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -2576,7 +2576,7 @@ void consoleWin_t::saveStateAs(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
+	std::string dir;
 	const char *base;
 	QFileDialog  dialog(this, tr("Save State To File") );
 	QList<QUrl> urls;
@@ -2626,9 +2626,9 @@ void consoleWin_t::saveStateAs(void)
 			last = std::string(base) + "/sav";
 		}
 	}
-	getDirFromFile( last.c_str(), dir, sizeof(dir) );
+	getDirFromFile( last.c_str(), dir );
 
-	dialog.setDirectory( tr(dir) );
+	dialog.setDirectory( tr(dir.c_str()) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -3376,7 +3376,7 @@ void consoleWin_t::loadGameGenieROM(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
+	std::string dir;
 	QFileDialog  dialog(this, tr("Open Game Genie ROM") );
 	QList<QUrl> urls;
 
@@ -3395,9 +3395,9 @@ void consoleWin_t::loadGameGenieROM(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	getDirFromFile( last.c_str(), dir, sizeof(dir) );
+	getDirFromFile( last.c_str(), dir );
 
-	dialog.setDirectory( tr(dir) );
+	dialog.setDirectory( tr(dir.c_str()) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -3471,7 +3471,7 @@ void consoleWin_t::fdsLoadBiosFile(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[512];
+	std::string dir;
 	QFileDialog  dialog(this, tr("Load FDS BIOS (disksys.rom)") );
 	QList<QUrl> urls;
 
@@ -3490,9 +3490,9 @@ void consoleWin_t::fdsLoadBiosFile(void)
 
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	getDirFromFile( last.c_str(), dir, sizeof(dir) );
+	getDirFromFile( last.c_str(), dir);
 
-	dialog.setDirectory( tr(dir) );
+	dialog.setDirectory( tr(dir.c_str()) );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);

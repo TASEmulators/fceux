@@ -279,7 +279,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string last;
-	char dir[2048];
+	std::string dir;
 	const char *exePath = nullptr;
 	const char *luaPath = nullptr;
 	QFileDialog dialog(this, tr("Open LUA Script"));
@@ -379,9 +379,9 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 #endif
 	}
 
-	getDirFromFile(last.c_str(), dir, sizeof(dir));
+	getDirFromFile(last.c_str(), dir);
 
-	dialog.setDirectory(tr(dir));
+	dialog.setDirectory(tr(dir.c_str()));
 
 	// Check config option to use native file dialog or not
 	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
