@@ -456,13 +456,24 @@ volatile int rendercount, vromreadcount, undefinedvromcount, LogAddress = -1;
 unsigned char *cdloggervdata = NULL;
 unsigned int cdloggerVideoDataSize = 0;
 
-int GetCHRAddress(int A) {
-	if (cdloggerVideoDataSize) {
-		int result = &VPage[A >> 10][A] - CHRptr[0];
+int GetCHRAddress(int A) 
+{
+	if (cdloggerVideoDataSize) 
+	{
+		int result = -1;
+		if ( (A >= 0) && (A < 0x2000) )
+		{
+			result = &VPage[A >> 10][A] - CHRptr[0];
+		}
 		if ((result >= 0) && (result < (int)cdloggerVideoDataSize))
+		{
 			return result;
-	} else
-		if(A < 0x2000) return A;
+		}
+	}
+	else
+	{
+		if ( (A >= 0) && (A < 0x2000) ) return A;
+	}
 	return -1;
 }
 
