@@ -15,9 +15,9 @@ int  getDirFromFile( const char *path, std::string &dir );
 
 const char *getRomFile( void );
 
-int getFileBaseName( const char *filepath, char *base, char *suffix = NULL );
+int getFileBaseName( const char *filepath, char *base, char *suffix = nullptr );
 
-int parseFilepath( const char *filepath, char *dir, char *base, char *suffix = NULL );
+int parseFilepath( const char *filepath, std::string *dir, std::string *base = nullptr, std::string *suffix = nullptr );
 
 const char *fceuExecutablePath(void);
 

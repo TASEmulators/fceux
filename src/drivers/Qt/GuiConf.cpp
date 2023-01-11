@@ -753,15 +753,17 @@ void fceuStyle::polish(QApplication *app)
 
 		if ( rccFilePath.size() == 0 )
 		{
-			char dir[1024], rccBase[256], tmpFile[2048];
+			std::string dir, rccBase, tmpFile;
 
-			parseFilepath( s.c_str(), dir, rccBase, NULL );
+			parseFilepath( s.c_str(), &dir, &rccBase, nullptr );
 
-			sprintf( tmpFile, "%s%s.rcc", dir, rccBase );
+			tmpFile.assign(dir);
+			tmpFile.append(rccBase);
+			tmpFile.append(".rcc");
 
-			//printf("RCC: '%s%s'\n", dir, rccBase );
+			//printf("RCC: '%s%s'\n", dir.c_str(), rccBase.c_str() );
 
-			if ( QResource::registerResource( tmpFile ) )
+			if ( QResource::registerResource( tmpFile.c_str() ) )
 			{
 				//printf("Loaded RCC File: '%s'\n", tmpFile );
 				rccFilePath.assign( tmpFile );

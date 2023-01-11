@@ -544,15 +544,15 @@ void RamWatchDialog_t::openListCB(void)
 
 	if ( romFile != NULL )
 	{
-		char dir[512], base[256];
+		std::string dir, base;
 
-		parseFilepath( romFile, dir, base );
+		parseFilepath( romFile, &dir, &base );
 
-		strcat( base, ".wch");
+		base.append(".wch");
 
-		dialog.setDirectory( tr(dir) );
+		dialog.setDirectory( tr(dir.c_str()) );
 
-		dialog.selectFile( tr(base) );
+		dialog.selectFile( tr(base.c_str()) );
 	}
 
 	// Check config option to use native file dialog or not
@@ -604,15 +604,15 @@ void RamWatchDialog_t::appendListCB(void)
 
 	if ( romFile != NULL )
 	{
-		char dir[512], base[256];
+		std::string dir, base;
 
-		parseFilepath( romFile, dir, base );
+		parseFilepath( romFile, &dir, &base );
 
-		strcat( base, ".wch");
+		base.append(".wch");
 
-		dialog.setDirectory( tr(dir) );
+		dialog.setDirectory( tr(dir.c_str()) );
 
-		dialog.selectFile( tr(base) );
+		dialog.selectFile( tr(base.c_str()) );
 	}
 
 	// Check config option to use native file dialog or not
@@ -687,15 +687,15 @@ void RamWatchDialog_t::saveListAs(void)
 
 	if ( romFile != NULL )
 	{
-		char dir[512], base[256];
+		std::string dir, base;
 
-		parseFilepath( romFile, dir, base );
+		parseFilepath( romFile, &dir, &base );
 
-		strcat( base, ".wch");
+		base.append(".wch");
 
-		dialog.setDirectory( tr(dir) );
+		dialog.setDirectory( tr(dir.c_str()) );
 
-		dialog.selectFile( tr(base) );
+		dialog.selectFile( tr(base.c_str()) );
 	}
 
 	// Check config option to use native file dialog or not

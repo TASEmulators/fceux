@@ -434,11 +434,11 @@ void MoviePlayDialog_t::doScan(void)
 
 	if (romFile != NULL)
 	{
-		char dir[512], base[256];
+		std::string dir;
 
-		parseFilepath(romFile, dir, base);
+		parseFilepath(romFile, &dir);
 
-		path = std::string(dir);
+		path = dir;
 
 		scanDirectory(path.c_str(), md5);
 	}

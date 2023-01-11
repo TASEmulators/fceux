@@ -528,13 +528,13 @@ void InputConfDialog_t::openSavePresetFile(void)
 
 	if (romFile != NULL)
 	{
-		char dirStr[256], base[256];
+		std::string base;
 
-		parseFilepath(romFile, dirStr, base);
+		parseFilepath(romFile, nullptr, &base);
 
-		strcat(base, ".pre");
+		base.append(".pre");
 
-		dialog.selectFile(tr(base));
+		dialog.selectFile(tr(base.c_str()));
 	}
 
 	dialog.setDirectory(tr(path.c_str()));

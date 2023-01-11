@@ -76,7 +76,7 @@ int  getDirFromFile( const char *path, std::string &dir )
 //---------------------------------------------------------------------------
 const char *getRomFile( void )
 {
-	static char filePath[2048];
+	static std::string filePath;
 
 	if ( GameInfo )
 	{
@@ -85,32 +85,32 @@ const char *getRomFile( void )
 
 		if ( GameInfo->archiveFilename != NULL )
 		{
-			char dir[1024], base[512], suffix[64];
+			std::string dir, base, suffix;
 
-			parseFilepath( GameInfo->archiveFilename, dir, base, suffix );
+			parseFilepath( GameInfo->archiveFilename, &dir, &base, &suffix );
 
-			filePath[0] = 0;
+			filePath.clear();
 
-			if ( dir[0] != 0 )
+			if ( dir.size() != 0 )
 			{
-				strcat( filePath, dir );
+				filePath.append( dir );
 			}
 
-			parseFilepath( GameInfo->filename, dir, base, suffix );
+			parseFilepath( GameInfo->filename, &dir, &base, &suffix );
 
-			strcat( filePath, base   );
-			strcat( filePath, suffix );
+			filePath.append( base   );
+			filePath.append( suffix );
 
-			//printf("ArchivePath: '%s' \n", filePath );
+			//printf("ArchivePath: '%s' \n", filePath.c_str() );
 
-			return filePath;
+			return filePath.c_str();
 		}
 		else
 		{
 			return GameInfo->filename;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 //---------------------------------------------------------------------------
 // Return file base name stripping out preceding path and trailing suffix.
@@ -160,19 +160,25 @@ int getFileBaseName( const char *filepath, char *base, char *suffix )
 	return end;
 }
 //---------------------------------------------------------------------------
-int parseFilepath( const char *filepath, char *dir, char *base, char *suffix )
+int parseFilepath( const char *filepath, std::string *dir, std::string *base, std::string *suffix )
 {
-	int i=0,j=0,end=0;
-
-	if ( suffix != NULL )
+	if (dir)
 	{
-		suffix[0] = 0;
+		dir->clear();
 	}
+	if (base)
+	{
+		base->clear();
+	}
+	if (suffix)
+	{
+		suffix->clear();
+	}
+
+	size_t i=0,j=0;
+
 	if ( filepath == NULL )
 	{
-		if ( dir   ) dir[0] = 0;
-		if ( base  ) base[0] = 0;
-		if ( suffix) suffix[0] = 0;
 		return 0;
 	}
 	i=0; j=0;
@@ -184,47 +190,46 @@ int parseFilepath( const char *filepath, char *dir, char *base, char *suffix )
 		}
 		if ( dir )
 		{
-			dir[i] = filepath[i];
+			dir->push_back(filepath[i]);
 		}
 		i++;
 	}
-	if ( dir )
+	if (dir)
 	{
-		dir[j] = 0;
+		if (j > 0)
+		{
+			dir->erase(j);
+		}
 	}
 	i = j;
 
-	if ( base == NULL )
-	{
-		return end;
-	}
-
-	j=0;
 	while ( filepath[i] != 0 )
 	{
-		base[j] = filepath[i]; i++; j++;
-	}
-	base[j] = 0; end=j;
-
-	if ( suffix )
-	{
-		suffix[0] = 0;
-	}
-
-	while ( j > 1 )
-	{
-		j--;
-		if ( base[j] == '.' )
+		if (filepath[i] == '.')
 		{
-			if ( suffix )
-			{
-				strcpy( suffix, &base[j] );
-			}
-			end=j; base[j] = 0; 
-			break;
+			j = i;
+		}
+		if (base)
+		{
+			base->push_back(filepath[i]);
+		}
+		i++;
+	}
+
+	if (filepath[j] == '.')
+	{
+		if ( suffix )
+		{
+			suffix->assign( &filepath[j] );
+		}
+		i = base->find_last_of('.');
+
+		if ( i != std::string::npos )
+		{
+			base->erase(i);
 		}
 	}
-	return end;
+	return 0;
 }
 //---------------------------------------------------------------------------
 //  Returns the path of fceux.exe as a string.

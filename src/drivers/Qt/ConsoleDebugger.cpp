@@ -4335,7 +4335,7 @@ void updateAllDebuggerWindows( void )
 	}
 }
 //----------------------------------------------------------------------------
-static int getGameDebugBreakpointFileName(char *filepath)
+static int getGameDebugBreakpointFileName(std::string &filepath)
 {
 	int i,j;
 	const char *romFile;
@@ -4352,11 +4352,11 @@ static int getGameDebugBreakpointFileName(char *filepath)
 
 		if ( romFile[i] == '|' )
 		{
-			filepath[i] = '.';
+			filepath.push_back('.');
 		}
 		else
 		{
-			if ( romFile[i] == '/' )
+			if ( (romFile[i] == '/') || (romFile[i] == '\\') )
 			{
 				j = -1;
 			}
@@ -4364,20 +4364,15 @@ static int getGameDebugBreakpointFileName(char *filepath)
 			{
 				j = i;
 			}
-			filepath[i] = romFile[i];
+			filepath.push_back(romFile[i]);
 		}
 		i++;
 	}
-	if ( j >= 0 )
+	if ( (j >= 0) && (j < filepath.size()) )
 	{
-		filepath[j] = 0; i=j;
+		filepath.erase(j);
 	}
-
-	filepath[i] = '.'; i++;
-	filepath[i] = 'f'; i++;
-	filepath[i] = 'd'; i++;
-	filepath[i] = 'b'; i++;
-	filepath[i] =  0;
+	filepath.append(".fdb");
 
 	return 0;
 }
@@ -4386,28 +4381,28 @@ void saveGameDebugBreakpoints( bool force )
 {
 	int i;
 	FILE *fp;
-	char stmp[512];
 	char flags[8];
 	debuggerBookmark_t *bm;
+	std::string fileName;
 
 	// If no breakpoints are loaded, skip saving
 	if ( !force && (numWPs == 0) && (dbgBmMgr.size() == 0) )
 	{
 		return;
 	}
-	if ( getGameDebugBreakpointFileName( stmp ) )
+	if ( getGameDebugBreakpointFileName( fileName ) )
 	{
 		printf("Error: Failed to get save file name for debug\n");
 		return;
 	}
 
-	printf("Debug Save File: '%s' \n", stmp );
+	printf("Debug Save File: '%s' \n", fileName.c_str());
 
-	fp = fopen( stmp, "w");
+	fp = fopen( fileName.c_str(), "w");
 
 	if ( fp == NULL )
 	{
-		printf("Error: Failed to open file '%s' for writing\n", stmp );
+		printf("Error: Failed to open file '%s' for writing\n", fileName.c_str() );
 		return;
 	}
 
@@ -4532,6 +4527,7 @@ void loadGameDebugBreakpoints(void)
 	FILE *fp;
 	char stmp[512];
 	char id[64], data[128];
+	std::string fileName;
 
 	// If no debug windows are open, skip loading breakpoints
 	if ( dbgWin == NULL )
@@ -4539,19 +4535,19 @@ void loadGameDebugBreakpoints(void)
 		printf("No Debug Windows Open: Skipping loading of breakpoint data\n");
 		return;
 	}
-	if ( getGameDebugBreakpointFileName( stmp ) )
+	if ( getGameDebugBreakpointFileName( fileName ) )
 	{
 		printf("Error: Failed to get load file name for debug\n");
 		return;
 	}
 
-	//printf("Debug Load File: '%s' \n", stmp );
+	//printf("Debug Load File: '%s' \n", fileName.c_str() );
 
-	fp = fopen( stmp, "r");
+	fp = fopen( fileName.c_str(), "r");
 
 	if ( fp == NULL )
 	{
-		printf("Error: Failed to open file '%s' for writing\n", stmp );
+		printf("Error: Failed to open file '%s' for writing\n", fileName.c_str() );
 		return;
 	}
 
