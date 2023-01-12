@@ -295,11 +295,14 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 		case HK_SELECT_STATE_PREV:
 			name = "SelectStatePrev"; keySeq = ""; title = "Select Previous State Slot"; group = "State";
 		break;
+		case HK_VOLUME_MUTE:
+			name = "VolumeMute"; keySeq = ""; title = "Sound Volume Mute"; group = "Sound";
+		break;
 		case HK_VOLUME_DOWN:
-			name = "VolumeDown"; keySeq = "";
+			name = "VolumeDown"; keySeq = ""; title = "Sound Volume Down"; group = "Sound";
 		break;
 		case HK_VOLUME_UP:
-			name = "VolumeUp"; keySeq = "";
+			name = "VolumeUp"; keySeq = ""; title = "Sound Volume Up"; group = "Sound";
 		break;
 		case HK_FKB_ENABLE:
 			name = "FKB_Enable"; keySeq = "ScrollLock"; title = "Toggle Family Keyboard Enable";
@@ -489,6 +492,7 @@ InitConfig()
 
 	// sound options
 	config->addOption('s', "sound", "SDL.Sound", 1);
+	config->addOption("soundMute", "SDL.Sound.Mute", 0);
 	config->addOption("volume", "SDL.Sound.Volume", 255);
 	config->addOption("trianglevol", "SDL.Sound.TriangleVolume", 255);
 	config->addOption("square1vol", "SDL.Sound.Square1Volume", 255);

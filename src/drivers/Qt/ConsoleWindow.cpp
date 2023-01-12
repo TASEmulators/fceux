@@ -450,11 +450,11 @@ void consoleWin_t::winActiveChanged(void)
 			{
 				if ( hdl->isActive() )
 				{
-					FCEUD_MuteSoundOutput(false);
+					FCEUD_MuteSoundWindow(false);
 				}
 				else
 				{
-					FCEUD_MuteSoundOutput(true);
+					FCEUD_MuteSoundWindow(true);
 				}
 			}
 		}
@@ -850,6 +850,7 @@ void consoleWin_t::initHotKeys(void)
 	Hotkeys[HK_FRAME_ADVANCE].getShortcut()->setEnabled(false);
 	Hotkeys[HK_TURBO        ].getShortcut()->setEnabled(false);
 
+	connect( Hotkeys[ HK_VOLUME_MUTE ].getShortcut(), SIGNAL(activated()), this, SLOT(muteSoundVolume(void)) );
 	connect( Hotkeys[ HK_VOLUME_DOWN ].getShortcut(), SIGNAL(activated()), this, SLOT(decrSoundVolume(void)) );
 	connect( Hotkeys[ HK_VOLUME_UP   ].getShortcut(), SIGNAL(activated()), this, SLOT(incrSoundVolume(void)) );
 
@@ -3702,6 +3703,13 @@ void consoleWin_t::setCustomAutoFire(void)
 		g_config->setOption("SDL.AutofireCustomOffFrames" , autoFireOffFrames);
 		g_config->save();
 	}
+}
+
+void consoleWin_t::muteSoundVolume(void)
+{
+	FCEU_WRAPPER_LOCK();
+	FCEUD_SoundToggle();
+	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::incrSoundVolume(void)

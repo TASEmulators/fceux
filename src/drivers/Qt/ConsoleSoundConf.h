@@ -31,6 +31,7 @@ protected:
 
 	int  sndQuality;
 	QCheckBox *enaChkbox;
+	QCheckBox *muteChkbox;
 	QCheckBox *enaLowPass;
 	QCheckBox *swapDutyChkbox;
 	QCheckBox *useGlobalFocus;
@@ -68,6 +69,7 @@ private slots:
 	void noiseChanged(int value);
 	void pcmChanged(int value);
 	void enaSoundStateChange(int value);
+	void enaSpeakerMuteChange(int value);
 	void enaSoundLowPassChange(int value);
 	void swapDutyCallback(int value);
 	void useGlobalFocusChanged(int value);

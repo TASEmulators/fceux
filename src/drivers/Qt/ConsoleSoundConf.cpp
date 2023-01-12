@@ -54,16 +54,21 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	// Enable Sound Select
 	enaChkbox = new QCheckBox(tr("Enable Sound"));
+	// Speaker Mute Select
+	muteChkbox = new QCheckBox(tr("Mute Speaker Output"));
 	// Enable Low Pass Filter Select
 	enaLowPass = new QCheckBox(tr("Enable Low Pass Filter"));
 
 	setCheckBoxFromProperty(enaChkbox, "SDL.Sound");
+	setCheckBoxFromProperty(muteChkbox, "SDL.Sound.Mute");
 	setCheckBoxFromProperty(enaLowPass, "SDL.Sound.LowPass");
 
 	connect(enaChkbox, SIGNAL(stateChanged(int)), this, SLOT(enaSoundStateChange(int)));
+	connect(muteChkbox, SIGNAL(stateChanged(int)), this, SLOT(enaSpeakerMuteChange(int)));
 	connect(enaLowPass, SIGNAL(stateChanged(int)), this, SLOT(enaSoundLowPassChange(int)));
 
 	vbox1->addWidget(enaChkbox);
+	vbox1->addWidget(muteChkbox);
 	vbox1->addWidget(enaLowPass);
 
 	// Audio Quality Select
@@ -330,6 +335,11 @@ void ConsoleSndConfDialog_t::periodicUpdate(void)
 	sprintf( stmp, "Sink Starve Count: %u", nes_shm->sndBuf.starveCounter );
 
 	starveLbl->setText( tr(stmp) );
+
+	if ( FCEUD_SoundIsMuted() != muteChkbox->isChecked() )
+	{
+		muteChkbox->setChecked( FCEUD_SoundIsMuted() );
+	}
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::setSliderEnables(void)
@@ -534,6 +544,11 @@ void ConsoleSndConfDialog_t::enaSoundStateChange(int value)
 		KillSound();
 		FCEU_WRAPPER_UNLOCK();
 	}
+}
+//----------------------------------------------------
+void ConsoleSndConfDialog_t::enaSpeakerMuteChange(int value)
+{
+	FCEUD_MuteSoundOutput( value ? true : false );
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::enaSoundLowPassChange(int value)

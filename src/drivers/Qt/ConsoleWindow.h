@@ -405,6 +405,7 @@ class  consoleWin_t : public QMainWindow
 		void stopMovie(void);
 		void playMovieFromBeginning(void);
 		void setCustomAutoFire(void);
+		void muteSoundVolume(void);
 		void incrSoundVolume(void);
 		void decrSoundVolume(void);
 		void toggleLagCounterDisplay(void);

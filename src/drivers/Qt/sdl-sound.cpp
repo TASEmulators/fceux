@@ -47,10 +47,10 @@ static unsigned int s_SampleRate = 44100;
 static double noiseGate = 0.0;
 static double noiseGateRate = 0.010;
 static bool   noiseGateActive = true;
-static bool   muteSoundOutput = false;
+static bool   windowSoundMute = false;
 static bool   fillInit = 1;
 
-static int s_mute = 0;
+static bool s_mute = false;
 
 extern int EmulationPaused;
 extern double frmRateAdjRatio;
@@ -99,7 +99,7 @@ fillaudio(void *udata,
 		noiseGateActive = 1;
 		return;
 	}
-	mute = EmulationPaused || muteSoundOutput;
+	mute = EmulationPaused || windowSoundMute || s_mute;
 
 	if ( mute || noiseGateActive )
 	{
@@ -207,6 +207,7 @@ InitSound()
 	}
 
 	// load configuration variables
+	g_config->getOption("SDL.Sound.Mute", &s_mute);
 	g_config->getOption("SDL.Sound.Rate", &soundrate);
 	g_config->getOption("SDL.Sound.BufSize", &soundbufsize);
 	g_config->getOption("SDL.Sound.Volume", &soundvolume);
@@ -524,7 +525,9 @@ FCEUD_SoundVolumeAdjust(int n)
 		break;
 	}
 
-	s_mute = 0;
+	s_mute = false;
+	g_config->setOption("SDL.Sound.Mute", s_mute);
+
 	FCEUI_SetSoundVolume(soundvolume);
 	g_config->setOption("SDL.Sound.Volume", soundvolume);
 
@@ -537,21 +540,34 @@ FCEUD_SoundVolumeAdjust(int n)
 void
 FCEUD_SoundToggle(void)
 {
-	if(s_mute) {
-		int soundvolume;
-		g_config->getOption("SDL.SoundVolume", &soundvolume);
+	FCEUD_MuteSoundOutput( !s_mute );
+}
 
-		s_mute = 0;
-		FCEUI_SetSoundVolume(soundvolume);
-		FCEU_DispMessage("Sound mute off.",0);
-	} else {
-		s_mute = 1;
-		FCEUI_SetSoundVolume(0);
-		FCEU_DispMessage("Sound mute on.",0);
-	}
+bool FCEUD_SoundIsMuted(void)
+{
+	return s_mute;
 }
 
 void FCEUD_MuteSoundOutput( bool value )
 {
-	muteSoundOutput = value;
+	if (value != s_mute)
+	{
+		g_config->setOption("SDL.Sound.Mute", value);
+
+		if (value)
+		{
+			FCEU_DispMessage("Sound mute on.",0);
+		}
+		else
+		{
+			FCEU_DispMessage("Sound mute off.",0);
+		}
+	}
+	s_mute = value;
+}
+
+// This function is used by the GUI to mute sound when main window is not in focus.
+void FCEUD_MuteSoundWindow( bool value )
+{
+	windowSoundMute = value;
 }
