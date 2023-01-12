@@ -435,6 +435,7 @@ void consoleWin_t::winScreenChanged(QScreen *scr)
 void consoleWin_t::winActiveChanged(void)
 {
 	QWidget *w;
+	bool muteWindow = false;
 
 	w = this->window();
 
@@ -450,15 +451,16 @@ void consoleWin_t::winActiveChanged(void)
 			{
 				if ( hdl->isActive() )
 				{
-					FCEUD_MuteSoundWindow(false);
+					muteWindow = false;
 				}
 				else
 				{
-					FCEUD_MuteSoundWindow(true);
+					muteWindow = true;
 				}
 			}
 		}
 	}
+	FCEUD_MuteSoundWindow(muteWindow);
 }
 
 QSize consoleWin_t::calcRequiredSize(void)
