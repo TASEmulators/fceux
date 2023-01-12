@@ -42,7 +42,7 @@ static unsigned int s_BufferSize50;
 static unsigned int s_BufferSize75;
 static unsigned int s_BufferRead;
 static unsigned int s_BufferWrite;
-static volatile unsigned int s_BufferIn;
+static volatile unsigned int s_BufferIn = 0;
 static unsigned int s_SampleRate = 44100;
 static double noiseGate = 0.0;
 static double noiseGateRate = 0.010;
@@ -520,6 +520,7 @@ KillSound(void)
 		free((void *)s_Buffer);
 		s_Buffer = 0;
 	}
+	s_BufferIn = 0;
 	return 0;
 }
 
