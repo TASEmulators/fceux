@@ -49,6 +49,7 @@ static double noiseGateRate = 0.010;
 static bool   noiseGateActive = true;
 static bool   windowSoundMute = false;
 static bool   fillInit = 1;
+static const unsigned int supportedSampleRates[] = { 11025, 22050, 44100, 48000, 96000, 0 };
 
 static bool s_mute = false;
 
@@ -186,11 +187,12 @@ fillaudio(void *udata,
 int
 InitSound()
 {
-	int sound, soundrate, soundbufsize, soundvolume, soundtrianglevolume, soundsquare1volume, soundsquare2volume, soundnoisevolume, soundpcmvolume, soundq;
+	int i, sound, soundrate, soundbufsize, soundvolume, soundtrianglevolume, soundsquare1volume, soundsquare2volume, soundnoisevolume, soundpcmvolume, soundq;
 	SDL_AudioSpec spec;
 	const char *driverName;
 	int frmRateSampleAdj = 0;
 	int samplesPerFrame;
+	bool sampleRateIsSupported = false;
 
 	g_config->getOption("SDL.Sound", &sound);
 	if (!sound) 
@@ -217,6 +219,31 @@ InitSound()
 	g_config->getOption("SDL.Sound.Square2Volume", &soundsquare2volume);
 	g_config->getOption("SDL.Sound.NoiseVolume", &soundnoisevolume);
 	g_config->getOption("SDL.Sound.PCMVolume", &soundpcmvolume);
+
+	i = 0;
+	while (supportedSampleRates[i] != 0)
+	{
+		if (soundrate == supportedSampleRates[i])
+		{
+			sampleRateIsSupported = true;
+			break;
+		}
+		i++;
+	}
+
+	if (!sampleRateIsSupported)
+	{
+		printf("Error: Audio Sample Rate %i is either invalid or not supported, reverting to default of 44100\n", soundrate);
+		soundrate = 44100;
+		g_config->setOption("SDL.Sound.Rate", soundrate);
+	}
+
+	if ( (soundbufsize < 15) || (soundbufsize > 200) )
+	{
+		printf("Error: Audio Buffer Size of %i ms is invalid, reverting to default of 128\n", soundbufsize);
+		soundbufsize = 128;
+		g_config->setOption("SDL.Sound.BufSize", soundbufsize);
+	}
 
 	spec.freq = s_SampleRate = soundrate;
 	spec.format = AUDIO_S16SYS;
