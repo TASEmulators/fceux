@@ -3417,7 +3417,9 @@ void LibavEncOptItem::setValueText(void)
 			break;
 			case AV_OPT_TYPE_INT:
 			case AV_OPT_TYPE_INT64:
+			#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 58, 100)
 			case AV_OPT_TYPE_UINT64:
+			#endif
 			{
 				int64_t i;
 
@@ -3789,7 +3791,9 @@ LibavEncOptInputWin::LibavEncOptInputWin( LibavEncOptItem *itemIn, QWidget *pare
 	{
 		case AV_OPT_TYPE_INT:
 		case AV_OPT_TYPE_INT64:
+		#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 58, 100)
 		case AV_OPT_TYPE_UINT64:
+		#endif
 		{
 			int64_t val;
 
@@ -4054,7 +4058,9 @@ void LibavEncOptInputWin::applyChanges(void)
 	{
 		case AV_OPT_TYPE_INT:
 		case AV_OPT_TYPE_INT64:
+		#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 58, 100)
 		case AV_OPT_TYPE_UINT64:
+		#endif
 		{
 			if ( intEntry )
 			{
@@ -4144,7 +4150,9 @@ void LibavEncOptInputWin::resetDefaultsCB(void)
 	{
 		case AV_OPT_TYPE_INT:
 		case AV_OPT_TYPE_INT64:
+		#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 58, 100)
 		case AV_OPT_TYPE_UINT64:
+		#endif
 		{
 			if ( intEntry )
 			{
