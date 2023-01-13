@@ -1285,9 +1285,8 @@ static int initVideoStream( const char *codec_name, OutputStream *ost )
 	return 0;
 }
 
-static AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,
-                                  uint64_t channel_layout,
-                                  int sample_rate, int nb_samples)
+static AVFrame *alloc_audio_frame(const AVCodecContext *c,
+                                  int nb_samples)
 {
 	AVFrame *frame = av_frame_alloc();
 	int ret;
@@ -1296,9 +1295,13 @@ static AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,
 		fprintf(stderr, "Error allocating an audio frame\n");
 		return NULL;
 	}
-	frame->format = sample_fmt;
-	frame->channel_layout = channel_layout;
-	frame->sample_rate = sample_rate;
+	frame->format = c->sample_fmt;
+	#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 28, 100)
+	frame->channel_layout = c->channel_layout;
+	#else
+	av_channel_layout_copy(&frame->ch_layout, &c->ch_layout);
+	#endif
+	frame->sample_rate = c->sample_rate;
 	frame->nb_samples = nb_samples;
 
 	if (nb_samples)
@@ -1312,6 +1315,43 @@ static AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,
 	}
 	return frame;
 }
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 28, 100)
+static int select_audio_channel_layout(const OutputStream *ost, const AVCodec *codec, AVChannelLayout *dst)
+{
+	const AVChannelLayout *p, *best_ch_layout;
+	const AVChannelLayout defaultLayout = AV_CHANNEL_LAYOUT_MONO;
+	int best_nb_channels = 0;
+
+	if (!codec->ch_layouts)
+	{
+		return av_channel_layout_copy(dst, &defaultLayout);
+	}
+
+	best_ch_layout = p = codec->ch_layouts;
+	while (p && p->nb_channels)
+	{
+		int nb_channels = p->nb_channels;
+
+		if ( ost->chanLayout > 0 )
+		{
+			if (ost->chanLayout == p->u.mask)
+			{
+				best_ch_layout   = p;
+				best_nb_channels = nb_channels;
+				break;
+			}
+		}
+		if (nb_channels > best_nb_channels)
+		{
+			best_ch_layout   = p;
+			best_nb_channels = nb_channels;
+		}
+		p++;
+	}
+	return av_channel_layout_copy(dst, best_ch_layout);
+}
+#endif
 
 static int initAudioStream( const char *codec_name, OutputStream *ost )
 {
@@ -1406,6 +1446,7 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 	}
 
 	// Channel Layout Selection
+#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 28, 100)
 	if ( ost->chanLayout > 0 )
 	{
 		c->channel_layout = ost->chanLayout;
@@ -1432,6 +1473,13 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 		c->channel_layout = codec->channel_layouts       ? codec->channel_layouts[0]       : AV_CH_LAYOUT_STEREO;
 	}
 	c->channels       = av_get_channel_layout_nb_channels(c->channel_layout);
+#else
+	if (select_audio_channel_layout( ost, codec, &c->ch_layout) )
+	{
+		fprintf( avLogFp, "Error selecting the audio channel layout\n");
+		return -1;
+	}
+#endif
 	c->bit_rate       = 64000;
 	//ost->st->time_base = (AVRational){ 1, c->sample_rate };
 	ost->st->time_base.num = 1;
@@ -1454,10 +1502,19 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 	}
 	av_opt_set_sample_fmt(ost->swr_ctx, "in_sample_fmt",      AV_SAMPLE_FMT_S16,   0);
 	av_opt_set_int(ost->swr_ctx, "in_sample_rate",     audioSampleRate,     0);
+#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 28, 100)
 	av_opt_set_int(ost->swr_ctx, "in_channel_layout",  AV_CH_LAYOUT_MONO,   0);
+#else
+	AVChannelLayout src_ch_layout = AV_CHANNEL_LAYOUT_MONO;
+	av_opt_set_chlayout(ost->swr_ctx, "in_chlayout", &src_ch_layout, 0);
+#endif
 	av_opt_set_sample_fmt(ost->swr_ctx, "out_sample_fmt",     c->sample_fmt,       0);
 	av_opt_set_int(ost->swr_ctx, "out_sample_rate",    c->sample_rate,      0);
+#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 28, 100)
 	av_opt_set_int(ost->swr_ctx, "out_channel_layout", c->channel_layout,   0);
+#else
+	av_opt_set_chlayout(ost->swr_ctx, "out_chlayout", &c->ch_layout, 0);
+#endif
 
 	ret = swr_init(ost->swr_ctx);
 	if (ret < 0)
@@ -1498,9 +1555,8 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 	ost->frameSize = nb_samples;
 	ost->bytesPerSample  = av_get_bytes_per_sample( c->sample_fmt );
 
-	ost->frame     = alloc_audio_frame(c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples);
-	ost->tmp_frame = alloc_audio_frame(c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples);
-	//ost->tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_MONO, audioSampleRate, nb_samples);
+	ost->frame     = alloc_audio_frame(c, nb_samples);
+	ost->tmp_frame = alloc_audio_frame(c, nb_samples);
 
 	//printf("Audio: FMT:%i  ChanLayout:%li  Rate:%i  FrameSize:%i  bytesPerSample:%i \n",
 	//		c->sample_fmt, c->channel_layout, c->sample_rate, nb_samples, ost->bytesPerSample );
@@ -1856,7 +1912,12 @@ static int encode_audio_frame( int16_t *audioOut, int numSamples)
 
 			ret = av_samples_copy( ost->frame->data, ost->tmp_frame->data,
 					ost->frame->nb_samples, srcOffset, copySize, 
-						ost->frame->channels, ost->enc->sample_fmt );
+					#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 28, 100)
+						ost->frame->channels,
+					#else
+						ost->frame->ch_layout.nb_channels,
+					#endif
+							ost->enc->sample_fmt );
 
 			if ( ret < 0 )
 			{
@@ -3093,6 +3154,7 @@ void LibavOptionsPage::initChannelLayoutSelect( const char *codec_name )
 	{
 		return;
 	}
+	#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 28, 100)
 	if ( c->channel_layouts )
 	{
 		int i=0;
@@ -3111,7 +3173,27 @@ void LibavOptionsPage::initChannelLayoutSelect( const char *codec_name )
 			}
 			i++;
 		}
+
 	}
+	#else
+	const AVChannelLayout *p = c->ch_layouts;
+
+	while (p && p->nb_channels)
+	{
+		char layoutDesc[256];
+
+		av_channel_layout_describe(p, layoutDesc, sizeof(layoutDesc));
+
+		audioChanLayout->addItem( tr(layoutDesc), (unsigned long long)p->u.mask );
+
+		if ( LIBAV::audio_st.chanLayout == p->u.mask )
+		{
+			audioChanLayout->setCurrentIndex( audioChanLayout->count() - 1 );
+			formatOk = true;
+		}
+		p++;
+	}
+	#endif
 	if ( !formatOk )
 	{
 		LIBAV::audio_st.chanLayout = -1;
