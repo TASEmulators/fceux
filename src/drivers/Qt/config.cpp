@@ -432,7 +432,8 @@ CreateDirs(const std::string &dir)
 static void
 GetBaseDirectory(std::string &dir)
 {
-	char *home = getenv("FCEUX_HOME");
+	const char *home = getenv("FCEUX_HOME");
+	const char *conf = getenv("FCEUX_CONFIG_DIR");
 
 #ifdef WIN32
 	// Windows users want base directory to be where executable resides.
@@ -453,10 +454,16 @@ GetBaseDirectory(std::string &dir)
 	}
 #endif
 
-	if (home) 
+	if (conf)
+	{
+		dir = std::string(conf);
+	}
+	else if (home) 
 	{
 		dir = std::string(home) + "/.fceux";
-	} else {
+	}
+	else
+	{
 #ifdef WIN32
 		home = new char[MAX_PATH + 1];
 		GetModuleFileNameA(NULL, home, MAX_PATH + 1);
