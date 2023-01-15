@@ -465,16 +465,16 @@ GetBaseDirectory(std::string &dir)
 	else
 	{
 #ifdef WIN32
-		home = new char[MAX_PATH + 1];
-		GetModuleFileNameA(NULL, home, MAX_PATH + 1);
+		char *exePath = new char[MAX_PATH + 1];
+		GetModuleFileNameA(NULL, exePath, MAX_PATH + 1);
 
-		char *lastBS = strrchr(home,'\\');
+		char *lastBS = strrchr(exePath,'\\');
 		if(lastBS) {
 			*lastBS = 0;
 		}
 
-		dir = std::string(home);
-		delete[] home;
+		dir = std::string(exePath);
+		delete[] exePath;
 #else
 		dir = "";
 #endif
