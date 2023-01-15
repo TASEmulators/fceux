@@ -421,7 +421,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	//----------
 	//attempt to open the files
 	FCEUFILE *fp;
-	char fullname[2048];	// this name contains both archive name and ROM file name
+	std::string fullname;	// this name contains both archive name and ROM file name
 	int lastpal = PAL;
 	int lastdendy = dendy;
 
@@ -443,16 +443,19 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	}
 	else if (fp->archiveFilename != "")
 	{
-		strcpy(fullname, fp->archiveFilename.c_str());
-		strcat(fullname, "|");
-		strcat(fullname, fp->filename.c_str());
-	} else
-		strcpy(fullname, name);
+		fullname.assign(fp->archiveFilename.c_str());
+		fullname.append("|");
+		fullname.append(fp->filename.c_str());
+	}
+	else
+	{
+		fullname.assign(name);
+	}
 
 	// reset loaded game BEFORE it's loading.
 	ResetGameLoaded();
 	//file opened ok. start loading.
-	FCEU_printf("Loading %s...\n\n", fullname);
+	FCEU_printf("Loading %s...\n\n", fullname.c_str());
 	GetFileBase(fp->filename.c_str());
 	//reset parameters so they're cleared just in case a format's loader doesn't know to do the clearing
 	MasterRomInfoParams = TMasterRomInfoParams();
@@ -484,16 +487,16 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	bool FCEUXLoad(const char *name, FCEUFILE * fp);
 
 	int load_result;
-	load_result = iNESLoad(fullname, fp, OverwriteVidMode);
+	load_result = iNESLoad(fullname.c_str(), fp, OverwriteVidMode);
 	if (load_result == LOADER_INVALID_FORMAT)
 	{
-		load_result = NSFLoad(fullname, fp);
+		load_result = NSFLoad(fullname.c_str(), fp);
 		if (load_result == LOADER_INVALID_FORMAT)
 		{
-			load_result = UNIFLoad(fullname, fp);
+			load_result = UNIFLoad(fullname.c_str(), fp);
 			if (load_result == LOADER_INVALID_FORMAT)
 			{
-				load_result = FDSLoad(fullname, fp);
+				load_result = FDSLoad(fullname.c_str(), fp);
 			}
 		}
 	}	
