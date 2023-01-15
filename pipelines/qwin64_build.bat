@@ -49,7 +49,7 @@ cmake -DQT6=0 -DPUBLIC_RELEASE=%PUBLIC_RELEASE% -DSDL_INSTALL_PREFIX=%SDL_INSTAL
 
 REM nmake
 msbuild /m fceux.sln /p:Configuration=Release
-@if ERRORLEVEL 1 goto end
+@if %ERRORLEVEL% NEQ 0 goto end
 
 copy src\Release\fceux.exe bin\qfceux.exe
 copy %PROJECT_ROOT%\src\auxlib.lua bin\.
@@ -70,16 +70,16 @@ dir bin
 
 REM Create Zip Archive
 %PROJECT_ROOT%\vc\zip  -X -9 -r %PROJECT_ROOT%\vc\%ZIP_FILENAME%  bin
-@if ERRORLEVEL 1 goto end
+@if %ERRORLEVEL% NEQ 0 goto end
 
 cd %PROJECT_ROOT%\output
 %PROJECT_ROOT%\vc\zip -X -9 -u -r %PROJECT_ROOT%\vc\%ZIP_FILENAME%  palettes luaScripts tools
-@if ERRORLEVEL 1 goto end
+@if %ERRORLEVEL% NEQ 0 goto end
 
 mkdir doc
 copy *.chm doc\.
 %PROJECT_ROOT%\vc\zip -X -9 -u -r %PROJECT_ROOT%\vc\%ZIP_FILENAME%  doc
-@if ERRORLEVEL 1 goto end
+@if %ERRORLEVEL% NEQ 0 goto end
 
 cd %PROJECT_ROOT%
 
