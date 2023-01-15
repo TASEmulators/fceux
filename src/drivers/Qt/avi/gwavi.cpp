@@ -1037,17 +1037,18 @@ unsigned int gwavi_t::readChunk(const char *id, int lvl)
 
 int  gwavi_t::getChunkData( long long int fpos, unsigned char *buf, size_t size )
 {
+	int ret;
 	long long int prev_fpos;
 
 	prev_fpos = ftell(in);
 
 	fseek( in, fpos, SEEK_SET );
 
-	fread( buf, 1, size, in );
+	ret = fread( buf, 1, size, in ) != size;
 
 	fseek( in, prev_fpos, SEEK_SET );
 
-	return 0;
+	return ret;
 }
 
 unsigned int gwavi_t::readAviHeader(void)

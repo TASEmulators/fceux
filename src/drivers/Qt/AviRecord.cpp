@@ -1324,7 +1324,7 @@ static int select_audio_channel_layout(const OutputStream *ost, const AVCodec *c
 	#if __cplusplus >= 202002L
 	const AVChannelLayout defaultLayout = AV_CHANNEL_LAYOUT_MONO;
 	#else
-	const AVChannelLayout defaultLayout;
+	AVChannelLayout defaultLayout;
 	av_channel_layout_from_mask( &defaultLayout, AV_CH_LAYOUT_MONO );
 	#endif
 
