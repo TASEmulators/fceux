@@ -1319,9 +1319,14 @@ static AVFrame *alloc_audio_frame(const AVCodecContext *c,
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 28, 100)
 static int select_audio_channel_layout(const OutputStream *ost, const AVCodec *codec, AVChannelLayout *dst)
 {
-	const AVChannelLayout *p, *best_ch_layout;
-	const AVChannelLayout defaultLayout = AV_CHANNEL_LAYOUT_MONO;
 	int best_nb_channels = 0;
+	const AVChannelLayout *p, *best_ch_layout;
+	#if __cplusplus >= 202002L
+	const AVChannelLayout defaultLayout = AV_CHANNEL_LAYOUT_MONO;
+	#else
+	const AVChannelLayout defaultLayout;
+	av_channel_layout_from_mask( &defaultLayout, AV_CH_LAYOUT_MONO );
+	#endif
 
 	if (!codec->ch_layouts)
 	{
@@ -1505,7 +1510,12 @@ static int initAudioStream( const char *codec_name, OutputStream *ost )
 #if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(57, 28, 100)
 	av_opt_set_int(ost->swr_ctx, "in_channel_layout",  AV_CH_LAYOUT_MONO,   0);
 #else
+	#if __cplusplus >= 202002L
 	AVChannelLayout src_ch_layout = AV_CHANNEL_LAYOUT_MONO;
+	#else
+	AVChannelLayout src_ch_layout;
+	av_channel_layout_from_mask( &src_ch_layout, AV_CH_LAYOUT_MONO );
+	#endif
 	av_opt_set_chlayout(ost->swr_ctx, "in_chlayout", &src_ch_layout, 0);
 #endif
 	av_opt_set_sample_fmt(ost->swr_ctx, "out_sample_fmt",     c->sample_fmt,       0);

@@ -10,7 +10,7 @@ set DEPLOY_GROUP=master
 IF DEFINED APPVEYOR_REPO_TAG_NAME set DEPLOY_GROUP=%APPVEYOR_REPO_TAG_NAME%
 
 msbuild %PROJECT_ROOT%\vc\vc14_fceux.vcxproj /p:Configuration=%BUILD_CONFIG% /p:Platform="x64"
-@if ERRORLEVEL 1 goto end
+if %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 cd %PROJECT_ROOT%\vc
 
@@ -18,9 +18,9 @@ REM Create Zip Archive
 
 cd %PROJECT_ROOT%\output
 ..\vc\zip -X -9 -j ..\vc\%ZIP_FILENAME% ..\vc\x64\%BUILD_CONFIG%\fceux64.exe ..\src\drivers\win\lua\x64\lua5.1.dll ..\src\drivers\win\lua\x64\lua51.dll ..\src\auxlib.lua ..\src\drivers\win\7z_64.dll
-@if ERRORLEVEL 1 goto end
+if %ERRORLEVEL% NEQ 0 EXIT /B 1
 ..\vc\zip -X -9 -u -r ..\vc\%ZIP_FILENAME% fceux.chm taseditor.chm palettes luaScripts tools
-@if ERRORLEVEL 1 goto end
+if %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 cd %PROJECT_ROOT%
 
