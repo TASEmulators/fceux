@@ -43,26 +43,27 @@ static void MessageOutput(QtMsgType type, const QMessageLogContext &context, con
     switch (type) 
     {
        case QtDebugMsg:
-           sprintf( cmsg, "Qt Debug: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+           snprintf( cmsg, sizeof(cmsg), "Qt Debug: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
 	   FCEUD_Message(cmsg);
            break;
        case QtInfoMsg:
-           sprintf( cmsg, "Qt Info: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+           snprintf( cmsg, sizeof(cmsg), "Qt Info: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
 	   FCEUD_Message(cmsg);
            break;
        case QtWarningMsg:
-           sprintf( cmsg, "Qt Warning: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+           snprintf( cmsg, sizeof(cmsg), "Qt Warning: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
 	   FCEUD_Message(cmsg);
            break;
        case QtCriticalMsg:
-           sprintf( cmsg, "Qt Critical: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+           snprintf( cmsg, sizeof(cmsg), "Qt Critical: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
 	   FCEUD_PrintError(cmsg);
            break;
        case QtFatalMsg:
-           sprintf( cmsg, "Qt Fatal: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+           snprintf( cmsg, sizeof(cmsg), "Qt Fatal: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
 	   FCEUD_PrintError(cmsg);
            break;
     }
+    cmsg[sizeof(cmsg)-1] = 0;
     fprintf(stderr, "%s", cmsg );
 }
 
