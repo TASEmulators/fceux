@@ -656,7 +656,7 @@ Config::_loadFile(const char* fname)
 		configFile = fname;
 	}
 	std::string line, name, value;
-	char buf[1024];
+	char buf[4096];
 
 	// set the exception handling to catch i/o errors
 	config.exceptions(std::fstream::badbit);
@@ -671,7 +671,7 @@ Config::_loadFile(const char* fname)
 
 		while(!config.eof()) {
 			// read a line
-			config.getline(buf, 1024);
+			config.getline(buf, sizeof(buf));
 			line = buf;
 
 			// check line validity
@@ -723,7 +723,7 @@ Config::save()
 	std::map<std::string, double>::iterator dbl_i;
 	std::map<std::string, std::string>::iterator str_i;
 	std::string configFile = _dir + "/" + cfgFile;
-	char buf[1024];
+	char buf[4096];
 
 	// set the exception handling to catch i/o errors
 	config.exceptions(std::ios::failbit | std::ios::badbit);
@@ -741,19 +741,19 @@ Config::save()
 		// write each configuration setting
 		for(int_i = _intOptMap.begin(); int_i != _intOptMap.end(); int_i++) 
 		{
-			snprintf(buf, 1024, "%s = %d\n",
+			snprintf(buf, sizeof(buf), "%s = %d\n",
 				int_i->first.c_str(), int_i->second);
 			config.write(buf, strlen(buf));
 		}
 		for(dbl_i = _dblOptMap.begin(); dbl_i != _dblOptMap.end(); dbl_i++) 
 		{
-			snprintf(buf, 1024, "%s = %f\n",
+			snprintf(buf, sizeof(buf), "%s = %f\n",
 				dbl_i->first.c_str(), dbl_i->second);
 			config.write(buf, strlen(buf));
 		}
 		for(str_i = _strOptMap.begin(); str_i != _strOptMap.end(); str_i++) 
 		{
-			snprintf(buf, 1024, "%s = %s\n",
+			snprintf(buf, sizeof(buf), "%s = %s\n",
 				str_i->first.c_str(), str_i->second.c_str());
 			config.write(buf, strlen(buf));
 		}
