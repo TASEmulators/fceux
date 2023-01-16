@@ -178,8 +178,8 @@ class SymbolEditWindow : public QDialog
 };
 
 
-int generateNLFilenameForBank(int bank, char *NLfilename);
-int generateNLFilenameForAddress(int address, char *NLfilename);
+int generateNLFilenameForBank(int bank, std::string &NLfilename);
+int generateNLFilenameForAddress(int address, std::string &NLfilename);
 
 #define  ASM_DEBUG_SYMS       0x0001
 #define  ASM_DEBUG_REGS       0x0002

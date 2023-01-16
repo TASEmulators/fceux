@@ -262,7 +262,7 @@ void debugSymbolTable_t::clear(void)
 	pageMap.clear();
 }
 //--------------------------------------------------------------
-int generateNLFilenameForAddress(int address, char *NLfilename)
+int generateNLFilenameForAddress(int address, std::string &NLfilename)
 {
 	int bank;
 
@@ -281,7 +281,7 @@ int generateNLFilenameForAddress(int address, char *NLfilename)
 	return generateNLFilenameForBank( bank, NLfilename );
 }
 //--------------------------------------------------------------
-int generateNLFilenameForBank(int bank, char *NLfilename)
+int generateNLFilenameForBank(int bank, std::string &NLfilename)
 {
 	int i;
 	const char *romFile;
@@ -298,20 +298,19 @@ int generateNLFilenameForBank(int bank, char *NLfilename)
 
 		if ( romFile[i] == '|' )
 		{
-			NLfilename[i] = '.';
+			NLfilename.push_back('.');
 		}
 		else
 		{
-			NLfilename[i] = romFile[i];
+			NLfilename.push_back(romFile[i]);
 		}
 		i++;
 	}
-	NLfilename[i] = 0;
 
 	if (bank < 0)
 	{
 		// The NL file for the RAM addresses has the name nesrom.nes.ram.nl
-		strcat(NLfilename, ".ram.nl");
+		NLfilename.append(".ram.nl");
 	} 
 	else
 	{
@@ -321,7 +320,7 @@ int generateNLFilenameForBank(int bank, char *NLfilename)
 			bank = 0x1F;
 		#endif
 		sprintf( stmp, ".%X.nl", bank);
-		strcat(NLfilename, stmp );
+		NLfilename.append( stmp );
 	}
 	return 0;
 }
@@ -330,8 +329,8 @@ int debugSymbolTable_t::loadFileNL( int bank )
 {
 	FILE *fp;
 	int i, j, ofs, lineNum = 0, literal = 0, array = 0;
-	char fileName[512], line[512];
-	char stmp[512];
+	std::string fileName;
+	char stmp[512], line[512];
 	debugSymbolPage_t *page = NULL;
 	debugSymbol_t *sym = NULL;
 
@@ -341,9 +340,9 @@ int debugSymbolTable_t::loadFileNL( int bank )
 	{
 		return -1;
 	}
-	//printf("Loading NL File: %s\n", fileName );
+	//printf("Loading NL File: %s\n", fileName.c_str() );
 
-	fp = ::fopen( fileName, "r" );
+	fp = ::fopen( fileName.c_str(), "r" );
 
 	if ( fp == NULL )
 	{
@@ -400,7 +399,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 			j=0; i++;
 			if ( !isxdigit( line[i] ) )
 			{
-				printf("Error: Invalid Offset on Line %i of File %s\n", lineNum, fileName );
+				printf("Error: Invalid Offset on Line %i of File %s\n", lineNum, fileName.c_str() );
 			}
 			while ( isxdigit( line[i] ) )
 			{
@@ -424,7 +423,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 
 			if ( line[i] != '#' )
 			{
-				printf("Error: Missing field delimiter following offset $%X on Line %i of File %s\n", ofs, lineNum, fileName );
+				printf("Error: Missing field delimiter following offset $%X on Line %i of File %s\n", ofs, lineNum, fileName.c_str() );
 				continue;
 			}
 			i++;
@@ -489,7 +488,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 
 			if ( line[i] != '#' )
 			{
-				printf("Error: Missing field delimiter following name '%s' on Line %i of File %s\n", stmp, lineNum, fileName );
+				printf("Error: Missing field delimiter following name '%s' on Line %i of File %s\n", stmp, lineNum, fileName.c_str() );
 				continue;
 			}
 			i++;
@@ -498,7 +497,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 
 			if ( sym == NULL )
 			{
-				printf("Error: Failed to allocate memory for offset $%04X Name '%s' on Line %i of File %s\n", ofs, stmp, lineNum, fileName );
+				printf("Error: Failed to allocate memory for offset $%04X Name '%s' on Line %i of File %s\n", ofs, stmp, lineNum, fileName.c_str() );
 				continue;
 			}
 			sym->ofs = ofs;
@@ -548,7 +547,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 
 						if ( page->addSymbol( arraySym ) )
 						{
-							printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, arraySym->name.c_str(), lineNum, fileName );
+							printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, arraySym->name.c_str(), lineNum, fileName.c_str() );
 							delete arraySym; arraySym = NULL; // Failed to add symbol
 						}
 					}
@@ -559,7 +558,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 			{
 				if ( page->addSymbol( sym ) )
 				{
-					printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, sym->name.c_str(), lineNum, fileName );
+					printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, sym->name.c_str(), lineNum, fileName.c_str() );
 					delete sym; sym = NULL; // Failed to add symbol
 				}
 			}
@@ -1415,7 +1414,8 @@ void SymbolEditWindow::arrayCommentHeadOnlyChanged( int state )
 //--------------------------------------------------------------
 void SymbolEditWindow::setAddr( int addrIn )
 {
-	char stmp[512];
+	char stmp[64];
+	std::string filename;
 
 	addr = addrIn;
 
@@ -1435,9 +1435,9 @@ void SymbolEditWindow::setAddr( int addrIn )
 		}
 	}
 
-	generateNLFilenameForAddress( addr, stmp );
+	generateNLFilenameForAddress( addr, filename );
 
-	filepath->setText( tr(stmp) );
+	filepath->setText( tr(filename.c_str()) );
 	filepath->setMinimumWidth( charWidth * (filepath->text().size() + 4) );
 }
 //--------------------------------------------------------------
