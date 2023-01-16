@@ -25,6 +25,8 @@
 #include <string.h>
 #include <map>
 
+#include "cart.h"
+
 struct TMasterRomInfo
 {
 	uint64 md5lower;
