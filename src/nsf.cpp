@@ -32,6 +32,7 @@
 #include "file.h"
 #include "fds.h"
 #include "cart.h"
+#include "ines.h"
 #include "input.h"
 #include "state.h"
 #include "driver.h"
@@ -122,8 +123,6 @@ static uint8 BankCounter; //configuration
 static uint16 PlayAddr; //configuration
 static uint16 InitAddr; //configuration
 static uint16 LoadAddr; //configuration
-
-extern char LoadedRomFName[2048];
 
 NSF_HEADER NSFHeader; //mbg merge 6/29/06 - needs to be global
 

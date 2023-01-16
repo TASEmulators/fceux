@@ -58,8 +58,8 @@ uint8 Mirroring = 0;
 uint8 MirroringAs2bits = 0;
 uint32 ROM_size = 0;
 uint32 VROM_size = 0;
-char LoadedRomFName[2048]; //mbg merge 7/17/06 added
-char LoadedRomFNamePatchToUse[2048];
+char LoadedRomFName[4096]; //mbg merge 7/17/06 added
+char LoadedRomFNamePatchToUse[4096];
 
 static int CHRRAMSize = -1;
 static int iNES_Init(int num);

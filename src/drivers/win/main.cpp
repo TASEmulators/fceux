@@ -44,6 +44,7 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #include "../../version.h"
 #include "../../types.h"
 #include "../../fceu.h"
+#include "../../ines.h"
 #include "../../state.h"
 #include "../../debug.h"
 #include "../../movie.h"
@@ -544,7 +545,6 @@ void DoFCEUExit()
 
 		closeGame = true;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
 		// remember the ROM name
-		extern char LoadedRomFName[2048];
 		if (GameInfo)
 			strcpy(romNameWhenClosingEmulator, LoadedRomFName);
 		else
@@ -1174,7 +1174,7 @@ std::string GetRomName(bool force)
 	//The purpose of this function is to format the ROM name stored in LoadedRomFName
 	//And return a char array with just the name with path or extension
 	//The purpose of this function is to populate a save as dialog with the ROM name as a default filename
-	extern char LoadedRomFName[2048];	//Contains full path of ROM
+	// LoadedRomFName;	//Contains full path of ROM
 	std::string Rom;					//Will contain the formatted path
 	if(GameInfo || force)						//If ROM is loaded
 	{
@@ -1193,7 +1193,7 @@ std::string GetRomPath(bool force)
 	//The purpose of this function is to format the ROM name stored in LoadedRomFName
 	//And return a char array with just the name with path or extension
 	//The purpose of this function is to populate a save as dialog with the ROM name as a default filename
-	extern char LoadedRomFName[2048];	//Contains full path of ROM
+	// LoadedRomFName;	//Contains full path of ROM
 	std::string Rom;					//Will contain the formatted path
 	if(GameInfo || force)						//If ROM is loaded
 	{

@@ -23,6 +23,7 @@
 #include "debuggersp.h"
 #include "window.h"
 #include "../../fceu.h"
+#include "../../ines.h"
 #include "../../debug.h"
 #include "../../conddebug.h"
 
@@ -54,7 +55,6 @@ int pageNumbersLoaded[32] = {
 Name* ramBankNames = 0;
 bool ramBankNamesLoaded = false;
 
-extern char LoadedRomFName[2048];
 char NLfilename[2048];
 bool symbDebugEnabled = true;
 bool symbRegNames = true;
