@@ -116,6 +116,7 @@ int debugSymbolPage_t::save(void)
 	debugSymbol_t *sym;
 	std::map <int, debugSymbol_t*>::iterator it;
 	const char *romFile;
+	std::string filename;
 	char stmp[512];
 	int i,j;
 
@@ -142,19 +143,18 @@ int debugSymbolPage_t::save(void)
 
 		if ( romFile[i] == '|' )
 		{
-			stmp[i] = '.';
+			filename.push_back('.');
 		}
 		else
 		{
-			stmp[i] = romFile[i];
+			filename.push_back(romFile[i]);
 		}
 		i++;
 	}
-	stmp[i] = 0;
 
 	if ( pageNum < 0 )
 	{
-		strcat( stmp, ".ram.nl" );
+		filename.append(".ram.nl" );
 	}
 	else
 	{
@@ -162,14 +162,14 @@ int debugSymbolPage_t::save(void)
 
 		sprintf( suffix, ".%X.nl", pageNum );
 
-		strcat( stmp, suffix );
+		filename.append( suffix );
 	}
 
-	fp = fopen( stmp, "w" );
+	fp = ::fopen( filename.c_str(), "w" );
 
 	if ( fp == NULL )
 	{
-		printf("Error: Could not open file '%s' for writing\n", stmp );
+		printf("Error: Could not open file '%s' for writing\n", filename.c_str() );
 		return -1;
 	}
 
