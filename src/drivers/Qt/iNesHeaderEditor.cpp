@@ -695,8 +695,8 @@ bool iNesHeaderEditor_t::loadHeader(iNES_HEADER* header)
 		{
 			case errors::OPEN_FAILED:
 			{
-				char buf[2200];
-				sprintf(buf, "Error opening %s!", LoadedRomFName);
+				char buf[5120];
+				snprintf(buf, sizeof(buf), "Error opening %s!", LoadedRomFName);
 				showErrorMsgWindow( buf );
 				break;
 			}
@@ -737,8 +737,9 @@ bool iNesHeaderEditor_t::SaveINESFile(const char* path, iNES_HEADER* header)
 	FCEUFILE* source = FCEU_fopen(LoadedRomFName, NULL, "rb", 0, -1, ext);
 	if (!source)
 	{
-		sprintf(buf, "Opening source file %s failed.", LoadedRomFName);
-		showErrorMsgWindow(buf);
+		char msg[5120];
+		snprintf(msg, sizeof(msg), "Opening source file %s failed.", LoadedRomFName);
+		showErrorMsgWindow(msg);
 		return false;
 	}
 
@@ -746,8 +747,9 @@ bool iNesHeaderEditor_t::SaveINESFile(const char* path, iNES_HEADER* header)
 	FILE* target = FCEUD_UTF8fopen(path, "wb");
 	if (!target)
 	{
-		sprintf(buf, "Creating target file %s failed.", path);
-		showErrorMsgWindow(buf);
+		char msg[5120];
+		snprintf(msg, sizeof(msg), "Creating target file %s failed.", path);
+		showErrorMsgWindow(msg);
 		return false;
 	}
 
@@ -825,7 +827,8 @@ bool iNesHeaderEditor_t::openFile(void)
 
 	if ( GameInfo == NULL )
 	{
-		strcpy( LoadedRomFName, filename.toStdString().c_str() );
+		strncpy( LoadedRomFName, filename.toStdString().c_str(), sizeof(LoadedRomFName) );
+		LoadedRomFName[sizeof(LoadedRomFName)-1] = 0;
 	}
 
    return true;
