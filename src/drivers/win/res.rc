@@ -2440,6 +2440,7 @@ BEGIN
         MENUITEM "&Insert Coin #1",             MENU_INSERT_COIN
         MENUITEM "I&nsert Coin #2",             MENU_INSERT_COIN2
         MENUITEM "Ser&vice Button",             MENU_SERVICE_BUTTON
+        MENUITEM SEPARATOR
         MENUITEM "Input &Barcode",              MENU_INPUT_BARCODE
         MENUITEM SEPARATOR
         POPUP "E&mulation Speed"
