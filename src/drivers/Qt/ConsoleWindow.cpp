@@ -36,6 +36,7 @@
 #include <QWindow>
 #include <QScreen>
 #include <QHeaderView>
+#include <QFileInfo>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QInputDialog>
@@ -4779,7 +4780,16 @@ void consoleMenuBar::keyReleaseEvent(QKeyEvent *event)
 consoleRecentRomAction::consoleRecentRomAction(QString desc, QWidget *parent)
 	: QAction( desc, parent )
 {
+	QString txt;
+	QFileInfo fi(desc);
+
 	path = desc.toStdString();
+
+	txt  = fi.fileName();
+	txt += QString("\t");
+	txt += desc;
+
+	setText( txt );
 }
 //----------------------------------------------------------------------------
 consoleRecentRomAction::~consoleRecentRomAction(void)
