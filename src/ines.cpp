@@ -789,6 +789,7 @@ BMAPPINGLocal bmap[] = {
 	{"810544-CA-1",			261, BMC810544CA1_Init},
 	{"AA6023/AA6023B",		268, AA6023_Init},
 	{"COOLGIRL",			342, COOLGIRL_Init },
+	{"FAM250/81-01-39-C/SCHI-24",			354, Mapper354_Init },
 
 	{"Impact Soft MMC3 Flash Board",	406, Mapper406_Init },
 	{"INX_007T_V01",		470, INX_007T_Init },

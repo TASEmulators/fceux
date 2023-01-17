@@ -347,6 +347,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/32.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/33.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/34.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/boards/354.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/36.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/3d-block.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/40.cpp
