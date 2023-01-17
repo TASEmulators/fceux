@@ -1416,6 +1416,7 @@ void SymbolEditWindow::setAddr( int addrIn )
 {
 	char stmp[64];
 	std::string filename;
+	size_t size;
 
 	addr = addrIn;
 
@@ -1438,7 +1439,13 @@ void SymbolEditWindow::setAddr( int addrIn )
 	generateNLFilenameForAddress( addr, filename );
 
 	filepath->setText( tr(filename.c_str()) );
-	filepath->setMinimumWidth( charWidth * (filepath->text().size() + 4) );
+
+	size = filepath->text().size();
+
+	// Limit max size so that widget size doesn't explode on a large file path.
+	if (size > 32) size = 32;
+
+	filepath->setMinimumWidth( charWidth * (size + 4) );
 }
 //--------------------------------------------------------------
 void SymbolEditWindow::setBank( int bankIn )
