@@ -819,7 +819,7 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 	FILE *fp;
 	int ret, useNativeFileDialogVal;
 	QString filename;
-	char dir[512];
+	char dir[4096];
 	QFileDialog dialog(this, tr("Save Cheat File"));
 
 	dialog.setFileMode(QFileDialog::AnyFile);

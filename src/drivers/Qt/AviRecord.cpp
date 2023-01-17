@@ -2134,7 +2134,7 @@ int aviRecordOpenFile( const char *filepath )
 	char fourcc[8];
 	gwavi_audio_t  audioConfig;
 	double fps;
-	char fileName[1024];
+	std::string fileName;
 	char txt[512];
 	const char *romFile;
 
@@ -2147,7 +2147,7 @@ int aviRecordOpenFile( const char *filepath )
 
 	if ( filepath != NULL )
 	{
-		strcpy( fileName, filepath );
+		fileName.assign( filepath );
 	}
 	else
 	{
@@ -2166,21 +2166,21 @@ int aviRecordOpenFile( const char *filepath )
 
 			if ( lastPath.size() > 0 )
 			{
-				strcpy( fileName, lastPath.c_str() );
-				strcat( fileName, "/" );
+				fileName.assign( lastPath.c_str() );
+				fileName.append( "/" );
 			}
 			else if ( baseDir )
 			{
-				strcpy( fileName, baseDir );
-				strcat( fileName, "/avi/" );
+				fileName.assign( baseDir );
+				fileName.append( "/avi/" );
 			}
 			else
 			{
-				fileName[0] = 0;
+				fileName.clear();
 			}
-			strcat( fileName, base );
-			strcat( fileName, ".avi");
-			//printf("AVI Filepath:'%s'\n", fileName );
+			fileName.append( base );
+			fileName.append(".avi");
+			//printf("AVI Filepath:'%s'\n", fileName.c_str() );
 		}
 		else
 		{
@@ -2188,9 +2188,9 @@ int aviRecordOpenFile( const char *filepath )
 		}
 	}
 
-	if ( fileName[0] != 0 )
+	if ( fileName.size() > 0 )
 	{
-		QFile file(fileName);
+		QFile file(fileName.c_str());
 
 		if ( file.exists() )
 		{
@@ -2198,7 +2198,7 @@ int aviRecordOpenFile( const char *filepath )
 			std::string msg;
 
 			msg = "Pre-existing AVI file will be overwritten:\n\n" +
-				std::string(fileName) +	"\n\nReplace file?";
+				fileName +	"\n\nReplace file?";
 
 			ret = QMessageBox::warning( consoleWindow, QObject::tr("Overwrite Warning"),
 					QString::fromStdString(msg), QMessageBox::Yes | QMessageBox::No );
@@ -2296,7 +2296,7 @@ int aviRecordOpenFile( const char *filepath )
 #ifdef _USE_LIBAV
 	if ( aviDriver == AVI_DRIVER_LIBAV )
 	{
-		if ( LIBAV::initMedia( fileName ) )
+		if ( LIBAV::initMedia( fileName.c_str() ) )
 		{
 			char msg[512];
 			fprintf( avLogFp, "Error: Failed to open AVI file.\n");
@@ -2311,7 +2311,7 @@ int aviRecordOpenFile( const char *filepath )
 	{
 		gwavi = new gwavi_t();
 
-		if ( gwavi->open( fileName, nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, recordAudio ? &audioConfig : NULL ) )
+		if ( gwavi->open( fileName.c_str(), nes_shm->video.ncol, nes_shm->video.nrow, fourcc, fps, recordAudio ? &audioConfig : NULL ) )
 		{
 			char msg[512];
 			fprintf( avLogFp, "Error: Failed to open AVI file.\n");

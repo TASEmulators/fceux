@@ -1510,7 +1510,7 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 
 		for (size_t i=0; i<asr.files.size(); i++)
 		{
-			char base[512], suffix[32];
+			char base[512], suffix[128];
 
 			getFileBaseName( asr.files[i].name.c_str(), base, suffix );
 

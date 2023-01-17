@@ -2433,7 +2433,7 @@ int saveInputSettingsToFile(const char *filename)
 	QDir dir;
 	std::string path;
 	const char *baseDir = FCEUI_GetBaseDirectory();
-	char base[256];
+	char base[512];
 
 	path = std::string(baseDir) + "/input/presets/";
 
@@ -2481,7 +2481,7 @@ int loadInputSettingsFromFile(const char *filename)
 	QDir dir;
 	std::string path;
 	const char *baseDir = FCEUI_GetBaseDirectory();
-	char base[256], line[256];
+	char base[512], line[256];
 	char id[128], val[128];
 	int i, j;
 
