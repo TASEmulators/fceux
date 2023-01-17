@@ -779,10 +779,41 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 	{
 		QList<QUrl> urls = event->mimeData()->urls();
 
-		FCEU_WRAPPER_LOCK();
-		LoadGame( urls[0].toString( QUrl::PreferLocalFile ).toStdString().c_str() );
-		FCEU_WRAPPER_UNLOCK();
-		event->accept();
+		QString filename = urls[0].toString( QUrl::PreferLocalFile );
+
+		QFileInfo fi( filename );
+		QString suffix = fi.suffix();
+
+		//printf("DragNDrop Suffix: %s\n", suffix.toStdString().c_str() );
+
+		if ( suffix.compare("lua", Qt::CaseInsensitive) == 0 )
+		{
+			int luaLoadSuccess;
+
+			FCEU_WRAPPER_LOCK();
+			luaLoadSuccess = FCEU_LoadLuaCode( filename.toStdString().c_str() );
+			FCEU_WRAPPER_UNLOCK();
+
+			if (luaLoadSuccess)
+			{
+				g_config->setOption("SDL.LastLoadLua", filename.toStdString().c_str());
+			}
+			event->accept();
+		}
+		else
+		{
+			int romLoadSuccess;
+
+			FCEU_WRAPPER_LOCK();
+			romLoadSuccess = LoadGame( filename.toStdString().c_str() );
+			FCEU_WRAPPER_UNLOCK();
+
+			if (!romLoadSuccess)
+			{
+				printf("DragNDrop ROM Load Failed for %s\n", filename.toStdString().c_str() );
+			}
+			event->accept();
+		}
 	}
 }
 
