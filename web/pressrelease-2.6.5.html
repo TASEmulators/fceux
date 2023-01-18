@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<link href="fceux.css" rel="stylesheet" type="text/css" />
+<title>Press Release 2.6.5</title>
+</head>
+
+<body>
+<div id="masthead">
+	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom/Dendy Emulator
+</div>
+<div id="top_nav">
+  <a href="home.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="documentation.html">Documentation</a>
+  <a href="version.html">Versions</a>
+  <a href="contact.html">Contact</a>
+  <a href="links.html">Links</a>
+</div>
+<div id="container">
+	<div id="left_col">
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	 		style="display:inline-block;width:180px;height:150px"
+	 		data-ad-client="ca-pub-0764229755985190"
+	 		data-ad-slot="7648866201"></ins>
+		<script>
+	     (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>	
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	    	 style="display:inline-block;width:180px;height:150px"
+	     	data-ad-client="ca-pub-0764229755985190"
+	     	data-ad-slot="7648866201"></ins>
+		<script>
+	    	 (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
+<div id="page_content">
+<h1>FCEUX 2.6.5 Maintenance Release</h1>
+<p>01 February 2023</p>
+<p>
+The 2.6.5 release is a maintenance update that contains various fixes from a back log of bugs and feature requests over the past year.
+</p>
+
+<h2>Common</h2>
+<h3>Mappers</h3>
+Mapper 235: Update support for 260-in-1 and add UNROM mode<br>
+Mapper 268 (COOLBOY): Updated<br>
+Added Mapper 342 (COOLGIRL) support<br>
+Added Mapper 354 support<br>
+Added Mapper 470 support<br>
+UNROM-512 emulation fixes<br>
+Added cycle IRQ mode for Konami VRC mappers<br>
+
+<h3>Core</h3>
+Changed built-in palettes to be bit-shifted properly so that whites are pure FF<br>
+Various fixes for issues caught by clang code sanitizers<br>
+Added hotkey to allow for global enable/disable of cheats.<br>
+Memory allocation and alignment code cleanup.
+
+<h2>Win32</h2>
+
+<h3>Debugger</h3>
+Added protections to guard against corrupt save files.<br>
+
+<h3>Hex Editor</h3>
+Added ability to apply ROM file pasting as a single undoable action.<br>
+
+<h3>Trace Logger</h3>
+Changed disk flushing logic to be more efficient giving significant performance increase.<br>
+
+<h3>IPS</h3>
+Added support for loading IPS files on top of already loaded ROMs.<br>
+
+<h2>Qt/SDL</h2>
+
+<h3>GUI</h3>
+Added logic to raise and shift focus to hex editor window when opening from debugger.<br>
+Added separate hot keys for hard and soft NES reset functions.<br>
+Added logic to prevent controller buttons that are bound to the keyboard from being active when family keyboard is enabled. Controller buttons that are mapped to physical gamepad or joystick are unaffected.<br>
+Fixes for OpenGL blending parameters.<br>
+Added option to use palette background color as video background.<br>
+Added sound mute function. Accessible either via hot key or checkbox on sound config window.<br>
+Added option to set fceux base/config directory path via FCEUX_CONFIG_DIR environment variable.<br>
+
+<h3>Debugger</h3>
+Changed debugger data save file extension to be .fdb instead of .dbg so that it does not conflict/overwrite ld65 debug symbol files.<br>
+
+<h3>Trace Logger</h3>
+Now ensures that logged output is flushed to disk when emulator is paused. This ensures that latest data is available for inspection when stopped at a breakpoint.<br>
+
+<h3>Lua</h3>
+Implemented support for input.get() lua function binding.<br>
+Added lua script loading via file drag and drop feature.<br>
+
+<h3>Build</h3>
+Added cmake SOURCE_DATE_EPOCH hook to allow setting of UTC timestamp for reproducible binary builds.<br>
+Added clang address/undefined behavior sanitizer build option for unix debug builds.<br>
+Upgraded Win64 build to link SDL2 library version 2.24.1<br>
+Upgraded Win64 build to link ffmpeg library version 5.1.2<br>
+Updated code to remove usage of ffmpeg 5.1.x deprecated symbols.<br>
+Cleaned up a few compiler warnings<br>
+
+</div>
+
+<p>
+<hr>
+
+<div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
+		<br/>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc.
+</div>
+</div>
+</body>
+</html>
