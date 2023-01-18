@@ -770,7 +770,7 @@ BMAPPINGLocal bmap[] = {
 	{"SAN GUO ZHI PIRATE",	252, Mapper252_Init},
 	{"DRAGON BALL PIRATE",	253, Mapper253_Init},
 	{"",					254, Mapper254_Init},
-//	{"",					255, Mapper255_Init},	// No good dumps for this mapper
+	{"",					255, Mapper255_Init},	// dupe of 225
 
 //-------- Mappers 256-511 is the Supplementary Multilingual Plane ----------
 //-------- Mappers 512-767 is the Supplementary Ideographic Plane -----------
