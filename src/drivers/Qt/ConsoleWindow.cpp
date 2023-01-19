@@ -4230,9 +4230,9 @@ void consoleWin_t::openMsgLogWin(void)
 
 void consoleWin_t::openOnlineDocs(void)
 {
-	if ( QDesktopServices::openUrl( QUrl("http://fceux.com/web/help/fceux.html") ) == false )
+	if ( QDesktopServices::openUrl( QUrl("https://fceux.com/web/help/fceux.html") ) == false )
 	{
-		QueueErrorMsgWindow("Error: Failed to open link to: http://fceux.com/web/help/fceux.html");
+		QueueErrorMsgWindow("Error: Failed to open link to: https://fceux.com/web/help/fceux.html");
 	}
 	return;
 }

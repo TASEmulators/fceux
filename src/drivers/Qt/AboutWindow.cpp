@@ -147,7 +147,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 
 	hbox1 = new QHBoxLayout();
 	lbl = new QLabel();
-	lbl->setText("<a href=\"http://fceux.com\">Website</a>");
+	lbl->setText("<a href=\"https://fceux.com\">Website</a>");
 	lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
 	lbl->setOpenExternalLinks(true);
 

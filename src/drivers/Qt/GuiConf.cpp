@@ -1613,7 +1613,7 @@ guiStyleTestDialog::guiStyleTestDialog(QWidget *parent)
 	grid->addWidget( lbl, 2, 0 );
 
 	lbl = new QLabel();
-	lbl->setText("<a href=\"http://fceux.com\">Website Link</a>");
+	lbl->setText("<a href=\"https://fceux.com\">Website Link</a>");
 	lbl->setTextInteractionFlags(Qt::TextBrowserInteraction);
 	lbl->setOpenExternalLinks(false);
 	grid->addWidget( lbl, 2, 1 );
