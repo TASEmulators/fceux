@@ -225,10 +225,10 @@ static void FCEU_CloseGame(void)
 		currFrameCounter = 0;
 
 		//Reset flags for Undo/Redo/Auto Savestating //adelikat: TODO: maybe this stuff would be cleaner as a struct or class
-		lastSavestateMade[0] = 0;
+		lastSavestateMade.clear();
 		undoSS = false;
 		redoSS = false;
-		lastLoadstateMade[0] = 0;
+		lastLoadstateMade.clear();
 		undoLS = false;
 		redoLS = false;
 		AutoSS = false;
