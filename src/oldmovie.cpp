@@ -48,7 +48,7 @@ static uint8 joop[4];
 static uint8 joopcmd;
 static uint32 framets = 0;
 static uint32 frameptr = 0;
-static uint8* moviedata = NULL;
+static uint8* moviedata = nullptr;
 static uint32 moviedatasize = 0;
 static uint32 firstframeoffset = 0;
 static uint32 savestate_offset = 0;
@@ -626,7 +626,19 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	//ResetInputTypes();
 
 	fp->fseek(firstframeoffset,SEEK_SET);
-	moviedata = (uint8*)realloc(moviedata, moviedatasize);
+	uint8 *newMovieData = (uint8*)realloc(moviedata, moviedatasize);
+	if (newMovieData)
+	{
+		moviedata = newMovieData;
+	}
+	else
+	{
+		if (moviedata)
+		{
+			free(moviedata); moviedata = nullptr;
+		}
+		return FCM_CONVERTRESULT_REALLOC_FAIL;
+	}
 	fp->fread((char*)moviedata,moviedatasize);
 
 	frameptr = 0;
@@ -669,8 +681,11 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 		md.ports[0] = md.ports[1] = SI_GAMEPAD;
 	}
 
-	free(moviedata);
-	moviedata = 0;
+	if (moviedata)
+	{
+		free(moviedata);
+		moviedata = nullptr;
+	}
 
 	delete fp;
 	return FCM_CONVERTRESULT_SUCCESS;
