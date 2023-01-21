@@ -466,7 +466,7 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 void FCEUSS_Save(const char *fname, bool display_message)
 {
 	EMUFILE* st = 0;
-	char fn[2048];
+	std::string fn;
 
 	if (geniestage==1)
 	{
@@ -478,24 +478,24 @@ void FCEUSS_Save(const char *fname, bool display_message)
 	if(fname)	//If filename is given use it.
 	{
 		st = FCEUD_UTF8_fstream(fname, "wb");
-		strcpy(fn, fname);
+		fn.assign(fname);
 	}
 	else		//Else, generate one
 	{
 		//FCEU_PrintError("daCurrentState=%d",CurrentState);
-		strcpy(fn, FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());
+		fn = FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0);
 
 		//backup existing savestate first
-		if (CheckFileExists(fn) && backupSavestates)	//adelikat:  If the files exists and we are allowed to make backup savestates
+		if (CheckFileExists(fn.c_str()) && backupSavestates)	//adelikat:  If the files exists and we are allowed to make backup savestates
 		{
-			CreateBackupSaveState(fn);		//Make a backup of previous savestate before overwriting it
+			CreateBackupSaveState(fn.c_str());		//Make a backup of previous savestate before overwriting it
 			lastSavestateMade.assign(fn);	//Remember what the last savestate filename was (for undoing later)
 			undoSS = true;					//Backup was created so undo is possible
 		}
 		else
 			undoSS = false;					//so backup made so lastSavestateMade does have a backup file, so no undo
 
-		st = FCEUD_UTF8_fstream(fn,"wb");
+		st = FCEUD_UTF8_fstream(fn.c_str(),"wb");
 	}
 
 	if (st == NULL || st->get_fp() == NULL)
@@ -512,7 +512,7 @@ void FCEUSS_Save(const char *fname, bool display_message)
 		CallRegisteredLuaSaveFunctions(CurrentState, saveData);
 
 		char luaSaveFilename [512];
-		strncpy(luaSaveFilename, fn, 512);
+		strncpy(luaSaveFilename, fn.c_str(), 512);
 		luaSaveFilename[512-(1+7/*strlen(".luasav")*/)] = '\0';
 		strcat(luaSaveFilename, ".luasav");
 		if(saveData.recordList)
@@ -724,7 +724,7 @@ bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 bool FCEUSS_Load(const char *fname, bool display_message)
 {
 	EMUFILE* st;
-	char fn[2048];
+	std::string fn;
 
 	//mbg movie - this needs to be overhauled
 	////this fixes read-only toggle problems
@@ -742,12 +742,12 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	if (fname)
 	{
 		st = FCEUD_UTF8_fstream(fname, "rb");
-		strcpy(fn, fname);
+		fn.assign(fname);
 	} else
 	{
-		strcpy(fn, FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname).c_str());
-		st=FCEUD_UTF8_fstream(fn,"rb");
-        lastLoadstateMade.assign(fn);
+		fn = FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname);
+		st=FCEUD_UTF8_fstream(fn.c_str(),"rb");
+        	lastLoadstateMade.assign(fn);
 	}
 
 	if (st == NULL || (st->get_fp() == NULL))
@@ -755,7 +755,7 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 		if (display_message)
 		{
 			FCEU_DispMessage("State %d load error.", 0, CurrentState);
-			//FCEU_DispMessage("State %d load error. Filename: %s", 0, CurrentState, fn);
+			//FCEU_DispMessage("State %d load error. Filename: %s", 0, CurrentState, fn.c_str());
 		}
 		SaveStateStatus[CurrentState] = 0;
 		return false;
@@ -773,14 +773,14 @@ bool FCEUSS_Load(const char *fname, bool display_message)
             if (display_message)
 			{
                 FCEU_DispMessage("State %s loaded.", 0, szFilename);
-				//FCEU_DispMessage("State %s loaded. Filename: %s", 0, szFilename, fn);
+				//FCEU_DispMessage("State %s loaded. Filename: %s", 0, szFilename, fn.c_str());
             }
 		} else
 		{
             if (display_message)
 			{
                 FCEU_DispMessage("State %d loaded.", 0, CurrentState);
-				//FCEU_DispMessage("State %d loaded. Filename: %s", 0, CurrentState, fn);
+				//FCEU_DispMessage("State %d loaded. Filename: %s", 0, CurrentState, fn.c_str());
             }
 			SaveStateStatus[CurrentState] = 1;
 		}
@@ -792,7 +792,7 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 			LuaSaveData saveData;
 
 			char luaSaveFilename [512];
-			strncpy(luaSaveFilename, fn, 512);
+			strncpy(luaSaveFilename, fn.c_str(), 512);
 			luaSaveFilename[512-(1+7/*strlen(".luasav")*/)] = '\0';
 			strcat(luaSaveFilename, ".luasav");
 			FILE* luaSaveFile = fopen(luaSaveFilename, "rb");
