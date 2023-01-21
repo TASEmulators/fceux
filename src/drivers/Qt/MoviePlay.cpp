@@ -65,6 +65,8 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	movSelBox = new QComboBox();
 	movBrowseBtn = new QPushButton(tr("Browse"));
 
+	movSelBox->setMaximumWidth(512);
+
 	hbox->addWidget(lbl, 1);
 	hbox->addWidget(movSelBox, 100);
 	hbox->addWidget(movBrowseBtn, 1);

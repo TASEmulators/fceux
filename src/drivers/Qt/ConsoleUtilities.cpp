@@ -222,11 +222,14 @@ int parseFilepath( const char *filepath, std::string *dir, std::string *base, st
 		{
 			suffix->assign( &filepath[j] );
 		}
-		i = base->find_last_of('.');
-
-		if ( i != std::string::npos )
+		if (base)
 		{
-			base->erase(i);
+			i = base->find_last_of('.');
+
+			if ( i != std::string::npos )
+			{
+				base->erase(i);
+			}
 		}
 	}
 	return 0;
