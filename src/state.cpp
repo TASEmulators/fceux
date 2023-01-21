@@ -70,11 +70,11 @@ static int StateShow;
 //tells the save system innards that we're loading the old format
 bool FCEU_state_loading_old_format = false;
 
-char lastSavestateMade[2048]; //Stores the filename of the last savestate made (needed for UndoSavestate)
+std::string lastSavestateMade; //Stores the filename of the last savestate made (needed for UndoSavestate)
 bool undoSS = false;		  //This will be true if there is lastSavestateMade, it was made since ROM was loaded, a backup state for lastSavestateMade exists
 bool redoSS = false;		  //This will be true if UndoSaveState is run, will turn false when a new savestate is made
 
-char lastLoadstateMade[2048]; //Stores the filename of the last state loaded (needed for Undo/Redo loadstate)
+std::string lastLoadstateMade; //Stores the filename of the last state loaded (needed for Undo/Redo loadstate)
 bool undoLS = false;		  //This will be true if a backupstate was made and it was made since ROM was loaded
 bool redoLS = false;		  //This will be true if a backupstate was loaded, meaning redoLoadState can be run
 
@@ -489,7 +489,7 @@ void FCEUSS_Save(const char *fname, bool display_message)
 		if (CheckFileExists(fn) && backupSavestates)	//adelikat:  If the files exists and we are allowed to make backup savestates
 		{
 			CreateBackupSaveState(fn);		//Make a backup of previous savestate before overwriting it
-			strcpy(lastSavestateMade,fn);	//Remember what the last savestate filename was (for undoing later)
+			lastSavestateMade.assign(fn);	//Remember what the last savestate filename was (for undoing later)
 			undoSS = true;					//Backup was created so undo is possible
 		}
 		else
@@ -747,7 +747,7 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	{
 		strcpy(fn, FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname).c_str());
 		st=FCEUD_UTF8_fstream(fn,"rb");
-        strcpy(lastLoadstateMade,fn);
+        lastLoadstateMade.assign(fn);
 	}
 
 	if (st == NULL || (st->get_fp() == NULL))
@@ -1067,13 +1067,13 @@ void SwapSaveState()
 	//Both files must exist
 	//--------------------------------------------------------------------------------------------
 
-	if (!lastSavestateMade)
+	if (lastSavestateMade.empty())
 	{
 		FCEUI_DispMessage("Can't Undo",0);
 		FCEUI_printf("Undo savestate was attempted but unsuccessful because there was not a recently used savestate.\n");
 		return;		//If there is no last savestate, can't undo
 	}
-	string backup = GenerateBackupSaveStateFn(lastSavestateMade);	//Get filename of backup state
+	string backup = GenerateBackupSaveStateFn(lastSavestateMade.c_str());	//Get filename of backup state
 	if (!CheckFileExists(backup.c_str()))
 	{
 		FCEUI_DispMessage("Can't Undo",0);
@@ -1087,9 +1087,9 @@ void SwapSaveState()
 	string temp = backup;					//Put backup filename in temp
 	temp.append("x");						//Add x
 
-	rename(backup.c_str(),temp.c_str());		//rename backup file to temp file
-	rename(lastSavestateMade,backup.c_str());	//rename current as backup
-	rename(temp.c_str(),lastSavestateMade);		//rename backup as current
+	rename(backup.c_str(),temp.c_str());			//rename backup file to temp file
+	rename(lastSavestateMade.c_str(),backup.c_str());	//rename current as backup
+	rename(temp.c_str(),lastSavestateMade.c_str());		//rename backup as current
 
 	undoSS = true;	//Just in case, if this was run, then there is definately a last savestate and backup
 	if (redoSS)				//This was a redo function, so if run again it will be an undo again
@@ -1172,10 +1172,10 @@ void LoadBackup()
 void RedoLoadState()
 {
 	if (!redoLS) return;
-	if (lastLoadstateMade && redoLS)
+	if (!lastLoadstateMade.empty() && redoLS)
 	{
-		FCEUSS_Load(lastLoadstateMade);
-		FCEUI_printf("Redoing %s\n",lastLoadstateMade);
+		FCEUSS_Load(lastLoadstateMade.c_str());
+		FCEUI_printf("Redoing %s\n",lastLoadstateMade.c_str());
 	}
 	redoLS = false;		//Flag that RedoLoadState can not be run again
 	undoLS = true;		//Flag that LoadBackup can be run again

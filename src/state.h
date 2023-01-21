@@ -17,6 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include <string>
 
 enum ENUM_SSLOADPARAMS
 {
@@ -67,10 +68,10 @@ void LoadBackup();					 //Loads the backupsavestate
 void RedoLoadState();				 //reloads a loadstate if backupsavestate was run
 void SwapSaveState();				 //Swaps a savestate with its backup state
 
-extern char lastSavestateMade[2048]; //Filename of last savestate used
+extern std::string lastSavestateMade; //Filename of last savestate used
 extern bool undoSS;					 //undo savestate flag
 extern bool redoSS;					 //redo savestate flag
-extern char lastLoadstateMade[2048]; //Filename of last state loaded
+extern std::string lastLoadstateMade; //Filename of last state loaded
 extern bool undoLS;					 //undo loadstate flag
 extern bool redoLS;					 //redo savestate flag
 extern bool backupSavestates;		 //Whether or not to make backups, true by default

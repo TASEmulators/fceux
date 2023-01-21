@@ -1365,10 +1365,7 @@ static void MovieSubtitleToggle(void)
 
 static void UndoRedoSavestate(void)
 {
-	// FIXME this will always evaluate to true, should this be
-	// if (*lastSavestateMade...) to check if it holds a string or just
-	// a '\0'?
-	if (lastSavestateMade && (undoSS || redoSS))
+	if ( !lastSavestateMade.empty() && (undoSS || redoSS))
 		SwapSaveState();
 }
 
