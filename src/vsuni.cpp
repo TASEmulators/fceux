@@ -160,6 +160,9 @@ void FCEU_VSUniPower(void) {
 	case GIPPU_RP2C04_0004:
 		default_palette_selection = GameInfo->vs_ppu;
 		break;
+	default:
+		// nothing todo
+		break;
 	}
 	if (GameInfo->vs_ppu == GIPPU_RC2C05_04) {
 		OldReadPPU = GetReadHandler(0x2002);

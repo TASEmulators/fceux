@@ -318,8 +318,8 @@ static uint8 ZNTable[256];
 #define LD_ZP(op)  {uint8 A; uint8 x; GetZP(A); x=RdRAM(A); op; break;}
 #define LD_ZPX(op)  {uint8 A; uint8 x; GetZPI(A,_X); x=RdRAM(A); op; break;}
 #define LD_ZPY(op)  {uint8 A; uint8 x; GetZPI(A,_Y); x=RdRAM(A); op; break;}
-#define LD_AB(op)  {unsigned int A; uint8 x; GetAB(A); x=RdMem(A); op; break; }
-#define LD_ABI(reg,op)  {unsigned int A; uint8 x; GetABIRD(A,reg); x=RdMem(A); op; break;}
+#define LD_AB(op)  {unsigned int A; FCEU_MAYBE_UNUSED uint8 x; GetAB(A); x=RdMem(A); op; break; }
+#define LD_ABI(reg,op)  {unsigned int A; FCEU_MAYBE_UNUSED uint8 x; GetABIRD(A,reg); x=RdMem(A); op; break;}
 #define LD_ABX(op)  LD_ABI(_X,op)
 #define LD_ABY(op)  LD_ABI(_Y,op)
 #define LD_IX(op)  {unsigned int A; uint8 x; GetIX(A); x=RdMem(A); op; break;}

@@ -34,11 +34,13 @@ static uint8 *WRAM = NULL;
 static int kanji_pos, kanji_page, r40C0;
 static int IRQa, IRQCount;
 
+FCEU_MAYBE_UNUSED
 static DECLFW(MBWRAM) {
 	if (!(DRegs[3] & 0x10))
 		Page[A >> 11][A] = V;
 }
 
+FCEU_MAYBE_UNUSED
 static DECLFR(MAWRAM) {
 	if (DRegs[3] & 0x10)
 		return X.DB;

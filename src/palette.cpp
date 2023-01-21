@@ -87,6 +87,7 @@ pal *palo = NULL;
 	(type) (y + to_rgb [4] * i + to_rgb [5] * q)\
 )
 
+FCEU_MAYBE_UNUSED
 static void ApplyDeemphasisNTSC(int entry, u8& r, u8& g, u8& b)
 {
 				static float const to_float = 1.0f / 0xFF;
@@ -252,6 +253,7 @@ static void ApplyDeemphasisBisqwit(int entry, u8& r, u8& g, u8& b)
 }
 
 //classic algorithm
+FCEU_MAYBE_UNUSED
 static void ApplyDeemphasisClassic(int entry, u8& r, u8& g, u8& b)
 {
 	//DEEMPH BITS MAY BE ORDERED WRONG. PLEASE CHECK

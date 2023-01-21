@@ -143,6 +143,14 @@ typedef uint8 (*readfunc)(uint32 A);
 #define CTASSERT(x)  typedef char __assert ## y[(x) ? 1 : -1];
 #endif
 
+#define  FCEU_UNUSED(x)   (void)(x)
+
+#if __has_cpp_attribute(maybe_unused)
+#define  FCEU_MAYBE_UNUSED  [[maybe_unused]]
+#else
+#define  FCEU_MAYBE_UNUSED
+#endif
+
 #include "utils/endian.h"
 
 #endif

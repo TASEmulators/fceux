@@ -1376,6 +1376,7 @@ static DECLFW(M406IRQWrite) {
 	MMC3_IRQWrite((A & 0xFFFE) | ((A & 2) >> 1), V);
 }
 
+FCEU_MAYBE_UNUSED
 static DECLFW(M406Write) {
 }
 
