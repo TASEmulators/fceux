@@ -807,7 +807,10 @@ static EMUFILE *openRecordingMovie(const char* fname)
 		FCEU_PrintError("Error opening movie output file: %s", fname);
 		return NULL;
 	}
-	curMovieFilename.assign(fname);
+	if ( fname != curMovieFilename.c_str() )
+	{
+		curMovieFilename.assign(fname);
+	}
 
 	return osRecordingMovie;
 }
