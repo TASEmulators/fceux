@@ -59,7 +59,7 @@ void FCEU_CheatAddRAM(int s, uint32 A, uint8 *p)
 }
 
 
-CHEATF_SUBFAST SubCheats[256] = { 0 };
+CHEATF_SUBFAST SubCheats[256];
 uint32 numsubcheats = 0;
 int globalCheatDisabled = 0;
 int disableAutoLSCheats = 0;
