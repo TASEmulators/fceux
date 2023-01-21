@@ -114,7 +114,7 @@ SFORMAT FCEUMOV_STATEINFO[]={
 	{ 0 }
 };
 
-char curMovieFilename[512] = {0};
+std::string curMovieFilename;
 MovieData currMovieData;
 MovieData defaultMovieData;
 int currRerecordCount; // Keep the global value
@@ -807,7 +807,7 @@ static EMUFILE *openRecordingMovie(const char* fname)
 		FCEU_PrintError("Error opening movie output file: %s", fname);
 		return NULL;
 	}
-	strcpy(curMovieFilename, fname);
+	curMovieFilename.assign(fname);
 
 	return osRecordingMovie;
 }
@@ -827,7 +827,7 @@ static void RedumpWholeMovieFile(bool justToggledRecording = false)
 	bool recording = (movieMode == MOVIEMODE_RECORD);
 	assert((NULL != osRecordingMovie) == (recording != justToggledRecording) && "osRecordingMovie should be consistent with movie mode!");
 
-	if (NULL == openRecordingMovie(curMovieFilename))
+	if (NULL == openRecordingMovie(curMovieFilename.c_str()))
 		return;
 
 	currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/, recording);
@@ -875,7 +875,7 @@ static void OnMovieClosed()
 {
 	assert(movieMode == MOVIEMODE_INACTIVE);
 
-	curMovieFilename[0] = 0;			//No longer a current movie filename
+	curMovieFilename.clear();			//No longer a current movie filename
 	freshMovie = false;					//No longer a fresh movie loaded
 	if (bindSavestate) AutoSS = false;	//If bind movies to savestates is true, then there is no longer a valid auto-save to load
 
@@ -1040,7 +1040,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 
 	currMovieData = MovieData();
 
-	strcpy(curMovieFilename, fname);
+	curMovieFilename.assign(fname);
 	FCEUFILE *fp = FCEU_fopen(fname,0,"rb",0);
 	if (!fp) return false;
 	if(fp->isArchive() && !_read_only) {
@@ -1445,7 +1445,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 #endif
 			movie_readonly = true;
 		}
-		if (FCEU_isFileInArchive(curMovieFilename))
+		if (FCEU_isFileInArchive(curMovieFilename.c_str()))
 		{
 			//a little rule: cant load states in read+write mode with a movie from an archive.
 			//so we are going to switch it to readonly mode in that case
@@ -1956,7 +1956,7 @@ void FCEUI_MoviePlayFromBeginning(void)
 #endif
 }
 
-string FCEUI_GetMovieName(void)
+std::string FCEUI_GetMovieName(void)
 {
 	return curMovieFilename;
 }
@@ -2050,9 +2050,9 @@ void FCEUI_CreateMovieFile(std::string fn)
 void FCEUI_MakeBackupMovie(bool dispMessage)
 {
 	//This function generates backup movie files
-	string currentFn;					//Current movie fillename
-	string backupFn;					//Target backup filename
-	string tempFn;						//temp used in back filename creation
+	std::string currentFn;					//Current movie fillename
+	std::string backupFn;					//Target backup filename
+	std::string tempFn;						//temp used in back filename creation
 	stringstream stream;
 	int x;								//Temp variable for string manip
 	bool exist = false;					//Used to test if filename exists

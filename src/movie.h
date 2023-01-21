@@ -276,7 +276,7 @@ private:
 extern EMOVIEMODE movieMode;
 extern MovieData currMovieData;
 extern int currFrameCounter;
-extern char curMovieFilename[512];
+extern std::string curMovieFilename;
 extern bool subtitlesOnAVI;
 extern bool freshMovie;
 extern bool movie_readonly;

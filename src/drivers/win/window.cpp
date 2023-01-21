@@ -3216,7 +3216,7 @@ void SaveMovieAs()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Movie as...";
 	ofn.lpstrFilter=filter;
-	strcpy(nameo,curMovieFilename);
+	strcpy(nameo,curMovieFilename.c_str());
 	ofn.lpstrFile=nameo;
 	ofn.lpstrDefExt="fm2";
 	ofn.nMaxFile=256;

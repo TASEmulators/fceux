@@ -446,13 +446,12 @@ int FCEU_fisarchive(FCEUFILE *fp)
 std::string GetMfn() //Retrieves the movie filename from curMovieFilename (for adding to savestate and auto-save files)
 {
 	std::string movieFilenamePart;
-	extern char curMovieFilename[512];
-	if(*curMovieFilename)
-		{
+	if (!curMovieFilename.empty())
+	{
 		char drv[PATH_MAX], dir[PATH_MAX], name[PATH_MAX], ext[PATH_MAX];
-		splitpath(curMovieFilename,drv,dir,name,ext);
+		splitpath(curMovieFilename.c_str(),drv,dir,name,ext);
 		movieFilenamePart = std::string(".") + name;
-		}
+	}
 	return movieFilenamePart;
 }
 

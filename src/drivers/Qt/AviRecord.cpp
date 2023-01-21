@@ -853,7 +853,7 @@ static void log_callback( void *avcl, int level, const char *fmt, va_list vl)
 int loadCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 {
 	int i,j;
-	char filename[512];
+	char filename[4096];
 	char line[512];
 	char section[256], id[256], val[256];
 	void *obj, *child;

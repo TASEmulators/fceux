@@ -236,8 +236,8 @@ void updateTASEditor()
 		TaseditorAutoFunction();	// but we still should run Lua auto function
 		if (mustEngageTaseditor)
 		{
-			char fullname[1000];
-			strcpy(fullname, curMovieFilename);
+			char fullname[2048];
+			strcpy(fullname, curMovieFilename.c_str());
 			if (enterTASEditor())
 				loadProject(fullname);
 			mustEngageTaseditor = false;
