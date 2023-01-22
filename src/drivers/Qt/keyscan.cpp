@@ -27,6 +27,109 @@
 
 using namespace Qt;
 
+/* scan code to virtual keys */
+struct _KeyValue
+{
+  int vkey, key;
+};
+
+/* for readability */
+typedef int NativeScanCode;
+
+/* mapt to convert keyboard native scan code to qt keys */
+static QMap<NativeScanCode, _KeyValue> s_nativeScanCodesMap = {
+  {10, {49, 49}},
+  {11, {50, 50}},
+  {12, {51, 51}},
+  {13, {52, 52}},
+  {14, {53, 53}},
+  {15, {54, 54}},
+  {16, {55, 55}},
+  {17, {56, 56}},
+  {18, {57, 57}},
+  {19, {48, 48}},
+  {20, {45, 45}},
+  {21, {61, 61}},
+  {22, {65288, 16777219}},
+  {23, {65289, 16777217}},
+  {24, {113, 81}},
+  {25, {119, 87}},
+  {26, {101, 69}},
+  {27, {114, 82}},
+  {28, {116, 84}},
+  {29, {121, 89}},
+  {30, {117, 85}},
+  {31, {105, 73}},
+  {32, {111, 79}},
+  {33, {112, 80}},
+  {34, {91, 91}},
+  {35, {93, 93}},
+  {36, {65293, 16777220}},
+  {37, {65507, 16777249}},
+  {38, {97, 65}},
+  {39, {115, 83}},
+  {40, {68, 68}},
+  {41, {70, 70}},
+  {42, {71, 71}},
+  {43, {72, 72}},
+  {44, {74, 74}},
+  {45, {107, 75}},
+  {46, {108, 76}},
+  {47, {59, 59}},
+  {48, {39, 39}},
+  {49, {96, 96}},
+  {50, {65505, 16777248}},
+  {51, {92, 92}},
+  {52, {90, 90}},
+  {53, {88, 88}},
+  {54, {67, 67}},
+  {55, {118, 86}},
+  {56, {98, 66}},
+  {57, {78, 78}},
+  {58, {77, 77}},
+  {59, {44, 44}},
+  {60, {46, 46}},
+  {61, {47, 47}},
+  {62, {65506, 16777248}},
+  {63, {65450, 42}},
+  {64, {65513, 16777251}},
+  {66, {65509, 16777252}},
+  {67, {65470, 16777264}},
+  {68, {65471, 16777265}},
+  {69, {65472, 16777266}},
+  {70, {65473, 16777267}},
+  {71, {65474, 16777268}},
+  {72, {65475, 16777269}},
+  {73, {65476, 16777270}},
+  {74, {65477, 16777271}},
+  {75, {65478, 16777272}},
+  {76, {65479, 16777273}},
+  {77, {65407, 16777253}},
+  {78, {65300, 16777254}},
+  {79, {65463, 55}},
+  {80, {65464, 56}},
+  {81, {65465, 57}},
+  {82, {65453, 45}},
+  {83, {65460, 52}},
+  {84, {65461, 53}},
+  {85, {65462, 54}},
+  {86, {65451, 43}},
+  {87, {65457, 49}},
+  {88, {65458, 50}},
+  {89, {65459, 51}},
+  {90, {65456, 48}},
+  {91, {65454, 46}},
+  {95, {65480, 16777274}},
+  {96, {65481, 16777275}},
+  {104, {65421, 16777221}},
+  {105, {65508, 16777249}},
+  {106, {65455, 47}},
+  {108, {65027, 16781571}},
+  {118, {65379, 16777222}},
+  {119, {65535, 16777223}},
+  {127, {65299, 16777224}},
+};
+
 #if defined(WIN32)
 
 #include <windows.h>
@@ -1355,6 +1458,9 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 
 	vkey = event->nativeVirtualKey();
 
+//	auto nsc  = event->nativeScanCode();
+//	qDebug() << __PRETTY_FUNCTION__ << nsc << vkey << event->key();
+
 	sdlev.key.keysym.sym = convQtKey2SDLKeyCode((Qt::Key)event->key(), vkey);
 
 	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlev.key.keysym.sym);
@@ -1384,6 +1490,18 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 	sdlev.key.repeat = 0;
 
 	//printf("Modifiers: %08X -> %08X \n", event->modifiers(), sdlev.key.keysym.mod );
+
+	/* when we're unable to convert qt keys to sdl, we do keyboard native scan code convertation */
+	if (sdlev.key.keysym.scancode == SDL_SCANCODE_UNKNOWN)
+	  {
+	    int nativeKey = event->nativeScanCode();
+	    auto value	  = s_nativeScanCodesMap.value (nativeKey, _KeyValue {0, 0});
+	    if (value.key != 0 && value.vkey != 0)
+	      {
+		sdlev.key.keysym.sym	  = convQtKey2SDLKeyCode    ((Qt::Key)value.key, value.vkey);
+		sdlev.key.keysym.scancode = SDL_GetScancodeFromKey  (sdlev.key.keysym.sym);
+	      }
+	  }
 
 	if (sdlev.key.keysym.scancode != SDL_SCANCODE_UNKNOWN)
 	{
