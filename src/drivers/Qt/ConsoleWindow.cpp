@@ -4039,7 +4039,7 @@ void consoleWin_t::wavRecordStart(void)
 	if ( !FCEUI_WaveRecordRunning() )
 	{
 		const char *romFile;
-		char fileName[1024];
+		std::string fileName;
 
 		romFile = getRomFile();
 
@@ -4055,20 +4055,20 @@ void consoleWin_t::wavRecordStart(void)
 
 			if ( lastPath.size() > 0 )
 			{
-				strcpy( fileName, lastPath.c_str() );
-				strcat( fileName, "/" );
+				fileName.assign( lastPath );
+				fileName.append( "/" );
 			}
 			else if ( baseDir )
 			{
-				strcpy( fileName, baseDir );
-				strcat( fileName, "/wav/" );
+				fileName.assign( baseDir );
+				fileName.append( "/wav/" );
 			}
 			else
 			{
-				fileName[0] = 0;
+				fileName.clear();
 			}
-			strcat( fileName, base );
-			strcat( fileName, ".wav");
+			fileName.append( base );
+			fileName.append(".wav");
 			//printf("WAV Filepath:'%s'\n", fileName );
 		}
 		else
@@ -4076,7 +4076,7 @@ void consoleWin_t::wavRecordStart(void)
 			return;
 		}
 		FCEU_WRAPPER_LOCK();
-		FCEUI_BeginWaveRecord( fileName );
+		FCEUI_BeginWaveRecord( fileName.c_str() );
 		FCEU_WRAPPER_UNLOCK();
 	}
 }
@@ -4090,7 +4090,6 @@ void consoleWin_t::wavRecordAsStart(void)
 	int ret, useNativeFileDialogVal;
 	QString filename;
 	std::string lastPath;
-	//char dir[512];
 	const char *base, *rom;
 	QFileDialog  dialog(this, tr("Save WAV Movie for Recording") );
 	QList<QUrl> urls;
