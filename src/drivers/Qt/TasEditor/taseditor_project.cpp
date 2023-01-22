@@ -415,7 +415,7 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 void TASEDITOR_PROJECT::renameProject(const char* newFullName, bool filenameIsCorrect)
 {
 	projectFile = newFullName;
-	char drv[512], dir[512], name[512], ext[512];		// For getting the filename
+	char drv[512], dir[4096], name[512], ext[512];		// For getting the filename
 	splitpath(newFullName, drv, dir, name, ext);
 	projectName = name;
 	std::string thisfm2name = name;
