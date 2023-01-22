@@ -7305,7 +7305,16 @@ void TasFindNoteWindow::findNextClicked(void)
 TasRecentProjectAction::TasRecentProjectAction(QString desc, QWidget *parent)
 	: QAction( desc, parent )
 {
+	QString txt;
+	QFileInfo fi(desc);
+
 	path = desc.toStdString();
+
+	txt  = fi.fileName();
+	txt += QString("\t");
+	txt += desc;
+
+	setText( txt );
 }
 //----------------------------------------------------------------------------
 TasRecentProjectAction::~TasRecentProjectAction(void)
