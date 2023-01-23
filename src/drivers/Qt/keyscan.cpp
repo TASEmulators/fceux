@@ -36,6 +36,50 @@ struct _KeyValue
 /* for readability */
 typedef int NativeScanCode;
 
+#if defined(WIN32)
+
+#include <windows.h>
+#include <winuser.h>
+static uint32_t ShiftKeyCodeR = VK_RSHIFT;
+static uint32_t CtrlKeyCodeR  = VK_RCONTROL;
+static uint32_t AltKeyCodeR   = VK_RMENU;
+static uint32_t MetaKeyCodeR  = VK_RWIN;
+static BYTE keyBuf[256];
+
+#elif  defined(__linux__)
+
+   #if  defined(_HAS_XKB)
+	#include <xkbcommon/xkbcommon.h>
+	static uint32_t ShiftKeyCodeR = XKB_KEY_Shift_R;
+	static uint32_t CtrlKeyCodeR  = XKB_KEY_Control_R;
+	static uint32_t AltKeyCodeR   = XKB_KEY_Alt_R;
+	static uint32_t MetaKeyCodeR  = XKB_KEY_Meta_R;
+   #elif  defined(_HAS_X11)
+        #include <X11/keysym.h>
+	static uint32_t ShiftKeyCodeR = XK_Shift_R;
+	static uint32_t CtrlKeyCodeR  = XK_Control_R;
+	static uint32_t AltKeyCodeR   = XK_Alt_R;
+	static uint32_t MetaKeyCodeR  = XK_Meta_R;
+   #else
+	static uint32_t ShiftKeyCodeR = 0xffe2;
+	static uint32_t CtrlKeyCodeR  = 0xffe4;
+	static uint32_t AltKeyCodeR   = 0xffea;
+	static uint32_t MetaKeyCodeR  = 0xffe8;
+   #endif
+
+#elif  defined(__APPLE__)
+static uint32_t ShiftKeyCodeR = 0x003C;
+static uint32_t CtrlKeyCodeR  = 0x003E;
+static uint32_t AltKeyCodeR   = 0x003D;
+static uint32_t MetaKeyCodeR  = 0x0036;
+
+#else
+static uint32_t ShiftKeyCodeR = 0xffe2;
+static uint32_t CtrlKeyCodeR  = 0xffe4;
+static uint32_t AltKeyCodeR   = 0xffea;
+static uint32_t MetaKeyCodeR  = 0xffe8;
+#endif
+
 /* mapt to convert keyboard native scan code to qt keys */
 static QMap<NativeScanCode, _KeyValue> s_nativeScanCodesMap =
 #if defined(WIN32)
@@ -132,141 +176,210 @@ static QMap<NativeScanCode, _KeyValue> s_nativeScanCodesMap =
 };
 #else
 {
-  {10, {49, 49}},
-  {11, {50, 50}},
-  {12, {51, 51}},
-  {13, {52, 52}},
-  {14, {53, 53}},
-  {15, {54, 54}},
-  {16, {55, 55}},
-  {17, {56, 56}},
-  {18, {57, 57}},
-  {19, {48, 48}},
-  {20, {45, 45}},
-  {21, {61, 61}},
-  {22, {65288, 16777219}},
-  {23, {65289, 16777217}},
-  {24, {113, 81}},
-  {25, {119, 87}},
-  {26, {101, 69}},
-  {27, {114, 82}},
-  {28, {116, 84}},
-  {29, {121, 89}},
-  {30, {117, 85}},
-  {31, {105, 73}},
-  {32, {111, 79}},
-  {33, {112, 80}},
-  {34, {91, 91}},
-  {35, {93, 93}},
-  {36, {65293, 16777220}},
-  {37, {65507, 16777249}},
-  {38, {97, 65}},
-  {39, {115, 83}},
-  {40, {68, 68}},
-  {41, {70, 70}},
-  {42, {71, 71}},
-  {43, {72, 72}},
-  {44, {74, 74}},
-  {45, {107, 75}},
-  {46, {108, 76}},
-  {47, {59, 59}},
-  {48, {39, 39}},
-  {49, {96, 96}},
-  {50, {65505, 16777248}},
-  {51, {92, 92}},
-  {52, {90, 90}},
-  {53, {88, 88}},
-  {54, {67, 67}},
-  {55, {118, 86}},
-  {56, {98, 66}},
-  {57, {78, 78}},
-  {58, {77, 77}},
-  {59, {44, 44}},
-  {60, {46, 46}},
-  {61, {47, 47}},
-  {62, {65506, 16777248}},
-  {63, {65450, 42}},
-  {64, {65513, 16777251}},
-  {66, {65509, 16777252}},
-  {67, {65470, 16777264}},
-  {68, {65471, 16777265}},
-  {69, {65472, 16777266}},
-  {70, {65473, 16777267}},
-  {71, {65474, 16777268}},
-  {72, {65475, 16777269}},
-  {73, {65476, 16777270}},
-  {74, {65477, 16777271}},
-  {75, {65478, 16777272}},
-  {76, {65479, 16777273}},
-  {77, {65407, 16777253}},
-  {78, {65300, 16777254}},
-  {79, {65463, 55}},
-  {80, {65464, 56}},
-  {81, {65465, 57}},
-  {82, {65453, 45}},
-  {83, {65460, 52}},
-  {84, {65461, 53}},
-  {85, {65462, 54}},
-  {86, {65451, 43}},
-  {87, {65457, 49}},
-  {88, {65458, 50}},
-  {89, {65459, 51}},
-  {90, {65456, 48}},
-  {91, {65454, 46}},
-  {95, {65480, 16777274}},
-  {96, {65481, 16777275}},
-  {104, {65421, 16777221}},
-  {105, {65508, 16777249}},
-  {106, {65455, 47}},
-  {108, {65027, 16781571}},
-  {118, {65379, 16777222}},
-  {119, {65535, 16777223}},
-  {127, {65299, 16777224}},
+  #if  defined(_HAS_XKB)
+  {  9, { XKB_KEY_Escape           , Qt::Key_Escape       }},
+  { 10, { XKB_KEY_1                , Qt::Key_1            }},
+  { 11, { XKB_KEY_2                , Qt::Key_2            }},
+  { 12, { XKB_KEY_3                , Qt::Key_3            }},
+  { 13, { XKB_KEY_4                , Qt::Key_4            }},
+  { 14, { XKB_KEY_5                , Qt::Key_5            }},
+  { 15, { XKB_KEY_6                , Qt::Key_6            }},
+  { 16, { XKB_KEY_7                , Qt::Key_7            }},
+  { 17, { XKB_KEY_8                , Qt::Key_8            }},
+  { 18, { XKB_KEY_9                , Qt::Key_9            }},
+  { 19, { XKB_KEY_0                , Qt::Key_0            }},
+  { 20, { XKB_KEY_minus            , Qt::Key_Minus        }},
+  { 21, { XKB_KEY_equal            , Qt::Key_Equal        }},
+  { 22, { XKB_KEY_BackSpace        , Qt::Key_Backspace    }},
+  { 23, { XKB_KEY_Tab              , Qt::Key_Tab          }},
+  { 24, { XKB_KEY_q                , Qt::Key_Q            }},
+  { 25, { XKB_KEY_w                , Qt::Key_W            }},
+  { 26, { XKB_KEY_e                , Qt::Key_E            }},
+  { 27, { XKB_KEY_r                , Qt::Key_R            }},
+  { 28, { XKB_KEY_t                , Qt::Key_T            }},
+  { 29, { XKB_KEY_y                , Qt::Key_Y            }},
+  { 30, { XKB_KEY_u                , Qt::Key_U            }},
+  { 31, { XKB_KEY_i                , Qt::Key_I            }},
+  { 32, { XKB_KEY_o                , Qt::Key_O            }},
+  { 33, { XKB_KEY_p                , Qt::Key_P            }},
+  { 34, { XKB_KEY_bracketleft      , Qt::Key_BracketLeft  }},
+  { 35, { XKB_KEY_bracketright     , Qt::Key_BracketRight }},
+  { 36, { XKB_KEY_Return           , Qt::Key_Return       }},
+  { 37, { XKB_KEY_Control_L        , Qt::Key_Control      }},
+  { 38, { XKB_KEY_a                , Qt::Key_A            }},
+  { 39, { XKB_KEY_s                , Qt::Key_S            }},
+  { 40, { XKB_KEY_d                , Qt::Key_D            }},
+  { 41, { XKB_KEY_f                , Qt::Key_F            }},
+  { 42, { XKB_KEY_g                , Qt::Key_G            }},
+  { 43, { XKB_KEY_h                , Qt::Key_H            }},
+  { 44, { XKB_KEY_j                , Qt::Key_J            }},
+  { 45, { XKB_KEY_k                , Qt::Key_K            }},
+  { 46, { XKB_KEY_l                , Qt::Key_L            }},
+  { 47, { XKB_KEY_semicolon        , Qt::Key_Semicolon    }},
+  { 48, { XKB_KEY_apostrophe       , Qt::Key_Apostrophe   }},
+  { 49, { XKB_KEY_grave            , Qt::Key_QuoteLeft    }},
+  { 50, { XKB_KEY_Shift_L          , Qt::Key_Shift        }},
+  { 51, { XKB_KEY_backslash        , Qt::Key_Backslash    }},
+  { 52, { XKB_KEY_z                , Qt::Key_Z            }},
+  { 53, { XKB_KEY_x                , Qt::Key_X            }},
+  { 54, { XKB_KEY_c                , Qt::Key_C            }},
+  { 55, { XKB_KEY_v                , Qt::Key_V            }},
+  { 56, { XKB_KEY_b                , Qt::Key_B            }},
+  { 57, { XKB_KEY_n                , Qt::Key_N            }},
+  { 58, { XKB_KEY_m                , Qt::Key_M            }},
+  { 59, { XKB_KEY_comma            , Qt::Key_Comma        }},
+  { 60, { XKB_KEY_period           , Qt::Key_Period       }},
+  { 61, { XKB_KEY_slash            , Qt::Key_Slash        }},
+  { 62, { XKB_KEY_Shift_R          , Qt::Key_Shift        }},
+  { 63, { XKB_KEY_KP_Multiply      , Qt::Key_Asterisk     }},
+  { 64, { XKB_KEY_Alt_L            , Qt::Key_Alt          }},
+  { 66, { XKB_KEY_Caps_Lock        , Qt::Key_CapsLock     }},
+  { 67, { XKB_KEY_F1               , Qt::Key_F1           }},
+  { 68, { XKB_KEY_F2               , Qt::Key_F2           }},
+  { 69, { XKB_KEY_F3               , Qt::Key_F3           }},
+  { 70, { XKB_KEY_F4               , Qt::Key_F4           }},
+  { 71, { XKB_KEY_F5               , Qt::Key_F5           }},
+  { 72, { XKB_KEY_F6               , Qt::Key_F6           }},
+  { 73, { XKB_KEY_F7               , Qt::Key_F7           }},
+  { 74, { XKB_KEY_F8               , Qt::Key_F8           }},
+  { 75, { XKB_KEY_F9               , Qt::Key_F9           }},
+  { 76, { XKB_KEY_F10              , Qt::Key_F10          }},
+  { 77, { XKB_KEY_Num_Lock         , Qt::Key_NumLock      }},
+  { 78, { XKB_KEY_Scroll_Lock      , Qt::Key_ScrollLock   }},
+  { 79, { XKB_KEY_KP_7             , Qt::Key_7            }},
+  { 80, { XKB_KEY_KP_8             , Qt::Key_8            }},
+  { 81, { XKB_KEY_KP_9             , Qt::Key_9            }},
+  { 82, { XKB_KEY_KP_Subtract      , Qt::Key_Minus        }},
+  { 83, { XKB_KEY_KP_4             , Qt::Key_4            }},
+  { 84, { XKB_KEY_KP_5             , Qt::Key_5            }},
+  { 85, { XKB_KEY_KP_6             , Qt::Key_6            }},
+  { 86, { XKB_KEY_KP_Add           , Qt::Key_Plus         }},
+  { 87, { XKB_KEY_KP_1             , Qt::Key_1            }},
+  { 88, { XKB_KEY_KP_2             , Qt::Key_2            }},
+  { 89, { XKB_KEY_KP_3             , Qt::Key_3            }},
+  { 90, { XKB_KEY_KP_0             , Qt::Key_0            }},
+  { 91, { XKB_KEY_KP_Decimal       , Qt::Key_Period       }},
+  { 95, { XKB_KEY_F11              , Qt::Key_F11          }},
+  { 96, { XKB_KEY_F12              , Qt::Key_F12          }},
+  {104, { XKB_KEY_KP_Enter         , Qt::Key_Enter        }},
+  {105, { XKB_KEY_Control_R        , Qt::Key_Control      }},
+  {106, { XKB_KEY_KP_Divide        , Qt::Key_Slash        }},
+  {108, { XKB_KEY_Alt_R            , Qt::Key_Alt          }},
+  {110, { XKB_KEY_Home             , Qt::Key_Home         }},
+  {111, { XKB_KEY_Up               , Qt::Key_Up           }},
+  {112, { XKB_KEY_Page_Up          , Qt::Key_PageUp       }},
+  {113, { XKB_KEY_Left             , Qt::Key_Left         }},
+  {114, { XKB_KEY_Right            , Qt::Key_Right        }},
+  {115, { XKB_KEY_End              , Qt::Key_End          }},
+  {116, { XKB_KEY_Down             , Qt::Key_Down         }},
+  {117, { XKB_KEY_Page_Down        , Qt::Key_PageDown     }},
+  {118, { XKB_KEY_Insert           , Qt::Key_Insert       }},
+  {119, { XKB_KEY_Delete           , Qt::Key_Delete       }},
+  {127, { XKB_KEY_Pause            , Qt::Key_Pause        }},
+  {134, { XKB_KEY_Super_R          , Qt::Key_Meta         }},
+  #else
+  {  9, { 0xff1b   , Qt::Key_Escape       }},
+  { 10, { 0x0031   , Qt::Key_1            }},
+  { 11, { 0x0032   , Qt::Key_2            }},
+  { 12, { 0x0033   , Qt::Key_3            }},
+  { 13, { 0x0034   , Qt::Key_4            }},
+  { 14, { 0x0035   , Qt::Key_5            }},
+  { 15, { 0x0036   , Qt::Key_6            }},
+  { 16, { 0x0037   , Qt::Key_7            }},
+  { 17, { 0x0038   , Qt::Key_8            }},
+  { 18, { 0x0039   , Qt::Key_9            }},
+  { 19, { 0x0030   , Qt::Key_0            }},
+  { 20, { 0x002d   , Qt::Key_Minus        }},
+  { 21, { 0x003d   , Qt::Key_Equal        }},
+  { 22, { 0xff08   , Qt::Key_Backspace    }},
+  { 23, { 0xff09   , Qt::Key_Tab          }},
+  { 24, { 0x0071   , Qt::Key_Q            }},
+  { 25, { 0x0077   , Qt::Key_W            }},
+  { 26, { 0x0065   , Qt::Key_E            }},
+  { 27, { 0x0072   , Qt::Key_R            }},
+  { 28, { 0x0074   , Qt::Key_T            }},
+  { 29, { 0x0079   , Qt::Key_Y            }},
+  { 30, { 0x0075   , Qt::Key_U            }},
+  { 31, { 0x0069   , Qt::Key_I            }},
+  { 32, { 0x006f   , Qt::Key_O            }},
+  { 33, { 0x0070   , Qt::Key_P            }},
+  { 34, { 0x005b   , Qt::Key_BracketLeft  }},
+  { 35, { 0x005d   , Qt::Key_BracketRight }},
+  { 36, { 0xff0d   , Qt::Key_Return       }},
+  { 37, { 0xffe3   , Qt::Key_Control      }},
+  { 38, { 0x0061   , Qt::Key_A            }},
+  { 39, { 0x0073   , Qt::Key_S            }},
+  { 40, { 0x0064   , Qt::Key_D            }},
+  { 41, { 0x0066   , Qt::Key_F            }},
+  { 42, { 0x0067   , Qt::Key_G            }},
+  { 43, { 0x0068   , Qt::Key_H            }},
+  { 44, { 0x006a   , Qt::Key_J            }},
+  { 45, { 0x006b   , Qt::Key_K            }},
+  { 46, { 0x006c   , Qt::Key_L            }},
+  { 47, { 0x003b   , Qt::Key_Semicolon    }},
+  { 48, { 0x0027   , Qt::Key_Apostrophe   }},
+  { 49, { 0x0060   , Qt::Key_QuoteLeft    }},
+  { 50, { 0xffe1   , Qt::Key_Shift        }},
+  { 51, { 0x005c   , Qt::Key_Backslash    }},
+  { 52, { 0x007a   , Qt::Key_Z            }},
+  { 53, { 0x0078   , Qt::Key_X            }},
+  { 54, { 0x0063   , Qt::Key_C            }},
+  { 55, { 0x0076   , Qt::Key_V            }},
+  { 56, { 0x0062   , Qt::Key_B            }},
+  { 57, { 0x006e   , Qt::Key_N            }},
+  { 58, { 0x006d   , Qt::Key_M            }},
+  { 59, { 0x002c   , Qt::Key_Comma        }},
+  { 60, { 0x002e   , Qt::Key_Period       }},
+  { 61, { 0x002f   , Qt::Key_Slash        }},
+  { 62, { 0xffe2   , Qt::Key_Shift        }},
+  { 63, { 0xffaa   , Qt::Key_Asterisk     }},
+  { 64, { 0xffe9   , Qt::Key_Alt          }},
+  { 66, { 0xffe5   , Qt::Key_CapsLock     }},
+  { 67, { 0xffbe   , Qt::Key_F1           }},
+  { 68, { 0xffbf   , Qt::Key_F2           }},
+  { 69, { 0xffc0   , Qt::Key_F3           }},
+  { 70, { 0xffc1   , Qt::Key_F4           }},
+  { 71, { 0xffc2   , Qt::Key_F5           }},
+  { 72, { 0xffc3   , Qt::Key_F6           }},
+  { 73, { 0xffc4   , Qt::Key_F7           }},
+  { 74, { 0xffc5   , Qt::Key_F8           }},
+  { 75, { 0xffc6   , Qt::Key_F9           }},
+  { 76, { 0xffc7   , Qt::Key_F10          }},
+  { 77, { 0xff7f   , Qt::Key_NumLock      }},
+  { 78, { 0xff14   , Qt::Key_ScrollLock   }},
+  { 79, { 0xffb7   , Qt::Key_7            }},
+  { 80, { 0xffb8   , Qt::Key_8            }},
+  { 81, { 0xffb9   , Qt::Key_9            }},
+  { 82, { 0xffad   , Qt::Key_Minus        }},
+  { 83, { 0xffb4   , Qt::Key_4            }},
+  { 84, { 0xffb5   , Qt::Key_5            }},
+  { 85, { 0xffb6   , Qt::Key_6            }},
+  { 86, { 0xffab   , Qt::Key_Plus         }},
+  { 87, { 0xffb1   , Qt::Key_1            }},
+  { 88, { 0xffb2   , Qt::Key_2            }},
+  { 89, { 0xffb3   , Qt::Key_3            }},
+  { 90, { 0xffb0   , Qt::Key_0            }},
+  { 91, { 0xffae   , Qt::Key_Period       }},
+  { 95, { 0xffc8   , Qt::Key_F11          }},
+  { 96, { 0xffc9   , Qt::Key_F12          }},
+  {104, { 0xff8d   , Qt::Key_Enter        }},
+  {105, { 0xffe4   , Qt::Key_Control      }},
+  {106, { 0xffaf   , Qt::Key_Slash        }},
+  {108, { 0xffea   , Qt::Key_Alt          }},
+  {110, { 0xff50   , Qt::Key_Home         }},
+  {111, { 0xff52   , Qt::Key_Up           }},
+  {112, { 0xff55   , Qt::Key_PageUp       }},
+  {113, { 0xff51   , Qt::Key_Left         }},
+  {114, { 0xff53   , Qt::Key_Right        }},
+  {115, { 0xff57   , Qt::Key_End          }},
+  {116, { 0xff54   , Qt::Key_Down         }},
+  {117, { 0xff56   , Qt::Key_PageDown     }},
+  {118, { 0xff63   , Qt::Key_Insert       }},
+  {119, { 0xffff   , Qt::Key_Delete       }},
+  {127, { 0xff13   , Qt::Key_Pause        }},
+  {134, { 0xffec   , Qt::Key_Meta         }},
+  #endif
 };
-#endif
-
-#if defined(WIN32)
-
-#include <windows.h>
-#include <winuser.h>
-static uint32_t ShiftKeyCodeR = VK_RSHIFT;
-static uint32_t CtrlKeyCodeR  = VK_RCONTROL;
-static uint32_t AltKeyCodeR   = VK_RMENU;
-static uint32_t MetaKeyCodeR  = VK_RWIN;
-static BYTE keyBuf[256];
-
-#elif  defined(__linux__)
-
-   #if  defined(_HAS_XKB)
-	#include <xkbcommon/xkbcommon.h>
-	static uint32_t ShiftKeyCodeR = XKB_KEY_Shift_R;
-	static uint32_t CtrlKeyCodeR  = XKB_KEY_Control_R;
-	static uint32_t AltKeyCodeR   = XKB_KEY_Alt_R;
-	static uint32_t MetaKeyCodeR  = XKB_KEY_Meta_R;
-   #elif  defined(_HAS_X11)
-        #include <X11/keysym.h>
-	static uint32_t ShiftKeyCodeR = XK_Shift_R;
-	static uint32_t CtrlKeyCodeR  = XK_Control_R;
-	static uint32_t AltKeyCodeR   = XK_Alt_R;
-	static uint32_t MetaKeyCodeR  = XK_Meta_R;
-   #else
-	static uint32_t ShiftKeyCodeR = 0xffe2;
-	static uint32_t CtrlKeyCodeR  = 0xffe4;
-	static uint32_t AltKeyCodeR   = 0xffea;
-	static uint32_t MetaKeyCodeR  = 0xffe8;
-   #endif
-
-#elif  defined(__APPLE__)
-static uint32_t ShiftKeyCodeR = 0x003C;
-static uint32_t CtrlKeyCodeR  = 0x003E;
-static uint32_t AltKeyCodeR   = 0x003D;
-static uint32_t MetaKeyCodeR  = 0x0036;
-
-#else
-static uint32_t ShiftKeyCodeR = 0xffe2;
-static uint32_t CtrlKeyCodeR  = 0xffe4;
-static uint32_t AltKeyCodeR   = 0xffea;
-static uint32_t MetaKeyCodeR  = 0xffe8;
 #endif
 
 SDL_Scancode convQtKey2SDLScanCode(Qt::Key q, uint32_t nativeVirtualKey)
@@ -1560,9 +1673,9 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 
 	sdlev.key.keysym.scancode = SDL_GetScancodeFromKey(sdlev.key.keysym.sym);
 
-	//printf("Key %s: x%08X  %i\n", (sdlev.type == SDL_KEYUP) ? "UP" : "DOWN", event->key(), event->key() );
-	//printf("   Native ScanCode: x%08X  %i \n", event->nativeScanCode(), event->nativeScanCode() );
-	//printf("   Virtual ScanCode: x%08X  %i \n", event->nativeVirtualKey(), event->nativeVirtualKey() );
+	printf("Key %s: x%08X  %i\n", (sdlev.type == SDL_KEYUP) ? "UP" : "DOWN", event->key(), event->key() );
+	printf("   Native ScanCode: x%08X  %i \n", event->nativeScanCode(), event->nativeScanCode() );
+	printf("   Virtual ScanCode: x%08X  %i \n", event->nativeVirtualKey(), event->nativeVirtualKey() );
 	//printf("   Scancode: 0x%08X  %i \n", sdlev.key.keysym.scancode, sdlev.key.keysym.scancode );
 
 	// SDL Docs say this code should never happen, but it does... 
@@ -1586,17 +1699,17 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 
 	//printf("Modifiers: %08X -> %08X \n", event->modifiers(), sdlev.key.keysym.mod );
 
-	/* when we're unable to convert qt keys to sdl, we do keyboard native scan code convertation */
+	/* when we're unable to convert qt keys to sdl, we do keyboard native scan code conversion */
 	if (sdlev.key.keysym.scancode == SDL_SCANCODE_UNKNOWN)
-	  {
-	    int nativeKey = event->nativeScanCode();
-	    auto value	  = s_nativeScanCodesMap.value (nativeKey, _KeyValue {0, 0});
-	    if (value.key != 0 && value.vkey != 0)
-	      {
-		sdlev.key.keysym.sym	  = convQtKey2SDLKeyCode    ((Qt::Key)value.key, value.vkey);
-		sdlev.key.keysym.scancode = SDL_GetScancodeFromKey  (sdlev.key.keysym.sym);
-	      }
-	  }
+	{
+		int nativeKey = event->nativeScanCode();
+		auto value	  = s_nativeScanCodesMap.value (nativeKey, _KeyValue {0, 0});
+		if (value.key != 0 && value.vkey != 0)
+		{
+			sdlev.key.keysym.sym	  = convQtKey2SDLKeyCode    ((Qt::Key)value.key, value.vkey);
+			sdlev.key.keysym.scancode = SDL_GetScancodeFromKey  (sdlev.key.keysym.sym);
+		}
+	}
 
 	if (sdlev.key.keysym.scancode != SDL_SCANCODE_UNKNOWN)
 	{
