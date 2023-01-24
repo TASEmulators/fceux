@@ -174,7 +174,12 @@ static QMap<NativeScanCode, _KeyValue> s_nativeScanCodesMap =
   {348, { VK_RWIN            , Qt::Key_Meta         }},
   {349, { VK_APPS            , Qt::Key_Menu         }},
 };
-#else
+#elif  defined(__APPLE__)
+// QKeyEvent::nativeScanCode() does not return valid codes for Mac OS
+{
+  {  0, { 0, 0 }},
+};
+#else // Unix / Linux
 {
   #if  defined(_HAS_XKB)
   {  9, { XKB_KEY_Escape           , Qt::Key_Escape       }},
@@ -1703,7 +1708,7 @@ int pushKeyEvent(QKeyEvent *event, int pressDown)
 	if (sdlev.key.keysym.scancode == SDL_SCANCODE_UNKNOWN)
 	{
 		int nativeKey = event->nativeScanCode();
-		auto value	  = s_nativeScanCodesMap.value (nativeKey, _KeyValue {0, 0});
+		auto value    = s_nativeScanCodesMap.value (nativeKey, _KeyValue {0, 0});
 		if (value.key != 0 && value.vkey != 0)
 		{
 			sdlev.key.keysym.sym	  = convQtKey2SDLKeyCode    ((Qt::Key)value.key, value.vkey);
