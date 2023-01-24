@@ -860,7 +860,9 @@ int loadCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 	FILE *fp;
 	const char *baseDir = FCEUI_GetBaseDirectory();
 
-	sprintf( filename, "%s/avi/%s.conf", baseDir, codec_name );
+	snprintf( filename, sizeof(filename), "%s/avi/%s.conf", baseDir, codec_name );
+
+	filename[sizeof(filename)-1] = 0;
 
 	fp = fopen( filename, "r");
 
@@ -991,12 +993,14 @@ int saveCodecConfig( int type, const char *codec_name, AVCodecContext *ctx)
 	void *obj, *child = NULL;
 	FILE *fp;
 	uint8_t *str;
-	char filename[512];
+	char filename[4096];
 	const AVOption *opt;
 	bool useOpt;
 	const char *baseDir = FCEUI_GetBaseDirectory();
 
-	sprintf( filename, "%s/avi/%s.conf", baseDir, codec_name );
+	snprintf( filename, sizeof(filename), "%s/avi/%s.conf", baseDir, codec_name );
+
+	filename[sizeof(filename)-1] = 0;
 
 	fp = fopen( filename, "w");
 
