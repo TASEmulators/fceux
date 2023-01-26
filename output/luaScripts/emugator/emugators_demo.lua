@@ -38,6 +38,7 @@ local totalRoms = 0
 local pageNumber = 1
 local pageSlot = 1
 
+
 for rom in io.popen([[dir "]] ..romDir.. [[" /b]]):lines() do
 	local dot = nil
 	local dotPos = 0
@@ -93,6 +94,9 @@ end
 
 --Main Loop
 while(true) do 
+
+	
+
 	local inpt = input.read()
 
 	if(emu.emulating() == false) then --should be changed to allow gui to be swaped to while emulating. maybe check if paused?
@@ -113,6 +117,18 @@ while(true) do
 		gui.gdoverlay(PAGE_RIGHT.x, PAGE_RIGHT.y, rightArrow:gdStr())
 		gui.gdoverlay(PAGE_LEFT.x, PAGE_LEFT.y, leftArrow:gdStr())
 
+		--local scanLine = gd.createFromPng("gui/scan.png")
+		--gui.gdoverlay(MAX_SCREEN_WIDTH, MAX_SCREEN_HEIGHT, scanLine:gdStr())
+		
+		--for i=0,MAX_SCREEN_WIDTH,2 do
+			--gui.rect(i,0, i, MAX_SCREEN_HEIGHT, "red", "black")
+        --end
+
+		--for i=0,MAX_SCREEN_HEIGHT,2 do
+			--gui.rect(0,i, MAX_SCREEN_WIDTH, i, "red", "black")
+        --end
+
+		--gui.rect(MAX_SCREEN_WIDTH / 2,0, MAX_SCREEN_WIDTH / 2, MAX_SCREEN_HEIGHT, "red", "black")
 		--Draw console
 		--gui.rect(console.x1, console.y1, console.x2, console.y2, "blue", "white")
 		--gui.text(console.x1 + 9, console.y1 + 16, "Famicom\n/NES")
@@ -120,8 +136,11 @@ while(true) do
 		gui.rect(console.x1 + 10, console.y1 + 30, console.x1 + 10 + im:sizeX(), console.y1 + 30 + im:sizeY(), "grey", "white")
 		gui.gdoverlay(console.x1 + 10, console.y1 + 30, im:gdStr())  --doesnt actually line up quite right with hitbox, needs to be adjusted when image is finalized
 
+		
+
 		--Load Cartridge if dropped on Console
 		if (inpt.leftclick == nil) then
+			
 			if((inpt.xmouse > console.x1) and (inpt.xmouse < console.x2) and (inpt.ymouse > console.y1) and (inpt.ymouse < console.y2) and selectedRom.selected ~= nil) then
 				emu.loadrom(romDir ..FAMICOM_Roms[currPage][selectedRom.selected].rom)
 			elseif((inpt.xmouse > PAGE_LEFT.x) and (inpt.xmouse < PAGE_LEFT.x + leftArrow:sizeX()) and (inpt.ymouse > PAGE_LEFT.y) and (inpt.ymouse < PAGE_LEFT.y + leftArrow:sizeY()) and selectedRom.selected == nil and lmbWasPressed) then
@@ -168,6 +187,9 @@ while(true) do
 			local gdstr = FAMICOM_Roms[currPage][selectedRom.selected].image:gdStr()
 			gui.gdoverlay(inpt.xmouse + (FAMICOM_Roms[currPage][selectedRom.selected].x - selectedRom.x), inpt.ymouse + (FAMICOM_Roms[currPage][selectedRom.selected].y - selectedRom.y), gdstr)
 		end
+					
+		local scanLine = gd.createFromPng("gui/scan.png"):gdStr()
+		gui.drawimage(scanLine,0.3)
 
 		if(selectedRom.selected ~= nil) then
 			gui.text(inpt.xmouse, inpt.ymouse, FAMICOM_Roms[currPage][selectedRom.selected].name)
@@ -176,7 +198,12 @@ while(true) do
 		lmbWasPressed = inpt.leftclick ~= nil
 
 		emugator.yieldwithflag() -- call this if you want the script to run without emulation (game running)
+
+
 	else
+
+		
+
 		gui.rect(unloadButton.x1, unloadButton.y1, unloadButton.x2, unloadButton.y2, "blue", "white")
 		gui.text(unloadButton.x1+2, unloadButton.y1+2, "Unload")
 
@@ -208,5 +235,8 @@ while(true) do
 			wasClicked = false
 			emu.frameadvance()
 		end
+		
 	end
+	local scanLine2 = gd.createFromPng("gui/scan.png"):gdStr()
+	gui.gdoverlay(scanLine2,0.3)
 end
