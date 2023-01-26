@@ -78,7 +78,7 @@ void EMUFILE_FILE::open(const char* fname, const char* mode)
 }
 
 
-void EMUFILE_FILE::truncate(s32 length)
+void EMUFILE_FILE::truncate(size_t length)
 {
 	::fflush(fp);
 	#ifdef _MSC_VER

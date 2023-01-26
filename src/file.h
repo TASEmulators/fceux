@@ -35,7 +35,7 @@ struct FCEUFILE {
 	int archiveIndex;
 
 	//the size of the file
-	int size;
+	size_t size;
 
 	//whether the file is contained in an archive
 	bool isArchive() { return archiveCount > 0; }

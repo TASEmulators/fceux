@@ -327,7 +327,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, cha
 					if(gzfile) {
 						delete fp;
 
-						int size;
+						size_t size;
 						for(size=0; gzgetc(gzfile) != EOF; size++) {}
 						EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(size);
 						gzseek(gzfile,0,SEEK_SET);
