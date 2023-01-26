@@ -315,9 +315,9 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, cha
 			{
 				uint32 magic;
 
-				magic = fp->fgetc();
-				magic|=fp->fgetc()<<8;
-				magic|=fp->fgetc()<<16;
+				magic = (fp->fgetc() & 0x00ff);
+				magic|= (fp->fgetc() & 0x00ff) << 8;
+				magic|= (fp->fgetc() & 0x00ff) << 16;
 				fp->fseek(0,SEEK_SET);
 
 				if(magic==0x088b1f) {
