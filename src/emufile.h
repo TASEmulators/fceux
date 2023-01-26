@@ -155,7 +155,7 @@ public:
 	{
 		vec->resize(length);
 		len = length;
-		if(pos>length) pos=length;
+		if (static_cast<size_t>(pos) > length) pos=length;
 	}
 
 	u8* buf() {
@@ -193,7 +193,7 @@ public:
 		//if(_fread(&temp,1) != 1)
 		//	return EOF;
 		//else return temp;
-		u32 remain = len-pos;
+		size_t remain = len-pos;
 		if(remain<1) {
 			failbit = true;
 			return -1;
@@ -219,8 +219,8 @@ public:
 	virtual void fwrite(const void *ptr, size_t bytes){
 		reserve(pos+bytes);
 		memcpy(buf()+pos,ptr,bytes);
-		pos += bytes;
-		len = std::max<int>(pos,len);
+		pos += static_cast<long>(bytes);
+		len = std::max<size_t>(pos,len);
 	}
 
 	virtual int fseek(long int offset, int origin){
@@ -233,7 +233,7 @@ public:
 				pos += offset;
 				break;
 			case SEEK_END:
-				pos = size()+offset;
+				pos = (long int)(size()+offset);
 				break;
 			default:
 				assert(false);
@@ -251,8 +251,8 @@ public:
 	void set_len(size_t length)
 	{
 		len = length;
-		if(pos > length)
-			pos = length;
+		if (static_cast<size_t>(pos) > length)
+			pos = static_cast<long>(length);
 	}
 	void trim()
 	{
