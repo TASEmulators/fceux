@@ -155,7 +155,7 @@ public:
 	{
 		vec->resize(length);
 		len = length;
-		if (static_cast<size_t>(pos) > length) pos=length;
+		if (static_cast<size_t>(pos) > length) pos=static_cast<long int>(length);
 	}
 
 	u8* buf() {
