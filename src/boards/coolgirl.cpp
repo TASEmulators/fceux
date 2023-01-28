@@ -2286,7 +2286,7 @@ void COOLGIRL_Init(CartInfo *info) {
 	}
 
 	CFI = (uint8*)FCEU_gmalloc(sizeof(cfi_data) * 2);
-	for (int i = 0; i < sizeof(cfi_data); i++)
+	for (size_t i = 0; i < sizeof(cfi_data); i++)
 	{
 		CFI[i * 2] = CFI[i * 2 + 1] = cfi_data[i];
 	}

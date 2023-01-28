@@ -888,9 +888,9 @@ int  fceuWrapperInit( int argc, char *argv[] )
 			extern std::vector<std::string> subtitleMessages;
 			float fps = (md.palFlag == 0 ? 60.0988 : 50.0069); // NTSC vs PAL
 			float subduration = 3; // seconds for the subtitles to be displayed
-			for (int i = 0; i < subtitleFrames.size(); i++)
+			for (size_t i = 0; i < subtitleFrames.size(); i++)
 			{
-				fprintf(srtfile, "%i\n", i+1); // starts with 1, not 0
+				fprintf(srtfile, "%zi\n", i+1); // starts with 1, not 0
 				double seconds, ms, endseconds, endms;
 				seconds = subtitleFrames[i]/fps;
 				if (i+1 < subtitleFrames.size()) // there's another subtitle coming after this one

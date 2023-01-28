@@ -307,8 +307,7 @@ cartdata MMC5CartList[] =
 
 #define MMC5_NOCARTS (sizeof(MMC5CartList) / sizeof(MMC5CartList[0]))
 int DetectMMC5WRAMSize(uint32 crc32) {
-	int x;
-	for (x = 0; x < MMC5_NOCARTS; x++) {
+	for (size_t x = 0; x < MMC5_NOCARTS; x++) {
 		if (crc32 == MMC5CartList[x].crc32) {
 			if(MMC5CartList[x].size > 1)
 				FCEU_printf(" >8KB external WRAM present.  Use UNIF if you hack the ROM image.\n");

@@ -223,7 +223,7 @@ InitSound()
 	i = 0;
 	while (supportedSampleRates[i] != 0)
 	{
-		if (soundrate == supportedSampleRates[i])
+		if ( static_cast<unsigned int>(soundrate) == supportedSampleRates[i])
 		{
 			sampleRateIsSupported = true;
 			break;
