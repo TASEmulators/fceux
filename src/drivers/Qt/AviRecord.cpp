@@ -3180,7 +3180,7 @@ void LibavOptionsPage::initChannelLayoutSelect( const char *codec_name )
 
 			audioChanLayout->addItem( tr(layoutDesc), (unsigned long long)c->channel_layouts[i] );
 
-			if ( LIBAV::audio_st.chanLayout == c->channel_layouts[i] )
+			if ( static_cast<uint64_t>(LIBAV::audio_st.chanLayout) == c->channel_layouts[i] )
 			{
 				audioChanLayout->setCurrentIndex( audioChanLayout->count() - 1 );
 				formatOk = true;

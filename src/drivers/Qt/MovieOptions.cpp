@@ -50,7 +50,7 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	QVBoxLayout *vbox1, *vbox2;
 	QPushButton *closeButton;
 	std::vector <std::string> aviDriverList;
-	int aviDriver;
+	int aviDriver=0;
 
 	setWindowTitle("Movie Options");
 
@@ -146,7 +146,7 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 			break;
 		}
 
-		if ( i == aviDriver )
+		if ( i == static_cast<size_t>(aviDriver) )
 		{
 			aviBackend->setCurrentIndex(i);
 			aviPageStack->setCurrentIndex(i);

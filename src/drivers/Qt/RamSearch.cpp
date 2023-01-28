@@ -1778,7 +1778,7 @@ void QRamSearchView::keyPressEvent(QKeyEvent *event)
 		selAddr = -1;
 		selLine++;
 
-		if (selLine >= actvSrchList.size())
+		if ( static_cast<size_t>(selLine) >= actvSrchList.size())
 		{
 			selLine = actvSrchList.size() - 1;
 		}

@@ -1657,7 +1657,7 @@ void QTraceLogView::calcTextSel(int x, int y)
 	selAddrValue = -1;
 	selAddrText[0] = 0;
 
-	if (x < lineText[y].size())
+	if ( static_cast<size_t>(x) < lineText[y].size())
 	{
 		int ax = x;
 

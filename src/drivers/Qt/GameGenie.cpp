@@ -433,7 +433,6 @@ void EncodeGG(char *str, int a, int v, int c)
 //----------------------------------------------------------------------------
 void GameGenieDialog_t::ListGGAddresses(void)
 {
-	int i; //mbg merge 7/18/06 changed from int
 	int a = -1; int v = -1; int c = -1;
 	QTreeWidgetItem *item;
 	char str[32];
@@ -460,7 +459,7 @@ void GameGenieDialog_t::ListGGAddresses(void)
 
 	if (a != -1 && v != -1)
 	{
-		for (i = 0; i < PRGsize[0]; i += 0x2000)
+		for (unsigned int i = 0; i < PRGsize[0]; i += 0x2000)
 		{
 			if (c == -1 || PRGptr[0][i + (a & 0x1FFF)] == c)
 			{

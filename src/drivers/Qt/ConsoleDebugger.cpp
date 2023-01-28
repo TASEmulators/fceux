@@ -3190,7 +3190,7 @@ void QAsmView::setPC_placement( int mode, int ofs )
 //----------------------------------------------------------------------------
 void QAsmView::toggleBreakpoint(int line)
 {
-	if ( line < asmEntry.size() )
+	if ( static_cast<size_t>(line) < asmEntry.size() )
 	{
 		int bpNum = isBreakpointAtLine(line);
 
@@ -3230,15 +3230,15 @@ int QAsmView::isBreakpointAtAddr( int cpuAddr, int romAddr )
 		{
 			if ( watchpoint[i].endaddress )
 			{
-				if ( (romAddr >= watchpoint[i].address) && 
-					romAddr < watchpoint[i].endaddress )
+				if ( ( static_cast<unsigned int>(romAddr) >= watchpoint[i].address) && 
+					static_cast<unsigned int>(romAddr) < watchpoint[i].endaddress )
 				{
 					return i;
 				}
 			}
 			else
 			{
-				if (romAddr == watchpoint[i].address)
+				if ( static_cast<unsigned int>(romAddr) == watchpoint[i].address)
 				{
 					return i;
 				}
@@ -3248,15 +3248,15 @@ int QAsmView::isBreakpointAtAddr( int cpuAddr, int romAddr )
 		{
 			if ( watchpoint[i].endaddress )
 			{
-				if ( (cpuAddr >= watchpoint[i].address) && 
-					cpuAddr < watchpoint[i].endaddress )
+				if ( ( static_cast<unsigned int>(cpuAddr) >= watchpoint[i].address) && 
+					static_cast<unsigned int>(cpuAddr) < watchpoint[i].endaddress )
 				{
 					return i;
 				}
 			}
 			else
 			{
-				if (cpuAddr == watchpoint[i].address)
+				if ( static_cast<unsigned int>(cpuAddr) == watchpoint[i].address)
 				{
 					return i;
 				}
@@ -3268,7 +3268,7 @@ int QAsmView::isBreakpointAtAddr( int cpuAddr, int romAddr )
 //----------------------------------------------------------------------------
 int QAsmView::isBreakpointAtLine( int l )
 {
-	if ( l < asmEntry.size() )
+	if ( static_cast<size_t>(l) < asmEntry.size() )
 	{
 		if ( asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT )
 		{
@@ -3290,7 +3290,7 @@ void QAsmView::setBreakpointAtSelectedLine(void)
 {
 	int addr = -1;
 
-	if ( (selAddrLine >= 0) && (selAddrLine < asmEntry.size()) )
+	if ( (selAddrLine >= 0) && (static_cast<size_t>(selAddrLine) < asmEntry.size()) )
 	{
 		if ( selAddrValue == asmEntry[ selAddrLine ]->addr )
 		{
@@ -3311,7 +3311,7 @@ void QAsmView::setBreakpointAtSelectedLine(void)
 //----------------------------------------------------------------------------
 int  QAsmView::getAsmAddrFromLine(int line)
 {
-	if ( (line >= 0) && (line < asmEntry.size()) )
+	if ( (line >= 0) && (static_cast<size_t>(line) < asmEntry.size()) )
 	{
 		return asmEntry[line]->addr;
 	}
@@ -3424,7 +3424,7 @@ int  QAsmView::getAsmLineFromAddr(int addr)
 	}
 
 	// Don't stop on an symbol name or comment line, search for next assembly line
-	while ( (line < asmEntry.size()) && (asmEntry[line]->type != dbg_asm_entry_t::ASM_TEXT) )
+	while ( (static_cast<size_t>(line) < asmEntry.size()) && (asmEntry[line]->type != dbg_asm_entry_t::ASM_TEXT) )
 	{
 		line++;
 	}
@@ -3546,7 +3546,7 @@ void  QAsmView::updateAssemblyView(void)
 		{
 			uint8_t cdl_data;
 			instruction_addr = GetNesFileAddress(addr) - 16;
-			if ( (instruction_addr >= 0) && (instruction_addr < cdloggerdataSize) )
+			if ( (instruction_addr >= 0) && (static_cast<unsigned int>(instruction_addr) < cdloggerdataSize) )
 			{
 				cdl_data = cdloggerdata[instruction_addr] & 3;
 				if (cdl_data == 3)
@@ -3746,7 +3746,7 @@ void  QAsmView::updateAssemblyView(void)
 
 		a->line = asmEntry.size();
 
-		if ( maxLineLen < line.size() )
+		if ( static_cast<size_t>(maxLineLen) < line.size() )
 		{
 			maxLineLen = line.size();
 		}
@@ -4368,7 +4368,7 @@ static int getGameDebugBreakpointFileName(std::string &filepath)
 		}
 		i++;
 	}
-	if ( (j >= 0) && (j < filepath.size()) )
+	if ( (j >= 0) && (static_cast<size_t>(j) < filepath.size()) )
 	{
 		filepath.erase(j);
 	}
@@ -4954,7 +4954,7 @@ void QAsmView::gotoAddr( int addr )
 //----------------------------------------------------------------------------
 void QAsmView::gotoLine( int line )
 {
-	if ( (line >= 0) && (line < asmEntry.size()) )
+	if ( (line >= 0) && (static_cast<size_t>(line) < asmEntry.size()) )
 	{
 		if ( curNavLoc.addr != asmEntry[line]->addr )
 		{	// Don't push back to back duplicates into the navigation history
@@ -5021,7 +5021,7 @@ void QAsmView::navHistForward(void)
 //----------------------------------------------------------------------------
 void QAsmView::setSelAddrToLine( int line )
 {
-	if ( (line >= 0) && (line < asmEntry.size()) )
+	if ( (line >= 0) && (static_cast<size_t>(line) < asmEntry.size()) )
 	{
 		int addr = asmEntry[line]->addr;
 		selAddrLine  = line;
@@ -5174,7 +5174,7 @@ bool QAsmView::event(QEvent *event)
 
 		line = lineOffset + c.y();
 
-		opcodeValid = (line < asmEntry.size()) && (asmEntry[line]->size > 0) &&
+		opcodeValid = (static_cast<size_t>(line) < asmEntry.size()) && (asmEntry[line]->size > 0) &&
 				(asmEntry[line]->type == dbg_asm_entry_t::ASM_TEXT);
 
 		showOpcodeDesc = (c.x() >= opcodeLinePos) && (c.x() < operandLinePos) && opcodeValid;
@@ -5185,7 +5185,7 @@ bool QAsmView::event(QEvent *event)
 		{
 			size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name, operandLinePos );
 
-			if ( (subStrLoc != std::string::npos) && (subStrLoc > operandLinePos) )
+			if ( (subStrLoc != std::string::npos) && (subStrLoc > static_cast<size_t>(operandLinePos)) )
 			{
 				//printf("Line:%i asmEntry DB Sym: %zi  '%s'\n", line, subStrLoc, asmEntry[line]->sym.name.c_str() );
 				int symTextStart = subStrLoc;
@@ -5199,7 +5199,7 @@ bool QAsmView::event(QEvent *event)
 		}
 
 		if ( opcodeValid && (c.x() > operandLinePos) &&
-				(c.x() < asmEntry[line]->text.size()) )
+				( static_cast<size_t>(c.x()) < asmEntry[line]->text.size()) )
 		{
 			i = c.x();
 
@@ -5552,7 +5552,7 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 
 	//printf("c (%i,%i) : Line %i : %04X \n", c.x(), c.y(), line, asmEntry[line]->addr );
 
-	if ( line < asmEntry.size() )
+	if ( static_cast<size_t>(line) < asmEntry.size() )
 	{
 		int addr;
 
@@ -5651,7 +5651,7 @@ void QAsmView::loadHighlightToClipboard(void)
 			}
 			hlgtXd = (hlgtXe - hlgtXs);
 
-			if ( hlgtXs < asmEntry[l]->text.size() )
+			if ( static_cast<size_t>(hlgtXs) < asmEntry[l]->text.size() )
 			{
 				s = asmEntry[l]->text.substr( hlgtXs, hlgtXd );
 			}
@@ -5742,7 +5742,7 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 	selAddrType  =  0;
 	selAddrText[0] = 0;
 
-	if ( line < asmEntry.size() )
+	if ( static_cast<size_t>(line) < asmEntry.size() )
 	{
 		int i,j, addr = -1, addrTextLoc = -1, selChar;
 		int symTextStart = -1, symTextEnd = -1;
@@ -5753,7 +5753,7 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 
 		if ( asmEntry[line]->type == dbg_asm_entry_t::ASM_TEXT )
 		{
-			if ( selChar < (int)asmEntry[line]->text.size() )
+			if ( static_cast<size_t>(selChar) < asmEntry[line]->text.size() )
 			{
 				i = selChar;
 
@@ -5761,7 +5761,7 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 				{
 					size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name, operandLinePos );
 
-					if ( (subStrLoc != std::string::npos) && (subStrLoc > operandLinePos) )
+					if ( (subStrLoc != std::string::npos) && (subStrLoc > static_cast<size_t>(operandLinePos)) )
 					{
 						//printf("Line:%i asmEntry DB Sym: %zi  '%s'\n", line, subStrLoc, asmEntry[line]->sym.name.c_str() );
 						symTextStart = subStrLoc;
@@ -5980,7 +5980,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 
 	ctxMenuAddr = -1;
 
-	if ( line < asmEntry.size() )
+	if ( static_cast<size_t>(line) < asmEntry.size() )
 	{
 		int addr, romAddr;
 
@@ -6346,7 +6346,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			lineIsPC = false;
 		}
 
-		if ( l < asmEntry.size() )
+		if ( static_cast<size_t>(l) < asmEntry.size() )
 		{
 			//if ( asmEntry[l]->type != dbg_asm_entry_t::ASM_TEXT )
 			//{
@@ -6378,7 +6378,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 			if ( (selAddrLine == l) )
 			{	// Highlight ASM line for selected address.
 				if ( !txtHlgtSet && (selAddr == selAddrValue) && 
-				  	    (asmEntry[l]->text.size() >= (selAddrChar + selAddrWidth) ) && 
+				  	    (asmEntry[l]->text.size() >= static_cast<size_t>(selAddrChar + selAddrWidth) ) && 
 						    ( asmEntry[l]->text.compare( selAddrChar, selAddrWidth, selAddrText ) == 0 ) )
 				{
 					int ax;
@@ -6433,7 +6433,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 				}
 				hlgtXd = (hlgtXe - hlgtXs);
 
-				if ( hlgtXs < asmEntry[l]->text.size() )
+				if ( static_cast<size_t>(hlgtXs) < asmEntry[l]->text.size() )
 				{
 					s = asmEntry[l]->text.substr( hlgtXs, hlgtXd );
 				}
@@ -6465,7 +6465,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 		x = -pxLineXScroll;
 		l = lineOffset + row;
 
-		if ( l < asmEntry.size() )
+		if ( static_cast<size_t>(l) < asmEntry.size() )
 		{
 			if ( asmPC != NULL )
 			{

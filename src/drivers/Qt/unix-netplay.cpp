@@ -303,7 +303,7 @@ FCEUD_RecvData(void *data,
 			size = recv(s_Socket, data, len, MSG_WAITALL);
 #endif
 
-			if(size == len) {
+			if( static_cast<uint32>(size) == len) {
 				//unsigned long beefie;
 
 				FD_ZERO(&funfun);

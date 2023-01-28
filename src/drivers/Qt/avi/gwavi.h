@@ -297,7 +297,7 @@ class gwavi_t
 	int write_byte(FILE *fp, unsigned char n);
 	int write_short(FILE *fp, unsigned int n);
 	int write_chars(FILE *fp, const char *s);
-	int write_chars_bin(FILE *fp, const char *s, int count);
+	int write_chars_bin(FILE *fp, const char *s, size_t count);
 	int peak_chunk( FILE *fp, long int idx, char *fourcc, unsigned int *size );
 
 	int read_int(FILE *fp, int &n);
@@ -305,7 +305,7 @@ class gwavi_t
 	int read_short(FILE *fp, int16_t &n);
 	int read_short(FILE *fp, int &n);
 	int read_ushort(FILE *fp, uint16_t &n);
-	int read_chars_bin(FILE *fp, char *s, int count);
+	int read_chars_bin(FILE *fp, char *s, size_t count);
 	unsigned int readList(int lvl);
 	unsigned int readChunk(const char *id, int lvl);
 	unsigned int readAviHeader(void);

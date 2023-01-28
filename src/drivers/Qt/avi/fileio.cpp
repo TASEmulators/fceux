@@ -138,7 +138,7 @@ gwavi_t::write_chars(FILE *out, const char *s)
 }
 
 int
-gwavi_t::write_chars_bin(FILE *out, const char *s, int count)
+gwavi_t::write_chars_bin(FILE *out, const char *s, size_t count)
 {
 	if (fwrite(s, 1, count, out) != count)
 		return -1;
@@ -214,7 +214,7 @@ gwavi_t::read_short(FILE *in, int &n)
 }
 
 int
-gwavi_t::read_chars_bin(FILE *in, char *s, int count)
+gwavi_t::read_chars_bin(FILE *in, char *s, size_t count)
 {
 	if (fread(s, 1, count, in) != count)
 		return -1;

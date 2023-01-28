@@ -248,7 +248,7 @@ void FamilyKeyboardWidget::updateHardwareStatus(void)
 //*********************************************************************************
 int FamilyKeyboardWidget::getKeyAtPoint( QPoint p )
 {
-	for (int i=0; i<NUM_KEYS; i++)
+	for (int i=0; i < static_cast<int>(NUM_KEYS); i++)
 	{
 		if ( key[i].rect.contains(p) )
 		{
@@ -1029,7 +1029,7 @@ void FKBConfigDialog::keyTreeItemActivated(QTreeWidgetItem *item, int column)
 //----------------------------------------------------------------------------
 int FKBConfigDialog::getButtonIndexFromName( const char *buttonName )
 {
-	for (int j=0; j<FamilyKeyboardWidget::NUM_KEYS; j++)
+	for (int j=0; j < static_cast<int>(FamilyKeyboardWidget::NUM_KEYS); j++)
 	{
 		if ( strcmp( buttonName, FamilyKeyBoardNames[j] ) == 0 )
 		{

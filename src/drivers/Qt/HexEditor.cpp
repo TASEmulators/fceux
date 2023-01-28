@@ -733,7 +733,7 @@ int HexBookMarkManager_t::saveToFile(void)
 		return -1;
 	}
 
-	for (int i=0; i<v.size(); i++)
+	for (size_t i=0; i<v.size(); i++)
 	{
 		fprintf( fp, "%s:%08X:%s\n", 
 				memViewNames[ v[i]->mode ], v[i]->addr, v[i]->desc );
@@ -2455,9 +2455,9 @@ int QHexEdit::findPattern( std::vector <unsigned char> &varray, int dir )
 			return -1;
 		}
 		match = 1;
-		for (int i=0; i<varray.size(); i++)
+		for (size_t i=0; i<varray.size(); i++)
 		{
-			if ( (addr+i) >= mb.size() )
+			if ( (addr+i) >= static_cast<size_t>(mb.size()) )
 			{
 				match = 0; break;
 			}
@@ -3273,7 +3273,7 @@ int QHexEdit::FreezeRam( const char *name, uint32_t a, uint8_t v, int c, int s, 
 	//	printf("$%04X:%02X   %i: %s\n", a, v, s, name );
 	//}
 
-	if ( a == frzRamAddr )
+	if ( a == static_cast<uint32_t>(frzRamAddr) )
 	{
 		switch ( frzRamMode )
 		{

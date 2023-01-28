@@ -945,9 +945,9 @@ int  AviRiffViewerDialog::processChunk( AviRiffTreeItem *item )
 
 		sprintf( stmp, "%u", data.readU32(8) );
 
-		for (i=0; i<item->getSize(); i++)
+		for (i=0; i < static_cast<int>(item->getSize()); i++)
 		{
-			if ( i >= ( sizeof(stmp)-1 ) )
+			if ( i >= (static_cast<int>(sizeof(stmp))-1 ) )
 			{
 				i = sizeof(stmp)-1; break;
 			}
