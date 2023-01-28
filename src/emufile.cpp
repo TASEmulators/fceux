@@ -29,15 +29,15 @@ bool EMUFILE::readAllBytes(std::vector<u8>* dstbuf, const std::string& fname)
 {
 	EMUFILE_FILE file(fname.c_str(),"rb");
 	if(file.fail()) return false;
-	int size = file.size();
+	size_t size = file.size();
 	dstbuf->resize(size);
 	file.fread(&dstbuf->at(0),size);
 	return true;
 }
 
 size_t EMUFILE_MEMORY::_fread(const void *ptr, size_t bytes){
-	u32 remain = len-pos;
-	u32 todo = std::min<u32>(remain,(u32)bytes);
+	size_t remain = len-pos;
+	size_t todo = std::min<size_t>(remain,bytes);
 	if(len==0)
 	{
 		failbit = true;
