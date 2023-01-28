@@ -91,7 +91,7 @@ static DECLFW(UNROM512FlashWrite)
 			(flash_buffer_v[5] == 0x30)) {
 			int offset = &Page[A >> 11][A] - flash_data;
 			int sector = offset / FLASH_SECTOR_SIZE;
-			for (uint32 i = sector * FLASH_SECTOR_SIZE; i < (sector + 1) * FLASH_SECTOR_SIZE; i++)
+			for (int i = sector * FLASH_SECTOR_SIZE; i < (sector + 1) * FLASH_SECTOR_SIZE; i++)
 				flash_data[i % PRGsize[ROM_CHIP]] = 0xFF;
 			FCEU_printf("Flash sector #%d is erased (0x%08x - 0x%08x).\n", sector, offset, offset + FLASH_SECTOR_SIZE);
 		}
@@ -200,7 +200,7 @@ void UNROM512_Init(CartInfo *info) {
 		// Allocate memory for flash
 		flash_data = (uint8*)FCEU_gmalloc(PRGsize[ROM_CHIP]);
 		// Copy ROM to flash data
-		for (int i = 0; i < PRGsize[ROM_CHIP]; i++) {
+		for (unsigned int i = 0; i < PRGsize[ROM_CHIP]; i++) {
 			flash_data[i] = PRGptr[ROM_CHIP][i % PRGsize[ROM_CHIP]];
 		}
 		SetupCartPRGMapping(FLASH_CHIP, flash_data, PRGsize[ROM_CHIP], 1);

@@ -445,12 +445,12 @@ void CommonInit(CartInfo* info, int submapper)
 
 	if (flash_save) {
 		CFI = (uint8*)FCEU_gmalloc(sizeof(cfi_data) * 2);
-		for (int i = 0; i < sizeof(cfi_data); i++) {
+		for (size_t i = 0; i < sizeof(cfi_data); i++) {
 			CFI[i * 2] = CFI[i * 2 + 1] = cfi_data[i];
 		}
 		SetupCartPRGMapping(CFI_CHIP, CFI, sizeof(cfi_data) * 2, 0);
 		Flash = (uint8*)FCEU_gmalloc(PRGsize[ROM_CHIP]);
-		for (int i = 0; i < PRGsize[ROM_CHIP]; i++) {
+		for (unsigned int i = 0; i < PRGsize[ROM_CHIP]; i++) {
 			Flash[i] = PRGptr[ROM_CHIP][i % PRGsize[ROM_CHIP]];
 		}
 		SetupCartPRGMapping(FLASH_CHIP, Flash, PRGsize[ROM_CHIP], 1);
