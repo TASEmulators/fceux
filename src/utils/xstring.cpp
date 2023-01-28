@@ -194,7 +194,7 @@ static const struct Base64Table
 		data[62] = '+';                             // 62
 		data[63] = '/';                             // 63
 		// create ascii->value mapping (but due to overlap, write it to highbit region)
-		for(a=0; a<64; ++a) data[data[a]^0x80] = a; // 
+		for(a=0; a<64; ++a) data[data[a]^0x80] = static_cast<unsigned char>(a); // 
 		data[((unsigned char)'=') ^ 0x80] = 0;
 	}
 	unsigned char operator[] (size_t pos) const { return data[pos]; }
