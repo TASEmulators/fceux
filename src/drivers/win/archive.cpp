@@ -182,7 +182,7 @@ class InStream : public IInStream, private IStreamGetSize
 
 protected:
 
-	uint32 size;
+	size_t size;
 
 public:
 
@@ -495,10 +495,10 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 	if(!inf) return ArchiveScanRecord();
 
 	int matchingFormat = -1;
-	for(uint32 i=0;i<(int)formatRecords.size();i++)
+	for(size_t i=0;i<formatRecords.size();i++)
 	{
 		inf->fseek(0,SEEK_SET);
-		int size = formatRecords[i].signature.size();
+		size_t size = formatRecords[i].signature.size();
 		if(size==0)
 			continue; //WHY??
 		char* temp = new char[size];
@@ -506,7 +506,7 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 		if(!memcmp(&formatRecords[i].signature[0],temp,size))
 		{
 			delete[] temp;
-			matchingFormat = i;
+			matchingFormat = static_cast<int>(i);
 			break;
 		}
 		delete[] temp;

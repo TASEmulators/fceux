@@ -213,7 +213,7 @@ void SaveParse(const CFGSTRUCT *cfgst, FILE *fp)
 			if(*(char **)cfgst[x].ptr)
 			{
 				// Only save it if there IS a string.
-				unsigned int len = strlen(*(char **)cfgst[x].ptr);
+				size_t len = strlen(*(char **)cfgst[x].ptr);
 				SetValueR(fp,cfgst[x].name,*(char **)cfgst[x].ptr, len + 1);
 			}
 		}
