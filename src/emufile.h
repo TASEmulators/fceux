@@ -59,7 +59,7 @@ public:
 	bool fail(bool unset=false) { bool ret = failbit; if(unset) unfail(); return ret; }
 	void unfail() { failbit=false; }
 
-	bool eof() { return size()==ftell(); }
+	bool eof() { return size() == static_cast<size_t>(ftell()); }
 
 	size_t fread(const void *ptr, size_t bytes){
 		return _fread(ptr,bytes);
