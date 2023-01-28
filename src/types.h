@@ -143,9 +143,20 @@ typedef uint8 (*readfunc)(uint32 A);
 #define CTASSERT(x)  typedef char __assert ## y[(x) ? 1 : -1];
 #endif
 
+#define __FCEU_STRINGIZE2(x) #x
+#define __FCEU_STRINGIZE(x) __FCEU_STRINGIZE2(x)
+
+#define  FCEU_CPP_HAS_STD(x)  ( defined(__cplusplus) && (__cplusplus >= x) )
+
+#ifdef   __has_cpp_attribute
+#define  FCEU_HAS_CPP_ATTRIBUTE(x)  __has_cpp_attribute(x)
+#else
+#define  FCEU_HAS_CPP_ATTRIBUTE(x)  0
+#endif
+
 #define  FCEU_UNUSED(x)   (void)(x)
 
-#if __has_cpp_attribute(maybe_unused)
+#if FCEU_CPP_HAS_STD(201603L) || FCEU_HAS_CPP_ATTRIBUTE(maybe_unused)
 #define  FCEU_MAYBE_UNUSED  [[maybe_unused]]
 #else
 #define  FCEU_MAYBE_UNUSED

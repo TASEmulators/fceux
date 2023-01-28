@@ -11,11 +11,13 @@
 #include <cstdio>
 #include <cstdlib>
 
-static char *aboutString = 0;
+static std::string aboutString;
 
 #ifndef FCEUX_BUILD_TIMESTAMP
 #define FCEUX_BUILD_TIMESTAMP  __TIME__ " " __DATE__
 #endif
+
+//#pragma message( "Compiling using C++ Std: " __FCEU_STRINGIZE(__cplusplus) )
 
 // returns a string suitable for use in an aboutbox
 const char *FCEUI_GetAboutString(void) 
@@ -55,14 +57,17 @@ const char *FCEUI_GetAboutString(void)
 		"\n"
 		FCEUX_BUILD_TIMESTAMP "\n";
 
-	if (aboutString) return aboutString;
+	if (aboutString.size() > 0) return aboutString.c_str();
 
 	const char *compilerString = FCEUD_GetCompilerString();
 
-	//allocate the string and concatenate the template with the compiler string
-	if (!(aboutString = (char*)FCEU_dmalloc(strlen(aboutTemplate) + strlen(compilerString) + 1)))
-        return NULL;
+	char  cppVersion[128];
 
-	sprintf(aboutString,"%s%s",aboutTemplate,compilerString);
-	return aboutString;
+	snprintf( cppVersion, sizeof(cppVersion), "\nCompiled using C++ Language Standard: %li\n", __cplusplus);
+
+	aboutString.assign( aboutTemplate  );
+	aboutString.append( compilerString );
+	aboutString.append( cppVersion     );
+
+	return aboutString.c_str();
 }
