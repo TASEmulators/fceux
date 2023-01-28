@@ -27,8 +27,7 @@ MARKERS::MARKERS()
 void MARKERS::save(EMUFILE *os)
 {
 	// write size
-	int size = markersArray.size();
-	int len;
+	uint32_t size = markersArray.size();
 	write32le(size, os);
 	// write array
 	if (!alreadyCompressed)
@@ -38,9 +37,9 @@ void MARKERS::save(EMUFILE *os)
 	// write notes
 	size = notes.size();
 	write32le(size, os);
-	for (int i = 0; i < size; ++i)
+	for (unsigned int i = 0; i < size; ++i)
 	{
-		len = notes[i].length() + 1;
+		uint32_t len = notes[i].length() + 1;
 		if (len > MAX_NOTE_LEN) len = MAX_NOTE_LEN;
 		write32le(len, os);
 		os->fwrite(notes[i].c_str(), len);
@@ -49,13 +48,13 @@ void MARKERS::save(EMUFILE *os)
 // returns true if couldn't load
 bool MARKERS::load(EMUFILE *is)
 {
-	int size;
+	uint32_t size=0;
 	if (read32le(&size, is))
 	{
 		markersArray.resize(size);
 		// read and uncompress array
 		alreadyCompressed = true;
-		int comprlen, len;
+		uint32_t comprlen, len;
 		uLongf destlen = size * sizeof(int);
 		if (!read32le(&comprlen, is)) return true;
 		if (comprlen <= 0) return true;
@@ -64,14 +63,15 @@ bool MARKERS::load(EMUFILE *is)
 		int e = uncompress((uint8*)&markersArray[0], &destlen, &compressedMarkersArray[0], comprlen);
 		if (e != Z_OK && e != Z_BUF_ERROR) return true;
 		// read notes
-		if (read32le(&size, is) && size >= 0)
+		if (read32le(&size, is))
 		{
 			notes.resize(size);
 			char temp_str[MAX_NOTE_LEN];
-			for (int i = 0; i < size; ++i)
+			for (unsigned int i = 0; i < size; ++i)
 			{
-				if (!read32le(&len, is) || len < 0) return true;
-				if ((int)is->fread(temp_str, len) < len) return true;
+				if (!read32le(&len, is) || (len > MAX_NOTE_LEN) ) return true;
+				if (is->fread(temp_str, len) < len) return true;
+				temp_str[sizeof(temp_str)-1] = 0;
 				notes[i] = temp_str;
 			}
 			// all ok
@@ -85,15 +85,15 @@ bool MARKERS::skipLoad(EMUFILE *is)
 	if (!(is->fseek(sizeof(int), SEEK_CUR)))
 	{
 		// read array
-		int comprlen, len;
+		uint32_t comprlen, len;
 		if (!read32le(&comprlen, is)) return true;
 		if (is->fseek(comprlen, SEEK_CUR) != 0) return true;
 		// read notes
-		if (read32le(&comprlen, is) && comprlen >= 0)
+		if (read32le(&comprlen, is))
 		{
-			for (int i = 0; i < comprlen; ++i)
+			for (unsigned int i = 0; i < comprlen; ++i)
 			{
-				if (!read32le(&len, is) || len < 0) return true;
+				if (!read32le(&len, is) || (len > MAX_NOTE_LEN) ) return true;
 				if (is->fseek(len, SEEK_CUR) != 0) return true;
 			}
 			// all ok
@@ -105,7 +105,7 @@ bool MARKERS::skipLoad(EMUFILE *is)
 
 void MARKERS::compressData()
 {
-	int len = markersArray.size() * sizeof(int);
+	uint32_t len = markersArray.size() * sizeof(int);
 	uLongf comprlen = (len>>9)+12 + len;
 	compressedMarkersArray.resize(comprlen);
 	compress(&compressedMarkersArray[0], &comprlen, (uint8*)&markersArray[0], len);
