@@ -33,14 +33,15 @@ void LAGLOG::reset(void)
 
 void LAGLOG::compressData(void)
 {
-	int len = lagLog.size() * sizeof(uint8);
+	unsigned int len = lagLog.size() * sizeof(uint8);
 	if (len)
 	{
 		uLongf comprlen = (len>>9)+12 + len;
 		compressedLagLog.resize(comprlen, LAGGED_UNKNOWN);
 		compress(&compressedLagLog[0], &comprlen, (uint8*)&lagLog[0], len);
 		compressedLagLog.resize(comprlen);
-	} else
+	}
+	else
 	{
 		// LagLog can even be empty
 		compressedLagLog.resize(0);
@@ -59,7 +60,7 @@ void LAGLOG::resetCompressedStatus(void)
 void LAGLOG::save(EMUFILE *os)
 {
 	// write size
-	int size = lagLog.size();
+	unsigned int size = lagLog.size();
 	write32le(size, os);
 	if (size)
 	{
@@ -73,7 +74,7 @@ void LAGLOG::save(EMUFILE *os)
 // returns true if couldn't load
 bool LAGLOG::load(EMUFILE *is)
 {
-	int size;
+	unsigned int size;
 	if (read32le(&size, is))
 	{
 		alreadyCompressed = true;
@@ -81,15 +82,16 @@ bool LAGLOG::load(EMUFILE *is)
 		if (size)
 		{
 			// read and uncompress array
-			int comprlen;
+			unsigned int comprlen;
 			uLongf destlen = size * sizeof(int);
 			if (!read32le(&comprlen, is)) return true;
-			if (comprlen <= 0) return true;
+			if (comprlen == 0) return true;
 			compressedLagLog.resize(comprlen);
 			if (is->fread(&compressedLagLog[0], comprlen) != comprlen) return true;
 			int e = uncompress((uint8*)&lagLog[0], &destlen, &compressedLagLog[0], comprlen);
 			if (e != Z_OK && e != Z_BUF_ERROR) return true;
-		} else
+		}
+		else
 		{
 			compressedLagLog.resize(0);
 		}
@@ -100,7 +102,7 @@ bool LAGLOG::load(EMUFILE *is)
 }
 bool LAGLOG::skipLoad(EMUFILE *is)
 {
-	int size;
+	unsigned int size;
 	if (read32le(&size, is))
 	{
 		if (size)
@@ -117,7 +119,7 @@ bool LAGLOG::skipLoad(EMUFILE *is)
 // -------------------------------------------------------------------------------------------------
 void LAGLOG::invalidateFromFrame(int frame)
 {
-	if (frame >= 0 && frame < (int)lagLog.size())
+	if (frame >= 0 && static_cast<size_t>(frame) < lagLog.size())
 	{
 		lagLog.resize(frame);
 		alreadyCompressed = false;
@@ -126,7 +128,7 @@ void LAGLOG::invalidateFromFrame(int frame)
 
 void LAGLOG::setLagInfo(int frame, bool lagFlag)
 {
-	if ((int)lagLog.size() <= frame)
+	if (lagLog.size() <= static_cast<size_t>(frame))
 		lagLog.resize(frame + 1, LAGGED_UNKNOWN);
 
 	if (lagFlag)
@@ -138,18 +140,19 @@ void LAGLOG::setLagInfo(int frame, bool lagFlag)
 }
 void LAGLOG::eraseFrame(int frame, int numFrames)
 {
-	if (frame < (int)lagLog.size())
+	if ( static_cast<size_t>(frame) < lagLog.size())
 	{
 		if (numFrames == 1)
 		{
 			// erase 1 frame
 			lagLog.erase(lagLog.begin() + frame);
 			alreadyCompressed = false;
-		} else if (numFrames > 1)
+		}
+		else if (numFrames > 1)
 		{
 			// erase many frames
-			if (frame + numFrames > (int)lagLog.size())
-				numFrames = (int)lagLog.size() - frame;
+			if ( static_cast<size_t>(frame + numFrames) > lagLog.size())
+				numFrames = static_cast<int>(lagLog.size()) - frame;
 			lagLog.erase(lagLog.begin() + frame, lagLog.begin() + (frame + numFrames));
 			alreadyCompressed = false;
 		}
@@ -157,11 +160,12 @@ void LAGLOG::eraseFrame(int frame, int numFrames)
 }
 void LAGLOG::insertFrame(int frame, bool lagFlag, int numFrames)
 {
-	if (frame < (int)lagLog.size())
+	if ( static_cast<size_t>(frame) < lagLog.size())
 	{
 		// insert
 		lagLog.insert(lagLog.begin() + frame, numFrames, (lagFlag) ? LAGGED_YES : LAGGED_NO);
-	} else
+	}
+	else
 	{
 		// append
 		lagLog.resize(frame + 1, LAGGED_UNKNOWN);
@@ -180,7 +184,7 @@ int LAGLOG::getSize(void)
 }
 int LAGLOG::getLagInfoAtFrame(int frame)
 {
-	if (frame < (int)lagLog.size())
+	if (static_cast<size_t>(frame) < lagLog.size())
 		return lagLog[frame];
 	else
 		return LAGGED_UNKNOWN;

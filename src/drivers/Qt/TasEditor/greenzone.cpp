@@ -359,7 +359,8 @@ void GREENZONE::save(EMUFILE *os, int save_type)
 // returns true if couldn't load
 bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 {
-	int frame = 0, prev_frame = -1, size = 0;
+	int frame = 0, prev_frame = -1;
+       	unsigned int size = 0;
 	int last_tick = -1;
 	char save_id[GREENZONE_ID_LEN];
 
@@ -375,7 +376,7 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 		return false;
 	}
 	// read "GREENZONE" string
-	if ((int)is->fread(save_id, GREENZONE_ID_LEN) < GREENZONE_ID_LEN) goto error;
+	if (is->fread(save_id, GREENZONE_ID_LEN) < GREENZONE_ID_LEN) goto error;
 	if (!strcmp(greenzone_skipsave_id, save_id))
 	{
 		// string says to skip loading Greenzone
@@ -419,7 +420,7 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 	// read LagLog
 	lagLog.load(is);
 	// read size
-	if (read32le(&size, is) && size >= 0 && size <= currMovieData.getNumRecords())
+	if (read32le(&size, is) && size <= currMovieData.getNumRecords())
 	{
 		greenzoneSize = size;
 		savestates.resize(greenzoneSize);
@@ -461,7 +462,7 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 					if ((int)savestates.size() <= frame)
 						savestates.resize(frame + 1);
 					savestates[frame].resize(size);
-					if ((int)is->fread(&savestates[frame][0], size) < size) break;
+					if (is->fread(&savestates[frame][0], size) < size) break;
 					prev_frame = frame;			// successfully read one Greenzone frame info
 				}
 			}

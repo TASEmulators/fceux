@@ -180,14 +180,14 @@ bool INPUTLOG::load(EMUFILE *is)
 	inputType = tmp;
 	// read data
 	alreadyCompressed = true;
-	int comprlen;
+	unsigned int comprlen;
 	uLongf destlen;
 	// read and uncompress joysticks data
 	destlen = size * BYTES_PER_JOYSTICK * joysticksPerFrame[inputType];
 	joysticks.resize(destlen);
 	// read size
 	if (!read32le(&comprlen, is)) return true;
-	if (comprlen <= 0) return true;
+	if (comprlen == 0) return true;
 	compressedJoysticks.resize(comprlen);
 	if (is->fread(&compressedJoysticks[0], comprlen) != comprlen) return true;
 	int e = uncompress(&joysticks[0], &destlen, &compressedJoysticks[0], comprlen);
@@ -212,7 +212,7 @@ bool INPUTLOG::load(EMUFILE *is)
 		hotChanges.resize(destlen);
 		// read size
 		if (!read32le(&comprlen, is)) return true;
-		if (comprlen <= 0) return true;
+		if (comprlen == 0) return true;
 		compressedHotChanges.resize(comprlen);
 		if (is->fread(&compressedHotChanges[0], comprlen) != comprlen) return true;
 		e = uncompress(&hotChanges[0], &destlen, &compressedHotChanges[0], comprlen);
@@ -222,7 +222,7 @@ bool INPUTLOG::load(EMUFILE *is)
 }
 bool INPUTLOG::skipLoad(EMUFILE *is)
 {
-	int tmp;
+	unsigned int tmp;
 	uint8 tmp1;
 	// skip vars
 	if (is->fseek(sizeof(int) +	// size
