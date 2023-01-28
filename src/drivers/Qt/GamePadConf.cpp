@@ -604,7 +604,7 @@ void GamePadConfDialog_t::loadMapList(void)
 	mapSel->addItem(tr("default"), 0);
 	n = 1;
 
-	for (ssize_t i = 0; i < fileList.size(); i++)
+	for (qsizetype i = 0; i < fileList.size(); i++)
 	{
 		size_t suffixIdx;
 		std::string fileName = fileList[i].toStdString();
