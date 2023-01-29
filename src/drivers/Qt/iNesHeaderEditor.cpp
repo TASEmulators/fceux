@@ -827,7 +827,7 @@ bool iNesHeaderEditor_t::openFile(void)
 
 	if ( GameInfo == NULL )
 	{
-		strncpy( LoadedRomFName, filename.toStdString().c_str(), sizeof(LoadedRomFName) );
+		strncpy( LoadedRomFName, filename.toStdString().c_str(), sizeof(LoadedRomFName)-1 );
 		LoadedRomFName[sizeof(LoadedRomFName)-1] = 0;
 	}
 
