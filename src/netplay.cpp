@@ -122,7 +122,10 @@ int FCEUNET_SendFile(uint8 cmd, char *fn)
 	FCEUX_fstat(fileno(fp),&sb);
 	len = sb.st_size;
 	buf = (char*)FCEU_dmalloc(len); //mbg merge 7/17/06 added cast
-	fread(buf, 1, len, fp);
+	if ( fread(buf, 1, len, fp) != static_cast<size_t>(len) )
+	{
+		FCEU_printf("Warning: FCEUNET_SendFile failed to load complete file.\n");
+	}
 	fclose(fp);
 
 	cbuf = (char*)FCEU_dmalloc(4 + len + len / 1000 + 12); //mbg merge 7/17/06 added cast

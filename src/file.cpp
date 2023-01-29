@@ -132,7 +132,10 @@ void ApplyIPS(FILE *ips, FCEUFILE* fp)
 				memset(buf+fp->size,0,offset+size-fp->size);
 				fp->size=offset+size;
 			}
-			fread(buf+offset,1,size,ips);
+			if ( fread(buf+offset,1,size,ips) != static_cast<size_t>(size) )
+			{
+				FCEU_printf(" Warn IPS data read came up short!\n");
+			}
 		}
 		count++;
 	}

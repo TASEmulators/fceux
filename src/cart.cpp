@@ -562,10 +562,18 @@ void FCEU_LoadGameSave(CartInfo *LocalHWInfo) {
 
 		std::string soot = FCEU_MakeFName(FCEUMKF_SAV, 0, "sav");
 		sp = FCEUD_UTF8fopen(soot, "rb");
-		if (sp != NULL) {
+		if (sp != NULL)
+		{
 			for (int x = 0; x < 4; x++)
+			{
 				if (LocalHWInfo->SaveGame[x])
-					fread(LocalHWInfo->SaveGame[x], 1, LocalHWInfo->SaveGameLen[x], sp);
+				{
+					if ( fread(LocalHWInfo->SaveGame[x], 1, LocalHWInfo->SaveGameLen[x], sp) != static_cast<size_t>(LocalHWInfo->SaveGameLen[x]) )
+					{
+						FCEU_printf("Warning save game data read came up short!\n");
+					}
+				}
+			}
 		}
 	}
 }

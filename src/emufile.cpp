@@ -23,6 +23,7 @@ THE SOFTWARE.
 #include "emufile.h"
 #include "utils/xstring.h"
 
+#include <stdio.h>
 #include <vector>
 
 bool EMUFILE::readAllBytes(std::vector<u8>* dstbuf, const std::string& fname)
@@ -84,7 +85,10 @@ void EMUFILE_FILE::truncate(size_t length)
 	#ifdef _MSC_VER
 		_chsize(_fileno(fp),length);
 	#else
-		ftruncate(fileno(fp),length);
+		if ( ftruncate(fileno(fp),length) != 0 )
+		{
+			printf("Warning: EMUFILE_FILE::truncate failed\n");
+		}
 	#endif
 	// this is probably wrong if mode is "wb"
 	fclose(fp);
