@@ -41,7 +41,8 @@ if(WIN32)
      add_definitions( -DMSVC -D_CRT_SECURE_NO_WARNINGS )
      add_definitions( -D__SDL__  -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
      add_definitions( -DFCEUDEF_DEBUGGER )
-     add_definitions( /wd4267 /wd4244 /wd4018 )
+     add_definitions( /wd4267 /wd4244 )
+     #add_definitions( /wd4018 ) # Integer comparison sign mismatch warnings
      include_directories( ${SDL_INSTALL_PREFIX}/SDL2/include )
      include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
      set( OPENGL_LDFLAGS  OpenGL::GL )
@@ -77,7 +78,8 @@ else(WIN32)
   find_package(OpenGL REQUIRED)
   find_package(ZLIB REQUIRED)
 
-  add_definitions( -Wall  -Wno-write-strings  -Wno-sign-compare  -Wno-parentheses  -Wno-unused-local-typedefs  -fPIC )
+  add_definitions( -Wall  -Wno-write-strings  -Wno-parentheses  -Wno-unused-local-typedefs  -fPIC )
+  #add_definitions( -Wno-sign-compare )  # Integer comparison sign mismatch warnings
   add_definitions( -DFCEUDEF_DEBUGGER )
 
   #if ( ${QT6} )
