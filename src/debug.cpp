@@ -815,7 +815,7 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 						// TXS and TSX only deal with the pointer.
 						if (watchpoint[i].flags & stackop)
 						{
-							for (j = (stackopstartaddr|0x0100); j <= (stackopendaddr|0x0100); j++)
+							for (j = (stackopstartaddr|0x0100); j <= (static_cast<unsigned int>(stackopendaddr)|0x0100); j++)
 							{
 								if (watchpoint[i].endaddress)
 								{
@@ -859,7 +859,7 @@ static void breakpoint(uint8 *opcode, uint16 A, int size) {
 							// Pulls from stack
 							if (watchpoint[i].flags & WP_R)
 							{
-								for (j = (StackAddrBackup|0x0100); j < (X.S|0x0100); j++)
+								for (j = (StackAddrBackup|0x0100); j < (static_cast<unsigned int>(X.S)|0x0100); j++)
 								{
 									if (watchpoint[i].endaddress)
 									{

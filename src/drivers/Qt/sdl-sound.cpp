@@ -262,7 +262,7 @@ InitSound()
 	s_BufferSize = soundbufsize * soundrate / 1000;
 
 	// For safety, set a bare minimum:
-	if (s_BufferSize < spec.samples * 4)
+	if (s_BufferSize < static_cast<unsigned int>(spec.samples * 4))
 	{
 		s_BufferSize = spec.samples * 4;
 	}
