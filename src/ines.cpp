@@ -394,7 +394,7 @@ static void CheckHInfo(uint64 partialmd5) {
 	int32 tofix = 0, x, mask;
 
 	MasterRomInfo = NULL;
-	for (int i = 0; i < ARRAY_SIZE(sMasterRomInfo); i++) {
+	for (size_t i = 0; i < ARRAY_SIZE(sMasterRomInfo); i++) {
 		const TMasterRomInfo& info = sMasterRomInfo[i];
 		if (info.md5lower != partialmd5)
 			continue;
@@ -403,7 +403,7 @@ static void CheckHInfo(uint64 partialmd5) {
 		if (!info.params) break;
 
 		std::vector<std::string> toks = tokenize_str(info.params, ",");
-		for (int j = 0; j < (int)toks.size(); j++) {
+		for (size_t j = 0; j < toks.size(); j++) {
 			std::vector<std::string> parts = tokenize_str(toks[j], "=");
 			MasterRomInfoParams[parts[0]] = parts[1];
 		}
@@ -978,7 +978,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		FCEU_printf("\n");
 	}
 
-	for (int mappertest = 0; mappertest < (sizeof bmap / sizeof bmap[0]) - 1; mappertest++) {
+	for (size_t mappertest = 0; mappertest < (sizeof bmap / sizeof bmap[0]) - 1; mappertest++) {
 		if (bmap[mappertest].number == MapperNo) {
 			mappername = bmap[mappertest].name;
 			break;

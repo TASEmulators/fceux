@@ -214,7 +214,7 @@ public:
 	//whether microphone is enabled
 	bool microphone;
 
-	int getNumRecords() { return (int)records.size(); }
+	int getNumRecords() { return static_cast<int>( records.size() ); }
 
 	int RAMInitOption, RAMInitSeed;
 

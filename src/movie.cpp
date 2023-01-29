@@ -693,7 +693,7 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 		{
 			LoadFM2_binarychunk(movieData, fp, size);
 			return true;
-		} else if (isnewline && movieData.loadFrameCount == movieData.records.size())
+		} else if (isnewline && static_cast<size_t>(movieData.loadFrameCount) == movieData.records.size())
 			// exit prematurely if loaded the specified amound of records
 			return true;
 		switch(state)
@@ -994,7 +994,7 @@ bool MovieData::loadSaveramFrom(std::vector<uint8>* buf)
 			return false;
 		}
 
-		if(currCartInfo->SaveGameLen[i] != len)
+		if(currCartInfo->SaveGameLen[i] != static_cast<unsigned int>(len))
 		{
 			FCEU_PrintError("movie battery load mismatch 3");
 			return false;
@@ -1267,7 +1267,7 @@ void FCEUMOV_AddInputState()
 		}
 
 		//if we are on the last frame, then pause the emulator if the player requested it
-		if (currFrameCounter == currMovieData.records.size()-1)
+		if ( static_cast<size_t>(currFrameCounter) == currMovieData.records.size()-1)
 		{
 			if(FCEUD_PauseAfterPlayback())
 			{

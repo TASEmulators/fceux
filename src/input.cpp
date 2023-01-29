@@ -989,12 +989,12 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
 
-static int execcmd, i;
+static int execcmd;
 
 void FCEUI_HandleEmuCommands(TestCommandState* testfn)
 {
 	bool taseditor = FCEUMOV_Mode(MOVIEMODE_TASEDITOR);
-	for(i=0; i<NUM_EMU_CMDS; ++i)
+	for(size_t i=0; i<NUM_EMU_CMDS; ++i)
 	{
 		int new_state;
 		int old_state = FCEUI_CommandTable[i].state;
@@ -1418,7 +1418,7 @@ static void TaseditorCommand(void)
 **/
 EMUCMDTABLE* GetEmuCommandById(int cmd)
 {
-	for (i = 0; i<NUM_EMU_CMDS; ++i)
+	for (size_t i = 0; i<NUM_EMU_CMDS; ++i)
 	{
 		if (FCEUI_CommandTable[i].cmd == cmd)
 			return &FCEUI_CommandTable[i];

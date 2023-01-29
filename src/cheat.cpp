@@ -644,7 +644,7 @@ int FCEUI_ToggleCheat(uint32 which)
 
 int FCEUI_GlobalToggleCheat(int global_enabled)
 {
-	int _numsubcheats = numsubcheats;
+	unsigned int _numsubcheats = numsubcheats;
 	globalCheatDisabled = !global_enabled;
 	RebuildSubCheats();
 	return _numsubcheats != numsubcheats;

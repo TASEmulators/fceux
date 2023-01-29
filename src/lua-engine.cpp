@@ -746,7 +746,7 @@ static int emu_addgamegenie(lua_State *L) {
 
 	while (FCEUI_GetCheat(i,NULL,&Caddr,&Cval,&Ccompare,NULL,&Ctype)) {
 
-		if ((GGaddr == Caddr) && (GGval == Cval) && (GGcomp == Ccompare) && (Ctype == 1)) {
+		if ((static_cast<uint32>(GGaddr) == Caddr) && (GGval == static_cast<int>(Cval)) && (GGcomp == Ccompare) && (Ctype == 1)) {
 			// Already Added, so consider it a success
 			lua_pushboolean(L, true);
 			return 1;
@@ -789,7 +789,7 @@ static int emu_delgamegenie(lua_State *L) {
 
 	while (FCEUI_GetCheat(i,&Cname,&Caddr,&Cval,&Ccompare,NULL,&Ctype)) {
 
-		if ((Cname == msg) && (GGaddr == Caddr) && (GGval == Cval) && (GGcomp == Ccompare) && (Ctype == 1)) {
+		if ((Cname == msg) && (static_cast<uint32>(GGaddr) == Caddr) && (GGval == static_cast<int>(Cval)) && (GGcomp == Ccompare) && (Ctype == 1)) {
 			// Delete cheat code
 			if (FCEUI_DelCheat(i)) {
 				lua_pushboolean(L, true);
@@ -1997,7 +1997,7 @@ static int memory_getregister(lua_State *L)
 {
 	const char* qualifiedRegisterName = luaL_checkstring(L,1);
 	lua_settop(L,0);
-	for(int cpu = 0; cpu < sizeof(cpuToRegisterMaps)/sizeof(*cpuToRegisterMaps); cpu++)
+	for(size_t cpu = 0; cpu < sizeof(cpuToRegisterMaps)/sizeof(*cpuToRegisterMaps); cpu++)
 	{
 		cpuToRegisterMap ctrm = cpuToRegisterMaps[cpu];
 		int cpuNameLen = strlen(ctrm.cpuName);
@@ -2031,7 +2031,7 @@ static int memory_setregister(lua_State *L)
 	const char* qualifiedRegisterName = luaL_checkstring(L,1);
 	unsigned long value = (unsigned long)(luaL_checkinteger(L,2));
 	lua_settop(L,0);
-	for(int cpu = 0; cpu < sizeof(cpuToRegisterMaps)/sizeof(*cpuToRegisterMaps); cpu++)
+	for(size_t cpu = 0; cpu < sizeof(cpuToRegisterMaps)/sizeof(*cpuToRegisterMaps); cpu++)
 	{
 		cpuToRegisterMap ctrm = cpuToRegisterMaps[cpu];
 		int cpuNameLen = strlen(ctrm.cpuName);
@@ -2247,7 +2247,7 @@ static void CallRegisteredLuaMemHook_LuaMatch(unsigned int address, int size, un
 #endif
 				lua_settop(L, 0);
 				lua_getfield(L, LUA_REGISTRYINDEX, luaMemHookTypeStrings[hookType]);
-				for(int i = address; i != address+size; i++)
+				for(unsigned int i = address; i != address+size; i++)
 				{
 					lua_rawgeti(L, -1, i);
 					if (lua_isfunction(L, -1))
@@ -3854,7 +3854,7 @@ static inline bool str2colour(uint32 *colour, lua_State *L, const char *str) {
 			*colour = ((rand()*255/RAND_MAX) << 8) | ((rand()*255/RAND_MAX) << 16) | ((rand()*255/RAND_MAX) << 24) | 0xFF;
 			return true;
 		}
-		for(int i = 0; i < sizeof(s_colorMapping)/sizeof(*s_colorMapping); i++) {
+		for(size_t i = 0; i < sizeof(s_colorMapping)/sizeof(*s_colorMapping); i++) {
 			if(!stricmp(str,s_colorMapping[i].name)) {
 				*colour = s_colorMapping[i].value;
 				return true;

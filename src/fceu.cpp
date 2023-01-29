@@ -744,7 +744,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 		{
 			EmulationPaused = EMULATIONPAUSED_FA;
 		}
-		if (frameAdvance_Delay_count < frameAdvanceDelayScaled)
+		if ( static_cast<unsigned int>(frameAdvance_Delay_count) < frameAdvanceDelayScaled)
 		{
 			frameAdvance_Delay_count++;
 		}

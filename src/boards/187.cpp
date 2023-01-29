@@ -22,7 +22,7 @@
 #include "mmc3.h"
 
 static void M187CW(uint32 A, uint8 V) {
-	if ((A & 0x1000) == ((MMC3_cmd & 0x80) << 5))
+	if ((A & 0x1000) == static_cast<uint32>((MMC3_cmd & 0x80) << 5))
 		setchr1(A, V | 0x100);
 	else
 		setchr1(A, V);

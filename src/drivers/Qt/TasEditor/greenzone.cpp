@@ -420,7 +420,7 @@ bool GREENZONE::load(EMUFILE *is, unsigned int offset)
 	// read LagLog
 	lagLog.load(is);
 	// read size
-	if (read32le(&size, is) && size <= currMovieData.getNumRecords())
+	if (read32le(&size, is) && size <= static_cast<unsigned int>(currMovieData.getNumRecords()))
 	{
 		greenzoneSize = size;
 		savestates.resize(greenzoneSize);

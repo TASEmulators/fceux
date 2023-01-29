@@ -48,7 +48,7 @@ static void M121CW(uint32 A, uint8 V) {
 	if (PRGsize[0] == CHRsize[0]) {	// A9713 multigame extension hack!
 		setchr1(A, V | ((EXPREGS[3] & 0x80) << 1));
 	} else {
-		if ((A & 0x1000) == ((MMC3_cmd & 0x80) << 5))
+		if ((A & 0x1000) == static_cast<uint32>((MMC3_cmd & 0x80) << 5))
 			setchr1(A, V | 0x100);
 		else
 			setchr1(A, V);
