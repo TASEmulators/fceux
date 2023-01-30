@@ -506,11 +506,7 @@ void PrintToWindowConsole(intptr_t hDlgAsInt, const char *str)
 	updateLuaDisplay = true;
 }
 //----------------------------------------------------
-#ifdef WIN32
-int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char *format, ...)
-#else
-int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw()
-#endif
+int LuaPrintfToWindowConsole( __FCEU_PRINTF_FORMAT const char * format, ...)
 {
 	int retval;
 	va_list args;

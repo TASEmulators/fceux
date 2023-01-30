@@ -54,18 +54,7 @@ private slots:
 };
 
 // Formatted print
-#ifdef WIN32
-int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char *format, ...);
-#elif __linux__
-#ifdef __THROWNL
-int LuaPrintfToWindowConsole(const char *__restrict format, ...)
-	__THROWNL __attribute__((__format__(__printf__, 1, 2)));
-#else
-int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw() __attribute__((__format__(__printf__, 1, 2)));
-#endif
-#else
-int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw();
-#endif
+int LuaPrintfToWindowConsole( __FCEU_PRINTF_FORMAT const char *format, ...) __FCEU_PRINTF_ATTRIBUTE( 1, 2 );
 
 void PrintToWindowConsole(intptr_t hDlgAsInt, const char *str);
 

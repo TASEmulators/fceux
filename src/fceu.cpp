@@ -1066,7 +1066,7 @@ void FCEU_ResetVidSys(void) {
 
 FCEUS FSettings;
 
-void FCEU_printf(const char *format, ...) 
+void FCEU_printf( __FCEU_PRINTF_FORMAT const char *format, ...)
 {
 	char temp[2048];
 
@@ -1086,7 +1086,7 @@ void FCEU_printf(const char *format, ...)
 	va_end(ap);
 }
 
-void FCEU_PrintError(const char *format, ...) 
+void FCEU_PrintError( __FCEU_PRINTF_FORMAT const char *format, ...)
 {
 	char temp[2048];
 

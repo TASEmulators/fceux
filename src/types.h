@@ -162,6 +162,21 @@ typedef uint8 (*readfunc)(uint32 A);
 #define  FCEU_MAYBE_UNUSED
 #endif
 
+#if defined(_MSC_VER)
+	// Microsoft compiler won't catch format issues, but VS IDE can catch on analysis mode
+	#define  __FCEU_PRINTF_FORMAT  _In_z_ _Printf_format_string_
+	#define  __FCEU_PRINTF_ATTRIBUTE( fmt, va )
+
+#elif FCEU_HAS_CPP_ATTRIBUTE(format)
+	// GCC and Clang compilers will perform printf format type checks, useful for catching format errors.
+	#define  __FCEU_PRINTF_FORMAT
+	#define  __FCEU_PRINTF_ATTRIBUTE( fmt, va )  __attribute__((__format__(__printf__, fmt, va)))
+
+#else
+	#define  __FCEU_PRINTF_FORMAT
+	#define  __FCEU_PRINTF_ATTRIBUTE( fmt, va )
+#endif
+
 #include "utils/endian.h"
 
 #endif

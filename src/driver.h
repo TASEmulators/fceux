@@ -23,7 +23,7 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname);
 const char *FCEUD_GetCompilerString();
 
 //This makes me feel dirty for some reason.
-void FCEU_printf(const char *format, ...);
+void FCEU_printf( __FCEU_PRINTF_FORMAT const char *format, ...)  __FCEU_PRINTF_ATTRIBUTE( 1, 2 );
 #define FCEUI_printf FCEU_printf
 
 //Video interface
@@ -192,7 +192,7 @@ void TaseditorManualFunction(void);
 int32 FCEUI_GetDesiredFPS(void);
 void FCEUI_SaveSnapshot(void);
 void FCEUI_SaveSnapshotAs(void);
-void FCEU_DispMessage(const char *format, int disppos, ...);
+void FCEU_DispMessage( __FCEU_PRINTF_FORMAT const char *format, int disppos, ...) __FCEU_PRINTF_ATTRIBUTE( 1, 3 );
 #define FCEUI_DispMessage FCEU_DispMessage
 
 int FCEUI_DecodePAR(const char *code, int *a, int *v, int *c, int *type);
