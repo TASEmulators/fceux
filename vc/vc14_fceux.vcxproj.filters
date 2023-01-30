@@ -1120,6 +1120,7 @@
     <ClCompile Include="..\src\boards\354.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\debugsymboltable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">

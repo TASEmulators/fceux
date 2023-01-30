@@ -7,7 +7,13 @@
 #include "debug.h"
 #include "fceu.h"
 #include "cart.h"
+
+#ifdef __QT_DRIVER__
 #include "Qt/ConsoleUtilities.h"
+#else
+extern char LoadedRomFName[4096];
+static inline const char* getRomFile() { return LoadedRomFName; }
+#endif
 
 extern FCEUGI *GameInfo;
 
