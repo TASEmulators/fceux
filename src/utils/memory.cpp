@@ -112,6 +112,6 @@ void* FCEU_realloc(void* ptr, size_t size)
 
 void FCEU_abort(const char* message)
 {
-	if(message) FCEU_PrintError(message);
+	if(message) FCEU_PrintError("%s", message);
 	abort();
 }

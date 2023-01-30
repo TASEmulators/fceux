@@ -1583,10 +1583,10 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 					//TODO: turn frame counter to red to get attention
 					if (!backupSavestates)	//If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
 					{
-						FCEU_PrintError("Error: Savestate taken from a frame (%d) after the final frame in the savestated movie (%d) cannot be verified against current movie (%d). This is not permitted.\nUnable to restore backup, movie playback stopped.", currFrameCounter, tempMovieData.records.size() - 1, currMovieData.records.size() - 1);
+						FCEU_PrintError("Error: Savestate taken from a frame (%d) after the final frame in the savestated movie (%zi) cannot be verified against current movie (%zi). This is not permitted.\nUnable to restore backup, movie playback stopped.", currFrameCounter, tempMovieData.records.size() - 1, currMovieData.records.size() - 1);
 						FCEUI_StopMovie();
 					} else
-						FCEU_PrintError("Savestate taken from a frame (%d) after the final frame in the savestated movie (%d) cannot be verified against current movie (%d). This is not permitted.", currFrameCounter, tempMovieData.records.size() - 1, currMovieData.records.size() - 1);
+						FCEU_PrintError("Savestate taken from a frame (%d) after the final frame in the savestated movie (%zi) cannot be verified against current movie (%zi). This is not permitted.", currFrameCounter, tempMovieData.records.size() - 1, currMovieData.records.size() - 1);
 					return false;
 				}
 			}
@@ -1742,7 +1742,7 @@ void FCEUI_MovieToggleReadOnly()
 		strcpy(message, "Movie is now Read+Write");
 	
 	strcat(message, GetMovieModeStr());
-	FCEU_DispMessage(message,0);
+	FCEU_DispMessage("%s",0,message);
 }
 
 void FCEUI_MovieToggleRecording()
@@ -1786,7 +1786,7 @@ void FCEUI_MovieToggleRecording()
 
 	strcat(message, GetMovieModeStr());
 
-	FCEU_DispMessage(message, 0);
+	FCEU_DispMessage("%s",0,message);
 }
 
 void FCEUI_MovieInsertFrame()
@@ -1813,7 +1813,7 @@ void FCEUI_MovieInsertFrame()
 		strcat(message, GetMovieModeStr());
 	}
 
-	FCEU_DispMessage(message, 0);
+	FCEU_DispMessage("%s",0,message);
 }
 
 void FCEUI_MovieDeleteFrame()
@@ -1851,7 +1851,7 @@ void FCEUI_MovieDeleteFrame()
 		strcat(message, GetMovieModeStr());
 	}
 
-	FCEU_DispMessage(message, 0);
+	FCEU_DispMessage("%s",0,message);
 }
 
 void FCEUI_MovieTruncate()
@@ -1889,7 +1889,7 @@ void FCEUI_MovieTruncate()
 		strcat(message, GetMovieModeStr());
 	}
 
-	FCEU_DispMessage(message, 0);
+	FCEU_DispMessage("%s",0,message);
 }
 
 void FCEUI_MovieNextRecordMode()

@@ -122,7 +122,7 @@ static void UNL43272Sync(void) {
 	if ((latche & 0x81) == 0x81) {
 		setprg32(0x8000, (latche & 0x38) >> 3);
 	} else
-		FCEU_printf("unrecognized command %04!\n", latche);
+		FCEU_printf("unrecognized command %04x!\n", latche);
 	setchr8(0);
 	setmirror(0);
 }

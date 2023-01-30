@@ -899,7 +899,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 			GameInfo->type = GIT_VSUNI;
 			break;
 		default:
-			FCEU_PrintError("Game type is not supported at all.", MapperNo);
+			FCEU_PrintError("Game type is not supported at all.");
 			goto init_error;
 		}
 	}
@@ -969,7 +969,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	FCEU_printf(" PRG ROM: %d x 16KiB = %d KiB\n", round ? ROM_size : not_round_size, (round ? ROM_size : not_round_size) * 16);
 	FCEU_printf(" CHR ROM: %d x  8KiB = %d KiB\n", VROM_size, VROM_size * 8);
-	FCEU_printf(" ROM CRC32: 0x%08lx\n", iNESGameCRC32);
+	FCEU_printf(" ROM CRC32: 0x%08x\n", iNESGameCRC32);
 	{
 		int x;
 		FCEU_printf(" ROM MD5:  0x");

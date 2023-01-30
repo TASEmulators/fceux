@@ -140,7 +140,7 @@ static int DoMirroring(FCEUFILE *fp) {
 				return(0);
 			FCEU_printf(" %02x", t);
 		}
-		FCEU_printf("\n Default Name/Attribute Table Mirroring: Horizontal\n", uchead.info);
+		FCEU_printf("\n Default Name/Attribute Table Mirroring: Horizontal\n");
 		mirrortodo = 0;
 	}
 	return(1);

@@ -422,7 +422,7 @@ void FCEU_DispMessage( __FCEU_PRINTF_FORMAT const char *format, int disppos=0, .
 	vsnprintf(temp,sizeof(temp),format,ap);
 	va_end(ap);
 	strcat(temp, "\n");
-	FCEU_printf(temp);
+	FCEU_printf("%s",temp);
 
 	if ( vidGuiMsgEna )
 	{
