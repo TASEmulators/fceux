@@ -27,6 +27,9 @@
 /vc/fceux.zip
 /vc/fceux64.zip
 
+# macOS junk
+.DS_Store
+
 # linux build output
 bin
 src/fceux

@@ -6,6 +6,7 @@
 #include "cart.h"
 #include "ines.h"
 #include "debug.h"
+#include "debugsymboltable.h"
 #include "driver.h"
 #include "ppu.h"
 
@@ -41,6 +42,13 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 	}
 	else // BT_C
 	{
+		auto sym = debugSymbolTable.getSymbolAtAnyBank(offsetBuffer);
+
+		if (sym)
+		{
+			return sym->ofs & 0xFFFF;
+		}
+
 		int type = GIT_CART;
 
 		if (GameInfo)
