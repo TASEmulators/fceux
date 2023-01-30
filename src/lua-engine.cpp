@@ -24,6 +24,7 @@
 #include "file.h"
 #include "video.h"
 #include "debug.h"
+#include "debugsymboltable.h"
 #include "sound.h"
 #include "drawing.h"
 #include "state.h"
@@ -5070,6 +5071,19 @@ static int debugger_resetinstructionscount(lua_State *L)
 	return 0;
 }
 
+// debugger.getsymboladdress()
+static int debugger_getsymboladdress(lua_State *L)
+{
+	int bank = luaL_checkinteger(L, 1);
+	const char *name = luaL_checkstring(L, 2);
+
+	debugSymbol_t *sym = debugSymbolTable.getSymbol(bank, name);
+
+	lua_pushinteger(L, sym ? sym->ofs & 0xFFFF : -1);
+
+	return 1;
+}
+
 // TAS Editor functions library
 
 // bool taseditor.registerauto()
@@ -6241,6 +6255,7 @@ static const struct luaL_reg debuggerlib[] = {
 	{"getinstructionscount", debugger_getinstructionscount},
 	{"resetcyclescount", debugger_resetcyclescount},
 	{"resetinstructionscount", debugger_resetinstructionscount},
+	{"getsymboladdress", debugger_getsymboladdress},
 	{NULL,NULL}
 };
 
