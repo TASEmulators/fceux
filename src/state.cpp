@@ -511,13 +511,12 @@ void FCEUSS_Save(const char *fname, bool display_message)
 		LuaSaveData saveData;
 		CallRegisteredLuaSaveFunctions(CurrentState, saveData);
 
-		char luaSaveFilename [512];
-		strncpy(luaSaveFilename, fn.c_str(), 512);
-		luaSaveFilename[512-(1+7/*strlen(".luasav")*/)] = '\0';
-		strcat(luaSaveFilename, ".luasav");
+		std::string luaSaveFilename;
+		luaSaveFilename.assign(fn.c_str());
+		luaSaveFilename.append(".luasav");
 		if(saveData.recordList)
 		{
-			FILE* luaSaveFile = fopen(luaSaveFilename, "wb");
+			FILE* luaSaveFile = fopen(luaSaveFilename.c_str(), "wb");
 			if(luaSaveFile)
 			{
 				saveData.ExportRecords(luaSaveFile);
@@ -526,7 +525,7 @@ void FCEUSS_Save(const char *fname, bool display_message)
 		}
 		else
 		{
-			unlink(luaSaveFilename);
+			unlink(luaSaveFilename.c_str());
 		}
 	}
 	#endif
@@ -792,11 +791,10 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 		{
 			LuaSaveData saveData;
 
-			char luaSaveFilename [512];
-			strncpy(luaSaveFilename, fn.c_str(), 512);
-			luaSaveFilename[512-(1+7/*strlen(".luasav")*/)] = '\0';
-			strcat(luaSaveFilename, ".luasav");
-			FILE* luaSaveFile = fopen(luaSaveFilename, "rb");
+			std::string luaSaveFilename;
+			luaSaveFilename.assign(fn.c_str());
+			luaSaveFilename.append(".luasav");
+			FILE* luaSaveFile = fopen(luaSaveFilename.c_str(), "rb");
 			if(luaSaveFile)
 			{
 				saveData.ImportRecords(luaSaveFile);
