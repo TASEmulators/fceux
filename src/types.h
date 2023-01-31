@@ -62,6 +62,8 @@ typedef signed int int32;
 #define alloca __builtin_alloca
 #endif
 
+//#include <typeinfo>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -176,6 +178,54 @@ typedef uint8 (*readfunc)(uint32 A);
 	#define  __FCEU_PRINTF_FORMAT
 	#define  __FCEU_PRINTF_ATTRIBUTE( fmt, va )
 #endif
+
+// Scoped pointer ensures that memory pointed to by this object gets cleaned up
+// and deallocated when this object goes out of scope. Helps prevent memory leaks
+// on temporary memory allocations in functions with early outs.
+template <typename T> 
+class fceuScopedPtr
+{
+	public:
+		fceuScopedPtr( T *ptrIn = nullptr )
+		{
+			//printf("Scoped Pointer Constructor <%s>: %p\n", typeid(T).name(), ptrIn );
+			ptr = ptrIn;
+		}
+
+		~fceuScopedPtr(void)
+		{
+			//printf("Scoped Pointer Destructor <%s>: %p\n", typeid(T).name(), ptr );
+			if (ptr)
+			{
+				delete ptr;
+				ptr = nullptr;
+			}
+		}
+
+		T* operator= (T *ptrIn)
+		{
+			ptr = ptrIn;
+			return ptr;
+		}
+
+		T* get(void)
+		{
+			return ptr;
+		}
+
+		void Delete(void)
+		{
+			if (ptr)
+			{
+				delete ptr;
+				ptr = nullptr;
+			}
+		}
+
+	private:
+		T *ptr;
+
+};
 
 #include "utils/endian.h"
 

@@ -723,7 +723,7 @@ bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 
 bool FCEUSS_Load(const char *fname, bool display_message)
 {
-	EMUFILE* st;
+	fceuScopedPtr <EMUFILE> st; // fceuScopedPtr will auto delete the allocated EMUFILE at function return.
 	std::string fn;
 
 	//mbg movie - this needs to be overhauled
@@ -743,14 +743,15 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	{
 		st = FCEUD_UTF8_fstream(fname, "rb");
 		fn.assign(fname);
-	} else
+	}
+	else
 	{
 		fn = FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname);
 		st=FCEUD_UTF8_fstream(fn.c_str(),"rb");
         	lastLoadstateMade.assign(fn);
 	}
 
-	if (st == NULL || (st->get_fp() == NULL))
+	if (st.get() == NULL || (st.get()->get_fp() == NULL))
 	{
 		if (display_message)
 		{
@@ -764,27 +765,27 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	//If in bot mode, don't do a backup when loading.
 	//Otherwise you eat at the hard disk, since so many
 	//states are being loaded.
-	if (FCEUSS_LoadFP(st, backupSavestates ? SSLOADPARAM_BACKUP : SSLOADPARAM_NOBACKUP))
+	if (FCEUSS_LoadFP(st.get(), backupSavestates ? SSLOADPARAM_BACKUP : SSLOADPARAM_NOBACKUP))
 	{
 		if (fname)
 		{
 			char szFilename[260]={0};
 			splitpath(fname, 0, 0, szFilename, 0);
-            if (display_message)
+			if (display_message)
 			{
-                FCEU_DispMessage("State %s loaded.", 0, szFilename);
+				FCEU_DispMessage("State %s loaded.", 0, szFilename);
 				//FCEU_DispMessage("State %s loaded. Filename: %s", 0, szFilename, fn.c_str());
-            }
-		} else
+			}
+		}
+		else
 		{
-            if (display_message)
+			if (display_message)
 			{
-                FCEU_DispMessage("State %d loaded.", 0, CurrentState);
+				FCEU_DispMessage("State %d loaded.", 0, CurrentState);
 				//FCEU_DispMessage("State %d loaded. Filename: %s", 0, CurrentState, fn.c_str());
-            }
+			}
 			SaveStateStatus[CurrentState] = 1;
 		}
-		delete st;
 
 		#ifdef _S9XLUA_H
 		if (!internalSaveLoad)
@@ -807,7 +808,7 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 		#endif
 
 #ifdef __WIN_DRIVER__
-	Update_RAM_Search(); // Update_RAM_Watch() is also called.
+		Update_RAM_Search(); // Update_RAM_Watch() is also called.
 #endif
 
 		//Update input display if movie is loaded
@@ -817,7 +818,8 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 		cur_input_display = FCEU_GetJoyJoy(); //Input display should show the last buttons pressed (stored in the savestate)
 
 		return true;
-	} else
+	}
+	else
 	{
 		if(!fname)
 			SaveStateStatus[CurrentState] = 1;
@@ -827,7 +829,6 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 			FCEU_DispMessage("Error(s) reading state %d!", 0, CurrentState);
 			//FCEU_DispMessage("Error(s) reading state %d! Filename: %s", 0, CurrentState, fn);
 		}
-		delete st;
 		return 0;
 	}
 }
