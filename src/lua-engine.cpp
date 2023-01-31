@@ -186,10 +186,13 @@ struct LuaSaveState {
 		persisted = true;
 		FILE* inf = fopen(filename.c_str(),"rb");
 		fseek(inf,0,SEEK_END);
-		int len = ftell(inf);
+		long int len = ftell(inf);
 		fseek(inf,0,SEEK_SET);
 		data = new EMUFILE_MEMORY(len);
-		fread(data->buf(),1,len,inf);
+		if ( fread(data->buf(),1,len,inf) != static_cast<size_t>(len) )
+		{
+			FCEU_printf("Warning: LuaSaveState::ensureLoad failed to load full buffer.\n");
+		}
 		fclose(inf);
 	}
 };
@@ -660,12 +663,11 @@ static int emu_loadrom(lua_State *L)
 	return 0;
 #elif  defined(__QT_DRIVER__)
 	const char *nameo2 = luaL_checkstring(L,1);
-	char nameo[2048];
+	std::string nameo;
 
-	strncpy(nameo, nameo2, sizeof(nameo));
-	nameo[sizeof(nameo)-1] = 0;
+	nameo.assign( nameo2 );
 
-	LoadGameFromLua( nameo );
+	LoadGameFromLua( nameo.c_str() );
 
 	//lua_cpcall(L, emu_wait_for_rom_load, NULL);
 	//printf("Attempting to Load ROM: '%s'\n", nameo );
@@ -1306,7 +1308,10 @@ void freadint(unsigned int& value, FILE* file)
 	for(int i=0;i<4;i++)
 	{
 		int r = 0;
-		fread(&r, 1, 1, file);
+		if ( fread(&r, 1, 1, file) == 0)
+		{
+			break;
+		}
 		rv |= r << (i*8);
 	}
 	value = rv;
@@ -1350,7 +1355,10 @@ void LuaSaveData::ImportRecords(void* fileV)
 			break;
 
 		cur->data = new unsigned char [cur->size];
-		fread(cur->data, cur->size, 1, file);
+		if ( fread(cur->data, cur->size, 1, file) == 0 )
+		{
+			memset( cur->data, 0, cur->size );
+		}
 
 		Record* next = new Record();
 		memcpy(next, cur, sizeof(Record));
@@ -3229,11 +3237,10 @@ static int savestate_loadscriptdata(lua_State *L) {
 	{
 		LuaSaveData saveData;
 
-		char luaSaveFilename [512];
-		strncpy(luaSaveFilename, filename, 512);
-		luaSaveFilename[512-(1+7/*strlen(".luasav")*/)] = '\0';
-		strcat(luaSaveFilename, ".luasav");
-		FILE* luaSaveFile = fopen(luaSaveFilename, "rb");
+		std::string luaSaveFilename;
+		luaSaveFilename.assign( filename );
+		luaSaveFilename.append( ".luasav");
+		FILE* luaSaveFile = fopen(luaSaveFilename.c_str(), "rb");
 		if(luaSaveFile)
 		{
 			saveData.ImportRecords(luaSaveFile);
@@ -5639,13 +5646,20 @@ use_console:
 		// We don't want parameters
 		if (!t[0]) {
 			fprintf(stderr, "[Press Enter]");
-			fgets(buffer, sizeof(buffer), stdin);
+			if ( fgets(buffer, sizeof(buffer), stdin) == nullptr )
+			{
+				FCEU_printf("Error: fgets from stdin failed\n");
+			}
 			// We're done
 			return 0;
 
 		}
 		fprintf(stderr, "(%s): ", t);
-		fgets(buffer, sizeof(buffer), stdin);
+		if ( fgets(buffer, sizeof(buffer), stdin) == nullptr )
+		{
+			FCEU_printf("Error: fgets from stdin failed\n");
+			buffer[0] = 0;
+		}
 
 		// Check if the option is in the list
 		if (strchr(t, tolower(buffer[0]))) {
@@ -5698,7 +5712,11 @@ static int doOpenFilePopup(lua_State *L, bool saveFile) {
 	// TODO: more sophisticated interface
 	char filename[PATH_MAX];
 	printf("Enter %s filename: ", saveFile ? "save" : "open");
-	fgets(filename, PATH_MAX, stdin);
+	if ( fgets(filename, PATH_MAX, stdin) == nullptr )
+	{
+		FCEU_printf("Warning: fgets from stdin failed\n");
+		filename[0] = 0;
+	}
 	lua_newtable(L);
 	lua_pushstring(L, filename);
 	lua_rawseti(L, -2, 1);
@@ -6417,7 +6435,10 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 
 	getfilepath = getfilepath.substr(0,getfilepath.find_last_of("/\\") + 1);
 
-	SetCurrentDir(getfilepath.c_str());
+	if ( SetCurrentDir(getfilepath.c_str()) != 0 )
+	{
+		FCEU_printf("Warning: Failed chdir failed to set current dir to: %s\n", getfilepath.c_str() );
+	}
 
 	//stop any lua we might already have had running
 	FCEU_LuaStop();
