@@ -651,11 +651,7 @@ void RamWatchDialog_t::saveListCB(void)
 
 	if ( saveFileName.size() > 0 )
 	{
-		char file[512];
-
-		strcpy( file, saveFileName.c_str() );
-
-		saveWatchFile( file );
+		saveWatchFile( saveFileName.c_str() );
 	}
 	else
 	{
