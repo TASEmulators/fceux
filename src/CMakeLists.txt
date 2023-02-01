@@ -509,7 +509,6 @@ set(SRC_CORE
 set(SRC_DRIVERS_COMMON
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/args.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/cheat.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/config.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/configSys.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/hq2x.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/hq3x.cpp
