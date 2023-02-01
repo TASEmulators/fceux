@@ -522,6 +522,7 @@ InitConfig()
 	config->addOption("nospritelim", "SDL.DisableSpriteLimit", 0);
 	config->addOption("swapduty", "SDL.SwapDuty", 0);
 	config->addOption("ramInit", "SDL.RamInitMethod", 0);
+	config->addOption("SDL.FrameAdvanceDelay", 40);
 
 	// color control
 	config->addOption('p', "palette", "SDL.Palette", "");
@@ -1094,6 +1095,7 @@ UpdateEMUCore(Config *config)
 	config->getOption("SDL.VBlankScanlines"     , &vblankscanlines        );
 	config->getOption("SDL.Skip7bitOverClocking", &skip_7bit_overclocking );
 	config->getOption("SDL.ShowGuiMessages"     , &vidGuiMsgEna           );
+	config->getOption("SDL.FrameAdvanceDelay"   , &frameAdvance_Delay     );
 
 	config->getOption("SDL.PAL", &region);
 	FCEUI_SetRegion(region);

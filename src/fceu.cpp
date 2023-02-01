@@ -1250,8 +1250,8 @@ void FCEUI_FrameAdvanceEnd(void) {
 }
 
 void FCEUI_FrameAdvance(void) {
-	frameAdvanceRequested = true;
 	frameAdvance_Delay_count = 0;
+	frameAdvanceRequested = true;
 }
 
 static int AutosaveCounter = 0;
@@ -1268,7 +1268,7 @@ void UpdateAutosave(void) {
 		FCEUSS_Save(f, false);
 		AutoSS = true;  //Flag that an auto-savestate was made
 		free(f);
-        f = NULL;
+		f = NULL;
 		AutosaveStatus[AutosaveIndex] = 1;
 	}
 }

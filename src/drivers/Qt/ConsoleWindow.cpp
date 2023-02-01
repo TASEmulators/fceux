@@ -3640,6 +3640,9 @@ void consoleWin_t::emuSetFrameAdvDelay(void)
 	if ( QDialog::Accepted == ret )
 	{
 	   frameAdvance_Delay = dialog.intValue();
+
+	   g_config->setOption("SDL.FrameAdvanceDelay", frameAdvance_Delay );
+	   g_config->save();
 	}
 }
 
