@@ -215,16 +215,23 @@ void debugSymbolPage_t::print(void)
 //--------------------------------------------------------------
 debugSymbolTable_t::debugSymbolTable_t(void)
 {
-
+	cs = new FCEU::mutex();
 }
 //--------------------------------------------------------------
 debugSymbolTable_t::~debugSymbolTable_t(void)
 {
 	this->clear();
+
+	if (cs)
+	{
+		delete cs;
+	}
 }
 //--------------------------------------------------------------
 void debugSymbolTable_t::clear(void)
 {
+	FCEU::autoScopedLock alock(cs);
+
 	std::map <int, debugSymbolPage_t*>::iterator it;
 
 	for (it=pageMap.begin(); it!=pageMap.end(); it++)
@@ -305,6 +312,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 	char stmp[512], line[512];
 	debugSymbolPage_t *page = NULL;
 	debugSymbol_t *sym = NULL;
+	FCEU::autoScopedLock alock(cs);
 
 	//printf("Looking to Load Debug Bank: $%X \n", bank );
 
@@ -544,6 +552,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 //--------------------------------------------------------------
 int debugSymbolTable_t::loadRegisterMap(void)
 {
+	FCEU::autoScopedLock alock(cs);
 	debugSymbolPage_t *page;
 
 	page = new debugSymbolPage_t();
@@ -627,6 +636,7 @@ int debugSymbolTable_t::addSymbolAtBankOffset( int bank, int ofs, debugSymbol_t 
 {
 	debugSymbolPage_t *page;
 	std::map <int, debugSymbolPage_t*>::iterator it;
+	FCEU::autoScopedLock alock(cs);
 
 	it = pageMap.find( bank );
 
@@ -649,6 +659,7 @@ int debugSymbolTable_t::deleteSymbolAtBankOffset( int bank, int ofs )
 {
 	debugSymbolPage_t *page;
 	std::map <int, debugSymbolPage_t*>::iterator it;
+	FCEU::autoScopedLock alock(cs);
 
 	it = pageMap.find( bank );
 
@@ -666,6 +677,8 @@ int debugSymbolTable_t::deleteSymbolAtBankOffset( int bank, int ofs )
 //--------------------------------------------------------------
 debugSymbol_t *debugSymbolTable_t::getSymbolAtBankOffset( int bank, int ofs )
 {
+	FCEU::autoScopedLock alock(cs);
+
 	auto it = pageMap.find( bank );
 
 	return it != pageMap.end() ? it->second->getSymbolAtOffset( ofs ) : NULL;
@@ -673,6 +686,8 @@ debugSymbol_t *debugSymbolTable_t::getSymbolAtBankOffset( int bank, int ofs )
 //--------------------------------------------------------------
 debugSymbol_t *debugSymbolTable_t::getSymbol( int bank, const std::string &name )
 {
+	FCEU::autoScopedLock alock(cs);
+
 	auto it = pageMap.find( bank );
 
 	return it != pageMap.end() ? it->second->getSymbol( name ) : NULL;
@@ -680,6 +695,8 @@ debugSymbol_t *debugSymbolTable_t::getSymbol( int bank, const std::string &name 
 //--------------------------------------------------------------
 debugSymbol_t *debugSymbolTable_t::getSymbolAtAnyBank( const std::string &name )
 {
+	FCEU::autoScopedLock alock(cs);
+
 	for (auto &page : pageMap)
 	{
 		auto sym = getSymbol( page.first, name );
@@ -697,6 +714,7 @@ void debugSymbolTable_t::save(void)
 {
 	debugSymbolPage_t *page;
 	std::map <int, debugSymbolPage_t*>::iterator it;
+	FCEU::autoScopedLock alock(cs);
 
 	for (it=pageMap.begin(); it!=pageMap.end(); it++)
 	{
@@ -710,6 +728,7 @@ void debugSymbolTable_t::print(void)
 {
 	debugSymbolPage_t *page;
 	std::map <int, debugSymbolPage_t*>::iterator it;
+	FCEU::autoScopedLock alock(cs);
 
 	for (it=pageMap.begin(); it!=pageMap.end(); it++)
 	{

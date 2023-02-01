@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
+#include "utils/mutex.h"
+
 struct debugSymbol_t
 {
 	int   ofs;
@@ -103,6 +105,7 @@ class debugSymbolTable_t
 
 	private:
 		std::map <int, debugSymbolPage_t*> pageMap;
+		FCEU::mutex *cs;
 
 		int loadRegisterMap(void);
 

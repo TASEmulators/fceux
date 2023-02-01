@@ -743,6 +743,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\utils\ioapi.cpp" />
     <ClCompile Include="..\src\utils\md5.cpp" />
     <ClCompile Include="..\src\utils\memory.cpp" />
+    <ClCompile Include="..\src\utils\mutex.cpp" />
     <ClCompile Include="..\src\utils\unzip.cpp" />
     <ClCompile Include="..\src\utils\xstring.cpp" />
     <ClCompile Include="..\src\lua\src\lapi.c">
@@ -1145,6 +1146,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\utils\ioapi.h" />
     <ClInclude Include="..\src\utils\md5.h" />
     <ClInclude Include="..\src\utils\memory.h" />
+    <ClInclude Include="..\src\utils\mutex.h" />
     <ClInclude Include="..\src\utils\unzip.h" />
     <ClInclude Include="..\src\utils\valuearray.h" />
     <ClInclude Include="..\src\utils\xstring.h" />

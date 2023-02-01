@@ -502,6 +502,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/guid.cpp    
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/md5.cpp  
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/memory.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/utils/mutex.cpp
 )
 
 
