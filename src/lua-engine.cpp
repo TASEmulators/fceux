@@ -5078,16 +5078,24 @@ static int debugger_resetinstructionscount(lua_State *L)
 	return 0;
 }
 
-// debugger.getsymboladdress()
-static int debugger_getsymboladdress(lua_State *L)
+// debugger.getsymboloffset()
+static int debugger_getsymboloffset(lua_State *L)
 {
-	int bank = luaL_checkinteger(L, 1);
-	const char *name = luaL_checkstring(L, 2);
+	debugSymbol_t *sym = NULL;
 
-	debugSymbol_t *sym = debugSymbolTable.getSymbol(bank, name);
+	const char *name = luaL_checkstring(L, 1);
 
-	lua_pushinteger(L, sym ? sym->ofs & 0xFFFF : -1);
+	if (lua_type(L, 2) == LUA_TNUMBER)
+	{
+		int bank = luaL_checkinteger(L, 2);
+		sym = debugSymbolTable.getSymbol(bank, name);
+	}
+	else
+	{
+		sym = debugSymbolTable.getSymbolAtAnyBank(name);
+	}
 
+	lua_pushinteger(L, sym ? sym->ofs : -1);
 	return 1;
 }
 
@@ -6273,7 +6281,7 @@ static const struct luaL_reg debuggerlib[] = {
 	{"getinstructionscount", debugger_getinstructionscount},
 	{"resetcyclescount", debugger_resetcyclescount},
 	{"resetinstructionscount", debugger_resetinstructionscount},
-	{"getsymboladdress", debugger_getsymboladdress},
+	{"getsymboloffset", debugger_getsymboloffset},
 	{NULL,NULL}
 };
 
