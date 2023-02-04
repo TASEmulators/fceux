@@ -77,17 +77,19 @@ int debugSymbolPage_t::deleteSymbolAtOffset( int ofs )
 
 	if ( it != symMap.end() )
 	{
-		if ( it->second->name().size() > 0 )
+		auto sym = it->second;
+
+		if ( sym->name().size() > 0 )
 		{
-			auto itName = symNameMap.find( it->second->name() );
+			auto itName = symNameMap.find( sym->name() );
 
 			if ( itName != symNameMap.end() )
 			{
 				symNameMap.erase(itName);
 			}
 		}
-		delete it->second;
 		symMap.erase(it);
+		delete sym;
 
 		return 0;
 	}

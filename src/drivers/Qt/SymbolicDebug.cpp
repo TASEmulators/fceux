@@ -867,8 +867,8 @@ int SymbolEditWindow::exec(void)
 			{
 				sym->updateName( nameEntry->text().toStdString().c_str() );
 				sym->commentAssign( commentEntry->toPlainText().toStdString().c_str() );
+				sym->trimTrailingSpaces();
 			}
-			sym->trimTrailingSpaces();
 		}
 		debugSymbolTable.save(); // Save table to disk immediately after an add, edit, or delete
 		FCEU_WRAPPER_UNLOCK();
