@@ -17,11 +17,14 @@ struct debugSymbol_t
 		ofs = 0;
 	};
 
-	debugSymbol_t( int ofs, const char *name, const char *comment = NULL )
+	debugSymbol_t( int ofs, const char *name, const char *comment = nullptr )
 	{
 		this->ofs = ofs;
-		this->name.assign( name );
 
+		if (name)
+		{
+			this->name.assign(name);
+		}
 		if ( comment )
 		{
 			this->comment.assign( comment );
@@ -100,6 +103,8 @@ class debugSymbolTable_t
 		debugSymbol_t *getSymbolAtAnyBank( const std::string& name);
 
 		int addSymbolAtBankOffset( int bank, int ofs, debugSymbol_t *sym );
+
+		int addSymbolAtBankOffset(int bank, int ofs, const char* name, const char* comment = nullptr);
 
 		int deleteSymbolAtBankOffset( int bank, int ofs );
 

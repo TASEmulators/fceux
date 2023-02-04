@@ -25,6 +25,7 @@
 #include "../../fceu.h"
 #include "../../ines.h"
 #include "../../debug.h"
+#include "../../debugsymboltable.h"
 #include "../../conddebug.h"
 
 #include <stdio.h>
@@ -671,6 +672,16 @@ char* generateNLFilenameForAddress(uint16 address)
 	}
 	return NLfilename;
 }
+static int getRomPageIndexForAddress(uint16 address)
+{
+	int page = -1;
+
+	if (address >= 0x8000)
+	{
+		page = RomPageIndexForAddress(address);
+	}
+	return page;
+}
 Name* getNamesPointerForAddress(uint16 address)
 {
 	if(address >= 0x8000)
@@ -1107,6 +1118,7 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 	if (*newName || *newComment)
 	{
 		int i = 0;
+		int bank = -1;
 		char* tmpNewOffset = (char*)malloc(strlen(newOffset) + 1);
 		strcpy(tmpNewOffset, newOffset);
 		uint16 tmpNewAddress = newAddress;
@@ -1150,6 +1162,8 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 
 				node->next = 0;
 				setNamesPointerForAddress(tmpNewAddress, node);
+
+				debugSymbolTable.addSymbolAtBankOffset(getRomPageIndexForAddress(tmpNewAddress), tmpNewAddress, node->name, node->comment);
 			}
 			else
 			{
@@ -1233,6 +1247,7 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 
 						newNode->next = 0;
 						node->next = newNode;
+						debugSymbolTable.addSymbolAtBankOffset(getRomPageIndexForAddress(tmpNewAddress), tmpNewAddress, newNode->name, newNode->comment);
 						break;
 					}
 				}
@@ -1270,6 +1285,7 @@ void DeleteSymbolicName(uint16 address, int size)
 			prev = node;
 			node = node->next;
 		}
+		debugSymbolTable.deleteSymbolAtBankOffset(getRomPageIndexForAddress(tmpAddress), tmpAddress);
 		++tmpAddress;
 	} while (++i < size);
 }

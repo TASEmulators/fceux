@@ -28,6 +28,7 @@
 #include "../../cheat.h" //adelikat: For FCEU_LoadGameCheats()
 #include "../../version.h"
 #include "../../video.h" //adelikat: For ScreenshotAs Get/Set functions
+#include "../../debugsymboltable.h"
 #include "window.h"
 #include "main.h"
 #include "state.h"
@@ -1073,6 +1074,7 @@ void CloseGame()
 		updateGameDependentMenus();
 		updateGameDependentMenusDebugger();
 		SetMainWindowText();
+		debugSymbolTable.clear();
 	}
 }
 
@@ -1153,6 +1155,9 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 		{
 			DoDebug(0);
 		}
+		// Clear and Load core debug symbol table
+		debugSymbolTable.clear();
+		debugSymbolTable.loadGameSymbols();
 	}
 	else
 	{

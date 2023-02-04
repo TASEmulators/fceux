@@ -38,6 +38,7 @@ debugSymbolPage_t::~debugSymbolPage_t(void)
 //--------------------------------------------------------------
 int debugSymbolPage_t::addSymbol( debugSymbol_t*sym )
 {
+	// Check if symbol already is loaded by that name or offset
 	if ( symMap.count( sym->ofs ) || symNameMap.count( sym->name ) )
 	{
 		return -1;
@@ -631,9 +632,23 @@ int debugSymbolTable_t::loadGameSymbols(void)
 
 	return 0;
 }
+int debugSymbolTable_t::addSymbolAtBankOffset(int bank, int ofs, const char *name, const char *comment)
+{
+	int result = -1;
+	debugSymbol_t *sym = new debugSymbol_t(ofs, name, comment);
+
+	result = addSymbolAtBankOffset(bank, ofs, sym);
+
+	if (result)
+	{	// Symbol add failed
+		delete sym;
+	}
+	return result;
+}
 //--------------------------------------------------------------
 int debugSymbolTable_t::addSymbolAtBankOffset( int bank, int ofs, debugSymbol_t *sym )
 {
+	int result = -1;
 	debugSymbolPage_t *page;
 	std::map <int, debugSymbolPage_t*>::iterator it;
 	FCEU::autoScopedLock alock(cs);
@@ -650,9 +665,9 @@ int debugSymbolTable_t::addSymbolAtBankOffset( int bank, int ofs, debugSymbol_t 
 	{
 		page = it->second;
 	}
-	page->addSymbol( sym );
+	result = page->addSymbol( sym );
 
-	return 0;
+	return result;
 }
 //--------------------------------------------------------------
 int debugSymbolTable_t::deleteSymbolAtBankOffset( int bank, int ofs )
