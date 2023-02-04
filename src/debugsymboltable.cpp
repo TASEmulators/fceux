@@ -39,13 +39,22 @@ debugSymbolPage_t::~debugSymbolPage_t(void)
 int debugSymbolPage_t::addSymbol( debugSymbol_t*sym )
 {
 	// Check if symbol already is loaded by that name or offset
-	if ( symMap.count( sym->ofs ) || symNameMap.count( sym->name ) )
+	if ( symMap.count( sym->offset() ) )
+	{
+		return -1;
+	}
+	if ( (sym->name().size() > 0) && symNameMap.count( sym->name() ) )
 	{
 		return -1;
 	}
 
-	symMap[ sym->ofs ] = sym;
-	symNameMap[ sym->name ] = sym;
+	symMap[ sym->offset() ] = sym;
+
+	// Comment only lines don't need to have a name.
+	if (sym->name().size() > 0)
+	{
+		symNameMap[ sym->name() ] = sym;
+	}
 
 	return 0;
 }
@@ -53,13 +62,13 @@ int debugSymbolPage_t::addSymbol( debugSymbol_t*sym )
 debugSymbol_t *debugSymbolPage_t::getSymbolAtOffset( int ofs )
 {
 	auto it = symMap.find( ofs );
-	return it != symMap.end() ? it->second : NULL;
+	return it != symMap.end() ? it->second : nullptr;
 }
 //--------------------------------------------------------------
 debugSymbol_t *debugSymbolPage_t::getSymbol( const std::string &name )
 {
 	auto it = symNameMap.find( name );
-	return it != symNameMap.end() ? it->second : NULL;
+	return it != symNameMap.end() ? it->second : nullptr;
 }
 //--------------------------------------------------------------
 int debugSymbolPage_t::deleteSymbolAtOffset( int ofs )
@@ -68,17 +77,19 @@ int debugSymbolPage_t::deleteSymbolAtOffset( int ofs )
 
 	if ( it != symMap.end() )
 	{
-		auto itName = symNameMap.find( it->second->name );
-
-		if ( itName != symNameMap.end() )
+		if ( it->second->name().size() > 0 )
 		{
-			delete it->second;
+			auto itName = symNameMap.find( it->second->name() );
 
-			symMap.erase(it);
-			symNameMap.erase(itName);
-
-			return 0;
+			if ( itName != symNameMap.end() )
+			{
+				symNameMap.erase(itName);
+			}
 		}
+		delete it->second;
+		symMap.erase(it);
+
+		return 0;
 	}
 	return -1;
 }
@@ -106,7 +117,7 @@ int debugSymbolPage_t::save(void)
 
 	romFile = getRomFile();
 
-	if ( romFile == NULL )
+	if ( romFile == nullptr )
 	{
 		return -1;
 	}
@@ -140,7 +151,7 @@ int debugSymbolPage_t::save(void)
 
 	fp = ::fopen( filename.c_str(), "w" );
 
-	if ( fp == NULL )
+	if ( fp == nullptr )
 	{
 		printf("Error: Could not open file '%s' for writing\n", filename.c_str() );
 		return -1;
@@ -152,7 +163,7 @@ int debugSymbolPage_t::save(void)
 
 		sym = it->second;
 
-		i=0; j=0; c = sym->comment.c_str();
+		i=0; j=0; c = sym->_comment.c_str();
 
 		while ( c[i] != 0 )
 		{
@@ -167,7 +178,7 @@ int debugSymbolPage_t::save(void)
 		}
 		stmp[j] = 0;
 
-		fprintf( fp, "$%04X#%s#%s\n", sym->ofs, sym->name.c_str(), stmp );
+		fprintf( fp, "$%04X#%s#%s\n", sym->offset(), sym->name().c_str(), stmp );
 
 		j=0;
 		while ( c[i] != 0 )
@@ -208,7 +219,7 @@ void debugSymbolPage_t::print(void)
 	{
 		sym = it->second;
 
-		fprintf( fp, "   Sym: $%04X '%s' \n", sym->ofs, sym->name.c_str() );
+		fprintf( fp, "   Sym: $%04X '%s' \n", sym->ofs, sym->name().c_str() );
 	}
 }
 //--------------------------------------------------------------
@@ -249,7 +260,7 @@ static int generateNLFilenameForBank(int bank, std::string &NLfilename)
 
 	romFile = getRomFile();
 
-	if ( romFile == NULL )
+	if ( romFile == nullptr )
 	{
 		return -1;
 	}
@@ -311,8 +322,8 @@ int debugSymbolTable_t::loadFileNL( int bank )
 	int i, j, ofs, lineNum = 0, literal = 0, array = 0;
 	std::string fileName;
 	char stmp[512], line[512];
-	debugSymbolPage_t *page = NULL;
-	debugSymbol_t *sym = NULL;
+	debugSymbolPage_t *page = nullptr;
+	debugSymbol_t *sym = nullptr;
 	FCEU::autoScopedLock alock(cs);
 
 	//printf("Looking to Load Debug Bank: $%X \n", bank );
@@ -325,7 +336,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 
 	fp = ::fopen( fileName.c_str(), "r" );
 
-	if ( fp == NULL )
+	if ( fp == nullptr )
 	{
 		return -1;
 	}
@@ -367,9 +378,9 @@ int debugSymbolTable_t::loadFileNL( int bank )
 				}
 				j--;
 			}
-			if ( sym != NULL )
+			if ( sym != nullptr )
 			{
-				sym->comment.append( stmp );
+				sym->_comment.append( stmp );
 			}
 		}
 		else if ( line[i] == '$' )
@@ -388,7 +399,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 			}
 			stmp[j] = 0;
 
-			ofs = strtol( stmp, NULL, 16 );
+			ofs = strtol( stmp, nullptr, 16 );
 
 			if ( line[i] == '/' )
 			{
@@ -399,7 +410,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 				}
 				stmp[j] = 0;
 
-				array = strtol( stmp, NULL, 16 );
+				array = strtol( stmp, nullptr, 16 );
 			}
 
 			if ( line[i] != '#' )
@@ -474,15 +485,15 @@ int debugSymbolTable_t::loadFileNL( int bank )
 			}
 			i++;
 
-			sym = new debugSymbol_t();
+			sym = new debugSymbol_t( ofs, stmp );
 
-			if ( sym == NULL )
+			if ( sym == nullptr )
 			{
 				printf("Error: Failed to allocate memory for offset $%04X Name '%s' on Line %i of File %s\n", ofs, stmp, lineNum, fileName.c_str() );
 				continue;
 			}
 			sym->ofs = ofs;
-			sym->name.assign( stmp );
+			sym->_name.assign( stmp );
 
 			while ( isspace( line[i] ) ) i++;
 
@@ -507,11 +518,11 @@ int debugSymbolTable_t::loadFileNL( int bank )
 				j--;
 			}
 
-			sym->comment.assign( stmp );
+			sym->_comment.assign( stmp );
 
 			if ( array > 0 )
 			{
-				debugSymbol_t *arraySym = NULL;
+				debugSymbol_t *arraySym = nullptr;
 
 				for (j=0; j<array; j++)
 				{
@@ -522,25 +533,25 @@ int debugSymbolTable_t::loadFileNL( int bank )
 						arraySym->ofs = sym->ofs + j;
 
 						sprintf( stmp, "[%i]", j );
-						arraySym->name.assign( sym->name );
-						arraySym->name.append( stmp );
-						arraySym->comment.assign( sym->comment );
+						arraySym->_name.assign( sym->name() );
+						arraySym->_name.append( stmp );
+						arraySym->_comment.assign( sym->comment() );
 
 						if ( page->addSymbol( arraySym ) )
 						{
-							printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, arraySym->name.c_str(), lineNum, fileName.c_str() );
-							delete arraySym; arraySym = NULL; // Failed to add symbol
+							printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, arraySym->name().c_str(), lineNum, fileName.c_str() );
+							delete arraySym; arraySym = nullptr; // Failed to add symbol
 						}
 					}
 				}
-				delete sym; sym = NULL; // Delete temporary symbol
+				delete sym; sym = nullptr; // Delete temporary symbol
 			}
 			else
 			{
 				if ( page->addSymbol( sym ) )
 				{
-					printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, sym->name.c_str(), lineNum, fileName.c_str() );
-					delete sym; sym = NULL; // Failed to add symbol
+					printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, sym->name().c_str(), lineNum, fileName.c_str() );
+					delete sym; sym = nullptr; // Failed to add symbol
 				}
 			}
 		}
@@ -605,7 +616,7 @@ int debugSymbolTable_t::loadGameSymbols(void)
 	this->save();
 	this->clear();
 
-	if ( GameInfo != NULL )
+	if ( GameInfo != nullptr )
 	{
 		romSize = 16 + CHRsize[0] + PRGsize[0];
 	}
@@ -696,7 +707,7 @@ debugSymbol_t *debugSymbolTable_t::getSymbolAtBankOffset( int bank, int ofs )
 
 	auto it = pageMap.find( bank );
 
-	return it != pageMap.end() ? it->second->getSymbolAtOffset( ofs ) : NULL;
+	return it != pageMap.end() ? it->second->getSymbolAtOffset( ofs ) : nullptr;
 }
 //--------------------------------------------------------------
 debugSymbol_t *debugSymbolTable_t::getSymbol( int bank, const std::string &name )
@@ -705,7 +716,7 @@ debugSymbol_t *debugSymbolTable_t::getSymbol( int bank, const std::string &name 
 
 	auto it = pageMap.find( bank );
 
-	return it != pageMap.end() ? it->second->getSymbol( name ) : NULL;
+	return it != pageMap.end() ? it->second->getSymbol( name ) : nullptr;
 }
 //--------------------------------------------------------------
 debugSymbol_t *debugSymbolTable_t::getSymbolAtAnyBank( const std::string &name )
@@ -722,7 +733,7 @@ debugSymbol_t *debugSymbolTable_t::getSymbolAtAnyBank( const std::string &name )
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 //--------------------------------------------------------------
 void debugSymbolTable_t::save(void)

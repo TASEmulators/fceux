@@ -3677,13 +3677,13 @@ void  QAsmView::updateAssemblyView(void)
 				char stmp[256];
 				//printf("Debug symbol Found at $%04X \n", dbgSym->ofs );
 
-				if ( dbgSym->name.size() > 0 )
+				if ( dbgSym->name().size() > 0 )
 				{
 					d = new dbg_asm_entry_t();
 
 					*d = *a;
 					d->type = dbg_asm_entry_t::SYMBOL_NAME;
-					d->text.assign( "   " + dbgSym->name );
+					d->text.assign( "   " + dbgSym->name() );
 					d->text.append( ":");
 					d->line = asmEntry.size();
 					
@@ -3691,7 +3691,7 @@ void  QAsmView::updateAssemblyView(void)
 				}
 
 				i=0; j=0;
-				c = dbgSym->comment.c_str();
+				c = dbgSym->comment().c_str();
 
 				while ( c[i] != 0 )
 				{
@@ -5181,15 +5181,15 @@ bool QAsmView::event(QEvent *event)
 
 		showAddrDesc = (c.x() >= pcLocLinePos) && (c.x() < byteCodeLinePos) && opcodeValid;
 
-		if ( (c.x() > operandLinePos) && opcodeValid && (asmEntry[line]->sym.name.size() > 0) )
+		if ( (c.x() > operandLinePos) && opcodeValid && (asmEntry[line]->sym.name().size() > 0) )
 		{
-			size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name, operandLinePos );
+			size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name(), operandLinePos );
 
 			if ( (subStrLoc != std::string::npos) && (subStrLoc > static_cast<size_t>(operandLinePos)) )
 			{
 				//printf("Line:%i asmEntry DB Sym: %zi  '%s'\n", line, subStrLoc, asmEntry[line]->sym.name.c_str() );
 				int symTextStart = subStrLoc;
-				int symTextEnd   = subStrLoc + asmEntry[line]->sym.name.size();
+				int symTextEnd   = subStrLoc + asmEntry[line]->sym.name().size();
 
 				if ( (c.x() >= symTextStart) && (c.x() < symTextEnd) )
 				{
@@ -5253,7 +5253,7 @@ bool QAsmView::event(QEvent *event)
 		}
 		else if ( showSymHexDecode )
 		{
-			sprintf( stmp, "$%04X", asmEntry[line]->sym.ofs );
+			sprintf( stmp, "$%04X", asmEntry[line]->sym.offset() );
 
 			QToolTip::showText(helpEvent->globalPos(), tr(stmp), this );
 		}
@@ -5757,15 +5757,15 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 			{
 				i = selChar;
 
-				if ( asmEntry[line]->sym.name.size() > 0 )
+				if ( asmEntry[line]->sym.name().size() > 0 )
 				{
-					size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name, operandLinePos );
+					size_t subStrLoc = asmEntry[line]->text.find( asmEntry[line]->sym.name(), operandLinePos );
 
 					if ( (subStrLoc != std::string::npos) && (subStrLoc > static_cast<size_t>(operandLinePos)) )
 					{
 						//printf("Line:%i asmEntry DB Sym: %zi  '%s'\n", line, subStrLoc, asmEntry[line]->sym.name.c_str() );
 						symTextStart = subStrLoc;
-						symTextEnd   = subStrLoc + asmEntry[line]->sym.name.size();
+						symTextEnd   = subStrLoc + asmEntry[line]->sym.name().size();
 					}
 				}
 
@@ -5774,14 +5774,14 @@ void QAsmView::mousePressEvent(QMouseEvent * event)
 					selAddrLine  = line;
 					selAddrChar  = symTextStart;
 					selAddrWidth = symTextEnd - symTextStart;
-					selAddrValue = addr = asmEntry[line]->sym.ofs;
+					selAddrValue = addr = asmEntry[line]->sym.offset();
 					selAddrType  = 0;
 
 					if ( selAddrWidth >= (int)sizeof(selAddrText) )
 					{
 						selAddrWidth = sizeof(selAddrText)-1;
 					}
-					strncpy( selAddrText, asmEntry[line]->sym.name.c_str(), selAddrWidth );
+					strncpy( selAddrText, asmEntry[line]->sym.name().c_str(), selAddrWidth );
 					selAddrText[ selAddrWidth ] = 0;
 				}
 				else if ( isxdigit( asmEntry[line]->text[i] ) )

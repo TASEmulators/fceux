@@ -62,7 +62,7 @@ debugSymbol_t *replaceSymbols( int flags, int addr, char *str )
 	{
 		if ( flags & ASM_DEBUG_REPLACE )
 		{
-			strcpy( str, sym->name.c_str() );
+			strcpy( str, sym->name().c_str() );
 		}
 		else
 		{
@@ -74,7 +74,7 @@ debugSymbol_t *replaceSymbols( int flags, int addr, char *str )
 			{
 				sprintf( str, "$%04X ", addr );
 			}
-			strcat( str, sym->name.c_str() );
+			strcat( str, sym->name().c_str() );
 		}
 	}
 	else
@@ -641,15 +641,15 @@ SymbolEditWindow::SymbolEditWindow(QWidget *parent)
 	hbox->addWidget(     okButton );
 
 	connect(     okButton, SIGNAL(clicked(void)), this, SLOT(accept(void)) );
-   connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(reject(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(reject(void)) );
 
 	deleteBox->setEnabled( false );
 	okButton->setDefault(true);
 
 	if ( sym != NULL )
 	{
-		nameEntry->setText( tr(sym->name.c_str()) );
-		commentEntry->setPlainText( tr(sym->comment.c_str()) );
+		nameEntry->setText( tr(sym->name().c_str()) );
+		commentEntry->setPlainText( tr(sym->comment().c_str()) );
 	}
 
 	setLayout( mainLayout );
@@ -667,16 +667,16 @@ SymbolEditWindow::~SymbolEditWindow(void)
 //--------------------------------------------------------------
 void SymbolEditWindow::closeEvent(QCloseEvent *event)
 {
-   //printf("Symbolic Debug Close Window Event\n");
-   done(0);
+	//printf("Symbolic Debug Close Window Event\n");
+	done(0);
 	deleteLater();
-   event->accept();
+	event->accept();
 }
 //--------------------------------------------------------------
 void SymbolEditWindow::closeWindow(void)
 {
-   //printf("Close Window\n");
-   done(0);
+	//printf("Close Window\n");
+	done(0);
 	deleteLater();
 }
 //--------------------------------------------------------------
@@ -765,8 +765,8 @@ void SymbolEditWindow::setSym( debugSymbol_t *symIn )
 
 	if ( sym != NULL )
 	{
-		nameEntry->setText( tr(sym->name.c_str()) );
-		commentEntry->setPlainText( tr(sym->comment.c_str()) );
+		nameEntry->setText( tr(sym->name().c_str()) );
+		commentEntry->setPlainText( tr(sym->comment().c_str()) );
 		deleteBox->setEnabled( true );
 
 		determineArrayStart();
@@ -815,24 +815,22 @@ int SymbolEditWindow::exec(void)
 
 				if ( deleteBox->isChecked() )
 				{
-					if ( sym != NULL )
+					if ( sym != nullptr )
 					{
 						debugSymbolTable.deleteSymbolAtBankOffset( b, a );
 					}
 				}
 				else
 				{
-					if ( sym == NULL )
+					if ( sym == nullptr )
 					{
-						sym = new debugSymbol_t();
-
-						sym->ofs = a;
+						sym = new debugSymbol_t(a);
 
 						debugSymbolTable.addSymbolAtBankOffset( b, a, sym );
 
 						isNew = true;
 					}
-					sym->ofs = a;
+					sym->setOffset(a);
 
 					if ( (i == 0) || isNew || arrayNameOverWrite->isChecked() )
 					{
@@ -842,7 +840,7 @@ int SymbolEditWindow::exec(void)
 					{
 						if ( isNew || arrayCommentOverWrite->isChecked() || (i == 0) )
 						{
-							sym->comment = commentEntry->toPlainText().toStdString();
+							sym->commentAssign( commentEntry->toPlainText().toStdString() );
 						}
 					}
 					sym->trimTrailingSpaces();
@@ -860,17 +858,15 @@ int SymbolEditWindow::exec(void)
 			}
 			else if ( sym == NULL )
 			{
-				sym = new debugSymbol_t();
-				sym->ofs     = addr;
-				sym->name    = nameEntry->text().toStdString();
-				sym->comment = commentEntry->toPlainText().toStdString();
+				sym = new debugSymbol_t( addr, nameEntry->text().toStdString().c_str(), 
+						commentEntry->toPlainText().toStdString().c_str());
 
 				debugSymbolTable.addSymbolAtBankOffset( bank, addr, sym );
 			}
 			else
 			{
-				sym->name    = nameEntry->text().toStdString();
-				sym->comment = commentEntry->toPlainText().toStdString();
+				sym->updateName( nameEntry->text().toStdString().c_str() );
+				sym->commentAssign( commentEntry->toPlainText().toStdString().c_str() );
 			}
 			sym->trimTrailingSpaces();
 		}
@@ -980,13 +976,14 @@ void SymbolEditWindow::setSymNameWithArray(int idx)
 	}
 
 	// Reform with base string and new index.
-	sym->name.assign( stmp );
+	sym->updateName( stmp, idx );
+	//sym->name.assign( stmp );
 
-	sym->trimTrailingSpaces();
+	//sym->trimTrailingSpaces();
 
-	sprintf( stmp, "[%i]", idx );
+	//sprintf( stmp, "[%i]", idx );
 
-	sym->name.append( stmp );
+	//sym->name.append( stmp );
 
 }
 //--------------------------------------------------------------

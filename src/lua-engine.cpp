@@ -5095,7 +5095,7 @@ static int debugger_getsymboloffset(lua_State *L)
 		sym = debugSymbolTable.getSymbolAtAnyBank(name);
 	}
 
-	lua_pushinteger(L, sym ? sym->ofs : -1);
+	lua_pushinteger(L, sym ? sym->offset() : -1);
 	return 1;
 }
 

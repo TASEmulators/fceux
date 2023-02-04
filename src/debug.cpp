@@ -46,7 +46,7 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 
 		if (sym)
 		{
-			return sym->ofs & 0xFFFF;
+			return sym->offset() & 0xFFFF;
 		}
 
 		int type = GIT_CART;
