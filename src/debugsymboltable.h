@@ -171,6 +171,8 @@ class debugSymbolTable_t
 
 		int deleteSymbolAtBankOffset( int bank, int ofs );
 
+		const char *errorMessage(void);
+
 	private:
 		std::map <int, debugSymbolPage_t*> pageMap;
 		FCEU::mutex *cs;

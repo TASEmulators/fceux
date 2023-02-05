@@ -19,6 +19,7 @@ extern FCEUGI *GameInfo;
 
 debugSymbolTable_t  debugSymbolTable;
 
+static char dbgSymTblErrMsg[256] = {0};
 //--------------------------------------------------------------
 // debugSymbolPage_t
 //--------------------------------------------------------------
@@ -41,10 +42,12 @@ int debugSymbolPage_t::addSymbol( debugSymbol_t*sym )
 	// Check if symbol already is loaded by that name or offset
 	if ( symMap.count( sym->offset() ) )
 	{
+		snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: symbol offset 0x%04x already has an entry on page:%i\n", sym->offset(), pageNum );
 		return -1;
 	}
 	if ( (sym->name().size() > 0) && symNameMap.count( sym->name() ) )
 	{
+		snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: symbol name '%s' already exists on page:%i\n", sym->name().c_str(), pageNum );
 		return -1;
 	}
 
@@ -230,6 +233,8 @@ void debugSymbolPage_t::print(void)
 debugSymbolTable_t::debugSymbolTable_t(void)
 {
 	cs = new FCEU::mutex();
+
+	dbgSymTblErrMsg[0] = 0;
 }
 //--------------------------------------------------------------
 debugSymbolTable_t::~debugSymbolTable_t(void)
@@ -765,3 +770,9 @@ void debugSymbolTable_t::print(void)
 		page->print();
 	}
 }
+//--------------------------------------------------------------
+const char *debugSymbolTable_t::errorMessage(void)
+{
+	return dbgSymTblErrMsg;
+}
+//--------------------------------------------------------------

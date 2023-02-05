@@ -35,6 +35,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/SymbolicDebug.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/ConsoleWindow.h"
 
 
 //--------------------------------------------------------------
@@ -826,8 +827,14 @@ int SymbolEditWindow::exec(void)
 					{
 						sym = new debugSymbol_t(a);
 
-						debugSymbolTable.addSymbolAtBankOffset( b, a, sym );
-
+						if ( debugSymbolTable.addSymbolAtBankOffset( b, a, sym ) )
+						{
+							if (consoleWindow)
+							{
+								consoleWindow->QueueErrorMsgWindow( debugSymbolTable.errorMessage() );
+							}
+							delete sym;
+						}
 						isNew = true;
 					}
 					sym->setOffset(a);
@@ -861,7 +868,14 @@ int SymbolEditWindow::exec(void)
 				sym = new debugSymbol_t( addr, nameEntry->text().toStdString().c_str(), 
 						commentEntry->toPlainText().toStdString().c_str());
 
-				debugSymbolTable.addSymbolAtBankOffset( bank, addr, sym );
+				if ( debugSymbolTable.addSymbolAtBankOffset( bank, addr, sym ) )
+				{
+					if (consoleWindow)
+					{
+						consoleWindow->QueueErrorMsgWindow( debugSymbolTable.errorMessage() );
+					}
+					delete sym;
+				}
 			}
 			else
 			{
