@@ -102,7 +102,7 @@ int debugSymbolPage_t::addSymbol( debugSymbol_t*sym )
 	// Check if symbol already is loaded by that name or offset
 	if ( symMap.count( sym->offset() ) )
 	{
-		snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: symbol offset 0x%04x already has an entry on %s page\n", sym->offset(), _pageName );
+		snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: symbol offset 0x%04X already has an entry on %s page\n", sym->offset(), _pageName );
 		return -1;
 	}
 	if ( (sym->name().size() > 0) && symNameMap.count( sym->name() ) )
@@ -255,7 +255,7 @@ int debugSymbolPage_t::save(void)
 
 	if ( fp == nullptr )
 	{
-		printf("Error: Could not open file '%s' for writing\n", filename.c_str() );
+		FCEU_printf("Error: Could not open file '%s' for writing\n", filename.c_str() );
 		return -1;
 	}
 
@@ -493,7 +493,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 			j=0; i++;
 			if ( !isxdigit( line[i] ) )
 			{
-				printf("Error: Invalid Offset on Line %i of File %s\n", lineNum, fileName.c_str() );
+				FCEU_printf("Error: Invalid Offset on Line %i of File %s\n", lineNum, fileName.c_str() );
 			}
 			while ( isxdigit( line[i] ) )
 			{
@@ -517,7 +517,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 
 			if ( line[i] != '#' )
 			{
-				printf("Error: Missing field delimiter following offset $%X on Line %i of File %s\n", ofs, lineNum, fileName.c_str() );
+				FCEU_printf("Error: Missing field delimiter following offset $%X on Line %i of File %s\n", ofs, lineNum, fileName.c_str() );
 				continue;
 			}
 			i++;
@@ -582,7 +582,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 
 			if ( line[i] != '#' )
 			{
-				printf("Error: Missing field delimiter following name '%s' on Line %i of File %s\n", stmp, lineNum, fileName.c_str() );
+				FCEU_printf("Error: Missing field delimiter following name '%s' on Line %i of File %s\n", stmp, lineNum, fileName.c_str() );
 				continue;
 			}
 			i++;
@@ -591,7 +591,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 
 			if ( sym == nullptr )
 			{
-				printf("Error: Failed to allocate memory for offset $%04X Name '%s' on Line %i of File %s\n", ofs, stmp, lineNum, fileName.c_str() );
+				FCEU_printf("Error: Failed to allocate memory for offset $%04X Name '%s' on Line %i of File %s\n", ofs, stmp, lineNum, fileName.c_str() );
 				continue;
 			}
 			sym->ofs = ofs;
@@ -641,7 +641,8 @@ int debugSymbolTable_t::loadFileNL( int bank )
 
 						if ( page->addSymbol( arraySym ) )
 						{
-							printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, arraySym->name().c_str(), lineNum, fileName.c_str() );
+							FCEU_printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, arraySym->name().c_str(), lineNum, fileName.c_str() );
+							FCEU_printf("%s\n", errorMessage() );
 							delete arraySym; arraySym = nullptr; // Failed to add symbol
 						}
 					}
@@ -652,7 +653,8 @@ int debugSymbolTable_t::loadFileNL( int bank )
 			{
 				if ( page->addSymbol( sym ) )
 				{
-					printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, sym->name().c_str(), lineNum, fileName.c_str() );
+					FCEU_printf("Error: Failed to add symbol for offset $%04X Name '%s' on Line %i of File %s\n", ofs, sym->name().c_str(), lineNum, fileName.c_str() );
+					FCEU_printf("%s\n", errorMessage() );
 					delete sym; sym = nullptr; // Failed to add symbol
 				}
 			}
