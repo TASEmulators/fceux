@@ -21,12 +21,72 @@ debugSymbolTable_t  debugSymbolTable;
 
 static char dbgSymTblErrMsg[256] = {0};
 //--------------------------------------------------------------
+// debugSymbol_t
+//--------------------------------------------------------------
+void debugSymbol_t::updateName( const char *name, int arrayIndex )
+{
+	_name.assign( name );
+
+	trimTrailingSpaces();
+
+	if (arrayIndex >= 0)
+	{
+		char stmp[32];
+
+		sprintf( stmp, "[%i]", arrayIndex );
+
+		_name.append(stmp);
+	}
+	debugSymbolTable.updateSymbol(this);
+}
+//--------------------------------------------------------------
+void debugSymbol_t::trimTrailingSpaces(void)
+{
+	while ( _name.size() > 0 )
+	{
+		if ( isspace( _name.back() ) )
+		{
+			_name.pop_back();
+		}
+		else
+		{
+			break;
+		}
+	}
+	while ( _comment.size() > 0 )
+	{
+		if ( isspace( _comment.back() ) )
+		{
+			_comment.pop_back();
+		}
+		else
+		{
+			break;
+		}
+	}
+}
+//--------------------------------------------------------------
 // debugSymbolPage_t
 //--------------------------------------------------------------
-debugSymbolPage_t::debugSymbolPage_t(void)
+debugSymbolPage_t::debugSymbolPage_t(int page)
 {
-	pageNum = -1;
+	_pageNum = page;
 
+	_pageName[0] = 0;
+
+	if (page == -2)
+	{
+		strcpy( _pageName, "REG");
+	}
+	else if (page == -1)
+	{
+		strcpy( _pageName, "RAM");
+	}
+	else
+	{
+		snprintf( _pageName, sizeof(_pageName), "%X", page);
+		_pageName[sizeof(_pageName)-1] = 0;
+	}
 }
 //--------------------------------------------------------------
 debugSymbolPage_t::~debugSymbolPage_t(void)
@@ -42,16 +102,18 @@ int debugSymbolPage_t::addSymbol( debugSymbol_t*sym )
 	// Check if symbol already is loaded by that name or offset
 	if ( symMap.count( sym->offset() ) )
 	{
-		snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: symbol offset 0x%04x already has an entry on page:%i\n", sym->offset(), pageNum );
+		snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: symbol offset 0x%04x already has an entry on %s page\n", sym->offset(), _pageName );
 		return -1;
 	}
 	if ( (sym->name().size() > 0) && symNameMap.count( sym->name() ) )
 	{
-		snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: symbol name '%s' already exists on page:%i\n", sym->name().c_str(), pageNum );
+		snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: symbol name '%s' already exists on %s page\n", sym->name().c_str(), _pageName );
 		return -1;
 	}
 
 	symMap[ sym->offset() ] = sym;
+
+	sym->page = this;
 
 	// Comment only lines don't need to have a name.
 	if (sym->name().size() > 0)
@@ -86,7 +148,7 @@ int debugSymbolPage_t::deleteSymbolAtOffset( int ofs )
 		{
 			auto itName = symNameMap.find( sym->name() );
 
-			if ( itName != symNameMap.end() )
+			if ( (itName != symNameMap.end()) && (itName->second == sym) )
 			{
 				symNameMap.erase(itName);
 			}
@@ -97,6 +159,41 @@ int debugSymbolPage_t::deleteSymbolAtOffset( int ofs )
 		return 0;
 	}
 	return -1;
+}
+//--------------------------------------------------------------
+int debugSymbolPage_t::updateSymbol(debugSymbol_t *sym)
+{
+	auto itName = symNameMap.begin();
+
+	while (itName != symNameMap.end())
+	{
+		if (itName->second == sym)
+		{
+			if (sym->name().size() == 0 || sym->name().compare( itName->first ) )
+			{
+				//printf("Changing Name: %s %s\n", itName->first.c_str(), sym->name().c_str() );
+				itName = symNameMap.erase(itName);
+			}
+			break;
+		}
+		else
+		{
+			itName++;
+		}
+	}
+	if (sym->name().size() > 0)
+	{
+		symNameMap[ sym->name() ] = sym;
+	}
+
+	// Sanity Check
+	auto it = symMap.find( sym->offset() );
+
+	if ( it == symMap.end() )
+	{	// This shouldn't happen
+		return -1;
+	}
+	return 0;
 }
 //--------------------------------------------------------------
 int debugSymbolPage_t::save(void)
@@ -114,7 +211,7 @@ int debugSymbolPage_t::save(void)
 		//printf("Skipping Empty Debug Page Save\n");
 		return 0;
 	}
-	if ( pageNum == -2 )
+	if ( _pageNum == -2 )
 	{
 		//printf("Skipping Register Debug Page Save\n");
 		return 0;
@@ -141,7 +238,7 @@ int debugSymbolPage_t::save(void)
 		i++;
 	}
 
-	if ( pageNum < 0 )
+	if ( _pageNum < 0 )
 	{
 		filename.append(".ram.nl" );
 	}
@@ -149,7 +246,7 @@ int debugSymbolPage_t::save(void)
 	{
 		char suffix[32];
 
-		sprintf( suffix, ".%X.nl", pageNum );
+		sprintf( suffix, ".%X.nl", _pageNum );
 
 		filename.append( suffix );
 	}
@@ -218,7 +315,7 @@ void debugSymbolPage_t::print(void)
 
 	fp = stdout;
 
-	fprintf( fp, "Page: %X \n", pageNum );
+	fprintf( fp, "Page: %X \n", _pageNum );
 
 	for (it=symMap.begin(); it!=symMap.end(); it++)
 	{
@@ -347,11 +444,9 @@ int debugSymbolTable_t::loadFileNL( int bank )
 	{
 		return -1;
 	}
-	page = new debugSymbolPage_t;
+	page = new debugSymbolPage_t(bank);
 
-	page->pageNum = bank;
-
-	pageMap[ page->pageNum ] = page;
+	pageMap[ page->pageNum() ] = page;
 
 	while ( fgets( line, sizeof(line), fp ) != 0 )
 	{
@@ -574,9 +669,7 @@ int debugSymbolTable_t::loadRegisterMap(void)
 	FCEU::autoScopedLock alock(cs);
 	debugSymbolPage_t *page;
 
-	page = new debugSymbolPage_t();
-
-	page->pageNum = -2;
+	page = new debugSymbolPage_t(-2);
 
 	page->addSymbol( new debugSymbol_t( 0x2000, "PPU_CTRL" ) );
 	page->addSymbol( new debugSymbol_t( 0x2001, "PPU_MASK" ) );
@@ -611,7 +704,7 @@ int debugSymbolTable_t::loadRegisterMap(void)
 	page->addSymbol( new debugSymbol_t( 0x4016, "JOY1" ) );
 	page->addSymbol( new debugSymbol_t( 0x4017, "JOY2_FRAME" ) );
 
-	pageMap[ page->pageNum ] = page;
+	pageMap[ page->pageNum() ] = page;
 
 	return 0;
 }
@@ -675,8 +768,7 @@ int debugSymbolTable_t::addSymbolAtBankOffset( int bank, int ofs, debugSymbol_t 
 
 	if ( it == pageMap.end() )
 	{
-		page = new debugSymbolPage_t();
-		page->pageNum = bank;
+		page = new debugSymbolPage_t(bank);
 		pageMap[ bank ] = page;
 	}
 	else
@@ -706,6 +798,17 @@ int debugSymbolTable_t::deleteSymbolAtBankOffset( int bank, int ofs )
 	}
 
 	return page->deleteSymbolAtOffset( ofs );
+}
+//--------------------------------------------------------------
+int debugSymbolTable_t::updateSymbol(debugSymbol_t *sym)
+{
+	FCEU::autoScopedLock alock(cs);
+
+	if (sym->page == nullptr)
+	{
+		return -1;
+	}
+	return sym->page->updateSymbol(sym);
 }
 //--------------------------------------------------------------
 debugSymbol_t *debugSymbolTable_t::getSymbolAtBankOffset( int bank, int ofs )

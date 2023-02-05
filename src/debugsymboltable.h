@@ -15,6 +15,7 @@ class debugSymbol_t
 	debugSymbol_t(void)
 	{
 		ofs = 0;
+		page = nullptr;
 	};
 
 	debugSymbol_t( int ofs, const char *name = nullptr, const char *comment = nullptr )
@@ -29,6 +30,7 @@ class debugSymbol_t
 		{
 			this->_comment.assign( comment );
 		}
+		page = nullptr;
 	}
 
 	const std::string &name(void)
@@ -66,53 +68,16 @@ class debugSymbol_t
 		}
 	}
 
-	void updateName( const char *name, int arrayIndex = -1 )
-	{
-		_name.assign( name );
+	void updateName( const char *name, int arrayIndex = -1 );
 
-		trimTrailingSpaces();
-
-		if (arrayIndex >= 0)
-		{
-			char stmp[32];
-
-			sprintf( stmp, "[%i]", arrayIndex );
-
-			_name.append(stmp);
-		}
-	}
-
-	void trimTrailingSpaces(void)
-	{
-		while ( _name.size() > 0 )
-		{
-			if ( isspace( _name.back() ) )
-			{
-				_name.pop_back();
-			}
-			else
-			{
-				break;
-			}
-		}
-		while ( _comment.size() > 0 )
-		{
-			if ( isspace( _comment.back() ) )
-			{
-				_comment.pop_back();
-			}
-			else
-			{
-				break;
-			}
-		}
-	}
+	void trimTrailingSpaces(void);
 
 	private:
 
 	int   ofs;
 	std::string  _name;
 	std::string  _comment;
+	debugSymbolPage_t *page;
 
 	friend class debugSymbolPage_t;
 	friend class debugSymbolTable_t;
@@ -121,7 +86,7 @@ class debugSymbol_t
 class debugSymbolPage_t
 {
 	public:
-	debugSymbolPage_t(void);
+	debugSymbolPage_t(int page);
 	~debugSymbolPage_t(void);
 
 	int  save(void);
@@ -132,12 +97,25 @@ class debugSymbolPage_t
 
 	int deleteSymbolAtOffset( int ofs );
 
+	int updateSymbol( debugSymbol_t *sym );
+
 	debugSymbol_t *getSymbolAtOffset( int ofs );
 
 	debugSymbol_t *getSymbol( const std::string &name );
 
+	int pageNum(void)
+	{
+		return _pageNum;
+	}
+
+	const char *pageName(void)
+	{
+		return _pageName;
+	}
+
 	private:
-	int pageNum;
+	int _pageNum;
+	char _pageName[8];
 	std::map <int, debugSymbol_t*> symMap;
 	std::map <std::string, debugSymbol_t*> symNameMap;
 
@@ -170,6 +148,8 @@ class debugSymbolTable_t
 		int addSymbolAtBankOffset(int bank, int ofs, const char* name, const char* comment = nullptr);
 
 		int deleteSymbolAtBankOffset( int bank, int ofs );
+
+		int updateSymbol( debugSymbol_t *sym );
 
 		const char *errorMessage(void);
 
