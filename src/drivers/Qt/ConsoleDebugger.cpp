@@ -5982,7 +5982,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 
 	if ( static_cast<size_t>(line) < asmEntry.size() )
 	{
-		int addr, romAddr;
+		int addr, romAddr, bank = -1;
 
 		if ( selAddrValue < 0 )
 		{
@@ -6031,12 +6031,31 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 		act->setShortcut( QKeySequence(tr("B")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
 
-		act = new QAction(tr("Add &Symbolic Debug Marker"), &menu);
+		int cpuAddr = getAsmAddrFromLine( getCtxMenuLine() );
+		if ( cpuAddr >= 0x8000 )
+		{
+			bank = getBank(cpuAddr);
+		}
+		if ( debugSymbolTable.getSymbolAtBankOffset( bank, cpuAddr ) )
+		{
+			act = new QAction(tr("Edit &Symbolic Debug Marker"), &menu);
+		}
+		else
+		{
+			act = new QAction(tr("Add &Symbolic Debug Marker"), &menu);
+		}
 	 	menu.addAction(act);
 		act->setShortcut( QKeySequence(tr("S")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddSym(void)) );
 
-		act = new QAction(tr("Add Book&mark"), &menu);
+		if ( dbgBmMgr.getAddr( cpuAddr ) )
+		{
+			act = new QAction(tr("Edit Book&mark"), &menu);
+		}
+		else
+		{
+			act = new QAction(tr("Add Book&mark"), &menu);
+		}
 	 	menu.addAction(act);
 		act->setShortcut( QKeySequence(tr("M")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBM(void)) );
