@@ -23,11 +23,23 @@ static char dbgSymTblErrMsg[256] = {0};
 //--------------------------------------------------------------
 // debugSymbol_t
 //--------------------------------------------------------------
-void debugSymbol_t::updateName( const char *name, int arrayIndex )
+int debugSymbol_t::updateName( const char *name, int arrayIndex )
 {
-	_name.assign( name );
+	std::string newName;
 
-	trimTrailingSpaces();
+	newName.assign( name );
+
+	while ( newName.size() > 0 )
+	{
+		if ( isspace( newName.back() ) )
+		{
+			newName.pop_back();
+		}
+		else
+		{
+			break;
+		}
+	}
 
 	if (arrayIndex >= 0)
 	{
@@ -35,9 +47,24 @@ void debugSymbol_t::updateName( const char *name, int arrayIndex )
 
 		sprintf( stmp, "[%i]", arrayIndex );
 
-		_name.append(stmp);
+		newName.append(stmp);
 	}
+
+	if (page)
+	{
+		debugSymbol_t *dupSym = debugSymbolTable.getSymbol( page->pageNum(), newName );
+
+		if (dupSym != nullptr && dupSym != this)
+		{
+			snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: debug symbol '%s' already exists in %s page.\n", newName.c_str(), page->pageName() );
+			return -1;
+		}
+	}
+	_name = newName;
+
 	debugSymbolTable.updateSymbol(this);
+
+	return 0;
 }
 //--------------------------------------------------------------
 void debugSymbol_t::trimTrailingSpaces(void)

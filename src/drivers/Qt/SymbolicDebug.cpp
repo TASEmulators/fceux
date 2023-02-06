@@ -879,7 +879,13 @@ int SymbolEditWindow::exec(void)
 			}
 			else
 			{
-				sym->updateName( nameEntry->text().toStdString().c_str() );
+				if ( sym->updateName( nameEntry->text().toStdString().c_str() ) )
+				{
+					if (consoleWindow)
+					{
+						consoleWindow->QueueErrorMsgWindow( debugSymbolTable.errorMessage() );
+					}
+				}
 				sym->commentAssign( commentEntry->toPlainText().toStdString().c_str() );
 				sym->trimTrailingSpaces();
 			}
@@ -990,14 +996,12 @@ void SymbolEditWindow::setSymNameWithArray(int idx)
 	}
 
 	// Reform with base string and new index.
-	sym->updateName( stmp, idx );
-	//sym->name.assign( stmp );
-
-	//sym->trimTrailingSpaces();
-
-	//sprintf( stmp, "[%i]", idx );
-
-	//sym->name.append( stmp );
-
+	if ( sym->updateName( stmp, idx ) )
+	{
+		if (consoleWindow)
+		{
+			consoleWindow->QueueErrorMsgWindow( debugSymbolTable.errorMessage() );
+		}
+	}
 }
 //--------------------------------------------------------------

@@ -68,7 +68,7 @@ class debugSymbol_t
 		}
 	}
 
-	void updateName( const char *name, int arrayIndex = -1 );
+	int  updateName( const char *name, int arrayIndex = -1 );
 
 	void trimTrailingSpaces(void);
 
