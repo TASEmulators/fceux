@@ -672,15 +672,15 @@ char* generateNLFilenameForAddress(uint16 address)
 	}
 	return NLfilename;
 }
-static int getRomPageIndexForAddress(uint16 address)
+static int getBankIndexForAddress(uint16 address)
 {
-	int page = -1;
+	int bank = -1;
 
 	if (address >= 0x8000)
 	{
-		page = RomPageIndexForAddress(address);
+		bank = getBank(address);
 	}
-	return page;
+	return bank;
 }
 Name* getNamesPointerForAddress(uint16 address)
 {
@@ -1118,7 +1118,6 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 	if (*newName || *newComment)
 	{
 		int i = 0;
-		int bank = -1;
 		char* tmpNewOffset = (char*)malloc(strlen(newOffset) + 1);
 		strcpy(tmpNewOffset, newOffset);
 		uint16 tmpNewAddress = newAddress;
@@ -1163,7 +1162,7 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 				node->next = 0;
 				setNamesPointerForAddress(tmpNewAddress, node);
 
-				debugSymbolTable.addSymbolAtBankOffset(getRomPageIndexForAddress(tmpNewAddress), tmpNewAddress, node->name, node->comment);
+				debugSymbolTable.addSymbolAtBankOffset(getBankIndexForAddress(tmpNewAddress), tmpNewAddress, node->name, node->comment);
 			}
 			else
 			{
@@ -1205,6 +1204,28 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 							strcpy(node->comment, newComment);
 						}
 
+						debugSymbol_t* sym = debugSymbolTable.getSymbolAtBankOffset(getBankIndexForAddress(tmpNewAddress), tmpNewAddress);
+
+						if (sym)
+						{
+							if (node->name)
+							{
+								sym->updateName(node->name);
+							}
+							else
+							{
+								sym->updateName("");
+							}
+							if (node->comment)
+							{
+								sym->commentAssign(node->comment);
+							}
+							else
+							{
+								sym->commentAssign("");
+							}
+							sym->trimTrailingSpaces();
+						}
 						break;
 					}
 
@@ -1247,7 +1268,7 @@ void AddNewSymbolicName(uint16 newAddress, char* newOffset, char* newName, char*
 
 						newNode->next = 0;
 						node->next = newNode;
-						debugSymbolTable.addSymbolAtBankOffset(getRomPageIndexForAddress(tmpNewAddress), tmpNewAddress, newNode->name, newNode->comment);
+						debugSymbolTable.addSymbolAtBankOffset(getBankIndexForAddress(tmpNewAddress), tmpNewAddress, newNode->name, newNode->comment);
 						break;
 					}
 				}
@@ -1285,7 +1306,7 @@ void DeleteSymbolicName(uint16 address, int size)
 			prev = node;
 			node = node->next;
 		}
-		debugSymbolTable.deleteSymbolAtBankOffset(getRomPageIndexForAddress(tmpAddress), tmpAddress);
+		debugSymbolTable.deleteSymbolAtBankOffset(getBankIndexForAddress(tmpAddress), tmpAddress);
 		++tmpAddress;
 	} while (++i < size);
 }
