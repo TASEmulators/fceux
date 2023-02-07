@@ -481,7 +481,7 @@ void HighlightSyntax(HWND hWnd, int lines)
 	{
 		commentline = false;
 		wordbreak = SendDlgItemMessage(hWnd, IDC_DEBUGGER_DISASSEMBLY, EM_FINDWORDBREAK, (WPARAM)WB_RIGHT, (LPARAM)newline.chrg.cpMin + 21);
-		for (int ch = newline.chrg.cpMin; ; ch++)
+		for (int ch = newline.chrg.cpMin; debug_wstr[ch] != 0; ch++)
 		{
 			if (debug_wstr[ch] == L'=' || debug_wstr[ch] == L'@' || debug_wstr[ch] == L'\n' || debug_wstr[ch] == L'-' || debug_wstr[ch] == L';')
 			{
