@@ -83,10 +83,15 @@ static void Mapper354_Power(void)
 	Mapper354_Sync();
 }
 
+static void StateRestore(int version) {
+	Mapper354_Sync();
+}
+
 void Mapper354_Init(CartInfo *info)
 {
 	submapper = info->submapper;
 	info->Power = Mapper354_Power;
 	info->Reset = Mapper354_Reset;
+	GameStateRestore = StateRestore;
 	AddExState(StateRegs, ~0, 0, 0);
 }
