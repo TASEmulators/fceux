@@ -20,6 +20,7 @@ extern FCEUGI *GameInfo;
 debugSymbolTable_t  debugSymbolTable;
 
 static char dbgSymTblErrMsg[256] = {0};
+static bool dbgSymAllowDuplicateNames = true;
 //--------------------------------------------------------------
 // debugSymbol_t
 //--------------------------------------------------------------
@@ -54,7 +55,7 @@ int debugSymbol_t::updateName( const char *name, int arrayIndex )
 	{
 		debugSymbol_t *dupSym = debugSymbolTable.getSymbol( page->pageNum(), newName );
 
-		if (dupSym != nullptr && dupSym != this)
+		if (!dbgSymAllowDuplicateNames && dupSym != nullptr && dupSym != this)
 		{
 			snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: debug symbol '%s' already exists in %s page.\n", newName.c_str(), page->pageName() );
 			return -1;
@@ -132,7 +133,7 @@ int debugSymbolPage_t::addSymbol( debugSymbol_t*sym )
 		snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: symbol offset 0x%04X already has an entry on %s page\n", sym->offset(), _pageName );
 		return -1;
 	}
-	if ( (sym->name().size() > 0) && symNameMap.count( sym->name() ) )
+	if ( !dbgSymAllowDuplicateNames && (sym->name().size() > 0) && symNameMap.count( sym->name() ) )
 	{
 		snprintf( dbgSymTblErrMsg, sizeof(dbgSymTblErrMsg), "Error: symbol name '%s' already exists on %s page\n", sym->name().c_str(), _pageName );
 		return -1;
