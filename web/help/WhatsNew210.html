@@ -7,7 +7,7 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="generator" content="HelpNDoc Personal Edition 7.3.0.348">
+  <meta name="generator" content="HelpNDoc Personal Edition 7.9.1.631">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="favicon.ico"/>
 
@@ -51,6 +51,7 @@
   <link href="css/theme-light-blue.min.css" rel="stylesheet" />
   <link href="css/print.min.css" rel="stylesheet" media="print" />
   <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+  <style type="text/css">.navigation #inline-toc { width: auto !important}</style>
 
   <!-- Content style -->
   <link href="css/hnd.content.css" rel="stylesheet" />
@@ -415,7 +416,9 @@
   <script>
     $(function() {
       // Create the app
-      var app = new Hnd.App();
+      var app = new Hnd.App({
+        searchEngineMinChars: 3
+      });
       // Update translations
       hnd_ut(app);
 	  // Instanciate imageMapResizer

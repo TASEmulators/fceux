@@ -725,24 +725,30 @@ span.rvts118
 }
 span.rvts119
 {
- font-family: 'Lucida Console', 'Monaco', monospace;
- text-decoration: underline;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000000;
+ background-color: #ffffff;
 }
 span.rvts120
 {
- font-weight: bold;
+ font-family: 'Lucida Console', 'Monaco', monospace;
  text-decoration: underline;
 }
 span.rvts121
 {
- font-size: 11pt;
+ font-weight: bold;
  text-decoration: underline;
 }
 span.rvts122
 {
- font-size: 5pt;
+ font-size: 11pt;
+ text-decoration: underline;
 }
 span.rvts123
+{
+ font-size: 5pt;
+}
+span.rvts124
 {
  font-size: 5pt;
  font-weight: bold;

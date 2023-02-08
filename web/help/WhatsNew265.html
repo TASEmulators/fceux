@@ -7,7 +7,7 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="generator" content="HelpNDoc Personal Edition 7.3.0.348">
+  <meta name="generator" content="HelpNDoc Personal Edition 7.9.1.631">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="favicon.ico"/>
 
@@ -51,6 +51,7 @@
   <link href="css/theme-light-blue.min.css" rel="stylesheet" />
   <link href="css/print.min.css" rel="stylesheet" media="print" />
   <style type="text/css">nav { width: 250px} @media screen and (min-width:769px) { body.md-nav-expanded div#main { margin-left: 250px} body.md-nav-expanded header { padding-left: 264px} }</style>
+  <style type="text/css">.navigation #inline-toc { width: auto !important}</style>
 
   <!-- Content style -->
   <link href="css/hnd.content.css" rel="stylesheet" />
@@ -185,7 +186,7 @@
             <div class="main-content">
                 
 <p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.6.5</span></p>
-<p class="rvps2"><span class="rvts6">Released -- 01 February 2023</span></p>
+<p class="rvps2"><span class="rvts6">Released -- 07 February 2023</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts29">The 2.6.5 release is a maintenance update that contains various fixes from a back log of bugs and feature requests over the past year.</span></p>
 <p class="rvps2"><span class="rvts29"><br/></span></p>
@@ -260,6 +261,7 @@
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
  <li class="rvps2"><span class="rvts29">Implemented support for input.get() lua function binding</span></li>
  <li class="rvps2"><span class="rvts29">Added lua script loading via file drag and drop feature</span></li>
+ <li class="rvps2"><span class="rvts29">Added debugger.getsymboloffset lua function binding. Allows querying of debug symbols from lua scripts.</span></li>
 </ul>
 <p class="rvps2"><span class="rvts28"><br/></span></p>
 <p class="rvps2"><span class="rvts28">Build</span></p>
@@ -327,7 +329,9 @@
   <script>
     $(function() {
       // Create the app
-      var app = new Hnd.App();
+      var app = new Hnd.App({
+        searchEngineMinChars: 3
+      });
       // Update translations
       hnd_ut(app);
 	  // Instanciate imageMapResizer
