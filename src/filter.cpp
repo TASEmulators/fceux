@@ -37,7 +37,7 @@ void SexyFilter2(int32 *in, int32 count)
  while(count--)
  {
   int64 dropcurrent;
-  dropcurrent=((*in<<16)-acc)>>3;
+  dropcurrent=( int32(uint32(*in)<<16)-acc)>>3;
 
   acc+=dropcurrent;
   *in=acc>>16;
