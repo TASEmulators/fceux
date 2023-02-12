@@ -562,7 +562,6 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\boards\t-262.cpp" />
     <ClCompile Include="..\src\boards\tengen.cpp" />
     <ClCompile Include="..\src\boards\tf-1201.cpp" />
-    <ClCompile Include="..\src\debugsymboltable.cpp" />
     <ClCompile Include="..\src\drivers\common\args.cpp" />
     <ClCompile Include="..\src\drivers\common\cheat.cpp" />
     <ClCompile Include="..\src\drivers\common\config.cpp" />
@@ -992,6 +991,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\conddebug.cpp" />
     <ClCompile Include="..\src\config.cpp" />
     <ClCompile Include="..\src\debug.cpp" />
+    <ClCompile Include="..\src\debugsymboltable.cpp" />
     <ClCompile Include="..\src\drawing.cpp" />
     <ClCompile Include="..\src\fceu.cpp" />
     <ClCompile Include="..\src\fds.cpp" />
@@ -999,6 +999,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\filter.cpp" />
     <ClCompile Include="..\src\ines.cpp" />
     <ClCompile Include="..\src\input.cpp" />
+    <ClCompile Include="..\src\ld65dbg.cpp" />
     <ClCompile Include="..\src\lua-engine.cpp" />
     <ClCompile Include="..\src\movie.cpp" />
     <ClCompile Include="..\src\netplay.cpp" />
@@ -1020,6 +1021,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\cheat.h" />
     <ClInclude Include="..\src\conddebug.h" />
     <ClInclude Include="..\src\debug.h" />
+    <ClInclude Include="..\src\debugsymboltable.h" />
     <ClInclude Include="..\src\drawing.h" />
     <ClInclude Include="..\src\driver.h" />
     <ClInclude Include="..\src\drivers\common\args.h" />
@@ -1127,6 +1129,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\input\fkb.h" />
     <ClInclude Include="..\src\input\share.h" />
     <ClInclude Include="..\src\input\suborkb.h" />
+    <ClInclude Include="..\src\ld65dbg.h" />
     <ClInclude Include="..\src\movie.h" />
     <ClInclude Include="..\src\netplay.h" />
     <ClInclude Include="..\src\nsf.h" />
