@@ -1,6 +1,7 @@
 // ld65dbg.h
 //
 #pragma once
+#include <stdio.h>
 #include <string>
 #include <map>
 
@@ -69,5 +70,29 @@ namespace ld65
 		private:
 			std::map<int, scope*> scopeMap;
 			std::map<int, segment*> segmentMap;
+
+			class dbgLine
+			{
+				public:
+					dbgLine(size_t bufferSize = 1024);
+					~dbgLine(void);
+
+					const char *readFromFile( FILE *fp );
+
+					const char *getLine(void){ return buf; };
+
+					int readToken( char *tk, size_t tkSize );
+
+					int readKeyValuePair( char *keyValueBuffer, size_t keyValueBufferSize );
+
+					static int splitKeyValuePair( char *keyValueBuffer, char **keyPtr, char **valuePtr );
+
+				private:
+					void allocBuffer(size_t bufferSize);
+
+					size_t readPtr;
+					size_t bufSize;
+					char  *buf;
+			};
 	};
 };
