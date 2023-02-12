@@ -153,6 +153,8 @@ class debugSymbolTable_t
 
 		const char *errorMessage(void);
 
+		int ld65LoadDebugFile( const char *dbgFilePath );
+
 	private:
 		std::map <int, debugSymbolPage_t*> pageMap;
 		FCEU::mutex *cs;

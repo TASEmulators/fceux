@@ -35,6 +35,7 @@
 #include <QGridLayout>
 #include <QRadioButton>
 #include <QInputDialog>
+#include <QFileDialog>
 #include <QFontDialog>
 #include <QMessageBox>
 #include <QMenuBar>
@@ -43,6 +44,7 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QGuiApplication>
+#include <QStandardPaths>
 #include <QSettings>
 #include <QToolTip>
 #include <QWindow>
@@ -262,6 +264,83 @@ void ConsoleDebugger::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------------------------------
+void ConsoleDebugger::ld65ImportDebug(void)
+{
+	int ret, useNativeFileDialogVal;
+	QString filename;
+	std::string last;
+	const char *romPath;
+	QFileDialog  dialog(this, tr("Open ld65 Debug File") );
+	QList<QUrl> urls;
+	QDir d;
+
+	const QStringList filters({
+           "dbg files (*.dbg *.DBG)",
+           "Any files (*)"
+         });
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+	urls << QUrl::fromLocalFile( QDir( FCEUI_GetBaseDirectory() ).absolutePath() );
+
+	romPath = getRomFile();
+
+	if ( romPath != nullptr )
+	{
+		std::string dir;
+
+		getDirFromFile( romPath, dir);
+
+		d.setPath(dir.c_str());
+
+		if ( d.exists() )
+		{
+			urls << QUrl::fromLocalFile( d.absolutePath() );
+
+			dialog.setDirectory( tr(dir.c_str()) );
+		}
+	}
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilters( filters );
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
+
+	// Check config option to use native file dialog or not
+	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			filename = fileList[0];
+		}
+	}
+
+	if ( filename.isNull() )
+	{
+	   return;
+	}
+	//qDebug() << "selected file path : " << filename.toUtf8();
+
+	debugSymbolTable.ld65LoadDebugFile( filename.toStdString().c_str() );
+
+	return;
+}
+//----------------------------------------------------------------------------
 QMenuBar *ConsoleDebugger::buildMenuBar(void)
 {
 	QMenu       *fileMenu, *viewMenu, *debugMenu,
@@ -282,6 +361,14 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	//-----------------------------------------------------------------------
 	// File
 	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Import ld65 dbg
+	act = new QAction(tr("&Import ld65 dbg file"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Import ld65 Debug File"));
+	connect(act, SIGNAL(triggered()), this, SLOT(ld65ImportDebug(void)) );
+
+	fileMenu->addAction(act);
 
 	// File -> Close
 	act = new QAction(tr("&Close"), this);

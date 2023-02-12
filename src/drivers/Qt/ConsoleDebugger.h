@@ -557,6 +557,7 @@ class ConsoleDebugger : public QDialog
 		void asmViewCtxMenuRunToCursor(void);
 		void moveTab( QWidget *w, int row, int column);
 	private slots:
+		void ld65ImportDebug(void);
 		void updatePeriodic(void);
 		void hbarChanged(int value);
 		void vbarChanged(int value);

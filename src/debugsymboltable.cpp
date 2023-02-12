@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "fceu.h"
 #include "cart.h"
+#include "ld65dbg.h"
 
 #ifdef __QT_DRIVER__
 #include "Qt/ConsoleUtilities.h"
@@ -773,6 +774,7 @@ int debugSymbolTable_t::loadGameSymbols(void)
 
 	return 0;
 }
+//--------------------------------------------------------------
 int debugSymbolTable_t::addSymbolAtBankOffset(int bank, int ofs, const char *name, const char *comment)
 {
 	int result = -1;
@@ -907,5 +909,16 @@ void debugSymbolTable_t::print(void)
 const char *debugSymbolTable_t::errorMessage(void)
 {
 	return dbgSymTblErrMsg;
+}
+//--------------------------------------------------------------
+int debugSymbolTable_t::ld65LoadDebugFile( const char *dbgFilePath )
+{
+	ld65::database db;
+
+	if ( db.dbgFileLoad( dbgFilePath ) )
+	{
+		return -1;
+	}
+	return 0;
 }
 //--------------------------------------------------------------

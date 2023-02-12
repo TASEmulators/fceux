@@ -64,6 +64,8 @@ namespace ld65
 		public:
 			database(void);
 
+			int dbgFileLoad( const char *dbgFilePath );
+
 		private:
 			std::map<int, scope*> scopeMap;
 			std::map<int, segment*> segmentMap;
