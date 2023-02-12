@@ -22,6 +22,9 @@
 #ifndef __FCEU_TYPES
 #define __FCEU_TYPES
 
+#include <stdlib.h>
+#include <new>
+
 //enables a hack designed for debugging dragon warrior 3 which treats BRK as a 3-byte opcode
 //#define BRK_3BYTE_HACK
 
@@ -186,20 +189,23 @@ template <typename T>
 class fceuScopedPtr
 {
 	public:
-		fceuScopedPtr( T *ptrIn = nullptr )
+		enum 
+		{
+			New = 0,
+			NewArray,
+			Malloc
+		};
+		fceuScopedPtr( T *ptrIn = nullptr, int allocType = New )
 		{
 			//printf("Scoped Pointer Constructor <%s>: %p\n", typeid(T).name(), ptrIn );
 			ptr = ptrIn;
+			_allocType = allocType;
 		}
 
 		~fceuScopedPtr(void)
 		{
 			//printf("Scoped Pointer Destructor <%s>: %p\n", typeid(T).name(), ptr );
-			if (ptr)
-			{
-				delete ptr;
-				ptr = nullptr;
-			}
+			Delete();
 		}
 
 		T* operator= (T *ptrIn)
@@ -217,13 +223,25 @@ class fceuScopedPtr
 		{
 			if (ptr)
 			{
-				delete ptr;
+				if (_allocType == Malloc)
+				{
+					::free(ptr);
+				}
+				else if (_allocType == NewArray)
+				{
+					delete [] ptr;
+				}
+				else
+				{
+					delete ptr;
+				}
 				ptr = nullptr;
 			}
 		}
 
 	private:
 		T *ptr;
+		int  _allocType;
 
 };
 

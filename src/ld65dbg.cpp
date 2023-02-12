@@ -1,7 +1,10 @@
 // ld65dbg.cpp
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 
+#include "types.h"
 #include "ld65dbg.h"
 
 
@@ -19,12 +22,28 @@ namespace ld65
 	}
 	//---------------------------------------------------------------------------------------------------
 	sym::sym(int id, const char *name, int size)
-		: _name(name ? name : ""), _id(id), _size(size)
+		: _name(name ? name : ""), _id(id), _size(size), _scope(nullptr)
 	{
 	}
 	//---------------------------------------------------------------------------------------------------
 	database::database(void)
 	{
+	}
+	//---------------------------------------------------------------------------------------------------
+	database::~database(void)
+	{
+		for (auto itSym = symMap.begin(); itSym != symMap.end(); itSym++)
+		{
+			delete itSym->second;
+		}
+		for (auto itScope = scopeMap.begin(); itScope != scopeMap.end(); itScope++)
+		{
+			delete itScope->second;
+		}
+		for (auto itSeg = segmentMap.begin(); itSeg != segmentMap.end(); itSeg++)
+		{
+			delete itSeg->second;
+		}
 	}
 	//---------------------------------------------------------------------------------------------------
 	database::dbgLine::dbgLine(size_t bufferSize)
@@ -164,9 +183,9 @@ namespace ld65
 
 			while (isspace(buf[i])) i++;
 
-			while ( (buf[i] != 0) )
+			while ( buf[i] != 0 )
 			{
-				if ( !isStringLiteral && buf[i] != ',' )
+				if ( !isStringLiteral && buf[i] == ',' )
 				{
 					break;
 				}
@@ -230,10 +249,11 @@ namespace ld65
 	//---------------------------------------------------------------------------------------------------
 	int database::dbgFileLoad( const char *dbgFilePath )
 	{
+		static constexpr size_t lineSize = 4096;
 		FILE *fp;
-		dbgLine line;
+		dbgLine line( lineSize );
 		char lineType[64];
-		char keyValueBuffer[1024];
+		fceuScopedPtr <char> keyValueBuffer( new char[ lineSize ], fceuScopedPtr<char>::NewArray );
 
 		fp = ::fopen( dbgFilePath, "r");
 
@@ -241,21 +261,80 @@ namespace ld65
 		{
 			return -1;
 		}
+
 		while ( line.readFromFile(fp) != NULL )
 		{
 			printf("%s", line.getLine());
 
 			if ( line.readToken( lineType, sizeof(lineType) ) )
 			{
-				printf("%s\n", lineType);
+				int id = -1, size = 0, parentID = -1, scopeID = -1;
+				char name[256];
 
-				while ( line.readKeyValuePair( keyValueBuffer, sizeof(keyValueBuffer) ) )
+				name[0] = 0;
+
+				while ( line.readKeyValuePair( keyValueBuffer.get(), lineSize) )
 				{
 					char *key, *val;
 
-					line.splitKeyValuePair( keyValueBuffer, &key, &val );
+					line.splitKeyValuePair( keyValueBuffer.get(), &key, &val );
 
 					printf("   Key '%s' -> Value '%s' \n", key, val );
+
+					if ( strcmp( key, "id") == 0 )
+					{
+						id = strtol( val, nullptr, 0 );
+					}
+					else if ( strcmp( key, "name") == 0 )
+					{
+						strncpy( name, val, sizeof(name));
+					}
+					else if ( strcmp( key, "size") == 0 )
+					{
+						size = strtol( val, nullptr, 0 );
+					}
+					else if ( strcmp( key, "scope") == 0 )
+					{
+						scopeID = strtol( val, nullptr, 0 );
+					}
+					else if ( strcmp( key, "scope") == 0 )
+					{
+						parentID = strtol( val, nullptr, 0 );
+					}
+				}
+
+				if ( strcmp( lineType, "scope" ) == 0 )
+				{
+					if ( id >= 0 )
+					{
+						scope *s = new scope( id, name, size, parentID );
+
+						scopeMap[id] = s;
+
+						auto it = scopeMap.find( parentID );
+
+						if ( it != scopeMap.end() )
+						{
+							printf("Found Parent:%i for %i\n", parentID, id );
+							s->_parent = it->second;
+						}
+					}
+				}
+				else if ( strcmp( lineType, "sym") == 0 )
+				{
+					if ( id >= 0 )
+					{
+						sym *s = new sym( id, name, size );
+
+						auto it = scopeMap.find( scopeID );
+
+						if ( it != scopeMap.end() )
+						{
+							printf("Found Scope:%i for %s\n", scopeID, name );
+							s->_scope = it->second;
+						}
+						symMap[id] = s;
+					}
 				}
 			}
 		}

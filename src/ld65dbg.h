@@ -57,6 +57,8 @@ namespace ld65
 			int   _id;           // Debug ID
 			int   _size;
 
+			scope *_scope;
+
 		friend class database;
 	};
 
@@ -64,12 +66,14 @@ namespace ld65
 	{
 		public:
 			database(void);
+			~database(void);
 
 			int dbgFileLoad( const char *dbgFilePath );
 
 		private:
 			std::map<int, scope*> scopeMap;
 			std::map<int, segment*> segmentMap;
+			std::map<int, sym*> symMap;
 
 			class dbgLine
 			{
