@@ -940,7 +940,7 @@ void debugSymbolTable_t::ld65_SymbolLoad( ld65::sym *s )
 
 			//printf("  Seg: name:'%s'  ofs:%i  Bank:%x\n", seg->name(), romAddr, bank );
 		}
-		printf("\n");
+		//printf("\n");
 
 		auto pageIt = pageMap.find(bank);
 
