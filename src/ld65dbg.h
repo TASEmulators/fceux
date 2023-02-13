@@ -70,6 +70,8 @@ namespace ld65
 
 			sym( int id, const char *name = nullptr, int size = 0, int value = 0, int type = IMPORT);
 
+			int id(void){ return _id; };
+
 			const char *name(void){ return _name.c_str(); };
 
 			int size(void){ return _size; };

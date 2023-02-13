@@ -185,4 +185,5 @@ extern uint8 vsdip;
 #define EMULATIONPAUSED_FA 2
 
 #define FRAMEADVANCE_DELAY_DEFAULT 10
+#define NES_HEADER_SIZE  16
 
