@@ -21,8 +21,21 @@ namespace ld65
 	{
 	}
 	//---------------------------------------------------------------------------------------------------
-	sym::sym(int id, const char *name, int size)
-		: _name(name ? name : ""), _id(id), _size(size), _scope(nullptr)
+	void scope::getFullName(std::string &out)
+	{
+		if ( _parent )
+		{
+			_parent->getFullName(out);
+		}
+		if (!_name.empty())
+		{
+			out.append(_name);
+			out.append("::");
+		}
+	}
+	//---------------------------------------------------------------------------------------------------
+	sym::sym(int id, const char *name, int size, int value, int type)
+		: _name(name ? name : ""), _id(id), _size(size), _value(value), _type(type), _scope(nullptr), _segment(nullptr)
 	{
 	}
 	//---------------------------------------------------------------------------------------------------
@@ -253,7 +266,7 @@ namespace ld65
 		FILE *fp;
 		dbgLine line( lineSize );
 		char lineType[64];
-		fceuScopedPtr <char> keyValueBuffer( new char[ lineSize ], fceuScopedPtr<char>::NewArray );
+		fceuScopedPtr <char> keyValueBuffer( new char[ lineSize ], FCEU_ALLOC_TYPE_NEW_ARRAY );
 
 		fp = ::fopen( dbgFilePath, "r");
 
@@ -264,14 +277,18 @@ namespace ld65
 
 		while ( line.readFromFile(fp) != NULL )
 		{
-			printf("%s", line.getLine());
+			//printf("%s", line.getLine());
 
 			if ( line.readToken( lineType, sizeof(lineType) ) )
 			{
-				int id = -1, size = 0, parentID = -1, scopeID = -1;
+				int id = -1, size = 0, startAddr = 0, ofs = -1, parentID = -1, scopeID = -1, segmentID = -1;
+				int value = 0;
+				unsigned char segType = segment::READ;
 				char name[256];
+				char type[32];
 
 				name[0] = 0;
+				type[0] = 0;
 
 				while ( line.readKeyValuePair( keyValueBuffer.get(), lineSize) )
 				{
@@ -279,7 +296,7 @@ namespace ld65
 
 					line.splitKeyValuePair( keyValueBuffer.get(), &key, &val );
 
-					printf("   Key '%s' -> Value '%s' \n", key, val );
+					//printf("   Key '%s' -> Value '%s' \n", key, val );
 
 					if ( strcmp( key, "id") == 0 )
 					{
@@ -293,17 +310,42 @@ namespace ld65
 					{
 						size = strtol( val, nullptr, 0 );
 					}
+					else if ( strcmp( key, "val") == 0 )
+					{
+						value = strtol( val, nullptr, 0 );
+					}
 					else if ( strcmp( key, "scope") == 0 )
 					{
 						scopeID = strtol( val, nullptr, 0 );
 					}
-					else if ( strcmp( key, "scope") == 0 )
+					else if ( strcmp( key, "parent") == 0 )
 					{
 						parentID = strtol( val, nullptr, 0 );
 					}
+					else if ( strcmp( key, "seg") == 0 )
+					{
+						segmentID = strtol( val, nullptr, 0 );
+					}
+					else if ( strcmp( key, "ooffs") == 0 )
+					{
+						ofs = strtol( val, nullptr, 0 );
+					}
+					else if ( strcmp( key, "type") == 0 )
+					{
+						strncpy( type, val, sizeof(type));
+					}
 				}
 
-				if ( strcmp( lineType, "scope" ) == 0 )
+				if ( strcmp( lineType, "seg" ) == 0 )
+				{
+					if ( id >= 0 )
+					{
+						segment *s = new segment( id, name, startAddr, size, ofs, segType );
+
+						segmentMap[id] = s;
+					}
+				}
+				else if ( strcmp( lineType, "scope" ) == 0 )
 				{
 					if ( id >= 0 )
 					{
@@ -315,7 +357,7 @@ namespace ld65
 
 						if ( it != scopeMap.end() )
 						{
-							printf("Found Parent:%i for %i\n", parentID, id );
+							//printf("Found Parent:%i for %i\n", parentID, id );
 							s->_parent = it->second;
 						}
 					}
@@ -324,14 +366,33 @@ namespace ld65
 				{
 					if ( id >= 0 )
 					{
-						sym *s = new sym( id, name, size );
+						int symType = sym::IMPORT;
+
+						if ( strcmp( type, "lab") == 0)
+						{
+							symType = sym::LABEL;
+						}
+						else if ( strcmp( type, "equ") == 0)
+						{
+							symType = sym::EQU;
+						}
+
+						sym *s = new sym( id, name, size, value, symType );
 
 						auto it = scopeMap.find( scopeID );
 
 						if ( it != scopeMap.end() )
 						{
-							printf("Found Scope:%i for %s\n", scopeID, name );
+							//printf("Found Scope:%i for %s\n", scopeID, name );
 							s->_scope = it->second;
+						}
+
+						auto itSeg = segmentMap.find( segmentID );
+
+						if ( itSeg != segmentMap.end() )
+						{
+							//printf("Found Segment:%i for %s\n", segmentID, name );
+							s->_segment = itSeg->second;
 						}
 						symMap[id] = s;
 					}
@@ -341,6 +402,18 @@ namespace ld65
 		::fclose(fp);
 
 		return 0;
+	}
+	//---------------------------------------------------------------------------------------------------
+	int database::iterateSymbols( void *userData, void (*cb)( void *userData, sym *s ) )
+	{
+		int numSyms = 0;
+
+		for (auto it = symMap.begin(); it != symMap.end(); it++)
+		{
+			cb( userData, it->second );
+			numSyms++;
+		}
+		return numSyms;
 	}
 	//---------------------------------------------------------------------------------------------------
 }

@@ -911,6 +911,69 @@ const char *debugSymbolTable_t::errorMessage(void)
 	return dbgSymTblErrMsg;
 }
 //--------------------------------------------------------------
+static void ld65_iterate_cb( void *userData, ld65::sym *s )
+{
+	debugSymbolTable_t *tbl = static_cast<debugSymbolTable_t*>(userData);
+
+	if (tbl)
+	{
+		tbl->ld65_SymbolLoad(s);
+	}
+}
+//--------------------------------------------------------------
+void debugSymbolTable_t::ld65_SymbolLoad( ld65::sym *s )
+{
+	int bank = -1;
+	debugSymbol_t *sym;
+	debugSymbolPage_t *page;
+	ld65::scope *scope = s->getScope();
+	ld65::segment *seg = s->getSegment();
+
+	if ( s->type() == ld65::sym::LABEL )
+	{
+		//printf("Symbol Label Load: name:\"%s\"  val:%i  0x%x\n", s->name(), s->value(), s->value() );
+		if (seg)
+		{
+			int romAddr = seg->ofs();
+
+			bank =  romAddr >= 0 ? romAddr / (1<<debuggerPageSize) : -1;
+
+			//printf("  Seg: name:'%s'  ofs:%i  Bank:%x\n", seg->name(), romAddr, bank );
+		}
+		printf("\n");
+
+		auto pageIt = pageMap.find(bank);
+
+		if (pageIt == pageMap.end() )
+		{
+			page = new debugSymbolPage_t(bank);
+
+			pageMap[bank] = page;
+		}
+		else
+		{
+			page = pageIt->second;
+		}
+		std::string name;
+
+		if (scope)
+		{
+			scope->getFullName(name);
+		}
+		name.append(s->name());
+
+		//printf("Creating Symbol: %s\n", name.c_str() );
+
+		sym = new debugSymbol_t( s->value(), name.c_str() );
+
+		if ( page->addSymbol( sym ) )
+		{
+			//printf("Failed to load sym: '%s'\n", s->name() );
+			delete sym;
+		}
+	}
+}
+//--------------------------------------------------------------
 int debugSymbolTable_t::ld65LoadDebugFile( const char *dbgFilePath )
 {
 	ld65::database db;
@@ -919,6 +982,9 @@ int debugSymbolTable_t::ld65LoadDebugFile( const char *dbgFilePath )
 	{
 		return -1;
 	}
+
+	db.iterateSymbols( this, ld65_iterate_cb );
+
 	return 0;
 }
 //--------------------------------------------------------------

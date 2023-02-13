@@ -185,17 +185,18 @@ typedef uint8 (*readfunc)(uint32 A);
 // Scoped pointer ensures that memory pointed to by this object gets cleaned up
 // and deallocated when this object goes out of scope. Helps prevent memory leaks
 // on temporary memory allocations in functions with early outs.
+enum fceuAllocType
+{
+	FCEU_ALLOC_TYPE_NEW = 0,
+	FCEU_ALLOC_TYPE_NEW_ARRAY,
+	FCEU_ALLOC_TYPE_MALLOC
+};
+
 template <typename T> 
 class fceuScopedPtr
 {
 	public:
-		enum 
-		{
-			New = 0,
-			NewArray,
-			Malloc
-		};
-		fceuScopedPtr( T *ptrIn = nullptr, int allocType = New )
+		fceuScopedPtr( T *ptrIn = nullptr, enum  fceuAllocType allocType = FCEU_ALLOC_TYPE_NEW )
 		{
 			//printf("Scoped Pointer Constructor <%s>: %p\n", typeid(T).name(), ptrIn );
 			ptr = ptrIn;
@@ -223,17 +224,24 @@ class fceuScopedPtr
 		{
 			if (ptr)
 			{
-				if (_allocType == Malloc)
+				switch (_allocType)
 				{
-					::free(ptr);
-				}
-				else if (_allocType == NewArray)
-				{
-					delete [] ptr;
-				}
-				else
-				{
-					delete ptr;
+					case FCEU_ALLOC_TYPE_MALLOC:
+					{
+						::free(ptr);
+					}
+					break;
+					case FCEU_ALLOC_TYPE_NEW_ARRAY:
+					{
+						delete [] ptr;
+					}
+					break;
+					default:
+					case FCEU_ALLOC_TYPE_NEW:
+					{
+						delete ptr;
+					}
+					break;
 				}
 				ptr = nullptr;
 			}
@@ -241,7 +249,7 @@ class fceuScopedPtr
 
 	private:
 		T *ptr;
-		int  _allocType;
+		enum fceuAllocType  _allocType;
 
 };
 

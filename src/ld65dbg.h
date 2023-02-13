@@ -17,6 +17,12 @@ namespace ld65
 
 			segment( int id, const char *name = nullptr, int startAddr = 0, int size = 0, int ofs = -1, unsigned char type = READ );
 
+			const char *name(void){ return _name.c_str(); };
+
+			int addr(void){ return _startAddr; };
+
+			int ofs(void){ return _ofs; };
+
 		private:
 			std::string _name;   // Segment Name
 			int   _id;           // Debug ID
@@ -34,7 +40,12 @@ namespace ld65
 		public:
 			scope( int id, const char *name = nullptr, int size = 0, int parentID = -1);
 
+			const char *name(void){ return _name.c_str(); };
+
 			scope *getParent(void){ return _parent; };
+
+			void getFullName( std::string &out );
+
 		private:
 			std::string _name;   // Scope Name
 			int   _id;           // Debug ID
@@ -50,14 +61,36 @@ namespace ld65
 	class sym
 	{
 		public:
-			sym( int id, const char *name = nullptr, int size = 0);
+			enum 
+			{
+				IMPORT = 0,
+				LABEL,
+				EQU
+			};
+
+			sym( int id, const char *name = nullptr, int size = 0, int value = 0, int type = IMPORT);
+
+			const char *name(void){ return _name.c_str(); };
+
+			int size(void){ return _size; };
+
+			int value(void){ return _value; };
+
+			int type(void){ return _type; };
+
+			scope *getScope(void){ return _scope; };
+
+			segment *getSegment(void){ return _segment; };
 
 		private:
 			std::string _name;   // Scope Name
 			int   _id;           // Debug ID
 			int   _size;
+			int   _value;
+			int   _type;
 
-			scope *_scope;
+			scope   *_scope;
+			segment *_segment;
 
 		friend class database;
 	};
@@ -69,6 +102,8 @@ namespace ld65
 			~database(void);
 
 			int dbgFileLoad( const char *dbgFilePath );
+
+			int iterateSymbols( void *userData, void (*cb)( void *userData, sym *s ) );
 
 		private:
 			std::map<int, scope*> scopeMap;
