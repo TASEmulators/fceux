@@ -92,7 +92,7 @@ class debugSymbolPage_t
 
 	int  save(void);
 	void print(void);
-	int size(void){ return symMap.size(); }
+	int size(void){ return static_cast<int>(symMap.size()); }
 
 	int addSymbol( debugSymbol_t *sym );
 
@@ -131,8 +131,10 @@ class debugSymbolTable_t
 		~debugSymbolTable_t(void);
 
 		int loadFileNL( int addr );
+		int loadRegisterMap(void);
 		int loadGameSymbols(void);
 		int numPages(void){ return pageMap.size(); }
+		int numSymbols(void);
 
 		void save(void);
 		void clear(void);
@@ -161,9 +163,6 @@ class debugSymbolTable_t
 	private:
 		std::map <int, debugSymbolPage_t*> pageMap;
 		FCEU::mutex *cs;
-
-		int loadRegisterMap(void);
-
 };
 
 extern  debugSymbolTable_t  debugSymbolTable;

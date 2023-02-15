@@ -386,6 +386,18 @@ void debugSymbolTable_t::clear(void)
 	pageMap.clear();
 }
 //--------------------------------------------------------------
+int debugSymbolTable_t::numSymbols(void)
+{
+	int n = 0;
+	FCEU::autoScopedLock alock(cs);
+
+	for (auto it=pageMap.begin(); it!=pageMap.end(); it++)
+	{
+		n += it->second->size();
+	}
+	return n;
+}
+//--------------------------------------------------------------
 static int generateNLFilenameForBank(int bank, std::string &NLfilename)
 {
 	int i;

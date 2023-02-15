@@ -336,7 +336,26 @@ void ConsoleDebugger::ld65ImportDebug(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
+	if (debugSymbolTable.numSymbols() > 0)
+	{
+		QString msg = tr("Do you wish to clear the existing symbol table and replace with the data contained in the selected file?\n\n") + filename;
+
+		ret = QMessageBox::warning( this, tr("Symbol Table Clear Warning"), msg,
+				QMessageBox::Yes | QMessageBox::No );
+
+		if ( ret == QMessageBox::No )
+		{
+			//printf("Aborting dbg file load.\n");
+			return;
+		}
+	}
+	debugSymbolTable.clear();
+
+	debugSymbolTable.loadRegisterMap();
+
 	debugSymbolTable.ld65LoadDebugFile( filename.toStdString().c_str() );
+
+	queueUpdate();
 
 	return;
 }
