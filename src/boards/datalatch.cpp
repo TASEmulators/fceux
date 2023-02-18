@@ -21,11 +21,11 @@
 #include "mapinc.h"
 #include "../ines.h"
 
-static uint8 latche, latcheinit, bus_conflict;
-static uint16 addrreg0, addrreg1;
+static uint8 latche=0, latcheinit=0, bus_conflict=0;
+static uint16 addrreg0=0, addrreg1=0;
 static uint8 *WRAM = NULL;
-static uint32 WRAMSIZE;
-static void (*WSync)(void);
+static uint32 WRAMSIZE=0;
+static void (*WSync)(void) = nullptr;
 
 static DECLFW(LatchWrite) {
 //	FCEU_printf("bs %04x %02x\n",A,V);

@@ -1429,7 +1429,7 @@ int CheckTimelines(MovieData& stateMovie, MovieData& currMovie)
 }
 
 
-static bool load_successful;
+static bool load_successful = false;
 
 bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 {
