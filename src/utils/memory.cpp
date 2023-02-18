@@ -53,7 +53,7 @@ void FCEU_afree(void* ptr)
 	#endif
 }
 
-static void *_FCEU_malloc(uint32 size)
+static void *_FCEU_malloc(size_t size)
 {
 	void* ret = malloc(size);
 
@@ -68,7 +68,7 @@ static void _FCEU_free(void* ptr)
 	free(ptr);
 }
 
-void *FCEU_gmalloc(uint32 size)
+void *FCEU_gmalloc(size_t size)
 {
 	void *ret = _FCEU_malloc(size);
  
@@ -78,7 +78,7 @@ void *FCEU_gmalloc(uint32 size)
 	return ret;
 }
 
-void *FCEU_malloc(uint32 size)
+void *FCEU_malloc(size_t size)
 {
 	void *ret = _FCEU_malloc(size);
 	memset(ret, 0, size);
@@ -95,7 +95,7 @@ void FCEU_free(void *ptr)
 	_FCEU_free(ptr);
 }
 
-void *FCEU_dmalloc(uint32 size)
+void *FCEU_dmalloc(size_t size)
 {
 	return FCEU_malloc(size);
 }

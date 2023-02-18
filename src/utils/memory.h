@@ -25,11 +25,11 @@
 #define FCEU_dwmemset(d,c,n) {int _x; for(_x=n-4;_x>=0;_x-=4) *(uint32 *)&(d)[_x]=c;}
 
 //returns a buffer initialized to 0
-void *FCEU_malloc(uint32 size);
+void *FCEU_malloc(size_t size);
 
 //returns a buffer, with jumbled initial contents
 //used by boards for WRAM etc, initialized to 0 (default) or other via RAMInitOption
-void *FCEU_gmalloc(uint32 size);
+void *FCEU_gmalloc(size_t size);
 
 //free memory allocated with FCEU_gmalloc
 void FCEU_gfree(void *ptr);
@@ -48,7 +48,7 @@ void FCEU_free(void *ptr);
 void* FCEU_realloc(void* ptr, size_t size);
 
 //don't use these. change them if you find them.
-void *FCEU_dmalloc(uint32 size);
+void *FCEU_dmalloc(size_t size);
 
 //don't use these. change them if you find them.
 void FCEU_dfree(void *ptr);
