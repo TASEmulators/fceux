@@ -2322,6 +2322,11 @@ int  consoleWin_t::showListSelectDialog( const char *title, std::vector <std::st
 	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
 	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
 
+	    okButton->setIcon( style()->standardIcon( QStyle::SP_DialogOkButton ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
+	okButton->setDefault(true);
+
 	dialog.setLayout( mainLayout );
 
 	ret = dialog.exec();
@@ -2332,8 +2337,8 @@ int  consoleWin_t::showListSelectDialog( const char *title, std::vector <std::st
 
 		item = tree->currentItem();
 
-	   if ( item != NULL )
-	   {
+		if ( item != NULL )
+		{
 			idx = tree->indexOfTopLevelItem(item);
 		}
 	}
