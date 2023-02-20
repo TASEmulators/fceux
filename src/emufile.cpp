@@ -191,7 +191,7 @@ size_t EMUFILE::read32le(u32* Bufo)
 
 u32 EMUFILE::read32le()
 {
-	u32 ret;
+	u32 ret=0;
 	read32le(&ret);
 	return ret;
 }
@@ -230,7 +230,7 @@ size_t EMUFILE::read16le(u16* Bufo)
 
 u16 EMUFILE::read16le()
 {
-	u16 ret;
+	u16 ret=0;
 	read16le(&ret);
 	return ret;
 }
@@ -269,14 +269,14 @@ void EMUFILE::writedouble(double val)
 
 double EMUFILE::readdouble()
 {
-	double temp;
+	double temp=0.0;
 	readdouble(&temp);
 	return temp;
 }
 
 size_t EMUFILE::readdouble(double* val)
 {
-	u64 temp;
+	u64 temp=0;
 	size_t ret = read64le(&temp);
 	*val = u64_to_double(temp);
 	return ret;
