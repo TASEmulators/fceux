@@ -204,8 +204,9 @@ void UNROM512_Init(CartInfo *info) {
 			flash_data[i] = PRGptr[ROM_CHIP][i % PRGsize[ROM_CHIP]];
 		}
 		SetupCartPRGMapping(FLASH_CHIP, flash_data, PRGsize[ROM_CHIP], 1);
-		info->SaveGame[0] = flash_data;
-		info->SaveGameLen[0] = PRGsize[ROM_CHIP];
+		// SaveGame is commented out due to movie issue where FCEU_ClearGameSave is clearing flash to zeros
+		//info->SaveGame[0] = flash_data;
+		//info->SaveGameLen[0] = PRGsize[ROM_CHIP];
 
 		flash_id[0] = 0xBF;
 		flash_id[1] = 0xB5 + (ROM_size >> 4);
