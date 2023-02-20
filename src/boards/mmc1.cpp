@@ -306,8 +306,7 @@ static void GenMMC1Init(CartInfo *info, int prg, int chr, int wram, int bram) {
 		SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 		AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 		if (bram) {
-			info->SaveGame[0] = WRAM + NONBRAMSIZE;
-			info->SaveGameLen[0] = bram * 1024;
+			info->addSaveGameBuf( WRAM + NONBRAMSIZE, bram * 1024 );
 		}
 	}
 	if (!chr) {

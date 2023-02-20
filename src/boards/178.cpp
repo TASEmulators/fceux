@@ -27,7 +27,7 @@
 static uint8 reg[4];
 
 static uint8 *WRAM = NULL;
-static uint32 WRAMSIZE;
+static uint32 WRAMSIZE=0;
 
 // Tennis with VR sensor, very simple behaviour
 extern void GetMouseData(uint32 (&md)[3]);
@@ -192,8 +192,7 @@ void Mapper178_Init(CartInfo *info) {
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 

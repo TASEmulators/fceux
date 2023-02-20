@@ -28,7 +28,7 @@
 static uint8 DRegs[4];
 static uint8 Buffer, BufferShift;
 
-static uint32 WRAMSIZE;
+static uint32 WRAMSIZE=0;
 static uint8 *WRAM = NULL;
 
 static int kanji_pos, kanji_page, r40C0;
@@ -256,8 +256,7 @@ void FNS_Init(CartInfo *info) {
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
-	info->SaveGame[0] = WRAM;
-	info->SaveGameLen[0] = WRAMSIZE;
+	info->addSaveGameBuf( WRAM, WRAMSIZE );
 
 	AddExState(DRegs, 4, 0, "DREG");
 	AddExState(&lreset, 8, 1, "LRST");

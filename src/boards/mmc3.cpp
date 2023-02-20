@@ -324,8 +324,7 @@ void GenMMC3_Init(CartInfo *info, int prg, int chr, int wram, int battery) {
 
 	if (battery) {
 		mmc3opts |= 2;
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 
 // KT-008 boards hack 2-in-1, TODO assign to new ines mapper, most dump of KT-boards on the net are mapper 4, so need database or goodnes fix support

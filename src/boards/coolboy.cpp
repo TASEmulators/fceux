@@ -454,8 +454,7 @@ void CommonInit(CartInfo* info, int submapper)
 			Flash[i] = PRGptr[ROM_CHIP][i % PRGsize[ROM_CHIP]];
 		}
 		SetupCartPRGMapping(FLASH_CHIP, Flash, PRGsize[ROM_CHIP], 1);
-		info->SaveGame[1] = Flash;
-		info->SaveGameLen[1] = PRGsize[ROM_CHIP];
+		info->addSaveGameBuf( Flash, PRGsize[ROM_CHIP] );
 	}
 
 	AddExState(EXPREGS, 4, 0, "EXPR");

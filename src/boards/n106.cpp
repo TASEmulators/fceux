@@ -429,10 +429,8 @@ void Mapper19_Init(CartInfo *info) {
 	AddExState(N106_StateRegs, ~0, 0, 0);
 
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = 8192;
-		info->SaveGame[1] = IRAM;
-		info->SaveGameLen[1] = 128;
+		info->addSaveGameBuf( WRAM, 8192 );
+		info->addSaveGameBuf( IRAM, 128 );
 	}
 }
 

@@ -254,11 +254,10 @@ void QTAi_Init(CartInfo *info) {
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
 		// note, only extrnal cart's SRAM is battery backed, the the part on the main cartridge is just
 		// an additional work ram. so we may save only half here, but I forgot what part is saved lol, will 
 		// find out later.
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 
 	AddExState(&StateRegs, ~0, 0, 0);

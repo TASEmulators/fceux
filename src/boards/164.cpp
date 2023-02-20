@@ -27,7 +27,7 @@
 static uint8 laststrobe, trigger;
 static uint8 reg[8];
 static uint8 *WRAM = NULL;
-static uint32 WRAMSIZE;
+static uint32 WRAMSIZE=0;
 
 static writefunc pcmwrite;
 
@@ -123,8 +123,7 @@ void Mapper164_Init(CartInfo *info) {
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 
 	GameStateRestore = StateRestore;
@@ -172,8 +171,7 @@ void Mapper163_Init(CartInfo *info) {
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
@@ -223,8 +221,7 @@ void UNLFS304_Init(CartInfo *info) {
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 
 	GameStateRestore = StateRestore;

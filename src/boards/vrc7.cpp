@@ -24,7 +24,7 @@ static uint8 vrc7idx, preg[3], creg[8], mirr;
 static uint8 IRQLatch, IRQa, IRQd, IRQMode;
 static int32 IRQCount, CycleCount;
 static uint8 *WRAM = NULL;
-static uint32 WRAMSIZE;
+static uint32 WRAMSIZE=0;
 
 #include "emu2413.h"
 
@@ -204,8 +204,7 @@ void Mapper85_Init(CartInfo *info) {
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 	GameStateRestore = StateRestore;
 	VRC7_ESI();

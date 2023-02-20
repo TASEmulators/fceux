@@ -54,8 +54,7 @@ void SA9602B_Init(CartInfo *info) {
 	GenMMC3_Init(info, 512, 0, 0, 0);
 	pwrap = SA9602BPW;
 	mmc3opts |= 2;
-	info->SaveGame[0] = UNIFchrrama;
-	info->SaveGameLen[0] = 32 * 1024;
+	info->addSaveGameBuf( UNIFchrrama, 32 * 1024 );
 	info->Power = SA9602BPower;
 	AddExState(EXPREGS, 2, 0, "EXPR");
 }

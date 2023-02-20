@@ -185,8 +185,7 @@ static void VRC24_Init(CartInfo *info) {
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if(info->battery) {
-		info->SaveGame[0]=WRAM;
-		info->SaveGameLen[0]=WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 
 	AddExState(&StateRegs, ~0, 0, 0);

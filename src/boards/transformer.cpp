@@ -21,7 +21,7 @@
 #include "mapinc.h"
 
 static uint8 *WRAM = NULL;
-static uint32 WRAMSIZE;
+static uint32 WRAMSIZE=0;
 
 unsigned int *GetKeyboard(void);	// FIXME: 10/28 - now implemented in SDL as well.  should we rename this to a FCEUI_* function?
 
@@ -90,8 +90,7 @@ void Transformer_Init(CartInfo *info) {
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 }

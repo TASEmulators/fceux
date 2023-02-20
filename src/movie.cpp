@@ -984,23 +984,23 @@ bool MovieData::loadSaveramFrom(std::vector<uint8>* buf)
 		return false;
 	}
 
-	for(int i=0;i<4;i++)
+	for (size_t i=0;i<currCartInfo->SaveGame.size();i++)
 	{
 		int len = ms.read32le();
 
-		if(!currCartInfo->SaveGame[i] && len!=0)
+		if( (currCartInfo->SaveGame[i].bufptr == nullptr) && (len!=0) )
 		{
 			FCEU_PrintError("movie battery load mismatch 2");
 			return false;
 		}
 
-		if(currCartInfo->SaveGameLen[i] != static_cast<unsigned int>(len))
+		if(currCartInfo->SaveGame[i].buflen != static_cast<size_t>(len))
 		{
 			FCEU_PrintError("movie battery load mismatch 3");
 			return false;
 		}
 
-		ms.fread(currCartInfo->SaveGame[i], len);
+		ms.fread(currCartInfo->SaveGame[i].bufptr, len);
 	}
 
 	return true;
@@ -1011,16 +1011,15 @@ void MovieData::dumpSaveramTo(std::vector<uint8>* buf, int compressionLevel)
 	EMUFILE_MEMORY ms(buf);
 
 	ms.write32le(currCartInfo->battery?1:0);
-	for(int i=0;i<4;i++)
+	for(size_t i=0;i<currCartInfo->SaveGame.size();i++)
 	{
-		if(!currCartInfo->SaveGame[i])
+		if (!currCartInfo->SaveGame[i].bufptr)
 		{
 			ms.write32le((u32)0);
 			continue;
 		}
-
-		ms.write32le(currCartInfo->SaveGameLen[i]);
-		ms.fwrite(currCartInfo->SaveGame[i], currCartInfo->SaveGameLen[i]);
+		ms.write32le( static_cast<uint32>(currCartInfo->SaveGame[i].buflen) );
+		ms.fwrite(currCartInfo->SaveGame[i].bufptr, currCartInfo->SaveGame[i].buflen);
 	}
 
 }

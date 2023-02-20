@@ -810,7 +810,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	
 	head.cleanup();
 
-	memset(&iNESCart, 0, sizeof(iNESCart));
+	iNESCart.clear();
 
 	iNES2 = ((head.ROM_type2 & 0x0C) == 0x08);
 	if(iNES2)

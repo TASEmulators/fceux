@@ -2271,8 +2271,7 @@ void COOLGIRL_Init(CartInfo *info) {
 		AddExState(WRAM, 32 * 1024, 0, "SRAM");
 		if (info->battery)
 		{
-			info->SaveGame[0] = WRAM;
-			info->SaveGameLen[0] = 32 * 1024;
+			info->addSaveGameBuf( WRAM, 32 * 1024);
 		}
 	}
 
@@ -2281,8 +2280,7 @@ void COOLGIRL_Init(CartInfo *info) {
 		SAVE_FLASH = (uint8*)FCEU_gmalloc(SAVE_FLASH_SIZE);
 		SetupCartPRGMapping(FLASH_CHIP, SAVE_FLASH, SAVE_FLASH_SIZE, 1);
 		AddExState(SAVE_FLASH, SAVE_FLASH_SIZE, 0, "SAVF");
-		info->SaveGame[1] = SAVE_FLASH;
-		info->SaveGameLen[1] = SAVE_FLASH_SIZE;
+		info->addSaveGameBuf( SAVE_FLASH, SAVE_FLASH_SIZE );
 	}
 
 	CFI = (uint8*)FCEU_gmalloc(sizeof(cfi_data) * 2);

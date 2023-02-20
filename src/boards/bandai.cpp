@@ -29,7 +29,7 @@ static uint8 IRQa;
 static int16 IRQCount, IRQLatch;
 
 static uint8 *WRAM = NULL;
-static uint32 WRAMSIZE;
+static uint32 WRAMSIZE=0;
 
 static SFORMAT StateRegs[] =
 {
@@ -317,8 +317,7 @@ void Mapper16_Init(CartInfo *info) {
 	MapIRQHook = BandaiIRQHook;
 
 	info->battery = 1;
-	info->SaveGame[0] = x24c0x_data + 256;
-	info->SaveGameLen[0] = 256;
+	info->addSaveGameBuf( x24c0x_data + 256, 256 );
 	AddExState(x24c0x_data, 256, 0, "DATA");
 	AddExState(&x24c02StateRegs, ~0, 0, 0);
 
@@ -333,8 +332,7 @@ void Mapper159_Init(CartInfo *info) {
 	MapIRQHook = BandaiIRQHook;
 
 	info->battery = 1;
-	info->SaveGame[0] = x24c0x_data;
-	info->SaveGameLen[0] = 128;
+	info->addSaveGameBuf( x24c0x_data, 128 );
 	AddExState(x24c0x_data, 128, 0, "DATA");
 	AddExState(&x24c01StateRegs, ~0, 0, 0);
 
@@ -378,8 +376,7 @@ void Mapper153_Init(CartInfo *info) {
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 
 	GameStateRestore = StateRestore;
@@ -599,8 +596,7 @@ void Mapper157_Init(CartInfo *info) {
 
 	GameInfo->cspecial = SIS_DATACH;
 	info->battery = 1;
-	info->SaveGame[0] = x24c0x_data;
-	info->SaveGameLen[0] = 512;
+	info->addSaveGameBuf( x24c0x_data, 512 );
 	AddExState(x24c0x_data, 512, 0, "DATA");
 	AddExState(&x24c01StateRegs, ~0, 0, 0);
 	AddExState(&x24c02StateRegs, ~0, 0, 0);

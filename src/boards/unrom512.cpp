@@ -168,6 +168,18 @@ static void UNROM512LatchClose(void) {
 	flash_data = NULL;
 }
 
+static void UNROM512_FlashReset(void)
+{
+	if (flash_data)
+	{
+		size_t flash_size = PRGsize[ROM_CHIP];
+		// Copy ROM to flash data
+		for (size_t i = 0; i < flash_size; i++) {
+			flash_data[i] = PRGptr[ROM_CHIP][i];
+		}
+	}
+}
+
 void UNROM512_Init(CartInfo *info) {
 	info->Power = UNROM512LatchPower;
 	info->Close = UNROM512LatchClose;
@@ -205,9 +217,7 @@ void UNROM512_Init(CartInfo *info) {
 			flash_data[i] = PRGptr[ROM_CHIP][i];
 		}
 		SetupCartPRGMapping(FLASH_CHIP, flash_data, flash_size, 1);
-		// SaveGame is commented out due to movie issue where FCEU_ClearGameSave is clearing flash to zeros
-		//info->SaveGame[0] = flash_data;
-		//info->SaveGameLen[0] = PRGsize[ROM_CHIP];
+		info->addSaveGameBuf( flash_data, flash_size, UNROM512_FlashReset );
 
 		flash_id[0] = 0xBF;
 		flash_id[1] = 0xB5 + (ROM_size >> 4);

@@ -26,7 +26,7 @@ static uint8 dipswitch;
 static void (*WSync)(void);
 static readfunc defread;
 static uint8 *WRAM = NULL;
-static uint32 WRAMSIZE;
+static uint32 WRAMSIZE=0;
 
 static DECLFW(LatchWrite) {
 	latche = A;
@@ -77,8 +77,7 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), readfunc func, uint16
 		WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 		SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 		if (info->battery) {
-			info->SaveGame[0] = WRAM;
-			info->SaveGameLen[0] = WRAMSIZE;
+			info->addSaveGameBuf( WRAM, WRAMSIZE );
 		}
 		AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 	}

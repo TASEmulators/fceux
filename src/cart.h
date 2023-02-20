@@ -1,20 +1,45 @@
 #ifndef CART_H
 #define CART_H
 
-typedef struct {
+#include <vector>
+
+struct CartInfo
+{
 	// Set by mapper/board code:
 	void (*Power)(void);
 	void (*Reset)(void);
 	void (*Close)(void);
-	uint8 *SaveGame[4];		// Pointers to memory to save/load.
-	uint32 SaveGameLen[4];	// How much memory to save/load.
+
+	struct SaveGame_t
+	{
+		uint8  *bufptr;	// Pointer to memory to save/load.
+		uint32  buflen;	// How much memory to save/load.
+		void (*resetFunc)(void); // Callback to reset save game memory
+
+		SaveGame_t(void)
+			: bufptr(nullptr), buflen(0), resetFunc(nullptr)
+		{
+		}
+	};
+	std::vector <SaveGame_t> SaveGame;
+
+	void addSaveGameBuf( uint8* bufptrIn, uint32 buflenIn, void (*resetFuncIn)(void) = nullptr )
+	{
+		SaveGame_t tmp;
+
+		tmp.bufptr = bufptrIn;
+		tmp.buflen = buflenIn;
+		tmp.resetFunc = resetFuncIn;
+
+		SaveGame.push_back( tmp );
+	}
 
 	// Set by iNES/UNIF loading code.
 	int mirror;		// As set in the header or chunk.
-					// iNES/UNIF specific.  Intended
-					// to help support games like "Karnov"
-					// that are not really MMC3 but are
-					// set to mapper 4.
+				// iNES/UNIF specific.  Intended
+				// to help support games like "Karnov"
+				// that are not really MMC3 but are
+				// set to mapper 4.
 	int mirrorAs2Bits;
 	int battery;	// Presence of an actual battery.
 	int ines2;
@@ -27,7 +52,33 @@ typedef struct {
 	uint32 CRC32;	// Should be set by the iNES/UNIF loading
 					// code, used by mapper/board code, maybe
 					// other code in the future.
-} CartInfo;
+
+	CartInfo(void)
+	{
+		clear();
+	}
+	
+	void clear(void)
+	{
+		Power = nullptr;
+		Reset = nullptr;
+		Close = nullptr;
+
+		SaveGame.clear();
+
+		mirror = 0;
+		mirrorAs2Bits = 0;
+		battery = 0;
+		ines2 = 0;
+		submapper = 0;
+		wram_size = 0;
+		battery_wram_size = 0;
+		vram_size = 0;
+		battery_vram_size = 0;
+		memset( MD5, 0, sizeof(MD5));
+		CRC32 = 0;
+	};
+};
 
 extern CartInfo *currCartInfo;
 

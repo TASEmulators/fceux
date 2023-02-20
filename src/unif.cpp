@@ -104,7 +104,7 @@ static void ResetUNIF(void) {
 	vramo = 0;
 	boardname = 0;
 	mirrortodo = 0;
-	memset(&UNIFCart, 0, sizeof(UNIFCart));
+	UNIFCart.clear();
 	UNIFchrrama = 0;
 }
 

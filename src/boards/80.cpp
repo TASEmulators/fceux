@@ -169,8 +169,7 @@ void Mapper80_Init(CartInfo *info) {
 	GameStateRestore = StateRestore;
 
 	if (info->battery) {
-		info->SaveGame[0] = wram;
-		info->SaveGameLen[0] = 256;
+		info->addSaveGameBuf( wram, sizeof(wram) );
 	}
 
 	AddExState(&StateRegs80, ~0, 0, 0);

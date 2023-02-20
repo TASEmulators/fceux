@@ -70,8 +70,7 @@ void UNLEDU2000_Init(CartInfo *info) {
 	WRAM = (uint8*)FCEU_gmalloc(32768);
 	SetupCartPRGMapping(0x10, WRAM, 32768, 1);
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = 32768;
+		info->addSaveGameBuf( WRAM, 32768 );
 	}
 	AddExState(WRAM, 32768, 0, "WRAM");
 	AddExState(StateRegs, ~0, 0, 0);

@@ -85,14 +85,12 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 			//else if(!info->wram_size && info->battery_wram_size)
 			//{
 			//	SetupCartPRGMapping(0x10, WRAM, info->battery_wram_size, 1);
-			//	info->SaveGame[0] = WRAM;
-			//	info->SaveGameLen[0] = info->battery_wram_size;
+			//	info->addSaveGameBuf( WRAM, info->battery_wram_size );
 			//} else {
 			//	//well, this is annoying
 			//	SetupCartPRGMapping(0x10, WRAM, info->wram_size, 1);
 			//	SetupCartPRGMapping(0x11, WRAM, info->battery_wram_size, 1); //? ? ? there probably isnt even a way to select this
-			//	info->SaveGame[0] = WRAM + info->wram_size;
-			//	info->SaveGameLen[0] = info->battery_wram_size;
+			//	info->addSaveGameBuf( WRAM + info->wram_size, info->battery_wram_size );
 			//}
 			
 			//this is more likely the only practical scenario
@@ -104,8 +102,7 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 			setprg8r(0x10, 0x6000, 0);
 			if(info->battery_wram_size)
 			{
-				info->SaveGame[0] = WRAM;
-				info->SaveGameLen[0] = 8192;
+				info->addSaveGameBuf( WRAM, 8192 );
 			}
 		}
 		else
@@ -114,8 +111,7 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 			WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 			SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 			if (info->battery) {
-				info->SaveGame[0] = WRAM;
-				info->SaveGameLen[0] = WRAMSIZE;
+				info->addSaveGameBuf( WRAM, WRAMSIZE );
 			}
 			AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 		}
@@ -158,8 +154,7 @@ void NROM_Init(CartInfo *info) {
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 }

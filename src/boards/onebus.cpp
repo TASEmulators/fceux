@@ -320,8 +320,7 @@ void UNLOneBus_Init(CartInfo *info) {
 		SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 		AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 		if (info->battery) {
-			info->SaveGame[0] = WRAM;
-			info->SaveGameLen[0] = WRAMSIZE;
+			info->addSaveGameBuf( WRAM, WRAMSIZE );
 		}
 	}
 }

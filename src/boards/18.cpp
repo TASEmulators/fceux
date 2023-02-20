@@ -24,7 +24,7 @@ static uint8 preg[4], creg[8];
 static uint8 IRQa, mirr;
 static int32 IRQCount, IRQLatch;
 static uint8 *WRAM = NULL;
-static uint32 WRAMSIZE;
+static uint32 WRAMSIZE=0;
 
 static SFORMAT StateRegs[] =
 {
@@ -125,8 +125,7 @@ void Mapper18_Init(CartInfo *info) {
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 	if (info->battery) {
-		info->SaveGame[0] = WRAM;
-		info->SaveGameLen[0] = WRAMSIZE;
+		info->addSaveGameBuf( WRAM, WRAMSIZE );
 	}
 
 	AddExState(&StateRegs, ~0, 0, 0);
