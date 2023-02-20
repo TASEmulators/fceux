@@ -1291,6 +1291,25 @@ int FCEUD_TraceLoggerStart(void)
 	return logging;
 }
 //----------------------------------------------------
+int FCEUD_TraceLoggerStop(void)
+{
+	if (!logging)
+	{
+		return 0;
+	}
+	if (traceLogWindow)
+	{
+		traceLogWindow->toggleLoggingOnOff();
+	}
+	else
+	{
+		logging = 0;
+		msleep(1);
+		pushMsgToLogBuffer("Logging Finished");
+	}
+	return logging;
+}
+//----------------------------------------------------
 int FCEUD_TraceLoggerRunning(void)
 {
 	return logging;

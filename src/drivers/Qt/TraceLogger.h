@@ -200,9 +200,9 @@ protected:
 private:
 public slots:
 	void closeWindow(void);
+	void toggleLoggingOnOff(void);
 private slots:
 	void updatePeriodic(void);
-	void toggleLoggingOnOff(void);
 	void autoUpdateStateChanged(int state);
 	void logToFileStateChanged(int state);
 	void logRegStateChanged(int state);
@@ -232,6 +232,7 @@ int initTraceLogBuffer(int maxRecs);
 
 void openTraceLoggerWindow(QWidget *parent);
 
+int FCEUD_TraceLoggerStop(void);
 int FCEUD_TraceLoggerStart(void);
 int FCEUD_TraceLoggerRunning(void);
 int FCEUD_TraceLoggerBackUpInstruction(void);

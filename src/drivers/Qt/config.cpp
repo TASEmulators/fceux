@@ -686,6 +686,7 @@ InitConfig()
 	config->addOption("SDL.DebuggerBreakOnBadOpcodes", 0);
 	config->addOption("SDL.DebuggerBreakOnUnloggedCode", 0);
 	config->addOption("SDL.DebuggerBreakOnUnloggedData", 0);
+	config->addOption("SDL.DebugAutoStartTraceLogger", 0);
 
 	// Code Data Logger Options
 	config->addOption("autoSaveCDL"  , "SDL.AutoSaveCDL", 1);

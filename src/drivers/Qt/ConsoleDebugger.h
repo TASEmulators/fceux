@@ -531,6 +531,7 @@ class ConsoleDebugger : public QDialog
 
 		int   selBmAddrVal;
 		bool  windowUpdateReq;
+		bool  startedTraceLogger;
 
 	private:
 		void setRegsFromEntry(void);
@@ -590,6 +591,7 @@ class ConsoleDebugger : public QDialog
 		void registerNameEnableCB(bool value);
 		void autoOpenDebugCB( bool value );
 		void debFileAutoLoadCB( bool value );
+		void autoStartTraceLoggerOnOpen(bool value);
 		void breakOnBadOpcodeCB(bool value);
 		void breakOnNewCodeCB(bool value);
 		void breakOnNewDataCB(bool value);

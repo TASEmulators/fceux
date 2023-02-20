@@ -106,6 +106,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 	QMenuBar    *menuBar;
 	QSettings settings;
 	std::string fontString;
+	bool autoStartTraceLogger = false;
 
 	g_config->getOption("SDL.DebuggerCpuStatusFont", &fontString);
 
@@ -210,8 +211,19 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
 
-	// Start Trace Logger for Step Back Function 
-	FCEUD_TraceLoggerStart();
+	g_config->getOption("SDL.DebugAutoStartTraceLogger", &autoStartTraceLogger);
+
+	startedTraceLogger = false;
+
+	if (autoStartTraceLogger)
+	{
+		// Start Trace Logger for Step Back Function 
+		if (!FCEUD_TraceLoggerRunning())
+		{
+			FCEUD_TraceLoggerStart();
+			startedTraceLogger = true;
+		}
+	}
 }
 //----------------------------------------------------------------------------
 ConsoleDebugger::~ConsoleDebugger(void)
@@ -222,6 +234,12 @@ ConsoleDebugger::~ConsoleDebugger(void)
 	periodicTimer->stop();
 
 	saveDisplayViews();
+
+	if (startedTraceLogger && FCEUD_TraceLoggerRunning() )
+	{
+		FCEUD_TraceLoggerStop();
+		startedTraceLogger = false;
+	}
 
 	if ( dbgWin == this )
 	{
@@ -822,15 +840,27 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	optMenu->addAction(act);
 
-	// Options -> Load .DEB
+	// Options -> Load .FDB
 	g_config->getOption( "SDL.AutoLoadDebugFiles", &opt );
 
-	act = new QAction(tr("&Load .DEB on ROM Load"), this);
+	act = new QAction(tr("&Load .FDB on ROM Load"), this);
 	//act->setShortcut(QKeySequence( tr("F7") ) );
-	act->setStatusTip(tr("&Load .DEB on ROM Load"));
+	act->setStatusTip(tr("&Load .FDB on ROM Load"));
 	act->setCheckable(true);
 	act->setChecked( opt ? true : false );
 	connect( act, SIGNAL(triggered(bool)), this, SLOT(debFileAutoLoadCB(bool)) );
+
+	optMenu->addAction(act);
+
+	// Options -> Auto Start Trace Logger
+	g_config->getOption( "SDL.DebugAutoStartTraceLogger", &opt );
+
+	act = new QAction(tr("Auto Start &Trace Logger on Debugger Open"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("Auto Start &Trace Logger on Debugger Open"));
+	act->setCheckable(true);
+	act->setChecked( opt ? true : false );
+	connect( act, SIGNAL(triggered(bool)), this, SLOT(autoStartTraceLoggerOnOpen(bool)) );
 
 	optMenu->addAction(act);
 
@@ -2654,6 +2684,13 @@ void ConsoleDebugger::debFileAutoLoadCB( bool value )
 	{
 		loadGameDebugBreakpoints();
 	}
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::autoStartTraceLoggerOnOpen( bool value )
+{
+	int autoStartTraceLogger = value;
+
+	g_config->setOption("SDL.DebugAutoStartTraceLogger", autoStartTraceLogger);
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::changeAsmFontCB(void)
