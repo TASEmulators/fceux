@@ -28,8 +28,11 @@
 #include "endian.h"
 #include "../emufile.h"
 
-//OMG ! configure this correctly
+#ifdef FCEU_BIG_ENDIAN
+#define LOCAL_BE
+#else
 #define LOCAL_LE
+#endif
 
 /* little endian to local endianess convert macros */
 #ifdef LOCAL_BE	/* local arch is big endian */
@@ -121,7 +124,7 @@ int read32le(uint32 *Bufo, FILE *fp)
 	uint32 buf;
 	if(fread(&buf,1,4,fp)<4)
 		return 0;
-#ifdef LSB_FIRST
+#ifdef FCEU_LITTLE_ENDIAN
 	*(uint32*)Bufo=buf;
 #else
 	*(uint32*)Bufo=((buf&0xFF)<<24)|((buf&0xFF00)<<8)|((buf&0xFF0000)>>8)|((buf&0xFF000000)>>24);
@@ -134,7 +137,7 @@ int read16le(uint16 *Bufo, std::istream *is)
 	uint16 buf;
 	if(is->read((char*)&buf,2).gcount() != 2)
 		return 0;
-#ifdef LSB_FIRST
+#ifdef FCEU_LITTLE_ENDIAN
 	*Bufo=buf;
 #else
 	*Bufo = FCEU_de16lsb((uint8*)&buf);
@@ -148,7 +151,7 @@ int read64le(uint64 *Bufo, std::istream *is)
 	uint64 buf;
 	if(is->read((char*)&buf,8).gcount() != 8)
 		return 0;
-#ifdef LSB_FIRST
+#ifdef FCEU_LITTLE_ENDIAN
 	*Bufo=buf;
 #else
 	*Bufo = FCEU_de64lsb((uint8*)&buf);
@@ -162,7 +165,7 @@ int read32le(uint32 *Bufo, std::istream *is)
 	uint32 buf;
 	if(is->read((char*)&buf,4).gcount() != 4)
 		return 0;
-#ifdef LSB_FIRST
+#ifdef FCEU_LITTLE_ENDIAN
 	*(uint32*)Bufo=buf;
 #else
 	*(uint32*)Bufo=((buf&0xFF)<<24)|((buf&0xFF00)<<8)|((buf&0xFF0000)>>8)|((buf&0xFF000000)>>24);
@@ -173,7 +176,7 @@ int read32le(uint32 *Bufo, std::istream *is)
 ///reads a little endian 16bit value from the specified file
 int read16le(char *d, FILE *fp)
 {
-#ifdef LSB_FIRST
+#ifdef FCEU_LITTLE_ENDIAN
 	return((fread(d,1,2,fp)<2)?0:2);
 #else
 	int ret;

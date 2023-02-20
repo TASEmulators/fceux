@@ -107,5 +107,13 @@ int writele(T *Bufo, EMUFILE*os)
 	}
 }
 
+#ifdef __BIG_ENDIAN__
+# define FCEU_BIG_ENDIAN
+#elif defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+# define FCEU_BIG_ENDIAN
+#else
+# define FCEU_LITTLE_ENDIAN
+#endif
+
 #endif //__FCEU_ENDIAN
 

@@ -152,7 +152,8 @@ static int SubWrite(EMUFILE* os, SFORMAT *sf)
 			os->fwrite(sf->desc,4);
 			write32le(sf->s&(~FCEUSTATE_FLAGS),os);
 
-#ifndef LSB_FIRST
+#ifdef FCEU_BIG_ENDIAN
+#pragma message("BSB!!!")
 			if(sf->s&RLSB)
 				FlipByteOrder((uint8*)sf->v,sf->s&(~FCEUSTATE_FLAGS));
 #endif
@@ -163,7 +164,7 @@ static int SubWrite(EMUFILE* os, SFORMAT *sf)
 				os->fwrite((char*)sf->v,sf->s&(~FCEUSTATE_FLAGS));
 
 			//Now restore the original byte order.
-#ifndef LSB_FIRST
+#ifdef FCEU_BIG_ENDIAN
 			if(sf->s&RLSB)
 				FlipByteOrder((uint8*)sf->v,sf->s&(~FCEUSTATE_FLAGS));
 #endif
@@ -231,7 +232,7 @@ static bool ReadStateChunk(EMUFILE* is, SFORMAT *sf, int size)
 			else
 				is->fread((char *)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
 
-#ifndef LSB_FIRST
+#ifdef FCEU_BIG_ENDIAN
 			if(tmp->s&RLSB)
 				FlipByteOrder((uint8*)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
 #endif

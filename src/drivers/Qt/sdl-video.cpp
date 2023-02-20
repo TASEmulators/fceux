@@ -47,10 +47,6 @@
 #include <cstring>
 #include <cstdlib>
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-#define  LSB_FIRST 
-#endif
-
 // GLOBALS
 extern Config *g_config;
 
@@ -286,7 +282,7 @@ int InitVideo(FCEUGI *gi)
 	}
 	nes_shm->video.pitch = nes_shm->video.ncol * 4;
 
-#ifdef LSB_FIRST
+#ifdef FCEU_BIG_ENDIAN
 	rmask = 0x00FF0000;
 	gmask = 0x0000FF00;
 	bmask = 0x000000FF;
