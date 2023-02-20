@@ -198,12 +198,13 @@ void UNROM512_Init(CartInfo *info) {
 	if(flash_save)
 	{
 		// Allocate memory for flash
-		flash_data = (uint8*)FCEU_gmalloc(PRGsize[ROM_CHIP]);
+		size_t flash_size = PRGsize[ROM_CHIP];
+		flash_data = (uint8*)FCEU_gmalloc(flash_size);
 		// Copy ROM to flash data
-		for (unsigned int i = 0; i < PRGsize[ROM_CHIP]; i++) {
-			flash_data[i] = PRGptr[ROM_CHIP][i % PRGsize[ROM_CHIP]];
+		for (size_t i = 0; i < flash_size; i++) {
+			flash_data[i] = PRGptr[ROM_CHIP][i];
 		}
-		SetupCartPRGMapping(FLASH_CHIP, flash_data, PRGsize[ROM_CHIP], 1);
+		SetupCartPRGMapping(FLASH_CHIP, flash_data, flash_size, 1);
 		// SaveGame is commented out due to movie issue where FCEU_ClearGameSave is clearing flash to zeros
 		//info->SaveGame[0] = flash_data;
 		//info->SaveGameLen[0] = PRGsize[ROM_CHIP];
@@ -212,13 +213,13 @@ void UNROM512_Init(CartInfo *info) {
 		flash_id[1] = 0xB5 + (ROM_size >> 4);
 		SetupCartPRGMapping(CFI_CHIP, flash_id, sizeof(flash_id), 0);
 
-		AddExState(flash_data, PRGsize[ROM_CHIP], 0, "FLSH");
-		AddExState(&flash_state, 1, 0, "FLST");
-		AddExState(&flash_id_mode, 1, 0, "FLMD");
+		AddExState(flash_data, flash_size, 0, "FLSH");
+		AddExState(&flash_state, sizeof(flash_state), 0, "FLST");
+		AddExState(&flash_id_mode, sizeof(flash_id_mode), 0, "FLMD");
 		AddExState(flash_buffer_a, sizeof(flash_buffer_a), 0, "FLBA");
 		AddExState(flash_buffer_v, sizeof(flash_buffer_v), 0, "FLBV");
 	}
-	AddExState(&latcha, 2, 0, "LATA");
-	AddExState(&latche, 1, 0, "LATC");
-	AddExState(&bus_conflict, 1, 0, "BUSC");
+	AddExState(&latcha, sizeof(latcha), 0, "LATA");
+	AddExState(&latche, sizeof(latche), 0, "LATC");
+	AddExState(&bus_conflict, sizeof(bus_conflict), 0, "BUSC");
 }

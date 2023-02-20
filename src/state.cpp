@@ -153,7 +153,6 @@ static int SubWrite(EMUFILE* os, SFORMAT *sf)
 			write32le(sf->s&(~FCEUSTATE_FLAGS),os);
 
 #ifdef FCEU_BIG_ENDIAN
-#pragma message("BSB!!!")
 			if(sf->s&RLSB)
 				FlipByteOrder((uint8*)sf->v,sf->s&(~FCEUSTATE_FLAGS));
 #endif
