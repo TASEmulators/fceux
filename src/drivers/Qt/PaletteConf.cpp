@@ -417,6 +417,7 @@ void PaletteConfDialog_t::use_Custom_Changed(int state)
 		{
 			FCEUI_SetUserPalette(NULL, 0);
 		}
+		palupdate = 1;
 		fceuWrapperUnLock();
 	}
 }
@@ -433,6 +434,7 @@ void PaletteConfDialog_t::force_GrayScale_Changed(int state)
 		g_config->getOption("SDL.Tint", &t);
 		force_grayscale = value ? true : false;
 		FCEUI_SetNTSCTH(e, t, h);
+		palupdate = 1;
 		fceuWrapperUnLock();
 
 		g_config->setOption("SDL.ForceGrayScale", force_grayscale);
@@ -615,6 +617,7 @@ void PaletteConfDialog_t::openPaletteFile(void)
 		{
 			printf("Error: Failed to Load Palette File: %s \n", filename.toStdString().c_str());
 		}
+		palupdate = 1;
 		fceuWrapperUnLock();
 
 		useCustom->setChecked(FCEUI_GetUserPaletteAvail());
