@@ -58,6 +58,7 @@ static void Mapper354_Sync(void)
 		setprg32(0x8000, prg >> 1 | 3);
 		break;
 	}
+	SetupCartCHRMapping(0, CHRptr[0], CHRsize[0], (latchAddr & 8) ? 0 : 1);
 	setchr8(0);
 	setmirror(latchData & 0x40 ? MI_H : MI_V);
 }
