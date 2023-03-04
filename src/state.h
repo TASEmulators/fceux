@@ -78,3 +78,9 @@ extern bool backupSavestates;		 //Whether or not to make backups, true by defaul
 bool CheckBackupSaveStateExist();	 //Checks if backupsavestate exists
 
 extern bool compressSavestates;		//Whether or not to compress non-movie savestates (by default, yes)
+
+int FCEU_StateRecorderStart(void);
+int FCEU_StateRecorderStop(void);
+int FCEU_StateRecorderUpdate(void);
+bool FCEU_StateRecorderRunning(void);
+bool FCEU_StateRecorderIsEnabled(void);

@@ -208,6 +208,8 @@ static void FCEU_CloseGame(void)
 
 		GameInterface(GI_CLOSE);
 
+		FCEU_StateRecorderStop();
+
 		FCEUI_StopMovie();
 
 		ResetExState(0, 0);
@@ -592,6 +594,12 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 	}
 
 	FCEU_fclose(fp);
+
+	if ( FCEU_StateRecorderIsEnabled() )
+	{
+		FCEU_StateRecorderStart();
+	}
+
 	return GameInfo;
 }
 
@@ -793,6 +801,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	AutoFire();
 	UpdateAutosave();
+	FCEU_StateRecorderUpdate();
 
 #ifdef _S9XLUA_H
 	FCEU_LuaFrameBoundary();
