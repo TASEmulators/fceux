@@ -1144,12 +1144,20 @@ https://wiki.nesdev.com/w/index.php/INES_Mapper_205 */
 
 static void M205PW(uint32 A, uint8 V) {
 	uint8 bank = V & ((EXPREGS[0] & 0x02) ? 0x0F : 0x1F);
-	setprg8(A, EXPREGS[0] << 4 | bank);
+	if (PRGsize[1]) {  // split-rom variant
+		setprg8r((EXPREGS[0] & 3) ? (EXPREGS[0] - 1) : 0, A, bank);
+	} else {
+		setprg8(A, EXPREGS[0] << 4 | bank);
+	}
 }
 
 static void M205CW(uint32 A, uint8 V) {
 	uint8 bank = V & ((EXPREGS[0] & 0x02) ? 0x7F : 0xFF);
-	setchr1(A, (EXPREGS[0] << 7) | bank);
+	if (CHRsize[1]) { // split-rom variant
+		setchr1r((EXPREGS[0] & 3) ? (EXPREGS[0] - 1) : 0, A, bank);
+	} else {
+		setchr1(A, (EXPREGS[0] << 7) | bank);
+	}
 }
 
 static DECLFW(M205Write) {
@@ -1175,7 +1183,7 @@ static void M205Power(void) {
 }
 
 void Mapper205_Init(CartInfo *info) {
-	GenMMC3_Init(info, 256, 128, 8, 0);
+	GenMMC3_Init(info, 256, 128, 0, 0);
 	pwrap = M205PW;
 	cwrap = M205CW;
 	info->Power = M205Power;
