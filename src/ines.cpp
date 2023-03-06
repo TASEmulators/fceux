@@ -689,7 +689,7 @@ BMAPPINGLocal bmap[] = {
 	{"",					171, Mapper171_Init},
 	{"",					172, Mapper172_Init},
 	{"",					173, Mapper173_Init},
-//	{"",					174, Mapper174_Init},
+	{"NTDec 5-in-1",		174, Mapper174_Init},
 	{"",					175, Mapper175_Init},
 	{"BMCFK23C",			176, BMCFK23C_Init},	// zero 26-may-2012 - well, i have some WXN junk games that use 176 for instance ????. i dont know what game uses this BMCFK23C as mapper 176. we'll have to make a note when we find it.
 	{"",					177, Mapper177_Init},
