@@ -689,7 +689,7 @@ BMAPPINGLocal bmap[] = {
 	{"",					171, Mapper171_Init},
 	{"",					172, Mapper172_Init},
 	{"",					173, Mapper173_Init},
-//	{"",					174, Mapper174_Init},
+	{"NTDec 5-in-1",		174, Mapper174_Init},
 	{"",					175, Mapper175_Init},
 	{"BMCFK23C",			176, BMCFK23C_Init},	// zero 26-may-2012 - well, i have some WXN junk games that use 176 for instance ????. i dont know what game uses this BMCFK23C as mapper 176. we'll have to make a note when we find it.
 	{"",					177, Mapper177_Init},
@@ -720,7 +720,7 @@ BMAPPINGLocal bmap[] = {
 	{"",					202, Mapper202_Init},
 	{"",					203, Mapper203_Init},
 	{"",					204, Mapper204_Init},
-	{"",					205, Mapper205_Init},
+	{"JC-016-2",			205, Mapper205_Init},
 	{"NAMCOT 108 Rev. C",	206, Mapper206_Init},	// Deprecated, Used to be "DEIROM" whatever it means, but actually simple version of MMC3
 	{"TAITO X1-005 Rev. B",	207, Mapper207_Init},
 	{"",					208, Mapper208_Init},
@@ -788,6 +788,8 @@ BMAPPINGLocal bmap[] = {
 	{"HP10xx/H20xx Boards",	260, BMCHPxx_Init},
 	{"810544-CA-1",			261, BMC810544CA1_Init},
 	{"AA6023/AA6023B",		268, AA6023_Init},
+	{"OK-411",				361, GN45_Init},
+	{"GN-45",				366, GN45_Init},
 	{"COOLGIRL",			342, COOLGIRL_Init },
 	{"FAM250/81-01-39-C/SCHI-24",			354, Mapper354_Init },
 
