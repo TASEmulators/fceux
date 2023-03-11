@@ -295,6 +295,12 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 		case HK_SELECT_STATE_PREV:
 			name = "SelectStatePrev"; keySeq = ""; title = "Select Previous State Slot"; group = "State";
 		break;
+		case HK_LOAD_PREV_STATE:
+			name = "LoadPrevState"; keySeq = ""; title = "Load Previous Recorded State"; group = "State";
+		break;
+		case HK_LOAD_NEXT_STATE:
+			name = "LoadNextState"; keySeq = ""; title = "Load Next Recorded State"; group = "State";
+		break;
 		case HK_VOLUME_MUTE:
 			name = "VolumeMute"; keySeq = ""; title = "Sound Volume Mute"; group = "Sound";
 		break;

@@ -53,6 +53,7 @@
 #include "../../input.h"
 #include "../../movie.h"
 #include "../../wave.h"
+#include "../../state.h"
 #include "../../version.h"
 #include "common/os_utils.h"
 
@@ -920,6 +921,9 @@ void consoleWin_t::initHotKeys(void)
 	connect( Hotkeys[ HK_LOAD_STATE_7         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState7(void))        );
 	connect( Hotkeys[ HK_LOAD_STATE_8         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState8(void))        );
 	connect( Hotkeys[ HK_LOAD_STATE_9         ].getShortcut(), SIGNAL(activated()), this, SLOT(loadState9(void))        );
+
+	connect( Hotkeys[ HK_LOAD_PREV_STATE      ].getShortcut(), SIGNAL(activated()), this, SLOT(loadPrevState(void))     );
+	connect( Hotkeys[ HK_LOAD_NEXT_STATE      ].getShortcut(), SIGNAL(activated()), this, SLOT(loadNextState(void))     );
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::createMainMenu(void)
@@ -2728,6 +2732,20 @@ void consoleWin_t::loadState6(void){ loadState(6); }
 void consoleWin_t::loadState7(void){ loadState(7); }
 void consoleWin_t::loadState8(void){ loadState(8); }
 void consoleWin_t::loadState9(void){ loadState(9); }
+
+void consoleWin_t::loadPrevState(void)
+{
+	FCEU_WRAPPER_LOCK();
+	FCEU_StateRecorderLoadState( FCEU_StateRecorderGetStateIndex()-1 );
+	FCEU_WRAPPER_UNLOCK();
+}
+
+void consoleWin_t::loadNextState(void)
+{
+	FCEU_WRAPPER_LOCK();
+	FCEU_StateRecorderLoadState( FCEU_StateRecorderGetStateIndex()-1 );
+	FCEU_WRAPPER_UNLOCK();
+}
 
 void consoleWin_t::quickSave(void)
 {

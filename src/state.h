@@ -84,3 +84,5 @@ int FCEU_StateRecorderStop(void);
 int FCEU_StateRecorderUpdate(void);
 bool FCEU_StateRecorderRunning(void);
 bool FCEU_StateRecorderIsEnabled(void);
+int FCEU_StateRecorderGetStateIndex(void);
+int FCEU_StateRecorderLoadState(int snapIndex);

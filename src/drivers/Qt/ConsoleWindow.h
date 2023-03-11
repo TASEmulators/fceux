@@ -439,6 +439,8 @@ class  consoleWin_t : public QMainWindow
 		void loadState7(void);
 		void loadState8(void);
 		void loadState9(void);
+		void loadPrevState(void);
+		void loadNextState(void);
 		void mainMenuOpen(void);
 		void mainMenuClose(void);
 		void warnAmbiguousShortcut( QShortcut*);

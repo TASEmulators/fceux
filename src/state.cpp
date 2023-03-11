@@ -1202,6 +1202,9 @@ class StateRecorder
 			frameCounter = 0;
 			framesPerSnap = 3 * 60;
 			compressionLevel = Z_NO_COMPRESSION;
+			lastState = ringHead;
+			loadIndexReset = false;
+			lastLoadFrame = 0;
 		}
 
 		~StateRecorder(void)
@@ -1215,9 +1218,22 @@ class StateRecorder
 
 		void update(void)
 		{
+			bool isPaused = FCEUI_EmulationPaused() ? true : false;
+
 			unsigned int curFrame = static_cast<unsigned int>(currFrameCounter);
 
-			if (curFrame != frameCounter)
+			if (!isPaused && loadIndexReset)
+			{
+				int ringBufSize = static_cast<int>( ringBuf.size() );
+
+				ringHead = (lastState + 1) % ringBufSize;
+
+				frameCounter = curFrame;
+
+				loadIndexReset = false;
+			}
+
+			if (!isPaused && (curFrame > frameCounter) )
 			{
 				frameCounter = curFrame;
 
@@ -1233,17 +1249,19 @@ class StateRecorder
 
 					//printf("Frame:%u  Save:%i  Size:%zu  Total:%zukB \n", frameCounter, ringHead, em->size(), dataSize() / 1024 );
 
+					lastState = ringHead;
+
 					ringHead = (ringHead + 1) % ringBufSize;
 
 					if (ringStart == ringHead)
-					{	// Buffer Overrun
+					{
 						ringStart = (ringHead + 1) % ringBufSize;
 					}
 				}
 			}
 		}
 
-		int loadState( int numSnapsFromLatest )
+		int loadStateRelativeToEnd( int numSnapsFromLatest )
 		{
 			int ringBufSize = static_cast<int>( ringBuf.size() );
 
@@ -1255,16 +1273,41 @@ class StateRecorder
 
 			int snapIdx = ringHead - numSnapsFromLatest - 1;
 
+			loadStateByIndex(snapIdx);
+
+			return 0;
+		}
+
+		int loadStateByIndex( int snapIdx )
+		{
+			int ringBufSize = static_cast<int>( ringBuf.size() );
+
 			if (snapIdx < 0)
 			{
 				snapIdx = snapIdx + ringBufSize;
 			}
+			snapIdx = snapIdx % ringBufSize;
 
 			EMUFILE_MEMORY *em = ringBuf[ snapIdx ];
 
 			FCEUSS_LoadFP( em, SSLOADPARAM_NOBACKUP );
 
+			frameCounter = lastLoadFrame = static_cast<unsigned int>(currFrameCounter);
+
+			lastState = snapIdx;
+			loadIndexReset = true;
+
 			return 0;
+		}
+
+		int getHeadIndex(void)
+		{
+			return ringHead;
+		}
+
+		int getStartIndex(void)
+		{
+			return ringStart;
 		}
 
 		int numSnapsSaved(void)
@@ -1284,6 +1327,7 @@ class StateRecorder
 		}
 
 		static bool enabled;
+		static int  lastState;
 	private:
 
 		void doSnap(void)
@@ -1298,11 +1342,14 @@ class StateRecorder
 		int  compressionLevel;
 		unsigned int frameCounter;
 		unsigned int framesPerSnap;
+		unsigned int lastLoadFrame;
+		bool loadIndexReset;
 
 };
 
 static StateRecorder *stateRecorder = nullptr;
 bool StateRecorder::enabled = false;
+int StateRecorder::lastState = 0;
 
 int FCEU_StateRecorderStart(void)
 {
@@ -1339,4 +1386,18 @@ bool FCEU_StateRecorderIsEnabled(void)
 bool FCEU_StateRecorderRunning(void)
 {
 	return stateRecorder != nullptr;
+}
+
+int FCEU_StateRecorderLoadState(int snapIndex)
+{
+	if (stateRecorder != nullptr)
+	{
+		stateRecorder->loadStateByIndex(snapIndex);
+	}
+	return 0;
+}
+
+int FCEU_StateRecorderGetStateIndex(void)
+{
+	return StateRecorder::lastState;
 }
