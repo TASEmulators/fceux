@@ -220,6 +220,23 @@ void Mapper92_Init(CartInfo *info) {
 	Latch_Init(info, M92Sync, NULL, 0x80B0, 0x8000, 0xFFFF, 0);
 }
 
+//------------------ Map 174 ---------------------------
+
+static void M174Sync(void) {
+	if (latche & 0x80) {
+		setprg32(0x8000, (latche >> 5) & 3);
+	} else {
+		setprg16(0x8000, (latche >> 4) & 7);
+		setprg16(0xC000, (latche >> 4) & 7);
+	}
+	setchr8((latche >> 1) & 7);
+	setmirror((latche & 1) ^ 1);
+}
+
+void Mapper174_Init(CartInfo *info) {
+	Latch_Init(info, M174Sync, NULL, 0, 0x8000, 0xFFFF, 0);
+}
+
 //------------------ Map 200 ---------------------------
 
 static void M200Sync(void) {
