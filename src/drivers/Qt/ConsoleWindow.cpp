@@ -79,6 +79,7 @@
 #include "Qt/MoviePlay.h"
 #include "Qt/MovieRecord.h"
 #include "Qt/MovieOptions.h"
+#include "Qt/StateRecorderConf.h"
 #include "Qt/TimingConf.h"
 #include "Qt/FrameTimingStats.h"
 #include "Qt/LuaControl.h"
@@ -1217,6 +1218,15 @@ void consoleWin_t::createMainMenu(void)
 	connect(timingConfig, SIGNAL(triggered()), this, SLOT(openTimingConfWin(void)) );
 	
 	optMenu->addAction(timingConfig);
+
+	// Options -> State Recorder Config
+	stateRecordConfig = new QAction(tr("&State Recorder Config"), this);
+	//stateRecordConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
+	stateRecordConfig->setStatusTip(tr("State Recorder Configure"));
+	stateRecordConfig->setIcon( QIcon(":icons/media-record.png") );
+	connect(stateRecordConfig, SIGNAL(triggered()), this, SLOT(openStateRecorderConfWin(void)) );
+	
+	optMenu->addAction(stateRecordConfig);
 
 	// Options -> Movie Options
 	movieConfig = new QAction(tr("&Movie Options"), this);
@@ -3862,6 +3872,15 @@ void consoleWin_t::toggleForeground(void)
 void consoleWin_t::toggleTurboMode(void)
 {
 	NoWaiting ^= 1;
+}
+
+void consoleWin_t::openStateRecorderConfWin(void)
+{
+	StateRecorderDialog_t *win;
+
+	win = new StateRecorderDialog_t(this);
+
+	win->show();
 }
 
 void consoleWin_t::openMovie(void)
