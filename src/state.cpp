@@ -1185,23 +1185,23 @@ void RedoLoadState()
 //----------- Save State History ----------------
 //-----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
+static StateRecorderConfigData stateRecorderConfig;
+
 class StateRecorder
 {
 	public:
 		StateRecorder(void)
 		{
-			size_t ringBufSize = 60;
+			loadConfig( stateRecorderConfig );
 
-			for (size_t i=0; i<ringBufSize; i++)
+			for (int i=0; i<ringBufSize; i++)
 			{
-				EMUFILE_MEMORY *em = new EMUFILE_MEMORY( 0x10000 );
+				EMUFILE_MEMORY *em = new EMUFILE_MEMORY( 0x1000 );
 
 				ringBuf.push_back(em);
 			}
 			ringStart = ringHead = ringTail = 0;
 			frameCounter = 0;
-			framesPerSnap = 3 * 60;
-			compressionLevel = Z_NO_COMPRESSION;
 			lastState = ringHead;
 			loadIndexReset = false;
 			lastLoadFrame = 0;
@@ -1216,6 +1216,35 @@ class StateRecorder
 			ringBuf.clear();
 		}
 
+		void loadConfig( StateRecorderConfigData &config )
+		{
+			if (config.timeBetweenSnapsMinutes < 0.0)
+			{
+				config.timeBetweenSnapsMinutes = 3.0f / 60.0f;
+			}
+			if (config.timeBetweenSnapsMinutes > config.historyDurationMinutes)
+			{
+				config.historyDurationMinutes = config.timeBetweenSnapsMinutes;
+			}
+			const double fhistMin  = config.historyDurationMinutes;
+			const double fsnapMin  = config.timeBetweenSnapsMinutes;
+			const double fnumSnaps = fhistMin / fsnapMin;
+
+			ringBufSize = static_cast<int>( fnumSnaps + 0.5f );
+
+			int32_t fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
+
+			double hz = ( ((double)fps) / 16777216.0 );
+
+			double framesPerSnapf = hz * fsnapMin * 60.0;
+
+			framesPerSnap = static_cast<unsigned int>( framesPerSnapf + 0.50 );
+
+			printf("ringBufSize:%i  framesPerSnap:%i\n", ringBufSize, framesPerSnap );
+
+			compressionLevel = stateRecorderConfig.compressionLevel;
+		}
+
 		void update(void)
 		{
 			bool isPaused = FCEUI_EmulationPaused() ? true : false;
@@ -1224,8 +1253,6 @@ class StateRecorder
 
 			if (!isPaused && loadIndexReset)
 			{
-				int ringBufSize = static_cast<int>( ringBuf.size() );
-
 				ringHead = (lastState + 1) % ringBufSize;
 
 				frameCounter = curFrame;
@@ -1239,8 +1266,6 @@ class StateRecorder
 
 				if ( (frameCounter % framesPerSnap) == 0 )
 				{
-					int ringBufSize = static_cast<int>( ringBuf.size() );
-
 					EMUFILE_MEMORY *em = ringBuf[ ringHead ];
 
 					em->set_len(0);
@@ -1263,8 +1288,6 @@ class StateRecorder
 
 		int loadStateRelativeToEnd( int numSnapsFromLatest )
 		{
-			int ringBufSize = static_cast<int>( ringBuf.size() );
-
 			if (numSnapsFromLatest < 0)
 			{
 				numSnapsFromLatest = 0;
@@ -1280,8 +1303,6 @@ class StateRecorder
 
 		int loadStateByIndex( int snapIdx )
 		{
-			int ringBufSize = static_cast<int>( ringBuf.size() );
-
 			if (snapIdx < 0)
 			{
 				snapIdx = snapIdx + ringBufSize;
@@ -1339,6 +1360,7 @@ class StateRecorder
 		int  ringHead;
 		int  ringTail;
 		int  ringStart;
+		int  ringBufSize;
 		int  compressionLevel;
 		unsigned int frameCounter;
 		unsigned int framesPerSnap;
@@ -1383,6 +1405,11 @@ bool FCEU_StateRecorderIsEnabled(void)
 	return StateRecorder::enabled;
 }
 
+void FCEU_StateRecorderSetEnabled(bool enabled)
+{
+	StateRecorder::enabled = enabled;
+}
+
 bool FCEU_StateRecorderRunning(void)
 {
 	return stateRecorder != nullptr;
@@ -1400,4 +1427,14 @@ int FCEU_StateRecorderLoadState(int snapIndex)
 int FCEU_StateRecorderGetStateIndex(void)
 {
 	return StateRecorder::lastState;
+}
+
+const StateRecorderConfigData& FCEU_StateRecorderGetConfigData(void)
+{
+	return stateRecorderConfig;
+}
+int FCEU_StateRecorderSetConfigData(const StateRecorderConfigData &newConfig)
+{
+	stateRecorderConfig = newConfig;
+	return 0;
 }

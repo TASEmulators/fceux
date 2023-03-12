@@ -43,5 +43,7 @@ protected:
 public slots:
 	void closeWindow(void);
 private slots:
-
+	void applyChanges(void);
+	void spinBoxValueChanged(int newValue);
+	void enableChanged(int);
 };

@@ -52,6 +52,7 @@
 #include "../../fceu.h"
 #include "../../cheat.h"
 #include "../../movie.h"
+#include "../../state.h"
 #include "../../version.h"
 
 #ifdef _S9XLUA_H
@@ -971,6 +972,12 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	
 	// load the hotkeys from the config life
 	setHotKeys();
+
+	// Initialize the State Recorder
+	bool srEnable = false;
+	g_config->getOption("SDL.StateRecorderEnable", &srEnable);
+
+	FCEU_StateRecorderSetEnabled( srEnable );
 
 	if (romIndex >= 0)
 	{

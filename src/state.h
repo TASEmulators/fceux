@@ -79,10 +79,27 @@ bool CheckBackupSaveStateExist();	 //Checks if backupsavestate exists
 
 extern bool compressSavestates;		//Whether or not to compress non-movie savestates (by default, yes)
 
+struct StateRecorderConfigData
+{
+	float historyDurationMinutes;
+	float timeBetweenSnapsMinutes;
+	int   compressionLevel;
+
+	StateRecorderConfigData(void)
+	{
+		historyDurationMinutes = 15.0f;
+		timeBetweenSnapsMinutes = 3.0f / 60.0f;
+		compressionLevel = 0;
+	}
+};
+
 int FCEU_StateRecorderStart(void);
 int FCEU_StateRecorderStop(void);
 int FCEU_StateRecorderUpdate(void);
 bool FCEU_StateRecorderRunning(void);
 bool FCEU_StateRecorderIsEnabled(void);
+void FCEU_StateRecorderSetEnabled(bool enabled);
 int FCEU_StateRecorderGetStateIndex(void);
 int FCEU_StateRecorderLoadState(int snapIndex);
+int FCEU_StateRecorderSetConfigData(const StateRecorderConfigData &newConfig);
+const StateRecorderConfigData& FCEU_StateRecorderGetConfigData(void);

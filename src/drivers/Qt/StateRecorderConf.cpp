@@ -28,6 +28,7 @@
 #include <QGridLayout>
 #include <QSettings>
 
+#include "Qt/fceuWrapper.h"
 #include "Qt/StateRecorderConf.h"
 
 #include "../../fceu.h"
@@ -54,6 +55,10 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	snapSeconds     = new QSpinBox();
 	historyDuration = new QSpinBox();
 
+	recorderEnable->setChecked( FCEU_StateRecorderIsEnabled() );
+
+	connect( recorderEnable, SIGNAL(stateChanged(int)), this, SLOT(enableChanged(int)) );
+
 	snapSeconds->setMinimum(0);
 	snapSeconds->setMaximum(60);
 	snapSeconds->setValue(3);
@@ -63,6 +68,10 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	historyDuration->setMinimum(1);
 	historyDuration->setMaximum(180);
 	historyDuration->setValue(15);
+
+	connect(     snapSeconds, SIGNAL(valueChanged(int)), this, SLOT(spinBoxValueChanged(int)) );
+	connect(     snapMinutes, SIGNAL(valueChanged(int)), this, SLOT(spinBoxValueChanged(int)) );
+	connect( historyDuration, SIGNAL(valueChanged(int)), this, SLOT(spinBoxValueChanged(int)) );
 
 	frame = new QGroupBox(tr("Retain History For:"));
 	hbox  = new QHBoxLayout();
@@ -131,6 +140,9 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	closeButton->setIcon( style()->standardIcon( QStyle::SP_DialogCloseButton ) );
 	applyButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton ) );
 
+	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+	connect(applyButton, SIGNAL(clicked(void)), this, SLOT(applyChanges(void)));
+
 	hbox->addWidget(applyButton, 1);
 	hbox->addStretch(8);
 	hbox->addWidget(closeButton, 1);
@@ -162,6 +174,26 @@ void StateRecorderDialog_t::closeWindow(void)
 	settings.setValue("stateRecorderWindow/geometry", saveGeometry());
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::applyChanges(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::enableChanged(int val)
+{
+	bool ena = val ? true : false;
+
+	FCEU_StateRecorderSetEnabled( ena );
+
+	g_config->setOption("SDL.StateRecorderEnable", ena);
+	g_config->save();
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::spinBoxValueChanged(int newValue)
+{
+	recalcMemoryUsage();
 }
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::recalcMemoryUsage(void)
