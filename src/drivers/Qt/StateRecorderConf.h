@@ -37,6 +37,7 @@ protected:
 	QLineEdit   *totalMemUsageLbl;
 	QPushButton *applyButton;
 	QPushButton *closeButton;
+	QComboBox   *cmprLvlCbox;
 
 	void recalcMemoryUsage(void);
 

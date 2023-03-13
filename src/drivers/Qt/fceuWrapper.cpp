@@ -974,11 +974,30 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	setHotKeys();
 
 	// Initialize the State Recorder
-	bool srEnable = false;
-	g_config->getOption("SDL.StateRecorderEnable", &srEnable);
+	{
+		bool srEnable = false;
+		int srHistDurMin = 15;
+		int srTimeBtwSnapsMin = 0;
+		int srTimeBtwSnapsSec = 3;
+		int srCompressionLevel = 0;
+		g_config->getOption("SDL.StateRecorderEnable", &srEnable);
+		g_config->getOption("SDL.StateRecorderHistoryDurationMin", &srHistDurMin);
+		g_config->getOption("SDL.StateRecorderTimeBetweenSnapsMin", &srTimeBtwSnapsMin);
+		g_config->getOption("SDL.StateRecorderTimeBetweenSnapsSec", &srTimeBtwSnapsSec);
+		g_config->getOption("SDL.StateRecorderCompressionLevel", &srCompressionLevel);
 
-	FCEU_StateRecorderSetEnabled( srEnable );
+		StateRecorderConfigData srConfig;
 
+		srConfig.historyDurationMinutes = srHistDurMin;
+		srConfig.timeBetweenSnapsMinutes = static_cast<float>( srTimeBtwSnapsMin ) +
+			                          ( static_cast<float>( srTimeBtwSnapsSec ) / 60.0f );
+		srConfig.compressionLevel = srCompressionLevel;
+
+		FCEU_StateRecorderSetEnabled( srEnable );
+		FCEU_StateRecorderSetConfigData( srConfig );
+	}
+
+	// Rom Load
 	if (romIndex >= 0)
 	{
 		QFileInfo fi( argv[romIndex] );

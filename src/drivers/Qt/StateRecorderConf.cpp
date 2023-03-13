@@ -44,6 +44,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	QGroupBox *frame, *frame1;
 	QGridLayout *grid, *memStatsGrid;
 	QSettings settings;
+	int opt;
 
 	setWindowTitle("State Recorder Config");
 
@@ -61,13 +62,22 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 
 	snapSeconds->setMinimum(0);
 	snapSeconds->setMaximum(60);
-	snapSeconds->setValue(3);
 	snapMinutes->setMinimum(0);
 	snapMinutes->setMaximum(60);
-	snapMinutes->setValue(0);
 	historyDuration->setMinimum(1);
 	historyDuration->setMaximum(180);
-	historyDuration->setValue(15);
+
+	opt = 15;
+	g_config->getOption("SDL.StateRecorderHistoryDurationMin", &opt );
+	historyDuration->setValue(opt);
+
+	opt = 0;
+	g_config->getOption("SDL.StateRecorderTimeBetweenSnapsMin", &opt);
+	snapMinutes->setValue(opt);
+
+	opt = 3;
+	g_config->getOption("SDL.StateRecorderTimeBetweenSnapsSec", &opt);
+	snapSeconds->setValue(opt);
 
 	connect(     snapSeconds, SIGNAL(valueChanged(int)), this, SLOT(spinBoxValueChanged(int)) );
 	connect(     snapMinutes, SIGNAL(valueChanged(int)), this, SLOT(spinBoxValueChanged(int)) );
@@ -84,10 +94,34 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	grid->addWidget( recorderEnable, 0, 0 );
 	grid->addWidget( frame         , 1, 0 );
 
+	frame = new QGroupBox(tr("Compression Level:"));
+	hbox  = new QHBoxLayout();
+
+	cmprLvlCbox = new QComboBox();
+	cmprLvlCbox->addItem( tr("0 - None"), 0 );
+	cmprLvlCbox->addItem( tr("1"), 1 );
+	cmprLvlCbox->addItem( tr("2"), 2 );
+	cmprLvlCbox->addItem( tr("3"), 3 );
+	cmprLvlCbox->addItem( tr("4"), 4 );
+	cmprLvlCbox->addItem( tr("5"), 5 );
+	cmprLvlCbox->addItem( tr("6"), 6 );
+	cmprLvlCbox->addItem( tr("7"), 7 );
+	cmprLvlCbox->addItem( tr("8"), 8 );
+	cmprLvlCbox->addItem( tr("9 - Max"), 9 );
+
+	opt = 0;
+	g_config->getOption("SDL.StateRecorderCompressionLevel", &opt);
+	cmprLvlCbox->setCurrentIndex(opt);
+
+	hbox->addWidget(cmprLvlCbox);
+
+	frame->setLayout(hbox);
+	grid->addWidget( frame, 1, 1 );
+
 	frame1 = new QGroupBox(tr("Time Between Snapshots:"));
 	hbox1  = new QHBoxLayout();
 	frame1->setLayout(hbox1);
-	grid->addWidget( frame1, 2, 0 );
+	grid->addWidget( frame1, 2, 0, 1, 2 );
 
 	frame  = new QGroupBox();
 	hbox   = new QHBoxLayout();
@@ -118,7 +152,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	  snapMemSizeLbl->setReadOnly(true);
 	totalMemUsageLbl->setReadOnly(true);
 
-	grid->addWidget(frame, 1, 2, 2, 2);
+	grid->addWidget(frame, 1, 3, 2, 2);
 	frame->setLayout(memStatsGrid);
 	memStatsGrid->addWidget( new QLabel( tr("Number of\nSnapshots:") ), 0, 0 );
 	memStatsGrid->addWidget( numSnapsLbl, 0, 1 );
@@ -178,16 +212,38 @@ void StateRecorderDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::applyChanges(void)
 {
+	StateRecorderConfigData config;
 
+	config.historyDurationMinutes = static_cast<float>( historyDuration->value() );
+	config.timeBetweenSnapsMinutes = static_cast<float>( snapMinutes->value() ) +
+		                          ( static_cast<float>( snapSeconds->value() ) / 60.0f );
+	config.compressionLevel = cmprLvlCbox->currentData().toInt();
+
+	FCEU_WRAPPER_LOCK();
+	FCEU_StateRecorderSetEnabled( recorderEnable->isChecked() );
+	FCEU_StateRecorderSetConfigData( config );
+	if (FCEU_StateRecorderRunning())
+	{
+		// TODO restart with new settings
+	}
+	FCEU_WRAPPER_UNLOCK();
+
+	g_config->setOption("SDL.StateRecorderHistoryDurationMin", historyDuration->value() );
+	g_config->setOption("SDL.StateRecorderTimeBetweenSnapsMin", snapMinutes->value() );
+	g_config->setOption("SDL.StateRecorderTimeBetweenSnapsSec", snapSeconds->value() );
+	g_config->setOption("SDL.StateRecorderEnable", recorderEnable->isChecked() );
+	g_config->save();
 }
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::enableChanged(int val)
 {
 	bool ena = val ? true : false;
 
+	FCEU_WRAPPER_LOCK();
 	FCEU_StateRecorderSetEnabled( ena );
+	FCEU_WRAPPER_UNLOCK();
 
-	g_config->setOption("SDL.StateRecorderEnable", ena);
+	g_config->setOption("SDL.StateRecorderEnable", ena );
 	g_config->save();
 }
 //----------------------------------------------------------------------------
@@ -218,12 +274,16 @@ void StateRecorderDialog_t::recalcMemoryUsage(void)
 
 	if (GameInfo)
 	{
+		FCEU_WRAPPER_LOCK();
+
 		EMUFILE_MEMORY em;
 		int compressionLevel = 0;
 
 		FCEUSS_SaveMS( &em, compressionLevel );
 
 		fsnapSize = static_cast<float>( em.size() ) / 1024.0f;
+
+		FCEU_WRAPPER_UNLOCK();
 	}
 
 	if (fsnapSize >= oneKiloByte)

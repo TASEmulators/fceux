@@ -758,6 +758,7 @@ InitConfig()
 	config->addOption("SDL.StateRecorderHistoryDurationMin", 15);
 	config->addOption("SDL.StateRecorderTimeBetweenSnapsMin", 0);
 	config->addOption("SDL.StateRecorderTimeBetweenSnapsSec", 3);
+	config->addOption("SDL.StateRecorderCompressionLevel", 0);
 
 	//TODO implement this
 	config->addOption("periodicsaves", "SDL.PeriodicSaves", 0);
