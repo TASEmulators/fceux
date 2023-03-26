@@ -17,6 +17,7 @@
 /output/auxlib.lua
 /output/fceux.pdb
 /output/7z.dll
+/output/7z_64.dll
 /output/fceux.exe
 /output/fceux.exp
 /output/fceux.lib
