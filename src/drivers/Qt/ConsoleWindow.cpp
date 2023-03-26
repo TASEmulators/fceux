@@ -786,9 +786,21 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 		QFileInfo fi( filename );
 		QString suffix = fi.suffix();
 
+		bool isStateSaveFile = (suffix.size() == 3) && 
+						(suffix[0] == 'f') && (suffix[1] == 'c') &&
+							( (suffix[2] == 's') || suffix[2].isDigit() );
+
 		//printf("DragNDrop Suffix: %s\n", suffix.toStdString().c_str() );
 
-		if ( suffix.compare("lua", Qt::CaseInsensitive) == 0 )
+		if (isStateSaveFile)
+		{
+			FCEU_WRAPPER_LOCK();
+			FCEUI_LoadState( filename.toStdString().c_str() );
+			FCEU_WRAPPER_UNLOCK();
+
+			event->accept();
+		}
+		else if ( suffix.compare("lua", Qt::CaseInsensitive) == 0 )
 		{
 			int luaLoadSuccess;
 
