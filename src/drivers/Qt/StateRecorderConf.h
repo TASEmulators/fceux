@@ -31,13 +31,18 @@ protected:
 	QSpinBox    *snapMinutes;
 	QSpinBox    *snapSeconds;
 	QSpinBox    *historyDuration;
+	QSpinBox    *pauseDuration;
 	QCheckBox   *recorderEnable;
 	QLineEdit   *numSnapsLbl;
 	QLineEdit   *snapMemSizeLbl;
 	QLineEdit   *totalMemUsageLbl;
+	QLineEdit   *saveTimeLbl;
 	QPushButton *applyButton;
 	QPushButton *closeButton;
 	QComboBox   *cmprLvlCbox;
+	QComboBox   *pauseOnLoadCbox;
+
+	double       saveTimeMs;
 
 	void recalcMemoryUsage(void);
 
@@ -47,4 +52,5 @@ private slots:
 	void applyChanges(void);
 	void spinBoxValueChanged(int newValue);
 	void enableChanged(int);
+	void compressionLevelChanged(int newValue);
 };

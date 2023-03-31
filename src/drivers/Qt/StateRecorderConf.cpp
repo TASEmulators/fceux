@@ -28,6 +28,7 @@
 #include <QGridLayout>
 #include <QSettings>
 
+#include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/StateRecorderConf.h"
 
@@ -39,7 +40,7 @@
 StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	: QDialog(parent)
 {
-	QVBoxLayout *mainLayout;
+	QVBoxLayout *mainLayout, *vbox1;
 	QHBoxLayout *hbox, *hbox1;
 	QGroupBox *frame, *frame1;
 	QGridLayout *grid, *memStatsGrid;
@@ -113,6 +114,8 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	g_config->getOption("SDL.StateRecorderCompressionLevel", &opt);
 	cmprLvlCbox->setCurrentIndex(opt);
 
+	connect( cmprLvlCbox, SIGNAL(currentIndexChanged(int)), this, SLOT(compressionLevelChanged(int)) );
+
 	hbox->addWidget(cmprLvlCbox);
 
 	frame->setLayout(hbox);
@@ -141,16 +144,45 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 
 	frame->setLayout(hbox);
 
+	frame1 = new QGroupBox(tr("Pause on Load:"));
+	vbox1  = new QVBoxLayout();
+	frame1->setLayout(vbox1);
+
+	pauseOnLoadCbox = new QComboBox();
+	pauseOnLoadCbox->addItem( tr("No"), 0 );
+	pauseOnLoadCbox->addItem( tr("Temporary"), 1 );
+	pauseOnLoadCbox->addItem( tr("Full"), 2 );
+
+	pauseDuration = new QSpinBox();
+	pauseDuration->setMinimum(0);
+	pauseDuration->setMaximum(60);
+	pauseDuration->setValue(3); // TODO
+
+	vbox1->addWidget(pauseOnLoadCbox);
+
+	frame = new QGroupBox( tr("Duration:") );
+	hbox  = new QHBoxLayout();
+
+	vbox1->addWidget(frame);
+	hbox->addWidget( pauseDuration);
+	hbox->addWidget( new QLabel( tr("Seconds") ) );
+
+	frame->setLayout(hbox);
+
+	grid->addWidget(frame1, 3, 0, 2, 1);
+
 	frame = new QGroupBox( tr("Memory Usage:") );
 	memStatsGrid = new QGridLayout();
 
 	numSnapsLbl      = new QLineEdit();
 	snapMemSizeLbl   = new QLineEdit();
 	totalMemUsageLbl = new QLineEdit();
+	saveTimeLbl      = new QLineEdit();
 
 	     numSnapsLbl->setReadOnly(true);
 	  snapMemSizeLbl->setReadOnly(true);
 	totalMemUsageLbl->setReadOnly(true);
+	     saveTimeLbl->setReadOnly(true);
 
 	grid->addWidget(frame, 1, 3, 2, 2);
 	frame->setLayout(memStatsGrid);
@@ -162,6 +194,15 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 
 	memStatsGrid->addWidget( new QLabel( tr("Total Size:") ), 2, 0 );
 	memStatsGrid->addWidget( totalMemUsageLbl, 2, 1 );
+
+	frame = new QGroupBox( tr("CPU Usage:") );
+	hbox  = new QHBoxLayout();
+	frame->setLayout(hbox);
+
+	hbox->addWidget(new QLabel(tr("Save Time:")));
+	hbox->addWidget(saveTimeLbl);
+
+	grid->addWidget(frame, 3, 3, 1, 1);
 
 	mainLayout->addLayout(grid);
 
@@ -218,6 +259,7 @@ void StateRecorderDialog_t::applyChanges(void)
 	config.timeBetweenSnapsMinutes = static_cast<float>( snapMinutes->value() ) +
 		                          ( static_cast<float>( snapSeconds->value() ) / 60.0f );
 	config.compressionLevel = cmprLvlCbox->currentData().toInt();
+	config.loadPauseTimeSeconds = pauseDuration->value();
 
 	FCEU_WRAPPER_LOCK();
 	FCEU_StateRecorderSetEnabled( recorderEnable->isChecked() );
@@ -231,6 +273,7 @@ void StateRecorderDialog_t::applyChanges(void)
 	g_config->setOption("SDL.StateRecorderHistoryDurationMin", historyDuration->value() );
 	g_config->setOption("SDL.StateRecorderTimeBetweenSnapsMin", snapMinutes->value() );
 	g_config->setOption("SDL.StateRecorderTimeBetweenSnapsSec", snapSeconds->value() );
+	g_config->setOption("SDL.StateRecorderCompressionLevel", config.compressionLevel);
 	g_config->setOption("SDL.StateRecorderEnable", recorderEnable->isChecked() );
 	g_config->save();
 }
@@ -248,6 +291,11 @@ void StateRecorderDialog_t::enableChanged(int val)
 }
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::spinBoxValueChanged(int newValue)
+{
+	recalcMemoryUsage();
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::compressionLevelChanged(int newValue)
 {
 	recalcMemoryUsage();
 }
@@ -272,16 +320,32 @@ void StateRecorderDialog_t::recalcMemoryUsage(void)
 	
 	numSnapsLbl->setText( tr(stmp) );
 
+	saveTimeMs = 0.0;
+
 	if (GameInfo)
 	{
+		constexpr int numIterations = 10;
+		double ts_start, ts_end;
+
 		FCEU_WRAPPER_LOCK();
 
 		EMUFILE_MEMORY em;
-		int compressionLevel = 0;
+		int compressionLevel = cmprLvlCbox->currentData().toInt();
 
-		FCEUSS_SaveMS( &em, compressionLevel );
+		ts_start = getHighPrecTimeStamp();
 
-		fsnapSize = static_cast<float>( em.size() ) / 1024.0f;
+		// Perform State Save multiple times to get a good average
+		// on what the compression delays will be.
+		for (int i=0; i<numIterations; i++)
+		{
+			em.set_len(0);
+			FCEUSS_SaveMS( &em, compressionLevel );
+		}
+		ts_end   = getHighPrecTimeStamp();
+
+		saveTimeMs = (ts_end - ts_start) * 1000.0 / static_cast<double>(numIterations);
+
+		fsnapSize = static_cast<float>( em.size() );
 
 		FCEU_WRAPPER_UNLOCK();
 	}
@@ -313,5 +377,8 @@ void StateRecorderDialog_t::recalcMemoryUsage(void)
 	}
 
 	totalMemUsageLbl->setText( tr(stmp) );
+
+	sprintf( stmp, "%.02f ms", saveTimeMs);
+	saveTimeLbl->setText( tr(stmp) );
 }
 //----------------------------------------------------------------------------
