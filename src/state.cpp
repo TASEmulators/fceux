@@ -1205,6 +1205,7 @@ class StateRecorder
 			lastState = ringHead;
 			loadIndexReset = false;
 			lastLoadFrame = 0;
+			loadPauseTime = 3;
 		}
 
 		~StateRecorder(void)
@@ -1243,6 +1244,7 @@ class StateRecorder
 			printf("ringBufSize:%i  framesPerSnap:%i\n", ringBufSize, framesPerSnap );
 
 			compressionLevel = stateRecorderConfig.compressionLevel;
+			loadPauseTime    = stateRecorderConfig.loadPauseTimeSeconds;
 		}
 
 		void update(void)
@@ -1318,6 +1320,11 @@ class StateRecorder
 			lastState = snapIdx;
 			loadIndexReset = true;
 
+			if (loadPauseTime > 0)
+			{	// Temporary pause after loading new state for user to have time to process
+				FCEUI_PauseForDuration(loadPauseTime);
+			}
+
 			return 0;
 		}
 
@@ -1362,6 +1369,7 @@ class StateRecorder
 		int  ringStart;
 		int  ringBufSize;
 		int  compressionLevel;
+		int  loadPauseTime;
 		unsigned int frameCounter;
 		unsigned int framesPerSnap;
 		unsigned int lastLoadFrame;

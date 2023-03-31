@@ -181,8 +181,9 @@ extern uint8 vsdip;
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 
-#define EMULATIONPAUSED_PAUSED 1
-#define EMULATIONPAUSED_FA 2
+#define EMULATIONPAUSED_PAUSED  0x01
+#define EMULATIONPAUSED_TIMER   0x02
+#define EMULATIONPAUSED_FA      0x04
 
 #define FRAMEADVANCE_DELAY_DEFAULT 10
 #define NES_HEADER_SIZE  16

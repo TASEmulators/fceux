@@ -273,6 +273,8 @@ void FCEUI_ClearEmulationFrameStepped();
 void FCEUI_SetEmulationPaused(int val);
 ///toggles the paused bit (bit0) for EmulationPaused. caused FCEUD_DebugUpdate() to fire if the emulation pauses
 void FCEUI_ToggleEmulationPause();
+void FCEUI_PauseForDuration(int secs);
+int FCEUI_PauseFramesRemaining();
 
 //indicates whether input aids should be drawn (such as crosshairs, etc; usually in fullscreen mode)
 bool FCEUD_ShouldDrawInputAids();

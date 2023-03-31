@@ -116,6 +116,7 @@ bool movieSubtitles = true; //Toggle for displaying movie subtitles
 bool DebuggerWasUpdated = false; //To prevent the debugger from updating things without being updated.
 bool AutoResumePlay = false;
 char romNameWhenClosingEmulator[2048] = {0};
+static unsigned int pauseTimer = 0;
 
 
 FCEUGI::FCEUGI()
@@ -764,6 +765,22 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 #endif
 	}
 
+	if (EmulationPaused & EMULATIONPAUSED_TIMER)
+	{
+		if (pauseTimer > 0)
+		{
+			pauseTimer--;
+		}
+		else
+		{
+			EmulationPaused &= ~EMULATIONPAUSED_TIMER;
+		}
+		if (EmulationPaused & EMULATIONPAUSED_PAUSED)
+		{
+			EmulationPaused &= ~EMULATIONPAUSED_TIMER;
+		}
+	}
+
 	if (EmulationPaused & EMULATIONPAUSED_FA)
 	{
 		// the user is holding Frame Advance key
@@ -787,7 +804,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 			RefreshThrottleFPS();
 		}
 #endif
-		if (EmulationPaused & EMULATIONPAUSED_PAUSED)
+		if (EmulationPaused & (EMULATIONPAUSED_PAUSED | EMULATIONPAUSED_TIMER) )
 		{
 			// emulator is paused
 			memcpy(XBuf, XBackBuf, 256*256);
@@ -1261,6 +1278,33 @@ void FCEUI_FrameAdvanceEnd(void) {
 void FCEUI_FrameAdvance(void) {
 	frameAdvance_Delay_count = 0;
 	frameAdvanceRequested = true;
+}
+
+void FCEUI_PauseForDuration(int secs)
+{
+	int framesPerSec;
+
+	// If already paused, do nothing
+	if (EmulationPaused & EMULATIONPAUSED_PAUSED)
+	{
+		return;
+	}
+
+	if (PAL || dendy)
+	{
+		framesPerSec = 50;
+	}
+	else
+	{
+		framesPerSec = 60;
+	}
+	pauseTimer = framesPerSec * secs;
+	EmulationPaused |= EMULATIONPAUSED_TIMER;
+}
+
+int FCEUI_PauseFramesRemaining(void)
+{
+	return (EmulationPaused & EMULATIONPAUSED_TIMER) ? pauseTimer : 0;
 }
 
 static int AutosaveCounter = 0;

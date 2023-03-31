@@ -346,7 +346,7 @@ void FCEU_DrawRecordingStatus(uint8* XBuf)
 			hasPlayRecIcon = true;
 		}
 
-		if(FCEUI_EmulationPaused())
+		if( EmulationPaused & (EMULATIONPAUSED_PAUSED | EMULATIONPAUSED_TIMER) )
 			drawstatus(XBuf-ClipSidesOffset,3,28,hasPlayRecIcon?-16:0);
 	}
 }

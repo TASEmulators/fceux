@@ -84,12 +84,14 @@ struct StateRecorderConfigData
 	float historyDurationMinutes;
 	float timeBetweenSnapsMinutes;
 	int   compressionLevel;
+	int   loadPauseTimeSeconds;
 
 	StateRecorderConfigData(void)
 	{
 		historyDurationMinutes = 15.0f;
 		timeBetweenSnapsMinutes = 3.0f / 60.0f;
 		compressionLevel = 0;
+		loadPauseTimeSeconds = 3;
 	}
 };
 
