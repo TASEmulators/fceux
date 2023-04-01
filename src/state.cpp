@@ -1315,6 +1315,8 @@ class StateRecorder
 
 			EMUFILE_MEMORY *em = ringBuf[ snapIdx ];
 
+			em->fseek(SEEK_SET, 0);
+
 			FCEUSS_LoadFP( em, SSLOADPARAM_NOBACKUP );
 
 			frameCounter = lastLoadFrame = static_cast<unsigned int>(currFrameCounter);
