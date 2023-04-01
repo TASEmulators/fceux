@@ -53,4 +53,5 @@ private slots:
 	void spinBoxValueChanged(int newValue);
 	void enableChanged(int);
 	void compressionLevelChanged(int newValue);
+	void pauseOnLoadChanged(int index);
 };

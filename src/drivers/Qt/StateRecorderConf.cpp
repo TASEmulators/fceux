@@ -144,19 +144,27 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 
 	frame->setLayout(hbox);
 
-	frame1 = new QGroupBox(tr("Pause on Load:"));
+	frame1 = new QGroupBox(tr("Pause on State Load:"));
 	vbox1  = new QVBoxLayout();
 	frame1->setLayout(vbox1);
 
+	g_config->getOption("SDL.StateRecorderPauseOnLoad", &opt);
+
 	pauseOnLoadCbox = new QComboBox();
-	pauseOnLoadCbox->addItem( tr("No"), 0 );
-	pauseOnLoadCbox->addItem( tr("Temporary"), 1 );
-	pauseOnLoadCbox->addItem( tr("Full"), 2 );
+	pauseOnLoadCbox->addItem( tr("No"), StateRecorderConfigData::NO_PAUSE );
+	pauseOnLoadCbox->addItem( tr("Temporary"), StateRecorderConfigData::TEMPORARY_PAUSE );
+	pauseOnLoadCbox->addItem( tr("Full"), StateRecorderConfigData::FULL_PAUSE );
+
+	pauseOnLoadCbox->setCurrentIndex( opt );
+
+	connect( pauseOnLoadCbox, SIGNAL(currentIndexChanged(int)), this, SLOT(pauseOnLoadChanged(int)) );
+
+	g_config->getOption("SDL.StateRecorderPauseDuration", &opt);
 
 	pauseDuration = new QSpinBox();
 	pauseDuration->setMinimum(0);
 	pauseDuration->setMaximum(60);
-	pauseDuration->setValue(3); // TODO
+	pauseDuration->setValue(opt);
 
 	vbox1->addWidget(pauseOnLoadCbox);
 
@@ -227,6 +235,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	restoreGeometry(settings.value("stateRecorderWindow/geometry").toByteArray());
 
 	recalcMemoryUsage();
+	pauseOnLoadChanged( pauseOnLoadCbox->currentIndex() );
 }
 //----------------------------------------------------------------------------
 StateRecorderDialog_t::~StateRecorderDialog_t(void)
@@ -260,6 +269,7 @@ void StateRecorderDialog_t::applyChanges(void)
 		                          ( static_cast<float>( snapSeconds->value() ) / 60.0f );
 	config.compressionLevel = cmprLvlCbox->currentData().toInt();
 	config.loadPauseTimeSeconds = pauseDuration->value();
+	config.pauseOnLoad = static_cast<StateRecorderConfigData::PauseType>( pauseOnLoadCbox->currentData().toInt() );
 
 	FCEU_WRAPPER_LOCK();
 	FCEU_StateRecorderSetEnabled( recorderEnable->isChecked() );
@@ -274,6 +284,8 @@ void StateRecorderDialog_t::applyChanges(void)
 	g_config->setOption("SDL.StateRecorderTimeBetweenSnapsMin", snapMinutes->value() );
 	g_config->setOption("SDL.StateRecorderTimeBetweenSnapsSec", snapSeconds->value() );
 	g_config->setOption("SDL.StateRecorderCompressionLevel", config.compressionLevel);
+	g_config->setOption("SDL.StateRecorderPauseOnLoad", config.pauseOnLoad);
+	g_config->setOption("SDL.StateRecorderPauseDuration", config.loadPauseTimeSeconds);
 	g_config->setOption("SDL.StateRecorderEnable", recorderEnable->isChecked() );
 	g_config->save();
 }
@@ -298,6 +310,15 @@ void StateRecorderDialog_t::spinBoxValueChanged(int newValue)
 void StateRecorderDialog_t::compressionLevelChanged(int newValue)
 {
 	recalcMemoryUsage();
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::pauseOnLoadChanged(int index)
+{
+	StateRecorderConfigData::PauseType pauseOnLoad;
+
+	pauseOnLoad = static_cast<StateRecorderConfigData::PauseType>( pauseOnLoadCbox->currentData().toInt() );
+
+	pauseDuration->setEnabled( pauseOnLoad == StateRecorderConfigData::TEMPORARY_PAUSE );
 }
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::recalcMemoryUsage(void)
