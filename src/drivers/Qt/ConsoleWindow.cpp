@@ -2758,14 +2758,14 @@ void consoleWin_t::loadState9(void){ loadState(9); }
 void consoleWin_t::loadPrevState(void)
 {
 	FCEU_WRAPPER_LOCK();
-	FCEU_StateRecorderLoadState( FCEU_StateRecorderGetStateIndex()-1 );
+	FCEU_StateRecorderLoadPrevState();
 	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::loadNextState(void)
 {
 	FCEU_WRAPPER_LOCK();
-	FCEU_StateRecorderLoadState( FCEU_StateRecorderGetStateIndex()-1 );
+	FCEU_StateRecorderLoadNextState();
 	FCEU_WRAPPER_UNLOCK();
 }
 

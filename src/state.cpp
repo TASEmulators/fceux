@@ -1338,6 +1338,41 @@ class StateRecorder
 			return 0;
 		}
 
+		int loadPrevState(void)
+		{
+			int snapIdx = lastState;
+
+			if ( lastState == ringHead )
+			{	// No States to Load
+				return -1;
+			}
+			if ( lastState != ringStart )
+			{
+				if ( (lastLoadFrame+30) > frameCounter)
+				{
+					snapIdx--;
+
+					if (snapIdx < 0)
+					{
+						snapIdx += ringBufSize;
+					}
+				}
+			}
+			return loadStateByIndex( snapIdx );
+		}
+
+		int loadNextState(void)
+		{
+			int snapIdx =  lastState;
+			int nextIdx = (lastState + 1) % ringBufSize;
+
+			if ( nextIdx != ringHead )
+			{
+				snapIdx = nextIdx;
+			}
+			return loadStateByIndex( snapIdx );
+		}
+
 		int getHeadIndex(void)
 		{
 			return ringHead;
@@ -1436,16 +1471,40 @@ bool FCEU_StateRecorderRunning(void)
 
 int FCEU_StateRecorderLoadState(int snapIndex)
 {
+	int ret = -1;
+
 	if (stateRecorder != nullptr)
 	{
-		stateRecorder->loadStateByIndex(snapIndex);
+		ret = stateRecorder->loadStateByIndex(snapIndex);
 	}
-	return 0;
+	return ret;
 }
 
 int FCEU_StateRecorderGetStateIndex(void)
 {
 	return StateRecorder::lastState;
+}
+
+int FCEU_StateRecorderLoadPrevState(void)
+{
+	int ret = -1;
+
+	if (stateRecorder != nullptr)
+	{
+		ret = stateRecorder->loadPrevState();
+	}
+	return ret;
+}
+
+int FCEU_StateRecorderLoadNextState(void)
+{
+	int ret = -1;
+
+	if (stateRecorder != nullptr)
+	{
+		ret = stateRecorder->loadNextState();
+	}
+	return ret;
 }
 
 const StateRecorderConfigData& FCEU_StateRecorderGetConfigData(void)
