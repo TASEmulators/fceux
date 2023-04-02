@@ -84,9 +84,9 @@ bool backupSavestates = true;
 bool compressSavestates = true;  //By default FCEUX compresses savestates when a movie is inactive.
 
 // a temp memory stream. We'll be dumping some data here and then compress
-EMUFILE_MEMORY memory_savestate;
+static EMUFILE_MEMORY memory_savestate;
 // temporary buffer for compressed data of a savestate
-std::vector<uint8> compressed_buf;
+static std::vector<uint8> compressed_buf;
 
 #define SFMDATA_SIZE (128)
 static SFORMAT SFMDATA[SFMDATA_SIZE];
