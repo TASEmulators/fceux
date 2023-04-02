@@ -109,6 +109,8 @@ int FCEU_StateRecorderUpdate(void);
 bool FCEU_StateRecorderRunning(void);
 bool FCEU_StateRecorderIsEnabled(void);
 void FCEU_StateRecorderSetEnabled(bool enabled);
+int FCEU_StateRecorderGetMaxSnaps(void);
+int FCEU_StateRecorderGetNumSnapsSaved(void);
 int FCEU_StateRecorderGetStateIndex(void);
 int FCEU_StateRecorderLoadState(int snapIndex);
 int FCEU_StateRecorderLoadPrevState(void);

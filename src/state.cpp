@@ -1251,7 +1251,7 @@ class StateRecorder
 
 		void update(void)
 		{
-			bool isPaused = FCEUI_EmulationPaused() ? true : false;
+			bool isPaused = EmulationPaused ? true : false;
 
 			unsigned int curFrame = static_cast<unsigned int>(currFrameCounter);
 
@@ -1399,6 +1399,10 @@ class StateRecorder
 			return ringBuf.size() * ringBuf[0]->size();
 		}
 
+		size_t  ringBufferSize(void)
+		{
+			return ringBuf.size();
+		}
 		static bool enabled;
 		static int  lastState;
 	private:
@@ -1467,6 +1471,28 @@ void FCEU_StateRecorderSetEnabled(bool enabled)
 bool FCEU_StateRecorderRunning(void)
 {
 	return stateRecorder != nullptr;
+}
+
+int FCEU_StateRecorderGetMaxSnaps(void)
+{
+	int size = 0;
+
+	if (stateRecorder != nullptr)
+	{
+		size = stateRecorder->ringBufferSize();
+	}
+	return size;
+}
+
+int FCEU_StateRecorderGetNumSnapsSaved(void)
+{
+	int n = 0;
+
+	if (stateRecorder != nullptr)
+	{
+		n = stateRecorder->numSnapsSaved();
+	}
+	return n;
 }
 
 int FCEU_StateRecorderLoadState(int snapIndex)

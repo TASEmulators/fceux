@@ -43,7 +43,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	QVBoxLayout *mainLayout, *vbox1;
 	QHBoxLayout *hbox, *hbox1;
 	QGroupBox *frame, *frame1;
-	QGridLayout *grid, *memStatsGrid;
+	QGridLayout *grid, *memStatsGrid, *sysStatusGrid;
 	QSettings settings;
 	int opt;
 
@@ -207,12 +207,64 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	hbox  = new QHBoxLayout();
 	frame->setLayout(hbox);
 
-	hbox->addWidget(new QLabel(tr("Save Time:")));
-	hbox->addWidget(saveTimeLbl);
+	hbox->addWidget(new QLabel(tr("Snapshot\nSave Time:")), 2);
+	hbox->addWidget(saveTimeLbl, 2);
 
 	grid->addWidget(frame, 3, 3, 1, 1);
 
 	mainLayout->addLayout(grid);
+
+	frame1 = new QGroupBox(tr("Recorder Status"));
+	sysStatusGrid = new QGridLayout();
+	frame1->setLayout(sysStatusGrid);
+
+	frame = new QGroupBox();
+	hbox  = new QHBoxLayout();
+
+	sysStatusGrid->addWidget( frame, 0, 0, 1, 2);
+	frame->setLayout(hbox);
+
+	recStatusLbl = new QLineEdit();
+	recStatusLbl->setReadOnly(true);
+	startStopButton = new QPushButton( tr("Start") );
+	hbox->addWidget( new QLabel(tr("State:")), 1 );
+	hbox->addWidget( recStatusLbl, 2 );
+	hbox->addWidget( startStopButton, 1 );
+
+	updateStartStopBuffon();
+	updateRecorderStatusLabel();
+
+	connect(startStopButton, SIGNAL(clicked(void)), this, SLOT(startStopClicked(void)));
+
+	frame = new QGroupBox();
+	hbox  = new QHBoxLayout();
+
+	sysStatusGrid->addWidget( frame, 0, 2, 1, 1);
+	frame->setLayout(hbox);
+
+	recBufSizeLbl = new QLineEdit();
+	recBufSizeLbl->setReadOnly(true);
+	hbox->addWidget( new QLabel(tr("Buffer Size:")), 1 );
+	hbox->addWidget( recBufSizeLbl, 1 );
+
+	frame = new QGroupBox( tr("Buffer Use:") );
+	hbox  = new QHBoxLayout();
+
+	sysStatusGrid->addWidget( frame, 1, 0, 1, 3);
+	frame->setLayout(hbox);
+
+	bufUsage = new QProgressBar();
+	bufUsage->setToolTip( tr("% use of history record buffer.") );
+	bufUsage->setOrientation( Qt::Horizontal );
+	bufUsage->setMinimum(   0 );
+	bufUsage->setMaximum( 100 );
+	bufUsage->setValue( 0 );
+
+	hbox->addWidget(bufUsage);
+
+	updateBufferSizeStatus();
+
+	mainLayout->addWidget(frame1);
 
 	hbox  = new QHBoxLayout();
 	mainLayout->addLayout(hbox);
@@ -236,6 +288,12 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 
 	recalcMemoryUsage();
 	pauseOnLoadChanged( pauseOnLoadCbox->currentIndex() );
+
+	updateTimer = new QTimer(this);
+
+	connect(updateTimer, &QTimer::timeout, this, &StateRecorderDialog_t::updatePeriodic);
+
+	updateTimer->start(1000); // 1hz
 }
 //----------------------------------------------------------------------------
 StateRecorderDialog_t::~StateRecorderDialog_t(void)
@@ -288,6 +346,86 @@ void StateRecorderDialog_t::applyChanges(void)
 	g_config->setOption("SDL.StateRecorderPauseDuration", config.loadPauseTimeSeconds);
 	g_config->setOption("SDL.StateRecorderEnable", recorderEnable->isChecked() );
 	g_config->save();
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::startStopClicked(void)
+{
+	FCEU_WRAPPER_LOCK();
+	bool isRunning = FCEU_StateRecorderRunning();
+
+	if (isRunning)
+	{
+		FCEU_StateRecorderStop();
+	}
+	else
+	{
+		FCEU_StateRecorderStart();
+	}
+	updateStatusDisplay();
+
+	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::updateStartStopBuffon(void)
+{
+	bool isRunning = FCEU_StateRecorderRunning();
+
+	if (isRunning)
+	{
+		startStopButton->setText( tr("Stop") );
+		startStopButton->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
+	}
+	else
+	{
+		startStopButton->setText( tr("Start") );
+		startStopButton->setIcon( QIcon(":icons/media-record.png") );
+	}
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::updateBufferSizeStatus(void)
+{
+	char stmp[64];
+
+	int numSnapsSaved = FCEU_StateRecorderGetNumSnapsSaved();
+	int maxSnaps      = FCEU_StateRecorderGetMaxSnaps();
+
+	snprintf( stmp, sizeof(stmp), "%i", maxSnaps );
+
+	recBufSizeLbl->setText( tr(stmp) );
+
+	if (maxSnaps > 0)
+	{
+		bufUsage->setMaximum( maxSnaps );
+	}
+	bufUsage->setValue( numSnapsSaved );
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::updateRecorderStatusLabel(void)
+{
+	bool isRunning = FCEU_StateRecorderRunning();
+
+	if (isRunning)
+	{
+		recStatusLbl->setText( tr("Recording") );
+	}
+	else
+	{
+		recStatusLbl->setText( tr("Off") );
+	}
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::updateStatusDisplay(void)
+{
+	updateStartStopBuffon();
+	updateRecorderStatusLabel();
+	updateBufferSizeStatus();
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::updatePeriodic(void)
+{
+	FCEU_WRAPPER_LOCK();
+	updateStatusDisplay();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::enableChanged(int val)

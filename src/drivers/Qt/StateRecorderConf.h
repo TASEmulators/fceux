@@ -12,10 +12,12 @@
 #include <QSpinBox>
 #include <QComboBox>
 #include <QPushButton>
+#include <QProgressBar>
 #include <QLineEdit>
 #include <QLabel>
 #include <QFrame>
 #include <QGroupBox>
+#include <QTimer>
 
 class StateRecorderDialog_t : public QDialog
 {
@@ -28,28 +30,39 @@ public:
 protected:
 	void closeEvent(QCloseEvent *event);
 
-	QSpinBox    *snapMinutes;
-	QSpinBox    *snapSeconds;
-	QSpinBox    *historyDuration;
-	QSpinBox    *pauseDuration;
-	QCheckBox   *recorderEnable;
-	QLineEdit   *numSnapsLbl;
-	QLineEdit   *snapMemSizeLbl;
-	QLineEdit   *totalMemUsageLbl;
-	QLineEdit   *saveTimeLbl;
-	QPushButton *applyButton;
-	QPushButton *closeButton;
-	QComboBox   *cmprLvlCbox;
-	QComboBox   *pauseOnLoadCbox;
+	QSpinBox     *snapMinutes;
+	QSpinBox     *snapSeconds;
+	QSpinBox     *historyDuration;
+	QSpinBox     *pauseDuration;
+	QCheckBox    *recorderEnable;
+	QLineEdit    *numSnapsLbl;
+	QLineEdit    *snapMemSizeLbl;
+	QLineEdit    *totalMemUsageLbl;
+	QLineEdit    *saveTimeLbl;
+	QPushButton  *applyButton;
+	QPushButton  *closeButton;
+	QComboBox    *cmprLvlCbox;
+	QComboBox    *pauseOnLoadCbox;
+	QLineEdit    *recStatusLbl;
+	QLineEdit    *recBufSizeLbl;
+	QPushButton  *startStopButton;
+	QProgressBar *bufUsage;
+	QTimer       *updateTimer;
 
 	double       saveTimeMs;
 
 	void recalcMemoryUsage(void);
+	void updateStartStopBuffon(void);
+	void updateRecorderStatusLabel(void);
+	void updateBufferSizeStatus(void);
+	void updateStatusDisplay(void);
 
 public slots:
 	void closeWindow(void);
 private slots:
 	void applyChanges(void);
+	void updatePeriodic(void);
+	void startStopClicked(void);
 	void spinBoxValueChanged(int newValue);
 	void enableChanged(int);
 	void compressionLevelChanged(int newValue);
