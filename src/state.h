@@ -17,6 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#pragma once
 #include <string>
 
 enum ENUM_SSLOADPARAMS
@@ -100,6 +101,11 @@ struct StateRecorderConfigData
 		compressionLevel = 0;
 		loadPauseTimeSeconds = 3;
 		pauseOnLoad = TEMPORARY_PAUSE;
+	}
+
+	bool compare( const StateRecorderConfigData &other )
+	{
+		return memcmp( this, &other, sizeof(StateRecorderConfigData) ) == 0;
 	}
 };
 

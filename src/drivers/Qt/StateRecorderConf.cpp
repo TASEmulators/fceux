@@ -27,6 +27,7 @@
 #include <QCloseEvent>
 #include <QGridLayout>
 #include <QSettings>
+#include <QMessageBox>
 
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
@@ -305,36 +306,89 @@ void StateRecorderDialog_t::closeEvent(QCloseEvent *event)
 {
 	QSettings settings;
 	settings.setValue("stateRecorderWindow/geometry", saveGeometry());
-	done(0);
-	deleteLater();
-	event->accept();
+
+	if (dataSavedCheck())
+	{
+		done(0);
+		deleteLater();
+		event->accept();
+	}
 }
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::closeWindow(void)
 {
 	QSettings settings;
 	settings.setValue("stateRecorderWindow/geometry", saveGeometry());
-	done(0);
-	deleteLater();
+
+	if (dataSavedCheck())
+	{
+		done(0);
+		deleteLater();
+	}
 }
 //----------------------------------------------------------------------------
-void StateRecorderDialog_t::applyChanges(void)
+void StateRecorderDialog_t::packConfig( StateRecorderConfigData &config )
 {
-	StateRecorderConfigData config;
-
 	config.historyDurationMinutes = static_cast<float>( historyDuration->value() );
 	config.timeBetweenSnapsMinutes = static_cast<float>( snapMinutes->value() ) +
 		                          ( static_cast<float>( snapSeconds->value() ) / 60.0f );
 	config.compressionLevel = cmprLvlCbox->currentData().toInt();
 	config.loadPauseTimeSeconds = pauseDuration->value();
 	config.pauseOnLoad = static_cast<StateRecorderConfigData::PauseType>( pauseOnLoadCbox->currentData().toInt() );
+}
+//----------------------------------------------------------------------------
+bool StateRecorderDialog_t::dataSavedCheck(void)
+{
+	bool okToClose = true;
+	const StateRecorderConfigData &curConfig = FCEU_StateRecorderGetConfigData();
+
+	StateRecorderConfigData selConfig;
+
+	packConfig( selConfig );
+
+	if ( selConfig.compare( curConfig ) == false )
+	{
+		QMessageBox msgBox(QMessageBox::Question, tr("State Recorder"),
+				tr("Setting selections have not yet been saved.\nDo you wish to save/apply the new settings?"),
+				QMessageBox::No | QMessageBox::Yes, this);
+
+		msgBox.setDefaultButton( QMessageBox::Yes );
+
+		int ret = msgBox.exec();
+
+		if ( ret == QMessageBox::Yes )
+		{
+			applyChanges();
+		}
+	}
+	return okToClose;
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::applyChanges(void)
+{
+	StateRecorderConfigData config;
+
+	packConfig( config );
 
 	FCEU_WRAPPER_LOCK();
 	FCEU_StateRecorderSetEnabled( recorderEnable->isChecked() );
 	FCEU_StateRecorderSetConfigData( config );
 	if (FCEU_StateRecorderRunning())
 	{
-		// TODO restart with new settings
+		QMessageBox msgBox(QMessageBox::Question, tr("State Recorder"),
+				tr("New settings will not take effect until state recorder is restarted. Do you wish to restart?"),
+				QMessageBox::No | QMessageBox::Yes, this);
+
+		msgBox.setDefaultButton( QMessageBox::Yes );
+
+		int ret = msgBox.exec();
+
+		if ( ret == QMessageBox::Yes )
+		{
+			FCEU_StateRecorderStop();
+			FCEU_StateRecorderStart();
+			updateStatusDisplay();
+		}
 	}
 	FCEU_WRAPPER_UNLOCK();
 

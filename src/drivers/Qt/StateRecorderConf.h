@@ -19,6 +19,8 @@
 #include <QGroupBox>
 #include <QTimer>
 
+struct StateRecorderConfigData;
+
 class StateRecorderDialog_t : public QDialog
 {
 	Q_OBJECT
@@ -51,11 +53,13 @@ protected:
 
 	double       saveTimeMs;
 
+	bool dataSavedCheck(void);
 	void recalcMemoryUsage(void);
 	void updateStartStopBuffon(void);
 	void updateRecorderStatusLabel(void);
 	void updateBufferSizeStatus(void);
 	void updateStatusDisplay(void);
+	void packConfig( StateRecorderConfigData &config );
 
 public slots:
 	void closeWindow(void);
