@@ -103,8 +103,39 @@
 	}
 
 #else
+#ifdef __APPLE__
+
+       // If the OS doesn't declare it, do it ourself (copy-pasted from GNU C Library, license: LGPL)
+#      include <stdint.h>
+       struct icmphdr
+       {
+               uint8_t type;           /* message type */
+               uint8_t code;           /* type sub-code */
+               uint16_t checksum;
+               union
+               {
+                       struct
+                       {
+                               uint16_t        id;
+                               uint16_t        sequence;
+                       } echo;                 /* echo datagram */
+                       uint32_t        gateway;        /* gateway address */
+                       struct
+                       {
+                               uint16_t        unused;
+                               uint16_t        mtu;
+                       } frag;                 /* path mtu discovery */
+                       /*uint8_t reserved[4];*/
+               } un;
+       };
+
+       // Fix slightly changed names
+#      define SOL_IP IPPROTO_IP
+
+#endif
+
 #	include <sys/socket.h>
-#	include <netinet/in.h>
+#	include <netinet/ip.h>
 #	include <arpa/inet.h>
 #	include <netdb.h>
 #	include <unistd.h>
@@ -277,7 +308,11 @@ static int pping_ping_posix(int ping_sockfd, struct sockaddr_in *ping_addr, int 
 
 	char* rcv_buf = (char*)&pckt.hdr;
 	size_t rcv_buf_len = sizeof(pckt.hdr) + sizeof(pckt.msg);
+#ifndef __APPLE__
 	if (sock_is_raw) {
+#else
+	{
+#endif
 		rcv_buf -= IP_HEADER_LEN;
 		rcv_buf_len += IP_HEADER_LEN;
 	}
