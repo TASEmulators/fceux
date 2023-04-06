@@ -1232,7 +1232,7 @@ void NSFRainbow13_Init(void) {
 // mapper init
 
 void RAINBOW13_Init(CartInfo *info) {
-	int save_game_index = 0;
+	//int save_game_index = 0;
 	info->Power = Rainbow13Power;
 	info->Reset = Rainbow13Reset;
 	info->Close = Rainbow13Close;
@@ -1250,9 +1250,10 @@ void RAINBOW13_Init(CartInfo *info) {
 
 		if (info->battery)
 		{
-			info->SaveGame[save_game_index] = WRAM;
-			info->SaveGameLen[save_game_index] = WRAMSIZE;
-			save_game_index++;
+			info->addSaveGameBuf(WRAM, WRAMSIZE);
+			//info->SaveGame[save_game_index] = WRAM;
+			//info->SaveGameLen[save_game_index] = WRAMSIZE;
+			//save_game_index++;
 		}
 	}
 
@@ -1262,9 +1263,10 @@ void RAINBOW13_Init(CartInfo *info) {
 	AddExState(FPGA_WRAM, FPGA_WRAMSIZE, 0, "FPGA_WRAM");
 	if (info->battery)
 	{
-		info->SaveGame[save_game_index] = FPGA_WRAM;
-		info->SaveGameLen[save_game_index] = FPGA_WRAMSIZE;
-		save_game_index++;
+		info->addSaveGameBuf(FPGA_WRAM, FPGA_WRAMSIZE);
+		//info->SaveGame[save_game_index] = FPGA_WRAM;
+		//info->SaveGameLen[save_game_index] = FPGA_WRAMSIZE;
+		//save_game_index++;
 	}
 
 	// PRG FLASH ROM
@@ -1272,9 +1274,10 @@ void RAINBOW13_Init(CartInfo *info) {
 	AddExState(PRG_FLASHROM, PRG_FLASHROMSIZE, 0, "PFROM");
 	if (info->battery)
 	{
-		info->SaveGame[save_game_index] = PRG_FLASHROM;
-		info->SaveGameLen[save_game_index] = PRG_FLASHROMSIZE;
-		save_game_index++;
+		info->addSaveGameBuf(PRG_FLASHROM, PRG_FLASHROMSIZE);
+		//info->SaveGame[save_game_index] = PRG_FLASHROM;
+		//info->SaveGameLen[save_game_index] = PRG_FLASHROMSIZE;
+		//save_game_index++;
 	}
 
 	// copy PRG ROM into PRG_FLASHROM, use it instead of PRG ROM
@@ -1313,9 +1316,10 @@ void RAINBOW13_Init(CartInfo *info) {
 		AddExState(CHR_FLASHROM, CHR_FLASHROMSIZE, 0, "CFROM");
 		if (info->battery)
 		{
-			info->SaveGame[save_game_index] = CHR_FLASHROM;
-			info->SaveGameLen[save_game_index] = CHR_FLASHROMSIZE;
-			save_game_index++;
+			info->addSaveGameBuf(CHR_FLASHROM, CHR_FLASHROMSIZE);
+			//info->SaveGame[save_game_index] = CHR_FLASHROM;
+			//info->SaveGameLen[save_game_index] = CHR_FLASHROMSIZE;
+			//save_game_index++;
 		}
 
 		// copy CHR ROM into CHR_FLASHROM, use it instead of CHR ROM

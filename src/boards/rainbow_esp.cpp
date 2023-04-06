@@ -1093,10 +1093,30 @@ uint8 BrokeStudioFirmware::getFreeFileId(uint8 path) const {
 void BrokeStudioFirmware::saveFiles() const {
 	char const* filesystem_file_path = ::getenv("RAINBOW_FILESYSTEM_FILE");
 	if (filesystem_file_path == NULL) {
+		FCEU_printf("RAINBOW_FILESYSTEM_FILE environment variable is not set\n");
 		return;
 	}
 
 	std::ofstream ofs(filesystem_file_path);
+	for (uint8 p = 0; p < NUM_FILE_PATHS; p++)
+	{
+		for (uint8 f = 0; f < NUM_FILES; f++)
+		{
+			if (this->file_exists[p][f])
+			{
+				ofs << (char)p << (char)f;
+				uint32 size = this->files[p][f].size();
+				ofs << (char)((size & 0xff000000) >> 24);
+				ofs << (char)((size & 0x00ff0000) >> 16);
+				ofs << (char)((size & 0x0000ff00) >> 8);
+				ofs << (char)((size & 0x000000ff));
+				for (uint8 byte : this->files[p][f]) {
+					ofs << (char)byte;
+				}
+			}
+		}
+	}
+/*
 	for(std::array<bool, NUM_FILES> const& path: this->file_exists) {
 		for(bool exists: path) {
 			ofs << exists << ' ';
@@ -1107,26 +1127,56 @@ void BrokeStudioFirmware::saveFiles() const {
 
 	for (std::array<std::vector<uint8>, NUM_FILES> const& path: this->files) {
 		for (std::vector<uint8> const& file: path) {
-			ofs << file.size() << '\n';
+			ofs << (char)file.size();
 			for (uint8 byte: file) {
-				ofs << (uint16_t)byte << ' ';
+				ofs << (char)byte;
 			}
 			ofs << '\n';
 		}
 	}
+*/
 }
 
 void BrokeStudioFirmware::loadFiles() {
 	char const* filesystem_file_path = ::getenv("RAINBOW_FILESYSTEM_FILE");
 	if (filesystem_file_path == NULL) {
+		FCEU_printf("RAINBOW_FILESYSTEM_FILE environment variable is not set\n");
 		return;
 	}
 
 	std::ifstream ifs(filesystem_file_path);
 	if (ifs.fail()) {
+		FCEU_printf("Couldn't open RAINBOW_FILESYSTEM_FILE\n");
 		return;
 	}
 
+	while (!ifs.peek())
+	{
+		uint8 p;
+		uint8 f;
+		uint8 t;
+		uint32 size = 0;
+		ifs >> p;
+		ifs >> f;
+		ifs >> t;
+		size |= (t << 24);
+		ifs >> t;
+		size |= (t << 16);
+		ifs >> t;
+		size |= (t << 8);
+		ifs >> t;
+		size |= t;
+		this->file_exists[p][f] = true;
+		this->files[p][f].clear();
+		this->files[p][f].reserve(size);
+		for (uint32 i = 0; i < size; i++)
+		{
+			ifs >> t;
+			this->files[p][f].push_back(t);
+		}
+
+	}
+/*
 	for(std::array<bool, NUM_FILES>& path: this->file_exists) {
 		for(bool& exists: path) {
 			ifs >> exists;
@@ -1148,6 +1198,7 @@ void BrokeStudioFirmware::loadFiles() {
 			}
 		}
 	}
+*/
 }
 
 template<class I>
