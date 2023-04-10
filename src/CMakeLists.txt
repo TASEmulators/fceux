@@ -503,11 +503,12 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/vrc7p.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/yoko.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/inx007t.cpp
-  	${CMAKE_CURRENT_SOURCE_DIR}/boards/easywsclient.cpp
-  	${CMAKE_CURRENT_SOURCE_DIR}/boards/mongoose.c
-  	${CMAKE_CURRENT_SOURCE_DIR}/boards/pping.c
+	${CMAKE_CURRENT_SOURCE_DIR}/boards/RNBW/easywsclient.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/boards/RNBW/mongoose.c
+	${CMAKE_CURRENT_SOURCE_DIR}/boards/RNBW/pping.c
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/rainbow_esp.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/boards/rainbow13.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/boards/rainbow2.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/arkanoid.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/bworld.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/input/cursor.cpp
