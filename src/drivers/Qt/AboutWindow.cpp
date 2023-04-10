@@ -30,6 +30,7 @@
 #endif
 
 #ifdef _USE_X264
+#include <cstdint>
 #include "x264.h"
 #endif
 
