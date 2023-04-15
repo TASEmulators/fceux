@@ -1205,8 +1205,6 @@ class StateRecorder
 			lastState = ringHead;
 			loadIndexReset = false;
 			lastLoadFrame = 0;
-			loadPauseTime = 3;
-			pauseOnLoad = StateRecorderConfigData::TEMPORARY_PAUSE;
 		}
 
 		~StateRecorder(void)
@@ -1244,9 +1242,9 @@ class StateRecorder
 
 			printf("ringBufSize:%i  framesPerSnap:%i\n", ringBufSize, framesPerSnap );
 
-			compressionLevel = stateRecorderConfig.compressionLevel;
-			loadPauseTime    = stateRecorderConfig.loadPauseTimeSeconds;
-			pauseOnLoad      = stateRecorderConfig.pauseOnLoad;
+			compressionLevel = config.compressionLevel;
+			loadPauseTime    = config.loadPauseTimeSeconds;
+			pauseOnLoad      = config.pauseOnLoad;
 		}
 
 		void update(void)
