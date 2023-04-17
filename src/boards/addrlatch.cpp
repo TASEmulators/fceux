@@ -27,6 +27,7 @@ static void (*WSync)(void);
 static readfunc defread;
 static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE=0;
+static uint8 hasBattery = 0;
 
 static DECLFW(LatchWrite) {
 	latche = A;
@@ -358,20 +359,17 @@ void Mapper217_Init(CartInfo *info) {
 }
 
 //------------------ Map 227 ---------------------------
-
 static void M227Sync(void) {
 	uint32 S = latche & 1;
 	uint32 p = ((latche >> 2) & 0x1F) + ((latche & 0x100) >> 3);
 	uint32 L = (latche >> 9) & 1;
 
-// ok, according to nesdev wiki (refrenced to the nesdev dumping thread) there is a CHR write protection bit7.
-// however, this bit clearly determined a specific PRG layout for some game but does not meant to have additional
-// functionality. as I see from the menu code, it disables the chr writing before run an actual game.
-// this fix here makes happy both waixing rpgs and multigame menus at once. can't veryfy it on a hardware
-// but if I find some i'll definitly do this.
-
-	if ((latche & 0xF000) == 0xF000)
-		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 0);	
+// Only Waixing appear to have battery flag enabled, while multicarts don't.
+// Multicarts needs CHR-RAM protect in NROM modes, so only apply CHR-RAM protect
+// on non battery-enabled carts.
+	if (!hasBattery && (latche & 0x80) == 0x80)
+		/* CHR-RAM write protect hack, needed for some multicarts */
+		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 0);
 	else
 		SetupCartCHRMapping(0, CHRptr[0], 0x2000, 1);
 
@@ -409,6 +407,7 @@ static void M227Sync(void) {
 
 void Mapper227_Init(CartInfo *info) {
 	Latch_Init(info, M227Sync, NULL, 0x0000, 0x8000, 0xFFFF, 1);
+	hasBattery = info->battery;
 }
 
 //------------------ Map 229 ---------------------------
