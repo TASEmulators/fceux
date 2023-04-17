@@ -4548,7 +4548,6 @@ void debuggerWindowSetFocus(bool val)
 	{
 		dbgWin->activateWindow();
 		dbgWin->raise();
-		dbgWin->setFocus();
 	}
 }
 //----------------------------------------------------------------------------

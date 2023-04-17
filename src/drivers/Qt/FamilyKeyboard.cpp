@@ -126,7 +126,6 @@ int openFamilyKeyboardDialog(QWidget *parent)
 	{
 		fkbWin->activateWindow();
 		fkbWin->raise();
-		fkbWin->setFocus();
 	}
 	else
 	{

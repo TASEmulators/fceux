@@ -54,7 +54,6 @@ void openCheatDialog(QWidget *parent)
 	{
 		win->activateWindow();
 		win->raise();
-		win->setFocus();
 		return;
 	}
 	win = new GuiCheatsDialog_t(parent);
