@@ -1834,6 +1834,391 @@ void ConsoleDebugger::selBmAddrChanged(const QString &txt)
 	//printf("selBmAddrVal = %04X\n", selBmAddrVal );
 }
 //----------------------------------------------------------------------------
+DebuggerBreakpointEditor::DebuggerBreakpointEditor(int editIndex, watchpointinfo *wpIn, QWidget *parent)
+	: QDialog(parent)
+{
+	editIdx = editIndex;
+	wp = wpIn;
+
+	QHBoxLayout *hbox;
+	QVBoxLayout *mainLayout, *vbox;
+	QLabel *lbl;
+	QGridLayout *grid;
+	QFrame *frame;
+	QGroupBox *gbox;
+
+	if ( editIdx >= 0 )
+	{
+		setWindowTitle( tr("Edit Breakpoint") );
+	}
+	else
+	{
+		setWindowTitle( tr("Add Breakpoint") );
+	}
+
+	hbox       = new QHBoxLayout();
+	mainLayout = new QVBoxLayout();
+
+	mainLayout->addLayout( hbox );
+
+	lbl   = new QLabel( tr("Address") );
+	addr1 = new QLineEdit();
+
+	hbox->addWidget( lbl );
+	hbox->addWidget( addr1 );
+
+	lbl   = new QLabel( tr("-") );
+	addr2 = new QLineEdit();
+	hbox->addWidget( lbl );
+	hbox->addWidget( addr2 );
+
+	forbidChkBox = new QCheckBox( tr("Forbid") );
+	hbox->addWidget( forbidChkBox );
+
+	frame = new QFrame();
+	vbox  = new QVBoxLayout();
+	hbox  = new QHBoxLayout();
+	gbox  = new QGroupBox();
+
+	rbp = new QCheckBox( tr("Read") );
+	wbp = new QCheckBox( tr("Write") );
+	xbp = new QCheckBox( tr("Execute") );
+	ebp = new QCheckBox( tr("Enable") );
+
+	gbox->setTitle( tr("Memory") );
+	mainLayout->addWidget( frame );
+	frame->setLayout( vbox );
+	frame->setFrameShape( QFrame::Box );
+	vbox->addLayout( hbox );
+	vbox->addWidget( gbox );
+
+	hbox->addWidget( rbp );
+	hbox->addWidget( wbp );
+	hbox->addWidget( xbp );
+	hbox->addWidget( ebp );
+	
+	hbox         = new QHBoxLayout();
+	cpu_radio    = new QRadioButton( tr("CPU") );
+	ppu_radio    = new QRadioButton( tr("PPU") );
+	oam_radio    = new QRadioButton( tr("OAM") );
+	rom_radio    = new QRadioButton( tr("ROM") );
+	cpu_radio->setChecked(true);
+
+	gbox->setLayout( hbox );
+	hbox->addWidget( cpu_radio );
+	hbox->addWidget( ppu_radio );
+	hbox->addWidget( oam_radio );
+	hbox->addWidget( rom_radio );
+
+	grid  = new QGridLayout();
+
+	mainLayout->addLayout( grid );
+	lbl   = new QLabel( tr("Condition") );
+	cond  = new QLineEdit();
+	condValid = true;
+
+	connect( cond, SIGNAL(textChanged(const QString &)), this, SLOT(conditionTextChanged(const QString &)));
+
+	grid->addWidget(  lbl, 0, 0 );
+	grid->addWidget( cond, 0, 1 );
+
+	lbl   = new QLabel( tr("Name") );
+	name  = new QLineEdit();
+
+	grid->addWidget(  lbl, 1, 0 );
+	grid->addWidget( name, 1, 1 );
+
+	hbox         = new QHBoxLayout();
+	msgLbl       = new QLabel();
+	okButton     = new QPushButton( tr("OK") );
+	cancelButton = new QPushButton( tr("Cancel") );
+
+	mainLayout->addLayout( hbox );
+	hbox->addWidget( msgLbl, 5 );
+	hbox->addWidget( cancelButton, 1 );
+	hbox->addWidget(     okButton, 1 );
+
+	connect(     okButton, SIGNAL(clicked(void)), this, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(reject(void)) );
+
+	    okButton->setIcon( style()->standardIcon( QStyle::SP_DialogOkButton ) );
+	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
+
+	okButton->setDefault(true);
+
+	if ( wp != NULL )
+	{
+		char stmp[256];
+
+		if ( wp->flags & BT_P )
+		{
+			ppu_radio->setChecked(true);
+		}
+		else if ( wp->flags & BT_S )
+		{
+			oam_radio->setChecked(true);
+		}
+		else if ( wp->flags & BT_R )
+		{
+			rom_radio->setChecked(true);
+		}
+
+		sprintf( stmp, "%04X", wp->address );
+
+		addr1->setText( tr(stmp) );
+
+		if ( wp->endaddress > 0 )
+		{
+			sprintf( stmp, "%04X", wp->endaddress );
+
+			addr2->setText( tr(stmp) );
+		}
+
+		if ( wp->flags & WP_R )
+		{
+		   rbp->setChecked(true);
+		}
+		if ( wp->flags & WP_W )
+		{
+		   wbp->setChecked(true);
+		}
+		if ( wp->flags & WP_X )
+		{
+		   xbp->setChecked(true);
+		}
+		if ( wp->flags & WP_F )
+		{
+		   forbidChkBox->setChecked(true);
+		}
+		if ( wp->flags & WP_E )
+		{
+		   ebp->setChecked(true);
+		}
+
+		if ( wp->condText )
+		{
+			cond->setText( tr(wp->condText) );
+		}
+		else
+		{
+			if ( editIdx < 0 )
+			{
+				// If new breakpoint, default enable checkbox to true
+				ebp->setChecked(true);
+
+				// If new breakpoint, suggest condition if in ROM Mapping area of memory.
+				if ( cpu_radio->isChecked() && (wp->address >= 0x8000) )
+				{
+					int romAddr = GetNesFileAddress(wp->address);
+
+					if ( romAddr >= 0 )
+					{
+						wp->address = romAddr;
+						sprintf( stmp, "%X", wp->address );
+						addr1->setText( tr(stmp) );
+						rom_radio->setChecked(true);
+					}
+					else
+					{
+						char str[64];
+						sprintf(str, "K==#%02X", getBank(wp->address));
+						cond->setText( tr(str) );
+					}
+				}
+			}
+		}
+
+		if ( wp->desc )
+		{
+			name->setText( tr(wp->desc) );
+		}
+	}
+	else
+	{
+		// If new breakpoint, default enable checkbox to true
+		ebp->setChecked(true);
+	}
+
+	setLayout( mainLayout );
+
+	connect( this  , SIGNAL(finished(int)), this, SLOT(closeWindow(int)) );
+}
+//----------------------------------------------------------------------------
+DebuggerBreakpointEditor::~DebuggerBreakpointEditor(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::closeEvent(QCloseEvent *event)
+{
+	//printf("Close Window Event\n");
+	done(QDialog::Rejected);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::closeWindow(int ret)
+{
+	//printf("Close Window %i\n", ret);
+	if ( ret == QDialog::Accepted )
+	{
+		loadBreakpoint();
+	}
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::checkDataValid(void)
+{
+	bool allEntriesValid = condValid;
+
+	okButton->setEnabled( allEntriesValid );
+
+	if (allEntriesValid)
+	{
+		msgLbl->clear();
+	}
+	else if (!condValid)
+	{
+		msgLbl->setText(tr("Condition Invalid"));
+	}
+	else
+	{
+		msgLbl->clear();
+	}
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::conditionTextChanged(const QString &txt)
+{
+	if ( txt.size() > 0 )
+	{
+		Condition *c = generateCondition( txt.toStdString().c_str() );
+
+		condValid = (c != nullptr);
+
+		if (c)
+		{
+			delete c; c = nullptr;
+		}
+	}
+	else
+	{
+		condValid = true;
+	}
+	checkDataValid();
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::loadBreakpoint(void)
+{
+	int  start_addr = -1, end_addr = -1, type = 0, enable = 1, slot;
+	std::string s;
+
+	FCEU_WRAPPER_LOCK();
+
+	slot = (editIdx < 0) ? numWPs : editIdx;
+
+	if ( cpu_radio->isChecked() )
+	{
+		type |= BT_C;
+	}
+	else if ( ppu_radio->isChecked() ) 
+	{
+		type |= BT_P;
+	}
+	else if ( oam_radio->isChecked() ) 
+	{
+		type |= BT_S;
+	}
+	else if ( rom_radio->isChecked() )
+	{
+		type |= BT_R;
+	}
+
+	s = addr1->text().toStdString();
+
+	if ( s.size() > 0 )
+	{
+		start_addr = offsetStringToInt( type, s.c_str() );
+	}
+
+	s = addr2->text().toStdString();
+
+	if ( s.size() > 0 )
+	{
+		end_addr = offsetStringToInt( type, s.c_str() );
+	}
+
+	if ( rbp->isChecked() )
+	{
+		type |= WP_R;
+	}
+	if ( wbp->isChecked() )
+	{
+		type |= WP_W;
+	}
+	if ( xbp->isChecked() )
+	{
+		type |= WP_X;
+	}
+
+	if ( forbidChkBox->isChecked() )
+	{
+		type |= WP_F;
+	}
+
+	enable = ebp->isChecked();
+
+	if ( (start_addr >= 0) && (numWPs < 64) )
+	{
+		unsigned int retval;
+		std::string nameString, condString;
+
+		nameString = name->text().toStdString();
+		condString = cond->text().toStdString();
+
+		retval = NewBreak( nameString.c_str(), start_addr, end_addr, type, condString.c_str(), slot, enable);
+
+		if ( (retval == 1) || (retval == 2) )
+		{
+			printf("Breakpoint Add Failed\n");
+		}
+		else
+		{
+			if (editIdx < 0)
+			{
+				numWPs++;
+			}
+
+			//bpListUpdate( false );
+		}
+	}
+	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------------------------------
+	       	//int editIndex, watchpointinfo *wp, bool forceAccept, 
+//----------------------------------------------------------------------------
+void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool forceAccept )
+{
+	int ret;
+
+	DebuggerBreakpointEditor *dialog = new DebuggerBreakpointEditor( editIdx, wp, this );
+
+	if ( forceAccept )
+	{
+		dialog->loadBreakpoint();
+		dialog->deleteLater();
+		ret = QDialog::Accepted;
+	}
+	else
+	{
+		ret = dialog->exec();
+	}
+
+	if (ret == QDialog::Accepted)
+	{
+		bpListUpdate( false );
+	}
+}
+/*
 void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool forceAccept )
 {
 	int ret;
@@ -2131,6 +2516,7 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 		}
 	}
 }
+*/
 //----------------------------------------------------------------------------
 void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 {
@@ -2439,7 +2825,7 @@ static void DeleteBreak(int sel)
 
 	if (watchpoint[sel].cond)
 	{
-		freeTree(watchpoint[sel].cond);
+		delete watchpoint[sel].cond;
 	}
 	if (watchpoint[sel].condText)
 	{
@@ -2488,7 +2874,7 @@ void debuggerClearAllBreakpoints(void)
 	{
 	   if (watchpoint[i].cond)
 	   {
-	   	freeTree(watchpoint[i].cond);
+	   	delete watchpoint[i].cond;
 	   }
 	   if (watchpoint[i].condText)
 	   {
@@ -2499,7 +2885,7 @@ void debuggerClearAllBreakpoints(void)
 	   	free(watchpoint[i].desc);
 	   }
 
-		watchpoint[i].address = 0;
+	   watchpoint[i].address = 0;
 	   watchpoint[i].endaddress = 0;
 	   watchpoint[i].flags = 0;
 	   watchpoint[i].cond = 0;

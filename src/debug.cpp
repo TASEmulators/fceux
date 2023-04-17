@@ -139,7 +139,7 @@ int checkCondition(const char* condition, int num)
 		// Remove the old breakpoint condition before adding a new condition.
 		if (watchpoint[num].cond)
 		{
-			freeTree(watchpoint[num].cond);
+			delete watchpoint[num].cond;
 			free(watchpoint[num].condText);
 			watchpoint[num].cond = 0;
 			watchpoint[num].condText = 0;
@@ -153,8 +153,8 @@ int checkCondition(const char* condition, int num)
 		{
 			watchpoint[num].cond = c;
 			watchpoint[num].condText = (char*)malloc(strlen(condition) + 1);
-            if (!watchpoint[num].condText)
-                return 0;
+			if (!watchpoint[num].condText)
+				return 0;
 			strcpy(watchpoint[num].condText, condition);
 		}
 		else
@@ -169,7 +169,7 @@ int checkCondition(const char* condition, int num)
 		// Remove the old breakpoint condition
 		if (watchpoint[num].cond)
 		{
-			freeTree(watchpoint[num].cond);
+			delete watchpoint[num].cond;
 			free(watchpoint[num].condText);
 			watchpoint[num].cond = 0;
 			watchpoint[num].condText = 0;

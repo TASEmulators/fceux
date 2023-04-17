@@ -420,6 +420,49 @@ class DebugBreakOnDialog : public QDialog
 		void resetDeltas(void);
 };
 
+class DebuggerBreakpointEditor : public QDialog
+{
+   Q_OBJECT
+
+	public:
+		DebuggerBreakpointEditor(int editIndex = -1, watchpointinfo *wpIn = nullptr, QWidget *parent = 0);
+		~DebuggerBreakpointEditor(void);
+
+		void loadBreakpoint(void);
+
+	protected:
+		void closeEvent(QCloseEvent *event) override;
+		void checkDataValid(void);
+
+	private:
+		int editIdx;
+		watchpointinfo *wp;
+
+		QLineEdit *addr1;
+		QLineEdit *addr2;
+		QLineEdit *cond;
+		QLineEdit *name;
+		QCheckBox *forbidChkBox;
+		QCheckBox *rbp;
+		QCheckBox *wbp;
+		QCheckBox *xbp;
+		QCheckBox *ebp;
+		QLabel    *msgLbl;
+
+		QPushButton *okButton;
+		QPushButton *cancelButton;
+		QRadioButton *cpu_radio;
+		QRadioButton *ppu_radio;
+		QRadioButton *oam_radio;
+		QRadioButton *rom_radio;
+
+		bool condValid;
+
+	private slots:
+		void closeWindow(int ret);
+		void conditionTextChanged( const QString &text );
+};
+
 class ConsoleDebugger : public QDialog
 {
    Q_OBJECT
