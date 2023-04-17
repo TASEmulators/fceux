@@ -1211,7 +1211,6 @@ void openTraceLoggerWindow(QWidget *parent)
 	{
 		traceLogWindow->activateWindow();
 		traceLogWindow->raise();
-		traceLogWindow->setFocus();
 		return;
 	}
 	//printf("Open Trace Logger Window\n");
