@@ -172,7 +172,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	loadDisplayViews();
 
-	windowUpdateReq   = true;
+	windowUpdateReq   = QAsmView::UPDATE_ALL;
 
 	dbgWin = this;
 
@@ -373,7 +373,7 @@ void ConsoleDebugger::ld65ImportDebug(void)
 
 	debugSymbolTable.ld65LoadDebugFile( filename.toStdString().c_str() );
 
-	queueUpdate();
+	queueUpdate(QAsmView::UPDATE_ALL);
 
 	return;
 }
@@ -2985,7 +2985,7 @@ void ConsoleDebugger::debugStepBackCB(void)
 	{
 		FCEU_WRAPPER_LOCK();
 		FCEUD_TraceLoggerBackUpInstruction();
-		updateWindowData();
+		updateWindowData(QAsmView::UPDATE_ALL);
 		hexEditorUpdateMemoryValues(true);
 		hexEditorRequestUpdateAll();
 		lastBpIdx = BREAK_TYPE_STEP;
@@ -3180,8 +3180,7 @@ void ConsoleDebugger::seekPCCB (void)
 		setRegsFromEntry();
 		//updateAllDebugWindows();
 	}
-	windowUpdateReq = true;
-	//asmView->scrollToPC();
+	windowUpdateReq = QAsmView::UPDATE_ALL;
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::openChangePcDialog(void)
@@ -3235,7 +3234,7 @@ void ConsoleDebugger::openChangePcDialog(void)
 	{
 		X.PC = sbox->value();
 	
-		windowUpdateReq = true;
+		windowUpdateReq = QAsmView::UPDATE_ALL;
 	}
 }
 //----------------------------------------------------------------------------
@@ -4229,20 +4228,25 @@ void  ConsoleDebugger::updateRegisterView(void)
 	ppuScrollY->setText( tr(stmp) );
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::updateWindowData(void)
+void ConsoleDebugger::updateWindowData(enum QAsmView::UpdateType type)
 {
-	asmView->updateAssemblyView();
-	
-	asmView->scrollToPC();
+	if (type == QAsmView::UPDATE_ALL)
+	{
+		asmView->updateAssemblyView();
+		asmView->scrollToPC();
+		updateRegisterView();
+	} else if (type == QAsmView::UPDATE_NO_SCROLL)
+	{
+		asmView->updateAssemblyView();
+		updateRegisterView();
+	}
 
-	updateRegisterView();
-
-	windowUpdateReq = false;
+	windowUpdateReq = QAsmView::UPDATE_NONE;
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::queueUpdate(void)
+void ConsoleDebugger::queueUpdate(enum QAsmView::UpdateType type)
 {
-	windowUpdateReq = true;
+	windowUpdateReq = type;
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::updatePeriodic(void)
@@ -4260,10 +4264,10 @@ void ConsoleDebugger::updatePeriodic(void)
 		bpNotifyReq = false;
 	}
 
-	if ( windowUpdateReq )
+	if ( windowUpdateReq != QAsmView::UPDATE_NONE )
 	{
 		FCEU_WRAPPER_LOCK();
-		updateWindowData();
+		updateWindowData(windowUpdateReq);
 		FCEU_WRAPPER_UNLOCK();
 	}
 	asmView->update();
@@ -4433,7 +4437,7 @@ void ConsoleDebugger::breakPointNotify( int bpNum )
 		}
 	}
 
-	windowUpdateReq = true;
+	windowUpdateReq = QAsmView::UPDATE_ALL;
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::hbarChanged(int value)
@@ -4556,11 +4560,11 @@ bool debuggerWaitingAtBreakpoint(void)
 	return waitingAtBp;
 }
 //----------------------------------------------------------------------------
-void updateAllDebuggerWindows( void )
+void updateAllDebuggerWindows( enum QAsmView::UpdateType type )
 {
 	if ( dbgWin )
 	{
-		dbgWin->queueUpdate();
+		dbgWin->queueUpdate(type);
 	}
 }
 //----------------------------------------------------------------------------

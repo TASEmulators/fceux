@@ -167,6 +167,8 @@ class QAsmView : public QWidget
 
 		QFont getFont(void){ return font; };
 
+		enum UpdateType { UPDATE_NONE, UPDATE_ALL, UPDATE_NO_SCROLL };
+
 	protected:
 		bool event(QEvent *event) override;
 		void paintEvent(QPaintEvent *event) override;
@@ -471,7 +473,7 @@ class ConsoleDebugger : public QDialog
 		ConsoleDebugger(QWidget *parent = 0);
 		~ConsoleDebugger(void);
 
-		void updateWindowData(void);
+		void updateWindowData(enum QAsmView::UpdateType type);
 		void updateRegisterView(void);
 		void updateTabVisibility(void);
 		void breakPointNotify(int bpNum);
@@ -480,7 +482,7 @@ class ConsoleDebugger : public QDialog
 		void setBookmarkSelectedAddress( int addr );
 		int  getBookmarkSelectedAddress(void){ return selBmAddrVal; };
 		void edit_BM_name( int addr );
-		void queueUpdate(void);
+		void queueUpdate(enum QAsmView::UpdateType type);
 
 		QLabel    *asmLineSelLbl;
 
@@ -573,7 +575,8 @@ class ConsoleDebugger : public QDialog
 		ColorMenuItem *pcColorAct;
 
 		int   selBmAddrVal;
-		bool  windowUpdateReq;
+		enum QAsmView::UpdateType windowUpdateReq;
+
 		bool  startedTraceLogger;
 
 	private:
@@ -668,6 +671,6 @@ void saveGameDebugBreakpoints( bool force = false );
 void loadGameDebugBreakpoints(void);
 void debuggerClearAllBreakpoints(void);
 void debuggerClearAllBookmarks(void);
-void updateAllDebuggerWindows(void);
+void updateAllDebuggerWindows(enum QAsmView::UpdateType type);
 
 extern debuggerBookmarkManager_t dbgBmMgr;
