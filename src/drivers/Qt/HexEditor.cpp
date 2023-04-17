@@ -2777,7 +2777,13 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		event->accept();
 	}
 	else
-	{
+	{  // Use the input text to modify the values in the editor area.
+
+		if (event->text().isEmpty())
+		{
+			return;
+		}
+
 		int key;
 		if ( cursorPosX >= 32 )
 		{  // Edit Area is ASCII
