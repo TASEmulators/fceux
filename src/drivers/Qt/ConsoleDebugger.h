@@ -460,6 +460,8 @@ class DebuggerBreakpointEditor : public QDialog
 
 	private slots:
 		void closeWindow(int ret);
+		void typeChanged(bool checked);
+		void addressTextChanged( const QString &text );
 		void conditionTextChanged( const QString &text );
 };
 

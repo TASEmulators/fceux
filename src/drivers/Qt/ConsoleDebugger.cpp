@@ -1872,6 +1872,9 @@ DebuggerBreakpointEditor::DebuggerBreakpointEditor(int editIndex, watchpointinfo
 	hbox->addWidget( lbl );
 	hbox->addWidget( addr2 );
 
+	connect( addr1, SIGNAL(textChanged(const QString &)), this, SLOT(addressTextChanged(const QString &)));
+	connect( addr2, SIGNAL(textChanged(const QString &)), this, SLOT(addressTextChanged(const QString &)));
+
 	forbidChkBox = new QCheckBox( tr("Forbid") );
 	hbox->addWidget( forbidChkBox );
 
@@ -1903,6 +1906,11 @@ DebuggerBreakpointEditor::DebuggerBreakpointEditor(int editIndex, watchpointinfo
 	oam_radio    = new QRadioButton( tr("OAM") );
 	rom_radio    = new QRadioButton( tr("ROM") );
 	cpu_radio->setChecked(true);
+
+	connect( cpu_radio, SIGNAL(toggled(bool)), this, SLOT(typeChanged(bool)));
+	connect( ppu_radio, SIGNAL(toggled(bool)), this, SLOT(typeChanged(bool)));
+	connect( oam_radio, SIGNAL(toggled(bool)), this, SLOT(typeChanged(bool)));
+	connect( rom_radio, SIGNAL(toggled(bool)), this, SLOT(typeChanged(bool)));
 
 	gbox->setLayout( hbox );
 	hbox->addWidget( cpu_radio );
@@ -2069,13 +2077,87 @@ void DebuggerBreakpointEditor::closeWindow(int ret)
 //----------------------------------------------------------------------------
 void DebuggerBreakpointEditor::checkDataValid(void)
 {
-	bool allEntriesValid = condValid;
+	int type = 0;
+	bool startAddrValid = false;
+	bool endAddrValid = false;
+	bool allEntriesValid = false;
+	int addrLowerBound = 0;
+	int addrUpperBound = 0;
+	int start_addr = 0, end_addr = 0;
+
+	if ( cpu_radio->isChecked() )
+	{
+		type |= BT_C;
+		addrLowerBound = 0;
+		addrUpperBound = 0x10000;
+	}
+	else if ( ppu_radio->isChecked() ) 
+	{
+		type |= BT_P;
+		addrLowerBound = 0;
+		addrUpperBound = 0x4000;
+	}
+	else if ( oam_radio->isChecked() ) 
+	{
+		type |= BT_S;
+		addrLowerBound = 0;
+		addrUpperBound = 0x100;
+	}
+	else if ( rom_radio->isChecked() )
+	{
+		type |= BT_R;
+		addrLowerBound = 0;
+		addrUpperBound = 0x10000;
+
+		if (GameInfo != nullptr)
+		{
+			addrUpperBound = 16+PRGsize[0]+CHRsize[0];
+		}
+	}
+
+	if ( addr1->text().size() > 0 )
+	{
+		bool convOk = false;
+
+		start_addr = offsetStringToInt( type, addr1->text().toStdString().c_str(), &convOk );
+
+		//printf("StartAddr:0x%04X   Upper:0x%04X\n", start_addr, addrUpperBound);
+		startAddrValid = convOk && (start_addr >= addrLowerBound) && (start_addr < addrUpperBound);
+	}
+	else
+	{
+		startAddrValid = false;
+	}
+
+	if ( addr2->text().size() > 0 )
+	{
+		bool convOk = false;
+
+		end_addr = offsetStringToInt( type, addr2->text().toStdString().c_str(), &convOk );
+
+		endAddrValid = convOk && (end_addr >= addrLowerBound) && 
+			(end_addr < addrUpperBound) && (start_addr < end_addr);
+	}
+	else
+	{
+		endAddrValid = true;
+	}
+
+	allEntriesValid = startAddrValid && endAddrValid && condValid;
 
 	okButton->setEnabled( allEntriesValid );
 
 	if (allEntriesValid)
 	{
 		msgLbl->clear();
+	}
+	else if (!startAddrValid)
+	{
+		msgLbl->setText(tr("Start Address Invalid"));
+	}
+	else if (!endAddrValid)
+	{
+		msgLbl->setText(tr("End Address Invalid"));
 	}
 	else if (!condValid)
 	{
@@ -2085,6 +2167,19 @@ void DebuggerBreakpointEditor::checkDataValid(void)
 	{
 		msgLbl->clear();
 	}
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::typeChanged(bool checked)
+{
+	if (checked)
+	{
+		checkDataValid();
+	}
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::addressTextChanged(const QString &txt)
+{
+	checkDataValid();
 }
 //----------------------------------------------------------------------------
 void DebuggerBreakpointEditor::conditionTextChanged(const QString &txt)
