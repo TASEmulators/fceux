@@ -399,7 +399,7 @@ static int writeMem( int mode, unsigned int addr, int value )
 	{
 		if (debuggerWindowIsOpen())
 		{
-			updateAllDebuggerWindows();
+			updateAllDebuggerWindows(QAsmView::UPDATE_NO_SCROLL);
 		}
 	}
 
@@ -1853,7 +1853,7 @@ void HexEditorDialog_t::openDebugSymbolEditWindow( int addr )
 
 	if ( ret == QDialog::Accepted )
 	{
-		updateAllDebuggerWindows();
+		updateAllDebuggerWindows(QAsmView::UPDATE_NO_SCROLL);
 	}
 }
 //----------------------------------------------------------------------------
@@ -2836,6 +2836,7 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 		}
 		else
 		{  // Edit Area is Hex
+
 		   key = int(event->text()[0].toUpper().toLatin1());
 		
 		   if ( ::isxdigit( key ) )
