@@ -72,7 +72,6 @@ protected:
 
 	int fontCharWidth;
 	int actvCheatIdx;
-	bool actvCheatRedraw;
 	bool pauseWhileActive;
 	bool wasPausedByCheats;
 

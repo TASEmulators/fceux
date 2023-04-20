@@ -704,14 +704,10 @@ int GuiCheatsDialog_t::activeCheatListCB(const char *name, uint32 a, uint8 v, in
 
 	if (item == NULL)
 	{
-		item = new QTreeWidgetItem();
-
-		actvCheatList->addTopLevelItem(item);
+		item = new QTreeWidgetItem(actvCheatList);
 	}
 
-	//item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
 	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemNeverHasChildren);
-
 	item->setCheckState(0, s ? Qt::Checked : Qt::Unchecked);
 
 	item->setText(0, tr(codeStr));
@@ -737,8 +733,6 @@ void GuiCheatsDialog_t::showActiveCheatList(bool redraw)
 
 	enaCheats->setChecked(!globalCheatDisabled);
 
-	actvCheatRedraw = redraw;
-
 	if (redraw)
 	{
 		actvCheatList->clear();
@@ -746,6 +740,8 @@ void GuiCheatsDialog_t::showActiveCheatList(bool redraw)
 	actvCheatIdx = 0;
 
 	FCEUI_ListCheats(::activeCheatListCB, (void *)this);
+
+	actvCheatList->viewport()->update();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::openCheatFile(void)
