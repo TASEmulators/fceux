@@ -2470,7 +2470,6 @@ static int memory_registerwrite(lua_State *L)
 {
 	return memory_registerHook(L, MatchHookTypeToCPU(L,LUAMEMHOOK_WRITE), 1);
 }
-FCEU_MAYBE_UNUSED
 static int memory_registerread(lua_State *L)
 {
 	return memory_registerHook(L, MatchHookTypeToCPU(L,LUAMEMHOOK_READ), 1);
@@ -6137,7 +6136,7 @@ static const struct luaL_reg memorylib [] = {
 
 	// memory hooks
 	{"registerwrite", memory_registerwrite},
-	//{"registerread", memory_registerread}, TODO
+	{"registerread", memory_registerread},
 	{"registerexec", memory_registerexec},
 	// alternate names
 	{"register", memory_registerwrite},
