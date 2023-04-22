@@ -12,6 +12,7 @@
 #include <QSpinBox>
 #include <QComboBox>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QProgressBar>
 #include <QLineEdit>
 #include <QLabel>
@@ -34,6 +35,7 @@ protected:
 
 	QSpinBox     *snapMinutes;
 	QSpinBox     *snapSeconds;
+	QSpinBox     *snapFrames;
 	QSpinBox     *historyDuration;
 	QSpinBox     *pauseDuration;
 	QCheckBox    *recorderEnable;
@@ -45,6 +47,10 @@ protected:
 	QPushButton  *closeButton;
 	QComboBox    *cmprLvlCbox;
 	QComboBox    *pauseOnLoadCbox;
+	QGroupBox    *snapTimeGroup;
+	QGroupBox    *snapFramesGroup;
+	QRadioButton *snapFrameSelBtn;
+	QRadioButton *snapTimeSelBtn;
 	QLineEdit    *recStatusLbl;
 	QLineEdit    *recBufSizeLbl;
 	QPushButton  *startStopButton;
@@ -52,6 +58,7 @@ protected:
 	QTimer       *updateTimer;
 
 	double       saveTimeMs;
+	bool         snapUseTime;
 
 	bool dataSavedCheck(void);
 	void recalcMemoryUsage(void);
@@ -67,6 +74,8 @@ private slots:
 	void applyChanges(void);
 	void updatePeriodic(void);
 	void startStopClicked(void);
+	void snapTimeModeClicked(void);
+	void snapFrameModeClicked(void);
 	void spinBoxValueChanged(int newValue);
 	void enableChanged(int);
 	void compressionLevelChanged(int newValue);

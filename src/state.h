@@ -84,8 +84,15 @@ struct StateRecorderConfigData
 {
 	float historyDurationMinutes;
 	float timeBetweenSnapsMinutes;
+	int   framesBetweenSnaps;
 	int   compressionLevel;
 	int   loadPauseTimeSeconds;
+
+	enum TimingType
+	{
+		FRAMES = 0,
+		TIME,
+	} timingMode;
 
 	enum PauseType
 	{
@@ -96,11 +103,13 @@ struct StateRecorderConfigData
 
 	StateRecorderConfigData(void)
 	{
+		framesBetweenSnaps = 60;
 		historyDurationMinutes = 15.0f;
 		timeBetweenSnapsMinutes = 3.0f / 60.0f;
 		compressionLevel = 0;
 		loadPauseTimeSeconds = 3;
 		pauseOnLoad = TEMPORARY_PAUSE;
+		timingMode = FRAMES;
 	}
 
 	bool compare( const StateRecorderConfigData &other )

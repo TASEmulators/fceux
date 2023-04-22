@@ -35,6 +35,7 @@
 
 #include "../../fceu.h"
 #include "../../state.h"
+#include "../../driver.h"
 #include "../../emufile.h"
 
 //----------------------------------------------------------------------------
@@ -54,20 +55,29 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	      grid = new QGridLayout();
 
 	recorderEnable  = new QCheckBox(tr("Auto Start Recorder at ROM Load"));
+	snapFrames      = new QSpinBox();
 	snapMinutes     = new QSpinBox();
 	snapSeconds     = new QSpinBox();
 	historyDuration = new QSpinBox();
+	snapFrameSelBtn = new QRadioButton( tr("By Frames") );
+	snapTimeSelBtn  = new QRadioButton( tr("By Time") );
 
 	recorderEnable->setChecked( FCEU_StateRecorderIsEnabled() );
 
 	connect( recorderEnable, SIGNAL(stateChanged(int)), this, SLOT(enableChanged(int)) );
 
+	snapFrames->setMinimum(1);
+	snapFrames->setMaximum(10000);
 	snapSeconds->setMinimum(0);
 	snapSeconds->setMaximum(60);
 	snapMinutes->setMinimum(0);
 	snapMinutes->setMaximum(60);
 	historyDuration->setMinimum(1);
 	historyDuration->setMaximum(180);
+
+	opt = 10;
+	g_config->getOption("SDL.StateRecorderFramesBetweenSnaps", &opt);
+	snapFrames->setValue(opt);
 
 	opt = 15;
 	g_config->getOption("SDL.StateRecorderHistoryDurationMin", &opt );
@@ -81,6 +91,14 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	g_config->getOption("SDL.StateRecorderTimeBetweenSnapsSec", &opt);
 	snapSeconds->setValue(opt);
 
+	opt = 0;
+	g_config->getOption("SDL.StateRecorderTimingMode", &opt);
+
+	snapFrameSelBtn->setChecked(opt == 0);
+	 snapTimeSelBtn->setChecked(opt == 1);
+	 snapUseTime = opt ? true : false;
+
+	connect(     snapFrames , SIGNAL(valueChanged(int)), this, SLOT(spinBoxValueChanged(int)) );
 	connect(     snapSeconds, SIGNAL(valueChanged(int)), this, SLOT(spinBoxValueChanged(int)) );
 	connect(     snapMinutes, SIGNAL(valueChanged(int)), this, SLOT(spinBoxValueChanged(int)) );
 	connect( historyDuration, SIGNAL(valueChanged(int)), this, SLOT(spinBoxValueChanged(int)) );
@@ -122,10 +140,30 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	frame->setLayout(hbox);
 	grid->addWidget( frame, 1, 1 );
 
-	frame1 = new QGroupBox(tr("Time Between Snapshots:"));
+	frame1 = new QGroupBox(tr("Snapshot Timing Setting:"));
 	hbox1  = new QHBoxLayout();
 	frame1->setLayout(hbox1);
 	grid->addWidget( frame1, 2, 0, 1, 2 );
+
+	g_config->getOption("SDL.StateRecorderTimingMode", &opt);
+
+	hbox1->addWidget( snapFrameSelBtn );
+	hbox1->addWidget( snapTimeSelBtn  );
+
+	snapFramesGroup = new QGroupBox(tr("Frames Between Snapshots:"));
+	hbox1  = new QHBoxLayout();
+	snapFramesGroup->setLayout(hbox1);
+	snapFramesGroup->setEnabled(snapFrameSelBtn->isChecked());
+	grid->addWidget( snapFramesGroup, 3, 0, 1, 2 );
+
+	hbox1->addWidget( snapFrames);
+	hbox1->addWidget( new QLabel( tr("Range (1 - 10000)") ) );
+
+	snapTimeGroup = new QGroupBox(tr("Time Between Snapshots:"));
+	hbox1  = new QHBoxLayout();
+	snapTimeGroup->setLayout(hbox1);
+	snapTimeGroup->setEnabled(snapTimeSelBtn->isChecked());
+	grid->addWidget( snapTimeGroup, 4, 0, 1, 2 );
 
 	frame  = new QGroupBox();
 	hbox   = new QHBoxLayout();
@@ -178,7 +216,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 
 	frame->setLayout(hbox);
 
-	grid->addWidget(frame1, 3, 0, 2, 1);
+	grid->addWidget(frame1, 4, 3, 2, 1);
 
 	frame = new QGroupBox( tr("Memory Usage:") );
 	memStatsGrid = new QGridLayout();
@@ -236,6 +274,8 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	updateRecorderStatusLabel();
 
 	connect(startStopButton, SIGNAL(clicked(void)), this, SLOT(startStopClicked(void)));
+	connect(snapFrameSelBtn, SIGNAL(clicked(void)), this, SLOT(snapFrameModeClicked(void)));
+	connect(snapTimeSelBtn , SIGNAL(clicked(void)), this, SLOT(snapTimeModeClicked(void)));
 
 	frame = new QGroupBox();
 	hbox  = new QHBoxLayout();
@@ -288,6 +328,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	restoreGeometry(settings.value("stateRecorderWindow/geometry").toByteArray());
 
 	recalcMemoryUsage();
+
 	pauseOnLoadChanged( pauseOnLoadCbox->currentIndex() );
 
 	updateTimer = new QTimer(this);
@@ -329,6 +370,10 @@ void StateRecorderDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::packConfig( StateRecorderConfigData &config )
 {
+	config.timingMode = snapTimeSelBtn->isChecked() ? 
+		StateRecorderConfigData::TIME : StateRecorderConfigData::FRAMES;
+
+	config.framesBetweenSnaps = snapFrames->value();
 	config.historyDurationMinutes = static_cast<float>( historyDuration->value() );
 	config.timeBetweenSnapsMinutes = static_cast<float>( snapMinutes->value() ) +
 		                          ( static_cast<float>( snapSeconds->value() ) / 60.0f );
@@ -393,6 +438,8 @@ void StateRecorderDialog_t::applyChanges(void)
 	FCEU_WRAPPER_UNLOCK();
 
 	g_config->setOption("SDL.StateRecorderHistoryDurationMin", historyDuration->value() );
+	g_config->setOption("SDL.StateRecorderTimingMode", snapTimeSelBtn->isChecked() ? 1 : 0);
+	g_config->setOption("SDL.StateRecorderFramesBetweenSnaps", snapFrames->value() );
 	g_config->setOption("SDL.StateRecorderTimeBetweenSnapsMin", snapMinutes->value() );
 	g_config->setOption("SDL.StateRecorderTimeBetweenSnapsSec", snapSeconds->value() );
 	g_config->setOption("SDL.StateRecorderCompressionLevel", config.compressionLevel);
@@ -418,6 +465,24 @@ void StateRecorderDialog_t::startStopClicked(void)
 	updateStatusDisplay();
 
 	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::snapFrameModeClicked(void)
+{
+	snapUseTime = false;
+	snapTimeGroup->setEnabled(false);
+	snapFramesGroup->setEnabled(true);
+
+	recalcMemoryUsage();
+}
+//----------------------------------------------------------------------------
+void StateRecorderDialog_t::snapTimeModeClicked(void)
+{
+	snapUseTime = true;
+	snapFramesGroup->setEnabled(false);
+	snapTimeGroup->setEnabled(true);
+
+	recalcMemoryUsage();
 }
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::updateStartStopBuffon(void)
@@ -517,9 +582,21 @@ void StateRecorderDialog_t::recalcMemoryUsage(void)
 {
 	char stmp[64];
 
+	float fsnapMin = 1.0;
 	float fhistMin = static_cast<float>( historyDuration->value() );
-	float fsnapMin =   static_cast<float>( snapMinutes->value() ) +
+
+	if (snapUseTime)
+	{
+		fsnapMin =   static_cast<float>( snapMinutes->value() ) +
 		        ( static_cast<float>( snapSeconds->value() ) / 60.0f );
+	}
+	else
+	{
+		int32_t fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
+		double hz = ( ((double)fps) / 16777216.0 );
+
+		fsnapMin  = static_cast<double>(snapFrames->value()) / (hz * 60.0);
+	}
 
 	float fnumSnaps = fhistMin / fsnapMin;
 	float fsnapSize = 10.0f * 1024.0f;

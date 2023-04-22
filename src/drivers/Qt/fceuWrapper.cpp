@@ -976,7 +976,9 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	// Initialize the State Recorder
 	{
 		bool srEnable = false;
+		bool srUseTimeMode = false;
 		int srHistDurMin = 15;
+		int srFramesBtwSnaps = 60;
 		int srTimeBtwSnapsMin = 0;
 		int srTimeBtwSnapsSec = 3;
 		int srCompressionLevel = 0;
@@ -984,7 +986,9 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		int pauseOnLoad = StateRecorderConfigData::TEMPORARY_PAUSE;
 
 		g_config->getOption("SDL.StateRecorderEnable", &srEnable);
+		g_config->getOption("SDL.StateRecorderTimingMode", &srUseTimeMode);
 		g_config->getOption("SDL.StateRecorderHistoryDurationMin", &srHistDurMin);
+		g_config->getOption("SDL.StateRecorderFramesBetweenSnaps", &srFramesBtwSnaps);
 		g_config->getOption("SDL.StateRecorderTimeBetweenSnapsMin", &srTimeBtwSnapsMin);
 		g_config->getOption("SDL.StateRecorderTimeBetweenSnapsSec", &srTimeBtwSnapsSec);
 		g_config->getOption("SDL.StateRecorderCompressionLevel", &srCompressionLevel);
@@ -994,8 +998,11 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		StateRecorderConfigData srConfig;
 
 		srConfig.historyDurationMinutes = srHistDurMin;
+		srConfig.timingMode = srUseTimeMode ?
+					StateRecorderConfigData::TIME : StateRecorderConfigData::FRAMES;
 		srConfig.timeBetweenSnapsMinutes = static_cast<float>( srTimeBtwSnapsMin ) +
 			                          ( static_cast<float>( srTimeBtwSnapsSec ) / 60.0f );
+		srConfig.framesBetweenSnaps = srFramesBtwSnaps;
 		srConfig.compressionLevel = srCompressionLevel;
 		srConfig.loadPauseTimeSeconds = pauseOnLoadTime;
 		srConfig.pauseOnLoad = static_cast<StateRecorderConfigData::PauseType>(pauseOnLoad);
