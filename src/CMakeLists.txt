@@ -110,6 +110,13 @@ else(WIN32)
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
   endif()
 
+  pkg_check_modules( LIBARCHIVE libarchive)
+
+  if ( ${LIBARCHIVE_FOUND} )
+	  message( STATUS "Using System Libarchive Library ${LIBARCHIVE_VERSION}" )
+	  add_definitions( -D_USE_LIBARCHIVE ${LIBARCHIVE_CFLAGS} )
+  endif()
+
   pkg_check_modules( X264 x264)
 
   if ( ${X264_FOUND} )
@@ -643,7 +650,7 @@ target_link_libraries( ${APP_NAME}  ${ASAN_LDFLAGS}
    ${${Qt}OpenGLWidgets_LIBRARIES}
    ${OPENGL_LDFLAGS}  
  	${SDL2_LDFLAGS}
-	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
+	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES} ${LIBARCHIVE_LDFLAGS}
 	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS} ${LIBAV_LDFLAGS}
  	${SYS_LIBS}
 )
