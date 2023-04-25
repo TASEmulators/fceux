@@ -215,8 +215,12 @@ AboutWindow::AboutWindow(QWidget *parent)
 	i=0;
 	while (libArcName[i])
 	{
-		sprintf( stmp, "		%s %s\n", libArcName[i], libArcVersion[i]); i++;
-		credits->insertPlainText( stmp );
+		if (libArcVersion[i])
+		{
+			sprintf( stmp, "		%s %s\n", libArcName[i], libArcVersion[i]);
+			credits->insertPlainText( stmp );
+		}
+		i++;
 	}
 #endif
 
