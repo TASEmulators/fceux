@@ -34,6 +34,10 @@
 #include "x264.h"
 #endif
 
+#ifdef _USE_LIBARCHIVE
+#include <archive.h>
+#endif
+
 #ifdef _USE_LIBAV
 #ifdef __cplusplus
 extern "C"
@@ -201,6 +205,19 @@ AboutWindow::AboutWindow(QWidget *parent)
 #ifdef ZLIB_VERSION
 	sprintf( stmp, "	Compiled with zlib %s\n", ZLIB_VERSION );
 	credits->insertPlainText( stmp );
+#endif
+#ifdef _USE_LIBARCHIVE
+	sprintf( stmp, "	Compiled with libarchive %s\n", ARCHIVE_VERSION_ONLY_STRING );
+	credits->insertPlainText( stmp );
+	const char *libArcName[]    = { "zlib", "liblzma", "bzlib", "liblz4", "libzstd", nullptr };
+	const char *libArcVersion[] = { archive_zlib_version(), archive_liblzma_version(), 
+		archive_bzlib_version(), archive_liblz4_version(), archive_libzstd_version(), nullptr };
+	i=0;
+	while (libArcName[i])
+	{
+		sprintf( stmp, "		%s %s\n", libArcName[i], libArcVersion[i]); i++;
+		credits->insertPlainText( stmp );
+	}
 #endif
 
 #ifdef _S9XLUA_H
