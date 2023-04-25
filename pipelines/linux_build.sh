@@ -61,6 +61,13 @@ echo '****************************************'
 sudo apt-get --assume-yes  install libminizip-dev
 pkg-config --cflags --libs  minizip
 
+# Install libarchive-dev
+echo '****************************************'
+echo 'Install Dependency libarchive-dev'
+echo '****************************************'
+sudo apt-get --assume-yes  install libarchive-dev
+pkg-config --cflags --libs  libarchive
+
 # GTK+-2 is no longer needed
 #sudo apt-get install libgtk2.0-dev
 
