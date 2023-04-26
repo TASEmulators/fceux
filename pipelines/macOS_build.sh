@@ -71,6 +71,12 @@ echo '****************************************'
 brew  install  minizip
 
 echo '****************************************'
+echo 'Install Optional Dependency libarchive'
+echo '****************************************'
+brew  install  libarchive
+LIBARCHIVE_PATH=`brew --prefix libarchive`;
+
+echo '****************************************'
 echo 'Install Optional Dependency x264'
 echo '****************************************'
 brew  install  x264
@@ -87,7 +93,7 @@ brew  install  ffmpeg
 
 #brew  install  zlib  # Already installed in appveyor macOS
 
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:$LIBARCHIVE_PATH:
 
 ls -ltr $HOME/Qt;
 
