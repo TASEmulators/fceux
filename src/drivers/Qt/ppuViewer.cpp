@@ -92,7 +92,6 @@ int openPPUViewWindow( QWidget *parent )
 	{
 		ppuViewWindow->activateWindow();
 		ppuViewWindow->raise();
-		ppuViewWindow->setFocus();
 		return -1;
 	}
 	initPPUViewer();
@@ -110,7 +109,6 @@ int openOAMViewWindow( QWidget *parent )
 	{
 		spriteViewWindow->activateWindow();
 		spriteViewWindow->raise();
-		spriteViewWindow->setFocus();
 		return -1;
 	}
 	initPPUViewer();
@@ -637,8 +635,8 @@ QPoint ppuPatternView_t::convPixToTile( QPoint p )
 	w = pattern->w;
 	h = pattern->h;
 
-	i = x / (w*8);
-	j = y / (h*8);
+	i = w == 0 ? 0 : x / (w*8);
+	j = h == 0 ? 0 : y / (h*8);
 
 	if ( PPUView_sprite16Mode[ patternIndex ] )
 	{
@@ -3338,8 +3336,8 @@ QPoint oamPatternView_t::convPixToTile( QPoint p )
 	w = oamPattern.w;
 	h = oamPattern.h;
 
-	i = x / (w*8);
-	j = y / (h*16);
+	i = w == 0 ? 0 : x / (w*8);
+	j = h == 0 ? 0 : y / (h*16);
 
 	//printf("(x,y) = (%i,%i) w=%i h=%i  $%X%X \n", x, y, w, h, jj, ii );
 

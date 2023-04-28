@@ -1235,7 +1235,7 @@ void DeleteBreak(int sel)
 	if(sel<0) return;
 	if(sel>=numWPs) return;
 	if (watchpoint[sel].cond)
-		freeTree(watchpoint[sel].cond);
+		delete watchpoint[sel].cond;
 	if (watchpoint[sel].condText)
 		free(watchpoint[sel].condText);
 	if (watchpoint[sel].desc)

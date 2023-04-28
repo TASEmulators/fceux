@@ -61,9 +61,28 @@ struct Condition
 
 	unsigned int type2;
 	unsigned int value2;
+
+	Condition(void)
+	{
+		op = 0;
+		lhs = rhs = nullptr;
+		type1 = value1 = 0;
+		type2 = value2 = 0;
+	};
+
+	~Condition(void)
+	{
+		if (lhs)
+		{
+			delete lhs;
+		}
+		if (rhs)
+		{
+			delete rhs;
+		}
+	}
 };
 
-void freeTree(Condition* c);
 Condition* generateCondition(const char* str);
 
 #endif

@@ -172,7 +172,7 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	loadDisplayViews();
 
-	windowUpdateReq   = true;
+	windowUpdateReq   = QAsmView::UPDATE_ALL;
 
 	dbgWin = this;
 
@@ -373,7 +373,7 @@ void ConsoleDebugger::ld65ImportDebug(void)
 
 	debugSymbolTable.ld65LoadDebugFile( filename.toStdString().c_str() );
 
-	queueUpdate();
+	queueUpdate(QAsmView::UPDATE_ALL);
 
 	return;
 }
@@ -1834,28 +1834,26 @@ void ConsoleDebugger::selBmAddrChanged(const QString &txt)
 	//printf("selBmAddrVal = %04X\n", selBmAddrVal );
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool forceAccept )
+DebuggerBreakpointEditor::DebuggerBreakpointEditor(int editIndex, watchpointinfo *wpIn, QWidget *parent)
+	: QDialog(parent)
 {
-	int ret;
-	QDialog dialog(this);
+	editIdx = editIndex;
+	wp = wpIn;
+
 	QHBoxLayout *hbox;
 	QVBoxLayout *mainLayout, *vbox;
 	QLabel *lbl;
-	QLineEdit *addr1, *addr2, *cond, *name;
-	QCheckBox *forbidChkBox, *rbp, *wbp, *xbp, *ebp;
 	QGridLayout *grid;
 	QFrame *frame;
 	QGroupBox *gbox;
-	QPushButton *okButton, *cancelButton;
-	QRadioButton *cpu_radio, *ppu_radio, *oam_radio, *rom_radio;
 
 	if ( editIdx >= 0 )
 	{
-		dialog.setWindowTitle( tr("Edit Breakpoint") );
+		setWindowTitle( tr("Edit Breakpoint") );
 	}
 	else
 	{
-		dialog.setWindowTitle( tr("Add Breakpoint") );
+		setWindowTitle( tr("Add Breakpoint") );
 	}
 
 	hbox       = new QHBoxLayout();
@@ -1873,6 +1871,9 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 	addr2 = new QLineEdit();
 	hbox->addWidget( lbl );
 	hbox->addWidget( addr2 );
+
+	connect( addr1, SIGNAL(textChanged(const QString &)), this, SLOT(addressTextChanged(const QString &)));
+	connect( addr2, SIGNAL(textChanged(const QString &)), this, SLOT(addressTextChanged(const QString &)));
 
 	forbidChkBox = new QCheckBox( tr("Forbid") );
 	hbox->addWidget( forbidChkBox );
@@ -1906,6 +1907,11 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 	rom_radio    = new QRadioButton( tr("ROM") );
 	cpu_radio->setChecked(true);
 
+	connect( cpu_radio, SIGNAL(toggled(bool)), this, SLOT(typeChanged(bool)));
+	connect( ppu_radio, SIGNAL(toggled(bool)), this, SLOT(typeChanged(bool)));
+	connect( oam_radio, SIGNAL(toggled(bool)), this, SLOT(typeChanged(bool)));
+	connect( rom_radio, SIGNAL(toggled(bool)), this, SLOT(typeChanged(bool)));
+
 	gbox->setLayout( hbox );
 	hbox->addWidget( cpu_radio );
 	hbox->addWidget( ppu_radio );
@@ -1917,6 +1923,9 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 	mainLayout->addLayout( grid );
 	lbl   = new QLabel( tr("Condition") );
 	cond  = new QLineEdit();
+	condValid = true;
+
+	connect( cond, SIGNAL(textChanged(const QString &)), this, SLOT(conditionTextChanged(const QString &)));
 
 	grid->addWidget(  lbl, 0, 0 );
 	grid->addWidget( cond, 0, 1 );
@@ -1928,15 +1937,17 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 	grid->addWidget( name, 1, 1 );
 
 	hbox         = new QHBoxLayout();
+	msgLbl       = new QLabel();
 	okButton     = new QPushButton( tr("OK") );
 	cancelButton = new QPushButton( tr("Cancel") );
 
 	mainLayout->addLayout( hbox );
-	hbox->addWidget( cancelButton );
-	hbox->addWidget(     okButton );
+	hbox->addWidget( msgLbl, 5 );
+	hbox->addWidget( cancelButton, 1 );
+	hbox->addWidget(     okButton, 1 );
 
-	connect(     okButton, SIGNAL(clicked(void)), &dialog, SLOT(accept(void)) );
-	connect( cancelButton, SIGNAL(clicked(void)), &dialog, SLOT(reject(void)) );
+	connect(     okButton, SIGNAL(clicked(void)), this, SLOT(accept(void)) );
+	connect( cancelButton, SIGNAL(clicked(void)), this, SLOT(reject(void)) );
 
 	    okButton->setIcon( style()->standardIcon( QStyle::SP_DialogOkButton ) );
 	cancelButton->setIcon( style()->standardIcon( QStyle::SP_DialogCancelButton ) );
@@ -2036,99 +2047,270 @@ void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool fo
 		ebp->setChecked(true);
 	}
 
-	dialog.setLayout( mainLayout );
+	setLayout( mainLayout );
+
+	connect( this  , SIGNAL(finished(int)), this, SLOT(closeWindow(int)) );
+}
+//----------------------------------------------------------------------------
+DebuggerBreakpointEditor::~DebuggerBreakpointEditor(void)
+{
+
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::closeEvent(QCloseEvent *event)
+{
+	//printf("Close Window Event\n");
+	done(QDialog::Rejected);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::closeWindow(int ret)
+{
+	//printf("Close Window %i\n", ret);
+	if ( ret == QDialog::Accepted )
+	{
+		loadBreakpoint();
+	}
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::checkDataValid(void)
+{
+	int type = 0;
+	bool startAddrValid = false;
+	bool endAddrValid = false;
+	bool allEntriesValid = false;
+	int addrLowerBound = 0;
+	int addrUpperBound = 0;
+	int start_addr = 0, end_addr = 0;
+
+	if ( cpu_radio->isChecked() )
+	{
+		type |= BT_C;
+		addrLowerBound = 0;
+		addrUpperBound = 0x10000;
+	}
+	else if ( ppu_radio->isChecked() ) 
+	{
+		type |= BT_P;
+		addrLowerBound = 0;
+		addrUpperBound = 0x4000;
+	}
+	else if ( oam_radio->isChecked() ) 
+	{
+		type |= BT_S;
+		addrLowerBound = 0;
+		addrUpperBound = 0x100;
+	}
+	else if ( rom_radio->isChecked() )
+	{
+		type |= BT_R;
+		addrLowerBound = 0;
+		addrUpperBound = 0x10000;
+
+		if (GameInfo != nullptr)
+		{
+			addrUpperBound = 16+PRGsize[0]+CHRsize[0];
+		}
+	}
+
+	if ( addr1->text().size() > 0 )
+	{
+		bool convOk = false;
+
+		start_addr = offsetStringToInt( type, addr1->text().toStdString().c_str(), &convOk );
+
+		//printf("StartAddr:0x%04X   Upper:0x%04X\n", start_addr, addrUpperBound);
+		startAddrValid = convOk && (start_addr >= addrLowerBound) && (start_addr < addrUpperBound);
+	}
+	else
+	{
+		startAddrValid = false;
+	}
+
+	if ( addr2->text().size() > 0 )
+	{
+		bool convOk = false;
+
+		end_addr = offsetStringToInt( type, addr2->text().toStdString().c_str(), &convOk );
+
+		endAddrValid = convOk && (end_addr >= addrLowerBound) && 
+			(end_addr < addrUpperBound) && (start_addr < end_addr);
+	}
+	else
+	{
+		endAddrValid = true;
+	}
+
+	allEntriesValid = startAddrValid && endAddrValid && condValid;
+
+	okButton->setEnabled( allEntriesValid );
+
+	if (allEntriesValid)
+	{
+		msgLbl->clear();
+	}
+	else if (!startAddrValid)
+	{
+		msgLbl->setText(tr("Start Address Invalid"));
+	}
+	else if (!endAddrValid)
+	{
+		msgLbl->setText(tr("End Address Invalid"));
+	}
+	else if (!condValid)
+	{
+		msgLbl->setText(tr("Condition Invalid"));
+	}
+	else
+	{
+		msgLbl->clear();
+	}
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::typeChanged(bool checked)
+{
+	if (checked)
+	{
+		checkDataValid();
+	}
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::addressTextChanged(const QString &txt)
+{
+	checkDataValid();
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::conditionTextChanged(const QString &txt)
+{
+	if ( txt.size() > 0 )
+	{
+		Condition *c = generateCondition( txt.toStdString().c_str() );
+
+		condValid = (c != nullptr);
+
+		if (c)
+		{
+			delete c; c = nullptr;
+		}
+	}
+	else
+	{
+		condValid = true;
+	}
+	checkDataValid();
+}
+//----------------------------------------------------------------------------
+void DebuggerBreakpointEditor::loadBreakpoint(void)
+{
+	int  start_addr = -1, end_addr = -1, type = 0, enable = 1, slot;
+	std::string s;
+
+	FCEU_WRAPPER_LOCK();
+
+	slot = (editIdx < 0) ? numWPs : editIdx;
+
+	if ( cpu_radio->isChecked() )
+	{
+		type |= BT_C;
+	}
+	else if ( ppu_radio->isChecked() ) 
+	{
+		type |= BT_P;
+	}
+	else if ( oam_radio->isChecked() ) 
+	{
+		type |= BT_S;
+	}
+	else if ( rom_radio->isChecked() )
+	{
+		type |= BT_R;
+	}
+
+	s = addr1->text().toStdString();
+
+	if ( s.size() > 0 )
+	{
+		start_addr = offsetStringToInt( type, s.c_str() );
+	}
+
+	s = addr2->text().toStdString();
+
+	if ( s.size() > 0 )
+	{
+		end_addr = offsetStringToInt( type, s.c_str() );
+	}
+
+	if ( rbp->isChecked() )
+	{
+		type |= WP_R;
+	}
+	if ( wbp->isChecked() )
+	{
+		type |= WP_W;
+	}
+	if ( xbp->isChecked() )
+	{
+		type |= WP_X;
+	}
+
+	if ( forbidChkBox->isChecked() )
+	{
+		type |= WP_F;
+	}
+
+	enable = ebp->isChecked();
+
+	if ( (start_addr >= 0) && (numWPs < 64) )
+	{
+		unsigned int retval;
+		std::string nameString, condString;
+
+		nameString = name->text().toStdString();
+		condString = cond->text().toStdString();
+
+		retval = NewBreak( nameString.c_str(), start_addr, end_addr, type, condString.c_str(), slot, enable);
+
+		if ( (retval == 1) || (retval == 2) )
+		{
+			printf("Breakpoint Add Failed\n");
+		}
+		else
+		{
+			if (editIdx < 0)
+			{
+				numWPs++;
+			}
+
+			//bpListUpdate( false );
+		}
+	}
+	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------------------------------
+	       	//int editIndex, watchpointinfo *wp, bool forceAccept, 
+//----------------------------------------------------------------------------
+void ConsoleDebugger::openBpEditWindow( int editIdx, watchpointinfo *wp, bool forceAccept )
+{
+	int ret;
+
+	DebuggerBreakpointEditor *dialog = new DebuggerBreakpointEditor( editIdx, wp, this );
 
 	if ( forceAccept )
 	{
+		dialog->loadBreakpoint();
+		dialog->deleteLater();
 		ret = QDialog::Accepted;
 	}
 	else
 	{
-		ret = dialog.exec();
+		ret = dialog->exec();
 	}
 
-	if ( ret == QDialog::Accepted )
+	if (ret == QDialog::Accepted)
 	{
-		int  start_addr = -1, end_addr = -1, type = 0, enable = 1, slot;
-		std::string s;
-
-		slot = (editIdx < 0) ? numWPs : editIdx;
-
-		if ( cpu_radio->isChecked() )
-		{
-			type |= BT_C;
-		}
-		else if ( ppu_radio->isChecked() ) 
-		{
-			type |= BT_P;
-		}
-		else if ( oam_radio->isChecked() ) 
-		{
-			type |= BT_S;
-		}
-		else if ( rom_radio->isChecked() )
-		{
-			type |= BT_R;
-		}
-
-		s = addr1->text().toStdString();
-
-		if ( s.size() > 0 )
-		{
-			start_addr = offsetStringToInt( type, s.c_str() );
-		}
-
-		s = addr2->text().toStdString();
-
-		if ( s.size() > 0 )
-		{
-			end_addr = offsetStringToInt( type, s.c_str() );
-		}
-
-		if ( rbp->isChecked() )
-		{
-			type |= WP_R;
-		}
-		if ( wbp->isChecked() )
-		{
-			type |= WP_W;
-		}
-		if ( xbp->isChecked() )
-		{
-			type |= WP_X;
-		}
-
-		if ( forbidChkBox->isChecked() )
-		{
-			type |= WP_F;
-		}
-
-		enable = ebp->isChecked();
-
-		if ( (start_addr >= 0) && (numWPs < 64) )
-		{
-			unsigned int retval;
-			std::string nameString, condString;
-
-			nameString = name->text().toStdString();
-			condString = cond->text().toStdString();
-
-			retval = NewBreak( nameString.c_str(), start_addr, end_addr, type, condString.c_str(), slot, enable);
-
-			if ( (retval == 1) || (retval == 2) )
-			{
-				printf("Breakpoint Add Failed\n");
-			}
-			else
-			{
-				if (editIdx < 0)
-				{
-					numWPs++;
-				}
-
-				bpListUpdate( false );
-			}
-		}
+		bpListUpdate( false );
 	}
 }
 //----------------------------------------------------------------------------
@@ -2439,7 +2621,7 @@ static void DeleteBreak(int sel)
 
 	if (watchpoint[sel].cond)
 	{
-		freeTree(watchpoint[sel].cond);
+		delete watchpoint[sel].cond;
 	}
 	if (watchpoint[sel].condText)
 	{
@@ -2488,7 +2670,7 @@ void debuggerClearAllBreakpoints(void)
 	{
 	   if (watchpoint[i].cond)
 	   {
-	   	freeTree(watchpoint[i].cond);
+	   	delete watchpoint[i].cond;
 	   }
 	   if (watchpoint[i].condText)
 	   {
@@ -2499,7 +2681,7 @@ void debuggerClearAllBreakpoints(void)
 	   	free(watchpoint[i].desc);
 	   }
 
-		watchpoint[i].address = 0;
+	   watchpoint[i].address = 0;
 	   watchpoint[i].endaddress = 0;
 	   watchpoint[i].flags = 0;
 	   watchpoint[i].cond = 0;
@@ -2898,7 +3080,7 @@ void ConsoleDebugger::debugStepBackCB(void)
 	{
 		FCEU_WRAPPER_LOCK();
 		FCEUD_TraceLoggerBackUpInstruction();
-		updateWindowData();
+		updateWindowData(QAsmView::UPDATE_ALL);
 		hexEditorUpdateMemoryValues(true);
 		hexEditorRequestUpdateAll();
 		lastBpIdx = BREAK_TYPE_STEP;
@@ -3093,8 +3275,7 @@ void ConsoleDebugger::seekPCCB (void)
 		setRegsFromEntry();
 		//updateAllDebugWindows();
 	}
-	windowUpdateReq = true;
-	//asmView->scrollToPC();
+	windowUpdateReq = QAsmView::UPDATE_ALL;
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::openChangePcDialog(void)
@@ -3148,7 +3329,7 @@ void ConsoleDebugger::openChangePcDialog(void)
 	{
 		X.PC = sbox->value();
 	
-		windowUpdateReq = true;
+		windowUpdateReq = QAsmView::UPDATE_ALL;
 	}
 }
 //----------------------------------------------------------------------------
@@ -4142,20 +4323,25 @@ void  ConsoleDebugger::updateRegisterView(void)
 	ppuScrollY->setText( tr(stmp) );
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::updateWindowData(void)
+void ConsoleDebugger::updateWindowData(enum QAsmView::UpdateType type)
 {
-	asmView->updateAssemblyView();
-	
-	asmView->scrollToPC();
+	if (type == QAsmView::UPDATE_ALL)
+	{
+		asmView->updateAssemblyView();
+		asmView->scrollToPC();
+		updateRegisterView();
+	} else if (type == QAsmView::UPDATE_NO_SCROLL)
+	{
+		asmView->updateAssemblyView();
+		updateRegisterView();
+	}
 
-	updateRegisterView();
-
-	windowUpdateReq = false;
+	windowUpdateReq = QAsmView::UPDATE_NONE;
 }
 //----------------------------------------------------------------------------
-void ConsoleDebugger::queueUpdate(void)
+void ConsoleDebugger::queueUpdate(enum QAsmView::UpdateType type)
 {
-	windowUpdateReq = true;
+	windowUpdateReq = type;
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::updatePeriodic(void)
@@ -4173,10 +4359,10 @@ void ConsoleDebugger::updatePeriodic(void)
 		bpNotifyReq = false;
 	}
 
-	if ( windowUpdateReq )
+	if ( windowUpdateReq != QAsmView::UPDATE_NONE )
 	{
 		FCEU_WRAPPER_LOCK();
-		updateWindowData();
+		updateWindowData(windowUpdateReq);
 		FCEU_WRAPPER_UNLOCK();
 	}
 	asmView->update();
@@ -4346,7 +4532,7 @@ void ConsoleDebugger::breakPointNotify( int bpNum )
 		}
 	}
 
-	windowUpdateReq = true;
+	windowUpdateReq = QAsmView::UPDATE_ALL;
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::hbarChanged(int value)
@@ -4461,7 +4647,6 @@ void debuggerWindowSetFocus(bool val)
 	{
 		dbgWin->activateWindow();
 		dbgWin->raise();
-		dbgWin->setFocus();
 	}
 }
 //----------------------------------------------------------------------------
@@ -4470,11 +4655,11 @@ bool debuggerWaitingAtBreakpoint(void)
 	return waitingAtBp;
 }
 //----------------------------------------------------------------------------
-void updateAllDebuggerWindows( void )
+void updateAllDebuggerWindows( enum QAsmView::UpdateType type )
 {
 	if ( dbgWin )
 	{
-		dbgWin->queueUpdate();
+		dbgWin->queueUpdate(type);
 	}
 }
 //----------------------------------------------------------------------------

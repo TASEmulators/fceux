@@ -57,6 +57,7 @@
 
 #include "common/os_utils.h"
 
+#include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/TraceLogger.h"
@@ -1211,7 +1212,6 @@ void openTraceLoggerWindow(QWidget *parent)
 	{
 		traceLogWindow->activateWindow();
 		traceLogWindow->raise();
-		traceLogWindow->setFocus();
 		return;
 	}
 	//printf("Open Trace Logger Window\n");
@@ -2188,7 +2188,7 @@ void QTraceLogView::openBpEditWindow(int editIdx, watchpointinfo *wp, traceRecor
 					numWPs++;
 				}
 
-				updateAllDebuggerWindows();
+				updateAllDebuggerWindows(QAsmView::UPDATE_NO_SCROLL);
 			}
 		}
 	}
@@ -2233,7 +2233,7 @@ void QTraceLogView::openDebugSymbolEditWindow(int addr, int bank)
 
 	if (ret == QDialog::Accepted)
 	{
-		updateAllDebuggerWindows();
+		updateAllDebuggerWindows(QAsmView::UPDATE_NO_SCROLL);
 	}
 }
 //----------------------------------------------------------------------------

@@ -2388,7 +2388,7 @@ void consoleWin_t::openROMFile(void)
 	QDir d;
 
 	const QStringList filters(
-			{ "All Useable files (*.nes *.NES *.nsf *.NSF *.fds *.FDS *.unf *.UNF *.unif *.UNIF *.zip *.ZIP)",
+			{ "All Useable files (*.nes *.NES *.nsf *.NSF *.fds *.FDS *.unf *.UNF *.unif *.UNIF *.zip *.ZIP, *.7z *.7zip)",
            "NES files (*.nes *.NES)",
            "NSF files (*.nsf *.NSF)",
            "UNF files (*.unf *.UNF *.unif *.UNIF)",
@@ -2758,14 +2758,14 @@ void consoleWin_t::loadState9(void){ loadState(9); }
 void consoleWin_t::loadPrevState(void)
 {
 	FCEU_WRAPPER_LOCK();
-	FCEU_StateRecorderLoadState( FCEU_StateRecorderGetStateIndex()-1 );
+	FCEU_StateRecorderLoadPrevState();
 	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::loadNextState(void)
 {
 	FCEU_WRAPPER_LOCK();
-	FCEU_StateRecorderLoadState( FCEU_StateRecorderGetStateIndex()-1 );
+	FCEU_StateRecorderLoadNextState();
 	FCEU_WRAPPER_UNLOCK();
 }
 

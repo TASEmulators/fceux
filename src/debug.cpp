@@ -19,9 +19,14 @@ unsigned int debuggerPageSize = 14;
 int vblankScanLines = 0;	//Used to calculate scanlines 240-261 (vblank)
 int vblankPixel = 0;		//Used to calculate the pixels in vblank
 
-int offsetStringToInt(unsigned int type, const char* offsetBuffer)
+int offsetStringToInt(unsigned int type, const char* offsetBuffer, bool *conversionOk)
 {
 	int offset = -1;
+
+	if (conversionOk)
+	{
+		*conversionOk = false;
+	}
 
 	if (sscanf(offsetBuffer,"%7X",(unsigned int *)&offset) == EOF)
 	{
@@ -30,14 +35,26 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 
 	if (type & BT_P)
 	{
+		if (conversionOk)
+		{
+			*conversionOk = (offset >= 0) && (offset < 0x4000);
+		}
 		return offset & 0x3FFF;
 	}
 	else if (type & BT_S)
 	{
+		if (conversionOk)
+		{
+			*conversionOk = (offset >= 0) && (offset < 0x100);
+		}
 		return offset & 0x00FF;
 	}
 	else if (type & BT_R)
 	{
+		if (conversionOk)
+		{
+			*conversionOk = (offset >= 0);
+		}
 		return offset;
 	}
 	else // BT_C
@@ -46,6 +63,10 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 
 		if (sym)
 		{
+			if (conversionOk)
+			{
+				*conversionOk = true;
+			}
 			return sym->offset() & 0xFFFF;
 		}
 
@@ -56,21 +77,26 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 			type = GameInfo->type;
 		}
 		if (type == GIT_NSF) { //NSF Breakpoint keywords
-			if (strcmp(offsetBuffer,"LOAD") == 0) return (NSFHeader.LoadAddressLow | (NSFHeader.LoadAddressHigh<<8));
-			if (strcmp(offsetBuffer,"INIT") == 0) return (NSFHeader.InitAddressLow | (NSFHeader.InitAddressHigh<<8));
-			if (strcmp(offsetBuffer,"PLAY") == 0) return (NSFHeader.PlayAddressLow | (NSFHeader.PlayAddressHigh<<8));
+			if (strcmp(offsetBuffer,"LOAD") == 0) offset = (NSFHeader.LoadAddressLow | (NSFHeader.LoadAddressHigh<<8));
+			else if (strcmp(offsetBuffer,"INIT") == 0) offset = (NSFHeader.InitAddressLow | (NSFHeader.InitAddressHigh<<8));
+			else if (strcmp(offsetBuffer,"PLAY") == 0) offset = (NSFHeader.PlayAddressLow | (NSFHeader.PlayAddressHigh<<8));
 		}
 		else if (type == GIT_FDS) { //FDS Breakpoint keywords
-			if (strcmp(offsetBuffer,"NMI1") == 0) return (GetMem(0xDFF6) | (GetMem(0xDFF7)<<8));
-			if (strcmp(offsetBuffer,"NMI2") == 0) return (GetMem(0xDFF8) | (GetMem(0xDFF9)<<8));
-			if (strcmp(offsetBuffer,"NMI3") == 0) return (GetMem(0xDFFA) | (GetMem(0xDFFB)<<8));
-			if (strcmp(offsetBuffer,"RST") == 0) return (GetMem(0xDFFC) | (GetMem(0xDFFD)<<8));
-			if ((strcmp(offsetBuffer,"IRQ") == 0) || (strcmp(offsetBuffer,"BRK") == 0)) return (GetMem(0xDFFE) | (GetMem(0xDFFF)<<8));
+			if (strcmp(offsetBuffer,"NMI1") == 0) offset = (GetMem(0xDFF6) | (GetMem(0xDFF7)<<8));
+			else if (strcmp(offsetBuffer,"NMI2") == 0) offset = (GetMem(0xDFF8) | (GetMem(0xDFF9)<<8));
+			else if (strcmp(offsetBuffer,"NMI3") == 0) offset = (GetMem(0xDFFA) | (GetMem(0xDFFB)<<8));
+			else if (strcmp(offsetBuffer,"RST") == 0) offset = (GetMem(0xDFFC) | (GetMem(0xDFFD)<<8));
+			else if ((strcmp(offsetBuffer,"IRQ") == 0) || (strcmp(offsetBuffer,"BRK") == 0)) offset = (GetMem(0xDFFE) | (GetMem(0xDFFF)<<8));
 		}
 		else { //NES Breakpoint keywords
-			if ((strcmp(offsetBuffer,"NMI") == 0) || (strcmp(offsetBuffer,"VBL") == 0)) return (GetMem(0xFFFA) | (GetMem(0xFFFB)<<8));
-			if (strcmp(offsetBuffer,"RST") == 0) return (GetMem(0xFFFC) | (GetMem(0xFFFD)<<8));
-			if ((strcmp(offsetBuffer,"IRQ") == 0) || (strcmp(offsetBuffer,"BRK") == 0)) return (GetMem(0xFFFE) | (GetMem(0xFFFF)<<8));
+			if ((strcmp(offsetBuffer,"NMI") == 0) || (strcmp(offsetBuffer,"VBL") == 0)) offset = (GetMem(0xFFFA) | (GetMem(0xFFFB)<<8));
+			else if (strcmp(offsetBuffer,"RST") == 0) offset = (GetMem(0xFFFC) | (GetMem(0xFFFD)<<8));
+			else if ((strcmp(offsetBuffer,"IRQ") == 0) || (strcmp(offsetBuffer,"BRK") == 0)) offset = (GetMem(0xFFFE) | (GetMem(0xFFFF)<<8));
+		}
+
+		if (conversionOk)
+		{
+			*conversionOk = (offset >= 0) && (offset < 0x10000);
 		}
 	}
 
@@ -139,7 +165,7 @@ int checkCondition(const char* condition, int num)
 		// Remove the old breakpoint condition before adding a new condition.
 		if (watchpoint[num].cond)
 		{
-			freeTree(watchpoint[num].cond);
+			delete watchpoint[num].cond;
 			free(watchpoint[num].condText);
 			watchpoint[num].cond = 0;
 			watchpoint[num].condText = 0;
@@ -153,8 +179,8 @@ int checkCondition(const char* condition, int num)
 		{
 			watchpoint[num].cond = c;
 			watchpoint[num].condText = (char*)malloc(strlen(condition) + 1);
-            if (!watchpoint[num].condText)
-                return 0;
+			if (!watchpoint[num].condText)
+				return 0;
 			strcpy(watchpoint[num].condText, condition);
 		}
 		else
@@ -169,7 +195,7 @@ int checkCondition(const char* condition, int num)
 		// Remove the old breakpoint condition
 		if (watchpoint[num].cond)
 		{
-			freeTree(watchpoint[num].cond);
+			delete watchpoint[num].cond;
 			free(watchpoint[num].condText);
 			watchpoint[num].cond = 0;
 			watchpoint[num].condText = 0;

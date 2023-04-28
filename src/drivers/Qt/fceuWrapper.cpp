@@ -976,22 +976,36 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	// Initialize the State Recorder
 	{
 		bool srEnable = false;
+		bool srUseTimeMode = false;
 		int srHistDurMin = 15;
+		int srFramesBtwSnaps = 60;
 		int srTimeBtwSnapsMin = 0;
 		int srTimeBtwSnapsSec = 3;
 		int srCompressionLevel = 0;
+		int pauseOnLoadTime = 3;
+		int pauseOnLoad = StateRecorderConfigData::TEMPORARY_PAUSE;
+
 		g_config->getOption("SDL.StateRecorderEnable", &srEnable);
+		g_config->getOption("SDL.StateRecorderTimingMode", &srUseTimeMode);
 		g_config->getOption("SDL.StateRecorderHistoryDurationMin", &srHistDurMin);
+		g_config->getOption("SDL.StateRecorderFramesBetweenSnaps", &srFramesBtwSnaps);
 		g_config->getOption("SDL.StateRecorderTimeBetweenSnapsMin", &srTimeBtwSnapsMin);
 		g_config->getOption("SDL.StateRecorderTimeBetweenSnapsSec", &srTimeBtwSnapsSec);
 		g_config->getOption("SDL.StateRecorderCompressionLevel", &srCompressionLevel);
+		g_config->getOption("SDL.StateRecorderPauseOnLoad", &pauseOnLoad);
+		g_config->getOption("SDL.StateRecorderPauseDuration", &pauseOnLoadTime);
 
 		StateRecorderConfigData srConfig;
 
 		srConfig.historyDurationMinutes = srHistDurMin;
+		srConfig.timingMode = srUseTimeMode ?
+					StateRecorderConfigData::TIME : StateRecorderConfigData::FRAMES;
 		srConfig.timeBetweenSnapsMinutes = static_cast<float>( srTimeBtwSnapsMin ) +
 			                          ( static_cast<float>( srTimeBtwSnapsSec ) / 60.0f );
+		srConfig.framesBetweenSnaps = srFramesBtwSnaps;
 		srConfig.compressionLevel = srCompressionLevel;
+		srConfig.loadPauseTimeSeconds = pauseOnLoadTime;
+		srConfig.pauseOnLoad = static_cast<StateRecorderConfigData::PauseType>(pauseOnLoad);
 
 		FCEU_StateRecorderSetEnabled( srEnable );
 		FCEU_StateRecorderSetConfigData( srConfig );
@@ -1469,20 +1483,19 @@ int  fceuWrapperUpdate( void )
 	return 0;
 }
 
-ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
+static int minizip_ScanArchive( const char *filepath, ArchiveScanRecord &rec)
 {
 	int idx=0, ret;
 	unzFile zf;
 	unz_file_info fi;
 	char filename[512];
-	ArchiveScanRecord rec;
-		
-	zf = unzOpen( fname.c_str() );
+
+	zf = unzOpen( filepath );
 
 	if ( zf == NULL )
 	{
 		//printf("Error: Failed to open Zip File: '%s'\n", fname.c_str() );
-		return rec;
+		return -1;
 	}
 	rec.type = 0;
 
@@ -1512,18 +1525,313 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 
 	unzClose( zf );
 
+	return 0;
+}
+
+#ifdef _USE_LIBARCHIVE
+#include <archive.h>
+#include <archive_entry.h>
+
+static int libarchive_ScanArchive( const char *filepath, ArchiveScanRecord &rec)
+{
+	int r, idx=0;
+	struct archive *a;
+	struct archive_entry *entry;
+
+	a = archive_read_new();
+
+	if (a == nullptr)
+	{
+		return -1;
+	}
+
+	// Initialize decoders
+	r = archive_read_support_filter_all(a);
+	if (r)
+	{
+		archive_read_free(a);
+		return -1;
+	}
+
+	// Initialize formats
+	r = archive_read_support_format_all(a);
+	if (r)
+	{
+		archive_read_free(a);
+		return -1;
+	}
+
+	r = archive_read_open_filename(a, filepath, 10240);
+
+	if (r)
+	{
+		archive_read_free(a);
+		return -1;
+	}
+	rec.type = 1;
+
+	while (1)
+	{
+		r = archive_read_next_header(a, &entry);
+		if (r == ARCHIVE_EOF)
+		{
+			break;
+		}
+		else if (r != ARCHIVE_OK)
+		{
+			printf("archive_read_next_header() %s\n", archive_error_string(a));
+			break;
+		}
+		const char *filename = archive_entry_pathname(entry);
+
+		FCEUARCHIVEFILEINFO_ITEM item;
+		item.name.assign( filename );
+		item.size  = archive_entry_size(entry);
+		item.index = idx; idx++;
+
+		rec.files.push_back( item );
+	}
+	rec.numFilesInArchive = idx;
+
+	archive_read_free(a);
+
+	return 0;
+}
+#endif
+
+ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
+{
+	int ret = -1;
+	ArchiveScanRecord rec;
+		
+#ifdef _USE_LIBARCHIVE
+	ret = libarchive_ScanArchive( fname.c_str(), rec );
+#endif
+
+	if (ret == -1)
+	{
+		minizip_ScanArchive( fname.c_str(), rec );
+	}
 	return rec;
 }
 
-FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int* userCancel)
+static FCEUFILE* minizip_OpenArchive(ArchiveScanRecord& asr, std::string &fname, std::string *searchFile, int innerIndex )
 {
-	int ret;
-	FCEUFILE* fp = 0;
+	int ret, idx=0;
+	FCEUFILE* fp = nullptr;
+	void *tmpMem = nullptr;
 	unzFile zf;
 	unz_file_info fi;
 	char filename[512];
-	char foundFile = 0;
-	void *tmpMem = NULL;
+	bool foundFile = false;
+
+	zf = unzOpen( fname.c_str() );
+
+	if ( zf == NULL )
+	{
+		//printf("Error: Failed to open Zip File: '%s'\n", fname.c_str() );
+		return fp;
+	}
+
+	//printf("Searching for %s in %s \n", searchFile.c_str(), fname.c_str() );
+
+	ret = unzGoToFirstFile( zf );
+
+	//printf("unzGoToFirstFile: %i \n", ret );
+
+	while ( ret == 0 )
+	{
+		unzGetCurrentFileInfo( zf, &fi, filename, sizeof(filename), NULL, 0, NULL, 0 );
+
+		//printf("Filename: %u '%s' \n", fi.uncompressed_size, filename );
+
+		if (searchFile)
+		{
+			if ( strcmp( searchFile->c_str(), filename ) == 0 )
+			{
+			   //printf("Found Filename: %u '%s' \n", fi.uncompressed_size, filename );
+				foundFile = true; break;
+			}
+		}
+		else if ((innerIndex != -1) && (idx == innerIndex))
+		{
+			foundFile = true; break;
+		}
+
+		ret = unzGoToNextFile( zf );
+
+		//printf("unzGoToNextFile: %i \n", ret );
+		idx++;
+	}
+
+	if ( !foundFile )
+	{
+		unzClose( zf );
+		return fp;
+	}
+
+	tmpMem = ::malloc( fi.uncompressed_size );
+
+	if ( tmpMem == NULL )
+	{
+		unzClose( zf );
+		return fp;
+	}
+	//printf("Loading via minizip\n");
+
+	EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(fi.uncompressed_size);
+
+	unzOpenCurrentFile( zf );
+	unzReadCurrentFile( zf, tmpMem, fi.uncompressed_size );
+	unzCloseCurrentFile( zf );
+
+	ms->fwrite( tmpMem, fi.uncompressed_size );
+
+	free( tmpMem );
+
+	//if we extracted the file correctly
+	fp = new FCEUFILE();
+	fp->archiveFilename = fname;
+	fp->filename = filename;
+	fp->fullFilename = fp->archiveFilename + "|" + fp->filename;
+	fp->archiveIndex = idx;
+	fp->mode = FCEUFILE::READ;
+	fp->size = fi.uncompressed_size;
+	fp->stream = ms;
+	fp->archiveCount = (int)asr.numFilesInArchive;
+	ms->fseek(0,SEEK_SET); //rewind so that the rom analyzer sees a freshly opened file
+
+	unzClose( zf );
+
+	return fp;
+}
+
+#ifdef _USE_LIBARCHIVE
+static FCEUFILE* libarchive_OpenArchive( ArchiveScanRecord& asr, std::string& fname, std::string *searchFile, int innerIndex)
+{
+	int r, idx=0;
+	struct archive *a;
+	struct archive_entry *entry;
+	const char *filename = nullptr;
+	bool foundFile = false;
+	int fileSize = 0;
+	FCEUFILE* fp = nullptr;
+
+	a = archive_read_new();
+
+	if (a == nullptr)
+	{
+		archive_read_free(a);
+		return nullptr;
+	}
+
+	// Initialize decoders
+	r = archive_read_support_filter_all(a);
+	if (r)
+	{
+		archive_read_free(a);
+		return nullptr;
+	}
+
+	// Initialize formats
+	r = archive_read_support_format_all(a);
+	if (r)
+	{
+		archive_read_free(a);
+		return nullptr;
+	}
+
+	r = archive_read_open_filename(a, fname.c_str(), 10240);
+
+	if (r)
+	{
+		archive_read_free(a);
+		return nullptr;
+	}
+
+	while (1)
+	{
+		r = archive_read_next_header(a, &entry);
+		if (r == ARCHIVE_EOF)
+		{
+			break;
+		}
+		else if (r != ARCHIVE_OK)
+		{
+			printf("archive_read_next_header() %s\n", archive_error_string(a));
+			break;
+		}
+		filename = archive_entry_pathname(entry);
+		fileSize = archive_entry_size(entry);
+
+		if (searchFile)
+		{
+			if (strcmp( filename, searchFile->c_str() ) == 0)
+			{
+				foundFile = true; break;
+			}
+		}
+		else if ((innerIndex != -1) && (idx == innerIndex))
+		{
+			foundFile = true; break;
+		}
+		idx++;
+	}
+
+	if (foundFile && (fileSize > 0))
+	{
+		const void *buff;
+		size_t size, totalSize = 0;
+		#if ARCHIVE_VERSION_NUMBER >= 3000000
+			int64_t offset;
+		#else
+			off_t offset;
+		#endif
+
+		//printf("Loading via libarchive\n");
+
+		EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(fileSize);
+
+		while (1)
+		{
+			r = archive_read_data_block(a, &buff, &size, &offset);
+
+			if (r == ARCHIVE_EOF)
+			{
+				break;
+			}
+			if (r != ARCHIVE_OK)
+			{
+				break;
+			}
+			//printf("Read: %p   Size:%zu   Offset:%llu\n", buff, size, (long long int)offset);
+			ms->fwrite( buff, size );
+			totalSize += size;
+		}
+
+		//if we extracted the file correctly
+		fp = new FCEUFILE();
+		fp->archiveFilename = fname;
+		fp->filename = filename;
+		fp->fullFilename = fp->archiveFilename + "|" + fp->filename;
+		fp->archiveIndex = idx;
+		fp->mode = FCEUFILE::READ;
+		fp->size = totalSize;
+		fp->stream = ms;
+		fp->archiveCount = (int)asr.numFilesInArchive;
+		ms->fseek(0,SEEK_SET); //rewind so that the rom analyzer sees a freshly opened file
+	}
+
+	archive_read_free(a);
+
+	return fp;
+}
+
+#endif
+
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int* userCancel)
+{
+	FCEUFILE* fp = nullptr;
 	std::string searchFile;
 
 	if ( innerFilename != NULL )
@@ -1573,75 +1881,14 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 		}
 	}
 
-	zf = unzOpen( fname.c_str() );
+#ifdef _USE_LIBARCHIVE
+	fp = libarchive_OpenArchive(asr, fname, &searchFile, -1 );
+#endif
 
-	if ( zf == NULL )
+	if (fp == nullptr)
 	{
-		//printf("Error: Failed to open Zip File: '%s'\n", fname.c_str() );
-		return fp;
+		fp = minizip_OpenArchive(asr, fname, &searchFile, -1 );
 	}
-
-	//printf("Searching for %s in %s \n", searchFile.c_str(), fname.c_str() );
-
-	ret = unzGoToFirstFile( zf );
-
-	//printf("unzGoToFirstFile: %i \n", ret );
-
-	while ( ret == 0 )
-	{
-		unzGetCurrentFileInfo( zf, &fi, filename, sizeof(filename), NULL, 0, NULL, 0 );
-
-		//printf("Filename: %u '%s' \n", fi.uncompressed_size, filename );
-
-		if ( strcmp( searchFile.c_str(), filename ) == 0 )
-		{
-		   //printf("Found Filename: %u '%s' \n", fi.uncompressed_size, filename );
-			foundFile = 1; break;
-		}
-
-		ret = unzGoToNextFile( zf );
-
-		//printf("unzGoToNextFile: %i \n", ret );
-	}
-
-	if ( !foundFile )
-	{
-		unzClose( zf );
-		return fp;
-	}
-
-	tmpMem = ::malloc( fi.uncompressed_size );
-
-	if ( tmpMem == NULL )
-	{
-		unzClose( zf );
-		return fp;
-	}
-
-	EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(fi.uncompressed_size);
-
-	unzOpenCurrentFile( zf );
-	unzReadCurrentFile( zf, tmpMem, fi.uncompressed_size );
-	unzCloseCurrentFile( zf );
-
-	ms->fwrite( tmpMem, fi.uncompressed_size );
-
-	free( tmpMem );
-
-	//if we extracted the file correctly
-	fp = new FCEUFILE();
-	fp->archiveFilename = fname;
-	fp->filename = searchFile;
-	fp->fullFilename = fp->archiveFilename + "|" + fp->filename;
-	fp->archiveIndex = ret;
-	fp->mode = FCEUFILE::READ;
-	fp->size = fi.uncompressed_size;
-	fp->stream = ms;
-	fp->archiveCount = (int)asr.numFilesInArchive;
-	ms->fseek(0,SEEK_SET); //rewind so that the rom analyzer sees a freshly opened file
-
-	unzClose( zf );
-
 	return fp;
 }
 
@@ -1654,81 +1901,15 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 
 FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex, int* userCancel)
 {
-	int ret, idx=0;
-	FCEUFILE* fp = 0;
-	unzFile zf;
-	unz_file_info fi;
-	char filename[512];
-	char foundFile = 0;
-	void *tmpMem = NULL;
+	FCEUFILE* fp = nullptr;
 
-	zf = unzOpen( fname.c_str() );
-
-	if ( zf == NULL )
+#ifdef _USE_LIBARCHIVE
+	fp = libarchive_OpenArchive( asr, fname, nullptr, innerIndex );
+#endif
+	if (fp == nullptr)
 	{
-		//printf("Error: Failed to open Zip File: '%s'\n", fname.c_str() );
-		return fp;
+		fp = minizip_OpenArchive(asr, fname, nullptr, innerIndex);
 	}
-
-	ret = unzGoToFirstFile( zf );
-
-	//printf("unzGoToFirstFile: %i \n", ret );
-
-	while ( ret == 0 )
-	{
-		unzGetCurrentFileInfo( zf, &fi, filename, sizeof(filename), NULL, 0, NULL, 0 );
-
-		//printf("Filename: %u '%s' \n", fi.uncompressed_size, filename );
-
-		if ( idx == innerIndex )
-		{
-		   //printf("Found Filename: %u '%s' \n", fi.uncompressed_size, filename );
-			foundFile = 1; break;
-		}
-		idx++;
-
-		ret = unzGoToNextFile( zf );
-
-		//printf("unzGoToNextFile: %i \n", ret );
-	}
-
-	if ( !foundFile )
-	{
-		unzClose( zf );
-		return fp;
-	}
-
-	tmpMem = ::malloc( fi.uncompressed_size );
-
-	if ( tmpMem == NULL )
-	{
-		unzClose( zf );
-		return fp;
-	}
-
-	EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(fi.uncompressed_size);
-
-	unzOpenCurrentFile( zf );
-	unzReadCurrentFile( zf, tmpMem, fi.uncompressed_size );
-	unzCloseCurrentFile( zf );
-
-	ms->fwrite( tmpMem, fi.uncompressed_size );
-
-	free( tmpMem );
-
-	//if we extracted the file correctly
-	fp = new FCEUFILE();
-	fp->archiveFilename = fname;
-	fp->filename = filename;
-	fp->fullFilename = fp->archiveFilename + "|" + fp->filename;
-	fp->archiveIndex = ret;
-	fp->mode = FCEUFILE::READ;
-	fp->size = fi.uncompressed_size;
-	fp->stream = ms;
-	fp->archiveCount = (int)asr.numFilesInArchive;
-	ms->fseek(0,SEEK_SET); //rewind so that the rom analyzer sees a freshly opened file
-
-	unzClose( zf );
 
 	return fp;
 }

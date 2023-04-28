@@ -41,12 +41,15 @@ if(WIN32)
      add_definitions( -DMSVC -D_CRT_SECURE_NO_WARNINGS )
      add_definitions( -D__SDL__  -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
      add_definitions( -DFCEUDEF_DEBUGGER )
+     add_definitions( -D_USE_LIBARCHIVE )
      add_definitions( /wd4267 /wd4244 )
      #add_definitions( /wd4018 ) # Integer comparison sign mismatch warnings
      include_directories( ${SDL_INSTALL_PREFIX}/SDL2/include )
+     include_directories( ${LIBARCHIVE_INSTALL_PREFIX}/libarchive/include )
      include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
      set( OPENGL_LDFLAGS  OpenGL::GL )
      set( SDL2_LDFLAGS  ${SDL_INSTALL_PREFIX}/SDL2/lib/x64/SDL2.lib )
+     set( LIBARCHIVE_LDFLAGS  ${LIBARCHIVE_INSTALL_PREFIX}/libarchive/lib/archive.lib )
      set( SYS_LIBS  wsock32 ws2_32 vfw32 Htmlhelp )
      set(APP_ICON_RESOURCES_WINDOWS  ${CMAKE_SOURCE_DIR}/icons/fceux.rc )
 
@@ -108,6 +111,13 @@ else(WIN32)
   if ( ${MINIZIP_FOUND} )
 	  message( STATUS "Using System minizip ${MINIZIP_VERSION}" )
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
+  endif()
+
+  pkg_check_modules( LIBARCHIVE libarchive)
+
+  if ( ${LIBARCHIVE_FOUND} )
+	  message( STATUS "Using System Libarchive Library ${LIBARCHIVE_VERSION}" )
+	  add_definitions( -D_USE_LIBARCHIVE ${LIBARCHIVE_CFLAGS} )
   endif()
 
   pkg_check_modules( X264 x264)
@@ -643,7 +653,7 @@ target_link_libraries( ${APP_NAME}  ${ASAN_LDFLAGS}
    ${${Qt}OpenGLWidgets_LIBRARIES}
    ${OPENGL_LDFLAGS}  
  	${SDL2_LDFLAGS}
-	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
+	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES} ${LIBARCHIVE_LDFLAGS}
 	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS} ${LIBAV_LDFLAGS}
  	${SYS_LIBS}
 )
