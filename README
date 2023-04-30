@@ -7,7 +7,7 @@ Updated By mjbudd77
 
 https://fceux.com
 
-Last Modified: March 24, 2022
+Last Modified: April 30, 2023
 
 Table of Contents
 -----------------
@@ -32,6 +32,7 @@ Table of Contents
 * libx265 (optional) - H.265 video encoder for avi recording (recommended)
 * ffmpeg libraries (optional) - for avi recording (recommended)
 *	- ffmpeg libraries used: libavcodec  libavformat  libavutil  libswresample  libswscale
+* libarchive (optional) - for 7zip archive support (test with version 3.4.0)
 * minizip  
 * zlib  
 * openGL
