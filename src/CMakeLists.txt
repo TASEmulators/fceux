@@ -96,6 +96,12 @@ else(WIN32)
   #endif()
   add_definitions( -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
 
+  if ( ${GPROF_ENABLE} )
+	add_definitions( -pg )
+	set( GPROF_LDFLAGS  -pg )
+	message( STATUS "GNU Profiling Enabled" )
+  endif()
+
   if ( ${ASAN_ENABLE} )
 	add_definitions( -fsanitize=address -fsanitize=bounds-strict )
 	add_definitions( -fsanitize=undefined -fno-sanitize=vptr )
@@ -646,7 +652,8 @@ add_executable(  ${APP_NAME}  ${SOURCES} ../resources.qrc
 	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
 endif()
 
-target_link_libraries( ${APP_NAME}  ${ASAN_LDFLAGS}
+target_link_libraries( ${APP_NAME}
+   ${ASAN_LDFLAGS}  ${GPROF_LDFLAGS}
    ${${Qt}Widgets_LIBRARIES}
    ${${Qt}Help_LIBRARIES}
    ${${Qt}OpenGL_LIBRARIES}
