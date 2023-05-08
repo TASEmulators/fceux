@@ -606,6 +606,8 @@ static DECLFW(COOLGIRL_WRITE) {
 			if (mapper == 0b010001) prg_bank_b = ~2; // if (USE_MAPPER_009_010 && mapper == 6'b010001) prg_bank_b = 8'b11111101;
 			if (mapper == 0b010111) map_rom_on_6000 = 1; // if (ENABLE_MAPPER_042 && (mapper == 6'b010111)) map_rom_on_6000 <= 1;
 			if (mapper == 0b001110) prg_bank_b = 1; // if (USE_MAPPER_065 && mapper == 6'b001110) prg_bank_b = 1;
+			if (lockout)
+				FCEU_printf("Mapper: %02X/%02X\n", mapper, flags);
 			break;
 		}
 	}
@@ -1174,7 +1176,6 @@ static DECLFW(COOLGIRL_WRITE) {
 
 		// Mapper #1 - MMC1
 		/*
-		r0 - load register
 		flag0 - 16KB of SRAM (SOROM)
 		*/
 		if (mapper == 0b010000)
@@ -1228,7 +1229,7 @@ static DECLFW(COOLGIRL_WRITE) {
 						SET_BITS(chr_bank_e, "6:2", mmc1_load_register, "5:1");
 						break;
 					case 0b11: // 2'b11
-						// prg_bank_a[4:1] = r0[4:1];
+						// prg_bank_a[4:1] = mmc1_load_register[4:1];
 						SET_BITS(prg_bank_a, "4:1", mmc1_load_register, "4:1");
 						// sram_enabled = ~mmc1_load_register[5];
 						sram_enabled = get_bits(mmc1_load_register, "5") ^ 1;
@@ -1395,9 +1396,6 @@ static DECLFW(COOLGIRL_WRITE) {
 		}
 
 		// Mapper #112
-		/*
-		r0[2:0] - internal register
-		*/
 		if (mapper == 0b010101)
 		{
 			switch (get_bits(A, "14:13"))
