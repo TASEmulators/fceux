@@ -22,6 +22,12 @@ if ( ${QHELP} )
 	add_definitions( -D_USE_QHELP )
 endif()
 
+if ( ${FCEU_PROFILER_ENABLE} )
+	message( STATUS "FCEU Profiler Enabled")
+	add_definitions( -D__FCEU_PROFILER_ENABLE__ )
+endif()
+	
+
 if ( ${QT6} )
 	find_package( Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets ${QtHelpModule})
   	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
@@ -309,6 +315,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/nsf.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/oldmovie.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/palette.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/profiler.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/ppu.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/sound.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/state.cpp

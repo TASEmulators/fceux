@@ -32,6 +32,7 @@ namespace FCEU
 	{
 		public:
 			autoScopedLock( mutex *mtx );
+			autoScopedLock( mutex &mtx );
 			~autoScopedLock(void);
 
 		private:

@@ -36,6 +36,7 @@
 #include "unif.h"
 #include "cheat.h"
 #include "palette.h"
+#include "profiler.h"
 #include "state.h"
 #include "movie.h"
 #include "video.h"
@@ -734,6 +735,7 @@ extern unsigned int frameAdvHoldTimer;
 
 ///Skip may be passed in, if FRAMESKIP is #defined, to cause this to emulate more than one frame
 void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int skip) {
+	FCEU_PROFILE_FUNC(prof, "Emulate Single Frame");
 	//skip initiates frame skip if 1, or frame skip and sound skip if 2
 	FCEU_MAYBE_UNUSED int r;
 	int ssize;

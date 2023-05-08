@@ -54,6 +54,7 @@
 #include "../../movie.h"
 #include "../../wave.h"
 #include "../../state.h"
+#include "../../profiler.h"
 #include "../../version.h"
 #include "common/os_utils.h"
 
@@ -4484,6 +4485,7 @@ int consoleWin_t::getPeriodicInterval(void)
 
 void consoleWin_t::transferVideoBuffer(void)
 {
+	FCEU_PROFILE_FUNC(prof, "VideoXfer");
 	if ( nes_shm->blitUpdated )
 	{
 		nes_shm->blitUpdated = 0;
@@ -4525,6 +4527,7 @@ void consoleWin_t::emuFrameFinish(void)
 
 void consoleWin_t::updatePeriodic(void)
 {
+	FCEU_PROFILE_FUNC(prof, "updatePeriodic");
 	static bool eventProcessingInProg = false;
 
 	if ( eventProcessingInProg )
