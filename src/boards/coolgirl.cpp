@@ -16,11 +16,11 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-* 
-* Very complicated homebrew multicart mapper with. 
-* The code is so obscured and weird because it's ported from Verilog CPLD source code: 
+*
+* Very complicated homebrew multicart mapper with.
+* The code is so obscured and weird because it's ported from Verilog CPLD source code:
 * https://github.com/ClusterM/coolgirl-famicom-multicart/blob/master/CoolGirl_mappers.vh
-* 
+*
 * Range: $5000-$5FFF
 *
 * Mask: $5007
@@ -107,8 +107,8 @@ const int CFI_CHIP = 0x13;
 
 static int CHR_SIZE = 0;
 static uint32 WRAM_SIZE = 0;
-static uint8 *WRAM = NULL;
-static uint8 *SAVE_FLASH = NULL;
+static uint8* WRAM = NULL;
+static uint8* SAVE_FLASH = NULL;
 static uint8* CFI;
 
 static uint8 sram_enabled = 0;
@@ -509,7 +509,7 @@ static DECLFW(COOLGIRL_Flash_Write) {
 				SAVE_FLASH[i % SAVE_FLASH_SIZE] = 0xFF;
 			FCEU_printf("Flash sector #%d is erased: 0x%08x - 0x%08x.\n", sector, sector_address, sector_address + FLASH_SECTOR_SIZE - 1);
 			flash_state = 0;
-		}	
+		}
 
 		// write byte
 		if ((flash_state == 4) &&
@@ -884,7 +884,7 @@ static DECLFW(COOLGIRL_WRITE) {
 		if (mapper == 0b000100)
 		{
 			// prg_bank_a[5:1] = cpu_data_in[4:0];
-			SET_BITS(chr_bank_a, "5:1", V, "4:0");
+			SET_BITS(prg_bank_a, "5:1", V, "4:0");
 			// mirroring = { 1'b0, ~cpu_data_in[7]};
 			mirroring = get_bits(V, "7") ^ 1;
 		}
@@ -1462,6 +1462,7 @@ static DECLFW(COOLGIRL_WRITE) {
 			case 0b1100: // 4'b1100: if (flags[0]) mirroring = {1'b0, cpu_data_in[6]};	// $E000, mirroring, for mapper #48
 				if (flags & 1) // 48
 					mirroring = get_bits(V, "6"); // mirroring = cpu_data_in[6];
+				break;
 			case 0b1000: // 4'b1000: irq_scanline_latch = ~cpu_data_in; // $C000, IRQ latch
 				mmc3_irq_latch = set_bits(mmc3_irq_latch, "7:0", get_bits(V, "7:0") ^ 0b11111111);
 				break;
@@ -1811,7 +1812,7 @@ static DECLFW(COOLGIRL_WRITE) {
 							SET_BITS(chr_bank_c, "8:1", V, "7:0"); break; // 3'b001: chr_bank_c[8:1] <= cpu_data_in[7:0];
 						case 0b110:
 							SET_BITS(chr_bank_e, "8:1", V, "7:0"); break; // 3'b110: chr_bank_e[8:1] <= cpu_data_in[7:0];
-						case 0b111: 
+						case 0b111:
 							SET_BITS(chr_bank_g, "8:1", V, "7:0"); break; // 3'b111: chr_bank_g[8:1] <= cpu_data_in[7:0];
 						}
 					}
@@ -1961,32 +1962,19 @@ static void COOLGIRL_CpuCounter(int a) {
 		// Mapper #23 - VRC4
 		if (vrc4_irq_control & 2) // if (ENABLE_MAPPER_021_022_023_025 & ENABLE_VRC4_INTERRUPTS & (vrc4_irq_control[1]))
 		{
-			// Cycle mode without prescaler is not used by any games? It's missed in fceux source code.
-			if (vrc4_irq_control & 4) // if (vrc4_irq_control[2]) // cycle mode
+			vrc4_irq_prescaler++; // vrc4_irq_prescaler = vrc4_irq_prescaler + 1'b1; // count prescaler
+			// if ((vrc4_irq_prescaler_counter[1] == 0 && vrc4_irq_prescaler == 114)
+			//   || (vrc4_irq_prescaler_counter[1] == 1 && vrc4_irq_prescaler == 113)) // 114, 114, 113
+			if ((!(vrc4_irq_prescaler_counter & 2) && vrc4_irq_prescaler == 114) || ((vrc4_irq_prescaler_counter & 2) && vrc4_irq_prescaler == 113))
 			{
-				FCEU_PrintError("Cycle IRQ mode is not supported, please report to Cluster");
-				vrc4_irq_value++; // {carry, vrc4_irq_value[7:0]} = vrc4_irq_value[7:0] + 1'b1; // just count IRQ value
-				if (vrc4_irq_value == 0) // if (carry)
+				vrc4_irq_prescaler = 0; // vrc4_irq_prescaler = 0;
+				vrc4_irq_prescaler_counter++; // vrc4_irq_prescaler_counter = vrc4_irq_prescaler_counter + 1'b1;
+				if (vrc4_irq_prescaler_counter == 0b11) vrc4_irq_prescaler_counter = 0; // if (vrc4_irq_prescaler_counter == 2'b11) vrc4_irq_prescaler_counter =  2'b00;
+				vrc4_irq_value++; // {carry, vrc4_irq_value[7:0]} = vrc4_irq_value[7:0] + 1'b1;
+				if (vrc4_irq_value == 0) // f (carry)
 				{
-					X6502_IRQBegin(FCEU_IQEXT); // vrc4_irq_out = 1;					
-					vrc4_irq_value = vrc4_irq_latch; // vrc4_irq_value[7:0] = vrc4_irq_latch[7:0];
-				}
-			}
-			else {
-				vrc4_irq_prescaler++; // vrc4_irq_prescaler = vrc4_irq_prescaler + 1'b1; // count prescaler
-				// if ((vrc4_irq_prescaler_counter[1] == 0 && vrc4_irq_prescaler == 114)
-				//   || (vrc4_irq_prescaler_counter[1] == 1 && vrc4_irq_prescaler == 113)) // 114, 114, 113
-				if ((!(vrc4_irq_prescaler_counter & 2) && vrc4_irq_prescaler == 114) || ((vrc4_irq_prescaler_counter & 2) && vrc4_irq_prescaler == 113))
-				{
-					vrc4_irq_prescaler = 0; // vrc4_irq_prescaler = 0;
-					vrc4_irq_prescaler_counter++; // vrc4_irq_prescaler_counter = vrc4_irq_prescaler_counter + 1'b1;
-					if (vrc4_irq_prescaler_counter == 0b11) vrc4_irq_prescaler_counter = 0; // if (vrc4_irq_prescaler_counter == 2'b11) vrc4_irq_prescaler_counter =  2'b00;
-					vrc4_irq_value++; // {carry, vrc4_irq_value[7:0]} = vrc4_irq_value[7:0] + 1'b1;
-					if (vrc4_irq_value == 0) // f (carry)
-					{
-						X6502_IRQBegin(FCEU_IQEXT);
-						vrc4_irq_value = vrc4_irq_latch; // irq_cpu_value[7:0] = vrc4_irq_latch[7:0];
-					}
+					X6502_IRQBegin(FCEU_IQEXT);
+					vrc4_irq_value = vrc4_irq_latch; // irq_cpu_value[7:0] = vrc4_irq_latch[7:0];
 				}
 			}
 		}
@@ -2252,7 +2240,7 @@ static void COOLGIRL_Restore(int version) {
 
 #define ExState(var, varname) AddExState(&var, sizeof(var), 0, varname)
 
-void COOLGIRL_Init(CartInfo *info) {
+void COOLGIRL_Init(CartInfo* info) {
 	CHR_SIZE = info->vram_size ? info->vram_size /* NES 2.0 */ : 256 * 1024 /* UNIF, fixed */;
 
 	WRAM_SIZE = info->ines2 ? (info->wram_size + info->battery_wram_size) : (32 * 1024);
@@ -2263,7 +2251,7 @@ void COOLGIRL_Init(CartInfo *info) {
 		AddExState(WRAM, 32 * 1024, 0, "SRAM");
 		if (info->battery)
 		{
-			info->addSaveGameBuf( WRAM, 32 * 1024);
+			info->addSaveGameBuf(WRAM, 32 * 1024);
 		}
 	}
 
@@ -2272,7 +2260,7 @@ void COOLGIRL_Init(CartInfo *info) {
 		SAVE_FLASH = (uint8*)FCEU_gmalloc(SAVE_FLASH_SIZE);
 		SetupCartPRGMapping(FLASH_CHIP, SAVE_FLASH, SAVE_FLASH_SIZE, 1);
 		AddExState(SAVE_FLASH, SAVE_FLASH_SIZE, 0, "SAVF");
-		info->addSaveGameBuf( SAVE_FLASH, SAVE_FLASH_SIZE );
+		info->addSaveGameBuf(SAVE_FLASH, SAVE_FLASH_SIZE);
 	}
 
 	CFI = (uint8*)FCEU_gmalloc(sizeof(cfi_data) * 2);
