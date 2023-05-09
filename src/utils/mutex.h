@@ -1,4 +1,5 @@
 // mutex.h
+#pragma once
 
 #ifdef __QT_DRIVER__
 #include <QMutex>

@@ -23,74 +23,21 @@
 
 #include <stdio.h>
 
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+#include <unistd.h>
+#endif
+
 #include "utils/mutex.h"
 #include "profiler.h"
+
+#if defined(WIN32)
+#include <windows.h>
+#endif
 
 namespace FCEU
 {
 static thread_local profilerFuncMap threadProfileMap;
 
-class profilerManager
-{
-	public:
-		profilerManager(void)
-		{
-			printf("profilerManager Constructor\n");
-			if (pLog == nullptr)
-			{
-				pLog = stdout;
-			}
-		}
-
-		~profilerManager(void)
-		{
-			printf("profilerManager Destructor\n");
-			{
-				autoScopedLock aLock(threadListMtx);
-				threadList.clear();
-			}
-
-			if (pLog && (pLog != stdout))
-			{
-				fclose(pLog); pLog = nullptr;
-			}
-		}
-
-		int addThreadProfiler( profilerFuncMap *m )
-		{
-			autoScopedLock aLock(threadListMtx);
-			threadList.push_back(m);
-			return 0;
-		}
-
-		int removeThreadProfiler( profilerFuncMap *m, bool shouldDestroy = false )
-		{
-			int result = -1;
-			autoScopedLock aLock(threadListMtx);
-
-			for (auto it = threadList.begin(); it != threadList.end(); it++)
-			{
-				if (*it == m )
-				{
-					threadList.erase(it);
-					if (shouldDestroy)
-					{
-						delete m;
-					}
-					result = 0;
-					break;
-				}
-			}
-			return result;
-		}
-
-		static FILE *pLog;
-	private:
-
-		mutex  threadListMtx;
-		std::list <profilerFuncMap*> threadList;
-
-};
 FILE *profilerManager::pLog = nullptr;
 
 static profilerManager  pMgr;
@@ -98,13 +45,68 @@ static profilerManager  pMgr;
 //-------------------------------------------------------------------------
 //---- Time Stamp Record
 //-------------------------------------------------------------------------
+#if defined(WIN32)
+uint64_t timeStampRecord::qpcFreq = 0;
+#include <intrin.h>
+#pragma intrinsic(__rdtsc)
+#else
+#include <x86intrin.h>
+#endif
+uint64_t timeStampRecord::tscFreq = 0;
+
+static uint64_t rdtsc()
+{
+	return __rdtsc();
+}
+
 void timeStampRecord::readNew(void)
 {
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 	clock_gettime( CLOCK_REALTIME, &ts );
+#elif defined(WIN32)
+	QueryPerformanceCounter((LARGE_INTEGER*)&ts);
 #else
 	ts = 0;
 #endif
+	tsc = rdtsc();
+}
+
+static void calibrateTSC(void)
+{
+	constexpr int numSamples = 1;
+	timeStampRecord t1, t2, td;
+	uint64_t td_sum = 0;
+	double td_avg;
+
+#if defined(WIN32)
+	if (QueryPerformanceFrequency((LARGE_INTEGER*)&timeStampRecord::qpcFreq) == 0)
+	{
+		printf("QueryPerformanceFrequency FAILED!\n");
+	}
+#endif
+	printf("Running TSC Calibration: %i sec...\n", numSamples);
+
+	for (int i=0; i<numSamples; i++)
+	{
+		t1.readNew();
+#if defined(WIN32)
+		Sleep(1000);
+#else
+		sleep(1);
+#endif
+		t2.readNew();
+
+		td += t2 - t1;
+
+		td_sum = td.tsc;
+
+		td_avg = static_cast<double>(td_sum);
+
+		timeStampRecord::tscFreq = static_cast<uint64_t>( td_avg / td.toSeconds() );
+
+		printf("%i Calibration: %f sec   TSC:%llu   TSC Freq: %f MHz\n", i, td.toSeconds(), 
+			static_cast<unsigned long long>(td.tsc), static_cast<double>(timeStampRecord::tscFreq) * 1.0e-6 );
+	}
 }
 
 //-------------------------------------------------------------------------
@@ -250,6 +252,61 @@ funcProfileRecord *profilerFuncMap::findRecord(const char *fileNameStringLiteral
 		_map[fname] = rec;
 	}
 	return rec;
+}
+//-------------------------------------------------------------------------
+//-----  profilerManager class
+//-------------------------------------------------------------------------
+profilerManager::profilerManager(void)
+{
+	calibrateTSC();
+
+	printf("profilerManager Constructor\n");
+	if (pLog == nullptr)
+	{
+		pLog = stdout;
+	}
+}
+
+profilerManager::~profilerManager(void)
+{
+	printf("profilerManager Destructor\n");
+	{
+		autoScopedLock aLock(threadListMtx);
+		threadList.clear();
+	}
+
+	if (pLog && (pLog != stdout))
+	{
+		fclose(pLog); pLog = nullptr;
+	}
+}
+
+int profilerManager::addThreadProfiler( profilerFuncMap *m )
+{
+	autoScopedLock aLock(threadListMtx);
+	threadList.push_back(m);
+	return 0;
+}
+
+int profilerManager::removeThreadProfiler( profilerFuncMap *m, bool shouldDestroy )
+{
+	int result = -1;
+	autoScopedLock aLock(threadListMtx);
+
+	for (auto it = threadList.begin(); it != threadList.end(); it++)
+	{
+		if (*it == m )
+		{
+			threadList.erase(it);
+			if (shouldDestroy)
+			{
+				delete m;
+			}
+			result = 0;
+			break;
+		}
+	}
+	return result;
 }
 //-------------------------------------------------------------------------
 //
