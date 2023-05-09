@@ -230,9 +230,13 @@ MsgLogViewDialog_t::MsgLogViewDialog_t(QWidget *parent)
 
 	updateTimer->start(500); // 2hz
 
+	FCEU_WRAPPER_LOCK();
+
 	msgLog.loadTextViewer(txtView);
 
 	totalLines = msgLog.getTotalLineCount();
+
+	FCEU_WRAPPER_UNLOCK();
 
 	txtView->moveCursor(QTextCursor::End);
 

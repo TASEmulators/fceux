@@ -1007,6 +1007,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\oldmovie.cpp" />
     <ClCompile Include="..\src\palette.cpp" />
     <ClCompile Include="..\src\ppu.cpp" />
+    <ClCompile Include="..\src\profiler.cpp" />
     <ClCompile Include="..\src\sound.cpp" />
     <ClCompile Include="..\src\state.cpp" />
     <ClCompile Include="..\src\unif.cpp" />
@@ -1136,6 +1137,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\oldmovie.h" />
     <ClInclude Include="..\src\palette.h" />
     <ClInclude Include="..\src\ppu.h" />
+    <ClInclude Include="..\src\profiler.h" />
     <ClInclude Include="..\src\sound.h" />
     <ClInclude Include="..\src\state.h" />
     <ClInclude Include="..\src\types-des.h" />

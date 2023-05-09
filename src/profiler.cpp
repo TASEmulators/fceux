@@ -28,6 +28,7 @@
 #endif
 
 #include "utils/mutex.h"
+#include "fceu.h"
 #include "profiler.h"
 
 #if defined(WIN32)
@@ -84,7 +85,7 @@ static void calibrateTSC(void)
 		printf("QueryPerformanceFrequency FAILED!\n");
 	}
 #endif
-	printf("Running TSC Calibration: %i sec...\n", numSamples);
+	FCEU_printf("Running TSC Calibration: %i sec...\n", numSamples);
 
 	for (int i=0; i<numSamples; i++)
 	{
@@ -104,7 +105,7 @@ static void calibrateTSC(void)
 
 		timeStampRecord::tscFreq = static_cast<uint64_t>( td_avg / td.toSeconds() );
 
-		printf("%i Calibration: %f sec   TSC:%llu   TSC Freq: %f MHz\n", i, td.toSeconds(), 
+		FCEU_printf("%i Calibration: %f sec   TSC:%llu   TSC Freq: %f MHz\n", i, td.toSeconds(), 
 			static_cast<unsigned long long>(td.tsc), static_cast<double>(timeStampRecord::tscFreq) * 1.0e-6 );
 	}
 }
@@ -195,13 +196,13 @@ profileFuncScoped::~profileFuncScoped(void)
 //-------------------------------------------------------------------------
 profilerFuncMap::profilerFuncMap(void)
 {
-	printf("profilerFuncMap Constructor: %p\n", this);
+	//printf("profilerFuncMap Constructor: %p\n", this);
 	pMgr.addThreadProfiler(this);
 }
 //-------------------------------------------------------------------------
 profilerFuncMap::~profilerFuncMap(void)
 {
-	printf("profilerFuncMap Destructor: %p\n", this);
+	//printf("profilerFuncMap Destructor: %p\n", this);
 	pMgr.removeThreadProfiler(this);
 
 	for (auto it = _map.begin(); it != _map.end(); it++)
@@ -260,7 +261,7 @@ profilerManager::profilerManager(void)
 {
 	calibrateTSC();
 
-	printf("profilerManager Constructor\n");
+	//printf("profilerManager Constructor\n");
 	if (pLog == nullptr)
 	{
 		pLog = stdout;
@@ -269,7 +270,7 @@ profilerManager::profilerManager(void)
 
 profilerManager::~profilerManager(void)
 {
-	printf("profilerManager Destructor\n");
+	//printf("profilerManager Destructor\n");
 	{
 		autoScopedLock aLock(threadListMtx);
 		threadList.clear();
