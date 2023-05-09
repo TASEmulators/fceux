@@ -507,7 +507,6 @@ static DECLFW(COOLGIRL_Flash_Write) {
 			uint32 sector_address = sector * FLASH_SECTOR_SIZE;
 			for (uint32 i = sector_address; i < sector_address + FLASH_SECTOR_SIZE; i++)
 				SAVE_FLASH[i % SAVE_FLASH_SIZE] = 0xFF;
-			FCEU_printf("Flash sector #%d is erased: 0x%08x - 0x%08x.\n", sector, sector_address, sector_address + FLASH_SECTOR_SIZE - 1);
 			flash_state = 0;
 		}
 
@@ -555,7 +554,6 @@ static DECLFW(COOLGIRL_WRITE) {
 
 	if (A >= 0x5000 && A < 0x6000 && !lockout)
 	{
-		//FCEU_printf("Write: %02x => %04x\n", V, A);
 		switch (A & 7)
 		{
 		case 0:
@@ -571,7 +569,6 @@ static DECLFW(COOLGIRL_WRITE) {
 			// {chr_mask[18], prg_mask[20:14]} = cpu_data_in[7:0];
 			SET_BITS(chr_mask, "18", V, "7");
 			SET_BITS(prg_mask, "20:14", V, "6:0");
-			//FCEU_printf("REG_prg_mask: %02x\n", REG_prg_mask);
 			break;
 		case 3:
 			// {prg_mode[2:0], chr_bank_a[7:3]} = cpu_data_in[7:0];
@@ -606,8 +603,6 @@ static DECLFW(COOLGIRL_WRITE) {
 			if (mapper == 0b010001) prg_bank_b = ~2; // if (USE_MAPPER_009_010 && mapper == 6'b010001) prg_bank_b = 8'b11111101;
 			if (mapper == 0b010111) map_rom_on_6000 = 1; // if (ENABLE_MAPPER_042 && (mapper == 6'b010111)) map_rom_on_6000 <= 1;
 			if (mapper == 0b001110) prg_bank_b = 1; // if (USE_MAPPER_065 && mapper == 6'b001110) prg_bank_b = 1;
-			if (lockout)
-				FCEU_printf("Mapper: %02X/%02X\n", mapper, flags);
 			break;
 		}
 	}
