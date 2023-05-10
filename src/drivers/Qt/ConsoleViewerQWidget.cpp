@@ -233,15 +233,6 @@ void ConsoleViewQWidget_t::transfer2LocalBuffer(void)
 
 int ConsoleViewQWidget_t::init(void)
 {
-	if ( linearFilter )
-	{
-	    //SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
-	}
-	else
-	{
-	    //SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
-	}
-
 	return 0;
 }
 
@@ -493,6 +484,7 @@ void ConsoleViewQWidget_t::paintEvent(QPaintEvent *event)
 	{
 		painter.fillRect( 0, 0, view_width, view_height, Qt::black );
 	}
+	painter.setRenderHint( QPainter::SmoothPixmapTransform, linearFilter );
 
 	int rowPitch = nesWidth * sizeof(uint32_t);
 
