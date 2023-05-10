@@ -1,4 +1,4 @@
-// GameViewerSDL.h
+// ConsoleViewerQWidget.h
 //
 
 #pragma  once
@@ -6,26 +6,25 @@
 #include <QWidget>
 #include <QColor>
 #include <QCursor>
+#include <QImage>
 #include <QPaintEvent>
 #include <QResizeEvent>
-#include <SDL.h>
 
 #include "Qt/ConsoleViewerInterface.h"
 
-class ConsoleViewSDL_t : public QWidget, public ConsoleViewerBase
+class ConsoleViewQWidget_t : public QWidget, public ConsoleViewerBase
 {
     Q_OBJECT
 
 	public:
-		ConsoleViewSDL_t(QWidget *parent = 0);
-		~ConsoleViewSDL_t(void);
+		ConsoleViewQWidget_t(QWidget *parent = 0);
+		~ConsoleViewQWidget_t(void);
 
 		int  init(void);
 		void reset(void);
 		void cleanup(void);
-		void render(void);
-		void queueRedraw(void){ render(); };
-		int  driver(void){ return VIDEO_DRIVER_SDL; };
+		void queueRedraw(void){ update(); };
+		int  driver(void){ return VIDEO_DRIVER_QPAINTER; };
 
 		void transfer2LocalBuffer(void);
 
@@ -56,7 +55,7 @@ class ConsoleViewSDL_t : public QWidget, public ConsoleViewerBase
 
 	protected:
 
-	//void paintEvent(QPaintEvent *event);
+	void paintEvent(QPaintEvent *event);
 	void showEvent(QShowEvent *event);
 	void resizeEvent(QResizeEvent *event);
 	void mousePressEvent(QMouseEvent * event);
@@ -87,12 +86,6 @@ class ConsoleViewSDL_t : public QWidget, public ConsoleViewerBase
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;
 	unsigned int mouseButtonMask;
-
- 	SDL_Window   *sdlWindow;
-	SDL_Renderer *sdlRenderer;
-	SDL_Texture  *sdlTexture;
-	SDL_Cursor   *sdlCursor;
-	//SDL_Rect      sdlViewport;
 
 	private slots:
 };

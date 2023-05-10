@@ -549,6 +549,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleWindow.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerGL.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerSDL.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerQWidget.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/InputConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/FamilyKeyboard.cpp  
