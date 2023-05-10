@@ -273,10 +273,15 @@ namespace FCEU
 						      const char *commentStringLiteral,
 						      bool create = false);
 
+			funcProfileRecord *iterateBegin(void);
+			funcProfileRecord *iterateNext(void);
+
 			void pushStack(funcProfileRecord *rec);
 			void popStack(funcProfileRecord *rec);
 		private:
+			mutex  _mapMtx;
 			std::map<std::string, funcProfileRecord*> _map;
+			std::map<std::string, funcProfileRecord*>::iterator _map_it;
 
 			std::vector <funcProfileRecord*> stack;
 	};
@@ -291,10 +296,13 @@ namespace FCEU
 			int removeThreadProfiler( profilerFuncMap *m, bool shouldDestroy = false );
 	
 			static FILE *pLog;
+
+			static profilerManager *getInstance();
 		private:
 	
 			mutex  threadListMtx;
 			std::list <profilerFuncMap*> threadList;
+			static profilerManager *instance;
 	};
 }
 

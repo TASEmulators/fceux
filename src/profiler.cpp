@@ -198,6 +198,8 @@ profilerFuncMap::profilerFuncMap(void)
 {
 	//printf("profilerFuncMap Constructor: %p\n", this);
 	pMgr.addThreadProfiler(this);
+
+	_map_it = _map.begin();
 }
 //-------------------------------------------------------------------------
 profilerFuncMap::~profilerFuncMap(void)
@@ -205,11 +207,15 @@ profilerFuncMap::~profilerFuncMap(void)
 	//printf("profilerFuncMap Destructor: %p\n", this);
 	pMgr.removeThreadProfiler(this);
 
-	for (auto it = _map.begin(); it != _map.end(); it++)
 	{
-		delete it->second;
+		autoScopedLock aLock(_mapMtx);
+
+		for (auto it = _map.begin(); it != _map.end(); it++)
+		{
+			delete it->second;
+		}
+		_map.clear();
 	}
-	_map.clear();
 }
 //-------------------------------------------------------------------------
 void profilerFuncMap::pushStack(funcProfileRecord *rec)
@@ -228,6 +234,7 @@ funcProfileRecord *profilerFuncMap::findRecord(const char *fileNameStringLiteral
 					       const char *commentStringLiteral,
 					       bool create)
 {
+	autoScopedLock aLock(_mapMtx);
 	char lineString[64];
 	funcProfileRecord *rec = nullptr;
 
@@ -255,7 +262,44 @@ funcProfileRecord *profilerFuncMap::findRecord(const char *fileNameStringLiteral
 	return rec;
 }
 //-------------------------------------------------------------------------
+funcProfileRecord *profilerFuncMap::iterateBegin(void)
+{
+	autoScopedLock aLock(_mapMtx);
+	funcProfileRecord *rec = nullptr;
+
+	_map_it = _map.begin();
+
+	if (_map_it != _map.end())
+	{
+		rec = _map_it->second;
+	}
+	return rec;
+}
+//-------------------------------------------------------------------------
+funcProfileRecord *profilerFuncMap::iterateNext(void)
+{
+	autoScopedLock aLock(_mapMtx);
+	funcProfileRecord *rec = nullptr;
+
+	if (_map_it != _map.end())
+	{
+		_map_it++;
+	}
+	if (_map_it != _map.end())
+	{
+		rec = _map_it->second;
+	}
+	return rec;
+}
+//-------------------------------------------------------------------------
 //-----  profilerManager class
+//-------------------------------------------------------------------------
+profilerManager* profilerManager::instance = nullptr;
+
+profilerManager* profilerManager::getInstance(void)
+{
+	return instance;
+}
 //-------------------------------------------------------------------------
 profilerManager::profilerManager(void)
 {
@@ -265,6 +309,11 @@ profilerManager::profilerManager(void)
 	if (pLog == nullptr)
 	{
 		pLog = stdout;
+	}
+
+	if (instance == nullptr)
+	{
+		instance = this;
 	}
 }
 
@@ -279,6 +328,10 @@ profilerManager::~profilerManager(void)
 	if (pLog && (pLog != stdout))
 	{
 		fclose(pLog); pLog = nullptr;
+	}
+	if (instance == this)
+	{
+		instance = nullptr;
 	}
 }
 
