@@ -40,7 +40,7 @@ ConsoleViewQWidget_t::ConsoleViewQWidget_t(QWidget *parent)
 {
 	consoleWin_t *win = qobject_cast <consoleWin_t*>(parent);
 
-	printf("Initialing QPainter Video Driver\n");
+	printf("Initializing QPainter Video Driver\n");
 
 	QPalette pal = palette();
 

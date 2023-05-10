@@ -152,7 +152,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	g_config->getOption( "SDL.Sound.UseGlobalFocus", &soundUseGlobalFocus );
 	g_config->getOption ("SDL.VideoDriver", &videoDriver);
 
-	if ( videoDriver == 1)
+	if ( videoDriver == ConsoleViewerBase::VIDEO_DRIVER_SDL)
 	{
 		viewport_SDL = new ConsoleViewSDL_t(this);
 
@@ -160,7 +160,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 		viewport_Interface = static_cast<ConsoleViewerBase*>(viewport_SDL);
 	}
-	else if ( videoDriver == 2)
+	else if ( videoDriver == ConsoleViewerBase::VIDEO_DRIVER_QPAINTER)
 	{
 		viewport_QWidget = new ConsoleViewQWidget_t(this);
 
