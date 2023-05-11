@@ -246,14 +246,6 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		{
 			viewport_Interface->setMinimumSize( reqSize );
 		}
-		//if ( viewport_GL != NULL )
-		//{
-		//	viewport_GL->setMinimumSize( reqSize );
-		//}
-		//else if ( viewport_SDL != NULL )
-		//{
-		//	viewport_SDL->setMinimumSize( reqSize );
-		//}
 		//this->resize( reqSize );
 	}
 
@@ -295,17 +287,6 @@ consoleWin_t::~consoleWin_t(void)
 	if ( !isFullScreen() && !isMaximized() )
 	{
 		// Scaling is only saved when applying video settings
-		//if ( viewport_GL != NULL )
-		//{
-		//	g_config->setOption( "SDL.XScale", viewport_GL->getScaleX() );
-		//	g_config->setOption( "SDL.YScale", viewport_GL->getScaleY() );
-		//}
-		//else if ( viewport_SDL != NULL )
-		//{
-		//	g_config->setOption( "SDL.XScale", viewport_SDL->getScaleX() );
-		//	g_config->setOption( "SDL.YScale", viewport_SDL->getScaleY() );
-		//}
-
 		g_config->setOption( "SDL.WinPosX" , pos().x() );
 		g_config->setOption( "SDL.WinPosY" , pos().y() );
 		g_config->setOption( "SDL.WinSizeX", w.width() );
@@ -394,19 +375,6 @@ int consoleWin_t::videoInit(void)
 	{
 		ret = viewport_Interface->init();
 	}
-
-	//if ( viewport_SDL )
-	//{
-	//	ret = viewport_SDL->init();
-	//}
-	//else if ( viewport_GL )
-	//{
-	//	ret = viewport_GL->init();
-	//}
-	//else if ( viewport_QWidget )
-	//{
-	//	ret = viewport_QWidget->init();
-	//}
 	return ret;
 }
 
@@ -416,18 +384,6 @@ void consoleWin_t::videoReset(void)
 	{
 		viewport_Interface->reset();
 	}
-	//if ( viewport_SDL )
-	//{
-	//	viewport_SDL->reset();
-	//}
-	//else if ( viewport_GL )
-	//{
-	//	viewport_GL->reset();
-	//}
-	//else if ( viewport_QWidget )
-	//{
-	//	viewport_QWidget->reset();
-	//}
 	return;
 }
 
@@ -538,31 +494,6 @@ QSize consoleWin_t::calcRequiredSize(void)
 		yscale = viewport_Interface->getScaleY();
 	}
 
-	//if ( viewport_GL )
-	//{
-	//	v = viewport_GL->size();
-	//	forceAspect = viewport_GL->getForceAspectOpt();
-	//	aspectRatio = viewport_GL->getAspectRatio();
-	//	xscale = viewport_GL->getScaleX();
-	//	yscale = viewport_GL->getScaleY();
-	//}
-	//else if ( viewport_SDL )
-	//{
-	//	v = viewport_SDL->size();
-	//	forceAspect = viewport_SDL->getForceAspectOpt();
-	//	aspectRatio = viewport_SDL->getAspectRatio();
-	//	xscale = viewport_SDL->getScaleX();
-	//	yscale = viewport_SDL->getScaleY();
-	//}
-	//else if ( viewport_QWidget )
-	//{
-	//	v = viewport_QWidget->size();
-	//	forceAspect = viewport_QWidget->getForceAspectOpt();
-	//	aspectRatio = viewport_QWidget->getAspectRatio();
-	//	xscale = viewport_QWidget->getScaleX();
-	//	yscale = viewport_QWidget->getScaleY();
-	//}
-
 	dw = 0;
 	dh = 0;
 
@@ -635,18 +566,6 @@ void consoleWin_t::setViewportAspect(void)
 	{
 		viewport_Interface->setAspectXY( x, y );
 	}
-	//if ( viewport_GL )
-	//{
-	//	viewport_GL->setAspectXY( x, y );
-	//}
-	//else if ( viewport_SDL )
-	//{
-	//	viewport_SDL->setAspectXY( x, y );
-	//}
-	//else if ( viewport_QWidget )
-	//{
-	//	viewport_QWidget->setAspectXY( x, y );
-	//}
 }
 
 void consoleWin_t::setMenuAccessPauseEnable( bool enable )
@@ -719,18 +638,6 @@ void consoleWin_t::setViewerCursor( QCursor s )
 	{
 		viewport_Interface->setCursor(s);
 	}
-	//if ( viewport_GL )
-	//{
-	//	viewport_GL->setCursor(s);
-	//}
-	//else if ( viewport_SDL )
-	//{
-	//	viewport_SDL->setCursor(s);
-	//}
-	//else if ( viewport_QWidget )
-	//{
-	//	viewport_QWidget->setCursor(s);
-	//}
 }
 
 void consoleWin_t::setViewerCursor( Qt::CursorShape s )
@@ -739,18 +646,6 @@ void consoleWin_t::setViewerCursor( Qt::CursorShape s )
 	{
 		viewport_Interface->setCursor(s);
 	}
-	//if ( viewport_GL )
-	//{
-	//	viewport_GL->setCursor(s);
-	//}
-	//else if ( viewport_SDL )
-	//{
-	//	viewport_SDL->setCursor(s);
-	//}
-	//else if ( viewport_QWidget )
-	//{
-	//	viewport_QWidget->setCursor(s);
-	//}
 }
 
 Qt::CursorShape consoleWin_t::getViewerCursor(void)
@@ -761,19 +656,6 @@ Qt::CursorShape consoleWin_t::getViewerCursor(void)
 	{
 		s = viewport_Interface->cursor().shape();
 	}
-
-	//if ( viewport_GL )
-	//{
-	//	s = viewport_GL->cursor().shape();
-	//}
-	//else if ( viewport_SDL )
-	//{
-	//	s = viewport_SDL->cursor().shape();
-	//}
-	//else if ( viewport_QWidget )
-	//{
-	//	s = viewport_QWidget->cursor().shape();
-	//}
 	return s;
 }
 
@@ -789,18 +671,6 @@ void consoleWin_t::resizeEvent(QResizeEvent *event)
 			viewport_Interface->setMinimumSize( QSize( 256, 224 ) );
 		}
 
-		//if ( viewport_GL != NULL )
-		//{
-		//	viewport_GL->setMinimumSize( QSize( 256, 224 ) );
-		//}
-		//else if ( viewport_SDL != NULL )
-		//{
-		//	viewport_SDL->setMinimumSize( QSize( 256, 224 ) );
-		//}
-		//else if ( viewport_QWidget != NULL )
-		//{
-		//	viewport_QWidget->setMinimumSize( QSize( 256, 224 ) );
-		//}
 		firstResize = false;
 	}
 	//printf("%i x %i \n", event->size().width(), event->size().height() );
@@ -2404,22 +2274,6 @@ void consoleWin_t::videoBgColorChanged( QColor &c )
 		viewport_Interface->setBgColor(c);
 		viewport_Interface->queueRedraw();
 	}
-
-	//if ( viewport_GL )
-	//{
-	//	viewport_GL->setBgColor(c);
-	//	viewport_GL->update();
-	//}
-	//else if ( viewport_SDL )
-	//{
-	//	viewport_SDL->setBgColor(c);
-	//	viewport_SDL->render();
-	//}
-	//else if ( viewport_QWidget )
-	//{
-	//	viewport_QWidget->setBgColor(c);
-	//	viewport_QWidget->update();
-	//}
 }
 //---------------------------------------------------------------------------
 int  consoleWin_t::showListSelectDialog( const char *title, std::vector <std::string> &l )
@@ -3351,24 +3205,6 @@ void consoleWin_t::winResizeIx(int iscale)
 		aspectRatio = viewport_Interface->getAspectRatio();
 		forceAspect = viewport_Interface->getForceAspectOpt();
 	}
-	//if ( viewport_GL )
-	//{
-	//	v = viewport_GL->size();
-	//	aspectRatio = viewport_GL->getAspectRatio();
-	//	forceAspect = viewport_GL->getForceAspectOpt();
-	//}
-	//else if ( viewport_SDL )
-	//{
-	//	v = viewport_SDL->size();
-	//	aspectRatio = viewport_SDL->getAspectRatio();
-	//	forceAspect = viewport_SDL->getForceAspectOpt();
-	//}
-	//else if ( viewport_QWidget )
-	//{
-	//	v = viewport_QWidget->size();
-	//	aspectRatio = viewport_QWidget->getAspectRatio();
-	//	forceAspect = viewport_QWidget->getForceAspectOpt();
-	//}
 
 	dw = w.width()  - v.width();
 	dh = w.height() - v.height();
@@ -4638,21 +4474,6 @@ void consoleWin_t::transferVideoBuffer(void)
 			viewport_Interface->transfer2LocalBuffer();
 			viewport_Interface->queueRedraw();
 		}
-		//if ( viewport_SDL )
-		//{
-		//	viewport_SDL->transfer2LocalBuffer();
-		//	viewport_SDL->render();
-		//}
-		//else if ( viewport_GL )
-		//{
-		//	viewport_GL->transfer2LocalBuffer();
-		//	viewport_GL->update();
-		//}
-		//else if ( viewport_QWidget )
-		//{
-		//	viewport_QWidget->transfer2LocalBuffer();
-		//	viewport_QWidget->update();
-		//}
 	}
 }
 

@@ -1230,28 +1230,15 @@ void GetMouseData(uint32 (&d)[3])
 
 	b = 0; // map mouse buttons
 
-	if (consoleWindow->viewport_SDL)
+	if (consoleWindow->viewport_Interface)
 	{
-		consoleWindow->viewport_SDL->getNormalizedCursorPos(nx, ny);
+		consoleWindow->viewport_Interface->getNormalizedCursorPos(nx, ny);
 
-		if (consoleWindow->viewport_SDL->getMouseButtonState(Qt::LeftButton))
+		if (consoleWindow->viewport_Interface->getMouseButtonState(Qt::LeftButton))
 		{
 			b |= 0x01;
 		}
-		if (consoleWindow->viewport_SDL->getMouseButtonState(Qt::RightButton))
-		{
-			b |= 0x02;
-		}
-	}
-	else if (consoleWindow->viewport_GL)
-	{
-		consoleWindow->viewport_GL->getNormalizedCursorPos(nx, ny);
-
-		if (consoleWindow->viewport_GL->getMouseButtonState(Qt::LeftButton))
-		{
-			b |= 0x01;
-		}
-		if (consoleWindow->viewport_GL->getMouseButtonState(Qt::RightButton))
+		if (consoleWindow->viewport_Interface->getMouseButtonState(Qt::RightButton))
 		{
 			b |= 0x02;
 		}
