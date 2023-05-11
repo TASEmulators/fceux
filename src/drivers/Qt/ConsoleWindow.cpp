@@ -152,31 +152,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	g_config->getOption( "SDL.Sound.UseGlobalFocus", &soundUseGlobalFocus );
 	g_config->getOption ("SDL.VideoDriver", &videoDriver);
 
-	if ( videoDriver == ConsoleViewerBase::VIDEO_DRIVER_SDL)
-	{
-		viewport_SDL = new ConsoleViewSDL_t(this);
-
-		setCentralWidget(viewport_SDL);
-
-		viewport_Interface = static_cast<ConsoleViewerBase*>(viewport_SDL);
-	}
-	else if ( videoDriver == ConsoleViewerBase::VIDEO_DRIVER_QPAINTER)
-	{
-		viewport_QWidget = new ConsoleViewQWidget_t(this);
-
-		setCentralWidget(viewport_QWidget);
-
-		viewport_Interface = static_cast<ConsoleViewerBase*>(viewport_QWidget);
-	}
-	else
-	{
-		viewport_GL = new ConsoleViewGL_t(this);
-
-		setCentralWidget(viewport_GL);
-
-		viewport_Interface = static_cast<ConsoleViewerBase*>(viewport_GL);
-	}
-	setViewportAspect();
+	loadVideoDriver( videoDriver );
 
 	setWindowTitle( tr(FCEU_NAME_AND_VERSION) );
 	setWindowIcon(QIcon(":fceux1.png"));
@@ -327,18 +303,8 @@ consoleWin_t::~consoleWin_t(void)
 	//fceuWrapperClose();
 	//FCEU_WRAPPER_UNLOCK();
 
-	if ( viewport_GL != NULL )
-	{
-		delete viewport_GL; viewport_GL = NULL;
-	}
-	if ( viewport_SDL != NULL )
-	{
-		delete viewport_SDL; viewport_SDL = NULL;
-	}
-	if ( viewport_QWidget != NULL )
-	{
-		delete viewport_QWidget; viewport_QWidget = NULL;
-	}
+	unloadVideoDriver();
+
 	delete mutex;
 
 	// LoadGame() checks for an IP and if it finds one begins a network session
@@ -1977,6 +1943,99 @@ void consoleWin_t::createMainMenu(void)
 #endif
 };
 //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+int consoleWin_t::unloadVideoDriver(void)
+{
+	viewport_Interface = NULL;
+
+	if (viewport_GL != NULL)
+	{
+		if ( viewport_GL == centralWidget() )
+		{
+			takeCentralWidget();
+		}
+		else
+		{
+			printf("Error: Central Widget Failed!\n");
+		}
+		viewport_GL->deleteLater();
+
+		viewport_GL = NULL;
+	}
+
+	if (viewport_SDL != NULL)
+	{
+		if ( viewport_SDL == centralWidget() )
+		{
+			takeCentralWidget();
+		}
+		else
+		{
+			printf("Error: Central Widget Failed!\n");
+		}
+		viewport_SDL->deleteLater();
+
+		viewport_SDL = NULL;
+	}
+
+	if (viewport_QWidget != NULL)
+	{
+		if ( viewport_QWidget == centralWidget() )
+		{
+			takeCentralWidget();
+		}
+		else
+		{
+			printf("Error: Central Widget Failed!\n");
+		}
+		viewport_QWidget->deleteLater();
+
+		viewport_QWidget = NULL;
+	}
+	return 0;
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::videoDriverDestroyed(QObject* obj)
+{
+	if (viewport_GL == obj)
+	{
+		//printf("GL Video Driver Destroyed\n");
+
+		if (viewport_Interface == static_cast<ConsoleViewerBase*>(viewport_GL))
+		{
+			viewport_Interface = NULL;
+		}
+		viewport_GL = NULL;
+	}
+
+	if (viewport_SDL == obj)
+	{
+		//printf("SDL Video Driver Destroyedi\n");
+
+		if (viewport_Interface == static_cast<ConsoleViewerBase*>(viewport_SDL))
+		{
+			viewport_Interface = NULL;
+		}
+		viewport_SDL = NULL;
+	}
+
+	if (viewport_QWidget == obj)
+	{
+		//printf("QPainter Video Driver Destroyed\n");
+
+		if (viewport_Interface == static_cast<ConsoleViewerBase*>(viewport_QWidget))
+		{
+			viewport_Interface = NULL;
+		}
+		viewport_QWidget = NULL;
+	}
+	printf("Video Driver Destroyed: %p\n", obj);
+	//printf("viewport_GL: %p\n", viewport_GL);
+	//printf("viewport_SDL: %p\n", viewport_SDL);
+	//printf("viewport_Qt: %p\n", viewport_QWidget);
+	//printf("viewport_Interface: %p\n", viewport_Interface);
+}
+//---------------------------------------------------------------------------
 int consoleWin_t::loadVideoDriver( int driverId, bool force )
 {
 	if (viewport_Interface)
@@ -1985,46 +2044,7 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 		{  // Already Loaded
 			if (force)
 			{
-				switch (viewport_Interface->driver())
-				{
-					case ConsoleViewerBase::VIDEO_DRIVER_OPENGL:
-					{
-						if ( viewport_GL == centralWidget() )
-						{
-							takeCentralWidget();
-						}
-						delete viewport_GL;
-
-						viewport_GL = NULL;
-					}
-					break;
-					case ConsoleViewerBase::VIDEO_DRIVER_SDL:
-					{
-						if ( viewport_SDL == centralWidget() )
-						{
-							takeCentralWidget();
-						}
-						delete viewport_SDL;
-
-						viewport_SDL = NULL;
-					}
-					break;
-					case ConsoleViewerBase::VIDEO_DRIVER_QPAINTER:
-					{
-						if ( viewport_QWidget == centralWidget() )
-						{
-							takeCentralWidget();
-						}
-						delete viewport_QWidget;
-
-						viewport_QWidget = NULL;
-					}
-					break;
-					default:
-						printf("Error: Invalid video driver\n");
-					break;
-				}
-
+				unloadVideoDriver();
 			}
 			else
 			{
@@ -2046,6 +2066,8 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 			setViewportAspect();
 
 			viewport_SDL->init();
+
+			connect( viewport_SDL, SIGNAL(destroyed(QObject*)), this, SLOT(videoDriverDestroyed(QObject*)) );
 		}
 		break;
 		case ConsoleViewerBase::VIDEO_DRIVER_OPENGL:
@@ -2059,8 +2081,11 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 			setViewportAspect();
 
 			viewport_GL->init();
+
+			connect( viewport_GL, SIGNAL(destroyed(QObject*)), this, SLOT(videoDriverDestroyed(QObject*)) );
 		}
 		break;
+		default:
 		case ConsoleViewerBase::VIDEO_DRIVER_QPAINTER:
 		{
 			viewport_QWidget = new ConsoleViewQWidget_t(this);
@@ -2072,6 +2097,8 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 			setViewportAspect();
 
 			viewport_QWidget->init();
+
+			connect( viewport_QWidget, SIGNAL(destroyed(QObject*)), this, SLOT(videoDriverDestroyed(QObject*)) );
 		}
 		break;
 	}

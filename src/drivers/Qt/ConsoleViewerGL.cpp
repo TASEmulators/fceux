@@ -136,6 +136,8 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 
 ConsoleViewGL_t::~ConsoleViewGL_t(void)
 {
+	//printf("Destroying GL Viewport\n");
+
 	if ( localBuf )
 	{
 		free( localBuf ); localBuf = NULL;

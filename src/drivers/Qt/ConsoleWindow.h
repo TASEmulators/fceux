@@ -158,6 +158,7 @@ class  consoleWin_t : public QMainWindow
 		#endif
 
 		int loadVideoDriver( int driverId, bool force = false );
+		int unloadVideoDriver(void);
 
 		double getRefreshRate(void){ return refreshRate; }
 
@@ -466,6 +467,7 @@ class  consoleWin_t : public QMainWindow
 		void toggleUseBgPaletteForVideo(bool);
 		void videoBgColorChanged( QColor &c );
 		void loadRomRequestCB( QString s );
+		void videoDriverDestroyed( QObject *obj );
 
 };
 

@@ -120,6 +120,8 @@ ConsoleViewQWidget_t::ConsoleViewQWidget_t(QWidget *parent)
 
 ConsoleViewQWidget_t::~ConsoleViewQWidget_t(void)
 {
+	//printf("Destroying QPainter Viewport\n");
+
 	if ( localBuf )
 	{
 		free( localBuf ); localBuf = nullptr;

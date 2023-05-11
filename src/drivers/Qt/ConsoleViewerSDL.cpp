@@ -122,6 +122,8 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 
 ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
 {
+	//printf("Destroying SDL Viewport\n");
+
 	if ( localBuf )
 	{
 		free( localBuf ); localBuf = NULL;
