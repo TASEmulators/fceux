@@ -1,6 +1,7 @@
 // ConsoleViewerInterface.h
 //
 #pragma once
+#include <stdint.h>
 
 #include <QColor>
 #include <QCursor>
@@ -47,5 +48,9 @@ class ConsoleViewerBase
 		virtual void    setMinimumSize(const QSize &) = 0;
 		virtual void    setMaximumSize(const QSize &) = 0;
 
+		static  void    memset32( void *buf, uint32_t val, size_t size);
+		static  void    copyPixels32( void *dest, void *src, size_t size, uint32_t alphaMask);
+
+		static constexpr uint32_t alphaMask = 0xff000000;
 	protected:
 };

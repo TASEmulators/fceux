@@ -89,7 +89,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 
 	if ( localBuf )
 	{
-		memset( localBuf, 0, localBufSize );
+		memset32( localBuf, alphaMask, localBufSize );
 	}
 
 	forceAspect  = true;
@@ -240,7 +240,7 @@ void ConsoleViewSDL_t::transfer2LocalBuffer(void)
 	}
 	else
 	{
-		memcpy( localBuf, src, cpSize );
+		copyPixels32( dest, src, cpSize, alphaMask);
 	}
 }
 

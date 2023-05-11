@@ -25,6 +25,7 @@
 #include <math.h>
 //#include <unistd.h>
 
+#include "../../profiler.h"
 #include "Qt/nes_shm.h"
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
@@ -86,7 +87,7 @@ ConsoleViewQWidget_t::ConsoleViewQWidget_t(QWidget *parent)
 
 	if ( localBuf )
 	{
-		memset( localBuf, 0, localBufSize );
+		memset32( localBuf, alphaMask, localBufSize );
 	}
 
 	forceAspect  = true;
@@ -227,7 +228,8 @@ void ConsoleViewQWidget_t::transfer2LocalBuffer(void)
 	}
 	else
 	{
-		memcpy( localBuf, src, cpSize );
+		//memcpy( localBuf, src, cpSize );
+		copyPixels32( dest, src, cpSize, alphaMask);
 	}
 }
 
@@ -488,7 +490,7 @@ void ConsoleViewQWidget_t::paintEvent(QPaintEvent *event)
 
 	int rowPitch = nesWidth * sizeof(uint32_t);
 
-	QImage tmpImage( (const uchar*)localBuf, nesWidth, nesHeight, rowPitch, QImage::Format_RGB32);
+	QImage tmpImage( (const uchar*)localBuf, nesWidth, nesHeight, rowPitch, QImage::Format_ARGB32);
 
 	//SDL_Rect source = {0, 0, nesWidth, nesHeight };
 	QRect dest( sx, sy, rw, rh );
