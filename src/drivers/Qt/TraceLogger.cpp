@@ -2507,6 +2507,7 @@ void QTraceLogView::paintEvent(QPaintEvent *event)
 TraceLogDiskThread_t::TraceLogDiskThread_t( QObject *parent )
 	: QThread(parent)
 {
+	setObjectName( QString("TraceLogDiskThread") );
 }
 //----------------------------------------------------
 TraceLogDiskThread_t::~TraceLogDiskThread_t(void)

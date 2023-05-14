@@ -53,6 +53,7 @@
 #include "../../cheat.h"
 #include "../../movie.h"
 #include "../../state.h"
+#include "../../profiler.h"
 #include "../../version.h"
 
 #ifdef _S9XLUA_H
@@ -1465,6 +1466,9 @@ int  fceuWrapperUpdate( void )
 
 		emulatorHasMutex = 0;
 
+#ifdef __FCEU_PROFILER_ENABLE__
+		FCEU_profiler_log_thread_activity();
+#endif
 		while ( SpeedThrottle() )
 		{
 			// Input device processing is in main thread
@@ -1478,6 +1482,9 @@ int  fceuWrapperUpdate( void )
 
 		emulatorHasMutex = 0;
 
+#ifdef __FCEU_PROFILER_ENABLE__
+		FCEU_profiler_log_thread_activity();
+#endif
 		msleep( 100 );
 	}
 	return 0;

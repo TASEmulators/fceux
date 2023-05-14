@@ -32,6 +32,7 @@
  */
 #ifdef __FCEU_PROFILER_ENABLE__
 
+#include <stdio.h>
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -123,7 +124,7 @@ namespace FCEU
 			}
 			else if (ts.tv_sec > op.ts.tv_sec)
 			{
-				res = (ts.tv_sec > op.ts.tv_sec);
+				res = true;
 			}
 			return res;
 		}
@@ -135,9 +136,9 @@ namespace FCEU
 			{
 				res = (ts.tv_nsec < op.ts.tv_nsec);
 			}
-			else if (ts.tv_sec > op.ts.tv_sec)
+			else if (ts.tv_sec < op.ts.tv_sec)
 			{
-				res = (ts.tv_sec < op.ts.tv_sec);
+				res = true;
 			}
 			return res;
 		}
@@ -145,6 +146,13 @@ namespace FCEU
 		void zero(void)
 		{
 			ts.tv_sec = 0;
+			ts.tv_nsec = 0;
+			tsc = 0;
+		}
+
+		void fromSeconds(unsigned int sec)
+		{
+			ts.tv_sec = sec;
 			ts.tv_nsec = 0;
 			tsc = 0;
 		}
@@ -213,6 +221,12 @@ namespace FCEU
 			tsc = 0;
 		}
 
+		void fromSeconds(unsigned int sec)
+		{
+			ts = sec * qpcFreq;
+			tsc = 0;
+		}
+
 		double toSeconds(void)
 		{
 			double sec = static_cast<double>(ts) / static_cast<double>(qpcFreq);
@@ -235,6 +249,7 @@ namespace FCEU
 		timeStampRecord min;
 		timeStampRecord max;
 		timeStampRecord sum;
+		timeStampRecord last;
 		unsigned int numCalls;
 		unsigned int recursionCount;
 
@@ -253,12 +268,21 @@ namespace FCEU
 		funcProfileRecord *rec;
 		timeStampRecord start;
 
-		profileFuncScoped(const char *fileNameStringLiteral,
-				  const int   fileLineNumber,
-				  const char *funcNameStringLiteral,
-				  const char *commentStringLiteral);
+		profileFuncScoped( funcProfileRecord *recordIn );
 
 		~profileFuncScoped(void);
+	};
+
+	struct profileExecVector
+	{
+		profileExecVector(void);
+		~profileExecVector(void);
+
+		void update(void);
+
+		std::vector <funcProfileRecord> _vec;
+
+		FILE *logFp;
 	};
 
 	class profilerFuncMap
@@ -266,6 +290,12 @@ namespace FCEU
 		public:
 			profilerFuncMap();
 			~profilerFuncMap();
+
+			int addRecord(const char *fileNameStringLiteral,
+				      const int   fileLineNumber,
+				      const char *funcNameStringLiteral,
+				      const char *commentStringLiteral,
+				      funcProfileRecord *rec );
 
 			funcProfileRecord *findRecord(const char *fileNameStringLiteral,
 						      const int   fileLineNumber,
@@ -312,7 +342,12 @@ namespace FCEU
 #define  __FCEU_PROFILE_FUNC_NAME__  __func__
 #endif
 
-#define  FCEU_PROFILE_FUNC(id, comment)   FCEU::profileFuncScoped  id( __FILE__, __LINE__, __FCEU_PROFILE_FUNC_NAME__, comment )
+#define  FCEU_PROFILE_FUNC(id, comment)   \
+	static thread_local FCEU::funcProfileRecord  id( __FILE__, __LINE__, __FCEU_PROFILE_FUNC_NAME__, comment ); \
+	FCEU::profileFuncScoped id ## _unique_scope( &id )
+
+
+int FCEU_profiler_log_thread_activity(void);
 
 #else  // __FCEU_PROFILER_ENABLE__ not defined
 

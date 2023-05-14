@@ -23,6 +23,10 @@
 
 #include <stdio.h>
 
+#ifdef __QT_DRIVER__
+#include <QThread>
+#endif
+
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 #include <unistd.h>
 #endif
@@ -37,6 +41,7 @@
 
 namespace FCEU
 {
+static thread_local profileExecVector execList;
 static thread_local profilerFuncMap threadProfileMap;
 
 FILE *profilerManager::pLog = nullptr;
@@ -64,10 +69,8 @@ void timeStampRecord::readNew(void)
 {
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 	clock_gettime( CLOCK_REALTIME, &ts );
-#elif defined(WIN32)
-	QueryPerformanceCounter((LARGE_INTEGER*)&ts);
 #else
-	ts = 0;
+	QueryPerformanceCounter((LARGE_INTEGER*)&ts);
 #endif
 	tsc = rdtsc();
 }
@@ -121,16 +124,19 @@ funcProfileRecord::funcProfileRecord(const char *fileNameStringLiteral,
 	: fileLineNum(fileLineNumber), fileName(fileNameStringLiteral),
 	  funcName(funcNameStringLiteral), comment(commentStringLiteral)
 {
-	min.zero();
+	min.fromSeconds(9);
 	max.zero();
 	sum.zero();
 	numCalls = 0;
 	recursionCount = 0;
+
+	threadProfileMap.addRecord( fileNameStringLiteral, fileLineNumber,
+					funcNameStringLiteral, commentStringLiteral, this);
 }
 //-------------------------------------------------------------------------
 void funcProfileRecord::reset(void)
 {
-	min.zero();
+	min.fromSeconds(9);
 	max.zero();
 	sum.zero();
 	numCalls = 0;
@@ -149,20 +155,9 @@ double funcProfileRecord::average(void)
 //-------------------------------------------------------------------------
 //---- Profile Scoped Function Class
 //-------------------------------------------------------------------------
-profileFuncScoped::profileFuncScoped(const char *fileNameStringLiteral,
-				     const int   fileLineNumber,
-				     const char *funcNameStringLiteral,
-				     const char *commentStringLiteral)
+profileFuncScoped::profileFuncScoped( funcProfileRecord *recordIn )
 {
-	rec = nullptr;
-
-	//if (threadProfileMap == nullptr)
-	//{
-	//	threadProfileMap = new profilerFuncMap();
-	//}
-
-	rec = threadProfileMap.findRecord( fileNameStringLiteral, fileLineNumber,
-						funcNameStringLiteral, commentStringLiteral, true);
+	rec = recordIn;
 
 	if (rec)
 	{
@@ -181,15 +176,68 @@ profileFuncScoped::~profileFuncScoped(void)
 		ts.readNew();
 		dt = ts - start;
 
+		rec->last = dt;
 		rec->sum += dt;
 		if (dt < rec->min) rec->min = dt;
 		if (dt > rec->max) rec->max = dt;
 
 		rec->recursionCount--;
 
-		//printf("%s: %u  %f  %f  %f  %f\n", rec->funcName, rec->numCalls, dt.toSeconds(), rec->average(), rec->min.toSeconds(), rec->max.toSeconds());
+		execList._vec.push_back(*rec);
+
 		threadProfileMap.popStack(rec);
 	}
+}
+//-------------------------------------------------------------------------
+//---- Profile Execution Vector
+//-------------------------------------------------------------------------
+profileExecVector::profileExecVector(void)
+{
+	_vec.reserve( 10000 );
+
+	char threadName[128];
+	char fileName[256];
+
+	strcpy( threadName, "MainThread");
+
+#ifdef __QT_DRIVER__
+	QThread *thread = QThread::currentThread();
+
+	if (thread)
+	{
+		//printf("Thread: %s\n", thread->objectName().toStdString().c_str());
+		strcpy( threadName, thread->objectName().toStdString().c_str());
+	}
+#endif
+	sprintf( fileName, "fceux-profile-%s.log", threadName);
+
+	logFp = ::fopen(fileName, "w");
+
+	if (logFp == nullptr)
+	{
+		printf("Error: Failed to create profiler logfile: %s\n", fileName);
+	}
+}
+//-------------------------------------------------------------------------
+profileExecVector::~profileExecVector(void)
+{
+	if (logFp)
+	{
+		::fclose(logFp);
+	}
+}
+//-------------------------------------------------------------------------
+void profileExecVector::update(void)
+{
+	size_t n = _vec.size();
+
+	for (size_t i=0; i<n; i++)
+	{
+		funcProfileRecord &rec = _vec[i];
+
+		fprintf( logFp, "%s: %u  %f  %f  %f  %f\n", rec.funcName, rec.numCalls, rec.last.toSeconds(), rec.average(), rec.min.toSeconds(), rec.max.toSeconds());
+	}
+	_vec.clear();
 }
 //-------------------------------------------------------------------------
 //---- Profile Function Record Map
@@ -207,15 +255,15 @@ profilerFuncMap::~profilerFuncMap(void)
 	//printf("profilerFuncMap Destructor: %p\n", this);
 	pMgr.removeThreadProfiler(this);
 
-	{
-		autoScopedLock aLock(_mapMtx);
+	//{
+	//	autoScopedLock aLock(_mapMtx);
 
-		for (auto it = _map.begin(); it != _map.end(); it++)
-		{
-			delete it->second;
-		}
-		_map.clear();
-	}
+	//	for (auto it = _map.begin(); it != _map.end(); it++)
+	//	{
+	//		delete it->second;
+	//	}
+	//	_map.clear();
+	//}
 }
 //-------------------------------------------------------------------------
 void profilerFuncMap::pushStack(funcProfileRecord *rec)
@@ -226,6 +274,26 @@ void profilerFuncMap::pushStack(funcProfileRecord *rec)
 void profilerFuncMap::popStack(funcProfileRecord *rec)
 {
 	stack.pop_back();
+}
+//-------------------------------------------------------------------------
+int profilerFuncMap::addRecord(const char *fileNameStringLiteral,
+			      const int   fileLineNumber,
+			      const char *funcNameStringLiteral,
+			      const char *commentStringLiteral,
+			      funcProfileRecord *rec )
+{
+	autoScopedLock aLock(_mapMtx);
+	char lineString[64];
+
+	sprintf( lineString, ":%i", fileLineNumber);
+
+	std::string fname(fileNameStringLiteral);
+
+	fname.append( lineString );
+
+	_map[fname] = rec;
+
+	return 0;
 }
 //-------------------------------------------------------------------------
 funcProfileRecord *profilerFuncMap::findRecord(const char *fileNameStringLiteral,
@@ -363,6 +431,12 @@ int profilerManager::removeThreadProfiler( profilerFuncMap *m, bool shouldDestro
 	return result;
 }
 //-------------------------------------------------------------------------
-//
+} // namespace FCEU
+
+//-------------------------------------------------------------------------
+int FCEU_profiler_log_thread_activity(void)
+{
+	FCEU::execList.update();
+	return 0;
 }
 #endif //  __FCEU_PROFILER_ENABLE__

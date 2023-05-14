@@ -125,6 +125,13 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	printf("Running on Platform: %s\n", QGuiApplication::platformName().toStdString().c_str() );
 
+	QThread *thread = QThread::currentThread();
+
+	if (thread)
+	{
+		thread->setObjectName( QString("MainThread") );
+	}
+
 	QApplication::setStyle( new fceuStyle() );
 
 	initHotKeys();
@@ -4604,6 +4611,9 @@ void consoleWin_t::updatePeriodic(void)
 
 	updateCounter++;
 
+#ifdef __FCEU_PROFILER_ENABLE__
+		FCEU_profiler_log_thread_activity();
+#endif
    return;
 }
 
@@ -4614,6 +4624,7 @@ emulatorThread_t::emulatorThread_t( QObject *parent )
 	pself = 0;
 	#endif
 
+	setObjectName( QString("EmulationThread") );
 }
 
 #if defined(__linux__) 
