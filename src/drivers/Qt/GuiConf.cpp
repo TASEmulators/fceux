@@ -989,6 +989,8 @@ static int readQPaletteFromFile( const char *path, QPalette *pal )
 
 		rTxtMatch = NULL;
 
+		r = QPalette::WindowText;
+
 		for (k=0; k<30; k++)
 		{
 
