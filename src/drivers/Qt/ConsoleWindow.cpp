@@ -35,6 +35,7 @@
 #include <QPixmap>
 #include <QWindow>
 #include <QScreen>
+#include <QSettings>
 #include <QHeaderView>
 #include <QFileInfo>
 #include <QFileDialog>
@@ -2324,6 +2325,7 @@ int  consoleWin_t::showListSelectDialog( const char *title, std::vector <std::st
 	QPushButton *okButton, *cancelButton;
 	QTreeWidget *tree;
 	QTreeWidgetItem *item;
+	QSettings  settings;
 
 	dialog.setWindowTitle( tr(title) );
 
@@ -2371,7 +2373,14 @@ int  consoleWin_t::showListSelectDialog( const char *title, std::vector <std::st
 
 	dialog.setLayout( mainLayout );
 
+	// Restore Window Geometry
+	dialog.restoreGeometry(settings.value("ArchiveViewer/geometry").toByteArray());
+
+	// Run Dialog Execution Loop
 	ret = dialog.exec();
+
+	// Save Window Geometry
+	settings.setValue("ArchiveViewer/geometry", dialog.saveGeometry());
 
 	if ( ret == QDialog::Accepted )
 	{
