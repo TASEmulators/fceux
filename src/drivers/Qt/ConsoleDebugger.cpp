@@ -879,6 +879,16 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	symMenu->addAction(act);
 
+	// Symbols -> Save
+	act = new QAction(tr("&Save"), this);
+	//act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setStatusTip(tr("&Save"));
+	//act->setCheckable(true);
+	//act->setChecked( break_on_unlogged_data );
+	connect( act, SIGNAL(triggered(void)), this, SLOT(saveSymbolsCB(void)) );
+
+	symMenu->addAction(act);
+
 	symMenu->addSeparator();
 
 	// Symbols -> Symbolic Debug
@@ -2932,6 +2942,13 @@ void ConsoleDebugger::reloadSymbolsCB(void)
 	debugSymbolTable.loadGameSymbols();
 
 	asmView->updateAssemblyView();
+	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::saveSymbolsCB(void)
+{
+	FCEU_WRAPPER_LOCK();
+	debugSymbolTable.save();
 	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------

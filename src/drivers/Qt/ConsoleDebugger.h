@@ -632,6 +632,7 @@ class ConsoleDebugger : public QDialog
 		void resizeToMinimumSizeHint(void);
 		void resetCountersCB (void);
 		void reloadSymbolsCB(void);
+		void saveSymbolsCB(void);
 		void displayByteCodesCB(bool value);
 		void displayTraceDataCB(bool value);
 		void displayROMoffsetCB(bool value);
