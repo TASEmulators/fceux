@@ -27,17 +27,9 @@
 #include <QThread>
 #endif
 
-#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
-#include <unistd.h>
-#endif
-
 #include "utils/mutex.h"
 #include "fceu.h"
 #include "profiler.h"
-
-#if defined(WIN32)
-#include <windows.h>
-#endif
 
 namespace FCEU
 {
@@ -47,71 +39,6 @@ static thread_local profilerFuncMap threadProfileMap;
 FILE *profilerManager::pLog = nullptr;
 
 static profilerManager  pMgr;
-
-//-------------------------------------------------------------------------
-//---- Time Stamp Record
-//-------------------------------------------------------------------------
-#if defined(WIN32)
-uint64_t timeStampRecord::qpcFreq = 0;
-#include <intrin.h>
-#pragma intrinsic(__rdtsc)
-#else
-#include <x86intrin.h>
-#endif
-uint64_t timeStampRecord::tscFreq = 0;
-
-static uint64_t rdtsc()
-{
-	return __rdtsc();
-}
-
-void timeStampRecord::readNew(void)
-{
-#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
-	clock_gettime( CLOCK_REALTIME, &ts );
-#else
-	QueryPerformanceCounter((LARGE_INTEGER*)&ts);
-#endif
-	tsc = rdtsc();
-}
-
-static void calibrateTSC(void)
-{
-	constexpr int numSamples = 1;
-	timeStampRecord t1, t2, td;
-	uint64_t td_sum = 0;
-	double td_avg;
-
-#if defined(WIN32)
-	if (QueryPerformanceFrequency((LARGE_INTEGER*)&timeStampRecord::qpcFreq) == 0)
-	{
-		printf("QueryPerformanceFrequency FAILED!\n");
-	}
-#endif
-	FCEU_printf("Running TSC Calibration: %i sec...\n", numSamples);
-
-	for (int i=0; i<numSamples; i++)
-	{
-		t1.readNew();
-#if defined(WIN32)
-		Sleep(1000);
-#else
-		sleep(1);
-#endif
-		t2.readNew();
-
-		td += t2 - t1;
-
-		td_sum = td.tsc;
-
-		td_avg = static_cast<double>(td_sum);
-
-		timeStampRecord::tscFreq = static_cast<uint64_t>( td_avg / td.toSeconds() );
-
-		FCEU_printf("%i Calibration: %f sec   TSC:%llu   TSC Freq: %f MHz\n", i, td.toSeconds(), 
-			static_cast<unsigned long long>(td.tsc), static_cast<double>(timeStampRecord::tscFreq) * 1.0e-6 );
-	}
-}
 
 //-------------------------------------------------------------------------
 //---- Function Profile Record
@@ -371,8 +298,6 @@ profilerManager* profilerManager::getInstance(void)
 //-------------------------------------------------------------------------
 profilerManager::profilerManager(void)
 {
-	calibrateTSC();
-
 	//printf("profilerManager Constructor\n");
 	if (pLog == nullptr)
 	{

@@ -58,6 +58,7 @@
 #include "../../profiler.h"
 #include "../../version.h"
 #include "common/os_utils.h"
+#include "utils/timeStamp.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"

@@ -22,6 +22,7 @@
 
 #include "Qt/sdl.h"
 #include "Qt/throttle.h"
+#include "utils/timeStamp.h"
 
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 #include <time.h>
@@ -60,21 +61,22 @@ extern bool turbo;
 
 double getHighPrecTimeStamp(void)
 {
-#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
-	struct timespec ts;
 	double t;
 
-	clock_gettime( CLOCK_REALTIME, &ts );
+	if (FCEU::timeStampModuleInitialized())
+	{
+		FCEU::timeStampRecord ts;
 
-	t = (double)ts.tv_sec + (double)(ts.tv_nsec * 1.0e-9);
-#else
-	double t;
+		ts.readNew();
 
-	t = (double)SDL_GetTicks();
+		t = ts.toSeconds();
+	}
+	else
+	{
+		t = (double)SDL_GetTicks();
 
-	t = t * 1e-3;
-#endif
-
+		t = t * 1e-3;
+	}
 	return t;
 }
 
