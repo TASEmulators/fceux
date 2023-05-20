@@ -44,8 +44,6 @@ void timeStampRecord::readNew(void)
 	tsc = rdtsc();
 }
 
-static timeStampRecord cal_t1, cal_t2, cal_td;
-
 class timeStampModule
 {
 	public:
@@ -53,7 +51,7 @@ class timeStampModule
 	{
 		printf("timeStampModuleInit\n");
 	#if defined(WIN32)
-		if (QueryPerformanceFrequency((LARGE_INTEGER*)&StampRecord::qpcFreq) == 0)
+		if (QueryPerformanceFrequency((LARGE_INTEGER*)&timeStampRecord::qpcFreq) == 0)
 		{
 			printf("QueryPerformanceFrequency FAILED!\n");
 		}
