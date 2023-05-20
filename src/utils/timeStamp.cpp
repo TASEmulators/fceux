@@ -15,7 +15,6 @@
 //---- Time Stamp Record
 //-------------------------------------------------------------------------
 #if defined(WIN32)
-uint64_t timeStampRecord::qpcFreq = 0;
 #include <intrin.h>
 #pragma intrinsic(__rdtsc)
 #else
@@ -31,6 +30,9 @@ namespace FCEU
 {
 
 uint64_t timeStampRecord::tscFreq = 0;
+#if defined(WIN32)
+uint64_t timeStampRecord::qpcFreq = 0;
+#endif
 
 void timeStampRecord::readNew(void)
 {
