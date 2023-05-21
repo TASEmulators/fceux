@@ -43,6 +43,15 @@ void timeStampRecord::readNew(void)
 #endif
 	tsc = rdtsc();
 }
+#if defined(WIN32)
+void timeStampRecord::qpcCalibrate(void)
+{
+		if (QueryPerformanceFrequency((LARGE_INTEGER*)&timeStampRecord::qpcFreq) == 0)
+		{
+			printf("QueryPerformanceFrequency FAILED!\n");
+		}
+}
+#endif
 
 class timeStampModule
 {
@@ -51,10 +60,7 @@ class timeStampModule
 	{
 		printf("timeStampModuleInit\n");
 	#if defined(WIN32)
-		if (QueryPerformanceFrequency((LARGE_INTEGER*)&timeStampRecord::qpcFreq) == 0)
-		{
-			printf("QueryPerformanceFrequency FAILED!\n");
-		}
+		timeStampRecord::qpcCalibrate();
 	#endif
 	}
 };
@@ -64,7 +70,7 @@ static timeStampModule module;
 bool timeStampModuleInitialized(void)
 {
 #if defined(WIN32)
-	bool initialized = timeStampRecord::qpcFreq != 0;
+	bool initialized = timeStampRecord::countFreq() != 0;
 #else
 	bool initialized = true;
 #endif

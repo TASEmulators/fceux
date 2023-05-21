@@ -346,6 +346,8 @@ namespace FCEU
 		{
 			return qpcFreq;
 		}
+
+		static void qpcCalibrate(void);
 #endif
 
 		uint64_t getTSC(void){ return tsc; };
