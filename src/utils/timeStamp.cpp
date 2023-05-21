@@ -29,7 +29,7 @@ static uint64_t rdtsc()
 namespace FCEU
 {
 
-uint64_t timeStampRecord::tscFreq = 0;
+uint64_t timeStampRecord::_tscFreq = 0;
 #if defined(WIN32)
 uint64_t timeStampRecord::qpcFreq = 0;
 #endif
@@ -63,16 +63,15 @@ static timeStampModule module;
 
 bool timeStampModuleInitialized(void)
 {
-	bool initialized = false;
 #if defined(WIN32)
-	initialized = timeStampRecord::qpcFreq != 0;
+	bool initialized = timeStampRecord::qpcFreq != 0;
 #else
-	initialized = true;
+	bool initialized = true;
 #endif
 	return initialized;
 }
 
-void timeStampModuleCalibrate(int numSamples)
+void timeStampRecord::tscCalibrate(int numSamples)
 {
 	timeStampRecord t1, t2, td;
 	uint64_t td_sum = 0;
@@ -102,10 +101,10 @@ void timeStampModuleCalibrate(int numSamples)
 
 		td_avg = static_cast<double>(td_sum);
 
-		timeStampRecord::tscFreq = static_cast<uint64_t>( td_avg / td.toSeconds() );
+		timeStampRecord::_tscFreq = static_cast<uint64_t>( td_avg / td.toSeconds() );
 
 		printf("%i Calibration: %f sec   TSC:%llu   TSC Freq: %f MHz\n", i, td.toSeconds(), 
-			static_cast<unsigned long long>(td.tsc), static_cast<double>(timeStampRecord::tscFreq) * 1.0e-6 );
+			static_cast<unsigned long long>(td.tsc), static_cast<double>(timeStampRecord::_tscFreq) * 1.0e-6 );
 	}
 }
 

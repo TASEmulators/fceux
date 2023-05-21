@@ -9,11 +9,10 @@
 
 namespace FCEU
 {
-	struct timeStampRecord
+	class timeStampRecord
 	{
+		public:
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
-		struct timespec ts;
-		uint64_t tsc;
 
 		timeStampRecord(void)
 		{
@@ -37,7 +36,7 @@ namespace FCEU
 			if (ts.tv_nsec >= 1000000000)
 			{
 				ts.tv_nsec -= 1000000000;
-				ts.tv_sec++;	
+				ts.tv_sec++;
 			}
 			tsc += op.tsc;
 			return *this;
@@ -53,7 +52,7 @@ namespace FCEU
 			if (res.ts.tv_nsec >= 1000000000)
 			{
 				res.ts.tv_nsec -= 1000000000;
-				res.ts.tv_sec++;	
+				res.ts.tv_sec++;
 			}
 			res.tsc = tsc + op.tsc;
 			return res;
@@ -76,30 +75,84 @@ namespace FCEU
 			return res;
 		}
 
+		timeStampRecord operator * (const unsigned int multiplier)
+		{
+			timeStampRecord res;
+
+			res.ts.tv_sec  = ts.tv_sec * multiplier;
+			res.ts.tv_nsec = ts.tv_nsec * multiplier;
+
+			if (res.ts.tv_nsec >= 1000000000)
+			{
+				res.ts.tv_nsec -= 1000000000;
+				res.ts.tv_sec++;
+			}
+			res.tsc = tsc * multiplier;
+
+			return res;
+		}
+
+		timeStampRecord operator / (const unsigned int divisor)
+		{
+			timeStampRecord res;
+
+			res.ts.tv_sec  = ts.tv_sec / divisor;
+			res.ts.tv_nsec = ts.tv_nsec / divisor;
+			res.tsc = tsc / divisor;
+
+			return res;
+		}
+
 		bool operator > (const timeStampRecord& op)
 		{
-			bool res = false;
+			bool res;
 			if (ts.tv_sec == op.ts.tv_sec)
 			{
 				res = (ts.tv_nsec > op.ts.tv_nsec);
 			}
-			else if (ts.tv_sec > op.ts.tv_sec)
+			else
 			{
-				res = true;
+				res = (ts.tv_sec > op.ts.tv_sec);
+			}
+			return res;
+		}
+		bool operator >= (const timeStampRecord& op)
+		{
+			bool res;
+			if (ts.tv_sec == op.ts.tv_sec)
+			{
+				res = (ts.tv_nsec >= op.ts.tv_nsec);
+			}
+			else
+			{
+				res = (ts.tv_sec >= op.ts.tv_sec);
 			}
 			return res;
 		}
 
 		bool operator < (const timeStampRecord& op)
 		{
-			bool res = false;
+			bool res;
 			if (ts.tv_sec == op.ts.tv_sec)
 			{
 				res = (ts.tv_nsec < op.ts.tv_nsec);
 			}
-			else if (ts.tv_sec < op.ts.tv_sec)
+			else
 			{
-				res = true;
+				res = (ts.tv_sec < op.ts.tv_sec);
+			}
+			return res;
+		}
+		bool operator <= (const timeStampRecord& op)
+		{
+			bool res;
+			if (ts.tv_sec == op.ts.tv_sec)
+			{
+				res = (ts.tv_nsec <= op.ts.tv_nsec);
+			}
+			else
+			{
+				res = (ts.tv_sec <= op.ts.tv_sec);
 			}
 			return res;
 		}
@@ -111,6 +164,11 @@ namespace FCEU
 			tsc = 0;
 		}
 
+		bool isZero(void)
+		{
+			return (ts.tv_sec == 0) && (ts.tv_nsec == 0);
+		}
+
 		void fromSeconds(unsigned int sec)
 		{
 			ts.tv_sec = sec;
@@ -118,10 +176,31 @@ namespace FCEU
 			tsc = 0;
 		}
 
+		void fromSeconds(double sec)
+		{
+			double ns;
+			ts.tv_sec = static_cast<time_t>(sec);
+			ns = (sec - static_cast<double>(ts.tv_sec)) * 1.0e9;
+			ts.tv_nsec = static_cast<long>(ns);
+			tsc = 0;
+		}
+
 		double toSeconds(void)
 		{
 			double sec = static_cast<double>(ts.tv_sec) + ( static_cast<double>(ts.tv_nsec) * 1.0e-9 );
 			return sec;
+		}
+
+		void fromMilliSeconds(uint64_t ms)
+		{
+			ts.tv_sec = ms / 1000;
+			ts.tv_nsec = (ms * 1000000) - (ts.tv_sec * 1000000000);
+		}
+
+		uint64_t toMilliSeconds(void)
+		{
+			uint64_t ms = (ts.tv_sec * 1000) + (ts.tv_nsec / 1000000 );
+			return ms;
 		}
 
 		uint64_t toCounts(void)
@@ -133,9 +212,12 @@ namespace FCEU
 		{
 			return 1000000000;
 		}
+
+		struct timespec toTimeSpec(void)
+		{
+			return ts;
+		}
 #else	// WIN32
-		uint64_t ts;
-		uint64_t tsc;
 
 		timeStampRecord(void)
 		{
@@ -176,14 +258,42 @@ namespace FCEU
 			return res;
 		}
 
+		timeStampRecord operator * (const unsigned int multiplier)
+		{
+			timeStampRecord res;
+
+			res.ts  = ts  * multiplier;
+			res.tsc = tsc * multiplier;
+
+			return res;
+		}
+
+		timeStampRecord operator / (const unsigned int divisor)
+		{
+			timeStampRecord res;
+
+			res.ts  = ts  / divisor;
+			res.tsc = tsc / divisor;
+
+			return res;
+		}
+
 		bool operator > (const timeStampRecord& op)
 		{
 			return ts > op.ts;
+		}
+		bool operator >= (const timeStampRecord& op)
+		{
+			return ts >= op.ts;
 		}
 
 		bool operator < (const timeStampRecord& op)
 		{
 			return ts < op.ts;
+		}
+		bool operator <= (const timeStampRecord& op)
+		{
+			return ts <= op.ts;
 		}
 
 		void zero(void)
@@ -192,9 +302,21 @@ namespace FCEU
 			tsc = 0;
 		}
 
+		bool isZero(void)
+		{
+			return (ts == 0);
+		}
+
+
 		void fromSeconds(unsigned int sec)
 		{
 			ts = sec * qpcFreq;
+			tsc = 0;
+		}
+
+		void fromSeconds(double sec)
+		{
+			ts = static_cast<uint64_t>(sec * static_cast<double>(qpcFreq));
 			tsc = 0;
 		}
 
@@ -202,6 +324,17 @@ namespace FCEU
 		{
 			double sec = static_cast<double>(ts) / static_cast<double>(qpcFreq);
 			return sec;
+		}
+
+		void fromMilliSeconds(uint64_t ms)
+		{
+			ts = (ms * qpcFreq) / 1000;
+		}
+
+		uint64_t toMilliSeconds(void)
+		{
+			uint64_t ms = (ts * 1000) / qpcFreq;
+			return ms;
 		}
 
 		uint64_t toCounts(void)
@@ -213,19 +346,33 @@ namespace FCEU
 		{
 			return qpcFreq;
 		}
-		static uint64_t qpcFreq;
 #endif
-		static uint64_t tscFreq;
 
+		uint64_t getTSC(void){ return tsc; };
+
+		static uint64_t tscFreq(void)
+		{
+			return _tscFreq;
+		}
 		static bool tscValid(void){ return tscFreq != 0; };
 
+		// Call this function to calibrate the estimated TSC frequency
+		static void tscCalibrate(int numSamples = 0);
+
 		void readNew(void);
+
+		private:
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+		struct timespec ts;
+#else // Win32
+		uint64_t ts;
+		static uint64_t qpcFreq;
+#endif
+		uint64_t tsc;
+		static uint64_t _tscFreq;
 	};
 
 	bool timeStampModuleInitialized(void);
-
-	// Call this function to calibrate the estimated TSC frequency
-	void timeStampModuleCalibrate(int numSamples = 1);
 
 } // namespace FCEU
 
