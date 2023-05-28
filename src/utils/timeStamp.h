@@ -12,7 +12,11 @@ namespace FCEU
 	class timeStampRecord
 	{
 		public:
+		static constexpr uint64_t ONE_SEC_TO_MILLI = 1000;
+
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+		static constexpr long int ONE_SEC_TO_NANO  = 1000000000;
+		static constexpr long int MILLI_TO_NANO    = 1000000;
 
 		timeStampRecord(void)
 		{
@@ -33,9 +37,9 @@ namespace FCEU
 			ts.tv_sec  += op.ts.tv_sec;
 			ts.tv_nsec += op.ts.tv_nsec;
 
-			if (ts.tv_nsec >= 1000000000)
+			if (ts.tv_nsec >= ONE_SEC_TO_NANO)
 			{
-				ts.tv_nsec -= 1000000000;
+				ts.tv_nsec -= ONE_SEC_TO_NANO;
 				ts.tv_sec++;
 			}
 			tsc += op.tsc;
@@ -49,9 +53,9 @@ namespace FCEU
 			res.ts.tv_sec  = ts.tv_sec  + op.ts.tv_sec;
 			res.ts.tv_nsec = ts.tv_nsec + op.ts.tv_nsec;
 
-			if (res.ts.tv_nsec >= 1000000000)
+			if (res.ts.tv_nsec >= ONE_SEC_TO_NANO)
 			{
-				res.ts.tv_nsec -= 1000000000;
+				res.ts.tv_nsec -= ONE_SEC_TO_NANO;
 				res.ts.tv_sec++;
 			}
 			res.tsc = tsc + op.tsc;
@@ -67,7 +71,7 @@ namespace FCEU
 
 			if (res.ts.tv_nsec < 0)
 			{
-				res.ts.tv_nsec += 1000000000;
+				res.ts.tv_nsec += ONE_SEC_TO_NANO;
 				res.ts.tv_sec--;	
 			}
 			res.tsc = tsc - op.tsc;
@@ -82,9 +86,9 @@ namespace FCEU
 			res.ts.tv_sec  = ts.tv_sec * multiplier;
 			res.ts.tv_nsec = ts.tv_nsec * multiplier;
 
-			if (res.ts.tv_nsec >= 1000000000)
+			if (res.ts.tv_nsec >= ONE_SEC_TO_NANO)
 			{
-				res.ts.tv_nsec -= 1000000000;
+				res.ts.tv_nsec -= ONE_SEC_TO_NANO;
 				res.ts.tv_sec++;
 			}
 			res.tsc = tsc * multiplier;
@@ -193,24 +197,24 @@ namespace FCEU
 
 		void fromMilliSeconds(uint64_t ms)
 		{
-			ts.tv_sec = ms / 1000;
-			ts.tv_nsec = (ms * 1000000) - (ts.tv_sec * 1000000000);
+			ts.tv_sec = ms / ONE_SEC_TO_MILLI;
+			ts.tv_nsec = (ms * MILLI_TO_NANO) - (ts.tv_sec * ONE_SEC_TO_NANO);
 		}
 
 		uint64_t toMilliSeconds(void)
 		{
-			uint64_t ms = (ts.tv_sec * 1000) + (ts.tv_nsec / 1000000 );
+			uint64_t ms = (ts.tv_sec * ONE_SEC_TO_MILLI) + (ts.tv_nsec / MILLI_TO_NANO );
 			return ms;
 		}
 
 		uint64_t toCounts(void)
 		{
-			return (ts.tv_sec * 1000000000) + ts.tv_nsec;
+			return (ts.tv_sec * ONE_SEC_TO_NANO) + ts.tv_nsec;
 		}
 
 		static uint64_t countFreq(void)
 		{
-			return 1000000000;
+			return ONE_SEC_TO_NANO;
 		}
 
 		struct timespec toTimeSpec(void)
@@ -328,12 +332,12 @@ namespace FCEU
 
 		void fromMilliSeconds(uint64_t ms)
 		{
-			ts = (ms * qpcFreq) / 1000;
+			ts = (ms * qpcFreq) / ONE_SEC_TO_MILLI;
 		}
 
 		uint64_t toMilliSeconds(void)
 		{
-			uint64_t ms = (ts * 1000) / qpcFreq;
+			uint64_t ms = (ts * ONE_SEC_TO_MILLI) / qpcFreq;
 			return ms;
 		}
 
