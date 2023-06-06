@@ -2580,6 +2580,7 @@ int FCEUD_AviGetFormatOpts( std::vector <std::string> &formatList )
 AviRecordDiskThread_t::AviRecordDiskThread_t( QObject *parent )
 	: QThread(parent)
 {
+	setObjectName( QString("AviRecordDiskThread") );
 }
 //----------------------------------------------------
 AviRecordDiskThread_t::~AviRecordDiskThread_t(void)

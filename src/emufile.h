@@ -179,10 +179,10 @@ public:
 		va_start(argptr, format);
 		vsprintf(tempbuf,format,argptr);
 
-        fwrite(tempbuf,amt);
+		fwrite(tempbuf,amt);
 		delete[] tempbuf;
 
-        va_end(argptr);
+		va_end(argptr);
 		return amt;
 	};
 

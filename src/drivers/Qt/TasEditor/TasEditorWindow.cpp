@@ -116,7 +116,6 @@ void tasWindowSetFocus(bool val)
 	{
 		tasWin->activateWindow();
 		tasWin->raise();
-		tasWin->setFocus();
 	}
 }
 // this getter contains formula to decide whether to record or replay movie
@@ -2917,7 +2916,6 @@ void TasEditorWindow::openFindNoteWindow(void)
 	{
 		findWin->activateWindow();
 		findWin->raise();
-		findWin->setFocus();
 	}
 	else
 	{

@@ -30,6 +30,7 @@
 #include "Qt/ColorMenu.h"
 #include "Qt/ConsoleViewerGL.h"
 #include "Qt/ConsoleViewerSDL.h"
+#include "Qt/ConsoleViewerQWidget.h"
 #include "Qt/GamePadConf.h"
 #include "Qt/AviRecord.h"
 
@@ -126,8 +127,10 @@ class  consoleWin_t : public QMainWindow
 		consoleWin_t(QWidget *parent = 0);
 		~consoleWin_t(void);
 
-		ConsoleViewGL_t   *viewport_GL;
-		ConsoleViewSDL_t  *viewport_SDL;
+		ConsoleViewGL_t       *viewport_GL;
+		ConsoleViewSDL_t      *viewport_SDL;
+		ConsoleViewQWidget_t  *viewport_QWidget;
+		ConsoleViewerBase     *viewport_Interface;
 
 		void setCyclePeriodms( int ms );
 
@@ -155,6 +158,7 @@ class  consoleWin_t : public QMainWindow
 		#endif
 
 		int loadVideoDriver( int driverId, bool force = false );
+		int unloadVideoDriver(void);
 
 		double getRefreshRate(void){ return refreshRate; }
 
@@ -211,6 +215,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *hotkeyConfig;
 		QAction *paletteConfig;
 		QAction *guiConfig;
+		QAction *stateRecordConfig;
 		QAction *timingConfig;
 		QAction *movieConfig;
 		QAction *autoResume;
@@ -344,6 +349,7 @@ class  consoleWin_t : public QMainWindow
 		void openPaletteConfWin(void);
 		void openGuiConfWin(void);
 		void openTimingConfWin(void);
+		void openStateRecorderConfWin(void);
 		void openPaletteEditorWin(void);
 		void openAviRiffViewer(void);
 		void openTimingStatWin(void);
@@ -439,6 +445,8 @@ class  consoleWin_t : public QMainWindow
 		void loadState7(void);
 		void loadState8(void);
 		void loadState9(void);
+		void loadPrevState(void);
+		void loadNextState(void);
 		void mainMenuOpen(void);
 		void mainMenuClose(void);
 		void warnAmbiguousShortcut( QShortcut*);
@@ -459,6 +467,7 @@ class  consoleWin_t : public QMainWindow
 		void toggleUseBgPaletteForVideo(bool);
 		void videoBgColorChanged( QColor &c );
 		void loadRomRequestCB( QString s );
+		void videoDriverDestroyed( QObject *obj );
 
 };
 

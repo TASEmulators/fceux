@@ -85,8 +85,9 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	driverSelect = new QComboBox();
 
-	driverSelect->addItem( tr("OpenGL"), 0 );
-	driverSelect->addItem( tr("SDL"), 1 );
+	driverSelect->addItem( tr("OpenGL"), ConsoleViewerBase::VIDEO_DRIVER_OPENGL );
+	driverSelect->addItem( tr("SDL"), ConsoleViewerBase::VIDEO_DRIVER_SDL );
+	driverSelect->addItem( tr("QPainter"), ConsoleViewerBase::VIDEO_DRIVER_QPAINTER );
 	
 	hbox1 = new QHBoxLayout();
 
@@ -232,15 +233,10 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	
 	if ( consoleWindow )
 	{
-		if ( consoleWindow->viewport_GL )
+		if ( consoleWindow->viewport_Interface )
 		{
-			autoScaleCbx->setChecked( consoleWindow->viewport_GL->getAutoScaleOpt() );
-			aspectCbx->setChecked( consoleWindow->viewport_GL->getForceAspectOpt() );
-		}
-		else if ( consoleWindow->viewport_SDL )
-		{
-			autoScaleCbx->setChecked( consoleWindow->viewport_SDL->getAutoScaleOpt() );
-			aspectCbx->setChecked( consoleWindow->viewport_SDL->getForceAspectOpt() );
+			autoScaleCbx->setChecked( consoleWindow->viewport_Interface->getAutoScaleOpt() );
+			aspectCbx->setChecked( consoleWindow->viewport_Interface->getForceAspectOpt() );
 		}
 	}
 
@@ -305,15 +301,10 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	if ( consoleWindow )
 	{
-		if ( consoleWindow->viewport_GL )
+		if ( consoleWindow->viewport_Interface )
 		{
-			xScaleBox->setValue( consoleWindow->viewport_GL->getScaleX() );
-			yScaleBox->setValue( consoleWindow->viewport_GL->getScaleY() );
-		}
-		else if ( consoleWindow->viewport_SDL )
-		{
-			xScaleBox->setValue( consoleWindow->viewport_SDL->getScaleX() );
-			yScaleBox->setValue( consoleWindow->viewport_SDL->getScaleY() );
+			xScaleBox->setValue( consoleWindow->viewport_Interface->getScaleX() );
+			yScaleBox->setValue( consoleWindow->viewport_Interface->getScaleY() );
 		}
 	}
 
@@ -594,13 +585,9 @@ void ConsoleVideoConfDialog_t::updateReadouts(void)
 
 		w = consoleWindow->size();
 
-		if ( consoleWindow->viewport_GL )
+		if ( consoleWindow->viewport_Interface )
 		{
-			v = consoleWindow->viewport_GL->size();
-		}
-		else if ( consoleWindow->viewport_SDL )
-		{
-			v = consoleWindow->viewport_SDL->size();
+			v = consoleWindow->viewport_Interface->size();
 		}
 
 		sprintf( stmp, "%i x %i ", w.width(), w.height() );
@@ -726,13 +713,9 @@ void ConsoleVideoConfDialog_t::openGL_linearFilterChanged( int value )
 
    if ( consoleWindow != NULL )
    {
-      if ( consoleWindow->viewport_GL )
+      if ( consoleWindow->viewport_Interface )
       {
-         consoleWindow->viewport_GL->setLinearFilterEnable( opt );
-      }
-      if ( consoleWindow->viewport_SDL )
-      {
-         consoleWindow->viewport_SDL->setLinearFilterEnable( opt );
+         consoleWindow->viewport_Interface->setLinearFilterEnable( opt );
       }
    }
 }
@@ -745,13 +728,9 @@ void ConsoleVideoConfDialog_t::autoScaleChanged( int value )
 
    if ( consoleWindow != NULL )
    {
-      if ( consoleWindow->viewport_GL )
+      if ( consoleWindow->viewport_Interface )
       {
-         consoleWindow->viewport_GL->setAutoScaleOpt( opt );
-      }
-      if ( consoleWindow->viewport_SDL )
-      {
-         consoleWindow->viewport_SDL->setAutoScaleOpt( opt );
+         consoleWindow->viewport_Interface->setAutoScaleOpt( opt );
       }
    }
 }
@@ -832,9 +811,9 @@ void ConsoleVideoConfDialog_t::vsync_changed( int value )
 			//consoleWindow->viewport_GL->setVsyncEnable( opt );
 			consoleWindow->loadVideoDriver( 0, true );
 		}
-		if ( consoleWindow->viewport_SDL )
+		else if ( consoleWindow->viewport_Interface )
 		{
-			consoleWindow->viewport_SDL->setVsyncEnable( opt );
+			consoleWindow->viewport_Interface->setVsyncEnable( opt );
 		}
 	}
 }
@@ -1094,15 +1073,10 @@ QSize ConsoleVideoConfDialog_t::calcNewScreenSize(void)
 
 		w = consoleWindow->size();
 
-		if ( consoleWindow->viewport_GL )
+		if ( consoleWindow->viewport_Interface )
 		{
-			v = consoleWindow->viewport_GL->size();
-			aspectRatio = consoleWindow->viewport_GL->getAspectRatio();
-		}
-		else if ( consoleWindow->viewport_SDL )
-		{
-			v = consoleWindow->viewport_SDL->size();
-			aspectRatio = consoleWindow->viewport_SDL->getAspectRatio();
+			v = consoleWindow->viewport_Interface->size();
+			aspectRatio = consoleWindow->viewport_Interface->getAspectRatio();
 		}
 
 		dw = w.width()  - v.width();
@@ -1167,21 +1141,13 @@ void ConsoleVideoConfDialog_t::applyChanges( void )
 		g_config->setOption("SDL.WinSizeX", s.width() );
 		g_config->setOption("SDL.WinSizeY", s.height() );
 
-		if ( consoleWindow->viewport_GL )
+		if ( consoleWindow->viewport_Interface )
 		{
-         		consoleWindow->viewport_GL->setLinearFilterEnable( gl_LF_chkBox->isChecked() );
-			consoleWindow->viewport_GL->setForceAspectOpt( aspectCbx->isChecked() );
-			consoleWindow->viewport_GL->setAutoScaleOpt( autoScaleCbx->isChecked() );
-			consoleWindow->viewport_GL->setScaleXY( xscale, yscale );
-			consoleWindow->viewport_GL->reset();
-		}
-		if ( consoleWindow->viewport_SDL )
-		{
-         		consoleWindow->viewport_SDL->setLinearFilterEnable( gl_LF_chkBox->isChecked() );
-			consoleWindow->viewport_SDL->setForceAspectOpt( aspectCbx->isChecked() );
-			consoleWindow->viewport_SDL->setAutoScaleOpt( autoScaleCbx->isChecked() );
-			consoleWindow->viewport_SDL->setScaleXY( xscale, yscale );
-			consoleWindow->viewport_SDL->reset();
+         		consoleWindow->viewport_Interface->setLinearFilterEnable( gl_LF_chkBox->isChecked() );
+			consoleWindow->viewport_Interface->setForceAspectOpt( aspectCbx->isChecked() );
+			consoleWindow->viewport_Interface->setAutoScaleOpt( autoScaleCbx->isChecked() );
+			consoleWindow->viewport_Interface->setScaleXY( xscale, yscale );
+			consoleWindow->viewport_Interface->reset();
 		}
 
 		if ( !consoleWindow->isFullScreen() && !consoleWindow->isMaximized() )

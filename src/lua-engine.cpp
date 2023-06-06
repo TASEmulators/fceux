@@ -26,7 +26,6 @@
 #include "debug.h"
 #include "debugsymboltable.h"
 #include "sound.h"
-#include "drawing.h"
 #include "state.h"
 #include "movie.h"
 #include "driver.h"
@@ -319,10 +318,6 @@ static const char* luaMemHookTypeStrings [] =
 	"MEMHOOK_WRITE",
 	"MEMHOOK_READ",
 	"MEMHOOK_EXEC",
-
-	"MEMHOOK_WRITE_SUB",
-	"MEMHOOK_READ_SUB",
-	"MEMHOOK_EXEC_SUB",
 };
 
 //make sure we have the right number of strings
@@ -2431,53 +2426,17 @@ static int memory_registerHook(lua_State* L, LuaMemHookType hookType, int defaul
 	return 0;
 }
 
-LuaMemHookType MatchHookTypeToCPU(lua_State* L, LuaMemHookType hookType)
-{
-	int cpuID = 0;
-
-	int cpunameIndex = 0;
-	if(lua_type(L,2) == LUA_TSTRING)
-		cpunameIndex = 2;
-	else if(lua_type(L,3) == LUA_TSTRING)
-		cpunameIndex = 3;
-
-	if(cpunameIndex)
-	{
-		const char* cpuName = lua_tostring(L, cpunameIndex);
-		if(!stricmp(cpuName, "sub"))
-			cpuID = 1;
-		lua_remove(L, cpunameIndex);
-	}
-
-	switch(cpuID)
-	{
-	case 0:
-		return hookType;
-
-	case 1:
-		switch(hookType)
-		{
-		case LUAMEMHOOK_WRITE: return LUAMEMHOOK_WRITE_SUB;
-		case LUAMEMHOOK_READ: return LUAMEMHOOK_READ_SUB;
-		case LUAMEMHOOK_EXEC: return LUAMEMHOOK_EXEC_SUB;
-		default: return hookType;
-		}
-	}
-	return hookType;
-}
-
 static int memory_registerwrite(lua_State *L)
 {
-	return memory_registerHook(L, MatchHookTypeToCPU(L,LUAMEMHOOK_WRITE), 1);
+	return memory_registerHook(L, LUAMEMHOOK_WRITE, 1);
 }
-FCEU_MAYBE_UNUSED
 static int memory_registerread(lua_State *L)
 {
-	return memory_registerHook(L, MatchHookTypeToCPU(L,LUAMEMHOOK_READ), 1);
+	return memory_registerHook(L, LUAMEMHOOK_READ, 1);
 }
 static int memory_registerexec(lua_State *L)
 {
-	return memory_registerHook(L, MatchHookTypeToCPU(L,LUAMEMHOOK_EXEC), 1);
+	return memory_registerHook(L, LUAMEMHOOK_EXEC, 1);
 }
 
 //adelikat: table pulled from GENS.  credz nitsuja!
@@ -6137,7 +6096,7 @@ static const struct luaL_reg memorylib [] = {
 
 	// memory hooks
 	{"registerwrite", memory_registerwrite},
-	//{"registerread", memory_registerread}, TODO
+	{"registerread", memory_registerread},
 	{"registerexec", memory_registerexec},
 	// alternate names
 	{"register", memory_registerwrite},

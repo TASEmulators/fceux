@@ -16,11 +16,11 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-* 
-* Very complicated homebrew multicart mapper with. 
-* The code is so obscured and weird because it's ported from Verilog CPLD source code: 
+*
+* Very complicated homebrew multicart mapper with.
+* The code is so obscured and weird because it's ported from Verilog CPLD source code:
 * https://github.com/ClusterM/coolgirl-famicom-multicart/blob/master/CoolGirl_mappers.vh
-* 
+*
 * Range: $5000-$5FFF
 *
 * Mask: $5007
@@ -103,14 +103,12 @@ const uint32 FLASH_SECTOR_SIZE = 128 * 1024;
 const int ROM_CHIP = 0x00;
 const int WRAM_CHIP = 0x10;
 const int FLASH_CHIP = 0x11;
-const int CHR_RAM_CHIP = 0x12;
 const int CFI_CHIP = 0x13;
 
+static int CHR_SIZE = 0;
 static uint32 WRAM_SIZE = 0;
-static uint8 *WRAM = NULL;
-static uint32 CHR_RAM_SIZE = 0;
-static uint8 *CHR_RAM;
-static uint8 *SAVE_FLASH = NULL;
+static uint8* WRAM = NULL;
+static uint8* SAVE_FLASH = NULL;
 static uint8* CFI;
 
 static uint8 sram_enabled = 0;
@@ -388,75 +386,75 @@ static void COOLGIRL_Sync_CHR(void) {
 	int chr_shift_left = 0;
 
 	// enable or disable writes to CHR RAM, setup CHR mask
-	SetupCartCHRMapping(CHR_RAM_CHIP, CHR_RAM, ((((~(chr_mask >> 13) & 0x3F) + 1) * 0x2000 - 1) & (CHR_RAM_SIZE - 1)) + 1, can_write_chr);
+	SetupCartCHRMapping(0, UNIFchrrama, ((((~(chr_mask >> 13) & 0x3F) + 1) * 0x2000 - 1) & (CHR_SIZE - 1)) + 1, can_write_chr);
 
 	switch (chr_mode & 7)
 	{
 	default:
 	case 0:
-		setchr8r(0x12, chr_bank_a >> 3 >> chr_shift_right << chr_shift_left);
+		setchr8(chr_bank_a >> 3 >> chr_shift_right << chr_shift_left);
 		break;
 	case 1:
-		setchr4r(0x12, 0x0000, mapper_163_latch >> chr_shift_right << chr_shift_left);
-		setchr4r(0x12, 0x1000, mapper_163_latch >> chr_shift_right << chr_shift_left);
+		setchr4(0x0000, mapper_163_latch >> chr_shift_right << chr_shift_left);
+		setchr4(0x1000, mapper_163_latch >> chr_shift_right << chr_shift_left);
 		break;
 	case 2:
-		setchr2r(0x12, 0x0000, chr_bank_a >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2(0x0000, chr_bank_a >> 1 >> chr_shift_right << chr_shift_left);
 		TKSMIR[0] = TKSMIR[1] = chr_bank_a;
-		setchr2r(0x12, 0x0800, chr_bank_c >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2(0x0800, chr_bank_c >> 1 >> chr_shift_right << chr_shift_left);
 		TKSMIR[2] = TKSMIR[3] = chr_bank_c;
-		setchr1r(0x12, 0x1000, chr_bank_e >> chr_shift_right << chr_shift_left);
+		setchr1(0x1000, chr_bank_e >> chr_shift_right << chr_shift_left);
 		TKSMIR[4] = chr_bank_e;
-		setchr1r(0x12, 0x1400, chr_bank_f >> chr_shift_right << chr_shift_left);
+		setchr1(0x1400, chr_bank_f >> chr_shift_right << chr_shift_left);
 		TKSMIR[5] = chr_bank_f;
-		setchr1r(0x12, 0x1800, chr_bank_g >> chr_shift_right << chr_shift_left);
+		setchr1(0x1800, chr_bank_g >> chr_shift_right << chr_shift_left);
 		TKSMIR[6] = chr_bank_g;
-		setchr1r(0x12, 0x1C00, chr_bank_h >> chr_shift_right << chr_shift_left);
+		setchr1(0x1C00, chr_bank_h >> chr_shift_right << chr_shift_left);
 		TKSMIR[7] = chr_bank_h;
 		break;
 	case 3:
-		setchr1r(0x12, 0x0000, chr_bank_e >> chr_shift_right << chr_shift_left);
+		setchr1(0x0000, chr_bank_e >> chr_shift_right << chr_shift_left);
 		TKSMIR[0] = chr_bank_e;
-		setchr1r(0x12, 0x0400, chr_bank_f >> chr_shift_right << chr_shift_left);
+		setchr1(0x0400, chr_bank_f >> chr_shift_right << chr_shift_left);
 		TKSMIR[1] = chr_bank_f;
-		setchr1r(0x12, 0x0800, chr_bank_g >> chr_shift_right << chr_shift_left);
+		setchr1(0x0800, chr_bank_g >> chr_shift_right << chr_shift_left);
 		TKSMIR[2] = chr_bank_g;
-		setchr1r(0x12, 0x0C00, chr_bank_h >> chr_shift_right << chr_shift_left);
+		setchr1(0x0C00, chr_bank_h >> chr_shift_right << chr_shift_left);
 		TKSMIR[3] = chr_bank_h;
-		setchr2r(0x12, 0x1000, chr_bank_a >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2(0x1000, chr_bank_a >> 1 >> chr_shift_right << chr_shift_left);
 		TKSMIR[4] = TKSMIR[5] = chr_bank_a;
-		setchr2r(0x12, 0x1800, chr_bank_c >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2(0x1800, chr_bank_c >> 1 >> chr_shift_right << chr_shift_left);
 		TKSMIR[6] = TKSMIR[7] = chr_bank_c;
 		break;
 	case 4:
-		setchr4r(0x12, 0x0000, chr_bank_a >> 2 >> chr_shift_right << chr_shift_left);
-		setchr4r(0x12, 0x1000, chr_bank_e >> 2 >> chr_shift_right << chr_shift_left);
+		setchr4(0x0000, chr_bank_a >> 2 >> chr_shift_right << chr_shift_left);
+		setchr4(0x1000, chr_bank_e >> 2 >> chr_shift_right << chr_shift_left);
 		break;
 	case 5:
 		if (!ppu_latch0)
-			setchr4r(0x12, 0x0000, chr_bank_a >> 2 >> chr_shift_right << chr_shift_left);
+			setchr4(0x0000, chr_bank_a >> 2 >> chr_shift_right << chr_shift_left);
 		else
-			setchr4r(0x12, 0x0000, chr_bank_b >> 2 >> chr_shift_right << chr_shift_left);
+			setchr4(0x0000, chr_bank_b >> 2 >> chr_shift_right << chr_shift_left);
 		if (!ppu_latch1)
-			setchr4r(0x12, 0x1000, chr_bank_e >> 2 >> chr_shift_right << chr_shift_left);
+			setchr4(0x1000, chr_bank_e >> 2 >> chr_shift_right << chr_shift_left);
 		else
-			setchr4r(0x12, 0x1000, chr_bank_f >> 2 >> chr_shift_right << chr_shift_left);
+			setchr4(0x1000, chr_bank_f >> 2 >> chr_shift_right << chr_shift_left);
 		break;
 	case 6:
-		setchr2r(0x12, 0x0000, chr_bank_a >> 1 >> chr_shift_right << chr_shift_left);
-		setchr2r(0x12, 0x0800, chr_bank_c >> 1 >> chr_shift_right << chr_shift_left);
-		setchr2r(0x12, 0x1000, chr_bank_e >> 1 >> chr_shift_right << chr_shift_left);
-		setchr2r(0x12, 0x1800, chr_bank_g >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2(0x0000, chr_bank_a >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2(0x0800, chr_bank_c >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2(0x1000, chr_bank_e >> 1 >> chr_shift_right << chr_shift_left);
+		setchr2(0x1800, chr_bank_g >> 1 >> chr_shift_right << chr_shift_left);
 		break;
 	case 7:
-		setchr1r(0x12, 0x0000, chr_bank_a >> chr_shift_right << chr_shift_left);
-		setchr1r(0x12, 0x0400, chr_bank_b >> chr_shift_right << chr_shift_left);
-		setchr1r(0x12, 0x0800, chr_bank_c >> chr_shift_right << chr_shift_left);
-		setchr1r(0x12, 0x0C00, chr_bank_d >> chr_shift_right << chr_shift_left);
-		setchr1r(0x12, 0x1000, chr_bank_e >> chr_shift_right << chr_shift_left);
-		setchr1r(0x12, 0x1400, chr_bank_f >> chr_shift_right << chr_shift_left);
-		setchr1r(0x12, 0x1800, chr_bank_g >> chr_shift_right << chr_shift_left);
-		setchr1r(0x12, 0x1C00, chr_bank_h >> chr_shift_right << chr_shift_left);
+		setchr1(0x0000, chr_bank_a >> chr_shift_right << chr_shift_left);
+		setchr1(0x0400, chr_bank_b >> chr_shift_right << chr_shift_left);
+		setchr1(0x0800, chr_bank_c >> chr_shift_right << chr_shift_left);
+		setchr1(0x0C00, chr_bank_d >> chr_shift_right << chr_shift_left);
+		setchr1(0x1000, chr_bank_e >> chr_shift_right << chr_shift_left);
+		setchr1(0x1400, chr_bank_f >> chr_shift_right << chr_shift_left);
+		setchr1(0x1800, chr_bank_g >> chr_shift_right << chr_shift_left);
+		setchr1(0x1C00, chr_bank_h >> chr_shift_right << chr_shift_left);
 		break;
 	}
 }
@@ -468,10 +466,10 @@ static void COOLGIRL_Sync_Mirroring(void) {
 			setmirror((mirroring < 2) ? (mirroring ^ 1) : mirroring);
 	}
 	else { // four screen mode
-		vnapage[0] = CHR_RAM + 0x3F000;
-		vnapage[1] = CHR_RAM + 0x3F400;
-		vnapage[2] = CHR_RAM + 0x3F800;
-		vnapage[3] = CHR_RAM + 0x3FC00;
+		vnapage[0] = UNIFchrrama + 0x3F000;
+		vnapage[1] = UNIFchrrama + 0x3F400;
+		vnapage[2] = UNIFchrrama + 0x3F800;
+		vnapage[3] = UNIFchrrama + 0x3FC00;
 	}
 }
 
@@ -509,9 +507,8 @@ static DECLFW(COOLGIRL_Flash_Write) {
 			uint32 sector_address = sector * FLASH_SECTOR_SIZE;
 			for (uint32 i = sector_address; i < sector_address + FLASH_SECTOR_SIZE; i++)
 				SAVE_FLASH[i % SAVE_FLASH_SIZE] = 0xFF;
-			FCEU_printf("Flash sector #%d is erased: 0x%08x - 0x%08x.\n", sector, sector_address, sector_address + FLASH_SECTOR_SIZE - 1);
 			flash_state = 0;
-		}	
+		}
 
 		// write byte
 		if ((flash_state == 4) &&
@@ -557,7 +554,6 @@ static DECLFW(COOLGIRL_WRITE) {
 
 	if (A >= 0x5000 && A < 0x6000 && !lockout)
 	{
-		//FCEU_printf("Write: %02x => %04x\n", V, A);
 		switch (A & 7)
 		{
 		case 0:
@@ -573,7 +569,6 @@ static DECLFW(COOLGIRL_WRITE) {
 			// {chr_mask[18], prg_mask[20:14]} = cpu_data_in[7:0];
 			SET_BITS(chr_mask, "18", V, "7");
 			SET_BITS(prg_mask, "20:14", V, "6:0");
-			//FCEU_printf("REG_prg_mask: %02x\n", REG_prg_mask);
 			break;
 		case 3:
 			// {prg_mode[2:0], chr_bank_a[7:3]} = cpu_data_in[7:0];
@@ -886,7 +881,7 @@ static DECLFW(COOLGIRL_WRITE) {
 		if (mapper == 0b000100)
 		{
 			// prg_bank_a[5:1] = cpu_data_in[4:0];
-			SET_BITS(chr_bank_a, "5:1", V, "4:0");
+			SET_BITS(prg_bank_a, "5:1", V, "4:0");
 			// mirroring = { 1'b0, ~cpu_data_in[7]};
 			mirroring = get_bits(V, "7") ^ 1;
 		}
@@ -1176,7 +1171,6 @@ static DECLFW(COOLGIRL_WRITE) {
 
 		// Mapper #1 - MMC1
 		/*
-		r0 - load register
 		flag0 - 16KB of SRAM (SOROM)
 		*/
 		if (mapper == 0b010000)
@@ -1230,7 +1224,7 @@ static DECLFW(COOLGIRL_WRITE) {
 						SET_BITS(chr_bank_e, "6:2", mmc1_load_register, "5:1");
 						break;
 					case 0b11: // 2'b11
-						// prg_bank_a[4:1] = r0[4:1];
+						// prg_bank_a[4:1] = mmc1_load_register[4:1];
 						SET_BITS(prg_bank_a, "4:1", mmc1_load_register, "4:1");
 						// sram_enabled = ~mmc1_load_register[5];
 						sram_enabled = get_bits(mmc1_load_register, "5") ^ 1;
@@ -1397,9 +1391,6 @@ static DECLFW(COOLGIRL_WRITE) {
 		}
 
 		// Mapper #112
-		/*
-		r0[2:0] - internal register
-		*/
 		if (mapper == 0b010101)
 		{
 			switch (get_bits(A, "14:13"))
@@ -1464,6 +1455,7 @@ static DECLFW(COOLGIRL_WRITE) {
 			case 0b1100: // 4'b1100: if (flags[0]) mirroring = {1'b0, cpu_data_in[6]};	// $E000, mirroring, for mapper #48
 				if (flags & 1) // 48
 					mirroring = get_bits(V, "6"); // mirroring = cpu_data_in[6];
+				break;
 			case 0b1000: // 4'b1000: irq_scanline_latch = ~cpu_data_in; // $C000, IRQ latch
 				mmc3_irq_latch = set_bits(mmc3_irq_latch, "7:0", get_bits(V, "7:0") ^ 0b11111111);
 				break;
@@ -1813,7 +1805,7 @@ static DECLFW(COOLGIRL_WRITE) {
 							SET_BITS(chr_bank_c, "8:1", V, "7:0"); break; // 3'b001: chr_bank_c[8:1] <= cpu_data_in[7:0];
 						case 0b110:
 							SET_BITS(chr_bank_e, "8:1", V, "7:0"); break; // 3'b110: chr_bank_e[8:1] <= cpu_data_in[7:0];
-						case 0b111: 
+						case 0b111:
 							SET_BITS(chr_bank_g, "8:1", V, "7:0"); break; // 3'b111: chr_bank_g[8:1] <= cpu_data_in[7:0];
 						}
 					}
@@ -1963,32 +1955,19 @@ static void COOLGIRL_CpuCounter(int a) {
 		// Mapper #23 - VRC4
 		if (vrc4_irq_control & 2) // if (ENABLE_MAPPER_021_022_023_025 & ENABLE_VRC4_INTERRUPTS & (vrc4_irq_control[1]))
 		{
-			// Cycle mode without prescaler is not used by any games? It's missed in fceux source code.
-			if (vrc4_irq_control & 4) // if (vrc4_irq_control[2]) // cycle mode
+			vrc4_irq_prescaler++; // vrc4_irq_prescaler = vrc4_irq_prescaler + 1'b1; // count prescaler
+			// if ((vrc4_irq_prescaler_counter[1] == 0 && vrc4_irq_prescaler == 114)
+			//   || (vrc4_irq_prescaler_counter[1] == 1 && vrc4_irq_prescaler == 113)) // 114, 114, 113
+			if ((!(vrc4_irq_prescaler_counter & 2) && vrc4_irq_prescaler == 114) || ((vrc4_irq_prescaler_counter & 2) && vrc4_irq_prescaler == 113))
 			{
-				FCEU_PrintError("Cycle IRQ mode is not supported, please report to Cluster");
-				vrc4_irq_value++; // {carry, vrc4_irq_value[7:0]} = vrc4_irq_value[7:0] + 1'b1; // just count IRQ value
-				if (vrc4_irq_value == 0) // if (carry)
+				vrc4_irq_prescaler = 0; // vrc4_irq_prescaler = 0;
+				vrc4_irq_prescaler_counter++; // vrc4_irq_prescaler_counter = vrc4_irq_prescaler_counter + 1'b1;
+				if (vrc4_irq_prescaler_counter == 0b11) vrc4_irq_prescaler_counter = 0; // if (vrc4_irq_prescaler_counter == 2'b11) vrc4_irq_prescaler_counter =  2'b00;
+				vrc4_irq_value++; // {carry, vrc4_irq_value[7:0]} = vrc4_irq_value[7:0] + 1'b1;
+				if (vrc4_irq_value == 0) // f (carry)
 				{
-					X6502_IRQBegin(FCEU_IQEXT); // vrc4_irq_out = 1;					
-					vrc4_irq_value = vrc4_irq_latch; // vrc4_irq_value[7:0] = vrc4_irq_latch[7:0];
-				}
-			}
-			else {
-				vrc4_irq_prescaler++; // vrc4_irq_prescaler = vrc4_irq_prescaler + 1'b1; // count prescaler
-				// if ((vrc4_irq_prescaler_counter[1] == 0 && vrc4_irq_prescaler == 114)
-				//   || (vrc4_irq_prescaler_counter[1] == 1 && vrc4_irq_prescaler == 113)) // 114, 114, 113
-				if ((!(vrc4_irq_prescaler_counter & 2) && vrc4_irq_prescaler == 114) || ((vrc4_irq_prescaler_counter & 2) && vrc4_irq_prescaler == 113))
-				{
-					vrc4_irq_prescaler = 0; // vrc4_irq_prescaler = 0;
-					vrc4_irq_prescaler_counter++; // vrc4_irq_prescaler_counter = vrc4_irq_prescaler_counter + 1'b1;
-					if (vrc4_irq_prescaler_counter == 0b11) vrc4_irq_prescaler_counter = 0; // if (vrc4_irq_prescaler_counter == 2'b11) vrc4_irq_prescaler_counter =  2'b00;
-					vrc4_irq_value++; // {carry, vrc4_irq_value[7:0]} = vrc4_irq_value[7:0] + 1'b1;
-					if (vrc4_irq_value == 0) // f (carry)
-					{
-						X6502_IRQBegin(FCEU_IQEXT);
-						vrc4_irq_value = vrc4_irq_latch; // irq_cpu_value[7:0] = vrc4_irq_latch[7:0];
-					}
+					X6502_IRQBegin(FCEU_IQEXT);
+					vrc4_irq_value = vrc4_irq_latch; // irq_cpu_value[7:0] = vrc4_irq_latch[7:0];
 				}
 			}
 		}
@@ -2238,15 +2217,13 @@ static void COOLGIRL_Power(void) {
 }
 
 static void COOLGIRL_Close(void) {
-	if (CHR_RAM)
-		FCEU_gfree(CHR_RAM);
 	if (WRAM)
 		FCEU_gfree(WRAM);
 	if (SAVE_FLASH)
 		FCEU_gfree(SAVE_FLASH);
 	if (CFI)
 		FCEU_gfree(CFI);
-	CHR_RAM = WRAM = SAVE_FLASH = CFI = NULL;
+	WRAM = SAVE_FLASH = CFI = NULL;
 }
 
 static void COOLGIRL_Restore(int version) {
@@ -2256,12 +2233,8 @@ static void COOLGIRL_Restore(int version) {
 
 #define ExState(var, varname) AddExState(&var, sizeof(var), 0, varname)
 
-void COOLGIRL_Init(CartInfo *info) {
-	CHR_RAM_SIZE = info->ines2 ? (info->vram_size + info->battery_vram_size) : (512 * 1024);
-	CHR_RAM = (uint8*)FCEU_gmalloc(CHR_RAM_SIZE);
-	memset(CHR_RAM, 0, CHR_RAM_SIZE);
-	SetupCartCHRMapping(CHR_RAM_CHIP, CHR_RAM, CHR_RAM_SIZE, 0);
-	AddExState(CHR_RAM, sizeof(CHR_RAM_SIZE), 0, "CHR_");
+void COOLGIRL_Init(CartInfo* info) {
+	CHR_SIZE = info->vram_size ? info->vram_size /* NES 2.0 */ : 256 * 1024 /* UNIF, fixed */;
 
 	WRAM_SIZE = info->ines2 ? (info->wram_size + info->battery_wram_size) : (32 * 1024);
 	if (WRAM_SIZE > 0) {
@@ -2271,7 +2244,7 @@ void COOLGIRL_Init(CartInfo *info) {
 		AddExState(WRAM, 32 * 1024, 0, "SRAM");
 		if (info->battery)
 		{
-			info->addSaveGameBuf( WRAM, 32 * 1024);
+			info->addSaveGameBuf(WRAM, 32 * 1024);
 		}
 	}
 
@@ -2280,7 +2253,7 @@ void COOLGIRL_Init(CartInfo *info) {
 		SAVE_FLASH = (uint8*)FCEU_gmalloc(SAVE_FLASH_SIZE);
 		SetupCartPRGMapping(FLASH_CHIP, SAVE_FLASH, SAVE_FLASH_SIZE, 1);
 		AddExState(SAVE_FLASH, SAVE_FLASH_SIZE, 0, "SAVF");
-		info->addSaveGameBuf( SAVE_FLASH, SAVE_FLASH_SIZE );
+		info->addSaveGameBuf(SAVE_FLASH, SAVE_FLASH_SIZE);
 	}
 
 	CFI = (uint8*)FCEU_gmalloc(sizeof(cfi_data) * 2);

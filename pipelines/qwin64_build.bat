@@ -24,28 +24,33 @@ mkdir bin
 
 set SDL_VERSION=2.24.1
 set FFMPEG_VERSION=5.1.2
+set LIBARCHIVE_VERSION=3.6.2
 
 curl -s -LO https://github.com/libsdl-org/SDL/releases/download/release-%SDL_VERSION%/SDL2-devel-%SDL_VERSION%-VC.zip
 curl -s -LO https://github.com/GyanD/codexffmpeg/releases/download/%FFMPEG_VERSION%/ffmpeg-%FFMPEG_VERSION%-full_build-shared.zip
+curl -s -LO https://www.libarchive.org/downloads/libarchive-v%LIBARCHIVE_VERSION%-amd64.zip
 
 REM rmdir /q /s SDL2
 
 powershell -command "Expand-Archive" SDL2-devel-%SDL_VERSION%-VC.zip .
 powershell -command "Expand-Archive" ffmpeg-%FFMPEG_VERSION%-full_build-shared.zip
+powershell -command "Expand-Archive" libarchive-v%LIBARCHIVE_VERSION%-amd64.zip
 
 rename SDL2-%SDL_VERSION%  SDL2
 move   ffmpeg-%FFMPEG_VERSION%-full_build-shared\ffmpeg-%FFMPEG_VERSION%-full_build-shared   ffmpeg
 rmdir  ffmpeg-%FFMPEG_VERSION%-full_build-shared
 del    ffmpeg-%FFMPEG_VERSION%-full_build-shared.zip
+move   libarchive-v%LIBARCHIVE_VERSION%-amd64\libarchive libarchive
 
 set SDL_INSTALL_PREFIX=%CD%
 set FFMPEG_INSTALL_PREFIX=%CD%
+set LIBARCHIVE_INSTALL_PREFIX=%CD%
 set PUBLIC_RELEASE=0
 IF DEFINED FCEU_RELEASE_VERSION (set PUBLIC_RELEASE=1)
 
 REM cmake -h
 REM cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
-cmake -DQT6=0 -DPUBLIC_RELEASE=%PUBLIC_RELEASE% -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX% -DUSE_LIBAV=1 -DFFMPEG_INSTALL_PREFIX=%FFMPEG_INSTALL_PREFIX% -G"Visual Studio 16" -T"v142" ..
+cmake -DQT6=0 -DPUBLIC_RELEASE=%PUBLIC_RELEASE% -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX% -DLIBARCHIVE_INSTALL_PREFIX=%LIBARCHIVE_INSTALL_PREFIX% -DUSE_LIBAV=1 -DFFMPEG_INSTALL_PREFIX=%FFMPEG_INSTALL_PREFIX% -G"Visual Studio 16" -T"v142" ..
 
 REM nmake
 msbuild /m fceux.sln /p:Configuration=Release
@@ -53,9 +58,10 @@ if %ERRORLEVEL% NEQ 0 EXIT /B 1
 
 copy src\Release\fceux.exe bin\qfceux.exe
 copy %PROJECT_ROOT%\src\auxlib.lua bin\.
-REM copy %PROJECT_ROOT%\src\drivers\win\lua\x64\lua51.dll  bin\.
-REM copy %PROJECT_ROOT%\src\drivers\win\lua\x64\lua5.1.dll  bin\.
+copy %PROJECT_ROOT%\src\drivers\win\lua\x64\lua51.dll  bin\.
+copy %PROJECT_ROOT%\src\drivers\win\lua\x64\lua5.1.dll  bin\.
 copy %SDL_INSTALL_PREFIX%\SDL2\lib\x64\SDL2.dll  bin\.
+copy %LIBARCHIVE_INSTALL_PREFIX%\libarchive\bin\archive.dll  bin\.
 copy %FFMPEG_INSTALL_PREFIX%\ffmpeg\bin\*.dll  bin\.
 
 windeployqt  --no-compiler-runtime  bin\qfceux.exe

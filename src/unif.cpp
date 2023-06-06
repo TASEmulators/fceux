@@ -475,7 +475,8 @@ static BMAPPING bmap[] = {
 	{ "FNS", FNS_Init, BMCFLAG_16KCHRR },
 	{ "BS-400R", BS400R_Init, 0 },
 	{ "BS-4040R", BS4040R_Init, 0 },
-	{ "COOLGIRL", COOLGIRL_Init, 0 },
+	{ "COOLGIRL", COOLGIRL_Init, BMCFLAG_256KCHRR },
+	{ "JC-016-2", Mapper205_Init, 0 },
 
 	{ 0, 0, 0 }
 };

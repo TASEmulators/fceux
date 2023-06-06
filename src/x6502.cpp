@@ -47,7 +47,11 @@ void (*MapIRQHook)(int a);
 //normal memory read
 static INLINE uint8 RdMem(unsigned int A)
 {
- return(_DB=ARead[A](A));
+ _DB=ARead[A](A);
+ #ifdef _S9XLUA_H
+ CallRegisteredLuaMemHook(A, 1, _DB, LUAMEMHOOK_READ);
+ #endif
+ return(_DB);
 }
 
 //normal memory write
@@ -61,9 +65,13 @@ static INLINE void WrMem(unsigned int A, uint8 V)
 
 static INLINE uint8 RdRAM(unsigned int A)
 {
+  _DB=ARead[A](A);
+  #ifdef _S9XLUA_H
+  CallRegisteredLuaMemHook(A, 1, _DB, LUAMEMHOOK_READ);
+  #endif
   //bbit edited: this was changed so cheat substituion would work
-  return(_DB=ARead[A](A));
   // return(_DB=RAM[A]);
+  return(_DB);
 }
 
 static INLINE void WrRAM(unsigned int A, uint8 V)
@@ -77,7 +85,11 @@ static INLINE void WrRAM(unsigned int A, uint8 V)
 uint8 X6502_DMR(uint32 A)
 {
  ADDCYC(1);
- return(X.DB=ARead[A](A));
+ _DB=ARead[A](A);
+ #ifdef _S9XLUA_H
+ CallRegisteredLuaMemHook(A, 1, _DB, LUAMEMHOOK_READ);
+ #endif
+ return(_DB);
 }
 
 void X6502_DMW(uint32 A, uint8 V)

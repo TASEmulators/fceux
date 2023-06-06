@@ -1,4 +1,5 @@
 // mutex.h
+#pragma once
 
 #ifdef __QT_DRIVER__
 #include <QMutex>
@@ -32,6 +33,7 @@ namespace FCEU
 	{
 		public:
 			autoScopedLock( mutex *mtx );
+			autoScopedLock( mutex &mtx );
 			~autoScopedLock(void);
 
 		private:

@@ -42,6 +42,7 @@
 #include "Qt/config.h"
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/CheatsConf.h"
 #include "Qt/HexEditor.h"
 #include "Qt/GameGenie.h"
 
@@ -278,6 +279,7 @@ void GameGenieDialog_t::addCheatClicked(void)
 
 	FCEU_WRAPPER_LOCK();
 	FCEUI_AddCheat( name.c_str(), a, v, c, 1 );
+	updateCheatDialog();
 	FCEU_WRAPPER_UNLOCK();
 
 }

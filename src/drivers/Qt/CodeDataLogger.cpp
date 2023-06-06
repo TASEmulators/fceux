@@ -63,7 +63,6 @@ int openCDLWindow( QWidget *parent )
 	{
 		cdlWin->activateWindow();
 		cdlWin->raise();
-		cdlWin->setFocus();
 	}
 	else
 	{

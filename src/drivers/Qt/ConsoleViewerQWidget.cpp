@@ -25,20 +25,23 @@
 #include <math.h>
 //#include <unistd.h>
 
+#include "../../profiler.h"
 #include "Qt/nes_shm.h"
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
-#include "Qt/ConsoleViewerSDL.h"
+#include "Qt/ConsoleViewerQWidget.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleWindow.h"
 
 extern unsigned int gui_draw_area_width;
 extern unsigned int gui_draw_area_height;
 
-ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
+ConsoleViewQWidget_t::ConsoleViewQWidget_t(QWidget *parent)
 	: QWidget( parent )
 {
 	consoleWin_t *win = qobject_cast <consoleWin_t*>(parent);
+
+	printf("Initializing QPainter Video Driver\n");
 
 	QPalette pal = palette();
 
@@ -46,7 +49,7 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	setAutoFillBackground(true);
 	setPalette(pal);
 
-	bgColor = NULL;
+	bgColor = nullptr;
 
 	if ( win )
 	{
@@ -74,11 +77,6 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	aspectRatio = 1.0f;
 	aspectX     = 1.0f;
 	aspectY     = 1.0f;
-
-	sdlWindow   = NULL;
-	sdlRenderer = NULL;
-	sdlTexture  = NULL;
-	sdlCursor   = NULL;
 
 	vsyncEnabled = false;
 	mouseButtonMask = 0;
@@ -120,28 +118,18 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	}
 }
 
-ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
+ConsoleViewQWidget_t::~ConsoleViewQWidget_t(void)
 {
-	//printf("Destroying SDL Viewport\n");
+	//printf("Destroying QPainter Viewport\n");
 
 	if ( localBuf )
 	{
-		free( localBuf ); localBuf = NULL;
-	}
-	if ( sdlCursor )
-	{
-		SDL_FreeCursor(sdlCursor); sdlCursor = NULL;
+		free( localBuf ); localBuf = nullptr;
 	}
 	cleanup();
-
-	if ( sdlWindow )
-	{
-		SDL_DestroyWindow( sdlWindow );
-		sdlWindow = NULL;
-	}
 }
 
-void ConsoleViewSDL_t::setBgColor( QColor &c )
+void ConsoleViewQWidget_t::setBgColor( QColor &c )
 {
 	if ( bgColor )
 	{
@@ -149,7 +137,7 @@ void ConsoleViewSDL_t::setBgColor( QColor &c )
 	}
 }
 
-void ConsoleViewSDL_t::setVsyncEnable( bool ena )
+void ConsoleViewQWidget_t::setVsyncEnable( bool ena )
 {
 	if ( vsyncEnabled != ena )
 	{
@@ -159,7 +147,7 @@ void ConsoleViewSDL_t::setVsyncEnable( bool ena )
 	}
 }
 
-void ConsoleViewSDL_t::setLinearFilterEnable( bool ena )
+void ConsoleViewQWidget_t::setLinearFilterEnable( bool ena )
 {
    if ( ena != linearFilter )
    {
@@ -169,7 +157,7 @@ void ConsoleViewSDL_t::setLinearFilterEnable( bool ena )
    }
 }
 
-void ConsoleViewSDL_t::setScaleXY( double xs, double ys )
+void ConsoleViewQWidget_t::setScaleXY( double xs, double ys )
 {
 	xscale = xs;
 	yscale = ys;
@@ -187,7 +175,7 @@ void ConsoleViewSDL_t::setScaleXY( double xs, double ys )
 	}
 }
 
-void ConsoleViewSDL_t::setAspectXY( double x, double y )
+void ConsoleViewQWidget_t::setAspectXY( double x, double y )
 {
 	aspectX = x;
 	aspectY = y;
@@ -195,18 +183,18 @@ void ConsoleViewSDL_t::setAspectXY( double x, double y )
 	aspectRatio = aspectY / aspectX;
 }
 
-void ConsoleViewSDL_t::getAspectXY( double &x, double &y )
+void ConsoleViewQWidget_t::getAspectXY( double &x, double &y )
 {
 	x = aspectX;
 	y = aspectY;
 }
 
-double ConsoleViewSDL_t::getAspectRatio(void)
+double ConsoleViewQWidget_t::getAspectRatio(void)
 {
 	return aspectRatio;
 }
 
-void ConsoleViewSDL_t::transfer2LocalBuffer(void)
+void ConsoleViewQWidget_t::transfer2LocalBuffer(void)
 {
 	int i=0, hq = 0, bufIdx;
 	int numPixels = nes_shm->video.ncol * nes_shm->video.nrow;
@@ -242,119 +230,22 @@ void ConsoleViewSDL_t::transfer2LocalBuffer(void)
 	}
 	else
 	{
+		//memcpy( localBuf, src, cpSize );
 		copyPixels32( dest, src, cpSize, alphaMask);
 	}
 }
 
-int ConsoleViewSDL_t::init(void)
+int ConsoleViewQWidget_t::init(void)
 {
-	WId windowHandle;
-
-	if ( linearFilter )
-	{
-	    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
-	}
-	else
-	{
-	    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
-	}
-
-	if ( SDL_WasInit(SDL_INIT_VIDEO) == 0 )
-	{
-		if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) 
-		{
-			printf("[SDL] Failed to initialize video subsystem.\n");
-			return -1;
-		}
-		else
-		{
-			printf("Initialized SDL Video Subsystem\n");
-		}
-	}
-	else
-	{
-		printf("SDL Video Subsystem is Initialized\n");
-	}
-
-	for (int i=0; i<SDL_GetNumVideoDrivers(); i++)
-	{
-		printf("SDL Video Driver %i: %s\n", i, SDL_GetVideoDriver(i) );
-	}
-	printf("Using Video Driver: %s \n", SDL_GetCurrentVideoDriver() );
-
-	windowHandle = this->winId();
-
-	if (sdlWindow == NULL) 
-	{
-		sdlWindow = SDL_CreateWindowFrom( (void*)windowHandle);
-	}
-
-	if (sdlWindow == NULL) 
-	{
-		printf("[SDL] Failed to create window from handle.\n");
-		return -1;
-	}
-
-	SDL_ShowWindow( sdlWindow );
-
-	//if ( vsyncEnabled )
-	//{
-	//	printf("Vsync Enabled\n");
-	//}
-	uint32_t baseFlags = vsyncEnabled ? SDL_RENDERER_PRESENTVSYNC : 0;
-
-	sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, baseFlags | SDL_RENDERER_ACCELERATED);
-
-	if (sdlRenderer == NULL) 
-	{
-		printf("[SDL] Failed to create accelerated renderer.\n");
-
-		printf("[SDL] Attempting to create software renderer...\n");
-
-		sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, baseFlags | SDL_RENDERER_SOFTWARE);
-
-		if (sdlRenderer == NULL)
-	  	{
-			printf("[SDL] Failed to create software renderer.\n");
-			return -1;
-		}		
-	}
-
-	SDL_GetRendererOutputSize( sdlRenderer, &sdlRendW, &sdlRendH );
-
-	printf("[SDL] Renderer Output Size: %i x %i \n", sdlRendW, sdlRendH );
-
-	sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, nes_shm->video.ncol, nes_shm->video.nrow);
-
-	if (sdlTexture == NULL) 
-	{
-		printf("[SDL] Failed to create texture: %i x %i", nes_shm->video.ncol, nes_shm->video.nrow );
-		return -1;
-	}
-
 	return 0;
 }
 
-void ConsoleViewSDL_t::cleanup(void)
+void ConsoleViewQWidget_t::cleanup(void)
 {
-	if (sdlTexture) 
-	{
-		SDL_DestroyTexture(sdlTexture);
-		sdlTexture = NULL;		
-	}
-	if (sdlRenderer) 
-	{
-		SDL_DestroyRenderer(sdlRenderer);
-		sdlRenderer = NULL;
-	}
-	if ( sdlWindow )
-	{
-		SDL_DestroyWindow( sdlWindow );
-		sdlWindow = NULL;
-	}
+
 }
 
-void ConsoleViewSDL_t::reset(void)
+void ConsoleViewQWidget_t::reset(void)
 {
 	cleanup();
 	if ( init() == 0 )
@@ -367,105 +258,17 @@ void ConsoleViewSDL_t::reset(void)
 	}
 }
 
-void ConsoleViewSDL_t::setCursor(const QCursor &c)
+void ConsoleViewQWidget_t::setCursor(const QCursor &c)
 {
-	QImage pm;
-	SDL_Surface *s;
-
-	pm = c.pixmap().toImage();
-
-	if (pm.format() != QImage::Format_ARGB32)
-	{
-		//printf("Coverting Image to ARGB32\n");
-		pm = pm.convertToFormat(QImage::Format_ARGB32);
-	}
-
-	// QImage stores each pixel in ARGB format
-	// Mask appropriately for the endianness
-	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	    Uint32 amask = 0x000000ff;
-	    Uint32 rmask = 0x0000ff00;
-	    Uint32 gmask = 0x00ff0000;
-	    Uint32 bmask = 0xff000000;
-	#else
-	    Uint32 amask = 0xff000000;
-	    Uint32 rmask = 0x00ff0000;
-	    Uint32 gmask = 0x0000ff00;
-	    Uint32 bmask = 0x000000ff;
-	#endif
-
-	s = SDL_CreateRGBSurfaceFrom((void*)pm.constBits(),
-		pm.width(), pm.height(), pm.depth(), pm.bytesPerLine(),
-			rmask, gmask, bmask, amask);
-
-	if ( s == NULL )
-	{
-		printf("Error: Failed to create SDL Surface for Icon\n");
-		return;
-	}
-
-	if ( sdlCursor )
-	{
-		SDL_FreeCursor(sdlCursor); sdlCursor = NULL;
-	}
-
-	sdlCursor = SDL_CreateColorCursor( s, c.hotSpot().x(), c.hotSpot().y() );
-
-	if ( sdlCursor == NULL )
-	{
-		printf("SDL Cursor Failed: %s\n", SDL_GetError() );
-	}
-	else
-	{
-		//printf("SDL Cursor Initialized at (%i,%i)\n", c.hotSpot().x(), c.hotSpot().y() );
-		SDL_SetCursor(sdlCursor);
-		SDL_ShowCursor( SDL_ENABLE );
-	}
-
 	QWidget::setCursor(c);
 }
 
-void ConsoleViewSDL_t::setCursor( Qt::CursorShape s )
+void ConsoleViewQWidget_t::setCursor( Qt::CursorShape s )
 {
-	SDL_SystemCursor sdlSysCursor;
-
-	switch ( s )
-	{
-		default:
-		case Qt::ArrowCursor:
-			sdlSysCursor = SDL_SYSTEM_CURSOR_ARROW;
-		break;
-		case Qt::BlankCursor:
-			sdlSysCursor = SDL_SYSTEM_CURSOR_ARROW;
-		break;
-		case Qt::CrossCursor:
-			sdlSysCursor = SDL_SYSTEM_CURSOR_CROSSHAIR;
-		break;
-	}
-
-	if ( sdlCursor )
-	{
-		SDL_FreeCursor(sdlCursor); sdlCursor = NULL;
-	}
-
-	sdlCursor = SDL_CreateSystemCursor( sdlSysCursor );
-
-	if ( sdlCursor == NULL )
-	{
-		printf("SDL Cursor Failed: %s\n", SDL_GetError() );
-	}
-	else
-	{
-		//printf("SDL System Cursor Initialized\n");
-		SDL_SetCursor(sdlCursor);
-	}
-
-	SDL_ShowCursor( (s == Qt::BlankCursor) ? SDL_DISABLE : SDL_ENABLE );
-
 	QWidget::setCursor(s);
 }
 
-void ConsoleViewSDL_t::showEvent(QShowEvent *event)
+void ConsoleViewQWidget_t::showEvent(QShowEvent *event)
 {
 	//printf("SDL Show: %i x %i \n", width(), height() );
 
@@ -478,14 +281,14 @@ void ConsoleViewSDL_t::showEvent(QShowEvent *event)
 	//reset();
 }
 
-void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
+void ConsoleViewQWidget_t::resizeEvent(QResizeEvent *event)
 {
 	QSize s;
 
 	s = event->size();
 	view_width  = s.width();
 	view_height = s.height();
-	printf("SDL Resize: %i x %i \n", view_width, view_height);
+	printf("QWidget Resize: %i x %i \n", view_width, view_height);
 
 	gui_draw_area_width = view_width;
 	gui_draw_area_height = view_height;
@@ -493,7 +296,7 @@ void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
 	reset();
 }
 
-void ConsoleViewSDL_t::mousePressEvent(QMouseEvent * event)
+void ConsoleViewQWidget_t::mousePressEvent(QMouseEvent * event)
 {
 	//printf("Mouse Button Press: (%i,%i) %x  %x\n", 
 	//		event->pos().x(), event->pos().y(), event->button(), event->buttons() );
@@ -501,7 +304,7 @@ void ConsoleViewSDL_t::mousePressEvent(QMouseEvent * event)
 	mouseButtonMask = event->buttons();
 }
 
-void ConsoleViewSDL_t::mouseReleaseEvent(QMouseEvent * event)
+void ConsoleViewQWidget_t::mouseReleaseEvent(QMouseEvent * event)
 {
 	//printf("Mouse Button Release: (%i,%i) %x  %x\n", 
 	//		event->pos().x(), event->pos().y(), event->button(), event->buttons() );
@@ -509,7 +312,7 @@ void ConsoleViewSDL_t::mouseReleaseEvent(QMouseEvent * event)
 	mouseButtonMask = event->buttons();
 }
 
-bool ConsoleViewSDL_t::getMouseButtonState( unsigned int btn )
+bool ConsoleViewQWidget_t::getMouseButtonState( unsigned int btn )
 {
 	bool isPressed = false;
 
@@ -551,7 +354,7 @@ bool ConsoleViewSDL_t::getMouseButtonState( unsigned int btn )
 	return isPressed;
 }
 
-void  ConsoleViewSDL_t::getNormalizedCursorPos( double &x, double &y )
+void  ConsoleViewQWidget_t::getNormalizedCursorPos( double &x, double &y )
 {
 	QPoint cursor;
 
@@ -585,14 +388,15 @@ void  ConsoleViewSDL_t::getNormalizedCursorPos( double &x, double &y )
 	//printf("Normalized Cursor (%f,%f) \n", x, y );
 }
 
-void ConsoleViewSDL_t::render(void)
+void ConsoleViewQWidget_t::paintEvent(QPaintEvent *event)
 {
+	QPainter painter(this);
 	int nesWidth  = GL_NES_WIDTH;
 	int nesHeight = GL_NES_HEIGHT;
 	float ixScale = 1.0;
 	float iyScale = 1.0;
 
-	if ( nes_shm != NULL )
+	if ( nes_shm != nullptr )
 	{
 		nesWidth  = nes_shm->video.ncol;
 		nesHeight = nes_shm->video.nrow;
@@ -676,34 +480,24 @@ void ConsoleViewSDL_t::render(void)
 	sx=(view_width-rw)/2;   
 	sy=(view_height-rh)/2;
 
-	if ( (sdlRenderer == NULL) || (sdlTexture == NULL) )
-  	{
-		return;
-	}
-
 	if ( bgColor )
 	{
-		SDL_SetRenderDrawColor( sdlRenderer, bgColor->red(), bgColor->green(), bgColor->blue(), 255 );
+		painter.fillRect( 0, 0, view_width, view_height, *bgColor );
 	}
 	else
 	{
-		SDL_SetRenderDrawColor( sdlRenderer, 0, 0, 0, 255 );
+		painter.fillRect( 0, 0, view_width, view_height, Qt::black );
 	}
-	SDL_RenderClear(sdlRenderer);
+	painter.setRenderHint( QPainter::SmoothPixmapTransform, linearFilter );
 
-	uint8_t *textureBuffer;
-	int rowPitch;
-	SDL_LockTexture( sdlTexture, nullptr, (void**)&textureBuffer, &rowPitch);
-	{
-		memcpy( textureBuffer, localBuf, nesWidth*nesHeight*sizeof(uint32_t) );
-	}
-	SDL_UnlockTexture(sdlTexture);
+	int rowPitch = nesWidth * sizeof(uint32_t);
 
-	SDL_Rect source = {0, 0, nesWidth, nesHeight };
-	SDL_Rect dest = { sx, sy, rw, rh };
-	SDL_RenderCopy(sdlRenderer, sdlTexture, &source, &dest);
+	QImage tmpImage( (const uchar*)localBuf, nesWidth, nesHeight, rowPitch, QImage::Format_ARGB32);
 
-	SDL_RenderPresent(sdlRenderer);
+	//SDL_Rect source = {0, 0, nesWidth, nesHeight };
+	QRect dest( sx, sy, rw, rh );
+
+	painter.drawImage( dest, tmpImage );
 
 	videoBufferSwapMark();
 

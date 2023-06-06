@@ -167,6 +167,8 @@ class QAsmView : public QWidget
 
 		QFont getFont(void){ return font; };
 
+		enum UpdateType { UPDATE_NONE, UPDATE_ALL, UPDATE_NO_SCROLL };
+
 	protected:
 		bool event(QEvent *event) override;
 		void paintEvent(QPaintEvent *event) override;
@@ -420,6 +422,51 @@ class DebugBreakOnDialog : public QDialog
 		void resetDeltas(void);
 };
 
+class DebuggerBreakpointEditor : public QDialog
+{
+   Q_OBJECT
+
+	public:
+		DebuggerBreakpointEditor(int editIndex = -1, watchpointinfo *wpIn = nullptr, QWidget *parent = 0);
+		~DebuggerBreakpointEditor(void);
+
+		void loadBreakpoint(void);
+
+	protected:
+		void closeEvent(QCloseEvent *event) override;
+		void checkDataValid(void);
+
+	private:
+		int editIdx;
+		watchpointinfo *wp;
+
+		QLineEdit *addr1;
+		QLineEdit *addr2;
+		QLineEdit *cond;
+		QLineEdit *name;
+		QCheckBox *forbidChkBox;
+		QCheckBox *rbp;
+		QCheckBox *wbp;
+		QCheckBox *xbp;
+		QCheckBox *ebp;
+		QLabel    *msgLbl;
+
+		QPushButton *okButton;
+		QPushButton *cancelButton;
+		QRadioButton *cpu_radio;
+		QRadioButton *ppu_radio;
+		QRadioButton *oam_radio;
+		QRadioButton *rom_radio;
+
+		bool condValid;
+
+	private slots:
+		void closeWindow(int ret);
+		void typeChanged(bool checked);
+		void addressTextChanged( const QString &text );
+		void conditionTextChanged( const QString &text );
+};
+
 class ConsoleDebugger : public QDialog
 {
    Q_OBJECT
@@ -428,7 +475,7 @@ class ConsoleDebugger : public QDialog
 		ConsoleDebugger(QWidget *parent = 0);
 		~ConsoleDebugger(void);
 
-		void updateWindowData(void);
+		void updateWindowData(enum QAsmView::UpdateType type);
 		void updateRegisterView(void);
 		void updateTabVisibility(void);
 		void breakPointNotify(int bpNum);
@@ -437,7 +484,7 @@ class ConsoleDebugger : public QDialog
 		void setBookmarkSelectedAddress( int addr );
 		int  getBookmarkSelectedAddress(void){ return selBmAddrVal; };
 		void edit_BM_name( int addr );
-		void queueUpdate(void);
+		void queueUpdate(enum QAsmView::UpdateType type);
 
 		QLabel    *asmLineSelLbl;
 
@@ -530,7 +577,8 @@ class ConsoleDebugger : public QDialog
 		ColorMenuItem *pcColorAct;
 
 		int   selBmAddrVal;
-		bool  windowUpdateReq;
+		enum QAsmView::UpdateType windowUpdateReq;
+
 		bool  startedTraceLogger;
 
 	private:
@@ -584,6 +632,7 @@ class ConsoleDebugger : public QDialog
 		void resizeToMinimumSizeHint(void);
 		void resetCountersCB (void);
 		void reloadSymbolsCB(void);
+		void saveSymbolsCB(void);
 		void displayByteCodesCB(bool value);
 		void displayTraceDataCB(bool value);
 		void displayROMoffsetCB(bool value);
@@ -625,6 +674,6 @@ void saveGameDebugBreakpoints( bool force = false );
 void loadGameDebugBreakpoints(void);
 void debuggerClearAllBreakpoints(void);
 void debuggerClearAllBookmarks(void);
-void updateAllDebuggerWindows(void);
+void updateAllDebuggerWindows(enum QAsmView::UpdateType type);
 
 extern debuggerBookmarkManager_t dbgBmMgr;

@@ -756,7 +756,6 @@ int debugSymbolTable_t::loadGameSymbols(void)
 {
 	int nPages, pageSize, romSize = 0x10000;
 
-	this->save();
 	this->clear();
 
 	if ( GameInfo != nullptr )

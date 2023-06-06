@@ -10,7 +10,9 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 
-class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
+#include "Qt/ConsoleViewerInterface.h"
+
+class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public ConsoleViewerBase
 {
     Q_OBJECT
 
@@ -20,6 +22,8 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 
 		int  init(void);
 		void reset(void);
+		void queueRedraw(void){ update(); };
+		int  driver(void){ return VIDEO_DRIVER_OPENGL; };
 
 		void transfer2LocalBuffer(void);
 
@@ -41,6 +45,13 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions
 
 		void   screenChanged(QScreen *scr);
 		void   setBgColor( QColor &c );
+		void   setCursor(const QCursor &c){ QOpenGLWidget::setCursor(c); };
+		void   setCursor( Qt::CursorShape s ){ QOpenGLWidget::setCursor(s); };
+
+		QSize   size(void){ return QOpenGLWidget::size(); };
+		QCursor cursor(void){ return QOpenGLWidget::cursor(); };
+		void    setMinimumSize(const QSize &s){ return QOpenGLWidget::setMinimumSize(s); };
+		void    setMaximumSize(const QSize &s){ return QOpenGLWidget::setMaximumSize(s); };
 
 	protected:
 	void initializeGL(void);

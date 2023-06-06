@@ -17,6 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#pragma once
 #include <string>
 
 enum ENUM_SSLOADPARAMS
@@ -78,3 +79,56 @@ extern bool backupSavestates;		 //Whether or not to make backups, true by defaul
 bool CheckBackupSaveStateExist();	 //Checks if backupsavestate exists
 
 extern bool compressSavestates;		//Whether or not to compress non-movie savestates (by default, yes)
+
+struct StateRecorderConfigData
+{
+	float historyDurationMinutes;
+	float timeBetweenSnapsMinutes;
+	int   framesBetweenSnaps;
+	int   compressionLevel;
+	int   loadPauseTimeSeconds;
+
+	enum TimingType
+	{
+		FRAMES = 0,
+		TIME,
+	} timingMode;
+
+	enum PauseType
+	{
+		NO_PAUSE = 0,
+		TEMPORARY_PAUSE,
+		FULL_PAUSE,
+	} pauseOnLoad;
+
+	StateRecorderConfigData(void)
+	{
+		framesBetweenSnaps = 60;
+		historyDurationMinutes = 15.0f;
+		timeBetweenSnapsMinutes = 3.0f / 60.0f;
+		compressionLevel = 0;
+		loadPauseTimeSeconds = 3;
+		pauseOnLoad = TEMPORARY_PAUSE;
+		timingMode = FRAMES;
+	}
+
+	bool compare( const StateRecorderConfigData &other )
+	{
+		return memcmp( this, &other, sizeof(StateRecorderConfigData) ) == 0;
+	}
+};
+
+int FCEU_StateRecorderStart(void);
+int FCEU_StateRecorderStop(void);
+int FCEU_StateRecorderUpdate(void);
+bool FCEU_StateRecorderRunning(void);
+bool FCEU_StateRecorderIsEnabled(void);
+void FCEU_StateRecorderSetEnabled(bool enabled);
+int FCEU_StateRecorderGetMaxSnaps(void);
+int FCEU_StateRecorderGetNumSnapsSaved(void);
+int FCEU_StateRecorderGetStateIndex(void);
+int FCEU_StateRecorderLoadState(int snapIndex);
+int FCEU_StateRecorderLoadPrevState(void);
+int FCEU_StateRecorderLoadNextState(void);
+int FCEU_StateRecorderSetConfigData(const StateRecorderConfigData &newConfig);
+const StateRecorderConfigData& FCEU_StateRecorderGetConfigData(void);

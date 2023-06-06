@@ -26,6 +26,7 @@ static uint16 addrreg0=0, addrreg1=0;
 static uint8 *WRAM = NULL;
 static uint32 WRAMSIZE=0;
 static void (*WSync)(void) = nullptr;
+static uint8 submapper;
 
 static DECLFW(LatchWrite) {
 //	FCEU_printf("bs %04x %02x\n",A,V);
@@ -68,6 +69,7 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 	info->Power = LatchPower;
 	info->Close = LatchClose;
 	GameStateRestore = StateRestore;
+	submapper = info->submapper;
 	if(info->ines2)
 		if(info->battery_wram_size + info->wram_size > 0)
 			wram = 1;
@@ -295,7 +297,11 @@ static void M78Sync() {
 	setprg16(0x8000, (latche & 7));
 	setprg16(0xc000, ~0);
 	setchr8(latche >> 4);
-	setmirror(MI_0 + ((latche >> 3) & 1));
+	if (submapper == 3) {
+		setmirror((latche >> 3) & 1);	
+	} else {
+		setmirror(MI_0 + ((latche >> 3) & 1));
+	}
 }
 
 void Mapper78_Init(CartInfo *info) {

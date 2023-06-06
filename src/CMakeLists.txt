@@ -22,6 +22,12 @@ if ( ${QHELP} )
 	add_definitions( -D_USE_QHELP )
 endif()
 
+if ( ${FCEU_PROFILER_ENABLE} )
+	message( STATUS "FCEU Profiler Enabled")
+	add_definitions( -D__FCEU_PROFILER_ENABLE__ )
+endif()
+	
+
 if ( ${QT6} )
 	find_package( Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets ${QtHelpModule})
   	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
@@ -41,12 +47,15 @@ if(WIN32)
      add_definitions( -DMSVC -D_CRT_SECURE_NO_WARNINGS )
      add_definitions( -D__SDL__  -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
      add_definitions( -DFCEUDEF_DEBUGGER )
+     add_definitions( -D_USE_LIBARCHIVE )
      add_definitions( /wd4267 /wd4244 )
      #add_definitions( /wd4018 ) # Integer comparison sign mismatch warnings
      include_directories( ${SDL_INSTALL_PREFIX}/SDL2/include )
+     include_directories( ${LIBARCHIVE_INSTALL_PREFIX}/libarchive/include )
      include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
      set( OPENGL_LDFLAGS  OpenGL::GL )
      set( SDL2_LDFLAGS  ${SDL_INSTALL_PREFIX}/SDL2/lib/x64/SDL2.lib )
+     set( LIBARCHIVE_LDFLAGS  ${LIBARCHIVE_INSTALL_PREFIX}/libarchive/lib/archive.lib )
      set( SYS_LIBS  wsock32 ws2_32 vfw32 Htmlhelp )
      set(APP_ICON_RESOURCES_WINDOWS  ${CMAKE_SOURCE_DIR}/icons/fceux.rc )
 
@@ -93,6 +102,12 @@ else(WIN32)
   #endif()
   add_definitions( -D__QT_DRIVER__  -DQT_DEPRECATED_WARNINGS )
 
+  if ( ${GPROF_ENABLE} )
+	add_definitions( -pg )
+	set( GPROF_LDFLAGS  -pg )
+	message( STATUS "GNU Profiling Enabled" )
+  endif()
+
   if ( ${ASAN_ENABLE} )
 	add_definitions( -fsanitize=address -fsanitize=bounds-strict )
 	add_definitions( -fsanitize=undefined -fno-sanitize=vptr )
@@ -108,6 +123,13 @@ else(WIN32)
   if ( ${MINIZIP_FOUND} )
 	  message( STATUS "Using System minizip ${MINIZIP_VERSION}" )
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
+  endif()
+
+  pkg_check_modules( LIBARCHIVE libarchive)
+
+  if ( ${LIBARCHIVE_FOUND} )
+	  message( STATUS "Using System Libarchive Library ${LIBARCHIVE_VERSION}" )
+	  add_definitions( -D_USE_LIBARCHIVE ${LIBARCHIVE_CFLAGS} )
   endif()
 
   pkg_check_modules( X264 x264)
@@ -293,6 +315,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/nsf.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/oldmovie.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/palette.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/profiler.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/ppu.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/sound.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/state.cpp
@@ -504,6 +527,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/md5.cpp  
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/memory.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/utils/mutex.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/utils/timeStamp.cpp
 )
 
 
@@ -526,6 +550,8 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleWindow.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerGL.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerSDL.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerQWidget.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerInterface.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/InputConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/FamilyKeyboard.cpp  
@@ -551,6 +577,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleUtilities.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleVideoConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleSoundConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/StateRecorderConf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/iNesHeaderEditor.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/SplashScreen.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TraceLogger.cpp  
@@ -635,14 +662,15 @@ add_executable(  ${APP_NAME}  ${SOURCES} ../resources.qrc
 	${CMAKE_CURRENT_BINARY_DIR}/fceux_git_info.cpp)
 endif()
 
-target_link_libraries( ${APP_NAME}  ${ASAN_LDFLAGS}
+target_link_libraries( ${APP_NAME}
+   ${ASAN_LDFLAGS}  ${GPROF_LDFLAGS}
    ${${Qt}Widgets_LIBRARIES}
    ${${Qt}Help_LIBRARIES}
    ${${Qt}OpenGL_LIBRARIES}
    ${${Qt}OpenGLWidgets_LIBRARIES}
    ${OPENGL_LDFLAGS}  
  	${SDL2_LDFLAGS}
-	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES}
+	${MINIZIP_LDFLAGS} ${ZLIB_LIBRARIES} ${LIBARCHIVE_LDFLAGS}
 	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS} ${LIBAV_LDFLAGS}
  	${SYS_LIBS}
 )

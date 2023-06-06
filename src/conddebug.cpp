@@ -52,17 +52,17 @@
 #include <cctype>
 
 uint16 debugLastAddress = 0; // used by 'T' and 'R' conditions
-uint8 debugLastOpcode; // used to evaluate 'W' condition
+uint8 debugLastOpcode = 0; // used to evaluate 'W' condition
 
 // Next non-whitespace character in string
-char next;
+static char next = 0;
 
-int ishex(char c)
+static int ishex(char c)
 {
 	return isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 }
 
-void scan(const char** str)
+static void scan(const char** str)
 {
 	do
 	{
@@ -71,40 +71,37 @@ void scan(const char** str)
 	} while (isspace(next));
 }
 
-// Frees a condition and all of it's sub conditions
-void freeTree(Condition* c)
-{
-	if (c->lhs) freeTree(c->lhs);
-	if (c->rhs) freeTree(c->rhs);
-
-	free(c);
-}
-
 // Generic function to handle all infix operators but the last one in the precedence hierarchy. : '(' E ')'
-Condition* InfixOperator(const char** str, Condition(*nextPart(const char**)), int(*operators)(const char**))
+static Condition* InfixOperator(const char** str, Condition(*nextPart(const char**)), int(*operators)(const char**))
 {
 	Condition* t = nextPart(str);
 	Condition* t1;
 	Condition* mid;
 	int op;
 
+	if (t == nullptr)
+	{
+		return nullptr;
+	}
 	while ((op = operators(str)))
 	{
 		scan(str);
 
 		t1 = nextPart(str);
 
-		if (t1 == 0)
+		if (t1 == nullptr)
 		{
-			if(t)
-				freeTree(t);
+			delete t;
 			return 0;
 		}
 
-		mid = (Condition*)FCEU_dmalloc(sizeof(Condition));
-		if (!mid)
-			return NULL;
-		memset(mid, 0, sizeof(Condition));
+		mid = new Condition();
+		if (mid == nullptr)
+		{
+			delete t;
+			delete t1;
+			return nullptr;
+		}
 
 		mid->lhs = t;
 		mid->rhs = t1;
@@ -117,7 +114,7 @@ Condition* InfixOperator(const char** str, Condition(*nextPart(const char**)), i
 }
 
 // Generic handler for two-character operators
-int TwoCharOperator(const char** str, char c1, char c2, int op)
+static int TwoCharOperator(const char** str, char c1, char c2, int op)
 {
 	if (next == c1 && **str == c2)
 	{
@@ -131,43 +128,43 @@ int TwoCharOperator(const char** str, char c1, char c2, int op)
 }
 
 // Determines if a character is a flag
-int isFlag(char c)
+static int isFlag(char c)
 {
 	return c == 'N' || c == 'I' || c == 'C' || c == 'V' || c == 'Z' || c == 'B' || c == 'U' || c == 'D';
 }
 
 // Determines if a character is a register
-int isRegister(char c)
+static int isRegister(char c)
 {
 	return c == 'A' || c == 'X' || c == 'Y' || c == 'P' || c == 'S';
 }
 
 // Determines if a character is for PC bank
-int isPCBank(char c)
+static int isPCBank(char c)
 {
 	return c == 'K';
 }
 
 // Determines if a character is for Data bank
-int isDataBank(char c)
+static int isDataBank(char c)
 {
 	return c == 'T';
 }
 
 // Determines if a character is for value read
-int isValueRead(char c)
+static int isValueRead(char c)
 {
 	return c == 'R';
 }
 
 // Determines if a character is for value write
-int isValueWrite(char c)
+static int isValueWrite(char c)
 {
 	return c == 'W';
 }
 
 // Reads a hexadecimal number from str
-int getNumber(unsigned int* number, const char** str)
+static int getNumber(unsigned int* number, const char** str)
 {
 //	char buffer[5];
 
@@ -185,10 +182,10 @@ int getNumber(unsigned int* number, const char** str)
 	return 1;
 }
 
-Condition* Connect(const char** str);
+static Condition* Connect(const char** str);
 
 // Handles the following part of the grammar: '(' E ')'
-Condition* Parentheses(const char** str, Condition* c, char openPar, char closePar)
+static Condition* Parentheses(const char** str, Condition* c, char openPar, char closePar)
 {
 	if (next == openPar)
 	{
@@ -216,7 +213,7 @@ Condition* Parentheses(const char** str, Condition* c, char openPar, char closeP
 * Check for primitives
 * Flags, Registers, Numbers, Addresses and parentheses
 */
-Condition* Primitive(const char** str, Condition* c)
+static Condition* Primitive(const char** str, Condition* c)
 {
 	if (isFlag(next)) /* Flags */
 	{
@@ -394,24 +391,22 @@ Condition* Primitive(const char** str, Condition* c)
 }
 
 /* Handle * and / operators */
-Condition* Term(const char** str)
+static Condition* Term(const char** str)
 {
 	Condition* t;
 	Condition* t1;
 	Condition* mid;
 
-	t = (Condition*)FCEU_dmalloc(sizeof(Condition));
+	t = new Condition();
 
-	if (!t)
+	if (t == nullptr)
 	{
 		return NULL;
 	}
 
-	memset(t, 0, sizeof(Condition));
-
 	if (!Primitive(str, t))
 	{
-		freeTree(t);
+		delete t;
 		return 0;
 	}
 
@@ -421,22 +416,25 @@ Condition* Term(const char** str)
 
 		scan(str);
 
-		if (!(t1 = (Condition*)FCEU_dmalloc(sizeof(Condition))))
-            return NULL;
-
-		memset(t1, 0, sizeof(Condition));
+		if ((t1 = new Condition()) == nullptr)
+		{
+			delete t;
+			return nullptr;
+		}
 
 		if (!Primitive(str, t1))
 		{
-			freeTree(t);
-			freeTree(t1);
+			delete t;
+			delete t1;
 			return 0;
 		}
 
-		if (!(mid = (Condition*)FCEU_dmalloc(sizeof(Condition))))
-            return NULL;
-
-		memset(mid, 0, sizeof(Condition));
+		if ((mid = new Condition()) == nullptr)
+		{
+			delete t;
+			delete t1;
+			return nullptr;
+		}
 
 		mid->lhs = t;
 		mid->rhs = t1;
@@ -449,7 +447,7 @@ Condition* Term(const char** str)
 }
 
 /* Check for + and - operators */
-int SumOperators(const char** str)
+static int SumOperators(const char** str)
 {
 	switch (next)
 	{
@@ -460,13 +458,13 @@ int SumOperators(const char** str)
 }
 
 /* Handle + and - operators */
-Condition* Sum(const char** str)
+static Condition* Sum(const char** str)
 {
 	return InfixOperator(str, Term, SumOperators);
 }
 
 /* Check for <=, =>, ==, !=, > and < operators */
-int CompareOperators(const char** str)
+static int CompareOperators(const char** str)
 {
 	int val = TwoCharOperator(str, '=', '=', OP_EQ);
 	if (val) return val;
@@ -490,13 +488,13 @@ int CompareOperators(const char** str)
 }
 
 /* Handle <=, =>, ==, !=, > and < operators */
-Condition* Compare(const char** str)
+static Condition* Compare(const char** str)
 {
 	return InfixOperator(str, Sum, CompareOperators);
 }
 
 /* Check for || or && operators */
-int ConnectOperators(const char** str)
+static int ConnectOperators(const char** str)
 {
 	int val = TwoCharOperator(str, '|', '|', OP_OR);
 	if(val) return val;
@@ -508,7 +506,7 @@ int ConnectOperators(const char** str)
 }
 
 /* Handle || and && operators */
-Condition* Connect(const char** str)
+static Condition* Connect(const char** str)
 {
 	return InfixOperator(str, Compare, ConnectOperators);
 }
@@ -521,6 +519,10 @@ Condition* generateCondition(const char* str)
 	scan(&str);
 	c = Connect(&str);
 
-	if (!c || next != 0) return 0;
+	if (!c || next != 0)
+	{
+		if (c) delete c;
+		return 0;
+	}
 	else return c;
 }

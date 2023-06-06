@@ -60,6 +60,15 @@ autoScopedLock::autoScopedLock( mutex *mtx )
 	}
 }
 
+autoScopedLock::autoScopedLock( mutex &mtx )
+{
+	m = &mtx;
+	if (m)
+	{
+		m->lock();
+	}
+}
+
 autoScopedLock::~autoScopedLock(void)
 {
 	if (m)

@@ -744,6 +744,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\utils\md5.cpp" />
     <ClCompile Include="..\src\utils\memory.cpp" />
     <ClCompile Include="..\src\utils\mutex.cpp" />
+    <ClCompile Include="..\src\utils\timeStamp.cpp" />
     <ClCompile Include="..\src\utils\unzip.cpp" />
     <ClCompile Include="..\src\utils\xstring.cpp" />
     <ClCompile Include="..\src\lua\src\lapi.c">
@@ -1008,6 +1009,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\oldmovie.cpp" />
     <ClCompile Include="..\src\palette.cpp" />
     <ClCompile Include="..\src\ppu.cpp" />
+    <ClCompile Include="..\src\profiler.cpp" />
     <ClCompile Include="..\src\sound.cpp" />
     <ClCompile Include="..\src\state.cpp" />
     <ClCompile Include="..\src\unif.cpp" />
@@ -1137,6 +1139,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\oldmovie.h" />
     <ClInclude Include="..\src\palette.h" />
     <ClInclude Include="..\src\ppu.h" />
+    <ClInclude Include="..\src\profiler.h" />
     <ClInclude Include="..\src\sound.h" />
     <ClInclude Include="..\src\state.h" />
     <ClInclude Include="..\src\types-des.h" />
@@ -1151,6 +1154,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\utils\md5.h" />
     <ClInclude Include="..\src\utils\memory.h" />
     <ClInclude Include="..\src\utils\mutex.h" />
+    <ClInclude Include="..\src\utils\timeStamp.h" />
     <ClInclude Include="..\src\utils\unzip.h" />
     <ClInclude Include="..\src\utils\valuearray.h" />
     <ClInclude Include="..\src\utils\xstring.h" />

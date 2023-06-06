@@ -92,7 +92,7 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 
 	if ( localBuf )
 	{
-		memset( localBuf, 0, localBufSize );
+		memset32( localBuf, alphaMask, localBufSize );
 	}
 
 	vsyncEnabled = true;
@@ -136,6 +136,8 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 
 ConsoleViewGL_t::~ConsoleViewGL_t(void)
 {
+	//printf("Destroying GL Viewport\n");
+
 	if ( localBuf )
 	{
 		free( localBuf ); localBuf = NULL;
@@ -502,7 +504,7 @@ void ConsoleViewGL_t::transfer2LocalBuffer(void)
 	}
 	else
 	{
-		memcpy( localBuf, src, cpSize );
+		copyPixels32( dest, src, cpSize, alphaMask);
 	}
 }
 
