@@ -1121,6 +1121,11 @@
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\debugsymboltable.cpp" />
+    <ClCompile Include="..\src\utils\mutex.cpp" />
+    <ClCompile Include="..\src\ld65dbg.cpp" />
+    <ClCompile Include="..\src\boards\472.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
@@ -1630,6 +1635,9 @@
     <ClInclude Include="..\src\drivers\win\header_editor.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\debugsymboltable.h" />
+    <ClInclude Include="..\src\ld65dbg.h" />
+    <ClInclude Include="..\src\utils\mutex.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">
