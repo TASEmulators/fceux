@@ -57,15 +57,15 @@ static void StateRestore(int version) {
 	Sync();
 }
 
-void Mapper474_Init(CartInfo* info) {
-	if (info->submapper == 1)
-	{
-		info->Power = M474Power_submapper1;
-	}
-	else
-	{
-		// submapper 0
-		info->Power = M474Power;
-	}
-	GameStateRestore = StateRestore;
-}
+//void Mapper474_Init(CartInfo* info) {
+//	if (info->submapper == 1)
+//	{
+//		info->Power = M474Power_submapper1;
+//	}
+//	else
+//	{
+//		// submapper 0
+//		info->Power = M474Power;
+//	}
+//	GameStateRestore = StateRestore;
+//}

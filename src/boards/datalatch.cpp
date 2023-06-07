@@ -21,15 +21,15 @@
 #include "mapinc.h"
 #include "../ines.h"
 
-static uint8 latche=0, latcheinit=0, bus_conflict=0;
-static uint16 addrreg0=0, addrreg1=0;
-static uint8 *WRAM = NULL;
-static uint32 WRAMSIZE=0;
+static uint8 latche = 0, latcheinit = 0, bus_conflict = 0;
+static uint16 addrreg0 = 0, addrreg1 = 0;
+static uint8* WRAM = NULL;
+static uint32 WRAMSIZE = 0;
 static void (*WSync)(void) = nullptr;
 static uint8 submapper;
 
 static DECLFW(LatchWrite) {
-//	FCEU_printf("bs %04x %02x\n",A,V);
+	//	FCEU_printf("bs %04x %02x\n",A,V);
 	if (bus_conflict)
 		latche = V & CartBR(A);
 	else
@@ -44,7 +44,8 @@ static void LatchPower(void) {
 		SetReadHandler(0x6000, 0xFFFF, CartBR);
 		SetWriteHandler(0x6000, 0x7FFF, CartBW);
 		FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
-	} else {
+	}
+	else {
 		SetReadHandler(0x8000, 0xFFFF, CartBR);
 	}
 	SetWriteHandler(addrreg0, addrreg1, LatchWrite);
@@ -60,7 +61,7 @@ static void StateRestore(int version) {
 	WSync();
 }
 
-static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 adr0, uint16 adr1, uint8 wram, uint8 busc) {
+static void Latch_Init(CartInfo* info, void (*proc)(void), uint8 init, uint16 adr0, uint16 adr1, uint8 wram, uint8 busc) {
 	bus_conflict = busc;
 	latcheinit = init;
 	addrreg0 = adr0;
@@ -70,12 +71,12 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 	info->Close = LatchClose;
 	GameStateRestore = StateRestore;
 	submapper = info->submapper;
-	if(info->ines2)
-		if(info->battery_wram_size + info->wram_size > 0)
+	if (info->ines2)
+		if (info->battery_wram_size + info->wram_size > 0)
 			wram = 1;
 	if (wram)
 	{
-		if(info->ines2)
+		if (info->ines2)
 		{
 			//I would like to do it in this way, but FCEUX is woefully inadequate
 			//for instance if WRAMSIZE is large, the cheat pointers may get overwritten. and it's just a giant mess.
@@ -94,7 +95,7 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 			//	SetupCartPRGMapping(0x11, WRAM, info->battery_wram_size, 1); //? ? ? there probably isnt even a way to select this
 			//	info->addSaveGameBuf( WRAM + info->wram_size, info->battery_wram_size );
 			//}
-			
+
 			//this is more likely the only practical scenario
 			WRAMSIZE = 8192;
 			WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
@@ -102,9 +103,9 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 			SetReadHandler(0x6000, 0x7FFF, CartBR);
 			SetWriteHandler(0x6000, 0x7FFF, CartBW);
 			setprg8r(0x10, 0x6000, 0);
-			if(info->battery_wram_size)
+			if (info->battery_wram_size)
 			{
-				info->addSaveGameBuf( WRAM, 8192 );
+				info->addSaveGameBuf(WRAM, 8192);
 			}
 		}
 		else
@@ -113,11 +114,11 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
 			WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 			SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 			if (info->battery) {
-				info->addSaveGameBuf( WRAM, WRAMSIZE );
+				info->addSaveGameBuf(WRAM, WRAMSIZE);
 			}
 			AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 		}
-		
+
 	}
 	AddExState(&latche, 1, 0, "LATC");
 }
@@ -145,10 +146,10 @@ static void NROMPower(void) {
 
 #ifdef DEBUG_MAPPER
 	SetWriteHandler(0x4020, 0xFFFF, NROMWrite);
-	#endif
+#endif
 }
 
-void NROM_Init(CartInfo *info) {
+void NROM_Init(CartInfo* info) {
 	info->Power = NROMPower;
 	info->Close = LatchClose;
 
@@ -156,7 +157,7 @@ void NROM_Init(CartInfo *info) {
 	WRAM = (uint8*)FCEU_gmalloc(WRAMSIZE);
 	SetupCartPRGMapping(0x10, WRAM, WRAMSIZE, 1);
 	if (info->battery) {
-		info->addSaveGameBuf( WRAM, WRAMSIZE );
+		info->addSaveGameBuf(WRAM, WRAMSIZE);
 	}
 	AddExState(WRAM, WRAMSIZE, 0, "WRAM");
 }
@@ -164,19 +165,19 @@ void NROM_Init(CartInfo *info) {
 //------------------ Map 2 ---------------------------
 
 static void UNROMSync(void) {
-//	static uint32 mirror_in_use = 0;
-//	if (PRGsize[0] <= 128 * 1024) {
-//		setprg16(0x8000, latche & 0x7);
-//		if (latche & 8) mirror_in_use = 1;
-//		if (mirror_in_use)
-//			setmirror(((latche >> 3) & 1) ^ 1);	// Higway Star Hacked mapper, disabled till new mapper defined
-//	} else
+	//	static uint32 mirror_in_use = 0;
+	//	if (PRGsize[0] <= 128 * 1024) {
+	//		setprg16(0x8000, latche & 0x7);
+	//		if (latche & 8) mirror_in_use = 1;
+	//		if (mirror_in_use)
+	//			setmirror(((latche >> 3) & 1) ^ 1);	// Higway Star Hacked mapper, disabled till new mapper defined
+	//	} else
 	setprg16(0x8000, latche);
 	setprg16(0xc000, ~0);
 	setchr8(0);
 }
 
-void UNROM_Init(CartInfo *info) {
+void UNROM_Init(CartInfo* info) {
 	Latch_Init(info, UNROMSync, 0, 0x8000, 0xFFFF, 0, info->ines2 && info->submapper == 2);
 }
 
@@ -188,7 +189,7 @@ static void CNROMSync(void) {
 	setprg8r(0x10, 0x6000, 0);	// Hayauchy IGO uses 2Kb or RAM
 }
 
-void CNROM_Init(CartInfo *info) {
+void CNROM_Init(CartInfo* info) {
 	Latch_Init(info, CNROMSync, 0, 0x8000, 0xFFFF, 1, info->ines2 && info->submapper == 2);
 }
 
@@ -200,7 +201,7 @@ static void ANROMSync() {
 	setchr8(0);
 }
 
-void ANROM_Init(CartInfo *info) {
+void ANROM_Init(CartInfo* info) {
 	Latch_Init(info, ANROMSync, 0, 0x4020, 0xFFFF, 0, 0);
 }
 
@@ -212,7 +213,7 @@ static void M8Sync() {
 	setchr8(latche & 3);
 }
 
-void Mapper8_Init(CartInfo *info) {
+void Mapper8_Init(CartInfo* info) {
 	Latch_Init(info, M8Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -223,11 +224,11 @@ static void M11Sync(void) {
 	setchr8(latche >> 4);
 }
 
-void Mapper11_Init(CartInfo *info) {
+void Mapper11_Init(CartInfo* info) {
 	Latch_Init(info, M11Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
-void Mapper144_Init(CartInfo *info) {
+void Mapper144_Init(CartInfo* info) {
 	Latch_Init(info, M11Sync, 0, 0x8001, 0xFFFF, 0, 0);
 }
 
@@ -239,7 +240,7 @@ static void CPROMSync(void) {
 	setprg32(0x8000, 0);
 }
 
-void CPROM_Init(CartInfo *info) {
+void CPROM_Init(CartInfo* info) {
 	Latch_Init(info, CPROMSync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -252,7 +253,7 @@ static void M29Sync() {
 	setprg8r(0x10, 0x6000, 0);
 }
 
-void Mapper29_Init(CartInfo *info) {
+void Mapper29_Init(CartInfo* info) {
 	Latch_Init(info, M29Sync, 0, 0x8000, 0xFFFF, 1, 0);
 }
 
@@ -264,7 +265,7 @@ static void M38Sync(void) {
 	setchr8(latche >> 2);
 }
 
-void Mapper38_Init(CartInfo *info) {
+void Mapper38_Init(CartInfo* info) {
 	Latch_Init(info, M38Sync, 0, 0x7000, 0x7FFF, 0, 0);
 }
 
@@ -275,7 +276,7 @@ static void MHROMSync(void) {
 	setchr8(latche & 0xF);
 }
 
-void MHROM_Init(CartInfo *info) {
+void MHROM_Init(CartInfo* info) {
 	Latch_Init(info, MHROMSync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -287,7 +288,7 @@ static void M70Sync() {
 	setchr8(latche & 0xf);
 }
 
-void Mapper70_Init(CartInfo *info) {
+void Mapper70_Init(CartInfo* info) {
 	Latch_Init(info, M70Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -298,13 +299,14 @@ static void M78Sync() {
 	setprg16(0xc000, ~0);
 	setchr8(latche >> 4);
 	if (submapper == 3) {
-		setmirror((latche >> 3) & 1);	
-	} else {
+		setmirror((latche >> 3) & 1);
+	}
+	else {
 		setmirror(MI_0 + ((latche >> 3) & 1));
 	}
 }
 
-void Mapper78_Init(CartInfo *info) {
+void Mapper78_Init(CartInfo* info) {
 	Latch_Init(info, M78Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -315,7 +317,7 @@ static void M86Sync(void) {
 	setchr8((latche & 3) | ((latche >> 4) & 4));
 }
 
-void Mapper86_Init(CartInfo *info) {
+void Mapper86_Init(CartInfo* info) {
 	Latch_Init(info, M86Sync, ~0, 0x6000, 0x6FFF, 0, 0);
 }
 
@@ -326,7 +328,7 @@ static void M87Sync(void) {
 	setchr8(((latche >> 1) & 1) | ((latche << 1) & 2));
 }
 
-void Mapper87_Init(CartInfo *info) {
+void Mapper87_Init(CartInfo* info) {
 	Latch_Init(info, M87Sync, ~0, 0x6000, 0xFFFF, 0, 0);
 }
 
@@ -339,7 +341,7 @@ static void M89Sync(void) {
 	setmirror(MI_0 + ((latche >> 3) & 1));
 }
 
-void Mapper89_Init(CartInfo *info) {
+void Mapper89_Init(CartInfo* info) {
 	Latch_Init(info, M89Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -351,7 +353,7 @@ static void SSUNROMSync(void) {
 	setchr8(0);
 }
 
-void SUNSOFT_UNROM_Init(CartInfo *info) {
+void SUNSOFT_UNROM_Init(CartInfo* info) {
 	Latch_Init(info, SSUNROMSync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -363,7 +365,7 @@ static void M94Sync(void) {
 	setchr8(0);
 }
 
-void Mapper94_Init(CartInfo *info) {
+void Mapper94_Init(CartInfo* info) {
 	Latch_Init(info, M94Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -382,7 +384,7 @@ static void M97Sync(void) {
 	setchr8(((latche >> 1) & 1) | ((latche << 1) & 2));
 }
 
-void Mapper97_Init(CartInfo *info) {
+void Mapper97_Init(CartInfo* info) {
 	Latch_Init(info, M97Sync, ~0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -393,7 +395,7 @@ static void M101Sync(void) {
 	setchr8(latche);
 }
 
-void Mapper101_Init(CartInfo *info) {
+void Mapper101_Init(CartInfo* info) {
 	Latch_Init(info, M101Sync, ~0, 0x6000, 0x7FFF, 0, 0);
 }
 
@@ -404,7 +406,7 @@ static void M107Sync(void) {
 	setchr8(latche & 7);
 }
 
-void Mapper107_Init(CartInfo *info) {
+void Mapper107_Init(CartInfo* info) {
 	Latch_Init(info, M107Sync, ~0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -413,16 +415,16 @@ void Mapper107_Init(CartInfo *info) {
 static void M113Sync(void) {
 	setprg32(0x8000, (latche >> 3) & 7);
 	setchr8(((latche >> 3) & 8) | (latche & 7));
-//	setmirror(latche>>7); // only for HES 6in1
+	//	setmirror(latche>>7); // only for HES 6in1
 }
 
-void Mapper113_Init(CartInfo *info) {
+void Mapper113_Init(CartInfo* info) {
 	Latch_Init(info, M113Sync, 0, 0x4100, 0x7FFF, 0, 0);
 }
 
 //------------------ Map 140 ---------------------------
 
-void Mapper140_Init(CartInfo *info) {
+void Mapper140_Init(CartInfo* info) {
 	Latch_Init(info, MHROMSync, 0, 0x6000, 0x7FFF, 0, 0);
 }
 
@@ -435,7 +437,7 @@ static void M152Sync() {
 	setmirror(MI_0 + ((latche >> 7) & 1));	/* Saint Seiya...hmm. */
 }
 
-void Mapper152_Init(CartInfo *info) {
+void Mapper152_Init(CartInfo* info) {
 	Latch_Init(info, M152Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -447,7 +449,7 @@ static void M180Sync(void) {
 	setchr8(0);
 }
 
-void Mapper180_Init(CartInfo *info) {
+void Mapper180_Init(CartInfo* info) {
 	Latch_Init(info, M180Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -459,7 +461,7 @@ static void M184Sync(void) {
 	setprg32(0x8000, 0);
 }
 
-void Mapper184_Init(CartInfo *info) {
+void Mapper184_Init(CartInfo* info) {
 	Latch_Init(info, M184Sync, 0, 0x6000, 0x7FFF, 0, 0);
 }
 
@@ -471,7 +473,7 @@ static void M203Sync(void) {
 	setchr8(latche & 3);
 }
 
-void Mapper203_Init(CartInfo *info) {
+void Mapper203_Init(CartInfo* info) {
 	Latch_Init(info, M203Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -483,7 +485,7 @@ static void Mapper218_Power()
 	SetReadHandler(0x6000, 0xFFFF, &CartBROB);
 }
 
-void Mapper218_Init(CartInfo *info)
+void Mapper218_Init(CartInfo* info)
 {
 	info->Power = &Mapper218_Power;
 
@@ -491,8 +493,8 @@ void Mapper218_Init(CartInfo *info)
 	setprg32(0x8000, 0);
 
 	//this mapper is supposed to interpret the iNES header bits specially
-	static const uint8 mirrorings[] = {MI_V,MI_H,MI_0,MI_1};
-	SetupCartMirroring(mirrorings[info->mirrorAs2Bits],1,nullptr);
+	static const uint8 mirrorings[] = { MI_V,MI_H,MI_0,MI_1 };
+	SetupCartMirroring(mirrorings[info->mirrorAs2Bits], 1, nullptr);
 
 	//cryptic logic to effect the CHR RAM mappings by mapping 1k blocks to NTARAM according to how the pins are wired
 	//this could be done by bit logic, but this is self-documenting
@@ -502,8 +504,8 @@ void Mapper218_Init(CartInfo *info)
 		0,0,0,0,1,1,1,1, //mirrorAs2Bits==2
 		0,0,0,0,0,0,0,0  //mirrorAs2Bits==3
 	};
-	for(int i=0;i<8;i++)
-		VPageR[i] = &NTARAM[mapping[info->mirrorAs2Bits*8+i]];
+	for (int i = 0; i < 8; i++)
+		VPageR[i] = &NTARAM[mapping[info->mirrorAs2Bits * 8 + i]];
 
 	PPUCHRRAM = 0xFF;
 }
@@ -516,7 +518,7 @@ static void M240Sync(void) {
 	setchr8(latche & 0xF);
 }
 
-void Mapper240_Init(CartInfo *info) {
+void Mapper240_Init(CartInfo* info) {
 	Latch_Init(info, M240Sync, 0, 0x4020, 0x5FFF, 1, 0);
 }
 
@@ -533,7 +535,7 @@ static void M241Sync(void) {
 		setprg32(0x8000, latche);
 }
 
-void Mapper241_Init(CartInfo *info) {
+void Mapper241_Init(CartInfo* info) {
 	Latch_Init(info, M241Sync, 0, 0x8000, 0xFFFF, 1, 0);
 }
 
@@ -558,7 +560,7 @@ static void BMCA65ASSync(void) {
 		setmirror(((latche >> 3) & 1) ^ 1);
 }
 
-void BMCA65AS_Init(CartInfo *info) {
+void BMCA65AS_Init(CartInfo* info) {
 	Latch_Init(info, BMCA65ASSync, 0, 0x8000, 0xFFFF, 0, 0);
 }
 
@@ -572,6 +574,85 @@ static void BMC11160Sync(void) {
 	setmirror((latche >> 7) & 1);
 }
 
-void BMC11160_Init(CartInfo *info) {
+void BMC11160_Init(CartInfo* info) {
 	Latch_Init(info, BMC11160Sync, 0, 0x8000, 0xFFFF, 0, 0);
+}
+
+
+//------------------ Akerasoft NROM3XX /Mapper 474 ---------------------------
+// Simple Akerasoft NROM3XX
+
+static readfunc defapuread[0x1000];
+static uint8 subMapper = 0;
+static DECLFR(M474ReadCart) {
+	if (subMapper == 0)
+	{
+		if (A < 0x4020)
+		{
+			return defapuread[A - 0x4000](A);
+		}
+		else
+		{
+			return Page[A >> 11][A];
+		}
+	}
+	else
+	{
+		if (A < 0x4800)
+		{
+			return defapuread[A - 0x4000](A);
+		}
+		else
+		{
+			return Page[A >> 11][A];
+		}
+	}
+
+}
+
+static void M474Sync(void) {
+	setchr8(0);
+	setprg16(0x4000, 0);
+	setprg16(0x8000, 1);
+	setprg16(0xC000, 2);
+
+}
+
+
+static void M474Power(void) {
+	//  16 bytes: Header.PRG ROM size must be 3. Trainer and battery are forbidden; NES 2.0 PRG RAM size must be 0.
+	//	2048 bytes: Ignored.
+	//	47104 bytes : PRG ROM mapped to $4800 - $FFFF.
+	//  49119 bytes : PRG ROM mapped to $4020 - $FFFF.
+	//	8192¡Án bytes : CHR ROM mapped to PPU $0000 - $1FFF
+	//  My English is very poor!
+	// In theory, it should not exceed 48K,I hope Fceux can improve the support for nes 2.0
+	if (PRGsize[0] >= 64 * 1024)
+	{
+		SetupCartCHRMapping(0x00, &PRGptr[0][0xC000], 0x2000, 0);
+		// this is hack..... fceux seems to have an error reading PRG settings
+		// not modify fceux other code,
+		// fceux load prg is 64k, have 8k chr in 0xC000
+		// fceux load chr is 8k,but 0xFF or 0x00
+	}
+	if (subMapper == 1)
+	{
+		SetReadHandler(0x4800, 0xFFFF, M474ReadCart);
+	}
+	else
+	{
+		SetReadHandler(0x4020, 0xFFFF, M474ReadCart);
+	}
+	M474Sync();
+}
+
+
+
+void Mapper474_Init(CartInfo* info) {
+	info->Power = M474Power;
+	subMapper = info->submapper;
+
+	for (int i = 0; i < 0x1000; i++) {
+		defapuread[i] = GetReadHandler(0x4000 | i);
+	}
 }
