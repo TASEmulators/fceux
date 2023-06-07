@@ -90,7 +90,7 @@ std::vector<uint8> readHostFile(std::string const& file_path) {
 	return data;
 }
 
-std::array<std::string, NUM_FILE_PATHS> dir_names = { "SAVE", "ROMS", "USER" };
+std::array<std::string, NUM_FILE_PATHS> dir_names = { "save", "roms", "user" };
 
 }
 
@@ -118,7 +118,7 @@ BrokeStudioFirmware::BrokeStudioFirmware() {
 	this->nc = mg_bind(&this->mgr, httpd_port, BrokeStudioFirmware::httpdEvent);
 	if (this->nc == NULL) {
 		printf("Failed to create web server\n");
-	}else {
+	} else {
 		mg_set_protocol_http_websocket(this->nc);
 		this->httpd_thread = std::thread([this] {
 			while (this->httpd_run) {
@@ -126,15 +126,6 @@ BrokeStudioFirmware::BrokeStudioFirmware() {
 			}
 			mg_mgr_free(&this->mgr);
 		});
-	}
-
-	// Clear file list
-	for (uint8 p = 0; p < NUM_FILE_PATHS; p++)
-	{
-		for (uint8 f = 0; f < NUM_FILES; f++)
-		{
-			this->file_exists[p][f] = false;
-		}
 	}
 
 	// Init fake registered networks
@@ -230,7 +221,11 @@ void BrokeStudioFirmware::processBufferedMessage() {
 
 		case toesp_cmds_t::ESP_GET_STATUS:
 			UDBG("RAINBOW BrokeStudioFirmware received message ESP_GET_STATUS\n");
-			this->tx_messages.push_back({1, static_cast<uint8>(fromesp_cmds_t::READY)});
+			this->tx_messages.push_back({
+				2,
+				static_cast<uint8>(fromesp_cmds_t::READY),
+				static_cast<uint8>(isSdCardFilePresent ? 1 : 0)
+			});
 			break;
 		case toesp_cmds_t::DEBUG_GET_LEVEL:
 			UDBG("RAINBOW BrokeStudioFirmware received message DEBUG_GET_LEVEL\n");
@@ -293,22 +288,46 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			break;
 		case toesp_cmds_t::ESP_GET_FIRMWARE_VERSION:
 			UDBG("RAINBOW BrokeStudioFirmware received message ESP_GET_FIRMWARE_VERSION\n");
-			this->tx_messages.push_back({ 7, static_cast<uint8>(fromesp_cmds_t::ESP_FIRMWARE_VERSION), 5, 'F', 'C', 'E', 'U', 'X' });
+			this->tx_messages.push_back({ 16, static_cast<uint8>(fromesp_cmds_t::ESP_FIRMWARE_VERSION), 14, 'F', 'C', 'E', 'U', 'X', '_', 'F', 'I', 'R', 'M', 'W', 'A', 'R', 'E' });
+			break;
+
+		case toesp_cmds_t::ESP_FACTORY_SETTINGS:
+			UDBG("RAINBOW BrokeStudioFirmware received message ESP_FACTORY_SETTINGS\n");
+			UDBG("ESP_FACTORY_SETTINGS has no use here\n");
+			this->tx_messages.push_back({2,static_cast<uint8>(fromesp_cmds_t::ESP_FACTORY_RESET),static_cast<uint8>(esp_factory_reset::ERROR_WHILE_RESETTING_CONFIG)});
+			break;
+
+		case toesp_cmds_t::ESP_RESTART:
+			UDBG("RAINBOW BrokeStudioFirmware received message ESP_RESTART\n");
+			UDBG("ESP_RESTART has no use here\n");
 			break;
 
 		// WIFI CMDS
 
 		case toesp_cmds_t::WIFI_GET_STATUS:
 			UDBG("RAINBOW BrokeStudioFirmware received message WIFI_GET_STATUS\n");
-			this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::WIFI_STATUS), 3 }); // Simple answer, wifi is ok
+			this->tx_messages.push_back({ 3, static_cast<uint8>(fromesp_cmds_t::WIFI_STATUS), 3, 0 }); // Simple answer, wifi is ok
 			break;
+		// WIFI_GET_SSID/WIFI_GET_IP config commands are not relevant here, so we'll just use fake data
 		case toesp_cmds_t::WIFI_GET_SSID:
 			UDBG("RAINBOW BrokeStudioFirmware received message WIFI_GET_SSID\n");
-			this->tx_messages.push_back({ 12, static_cast<uint8>(fromesp_cmds_t::SSID), 10, 'F', 'C', 'E', 'U', 'X', '_', 'S', 'S', 'I', 'D' });
+			if ((this->wifi_config & static_cast<uint8>(wifi_config_t::WIFI_ENABLE)) == static_cast<uint8>(wifi_config_t::WIFI_ENABLE))
+			{
+				this->tx_messages.push_back({ 12, static_cast<uint8>(fromesp_cmds_t::SSID), 10, 'F', 'C', 'E', 'U', 'X', '_', 'S', 'S', 'I', 'D' });
+			} else
+			{
+				this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::SSID), 0 });
+			}
 			break;
 		case toesp_cmds_t::WIFI_GET_IP:
-			UDBG("RAINBOW BrokeStudioFirmware received message WIFI_GET_ID\n");
-			this->tx_messages.push_back({ 14, static_cast<uint8>(fromesp_cmds_t::IP_ADDRESS), 12, '1', '9', '2', '.', '1', '6', '8', '.', '1', '.', '1', '0' });
+			UDBG("RAINBOW BrokeStudioFirmware received message WIFI_GET_IP\n");
+			if ((this->wifi_config & static_cast<uint8>(wifi_config_t::WIFI_ENABLE)) == static_cast<uint8>(wifi_config_t::WIFI_ENABLE))
+			{
+				this->tx_messages.push_back({ 14, static_cast<uint8>(fromesp_cmds_t::IP_ADDRESS), 12, '1', '9', '2', '.', '1', '6', '8', '.', '1', '.', '1', '0' });
+			} else
+			{
+				this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::IP_ADDRESS), 0 });
+			}
 			break;
 		case toesp_cmds_t::WIFI_GET_CONFIG:
 			UDBG("RAINBOW BrokeStudioFirmware received message WIFI_GET_CONFIG\n");
@@ -320,14 +339,26 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			break;
 
 		// AP CMDS
-		// GET/SET AP config commands are not relevant here, so we'll just use a fake variable
+		// AP_GET_SSID/AP_GET_IP config commands are not relevant here, so we'll just use fake data
 		case toesp_cmds_t::AP_GET_SSID:
 			UDBG("RAINBOW BrokeStudioFirmware received message AP_GET_SSID\n");
-			this->tx_messages.push_back({ 12, static_cast<uint8>(fromesp_cmds_t::SSID), 10, 'F', 'C', 'E', 'U', 'X', '_', 'S', 'S', 'I', 'D' });
+			if ((this->wifi_config & static_cast<uint8>(wifi_config_t::AP_ENABLE)) == static_cast<uint8>(wifi_config_t::AP_ENABLE))
+			{
+				this->tx_messages.push_back({ 15, static_cast<uint8>(fromesp_cmds_t::SSID), 13, 'F', 'C', 'E', 'U', 'X', '_', 'A', 'P', '_', 'S', 'S', 'I', 'D' });
+			} else
+			{
+				this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::SSID), 0 });
+			}
 			break;
 		case toesp_cmds_t::AP_GET_IP:
 			UDBG("RAINBOW BrokeStudioFirmware received message AP_GET_ID\n");
-			this->tx_messages.push_back({ 16, static_cast<uint8>(fromesp_cmds_t::IP_ADDRESS), 14, '1', '2', '7', '.', '0', '.', '0', '.', '1', ':', '8', '0', '8', '0' });
+			if ((this->wifi_config & static_cast<uint8>(wifi_config_t::AP_ENABLE)) == static_cast<uint8>(wifi_config_t::AP_ENABLE))
+			{
+				this->tx_messages.push_back({ 16, static_cast<uint8>(fromesp_cmds_t::IP_ADDRESS), 14, '1', '2', '7', '.', '0', '.', '0', '.', '1', ':', '8', '0', '8', '0' });
+			} else
+			{
+				this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::IP_ADDRESS), 0 });
+			}
 			break;
 
 		// RND CMDS
@@ -465,8 +496,18 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			}
 			break;
 		}
-		case toesp_cmds_t::SERVER_GET_CONFIG_SETTINGS: {
-			UDBG("RAINBOW BrokeStudioFirmware received message SERVER_GET_CONFIG_SETTINGS\n");
+		case toesp_cmds_t::SERVER_SET_SETTINGS:
+			UDBG("RAINBOW BrokeStudioFirmware received message SERVER_SET_SETTINGS\n");
+			if (message_size >= 3) {
+				this->server_settings_port =
+					(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
+					(static_cast<uint16_t>(this->rx_buffer.at(3)));
+				uint8 len = this->rx_buffer.at(4);
+				this->server_settings_address = std::string(this->rx_buffer.begin() + 4, this->rx_buffer.begin() + 4 + len);
+			}
+			break;
+		case toesp_cmds_t::SERVER_GET_SAVED_SETTINGS: {
+			UDBG("RAINBOW BrokeStudioFirmware received message SERVER_GET_SAVED_SETTINGS\n");
 			if (this->default_server_settings_address.empty() && this->default_server_settings_port == 0) {
 				this->tx_messages.push_back({
 					1,
@@ -485,18 +526,19 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			}
 			break;
 		}
-		case toesp_cmds_t::SERVER_SET_SETTINGS:
-			UDBG("RAINBOW BrokeStudioFirmware received message SERVER_SET_SETTINGS\n");
-			if (message_size >= 3) {
-				this->server_settings_port =
-					(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
-					(static_cast<uint16_t>(this->rx_buffer.at(3)));
-				uint8 len = this->rx_buffer.at(4);
-				this->server_settings_address = std::string(this->rx_buffer.begin()+4, this->rx_buffer.begin()+4+len);
-			}
+		case toesp_cmds_t::SERVER_SET_SAVED_SETTINGS: {
+			UDBG("RAINBOW BrokeStudioFirmware received message SERVER_SET_SAVED_SETTINGS\n");
+			this->default_server_settings_port =
+				(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
+				(static_cast<uint16_t>(this->rx_buffer.at(3)));
+			uint8 len = this->rx_buffer.at(4);
+			this->default_server_settings_address = std::string(this->rx_buffer.begin() + 4, this->rx_buffer.begin() + 4 + len);
+			this->server_settings_port = this->default_server_settings_port;
+			this->server_settings_address = default_server_settings_address;
 			break;
-		case toesp_cmds_t::SERVER_RESTORE_SETTINGS:
-			UDBG("RAINBOW BrokeStudioFirmware received message SERVER_RESTORE_SETTINGS\n");
+		}
+		case toesp_cmds_t::SERVER_RESTORE_SAVED_SETTINGS:
+			UDBG("RAINBOW BrokeStudioFirmware received message SERVER_RESTORE_SAVED_SETTINGS\n");
 			this->server_settings_address = this->default_server_settings_address;
 			this->server_settings_port = this->default_server_settings_port;
 			break;
@@ -599,7 +641,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				if (networkItem > NUM_NETWORKS - 1) break;
 				bool const networkActive = this->rx_buffer.at(3) == 0 ? false : true;
 				if (networkActive) {
-					for (size_t i = 0; i < NUM_NETWORKS; i++)
+					for (size_t i = 0; i < NUM_NETWORKS; ++i)
 					{
 						this->networks[i].active = false;
 					}
@@ -631,7 +673,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				UDBG("%d (%s)\n", networkItem, networkActive ? "active" : "inactive");
 				if (this->networks[networkItem].ssid == "") break;
 				if (networkActive) {
-					for (size_t i = 0; i < NUM_NETWORKS; i++)
+					for (size_t i = 0; i < NUM_NETWORKS; ++i)
 					{
 						this->networks[i].active = false;
 					}
@@ -646,55 +688,74 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			UDBG("RAINBOW BrokeStudioFirmware received message FILE_OPEN\n");
 			if (message_size >= 4) {
 				uint8 config = this->rx_buffer.at(2);
-				uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
+				FileConfig file_config = parseFileConfig(config);
+				std::string filename;
 
-				if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
+				if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 					uint8 const path = this->rx_buffer.at(3);
 					uint8 const file = this->rx_buffer.at(4);
 					if (path < NUM_FILE_PATHS && file < NUM_FILES) {
-						this->file_exists[path][file] = true;
-						this->working_path = path;
-						this->working_file = file;
-						this->working_file_config = config;
-						this->file_offset = 0;
-						this->saveFiles();
+						filename = getAutoFilename(path, file);
+						int i = findFile(file_config.drive, filename);
+						if (i == -1) {
+							FileStruct temp_file = { file_config.drive, filename, std::vector<uint8>() };
+							this->files.push_back(temp_file);
+						}
 					}
-				}else {
-					//TODO manual mode
+				} else if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_MANUAL)) {
+					uint8 const path_length = this->rx_buffer.at(3);
+					filename = std::string(this->rx_buffer.begin() + 4, this->rx_buffer.begin() + 4 + path_length);
+					int i = findFile(file_config.drive, filename);
+					if (i == -1) {
+						FileStruct temp_file = { file_config.drive, filename, std::vector<uint8>() };
+						this->files.push_back(temp_file);
+					}
 				}
+				int i = findFile(file_config.drive, filename);
+				this->working_file.active = true;
+				this->working_file.offset = 0;
+				this->working_file.file = &this->files.at(i);
+				this->saveFiles();
 			}
 			break;
 		}
 		case toesp_cmds_t::FILE_CLOSE:
 			UDBG("RAINBOW BrokeStudioFirmware received message FILE_CLOSE\n");
-			this->working_file = NO_WORKING_FILE;
+			this->working_file.active = false;
 			this->saveFiles();
 			break;
 		case toesp_cmds_t::FILE_STATUS: {
 			UDBG("RAINBOW BrokeStudioFirmware received message FILE_STATUS\n");
 
-			uint8 access_mode = this->working_file_config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
-
-			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
-				if (this->working_file == NO_WORKING_FILE) {
-					this->tx_messages.push_back({
-						2,
-						static_cast<uint8>(fromesp_cmds_t::FILE_STATUS),
-						0
+			if (this->working_file.active == false) {
+				this->tx_messages.push_back({
+					2,
+					static_cast<uint8>(fromesp_cmds_t::FILE_STATUS),
+					0
 					});
-				}else {
+			} else {
+				FileConfig file_config = parseFileConfig(this->working_file.config);
+				if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 					this->tx_messages.push_back({
 						5,
 						static_cast<uint8>(fromesp_cmds_t::FILE_STATUS),
 						1,
-						static_cast<uint8>(this->working_file_config),
-						static_cast<uint8>(this->working_path),
-						static_cast<uint8>(this->working_file),
-					});
+						static_cast<uint8>(this->working_file.config),
+						static_cast<uint8>(this->working_file.auto_path),
+						static_cast<uint8>(this->working_file.auto_file),
+						});
+				} else if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_MANUAL)) {
+					std::string filename = this->working_file.file->filename;
+					filename = filename.substr(filename.find_first_of("/") + 1);
+					std::deque<uint8> message({
+						static_cast<uint8>(3 + filename.size()),
+						static_cast<uint8>(fromesp_cmds_t::FILE_STATUS),
+						1,
+						static_cast<uint8>(filename.size()),
+						});
+					message.insert(message.end(), filename.begin(), filename.end());
+					this->tx_messages.push_back(message);
 				}
-			}
-			else {
-				//TODO manual mode
 			}
 			break;
 		}
@@ -705,23 +766,43 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				break;
 			}
 			uint8 config = this->rx_buffer.at(2);
-			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
+			FileConfig file_config = parseFileConfig(config);
+			std::string filename;
+			int i = -1;
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
+			if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size == 4) {
 					uint8 const path = this->rx_buffer.at(3);
 					uint8 const file = this->rx_buffer.at(4);
-					if (path < NUM_FILE_PATHS && file < NUM_FILES) {
-						this->tx_messages.push_back({
-							2,
-							static_cast<uint8>(fromesp_cmds_t::FILE_EXISTS),
-							static_cast<uint8>(this->file_exists[path][file] ? 1 : 0)
-						});
-					}
+					filename = getAutoFilename(path, file);
 				}
-			}else {
-				//TODO manual mode
+			}else if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_MANUAL)) {
+				uint8 const path_length = this->rx_buffer.at(3);
+				filename = std::string(this->rx_buffer.begin() + 4, this->rx_buffer.begin() + 4 + path_length);
 			}
+
+			// special case just for emulation
+			if (filename == "/web/")
+			{
+				if (::getenv("RAINBOW_WWW_ROOT") != NULL) i = 1;
+			}
+			else
+			{
+				if (filename.find_last_of("/") == filename.length() - 1)
+				{
+					i = findPath(file_config.drive, filename);
+				}
+				else
+				{
+					i = findFile(file_config.drive, filename);
+				}
+			}
+
+			this->tx_messages.push_back({
+				2,
+				static_cast<uint8>(fromesp_cmds_t::FILE_EXISTS),
+				static_cast<uint8>(i == -1 ? 0 : 1)
+			});
 			break;
 		}
 		case toesp_cmds_t::FILE_DELETE: {
@@ -731,67 +812,77 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				break;
 			}
 			uint8 config = this->rx_buffer.at(2);
-			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
+			FileConfig file_config = parseFileConfig(config);
+			std::string filename;
+			int i = -1;
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
+			if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size == 4) {
 					uint8 const path = this->rx_buffer.at(3);
 					uint8 const file = this->rx_buffer.at(4);
 					if (path < NUM_FILE_PATHS && file < NUM_FILES) {
-						if (this->file_exists[path][file]) {
-							// File exists, let's delete it
-							this->files[path][file].clear();
-							this->file_exists[path][file] = false;
-							this->tx_messages.push_back({
-								2,
-								static_cast<uint8>(fromesp_cmds_t::FILE_DELETE),
-								static_cast<uint8>(file_delete_results_t::SUCCESS)
-							});
-							this->saveFiles();
-						}else {
-							// File does not exist
-							this->tx_messages.push_back({
-								2,
-								static_cast<uint8>(fromesp_cmds_t::FILE_DELETE),
-								static_cast<uint8>(file_delete_results_t::FILE_NOT_FOUND)
-							});
-						}
-					}else {
-						// Error while deleting the file
+						filename = getAutoFilename(path, file);
+					} else {
+						// Invalid path or file
 						this->tx_messages.push_back({
 							2,
 							static_cast<uint8>(fromesp_cmds_t::FILE_DELETE),
 							static_cast<uint8>(file_delete_results_t::INVALID_PATH_OR_FILE)
 						});
+						break;
 					}
 				}
 			}
-			else {
-				//TODO manual mode
+			else if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_MANUAL)) {
+				uint8 const path_length = this->rx_buffer.at(4);
+				filename = std::string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + path_length);
 			}
+
+			i = findFile(file_config.drive, filename);
+			if (i == -1) {
+				// File does not exist
+				this->tx_messages.push_back({
+					2,
+					static_cast<uint8>(fromesp_cmds_t::FILE_DELETE),
+					static_cast<uint8>(file_delete_results_t::FILE_NOT_FOUND)
+					});
+				break;
+			} else {
+				this->files.erase(this->files.begin() + i);
+				this->saveFiles();
+			}
+
+			this->tx_messages.push_back({
+				2,
+				static_cast<uint8>(fromesp_cmds_t::FILE_DELETE),
+				static_cast<uint8>(file_delete_results_t::SUCCESS)
+				});
+
 			break;
 		}
 		case toesp_cmds_t::FILE_SET_CUR:
 			UDBG("RAINBOW BrokeStudioFirmware received message FILE_SET_CUR\n");
 			if (2 <= message_size && message_size <= 5) {
-				this->file_offset = this->rx_buffer.at(2);
-				this->file_offset += static_cast<uint32>(message_size >= 3 ? this->rx_buffer.at(3) : 0) << 8;
-				this->file_offset += static_cast<uint32>(message_size >= 4 ? this->rx_buffer.at(4) : 0) << 16;
-				this->file_offset += static_cast<uint32>(message_size >= 5 ? this->rx_buffer.at(5) : 0) << 24;
+				if (this->working_file.active) {
+					this->working_file.offset = this->rx_buffer.at(2);
+					this->working_file.offset += static_cast<uint32>(message_size >= 3 ? this->rx_buffer.at(3) : 0) << 8;
+					this->working_file.offset += static_cast<uint32>(message_size >= 4 ? this->rx_buffer.at(4) : 0) << 16;
+					this->working_file.offset += static_cast<uint32>(message_size >= 5 ? this->rx_buffer.at(5) : 0) << 24;
+				}
 			}
 			break;
 		case toesp_cmds_t::FILE_READ:
 			UDBG("RAINBOW BrokeStudioFirmware received message FILE_READ\n");
 			if (message_size == 2) {
-				if (this->working_file != NO_WORKING_FILE) {
+				if (this->working_file.active) {
 					uint8 const n = this->rx_buffer.at(2);
-					this->readFile(this->working_path, this->working_file, n, this->file_offset);
-					this->file_offset += n;
-					UDBG("working file offset: %u (%x)\n", this->file_offset, this->file_offset);
-					UDBG("file size: %lu bytes\n", this->files[this->working_path][this->working_file].size());
-					if (this->file_offset > this->files[this->working_path][this->working_file].size()) {
-						this->file_offset = this->files[this->working_path][this->working_file].size();
-					}
+					this->readFile(n);
+					this->working_file.offset += n;
+					UDBG("working file offset: %u (%x)\n", this->working_file.offset, this->working_file.offset);
+					/*UDBG("file size: %lu bytes\n", this->esp_files[this->working_path_auto][this->working_file_auto].size());
+					if (this->working_file.offset > this->esp_files[this->working_path_auto][this->working_file_auto].size()) {
+						this->working_file.offset = this->esp_files[this->working_path_auto][this->working_file_auto].size();
+					}*/
 				}else {
 					this->tx_messages.push_back({2, static_cast<uint8>(fromesp_cmds_t::FILE_DATA), 0});
 				}
@@ -799,15 +890,15 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			break;
 		case toesp_cmds_t::FILE_WRITE:
 			UDBG("RAINBOW BrokeStudioFirmware received message FILE_WRITE\n");
-			if (message_size >= 3 && this->working_file != NO_WORKING_FILE) {
-				this->writeFile(this->working_path, this->working_file, this->file_offset, this->rx_buffer.begin() + 2, this->rx_buffer.begin() + message_size + 1);
-				this->file_offset += message_size - 1;
+			if (message_size >= 3 && this->working_file.active) {
+				this->writeFile(this->rx_buffer.begin() + 2, this->rx_buffer.begin() + message_size + 1);
+				this->working_file.offset += message_size - 1;
 			}
 			break;
 		case toesp_cmds_t::FILE_APPEND:
 			UDBG("RAINBOW BrokeStudioFirmware received message FILE_APPEND\n");
-			if (message_size >= 3 && this->working_file != NO_WORKING_FILE) {
-				this->writeFile(this->working_path, this->working_file, this->files[working_path][working_file].size(), this->rx_buffer.begin() + 2, this->rx_buffer.begin() + message_size + 1);
+			if (message_size >= 3 && this->working_file.active) {
+				//this->appendFile(this->rx_buffer.begin() + 2, this->rx_buffer.begin() + message_size + 1);
 			}
 			break;
 		case toesp_cmds_t::FILE_COUNT: {
@@ -817,9 +908,9 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				break;
 			}
 			uint8 config = this->rx_buffer.at(2);
-			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
+			FileConfig file_config = parseFileConfig(config);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
+			if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size == 3) {
 					uint8 const path = this->rx_buffer.at(3);
 					if (path >= NUM_FILE_PATHS) {
@@ -830,20 +921,22 @@ void BrokeStudioFirmware::processBufferedMessage() {
 						});
 					}else {
 						uint8 nb_files = 0;
-						for (bool exists : this->file_exists[path]) {
-							if (exists) {
-								++nb_files;
-							}
+
+						for (uint8_t file = 0; file < NUM_FILES; ++file) {
+							std::string filename = getAutoFilename(path, file);
+							int i = findFile(file_config.drive, filename);
+							if (i != -1) nb_files++;
 						}
+
 						this->tx_messages.push_back({
 							2,
 							static_cast<uint8>(fromesp_cmds_t::FILE_COUNT),
 							nb_files
-							});
+						});
 						UDBG("%u files found in path %u\n", nb_files, path);
 					}
 				}
-			}else {
+			} else {
 				//TODO manual mode
 			}
 
@@ -855,9 +948,9 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				break;
 			}
 			uint8 config = this->rx_buffer.at(2);
-			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
+			FileConfig file_config = parseFileConfig(config);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
+			if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size >= 3) {
 					std::vector<uint8> existing_files;
 					uint8 const path = this->rx_buffer.at(3);
@@ -869,18 +962,31 @@ void BrokeStudioFirmware::processBufferedMessage() {
 					}
 					uint8 page_start = current_page * page_size;
 					uint8 page_end = current_page * page_size + page_size;
-					uint8 nFiles = 0;
-					if (page_end > this->file_exists[path].size())
-						page_end = this->file_exists[path].size();
-					for (uint8 i = 0; i < NUM_FILES; ++i) {
-						if (this->file_exists[path][i]) {
-							if (nFiles >= page_start && nFiles < page_end) {
-								existing_files.push_back(i);
-							}
-							nFiles++;
-						}
-						if (nFiles >= page_end) break;
+					uint8 nb_files = 0;
+
+					for (uint8_t file = 0; file < NUM_FILES; ++file) {
+						std::string filename = getAutoFilename(path, file);
+						int i = findFile(file_config.drive, filename);
+						if (i != -1) nb_files++;
 					}
+
+					if (page_end > nb_files) {
+						page_end = nb_files;
+					}
+
+					nb_files = 0;
+					for (uint8_t file = 0; file < NUM_FILES; ++file) {
+						std::string filename = getAutoFilename(path, file);
+						int i = findFile(file_config.drive, filename);
+						if (i != -1) {
+							if (nb_files >= page_start && nb_files < page_end) {
+								existing_files.push_back(file);
+							}
+							nb_files++;
+						}
+						if (nb_files >= page_end) break;
+					}
+
 					std::deque<uint8> message({
 						static_cast<uint8>(existing_files.size() + 2),
 						static_cast<uint8>(fromesp_cmds_t::FILE_LIST),
@@ -889,32 +995,152 @@ void BrokeStudioFirmware::processBufferedMessage() {
 					message.insert(message.end(), existing_files.begin(), existing_files.end());
 					this->tx_messages.push_back(message);
 				}
-			}
-			else {
+			} else {
 				//TODO manual mode
+				this->tx_messages.push_back({
+					2,
+					static_cast<uint8>(fromesp_cmds_t::FILE_LIST),
+					0
+				});
 			}
 			break;
 		}
 		case toesp_cmds_t::FILE_GET_FREE_ID:
 			UDBG("RAINBOW BrokeStudioFirmware received message FILE_GET_FREE_ID\n");
-			if (message_size == 2) {
-				uint8 const file_id = this->getFreeFileId(this->rx_buffer.at(2));
-				if (file_id != 128) {
+			if (message_size == 3) {
+				uint8 const drive = this->rx_buffer.at(2);
+				uint8 const path = this->rx_buffer.at(3);
+				uint8 i;
+
+				for (i = 0; i < NUM_FILES; ++i) {
+					std::string filename = getAutoFilename(path, i);
+					int f = findFile(drive, filename);
+					if (f == -1) break;
+				}
+
+				if (i != NUM_FILES) {
 					// Free file ID found
 					this->tx_messages.push_back({
 						2,
 						static_cast<uint8>(fromesp_cmds_t::FILE_ID),
-						file_id,
-					});
-				}else {
+						i,
+						});
+				}
+				else {
 					// Free file ID not found
 					this->tx_messages.push_back({
 						1,
 						static_cast<uint8>(fromesp_cmds_t::FILE_ID)
-					});
+						});
 				}
 			}
 			break;
+		case toesp_cmds_t::FILE_GET_FS_INFO: {
+			UDBG("RAINBOW BrokeStudioFirmware received message FILE_GET_FS_INFO\n");
+			if (message_size < 2) {
+				break;
+			}
+			uint8 config = this->rx_buffer.at(2);
+			FileConfig file_config = parseFileConfig(config);
+			uint64 free = 0;
+			uint64 used = 0;
+			uint8 free_pct = 0;
+			uint8 used_pct = 0;
+			if (file_config.drive == static_cast<uint8>(file_config_flags_t::DESTINATION_ESP)) {
+
+				for (size_t i = 0; i < this->files.size(); ++i) {
+					if ((this->files.at(i).drive == static_cast<uint8>(file_config_flags_t::DESTINATION_ESP))) {
+						used += this->files.at(i).data.size();
+					}
+				}
+
+				free = ESP_FLASH_SIZE - used;
+				free_pct = ((ESP_FLASH_SIZE - used) * 100) / ESP_FLASH_SIZE;
+				used_pct = 100 - free_pct; // (used * 100) / ESP_FLASH_SIZE;
+
+				this->tx_messages.push_back({
+					27,
+					static_cast<uint8>(fromesp_cmds_t::FILE_FS_INFO),
+					(ESP_FLASH_SIZE >> 54) & 0xff,
+					(ESP_FLASH_SIZE >> 48) & 0xff,
+					(ESP_FLASH_SIZE >> 40) & 0xff,
+					(ESP_FLASH_SIZE >> 32) & 0xff,
+					(ESP_FLASH_SIZE >> 24) & 0xff,
+					(ESP_FLASH_SIZE >> 16) & 0xff,
+					(ESP_FLASH_SIZE >> 8) & 0xff,
+					(ESP_FLASH_SIZE) & 0xff,
+					static_cast<uint8>((free >> 54) & 0xff),
+					static_cast<uint8>((free >> 48) & 0xff),
+					static_cast<uint8>((free >> 40) & 0xff),
+					static_cast<uint8>((free >> 32) & 0xff),
+					static_cast<uint8>((free >> 24) & 0xff),
+					static_cast<uint8>((free >> 16) & 0xff),
+					static_cast<uint8>((free >> 8) & 0xff),
+					static_cast<uint8>((free) & 0xff),
+					free_pct,
+					static_cast<uint8>((used >> 54) & 0xff),
+					static_cast<uint8>((used >> 48) & 0xff),
+					static_cast<uint8>((used >> 40) & 0xff),
+					static_cast<uint8>((used >> 32) & 0xff),
+					static_cast<uint8>((used >> 24) & 0xff),
+					static_cast<uint8>((used >> 16) & 0xff),
+					static_cast<uint8>((used >> 8) & 0xff),
+					static_cast<uint8>((used) & 0xff),
+					used_pct
+				});
+				break;
+			} else if (file_config.drive == static_cast<uint8>(file_config_flags_t::DESTINATION_SD)) {
+				if (isSdCardFilePresent) {
+
+					for (size_t i = 0; i < this->files.size(); ++i) {
+						if ((this->files.at(i).drive == static_cast<uint8>(file_config_flags_t::DESTINATION_SD))) {
+							used += this->files.at(i).data.size();
+						}
+					}
+
+					free = SD_CARD_SIZE - used;
+					free_pct = ((SD_CARD_SIZE - used) * 100) / SD_CARD_SIZE;
+					used_pct = 100 - free_pct; // (used * 100) / SD_CARD_SIZE;
+
+					this->tx_messages.push_back({
+						27,
+						static_cast<uint8>(fromesp_cmds_t::FILE_FS_INFO),
+						(SD_CARD_SIZE >> 54) & 0xff,
+						(SD_CARD_SIZE >> 48) & 0xff,
+						(SD_CARD_SIZE >> 40) & 0xff,
+						(SD_CARD_SIZE >> 32) & 0xff,
+						(SD_CARD_SIZE >> 24) & 0xff,
+						(SD_CARD_SIZE >> 16) & 0xff,
+						(SD_CARD_SIZE >> 8) & 0xff,
+						(SD_CARD_SIZE) & 0xff,
+						static_cast<uint8>((free >> 54) & 0xff),
+						static_cast<uint8>((free >> 48) & 0xff),
+						static_cast<uint8>((free >> 40) & 0xff),
+						static_cast<uint8>((free >> 32) & 0xff),
+						static_cast<uint8>((free >> 24) & 0xff),
+						static_cast<uint8>((free >> 16) & 0xff),
+						static_cast<uint8>((free >> 8) & 0xff),
+						static_cast<uint8>((free) & 0xff),
+						free_pct,
+						static_cast<uint8>((used >> 54) & 0xff),
+						static_cast<uint8>((used >> 48) & 0xff),
+						static_cast<uint8>((used >> 40) & 0xff),
+						static_cast<uint8>((used >> 32) & 0xff),
+						static_cast<uint8>((used >> 24) & 0xff),
+						static_cast<uint8>((used >> 16) & 0xff),
+						static_cast<uint8>((used >> 8) & 0xff),
+						static_cast<uint8>((used) & 0xff),
+						used_pct
+					});
+					break;
+				}
+			}
+			this->tx_messages.push_back({
+				1,
+				static_cast<uint8>(fromesp_cmds_t::FILE_FS_INFO)
+			});
+			break;
+		}
 		case toesp_cmds_t::FILE_GET_INFO: {
 			UDBG("RAINBOW BrokeStudioFirmware received message FILE_GET_INFO\n");
 
@@ -922,18 +1148,20 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				break;
 			}
 			uint8 config = this->rx_buffer.at(2);
-			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
+			FileConfig file_config = parseFileConfig(config);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
+			if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size == 4) {
 					uint8 const path = this->rx_buffer.at(3);
 					uint8 const file = this->rx_buffer.at(4);
-					if (path < NUM_FILE_PATHS && file < NUM_FILES && this->file_exists[path][file]) {
+					std::string filename = getAutoFilename(path, file);
+					int i = findFile(file_config.drive, filename);
+					if (path < NUM_FILE_PATHS && file < NUM_FILES && i != -1) {
 						// Compute info
 						uint32 file_crc32;
-						file_crc32 = CalcCRC32(0L, this->files[path][file].data(), this->files[path][file].size());
+						file_crc32 = CalcCRC32(0L, this->files.at(i).data.data(), this->files.at(i).data.size());
 
-						uint32 file_size = this->files[path][file].size();
+						uint32 file_size = this->files.at(i).data.size();
 
 						// Send info
 						this->tx_messages.push_back({
@@ -958,7 +1186,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 						});
 					}
 				}
-			}else {
+			} else {
 				//TODO manual mode
 			}
 
@@ -971,9 +1199,9 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				break;
 			}
 			uint8 config = this->rx_buffer.at(2);
-			uint8 access_mode = config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE);
+			FileConfig file_config = parseFileConfig(config);
 
-			if (access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
+			if (file_config.access_mode == static_cast<uint8>(file_config_flags_t::ACCESS_MODE_AUTO)) {
 				if (message_size > 6) {
 					// Parse
 					uint8 const urlLength = this->rx_buffer.at(3);
@@ -987,10 +1215,10 @@ void BrokeStudioFirmware::processBufferedMessage() {
 
 					// Delete existing file
 					if (path < NUM_FILE_PATHS && file < NUM_FILES) {
-						if (this->file_exists[path][file]) {
-							// File exists, let's delete it
-							this->files[path][file].clear();
-							this->file_exists[path][file] = false;
+						std::string filename = getAutoFilename(path, file);
+						int i = findFile(file_config.drive, filename);
+						if (i != -1) {
+							this->files.erase(this->files.begin() + i);
 							this->saveFiles();
 						}
 					}else {
@@ -1008,20 +1236,16 @@ void BrokeStudioFirmware::processBufferedMessage() {
 					// Download new file
 					this->downloadFile(url, path, file);
 				}
-			}else {
+			} else {
 				//TODO manual mode
 			}
 			break;
 		}
 		case toesp_cmds_t::FILE_FORMAT:
 			UDBG("RAINBOW BrokeStudioFirmware received message FILE_FORMAT\n");
-			if (message_size == 1) {
-				// Clear file list
-				for (uint8 p = 0; p < NUM_FILE_PATHS; p++) {
-					for (uint8 f = 0; f < NUM_FILES; f++) {
-						this->file_exists[p][f] = false;
-					}
-				}
+			if (message_size == 2) {
+				uint8 drive = rx_buffer.at(2);
+				clearFiles(drive);
 			}
 			break;
 		default:
@@ -1033,20 +1257,45 @@ void BrokeStudioFirmware::processBufferedMessage() {
 	this->rx_buffer.clear();
 }
 
-void BrokeStudioFirmware::readFile(uint8 path, uint8 file, uint8 n, uint32 offset) {
-	assert(path < NUM_FILE_PATHS);
-	assert(file < NUM_FILES);
+FileConfig BrokeStudioFirmware::parseFileConfig(uint8 config) {
+	return FileConfig({
+		static_cast<uint8>(config & static_cast<uint8>(file_config_flags_t::ACCESS_MODE_MASK)),
+		static_cast<uint8>((config & static_cast<uint8>(file_config_flags_t::DESTINATION_MASK)))
+	});
+}
 
+int BrokeStudioFirmware::findFile(uint8 drive, std::string filename) {
+	for (size_t i = 0; i < this->files.size(); ++i) {
+		if ((this->files.at(i).drive == drive) && (this->files.at(i).filename == filename)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int BrokeStudioFirmware::findPath(uint8 drive, std::string path) {
+	for (size_t i = 0; i < this->files.size(); ++i) {
+		if ((this->files.at(i).drive == drive) && (this->files.at(i).filename.substr(0, path.length()) == path)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+std::string BrokeStudioFirmware::getAutoFilename(uint8 path, uint8 file) {
+	return "/" + dir_names[path] + "/file" + std::to_string(file) + ".bin";
+}
+
+void BrokeStudioFirmware::readFile(uint8 n) {
 	// Get data range
-	std::vector<uint8> const& f = this->files[path][file];
 	std::vector<uint8>::const_iterator data_begin;
 	std::vector<uint8>::const_iterator data_end;
-	if (offset >= f.size()) {
-		data_begin = f.end();
+	if (this->working_file.offset >= this->working_file.file->data.size()) {
+		data_begin = this->working_file.file->data.end();
 		data_end = data_begin;
 	}else {
-		data_begin = f.begin() + offset;
-		data_end = f.begin() + std::min(static_cast<std::vector<uint8>::size_type>(offset) + n, f.size());
+		data_begin = this->working_file.file->data.begin() + this->working_file.offset;
+		data_end = this->working_file.file->data.begin() + std::min(static_cast<std::vector<uint8>::size_type>(this->working_file.offset) + n, this->working_file.file->data.size());
 	}
 	std::vector<uint8>::size_type const data_size = data_end - data_begin;
 
@@ -1061,144 +1310,151 @@ void BrokeStudioFirmware::readFile(uint8 path, uint8 file, uint8 n, uint32 offse
 }
 
 template<class I>
-void BrokeStudioFirmware::writeFile(uint8 path, uint8 file, uint32 offset, I data_begin, I data_end) {
-	std::vector<uint8>& f = this->files[path][file];
-	auto const data_size = data_end - data_begin;
-	uint32 const offset_end = offset + data_size;
-	if (offset_end > f.size()) {
-		f.resize(offset_end, 0);
-	}
-
-	for (std::vector<uint8>::size_type i = offset; i < offset_end; ++i) {
-		f[i] = *data_begin;
-		++data_begin;
-	}
-	this->file_exists[path][file] = true;
-}
-
-uint8 BrokeStudioFirmware::getFreeFileId(uint8 path) const {
-	uint8 const NOT_FOUND = 128;
-	if (path >= NUM_FILE_PATHS) {
-		return NOT_FOUND;
-	}
-	std::array<bool, NUM_FILES> const& existing_files = this->file_exists.at(path);
-	for (size_t i = 0; i < existing_files.size(); ++i) {
-		if (!existing_files[i]) {
-			return i;
-		}
-	}
-	return NOT_FOUND;
-}
-
-void BrokeStudioFirmware::saveFiles() const {
-	char const* filesystem_file_path = ::getenv("RAINBOW_FILESYSTEM_FILE");
-	if (filesystem_file_path == NULL) {
-		FCEU_printf("RAINBOW_FILESYSTEM_FILE environment variable is not set\n");
+void BrokeStudioFirmware::writeFile(I data_begin, I data_end) {
+	if (this->working_file.active == false) {
 		return;
 	}
 
-	std::ofstream ofs(filesystem_file_path);
-	for (uint8 p = 0; p < NUM_FILE_PATHS; p++)
-	{
-		for (uint8 f = 0; f < NUM_FILES; f++)
-		{
-			if (this->file_exists[p][f])
-			{
-				ofs << (char)p << (char)f;
-				uint32 size = this->files[p][f].size();
-				ofs << (char)((size & 0xff000000) >> 24);
-				ofs << (char)((size & 0x00ff0000) >> 16);
-				ofs << (char)((size & 0x0000ff00) >> 8);
-				ofs << (char)((size & 0x000000ff));
-				for (uint8 byte : this->files[p][f]) {
-					ofs << (char)byte;
-				}
-			}
-		}
+	auto const data_size = data_end - data_begin;
+	uint32 const offset_end = this->working_file.offset + data_size;
+	if (offset_end > this->working_file.file->data.size()) {
+		this->working_file.file->data.resize(offset_end, 0);
 	}
-/*
-	for(std::array<bool, NUM_FILES> const& path: this->file_exists) {
-		for(bool exists: path) {
-			ofs << exists << ' ';
-		}
-		ofs << '\n';
-	}
-	ofs << '\n';
 
-	for (std::array<std::vector<uint8>, NUM_FILES> const& path: this->files) {
-		for (std::vector<uint8> const& file: path) {
-			ofs << (char)file.size();
-			for (uint8 byte: file) {
-				ofs << (char)byte;
-			}
-			ofs << '\n';
+	for (std::vector<uint8>::size_type i = this->working_file.offset; i < offset_end; ++i) {
+		this->working_file.file->data[i] = *data_begin;
+		++data_begin;
+	}
+}
+
+void BrokeStudioFirmware::saveFiles() {
+	char const* esp_filesystem_file_path = ::getenv("RAINBOW_ESP_FILESYSTEM_FILE");
+	if (esp_filesystem_file_path == NULL) {
+		FCEU_printf("RAINBOW_ESP_FILESYSTEM_FILE environment variable is not set\n");
+	} else {
+		_saveFiles(0, esp_filesystem_file_path);
+	}
+
+	char const* sd_filesystem_file_path = ::getenv("RAINBOW_SD_FILESYSTEM_FILE");
+	if (sd_filesystem_file_path == NULL) {
+		FCEU_printf("RAINBOW_SD_FILESYSTEM_FILE environment variable is not set\n");
+	} else {
+		_saveFiles(2, sd_filesystem_file_path);
+	}
+}
+
+void BrokeStudioFirmware::_saveFiles(uint8 drive, char const* filename) {
+	std::ofstream ofs(filename, std::ios::binary);
+	if (ofs.fail()) {
+		FCEU_printf("Couldn't open RAINBOW_FILESYSTEM_FILE (%s)\n", filename);
+		return;
+	}
+
+	ofs << (char)(0x00); //file format version
+
+	auto file = this->files.begin();
+	for (file; file != this->files.end(); ++file)
+	{
+		if (file->drive != drive) continue;
+		ofs << (char)file->filename.length(); //filename length
+		for (char& c : std::string(file->filename)) { //filename
+			ofs << (c);
+		}
+		uint32 size = file->data.size(); //data size
+		ofs << (char)((size & 0xff000000) >> 24);
+		ofs << (char)((size & 0x00ff0000) >> 16);
+		ofs << (char)((size & 0x0000ff00) >> 8);
+		ofs << (char)((size & 0x000000ff));
+		for (uint8 byte : file->data) { //actual data
+			ofs << (char)byte;
 		}
 	}
-*/
 }
 
 void BrokeStudioFirmware::loadFiles() {
-	char const* filesystem_file_path = ::getenv("RAINBOW_FILESYSTEM_FILE");
-	if (filesystem_file_path == NULL) {
-		FCEU_printf("RAINBOW_FILESYSTEM_FILE environment variable is not set\n");
-		return;
+	char const* esp_filesystem_file_path = ::getenv("RAINBOW_ESP_FILESYSTEM_FILE");
+	if (esp_filesystem_file_path == NULL) {
+		isEspFlashFilePresent = false;
+		FCEU_printf("RAINBOW_ESP_FILESYSTEM_FILE environment variable is not set\n");
+	}
+	else {
+		isEspFlashFilePresent = true;
+		_loadFiles(0, esp_filesystem_file_path);
 	}
 
-	std::ifstream ifs(filesystem_file_path);
+	char const* sd_filesystem_file_path = ::getenv("RAINBOW_SD_FILESYSTEM_FILE");
+	if (sd_filesystem_file_path == NULL) {
+		isSdCardFilePresent = false;
+		FCEU_printf("RAINBOW_SD_FILESYSTEM_FILE environment variable is not set\n");
+	}
+	else {
+		isSdCardFilePresent = true;
+		_loadFiles(2, sd_filesystem_file_path);
+	}
+}
+
+void BrokeStudioFirmware::_loadFiles(uint8 drive, char const* filename) {
+	std::ifstream ifs(filename, std::ios::binary);
 	if (ifs.fail()) {
-		FCEU_printf("Couldn't open RAINBOW_FILESYSTEM_FILE\n");
+		FCEU_printf("Couldn't open RAINBOW_FILESYSTEM_FILE (%s)\n", filename);
 		return;
 	}
+	
+	// Stop eating new lines in binary mode!!!
+	ifs.unsetf(std::ios::skipws);
 
-	while (!ifs.peek())
-	{
-		uint8 p;
-		uint8 f;
-		uint8 t;
-		uint32 size = 0;
-		ifs >> p;
-		ifs >> f;
-		ifs >> t;
-		size |= (t << 24);
-		ifs >> t;
-		size |= (t << 16);
-		ifs >> t;
-		size |= (t << 8);
-		ifs >> t;
-		size |= t;
-		this->file_exists[p][f] = true;
-		this->files[p][f].clear();
-		this->files[p][f].reserve(size);
-		for (uint32 i = 0; i < size; i++)
-		{
-			ifs >> t;
-			this->files[p][f].push_back(t);
-		}
+	clearFiles(drive);
 
-	}
-/*
-	for(std::array<bool, NUM_FILES>& path: this->file_exists) {
-		for(bool& exists: path) {
-			ifs >> exists;
-		}
-	}
+	char c;
+	uint8 l;
+	uint8 t;
+	uint32 size;
+	uint8 v;
 
-	for (std::array<std::vector<uint8>, NUM_FILES>& path: this->files) {
-		for (std::vector<uint8>& file: path) {
-			size_t file_size;
-			ifs >> file_size;
+	v = ifs.get(); //file format version
 
-			file.clear();
-			file.reserve(file_size);
-			for (size_t i = 0; i < file_size; ++i) {
-				uint16_t byte;
-				ifs >> byte;
-				if (byte > 255) throw std::runtime_error("invalid filesystem file");
-				file.push_back(byte);
+	if (v == 0) {
+		while (ifs.peek() != EOF) {
+			FileStruct temp_file;// = { 0, 0, 0, "", std::vector<uint8>() };
+			temp_file.drive = drive; //drive
+			l = ifs.get(); //filename length
+			temp_file.filename.reserve(l);
+			for (size_t i = 0; i < l; ++i) { //filename
+				c = ifs.get();
+				temp_file.filename.push_back(c);
 			}
+			size = 0; //data size
+			t = ifs.get();
+			size |= (t << 24);
+			t = ifs.get();
+			size |= (t << 16);
+			t = ifs.get();
+			size |= (t << 8);
+			t = ifs.get();
+			size |= t;
+			temp_file.data.clear();
+			temp_file.data.reserve(size);
+			for (uint32 i = 0; i < size; ++i) { //actual data
+				t = ifs.get();
+				temp_file.data.push_back(t);
+			}
+			this->files.push_back(temp_file);
+		}
+	} else {
+		FCEU_printf("RAINBOW_FILESYSTEM_FILE (%s) format version unknown\n", filename);
+	}
+}
+
+void BrokeStudioFirmware::clearFiles(uint8 drive) {
+	unsigned int i = 0;
+	while (i < this->files.size()) {
+		if (this->files.at(i).drive == drive) {
+			this->files.erase(this->files.begin() + i);
+		}
+		else {
+			++i;
 		}
 	}
-*/
 }
 
 template<class I>
@@ -1569,15 +1825,19 @@ void BrokeStudioFirmware::httpdEvent(mg_connection *nc, int ev, void *ev_data) {
 		UDBG("http request event \n");
 		struct http_message *hm = (struct http_message *) ev_data;
 		UDBG("  uri: %.*s\n", hm->uri.len, hm->uri.p);
-		if (std::string("/api/config") == std::string(hm->uri.p, hm->uri.len)) {
+		if (std::string("/api/esp/status") == std::string(hm->uri.p, hm->uri.len)) {
+			if (mg_vcasecmp(&hm->method, "GET") == 0) {
+				mg_send_response_line(nc, 200, "Content-Type: application/json\r\nConnection: close\r\n");
+				mg_printf(nc, "{\"sd\":{\"isPresent\":%s}}\n", self->isSdCardFilePresent ? "true" : "false");
+				nc->flags |= MG_F_SEND_AND_CLOSE;
+			}
+		}
+		else if (std::string("/api/config") == std::string(hm->uri.p, hm->uri.len)) {
 			if (mg_vcasecmp(&hm->method, "GET") == 0) {
 				mg_send_response_line(nc, 200, "Content-Type: application/json\r\nConnection: close\r\n");
 				mg_printf(nc, "{\"server\":{\"host\":\"%s\", \"port\":\"%u\"}}\n", self->server_settings_address.c_str(), self->server_settings_port);
 				nc->flags |= MG_F_SEND_AND_CLOSE;
-			}
-		}
-		else if (std::string("/api/config/update") == std::string(hm->uri.p, hm->uri.len)) {
-			if (mg_vcasecmp(&hm->method, "POST") == 0) {
+			} else if (mg_vcasecmp(&hm->method, "POST") == 0) {
 				char var_name[100], file_name[100];
 				const char *chunk;
 				size_t chunk_len, n1, n2;
@@ -1591,14 +1851,19 @@ void BrokeStudioFirmware::httpdEvent(mg_connection *nc, int ev, void *ev_data) {
 					}
 					n1 += n2;
 				}
-				send_message(200, "{\"success\":\"true\"}\n", "application/json");
-			}
-			else {
+				mg_send_response_line(nc, 200, "Content-Type: application/json\r\nConnection: close\r\n");
+				mg_printf(nc, "{\"success\":\"true\", \"config\":{\"server\":{\"host\":\"%s\", \"port\":\"%u\"}}}\n", self->server_settings_address.c_str(), self->server_settings_port);
+				nc->flags |= MG_F_SEND_AND_CLOSE;
+			} else {
 				send_generic_error();
 			}
 		}
-		else if (std::string("/api/esp/debugconfig") == std::string(hm->uri.p, hm->uri.len)) {
-			if (mg_vcasecmp(&hm->method, "POST") == 0) {
+		else if (std::string("/api/esp/advancedconfig") == std::string(hm->uri.p, hm->uri.len)) {
+			if (mg_vcasecmp(&hm->method, "GET") == 0) {
+				mg_send_response_line(nc, 200, "Content-Type: application/json\r\nConnection: close\r\n");
+				mg_printf(nc, "{\"debugConfig\":\"%u\"}", self->debug_config);
+				nc->flags |= MG_F_SEND_AND_CLOSE;
+			} else if (mg_vcasecmp(&hm->method, "POST") == 0) {
 				char var_name[100], file_name[100];
 				const char *chunk;
 				size_t chunk_len, n1, n2;
@@ -1612,245 +1877,387 @@ void BrokeStudioFirmware::httpdEvent(mg_connection *nc, int ev, void *ev_data) {
 					n1 += n2;
 				}
 			}else {
-				mg_send_response_line(nc, 200, "Content-Type: application/json\r\nConnection: close\r\n");
-				mg_printf(nc, "{\"debugConfig\":\"%u\"}", self->debug_config);
-				nc->flags |= MG_F_SEND_AND_CLOSE;
+				send_generic_error();
 			}
 		}
 		else if (std::string("/api/file/list") == std::string(hm->uri.p, hm->uri.len)) {
-			char path[256];
-			int const path_len = mg_get_http_var(&hm->query_string, "path", path, 256);
-			if (path_len < 0) {
-				send_generic_error();
-				return;
-			}
-			mg_send_response_line(nc, 200, "Content-Type: application/json\r\nConnection: close\r\n");
-			mg_printf(nc, "[");
-			if (path_len == 0) {
-				// Send three paths
-				for (uint8_t path_index = 0; path_index < NUM_FILE_PATHS; ++path_index) {
-					if (path_index != 0)
-					{
-						mg_printf(nc, ",");
-					}
-					uint32_t path_size = 0L;
-					for (uint8_t file_index = 0; file_index < NUM_FILES; ++file_index) {
-						if (self->file_exists[path_index][file_index])
-							path_size += self->files[path_index][file_index].size();
-					}
-					mg_printf(nc, "{\"id\":\"%d\",\"type\":\"dir\",\"name\":\"%s\",\"size\":\"%d\"}", path_index, dir_names[path_index].c_str(), path_size);
+			if (mg_vcasecmp(&hm->method, "GET") == 0) {
+				char _drive[256];
+				int const drive_len = mg_get_http_var(&hm->query_string, "drive", _drive, 256);
+				if (drive_len < 0) {
+					send_generic_error();
+					return;
 				}
-			}
-			else {
-				// Send path content
-				int path_index = path[0] - '0';
-				mg_printf(nc, "{\"id\":\"\",\"type\":\"dir\",\"name\":\"..\",\"size\":\"-1\"}");
-					for (uint8_t file_index = 0; file_index < self->file_exists[path_index].size(); ++file_index) {
-						if (self->file_exists[path_index][file_index]) {
-							mg_printf(nc, ",");
-							mg_printf(nc, "{\"id\":\"%d\",\"type\":\"file\",\"name\":\"file%d.bin\",\"size\":\"%d\"}", file_index, file_index, static_cast<int>(self->files[path_index][file_index].size()));
+				char _path[256];
+				int const path_len = mg_get_http_var(&hm->query_string, "path", _path, 256);
+				if (path_len < 0) {
+					send_generic_error();
+					return;
+				}
+
+				mg_send_response_line(nc, 200, "Content-Type: application/json\r\nConnection: close\r\n");
+				mg_printf(nc, "[");
+
+				int slash_pos;
+				int id = 0;
+				int drive = std::atoi(_drive);
+
+				std::vector<std::string> path_list;
+
+				std::string label = "";		// Dir: b		| File: esp8266.txt
+				std::string path = "/";		// Dir: /a		| File: /a/b
+				std::string filename = "";	// Dir: b		| File: esp8266.txt 
+				std::string fullname = "";	// Dir: /a/b	| File: /a/b/esp8266.txt
+				uint32 size = 0L;
+
+				std::string full_path = "";
+				std::string request_path = std::string(_path);
+
+				// Need to go up?
+				if (request_path != "/")
+				{
+					request_path = request_path + "/";
+					std::string parent_path = "/";
+					slash_pos = request_path.find_last_of("/", request_path.size() - 2);
+					if (slash_pos != 0)
+					{
+						parent_path = request_path.substr(0, slash_pos);
+					}
+					mg_printf(
+						nc,
+						"{\"id\":\"%d\",\"type\":\"dir\",\"label\":\"..\",\"path\":\"%s\",\"filename\":\"..\",\"fullname\":\"%s\",\"size\":-1}",
+						id, parent_path.c_str(), parent_path.c_str()
+					);
+					id++;
+				}
+
+				// Loop through files
+				for (size_t i = 0; i < self->files.size(); ++i) {
+					if (self->files.at(i).drive == drive) {
+
+						fullname = self->files.at(i).filename;
+
+						// In requested path?
+						std::string tmp = fullname.substr(0, request_path.size());
+						if (tmp != request_path)
+						{
+							continue;
+						}
+
+						// File or Dir?
+						slash_pos = fullname.find("/", request_path.size() + 1);
+						if (slash_pos == -1)
+						{
+							// File
+
+							// Split file path and file name
+							slash_pos = fullname.find_last_of("/");
+							path = fullname.substr(0, slash_pos + 1);
+							filename = fullname.substr(slash_pos + 1);
+							label = filename;
+
+							if (id != 0) {
+								mg_printf(nc, ",");
+							}
+
+							mg_printf(
+								nc,
+								"{\"id\":%d,\"type\":\"file\",\"label\":\"%s\",\"path\":\"%s\",\"filename\":\"%s\",\"fullname\":\"%s\",\"size\":%d}",
+								id, label.c_str(), path.c_str(), filename.c_str(), fullname.c_str(), self->files.at(i).data.size()
+							);
+							id++;
+						}
+						else
+						{
+							// Dir
+
+							slash_pos = fullname.find_first_of("/", request_path.size());
+							path = fullname.substr(0, slash_pos);
+							bool found = false;
+							for (auto &i : path_list) {
+								if (i == path) {
+									found = true;
+									break;
+								}
+							}
+							if (!found)
+							{
+								path_list.push_back(path);
+
+								slash_pos = path.find_last_of("/");
+								filename = path.substr(slash_pos + 1);
+								label = filename;
+
+								full_path = path;
+
+								slash_pos = path.find_last_of("/");
+								path = path.substr(0, slash_pos + 1);
+								if (path == "") path = "/";
+
+								if (id != 0) {
+									mg_printf(nc, ",");
+								}
+
+								mg_printf(
+									nc,
+									"{\"id\":%d,\"type\":\"dir\",\"label\":\"%s\",\"path\":\"%s\",\"filename\":\"%s\",\"fullname\":\"%s\",\"size\":-1}",
+									id, label.c_str(), path.c_str(), filename.c_str(), full_path.c_str()
+								);
+								id++;
+							}
 						}
 					}
+				}
+				mg_printf(nc, "]");
+				nc->flags |= MG_F_SEND_AND_CLOSE;
+			} else {
+				send_generic_error();
 			}
-			mg_printf(nc, "]");
-			nc->flags |= MG_F_SEND_AND_CLOSE;
 		}
 		else if (std::string("/api/file/free") == std::string(hm->uri.p, hm->uri.len)) {
-			char path[256];
-			int const path_len = mg_get_http_var(&hm->query_string, "path", path, 256);
-			if (path_len <= 0) {
-				send_generic_error();
-				return;
-			}
-			mg_send_response_line(nc, 200, "Content-Type: application/json\r\nConnection: close\r\n");
-			mg_printf(nc, "[");
-			int path_index = std::atoi(path);
-			bool found = false;
-			for (uint8_t file_index = 0; file_index < NUM_FILES; ++file_index) {
-				if (!self->file_exists[path_index][file_index]) {
-					if (found) {
-						mg_printf(nc, ",");
-					}
-					mg_printf(nc, "{\"id\":\"%d\",\"name\":\"%d\"}", file_index, file_index);
-					found = true;
+			if (mg_vcasecmp(&hm->method, "GET") == 0) {
+				char drive[256];
+				int const drive_len = mg_get_http_var(&hm->query_string, "drive", drive, 256);
+				if (drive_len < 0) {
+					send_generic_error();
+					return;
 				}
+				char path[256];
+				int const path_len = mg_get_http_var(&hm->query_string, "path", path, 256);
+				if (path_len <= 0) {
+					send_generic_error();
+					return;
+				}
+				mg_send_response_line(nc, 200, "Content-Type: application/json\r\nConnection: close\r\n");
+				mg_printf(nc, "[");
+				int drive_index = std::atoi(drive);
+				int path_index = std::atoi(path);
+				bool found = false;
+				for (uint8_t file_index = 0; file_index < NUM_FILES; ++file_index) {
+					std::string filename = self->getAutoFilename(path_index, file_index);
+					int i = self->findFile(drive_index, filename);
+					if (i == -1) {
+						if (found) {
+							mg_printf(nc, ",");
+						}
+						mg_printf(nc, "{\"id\":\"%d\",\"name\":\"%d\"}", file_index, file_index);
+						found = true;
+					}
+				}
+				mg_printf(nc, "]");
+				nc->flags |= MG_F_SEND_AND_CLOSE;
+			} else {
+				send_generic_error();
 			}
-			mg_printf(nc, "]");
-			nc->flags |= MG_F_SEND_AND_CLOSE;
 		}else if (std::string("/api/file/delete") == std::string(hm->uri.p, hm->uri.len)) {
-			char path[256];
-			char file[256];
-			int const path_len = mg_get_http_var(&hm->query_string, "path", path, 256);
-			int const file_len = mg_get_http_var(&hm->query_string, "file", file, 256);
+			if (mg_vcasecmp(&hm->method, "POST") == 0) {
+				char _drive[256];
+				int const drive_len = mg_get_http_var(&hm->query_string, "drive", _drive, 256);
+				if (drive_len < 0) {
+					send_generic_error();
+					return;
+				}
+				char _filename[256];
+				int const filename_len = mg_get_http_var(&hm->query_string, "filename", _filename, 256);
+				if (filename_len < 0) {
+					send_generic_error();
+					return;
+				}
+				std::string filename = std::string(_filename);
+				int drive = atoi(_drive);
+				int i = self->findFile(drive, filename);
 
-			if (path_len <= 0 || file_len <= 0) {
+				UDBG("RAINBOW Web(self=%p) deleting file %s\n", self, filename);
+				self->files.erase(self->files.begin() + i);
+				self->saveFiles();
+				send_message(200, "{\"success\":\"true\"}\n", "application/json");
+			} else {
 				send_generic_error();
-				return;
 			}
-
-			uint8 path_index = std::atoi(path);
-			uint8 file_index = std::atoi(file);
-
-			if (path_index >= NUM_FILE_PATHS || file_index >= NUM_FILES || !self->file_exists[path_index][file_index]) {
-				send_generic_error();
-				return;
-			}
-
-			UDBG("RAINBOW Web(self=%p) deleting file %d/%d\n", self, path_index, file_index);
-			self->file_exists[path_index][file_index] = false;
-			self->files[path_index][file_index].clear();
-			self->saveFiles();
-			send_message(200, "{\"success\":\"true\"}\n", "application/json");
 
 		}else if (std::string("/api/file/rename") == std::string(hm->uri.p, hm->uri.len)) {
-			char path[256];
-			char file[256];
-			char new_path[256];
-			char new_file[256];
-			int const path_len = mg_get_http_var(&hm->query_string, "path", path, 256);
-			int const file_len = mg_get_http_var(&hm->query_string, "file", file, 256);
-			int const new_path_len = mg_get_http_var(&hm->query_string, "newPath", new_path, 256);
-			int const new_file_len = mg_get_http_var(&hm->query_string, "newFile", new_file, 256);
+			if (mg_vcasecmp(&hm->method, "POST") == 0) {
+				char _drive[256];
+				int const drive_len = mg_get_http_var(&hm->query_string, "drive", _drive, 256);
+				if (drive_len < 0) {
+					send_generic_error();
+					return;
+				}
+				char _new_drive[256];
+				int const new_drive_len = mg_get_http_var(&hm->query_string, "newDrive", _new_drive, 256);
+				if (new_drive_len < 0) {
+					send_generic_error();
+					return;
+				}
+				char _filename[256];
+				int const filename_len = mg_get_http_var(&hm->query_string, "filename", _filename, 256);
+				if (filename_len < 0) {
+					send_generic_error();
+					return;
+				}
+				char _new_filename[256];
+				int const new_filename_len = mg_get_http_var(&hm->query_string, "newFilename", _new_filename, 256);
+				if (new_filename_len < 0) {
+					send_generic_error();
+					return;
+				}
+				std::string filename = std::string(_filename);
+				std::string new_filename = std::string(_new_filename);
+				int drive = atoi(_drive);
+				int new_drive = atoi(_new_drive);
 
-			if (path_len <= 0 || file_len <= 0 || new_path_len <= 0 || new_file_len <= 0) {
+				int i = self->findFile(new_drive, new_filename);
+				if (i != -1)
+				{
+					send_message(200, "{\"success\":false,\"message\":\"Destination file already exists.\"}\n", "application/json");
+					return;
+				}
+
+				i = self->findFile(drive, filename);
+				if (i == -1)
+				{
+					send_message(200, "{\"success\":false,\"message\":\"Source file does not exist.\"}\n", "application/json");
+					return;
+				}
+
+				self->files.at(i).filename = new_filename;
+				self->files.at(i).drive = new_drive;
+				self->saveFiles();
+
+				send_message(200, "{\"success\":\"true\"}\n", "application/json");
+			} else {
 				send_generic_error();
-				return;
 			}
-
-			uint8 path_index = std::atoi(path);
-			uint8 file_index = std::atoi(file);
-			uint8 new_path_index = std::atoi(new_path);
-			uint8 new_file_index = std::atoi(new_file);
-			UDBG("%d %d %d %d\n", path_index, file_index, new_path_index, new_file_index);
-
-			if (path_index >= NUM_FILE_PATHS || file_index >= NUM_FILES || new_path_index >= NUM_FILE_PATHS || new_file_index >= NUM_FILES|| !self->file_exists[path_index][file_index]) {
-				send_generic_error();
-				return;
-			}
-
-			self->files[new_path_index][new_file_index] = self->files[path_index][file_index];
-			self->file_exists[new_path_index][new_file_index] = self->file_exists[path_index][file_index];
-			self->file_exists[path_index][file_index] = false;
-			self->files[path_index][file_index].clear();
-			self->saveFiles();
-
-			send_message(200, "{\"success\":\"true\"}\n", "application/json");
 		}else if (std::string("/api/file/download") == std::string(hm->uri.p, hm->uri.len)) {
-			char path[256];
-			char file[256];
-			int const path_len = mg_get_http_var(&hm->query_string, "path", path, 256);
-			int const file_len = mg_get_http_var(&hm->query_string, "file", file, 256);
-
-			if (path_len <= 0 ||file_len <= 0) {
-				send_generic_error();
-				return;
-			}
-
-			uint8 path_index = std::atoi(path);
-			uint8 file_index = std::atoi(file);
-
-			if (path_index >= NUM_FILE_PATHS || file_index >= NUM_FILES || !self->file_exists[path_index][file_index]) {
-				send_generic_error();
-				return;
-			}
-			mg_send_response_line(
-				nc, 200,
-				"Content-Type: application/octet-stream\r\n"
-				"Connection: close\r\n"
-			);
-			mg_send(nc, self->files[path_index][file_index].data(), self->files[path_index][file_index].size());
-			nc->flags |= MG_F_SEND_AND_CLOSE;
-		}else if (std::string("/api/file/upload") == std::string(hm->uri.p, hm->uri.len)) {
-			// Get boundary for multipart form in HTTP headers
-			std::string multipart_boundary;
-			{
-				mg_str const * content_type = mg_get_http_header(hm, "Content-Type");
-				if (content_type == NULL) {
+			if (mg_vcasecmp(&hm->method, "GET") == 0) {
+				char _drive[256];
+				int const drive_len = mg_get_http_var(&hm->query_string, "drive", _drive, 256);
+				if (drive_len < 0) {
 					send_generic_error();
 					return;
 				}
-				static std::regex const content_type_regex("multipart/form-data; boundary=(.*)");
-				std::smatch match;
-				std::string content_type_str(content_type->p, content_type->len);
-				if (!std::regex_match(content_type_str, match, content_type_regex)) {
+				char _filename[256];
+				int const filename_len = mg_get_http_var(&hm->query_string, "filename", _filename, 256);
+				if (filename_len < 0) {
 					send_generic_error();
 					return;
 				}
-				assert(match.size() == 2);
-				multipart_boundary = match[1];
-			}
+				std::string filename = std::string(_filename);
+				int drive = atoi(_drive);
+				int i = self->findFile(drive, filename);
 
-			// Parse form parts
-			std::map<std::string, std::string> params;
-			{
-				std::string body_str(hm->body.p, hm->body.len);
-				std::string::size_type pos = 0;
-				while (pos != std::string::npos) {
-					// Find the parameter name
-					std::string::size_type found_pos = body_str.find("form-data; name=\"", pos);
-					if (found_pos == std::string::npos) {
-						break;
-					}
-					pos = found_pos + 17;
-					found_pos = body_str.find('"', pos);
-					if (found_pos == std::string::npos) {
-						break;
-					}
-					std::string const param_name = body_str.substr(pos, found_pos - pos);
-					pos = found_pos;
-
-					// Find the begining of the body
-					found_pos = body_str.find("\r\n\r\n", pos);
-					if (found_pos == std::string::npos) {
-						break;
-					}
-					pos = found_pos + 4;
-
-					// Find the begining of the next delimiter
-					found_pos = body_str.find("\r\n--" + multipart_boundary, pos);
-					if (found_pos == std::string::npos) {
-						break;
-					}
-					std::string const param_value = body_str.substr(pos, found_pos - pos);
-					pos = found_pos;
-
-					// Store parsed parameter
-					params[param_name] = param_value;
-				}
-			}
-
-			// Process request
-			std::map<std::string, std::string>::const_iterator file_data = params.find("file_data");
-			std::map<std::string, std::string>::const_iterator path = params.find("path");
-			std::map<std::string, std::string>::const_iterator file = params.find("file");
-
-			if (file_data == params.end() || path == params.end() || file == params.end()) {
+				mg_send_response_line(
+					nc, 200,
+					"Content-Type: application/octet-stream\r\n"
+					"Connection: close\r\n"
+				);
+				mg_send(nc, self->files.at(i).data.data(), self->files.at(i).data.size());
+				nc->flags |= MG_F_SEND_AND_CLOSE;
+			} else {
 				send_generic_error();
-				return;
 			}
+		}else if (std::string("/api/upload") == std::string(hm->uri.p, hm->uri.len)) {
+			if (mg_vcasecmp(&hm->method, "POST") == 0) {
+				char _drive[256];
+				int const drive_len = mg_get_http_var(&hm->query_string, "drive", _drive, 256);
+				if (drive_len < 0) {
+					send_generic_error();
+					return;
+				}
+				uint8 drive = atoi(_drive);
 
-			uint8 path_index = std::atoi(path->second.c_str());
-			uint8 file_index = std::atoi(file->second.c_str());
+				// Get boundary for multipart form in HTTP headers
+				std::string multipart_boundary;
+				{
+					mg_str const * content_type = mg_get_http_header(hm, "Content-Type");
+					if (content_type == NULL) {
+						send_generic_error();
+						return;
+					}
+					static std::regex const content_type_regex("multipart/form-data; boundary=(.*)");
+					std::smatch match;
+					std::string content_type_str(content_type->p, content_type->len);
+					if (!std::regex_match(content_type_str, match, content_type_regex)) {
+						send_generic_error();
+						return;
+					}
+					assert(match.size() == 2);
+					multipart_boundary = match[1];
+				}
 
-			self->files[path_index][file_index] = std::vector<uint8>(file_data->second.begin(), file_data->second.end());
-			self->file_exists[path_index][file_index] = true;
-			self->saveFiles();
+				// Parse form parts
+				std::map<std::string, std::string> params;
+				{
+					std::string body_str(hm->body.p, hm->body.len);
+					std::string::size_type pos = 0;
+					while (pos != std::string::npos) {
+						// Find the parameter name
+						std::string::size_type found_pos = body_str.find("form-data; name=\"", pos);
+						if (found_pos == std::string::npos) {
+							break;
+						}
+						pos = found_pos + 17;
+						found_pos = body_str.find('"', pos);
+						if (found_pos == std::string::npos) {
+							break;
+						}
+						std::string const param_name = body_str.substr(pos, found_pos - pos);
+						pos = found_pos;
 
-			UDBG("RAINBOW Web(self=%p) sucessfuly uploaded file %d/%d\n", self, path_index, file_index);
+						// Find the begining of the body
+						found_pos = body_str.find("\r\n\r\n", pos);
+						if (found_pos == std::string::npos) {
+							break;
+						}
+						pos = found_pos + 4;
 
-			// Return something webbrowser friendly
-			send_message(200, "{\"success\":\"true\"}\n", "application/json");
+						// Find the begining of the next delimiter
+						found_pos = body_str.find("\r\n--" + multipart_boundary, pos);
+						if (found_pos == std::string::npos) {
+							break;
+						}
+						std::string const param_value = body_str.substr(pos, found_pos - pos);
+						pos = found_pos;
+
+						// Store parsed parameter
+						params[param_name] = param_value;
+					}
+				}
+
+				// Process request
+				std::map<std::string, std::string>::const_iterator filename = params.find("filename");
+				std::map<std::string, std::string>::const_iterator file_data = params.find("file");
+
+				if (file_data == params.end() || filename == params.end()) {
+					send_generic_error();
+					return;
+				}
+
+				self->files.push_back(FileStruct({ drive, filename->second , std::vector<uint8>(file_data->second.begin(), file_data->second.end()) }));
+				self->saveFiles();
+
+				UDBG("RAINBOW Web(self=%p) sucessfuly uploaded file %s\n", self, filename->second);
+
+				// Return something webbrowser friendly
+				send_message(200, "{\"success\":\"true\"}\n", "application/json");
+			} else {
+				send_generic_error();
+			}
 		}else if (std::string("/api/file/format") == std::string(hm->uri.p, hm->uri.len)) {
 			if (mg_vcasecmp(&hm->method, "POST") == 0) {
-				// Clear file list
-				for (uint8 p = 0; p < NUM_FILE_PATHS; p++)
-				{
-					for (uint8 f = 0; f < NUM_FILES; f++)
-					{
-						self->file_exists[p][f] = false;
-					}
+				char _drive[256];
+				int const drive_len = mg_get_http_var(&hm->query_string, "drive", _drive, 256);
+				if (drive_len < 0) {
+					send_generic_error();
+					return;
 				}
-				UDBG("RAINBOW Web(self=%p) sucessfuly formatted file system %d/%d\n", self);
+				uint8 drive = atoi(_drive);
+				int i = 0;
+				self->clearFiles(drive);
+				std::string str_drive;
+				if (drive == 0) str_drive = "ESP Flash";
+				else if (drive == 1) str_drive = "SD Card";
+				UDBG("RAINBOW Web(self=%p) sucessfuly formatted file system %s\n", self, str_drive);
 
 				// Return something webbrowser friendly
 				send_message(200, "{\"success\":\"true\"}\n", "application/json");
@@ -1861,44 +2268,129 @@ void BrokeStudioFirmware::httpdEvent(mg_connection *nc, int ev, void *ev_data) {
 		}else {
 			char const* www_root = ::getenv("RAINBOW_WWW_ROOT");
 			if (www_root == NULL) {
-				std::string upload_form = R"-(<!doctype html><html><head><style>*{margin:2px}body{font-family:Arial}</style></style>)-";
-				upload_form += R"-(<body><h1>Upload file to Rainbow:</h1>)-";
-				upload_form += R"-(<input id="file_data" name="file_data" type="file"><br/>)-";
-				upload_form += R"-(Path: <select id="path" name="path"><option value="0">SAVE</option><option value="1">ROMS</option><option value="2">USER</option></select><br />)-";
-				upload_form += R"-(File: <select id="file" name="file">)-";
-				for (uint8 i = 0; i < NUM_FILES; i++)
-				{
-					upload_form += "<option value=\"" + std::to_string(i) + "\">" + std::to_string(i) + "</option>";
-				}
-				upload_form += "</select><br/>";
-				upload_form += R"-(<button id="btnSubmit" type="submit" onclick="handleSubmit()">Upload</button>)-";
-				upload_form += "<script>function handleSubmit(){";
-				upload_form += R"-(btnSubmit.disabled=true;)-";
-				upload_form += R"-(btnSubmit.innerHTML = "Uploading...";)-";
-				upload_form += R"-(let formData = new FormData();)-";
-				upload_form += R"-(formData.append("file_data", file_data.files[0]);)-";
-				upload_form += R"-(let path_index = path.options[path.selectedIndex].value;)-";
-				upload_form += R"-(formData.append("path", path.value);)-";
-				upload_form += R"-(formData.append("file", file.value);)-";
-				upload_form += R"-(let xhr = new XMLHttpRequest();)-";
-				upload_form += R"-(xhr.open("POST", "/api/file/upload");)-";
-				upload_form += R"-(xhr.onreadystatechange = function () {)-";
-				upload_form += R"-(if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {)-";
-				upload_form += R"-(var r = JSON.parse(this.responseText);)-";
-				upload_form += R"-(if (r.success) alert("File uploaded successfully.");)-";
-				upload_form += R"-(else alert('Error while uploading the file.');)-";
-				upload_form += R"-(btnSubmit.disabled=false;)-";
-				upload_form += R"-(btnSubmit.innerHTML = "Upload";)-";
-				upload_form += R"-(})-";
-				upload_form += R"-(if (this.readyState === XMLHttpRequest.DONE && this.status === 0) {)-";
-				upload_form += R"-(alert('Please check your connection.');)-";
-				upload_form += R"-(btnSubmit.disabled=false;)-";
-				upload_form += R"-(btnSubmit.innerHTML = "Upload";)-";
-				upload_form += R"-(})-";
-				upload_form += R"-(};)-";
-				upload_form += R"-(xhr.send(formData);)-";
-				upload_form += "}</script>";
-				upload_form += "</body></html>";
+				std::string upload_form = R"""(
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rainbow + FCEUX</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Rainbow + FCEUX</h1>
+      <article>
+        <h2>About</h2>
+        <p>
+          The Rainbow mapper offers the possibility to store files on the ESP
+          embedded flash memory and/or the SD Card if present.
+        </p>
+        <p>
+          This behaviour can be replicated with FCEUX by setting up some
+          environment variables and the Rainbow Webapp.
+        </p>
+        <p>Also, a webapp is provided to help you browse those files.</p>
+      </article>
+      <article>
+        <h2>Web server</h2>
+        <p>
+          If you can read this, it means that the web server is already running
+          in FCEUX.
+        </p>
+        <p>Here's how you can change the port used for the web server:</p>
+        <ol>
+          <li>
+            Create a environment variable called <kbd>RAINBOW_WWW_PORT</kbd>
+          </li>
+          <li>Set its value to the port you want to use</li>
+          <li>You may need to restart your computer and/or FCEUX</li>
+        </ol>
+      </article>
+      <article>
+        <h2>File system</h2>
+        <p>
+          If you want to set up default value for your game server, you can
+          create two environment variables as follows.
+        </p>
+        <ul>
+          <li>
+            <kbd>RAINBOW_ESP_FILESYSTEM_FILE</kbd> defines the file used to save
+            ESP Flash content
+          </li>
+          <li>
+            <kbd>RAINBOW_SD_FILESYSTEM_FILE</kbd> defines the file used to save
+            SD card content
+          </li>
+        </ul>
+      </article>
+      <article>
+        <h2>Webapp</h2>
+        <ol>
+          <li>
+            Download the Webapp zipfile
+            <a href="fceux-rainbow-webapp.zip"><strong>here</strong></a>
+          </li>
+          <li>Unzip the file where you want</li>
+          <li>
+            Create a environment variable called <kbd>RAINBOW_WWW_ROOT</kbd>
+          </li>
+          <li>
+            Set its value to the absolute path to the folder containing the
+            files you unzipped
+          </li>
+          <li>You may need to restart your computer and/or FCEUX</li>
+        </ol>
+      </article>
+      <article>
+        <h2>Game server</h2>
+        <p>
+          If you want to set up default values for your game server, you can
+          create two environment variables as follows.
+        </p>
+        <ul>
+          <li>
+            <kbd>RAINBOW_SERVER_ADDR</kbd> defines the server host/IP address
+          </li>
+          <li><kbd>RAINBOW_SERVER_PORT</kbd> defines the server port</li>
+        </ul>
+      </article>
+      <article>
+        <h2>Need help?</h2>
+        <p>
+          If you need help or if you found an issue or a bug, feel free to
+          contact us:
+        </p>
+        <ul>
+          <li>
+            Mail:
+            <a href="mailto:contact@brokestudio.fr">contact@brokestudio.fr</a>
+          </li>
+          <li>
+            Discord:
+            <a href="http://discord.gg/FffVMAuhTX"
+              >http://discord.gg/FffVMAuhTX</a
+            >
+          </li>
+          <li>
+            Twitter:
+            <a href="https://twitter.com/Broke_Studio"
+              >https://twitter.com/Broke_Studio</a
+            >
+          </li>
+        </ul>
+      </article>
+      <small
+        >&copy; <a href="https://brokestudio.fr">Broke Studio</a> &bull; Page
+        built with <a href="https://picocss.com">Pico</a>
+      </small>
+    </main>
+  </body>
+</html>
+)""";
 				send_message(200, upload_form.c_str(), "text/html");
 			}else {
 				// Translate url path to a file path on disk
@@ -2041,8 +2533,8 @@ void BrokeStudioFirmware::downloadFile(std::string const& url, uint8 path, uint8
 	}else {
 		UDBG("RAINBOW BrokeStudioFirmware download success\n");
 		// Store data
-		this->files[path][file] = data;
-		this->file_exists[path][file] = true;
+		std::string filename = this->getAutoFilename(path, file);
+		this->files.push_back(FileStruct({ 0, filename, data}));
 		this->saveFiles();
 
 		// Write result message

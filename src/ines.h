@@ -42,8 +42,10 @@ public:
 //mbg merge 6/29/06
 extern uint8 *ROM;
 extern uint8 *VROM;
+extern uint8 *MiscROMS;
 extern uint32 VROM_size;
 extern uint32 ROM_size;
+extern uint32 MiscROMS_size;
 extern uint8 *ExtraNTARAM;
 extern uint8 **VPageR;
 extern int iNesSave(void); //bbit Edited: line added

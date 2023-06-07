@@ -5,6 +5,7 @@
 
 #include "RNBW/easywsclient.hpp"
 #include "RNBW/mongoose.h"
+#include "RNBW/bootrom_chr.h"
 
 #define CURL_STATICLIB
 #include "curl/curl.h"
@@ -22,6 +23,10 @@
 static uint8 const NO_WORKING_FILE = 0xff;
 static uint8 const NUM_FILE_PATHS = 3;
 static uint8 const NUM_FILES = 64;
+
+static uint64 const ESP_FLASH_SIZE = 0x200000; // 2MiB - 0x200000
+static uint64 const SD_CARD_SIZE = 0x80000000; // 2GiB - 0x80000000
+
 static uint8 const NUM_NETWORKS = 3;
 static uint8 const NUM_FAKE_NETWORKS = 5;
 static uint8 const SSID_MAX_LENGTH = 32;
@@ -37,6 +42,29 @@ struct NetworkInfo
 	std::string ssid;
 	std::string pass;
 	bool active;
+};
+
+struct FileConfig
+{
+	uint8 access_mode;
+	uint8 drive;
+};
+
+struct FileStruct
+{
+	uint8 drive;
+	std::string filename;
+	std::vector<uint8> data;
+};
+
+struct WorkingFile
+{
+	bool active;
+	uint8 config;
+	uint8 auto_path;
+	uint8 auto_file;
+	uint32 offset;
+	FileStruct *file;
 };
 
 class BrokeStudioFirmware: public EspFirmware {
@@ -60,6 +88,7 @@ private:
 		BUFFER_CLEAR_RX_TX,
 		BUFFER_DROP_FROM_ESP,
 		ESP_GET_FIRMWARE_VERSION,
+		ESP_FACTORY_SETTINGS,
 		ESP_RESTART,
 
 		// WIFI CMDS
@@ -84,9 +113,10 @@ private:
 		SERVER_PING,
 		SERVER_SET_PROTOCOL,
 		SERVER_GET_SETTINGS,
-		SERVER_GET_CONFIG_SETTINGS,
 		SERVER_SET_SETTINGS,
-		SERVER_RESTORE_SETTINGS,
+		SERVER_GET_SAVED_SETTINGS,
+		SERVER_SET_SAVED_SETTINGS,
+		SERVER_RESTORE_SAVED_SETTINGS,
 		SERVER_CONNECT,
 		SERVER_DISCONNECT,
 		SERVER_SEND_MSG,
@@ -113,6 +143,7 @@ private:
 		FILE_COUNT,
 		FILE_GET_LIST,
 		FILE_GET_FREE_ID,
+		FILE_GET_FS_INFO,
 		FILE_GET_INFO,
 		FILE_DOWNLOAD,
 		FILE_FORMAT,
@@ -124,6 +155,7 @@ private:
 		READY,
 		DEBUG_LEVEL,
 		ESP_FIRMWARE_VERSION,
+		ESP_FACTORY_RESET,
 
 		// WIFI / AP CMDS
 		WIFI_STATUS,
@@ -155,8 +187,17 @@ private:
 		FILE_DATA,
 		FILE_COUNT,
 		FILE_ID,
+		FILE_FS_INFO,
 		FILE_INFO,
 		FILE_DOWNLOAD,
+	};
+
+	// ESP factory reset result codes
+	enum class esp_factory_reset : uint8 {
+		SUCCESS = 0,
+		ERROR_WHILE_RESETTING_CONFIG = 1,
+		ERROR_WHILE_DELETING_TWEB = 2,
+		ERROR_WHILE_DELETING_WEB = 3
 	};
 
 	enum class server_protocol_t : uint8 {
@@ -176,9 +217,12 @@ private:
 
 	// FILE_CONFIG
 	enum class file_config_flags_t : uint8 {
-		ACCESS_MODE = 1,
+		ACCESS_MODE_MASK = 1,
 		ACCESS_MODE_AUTO = 0,
-		ACCESS_MODE_MANUAL = 1
+		ACCESS_MODE_MANUAL = 1,
+		DESTINATION_MASK = 2,
+		DESTINATION_ESP = 0,
+		DESTINATION_SD = 2,
 	};
 
 	enum class file_delete_results_t : uint8 {
@@ -212,12 +256,18 @@ private:
 	};
 
 	void processBufferedMessage();
-	void readFile(uint8 path, uint8 file, uint8 n, uint32 offset);
+	FileConfig BrokeStudioFirmware::parseFileConfig(uint8 config);
+	int findFile(uint8 drive, std::string filename);
+	int findPath(uint8 drive, std::string path);
+	std::string getAutoFilename(uint8 path, uint8 file);
+	void readFile(uint8 n);
 	template<class I>
-	void writeFile(uint8 path, uint8 file, uint32 offset, I data_begin, I data_end);
-	uint8 getFreeFileId(uint8 path) const;
-	void saveFiles() const;
+	void writeFile(I data_begin, I data_end);
+	void saveFiles();
+	void _saveFiles(uint8 drive, char const* filename);
 	void loadFiles();
+	void _loadFiles(uint8 drive, char const* filename);
+	void clearFiles(uint8 drive);
 
 	template<class I>
 	void sendMessageToServer(I begin, I end);
@@ -248,12 +298,10 @@ private:
 	std::deque<uint8> tx_buffer;
 	std::deque<std::deque<uint8>> tx_messages;
 
-	std::array<std::array<std::vector<uint8>, NUM_FILES>, NUM_FILE_PATHS> files;
-	std::array<std::array<bool, NUM_FILES>, NUM_FILE_PATHS> file_exists;
-	uint32 file_offset = 0;
-	uint8 working_file_config = 0;
-	uint8 working_path = 0;
-	uint8 working_file = NO_WORKING_FILE;
+	bool isEspFlashFilePresent = false;
+	bool isSdCardFilePresent = false;
+	WorkingFile working_file;
+	std::vector<FileStruct> files;
 
 	std::array<NetworkInfo, NUM_NETWORKS> networks;
 
@@ -264,7 +312,7 @@ private:
 	uint16_t server_settings_port = 0;
 
 	uint8 debug_config = 0;
-	uint8 wifi_config = 3;
+	uint8 wifi_config = 1;
 
 	easywsclient::WebSocket::pointer socket = nullptr;
 	std::thread socket_close_thread;

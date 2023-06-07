@@ -50,6 +50,7 @@ uint8 *trainerpoo = NULL;
 uint8 *ROM = NULL;
 uint8 *VROM = NULL;
 uint8 *ExtraNTARAM = NULL;
+uint8 *MiscROMS = NULL;
 iNES_HEADER head;
 
 static CartInfo iNESCart;
@@ -58,6 +59,7 @@ uint8 Mirroring = 0;
 uint8 MirroringAs2bits = 0;
 uint32 ROM_size = 0;
 uint32 VROM_size = 0;
+uint32 MiscROMS_size = 0;
 char LoadedRomFName[4096]; //mbg merge 7/17/06 added
 char LoadedRomFNamePatchToUse[4096];
 
@@ -116,6 +118,10 @@ void iNESGI(GI h) { //bbit edited: removed static keyword
 		if (VROM) {
 			FCEU_free(VROM);
 			VROM = NULL;
+		}
+		if (MiscROMS) {
+			FCEU_free(MiscROMS);
+			MiscROMS = NULL;
 		}
 		if (trainerpoo) {
 			free(trainerpoo);
@@ -798,8 +804,8 @@ BMAPPINGLocal bmap[] = {
 
 	{"KONAMI QTAi Board",	547, QTAi_Init },
 
+	{"RAINBOW2",           682, RAINBOW2_Init },
 	{"RAINBOW13",          3872, RAINBOW13_Init },
-	{"RAINBOW2",           3873, RAINBOW2_Init },
 
 	{"",					0, NULL}
 };
@@ -826,6 +832,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		iNESCart.vram_size = (head.VRAM_size & 0x0F)?(64 << (head.VRAM_size & 0x0F)):0;
 		iNESCart.battery_vram_size = (head.VRAM_size & 0xF0)?(64 << ((head.VRAM_size & 0xF0)>>4)):0;
 		iNESCart.submapper = head.ROM_type3 >> 4;
+		iNESCart.misc_roms = head.misc_roms & 0x03;
 	}
 
 	MapperNo = (head.ROM_type >> 4);
@@ -868,6 +875,10 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 			VROM_size = uppow2(head.VROM_size | ((head.Upper_ROM_VROM_size & 0xF0) << 4));
 		else
 			VROM_size = ((1 << (head.VROM_size >> 2)) * ((head.VROM_size & 0b11) * 2 + 1)) >> 13;
+	}
+
+	if (iNES2 && iNESCart.misc_roms != 0) {
+		MiscROMS_size = fp->size - (ROM_size * 0x4000 + VROM_size * 0x2000 + 0x10);
 	}
 
 	int round = true;
@@ -955,6 +966,13 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	if (VROM_size)
 		FCEU_fread(VROM, 0x2000, VROM_size, fp);
+
+	if (iNES2 && iNESCart.misc_roms != 0 && MiscROMS_size)
+	{
+		MiscROMS = (uint8*)FCEU_malloc(MiscROMS_size);
+		memset(MiscROMS, 0xFF, MiscROMS_size);
+		FCEU_fread(MiscROMS, MiscROMS_size, 1, fp);
+	}
 
 	md5_starts(&md5); 
 	md5_update(&md5, ROM, ROM_size << 14);

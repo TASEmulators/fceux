@@ -52,6 +52,7 @@ struct CartInfo
 	uint32 CRC32;	// Should be set by the iNES/UNIF loading
 					// code, used by mapper/board code, maybe
 					// other code in the future.
+	int misc_roms;
 
 	CartInfo(void)
 	{
@@ -77,6 +78,7 @@ struct CartInfo
 		battery_vram_size = 0;
 		memset( MD5, 0, sizeof(MD5));
 		CRC32 = 0;
+		misc_roms = 0;
 	};
 };
 
