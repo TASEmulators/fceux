@@ -275,13 +275,13 @@ void BrokeStudioFirmware::processBufferedMessage() {
 					if (message->at(1) == message_type) {
 						++i;
 						if (i > n_keep) {
-							UDBG("RAINBOW BrokeStudioFirmware erase message: index=%d\n", message - this->tx_messages.begin());
+							UDBG("RAINBOW BrokeStudioFirmware erase message: index=%ld\n", message - this->tx_messages.begin());
 							message = this->tx_messages.erase(message);
 						}else {
-							UDBG("RAINBOW BrokeStudioFirmware keep message: index=%d - too recent\n", message - this->tx_messages.begin());
+							UDBG("RAINBOW BrokeStudioFirmware keep message: index=%ld - too recent\n", message - this->tx_messages.begin());
 						}
 					}else {
-						UDBG("RAINBOW BrokeStudioFirmware keep message: index=%d - bad type\n", message - this->tx_messages.begin());
+						UDBG("RAINBOW BrokeStudioFirmware keep message: index=%ld - bad type\n", message - this->tx_messages.begin());
 					}
 				}
 			}
@@ -469,7 +469,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			if (message_size == 2) {
 				server_protocol_t const requested_protocol = static_cast<server_protocol_t>(this->rx_buffer.at(2));
 				if (requested_protocol > server_protocol_t::UDP) {
-					UDBG("RAINBOW BrokeStudioFirmware SET_SERVER_PROTOCOL: unknown protocol (%d)\n", requested_protocol);
+					UDBG("RAINBOW BrokeStudioFirmware SET_SERVER_PROTOCOL: unknown protocol (%u)\n", static_cast<unsigned int>(requested_protocol));
 				}else {
 					this->active_protocol = requested_protocol;
 				}
@@ -571,7 +571,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				this->sendUdpDatagramToServer(payload_begin, payload_end);
 				break;
 			default:
-				UDBG("RAINBOW BrokeStudioFirmware active protocol (%d) not implemented\n", this->active_protocol);
+				UDBG("RAINBOW BrokeStudioFirmware active protocol (%u) not implemented\n", static_cast<unsigned int>(this->active_protocol));
 			};
 			break;
 		}
@@ -1352,8 +1352,7 @@ void BrokeStudioFirmware::_saveFiles(uint8 drive, char const* filename) {
 
 	ofs << (char)(0x00); //file format version
 
-	auto file = this->files.begin();
-	for (file; file != this->files.end(); ++file)
+	for (auto file = this->files.begin(); file != this->files.end(); ++file)
 	{
 		if (file->drive != drive) continue;
 		ofs << (char)file->filename.length(); //filename length
@@ -1502,7 +1501,7 @@ void BrokeStudioFirmware::sendUdpDatagramToServer(I begin, I end) {
 		);
 		if (n == -1) {
 			UDBG("RAINBOW UDP send failed: %s\n", strerror(errno));
-		}else if (n != message_size) {
+		}else if (static_cast<size_t>(n) != message_size) {
 			UDBG("RAINBOW UDP sent partial message\n");
 		}
 	}
@@ -1534,7 +1533,7 @@ void BrokeStudioFirmware::sendTcpDataToServer(I begin, I end) {
 		);
 		if (n == -1) {
 			UDBG("RAINBOW TCP send failed: %s\n", strerror(errno));
-		}else if (n != message_size) {
+		}else if (static_cast<size_t>(n) != message_size) {
 			UDBG("RAINBOW TCP sent partial message\n");
 		}
 	}
@@ -1567,7 +1566,7 @@ std::deque<uint8> BrokeStudioFirmware::read_socket(int socket) {
 
 			if (msg_len == -1) {
 				UDBG("RAINBOW failed to read socket: %s\n", strerror(errno));
-			}else if (msg_len <= MAX_MSG_SIZE) {
+			}else if (msg_len <= static_cast<ssize_t>(MAX_MSG_SIZE)) {
 				UDBG("RAINBOW %lu received message of size %zd", wall_clock_milli(), msg_len);
 #if RAINBOW_DEBUG >= 2
 				UDBG_FLOOD(": ");
@@ -1598,7 +1597,7 @@ void BrokeStudioFirmware::receiveDataFromServer() {
 		this->socket->dispatchBinary([this] (std::vector<uint8_t> const& data) {
 			size_t const msg_len = data.end() - data.begin();
 			if (msg_len <= 0xff) {
-				UDBG("RAINBOW %lu WebSocket data received... size %02x", wall_clock_milli(), msg_len);
+				UDBG("RAINBOW %lu WebSocket data received... size %02x", wall_clock_milli(), static_cast<unsigned int>(msg_len));
 #if RAINBOW_DEBUG >= 2
 				UDBG_FLOOD(": ");
 				for (uint8_t const c: data) {
@@ -1799,6 +1798,7 @@ std::pair<bool, sockaddr_in> BrokeStudioFirmware::resolve_server_address() {
 	hostent *he = gethostbyname(this->server_settings_address.c_str());
 	if (he == NULL) {
 		UDBG("RAINBOW unable to resolve server's hostname\n");
+		::memset(&addr, 0, sizeof(addr));
 		return std::make_pair(false, addr);
 	}
 
@@ -1824,7 +1824,7 @@ void BrokeStudioFirmware::httpdEvent(mg_connection *nc, int ev, void *ev_data) {
 	if (ev == MG_EV_HTTP_REQUEST) {
 		UDBG("http request event \n");
 		struct http_message *hm = (struct http_message *) ev_data;
-		UDBG("  uri: %.*s\n", hm->uri.len, hm->uri.p);
+		UDBG("  uri: %.*s\n", static_cast<int>(std::max<size_t>(0, std::min<size_t>(INT_MAX, hm->uri.len))), hm->uri.p);
 		if (std::string("/api/esp/status") == std::string(hm->uri.p, hm->uri.len)) {
 			if (mg_vcasecmp(&hm->method, "GET") == 0) {
 				mg_send_response_line(nc, 200, "Content-Type: application/json\r\nConnection: close\r\n");
@@ -1908,7 +1908,6 @@ void BrokeStudioFirmware::httpdEvent(mg_connection *nc, int ev, void *ev_data) {
 				std::string path = "/";		// Dir: /a		| File: /a/b
 				std::string filename = "";	// Dir: b		| File: esp8266.txt 
 				std::string fullname = "";	// Dir: /a/b	| File: /a/b/esp8266.txt
-				uint32 size = 0L;
 
 				std::string full_path = "";
 				std::string request_path = std::string(_path);
@@ -1962,7 +1961,7 @@ void BrokeStudioFirmware::httpdEvent(mg_connection *nc, int ev, void *ev_data) {
 
 							mg_printf(
 								nc,
-								"{\"id\":%d,\"type\":\"file\",\"label\":\"%s\",\"path\":\"%s\",\"filename\":\"%s\",\"fullname\":\"%s\",\"size\":%d}",
+								"{\"id\":%d,\"type\":\"file\",\"label\":\"%s\",\"path\":\"%s\",\"filename\":\"%s\",\"fullname\":\"%s\",\"size\":%lu}",
 								id, label.c_str(), path.c_str(), filename.c_str(), fullname.c_str(), self->files.at(i).data.size()
 							);
 							id++;
@@ -2067,7 +2066,7 @@ void BrokeStudioFirmware::httpdEvent(mg_connection *nc, int ev, void *ev_data) {
 				int drive = atoi(_drive);
 				int i = self->findFile(drive, filename);
 
-				UDBG("RAINBOW Web(self=%p) deleting file %s\n", self, filename);
+				UDBG("RAINBOW Web(self=%p) deleting file %s\n", self, filename.c_str());
 				self->files.erase(self->files.begin() + i);
 				self->saveFiles();
 				send_message(200, "{\"success\":\"true\"}\n", "application/json");
@@ -2236,7 +2235,7 @@ void BrokeStudioFirmware::httpdEvent(mg_connection *nc, int ev, void *ev_data) {
 				self->files.push_back(FileStruct({ drive, filename->second , std::vector<uint8>(file_data->second.begin(), file_data->second.end()) }));
 				self->saveFiles();
 
-				UDBG("RAINBOW Web(self=%p) sucessfuly uploaded file %s\n", self, filename->second);
+				UDBG("RAINBOW Web(self=%p) sucessfuly uploaded file %s\n", self, filename->second.c_str());
 
 				// Return something webbrowser friendly
 				send_message(200, "{\"success\":\"true\"}\n", "application/json");
@@ -2252,12 +2251,11 @@ void BrokeStudioFirmware::httpdEvent(mg_connection *nc, int ev, void *ev_data) {
 					return;
 				}
 				uint8 drive = atoi(_drive);
-				int i = 0;
 				self->clearFiles(drive);
 				std::string str_drive;
 				if (drive == 0) str_drive = "ESP Flash";
 				else if (drive == 1) str_drive = "SD Card";
-				UDBG("RAINBOW Web(self=%p) sucessfuly formatted file system %s\n", self, str_drive);
+				UDBG("RAINBOW Web(self=%p) sucessfuly formatted file system %s\n", self, str_drive.c_str());
 
 				// Return something webbrowser friendly
 				send_message(200, "{\"success\":\"true\"}\n", "application/json");

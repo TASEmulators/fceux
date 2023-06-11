@@ -309,7 +309,7 @@ static void Rainbow2IRQ(int a) {
 }
 
 static void Sync(void) {
-	static uint8 *address;
+	//static uint8 *address;
 	//uint32 start;
 	//uint32 offset;
 	uint8 cart_chr_map;
@@ -938,6 +938,7 @@ uint8 Rainbow2FlashID(uint8 chip, uint32 A) {
 
 	if (chip == CHIP_TYPE_PRG) flash_size = ROM_size * 16;
 	else if (chip == CHIP_TYPE_CHR) flash_size = VROM_size * 8;
+	else flash_size = ROM_size * 16; // Invalid chip number. Behavior to be verified, but don't let flash_size uninitialized.
 
 	uint32 aid = A & 0x1FF;
 	switch (aid)
@@ -1169,6 +1170,9 @@ void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
 					flash_size = ROM_size * 16;
 				else if (chip == CHIP_TYPE_CHR)
 					flash_size = VROM_size * 8;
+				else
+					// Invalid chip number. Behavior to be verified, but don't let flash_size uninitialized.
+					flash_size = ROM_size * 16;
 
 				switch (flash_size)
 				{

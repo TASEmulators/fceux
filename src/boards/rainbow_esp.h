@@ -256,7 +256,7 @@ private:
 	};
 
 	void processBufferedMessage();
-	FileConfig BrokeStudioFirmware::parseFileConfig(uint8 config);
+	FileConfig parseFileConfig(uint8 config);
 	int findFile(uint8 drive, std::string filename);
 	int findPath(uint8 drive, std::string path);
 	std::string getAutoFilename(uint8 path, uint8 file);
