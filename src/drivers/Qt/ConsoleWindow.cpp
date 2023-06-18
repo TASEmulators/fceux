@@ -204,10 +204,23 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	}
 
 
-	g_config->getOption( "SDL.WinPosX" , &xWinPos );
-	g_config->getOption( "SDL.WinPosY" , &yWinPos );
-	g_config->getOption( "SDL.WinSizeX", &xWinSize );
-	g_config->getOption( "SDL.WinSizeY", &yWinSize );
+	SDL_DisplayMode mode;
+	int sdl_err = SDL_GetCurrentDisplayMode(0,&mode);
+	g_config->getOption( "SDL.Fullscreen", &setFullScreen );
+	if( (sdl_err == 0) && setFullScreen )
+	{
+	        xWinPos = 0;
+	        yWinPos = 0;
+	        xWinSize = mode.w;
+	        yWinSize = mode.h;
+	}
+	else
+	{
+	        g_config->getOption( "SDL.WinPosX" , &xWinPos );
+	        g_config->getOption( "SDL.WinPosY" , &yWinPos );
+	        g_config->getOption( "SDL.WinSizeX", &xWinSize );
+	        g_config->getOption( "SDL.WinSizeY", &yWinSize );
+	}
 
 	if ( (xWinSize >= 256) && (yWinSize >= 224) )
 	{
