@@ -1439,26 +1439,6 @@ void BrokeStudioFirmware::clearFiles(uint8 drive) {
 }
 
 template<class I>
-void BrokeStudioFirmware::sendMessageToServer(I begin, I end) {
-#if RAINBOW_DEBUG >= 1
-	FCEU_printf("RAINBOW message to send: ");
-	for (I cur = begin; cur < end; ++cur) {
-		FCEU_printf("%02x ", *cur);
-	}
-	FCEU_printf("\n");
-#endif
-
-	if (this->socket != nullptr) {
-		size_t message_size = end - begin;
-		std::vector<uint8> aggregated;
-		aggregated.reserve(message_size);
-		aggregated.insert(aggregated.end(), begin, end);
-		this->socket->sendBinary(aggregated);
-		this->socket->poll();
-	}
-}
-
-template<class I>
 void BrokeStudioFirmware::sendUdpDatagramToServer(I begin, I end) {
 #if RAINBOW_DEBUG >= 1
 	FCEU_printf("RAINBOW %lu udp datagram to send", wall_clock_milli());

@@ -267,8 +267,6 @@ private:
 	void clearFiles(uint8 drive);
 
 	template<class I>
-	void sendMessageToServer(I begin, I end);
-	template<class I>
 	void sendUdpDatagramToServer(I begin, I end);
 	template<class I>
 	void sendTcpDataToServer(I begin, I end);
