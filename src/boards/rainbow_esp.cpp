@@ -484,7 +484,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 		}
 		case toesp_cmds_t::SERVER_SET_SETTINGS:
 			UDBG("RAINBOW BrokeStudioFirmware received message SERVER_SET_SETTINGS\n");
-			if (message_size >= 3) {
+			if (message_size >= 5) {
 				this->server_settings_port =
 					(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
 					(static_cast<uint16_t>(this->rx_buffer.at(3)));
@@ -514,13 +514,15 @@ void BrokeStudioFirmware::processBufferedMessage() {
 		}
 		case toesp_cmds_t::SERVER_SET_SAVED_SETTINGS: {
 			UDBG("RAINBOW BrokeStudioFirmware received message SERVER_SET_SAVED_SETTINGS\n");
-			this->default_server_settings_port =
-				(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
-				(static_cast<uint16_t>(this->rx_buffer.at(3)));
-			uint8 len = this->rx_buffer.at(4);
-			this->default_server_settings_address = std::string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + len);
-			this->server_settings_port = this->default_server_settings_port;
-			this->server_settings_address = default_server_settings_address;
+			if (message_size >= 5) {
+				this->default_server_settings_port =
+					(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
+					(static_cast<uint16_t>(this->rx_buffer.at(3)));
+				uint8 len = this->rx_buffer.at(4);
+				this->default_server_settings_address = std::string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + len);
+				this->server_settings_port = this->default_server_settings_port;
+				this->server_settings_address = default_server_settings_address;
+			}
 			break;
 		}
 		case toesp_cmds_t::SERVER_RESTORE_SAVED_SETTINGS:
