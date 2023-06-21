@@ -38,8 +38,6 @@ typedef SSIZE_T ssize_t;
 
 #endif
 
-using easywsclient::WebSocket;
-
 #define RAINBOW_DEBUG 1
 
 #if RAINBOW_DEBUG >= 1
@@ -149,14 +147,6 @@ BrokeStudioFirmware::~BrokeStudioFirmware() {
 	UDBG("RAINBOW BrokeStudioFirmware dtor\n");
 
 	this->closeConnection();
-	if (this->socket_close_thread.joinable()) {
-		this->socket_close_thread.join();
-	}
-
-	if (this->socket != nullptr) {
-		delete this->socket;
-		this->socket = nullptr;
-	}
 
 	this->httpd_run = false;
 	if (this->httpd_thread.joinable()) {
@@ -419,10 +409,6 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			UDBG("RAINBOW BrokeStudioFirmware received message SERVER_GET_STATUS\n");
 			uint8 status;
 			switch (this->active_protocol) {
-			case server_protocol_t::WEBSOCKET:
-			case server_protocol_t::WEBSOCKET_SECURED:
-				status = (this->socket != nullptr); // Server connection is ok if we succeed to open it
-				break;
 			case server_protocol_t::TCP:
 				//TODO actually check connection state
 				status = (this->tcp_socket != -1); // Considere server connection ok if we created a socket
@@ -503,7 +489,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 					(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
 					(static_cast<uint16_t>(this->rx_buffer.at(3)));
 				uint8 len = this->rx_buffer.at(4);
-				this->server_settings_address = std::string(this->rx_buffer.begin() + 4, this->rx_buffer.begin() + 4 + len);
+				this->server_settings_address = std::string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + len);
 			}
 			break;
 		case toesp_cmds_t::SERVER_GET_SAVED_SETTINGS: {
@@ -532,7 +518,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
 				(static_cast<uint16_t>(this->rx_buffer.at(3)));
 			uint8 len = this->rx_buffer.at(4);
-			this->default_server_settings_address = std::string(this->rx_buffer.begin() + 4, this->rx_buffer.begin() + 4 + len);
+			this->default_server_settings_address = std::string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + len);
 			this->server_settings_port = this->default_server_settings_port;
 			this->server_settings_address = default_server_settings_address;
 			break;
@@ -557,10 +543,6 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			std::deque<uint8>::const_iterator payload_end = payload_begin + payload_size;
 
 			switch (this->active_protocol) {
-			case server_protocol_t::WEBSOCKET:
-			case server_protocol_t::WEBSOCKET_SECURED:
-				this->sendMessageToServer(payload_begin, payload_end);
-				break;
 			case server_protocol_t::TCP:
 				this->sendTcpDataToServer(payload_begin, payload_end);
 				break;
@@ -1591,30 +1573,6 @@ std::deque<uint8> BrokeStudioFirmware::read_socket(int socket) {
 }
 
 void BrokeStudioFirmware::receiveDataFromServer() {
-	// Websocket
-	if (this->socket != nullptr) {
-		this->socket->poll();
-		this->socket->dispatchBinary([this] (std::vector<uint8_t> const& data) {
-			size_t const msg_len = data.end() - data.begin();
-			if (msg_len <= 0xff) {
-				UDBG("RAINBOW %lu WebSocket data received... size %02x", wall_clock_milli(), static_cast<unsigned int>(msg_len));
-#if RAINBOW_DEBUG >= 2
-				UDBG_FLOOD(": ");
-				for (uint8_t const c: data) {
-					UDBG_FLOOD("%02x ", c);
-				}
-#endif
-				UDBG("\n");
-				std::deque<uint8> message({
-					static_cast<uint8>(msg_len+1),
-					static_cast<uint8>(fromesp_cmds_t::MESSAGE_FROM_SERVER)
-				});
-				message.insert(message.end(), data.begin(), data.end());
-				this->tx_messages.push_back(message);
-			}
-		});
-	}
-
 	// TCP
 	if (this->tcp_socket != -1) {
 		std::deque<uint8> message = read_socket(this->tcp_socket);
@@ -1639,48 +1597,12 @@ void BrokeStudioFirmware::closeConnection() {
 	if (this->tcp_socket != - 1) {
 		close_sock(this->tcp_socket);
 	}
-
-	// Close WebSocket
-	if (this->socket != nullptr) {
-		// Gently ask for connection closing
-		if (this->socket->getReadyState() == WebSocket::OPEN) {
-			this->socket->close();
-		}
-
-		// Start a thread that waits for the connection to be closed, before deleting the socket
-		if (this->socket_close_thread.joinable()) {
-			this->socket_close_thread.join();
-		}
-		WebSocket::pointer ws = this->socket;
-		this->socket_close_thread = std::thread([ws] {
-			while (ws->getReadyState() != WebSocket::CLOSED) {
-				ws->poll(5);
-			}
-			delete ws;
-		});
-
-		// Forget about this connection
-		this->socket = nullptr;
-	}
 }
 
 void BrokeStudioFirmware::openConnection() {
 	this->closeConnection();
 
-	if ((this->active_protocol == server_protocol_t::WEBSOCKET) || (this->active_protocol == server_protocol_t::WEBSOCKET_SECURED)) {
-		// Create websocket
-		std::ostringstream ws_url;
-		std::string protocol = "";
-		if (this->active_protocol == server_protocol_t::WEBSOCKET) protocol = "ws://";
-		if (this->active_protocol == server_protocol_t::WEBSOCKET_SECURED) protocol = "wss://";
-		ws_url << protocol << this->server_settings_address << ':' << this->server_settings_port;
-		WebSocket::pointer ws = WebSocket::from_url(ws_url.str());
-		if (!ws) {
-			UDBG("RAINBOW unable to connect to WebSocket server\n");
-		}else {
-			this->socket = ws;
-		}
-	}else if (this->active_protocol == server_protocol_t::TCP) {
+	if (this->active_protocol == server_protocol_t::TCP) {
 		// Resolve server's hostname
 		std::pair<bool, sockaddr_in> server_addr = this->resolve_server_address();
 		if (!server_addr.first) {

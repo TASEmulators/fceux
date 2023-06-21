@@ -3,7 +3,6 @@
 
 #include "../types.h"
 
-#include "RNBW/easywsclient.hpp"
 #include "RNBW/mongoose.h"
 #include "RNBW/bootrom_chr.h"
 
@@ -201,8 +200,6 @@ private:
 	};
 
 	enum class server_protocol_t : uint8 {
-		WEBSOCKET,
-		WEBSOCKET_SECURED,
 		TCP,
 		TCP_SECURED,
 		UDP,
@@ -305,7 +302,7 @@ private:
 
 	std::array<NetworkInfo, NUM_NETWORKS> networks;
 
-	server_protocol_t active_protocol = server_protocol_t::WEBSOCKET;
+	server_protocol_t active_protocol = server_protocol_t::TCP;
 	std::string default_server_settings_address;
 	uint16_t default_server_settings_port = 0;
 	std::string server_settings_address;
@@ -313,9 +310,6 @@ private:
 
 	uint8 debug_config = 0;
 	uint8 wifi_config = 1;
-
-	easywsclient::WebSocket::pointer socket = nullptr;
-	std::thread socket_close_thread;
 
 	uint8 ping_min = 0;
 	uint8 ping_avg = 0;

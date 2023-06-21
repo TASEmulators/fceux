@@ -1133,9 +1133,6 @@
     <ClCompile Include="..\src\boards\rainbow13.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\RNBW\easywsclient.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\RNBW\mongoose.c">
       <Filter>boards</Filter>
     </ClCompile>
