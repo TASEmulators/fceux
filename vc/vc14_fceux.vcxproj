@@ -1024,7 +1024,6 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\asm.h" />
-    <ClInclude Include="..\src\boards\easywsclient.hpp" />
     <ClInclude Include="..\src\boards\RNBW\esp.h" />
     <ClInclude Include="..\src\boards\RNBW\mongoose.h" />
     <ClInclude Include="..\src\boards\RNBW\pping.h" />
