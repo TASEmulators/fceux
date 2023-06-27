@@ -360,7 +360,7 @@ namespace FCEU
 		{
 			return _tscFreq;
 		}
-		static bool tscValid(void){ return tscFreq != 0; };
+		static bool tscValid(void){ return _tscFreq != 0; };
 
 		// Call this function to calibrate the estimated TSC frequency
 		static void tscCalibrate(int numSamples = 0);
