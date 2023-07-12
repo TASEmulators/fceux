@@ -26,10 +26,11 @@
 #include "../ines.h"
 #include "rainbow_esp.h"
 
-#undef RAINBOW_DEBUG
- //define RAINBOW_DEBUG
+#ifndef RAINBOW_DEBUG_MAPPER
+#define RAINBOW_DEBUG_MAPPER 0
+#endif
 
-#ifdef RAINBOW_DEBUG
+#if RAINBOW_DEBUG_MAPPER >= 1
 #define UDBG(...) FCEU_printf(__VA_ARGS__)
 #else
 #define UDBG(...)

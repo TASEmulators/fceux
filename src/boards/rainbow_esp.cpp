@@ -38,21 +38,23 @@ typedef SSIZE_T ssize_t;
 
 #endif
 
-#define RAINBOW_DEBUG 1
+#ifndef RAINBOW_DEBUG_ESP
+#define RAINBOW_DEBUG_ESP 0
+#endif
 
-#if RAINBOW_DEBUG >= 1
+#if RAINBOW_DEBUG_ESP >= 1
 #define UDBG(...) FCEU_printf(__VA_ARGS__)
 #else
 #define UDBG(...)
 #endif
 
-#if RAINBOW_DEBUG >= 2
+#if RAINBOW_DEBUG_ESP >= 2
 #define UDBG_FLOOD(...) FCEU_printf(__VA_ARGS__)
 #else
 #define UDBG_FLOOD(...)
 #endif
 
-#if RAINBOW_DEBUG >= 1
+#if RAINBOW_DEBUG_ESP >= 1
 #include "../debug.h"
 namespace {
 uint64_t wall_clock_milli() {
@@ -234,7 +236,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			break;
 		case toesp_cmds_t::DEBUG_LOG:
 			UDBG("RAINBOW DEBUG/LOG\n");
-			if (RAINBOW_DEBUG > 0 || (this->debug_config & 1)) {
+			if (RAINBOW_DEBUG_ESP > 0 || (this->debug_config & 1)) {
 				for (std::deque<uint8>::const_iterator cur = this->rx_buffer.begin() + 2; cur < this->rx_buffer.end(); ++cur) {
 					FCEU_printf("%02x ", *cur);
 				}
@@ -1442,9 +1444,9 @@ void BrokeStudioFirmware::clearFiles(uint8 drive) {
 
 template<class I>
 void BrokeStudioFirmware::sendUdpDatagramToServer(I begin, I end) {
-#if RAINBOW_DEBUG >= 1
+#if RAINBOW_DEBUG_ESP >= 1
 	FCEU_printf("RAINBOW %lu udp datagram to send", wall_clock_milli());
-#	if RAINBOW_DEBUG >= 2
+#	if RAINBOW_DEBUG_ESP >= 2
 	FCEU_printf(": ");
 	for (I cur = begin; cur < end; ++cur) {
 		FCEU_printf("%02x ", *cur);
@@ -1473,9 +1475,9 @@ void BrokeStudioFirmware::sendUdpDatagramToServer(I begin, I end) {
 
 template<class I>
 void BrokeStudioFirmware::sendTcpDataToServer(I begin, I end) {
-#if RAINBOW_DEBUG >= 1
+#if RAINBOW_DEBUG_ESP >= 1
 	FCEU_printf("RAINBOW %lu tcp data to send", wall_clock_milli());
-#	if RAINBOW_DEBUG >= 2
+#	if RAINBOW_DEBUG_ESP >= 2
 	FCEU_printf(": ");
 	for (I cur = begin; cur < end; ++cur) {
 		FCEU_printf("%02x ", *cur);
@@ -1532,7 +1534,7 @@ std::deque<uint8> BrokeStudioFirmware::read_socket(int socket) {
 				UDBG("RAINBOW failed to read socket: %s\n", strerror(errno));
 			}else if (msg_len <= static_cast<ssize_t>(MAX_MSG_SIZE)) {
 				UDBG("RAINBOW %lu received message of size %zd", wall_clock_milli(), msg_len);
-#if RAINBOW_DEBUG >= 2
+#if RAINBOW_DEBUG_ESP >= 2
 				UDBG_FLOOD(": ");
 				for (auto it = data.begin(); it != data.begin() + msg_len; ++it) {
 					UDBG_FLOOD("%02x", *it);
