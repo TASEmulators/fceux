@@ -1,0 +1,90 @@
+name: build
+
+on:
+  push:
+    branches: [ "rainbow-stable", "master" ]
+  pull_request:
+    branches: [ "rainbow-stable", "master" ]
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: vc\vc14_fceux.vcxproj
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+
+permissions:
+  contents: read
+
+jobs:
+  build-win64:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: cd pipelines ; .\win64_build.bat
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: fceux-win64
+        path: vc\fceux-win64.zip
+
+  build-win32:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: cd pipelines ; .\win32_build.bat
+      
+    - uses: actions/upload-artifact@v3
+      with:
+        name: fceux-win32
+        path: vc\fceux-win32.zip
+
+  build-ubuntu64:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: build
+      run: pipelines/linux_build.sh
+
+    - name: prepare_artifacts
+      run: mv /tmp/fceux-*.deb /tmp/fceux-ubuntu-x64.deb
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: fceux-ubuntu64
+        path: /tmp/fceux-ubuntu-x64.deb
+    
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: build
+      run: pipelines/macOS_build.sh
+
+    - name: prepare_artifacts
+      run: mv build/fceux-*.dmg build/fceux-macos.dmg
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: fceux-macos
+        path: build/fceux-macos.dmg

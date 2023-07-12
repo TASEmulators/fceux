@@ -118,6 +118,12 @@ echo 'Install Check Dependency cppcheck'
 echo '****************************************'
 sudo apt-get --assume-yes  install cppcheck
 
+# Install libcurl-dev
+echo '****************************************'
+echo 'Install Dependency libcurl-dev (libcurl4-gnutls-dev)'
+echo '****************************************'
+sudo apt-get --assume-yes  install libcurl4-gnutls-dev
+
 echo '**************************'
 echo '***  Building Project  ***'
 echo '**************************'
