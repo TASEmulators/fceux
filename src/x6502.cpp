@@ -61,6 +61,7 @@ static INLINE void WrMem(unsigned int A, uint8 V)
 	#ifdef _S9XLUA_H
 	CallRegisteredLuaMemHook(A, 1, V, LUAMEMHOOK_WRITE);
 	#endif
+    _DB = V;
 }
 
 static INLINE uint8 RdRAM(unsigned int A)
@@ -80,6 +81,7 @@ static INLINE void WrRAM(unsigned int A, uint8 V)
 	#ifdef _S9XLUA_H
 	CallRegisteredLuaMemHook(A, 1, V, LUAMEMHOOK_WRITE);
 	#endif
+    _DB = V;
 }
 
 uint8 X6502_DMR(uint32 A)
@@ -99,6 +101,7 @@ void X6502_DMW(uint32 A, uint8 V)
  #ifdef _S9XLUA_H
  CallRegisteredLuaMemHook(A, 1, V, LUAMEMHOOK_WRITE);
  #endif
+ _DB = V;
 }
 
 #define PUSH(V) \
