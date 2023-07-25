@@ -85,7 +85,7 @@ static uint16 chr[16];
 
 static uint8 NT_bank[4];
 static uint8 SPR_bank_offset;
-static uint16 SPR_bank[64];
+static uint8 SPR_bank[64];
 
 static uint8 audio_output;
 static uint8 rx_address, tx_address, rx_index;
@@ -390,7 +390,7 @@ static void Sync(void) {
 	}
 
 	// 4K + 4K + 4K + 4K + 4K + 4K + 4K + 4K
-	if (prg_rom_mode == PRG_ROM_MODE_4)
+	if (t_prg_rom_mode == PRG_ROM_MODE_4)
 	{
 		for (uint8 i = 0; i < 8; i++)
 		{
@@ -890,9 +890,9 @@ uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 		{
 			if (chr_spr_ext_mode)
 				if(Sprite16)
-					return RNBWHackVROMPtr[(SPR_bank[RNBWHackCurSprite] << 13) + (A)];
+					return RNBWHackVROMPtr[((SPR_bank[RNBWHackCurSprite] << 13) & RNBWHackVROMMask) + (A)]; // TODO: test + fix
 				else
-					return RNBWHackVROMPtr[(SPR_bank[RNBWHackCurSprite] << 12) + (A)];
+					return RNBWHackVROMPtr[((SPR_bank[RNBWHackCurSprite] << 12) & RNBWHackVROMMask) + (A)];
 			else
 			{
 				return VPage[A >> 9][A]; // FIXME
@@ -900,7 +900,11 @@ uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 		}
 
 		if (ppuphase == PPUPHASE_BG && ScreenON)
-			return *FCEUPPU_GetCHR(A, NTRefreshAddr);
+		{
+			uint8 *tmp = FCEUPPU_GetCHR(A, NTRefreshAddr);
+			if (tmp == NULL) return X.DB;
+			else return *tmp;
+		}
 
 		// default
 		return FFCEUX_PPURead_Default(A);
@@ -996,9 +1000,9 @@ void Rainbow2FlashIDEnter(uint8 chip)
 			return;
 		flash_id[chip] = 1;
 		if (bootrom)
-			SetReadHandler(0x8000, 0xDFFF, Rainbow2FlashPrgID);
+			SetReadHandler(0x6000, 0xDFFF, Rainbow2FlashPrgID);
 		else
-			SetReadHandler(0x8000, 0xFFFF, Rainbow2FlashPrgID);
+			SetReadHandler(0x6000, 0xFFFF, Rainbow2FlashPrgID);
 		break;
 	case CHIP_TYPE_CHR:
 		if (CHR_FLASHROM == NULL)
@@ -1021,7 +1025,7 @@ void Rainbow2FlashIDExit(uint8 chip)
 		if (!flash_id[chip])
 			return;
 		flash_id[chip] = 0;
-		SetReadHandler(0x8000, 0xFFFF, CartBR);
+		SetReadHandler(0x6000, 0xFFFF, CartBR);
 		break;
 	case CHIP_TYPE_CHR:
 		if (!flash_id[chip])
@@ -1274,11 +1278,12 @@ void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
 	}
 }
 
-static DECLFW(RNBW_0x8000Wr) {
+static DECLFW(RNBW_0x6000Wr) {
 	if ((A < 0x6000) || A > (0xFFFF))
 		return;
 
 	uint32 flash_addr = A;
+	uint8 prg_idx;
 
 	uint8 t_prg_rom_mode = bootrom ? PRG_ROM_MODE_3 : prg_rom_mode;
 
@@ -1287,30 +1292,25 @@ static DECLFW(RNBW_0x8000Wr) {
 		switch (prg_ram_mode)
 		{
 		case PRG_RAM_MODE_0:
-			if ((A >= 0x6000) & (A <= 0x7FFF) & !(prg[1] & 0x8000))
-			{
-				flash_addr &= 0x1FFF;
-				flash_addr |= (prg[1] & 0x7FFF) << 13;
-			}
-			else
-			{
-				return;
-			}
+			// 8K
+			if (((prg[1] & 0x8000) >> 14) != 0)
+				return CartBW(A, V); // FPGA_RAM or WRAM
+
+			// PRG-ROM
+			flash_addr &= 0x1FFF;
+			flash_addr |= (prg[1] & 0x7FFF) << 13;
+
 			break;
 		case PRG_RAM_MODE_1:
-			flash_addr &= 0x0FFF;
-			if ((A >= 0x6000) & (A <= 0x6FFF) & !(prg[1] & 0x8000))
-			{
-				flash_addr |= (prg[1] & 0x7FFF) << 12;
-			}
-			else if ((A >= 0x7000) & (A <= 0x7FFF) & !(prg[2] & 0x8000))
-			{
-				flash_addr |= (prg[2] & 0x7FFF) << 12;
-			}
-			else
-			{
-				return;
-			}
+			// 2 x 4K
+			prg_idx = ((A >> 12) & 0x07) - 6;
+			if (((prg[prg_idx] & 0x8000) >> 14) != 0)
+				return CartBW(A, V); // FPGA_RAM or WRAM
+			
+			// PRG-ROM
+			flash_addr &= 0x1FFF;
+			flash_addr |= (prg[prg_idx] & 0x7FFF) << 13;
+
 			break;
 		}
 	}
@@ -1319,94 +1319,75 @@ static DECLFW(RNBW_0x8000Wr) {
 		switch (t_prg_rom_mode)
 		{
 		case PRG_ROM_MODE_0:
+			// 32K
+			if ((prg[3] >> 14) != 0)
+				return CartBW(A, V); // WRAM
+
+			// PRG-ROM
 			flash_addr &= 0x7FFF;
 			flash_addr |= (prg[3] & 0x7FFF) << 15;
+
 			break;
 		case PRG_ROM_MODE_1:
+			// 2 x 16K
+			prg_idx = ((A >> 12) & 0x04) + 3;
+			if ((prg[prg_idx] >> 14) != 0)
+				return CartBW(A, V); // WRAM
+
+			// PRG-ROM
 			flash_addr &= 0x3FFF;
-			if ((A >= 0x8000) & (A <= 0xBFFF))
-			{
-				flash_addr |= (prg[3] & 0x7FFF) << 14;
-			}
-			else if ((A >= 0xC000) & (A <= 0xFFFF))
-			{
-				flash_addr |= (prg[7] & 0x7FFF) << 14;
-			}
+			flash_addr |= (prg[prg_idx] & 0x7FFF) << 14;
+
 			break;
 		case PRG_ROM_MODE_2:
 			if ((A >= 0x8000) & (A <= 0xBFFF))
 			{
+				// 16K
+				if ((prg[3] >> 14) != 0)
+					return CartBW(A, V); // WRAM
+
+				// PRG-ROM
 				flash_addr &= 0x3FFF;
 				flash_addr |= (prg[3] & 0x3F) << 14;
 			}
-			else if ((A >= 0xC000) & (A <= 0xDFFF))
+			else if ((A >= 0xC000) & (A <= 0xFFFF))
 			{
+				// 2 x 8K
+				prg_idx = ((A >> 12) & 0x06) + 3;
+				if ((prg[prg_idx] >> 14) != 0)
+					return CartBW(A, V); // WRAM
+
+				// PRG-ROM
 				flash_addr &= 0x1FFF;
-				flash_addr |= (prg[7] & 0x7FFF) << 13;
-			}
-			else if ((A >= 0xE000) & (A <= 0xFFFF))
-			{
-				flash_addr &= 0x1FFF;
-				flash_addr |= (prg[9] & 0x7FFF) << 13;
+				flash_addr |= (prg[prg_idx] & 0x7FFF) << 13;
+
 			}
 			break;
 		case PRG_ROM_MODE_3:
+			// 4 x 8K
+			prg_idx = ((A >> 12) & 0x06) + 3;
+			if ((prg[prg_idx] >> 14) != 0)
+				return CartBW(A, V); // WRAM
+			
+			// PRG-ROM
 			flash_addr &= 0x1FFF;
-			if ((A >= 0x8000) & (A <= 0x9FFF))
-			{
-				flash_addr |= (prg[3] & 0x7FFF) << 13;
-			}
-			else if ((A >= 0xA000) & (A <= 0xBFFF))
-			{
-				flash_addr |= (prg[5] & 0x7FFF) << 13;
-			}
-			else if ((A >= 0xC000) & (A <= 0xDFFF))
-			{
-				flash_addr |= (prg[7] & 0x7FFF) << 13;
-			}
-			else if ((A >= 0xE000) & (A <= 0xFFFF))
-			{
-				flash_addr |= (prg[9] & 0x7FFF) << 13;
-			}
+			flash_addr |= (prg[prg_idx] & 0x7FFF) << 13;
+
 			break;
 		case PRG_ROM_MODE_4:
+			// 8 x 4K
+			prg_idx = ((A >> 12) & 0x07) + 3;
+			
+			if ((prg[prg_idx] >> 14) != 0)
+				return CartBW(A, V); // WRAM
+			
+			// PRG-ROM
 			flash_addr &= 0x0FFF;
-			if ((A >= 0x8000) & (A <= 0x8FFF))
-			{
-				flash_addr |= (prg[3] & 0x7FFF) << 12;
-			}
-			else if ((A >= 0x9000) & (A <= 0x9FFF))
-			{
-				flash_addr |= (prg[4] & 0x7FFF) << 12;
-			}
-			else if ((A >= 0xA000) & (A <= 0xAFFF))
-			{
-				flash_addr |= (prg[5] & 0x7FFF) << 12;
-			}
-			else if ((A >= 0xB000) & (A <= 0xBFFF))
-			{
-				flash_addr |= (prg[6] & 0x7FFF) << 12;
-			}
-			else if ((A >= 0xC000) & (A <= 0xCFFF))
-			{
-				flash_addr |= (prg[7] & 0x7FFF) << 12;
-			}
-			else if ((A >= 0xD000) & (A <= 0xDFFF))
-			{
-				flash_addr |= (prg[8] & 0x7FFF) << 12;
-			}
-			else if ((A >= 0xE000) & (A <= 0xEFFF))
-			{
-				flash_addr |= (prg[9] & 0x7FFF) << 12;
-			}
-			else if ((A >= 0xF000) & (A <= 0xFFFF))
-			{
-				flash_addr |= (prg[10] & 0x7FFF) << 12;
-			}
+			flash_addr |= (prg[prg_idx] & 0x7FFF) << 13;
 			break;
 
 		default:
-			return;
+			return CartBW(A, V);
 		}
 	}
 	Rainbow2Flash(CHIP_TYPE_PRG, flash_addr, V);
@@ -1523,18 +1504,6 @@ static void Rainbow2Power(void) {
 	// audio expansion registers (writes)
 	SetWriteHandler(0x41A0, 0x41A8, RNBW_ExpAudioWr);
 
-	// FPGA WRAM @ $4800-$4fff (reads/writes)
-	SetWriteHandler(0x4800, 0x4fff, FPGA_0x4800Wr);
-	SetReadHandler(0x4800, 0x4fff, FPGA_0x4800Rd);
-
-	// FPGA WRAM @ $5000-$5fff (reads/writes)
-	SetWriteHandler(0x5000, 0x5fff, WRAM_0x5000Wr);
-	SetReadHandler(0x5000, 0x5fff, WRAM_0x5000Rd);
-
-	// WRAM @ $6000-$7fff (reads/writes)
-	SetWriteHandler(0x6000, 0x7fff, WRAM_0x6000Wr);
-	SetReadHandler(0x6000, 0x7fff, WRAM_0x6000Rd);
-
 	// self-flashing
 	flash_mode[CHIP_TYPE_PRG] = 0;
 	flash_mode[CHIP_TYPE_CHR] = 0;
@@ -1542,7 +1511,8 @@ static void Rainbow2Power(void) {
 	flash_sequence[CHIP_TYPE_CHR] = 0;
 	flash_id[CHIP_TYPE_PRG] = false;
 	flash_id[CHIP_TYPE_CHR] = false;
-	SetWriteHandler(0x8000, 0xFFFF, RNBW_0x8000Wr);
+	SetWriteHandler(0x6000, 0xFFFF, RNBW_0x6000Wr);
+
 
 	// fill WRAM/FPGA_RAM/CHRRAM/DUMMY_CHRRAM/DUMMY_CHRROM with random values
 	if (WRAM && !RNBWbattery)

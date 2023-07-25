@@ -459,6 +459,7 @@ uint8 *FCEUPPU_GetCHR(uint32 vadr, uint32 refreshaddr)
 		uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
 		if (NT_ext_mode & 0x02)
 		{
+			if (RNBWHackVROMPtr == NULL) return NULL;
 			uint8 *C = RNBWHackVROMPtr;
 			C += ((RNBWHackBGBankOffset * 0x40000) + ((RNBWHackExNTARAMPtr[NT_1K_dest * 0x400 + (NTRefreshAddr & 0x3ff)] & 0x3f) << 12) + (vadr & 0xfff)) & RNBWHackVROMMask;
 			return C;
