@@ -261,9 +261,9 @@ private:
 	template<class I>
 	void writeFile(I data_begin, I data_end);
 	void saveFiles();
-	void _saveFiles(uint8 drive, char const* filename);
+	void saveFile(uint8 drive, char const* filename);
 	void loadFiles();
-	void _loadFiles(uint8 drive, char const* filename);
+	void loadFile(uint8 drive, char const* filename);
 	void clearFiles(uint8 drive);
 
 	template<class I>

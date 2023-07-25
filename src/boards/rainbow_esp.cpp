@@ -1318,39 +1318,60 @@ void BrokeStudioFirmware::saveFiles() {
 	if (esp_filesystem_file_path == NULL) {
 		FCEU_printf("RAINBOW_ESP_FILESYSTEM_FILE environment variable is not set\n");
 	} else {
-		_saveFiles(0, esp_filesystem_file_path);
+		saveFile(0, esp_filesystem_file_path);
 	}
 
 	char const* sd_filesystem_file_path = ::getenv("RAINBOW_SD_FILESYSTEM_FILE");
 	if (sd_filesystem_file_path == NULL) {
 		FCEU_printf("RAINBOW_SD_FILESYSTEM_FILE environment variable is not set\n");
 	} else {
-		_saveFiles(2, sd_filesystem_file_path);
+		saveFile(2, sd_filesystem_file_path);
 	}
 }
 
-void BrokeStudioFirmware::_saveFiles(uint8 drive, char const* filename) {
-	std::ofstream ofs(filename, std::ios::binary);
+void BrokeStudioFirmware::saveFile(uint8 drive, char const* filename) {
+	std::ofstream ofs(filename, std::fstream::binary);
 	if (ofs.fail()) {
 		FCEU_printf("Couldn't open RAINBOW_FILESYSTEM_FILE (%s)\n", filename);
 		return;
 	}
 
-	ofs << (char)(0x00); //file format version
+	//header
+	ofs << 'R';
+	ofs << 'N';
+	ofs << 'B';
+	ofs	<< 'W';
+	ofs << 'F';
+	ofs << 'S';
+	ofs << (char)0x1A;
+
+	//file format version
+	ofs << (char)(0x00);
 
 	for (auto file = this->files.begin(); file != this->files.end(); ++file)
 	{
 		if (file->drive != drive) continue;
-		ofs << (char)file->filename.length(); //filename length
-		for (char& c : std::string(file->filename)) { //filename
+
+		//file separator
+		ofs << 'F';
+		ofs << '>';
+
+		//filename length
+		ofs << (char)file->filename.length();
+
+		//filename
+		for (char& c : std::string(file->filename)) {
 			ofs << (c);
 		}
-		uint32 size = file->data.size(); //data size
+		//data size
+		uint32 size = file->data.size();
 		ofs << (char)((size & 0xff000000) >> 24);
 		ofs << (char)((size & 0x00ff0000) >> 16);
 		ofs << (char)((size & 0x0000ff00) >> 8);
 		ofs << (char)((size & 0x000000ff));
-		for (uint8 byte : file->data) { //actual data
+		
+		//actual data
+		for (uint8 byte : file->data) {
 			ofs << (char)byte;
 		}
 	}
@@ -1364,7 +1385,7 @@ void BrokeStudioFirmware::loadFiles() {
 	}
 	else {
 		isEspFlashFilePresent = true;
-		_loadFiles(0, esp_filesystem_file_path);
+		loadFile(0, esp_filesystem_file_path);
 	}
 
 	char const* sd_filesystem_file_path = ::getenv("RAINBOW_SD_FILESYSTEM_FILE");
@@ -1374,41 +1395,69 @@ void BrokeStudioFirmware::loadFiles() {
 	}
 	else {
 		isSdCardFilePresent = true;
-		_loadFiles(2, sd_filesystem_file_path);
+		loadFile(2, sd_filesystem_file_path);
 	}
 }
 
-void BrokeStudioFirmware::_loadFiles(uint8 drive, char const* filename) {
-	std::ifstream ifs(filename, std::ios::binary);
+void BrokeStudioFirmware::loadFile(uint8 drive, char const* filename) {
+	std::ifstream ifs(filename, std::fstream::binary);
 	if (ifs.fail()) {
 		FCEU_printf("Couldn't open RAINBOW_FILESYSTEM_FILE (%s)\n", filename);
 		return;
 	}
-	
-	// Stop eating new lines in binary mode!!!
-	ifs.unsetf(std::ios::skipws);
 
 	clearFiles(drive);
 
-	char c;
 	uint8 l;
 	uint8 t;
 	uint32 size;
 	uint8 v;
 
-	v = ifs.get(); //file format version
+	//check file header
+	std::string header;
+	header.push_back(ifs.get());	//R
+	header.push_back(ifs.get());	//N
+	header.push_back(ifs.get());	//B
+	header.push_back(ifs.get());	//W
+	header.push_back(ifs.get());	//F
+	header.push_back(ifs.get());	//S
+	header.push_back(ifs.get());	//0x1A
+	if (header != "RNBWFS\x1a") {
+		FCEU_printf("RAINBOW_FILESYSTEM_FILE (%s) file invalid\n", filename);
+		return;
+	}
+
+	//file format version
+	v = ifs.get();
 
 	if (v == 0) {
 		while (ifs.peek() != EOF) {
-			FileStruct temp_file;// = { 0, 0, 0, "", std::vector<uint8>() };
-			temp_file.drive = drive; //drive
-			l = ifs.get(); //filename length
-			temp_file.filename.reserve(l);
-			for (size_t i = 0; i < l; ++i) { //filename
-				c = ifs.get();
-				temp_file.filename.push_back(c);
+
+			//check file separator
+			header = "";
+			header.push_back(ifs.get());	//F
+			header.push_back(ifs.get());	//>
+			if (header != "F>") {
+				FCEU_printf("RAINBOW_FILESYSTEM_FILE (%s) file malformed\n", filename);
+				return;
 			}
-			size = 0; //data size
+
+			FileStruct temp_file;
+
+			//drive
+			temp_file.drive = drive; 
+
+			//filename length
+			l = ifs.get(); 
+			temp_file.filename.reserve(l);
+
+			//filename
+			for (size_t i = 0; i < l; ++i) {
+				temp_file.filename.push_back(ifs.get());
+			}
+
+			//data size
+			size = 0;
 			t = ifs.get();
 			size |= (t << 24);
 			t = ifs.get();
@@ -1419,7 +1468,9 @@ void BrokeStudioFirmware::_loadFiles(uint8 drive, char const* filename) {
 			size |= t;
 			temp_file.data.clear();
 			temp_file.data.reserve(size);
-			for (uint32 i = 0; i < size; ++i) { //actual data
+
+			//actual data
+			for (uint32 i = 0; i < size; ++i) {
 				t = ifs.get();
 				temp_file.data.push_back(t);
 			}
