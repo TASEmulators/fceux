@@ -23,8 +23,8 @@ static uint8 const NO_WORKING_FILE = 0xff;
 static uint8 const NUM_FILE_PATHS = 3;
 static uint8 const NUM_FILES = 64;
 
-static uint64 const ESP_FLASH_SIZE = 0x200000; // 2MiB - 0x200000
-static uint64 const SD_CARD_SIZE = 0x80000000; // 2GiB - 0x80000000
+static uint64 const ESP_FLASH_SIZE = 0x200000; // 2MiB
+static uint64 const SD_CARD_SIZE = 0x80000000; // 2GiB
 
 static uint8 const NUM_NETWORKS = 3;
 static uint8 const NUM_FAKE_NETWORKS = 5;

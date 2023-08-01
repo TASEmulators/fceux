@@ -111,19 +111,22 @@ static int CHRRAMSIZE = 0; // max 512 KiB
 extern uint8 *ExtraNTARAM;
 
 static uint8 RNBWbattery = 0;
+static uint8 reset_step = 0;
 
 // Scanline IRQ
-static uint8 S_IRQcontrol, S_IRQlatch, S_IRQoffset; // matches hardware register
+static bool S_IRQ_enable, S_IRQ_pending, S_IRQ_in_frame, S_IRQ_HBlank;
+static uint8 S_IRQ_latch, S_IRQ_offset, S_IRQ_jitter_counter;
+
 // additional flags to emulate hardware correctly
-static float S_IRQdotcount;
-static uint8 S_IRQready, S_IRQlastSLtriggered;
+static float S_IRQ_dot_count;
+static uint8 S_IRQ_ready, S_IRQ_last_SL_triggered;
 
 // CPU Cycle IRQ
-static bool C_IRQe, C_IRQr, C_IRQp;
+static bool C_IRQ_enable, C_IRQ_reset, C_IRQ_pending;
 static int32 C_IRQLatch, C_IRQCount;
 
 // ESP message IRQ
-static uint8 ESP_IRQp;
+static uint8 ESP_IRQ_pending;
 
 static uint8 flash_mode[2];
 static uint8 flash_sequence[2];
@@ -153,20 +156,23 @@ static SFORMAT Rainbow2StateRegs[] =
 	{ prg, 11, "PRG" },
 	{ chr, 16, "CHR" },
 
-	{ &S_IRQcontrol, 1, "SICO" },
-	{ &S_IRQlatch, 1, "SILA" },
-	{ &S_IRQoffset, 1, "SIOF" },
-	{ &S_IRQdotcount, 4, "SIDC" },
-	{ &S_IRQready, 1, "SIRE" },
-	{ &S_IRQlastSLtriggered, 1, "SITR" },
+	{ &S_IRQ_enable, 1, "PPUE" },
+	{ &S_IRQ_pending, 1, "PPUP" },
+	{ &S_IRQ_in_frame, 1, "PPUF" },
+	{ &S_IRQ_HBlank, 1, "PPUH" },
+	{ &S_IRQ_latch, 1, "PPUL" },
+	{ &S_IRQ_offset, 1, "PPUO" },
+	{ &S_IRQ_dot_count, 4, "PPUD" },
+	{ &S_IRQ_ready, 1, "PPUR" },
+	{ &S_IRQ_last_SL_triggered, 1, "PPUT" },
 
-	{ &C_IRQe, 1, "CPUA" },
-	{ &C_IRQp, 1, "CPUP" },
-	{ &C_IRQr, 1, "CPUR" },
+	{ &C_IRQ_enable, 1, "CPUE" },
+	{ &C_IRQ_pending, 1, "CPUP" },
+	{ &C_IRQ_reset, 1, "CPUR" },
 	{ &C_IRQLatch, 4, "CPUL" },
 	{ &C_IRQCount, 4, "CPUC" },
 
-	{ &ESP_IRQp, 1, "ESPP" },
+	{ &ESP_IRQ_pending, 1, "ESPP" },
 
 	{ 0 }
 };
@@ -178,10 +184,12 @@ static int32 cvbc[3];
 static int32 vcount[3];
 static int32 dcount[2];
 
+static uint8 ZPCM[3];
+
 static SFORMAT SStateRegs[] =
 {
-	{ vpsg1, 8, "PSG1" },
-	{ vpsg2, 4, "PSG2" },
+	{ vpsg1, 8, "PSG1" },	// SQ 1+2
+	{ vpsg2, 4, "PSG2" },	// SAW
 	{ 0 }
 };
 
@@ -216,7 +224,7 @@ static void clear_esp_message_received() {
 }
 
 static void IRQEnd() {
-	if (!C_IRQp && !(S_IRQcontrol & 0x80) && !ESP_IRQp)
+	if (!C_IRQ_pending & !S_IRQ_pending & !ESP_IRQ_pending)
 	{
 		X6502_IRQEnd(FCEU_IQEXT);
 	}
@@ -229,64 +237,72 @@ static void Rainbow2IRQ(int a) {
 	int dot = newppu_get_dot();
 	int ppuon = (PPU[1] & 0x18);
 
+	S_IRQ_jitter_counter += a;
+
+	if (dot >= 256)
+		S_IRQ_HBlank = true;
+	else
+		S_IRQ_HBlank = false;
+
 	if (!ppuon || sl >= 241)
 	{
 		// whenever rendering is off for any reason (vblank or forced disable)
 		// the irq counter resets, as well as the inframe flag (easily verifiable from software)
-		S_IRQcontrol &= ~0x40; // in-frame flag cleared
-		S_IRQcontrol &= ~0x80; // pending IRQ flag cleared
-		S_IRQready = 0;
-		S_IRQlastSLtriggered = 255;
+		S_IRQ_in_frame = false; // in-frame flag cleared
+		S_IRQ_pending = false; // pending IRQ flag cleared
+		S_IRQ_ready = 0;
+		S_IRQ_last_SL_triggered = 255;
 		IRQEnd();
 	}
 	else
 	{
-		if (!(S_IRQcontrol & 0x40))
+		if (!S_IRQ_in_frame)
 		{
-			S_IRQcontrol |= 0x40;
-			S_IRQcontrol &= ~0x80;
+			S_IRQ_in_frame = true;
+			S_IRQ_pending = false;
 			IRQEnd();
 		}
 
 		// this is kind of hacky but result is pretty close to hardware
-		if ((sl == S_IRQlatch) & !S_IRQready & !(S_IRQcontrol & 0x80) & (sl != S_IRQlastSLtriggered))
+		if ((sl == S_IRQ_latch) & (S_IRQ_ready == 0) & !S_IRQ_pending & (sl != S_IRQ_last_SL_triggered))
 		{
-			S_IRQready = 1;
-			S_IRQdotcount = (float)dot;
-			if (PAL) S_IRQdotcount -= a * 3.2;
-			else S_IRQdotcount -= (float)a * 3;
+			S_IRQ_ready = 1;
+			S_IRQ_dot_count = (float)dot;
+			if (PAL) S_IRQ_dot_count -= a * 3.2;
+			else S_IRQ_dot_count -= (float)a * 3;
 		}
 
-		if ((S_IRQready == 1) & !(S_IRQcontrol & 0x80))
+		if ((S_IRQ_ready == 1) & !S_IRQ_pending)
 		{
-			if (PAL) S_IRQdotcount += (float)a * 3.2;
-			else S_IRQdotcount += (float)a * 3;
+			if (PAL) S_IRQ_dot_count += (float)a * 3.2;
+			else S_IRQ_dot_count += (float)a * 3;
 
-			int dotTarget = (S_IRQoffset * 2);
+			int dotTarget = (S_IRQ_offset * 2);
 			if (PAL) dotTarget += 20;
 			else dotTarget += 24;
 
-			if (((int)S_IRQdotcount) >= dotTarget)
+			if (((int)S_IRQ_dot_count) >= dotTarget)
 			{
-				S_IRQready = 2;
-				S_IRQlastSLtriggered = S_IRQlatch;
+				S_IRQ_ready = 2;
+				S_IRQ_last_SL_triggered = S_IRQ_latch;
 			}
 		}
 
-		if ((S_IRQcontrol & 0x01) && !(S_IRQcontrol & 0x80) && (S_IRQready == 2))
+		if (S_IRQ_enable & !S_IRQ_pending & (S_IRQ_ready == 2))
 		{
 			X6502_IRQBegin(FCEU_IQEXT);
-			S_IRQcontrol |= 0x80;
-			S_IRQready = 0;
+			S_IRQ_pending = true;
+			S_IRQ_ready = 0;
+			S_IRQ_jitter_counter = 0;
 		}
 	}
 
 	// Cycle Counter IRQ
-	if (C_IRQe) {
+	if (C_IRQ_enable) {
 		C_IRQCount -= a;
 		if (C_IRQCount <= 0) {
-			C_IRQe = C_IRQr;
-			C_IRQp = true;
+			C_IRQ_enable = C_IRQ_reset;
+			C_IRQ_pending = true;
 			C_IRQCount = C_IRQLatch;
 			X6502_IRQBegin(FCEU_IQEXT);
 		}
@@ -298,11 +314,11 @@ static void Rainbow2IRQ(int a) {
 		if (esp_message_received())
 		{
 			X6502_IRQBegin(FCEU_IQEXT);
-			ESP_IRQp = 1;
+			ESP_IRQ_pending = 1;
 		}
 		else
 		{
-			ESP_IRQp = 0;
+			ESP_IRQ_pending = 0;
 		}
 	}
 
@@ -310,9 +326,6 @@ static void Rainbow2IRQ(int a) {
 }
 
 static void Sync(void) {
-	//static uint8 *address;
-	//uint32 start;
-	//uint32 offset;
 	uint8 cart_chr_map;
 
 	// $8000-$ffff
@@ -455,21 +468,21 @@ static void Sync(void) {
 	// CHR
 	switch (chr_chip)
 	{
-		case CHR_CHIP_ROM:
-			RNBWHackVROMPtr = CHR_FLASHROM;
-			RNBWHackVROMMask = CHR_FLASHROMSIZE - 1;
-			break;
-		case CHR_CHIP_RAM:
-			RNBWHackVROMPtr = CHRRAM;
-			RNBWHackVROMMask = CHRRAMSIZE - 1;
-			break;
-		case CHR_CHIP_FPGA_RAM:
-			RNBWHackVROMPtr = FPGA_RAM;
-			RNBWHackVROMMask = FPGA_RAMSIZE - 1;
-			break;
+	case CHR_CHIP_ROM:
+		RNBWHackVROMPtr = CHR_FLASHROM;
+		RNBWHackVROMMask = CHR_FLASHROMSIZE - 1;
+		break;
+	case CHR_CHIP_RAM:
+		RNBWHackVROMPtr = CHRRAM;
+		RNBWHackVROMMask = CHRRAMSIZE - 1;
+		break;
+	case CHR_CHIP_FPGA_RAM:
+		RNBWHackVROMPtr = FPGA_RAM;
+		RNBWHackVROMMask = FPGA_RAMSIZE - 1;
+		break;
 	}
 
-	if(chr_chip == CHR_CHIP_FPGA_RAM)
+	if (chr_chip == CHR_CHIP_FPGA_RAM)
 	{
 		setchr4r(0x12, 0x0000, 0);
 		setchr4r(0x12, 0x1000, 0);
@@ -532,124 +545,44 @@ static void Sync(void) {
 }
 
 static DECLFW(RNBW_ExpAudioWr) {
+	uint8 i;
 	if (A >= 0x41A0 && A <= 0x41A2)
 	{
-		vpsg1[A & 3] = V;
+		i = A & 3; // 0, 1, 2
+		vpsg1[i] = V;
 		if (sfun[0])
 			sfun[0]();
 	}
 	else if (A >= 0x41A3 && A <= 0x41A5)
 	{
-		vpsg1[4 | ((A - 3) & 3)] = V;
+		i = 4 | ((A - 3) & 3); // 4, 5, 6
+		vpsg1[i] = V;
 		if (sfun[1])
 			sfun[1]();
 	}
 	else if (A >= 0x41A6 && A <= 0x41A8)
 	{
-		vpsg2[(A - 6) & 3] = V;
+		i = (A - 6) & 3; // 0, 1, 2
+		vpsg2[i] = V;
 		if (sfun[2])
 			sfun[2]();
 	}
 }
 
-static DECLFW(WRAM_0x6000Wr)
-{
-	// $6000-$7fff
-
-	// 8K
-	if (prg_ram_mode == PRG_RAM_MODE_0)
-	{
-		if (((prg[1] & 0xC000) >> 14) == 3)
-			CartBW(A, V); // FPGA_RAM
-		else if ((((prg[1] & 0xC000) >> 14) == 2) && WRAM)
-			CartBW(A, V); // WRAM
-		else if (((prg[1] & 0x8000) >> 15) == 0)
-			CartBW(A, V); // PRG-ROM
-	}
-
-	// 4K
-	if (prg_ram_mode == PRG_RAM_MODE_1)
-	{
-		if ((A >= 0x6000) & (A < 0x7000))
-		{
-			if (((prg[1] & 0xC000) >> 14) == 3)
-				CartBW(A, V); // FPGA_RAM
-			else if ((((prg[1] & 0xC000) >> 14) == 2) && WRAM)
-				CartBW(A, V); // WRAM
-			else  if (((prg[1] & 0x8000) >> 15) == 0)
-				CartBW(A, V); // PRG-ROM
-		}
-
-		if ((A >= 0x7000) & (A < 0x8000))
-		{
-			if (((prg[2] & 0xC000) >> 14) == 3)
-				CartBW(A, V); // FPGA_RAM
-			else if ((((prg[2] & 0xC000) >> 14) == 2) && WRAM)
-				CartBW(A, V); // WRAM
-			else if (((prg[2] & 0x8000) >> 15) == 0)
-				CartBW(A, V); // PRG-ROM
-		}
-	}
+static DECLFR(RNBW_0x4011Rd) {
+	uint8 ZPCM_val = ((ZPCM[0] + ZPCM[1] + ZPCM[2]) & 0x3f) << 2;
+	return ZPCM_val;
 }
 
-static DECLFR(WRAM_0x6000Rd)
-{
-	// $6000-$7fff
-
-	// 8K
-	if (prg_ram_mode == PRG_RAM_MODE_0)
+static DECLFR(RNBW_RstPowRd) {
+	if (A == 0xFFFC) reset_step = 1;
+	else if (A == 0xFFFD & reset_step == 1)
 	{
-		if (((prg[1] & 0xC000) >> 14) == 3)
-			return CartBR(A); // FPGA_RAM
-		else if ((((prg[1] & 0xC000) >> 14) == 2) && WRAM)
-			return CartBR(A); // WRAM
-		else if (((prg[1] & 0x8000) >> 15) == 0)
-			return CartBR(A); // PRG-ROM
+		Rainbow2Reset();
+		reset_step = 0;
 	}
-
-	// 4K
-	if (prg_ram_mode == PRG_RAM_MODE_1)
-	{
-		if ((A >= 0x6000) & (A < 0x7000))
-		{
-			if (((prg[1] & 0xC000) >> 14) == 3)
-				return CartBR(A); // FPGA_RAM
-			else if ((((prg[1] & 0xC000) >> 14) == 2) && WRAM)
-				return CartBR(A); // WRAM
-			else if (((prg[1] & 0x8000) >> 15) == 0)
-				return CartBR(A); // PRG-ROM
-		}
-
-		if ((A >= 0x7000) & (A < 0x8000))
-		{
-			if (((prg[2] & 0xC000) >> 14) == 3)
-				return CartBR(A); // FPGA_RAM
-			else if ((((prg[2] & 0xC000) >> 14) == 2) && WRAM)
-				return CartBR(A); // WRAM
-			else if (((prg[2] & 0x8000) >> 15) == 0)
-				return CartBR(A); // PRG-ROM
-		}
-	}
-	
-	return X.DB;
-}
-static DECLFW(WRAM_0x5000Wr)
-{
-	CartBW(A, V);
-}
-static DECLFR(WRAM_0x5000Rd)
-{
+	else reset_step = 0;
 	return CartBR(A);
-}
-static DECLFW(FPGA_0x4800Wr)
-{
-	CartBW(A, V);
-	//FPGA_RAM[(A & 0x7ff) + 0x1800] = V;
-}
-static DECLFR(FPGA_0x4800Rd)
-{
-	return CartBR(A);
-	//return FPGA_RAM[(A & 0x7ff) + 0x1800];
 }
 
 static DECLFR(RNBW_0x4100Rd) {
@@ -658,12 +591,15 @@ static DECLFR(RNBW_0x4100Rd) {
 	case 0x4100: return (prg_ram_mode << 6) | prg_rom_mode;
 	case 0x4120: return (chr_chip << 6) | (chr_spr_ext_mode << 5) | chr_mode;
 	case 0x4151: {
-		S_IRQcontrol &= ~0x80;
-		S_IRQready = 0;
+		uint8 rv = (S_IRQ_HBlank ? 0x80 : 0) | (S_IRQ_in_frame ? 0x40 : 0 | (S_IRQ_pending ? 0x01 : 0));
+		S_IRQ_pending = false;
+		S_IRQ_ready = 0;
 		IRQEnd();
-		return CartBR(A);
+		return rv;
 	}
+	case 0x4154: return S_IRQ_jitter_counter;
 	case 0x4160: return MAPPER_VERSION;
+	case 0x4161: return (S_IRQ_pending ? 0x80 : 0) | (C_IRQ_pending ? 0x40 : 0) | (ESP_IRQ_pending ? 0x01 : 0);
 
 		// ESP - WiFi
 	case 0x4170:
@@ -712,7 +648,7 @@ static DECLFW(RNBW_0x4100Wr) {
 	case 0x410E:
 	case 0x410F:
 	{
-		int bank = ( A & 0x0f ) - 5;
+		int bank = (A & 0x0f) - 5;
 		prg[bank] = (prg[bank] & 0x00ff) | (V << 8);
 		Sync();
 		break;
@@ -729,12 +665,12 @@ static DECLFW(RNBW_0x4100Wr) {
 	case 0x411E:
 	case 0x411F:
 	{
-		int bank = ( A & 0x0f ) - 5;
+		int bank = (A & 0x0f) - 5;
 		prg[bank] = (prg[bank] & 0xff00) | V;
 		Sync();
 		break;
 	}
-		// CHR banking / chip selector / sprite extended mode
+	// CHR banking / chip selector / sprite extended mode
 	case 0x4120:
 		chr_chip = (V & 0xC0) >> 6;
 		chr_spr_ext_mode = (V & 0x20) >> 5;
@@ -799,22 +735,22 @@ static DECLFW(RNBW_0x4100Wr) {
 		Sync();
 		break;
 	}
-		// Scanline IRQ
-	case 0x4150: S_IRQlatch = V; break;
-	case 0x4151: S_IRQcontrol |= 1; break;
-	case 0x4152: S_IRQcontrol &= 0x7E; break;
-	case 0x4153: S_IRQoffset = V > 169 ? 169 : V; break;
+	// Scanline IRQ
+	case 0x4150: S_IRQ_latch = V; break;
+	case 0x4151: S_IRQ_enable = true; break;
+	case 0x4152: S_IRQ_pending = false; S_IRQ_enable = false; break;
+	case 0x4153: S_IRQ_offset = V > 169 ? 169 : V; break;
 		// CPU Cycle IRQ
 	case 0x4158: C_IRQLatch &= 0xFF00; C_IRQLatch |= V; C_IRQCount = C_IRQLatch; break;
 	case 0x4159: C_IRQLatch &= 0x00FF; C_IRQLatch |= V << 8; C_IRQCount = C_IRQLatch; break;
 	case 0x415A:
-		C_IRQe = V & 0x01;
-		C_IRQr = (V & 0x02) >> 1;
-		if (C_IRQe)
+		C_IRQ_enable = V & 0x01;
+		C_IRQ_reset = (V & 0x02) >> 1;
+		if (C_IRQ_enable)
 			C_IRQCount = C_IRQLatch;
 		break;
 	case 0x415B:
-		C_IRQp = false;
+		C_IRQ_pending = false;
 		IRQEnd();
 		break;
 		// ESP - WiFi
@@ -869,27 +805,27 @@ static DECLFW(RNBW_0x4100Wr) {
 
 extern uint32 NTRefreshAddr;
 uint8 FASTCALL Rainbow2PPURead(uint32 A) {
-/*
-	// if CHR-RAM, check if CHR-RAM exists, if not return data bus cache
-	if (chr_chip == CHR_CHIP_RAM && CHRRAM == NULL)
-	{
-		if (PPU_hook) PPU_hook(A);
-		return X.DB;
-	}
+	/*
+		// if CHR-RAM, check if CHR-RAM exists, if not return data bus cache
+		if (chr_chip == CHR_CHIP_RAM && CHRRAM == NULL)
+		{
+			if (PPU_hook) PPU_hook(A);
+			return X.DB;
+		}
 
-	// if CHR-ROM, check if CHR-ROM exists, if not return data bus cache
-	if (chr_chip == CHR_CHIP_ROM && CHR_FLASHROM == NULL)
-	{
-		if (PPU_hook) PPU_hook(A);
-		return X.DB;
-	}
-*/
+		// if CHR-ROM, check if CHR-ROM exists, if not return data bus cache
+		if (chr_chip == CHR_CHIP_ROM && CHR_FLASHROM == NULL)
+		{
+			if (PPU_hook) PPU_hook(A);
+			return X.DB;
+		}
+	*/
 	if (A < 0x2000)
 	{
 		if (ppuphase == PPUPHASE_OBJ && ScreenON)
 		{
 			if (chr_spr_ext_mode)
-				if(Sprite16)
+				if (Sprite16)
 					return RNBWHackVROMPtr[((SPR_bank[RNBWHackCurSprite] << 13) & RNBWHackVROMMask) + (A)]; // TODO: test + fix
 				else
 					return RNBWHackVROMPtr[((SPR_bank[RNBWHackCurSprite] << 12) & RNBWHackVROMMask) + (A)];
@@ -914,7 +850,7 @@ uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 		uint8 NT = (A >> 10) & 0x03;
 		uint8 NT_1K_dest = (RNBWHackNTcontrol[NT] & 0x0C) >> 2;
 		uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
-		if(( A & 0x3FF ) >= 0x3C0)
+		if ((A & 0x3FF) >= 0x3C0)
 		{
 			// Attributes
 			if (NT_ext_mode & 0x01)
@@ -1184,14 +1120,14 @@ void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
 				case 1024: // S29AL008
 					if (S29AL008_TOP && sector_index == 15)
 					{
-							 if (flash_addr >= 0xF0000 && flash_addr <= 0xF7FFF) { sector_offset = 0xF0000; sector_size = 32; }
+						if (flash_addr >= 0xF0000 && flash_addr <= 0xF7FFF) { sector_offset = 0xF0000; sector_size = 32; }
 						else if (flash_addr >= 0xF8000 && flash_addr <= 0xF9FFF) { sector_offset = 0xF8000; sector_size = 8; }
 						else if (flash_addr >= 0xFA000 && flash_addr <= 0xFBFFF) { sector_offset = 0xFA000; sector_size = 8; }
 						else if (flash_addr >= 0xFC000 && flash_addr <= 0xFFFFF) { sector_offset = 0xFC000; sector_size = 16; }
 					}
 					else if (!S29AL008_TOP && sector_index == 0)
 					{
-							 if (flash_addr >= 0x00000 && flash_addr <= 0x03FFF) { sector_offset = 0x00000; sector_size = 16; }
+						if (flash_addr >= 0x00000 && flash_addr <= 0x03FFF) { sector_offset = 0x00000; sector_size = 16; }
 						else if (flash_addr >= 0x04000 && flash_addr <= 0x05FFF) { sector_offset = 0x04000; sector_size = 8; }
 						else if (flash_addr >= 0x06000 && flash_addr <= 0x07FFF) { sector_offset = 0x06000; sector_size = 8; }
 						else if (flash_addr >= 0x08000 && flash_addr <= 0x0FFFF) { sector_offset = 0x08000; sector_size = 32; }
@@ -1200,14 +1136,14 @@ void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
 				case 2048: // S29AL016
 					if (S29AL016_TOP && sector_index == 31)
 					{
-							 if (flash_addr >= 0x1F0000 && flash_addr <= 0x1F7FFF) { sector_offset = 0xF0000; sector_size = 32; }
+						if (flash_addr >= 0x1F0000 && flash_addr <= 0x1F7FFF) { sector_offset = 0xF0000; sector_size = 32; }
 						else if (flash_addr >= 0x1F8000 && flash_addr <= 0x1F9FFF) { sector_offset = 0xF8000; sector_size = 8; }
 						else if (flash_addr >= 0x1FA000 && flash_addr <= 0x1FBFFF) { sector_offset = 0xFA000; sector_size = 8; }
 						else if (flash_addr >= 0x1FC000 && flash_addr <= 0x1FFFFF) { sector_offset = 0xFC000; sector_size = 16; }
 					}
 					else if (!S29AL016_TOP && sector_index == 0)
 					{
-							 if (flash_addr >= 0x00000 && flash_addr <= 0x03FFF) { sector_offset = 0x00000; sector_size = 16; }
+						if (flash_addr >= 0x00000 && flash_addr <= 0x03FFF) { sector_offset = 0x00000; sector_size = 16; }
 						else if (flash_addr >= 0x04000 && flash_addr <= 0x05FFF) { sector_offset = 0x04000; sector_size = 8; }
 						else if (flash_addr >= 0x06000 && flash_addr <= 0x07FFF) { sector_offset = 0x06000; sector_size = 8; }
 						else if (flash_addr >= 0x08000 && flash_addr <= 0x0FFFF) { sector_offset = 0x08000; sector_size = 32; }
@@ -1216,7 +1152,7 @@ void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
 				case 4096: // S29JL032
 					if (S29JL032_TOP && sector_index == 63)
 					{
-							 if (flash_addr >= 0x3F0000 && flash_addr <= 0x3F1FFF) { sector_offset = 0x3F0000; sector_size = 8; }
+						if (flash_addr >= 0x3F0000 && flash_addr <= 0x3F1FFF) { sector_offset = 0x3F0000; sector_size = 8; }
 						else if (flash_addr >= 0x3F2000 && flash_addr <= 0x3F3FFF) { sector_offset = 0x3F2000; sector_size = 8; }
 						else if (flash_addr >= 0x3F4000 && flash_addr <= 0x3F5FFF) { sector_offset = 0x3F4000; sector_size = 8; }
 						else if (flash_addr >= 0x3F6000 && flash_addr <= 0x3F7FFF) { sector_offset = 0x3F6000; sector_size = 8; }
@@ -1228,7 +1164,7 @@ void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
 					}
 					else if (!S29JL032_TOP && sector_index == 0)
 					{
-							 if (flash_addr >= 0x000000 && flash_addr <= 0x001FFF) { sector_offset = 0x000000; sector_size = 8; }
+						if (flash_addr >= 0x000000 && flash_addr <= 0x001FFF) { sector_offset = 0x000000; sector_size = 8; }
 						else if (flash_addr >= 0x002000 && flash_addr <= 0x003FFF) { sector_offset = 0x002000; sector_size = 8; }
 						else if (flash_addr >= 0x004000 && flash_addr <= 0x005FFF) { sector_offset = 0x004000; sector_size = 8; }
 						else if (flash_addr >= 0x006000 && flash_addr <= 0x007FFF) { sector_offset = 0x006000; sector_size = 8; }
@@ -1241,7 +1177,7 @@ void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
 				case 8192: // S29GL064S
 					if (!S29GL064S_TOP && sector_index == 0)
 					{
-							 if (flash_addr >= 0x000000 && flash_addr <= 0x001FFF) { sector_offset = 0x000000; sector_size = 8; }
+						if (flash_addr >= 0x000000 && flash_addr <= 0x001FFF) { sector_offset = 0x000000; sector_size = 8; }
 						else if (flash_addr >= 0x002000 && flash_addr <= 0x003FFF) { sector_offset = 0x002000; sector_size = 8; }
 						else if (flash_addr >= 0x004000 && flash_addr <= 0x005FFF) { sector_offset = 0x004000; sector_size = 8; }
 						else if (flash_addr >= 0x006000 && flash_addr <= 0x007FFF) { sector_offset = 0x006000; sector_size = 8; }
@@ -1252,7 +1188,7 @@ void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
 					}
 					else if (S29GL064S_TOP && sector_index == 127)
 					{
-							 if (flash_addr >= 0x7F0000 && flash_addr <= 0x7F1FFF) { sector_offset = 0x7F0000; sector_size = 8; }
+						if (flash_addr >= 0x7F0000 && flash_addr <= 0x7F1FFF) { sector_offset = 0x7F0000; sector_size = 8; }
 						else if (flash_addr >= 0x7F2000 && flash_addr <= 0x7F3FFF) { sector_offset = 0x7F2000; sector_size = 8; }
 						else if (flash_addr >= 0x7F4000 && flash_addr <= 0x7F5FFF) { sector_offset = 0x7F4000; sector_size = 8; }
 						else if (flash_addr >= 0x7F6000 && flash_addr <= 0x7F7FFF) { sector_offset = 0x7F6000; sector_size = 8; }
@@ -1306,7 +1242,7 @@ static DECLFW(RNBW_0x6000Wr) {
 			prg_idx = ((A >> 12) & 0x07) - 6;
 			if (((prg[prg_idx] & 0x8000) >> 14) != 0)
 				return CartBW(A, V); // FPGA_RAM or WRAM
-			
+
 			// PRG-ROM
 			flash_addr &= 0x1FFF;
 			flash_addr |= (prg[prg_idx] & 0x7FFF) << 13;
@@ -1368,7 +1304,7 @@ static DECLFW(RNBW_0x6000Wr) {
 			prg_idx = ((A >> 12) & 0x06) + 3;
 			if ((prg[prg_idx] >> 14) != 0)
 				return CartBW(A, V); // WRAM
-			
+
 			// PRG-ROM
 			flash_addr &= 0x1FFF;
 			flash_addr |= (prg[prg_idx] & 0x7FFF) << 13;
@@ -1377,10 +1313,10 @@ static DECLFW(RNBW_0x6000Wr) {
 		case PRG_ROM_MODE_4:
 			// 8 x 4K
 			prg_idx = ((A >> 12) & 0x07) + 3;
-			
+
 			if ((prg[prg_idx] >> 14) != 0)
 				return CartBW(A, V); // WRAM
-			
+
 			// PRG-ROM
 			flash_addr &= 0x0FFF;
 			flash_addr |= (prg[prg_idx] & 0x7FFF) << 13;
@@ -1394,15 +1330,15 @@ static DECLFW(RNBW_0x6000Wr) {
 }
 
 static void Rainbow2PPUWrite(uint32 A, uint8 V) {
-/*
-	// if CHR-RAM but CHR-RAM does not exist then return
-	if (chr_chip == CHR_CHIP_RAM && CHRRAM == NULL)
-		return;
+	/*
+		// if CHR-RAM but CHR-RAM does not exist then return
+		if (chr_chip == CHR_CHIP_RAM && CHRRAM == NULL)
+			return;
 
-	// if CHR-ROM but CHR-ROM does not exist then return
-	if (chr_chip == CHR_CHIP_ROM && CHR_FLASHROM == NULL)
-		return;
-	else*/
+		// if CHR-ROM but CHR-ROM does not exist then return
+		if (chr_chip == CHR_CHIP_ROM && CHR_FLASHROM == NULL)
+			return;
+		else*/
 	{
 		uint32 flash_addr = A;
 		if (A < 0x2000)
@@ -1438,6 +1374,9 @@ static void Rainbow2PPUWrite(uint32 A, uint8 V) {
 }
 
 static void Rainbow2Reset(void) {
+	// reset
+	reset_step = 0;
+
 	// PRG - 32K banks mapped to first PRG-ROM bank
 	prg_rom_mode = PRG_ROM_MODE_0;
 	prg[3] = 0;
@@ -1460,11 +1399,16 @@ static void Rainbow2Reset(void) {
 	RNBWHackNTcontrol[3] = 0;
 
 	// Scanline IRQ
-	S_IRQcontrol = 0;
-	S_IRQoffset = 135;
+	S_IRQ_enable = false;
+	S_IRQ_pending = false;
+	S_IRQ_in_frame = false;
+	S_IRQ_HBlank = false;
+	S_IRQ_offset = 135;
 
 	// CPU Cycle IRQ
-	C_IRQe = C_IRQp = C_IRQr = 0;
+	C_IRQ_enable = false;
+	C_IRQ_pending = false;
+	C_IRQ_reset = false;
 
 	// Audio Output
 	audio_output = 1;
@@ -1476,30 +1420,38 @@ static void Rainbow2Reset(void) {
 	//rx_address = 0;
 	//tx_address = 0;
 	//rx_index = 0;
-	ESP_IRQp = 0;
+	ESP_IRQ_pending = 0;
 	Sync();
 }
 
 static void Rainbow2Power(void) {
 
 	// mapper init
-	if(MiscROMS) bootrom = 1;
+	if (MiscROMS) bootrom = 1;
 	else bootrom = 0;
-	Rainbow2Reset();	
+	Rainbow2Reset();
 
-	SetReadHandler(0x4800, 0xFFFF, CartBR);
-	SetWriteHandler(0x4800, 0x7FFF, CartBW);
-/*
-	if (WRAM)
-		FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
-	FCEU_CheatAddRAM(FPGA_RAMSIZE >> 10, 0x5000, FPGA_RAM);
-	FCEU_CheatAddRAM(0x1800 >> 10, 0x4800, FPGA_RAM);
-*/
+	// reset-power vectors
+	SetReadHandler(0xFFFC, 0xFFFF, RNBW_RstPowRd);
+
+	//
+	SetReadHandler(0x4800, 0xFFFB, CartBR);
+	SetWriteHandler(0x4800, 0x5FFF, CartBW);
+
+	/*
+		if (WRAM)
+			FCEU_CheatAddRAM(WRAMSIZE >> 10, 0x6000, WRAM);
+		FCEU_CheatAddRAM(FPGA_RAMSIZE >> 10, 0x5000, FPGA_RAM);
+		FCEU_CheatAddRAM(0x1800 >> 10, 0x4800, FPGA_RAM);
+	*/
 	// mapper registers (writes)
 	SetWriteHandler(0x4100, 0x47ff, RNBW_0x4100Wr);
 
 	// mapper registers (reads)
 	SetReadHandler(0x4100, 0x47ff, RNBW_0x4100Rd);
+
+	// audio expansion (reads)
+	SetReadHandler(0x4011, 0x4011, RNBW_0x4011Rd);
 
 	// audio expansion registers (writes)
 	SetWriteHandler(0x41A0, 0x41A8, RNBW_ExpAudioWr);
@@ -1512,8 +1464,7 @@ static void Rainbow2Power(void) {
 	flash_id[CHIP_TYPE_PRG] = false;
 	flash_id[CHIP_TYPE_CHR] = false;
 	SetWriteHandler(0x6000, 0xFFFF, RNBW_0x6000Wr);
-
-
+	
 	// fill WRAM/FPGA_RAM/CHRRAM/DUMMY_CHRRAM/DUMMY_CHRROM with random values
 	if (WRAM && !RNBWbattery)
 		FCEU_MemoryRand(WRAM, WRAMSIZE, false);
@@ -1635,7 +1586,9 @@ static INLINE void DoSQV(int x) {
 		if (vpsg1[x << 2] & 0x80)
 		{
 			for (V = start; V < end; V++)
+			{
 				Wave[V >> 4] += amp;
+			}
 		}
 		else
 		{
@@ -1643,7 +1596,9 @@ static INLINE void DoSQV(int x) {
 			int32 freq = ((vpsg1[(x << 2) | 0x1] | ((vpsg1[(x << 2) | 0x2] & 15) << 8)) + 1) << 17;
 			for (V = start; V < end; V++) {
 				if (dcount[x] > thresh)
+				{
 					Wave[V >> 4] += amp;
+				}
 				vcount[x] -= nesincsize;
 				while (vcount[x] <= 0) {
 					vcount[x] += freq;
@@ -1708,32 +1663,51 @@ static void DoSawV(void) {
 }
 
 static INLINE void DoSQVHQ(int x) {
-	int32 V;
-	int32 amp = ((vpsg1[x << 2] & 15) << 8) * 6 / 8;
+	int volume = vpsg1[x << 2] & 15;
+	int duty = (vpsg1[x << 2] >> 4) & 7;
+	bool ignore_duty = vpsg1[x << 2] & 0x80;
+	int freq_lo = vpsg1[(x << 2) | 0x1];
+	int freq_hi = vpsg1[(x << 2) | 0x2] & 15;
+	bool enable = vpsg1[(x << 2) | 0x2] & 0x80;
 
-	if ((vpsg1[(x << 2) | 0x2] & 0x80) && (audio_output & 0x03))
+	int32 V;
+	int32 amp = (volume << 8) * 6 / 8;
+
+	if (enable)
 	{
-		if (vpsg1[x << 2] & 0x80)
+		if (ignore_duty)
 		{
 			for (V = cvbc[x]; V < (int)SOUNDTS; V++)
-				WaveHi[V] += amp;
+			{
+				if (audio_output & 0x03) WaveHi[V] += amp;
+				ZPCM[x] = volume;
+			}
 		}
 		else
 		{
-			int32 thresh = (vpsg1[x << 2] >> 4) & 7;
+			int32 thresh = duty;
 			for (V = cvbc[x]; V < (int)SOUNDTS; V++) {
 				if (dcount[x] > thresh)
-					WaveHi[V] += amp;
+				{
+					if (audio_output & 0x03) WaveHi[V] += amp;
+					ZPCM[x] = volume;
+				}
 				vcount[x]--;
 				if (vcount[x] <= 0)
 				{
-					vcount[x] = (vpsg1[(x << 2) | 0x1] | ((vpsg1[(x << 2) | 0x2] & 15) << 8)) + 1;
+					vcount[x] = (freq_lo | (freq_hi << 8)) + 1;
 					dcount[x] = (dcount[x] + 1) & 15;
 				}
 			}
 		}
 	}
+	else
+	{
+		ZPCM[x] = 0;
+	}
 	cvbc[x] = SOUNDTS;
+
+	return;
 }
 
 static void DoSQV1HQ(void) {
@@ -1749,10 +1723,11 @@ static void DoSawVHQ(void) {
 	static int32 phaseacc = 0;
 	int32 V;
 
-	if ((vpsg2[2] & 0x80) && (audio_output & 0x03))
+	if (vpsg2[2] & 0x80)
 	{
 		for (V = cvbc[2]; V < (int)SOUNDTS; V++) {
-			WaveHi[V] += (((phaseacc >> 3) & 0x1f) << 8) * 6 / 8;
+			ZPCM[2] = (phaseacc >> 3) & 0x1f;
+			if (audio_output & 0x03) WaveHi[V] += (((phaseacc >> 3) & 0x1f) << 8) * 6 / 8;
 			vcount[2]--;
 			if (vcount[2] <= 0)
 			{
@@ -1765,6 +1740,10 @@ static void DoSawVHQ(void) {
 				}
 			}
 		}
+	}
+	else
+	{
+		ZPCM[2] = 0;
 	}
 	cvbc[2] = SOUNDTS;
 }
@@ -1963,7 +1942,7 @@ void RAINBOW2_Init(CartInfo *info) {
 		}
 		SetupCartCHRMapping(0x10, CHR_FLASHROM, CHR_FLASHROMSIZE, 0);
 	}
-		else
+	else
 	{
 		// create dummy CHR-ROM to avoid crash when trying to use CHR-ROM for pattern tables
 		// when no CHR-ROM is specified in the ROM header
