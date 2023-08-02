@@ -1133,9 +1133,6 @@
     <ClCompile Include="..\src\boards\rainbow13.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\RNBW\mongoose.c">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\RNBW\pping.c">
       <Filter>boards</Filter>
     </ClCompile>
@@ -1652,9 +1649,6 @@
       <Filter>drivers\win</Filter>
     </ClInclude>
     <ClInclude Include="..\src\boards\RNBW\esp.h">
-      <Filter>boards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\boards\RNBW\mongoose.h">
       <Filter>boards</Filter>
     </ClInclude>
     <ClInclude Include="..\src\boards\RNBW\pping.h">

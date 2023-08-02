@@ -508,7 +508,6 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\boards\rainbow2.cpp" />
     <ClCompile Include="..\src\boards\rainbow_esp.cpp" />
     <ClCompile Include="..\src\boards\rainbow13.cpp" />
-    <ClCompile Include="..\src\boards\RNBW\mongoose.c" />
     <ClCompile Include="..\src\boards\RNBW\pping.c" />
     <ClCompile Include="..\src\boards\rt-01.cpp" />
     <ClCompile Include="..\src\boards\sa-9602b.cpp" />
@@ -1025,7 +1024,6 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="..\src\asm.h" />
     <ClInclude Include="..\src\boards\RNBW\esp.h" />
-    <ClInclude Include="..\src\boards\RNBW\mongoose.h" />
     <ClInclude Include="..\src\boards\RNBW\pping.h" />
     <ClInclude Include="..\src\cart.h" />
     <ClInclude Include="..\src\cheat.h" />

@@ -3,7 +3,6 @@
 
 #include "../types.h"
 
-#include "RNBW/mongoose.h"
 #include "RNBW/bootrom_chr.h"
 
 #define CURL_STATICLIB
@@ -15,6 +14,12 @@
 #include <thread>
 
 #include "esp.h"
+
+#if defined(_WIN32) || defined(WIN32)
+#include <winsock2.h>
+#else
+#include <netinet/in.h>
+#endif
 
 //////////////////////////////////////
 // BrokeStudio's ESP firmware implementation
@@ -281,8 +286,6 @@ private:
 	std::pair<bool, sockaddr_in> resolve_server_address();
 	static std::deque<uint8> read_socket(int socket);
 
-	static void httpdEvent(mg_connection *nc, int ev, void *ev_data);
-
 	void initDownload();
 	static std::pair<uint8, uint8> curle_to_net_error(CURLcode curle);
 	void downloadFile(std::string const& url, uint8_t path, uint8_t file);
@@ -320,11 +323,6 @@ private:
 	sockaddr_in server_addr;
 
 	int tcp_socket = -1;
-
-	mg_mgr mgr;
-	mg_connection *nc = nullptr;
-	std::atomic<bool> httpd_run;
-	std::thread httpd_thread;
 
 	bool msg_first_byte = true;
 	uint8 msg_length = 0;
