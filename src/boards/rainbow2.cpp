@@ -575,13 +575,16 @@ static DECLFR(RNBW_0x4011Rd) {
 }
 
 static DECLFR(RNBW_RstPowRd) {
-	if (A == 0xFFFC) reset_step = 1;
-	else if (A == 0xFFFD & reset_step == 1)
+	if (fceuindbg == 0)
 	{
-		Rainbow2Reset();
-		reset_step = 0;
+		if (A == 0xFFFC) reset_step = 1;
+		else if ((A == 0xFFFD) & (reset_step == 1))
+		{
+			Rainbow2Reset();
+			reset_step = 0;
+		}
+		else reset_step = 0;
 	}
-	else reset_step = 0;
 	return CartBR(A);
 }
 
