@@ -988,7 +988,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			if (file_config.drive == static_cast<uint8>(file_config_flags_t::DESTINATION_ESP)) {
 
 				for (size_t i = 0; i < this->files.size(); ++i) {
-					if ((this->files.at(i).drive == static_cast<uint8>(file_config_flags_t::DESTINATION_ESP))) {
+					if (this->files.at(i).drive == static_cast<uint8>(file_config_flags_t::DESTINATION_ESP)) {
 						used += this->files.at(i).data.size();
 					}
 				}
@@ -1032,7 +1032,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				if (isSdCardFilePresent) {
 
 					for (size_t i = 0; i < this->files.size(); ++i) {
-						if ((this->files.at(i).drive == static_cast<uint8>(file_config_flags_t::DESTINATION_SD))) {
+						if (this->files.at(i).drive == static_cast<uint8>(file_config_flags_t::DESTINATION_SD)) {
 							used += this->files.at(i).data.size();
 						}
 					}
