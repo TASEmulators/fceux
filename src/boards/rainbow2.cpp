@@ -1832,7 +1832,7 @@ void RAINBOW2_Init(CartInfo *info) {
 		{
 			WRAMSIZE = 0x80000; // maximum is 512KiB
 		}
-		else if (info->wram_size > 0x80000)
+		else if (info->wram_size < 0x8000)
 		{
 			WRAMSIZE = 0x8000;  // minimum is 32Kib
 		}
@@ -1895,7 +1895,7 @@ void RAINBOW2_Init(CartInfo *info) {
 		{
 			CHRRAMSIZE = 0x80000; // maximum is 512KiB
 		}
-		else if (info->vram_size > 0x80000)
+		else if (info->vram_size < 0x8000)
 		{
 			CHRRAMSIZE = 0x8000;  // minimum is 32Kib
 		}
