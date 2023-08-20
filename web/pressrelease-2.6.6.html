@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<link href="fceux.css" rel="stylesheet" type="text/css" />
+<title>Press Release 2.6.6</title>
+</head>
+
+<body>
+<div id="masthead">
+	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom/Dendy Emulator
+</div>
+<div id="top_nav">
+  <a href="home.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="documentation.html">Documentation</a>
+  <a href="version.html">Versions</a>
+  <a href="contact.html">Contact</a>
+  <a href="links.html">Links</a>
+</div>
+<div id="container">
+	<div id="left_col">
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	 		style="display:inline-block;width:180px;height:150px"
+	 		data-ad-client="ca-pub-0764229755985190"
+	 		data-ad-slot="7648866201"></ins>
+		<script>
+	     (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>	
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	    	 style="display:inline-block;width:180px;height:150px"
+	     	data-ad-client="ca-pub-0764229755985190"
+	     	data-ad-slot="7648866201"></ins>
+		<script>
+	    	 (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
+<div id="page_content">
+<h1>FCEUX 2.6.6 Maintenance Release</h1>
+<p>26 August 2023</p>
+<p>
+The 2.6.6 release is mainly a maintenance update for the mappers and emulation core with a few new features added in.<br>
+Some of these new features apply only to the Qt/SDL version of the GUI.
+</p>
+
+<h2>Common</h2>
+<h3>Mappers</h3>
+Minor refactor of save game RAM code. Fixes UNROM-512 flash clearing bug during movie play.<br>
+Mapper 354: Add CHR-RAM protect.<br>
+Mapper 78: Add submapper support.<br>
+Add mapper 174.<br>
+Move mapper 205 to mapper 361/366, add proper mapper 205.<br>
+Mapper 205: Fix for split-rom variant (UNIF).<br>
+Mapper 227: Fix CHR-RAM protext check.<br>
+Changed UNROM-512 to use 8kB of CHR RAM memory by default.<br>
+Mapper 342 memory optimization.<br>
+
+<h3>Lua</h3>
+Implemented LUA function memory.registerread<br>
+
+<h3>Core</h3>
+Memory initialization settings are now also applied to nametable, palettes, and sprites.<br>
+Fixed bug were write instructions didn't always update the databus.<br>
+
+<h2>Qt/SDL</h2>
+
+<h3>Debugger</h3>
+Added ld65 debug file symbol loader feature.<br>
+Added checkbox to Qt debugger menu to control trace logger auto start function on debugger open.<br>
+Added code to stop the trace logger on debugger close if it was the debugger who started it in the first place.<br>
+Added address validity checking to breakpoint editor dialog entry fields.<br>
+
+<h3>Video</h3>
+Added a third video driver option that uses a QPainter object to render QImages to the viewport (uses pure Qt API)<br>
+Fixed video transparency issue that has been seen on some platforms (Wayland) by forcing alpha bits to be set to full opaque<br>
+
+<h3>GUI</h3>
+Added state recorder feature, periodically saves time history of game play states that can be recalled and played out from.<br>
+Fixed bug regarding force grayscale or use custom palette settings change not updating PAL 3x filter appropriately.<br>
+Added feature that allows loading of save state files via drag n drop file dialog operations.<br>
+Fixed redundant window focus bug that would occur when attempting to open a pre-existing window.<br>
+Added optional cross-platform libarchive interface to allow Qt GUI to open ROMs from 7zip archives.<br>
+Minor improvements to the ROM selection from archive dialog.<br>
+Improved frame scheduling timing precision.<br>
+
+<h3>Build</h3>
+Build fixes for GCC 13.<br>
+
+</div>
+
+<p>
+<hr>
+
+<div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
+		<br/>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc.
+</div>
+</div>
+</body>
+</html>
