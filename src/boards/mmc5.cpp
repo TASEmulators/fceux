@@ -424,7 +424,7 @@ static void MMC5PRG(void) {
 	switch (mmc5psize & 3) {
 	case 0:
 		MMC5ROMWrProtect[0] = MMC5ROMWrProtect[1] = MMC5ROMWrProtect[2] = MMC5ROMWrProtect[3] = 1;
-		setprg32(0x8000, ((PRGBanks[1] & 0x7F) >> 2));
+		setprg32(0x8000, ((PRGBanks[3] & 0x7F) >> 2));
 		for (x = 0; x < 4; x++)
 			MMC5MemIn[1 + x] = 1;
 		break;
