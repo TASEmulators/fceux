@@ -189,105 +189,105 @@
 <p class="rvps2"><span class="rvts6">Released -- 15 December 2020</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps5"><span class="rvts31">The 2.3.0 release includes 4 years worth of improvements and bug fixes.</span></p>
-<p class="rvps5"><span class="rvts32"><br/></span></p>
-<p class="rvps5"><span class="rvts33">Common</span></p>
+<p class="rvps5"><span class="rvts32">The 2.3.0 release includes 4 years worth of improvements and bug fixes.</span></p>
+<p class="rvps5"><span class="rvts33"><br/></span></p>
+<p class="rvps5"><span class="rvts34">Common</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">64 bit build support</span></li>
+ <li class="rvps5"><span class="rvts32">64 bit build support</span></li>
 </ul>
-<p class="rvps2"><span class="rvts35"><br/></span></p>
-<p class="rvps5"><span class="rvts32">Emulation</span></p>
+<p class="rvps2"><span class="rvts36"><br/></span></p>
+<p class="rvps5"><span class="rvts33">Emulation</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">Added Mapper 111 cheapocabra</span></li>
- <li class="rvps5"><span class="rvts31">Added Mapper 190</span></li>
- <li class="rvps5"><span class="rvts31">Added RAM Init Options: default (00 00 00 00 FF FF FF FF as always), all FF, all 00, random</span></li>
- <li class="rvps5"><span class="rvts31">New UNIF mappers</span></li>
- <li class="rvps5"><span class="rvts31">Mapper 30 4-screen support</span></li>
- <li class="rvps5"><span class="rvts31">Mapper 5 MMC5 large WRAM support</span></li>
- <li class="rvps5"><span class="rvts31">VRC7 patch set finalized with correct values dumped by Nuke.YKT</span></li>
- <li class="rvps5"><span class="rvts31">Fixed rendering and debugging of mirrored palette entries</span></li>
+ <li class="rvps5"><span class="rvts32">Added Mapper 111 cheapocabra</span></li>
+ <li class="rvps5"><span class="rvts32">Added Mapper 190</span></li>
+ <li class="rvps5"><span class="rvts32">Added RAM Init Options: default (00 00 00 00 FF FF FF FF as always), all FF, all 00, random</span></li>
+ <li class="rvps5"><span class="rvts32">New UNIF mappers</span></li>
+ <li class="rvps5"><span class="rvts32">Mapper 30 4-screen support</span></li>
+ <li class="rvps5"><span class="rvts32">Mapper 5 MMC5 large WRAM support</span></li>
+ <li class="rvps5"><span class="rvts32">VRC7 patch set finalized with correct values dumped by Nuke.YKT</span></li>
+ <li class="rvps5"><span class="rvts32">Fixed rendering and debugging of mirrored palette entries</span></li>
 </ul>
-<p class="rvps5"><span class="rvts32"><br/></span></p>
-<p class="rvps5"><span class="rvts32">Lua</span></p>
+<p class="rvps5"><span class="rvts33"><br/></span></p>
+<p class="rvps5"><span class="rvts33">Lua</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">Various improvements and bug fixes to pre-existing functions</span></li>
- <li class="rvps5"><span class="rvts31">Fix parsing of lua colors over 0x80000000 on 32bits systems</span></li>
- <li class="rvps5"><span class="rvts31">Extra colors available to lua overlays</span></li>
- <li class="rvps5"><span class="rvts31">Lua write callbacks: adding optional third parameter to retrieve the value written</span></li>
- <li class="rvps5"><span class="rvts31">Added Sprites.lua script to visualize sprites</span></li>
- <li class="rvps5"><span class="rvts31">Zapper control</span></li>
+ <li class="rvps5"><span class="rvts32">Various improvements and bug fixes to pre-existing functions</span></li>
+ <li class="rvps5"><span class="rvts32">Fix parsing of lua colors over 0x80000000 on 32bits systems</span></li>
+ <li class="rvps5"><span class="rvts32">Extra colors available to lua overlays</span></li>
+ <li class="rvps5"><span class="rvts32">Lua write callbacks: adding optional third parameter to retrieve the value written</span></li>
+ <li class="rvps5"><span class="rvts32">Added Sprites.lua script to visualize sprites</span></li>
+ <li class="rvps5"><span class="rvts32">Zapper control</span></li>
+</ul>
+<p class="rvps5"><span class="rvts35"><br/></span></p>
+<p class="rvps2"><span class="rvts33">New Lua functions</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps5"><span class="rvts32">emu.exit()</span></li>
+ <li class="rvps5"><span class="rvts32">rom.getfilename()</span></li>
+ <li class="rvps5"><span class="rvts32">zapper.set(table input)</span></li>
+</ul>
+<p class="rvps5"><span class="rvts33"><br/></span></p>
+<p class="rvps5"><span class="rvts33">Win32</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps5"><span class="rvts32">Various GUI improvements and bug fixes</span></li>
+ <li class="rvps5"><span class="rvts32">Fixed font rescaling issue</span></li>
+ <li class="rvps5"><span class="rvts32">Relative position mouse support for better fullscreen mouse capture</span></li>
+ <li class="rvps5"><span class="rvts32">Left and right mouse buttons no longer conflict with each other</span></li>
+ <li class="rvps5"><span class="rvts32">Virtual boy controller</span></li>
+ <li class="rvps5"><span class="rvts32">Fixed silly quit message randomizer</span></li>
+ <li class="rvps5"><span class="rvts32">Fixed NTSC filter null pointer crash when closing, NTSC filter now supports emphasis</span></li>
+ <li class="rvps5"><span class="rvts32">Sound output is now 48000 Hz by default</span></li>
+ <li class="rvps5"><span class="rvts32">Improve error message for invalid ROM file</span></li>
+</ul>
+<p class="rvps5"><span class="rvts33"><br/></span></p>
+<p class="rvps5"><span class="rvts34">Debugger</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps5"><span class="rvts32">Added memory read/write conditional breakpoint capability</span></li>
+ <li class="rvps5"><span class="rvts32">Added illegal opcode support for breakpoints</span></li>
+ <li class="rvps5"><span class="rvts32">Support for 'S' register in conditional debugger breakpoints</span></li>
+ <li class="rvps5"><span class="rvts32">Syntax highlight of disassembly</span></li>
+ <li class="rvps5"><span class="rvts32">Fixed corruption of PPU reset while debugging</span></li>
+ <li class="rvps5"><span class="rvts32">Attribute mode for nametable viewer</span></li>
+ <li class="rvps5"><span class="rvts32">Greyscale palettes for PPU and nametable viewers</span></li>
+ <li class="rvps5"><span class="rvts32">Fixed transparent sprite palette display in PPU viewer</span></li>
+ <li class="rvps5"><span class="rvts32">Fixed accidental filtering of special symbols</span></li>
 </ul>
 <p class="rvps5"><span class="rvts34"><br/></span></p>
-<p class="rvps2"><span class="rvts32">New Lua functions</span></p>
+<p class="rvps5"><span class="rvts34">Trace Logger</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">emu.exit()</span></li>
- <li class="rvps5"><span class="rvts31">rom.getfilename()</span></li>
- <li class="rvps5"><span class="rvts31">zapper.set(table input)</span></li>
-</ul>
-<p class="rvps5"><span class="rvts32"><br/></span></p>
-<p class="rvps5"><span class="rvts32">Win32</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">Various GUI improvements and bug fixes</span></li>
- <li class="rvps5"><span class="rvts31">Fixed font rescaling issue</span></li>
- <li class="rvps5"><span class="rvts31">Relative position mouse support for better fullscreen mouse capture</span></li>
- <li class="rvps5"><span class="rvts31">Left and right mouse buttons no longer conflict with each other</span></li>
- <li class="rvps5"><span class="rvts31">Virtual boy controller</span></li>
- <li class="rvps5"><span class="rvts31">Fixed silly quit message randomizer</span></li>
- <li class="rvps5"><span class="rvts31">Fixed NTSC filter null pointer crash when closing, NTSC filter now supports emphasis</span></li>
- <li class="rvps5"><span class="rvts31">Sound output is now 48000 Hz by default</span></li>
- <li class="rvps5"><span class="rvts31">Improve error message for invalid ROM file</span></li>
-</ul>
-<p class="rvps5"><span class="rvts32"><br/></span></p>
-<p class="rvps5"><span class="rvts33">Debugger</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">Added memory read/write conditional breakpoint capability</span></li>
- <li class="rvps5"><span class="rvts31">Added illegal opcode support for breakpoints</span></li>
- <li class="rvps5"><span class="rvts31">Support for 'S' register in conditional debugger breakpoints</span></li>
- <li class="rvps5"><span class="rvts31">Syntax highlight of disassembly</span></li>
- <li class="rvps5"><span class="rvts31">Fixed corruption of PPU reset while debugging</span></li>
- <li class="rvps5"><span class="rvts31">Attribute mode for nametable viewer</span></li>
- <li class="rvps5"><span class="rvts31">Greyscale palettes for PPU and nametable viewers</span></li>
- <li class="rvps5"><span class="rvts31">Fixed transparent sprite palette display in PPU viewer</span></li>
- <li class="rvps5"><span class="rvts31">Fixed accidental filtering of special symbols</span></li>
-</ul>
-<p class="rvps5"><span class="rvts33"><br/></span></p>
-<p class="rvps5"><span class="rvts33">Trace Logger</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">Added bank number log option</span></li>
-</ul>
-<p class="rvps5"><span class="rvts33"><br/></span></p>
-<p class="rvps5"><span class="rvts33">CDLogger</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">Fix&nbsp;Fixed VRAM data logging glitch</span></li>
+ <li class="rvps5"><span class="rvts32">Added bank number log option</span></li>
 </ul>
 <p class="rvps5"><span class="rvts34"><br/></span></p>
-<p class="rvps5"><span class="rvts33">Hex Editor</span></p>
+<p class="rvps5"><span class="rvts34">CDLogger</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">Added OAM view feature</span></li>
- <li class="rvps5"><span class="rvts31">Added Home/End key response</span></li>
- <li class="rvps5"><span class="rvts31">Bookmark fixes for all view region types</span></li>
- <li class="rvps5"><span class="rvts31">Fixed Find dialog to be able to find the first or last byte of the memory region</span></li>
- <li class="rvps5"><span class="rvts31">Prevent middle mouse button from attempting to "FreezeRam" when not in RAM mode</span></li>
- <li class="rvps5"><span class="rvts31">Added Load from file feature</span></li>
+ <li class="rvps5"><span class="rvts32">Fix&nbsp;Fixed VRAM data logging glitch</span></li>
+</ul>
+<p class="rvps5"><span class="rvts35"><br/></span></p>
+<p class="rvps5"><span class="rvts34">Hex Editor</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps5"><span class="rvts32">Added OAM view feature</span></li>
+ <li class="rvps5"><span class="rvts32">Added Home/End key response</span></li>
+ <li class="rvps5"><span class="rvts32">Bookmark fixes for all view region types</span></li>
+ <li class="rvps5"><span class="rvts32">Fixed Find dialog to be able to find the first or last byte of the memory region</span></li>
+ <li class="rvps5"><span class="rvts32">Prevent middle mouse button from attempting to "FreezeRam" when not in RAM mode</span></li>
+ <li class="rvps5"><span class="rvts32">Added Load from file feature</span></li>
+</ul>
+<p class="rvps5"><span class="rvts34"><br/></span></p>
+<p class="rvps5"><span class="rvts34">iNES Header Editor</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps5"><span class="rvts32">A new tool which can edit the iNES header of ROM files</span></li>
 </ul>
 <p class="rvps5"><span class="rvts33"><br/></span></p>
-<p class="rvps5"><span class="rvts33">iNES Header Editor</span></p>
+<p class="rvps5"><span class="rvts33">TAS Editor</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">A new tool which can edit the iNES header of ROM files</span></li>
+ <li class="rvps5"><span class="rvts32">Fixed dialog height that kept increasing</span></li>
 </ul>
-<p class="rvps5"><span class="rvts32"><br/></span></p>
-<p class="rvps5"><span class="rvts32">TAS Editor</span></p>
+<p class="rvps5"><span class="rvts33"><br/></span></p>
+<p class="rvps5"><span class="rvts33">SDL</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">Fixed dialog height that kept increasing</span></li>
+ <li class="rvps5"><span class="rvts32">GUI completely rewritten using Qt5. Replaces old GTK GUI</span></li>
+ <li class="rvps5"><span class="rvts32">New Qt GUI now contains most of the debug tools that previously only existed in windows version</span></li>
+ <li class="rvps5"><span class="rvts32">Build setup migrated to cmake. Replaces scons build setup</span></li>
 </ul>
-<p class="rvps5"><span class="rvts32"><br/></span></p>
-<p class="rvps5"><span class="rvts32">SDL</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps5"><span class="rvts31">GUI completely rewritten using Qt5. Replaces old GTK GUI</span></li>
- <li class="rvps5"><span class="rvts31">New Qt GUI now contains most of the debug tools that previously only existed in windows version</span></li>
- <li class="rvps5"><span class="rvts31">Build setup migrated to cmake. Replaces scons build setup</span></li>
-</ul>
-<p class="rvps2"><span class="rvts35"></span><span class="rvts6"></span></p>
+<p class="rvps2"><span class="rvts36"></span><span class="rvts6"></span></p>
 <p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour/create-help-files-for-the-qt-help-framework">Create help files for the Qt Help Framework</a></p>
 
             </div>
