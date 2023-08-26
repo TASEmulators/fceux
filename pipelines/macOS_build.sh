@@ -93,7 +93,7 @@ brew  install  ffmpeg
 
 #brew  install  zlib  # Already installed in appveyor macOS
 
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:$LIBARCHIVE_PATH:
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:$LIBARCHIVE_PATH/lib/pkgconfig:
 
 ls -ltr $HOME/Qt;
 
