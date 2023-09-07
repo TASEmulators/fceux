@@ -14,7 +14,7 @@
 //-------------------------------------------------------------------------
 //---- Time Stamp Record
 //-------------------------------------------------------------------------
-#ifdef __QT_DRIVER__
+#ifdef __FCEU_X86_TSC_ENABLE
 #if defined(WIN32)
 #include <intrin.h>
 #pragma intrinsic(__rdtsc)
@@ -38,14 +38,14 @@ uint64_t timeStampRecord::qpcFreq = 0;
 
 void timeStampRecord::readNew(void)
 {
-	#ifdef __QT_DRIVER__
+	#ifdef __FCEU_X86_TSC_ENABLE
 		tsc = rdtsc();
+	#endif
+
+	#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+		clock_gettime( CLOCK_REALTIME, &ts );
 	#else
-		#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
-			clock_gettime( CLOCK_REALTIME, &ts );
-		#else
-			QueryPerformanceCounter((LARGE_INTEGER*)&ts);
-		#endif
+		QueryPerformanceCounter((LARGE_INTEGER*)&ts);
 	#endif
 }
 #if defined(WIN32)
