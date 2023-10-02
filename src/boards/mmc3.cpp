@@ -871,13 +871,10 @@ static void M134PW(uint32 A, uint8 V) {
 }
 
 static void M134CW(uint32 A, uint8 V) {
-	/*
-	// CNROM mode. Unclear. Untested. Not compatible with some games.
+	// CNROM mode. Unclear. Untested.
 	if (EXPREGS[0] & 0x08)
 		setchr8(EXPREGS[2]); 
-	else
-	*/
-	if (EXPREGS[1] & 0x40)
+	else if (EXPREGS[1] & 0x40)
 		setchr1(A, ((EXPREGS[0] & 0x20) << 4) | (V & 0x7F) | ((EXPREGS[1] & 0x30) << 3)); // 128KB mask
 	else
 		setchr1(A, ((EXPREGS[0] & 0x20) << 4) | (V & 0xFF) | ((EXPREGS[1] & 0x20) << 3)); // 256KB mask
@@ -899,7 +896,7 @@ static DECLFW(M134Write) {
 static void M134Power(void) {
 	EXPREGS[0] = EXPREGS[1] = EXPREGS[2] = EXPREGS[3] = 0;
 	GenMMC3Power();
-	SetWriteHandler(0x6001, 0x7FFF, M134Write);
+	SetWriteHandler(0x6000, 0x7FFF, M134Write);
 }
 
 static void M134Reset(void) {
