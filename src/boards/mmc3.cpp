@@ -860,32 +860,55 @@ void Mapper119_Init(CartInfo *info) {
 // ---------------------------- Mapper 134 ------------------------------
 
 static void M134PW(uint32 A, uint8 V) {
-	setprg8(A, (V & 0x1F) | ((EXPREGS[0] & 2) << 4));
+	if ((EXPREGS[1] & 0x88) == 0x80)
+		setprg32(A, (EXPREGS[0] & 0x10) | ((EXPREGS[1] & 2) << 2)); // NROM-256
+	else if ((EXPREGS[1] & 0x88) == 0x88)
+		setprg16(0x8000 | (A & 0x4000), ((EXPREGS[0] & 0x10) << 1) | ((V & 0x10) >> 1) | ((EXPREGS[1] & 3) << 3)); // NROM-128
+	else if (EXPREGS[1] & 4)
+		setprg8(A, ((EXPREGS[0] & 0x10) << 2) | (V & 0x0F) | ((EXPREGS[1] & 3) << 4)); // MMC3 128KB mask
+	else
+		setprg8(A, ((EXPREGS[0] & 0x10) << 2) | (V & 0x1F) | ((EXPREGS[1] & 2) << 4)); // MMC3 256KB mask
 }
 
 static void M134CW(uint32 A, uint8 V) {
-	setchr1(A, (V & 0xFF) | ((EXPREGS[0] & 0x20) << 3));
+	/*
+	// CNROM mode. Unclear. Untested. Not compatible with some games.
+	if (EXPREGS[0] & 0x08)
+		setchr8(EXPREGS[2]); 
+	else
+	*/
+	if (EXPREGS[1] & 0x40)
+		setchr1(A, ((EXPREGS[0] & 0x20) << 4) | (V & 0x7F) | ((EXPREGS[1] & 0x30) << 3)); // 128KB mask
+	else
+		setchr1(A, ((EXPREGS[0] & 0x20) << 4) | (V & 0xFF) | ((EXPREGS[1] & 0x20) << 3)); // 256KB mask
 }
 
 static DECLFW(M134Write) {
-	EXPREGS[0] = V;
+	if (EXPREGS[0] & 0x80)
+	{
+		// locked (except $6002.0-1)
+		if ((A & 3) == 2)
+			EXPREGS[2] = (EXPREGS[2] & 0xFC) | (V & 3);
+		return;
+	}
+	EXPREGS[A & 3] = V;
 	FixMMC3CHR(MMC3_cmd);
 	FixMMC3PRG(MMC3_cmd);
 }
 
 static void M134Power(void) {
-	EXPREGS[0] = 0;
+	EXPREGS[0] = EXPREGS[1] = EXPREGS[2] = EXPREGS[3] = 0;
 	GenMMC3Power();
-	SetWriteHandler(0x6001, 0x6001, M134Write);
+	SetWriteHandler(0x6001, 0x7FFF, M134Write);
 }
 
 static void M134Reset(void) {
-	EXPREGS[0] = 0;
+	EXPREGS[0] = EXPREGS[1] = EXPREGS[2] = EXPREGS[3] = 0;
 	MMC3RegReset();
 }
 
 void Mapper134_Init(CartInfo *info) {
-	GenMMC3_Init(info, 256, 256, 0, 0);
+	GenMMC3_Init(info, 512, 512, 0, 0);
 	pwrap = M134PW;
 	cwrap = M134CW;
 	info->Power = M134Power;
