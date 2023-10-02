@@ -1963,6 +1963,7 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	//these messages get handled at any time
 	switch(uMsg)
 	{
+
 		case WM_INITDIALOG:
 		{
 			char str[256] = { 0 };
@@ -2157,22 +2158,16 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							break;
 						case IDC_DEBUGGER_CYCLES_EXCEED:
 						{
-							if (HIWORD(wParam) == EN_CHANGE)
-							{
-								char str[16];
-								GetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str, 16);
-								break_cycles_limit = strtoul(str, NULL, 10);
-							}
+							char str[16];
+							GetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str, 16);
+							break_cycles_limit = strtoul(str, NULL, 10);
 							break;
 						}
 						case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
 						{
-							if (HIWORD(wParam) == EN_CHANGE)
-							{
-								char str[16];
-								GetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str, 16);
-								break_instructions_limit = strtoul(str, NULL, 10);
-							}
+							char str[16];
+							GetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str, 16);
+							break_instructions_limit = strtoul(str, NULL, 10);
 							break;
 						}
 						case ID_DEBUGGER_DEFCOLOR:
@@ -2218,6 +2213,26 @@ INT_PTR CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							break;
 					}
 				}
+				case EN_CHANGE:
+				case EN_UPDATE:
+					switch (LOWORD(wParam))
+					{
+						case IDC_DEBUGGER_CYCLES_EXCEED:
+						{
+							char str[16];
+							GetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str, 16);
+							break_cycles_limit = strtoul(str, NULL, 10);
+							break;
+						}
+						case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
+						{
+							char str[16];
+							GetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str, 16);
+							break_instructions_limit = strtoul(str, NULL, 10);
+							break;
+						}
+					}
+					break;
 			}
 		}
 	}
