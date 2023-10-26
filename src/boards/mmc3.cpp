@@ -514,14 +514,22 @@ static void M45PW(uint32 A, uint8 V) {
 }
 
 static DECLFW(M45Write) {
-	if (EXPREGS[3] & 0x40) {
-		WRAM[A - 0x6000] = V;
-		return;
+	WRAM[A - 0x6000] = V;
+	if (!(A & 1))
+	{
+		if (EXPREGS[3] & 0x40) {
+			WRAM[A - 0x6000] = V;
+			return;
+		}
+		EXPREGS[EXPREGS[4]] = V;
+		EXPREGS[4] = (EXPREGS[4] + 1) & 3;
+		FixMMC3PRG(MMC3_cmd);
+		FixMMC3CHR(MMC3_cmd);
 	}
-	EXPREGS[EXPREGS[4]] = V;
-	EXPREGS[4] = (EXPREGS[4] + 1) & 3;
-	FixMMC3PRG(MMC3_cmd);
-	FixMMC3CHR(MMC3_cmd);
+	else {
+		// lock reset
+		EXPREGS[3] &= ~0x40;
+	}
 }
 
 static DECLFR(M45Read) {
@@ -542,7 +550,7 @@ static void M45Reset(void) {
 static void M45Power(void) {
 	GenMMC3Power();
 	EXPREGS[0] = EXPREGS[1] = EXPREGS[2] = EXPREGS[3] = EXPREGS[4] = EXPREGS[5] = 0;
-	SetWriteHandler(0x5000, 0x7FFF, M45Write);
+	SetWriteHandler(0x6000, 0x7FFF, M45Write);
 	SetReadHandler(0x5000, 0x5FFF, M45Read);
 }
 
