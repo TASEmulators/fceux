@@ -498,27 +498,19 @@ void Mapper44_Init(CartInfo *info) {
 // ---------------------------- Mapper 45 -------------------------------
 
 static void M45CW(uint32 A, uint8 V) {
-	if (!UNIFchrrama) {
-		uint32 NV = V;
-		if (EXPREGS[2] & 8)
-			NV &= (1 << ((EXPREGS[2] & 7) + 1)) - 1;
-		else
-		if (EXPREGS[2])
-			NV &= 0;	// hack ;( don't know exactly how it should be
-		NV |= EXPREGS[0] | ((EXPREGS[2] & 0xF0) << 4);
-		setchr1(A, NV);
-	} else
-//		setchr8(0);		// i don't know what cart need this, but a new one need other lol
-		setchr1(A, V);
+	uint32 NV = V;
+	const int mask = ((EXPREGS[2] & 0x0F) > 7)
+		? ((1 << (EXPREGS[2] & 0x0F) << 3) - 1)
+		: 0;
+	NV |= (EXPREGS[0] & mask) | ((EXPREGS[2] & 0xF0) << 4);
+	setchr1(A, NV);
 }
 
 static void M45PW(uint32 A, uint8 V) {
-	uint32 MV = V & ((EXPREGS[3] & 0x3F) ^ 0x3F);
-	MV |= EXPREGS[1];
-	if(UNIFchrrama)
-		MV |= ((EXPREGS[2] & 0x40) << 2);
+	uint32 MV = V;
+	const int mask = (EXPREGS[3] & 0x3F) ^ 0x3F;
+	MV |= (EXPREGS[1] & 0x3F & mask) | (EXPREGS[1] & 0xC0);
 	setprg8(A, MV);
-//	FCEU_printf("1:%02x 2:%02x 3:%02x A=%04x V=%03x\n",EXPREGS[1],EXPREGS[2],EXPREGS[3],A,MV);
 }
 
 static DECLFW(M45Write) {
