@@ -88,7 +88,7 @@ BrokeStudioFirmware::BrokeStudioFirmware() {
 
 	// Init fake registered networks
 	this->networks = { {
-		{"FCEUX_SSID", "FCEUX_PASS", true},
+		{"EMULATOR_SSID", "EMULATOR_PASS", true},
 		{"", "", false},
 		{"", "", false},
 	} };
@@ -233,7 +233,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			break;
 		case toesp_cmds_t::ESP_GET_FIRMWARE_VERSION:
 			UDBG("RAINBOW BrokeStudioFirmware received message ESP_GET_FIRMWARE_VERSION\n");
-			this->tx_messages.push_back({ 16, static_cast<uint8>(fromesp_cmds_t::ESP_FIRMWARE_VERSION), 14, 'F', 'C', 'E', 'U', 'X', '_', 'F', 'I', 'R', 'M', 'W', 'A', 'R', 'E' });
+			this->tx_messages.push_back({ 19, static_cast<uint8>(fromesp_cmds_t::ESP_FIRMWARE_VERSION), 17, 'E', 'M', 'U', 'L', 'A', 'T', 'O', 'R', '_', 'F', 'I', 'R', 'M', 'W', 'A', 'R', 'E' });
 			break;
 
 		case toesp_cmds_t::ESP_FACTORY_SETTINGS:
@@ -258,7 +258,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			UDBG("RAINBOW BrokeStudioFirmware received message WIFI_GET_SSID\n");
 			if ((this->wifi_config & static_cast<uint8>(wifi_config_t::WIFI_ENABLE)) == static_cast<uint8>(wifi_config_t::WIFI_ENABLE))
 			{
-				this->tx_messages.push_back({ 12, static_cast<uint8>(fromesp_cmds_t::SSID), 10, 'F', 'C', 'E', 'U', 'X', '_', 'S', 'S', 'I', 'D' });
+				this->tx_messages.push_back({ 15, static_cast<uint8>(fromesp_cmds_t::SSID), 13, 'E', 'M', 'U', 'L', 'A', 'T', 'O', 'R', '_', 'S', 'S', 'I', 'D' });
 			} else
 			{
 				this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::SSID), 0 });
@@ -289,7 +289,7 @@ void BrokeStudioFirmware::processBufferedMessage() {
 			UDBG("RAINBOW BrokeStudioFirmware received message AP_GET_SSID\n");
 			if ((this->wifi_config & static_cast<uint8>(wifi_config_t::AP_ENABLE)) == static_cast<uint8>(wifi_config_t::AP_ENABLE))
 			{
-				this->tx_messages.push_back({ 15, static_cast<uint8>(fromesp_cmds_t::SSID), 13, 'F', 'C', 'E', 'U', 'X', '_', 'A', 'P', '_', 'S', 'S', 'I', 'D' });
+				this->tx_messages.push_back({ 18, static_cast<uint8>(fromesp_cmds_t::SSID), 16, 'E', 'M', 'U', 'L', 'A', 'T', 'O', 'R', '_', 'A', 'P', '_', 'S', 'S', 'I', 'D' });
 			} else
 			{
 				this->tx_messages.push_back({ 2, static_cast<uint8>(fromesp_cmds_t::SSID), 0 });
@@ -533,14 +533,14 @@ void BrokeStudioFirmware::processBufferedMessage() {
 				uint8 networkItem = this->rx_buffer.at(2);
 				if (networkItem > NUM_FAKE_NETWORKS-1) networkItem = NUM_FAKE_NETWORKS-1;
 				this->tx_messages.push_back({
-					21,
+					24,
 					static_cast<uint8>(fromesp_cmds_t::NETWORK_SCANNED_DETAILS),
 					4, // encryption type
 					0x47, // RSSI
 					0x00,0x00,0x00,0x01, // channel
 					0, // hidden?
-					12, // SSID length
-					'F','C','E','U','X','_','S','S','I','D','_',static_cast<uint8>(networkItem + '0') // SSID
+					15, // SSID length
+					'E', 'M', 'U', 'L', 'A', 'T', 'O', 'R', '_','S','S','I','D','_',static_cast<uint8>(networkItem + '0') // SSID
 				});
 			}
 			break;
