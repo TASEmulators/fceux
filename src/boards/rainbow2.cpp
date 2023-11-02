@@ -856,7 +856,7 @@ uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 
 	if (A < 0x2000) // pattern table / CHR data
 	{
-		if ((ppuphase == PPUPHASE_OBJ) & (ScreenON)) // sprite fetch
+		if (ppuphase == PPUPHASE_OBJ && SpriteON) // sprite fetch
 		{
 			if (chr_spr_ext_mode)
 				if (Sprite16)
@@ -869,7 +869,7 @@ uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 			}
 		}
 
-		if ((ppuphase == PPUPHASE_BG) & (ScreenON)) // tile fetch
+		if (ppuphase == PPUPHASE_BG && ScreenON) // tile fetch
 		{
 
 			if(split)
