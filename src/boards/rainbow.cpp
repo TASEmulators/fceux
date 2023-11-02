@@ -87,7 +87,6 @@ static uint16 prg[11]; // 0: $5000, 1: $6000, 2: $7000, 3: $8000, 4: $9000, etc
 static uint8 chr_chip, chr_spr_ext_mode, chr_mode;
 static uint16 chr[16];
 
-static uint8 RNBWHackNTbank[5];
 static uint8 SPR_bank_offset;
 static uint8 SPR_bank[64];
 

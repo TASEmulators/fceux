@@ -72,12 +72,12 @@ struct WorkingFile
 class BrokeStudioFirmware {
 public:
 	BrokeStudioFirmware();
-	~BrokeStudioFirmware();
+	virtual ~BrokeStudioFirmware();
 
 	void rx(uint8 v);
 	uint8 tx();
 
-	virtual bool getDataReadyIO();
+	bool getDataReadyIO();
 
 private:
 	// Defined message types from CPU to ESP
