@@ -373,9 +373,16 @@ int RNBWHack = 0;
 uint8 *RNBWHackExNTARAMPtr = 0;
 uint8 *RNBWHackVROMPtr = 0;
 uint32 RNBWHackVROMMask = 0xff;
-uint8 RNBWHackNTcontrol[4];
+uint8 RNBWHackNTbank[5];
+uint8 RNBWHackNTcontrol[5];
 uint8 RNBWHackBGBankOffset;
 uint8 RNBWHackCurSprite;
+uint8 RNBWHackSplitEnable;
+uint8 RNBWHackWindowXStartTile;
+uint8 RNBWHackWindowXEndTile;
+uint8 RNBWHackSplitXScroll;
+uint8 RNBWHackSplitYScroll;
+uint8 *RNBWHackSplitNTARAMPtr;
 
 int PEC586Hack = 0;
 
@@ -454,15 +461,55 @@ uint8 *FCEUPPU_GetCHR(uint32 vadr, uint32 refreshaddr)
 	}
 	else if (RNBWHack)
 	{
-		uint8 NT = (NTRefreshAddr >> 10) & 0x03;
+		// uint8 xt = refreshaddr & 31;
+		uint8 NT;
+		/*
+				static const int kHack = -1; //dunno if theres science to this or if it just fixes SDF (cant be bothered to think about it)
+				int linetile = (newppu_get_scanline() + kHack + RNBWHackSplitYScroll) / 8;
+				int coltile = newppu_get_dot();
+				coltile = coltile / 8; // +RNBWHackSplitXScroll;
+				bool split = false;
+				if (RNBWHackSplitEnable & (
+					( (RNBWHackWindowXStartTile <= RNBWHackWindowXEndTile) & ( (coltile >= RNBWHackWindowXStartTile) & (coltile <= RNBWHackWindowXEndTile) ) ) |
+					( (RNBWHackWindowXStartTile > RNBWHackWindowXEndTile) & ( (coltile >= RNBWHackWindowXStartTile) | (coltile <= RNBWHackWindowXEndTile) ) )
+				) ) {
+					split = true;
+					NT = 4;
+				} else {
+					NT = (NTRefreshAddr >> 10) & 0x03;
+				}
+		*/
+		NT = (NTRefreshAddr >> 10) & 0x03;
 		uint8 NT_1K_dest = (RNBWHackNTcontrol[NT] & 0x0C) >> 2;
 		uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
-		if (NT_ext_mode & 0x02)
+		switch (NT_ext_mode)
 		{
-			if (RNBWHackVROMPtr == NULL) return NULL;
+		case 0: // extended mode disabled
+		case 1: // extended attributes
+		{
+			/*if (split) {
+				int tmpA = vadr & 0x3ff;
+				tmpA &= ~(0x1F << 5); // | (1 << 0xB)); //mask off VT and V
+				tmpA |= (linetile & 31) << 5; //mask on adjusted VT (V doesnt make any sense, I think)
+				return RNBWHackSplitNTARAMPtr + tmpA;
+
+				//vadr = (RNBWHackExNTARAMPtr[xs | (ys << 5)] << 4) + ((scanline + RNBWHackSplitYScroll) & 7);
+
+			}
+			else*/
+			return VRAMADR(vadr);
+			// return vnapage[(A >> 10) & 0x3][A & 0x3FF];
+			//&VPage[(vadr) >> 9][(vadr)]
+		}
+		case 2: // extended tiles
+		case 3: // extended attributes + tiles
+		{
+			if (RNBWHackVROMPtr == NULL)
+				return NULL;
 			uint8 *C = RNBWHackVROMPtr;
 			C += ((RNBWHackBGBankOffset * 0x40000) + ((RNBWHackExNTARAMPtr[NT_1K_dest * 0x400 + (NTRefreshAddr & 0x3ff)] & 0x3f) << 12) + (vadr & 0xfff)) & RNBWHackVROMMask;
 			return C;
+		}
 		}
 	}
 	return VRAMADR(vadr);
@@ -478,11 +525,90 @@ int FCEUPPU_GetAttr(int ntnum, int xt, int yt)
 		return (MMC5HackExNTARAMPtr[refreshaddr & 0x3ff] & 0xC0) >> 6;
 	else if (RNBWHack)
 	{
-		uint8 NT = (NTRefreshAddr >> 10) & 0x03;
+		uint8 NT;
+		/*
+				int linetile;
+				bool split = false;
+				if (RNBWHackSplitEnable & (
+					((RNBWHackWindowXStartTile <= RNBWHackWindowXEndTile) & ((xt >= RNBWHackWindowXStartTile) & (xt <= RNBWHackWindowXEndTile))) |
+					((RNBWHackWindowXStartTile > RNBWHackWindowXEndTile) & ((xt >= RNBWHackWindowXStartTile) | (xt <= RNBWHackWindowXEndTile)))
+					)) {
+					static const int kHack = -1; //dunno if theres science to this or if it just fixes SDF (cant be bothered to think about it)
+					linetile = (newppu_get_scanline() + kHack + RNBWHackSplitYScroll) / 8;
+					split = true;
+					NT = 4;
+					xt = NTRefreshAddr & 31;
+					yt = (NTRefreshAddr >> 5) & 31;
+				}
+				else {
+					NT = (NTRefreshAddr >> 10) & 0x03;
+				}
+		*/
+		NT = (NTRefreshAddr >> 10) & 0x03;
 		uint8 NT_1K_dest = (RNBWHackNTcontrol[NT] & 0x0C) >> 2;
 		uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
-		if (NT_ext_mode & 0x01)
-			return (RNBWHackExNTARAMPtr[NT_1K_dest * 0x400 + (NTRefreshAddr & 0x3ff)] & 0xC0) >> 6;
+		switch (NT_ext_mode)
+		{
+		case 0: // extended mode disabled
+		case 2: // extended tiles
+		{
+			return (vnapage[ntnum][attraddr] & (3 << temp)) >> temp;
+		}
+		case 1: // extended attributes
+		{
+			/*if (split) {
+				int tmpA = refreshaddr & 0x3ff;
+				tmpA &= ~(0x1F << 5); // | (1 << 0xB)); //mask off VT and V
+				tmpA |= (linetile & 31) << 5; //mask on adjusted VT (V doesnt make any sense, I think)
+				//return RNBWHackSplitNTARAMPtr + (vadr & 0x3ff);
+				uint8 byte = (RNBWHackExNTARAMPtr[NT_1K_dest * 0x400 + tmpA] & 0xC0);
+				byte *= 0x55;
+				return byte;
+			}
+			else
+			{*/
+			uint8 byte = (RNBWHackExNTARAMPtr[NT_1K_dest * 0x400 + (NTRefreshAddr & 0x3ff)] & 0xC0);
+			byte >>= 6;
+			byte *= 0x55;
+			return byte;
+			//}
+		}
+		case 3: // extended attributes + tiles
+		{
+			uint8 byte = (RNBWHackExNTARAMPtr[NT_1K_dest * 0x400 + (NTRefreshAddr & 0x3ff)] & 0xC0);
+			byte >>= 6;
+			byte *= 0x55;
+			return byte;
+		}
+		}
+
+		//////////////////////////////////////////////////////////////////////
+		/*
+				uint8 NT;
+				bool split = false;
+				if(RNBWHackSplitEnable) {
+					if(RNBWHackWindowXStartTile < RNBWHackWindowXEndTile)
+					{
+						if((xt >= RNBWHackWindowXStartTile) & (xt <= RNBWHackWindowXEndTile))
+							split = true;
+					}
+					else
+					{
+						if((xt <= RNBWHackWindowXEndTile) | (xt >= RNBWHackWindowXStartTile))
+							split = true;
+					}
+				}
+				if(split) {
+					NT = 4;
+				} else {
+					NT = (NTRefreshAddr >> 10) & 0x03;
+				}
+				uint8 NT_1K_dest = (RNBWHackNTcontrol[NT] & 0x0C) >> 2;
+				uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
+				if (NT_ext_mode & 0x01)
+					return (RNBWHackExNTARAMPtr[NT_1K_dest * 0x400 + (NTRefreshAddr & 0x3ff)] & 0xC0) >> 6;
+		*/
+		//////////////////////////////////////////////////////////////////////
 	}
 	return (vnapage[ntnum][attraddr] & (3 << temp)) >> temp;
 }
@@ -1438,6 +1564,95 @@ static void RefreshLine(int lastpixel)
 		}
 	}
 #undef PPUT_MMC5
+
+	// Rainbow mapper specific code for vertical split-screen
+
+#define PPUT_RNBW
+	else if (RNBWHack && geniestage != 1)
+	{
+		for (X1 = firsttile; X1 < lasttile; X1++)
+		{
+			if (RNBWHackSplitEnable & (((RNBWHackWindowXStartTile <= RNBWHackWindowXEndTile) & ((X1 >= RNBWHackWindowXStartTile) & (X1 <= RNBWHackWindowXEndTile))) |
+																 ((RNBWHackWindowXStartTile > RNBWHackWindowXEndTile) & ((X1 >= RNBWHackWindowXStartTile) | (X1 <= RNBWHackWindowXEndTile)))))
+			{
+// handle vertical split-screen
+#define PPUT_RNBW_SPLIT
+				uint8 NT_1K_dest = (RNBWHackNTcontrol[4] & 0x0C) >> 2;
+				uint8 NT_ext_mode = RNBWHackNTcontrol[4] & 0x03;
+				switch (NT_ext_mode)
+				{
+				case 0:
+				{
+#include "pputile.inc"
+					break;
+				}
+				case 1: // extended attributes
+				{
+#define PPUT_RNBW_SPLIT_EXT_ATTR
+#include "pputile.inc"
+#undef PPUT_RNBW_SPLIT_EXT_ATTR
+					break;
+				}
+				case 2: // extended tiles
+				{
+#define PPUT_RNBW_SPLIT_EXT_TILE
+#include "pputile.inc"
+#undef PPUT_RNBW_SPLIT_EXT_TILE
+					break;
+				}
+				case 3: // extended attributes + tiles
+				{
+#define PPUT_RNBW_SPLIT_EXT_ATTR
+#define PPUT_RNBW_SPLIT_EXT_TILE
+#include "pputile.inc"
+#undef PPUT_RNBW_SPLIT_EXT_TILE
+#undef PPUT_RNBW_SPLIT_EXT_ATTR
+					break;
+				}
+#undef PPUT_RNBW_SPLIT
+				}
+			}
+			else
+			{
+				// handle other screens
+				uint8 NT = (RefreshAddr >> 10) & 0x03;
+				uint8 NT_1K_dest = (RNBWHackNTcontrol[NT] & 0x0C) >> 2;
+				uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
+				switch (NT_ext_mode)
+				{
+				case 0:
+				{
+#include "pputile.inc"
+					break;
+				}
+				case 1: // extended attributes
+				{
+#define PPUT_RNBW_EXT_ATTR
+#include "pputile.inc"
+#undef PPUT_RNBW_EXT_ATTR
+					break;
+				}
+				case 2: // extended tiles
+				{
+#define PPUT_RNBW_EXT_TILE
+#include "pputile.inc"
+#undef PPUT_RNBW_EXT_TILE
+					break;
+				}
+				case 3: // extended attributes + tiles
+				{
+#define PPUT_RNBW_EXT_ATTR
+#define PPUT_RNBW_EXT_TILE
+#include "pputile.inc"
+#undef PPUT_RNBW_EXT_TILE
+#undef PPUT_RNBW_EXT_ATTR
+					break;
+				}
+				}
+			}
+		}
+	}
+#undef PPUT_RNBW
 	else if (PPU_hook)
 	{
 		norecurse = 1;

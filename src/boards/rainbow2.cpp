@@ -87,7 +87,7 @@ static uint16 prg[11]; // 0: $5000, 1: $6000, 2: $7000, 3: $8000, 4: $9000, etc
 static uint8 chr_chip, chr_spr_ext_mode, chr_mode;
 static uint16 chr[16];
 
-static uint8 NT_bank[4];
+static uint8 RNBWHackNTbank[5];
 static uint8 SPR_bank_offset;
 static uint8 SPR_bank[64];
 
@@ -237,9 +237,8 @@ static void IRQEnd() {
 static void Rainbow2IRQ(int a) {
 
 	// Scanline IRQ
-	int sl = newppu_get_scanline();
+	int sl = newppu_get_scanline()-1;
 	int dot = newppu_get_dot();
-	int ppuon = (PPU[1] & 0x18);
 
 	S_IRQ_jitter_counter += a;
 
@@ -248,7 +247,7 @@ static void Rainbow2IRQ(int a) {
 	else
 		S_IRQ_HBlank = false;
 
-	if (!ppuon || sl >= 241)
+	if (!PPUON || sl >= 241)
 	{
 		// whenever rendering is off for any reason (vblank or forced disable)
 		// the irq counter resets, as well as the inframe flag (easily verifiable from software)
@@ -497,26 +496,26 @@ static void Sync(void) {
 		switch (chr_mode)
 		{
 		case CHR_MODE_0:
-			setchr8r(cart_chr_map, chr[0] & 0xffff);
+			setchr8r(cart_chr_map, chr[0] & 0x03ff);
 			break;
 		case CHR_MODE_1:
-			setchr4r(cart_chr_map, 0x0000, chr[0] & 0xffff);
-			setchr4r(cart_chr_map, 0x1000, chr[1] & 0xffff);
+			setchr4r(cart_chr_map, 0x0000, chr[0] & 0x07ff);
+			setchr4r(cart_chr_map, 0x1000, chr[1] & 0x07ff);
 			break;
 		case CHR_MODE_2:
-			setchr2r(cart_chr_map, 0x0000, chr[0] & 0xffff);
-			setchr2r(cart_chr_map, 0x0800, chr[1] & 0xffff);
-			setchr2r(cart_chr_map, 0x1000, chr[2] & 0xffff);
-			setchr2r(cart_chr_map, 0x1800, chr[3] & 0xffff);
+			setchr2r(cart_chr_map, 0x0000, chr[0] & 0x0fff);
+			setchr2r(cart_chr_map, 0x0800, chr[1] & 0x0fff);
+			setchr2r(cart_chr_map, 0x1000, chr[2] & 0x0fff);
+			setchr2r(cart_chr_map, 0x1800, chr[3] & 0x0fff);
 			break;
 		case CHR_MODE_3:
 			for (uint8 i = 0; i < 8; i++) {
-				setchr1r(cart_chr_map, i << 10, chr[i] & 0xffff);
+				setchr1r(cart_chr_map, i << 10, chr[i] & 0x1fff);
 			}
 			break;
 		case CHR_MODE_4:
 			for (uint8 i = 0; i < 16; i++) {
-				setchr512r(cart_chr_map, i << 9, chr[i] & 0xffff);
+				setchr512r(cart_chr_map, i << 9, chr[i] & 0x3fff);
 			}
 			break;
 		}
@@ -524,7 +523,7 @@ static void Sync(void) {
 
 	for (int i = 0; i < 4; i++)
 	{
-		uint8 cur_NT_bank = NT_bank[i];
+		uint8 cur_RNBWHackNT = RNBWHackNTbank[i];
 		uint8 cur_NT_chip = RNBWHackNTcontrol[i] >> 6;
 		//uint8 cur_NT_1K_dest = (RNBWHackNTcontrol[i] & 0x0C) >> 2;
 		//uint8 cur_NT_ext_mode = RNBWHackNTcontrol[i] & 0x03;
@@ -532,19 +531,21 @@ static void Sync(void) {
 		switch (cur_NT_chip)
 		{
 		case NT_CIRAM:
-			vnapage[i] = NTARAM + 0x400 * (cur_NT_bank & 0x01);
+			vnapage[i] = NTARAM + 0x400 * (cur_RNBWHackNT & 0x01);
 			break;
 		case NT_CHR_RAM:
-			vnapage[i] = CHRRAM + 0x400 * (cur_NT_bank & 0x1f);
+			vnapage[i] = CHRRAM + 0x400 * (cur_RNBWHackNT & 0x1f);
 			break;
 		case NT_FPGA_RAM:
-			vnapage[i] = FPGA_RAM + 0x400 * (cur_NT_bank & 0x03);
+			vnapage[i] = FPGA_RAM + 0x400 * (cur_RNBWHackNT & 0x03);
 			break;
 		case NT_CHR_ROM:
-			vnapage[i] = CHR_FLASHROM + 0x400 * cur_NT_bank;
+			vnapage[i] = CHR_FLASHROM + 0x400 * cur_RNBWHackNT;
 			break;
 		}
 	}
+
+	RNBWHackSplitNTARAMPtr = FPGA_RAM + 0x400 * (RNBWHackNTbank[4] & 0x03);
 
 }
 
@@ -596,7 +597,7 @@ static DECLFR(RNBW_0x4100Rd) {
 	switch (A)
 	{
 	case 0x4100: return (prg_ram_mode << 6) | prg_rom_mode;
-	case 0x4120: return (chr_chip << 6) | (chr_spr_ext_mode << 5) | chr_mode;
+	case 0x4120: return (chr_chip << 6) | (chr_spr_ext_mode << 5) | (RNBWHackSplitEnable << 4) | chr_mode;
 	case 0x4151: {
 		uint8 rv = (S_IRQ_HBlank ? 0x80 : 0) | (S_IRQ_in_frame ? 0x40 : 0 | (S_IRQ_pending ? 0x01 : 0));
 		S_IRQ_pending = false;
@@ -609,21 +610,21 @@ static DECLFR(RNBW_0x4100Rd) {
 	case 0x4161: return (S_IRQ_pending ? 0x80 : 0) | (C_IRQ_pending ? 0x40 : 0) | (ESP_IRQ_pending ? 0x01 : 0);
 
 		// ESP - WiFi
-	case 0x4170:
+	case 0x4190:
 	{
 		uint8 esp_enable_flag = esp_enable ? 0x01 : 0x00;
 		uint8 irq_enable_flag = esp_irq_enable ? 0x02 : 0x00;
 		UDBG("RAINBOW read flags %04x => %02xs\n", A, esp_enable_flag | irq_enable_flag);
 		return esp_enable_flag | irq_enable_flag;
 	}
-	case 0x4171:
+	case 0x4191:
 	{
 		uint8 esp_message_received_flag = esp_message_received() ? 0x80 : 0;
 		uint8 esp_rts_flag = esp->getDataReadyIO() ? 0x40 : 0x00;
 		return esp_message_received_flag | esp_rts_flag;
 	}
-	case 0x4172: return esp_message_sent ? 0x80 : 0;
-	case 0x4175:
+	case 0x4192: return esp_message_sent ? 0x80 : 0;
+	case 0x4195:
 	{
 		uint8 retval = FPGA_RAM[0x1800 + (rx_address << 8) + rx_index];
 		rx_index++;
@@ -637,13 +638,13 @@ static DECLFR(RNBW_0x4100Rd) {
 static DECLFW(RNBW_0x4100Wr) {
 	switch (A)
 	{
-		// Mapper configuration
+	// Mapper configuration
 	case 0x4100:
 		prg_rom_mode = V & 0x07;
 		prg_ram_mode = (V & 0x80) >> 7;
 		Sync();
 		break;
-		// PRG banking
+	// PRG banking
 	case 0x4106:
 	case 0x4107:
 	case 0x4108:
@@ -677,27 +678,30 @@ static DECLFW(RNBW_0x4100Wr) {
 		Sync();
 		break;
 	}
-	// CHR banking / chip selector / sprite extended mode
+	// CHR banking / chip selector / vertical split-screen / sprite extended mode
 	case 0x4120:
 		chr_chip = (V & 0xC0) >> 6;
 		chr_spr_ext_mode = (V & 0x20) >> 5;
+		RNBWHackSplitEnable = (V & 0x10) >> 4;
 		chr_mode = V & 0x07;
 		Sync();
 		break;
 	case 0x4121:
 		RNBWHackBGBankOffset = V & 0x1f;
 		break;
-		// Nametables bank
-	case 0x4126: NT_bank[0] = V; Sync(); break;
-	case 0x4127: NT_bank[1] = V; Sync(); break;
-	case 0x4128: NT_bank[2] = V; Sync(); break;
-	case 0x4129: NT_bank[3] = V; Sync(); break;
-		// Nametables control
+	// Nametables bank
+	case 0x4126: RNBWHackNTbank[0] = V; Sync(); break;
+	case 0x4127: RNBWHackNTbank[1] = V; Sync(); break;
+	case 0x4128: RNBWHackNTbank[2] = V; Sync(); break;
+	case 0x4129: RNBWHackNTbank[3] = V; Sync(); break;
+	case 0x412E: RNBWHackNTbank[4] = V; Sync(); break;
+	// Nametables control
 	case 0x412A: RNBWHackNTcontrol[0] = V; Sync(); break;
 	case 0x412B: RNBWHackNTcontrol[1] = V; Sync(); break;
 	case 0x412C: RNBWHackNTcontrol[2] = V; Sync(); break;
 	case 0x412D: RNBWHackNTcontrol[3] = V; Sync(); break;
-		// CHR banking
+	case 0x412F: RNBWHackNTcontrol[4] = V; Sync(); break;
+	// CHR banking
 	case 0x4130:
 	case 0x4131:
 	case 0x4132:
@@ -747,7 +751,7 @@ static DECLFW(RNBW_0x4100Wr) {
 	case 0x4151: S_IRQ_enable = true; break;
 	case 0x4152: S_IRQ_pending = false; S_IRQ_enable = false; break;
 	case 0x4153: S_IRQ_offset = V > 169 ? 169 : V; break;
-		// CPU Cycle IRQ
+	// CPU Cycle IRQ
 	case 0x4158: C_IRQLatch &= 0xFF00; C_IRQLatch |= V; C_IRQCount = C_IRQLatch; break;
 	case 0x4159: C_IRQLatch &= 0x00FF; C_IRQLatch |= V << 8; C_IRQCount = C_IRQLatch; break;
 	case 0x415A:
@@ -760,16 +764,35 @@ static DECLFW(RNBW_0x4100Wr) {
 		C_IRQ_pending = false;
 		IRQEnd();
 		break;
-		// ESP - WiFi
+	// Window Mode
 	case 0x4170:
+		RNBWHackWindowXStartTile = V & 0x1f;
+		break;
+	case 0x4171:
+		RNBWHackWindowXEndTile = V & 0x1f;
+		break;
+	case 0x4172:
+		//RNBWHackWindowYStart = V; // TODO
+		break;
+	case 0x4173:
+		//RNBWHackWindowYEnd = V; // TODO
+		break;
+	case 0x4174:
+		RNBWHackSplitXScroll = V & 0x1f;
+		break;
+	case 0x4175:
+		RNBWHackSplitYScroll = V;
+		break;
+	// ESP - WiFi
+	case 0x4190:
 		esp_enable = V & 0x01;
 		esp_irq_enable = V & 0x02;
 		break;
-	case 0x4171:
+	case 0x4191:
 		if (esp_enable) clear_esp_message_received();
-		else FCEU_printf("RAINBOW warning: $4170.0 is not set\n");
+		else FCEU_printf("RAINBOW warning: $4190.0 is not set\n");
 		break;
-	case 0x4172:
+	case 0x4192:
 		if (esp_enable)
 		{
 			esp_message_sent = false;
@@ -781,15 +804,15 @@ static DECLFW(RNBW_0x4100Wr) {
 			}
 			esp_message_sent = true;
 		}
-		else FCEU_printf("RAINBOW warning: $4170.0 is not set\n");
+		else FCEU_printf("RAINBOW warning: $4190.0 is not set\n");
 		break;
-	case 0x4173:
+	case 0x4193:
 		rx_address = V & 0x07;
 		break;
-	case 0x4174:
+	case 0x4194:
 		tx_address = V & 0x07;
 		break;
-	case 0x4175:
+	case 0x4195:
 		rx_index = V;
 		break;
 	case 0x41FF:
@@ -812,24 +835,28 @@ static DECLFW(RNBW_0x4100Wr) {
 
 extern uint32 NTRefreshAddr;
 uint8 FASTCALL Rainbow2PPURead(uint32 A) {
-	/*
-		// if CHR-RAM, check if CHR-RAM exists, if not return data bus cache
-		if (chr_chip == CHR_CHIP_RAM && CHRRAM == NULL)
-		{
-			if (PPU_hook) PPU_hook(A);
-			return X.DB;
-		}
 
-		// if CHR-ROM, check if CHR-ROM exists, if not return data bus cache
-		if (chr_chip == CHR_CHIP_ROM && CHR_FLASHROM == NULL)
-		{
-			if (PPU_hook) PPU_hook(A);
-			return X.DB;
-		}
-	*/
-	if (A < 0x2000)
+	int xt = NTRefreshAddr & 31;
+	int yt = (NTRefreshAddr >> 5) & 31;
+	int ntnum = (NTRefreshAddr >> 10) & 3;
+
+	bool split = false;
+	int linetile;
+	if(newppu)
 	{
-		if (ppuphase == PPUPHASE_OBJ && ScreenON)
+		if (RNBWHackSplitEnable & (
+			((RNBWHackWindowXStartTile <= RNBWHackWindowXEndTile) & ((xt >= RNBWHackWindowXStartTile) & (xt <= RNBWHackWindowXEndTile))) |
+			((RNBWHackWindowXStartTile > RNBWHackWindowXEndTile) & ((xt >= RNBWHackWindowXStartTile) | (xt <= RNBWHackWindowXEndTile)))
+			)) {
+			static const int kHack = -1; //dunno if theres science to this or if it just fixes SDF (cant be bothered to think about it)
+			linetile = (newppu_get_scanline() + kHack + RNBWHackSplitYScroll) / 8;
+			split = true;
+		}
+	}
+
+	if (A < 0x2000) // pattern table / CHR data
+	{
+		if ((ppuphase == PPUPHASE_OBJ) & (ScreenON)) // sprite fetch
 		{
 			if (chr_spr_ext_mode)
 				if (Sprite16)
@@ -838,12 +865,18 @@ uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 					return RNBWHackVROMPtr[((SPR_bank[RNBWHackCurSprite] << 12) & RNBWHackVROMMask) + (A)];
 			else
 			{
-				return VPage[A >> 9][A]; // FIXME
+				return VPage[A >> 9][A]; // TODO: FIXME?
 			}
 		}
 
-		if (ppuphase == PPUPHASE_BG && ScreenON)
+		if ((ppuphase == PPUPHASE_BG) & (ScreenON)) // tile fetch
 		{
+
+			if(split)
+			{
+				return RNBWHackVROMPtr[A & 0xFFF];
+			}
+
 			uint8 *tmp = FCEUPPU_GetCHR(A, NTRefreshAddr);
 			if (tmp == NULL) return X.DB;
 			else return *tmp;
@@ -852,14 +885,86 @@ uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 		// default
 		return FFCEUX_PPURead_Default(A);
 	}
-	else
+	else if (A < 0x3F00)  // tiles / attributes
 	{
-		uint8 NT = (A >> 10) & 0x03;
-		uint8 NT_1K_dest = (RNBWHackNTcontrol[NT] & 0x0C) >> 2;
-		uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
+		if ((A & 0x3FF) >= 0x3C0) { // attributes
+			if (split) {
+				//return 0x00;
+				//uint8 NT_1K_dest = (RNBWHackNTcontrol[4] & 0x0C) >> 2;
+				//uint8 NT_ext_mode = RNBWHackNTcontrol[4] & 0x03;
+
+				//REF NT: return 0x2000 | (v << 0xB) | (h << 0xA) | (vt << 5) | ht;
+				//REF AT: return 0x2000 | (v << 0xB) | (h << 0xA) | 0x3C0 | ((vt & 0x1C) << 1) | ((ht & 0x1C) >> 2);
+
+				// Attributes
+				//return FCEUPPU_GetAttr(ntnum, xt, yt);
+
+				A &= ~(0x1C << 1); //mask off VT
+				A |= (linetile & 0x1C) << 1; //mask on adjusted VT
+				return FPGA_RAM[RNBWHackNTbank[4] * 0x400 + (A & 0x3ff)];
+			} else {
+				return FCEUPPU_GetAttr(ntnum, xt, yt);
+			}
+		} else { // tiles
+			if(split) {
+				// Tiles
+				A &= ~((0x1F << 5) | (1 << 0xB)); //mask off VT and V
+				A |= (linetile & 31) << 5; //mask on adjusted VT (V doesnt make any sense, I think)
+
+				//uint8 *tmp = FCEUPPU_GetCHR(A, NTRefreshAddr);
+				//if (tmp == NULL) return X.DB;
+				//else return *tmp;
+
+				return FPGA_RAM[RNBWHackNTbank[4] * 0x400 + (A & 0x3ff)];
+			} else {
+				return vnapage[(A >> 10) & 0x3][A & 0x3FF];
+			}
+		}
+/*
+		if(split)
+		{
+			uint8 NT_1K_dest = (RNBWHackNTcontrol[4] & 0x0C) >> 2;
+			uint8 NT_ext_mode = RNBWHackNTcontrol[4] & 0x03;
+
+			static const int kHack = -1; //dunno if theres science to this or if it just fixes SDF (cant be bothered to think about it)
+			int linetile = (newppu_get_scanline() + kHack) / 8 + RNBWHackSplitYScroll;
+
+			//REF NT: return 0x2000 | (v << 0xB) | (h << 0xA) | (vt << 5) | ht;
+			//REF AT: return 0x2000 | (v << 0xB) | (h << 0xA) | 0x3C0 | ((vt & 0x1C) << 1) | ((ht & 0x1C) >> 2);
+
+			// TODO: need to handle 8x8 attributes
+			if((A & 0x3FF) >= 0x3C0)
+			{
+				// Attributes
+				return FCEUPPU_GetAttr(ntnum, xt, yt);
+
+				A &= ~(0x1C << 1); //mask off VT
+				A |= (linetile & 0x1C) << 1; //mask on adjusted VT
+				return FPGA_RAM[RNBWHackNTbank[4] * 0x400 + (A & 0x3ff)];
+			}
+			else
+			{
+				// Tiles
+				//A &= ~((0x1F << 5) | (1 << 0xB)); //mask off VT and V
+				//A |= (linetile & 31) << 5; //mask on adjusted VT (V doesnt make any sense, I think)
+
+				uint8 *tmp = FCEUPPU_GetCHR(A, NTRefreshAddr);
+				if (tmp == NULL) return X.DB;
+				else return *tmp;
+
+				return FPGA_RAM[RNBWHackNTbank[4] * 0x400 + (A & 0x3ff)];
+				
+			}
+		}
+*/
+/*
 		if ((A & 0x3FF) >= 0x3C0)
 		{
-			// Attributes
+			uint8 NT = (A >> 10) & 0x03;
+			uint8 NT_1K_dest = (RNBWHackNTcontrol[NT] & 0x0C) >> 2;
+			uint8 NT_ext_mode = RNBWHackNTcontrol[NT] & 0x03;
+
+			// 8x8 attributes
 			if (NT_ext_mode & 0x01)
 			{
 				uint8 byte = FPGA_RAM[NT_1K_dest * 0x400 + (NTRefreshAddr & 0x3ff)];
@@ -869,11 +974,11 @@ uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 				return byte;
 			}
 		}
-		else
-		{
+*/
 
-		}
 		return vnapage[(A >> 10) & 0x3][A & 0x3FF];
+	} else { // palette fetch
+		return FFCEUX_PPURead_Default(A);
 	}
 }
 
@@ -1392,14 +1497,15 @@ static void Rainbow2Reset(void) {
 	// extended sprite mode disabled
 	chr_chip = CHR_CHIP_ROM;
 	chr_spr_ext_mode = 0;
+	RNBWHackSplitEnable = 0;
 	chr_mode = CHR_MODE_0;
 	chr[0] = 0;
 
 	// Nametables - CIRAM horizontal mirroring
-	NT_bank[0] = 0;
-	NT_bank[1] = 0;
-	NT_bank[2] = 1;
-	NT_bank[3] = 1;
+	RNBWHackNTbank[0] = 0;
+	RNBWHackNTbank[1] = 0;
+	RNBWHackNTbank[2] = 1;
+	RNBWHackNTbank[3] = 1;
 	RNBWHackNTcontrol[0] = 0;
 	RNBWHackNTcontrol[1] = 0;
 	RNBWHackNTcontrol[2] = 0;
@@ -1563,6 +1669,7 @@ static void Rainbow2Close(void)
 	RNBWHackNTcontrol[1] = 0;
 	RNBWHackNTcontrol[2] = 0;
 	RNBWHackNTcontrol[3] = 0;
+	RNBWHackNTcontrol[4] = 0;
 	RNBWHackVROMPtr = NULL;
 	RNBWHackExNTARAMPtr = NULL;
 }

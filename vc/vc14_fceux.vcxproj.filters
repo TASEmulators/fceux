@@ -1139,6 +1139,8 @@
     <ClCompile Include="..\src\boards\rainbow2.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\utils\mutex.cpp" />
+    <ClCompile Include="..\src\ld65dbg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
@@ -1654,6 +1656,9 @@
     <ClInclude Include="..\src\boards\RNBW\pping.h">
       <Filter>boards</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\debugsymboltable.h" />
+    <ClInclude Include="..\src\ld65dbg.h" />
+    <ClInclude Include="..\src\utils\mutex.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">
@@ -1667,7 +1672,6 @@
     <None Include="..\src\drivers\win\res\ICON_2.ico">
       <Filter>drivers\win\res</Filter>
     </None>
-    <None Include="..\src\pputile.inc" />
     <None Include="..\src\drivers\win\res\branch_spritesheet.bmp">
       <Filter>pix</Filter>
     </None>
@@ -1990,6 +1994,7 @@
       <Filter>drivers\win\res</Filter>
     </None>
     <None Include="..\src\ops.inc" />
+    <None Include="..\src\pputile.inc" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />

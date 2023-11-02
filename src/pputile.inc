@@ -5,13 +5,17 @@ uint32 vadr;
 uint8 tmpd;
 #endif
 
-#ifndef PPUT_MMC5SP
-	FCEU_MAYBE_UNUSED uint8 zz;
-#else
+#ifdef PPUT_MMC5SP
 	uint8 xs, ys;
 	xs = X1;
 	ys = ((scanline >> 3) + MMC5HackSPScroll) & 0x1F;
 	if (ys >= 0x1E) ys -= 0x1E;
+#elif defined(PPUT_RNBW_SPLIT)
+	uint8 xs, ys;
+	xs = (X1 + RNBWHackSplitXScroll) & 0x1f;
+	ys = ((scanline + RNBWHackSplitYScroll) >> 3 ) & 0x1F;
+#else
+	FCEU_MAYBE_UNUSED uint8 zz;
 #endif
 
 if (X1 >= 2) {
@@ -42,6 +46,17 @@ if (X1 >= 2) {
 
 #ifdef PPUT_MMC5SP
 	vadr = (MMC5HackExNTARAMPtr[xs | (ys << 5)] << 4) + (vofs & 7);
+#elif defined(PPUT_RNBW_SPLIT)
+	#if defined(PPUT_RNBW_SPLIT_EXT_TILE)
+		// TODO need to use split config in account here
+		vadr = (RNBWHackExNTARAMPtr[xs | (ys << 5)] << 4) + ((scanline + RNBWHackSplitYScroll) & 7);
+	#else
+		vadr = (RNBWHackExNTARAMPtr[xs | (ys << 5)] << 4) + ((scanline + RNBWHackSplitYScroll) & 7);
+	#endif
+#elif defined(PPUT_RNBW_EXT_TILE)
+	zz = RefreshAddr & 0x1F;
+	C = vnapage[(RefreshAddr >> 10) & 3];
+	vadr = (C[RefreshAddr & 0x3ff] << 4) + vofs;				// Fetch name table byte.
 #else
 	zz = RefreshAddr & 0x1F;
 	C = vnapage[(RefreshAddr >> 10) & 3];
@@ -59,6 +74,15 @@ if (X1 >= 2) {
 #ifdef PPUT_MMC5SP
 	cc = MMC5HackExNTARAMPtr[0x3c0 + (xs >> 2) + ((ys & 0x1C) << 1)];
 	cc = ((cc >> ((xs & 2) + ((ys & 0x2) << 1))) & 3);
+#elif defined(PPUT_RNBW_SPLIT)
+	#if defined(PPUT_RNBW_SPLIT_EXT_ATTR)
+		cc = (RNBWHackExNTARAMPtr[NT_1K_dest * 0x400 + (xs | (ys << 5))] & 0xC0) >> 6;
+	#else
+		cc = RNBWHackExNTARAMPtr[0x3c0 + (xs >> 2) + ((ys & 0x1C) << 1)];
+		cc = ((cc >> ((xs & 2) + ((ys & 0x2) << 1))) & 3);
+	#endif
+#elif defined(PPUT_RNBW_EXT_ATTR)
+	cc = (RNBWHackExNTARAMPtr[NT_1K_dest * 0x400 + (RefreshAddr & 0x3ff)] & 0xC0) >> 6;
 #else
 	#ifdef PPUT_MMC5CHR1
 		cc = (MMC5HackExNTARAMPtr[RefreshAddr & 0x3ff] & 0xC0) >> 6;
@@ -77,6 +101,9 @@ pshift[1] <<= 8;
 #ifdef PPUT_MMC5SP
 	C = MMC5HackVROMPTR + vadr;
 	C += ((MMC5HackSPPage & 0x3f & MMC5HackVROMMask) << 12);
+#elif defined(PPUT_RNBW_SPLIT)
+	C = RNBWHackVROMPtr + vadr;
+	//C += ((RNBWHackSPPage & 0x3f & RNBWHackVROMMask) << 12);
 #else
 	#ifdef PPUT_MMC5CHR1
 		C = MMC5HackVROMPTR;
@@ -85,6 +112,11 @@ pshift[1] <<= 8;
 	#elif defined(PPUT_MMC5)
 		C = MMC5BGVRAMADR(vadr);
 	#else
+
+	#ifdef PPUT_RNBW_EXT_TILE
+		C = RNBWHackVROMPtr;
+		C += ( (RNBWHackBGBankOffset * 0x40000) + (( RNBWHackExNTARAMPtr[NT_1K_dest * 0x400 + (RefreshAddr & 0x3ff)] & 0x3f ) << 12) + (vadr & 0xfff) ) & RNBWHackVROMMask;
+	#endif
 
 	#ifdef PPU_VRC5FETCH
 	if(tmpd & 0x40)

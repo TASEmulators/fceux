@@ -66,13 +66,20 @@ extern int RNBWHack;
 extern uint8 *RNBWHackExNTARAMPtr;
 extern uint8 *RNBWHackVROMPtr;
 extern uint32 RNBWHackVROMMask;
-extern uint8 RNBWHackNTcontrol[4];
+extern uint8 RNBWHackNTbank[5];
+extern uint8 RNBWHackNTcontrol[5];
 extern uint8 RNBWHackBGBankOffset;
 extern uint8 RNBWHackCurSprite;
+extern uint8 RNBWHackSplitEnable;
+extern uint8 RNBWHackWindowXStartTile;
+extern uint8 RNBWHackWindowXEndTile;
+extern uint8 RNBWHackSplitXScroll;
+extern uint8 RNBWHackSplitYScroll;
+extern uint8 *RNBWHackSplitNTARAMPtr;
 
 extern int PEC586Hack;
 
-// VRCV extarnal shared buffers/vars
+// VRCV external shared buffers/vars
 extern int QTAIHack;
 extern uint8 QTAINTRAM[2048];
 extern uint8 qtaintramreg;
