@@ -197,7 +197,7 @@ static SFORMAT SStateRegs[] =
 	{ 0 }
 };
 
-static EspFirmware *esp = NULL;
+static BrokeStudioFirmware *esp = NULL;
 static bool esp_enable;
 static bool esp_irq_enable;
 static bool has_esp_message_received;

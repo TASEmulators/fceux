@@ -13,8 +13,6 @@
 #include <deque>
 #include <thread>
 
-#include "esp.h"
-
 #if defined(_WIN32) || defined(WIN32)
 #include <winsock2.h>
 #else
@@ -71,15 +69,15 @@ struct WorkingFile
 	FileStruct *file;
 };
 
-class BrokeStudioFirmware: public EspFirmware {
+class BrokeStudioFirmware {
 public:
 	BrokeStudioFirmware();
 	~BrokeStudioFirmware();
 
-	void rx(uint8 v) override;
-	uint8 tx() override;
+	void rx(uint8 v);
+	uint8 tx();
 
-	virtual bool getDataReadyIO() override;
+	virtual bool getDataReadyIO();
 
 private:
 	// Defined message types from CPU to ESP

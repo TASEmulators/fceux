@@ -1644,9 +1644,6 @@
     <ClInclude Include="..\src\drivers\win\header_editor.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\boards\RNBW\esp.h">
-      <Filter>boards</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\boards\RNBW\pping.h">
       <Filter>boards</Filter>
     </ClInclude>
