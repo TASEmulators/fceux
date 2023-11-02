@@ -841,9 +841,6 @@
     <ClCompile Include="..\src\boards\rainbow_esp.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\rainbow13.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\sa-9602b.cpp">
       <Filter>boards</Filter>
     </ClCompile>
@@ -1130,13 +1127,10 @@
     <ClCompile Include="..\src\boards\rainbow_esp.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\rainbow13.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\RNBW\pping.c">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\rainbow2.cpp">
+    <ClCompile Include="..\src\boards\rainbow.cpp">
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\utils\mutex.cpp" />

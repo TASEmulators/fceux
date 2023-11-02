@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
- // mapper 682 - Rainbow2 board v1.0 revA and v1.1 by Broke Studio
+ // mapper 682 - Rainbow board v1.0 revA and v1.1 by Broke Studio
  //
  // documentation available here: https://github.com/BrokeStudio/rainbow-lib
 
@@ -79,7 +79,7 @@
 #define PPUON				(PPU[1] & 0x18)	//PPU should operate
 #define Sprite16			(PPU[0] & 0x20)	//Sprites 8x16/8x8
 
-static void Rainbow2Reset(void);
+static void RainbowReset(void);
 
 static uint8 prg_rom_mode, prg_ram_mode, bootrom;
 static uint16 prg[11]; // 0: $5000, 1: $6000, 2: $7000, 3: $8000, 4: $9000, etc
@@ -155,7 +155,7 @@ static SFORMAT FlashRegs[] =
 	{ 0 }
 };
 
-static SFORMAT Rainbow2StateRegs[] =
+static SFORMAT RainbowStateRegs[] =
 {
 	{ prg, 11, "PRG" },
 	{ chr, 16, "CHR" },
@@ -234,7 +234,7 @@ static void IRQEnd() {
 	}
 }
 
-static void Rainbow2IRQ(int a) {
+static void RainbowIRQ(int a) {
 
 	// Scanline IRQ
 	int sl = newppu_get_scanline()-1;
@@ -585,7 +585,7 @@ static DECLFR(RNBW_RstPowRd) {
 		if (A == 0xFFFC) reset_step = 1;
 		else if ((A == 0xFFFD) & (reset_step == 1))
 		{
-			Rainbow2Reset();
+			RainbowReset();
 			reset_step = 0;
 		}
 		else reset_step = 0;
@@ -817,7 +817,7 @@ static DECLFW(RNBW_0x4100Wr) {
 		break;
 	case 0x41FF:
 		bootrom = V & 0x01;
-		if (bootrom == 0) Rainbow2Reset(); // a bit hacky but does the job for testing
+		if (bootrom == 0) RainbowReset(); // a bit hacky but does the job for testing
 		Sync();
 		break;
 	case 0x4240:
@@ -834,7 +834,7 @@ static DECLFW(RNBW_0x4100Wr) {
 }
 
 extern uint32 NTRefreshAddr;
-uint8 FASTCALL Rainbow2PPURead(uint32 A) {
+uint8 FASTCALL RainbowPPURead(uint32 A) {
 
 	int xt = NTRefreshAddr & 31;
 	int yt = (NTRefreshAddr >> 5) & 31;
@@ -982,7 +982,7 @@ uint8 FASTCALL Rainbow2PPURead(uint32 A) {
 	}
 }
 
-uint8 Rainbow2FlashID(uint8 chip, uint32 A) {
+uint8 RainbowFlashID(uint8 chip, uint32 A) {
 	// Software ID mode is undefined by the datasheet for all but the lowest 2 addressable bytes,
 	// but some tests of the chip currently being used found it repeats in 512-byte patterns.
 	// http://forums.nesdev.com/viewtopic.php?p=178728#p178728
@@ -1030,16 +1030,16 @@ uint8 Rainbow2FlashID(uint8 chip, uint32 A) {
 	}
 }
 
-uint8 FASTCALL Rainbow2FlashChrID(uint32 A) {
-	return Rainbow2FlashID(CHIP_TYPE_CHR, A);
+uint8 FASTCALL RainbowFlashChrID(uint32 A) {
+	return RainbowFlashID(CHIP_TYPE_CHR, A);
 }
 
-static DECLFR(Rainbow2FlashPrgID)
+static DECLFR(RainbowFlashPrgID)
 {
-	return Rainbow2FlashID(CHIP_TYPE_PRG, A);
+	return RainbowFlashID(CHIP_TYPE_PRG, A);
 }
 
-void Rainbow2FlashIDEnter(uint8 chip)
+void RainbowFlashIDEnter(uint8 chip)
 {
 	switch (chip)
 	{
@@ -1048,9 +1048,9 @@ void Rainbow2FlashIDEnter(uint8 chip)
 			return;
 		flash_id[chip] = 1;
 		if (bootrom)
-			SetReadHandler(0x6000, 0xDFFF, Rainbow2FlashPrgID);
+			SetReadHandler(0x6000, 0xDFFF, RainbowFlashPrgID);
 		else
-			SetReadHandler(0x6000, 0xFFFF, Rainbow2FlashPrgID);
+			SetReadHandler(0x6000, 0xFFFF, RainbowFlashPrgID);
 		break;
 	case CHIP_TYPE_CHR:
 		if (CHR_FLASHROM == NULL)
@@ -1058,14 +1058,14 @@ void Rainbow2FlashIDEnter(uint8 chip)
 		if (flash_id[chip])
 			return;
 		flash_id[chip] = 1;
-		FFCEUX_PPURead = Rainbow2FlashChrID;
+		FFCEUX_PPURead = RainbowFlashChrID;
 		break;
 	default:
 		return;
 	}
 }
 
-void Rainbow2FlashIDExit(uint8 chip)
+void RainbowFlashIDExit(uint8 chip)
 {
 	switch (chip)
 	{
@@ -1079,14 +1079,14 @@ void Rainbow2FlashIDExit(uint8 chip)
 		if (!flash_id[chip])
 			return;
 		flash_id[chip] = 0;
-		FFCEUX_PPURead = Rainbow2PPURead;
+		FFCEUX_PPURead = RainbowPPURead;
 		break;
 	default:
 		return;
 	}
 }
 
-void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
+void RainbowFlash(uint8 chip, uint32 flash_addr, uint8 V) {
 
 	uint32 command_addr = flash_addr & 0x0FFF;
 
@@ -1110,7 +1110,7 @@ void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
 		}
 		else if (V == 0xF0)
 		{
-			Rainbow2FlashIDExit(chip);
+			RainbowFlashIDExit(chip);
 		}
 		break;
 	case flash_mode_COMMAND:
@@ -1136,8 +1136,8 @@ void Rainbow2Flash(uint8 chip, uint32 flash_addr, uint8 V) {
 				case 0x20: flash_mode[chip] = flash_mode_UNLOCK_BYPASS; break;
 				case 0xA0: flash_mode[chip] = flash_mode_BYTE_WRITE; break;
 				case 0x80: flash_mode[chip] = flash_mode_ERASE; break;
-				case 0x90: Rainbow2FlashIDEnter(chip); flash_mode[chip] = flash_mode_READY; break;
-				case 0xF0: Rainbow2FlashIDExit(chip); flash_mode[chip] = flash_mode_READY; break;
+				case 0x90: RainbowFlashIDEnter(chip); flash_mode[chip] = flash_mode_READY; break;
+				case 0xF0: RainbowFlashIDExit(chip); flash_mode[chip] = flash_mode_READY; break;
 				}
 			}
 			else
@@ -1438,10 +1438,10 @@ static DECLFW(RNBW_0x6000Wr) {
 			return CartBW(A, V);
 		}
 	}
-	Rainbow2Flash(CHIP_TYPE_PRG, flash_addr, V);
+	RainbowFlash(CHIP_TYPE_PRG, flash_addr, V);
 }
 
-static void Rainbow2PPUWrite(uint32 A, uint8 V) {
+static void RainbowPPUWrite(uint32 A, uint8 V) {
 	/*
 		// if CHR-RAM but CHR-RAM does not exist then return
 		if (chr_chip == CHR_CHIP_RAM && CHRRAM == NULL)
@@ -1479,13 +1479,13 @@ static void Rainbow2PPUWrite(uint32 A, uint8 V) {
 				flash_addr |= (chr[A >> 9] & 0xffff) << 9;
 				break;
 			}
-			Rainbow2Flash(CHIP_TYPE_CHR, flash_addr, V);
+			RainbowFlash(CHIP_TYPE_CHR, flash_addr, V);
 		}
 	}
 	FFCEUX_PPUWrite_Default(A, V);
 }
 
-static void Rainbow2Reset(void) {
+static void RainbowReset(void) {
 	// reset
 	reset_step = 0;
 
@@ -1537,12 +1537,12 @@ static void Rainbow2Reset(void) {
 	Sync();
 }
 
-static void Rainbow2Power(void) {
+static void RainbowPower(void) {
 
 	// mapper init
 	if (MiscROMS) bootrom = 1;
 	else bootrom = 0;
-	Rainbow2Reset();
+	RainbowReset();
 
 	// reset-power vectors
 	SetReadHandler(0xFFFC, 0xFFFF, RNBW_RstPowRd);
@@ -1621,7 +1621,7 @@ static void Rainbow2Power(void) {
 	//rx_index = 0;
 }
 
-static void Rainbow2Close(void)
+static void RainbowClose(void)
 {
 	if (WRAM)
 	{
@@ -1862,7 +1862,7 @@ static void DoSawVHQ(void) {
 	cvbc[2] = SOUNDTS;
 }
 
-void Rainbow2Sound(int Count) {
+void RainbowSound(int Count) {
 	int x;
 
 	DoSQV1();
@@ -1872,22 +1872,22 @@ void Rainbow2Sound(int Count) {
 		cvbc[x] = Count;
 }
 
-void Rainbow2SoundHQ(void) {
+void RainbowSoundHQ(void) {
 	DoSQV1HQ();
 	DoSQV2HQ();
 	DoSawVHQ();
 }
 
-void Rainbow2SyncHQ(int32 ts) {
+void RainbowSyncHQ(int32 ts) {
 	int x;
 	for (x = 0; x < 3; x++) cvbc[x] = ts;
 }
 
-static void Rainbow2ESI(void) {
-	GameExpSound.RChange = Rainbow2ESI;
-	GameExpSound.Fill = Rainbow2Sound;
-	GameExpSound.HiFill = Rainbow2SoundHQ;
-	GameExpSound.HiSync = Rainbow2SyncHQ;
+static void RainbowESI(void) {
+	GameExpSound.RChange = RainbowESI;
+	GameExpSound.Fill = RainbowSound;
+	GameExpSound.HiFill = RainbowSoundHQ;
+	GameExpSound.HiSync = RainbowSyncHQ;
 
 	memset(cvbc, 0, sizeof(cvbc));
 	memset(vcount, 0, sizeof(vcount));
@@ -1917,18 +1917,18 @@ static void Rainbow2ESI(void) {
 
 // NSF Init
 
-void NSFRainbow2_Init(void) {
-	Rainbow2ESI();
+void NSFRainbow_Init(void) {
+	RainbowESI();
 	SetWriteHandler(0x8000, 0xbfff, RNBW_ExpAudioWr);
 }
 #endif
 
 // mapper init
 
-void RAINBOW2_Init(CartInfo *info) {
-	info->Power = Rainbow2Power;
-	info->Reset = Rainbow2Reset;
-	info->Close = Rainbow2Close;
+void RAINBOW_Init(CartInfo *info) {
+	info->Power = RainbowPower;
+	info->Reset = RainbowReset;
+	info->Close = RainbowClose;
 
 	RNBWbattery = info->battery;
 
@@ -2070,11 +2070,11 @@ void RAINBOW2_Init(CartInfo *info) {
 		SetupCartPRGMapping(0x13, MiscROMS, MiscROMS_size, 0);
 	}
 
-	FFCEUX_PPURead = Rainbow2PPURead;
-	FFCEUX_PPUWrite = Rainbow2PPUWrite;
+	FFCEUX_PPURead = RainbowPPURead;
+	FFCEUX_PPUWrite = RainbowPPUWrite;
 
-	//GameHBIRQHook = Rainbow2hb;
-	MapIRQHook = Rainbow2IRQ;
+	//GameHBIRQHook = Rainbowhb;
+	MapIRQHook = RainbowIRQ;
 	RNBWHack = 1;
 	RNBWHackNTcontrol[0] = 0;
 	RNBWHackNTcontrol[1] = 0;
@@ -2083,9 +2083,9 @@ void RAINBOW2_Init(CartInfo *info) {
 	RNBWHackVROMPtr = FPGA_RAM;
 	RNBWHackVROMMask = FPGA_RAMSIZE - 1;
 	RNBWHackExNTARAMPtr = FPGA_RAM;
-	Rainbow2ESI();
+	RainbowESI();
 	GameStateRestore = StateRestore;
 
 	AddExState(&FlashRegs, ~0, 0, 0);
-	AddExState(&Rainbow2StateRegs, ~0, 0, 0);
+	AddExState(&RainbowStateRegs, ~0, 0, 0);
 }
