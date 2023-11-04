@@ -1,19 +1,30 @@
-#ifndef _RAINBOW_ESP_H_
-#define _RAINBOW_ESP_H_
-
+#pragma once
 #include "../types.h"
-
 #include "RNBW/bootrom_chr.h"
 
 #define CURL_STATICLIB
 #include "curl/curl.h"
 
+#include <assert.h>
 #include <array>
 #include <atomic>
 #include <deque>
 #include <thread>
+#include <fstream>
 
-#if defined(_WIN32) || defined(WIN32)
+using std::pair;
+using std::array;
+using std::vector;
+using std::min;
+using std::max;
+using std::ifstream;
+using std::ofstream;
+using std::string;
+using std::atomic;
+using std::thread;
+using std::deque;
+
+#ifdef _WIN32
 #include <winsock2.h>
 #else
 #include <netinet/in.h>
@@ -22,66 +33,68 @@
 //////////////////////////////////////
 // BrokeStudio's ESP firmware implementation
 
-static uint8 const NO_WORKING_FILE = 0xff;
-static uint8 const NUM_FILE_PATHS = 3;
-static uint8 const NUM_FILES = 64;
+static const uint8_t NO_WORKING_FILE = 0xff;
+static const uint8_t NUM_FILE_PATHS = 3;
+static const uint8_t NUM_FILES = 64;
 
-static uint64 const ESP_FLASH_SIZE = 0x200000; // 2MiB
-static uint64 const SD_CARD_SIZE = 0x80000000; // 2GiB
+static const uint64_t ESP_FLASH_SIZE = 0x200000; // 2MiB
+static const uint64_t SD_CARD_SIZE = 0x80000000; // 2GiB
 
-static uint8 const NUM_NETWORKS = 3;
-static uint8 const NUM_FAKE_NETWORKS = 5;
-static uint8 const SSID_MAX_LENGTH = 32;
-static uint8 const PASS_MAX_LENGTH = 64;
+static const uint8_t NUM_NETWORKS = 3;
+static const uint8_t NUM_FAKE_NETWORKS = 5;
+static const uint8_t SSID_MAX_LENGTH = 32;
+static const uint8_t PASS_MAX_LENGTH = 64;
 
-static uint8 const DBG_CFG_OFF = 0x00;
-static uint8 const DBG_CFG_DEV_LOG = 0x01;
-static uint8 const DBG_CFG_SERIAL = 0x02;
-static uint8 const DBG_CFG_NETWORK = 0x04;
+static const uint8_t DBG_CFG_OFF = 0x00;
+static const uint8_t DBG_CFG_DEV_LOG = 0x01;
+static const uint8_t DBG_CFG_SERIAL = 0x02;
+static const uint8_t DBG_CFG_NETWORK = 0x04;
 
 struct NetworkInfo
 {
-	std::string ssid;
-	std::string pass;
+	string ssid;
+	string pass;
 	bool active;
 };
 
 struct FileConfig
 {
-	uint8 access_mode;
-	uint8 drive;
+	uint8_t access_mode;
+	uint8_t drive;
 };
 
 struct FileStruct
 {
-	uint8 drive;
-	std::string filename;
-	std::vector<uint8> data;
+	uint8_t drive;
+	string filename;
+	vector<uint8_t> data;
 };
 
 struct WorkingFile
 {
 	bool active;
-	uint8 config;
-	uint8 auto_path;
-	uint8 auto_file;
-	uint32 offset;
+	uint8_t config;
+	uint8_t auto_path;
+	uint8_t auto_file;
+	uint32_t offset;
 	FileStruct *file;
 };
 
-class BrokeStudioFirmware {
+class BrokeStudioFirmware
+{
 public:
 	BrokeStudioFirmware();
-	virtual ~BrokeStudioFirmware();
+	~BrokeStudioFirmware();
 
-	void rx(uint8 v);
-	uint8 tx();
+	void rx(uint8_t v);
+	uint8_t tx();
 
 	bool getDataReadyIO();
 
 private:
 	// Defined message types from CPU to ESP
-	enum class toesp_cmds_t : uint8 {
+	enum class toesp_cmds_t : uint8_t
+	{
 		// ESP CMDS
 		ESP_GET_STATUS,
 		DEBUG_GET_LEVEL,
@@ -152,7 +165,8 @@ private:
 	};
 
 	// Defined message types from ESP to CPU
-	enum class fromesp_cmds_t : uint8 {
+	enum class fromesp_cmds_t : uint8_t
+	{
 		// ESP CMDS
 		READY,
 		DEBUG_LEVEL,
@@ -195,28 +209,32 @@ private:
 	};
 
 	// ESP factory reset result codes
-	enum class esp_factory_reset : uint8 {
+	enum class esp_factory_reset : uint8_t
+	{
 		SUCCESS = 0,
 		ERROR_WHILE_RESETTING_CONFIG = 1,
 		ERROR_WHILE_DELETING_TWEB = 2,
 		ERROR_WHILE_DELETING_WEB = 3
 	};
 
-	enum class server_protocol_t : uint8 {
+	enum class server_protocol_t : uint8_t
+	{
 		TCP,
 		TCP_SECURED,
 		UDP,
 	};
 
-	// WIFI_CONFIG 
-	enum class wifi_config_t : uint8 {
+	// WIFI_CONFIG
+	enum class wifi_config_t : uint8_t
+	{
 		WIFI_ENABLE = 1,
 		AP_ENABLE = 2,
 		WEB_SERVER_ENABLE = 4
 	};
 
 	// FILE_CONFIG
-	enum class file_config_flags_t : uint8 {
+	enum class file_config_flags_t : uint8_t
+	{
 		ACCESS_MODE_MASK = 1,
 		ACCESS_MODE_AUTO = 0,
 		ACCESS_MODE_MANUAL = 1,
@@ -225,14 +243,16 @@ private:
 		DESTINATION_SD = 2,
 	};
 
-	enum class file_delete_results_t : uint8 {
+	enum class file_delete_results_t : uint8_t
+	{
 		SUCCESS,
 		ERROR_WHILE_DELETING_FILE,
 		FILE_NOT_FOUND,
 		INVALID_PATH_OR_FILE,
 	};
 
-	enum class file_download_results_t : uint8 {
+	enum class file_download_results_t : uint8_t
+	{
 		SUCCESS,
 		INVALID_DESTINATION,
 		ERROR_WHILE_DELETING_FILE,
@@ -241,7 +261,8 @@ private:
 		HTTP_STATUS_NOT_IN_2XX,
 	};
 
-	enum class file_download_network_error_t : uint8 {
+	enum class file_download_network_error_t : uint8_t
+	{
 		CONNECTION_FAILED = 255,
 		SEND_HEADER_FAILED = 254,
 		SEND_PAYLOAD_FILED = 253,
@@ -256,77 +277,75 @@ private:
 	};
 
 	void processBufferedMessage();
-	FileConfig parseFileConfig(uint8 config);
-	int findFile(uint8 drive, std::string filename);
-	int findPath(uint8 drive, std::string path);
-	std::string getAutoFilename(uint8 path, uint8 file);
-	void readFile(uint8 n);
-	template<class I>
+	FileConfig parseFileConfig(uint8_t config);
+	int findFile(uint8_t drive, string filename);
+	int findPath(uint8_t drive, string path);
+	string getAutoFilename(uint8_t path, uint8_t file);
+	void readFile(uint8_t n);
+	template <class I>
 	void writeFile(I data_begin, I data_end);
 	void saveFiles();
-	void saveFile(uint8 drive, char const* filename);
+	void saveFile(uint8_t drive, char const* filename);
 	void loadFiles();
-	void loadFile(uint8 drive, char const* filename);
-	void clearFiles(uint8 drive);
+	void loadFile(uint8_t drive, char const* filename);
+	void clearFiles(uint8_t drive);
 
-	template<class I>
+	template <class I>
 	void sendUdpDatagramToServer(I begin, I end);
-	template<class I>
+	template <class I>
 	void sendTcpDataToServer(I begin, I end);
 	void receiveDataFromServer();
 
 	void closeConnection();
 	void openConnection();
 
-	void pingRequest(uint8 n);
+	void pingRequest(uint8_t n);
 	void receivePingResult();
 
-	std::pair<bool, sockaddr_in> resolve_server_address();
-	static std::deque<uint8> read_socket(int socket);
+	pair<bool, sockaddr> resolve_server_address();
+	static deque<uint8_t> read_socket(int socket);
 
 	void initDownload();
-	static std::pair<uint8, uint8> curle_to_net_error(CURLcode curle);
-	void downloadFile(std::string const& url, uint8_t path, uint8_t file);
+	static pair<uint8_t, uint8_t> curle_to_net_error(CURLcode curle);
+	void downloadFile(string const &url, uint8_t path, uint8_t file);
 	void cleanupDownload();
 
 private:
-	std::deque<uint8> rx_buffer;
-	std::deque<uint8> tx_buffer;
-	std::deque<std::deque<uint8>> tx_messages;
+	deque<uint8_t> rx_buffer;
+	deque<uint8_t> tx_buffer;
+	deque<deque<uint8_t>> tx_messages;
 
 	bool isEspFlashFilePresent = false;
 	bool isSdCardFilePresent = false;
 	WorkingFile working_file;
-	std::vector<FileStruct> files;
+	vector<FileStruct> files;
 
-	std::array<NetworkInfo, NUM_NETWORKS> networks;
+	array<NetworkInfo, NUM_NETWORKS> networks;
 
 	server_protocol_t active_protocol = server_protocol_t::TCP;
-	std::string default_server_settings_address;
+	string default_server_settings_address;
 	uint16_t default_server_settings_port = 0;
-	std::string server_settings_address;
+	string server_settings_address;
 	uint16_t server_settings_port = 0;
 
-	uint8 debug_config = 0;
-	uint8 wifi_config = 1;
+	uint8_t debug_config = 0;
+	uint8_t wifi_config = 1;
 
-	uint8 ping_min = 0;
-	uint8 ping_avg = 0;
-	uint8 ping_max = 0;
-	uint8 ping_lost = 0;
-	std::atomic<bool> ping_ready;
-	std::thread ping_thread;
+	uint8_t ping_min = 0;
+	uint8_t ping_avg = 0;
+	uint8_t ping_max = 0;
+	uint8_t ping_lost = 0;
+	atomic<bool> ping_ready;
+	thread ping_thread;
 
 	int udp_socket = -1;
-	sockaddr_in server_addr;
+	sockaddr server_addr;
 
 	int tcp_socket = -1;
 
 	bool msg_first_byte = true;
-	uint8 msg_length = 0;
-	uint8 last_byte_read = 0;
+	uint8_t msg_length = 0;
+	uint8_t last_byte_read = 0;
 
 	CURL* curl_handle = nullptr;
 };
-
-#endif
