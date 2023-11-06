@@ -284,6 +284,8 @@ private:
 	void readFile(uint8_t n);
 	template <class I>
 	void writeFile(I data_begin, I data_end);
+	template <class I>
+	void appendFile(I data_begin, I data_end);
 	void saveFiles();
 	void saveFile(uint8_t drive, char const* filename);
 	void loadFiles();
