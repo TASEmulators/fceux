@@ -886,14 +886,14 @@ void BrokeStudioFirmware::processBufferedMessage()
 	}
 	case toesp_cmds_t::FILE_SET_CUR:
 		UDBG("[Rainbow] ESP received command FILE_SET_CUR\n");
-		if (2 <= message_size && message_size <= 5)
+		if (message_size >= 2 && message_size <= 5)
 		{
 			if (this->working_file.active)
 			{
 				this->working_file.offset = this->rx_buffer.at(2);
-				this->working_file.offset += static_cast<uint32_t>(message_size >= 3 ? this->rx_buffer.at(3) : 0) << 8;
-				this->working_file.offset += static_cast<uint32_t>(message_size >= 4 ? this->rx_buffer.at(4) : 0) << 16;
-				this->working_file.offset += static_cast<uint32_t>(message_size >= 5 ? this->rx_buffer.at(5) : 0) << 24;
+					if(message_size == 3) this->working_file.offset += static_cast<uint32_t>(message_size >= 3 ? this->rx_buffer.at(3) : 0) << 8;
+					if(message_size == 4) this->working_file.offset += static_cast<uint32_t>(message_size >= 4 ? this->rx_buffer.at(4) : 0) << 16;
+					if(message_size == 5) this->working_file.offset += static_cast<uint32_t>(message_size >= 5 ? this->rx_buffer.at(5) : 0) << 24;
 			}
 		}
 		break;
