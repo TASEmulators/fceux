@@ -548,7 +548,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 	case toesp_cmds_t::SERVER_SET_SAVED_SETTINGS:
 	{
 		UDBG("[Rainbow] ESP received command SERVER_SET_SAVED_SETTINGS\n");
-		if (message_size >= 5)
+		if (message_size == 1)
+		{
+			this->default_server_settings_port = 0;
+			this->default_server_settings_address = "";
+		} else if (message_size >= 5)
 		{
 			this->default_server_settings_port =
 					(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
