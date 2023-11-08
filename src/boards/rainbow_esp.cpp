@@ -188,7 +188,7 @@ void BrokeStudioFirmware::processBufferedMessage()
 {
 	assert(this->rx_buffer.size() >= 2); // Buffer must contain exactly one message, minimal message is two bytes (length + type)
 	uint8_t const message_size = this->rx_buffer.front();
-	assert(message_size >= 1);																																	// minimal payload is one byte (type)
+	assert(message_size >= 1);	// minimal payload is one byte (type)
 	assert(this->rx_buffer.size() == static_cast<deque<uint8_t>::size_type>(message_size) + 1); // Buffer size must match declared payload size
 
 	// Process the message in RX buffer
@@ -199,15 +199,19 @@ void BrokeStudioFirmware::processBufferedMessage()
 
 	case toesp_cmds_t::ESP_GET_STATUS:
 		UDBG("[Rainbow] ESP received command ESP_GET_STATUS\n");
-		this->tx_messages.push_back({2,
-																 static_cast<uint8_t>(fromesp_cmds_t::READY),
-																 static_cast<uint8_t>(isSdCardFilePresent ? 1 : 0)});
+		this->tx_messages.push_back({
+			2,
+			static_cast<uint8_t>(fromesp_cmds_t::READY),
+			static_cast<uint8_t>(isSdCardFilePresent ? 1 : 0)
+		});
 		break;
 	case toesp_cmds_t::DEBUG_GET_LEVEL:
 		UDBG("[Rainbow] ESP received command DEBUG_GET_LEVEL\n");
-		this->tx_messages.push_back({2,
-																 static_cast<uint8_t>(fromesp_cmds_t::DEBUG_LEVEL),
-																 static_cast<uint8_t>(this->debug_config)});
+		this->tx_messages.push_back({
+			2,
+			static_cast<uint8_t>(fromesp_cmds_t::DEBUG_LEVEL),
+			static_cast<uint8_t>(this->debug_config)
+		});
 		break;
 	case toesp_cmds_t::DEBUG_SET_LEVEL:
 		UDBG("[Rainbow] ESP received command DEBUG_SET_LEVEL\n");
@@ -247,9 +251,8 @@ void BrokeStudioFirmware::processBufferedMessage()
 			uint8_t const n_keep = this->rx_buffer.at(3);
 
 			size_t i = 0;
-			for (
-					deque<deque<uint8_t>>::iterator message = this->tx_messages.end();
-					message != this->tx_messages.begin();)
+			for (deque<deque<uint8_t>>::iterator message = this->tx_messages.end();
+				message != this->tx_messages.begin();)
 			{
 				--message;
 				if (message->at(1) == message_type)
@@ -355,9 +358,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 
 	case toesp_cmds_t::RND_GET_BYTE:
 		UDBG("[Rainbow] ESP received command RND_GET_BYTE\n");
-		this->tx_messages.push_back({2,
-																 static_cast<uint8_t>(fromesp_cmds_t::RND_BYTE),
-																 static_cast<uint8_t>(rand() % 256)});
+		this->tx_messages.push_back({
+			2,
+			static_cast<uint8_t>(fromesp_cmds_t::RND_BYTE),
+			static_cast<uint8_t>(rand() % 256)
+		});
 		break;
 	case toesp_cmds_t::RND_GET_BYTE_RANGE:
 	{
@@ -369,17 +374,21 @@ void BrokeStudioFirmware::processBufferedMessage()
 		int const min_value = this->rx_buffer.at(2);
 		int const max_value = this->rx_buffer.at(3);
 		int const range = max_value - min_value;
-		this->tx_messages.push_back({2,
-																 static_cast<uint8_t>(fromesp_cmds_t::RND_BYTE),
-																 static_cast<uint8_t>(min_value + (rand() % range))});
+		this->tx_messages.push_back({
+			2,
+			static_cast<uint8_t>(fromesp_cmds_t::RND_BYTE),
+			static_cast<uint8_t>(min_value + (rand() % range))
+		});
 		break;
 	}
 	case toesp_cmds_t::RND_GET_WORD:
 		UDBG("[Rainbow] ESP received command RND_GET_WORD\n");
-		this->tx_messages.push_back({3,
-																 static_cast<uint8_t>(fromesp_cmds_t::RND_WORD),
-																 static_cast<uint8_t>(rand() % 256),
-																 static_cast<uint8_t>(rand() % 256)});
+		this->tx_messages.push_back({
+			3,
+			static_cast<uint8_t>(fromesp_cmds_t::RND_WORD),
+			static_cast<uint8_t>(rand() % 256),
+			static_cast<uint8_t>(rand() % 256)
+		});
 		break;
 	case toesp_cmds_t::RND_GET_WORD_RANGE:
 	{
@@ -392,10 +401,12 @@ void BrokeStudioFirmware::processBufferedMessage()
 		int const max_value = (static_cast<int>(this->rx_buffer.at(4)) << 8) + this->rx_buffer.at(5);
 		int const range = max_value - min_value;
 		int const rand_value = min_value + (rand() % range);
-		this->tx_messages.push_back({3,
-																 static_cast<uint8_t>(fromesp_cmds_t::RND_WORD),
-																 static_cast<uint8_t>(rand_value >> 8),
-																 static_cast<uint8_t>(rand_value & 0xff)});
+		this->tx_messages.push_back({
+			3,
+			static_cast<uint8_t>(fromesp_cmds_t::RND_WORD),
+			static_cast<uint8_t>(rand_value >> 8),
+			static_cast<uint8_t>(rand_value & 0xff)
+		});
 		break;
 	}
 
@@ -422,9 +433,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 			status = 0; // Unknown active protocol, connection certainly broken
 		}
 
-		this->tx_messages.push_back({2,
-																 static_cast<uint8_t>(fromesp_cmds_t::SERVER_STATUS),
-																 status});
+		this->tx_messages.push_back({
+			2,
+			static_cast<uint8_t>(fromesp_cmds_t::SERVER_STATUS),
+			status
+		});
 		break;
 	}
 	case toesp_cmds_t::SERVER_PING:
@@ -433,8 +446,10 @@ void BrokeStudioFirmware::processBufferedMessage()
 		{
 			if (this->server_settings_address.empty())
 			{
-				this->tx_messages.push_back({1,
-																		 static_cast<uint8_t>(fromesp_cmds_t::SERVER_PING)});
+				this->tx_messages.push_back({
+					1,
+					static_cast<uint8_t>(fromesp_cmds_t::SERVER_PING)
+				});
 			}
 			else if (message_size >= 1)
 			{
@@ -476,16 +491,20 @@ void BrokeStudioFirmware::processBufferedMessage()
 		UDBG("[Rainbow] ESP received command SERVER_GET_SETTINGS\n");
 		if (this->server_settings_address.empty() && this->server_settings_port == 0)
 		{
-			this->tx_messages.push_back({1,
-																	 static_cast<uint8_t>(fromesp_cmds_t::SERVER_SETTINGS)});
+			this->tx_messages.push_back({
+				1,
+				static_cast<uint8_t>(fromesp_cmds_t::SERVER_SETTINGS)
+			});
 		}
 		else
 		{
-			deque<uint8_t> message({static_cast<uint8_t>(1 + 2 + 1 + this->server_settings_address.size()),
-															static_cast<uint8_t>(fromesp_cmds_t::SERVER_SETTINGS),
-															static_cast<uint8_t>(this->server_settings_port >> 8),
-															static_cast<uint8_t>(this->server_settings_port & 0xff),
-															static_cast<uint8_t>(this->server_settings_address.size())});
+			deque<uint8_t> message({
+				static_cast<uint8_t>(1 + 2 + 1 + this->server_settings_address.size()),
+				static_cast<uint8_t>(fromesp_cmds_t::SERVER_SETTINGS),
+				static_cast<uint8_t>(this->server_settings_port >> 8),
+				static_cast<uint8_t>(this->server_settings_port & 0xff),
+				static_cast<uint8_t>(this->server_settings_address.size())
+			});
 			message.insert(message.end(), this->server_settings_address.begin(), this->server_settings_address.end());
 			this->tx_messages.push_back(message);
 		}
@@ -507,16 +526,20 @@ void BrokeStudioFirmware::processBufferedMessage()
 		UDBG("[Rainbow] ESP received command SERVER_GET_SAVED_SETTINGS\n");
 		if (this->default_server_settings_address.empty() && this->default_server_settings_port == 0)
 		{
-			this->tx_messages.push_back({1,
-																	 static_cast<uint8_t>(fromesp_cmds_t::SERVER_SETTINGS)});
+			this->tx_messages.push_back({
+				1,
+				static_cast<uint8_t>(fromesp_cmds_t::SERVER_SETTINGS)
+			});
 		}
 		else
 		{
-			deque<uint8_t> message({static_cast<uint8_t>(1 + 2 + 1 + this->default_server_settings_address.size()),
-															static_cast<uint8_t>(fromesp_cmds_t::SERVER_SETTINGS),
-															static_cast<uint8_t>(this->default_server_settings_port >> 8),
-															static_cast<uint8_t>(this->default_server_settings_port & 0xff),
-															static_cast<uint8_t>(this->server_settings_address.size())});
+			deque<uint8_t> message({
+				static_cast<uint8_t>(1 + 2 + 1 + this->default_server_settings_address.size()),
+				static_cast<uint8_t>(fromesp_cmds_t::SERVER_SETTINGS),
+				static_cast<uint8_t>(this->default_server_settings_port >> 8),
+				static_cast<uint8_t>(this->default_server_settings_port & 0xff),
+				static_cast<uint8_t>(this->server_settings_address.size())
+			});
 			message.insert(message.end(), this->default_server_settings_address.begin(), this->default_server_settings_address.end());
 			this->tx_messages.push_back(message);
 		}
@@ -580,9 +603,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 		UDBG("[Rainbow] ESP received command NETWORK_SCAN\n");
 		if (message_size == 1)
 		{
-			this->tx_messages.push_back({2,
-																	 static_cast<uint8_t>(fromesp_cmds_t::NETWORK_COUNT),
-																	 NUM_FAKE_NETWORKS});
+			this->tx_messages.push_back({
+				2,
+				static_cast<uint8_t>(fromesp_cmds_t::NETWORK_COUNT),
+				NUM_FAKE_NETWORKS
+			});
 		}
 		break;
 	case toesp_cmds_t::NETWORK_GET_DETAILS:
@@ -593,14 +618,14 @@ void BrokeStudioFirmware::processBufferedMessage()
 			if (networkItem > NUM_FAKE_NETWORKS - 1)
 				networkItem = NUM_FAKE_NETWORKS - 1;
 			this->tx_messages.push_back({
-					24,
-					static_cast<uint8_t>(fromesp_cmds_t::NETWORK_SCANNED_DETAILS),
-					4,																																																						// encryption type
-					0x47,																																																					// RSSI
-					0x00, 0x00, 0x00, 0x01,																																												// channel
-					0,																																																						// hidden?
-					15,																																																						// SSID length
-					'E', 'M', 'U', 'L', 'A', 'T', 'O', 'R', '_', 'S', 'S', 'I', 'D', '_', static_cast<uint8_t>(networkItem + '0') // SSID
+				24,
+				static_cast<uint8_t>(fromesp_cmds_t::NETWORK_SCANNED_DETAILS),
+				4,																																																						// encryption type
+				0x47,																																																					// RSSI
+				0x00, 0x00, 0x00, 0x01,																																												// channel
+				0,																																																						// hidden?
+				15,																																																						// SSID length
+				'E', 'M', 'U', 'L', 'A', 'T', 'O', 'R', '_', 'S', 'S', 'I', 'D', '_', static_cast<uint8_t>(networkItem + '0') // SSID
 			});
 		}
 		break;
@@ -608,11 +633,13 @@ void BrokeStudioFirmware::processBufferedMessage()
 		UDBG("[Rainbow] ESP received command NETWORK_GET_REGISTERED\n");
 		if (message_size == 1)
 		{
-			this->tx_messages.push_back({NUM_NETWORKS + 1,
-																	 static_cast<uint8_t>(fromesp_cmds_t::NETWORK_REGISTERED),
-																	 static_cast<uint8_t>((this->networks[0].ssid != "") ? 1 : 0),
-																	 static_cast<uint8_t>((this->networks[1].ssid != "") ? 1 : 0),
-																	 static_cast<uint8_t>((this->networks[2].ssid != "") ? 1 : 0)});
+			this->tx_messages.push_back({
+				NUM_NETWORKS + 1,
+				static_cast<uint8_t>(fromesp_cmds_t::NETWORK_REGISTERED),
+				static_cast<uint8_t>((this->networks[0].ssid != "") ? 1 : 0),
+				static_cast<uint8_t>((this->networks[1].ssid != "") ? 1 : 0),
+				static_cast<uint8_t>((this->networks[2].ssid != "") ? 1 : 0)
+			});
 		}
 		break;
 	case toesp_cmds_t::NETWORK_GET_REGISTERED_DETAILS:
@@ -622,10 +649,12 @@ void BrokeStudioFirmware::processBufferedMessage()
 			uint8_t networkItem = this->rx_buffer.at(2);
 			if (networkItem > NUM_NETWORKS - 1)
 				networkItem = NUM_NETWORKS - 1;
-			deque<uint8_t> message({static_cast<uint8_t>(2 + 1 + this->networks[networkItem].ssid.length() + 1 + this->networks[networkItem].pass.length()),
-															static_cast<uint8_t>(fromesp_cmds_t::NETWORK_REGISTERED_DETAILS),
-															static_cast<uint8_t>(this->networks[networkItem].active ? 1 : 0),
-															static_cast<uint8_t>(this->networks[networkItem].ssid.length())});
+			deque<uint8_t> message({
+				static_cast<uint8_t>(2 + 1 + this->networks[networkItem].ssid.length() + 1 + this->networks[networkItem].pass.length()),
+				static_cast<uint8_t>(fromesp_cmds_t::NETWORK_REGISTERED_DETAILS),
+				static_cast<uint8_t>(this->networks[networkItem].active ? 1 : 0),
+				static_cast<uint8_t>(this->networks[networkItem].ssid.length())
+			});
 			message.insert(message.end(), this->networks[networkItem].ssid.begin(), this->networks[networkItem].ssid.end());
 			message.insert(message.end(), static_cast<const uint8_t>(this->networks[networkItem].pass.length()));
 			message.insert(message.end(), this->networks[networkItem].pass.begin(), this->networks[networkItem].pass.end());
@@ -744,9 +773,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 
 		if (this->working_file.active == false)
 		{
-			this->tx_messages.push_back({2,
-																	 static_cast<uint8_t>(fromesp_cmds_t::FILE_STATUS),
-																	 0});
+			this->tx_messages.push_back({
+				2,
+				static_cast<uint8_t>(fromesp_cmds_t::FILE_STATUS),
+				0
+			});
 		}
 		else
 		{
@@ -754,12 +785,12 @@ void BrokeStudioFirmware::processBufferedMessage()
 			if (file_config.access_mode == static_cast<uint8_t>(file_config_flags_t::ACCESS_MODE_AUTO))
 			{
 				this->tx_messages.push_back({
-						5,
-						static_cast<uint8_t>(fromesp_cmds_t::FILE_STATUS),
-						1,
-						static_cast<uint8_t>(this->working_file.config),
-						static_cast<uint8_t>(this->working_file.auto_path),
-						static_cast<uint8_t>(this->working_file.auto_file),
+					5,
+					static_cast<uint8_t>(fromesp_cmds_t::FILE_STATUS),
+					1,
+					static_cast<uint8_t>(this->working_file.config),
+					static_cast<uint8_t>(this->working_file.auto_path),
+					static_cast<uint8_t>(this->working_file.auto_file),
 				});
 			}
 			else if (file_config.access_mode == static_cast<uint8_t>(file_config_flags_t::ACCESS_MODE_MANUAL))
@@ -767,10 +798,10 @@ void BrokeStudioFirmware::processBufferedMessage()
 				string filename = this->working_file.file->filename;
 				filename = filename.substr(filename.find_first_of("/") + 1);
 				deque<uint8_t> message({
-						static_cast<uint8_t>(3 + filename.size()),
-						static_cast<uint8_t>(fromesp_cmds_t::FILE_STATUS),
-						1,
-						static_cast<uint8_t>(filename.size()),
+					static_cast<uint8_t>(3 + filename.size()),
+					static_cast<uint8_t>(fromesp_cmds_t::FILE_STATUS),
+					1,
+					static_cast<uint8_t>(filename.size()),
 				});
 				message.insert(message.end(), filename.begin(), filename.end());
 				this->tx_messages.push_back(message);
@@ -819,9 +850,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 			}
 		}
 
-		this->tx_messages.push_back({2,
-																 static_cast<uint8_t>(fromesp_cmds_t::FILE_EXISTS),
-																 static_cast<uint8_t>(i == -1 ? 0 : 1)});
+		this->tx_messages.push_back({
+			2,
+			static_cast<uint8_t>(fromesp_cmds_t::FILE_EXISTS),
+			static_cast<uint8_t>(i == -1 ? 0 : 1)
+		});
 		break;
 	}
 	case toesp_cmds_t::FILE_DELETE:
@@ -850,9 +883,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 				else
 				{
 					// Invalid path or file
-					this->tx_messages.push_back({2,
-																			 static_cast<uint8_t>(fromesp_cmds_t::FILE_DELETE),
-																			 static_cast<uint8_t>(file_delete_results_t::INVALID_PATH_OR_FILE)});
+					this->tx_messages.push_back({
+						2,
+						static_cast<uint8_t>(fromesp_cmds_t::FILE_DELETE),
+						static_cast<uint8_t>(file_delete_results_t::INVALID_PATH_OR_FILE)
+					});
 					break;
 				}
 			}
@@ -867,9 +902,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 		if (i == -1)
 		{
 			// File does not exist
-			this->tx_messages.push_back({2,
-																	 static_cast<uint8_t>(fromesp_cmds_t::FILE_DELETE),
-																	 static_cast<uint8_t>(file_delete_results_t::FILE_NOT_FOUND)});
+			this->tx_messages.push_back({
+				2,
+				static_cast<uint8_t>(fromesp_cmds_t::FILE_DELETE),
+				static_cast<uint8_t>(file_delete_results_t::FILE_NOT_FOUND)
+			});
 			break;
 		}
 		else
@@ -878,9 +915,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 			this->saveFiles();
 		}
 
-		this->tx_messages.push_back({2,
-																 static_cast<uint8_t>(fromesp_cmds_t::FILE_DELETE),
-																 static_cast<uint8_t>(file_delete_results_t::SUCCESS)});
+		this->tx_messages.push_back({
+			2,
+			static_cast<uint8_t>(fromesp_cmds_t::FILE_DELETE),
+			static_cast<uint8_t>(file_delete_results_t::SUCCESS)
+		});
 
 		break;
 	}
@@ -890,10 +929,10 @@ void BrokeStudioFirmware::processBufferedMessage()
 		{
 			if (this->working_file.active)
 			{
-				this->working_file.offset = this->rx_buffer.at(2);
-					if(message_size == 3) this->working_file.offset += static_cast<uint32_t>(message_size >= 3 ? this->rx_buffer.at(3) : 0) << 8;
-					if(message_size == 4) this->working_file.offset += static_cast<uint32_t>(message_size >= 4 ? this->rx_buffer.at(4) : 0) << 16;
-					if(message_size == 5) this->working_file.offset += static_cast<uint32_t>(message_size >= 5 ? this->rx_buffer.at(5) : 0) << 24;
+			this->working_file.offset = this->rx_buffer.at(2);
+			if(message_size == 3) this->working_file.offset += this->rx_buffer.at(3) << 8;
+			if(message_size == 4) this->working_file.offset += this->rx_buffer.at(4) << 16;
+			if(message_size == 5) this->working_file.offset += this->rx_buffer.at(5) << 24;
 			}
 		}
 		break;
@@ -951,9 +990,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 				uint8_t const path = this->rx_buffer.at(3);
 				if (path >= NUM_FILE_PATHS)
 				{
-					this->tx_messages.push_back({2,
-																			 static_cast<uint8_t>(fromesp_cmds_t::FILE_COUNT),
-																			 0});
+					this->tx_messages.push_back({
+						2,
+						static_cast<uint8_t>(fromesp_cmds_t::FILE_COUNT),
+						0
+					});
 				}
 				else
 				{
@@ -967,9 +1008,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 							nb_files++;
 					}
 
-					this->tx_messages.push_back({2,
-																			 static_cast<uint8_t>(fromesp_cmds_t::FILE_COUNT),
-																			 nb_files});
+					this->tx_messages.push_back({
+						2,
+						static_cast<uint8_t>(fromesp_cmds_t::FILE_COUNT),
+						nb_files
+					});
 					UDBG("[Rainbow] ESP %u files found in path %u\n", nb_files, path);
 				}
 			}
@@ -1040,9 +1083,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 						break;
 				}
 
-				deque<uint8_t> message({static_cast<uint8_t>(existing_files.size() + 2),
-																static_cast<uint8_t>(fromesp_cmds_t::FILE_LIST),
-																static_cast<uint8_t>(existing_files.size())});
+				deque<uint8_t> message({
+					static_cast<uint8_t>(existing_files.size() + 2),
+					static_cast<uint8_t>(fromesp_cmds_t::FILE_LIST),
+					static_cast<uint8_t>(existing_files.size())}
+				);
 				message.insert(message.end(), existing_files.begin(), existing_files.end());
 				this->tx_messages.push_back(message);
 			}
@@ -1051,9 +1096,11 @@ void BrokeStudioFirmware::processBufferedMessage()
 		{
 			// TODO manual mode
 			UDBG("[Rainbow] ESP command FILE_GET_LIST manual mode not implemented\n");
-			this->tx_messages.push_back({2,
-																	 static_cast<uint8_t>(fromesp_cmds_t::FILE_LIST),
-																	 0});
+			this->tx_messages.push_back({
+				2,
+				static_cast<uint8_t>(fromesp_cmds_t::FILE_LIST),
+				0
+			});
 		}
 		break;
 	}
@@ -1077,16 +1124,18 @@ void BrokeStudioFirmware::processBufferedMessage()
 			{
 				// Free file ID found
 				this->tx_messages.push_back({
-						2,
-						static_cast<uint8_t>(fromesp_cmds_t::FILE_ID),
-						i,
+					2,
+					static_cast<uint8_t>(fromesp_cmds_t::FILE_ID),
+					i,
 				});
 			}
 			else
 			{
 				// Free file ID not found
-				this->tx_messages.push_back({1,
-																		 static_cast<uint8_t>(fromesp_cmds_t::FILE_ID)});
+				this->tx_messages.push_back({
+					1,
+					static_cast<uint8_t>(fromesp_cmds_t::FILE_ID)
+				});
 			}
 		}
 		break;
@@ -1118,34 +1167,36 @@ void BrokeStudioFirmware::processBufferedMessage()
 			free_pct = ((ESP_FLASH_SIZE - used) * 100) / ESP_FLASH_SIZE;
 			used_pct = 100 - free_pct; // (used * 100) / ESP_FLASH_SIZE;
 
-			this->tx_messages.push_back({27,
-																	 static_cast<uint8_t>(fromesp_cmds_t::FILE_FS_INFO),
-																	 (ESP_FLASH_SIZE >> 54) & 0xff,
-																	 (ESP_FLASH_SIZE >> 48) & 0xff,
-																	 (ESP_FLASH_SIZE >> 40) & 0xff,
-																	 (ESP_FLASH_SIZE >> 32) & 0xff,
-																	 (ESP_FLASH_SIZE >> 24) & 0xff,
-																	 (ESP_FLASH_SIZE >> 16) & 0xff,
-																	 (ESP_FLASH_SIZE >> 8) & 0xff,
-																	 (ESP_FLASH_SIZE)&0xff,
-																	 static_cast<uint8_t>((free >> 54) & 0xff),
-																	 static_cast<uint8_t>((free >> 48) & 0xff),
-																	 static_cast<uint8_t>((free >> 40) & 0xff),
-																	 static_cast<uint8_t>((free >> 32) & 0xff),
-																	 static_cast<uint8_t>((free >> 24) & 0xff),
-																	 static_cast<uint8_t>((free >> 16) & 0xff),
-																	 static_cast<uint8_t>((free >> 8) & 0xff),
-																	 static_cast<uint8_t>((free)&0xff),
-																	 free_pct,
-																	 static_cast<uint8_t>((used >> 54) & 0xff),
-																	 static_cast<uint8_t>((used >> 48) & 0xff),
-																	 static_cast<uint8_t>((used >> 40) & 0xff),
-																	 static_cast<uint8_t>((used >> 32) & 0xff),
-																	 static_cast<uint8_t>((used >> 24) & 0xff),
-																	 static_cast<uint8_t>((used >> 16) & 0xff),
-																	 static_cast<uint8_t>((used >> 8) & 0xff),
-																	 static_cast<uint8_t>((used)&0xff),
-																	 used_pct});
+			this->tx_messages.push_back({
+				27,
+				static_cast<uint8_t>(fromesp_cmds_t::FILE_FS_INFO),
+				(ESP_FLASH_SIZE >> 54) & 0xff,
+				(ESP_FLASH_SIZE >> 48) & 0xff,
+				(ESP_FLASH_SIZE >> 40) & 0xff,
+				(ESP_FLASH_SIZE >> 32) & 0xff,
+				(ESP_FLASH_SIZE >> 24) & 0xff,
+				(ESP_FLASH_SIZE >> 16) & 0xff,
+				(ESP_FLASH_SIZE >> 8) & 0xff,
+				(ESP_FLASH_SIZE)&0xff,
+				static_cast<uint8_t>((free >> 54) & 0xff),
+				static_cast<uint8_t>((free >> 48) & 0xff),
+				static_cast<uint8_t>((free >> 40) & 0xff),
+				static_cast<uint8_t>((free >> 32) & 0xff),
+				static_cast<uint8_t>((free >> 24) & 0xff),
+				static_cast<uint8_t>((free >> 16) & 0xff),
+				static_cast<uint8_t>((free >> 8) & 0xff),
+				static_cast<uint8_t>((free)&0xff),
+				free_pct,
+				static_cast<uint8_t>((used >> 54) & 0xff),
+				static_cast<uint8_t>((used >> 48) & 0xff),
+				static_cast<uint8_t>((used >> 40) & 0xff),
+				static_cast<uint8_t>((used >> 32) & 0xff),
+				static_cast<uint8_t>((used >> 24) & 0xff),
+				static_cast<uint8_t>((used >> 16) & 0xff),
+				static_cast<uint8_t>((used >> 8) & 0xff),
+				static_cast<uint8_t>((used)&0xff),
+				used_pct
+			});
 			break;
 		}
 		else if (file_config.drive == static_cast<uint8_t>(file_config_flags_t::DESTINATION_SD))
@@ -1165,39 +1216,43 @@ void BrokeStudioFirmware::processBufferedMessage()
 				free_pct = ((SD_CARD_SIZE - used) * 100) / SD_CARD_SIZE;
 				used_pct = 100 - free_pct; // (used * 100) / SD_CARD_SIZE;
 
-				this->tx_messages.push_back({27,
-																		 static_cast<uint8_t>(fromesp_cmds_t::FILE_FS_INFO),
-																		 (SD_CARD_SIZE >> 54) & 0xff,
-																		 (SD_CARD_SIZE >> 48) & 0xff,
-																		 (SD_CARD_SIZE >> 40) & 0xff,
-																		 (SD_CARD_SIZE >> 32) & 0xff,
-																		 (SD_CARD_SIZE >> 24) & 0xff,
-																		 (SD_CARD_SIZE >> 16) & 0xff,
-																		 (SD_CARD_SIZE >> 8) & 0xff,
-																		 (SD_CARD_SIZE)&0xff,
-																		 static_cast<uint8_t>((free >> 54) & 0xff),
-																		 static_cast<uint8_t>((free >> 48) & 0xff),
-																		 static_cast<uint8_t>((free >> 40) & 0xff),
-																		 static_cast<uint8_t>((free >> 32) & 0xff),
-																		 static_cast<uint8_t>((free >> 24) & 0xff),
-																		 static_cast<uint8_t>((free >> 16) & 0xff),
-																		 static_cast<uint8_t>((free >> 8) & 0xff),
-																		 static_cast<uint8_t>((free)&0xff),
-																		 free_pct,
-																		 static_cast<uint8_t>((used >> 54) & 0xff),
-																		 static_cast<uint8_t>((used >> 48) & 0xff),
-																		 static_cast<uint8_t>((used >> 40) & 0xff),
-																		 static_cast<uint8_t>((used >> 32) & 0xff),
-																		 static_cast<uint8_t>((used >> 24) & 0xff),
-																		 static_cast<uint8_t>((used >> 16) & 0xff),
-																		 static_cast<uint8_t>((used >> 8) & 0xff),
-																		 static_cast<uint8_t>((used)&0xff),
-																		 used_pct});
+				this->tx_messages.push_back({
+					27,
+					static_cast<uint8_t>(fromesp_cmds_t::FILE_FS_INFO),
+					(SD_CARD_SIZE >> 54) & 0xff,
+					(SD_CARD_SIZE >> 48) & 0xff,
+					(SD_CARD_SIZE >> 40) & 0xff,
+					(SD_CARD_SIZE >> 32) & 0xff,
+					(SD_CARD_SIZE >> 24) & 0xff,
+					(SD_CARD_SIZE >> 16) & 0xff,
+					(SD_CARD_SIZE >> 8) & 0xff,
+					(SD_CARD_SIZE)&0xff,
+					static_cast<uint8_t>((free >> 54) & 0xff),
+					static_cast<uint8_t>((free >> 48) & 0xff),
+					static_cast<uint8_t>((free >> 40) & 0xff),
+					static_cast<uint8_t>((free >> 32) & 0xff),
+					static_cast<uint8_t>((free >> 24) & 0xff),
+					static_cast<uint8_t>((free >> 16) & 0xff),
+					static_cast<uint8_t>((free >> 8) & 0xff),
+					static_cast<uint8_t>((free)&0xff),
+					free_pct,
+					static_cast<uint8_t>((used >> 54) & 0xff),
+					static_cast<uint8_t>((used >> 48) & 0xff),
+					static_cast<uint8_t>((used >> 40) & 0xff),
+					static_cast<uint8_t>((used >> 32) & 0xff),
+					static_cast<uint8_t>((used >> 24) & 0xff),
+					static_cast<uint8_t>((used >> 16) & 0xff),
+					static_cast<uint8_t>((used >> 8) & 0xff),
+					static_cast<uint8_t>((used)&0xff),
+					used_pct
+				});
 				break;
 			}
 		}
-		this->tx_messages.push_back({1,
-																 static_cast<uint8_t>(fromesp_cmds_t::FILE_FS_INFO)});
+		this->tx_messages.push_back({
+			1,
+			static_cast<uint8_t>(fromesp_cmds_t::FILE_FS_INFO)
+		});
 		break;
 	}
 	case toesp_cmds_t::FILE_GET_INFO:
@@ -1227,24 +1282,28 @@ void BrokeStudioFirmware::processBufferedMessage()
 					size_t file_size = this->files.at(i).data.size();
 
 					// Send info
-					this->tx_messages.push_back({9,
-																			 static_cast<uint8_t>(fromesp_cmds_t::FILE_INFO),
+					this->tx_messages.push_back({
+						9,
+						static_cast<uint8_t>(fromesp_cmds_t::FILE_INFO),
 
-																			 static_cast<uint8_t>((file_crc32 >> 24) & 0xff),
-																			 static_cast<uint8_t>((file_crc32 >> 16) & 0xff),
-																			 static_cast<uint8_t>((file_crc32 >> 8) & 0xff),
-																			 static_cast<uint8_t>(file_crc32 & 0xff),
+						static_cast<uint8_t>((file_crc32 >> 24) & 0xff),
+						static_cast<uint8_t>((file_crc32 >> 16) & 0xff),
+						static_cast<uint8_t>((file_crc32 >> 8) & 0xff),
+						static_cast<uint8_t>(file_crc32 & 0xff),
 
-																			 static_cast<uint8_t>((file_size >> 24) & 0xff),
-																			 static_cast<uint8_t>((file_size >> 16) & 0xff),
-																			 static_cast<uint8_t>((file_size >> 8) & 0xff),
-																			 static_cast<uint8_t>(file_size & 0xff)});
+						static_cast<uint8_t>((file_size >> 24) & 0xff),
+						static_cast<uint8_t>((file_size >> 16) & 0xff),
+						static_cast<uint8_t>((file_size >> 8) & 0xff),
+						static_cast<uint8_t>(file_size & 0xff)
+					});
 				}
 				else
 				{
 					// File not found or path/file out of bounds
-					this->tx_messages.push_back({1,
-																			 static_cast<uint8_t>(fromesp_cmds_t::FILE_INFO)});
+					this->tx_messages.push_back({
+						1,
+						static_cast<uint8_t>(fromesp_cmds_t::FILE_INFO)
+					});
 				}
 			}
 		}
@@ -1296,11 +1355,13 @@ void BrokeStudioFirmware::processBufferedMessage()
 				else
 				{
 					// Invalid path / file
-					this->tx_messages.push_back({4,
-																			 static_cast<uint8_t>(fromesp_cmds_t::FILE_DOWNLOAD),
-																			 static_cast<uint8_t>(file_download_results_t::INVALID_DESTINATION),
-																			 0,
-																			 0});
+					this->tx_messages.push_back({
+						4,
+						static_cast<uint8_t>(fromesp_cmds_t::FILE_DOWNLOAD),
+						static_cast<uint8_t>(file_download_results_t::INVALID_DESTINATION),
+						0,
+						0
+					});
 					break;
 				}
 
@@ -1334,8 +1395,10 @@ void BrokeStudioFirmware::processBufferedMessage()
 
 FileConfig BrokeStudioFirmware::parseFileConfig(uint8_t config)
 {
-	return FileConfig({static_cast<uint8_t>(config & static_cast<uint8_t>(file_config_flags_t::ACCESS_MODE_MASK)),
-										 static_cast<uint8_t>((config & static_cast<uint8_t>(file_config_flags_t::DESTINATION_MASK)))});
+	return FileConfig({
+		static_cast<uint8_t>(config & static_cast<uint8_t>(file_config_flags_t::ACCESS_MODE_MASK)),
+		static_cast<uint8_t>((config & static_cast<uint8_t>(file_config_flags_t::DESTINATION_MASK)))
+	});
 }
 
 int BrokeStudioFirmware::findFile(uint8_t drive, string filename)
@@ -1385,9 +1448,11 @@ void BrokeStudioFirmware::readFile(uint8_t n)
 	vector<uint8_t>::size_type const data_size = data_end - data_begin;
 
 	// Write response
-	deque<uint8_t> message({static_cast<uint8_t>(data_size + 2),
-													static_cast<uint8_t>(fromesp_cmds_t::FILE_DATA),
-													static_cast<uint8_t>(data_size)});
+	deque<uint8_t> message({
+		static_cast<uint8_t>(data_size + 2),
+		static_cast<uint8_t>(fromesp_cmds_t::FILE_DATA),
+		static_cast<uint8_t>(data_size)
+	});
 	message.insert(message.end(), data_begin, data_end);
 	this->tx_messages.push_back(message);
 }
@@ -2042,12 +2107,14 @@ void BrokeStudioFirmware::receivePingResult()
 	this->ping_thread.join();
 	this->ping_ready = false;
 
-	this->tx_messages.push_back({5,
-															 static_cast<uint8_t>(fromesp_cmds_t::SERVER_PING),
-															 this->ping_min,
-															 this->ping_max,
-															 this->ping_avg,
-															 this->ping_lost});
+	this->tx_messages.push_back({
+		5,
+		static_cast<uint8_t>(fromesp_cmds_t::SERVER_PING),
+		this->ping_min,
+		this->ping_max,
+		this->ping_avg,
+		this->ping_lost
+	});
 }
 
 // std::pair<bool, sockaddr_in> BrokeStudioFirmware::resolve_server_address()
@@ -2116,15 +2183,26 @@ void BrokeStudioFirmware::initDownload()
 std::pair<uint8_t, uint8_t> BrokeStudioFirmware::curle_to_net_error(CURLcode curle)
 {
 	static std::map<CURLcode, std::pair<uint8_t, uint8_t>> const resolution = {
-			{CURLE_UNSUPPORTED_PROTOCOL, std::pair<uint8_t, uint8_t>(
-																			 static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::UNKNOWN_OR_UNSUPPORTED_PROTOCOL),
-																			 static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::CONNECTION_LOST))},
-			{CURLE_WRITE_ERROR, std::pair<uint8_t, uint8_t>(
-															static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::NETWORK_ERROR),
-															static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::STREAM_WRITE))},
-			{CURLE_OUT_OF_MEMORY, std::pair<uint8_t, uint8_t>(
-																static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::NETWORK_ERROR),
-																static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::OUT_OF_RAM))},
+			{
+				CURLE_UNSUPPORTED_PROTOCOL,
+				std::pair<uint8_t, uint8_t>(
+					static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::UNKNOWN_OR_UNSUPPORTED_PROTOCOL),
+					static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::CONNECTION_LOST)
+				)
+			},
+			{	CURLE_WRITE_ERROR,
+				std::pair<uint8_t, uint8_t>(
+					static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::NETWORK_ERROR),
+					static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::STREAM_WRITE)
+				)
+			},
+			{
+				CURLE_OUT_OF_MEMORY,
+				std::pair<uint8_t, uint8_t>(
+					static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::NETWORK_ERROR),
+					static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::OUT_OF_RAM)
+				)
+			},
 	};
 
 	auto entry = resolution.find(curle);
@@ -2133,8 +2211,9 @@ std::pair<uint8_t, uint8_t> BrokeStudioFirmware::curle_to_net_error(CURLcode cur
 		return entry->second;
 	}
 	return std::pair<uint8_t, uint8_t>(
-			static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::NETWORK_ERROR),
-			static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::CONNECTION_FAILED));
+		static_cast<uint8_t>(BrokeStudioFirmware::file_download_results_t::NETWORK_ERROR),
+		static_cast<uint8_t>(BrokeStudioFirmware::file_download_network_error_t::CONNECTION_FAILED)
+	);
 }
 
 void BrokeStudioFirmware::downloadFile(string const &url, uint8_t path, uint8_t file)
@@ -2167,11 +2246,13 @@ void BrokeStudioFirmware::downloadFile(string const &url, uint8_t path, uint8_t 
 	{
 		UDBG("[Rainbow] ESP download failed\n");
 		std::pair<uint8_t, uint8_t> rainbow_error = curle_to_net_error(res);
-		this->tx_messages.push_back({4,
-																 static_cast<uint8_t>(fromesp_cmds_t::FILE_DOWNLOAD),
-																 rainbow_error.first,
-																 0,
-																 rainbow_error.second});
+		this->tx_messages.push_back({
+			4,
+			static_cast<uint8_t>(fromesp_cmds_t::FILE_DOWNLOAD),
+			rainbow_error.first,
+			0,
+			rainbow_error.second
+		});
 	}
 	else
 	{
@@ -2182,9 +2263,11 @@ void BrokeStudioFirmware::downloadFile(string const &url, uint8_t path, uint8_t 
 		this->saveFiles();
 
 		// Write result message
-		this->tx_messages.push_back({4,
-																 static_cast<uint8_t>(fromesp_cmds_t::FILE_DOWNLOAD),
-																 static_cast<uint8_t>(file_download_results_t::SUCCESS)});
+		this->tx_messages.push_back({
+			4,
+			static_cast<uint8_t>(fromesp_cmds_t::FILE_DOWNLOAD),
+			static_cast<uint8_t>(file_download_results_t::SUCCESS)
+		});
 	}
 }
 
