@@ -605,14 +605,19 @@ void BrokeStudioFirmware::processBufferedMessage()
 	// network commands are not relevant here, so we'll just use test/fake data
 	case toesp_cmds_t::NETWORK_SCAN:
 		UDBG("[Rainbow] ESP received command NETWORK_SCAN\n");
-		if (message_size == 1)
-		{
-			this->tx_messages.push_back({
-				2,
-				static_cast<uint8_t>(fromesp_cmds_t::NETWORK_COUNT),
-				NUM_FAKE_NETWORKS
+		this->tx_messages.push_back({
+			2,
+			static_cast<uint8_t>(fromesp_cmds_t::NETWORK_SCAN_RESULT),
+			NUM_FAKE_NETWORKS
+		});
+		break;
+	case toesp_cmds_t::NETWORK_GET_SCAN_RESULT:
+		UDBG("[Rainbow] ESP received command NETWORK_GET_SCAN_RESULT\n");
+		this->tx_messages.push_back({
+			2,
+			static_cast<uint8_t>(fromesp_cmds_t::NETWORK_SCAN_RESULT),
+			NUM_FAKE_NETWORKS
 			});
-		}
 		break;
 	case toesp_cmds_t::NETWORK_GET_DETAILS:
 		UDBG("[Rainbow] ESP received command NETWORK_GET_DETAILS\n");
