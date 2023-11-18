@@ -9,7 +9,7 @@ env
 
 SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
 
-QT_MAJOR=5;
+QT_MAJOR=6;
 QT_PKGNAME=qt$QT_MAJOR;
 FCEUX_VERSION_MAJOR=`perl $SCRIPT_DIR/../scripts/fceuVersion.pl -major`;
 FCEUX_VERSION_MINOR=`perl $SCRIPT_DIR/../scripts/fceuVersion.pl -minor`;
