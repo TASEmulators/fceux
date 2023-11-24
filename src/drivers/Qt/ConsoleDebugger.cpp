@@ -4892,7 +4892,7 @@ void loadGameDebugBreakpoints(void)
 
 	if ( fp == NULL )
 	{
-		printf("Warning: Failed to open file '%s' for reading\n", fileName.c_str() );
+		//printf("Warning: Failed to open file '%s' for reading\n", fileName.c_str() );
 		return;
 	}
 
