@@ -214,6 +214,27 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 		case HK_TURBO:
 			name = "Turbo"; keySeq = "Tab"; group = "Speed";
 		break;
+		case HK_SPEED_NORMAL:
+			name = "Normal Speed"; keySeq = ""; group = "Speed";
+		break;
+		case HK_SPEED_QUARTER:
+			name = "1/4x Speed"; keySeq = ""; group = "Speed";
+		break;
+		case HK_SPEED_HALF:
+			name = "1/2x Speed"; keySeq = ""; group = "Speed";
+		break;
+		case HK_SPEED_2X:
+			name = "2x Speed"; keySeq = ""; group = "Speed";
+		break;
+		case HK_SPEED_4X:
+			name = "4x Speed"; keySeq = ""; group = "Speed";
+		break;
+		case HK_SPEED_8X:
+			name = "8x Speed"; keySeq = ""; group = "Speed";
+		break;
+		case HK_SPEED_16X:
+			name = "16x Speed"; keySeq = ""; group = "Speed";
+		break;
 		case HK_TOGGLE_INPUT_DISPLAY:
 			name = "ToggleInputDisplay"; keySeq = ","; group = "Misc";
 		break;

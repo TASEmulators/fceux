@@ -855,6 +855,14 @@ void consoleWin_t::initHotKeys(void)
 	Hotkeys[HK_FRAME_ADVANCE].getShortcut()->setEnabled(false);
 	Hotkeys[HK_TURBO        ].getShortcut()->setEnabled(false);
 
+	connect( Hotkeys[ HK_SPEED_QUARTER ].getShortcut(), &QShortcut::activated, [] { CustomEmulationSpeed(  25); } );
+	connect( Hotkeys[ HK_SPEED_HALF    ].getShortcut(), &QShortcut::activated, [] { CustomEmulationSpeed(  50); } );
+	connect( Hotkeys[ HK_SPEED_NORMAL  ].getShortcut(), &QShortcut::activated, [] { CustomEmulationSpeed( 100); } );
+	connect( Hotkeys[ HK_SPEED_2X      ].getShortcut(), &QShortcut::activated, [] { CustomEmulationSpeed( 200); } );
+	connect( Hotkeys[ HK_SPEED_4X      ].getShortcut(), &QShortcut::activated, [] { CustomEmulationSpeed( 400); } );
+	connect( Hotkeys[ HK_SPEED_8X      ].getShortcut(), &QShortcut::activated, [] { CustomEmulationSpeed( 800); } );
+	connect( Hotkeys[ HK_SPEED_16X     ].getShortcut(), &QShortcut::activated, [] { CustomEmulationSpeed(1600); } );
+
 	connect( Hotkeys[ HK_VOLUME_MUTE ].getShortcut(), SIGNAL(activated()), this, SLOT(muteSoundVolume(void)) );
 	connect( Hotkeys[ HK_VOLUME_DOWN ].getShortcut(), SIGNAL(activated()), this, SLOT(decrSoundVolume(void)) );
 	connect( Hotkeys[ HK_VOLUME_UP   ].getShortcut(), SIGNAL(activated()), this, SLOT(incrSoundVolume(void)) );
