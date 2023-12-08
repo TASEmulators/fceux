@@ -837,34 +837,36 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	MirroringAs2bits = head.ROM_type & 1;
 	if (head.ROM_type & 8) MirroringAs2bits |= 2;
 
-	int not_round_size;
+	int not_round_size = 0;
+	int rom_size_bytes = 0;
+	int vrom_size_bytes = 0;
+
 	if (!iNES2)	{
-		not_round_size = head.ROM_size;
+		not_round_size = head.ROM_size << 14;
 	}
 	else {
 		if ((head.Upper_ROM_VROM_size & 0x0F) != 0x0F)
 			// simple notation
-			not_round_size = head.ROM_size | ((head.Upper_ROM_VROM_size & 0x0F) << 8);
+			not_round_size = (head.ROM_size | ((head.Upper_ROM_VROM_size & 0x0F) << 8)) << 14;
 		else
 			// exponent-multiplier notation
-			not_round_size = ((1 << (head.ROM_size >> 2)) * ((head.ROM_size & 0b11) * 2 + 1)) >> 14;
+			not_round_size = ((1 << (head.ROM_size >> 2)) * ((head.ROM_size & 0b11) * 2 + 1));
 	}
 	
 	if (!head.ROM_size && !iNES2)
-		ROM_size = 256;
+		rom_size_bytes = 256 << 14;
 	else
-		ROM_size = uppow2(not_round_size);
+		rom_size_bytes = uppow2(not_round_size);
 
-	VROM_size = uppow2(head.VROM_size | (iNES2?((head.Upper_ROM_VROM_size & 0xF0)<<4):0));
 	if (!iNES2)	{
-		VROM_size = uppow2(head.VROM_size);
+		vrom_size_bytes = uppow2(head.VROM_size << 13);
 	}
 	else {
 		if ((head.Upper_ROM_VROM_size & 0xF0) != 0xF0)
 			// simple notation
-			VROM_size = uppow2(head.VROM_size | ((head.Upper_ROM_VROM_size & 0xF0) << 4));
+			vrom_size_bytes = uppow2((head.VROM_size | ((head.Upper_ROM_VROM_size & 0xF0) << 4)) << 13);
 		else
-			VROM_size = ((1 << (head.VROM_size >> 2)) * ((head.VROM_size & 0b11) * 2 + 1)) >> 13;
+			vrom_size_bytes = ((1 << (head.VROM_size >> 2)) * ((head.VROM_size & 0b11) * 2 + 1));
 	}
 
 	int round = true;
@@ -880,12 +882,15 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		}
 	}
 
-	ROM = (uint8*)FCEU_malloc(ROM_size << 14);
-	memset(ROM, 0xFF, ROM_size << 14);
+	ROM_size = rom_size_bytes >> 14;
+	VROM_size = vrom_size_bytes >> 13;
 
-	if (VROM_size) {
-		VROM = (uint8*)FCEU_malloc(VROM_size << 13);
-		memset(VROM, 0xFF, VROM_size << 13);
+	ROM = (uint8*)FCEU_malloc(rom_size_bytes);
+	memset(ROM, 0xFF, rom_size_bytes);
+
+	if (vrom_size_bytes) {
+		VROM = (uint8*)FCEU_malloc(vrom_size_bytes);
+		memset(VROM, 0xFF, vrom_size_bytes);
 	}
 
 	// Set Vs. System flag if need
@@ -946,21 +951,21 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	ResetCartMapping();
 	ResetExState(0, 0);
 
-	SetupCartPRGMapping(0, ROM, ROM_size << 14, 0);
+	SetupCartPRGMapping(0, ROM, rom_size_bytes, 0);
 
-	FCEU_fread(ROM, 0x4000, (round) ? ROM_size : not_round_size, fp);
+	FCEU_fread(ROM, 1, (round) ? rom_size_bytes : not_round_size, fp);
 
-	if (VROM_size)
-		FCEU_fread(VROM, 0x2000, VROM_size, fp);
+	if (vrom_size_bytes)
+		FCEU_fread(VROM, 1, vrom_size_bytes, fp);
 
 	md5_starts(&md5); 
-	md5_update(&md5, ROM, ROM_size << 14);
+	md5_update(&md5, ROM, rom_size_bytes);
 
-	iNESGameCRC32 = CalcCRC32(0, ROM, ROM_size << 14);
+	iNESGameCRC32 = CalcCRC32(0, ROM, rom_size_bytes);
 
-	if (VROM_size) {
-		iNESGameCRC32 = CalcCRC32(iNESGameCRC32, VROM, VROM_size << 13);
-		md5_update(&md5, VROM, VROM_size << 13);
+	if (vrom_size_bytes) {
+		iNESGameCRC32 = CalcCRC32(iNESGameCRC32, VROM, vrom_size_bytes);
+		md5_update(&md5, VROM, vrom_size_bytes);
 	}
 	md5_finish(&md5, iNESCart.MD5);
 	memcpy(&GameInfo->MD5, &iNESCart.MD5, sizeof(iNESCart.MD5));
@@ -969,8 +974,8 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	iNESCart.CRC32 = iNESGameCRC32;
 
-	FCEU_printf(" PRG ROM: %d x 16KiB = %d KiB\n", round ? ROM_size : not_round_size, (round ? ROM_size : not_round_size) * 16);
-	FCEU_printf(" CHR ROM: %d x  8KiB = %d KiB\n", VROM_size, VROM_size * 8);
+	FCEU_printf(" PRG ROM: %d x 16KiB = %d KiB\n", (round ? rom_size_bytes : not_round_size) >> 14, ((round ? rom_size_bytes : not_round_size) >> 14) * 16);
+	FCEU_printf(" CHR ROM: %d x  8KiB = %d KiB\n", (vrom_size_bytes >> 13), (vrom_size_bytes >> 13) * 8);
 	FCEU_printf(" ROM CRC32: 0x%08x\n", iNESGameCRC32);
 	{
 		int x;
@@ -1015,8 +1020,8 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	/* Must remain here because above functions might change value of
 	VROM_size and free(VROM).
 	*/
-	if (VROM_size)
-		SetupCartCHRMapping(0, VROM, VROM_size * 0x2000, 0);
+	if (vrom_size_bytes)
+		SetupCartCHRMapping(0, VROM, vrom_size_bytes, 0);
 
 	if (Mirroring == 2) {
 		ExtraNTARAM = (uint8*)FCEU_gmalloc(2048);
