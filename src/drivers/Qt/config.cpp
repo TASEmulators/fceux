@@ -614,6 +614,9 @@ InitConfig()
 	config->addOption("SDL.SpecialFilter", 0);
 	config->addOption("SDL.SpecialFX", 0);
 	config->addOption("SDL.Vsync", 1);
+	#ifdef WIN32
+	config->addOption("SDL.winFullScreenBorder", 0);
+	#endif
 
 	// network play options - netplay is broken
 	config->addOption("server", "SDL.NetworkIsServer", 0);
