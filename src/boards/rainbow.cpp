@@ -131,6 +131,10 @@ static uint8 S_IRQ_ready, S_IRQ_last_SL_triggered;
 static bool C_IRQ_enable, C_IRQ_reset, C_IRQ_pending;
 static int32 C_IRQLatch, C_IRQCount;
 
+// FPGA RAM auto R/W
+uint16 fpga_ram_auto_rw_address;
+uint8 fpga_ram_auto_rw_increment;
+
 // ESP message IRQ
 static uint8 ESP_IRQ_pending;
 
@@ -608,6 +612,14 @@ static DECLFR(RNBW_0x4100Rd) {
 		return rv;
 	}
 	case 0x4154: return S_IRQ_jitter_counter;
+
+		// FPGA RAM auto R/W
+	case 0x415F:
+	{
+		uint8_t retval = FPGA_RAM[fpga_ram_auto_rw_address];
+		fpga_ram_auto_rw_address += fpga_ram_auto_rw_increment;
+		return retval;
+	}
 	case 0x4160: return MAPPER_VERSION;
 	case 0x4161: return (S_IRQ_pending ? 0x80 : 0) | (C_IRQ_pending ? 0x40 : 0) | (ESP_IRQ_pending ? 0x01 : 0);
 
@@ -626,12 +638,6 @@ static DECLFR(RNBW_0x4100Rd) {
 		return esp_message_received_flag | esp_rts_flag;
 	}
 	case 0x4192: return esp_message_sent ? 0x80 : 0;
-	case 0x4195:
-	{
-		uint8 retval = FPGA_RAM[0x1800 + (rx_address << 8) + rx_index];
-		rx_index++;
-		return retval;
-	}
 	default:
 		return CartBR(A);
 	}
@@ -769,6 +775,16 @@ static DECLFW(RNBW_0x4100Wr) {
 		C_IRQ_pending = false;
 		IRQEnd();
 		break;
+	// FPGA RAM auto R/W
+	case 0x415C: fpga_ram_auto_rw_address = (fpga_ram_auto_rw_address & 0x00ff) | ((V & 0x1f) << 8); break;
+	case 0x415D: fpga_ram_auto_rw_address = (fpga_ram_auto_rw_address & 0xff00) | (V); break;
+	case 0x415E: fpga_ram_auto_rw_increment = V; break;
+	case 0x415F:
+	{
+		FPGA_RAM[fpga_ram_auto_rw_address] = V;
+		fpga_ram_auto_rw_address += fpga_ram_auto_rw_increment;
+		break;
+	}
 	// Window Mode
 	case 0x4170:
 		RNBWHackWindowXStartTile = V & 0x1f;
@@ -816,9 +832,6 @@ static DECLFW(RNBW_0x4100Wr) {
 		break;
 	case 0x4194:
 		tx_address = V & 0x07;
-		break;
-	case 0x4195:
-		rx_index = V;
 		break;
 	case 0x41FF:
 		bootrom = V & 0x01;
