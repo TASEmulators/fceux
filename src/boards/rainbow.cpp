@@ -113,6 +113,9 @@ static int CHRRAMSIZE = 0; // max 512 KiB
 
 extern uint8 *ExtraNTARAM;
 
+uint8 fill_mode_tile;
+uint8 fill_mode_attr;
+
 static uint8 RNBWbattery = 0;
 static uint8 reset_step = 0;
 
@@ -688,6 +691,9 @@ static DECLFW(RNBW_0x4100Wr) {
 	case 0x4121:
 		RNBWHackBGBankOffset = V & 0x1f;
 		break;
+	// Fill-mode
+	case 0x4124: fill_mode_tile = V; break;
+	case 0x4125: fill_mode_attr = V & 0x03; break;
 	// Nametables bank
 	case 0x4126: RNBWHackNTbank[0] = V; Sync(); break;
 	case 0x4127: RNBWHackNTbank[1] = V; Sync(); break;
@@ -898,15 +904,30 @@ uint8 FASTCALL RainbowPPURead(uint32 A) {
 				// Attributes
 				//return FCEUPPU_GetAttr(ntnum, xt, yt);
 
+				// Fill-mode?
+				if(RNBWHackNTcontrol[4] & 0x20)
+					return fill_mode_attr | fill_mode_attr << 2 | fill_mode_attr << 4 | fill_mode_attr << 6;
+
 				A &= ~(0x1C << 1); //mask off VT
 				A |= (linetile & 0x1C) << 1; //mask on adjusted VT
 				return FPGA_RAM[RNBWHackNTbank[4] * 0x400 + (A & 0x3ff)];
 			} else {
+
+				// Fill-mode?
+				uint8 NT = (A >> 10) & 0x03;
+				if(RNBWHackNTcontrol[NT] & 0x20)
+					return fill_mode_attr | fill_mode_attr << 2 | fill_mode_attr << 4 | fill_mode_attr << 6;
+
 				return FCEUPPU_GetAttr(ntnum, xt, yt);
 			}
 		} else { // tiles
 			if(split) {
 				// Tiles
+
+				// Fill-mode?
+				if(RNBWHackNTcontrol[4] & 0x20)
+					return fill_mode_tile;
+
 				A &= ~((0x1F << 5) | (1 << 0xB)); //mask off VT and V
 				A |= (linetile & 31) << 5; //mask on adjusted VT (V doesnt make any sense, I think)
 
@@ -916,6 +937,12 @@ uint8 FASTCALL RainbowPPURead(uint32 A) {
 
 				return FPGA_RAM[RNBWHackNTbank[4] * 0x400 + (A & 0x3ff)];
 			} else {
+
+				// Fill-mode?
+				uint8 NT = (A >> 10) & 0x03;
+				if (RNBWHackNTcontrol[NT] & 0x20)
+					return fill_mode_tile;
+
 				return vnapage[(A >> 10) & 0x3][A & 0x3FF];
 			}
 		}
