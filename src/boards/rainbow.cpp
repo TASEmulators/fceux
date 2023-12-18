@@ -1390,7 +1390,7 @@ static DECLFW(RNBW_0x6000Wr) {
 			break;
 		case PRG_RAM_MODE_1:
 			// 2 x 4K
-			prg_idx = ((A >> 12) & 0x07) - 6;
+			prg_idx = ((A >> 12) & 0x07) - 5;
 			if (((prg[prg_idx] & 0x8000) >> 14) != 0)
 				return CartBW(A, V); // FPGA_RAM or WRAM
 
