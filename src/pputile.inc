@@ -87,9 +87,14 @@ pshift[1] <<= 8;
 	#else
 
 	#ifdef PPU_VRC5FETCH
-	if(tmpd & 0x40)
+	if(tmpd & 0x40) {
+		if (CHRsize[0] == (128 * 1024)) {
+			// NOTE: address 128K CHR-ROM using offsets into 256K CHR-ROM data
+			// https://www.nesdev.org/wiki/NES_2.0_Mapper_547#Kanji_ROM_layout
+			vadr = ((vadr & 0x00007) << 1) | ((vadr & 0x00010) >> 4) | ((vadr & 0x3FFE0) >> 1);
+		}
 		C = CHRptr[0] + vadr;
-	else
+	} else
 		C = VRAMADR(vadr);
 	#else
 		C = VRAMADR(vadr);
