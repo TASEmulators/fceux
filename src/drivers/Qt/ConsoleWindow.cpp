@@ -67,6 +67,7 @@
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/input.h"
+#include "Qt/throttle.h"
 #include "Qt/ColorMenu.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/InputConf.h"
@@ -86,6 +87,7 @@
 #include "Qt/TimingConf.h"
 #include "Qt/FrameTimingStats.h"
 #include "Qt/LuaControl.h"
+#include "Qt/QtScriptManager.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/GameGenie.h"
 #include "Qt/HexEditor.h"
@@ -270,6 +272,9 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	// Create AVI Recording Disk Thread
 	aviDiskThread = new AviRecordDiskThread_t(this);
 
+#ifdef __FCEU_QSCRIPT_ENABLE__
+	QtScriptManager::create(this);
+#endif
 	scrHandlerConnected = false;
 }
 
@@ -1079,7 +1084,7 @@ void consoleWin_t::createMainMenu(void)
 	connect( Hotkeys[ HK_SELECT_STATE_NEXT ].getShortcut(), SIGNAL(activated()), this, SLOT(incrementState(void)) );
 
 #ifdef _S9XLUA_H
-	// File -> Quick Save
+	// File -> Load Lua
 	loadLuaAct = new QAction(tr("Load &Lua Script"), this);
 	//loadLuaAct->setShortcut( QKeySequence(tr("F5")));
 	loadLuaAct->setStatusTip(tr("Load Lua Script"));
@@ -1090,7 +1095,20 @@ void consoleWin_t::createMainMenu(void)
 	
 	fileMenu->addSeparator();
 #else
-	loadLuaAct = NULL;
+	loadLuaAct = nullptr;
+#endif
+
+#ifdef _S9XLUA_H
+	// File -> Load QScript
+	loadJsAct = new QAction(tr("Load &Qt Script"), this);
+	loadJsAct->setStatusTip(tr("Load Qt Script"));
+	connect(loadJsAct, SIGNAL(triggered()), this, SLOT(loadJs(void)) );
+	
+	fileMenu->addAction(loadJsAct);
+	
+	fileMenu->addSeparator();
+#else
+	loadJsAct = NULL;
 #endif
 
 	// File -> Screenshot
@@ -2981,6 +2999,19 @@ void consoleWin_t::loadLua(void)
 #endif
 }
 
+void consoleWin_t::loadJs(void)
+{
+#ifdef __FCEU_QSCRIPT_ENABLE__
+	QScriptDialog_t *jsCtrlWin;
+
+	//printf("Open JS Control Window\n");
+	
+   jsCtrlWin = new QScriptDialog_t(this);
+	
+   jsCtrlWin->show();
+#endif
+}
+
 void consoleWin_t::openInputConfWin(void)
 {
 	//printf("Open Input Config Window\n");
@@ -4546,20 +4577,29 @@ void consoleWin_t::emuFrameFinish(void)
 {
 	static bool eventProcessingInProg = false;
 
-	if ( eventProcessingInProg )
-	{   // Prevent recursion as processEvents function can double back on us
-		return;
-	}
-	eventProcessingInProg = true;
-	// Process all events before attempting to render viewport
-	QCoreApplication::processEvents();
+	guiSignalRecvMark();
 
-	eventProcessingInProg = false;
+	//if ( eventProcessingInProg )
+	//{   // Prevent recursion as processEvents function can double back on us
+	//	return;
+	//}
+	// Prevent recursion as processEvents function can double back on us
+	if ( !eventProcessingInProg )
+	{
+		eventProcessingInProg = true;
+		// Process all events before attempting to render viewport
+		QCoreApplication::processEvents();
+		eventProcessingInProg = false;
+	}
 
 	// Update Input Devices
 	FCEUD_UpdateInput();
 	
 	//printf("EMU Frame Finish\n");
+
+#ifdef __FCEU_QSCRIPT_ENABLE__
+	QtScriptManager::getInstance()->frameFinishedUpdate();
+#endif
 
 	transferVideoBuffer();
 }
@@ -4569,15 +4609,18 @@ void consoleWin_t::updatePeriodic(void)
 	FCEU_PROFILE_FUNC(prof, "updatePeriodic");
 	static bool eventProcessingInProg = false;
 
-	if ( eventProcessingInProg )
-	{   // Prevent recursion as processEvents function can double back on us
-		return;
+	//if ( eventProcessingInProg )
+	//{   // Prevent recursion as processEvents function can double back on us
+	//	return;
+	//}
+	// Prevent recursion as processEvents function can double back on us
+	if ( !eventProcessingInProg )
+	{
+		eventProcessingInProg = true;
+		// Process all events before attempting to render viewport
+		QCoreApplication::processEvents();
+		eventProcessingInProg = false;
 	}
-	eventProcessingInProg = true;
-	// Process all events before attempting to render viewport
-	QCoreApplication::processEvents();
-
-	eventProcessingInProg = false;
 
 	// Update Input Devices
 	FCEUD_UpdateInput();
@@ -4863,6 +4906,7 @@ void emulatorThread_t::run(void)
 
 void emulatorThread_t::signalFrameFinished(void)
 {
+	emuSignalSendMark();
 	emit frameFinished();
 }
 

@@ -801,6 +801,7 @@ InitConfig()
 	config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", savPath );
 	config->addOption("_lastopenmovie", "SDL.LastOpenMovie", movPath);
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
+	config->addOption("_lastloadjs", "SDL.LastLoadJs", "");
 	config->addOption("SDL.HelpFilePath", "");
 	config->addOption("SDL.AviFilePath", "");
 	config->addOption("SDL.WavFilePath", "");

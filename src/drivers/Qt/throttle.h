@@ -43,6 +43,13 @@ struct frameTimingStat_t
 		double max;
 	} videoTimeDel;
 
+	struct {
+		double tgt;
+		double cur;
+		double min;
+		double max;
+	} emuSignalDelay;
+
 	unsigned int lateCount;
 
 	bool enabled;
@@ -52,6 +59,8 @@ void resetFrameTiming(void);
 void setFrameTimingEnable( bool enable );
 int  getFrameTimingStats( struct frameTimingStat_t *stats );
 void videoBufferSwapMark(void);
+void emuSignalSendMark(void);
+void guiSignalRecvMark(void);
 double getHighPrecTimeStamp(void);
 double getFrameRate(void);
 double getFrameRateAdjustmentRatio(void);

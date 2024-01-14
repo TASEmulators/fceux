@@ -10,34 +10,80 @@ if (${PUBLIC_RELEASE})
 endif()
 
 if ( ${QT6} )
-	message( STATUS "GUI Frontend: Qt6")
-	set( Qt Qt6 )
-else()
-	message( STATUS "GUI Frontend: Qt5")
-	set( Qt Qt5 )
+	set( QT 6 )
 endif()
 
-if ( ${QHELP} )
-	set(QtHelpModule Help)
-	add_definitions( -D_USE_QHELP )
+if (NOT DEFINED QT)
+	message( STATUS "Attempting to determine Qt Version...")
+	find_package( Qt6 COMPONENTS Core)
+
+	if (${Qt6Core_FOUND})
+		message( STATUS "Found Qt Version: ${Qt6Core_VERSION}")
+		set( QT 6 )
+	else()
+		find_package( Qt5 COMPONENTS Core)
+
+	       	if (${Qt5Core_FOUND})
+			message( STATUS "Found Qt Version: ${Qt5Core_VERSION}")
+			set( QT 5 )
+		endif()
+	endif()
 endif()
 
 if ( ${FCEU_PROFILER_ENABLE} )
 	message( STATUS "FCEU Profiler Enabled")
 	add_definitions( -D__FCEU_PROFILER_ENABLE__ )
 endif()
-	
 
-if ( ${QT6} )
-	find_package( Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets ${QtHelpModule})
-  	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
-  	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
+if ( ${QT} EQUAL 6 )
+	message( STATUS "GUI Frontend: Qt6")
+	set( Qt Qt6 )
+	find_package( Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets)
+	find_package( Qt6 COMPONENTS Help QUIET)
+	find_package( Qt6 COMPONENTS Qml)
+  	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Qml_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
+  	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Qml_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
+
+	if (${Qt6Help_FOUND})
+		message( STATUS "Qt6 Help Module Found")
+		if (${QHELP})
+			add_definitions( -D_USE_QHELP )
+		endif()
+	else()
+		message( STATUS "Qt6 Help Module Not Found")
+	endif()
+
+	if (${Qt6Qml_FOUND})
+		message( STATUS "Qt6 Qml Module Found")
+		#add_definitions( -D__FCEU_QSCRIPT_ENABLE__ )
+	else()
+		message( STATUS "Qt6 Qml Module Not Found")
+	endif()
 else()
-	find_package( Qt5 REQUIRED COMPONENTS Widgets OpenGL ${QtHelpModule})
-	add_definitions( ${Qt5Widgets_DEFINITIONS} ${Qt5Help_DEFINITIONS} )
-	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Help_INCLUDE_DIRS} )
-endif()
+	message( STATUS "GUI Frontend: Qt5")
+	set( Qt Qt5 )
+	find_package( Qt5 REQUIRED COMPONENTS Widgets OpenGL)
+	find_package( Qt5 COMPONENTS Help QUIET)
+	find_package( Qt5 COMPONENTS Qml)
+	add_definitions( ${Qt5Widgets_DEFINITIONS} ${Qt5Qml_DEFINITIONS} ${Qt5Help_DEFINITIONS} )
+	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Qml_INCLUDE_DIRS} ${Qt5Help_INCLUDE_DIRS} )
 
+	if (${Qt5Help_FOUND})
+		message( STATUS "Qt5 Help Module Found")
+		if (${QHELP})
+			add_definitions( -D_USE_QHELP )
+		endif()
+	else()
+		message( STATUS "Qt5 Help Module Not Found")
+	endif()
+
+	if (${Qt5Qml_FOUND})
+		message( STATUS "Qt5 Qml Module Found")
+		add_definitions( -D__FCEU_QSCRIPT_ENABLE__ )
+	else()
+		message( STATUS "Qt5 Qml Module Not Found")
+	endif()
+endif()
 
 if(WIN32)
      find_package(OpenGL REQUIRED)
@@ -579,6 +625,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleSoundConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/StateRecorderConf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/iNesHeaderEditor.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/QtScriptManager.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/SplashScreen.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TraceLogger.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AboutWindow.cpp  
@@ -666,6 +713,7 @@ target_link_libraries( ${APP_NAME}
    ${ASAN_LDFLAGS}  ${GPROF_LDFLAGS}
    ${${Qt}Widgets_LIBRARIES}
    ${${Qt}Help_LIBRARIES}
+   ${${Qt}Qml_LIBRARIES}
    ${${Qt}OpenGL_LIBRARIES}
    ${${Qt}OpenGLWidgets_LIBRARIES}
    ${OPENGL_LDFLAGS}  

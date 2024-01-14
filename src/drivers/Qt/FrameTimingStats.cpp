@@ -89,6 +89,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	frameTimeIdlePct = new QTreeWidgetItem();
 	frameLateCount = new QTreeWidgetItem();
 	videoTimeAbs = new QTreeWidgetItem();
+	emuSignalDelay = new QTreeWidgetItem();
 
 	tree->addTopLevelItem(frameTimeAbs);
 	tree->addTopLevelItem(frameTimeDel);
@@ -97,6 +98,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	tree->addTopLevelItem(frameTimeWorkPct);
 	tree->addTopLevelItem(frameTimeIdlePct);
 	tree->addTopLevelItem(videoTimeAbs);
+	tree->addTopLevelItem(emuSignalDelay);
 	tree->addTopLevelItem(frameLateCount);
 
 	frameTimeAbs->setFlags(Qt::ItemIsEnabled | Qt::ItemNeverHasChildren);
@@ -109,6 +111,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	frameTimeWorkPct->setText(0, tr("Frame Work %"));
 	frameTimeIdlePct->setText(0, tr("Frame Idle %"));
 	frameLateCount->setText(0, tr("Frame Late Count"));
+	emuSignalDelay->setText(0, tr("EMU Signal Delay ms"));
 	videoTimeAbs->setText(0, tr("Video Period ms"));
 
 	frameTimeAbs->setTextAlignment(0, Qt::AlignLeft);
@@ -119,6 +122,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	frameTimeIdlePct->setTextAlignment(0, Qt::AlignLeft);
 	frameLateCount->setTextAlignment(0, Qt::AlignLeft);
 	videoTimeAbs->setTextAlignment(0, Qt::AlignLeft);
+	emuSignalDelay->setTextAlignment(0, Qt::AlignLeft);
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -130,6 +134,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 		frameTimeIdlePct->setTextAlignment(i + 1, Qt::AlignCenter);
 		frameLateCount->setTextAlignment(i + 1, Qt::AlignCenter);
 		videoTimeAbs->setTextAlignment(i + 1, Qt::AlignCenter);
+		emuSignalDelay->setTextAlignment(i + 1, Qt::AlignCenter);
 	}
 
 	hbox = new QHBoxLayout();
@@ -293,6 +298,19 @@ void FrameTimingDialog_t::updateTimingStats(void)
 
 	sprintf(stmp, "%.3f", stats.videoTimeDel.max * 1e3);
 	videoTimeAbs->setText(4, tr(stmp));
+
+	// Emulator to GUI Thread Signal Delay
+	sprintf(stmp, "%.3f", stats.emuSignalDelay.tgt * 1e3);
+	emuSignalDelay->setText(1, tr(stmp));
+
+	sprintf(stmp, "%.3f", stats.emuSignalDelay.cur * 1e3);
+	emuSignalDelay->setText(2, tr(stmp));
+
+	sprintf(stmp, "%.3f", stats.emuSignalDelay.min * 1e3);
+	emuSignalDelay->setText(3, tr(stmp));
+
+	sprintf(stmp, "%.3f", stats.emuSignalDelay.max * 1e3);
+	emuSignalDelay->setText(4, tr(stmp));
 
 	// Late Count
 	sprintf(stmp, "%u", stats.lateCount);

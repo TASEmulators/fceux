@@ -39,6 +39,7 @@ static const double Normal  = 1.0;      // 1x speed    (around 60 fps on NTSC)
 static uint32 frameLateCounter = 0;
 static FCEU::timeStampRecord Lasttime, Nexttime, Latetime;
 static FCEU::timeStampRecord DesiredFrameTime, HalfFrameTime, QuarterFrameTime, DoubleFrameTime;
+static FCEU::timeStampRecord emuSignalTx, guiSignalRx, emuSignalLatency;
 static double desired_frametime = (1.0 / 60.099823);
 static double desired_frameRate = (60.099823);
 static double baseframeRate     = (60.099823);
@@ -52,6 +53,9 @@ static double videoLastTs  = 0.0;
 static double videoPeriodCur  = 0.0;
 static double videoPeriodMin  = 1.0;
 static double videoPeriodMax  = 0.0;
+static double emuLatencyCur  = 0.0;
+static double emuLatencyMin  = 1.0;
+static double emuLatencyMax  = 0.0;
 static bool   keepFrameTimeStats = false;
 static int InFrame = 0;
 double g_fpsScale = Normal; // used by sdl.cpp
@@ -193,6 +197,11 @@ int  getFrameTimingStats( struct frameTimingStat_t *stats )
 	stats->videoTimeDel.min = videoPeriodMin;
 	stats->videoTimeDel.max = videoPeriodMax;
 
+	stats->emuSignalDelay.tgt = 0.0;
+	stats->emuSignalDelay.cur = emuLatencyCur;
+	stats->emuSignalDelay.min = emuLatencyMin;
+	stats->emuSignalDelay.max = emuLatencyMax;
+
 	return 0;
 }
 
@@ -216,6 +225,34 @@ void videoBufferSwapMark(void)
 	}
 }
 
+void emuSignalSendMark(void)
+{
+	if ( keepFrameTimeStats )
+	{
+		emuSignalTx.readNew();
+	}
+}
+
+void guiSignalRecvMark(void)
+{
+	if ( keepFrameTimeStats )
+	{
+		guiSignalRx.readNew();
+		emuSignalLatency = guiSignalRx - emuSignalTx;
+
+		emuLatencyCur = emuSignalLatency.toSeconds();
+
+		if ( emuLatencyCur < emuLatencyMin )
+		{
+			emuLatencyMin = emuLatencyCur;
+		}
+		if ( emuLatencyCur > emuLatencyMax )
+		{
+			emuLatencyMax = emuLatencyCur;
+		}
+	}
+}
+
 void resetFrameTiming(void)
 {
 	frameLateCounter = 0;
@@ -225,6 +262,8 @@ void resetFrameTiming(void)
 	frameIdleMin = 1.0;
 	videoPeriodMin = 1.0;
 	videoPeriodMax = 0.0;
+	emuLatencyMin =  1.0;
+	emuLatencyMax =  0.0;
 }
 
 /* LOGMUL = exp(log(2) / 3)
