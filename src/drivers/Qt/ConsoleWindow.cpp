@@ -4597,9 +4597,9 @@ void consoleWin_t::emuFrameFinish(void)
 	
 	//printf("EMU Frame Finish\n");
 
-#ifdef __FCEU_QSCRIPT_ENABLE__
-	QtScriptManager::getInstance()->frameFinishedUpdate();
-#endif
+//#ifdef __FCEU_QSCRIPT_ENABLE__
+//	QtScriptManager::getInstance()->frameFinishedUpdate();
+//#endif
 
 	transferVideoBuffer();
 }

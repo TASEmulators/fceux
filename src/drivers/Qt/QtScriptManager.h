@@ -113,11 +113,16 @@ public:
 
 	void addScriptInstance(QtScriptInstance* script);
 	void removeScriptInstance(QtScriptInstance* script);
+	void addFrameFinishedConnection(QtScriptInstance* script);
+	void removeFrameFinishedConnection(QtScriptInstance* script);
 private:
 	static QtScriptManager* _instance;
 
 	QList<QtScriptInstance*> scriptList;
+	QList<QtScriptInstance*> frameFinishConnectList;
 	FCEU::timeStampRecord lastFrameUpdate;
+
+	int frameFinishedConnectCount = 0;
 
 public slots:
 	void frameFinishedUpdate();

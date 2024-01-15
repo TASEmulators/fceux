@@ -240,6 +240,8 @@ int QtScriptInstance::configEngine()
 
 	engine->globalObject().setProperty("gui", guiObject);
 
+	QtScriptManager::getInstance()->removeFrameFinishedConnection(this);
+
 	onFrameFinishCallback = QJSValue();
 	onScriptStopCallback = QJSValue();
 
@@ -277,6 +279,10 @@ int QtScriptInstance::loadScriptFile( QString filepath )
 	onFrameFinishCallback = engine->globalObject().property("onFrameFinish");
 	onScriptStopCallback = engine->globalObject().property("onScriptStop");
 
+	if (onFrameFinishCallback.isCallable())
+	{
+		QtScriptManager::getInstance()->addFrameFinishedConnection(this);
+	}
 	return 0;
 }
 //----------------------------------------------------
@@ -513,12 +519,45 @@ void QtScriptManager::removeScriptInstance(QtScriptInstance* script)
 			it++;
 		}
 	}
+
+	removeFrameFinishedConnection(script);
+}
+//----------------------------------------------------
+void QtScriptManager::addFrameFinishedConnection(QtScriptInstance* script)
+{
+	if (frameFinishConnectList.size() == 0)
+	{
+		connect(consoleWindow->emulatorThread, SIGNAL(frameFinished(void)), this, SLOT(frameFinishedUpdate(void)), Qt::BlockingQueuedConnection);
+	}
+	frameFinishConnectList.push_back(script);
+}
+//----------------------------------------------------
+void QtScriptManager::removeFrameFinishedConnection(QtScriptInstance* script)
+{
+	auto it = frameFinishConnectList.begin();
+
+	while (it != frameFinishConnectList.end())
+	{
+		if (*it == script)
+		{
+			it = frameFinishConnectList.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+
+	if (frameFinishConnectList.size() == 0)
+	{
+		consoleWindow->emulatorThread->disconnect( SIGNAL(frameFinished(void)), this, SLOT(frameFinishedUpdate(void)));
+	}
 }
 //----------------------------------------------------
 void QtScriptManager::frameFinishedUpdate()
 {
 	FCEU_WRAPPER_LOCK();
-	for (auto script : scriptList)
+	for (auto script : frameFinishConnectList)
 	{
 		script->onFrameFinish();
 	}

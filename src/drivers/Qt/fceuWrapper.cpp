@@ -1481,12 +1481,12 @@ int  fceuWrapperUpdate( void )
 	
 		hexEditorUpdateMemoryValues();
 
+		fceuWrapperUnLock();
+
 		if ( consoleWindow )
 		{
 			consoleWindow->emulatorThread->signalFrameFinished();
 		}
-		fceuWrapperUnLock();
-
 		emulatorHasMutex = 0;
 
 #ifdef __FCEU_PROFILER_ENABLE__
