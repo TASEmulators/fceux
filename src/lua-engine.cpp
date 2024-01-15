@@ -118,6 +118,19 @@ bool DemandLua()
 #endif
 }
 
+static void luaReadMemHook(unsigned int address, unsigned int value)
+{
+	CallRegisteredLuaMemHook(address, 1, value, LUAMEMHOOK_READ);
+}
+static void luaWriteMemHook(unsigned int address, unsigned int value)
+{
+	CallRegisteredLuaMemHook(address, 1, value, LUAMEMHOOK_WRITE);
+}
+static void luaExecMemHook(unsigned int address, unsigned int value)
+{
+	CallRegisteredLuaMemHook(address, 1, value, LUAMEMHOOK_EXEC);
+}
+
 extern "C"
 {
 #include <lua.h>
@@ -6378,6 +6391,7 @@ void FCEU_LuaFrameBoundary()
 #endif
 }
 
+
 /**
  * Loads and runs the given Lua script.
  * The emulator MUST be paused for this function to be
@@ -6486,6 +6500,10 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 			lua_newtable(L);
 			lua_setfield(L, LUA_REGISTRYINDEX, luaMemHookTypeStrings[i]);
 		}
+
+		X6502_MemHook::Add( X6502_MemHook::Read , luaReadMemHook  );
+		X6502_MemHook::Add( X6502_MemHook::Write, luaWriteMemHook );
+		X6502_MemHook::Add( X6502_MemHook::Exec , luaExecMemHook  );
 	}
 
 	// We make our thread NOW because we want it at the bottom of the stack.
@@ -6600,6 +6618,10 @@ void FCEU_LuaStop() {
 
 	//already killed
 	if (!L) return;
+
+	X6502_MemHook::Remove( X6502_MemHook::Read , luaReadMemHook  );
+	X6502_MemHook::Remove( X6502_MemHook::Write, luaWriteMemHook );
+	X6502_MemHook::Remove( X6502_MemHook::Exec , luaExecMemHook  );
 
 	// Since the script is exiting, we want to prevent an infinite loop.
 	// CallExitFunction() > HandleCallbackError() > FCEU_LuaStop() > CallExitFunction() ...
