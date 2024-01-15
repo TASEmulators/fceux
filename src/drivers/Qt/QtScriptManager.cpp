@@ -167,10 +167,29 @@ void EmuScriptObject::speedMode(const QString& mode)
 	FCEUD_SetEmulationSpeed(speed);
 }
 //----------------------------------------------------
+void EmuScriptObject::registerBefore(const QJSValue& func)
+{
+	script->registerBefore(func);
+}
+//----------------------------------------------------
+void EmuScriptObject::registerAfter(const QJSValue& func)
+{
+	script->registerAfter(func);
+}
+//----------------------------------------------------
+void EmuScriptObject::registerStop(const QJSValue& func)
+{
+	script->registerStop(func);
+}
+//----------------------------------------------------
 bool EmuScriptObject::loadRom(const QString& romPath)
 {
-	int ret = LoadGame(romPath.toLocal8Bit().constData());
+	int ret = 0;
 
+	if (!romPath.isEmpty())
+	{
+		ret = LoadGame(romPath.toLocal8Bit().constData());
+	}
 	return ret != 0;
 }
 //----------------------------------------------------
@@ -193,7 +212,7 @@ QtScriptInstance::QtScriptInstance(QObject* parent)
 		dialog = win;
 		emu->setDialog(dialog);
 	}
-	engine = new QJSEngine(this);
+	engine = new QJSEngine(nullptr);
 
 	emu->setEngine(engine);
 
@@ -223,7 +242,14 @@ void QtScriptInstance::resetEngine()
 		engine->deleteLater();
 		engine = nullptr;
 	}
-	engine = new QJSEngine(this);
+	engine = new QJSEngine(nullptr);
+
+	if (ui_rootWidget != nullptr)
+	{
+		ui_rootWidget->hide();
+		ui_rootWidget->deleteLater();
+		ui_rootWidget = nullptr;
+	}
 
 	configEngine();
 }
@@ -240,8 +266,7 @@ int QtScriptInstance::configEngine()
 
 	engine->globalObject().setProperty("gui", guiObject);
 
-	QtScriptManager::getInstance()->removeFrameFinishedConnection(this);
-
+	onFrameBeginCallback = QJSValue();
 	onFrameFinishCallback = QJSValue();
 	onScriptStopCallback = QJSValue();
 
@@ -276,13 +301,10 @@ int QtScriptInstance::loadScriptFile( QString filepath )
 		running = true;
 		//printf("Script Evaluation Success!\n");
 	}
-	onFrameFinishCallback = engine->globalObject().property("onFrameFinish");
-	onScriptStopCallback = engine->globalObject().property("onScriptStop");
+	//onFrameBeginCallback = engine->globalObject().property("onFrameBegin");
+	//onFrameFinishCallback = engine->globalObject().property("onFrameFinish");
+	//onScriptStopCallback = engine->globalObject().property("onScriptStop");
 
-	if (onFrameFinishCallback.isCallable())
-	{
-		QtScriptManager::getInstance()->addFrameFinishedConnection(this);
-	}
 	return 0;
 }
 //----------------------------------------------------
@@ -313,22 +335,38 @@ void QtScriptInstance::loadUI(const QString& uiFilePath)
 	QFile uiFile(uiFilePath);
 	QUiLoader  uiLoader;
 
-	QWidget* rootWidget = uiLoader.load(&uiFile, dialog);
+	ui_rootWidget = uiLoader.load(&uiFile, dialog);
 
-	if (rootWidget == nullptr)
+	if (ui_rootWidget == nullptr)
 	{
 		return;
 	}
-	QJSValue uiObject = engine->newQObject(rootWidget);
+	
+	QJSValue uiObject = engine->newQObject(ui_rootWidget);
 
 	engine->globalObject().setProperty("ui", uiObject);
 
-	loadObjectChildren( uiObject, rootWidget);
+	loadObjectChildren( uiObject, ui_rootWidget);
 
-	rootWidget->show();
+	ui_rootWidget->show();
 #else
 	throwError(QJSValue::GenericError, "Error: Application was not linked against Qt UI Tools");
 #endif
+}
+//----------------------------------------------------
+void QtScriptInstance::registerBefore(const QJSValue& func)
+{
+	onFrameBeginCallback = func;
+}
+//----------------------------------------------------
+void QtScriptInstance::registerAfter(const QJSValue& func)
+{
+	onFrameFinishCallback = func;
+}
+//----------------------------------------------------
+void QtScriptInstance::registerStop(const QJSValue& func)
+{
+	onScriptStopCallback = func;
 }
 //----------------------------------------------------
 void QtScriptInstance::print(const QString& msg)
@@ -416,6 +454,14 @@ void QtScriptInstance::stopRunning()
 	}
 }
 //----------------------------------------------------
+void QtScriptInstance::onFrameBegin()
+{
+	if (running && onFrameBeginCallback.isCallable())
+	{
+		onFrameBeginCallback.call();
+	}
+}
+//----------------------------------------------------
 void QtScriptInstance::onFrameFinish()
 {
 	if (running && onFrameFinishCallback.isCallable())
@@ -499,6 +545,14 @@ QtScriptManager* QtScriptManager::create(QObject* parent)
 	return mgr;
 }
 //----------------------------------------------------
+void QtScriptManager::destroy(void)
+{
+	if (_instance != nullptr)
+	{
+		delete _instance;
+	}
+}
+//----------------------------------------------------
 void QtScriptManager::addScriptInstance(QtScriptInstance* script)
 {
 	scriptList.push_back(script);
@@ -519,45 +573,22 @@ void QtScriptManager::removeScriptInstance(QtScriptInstance* script)
 			it++;
 		}
 	}
-
-	removeFrameFinishedConnection(script);
 }
 //----------------------------------------------------
-void QtScriptManager::addFrameFinishedConnection(QtScriptInstance* script)
+void QtScriptManager::frameBeginUpdate()
 {
-	if (frameFinishConnectList.size() == 0)
+	FCEU_WRAPPER_LOCK();
+	for (auto script : scriptList)
 	{
-		connect(consoleWindow->emulatorThread, SIGNAL(frameFinished(void)), this, SLOT(frameFinishedUpdate(void)), Qt::BlockingQueuedConnection);
+		script->onFrameBegin();
 	}
-	frameFinishConnectList.push_back(script);
-}
-//----------------------------------------------------
-void QtScriptManager::removeFrameFinishedConnection(QtScriptInstance* script)
-{
-	auto it = frameFinishConnectList.begin();
-
-	while (it != frameFinishConnectList.end())
-	{
-		if (*it == script)
-		{
-			it = frameFinishConnectList.erase(it);
-		}
-		else
-		{
-			it++;
-		}
-	}
-
-	if (frameFinishConnectList.size() == 0)
-	{
-		consoleWindow->emulatorThread->disconnect( SIGNAL(frameFinished(void)), this, SLOT(frameFinishedUpdate(void)));
-	}
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QtScriptManager::frameFinishedUpdate()
 {
 	FCEU_WRAPPER_LOCK();
-	for (auto script : frameFinishConnectList)
+	for (auto script : scriptList)
 	{
 		script->onFrameFinish();
 	}
@@ -649,6 +680,8 @@ QScriptDialog_t::QScriptDialog_t(QWidget *parent)
 
 	setLayout(mainLayout);
 
+	emuThreadText.reserve(4096);
+
 	//winList.push_back(this);
 
 	periodicTimer = new QTimer(this);
@@ -694,13 +727,15 @@ void QScriptDialog_t::closeWindow(void)
 //----------------------------------------------------
 void QScriptDialog_t::updatePeriodic(void)
 {
-	// TODO
 	//printf("Update JS\n");
-	//if (updateJSDisplay)
-	//{
-	//	updateJSWindows();
-	//	updateJSDisplay = false;
-	//}
+	FCEU_WRAPPER_LOCK();
+	if (!emuThreadText.isEmpty())
+	{
+		jsOutput->insertPlainText(emuThreadText);
+		emuThreadText.clear();
+	}
+	refreshState();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QScriptDialog_t::openJSKillMessageBox(void)
@@ -863,10 +898,12 @@ void QScriptDialog_t::openScriptFile(void)
 //----------------------------------------------------
 void QScriptDialog_t::startScript(void)
 {
+	FCEU_WRAPPER_LOCK();
 	scriptInstance->resetEngine();
 	if (scriptInstance->loadScriptFile(scriptPath->text()))
 	{
 		// Script parsing error
+		FCEU_WRAPPER_UNLOCK();
 		return;
 	}
 	// TODO add option to pass options to script main.
@@ -880,12 +917,16 @@ void QScriptDialog_t::startScript(void)
 	scriptInstance->call("main", argList);
 
 	refreshState();
+
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QScriptDialog_t::stopScript(void)
 {
+	FCEU_WRAPPER_LOCK();
 	scriptInstance->stopRunning();
 	refreshState();
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QScriptDialog_t::refreshState(void)
@@ -904,7 +945,14 @@ void QScriptDialog_t::refreshState(void)
 //----------------------------------------------------
 void QScriptDialog_t::logOutput(const QString& text)
 {
-	jsOutput->insertPlainText(text);
+	if (QThread::currentThread() == consoleWindow->emulatorThread)
+	{
+		emuThreadText.append(text);
+	}
+	else
+	{
+		jsOutput->insertPlainText(text);
+	}
 }
 //----------------------------------------------------
 #endif // __FCEU_QSCRIPT_ENABLE__

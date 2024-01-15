@@ -55,6 +55,9 @@ public slots:
 	Q_INVOKABLE  bool lagged();
 	Q_INVOKABLE  void setlagflag(bool flag);
 	Q_INVOKABLE  bool emulating();
+	Q_INVOKABLE  void registerBefore(const QJSValue& func);
+	Q_INVOKABLE  void registerAfter(const QJSValue& func);
+	Q_INVOKABLE  void registerStop(const QJSValue& func);
 	Q_INVOKABLE  void message(const QString& msg);
 	Q_INVOKABLE  void speedMode(const QString& mode);
 	Q_INVOKABLE  bool loadRom(const QString& romPath);
@@ -76,6 +79,7 @@ public:
 	void stopRunning();
 
 	int  call(const QString& funcName, const QJSValueList& args = QJSValueList());
+	void onFrameBegin();
 	void onFrameFinish();
 
 	int  throwError(QJSValue::ErrorType errorType, const QString &message = QString());
@@ -90,6 +94,8 @@ private:
 	QJSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	EmuScriptObject* emu = nullptr;
+	QWidget* ui_rootWidget = nullptr;
+	QJSValue onFrameBeginCallback;
 	QJSValue onFrameFinishCallback;
 	QJSValue onScriptStopCallback;
 	bool running = false;
@@ -98,6 +104,9 @@ public slots:
 	Q_INVOKABLE  void print(const QString& msg);
 	Q_INVOKABLE  void loadUI(const QString& uiFilePath);
 	Q_INVOKABLE  QString openFileBrowser(const QString& initialPath = QString());
+	Q_INVOKABLE  void registerBefore(const QJSValue& func);
+	Q_INVOKABLE  void registerAfter(const QJSValue& func);
+	Q_INVOKABLE  void registerStop(const QJSValue& func);
 };
 
 class QtScriptManager : public QObject
@@ -110,21 +119,19 @@ public:
 
 	static QtScriptManager* getInstance(){ return _instance; }
 	static QtScriptManager* create(QObject* parent = nullptr);
+	static void destroy();
 
+	int  numScriptsLoaded(void){ return scriptList.size(); }
 	void addScriptInstance(QtScriptInstance* script);
 	void removeScriptInstance(QtScriptInstance* script);
-	void addFrameFinishedConnection(QtScriptInstance* script);
-	void removeFrameFinishedConnection(QtScriptInstance* script);
 private:
 	static QtScriptManager* _instance;
 
 	QList<QtScriptInstance*> scriptList;
-	QList<QtScriptInstance*> frameFinishConnectList;
 	FCEU::timeStampRecord lastFrameUpdate;
 
-	int frameFinishedConnectCount = 0;
-
 public slots:
+	void frameBeginUpdate();
 	void frameFinishedUpdate();
 };
 
@@ -151,6 +158,7 @@ protected:
 	QPushButton *startButton;
 	QTextEdit *jsOutput;
 	QtScriptInstance *scriptInstance;
+	QString   emuThreadText;
 
 private:
 public slots:

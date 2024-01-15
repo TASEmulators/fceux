@@ -186,6 +186,10 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	gameTimer->setTimerType( Qt::PreciseTimer );
 	gameTimer->start( 8 ); // 120hz
 
+#ifdef __FCEU_QSCRIPT_ENABLE__
+	QtScriptManager::create(nullptr);
+#endif
+
 	emulatorThread->start();
 
 	g_config->getOption( "SDL.SetSchedParam", &opt );
@@ -272,9 +276,6 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	// Create AVI Recording Disk Thread
 	aviDiskThread = new AviRecordDiskThread_t(this);
 
-#ifdef __FCEU_QSCRIPT_ENABLE__
-	QtScriptManager::create(this);
-#endif
 	scrHandlerConnected = false;
 }
 
@@ -316,6 +317,9 @@ consoleWin_t::~consoleWin_t(void)
 
 	closeGamePadConfWindow();
 
+#ifdef __FCEU_QSCRIPT_ENABLE__
+	QtScriptManager::destroy();
+#endif
 	// The closeApp function call stops all threads.
 	// Calling quit on threads should not happen here. 
 	//printf("Thread Finished: %i \n", emulatorThread->isFinished() );
