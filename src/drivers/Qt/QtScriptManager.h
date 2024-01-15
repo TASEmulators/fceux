@@ -26,6 +26,7 @@
 #include "utils/timeStamp.h"
 
 class QScriptDialog_t;
+class QtScriptInstance;
 
 class EmuScriptObject: public QObject
 {
@@ -34,16 +35,30 @@ public:
 	EmuScriptObject(QObject* parent = nullptr);
 	~EmuScriptObject();
 
+	void setEngine(QJSEngine* _engine){ engine = _engine; }
 	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
 
 private:
+	QJSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
+	QtScriptInstance* script = nullptr;
 
 public slots:
 	Q_INVOKABLE  void print(const QString& msg);
-	Q_INVOKABLE  void softreset();
+	Q_INVOKABLE  void powerOn();
+	Q_INVOKABLE  void softReset();
 	Q_INVOKABLE  void pause();
 	Q_INVOKABLE  void unpause();
+	Q_INVOKABLE  bool paused();
+	Q_INVOKABLE  int  framecount();
+	Q_INVOKABLE  int  lagcount();
+	Q_INVOKABLE  bool lagged();
+	Q_INVOKABLE  void setlagflag(bool flag);
+	Q_INVOKABLE  bool emulating();
+	Q_INVOKABLE  void message(const QString& msg);
+	Q_INVOKABLE  void speedMode(const QString& mode);
+	Q_INVOKABLE  bool loadRom(const QString& romPath);
+	Q_INVOKABLE  QString getDir();
 
 };
 
@@ -57,24 +72,32 @@ public:
 	void resetEngine();
 	int loadScriptFile(QString filepath);
 
-	bool isRunning();
+	bool isRunning(){ return running; };
+	void stopRunning();
 
 	int  call(const QString& funcName, const QJSValueList& args = QJSValueList());
 	void onFrameFinish();
+
+	int  throwError(QJSValue::ErrorType errorType, const QString &message = QString());
 
 	QJSEngine* getEngine(){ return engine; };
 private:
 
 	int configEngine();
 	void printSymbols(QJSValue& val, int iter = 0);
+	void loadObjectChildren(QJSValue& jsObject, QObject* obj);
 
 	QJSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	EmuScriptObject* emu = nullptr;
 	QJSValue onFrameFinishCallback;
+	QJSValue onScriptStopCallback;
+	bool running = false;
 
 public slots:
 	Q_INVOKABLE  void print(const QString& msg);
+	Q_INVOKABLE  void loadUI(const QString& uiFilePath);
+	Q_INVOKABLE  QString openFileBrowser(const QString& initialPath = QString());
 };
 
 class QtScriptManager : public QObject

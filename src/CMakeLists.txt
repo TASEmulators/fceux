@@ -15,13 +15,13 @@ endif()
 
 if (NOT DEFINED QT)
 	message( STATUS "Attempting to determine Qt Version...")
-	find_package( Qt6 COMPONENTS Core)
+	find_package( Qt6 COMPONENTS Core QUIET)
 
 	if (${Qt6Core_FOUND})
 		message( STATUS "Found Qt Version: ${Qt6Core_VERSION}")
 		set( QT 6 )
 	else()
-		find_package( Qt5 COMPONENTS Core)
+		find_package( Qt5 COMPONENTS Core QUIET)
 
 	       	if (${Qt5Core_FOUND})
 			message( STATUS "Found Qt Version: ${Qt5Core_VERSION}")
@@ -41,8 +41,9 @@ if ( ${QT} EQUAL 6 )
 	find_package( Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets)
 	find_package( Qt6 COMPONENTS Help QUIET)
 	find_package( Qt6 COMPONENTS Qml)
-  	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Qml_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
-  	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Qml_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
+	find_package( Qt6 COMPONENTS UiTools)
+  	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Qml_DEFINITIONS} ${Qt6UiTools_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
+  	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Qml_INCLUDE_DIRS} ${Qt6UiTools_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
 
 	if (${Qt6Help_FOUND})
 		message( STATUS "Qt6 Help Module Found")
@@ -55,9 +56,16 @@ if ( ${QT} EQUAL 6 )
 
 	if (${Qt6Qml_FOUND})
 		message( STATUS "Qt6 Qml Module Found")
-		#add_definitions( -D__FCEU_QSCRIPT_ENABLE__ )
+		add_definitions( -D__FCEU_QSCRIPT_ENABLE__ )
 	else()
 		message( STATUS "Qt6 Qml Module Not Found")
+	endif()
+
+	if (${Qt6UiTools_FOUND})
+		message( STATUS "Qt6 UiTools Module Found")
+		add_definitions( -D__QT_UI_TOOLS__ )
+	else()
+		message( STATUS "Qt6 UiTools Module Not Found")
 	endif()
 else()
 	message( STATUS "GUI Frontend: Qt5")
@@ -65,8 +73,9 @@ else()
 	find_package( Qt5 REQUIRED COMPONENTS Widgets OpenGL)
 	find_package( Qt5 COMPONENTS Help QUIET)
 	find_package( Qt5 COMPONENTS Qml)
-	add_definitions( ${Qt5Widgets_DEFINITIONS} ${Qt5Qml_DEFINITIONS} ${Qt5Help_DEFINITIONS} )
-	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Qml_INCLUDE_DIRS} ${Qt5Help_INCLUDE_DIRS} )
+	find_package( Qt5 COMPONENTS UiTools)
+	add_definitions( ${Qt5Widgets_DEFINITIONS} ${Qt5Qml_DEFINITIONS} ${Qt5UiTools_DEFINITIONS} ${Qt5Help_DEFINITIONS} )
+	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Qml_INCLUDE_DIRS} ${Qt5UiTools_INCLUDE_DIRS} ${Qt5Help_INCLUDE_DIRS} )
 
 	if (${Qt5Help_FOUND})
 		message( STATUS "Qt5 Help Module Found")
@@ -82,6 +91,13 @@ else()
 		add_definitions( -D__FCEU_QSCRIPT_ENABLE__ )
 	else()
 		message( STATUS "Qt5 Qml Module Not Found")
+	endif()
+
+	if (${Qt5UiTools_FOUND})
+		message( STATUS "Qt5 UiTools Module Found")
+		add_definitions( -D__QT_UI_TOOLS__ )
+	else()
+		message( STATUS "Qt5 UiTools Module Not Found")
 	endif()
 endif()
 
@@ -714,6 +730,7 @@ target_link_libraries( ${APP_NAME}
    ${${Qt}Widgets_LIBRARIES}
    ${${Qt}Help_LIBRARIES}
    ${${Qt}Qml_LIBRARIES}
+   ${${Qt}UiTools_LIBRARIES}
    ${${Qt}OpenGL_LIBRARIES}
    ${${Qt}OpenGLWidgets_LIBRARIES}
    ${OPENGL_LDFLAGS}  

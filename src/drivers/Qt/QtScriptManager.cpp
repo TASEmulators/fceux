@@ -34,6 +34,10 @@
 #include <QSettings>
 #include <QJSValueIterator>
 
+#ifdef __QT_UI_TOOLS__
+#include <QUiLoader>
+#endif
+
 #include "../../fceu.h"
 #include "../../movie.h"
 
@@ -54,6 +58,7 @@
 EmuScriptObject::EmuScriptObject(QObject* parent)
 	: QObject(parent)
 {
+	script = qobject_cast<QtScriptInstance*>(parent);
 }
 //----------------------------------------------------
 EmuScriptObject::~EmuScriptObject()
@@ -68,7 +73,12 @@ void EmuScriptObject::print(const QString& msg)
 	}
 }
 //----------------------------------------------------
-void EmuScriptObject::softreset()
+void EmuScriptObject::powerOn()
+{
+	fceuWrapperHardReset();
+}
+//----------------------------------------------------
+void EmuScriptObject::softReset()
 {
 	fceuWrapperSoftReset();
 }
@@ -81,6 +91,92 @@ void EmuScriptObject::pause()
 void EmuScriptObject::unpause()
 {
 	FCEUI_SetEmulationPaused(0);
+}
+//----------------------------------------------------
+bool EmuScriptObject::paused()
+{
+	return FCEUI_EmulationPaused() != 0;
+}
+//----------------------------------------------------
+int EmuScriptObject::framecount()
+{
+	return FCEUMOV_GetFrame();
+}
+//----------------------------------------------------
+int EmuScriptObject::lagcount()
+{
+	return FCEUI_GetLagCount();
+}
+//----------------------------------------------------
+bool EmuScriptObject::lagged()
+{
+	return FCEUI_GetLagged();
+}
+//----------------------------------------------------
+void EmuScriptObject::setlagflag(bool flag)
+{
+	FCEUI_SetLagFlag(flag);
+}
+//----------------------------------------------------
+bool EmuScriptObject::emulating()
+{
+	return (GameInfo != nullptr);
+}
+//----------------------------------------------------
+void EmuScriptObject::message(const QString& msg)
+{
+	FCEU_DispMessage("%s",0, msg.toStdString().c_str());
+}
+//----------------------------------------------------
+void EmuScriptObject::speedMode(const QString& mode)
+{
+	int speed = EMUSPEED_NORMAL;
+	bool useTurbo = false;
+
+	if (mode.contains("normal", Qt::CaseInsensitive))
+	{
+		speed = EMUSPEED_NORMAL;
+	}
+	else if (mode.contains("nothrottle", Qt::CaseInsensitive))
+	{
+		useTurbo = true;
+	}
+	else if (mode.contains("turbo", Qt::CaseInsensitive))
+	{
+		useTurbo = true;
+	}
+	else if (mode.contains("maximum", Qt::CaseInsensitive))
+	{
+		speed = EMUSPEED_FASTEST;
+	}
+	else
+	{
+		QString msg = "Invalid mode argument \"" + mode + "\" to emu.speedmode\n";
+		script->throwError(QJSValue::TypeError, msg);
+		return;
+	}
+
+	if (useTurbo)
+	{
+		FCEUD_TurboOn();
+	}
+	else
+	{
+		FCEUD_TurboOff();
+	}
+	FCEUD_SetEmulationSpeed(speed);
+}
+//----------------------------------------------------
+bool EmuScriptObject::loadRom(const QString& romPath)
+{
+	int ret = LoadGame(romPath.toLocal8Bit().constData());
+
+	return ret != 0;
+}
+//----------------------------------------------------
+QString EmuScriptObject::getDir()
+{
+	return QString(fceuExecutablePath());
 }
 //----------------------------------------------------
 //----  Qt Script Instance
@@ -98,6 +194,8 @@ QtScriptInstance::QtScriptInstance(QObject* parent)
 		emu->setDialog(dialog);
 	}
 	engine = new QJSEngine(this);
+
+	emu->setEngine(engine);
 
 	configEngine();
 
@@ -118,6 +216,8 @@ QtScriptInstance::~QtScriptInstance()
 //----------------------------------------------------
 void QtScriptInstance::resetEngine()
 {
+	running = false;
+
 	if (engine != nullptr)
 	{
 		engine->deleteLater();
@@ -136,7 +236,12 @@ int QtScriptInstance::configEngine()
 
 	engine->globalObject().setProperty("emu", emuObject);
 
+	QJSValue guiObject = engine->newQObject(this);
+
+	engine->globalObject().setProperty("gui", guiObject);
+
 	onFrameFinishCallback = QJSValue();
+	onScriptStopCallback = QJSValue();
 
 	return 0;
 }
@@ -144,6 +249,8 @@ int QtScriptInstance::configEngine()
 int QtScriptInstance::loadScriptFile( QString filepath )
 {
 	QFile scriptFile(filepath);
+
+	running = false;
 
 	if (!scriptFile.open(QIODevice::ReadOnly))
 	{
@@ -164,11 +271,58 @@ int QtScriptInstance::loadScriptFile( QString filepath )
 	}
 	else
 	{
+		running = true;
 		//printf("Script Evaluation Success!\n");
 	}
 	onFrameFinishCallback = engine->globalObject().property("onFrameFinish");
+	onScriptStopCallback = engine->globalObject().property("onScriptStop");
 
 	return 0;
+}
+//----------------------------------------------------
+void QtScriptInstance::loadObjectChildren(QJSValue& jsObject, QObject* obj)
+{
+	const QObjectList& childList = obj->children();
+
+	for (auto& child : childList)
+	{
+		QString name = child->objectName();
+
+		if (!name.isEmpty())
+		{
+			printf("Object: %s.%s\n", obj->objectName().toStdString().c_str(), child->objectName().toStdString().c_str());
+
+			QJSValue newJsObj = engine->newQObject(child);
+
+			jsObject.setProperty(child->objectName(), newJsObj);
+
+			loadObjectChildren( newJsObj, child);
+		}
+	}
+}
+//----------------------------------------------------
+void QtScriptInstance::loadUI(const QString& uiFilePath)
+{
+#ifdef __QT_UI_TOOLS__
+	QFile uiFile(uiFilePath);
+	QUiLoader  uiLoader;
+
+	QWidget* rootWidget = uiLoader.load(&uiFile, dialog);
+
+	if (rootWidget == nullptr)
+	{
+		return;
+	}
+	QJSValue uiObject = engine->newQObject(rootWidget);
+
+	engine->globalObject().setProperty("ui", uiObject);
+
+	loadObjectChildren( uiObject, rootWidget);
+
+	rootWidget->show();
+#else
+	throwError(QJSValue::GenericError, "Error: Application was not linked against Qt UI Tools");
+#endif
 }
 //----------------------------------------------------
 void QtScriptInstance::print(const QString& msg)
@@ -177,6 +331,14 @@ void QtScriptInstance::print(const QString& msg)
 	{
 		dialog->logOutput(msg);
 	}
+}
+//----------------------------------------------------
+int QtScriptInstance::throwError(QJSValue::ErrorType errorType, const QString &message)
+{
+	running = false;
+	print(message);
+	engine->setInterrupted(true);
+	return 0;
 }
 //----------------------------------------------------
 void QtScriptInstance::printSymbols(QJSValue& val, int iter)
@@ -236,17 +398,74 @@ int  QtScriptInstance::call(const QString& funcName, const QJSValueList& args)
 	return 0;
 }
 //----------------------------------------------------
+void QtScriptInstance::stopRunning()
+{
+	if (running)
+	{
+		if (onScriptStopCallback.isCallable())
+		{
+			onScriptStopCallback.call();
+		}
+		running = false;
+	}
+}
+//----------------------------------------------------
 void QtScriptInstance::onFrameFinish()
 {
-	if (onFrameFinishCallback.isCallable())
+	if (running && onFrameFinishCallback.isCallable())
 	{
 		onFrameFinishCallback.call();
 	}
 }
 //----------------------------------------------------
-bool QtScriptInstance::isRunning()
+QString QtScriptInstance::openFileBrowser(const QString& initialPath)
 {
-	return false;
+	QString selectedFile;
+	QFileDialog  dialog(this->dialog, tr("Open File") );
+	QList<QUrl> urls;
+	bool useNativeFileDialogVal = false;
+
+	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	const QStringList filters({
+           "Any files (*)"
+         });
+
+	urls << QUrl::fromLocalFile( QDir::rootPath() );
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
+	urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+	urls << QUrl::fromLocalFile( QDir( FCEUI_GetBaseDirectory() ).absolutePath() );
+
+	dialog.setFileMode(QFileDialog::ExistingFile);
+
+	dialog.setNameFilters( filters );
+
+	dialog.setViewMode(QFileDialog::List);
+	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
+
+	if (!initialPath.isEmpty() )
+	{
+		dialog.setDirectory( initialPath );
+	}
+
+	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+	dialog.setSidebarUrls(urls);
+
+	int ret = dialog.exec();
+
+	if ( ret )
+	{
+		QStringList fileList;
+		fileList = dialog.selectedFiles();
+
+		if ( fileList.size() > 0 )
+		{
+			selectedFile = fileList[0];
+		}
+	}
+	return selectedFile;
 }
 //----------------------------------------------------
 //----  Qt Script Manager
@@ -401,31 +620,24 @@ QScriptDialog_t::QScriptDialog_t(QWidget *parent)
 
 	restoreGeometry(settings.value("QScriptWindow/geometry").toByteArray());
 }
-
 //----------------------------------------------------
 QScriptDialog_t::~QScriptDialog_t(void)
 {
 	QSettings settings;
-	std::list<QScriptDialog_t *>::iterator it;
 
 	//printf("Destroy JS Control Window\n");
 
 	periodicTimer->stop();
 
-	//for (it = winList.begin(); it != winList.end(); it++)
-	//{
-	//	if ((*it) == this)
-	//	{
-	//		winList.erase(it);
-	//		//printf("Removing JS Window\n");
-	//		break;
-	//	}
-	//}
+	scriptInstance->stopRunning();
+
 	settings.setValue("QScriptWindow/geometry", saveGeometry());
 }
 //----------------------------------------------------
 void QScriptDialog_t::closeEvent(QCloseEvent *event)
 {
+	scriptInstance->stopRunning();
+
 	//printf("JS Control Close Window Event\n");
 	done(0);
 	deleteLater();
@@ -434,6 +646,8 @@ void QScriptDialog_t::closeEvent(QCloseEvent *event)
 //----------------------------------------------------
 void QScriptDialog_t::closeWindow(void)
 {
+	scriptInstance->stopRunning();
+
 	//printf("JS Control Close Window\n");
 	done(0);
 	deleteLater();
@@ -625,10 +839,14 @@ void QScriptDialog_t::startScript(void)
 	QJSValueList argList = { argArray };
 
 	scriptInstance->call("main", argList);
+
+	refreshState();
 }
 //----------------------------------------------------
 void QScriptDialog_t::stopScript(void)
 {
+	scriptInstance->stopRunning();
+	refreshState();
 }
 //----------------------------------------------------
 void QScriptDialog_t::refreshState(void)
