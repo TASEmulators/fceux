@@ -42,7 +42,8 @@ if ( ${QT} EQUAL 6 )
 	find_package( Qt6 COMPONENTS Help QUIET)
 	find_package( Qt6 COMPONENTS Qml)
 	find_package( Qt6 COMPONENTS UiTools)
-  	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Qml_DEFINITIONS} ${Qt6UiTools_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
+  	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Qml_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
+	# add_definitions(${Qt6UiTools_DEFINITIONS}) # Leave ${Qt6UiTools_DEFINITIONS} out as this is causing a build error
   	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Qml_INCLUDE_DIRS} ${Qt6UiTools_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
 
 	if (${Qt6Help_FOUND})
