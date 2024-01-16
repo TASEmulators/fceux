@@ -1478,6 +1478,7 @@ int  fceuWrapperUpdate( void )
  
 	if ( GameInfo )
 	{
+#ifdef __FCEU_QSCRIPT_ENABLE__
 		auto* qscriptMgr = QtScriptManager::getInstance();
 
 		bool scriptsLoaded = (qscriptMgr != nullptr) && (qscriptMgr->numScriptsLoaded() > 0);
@@ -1486,13 +1487,16 @@ int  fceuWrapperUpdate( void )
 		{
 			qscriptMgr->frameBeginUpdate();
 		}
+#endif
 
 		DoFun(frameskip, periodic_saves);
 	
+#ifdef __FCEU_QSCRIPT_ENABLE__
 		if (scriptsLoaded)
 		{
 			qscriptMgr->frameFinishedUpdate();
 		}
+#endif
 
 		hexEditorUpdateMemoryValues();
 
