@@ -40,7 +40,7 @@ typedef SSIZE_T ssize_t;
 #endif
 
 #ifndef RAINBOW_DEBUG_ESP
-#define RAINBOW_DEBUG_ESP 2
+#define RAINBOW_DEBUG_ESP 0
 #endif
 
 #if RAINBOW_DEBUG_ESP >= 1
