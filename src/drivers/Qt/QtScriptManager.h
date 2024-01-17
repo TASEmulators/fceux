@@ -155,6 +155,23 @@ public:
 	QMap<QString, JsPropertyItem*> childMap;
 };
 
+class JsPropertyTree : public QTreeWidget
+{
+	Q_OBJECT
+
+public:
+	JsPropertyTree(QWidget *parent = nullptr)
+		: QTreeWidget(parent)
+	{
+	}
+
+	virtual ~JsPropertyTree() override
+	{
+	}
+
+	QMap<QString, JsPropertyItem*> childMap;
+};
+
 class QScriptDialog_t : public QDialog
 {
 	Q_OBJECT
@@ -169,6 +186,7 @@ public:
 protected:
 	void closeEvent(QCloseEvent *bar);
 	void openJSKillMessageBox(void);
+	void clearPropertyTree();
 	void loadPropertyTree(QJSValue& val, JsPropertyItem* parentItem = nullptr);
 
 	QTimer *periodicTimer;
@@ -180,7 +198,7 @@ protected:
 	QPushButton *clearButton;
 	QTabWidget *tabWidget;
 	QTextEdit *jsOutput;
-	QTreeWidget *propTree;
+	JsPropertyTree *propTree;
 	QtScriptInstance *scriptInstance;
 	QString   emuThreadText;
 

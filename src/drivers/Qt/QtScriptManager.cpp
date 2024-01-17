@@ -667,7 +667,7 @@ QScriptDialog_t::QScriptDialog_t(QWidget *parent)
 
 	tabWidget->addTab(jsOutput, tr("Output Console"));
 
-	propTree = new QTreeWidget();
+	propTree = new JsPropertyTree();
 
 	propTree->setColumnCount(3);
 	propTree->setSelectionMode( QAbstractItemView::SingleSelection );
@@ -742,6 +742,12 @@ void QScriptDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------
+void QScriptDialog_t::clearPropertyTree()
+{
+	propTree->childMap.clear();
+	propTree->clear();
+}
+//----------------------------------------------------
 void QScriptDialog_t::loadPropertyTree(QJSValue& object, JsPropertyItem* parentItem)
 {
 	QJSValueIterator it(object);
@@ -755,9 +761,35 @@ void QScriptDialog_t::loadPropertyTree(QJSValue& object, JsPropertyItem* parentI
 
 		if (!isPrototype)
 		{
-			JsPropertyItem* item = new JsPropertyItem();
+			JsPropertyItem* item = nullptr;
+			QString name = it.name();
 			QString value;
 			const char *type = "unknown";
+			bool itemIsNew = false;
+
+			if (parentItem == nullptr)
+			{
+				auto it = propTree->childMap.find(name);
+
+				if (it != propTree->childMap.end())
+				{
+					item = it.value();
+				}
+			}
+			else
+			{
+				auto it = parentItem->childMap.find(name);
+
+				if (it != parentItem->childMap.end())
+				{
+					item = it.value();
+				}
+			}
+			if (item == nullptr)
+			{
+				item = new JsPropertyItem();
+				itemIsNew = true;
+			}
 
 			if (child.isArray())
 			{
@@ -830,18 +862,36 @@ void QScriptDialog_t::loadPropertyTree(QJSValue& object, JsPropertyItem* parentI
 				value = child.toString();
 			}
 
-			item->setText(0, it.name());
-			item->setText(1, type);
-			item->setText(2, value);
-			item->jsValue = child;
 
-			if (parentItem == nullptr)
+			if (itemIsNew)
 			{
-				propTree->addTopLevelItem(item);
+				item->setText(0, name);
+				item->setText(1, type);
+				item->setText(2, value);
 			}
 			else
 			{
-				parentItem->addChild(item);
+				bool itemHasChanged = !item->jsValue.strictlyEquals(child);
+
+				if (itemHasChanged)
+				{
+					item->setText(2, value);
+				}
+			}
+			item->jsValue = child;
+
+			if (itemIsNew)
+			{
+				if (parentItem == nullptr)
+				{
+					propTree->addTopLevelItem(item);
+					propTree->childMap[name] = item;
+				}
+				else
+				{
+					parentItem->addChild(item);
+					parentItem->childMap[name] = item;
+				}
 			}
 
 			if (child.isObject())
@@ -869,6 +919,18 @@ void QScriptDialog_t::updatePeriodic(void)
 			vbar->setValue( vbar->maximum() );
 		}
 		emuThreadText.clear();
+	}
+
+	if (scriptInstance != nullptr)
+	{
+		auto* engine = scriptInstance->getEngine();
+
+		if (engine)
+		{
+			QJSValue globals = engine->globalObject();
+
+			loadPropertyTree(globals);
+		}
 	}
 	refreshState();
 	FCEU_WRAPPER_UNLOCK();
@@ -1035,6 +1097,7 @@ void QScriptDialog_t::openScriptFile(void)
 void QScriptDialog_t::startScript(void)
 {
 	FCEU_WRAPPER_LOCK();
+	clearPropertyTree();
 	scriptInstance->resetEngine();
 	if (scriptInstance->loadScriptFile(scriptPath->text()))
 	{
@@ -1056,7 +1119,6 @@ void QScriptDialog_t::startScript(void)
 
 	QJSValue globals = scriptInstance->getEngine()->globalObject();
 
-	propTree->clear();
 	loadPropertyTree(globals);
 
 	FCEU_WRAPPER_UNLOCK();
