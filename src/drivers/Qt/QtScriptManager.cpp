@@ -742,7 +742,7 @@ void QScriptDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------
-void QScriptDialog_t::loadPropertyTree(QJSValue& object, QTreeWidgetItem* parentItem)
+void QScriptDialog_t::loadPropertyTree(QJSValue& object, JsPropertyItem* parentItem)
 {
 	QJSValueIterator it(object);
 
@@ -755,7 +755,7 @@ void QScriptDialog_t::loadPropertyTree(QJSValue& object, QTreeWidgetItem* parent
 
 		if (!isPrototype)
 		{
-			QTreeWidgetItem* item = new QTreeWidgetItem();
+			JsPropertyItem* item = new JsPropertyItem();
 			QString value;
 			const char *type = "unknown";
 
@@ -833,6 +833,7 @@ void QScriptDialog_t::loadPropertyTree(QJSValue& object, QTreeWidgetItem* parent
 			item->setText(0, it.name());
 			item->setText(1, type);
 			item->setText(2, value);
+			item->jsValue = child;
 
 			if (parentItem == nullptr)
 			{
@@ -1055,6 +1056,7 @@ void QScriptDialog_t::startScript(void)
 
 	QJSValue globals = scriptInstance->getEngine()->globalObject();
 
+	propTree->clear();
 	loadPropertyTree(globals);
 
 	FCEU_WRAPPER_UNLOCK();

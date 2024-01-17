@@ -139,6 +139,22 @@ public slots:
 	void frameFinishedUpdate();
 };
 
+class JsPropertyItem : public QTreeWidgetItem
+{
+public:
+	JsPropertyItem()
+		: QTreeWidgetItem()
+	{
+	}
+
+	virtual ~JsPropertyItem() override
+	{
+	}
+
+	QJSValue  jsValue;
+	QMap<QString, JsPropertyItem*> childMap;
+};
+
 class QScriptDialog_t : public QDialog
 {
 	Q_OBJECT
@@ -153,7 +169,7 @@ public:
 protected:
 	void closeEvent(QCloseEvent *bar);
 	void openJSKillMessageBox(void);
-	void loadPropertyTree(QJSValue& val, QTreeWidgetItem* parentItem = nullptr);
+	void loadPropertyTree(QJSValue& val, JsPropertyItem* parentItem = nullptr);
 
 	QTimer *periodicTimer;
 	QLineEdit *scriptPath;
