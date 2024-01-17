@@ -10,6 +10,7 @@
 
 #include <QWidget>
 #include <QDialog>
+#include <QTabWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QComboBox>
@@ -20,6 +21,9 @@
 #include <QGroupBox>
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QTreeView>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 #include <QJSEngine>
 
 #include "Qt/main.h"
@@ -149,6 +153,7 @@ public:
 protected:
 	void closeEvent(QCloseEvent *bar);
 	void openJSKillMessageBox(void);
+	void loadPropertyTree(QJSValue& val, QTreeWidgetItem* parentItem = nullptr);
 
 	QTimer *periodicTimer;
 	QLineEdit *scriptPath;
@@ -156,7 +161,10 @@ protected:
 	QPushButton *browseButton;
 	QPushButton *stopButton;
 	QPushButton *startButton;
+	QPushButton *clearButton;
+	QTabWidget *tabWidget;
 	QTextEdit *jsOutput;
+	QTreeWidget *propTree;
 	QtScriptInstance *scriptInstance;
 	QString   emuThreadText;
 

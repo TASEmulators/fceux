@@ -32,6 +32,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
+#include <QHeaderView>
 #include <QJSValueIterator>
 
 #ifdef __QT_UI_TOOLS__
@@ -435,10 +436,6 @@ int  QtScriptInstance::call(const QString& funcName, const QJSValueList& args)
 		//printf("Script Call Success!\n");
 	}
 
-	QJSValue global = engine->globalObject();
-
-	printSymbols( global );
-
 	return 0;
 }
 //----------------------------------------------------
@@ -665,9 +662,29 @@ QScriptDialog_t::QScriptDialog_t(QWidget *parent)
 
 	mainLayout->addLayout(hbox);
 
-	lbl = new QLabel(tr("Output Console:"));
-	mainLayout->addWidget(lbl);
-	mainLayout->addWidget(jsOutput);
+	tabWidget = new QTabWidget();
+	mainLayout->addWidget(tabWidget);
+
+	tabWidget->addTab(jsOutput, tr("Output Console"));
+
+	propTree = new QTreeWidget();
+
+	propTree->setColumnCount(3);
+	propTree->setSelectionMode( QAbstractItemView::SingleSelection );
+	propTree->setAlternatingRowColors(true);
+
+	auto* item = new QTreeWidgetItem();
+	item->setText(0, QString::fromStdString("Name"));
+	item->setText(1, QString::fromStdString("Type"));
+	item->setText(2, QString::fromStdString("Value"));
+	item->setTextAlignment(0, Qt::AlignLeft);
+	item->setTextAlignment(1, Qt::AlignLeft);
+	item->setTextAlignment(2, Qt::AlignLeft);
+
+	propTree->setHeaderItem(item);
+	propTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+	tabWidget->addTab(propTree, tr("Global Properties"));
 
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
@@ -725,13 +742,131 @@ void QScriptDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------
+void QScriptDialog_t::loadPropertyTree(QJSValue& object, QTreeWidgetItem* parentItem)
+{
+	QJSValueIterator it(object);
+
+	while (it.hasNext())
+	{
+		it.next();
+		QJSValue child = it.value();
+
+		bool isPrototype = it.name() == "prototype";
+
+		if (!isPrototype)
+		{
+			QTreeWidgetItem* item = new QTreeWidgetItem();
+			QString value;
+			const char *type = "unknown";
+
+			if (child.isArray())
+			{
+				type = "array";
+			}
+			else if (child.isBool())
+			{
+				type = "bool";
+				value = QVariant(child.toBool()).toString();
+			}
+			else if (child.isCallable())
+			{
+				type = "function";
+				value = "";
+			}
+			else if (child.isDate())
+			{
+				type = "date";
+				value = child.toDateTime().toString();
+			}
+			else if (child.isError())
+			{
+				type = "error";
+				value = child.toString();
+			}
+			else if (child.isNull())
+			{
+				type = "null";
+				value = "null";
+			}
+			else if (child.isNumber())
+			{
+				type = "number";
+				value = QVariant(child.toNumber()).toString();
+			}
+			else if (child.isRegExp())
+			{
+				type = "RegExp";
+				value.clear();
+			}
+			else if (child.isQMetaObject())
+			{
+				type = "meta";
+				value.clear();
+
+				auto* meta = child.toQMetaObject();
+				if (meta != nullptr)
+				{
+					value = meta->className();
+				}
+			}
+			else if (child.isObject())
+			{
+				type = "object";
+				value.clear();
+
+				auto* obj = child.toQObject();
+				if (obj != nullptr)
+				{
+					auto* meta = obj->metaObject();
+					if (meta != nullptr)
+					{
+						value = meta->className();
+					}
+				}
+			}
+			else if (child.isString())
+			{
+				type = "string";
+				value = child.toString();
+			}
+
+			item->setText(0, it.name());
+			item->setText(1, type);
+			item->setText(2, value);
+
+			if (parentItem == nullptr)
+			{
+				propTree->addTopLevelItem(item);
+			}
+			else
+			{
+				parentItem->addChild(item);
+			}
+
+			if (child.isObject())
+			{
+				loadPropertyTree(child, item);
+			}
+		}
+	}
+}
+//----------------------------------------------------
 void QScriptDialog_t::updatePeriodic(void)
 {
 	//printf("Update JS\n");
 	FCEU_WRAPPER_LOCK();
 	if (!emuThreadText.isEmpty())
 	{
+		auto* vbar = jsOutput->verticalScrollBar();
+		int vbarValue = vbar->value();
+		bool vbarAtMax = vbarValue >= vbar->maximum();
+
 		jsOutput->insertPlainText(emuThreadText);
+
+		if (vbarAtMax)
+		{
+			vbar->setValue( vbar->maximum() );
+		}
 		emuThreadText.clear();
 	}
 	refreshState();
@@ -918,6 +1053,10 @@ void QScriptDialog_t::startScript(void)
 
 	refreshState();
 
+	QJSValue globals = scriptInstance->getEngine()->globalObject();
+
+	loadPropertyTree(globals);
+
 	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
@@ -951,7 +1090,16 @@ void QScriptDialog_t::logOutput(const QString& text)
 	}
 	else
 	{
+		auto* vbar = jsOutput->verticalScrollBar();
+		int vbarValue = vbar->value();
+		bool vbarAtMax = vbarValue >= vbar->maximum();
+
 		jsOutput->insertPlainText(text);
+
+		if (vbarAtMax)
+		{
+			vbar->setValue( vbar->maximum() );
+		}
 	}
 }
 //----------------------------------------------------
