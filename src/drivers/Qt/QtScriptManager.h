@@ -69,6 +69,43 @@ public slots:
 
 };
 
+class MemoryScriptObject: public QObject
+{
+	Q_OBJECT
+public:
+	MemoryScriptObject(QObject* parent = nullptr);
+	~MemoryScriptObject();
+
+	void setEngine(QJSEngine* _engine){ engine = _engine; }
+	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
+
+private:
+	QJSEngine* engine = nullptr;
+	QScriptDialog_t* dialog = nullptr;
+	QtScriptInstance* script = nullptr;
+
+public slots:
+	Q_INVOKABLE  uint8_t readByte(int address);
+	Q_INVOKABLE   int8_t readByteSigned(int address);
+	Q_INVOKABLE  uint8_t readByteUnsigned(int address);
+	Q_INVOKABLE uint16_t readWord(int addressLow, int addressHigh = -1);
+	Q_INVOKABLE  int16_t readWordSigned(int addressLow, int addressHigh = -1);
+	Q_INVOKABLE uint16_t readWordUnsigned(int addressLow, int addressHigh = -1);
+	Q_INVOKABLE     void writeByte(int address, int value);
+	Q_INVOKABLE uint16_t getRegisterPC();
+	Q_INVOKABLE  uint8_t getRegisterA();
+	Q_INVOKABLE  uint8_t getRegisterX();
+	Q_INVOKABLE  uint8_t getRegisterY();
+	Q_INVOKABLE  uint8_t getRegisterS();
+	Q_INVOKABLE  uint8_t getRegisterP();
+	Q_INVOKABLE     void setRegisterPC(uint16_t v);
+	Q_INVOKABLE     void setRegisterA(uint8_t v);
+	Q_INVOKABLE     void setRegisterX(uint8_t v);
+	Q_INVOKABLE     void setRegisterY(uint8_t v);
+	Q_INVOKABLE     void setRegisterS(uint8_t v);
+	Q_INVOKABLE     void setRegisterP(uint8_t v);
+};
+
 class QtScriptInstance : public QObject
 {
 	Q_OBJECT
@@ -98,6 +135,7 @@ private:
 	QJSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	EmuScriptObject* emu = nullptr;
+	MemoryScriptObject* mem = nullptr;
 	QWidget* ui_rootWidget = nullptr;
 	QJSValue onFrameBeginCallback;
 	QJSValue onFrameFinishCallback;

@@ -41,6 +41,8 @@
 
 #include "../../fceu.h"
 #include "../../movie.h"
+#include "../../x6502.h"
+#include "../../debug.h"
 
 #include "common/os_utils.h"
 
@@ -199,6 +201,137 @@ QString EmuScriptObject::getDir()
 	return QString(fceuExecutablePath());
 }
 //----------------------------------------------------
+//----  Memory Script Object
+//----------------------------------------------------
+MemoryScriptObject::MemoryScriptObject(QObject* parent)
+	: QObject(parent)
+{
+	script = qobject_cast<QtScriptInstance*>(parent);
+}
+//----------------------------------------------------
+MemoryScriptObject::~MemoryScriptObject()
+{
+}
+//----------------------------------------------------
+uint8_t MemoryScriptObject::readByte(int address)
+{
+	return GetMem(address);
+}
+//----------------------------------------------------
+uint8_t MemoryScriptObject::readByteUnsigned(int address)
+{
+	return GetMem(address);
+}
+//----------------------------------------------------
+int8_t MemoryScriptObject::readByteSigned(int address)
+{
+	return static_cast<int8_t>(GetMem(address));
+}
+//----------------------------------------------------
+uint16_t MemoryScriptObject::readWord(int addressLow, int addressHigh)
+{
+	// little endian, unless the high byte address is specified as a 2nd parameter
+	if (addressHigh < 0)
+	{
+		addressHigh = addressLow + 1;
+	}
+	uint16_t result = GetMem(addressLow) | (GetMem(addressHigh) << 8);
+	return result;
+}
+//----------------------------------------------------
+uint16_t MemoryScriptObject::readWordUnsigned(int addressLow, int addressHigh)
+{
+	// little endian, unless the high byte address is specified as a 2nd parameter
+	if (addressHigh < 0)
+	{
+		addressHigh = addressLow + 1;
+	}
+	uint16_t result = GetMem(addressLow) | (GetMem(addressHigh) << 8);
+	return result;
+}
+//----------------------------------------------------
+int16_t MemoryScriptObject::readWordSigned(int addressLow, int addressHigh)
+{
+	// little endian, unless the high byte address is specified as a 2nd parameter
+	if (addressHigh < 0)
+	{
+		addressHigh = addressLow + 1;
+	}
+	uint16_t result = GetMem(addressLow) | (GetMem(addressHigh) << 8);
+	return static_cast<int16_t>(result);
+}
+//----------------------------------------------------
+void MemoryScriptObject::writeByte(int address, int value)
+{
+	uint32_t A = address;
+	uint8_t  V = value;
+
+	if (A < 0x10000)
+	{
+		BWrite[A](A, V);
+	}
+}
+//----------------------------------------------------
+uint16_t MemoryScriptObject::getRegisterPC()
+{
+	return X.PC;
+}
+//----------------------------------------------------
+uint8_t MemoryScriptObject::getRegisterA()
+{
+	return X.A;
+}
+//----------------------------------------------------
+uint8_t MemoryScriptObject::getRegisterX()
+{
+	return X.X;
+}
+//----------------------------------------------------
+uint8_t MemoryScriptObject::getRegisterY()
+{
+	return X.Y;
+}
+//----------------------------------------------------
+uint8_t MemoryScriptObject::getRegisterS()
+{
+	return X.S;
+}
+//----------------------------------------------------
+uint8_t MemoryScriptObject::getRegisterP()
+{
+	return X.P;
+}
+//----------------------------------------------------
+void MemoryScriptObject::setRegisterPC(uint16_t v)
+{
+	X.PC = v;
+}
+//----------------------------------------------------
+void MemoryScriptObject::setRegisterA(uint8_t v)
+{
+	X.A = v;
+}
+//----------------------------------------------------
+void MemoryScriptObject::setRegisterX(uint8_t v)
+{
+	X.X = v;
+}
+//----------------------------------------------------
+void MemoryScriptObject::setRegisterY(uint8_t v)
+{
+	X.Y = v;
+}
+//----------------------------------------------------
+void MemoryScriptObject::setRegisterS(uint8_t v)
+{
+	X.S = v;
+}
+//----------------------------------------------------
+void MemoryScriptObject::setRegisterP(uint8_t v)
+{
+	X.P = v;
+}
+//----------------------------------------------------
 //----  Qt Script Instance
 //----------------------------------------------------
 QtScriptInstance::QtScriptInstance(QObject* parent)
@@ -207,15 +340,18 @@ QtScriptInstance::QtScriptInstance(QObject* parent)
 	QScriptDialog_t* win = qobject_cast<QScriptDialog_t*>(parent);
 
 	emu = new EmuScriptObject(this);
+	mem = new MemoryScriptObject(this);
 
 	if (win != nullptr)
 	{
 		dialog = win;
 		emu->setDialog(dialog);
+		mem->setDialog(dialog);
 	}
 	engine = new QJSEngine(nullptr);
 
 	emu->setEngine(engine);
+	mem->setEngine(engine);
 
 	configEngine();
 
@@ -262,6 +398,10 @@ int QtScriptInstance::configEngine()
 	QJSValue emuObject = engine->newQObject(emu);
 
 	engine->globalObject().setProperty("emu", emuObject);
+
+	QJSValue memObject = engine->newQObject(mem);
+
+	engine->globalObject().setProperty("memory", memObject);
 
 	QJSValue guiObject = engine->newQObject(this);
 
