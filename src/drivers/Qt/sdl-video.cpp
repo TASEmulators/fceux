@@ -168,7 +168,7 @@ void CalcVideoDimensions(void)
 	int iScale = nes_shm->video.xscale;
 	if ( s_sponge == 3 )
 	{
-		nes_shm->video.ncol = iScale*301;
+		nes_shm->video.ncol = iScale*(301-(ClipSidesOffset ? 21 : 0));
 	}
 	else
 	{
@@ -264,7 +264,7 @@ int InitVideo(FCEUGI *gi)
 	int iScale = nes_shm->video.xscale;
 	if ( s_sponge == 3 )
 	{
-		nes_shm->video.ncol = iScale*301;
+		nes_shm->video.ncol = iScale*(301-(ClipSidesOffset ? 21 : 0));
 	}
 	else
 	{
@@ -446,7 +446,7 @@ doBlitScreen(uint8_t *XBuf, uint8_t *dest)
 
 	if ( s_sponge == 3 )
 	{
-		w = ixScale*301;
+		w = ixScale*(301-(ClipSidesOffset ? 21 : 0));
 		bw = 256;
 	}
 	else
@@ -539,7 +539,7 @@ uint32 PtoV(double nx, double ny)
 
 	if ( nes_shm->video.preScaler == 3 )
 	{
-		x = (int)( nx * (double)nes_shm->video.ncol * (256.0/301.0) );
+		x = (int)( nx * (double)nes_shm->video.ncol * (256.0/(301.0-(ClipSidesOffset ? 21 : 0))) );
 	}
 	else
 	{
