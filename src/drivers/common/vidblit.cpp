@@ -859,7 +859,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale,
 			{
 			case 4:
 				if ( nes_ntsc && GameInfo && GameInfo->type!=GIT_NSF) {
-					int outxr = 301 - (ClipSidesOffset ? 21 : 0);
+					int outxr = 301 - (ClipSidesOffset ? 19 : 0);
 					//if(xr == 282) outxr = 282; //hack for windows
 					burst_phase ^= 1;
 					u8* srcD = XDBuf + (src-XBuf); // get deemphasis buffer

@@ -62,8 +62,10 @@ static int s_fullscreen = 0;
 static int noframe = 0;
 static int initBlitToHighDone = 0;
 
-#define NWIDTH	(256 - (s_clipSides ? 16 : 0))
-#define NOFFSET	(s_clipSides ? 8 : 0)
+#define NWIDTH	  (256 - (s_clipSides ? 16 : 0))
+#define NOFFSET	  (s_clipSides ? 8 : 0)
+
+#define NTSCWIDTH (301 - (s_clipSides ? 19 : 0))
 
 static int s_paletterefresh = 1;
 
@@ -168,7 +170,7 @@ void CalcVideoDimensions(void)
 	int iScale = nes_shm->video.xscale;
 	if ( s_sponge == 3 )
 	{
-		nes_shm->video.ncol = iScale*(301-(ClipSidesOffset ? 21 : 0));
+		nes_shm->video.ncol = iScale*NTSCWIDTH;
 	}
 	else
 	{
@@ -264,7 +266,7 @@ int InitVideo(FCEUGI *gi)
 	int iScale = nes_shm->video.xscale;
 	if ( s_sponge == 3 )
 	{
-		nes_shm->video.ncol = iScale*(301-(ClipSidesOffset ? 21 : 0));
+		nes_shm->video.ncol = iScale*NTSCWIDTH;
 	}
 	else
 	{
@@ -446,7 +448,7 @@ doBlitScreen(uint8_t *XBuf, uint8_t *dest)
 
 	if ( s_sponge == 3 )
 	{
-		w = ixScale*(301-(ClipSidesOffset ? 21 : 0));
+		w = ixScale*NTSCWIDTH;
 		bw = 256;
 	}
 	else
@@ -539,7 +541,7 @@ uint32 PtoV(double nx, double ny)
 
 	if ( nes_shm->video.preScaler == 3 )
 	{
-		x = (int)( nx * (double)nes_shm->video.ncol * (256.0/(301.0-(ClipSidesOffset ? 21 : 0))) );
+		x = (int)( nx * (double)nes_shm->video.ncol * (256.0/301.0) );
 	}
 	else
 	{
