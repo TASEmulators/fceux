@@ -245,6 +245,7 @@ extern void WinLuaOnStop(intptr_t hDlgAsInt);
 static lua_State *L;
 
 static int luaexiterrorcount = 8;
+static int luaCallbackErrorCounter = 0;
 
 // Are we running any code right now?
 static char *luaScriptName = NULL;
@@ -2096,7 +2097,7 @@ static const char *CallLuaTraceback(lua_State *L) {
 }
 
 
-void HandleCallbackError(lua_State* L)
+void HandleCallbackError(lua_State* L, bool stop)
 {
 	//if(L->errfunc || L->errorJmp)
 	//	luaL_error(L, "%s", lua_tostring(L,-1));
@@ -2118,7 +2119,13 @@ void HandleCallbackError(lua_State* L)
 		fprintf(stderr, "Lua thread bombed out: %s\n", errmsg);
 #endif
 
-		FCEU_LuaStop();
+		// If stop flag is true, destruct the lua engine immediately.
+		// else it will be destructed later at the next frame boundary when callback errors are detected.
+		if (stop)
+		{
+			FCEU_LuaStop();
+		}
+		luaCallbackErrorCounter++;
 	}
 }
 
@@ -2256,7 +2263,7 @@ static void CallRegisteredLuaMemHook_LuaMatch(unsigned int address, int size, un
 		if(/*info.*/ numMemHooks)
 		{
 //			lua_State* L = info.L;
-			if(L/* && !info.panic*/)
+			if( (L != nullptr) && (luaCallbackErrorCounter == 0) )
 			{
 #ifdef USE_INFO_STACK
 				infoStack.insert(infoStack.begin(), &info);
@@ -2280,7 +2287,8 @@ static void CallRegisteredLuaMemHook_LuaMatch(unsigned int address, int size, un
 						//RefreshScriptSpeedStatus();
 						if (errorcode)
 						{
-							HandleCallbackError(L);
+							// Defer Lua destruction until x6502 memory hooks can fully return.
+							HandleCallbackError(L, false);
 							//int uid = iter->first;
 							//HandleCallbackError(L,info,uid,true);
 						}
@@ -2329,7 +2337,7 @@ void CallRegisteredLuaFunctions(LuaCallID calltype)
 	{
 		errorcode = lua_pcall(L, 0, 0, 0);
 		if (errorcode)
-			HandleCallbackError(L);
+			HandleCallbackError(L, true);
 	}
 	else
 	{
@@ -6318,7 +6326,7 @@ void CallExitFunction()
 	}
 
 	if (errorcode)
-		HandleCallbackError(L);
+		HandleCallbackError(L, true);
 }
 
 void FCEU_LuaFrameBoundary()
@@ -6326,8 +6334,19 @@ void FCEU_LuaFrameBoundary()
 	//printf("Lua Frame\n");
 
 	// HA!
-	if (!L || !luaRunning)
+	if (L == nullptr)
+	{
 		return;
+	}
+	if (luaCallbackErrorCounter > 0)
+	{
+		FCEU_LuaStop();
+		return;
+	}
+	if (!luaRunning)
+	{
+		return;
+	}
 
 	// Our function needs calling
 	lua_settop(L,0);
@@ -6426,6 +6445,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 
 	//Reinit the error count
 	luaexiterrorcount = 8;
+	luaCallbackErrorCounter = 0;
 
 	if (!L) {
 
