@@ -1650,6 +1650,9 @@
     <ClInclude Include="..\src\debugsymboltable.h" />
     <ClInclude Include="..\src\ld65dbg.h" />
     <ClInclude Include="..\src\utils\mutex.h" />
+    <ClInclude Include="..\src\boards\rainbow_esp.h">
+      <Filter>boards</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">

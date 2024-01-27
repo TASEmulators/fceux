@@ -111,6 +111,12 @@ BrokeStudioFirmware::BrokeStudioFirmware()
 	this->default_server_settings_port = this->server_settings_port;
 #endif
 
+	// Clear UDP address pool
+	for (size_t i = 0; i < 16; i++) {
+		this->ipAddressPool[i].ipAddress = "";
+		this->ipAddressPool[i].port = 0;
+	}
+
 	// Init fake registered networks
 	this->networks = {{
 			{"EMULATOR_SSID", "EMULATOR_PASS", true},
@@ -280,10 +286,10 @@ void BrokeStudioFirmware::processBufferedMessage()
 		this->tx_messages.push_back({19, static_cast<uint8_t>(fromesp_cmds_t::ESP_FIRMWARE_VERSION), 17, 'E', 'M', 'U', 'L', 'A', 'T', 'O', 'R', '_', 'F', 'I', 'R', 'M', 'W', 'A', 'R', 'E'});
 		break;
 
-	case toesp_cmds_t::ESP_FACTORY_SETTINGS:
+	case toesp_cmds_t::ESP_FACTORY_RESET:
 		UDBG("[Rainbow] ESP received command ESP_FACTORY_SETTINGS\n");
 		UDBG("[Rainbow] ESP_FACTORY_SETTINGS has no use here\n");
-		this->tx_messages.push_back({2, static_cast<uint8_t>(fromesp_cmds_t::ESP_FACTORY_RESET), static_cast<uint8_t>(esp_factory_reset::ERROR_WHILE_RESETTING_CONFIG)});
+		this->tx_messages.push_back({2, static_cast<uint8_t>(fromesp_cmds_t::ESP_FACTORY_RESET), static_cast<uint8_t>(esp_factory_reset::ERROR_WHILE_SAVING_CONFIG)});
 		break;
 
 	case toesp_cmds_t::ESP_RESTART:
@@ -470,15 +476,15 @@ void BrokeStudioFirmware::processBufferedMessage()
 		if (message_size == 2)
 		{
 			server_protocol_t requested_protocol = static_cast<server_protocol_t>(this->rx_buffer.at(2));
-			if (requested_protocol > server_protocol_t::UDP)
+			if (requested_protocol > server_protocol_t::UDP_POOL)
 			{
-				UDBG("[Rainbow] ESP SET_SERVER_PROTOCOL: unknown protocol (%u)\n", static_cast<unsigned int>(requested_protocol));
+				UDBG("[Rainbow] SERVER_SET_PROTOCOL: unknown protocol (%u)\n", static_cast<unsigned int>(requested_protocol));
 			}
 			else
 			{
 				if (requested_protocol == server_protocol_t::TCP_SECURED)
 				{
-					UDBG("[Rainbow] SET_SERVER_PROTOCOL: protocol TCP_SECURED not supported, falling back to TCP\n");
+					UDBG("[Rainbow] SERVER_SET_PROTOCOL: protocol TCP_SECURED not supported, falling back to TCP\n");
 					requested_protocol = server_protocol_t::TCP;
 				}
 				this->active_protocol = requested_protocol;
@@ -601,6 +607,74 @@ void BrokeStudioFirmware::processBufferedMessage()
 		break;
 	}
 
+		// UDP ADDRESS POOL CMDS
+
+		case toesp_cmds_t::UDP_ADDR_POOL_CLEAR:
+			UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_CLEAR");
+			for(size_t i = 0; i < 16; i++) {
+				this->ipAddressPool[i].ipAddress = "";
+				this->ipAddressPool[i].port = 0;
+			}
+			break;
+
+		case toesp_cmds_t::UDP_ADDR_POOL_ADD:
+		{
+			UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_ADD");
+			int port =
+				(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
+				(static_cast<uint16_t>(this->rx_buffer.at(3)));
+			uint8_t len = this->rx_buffer.at(4);
+			if(len >= 16) break;
+			string ipAddress = string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + len);
+
+			for(size_t i = 0; i < 16; i++) {
+				if(this->ipAddressPool[i].ipAddress == ipAddress && this->ipAddressPool[i].port == port)
+					break;
+			}
+
+			for(size_t i = 0; i < 16; i++) {
+				if(this->ipAddressPool[i].ipAddress == "") {
+					this->ipAddressPool[i].ipAddress = ipAddress;
+					this->ipAddressPool[i].port = port;
+					break;
+				}
+			}
+
+			break;
+		}
+
+		case toesp_cmds_t::UDP_ADDR_POOL_REMOVE:
+		{
+			UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_REMOVE");
+			int port =
+				(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
+				(static_cast<uint16_t>(this->rx_buffer.at(3)));
+			uint8_t len = this->rx_buffer.at(4);
+			if(len >= 16) break;
+			string ipAddress = string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + len);
+
+			for(size_t i = 0; i < 16; i++) {
+				if(this->ipAddressPool[i].ipAddress == ipAddress && this->ipAddressPool[i].port == port) {
+					this->ipAddressPool[i].ipAddress = "";
+					this->ipAddressPool[i].port = 0;
+					break;
+				}
+			}
+			break;
+		}
+
+		case toesp_cmds_t::UDP_ADDR_POOL_SEND_MSG:
+		{
+			UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_SEND_MSG");
+			if (this->active_protocol == server_protocol_t::UDP_POOL) {
+				uint8_t const payload_size = static_cast<const uint8_t>(this->rx_buffer.size() - 2);
+				deque<uint8_t>::const_iterator payload_begin = this->rx_buffer.begin() + 2;
+				deque<uint8_t>::const_iterator payload_end = payload_begin + payload_size;
+				this->sendUdpDatagramToPool(payload_begin, payload_end);
+			}
+			break;
+		}
+
 	// NETWORK CMDS
 	// network commands are not relevant here, so we'll just use test/fake data
 	case toesp_cmds_t::NETWORK_SCAN:
@@ -619,8 +693,8 @@ void BrokeStudioFirmware::processBufferedMessage()
 			NUM_FAKE_NETWORKS
 			});
 		break;
-	case toesp_cmds_t::NETWORK_GET_DETAILS:
-		UDBG("[Rainbow] ESP received command NETWORK_GET_DETAILS\n");
+	case toesp_cmds_t::NETWORK_GET_SCANNED_DETAILS:
+		UDBG("[Rainbow] ESP received command NETWORK_GET_SCANNED_DETAILS\n");
 		if (message_size == 2)
 		{
 			uint8_t networkItem = this->rx_buffer.at(2);
@@ -938,10 +1012,10 @@ void BrokeStudioFirmware::processBufferedMessage()
 		{
 			if (this->working_file.active)
 			{
-			this->working_file.offset = this->rx_buffer.at(2);
-			if(message_size == 3) this->working_file.offset += this->rx_buffer.at(3) << 8;
-			if(message_size == 4) this->working_file.offset += this->rx_buffer.at(4) << 16;
-			if(message_size == 5) this->working_file.offset += this->rx_buffer.at(5) << 24;
+				this->working_file.offset = this->rx_buffer.at(2);
+				if(message_size == 3) this->working_file.offset += this->rx_buffer.at(3) << 8;
+				if(message_size == 4) this->working_file.offset += this->rx_buffer.at(4) << 16;
+				if(message_size == 5) this->working_file.offset += this->rx_buffer.at(5) << 24;
 			}
 		}
 		break;
@@ -1818,6 +1892,59 @@ void BrokeStudioFirmware::sendUdpDatagramToServer(I begin, I end)
 	}
 }
 
+template<class I>
+void BrokeStudioFirmware::sendUdpDatagramToPool(I begin, I end)
+{
+#if RAINBOW_DEBUG_ESP >= 1
+	FCEU_printf("RAINBOW %lu udp datagram to send", wall_clock_milli());
+#if RAINBOW_DEBUG_ESP >= 2
+	FCEU_printf(": ");
+	for (I cur = begin; cur < end; ++cur)
+	{
+		FCEU_printf("%02x ", *cur);
+	}
+#endif
+	FCEU_printf("\n");
+#endif
+
+	if(this->udp_socket == -1) return;
+
+	size_t message_size = end - begin;
+	vector<uint8_t> aggregated;
+	aggregated.reserve(message_size);
+	aggregated.insert(aggregated.end(), begin, end);
+
+	for(size_t i = 0; i < 16; i++) {
+		if(this->ipAddressPool[i].ipAddress != "") {
+
+			// Init UDP socket and store parsed address
+			std::pair<bool, sockaddr> res_dest_addr = this->resolve_address(this->ipAddressPool[i].ipAddress, this->ipAddressPool[i].port);
+			if(!res_dest_addr.first) {
+				continue;
+			}
+
+			sockaddr dest_addr = res_dest_addr.second;
+
+			ssize_t n = sendto(
+				this->udp_socket, cast_network_payload(aggregated.data()), static_cast<int>(aggregated.size()), 0,
+				&dest_addr, sizeof(sockaddr)
+			);
+
+			if(n == -1) {
+#ifdef _WIN32
+				char errmsg[ERR_MSG_SIZE];
+				errno_t r = strerror_s(errmsg, ERR_MSG_SIZE, errno);
+				UDBG("[Rainbow] UDP send failed: %s\n", string(errmsg));
+#else
+				UDBG("[Rainbow] UDP send failed: %s\n", strerror(errno));
+#endif
+			} else if(static_cast<size_t>(n) != message_size) {
+				UDBG("[Rainbow] UDP sent partial message");
+			}
+		}
+	}
+}
+
 template <class I>
 void BrokeStudioFirmware::sendTcpDataToServer(I begin, I end)
 {
@@ -1978,12 +2105,12 @@ void BrokeStudioFirmware::openConnection()
 	if (this->active_protocol == server_protocol_t::TCP)
 	{
 		// Resolve server's hostname
-		// std::pair<bool, sockaddr_in> server_addr = this->resolve_server_address();
-		std::pair<bool, sockaddr> server_addr = this->resolve_server_address();
-		if (!server_addr.first)
+		std::pair<bool, sockaddr> res_server_addr = this->resolve_address(this->server_settings_address, this->server_settings_port);
+		if (!res_server_addr.first)
 		{
 			return;
 		}
+		this->server_addr = res_server_addr.second;
 
 		// Create socket
 		this->tcp_socket = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -1998,7 +2125,7 @@ void BrokeStudioFirmware::openConnection()
 		}
 
 		// Connect to server
-		int connect_res = ::connect(this->tcp_socket, &server_addr.second, sizeof(sockaddr));
+		int connect_res = ::connect(this->tcp_socket, &this->server_addr, sizeof(sockaddr));
 		if (connect_res == -1)
 		{
 #ifdef _WIN32
@@ -2015,16 +2142,17 @@ void BrokeStudioFirmware::openConnection()
 		// TODO
 		UDBG("[Rainbow] TCP_SECURED not yet implemented");
 	}
-	else if (this->active_protocol == server_protocol_t::UDP)
+	else if(this->active_protocol == server_protocol_t::UDP || this->active_protocol == server_protocol_t::UDP_POOL)
 	{
-		// Init UDP socket and store parsed address
-		// std::pair<bool, sockaddr_in> server_addr = this->resolve_server_address();
-		std::pair<bool, sockaddr> server_addr = this->resolve_server_address();
-		if (!server_addr.first)
-		{
-			return;
+		if(this->active_protocol == server_protocol_t::UDP) {
+			// Init UDP socket and store parsed address
+			std::pair<bool, sockaddr> res_server_addr = this->resolve_address(this->server_settings_address, this->server_settings_port);
+			if (!res_server_addr.first)
+			{
+				return;
+			}
+			this->server_addr = res_server_addr.second;
 		}
-		this->server_addr = server_addr.second;
 
 		this->udp_socket = ::socket(AF_INET, SOCK_DGRAM, 0);
 		if (this->udp_socket == -1)
@@ -2126,8 +2254,7 @@ void BrokeStudioFirmware::receivePingResult()
 	});
 }
 
-// std::pair<bool, sockaddr_in> BrokeStudioFirmware::resolve_server_address()
-std::pair<bool, sockaddr> BrokeStudioFirmware::resolve_server_address()
+std::pair<bool, sockaddr> BrokeStudioFirmware::resolve_address(string address, uint16_t port)
 {
 	// Resolve IP address for hostname
 	bool result = false;
@@ -2138,9 +2265,9 @@ std::pair<bool, sockaddr> BrokeStudioFirmware::resolve_server_address()
 	sockaddr sa;
 	memset(&sa, 0, sizeof(sa));
 
-	if (getaddrinfo(this->server_settings_address.c_str(), std::to_string(this->server_settings_port).c_str(), &hint, &addrInfo) != 0)
+	if (getaddrinfo(address.c_str(), std::to_string(port).c_str(), &hint, &addrInfo) != 0)
 	{
-		UDBG("[Rainbow] Unable to resolve server's hostname (%s:%s)\n", this->server_settings_address.c_str(), std::to_string(this->server_settings_port).c_str());
+		UDBG("[Rainbow] Unable to resolve server's hostname (%s:%s)\n", address.c_str(), std::to_string(port).c_str());
 	}
 	else
 	{
@@ -2150,25 +2277,6 @@ std::pair<bool, sockaddr> BrokeStudioFirmware::resolve_server_address()
 
 	freeaddrinfo(addrInfo);
 	return std::make_pair(result, sa);
-
-	/*
-
-	sockaddr_in addr;
-
-	hostent *he = gethostbyname(this->server_settings_address.c_str());
-	if (he == NULL) {
-		UDBG("[Rainbow] unable to resolve server's hostname\n");
-		::memset(&addr, 0, sizeof(addr));
-		return std::make_pair(false, addr);
-	}
-
-	bzero(reinterpret_cast<void*>(&addr), sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(this->server_settings_port);
-	addr.sin_addr = *((in_addr*)he->h_addr);
-
-	return std::make_pair(true, addr);
-*/
 }
 
 namespace
