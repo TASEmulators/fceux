@@ -80,9 +80,9 @@ public:
 	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
 	void reset();
 
-	const QJSValue* getReadFunc(int address) const { return readFunc[address]; }
-	const QJSValue* getWriteFunc(int address) const { return writeFunc[address]; }
-	const QJSValue* getExecFunc(int address) const { return execFunc[address]; }
+	QJSValue* getReadFunc(int address) { return readFunc[address]; }
+	QJSValue* getWriteFunc(int address) { return writeFunc[address]; }
+	QJSValue* getExecFunc(int address) { return execFunc[address]; }
 private:
 	static constexpr int AddressRange = 0x10000;
 	QJSEngine* engine = nullptr;

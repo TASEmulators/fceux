@@ -206,11 +206,11 @@ QString EmuScriptObject::getDir()
 //----------------------------------------------------
 static void addressReadCallback(unsigned int address, unsigned int value, void *userData)
 {
-	const MemoryScriptObject* mem = static_cast<const MemoryScriptObject*>(userData);
+	MemoryScriptObject* mem = static_cast<MemoryScriptObject*>(userData);
 
 	if (mem != nullptr)
 	{
-		const QJSValue* func = mem->getReadFunc(address);
+		QJSValue* func = mem->getReadFunc(address);
 
 		if (func != nullptr)
 		{
@@ -223,11 +223,11 @@ static void addressReadCallback(unsigned int address, unsigned int value, void *
 //----------------------------------------------------
 static void addressWriteCallback(unsigned int address, unsigned int value, void *userData)
 {
-	const MemoryScriptObject* mem = static_cast<const MemoryScriptObject*>(userData);
+	MemoryScriptObject* mem = static_cast<MemoryScriptObject*>(userData);
 
 	if (mem != nullptr)
 	{
-		const QJSValue* func = mem->getWriteFunc(address);
+		QJSValue* func = mem->getWriteFunc(address);
 
 		if (func != nullptr)
 		{
@@ -240,11 +240,11 @@ static void addressWriteCallback(unsigned int address, unsigned int value, void 
 //----------------------------------------------------
 static void addressExecCallback(unsigned int address, unsigned int value, void *userData)
 {
-	const MemoryScriptObject* mem = static_cast<const MemoryScriptObject*>(userData);
+	MemoryScriptObject* mem = static_cast<MemoryScriptObject*>(userData);
 
 	if (mem != nullptr)
 	{
-		const QJSValue* func = mem->getExecFunc(address);
+		QJSValue* func = mem->getExecFunc(address);
 
 		if (func != nullptr)
 		{
