@@ -17,6 +17,7 @@ print "Executable: $exe\n";
 my $gdbCmdFile = "/tmp/gdbCmdFile";
 open CMD_FILE, ">$gdbCmdFile" or die "Error: Could not open file: $gdbCmdFile\n";
 print CMD_FILE "run\n";
+print CMD_FILE "list\n";
 print CMD_FILE "backtrace\n";
 close(CMD_FILE);
 
