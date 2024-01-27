@@ -78,11 +78,25 @@ public:
 
 	void setEngine(QJSEngine* _engine){ engine = _engine; }
 	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
+	void reset();
 
+	const QJSValue* getReadFunc(int address) const { return readFunc[address]; }
+	const QJSValue* getWriteFunc(int address) const { return writeFunc[address]; }
+	const QJSValue* getExecFunc(int address) const { return execFunc[address]; }
 private:
+	static constexpr int AddressRange = 0x10000;
 	QJSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	QtScriptInstance* script = nullptr;
+	QJSValue* readFunc[AddressRange] = { nullptr };
+	QJSValue* writeFunc[AddressRange] = { nullptr };
+	QJSValue* execFunc[AddressRange] = { nullptr };
+	int numReadFuncsRegistered = 0;
+	int numWriteFuncsRegistered = 0;
+	int numExecFuncsRegistered = 0;
+
+	void registerCallback(int type, const QJSValue& func, int address, int size = 1);
+	void unregisterCallback(int type, const QJSValue& func, int address, int size = 1);
 
 public slots:
 	Q_INVOKABLE  uint8_t readByte(int address);
@@ -104,6 +118,13 @@ public slots:
 	Q_INVOKABLE     void setRegisterY(uint8_t v);
 	Q_INVOKABLE     void setRegisterS(uint8_t v);
 	Q_INVOKABLE     void setRegisterP(uint8_t v);
+	Q_INVOKABLE     void registerRead(const QJSValue& func, int address, int size = 1);
+	Q_INVOKABLE     void registerWrite(const QJSValue& func, int address, int size = 1);
+	Q_INVOKABLE     void registerExec(const QJSValue& func, int address, int size = 1);
+	Q_INVOKABLE     void unregisterRead(const QJSValue& func, int address, int size = 1);
+	Q_INVOKABLE     void unregisterWrite(const QJSValue& func, int address, int size = 1);
+	Q_INVOKABLE     void unregisterExec(const QJSValue& func, int address, int size = 1);
+	Q_INVOKABLE     void unregisterAll();
 };
 
 class QtScriptInstance : public QObject

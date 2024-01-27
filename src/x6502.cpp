@@ -48,7 +48,7 @@ static X6502_MemHook* readMemHook = nullptr;
 static X6502_MemHook* writeMemHook = nullptr;
 static X6502_MemHook* execMemHook = nullptr;
 
-void X6502_MemHook::Add(enum X6502_MemHook::Type type, void (*func)(unsigned int address, unsigned int value) )
+void X6502_MemHook::Add(enum X6502_MemHook::Type type, void (*func)(unsigned int address, unsigned int value, void *userData), void *userData )
 {
 	X6502_MemHook** hookStart = nullptr;
 
@@ -75,10 +75,11 @@ void X6502_MemHook::Add(enum X6502_MemHook::Type type, void (*func)(unsigned int
 
 		while (hook->next != nullptr)
 		{
-			if (hook->func == func)
+			if ((hook->func == func) && (hook->userData == userData))
 			{
 				// Already registered
 				//printf("LUA MemHook Already Registered\n");
+				hook->refCount++;
 				return;
 			}
 			hook = hook->next;
@@ -86,6 +87,8 @@ void X6502_MemHook::Add(enum X6502_MemHook::Type type, void (*func)(unsigned int
 		X6502_MemHook* newHook = new X6502_MemHook();
 		newHook->type = type;
 		newHook->func = func;
+		newHook->userData = userData;
+		newHook->refCount = 1;
 		hook->next = newHook;
 	}
 	else
@@ -93,12 +96,14 @@ void X6502_MemHook::Add(enum X6502_MemHook::Type type, void (*func)(unsigned int
 		X6502_MemHook* newHook = new X6502_MemHook();
 		newHook->type = type;
 		newHook->func = func;
+		newHook->userData = userData;
+		newHook->refCount = 1;
 		*hookStart = newHook;
 	}
 	//printf("LUA MemHook Added: %p\n", func);
 }
 
-void X6502_MemHook::Remove(enum X6502_MemHook::Type type, void (*func)(unsigned int address, unsigned int value) )
+void X6502_MemHook::Remove(enum X6502_MemHook::Type type, void (*func)(unsigned int address, unsigned int value, void *userData), void *userData )
 {
 	X6502_MemHook** hookStart = nullptr;
 
@@ -126,18 +131,23 @@ void X6502_MemHook::Remove(enum X6502_MemHook::Type type, void (*func)(unsigned 
 
 		while (hook != nullptr)
 		{
-			if (hook->func == func)
+			if ((hook->func == func) && (hook->userData == userData))
 			{
-				if (prev != nullptr)
+				hook->refCount--;
+				
+				if (hook->refCount <= 0)
 				{
-					prev->next = hook->next;
+					if (prev != nullptr)
+					{
+						prev->next = hook->next;
+					}
+					else
+					{
+						*hookStart = hook->next;
+					}
+					delete hook;
+					//printf("LUA MemHook Removed: %p\n", func);
 				}
-				else
-				{
-					*hookStart = hook->next;
-				}
-				delete hook;
-				//printf("LUA MemHook Removed: %p\n", func);
 				return;
 			}
 			prev = hook;

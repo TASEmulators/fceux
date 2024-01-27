@@ -118,15 +118,15 @@ bool DemandLua()
 #endif
 }
 
-static void luaReadMemHook(unsigned int address, unsigned int value)
+static void luaReadMemHook(unsigned int address, unsigned int value, void *userData)
 {
 	CallRegisteredLuaMemHook(address, 1, value, LUAMEMHOOK_READ);
 }
-static void luaWriteMemHook(unsigned int address, unsigned int value)
+static void luaWriteMemHook(unsigned int address, unsigned int value, void *userData)
 {
 	CallRegisteredLuaMemHook(address, 1, value, LUAMEMHOOK_WRITE);
 }
-static void luaExecMemHook(unsigned int address, unsigned int value)
+static void luaExecMemHook(unsigned int address, unsigned int value, void *userData)
 {
 	CallRegisteredLuaMemHook(address, 1, value, LUAMEMHOOK_EXEC);
 }
@@ -6501,9 +6501,9 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 			lua_setfield(L, LUA_REGISTRYINDEX, luaMemHookTypeStrings[i]);
 		}
 
-		X6502_MemHook::Add( X6502_MemHook::Read , luaReadMemHook  );
-		X6502_MemHook::Add( X6502_MemHook::Write, luaWriteMemHook );
-		X6502_MemHook::Add( X6502_MemHook::Exec , luaExecMemHook  );
+		X6502_MemHook::Add( X6502_MemHook::Read , luaReadMemHook , nullptr );
+		X6502_MemHook::Add( X6502_MemHook::Write, luaWriteMemHook, nullptr );
+		X6502_MemHook::Add( X6502_MemHook::Exec , luaExecMemHook , nullptr );
 	}
 
 	// We make our thread NOW because we want it at the bottom of the stack.
@@ -6619,9 +6619,9 @@ void FCEU_LuaStop() {
 	//already killed
 	if (!L) return;
 
-	X6502_MemHook::Remove( X6502_MemHook::Read , luaReadMemHook  );
-	X6502_MemHook::Remove( X6502_MemHook::Write, luaWriteMemHook );
-	X6502_MemHook::Remove( X6502_MemHook::Exec , luaExecMemHook  );
+	X6502_MemHook::Remove( X6502_MemHook::Read , luaReadMemHook , nullptr );
+	X6502_MemHook::Remove( X6502_MemHook::Write, luaWriteMemHook, nullptr );
+	X6502_MemHook::Remove( X6502_MemHook::Exec , luaExecMemHook , nullptr );
 
 	// Since the script is exiting, we want to prevent an infinite loop.
 	// CallExitFunction() > HandleCallbackError() > FCEU_LuaStop() > CallExitFunction() ...

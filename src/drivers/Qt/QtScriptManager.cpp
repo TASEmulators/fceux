@@ -203,6 +203,58 @@ QString EmuScriptObject::getDir()
 //----------------------------------------------------
 //----  Memory Script Object
 //----------------------------------------------------
+//----------------------------------------------------
+static void addressReadCallback(unsigned int address, unsigned int value, void *userData)
+{
+	const MemoryScriptObject* mem = static_cast<const MemoryScriptObject*>(userData);
+
+	if (mem != nullptr)
+	{
+		const QJSValue* func = mem->getReadFunc(address);
+
+		if (func != nullptr)
+		{
+			QJSValueList args = { address, value };
+
+			func->call(args);
+		}
+	}
+}
+//----------------------------------------------------
+static void addressWriteCallback(unsigned int address, unsigned int value, void *userData)
+{
+	const MemoryScriptObject* mem = static_cast<const MemoryScriptObject*>(userData);
+
+	if (mem != nullptr)
+	{
+		const QJSValue* func = mem->getWriteFunc(address);
+
+		if (func != nullptr)
+		{
+			QJSValueList args = { address, value };
+
+			func->call(args);
+		}
+	}
+}
+//----------------------------------------------------
+static void addressExecCallback(unsigned int address, unsigned int value, void *userData)
+{
+	const MemoryScriptObject* mem = static_cast<const MemoryScriptObject*>(userData);
+
+	if (mem != nullptr)
+	{
+		const QJSValue* func = mem->getExecFunc(address);
+
+		if (func != nullptr)
+		{
+			QJSValueList args = { address, value };
+
+			func->call(args);
+		}
+	}
+}
+//----------------------------------------------------
 MemoryScriptObject::MemoryScriptObject(QObject* parent)
 	: QObject(parent)
 {
@@ -211,6 +263,12 @@ MemoryScriptObject::MemoryScriptObject(QObject* parent)
 //----------------------------------------------------
 MemoryScriptObject::~MemoryScriptObject()
 {
+	unregisterAll();
+}
+//----------------------------------------------------
+void MemoryScriptObject::reset()
+{
+	unregisterAll();
 }
 //----------------------------------------------------
 uint8_t MemoryScriptObject::readByte(int address)
@@ -332,6 +390,207 @@ void MemoryScriptObject::setRegisterP(uint8_t v)
 	X.P = v;
 }
 //----------------------------------------------------
+void MemoryScriptObject::registerCallback(int type, const QJSValue& func, int address, int size)
+{
+	int n=0;
+	int *numFuncsRegistered = nullptr;
+	QJSValue** funcArray = nullptr;
+
+	switch (type)
+	{
+		default:
+		case X6502_MemHook::Read:
+			funcArray = readFunc;
+			numFuncsRegistered = &numReadFuncsRegistered;
+			X6502_MemHook::Add(X6502_MemHook::Read, addressReadCallback, this);
+		break;
+		case X6502_MemHook::Write:
+			funcArray = writeFunc;
+			numFuncsRegistered = &numWriteFuncsRegistered;
+			X6502_MemHook::Add(X6502_MemHook::Write, addressWriteCallback, this);
+		break;
+		case X6502_MemHook::Exec:
+			funcArray = execFunc;
+			numFuncsRegistered = &numExecFuncsRegistered;
+			X6502_MemHook::Add(X6502_MemHook::Exec, addressExecCallback, this);
+		break;
+	}
+	n = *numFuncsRegistered;
+
+	if (func.isCallable())
+	{
+		for (int i=0; i<size; i++)
+		{
+			int addr = address + i;
+
+			if ( (addr >= 0) && (addr < AddressRange) )
+			{
+				if (funcArray[addr] != nullptr)
+				{
+					n--;
+					delete funcArray[addr];
+				}
+				funcArray[addr] = new QJSValue(func);
+				n++;
+			}
+		}
+	}
+	else
+	{
+		for (int i=0; i<size; i++)
+		{
+			int addr = address + i;
+
+			if ( (addr >= 0) && (addr < AddressRange) )
+			{
+				if (funcArray[addr] != nullptr)
+				{
+					n--;
+					delete funcArray[addr];
+				}
+				funcArray[addr] = nullptr;
+			}
+		}
+	}
+	*numFuncsRegistered = n;
+}
+//----------------------------------------------------
+void MemoryScriptObject::registerRead(const QJSValue& func, int address, int size)
+{
+	registerCallback(X6502_MemHook::Read, func, address, size);
+}
+//----------------------------------------------------
+void MemoryScriptObject::registerWrite(const QJSValue& func, int address, int size)
+{
+	registerCallback(X6502_MemHook::Write, func, address, size);
+}
+//----------------------------------------------------
+void MemoryScriptObject::registerExec(const QJSValue& func, int address, int size)
+{
+	registerCallback(X6502_MemHook::Exec, func, address, size);
+}
+//----------------------------------------------------
+void MemoryScriptObject::unregisterCallback(int type, const QJSValue& func, int address, int size)
+{
+	int n=0;
+	int *numFuncsRegistered = nullptr;
+	QJSValue** funcArray = nullptr;
+
+	switch (type)
+	{
+		default:
+		case X6502_MemHook::Read:
+			funcArray = readFunc;
+			numFuncsRegistered = &numReadFuncsRegistered;
+		break;
+		case X6502_MemHook::Write:
+			funcArray = writeFunc;
+			numFuncsRegistered = &numWriteFuncsRegistered;
+		break;
+		case X6502_MemHook::Exec:
+			funcArray = execFunc;
+			numFuncsRegistered = &numExecFuncsRegistered;
+		break;
+	}
+	n = *numFuncsRegistered;
+
+	if (func.isCallable())
+	{
+		for (int i=0; i<size; i++)
+		{
+			int addr = address + i;
+
+			if ( (addr >= 0) && (addr < AddressRange) )
+			{
+				if (funcArray[addr] != nullptr)
+				{
+					n--;
+					delete funcArray[addr];
+				}
+				funcArray[addr] = nullptr;
+			}
+		}
+	}
+	else
+	{
+		for (int i=0; i<size; i++)
+		{
+			int addr = address + i;
+
+			if ( (addr >= 0) && (addr < AddressRange) )
+			{
+				if (funcArray[addr] != nullptr)
+				{
+					n--;
+					delete funcArray[addr];
+				}
+				funcArray[addr] = nullptr;
+			}
+		}
+	}
+	*numFuncsRegistered = n;
+
+	if (0 <= numReadFuncsRegistered)
+	{
+		X6502_MemHook::Remove(X6502_MemHook::Read, addressReadCallback, this);
+	}
+	if (0 <= numWriteFuncsRegistered)
+	{
+		X6502_MemHook::Remove(X6502_MemHook::Write, addressWriteCallback, this);
+	}
+	if (0 <= numExecFuncsRegistered)
+	{
+		X6502_MemHook::Remove(X6502_MemHook::Exec, addressExecCallback, this);
+	}
+}
+//----------------------------------------------------
+void MemoryScriptObject::unregisterRead(const QJSValue& func, int address, int size)
+{
+	unregisterCallback(X6502_MemHook::Read, func, address, size);
+}
+//----------------------------------------------------
+void MemoryScriptObject::unregisterWrite(const QJSValue& func, int address, int size)
+{
+	unregisterCallback(X6502_MemHook::Write, func, address, size);
+}
+//----------------------------------------------------
+void MemoryScriptObject::unregisterExec(const QJSValue& func, int address, int size)
+{
+	unregisterCallback(X6502_MemHook::Exec, func, address, size);
+}
+//----------------------------------------------------
+void MemoryScriptObject::unregisterAll()
+{
+	X6502_MemHook::Remove(X6502_MemHook::Read, addressReadCallback, this);
+	X6502_MemHook::Remove(X6502_MemHook::Write, addressWriteCallback, this);
+	X6502_MemHook::Remove(X6502_MemHook::Exec, addressExecCallback, this);
+
+	for (int i=0; i<AddressRange; i++)
+	{
+		if (execFunc[i] != nullptr)
+		{
+			numExecFuncsRegistered--;
+			delete execFunc[i];
+		}
+		if (readFunc[i] != nullptr)
+		{
+			numReadFuncsRegistered--;
+			delete readFunc[i];
+		}
+		if (writeFunc[i] != nullptr)
+		{
+			numWriteFuncsRegistered--;
+			delete writeFunc[i];
+		}
+		execFunc[i] = nullptr;
+		readFunc[i] = nullptr;
+		writeFunc[i] = nullptr;
+	}
+	numReadFuncsRegistered = 0;
+	numWriteFuncsRegistered = 0;
+	numExecFuncsRegistered = 0;
+}
+//----------------------------------------------------
 //----  Qt Script Instance
 //----------------------------------------------------
 QtScriptInstance::QtScriptInstance(QObject* parent)
@@ -387,6 +646,7 @@ void QtScriptInstance::resetEngine()
 		ui_rootWidget->deleteLater();
 		ui_rootWidget = nullptr;
 	}
+	mem->reset();
 
 	configEngine();
 }
@@ -434,7 +694,10 @@ int QtScriptInstance::loadScriptFile( QString filepath )
 
 	if (evalResult.isError())
 	{
-		print(evalResult.toString());
+		QString msg;
+		msg += evalResult.property("lineNumber").toString() + ": ";
+		msg += evalResult.toString();
+		print(msg);
 		return -1;
 	}
 	else
@@ -442,9 +705,6 @@ int QtScriptInstance::loadScriptFile( QString filepath )
 		running = true;
 		//printf("Script Evaluation Success!\n");
 	}
-	//onFrameBeginCallback = engine->globalObject().property("onFrameBegin");
-	//onFrameFinishCallback = engine->globalObject().property("onFrameFinish");
-	//onScriptStopCallback = engine->globalObject().property("onScriptStop");
 
 	return 0;
 }
@@ -459,7 +719,7 @@ void QtScriptInstance::loadObjectChildren(QJSValue& jsObject, QObject* obj)
 
 		if (!name.isEmpty())
 		{
-			printf("Object: %s.%s\n", obj->objectName().toStdString().c_str(), child->objectName().toStdString().c_str());
+			//printf("Object: %s.%s\n", obj->objectName().toStdString().c_str(), child->objectName().toStdString().c_str());
 
 			QJSValue newJsObj = engine->newQObject(child);
 
@@ -581,6 +841,7 @@ int  QtScriptInstance::call(const QString& funcName, const QJSValueList& args)
 //----------------------------------------------------
 void QtScriptInstance::stopRunning()
 {
+	FCEU_WRAPPER_LOCK();
 	if (running)
 	{
 		if (onScriptStopCallback.isCallable())
@@ -588,7 +849,10 @@ void QtScriptInstance::stopRunning()
 			onScriptStopCallback.call();
 		}
 		running = false;
+
+		mem->reset();
 	}
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QtScriptInstance::onFrameBegin()
