@@ -160,6 +160,7 @@ typedef uint8 (*readfunc)(uint32 A);
 #endif
 
 #define  FCEU_UNUSED(x)   (void)(x)
+#define  FCEU_CRASH()     int *_dumbPointer = nullptr; *_dumbPointer = 0xdeadbeef
 
 #if FCEU_CPP_HAS_STD(201603L) || FCEU_HAS_CPP_ATTRIBUTE(maybe_unused)
 #define  FCEU_MAYBE_UNUSED  [[maybe_unused]]
