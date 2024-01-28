@@ -92,20 +92,20 @@ static DECLFW(M413Write) {
 	case 0xE000:
 	case 0xF000:
 		reg[V >> 6] = V & 0x3F;
-        Sync();
+		Sync();
 		break;
 	}
 }
 
 static void M413Power(void) {
-    serialAddress = 0;
-    serialControl = 0;
+	serialAddress = 0;
+	serialControl = 0;
 
-    IRQCount = 0;
-    IRQReload = 0;
-    IRQa = 0;
+	IRQCount = 0;
+	IRQReload = 0;
+	IRQa = 0;
 
-    reg[0] = 0;
+	reg[0] = 0;
 	reg[1] = 0;
 	reg[2] = 0;
 	reg[3] = 0;
@@ -114,11 +114,11 @@ static void M413Power(void) {
 	lreset = 0;
 
 	Sync();
-	
+
 	SetReadHandler(0x4800, 0x4FFF, M413ReadPCM);
 	SetReadHandler(0x5000, 0x7FFF, CartBR);
 	SetReadHandler(0x8000, 0xBFFF, CartBR);
-    SetReadHandler(0xC000, 0xCFFF, M413ReadPCM);
+	SetReadHandler(0xC000, 0xCFFF, M413ReadPCM);
 	SetReadHandler(0xD000, 0xFFFF, CartBR);
 
 	SetWriteHandler(0x8000, 0xFFFF, M413Write);
