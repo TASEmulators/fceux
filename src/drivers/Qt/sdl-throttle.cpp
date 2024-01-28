@@ -365,7 +365,12 @@ static int highPrecSleep( FCEU::timeStampRecord &ts )
 int
 SpeedThrottle(void)
 {
-	if ( (g_fpsScale >= 32) || (NoWaiting & 0x01) || turbo )
+	bool isEmuPaused = FCEUI_EmulationPaused() ? true : false;
+	bool noWaitActive = (NoWaiting & 0x01) ? true : false;
+	bool turboActive = (turbo || noWaitActive);
+
+	// If Emulator is paused, don't waste CPU cycles spinning on nothing.
+	if ( !isEmuPaused && ((g_fpsScale >= 32) || turboActive) )
 	{
 		return 0; /* Done waiting */
 	}
@@ -397,6 +402,16 @@ SpeedThrottle(void)
 		time_left = Nexttime - cur_time;
 	}
     
+	// If Emulator is paused, ensure that sleep time cannot be zero
+	// we don't want to waste a full CPU core on nothing.
+	if (isEmuPaused)
+	{
+		if (time_left.toMilliSeconds() < 1)
+		{
+			time_left.fromMilliSeconds(1);
+		}
+	}
+
 	if (time_left.toMilliSeconds() > 50)
 	{
 		time_left.fromMilliSeconds(50);
@@ -407,7 +422,7 @@ SpeedThrottle(void)
 	{
 		InFrame = 0;
 	}
-    
+
 	//fprintf(stderr, "attempting to sleep %Ld ms, frame complete=%s\n",
 	//	time_left, InFrame?"no":"yes");
 
