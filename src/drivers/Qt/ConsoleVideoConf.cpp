@@ -123,8 +123,8 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	vbox1->addLayout( hbox1 );
 
-	// Enable OpenGL Linear Filter Checkbox
-	gl_LF_chkBox  = new QCheckBox( tr("Enable OpenGL Linear Filter") );
+	// Enable Linear Filter Checkbox
+	gl_LF_chkBox  = new QCheckBox( tr("Enable Linear Filter") );
 
 	setCheckBoxFromProperty( gl_LF_chkBox  , "SDL.OpenGLip");
 
