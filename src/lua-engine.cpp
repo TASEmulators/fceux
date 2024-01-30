@@ -663,13 +663,6 @@ static int emu_loadrom(lua_State *L)
 		extern void LoadRecentRom(int slot);
 		LoadRecentRom(0);
 	}
-	if ( GameInfo )
-	{
-		//printf("Currently Loaded ROM: '%s'\n", GameInfo->filename );
-		lua_pushstring(L, GameInfo->filename);
-		return 1;
-	}
-	return 0;
 #elif  defined(__QT_DRIVER__)
 	const char *nameo2 = luaL_checkstring(L,1);
 	std::string nameo;
@@ -685,15 +678,17 @@ static int emu_loadrom(lua_State *L)
 	//	//printf("Failed to Load ROM: '%s'\n", nameo );
 	//	reloadLastGame();
 	//}
+#endif
+
+#if defined(__WIN_DRIVER__) || defined(__QT_DRIVER__)
 	if ( GameInfo )
 	{
 		//printf("Currently Loaded ROM: '%s'\n", GameInfo->filename );
 		lua_pushstring(L, GameInfo->filename);
 		return 1;
-	} else {
-		return 0;
 	}
 #endif
+
 	return 0;
 }
 
@@ -1507,12 +1502,18 @@ static int rom_getfilename(lua_State *L) {
 
 static int rom_gethash(lua_State *L) {
 	const char *type = luaL_checkstring(L, 1);
-	MD5DATA md5hash = GameInfo->MD5;
+	if (GameInfo != nullptr)
+	{
+		MD5DATA md5hash = GameInfo->MD5;
 
-	if      (!type)                    lua_pushstring(L, "");
-	else if (!stricmp(type, "md5"))    lua_pushstring(L, md5_asciistr(md5hash));
-	else if (!stricmp(type, "base64")) lua_pushstring(L, BytesToString(md5hash.data, MD5DATA::size).c_str());
-	else                               lua_pushstring(L, "");
+		if (!type)                         lua_pushstring(L, "");
+		else if (!stricmp(type, "md5"))    lua_pushstring(L, md5_asciistr(md5hash));
+		else if (!stricmp(type, "base64")) lua_pushstring(L, BytesToString(md5hash.data, MD5DATA::size).c_str());
+		else                               lua_pushstring(L, "");
+	}
+	else
+		lua_pushnil(L);
+
 	return 1;
 }
 
@@ -2077,7 +2078,7 @@ static int memory_setregister(lua_State *L)
 }
 
 // Forces a stack trace and returns the string
-static const char *CallLuaTraceback(lua_State *L) {
+static const char *CallLuaTraceback(lua_State *L, int msgDepth = -1) {
 	lua_getfield(L, LUA_GLOBALSINDEX, "debug");
 	if (!lua_istable(L, -1)) {
 		lua_pop(L, 1);
@@ -2090,20 +2091,23 @@ static const char *CallLuaTraceback(lua_State *L) {
 		return "";
 	}
 
-	lua_pushvalue(L, 1);
+	if (msgDepth < 0)
+		msgDepth -= 2; // We pushed 2 onto the stack
+
+	lua_pushvalue(L, msgDepth);
 	lua_call(L, 1, 1);
 
 	return lua_tostring(L, -1);
 }
 
 
-void HandleCallbackError(lua_State* L, bool stop)
+void HandleCallbackError(lua_State* L, bool stop, int msgDepth = -1)
 {
 	//if(L->errfunc || L->errorJmp)
 	//	luaL_error(L, "%s", lua_tostring(L,-1));
 	//else
 	{
-		const char *trace = CallLuaTraceback(L);
+		const char *trace = CallLuaTraceback(L, msgDepth);
 
 		lua_pushnil(L);
 		lua_setfield(L, LUA_REGISTRYINDEX, guiCallbackTable);
