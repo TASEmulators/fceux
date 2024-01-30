@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <QColor>
 #include <QWidget>
 #include <QDialog>
 #include <QTabWidget>
@@ -32,36 +31,6 @@
 
 class QScriptDialog_t;
 class QtScriptInstance;
-
-namespace JS
-{
-
-class ColorScriptObject: public QObject
-{
-	Q_OBJECT
-	Q_PROPERTY(int red READ getRed WRITE setRed)
-	Q_PROPERTY(int green READ getGreen WRITE setGreen)
-	Q_PROPERTY(int blue READ getBlue WRITE setBlue)
-	Q_PROPERTY(int palette READ getPalette WRITE setPalette)
-public:
-	Q_INVOKABLE ColorScriptObject(int r=0, int g=0, int b=0);
-	~ColorScriptObject();
-
-private:
-	QColor color;
-	int    _palette;
-	static int numInstances;
-
-public slots:
-	Q_INVOKABLE  int getRed(){ return color.red(); }
-	Q_INVOKABLE  int getGreen(){ return color.green(); }
-	Q_INVOKABLE  int getBlue(){ return color.blue(); }
-	Q_INVOKABLE  void setRed(int r){ color.setRed(r); }
-	Q_INVOKABLE  void setGreen(int g){ color.setGreen(g); }
-	Q_INVOKABLE  void setBlue(int b){ color.setBlue(b); }
-	Q_INVOKABLE  int getPalette(){ return _palette; }
-	Q_INVOKABLE  void setPalette(int p){ _palette = p; }
-};
 
 class EmuScriptObject: public QObject
 {
@@ -96,9 +65,7 @@ public slots:
 	Q_INVOKABLE  void message(const QString& msg);
 	Q_INVOKABLE  void speedMode(const QString& mode);
 	Q_INVOKABLE  bool loadRom(const QString& romPath);
-	Q_INVOKABLE  bool onEmulationThread();
 	Q_INVOKABLE  QString getDir();
-	Q_INVOKABLE  QJSValue getScreenPixel(int x, int y, bool useBackup = false);
 
 };
 
@@ -159,7 +126,6 @@ public slots:
 	Q_INVOKABLE     void unregisterExec(const QJSValue& func, int address, int size = 1);
 	Q_INVOKABLE     void unregisterAll();
 };
-} // JS
 
 class QtScriptInstance : public QObject
 {
@@ -180,23 +146,21 @@ public:
 
 	int  throwError(QJSValue::ErrorType errorType, const QString &message = QString());
 
-	QObject* getObjectParent();
 	QJSEngine* getEngine(){ return engine; };
 private:
 
-	int  initEngine();
-	void shutdownEngine();
+	int configEngine();
 	void printSymbols(QJSValue& val, int iter = 0);
 	void loadObjectChildren(QJSValue& jsObject, QObject* obj);
 
 	QJSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
-	JS::EmuScriptObject* emu = nullptr;
-	JS::MemoryScriptObject* mem = nullptr;
+	EmuScriptObject* emu = nullptr;
+	MemoryScriptObject* mem = nullptr;
 	QWidget* ui_rootWidget = nullptr;
-	QJSValue *onFrameBeginCallback = nullptr;
-	QJSValue *onFrameFinishCallback = nullptr;
-	QJSValue *onScriptStopCallback = nullptr;
+	QJSValue onFrameBeginCallback;
+	QJSValue onFrameFinishCallback;
+	QJSValue onScriptStopCallback;
 	bool running = false;
 
 public slots:
@@ -206,8 +170,6 @@ public slots:
 	Q_INVOKABLE  void registerBefore(const QJSValue& func);
 	Q_INVOKABLE  void registerAfter(const QJSValue& func);
 	Q_INVOKABLE  void registerStop(const QJSValue& func);
-	Q_INVOKABLE  bool onGuiThread();
-	Q_INVOKABLE  bool onEmulationThread();
 };
 
 class QtScriptManager : public QObject

@@ -1980,6 +1980,10 @@ FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int
     }
 DUMMY(FCEUD_HideMenuToggle)
 DUMMY(FCEUD_MovieReplayFrom)
+//DUMMY(FCEUD_AviRecordTo)
+//DUMMY(FCEUD_AviStop)
+//void FCEUI_AviVideoUpdate(const unsigned char* buffer) { }
+//bool FCEUI_AviIsRecording(void) {return false;}
 void FCEUI_UseInputPreset(int preset) { }
 bool FCEUD_PauseAfterPlayback() { return pauseAfterPlayback; }
 
