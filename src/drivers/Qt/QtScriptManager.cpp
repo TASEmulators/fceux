@@ -256,7 +256,9 @@ QJSValue EmuScriptObject::getScreenPixel(int x, int y, bool useBackup)
 
 	QJSValue jsVal = engine->newQObject(pixelObj);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 	QJSEngine::setObjectOwnership( pixelObj, QJSEngine::JavaScriptOwnership);
+#endif
 
 	return jsVal;
 }
