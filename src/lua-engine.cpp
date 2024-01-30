@@ -357,9 +357,6 @@ static void FCEU_LuaOnStop()
 #ifdef __WIN_DRIVER__
 	TaseditorDisableManualFunctionIfNeeded();
 #endif
-
-	if (info_onstop)
-		info_onstop(info_uid);
 }
 
 
@@ -1491,12 +1488,18 @@ static int rom_getfilename(lua_State *L) {
 
 static int rom_gethash(lua_State *L) {
 	const char *type = luaL_checkstring(L, 1);
-	MD5DATA md5hash = GameInfo->MD5;
+	if (GameInfo != nullptr)
+	{
+		MD5DATA md5hash = GameInfo->MD5;
 
-	if      (!type)                    lua_pushstring(L, "");
-	else if (!stricmp(type, "md5"))    lua_pushstring(L, md5_asciistr(md5hash));
-	else if (!stricmp(type, "base64")) lua_pushstring(L, BytesToString(md5hash.data, MD5DATA::size).c_str());
-	else                               lua_pushstring(L, "");
+		if (!type)                         lua_pushstring(L, "");
+		else if (!stricmp(type, "md5"))    lua_pushstring(L, md5_asciistr(md5hash));
+		else if (!stricmp(type, "base64")) lua_pushstring(L, BytesToString(md5hash.data, MD5DATA::size).c_str());
+		else                               lua_pushstring(L, "");
+	}
+	else
+		lua_pushnil(L);
+
 	return 1;
 }
 
@@ -6627,6 +6630,9 @@ void FCEU_LuaStop() {
 	#ifdef __WIN_DRIVER__
 	CoInitialize(0);
 	#endif
+
+	if (info_onstop)
+		info_onstop(info_uid);
 
 	//lua_gc(L,LUA_GCCOLLECT,0);
 
