@@ -41,6 +41,7 @@
 
 #include "../../fceu.h"
 #include "../../movie.h"
+#include "../../video.h"
 #include "../../x6502.h"
 #include "../../debug.h"
 
@@ -55,6 +56,35 @@
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleWindow.h"
 
+// pix format for JS graphics
+#define BUILD_PIXEL_ARGB8888(A,R,G,B) (((int) (A) << 24) | ((int) (R) << 16) | ((int) (G) << 8) | (int) (B))
+#define DECOMPOSE_PIXEL_ARGB8888(PIX,A,R,G,B) { (A) = ((PIX) >> 24) & 0xff; (R) = ((PIX) >> 16) & 0xff; (G) = ((PIX) >> 8) & 0xff; (B) = (PIX) & 0xff; }
+#define JS_BUILD_PIXEL BUILD_PIXEL_ARGB8888
+#define JS_DECOMPOSE_PIXEL DECOMPOSE_PIXEL_ARGB8888
+#define JS_PIXEL_A(PIX) (((PIX) >> 24) & 0xff)
+#define JS_PIXEL_R(PIX) (((PIX) >> 16) & 0xff)
+#define JS_PIXEL_G(PIX) (((PIX) >> 8) & 0xff)
+#define JS_PIXEL_B(PIX) ((PIX) & 0xff)
+
+namespace JS
+{
+//----------------------------------------------------
+//----  Color Object
+//----------------------------------------------------
+int ColorScriptObject::numInstances = 0;
+
+ColorScriptObject::ColorScriptObject(int r, int g, int b)
+	: QObject(), color(r, g, b), _palette(0)
+{
+	numInstances++;
+	//printf("ColorScriptObject(r,g,b) %p Constructor: %i\n", this, numInstances);
+}
+//----------------------------------------------------
+ColorScriptObject::~ColorScriptObject()
+{
+	numInstances--;
+	//printf("ColorScriptObject %p Destructor: %i\n", this, numInstances);
+}
 //----------------------------------------------------
 //----  EMU Script Object
 //----------------------------------------------------
@@ -196,9 +226,39 @@ bool EmuScriptObject::loadRom(const QString& romPath)
 	return ret != 0;
 }
 //----------------------------------------------------
+bool EmuScriptObject::onEmulationThread()
+{
+	bool isEmuThread = (consoleWindow != nullptr) && 
+		(QThread::currentThread() == consoleWindow->emulatorThread);
+	return isEmuThread;
+}
+//----------------------------------------------------
 QString EmuScriptObject::getDir()
 {
 	return QString(fceuExecutablePath());
+}
+//----------------------------------------------------
+QJSValue EmuScriptObject::getScreenPixel(int x, int y, bool useBackup)
+{
+	int r,g,b,p;
+	uint32_t pixel = GetScreenPixel(x,y,useBackup);
+	r = JS_PIXEL_R(pixel);
+	g = JS_PIXEL_G(pixel);
+	b = JS_PIXEL_B(pixel);
+
+	p = GetScreenPixelPalette(x,y,useBackup);
+
+	ColorScriptObject* pixelObj = new ColorScriptObject(r, g, b);
+
+	pixelObj->setPalette(p);
+
+	pixelObj->moveToThread(QApplication::instance()->thread());
+
+	QJSValue jsVal = engine->newQObject(pixelObj);
+
+	QJSEngine::setObjectOwnership( pixelObj, QJSEngine::JavaScriptOwnership);
+
+	return jsVal;
 }
 //----------------------------------------------------
 //----  Memory Script Object
@@ -590,6 +650,7 @@ void MemoryScriptObject::unregisterAll()
 	numWriteFuncsRegistered = 0;
 	numExecFuncsRegistered = 0;
 }
+} // JS
 //----------------------------------------------------
 //----  Qt Script Instance
 //----------------------------------------------------
@@ -598,47 +659,64 @@ QtScriptInstance::QtScriptInstance(QObject* parent)
 {
 	QScriptDialog_t* win = qobject_cast<QScriptDialog_t*>(parent);
 
-	emu = new EmuScriptObject(this);
-	mem = new MemoryScriptObject(this);
-
 	if (win != nullptr)
 	{
 		dialog = win;
-		emu->setDialog(dialog);
-		mem->setDialog(dialog);
 	}
-	engine = new QJSEngine(nullptr);
 
-	emu->setEngine(engine);
-	mem->setEngine(engine);
-
-	configEngine();
+	initEngine();
 
 	QtScriptManager::getInstance()->addScriptInstance(this);
 }
 //----------------------------------------------------
 QtScriptInstance::~QtScriptInstance()
 {
-	if (engine != nullptr)
-	{
-		engine->deleteLater();
-		engine = nullptr;
-	}
 	QtScriptManager::getInstance()->removeScriptInstance(this);
+
+	shutdownEngine();
 
 	//printf("QtScriptInstance Destroyed\n");
 }
 //----------------------------------------------------
-void QtScriptInstance::resetEngine()
+void QtScriptInstance::shutdownEngine()
 {
 	running = false;
 
+	if (onFrameBeginCallback != nullptr)
+	{
+		delete onFrameBeginCallback;
+		onFrameBeginCallback = nullptr;
+	}
+	if (onFrameFinishCallback != nullptr)
+	{
+		delete onFrameFinishCallback;
+		onFrameFinishCallback = nullptr;
+	}
+	if (onScriptStopCallback != nullptr)
+	{
+		delete onScriptStopCallback;
+		onScriptStopCallback = nullptr;
+	}
+
 	if (engine != nullptr)
 	{
-		engine->deleteLater();
+		engine->collectGarbage();
+		//engine->deleteLater();
+		delete engine;
 		engine = nullptr;
 	}
-	engine = new QJSEngine(nullptr);
+
+	if (emu != nullptr)
+	{
+		delete emu;
+		emu = nullptr;
+	}
+	if (mem != nullptr)
+	{
+		mem->reset();
+		delete mem;
+		mem = nullptr;
+	}
 
 	if (ui_rootWidget != nullptr)
 	{
@@ -646,14 +724,28 @@ void QtScriptInstance::resetEngine()
 		ui_rootWidget->deleteLater();
 		ui_rootWidget = nullptr;
 	}
-	mem->reset();
-
-	configEngine();
 }
 //----------------------------------------------------
-int QtScriptInstance::configEngine()
+void QtScriptInstance::resetEngine()
 {
+	shutdownEngine();
+	initEngine();
+}
+//----------------------------------------------------
+int QtScriptInstance::initEngine()
+{
+	engine = new QJSEngine(this);
+
+	emu = new JS::EmuScriptObject(this);
+	mem = new JS::MemoryScriptObject(this);
+
+	emu->setDialog(dialog);
+	mem->setDialog(dialog);
+
 	engine->installExtensions(QJSEngine::ConsoleExtension);
+
+	emu->setEngine(engine);
+	mem->setEngine(engine);
 
 	QJSValue emuObject = engine->newQObject(emu);
 
@@ -667,9 +759,9 @@ int QtScriptInstance::configEngine()
 
 	engine->globalObject().setProperty("gui", guiObject);
 
-	onFrameBeginCallback = QJSValue();
-	onFrameFinishCallback = QJSValue();
-	onScriptStopCallback = QJSValue();
+	// Class Type Definitions for Script Use
+	QJSValue jsMetaObject = engine->newQMetaObject(&JS::ColorScriptObject::staticMetaObject);
+	engine->globalObject().setProperty("Color", jsMetaObject);
 
 	return 0;
 }
@@ -757,17 +849,29 @@ void QtScriptInstance::loadUI(const QString& uiFilePath)
 //----------------------------------------------------
 void QtScriptInstance::registerBefore(const QJSValue& func)
 {
-	onFrameBeginCallback = func;
+	if (onFrameBeginCallback != nullptr)
+	{
+		delete onFrameBeginCallback;
+	}
+	onFrameBeginCallback = new QJSValue(func);
 }
 //----------------------------------------------------
 void QtScriptInstance::registerAfter(const QJSValue& func)
 {
-	onFrameFinishCallback = func;
+	if (onFrameFinishCallback != nullptr)
+	{
+		delete onFrameFinishCallback;
+	}
+	onFrameFinishCallback = new QJSValue(func);
 }
 //----------------------------------------------------
 void QtScriptInstance::registerStop(const QJSValue& func)
 {
-	onScriptStopCallback = func;
+	if (onScriptStopCallback != nullptr)
+	{
+		delete onScriptStopCallback;
+	}
+	onScriptStopCallback = new QJSValue(func);
 }
 //----------------------------------------------------
 void QtScriptInstance::print(const QString& msg)
@@ -776,6 +880,23 @@ void QtScriptInstance::print(const QString& msg)
 	{
 		dialog->logOutput(msg);
 	}
+	else
+	{
+		qDebug() << msg;
+	}
+}
+//----------------------------------------------------
+bool QtScriptInstance::onEmulationThread()
+{
+	bool isEmuThread = (consoleWindow != nullptr) && 
+		(QThread::currentThread() == consoleWindow->emulatorThread);
+	return isEmuThread;
+}
+//----------------------------------------------------
+bool QtScriptInstance::onGuiThread()
+{
+	bool isGuiThread = (QThread::currentThread() == QApplication::instance()->thread());
+	return isGuiThread;
 }
 //----------------------------------------------------
 int QtScriptInstance::throwError(QJSValue::ErrorType errorType, const QString &message)
@@ -844,9 +965,14 @@ void QtScriptInstance::stopRunning()
 	FCEU_WRAPPER_LOCK();
 	if (running)
 	{
-		if (onScriptStopCallback.isCallable())
+		if (onScriptStopCallback != nullptr && onScriptStopCallback->isCallable())
 		{
-			onScriptStopCallback.call();
+			QJSValue callResult = onScriptStopCallback->call();
+
+			if (callResult.isError())
+			{
+				print(callResult.toString());
+			}
 		}
 		running = false;
 
@@ -857,17 +983,29 @@ void QtScriptInstance::stopRunning()
 //----------------------------------------------------
 void QtScriptInstance::onFrameBegin()
 {
-	if (running && onFrameBeginCallback.isCallable())
+	if (running && onFrameBeginCallback != nullptr && onFrameBeginCallback->isCallable())
 	{
-		onFrameBeginCallback.call();
+		QJSValue callResult = onFrameBeginCallback->call();
+
+		if (callResult.isError())
+		{
+			print(callResult.toString());
+			running = false;
+		}
 	}
 }
 //----------------------------------------------------
 void QtScriptInstance::onFrameFinish()
 {
-	if (running && onFrameFinishCallback.isCallable())
+	if (running && onFrameFinishCallback != nullptr && onFrameFinishCallback->isCallable())
 	{
-		onFrameFinishCallback.call();
+		QJSValue callResult = onFrameFinishCallback->call();
+
+		if (callResult.isError())
+		{
+			print(callResult.toString());
+			running = false;
+		}
 	}
 }
 //----------------------------------------------------
@@ -1122,7 +1260,10 @@ QScriptDialog_t::~QScriptDialog_t(void)
 
 	periodicTimer->stop();
 
+	clearPropertyTree();
+
 	scriptInstance->stopRunning();
+	delete scriptInstance;
 
 	settings.setValue("QScriptWindow/geometry", saveGeometry());
 }

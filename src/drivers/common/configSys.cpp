@@ -413,6 +413,25 @@ Config::getOption(const std::string &name,
     return 0;
 }
 
+#ifdef __QT_DRIVER__
+int
+Config::getOption(const std::string &name,
+                  QString *value) const
+{
+    std::map<std::string, std::string>::const_iterator opt_i;
+
+    // confirm that the option exists
+    opt_i = _strOptMap.find(name);
+    if(opt_i == _strOptMap.end()) {
+        return -1;
+    }
+
+    // get the option
+    (*value) = QString::fromStdString(opt_i->second);
+    return 0;
+}
+#endif
+
 int
 Config::getOption(const std::string &name,
                   const char **value) const

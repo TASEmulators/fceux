@@ -43,7 +43,7 @@
 static int writeQPaletteToFile( const char *path, QPalette *pal );
 static int readQPaletteFromFile( const char *path, QPalette *pal );
 
-static GuiPaletteEditDialog_t *editDialog = NULL;
+static GuiPaletteEditDialog_t *editDialog = nullptr;
 //----------------------------------------------------
 GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	: QDialog(parent)
@@ -590,7 +590,14 @@ fceuStyle::fceuStyle(QStyle *style) : QProxyStyle(style)
 {
 	//printf("New Style!!!\n");
 
-	setObjectName( style->objectName() );
+	if (style != nullptr)
+	{
+		setObjectName( style->objectName() );
+	}
+	else
+	{
+		setObjectName("fusion");
+	}
 }
 
 fceuStyle::~fceuStyle(void)
@@ -609,25 +616,21 @@ fceuStyle::~fceuStyle(void)
 
 QStyle *fceuStyle::styleBase(QStyle *style) const
 {
-	std::string s;
-	static QStyle *base;
+	static QStyle *base = nullptr;
+#ifdef WIN32
+	//QString defaultStyle("windows"); // fusion is much more stable and consistent.
+	QString styleName("fusion");
+#else
+	QString styleName("fusion");
+#endif
 
-	if ( g_config != NULL )
+	if ( g_config != nullptr )
 	{
-		g_config->getOption("SDL.GuiStyle", &s );
+		g_config->getOption("SDL.GuiStyle", &styleName );
 	}
 
-	if ( s.size() == 0 )
 	{
 		int i, idx = -1;
-#ifdef WIN32
-		//QString defaultStyle("windows"); // fusion is much more stable and consistent.
-		QString defaultStyle("fusion");
-#elif __APPLE__
-		QString defaultStyle("fusion");
-#else
-		QString defaultStyle("fusion");
-#endif
 
 		QStringList styleKeys = QStyleFactory::keys();
 
@@ -635,7 +638,7 @@ QStyle *fceuStyle::styleBase(QStyle *style) const
 		{
 			//printf("Style: '%s'\n", styleKeys[i].toStdString().c_str() );
 
-			if ( defaultStyle.compare( styleKeys[i], Qt::CaseInsensitive ) == 0 )
+			if ( styleName.compare( styleKeys[i], Qt::CaseInsensitive ) == 0 )
 			{
 				//printf("Style Match: %s\n", styleKeys[i].toStdString().c_str() );
 				idx = i;
@@ -645,17 +648,13 @@ QStyle *fceuStyle::styleBase(QStyle *style) const
 
 		if ( (idx >= 0) && (idx < styleKeys.size()) )
 		{
-			s = styleKeys[idx].toStdString();
-		}
-		else
-		{
-			s.assign("fusion");
+			styleName = styleKeys[idx];
 		}
 	}
 
-	if ( style == NULL )
+	if ( style == nullptr )
 	{
-		base = QStyleFactory::create(QString::fromStdString(s));
+		base = QStyleFactory::create(styleName);
 	}
 	else
 	{
@@ -772,7 +771,7 @@ void fceuStyle::polish(QApplication *app)
 	}
 	else
 	{
-		app->setStyleSheet(NULL);
+		app->setStyleSheet(nullptr);
 	}
 }
 //----------------------------------------------------
@@ -852,7 +851,7 @@ static const char *getRoleText( QPalette::ColorRole role )
 			rTxt = "NoRole";
 		break;
 		default:
-			rTxt = NULL;
+			rTxt = nullptr;
 		break;
 	}
 	return rTxt;
@@ -869,7 +868,7 @@ static int writeQPaletteToFile( const char *path, QPalette *pal )
 
 	fp = fopen( path, "w");
 
-	if ( fp == NULL )
+	if ( fp == nullptr )
 	{
 		printf("Error: Failed to Open File for writing: '%s'\n", path );
 		return -1;
@@ -928,7 +927,7 @@ static int readQPaletteFromFile( const char *path, QPalette *pal )
 
 	fp = fopen( path, "r");
 
-	if ( fp == NULL )
+	if ( fp == nullptr )
 	{
 		printf("Error: Failed to Open File for writing: '%s'\n", path );
 		return -1;
@@ -987,7 +986,7 @@ static int readQPaletteFromFile( const char *path, QPalette *pal )
 			continue;
 		}
 
-		rTxtMatch = NULL;
+		rTxtMatch = nullptr;
 
 		r = QPalette::WindowText;
 
@@ -1006,7 +1005,7 @@ static int readQPaletteFromFile( const char *path, QPalette *pal )
 			}
 		}
 
-		if ( rTxtMatch == NULL ) continue;
+		if ( rTxtMatch == nullptr ) continue;
 
 		color = pal->color( g, r );
 
@@ -1156,7 +1155,7 @@ GuiPaletteEditDialog_t::~GuiPaletteEditDialog_t(void)
 {
 	if ( editDialog == this )
 	{
-		editDialog = NULL;
+		editDialog = nullptr;
 	}
 }
 //----------------------------------------------------
@@ -1328,13 +1327,13 @@ void GuiPaletteColorSelect::setText(void)
 			gTxt = "Inactive";
 		break;
 		default:
-			gTxt = NULL;
+			gTxt = nullptr;
 		break;
 	}
 
 	rTxt = getRoleText( role );
 
-	if ( (gTxt == NULL) || (rTxt == NULL) )
+	if ( (gTxt == nullptr) || (rTxt == nullptr) )
 	{
 		return;
 	}

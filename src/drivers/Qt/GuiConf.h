@@ -33,8 +33,6 @@ public:
 
 	~fceuStyle(void);
 
-	QStyle *baseStyle() const;
-
 	void polish(QPalette &palette) override;
 	void polish(QApplication *app) override;
 
