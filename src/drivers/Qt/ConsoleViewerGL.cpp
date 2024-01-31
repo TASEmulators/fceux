@@ -86,6 +86,12 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	setFocusPolicy(Qt::StrongFocus);
 	//setAttribute(Qt::WA_OpaquePaintEvent);
 
+	drawTimer = new QTimer(this);
+	drawTimer->setInterval(14);
+	drawTimer->setSingleShot(true);
+	drawTimer->setTimerType(Qt::PreciseTimer);
+	connect(drawTimer, &QTimer::timeout, this, &ConsoleViewGL_t::onDrawSignal);
+
 	localBufSize = (4 * GL_NES_WIDTH) * (4 * GL_NES_HEIGHT) * sizeof(uint32_t);
 
 	localBuf = (uint32_t*)malloc( localBufSize );
@@ -137,6 +143,8 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 ConsoleViewGL_t::~ConsoleViewGL_t(void)
 {
 	//printf("Destroying GL Viewport\n");
+	drawTimer->stop();
+	delete drawTimer;
 
 	if ( localBuf )
 	{
@@ -566,6 +574,22 @@ void  ConsoleViewGL_t::getNormalizedCursorPos( double &x, double &y )
 void ConsoleViewGL_t::renderFinished(void)
 {
 	videoBufferSwapMark();
+
+	// Schedule draw timing inline with vsync
+	drawTimer->start();
+}
+
+void ConsoleViewGL_t::queueRedraw(void)
+{
+	if (!drawTimer->isActive())
+	{
+		update();
+	}
+}
+
+void ConsoleViewGL_t::onDrawSignal(void)
+{
+	update();
 }
 
 void ConsoleViewGL_t::paintGL(void)

@@ -22,7 +22,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public
 
 		int  init(void);
 		void reset(void);
-		void queueRedraw(void){ update(); };
+		void queueRedraw(void);
 		int  driver(void){ return VIDEO_DRIVER_OPENGL; };
 
 		void transfer2LocalBuffer(void);
@@ -90,6 +90,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public
 	unsigned int  textureType;
 	unsigned int  mouseButtonMask;
 	QColor *bgColor;
+	QTimer *drawTimer;
 
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;
@@ -97,5 +98,6 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public
 	private slots:
 		void cleanupGL(void);
 		void renderFinished(void);
+		void onDrawSignal();
 };
 
