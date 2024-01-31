@@ -287,8 +287,8 @@ void BrokeStudioFirmware::processBufferedMessage()
 		break;
 
 	case toesp_cmds_t::ESP_FACTORY_RESET:
-		UDBG("[Rainbow] ESP received command ESP_FACTORY_SETTINGS\n");
-		UDBG("[Rainbow] ESP_FACTORY_SETTINGS has no use here\n");
+		UDBG("[Rainbow] ESP received command ESP_FACTORY_RESET\n");
+		UDBG("[Rainbow] ESP_FACTORY_RESET has no use here\n");
 		this->tx_messages.push_back({2, static_cast<uint8_t>(fromesp_cmds_t::ESP_FACTORY_RESET), static_cast<uint8_t>(esp_factory_reset::ERROR_WHILE_SAVING_CONFIG)});
 		break;
 
@@ -609,71 +609,71 @@ void BrokeStudioFirmware::processBufferedMessage()
 
 		// UDP ADDRESS POOL CMDS
 
-		case toesp_cmds_t::UDP_ADDR_POOL_CLEAR:
-			UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_CLEAR");
-			for(size_t i = 0; i < 16; i++) {
+	case toesp_cmds_t::UDP_ADDR_POOL_CLEAR:
+		UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_CLEAR");
+		for(size_t i = 0; i < 16; i++) {
+			this->ipAddressPool[i].ipAddress = "";
+			this->ipAddressPool[i].port = 0;
+		}
+		break;
+
+	case toesp_cmds_t::UDP_ADDR_POOL_ADD:
+	{
+		UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_ADD");
+		int port =
+			(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
+			(static_cast<uint16_t>(this->rx_buffer.at(3)));
+		uint8_t len = this->rx_buffer.at(4);
+		if(len >= 16) break;
+		string ipAddress = string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + len);
+
+		for(size_t i = 0; i < 16; i++) {
+			if(this->ipAddressPool[i].ipAddress == ipAddress && this->ipAddressPool[i].port == port)
+				break;
+		}
+
+		for(size_t i = 0; i < 16; i++) {
+			if(this->ipAddressPool[i].ipAddress == "") {
+				this->ipAddressPool[i].ipAddress = ipAddress;
+				this->ipAddressPool[i].port = port;
+				break;
+			}
+		}
+
+		break;
+	}
+
+	case toesp_cmds_t::UDP_ADDR_POOL_REMOVE:
+	{
+		UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_REMOVE");
+		int port =
+			(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
+			(static_cast<uint16_t>(this->rx_buffer.at(3)));
+		uint8_t len = this->rx_buffer.at(4);
+		if(len >= 16) break;
+		string ipAddress = string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + len);
+
+		for(size_t i = 0; i < 16; i++) {
+			if(this->ipAddressPool[i].ipAddress == ipAddress && this->ipAddressPool[i].port == port) {
 				this->ipAddressPool[i].ipAddress = "";
 				this->ipAddressPool[i].port = 0;
+				break;
 			}
-			break;
-
-		case toesp_cmds_t::UDP_ADDR_POOL_ADD:
-		{
-			UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_ADD");
-			int port =
-				(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
-				(static_cast<uint16_t>(this->rx_buffer.at(3)));
-			uint8_t len = this->rx_buffer.at(4);
-			if(len >= 16) break;
-			string ipAddress = string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + len);
-
-			for(size_t i = 0; i < 16; i++) {
-				if(this->ipAddressPool[i].ipAddress == ipAddress && this->ipAddressPool[i].port == port)
-					break;
-			}
-
-			for(size_t i = 0; i < 16; i++) {
-				if(this->ipAddressPool[i].ipAddress == "") {
-					this->ipAddressPool[i].ipAddress = ipAddress;
-					this->ipAddressPool[i].port = port;
-					break;
-				}
-			}
-
-			break;
 		}
+		break;
+	}
 
-		case toesp_cmds_t::UDP_ADDR_POOL_REMOVE:
-		{
-			UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_REMOVE");
-			int port =
-				(static_cast<uint16_t>(this->rx_buffer.at(2)) << 8) +
-				(static_cast<uint16_t>(this->rx_buffer.at(3)));
-			uint8_t len = this->rx_buffer.at(4);
-			if(len >= 16) break;
-			string ipAddress = string(this->rx_buffer.begin() + 5, this->rx_buffer.begin() + 5 + len);
-
-			for(size_t i = 0; i < 16; i++) {
-				if(this->ipAddressPool[i].ipAddress == ipAddress && this->ipAddressPool[i].port == port) {
-					this->ipAddressPool[i].ipAddress = "";
-					this->ipAddressPool[i].port = 0;
-					break;
-				}
-			}
-			break;
+	case toesp_cmds_t::UDP_ADDR_POOL_SEND_MSG:
+	{
+		UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_SEND_MSG");
+		if (this->active_protocol == server_protocol_t::UDP_POOL) {
+			uint8_t const payload_size = static_cast<const uint8_t>(this->rx_buffer.size() - 2);
+			deque<uint8_t>::const_iterator payload_begin = this->rx_buffer.begin() + 2;
+			deque<uint8_t>::const_iterator payload_end = payload_begin + payload_size;
+			this->sendUdpDatagramToPool(payload_begin, payload_end);
 		}
-
-		case toesp_cmds_t::UDP_ADDR_POOL_SEND_MSG:
-		{
-			UDBG("[Rainbow] ESP received command UDP_ADDR_POOL_SEND_MSG");
-			if (this->active_protocol == server_protocol_t::UDP_POOL) {
-				uint8_t const payload_size = static_cast<const uint8_t>(this->rx_buffer.size() - 2);
-				deque<uint8_t>::const_iterator payload_begin = this->rx_buffer.begin() + 2;
-				deque<uint8_t>::const_iterator payload_end = payload_begin + payload_size;
-				this->sendUdpDatagramToPool(payload_begin, payload_end);
-			}
-			break;
-		}
+		break;
+	}
 
 	// NETWORK CMDS
 	// network commands are not relevant here, so we'll just use test/fake data
