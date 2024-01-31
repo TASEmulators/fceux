@@ -278,6 +278,7 @@ class  consoleWin_t : public QMainWindow
 		bool        contextMenuEnable;
 		bool        soundUseGlobalFocus;
 		bool        autoHideMenuFullscreen;
+		bool        redrawVideoRequest;
 
 		std::list <std::string*> romList;
 		std::vector <autoFireMenuAction*> afActList;
@@ -313,7 +314,7 @@ class  consoleWin_t : public QMainWindow
 		void changeState(int slot);
 		void saveState(int slot);
 		void loadState(int slot);
-		void transferVideoBuffer(void);
+		void transferVideoBuffer(bool allowRedraw);
 		void syncAutoFirePatternMenu(void);
 
 		std::string findHelpFile(void);

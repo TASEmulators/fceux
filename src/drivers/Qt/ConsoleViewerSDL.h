@@ -24,7 +24,7 @@ class ConsoleViewSDL_t : public QWidget, public ConsoleViewerBase
 		void reset(void);
 		void cleanup(void);
 		void render(void);
-		void queueRedraw(void){ render(); };
+		void queueRedraw(void);
 		int  driver(void){ return VIDEO_DRIVER_SDL; };
 
 		void transfer2LocalBuffer(void);
@@ -83,6 +83,7 @@ class ConsoleViewSDL_t : public QWidget, public ConsoleViewerBase
 	bool forceAspect;
 	bool autoScaleEna;
 	QColor *bgColor;
+	QTimer  *drawTimer;
 
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;
@@ -95,5 +96,6 @@ class ConsoleViewSDL_t : public QWidget, public ConsoleViewerBase
 	//SDL_Rect      sdlViewport;
 
 	private slots:
+		void onDrawSignal();
 };
 

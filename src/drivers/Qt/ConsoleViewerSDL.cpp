@@ -82,6 +82,11 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 
 	vsyncEnabled = false;
 	mouseButtonMask = 0;
+	drawTimer = new QTimer(this);
+	drawTimer->setInterval(14);
+	drawTimer->setSingleShot(true);
+	drawTimer->setTimerType(Qt::PreciseTimer);
+	connect(drawTimer, &QTimer::timeout, this, &ConsoleViewSDL_t::onDrawSignal);
 
 	localBufSize = (4 * GL_NES_WIDTH) * (4 * GL_NES_HEIGHT) * sizeof(uint32_t);
 
@@ -123,6 +128,8 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 ConsoleViewSDL_t::~ConsoleViewSDL_t(void)
 {
 	//printf("Destroying SDL Viewport\n");
+	drawTimer->stop();
+	delete drawTimer;
 
 	if ( localBuf )
 	{
@@ -585,6 +592,19 @@ void  ConsoleViewSDL_t::getNormalizedCursorPos( double &x, double &y )
 	//printf("Normalized Cursor (%f,%f) \n", x, y );
 }
 
+void ConsoleViewSDL_t::queueRedraw(void)
+{
+	if (!drawTimer->isActive())
+	{
+		render();
+	}
+}
+
+void ConsoleViewSDL_t::onDrawSignal(void)
+{
+	render();
+}
+
 void ConsoleViewSDL_t::render(void)
 {
 	int nesWidth  = GL_NES_WIDTH;
@@ -706,6 +726,9 @@ void ConsoleViewSDL_t::render(void)
 	SDL_RenderPresent(sdlRenderer);
 
 	videoBufferSwapMark();
+
+	// Schedule draw timing inline with vsync
+	drawTimer->start();
 
 	nes_shm->render_count++;
 }
