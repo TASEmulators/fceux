@@ -170,11 +170,6 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	setAcceptDrops(true);
 
 	gameTimer  = new QTimer( this );
-#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-	mutex      = new QRecursiveMutex();
-#else
-	mutex      = new QMutex( QMutex::Recursive );
-#endif
 	emulatorThread = new emulatorThread_t(this);
 
 	connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
@@ -335,8 +330,6 @@ consoleWin_t::~consoleWin_t(void)
 	//FCEU_WRAPPER_UNLOCK();
 
 	unloadVideoDriver();
-
-	delete mutex;
 
 	// LoadGame() checks for an IP and if it finds one begins a network session
 	// clear the NetworkIP field so this doesn't happen unintentionally
@@ -4564,16 +4557,27 @@ int consoleWin_t::getPeriodicInterval(void)
 
 void consoleWin_t::transferVideoBuffer(void)
 {
+	bool redraw = false;
 	FCEU_PROFILE_FUNC(prof, "VideoXfer");
-	if ( nes_shm->blitUpdated )
-	{
-		nes_shm->blitUpdated = 0;
 
-		if (viewport_Interface)
+	{
+		FCEU::autoScopedLock lock(videoBufferMutex);
+		if ( nes_shm->blitUpdated )
 		{
-			viewport_Interface->transfer2LocalBuffer();
-			viewport_Interface->queueRedraw();
+			nes_shm->blitUpdated = 0;
+
+			if (viewport_Interface != nullptr)
+			{
+				viewport_Interface->transfer2LocalBuffer();
+				redraw = true;
+			}
 		}
+	}
+
+	// Don't queue redraw in mutex lock scope
+	if (redraw && (viewport_Interface != nullptr))
+	{
+		viewport_Interface->queueRedraw();
 	}
 }
 

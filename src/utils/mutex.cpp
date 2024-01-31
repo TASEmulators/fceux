@@ -48,6 +48,24 @@ void mutex::unlock(void)
 #endif
 }
 
+bool mutex::tryLock()
+{
+	bool success = false;
+#ifdef __QT_DRIVER__
+	success = mtx->tryLock();
+#endif
+	return success;
+}
+
+bool mutex::tryLock(int timeout)
+{
+	bool success = false;
+#ifdef __QT_DRIVER__
+	success = mtx->tryLock(timeout);
+#endif
+	return success;
+}
+
 //-----------------------------------------------------
 // Scoped AutoLock
 //-----------------------------------------------------

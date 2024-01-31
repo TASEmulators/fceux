@@ -496,8 +496,6 @@ doBlitScreen(uint8_t *XBuf, uint8_t *dest)
 void
 BlitScreen(uint8 *XBuf)
 {
-	int i = nes_shm->pixBufIdx;
-
 	if (usePaletteForVideoBg)
 	{
 		unsigned char r, g, b;
@@ -511,11 +509,18 @@ BlitScreen(uint8 *XBuf)
 		}
 	}
 
-	doBlitScreen(XBuf, (uint8_t*)nes_shm->pixbuf[i]);
+	if (consoleWindow != nullptr)
+	{
+		FCEU::autoScopedLock lock(consoleWindow->videoBufferMutex);
 
-	nes_shm->pixBufIdx = (i+1) % NES_VIDEO_BUFLEN;
-	nes_shm->blit_count++;
-	nes_shm->blitUpdated = 1;
+		int i = nes_shm->pixBufIdx;
+
+		doBlitScreen(XBuf, (uint8_t*)nes_shm->pixbuf[i]);
+
+		nes_shm->pixBufIdx = (i+1) % NES_VIDEO_BUFLEN;
+		nes_shm->blit_count++;
+		nes_shm->blitUpdated = 1;
+	}
 }
 
 void FCEUI_AviVideoUpdate(const unsigned char* buffer)

@@ -27,6 +27,7 @@
 #include <QRecursiveMutex>
 #endif
 
+#include "utils/mutex.h"
 #include "Qt/ColorMenu.h"
 #include "Qt/ConsoleViewerGL.h"
 #include "Qt/ConsoleViewerSDL.h"
@@ -134,11 +135,8 @@ class  consoleWin_t : public QMainWindow
 
 		void setCyclePeriodms( int ms );
 
-#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-		QRecursiveMutex *mutex;
-#else
-		QMutex *mutex;
-#endif
+		FCEU::mutex emulatorMutex;
+		FCEU::mutex videoBufferMutex;
 
 		int  videoInit(void);
 		void videoReset(void);

@@ -18,6 +18,8 @@ namespace FCEU
 	
 			void lock(void);
 			void unlock(void);
+			bool tryLock(void);
+			bool tryLock(int timeout);
 	
 		private:
 	#ifdef __QT_DRIVER__
