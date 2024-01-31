@@ -42,8 +42,10 @@ public:
 //mbg merge 6/29/06
 extern uint8 *ROM;
 extern uint8 *VROM;
+extern uint8 *MiscROM;
 extern uint32 VROM_size;
 extern uint32 ROM_size;
+extern uint32 MiscROM_size;
 extern uint8 *ExtraNTARAM;
 extern uint8 **VPageR;
 extern int iNesSave(void); //bbit Edited: line added
@@ -278,6 +280,7 @@ void Mapper254_Init(CartInfo *);
 void Mapper255_Init(CartInfo *);
 void Mapper354_Init(CartInfo *);
 void Mapper406_Init(CartInfo *);
+void Mapper413_Init(CartInfo *);
 
 void INX_007T_Init(CartInfo* info);
 void GN45_Init(CartInfo *info); /* previously mapper 205 */
