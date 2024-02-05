@@ -44,6 +44,7 @@
 #include "../../video.h"
 #include "../../x6502.h"
 #include "../../debug.h"
+#include "../../ppu.h"
 
 #include "common/os_utils.h"
 #include "utils/xstring.h"
@@ -465,6 +466,83 @@ void RomScriptObject::writeByte(int address, int value)
 	else
 	{
 		FCEU_WriteRomByte(address, value);
+	}
+}
+//----------------------------------------------------
+//----  PPU Script Object
+//----------------------------------------------------
+//----------------------------------------------------
+PpuScriptObject::PpuScriptObject(QObject* parent)
+	: QObject(parent)
+{
+	script = qobject_cast<QtScriptInstance*>(parent);
+}
+//----------------------------------------------------
+PpuScriptObject::~PpuScriptObject()
+{
+}
+//----------------------------------------------------
+uint8_t PpuScriptObject::readByte(int address)
+{
+	uint8_t byte = 0;
+	if (FFCEUX_PPURead == nullptr)
+	{
+		byte = FFCEUX_PPURead(address);
+	}
+	return byte;
+}
+//----------------------------------------------------
+uint8_t PpuScriptObject::readByteUnsigned(int address)
+{
+	uint8_t byte = 0;
+	if (FFCEUX_PPURead == nullptr)
+	{
+		byte = FFCEUX_PPURead(address);
+	}
+	return byte;
+}
+//----------------------------------------------------
+int8_t PpuScriptObject::readByteSigned(int address)
+{
+	int8_t byte = 0;
+	if (FFCEUX_PPURead == nullptr)
+	{
+		byte = static_cast<int8_t>(FFCEUX_PPURead(address));
+	}
+	return byte;
+}
+//----------------------------------------------------
+QJSValue PpuScriptObject::readByteRange(int start, int end)
+{
+	QJSValue array;
+	int size = end - start + 1;
+
+	if (FFCEUX_PPURead == nullptr)
+	{
+		return array;
+	}
+
+	if (size > 0)
+	{
+		array = engine->newArray(size);
+
+		for (int i=0; i<size; i++)
+		{
+			int byte = FFCEUX_PPURead(start + i);
+
+			QJSValue element = byte;
+
+			array.setProperty(i, element);
+		}
+	}
+	return array;
+}
+//----------------------------------------------------
+void PpuScriptObject::writeByte(int address, int value)
+{
+	if (FFCEUX_PPUWrite != nullptr)
+	{
+		FFCEUX_PPUWrite(address, value);
 	}
 }
 //----------------------------------------------------
@@ -928,6 +1006,11 @@ void QtScriptInstance::shutdownEngine()
 		delete rom;
 		rom = nullptr;
 	}
+	if (ppu != nullptr)
+	{
+		delete ppu;
+		ppu = nullptr;
+	}
 	if (mem != nullptr)
 	{
 		mem->reset();
@@ -955,6 +1038,7 @@ int QtScriptInstance::initEngine()
 
 	emu = new JS::EmuScriptObject(this);
 	rom = new JS::RomScriptObject(this);
+	ppu = new JS::PpuScriptObject(this);
 	mem = new JS::MemoryScriptObject(this);
 
 	emu->setDialog(dialog);
@@ -967,18 +1051,27 @@ int QtScriptInstance::initEngine()
 	rom->setEngine(engine);
 	mem->setEngine(engine);
 
+	// emu
 	QJSValue emuObject = engine->newQObject(emu);
 
 	engine->globalObject().setProperty("emu", emuObject);
 
+	// rom
 	QJSValue romObject = engine->newQObject(rom);
 
 	engine->globalObject().setProperty("rom", romObject);
 
+	// ppu
+	QJSValue ppuObject = engine->newQObject(ppu);
+
+	engine->globalObject().setProperty("ppu", ppuObject);
+
+	// memory
 	QJSValue memObject = engine->newQObject(mem);
 
 	engine->globalObject().setProperty("memory", memObject);
 
+	// gui
 	QJSValue guiObject = engine->newQObject(this);
 
 	engine->globalObject().setProperty("gui", guiObject);

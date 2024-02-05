@@ -194,6 +194,29 @@ public slots:
 	Q_INVOKABLE     void unregisterExec(const QJSValue& func, int address, int size = 1);
 	Q_INVOKABLE     void unregisterAll();
 };
+
+class PpuScriptObject: public QObject
+{
+	Q_OBJECT
+public:
+	PpuScriptObject(QObject* parent = nullptr);
+	~PpuScriptObject();
+
+	void setEngine(QJSEngine* _engine){ engine = _engine; }
+	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
+private:
+	QJSEngine* engine = nullptr;
+	QScriptDialog_t* dialog = nullptr;
+	QtScriptInstance* script = nullptr;
+
+public slots:
+	Q_INVOKABLE  uint8_t readByte(int address);
+	Q_INVOKABLE   int8_t readByteSigned(int address);
+	Q_INVOKABLE  uint8_t readByteUnsigned(int address);
+	Q_INVOKABLE QJSValue readByteRange(int start, int end);
+	Q_INVOKABLE  void    writeByte(int address, int value);
+};
+
 } // JS
 
 class ScriptExecutionState
@@ -263,6 +286,7 @@ private:
 	QScriptDialog_t* dialog = nullptr;
 	JS::EmuScriptObject* emu = nullptr;
 	JS::RomScriptObject* rom = nullptr;
+	JS::PpuScriptObject* ppu = nullptr;
 	JS::MemoryScriptObject* mem = nullptr;
 	QWidget* ui_rootWidget = nullptr;
 	QJSValue *onFrameBeginCallback = nullptr;
