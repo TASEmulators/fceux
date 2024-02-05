@@ -46,6 +46,7 @@
 #include "../../debug.h"
 
 #include "common/os_utils.h"
+#include "utils/xstring.h"
 
 #include "Qt/QtScriptManager.h"
 #include "Qt/main.h"
@@ -65,6 +66,9 @@
 #define JS_PIXEL_R(PIX) (((PIX) >> 16) & 0xff)
 #define JS_PIXEL_G(PIX) (((PIX) >> 8) & 0xff)
 #define JS_PIXEL_B(PIX) ((PIX) & 0xff)
+
+// File Base Name from Core
+extern char FileBase[];
 
 namespace JS
 {
@@ -365,6 +369,103 @@ QJSValue EmuScriptObject::getScreenPixel(int x, int y, bool useBackup)
 #endif
 
 	return jsVal;
+}
+//----------------------------------------------------
+//----  ROM Script Object
+//----------------------------------------------------
+//----------------------------------------------------
+RomScriptObject::RomScriptObject(QObject* parent)
+	: QObject(parent)
+{
+	script = qobject_cast<QtScriptInstance*>(parent);
+}
+//----------------------------------------------------
+RomScriptObject::~RomScriptObject()
+{
+}
+//----------------------------------------------------
+bool RomScriptObject::isLoaded()
+{
+	return (GameInfo != nullptr);
+}
+//----------------------------------------------------
+QString RomScriptObject::getFileName()
+{
+	QString baseName;
+
+	if (GameInfo != nullptr)
+	{
+		baseName = FileBase;
+	}
+	return baseName;
+}
+//----------------------------------------------------
+QString RomScriptObject::getHash(const QString& type)
+{
+	QString hash;
+
+	if (GameInfo != nullptr)
+	{
+		MD5DATA md5hash = GameInfo->MD5;
+
+		if (type.compare("md5", Qt::CaseInsensitive) == 0)
+		{
+			hash = md5_asciistr(md5hash);
+		}
+		else if (type.compare("base64", Qt::CaseInsensitive) == 0)
+		{
+			hash = BytesToString(md5hash.data, MD5DATA::size).c_str();
+		}
+	}
+	return hash;
+}
+//----------------------------------------------------
+uint8_t RomScriptObject::readByte(int address)
+{
+	return FCEU_ReadRomByte(address);
+}
+//----------------------------------------------------
+uint8_t RomScriptObject::readByteUnsigned(int address)
+{
+	return FCEU_ReadRomByte(address);
+}
+//----------------------------------------------------
+int8_t RomScriptObject::readByteSigned(int address)
+{
+	return static_cast<int8_t>(FCEU_ReadRomByte(address));
+}
+//----------------------------------------------------
+QJSValue RomScriptObject::readByteRange(int start, int end)
+{
+	QJSValue array;
+	int size = end - start + 1;
+
+	if (size > 0)
+	{
+		array = engine->newArray(size);
+
+		for (int i=0; i<size; i++)
+		{
+			int byte = FCEU_ReadRomByte(start + i);
+
+			QJSValue element = byte;
+
+			array.setProperty(i, element);
+		}
+	}
+	return array;
+}
+//----------------------------------------------------
+void RomScriptObject::writeByte(int address, int value)
+{
+	if (address < 16)
+	{
+		script->print("rom.writebyte() can't edit the ROM header.");
+	}
+	else
+	{
+		FCEU_WriteRomByte(address, value);
+	}
 }
 //----------------------------------------------------
 //----  Memory Script Object
@@ -822,6 +923,11 @@ void QtScriptInstance::shutdownEngine()
 		delete emu;
 		emu = nullptr;
 	}
+	if (rom != nullptr)
+	{
+		delete rom;
+		rom = nullptr;
+	}
 	if (mem != nullptr)
 	{
 		mem->reset();
@@ -848,19 +954,26 @@ int QtScriptInstance::initEngine()
 	engine = new QJSEngine(this);
 
 	emu = new JS::EmuScriptObject(this);
+	rom = new JS::RomScriptObject(this);
 	mem = new JS::MemoryScriptObject(this);
 
 	emu->setDialog(dialog);
+	rom->setDialog(dialog);
 	mem->setDialog(dialog);
 
 	engine->installExtensions(QJSEngine::ConsoleExtension);
 
 	emu->setEngine(engine);
+	rom->setEngine(engine);
 	mem->setEngine(engine);
 
 	QJSValue emuObject = engine->newQObject(emu);
 
 	engine->globalObject().setProperty("emu", emuObject);
+
+	QJSValue romObject = engine->newQObject(rom);
+
+	engine->globalObject().setProperty("rom", romObject);
 
 	QJSValue memObject = engine->newQObject(mem);
 
@@ -1878,6 +1991,7 @@ void QScriptDialog_t::openScriptFile(void)
 void QScriptDialog_t::startScript(void)
 {
 	FCEU_WRAPPER_LOCK();
+	jsOutput->clear();
 	clearPropertyTree();
 	scriptInstance->resetEngine();
 	if (scriptInstance->loadScriptFile(scriptPath->text()))
