@@ -26,8 +26,10 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QJSEngine>
+#include <QThread>
 
 #include "Qt/main.h"
+#include "utils/mutex.h"
 #include "utils/timeStamp.h"
 
 class QScriptDialog_t;
@@ -85,13 +87,13 @@ public slots:
 	Q_INVOKABLE  void pause();
 	Q_INVOKABLE  void unpause();
 	Q_INVOKABLE  bool paused();
-	Q_INVOKABLE  int  framecount();
-	Q_INVOKABLE  int  lagcount();
+	Q_INVOKABLE  int  frameCount();
+	Q_INVOKABLE  int  lagCount();
 	Q_INVOKABLE  bool lagged();
-	Q_INVOKABLE  void setlagflag(bool flag);
+	Q_INVOKABLE  void setLagFlag(bool flag);
 	Q_INVOKABLE  bool emulating();
-	Q_INVOKABLE  void registerBefore(const QJSValue& func);
-	Q_INVOKABLE  void registerAfter(const QJSValue& func);
+	Q_INVOKABLE  void registerBeforeFrame(const QJSValue& func);
+	Q_INVOKABLE  void registerAfterFrame(const QJSValue& func);
 	Q_INVOKABLE  void registerStop(const QJSValue& func);
 	Q_INVOKABLE  void message(const QString& msg);
 	Q_INVOKABLE  void speedMode(const QString& mode);
@@ -113,6 +115,7 @@ public:
 	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
 	void reset();
 
+	QtScriptInstance* getScript(){ return script; }
 	QJSValue* getReadFunc(int address) { return readFunc[address]; }
 	QJSValue* getWriteFunc(int address) { return writeFunc[address]; }
 	QJSValue* getExecFunc(int address) { return execFunc[address]; }
@@ -161,6 +164,36 @@ public slots:
 };
 } // JS
 
+class ScriptExecutionState
+{
+	public:
+		void start()
+		{
+			startTime.readNew();
+			executing = true;
+		}
+		void stop()
+		{
+			executing = false;
+		}
+		bool isRunning(){ return executing; }
+
+		uint64_t timeRunning()
+		{
+			FCEU::timeStampRecord now, diff;
+
+			now.readNew();
+
+			diff = now - startTime;
+
+			return diff.toMilliSeconds();
+		}
+
+	private:
+		bool executing = false;
+		FCEU::timeStampRecord startTime;
+};
+
 class QtScriptInstance : public QObject
 {
 	Q_OBJECT
@@ -177,6 +210,9 @@ public:
 	int  call(const QString& funcName, const QJSValueList& args = QJSValueList());
 	void onFrameBegin();
 	void onFrameFinish();
+	void onGuiUpdate();
+	void checkForHang();
+	int  runFunc(QJSValue &func, const QJSValueList& args = QJSValueList());
 
 	int  throwError(QJSValue::ErrorType errorType, const QString &message = QString());
 
@@ -189,6 +225,8 @@ private:
 	void printSymbols(QJSValue& val, int iter = 0);
 	void loadObjectChildren(QJSValue& jsObject, QObject* obj);
 
+	ScriptExecutionState* getExecutionState();
+
 	QJSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	JS::EmuScriptObject* emu = nullptr;
@@ -197,17 +235,32 @@ private:
 	QJSValue *onFrameBeginCallback = nullptr;
 	QJSValue *onFrameFinishCallback = nullptr;
 	QJSValue *onScriptStopCallback = nullptr;
+	QJSValue *onGuiUpdateCallback = nullptr;
+	ScriptExecutionState guiFuncState;
+	ScriptExecutionState emuFuncState;
 	bool running = false;
 
 public slots:
 	Q_INVOKABLE  void print(const QString& msg);
 	Q_INVOKABLE  void loadUI(const QString& uiFilePath);
 	Q_INVOKABLE  QString openFileBrowser(const QString& initialPath = QString());
-	Q_INVOKABLE  void registerBefore(const QJSValue& func);
-	Q_INVOKABLE  void registerAfter(const QJSValue& func);
+	Q_INVOKABLE  void registerBeforeEmuFrame(const QJSValue& func);
+	Q_INVOKABLE  void registerAfterEmuFrame(const QJSValue& func);
 	Q_INVOKABLE  void registerStop(const QJSValue& func);
+	Q_INVOKABLE  void registerGuiUpdate(const QJSValue& func);
 	Q_INVOKABLE  bool onGuiThread();
 	Q_INVOKABLE  bool onEmulationThread();
+};
+
+class  ScriptMonitorThread_t : public QThread
+{
+	Q_OBJECT
+
+	protected:
+		void run( void ) override;
+
+	public:
+		ScriptMonitorThread_t( QObject *parent = 0 );
 };
 
 class QtScriptManager : public QObject
@@ -228,12 +281,17 @@ public:
 private:
 	static QtScriptManager* _instance;
 
+	FCEU::mutex scriptListMutex;
 	QList<QtScriptInstance*> scriptList;
-	FCEU::timeStampRecord lastFrameUpdate;
+	QTimer  *periodicUpdateTimer = nullptr;
+	ScriptMonitorThread_t *monitorThread = nullptr;
+
+	friend class ScriptMonitorThread_t; 
 
 public slots:
 	void frameBeginUpdate();
 	void frameFinishedUpdate();
+	void guiUpdate();
 };
 
 class JsPropertyItem : public QTreeWidgetItem

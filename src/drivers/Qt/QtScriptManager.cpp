@@ -131,12 +131,12 @@ bool EmuScriptObject::paused()
 	return FCEUI_EmulationPaused() != 0;
 }
 //----------------------------------------------------
-int EmuScriptObject::framecount()
+int EmuScriptObject::frameCount()
 {
 	return FCEUMOV_GetFrame();
 }
 //----------------------------------------------------
-int EmuScriptObject::lagcount()
+int EmuScriptObject::lagCount()
 {
 	return FCEUI_GetLagCount();
 }
@@ -146,7 +146,7 @@ bool EmuScriptObject::lagged()
 	return FCEUI_GetLagged();
 }
 //----------------------------------------------------
-void EmuScriptObject::setlagflag(bool flag)
+void EmuScriptObject::setLagFlag(bool flag)
 {
 	FCEUI_SetLagFlag(flag);
 }
@@ -200,14 +200,14 @@ void EmuScriptObject::speedMode(const QString& mode)
 	FCEUD_SetEmulationSpeed(speed);
 }
 //----------------------------------------------------
-void EmuScriptObject::registerBefore(const QJSValue& func)
+void EmuScriptObject::registerBeforeFrame(const QJSValue& func)
 {
-	script->registerBefore(func);
+	script->registerBeforeEmuFrame(func);
 }
 //----------------------------------------------------
-void EmuScriptObject::registerAfter(const QJSValue& func)
+void EmuScriptObject::registerAfterFrame(const QJSValue& func)
 {
-	script->registerAfter(func);
+	script->registerAfterEmuFrame(func);
 }
 //----------------------------------------------------
 void EmuScriptObject::registerStop(const QJSValue& func)
@@ -278,7 +278,7 @@ static void addressReadCallback(unsigned int address, unsigned int value, void *
 		{
 			QJSValueList args = { address, value };
 
-			func->call(args);
+			mem->getScript()->runFunc( *func, args);
 		}
 	}
 }
@@ -295,7 +295,7 @@ static void addressWriteCallback(unsigned int address, unsigned int value, void 
 		{
 			QJSValueList args = { address, value };
 
-			func->call(args);
+			mem->getScript()->runFunc( *func, args);
 		}
 	}
 }
@@ -312,7 +312,7 @@ static void addressExecCallback(unsigned int address, unsigned int value, void *
 		{
 			QJSValueList args = { address, value };
 
-			func->call(args);
+			mem->getScript()->runFunc( *func, args);
 		}
 	}
 }
@@ -699,6 +699,11 @@ void QtScriptInstance::shutdownEngine()
 		delete onScriptStopCallback;
 		onScriptStopCallback = nullptr;
 	}
+	if (onGuiUpdateCallback != nullptr)
+	{
+		delete onGuiUpdateCallback;
+		onGuiUpdateCallback = nullptr;
+	}
 
 	if (engine != nullptr)
 	{
@@ -849,7 +854,7 @@ void QtScriptInstance::loadUI(const QString& uiFilePath)
 #endif
 }
 //----------------------------------------------------
-void QtScriptInstance::registerBefore(const QJSValue& func)
+void QtScriptInstance::registerBeforeEmuFrame(const QJSValue& func)
 {
 	if (onFrameBeginCallback != nullptr)
 	{
@@ -858,7 +863,7 @@ void QtScriptInstance::registerBefore(const QJSValue& func)
 	onFrameBeginCallback = new QJSValue(func);
 }
 //----------------------------------------------------
-void QtScriptInstance::registerAfter(const QJSValue& func)
+void QtScriptInstance::registerAfterEmuFrame(const QJSValue& func)
 {
 	if (onFrameFinishCallback != nullptr)
 	{
@@ -874,6 +879,15 @@ void QtScriptInstance::registerStop(const QJSValue& func)
 		delete onScriptStopCallback;
 	}
 	onScriptStopCallback = new QJSValue(func);
+}
+//----------------------------------------------------
+void QtScriptInstance::registerGuiUpdate(const QJSValue& func)
+{
+	if (onGuiUpdateCallback != nullptr)
+	{
+		delete onGuiUpdateCallback;
+	}
+	onGuiUpdateCallback = new QJSValue(func);
 }
 //----------------------------------------------------
 void QtScriptInstance::print(const QString& msg)
@@ -933,6 +947,26 @@ void QtScriptInstance::printSymbols(QJSValue& val, int iter)
 	}
 }
 //----------------------------------------------------
+int  QtScriptInstance::runFunc(QJSValue &func, const QJSValueList& args)
+{
+	int retval = 0;
+	auto state = getExecutionState();
+
+	state->start();
+
+	QJSValue callResult = func.call(args);
+
+	state->stop();
+
+	if (callResult.isError())
+	{
+		retval = -1;
+		running = false;
+		print(callResult.toString());
+	}
+	return retval;
+}
+//----------------------------------------------------
 int  QtScriptInstance::call(const QString& funcName, const QJSValueList& args)
 {
 	if (engine == nullptr)
@@ -947,19 +981,10 @@ int  QtScriptInstance::call(const QString& funcName, const QJSValueList& args)
 	QJSValue func = engine->globalObject().property(funcName);
 
 	FCEU_WRAPPER_LOCK();
-	QJSValue callResult = func.call(args);
+	int retval = runFunc(func, args);
 	FCEU_WRAPPER_UNLOCK();
 
-	if (callResult.isError())
-	{
-		print(callResult.toString());
-	}
-	else
-	{
-		//printf("Script Call Success!\n");
-	}
-
-	return 0;
+	return retval;
 }
 //----------------------------------------------------
 void QtScriptInstance::stopRunning()
@@ -969,12 +994,7 @@ void QtScriptInstance::stopRunning()
 	{
 		if (onScriptStopCallback != nullptr && onScriptStopCallback->isCallable())
 		{
-			QJSValue callResult = onScriptStopCallback->call();
-
-			if (callResult.isError())
-			{
-				print(callResult.toString());
-			}
+			runFunc( *onScriptStopCallback );
 		}
 		running = false;
 
@@ -987,13 +1007,7 @@ void QtScriptInstance::onFrameBegin()
 {
 	if (running && onFrameBeginCallback != nullptr && onFrameBeginCallback->isCallable())
 	{
-		QJSValue callResult = onFrameBeginCallback->call();
-
-		if (callResult.isError())
-		{
-			print(callResult.toString());
-			running = false;
-		}
+		runFunc( *onFrameBeginCallback );
 	}
 }
 //----------------------------------------------------
@@ -1001,14 +1015,59 @@ void QtScriptInstance::onFrameFinish()
 {
 	if (running && onFrameFinishCallback != nullptr && onFrameFinishCallback->isCallable())
 	{
-		QJSValue callResult = onFrameFinishCallback->call();
+		runFunc( *onFrameFinishCallback );
+	}
+}
+//----------------------------------------------------
+void QtScriptInstance::onGuiUpdate()
+{
+	if (running && onGuiUpdateCallback != nullptr && onGuiUpdateCallback->isCallable())
+	{
+		runFunc( *onGuiUpdateCallback );
+	}
+}
+//----------------------------------------------------
+ScriptExecutionState* QtScriptInstance::getExecutionState()
+{
+	ScriptExecutionState* state;
 
-		if (callResult.isError())
+	if (onEmulationThread())
+	{
+		state = &emuFuncState;
+	}
+	else
+	{
+		state = &guiFuncState;
+	}
+	return state;
+}
+//----------------------------------------------------
+void QtScriptInstance::checkForHang()
+{
+	static constexpr uint64_t funcTimeoutMs = 1000;
+
+	if ( guiFuncState.isRunning() )
+	{
+		uint64_t timeRunningMs = guiFuncState.timeRunning();
+
+		if (timeRunningMs > funcTimeoutMs)
 		{
-			print(callResult.toString());
-			running = false;
+			printf("Interrupted GUI Thread Script Function\n");
+			engine->setInterrupted(true);
 		}
 	}
+
+	if ( emuFuncState.isRunning() )
+	{
+		uint64_t timeRunningMs = emuFuncState.timeRunning();
+
+		if (timeRunningMs > funcTimeoutMs)
+		{
+			printf("Interrupted Emulation Thread Script Function\n");
+			engine->setInterrupted(true);
+		}
+	}
+
 }
 //----------------------------------------------------
 QString QtScriptInstance::openFileBrowser(const QString& initialPath)
@@ -1069,10 +1128,19 @@ QtScriptManager::QtScriptManager(QObject* parent)
 	: QObject(parent)
 {
 	_instance = this;
+	monitorThread = new ScriptMonitorThread_t();
+	monitorThread->start();
+
+	periodicUpdateTimer = new QTimer(this);
+	connect( periodicUpdateTimer, &QTimer::timeout, this, &QtScriptManager::guiUpdate );
+	periodicUpdateTimer->start(50); // ~20hz
 }
 //----------------------------------------------------
 QtScriptManager::~QtScriptManager()
 {
+	monitorThread->requestInterruption();
+	monitorThread->wait();
+
 	_instance = nullptr;
 	//printf("QtScriptManager destroyed\n");
 }
@@ -1096,11 +1164,13 @@ void QtScriptManager::destroy(void)
 //----------------------------------------------------
 void QtScriptManager::addScriptInstance(QtScriptInstance* script)
 {
+	FCEU::autoScopedLock autoLock(scriptListMutex);
 	scriptList.push_back(script);
 }
 //----------------------------------------------------
 void QtScriptManager::removeScriptInstance(QtScriptInstance* script)
 {
+	FCEU::autoScopedLock autoLock(scriptListMutex);
 	auto it = scriptList.begin();
 
 	while (it != scriptList.end())
@@ -1134,6 +1204,41 @@ void QtScriptManager::frameFinishedUpdate()
 		script->onFrameFinish();
 	}
 	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------
+void QtScriptManager::guiUpdate()
+{
+	FCEU_WRAPPER_LOCK();
+	for (auto script : scriptList)
+	{
+		script->onGuiUpdate();
+	}
+	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------
+//---- Qt Script Monitor Thread
+//----------------------------------------------------
+ScriptMonitorThread_t::ScriptMonitorThread_t(QObject *parent)
+	: QThread(parent)
+{
+}
+//----------------------------------------------------
+void ScriptMonitorThread_t::run()
+{
+	//printf("Script Monitor Thread is Running...\n");
+	QtScriptManager* manager = QtScriptManager::getInstance();
+
+	while (!isInterruptionRequested())
+	{
+		manager->scriptListMutex.lock();
+		for (auto script : manager->scriptList)
+		{
+			script->checkForHang();
+		}
+		manager->scriptListMutex.unlock();
+		msleep(100);
+	}
+	//printf("Script Monitor Thread is Stopping...\n");
 }
 //----------------------------------------------------
 //---- Qt Script Dialog Window
