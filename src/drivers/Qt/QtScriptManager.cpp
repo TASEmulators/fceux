@@ -485,7 +485,7 @@ PpuScriptObject::~PpuScriptObject()
 uint8_t PpuScriptObject::readByte(int address)
 {
 	uint8_t byte = 0;
-	if (FFCEUX_PPURead == nullptr)
+	if (FFCEUX_PPURead != nullptr)
 	{
 		byte = FFCEUX_PPURead(address);
 	}
@@ -495,7 +495,7 @@ uint8_t PpuScriptObject::readByte(int address)
 uint8_t PpuScriptObject::readByteUnsigned(int address)
 {
 	uint8_t byte = 0;
-	if (FFCEUX_PPURead == nullptr)
+	if (FFCEUX_PPURead != nullptr)
 	{
 		byte = FFCEUX_PPURead(address);
 	}
@@ -505,7 +505,7 @@ uint8_t PpuScriptObject::readByteUnsigned(int address)
 int8_t PpuScriptObject::readByteSigned(int address)
 {
 	int8_t byte = 0;
-	if (FFCEUX_PPURead == nullptr)
+	if (FFCEUX_PPURead != nullptr)
 	{
 		byte = static_cast<int8_t>(FFCEUX_PPURead(address));
 	}
