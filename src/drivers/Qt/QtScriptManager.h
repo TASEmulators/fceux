@@ -87,11 +87,15 @@ public slots:
 	Q_INVOKABLE  void pause();
 	Q_INVOKABLE  void unpause();
 	Q_INVOKABLE  bool paused();
+	Q_INVOKABLE  void frameAdvance();
 	Q_INVOKABLE  int  frameCount();
 	Q_INVOKABLE  int  lagCount();
 	Q_INVOKABLE  bool lagged();
 	Q_INVOKABLE  void setLagFlag(bool flag);
 	Q_INVOKABLE  bool emulating();
+	Q_INVOKABLE  bool isReadOnly();
+	Q_INVOKABLE  void setReadOnly(bool flag);
+	Q_INVOKABLE  void setRenderPlanes(bool sprites, bool background);
 	Q_INVOKABLE  void registerBeforeFrame(const QJSValue& func);
 	Q_INVOKABLE  void registerAfterFrame(const QJSValue& func);
 	Q_INVOKABLE  void registerStop(const QJSValue& func);
@@ -99,6 +103,9 @@ public slots:
 	Q_INVOKABLE  void speedMode(const QString& mode);
 	Q_INVOKABLE  bool loadRom(const QString& romPath);
 	Q_INVOKABLE  bool onEmulationThread();
+	Q_INVOKABLE  bool addGameGenie(const QString& code);
+	Q_INVOKABLE  bool delGameGenie(const QString& code);
+	Q_INVOKABLE  void exit();
 	Q_INVOKABLE  QString getDir();
 	Q_INVOKABLE  QJSValue getScreenPixel(int x, int y, bool useBackup = false);
 
@@ -169,29 +176,28 @@ class ScriptExecutionState
 	public:
 		void start()
 		{
-			startTime.readNew();
+			timeMs = 0;
 			executing = true;
 		}
 		void stop()
 		{
 			executing = false;
+			timeMs = 0;
 		}
 		bool isRunning(){ return executing; }
 
-		uint64_t timeRunning()
+		unsigned int timeCheck()
 		{
-			FCEU::timeStampRecord now, diff;
-
-			now.readNew();
-
-			diff = now - startTime;
-
-			return diff.toMilliSeconds();
+			unsigned int retval = timeMs;
+			timeMs += checkPeriod;
+			return retval;
 		}
+
+		static constexpr unsigned int checkPeriod = 100;
 
 	private:
 		bool executing = false;
-		FCEU::timeStampRecord startTime;
+		unsigned int timeMs = 0;
 };
 
 class QtScriptInstance : public QObject
@@ -208,6 +214,7 @@ public:
 	void stopRunning();
 
 	int  call(const QString& funcName, const QJSValueList& args = QJSValueList());
+	void frameAdvance();
 	void onFrameBegin();
 	void onFrameFinish();
 	void onGuiUpdate();
@@ -238,6 +245,8 @@ private:
 	QJSValue *onGuiUpdateCallback = nullptr;
 	ScriptExecutionState guiFuncState;
 	ScriptExecutionState emuFuncState;
+	int frameAdvanceCount = 0;
+	int frameAdvanceState = 0;
 	bool running = false;
 
 public slots:

@@ -131,6 +131,11 @@ bool EmuScriptObject::paused()
 	return FCEUI_EmulationPaused() != 0;
 }
 //----------------------------------------------------
+void EmuScriptObject::frameAdvance()
+{
+	script->frameAdvance();
+}
+//----------------------------------------------------
 int EmuScriptObject::frameCount()
 {
 	return FCEUMOV_GetFrame();
@@ -154,6 +159,26 @@ void EmuScriptObject::setLagFlag(bool flag)
 bool EmuScriptObject::emulating()
 {
 	return (GameInfo != nullptr);
+}
+//----------------------------------------------------
+bool EmuScriptObject::isReadOnly()
+{
+	return FCEUI_GetMovieToggleReadOnly();
+}
+//----------------------------------------------------
+void EmuScriptObject::setReadOnly(bool flag)
+{
+	FCEUI_SetMovieToggleReadOnly(flag);
+}
+//----------------------------------------------------
+void EmuScriptObject::setRenderPlanes(bool sprites, bool background)
+{
+	FCEUI_SetRenderPlanes(sprites, background);
+}
+//----------------------------------------------------
+void EmuScriptObject::exit()
+{
+	fceuWrapperRequestAppExit();
 }
 //----------------------------------------------------
 void EmuScriptObject::message(const QString& msg)
@@ -198,6 +223,85 @@ void EmuScriptObject::speedMode(const QString& mode)
 		FCEUD_TurboOff();
 	}
 	FCEUD_SetEmulationSpeed(speed);
+}
+//----------------------------------------------------
+bool EmuScriptObject::addGameGenie(const QString& code)
+{
+	// Add a Game Genie code if it hasn't already been added
+	int GGaddr, GGcomp, GGval;
+	int i=0;
+
+	uint32 Caddr;
+	uint8 Cval;
+	int Ccompare, Ctype;
+
+	if (!FCEUI_DecodeGG(code.toLocal8Bit().data(), &GGaddr, &GGval, &GGcomp))
+	{
+		print("Failed to decode game genie code");
+		return false;
+	}
+
+	while (FCEUI_GetCheat(i,NULL,&Caddr,&Cval,&Ccompare,NULL,&Ctype))
+	{
+		if ((static_cast<uint32>(GGaddr) == Caddr) && (GGval == static_cast<int>(Cval)) && (GGcomp == Ccompare) && (Ctype == 1))
+		{
+			// Already Added, so consider it a success
+			return true;
+		}
+		i = i + 1;
+	}
+
+	if (FCEUI_AddCheat(code.toLocal8Bit().data(),GGaddr,GGval,GGcomp,1))
+	{
+		// Code was added
+		// Can't manage the display update the way I want, so I won't bother with it
+		// UpdateCheatsAdded();
+		return true;
+	}
+	else
+	{
+		// Code didn't get added
+	}
+	return false;
+}
+//----------------------------------------------------
+bool EmuScriptObject::delGameGenie(const QString& code)
+{
+	// Remove a Game Genie code. Very restrictive about deleted code.
+	int GGaddr, GGcomp, GGval;
+	uint32 i=0;
+
+	std::string Cname;
+	uint32 Caddr;
+	uint8 Cval;
+	int Ccompare, Ctype;
+
+	if (!FCEUI_DecodeGG(code.toLocal8Bit().data(), &GGaddr, &GGval, &GGcomp))
+	{
+		print("Failed to decode game genie code");
+		return false;
+	}
+
+	while (FCEUI_GetCheat(i,&Cname,&Caddr,&Cval,&Ccompare,NULL,&Ctype))
+	{
+		QString name = QString::fromStdString(Cname);
+
+		if ((code == name) && (static_cast<uint32>(GGaddr) == Caddr) && (GGval == static_cast<int>(Cval)) && (GGcomp == Ccompare) && (Ctype == 1))
+		{
+			// Delete cheat code
+			if (FCEUI_DelCheat(i))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		i = i + 1;
+	}
+	// Cheat didn't exist, so it's not an error
+	return true;
 }
 //----------------------------------------------------
 void EmuScriptObject::registerBeforeFrame(const QJSValue& func)
@@ -854,6 +958,11 @@ void QtScriptInstance::loadUI(const QString& uiFilePath)
 #endif
 }
 //----------------------------------------------------
+void QtScriptInstance::frameAdvance()
+{
+	frameAdvanceCount++;
+}
+//----------------------------------------------------
 void QtScriptInstance::registerBeforeEmuFrame(const QJSValue& func)
 {
 	if (onFrameBeginCallback != nullptr)
@@ -1005,17 +1114,37 @@ void QtScriptInstance::stopRunning()
 //----------------------------------------------------
 void QtScriptInstance::onFrameBegin()
 {
-	if (running && onFrameBeginCallback != nullptr && onFrameBeginCallback->isCallable())
+	if (running)
 	{
-		runFunc( *onFrameBeginCallback );
+		if (onFrameBeginCallback != nullptr && onFrameBeginCallback->isCallable())
+		{
+			runFunc( *onFrameBeginCallback );
+		}
+		if (frameAdvanceCount > 0)
+		{
+			if (frameAdvanceState == 0)
+			{
+				FCEUI_FrameAdvance();
+				frameAdvanceState = 1;
+				frameAdvanceCount--;
+			}
+		}
 	}
 }
 //----------------------------------------------------
 void QtScriptInstance::onFrameFinish()
 {
-	if (running && onFrameFinishCallback != nullptr && onFrameFinishCallback->isCallable())
+	if (running)
 	{
-		runFunc( *onFrameFinishCallback );
+		if (onFrameFinishCallback != nullptr && onFrameFinishCallback->isCallable())
+		{
+			runFunc( *onFrameFinishCallback );
+		}
+		if (frameAdvanceState == 1)
+		{
+			FCEUI_FrameAdvanceEnd();
+			frameAdvanceState = 0;
+		}
 	}
 }
 //----------------------------------------------------
@@ -1044,11 +1173,11 @@ ScriptExecutionState* QtScriptInstance::getExecutionState()
 //----------------------------------------------------
 void QtScriptInstance::checkForHang()
 {
-	static constexpr uint64_t funcTimeoutMs = 1000;
+	static constexpr unsigned int funcTimeoutMs = 1000;
 
 	if ( guiFuncState.isRunning() )
 	{
-		uint64_t timeRunningMs = guiFuncState.timeRunning();
+		unsigned int timeRunningMs = guiFuncState.timeCheck();
 
 		if (timeRunningMs > funcTimeoutMs)
 		{
@@ -1059,7 +1188,7 @@ void QtScriptInstance::checkForHang()
 
 	if ( emuFuncState.isRunning() )
 	{
-		uint64_t timeRunningMs = emuFuncState.timeRunning();
+		unsigned int timeRunningMs = emuFuncState.timeCheck();
 
 		if (timeRunningMs > funcTimeoutMs)
 		{
@@ -1236,7 +1365,7 @@ void ScriptMonitorThread_t::run()
 			script->checkForHang();
 		}
 		manager->scriptListMutex.unlock();
-		msleep(100);
+		msleep(ScriptExecutionState::checkPeriod);
 	}
 	//printf("Script Monitor Thread is Stopping...\n");
 }
