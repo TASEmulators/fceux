@@ -65,6 +65,43 @@ public slots:
 	Q_INVOKABLE  void setPalette(int p){ _palette = p; }
 };
 
+class EmuStateScriptObject: public QObject
+{
+	Q_OBJECT
+public:
+	Q_INVOKABLE EmuStateScriptObject(const QJSValue& jsArg1 = QJSValue(), const QJSValue& jsArg2 = QJSValue());
+	~EmuStateScriptObject();
+
+	Q_PROPERTY(bool persist READ isPersistent WRITE setPersistent)
+	Q_PROPERTY(int slot READ getSlot WRITE setSlot)
+	Q_PROPERTY(int compressionLevel READ getCompressionLevel WRITE setCompressionLevel)
+
+	EmuStateScriptObject& operator= (const EmuStateScriptObject& obj);
+
+private:
+	QString filename;
+	EMUFILE_MEMORY *data = nullptr;
+	int compression = 0;
+	int slot = -1;
+	bool persist = false;
+
+	static int numInstances;
+
+public slots:
+	Q_INVOKABLE  bool  save();
+	Q_INVOKABLE  bool  load();
+	Q_INVOKABLE  bool  isValid(){ return (data != nullptr); }
+	Q_INVOKABLE  bool  isPersistent(){ return persist; }
+	Q_INVOKABLE  void  setPersistent(bool value){ persist = value; }
+	Q_INVOKABLE  int   getSlot(){ return slot; }
+	Q_INVOKABLE  void  setSlot(int value);
+	Q_INVOKABLE  int   getCompressionLevel(){ return compression; }
+	Q_INVOKABLE  void  setCompressionLevel(int value){ compression = value; }
+	Q_INVOKABLE  void  setFilename(const QString& name){ filename = name; }
+	Q_INVOKABLE  bool  saveToFile(const QString& filepath);
+	Q_INVOKABLE  bool  loadFromFile(const QString& filepath);
+};
+
 class EmuScriptObject: public QObject
 {
 	Q_OBJECT
@@ -108,6 +145,7 @@ public slots:
 	Q_INVOKABLE  void exit();
 	Q_INVOKABLE  QString getDir();
 	Q_INVOKABLE  QJSValue getScreenPixel(int x, int y, bool useBackup = false);
+	Q_INVOKABLE  QJSValue createState(int slot = -1);
 
 };
 

@@ -44,6 +44,7 @@
 #include "../../video.h"
 #include "../../x6502.h"
 #include "../../debug.h"
+#include "../../state.h"
 #include "../../ppu.h"
 
 #include "common/os_utils.h"
@@ -83,12 +84,185 @@ ColorScriptObject::ColorScriptObject(int r, int g, int b)
 {
 	numInstances++;
 	//printf("ColorScriptObject(r,g,b) %p Constructor: %i\n", this, numInstances);
+
+	moveToThread(QApplication::instance()->thread());
 }
 //----------------------------------------------------
 ColorScriptObject::~ColorScriptObject()
 {
 	numInstances--;
 	//printf("ColorScriptObject %p Destructor: %i\n", this, numInstances);
+}
+//----------------------------------------------------
+//----  EMU State Object
+//----------------------------------------------------
+int EmuStateScriptObject::numInstances = 0;
+
+//----------------------------------------------------
+EmuStateScriptObject::EmuStateScriptObject(const QJSValue& jsArg1, const QJSValue& jsArg2)
+{
+	numInstances++;
+	//printf("EmuStateScriptObject %p JS Constructor: %i\n", this, numInstances);
+
+	moveToThread(QApplication::instance()->thread());
+	QJSValueList args = { jsArg1, jsArg2 };
+
+	for (auto& jsVal : args)
+	{
+		if (jsVal.isObject())
+		{
+			//printf("EmuStateScriptObject %p JS Constructor(Obj): %i\n", this, numInstances);
+			auto obj = qobject_cast<EmuStateScriptObject*>(jsVal.toQObject());
+
+			if (obj != nullptr)
+			{
+				*this = *obj;
+			}
+		}
+		else if (jsVal.isNumber())
+		{
+			//printf("EmuStateScriptObject %p JS Constructor(int): %i\n", this, numInstances);
+			setSlot(jsVal.toInt());
+
+			if (slot >= 0)
+			{
+				loadFromFile(filename);
+			}
+		}
+	}
+}
+//----------------------------------------------------
+EmuStateScriptObject::~EmuStateScriptObject()
+{
+	if (data != nullptr)
+	{
+		if (persist)
+		{
+			saveToFile(filename);
+		}
+		delete data;
+		data = nullptr;
+	}
+	numInstances--;
+	//printf("EmuStateScriptObject %p Destructor: %i\n", this, numInstances);
+}
+//----------------------------------------------------
+EmuStateScriptObject& EmuStateScriptObject::operator= (const EmuStateScriptObject& obj)
+{
+	setSlot( obj.slot );
+	persist = obj.persist;
+	compression = obj.compression;
+	filename = obj.filename;
+
+	//printf("EmuStateScriptObject Copy Assignment: %p\n", this);
+
+	if (obj.data != nullptr)
+	{
+		data = new EMUFILE_MEMORY(obj.data->size());
+		memcpy( data->buf(), obj.data->buf(), obj.data->size());
+	}
+	return *this;
+}
+//----------------------------------------------------
+void EmuStateScriptObject::setSlot(int value)
+{
+	slot = value;
+
+	if (slot >= 0)
+	{
+		slot = slot % 10;
+
+		std::string fileString = FCEU_MakeFName(FCEUMKF_STATE, slot, 0);
+
+		filename = QString::fromStdString(fileString);
+	}
+}
+//----------------------------------------------------
+bool EmuStateScriptObject::save()
+{
+	if (data != nullptr)
+	{
+		delete data;
+		data = nullptr;
+	}
+	data = new EMUFILE_MEMORY();
+
+	FCEU_WRAPPER_LOCK();
+	FCEUSS_SaveMS( data, compression);
+	data->fseek(0,SEEK_SET);
+	FCEU_WRAPPER_UNLOCK();
+
+	if (persist)
+	{
+		saveToFile(filename);
+	}
+	return true;
+}
+//----------------------------------------------------
+bool EmuStateScriptObject::load()
+{
+	bool loaded = false;
+	if (data != nullptr)
+	{
+		FCEU_WRAPPER_LOCK();
+		if (FCEUSS_LoadFP( data, SSLOADPARAM_NOBACKUP))
+		{
+			data->fseek(0,SEEK_SET);
+			loaded = true;
+		}
+		FCEU_WRAPPER_UNLOCK();
+	}
+	return loaded;
+}
+//----------------------------------------------------
+bool EmuStateScriptObject::saveToFile(const QString& filepath)
+{
+	if (filepath.isEmpty())
+	{
+		return false;
+	}
+	if (data == nullptr)
+	{
+		return false;
+	}
+	FILE* outf = fopen(filepath.toLocal8Bit().data(),"wb");
+	if (outf == nullptr)
+	{
+		return false;
+	}
+	fwrite( data->buf(), 1, data->size(), outf);
+	fclose(outf);
+	return true;
+}
+//----------------------------------------------------
+bool EmuStateScriptObject::loadFromFile(const QString& filepath)
+{
+	if (filepath.isEmpty())
+	{
+		return false;
+	}
+	if (data != nullptr)
+	{
+		delete data;
+		data = nullptr;
+	}
+	FILE* inf = fopen(filepath.toLocal8Bit().data(),"rb");
+	if (inf == nullptr)
+	{
+		return false;
+	}
+	fseek(inf,0,SEEK_END);
+	long int len = ftell(inf);
+	fseek(inf,0,SEEK_SET);
+	data = new EMUFILE_MEMORY(len);
+	if ( fread(data->buf(),1,len,inf) != static_cast<size_t>(len) )
+	{
+		FCEU_printf("Warning: JS EmuState::loadFromFile failed to load full buffer.\n");
+		delete data;
+		data = nullptr;
+	}
+	fclose(inf);
+	return true;
 }
 //----------------------------------------------------
 //----  EMU Script Object
@@ -361,14 +535,28 @@ QJSValue EmuScriptObject::getScreenPixel(int x, int y, bool useBackup)
 
 	pixelObj->setPalette(p);
 
-	pixelObj->moveToThread(QApplication::instance()->thread());
-
 	QJSValue jsVal = engine->newQObject(pixelObj);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 	QJSEngine::setObjectOwnership( pixelObj, QJSEngine::JavaScriptOwnership);
 #endif
 
+	return jsVal;
+}
+//----------------------------------------------------
+QJSValue EmuScriptObject::createState(int slot)
+{
+	QJSValue jsVal;
+	EmuStateScriptObject* emuStateObj = new EmuStateScriptObject(slot);
+
+	if (emuStateObj != nullptr)
+	{
+		jsVal = engine->newQObject(emuStateObj);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+		QJSEngine::setObjectOwnership( emuStateObj, QJSEngine::JavaScriptOwnership);
+#endif
+	}
 	return jsVal;
 }
 //----------------------------------------------------
@@ -1077,8 +1265,11 @@ int QtScriptInstance::initEngine()
 	engine->globalObject().setProperty("gui", guiObject);
 
 	// Class Type Definitions for Script Use
-	QJSValue jsMetaObject = engine->newQMetaObject(&JS::ColorScriptObject::staticMetaObject);
-	engine->globalObject().setProperty("Color", jsMetaObject);
+	QJSValue jsColorMetaObject = engine->newQMetaObject(&JS::ColorScriptObject::staticMetaObject);
+	engine->globalObject().setProperty("Color", jsColorMetaObject);
+
+	QJSValue jsEmuStateMetaObject = engine->newQMetaObject(&JS::EmuStateScriptObject::staticMetaObject);
+	engine->globalObject().setProperty("EmuState", jsEmuStateMetaObject);
 
 	return 0;
 }
