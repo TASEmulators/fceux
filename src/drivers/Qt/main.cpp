@@ -27,6 +27,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/SplashScreen.h"
+#include "Qt/QtScriptManager.h"
 
 #ifdef WIN32
 #include <QtPlatformHeaders/QWindowsWindowFunctions>
@@ -65,6 +66,10 @@ static void MessageOutput(QtMsgType type, const QMessageLogContext &context, con
     }
     cmsg[sizeof(cmsg)-1] = 0;
     fprintf(stderr, "%s", cmsg );
+
+#ifdef  __FCEU_QSCRIPT_ENABLE__
+    QtScriptManager::logMessageQt(type, msg);
+#endif
 }
 
 

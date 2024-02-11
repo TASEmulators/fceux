@@ -126,7 +126,7 @@ EmuStateScriptObject::EmuStateScriptObject(const QJSValue& jsArg1, const QJSValu
 			//printf("EmuStateScriptObject %p JS Constructor(int): %i\n", this, numInstances);
 			setSlot(jsVal.toInt());
 
-			if (slot >= 0)
+			if ( (slot >= 0) && saveFileExists())
 			{
 				loadFromFile(filename);
 			}
@@ -251,7 +251,7 @@ bool EmuStateScriptObject::loadFromFile(const QString& filepath)
 	FILE* inf = fopen(filepath.toLocal8Bit().data(),"rb");
 	if (inf == nullptr)
 	{
-		QString msg = "Warning: JS EmuState::loadFromFile failed to open file: " + filepath + "\n";
+		QString msg = "JS EmuState::loadFromFile failed to open file: " + filepath;
 		logMessage(FCEU::JSEngine::WARNING, msg);
 		return false;
 	}
@@ -261,7 +261,7 @@ bool EmuStateScriptObject::loadFromFile(const QString& filepath)
 	data = new EMUFILE_MEMORY(len);
 	if ( fread(data->buf(),1,len,inf) != static_cast<size_t>(len) )
 	{
-		QString msg = "Warning: JS EmuState::loadFromFile failed to load full buffer.\n";
+		QString msg = "JS EmuState::loadFromFile failed to load full buffer.";
 		logMessage(FCEU::JSEngine::WARNING, msg);
 		delete data;
 		data = nullptr;
@@ -278,6 +278,41 @@ void EmuStateScriptObject::logMessage(int lvl, QString& msg)
 	{
 		engine->logMessage(lvl, msg);
 	}
+}
+//----------------------------------------------------
+bool EmuStateScriptObject::saveFileExists()
+{
+	bool exists = false;
+	QFileInfo fileInfo(filename);
+
+	if (fileInfo.exists() && fileInfo.isFile())
+	{
+		exists = true;
+	}
+	return exists;
+}
+//----------------------------------------------------
+QJSValue EmuStateScriptObject::copy()
+{
+	QJSValue jsVal;
+	auto* engine = FCEU::JSEngine::getCurrent();
+
+	if (engine != nullptr)
+	{
+		EmuStateScriptObject* emuStateObj = new EmuStateScriptObject();
+
+		if (emuStateObj != nullptr)
+		{
+			*emuStateObj = *this;
+
+			jsVal = engine->newQObject(emuStateObj);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+			QJSEngine::setObjectOwnership( emuStateObj, QJSEngine::JavaScriptOwnership);
+#endif
+		}
+	}
+	return jsVal;
 }
 //----------------------------------------------------
 //----  EMU Script Object
@@ -1159,7 +1194,27 @@ namespace FCEU
 		{
 			if (lvl <= _logLevel)
 			{
-				dialog->logOutput(msg);
+				const char *prefix = "Warning: ";
+				switch (lvl)
+				{
+					case FCEU::JSEngine::DEBUG:
+						prefix = "Debug: ";
+					break;
+					case FCEU::JSEngine::INFO:
+						prefix = "Info: ";
+					break;
+					case FCEU::JSEngine::WARNING:
+						prefix = "Warning: ";
+					break;
+					case FCEU::JSEngine::CRITICAL:
+						prefix = "Critical: ";
+					break;
+					case FCEU::JSEngine::FATAL:
+						prefix = "Fatal: ";
+					break;
+				}
+				QString fullMsg = prefix + msg.trimmed() + "\n";
+				dialog->logOutput(fullMsg);
 			}
 		}
 	}
@@ -1356,9 +1411,11 @@ int QtScriptInstance::loadScriptFile( QString filepath )
 
 	if (evalResult.isError())
 	{
-		QString msg;
-		msg += evalResult.property("lineNumber").toString() + ": ";
-		msg += evalResult.toString();
+		QString msg = "Uncaught exception at: " +
+			evalResult.property("fileName").toString() + ":" +
+			evalResult.property("lineNumber").toString() + " : " +
+			evalResult.toString() + "\nStack:\n" +
+			evalResult.property("stack").toString() + "\n";
 		print(msg);
 		return -1;
 	}
@@ -1534,7 +1591,12 @@ int  QtScriptInstance::runFunc(QJSValue &func, const QJSValueList& args)
 	{
 		retval = -1;
 		running = false;
-		print(callResult.toString());
+		QString msg = "Uncaught exception at: " +
+			callResult.property("fileName").toString() + ":" +
+			callResult.property("lineNumber").toString() + " : " +
+			callResult.toString() + "\nStack:\n" +
+			callResult.property("stack").toString() + "\n";
+		print(msg);
 	}
 	return retval;
 }
@@ -1751,6 +1813,36 @@ void QtScriptManager::destroy(void)
 	if (_instance != nullptr)
 	{
 		delete _instance;
+	}
+}
+//----------------------------------------------------
+void QtScriptManager::logMessageQt(QtMsgType type, const QString &msg)
+{
+	auto* engine = FCEU::JSEngine::getCurrent();
+
+	if (engine != nullptr)
+	{
+		int logLevel = FCEU::JSEngine::WARNING;
+
+		switch (type)
+		{
+			case QtDebugMsg:
+				logLevel = FCEU::JSEngine::DEBUG;
+			break;
+			case QtInfoMsg:
+				logLevel = FCEU::JSEngine::INFO;
+			break;
+			case QtWarningMsg:
+				logLevel = FCEU::JSEngine::WARNING;
+			break;
+			case QtCriticalMsg:
+				logLevel = FCEU::JSEngine::CRITICAL;
+			break;
+			case QtFatalMsg:
+				logLevel = FCEU::JSEngine::FATAL;
+			break;
+		}
+		engine->logMessage( logLevel, msg );
 	}
 }
 //----------------------------------------------------

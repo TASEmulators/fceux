@@ -142,6 +142,8 @@ public slots:
 	Q_INVOKABLE  void  setFilename(const QString& name){ filename = name; }
 	Q_INVOKABLE  bool  saveToFile(const QString& filepath);
 	Q_INVOKABLE  bool  loadFromFile(const QString& filepath);
+	Q_INVOKABLE  bool  saveFileExists();
+	Q_INVOKABLE  QJSValue  copy();
 };
 
 class EmuScriptObject: public QObject
@@ -412,6 +414,8 @@ public:
 	static QtScriptManager* getInstance(){ return _instance; }
 	static QtScriptManager* create(QObject* parent = nullptr);
 	static void destroy();
+
+	static void logMessageQt(QtMsgType type, const QString &msg);
 
 	int  numScriptsLoaded(void){ return scriptList.size(); }
 	void addScriptInstance(QtScriptInstance* script);
