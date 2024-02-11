@@ -1521,10 +1521,6 @@ void QtScriptInstance::print(const QString& msg)
 	{
 		dialog->logOutput(msg);
 	}
-	else
-	{
-		qDebug() << msg;
-	}
 }
 //----------------------------------------------------
 bool QtScriptInstance::onEmulationThread()
@@ -2422,7 +2418,7 @@ void QScriptDialog_t::openScriptFile(void)
 	{
 		return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toUtf8();
 
 	g_config->setOption("SDL.LastLoadJs", filename.toStdString().c_str());
 
@@ -2442,11 +2438,13 @@ void QScriptDialog_t::startScript(void)
 		FCEU_WRAPPER_UNLOCK();
 		return;
 	}
-	// TODO add option to pass options to script main.
-	QJSValue argArray = scriptInstance->getEngine()->newArray(4);
-	argArray.setProperty(0, "arg1");
-	argArray.setProperty(1, "arg2");
-	argArray.setProperty(2, "arg3");
+	// Pass command line arguments to script main.
+	QStringList argStringList = scriptArgs->text().split(" ", Qt::SkipEmptyParts);
+	QJSValue argArray = scriptInstance->getEngine()->newArray(argStringList.size());
+	for (int i=0; i<argStringList.size(); i++)
+	{
+		argArray.setProperty(i, argStringList[i]);
+	}
 
 	QJSValueList argList = { argArray };
 
