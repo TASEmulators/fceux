@@ -105,6 +105,49 @@ public slots:
 	Q_INVOKABLE  void setPalette(int p){ _palette = p; }
 };
 
+class JoypadScriptObject: public QObject
+{
+	Q_OBJECT
+	Q_PROPERTY(bool up READ getUp)
+	Q_PROPERTY(bool down READ getDown)
+	Q_PROPERTY(bool left READ getLeft)
+	Q_PROPERTY(bool right READ getRight)
+	Q_PROPERTY(bool select READ getSelect)
+	Q_PROPERTY(bool start READ getStart)
+	Q_PROPERTY(bool a READ getA)
+	Q_PROPERTY(bool b READ getB)
+	Q_PROPERTY(int  player READ getPlayer)
+public:
+	JoypadScriptObject(int playerIdx);
+	~JoypadScriptObject();
+
+	void readData();
+	void readDataPhy();
+
+private:
+	bool   up = false;
+	bool   down = false;
+	bool   left = false;
+	bool   right = false;
+	bool   select = false;
+	bool   start = false;
+	bool   a = false;
+	bool   b = false;
+	int    player = 0;
+	static int numInstances;
+
+public slots:
+	Q_INVOKABLE  bool getUp(){ return up; }
+	Q_INVOKABLE  bool getDown(){ return down; }
+	Q_INVOKABLE  bool getLeft(){ return left; }
+	Q_INVOKABLE  bool getRight(){ return right; }
+	Q_INVOKABLE  bool getSelect(){ return select; }
+	Q_INVOKABLE  bool getStart(){ return start; }
+	Q_INVOKABLE  bool getA(){ return a; }
+	Q_INVOKABLE  bool getB(){ return b; }
+	Q_INVOKABLE  int  getPlayer(){ return player; }
+};
+
 class EmuStateScriptObject: public QObject
 {
 	Q_OBJECT
@@ -299,6 +342,32 @@ public slots:
 	Q_INVOKABLE  void    writeByte(int address, int value);
 };
 
+class InputScriptObject: public QObject
+{
+	Q_OBJECT
+public:
+	InputScriptObject(QObject* parent = nullptr);
+	~InputScriptObject();
+
+	void setEngine(FCEU::JSEngine* _engine){ engine = _engine; }
+	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
+
+	static constexpr int MAX_NUM_JOYPADS = 4;
+private:
+	FCEU::JSEngine* engine = nullptr;
+	QScriptDialog_t* dialog = nullptr;
+	QtScriptInstance* script = nullptr;
+
+	struct
+	{
+		JoypadScriptObject*  qObj;
+		QJSValue  jsObj;
+	} joypad[MAX_NUM_JOYPADS];
+
+public slots:
+	Q_INVOKABLE QJSValue readJoypad(int player, bool immediate = false);
+};
+
 } // JS
 
 class ScriptExecutionState
@@ -369,6 +438,7 @@ private:
 	JS::RomScriptObject* rom = nullptr;
 	JS::PpuScriptObject* ppu = nullptr;
 	JS::MemoryScriptObject* mem = nullptr;
+	JS::InputScriptObject* input = nullptr;
 	QWidget* ui_rootWidget = nullptr;
 	QJSValue *onFrameBeginCallback = nullptr;
 	QJSValue *onFrameFinishCallback = nullptr;

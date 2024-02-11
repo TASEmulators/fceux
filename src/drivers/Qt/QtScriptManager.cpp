@@ -71,6 +71,8 @@
 
 // File Base Name from Core
 extern char FileBase[];
+extern uint8 joy[4];
+extern uint32 GetGamepadPressedImmediate();
 
 static thread_local FCEU::JSEngine* currentEngine = nullptr;
 
@@ -94,6 +96,56 @@ ColorScriptObject::~ColorScriptObject()
 {
 	numInstances--;
 	//printf("ColorScriptObject %p Destructor: %i\n", this, numInstances);
+}
+//----------------------------------------------------
+//----  Joypad Object
+//----------------------------------------------------
+int JoypadScriptObject::numInstances = 0;
+
+JoypadScriptObject::JoypadScriptObject(int playerIdx)
+	: QObject()
+{
+	numInstances++;
+	//printf("JoypadScriptObject %p Constructor: %i\n", this, numInstances);
+
+	moveToThread(QApplication::instance()->thread());
+
+	player = playerIdx;
+}
+//----------------------------------------------------
+JoypadScriptObject::~JoypadScriptObject()
+{
+	numInstances--;
+	//printf("JoypadScriptObject %p Destructor: %i\n", this, numInstances);
+}
+//----------------------------------------------------
+void JoypadScriptObject::readData()
+{
+	uint8_t buttons = joy[player];
+
+	a      = (buttons & 0x01) ? true : false;
+	b      = (buttons & 0x02) ? true : false;
+	select = (buttons & 0x04) ? true : false;
+	start  = (buttons & 0x08) ? true : false;
+	up     = (buttons & 0x10) ? true : false;
+	down   = (buttons & 0x20) ? true : false;
+	left   = (buttons & 0x40) ? true : false;
+	right  = (buttons & 0x80) ? true : false;
+}
+//----------------------------------------------------
+void JoypadScriptObject::readDataPhy()
+{
+	uint32_t gpData = GetGamepadPressedImmediate();
+	uint8_t buttons = gpData >> (player * 8);
+
+	a      = (buttons & 0x01) ? true : false;
+	b      = (buttons & 0x02) ? true : false;
+	select = (buttons & 0x04) ? true : false;
+	start  = (buttons & 0x08) ? true : false;
+	up     = (buttons & 0x10) ? true : false;
+	down   = (buttons & 0x20) ? true : false;
+	left   = (buttons & 0x40) ? true : false;
+	right  = (buttons & 0x80) ? true : false;
 }
 //----------------------------------------------------
 //----  EMU State Object
@@ -784,6 +836,50 @@ void PpuScriptObject::writeByte(int address, int value)
 	}
 }
 //----------------------------------------------------
+//----  Input Script Object
+//----------------------------------------------------
+//----------------------------------------------------
+InputScriptObject::InputScriptObject(QObject* parent)
+	: QObject(parent)
+{
+	script = qobject_cast<QtScriptInstance*>(parent);
+	engine = script->getEngine();
+
+	for (int i=0; i<MAX_NUM_JOYPADS; i++)
+	{
+		joypad[i].qObj = new JoypadScriptObject(i);
+
+		joypad[i].jsObj = engine->newQObject( joypad[i].qObj );
+
+//#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+//		QJSEngine::setObjectOwnership( joypad[i].qObj, QJSEngine::CppScriptOwnership);
+//#endif
+	}
+}
+//----------------------------------------------------
+InputScriptObject::~InputScriptObject()
+{
+}
+//----------------------------------------------------
+QJSValue InputScriptObject::readJoypad(int player, bool immediate)
+{
+	if ( (player < 0) || (player >= MAX_NUM_JOYPADS) )
+	{
+		QString msg = "Error: Joypad player index (" + QString::number(player) + ") is out of bounds!\n";
+		engine->throwError(QJSValue::RangeError, msg);
+		player = 0;
+	}
+	if (immediate)
+	{
+		joypad[player].qObj->readDataPhy();
+	}
+	else
+	{
+		joypad[player].qObj->readData();
+	}
+	return joypad[player].jsObj;
+}
+//----------------------------------------------------
 //----  Memory Script Object
 //----------------------------------------------------
 //----------------------------------------------------
@@ -1317,6 +1413,11 @@ void QtScriptInstance::shutdownEngine()
 		delete mem;
 		mem = nullptr;
 	}
+	if (input != nullptr)
+	{
+		delete input;
+		input = nullptr;
+	}
 
 	if (ui_rootWidget != nullptr)
 	{
@@ -1343,6 +1444,7 @@ int QtScriptInstance::initEngine()
 	rom = new JS::RomScriptObject(this);
 	ppu = new JS::PpuScriptObject(this);
 	mem = new JS::MemoryScriptObject(this);
+	input = new JS::InputScriptObject(this);
 
 	emu->setDialog(dialog);
 	rom->setDialog(dialog);
@@ -1373,6 +1475,11 @@ int QtScriptInstance::initEngine()
 	QJSValue memObject = engine->newQObject(mem);
 
 	engine->globalObject().setProperty("memory", memObject);
+
+	// input
+	QJSValue inputObject = engine->newQObject(input);
+
+	engine->globalObject().setProperty("input", inputObject);
 
 	// gui
 	QJSValue guiObject = engine->newQObject(this);
@@ -1778,7 +1885,7 @@ QtScriptManager::QtScriptManager(QObject* parent)
 	: QObject(parent)
 {
 	_instance = this;
-	monitorThread = new ScriptMonitorThread_t();
+	monitorThread = new ScriptMonitorThread_t(this);
 	monitorThread->start();
 
 	periodicUpdateTimer = new QTimer(this);
