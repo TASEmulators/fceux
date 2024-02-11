@@ -35,6 +35,46 @@
 class QScriptDialog_t;
 class QtScriptInstance;
 
+namespace FCEU
+{
+	class JSEngine : public QJSEngine
+	{
+		Q_OBJECT
+	public:
+		JSEngine(QObject* parent = nullptr);
+		~JSEngine();
+
+		QScriptDialog_t* getDialog(){ return dialog; }
+		QtScriptInstance* getScript(){ return script; }
+
+		void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
+		void setScript(QtScriptInstance* _script){ script = _script; }
+
+		enum logLevel
+		{
+			FATAL = 0,
+			CRITICAL,
+			WARNING,
+			INFO,
+			DEBUG,
+		};
+
+		void acquireThreadContext();
+		void releaseThreadContext();
+		void setLogLevel(enum logLevel lvl){ _logLevel = lvl; }
+		void logMessage(int lvl, const QString& msg);
+
+		static JSEngine* getCurrent();
+	private:
+		QScriptDialog_t* dialog = nullptr;
+		QtScriptInstance* script = nullptr;
+
+		int _logLevel = WARNING;
+		JSEngine*  prevContext = nullptr;
+
+	};
+} // FCEU
+
 namespace JS
 {
 
@@ -87,6 +127,8 @@ private:
 
 	static int numInstances;
 
+	void logMessage(int lvl, QString& msg);
+
 public slots:
 	Q_INVOKABLE  bool  save();
 	Q_INVOKABLE  bool  load();
@@ -109,11 +151,11 @@ public:
 	EmuScriptObject(QObject* parent = nullptr);
 	~EmuScriptObject();
 
-	void setEngine(QJSEngine* _engine){ engine = _engine; }
+	void setEngine(FCEU::JSEngine* _engine){ engine = _engine; }
 	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
 
 private:
-	QJSEngine* engine = nullptr;
+	FCEU::JSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	QtScriptInstance* script = nullptr;
 
@@ -156,10 +198,10 @@ public:
 	RomScriptObject(QObject* parent = nullptr);
 	~RomScriptObject();
 
-	void setEngine(QJSEngine* _engine){ engine = _engine; }
+	void setEngine(FCEU::JSEngine* _engine){ engine = _engine; }
 	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
 private:
-	QJSEngine* engine = nullptr;
+	FCEU::JSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	QtScriptInstance* script = nullptr;
 
@@ -181,7 +223,7 @@ public:
 	MemoryScriptObject(QObject* parent = nullptr);
 	~MemoryScriptObject();
 
-	void setEngine(QJSEngine* _engine){ engine = _engine; }
+	void setEngine(FCEU::JSEngine* _engine){ engine = _engine; }
 	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
 	void reset();
 
@@ -191,7 +233,7 @@ public:
 	QJSValue* getExecFunc(int address) { return execFunc[address]; }
 private:
 	static constexpr int AddressRange = 0x10000;
-	QJSEngine* engine = nullptr;
+	FCEU::JSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	QtScriptInstance* script = nullptr;
 	QJSValue* readFunc[AddressRange] = { nullptr };
@@ -240,10 +282,10 @@ public:
 	PpuScriptObject(QObject* parent = nullptr);
 	~PpuScriptObject();
 
-	void setEngine(QJSEngine* _engine){ engine = _engine; }
+	void setEngine(FCEU::JSEngine* _engine){ engine = _engine; }
 	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
 private:
-	QJSEngine* engine = nullptr;
+	FCEU::JSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	QtScriptInstance* script = nullptr;
 
@@ -309,8 +351,7 @@ public:
 
 	int  throwError(QJSValue::ErrorType errorType, const QString &message = QString());
 
-	QObject* getObjectParent();
-	QJSEngine* getEngine(){ return engine; };
+	FCEU::JSEngine* getEngine(){ return engine; };
 private:
 
 	int  initEngine();
@@ -320,7 +361,7 @@ private:
 
 	ScriptExecutionState* getExecutionState();
 
-	QJSEngine* engine = nullptr;
+	FCEU::JSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	JS::EmuScriptObject* emu = nullptr;
 	JS::RomScriptObject* rom = nullptr;

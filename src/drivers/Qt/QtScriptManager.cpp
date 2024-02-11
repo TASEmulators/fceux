@@ -72,6 +72,8 @@
 // File Base Name from Core
 extern char FileBase[];
 
+static thread_local FCEU::JSEngine* currentEngine = nullptr;
+
 namespace JS
 {
 //----------------------------------------------------
@@ -249,6 +251,8 @@ bool EmuStateScriptObject::loadFromFile(const QString& filepath)
 	FILE* inf = fopen(filepath.toLocal8Bit().data(),"rb");
 	if (inf == nullptr)
 	{
+		QString msg = "Warning: JS EmuState::loadFromFile failed to open file: " + filepath + "\n";
+		logMessage(FCEU::JSEngine::WARNING, msg);
 		return false;
 	}
 	fseek(inf,0,SEEK_END);
@@ -257,12 +261,23 @@ bool EmuStateScriptObject::loadFromFile(const QString& filepath)
 	data = new EMUFILE_MEMORY(len);
 	if ( fread(data->buf(),1,len,inf) != static_cast<size_t>(len) )
 	{
-		FCEU_printf("Warning: JS EmuState::loadFromFile failed to load full buffer.\n");
+		QString msg = "Warning: JS EmuState::loadFromFile failed to load full buffer.\n";
+		logMessage(FCEU::JSEngine::WARNING, msg);
 		delete data;
 		data = nullptr;
 	}
 	fclose(inf);
 	return true;
+}
+//----------------------------------------------------
+void EmuStateScriptObject::logMessage(int lvl, QString& msg)
+{
+	auto* engine = FCEU::JSEngine::getCurrent();
+
+	if (engine != nullptr)
+	{
+		engine->logMessage(lvl, msg);
+	}
 }
 //----------------------------------------------------
 //----  EMU Script Object
@@ -1125,6 +1140,48 @@ void MemoryScriptObject::unregisterAll()
 }
 } // JS
 //----------------------------------------------------
+//----  FCEU JSEngine
+//----------------------------------------------------
+namespace FCEU
+{
+	JSEngine::JSEngine(QObject* parent)
+		: QJSEngine(parent)
+	{
+	}
+
+	JSEngine::~JSEngine()
+	{
+	}
+
+	void JSEngine::logMessage(int lvl, const QString& msg)
+	{
+		if (dialog != nullptr)
+		{
+			if (lvl <= _logLevel)
+			{
+				dialog->logOutput(msg);
+			}
+		}
+	}
+
+	void JSEngine::acquireThreadContext()
+	{
+		prevContext = currentEngine;
+		currentEngine = this;
+	}
+
+	void JSEngine::releaseThreadContext()
+	{
+		currentEngine = prevContext;
+		prevContext = nullptr;
+	}
+
+	JSEngine* JSEngine::getCurrent()
+	{
+		return currentEngine;
+	}
+}
+//----------------------------------------------------
 //----  Qt Script Instance
 //----------------------------------------------------
 QtScriptInstance::QtScriptInstance(QObject* parent)
@@ -1222,7 +1279,10 @@ void QtScriptInstance::resetEngine()
 //----------------------------------------------------
 int QtScriptInstance::initEngine()
 {
-	engine = new QJSEngine(this);
+	engine = new FCEU::JSEngine(this);
+
+	engine->setScript(this);
+	engine->setDialog(dialog);
 
 	emu = new JS::EmuScriptObject(this);
 	rom = new JS::RomScriptObject(this);
@@ -1289,7 +1349,9 @@ int QtScriptInstance::loadScriptFile( QString filepath )
 	scriptFile.close();
 
 	FCEU_WRAPPER_LOCK();
+	engine->acquireThreadContext();
 	QJSValue evalResult = engine->evaluate(fileText, filepath);
+	engine->releaseThreadContext();
 	FCEU_WRAPPER_UNLOCK();
 
 	if (evalResult.isError())
@@ -1460,7 +1522,11 @@ int  QtScriptInstance::runFunc(QJSValue &func, const QJSValueList& args)
 
 	state->start();
 
+	engine->acquireThreadContext();
+
 	QJSValue callResult = func.call(args);
+
+	engine->releaseThreadContext();
 
 	state->stop();
 
