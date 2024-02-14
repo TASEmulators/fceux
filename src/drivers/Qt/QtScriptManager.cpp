@@ -102,7 +102,7 @@ ColorScriptObject::~ColorScriptObject()
 //----------------------------------------------------
 int JoypadScriptObject::numInstances = 0;
 
-JoypadScriptObject::JoypadScriptObject(int playerIdx)
+JoypadScriptObject::JoypadScriptObject(int playerIdx, bool immediate)
 	: QObject()
 {
 	numInstances++;
@@ -110,7 +110,20 @@ JoypadScriptObject::JoypadScriptObject(int playerIdx)
 
 	moveToThread(QApplication::instance()->thread());
 
+	if ( (playerIdx < 0) || (playerIdx >= MAX_JOYPAD_PLAYERS) )
+	{
+		QString msg = "Error: Joypad player index (" + QString::number(playerIdx) + ") is out of bounds!\n";
+		auto* engine = FCEU::JSEngine::getCurrent();
+		if (engine != nullptr)
+		{
+			engine->throwError(QJSValue::RangeError, msg);
+		}
+		playerIdx = 0;
+	}
+
 	player = playerIdx;
+
+	refreshData(immediate);
 }
 //----------------------------------------------------
 JoypadScriptObject::~JoypadScriptObject()
@@ -119,33 +132,35 @@ JoypadScriptObject::~JoypadScriptObject()
 	//printf("JoypadScriptObject %p Destructor: %i\n", this, numInstances);
 }
 //----------------------------------------------------
-void JoypadScriptObject::readData()
+void JoypadScriptObject::refreshData(bool immediate)
 {
-	uint8_t buttons = joy[player];
+	if (immediate)
+	{
+		uint32_t gpData = GetGamepadPressedImmediate();
+		uint8_t buttons = gpData >> (player * 8);
 
-	a      = (buttons & 0x01) ? true : false;
-	b      = (buttons & 0x02) ? true : false;
-	select = (buttons & 0x04) ? true : false;
-	start  = (buttons & 0x08) ? true : false;
-	up     = (buttons & 0x10) ? true : false;
-	down   = (buttons & 0x20) ? true : false;
-	left   = (buttons & 0x40) ? true : false;
-	right  = (buttons & 0x80) ? true : false;
-}
-//----------------------------------------------------
-void JoypadScriptObject::readDataPhy()
-{
-	uint32_t gpData = GetGamepadPressedImmediate();
-	uint8_t buttons = gpData >> (player * 8);
+		a      = (buttons & 0x01) ? true : false;
+		b      = (buttons & 0x02) ? true : false;
+		select = (buttons & 0x04) ? true : false;
+		start  = (buttons & 0x08) ? true : false;
+		up     = (buttons & 0x10) ? true : false;
+		down   = (buttons & 0x20) ? true : false;
+		left   = (buttons & 0x40) ? true : false;
+		right  = (buttons & 0x80) ? true : false;
+	}
+	else
+	{
+		uint8_t buttons = joy[player];
 
-	a      = (buttons & 0x01) ? true : false;
-	b      = (buttons & 0x02) ? true : false;
-	select = (buttons & 0x04) ? true : false;
-	start  = (buttons & 0x08) ? true : false;
-	up     = (buttons & 0x10) ? true : false;
-	down   = (buttons & 0x20) ? true : false;
-	left   = (buttons & 0x40) ? true : false;
-	right  = (buttons & 0x80) ? true : false;
+		a      = (buttons & 0x01) ? true : false;
+		b      = (buttons & 0x02) ? true : false;
+		select = (buttons & 0x04) ? true : false;
+		start  = (buttons & 0x08) ? true : false;
+		up     = (buttons & 0x10) ? true : false;
+		down   = (buttons & 0x20) ? true : false;
+		left   = (buttons & 0x40) ? true : false;
+		right  = (buttons & 0x80) ? true : false;
+	}
 }
 //----------------------------------------------------
 //----  EMU State Object
@@ -844,17 +859,6 @@ InputScriptObject::InputScriptObject(QObject* parent)
 {
 	script = qobject_cast<QtScriptInstance*>(parent);
 	engine = script->getEngine();
-
-	for (int i=0; i<MAX_NUM_JOYPADS; i++)
-	{
-		joypad[i].qObj = new JoypadScriptObject(i);
-
-		joypad[i].jsObj = engine->newQObject( joypad[i].qObj );
-
-//#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-//		QJSEngine::setObjectOwnership( joypad[i].qObj, QJSEngine::CppScriptOwnership);
-//#endif
-	}
 }
 //----------------------------------------------------
 InputScriptObject::~InputScriptObject()
@@ -863,21 +867,15 @@ InputScriptObject::~InputScriptObject()
 //----------------------------------------------------
 QJSValue InputScriptObject::readJoypad(int player, bool immediate)
 {
-	if ( (player < 0) || (player >= MAX_NUM_JOYPADS) )
-	{
-		QString msg = "Error: Joypad player index (" + QString::number(player) + ") is out of bounds!\n";
-		engine->throwError(QJSValue::RangeError, msg);
-		player = 0;
-	}
-	if (immediate)
-	{
-		joypad[player].qObj->readDataPhy();
-	}
-	else
-	{
-		joypad[player].qObj->readData();
-	}
-	return joypad[player].jsObj;
+	JoypadScriptObject* joypadObj = new JoypadScriptObject(player, immediate);
+
+	QJSValue jsObj = engine->newQObject( joypadObj );
+
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	QJSEngine::setObjectOwnership( joypadObj, QJSEngine::JavaScriptOwnership);
+#endif
+
+	return jsObj;
 }
 //----------------------------------------------------
 //----  Memory Script Object
@@ -1489,6 +1487,9 @@ int QtScriptInstance::initEngine()
 	// Class Type Definitions for Script Use
 	QJSValue jsColorMetaObject = engine->newQMetaObject(&JS::ColorScriptObject::staticMetaObject);
 	engine->globalObject().setProperty("Color", jsColorMetaObject);
+
+	QJSValue jsJoypadMetaObject = engine->newQMetaObject(&JS::JoypadScriptObject::staticMetaObject);
+	engine->globalObject().setProperty("Joypad", jsJoypadMetaObject);
 
 	QJSValue jsEmuStateMetaObject = engine->newQMetaObject(&JS::EmuStateScriptObject::staticMetaObject);
 	engine->globalObject().setProperty("EmuState", jsEmuStateMetaObject);

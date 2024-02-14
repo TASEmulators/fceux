@@ -116,14 +116,12 @@ class JoypadScriptObject: public QObject
 	Q_PROPERTY(bool start READ getStart)
 	Q_PROPERTY(bool a READ getA)
 	Q_PROPERTY(bool b READ getB)
-	Q_PROPERTY(int  player READ getPlayer)
+	Q_PROPERTY(int  player READ getPlayer WRITE setPlayer)
 public:
-	JoypadScriptObject(int playerIdx);
+	Q_INVOKABLE JoypadScriptObject(int playerIdx = 0, bool immediate = false);
 	~JoypadScriptObject();
 
-	void readData();
-	void readDataPhy();
-
+	static constexpr int MAX_JOYPAD_PLAYERS = 4;
 private:
 	bool   up = false;
 	bool   down = false;
@@ -137,6 +135,7 @@ private:
 	static int numInstances;
 
 public slots:
+	Q_INVOKABLE  void refreshData(bool immediate = false);
 	Q_INVOKABLE  bool getUp(){ return up; }
 	Q_INVOKABLE  bool getDown(){ return down; }
 	Q_INVOKABLE  bool getLeft(){ return left; }
@@ -145,7 +144,9 @@ public slots:
 	Q_INVOKABLE  bool getStart(){ return start; }
 	Q_INVOKABLE  bool getA(){ return a; }
 	Q_INVOKABLE  bool getB(){ return b; }
+	Q_INVOKABLE  int  maxPlayers(){ return MAX_JOYPAD_PLAYERS; }
 	Q_INVOKABLE  int  getPlayer(){ return player; }
+	Q_INVOKABLE  void setPlayer(int newPlayerIdx){ player = newPlayerIdx; }
 };
 
 class EmuStateScriptObject: public QObject
@@ -352,20 +353,14 @@ public:
 	void setEngine(FCEU::JSEngine* _engine){ engine = _engine; }
 	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
 
-	static constexpr int MAX_NUM_JOYPADS = 4;
 private:
 	FCEU::JSEngine* engine = nullptr;
 	QScriptDialog_t* dialog = nullptr;
 	QtScriptInstance* script = nullptr;
 
-	struct
-	{
-		JoypadScriptObject*  qObj;
-		QJSValue  jsObj;
-	} joypad[MAX_NUM_JOYPADS];
-
 public slots:
-	Q_INVOKABLE QJSValue readJoypad(int player, bool immediate = false);
+	Q_INVOKABLE QJSValue readJoypad(int player = 0, bool immediate = false);
+	Q_INVOKABLE int  maxJoypadPlayers(){ return JoypadScriptObject::MAX_JOYPAD_PLAYERS; }
 };
 
 } // JS
