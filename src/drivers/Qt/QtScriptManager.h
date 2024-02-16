@@ -122,31 +122,160 @@ public:
 	~JoypadScriptObject();
 
 	static constexpr int MAX_JOYPAD_PLAYERS = 4;
+
+	enum Button
+	{
+		FIRST_BUTTON = 0,
+		A_BUTTON = FIRST_BUTTON,
+		B_BUTTON,
+		SELECT_BUTTON,
+		START_BUTTON,
+		UP_BUTTON,
+		DOWN_BUTTON,
+		LEFT_BUTTON,
+		RIGHT_BUTTON,
+		LAST_BUTTON = RIGHT_BUTTON,
+		END_BUTTON
+	};
+	Q_ENUM(Button);
+
+	// Joypad Override Function
+	static uint8_t readOverride(int which, uint8_t joyl);
+
 private:
-	bool   up = false;
-	bool   down = false;
-	bool   left = false;
-	bool   right = false;
-	bool   select = false;
-	bool   start = false;
-	bool   a = false;
-	bool   b = false;
+	// Joypad Override Bit Masks
+	static uint8_t jsOverrideMask1[MAX_JOYPAD_PLAYERS];
+	static uint8_t jsOverrideMask2[MAX_JOYPAD_PLAYERS];
+
+	struct buttonState
+	{
+		uint32_t  buttonMask = 0;
+		bool   _immediate = false;
+	};
+	buttonState  current;
+	buttonState  prev;
+
 	int    player = 0;
 	static int numInstances;
 
+	static constexpr uint32_t ButtonMaskA      = 0x01;
+	static constexpr uint32_t ButtonMaskB      = 0x02;
+	static constexpr uint32_t ButtonMaskSelect = 0x04;
+	static constexpr uint32_t ButtonMaskStart  = 0x08;
+	static constexpr uint32_t ButtonMaskUp     = 0x10;
+	static constexpr uint32_t ButtonMaskDown   = 0x20;
+	static constexpr uint32_t ButtonMaskLeft   = 0x40;
+	static constexpr uint32_t ButtonMaskRight  = 0x80;
+
+	template <uint32_t mask> bool isBitSet(uint32_t& byte)
+	{
+		return (byte & mask) ? true : false;
+	}
+
+	template <uint32_t mask> bool isChanged()
+	{
+		return ((current.buttonMask ^ prev.buttonMask) & mask) ? true : false;
+	}
+
+	template <uint32_t mask> void setButtonOverride(bool value)
+	{
+		if (value)
+		{
+			jsOverrideMask1[player] |= mask;
+			jsOverrideMask2[player] |= mask;
+		}
+		else
+		{
+			jsOverrideMask1[player] &= ~mask;
+			jsOverrideMask2[player] &= ~mask;
+		}
+	}
+
+	template <uint32_t mask> void clearButtonOverride()
+	{
+		jsOverrideMask1[player] |=  mask;
+		jsOverrideMask2[player] &= ~mask;
+	}
+
+	template <uint32_t mask> void invertButtonOverride()
+	{
+		jsOverrideMask1[player] &= ~mask;
+		jsOverrideMask2[player] |=  mask;
+	}
+
 public slots:
 	Q_INVOKABLE  void refreshData(bool immediate = false);
-	Q_INVOKABLE  bool getUp(){ return up; }
-	Q_INVOKABLE  bool getDown(){ return down; }
-	Q_INVOKABLE  bool getLeft(){ return left; }
-	Q_INVOKABLE  bool getRight(){ return right; }
-	Q_INVOKABLE  bool getSelect(){ return select; }
-	Q_INVOKABLE  bool getStart(){ return start; }
-	Q_INVOKABLE  bool getA(){ return a; }
-	Q_INVOKABLE  bool getB(){ return b; }
+
+	Q_INVOKABLE  bool getUp(){ return isBitSet<ButtonMaskUp>(current.buttonMask); }
+	Q_INVOKABLE  bool getDown(){ return isBitSet<ButtonMaskDown>(current.buttonMask); }
+	Q_INVOKABLE  bool getLeft(){ return isBitSet<ButtonMaskLeft>(current.buttonMask); }
+	Q_INVOKABLE  bool getRight(){ return isBitSet<ButtonMaskRight>(current.buttonMask); }
+	Q_INVOKABLE  bool getSelect(){ return isBitSet<ButtonMaskSelect>(current.buttonMask); }
+	Q_INVOKABLE  bool getStart(){ return isBitSet<ButtonMaskStart>(current.buttonMask); }
+	Q_INVOKABLE  bool getA(){ return isBitSet<ButtonMaskA>(current.buttonMask); }
+	Q_INVOKABLE  bool getB(){ return isBitSet<ButtonMaskB>(current.buttonMask); }
+
+	Q_INVOKABLE  bool upChanged(){ return isChanged<ButtonMaskUp>(); }
+	Q_INVOKABLE  bool downChanged(){ return isChanged<ButtonMaskDown>(); }
+	Q_INVOKABLE  bool leftChanged(){ return isChanged<ButtonMaskLeft>(); }
+	Q_INVOKABLE  bool rightChanged(){ return isChanged<ButtonMaskRight>(); }
+	Q_INVOKABLE  bool selectChanged(){ return isChanged<ButtonMaskSelect>(); }
+	Q_INVOKABLE  bool startChanged(){ return isChanged<ButtonMaskStart>(); }
+	Q_INVOKABLE  bool aChanged(){ return isChanged<ButtonMaskA>(); }
+	Q_INVOKABLE  bool bChanged(){ return isChanged<ButtonMaskB>(); }
+
+	Q_INVOKABLE  bool isImmediate(){ return current._immediate; }
+	Q_INVOKABLE  bool getButton(enum Button b);
+	Q_INVOKABLE  bool buttonChanged(enum Button b);
+	Q_INVOKABLE  bool stateChanged(){ return prev.buttonMask != current.buttonMask; }
+	Q_INVOKABLE  void setState(int mask){ prev.buttonMask = current.buttonMask; current.buttonMask = mask; }
+	Q_INVOKABLE  int  getState(){ return current.buttonMask; }
 	Q_INVOKABLE  int  maxPlayers(){ return MAX_JOYPAD_PLAYERS; }
 	Q_INVOKABLE  int  getPlayer(){ return player; }
 	Q_INVOKABLE  void setPlayer(int newPlayerIdx){ player = newPlayerIdx; }
+
+	Q_INVOKABLE  void ovrdClearA(){ clearButtonOverride<ButtonMaskA>(); }
+	Q_INVOKABLE  void ovrdClearB(){ clearButtonOverride<ButtonMaskB>(); }
+	Q_INVOKABLE  void ovrdClearStart(){ clearButtonOverride<ButtonMaskStart>(); }
+	Q_INVOKABLE  void ovrdClearSelect(){ clearButtonOverride<ButtonMaskSelect>(); }
+	Q_INVOKABLE  void ovrdClearUp(){ clearButtonOverride<ButtonMaskUp>(); }
+	Q_INVOKABLE  void ovrdClearDown(){ clearButtonOverride<ButtonMaskDown>(); }
+	Q_INVOKABLE  void ovrdClearLeft(){ clearButtonOverride<ButtonMaskLeft>(); }
+	Q_INVOKABLE  void ovrdClearRight(){ clearButtonOverride<ButtonMaskRight>(); }
+	Q_INVOKABLE  void ovrdClear(){ ovrdReset(); }
+
+	Q_INVOKABLE  void ovrdInvertA(){ invertButtonOverride<ButtonMaskA>(); }
+	Q_INVOKABLE  void ovrdInvertB(){ invertButtonOverride<ButtonMaskB>(); }
+	Q_INVOKABLE  void ovrdInvertStart(){ invertButtonOverride<ButtonMaskStart>(); }
+	Q_INVOKABLE  void ovrdInvertSelect(){ invertButtonOverride<ButtonMaskSelect>(); }
+	Q_INVOKABLE  void ovrdInvertUp(){ invertButtonOverride<ButtonMaskUp>(); }
+	Q_INVOKABLE  void ovrdInvertDown(){ invertButtonOverride<ButtonMaskDown>(); }
+	Q_INVOKABLE  void ovrdInvertLeft(){ invertButtonOverride<ButtonMaskLeft>(); }
+	Q_INVOKABLE  void ovrdInvertRight(){ invertButtonOverride<ButtonMaskRight>(); }
+
+	Q_INVOKABLE  void ovrdA(bool value){ setButtonOverride<ButtonMaskA>(value); }
+	Q_INVOKABLE  void ovrdB(bool value){ setButtonOverride<ButtonMaskB>(value); }
+	Q_INVOKABLE  void ovrdStart(bool value){ setButtonOverride<ButtonMaskStart>(value); }
+	Q_INVOKABLE  void ovrdSelect(bool value){ setButtonOverride<ButtonMaskSelect>(value); }
+	Q_INVOKABLE  void ovrdUp(bool value){ setButtonOverride<ButtonMaskUp>(value); }
+	Q_INVOKABLE  void ovrdDown(bool value){ setButtonOverride<ButtonMaskDown>(value); }
+	Q_INVOKABLE  void ovrdLeft(bool value){ setButtonOverride<ButtonMaskLeft>(value); }
+	Q_INVOKABLE  void ovrdRight(bool value){ setButtonOverride<ButtonMaskRight>(value); }
+
+	Q_INVOKABLE  void ovrdReset()
+	{
+		jsOverrideMask1[player] = 0xFF;
+		jsOverrideMask2[player] = 0x00;
+	}
+
+	Q_INVOKABLE  void ovrdResetAll()
+	{
+		for (int i=0; i<MAX_JOYPAD_PLAYERS; i++)
+		{
+			jsOverrideMask1[i] = 0xFF;
+			jsOverrideMask2[i] = 0x00;
+		}
+	}
 };
 
 class EmuStateScriptObject: public QObject
@@ -574,11 +703,6 @@ private slots:
 	void stopScript(void);
 };
 
-// Formatted print
-//int LuaPrintfToWindowConsole( __FCEU_PRINTF_FORMAT const char *format, ...) __FCEU_PRINTF_ATTRIBUTE( 1, 2 );
-
-//void PrintToWindowConsole(intptr_t hDlgAsInt, const char *str);
-
-//int LuaKillMessageBox(void);
+uint8_t FCEU_JSReadJoypad(int which, uint8_t phyState);
 
 #endif // __FCEU_QSCRIPT_ENABLE__

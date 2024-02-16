@@ -101,6 +101,11 @@ ColorScriptObject::~ColorScriptObject()
 //----  Joypad Object
 //----------------------------------------------------
 int JoypadScriptObject::numInstances = 0;
+/* Joypad Override Logic True Table
+	11 - true		01 - pass-through (default)
+	00 - false		10 - invert		*/
+uint8_t JoypadScriptObject::jsOverrideMask1[MAX_JOYPAD_PLAYERS]= { 0xFF, 0xFF, 0xFF, 0xFF };
+uint8_t JoypadScriptObject::jsOverrideMask2[MAX_JOYPAD_PLAYERS]= { 0x00, 0x00, 0x00, 0x00 };
 
 JoypadScriptObject::JoypadScriptObject(int playerIdx, bool immediate)
 	: QObject()
@@ -132,35 +137,51 @@ JoypadScriptObject::~JoypadScriptObject()
 	//printf("JoypadScriptObject %p Destructor: %i\n", this, numInstances);
 }
 //----------------------------------------------------
+uint8_t JoypadScriptObject::readOverride(int which, uint8_t joyl)
+{
+	joyl = (joyl & jsOverrideMask1[which]) | (~joyl & jsOverrideMask2[which]);
+	jsOverrideMask1[which] = 0xFF;
+	jsOverrideMask2[which] = 0x00;
+	return joyl;
+
+}
+//----------------------------------------------------
 void JoypadScriptObject::refreshData(bool immediate)
 {
+	uint8_t buttons = 0;
 	if (immediate)
 	{
 		uint32_t gpData = GetGamepadPressedImmediate();
-		uint8_t buttons = gpData >> (player * 8);
-
-		a      = (buttons & 0x01) ? true : false;
-		b      = (buttons & 0x02) ? true : false;
-		select = (buttons & 0x04) ? true : false;
-		start  = (buttons & 0x08) ? true : false;
-		up     = (buttons & 0x10) ? true : false;
-		down   = (buttons & 0x20) ? true : false;
-		left   = (buttons & 0x40) ? true : false;
-		right  = (buttons & 0x80) ? true : false;
+		buttons = gpData >> (player * 8);
 	}
 	else
 	{
-		uint8_t buttons = joy[player];
-
-		a      = (buttons & 0x01) ? true : false;
-		b      = (buttons & 0x02) ? true : false;
-		select = (buttons & 0x04) ? true : false;
-		start  = (buttons & 0x08) ? true : false;
-		up     = (buttons & 0x10) ? true : false;
-		down   = (buttons & 0x20) ? true : false;
-		left   = (buttons & 0x40) ? true : false;
-		right  = (buttons & 0x80) ? true : false;
+		buttons = joy[player];
 	}
+	prev = current;
+
+	current.buttonMask = buttons;
+	current._immediate = immediate;
+}
+//----------------------------------------------------
+bool JoypadScriptObject::getButton(enum Button b)
+{
+	bool isPressed = false;
+	uint8_t mask = 0x01 << b;
+
+	//printf("mask=%08x  buttons=%08x\n", mask, current.buttonMask);
+	isPressed = (current.buttonMask & mask) ? true : false;
+	return isPressed;
+}
+//----------------------------------------------------
+bool JoypadScriptObject::buttonChanged(enum Button b)
+{
+	bool hasChanged = false;
+	uint8_t mask = 0x01 << b;
+
+	//printf("mask=%08x  buttons=%08x\n", mask, current.buttonMask);
+	hasChanged = ((current.buttonMask ^ prev.buttonMask) & mask) ? true : false;
+	return hasChanged;
 }
 //----------------------------------------------------
 //----  EMU State Object
@@ -2608,6 +2629,11 @@ void QScriptDialog_t::logOutput(const QString& text)
 			vbar->setValue( vbar->maximum() );
 		}
 	}
+}
+//----------------------------------------------------
+uint8_t FCEU_JSReadJoypad(int which, uint8_t joyl)
+{
+	return JS::JoypadScriptObject::readOverride(which, joyl);
 }
 //----------------------------------------------------
 #endif // __FCEU_QSCRIPT_ENABLE__
