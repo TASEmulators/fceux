@@ -103,6 +103,8 @@ public slots:
 	Q_INVOKABLE  void setBlue(int b){ color.setBlue(b); }
 	Q_INVOKABLE  int getPalette(){ return _palette; }
 	Q_INVOKABLE  void setPalette(int p){ _palette = p; }
+	Q_INVOKABLE  int toRGB8(){ return color.value(); }
+	Q_INVOKABLE  QString name(){ return color.name(QColor::HexRgb); }
 };
 
 class JoypadScriptObject: public QObject
@@ -472,6 +474,35 @@ public slots:
 	Q_INVOKABLE  void    writeByte(int address, int value);
 };
 
+class MovieScriptObject: public QObject
+{
+	Q_OBJECT
+public:
+	MovieScriptObject(QObject* parent = nullptr);
+	~MovieScriptObject();
+
+	void setEngine(FCEU::JSEngine* _engine){ engine = _engine; }
+
+	enum SaveType
+	{
+		FROM_POWERON = 0,
+		FROM_SAVESTATE,
+		FROM_SAVERAM,
+	};
+	Q_ENUM(SaveType);
+private:
+	FCEU::JSEngine* engine = nullptr;
+	QtScriptInstance* script = nullptr;
+
+public slots:
+	Q_INVOKABLE  bool active();
+	Q_INVOKABLE  bool isPlaying();
+	Q_INVOKABLE  bool isRecording();
+	Q_INVOKABLE  bool isPowerOn();
+	Q_INVOKABLE  bool isFromSaveState();
+	Q_INVOKABLE  bool record(const QString& filename, int saveType = FROM_POWERON, const QString author = QString());
+};
+
 class InputScriptObject: public QObject
 {
 	Q_OBJECT
@@ -480,11 +511,9 @@ public:
 	~InputScriptObject();
 
 	void setEngine(FCEU::JSEngine* _engine){ engine = _engine; }
-	void setDialog(QScriptDialog_t* _dialog){ dialog = _dialog; }
 
 private:
 	FCEU::JSEngine* engine = nullptr;
-	QScriptDialog_t* dialog = nullptr;
 	QtScriptInstance* script = nullptr;
 
 public slots:
@@ -563,6 +592,7 @@ private:
 	JS::PpuScriptObject* ppu = nullptr;
 	JS::MemoryScriptObject* mem = nullptr;
 	JS::InputScriptObject* input = nullptr;
+	JS::MovieScriptObject* movie = nullptr;
 	QWidget* ui_rootWidget = nullptr;
 	QJSValue *onFrameBeginCallback = nullptr;
 	QJSValue *onFrameFinishCallback = nullptr;

@@ -872,6 +872,78 @@ void PpuScriptObject::writeByte(int address, int value)
 	}
 }
 //----------------------------------------------------
+//----  Movie Script Object
+//----------------------------------------------------
+//----------------------------------------------------
+MovieScriptObject::MovieScriptObject(QObject* parent)
+	: QObject(parent)
+{
+	script = qobject_cast<QtScriptInstance*>(parent);
+	engine = script->getEngine();
+}
+//----------------------------------------------------
+MovieScriptObject::~MovieScriptObject()
+{
+}
+//----------------------------------------------------
+bool MovieScriptObject::active()
+{
+	bool movieActive = (FCEUMOV_IsRecording() || FCEUMOV_IsPlaying());
+	return movieActive;
+}
+//----------------------------------------------------
+bool MovieScriptObject::isPlaying()
+{
+	bool playing = FCEUMOV_IsPlaying();
+	return playing;
+}
+//----------------------------------------------------
+bool MovieScriptObject::isRecording()
+{
+	bool recording = FCEUMOV_IsRecording();
+	return recording;
+}
+//----------------------------------------------------
+bool MovieScriptObject::isPowerOn()
+{
+	bool flag = false;
+	if (FCEUMOV_IsRecording() || FCEUMOV_IsPlaying())
+	{
+		flag = FCEUMOV_FromPoweron();
+	}
+	return flag;
+}
+//----------------------------------------------------
+bool MovieScriptObject::isFromSaveState()
+{
+	bool flag = false;
+	if (FCEUMOV_IsRecording() || FCEUMOV_IsPlaying())
+	{
+		flag = !FCEUMOV_FromPoweron();
+	}
+	return flag;
+}
+//----------------------------------------------------
+bool MovieScriptObject::record(const QString& filename, int saveType, const QString author)
+{
+	if (filename.isEmpty())
+	{
+		script->throwError(QJSValue::GenericError, "movie.record(): Filename required");
+		return false;
+	}
+
+	// No need to use the full functionality of the enum
+	EMOVIE_FLAG flags;
+	if      (saveType == FROM_SAVESTATE) flags = MOVIE_FLAG_NONE;  // from savestate
+	else if (saveType == FROM_SAVERAM  ) flags = MOVIE_FLAG_FROM_SAVERAM;
+	else                                 flags = MOVIE_FLAG_FROM_POWERON;
+
+	// Save it!
+	FCEUI_SaveMovie( filename.toLocal8Bit().data(), flags, author.toStdWString());
+
+	return true;
+}
+//----------------------------------------------------
 //----  Input Script Object
 //----------------------------------------------------
 //----------------------------------------------------
@@ -1437,6 +1509,11 @@ void QtScriptInstance::shutdownEngine()
 		delete input;
 		input = nullptr;
 	}
+	if (movie != nullptr)
+	{
+		delete movie;
+		movie = nullptr;
+	}
 
 	if (ui_rootWidget != nullptr)
 	{
@@ -1464,6 +1541,7 @@ int QtScriptInstance::initEngine()
 	ppu = new JS::PpuScriptObject(this);
 	mem = new JS::MemoryScriptObject(this);
 	input = new JS::InputScriptObject(this);
+	movie = new JS::MovieScriptObject(this);
 
 	emu->setDialog(dialog);
 	rom->setDialog(dialog);
@@ -1499,6 +1577,11 @@ int QtScriptInstance::initEngine()
 	QJSValue inputObject = engine->newQObject(input);
 
 	engine->globalObject().setProperty("input", inputObject);
+
+	// movie
+	QJSValue movieObject = engine->newQObject(movie);
+
+	engine->globalObject().setProperty("movie", movieObject);
 
 	// gui
 	QJSValue guiObject = engine->newQObject(this);
@@ -1668,8 +1751,7 @@ bool QtScriptInstance::onGuiThread()
 int QtScriptInstance::throwError(QJSValue::ErrorType errorType, const QString &message)
 {
 	running = false;
-	print(message);
-	engine->setInterrupted(true);
+	engine->throwError(errorType, message);
 	return 0;
 }
 //----------------------------------------------------
