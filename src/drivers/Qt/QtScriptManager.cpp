@@ -28,12 +28,14 @@
 #include <Windows.h>
 #endif
 
+#include <QUrl>
 #include <QTextEdit>
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
 #include <QHeaderView>
+#include <QDesktopServices>
 #include <QJSValueIterator>
 
 #ifdef __QT_UI_TOOLS__
@@ -1744,6 +1746,7 @@ int QtScriptInstance::loadScriptFile( QString filepath )
 			evalResult.toString() + "\nStack:\n" +
 			evalResult.property("stack").toString() + "\n";
 		print(msg);
+		emit errorNotify();
 		return -1;
 	}
 	else
@@ -1920,6 +1923,8 @@ int  QtScriptInstance::runFunc(QJSValue &func, const QJSValueList& args)
 			callResult.toString() + "\nStack:\n" +
 			callResult.property("stack").toString() + "\n";
 		print(msg);
+
+		emit errorNotify();
 	}
 	return retval;
 }
@@ -1933,6 +1938,7 @@ int  QtScriptInstance::call(const QString& funcName, const QJSValueList& args)
 	if (!engine->globalObject().hasProperty(funcName))
 	{
 		print(QString("No function exists: ") + funcName);
+		emit errorNotify();
 		return -1;
 	}
 	QJSValue func = engine->globalObject().property(funcName);
@@ -1993,6 +1999,14 @@ void QtScriptInstance::onFrameFinish()
 			FCEUI_FrameAdvanceEnd();
 			frameAdvanceState = 0;
 		}
+	}
+}
+//----------------------------------------------------
+void QtScriptInstance::flushLog()
+{
+	if (dialog != nullptr)
+	{
+		dialog->flushLog();
 	}
 }
 //----------------------------------------------------
@@ -2228,6 +2242,11 @@ void QtScriptManager::guiUpdate()
 		script->onGuiUpdate();
 	}
 	FCEU_WRAPPER_UNLOCK();
+
+	//for (auto script : scriptList)
+	//{
+	//	script->flushLog();
+	//}
 }
 //----------------------------------------------------
 //---- Qt Script Monitor Thread
@@ -2269,14 +2288,29 @@ QScriptDialog_t::QScriptDialog_t(QWidget *parent)
 
 	resize(512, 512);
 
-	setWindowTitle(tr("Qt Java Script Control"));
+	setWindowTitle(tr("JavaScript Control"));
 
+	menuBar = buildMenuBar();
 	mainLayout = new QVBoxLayout();
+	mainLayout->setMenuBar( menuBar );
 
 	lbl = new QLabel(tr("Script File:"));
 
 	scriptPath = new QLineEdit();
 	scriptArgs = new QLineEdit();
+	browseButton = new QPushButton(tr("Browse"));
+
+	hbox = new QHBoxLayout();
+	hbox->addWidget(lbl);
+	hbox->addWidget(scriptPath);
+	hbox->addWidget(browseButton);
+	mainLayout->addLayout(hbox);
+
+	hbox = new QHBoxLayout();
+	lbl = new QLabel(tr("Arguments:"));
+	hbox->addWidget(lbl);
+	hbox->addWidget(scriptArgs);
+	mainLayout->addLayout(hbox);
 
 	g_config->getOption("SDL.LastLoadJs", &filename);
 
@@ -2287,9 +2321,6 @@ QScriptDialog_t::QScriptDialog_t(QWidget *parent)
 	jsOutput = new QTextEdit();
 	jsOutput->setReadOnly(true);
 
-	hbox = new QHBoxLayout();
-
-	browseButton = new QPushButton(tr("Browse"));
 	stopButton = new QPushButton(tr("Stop"));
 
 	scriptInstance = new QtScriptInstance(this);
@@ -2309,20 +2340,9 @@ QScriptDialog_t::QScriptDialog_t(QWidget *parent)
 	connect(stopButton, SIGNAL(clicked()), this, SLOT(stopScript(void)));
 	connect(startButton, SIGNAL(clicked()), this, SLOT(startScript(void)));
 
-	hbox->addWidget(browseButton);
+	hbox = new QHBoxLayout();
 	hbox->addWidget(stopButton);
 	hbox->addWidget(startButton);
-
-	mainLayout->addWidget(lbl);
-	mainLayout->addWidget(scriptPath);
-	mainLayout->addLayout(hbox);
-
-	hbox = new QHBoxLayout();
-	lbl = new QLabel(tr("Arguments:"));
-
-	hbox->addWidget(lbl);
-	hbox->addWidget(scriptArgs);
-
 	mainLayout->addLayout(hbox);
 
 	tabWidget = new QTabWidget();
@@ -2349,12 +2369,17 @@ QScriptDialog_t::QScriptDialog_t(QWidget *parent)
 
 	tabWidget->addTab(propTree, tr("Global Properties"));
 
+	logFilepathLbl = new QLabel( tr("Logging to:") );
+	logFilepath = new QLabel();
+	logFilepath->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	connect( logFilepath, SIGNAL(linkActivated(const QString&)), this, SLOT(onLogLinkClicked(const QString&)) );
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
 	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
 
 	hbox = new QHBoxLayout();
-	hbox->addStretch(5);
+	hbox->addWidget( logFilepathLbl, 1 );
+	hbox->addWidget( logFilepath, 10 );
 	hbox->addWidget( closeButton, 1 );
 	mainLayout->addLayout( hbox );
 
@@ -2371,6 +2396,8 @@ QScriptDialog_t::QScriptDialog_t(QWidget *parent)
 	periodicTimer->start(200); // 5hz
 
 	restoreGeometry(settings.value("QScriptWindow/geometry").toByteArray());
+
+	connect(scriptInstance, SIGNAL(errorNotify()), this, SLOT(onScriptError(void)));
 }
 //----------------------------------------------------
 QScriptDialog_t::~QScriptDialog_t(void)
@@ -2406,6 +2433,169 @@ void QScriptDialog_t::closeWindow(void)
 	//printf("JS Control Close Window\n");
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------
+QMenuBar *QScriptDialog_t::buildMenuBar(void)
+{
+	QMenu       *fileMenu;
+	//QActionGroup *actGroup;
+	QAction     *act;
+	int useNativeMenuBar=0;
+
+	QMenuBar *menuBar = new QMenuBar(this);
+
+	// This is needed for menu bar to show up on MacOS
+	g_config->getOption( "SDL.UseNativeMenuBar", &useNativeMenuBar );
+
+	menuBar->setNativeMenuBar( useNativeMenuBar ? true : false );
+
+	//-----------------------------------------------------------------------
+	// Menu Start
+	//-----------------------------------------------------------------------
+	// File
+	fileMenu = menuBar->addMenu(tr("&File"));
+
+	// File -> Open Script
+	act = new QAction(tr("&Open Script"), this);
+	act->setShortcut(QKeySequence::Open);
+	act->setStatusTip(tr("Open Script"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openScriptFile(void)) );
+
+	fileMenu->addAction(act);
+
+	// File -> Save Log
+	act = new QAction(tr("&Save Log"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Save Log"));
+	connect(act, &QAction::triggered, [ this ] { saveLog(false); } );
+
+	fileMenu->addAction(act);
+
+	// File -> Save Log As
+	act = new QAction(tr("Save Log &As"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Save Log As"));
+	connect(act, &QAction::triggered, [ this ] { saveLog(true); } );
+
+	fileMenu->addAction(act);
+
+	// File -> Flush Log
+	act = new QAction(tr("Flush &Log"), this);
+	//act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Flush Log to Disk"));
+	connect(act, SIGNAL(triggered()), this, SLOT(flushLog(void)) );
+
+	fileMenu->addAction(act);
+
+	// File -> Close
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence::Close);
+	act->setStatusTip(tr("Close Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
+
+	fileMenu->addAction(act);
+
+	return menuBar;
+}
+//----------------------------------------------------
+void QScriptDialog_t::saveLog(bool openFileBrowser)
+{
+	if (logFile != nullptr)
+	{
+	       	if (logSavePath.isEmpty() || openFileBrowser)
+		{
+			QString initialPath;
+			QFileDialog  dialog(this, tr("Save Log File") );
+			QList<QUrl> urls;
+			bool useNativeFileDialogVal = false;
+
+			g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+			const QStringList filters({
+        		   "Any files (*)"
+        		 });
+
+			urls << QUrl::fromLocalFile( QDir::rootPath() );
+			urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+			urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first());
+			urls << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::DownloadLocation).first());
+			urls << QUrl::fromLocalFile( QDir( FCEUI_GetBaseDirectory() ).absolutePath() );
+
+			dialog.setFileMode(QFileDialog::AnyFile);
+
+			dialog.setNameFilters( filters );
+
+			dialog.setViewMode(QFileDialog::List);
+			dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+			dialog.setLabelText( QFileDialog::Accept, tr("Save") );
+
+			if (!initialPath.isEmpty() )
+			{
+				dialog.setDirectory( initialPath );
+			}
+
+			dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+			dialog.setSidebarUrls(urls);
+
+			int ret = dialog.exec();
+
+			if ( ret != QDialog::Rejected )
+			{
+				QStringList fileList;
+				fileList = dialog.selectedFiles();
+
+				if ( fileList.size() > 0 )
+				{
+					logSavePath = fileList[0];
+				}
+			}
+			else
+			{
+				return;
+			}
+		}
+
+		if (QFile::exists(logSavePath))
+		{
+			QFile::remove(logSavePath);
+		}
+		printf("Saving Log File: %s\n", logSavePath.toLocal8Bit().data());
+		FCEU_WRAPPER_LOCK();
+		flushLog();
+		if ( logFile->copy( logSavePath ) )
+		{
+			// Log file needs to be reopened on a successful copy
+			logFile->reopen();
+		}
+		FCEU_WRAPPER_UNLOCK();
+	}
+}
+//----------------------------------------------------
+void QScriptDialog_t::flushLog()
+{
+	if (logFile != nullptr)
+	{
+		logFile->flush();
+	}
+}
+//----------------------------------------------------
+void QScriptDialog_t::onScriptError()
+{
+	//printf("QScriptDialog_t::onScriptError\n");
+
+	flushLog();
+}
+//----------------------------------------------------
+void QScriptDialog_t::onLogLinkClicked(const QString& link)
+{
+	QUrl url = QUrl::fromUserInput(link);
+
+	if( url.isValid() )
+	{
+		flushLog();
+
+		QDesktopServices::openUrl(url);
+	}
 }
 //----------------------------------------------------
 void QScriptDialog_t::clearPropertyTree()
@@ -2760,9 +2950,26 @@ void QScriptDialog_t::openScriptFile(void)
 
 }
 //----------------------------------------------------
+void QScriptDialog_t::resetLog()
+{
+	if (logFile != nullptr)
+	{
+		delete logFile;
+		logFile = nullptr;
+	}
+	logFile = new QScriptLogFile(this);
+	logFile->setAutoRemove(true);
+	logFile->setFileTemplate(QDir::tempPath() + QString("/fceux_js_XXXXXX.log"));
+	logFile->open();
+	QString link = QString("<a href=\"file://") + 
+		logFile->fileName() + QString("\">") + logFile->fileName() + QString("</a>");
+	logFilepath->setText( link );
+}
+//----------------------------------------------------
 void QScriptDialog_t::startScript(void)
 {
 	FCEU_WRAPPER_LOCK();
+	resetLog();
 	jsOutput->clear();
 	clearPropertyTree();
 	scriptInstance->resetEngine();
@@ -2833,6 +3040,11 @@ void QScriptDialog_t::logOutput(const QString& text)
 		{
 			vbar->setValue( vbar->maximum() );
 		}
+	}
+
+	if (logFile != nullptr)
+	{
+		logFile->write( text.toLocal8Bit() );
 	}
 }
 //----------------------------------------------------

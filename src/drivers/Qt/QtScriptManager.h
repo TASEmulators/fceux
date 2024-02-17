@@ -27,6 +27,10 @@
 #include <QTreeWidgetItem>
 #include <QJSEngine>
 #include <QThread>
+#include <QTemporaryFile>
+#include <QMenu>
+#include <QMenuBar>
+#include <QAction>
 
 #include "Qt/main.h"
 #include "utils/mutex.h"
@@ -596,6 +600,7 @@ public:
 	void onFrameFinish();
 	void onGuiUpdate();
 	void checkForHang();
+	void flushLog();
 	int  runFunc(QJSValue &func, const QJSValueList& args = QJSValueList());
 
 	int  throwError(QJSValue::ErrorType errorType, const QString &message = QString());
@@ -628,6 +633,9 @@ private:
 	int frameAdvanceCount = 0;
 	int frameAdvanceState = 0;
 	bool running = false;
+
+signals:
+	void errorNotify();
 
 public slots:
 	Q_INVOKABLE  void print(const QString& msg);
@@ -718,6 +726,24 @@ public:
 	QMap<QString, JsPropertyItem*> childMap;
 };
 
+class QScriptLogFile : public QTemporaryFile
+{
+	Q_OBJECT
+
+public:
+	QScriptLogFile(QObject* parent = nullptr)
+		: QTemporaryFile(parent)
+	{
+	}
+
+	~QScriptLogFile(void){}
+
+	void reopen()
+	{
+		open(QIODeviceBase::Append | QIODeviceBase::ReadWrite);
+	}
+};
+
 class QScriptDialog_t : public QDialog
 {
 	Q_OBJECT
@@ -730,11 +756,15 @@ public:
 	void logOutput(const QString& text);
 
 protected:
+	void resetLog();
 	void closeEvent(QCloseEvent *bar);
 	void openJSKillMessageBox(void);
 	void clearPropertyTree();
 	void loadPropertyTree(QJSValue& val, JsPropertyItem* parentItem = nullptr);
+	QMenuBar* buildMenuBar();
 
+	QMenuBar* menuBar;
+	QScriptLogFile *logFile = nullptr;
 	QTimer *periodicTimer;
 	QLineEdit *scriptPath;
 	QLineEdit *scriptArgs;
@@ -747,15 +777,23 @@ protected:
 	JsPropertyTree *propTree;
 	QtScriptInstance *scriptInstance;
 	QString   emuThreadText;
+	QString   logSavePath;
+	QLabel *logFilepathLbl;
+	QLabel *logFilepath;
 
 private:
 public slots:
+	void flushLog();
 	void closeWindow(void);
+
 private slots:
+	void saveLog(bool openFileBrowser = false);
 	void updatePeriodic(void);
 	void openScriptFile(void);
 	void startScript(void);
 	void stopScript(void);
+	void onLogLinkClicked(const QString&);
+	void onScriptError(void);
 };
 
 bool FCEU_JSRerecordCountSkip();
