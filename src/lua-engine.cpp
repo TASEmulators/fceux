@@ -2899,7 +2899,7 @@ static int joypad_getimmediate(lua_State *L)
 		luaL_error(L,"Invalid input port (valid range 1-4, specified %d)", which);
 	}
 	// Currently only supports Windows, sorry...
-#ifdef __WIN_DRIVER__
+#if  defined(__WIN_DRIVER__) || defined(__QT_DRIVER__)
 	extern uint32 GetGamepadPressedImmediate();
 	uint8 buttons = GetGamepadPressedImmediate() >> ((which - 1) * 8);
 
@@ -6738,7 +6738,7 @@ uint8 FCEU_LuaReadJoypad(int which, uint8 joyl) {
  *
  * This function will not return true if a script is not running.
  */
-int FCEU_LuaRerecordCountSkip() {
+bool FCEU_LuaRerecordCountSkip() {
 	// FIXME: return true if (there are any active callback functions && skipRerecords)
 	return L && luaRunning && skipRerecords;
 }

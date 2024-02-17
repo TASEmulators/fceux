@@ -29,6 +29,7 @@
 #endif
 
 #include <QTextEdit>
+#include <QFileInfo>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
@@ -182,6 +183,15 @@ bool JoypadScriptObject::buttonChanged(enum Button b)
 	//printf("mask=%08x  buttons=%08x\n", mask, current.buttonMask);
 	hasChanged = ((current.buttonMask ^ prev.buttonMask) & mask) ? true : false;
 	return hasChanged;
+}
+//----------------------------------------------------
+Q_INVOKABLE void JoypadScriptObject::ovrdResetAll()
+{
+	for (int i=0; i<MAX_JOYPAD_PLAYERS; i++)
+	{
+		jsOverrideMask1[i] = 0xFF;
+		jsOverrideMask2[i] = 0x00;
+	}
 }
 //----------------------------------------------------
 //----  EMU State Object
@@ -922,6 +932,111 @@ bool MovieScriptObject::isFromSaveState()
 		flag = !FCEUMOV_FromPoweron();
 	}
 	return flag;
+}
+//----------------------------------------------------
+void MovieScriptObject::replay()
+{
+	FCEUI_MoviePlayFromBeginning();
+}
+//----------------------------------------------------
+bool MovieScriptObject::readOnly()
+{
+	return FCEUI_GetMovieToggleReadOnly();
+}
+//----------------------------------------------------
+void MovieScriptObject::setReadOnly(bool which)
+{
+	FCEUI_SetMovieToggleReadOnly(which);
+}
+//----------------------------------------------------
+int MovieScriptObject::mode()
+{
+	int _mode = IDLE;
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+	{
+		_mode = TAS_EDITOR;
+	}
+	else if (FCEUMOV_IsRecording())
+	{
+		_mode = RECORD;
+	}
+	else if (FCEUMOV_IsFinished())
+	{
+		_mode = FINISHED; //Note: this comes before playback since playback checks for finished as well
+	}
+	else if (FCEUMOV_IsPlaying())
+	{
+		_mode = PLAYBACK;
+	}
+	else
+	{
+		_mode = IDLE;
+	}
+	return _mode;
+}
+//----------------------------------------------------
+void MovieScriptObject::stop()
+{
+	FCEUI_StopMovie();
+}
+//----------------------------------------------------
+int MovieScriptObject::frameCount()
+{
+	return FCEUMOV_GetFrame();
+}
+//----------------------------------------------------
+int MovieScriptObject::length()
+{
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying() && !FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+	{
+		script->throwError(QJSValue::GenericError, "No movie loaded.");
+	}
+	return FCEUI_GetMovieLength();
+}
+//----------------------------------------------------
+int MovieScriptObject::rerecordCount()
+{
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying() && !FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+	{
+		script->throwError(QJSValue::GenericError, "No movie loaded.");
+	}
+	return FCEUI_GetMovieRerecordCount();
+}
+//----------------------------------------------------
+QString MovieScriptObject::getFilepath()
+{
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying() && !FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+	{
+		script->throwError(QJSValue::GenericError, "No movie loaded.");
+	}
+	return QString::fromStdString(FCEUI_GetMovieName());
+}
+//----------------------------------------------------
+QString MovieScriptObject::getFilename()
+{
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying() && !FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+	{
+		script->throwError(QJSValue::GenericError, "No movie loaded.");
+	}
+	QFileInfo fi( QString::fromStdString(FCEUI_GetMovieName()) );
+	return fi.fileName();
+}
+//----------------------------------------------------
+bool MovieScriptObject::skipRerecords = false;
+//----------------------------------------------------
+void MovieScriptObject::rerecordCounting(bool counting)
+{
+	skipRerecords = counting;
+}
+//----------------------------------------------------
+bool MovieScriptObject::play(const QString& filename, bool readOnly, int pauseFrame)
+{
+	if (pauseFrame < 0) pauseFrame = 0;
+
+	// Load it!
+	bool loaded = FCEUI_LoadMovie(filename.toLocal8Bit().data(), readOnly, pauseFrame);
+
+	return loaded;
 }
 //----------------------------------------------------
 bool MovieScriptObject::record(const QString& filename, int saveType, const QString author)
@@ -1751,6 +1866,7 @@ bool QtScriptInstance::onGuiThread()
 int QtScriptInstance::throwError(QJSValue::ErrorType errorType, const QString &message)
 {
 	running = false;
+	mem->reset();
 	engine->throwError(errorType, message);
 	return 0;
 }
@@ -2074,6 +2190,13 @@ void QtScriptManager::removeScriptInstance(QtScriptInstance* script)
 		{
 			it++;
 		}
+	}
+
+	// If no scripts are loaded, reset globals
+	if (scriptList.size() == 0)
+	{
+		JS::MovieScriptObject::skipRerecords = false;
+		JS::JoypadScriptObject::ovrdResetAll();
 	}
 }
 //----------------------------------------------------
@@ -2711,6 +2834,11 @@ void QScriptDialog_t::logOutput(const QString& text)
 			vbar->setValue( vbar->maximum() );
 		}
 	}
+}
+//----------------------------------------------------
+bool FCEU_JSRerecordCountSkip()
+{
+	return JS::MovieScriptObject::skipRerecords;
 }
 //----------------------------------------------------
 uint8_t FCEU_JSReadJoypad(int which, uint8_t joyl)

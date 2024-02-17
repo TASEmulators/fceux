@@ -1645,18 +1645,20 @@ bool FCEUMOV_PostLoad(void)
 
 void FCEUMOV_IncrementRerecordCount()
 {
+	bool skip = false;
 #ifdef _S9XLUA_H
-	if(!FCEU_LuaRerecordCountSkip())
+	skip = skip || FCEU_LuaRerecordCountSkip();
+#endif
+#ifdef __FCEU_QSCRIPT_ENABLE__
+	extern bool FCEU_JSRerecordCountSkip();
+	skip = skip || FCEU_JSRerecordCountSkip();
+#endif
+
+	if(!skip)
 		if (movieMode != MOVIEMODE_TASEDITOR)
 			currRerecordCount++;
 		else
 			currMovieData.rerecordCount++;
-#else
-	if (movieMode != MOVIEMODE_TASEDITOR)
-		currRerecordCount++;
-	else
-		currMovieData.rerecordCount++;
-#endif
 	if (movieMode != MOVIEMODE_TASEDITOR)
 		currMovieData.rerecordCount = currRerecordCount;
 }

@@ -270,14 +270,7 @@ public slots:
 		jsOverrideMask2[player] = 0x00;
 	}
 
-	Q_INVOKABLE  void ovrdResetAll()
-	{
-		for (int i=0; i<MAX_JOYPAD_PLAYERS; i++)
-		{
-			jsOverrideMask1[i] = 0xFF;
-			jsOverrideMask2[i] = 0x00;
-		}
-	}
+	Q_INVOKABLE  static void ovrdResetAll();
 };
 
 class EmuStateScriptObject: public QObject
@@ -408,6 +401,7 @@ public:
 	QJSValue* getReadFunc(int address) { return readFunc[address]; }
 	QJSValue* getWriteFunc(int address) { return writeFunc[address]; }
 	QJSValue* getExecFunc(int address) { return execFunc[address]; }
+
 private:
 	static constexpr int AddressRange = 0x10000;
 	FCEU::JSEngine* engine = nullptr;
@@ -483,6 +477,16 @@ public:
 
 	void setEngine(FCEU::JSEngine* _engine){ engine = _engine; }
 
+	enum Mode
+	{
+		IDLE = 0,
+		RECORD,
+		PLAYBACK,
+		FINISHED,
+		TAS_EDITOR
+	};
+	Q_ENUM(Mode);
+
 	enum SaveType
 	{
 		FROM_POWERON = 0,
@@ -490,6 +494,8 @@ public:
 		FROM_SAVERAM,
 	};
 	Q_ENUM(SaveType);
+
+	static bool skipRerecords;
 private:
 	FCEU::JSEngine* engine = nullptr;
 	QtScriptInstance* script = nullptr;
@@ -500,7 +506,20 @@ public slots:
 	Q_INVOKABLE  bool isRecording();
 	Q_INVOKABLE  bool isPowerOn();
 	Q_INVOKABLE  bool isFromSaveState();
+	Q_INVOKABLE  void replay();
+	Q_INVOKABLE  bool readOnly();
+	Q_INVOKABLE  void setReadOnly(bool which);
+	Q_INVOKABLE  bool play(const QString& filename, bool readOnly = false, int pauseFrame = 0);
 	Q_INVOKABLE  bool record(const QString& filename, int saveType = FROM_POWERON, const QString author = QString());
+	Q_INVOKABLE  int  frameCount();
+	Q_INVOKABLE  int  mode();
+	Q_INVOKABLE  void stop();
+	Q_INVOKABLE  int  length();
+	Q_INVOKABLE  int  rerecordCount();
+	Q_INVOKABLE  void rerecordCounting(bool counting);
+	Q_INVOKABLE  QString  getFilename();
+	Q_INVOKABLE  QString  getFilepath();
+
 };
 
 class InputScriptObject: public QObject
@@ -732,6 +751,8 @@ private slots:
 	void startScript(void);
 	void stopScript(void);
 };
+
+bool FCEU_JSRerecordCountSkip();
 
 uint8_t FCEU_JSReadJoypad(int which, uint8_t phyState);
 

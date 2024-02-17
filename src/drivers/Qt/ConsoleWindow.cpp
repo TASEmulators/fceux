@@ -1096,10 +1096,10 @@ void consoleWin_t::createMainMenu(void)
 	loadLuaAct = nullptr;
 #endif
 
-#ifdef _S9XLUA_H
-	// File -> Load QScript
-	loadJsAct = new QAction(tr("Load &Qt Script"), this);
-	loadJsAct->setStatusTip(tr("Load Qt Script"));
+#ifdef __FCEU_QSCRIPT_ENABLE__
+	// File -> Load JavaScript
+	loadJsAct = new QAction(tr("Load &JavaScript"), this);
+	loadJsAct->setStatusTip(tr("Load JavaScript"));
 	connect(loadJsAct, SIGNAL(triggered()), this, SLOT(loadJs(void)) );
 	
 	fileMenu->addAction(loadJsAct);
