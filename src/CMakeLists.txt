@@ -181,12 +181,12 @@ else(WIN32)
   endif()
 
   # Check for libminizip
- # pkg_check_modules( MINIZIP REQUIRED minizip)
+  pkg_check_modules( MINIZIP REQUIRED minizip)
 
- # if ( ${MINIZIP_FOUND} )
+  if ( ${MINIZIP_FOUND} )
 	  message( STATUS "Using System minizip ${MINIZIP_VERSION}" )
 	  add_definitions( -D_SYSTEM_MINIZIP ${MINIZIP_CFLAGS} )
- # endif()
+  endif()
 
   pkg_check_modules( LIBARCHIVE libarchive)
 
