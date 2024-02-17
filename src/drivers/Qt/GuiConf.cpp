@@ -66,7 +66,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	QSettings    settings;
 
 	//resize( 512, 600 );
-	//printf("Style: %s \n", style()->objectName().toStdString().c_str() );
+	//printf("Style: %s \n", style()->objectName().toUtf8().constData() );
 
 	selStyle = style()->objectName();
 
@@ -153,7 +153,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 
 		if ( selStyle.compare( styleKeys[i], Qt::CaseInsensitive ) == 0 )
 		{
-			//printf("Style Match: %s \n", selStyle.toStdString().c_str() );
+			//printf("Style Match: %s \n", selStyle.toUtf8().constData() );
 			styleComboBox->setCurrentIndex(i);
 		}
 	}
@@ -348,7 +348,7 @@ void GuiConfDialog_t::styleChanged(int index)
 
 	s = styleComboBox->currentText();
 
-	g_config->setOption("SDL.GuiStyle", s.toStdString().c_str() );
+	g_config->setOption("SDL.GuiStyle", s.toUtf8().constData() );
 	g_config->save();
 
 	QApplication::setStyle( new fceuStyle() );
@@ -389,7 +389,7 @@ void GuiConfDialog_t::openQss(void)
 		if (d.exists())
 		{
 			urls << QUrl::fromLocalFile(d.absolutePath());
-			iniPath = d.absolutePath().toStdString();
+			iniPath = d.absolutePath().toUtf8().constData();
 		}
 	}
 #ifdef WIN32
@@ -400,7 +400,7 @@ void GuiConfDialog_t::openQss(void)
 	if (d.exists())
 	{
 		urls << QUrl::fromLocalFile(d.absolutePath());
-		iniPath = d.absolutePath().toStdString();
+		iniPath = d.absolutePath().toUtf8().constData();
 	}
 #endif
 
@@ -448,9 +448,9 @@ void GuiConfDialog_t::openQss(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	custom_qss_path->setText(filename.toStdString().c_str());
+	custom_qss_path->setText(filename.toUtf8().constData());
 
-	g_config->setOption("SDL.QtStyleSheet", filename.toStdString().c_str() );
+	g_config->setOption("SDL.QtStyleSheet", filename.toUtf8().constData() );
 	g_config->save();
 
 	QApplication::setStyle( new fceuStyle() );
@@ -493,7 +493,7 @@ void GuiConfDialog_t::openQPal(void)
 		if (d.exists())
 		{
 			urls << QUrl::fromLocalFile(d.absolutePath());
-			iniPath = d.absolutePath().toStdString();
+			iniPath = d.absolutePath().toUtf8().constData();
 		}
 	}
 #ifdef WIN32
@@ -504,7 +504,7 @@ void GuiConfDialog_t::openQPal(void)
 	if (d.exists())
 	{
 		urls << QUrl::fromLocalFile(d.absolutePath());
-		iniPath = d.absolutePath().toStdString();
+		iniPath = d.absolutePath().toUtf8().constData();
 	}
 #endif
 
@@ -552,9 +552,9 @@ void GuiConfDialog_t::openQPal(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	custom_qpal_path->setText(filename.toStdString().c_str());
+	custom_qpal_path->setText(filename.toUtf8().constData());
 
-	g_config->setOption("SDL.QPaletteFile", filename.toStdString().c_str() );
+	g_config->setOption("SDL.QPaletteFile", filename.toUtf8().constData() );
 	g_config->save();
 
 	QApplication::setStyle( new fceuStyle() );
@@ -602,7 +602,7 @@ fceuStyle::fceuStyle(QStyle *style) : QProxyStyle(style)
 
 fceuStyle::~fceuStyle(void)
 {
-	//printf("Style Deleted: %s\n", objectName().toStdString().c_str() );
+	//printf("Style Deleted: %s\n", objectName().toUtf8().constData() );
 
 	if ( rccFilePath.size() > 0 )
 	{
@@ -636,11 +636,11 @@ QStyle *fceuStyle::styleBase(QStyle *style) const
 
 		for (i=0; i<styleKeys.size(); i++)
 		{
-			//printf("Style: '%s'\n", styleKeys[i].toStdString().c_str() );
+			//printf("Style: '%s'\n", styleKeys[i].toUtf8().constData() );
 
 			if ( styleName.compare( styleKeys[i], Qt::CaseInsensitive ) == 0 )
 			{
-				//printf("Style Match: %s\n", styleKeys[i].toStdString().c_str() );
+				//printf("Style Match: %s\n", styleKeys[i].toUtf8().constData() );
 				idx = i;
 				break;
 			}
@@ -903,7 +903,7 @@ static int writeQPaletteToFile( const char *path, QPalette *pal )
 			{
 				c = pal->color( g,  r );
 
-				fprintf( fp, "%s::%s = %s \n", gTxt, rTxt, c.name().toStdString().c_str() );
+				fprintf( fp, "%s::%s = %s \n", gTxt, rTxt, c.name().toUtf8().constData() );
 			}
 		}
 	}
@@ -1200,7 +1200,7 @@ void GuiPaletteEditDialog_t::paletteSaveAs(void)
 		if (d.exists())
 		{
 			urls << QUrl::fromLocalFile(d.absolutePath());
-			iniPath = d.absolutePath().toStdString();
+			iniPath = d.absolutePath().toUtf8().constData();
 		}
 	}
 #ifdef WIN32
@@ -1211,7 +1211,7 @@ void GuiPaletteEditDialog_t::paletteSaveAs(void)
 	if (d.exists())
 	{
 		urls << QUrl::fromLocalFile(d.absolutePath());
-		iniPath = d.absolutePath().toStdString();
+		iniPath = d.absolutePath().toUtf8().constData();
 	}
 #endif
 
@@ -1260,9 +1260,9 @@ void GuiPaletteEditDialog_t::paletteSaveAs(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	writeQPaletteToFile( filename.toStdString().c_str(), &pal );
+	writeQPaletteToFile( filename.toUtf8().constData(), &pal );
 
-	//g_config->setOption("SDL.QPaletteFile", filename.toStdString().c_str() );
+	//g_config->setOption("SDL.QPaletteFile", filename.toUtf8().constData() );
 	//g_config->save();
 
 	//QApplication::setStyle( new fceuStyle() );
@@ -1357,7 +1357,7 @@ void GuiPaletteColorSelect::updateColor(void)
 		txtColor.setRgb( 255, 255, 255 );
 	}
 	sprintf( stmp, "QLabel { background-color : %s; color : %s; border-color : black; }",
-		       color.name().toStdString().c_str(), txtColor.name().toStdString().c_str() );
+		       color.name().toUtf8().constData(), txtColor.name().toUtf8().constData() );
 
 	lbl->setStyleSheet( stmp );
 }

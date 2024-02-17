@@ -591,9 +591,9 @@ void GuiCheatsDialog_t::knownValueCallback(void)
 	//printf("Cheat Search Known!\n");
 	FCEU_WRAPPER_LOCK();
 
-	//printf("'%s'\n", knownValEntry->displayText().toStdString().c_str() );
+	//printf("'%s'\n", knownValEntry->displayText().toUtf8().constData() );
 
-	value = strtol(knownValEntry->displayText().toStdString().c_str(), NULL, 16);
+	value = strtol(knownValEntry->displayText().toUtf8().constData(), NULL, 16);
 
 	FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_KNOWN, value, 0);
 
@@ -624,7 +624,7 @@ void GuiCheatsDialog_t::notEqualValueCallback(void)
 
 	if (checked)
 	{
-		value = strtol(neValEntry->displayText().toStdString().c_str(), NULL, 16);
+		value = strtol(neValEntry->displayText().toUtf8().constData(), NULL, 16);
 
 		FCEUI_CheatSearchEnd(FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, value);
 	}
@@ -648,7 +648,7 @@ void GuiCheatsDialog_t::greaterThanValueCallback(void)
 
 	if (checked)
 	{
-		value = strtol(grValEntry->displayText().toStdString().c_str(), NULL, 16);
+		value = strtol(grValEntry->displayText().toUtf8().constData(), NULL, 16);
 
 		FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_GT_KNOWN, 0, value);
 	}
@@ -672,7 +672,7 @@ void GuiCheatsDialog_t::lessThanValueCallback(void)
 
 	if (checked)
 	{
-		value = strtol(ltValEntry->displayText().toStdString().c_str(), NULL, 16);
+		value = strtol(ltValEntry->displayText().toUtf8().constData(), NULL, 16);
 
 		FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_LT_KNOWN, 0, value);
 	}
@@ -791,11 +791,11 @@ void GuiCheatsDialog_t::openCheatFile(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption("SDL.LastOpenFile", filename.toStdString().c_str());
+	g_config->setOption("SDL.LastOpenFile", filename.toUtf8().constData());
 
 	FCEU_WRAPPER_LOCK();
 
-	fp = fopen(filename.toStdString().c_str(), "r");
+	fp = fopen(filename.toUtf8().constData(), "r");
 
 	if (fp != NULL)
 	{
@@ -862,11 +862,11 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	//g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
+	//g_config->setOption ("SDL.LastOpenFile", filename.toUtf8().constData() );
 
 	FCEU_WRAPPER_LOCK();
 
-	fp = FCEUD_UTF8fopen(filename.toStdString().c_str(), "wb");
+	fp = FCEUD_UTF8fopen(filename.toUtf8().constData(), "wb");
 
 	if (fp != NULL)
 	{
@@ -888,11 +888,11 @@ void GuiCheatsDialog_t::addActvCheat(void)
 	int t = 1;
 	std::string name, cmpStr;
 
-	a = strtoul(cheatAddrEntry->displayText().toStdString().c_str(), NULL, 16);
+	a = strtoul(cheatAddrEntry->displayText().toUtf8().constData(), NULL, 16);
 
-	v = strtoul(cheatValEntry->displayText().toStdString().c_str(), NULL, 16);
+	v = strtoul(cheatValEntry->displayText().toUtf8().constData(), NULL, 16);
 
-	cmpStr = cheatCmpEntry->displayText().toStdString();
+	cmpStr = cheatCmpEntry->displayText().toUtf8().constData();
 
 	if (isxdigit(cmpStr[0]))
 	{
@@ -903,7 +903,7 @@ void GuiCheatsDialog_t::addActvCheat(void)
 		c = -1;
 	}
 
-	name = cheatNameEntry->text().toStdString();
+	name = cheatNameEntry->text().toUtf8().constData();
 
 	t = typeEntry->currentData().toInt();
 
@@ -965,11 +965,11 @@ void GuiCheatsDialog_t::updateCheatParameters(void)
 	}
 	//printf("Row: %i \n", row );
 
-	a = strtoul(cheatAddrEntry->displayText().toStdString().c_str(), NULL, 16);
+	a = strtoul(cheatAddrEntry->displayText().toUtf8().constData(), NULL, 16);
 
-	v = strtoul(cheatValEntry->displayText().toStdString().c_str(), NULL, 16);
+	v = strtoul(cheatValEntry->displayText().toUtf8().constData(), NULL, 16);
 
-	cmpStr = cheatCmpEntry->displayText().toStdString();
+	cmpStr = cheatCmpEntry->displayText().toUtf8().constData();
 
 	//printf("CMP: '%s' \n", cmpStr.c_str() );
 
@@ -983,7 +983,7 @@ void GuiCheatsDialog_t::updateCheatParameters(void)
 	}
 	//printf("CMP: '%i' 0x%X\n", c, c );
 
-	name = cheatNameEntry->text().toStdString();
+	name = cheatNameEntry->text().toUtf8().constData();
 
 	//printf("Name: %s \n", name.c_str() );
 

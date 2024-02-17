@@ -516,19 +516,19 @@ void PaletteConfDialog_t::openPaletteFile(void)
 		if (d.exists())
 		{
 			urls << QUrl::fromLocalFile(d.absolutePath());
-			iniPath = d.absolutePath().toStdString();
+			iniPath = d.absolutePath().toUtf8().constData();
 		}
 
 		#ifdef __APPLE__
 		// Search for MacOSX DragNDrop Resources
 		d.setPath(QString(exePath) + "/../Resources/palettes");
 
-		//printf("Looking for: '%s'\n", d.path().toStdString().c_str());
+		//printf("Looking for: '%s'\n", d.path().toUtf8().constData());
 
 		if (d.exists())
 		{
 			urls << QUrl::fromLocalFile(d.absolutePath());
-			iniPath = d.absolutePath().toStdString();
+			iniPath = d.absolutePath().toUtf8().constData();
 		}
 		#endif
 	}
@@ -553,12 +553,12 @@ void PaletteConfDialog_t::openPaletteFile(void)
 		d.setPath(QString("/usr/share/fceux/palettes"));
 	}
 
-	//printf("Looking for: '%s'\n", d.path().toStdString().c_str());
+	//printf("Looking for: '%s'\n", d.path().toUtf8().constData());
 
 	if (d.exists())
 	{
 		urls << QUrl::fromLocalFile(d.absolutePath());
-		iniPath = d.absolutePath().toStdString();
+		iniPath = d.absolutePath().toUtf8().constData();
 	}
 #endif
 
@@ -608,14 +608,14 @@ void PaletteConfDialog_t::openPaletteFile(void)
 
 	if (fceuWrapperTryLock())
 	{
-		if (LoadCPalette(filename.toStdString().c_str()))
+		if (LoadCPalette(filename.toUtf8().constData()))
 		{
-			g_config->setOption("SDL.Palette", filename.toStdString().c_str());
-			custom_palette_path->setText(filename.toStdString().c_str());
+			g_config->setOption("SDL.Palette", filename.toUtf8().constData());
+			custom_palette_path->setText(filename.toUtf8().constData());
 		}
 		else
 		{
-			printf("Error: Failed to Load Palette File: %s \n", filename.toStdString().c_str());
+			printf("Error: Failed to Load Palette File: %s \n", filename.toUtf8().constData());
 		}
 		palupdate = 1;
 		fceuWrapperUnLock();

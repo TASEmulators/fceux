@@ -241,7 +241,7 @@ void MoviePlayDialog_t::updateMovieText(void)
 	}
 	idx = movSelBox->currentIndex();
 
-	path = movSelBox->itemText(idx).toStdString();
+	path = movSelBox->itemText(idx).toUtf8().constData();
 
 	fp = FCEU_fopen(path.c_str(), 0, "rb", 0);
 
@@ -337,7 +337,7 @@ int MoviePlayDialog_t::addFileToList(const char *file, bool setActive)
 
 	for (int i = 0; i < movSelBox->count(); i++)
 	{
-		if (strcmp(file, movSelBox->itemText(i).toStdString().c_str()) == 0)
+		if (strcmp(file, movSelBox->itemText(i).toUtf8().constData()) == 0)
 		{
 			if (setActive)
 			{
@@ -402,7 +402,7 @@ void MoviePlayDialog_t::scanDirectory(const char *dirPath, const char *md5)
 	{
 		QFileInfo fileInfo = list.at(i);
 
-		path = std::string(dirPath) + fileInfo.fileName().toStdString();
+		path = std::string(dirPath) + fileInfo.fileName().toUtf8().constData();
 
 		//printf("File: '%s'\n", path.c_str() );
 
@@ -465,13 +465,13 @@ void MoviePlayDialog_t::playMovie(void)
 
 	idx = movSelBox->currentIndex();
 
-	path = movSelBox->itemText(idx).toStdString();
+	path = movSelBox->itemText(idx).toUtf8().constData();
 
 	replayReadOnlySetting = openReadOnly->isChecked();
 
 	if (pauseAtFrame->isChecked())
 	{
-		pauseframe = strtol(pauseAtFrameEntry->text().toStdString().c_str(), NULL, 0);
+		pauseframe = strtol(pauseAtFrameEntry->text().toUtf8().constData(), NULL, 0);
 	}
 
 	FCEU_WRAPPER_LOCK();
@@ -547,7 +547,7 @@ void MoviePlayDialog_t::openMovie(void)
 
 		strcpy(md5, md5_asciistr(GameInfo->MD5));
 
-		if (checkMD5Sum(filename.toStdString().c_str(), md5))
+		if (checkMD5Sum(filename.toUtf8().constData(), md5))
 		{
 			md5Match = 1;
 		}
@@ -558,11 +558,11 @@ void MoviePlayDialog_t::openMovie(void)
 		}
 	}
 
-	addFileToList(filename.toStdString().c_str(), true);
+	addFileToList(filename.toUtf8().constData(), true);
 
 	updateMovieText();
 
-	g_config->setOption("SDL.LastOpenMovie", filename.toStdString().c_str());
+	g_config->setOption("SDL.LastOpenMovie", filename.toUtf8().constData());
 
 	return;
 }

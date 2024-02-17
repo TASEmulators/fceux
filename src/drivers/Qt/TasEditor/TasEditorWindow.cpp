@@ -1301,7 +1301,7 @@ void TasEditorWindow::initHotKeys(void)
 		QKeySequence ks = Hotkeys[i].getKeySeq();
 		QShortcut *shortcut = Hotkeys[i].getShortcut();
 
-		//printf("HotKey: %i   %s\n", i, ks.toString().toStdString().c_str() );
+		//printf("HotKey: %i   %s\n", i, ks.toString().toUtf8().constData() );
 
 		if ( hotkeyShortcut[i] == nullptr )
 		{
@@ -1715,7 +1715,7 @@ bool TasEditorWindow::saveProjectAs(bool save_compact)
 		std::string msg;
 
 		msg = "Pre-existing TAS project file will be overwritten:\n\n" +
-			fi.fileName().toStdString() + "\n\nReplace file?";
+			fi.fileName().toUtf8() + "\n\nReplace file?";
 
 		ret = QMessageBox::warning( this, QObject::tr("Overwrite Warning"),
 				QString::fromStdString(msg), QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
@@ -1727,16 +1727,16 @@ bool TasEditorWindow::saveProjectAs(bool save_compact)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	project.renameProject( filename.toStdString().c_str(), true);
+	project.renameProject( filename.toUtf8().constData(), true);
 	if (save_compact)
 	{
-		project.save( filename.toStdString().c_str(), taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
+		project.save( filename.toUtf8().constData(), taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
 	}
 	else
 	{
-		project.save( filename.toStdString().c_str(), taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
+		project.save( filename.toUtf8().constData(), taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
 	}
-	addRecentProject( filename.toStdString().c_str() );
+	addRecentProject( filename.toUtf8().constData() );
 	// saved successfully - remove * mark from caption
 	project.reset();
 	updateCaption();
@@ -1854,7 +1854,7 @@ void TasEditorWindow::openProject(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	loadProject( filename.toStdString().c_str());
+	loadProject( filename.toUtf8().constData());
 
 	return;
 }
@@ -2030,9 +2030,9 @@ void TasEditorWindow::importMovieFile( const char *path )
 		QFileInfo fi( path );
 		// loaded successfully, now register Input changes
 		//char drv[512], dir[512], name[1024], ext[512];
-		//splitpath(filename.toStdString().c_str(), drv, dir, name, ext);
+		//splitpath(filename.toUtf8().constData(), drv, dir, name, ext);
 		//strcat(name, ext);
-		int result = history.registerImport(md, fi.fileName().toStdString().c_str() );
+		int result = history.registerImport(md, fi.fileName().toUtf8().constData() );
 		if (result >= 0)
 		{
 			greenzone.invalidateAndUpdatePlayback(result);
@@ -2137,9 +2137,9 @@ void TasEditorWindow::importMovieFile(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	importMovieFile( filename.toStdString().c_str() );
+	importMovieFile( filename.toUtf8().constData() );
 
-	//EMUFILE_FILE ifs( filename.toStdString().c_str(), "rb");
+	//EMUFILE_FILE ifs( filename.toUtf8().constData(), "rb");
 
 	//// Load Input to temporary moviedata
 	//MovieData md;
@@ -2148,9 +2148,9 @@ void TasEditorWindow::importMovieFile(void)
 	//	QFileInfo fi( filename );
 	//	// loaded successfully, now register Input changes
 	//	//char drv[512], dir[512], name[1024], ext[512];
-	//	//splitpath(filename.toStdString().c_str(), drv, dir, name, ext);
+	//	//splitpath(filename.toUtf8().constData(), drv, dir, name, ext);
 	//	//strcat(name, ext);
-	//	int result = history.registerImport(md, fi.fileName().toStdString().c_str() );
+	//	int result = history.registerImport(md, fi.fileName().toUtf8().constData() );
 	//	if (result >= 0)
 	//	{
 	//		greenzone.invalidateAndUpdatePlayback(result);
@@ -2256,7 +2256,7 @@ void TasEditorWindow::exportMovieFile(void)
 	   return;
 	}
 
-	EMUFILE* osRecordingMovie = FCEUD_UTF8_fstream( filename.toStdString().c_str(), "wb");
+	EMUFILE* osRecordingMovie = FCEUD_UTF8_fstream( filename.toUtf8().constData(), "wb");
 	// create copy of current movie data
 	MovieData temp_md = currMovieData;
 	// modify the copy according to selected type of export
@@ -2551,7 +2551,7 @@ bool TasEditorWindow::saveCompactGetFilename( QString &outputFilePath )
 		std::string msg;
 
 		msg = "Pre-existing TAS project file will be overwritten:\n\n" +
-			fi.fileName().toStdString() + "\n\nReplace file?";
+			fi.fileName().toUtf8() + "\n\nReplace file?";
 
 		ret = QMessageBox::warning( this, QObject::tr("Overwrite Warning"),
 				QString::fromStdString(msg), QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
@@ -2683,7 +2683,7 @@ void TasEditorWindow::saveProjectCompactCb(void)
 
 		if ( saveCompactGetFilename( filename ) )
 		{
-			project.save(filename.toStdString().c_str(), taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
+			project.save(filename.toUtf8().constData(), taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
 		}
 	}
 }
@@ -3113,9 +3113,9 @@ void TasEditorWindow::changePianoRollFontCB(void)
 	{
 		pianoRoll->setFont( selFont );
 
-		//printf("Font Changed to: '%s'\n", selFont.toString().toStdString().c_str() );
+		//printf("Font Changed to: '%s'\n", selFont.toString().toUtf8().constData() );
 
-		g_config->setOption("SDL.TasPianoRollFont", selFont.toString().toStdString().c_str() );
+		g_config->setOption("SDL.TasPianoRollFont", selFont.toString().toUtf8().constData() );
 	}
 }
 //----------------------------------------------------------------------------
@@ -3129,9 +3129,9 @@ void TasEditorWindow::changeBookmarksFontCB(void)
 	{
 		bookmarks.setFont( selFont );
 
-		//printf("Font Changed to: '%s'\n", selFont.toString().toStdString().c_str() );
+		//printf("Font Changed to: '%s'\n", selFont.toString().toUtf8().constData() );
 
-		g_config->setOption("SDL.TasBookmarksFont", selFont.toString().toStdString().c_str() );
+		g_config->setOption("SDL.TasBookmarksFont", selFont.toString().toUtf8().constData() );
 	}
 }
 //----------------------------------------------------------------------------
@@ -3145,9 +3145,9 @@ void TasEditorWindow::changeBranchesFontCB(void)
 	{
 		branches.setFont( selFont );
 
-		//printf("Font Changed to: '%s'\n", selFont.toString().toStdString().c_str() );
+		//printf("Font Changed to: '%s'\n", selFont.toString().toUtf8().constData() );
 
-		g_config->setOption("SDL.TasBranchesFont", selFont.toString().toStdString().c_str() );
+		g_config->setOption("SDL.TasBranchesFont", selFont.toString().toUtf8().constData() );
 	}
 }
 //----------------------------------------------------------------------------
@@ -5256,7 +5256,7 @@ void QPianoRoll::dragEnterEvent(QDragEnterEvent *event)
 		QList<QUrl> urls = event->mimeData()->urls();
 		QFileInfo fi( urls[0].toString( QUrl::PreferLocalFile ) );
 
-		//printf("Suffix: '%s'\n", fi.suffix().toStdString().c_str() );
+		//printf("Suffix: '%s'\n", fi.suffix().toUtf8().constData() );
 
 		if ( fi.suffix().compare("fm3") == 0)
 		{
@@ -5287,14 +5287,14 @@ void QPianoRoll::dropEvent(QDropEvent *event)
 		if ( fi.suffix().compare("fm3") == 0 )
 		{
 			FCEU_WRAPPER_LOCK();
-			tasWin->loadProject( fi.filePath().toStdString().c_str() );
+			tasWin->loadProject( fi.filePath().toUtf8().constData() );
 			FCEU_WRAPPER_UNLOCK();
 			event->accept();
 		}
 		else if ( fi.suffix().compare("fm2") == 0 )
 		{
 			FCEU_WRAPPER_LOCK();
-			tasWin->importMovieFile( fi.filePath().toStdString().c_str() );
+			tasWin->importMovieFile( fi.filePath().toUtf8().constData() );
 			FCEU_WRAPPER_UNLOCK();
 			event->accept();
 		}
@@ -7228,7 +7228,7 @@ void TasFindNoteWindow::findNextClicked(void)
 	{
 		return;
 	}
-	strncpy( markersManager->findNoteString, searchPattern->text().toStdString().c_str(), MAX_NOTE_LEN-1 );
+	strncpy( markersManager->findNoteString, searchPattern->text().toUtf8().constData(), MAX_NOTE_LEN-1 );
 	markersManager->findNoteString[MAX_NOTE_LEN-1] = 0;
 
 	// scan frames from current Selection to the border
@@ -7306,7 +7306,7 @@ TasRecentProjectAction::TasRecentProjectAction(QString desc, QWidget *parent)
 	QString txt;
 	QFileInfo fi(desc);
 
-	path = desc.toStdString();
+	path = desc.toUtf8().constData();
 
 	txt  = fi.fileName();
 	txt += QString("\t");

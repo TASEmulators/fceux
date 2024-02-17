@@ -1894,7 +1894,7 @@ void tilePaletteView_t::exportPaletteFileDialog(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	exportActivePaletteACT( filename.toStdString().c_str() );
+	exportActivePaletteACT( filename.toUtf8().constData() );
 }
 //----------------------------------------------------
 void tilePaletteView_t::openColorPicker(void)

@@ -614,7 +614,7 @@ void TraceLoggerDialog_t::openLogFile(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	logFilePath = filename.toStdString();
+	logFilePath = filename.toUtf8().constData();
 
 	g_config->setOption("SDL.TraceLogSaveFilePath", logFilePath);
 
@@ -2133,14 +2133,14 @@ void QTraceLogView::openBpEditWindow(int editIdx, watchpointinfo *wp, traceRecor
 			type |= BT_S;
 		}
 
-		s = addr1->text().toStdString();
+		s = addr1->text().toUtf8().constData();
 
 		if (s.size() > 0)
 		{
 			start_addr = offsetStringToInt(type, s.c_str());
 		}
 
-		s = addr2->text().toStdString();
+		s = addr2->text().toUtf8().constData();
 
 		if (s.size() > 0)
 		{
@@ -2172,8 +2172,8 @@ void QTraceLogView::openBpEditWindow(int editIdx, watchpointinfo *wp, traceRecor
 			unsigned int retval;
 			std::string nameString, condString;
 
-			nameString = name->text().toStdString();
-			condString = cond->text().toStdString();
+			nameString = name->text().toUtf8().constData();
+			condString = cond->text().toUtf8().constData();
 
 			retval = NewBreak(nameString.c_str(), start_addr, end_addr, type, condString.c_str(), slot, enable);
 

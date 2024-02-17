@@ -156,7 +156,7 @@ void MovieRecordDialog_t::setFilePath( QString s )
 	 dirEdit->setText( fi.absolutePath() );
 	fileEdit->setText( fi.fileName() );
 
-	filepath = s.toStdString();
+	filepath = s.toUtf8().constData();
 }
 //----------------------------------------------------------------------------
 void MovieRecordDialog_t::stateSelChanged( int idx )
@@ -251,9 +251,9 @@ void MovieRecordDialog_t::setLoadState(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption ("SDL.LastLoadStateFrom", filename.toStdString().c_str() );
+	g_config->setOption ("SDL.LastLoadStateFrom", filename.toUtf8().constData() );
 
-	ic_file = filename.toStdString();
+	ic_file = filename.toUtf8().constData();
 }
 //----------------------------------------------------------------------------
 void MovieRecordDialog_t::recordMovie(void)
@@ -300,7 +300,7 @@ void MovieRecordDialog_t::recordMovie(void)
 
 		if ( startRecording )
 		{
-			std::string s = authorEdit->text().toStdString();
+			std::string s = authorEdit->text().toUtf8().constData();
 			std::wstring author (s.begin (), s.end ());
 			FCEUI_printf("Recording movie to %s\n", filepath.c_str ());
 			FCEUI_SaveMovie (filepath.c_str(), flags, author);
@@ -362,7 +362,7 @@ void MovieRecordDialog_t::browseFiles(void)
 	g_config->getOption ("SDL.PauseFrame", &pauseframe);
 	g_config->setOption ("SDL.PauseFrame", 0);
 
-	FCEUI_printf ("Recording movie to %s\n", filename.toStdString().c_str() );
+	FCEUI_printf ("Recording movie to %s\n", filename.toUtf8().constData() );
 	setFilePath( filename );
 
 	return;

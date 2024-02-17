@@ -497,7 +497,7 @@ bool SPLICER::pasteInputFromClipboard()
 
 	int num_joypads = joysticksPerFrame[getInputType(currMovieData)];
 	int pos = *(current_selection->begin());
-	std::string stmp = tasWin->clipboard->text().toStdString();
+	std::string stmp = tasWin->clipboard->text().toUtf8().constData();
 	const char *pGlobal = stmp.c_str();
 
 	// TAS recording info starts with "TAS "
@@ -622,7 +622,7 @@ bool SPLICER::pasteInsertInputFromClipboard(void)
 	int num_joypads = joysticksPerFrame[getInputType(currMovieData)];
 	bool markers_changed = false;
 	int pos = *current_selection_begin;
-	std::string stmp = tasWin->clipboard->text().toStdString();
+	std::string stmp = tasWin->clipboard->text().toUtf8().constData();
 	const char *pGlobal = stmp.c_str();
 
 	// TAS recording info starts with "TAS "
@@ -743,7 +743,7 @@ void SPLICER::checkClipboardContents(void)
 	// check if clipboard contains TAS Editor Input data
 	clipboardSelection.clear();
 	int current_pos = -1;
-	std::string stmp = tasWin->clipboard->text().toStdString();
+	std::string stmp = tasWin->clipboard->text().toUtf8().constData();
 	const char *pGlobal = stmp.c_str();
 	// TAS recording info starts with "TAS "
 	if (pGlobal[0]=='T' && pGlobal[1]=='A' && pGlobal[2]=='S')

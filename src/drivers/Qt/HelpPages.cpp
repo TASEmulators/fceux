@@ -73,7 +73,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 		if ( !QFile( QString::fromStdString(helpFileName) ).exists() )
 		{
 			// Search for MacOSX DragNDrop Resources
-			helpFileName = QApplication::applicationDirPath().toStdString() + "/../Resources/fceux.qhc";
+			helpFileName = QApplication::applicationDirPath().toUtf8() + "/../Resources/fceux.qhc";
 		}
 		#endif
 	}
@@ -209,9 +209,9 @@ std::string consoleWin_t::findHelpFile(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption ("SDL.HelpFilePath", filename.toStdString().c_str() );
+	g_config->setOption ("SDL.HelpFilePath", filename.toUtf8().constData() );
 
-	return filename.toStdString();
+	return filename.toUtf8().constData();
 }
 
 //#if  defined(__linux__) || defined(__unix__) || defined(__APPLE__)

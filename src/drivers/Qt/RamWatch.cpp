@@ -579,7 +579,7 @@ void RamWatchDialog_t::openListCB(void)
    }
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	loadWatchFile ( filename.toStdString().c_str() );
+	loadWatchFile ( filename.toUtf8().constData() );
 
    return;
 }
@@ -639,7 +639,7 @@ void RamWatchDialog_t::appendListCB(void)
    }
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	loadWatchFile( filename.toStdString().c_str(), 1 );
+	loadWatchFile( filename.toUtf8().constData(), 1 );
 }
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::saveListCB(void)
@@ -718,7 +718,7 @@ void RamWatchDialog_t::saveListAs(void)
    }
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	saveWatchFile( filename.toStdString().c_str() );
+	saveWatchFile( filename.toUtf8().constData() );
 }
 //----------------------------------------------------------------------------
 void ramWatch_t::updateMem (void)
@@ -893,7 +893,7 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 	{
 		int addr = -1, size = 1;
 
-		addr = ::strtol( addrEntry->text().toStdString().c_str(), NULL, 16 );
+		addr = ::strtol( addrEntry->text().toUtf8().constData(), NULL, 16 );
 
 		if ( dataSize4Btn->isChecked() )
 		{
@@ -910,12 +910,12 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 
 		if ( (rw == NULL) || mode )
 		{
-			ramWatchList.add_entry( notesEntry->text().toStdString().c_str(), 
+			ramWatchList.add_entry( notesEntry->text().toUtf8().constData(), 
 				addr, unsignedTypeBtn->isChecked() ? 'u' : 's', size, isSep);
 		}
 		else 
 		{
-			rw->name  = notesEntry->text().toStdString();
+			rw->name  = notesEntry->text().toUtf8().constData();
 			rw->type  = unsignedTypeBtn->isChecked() ? 'u' : 's';
 			rw->addr  = addr;
 			rw->size  = size;

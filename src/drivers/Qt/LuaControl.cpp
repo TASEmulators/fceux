@@ -408,7 +408,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption("SDL.LastLoadLua", filename.toStdString().c_str());
+	g_config->setOption("SDL.LastLoadLua", filename.toUtf8().constData());
 
 	scriptPath->setText(filename);
 
@@ -420,10 +420,10 @@ void LuaControlDialog_t::startLuaScript(void)
 #ifdef _S9XLUA_H
 	outBuf.clear();
 	FCEU_WRAPPER_LOCK();
-	if (0 == FCEU_LoadLuaCode(scriptPath->text().toStdString().c_str(), scriptArgs->text().toStdString().c_str()))
+	if (0 == FCEU_LoadLuaCode(scriptPath->text().toUtf8().constData(), scriptArgs->text().toUtf8().constData()))
 	{
 		char error_msg[2048];
-		sprintf( error_msg, "Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toStdString().c_str());
+		sprintf( error_msg, "Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toUtf8().constData());
 		FCEUD_PrintError(error_msg);
 	}
 	FCEU_WRAPPER_UNLOCK();

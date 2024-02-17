@@ -296,16 +296,16 @@ void AviRiffViewerDialog::openAviFileDialog(void)
 	}
 	//qDebug() << "selected file path : " << filename.toUtf8();
 
-	printf( "AVI Debug movie %s\n", filename.toStdString().c_str() );
+	printf( "AVI Debug movie %s\n", filename.toUtf8().constData() );
 
-	lastPath = QFileInfo(filename).absolutePath().toStdString();
+	lastPath = QFileInfo(filename).absolutePath().toUtf8().constData();
 
 	if ( lastPath.size() > 0 )
 	{
 		g_config->setOption ("SDL.AviFilePath", lastPath);
 	}
 
-	openFile( filename.toStdString().c_str() );
+	openFile( filename.toUtf8().constData() );
 }
 //----------------------------------------------------------------------------
 int AviRiffViewerDialog::openFile( const char *filepath )

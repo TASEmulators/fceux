@@ -335,19 +335,19 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 		if ( d.exists() )
 		{
 			urls << QUrl::fromLocalFile( d.absolutePath() );
-			iniPath = d.absolutePath().toStdString();
+			iniPath = d.absolutePath().toUtf8().constData();
 		}
 
 		#ifdef __APPLE__
 		// Search for MacOSX DragNDrop Resources
 		d.setPath(QString(exePath) + "/../Resources/palettes");
 
-		//printf("Looking for: '%s'\n", d.path().toStdString().c_str());
+		//printf("Looking for: '%s'\n", d.path().toUtf8().constData());
 
 		if (d.exists())
 		{
 			urls << QUrl::fromLocalFile(d.absolutePath());
-			iniPath = d.absolutePath().toStdString();
+			iniPath = d.absolutePath().toUtf8().constData();
 		}
 		#endif
 	}
@@ -372,12 +372,12 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 		d.setPath(QString("/usr/share/fceux/palettes"));
 	}
 
-	//printf("Looking for: '%s'\n", d.path().toStdString().c_str());
+	//printf("Looking for: '%s'\n", d.path().toUtf8().constData());
 
 	if (d.exists())
 	{
 		urls << QUrl::fromLocalFile(d.absolutePath());
-		iniPath = d.absolutePath().toStdString();
+		iniPath = d.absolutePath().toUtf8().constData();
 	}
 #endif
 
@@ -430,8 +430,8 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	palView->loadFromFile( filename.toStdString().c_str() );
-	g_config->setOption ("SDL.Palette", filename.toStdString().c_str() );
+	palView->loadFromFile( filename.toUtf8().constData() );
+	g_config->setOption ("SDL.Palette", filename.toUtf8().constData() );
 
    return;
 }
@@ -483,7 +483,7 @@ void PaletteEditorDialog_t::savePaletteFileDialog(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	palView->saveToFile( filename.toStdString().c_str() );
+	palView->saveToFile( filename.toUtf8().constData() );
 }
 //----------------------------------------------------------------------------
 void PaletteEditorDialog_t::exportPaletteFileDialog(void)
@@ -533,7 +533,7 @@ void PaletteEditorDialog_t::exportPaletteFileDialog(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	palView->exportToFileACT( filename.toStdString().c_str() );
+	palView->exportToFileACT( filename.toUtf8().constData() );
 }
 //----------------------------------------------------------------------------
 //---NES Color Palette Viewer

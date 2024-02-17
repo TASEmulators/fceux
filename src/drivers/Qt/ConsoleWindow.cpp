@@ -121,13 +121,13 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	int setFullScreen = false;
 
 	//QString libpath = QLibraryInfo::location(QLibraryInfo::PluginsPath);
-	//printf("LibPath: '%s'\n", libpath.toStdString().c_str() );
+	//printf("LibPath: '%s'\n", libpath.toUtf8().constData() );
 
 #ifdef __APPLE__
 	qt_set_sequence_auto_mnemonic(true);
 #endif
 
-	printf("Running on Platform: %s\n", QGuiApplication::platformName().toStdString().c_str() );
+	printf("Running on Platform: %s\n", QGuiApplication::platformName().toUtf8().constData() );
 
 	QThread *thread = QThread::currentThread();
 
@@ -750,12 +750,12 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 						(suffix[0] == 'f') && (suffix[1] == 'c') &&
 							( (suffix[2] == 's') || suffix[2].isDigit() );
 
-		//printf("DragNDrop Suffix: %s\n", suffix.toStdString().c_str() );
+		//printf("DragNDrop Suffix: %s\n", suffix.toUtf8().constData() );
 
 		if (isStateSaveFile)
 		{
 			FCEU_WRAPPER_LOCK();
-			FCEUI_LoadState( filename.toStdString().c_str() );
+			FCEUI_LoadState( filename.toUtf8().constData() );
 			FCEU_WRAPPER_UNLOCK();
 
 			event->accept();
@@ -765,12 +765,12 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 			int luaLoadSuccess;
 
 			FCEU_WRAPPER_LOCK();
-			luaLoadSuccess = FCEU_LoadLuaCode( filename.toStdString().c_str() );
+			luaLoadSuccess = FCEU_LoadLuaCode( filename.toUtf8().constData() );
 			FCEU_WRAPPER_UNLOCK();
 
 			if (luaLoadSuccess)
 			{
-				g_config->setOption("SDL.LastLoadLua", filename.toStdString().c_str());
+				g_config->setOption("SDL.LastLoadLua", filename.toUtf8().constData());
 			}
 			event->accept();
 		}
@@ -779,12 +779,12 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 			int romLoadSuccess;
 
 			FCEU_WRAPPER_LOCK();
-			romLoadSuccess = LoadGame( filename.toStdString().c_str() );
+			romLoadSuccess = LoadGame( filename.toUtf8().constData() );
 			FCEU_WRAPPER_UNLOCK();
 
 			if (!romLoadSuccess)
 			{
-				printf("DragNDrop ROM Load Failed for %s\n", filename.toStdString().c_str() );
+				printf("DragNDrop ROM Load Failed for %s\n", filename.toUtf8().constData() );
 			}
 			event->accept();
 		}
@@ -2516,11 +2516,11 @@ void consoleWin_t::openROMFile(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
+	g_config->setOption ("SDL.LastOpenFile", filename.toUtf8().constData() );
 
 	FCEU_WRAPPER_LOCK();
 	CloseGame ();
-	LoadGame ( filename.toStdString().c_str() );
+	LoadGame ( filename.toUtf8().constData() );
 	FCEU_WRAPPER_UNLOCK();
 
    return;
@@ -2528,10 +2528,10 @@ void consoleWin_t::openROMFile(void)
 
 void consoleWin_t::loadRomRequestCB( QString s )
 {
-	printf("Load ROM Req: '%s'\n", s.toStdString().c_str() );
+	printf("Load ROM Req: '%s'\n", s.toUtf8().constData() );
 	FCEU_WRAPPER_LOCK();
 	CloseGame ();
-	LoadGame ( s.toStdString().c_str() );
+	LoadGame ( s.toUtf8().constData() );
 	FCEU_WRAPPER_UNLOCK();
 }
 
@@ -2609,10 +2609,10 @@ void consoleWin_t::loadNSF(void)
    }
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption ("SDL.LastOpenNSF", filename.toStdString().c_str() );
+	g_config->setOption ("SDL.LastOpenNSF", filename.toUtf8().constData() );
 
 	FCEU_WRAPPER_LOCK();
-	LoadGame( filename.toStdString().c_str() );
+	LoadGame( filename.toUtf8().constData() );
 	FCEU_WRAPPER_UNLOCK();
 }
 
@@ -2693,10 +2693,10 @@ void consoleWin_t::loadStateFrom(void)
    }
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption ("SDL.LastLoadStateFrom", filename.toStdString().c_str() );
+	g_config->setOption ("SDL.LastLoadStateFrom", filename.toUtf8().constData() );
 
 	FCEU_WRAPPER_LOCK();
-	FCEUI_LoadState( filename.toStdString().c_str() );
+	FCEUI_LoadState( filename.toUtf8().constData() );
 	FCEU_WRAPPER_UNLOCK();
 }
 
@@ -2784,10 +2784,10 @@ void consoleWin_t::saveStateAs(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption ("SDL.LastSaveStateAs", filename.toStdString().c_str() );
+	g_config->setOption ("SDL.LastSaveStateAs", filename.toUtf8().constData() );
 
 	FCEU_WRAPPER_LOCK();
-	FCEUI_SaveState( filename.toStdString().c_str() );
+	FCEUI_SaveState( filename.toUtf8().constData() );
 	FCEU_WRAPPER_UNLOCK();
 }
 
@@ -3381,7 +3381,7 @@ void consoleWin_t::warnAmbiguousShortcut( QShortcut *shortcut)
 	std::string msg;
 	int c = 0;
 
-	sprintf( stmp, "Error: Ambiguous Shortcut Activation for Key Sequence: '%s'\n", shortcut->key().toString().toStdString().c_str() );
+	sprintf( stmp, "Error: Ambiguous Shortcut Activation for Key Sequence: '%s'\n", shortcut->key().toString().toUtf8().constData() );
 
 	msg.assign( stmp );
 
@@ -3578,10 +3578,10 @@ void consoleWin_t::loadGameGenieROM(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	g_config->setOption ("SDL.LastOpenFile", filename.toStdString().c_str() );
+	g_config->setOption ("SDL.LastOpenFile", filename.toUtf8().constData() );
 
 	// copy file to proper place (~/.fceux/gg.rom)
-	std::ifstream f1 ( filename.toStdString().c_str(), std::fstream::binary);
+	std::ifstream f1 ( filename.toUtf8().constData(), std::fstream::binary);
 	std::string fn_out = FCEU_MakeFName (FCEUMKF_GGROM, 0, "");
 	std::ofstream f2 (fn_out.c_str (),
 	std::fstream::trunc | std::fstream::binary);
@@ -3674,7 +3674,7 @@ void consoleWin_t::fdsLoadBiosFile(void)
 	qDebug() << "selected file path : " << filename.toUtf8();
 
 	// copy BIOS file to proper place (~/.fceux/disksys.rom)
-	std::ifstream fdsBios (filename.toStdString().c_str(), std::fstream::binary);
+	std::ifstream fdsBios (filename.toUtf8().constData(), std::fstream::binary);
 	std::string output_filename =
 		FCEU_MakeFName (FCEUMKF_FDSROM, 0, "");
 	std::ofstream outFile (output_filename.c_str (),
@@ -4108,9 +4108,9 @@ void consoleWin_t::aviRecordAsStart(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	FCEUI_printf ("AVI Recording movie to %s\n", filename.toStdString().c_str() );
+	FCEUI_printf ("AVI Recording movie to %s\n", filename.toUtf8().constData() );
 
-	lastPath = QFileInfo(filename).absolutePath().toStdString();
+	lastPath = QFileInfo(filename).absolutePath().toUtf8().constData();
 
 	if ( lastPath.size() > 0 )
 	{
@@ -4118,7 +4118,7 @@ void consoleWin_t::aviRecordAsStart(void)
 	}
 
 	FCEU_WRAPPER_LOCK();
-	if ( aviRecordOpenFile( filename.toStdString().c_str() ) == 0 )
+	if ( aviRecordOpenFile( filename.toUtf8().constData() ) == 0 )
 	{
 		aviDiskThread->start();
 	}
@@ -4300,9 +4300,9 @@ void consoleWin_t::wavRecordAsStart(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	FCEUI_printf ("WAV Recording movie to %s\n", filename.toStdString().c_str() );
+	FCEUI_printf ("WAV Recording movie to %s\n", filename.toUtf8().constData() );
 
-	lastPath = QFileInfo(filename).absolutePath().toStdString();
+	lastPath = QFileInfo(filename).absolutePath().toUtf8().constData();
 
 	if ( lastPath.size() > 0 )
 	{
@@ -4310,7 +4310,7 @@ void consoleWin_t::wavRecordAsStart(void)
 	}
 
 	FCEU_WRAPPER_LOCK();
-	FCEUI_BeginWaveRecord( filename.toStdString().c_str() );
+	FCEUI_BeginWaveRecord( filename.toUtf8().constData() );
 	FCEU_WRAPPER_UNLOCK();
 }
 
@@ -4969,7 +4969,7 @@ consoleRecentRomAction::consoleRecentRomAction(QString desc, QWidget *parent)
 	QString txt;
 	QFileInfo fi(desc);
 
-	path = desc.toStdString();
+	path = desc.toUtf8().constData();
 
 	txt  = fi.fileName();
 	txt += QString("\t");

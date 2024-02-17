@@ -1048,7 +1048,7 @@ void HexEditorFindDialog_t::runSearch(void)
 {
 	int i=0;
 	unsigned char v;
-	std::string s = searchBox->text().toStdString();
+	std::string s = searchBox->text().toUtf8().constData();
 	std::vector <unsigned char> varray;
 
 	if ( s.size() == 0 )
@@ -1669,7 +1669,7 @@ void HexEditorDialog_t::saveRomFileAs(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	iNesSaveAs( filename.toStdString().c_str() );
+	iNesSaveAs( filename.toUtf8().constData() );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::loadTableFromFile(void)
@@ -1711,7 +1711,7 @@ void HexEditorDialog_t::loadTableFromFile(void)
 	}
 	qDebug() << "selected file path : " << filename.toUtf8();
 
-	editor->charTable.loadFromFile( filename.toStdString().c_str() );
+	editor->charTable.loadFromFile( filename.toUtf8().constData() );
 
 	unloadTableAct->setEnabled( editor->charTable.customMapLoaded );
 }
@@ -2118,9 +2118,9 @@ void QHexEdit::changeFontRequest(void)
 
 		calcFontData();
 
-		//printf("Font Changed to: '%s'\n", font.toString().toStdString().c_str() );
+		//printf("Font Changed to: '%s'\n", font.toString().toUtf8().constData() );
 
-		g_config->setOption("SDL.HexEditFont", font.toString().toStdString().c_str() );
+		g_config->setOption("SDL.HexEditFont", font.toString().toUtf8().constData() );
 	}
 }
 //----------------------------------------------------------------------------
@@ -2337,7 +2337,7 @@ void QHexEdit::loadClipboard( const char *txt )
 void QHexEdit::pasteFromClipboard(void)
 {
 	int i, nbytes=0, val, addr;
-	std::string s = clipboard->text().toStdString();
+	std::string s = clipboard->text().toUtf8().constData();
 	const char *c;
 	unsigned char *buf;
 
@@ -3258,7 +3258,7 @@ void QHexEdit::addBookMarkCB(void)
 	
 	if ( QDialog::Accepted == ret )
 	{
-	     	hbm.addBookMark( ctxAddr, viewMode, dialog.textValue().toStdString().c_str() );
+	     	hbm.addBookMark( ctxAddr, viewMode, dialog.textValue().toUtf8().constData() );
 	     	parent->populateBookmarkMenu();
 	}
 }
