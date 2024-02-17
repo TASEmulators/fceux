@@ -507,7 +507,7 @@ public slots:
 	Q_INVOKABLE  bool isPowerOn();
 	Q_INVOKABLE  bool isFromSaveState();
 	Q_INVOKABLE  void replay();
-	Q_INVOKABLE  bool readOnly();
+	Q_INVOKABLE  bool getReadOnly();
 	Q_INVOKABLE  void setReadOnly(bool which);
 	Q_INVOKABLE  bool play(const QString& filename, bool readOnly = false, int pauseFrame = 0);
 	Q_INVOKABLE  bool record(const QString& filename, int saveType = FROM_POWERON, const QString author = QString());
@@ -520,6 +520,12 @@ public slots:
 	Q_INVOKABLE  QString  getFilename();
 	Q_INVOKABLE  QString  getFilepath();
 
+	Q_INVOKABLE  void close(){ stop(); }
+	Q_INVOKABLE  bool readOnly(){ return getReadOnly(); }
+	Q_INVOKABLE  void playBeginning(){ replay(); }
+	Q_INVOKABLE  bool playback(const QString& filename, bool readOnly = false, int pauseFrame = 0){ return play(filename, readOnly, pauseFrame); }
+	Q_INVOKABLE  bool load(const QString& filename, bool readOnly = false, int pauseFrame = 0){ return play(filename, readOnly, pauseFrame); }
+	Q_INVOKABLE  bool save(const QString& filename, int saveType = FROM_POWERON, const QString author = QString()){ return record(filename, saveType, author); }
 };
 
 class InputScriptObject: public QObject

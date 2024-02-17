@@ -939,7 +939,7 @@ void MovieScriptObject::replay()
 	FCEUI_MoviePlayFromBeginning();
 }
 //----------------------------------------------------
-bool MovieScriptObject::readOnly()
+bool MovieScriptObject::getReadOnly()
 {
 	return FCEUI_GetMovieToggleReadOnly();
 }
