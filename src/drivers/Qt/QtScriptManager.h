@@ -726,24 +726,6 @@ public:
 	QMap<QString, JsPropertyItem*> childMap;
 };
 
-class QScriptLogFile : public QTemporaryFile
-{
-	Q_OBJECT
-
-public:
-	QScriptLogFile(QObject* parent = nullptr)
-		: QTemporaryFile(parent)
-	{
-	}
-
-	~QScriptLogFile(void){}
-
-	void reopen()
-	{
-		open(QIODeviceBase::Append | QIODeviceBase::ReadWrite);
-	}
-};
-
 class QScriptDialog_t : public QDialog
 {
 	Q_OBJECT
@@ -764,7 +746,7 @@ protected:
 	QMenuBar* buildMenuBar();
 
 	QMenuBar* menuBar;
-	QScriptLogFile *logFile = nullptr;
+	QTemporaryFile *logFile = nullptr;
 	QTimer *periodicTimer;
 	QLineEdit *scriptPath;
 	QLineEdit *scriptArgs;

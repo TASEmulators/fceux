@@ -2561,11 +2561,21 @@ void QScriptDialog_t::saveLog(bool openFileBrowser)
 		}
 		printf("Saving Log File: %s\n", logSavePath.toLocal8Bit().data());
 		FCEU_WRAPPER_LOCK();
-		flushLog();
-		if ( logFile->copy( logSavePath ) )
 		{
-			// Log file needs to be reopened on a successful copy
-			logFile->reopen();
+			char buffer[4096];
+			flushLog();
+			QFile saveFile( logSavePath );
+			if (saveFile.open(QIODeviceBase::ReadWrite))
+			{
+				logFile->seek(0);
+				qint64 bytesRead = logFile->read(buffer, sizeof(buffer));
+				while (bytesRead > 0)
+				{
+					saveFile.write(buffer, bytesRead);
+
+					bytesRead = logFile->read(buffer, sizeof(buffer));
+				}
+			}
 		}
 		FCEU_WRAPPER_UNLOCK();
 	}
@@ -2957,7 +2967,7 @@ void QScriptDialog_t::resetLog()
 		delete logFile;
 		logFile = nullptr;
 	}
-	logFile = new QScriptLogFile(this);
+	logFile = new QTemporaryFile(this);
 	logFile->setAutoRemove(true);
 	logFile->setFileTemplate(QDir::tempPath() + QString("/fceux_js_XXXXXX.log"));
 	logFile->open();
