@@ -111,7 +111,7 @@ FileScriptObject::FileScriptObject(const QString& path)
 	: QObject()
 {
 	numInstances++;
-	printf("FileScriptObject(%s) %p Constructor: %i\n", path.toLocal8Bit().constData(), this, numInstances);
+	//printf("FileScriptObject(%s) %p Constructor: %i\n", path.toLocal8Bit().constData(), this, numInstances);
 
 	moveToThread(QApplication::instance()->thread());
 
@@ -128,9 +128,14 @@ FileScriptObject::~FileScriptObject()
 //----------------------------------------------------
 void FileScriptObject::setFilePath(const QString& path)
 {
+	if (isOpen())
+	{
+		auto* engine = FCEU::JSEngine::getCurrent();
+		engine->throwError(QJSValue::GenericError, "cannot change file path while open");
+	}
 	QFileInfo fi(path);
 	filepath = fi.absoluteFilePath();
-	printf("FileScriptObject::filepath(%s)\n", filepath.toLocal8Bit().constData());
+	//printf("FileScriptObject::filepath(%s)\n", filepath.toLocal8Bit().constData());
 }
 //----------------------------------------------------
 QString FileScriptObject::fileName()
@@ -152,7 +157,7 @@ bool FileScriptObject::open(int mode)
 	if (filepath.isEmpty())
 	{
 		auto* engine = FCEU::JSEngine::getCurrent();
-		engine->throwError(QJSValue::GenericError, "Error: unspecified file path ");
+		engine->throwError(QJSValue::GenericError, "unspecified file path ");
 		return false;
 	}
 
@@ -161,7 +166,7 @@ bool FileScriptObject::open(int mode)
 	if (file == nullptr)
 	{
 		auto* engine = FCEU::JSEngine::getCurrent();
-		engine->throwError(QJSValue::GenericError, "Error: Failed to create QFile object");
+		engine->throwError(QJSValue::GenericError, "failed to create QFile object");
 		return false;
 	}
 
@@ -216,7 +221,7 @@ int  FileScriptObject::writeString(const QString& s)
 	if ( (file == nullptr) || !file->isOpen())
 	{
 		auto* engine = FCEU::JSEngine::getCurrent();
-		engine->throwError(QJSValue::GenericError, "Error: file is not open ");
+		engine->throwError(QJSValue::GenericError, "file is not open ");
 		return -1;
 	}
 	int bytesWritten = file->write( s.toLocal8Bit() );
@@ -231,7 +236,7 @@ QJSValue FileScriptObject::readLine()
 	if ( (file == nullptr) || !file->isOpen())
 	{
 		auto* engine = FCEU::JSEngine::getCurrent();
-		engine->throwError(QJSValue::GenericError, "Error: file is not open ");
+		engine->throwError(QJSValue::GenericError, "file is not open ");
 		return obj;
 	}
 	auto* engine = FCEU::JSEngine::getCurrent();
@@ -1952,7 +1957,7 @@ void QtScriptInstance::loadUI(const QString& uiFilePath)
 
 	ui_rootWidget->show();
 #else
-	throwError(QJSValue::GenericError, "Error: Application was not linked against Qt UI Tools");
+	throwError(QJSValue::GenericError, "Application was not linked against Qt UI Tools");
 #endif
 }
 //----------------------------------------------------
