@@ -29,6 +29,8 @@
 #endif
 
 #include <QUrl>
+#include <QFile>
+#include <QIODevice>
 #include <QTextEdit>
 #include <QFileInfo>
 #include <QFileDialog>
