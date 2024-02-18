@@ -1715,7 +1715,7 @@ bool TasEditorWindow::saveProjectAs(bool save_compact)
 		std::string msg;
 
         msg = "Pre-existing TAS project file will be overwritten:\n\n" +
-            std::string(fi.fileName().toLocal8Bit()) + "\n\nReplace file?";
+            (std::string)fi.fileName().toLocal8Bit() + "\n\nReplace file?";
 
 		ret = QMessageBox::warning( this, QObject::tr("Overwrite Warning"),
 				QString::fromStdString(msg), QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
@@ -2551,7 +2551,7 @@ bool TasEditorWindow::saveCompactGetFilename( QString &outputFilePath )
 		std::string msg;
 
         msg = "Pre-existing TAS project file will be overwritten:\n\n" +
-            std::string(fi.fileName().toLocal8Bit()) + "\n\nReplace file?";
+            (std::string)fi.fileName().toLocal8Bit() + "\n\nReplace file?";
 
 		ret = QMessageBox::warning( this, QObject::tr("Overwrite Warning"),
 				QString::fromStdString(msg), QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
