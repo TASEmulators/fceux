@@ -1288,8 +1288,8 @@ void GetMouseRelative(int32 (&d)[3])
 /**
  * Handles outstanding SDL events.
  */
-static void
-UpdatePhysicalInput()
+void
+pollEventsSDL()
 {
 	SDL_Event event;
 
@@ -1646,7 +1646,7 @@ void FCEUD_UpdateInput(void)
 
 	updateGamePadKeyMappings();
 
-	UpdatePhysicalInput();
+	pollEventsSDL();
 	KeyboardCommands();
 
 	for (x = 0; x < 2; x++)
@@ -2598,7 +2598,7 @@ int loadInputSettingsFromFile(const char *filename)
 void UpdateInput(Config *config)
 {
 	char buf[64];
-	std::string device, prefix, guid, mapping;
+	std::string device, prefix;
 
 	InitJoysticks();
 
@@ -2686,19 +2686,20 @@ void UpdateInput(Config *config)
 	//              input device key.
 	int type, devnum, button;
 
+	// This is now done in InitJoysticks
 	// gamepad 0 - 3
-	for (unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
-	{
-		char buf[64];
-		snprintf(buf, sizeof(buf) - 1, "SDL.Input.GamePad.%u.", i);
-		prefix = buf;
+	//for (unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
+	//{
+	//	char buf[64];
+	//	snprintf(buf, sizeof(buf) - 1, "SDL.Input.GamePad.%u.", i);
+	//	prefix = buf;
 
-		config->getOption(prefix + "DeviceType", &device);
-		config->getOption(prefix + "DeviceGUID", &guid);
-		config->getOption(prefix + "Profile", &mapping);
+	//	config->getOption(prefix + "DeviceType", &device);
+	//	config->getOption(prefix + "DeviceGUID", &guid);
+	//	config->getOption(prefix + "Profile", &mapping);
 
-		GamePad[i].init(i, guid.c_str(), mapping.c_str());
-	}
+	//	GamePad[i].init(i, guid.c_str(), mapping.c_str());
+	//}
 
 	// PowerPad 0 - 1
 	for (unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++)

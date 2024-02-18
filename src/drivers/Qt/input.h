@@ -143,6 +143,7 @@ void UpdateInput(Config *config);
 
 const char* ButtonName(const ButtConfig* bc);
 
+void pollEventsSDL();
 int getInputSelection( int port, int *cur, int *usr );
 int saveInputSettingsToFile( const char *fileBase = NULL );
 int loadInputSettingsFromFile( const char *filename = NULL );
