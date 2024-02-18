@@ -823,11 +823,11 @@ bool iNesHeaderEditor_t::openFile(void)
    {
       return false;
    }
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
 	if ( GameInfo == NULL )
 	{
-		strncpy( LoadedRomFName, filename.toUtf8().constData(), sizeof(LoadedRomFName)-1 );
+		strncpy( LoadedRomFName, filename.toLocal8Bit().constData(), sizeof(LoadedRomFName)-1 );
 		LoadedRomFName[sizeof(LoadedRomFName)-1] = 0;
 	}
 
@@ -877,11 +877,11 @@ void iNesHeaderEditor_t::saveFileAs(void)
    {
       return;
    }
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
 	WriteHeaderData( iNesHdr );
 
-	if ( SaveINESFile( filename.toUtf8().constData(), iNesHdr ) )
+	if ( SaveINESFile( filename.toLocal8Bit().constData(), iNesHdr ) )
 	{
 		// Error
 	}
@@ -1414,7 +1414,7 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 	// Sub mapper
 	if (ines20) 
 	{
-		strcpy( buf, mapperSubEdit->text().toUtf8().constData() );
+		strcpy( buf, mapperSubEdit->text().toLocal8Bit().constData() );
 		int submapper;
 		if (sscanf(buf, "%d", &submapper) > 0)
 		{
@@ -1935,7 +1935,7 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 	// Miscellanous ROM(s)
 	if (ines20)
 	{
-		strcpy( buf, miscRomsEdit->text().toUtf8().constData() );
+		strcpy( buf, miscRomsEdit->text().toLocal8Bit().constData() );
 		int misc_roms = 0;
 		if (sscanf(buf, "%d", &misc_roms) < 1)
 		{

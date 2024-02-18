@@ -321,9 +321,9 @@ int LoadGame(const char *path, bool silent)
 	// Resolve absolute path to file
 	if ( fi.exists() )
 	{
-		//printf("FI: '%s'\n", fi.absoluteFilePath().toUtf8().constData() );
-		//printf("FI: '%s'\n", fi.canonicalFilePath().toUtf8().constData() );
-		fullpath = fi.canonicalFilePath().toUtf8().constData();
+		//printf("FI: '%s'\n", fi.absoluteFilePath().toLocal8Bit().constData() );
+		//printf("FI: '%s'\n", fi.canonicalFilePath().toLocal8Bit().constData() );
+		fullpath = fi.canonicalFilePath().toLocal8Bit().constData();
 	}
 	else
 	{
@@ -689,7 +689,7 @@ static void ShowUsage(const char *prog)
 	j=0;
 	for (i=0; i<styleList.size(); i++)
 	{
-		printf("  %16s  ", styleList[i].toUtf8().constData() ); j++;
+		printf("  %16s  ", styleList[i].toLocal8Bit().constData() ); j++;
 
 		if ( j >= 4 )
 		{
@@ -1044,7 +1044,7 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		// Resolve absolute path to file
 		if ( fi.exists() )
 		{
-			std::string fullpath = fi.canonicalFilePath().toUtf8().constData();
+			std::string fullpath = fi.canonicalFilePath().toLocal8Bit().constData();
 
 			error = LoadGame( fullpath.c_str() );
 
@@ -1117,9 +1117,9 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		// Resolve absolute path to file
 		if ( fi.exists() )
 		{
-			//printf("FI: '%s'\n", fi.absoluteFilePath().toUtf8().constData() );
-			//printf("FI: '%s'\n", fi.canonicalFilePath().toUtf8().constData() );
-			s = fi.canonicalFilePath().toUtf8().constData();
+			//printf("FI: '%s'\n", fi.absoluteFilePath().toLocal8Bit().constData() );
+			//printf("FI: '%s'\n", fi.canonicalFilePath().toLocal8Bit().constData() );
+			s = fi.canonicalFilePath().toLocal8Bit().constData();
 		}
 //#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 //

@@ -577,9 +577,9 @@ void RamWatchDialog_t::openListCB(void)
    {
       return;
    }
-	//qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	loadWatchFile ( filename.toUtf8().constData() );
+	loadWatchFile ( filename.toLocal8Bit().constData() );
 
    return;
 }
@@ -637,9 +637,9 @@ void RamWatchDialog_t::appendListCB(void)
    {
       return;
    }
-	//qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	loadWatchFile( filename.toUtf8().constData(), 1 );
+	loadWatchFile( filename.toLocal8Bit().constData(), 1 );
 }
 //----------------------------------------------------------------------------
 void RamWatchDialog_t::saveListCB(void)
@@ -716,9 +716,9 @@ void RamWatchDialog_t::saveListAs(void)
    {
       return;
    }
-	//qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	saveWatchFile( filename.toUtf8().constData() );
+	saveWatchFile( filename.toLocal8Bit().constData() );
 }
 //----------------------------------------------------------------------------
 void ramWatch_t::updateMem (void)
@@ -893,7 +893,7 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 	{
 		int addr = -1, size = 1;
 
-		addr = ::strtol( addrEntry->text().toUtf8().constData(), NULL, 16 );
+		addr = ::strtol( addrEntry->text().toLocal8Bit().constData(), NULL, 16 );
 
 		if ( dataSize4Btn->isChecked() )
 		{
@@ -910,12 +910,12 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 
 		if ( (rw == NULL) || mode )
 		{
-			ramWatchList.add_entry( notesEntry->text().toUtf8().constData(), 
+			ramWatchList.add_entry( notesEntry->text().toLocal8Bit().constData(),
 				addr, unsignedTypeBtn->isChecked() ? 'u' : 's', size, isSep);
 		}
 		else 
 		{
-			rw->name  = notesEntry->text().toUtf8().constData();
+			rw->name  = notesEntry->text().toLocal8Bit().constData();
 			rw->type  = unsignedTypeBtn->isChecked() ? 'u' : 's';
 			rw->addr  = addr;
 			rw->size  = size;

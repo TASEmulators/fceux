@@ -2216,13 +2216,13 @@ int aviRecordOpenFile( const char *filepath )
 
 	date = QDate::currentDate();
 
-	avi_info.add_pair( "ICRD", date.toString(Qt::ISODate).toUtf8().constData() ); 
+	avi_info.add_pair( "ICRD", date.toString(Qt::ISODate).toLocal8Bit().constData() ); 
 
-	avi_info.add_pair( "ILNG", QLocale::languageToString( locale.language() ).toUtf8().constData() );
+	avi_info.add_pair( "ILNG", QLocale::languageToString( locale.language() ).toLocal8Bit().constData() );
 
-	avi_info.add_pair( "IARL", QLocale::countryToString( locale.country() ).toUtf8().constData() );
+	avi_info.add_pair( "IARL", QLocale::countryToString( locale.country() ).toLocal8Bit().constData() );
 
-	avi_info.add_pair( "IMED", QSysInfo::prettyProductName().toUtf8().constData() );
+	avi_info.add_pair( "IMED", QSysInfo::prettyProductName().toLocal8Bit().constData() );
 
 	sprintf( txt, "FCEUX %s", FCEU_VERSION_STRING );
 	avi_info.add_pair( "ITCH", txt );
@@ -3263,10 +3263,10 @@ void LibavOptionsPage::initCodecLists(void)
 		c = av_codec_iterate( &it );
 	}
 
-	initPixelFormatSelect( videoEncSel->currentText().toUtf8().constData() );
-	initSampleFormatSelect( audioEncSel->currentText().toUtf8().constData() );
-	initSampleRateSelect( audioEncSel->currentText().toUtf8().constData() );
-	initChannelLayoutSelect( audioEncSel->currentText().toUtf8().constData() );
+	initPixelFormatSelect( videoEncSel->currentText().toLocal8Bit().constData() );
+	initSampleFormatSelect( audioEncSel->currentText().toLocal8Bit().constData() );
+	initSampleRateSelect( audioEncSel->currentText().toLocal8Bit().constData() );
+	initChannelLayoutSelect( audioEncSel->currentText().toLocal8Bit().constData() );
 
 	videoEncSel->model()->sort(0, Qt::AscendingOrder);
 	audioEncSel->model()->sort(0, Qt::AscendingOrder);
@@ -3281,7 +3281,7 @@ void LibavOptionsPage::videoCodecChanged(int idx)
 {
 	const AVCodec *c;
 
-	LIBAV::video_st.selEnc = videoEncSel->currentText().toUtf8().constData();
+	LIBAV::video_st.selEnc = videoEncSel->currentText().toLocal8Bit().constData();
 
 	c = avcodec_find_encoder_by_name( LIBAV::video_st.selEnc.c_str() );
 
@@ -3296,7 +3296,7 @@ void LibavOptionsPage::audioCodecChanged(int idx)
 {
 	const AVCodec *c;
 
-	LIBAV::audio_st.selEnc = audioEncSel->currentText().toUtf8().constData();
+	LIBAV::audio_st.selEnc = audioEncSel->currentText().toLocal8Bit().constData();
 
 	c = avcodec_find_encoder_by_name( LIBAV::audio_st.selEnc.c_str() );
 
@@ -4102,7 +4102,7 @@ void LibavEncOptInputWin::applyChanges(void)
 		{
 			if ( strEntry )
 			{
-				av_opt_set( item->obj, item->opt->name, strEntry->text().toUtf8().constData(), 0 );
+				av_opt_set( item->obj, item->opt->name, strEntry->text().toLocal8Bit().constData(), 0 );
 			}
 		}
 		break;

@@ -335,19 +335,19 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 		if ( d.exists() )
 		{
 			urls << QUrl::fromLocalFile( d.absolutePath() );
-			iniPath = d.absolutePath().toUtf8().constData();
+			iniPath = d.absolutePath().toLocal8Bit().constData();
 		}
 
 		#ifdef __APPLE__
 		// Search for MacOSX DragNDrop Resources
 		d.setPath(QString(exePath) + "/../Resources/palettes");
 
-		//printf("Looking for: '%s'\n", d.path().toUtf8().constData());
+		//printf("Looking for: '%s'\n", d.path().toLocal8Bit().constData());
 
 		if (d.exists())
 		{
 			urls << QUrl::fromLocalFile(d.absolutePath());
-			iniPath = d.absolutePath().toUtf8().constData();
+			iniPath = d.absolutePath().toLocal8Bit().constData();
 		}
 		#endif
 	}
@@ -372,12 +372,12 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 		d.setPath(QString("/usr/share/fceux/palettes"));
 	}
 
-	//printf("Looking for: '%s'\n", d.path().toUtf8().constData());
+	//printf("Looking for: '%s'\n", d.path().toLocal8Bit().constData());
 
 	if (d.exists())
 	{
 		urls << QUrl::fromLocalFile(d.absolutePath());
-		iniPath = d.absolutePath().toUtf8().constData();
+		iniPath = d.absolutePath().toLocal8Bit().constData();
 	}
 #endif
 
@@ -428,10 +428,10 @@ void PaletteEditorDialog_t::openPaletteFileDialog(void)
 	{
 	   return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	palView->loadFromFile( filename.toUtf8().constData() );
-	g_config->setOption ("SDL.Palette", filename.toUtf8().constData() );
+	palView->loadFromFile( filename.toLocal8Bit().constData() );
+	g_config->setOption ("SDL.Palette", filename.toLocal8Bit().constData() );
 
    return;
 }
@@ -481,9 +481,9 @@ void PaletteEditorDialog_t::savePaletteFileDialog(void)
 	{
 	   return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	palView->saveToFile( filename.toUtf8().constData() );
+	palView->saveToFile( filename.toLocal8Bit().constData() );
 }
 //----------------------------------------------------------------------------
 void PaletteEditorDialog_t::exportPaletteFileDialog(void)
@@ -531,9 +531,9 @@ void PaletteEditorDialog_t::exportPaletteFileDialog(void)
 	{
 	   return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	palView->exportToFileACT( filename.toUtf8().constData() );
+	palView->exportToFileACT( filename.toLocal8Bit().constData() );
 }
 //----------------------------------------------------------------------------
 //---NES Color Palette Viewer

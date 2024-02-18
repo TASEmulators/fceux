@@ -607,7 +607,7 @@ void GamePadConfDialog_t::loadMapList(void)
 	for (int i = 0; i < static_cast<int>(fileList.size()); i++)
 	{
 		size_t suffixIdx;
-		std::string fileName = fileList[i].toUtf8().constData();
+		std::string fileName = fileList[i].toLocal8Bit().constData();
 
 		suffixIdx = fileName.find_last_of('.');
 
@@ -1103,7 +1103,7 @@ void GamePadConfDialog_t::saveConfig(void)
 	sprintf(stmp, "SDL.Input.GamePad.%u.", portNum);
 	prefix = stmp;
 
-	mapName = mapSel->currentText().toUtf8().constData();
+	mapName = mapSel->currentText().toLocal8Bit().constData();
 
 	guid = GamePad[portNum].getGUID();
 
@@ -1151,7 +1151,7 @@ void GamePadConfDialog_t::newProfileCallback(void)
 
 	if (QDialog::Accepted == ret)
 	{
-		createNewProfile(dialog.textValue().toUtf8().constData());
+		createNewProfile(dialog.textValue().toLocal8Bit().constData());
 	}
 }
 //----------------------------------------------------
@@ -1164,7 +1164,7 @@ void GamePadConfDialog_t::loadProfileCallback(void)
 	index = devSel->currentIndex();
 	devIdx = devSel->itemData(index).toInt();
 
-	mapName = mapSel->currentText().toUtf8().constData();
+	mapName = mapSel->currentText().toLocal8Bit().constData();
 
 	GamePad[portNum].setDeviceIndex(devIdx);
 
@@ -1199,7 +1199,7 @@ void GamePadConfDialog_t::saveProfileCallback(void)
 	std::string mapName;
 	char stmp[256];
 
-	mapName = mapSel->currentText().toUtf8().constData();
+	mapName = mapSel->currentText().toLocal8Bit().constData();
 
 	ret = GamePad[portNum].saveCurrentMapToFile(mapName.c_str());
 
@@ -1222,7 +1222,7 @@ void GamePadConfDialog_t::deleteProfileCallback(void)
 	std::string mapName;
 	char stmp[256];
 
-	mapName = mapSel->currentText().toUtf8().constData();
+	mapName = mapSel->currentText().toLocal8Bit().constData();
 
 	ret = GamePad[portNum].deleteMapping(mapName.c_str());
 
@@ -2226,7 +2226,7 @@ void GamePadConfigHotKey_t::setKeyNameLbl( QLineEdit *lbl )
 void GamePadConfigHotKey_t::keyPressEvent(QKeyEvent *event)
 {
 	bool isModifier;
-	//printf("GamePad Hot Key Press: 0x%x  '%s'\n", event->key(), event->text().toUtf8().constData() );
+	//printf("GamePad Hot Key Press: 0x%x  '%s'\n", event->key(), event->text().toLocal8Bit().constData() );
 	
 	isModifier = (event->key() == Qt::Key_Shift   ) ||
 	             (event->key() == Qt::Key_Control ) ||
@@ -2241,7 +2241,7 @@ void GamePadConfigHotKey_t::keyPressEvent(QKeyEvent *event)
 
 		k->keySeq[idx].key      = event->key();
 		k->keySeq[idx].modifier = event->modifiers();
-		k->keySeq[idx].name     = ks.toString().toUtf8().constData();
+		k->keySeq[idx].name     = ks.toString().toLocal8Bit().constData();
 
 		if ( keySeqLbl )
 		{

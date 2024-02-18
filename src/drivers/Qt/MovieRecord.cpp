@@ -156,7 +156,7 @@ void MovieRecordDialog_t::setFilePath( QString s )
 	 dirEdit->setText( fi.absolutePath() );
 	fileEdit->setText( fi.fileName() );
 
-	filepath = s.toUtf8().constData();
+	filepath = s.toLocal8Bit().constData();
 }
 //----------------------------------------------------------------------------
 void MovieRecordDialog_t::stateSelChanged( int idx )
@@ -249,11 +249,11 @@ void MovieRecordDialog_t::setLoadState(void)
 	{
 		return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	g_config->setOption ("SDL.LastLoadStateFrom", filename.toUtf8().constData() );
+	g_config->setOption ("SDL.LastLoadStateFrom", filename.toLocal8Bit().constData() );
 
-	ic_file = filename.toUtf8().constData();
+	ic_file = filename.toLocal8Bit().constData();
 }
 //----------------------------------------------------------------------------
 void MovieRecordDialog_t::recordMovie(void)
@@ -300,7 +300,7 @@ void MovieRecordDialog_t::recordMovie(void)
 
 		if ( startRecording )
 		{
-			std::string s = authorEdit->text().toUtf8().constData();
+			std::string s = authorEdit->text().toLocal8Bit().constData();
 			std::wstring author (s.begin (), s.end ());
 			FCEUI_printf("Recording movie to %s\n", filepath.c_str ());
 			FCEUI_SaveMovie (filepath.c_str(), flags, author);
@@ -356,13 +356,13 @@ void MovieRecordDialog_t::browseFiles(void)
 	{
 	   return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
 	int pauseframe;
 	g_config->getOption ("SDL.PauseFrame", &pauseframe);
 	g_config->setOption ("SDL.PauseFrame", 0);
 
-	FCEUI_printf ("Recording movie to %s\n", filename.toUtf8().constData() );
+	FCEUI_printf ("Recording movie to %s\n", filename.toLocal8Bit().constData() );
 	setFilePath( filename );
 
 	return;

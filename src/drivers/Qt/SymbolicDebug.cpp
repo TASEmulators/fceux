@@ -794,8 +794,8 @@ int SymbolEditWindow::exec(void)
 		FCEU_WRAPPER_LOCK();
 		if ( isArrayBox->isChecked() )
 		{
-			size = atoi( arraySize->text().toUtf8().constData() );
-			init = atoi( arrayInit->text().toUtf8().constData() );
+			size = atoi( arraySize->text().toLocal8Bit().constData() );
+			init = atoi( arrayInit->text().toLocal8Bit().constData() );
 
 			for (i=0; i<size; i++)
 			{
@@ -847,7 +847,7 @@ int SymbolEditWindow::exec(void)
 					{
 						if ( isNew || arrayCommentOverWrite->isChecked() || (i == 0) )
 						{
-							sym->commentAssign( commentEntry->toPlainText().toUtf8().constData() );
+							sym->commentAssign( commentEntry->toPlainText().toLocal8Bit().constData() );
 						}
 					}
 					sym->trimTrailingSpaces();
@@ -865,8 +865,8 @@ int SymbolEditWindow::exec(void)
 			}
 			else if ( sym == NULL )
 			{
-				sym = new debugSymbol_t( addr, nameEntry->text().toUtf8().constData(), 
-						commentEntry->toPlainText().toUtf8().constData());
+				sym = new debugSymbol_t( addr, nameEntry->text().toLocal8Bit().constData(), 
+						commentEntry->toPlainText().toLocal8Bit().constData());
 
 				if ( debugSymbolTable.addSymbolAtBankOffset( bank, addr, sym ) )
 				{
@@ -879,14 +879,14 @@ int SymbolEditWindow::exec(void)
 			}
 			else
 			{
-				if ( sym->updateName( nameEntry->text().toUtf8().constData() ) )
+				if ( sym->updateName( nameEntry->text().toLocal8Bit().constData() ) )
 				{
 					if (consoleWindow)
 					{
 						consoleWindow->QueueErrorMsgWindow( debugSymbolTable.errorMessage() );
 					}
 				}
-				sym->commentAssign( commentEntry->toPlainText().toUtf8().constData() );
+				sym->commentAssign( commentEntry->toPlainText().toLocal8Bit().constData() );
 				sym->trimTrailingSpaces();
 			}
 		}
@@ -906,7 +906,7 @@ void SymbolEditWindow::determineArrayStart(void)
 	{
 		return;
 	}
-	strcpy( stmp, nameEntry->text().toUtf8().constData() );
+	strcpy( stmp, nameEntry->text().toLocal8Bit().constData() );
 
 	// Find Current Array Braces
 	i=0;
@@ -967,7 +967,7 @@ void SymbolEditWindow::setSymNameWithArray(int idx)
 	{
 		return;
 	}
-	strcpy( stmp, nameEntry->text().toUtf8().constData() );
+	strcpy( stmp, nameEntry->text().toLocal8Bit().constData() );
 
 	// Remove Current Array Braces
 	i=0;

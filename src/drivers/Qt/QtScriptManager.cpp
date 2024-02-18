@@ -666,7 +666,7 @@ void EmuScriptObject::exit()
 //----------------------------------------------------
 void EmuScriptObject::message(const QString& msg)
 {
-	FCEU_DispMessage("%s",0, msg.toUtf8().constData());
+	FCEU_DispMessage("%s",0, msg.toLocal8Bit().constData());
 }
 //----------------------------------------------------
 void EmuScriptObject::speedMode(const QString& mode)
@@ -1925,7 +1925,7 @@ void QtScriptInstance::loadObjectChildren(QJSValue& jsObject, QObject* obj)
 
 		if (!name.isEmpty())
 		{
-			//printf("Object: %s.%s\n", obj->objectName().toUtf8().constData(), child->objectName().toUtf8().constData());
+			//printf("Object: %s.%s\n", obj->objectName().toLocal8Bit().constData(), child->objectName().toLocal8Bit().constData());
 
 			QJSValue newJsObj = engine->newQObject(child);
 
@@ -3109,9 +3109,9 @@ void QScriptDialog_t::openScriptFile(void)
 	{
 		return;
 	}
-	//qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	g_config->setOption("SDL.LastLoadJs", filename.toUtf8().constData());
+	g_config->setOption("SDL.LastLoadJs", filename.toLocal8Bit().constData());
 
 	scriptPath->setText(filename);
 

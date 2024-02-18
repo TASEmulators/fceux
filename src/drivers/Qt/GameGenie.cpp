@@ -60,14 +60,14 @@ class fceuGGCodeValidtor : public QValidator
 		QValidator::State validate(QString &input, int &pos) const
 		{
 		   int i,j, ok;
-		   //printf("Validate: %i '%s'\n", input.size(), input.toUtf8().constData() );
+		   //printf("Validate: %i '%s'\n", input.size(), input.toLocal8Bit().constData() );
 		
 		   if ( input.size() == 0 )
 		   {
 		      return QValidator::Acceptable;
 		   }
 			input = input.toUpper();
-		   std::string s = input.toUtf8().constData();
+		   std::string s = input.toLocal8Bit().constData();
 		   i=0; 
 
 			while ( s[i] != 0 )
@@ -262,19 +262,19 @@ void GameGenieDialog_t::addCheatClicked(void)
 	int a = -1, v = -1, c = -1;
 	std::string name;
 
-	name = ggCode->text().toUtf8().constData();
+	name = ggCode->text().toLocal8Bit().constData();
 
 	if ( addr->text().size() > 0 )
 	{
-		a = strtol( addr->text().toUtf8().constData(), NULL, 16 );
+		a = strtol( addr->text().toLocal8Bit().constData(), NULL, 16 );
 	}
 	if ( val->text().size() > 0 )
 	{
-		v = strtol( val->text().toUtf8().constData(), NULL, 16 );
+		v = strtol( val->text().toLocal8Bit().constData(), NULL, 16 );
 	}
 	if ( cmp->text().size() > 0 )
 	{
-		c = strtol( cmp->text().toUtf8().constData(), NULL, 16 );
+		c = strtol( cmp->text().toLocal8Bit().constData(), NULL, 16 );
 	}
 
 	FCEU_WRAPPER_LOCK();
@@ -288,7 +288,7 @@ void GameGenieDialog_t::romAddrDoubleClicked(QTreeWidgetItem *item, int column)
 {
 	int addr;
 
-	addr = strtol( item->text(0).toUtf8().constData(), NULL, 16 );
+	addr = strtol( item->text(0).toLocal8Bit().constData(), NULL, 16 );
 
 	printf("ROM Addr: %06X \n", addr );
 
@@ -300,12 +300,12 @@ void GameGenieDialog_t::addrChanged(const QString &s)
 	int a, v, c = -1;
 	char gg[12];
 
-	a = strtol(           s.toUtf8().constData(), NULL, 16 );
-	v = strtol( val->text().toUtf8().constData(), NULL, 16 );
+	a = strtol(           s.toLocal8Bit().constData(), NULL, 16 );
+	v = strtol( val->text().toLocal8Bit().constData(), NULL, 16 );
 
 	if ( cmp->text().size() > 0 )
 	{
-		c = strtol( cmp->text().toUtf8().constData(), NULL, 16 );
+		c = strtol( cmp->text().toLocal8Bit().constData(), NULL, 16 );
 	}
 
 	EncodeGG( gg, a, v, c );
@@ -320,12 +320,12 @@ void GameGenieDialog_t::cmpChanged(const QString &s)
 	int a, v, c = -1;
 	char gg[12];
 
-	a = strtol( addr->text().toUtf8().constData(), NULL, 16 );
-	v = strtol(  val->text().toUtf8().constData(), NULL, 16 );
+	a = strtol( addr->text().toLocal8Bit().constData(), NULL, 16 );
+	v = strtol(  val->text().toLocal8Bit().constData(), NULL, 16 );
 
 	if ( s.size() > 0 )
 	{
-		c = strtol( s.toUtf8().constData(), NULL, 16 );
+		c = strtol( s.toLocal8Bit().constData(), NULL, 16 );
 	}
 
 	EncodeGG( gg, a, v, c );
@@ -340,12 +340,12 @@ void GameGenieDialog_t::valChanged(const QString &s)
 	int a, v, c = -1;
 	char gg[12];
 
-	a = strtol( addr->text().toUtf8().constData(), NULL, 16 );
-	v = strtol(            s.toUtf8().constData(), NULL, 16 );
+	a = strtol( addr->text().toLocal8Bit().constData(), NULL, 16 );
+	v = strtol(            s.toLocal8Bit().constData(), NULL, 16 );
 
 	if ( cmp->text().size() > 0 )
 	{
-		c = strtol( cmp->text().toUtf8().constData(), NULL, 16 );
+		c = strtol( cmp->text().toLocal8Bit().constData(), NULL, 16 );
 	}
 	EncodeGG( gg, a, v, c );
 
@@ -362,7 +362,7 @@ void GameGenieDialog_t::ggChanged(const QString &s)
 
 	memset( gg, 0, sizeof(gg) );
 
-	strncpy( gg, ggCode->text().toUtf8().constData(), 8 );
+	strncpy( gg, ggCode->text().toLocal8Bit().constData(), 8 );
 
 	FCEUI_DecodeGG( gg, &a, &v, &c);
 
@@ -442,15 +442,15 @@ void GameGenieDialog_t::ListGGAddresses(void)
 
 	if ( addr->text().size() > 0 )
 	{
-		a = strtol( addr->text().toUtf8().constData(), NULL, 16 );
+		a = strtol( addr->text().toLocal8Bit().constData(), NULL, 16 );
 	}
 	if ( val->text().size() > 0 )
 	{
-		v = strtol( val->text().toUtf8().constData(), NULL, 16 );
+		v = strtol( val->text().toLocal8Bit().constData(), NULL, 16 );
 	}
 	if ( cmp->text().size() > 0 )
 	{
-		c = strtol( cmp->text().toUtf8().constData(), NULL, 16 );
+		c = strtol( cmp->text().toLocal8Bit().constData(), NULL, 16 );
 	}
 	// also enable/disable the add GG button here
 	addCheatEmable = (a >= 0) && ( (ggCode->text().size() == 6) || (ggCode->text().size() == 8) );

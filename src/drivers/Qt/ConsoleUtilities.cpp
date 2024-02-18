@@ -62,11 +62,11 @@ int  getDirFromFile( const char *path, std::string &dir )
 
 		if (fi.exists())
 		{
-			dir = fi.canonicalPath().toUtf8().constData();
+			dir = fi.canonicalPath().toLocal8Bit().constData();
 		}
 		else
 		{
-			dir = fi.absolutePath().toUtf8().constData();
+			dir = fi.absolutePath().toLocal8Bit().constData();
 		}
 		//printf("Dir: '%s'\n", dir.c_str());
 	}
@@ -535,13 +535,13 @@ void fceuDecIntValidtor::setMinMax( long long int min, long long int max)
 QValidator::State fceuDecIntValidtor::validate(QString &input, int &pos) const
 {
    long long int i, v;
-   //printf("Validate: %i '%s'\n", input.size(), input.toUtf8().constData() );
+   //printf("Validate: %i '%s'\n", input.size(), input.toLocal8Bit().constData() );
 
    if ( input.size() == 0 )
    {
       return QValidator::Acceptable;
    }
-   std::string s = input.toUtf8().constData();
+   std::string s = input.toLocal8Bit().constData();
    i=0;
 
    if (s[i] == '-')
@@ -602,14 +602,14 @@ void fceuHexIntValidtor::setMinMax( long long int min, long long int max)
 QValidator::State fceuHexIntValidtor::validate(QString &input, int &pos) const
 {
    long long int i, v;
-   //printf("Validate: %i '%s'\n", input.size(), input.toUtf8().constData() );
+   //printf("Validate: %i '%s'\n", input.size(), input.toLocal8Bit().constData() );
 
    if ( input.size() == 0 )
    {
       return QValidator::Acceptable;
    }
 	input = input.toUpper();
-   std::string s = input.toUtf8().constData();
+   std::string s = input.toLocal8Bit().constData();
    i=0;
 
    if (s[i] == '-')

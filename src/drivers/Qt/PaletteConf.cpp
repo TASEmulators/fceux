@@ -516,19 +516,19 @@ void PaletteConfDialog_t::openPaletteFile(void)
 		if (d.exists())
 		{
 			urls << QUrl::fromLocalFile(d.absolutePath());
-			iniPath = d.absolutePath().toUtf8().constData();
+			iniPath = d.absolutePath().toLocal8Bit().constData();
 		}
 
 		#ifdef __APPLE__
 		// Search for MacOSX DragNDrop Resources
 		d.setPath(QString(exePath) + "/../Resources/palettes");
 
-		//printf("Looking for: '%s'\n", d.path().toUtf8().constData());
+		//printf("Looking for: '%s'\n", d.path().toLocal8Bit().constData());
 
 		if (d.exists())
 		{
 			urls << QUrl::fromLocalFile(d.absolutePath());
-			iniPath = d.absolutePath().toUtf8().constData();
+			iniPath = d.absolutePath().toLocal8Bit().constData();
 		}
 		#endif
 	}
@@ -553,12 +553,12 @@ void PaletteConfDialog_t::openPaletteFile(void)
 		d.setPath(QString("/usr/share/fceux/palettes"));
 	}
 
-	//printf("Looking for: '%s'\n", d.path().toUtf8().constData());
+	//printf("Looking for: '%s'\n", d.path().toLocal8Bit().constData());
 
 	if (d.exists())
 	{
 		urls << QUrl::fromLocalFile(d.absolutePath());
-		iniPath = d.absolutePath().toUtf8().constData();
+		iniPath = d.absolutePath().toLocal8Bit().constData();
 	}
 #endif
 
@@ -604,18 +604,18 @@ void PaletteConfDialog_t::openPaletteFile(void)
 	{
 		return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
 	if (fceuWrapperTryLock())
 	{
-		if (LoadCPalette(filename.toUtf8().constData()))
+		if (LoadCPalette(filename.toLocal8Bit().constData()))
 		{
-			g_config->setOption("SDL.Palette", filename.toUtf8().constData());
-			custom_palette_path->setText(filename.toUtf8().constData());
+			g_config->setOption("SDL.Palette", filename.toLocal8Bit().constData());
+			custom_palette_path->setText(filename.toLocal8Bit().constData());
 		}
 		else
 		{
-			printf("Error: Failed to Load Palette File: %s \n", filename.toUtf8().constData());
+			printf("Error: Failed to Load Palette File: %s \n", filename.toLocal8Bit().constData());
 		}
 		palupdate = 1;
 		fceuWrapperUnLock();

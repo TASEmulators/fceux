@@ -591,9 +591,9 @@ void GuiCheatsDialog_t::knownValueCallback(void)
 	//printf("Cheat Search Known!\n");
 	FCEU_WRAPPER_LOCK();
 
-	//printf("'%s'\n", knownValEntry->displayText().toUtf8().constData() );
+	//printf("'%s'\n", knownValEntry->displayText().toLocal8Bit().constData() );
 
-	value = strtol(knownValEntry->displayText().toUtf8().constData(), NULL, 16);
+	value = strtol(knownValEntry->displayText().toLocal8Bit().constData(), NULL, 16);
 
 	FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_KNOWN, value, 0);
 
@@ -624,7 +624,7 @@ void GuiCheatsDialog_t::notEqualValueCallback(void)
 
 	if (checked)
 	{
-		value = strtol(neValEntry->displayText().toUtf8().constData(), NULL, 16);
+		value = strtol(neValEntry->displayText().toLocal8Bit().constData(), NULL, 16);
 
 		FCEUI_CheatSearchEnd(FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, value);
 	}
@@ -648,7 +648,7 @@ void GuiCheatsDialog_t::greaterThanValueCallback(void)
 
 	if (checked)
 	{
-		value = strtol(grValEntry->displayText().toUtf8().constData(), NULL, 16);
+		value = strtol(grValEntry->displayText().toLocal8Bit().constData(), NULL, 16);
 
 		FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_GT_KNOWN, 0, value);
 	}
@@ -672,7 +672,7 @@ void GuiCheatsDialog_t::lessThanValueCallback(void)
 
 	if (checked)
 	{
-		value = strtol(ltValEntry->displayText().toUtf8().constData(), NULL, 16);
+		value = strtol(ltValEntry->displayText().toLocal8Bit().constData(), NULL, 16);
 
 		FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_LT_KNOWN, 0, value);
 	}
@@ -789,13 +789,13 @@ void GuiCheatsDialog_t::openCheatFile(void)
 	{
 		return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	g_config->setOption("SDL.LastOpenFile", filename.toUtf8().constData());
+	g_config->setOption("SDL.LastOpenFile", filename.toLocal8Bit().constData());
 
 	FCEU_WRAPPER_LOCK();
 
-	fp = fopen(filename.toUtf8().constData(), "r");
+	fp = fopen(filename.toLocal8Bit().constData(), "r");
 
 	if (fp != NULL)
 	{
@@ -860,13 +860,13 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 	{
 		return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	//g_config->setOption ("SDL.LastOpenFile", filename.toUtf8().constData() );
+	//g_config->setOption ("SDL.LastOpenFile", filename.toLocal8Bit().constData() );
 
 	FCEU_WRAPPER_LOCK();
 
-	fp = FCEUD_UTF8fopen(filename.toUtf8().constData(), "wb");
+	fp = FCEUD_UTF8fopen(filename.toLocal8Bit().constData(), "wb");
 
 	if (fp != NULL)
 	{
@@ -888,11 +888,11 @@ void GuiCheatsDialog_t::addActvCheat(void)
 	int t = 1;
 	std::string name, cmpStr;
 
-	a = strtoul(cheatAddrEntry->displayText().toUtf8().constData(), NULL, 16);
+	a = strtoul(cheatAddrEntry->displayText().toLocal8Bit().constData(), NULL, 16);
 
-	v = strtoul(cheatValEntry->displayText().toUtf8().constData(), NULL, 16);
+	v = strtoul(cheatValEntry->displayText().toLocal8Bit().constData(), NULL, 16);
 
-	cmpStr = cheatCmpEntry->displayText().toUtf8().constData();
+	cmpStr = cheatCmpEntry->displayText().toLocal8Bit().constData();
 
 	if (isxdigit(cmpStr[0]))
 	{
@@ -903,7 +903,7 @@ void GuiCheatsDialog_t::addActvCheat(void)
 		c = -1;
 	}
 
-	name = cheatNameEntry->text().toUtf8().constData();
+	name = cheatNameEntry->text().toLocal8Bit().constData();
 
 	t = typeEntry->currentData().toInt();
 
@@ -965,11 +965,11 @@ void GuiCheatsDialog_t::updateCheatParameters(void)
 	}
 	//printf("Row: %i \n", row );
 
-	a = strtoul(cheatAddrEntry->displayText().toUtf8().constData(), NULL, 16);
+	a = strtoul(cheatAddrEntry->displayText().toLocal8Bit().constData(), NULL, 16);
 
-	v = strtoul(cheatValEntry->displayText().toUtf8().constData(), NULL, 16);
+	v = strtoul(cheatValEntry->displayText().toLocal8Bit().constData(), NULL, 16);
 
-	cmpStr = cheatCmpEntry->displayText().toUtf8().constData();
+	cmpStr = cheatCmpEntry->displayText().toLocal8Bit().constData();
 
 	//printf("CMP: '%s' \n", cmpStr.c_str() );
 
@@ -983,7 +983,7 @@ void GuiCheatsDialog_t::updateCheatParameters(void)
 	}
 	//printf("CMP: '%i' 0x%X\n", c, c );
 
-	name = cheatNameEntry->text().toUtf8().constData();
+	name = cheatNameEntry->text().toLocal8Bit().constData();
 
 	//printf("Name: %s \n", name.c_str() );
 

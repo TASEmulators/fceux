@@ -241,7 +241,7 @@ void MoviePlayDialog_t::updateMovieText(void)
 	}
 	idx = movSelBox->currentIndex();
 
-	path = movSelBox->itemText(idx).toUtf8().constData();
+	path = movSelBox->itemText(idx).toLocal8Bit().constData();
 
 	fp = FCEU_fopen(path.c_str(), 0, "rb", 0);
 
@@ -337,7 +337,7 @@ int MoviePlayDialog_t::addFileToList(const char *file, bool setActive)
 
 	for (int i = 0; i < movSelBox->count(); i++)
 	{
-		if (strcmp(file, movSelBox->itemText(i).toUtf8().constData()) == 0)
+		if (strcmp(file, movSelBox->itemText(i).toLocal8Bit().constData()) == 0)
 		{
 			if (setActive)
 			{
@@ -402,7 +402,7 @@ void MoviePlayDialog_t::scanDirectory(const char *dirPath, const char *md5)
 	{
 		QFileInfo fileInfo = list.at(i);
 
-		path = std::string(dirPath) + fileInfo.fileName().toUtf8().constData();
+		path = std::string(dirPath) + fileInfo.fileName().toLocal8Bit().constData();
 
 		//printf("File: '%s'\n", path.c_str() );
 
@@ -465,13 +465,13 @@ void MoviePlayDialog_t::playMovie(void)
 
 	idx = movSelBox->currentIndex();
 
-	path = movSelBox->itemText(idx).toUtf8().constData();
+	path = movSelBox->itemText(idx).toLocal8Bit().constData();
 
 	replayReadOnlySetting = openReadOnly->isChecked();
 
 	if (pauseAtFrame->isChecked())
 	{
-		pauseframe = strtol(pauseAtFrameEntry->text().toUtf8().constData(), NULL, 0);
+		pauseframe = strtol(pauseAtFrameEntry->text().toLocal8Bit().constData(), NULL, 0);
 	}
 
 	FCEU_WRAPPER_LOCK();
@@ -539,7 +539,7 @@ void MoviePlayDialog_t::openMovie(void)
 	{
 		return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
 	if (GameInfo)
 	{
@@ -547,7 +547,7 @@ void MoviePlayDialog_t::openMovie(void)
 
 		strcpy(md5, md5_asciistr(GameInfo->MD5));
 
-		if (checkMD5Sum(filename.toUtf8().constData(), md5))
+		if (checkMD5Sum(filename.toLocal8Bit().constData(), md5))
 		{
 			md5Match = 1;
 		}
@@ -558,11 +558,11 @@ void MoviePlayDialog_t::openMovie(void)
 		}
 	}
 
-	addFileToList(filename.toUtf8().constData(), true);
+	addFileToList(filename.toLocal8Bit().constData(), true);
 
 	updateMovieText();
 
-	g_config->setOption("SDL.LastOpenMovie", filename.toUtf8().constData());
+	g_config->setOption("SDL.LastOpenMovie", filename.toLocal8Bit().constData());
 
 	return;
 }

@@ -352,7 +352,7 @@ void ConsoleDebugger::ld65ImportDebug(void)
 	{
 	   return;
 	}
-	//qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
 	if (debugSymbolTable.numSymbols() > 0)
 	{
@@ -371,7 +371,7 @@ void ConsoleDebugger::ld65ImportDebug(void)
 
 	debugSymbolTable.loadRegisterMap();
 
-	debugSymbolTable.ld65LoadDebugFile( filename.toUtf8().constData() );
+	debugSymbolTable.ld65LoadDebugFile( filename.toLocal8Bit().constData() );
 
 	queueUpdate(QAsmView::UPDATE_ALL);
 
@@ -1561,7 +1561,7 @@ void ConsoleDebugger::loadDisplayViews(void)
 			{
 				if ( tabList[k].size() > 0 )
 				{
-					//printf("   %i: %s\n", k, tabList[k].toUtf8().constData() );
+					//printf("   %i: %s\n", k, tabList[k].toLocal8Bit().constData() );
 
 					if ( tabList[k].compare( cpuFrame->objectName() ) == 0 )
 					{
@@ -1634,12 +1634,12 @@ void ConsoleDebugger::saveDisplayViews(void)
 			{
 				QWidget *w = tabView[i][j]->widget(k);
 
-				//printf("(%i,%i,%i)   %s\n", i, j, k, w->objectName().toUtf8().constData() );
+				//printf("(%i,%i,%i)   %s\n", i, j, k, w->objectName().toLocal8Bit().constData() );
 
 				tabListVal += w->objectName() + ",";
 			}
 
-			//printf("(%i,%i) %s\n", i, j, tabListVal.toUtf8().constData() );
+			//printf("(%i,%i) %s\n", i, j, tabListVal.toLocal8Bit().constData() );
 			settings.setValue( key, tabListVal );
 		}
 	}
@@ -1711,7 +1711,7 @@ void ConsoleDebugger::moveTab( QWidget *w, int row, int column)
 		QString txt = p->tabBar()->tabText( idx );
 		p->removeTab( idx );
 		tabView[column][row]->addTab(w, txt);
-		//printf("Move Widget %p to (%i,%i) %s\n", w, row, column, txt.toUtf8().constData() ); 
+		//printf("Move Widget %p to (%i,%i) %s\n", w, row, column, txt.toLocal8Bit().constData() ); 
 	}
 	updateTabVisibility();
 }
@@ -1830,7 +1830,7 @@ void 	ConsoleDebugger::bmItemDoubleClicked( QTreeWidgetItem *item, int column)
 
 	//printf("Row: %i Column: %i \n", row, column );
 
-	addr = strtol( item->text(0).toUtf8().constData(), NULL, 16 );
+	addr = strtol( item->text(0).toLocal8Bit().constData(), NULL, 16 );
 
 	line = asmView->getAsmLineFromAddr( addr );
 
@@ -1839,7 +1839,7 @@ void 	ConsoleDebugger::bmItemDoubleClicked( QTreeWidgetItem *item, int column)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::selBmAddrChanged(const QString &txt)
 {
-	selBmAddrVal = strtol( txt.toUtf8().constData(), NULL, 16 );
+	selBmAddrVal = strtol( txt.toLocal8Bit().constData(), NULL, 16 );
 
 	//printf("selBmAddrVal = %04X\n", selBmAddrVal );
 }
@@ -2129,7 +2129,7 @@ void DebuggerBreakpointEditor::checkDataValid(void)
 	{
 		bool convOk = false;
 
-		start_addr = offsetStringToInt( type, addr1->text().toUtf8().constData(), &convOk );
+		start_addr = offsetStringToInt( type, addr1->text().toLocal8Bit().constData(), &convOk );
 
 		//printf("StartAddr:0x%04X   Upper:0x%04X\n", start_addr, addrUpperBound);
 		startAddrValid = convOk && (start_addr >= addrLowerBound) && (start_addr < addrUpperBound);
@@ -2143,7 +2143,7 @@ void DebuggerBreakpointEditor::checkDataValid(void)
 	{
 		bool convOk = false;
 
-		end_addr = offsetStringToInt( type, addr2->text().toUtf8().constData(), &convOk );
+		end_addr = offsetStringToInt( type, addr2->text().toLocal8Bit().constData(), &convOk );
 
 		endAddrValid = convOk && (end_addr >= addrLowerBound) && 
 			(end_addr < addrUpperBound) && (start_addr < end_addr);
@@ -2196,7 +2196,7 @@ void DebuggerBreakpointEditor::conditionTextChanged(const QString &txt)
 {
 	if ( txt.size() > 0 )
 	{
-		Condition *c = generateCondition( txt.toUtf8().constData() );
+		Condition *c = generateCondition( txt.toLocal8Bit().constData() );
 
 		condValid = (c != nullptr);
 
@@ -2238,14 +2238,14 @@ void DebuggerBreakpointEditor::loadBreakpoint(void)
 		type |= BT_R;
 	}
 
-	s = addr1->text().toUtf8().constData();
+	s = addr1->text().toLocal8Bit().constData();
 
 	if ( s.size() > 0 )
 	{
 		start_addr = offsetStringToInt( type, s.c_str() );
 	}
 
-	s = addr2->text().toUtf8().constData();
+	s = addr2->text().toLocal8Bit().constData();
 
 	if ( s.size() > 0 )
 	{
@@ -2277,8 +2277,8 @@ void DebuggerBreakpointEditor::loadBreakpoint(void)
 		unsigned int retval;
 		std::string nameString, condString;
 
-		nameString = name->text().toUtf8().constData();
-		condString = cond->text().toUtf8().constData();
+		nameString = name->text().toLocal8Bit().constData();
+		condString = cond->text().toLocal8Bit().constData();
 
 		retval = NewBreak( nameString.c_str(), start_addr, end_addr, type, condString.c_str(), slot, enable);
 
@@ -2478,7 +2478,7 @@ void ConsoleDebugger::edit_BM_CB(void)
 		printf( "No Item Selected\n");
 		return;
 	}
-	s = item->text(0).toUtf8().constData();
+	s = item->text(0).toLocal8Bit().constData();
 
 	addr = strtol( s.c_str(), NULL, 16 );
 
@@ -2499,7 +2499,7 @@ void ConsoleDebugger::delete_BM_CB(void)
 		printf( "No Item Selected\n");
 		return;
 	}
-	s = item->text(0).toUtf8().constData();
+	s = item->text(0).toLocal8Bit().constData();
 
 	addr = strtol( s.c_str(), NULL, 16 );
 
@@ -2534,7 +2534,7 @@ void ConsoleDebugger::edit_BM_name( int addr )
 
 	if ( QDialog::Accepted == ret )
 	{
-	     	bm->name = dialog.textValue().toUtf8().constData();
+	     	bm->name = dialog.textValue().toLocal8Bit().constData();
 	     	bmListUpdate(false);
 	}
 }
@@ -2764,7 +2764,7 @@ void ConsoleDebugger::breakOnCyclesCB( bool value )
 		break_on_cycles = value;
 	}
 
-	//s = cpuCycExdVal->text().toUtf8().constData();
+	//s = cpuCycExdVal->text().toLocal8Bit().constData();
 
    //printf("'%s'\n", txt );
 
@@ -2778,7 +2778,7 @@ void ConsoleDebugger::cpuCycleThresChanged(const QString &txt)
 {
 	std::string s;
 
-	s = txt.toUtf8().constData();
+	s = txt.toLocal8Bit().constData();
 
 	//printf("Cycles: '%s'\n", s.c_str() );
 
@@ -2802,7 +2802,7 @@ void ConsoleDebugger::breakOnInstructionsCB( bool value )
 		break_on_instructions = value;
 	}
 
-	//s = instrExdVal->text().toUtf8().constData();
+	//s = instrExdVal->text().toLocal8Bit().constData();
 
    //printf("'%s'\n", txt );
 
@@ -2816,7 +2816,7 @@ void ConsoleDebugger::instructionsThresChanged(const QString &txt)
 {
 	std::string s;
 
-	s = txt.toUtf8().constData();
+	s = txt.toLocal8Bit().constData();
 
 	//printf("Instructions: '%s'\n", s.c_str() );
 
@@ -2896,9 +2896,9 @@ void ConsoleDebugger::changeAsmFontCB(void)
 		asmView->setFont( selFont );
 		asmView->updateAssemblyView();
 
-		//printf("Font Changed to: '%s'\n", font.toString().toUtf8().constData() );
+		//printf("Font Changed to: '%s'\n", font.toString().toLocal8Bit().constData() );
 
-		g_config->setOption("SDL.DebuggerAsmFont", selFont.toString().toUtf8().constData() );
+		g_config->setOption("SDL.DebuggerAsmFont", selFont.toString().toLocal8Bit().constData() );
 	}
 }
 //----------------------------------------------------------------------------
@@ -2912,9 +2912,9 @@ void ConsoleDebugger::changeStackFontCB(void)
 	{
 		stackText->setFont( selFont );
 
-		//printf("Font Changed to: '%s'\n", font.toString().toUtf8().constData() );
+		//printf("Font Changed to: '%s'\n", font.toString().toLocal8Bit().constData() );
 
-		g_config->setOption("SDL.DebuggerStackFont", selFont.toString().toUtf8().constData() );
+		g_config->setOption("SDL.DebuggerStackFont", selFont.toString().toLocal8Bit().constData() );
 	}
 }
 //----------------------------------------------------------------------------
@@ -2930,9 +2930,9 @@ void ConsoleDebugger::changeCpuFontCB(void)
 		setCpuStatusFont( selFont );
 		setPpuStatusFont( selFont );
 
-		//printf("Font Changed to: '%s'\n", font.toString().toUtf8().constData() );
+		//printf("Font Changed to: '%s'\n", font.toString().toLocal8Bit().constData() );
 
-		g_config->setOption("SDL.DebuggerCpuStatusFont", selFont.toString().toUtf8().constData() );
+		g_config->setOption("SDL.DebuggerCpuStatusFont", selFont.toString().toLocal8Bit().constData() );
 	}
 }
 //----------------------------------------------------------------------------
@@ -3148,7 +3148,7 @@ void ConsoleDebugger::debugRunLine128CB(void)
 //{
 //	std::string s;
 //
-//	s = seekEntry->displayText().toUtf8().constData();
+//	s = seekEntry->displayText().toLocal8Bit().constData();
 //
 //	//printf("Seek To: '%s'\n", s.c_str() );
 //
@@ -4122,7 +4122,7 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	std::string s;
 	long int i;
 
-	s = pcEntry->displayText().toUtf8().constData();
+	s = pcEntry->displayText().toLocal8Bit().constData();
 
 	if ( s.size() > 0 )
 	{
@@ -4135,7 +4135,7 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	X.PC = i;
 	//printf("Set PC: '%s'  %04X\n", s.c_str(), X.PC );
 
-	s = regAEntry->displayText().toUtf8().constData();
+	s = regAEntry->displayText().toLocal8Bit().constData();
 
 	if ( s.size() > 0 )
 	{
@@ -4148,7 +4148,7 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	X.A  = i;
 	//printf("Set A: '%s'  %02X\n", s.c_str(), X.A );
 
-	s = regXEntry->displayText().toUtf8().constData();
+	s = regXEntry->displayText().toLocal8Bit().constData();
 
 	if ( s.size() > 0 )
 	{
@@ -4161,7 +4161,7 @@ void ConsoleDebugger::setRegsFromEntry(void)
 	X.X  = i;
 	//printf("Set X: '%s'  %02X\n", s.c_str(), X.X );
 
-	s = regYEntry->displayText().toUtf8().constData();
+	s = regYEntry->displayText().toLocal8Bit().constData();
 
 	if ( s.size() > 0 )
 	{
@@ -8204,7 +8204,7 @@ void DebugBreakOnDialog::setThreshold( unsigned long long int val )
 //----------------------------------------------------------------------------
 void DebugBreakOnDialog::setThreshold( const QString &text )
 {
-	threshold = strtoull( text.toUtf8().constData(), NULL, 10 );
+	threshold = strtoull( text.toLocal8Bit().constData(), NULL, 10 );
 
 	updateLabel();
 }

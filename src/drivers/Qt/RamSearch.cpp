@@ -127,13 +127,13 @@ public:
 	QValidator::State validate(QString &input, int &pos) const
 	{
 		int i;
-		//printf("Validate: %i '%s'\n", input.size(), input.toUtf8().constData() );
+		//printf("Validate: %i '%s'\n", input.size(), input.toLocal8Bit().constData() );
 
 		if (input.size() == 0)
 		{
 			return QValidator::Acceptable;
 		}
-		std::string s = input.toUtf8().constData();
+		std::string s = input.toLocal8Bit().constData();
 		i = 0;
 
 		if ((s[i] == '-') || (s[i] == '+'))
@@ -648,7 +648,7 @@ static int64_t getLineEditValue(QLineEdit *edit, bool forceHex = false)
 	int64_t val = 0;
 	std::string s;
 
-	s = edit->text().toUtf8().constData();
+	s = edit->text().toLocal8Bit().constData();
 
 	if (s.size() > 0)
 	{
