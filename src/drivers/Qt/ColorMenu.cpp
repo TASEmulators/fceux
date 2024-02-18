@@ -119,9 +119,9 @@ void ColorMenuItem::pickerClosed(int ret)
 
 			colorText = colorPtr->name();
 
-			//printf("Saving '%s' = Color string '%s'\n", confName.c_str(), colorText.toStdString().c_str() );
+			//printf("Saving '%s' = Color string '%s'\n", confName.c_str(), colorText.toLocal8Bit().constData() );
 
-			g_config->setOption( confName, colorText.toStdString().c_str() );
+			g_config->setOption( confName, colorText.toLocal8Bit().constData() );
 
 			g_config->save();
 		}
@@ -140,7 +140,7 @@ void ColorMenuItem::openColorPicker(void)
 		qs = title;
 		qs.replace( "&", "", Qt::CaseInsensitive); // get rid of & accelerator characters
 
-		picker = new ColorMenuPickerDialog_t( colorPtr, qs.toStdString().c_str(), parentWidget() );
+		picker = new ColorMenuPickerDialog_t( colorPtr, qs.toLocal8Bit().constData(), parentWidget() );
 
 		picker->show();
 

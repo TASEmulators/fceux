@@ -509,10 +509,10 @@ void InputConfDialog_t::openLoadPresetFile(void)
 	{
 		return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
 	FCEU_WRAPPER_LOCK();
-	loadInputSettingsFromFile(filename.toStdString().c_str());
+	loadInputSettingsFromFile(filename.toLocal8Bit().constData());
 	FCEU_WRAPPER_UNLOCK();
 
 	updatePortLabels();
@@ -581,9 +581,9 @@ void InputConfDialog_t::openSavePresetFile(void)
 	{
 		return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	saveInputSettingsToFile(filename.toStdString().c_str());
+	saveInputSettingsToFile(filename.toLocal8Bit().constData());
 }
 //----------------------------------------------------------------------------
 void InputConfDialog_t::updatePeriodic(void)

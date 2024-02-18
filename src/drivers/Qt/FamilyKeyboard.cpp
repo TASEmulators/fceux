@@ -858,9 +858,9 @@ void FKBConfigDialog::openFontDialog(void)
 		keyboard->setFont( selFont );
 		keyboard->update();
 
-		//printf("Font Changed to: '%s'\n", font.toString().toStdString().c_str() );
+		//printf("Font Changed to: '%s'\n", font.toString().toLocal8Bit().constData() );
 
-		g_config->setOption("SDL.FamilyKeyboardFont", selFont.toString().toStdString().c_str() );
+		g_config->setOption("SDL.FamilyKeyboardFont", selFont.toString().toLocal8Bit().constData() );
 
 		QTimer::singleShot( 100, this, SLOT(keyTreeResizeDone(void)) );
 	}
@@ -1189,9 +1189,9 @@ void FKBConfigDialog::mappingLoad(void)
 	{
 	   return;
 	}
-	//qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	mappingLoad( filename.toStdString().c_str() );
+	mappingLoad( filename.toLocal8Bit().constData() );
 
 	return;
 }
@@ -1432,7 +1432,7 @@ void FKBConfigDialog::mappingSaveAs(void)
 	   return;
 	}
 
-	saveFileName = filename.toStdString();
+	saveFileName = filename.toLocal8Bit().constData();
 
 	mappingSave();
 }

@@ -1892,9 +1892,9 @@ void tilePaletteView_t::exportPaletteFileDialog(void)
 	{
 	   return;
 	}
-	//qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	exportActivePaletteACT( filename.toStdString().c_str() );
+	exportActivePaletteACT( filename.toLocal8Bit().constData() );
 }
 //----------------------------------------------------
 void tilePaletteView_t::openColorPicker(void)

@@ -239,7 +239,7 @@ int hotkey_t::init(QWidget *parent)
 
 	shortcut = new QShortcut(QKeySequence(QString::fromStdString(keyText)), parent);
 
-	//printf("ShortCut: '%s' = '%s'\n", configName, shortcut->key().toString().toStdString().c_str() );
+	//printf("ShortCut: '%s' = '%s'\n", configName, shortcut->key().toString().toLocal8Bit().constData() );
 
 	conv2SDL();
 	return 0;
@@ -259,7 +259,7 @@ int hotkey_t::readConfig(void)
 	{
 		shortcut->setKey(QString::fromStdString(keyText));
 
-		//printf("ShortCut: '%s' = '%s'\n", configName, shortcut->key().toString().toStdString().c_str() );
+		//printf("ShortCut: '%s' = '%s'\n", configName, shortcut->key().toString().toLocal8Bit().constData() );
 
 		if (act)
 		{
@@ -290,7 +290,7 @@ void hotkey_t::conv2SDL(void)
 	SDL_Keymod m = convQtKey2SDLModifier((Qt::KeyboardModifier)(shortcut->key()[0] & 0xFE000000));
 #endif
 
-	//printf("Key: '%s'  0x%08x\n", shortcut->key().toString().toStdString().c_str(), shortcut->key()[0] );
+	//printf("Key: '%s'  0x%08x\n", shortcut->key().toString().toLocal8Bit().constData(), shortcut->key()[0] );
 
 	sdl.value = k;
 	sdl.modifier = m;
@@ -328,7 +328,7 @@ int hotkey_t::getString(char *s)
 
 	if (shortcut)
 	{
-		strcpy(s, shortcut->key().toString().toStdString().c_str());
+		strcpy(s, shortcut->key().toString().toLocal8Bit().constData());
 	}
 	//if ( sdl.modifier != 0 )
 	//{
@@ -671,7 +671,7 @@ static std::string GetFilename(const char *title, int mode, const char *filter)
 
 		if (fileList.size() > 0)
 		{
-			fname = fileList[0].toStdString();
+			fname = fileList[0].toLocal8Bit().constData();
 		}
 	}
 
@@ -691,7 +691,7 @@ void FCEUD_MovieRecordTo(void)
 	//	return;													// no filename selected, quit the whole thing
 	//}
 	//std::string s = QInputDialog::getText( consoleWindow, QObject::tr("Movie Recording"), 
-	//			QObject::tr("Enter Author Name"), QLineEdit::Normal, QObject::tr(""), &ok ).toStdString();
+	//			QObject::tr("Enter Author Name"), QLineEdit::Normal, QObject::tr(""), &ok ).toLocal8Bit().constData();
 
 	//std::wstring author (s.begin (), s.end ());
 

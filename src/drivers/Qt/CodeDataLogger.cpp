@@ -476,10 +476,10 @@ void CodeDataLoggerDialog_t::saveCdlFileAs(void)
 	{
 		return;
 	}
-	//qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
 	FCEU_WRAPPER_LOCK();
-	strcpy(loadedcdfile, filename.toStdString().c_str());
+	strcpy(loadedcdfile, filename.toLocal8Bit().constData());
 	SaveCDLogFile();
 	FCEU_WRAPPER_UNLOCK();
 }
@@ -531,10 +531,10 @@ void CodeDataLoggerDialog_t::loadCdlFile(void)
 	{
 		return;
 	}
-	//qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
 	FCEU_WRAPPER_LOCK();
-	LoadCDLog(filename.toStdString().c_str());
+	LoadCDLog(filename.toLocal8Bit().constData());
 	FCEU_WRAPPER_UNLOCK();
 
 	return;
@@ -615,9 +615,9 @@ void CodeDataLoggerDialog_t::SaveStrippedROM(int invert)
 	{
 		return;
 	}
-	//qDebug() << "selected file path : " << filename.toUtf8();
+	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	FILE *fp = fopen(filename.toStdString().c_str(), "wb");
+	FILE *fp = fopen(filename.toLocal8Bit().constData(), "wb");
 	if (!fp)
 	{
 		FCEUD_PrintError("Error opening target stripped rom file!");

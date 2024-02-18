@@ -442,7 +442,7 @@ void HotKeyConfSetDialog_t::assignHotkey(QKeyEvent *event)
 			(k == SDLK_LGUI) || (k == SDLK_RGUI) ||
 			(k == SDLK_CAPSLOCK);
 
-	//printf("Assign: '%s' %i  0x%08x\n", ks.toString().toStdString().c_str(), event->key(), event->key() );
+	//printf("Assign: '%s' %i  0x%08x\n", ks.toString().toLocal8Bit().constData(), event->key(), event->key() );
 
 	if ((k != SDLK_UNKNOWN) && !keyIsModifier)
 	{
@@ -452,7 +452,7 @@ void HotKeyConfSetDialog_t::assignHotkey(QKeyEvent *event)
 
 		confName = prefix + Hotkeys[item->hkIdx].getConfigName();
 
-		keyText = ks.toString().toStdString();
+		keyText = ks.toString().toLocal8Bit().constData();
 
 		g_config->setOption( confName, keyText);
 

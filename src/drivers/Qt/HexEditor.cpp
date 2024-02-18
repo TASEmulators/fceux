@@ -1048,7 +1048,7 @@ void HexEditorFindDialog_t::runSearch(void)
 {
 	int i=0;
 	unsigned char v;
-	std::string s = searchBox->text().toStdString();
+	std::string s = searchBox->text().toLocal8Bit().constData();
 	std::vector <unsigned char> varray;
 
 	if ( s.size() == 0 )
@@ -1667,9 +1667,9 @@ void HexEditorDialog_t::saveRomFileAs(void)
 	{
 	   return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	iNesSaveAs( filename.toStdString().c_str() );
+	iNesSaveAs( filename.toLocal8Bit().constData() );
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::loadTableFromFile(void)
@@ -1709,9 +1709,9 @@ void HexEditorDialog_t::loadTableFromFile(void)
 	{
 	   return;
 	}
-	qDebug() << "selected file path : " << filename.toUtf8();
+	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	editor->charTable.loadFromFile( filename.toStdString().c_str() );
+	editor->charTable.loadFromFile( filename.toLocal8Bit().constData() );
 
 	unloadTableAct->setEnabled( editor->charTable.customMapLoaded );
 }
@@ -2118,9 +2118,9 @@ void QHexEdit::changeFontRequest(void)
 
 		calcFontData();
 
-		//printf("Font Changed to: '%s'\n", font.toString().toStdString().c_str() );
+		//printf("Font Changed to: '%s'\n", font.toString().toLocal8Bit().constData() );
 
-		g_config->setOption("SDL.HexEditFont", font.toString().toStdString().c_str() );
+		g_config->setOption("SDL.HexEditFont", font.toString().toLocal8Bit().constData() );
 	}
 }
 //----------------------------------------------------------------------------
@@ -2337,7 +2337,7 @@ void QHexEdit::loadClipboard( const char *txt )
 void QHexEdit::pasteFromClipboard(void)
 {
 	int i, nbytes=0, val, addr;
-	std::string s = clipboard->text().toStdString();
+	std::string s = clipboard->text().toLocal8Bit().constData();
 	const char *c;
 	unsigned char *buf;
 
@@ -3258,7 +3258,7 @@ void QHexEdit::addBookMarkCB(void)
 	
 	if ( QDialog::Accepted == ret )
 	{
-	     	hbm.addBookMark( ctxAddr, viewMode, dialog.textValue().toStdString().c_str() );
+	     	hbm.addBookMark( ctxAddr, viewMode, dialog.textValue().toLocal8Bit().constData() );
 	     	parent->populateBookmarkMenu();
 	}
 }
