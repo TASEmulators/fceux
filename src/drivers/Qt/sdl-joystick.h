@@ -98,4 +98,6 @@ extern GamePad_t GamePad[4];
 
 jsDev_t *getJoystickDevice(int devNum);
 
+void initGamepadBindings();
+
 #endif

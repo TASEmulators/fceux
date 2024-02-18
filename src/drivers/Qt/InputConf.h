@@ -43,6 +43,7 @@ protected:
 	QComboBox *expPortComboxBox;
 	QPushButton *loadConfigButton;
 	QPushButton *saveConfigButton;
+	QComboBox* newDeviceOptionBox;
 
 	int curNesInput[3];
 	int usrNesInput[3];
@@ -62,6 +63,7 @@ private slots:
 	void port1Select(int index);
 	void port2Select(int index);
 	void expSelect(int index);
+	void newDeviceSettingsChange(int index);
 	void fourScoreChanged(int state);
 	void port2MicChanged(int state);
 	void autoPresetChanged(int state);

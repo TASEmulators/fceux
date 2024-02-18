@@ -66,7 +66,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	QPalette pal;
 	QColor color;
 	char stmp[256];
-	int fourscore, autoInputPreset;
+	int fourscore, autoInputPreset, newDeviceBehavior;
 
 	pal = this->palette();
 
@@ -80,10 +80,22 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 	nesInputFrame = new QGroupBox(tr("NES-Style Input Ports"));
 	vbox1 = new QVBoxLayout();
-	hbox = new QHBoxLayout();
+	newDeviceOptionBox = new QComboBox();
 	fourScoreEna = new QCheckBox(tr("Attach 4-Score (Implies four gamepads)"));
 	port2Mic = new QCheckBox(tr("Replace Port 2 Start with Microphone"));
 	autoPreset = new QCheckBox(tr("Auto Load/Save Presets at ROM Open/Close"));
+
+	hbox = new QHBoxLayout();
+	hbox->addWidget( new QLabel(tr("On New Gamepad Device Detection:")), 1);
+	hbox->addWidget(newDeviceOptionBox, 3);
+	vbox1->addLayout(hbox);
+
+	newDeviceOptionBox->addItem("Do nothing", 0);
+	newDeviceOptionBox->addItem("Prompt User for Reconfigure", 1);
+	newDeviceOptionBox->addItem("Auto Reconfigure", 2);
+
+	g_config->getOption("SDL.NewInputDeviceBehavior", &newDeviceBehavior);
+	setComboBoxFromValue( newDeviceOptionBox, newDeviceBehavior );
 
 	g_config->getOption("SDL.FourScore", &fourscore);
 	fourScoreEna->setChecked(fourscore);
@@ -92,6 +104,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	g_config->getOption("SDL.AutoInputPreset", &autoInputPreset);
 	autoPreset->setChecked(autoInputPreset);
 
+	hbox = new QHBoxLayout();
 	hbox->addWidget(fourScoreEna);
 	hbox->addWidget(port2Mic);
 	vbox1->addLayout(hbox);
@@ -240,6 +253,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	connect(port2Mic, SIGNAL(stateChanged(int)), this, SLOT(port2MicChanged(int)));
 	connect(autoPreset, SIGNAL(stateChanged(int)), this, SLOT(autoPresetChanged(int)));
 
+	connect(newDeviceOptionBox , SIGNAL(activated(int)), this, SLOT(newDeviceSettingsChange(int)));
 	connect(nesPortComboxBox[0], SIGNAL(activated(int)), this, SLOT(port1Select(int)));
 	connect(nesPortComboxBox[1], SIGNAL(activated(int)), this, SLOT(port2Select(int)));
 	connect(expPortComboxBox, SIGNAL(activated(int)), this, SLOT(expSelect(int)));
@@ -360,6 +374,12 @@ void InputConfDialog_t::updatePortComboBoxes(void)
 			expPortComboxBox->setCurrentIndex(j);
 		}
 	}
+}
+//----------------------------------------------------------------------------
+void InputConfDialog_t::newDeviceSettingsChange(int index)
+{
+	g_config->setOption("SDL.NewInputDeviceBehavior", newDeviceOptionBox->itemData(index).toInt());
+	g_config->save();
 }
 //----------------------------------------------------------------------------
 void InputConfDialog_t::port1Select(int index)

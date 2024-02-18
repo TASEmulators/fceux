@@ -9,6 +9,7 @@
 #include <QValidator>
 #include <QDialog>
 #include <QHelpEvent>
+#include <QComboBox>
 #include <QCheckBox>
 
 int  getDirFromFile( const char *path, std::string &dir );
@@ -93,3 +94,8 @@ class QCheckBoxRO : public QCheckBox
 QString fceuGetOpcodeToolTip( uint8_t *opcode, int size );
 
 QDialog *fceuCustomToolTipShow( const QPoint &globalPos, QDialog *popup );
+
+//----------------------------------------------------
+void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
+void  setComboBoxFromProperty( QComboBox *cbx, const char *property );
+void  setComboBoxFromValue( QComboBox *cbx, int pval );

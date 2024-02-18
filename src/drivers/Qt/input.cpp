@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QApplication>
@@ -1362,7 +1363,51 @@ pollEventsSDL()
 
 			break;
 		case SDL_JOYDEVICEADDED:
-			AddJoystick(event.jdevice.which);
+			{
+				int devIdx = AddJoystick(event.jdevice.which);
+				if (devIdx >= 0)
+				{
+					int newDeviceBehavior = 0;
+					g_config->getOption("SDL.NewInputDeviceBehavior", &newDeviceBehavior);
+
+					if (newDeviceBehavior == 1)
+					{
+						bool wasPaused = FCEUI_EmulationPaused() ? true : false;
+
+						jsDev_t* jsDev = getJoystickDevice(devIdx);
+
+						QString msg = "A new joystick/gamepad device has been detected.\n";
+
+						if (jsDev != nullptr)
+						{
+							msg += QString("\nDevice ") + QString::number(devIdx) + QString(": ");
+							msg += QString(jsDev->getName()) + "\n";
+						}
+						msg += "\nDo you wish to reload button bindings?";
+						QMessageBox msgBox(QMessageBox::Question, QObject::tr("New Device Detected"), msg,
+							QMessageBox::No | QMessageBox::Yes, consoleWindow);
+
+						msgBox.setDefaultButton( QMessageBox::Yes );
+
+						FCEUI_SetEmulationPaused( EMULATIONPAUSED_PAUSED );
+
+						int answer = msgBox.exec();
+
+						if ( answer == QMessageBox::Yes )
+						{
+							initGamepadBindings();
+						}
+						if (!wasPaused)
+						{
+							FCEUI_SetEmulationPaused(0);
+						}
+					}
+					else if (newDeviceBehavior == 2)
+					{
+						initGamepadBindings();
+					}
+				}
+			}
 			break;
 		case SDL_JOYDEVICEREMOVED:
 			RemoveJoystick(event.jdevice.which);

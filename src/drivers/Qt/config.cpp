@@ -638,6 +638,7 @@ InitConfig()
 	config->addOption("SDL.AutofireOffFrames", 1);
 	config->addOption("SDL.AutofireCustomOnFrames" , 1);
 	config->addOption("SDL.AutofireCustomOffFrames", 1);
+	config->addOption("SDL.NewInputDeviceBehavior", 1);
 
 	// display input
 	config->addOption("inputdisplay", "SDL.InputDisplay", 0);
