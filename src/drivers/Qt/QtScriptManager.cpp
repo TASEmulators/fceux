@@ -1707,16 +1707,24 @@ QtScriptInstance::QtScriptInstance(QObject* parent)
 		dialog = win;
 	}
 
+	FCEU_WRAPPER_LOCK();
+
 	initEngine();
 
 	QtScriptManager::getInstance()->addScriptInstance(this);
+
+	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 QtScriptInstance::~QtScriptInstance()
 {
+	FCEU_WRAPPER_LOCK();
+
 	QtScriptManager::getInstance()->removeScriptInstance(this);
 
 	shutdownEngine();
+
+	FCEU_WRAPPER_UNLOCK();
 
 	//printf("QtScriptInstance Destroyed\n");
 }
@@ -2773,6 +2781,17 @@ void QScriptDialog_t::clearPropertyTree()
 //----------------------------------------------------
 void QScriptDialog_t::loadPropertyTree(QJSValue& object, JsPropertyItem* parentItem)
 {
+	const QMetaObject* objMeta = nullptr;
+
+	if (object.isObject())
+	{
+		auto* qobjPtr = object.toQObject();
+		if (qobjPtr != nullptr)
+		{
+			objMeta = qobjPtr->metaObject();
+		}
+	}
+
 	QJSValueIterator it(object);
 
 	while (it.hasNext())
@@ -2781,6 +2800,7 @@ void QScriptDialog_t::loadPropertyTree(QJSValue& object, JsPropertyItem* parentI
 		QJSValue child = it.value();
 
 		bool isPrototype = it.name() == "prototype";
+		//printf("ProtoType: %s :: %s\n", object.toString().toLocal8Bit().constData(), child.toString().toLocal8Bit().constData());
 
 		if (!isPrototype)
 		{
@@ -2827,6 +2847,26 @@ void QScriptDialog_t::loadPropertyTree(QJSValue& object, JsPropertyItem* parentI
 			{
 				type = "function";
 				value = "";
+
+				if (objMeta != nullptr)
+				{
+					//printf("Function: %s::%s\n", objMeta->className(), name.toLocal8Bit().constData());
+					for (int i=0; i<objMeta->methodCount(); i++)
+					{
+						QMetaMethod m = objMeta->method(i);
+
+						//printf("Method: %s  %s %s\n", 
+						//		m.name().constData(),
+						//		m.typeName(),
+						//		m.methodSignature().constData());
+
+						if (name == m.name())
+						{
+							value = QString("   ") + QString(m.typeName()) + " " +
+								QString::fromLocal8Bit(m.methodSignature());
+						}
+					}
+				}
 			}
 			else if (child.isDate())
 			{
@@ -2925,6 +2965,21 @@ void QScriptDialog_t::loadPropertyTree(QJSValue& object, JsPropertyItem* parentI
 	}
 }
 //----------------------------------------------------
+void QScriptDialog_t::reloadGlobalTree(void)
+{
+	if (scriptInstance != nullptr)
+	{
+		auto* engine = scriptInstance->getEngine();
+
+		if (engine)
+		{
+			QJSValue globals = engine->globalObject();
+
+			loadPropertyTree(globals);
+		}
+	}
+}
+//----------------------------------------------------
 void QScriptDialog_t::updatePeriodic(void)
 {
 	//printf("Update JS\n");
@@ -2944,17 +2999,11 @@ void QScriptDialog_t::updatePeriodic(void)
 		emuThreadText.clear();
 	}
 
-	if (scriptInstance != nullptr)
+	if ((scriptInstance != nullptr) && scriptInstance->isRunning())
 	{
-		auto* engine = scriptInstance->getEngine();
-
-		if (engine)
-		{
-			QJSValue globals = engine->globalObject();
-
-			loadPropertyTree(globals);
-		}
+		reloadGlobalTree();
 	}
+
 	refreshState();
 	FCEU_WRAPPER_UNLOCK();
 }

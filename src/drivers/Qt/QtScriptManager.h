@@ -811,6 +811,7 @@ private slots:
 	void stopScript(void);
 	void onLogLinkClicked(const QString&);
 	void onScriptError(void);
+	void reloadGlobalTree(void);
 };
 
 bool FCEU_JSRerecordCountSkip();

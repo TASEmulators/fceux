@@ -50,6 +50,7 @@ static const char *buttonNames[GAMEPAD_NUM_BUTTONS] =
 		"dpup", "dpdown", "dpleft", "dpright",
 		"turboA", "turboB"};
 
+extern Config* g_config;
 //********************************************************************************
 // Joystick Device
 jsDev_t::jsDev_t(void)
@@ -154,6 +155,8 @@ void jsDev_t::init(int idx)
 	SDL_JoystickGetGUIDString(guid, stmp, sizeof(stmp));
 
 	guidStr.assign(stmp);
+
+	FCEU_printf("Added Joystick:  devIdx:%i  name:'%s'  GUID:'%s'\n", idx, name.c_str(), guidStr.c_str() );
 
 	// If game controller, save default mapping if it does not already exist.
 	if (gc)
@@ -360,7 +363,7 @@ int GamePad_t::init(int port, const char *guid, const char *profile)
 
 	portNum = port;
 
-	//printf("Init: %i   %s   %s \n", port, guid, profile );
+	FCEU_printf("GamePad[%i].init   Requested:  GUID:'%s'   Profile:'%s' \n", port, guid, profile );
 
 	// First look for a controller that matches the specific GUID
 	// that is not already in use by another port.
@@ -381,9 +384,12 @@ int GamePad_t::init(int port, const char *guid, const char *profile)
 
 			if (strcmp(jsDev[i].getGUID(), guid) == 0)
 			{
+				FCEU_printf("GamePad[%i].init   Matched GUID to JS device %i \n", port, i );
+
 				setDeviceIndex(i);
 				if (loadProfile(profile, guid))
 				{
+					FCEU_printf("GamePad[%i].init   Using default profile.\n", port );
 					loadDefaults();
 				}
 				break;
@@ -407,9 +413,12 @@ int GamePad_t::init(int port, const char *guid, const char *profile)
 
 			if (jsDev[i].isGameController())
 			{
+				FCEU_printf("GamePad[%i].init   Using JS device %i \n", port, i );
+
 				setDeviceIndex(i);
 				if (loadProfile(profile))
 				{
+					FCEU_printf("GamePad[%i].init   Using default profile.\n", port );
 					loadDefaults();
 				}
 				break;
@@ -421,8 +430,10 @@ int GamePad_t::init(int port, const char *guid, const char *profile)
 	// game controller, then load default keyboard.
 	if ((portNum == 0 || strnlen(profile, 1) > 0) && (devIdx < 0))
 	{
+		FCEU_printf("GamePad[%i].init   Using keyboard device\n", port );
 		if (loadProfile(profile))
 		{
+			FCEU_printf("GamePad[%i].init   Using default profile.\n", port );
 			loadDefaults();
 		}
 	}
@@ -603,10 +614,16 @@ int GamePad_t::getMapFromFile(const char *filename, nesGamePadMap_t *gpm)
 	FILE *fp;
 	char line[256];
 
+	bool fileExists = QFile::exists( QString(filename) );
+
 	fp = ::fopen(filename, "r");
 
 	if (fp == NULL)
 	{
+		if (fileExists)
+		{
+			FCEU_printf("GamePad[%i]: Failed to open binding map from file: %s\n", portNum, filename);
+		}
 		return -1;
 	}
 	while (fgets(line, sizeof(line), fp) != 0)
@@ -633,6 +650,8 @@ int GamePad_t::getMapFromFile(const char *filename, nesGamePadMap_t *gpm)
 	}
 
 	::fclose(fp);
+
+	FCEU_printf("GamePad[%i]: Loaded Button Binding Map from File: %s\n", portNum, filename);
 
 	return 0;
 }
@@ -665,6 +684,7 @@ int GamePad_t::loadHotkeyMapFromFile(const char *filename)
 
 	if (fp == NULL)
 	{
+		FCEU_printf("Gamepad[%i]: Error: Failed to Load HotKey Map From File: %s\n", portNum, filename );
 		return -1;
 	}
 	deleteHotKeyMappings();
@@ -775,6 +795,7 @@ int GamePad_t::loadHotkeyMapFromFile(const char *filename)
 	}
 	::fclose(fp);
 
+	FCEU_printf("Gamepad[%i]: Loaded HotKey Map From File: %s   NumBindings:%zi\n", portNum, filename, gpKeySeqList.size() );
 	return 0;
 }
 //********************************************************************************
@@ -1268,11 +1289,17 @@ int KillJoysticks(void)
 		return -1;
 	}
 
+	for (unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
+	{
+		GamePad[i].setDeviceIndex(-1);
+	}
+
 	for (n = 0; n < MAX_JOYSTICKS; n++)
 	{
 		jsDev[n].close();
 	}
-	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+	FCEU_printf("Shutting down SDL joystick/game constroller subsystem\n");
+	SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
 
 	s_jinited = 0;
 
@@ -1280,12 +1307,30 @@ int KillJoysticks(void)
 }
 
 //********************************************************************************
+void initGamepadBindings()
+{
+	std::string device, prefix, guid, mapping;
+
+	for (unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
+	{
+		char buf[64];
+		snprintf(buf, sizeof(buf) - 1, "SDL.Input.GamePad.%u.", i);
+		prefix = buf;
+
+		g_config->getOption(prefix + "DeviceType", &device);
+		g_config->getOption(prefix + "DeviceGUID", &guid);
+		g_config->getOption(prefix + "Profile", &mapping);
+
+		GamePad[i].init(i, guid.c_str(), mapping.c_str());
+	}
+}
+//********************************************************************************
 int AddJoystick(int which)
 {
 	//printf("Add Joystick: %i \n", which );
 	if (jsDev[which].isConnected())
 	{
-		//printf("Error: Joystick already exists at device index %i \n", which );
+		//FCEU_printf("Error: Joystick already exists at device index %i \n", which );
 		return -1;
 	}
 	else
@@ -1296,12 +1341,12 @@ int AddJoystick(int which)
 
 			if (jsDev[which].gc == NULL)
 			{
-				printf("Could not open game controller %d: %s.\n",
+				FCEU_printf("Could not open game controller %d: %s.\n",
 					   which, SDL_GetError());
 			}
 			else
 			{
-				//printf("Added Joystick: %i \n", which );
+				//FCEU_printf("Added Joystick: %i \n", which );
 				jsDev[which].init(which);
 				//jsDev[which].print();
 				//printJoystick( s_Joysticks[which] );
@@ -1313,12 +1358,12 @@ int AddJoystick(int which)
 
 			if (jsDev[which].js == NULL)
 			{
-				printf("Could not open joystick %d: %s.\n",
+				FCEU_printf("Could not open joystick %d: %s.\n",
 					   which, SDL_GetError());
 			}
 			else
 			{
-				//printf("Added Joystick: %i \n", which );
+				//FCEU_printf("Added Joystick: %i \n", which );
 				jsDev[which].init(which);
 				//jsDev[which].print();
 				//printJoystick( s_Joysticks[which] );
@@ -1339,7 +1384,7 @@ int RemoveJoystick(int which)
 		{
 			if (SDL_JoystickInstanceID(jsDev[i].getJS()) == which)
 			{
-				printf("Remove Joystick: %i \n", which);
+				FCEU_printf("Remove Joystick: %i \n", which);
 				jsDev[i].close();
 				return 0;
 			}
@@ -1376,7 +1421,8 @@ int InitJoysticks(void)
 	{
 		return 1;
 	}
-	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+	FCEU_printf("Initializing SDL joystick/game constroller subsystem\n");
+	SDL_InitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
 
 	total = SDL_NumJoysticks();
 	if (total > MAX_JOYSTICKS)
@@ -1389,6 +1435,10 @@ int InitJoysticks(void)
 		/* Open the joystick under SDL. */
 		AddJoystick(n);
 	}
+
+	pollEventsSDL(); // Run event processing here to ensure that all joystick add events are processed.
+
+	initGamepadBindings();
 
 	s_jinited = 1;
 	return 1;
