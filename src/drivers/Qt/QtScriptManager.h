@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include <QFile>
 #include <QColor>
 #include <QWidget>
 #include <QDialog>
@@ -109,6 +110,40 @@ public slots:
 	Q_INVOKABLE  void setPalette(int p){ _palette = p; }
 	Q_INVOKABLE  int toRGB8(){ return color.value(); }
 	Q_INVOKABLE  QString name(){ return color.name(QColor::HexRgb); }
+};
+
+class FileScriptObject: public QObject
+{
+	Q_OBJECT
+public:
+	Q_INVOKABLE FileScriptObject(const QString& path = QString());
+	~FileScriptObject();
+
+	enum Mode
+	{
+		ReadOnly = 0x01,
+		WriteOnly = 0x02,
+		ReadWrite = 0x03,
+		Append = 0x04
+	};
+	Q_ENUM(Mode);
+
+private:
+	static int numInstances;
+	QString filepath;
+
+	QFile *file = nullptr;
+
+public slots:
+	Q_INVOKABLE  bool open(int mode = ReadOnly);
+	Q_INVOKABLE  void close();
+	Q_INVOKABLE  bool isOpen();
+	Q_INVOKABLE  void setFilePath(const QString& path);
+	Q_INVOKABLE  QString fileName();
+	Q_INVOKABLE  QString fileSuffix();
+	Q_INVOKABLE  QString filePath(){ return filepath; }
+	Q_INVOKABLE  QJSValue readLine();
+	Q_INVOKABLE  int  writeString(const QString& s);
 };
 
 class JoypadScriptObject: public QObject

@@ -29,6 +29,8 @@
 #endif
 
 #include <QUrl>
+#include <QFile>
+#include <QIODevice>
 #include <QTextEdit>
 #include <QFileInfo>
 #include <QFileDialog>
@@ -99,6 +101,158 @@ ColorScriptObject::~ColorScriptObject()
 {
 	numInstances--;
 	//printf("ColorScriptObject %p Destructor: %i\n", this, numInstances);
+}
+//----------------------------------------------------
+//----  File Object
+//----------------------------------------------------
+int FileScriptObject::numInstances = 0;
+
+FileScriptObject::FileScriptObject(const QString& path)
+	: QObject()
+{
+	numInstances++;
+	//printf("FileScriptObject(%s) %p Constructor: %i\n", path.toLocal8Bit().constData(), this, numInstances);
+
+	moveToThread(QApplication::instance()->thread());
+
+	setFilePath(path);
+}
+//----------------------------------------------------
+FileScriptObject::~FileScriptObject()
+{
+	close();
+
+	numInstances--;
+	//printf("FileScriptObject %p Destructor: %i\n", this, numInstances);
+}
+//----------------------------------------------------
+void FileScriptObject::setFilePath(const QString& path)
+{
+	if (isOpen())
+	{
+		auto* engine = FCEU::JSEngine::getCurrent();
+		engine->throwError(QJSValue::GenericError, "cannot change file path while open");
+	}
+	QFileInfo fi(path);
+	filepath = fi.absoluteFilePath();
+	//printf("FileScriptObject::filepath(%s)\n", filepath.toLocal8Bit().constData());
+}
+//----------------------------------------------------
+QString FileScriptObject::fileName()
+{
+	QFileInfo fi(filepath);
+	return fi.fileName();
+}
+//----------------------------------------------------
+QString FileScriptObject::fileSuffix()
+{
+	QFileInfo fi(filepath);
+	return fi.completeSuffix();
+}
+//----------------------------------------------------
+bool FileScriptObject::open(int mode)
+{
+	close();
+
+	if (filepath.isEmpty())
+	{
+		auto* engine = FCEU::JSEngine::getCurrent();
+		engine->throwError(QJSValue::GenericError, "unspecified file path ");
+		return false;
+	}
+
+	file = new QFile(filepath);
+
+	if (file == nullptr)
+	{
+		auto* engine = FCEU::JSEngine::getCurrent();
+		engine->throwError(QJSValue::GenericError, "failed to create QFile object");
+		return false;
+	}
+
+	QIODevice::OpenMode deviceMode = QIODevice::NotOpen;
+
+	if (mode & ReadOnly)
+	{
+		deviceMode |= QIODevice::ReadOnly;
+	}
+	if (mode & WriteOnly)
+	{
+		deviceMode |= QIODevice::WriteOnly;
+	}
+	if (mode & Append)
+	{
+		deviceMode |= QIODevice::Append;
+	}
+
+	bool success = file->open(deviceMode);
+
+	//printf("FileOpen: %i\n", success);
+
+	return success;
+}
+//----------------------------------------------------
+bool FileScriptObject::isOpen()
+{
+	bool flag = false;
+
+	if (file != nullptr)
+	{
+		flag = file->isOpen();
+	}
+	return flag;
+}
+//----------------------------------------------------
+void FileScriptObject::close()
+{
+	if (file != nullptr)
+	{
+		if (file->isOpen())
+		{
+			file->close();
+		}
+		delete file;
+		file = nullptr;
+	}
+}
+//----------------------------------------------------
+int  FileScriptObject::writeString(const QString& s)
+{
+	if ( (file == nullptr) || !file->isOpen())
+	{
+		auto* engine = FCEU::JSEngine::getCurrent();
+		engine->throwError(QJSValue::GenericError, "file is not open ");
+		return -1;
+	}
+	int bytesWritten = file->write( s.toLocal8Bit() );
+
+	return bytesWritten;
+}
+//----------------------------------------------------
+QJSValue FileScriptObject::readLine()
+{
+	QJSValue obj;
+
+	if ( (file == nullptr) || !file->isOpen())
+	{
+		auto* engine = FCEU::JSEngine::getCurrent();
+		engine->throwError(QJSValue::GenericError, "file is not open ");
+		return obj;
+	}
+	auto* engine = FCEU::JSEngine::getCurrent();
+
+	QByteArray byteArray = file->readLine();
+
+	QString line = QString::fromLocal8Bit(byteArray);
+
+	//printf("ReadLine: %s\n", line.toLocal8Bit().constData());
+
+	obj = engine->newObject();
+
+	obj.setProperty("text", line);
+	obj.setProperty("size", static_cast<int>(line.size()));
+
+	return obj;
 }
 //----------------------------------------------------
 //----  Joypad Object
@@ -327,7 +481,7 @@ bool EmuStateScriptObject::saveToFile(const QString& filepath)
 	{
 		return false;
 	}
-	FILE* outf = fopen(filepath.toLocal8Bit().data(),"wb");
+	FILE* outf = fopen(filepath.toLocal8Bit().constData(),"wb");
 	if (outf == nullptr)
 	{
 		return false;
@@ -348,7 +502,7 @@ bool EmuStateScriptObject::loadFromFile(const QString& filepath)
 		delete data;
 		data = nullptr;
 	}
-	FILE* inf = fopen(filepath.toLocal8Bit().data(),"rb");
+	FILE* inf = fopen(filepath.toLocal8Bit().constData(),"rb");
 	if (inf == nullptr)
 	{
 		QString msg = "JS EmuState::loadFromFile failed to open file: " + filepath;
@@ -564,7 +718,7 @@ bool EmuScriptObject::addGameGenie(const QString& code)
 	uint8 Cval;
 	int Ccompare, Ctype;
 
-	if (!FCEUI_DecodeGG(code.toLocal8Bit().data(), &GGaddr, &GGval, &GGcomp))
+	if (!FCEUI_DecodeGG(code.toLocal8Bit().constData(), &GGaddr, &GGval, &GGcomp))
 	{
 		print("Failed to decode game genie code");
 		return false;
@@ -580,7 +734,7 @@ bool EmuScriptObject::addGameGenie(const QString& code)
 		i = i + 1;
 	}
 
-	if (FCEUI_AddCheat(code.toLocal8Bit().data(),GGaddr,GGval,GGcomp,1))
+	if (FCEUI_AddCheat(code.toLocal8Bit().constData(),GGaddr,GGval,GGcomp,1))
 	{
 		// Code was added
 		// Can't manage the display update the way I want, so I won't bother with it
@@ -605,7 +759,7 @@ bool EmuScriptObject::delGameGenie(const QString& code)
 	uint8 Cval;
 	int Ccompare, Ctype;
 
-	if (!FCEUI_DecodeGG(code.toLocal8Bit().data(), &GGaddr, &GGval, &GGcomp))
+	if (!FCEUI_DecodeGG(code.toLocal8Bit().constData(), &GGaddr, &GGval, &GGcomp))
 	{
 		print("Failed to decode game genie code");
 		return false;
@@ -1036,7 +1190,7 @@ bool MovieScriptObject::play(const QString& filename, bool readOnly, int pauseFr
 	if (pauseFrame < 0) pauseFrame = 0;
 
 	// Load it!
-	bool loaded = FCEUI_LoadMovie(filename.toLocal8Bit().data(), readOnly, pauseFrame);
+	bool loaded = FCEUI_LoadMovie(filename.toLocal8Bit().constData(), readOnly, pauseFrame);
 
 	return loaded;
 }
@@ -1056,7 +1210,7 @@ bool MovieScriptObject::record(const QString& filename, int saveType, const QStr
 	else                                 flags = MOVIE_FLAG_FROM_POWERON;
 
 	// Save it!
-	FCEUI_SaveMovie( filename.toLocal8Bit().data(), flags, author.toStdWString());
+	FCEUI_SaveMovie( filename.toLocal8Bit().constData(), flags, author.toStdWString());
 
 	return true;
 }
@@ -1709,6 +1863,9 @@ int QtScriptInstance::initEngine()
 	QJSValue jsColorMetaObject = engine->newQMetaObject(&JS::ColorScriptObject::staticMetaObject);
 	engine->globalObject().setProperty("Color", jsColorMetaObject);
 
+	QJSValue jsFileMetaObject = engine->newQMetaObject(&JS::FileScriptObject::staticMetaObject);
+	engine->globalObject().setProperty("File", jsFileMetaObject);
+
 	QJSValue jsJoypadMetaObject = engine->newQMetaObject(&JS::JoypadScriptObject::staticMetaObject);
 	engine->globalObject().setProperty("Joypad", jsJoypadMetaObject);
 
@@ -1800,7 +1957,7 @@ void QtScriptInstance::loadUI(const QString& uiFilePath)
 
 	ui_rootWidget->show();
 #else
-	throwError(QJSValue::GenericError, "Error: Application was not linked against Qt UI Tools");
+	throwError(QJSValue::GenericError, "Application was not linked against Qt UI Tools");
 #endif
 }
 //----------------------------------------------------
@@ -2559,13 +2716,13 @@ void QScriptDialog_t::saveLog(bool openFileBrowser)
 		{
 			QFile::remove(logSavePath);
 		}
-		printf("Saving Log File: %s\n", logSavePath.toLocal8Bit().data());
+		//printf("Saving Log File: %s\n", logSavePath.toLocal8Bit().constData());
 		FCEU_WRAPPER_LOCK();
 		{
 			char buffer[4096];
 			flushLog();
 			QFile saveFile( logSavePath );
-			if (saveFile.open(QIODeviceBase::ReadWrite))
+			if (saveFile.open(QIODevice::ReadWrite))
 			{
 				logFile->seek(0);
 				qint64 bytesRead = logFile->read(buffer, sizeof(buffer));
