@@ -1298,7 +1298,7 @@ int KillJoysticks(void)
 	{
 		jsDev[n].close();
 	}
-	FCEU_printf("Shutting down SDL joystick/game constroller subsystem\n");
+	FCEU_printf("Shutting down SDL joystick/gamepad subsystem\n");
 	SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
 
 	s_jinited = 0;
@@ -1421,7 +1421,7 @@ int InitJoysticks(void)
 	{
 		return 1;
 	}
-	FCEU_printf("Initializing SDL joystick/game constroller subsystem\n");
+	FCEU_printf("Initializing SDL joystick/gamepad subsystem\n");
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
 
 	total = SDL_NumJoysticks();

@@ -124,13 +124,15 @@ public:
 		ReadOnly = 0x01,
 		WriteOnly = 0x02,
 		ReadWrite = 0x03,
-		Append = 0x04
+		Append = 0x04,
+		Truncate = 0x08
 	};
 	Q_ENUM(Mode);
 
 private:
 	static int numInstances;
 	QString filepath;
+	bool tmp = false;
 
 	QFile *file = nullptr;
 
@@ -138,12 +140,29 @@ public slots:
 	Q_INVOKABLE  bool open(int mode = ReadOnly);
 	Q_INVOKABLE  void close();
 	Q_INVOKABLE  bool isOpen();
+	Q_INVOKABLE  bool isReadable();
+	Q_INVOKABLE  bool isWritable();
+	Q_INVOKABLE  bool flush();
+	Q_INVOKABLE  bool atEnd();
+	Q_INVOKABLE  bool truncate();
+	Q_INVOKABLE  bool resize(int64_t size);
+	Q_INVOKABLE  bool seek(int64_t pos);
+	Q_INVOKABLE  int64_t pos();
+	Q_INVOKABLE  int64_t bytesAvailable();
+	Q_INVOKABLE  bool isTemporary(){ return tmp; }
+	Q_INVOKABLE  void setTemporary(bool value);
 	Q_INVOKABLE  void setFilePath(const QString& path);
 	Q_INVOKABLE  QString fileName();
 	Q_INVOKABLE  QString fileSuffix();
 	Q_INVOKABLE  QString filePath(){ return filepath; }
-	Q_INVOKABLE  QJSValue readLine();
+	Q_INVOKABLE  QString readLine();
+	Q_INVOKABLE  int64_t skip(int64_t size);
+	Q_INVOKABLE  QByteArray readData(unsigned int maxBytes = 0);
+	Q_INVOKABLE  QByteArray peekData(unsigned int maxSize);
 	Q_INVOKABLE  int  writeString(const QString& s);
+	Q_INVOKABLE  int  writeData(const QByteArray& data);
+	Q_INVOKABLE  bool putChar(char c);
+	Q_INVOKABLE  char getChar();
 };
 
 class JoypadScriptObject: public QObject

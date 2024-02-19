@@ -126,6 +126,11 @@ FileScriptObject::~FileScriptObject()
 	//printf("FileScriptObject %p Destructor: %i\n", this, numInstances);
 }
 //----------------------------------------------------
+void FileScriptObject::setTemporary(bool value)
+{
+	tmp = value;
+}
+//----------------------------------------------------
 void FileScriptObject::setFilePath(const QString& path)
 {
 	if (isOpen())
@@ -161,7 +166,14 @@ bool FileScriptObject::open(int mode)
 		return false;
 	}
 
-	file = new QFile(filepath);
+	if (tmp)
+	{
+		file = new QTemporaryFile();
+	}
+	else
+	{
+		file = new QFile(filepath);
+	}
 
 	if (file == nullptr)
 	{
@@ -184,6 +196,10 @@ bool FileScriptObject::open(int mode)
 	{
 		deviceMode |= QIODevice::Append;
 	}
+	if (mode & Truncate)
+	{
+		deviceMode |= QIODevice::Truncate;
+	}
 
 	bool success = file->open(deviceMode);
 
@@ -203,6 +219,116 @@ bool FileScriptObject::isOpen()
 	return flag;
 }
 //----------------------------------------------------
+bool FileScriptObject::isReadable()
+{
+	bool flag = false;
+
+	if (file != nullptr)
+	{
+		flag = file->isReadable();
+	}
+	return flag;
+}
+//----------------------------------------------------
+bool FileScriptObject::isWritable()
+{
+	bool flag = false;
+
+	if (file != nullptr)
+	{
+		flag = file->isWritable();
+	}
+	return flag;
+}
+//----------------------------------------------------
+bool FileScriptObject::atEnd()
+{
+	bool retval = false;
+
+	if (file != nullptr)
+	{
+		retval = file->atEnd();
+	}
+	return retval;
+}
+//----------------------------------------------------
+bool FileScriptObject::truncate()
+{
+	bool retval = false;
+
+	if (file != nullptr)
+	{
+		retval = file->resize(0);
+	}
+	return retval;
+}
+//----------------------------------------------------
+bool FileScriptObject::resize(int64_t size)
+{
+	bool retval = false;
+
+	if (file != nullptr)
+	{
+		retval = file->resize(size);
+	}
+	return retval;
+}
+//----------------------------------------------------
+int64_t FileScriptObject::skip(int64_t size)
+{
+	int64_t retval = 0;
+
+	if (file != nullptr)
+	{
+		retval = file->skip(size);
+	}
+	return retval;
+}
+//----------------------------------------------------
+bool FileScriptObject::seek(int64_t pos)
+{
+	bool retval = false;
+
+	if (file != nullptr)
+	{
+		retval = file->seek(pos);
+	}
+	return retval;
+}
+//----------------------------------------------------
+int64_t FileScriptObject::pos()
+{
+	int64_t retval = 0;
+
+	if (file != nullptr)
+	{
+		retval = file->pos();
+	}
+	return retval;
+}
+//----------------------------------------------------
+int64_t FileScriptObject::bytesAvailable()
+{
+	int64_t retval = 0;
+
+	if (file != nullptr)
+	{
+		retval = file->bytesAvailable();
+	}
+	return retval;
+}
+//----------------------------------------------------
+bool FileScriptObject::flush()
+{
+	bool retval = false;
+
+	if (file != nullptr)
+	{
+		retval = file->flush();
+	}
+	return retval;
+}
+//----------------------------------------------------
 void FileScriptObject::close()
 {
 	if (file != nullptr)
@@ -210,6 +336,10 @@ void FileScriptObject::close()
 		if (file->isOpen())
 		{
 			file->close();
+		}
+		if (tmp)
+		{
+			file->remove();
 		}
 		delete file;
 		file = nullptr;
@@ -229,30 +359,112 @@ int  FileScriptObject::writeString(const QString& s)
 	return bytesWritten;
 }
 //----------------------------------------------------
-QJSValue FileScriptObject::readLine()
+int  FileScriptObject::writeData(const QByteArray& s)
 {
-	QJSValue obj;
+	if ( (file == nullptr) || !file->isOpen())
+	{
+		auto* engine = FCEU::JSEngine::getCurrent();
+		engine->throwError(QJSValue::GenericError, "file is not open ");
+		return -1;
+	}
+	int bytesWritten = file->write( s );
+
+	return bytesWritten;
+}
+//----------------------------------------------------
+QString FileScriptObject::readLine()
+{
+	QString line;
 
 	if ( (file == nullptr) || !file->isOpen())
 	{
 		auto* engine = FCEU::JSEngine::getCurrent();
 		engine->throwError(QJSValue::GenericError, "file is not open ");
-		return obj;
+		return line;
 	}
-	auto* engine = FCEU::JSEngine::getCurrent();
-
 	QByteArray byteArray = file->readLine();
 
-	QString line = QString::fromLocal8Bit(byteArray);
+	line = QString::fromLocal8Bit(byteArray);
 
 	//printf("ReadLine: %s\n", line.toLocal8Bit().constData());
 
-	obj = engine->newObject();
+	return line;
+}
+//----------------------------------------------------
+QByteArray FileScriptObject::readData(unsigned int maxBytes)
+{
+	QJSValue arrayBuffer;
+	QByteArray byteArray;
 
-	obj.setProperty("text", line);
-	obj.setProperty("size", static_cast<int>(line.size()));
+	auto* engine = FCEU::JSEngine::getCurrent();
 
-	return obj;
+	if ( (file == nullptr) || !file->isOpen())
+	{
+		engine->throwError(QJSValue::GenericError, "file is not open ");
+		return byteArray;
+	}
+	if (maxBytes > 0)
+	{
+		byteArray = file->read(maxBytes);
+	}
+	else
+	{
+		byteArray = file->readAll();
+	}
+
+	//arrayBuffer = engine->toScriptValue(byteArray);
+
+	return byteArray;
+}
+//----------------------------------------------------
+QByteArray FileScriptObject::peekData(unsigned int maxBytes)
+{
+	QJSValue arrayBuffer;
+	QByteArray byteArray;
+
+	auto* engine = FCEU::JSEngine::getCurrent();
+
+	if ( (file == nullptr) || !file->isOpen())
+	{
+		engine->throwError(QJSValue::GenericError, "file is not open ");
+		return byteArray;
+	}
+	byteArray = file->peek(maxBytes);
+
+	//arrayBuffer = engine->toScriptValue(byteArray);
+
+	return byteArray;
+}
+//----------------------------------------------------
+bool FileScriptObject::putChar(char c)
+{
+	if ( (file == nullptr) || !file->isOpen())
+	{
+		auto* engine = FCEU::JSEngine::getCurrent();
+		engine->throwError(QJSValue::GenericError, "file is not open ");
+		return -1;
+	}
+	bool success = file->putChar(c);
+
+	return success;
+}
+//----------------------------------------------------
+char FileScriptObject::getChar()
+{
+	if ( (file == nullptr) || !file->isOpen())
+	{
+		auto* engine = FCEU::JSEngine::getCurrent();
+		engine->throwError(QJSValue::GenericError, "file is not open ");
+		return -1;
+	}
+	char c = -1;
+	bool success = file->getChar(&c);
+
+	if (!success)
+	{
+		c = -1;
+	}
+	return c;
 }
 //----------------------------------------------------
 //----  Joypad Object
