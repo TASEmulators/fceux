@@ -70,8 +70,7 @@ class NetPlayServer : public QTcpServer
 		static NetPlayServer *GetInstance(void){ return instance; };
 
 		static int Create(QObject *parent = 0);
-
-		bool removeClient(NetPlayClient *client, bool markForDelete = false);
+		static int Destroy();
 
 		int closeAllConnections(void);
 
@@ -148,11 +147,14 @@ class NetPlayClient : public QObject
 		static NetPlayClient *GetInstance(void){ return instance; };
 
 		static int Create(QObject *parent = 0);
+		static int Destroy();
 
 		int connectToHost( const QString host, int port );
 
 		bool isConnected(void);
-		void disconnect();
+		bool disconnectRequested(){ return disconnectPending; }
+		void forceDisconnect();
+		bool flushData();
 
 		void setSocket(QTcpSocket *s);
 		QTcpSocket* getSocket(void){ return sock; };
@@ -197,23 +199,31 @@ class NetPlayClient : public QObject
 			return frame;
 		}
 
+		bool isAuthenticated();
+		bool isPlayerRole();
+		bool shouldDestroy(){ return needsDestroy; }
 
 		QString userName;
-		int     role;
-		int     state;
-		unsigned int currentFrame;
+		QString password;
+		int     role = -1;
+		int     state = 0;
+		unsigned int currentFrame = 0;
+		uint8_t gpData[4];
 
 	private:
 		int createSocket(void);
 
 		static NetPlayClient *instance;
 
-		QTcpSocket *sock;
-		int     recvMsgId;
-		int     recvMsgSize;
-		int     recvMsgBytesLeft;
-		int     recvMsgByteIndex;
-		char   *recvMsgBuf;
+		QTcpSocket *sock = nullptr;
+		int     recvMsgId = 0;
+		int     recvMsgSize = 0;
+		int     recvMsgBytesLeft = 0;
+		int     recvMsgByteIndex = 0;
+		char   *recvMsgBuf = nullptr;
+		bool    disconnectPending = false;
+		bool    needsDestroy = false;
+		bool    connected = false;
 
 		std::list <NetPlayFrameInput> input;
 		FCEU::mutex inputMtx;
@@ -223,6 +233,7 @@ class NetPlayClient : public QObject
 	public slots:
 		void onConnect(void);
 		void onDisconnect(void);
+		void onSocketError(QAbstractSocket::SocketError);
 };
 
 
@@ -261,6 +272,8 @@ protected:
 	QLineEdit  *hostEntry;
 	QSpinBox   *portEntry;
 	QComboBox  *playerRoleBox;
+	QLineEdit  *userNameEntry;
+	QLineEdit  *passwordEntry;
 
 public slots:
 	void closeWindow(void);
@@ -269,7 +282,9 @@ public slots:
 };
 
 bool NetPlayActive(void);
+bool isNetPlayHost(void);
 void NetPlayPeriodicUpdate(void);
 bool NetPlaySkipWait(void);
 int NetPlayFrameWait(void);
 void NetPlayReadInputFrame(uint8_t* joy);
+void NetPlayCloseSession(void);

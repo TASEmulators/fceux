@@ -14,7 +14,6 @@ enum netPlayMsgType
 	NETPLAY_LOAD_ROM_REQ,
 	NETPLAY_SYNC_STATE,
 	NETPLAY_RUN_FRAME_REQ,
-	NETPLAY_RUN_FRAME_RESP,
 	NETPLAY_CLIENT_STATE,
 	NETPLAY_ERROR_MSG,
 };
@@ -61,7 +60,8 @@ struct netPlayAuthResp
 	netPlayMsgHdr  hdr;
 
 	char playerId;
-	char pswd[128];
+	char userName[64];
+	char pswd[72];
 
 	netPlayAuthResp(void)
 		: hdr(NETPLAY_AUTH_RESP, sizeof(netPlayAuthResp)), playerId(NETPLAY_SPECTATOR)
@@ -75,14 +75,29 @@ struct netPlayErrorMsg
 {
 	netPlayMsgHdr  hdr;
 
+	unsigned short code;
+	unsigned short flags;
 	char data[N];
 
+	static const uint32_t DISCONNECT_FLAG = 0x00000001;
+
 	netPlayErrorMsg(void)
-		: hdr(NETPLAY_ERROR_MSG, sizeof(netPlayErrorMsg))
+		: hdr(NETPLAY_ERROR_MSG, sizeof(netPlayErrorMsg)), code(0), flags(0)
 	{
+		memset(data, 0, N);
 	}
 
-	char *getMsgBuffer()
+	void setDisconnectFlag()
+	{
+		flags |= DISCONNECT_FLAG;
+	}
+
+	bool isDisconnectFlagSet()
+	{
+		return (flags & DISCONNECT_FLAG) ? true : false;
+	}
+
+	const char *getBuffer()
 	{
 		return &data[0];
 	}
@@ -95,7 +110,7 @@ struct netPlayErrorMsg
 		retval = ::vsnprintf(data, sizeof(data), format, args);
 		va_end(args);
 
-		hdr.msgSize = sizeof(netPlayMsgHdr) + strlen(data);
+		hdr.msgSize = sizeof(netPlayErrorMsg) - N + strlen(data) + 1;
 
 		return retval;
 	}
@@ -126,22 +141,6 @@ struct netPlayRunFrameReq
 
 	netPlayRunFrameReq(void)
 		: hdr(NETPLAY_RUN_FRAME_REQ, sizeof(netPlayRunFrameReq)), flags(0), frameNum(0) 
-	{
-		memset( ctrlState, 0, sizeof(ctrlState) );
-	}
-};
-
-struct netPlayRunFrameResp
-{
-	netPlayMsgHdr  hdr;
-
-	uint32_t  flags;
-	uint32_t  frameNum;
-	uint32_t  frameRun;
-	uint8_t   ctrlState[4];
-
-	netPlayRunFrameResp(void)
-		: hdr(NETPLAY_RUN_FRAME_RESP, sizeof(netPlayRunFrameResp)), flags(0), frameNum(0), frameRun(0)
 	{
 		memset( ctrlState, 0, sizeof(ctrlState) );
 	}

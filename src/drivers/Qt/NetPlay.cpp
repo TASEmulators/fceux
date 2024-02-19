@@ -69,6 +69,17 @@ int NetPlayServer::Create(QObject *parent)
 	return 0;
 }
 
+int NetPlayServer::Destroy()
+{
+	NetPlayServer* server = NetPlayServer::GetInstance();
+	if (server != nullptr)
+	{
+		delete server;
+		server = nullptr;
+	}
+	return 0;
+}
+
 void NetPlayServer::newConnectionRdy(void)
 {
 	printf("New Connection Ready!\n");
@@ -82,7 +93,7 @@ void NetPlayServer::processPendingConnections(void)
 
 	newSock = nextPendingConnection();
 
-	while (newSock)
+	while (newSock != nullptr)
 	{
 		NetPlayClient *client = new NetPlayClient(this);
 
@@ -100,47 +111,20 @@ void NetPlayServer::processPendingConnections(void)
 	}
 }
 
-bool NetPlayServer::removeClient(NetPlayClient *client, bool markForDelete)
-{
-	bool removed = false;
-	std::list <NetPlayClient*>::iterator it;
-
-	it = clientList.begin();
-       
-	while (it != clientList.end())
-	{
-		if (client == *it)
-		{
-			if (markForDelete)
-			{
-				client->deleteLater();
-			}
-
-			it = clientList.erase(it);
-		}
-		else
-		{
-			it++;
-		}
-	}
-
-	for (int i=0; i<4; i++)
-	{
-		if (clientPlayer[i] == client)
-		{
-			clientPlayer[i] = nullptr;	
-		}
-	}
-	return removed;
-}
-
 int NetPlayServer::closeAllConnections(void)
 {
 	std::list <NetPlayClient*>::iterator it;
 
+	for (int i=0; i<4; i++)
+	{
+		clientPlayer[i] = nullptr;
+	}
+
 	for (it = clientList.begin(); it != clientList.end(); it++)
 	{
-		delete *it;
+		auto* client = *it;
+
+		delete client;
 	}
 	clientList.clear();
 
@@ -298,24 +282,20 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 
 			if ( claimRole(client, msg->playerId) )
 			{
+				client->userName = msg->userName;
 				sendRomLoadReq( client );
 				sendStateSyncReq( client );
 				client->state = 1;
+				FCEU_DispMessage("%s Joined",0, client->userName.toLocal8Bit().constData());
 			}
 			else
 			{
 				netPlayErrorMsg<128>  errorMsg;
+				errorMsg.setDisconnectFlag();
 				errorMsg.printf("Player %i role is not available", msg->playerId+1);
 				sendMsg( client, &errorMsg, errorMsg.hdr.msgSize );
-				//client->disconnect();
+				client->flushData();
 			}
-		}
-		break;
-		case NETPLAY_RUN_FRAME_RESP:
-		{
-			netPlayRunFrameResp *msg = static_cast<netPlayRunFrameResp*>(msgBuf);
-
-			client->currentFrame = msg->frameRun;
 		}
 		break;
 		case NETPLAY_CLIENT_STATE:
@@ -323,6 +303,10 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			netPlayClientState *msg = static_cast<netPlayClientState*>(msgBuf);
 
 			client->currentFrame = msg->frameRun;
+			client->gpData[0] = msg->ctrlState[0];
+			client->gpData[1] = msg->ctrlState[1];
+			client->gpData[2] = msg->ctrlState[2];
+			client->gpData[3] = msg->ctrlState[3];
 		}
 		break;
 		default:
@@ -342,26 +326,65 @@ void NetPlayServer::update(void)
 	const uint32_t leadFrame = currFrame + maxLead;
 	const uint32_t lastFrame = inputFrameBack();
 	uint32_t lagFrame = 0;
+	uint8_t  localGP[4] = { 0 };
+	uint8_t  gpData[4] = { 0 };
 
 	if (currFrame > maxLead)
 	{
 		lagFrame = currFrame - maxLead;
 	}
 
+	uint32_t ctlrData = GetGamepadPressedImmediate();
+	localGP[0] = (ctlrData      ) & 0x000000ff;
+	localGP[1] = (ctlrData >>  8) & 0x000000ff;
+	localGP[2] = (ctlrData >> 16) & 0x000000ff;
+	localGP[3] = (ctlrData >> 24) & 0x000000ff;
+
+	if ( (role >= NETPLAY_PLAYER1) && (role <= NETPLAY_PLAYER4) )
+	{
+		gpData[role] = localGP[role];
+	}
+
 	// Input Processing
-	for (auto it = clientList.begin(); it != clientList.end(); it++)
+	for (auto it = clientList.begin(); it != clientList.end(); )
 	{
 		NetPlayClient *client = *it;
 
 		client->readMessages( serverMessageCallback, client );
 
-		if (client->currentFrame < clientMinFrame)
+		if (client->isAuthenticated())
 		{
-			clientMinFrame = client->currentFrame;
+			if (client->currentFrame < clientMinFrame)
+			{
+				clientMinFrame = client->currentFrame;
+			}
+			if (client->currentFrame > clientMaxFrame)
+			{
+				clientMaxFrame = client->currentFrame;
+			}
+
+			if (client->isPlayerRole())
+			{
+				gpData[client->role] = client->gpData[client->role];
+			}
 		}
-		if (client->currentFrame > clientMaxFrame)
+
+
+		if (client->shouldDestroy())
 		{
-			clientMaxFrame = client->currentFrame;
+			it = clientList.erase(it);
+			for (int i=0; i<4; i++)
+			{
+				if (client == clientPlayer[i])
+				{
+					clientPlayer[i] = nullptr;
+				}
+			}
+			delete client;
+		}
+		else
+		{
+			it++;
 		}
 	}
 
@@ -378,13 +401,11 @@ void NetPlayServer::update(void)
 		NetPlayFrameInput  inputFrame;
 		netPlayRunFrameReq  runFrameReq;
 
-		uint32_t ctlrData = GetGamepadPressedImmediate();
-
 		inputFrame.frameCounter = static_cast<uint32_t>(currFrameCounter) + 1;
-		inputFrame.ctrl[0] = (ctlrData      ) & 0x000000ff;
-		inputFrame.ctrl[1] = (ctlrData >>  8) & 0x000000ff;
-		inputFrame.ctrl[2] = (ctlrData >> 16) & 0x000000ff;
-		inputFrame.ctrl[3] = (ctlrData >> 24) & 0x000000ff;
+		inputFrame.ctrl[0] = gpData[0];
+		inputFrame.ctrl[1] = gpData[1];
+		inputFrame.ctrl[2] = gpData[2];
+		inputFrame.ctrl[3] = gpData[3];
 
 		runFrameReq.frameNum     = inputFrame.frameCounter;
 		runFrameReq.ctrlState[0] = inputFrame.ctrl[0];
@@ -438,6 +459,7 @@ NetPlayClient::~NetPlayClient(void)
 
 	if (sock != nullptr)
 	{
+		sock->close();
 		delete sock; sock = nullptr;
 	}
 	if (recvMsgBuf)
@@ -460,10 +482,43 @@ int NetPlayClient::Create(QObject *parent)
 	}
 	return 0;
 }
-//-----------------------------------------------------------------------------
-void NetPlayClient::disconnect()
+
+int NetPlayClient::Destroy()
 {
-	sock->close();
+	NetPlayClient* client = NetPlayClient::GetInstance();
+	if (client != nullptr)
+	{
+		delete client;
+		client = nullptr;
+	}
+	return 0;
+}
+//-----------------------------------------------------------------------------
+void NetPlayClient::forceDisconnect()
+{
+	disconnectPending = true;
+	needsDestroy = true;
+}
+//-----------------------------------------------------------------------------
+bool NetPlayClient::isAuthenticated()
+{
+	return state > 0;
+}
+//-----------------------------------------------------------------------------
+bool NetPlayClient::isPlayerRole()
+{
+	return (role >= NETPLAY_PLAYER1) && (role <= NETPLAY_PLAYER4);
+}
+//-----------------------------------------------------------------------------
+bool NetPlayClient::flushData()
+{
+	bool success = false;
+
+	if (sock != nullptr)
+	{
+		success = sock->flush();
+	}
+	return success;
 }
 //-----------------------------------------------------------------------------
 void NetPlayClient::setSocket(QTcpSocket *s)
@@ -486,6 +541,7 @@ int NetPlayClient::createSocket(void)
 
 	connect(sock, SIGNAL(connected(void))   , this, SLOT(onConnect(void)));
 	connect(sock, SIGNAL(disconnected(void)), this, SLOT(onDisconnect(void)));
+	connect(sock, SIGNAL(errorOccurred(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
 	
 	return 0;
 }
@@ -512,6 +568,8 @@ int NetPlayClient::connectToHost( const QString host, int port )
 void NetPlayClient::onConnect(void)
 {
 	printf("Client Connected!!!\n");
+	FCEU_DispMessage("Joined Host",0);
+	connected = true;
 }
 //-----------------------------------------------------------------------------
 void NetPlayClient::onDisconnect(void)
@@ -522,11 +580,23 @@ void NetPlayClient::onDisconnect(void)
 
 	if (server)
 	{
-		if (server->removeClient(this))
-		{
-			deleteLater();
-		}
+		FCEU_DispMessage("%s Disconnected",0, userName.toLocal8Bit().constData());
 	}
+	else
+	{
+		FCEU_DispMessage("Host Disconnected",0);
+	}
+	needsDestroy = true;
+}
+//-----------------------------------------------------------------------------
+void NetPlayClient::onSocketError(QAbstractSocket::SocketError error)
+{
+	FCEU_DispMessage("Socket Error",0);
+
+	QString errorMsg = sock->errorString();
+	printf("Error: %s\n", errorMsg.toLocal8Bit().constData());
+
+	FCEU_DispMessage("%s", 0, errorMsg.toLocal8Bit().constData());
 }
 //-----------------------------------------------------------------------------
 static void clientMessageCallback( void *userData, void *msgBuf, size_t msgSize )
@@ -540,20 +610,22 @@ void NetPlayClient::update(void)
 {
 	readMessages( clientMessageCallback, this );
 
-	uint32_t ctlrData = GetGamepadPressedImmediate();
-	uint32_t currFrame = static_cast<uint32_t>(currFrameCounter);
+	if (connected)
+	{
+		uint32_t ctlrData = GetGamepadPressedImmediate();
+		uint32_t currFrame = static_cast<uint32_t>(currFrameCounter);
 
-	netPlayClientState  statusMsg;
-	statusMsg.flags    = 0;
-	statusMsg.frameRdy = inputFrameBack();
-	statusMsg.frameRun = currFrame;
-	statusMsg.ctrlState[0] = (ctlrData      ) & 0x000000ff;
-	statusMsg.ctrlState[1] = (ctlrData >>  8) & 0x000000ff;
-	statusMsg.ctrlState[2] = (ctlrData >> 16) & 0x000000ff;
-	statusMsg.ctrlState[3] = (ctlrData >> 24) & 0x000000ff;
+		netPlayClientState  statusMsg;
+		statusMsg.flags    = 0;
+		statusMsg.frameRdy = inputFrameBack();
+		statusMsg.frameRun = currFrame;
+		statusMsg.ctrlState[0] = (ctlrData      ) & 0x000000ff;
+		statusMsg.ctrlState[1] = (ctlrData >>  8) & 0x000000ff;
+		statusMsg.ctrlState[2] = (ctlrData >> 16) & 0x000000ff;
+		statusMsg.ctrlState[3] = (ctlrData >> 24) & 0x000000ff;
 
-	sock->write( reinterpret_cast<const char*>(&statusMsg), sizeof(statusMsg) );
-
+		sock->write( reinterpret_cast<const char*>(&statusMsg), sizeof(statusMsg) );
+	}
 }
 //-----------------------------------------------------------------------------
 int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgBuf, size_t msgSize ), void *userData )
@@ -633,11 +705,24 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 
 	switch (hdr->msgId)
 	{
+		case NETPLAY_ERROR_MSG:
+		{
+			auto *msg = static_cast<netPlayErrorMsg<256>*>(msgBuf);
+			printf("Error: 0x%X  %s\n", msg->code, msg->getBuffer());
+
+			if (msg->isDisconnectFlagSet())
+			{
+				sock->disconnectFromHost();
+			}
+			FCEU_DispMessage("Host connect failed",0);
+		}
+		break;
 		case NETPLAY_AUTH_REQ:
 		{
 			netPlayAuthResp msg;
 			msg.playerId = role;
-			strncpy( msg.pswd, "TODO: Dummy Password", sizeof(msg.pswd) );
+			strncpy( msg.userName, userName.toLocal8Bit().constData(), sizeof(msg.userName));
+			strncpy( msg.pswd, password.toLocal8Bit().constData(), sizeof(msg.pswd) );
 
 			sock->write( (const char*)&msg, sizeof(netPlayAuthResp) );
 		}
@@ -682,8 +767,6 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			NetPlayFrameInput  inputFrame;
 			netPlayRunFrameReq *msg = static_cast<netPlayRunFrameReq*>(msgBuf);
 
-			uint32_t currFrame = static_cast<uint32_t>(currFrameCounter);
-
 			inputFrame.frameCounter = msg->frameNum;
 			inputFrame.ctrl[0] = msg->ctrlState[0];
 			inputFrame.ctrl[1] = msg->ctrlState[1];
@@ -694,17 +777,6 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			{
 				pushBackInput( inputFrame );
 			}
-
-			netPlayRunFrameResp  resp;
-			resp.flags    = msg->flags;
-			resp.frameNum = msg->frameNum;
-			resp.frameRun = currFrame;
-			resp.ctrlState[0] = msg->ctrlState[0];
-			resp.ctrlState[1] = msg->ctrlState[1];
-			resp.ctrlState[2] = msg->ctrlState[2];
-			resp.ctrlState[3] = msg->ctrlState[3];
-
-			sock->write( reinterpret_cast<const char*>(&resp), sizeof(resp) );
 		}
 		break;
 		default:
@@ -828,7 +900,7 @@ NetPlayJoinDialog::NetPlayJoinDialog(QWidget *parent)
 	QPushButton *cancelButton, *startButton;
 	QLabel *lbl;
 
-	setWindowTitle("NetPlay Host Game");
+	setWindowTitle("NetPlay Join Game");
 
 	mainLayout = new QVBoxLayout();
 	grid = new QGridLayout();
@@ -859,6 +931,26 @@ NetPlayJoinDialog::NetPlayJoinDialog(QWidget *parent)
 	playerRoleBox->addItem( tr("Player 4") , NETPLAY_PLAYER4  );
 	playerRoleBox->setCurrentIndex(2);
 	grid->addWidget( playerRoleBox, 2, 1 );
+
+	lbl = new QLabel( tr("User:") );
+	grid->addWidget( lbl, 3, 0 );
+
+	QString name = qgetenv("USER");
+    	if (name.isEmpty())
+	{
+        	name = qgetenv("USERNAME");
+	}
+	userNameEntry = new QLineEdit();
+	userNameEntry->setMaxLength(63);
+	userNameEntry->setText(name);
+	grid->addWidget( userNameEntry, 3, 1 );
+
+	lbl = new QLabel( tr("Password:") );
+	grid->addWidget( lbl, 4, 0 );
+
+	passwordEntry = new QLineEdit();
+	passwordEntry->setMaxLength(64);
+	grid->addWidget( passwordEntry, 4, 1 );
 
 	mainLayout->addLayout(grid);
 
@@ -912,10 +1004,12 @@ void NetPlayJoinDialog::onJoinClicked(void)
 
 	client = NetPlayClient::GetInstance();
 	client->role = playerRoleBox->currentData().toInt();
+	client->userName = userNameEntry->text();
+	client->password = passwordEntry->text();
 
 	if (client->connectToHost( hostEntry->text(), portEntry->value() ))
 	{
-		printf("Failed to connect to Host\n");
+		FCEU_DispMessage("Host connect failed",0);
 	}
 
 	//printf("Close Window\n");
@@ -928,6 +1022,11 @@ void NetPlayJoinDialog::onJoinClicked(void)
 bool NetPlayActive(void)
 {
 	return (NetPlayClient::GetInstance() != nullptr) || (NetPlayServer::GetInstance() != nullptr);
+}
+//----------------------------------------------------------------------------
+bool isNetPlayHost(void)
+{
+	return (NetPlayServer::GetInstance() != nullptr);
 }
 //----------------------------------------------------------------------------
 void NetPlayPeriodicUpdate(void)
@@ -1005,5 +1104,11 @@ void NetPlayReadInputFrame(uint8_t* joy)
 	joy[1] = netPlayInputFrame.ctrl[1];
 	joy[2] = netPlayInputFrame.ctrl[2];
 	joy[3] = netPlayInputFrame.ctrl[3];
+}
+//----------------------------------------------------------------------------
+void NetPlayCloseSession(void)
+{
+	NetPlayClient::Destroy();
+	NetPlayServer::Destroy();
 }
 //----------------------------------------------------------------------------

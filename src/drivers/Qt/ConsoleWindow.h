@@ -260,6 +260,9 @@ class  consoleWin_t : public QMainWindow
 		QAction *recAsWavAct;
 		QAction *stopWavAct;
 		QAction *tasEditorAct;
+		QAction *netPlayHostAct;
+		QAction *netPlayJoinAct;
+		QAction *netPlayDiscAct;
 		//QAction *aviHudAct;
 		//QAction *aviMsgAct;
 
@@ -354,6 +357,7 @@ class  consoleWin_t : public QMainWindow
 		void openPaletteEditorWin(void);
 		void openNetPlayHostWindow(void);
 		void openNetPlayJoinWindow(void);
+		void closeNetPlaySession(void);
 		void openAviRiffViewer(void);
 		void openTimingStatWin(void);
 		void openMovieOptWin(void);

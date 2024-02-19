@@ -1670,6 +1670,7 @@ void consoleWin_t::createMainMenu(void)
 	//act->setShortcut( QKeySequence(tr("Shift+F7")));
 	act->setStatusTip(tr("Host Game Window"));
 	connect(act, SIGNAL(triggered()), this, SLOT(openNetPlayHostWindow(void)) );
+	netPlayHostAct = act;
 
 	netPlayMenu->addAction(act);
 
@@ -1678,10 +1679,20 @@ void consoleWin_t::createMainMenu(void)
 	//act->setShortcut( QKeySequence(tr("Shift+F7")));
 	act->setStatusTip(tr("Join Game Window"));
 	connect(act, SIGNAL(triggered()), this, SLOT(openNetPlayJoinWindow(void)) );
+	netPlayJoinAct = act;
 
 	netPlayMenu->addAction(act);
 
-	netPlayMenu->setEnabled(false);
+	// NetPlay -> End Game / Disconnect
+	act = new QAction(tr("&Disconnect/End Game"), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Disconnect Netplay Game"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeNetPlaySession(void)) );
+	netPlayDiscAct = act;
+
+	netPlayMenu->addAction(act);
+
+	//netPlayMenu->setEnabled(false);
 	//-----------------------------------------------------------------------
 	// Tools
 
@@ -3157,6 +3168,11 @@ void consoleWin_t::openNetPlayJoinWindow(void)
    win = new NetPlayJoinDialog(this);
 	
    win->show();
+}
+
+void consoleWin_t::closeNetPlaySession(void)
+{
+	NetPlayCloseSession();
 }
 
 void consoleWin_t::openAviRiffViewer(void)
@@ -4717,6 +4733,12 @@ void consoleWin_t::updatePeriodic(void)
 		recAsWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
 		stopWavAct->setEnabled( FCEUI_WaveRecordRunning() );
 		tasEditorAct->setEnabled( FCEU_IsValidUI(FCEUI_TASEDITOR) );
+
+		bool netPlayactv = NetPlayActive();
+
+		netPlayHostAct->setEnabled( !netPlayactv );
+		netPlayJoinAct->setEnabled( !netPlayactv );
+		netPlayDiscAct->setEnabled(  netPlayactv );
 	}
 
 	if ( errorMsgValid )
