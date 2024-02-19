@@ -77,7 +77,6 @@
 // File Base Name from Core
 extern char FileBase[];
 extern uint8 joy[4];
-extern uint32 GetGamepadPressedImmediate();
 
 static thread_local FCEU::JSEngine* currentEngine = nullptr;
 

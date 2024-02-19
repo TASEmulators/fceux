@@ -40,11 +40,12 @@ if ( ${QT} EQUAL 6 )
 	set( Qt Qt6 )
 	find_package( Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets)
 	find_package( Qt6 COMPONENTS Help QUIET)
+	find_package( Qt6 COMPONENTS Network)
 	find_package( Qt6 COMPONENTS Qml)
 	find_package( Qt6 COMPONENTS UiTools)
-  	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Qml_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
+	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Qml_DEFINITIONS} ${Qt6Network_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
 	# add_definitions(${Qt6UiTools_DEFINITIONS}) # Leave ${Qt6UiTools_DEFINITIONS} out as this is causing a build error
-  	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Qml_INCLUDE_DIRS} ${Qt6UiTools_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
+	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Qml_INCLUDE_DIRS} ${Qt6UiTools_INCLUDE_DIRS} ${Qt6Network_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
 
 	if (${Qt6Help_FOUND})
 		message( STATUS "Qt6 Help Module Found")
@@ -53,6 +54,13 @@ if ( ${QT} EQUAL 6 )
 		endif()
 	else()
 		message( STATUS "Qt6 Help Module Not Found")
+	endif()
+
+	if (${Qt6Network_FOUND})
+		message( STATUS "Qt6 Network Module Found")
+		add_definitions( -D__FCEU_QNETWORK_ENABLE__ )
+	else()
+		message( STATUS "Qt6 Network Module Not Found")
 	endif()
 
 	if (${Qt6Qml_FOUND})
@@ -73,10 +81,11 @@ else()
 	set( Qt Qt5 )
 	find_package( Qt5 REQUIRED COMPONENTS Widgets OpenGL)
 	find_package( Qt5 COMPONENTS Help QUIET)
+	find_package( Qt5 COMPONENTS Network)
 	find_package( Qt5 COMPONENTS Qml)
 	find_package( Qt5 COMPONENTS UiTools)
-	add_definitions( ${Qt5Widgets_DEFINITIONS} ${Qt5Qml_DEFINITIONS} ${Qt5UiTools_DEFINITIONS} ${Qt5Help_DEFINITIONS} )
-	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Qml_INCLUDE_DIRS} ${Qt5UiTools_INCLUDE_DIRS} ${Qt5Help_INCLUDE_DIRS} )
+	add_definitions( ${Qt5Widgets_DEFINITIONS} ${Qt5Qml_DEFINITIONS} ${Qt5UiTools_DEFINITIONS} ${Qt5Network_DEFINITIONS} ${Qt5Help_DEFINITIONS} )
+	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Qml_INCLUDE_DIRS} ${Qt5UiTools_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS} ${Qt5Help_INCLUDE_DIRS} )
 
 	if (${Qt5Help_FOUND})
 		message( STATUS "Qt5 Help Module Found")
@@ -85,6 +94,13 @@ else()
 		endif()
 	else()
 		message( STATUS "Qt5 Help Module Not Found")
+	endif()
+
+	if (${Qt5Network_FOUND})
+		message( STATUS "Qt5 Network Module Found")
+		add_definitions( -D__FCEU_NETWORK_ENABLE__ )
+	else()
+		message( STATUS "Qt5 Network Module Not Found")
 	endif()
 
 	if (${Qt5Qml_FOUND})
@@ -661,6 +677,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-joystick.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-throttle.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/unix-netplay.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/NetPlay.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AviRecord.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AviRiffViewer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/avi/avi-utils.cpp
@@ -733,6 +750,7 @@ target_link_libraries( ${APP_NAME}
    ${${Qt}Help_LIBRARIES}
    ${${Qt}Qml_LIBRARIES}
    ${${Qt}UiTools_LIBRARIES}
+   ${${Qt}Network_LIBRARIES}
    ${${Qt}OpenGL_LIBRARIES}
    ${${Qt}OpenGLWidgets_LIBRARIES}
    ${OPENGL_LDFLAGS}  

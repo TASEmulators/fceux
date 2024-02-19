@@ -275,6 +275,8 @@ void FCEUI_SetEmulationPaused(int val);
 void FCEUI_ToggleEmulationPause();
 void FCEUI_PauseForDuration(int secs);
 int FCEUI_PauseFramesRemaining();
+void FCEUI_SetNetPlayPause(bool value);
+bool FCEUI_GetNetPlayPause();
 
 //indicates whether input aids should be drawn (such as crosshairs, etc; usually in fullscreen mode)
 bool FCEUD_ShouldDrawInputAids();

@@ -806,7 +806,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 			RefreshThrottleFPS();
 		}
 #endif
-		if (EmulationPaused & (EMULATIONPAUSED_PAUSED | EMULATIONPAUSED_TIMER) )
+		if (EmulationPaused & (EMULATIONPAUSED_PAUSED | EMULATIONPAUSED_TIMER | EMULATIONPAUSED_NETPLAY) )
 		{
 			// emulator is paused
 			memcpy(XBuf, XBackBuf, 256*256);
@@ -1307,6 +1307,23 @@ void FCEUI_PauseForDuration(int secs)
 int FCEUI_PauseFramesRemaining(void)
 {
 	return (EmulationPaused & EMULATIONPAUSED_TIMER) ? pauseTimer : 0;
+}
+
+bool FCEUI_GetNetPlayPause()
+{
+	return (EmulationPaused & EMULATIONPAUSED_NETPLAY) ? true : false;
+}
+
+void FCEUI_SetNetPlayPause(bool value)
+{
+	if (value)
+	{
+		EmulationPaused |= EMULATIONPAUSED_NETPLAY;
+	}
+	else
+	{
+		EmulationPaused &= ~EMULATIONPAUSED_NETPLAY;
+	}
 }
 
 static int AutosaveCounter = 0;

@@ -193,6 +193,7 @@ class  consoleWin_t : public QMainWindow
 		QMenu *toolsMenu;
 		QMenu *debugMenu;
 		QMenu *movieMenu;
+		QMenu *netPlayMenu;
 		QMenu *helpMenu;
 		QMenu *recentRomMenu;
 		
@@ -351,6 +352,8 @@ class  consoleWin_t : public QMainWindow
 		void openTimingConfWin(void);
 		void openStateRecorderConfWin(void);
 		void openPaletteEditorWin(void);
+		void openNetPlayHostWindow(void);
+		void openNetPlayJoinWindow(void);
 		void openAviRiffViewer(void);
 		void openTimingStatWin(void);
 		void openMovieOptWin(void);
