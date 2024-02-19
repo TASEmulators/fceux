@@ -1382,4 +1382,37 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 
 	return QString::fromStdString( text );
 }
+//----------------------------------------------------
+void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property )
+{
+	int  pval;
+	g_config->getOption (property, &pval);
+
+	cbx->setCheckState( pval ? Qt::Checked : Qt::Unchecked );
+}
+//----------------------------------------------------
+void  setComboBoxFromProperty( QComboBox *cbx, const char *property )
+{
+	int  i, pval;
+	g_config->getOption (property, &pval);
+
+	for (i=0; i<cbx->count(); i++)
+	{
+		if ( pval == cbx->itemData(i).toInt() )
+		{
+			cbx->setCurrentIndex(i); break;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+void  setComboBoxFromValue( QComboBox *cbx, int pval )
+{
+	for (int i=0; i<cbx->count(); i++)
+	{
+		if ( pval == cbx->itemData(i).toInt() )
+		{
+			cbx->setCurrentIndex(i); break;
+		}
+	}
+}
 //---------------------------------------------------------------------------
