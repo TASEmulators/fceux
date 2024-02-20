@@ -3190,24 +3190,16 @@ void consoleWin_t::openPaletteEditorWin(void)
 
 void consoleWin_t::openNetPlayHostWindow(void)
 {
-	NetPlayHostDialog *win;
-
 	//printf("Open NetPlay Host Window\n");
 	
-   win = new NetPlayHostDialog(this);
-	
-   win->show();
+	openNetPlayHostDialog(this);
 }
 
 void consoleWin_t::openNetPlayJoinWindow(void)
 {
-	NetPlayJoinDialog *win;
-
 	//printf("Open NetPlay Join Window\n");
 	
-   win = new NetPlayJoinDialog(this);
-	
-   win->show();
+	openNetPlayJoinDialog(this);
 }
 
 void consoleWin_t::closeNetPlaySession(void)

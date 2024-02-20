@@ -19,6 +19,7 @@
  */
 
 #include <QDir>
+#include <QMessageBox>
 
 #include "../../fceu.h"
 #include "../../state.h"
@@ -277,24 +278,46 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 	{
 		case NETPLAY_AUTH_RESP:
 		{
+			bool authentication_passed = false;
 			netPlayAuthResp *msg = static_cast<netPlayAuthResp*>(msgBuf);
 			printf("Authorize: Player: %i   Passwd: %s\n", msg->playerId, msg->pswd);
 
-			if ( claimRole(client, msg->playerId) )
+			if (sessionPasswd.isEmpty())
 			{
-				client->userName = msg->userName;
-				sendRomLoadReq( client );
-				sendStateSyncReq( client );
-				client->state = 1;
-				FCEU_DispMessage("%s Joined",0, client->userName.toLocal8Bit().constData());
+				authentication_passed = true;
 			}
 			else
 			{
-				netPlayErrorMsg<128>  errorMsg;
-				errorMsg.setDisconnectFlag();
-				errorMsg.printf("Player %i role is not available", msg->playerId+1);
-				sendMsg( client, &errorMsg, errorMsg.hdr.msgSize );
-				client->flushData();
+				authentication_passed = sessionPasswd.compare(msg->pswd, Qt::CaseSensitive) == 0;
+
+				if (!authentication_passed)
+				{
+					netPlayErrorMsg<128>  errorMsg;
+					errorMsg.setDisconnectFlag();
+					errorMsg.printf("Invalid Password");
+					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize );
+					client->flushData();
+				}
+			}
+
+			if (authentication_passed)
+			{
+				if ( claimRole(client, msg->playerId) )
+				{
+					client->userName = msg->userName;
+					sendRomLoadReq( client );
+					sendStateSyncReq( client );
+					client->state = 1;
+					FCEU_DispMessage("%s Joined",0, client->userName.toLocal8Bit().constData());
+				}
+				else
+				{
+					netPlayErrorMsg<128>  errorMsg;
+					errorMsg.setDisconnectFlag();
+					errorMsg.printf("Player %i role is not available", msg->playerId+1);
+					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize );
+					client->flushData();
+				}
 			}
 		}
 		break;
@@ -502,7 +525,7 @@ void NetPlayClient::forceDisconnect()
 //-----------------------------------------------------------------------------
 bool NetPlayClient::isAuthenticated()
 {
-	return state > 0;
+	return (state > 0);
 }
 //-----------------------------------------------------------------------------
 bool NetPlayClient::isPlayerRole()
@@ -532,18 +555,18 @@ void NetPlayClient::setSocket(QTcpSocket *s)
 	}
 }
 //-----------------------------------------------------------------------------
-int NetPlayClient::createSocket(void)
+QTcpSocket* NetPlayClient::createSocket(void)
 {
 	if (sock == nullptr)
 	{
 		sock = new QTcpSocket(this);
+
+		connect(sock, SIGNAL(connected(void))   , this, SLOT(onConnect(void)));
+		connect(sock, SIGNAL(disconnected(void)), this, SLOT(onDisconnect(void)));
+		connect(sock, SIGNAL(errorOccurred(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
 	}
 
-	connect(sock, SIGNAL(connected(void))   , this, SLOT(onConnect(void)));
-	connect(sock, SIGNAL(disconnected(void)), this, SLOT(onDisconnect(void)));
-	connect(sock, SIGNAL(errorOccurred(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
-	
-	return 0;
+	return sock;
 }
 //-----------------------------------------------------------------------------
 int NetPlayClient::connectToHost( const QString host, int port )
@@ -569,7 +592,9 @@ void NetPlayClient::onConnect(void)
 {
 	printf("Client Connected!!!\n");
 	FCEU_DispMessage("Joined Host",0);
-	connected = true;
+	_connected = true;
+
+	emit connected();
 }
 //-----------------------------------------------------------------------------
 void NetPlayClient::onDisconnect(void)
@@ -597,6 +622,8 @@ void NetPlayClient::onSocketError(QAbstractSocket::SocketError error)
 	printf("Error: %s\n", errorMsg.toLocal8Bit().constData());
 
 	FCEU_DispMessage("%s", 0, errorMsg.toLocal8Bit().constData());
+
+	emit errorOccurred(errorMsg);
 }
 //-----------------------------------------------------------------------------
 static void clientMessageCallback( void *userData, void *msgBuf, size_t msgSize )
@@ -610,7 +637,7 @@ void NetPlayClient::update(void)
 {
 	readMessages( clientMessageCallback, this );
 
-	if (connected)
+	if (_connected)
 	{
 		uint32_t ctlrData = GetGamepadPressedImmediate();
 		uint32_t currFrame = static_cast<uint32_t>(currFrameCounter);
@@ -787,6 +814,8 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 //-----------------------------------------------------------------------------
 //--- NetPlayHostDialog
 //-----------------------------------------------------------------------------
+NetPlayHostDialog* NetPlayHostDialog::instance = nullptr;
+//-----------------------------------------------------------------------------
 NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	: QDialog(parent)
 {
@@ -796,6 +825,8 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	QPushButton *cancelButton, *startButton;
 	QLabel *lbl;
 
+	instance = this;
+
 	setWindowTitle("NetPlay Host Game");
 
 	mainLayout = new QVBoxLayout();
@@ -804,15 +835,18 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	lbl = new QLabel( tr("Server Name:") );
 	grid->addWidget( lbl, 0, 0 );
 
-	serverNameEntry = new QLineEdit();
-	grid->addWidget( serverNameEntry, 0, 1 );
+	sessionNameEntry = new QLineEdit();
+	sessionNameEntry->setText("My Game");
+	grid->addWidget( sessionNameEntry, 0, 1 );
 
 	lbl = new QLabel( tr("Port:") );
 	grid->addWidget( lbl, 1, 0 );
 
+	int netPort = NetPlayServer::DefaultPort;
+	g_config->getOption("SDL.NetworkPort", &netPort);
 	portEntry = new QSpinBox();
 	portEntry->setRange(0,65535);
-	portEntry->setValue(5050);
+	portEntry->setValue(netPort);
 	grid->addWidget( portEntry, 1, 1 );
 
 	lbl = new QLabel( tr("Role:") );
@@ -826,6 +860,15 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	playerRoleBox->addItem( tr("Player 4") , NETPLAY_PLAYER4  );
 	playerRoleBox->setCurrentIndex(1);
 	grid->addWidget( playerRoleBox, 2, 1 );
+
+	passwordRequiredCBox = new QCheckBox(tr("Password Required"));
+	grid->addWidget( passwordRequiredCBox, 3, 0, 1, 2 );
+
+	lbl = new QLabel( tr("Password:") );
+	grid->addWidget( lbl, 4, 0 );
+
+	passwordEntry = new QLineEdit();
+	grid->addWidget( passwordEntry, 4, 1 );
 
 	mainLayout->addLayout(grid);
 
@@ -848,6 +891,7 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 //----------------------------------------------------------------------------
 NetPlayHostDialog::~NetPlayHostDialog(void)
 {
+	instance = nullptr;
 	//printf("Destroy NetPlay Host Window\n");
 }
 //----------------------------------------------------------------------------
@@ -877,19 +921,40 @@ void NetPlayHostDialog::onStartClicked(void)
 	}
 	NetPlayServer::Create(consoleWindow);
 
+	const int netPort = portEntry->value();
 	server = NetPlayServer::GetInstance();
 	server->setRole( playerRoleBox->currentData().toInt() );
+	server->sessionName = sessionNameEntry->text();
+	server->sessionPasswd = passwordEntry->text();
 
-	if (server->listen( QHostAddress::Any, portEntry->value() ) == false)
+	bool listenSucceeded = server->listen( QHostAddress::Any, netPort );
+
+	if (listenSucceeded)
 	{
-		printf("Error: TCP server failed to listen\n");
+		g_config->setOption("SDL.NetworkPort", netPort);
+		done(0);
+		deleteLater();
 	}
+	else
+	{
+		QString msg = "Failed to start TCP server on port ";
+	       	msg += QString::number(netPort);
+		msg += "\n\nReason: ";
+	       	msg += server->errorString();
+		QMessageBox::warning( this, tr("TCP Server Error"), msg, QMessageBox::Ok );
 
-	done(0);
-	deleteLater();
+		// Server init failed, destruct server
+		if (server != nullptr)
+		{
+			delete server;
+			server = nullptr;
+		}
+	}
 }
 //-----------------------------------------------------------------------------
 //--- NetPlayJoinDialog
+//-----------------------------------------------------------------------------
+NetPlayJoinDialog* NetPlayJoinDialog::instance = nullptr;
 //-----------------------------------------------------------------------------
 NetPlayJoinDialog::NetPlayJoinDialog(QWidget *parent)
 	: QDialog(parent)
@@ -900,6 +965,8 @@ NetPlayJoinDialog::NetPlayJoinDialog(QWidget *parent)
 	QPushButton *cancelButton, *startButton;
 	QLabel *lbl;
 
+	instance = this;
+
 	setWindowTitle("NetPlay Join Game");
 
 	mainLayout = new QVBoxLayout();
@@ -908,16 +975,20 @@ NetPlayJoinDialog::NetPlayJoinDialog(QWidget *parent)
 	lbl = new QLabel( tr("Host:") );
 	grid->addWidget( lbl, 0, 0 );
 
+	QString hostAddress = "localhost";
+	g_config->getOption("SDL.NetworkIP", &hostAddress);
 	hostEntry = new QLineEdit();
-	hostEntry->setText("localhost");
+	hostEntry->setText(hostAddress);
 	grid->addWidget( hostEntry, 0, 1 );
 
 	lbl = new QLabel( tr("Port:") );
 	grid->addWidget( lbl, 1, 0 );
 
+	int netPort = NetPlayServer::DefaultPort;
+	g_config->getOption("SDL.NetworkPort", &netPort);
 	portEntry = new QSpinBox();
 	portEntry->setRange(0,65535);
-	portEntry->setValue(5050);
+	portEntry->setValue(netPort);
 	grid->addWidget( portEntry, 1, 1 );
 
 	lbl = new QLabel( tr("Role:") );
@@ -935,11 +1006,9 @@ NetPlayJoinDialog::NetPlayJoinDialog(QWidget *parent)
 	lbl = new QLabel( tr("User:") );
 	grid->addWidget( lbl, 3, 0 );
 
-	QString name = qgetenv("USER");
-    	if (name.isEmpty())
-	{
-        	name = qgetenv("USERNAME");
-	}
+	QString name;
+	g_config->getOption("SDL.NetworkUsername", &name);
+
 	userNameEntry = new QLineEdit();
 	userNameEntry->setMaxLength(63);
 	userNameEntry->setText(name);
@@ -973,6 +1042,7 @@ NetPlayJoinDialog::NetPlayJoinDialog(QWidget *parent)
 //----------------------------------------------------------------------------
 NetPlayJoinDialog::~NetPlayJoinDialog(void)
 {
+	instance = nullptr;
 	//printf("Destroy NetPlay Host Window\n");
 }
 //----------------------------------------------------------------------------
@@ -1002,19 +1072,47 @@ void NetPlayJoinDialog::onJoinClicked(void)
 	}
 	NetPlayClient::Create(consoleWindow);
 
+	const int netPort = portEntry->value();
 	client = NetPlayClient::GetInstance();
 	client->role = playerRoleBox->currentData().toInt();
 	client->userName = userNameEntry->text();
 	client->password = passwordEntry->text();
 
-	if (client->connectToHost( hostEntry->text(), portEntry->value() ))
+	QString hostAddress = hostEntry->text();
+
+	connect(client, SIGNAL(connected(void))   , this, SLOT(onConnect(void)));
+	connect(client, SIGNAL(errorOccurred(const QString&)), this, SLOT(onSocketError(const QString&)));
+
+	if (client->connectToHost( hostAddress, netPort ))
 	{
 		FCEU_DispMessage("Host connect failed",0);
 	}
+	g_config->setOption("SDL.NetworkIP", hostAddress);
+	g_config->setOption("SDL.NetworkPort", netPort);
 
+}
+//----------------------------------------------------------------------------
+void NetPlayJoinDialog::onConnect()
+{
 	//printf("Close Window\n");
 	done(0);
 	deleteLater();
+}
+//----------------------------------------------------------------------------
+void NetPlayJoinDialog::onSocketError(const QString& errorMsg)
+{
+	QString msg = "Failed to connect to server";
+	msg += "\n\nReason: ";
+	msg += errorMsg;
+	QMessageBox::warning( this, tr("Connection Error"), msg, QMessageBox::Ok );
+
+	NetPlayClient *client = NetPlayClient::GetInstance();
+
+	if (client != nullptr)
+	{
+		delete client;
+		client = nullptr;
+	}
 }
 //----------------------------------------------------------------------------
 //---- Global Functions
@@ -1110,5 +1208,39 @@ void NetPlayCloseSession(void)
 {
 	NetPlayClient::Destroy();
 	NetPlayServer::Destroy();
+}
+//----------------------------------------------------------------------------
+void openNetPlayHostDialog(QWidget* parent)
+{
+	NetPlayHostDialog* win = NetPlayHostDialog::GetInstance();
+
+	if (win == nullptr)
+	{
+		win = new NetPlayHostDialog(parent);
+
+		win->show();
+	}
+	else
+	{
+		win->activateWindow();
+		win->raise();
+	}
+}
+//----------------------------------------------------------------------------
+void openNetPlayJoinDialog(QWidget* parent)
+{
+	NetPlayJoinDialog* win = NetPlayJoinDialog::GetInstance();
+
+	if (win == nullptr)
+	{
+		win = new NetPlayJoinDialog(parent);
+
+		win->show();
+	}
+	else
+	{
+		win->activateWindow();
+		win->raise();
+	}
 }
 //----------------------------------------------------------------------------
