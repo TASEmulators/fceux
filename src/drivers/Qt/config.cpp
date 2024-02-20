@@ -35,6 +35,7 @@
 #include "Qt/sdl-video.h"
 #include "Qt/AviRecord.h"
 #include "Qt/unix-netplay.h"
+#include "Qt/NetPlay.h"
 #include "Qt/TasEditor/taseditor_config.h"
 
 #ifdef WIN32
@@ -618,13 +619,19 @@ InitConfig()
 	config->addOption("SDL.winFullScreenBorder", 0);
 	#endif
 
+	QString userName = qgetenv("USER");
+    	if (userName.isEmpty())
+	{
+        	userName = qgetenv("USERNAME");
+	}
+
 	// network play options - netplay is broken
 	config->addOption("server", "SDL.NetworkIsServer", 0);
-	config->addOption('n', "net", "SDL.NetworkIP", "");
-	config->addOption('u', "user", "SDL.NetworkUsername", "");
+	config->addOption('n', "net", "SDL.NetworkIP", "localhost");
+	config->addOption('u', "user", "SDL.NetworkUsername", userName.toLocal8Bit().constData());
 	config->addOption('w', "pass", "SDL.NetworkPassword", "");
 	config->addOption('k', "netkey", "SDL.NetworkGameKey", "");
-	config->addOption("port", "SDL.NetworkPort", 4046);
+	config->addOption("port", "SDL.NetworkPort", NetPlayServer::DefaultPort);
 	config->addOption("players", "SDL.NetworkPlayers", 1);
      
 	// input configuration options

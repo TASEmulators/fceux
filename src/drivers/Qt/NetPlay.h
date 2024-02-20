@@ -67,6 +67,7 @@ class NetPlayServer : public QTcpServer
 		NetPlayServer(QObject *parent = 0);
 		~NetPlayServer(void);
 
+		static constexpr int DefaultPort = 4046;
 		static NetPlayServer *GetInstance(void){ return instance; };
 
 		static int Create(QObject *parent = 0);
@@ -120,6 +121,8 @@ class NetPlayServer : public QTcpServer
 
 		void serverProcessMessage( NetPlayClient *client, void *msgBuf, size_t msgSize );
 
+		QString sessionName;
+		QString sessionPasswd;
 	private:
 		static NetPlayServer *instance;
 
@@ -151,11 +154,12 @@ class NetPlayClient : public QObject
 
 		int connectToHost( const QString host, int port );
 
-		bool isConnected(void);
+		bool isConnected(void){ return _connected; }
 		bool disconnectRequested(){ return disconnectPending; }
 		void forceDisconnect();
 		bool flushData();
 
+		QTcpSocket* createSocket(void);
 		void setSocket(QTcpSocket *s);
 		QTcpSocket* getSocket(void){ return sock; };
 
@@ -211,7 +215,6 @@ class NetPlayClient : public QObject
 		uint8_t gpData[4];
 
 	private:
-		int createSocket(void);
 
 		static NetPlayClient *instance;
 
@@ -223,12 +226,16 @@ class NetPlayClient : public QObject
 		char   *recvMsgBuf = nullptr;
 		bool    disconnectPending = false;
 		bool    needsDestroy = false;
-		bool    connected = false;
+		bool    _connected = false;
 
 		std::list <NetPlayFrameInput> input;
 		FCEU::mutex inputMtx;
 
 		static constexpr size_t recvMsgBufSize = 2 * 1024 * 1024;
+
+	signals:
+		void connected(void);
+		void errorOccurred(const QString&);
 
 	public slots:
 		void onConnect(void);
@@ -245,12 +252,17 @@ public:
 	NetPlayHostDialog(QWidget *parent = 0);
 	~NetPlayHostDialog(void);
 
+	static NetPlayHostDialog *GetInstance(void){ return instance; };
 protected:
 	void closeEvent(QCloseEvent *event);
 
-	QLineEdit  *serverNameEntry;
+	QLineEdit  *sessionNameEntry;
 	QSpinBox   *portEntry;
 	QComboBox  *playerRoleBox;
+	QLineEdit  *passwordEntry;
+	QCheckBox  *passwordRequiredCBox;
+
+	static NetPlayHostDialog* instance;
 
 public slots:
 	void closeWindow(void);
@@ -266,6 +278,8 @@ public:
 	NetPlayJoinDialog(QWidget *parent = 0);
 	~NetPlayJoinDialog(void);
 
+	static NetPlayJoinDialog *GetInstance(void){ return instance; };
+
 protected:
 	void closeEvent(QCloseEvent *event);
 
@@ -275,10 +289,13 @@ protected:
 	QLineEdit  *userNameEntry;
 	QLineEdit  *passwordEntry;
 
+	static NetPlayJoinDialog* instance;
+
 public slots:
 	void closeWindow(void);
 	void onJoinClicked(void);
-
+	void onConnect(void);
+	void onSocketError(const QString& errorMsg);
 };
 
 bool NetPlayActive(void);
@@ -288,3 +305,5 @@ bool NetPlaySkipWait(void);
 int NetPlayFrameWait(void);
 void NetPlayReadInputFrame(uint8_t* joy);
 void NetPlayCloseSession(void);
+void openNetPlayHostDialog(QWidget* parent = nullptr);
+void openNetPlayJoinDialog(QWidget* parent = nullptr);
