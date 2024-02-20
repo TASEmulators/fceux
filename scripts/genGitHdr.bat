@@ -1,5 +1,5 @@
 
-set OUTPUT_DIR=%1
+set OUTPUT_DIR=c:\Users\andyv\Downloads\fceux\buildwin
 
 set OUTPUT_FILE=%OUTPUT_DIR%/fceux_git_info.cpp
 

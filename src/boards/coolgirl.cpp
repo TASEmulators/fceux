@@ -247,7 +247,7 @@ const uint8 cfi_data[] =
 
 #define SET_BITS(target, target_bits, source, source_bits) target = set_bits(target, target_bits, get_bits(source, source_bits))
 
-static inline uint8 string_to_bits(char* bitsstr, int* bits)
+static inline uint8 string_to_bits(const char bitsstr[], int* bits)
 {
 	uint8 bit1, bit2, count = 0;
 	for (int i = 0; i < 32; i++)
@@ -298,7 +298,7 @@ static inline uint8 string_to_bits(char* bitsstr, int* bits)
 	return count;
 }
 
-static inline uint32 get_bits(uint32 V, char* bitsstr)
+static inline uint32 get_bits(uint32 V, const char bitsstr[])
 {
 	uint32 result = 0;
 	int bits[32];
@@ -311,7 +311,7 @@ static inline uint32 get_bits(uint32 V, char* bitsstr)
 	return result;
 }
 
-static inline uint32 set_bits(uint32 V, char* bitsstr, uint32 new_bits)
+static inline uint32 set_bits(uint32 V, const char bitsstr[], uint32 new_bits)
 {
 	int bits[32];
 	uint8 count = string_to_bits(bitsstr, bits);
