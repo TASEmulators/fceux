@@ -389,6 +389,7 @@ class  consoleWin_t : public QMainWindow
 		void toggleGameGenie(bool checked);
 		void loadGameGenieROM(void);
 		void loadMostRecentROM(void);
+		void clearRecentRomMenu(void);
 		void setRegionNTSC(void);
 		void setRegionPAL(void);
 		void setRegionDendy(void);

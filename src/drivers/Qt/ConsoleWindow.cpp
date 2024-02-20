@@ -2246,6 +2246,16 @@ void consoleWin_t::buildRecentRomMenu(void)
 			g_config->setOption( buf, s);
 		}
 	}
+	// Add a dummy disable QAction to create a larger dead space between the ROM list and the clear item.
+	// Helps prevent accidental unintended clicking of the clear list item
+	recentRomMenu->addSeparator();
+	act = new QAction(recentRomMenu);
+	act->setEnabled(false);
+	recentRomMenu->addAction(act);
+
+	act = new QAction(tr("Clear Recent ROM List"), recentRomMenu);
+	connect(act, SIGNAL(triggered()), this, SLOT(clearRecentRomMenu(void)) );
+	recentRomMenu->addAction(act);
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::saveRecentRomMenu(void)
@@ -2273,6 +2283,19 @@ void consoleWin_t::saveRecentRomMenu(void)
 		g_config->setOption( buf, "");
 	}
 
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::clearRecentRomMenu()
+{
+	char buf[128];
+	for (int i = 0; i < 10; i++)
+	{
+		sprintf(buf, "SDL.RecentRom%02i", i);
+		g_config->setOption( buf, "");
+	}
+	clearRomList();
+
+	recentRomMenuReset = true;
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::addRecentRom( const char *rom )
