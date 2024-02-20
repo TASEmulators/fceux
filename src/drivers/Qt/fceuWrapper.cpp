@@ -37,6 +37,7 @@
 #include "Qt/sdl-video.h"
 #include "Qt/nes_shm.h"
 #include "Qt/unix-netplay.h"
+#include "Qt/NetPlay.h"
 #include "Qt/AviRecord.h"
 #include "Qt/HexEditor.h"
 #include "Qt/CheatsConf.h"
@@ -1475,6 +1476,23 @@ int  fceuWrapperUpdate( void )
 	}
 	mutexLockFail = false;
 	emulatorHasMutex = 1;
+
+	// For netplay, set pause if we do not have input ready for all players
+	if (NetPlayActive())
+	{
+		if (NetPlayFrameWait())
+		{
+			FCEUI_SetNetPlayPause(true);
+		}
+		else
+		{
+			FCEUI_SetNetPlayPause(false);
+		}
+	}
+	else
+	{
+		FCEUI_SetNetPlayPause(false);
+	}
  
 	if ( GameInfo )
 	{

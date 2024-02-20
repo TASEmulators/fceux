@@ -107,6 +107,7 @@
 #include "Qt/RamSearch.h"
 #include "Qt/keyscan.h"
 #include "Qt/nes_shm.h"
+#include "Qt/NetPlay.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 
 #ifdef __APPLE__
@@ -926,13 +927,14 @@ void consoleWin_t::createMainMenu(void)
 	menubar->setNativeMenuBar( useNativeMenuBar ? true : false );
 
 	// Top Level Menu Iterms
-	fileMenu  = menubar->addMenu(tr("&File"));
-	movieMenu = menubar->addMenu(tr("&Movie"));
-	optMenu   = menubar->addMenu(tr("&Options"));
-	emuMenu   = menubar->addMenu(tr("&Emulation"));
-	toolsMenu = menubar->addMenu(tr("&Tools"));
-	debugMenu = menubar->addMenu(tr("&Debug"));
-	helpMenu  = menubar->addMenu(tr("&Help"));
+	fileMenu    = menubar->addMenu(tr("&File"));
+	movieMenu   = menubar->addMenu(tr("&Movie"));
+	optMenu     = menubar->addMenu(tr("&Options"));
+	emuMenu     = menubar->addMenu(tr("&Emulation"));
+	netPlayMenu = menubar->addMenu(tr("&NetPlay"));
+	toolsMenu   = menubar->addMenu(tr("&Tools"));
+	debugMenu   = menubar->addMenu(tr("&Debug"));
+	helpMenu    = menubar->addMenu(tr("&Help"));
 
 	//-----------------------------------------------------------------------
 	// File
@@ -1657,6 +1659,40 @@ void consoleWin_t::createMainMenu(void)
 	
 	subMenu->addAction(act);
 
+	//-----------------------------------------------------------------------
+	// NetPlay
+
+	connect( netPlayMenu, SIGNAL(aboutToShow(void)), this, SLOT(mainMenuOpen(void)) );
+	connect( netPlayMenu, SIGNAL(aboutToHide(void)), this, SLOT(mainMenuClose(void)) );
+
+	// NetPlay -> Host
+	act = new QAction(tr("&Host"), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Host Game Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openNetPlayHostWindow(void)) );
+	netPlayHostAct = act;
+
+	netPlayMenu->addAction(act);
+
+	// NetPlay -> Join
+	act = new QAction(tr("&Join"), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Join Game Window"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openNetPlayJoinWindow(void)) );
+	netPlayJoinAct = act;
+
+	netPlayMenu->addAction(act);
+
+	// NetPlay -> End Game / Disconnect
+	act = new QAction(tr("&Disconnect/End Game"), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Disconnect Netplay Game"));
+	connect(act, SIGNAL(triggered()), this, SLOT(closeNetPlaySession(void)) );
+	netPlayDiscAct = act;
+
+	netPlayMenu->addAction(act);
+
+	//netPlayMenu->setEnabled(false);
 	//-----------------------------------------------------------------------
 	// Tools
 
@@ -3110,6 +3146,33 @@ void consoleWin_t::openPaletteEditorWin(void)
    win = new PaletteEditorDialog_t(this);
 	
    win->show();
+}
+
+void consoleWin_t::openNetPlayHostWindow(void)
+{
+	NetPlayHostDialog *win;
+
+	//printf("Open NetPlay Host Window\n");
+	
+   win = new NetPlayHostDialog(this);
+	
+   win->show();
+}
+
+void consoleWin_t::openNetPlayJoinWindow(void)
+{
+	NetPlayJoinDialog *win;
+
+	//printf("Open NetPlay Join Window\n");
+	
+   win = new NetPlayJoinDialog(this);
+	
+   win->show();
+}
+
+void consoleWin_t::closeNetPlaySession(void)
+{
+	NetPlayCloseSession();
 }
 
 void consoleWin_t::openAviRiffViewer(void)
@@ -4670,6 +4733,12 @@ void consoleWin_t::updatePeriodic(void)
 		recAsWavAct->setEnabled( FCEU_IsValidUI( FCEUI_RECORDMOVIE ) && !FCEUI_WaveRecordRunning() );
 		stopWavAct->setEnabled( FCEUI_WaveRecordRunning() );
 		tasEditorAct->setEnabled( FCEU_IsValidUI(FCEUI_TASEDITOR) );
+
+		bool netPlayactv = NetPlayActive();
+
+		netPlayHostAct->setEnabled( !netPlayactv );
+		netPlayJoinAct->setEnabled( !netPlayactv );
+		netPlayDiscAct->setEnabled(  netPlayactv );
 	}
 
 	if ( errorMsgValid )
@@ -4691,6 +4760,8 @@ void consoleWin_t::updatePeriodic(void)
 		closeApp();
 		closeRequested = false;
 	}
+
+	NetPlayPeriodicUpdate();
 
 	updateCounter++;
 

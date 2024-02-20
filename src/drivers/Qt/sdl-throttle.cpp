@@ -21,6 +21,7 @@
 /// \brief Handles emulation speed throttling using the SDL timing functions.
 
 #include "Qt/sdl.h"
+#include "Qt/NetPlay.h"
 #include "Qt/throttle.h"
 #include "utils/timeStamp.h"
 
@@ -367,7 +368,7 @@ SpeedThrottle(void)
 {
 	bool isEmuPaused = FCEUI_EmulationPaused() ? true : false;
 	bool noWaitActive = (NoWaiting & 0x01) ? true : false;
-	bool turboActive = (turbo || noWaitActive);
+	bool turboActive = (turbo || noWaitActive || NetPlaySkipWait());
 
 	// If Emulator is paused, don't waste CPU cycles spinning on nothing.
 	if ( !isEmuPaused && ((g_fpsScale >= 32) || turboActive) )

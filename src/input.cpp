@@ -274,7 +274,6 @@ static void UpdateGP(int w, void *data, int arg)
 		joy[3]= FCEU_JSReadJoypad(3,joy[3]);
 		#endif
 	}
-
 }
 
 static void LogGP(int w, MovieRecord* mr)
@@ -435,6 +434,10 @@ void FCEU_DrawInput(uint8 *buf)
 		portFC.driver->Draw(buf,portFC.attrib);
 }
 
+#ifdef __FCEU_QNETWORK_ENABLE__
+extern bool NetPlayActive(void);
+void NetPlayReadInputFrame(uint8_t* joy);
+#endif
 
 void FCEU_UpdateInput(void)
 {
@@ -452,6 +455,12 @@ void FCEU_UpdateInput(void)
 		if (coinon2) coinon2--;
 		if (service) service--;
 	}
+	#ifdef __FCEU_QNETWORK_ENABLE__
+	if (NetPlayActive())
+	{
+		NetPlayReadInputFrame(joy);
+	}
+	#endif
 
 	if(FCEUnetplay)
 		NetplayUpdate(joy);
