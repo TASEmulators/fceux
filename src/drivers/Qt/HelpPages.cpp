@@ -41,22 +41,9 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 
-#ifdef WIN32
-HWND
-WINAPI
-HtmlHelpA(
-	_In_opt_ HWND hwndCaller,
-	_In_ LPCSTR pszFile,
-	_In_ UINT uCommand,
-	_In_ DWORD_PTR dwData
-);
-
-#ifndef HH_DISPLAY_TOPIC
-#define HH_DISPLAY_TOPIC        0x0000
-#endif
-
+#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
 #include <Windows.h>
-//#include <htmlhelp.h>
+#include <htmlhelp.h>
 //#else // Linux or Unix or APPLE
 //#include <unistd.h>
 //#include <sys/types.h>
@@ -75,9 +62,9 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 
 	if ( helpFileName.length() == 0 )
 	{
-		#ifdef WIN32
+		#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
 		helpFileName = FCEUI_GetBaseDirectory();
-		helpFileName += "\\..\\doc\\fceux.chm";
+	g	helpFileName += "\\..\\doc\\fceux.chm";
 		#else
 		helpFileName = "/usr/share/fceux/fceux.qhc";
 		#endif
@@ -101,7 +88,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 		return;
 	}
 
-#ifdef WIN32
+#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
 	if (subpage.length() > 0)
 	{
 		helpFileName = helpFileName + "::/" + subpage + ".htm";
@@ -112,15 +99,15 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 
 	//printf("Looking for HelpFile '%s'\n", helpFileName.c_str() );
 
-#ifdef WIN32
+#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
 	// Windows specific HtmlHelp library function
-	helpWin = HtmlHelpA(HWND(winId()), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
+	helpWin = HtmlHelp(HWND(winId()), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
 	if ( helpWin == NULL )
 	{
 		printf("Error: Failed to open help file '%s'\n", helpFileName.c_str() );
 	}
 #else
-	if ( helpWin > 0 )
+	if ( (long)helpWin > 0 )
 	{
 		printf("There is already a CHM Viewer open somewhere...\n");
 		return;
