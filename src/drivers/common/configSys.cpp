@@ -360,6 +360,26 @@ Config::setOption(const std::string &name,
  */
 int
 Config::setOption(const std::string &name,
+                  const char *value)
+{
+    std::map<std::string, std::string>::iterator opt_i;
+
+    // confirm that the option exists
+    opt_i = _strOptMap.find(name);
+    if(opt_i == _strOptMap.end()) {
+        return -1;
+    }
+
+    // set the option
+    opt_i->second = value;
+    return 0;
+}
+
+/**
+ * Sets the specified option to the given string value.
+ */
+int
+Config::setOption(const std::string &name,
                   const std::string &value)
 {
     std::map<std::string, std::string>::iterator opt_i;
@@ -374,6 +394,28 @@ Config::setOption(const std::string &name,
     opt_i->second = value;
     return 0;
 }
+
+#ifdef __QT_DRIVER__
+/**
+ * Sets the specified option to the given string value.
+ */
+int
+Config::setOption(const std::string &name,
+                  const QString &value)
+{
+    std::map<std::string, std::string>::iterator opt_i;
+
+    // confirm that the option exists
+    opt_i = _strOptMap.find(name);
+    if(opt_i == _strOptMap.end()) {
+        return -1;
+    }
+
+    // set the option
+    opt_i->second = value.toLocal8Bit().constData();
+    return 0;
+}
+#endif
 
 /**
  * Sets the specified option to the given function.

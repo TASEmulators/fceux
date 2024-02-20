@@ -317,6 +317,9 @@ consoleWin_t::~consoleWin_t(void)
 #ifdef __FCEU_QSCRIPT_ENABLE__
 	QtScriptManager::destroy();
 #endif
+
+	NetPlayCloseSession();
+
 	// The closeApp function call stops all threads.
 	// Calling quit on threads should not happen here. 
 	//printf("Thread Finished: %i \n", emulatorThread->isFinished() );
@@ -931,9 +934,9 @@ void consoleWin_t::createMainMenu(void)
 	movieMenu   = menubar->addMenu(tr("&Movie"));
 	optMenu     = menubar->addMenu(tr("&Options"));
 	emuMenu     = menubar->addMenu(tr("&Emulation"));
-	netPlayMenu = menubar->addMenu(tr("&NetPlay"));
 	toolsMenu   = menubar->addMenu(tr("&Tools"));
 	debugMenu   = menubar->addMenu(tr("&Debug"));
+	netPlayMenu = menubar->addMenu(tr("&NetPlay"));
 	helpMenu    = menubar->addMenu(tr("&Help"));
 
 	//-----------------------------------------------------------------------
@@ -2219,8 +2222,9 @@ void consoleWin_t::buildRecentRomMenu(void)
 		g_config->getOption( buf, &s);
 
 		//printf("Recent Rom:%i  '%s'\n", i, s.c_str() );
+		bool fileExists = !s.empty() && QFile::exists(tr(s.c_str()));
 
-		if ( s.size() > 0 )
+		if ( fileExists )
 		{
 			act = new consoleRecentRomAction( tr(s.c_str()), recentRomMenu);
 
@@ -2233,6 +2237,13 @@ void consoleWin_t::buildRecentRomMenu(void)
 			sptr->assign( s.c_str() );
 
 			romList.push_front( sptr );
+		}
+		else
+		{
+			// Clear the option if file does not exist
+			s.clear();
+
+			g_config->setOption( buf, s);
 		}
 	}
 }
@@ -2251,11 +2262,17 @@ void consoleWin_t::saveRecentRomMenu(void)
 		s = *it;
 		sprintf(buf, "SDL.RecentRom%02i", i);
 
-		g_config->setOption( buf, s->c_str() );
+		g_config->setOption( buf, *s );
 
 		//printf("Recent Rom:%u  '%s'\n", i, s->c_str() );
 		i--;
 	}
+	for (i = romList.size(); i < 10; i++)
+	{
+		sprintf(buf, "SDL.RecentRom%02i", i);
+		g_config->setOption( buf, "");
+	}
+
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::addRecentRom( const char *rom )

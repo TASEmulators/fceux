@@ -65,10 +65,14 @@ public:
     /**
      * Sets a configuration option.  Can be called at any time.
      */
+    int setOption(const std::string &, const char *);
     int setOption(const std::string &, const std::string &);
     int setOption(const std::string &, int);
     int setOption(const std::string &, double);
     int setOption(const std::string &, void (*)(const std::string &));
+#ifdef __QT_DRIVER__
+    int setOption(const std::string &, const QString &);
+#endif
 
 #ifdef __QT_DRIVER__
     int getOption(const std::string &, QString *) const;
