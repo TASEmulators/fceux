@@ -42,8 +42,21 @@
 #include "Qt/ConsoleUtilities.h"
 
 #ifdef WIN32
+HWND
+WINAPI
+HtmlHelpA(
+	_In_opt_ HWND hwndCaller,
+	_In_ LPCSTR pszFile,
+	_In_ UINT uCommand,
+	_In_ DWORD_PTR dwData
+);
+
+#ifndef HH_DISPLAY_TOPIC
+#define HH_DISPLAY_TOPIC        0x0000
+#endif
+
 #include <Windows.h>
-#include <htmlhelp.h>
+//#include <htmlhelp.h>
 //#else // Linux or Unix or APPLE
 //#include <unistd.h>
 //#include <sys/types.h>
@@ -101,7 +114,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 
 #ifdef WIN32
 	// Windows specific HtmlHelp library function
-	helpWin = HtmlHelp( HWND(winId()), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
+	helpWin = HtmlHelpA(HWND(winId()), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
 	if ( helpWin == NULL )
 	{
 		printf("Error: Failed to open help file '%s'\n", helpFileName.c_str() );
