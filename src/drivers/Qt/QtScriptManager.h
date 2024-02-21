@@ -604,6 +604,24 @@ public slots:
 	Q_INVOKABLE int  maxJoypadPlayers(){ return JoypadScriptObject::MAX_JOYPAD_PLAYERS; }
 };
 
+class ModuleLoaderObject: public QObject
+{
+	Q_OBJECT
+public:
+	ModuleLoaderObject(QObject* parent = nullptr);
+	~ModuleLoaderObject();
+
+	void setEngine(FCEU::JSEngine* _engine){ engine = _engine; }
+
+private:
+	FCEU::JSEngine* engine = nullptr;
+	QtScriptInstance* script = nullptr;
+	int scopeCounter = 0;
+
+public slots:
+	Q_INVOKABLE void GlobalImport(const QString& ns, const QString& file);
+};
+
 } // JS
 
 class ScriptExecutionState
@@ -659,6 +677,7 @@ public:
 
 	int  throwError(QJSValue::ErrorType errorType, const QString &message = QString());
 
+	const QString& getSrcFile(){ return srcFile; };
 	FCEU::JSEngine* getEngine(){ return engine; };
 private:
 
@@ -677,6 +696,7 @@ private:
 	JS::MemoryScriptObject* mem = nullptr;
 	JS::InputScriptObject* input = nullptr;
 	JS::MovieScriptObject* movie = nullptr;
+	JS::ModuleLoaderObject* moduleLoader = nullptr;
 	QWidget* ui_rootWidget = nullptr;
 	QJSValue *onFrameBeginCallback = nullptr;
 	QJSValue *onFrameFinishCallback = nullptr;
@@ -687,6 +707,7 @@ private:
 	int frameAdvanceCount = 0;
 	int frameAdvanceState = 0;
 	bool running = false;
+	QString srcFile;
 
 signals:
 	void errorNotify();

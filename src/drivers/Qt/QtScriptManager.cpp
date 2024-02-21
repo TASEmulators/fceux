@@ -1842,6 +1842,63 @@ void MemoryScriptObject::unregisterAll()
 	numWriteFuncsRegistered = 0;
 	numExecFuncsRegistered = 0;
 }
+
+//----------------------------------------------------
+//----  Module Loader Object
+//----------------------------------------------------
+//----------------------------------------------------
+ModuleLoaderObject::ModuleLoaderObject(QObject* parent)
+	: QObject(parent)
+{
+	script = qobject_cast<QtScriptInstance*>(parent);
+	engine = script->getEngine();
+	scopeCounter = 0;
+}
+//----------------------------------------------------
+ModuleLoaderObject::~ModuleLoaderObject()
+{
+}
+//----------------------------------------------------
+void ModuleLoaderObject::GlobalImport(const QString& ns, const QString& file)
+{
+	const QString& srcFile = script->getSrcFile();
+	QFileInfo srcFileInfo(srcFile);
+	QString srcPath = srcFileInfo.canonicalPath();
+	QString cwd = QDir::currentPath();
+
+	scopeCounter++;
+
+	QDir::setCurrent(srcPath);
+	QFileInfo moduleFileInfo(file);
+	QString modulePath = moduleFileInfo.canonicalFilePath();
+
+	//printf("%i Namespace: %s     File: %s\n", scopeCounter, ns.toLocal8Bit().constData(), modulePath.toLocal8Bit().constData() );
+
+	QJSValue newModule = engine->importModule( modulePath );
+	QDir::setCurrent(cwd);
+
+	scopeCounter--;
+
+	if (newModule.isError())
+	{
+		QString errMsg = QString("Failed to load module: ") + file + "\n" +
+		newModule.toString() + "\n" +
+		newModule.property("fileName").toString() + ":" +
+		newModule.property("lineNumber").toString() + " : " +
+		newModule.toString() + "\nStack:\n" +
+		newModule.property("stack").toString() + "\n";
+
+		script->throwError(QJSValue::GenericError, errMsg);
+		return;
+	}
+
+	engine->globalObject().setProperty(ns, newModule);
+
+	QString msg = QString("Global import * as '") + ns + QString("' from \"") + file + "\";\n";
+	script->print(msg);
+}
+//----------------------------------------------------
+
 } // JS
 //----------------------------------------------------
 //----  FCEU JSEngine
@@ -2004,6 +2061,11 @@ void QtScriptInstance::shutdownEngine()
 		delete movie;
 		movie = nullptr;
 	}
+	if (moduleLoader != nullptr)
+	{
+		delete moduleLoader;
+		moduleLoader = nullptr;
+	}
 
 	if (ui_rootWidget != nullptr)
 	{
@@ -2032,6 +2094,7 @@ int QtScriptInstance::initEngine()
 	mem = new JS::MemoryScriptObject(this);
 	input = new JS::InputScriptObject(this);
 	movie = new JS::MovieScriptObject(this);
+	moduleLoader = new JS::ModuleLoaderObject(this);
 
 	emu->setDialog(dialog);
 	rom->setDialog(dialog);
@@ -2078,6 +2141,11 @@ int QtScriptInstance::initEngine()
 
 	engine->globalObject().setProperty("gui", guiObject);
 
+	// module
+	QJSValue moduleLoaderObject = engine->newQObject(moduleLoader);
+
+	engine->globalObject().setProperty("Module", moduleLoaderObject);
+
 	// Class Type Definitions for Script Use
 	QJSValue jsColorMetaObject = engine->newQMetaObject(&JS::ColorScriptObject::staticMetaObject);
 	engine->globalObject().setProperty("Color", jsColorMetaObject);
@@ -2107,6 +2175,8 @@ int QtScriptInstance::loadScriptFile( QString filepath )
 	QTextStream stream(&scriptFile);
 	QString fileText = stream.readAll();
 	scriptFile.close();
+
+	srcFile = filepath;
 
 	FCEU_WRAPPER_LOCK();
 	engine->acquireThreadContext();
