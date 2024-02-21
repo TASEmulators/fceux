@@ -64,7 +64,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 	{
 		#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
 		helpFileName = FCEUI_GetBaseDirectory();
-	g	helpFileName += "\\..\\doc\\fceux.chm";
+		helpFileName += "\\..\\doc\\fceux.chm";
 		#else
 		helpFileName = "/usr/share/fceux/fceux.qhc";
 		#endif
