@@ -748,7 +748,7 @@ void ConsoleVideoConfDialog_t::winFullScreenBorderChanged(int value)
 	g_config->setOption("SDL.winFullScreenBorder", opt );
 	g_config->save();
 }
-#else
+#elif defined(WIN32)
 void ConsoleVideoConfDialog_t::winFullScreenBorderChanged(int value)
 {
 	(void)value;
