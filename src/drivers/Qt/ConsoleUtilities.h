@@ -95,10 +95,21 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size );
 
 QDialog *fceuCustomToolTipShow( const QPoint &globalPos, QDialog *popup );
 
-// Faster replacement functions for sprintf
+// Faster replacement functions for sprintf. It's uglier, but much faster.
 class StringBuilder
 {
 public:
+	// Helper struct. Do not use directly.
+	template <unsigned Radix, typename T, typename Prefix = nullptr_t>
+	struct IntInfo
+	{
+		T x;
+		int minLen;
+		char leadChar;
+		bool upperCase;
+		Prefix prefix;
+	};
+
 	inline StringBuilder(char *str) : start(str), end(str)
 	{
 		*end = '\0';
@@ -114,13 +125,7 @@ public:
 		return size_t(end - start);
 	}
 
-	template <class T>
-	inline StringBuilder &operator << (T value)
-	{
-		return append(value);
-	}
-
-	inline StringBuilder &append(char ch)
+	inline StringBuilder &operator <<(char ch)
 	{
 		*(end++) = ch;
 		*end = '\0';
@@ -128,7 +133,7 @@ public:
 		return *this;
 	}
 
-	inline StringBuilder &append(const char *src)
+	inline StringBuilder &operator <<(const char *src)
 	{
 		size_t len = strlen(src);
 		memcpy(end, src, len + 1);
@@ -138,7 +143,20 @@ public:
 		return *this;
 	}
 
-	template <unsigned Radix, class T>
+	template<unsigned Radix, typename T, typename Prefix>
+	inline StringBuilder &operator <<(const IntInfo<Radix, T, Prefix> intInfo)
+	{
+		*this << intInfo.prefix;
+		return appendInt<Radix>(intInfo.x, intInfo.minLen, intInfo.leadChar, intInfo.upperCase);
+	}
+
+protected:
+	inline StringBuilder &operator <<(nullptr_t)
+	{
+		return *this;
+	}
+
+	template<unsigned Radix, typename T>
 	StringBuilder &appendInt(T x, int minLen = 0, char leadChar = ' ', bool upperCase = false)
 	{
 		static_assert(Radix >= 2 && Radix <= 36, "Radix must be between 2 and 36");
@@ -195,38 +213,43 @@ public:
 		return *this;
 	}
 
-	template <class T>
-	inline StringBuilder &appendDec(T x, int minLen = 0, char leadChar = ' ')
-	{
-		appendInt<10>(x, minLen, leadChar);
-
-		return *this;
-	}
-
-	template <class T>
-	inline StringBuilder &appendHex(T x, int minLen = 0, bool upperCase = true, char leadChar = '0')
-	{
-		appendInt<16>(x, minLen, leadChar, upperCase);
-
-		return *this;
-	}
-
-	template <class T>
-	inline StringBuilder &appendAddr(T addr, int minLen = 4, bool upperCase = true)
-	{
-		*(end++) = '$';
-		return appendHex(addr, minLen, upperCase);
-	}
-
-	template <class T>
-	inline StringBuilder &appendLit(T x, int minLen = 2, bool upperCase = true)
-	{
-		*(end++) = '#';
-		*(end++) = '$';
-		return appendHex(x, minLen, upperCase);
-	}
-
-protected:
 	char *start;
 	char *end;
 };
+
+// Formatters for numbers
+
+// Generic integer with any radius
+template<unsigned Radix, typename T>
+inline StringBuilder::IntInfo<Radix, T> sb_int(T x, int minLen = 0, char leadChar = ' ', bool upperCase = false)
+{
+	return { x, minLen, leadChar, upperCase, nullptr };
+}
+
+// A decimal number
+template <typename T>
+inline StringBuilder::IntInfo<10, T> sb_dec(T x, int minLen = 0, char leadChar = ' ')
+{
+	return { x, minLen, leadChar, false, nullptr };
+}
+
+// A hex number
+template <typename T>
+inline StringBuilder::IntInfo<16, T> sb_hex(T x, int minLen = 0, bool upperCase = true, char leadChar = '0')
+{
+	return { x, minLen, leadChar, upperCase, nullptr };
+}
+
+// An address of the basic form $%x
+template <typename T>
+inline StringBuilder::IntInfo<16, T, char> sb_addr(T x, int minLen = 4, bool upperCase = true)
+{
+	return { x, minLen, '0', upperCase, '$' };
+}
+
+// A literal value of the form #$%x
+template <typename T>
+inline StringBuilder::IntInfo<16, T, const char *> sb_lit(T x, int minLen = 2, bool upperCase = true)
+{
+	return { x, minLen, '0', upperCase, "#$" };
+}

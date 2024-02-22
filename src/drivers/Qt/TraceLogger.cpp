@@ -915,15 +915,10 @@ traceRecord_t::traceRecord_t(void)
 //----------------------------------------------------
 int traceRecord_t::appendAsmText(const char *txt)
 {
-	int i = 0;
+	size_t len = strlen(txt);
+	memcpy(asmTxt + asmTxtSize, txt, len + 1);
 
-	while (txt[i] != 0)
-	{
-		asmTxt[asmTxtSize] = txt[i];
-		i++;
-		asmTxtSize++;
-	}
-	asmTxt[asmTxtSize] = 0;
+	asmTxtSize += len;
 
 	return 0;
 }
@@ -961,26 +956,26 @@ int traceRecord_t::convToText(char *txt, int *len)
 
 	StringBuilder sb(txt + i);
 	if (skippedLines > 0)
-		(sb << '(').appendDec(skippedLines) << " lines skipped) ";
+		sb << '(' << sb_dec(skippedLines) << " lines skipped) ";
 
 	// Start filling the str_temp line: Frame count, Cycles count, Instructions count, AXYS state, Processor status, Tabs, Address, Data, Disassembly
 	if (logging_options & LOG_FRAMES_COUNT)
-		(sb << 'f').appendDec(frameCount, -6);
+		sb << 'f' << sb_dec(frameCount, -6);
 
 	if (logging_options & LOG_CYCLES_COUNT)
-		(sb << 'c').appendDec(cycleCount, -11);
+		sb << 'c' << sb_dec(cycleCount, -11);
 
 	if (logging_options & LOG_INSTRUCTIONS_COUNT)
-		(sb << 'i').appendDec(instrCount, -11);
+		sb << 'i' << sb_dec(instrCount, -11);
 
 	if (logging_options & LOG_REGISTERS)
 	{
 		StringBuilder sb(str_axystate);
-		(sb << "A:").appendHex(cpu.A, 2);
-		(sb << " X:").appendHex(cpu.X, 2);
-		(sb << " Y:").appendHex(cpu.Y, 2);
-		(sb << " S:").appendHex(cpu.S, 2);
-		sb << ' ';
+		sb << "A:" << sb_hex(cpu.A, 2)
+			<< " X:" << sb_hex(cpu.X, 2)
+			<< " Y:" << sb_hex(cpu.Y, 2)
+			<< " S:" << sb_hex(cpu.S, 2)
+			<< ' ';
 	}
 
 	if (logging_options & LOG_PROCESSOR_STATUS)
@@ -1020,24 +1015,24 @@ int traceRecord_t::convToText(char *txt, int *len)
 	if (logging_options & LOG_BANK_NUMBER)
 	{
 		if (cpu.PC >= 0x8000)
-			sb.appendAddr((uint8_t)bank, 2) << ':';
+			sb << sb_addr((uint8_t)bank, 2) << ':';
 		else
 			sb << "  $";
 	}
 	else
 		sb << '$';
 
-	sb.appendHex(cpu.PC, 4) << ": ";
+	sb << sb_hex(cpu.PC, 4) << ": ";
 
 	for (j = 0; j < opSize; j++)
-		sb.appendHex(opCode[j], 2) << ' ';
+		sb << sb_hex(opCode[j], 2) << ' ';
 	for (; j < 3; j++)
 		sb << "   ";
 
 	sb << asmTxt;
 
 	if (callAddr >= 0)
-		(sb << " (from ").appendAddr((uint16_t)callAddr) << ')';
+		sb << " (from " << sb_addr((uint16_t)callAddr) << ')';
 
 	if (!(logging_options & LOG_TO_THE_LEFT))
 	{

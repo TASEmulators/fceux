@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <string>
 
+// High-performance class for writing a series of text lines to a file, using overlapped, unbuffered I/O
+// Works on Windows builds both SDL/Qt and non-SQL/Qt
+// Apart from getLastError, the entire API can be adapted to other OS with no client changes
 class TraceFileWriter
 {
 public:
@@ -13,6 +16,7 @@ public:
 
 	inline TraceFileWriter()
 	{
+		// Windows Vista API that allows setting the end of file without closing and reopening it
 		HMODULE kernel32 = GetModuleHandleA("kernel32");
 		SetFileInformationByHandle = kernel32 ? (SetFileInformationByHandlePtr)GetProcAddress(kernel32, "SetFileInformationByHandle") : nullptr;
 
@@ -30,14 +34,16 @@ public:
 		return isOpen;
 	}
 
+	// SUPPOSED to always be valid (ERROR_SUCCESS if no error), but bugs may make it only valid after a failure
 	inline DWORD getLastError() const
 	{
 		return lastErr;
 	}
 
+	// Open the file and allocate all necessary resources
 	bool open(const char *fileName, bool isPaused = false)
 	{
-		HANDLE file = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_WRITE_THROUGH | FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED, NULL);
+		HANDLE file = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_FLAG_WRITE_THROUGH | FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED, nullptr);
 		if (file == INVALID_HANDLE_VALUE)
 		{
 			lastErr = GetLastError();
@@ -46,6 +52,7 @@ public:
 
 		initialize(false, isPaused, fileName, file);
 
+		// Allocate resources
 		do
 		{
 			for (unsigned i = 0; i < 2; i++)
@@ -70,11 +77,13 @@ public:
 		} while (false);
 
 		if (!isOpen)
+			// Free resources on failure
 			cleanup();
 
 		return isOpen;
 	}
 
+	// Close the file and free resources
 	void close()
 	{
 		if (!isOpen)
@@ -91,16 +100,19 @@ public:
 		cleanup();
 	}
 
+	// When going from unpaused to paused, flush file and set end of file so it can be accessed externally
 	bool setPause(bool isPaused)
 	{
 		if (isPaused && !this->isPaused)
 		{
+			// Wait for any outstanding writes to complete
 			for (unsigned i = 0; i < 2; i++)
 			{
 				if (!waitForBuffer(i))
 					return false;
 			}
 
+			// Write out anything still in the buffer
 			if (!writeTail())
 				return false;
 		}
@@ -111,6 +123,8 @@ public:
 		return true;
 	}
 
+	// Add a line to the buffer and write it out when the buffer is filled
+	// Under most failure cirumstances the line is added to the buffer
 	bool writeLine(const char *line)
 	{
 		if (!isOpen)
@@ -119,20 +133,23 @@ public:
 			return false;
 		}
 
+		// Add to buffer
+		static const char eol[] = "\r\n";
+		size_t eolSize = strlen(eol);
 		char *buff = buffers[buffIdx];
-		OVERLAPPED *ovl = &ovls[buffIdx];
-
 		size_t lineLen = strlen(line);
-		if (buffOffs + lineLen + 1 > BuffSize)
+		if (buffOffs + lineLen + eolSize > BuffSize)
 		{
+			// Buffer is full. This shouldn't ever happen.
 			lastErr = ERROR_INTERNAL_ERROR;
 			return false;
 		}
 
 		memcpy(buff + buffOffs, line, lineLen);
-		buffOffs += lineLen;
-		buff[buffOffs++] = '\n';
+		memcpy(buff + buffOffs + lineLen, eol, eolSize);
+		buffOffs += lineLen + eolSize;
 
+		// Check if the previous write is done, to detect it as early as possible
 		unsigned prevBuff = (buffIdx + 1) % 2;
 		if (!waitForBuffer(prevBuff, 0) && lastErr != ERROR_TIMEOUT)
 			return false;
@@ -142,35 +159,45 @@ public:
 		if (buffOffs < FlushSize)
 			return true;
 
-		DWORD writeSize = buffOffs - (buffOffs % BlockSize);
-		if (!beginWrite(writeSize))
+		return writeBlocks();
+	}
+
+	// Flush buffer contents. Writes partial blocks, but does NOT set end of file
+	// Do NOT call frequently, as writes may be significantly undersized and cause poor performance
+	bool flush()
+	{
+		if (!isOpen)
+		{
+			lastErr = ERROR_FILE_NOT_FOUND;
+			return false;
+		}
+
+		// Write full blocks, if any
+		if (!writeBlocks())
 			return false;
 
-		bool isAsync = bytesToWrite[buffIdx] != INVALID_FILE_SIZE;
-		if (isAsync)
+		char *buff = buffers[buffIdx];
+		if (buffOffs != 0)
 		{
-			if (!waitForBuffer(prevBuff))
+			// Write out partial block at the tail
+			size_t writeSize = (buffOffs + BlockSize - 1) & ~(BlockSize - 1);
+			memset(buff + buffOffs, ' ', writeSize - buffOffs);
+
+			if (!beginWrite(writeSize)
+				|| !waitForBuffer(buffIdx))
 				return false;
 
-			// Switch to next buffer
-
-			memcpy(buffers[prevBuff], buff + writeSize, buffOffs - writeSize);
-			buffOffs -= writeSize;
-
-			fileOffs += writeSize;
-
-			buffIdx = prevBuff;
+			// Do NOT update buffIdx, buffOffs, or fileOffs, as the partial block must be overwritten later
 		}
-		else
+
+		// Wait for all writes to complete
+		for (unsigned i = 0; i < 2; i++)
 		{
-			// Stick with same buffer
-			memmove(buff, buff + writeSize, buffOffs - writeSize);
-
-			buffOffs -= writeSize;
+			if (!waitForBuffer(i))
+				return false;
 		}
 
-		bytesToWrite[buffIdx] = INVALID_FILE_SIZE;
-
+		lastErr = ERROR_SUCCESS;
 		return true;
 	}
 
@@ -184,6 +211,8 @@ protected:
 
 	SetFileInformationByHandlePtr SetFileInformationByHandle;
 
+	const size_t NO_WRITE = size_t(-1);
+
 	DWORD lastErr;
 
 	bool isOpen;
@@ -192,14 +221,16 @@ protected:
 	std::string fileName;
 	HANDLE file;
 
+	// Double-buffers
 	char *buffers[2];
 	OVERLAPPED ovls[2];
-	size_t bytesToWrite[2];
+	size_t bytesToWrite[2]; // Write in progress size or size_t(-1) if none
 
 	unsigned buffIdx;
 	size_t buffOffs;
 	uint64_t fileOffs;
 
+	// Put the class into a defined state, but does NOT allocate resources
 	void initialize(bool isOpen = false, bool isPaused = false, const char *fileName = "", HANDLE file = INVALID_HANDLE_VALUE)
 	{
 		lastErr = ERROR_SUCCESS;
@@ -213,7 +244,7 @@ protected:
 		for (unsigned i = 0; i < 2; i++)
 		{
 			buffers[i] = nullptr;
-			bytesToWrite[i] = INVALID_FILE_SIZE;
+			bytesToWrite[i] = NO_WRITE;
 		}
 
 		memset(ovls, 0, sizeof(ovls));
@@ -223,6 +254,7 @@ protected:
 		fileOffs = 0;
 	}
 
+	// Close file and release resources. Does NOT wait for writes to complete.
 	void cleanup()
 	{
 		isOpen = false;
@@ -245,9 +277,52 @@ protected:
 		}
 	}
 
+	// Write out as many blocks as present in the buffer
+	bool writeBlocks()
+	{
+		if (buffOffs < BlockSize)
+			return true;
+
+		char *buff = buffers[buffIdx];
+		unsigned prevBuff = (buffIdx + 1) % 2;
+		OVERLAPPED *ovl = &ovls[buffIdx];
+
+		DWORD writeSize = buffOffs - (buffOffs % BlockSize);
+		if (!beginWrite(writeSize))
+			return false;
+
+		bool isAsync = bytesToWrite[buffIdx] != NO_WRITE;
+		if (isAsync)
+		{
+			if (!waitForBuffer(prevBuff))
+				return false; // Catastrophic failure case
+
+			// Switch to next buffer
+
+			memcpy(buffers[prevBuff], buff + writeSize, buffOffs - writeSize);
+			buffOffs -= writeSize;
+
+			fileOffs += writeSize;
+
+			buffIdx = prevBuff;
+		}
+		else
+		{
+			// Stick with same buffer
+			memmove(buff, buff + writeSize, buffOffs - writeSize);
+
+			buffOffs -= writeSize;
+		}
+
+		bytesToWrite[buffIdx] = NO_WRITE;
+
+		return true;
+	}
+
+	// Begin a write and handle errors without updating class state
 	bool beginWrite(size_t writeSize)
 	{
-		bytesToWrite[buffIdx] = INVALID_FILE_SIZE;
+		bytesToWrite[buffIdx] = NO_WRITE;
 
 		if (writeSize % BlockSize != 0)
 		{
@@ -281,21 +356,12 @@ protected:
 		return !lastErr;
 	}
 
-	bool writeTail()
+	// Set the end of file so it can be accessed
+	bool setEndOfFile()
 	{
-		char *buff = buffers[buffIdx];
-		if (buffOffs != 0)
-		{
-			size_t writeSize = (buffOffs + BlockSize - 1) & ~(BlockSize - 1);
-			memset(buff + buffOffs, ' ', writeSize - buffOffs);
-
-			if (!beginWrite(writeSize)
-				|| !waitForBuffer(buffIdx))
-				return false;
-		}
-
 		if (SetFileInformationByHandle != nullptr)
 		{
+			// Easy case: Vista or better
 			FILE_END_OF_FILE_INFO eofInfo;
 			eofInfo.EndOfFile.QuadPart = int64_t(fileOffs + buffOffs);
 
@@ -304,29 +370,89 @@ protected:
 				lastErr = GetLastError();
 				return false;
 			}
-		}
 
-		return true;
+			lastErr = ERROR_SUCCESS;
+			return true;
+		}
+		else
+		{
+			// Hard case: XP
+			// If set EOF fails, make a desperate attempt to reopen the file and keep running
+			lastErr = ERROR_SUCCESS;
+			do
+			{
+				// Set EOF to fileOffs rounded up to the next block
+				LARGE_INTEGER tgtOffs;
+				tgtOffs.QuadPart = (fileOffs + buffOffs + BlockSize - 1) & ~(BlockSize - 1);
+				LARGE_INTEGER newOffs;
+
+				if (!SetFilePointerEx(file, tgtOffs, &newOffs, FILE_BEGIN)
+					|| !SetEndOfFile(file))
+					break;
+				
+				CloseHandle(file);
+
+				// Open file with buffering so the exact byte size can be set
+				tgtOffs.QuadPart = fileOffs + buffOffs;
+
+				file = CreateFile(fileName.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+				if (file != INVALID_HANDLE_VALUE)
+				{
+					if (!SetFilePointerEx(file, tgtOffs, &newOffs, FILE_BEGIN)
+						|| !SetEndOfFile(file))
+						lastErr = GetLastError();
+
+					CloseHandle(file);
+				}
+				else
+					lastErr = GetLastError();
+
+				// Finally, reopen the file in original mode
+				file = CreateFile(fileName.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+					FILE_FLAG_WRITE_THROUGH | FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED, nullptr);
+				if (file == INVALID_HANDLE_VALUE || lastErr)
+					break;
+
+				lastErr = ERROR_SUCCESS;
+				return true;
+			} while (false);
+
+			// Failed
+			if (!lastErr)
+				lastErr = GetLastError();
+
+			return false;
+		}
 	}
 
+	// Write out everything in the buffer and set the file end for pausing
+	inline bool writeTail()
+	{
+		return flush() && setEndOfFile();
+	}
+
+	// Wait for an a buffer to become available, waiting for write completion if necessary
 	bool waitForBuffer(unsigned buffIdx, DWORD timeout = INFINITE)
 	{
 		if (buffIdx >= 2)
 			lastErr = ERROR_INTERNAL_ERROR;
-		else if (bytesToWrite[buffIdx] == INVALID_FILE_SIZE)
+		else if (bytesToWrite[buffIdx] == NO_WRITE)
+			// No write in progress
 			lastErr = ERROR_SUCCESS;
 		else
 		{
+			// Wait for the operation to complete
 			DWORD waitRes = WaitForSingleObject(ovls[buffIdx].hEvent, timeout);
 			if (waitRes == WAIT_TIMEOUT)
 				lastErr = ERROR_TIMEOUT;
 			else if (waitRes != WAIT_OBJECT_0)
 			{
 				lastErr = GetLastError();
-				bytesToWrite[buffIdx] = INVALID_FILE_SIZE;
+				bytesToWrite[buffIdx] = NO_WRITE;
 			}
 			else
 			{
+				// Verify it succeeded
 				DWORD prevBytesWritten;
 				if (!GetOverlappedResult(file, &ovls[buffIdx], &prevBytesWritten, FALSE))
 					lastErr = GetLastError();
@@ -335,7 +461,7 @@ protected:
 				else
 					lastErr = ERROR_SUCCESS;
 
-				bytesToWrite[buffIdx] = INVALID_FILE_SIZE;
+				bytesToWrite[buffIdx] = NO_WRITE;
 			}
 		}
 

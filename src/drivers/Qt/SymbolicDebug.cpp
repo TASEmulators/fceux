@@ -62,7 +62,7 @@ debugSymbol_t *replaceSymbols( int flags, int addr, char *str )
 
 	if ( !sym || !( flags & ASM_DEBUG_REPLACE ) )
 	{
-		(sb << '$').appendHex( addr, flags & ASM_DEBUG_ADDR_02X ? 2 : 4 );
+		sb << sb_addr( addr, flags & ASM_DEBUG_ADDR_02X ? 2 : 4 );
 
 		if ( sym )
 			sb << ' ';
@@ -169,7 +169,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 			if ( symDebugEnable )
 				sym = replaceSymbols( flags, tmp, stmp );
 
-			(sb << chr << " (").appendAddr(opcode[1], 2) << ',' << indReg << ')';
+			sb << chr << " (" << sb_addr(opcode[1], 2) << ',' << indReg << ')';
 
 			if (showTrace)
 			{
@@ -177,9 +177,9 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 				if (symDebugEnable)
 					sb << stmp;
 				else
-					sb.appendAddr(tmp);
+					sb << sb_addr(tmp);
 
-				(sb << " = ").appendLit(GetMem(tmp));
+				sb << " = " << sb_lit(GetMem(tmp));
 			}
 			break;
 
@@ -216,10 +216,10 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 				sb << stmp;
 			}
 			else
-				sb.appendAddr(opcode[1], 2);
+				sb << sb_addr(opcode[1], 2);
 
 			if (showTrace)
-				(sb << " = ").appendLit(GetMem(opcode[1]));
+				sb << " = " << sb_lit(GetMem(opcode[1]));
 
 		// ################################## End of SP CODE ###########################
 			break;
@@ -238,7 +238,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		case 0xE0: chr = "CPX"; goto _immediate;
 		case 0xE9: chr = "SBC"; goto _immediate;
 		_immediate:
-			(sb << chr << ' ').appendLit(opcode[1]);
+			sb << chr << ' ' << sb_lit(opcode[1]);
 			break;
 
 		//Absolute
@@ -273,10 +273,10 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 				sb << stmp;
 			}
 			else
-				sb.appendAddr(tmp);
+				sb << sb_addr(tmp);
 
 			if (showTrace)
-				(sb << " = ").appendLit(GetMem(tmp));
+				sb << " = " << sb_lit(GetMem(tmp));
 
 			break;
 
@@ -299,7 +299,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 				sb << stmp;
 			}
 			else
-				sb.appendAddr(tmp);
+				sb << sb_addr(tmp);
 
 			break;
 
@@ -345,16 +345,16 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 			if ( symDebugEnable )
 				sym = replaceSymbols( flags, tmp, stmp );
 				
-			(sb << chr << ' ').appendAddr(opcode[1], 2) << ',' << indReg;
+			sb << chr << ' ' << sb_addr(opcode[1], 2) << ',' << indReg;
 			if (showTrace)
 			{
 				sb << " @ ";
 				if (symDebugEnable)
 					sb << stmp;
 				else
-					sb.appendAddr(tmp);
+					sb << sb_addr(tmp);
 
-				(sb << " = ").appendLit(GetMem(tmp));
+				sb << " = " << sb_lit(GetMem(tmp));
 			}
 		// ################################## End of SP CODE ###########################
 			break;
@@ -383,7 +383,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 				sb << stmp;
 			}
 			else
-				sb.appendAddr(tmp);
+				sb << sb_addr(tmp);
 
 			sb << ',' << indReg;
 
@@ -393,9 +393,9 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 				if (symDebugEnable)
 					sb << stmp2;
 				else
-					sb.appendAddr(tmp2);
+					sb << sb_addr(tmp2);
 
-				(sb << " = ").appendLit(GetMem(tmp2));
+				sb << " = " << sb_lit(GetMem(tmp2));
 			}
 
 			break;
@@ -436,15 +436,15 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 				sb << stmp;
 			}
 			else
-				sb.appendAddr(tmp);
+				sb << sb_addr(tmp);
 
 			break;
 
 		case 0x6C:
 			absolute(tmp); 
 
-			(sb << "JMP (").appendAddr(tmp);
-			(sb << ") = ").appendAddr(GetMem(tmp) | GetMem(tmp + 1) << 8);
+			sb << "JMP (" << sb_addr(tmp);
+			sb << ") = " << sb_addr(GetMem(tmp) | GetMem(tmp + 1) << 8);
 			
 			break;
 
