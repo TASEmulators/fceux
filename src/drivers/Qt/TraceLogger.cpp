@@ -2417,7 +2417,6 @@ TraceLogDiskThread_t::~TraceLogDiskThread_t(void)
 void TraceLogDiskThread_t::run(void)
 {
 	char line[256];
-	unsigned idx = 0;
 	const unsigned blockSize = 4 * 1024;
 	bool dataNeedsFlush = true;
 	bool isPaused = false;
@@ -2462,7 +2461,6 @@ void TraceLogDiskThread_t::run(void)
 
 		logBuf = (traceRecord_t *)malloc(size);
 	}
-	idx = 0;
 
 	while ( !isInterruptionRequested() )
 	{
