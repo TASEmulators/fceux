@@ -31,6 +31,7 @@
 #include "../../ines.h"
 #include "../../asm.h"
 #include "../../x6502.h"
+#include "utils/StringBuilder.h"
 
 #include "Qt/fceuWrapper.h"
 #include "Qt/SymbolicDebug.h"

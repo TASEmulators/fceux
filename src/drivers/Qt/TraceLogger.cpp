@@ -57,6 +57,7 @@
 #include "../../movie.h"
 
 #include "common/os_utils.h"
+#include "utils/StringBuilder.h"
 
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
