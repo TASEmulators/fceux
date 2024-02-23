@@ -59,6 +59,57 @@ public:
 		return appendInt<Radix>(intInfo.x, intInfo.minLen, intInfo.leadChar, intInfo.upperCase);
 	}
 
+	// Append an array of characters that may or may not be null-terminated
+	StringBuilder &appendSubstr(const char *str, size_t maxLen)
+	{
+		size_t len = std::strlen(str),
+			copyLen = len <= maxLen ? len : maxLen;
+
+		std::memcpy(end, str, copyLen);
+		end += len;
+		*end = '\0';
+
+		return *this;
+	}
+
+	// Substitute for strncpy/strncat
+	// maxLen is the TOTAL size, including what's already built
+	// If alwaysAppendNull the last character will always be null
+	StringBuilder &appendStr(const char *str, size_t maxLen, bool alwaysAddNull = true)
+	{
+		size_t len = std::strlen(str),
+			curLen = size(),
+			lenLeft = maxLen - curLen;
+
+		if (len < lenLeft)
+		{
+			std::memcpy(end, str, len + 1);
+			end += len;
+		}
+		else if (!alwaysAddNull)
+		{
+			// strncpy/strncat case: no terminating null
+			std::memcpy(end, str, lenLeft);
+			end += lenLeft;
+		}
+		else
+		{
+			// strncpy_s/strncat_s case: always null-terminate
+			if (lenLeft != 0)
+			{
+				size_t copyLen = lenLeft - 1;
+				std::memcpy(end, str, copyLen);
+
+				end += copyLen;
+				*end = '\0';
+			}
+			else
+				end[-1] = '\0';
+		}
+
+		return *this;
+	}
+
 protected:
 	inline StringBuilder &operator <<(nullptr_t)
 	{

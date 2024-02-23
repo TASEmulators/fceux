@@ -125,7 +125,7 @@ public:
 
 	// Add a line to the buffer and write it out when the buffer is filled
 	// Under most failure cirumstances the line is added to the buffer
-	bool writeLine(const char *line)
+	bool writeLine(const char *line, bool addEol = true)
 	{
 		if (!isOpen)
 		{
@@ -138,6 +138,7 @@ public:
 		size_t eolSize = strlen(eol);
 		char *buff = buffers[buffIdx];
 		size_t lineLen = strlen(line);
+		size_t copyLen = lineLen + (addEol ? eolSize : 0);
 		if (buffOffs + lineLen + eolSize > BuffSize)
 		{
 			// Buffer is full. This shouldn't ever happen.
@@ -146,7 +147,8 @@ public:
 		}
 
 		memcpy(buff + buffOffs, line, lineLen);
-		memcpy(buff + buffOffs + lineLen, eol, eolSize);
+		if (addEol)
+			memcpy(buff + buffOffs + lineLen, eol, eolSize);
 		buffOffs += lineLen + eolSize;
 
 		// Check if the previous write is done, to detect it as early as possible
@@ -202,7 +204,7 @@ public:
 	}
 
 protected:
-	typedef BOOL (*SetFileInformationByHandlePtr)(
+	typedef BOOL (WINAPI *SetFileInformationByHandlePtr)(
 		HANDLE                    hFile,
 		FILE_INFO_BY_HANDLE_CLASS FileInformationClass,
 		LPVOID                    lpFileInformation,

@@ -32,8 +32,10 @@
 #include "cdlogger.h"
 #include "tracer.h"
 #include "memview.h"
+#include "TraceFileWriter.h"
 #include "main.h" //for GetRomName()
 #include "utils/xstring.h"
+#include "utils/StringBuilder.h"
 
 //Used to determine the current hotkey mapping for the pause key in order to display on the dialog
 #include "mapinput.h"
@@ -132,7 +134,7 @@ bool log_old_emu_paused = true;		// thanks to this flag the window only updates 
 extern bool JustFrameAdvanced;
 extern int currFrameCounter;
 
-FILE *LOG_FP;
+TraceFileWriter fileWriter;
 
 char trace_str[35000] = {0};
 WNDPROC IDC_TRACER_LOG_oldWndProc = 0;
@@ -686,14 +688,13 @@ void BeginLoggingSequence(void)
 	{
 		if(logfilename == NULL) ShowLogDirDialog();
 		if (!logfilename) return;
-		LOG_FP = fopen(logfilename,"w");
-		if (LOG_FP == NULL)
+		if (!fileWriter.open(logfilename, false))
 		{
 			sprintf(trace_str, "Error Opening File %s", logfilename);
 			MessageBox(hTracer, trace_str, "File Error", MB_OK);
 			return;
 		}
-		fprintf(LOG_FP,FCEU_NAME_AND_VERSION" - Trace Log File\n"); //mbg merge 7/19/06 changed string
+		fileWriter.writeLine(FCEU_NAME_AND_VERSION" - Trace Log File");
 	} else
 	{
 		ClearTraceLogBuf();
@@ -734,8 +735,8 @@ void BeginLoggingSequence(void)
 
 void FCEUD_FlushTrace()
 {
-	if(LOG_FP)
-		fflush(LOG_FP);
+	if(fileWriter.getOpen())
+		fileWriter.flush();
 }
 
 //todo: really speed this up
@@ -745,8 +746,8 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		return;
 
 	unsigned int addr = X.PC;
-	uint8 tmp;
 	static int unloggedlines;
+	StringBuilder dataSb(str_data), dasmSb(str_disassembly), resSb(str_result);
 
 	// if instruction executed from the RAM, skip this, log all instead
 	// TODO: loops folding mame-lyke style
@@ -760,7 +761,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			olddatacount = datacount;
 			if(unloggedlines > 0)
 			{
-				sprintf(str_result, "(%d lines skipped)", unloggedlines);
+				resSb << '(' << sb_dec(unloggedlines) << " lines skipped)";
 				OutputLogLine(str_result);
 				unloggedlines = 0;
 			}
@@ -778,20 +779,22 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 
 	if ((addr + size) > 0xFFFF)
 	{
-		sprintf(str_data, "%02X        ", opcode[0]);
-		sprintf(str_disassembly, "OVERFLOW");
+		dataSb << sb_hex(opcode[0], 2) << "        ";
+		dasmSb << "OVERFLOW";
 	} else
 	{
 		char* a = 0;
 		switch (size)
 		{
 			case 0:
-				sprintf(str_data, "%02X        ", opcode[0]);
-				sprintf(str_disassembly,"UNDEFINED");
+				dataSb << sb_hex(opcode[0], 2) << "        ";
+				dasmSb << "UNDEFINED";
 				break;
 			case 1:
 			{
-				sprintf(str_data, "%02X        ", opcode[0]);
+				StringBuilder decSb(str_decoration);
+
+				dataSb << sb_hex(opcode[0], 2) << "        ";
 				a = Disassemble(addr + 1, opcode);
 				// special case: an RTS opcode
 				if (opcode[0] == 0x60)
@@ -802,18 +805,18 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 					{
 						// this was a JSR instruction - take the subroutine address from it
 						unsigned int call_addr = GetMem(caller_addr + 1) + (GetMem(caller_addr + 2) << 8);
-						sprintf(str_decoration, " (from $%04X)", call_addr);
+						decSb << " (from " << sb_addr(call_addr) << ')';
 						strcat(a, str_decoration);
 					}
 				}
 				break;
 			}
 			case 2:
-				sprintf(str_data, "%02X %02X     ", opcode[0],opcode[1]);
+				dataSb << sb_hex(opcode[0], 2) << ' ' << sb_hex(opcode[1], 2) << "     ";
 				a = Disassemble(addr + 2, opcode);
 				break;
 			case 3:
-				sprintf(str_data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
+				dataSb << sb_hex(opcode[0], 2) << ' ' << sb_hex(opcode[1], 2) << ' ' << sb_hex(opcode[2], 2) << "  ";
 				a = Disassemble(addr + 3, opcode);
 				break;
 		}
@@ -822,6 +825,8 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		{
 			if (logging_options & LOG_SYMBOLIC)
 			{
+				StringBuilder decSb(str_decoration);
+
 				loadNameFiles();
 				tempAddressesLog.resize(0);
 				// Insert Name and Comment lines if needed
@@ -830,24 +835,22 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 				{
 					if (node->name)
 					{
-						strcpy(str_decoration, node->name);
-						strcat(str_decoration, ":");
+						decSb << node->name << ':';
 						tempAddressesLog.push_back(addr);
 						OutputLogLine(str_decoration, &tempAddressesLog);
 					}
 					if (node->comment)
 					{
 						// make a copy
-						strcpy(str_decoration_comment, node->comment);
-						strcat(str_decoration_comment, "\r\n");
+						StringBuilder cmtSb(str_decoration_comment);
+						cmtSb << node->comment << "\r\n";
 						tracer_decoration_comment = str_decoration_comment;
 						// divide the str_decoration_comment into strings (Comment1, Comment2, ...)
 						char* tracer_decoration_comment_end_pos = strstr(tracer_decoration_comment, "\r\n");
 						while (tracer_decoration_comment_end_pos)
 						{
 							tracer_decoration_comment_end_pos[0] = 0;		// set \0 instead of \r
-							strcpy(str_decoration, "; ");
-							strcat(str_decoration, tracer_decoration_comment);
+							decSb << "; " << tracer_decoration_comment;
 							OutputLogLine(str_decoration, &tempAddressesLog);
 							tracer_decoration_comment_end_pos += 2;
 							tracer_decoration_comment = tracer_decoration_comment_end_pos;
@@ -860,8 +863,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 				for(int i=0;i<ARRAY_SIZE(pageNames);i++)
 					replaceNames(pageNames[i], a, &tempAddressesLog);
 			}
-			strncpy(str_disassembly, a, LOG_DISASSEMBLY_MAX_LEN);
-			str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+			dasmSb.appendStr(a, LOG_DISASSEMBLY_MAX_LEN);
 		}
 	}
 
@@ -870,23 +872,19 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		// special case: an RTS opcode
 		// add "----------" to emphasize the end of subroutine
 		static const char* emphasize = " -------------------------------------------------------------------------------------------------------------------------";
-		strncat(str_disassembly, emphasize, LOG_DISASSEMBLY_MAX_LEN - strlen(str_disassembly) - 1);
+		dasmSb.appendStr(emphasize, LOG_DISASSEMBLY_MAX_LEN);
 	}
 	// stretch the disassembly string out if we have to output other stuff.
 	if ((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !(logging_options & LOG_TO_THE_LEFT))
 	{
-		for (int i = strlen(str_disassembly); i < (LOG_DISASSEMBLY_MAX_LEN - 1); ++i)
-			str_disassembly[i] = ' ';
-		str_disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
+		for (int i = dasmSb.size(); i < (LOG_DISASSEMBLY_MAX_LEN - 1); ++i)
+			dasmSb << ' ';
 	}
 
 	// Start filling the str_temp line: Frame count, Cycles count, Instructions count, AXYS state, Processor status, Tabs, Address, Data, Disassembly
 	if (logging_options & LOG_FRAMES_COUNT)
 	{
-		sprintf(str_result, "f%-6u ", currFrameCounter);
-	} else
-	{
-		str_result[0] = 0;
+		resSb << 'f' << sb_dec((unsigned)currFrameCounter, -6) << ' ';
 	}
 	if (logging_options & LOG_CYCLES_COUNT)
 	{
@@ -896,77 +894,74 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			ResetDebugStatisticsCounters();
 			counter_value = 0;
 		}
-		sprintf(str_temp, "c%-11llu ", counter_value);
-		strcat(str_result, str_temp);
+		resSb << 'c' << sb_dec((uint64_t)counter_value, -11) << ' ';
 	}
 	if (logging_options & LOG_INSTRUCTIONS_COUNT)
 	{
-		sprintf(str_temp, "i%-11llu ", total_instructions);
-		strcat(str_result, str_temp);
+		resSb << 'i' << sb_dec(total_instructions, -11) << ' ';
 	}
 	
 	if (logging_options & LOG_REGISTERS)
 	{
-		sprintf(str_axystate,"A:%02X X:%02X Y:%02X S:%02X ",(X.A),(X.X),(X.Y),(X.S));
+		StringBuilder sb(str_axystate);
+		sb << "A:" << sb_hex(X.A, 2) << " X:" << sb_hex(X.X, 2) << " Y:" << sb_hex(X.Y, 2) << " S:" << sb_hex(X.S, 2) << ' ';
 	}
 	
 	if (logging_options & LOG_PROCESSOR_STATUS)
 	{
-		tmp = X.P^0xFF;
-		sprintf(str_procstatus,"P:%c%c%c%c%c%c%c%c ",
-			'N'|(tmp&0x80)>>2,
-			'V'|(tmp&0x40)>>1,
-			'U'|(tmp&0x20),
-			'B'|(tmp&0x10)<<1,
-			'D'|(tmp&0x08)<<2,
-			'I'|(tmp&0x04)<<3,
-			'Z'|(tmp&0x02)<<4,
-			'C'|(tmp&0x01)<<5
-			);
+		char *s = str_procstatus;
+		*(s++) = X.P & 0x80 ? 'N' : 'n';
+		*(s++) = X.P & 0x40 ? 'V' : 'v';
+		*(s++) = X.P & 0x20 ? 'U' : 'u';
+		*(s++) = X.P & 0x10 ? 'B' : 'b';
+		*(s++) = X.P & 0x08 ? 'D' : 'd';
+		*(s++) = X.P & 0x04 ? 'I' : 'i';
+		*(s++) = X.P & 0x02 ? 'Z' : 'z';
+		*(s++) = X.P & 0x01 ? 'C' : 'c';
+		*(s++) = ' ';
+		*(s++) = '\0';
 	}
 
 	if (logging_options & LOG_TO_THE_LEFT)
 	{
 		if (logging_options & LOG_REGISTERS)
-			strcat(str_result, str_axystate);
+			resSb << str_axystate;
 		if (logging_options & LOG_PROCESSOR_STATUS)
-			strcat(str_result, str_procstatus);
+			resSb << str_procstatus;
 	}
 
 	if (logging_options & LOG_CODE_TABBING)
 	{
 		// add spaces at the beginning of the line according to stack pointer
 		int spaces = (0xFF - X.S) & LOG_TABS_MASK;
-		for (int i = 0; i < spaces; i++)
-			str_tabs[i] = ' ';
+		std::memset(str_tabs, ' ', spaces);
 		str_tabs[spaces] = 0;
-		strcat(str_result, str_tabs);
+		resSb << str_tabs;
 	} else if (logging_options & LOG_TO_THE_LEFT)
 	{
-		strcat(str_result, " ");
+		resSb << ' ';
 	}
 
 	if (logging_options & LOG_BANK_NUMBER)
 	{
 		if (addr >= 0x8000)
-			sprintf(str_address, "$%02X:%04X: ", getBank(addr), addr);
+			resSb << sb_addr(getBank(addr), 2) << ':' << sb_hex(addr, 4);
 		else
-			sprintf(str_address, "  $%04X: ", addr);
+			resSb << "  " << sb_addr(addr);
 	} else
 	{
-		sprintf(str_address, "$%04X: ", addr);
+		resSb << sb_addr(addr);
 	}
-
-	strcat(str_result, str_address);
-	strcat(str_result, str_data);
-	strcat(str_result, str_disassembly);
+	
+	resSb << ": " << str_data;
+	resSb << str_disassembly;
 
 	if (!(logging_options & LOG_TO_THE_LEFT))
 	{
 		if (logging_options & LOG_REGISTERS)
-			strcat(str_result, str_axystate);
+			resSb << str_axystate;
 		if (logging_options & LOG_PROCESSOR_STATUS)
-			strcat(str_result, str_procstatus);
+			resSb << str_procstatus;
 	}
 
 	OutputLogLine(str_result, &tempAddressesLog);
@@ -978,9 +973,7 @@ void OutputLogLine(const char *str, std::vector<uint16>* addressesLog, bool add_
 {
 	if (logtofile)
 	{
-		fputs(str, LOG_FP);
-		if (add_newline)
-			fputs("\n", LOG_FP);
+		fileWriter.writeLine(str, add_newline);
 	} else
 	{
 		if (add_newline)
@@ -1025,7 +1018,7 @@ void EndLoggingSequence()
 {
 	if (logtofile)
 	{
-		fclose(LOG_FP);
+		fileWriter.close();
 	} else
 	{
 		strcpy(str_result, "Logging finished.");
