@@ -924,21 +924,6 @@ int traceRecord_t::appendAsmText(const char *txt)
 	return 0;
 }
 //----------------------------------------------------
-static int convToXchar(int i)
-{
-	int c = 0;
-
-	if ((i >= 0) && (i < 10))
-	{
-		c = i + '0';
-	}
-	else if (i < 16)
-	{
-		c = (i - 10) + 'A';
-	}
-	return c;
-}
-//----------------------------------------------------
 int traceRecord_t::convToText(char *txt, int *len)
 {
 	int i = 0, j = 0;
@@ -2438,7 +2423,7 @@ void TraceLogDiskThread_t::run(void)
 	const unsigned bufSize = blockSize * 2;
 	const unsigned flushSize = blockSize;
 	char buf[bufSize];
-	int i, idx=0;
+	unsigned int i, idx=0;
 
 	logFile = open( logFilePath.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 
 			S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
