@@ -96,7 +96,7 @@ void consoleWin_t::OpenHelpWindow(QString subpage)
 	helpWin = HtmlHelpA( HWND(winId()), helpFileName.toLocal8Bit().constData(), HH_DISPLAY_TOPIC, (DWORD)NULL);
 	if ( helpWin == NULL )
 	{
-		printf("Error: Failed to open help file '%s'\n", helpFileName.c_str() );
+		printf("Error: Failed to open help file '%s'\n", helpFileName.toLocal8Bit().constData() );
 	}
 #else
 	if ( helpWin > 0 )

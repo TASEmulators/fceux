@@ -367,7 +367,11 @@ bool FCEU_IsValidUI(EFCEUI ui);
 
 #ifdef __cplusplus
 extern "C"
+{
 #endif
-FILE *FCEUI_UTF8fopen_C(const char *n, const char *m);
+	FILE *FCEUI_UTF8fopen_C(const char *n, const char *m);
+#ifdef __cplusplus
+} // extern C
+#endif
 
 #endif //__DRIVER_H_
