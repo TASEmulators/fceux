@@ -368,7 +368,7 @@ void GameGenieDialog_t::ggChanged(const QString &s)
 
 	if ( a >= 0 )
 	{
-		sprintf( stmp, "%04X", a );
+		snprintf( stmp, sizeof(stmp), "%04X", a );
 
 		addr->setText( tr(stmp) );
 	}
@@ -379,7 +379,7 @@ void GameGenieDialog_t::ggChanged(const QString &s)
 
 	if ( v >= 0 )
 	{
-		sprintf( stmp, "%02X", v );
+		snprintf( stmp, sizeof(stmp), "%02X", v );
 
 		val->setText( tr(stmp) );
 	}
@@ -390,7 +390,7 @@ void GameGenieDialog_t::ggChanged(const QString &s)
 
 	if ( c >= 0 )
 	{
-		sprintf( stmp, "%02X", c );
+		snprintf( stmp, sizeof(stmp), "%02X", c );
 
 		cmp->setText( tr(stmp) );
 	}
@@ -467,7 +467,7 @@ void GameGenieDialog_t::ListGGAddresses(void)
 			{
 				item = new QTreeWidgetItem();
 
-				sprintf(str, "%06X", i + (a & 0x1FFF) + 0x10);
+				snprintf(str, sizeof(str), "%06X", i + (a & 0x1FFF) + 0x10);
 
 				//printf("Added ROM ADDR: %s\n", str );
 				item->setText( 0, tr(str) );

@@ -332,7 +332,7 @@ void ConsoleSndConfDialog_t::periodicUpdate(void)
 
 	bufUsage->setValue( (int)(percBufUse) );
 
-	sprintf( stmp, "Sink Starve Count: %u", nes_shm->sndBuf.starveCounter );
+	snprintf( stmp, sizeof(stmp), "Sink Starve Count: %u", nes_shm->sndBuf.starveCounter );
 
 	starveLbl->setText( tr(stmp) );
 
@@ -396,7 +396,7 @@ void ConsoleSndConfDialog_t::setSliderFromProperty(QSlider *slider, QLabel *lbl,
 	char stmp[32];
 	g_config->getOption(property, &pval);
 	slider->setValue(pval);
-	sprintf(stmp, "%i", pval);
+	snprintf(stmp, sizeof(stmp), "%i", pval);
 	lbl->setText(stmp);
 }
 //----------------------------------------------------
@@ -404,7 +404,7 @@ void ConsoleSndConfDialog_t::bufSizeChanged(int value)
 {
 	char stmp[32];
 
-	sprintf(stmp, "%i", value);
+	snprintf(stmp, sizeof(stmp), "%i", value);
 
 	bufSizeLabel->setText(stmp);
 
@@ -422,7 +422,7 @@ void ConsoleSndConfDialog_t::volumeChanged(int value)
 {
 	char stmp[32];
 
-	sprintf(stmp, "%i", value);
+	snprintf(stmp, sizeof(stmp), "%i", value);
 
 	volLbl->setText(stmp);
 
@@ -439,7 +439,7 @@ void ConsoleSndConfDialog_t::triangleChanged(int value)
 {
 	char stmp[32];
 
-	sprintf(stmp, "%i", value);
+	snprintf(stmp, sizeof(stmp), "%i", value);
 
 	triLbl->setText(stmp);
 
@@ -456,7 +456,7 @@ void ConsoleSndConfDialog_t::square1Changed(int value)
 {
 	char stmp[32];
 
-	sprintf(stmp, "%i", value);
+	snprintf(stmp, sizeof(stmp), "%i", value);
 
 	sqr1Lbl->setText(stmp);
 
@@ -473,7 +473,7 @@ void ConsoleSndConfDialog_t::square2Changed(int value)
 {
 	char stmp[32];
 
-	sprintf(stmp, "%i", value);
+	snprintf(stmp, sizeof(stmp), "%i", value);
 
 	sqr2Lbl->setText(stmp);
 
@@ -490,7 +490,7 @@ void ConsoleSndConfDialog_t::noiseChanged(int value)
 {
 	char stmp[32];
 
-	sprintf(stmp, "%i", value);
+	snprintf(stmp, sizeof(stmp), "%i", value);
 
 	nseLbl->setText(stmp);
 
@@ -507,7 +507,7 @@ void ConsoleSndConfDialog_t::pcmChanged(int value)
 {
 	char stmp[32];
 
-	sprintf(stmp, "%i", value);
+	snprintf(stmp, sizeof(stmp), "%i", value);
 
 	pcmLbl->setText(stmp);
 

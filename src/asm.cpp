@@ -286,7 +286,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 
 		#ifdef BRK_3BYTE_HACK
 			case 0x00:
-			sprintf(str,"BRK %02X %02X", opcode[1], opcode[2]);
+			snprintf(str, sizeof(str), "BRK %02X %02X", opcode[1], opcode[2]);
 			break;
 		#else
 			case 0x00: strcpy(str,"BRK"); break;
@@ -333,7 +333,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 		case 0xE1: strcpy(chr,"SBC"); goto _indirectx;
 		_indirectx:
 			indirectX(tmp);
-			sprintf(str,"%s ($%02X,X) @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+			snprintf(str, sizeof(str), "%s ($%02X,X) @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
 			break;
 
 		//Zero Page
@@ -361,7 +361,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 		_zeropage:
 		// ################################## Start of SP CODE ###########################
 		// Change width to %04X // don't!
-			sprintf(str,"%s $%02X = #$%02X", chr,opcode[1],GetMem(opcode[1]));
+			snprintf(str, sizeof(str), "%s $%02X = #$%02X", chr,opcode[1],GetMem(opcode[1]));
 		// ################################## End of SP CODE ###########################
 			break;
 
@@ -379,7 +379,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 		case 0xE0: strcpy(chr,"CPX"); goto _immediate;
 		case 0xE9: strcpy(chr,"SBC"); goto _immediate;
 		_immediate:
-			sprintf(str,"%s #$%02X", chr,opcode[1]);
+			snprintf(str, sizeof(str), "%s #$%02X", chr,opcode[1]);
 			break;
 
 		//Absolute
@@ -406,7 +406,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 		case 0xEE: strcpy(chr,"INC"); goto _absolute;
 		_absolute:
 			absolute(tmp);
-			sprintf(str,"%s $%04X = #$%02X", chr,tmp,GetMem(tmp));
+			snprintf(str, sizeof(str), "%s $%04X = #$%02X", chr,tmp,GetMem(tmp));
 			break;
 
 		//branches
@@ -420,7 +420,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 		case 0xF0: strcpy(chr,"BEQ"); goto _branch;
 		_branch:
 			relative(tmp);
-			sprintf(str,"%s $%04X", chr,tmp);
+			snprintf(str, sizeof(str), "%s $%04X", chr,tmp);
 			break;
 
 		//(Indirect),Y
@@ -434,7 +434,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 		case 0xF1: strcpy(chr,"SBC"); goto _indirecty;
 		_indirecty:
 			indirectY(tmp);
-			sprintf(str,"%s ($%02X),Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+			snprintf(str, sizeof(str), "%s ($%02X),Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
 			break;
 
 		//Zero Page,X
@@ -458,7 +458,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 			zpIndex(tmp,RX);
 		// ################################## Start of SP CODE ###########################
 		// Change width to %04X // don't!
-			sprintf(str,"%s $%02X,X @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+			snprintf(str, sizeof(str), "%s $%02X,X @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
 		// ################################## End of SP CODE ###########################
 			break;
 
@@ -475,7 +475,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 		_absolutey:
 			absolute(tmp);
 			tmp2=(tmp+RY);
-			sprintf(str,"%s $%04X,Y @ $%04X = #$%02X", chr,tmp,tmp2,GetMem(tmp2));
+			snprintf(str, sizeof(str), "%s $%04X,Y @ $%04X = #$%02X", chr,tmp,tmp2,GetMem(tmp2));
 			break;
 
 		//Absolute,X
@@ -497,16 +497,16 @@ char *Disassemble(int addr, uint8 *opcode) {
 		_absolutex:
 			absolute(tmp);
 			tmp2=(tmp+RX);
-			sprintf(str,"%s $%04X,X @ $%04X = #$%02X", chr,tmp,tmp2,GetMem(tmp2));
+			snprintf(str, sizeof(str), "%s $%04X,X @ $%04X = #$%02X", chr,tmp,tmp2,GetMem(tmp2));
 			break;
 
 		//jumps
 		case 0x20: strcpy(chr,"JSR"); goto _jump;
 		case 0x4C: strcpy(chr,"JMP"); goto _jump;
-		case 0x6C: absolute(tmp); sprintf(str,"JMP ($%04X) = $%04X", tmp,GetMem(tmp)|GetMem(tmp+1)<<8); break;
+		case 0x6C: absolute(tmp); snprintf(str, sizeof(str), "JMP ($%04X) = $%04X", tmp,GetMem(tmp)|GetMem(tmp+1)<<8); break;
 		_jump:
 			absolute(tmp);
-			sprintf(str,"%s $%04X", chr,tmp);
+			snprintf(str, sizeof(str), "%s $%04X", chr,tmp);
 			break;
 
 		//Zero Page,Y
@@ -516,7 +516,7 @@ char *Disassemble(int addr, uint8 *opcode) {
 			zpIndex(tmp,RY);
 		// ################################## Start of SP CODE ###########################
 		// Change width to %04X // don't!
-			sprintf(str,"%s $%02X,Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
+			snprintf(str, sizeof(str), "%s $%02X,Y @ $%04X = #$%02X", chr,opcode[1],tmp,GetMem(tmp));
 		// ################################## End of SP CODE ###########################
 			break;
 

@@ -423,7 +423,7 @@ void LuaControlDialog_t::startLuaScript(void)
 	if (0 == FCEU_LoadLuaCode(scriptPath->text().toLocal8Bit().constData(), scriptArgs->text().toLocal8Bit().constData()))
 	{
 		char error_msg[2048];
-		sprintf( error_msg, "Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toLocal8Bit().constData());
+		snprintf( error_msg, sizeof(error_msg), "Error: Could not open the selected lua script: '%s'\n", scriptPath->text().toLocal8Bit().constData());
 		FCEUD_PrintError(error_msg);
 	}
 	FCEU_WRAPPER_UNLOCK();

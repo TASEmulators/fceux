@@ -517,9 +517,9 @@ int GuiCheatsDialog_t::addSearchResult(uint32_t a, uint8_t last, uint8_t current
 
 	item = new QTreeWidgetItem();
 
-	sprintf(addrStr, "$%04X", a);
-	sprintf(lastStr, "%02X", last);
-	sprintf(curStr, "%02X", current);
+	snprintf(addrStr, sizeof(addrStr), "$%04X", a);
+	snprintf(lastStr, sizeof(lastStr), "%02X", last);
+	snprintf(curStr, sizeof(curStr), "%02X", current);
 
 	//item->setFont( 0, font );
 	//item->setFont( 1, font );
@@ -693,11 +693,11 @@ int GuiCheatsDialog_t::activeCheatListCB(const char *name, uint32 a, uint8 v, in
 
 	if (c >= 0)
 	{
-		sprintf(codeStr, "$%04X?%02X:%02X", a, c, v);
+		snprintf(codeStr, sizeof(codeStr), "$%04X?%02X:%02X", a, c, v);
 	}
 	else
 	{
-		sprintf(codeStr, "$%04X:%02X   ", a, v);
+		snprintf(codeStr, sizeof(codeStr), "$%04X:%02X   ", a, v);
 	}
 
 	item = actvCheatList->topLevelItem(actvCheatIdx);
@@ -834,7 +834,7 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 		dialog.selectFile(dir);
 	}
 
-	sprintf(dir, "%s/cheats", FCEUI_GetBaseDirectory());
+	snprintf(dir, sizeof(dir), "%s/cheats", FCEUI_GetBaseDirectory());
 
 	dialog.setDirectory(tr(dir));
 
@@ -1025,15 +1025,15 @@ void GuiCheatsDialog_t::actvCheatItemClicked(QTreeWidgetItem *item, int column)
 			FCEUI_ToggleCheat(row);
 		}
 	}
-	sprintf(stmp, "%04X", a);
+	snprintf(stmp, sizeof(stmp), "%04X", a);
 	cheatAddrEntry->setText(tr(stmp));
 
-	sprintf(stmp, "%02X", v);
+	snprintf(stmp, sizeof(stmp), "%02X", v);
 	cheatValEntry->setText(tr(stmp));
 
 	if (c >= 0)
 	{
-		sprintf(stmp, "%02X", c);
+		snprintf(stmp, sizeof(stmp), "%02X", c);
 		cheatCmpEntry->setText(tr(stmp));
 	}
 	else

@@ -130,7 +130,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 
 	mainLayout->addLayout( hbox1 );
 
-	sprintf( stmp, "git URL: %s", fceu_get_git_url() );
+	snprintf( stmp, sizeof(stmp), "git URL: %s", fceu_get_git_url() );
 
 	hbox1 = new QHBoxLayout();
 	lbl = new QLabel( tr(stmp) );
@@ -140,7 +140,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 
 	mainLayout->addLayout( hbox1 );
 
-	sprintf( stmp, "git Revision: %s", fceu_get_git_rev() );
+	snprintf( stmp, sizeof(stmp), "git Revision: %s", fceu_get_git_rev() );
 
 	hbox1 = new QHBoxLayout();
 	lbl = new QLabel( tr(stmp) );
@@ -191,23 +191,23 @@ AboutWindow::AboutWindow(QWidget *parent)
 
 	credits->insertPlainText( "\nOpen Source Dependencies:\n" );
 
-	sprintf( stmp, "	Compiled with Qt version %d.%d.%d\n", QT_VERSION_MAJOR, QT_VERSION_MINOR, QT_VERSION_PATCH );
+	snprintf( stmp, sizeof(stmp), "	Compiled with Qt version %d.%d.%d\n", QT_VERSION_MAJOR, QT_VERSION_MINOR, QT_VERSION_PATCH );
 	credits->insertPlainText( stmp );
 
-	sprintf( stmp, "	Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
+	snprintf( stmp, sizeof(stmp), "	Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
 	credits->insertPlainText( stmp );
 
 	SDL_version v; 
 	SDL_GetVersion(&v);
-	sprintf( stmp, "	Linked with SDL version %d.%d.%d\n", v.major, v.minor, v.patch);
+	snprintf( stmp, sizeof(stmp), "	Linked with SDL version %d.%d.%d\n", v.major, v.minor, v.patch);
 	credits->insertPlainText( stmp );
 
 #ifdef ZLIB_VERSION
-	sprintf( stmp, "	Compiled with zlib %s\n", ZLIB_VERSION );
+	snprintf( stmp, sizeof(stmp), "	Compiled with zlib %s\n", ZLIB_VERSION );
 	credits->insertPlainText( stmp );
 #endif
 #ifdef _USE_LIBARCHIVE
-	sprintf( stmp, "	Compiled with libarchive %s\n", ARCHIVE_VERSION_ONLY_STRING );
+	snprintf( stmp, sizeof(stmp), "	Compiled with libarchive %s\n", ARCHIVE_VERSION_ONLY_STRING );
 	credits->insertPlainText( stmp );
 	const char *libArcName[]    = { "zlib", "liblzma", "bzlib", "liblz4", "libzstd", nullptr };
 	const char *libArcVersion[] = { archive_zlib_version(), archive_liblzma_version(), 
@@ -217,7 +217,7 @@ AboutWindow::AboutWindow(QWidget *parent)
 	{
 		if (libArcVersion[i])
 		{
-			sprintf( stmp, "		%s %s\n", libArcName[i], libArcVersion[i]);
+			snprintf( stmp, sizeof(stmp), "		%s %s\n", libArcName[i], libArcVersion[i]);
 			credits->insertPlainText( stmp );
 		}
 		i++;
@@ -225,27 +225,27 @@ AboutWindow::AboutWindow(QWidget *parent)
 #endif
 
 #ifdef _S9XLUA_H
-	sprintf( stmp, "	Compiled with %s\n", LUA_RELEASE );
+	snprintf( stmp, sizeof(stmp), "	Compiled with %s\n", LUA_RELEASE );
 	credits->insertPlainText( stmp );
 #endif
 
 #ifdef _USE_LIBAV
-	sprintf( stmp, "	Compiled with ffmpeg libraries:\n");
+	snprintf( stmp, sizeof(stmp), "	Compiled with ffmpeg libraries:\n");
 	credits->insertPlainText( stmp );
-	sprintf( stmp, "		libavutil    %i.%i.%i\n", LIBAVUTIL_VERSION_MAJOR, LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO);
+	snprintf( stmp, sizeof(stmp), "		libavutil    %i.%i.%i\n", LIBAVUTIL_VERSION_MAJOR, LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO);
 	credits->insertPlainText( stmp );
-	sprintf( stmp, "		libavformat  %i.%i.%i\n", LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
+	snprintf( stmp, sizeof(stmp), "		libavformat  %i.%i.%i\n", LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
 	credits->insertPlainText( stmp );
-	sprintf( stmp, "		libavcodec   %i.%i.%i\n", LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
+	snprintf( stmp, sizeof(stmp), "		libavcodec   %i.%i.%i\n", LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
 	credits->insertPlainText( stmp );
-	sprintf( stmp, "		libswscale   %i.%i.%i\n", LIBSWSCALE_VERSION_MAJOR, LIBSWSCALE_VERSION_MINOR, LIBSWSCALE_VERSION_MICRO);
+	snprintf( stmp, sizeof(stmp), "		libswscale   %i.%i.%i\n", LIBSWSCALE_VERSION_MAJOR, LIBSWSCALE_VERSION_MINOR, LIBSWSCALE_VERSION_MICRO);
 	credits->insertPlainText( stmp );
-	sprintf( stmp, "		libswresample  %i.%i.%i\n", LIBSWRESAMPLE_VERSION_MAJOR, LIBSWRESAMPLE_VERSION_MINOR, LIBSWRESAMPLE_VERSION_MICRO);
+	snprintf( stmp, sizeof(stmp), "		libswresample  %i.%i.%i\n", LIBSWRESAMPLE_VERSION_MAJOR, LIBSWRESAMPLE_VERSION_MINOR, LIBSWRESAMPLE_VERSION_MICRO);
 	credits->insertPlainText( stmp );
 #endif
 
 #ifdef _USE_X264
-	sprintf( stmp, "	Compiled with x264 version %s\n", X264_POINTVER );
+	snprintf( stmp, sizeof(stmp), "	Compiled with x264 version %s\n", X264_POINTVER );
 	credits->insertPlainText( stmp );
 #endif
 

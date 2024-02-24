@@ -181,7 +181,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 
 	color = pal.color(QPalette::WindowText);
 
-	sprintf(stmp, "border: 2px solid #%02X%02X%02X", color.red(), color.green(), color.blue());
+	snprintf(stmp, sizeof(stmp), "border: 2px solid #%02X%02X%02X", color.red(), color.green(), color.blue());
 
 	//printf("%s\n", stmp);
 	nesPortLabel[0]->setAlignment(Qt::AlignCenter);

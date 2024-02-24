@@ -215,7 +215,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 		{
 			if (js->isConnected())
 			{
-				sprintf(stmp, "%i: %s", i, js->getName());
+				snprintf(stmp, sizeof(stmp), "%i: %s", i, js->getName());
 				devSel->addItem(tr(stmp), i);
 			}
 		}
@@ -328,7 +328,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 		char text[64];
 		QLabel *buttonName;
 
-		sprintf(text, "%s:", GamePadNames[i]);
+		snprintf(text, sizeof(text), "%s:", GamePadNames[i]);
 
 		//hbox2 = new QHBoxLayout();
 
@@ -506,7 +506,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	for (int i = 0; i < GAMEPAD_NUM_DEVICES; i++)
 	{
-		sprintf(stmp, "SDL.Input.GamePad.%i.", i);
+		snprintf(stmp, sizeof(stmp), "SDL.Input.GamePad.%i.", i);
 		prefix = stmp;
 
 		g_config->getOption(prefix + "Profile", &lcl[i].profile);
@@ -595,7 +595,7 @@ void GamePadConfDialog_t::loadMapList(void)
 
 	fileList = dir.entryList(filters, QDir::Files, QDir::NoSort);
 
-	sprintf(stmp, "SDL.Input.GamePad.%u.", portNum);
+	snprintf(stmp, sizeof(stmp), "SDL.Input.GamePad.%u.", portNum);
 	prefix = stmp;
 
 	g_config->getOption(prefix + "Profile", &mapName);
@@ -880,7 +880,7 @@ void GamePadConfDialog_t::changeButton(int padNo, int x)
 					( strcmp( js1->getGUID(), js2->getGUID() ) != 0 ) )
 				{
 					char stmp[256];
-					sprintf( stmp, "Joystick device GUID MisMatch\n\nSelected device is: \n\t%s\n\nbut button mapping is from: \n\t%s",
+					snprintf( stmp, sizeof(stmp), "Joystick device GUID MisMatch\n\nSelected device is: \n\t%s\n\nbut button mapping is from: \n\t%s",
 							js1->getName(), js2->getName() );
 					QMessageBox::warning( this, tr("Mapping Error"), tr(stmp),
 						QMessageBox::Cancel, QMessageBox::Cancel );
@@ -1100,7 +1100,7 @@ void GamePadConfDialog_t::saveConfig(void)
 	const char *guid;
 	std::string prefix, mapName;
 
-	sprintf(stmp, "SDL.Input.GamePad.%u.", portNum);
+	snprintf(stmp, sizeof(stmp), "SDL.Input.GamePad.%u.", portNum);
 	prefix = stmp;
 
 	mapName = mapSel->currentText().toLocal8Bit().constData();
@@ -1134,7 +1134,7 @@ void GamePadConfDialog_t::createNewProfile(const char *name)
 	mapSel->setCurrentIndex(mapSel->count() - 1);
 	saveConfig();
 
-	sprintf(stmp, "Mapping Created: %s/%s \n", GamePad[portNum].getGUID(), name);
+	snprintf(stmp, sizeof(stmp), "Mapping Created: %s/%s \n", GamePad[portNum].getGUID(), name);
 	mapMsg->setText(tr(stmp));
 }
 //----------------------------------------------------
@@ -1180,11 +1180,11 @@ void GamePadConfDialog_t::loadProfileCallback(void)
 	{
 		saveConfig();
 
-		sprintf(stmp, "Mapping Loaded: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
+		snprintf(stmp, sizeof(stmp), "Mapping Loaded: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
 	}
 	else
 	{
-		sprintf(stmp, "Error: Failed to Load Mapping: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
+		snprintf(stmp, sizeof(stmp), "Error: Failed to Load Mapping: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
 	}
 	mapMsg->setText(tr(stmp));
 
@@ -1207,11 +1207,11 @@ void GamePadConfDialog_t::saveProfileCallback(void)
 	{
 		saveConfig();
 
-		sprintf(stmp, "Mapping Saved: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
+		snprintf(stmp, sizeof(stmp), "Mapping Saved: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
 	}
 	else
 	{
-		sprintf(stmp, "Error: Failed to Save Mapping: %s \n", mapName.c_str());
+		snprintf(stmp, sizeof(stmp), "Error: Failed to Save Mapping: %s \n", mapName.c_str());
 	}
 	mapMsg->setText(tr(stmp));
 }
@@ -1228,11 +1228,11 @@ void GamePadConfDialog_t::deleteProfileCallback(void)
 
 	if (ret == 0)
 	{
-		sprintf(stmp, "Mapping Deleted: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
+		snprintf(stmp, sizeof(stmp), "Mapping Deleted: %s/%s \n", GamePad[portNum].getGUID(), mapName.c_str());
 	}
 	else
 	{
-		sprintf(stmp, "Error: Failed to Delete Mapping: %s \n", mapName.c_str());
+		snprintf(stmp, sizeof(stmp), "Error: Failed to Delete Mapping: %s \n", mapName.c_str());
 	}
 	mapMsg->setText(tr(stmp));
 
@@ -1269,7 +1269,7 @@ int GamePadConfDialog_t::promptToSave(void)
 	{
 		return 0;
 	}
-	sprintf(stmp, "Warning: Gamepad mappings have not been saved for port%c ", (n > 1) ? 's' : ' ');
+	snprintf(stmp, sizeof(stmp), "Warning: Gamepad mappings have not been saved for port%c ", (n > 1) ? 's' : ' ');
 
 	msg.assign(stmp);
 
@@ -1278,7 +1278,7 @@ int GamePadConfDialog_t::promptToSave(void)
 	{
 		if (padNeedsSave[i])
 		{
-			sprintf(stmp, "%i", i + 1);
+			snprintf(stmp, sizeof(stmp), "%i", i + 1);
 
 			msg.append(stmp);
 
@@ -1427,7 +1427,7 @@ void GamePadConfDialog_t::updatePeriodic(void)
 				{
 					char stmp[256];
 					//printf("Adding Newly Connected JS\n");
-					sprintf(stmp, "%i: %s", i, js->getName());
+					snprintf(stmp, sizeof(stmp), "%i: %s", i, js->getName());
 					devSel->addItem(tr(stmp), i);
 				}
 			}

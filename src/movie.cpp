@@ -1358,22 +1358,22 @@ void FCEU_DrawMovies(uint8 *XBuf)
 		
 		if (movieMode == MOVIEMODE_PLAY)
 		{
-			sprintf(counterbuf, "%d/%d%s%s", currFrameCounter, (int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
+			snprintf(counterbuf, sizeof(counterbuf), "%d/%d%s%s", currFrameCounter, (int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
 		} else if (movieMode == MOVIEMODE_RECORD)
 		{
 			if (movieRecordMode == MOVIE_RECORD_MODE_TRUNCATE)
-				sprintf(counterbuf, "%d%s%s (record)", currFrameCounter, GetMovieRecordModeStr(), GetMovieReadOnlyStr()); // nearly classic
+				snprintf(counterbuf, sizeof(counterbuf), "%d%s%s (record)", currFrameCounter, GetMovieRecordModeStr(), GetMovieReadOnlyStr()); // nearly classic
 			else
-				sprintf(counterbuf, "%d/%d%s%s (record)", currFrameCounter, (int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
+				snprintf(counterbuf, sizeof(counterbuf), "%d/%d%s%s (record)", currFrameCounter, (int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
 		} else if (movieMode == MOVIEMODE_FINISHED)
 		{
-			sprintf(counterbuf,"%d/%d%s%s (finished)",currFrameCounter,(int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
+			snprintf(counterbuf, sizeof(counterbuf), "%d/%d%s%s (finished)",currFrameCounter,(int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
 			color = 0x17; //Show red to get attention
 		} else if (movieMode == MOVIEMODE_TASEDITOR)
 		{
-			sprintf(counterbuf,"%d",currFrameCounter);
+			snprintf(counterbuf, sizeof(counterbuf),"%d",currFrameCounter);
 		} else
-			sprintf(counterbuf,"%d (no movie)",currFrameCounter);
+			snprintf(counterbuf, sizeof(counterbuf),"%d (no movie)",currFrameCounter);
 
 		if (counterbuf[0])
 			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(30)+1, 256, (uint8*)counterbuf, color+0x80);
@@ -1381,7 +1381,7 @@ void FCEU_DrawMovies(uint8 *XBuf)
 	if (rerecord_display && movieMode != MOVIEMODE_INACTIVE)
 	{
 		char counterbuf[32] = {0};
-		sprintf(counterbuf, "%d", currMovieData.rerecordCount);
+		snprintf(counterbuf, sizeof(counterbuf), "%d", currMovieData.rerecordCount);
 
 		if (counterbuf[0])
 			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(50)+1, 256, (uint8*)counterbuf, 0x28+0x80);
@@ -1394,7 +1394,7 @@ void FCEU_DrawLagCounter(uint8 *XBuf)
 	{
 		// If currently lagging - display red, else display green
 		uint8 color = (lagFlag) ? (0x16+0x80) : (0x2A+0x80);
-		sprintf(lagcounterbuf, "%d", lagCounter);
+		snprintf(lagcounterbuf, sizeof(lagcounterbuf), "%d", lagCounter);
 		if(lagcounterbuf[0])
 			DrawTextTrans(ClipSidesOffset + XBuf + FCEU_TextScanlineOffsetFromBottom(40) + 1, 256, (uint8*)lagcounterbuf, color);
 	}

@@ -63,6 +63,7 @@ private:
 	void updateTimingMech(void);
 	void updateOverclocking(void);
 	void saveValues(void);
+	QString getSchedPrioErrorMsg(const char* funcName, int errorCode);
 
 public slots:
 	void closeWindow(void);

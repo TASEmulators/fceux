@@ -1339,7 +1339,7 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 
 	for (int i=0; i<size; i++)
 	{
-		sprintf(stmp, "$%02X  ", opcode[i] );
+		snprintf(stmp, sizeof(stmp), "$%02X  ", opcode[i] );
 
 		text.append( stmp );
 	}
@@ -1347,7 +1347,7 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 	text.append( addrMode );
 
 	text.append( "\nCycle Count:\t\t" );
-	sprintf( stmp, "%i", X6502_GetOpcodeCycles( opcode[0] ) );
+	snprintf( stmp, sizeof(stmp), "%i", X6502_GetOpcodeCycles( opcode[0] ) );
 	text.append( stmp );
 	text.append( "\n" );
 

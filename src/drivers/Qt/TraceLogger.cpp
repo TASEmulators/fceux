@@ -25,6 +25,7 @@
 
 #ifdef WIN32
 #include <windows.h>
+#include <Qt/TraceFileWriter.h>
 #else
 #include <unistd.h>
 #include <sys/types.h>
@@ -56,6 +57,7 @@
 #include "../../movie.h"
 
 #include "common/os_utils.h"
+#include "utils/StringBuilder.h"
 
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
@@ -914,38 +916,17 @@ traceRecord_t::traceRecord_t(void)
 //----------------------------------------------------
 int traceRecord_t::appendAsmText(const char *txt)
 {
-	int i = 0;
+	size_t len = strlen(txt);
+	memcpy(asmTxt + asmTxtSize, txt, len + 1);
 
-	while (txt[i] != 0)
-	{
-		asmTxt[asmTxtSize] = txt[i];
-		i++;
-		asmTxtSize++;
-	}
-	asmTxt[asmTxtSize] = 0;
+	asmTxtSize += len;
 
 	return 0;
-}
-//----------------------------------------------------
-static int convToXchar(int i)
-{
-	int c = 0;
-
-	if ((i >= 0) && (i < 10))
-	{
-		c = i + '0';
-	}
-	else if (i < 16)
-	{
-		c = (i - 10) + 'A';
-	}
-	return c;
 }
 //----------------------------------------------------
 int traceRecord_t::convToText(char *txt, int *len)
 {
 	int i = 0, j = 0;
-	char stmp[128];
 	char str_axystate[32], str_procstatus[32];
 
 	str_axystate[0] = 0;
@@ -954,112 +935,56 @@ int traceRecord_t::convToText(char *txt, int *len)
 	txt[0] = 0;
 	if (opSize == 0)
 	{
-		j = 0;
-		while (asmTxt[j] != 0)
-		{
-			txt[i] = asmTxt[j];
-			i++;
-			j++;
-		}
-		txt[i] = 0;
+		strcpy(txt, asmTxt);
 
 		return -1;
 	}
 
+	StringBuilder sb(txt + i);
 	if (skippedLines > 0)
-	{
-		sprintf(stmp, "(%d lines skipped) ", skippedLines);
-
-		j = 0;
-		while (stmp[j] != 0)
-		{
-			txt[i] = stmp[j];
-			i++;
-			j++;
-		}
-	}
+		sb << '(' << sb_dec(skippedLines) << " lines skipped) ";
 
 	// Start filling the str_temp line: Frame count, Cycles count, Instructions count, AXYS state, Processor status, Tabs, Address, Data, Disassembly
 	if (logging_options & LOG_FRAMES_COUNT)
-	{
-		sprintf(stmp, "f%-6llu ", (long long unsigned int)frameCount);
-
-		j = 0;
-		while (stmp[j] != 0)
-		{
-			txt[i] = stmp[j];
-			i++;
-			j++;
-		}
-	}
+		sb << 'f' << sb_dec(frameCount, -6);
 
 	if (logging_options & LOG_CYCLES_COUNT)
-	{
-		sprintf(stmp, "c%-11llu ", (long long unsigned int)cycleCount);
-
-		j = 0;
-		while (stmp[j] != 0)
-		{
-			txt[i] = stmp[j];
-			i++;
-			j++;
-		}
-	}
+		sb << 'c' << sb_dec(cycleCount, -11);
 
 	if (logging_options & LOG_INSTRUCTIONS_COUNT)
-	{
-		sprintf(stmp, "i%-11llu ", (long long unsigned int)instrCount);
-
-		j = 0;
-		while (stmp[j] != 0)
-		{
-			txt[i] = stmp[j];
-			i++;
-			j++;
-		}
-	}
+		sb << 'i' << sb_dec(instrCount, -11);
 
 	if (logging_options & LOG_REGISTERS)
 	{
-		sprintf(str_axystate, "A:%02X X:%02X Y:%02X S:%02X ", (cpu.A), (cpu.X), (cpu.Y), (cpu.S));
+		StringBuilder sb(str_axystate);
+		sb << "A:" << sb_hex(cpu.A, 2)
+			<< " X:" << sb_hex(cpu.X, 2)
+			<< " Y:" << sb_hex(cpu.Y, 2)
+			<< " S:" << sb_hex(cpu.S, 2)
+			<< ' ';
 	}
 
 	if (logging_options & LOG_PROCESSOR_STATUS)
 	{
-		int tmp = cpu.P ^ 0xFF;
-		sprintf(str_procstatus, "P:%c%c%c%c%c%c%c%c ",
-				'N' | (tmp & 0x80) >> 2,
-				'V' | (tmp & 0x40) >> 1,
-				'U' | (tmp & 0x20),
-				'B' | (tmp & 0x10) << 1,
-				'D' | (tmp & 0x08) << 2,
-				'I' | (tmp & 0x04) << 3,
-				'Z' | (tmp & 0x02) << 4,
-				'C' | (tmp & 0x01) << 5);
+		char *s = str_procstatus;
+		*(s++) = cpu.P & 0x80 ? 'N' : 'n';
+		*(s++) = cpu.P & 0x40 ? 'V' : 'v';
+		*(s++) = cpu.P & 0x20 ? 'U' : 'u';
+		*(s++) = cpu.P & 0x10 ? 'B' : 'b';
+		*(s++) = cpu.P & 0x08 ? 'D' : 'd';
+		*(s++) = cpu.P & 0x04 ? 'I' : 'i';
+		*(s++) = cpu.P & 0x02 ? 'Z' : 'z';
+		*(s++) = cpu.P & 0x01 ? 'C' : 'c';
+		*(s++) = ' ';
+		*(s++) = '\0';
 	}
 
 	if (logging_options & LOG_TO_THE_LEFT)
 	{
 		if (logging_options & LOG_REGISTERS)
-		{
-			j = 0;
-			while (str_axystate[j] != 0)
-			{
-				txt[i] = str_axystate[j];
-				i++;
-				j++;
-			}
-		}
+			sb << str_axystate;
 		if (logging_options & LOG_PROCESSOR_STATUS)
-		{
-			j = 0;
-			while (str_procstatus[j] != 0)
-			{
-				txt[i] = str_procstatus[j];
-				i++;
-				j++;
-			}
-		}
+			sb << str_procstatus;
 	}
 
 	if (logging_options & LOG_CODE_TABBING)
@@ -1067,106 +992,44 @@ int traceRecord_t::convToText(char *txt, int *len)
 		// add spaces at the beginning of the line according to stack pointer
 		int spaces = (0xFF - cpu.S) & LOG_TABS_MASK;
 
-		while (spaces > 0)
-		{
-			txt[i] = ' ';
-			i++;
-			spaces--;
-		}
+		for (; spaces > 0; spaces--)
+			sb << ' ';
 	}
 	else if (logging_options & LOG_TO_THE_LEFT)
-	{
-		txt[i] = ' ';
-		i++;
-	}
+		sb << ' ';
 
 	if (logging_options & LOG_BANK_NUMBER)
 	{
 		if (cpu.PC >= 0x8000)
-		{
-			sprintf(stmp, "$%02X:%04X: ", bank, cpu.PC);
-		}
+			sb << sb_addr((uint8_t)bank, 2) << ':';
 		else
-		{
-			sprintf(stmp, "  $%04X: ", cpu.PC);
-		}
+			sb << "  $";
 	}
 	else
-	{
-		sprintf(stmp, "$%04X: ", cpu.PC);
-	}
-	j = 0;
-	while (stmp[j] != 0)
-	{
-		txt[i] = stmp[j];
-		i++;
-		j++;
-	}
+		sb << '$';
+
+	sb << sb_hex(cpu.PC, 4) << ": ";
 
 	for (j = 0; j < opSize; j++)
-	{
-		txt[i] = convToXchar((opCode[j] >> 4) & 0x0F);
-		i++;
-		txt[i] = convToXchar(opCode[j] & 0x0F);
-		i++;
-		txt[i] = ' ';
-		i++;
-	}
-	while (j < 3)
-	{
-		txt[i] = ' ';
-		i++;
-		txt[i] = ' ';
-		i++;
-		txt[i] = ' ';
-		i++;
-		j++;
-	}
-	j = 0;
-	while (asmTxt[j] != 0)
-	{
-		txt[i] = asmTxt[j];
-		i++;
-		j++;
-	}
-	if (callAddr >= 0)
-	{
-		sprintf(stmp, " (from $%04X)", callAddr);
+		sb << sb_hex(opCode[j], 2) << ' ';
+	for (; j < 3; j++)
+		sb << "   ";
 
-		j = 0;
-		while (stmp[j] != 0)
-		{
-			txt[i] = stmp[j];
-			i++;
-			j++;
-		}
-	}
+	sb << asmTxt;
+
+	if (callAddr >= 0)
+		sb << " (from " << sb_addr((uint16_t)callAddr) << ')';
 
 	if (!(logging_options & LOG_TO_THE_LEFT))
 	{
 		if (logging_options & LOG_REGISTERS)
-		{
-			j = 0;
-			while (str_axystate[j] != 0)
-			{
-				txt[i] = str_axystate[j];
-				i++;
-				j++;
-			}
-		}
+			sb << str_axystate;
 		if (logging_options & LOG_PROCESSOR_STATUS)
-		{
-			j = 0;
-			while (str_procstatus[j] != 0)
-			{
-				txt[i] = str_procstatus[j];
-				i++;
-				j++;
-			}
-		}
+			sb << str_procstatus;
 	}
 
-	txt[i] = 0;
+	i = int(sb.str() + sb.size() - txt);
+	txt[i] = '\0';
 
 	if (len)
 	{
@@ -1249,12 +1112,15 @@ static void pushToLogBuffer(traceRecord_t &rec)
 				break;
 			}
 		}
+
+		bool overrun = nextHead == logBufTail;
+
 		logBufHead = nextHead;
 
 		if ( overrunWarningArmed )
 		{	// Don't spam with buffer overrun warning messages,
 			// we will print once if this happens.
-			if (logBufHead == logBufTail)
+			if (overrun)
 			{
 				if ( traceLogWindow )
 				{
@@ -1378,7 +1244,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			olddatacount = datacount;
 			if (unloggedlines > 0)
 			{
-				//sprintf(str_result, "(%d lines skipped)", unloggedlines);
+				//snprintf(str_result, "(%d lines skipped)", unloggedlines);
 				rec.skippedLines = unloggedlines;
 				unloggedlines = 0;
 			}
@@ -1399,8 +1265,8 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 
 	if ((addr + size) > 0xFFFF)
 	{
-		//sprintf(str_data, "%02X        ", opcode[0]);
-		//sprintf(str_disassembly, "OVERFLOW");
+		//snprintf(str_data, "%02X        ", opcode[0]);
+		//snprintf(str_disassembly, "OVERFLOW");
 		rec.flags |= 0x01;
 	}
 	else
@@ -1409,7 +1275,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		switch (size)
 		{
 		case 0:
-			//sprintf(str_disassembly,"UNDEFINED");
+			//snprintf(str_disassembly,"UNDEFINED");
 			rec.flags |= 0x02;
 			break;
 		case 1:
@@ -2046,13 +1912,13 @@ void QTraceLogView::openBpEditWindow(int editIdx, watchpointinfo *wp, traceRecor
 			sprite_radio->setChecked(true);
 		}
 
-		sprintf(stmp, "%04X", wp->address);
+		snprintf(stmp, sizeof(stmp), "%04X", wp->address);
 
 		addr1->setText(tr(stmp));
 
 		if (wp->endaddress > 0)
 		{
-			sprintf(stmp, "%04X", wp->endaddress);
+			snprintf(stmp, sizeof(stmp), "%04X", wp->endaddress);
 
 			addr2->setText(tr(stmp));
 		}
@@ -2092,11 +1958,11 @@ void QTraceLogView::openBpEditWindow(int editIdx, watchpointinfo *wp, traceRecor
 					char str[64];
 					if ((wp->address == recp->cpu.PC) && (recp->bank >= 0))
 					{
-						sprintf(str, "K==#%02X", recp->bank);
+						snprintf(str, sizeof(str), "K==#%02X", recp->bank);
 					}
 					else
 					{
-						sprintf(str, "K==#%02X", getBank(wp->address));
+						snprintf(str, sizeof(str), "K==#%02X", getBank(wp->address));
 					}
 					cond->setText(tr(str));
 				}
@@ -2536,9 +2402,7 @@ TraceLogDiskThread_t::~TraceLogDiskThread_t(void)
 void TraceLogDiskThread_t::run(void)
 {
 	char line[256];
-	char buf[8192];
-	int i,idx=0;
-	int blockSize = 4 * 1024;
+	const unsigned blockSize = 4 * 1024;
 	bool dataNeedsFlush = true;
 	bool isPaused = false;
 
@@ -2547,24 +2411,27 @@ void TraceLogDiskThread_t::run(void)
 	setPriority( QThread::HighestPriority );
 
 #ifdef WIN32
-	logFile = CreateFileA( logFilePath.c_str(), GENERIC_WRITE, 
-			0, NULL, OPEN_ALWAYS, FILE_FLAG_WRITE_THROUGH | FILE_FLAG_NO_BUFFERING, NULL );
-
-	if ( logFile == INVALID_HANDLE_VALUE )
+	TraceFileWriter tracer;
+	if (!tracer.open(logFilePath.c_str(), (bool)FCEUI_EmulationPaused()))
 	{
 		char stmp[1024];
-		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath.c_str() );
+		snprintf( stmp, sizeof(stmp), "Error: Failed to open log file for writing: %s", logFilePath.c_str() );
 		consoleWindow->QueueErrorMsgWindow(stmp);
 		return;
 	}
 #else
+	const unsigned bufSize = blockSize * 2;
+	const unsigned flushSize = blockSize;
+	char buf[bufSize];
+	unsigned int i, idx=0;
+
 	logFile = open( logFilePath.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 
 			S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
 
 	if ( logFile == -1 )
 	{
 		char stmp[1024];
-		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath.c_str() );
+		snprintf( stmp, sizeof(stmp), "Error: Failed to open log file for writing: %s", logFilePath.c_str() );
 		consoleWindow->QueueErrorMsgWindow(stmp);
 		return;
 	}
@@ -2579,7 +2446,6 @@ void TraceLogDiskThread_t::run(void)
 
 		logBuf = (traceRecord_t *)malloc(size);
 	}
-	idx = 0;
 
 	while ( !isInterruptionRequested() )
 	{
@@ -2588,7 +2454,13 @@ void TraceLogDiskThread_t::run(void)
 		while (logBufHead != logBufTail)
 		{
 			logBuf[logBufTail].convToText(line);
+			logBufTail = (logBufTail + 1) % logBufMax;
 
+			#ifdef WIN32
+			bool success = tracer.writeLine(line);
+
+			/// TODO: Do something on error
+			#else
 			i=0;
 			while ( line[i] != 0 )
 			{
@@ -2596,24 +2468,23 @@ void TraceLogDiskThread_t::run(void)
 			}
 			buf[idx] = '\n'; idx++;
 
-			logBufTail = (logBufTail + 1) % logBufMax;
-
-			if ( idx >= blockSize )
+			if ( idx >= flushSize )
 			{
-				#ifdef WIN32
-				DWORD bytesWritten;
-				WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
-				#else
 				if ( write( logFile, buf, idx ) < 0 )
 				{
 					// HANDLE ERROR TODO
 				}
 				idx = 0;
-				#endif
 				dataNeedsFlush = true;
 			}
+			#endif
 		}
 
+		#ifdef WIN32
+		bool success = tracer.setPause(isPaused);
+
+		/// TODO: Do something on error
+		#else
 		if (isPaused)
 		{
 			// If paused, the user might be at a breakpoint or doing some
@@ -2621,55 +2492,40 @@ void TraceLogDiskThread_t::run(void)
 			// Only flush data when paused, to keep write efficiency up.
 			if ( idx > 0 )
 			{
-				#ifdef WIN32
-				DWORD bytesWritten;
-				WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
-				#else
 				if ( write( logFile, buf, idx ) < 0 )
 				{
 					// HANDLE ERROR TODO
 				}
 				idx = 0;
-				#endif
 				dataNeedsFlush = true;
 			}
 			if (dataNeedsFlush)
 			{
 				//printf("Flushing Trace Log Disk Buffers\n");
-				#ifdef WIN32
-				FlushFileBuffers( logFile );
-				#else
 				if ( fsync( logFile ) )
 				{
 					printf("Trace Log fsync error\n");
 				}
-				#endif
 				dataNeedsFlush = false;
 			}
 		}
+		#endif
+
 		SDL_Delay(1);
 	}
 	
+	#ifdef WIN32
+	tracer.close();
+	#else
 	if ( idx > 0 )
 	{
-		#ifdef WIN32
-		DWORD bytesWritten;
-		WriteFile( logFile, buf, idx, &bytesWritten, NULL ); idx = 0;
-		#else
 		if ( write( logFile, buf, idx ) < 0 )
 		{
 			// HANDLE ERROR TODO
 		}
 		idx = 0;
-		#endif
 	}
 
-	#ifdef WIN32
-	if ( logFile != INVALID_HANDLE_VALUE )
-	{
-		CloseHandle( logFile ); logFile = INVALID_HANDLE_VALUE; 
-	}
-	#else
 	if ( logFile != -1 )
 	{
 		close(logFile); logFile = -1;

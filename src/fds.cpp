@@ -866,8 +866,8 @@ int FDSLoad(const char *name, FCEUFILE *fp) {
 	FDSSoundStateAdd();
 
 	for (x = 0; x < TotalSides; x++) {
-		char temp[5];
-		sprintf(temp, "DDT%d", x);
+		char temp[8];
+		snprintf(temp, sizeof(temp), "DDT%d", x);
 		AddExState(diskdata[x], 65500, 0, temp);
 	}
 

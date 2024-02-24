@@ -865,7 +865,7 @@ int HexEditorCharTable_t::loadFromFile( const char *filepath )
 
 		if ( hexValue > 255 )
 		{
-			sprintf( errMsg, "Error: Line %i: Hex Value 0x%X exceeds 0xFF \n", lineNum, hexValue );
+			snprintf( errMsg, sizeof(errMsg), "Error: Line %i: Hex Value 0x%X exceeds 0xFF \n", lineNum, hexValue );
 			retVal = -1;
 			continue;
 		}
@@ -874,7 +874,7 @@ int HexEditorCharTable_t::loadFromFile( const char *filepath )
 
 		if ( line[i] != '=' )
 		{
-			sprintf( errMsg, "Error: Line %i: Expected assignment operator '=' but got '%c' \n", lineNum, line[i] );
+			snprintf( errMsg, sizeof(errMsg), "Error: Line %i: Expected assignment operator '=' but got '%c' \n", lineNum, line[i] );
 			retVal = -1;
 			continue;
 		}
@@ -929,7 +929,7 @@ int HexEditorCharTable_t::loadFromFile( const char *filepath )
 
 		if ( mapValue > 255 )
 		{
-			sprintf( errMsg, "Error: Line %i: Map Value 0x%X exceeds 0xFF \n", lineNum, mapValue );
+			snprintf( errMsg, sizeof(errMsg), "Error: Line %i: Map Value 0x%X exceeds 0xFF \n", lineNum, mapValue );
 			retVal = -1;
 			continue;
 		}
@@ -1519,7 +1519,7 @@ void HexEditorDialog_t::setWindowTitle(void)
 
 	modeString = memViewNames[ editor->getMode() ];
 
-	sprintf( stmp, "Hex Editor - %s: 0x%04X", modeString, editor->getAddr() );
+	snprintf( stmp, sizeof(stmp), "Hex Editor - %s: 0x%04X", modeString, editor->getAddr() );
 
 	QDialog::setWindowTitle( tr(stmp) );
 
@@ -2253,7 +2253,7 @@ void QHexEdit::openGotoAddrDialog(void)
 	QHBoxLayout *hbox;
 	QPushButton *okButton, *cancelButton;
 
-	sprintf( stmp, "Specify Address [ 0x0 -> 0x%X ]", mb.size()-1 );
+	snprintf( stmp, sizeof(stmp), "Specify Address [ 0x0 -> 0x%X ]", mb.size()-1 );
 
 	vbox = new QVBoxLayout();
 	hbox = new QHBoxLayout();
@@ -2418,7 +2418,7 @@ void QHexEdit::loadHighlightToClipboard(void)
 
 	for (a=startAddr; a<=endAddr; a++)
 	{
-		sprintf( c, "%02X ", memAccessFunc(a) );
+		snprintf( c, sizeof(c), "%02X ", memAccessFunc(a) );
 
 		s.append(c);
 	}
@@ -3145,17 +3145,17 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 			subMenu->addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(frzRamUnsetAll(void)) );
 
-			sprintf( stmp, "Add &Read Breakpoint for Address $%04X", addr );
+			snprintf( stmp, sizeof(stmp), "Add &Read Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamReadBP(void)) );
 
-			sprintf( stmp, "Add &Write Breakpoint for Address $%04X", addr );
+			snprintf( stmp, sizeof(stmp), "Add &Write Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamWriteBP(void)) );
 
-			sprintf( stmp, "Add &Execute Breakpoint for Address $%04X", addr );
+			snprintf( stmp, sizeof(stmp), "Add &Execute Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addRamExecuteBP(void)) );
@@ -3167,7 +3167,7 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 				if ( romAddr >= 0 )
 				{
 					jumpToRomValue = romAddr;
-					sprintf( stmp, "&Go Here in ROM File: (%08X)", romAddr );
+					snprintf( stmp, sizeof(stmp), "&Go Here in ROM File: (%08X)", romAddr );
 					act = new QAction(tr(stmp), &menu);
 					menu.addAction(act);
 					connect( act, SIGNAL(triggered(void)), this, SLOT(jumpToROM(void)) );
@@ -3181,12 +3181,12 @@ void QHexEdit::contextMenuEvent(QContextMenuEvent *event)
 		break;
 		case MODE_NES_PPU:
 		{
-			sprintf( stmp, "Add &Read Breakpoint for Address $%04X", addr );
+			snprintf( stmp, sizeof(stmp), "Add &Read Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addPpuReadBP(void)) );
 
-			sprintf( stmp, "Add &Write Breakpoint for Address $%04X", addr );
+			snprintf( stmp, sizeof(stmp), "Add &Write Breakpoint for Address $%04X", addr );
 			act = new QAction(tr(stmp), &menu);
 			menu.addAction(act);
 			connect( act, SIGNAL(triggered(void)), this, SLOT(addPpuWriteBP(void)) );
@@ -3236,16 +3236,16 @@ void QHexEdit::addBookMarkCB(void)
 	{
 		default:
 		case MODE_NES_RAM:
-			sprintf( stmp, "CPU %04X", ctxAddr );
+			snprintf( stmp, sizeof(stmp), "CPU %04X", ctxAddr );
 		break;
 		case MODE_NES_PPU:
-			sprintf( stmp, "PPU %04X", ctxAddr );
+			snprintf( stmp, sizeof(stmp), "PPU %04X", ctxAddr );
 		break;
 		case MODE_NES_OAM:
-			sprintf( stmp, "OAM %04X", ctxAddr );
+			snprintf( stmp, sizeof(stmp), "OAM %04X", ctxAddr );
 		break;
 		case MODE_NES_ROM:
-			sprintf( stmp, "ROM %04X", ctxAddr );
+			snprintf( stmp, sizeof(stmp), "ROM %04X", ctxAddr );
 		break;
 	}
 
@@ -3436,7 +3436,7 @@ void QHexEdit::addRamReadBP(void)
 
 	if ( ctxAddr >= 0x8000 )
 	{
-		sprintf(cond, "K==#%02X", getBank(ctxAddr));
+		snprintf(cond, sizeof(cond), "K==#%02X", getBank(ctxAddr));
 	}
 
 	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
@@ -3463,7 +3463,7 @@ void QHexEdit::addRamWriteBP(void)
 
 	if ( ctxAddr >= 0x8000 )
 	{
-		sprintf(cond, "K==#%02X", getBank(ctxAddr));
+		snprintf(cond, sizeof(cond), "K==#%02X", getBank(ctxAddr));
 	}
 
 	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
@@ -3490,7 +3490,7 @@ void QHexEdit::addRamExecuteBP(void)
 
 	if ( ctxAddr >= 0x8000 )
 	{
-		sprintf(cond, "K==#%02X", getBank(ctxAddr));
+		snprintf(cond, sizeof(cond), "K==#%02X", getBank(ctxAddr));
 	}
 
 	retval = NewBreak( name, ctxAddr, -1, type, cond, numWPs, true);
@@ -3920,7 +3920,7 @@ void QHexEdit::paintEvent(QPaintEvent *event)
 
 
 		painter.setPen( fgColor );
-		sprintf( txt, "%06X", addr );
+		snprintf( txt, sizeof(txt), "%06X", addr );
 		painter.drawText( x, y, tr(txt) );
 
 		x = pxHexOffset - pxLineXScroll;

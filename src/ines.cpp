@@ -475,21 +475,33 @@ static void CheckHInfo(uint64 partialmd5) {
 	if (MapperNo == 99)
 		Mirroring = 2;
 
-	if (tofix) {
-		char gigastr[768];
-		strcpy(gigastr, "The iNES header contains incorrect information.  For now, the information will be corrected in RAM.  ");
+	if (tofix)
+	{
+		char tmpStr[128];
+		std::string gigastr;
+		gigastr.reserve(768);
+		gigastr.assign("The iNES header contains incorrect information.  For now, the information will be corrected in RAM.  ");
 		if (tofix & 1)
-			sprintf(gigastr + strlen(gigastr), "The mapper number should be set to %d.  ", MapperNo);
-		if (tofix & 2) {
+		{
+			snprintf(tmpStr, sizeof(tmpStr), "The mapper number should be set to %d.  ", MapperNo);
+			gigastr.append(tmpStr);
+		}
+		if (tofix & 2) 
+		{
 			const char *mstr[3] = { "Horizontal", "Vertical", "Four-screen" };
-			sprintf(gigastr + strlen(gigastr), "Mirroring should be set to \"%s\".  ", mstr[Mirroring & 3]);
+			snprintf(tmpStr, sizeof(tmpStr), "Mirroring should be set to \"%s\".  ", mstr[Mirroring & 3]);
+			gigastr.append(tmpStr);
 		}
 		if (tofix & 4)
-			strcat(gigastr, "The battery-backed bit should be set.  ");
+		{
+			gigastr.append("The battery-backed bit should be set.  ");
+		}
 		if (tofix & 8)
-			strcat(gigastr, "This game should not have any CHR ROM.  ");
-		strcat(gigastr, "\n");
-		FCEU_printf("%s", gigastr);
+		{
+			gigastr.append("This game should not have any CHR ROM.  ");
+		}
+		gigastr.append("\n");
+		FCEU_printf("%s", gigastr.c_str());
 	}
 }
 

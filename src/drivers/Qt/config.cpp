@@ -817,7 +817,7 @@ InitConfig()
 	for (unsigned int i=0; i<10; i++)
 	{
 		char buf[128];
-		sprintf(buf, "SDL.RecentRom%02u", i);
+		snprintf(buf, sizeof(buf), "SDL.RecentRom%02u", i);
 
 		config->addOption( buf, "");
 	}
@@ -825,7 +825,7 @@ InitConfig()
 	for (unsigned int i=0; i<10; i++)
 	{
 		char buf[128];
-		sprintf(buf, "SDL.RecentTasProject%02u", i);
+		snprintf(buf, sizeof(buf), "SDL.RecentTasProject%02u", i);
 
 		config->addOption( buf, "");
 	}
@@ -1084,7 +1084,7 @@ InitConfig()
 
 		//keyText.assign(" mod=");
 
-		//sprintf( buf, "  key=%s", SDL_GetKeyName( Hotkeys[i] ) );
+		//snprintf( buf, sizeof(buf), "  key=%s", SDL_GetKeyName( Hotkeys[i] ) );
 
 		if ( hotKeyName[0] != 0 )
 		{

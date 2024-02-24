@@ -403,11 +403,11 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		{
 			if ( rw->size > 1 )
 			{
-				sprintf (addrStr, "$%04X-$%04X", rw->addr, rw->addr + rw->size - 1);
+				snprintf (addrStr, sizeof(addrStr), "$%04X-$%04X", rw->addr, rw->addr + rw->size - 1);
 			}
 			else
 			{
-				sprintf (addrStr, "$%04X", rw->addr);
+				snprintf (addrStr, sizeof(addrStr), "$%04X", rw->addr);
 			}
 		}
 
@@ -424,37 +424,37 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		   {
 		   	if (rw->type == 's')
 		   	{
-		   		sprintf (valStr1, "%i", rw->val.i32);
+		   		snprintf (valStr1, sizeof(valStr1), "%i", rw->val.i32);
 		   	}
 		   	else
 		   	{
-		   		sprintf (valStr1, "%u", rw->val.u32);
+		   		snprintf (valStr1, sizeof(valStr1), "%u", rw->val.u32);
 		   	}
-		   	sprintf (valStr2, "0x%08X", rw->val.u32);
+		   	snprintf (valStr2, sizeof(valStr2), "0x%08X", rw->val.u32);
 		   }
 		   else if (rw->size == 2)
 		   {
 		   	if (rw->type == 's')
 		   	{
-		   		sprintf (valStr1, "%6i", rw->val.i16);
+		   		snprintf (valStr1, sizeof(valStr1), "%6i", rw->val.i16);
 		   	}
 		   	else
 		   	{
-		   		sprintf (valStr1, "%6u", rw->val.u16);
+		   		snprintf (valStr1, sizeof(valStr1), "%6u", rw->val.u16);
 		   	}
-		   	sprintf (valStr2, "0x%04X", rw->val.u16);
+		   	snprintf (valStr2, sizeof(valStr2), "0x%04X", rw->val.u16);
 		   }
 		   else
 		   {
 		   	if (rw->type == 's')
 		   	{
-		   		sprintf (valStr1, "%6i", rw->val.i8);
+		   		snprintf (valStr1, sizeof(valStr1), "%6i", rw->val.i8);
 		   	}
 		   	else
 		   	{
-		   		sprintf (valStr1, "%6u", rw->val.u8);
+		   		snprintf (valStr1, sizeof(valStr1), "%6u", rw->val.u8);
 		   	}
-		   	sprintf (valStr2, "0x%02X", rw->val.u8);
+		   	snprintf (valStr2, sizeof(valStr2), "0x%02X", rw->val.u8);
 		   }
 		}
 
@@ -851,7 +851,7 @@ void RamWatchDialog_t::openWatchEditWindow( ramWatch_t *rw, int mode)
 
 		if ( (rw->addr >= 0) && !rw->isSep )
 		{
-			sprintf( stmp, "%04X", rw->addr );
+			snprintf( stmp, sizeof(stmp), "%04X", rw->addr );
 			addrEntry->setText( tr(stmp) );
 		}
 		else

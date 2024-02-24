@@ -238,7 +238,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 
 	for (i = 0; bmap[i].init; ++i)
 	{
-		sprintf(stmp, "%d %s", bmap[i].number, bmap[i].name);
+		snprintf(stmp, sizeof(stmp), "%d %s", bmap[i].number, bmap[i].name);
 		
 		mapperComboBox->addItem( tr(stmp), bmap[i].number );
 	}
@@ -307,25 +307,25 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 		if (size >= 1024 << 3)
 		{
 			// The size of CHR ROM must be multiple of 8KB
-			sprintf( stmp, "%d KB", size / 1024);
+			snprintf( stmp, sizeof(stmp), "%d KB", size / 1024);
 			chrRomBox->addItem( tr(stmp), size );
 
 			// The size of PRG ROM must be multiple of 16KB
 			if (size >= 1024 * 16)
 			{
 				// PRG ROM
-				sprintf(stmp, "%d KB", size / 1024);
+				snprintf(stmp, sizeof(stmp), "%d KB", size / 1024);
 				prgRomBox->addItem( tr(stmp), size );
 			}
 		}
 		
 		if (size >= 1024)
 		{
-			sprintf( stmp, "%d KB", size / 1024);
+			snprintf( stmp, sizeof(stmp), "%d KB", size / 1024);
 		}
 		else
 		{
-			sprintf( stmp, "%d B", size);
+			snprintf( stmp, sizeof(stmp), "%d B", size);
 		}
 
 		prgRamBox->addItem( tr(stmp), size );
@@ -911,7 +911,7 @@ void iNesHeaderEditor_t::setHeaderData(iNES_HEADER* header)
 	{
 		if ( mapperComboBox->itemData(i).toInt() > mapper )
 		{
-			sprintf( buf, "%i Unknown/unsupported", i);
+			snprintf( buf, sizeof(buf), "%i Unknown/unsupported", i);
 			mapperComboBox->insertItem( i, tr(buf), mapper);
 			mapperComboBox->setCurrentIndex(i);
 			break;
@@ -924,7 +924,7 @@ void iNesHeaderEditor_t::setHeaderData(iNES_HEADER* header)
 	}
 
 	// Sub Mapper
-	sprintf(buf, "%d", ines20 ? header->ROM_type3 >> 4 : 0);
+	snprintf(buf, sizeof(buf), "%d", ines20 ? header->ROM_type3 >> 4 : 0);
 
 	mapperSubEdit->setText( tr(buf) );
 
@@ -1210,7 +1210,7 @@ void iNesHeaderEditor_t::setHeaderData(iNES_HEADER* header)
 	}
 
 	// Miscellaneous ROM Area(s)
-	sprintf(buf, "%d", header->misc_roms & 3);
+	snprintf(buf, sizeof(buf), "%d", header->misc_roms & 3);
 	miscRomsEdit->setText( tr(buf) );
 
 	// Trainer
@@ -1398,7 +1398,7 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 			}
 			else
 			{
-				sprintf(buf, "Error: Mapper# should be less than %d in iNES %d.0 format.", 256, 1);
+				snprintf(buf, sizeof(buf), "Error: Mapper# should be less than %d in iNES %d.0 format.", 256, 1);
 				showErrorMsgWindow(buf);
 				return false;
 			}
@@ -1406,7 +1406,7 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 	}
 	else 
 	{
-		sprintf(buf, "Mapper# should be less than %d in iNES %d.0 format.", 4096, 2);
+		snprintf(buf, sizeof(buf), "Mapper# should be less than %d in iNES %d.0 format.", 4096, 2);
 		showErrorMsgWindow(buf);
 		return false;
 	}
@@ -1483,13 +1483,13 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 						char buf2[64];
 						if (result % 1024 != 0)
 						{
-							sprintf(buf2, "%dB", result);
+							snprintf(buf2, sizeof(buf2), "%dB", result);
 						}
 						else
 						{
-							sprintf(buf2, "%dKB", result / 1024);
+							snprintf(buf2, sizeof(buf2), "%dKB", result / 1024);
 						}
-						sprintf(buf, "PRG ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
+						snprintf(buf, sizeof(buf), "PRG ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
 						showErrorMsgWindow(buf);
 						//if (MessageBox(hwnd, buf, "Error", MB_YESNO | MB_ICONERROR) == IDYES)
 						//{
@@ -1691,13 +1691,13 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 						char buf2[64];
 						if (result % 1024 != 0)
 						{
-							sprintf(buf2, "%dB", result);
+							snprintf(buf2, sizeof(buf2), "%dB", result);
 						}
 						else
 						{
-							sprintf(buf2, "%dKB", result / 1024);
+							snprintf(buf2, sizeof(buf2), "%dKB", result / 1024);
 						}
-						sprintf(buf, "CHR ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
+						snprintf(buf, sizeof(buf), "CHR ROM size you entered is invalid in iNES 2.0, do you want to set to its nearest value %s?", buf2);
 						showErrorMsgWindow(buf);
 						//if (MessageBox(hwnd, buf, "Error", MB_YESNO | MB_ICONERROR) == IDYES)
 						//	SetDlgItemText(hwnd, IDC_CHRROM_COMBO, buf2);
@@ -1986,7 +1986,7 @@ bool iNesHeaderEditor_t::WriteHeaderData(iNES_HEADER* header)
 		int ret;
 		QMessageBox msgBox(this);
 
-		sprintf(buf, "FCEUX doesn't support iNES Mapper# %d, this is not a serious problem, but the ROM will not be run in FCEUX properly.\nDo you want to continue?", mapper);
+		snprintf(buf, sizeof(buf), "FCEUX doesn't support iNES Mapper# %d, this is not a serious problem, but the ROM will not be run in FCEUX properly.\nDo you want to continue?", mapper);
 
 		msgBox.setIcon( QMessageBox::Warning );
 		msgBox.setText( tr(buf) );

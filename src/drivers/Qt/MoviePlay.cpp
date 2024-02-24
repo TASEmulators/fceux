@@ -247,7 +247,7 @@ void MoviePlayDialog_t::updateMovieText(void)
 
 	if (fp == NULL)
 	{
-		sprintf(stmp, "Error: Failed to open file '%s'", path.c_str());
+		snprintf(stmp, sizeof(stmp), "Error: Failed to open file '%s'", path.c_str());
 		showErrorMsgWindow(stmp);
 		clearMovieText();
 		return;
@@ -260,7 +260,7 @@ void MoviePlayDialog_t::updateMovieText(void)
 
 		validator->setMinMax(0, info.num_frames);
 
-		sprintf(stmp, "%u", (unsigned)info.num_frames);
+		snprintf(stmp, sizeof(stmp), "%u", (unsigned)info.num_frames);
 
 		movFramesLbl->setText(tr(stmp));
 		pauseAtFrameEntry->setText(tr(stmp));
@@ -272,11 +272,11 @@ void MoviePlayDialog_t::updateMovieText(void)
 		int seconds = num_seconds % 60;
 		int minutes = (num_seconds / 60) % 60;
 		int hours = (num_seconds / 60 / 60) % 60;
-		sprintf(stmp, "%02d:%02d:%02d.%02d", hours, minutes, seconds, fraction);
+		snprintf(stmp, sizeof(stmp), "%02d:%02d:%02d.%02d", hours, minutes, seconds, fraction);
 
 		movLenLbl->setText(tr(stmp));
 
-		sprintf(stmp, "%u", (unsigned)info.rerecord_count);
+		snprintf(stmp, sizeof(stmp), "%u", (unsigned)info.rerecord_count);
 
 		recCountLbl->setText(tr(stmp));
 
@@ -297,11 +297,11 @@ void MoviePlayDialog_t::updateMovieText(void)
 
 		if (info.emu_version_used < 20000)
 		{
-			sprintf(stmp, "FCEU %u.%02u.%02u%s", info.emu_version_used / 10000, (info.emu_version_used / 100) % 100, (info.emu_version_used) % 100, info.emu_version_used < 9813 ? " (blip)" : "");
+			snprintf(stmp, sizeof(stmp), "FCEU %u.%02u.%02u%s", info.emu_version_used / 10000, (info.emu_version_used / 100) % 100, (info.emu_version_used) % 100, info.emu_version_used < 9813 ? " (blip)" : "");
 		}
 		else
 		{
-			sprintf(stmp, "FCEUX %u.%02u.%02u", info.emu_version_used / 10000, (info.emu_version_used / 100) % 100, (info.emu_version_used) % 100);
+			snprintf(stmp, sizeof(stmp), "FCEUX %u.%02u.%02u", info.emu_version_used / 10000, (info.emu_version_used / 100) % 100, (info.emu_version_used) % 100);
 		}
 		emuUsedLbl->setText(tr(stmp));
 
@@ -315,14 +315,14 @@ void MoviePlayDialog_t::updateMovieText(void)
 
 			if (strcmp(stmp, md5_asciistr(info.md5_of_rom_used)) != 0)
 			{
-				sprintf(stmp, "Warning: Selected movie file '%s' may not have been created using the currently loaded ROM.", path.c_str());
+				snprintf(stmp, sizeof(stmp), "Warning: Selected movie file '%s' may not have been created using the currently loaded ROM.", path.c_str());
 				showWarningMsgWindow(stmp);
 			}
 		}
 	}
 	else
 	{
-		sprintf(stmp, "Error: Selected file '%s' does not have a recognized movie format.", path.c_str());
+		snprintf(stmp, sizeof(stmp), "Error: Selected file '%s' does not have a recognized movie format.", path.c_str());
 		showErrorMsgWindow(stmp);
 		clearMovieText();
 	}
@@ -485,7 +485,7 @@ void MoviePlayDialog_t::playMovie(void)
 	if (movieLoadError)
 	{
 		char stmp[256];
-		sprintf(stmp, "Error: Could not load movie file: %s \n", path.c_str());
+		snprintf(stmp, sizeof(stmp), "Error: Could not load movie file: %s \n", path.c_str());
 		showErrorMsgWindow(stmp);
 	}
 	else
