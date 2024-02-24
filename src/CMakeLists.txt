@@ -364,14 +364,6 @@ endif()
 include_directories( ${CMAKE_SOURCE_DIR}/src )
 include_directories( ${CMAKE_SOURCE_DIR}/src/drivers )
 
-if(APPLE)
-  add_definitions( -DPSS_STYLE=1 )
-else(APPLE)
-  if(UNIX)
-    add_definitions( -DPSS_STYLE=1 )
-  endif(UNIX)
-endif(APPLE)
-
 set(SRC_CORE
 	${CMAKE_CURRENT_SOURCE_DIR}/asm.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/cart.cpp

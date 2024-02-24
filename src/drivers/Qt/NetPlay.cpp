@@ -168,12 +168,12 @@ int NetPlayServer::sendRomLoadReq( NetPlayClient *client )
 			filepath = GameInfo->filename;
 		}
 	}
-	printf("Prep ROM Load Request: %s \n", filepath );
 
 	if (filepath == nullptr)
 	{
 		return -1;
 	}
+	printf("Prep ROM Load Request: %s \n", filepath );
 	FILE *fp = ::fopen( filepath, "r");
 
 	if (fp == nullptr)

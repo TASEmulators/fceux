@@ -96,9 +96,6 @@ typedef uint32_t uint32;
  #define GINLINE			/* Can't declare a function INLINE
 					   and global in MSVC.  Bummer.
 					*/
- #define PSS_STYLE 2			/* Does MSVC compile for anything
-					   other than Windows/DOS targets?
-					*/
 
  #if _MSC_VER >= 1300
   #pragma warning(disable:4244) //warning C4244: '=' : conversion from 'uint32' to 'uint8', possible loss of data
@@ -108,6 +105,17 @@ typedef uint32_t uint32;
  #if _MSC_VER < 1400
   #define vsnprintf _vsnprintf
  #endif
+#endif
+
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+
+ #define PSS_STYLE 1
+
+#elif defined(MSVC)
+
+ #define PSS_STYLE 2			/* Does MSVC compile for anything
+					   other than Windows/DOS targets?
+					*/
 #endif
 
 #if PSS_STYLE==2
