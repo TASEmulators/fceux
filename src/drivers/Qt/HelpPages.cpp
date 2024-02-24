@@ -56,53 +56,57 @@
 
 void consoleWin_t::OpenHelpWindow(std::string subpage)
 {
-	std::string helpFileName;
-
-	g_config->getOption ("SDL.HelpFilePath", &helpFileName );
-
-	if ( helpFileName.length() == 0 )
-	{
-		#if defined(WIN32)
-		helpFileName = FCEUI_GetBaseDirectory();
-		helpFileName += "\\..\\doc\\fceux.chm";
-		#else
-		helpFileName = "/usr/share/fceux/fceux.qhc";
-		#endif
-
-		#ifdef __APPLE__
-		if ( !QFile( QString::fromStdString(helpFileName) ).exists() )
-		{
-			// Search for MacOSX DragNDrop Resources
-			helpFileName = QApplication::applicationDirPath().toLocal8Bit() + "/../Resources/fceux.qhc";
-		}
-		#endif
-	}
-
-	if ( !QFile( QString::fromStdString(helpFileName) ).exists() )
-	{
-		helpFileName = findHelpFile();
-	}
-
-	if ( helpFileName.length() == 0 )
-	{
-		return;
-	}
-
-#if defined(WIN32)
-	if (subpage.length() > 0)
-	{
-		helpFileName = helpFileName + "::/" + subpage + ".htm";
-	}
-#else
-	// Subpage indexing is not supported by linux chm viewer
+    std::string helpFileName;
+#if defined(UNICODE) || defined(_UNICODE)
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring wHelpFileName = converter.from_bytes(helpFileName.c_str());
 #endif
-
-	//printf("Looking for HelpFile '%s'\n", helpFileName.c_str() );
-
+    
+    g_config->getOption ("SDL.HelpFilePath", &helpFileName );
+    
+    if ( helpFileName.length() == 0 )
+    {
 #if defined(WIN32)
-	// Windows specific HtmlHelp library function
+        helpFileName = FCEUI_GetBaseDirectory();
+        helpFileName += "\\..\\doc\\fceux.chm";
+#else
+        helpFileName = "/usr/share/fceux/fceux.qhc";
+#endif
+        
+#ifdef __APPLE__
+        if ( !QFile( QString::fromStdString(helpFileName) ).exists() )
+        {
+            // Search for MacOSX DragNDrop Resources
+            helpFileName = QApplication::applicationDirPath().toLocal8Bit() + "/../Resources/fceux.qhc";
+        }
+#endif
+    }
+    
+    if ( !QFile( QString::fromStdString(helpFileName) ).exists() )
+    {
+        helpFileName = findHelpFile();
+    }
+    
+    if ( helpFileName.length() == 0 )
+    {
+        return;
+    }
+    
+#if defined(WIN32)
+    if (subpage.length() > 0)
+    {
+        helpFileName = helpFileName + "::/" + subpage + ".htm";
+    }
+#else
+    // Subpage indexing is not supported by linux chm viewer
+#endif
+    
+    //printf("Looking for HelpFile '%s'\n", helpFileName.c_str() );
+    
+#if defined(WIN32)
+    // Windows specific HtmlHelp library function
 #if defined(_UNICODE) || defined(UNICODE)
-    helpWin = HtmlHelp(HWND(winId()), helpFileName.wstring(), HH_DISPLAY_TOPIC, (DWORD)NULL);
+    helpWin = HtmlHelp(HWND(winId()), wHelpFileName.data(), HH_DISPLAY_TOPIC, (DWORD)NULL);
 #else
 	helpWin = HtmlHelp(HWND(winId()), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
 #endif
