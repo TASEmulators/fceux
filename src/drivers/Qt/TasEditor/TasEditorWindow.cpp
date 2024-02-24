@@ -2274,7 +2274,7 @@ void TasEditorWindow::exportMovieFile(void)
 			markerID = markersManager.getMarkerAtFrame(i);
 			if (markerID)
 			{
-				sprintf( framenum, "%i ", i );
+				snprintf( framenum, sizeof(framenum), "%i ", i );
 				//_itoa(i, framenum, 10);
 				//strcat(framenum, " ");
 				subtitle = framenum;
@@ -2337,7 +2337,7 @@ void TasEditorWindow::buildRecentProjectMenu(void)
 
 	for (int i=0; i<10; i++)
 	{
-		sprintf(buf, "SDL.RecentTasProject%02i", i);
+		snprintf(buf, sizeof(buf), "SDL.RecentTasProject%02i", i);
 
 		g_config->getOption( buf, &s);
 
@@ -2373,7 +2373,7 @@ void TasEditorWindow::saveRecentProjectMenu(void)
 	for (it=projList.begin(); it != projList.end(); it++)
 	{
 		s = *it;
-		sprintf(buf, "SDL.RecentTasProject%02i", i);
+		snprintf(buf, sizeof(buf), "SDL.RecentTasProject%02i", i);
 
 		g_config->setOption( buf, s->c_str() );
 
@@ -6651,7 +6651,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 
 		//rect = QRect( -pxLineXScroll + pxFrameColX, y, pxWidthFrameCol, pxLineSpacing );
 
-		sprintf( stmp, "%07i", lineNum );
+		snprintf( stmp, sizeof(stmp), "%07i", lineNum );
 
 		rect = painter.fontMetrics().boundingRect( tr(stmp) );
 
@@ -7492,7 +7492,7 @@ void markerDragPopup::paintEvent(QPaintEvent *event)
 	w = event->rect().width();
 	h = event->rect().height();
 
-	sprintf( txt, "%07i", rowIndex );
+	snprintf( txt, sizeof(txt), "%07i", rowIndex );
 
 	//painter.setFont(font);
 	//I want to make the title bar pasted on the content

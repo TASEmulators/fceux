@@ -279,10 +279,10 @@ bool TASEDITOR_PROJECT::load(const char* fullName)
 				message.assign("This project was saved using different version of TAS Editor!\n\n");
 				message.append("Original version: ");
 				char versionNum[16];
-				sprintf( versionNum, "%u", projectFileVersion);
+				snprintf( versionNum, sizeof(versionNum), "%u", projectFileVersion);
 				message.append(versionNum);
 				message.append("\nCurrent version: ");
-				sprintf( versionNum, "%i", PROJECT_FILE_CURRENT_VERSION);
+				snprintf( versionNum, sizeof(versionNum), "%i", PROJECT_FILE_CURRENT_VERSION);
 				message.append(versionNum);
 				message.append("\n\nClick Yes to try loading all data from the file (may crash).\n");
 				message.append("Click No to only load movie data.\n");

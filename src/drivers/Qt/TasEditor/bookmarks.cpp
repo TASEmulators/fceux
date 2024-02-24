@@ -658,7 +658,7 @@ void BOOKMARKS::paintEvent(QPaintEvent *event)
 		}
 
 		x = pxStartCol1 + pxCharWidth;
-		sprintf( txt, "%i", item );
+		snprintf( txt, sizeof(txt), "%i", item );
 
 		painter.drawText( x, y+pxLineTextOfs, tr(txt) );
 

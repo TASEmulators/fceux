@@ -1023,11 +1023,11 @@ void BRANCHES::paintEvent(QPaintEvent *event)
 			char framenum_string[16] = {0};
 			if (bookmarks->itemUnderMouse < TOTAL_BOOKMARKS)
 			{
-				sprintf( framenum_string, "%07i", bookmarks->bookmarksArray[bookmarks->itemUnderMouse].snapshot.keyFrame );
+				snprintf( framenum_string, sizeof(framenum_string), "%07i", bookmarks->bookmarksArray[bookmarks->itemUnderMouse].snapshot.keyFrame );
 			}
 			else
 			{
-				sprintf( framenum_string, "%07i", currFrameCounter );
+				snprintf( framenum_string, sizeof(framenum_string), "%07i", currFrameCounter );
 			}
 			x = viewRect.x() + (2 * pxBoxWidth);
 			y = pxLineSpacing;
