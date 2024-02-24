@@ -102,7 +102,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 #if defined(WIN32)
 	// Windows specific HtmlHelp library function
 #if defined(_UNICODE) || defined(UNICODE)
-    helpWin = HtmlHelp(HWND(winId()), helpFileName.wc_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
+    helpWin = HtmlHelp(HWND(winId()), helpFileName.wstring(), HH_DISPLAY_TOPIC, (DWORD)NULL);
 #else
 	helpWin = HtmlHelp(HWND(winId()), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
 #endif
