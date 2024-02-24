@@ -55,7 +55,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QCheckBox   *showFrameCount_cbx;
 		QCheckBox   *showLagCount_cbx;
 		QCheckBox   *showRerecordCount_cbx;
-		#ifdef WIN32
+		#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
 		QCheckBox   *winFullScreenBorderCbx;
 		#endif
 		QDoubleSpinBox *xScaleBox;
