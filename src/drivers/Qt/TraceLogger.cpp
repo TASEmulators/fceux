@@ -25,7 +25,7 @@
 
 #ifdef WIN32
 #include <windows.h>
-#include <Qt/TraceFileWriter.h>
+#include "../win/TraceFileWriter.h"
 #else
 #include <unistd.h>
 #include <sys/types.h>
