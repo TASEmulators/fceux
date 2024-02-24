@@ -60,7 +60,7 @@ static uint8 rp2c05004_colortable[] =
 };
 
 
-main()
+int main(int argc, char *argv[])
 {
  int x;
  for(x=0;x<64;x++)
@@ -71,4 +71,5 @@ main()
 				 palette[rp2c04001_colortable[x]&0x3F].g,
 				 palette[rp2c04001_colortable[x]&0x3F].b);
  }
+ return 0;
 }
