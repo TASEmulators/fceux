@@ -99,7 +99,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 
 	//printf("Looking for HelpFile '%s'\n", helpFileName.c_str() );
 
-#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
+#if defined(WIN32)
 	// Windows specific HtmlHelp library function
 #if defined(_UNICODE) || defined(UNICODE)
     helpWin = HtmlHelp(HWND(winId()), helpFileName.wc_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
