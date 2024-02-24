@@ -946,7 +946,7 @@ int GamePad_t::saveCurrentMapToFile(const char *name)
 		output.append(name);
 		output.append(",");
 		output.append("config:");
-		sprintf( stmp, "%i,", c );
+		snprintf( stmp, sizeof(stmp), "%i,", c );
 		output.append(stmp);
 
 		for (i = 0; i < GAMEPAD_NUM_BUTTONS; i++)
@@ -970,26 +970,26 @@ int GamePad_t::saveCurrentMapToFile(const char *name)
 				}
 				stmp[k] = 0;
 
-				//sprintf(stmp, "k%s", SDL_GetKeyName(bmap[c][i].ButtonNum));
+				//snprintf(stmp, sizeof(stmp), "k%s", SDL_GetKeyName(bmap[c][i].ButtonNum));
 			}
 			else
 			{
 				if (bmap[c][i].ButtonNum & 0x2000)
 				{
 					/* Hat "button" */
-					sprintf(stmp, "h%i.%i",
+					snprintf(stmp, sizeof(stmp), "h%i.%i",
 							(bmap[c][i].ButtonNum >> 8) & 0x1F, bmap[c][i].ButtonNum & 0xFF);
 				}
 				else if (bmap[c][i].ButtonNum & 0x8000)
 				{
 					/* Axis "button" */
-					sprintf(stmp, "%ca%i",
+					snprintf(stmp, sizeof(stmp), "%ca%i",
 							(bmap[c][i].ButtonNum & 0x4000) ? '-' : '+', bmap[c][i].ButtonNum & 0x3FFF);
 				}
 				else
 				{
 					/* Button */
-					sprintf(stmp, "b%i", bmap[c][i].ButtonNum);
+					snprintf(stmp, sizeof(stmp), "b%i", bmap[c][i].ButtonNum);
 				}
 			}
 			output.append(buttonNames[i]);
@@ -1034,26 +1034,26 @@ int GamePad_t::saveCurrentMapToFile(const char *name)
 							stmp[k] = keyName[j]; k++; j++;
 						}
 						stmp[k] = 0;
-						//sprintf(stmp, "k%s", SDL_GetKeyName(fk->bmap[i].ButtonNum));
+						//snprintf(stmp, sizeof(stmp), "k%s", SDL_GetKeyName(fk->bmap[i].ButtonNum));
 					}
 					else
 					{
 						if (fk->bmap[i].ButtonNum & 0x2000)
 						{
 							/* Hat "button" */
-							sprintf(stmp, "h%i.%i",
+							snprintf(stmp, sizeof(stmp), "h%i.%i",
 									(fk->bmap[i].ButtonNum >> 8) & 0x1F, fk->bmap[i].ButtonNum & 0xFF);
 						}
 						else if (fk->bmap[i].ButtonNum & 0x8000)
 						{
 							/* Axis "button" */
-							sprintf(stmp, "%ca%i",
+							snprintf(stmp, sizeof(stmp), "%ca%i",
 									(fk->bmap[i].ButtonNum & 0x4000) ? '-' : '+', fk->bmap[i].ButtonNum & 0x3FFF);
 						}
 						else
 						{
 							/* Button */
-							sprintf(stmp, "b%i", fk->bmap[i].ButtonNum);
+							snprintf(stmp, sizeof(stmp), "b%i", fk->bmap[i].ButtonNum);
 						}
 					}
 					if ( i == 0 )

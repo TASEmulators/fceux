@@ -345,7 +345,7 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 			if(!warned)
 			{
 				char str [256];
-				sprintf(str, "Warning: Found unknown save chunk of type %d.\nThis could indicate the save state is corrupted\nor made with a different (incompatible) emulator version.", t);
+				snprintf(str, sizeof(str), "Warning: Found unknown save chunk of type %d.\nThis could indicate the save state is corrupted\nor made with a different (incompatible) emulator version.", t);
 				FCEUD_PrintError(str);
 				warned=true;
 			}

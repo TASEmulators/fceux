@@ -136,7 +136,7 @@ profileExecVector::profileExecVector(void)
 		strcpy( threadName, thread->objectName().toStdString().c_str());
 	}
 #endif
-	sprintf( fileName, "fceux-profile-%s.log", threadName);
+	snprintf( fileName, sizeof(fileName), "fceux-profile-%s.log", threadName);
 
 	logFp = ::fopen(fileName, "w");
 
@@ -212,7 +212,7 @@ int profilerFuncMap::addRecord(const char *fileNameStringLiteral,
 	autoScopedLock aLock(_mapMtx);
 	char lineString[64];
 
-	sprintf( lineString, ":%i", fileLineNumber);
+	snprintf( lineString, sizeof(lineString), ":%i", fileLineNumber);
 
 	std::string fname(fileNameStringLiteral);
 
@@ -233,7 +233,7 @@ funcProfileRecord *profilerFuncMap::findRecord(const char *fileNameStringLiteral
 	char lineString[64];
 	funcProfileRecord *rec = nullptr;
 
-	sprintf( lineString, ":%i", fileLineNumber);
+	snprintf( lineString, sizeof(lineString), ":%i", fileLineNumber);
 
 	std::string fname(fileNameStringLiteral);
 

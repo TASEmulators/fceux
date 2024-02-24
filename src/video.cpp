@@ -765,7 +765,7 @@ void ShowFPS(void)
 
 	if ( da > FCEUD_GetTimeFreq() )
 	{
-		sprintf(fpsmsg, "%.1f", (double)boopcount / ((double)da / FCEUD_GetTimeFreq()));
+		snprintf(fpsmsg, sizeof(fpsmsg), "%.1f", (double)boopcount / ((double)da / FCEUD_GetTimeFreq()));
 
 		boopcount = 0;
 		boop_ts = ts;
@@ -797,7 +797,7 @@ static void FCEU_DrawPauseCountDown(uint8 *XBuf)
 				framesPerSec = 60;
 			}
 
-			sprintf(text, "Unpausing in %d...", (pauseFramesLeft / framesPerSec) + 1);
+			snprintf(text, sizeof(text), "Unpausing in %d...", (pauseFramesLeft / framesPerSec) + 1);
 
 			if (text[0])
 			{
