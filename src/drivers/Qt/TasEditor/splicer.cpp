@@ -73,7 +73,7 @@ void SPLICER::update(void)
 			// rows
 			if (size > 1)
 			{
-				sprintf( num, "%i", size);
+				snprintf( num, sizeof(num), "%i", size);
 				strcat(new_text, num);
 				strcat(new_text, numTextRows);
 			}
@@ -85,7 +85,7 @@ void SPLICER::update(void)
 			int columns = NUM_JOYPAD_BUTTONS * joysticksPerFrame[getInputType(currMovieData)];	// in future the number of columns will depend on selected columns
 			if (columns > 1)
 			{
-				sprintf( num, "%i", columns);
+				snprintf( num, sizeof(num), "%i", columns);
 				strcat(new_text, num);
 				strcat(new_text, numTextColumns);
 			}
@@ -787,7 +787,7 @@ void SPLICER::redrawInfoAboutClipboard(void)
 		// rows
 		if (clipboardSelection.size() > 1)
 		{
-			sprintf( num, "%zi", clipboardSelection.size());
+			snprintf( num, sizeof(num), "%zi", clipboardSelection.size());
 			strcat(new_text, num);
 			strcat(new_text, numTextRows);
 		}
@@ -799,7 +799,7 @@ void SPLICER::redrawInfoAboutClipboard(void)
 		int columns = NUM_JOYPAD_BUTTONS * joysticksPerFrame[getInputType(currMovieData)];	// in future the number of columns will depend on selected columns
 		if (columns > 1)
 		{
-			sprintf( num, "%i", columns);
+			snprintf( num, sizeof(num), "%i", columns);
 			strcat(new_text, num);
 			strcat(new_text, numTextColumns);
 		}

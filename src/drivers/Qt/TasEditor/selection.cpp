@@ -193,7 +193,7 @@ void SELECTION::redrawMarkerData()
 		strcpy(new_text, lowerMarkerText);
 	}
 	char num[16];
-	sprintf( num, "%i", displayedMarkerNumber);
+	snprintf( num, sizeof(num), "%i", displayedMarkerNumber);
 	strcat(new_text, num);
 	strcat(new_text, " ");
 	tasWin->lowerMarkerLabel->setText( QObject::tr(new_text) );

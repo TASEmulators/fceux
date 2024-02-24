@@ -447,7 +447,7 @@ void PLAYBACK::redrawMarkerData()
 		strcpy(new_text, upperMarkerText);
 	}
 	char num[16];
-	sprintf( num, "%i", displayedMarkerNumber);
+	snprintf( num, sizeof(num), "%i", displayedMarkerNumber);
 	strcat(new_text, num);
 	strcat(new_text, " ");
 	tasWin->upperMarkerLabel->setText( QObject::tr(new_text) );

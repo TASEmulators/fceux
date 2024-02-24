@@ -27,10 +27,12 @@
 #include "../../debug.h"
 #include "../../debugsymboltable.h"
 #include "../../conddebug.h"
+#include "utils/StringBuilder.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <cstdlib>
 
 int GetNesFileAddress(int A);
 
@@ -103,7 +105,13 @@ MemoryMappedRegister RegNames[] = {
 	{"$4017", "JOY2_FRAME"}
 };
 
+const char minRegFirstDigit = '2', maxRegFirstDigit = '4';
+
 int RegNameCount = sizeof(RegNames)/sizeof(MemoryMappedRegister);
+
+auto cmpRegNames = [](const void *a, const void *b) { 
+	return std::strncmp(((const MemoryMappedRegister *)a)->offset + 1, ((const MemoryMappedRegister *)b)->offset + 1, 4);
+};
 
 /**
 * Parses a line from a NL file.
@@ -603,20 +611,39 @@ void replaceNames(Name* list, char* str, std::vector<uint16>* addressesLog)
 		list = list->next;
 	}
 
-	for (int i = 0; i < RegNameCount; i++) {
-		if (!symbRegNames) break;
-		// copypaste, because Name* is too complex to abstract
-		*buff = 0;
-		src = str;
+	if (symbRegNames) {
+		StringBuilder sb(buff);
 
-		while (pos = strstr(src, RegNames[i].offset)) {
-			*pos = 0;
-			strcat(buff, src);
-			strcat(buff, RegNames[i].name);
-			src = pos + 5;
+		pos = src = str;
+		while (pos = std::strchr(pos, '$'))
+		{
+			char first = pos[1];
+			if (first < minRegFirstDigit || first > maxRegFirstDigit)
+			{
+				pos += 1;
+				continue;
+			}
+
+			MemoryMappedRegister key = { pos, "" };
+			const MemoryMappedRegister *reg = (const MemoryMappedRegister *)std::bsearch(&key, RegNames, RegNameCount, sizeof(MemoryMappedRegister), cmpRegNames);
+			if (reg != nullptr)
+			{
+				*pos = '\0';
+				sb << src << reg->name;
+				
+				pos += 5;
+				src = pos;
+			}
+			else
+				pos += 1;
 		}
-		if (*buff) {
-			strcat(buff, src);
+
+		// If no registers were found then the string is unmodified and no copies are necessary
+		if (src != str)
+		{
+			if (*src)
+				sb << src;
+
 			strcpy(str, buff);
 		}
 	}

@@ -522,7 +522,7 @@ int HISTORY::registerChanges(int mod_type, int start, int end, int size, const c
 		if (mod_type == MODTYPE_INSERTNUM)
 		{
 			snap.endFrame = start + size - 1;
-			sprintf( framenum, "%i", size);
+			snprintf( framenum, sizeof(framenum), "%i", size);
 			strcat(snap.description, framenum);
 		} else
 		{
@@ -540,12 +540,12 @@ int HISTORY::registerChanges(int mod_type, int start, int end, int size, const c
 				snap.endFrame = snapshots[real_pos].endFrame;
 			// add upper and lower frame to description
 			strcat(snap.description, " ");
-			sprintf( framenum, "%i", snap.startFrame);
+			snprintf( framenum, sizeof(framenum), "%i", snap.startFrame);
 			strcat(snap.description, framenum);
 			if (snap.endFrame > snap.startFrame)
 			{
 				strcat(snap.description, "-");
-				sprintf( framenum, "%i", snap.endFrame);
+				snprintf( framenum, sizeof(framenum), "%i", snap.endFrame);
 				strcat(snap.description, framenum);
 			}
 			// add comment if there is one specified
@@ -570,12 +570,12 @@ int HISTORY::registerChanges(int mod_type, int start, int end, int size, const c
 			// don't combine
 			// add upper and lower frame to description
 			strcat(snap.description, " ");
-			sprintf( framenum, "%i", snap.startFrame);
+			snprintf( framenum, sizeof(framenum), "%i", snap.startFrame);
 			strcat(snap.description, framenum);
 			if (snap.endFrame > snap.startFrame)
 			{
 				strcat(snap.description, "-");
-				sprintf( framenum, "%i", snap.endFrame);
+				snprintf( framenum, sizeof(framenum), "%i", snap.endFrame);
 				strcat(snap.description, framenum);
 			}
 			// add comment if there is one specified
@@ -681,7 +681,7 @@ void HISTORY::registerMarkersChange(int modificationType, int start, int end, co
 	// add the frame to description
 	char framenum[16];
 	strcat(snap.description, " ");
-	sprintf( framenum, "%i", snap.startFrame);
+	snprintf( framenum, sizeof(framenum), "%i", snap.startFrame);
 	strcat(snap.description, framenum);
 	if (snap.endFrame > snap.startFrame || modificationType == MODTYPE_MARKER_DRAG || modificationType == MODTYPE_MARKER_SWAP)
 	{
@@ -691,7 +691,7 @@ void HISTORY::registerMarkersChange(int modificationType, int start, int end, co
 			strcat(snap.description, "<->");
 		else
 			strcat(snap.description, "-");
-		sprintf( framenum, "%i", snap.endFrame);
+		snprintf( framenum, sizeof(framenum), "%i", snap.endFrame);
 		strcat(snap.description, framenum);
 	}
 	// add comment if there is one specified
@@ -718,7 +718,7 @@ void HISTORY::registerBookmarkSet(int slot, BOOKMARK& backupCopy, int oldCurrent
 	snap.startFrame = snap.endFrame = snap.keyFrame = bookmarks->bookmarksArray[slot].snapshot.keyFrame;
 	char framenum[16];
 	strcat(snap.description, " ");
-	sprintf( framenum, "%i", snap.keyFrame);
+	snprintf( framenum, sizeof(framenum), "%i", snap.keyFrame);
 	strcat(snap.description, framenum);
 	if (taseditorConfig->enableHotChanges)
 		snap.inputlog.copyHotChanges(&getCurrentSnapshot().inputlog);
@@ -823,10 +823,10 @@ void HISTORY::registerRecording(int frameOfChange, uint32 joypadDifferenceBits)
 		}
 		// add upper and lower frame to description
 		strcat(snap->description, " ");
-		sprintf( framenum, "%i", snap->startFrame);
+		snprintf( framenum, sizeof(framenum), "%i", snap->startFrame);
 		strcat(snap->description, framenum);
 		strcat(snap->description, "-");
-		sprintf( framenum, "%i", snap->endFrame);
+		snprintf( framenum, sizeof(framenum), "%i", snap->endFrame);
 		strcat(snap->description, framenum);
 		// truncate history here
 		historyTotalItems = historyCursorPos+1;
@@ -860,7 +860,7 @@ void HISTORY::registerRecording(int frameOfChange, uint32 joypadDifferenceBits)
 		}
 		// add upper frame to description
 		strcat(snap.description, " ");
-		sprintf( framenum, "%i", frameOfChange);
+		snprintf( framenum, sizeof(framenum), "%i", frameOfChange);
 		strcat(snap.description, framenum);
 		// set hotchanges
 		if (taseditorConfig->enableHotChanges)
@@ -942,7 +942,7 @@ int HISTORY::registerLuaChanges(const char* name, int start, bool insertionOrDel
 		// add upper frame to description
 		char framenum[16];
 		strcat(snap.description, " ");
-		sprintf( framenum, "%i", first_changes);
+		snprintf( framenum, sizeof(framenum), "%i", first_changes);
 		strcat(snap.description, framenum);
 		// set hotchanges
 		if (taseditorConfig->enableHotChanges)
