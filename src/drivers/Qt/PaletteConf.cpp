@@ -143,7 +143,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 
 	connect(ntscFrame, SIGNAL(clicked(bool)), this, SLOT(use_NTSC_Changed(bool)));
 
-	sprintf(stmp, "Tint: %3i", tint);
+	snprintf(stmp, sizeof(stmp), "Tint: %3i", tint);
 	tintFrame = new QGroupBox(tr(stmp));
 	hbox1 = new QHBoxLayout();
 	tintSlider = new QSlider(Qt::Horizontal);
@@ -157,7 +157,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	tintFrame->setLayout(hbox1);
 	hbox2->addWidget(tintFrame);
 
-	sprintf(stmp, "Hue: %3i", hue);
+	snprintf(stmp, sizeof(stmp), "Hue: %3i", hue);
 	hueFrame = new QGroupBox(tr(stmp));
 	hbox1 = new QHBoxLayout();
 	hueSlider = new QSlider(Qt::Horizontal);
@@ -190,7 +190,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	grid->setColumnStretch( 1, 40 );
 	grid->setColumnStretch( 2, 20 );
 
-	sprintf(stmp, "Notch: %3i%%", palnotch);
+	snprintf(stmp, sizeof(stmp), "Notch: %3i%%", palnotch);
 	notchFrame = new QGroupBox(tr(stmp));
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	notchFrame->setMinimumWidth( notchFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
@@ -207,7 +207,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	hbox1->addWidget(notchSlider);
 	notchFrame->setLayout(hbox1);
 
-	sprintf(stmp, "Saturation: %3i%%", palsaturation);
+	snprintf(stmp, sizeof(stmp), "Saturation: %3i%%", palsaturation);
 	saturationFrame = new QGroupBox(tr(stmp));
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	saturationFrame->setMinimumWidth( saturationFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
@@ -224,7 +224,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	hbox1->addWidget(saturationSlider);
 	saturationFrame->setLayout(hbox1);
 
-	sprintf(stmp, "Sharpness: %3i%%", palsharpness*2);
+	snprintf(stmp, sizeof(stmp), "Sharpness: %3i%%", palsharpness*2);
 	sharpnessFrame = new QGroupBox(tr(stmp));
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	sharpnessFrame->setMinimumWidth( sharpnessFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
@@ -241,7 +241,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	hbox1->addWidget(sharpnessSlider);
 	sharpnessFrame->setLayout(hbox1);
 
-	sprintf(stmp, "Contrast: %3i%%", palcontrast);
+	snprintf(stmp, sizeof(stmp), "Contrast: %3i%%", palcontrast);
 	contrastFrame = new QGroupBox(tr(stmp));
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	contrastFrame->setMinimumWidth( contrastFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
@@ -258,7 +258,7 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	hbox1->addWidget(contrastSlider);
 	contrastFrame->setLayout(hbox1);
 
-	sprintf(stmp, "Brightness: %3i%%", palbrightness);
+	snprintf(stmp, sizeof(stmp), "Brightness: %3i%%", palbrightness);
 	brightnessFrame = new QGroupBox(tr(stmp));
 #if QT_VERSION > QT_VERSION_CHECK(5, 11, 0)
 	brightnessFrame->setMinimumWidth( brightnessFrame->fontMetrics().horizontalAdvance('2') * strlen(stmp) );
@@ -361,7 +361,7 @@ void PaletteConfDialog_t::hueChanged(int v)
 	int c, t;
 	char stmp[64];
 
-	sprintf(stmp, "Hue: %3i", v);
+	snprintf(stmp, sizeof(stmp), "Hue: %3i", v);
 
 	hueFrame->setTitle(stmp);
 
@@ -382,7 +382,7 @@ void PaletteConfDialog_t::tintChanged(int v)
 	int c, h;
 	char stmp[64];
 
-	sprintf(stmp, "Tint: %3i", v);
+	snprintf(stmp, sizeof(stmp), "Tint: %3i", v);
 
 	tintFrame->setTitle(stmp);
 
@@ -653,7 +653,7 @@ void PaletteConfDialog_t::palNotchChanged(int value)
 	{
 		char stmp[64];
 
-		sprintf( stmp, "Notch: %3i%%", value );
+		snprintf( stmp, sizeof(stmp), "Notch: %3i%%", value );
 		notchFrame->setTitle( tr(stmp) );
 
 		palnotch  = value;
@@ -671,7 +671,7 @@ void PaletteConfDialog_t::palSaturationChanged(int value)
 	{
 		char stmp[64];
 
-		sprintf( stmp, "Saturation: %3i%%", value );
+		snprintf( stmp, sizeof(stmp), "Saturation: %3i%%", value );
 		saturationFrame->setTitle( tr(stmp) );
 
 		palsaturation  = value;
@@ -689,7 +689,7 @@ void PaletteConfDialog_t::palSharpnessChanged(int value)
 	{
 		char stmp[64];
 
-		sprintf( stmp, "Sharpness: %3i%%", value*2 );
+		snprintf( stmp, sizeof(stmp), "Sharpness: %3i%%", value*2 );
 		sharpnessFrame->setTitle( tr(stmp) );
 
 		palsharpness   = value;
@@ -707,7 +707,7 @@ void PaletteConfDialog_t::palContrastChanged(int value)
 	{
 		char stmp[64];
 
-		sprintf( stmp, "Contrast: %3i%%", value );
+		snprintf( stmp, sizeof(stmp), "Contrast: %3i%%", value );
 		contrastFrame->setTitle( tr(stmp) );
 
 		palcontrast    = value;
@@ -725,7 +725,7 @@ void PaletteConfDialog_t::palBrightnessChanged(int value)
 	{
 		char stmp[64];
 
-		sprintf( stmp, "Brightness: %3i%%", value );
+		snprintf( stmp, sizeof(stmp), "Brightness: %3i%%", value );
 		brightnessFrame->setTitle( tr(stmp) );
 
 		palbrightness  = value;

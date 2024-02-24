@@ -284,7 +284,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	{
 	        char stmp[8];
 
-	        sprintf( stmp, "&%ix", i+1 );
+	        snprintf( stmp, sizeof(stmp), "&%ix", i+1 );
 
 	        zoomAct[i] = new QAction(tr(stmp), this);
 	        zoomAct[i]->setCheckable(true);
@@ -346,7 +346,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 				strcpy( stmp, "Full" );
 			break;
 			default:
-	        		sprintf( stmp, "1/%i", 0x01 << i );
+	        		snprintf( stmp, sizeof(stmp), "1/%i", 0x01 << i );
 			break;
 		}
 
@@ -768,28 +768,28 @@ void ppuNameTableViewerDialog_t::setPropertyLabels( int TileID, int TileX, int T
 {
 	char stmp[32];
 
-	sprintf( stmp, "%02X", TileID);
+	snprintf( stmp, sizeof(stmp), "%02X", TileID);
 	tileIdxLbl->setText( tr(stmp) );
 
-	sprintf( stmp, "%04X", TileID << 4);
+	snprintf( stmp, sizeof(stmp), "%04X", TileID << 4);
 	tileAddrLbl->setText( tr(stmp) );
 
-	sprintf( stmp, "%0d, %0d", TileX, TileY);
+	snprintf( stmp, sizeof(stmp), "%0d, %0d", TileX, TileY);
 	tileLocLbl->setText( tr(stmp) );
 
-	sprintf(stmp,"%04X",PPUAddress);
+	snprintf( stmp, sizeof(stmp), "%04X",PPUAddress);
 	ppuAddrLbl->setText( tr(stmp) );
 
-	sprintf(stmp,"%1X",NameTable);
+	snprintf( stmp, sizeof(stmp), "%1X",NameTable);
 	nameTableLbl->setText( tr(stmp) );
 
-	sprintf(stmp,"%02X",Attrib);
+	snprintf( stmp, sizeof(stmp), "%02X",Attrib);
 	attrDataLbl->setText( tr(stmp) );
 
-	sprintf(stmp,"%04X",AttAddress);
+	snprintf( stmp, sizeof(stmp), "%04X",AttAddress);
 	attrAddrLbl->setText( tr(stmp) );
 
-	sprintf(stmp,"%04X", palAddr );
+	snprintf( stmp, sizeof(stmp), "%04X", palAddr );
 	palAddrLbl->setText( tr(stmp) );
 
 }
@@ -1341,25 +1341,25 @@ void ppuNameTableView_t::contextMenuEvent(QContextMenuEvent *event)
 
 	redrawtables = true;
 
-	sprintf( stmp, "Open Tile $%04X in PPU &Viewer", tileAddr );
+	snprintf( stmp, sizeof(stmp), "Open Tile $%04X in PPU &Viewer", tileAddr );
 	act = new QAction(tr(stmp), &menu);
 	//act->setShortcut( QKeySequence(tr("V")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTilePpuViewer(void)) );
 	menu.addAction( act );
 
-	sprintf( stmp, "Open &Tile Addr $%04X in Hex Editor", tileAddr );
+	snprintf( stmp, sizeof(stmp), "Open &Tile Addr $%04X in Hex Editor", tileAddr );
 	act = new QAction(tr(stmp), &menu);
 	//act->setShortcut( QKeySequence(tr("H")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTileAddrHexEdit(void)) );
 	menu.addAction( act );
 
-	sprintf( stmp, "Open &Attr Addr $%04X in Hex Editor", atrbAddr );
+	snprintf( stmp, sizeof(stmp), "Open &Attr Addr $%04X in Hex Editor", atrbAddr );
 	act = new QAction(tr(stmp), &menu);
 	//act->setShortcut( QKeySequence(tr("H")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openAtrbAddrHexEdit(void)) );
 	menu.addAction( act );
 
-	sprintf( stmp, "Open &PPU Addr $%04X in Hex Editor", ppuAddr );
+	snprintf( stmp, sizeof(stmp), "Open &PPU Addr $%04X in Hex Editor", ppuAddr );
 	act = new QAction(tr(stmp), &menu);
 	//act->setShortcut( QKeySequence(tr("H")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openPpuAddrHexEdit(void)) );

@@ -887,7 +887,7 @@ void ppuPatternView_t::updateSelTileLabel(void)
 	char stmp[32];
 	if ( (selTile.y() >= 0) && (selTile.x() >= 0) )
 	{
-		sprintf( stmp, "Tile: $%X%X", selTile.y(), selTile.x() );
+		snprintf( stmp, sizeof(stmp), "Tile: $%X%X", selTile.y(), selTile.x() );
 	}
 	else
 	{
@@ -949,7 +949,7 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 
 	if ( mode )
 	{
-		sprintf( stmp, "Exit Tile &View: %X%X", selTile.y(), selTile.x() );
+		snprintf( stmp, sizeof(stmp), "Exit Tile &View: %X%X", selTile.y(), selTile.x() );
 		
 		act = new QAction(tr(stmp), &menu);
 		act->setShortcut( QKeySequence(tr("Z")));
@@ -958,7 +958,7 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 	}
 	else
 	{
-		sprintf( stmp, "&View Tile: %X%X", selTile.y(), selTile.x() );
+		snprintf( stmp, sizeof(stmp), "&View Tile: %X%X", selTile.y(), selTile.x() );
 		
 		act = new QAction(tr(stmp), &menu);
 		act->setShortcut( QKeySequence(tr("Z")));
@@ -987,7 +987,7 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 	{
 	   char stmp[8];
 
-	   sprintf( stmp, "&%i", i+1 );
+	   snprintf( stmp, sizeof(stmp), "&%i", i+1 );
 
 	   paletteAct[i] = new QAction(tr(stmp), &menu);
 	   paletteAct[i]->setCheckable(true);
@@ -1787,13 +1787,13 @@ void tilePaletteView_t::contextMenuEvent(QContextMenuEvent *event)
 
 		subMenu = menu.addMenu( tr("Copy Color to Clipboard") );
 
-		sprintf( stmp, "Hex #%02X%02X%02X", palo[i].r, palo[i].g, palo[i].b );
+		snprintf( stmp, sizeof(stmp), "Hex #%02X%02X%02X", palo[i].r, palo[i].g, palo[i].b );
 		act = new QAction(tr(stmp), &menu);
 		//act->setShortcut( QKeySequence(tr("G")));
 		connect( act, SIGNAL(triggered(void)), this, SLOT(copyColor2ClipBoardHex(void)) );
 		subMenu->addAction( act );
 
-		sprintf( stmp, "rgb(%3i,%3i,%3i)", palo[i].r, palo[i].g, palo[i].b );
+		snprintf( stmp, sizeof(stmp), "rgb(%3i,%3i,%3i)", palo[i].r, palo[i].g, palo[i].b );
 		act = new QAction(tr(stmp), &menu);
 		//act->setShortcut( QKeySequence(tr("G")));
 		connect( act, SIGNAL(triggered(void)), this, SLOT(copyColor2ClipBoardRGB(void)) );
@@ -1815,7 +1815,7 @@ void tilePaletteView_t::copyColor2ClipBoardHex(void)
 	}
 	p = palcache[ (palIdx << 2) | selBox ];
 
-	sprintf( txt, "#%02X%02X%02X", palo[p].r, palo[p].g, palo[p].b );
+	snprintf( txt, sizeof(txt), "#%02X%02X%02X", palo[p].r, palo[p].g, palo[p].b );
 
 	clipboard->setText( tr(txt), QClipboard::Clipboard );
 
@@ -1837,7 +1837,7 @@ void tilePaletteView_t::copyColor2ClipBoardRGB(void)
 	}
 	p = palcache[ (palIdx << 2) | selBox ];
 
-	sprintf( txt, "rgb(%3i,%3i,%3i)", palo[p].r, palo[p].g, palo[p].b );
+	snprintf( txt, sizeof(txt), "rgb(%3i,%3i,%3i)", palo[p].r, palo[p].g, palo[p].b );
 
 	clipboard->setText( tr(txt), QClipboard::Clipboard );
 
@@ -2164,7 +2164,7 @@ void ppuTileEditor_t::setTile( QPoint *t )
 		addr = addr + ( t->y() * 0x0100 );
 		addr = addr + ( t->x() * 0x0010 );
 
-		sprintf( stmp, "Tile Index: $%X%X   Address: $%04X", t->y(), t->x(), addr );
+		snprintf( stmp, sizeof(stmp), "Tile Index: $%X%X   Address: $%04X", t->y(), t->x(), addr );
 		tileIdxLbl->setText( tr(stmp) );
 
 		tileView->setTile( t );
@@ -2490,7 +2490,7 @@ void ppuTileView_t::contextMenuEvent(QContextMenuEvent *event)
 //
 //   if ( mode )
 //   {
-//      sprintf( stmp, "Exit Tile View: %X%X", selTile.y(), selTile.x() );
+//      snprintf( stmp, sizeof(stmp), "Exit Tile View: %X%X", selTile.y(), selTile.x() );
 //
 //      act = new QAction(tr(stmp), &menu);
 //      act->setShortcut( QKeySequence(tr("Z")));
@@ -2506,7 +2506,7 @@ void ppuTileView_t::contextMenuEvent(QContextMenuEvent *event)
 //   }
 //   else
 //   {
-//      sprintf( stmp, "View Tile: %X%X", selTile.y(), selTile.x() );
+//      snprintf( stmp, sizeof(stmp), "View Tile: %X%X", selTile.y(), selTile.x() );
 //
 //      act = new QAction(tr(stmp), &menu);
 //      act->setShortcut( QKeySequence(tr("Z")));
@@ -2533,7 +2533,7 @@ void ppuTileView_t::contextMenuEvent(QContextMenuEvent *event)
 //	{
 //	   char stmp[8];
 //
-//	   sprintf( stmp, "%i", i+1 );
+//	   snprintf( stmp, sizeof(stmp), "%i", i+1 );
 //
 //	   paletteAct[i] = new QAction(tr(stmp), &menu);
 //	   paletteAct[i]->setCheckable(true);
@@ -2728,7 +2728,7 @@ void ppuTileEditColorPicker_t::mouseMoveEvent(QMouseEvent *event)
 	//	char stmp[64];
 	//	int ix = (tile.y()<<4)|tile.x();
 
-	//	sprintf( stmp, "Palette: $%02X", palcache[ix]);
+	//	snprintf( stmp, sizeof(stmp), "Palette: $%02X", palcache[ix]);
 
 	//	frame->setTitle( tr(stmp) );
 	//}
@@ -3192,25 +3192,25 @@ void spriteViewerDialog_t::periodicUpdate(void)
 
 	idx = oamView->getSpriteIndex();
 
-	sprintf( stmp, "$%02X", idx );
+	snprintf( stmp, sizeof(stmp), "$%02X", idx );
 	spriteIndexBox->setText( tr(stmp) );
 
-	sprintf( stmp, "$%02X", oamPattern.sprite[idx].tNum );
+	snprintf( stmp, sizeof(stmp), "$%02X", oamPattern.sprite[idx].tNum );
 	tileIndexBox->setText( tr(stmp) );
 
-	sprintf( stmp, "$%04X", oamPattern.sprite[idx].chrAddr );
+	snprintf( stmp, sizeof(stmp), "$%04X", oamPattern.sprite[idx].chrAddr );
 	tileAddrBox->setText( tr(stmp) );
 
-	sprintf( stmp, "$%04X", 0x3F00 + (oamPattern.sprite[idx].pal*4) );
+	snprintf( stmp, sizeof(stmp), "$%04X", 0x3F00 + (oamPattern.sprite[idx].pal*4) );
 	palAddrBox->setText( tr(stmp) );
 
 	if ( showPosHex->isChecked() )
 	{
-		sprintf( stmp, "$%02X, $%02X", oamPattern.sprite[idx].x, oamPattern.sprite[idx].y );
+		snprintf( stmp, sizeof(stmp), "$%02X, $%02X", oamPattern.sprite[idx].x, oamPattern.sprite[idx].y );
 	}
 	else
 	{
-		sprintf( stmp, "%3i, %3i", oamPattern.sprite[idx].x, oamPattern.sprite[idx].y );
+		snprintf( stmp, sizeof(stmp), "%3i, %3i", oamPattern.sprite[idx].x, oamPattern.sprite[idx].y );
 	}
 	posBox->setText( tr(stmp) );
 

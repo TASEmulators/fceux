@@ -1244,7 +1244,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 			olddatacount = datacount;
 			if (unloggedlines > 0)
 			{
-				//sprintf(str_result, "(%d lines skipped)", unloggedlines);
+				//snprintf(str_result, "(%d lines skipped)", unloggedlines);
 				rec.skippedLines = unloggedlines;
 				unloggedlines = 0;
 			}
@@ -1265,8 +1265,8 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 
 	if ((addr + size) > 0xFFFF)
 	{
-		//sprintf(str_data, "%02X        ", opcode[0]);
-		//sprintf(str_disassembly, "OVERFLOW");
+		//snprintf(str_data, "%02X        ", opcode[0]);
+		//snprintf(str_disassembly, "OVERFLOW");
 		rec.flags |= 0x01;
 	}
 	else
@@ -1275,7 +1275,7 @@ void FCEUD_TraceInstruction(uint8 *opcode, int size)
 		switch (size)
 		{
 		case 0:
-			//sprintf(str_disassembly,"UNDEFINED");
+			//snprintf(str_disassembly,"UNDEFINED");
 			rec.flags |= 0x02;
 			break;
 		case 1:
@@ -1912,13 +1912,13 @@ void QTraceLogView::openBpEditWindow(int editIdx, watchpointinfo *wp, traceRecor
 			sprite_radio->setChecked(true);
 		}
 
-		sprintf(stmp, "%04X", wp->address);
+		snprintf(stmp, sizeof(stmp), "%04X", wp->address);
 
 		addr1->setText(tr(stmp));
 
 		if (wp->endaddress > 0)
 		{
-			sprintf(stmp, "%04X", wp->endaddress);
+			snprintf(stmp, sizeof(stmp), "%04X", wp->endaddress);
 
 			addr2->setText(tr(stmp));
 		}
@@ -1958,11 +1958,11 @@ void QTraceLogView::openBpEditWindow(int editIdx, watchpointinfo *wp, traceRecor
 					char str[64];
 					if ((wp->address == recp->cpu.PC) && (recp->bank >= 0))
 					{
-						sprintf(str, "K==#%02X", recp->bank);
+						snprintf(str, sizeof(str), "K==#%02X", recp->bank);
 					}
 					else
 					{
-						sprintf(str, "K==#%02X", getBank(wp->address));
+						snprintf(str, sizeof(str), "K==#%02X", getBank(wp->address));
 					}
 					cond->setText(tr(str));
 				}
@@ -2415,7 +2415,7 @@ void TraceLogDiskThread_t::run(void)
 	if (!tracer.open(logFilePath.c_str(), (bool)FCEUI_EmulationPaused()))
 	{
 		char stmp[1024];
-		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath.c_str() );
+		snprintf( stmp, sizeof(stmp), "Error: Failed to open log file for writing: %s", logFilePath.c_str() );
 		consoleWindow->QueueErrorMsgWindow(stmp);
 		return;
 	}
@@ -2431,7 +2431,7 @@ void TraceLogDiskThread_t::run(void)
 	if ( logFile == -1 )
 	{
 		char stmp[1024];
-		sprintf( stmp, "Error: Failed to open log file for writing: %s", logFilePath.c_str() );
+		snprintf( stmp, sizeof(stmp), "Error: Failed to open log file for writing: %s", logFilePath.c_str() );
 		consoleWindow->QueueErrorMsgWindow(stmp);
 		return;
 	}

@@ -329,6 +329,20 @@ void TimingConfDialog_t::saveValues(void)
 #endif
 }
 //----------------------------------------------------------------------------
+QString TimingConfDialog_t::getSchedPrioErrorMsg(const char* funcName, int errorCode)
+{
+	QString msg = QString("Error: system call setPriority Failed\nReason: ") + QString(strerror(errorCode)) + QString("\n");
+#ifdef __linux__
+	msg += "Ensure that your system has the proper resource permissions set in the file:\n\n";
+	msg += "        /etc/security/limits.conf \n\n";
+	msg += "Adding the following lines to that file and rebooting will usually fix the issue:\n\n";
+	msg += "*  -  priority   99 \n";
+	msg += "*  -  rtprio     99 \n";
+	msg += "*  -  nice      -20 \n";
+#endif
+	return msg;
+}
+//----------------------------------------------------------------------------
 void TimingConfDialog_t::emuSchedNiceChange(int val)
 {
 #ifndef WIN32
@@ -339,19 +353,9 @@ void TimingConfDialog_t::emuSchedNiceChange(int val)
 	FCEU_WRAPPER_LOCK();
 	if (consoleWindow->emulatorThread->setNicePriority(-val))
 	{
-		char msg[1024];
-
-		sprintf(msg, "Error: system call setPriority Failed\nReason: %s\n", strerror(errno));
-#ifdef __linux__
-		strcat(msg, "Ensure that your system has the proper resource permissions set in the file:\n\n");
-		strcat(msg, "        /etc/security/limits.conf \n\n");
-		strcat(msg, "Adding the following lines to that file and rebooting will usually fix the issue:\n\n");
-		strcat(msg, "*  -  priority   99 \n");
-		strcat(msg, "*  -  rtprio     99 \n");
-		strcat(msg, "*  -  nice      -20 \n");
-#endif
-		printf("%s\n", msg);
-		consoleWindow->QueueErrorMsgWindow(msg);
+		QString msg = getSchedPrioErrorMsg("setPriority", errno);
+		printf("%s\n", msg.toLocal8Bit().constData());
+		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
 		updateSliderValues();
 	}
 	FCEU_WRAPPER_UNLOCK();
@@ -377,19 +381,9 @@ void TimingConfDialog_t::emuSchedPrioChange(int val)
 
 	if (consoleWindow->emulatorThread->setSchedParam(policy, val))
 	{
-		char msg[1024];
-
-		sprintf(msg, "Error: system call pthread_setschedparam Failed\nReason: %s\n", strerror(errno));
-#ifdef __linux__
-		strcat(msg, "Ensure that your system has the proper resource permissions set in the file:\n\n");
-		strcat(msg, "        /etc/security/limits.conf \n\n");
-		strcat(msg, "Adding the following lines to that file and rebooting will usually fix the issue:\n\n");
-		strcat(msg, "*  -  priority   99 \n");
-		strcat(msg, "*  -  rtprio     99 \n");
-		strcat(msg, "*  -  nice      -20 \n");
-#endif
-		printf("%s\n", msg);
-		consoleWindow->QueueErrorMsgWindow(msg);
+		QString msg = getSchedPrioErrorMsg("pthread_setschedparam", errno);
+		printf("%s\n", msg.toLocal8Bit().constData());
+		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
 		updateSliderValues();
 	}
 	FCEU_WRAPPER_UNLOCK();
@@ -412,19 +406,9 @@ void TimingConfDialog_t::emuSchedPolicyChange(int index)
 
 	if (consoleWindow->emulatorThread->setSchedParam(policy, prio))
 	{
-		char msg[1024];
-
-		sprintf(msg, "Error: system call pthread_setschedparam Failed\nReason: %s\n", strerror(errno));
-#ifdef __linux__
-		strcat(msg, "Ensure that your system has the proper resource permissions set in the file:\n\n");
-		strcat(msg, "        /etc/security/limits.conf \n\n");
-		strcat(msg, "Adding the following lines to that file and rebooting will usually fix the issue:\n\n");
-		strcat(msg, "*  -  priority   99 \n");
-		strcat(msg, "*  -  rtprio     99 \n");
-		strcat(msg, "*  -  nice      -20 \n");
-#endif
-		printf("%s\n", msg);
-		consoleWindow->QueueErrorMsgWindow(msg);
+		QString msg = getSchedPrioErrorMsg("pthread_setschedparam", errno);
+		printf("%s\n", msg.toLocal8Bit().constData());
+		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
 	}
 
 	updatePolicyBox();
@@ -444,19 +428,9 @@ void TimingConfDialog_t::guiSchedNiceChange(int val)
 	FCEU_WRAPPER_LOCK();
 	if (consoleWindow->setNicePriority(-val))
 	{
-		char msg[1024];
-
-		sprintf(msg, "Error: system call setPriority Failed\nReason: %s\n", strerror(errno));
-#ifdef __linux__
-		strcat(msg, "Ensure that your system has the proper resource permissions set in the file:\n\n");
-		strcat(msg, "        /etc/security/limits.conf \n\n");
-		strcat(msg, "Adding the following lines to that file and rebooting will usually fix the issue:\n\n");
-		strcat(msg, "*  -  priority   99 \n");
-		strcat(msg, "*  -  rtprio     99 \n");
-		strcat(msg, "*  -  nice      -20 \n");
-#endif
-		printf("%s\n", msg);
-		consoleWindow->QueueErrorMsgWindow(msg);
+		QString msg = getSchedPrioErrorMsg("setPriority", errno);
+		printf("%s\n", msg.toLocal8Bit().constData());
+		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
 		updateSliderValues();
 	}
 	FCEU_WRAPPER_UNLOCK();
@@ -480,19 +454,9 @@ void TimingConfDialog_t::guiSchedPrioChange(int val)
 
 	if (consoleWindow->setSchedParam(policy, val))
 	{
-		char msg[1024];
-
-		sprintf(msg, "Error: system call pthread_setschedparam Failed\nReason: %s\n", strerror(errno));
-#ifdef __linux__
-		strcat(msg, "Ensure that your system has the proper resource permissions set in the file:\n\n");
-		strcat(msg, "        /etc/security/limits.conf \n\n");
-		strcat(msg, "Adding the following lines to that file and rebooting will usually fix the issue:\n\n");
-		strcat(msg, "*  -  priority   99 \n");
-		strcat(msg, "*  -  rtprio     99 \n");
-		strcat(msg, "*  -  nice      -20 \n");
-#endif
-		printf("%s\n", msg);
-		consoleWindow->QueueErrorMsgWindow(msg);
+		QString msg = getSchedPrioErrorMsg("pthread_setschedparam", errno);
+		printf("%s\n", msg.toLocal8Bit().constData());
+		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
 		updateSliderValues();
 	}
 	FCEU_WRAPPER_UNLOCK();
@@ -515,19 +479,9 @@ void TimingConfDialog_t::guiSchedPolicyChange(int index)
 
 	if (consoleWindow->setSchedParam(policy, prio))
 	{
-		char msg[1024];
-
-		sprintf(msg, "Error: system call pthread_setschedparam Failed\nReason: %s\n", strerror(errno));
-#ifdef __linux__
-		strcat(msg, "Ensure that your system has the proper resource permissions set in the file:\n\n");
-		strcat(msg, "        /etc/security/limits.conf \n\n");
-		strcat(msg, "Adding the following lines to that file and rebooting will usually fix the issue:\n\n");
-		strcat(msg, "*  -  priority   99 \n");
-		strcat(msg, "*  -  rtprio     99 \n");
-		strcat(msg, "*  -  nice      -20 \n");
-#endif
-		printf("%s\n", msg);
-		consoleWindow->QueueErrorMsgWindow(msg);
+		QString msg = getSchedPrioErrorMsg("pthread_setschedparam", errno);
+		printf("%s\n", msg.toLocal8Bit().constData());
+		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
 	}
 
 	updatePolicyBox();

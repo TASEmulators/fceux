@@ -167,7 +167,7 @@ ColorMenuPickerDialog_t::ColorMenuPickerDialog_t( QColor *c, const char *titleTe
 
 	style = this->style();
 
-	sprintf( stmp, "Pick Color for %s", titleText);
+	snprintf( stmp, sizeof(stmp), "Pick Color for %s", titleText);
 
 	setWindowTitle( stmp );
 

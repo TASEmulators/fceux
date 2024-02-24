@@ -606,7 +606,7 @@ void StateRecorderDialog_t::recalcMemoryUsage(void)
 
 	int inumSnaps = static_cast<int>( fnumSnaps + 0.5f );
 
-	sprintf( stmp, "%i", inumSnaps );
+	snprintf( stmp, sizeof(stmp), "%i", inumSnaps );
 	
 	numSnapsLbl->setText( tr(stmp) );
 
@@ -642,11 +642,11 @@ void StateRecorderDialog_t::recalcMemoryUsage(void)
 
 	if (fsnapSize >= oneKiloByte)
 	{
-		sprintf( stmp, "%.02f kB", fsnapSize / oneKiloByte );
+		snprintf( stmp, sizeof(stmp), "%.02f kB", fsnapSize / oneKiloByte );
 	}
 	else
 	{
-		sprintf( stmp, "%.0f B", fsnapSize );
+		snprintf( stmp, sizeof(stmp), "%.0f B", fsnapSize );
 	}
 
 	snapMemSizeLbl->setText( tr(stmp) );
@@ -655,20 +655,20 @@ void StateRecorderDialog_t::recalcMemoryUsage(void)
 
 	if (ftotalSize >= oneMegaByte)
 	{
-		sprintf( stmp, "%.02f MB", ftotalSize / oneMegaByte );
+		snprintf( stmp, sizeof(stmp), "%.02f MB", ftotalSize / oneMegaByte );
 	}
 	else if (ftotalSize >= oneKiloByte)
 	{
-		sprintf( stmp, "%.02f kB", ftotalSize / oneKiloByte );
+		snprintf( stmp, sizeof(stmp), "%.02f kB", ftotalSize / oneKiloByte );
 	}
 	else
 	{
-		sprintf( stmp, "%.0f B", ftotalSize );
+		snprintf( stmp, sizeof(stmp), "%.0f B", ftotalSize );
 	}
 
 	totalMemUsageLbl->setText( tr(stmp) );
 
-	sprintf( stmp, "%.02f ms", saveTimeMs);
+	snprintf( stmp, sizeof(stmp), "%.02f ms", saveTimeMs);
 	saveTimeLbl->setText( tr(stmp) );
 }
 //----------------------------------------------------------------------------

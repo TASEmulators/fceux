@@ -518,7 +518,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	scrRateReadout->setFont( font );
 	scrRateReadout->setReadOnly(true);
 	scrRateReadout->setAlignment(Qt::AlignCenter);
-	sprintf( stmp, "%.3f", consoleWindow->getRefreshRate() );
+	snprintf( stmp, sizeof(stmp), "%.3f", consoleWindow->getRefreshRate() );
 	scrRateReadout->setText( tr(stmp) );
 
 	hbox->addWidget( new QLabel( tr("Refresh Rate (Hz):") ) );
@@ -606,11 +606,11 @@ void ConsoleVideoConfDialog_t::updateReadouts(void)
 			v = consoleWindow->viewport_Interface->size();
 		}
 
-		sprintf( stmp, "%i x %i ", w.width(), w.height() );
+		snprintf( stmp, sizeof(stmp), "%i x %i ", w.width(), w.height() );
 
 		winSizeReadout->setText( tr(stmp) );
 
-		sprintf( stmp, "%i x %i ", v.width(), v.height() );
+		snprintf( stmp, sizeof(stmp), "%i x %i ", v.width(), v.height() );
 
 		vpSizeReadout->setText( tr(stmp) );
 	}

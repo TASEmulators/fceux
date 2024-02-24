@@ -117,7 +117,7 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 
 		#ifdef BRK_3BYTE_HACK
 			case 0x00:
-			sprintf(str,"BRK %02X %02X", opcode[1], opcode[2]);
+			snprintf(str, sizeof(str), "BRK %02X %02X", opcode[1], opcode[2]);
 			break;
 		#else
 			case 0x00: strcpy(str,"BRK"); break;
@@ -699,7 +699,7 @@ void SymbolEditWindow::setAddr( int addrIn )
 
 	addr = addrIn;
 
-	sprintf( stmp, "%04X", addr );
+	snprintf( stmp, sizeof(stmp), "%04X", addr );
 
 	addrEntry->setText( tr(stmp) );
 
@@ -921,7 +921,7 @@ void SymbolEditWindow::determineArrayStart(void)
 
 		if ( (val >= 0) && (val < 256) )
 		{
-			sprintf( digits, "%02X", val );
+			snprintf( digits, sizeof(digits), "%02X", val );
 
 			arrayInit->setText( tr(digits) );
 		}

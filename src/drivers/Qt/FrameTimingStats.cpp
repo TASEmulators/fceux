@@ -209,111 +209,111 @@ void FrameTimingDialog_t::updateTimingStats(void)
 	getFrameTimingStats(&stats);
 
 	// Absolute
-	sprintf(stmp, "%.3f", stats.frameTimeAbs.tgt * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeAbs.tgt * 1e3);
 	frameTimeAbs->setText(1, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeAbs.cur * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeAbs.cur * 1e3);
 	frameTimeAbs->setText(2, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeAbs.min * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeAbs.min * 1e3);
 	frameTimeAbs->setText(3, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeAbs.max * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeAbs.max * 1e3);
 	frameTimeAbs->setText(4, tr(stmp));
 
 	// Delta
-	sprintf(stmp, "%.3f", stats.frameTimeDel.tgt * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeDel.tgt * 1e3);
 	frameTimeDel->setText(1, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeDel.cur * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeDel.cur * 1e3);
 	frameTimeDel->setText(2, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeDel.min * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeDel.min * 1e3);
 	frameTimeDel->setText(3, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeDel.max * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeDel.max * 1e3);
 	frameTimeDel->setText(4, tr(stmp));
 
 	// Work
-	sprintf(stmp, "lt %.3f", stats.frameTimeWork.tgt * 1e3);
+	snprintf(stmp, sizeof(stmp), "lt %.3f", stats.frameTimeWork.tgt * 1e3);
 	frameTimeWork->setText(1, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeWork.cur * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeWork.cur * 1e3);
 	frameTimeWork->setText(2, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeWork.min * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeWork.min * 1e3);
 	frameTimeWork->setText(3, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeWork.max * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeWork.max * 1e3);
 	frameTimeWork->setText(4, tr(stmp));
 
 	// Idle
-	sprintf(stmp, "gt %.3f", stats.frameTimeIdle.tgt * 1e3);
+	snprintf(stmp, sizeof(stmp), "gt %.3f", stats.frameTimeIdle.tgt * 1e3);
 	frameTimeIdle->setText(1, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeIdle.cur * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeIdle.cur * 1e3);
 	frameTimeIdle->setText(2, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeIdle.min * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeIdle.min * 1e3);
 	frameTimeIdle->setText(3, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.frameTimeIdle.max * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.frameTimeIdle.max * 1e3);
 	frameTimeIdle->setText(4, tr(stmp));
 
 	// Work %
-	sprintf(stmp, "lt %.1f", 100.0 * stats.frameTimeWork.tgt / stats.frameTimeAbs.tgt);
+	snprintf(stmp, sizeof(stmp), "lt %.1f", 100.0 * stats.frameTimeWork.tgt / stats.frameTimeAbs.tgt);
 	frameTimeWorkPct->setText(1, tr(stmp));
 
-	sprintf(stmp, "%.1f", 100.0 * stats.frameTimeWork.cur / stats.frameTimeAbs.tgt);
+	snprintf(stmp, sizeof(stmp), "%.1f", 100.0 * stats.frameTimeWork.cur / stats.frameTimeAbs.tgt);
 	frameTimeWorkPct->setText(2, tr(stmp));
 
-	sprintf(stmp, "%.1f", 100.0 * stats.frameTimeWork.min / stats.frameTimeAbs.tgt);
+	snprintf(stmp, sizeof(stmp), "%.1f", 100.0 * stats.frameTimeWork.min / stats.frameTimeAbs.tgt);
 	frameTimeWorkPct->setText(3, tr(stmp));
 
-	sprintf(stmp, "%.1f", 100.0 * stats.frameTimeWork.max / stats.frameTimeAbs.tgt);
+	snprintf(stmp, sizeof(stmp), "%.1f", 100.0 * stats.frameTimeWork.max / stats.frameTimeAbs.tgt);
 	frameTimeWorkPct->setText(4, tr(stmp));
 
 	// Idle %
-	sprintf(stmp, "gt %.1f", 100.0 * stats.frameTimeIdle.tgt / stats.frameTimeAbs.tgt);
+	snprintf(stmp, sizeof(stmp), "gt %.1f", 100.0 * stats.frameTimeIdle.tgt / stats.frameTimeAbs.tgt);
 	frameTimeIdlePct->setText(1, tr(stmp));
 
-	sprintf(stmp, "%.1f", 100.0 * stats.frameTimeIdle.cur / stats.frameTimeAbs.tgt);
+	snprintf(stmp, sizeof(stmp), "%.1f", 100.0 * stats.frameTimeIdle.cur / stats.frameTimeAbs.tgt);
 	frameTimeIdlePct->setText(2, tr(stmp));
 
-	sprintf(stmp, "%.1f", 100.0 * stats.frameTimeIdle.min / stats.frameTimeAbs.tgt);
+	snprintf(stmp, sizeof(stmp), "%.1f", 100.0 * stats.frameTimeIdle.min / stats.frameTimeAbs.tgt);
 	frameTimeIdlePct->setText(3, tr(stmp));
 
-	sprintf(stmp, "%.1f", 100.0 * stats.frameTimeIdle.max / stats.frameTimeAbs.tgt);
+	snprintf(stmp, sizeof(stmp), "%.1f", 100.0 * stats.frameTimeIdle.max / stats.frameTimeAbs.tgt);
 	frameTimeIdlePct->setText(4, tr(stmp));
 
 	// Video
-	sprintf(stmp, "%.3f", stats.videoTimeDel.tgt * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.videoTimeDel.tgt * 1e3);
 	videoTimeAbs->setText(1, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.videoTimeDel.cur * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.videoTimeDel.cur * 1e3);
 	videoTimeAbs->setText(2, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.videoTimeDel.min * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.videoTimeDel.min * 1e3);
 	videoTimeAbs->setText(3, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.videoTimeDel.max * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.videoTimeDel.max * 1e3);
 	videoTimeAbs->setText(4, tr(stmp));
 
 	// Emulator to GUI Thread Signal Delay
-	sprintf(stmp, "%.3f", stats.emuSignalDelay.tgt * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.emuSignalDelay.tgt * 1e3);
 	emuSignalDelay->setText(1, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.emuSignalDelay.cur * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.emuSignalDelay.cur * 1e3);
 	emuSignalDelay->setText(2, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.emuSignalDelay.min * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.emuSignalDelay.min * 1e3);
 	emuSignalDelay->setText(3, tr(stmp));
 
-	sprintf(stmp, "%.3f", stats.emuSignalDelay.max * 1e3);
+	snprintf(stmp, sizeof(stmp), "%.3f", stats.emuSignalDelay.max * 1e3);
 	emuSignalDelay->setText(4, tr(stmp));
 
 	// Late Count
-	sprintf(stmp, "%u", stats.lateCount);
+	snprintf(stmp, sizeof(stmp), "%u", stats.lateCount);
 	frameLateCount->setText(1, tr("0"));
 	frameLateCount->setText(2, tr(stmp));
 

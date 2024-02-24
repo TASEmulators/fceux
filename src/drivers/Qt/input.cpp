@@ -2138,7 +2138,7 @@ const char *ButtonName(const ButtConfig *bc)
 			inputNum = bc->ButtonNum;
 			inputDirection = "";
 		}
-		sprintf(name, "js%i:%s%i%s", joyNum, inputType, inputNum, inputDirection);
+		snprintf(name, sizeof(name), "js%i:%s%i%s", joyNum, inputType, inputNum, inputDirection);
 	}
 	break;
 	}

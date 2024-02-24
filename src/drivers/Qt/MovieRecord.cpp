@@ -277,7 +277,7 @@ void MovieRecordDialog_t::recordMovie(void)
 				if (loadStateFailed)
 				{
 					char str [1024];
-					sprintf(str, "Failed to load save state \"%s\".\nRecording from current state instead...", ic_file.c_str());
+					snprintf(str, sizeof(str), "Failed to load save state \"%s\".\nRecording from current state instead...", ic_file.c_str());
 					FCEUD_PrintError(str);
 				}
 			}
