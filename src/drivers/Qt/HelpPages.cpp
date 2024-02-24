@@ -41,7 +41,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 
-#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
+#if defined(WIN32)
 #include <Windows.h>
 #include <htmlhelp.h>
 //#else // Linux or Unix or APPLE
@@ -62,7 +62,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 
 	if ( helpFileName.length() == 0 )
 	{
-		#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
+		#if defined(WIN32)
 		helpFileName = FCEUI_GetBaseDirectory();
 		helpFileName += "\\..\\doc\\fceux.chm";
 		#else
@@ -88,7 +88,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 		return;
 	}
 
-#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
+#if defined(WIN32)
 	if (subpage.length() > 0)
 	{
 		helpFileName = helpFileName + "::/" + subpage + ".htm";
