@@ -191,6 +191,7 @@ typedef uint8 (*readfunc)(uint32 A);
 	#define  __FCEU_PRINTF_ATTRIBUTE( fmt, va )
 #endif
 
+#if defined(__cplusplus)
 // Scoped pointer ensures that memory pointed to by this object gets cleaned up
 // and deallocated when this object goes out of scope. Helps prevent memory leaks
 // on temporary memory allocations in functions with early outs.
@@ -261,6 +262,7 @@ class fceuScopedPtr
 		enum fceuAllocType  _allocType;
 
 };
+#endif // __cplusplus
 
 #include "utils/endian.h"
 

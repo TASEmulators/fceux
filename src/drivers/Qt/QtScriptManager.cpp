@@ -441,7 +441,7 @@ bool FileScriptObject::putChar(char c)
 	{
 		auto* engine = FCEU::JSEngine::getCurrent();
 		engine->throwError(QJSValue::GenericError, "file is not open ");
-		return -1;
+		return false;
 	}
 	bool success = file->putChar(c);
 
