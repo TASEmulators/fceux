@@ -178,7 +178,7 @@ class  consoleWin_t : public QMainWindow
 		void setContextMenuEnable(bool enable);
 		void setSoundUseGlobalFocus(bool enable);
 
-		void OpenHelpWindow(std::string subpage = "");
+		void OpenHelpWindow(QString subpage = QString());
 
 		int  getPeriodicInterval(void);
 
@@ -321,7 +321,7 @@ class  consoleWin_t : public QMainWindow
 		void transferVideoBuffer(bool allowRedraw);
 		void syncAutoFirePatternMenu(void);
 
-		std::string findHelpFile(void);
+		QString findHelpFile(void);
 
 	public slots:
 		void openDebugWindow(void);

@@ -25,7 +25,7 @@ class HelpDialog : public QDialog
 	Q_OBJECT
 
 	public:
-		HelpDialog( const char *helpFileName, QWidget *parent = 0);
+		HelpDialog( const QString& helpFileName, QWidget *parent = 0);
 		~HelpDialog(void);
 
 	protected:

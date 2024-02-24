@@ -44,19 +44,11 @@
 #ifdef WIN32
 #include <Windows.h>
 #include <htmlhelp.h>
-//#else // Linux or Unix or APPLE
-//#include <unistd.h>
-//#include <sys/types.h>
-//#include <sys/wait.h>
 #endif
 
-//#if  defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-//static int forkHelpFileViewer( const char *chmViewer, const char *filepath );
-//#endif
-
-void consoleWin_t::OpenHelpWindow(std::string subpage)
+void consoleWin_t::OpenHelpWindow(QString subpage)
 {
-	std::string helpFileName;
+	QString helpFileName;
 
 	g_config->getOption ("SDL.HelpFilePath", &helpFileName );
 
@@ -73,12 +65,12 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 		if ( !QFile( QString::fromStdString(helpFileName) ).exists() )
 		{
 			// Search for MacOSX DragNDrop Resources
-			helpFileName = QApplication::applicationDirPath().toLocal8Bit() + "/../Resources/fceux.qhc";
+			helpFileName = QApplication::applicationDirPath() + QString("/../Resources/fceux.qhc");
 		}
 		#endif
 	}
 
-	if ( !QFile( QString::fromStdString(helpFileName) ).exists() )
+	if ( !QFile( helpFileName ).exists() )
 	{
 		helpFileName = findHelpFile();
 	}
@@ -91,7 +83,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 #ifdef WIN32
 	if (subpage.length() > 0)
 	{
-		helpFileName = helpFileName + "::/" + subpage + ".htm";
+		helpFileName = helpFileName + QString("::/") + subpage + QString(".htm");
 	}
 #else
 	// Subpage indexing is not supported by linux chm viewer
@@ -101,7 +93,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 
 #ifdef WIN32
 	// Windows specific HtmlHelp library function
-	helpWin = HtmlHelp( HWND(winId()), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
+	helpWin = HtmlHelpA( HWND(winId()), helpFileName.toLocal8Bit().constData(), HH_DISPLAY_TOPIC, (DWORD)NULL);
 	if ( helpWin == NULL )
 	{
 		printf("Error: Failed to open help file '%s'\n", helpFileName.c_str() );
@@ -115,7 +107,7 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 	//helpWin = forkHelpFileViewer( helpFileViewer.c_str(), helpFileName.c_str() );
 
 	#ifdef _USE_QHELP
-	HelpDialog *win = new HelpDialog( helpFileName.c_str(), this);
+	HelpDialog *win = new HelpDialog( helpFileName, this);
 
 	win->show();
 	#endif
@@ -123,32 +115,11 @@ void consoleWin_t::OpenHelpWindow(std::string subpage)
 #endif
 }
 
-//void consoleWin_t::helpPageMaint(void)
-//{
-//#ifdef WIN32
-//	// Does any help page cleanup need to be done in windows?
-//#else
-//	if ( helpWin > 0 )
-//	{	// Calling waitpid is important to ensure that CHM viewer process is cleaned up
-//		// in the event that it exits. Otherwise zombie processes will be left.
-//		int pid, wstat=0;
-//
-//		pid = waitpid( -1, &wstat, WNOHANG );
-//
-//		if ( pid == helpWin )
-//		{
-//			//printf("Help CHM Viewer Closed\n");
-//			helpWin = 0;
-//		}
-//	}
-//
-//#endif
-//}
-std::string consoleWin_t::findHelpFile(void)
+QString consoleWin_t::findHelpFile(void)
 {
 	int ret, useNativeFileDialogVal;
 	QString filename;
-	std::string last;
+	QString last;
 	std::string dir;
 	QFileDialog  dialog(this, tr("Open Help File") );
 	QList<QUrl> urls;
@@ -175,7 +146,7 @@ std::string consoleWin_t::findHelpFile(void)
 
 	if ( last.size() > 0 )
 	{
-		getDirFromFile( last.c_str(), dir );
+		getDirFromFile( last.toLocal8Bit().constData(), dir );
 
 		dialog.setDirectory( tr(dir.c_str()) );
 	}
@@ -209,9 +180,9 @@ std::string consoleWin_t::findHelpFile(void)
 	}
 	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	g_config->setOption ("SDL.HelpFilePath", filename.toLocal8Bit().constData() );
+	g_config->setOption ("SDL.HelpFilePath", filename);
 
-	return filename.toLocal8Bit().constData();
+	return filename;
 }
 
 //#if  defined(__linux__) || defined(__unix__) || defined(__APPLE__)
@@ -239,7 +210,7 @@ std::string consoleWin_t::findHelpFile(void)
 //-----------------------------------------------------------------------------------------------
 //---  Help Page Dialog
 //-----------------------------------------------------------------------------------------------
-HelpDialog::HelpDialog( const char *helpFileName, QWidget *parent)
+HelpDialog::HelpDialog( const QString& helpFileName, QWidget *parent)
 	: QDialog(parent, Qt::Window)
 {
 	int useNativeMenuBar;
