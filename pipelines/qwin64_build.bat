@@ -2,8 +2,8 @@
 set PROJECT_ROOT=%~dp0..
 set CWD=%CD%
 
-call "C:\Qt\5.15\msvc2019_64\bin\qtenv2.bat"
-REM call "C:\Qt\6.0\msvc2019_64\bin\qtenv2.bat"
+REM call "C:\Qt\5.15\msvc2019_64\bin\qtenv2.bat"
+call "C:\Qt\6.5\msvc2019_64\bin\qtenv2.bat"
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 cd /d %CWD%
@@ -50,7 +50,7 @@ IF DEFINED FCEU_RELEASE_VERSION (set PUBLIC_RELEASE=1)
 
 REM cmake -h
 REM cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
-cmake -DQT6=0 -DPUBLIC_RELEASE=%PUBLIC_RELEASE% -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX% -DLIBARCHIVE_INSTALL_PREFIX=%LIBARCHIVE_INSTALL_PREFIX% -DUSE_LIBAV=1 -DFFMPEG_INSTALL_PREFIX=%FFMPEG_INSTALL_PREFIX% -G"Visual Studio 16" -T"v142" ..
+cmake -DQT=6 -DPUBLIC_RELEASE=%PUBLIC_RELEASE% -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX% -DLIBARCHIVE_INSTALL_PREFIX=%LIBARCHIVE_INSTALL_PREFIX% -DUSE_LIBAV=1 -DFFMPEG_INSTALL_PREFIX=%FFMPEG_INSTALL_PREFIX% -G"Visual Studio 16" -T"v142" ..
 
 REM nmake
 msbuild /m fceux.sln /p:Configuration=Release
