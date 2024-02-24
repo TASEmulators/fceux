@@ -62,7 +62,7 @@ void consoleWin_t::OpenHelpWindow(QString subpage)
 		#endif
 
 		#ifdef __APPLE__
-		if ( !QFile( QString::fromStdString(helpFileName) ).exists() )
+		if ( !QFile( helpFileName ).exists() )
 		{
 			// Search for MacOSX DragNDrop Resources
 			helpFileName = QApplication::applicationDirPath() + QString("/../Resources/fceux.qhc");
