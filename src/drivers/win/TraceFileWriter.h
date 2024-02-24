@@ -397,7 +397,7 @@ protected:
 				// Open file with buffering so the exact byte size can be set
 				tgtOffs.QuadPart = fileOffs + buffOffs;
 
-				file = CreateFile(fileName.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+				file = CreateFileA(fileName.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
 				if (file != INVALID_HANDLE_VALUE)
 				{
 					if (!SetFilePointerEx(file, tgtOffs, &newOffs, FILE_BEGIN)
@@ -410,7 +410,7 @@ protected:
 					lastErr = GetLastError();
 
 				// Finally, reopen the file in original mode
-				file = CreateFile(fileName.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+				file = CreateFileA(fileName.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
 					FILE_FLAG_WRITE_THROUGH | FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED, nullptr);
 				if (file == INVALID_HANDLE_VALUE || lastErr)
 					break;
