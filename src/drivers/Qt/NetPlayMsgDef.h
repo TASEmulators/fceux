@@ -5,6 +5,11 @@
 #include <string.h>
 #include <stdint.h>
 
+// Network Byte Swap Functions
+uint16_t netPlayByteSwap(uint16_t);
+uint32_t netPlayByteSwap(uint32_t);
+uint64_t netPlayByteSwap(uint64_t);
+
 #pragma pack(push,4)
 
 enum netPlayMsgType
@@ -12,7 +17,8 @@ enum netPlayMsgType
 	NETPLAY_AUTH_REQ,
 	NETPLAY_AUTH_RESP,
 	NETPLAY_LOAD_ROM_REQ,
-	NETPLAY_SYNC_STATE,
+	NETPLAY_SYNC_STATE_REQ,
+	NETPLAY_SYNC_STATE_RESP,
 	NETPLAY_RUN_FRAME_REQ,
 	NETPLAY_CLIENT_STATE,
 	NETPLAY_ERROR_MSG,
@@ -41,17 +47,40 @@ struct netPlayMsgHdr
 		magic[1] = NETPLAY_MAGIC_NUMBER;
 		msgId = id; msgSize = size;
 	}
+
+	void toHostByteOrder()
+	{
+		magic[0] = netPlayByteSwap(magic[0]);
+		magic[1] = netPlayByteSwap(magic[1]);
+		msgId    = netPlayByteSwap(msgId);
+		msgSize  = netPlayByteSwap(msgSize);
+	};
+	void toNetworkByteOrder()
+	{
+		magic[0] = netPlayByteSwap(magic[0]);
+		magic[1] = netPlayByteSwap(magic[1]);
+		msgId    = netPlayByteSwap(msgId);
+		msgSize  = netPlayByteSwap(msgSize);
+	}
 };
 
 struct netPlayAuthReq
 {
 	netPlayMsgHdr  hdr;
 
-	uint8_t  ctrlMask;
-
 	netPlayAuthReq(void)
-		: hdr(NETPLAY_AUTH_REQ, sizeof(netPlayAuthReq)), ctrlMask(0)
+		: hdr(NETPLAY_AUTH_REQ, sizeof(netPlayAuthReq))
 	{
+	}
+
+	void toHostByteOrder()
+	{
+		hdr.toHostByteOrder();
+	}
+
+	void toNetworkByteOrder()
+	{
+		hdr.toNetworkByteOrder();
 	}
 };
 
@@ -67,6 +96,16 @@ struct netPlayAuthResp
 		: hdr(NETPLAY_AUTH_RESP, sizeof(netPlayAuthResp)), playerId(NETPLAY_SPECTATOR)
 	{
 		memset(pswd, 0, sizeof(pswd));
+	}
+
+	void toHostByteOrder()
+	{
+		hdr.toHostByteOrder();
+	}
+
+	void toNetworkByteOrder()
+	{
+		hdr.toNetworkByteOrder();
 	}
 };
 
@@ -114,6 +153,20 @@ struct netPlayErrorMsg
 
 		return retval;
 	}
+
+	void toHostByteOrder()
+	{
+		hdr.toHostByteOrder();
+		code  = netPlayByteSwap(code);
+		flags = netPlayByteSwap(flags);
+	}
+
+	void toNetworkByteOrder()
+	{
+		hdr.toNetworkByteOrder();
+		code  = netPlayByteSwap(code);
+		flags = netPlayByteSwap(flags);
+	}
 };
 
 struct netPlayLoadRomReq
@@ -127,6 +180,18 @@ struct netPlayLoadRomReq
 		: hdr(NETPLAY_LOAD_ROM_REQ, sizeof(netPlayLoadRomReq)), fileSize(0)
 	{
 		memset(fileName, 0, sizeof(fileName));
+	}
+
+	void toHostByteOrder()
+	{
+		hdr.toHostByteOrder();
+		fileSize  = netPlayByteSwap(fileSize);
+	}
+
+	void toNetworkByteOrder()
+	{
+		hdr.toNetworkByteOrder();
+		fileSize  = netPlayByteSwap(fileSize);
 	}
 };
 
@@ -144,6 +209,20 @@ struct netPlayRunFrameReq
 	{
 		memset( ctrlState, 0, sizeof(ctrlState) );
 	}
+
+	void toHostByteOrder()
+	{
+		hdr.toHostByteOrder();
+		flags    = netPlayByteSwap(flags);
+		frameNum = netPlayByteSwap(frameNum);
+	}
+
+	void toNetworkByteOrder()
+	{
+		hdr.toNetworkByteOrder();
+		flags    = netPlayByteSwap(flags);
+		frameNum = netPlayByteSwap(frameNum);
+	}
 };
 
 struct netPlayClientState
@@ -151,14 +230,40 @@ struct netPlayClientState
 	netPlayMsgHdr  hdr;
 
 	uint32_t  flags;
-	uint32_t  frameRdy;
+	uint32_t  frameRdy; // What frame we have input ready for
 	uint32_t  frameRun;
+	uint32_t  opsFrame; // Last frame for ops data
+	uint32_t  opsChkSum;
+	uint32_t  ramChkSum;
 	uint8_t   ctrlState[4];
 
 	netPlayClientState(void)
-		: hdr(NETPLAY_CLIENT_STATE, sizeof(netPlayClientState)), flags(0), frameRdy(0), frameRun(0)
+		: hdr(NETPLAY_CLIENT_STATE, sizeof(netPlayClientState)), flags(0),
+		frameRdy(0), frameRun(0), opsChkSum(0), ramChkSum(0)
 	{
 		memset( ctrlState, 0, sizeof(ctrlState) );
+	}
+
+	void toHostByteOrder()
+	{
+		hdr.toHostByteOrder();
+		flags     = netPlayByteSwap(flags);
+		frameRdy  = netPlayByteSwap(frameRdy);
+		frameRun  = netPlayByteSwap(frameRun);
+		opsFrame  = netPlayByteSwap(opsFrame);
+		opsChkSum = netPlayByteSwap(opsChkSum);
+		ramChkSum = netPlayByteSwap(ramChkSum);
+	}
+
+	void toNetworkByteOrder()
+	{
+		hdr.toNetworkByteOrder();
+		flags     = netPlayByteSwap(flags);
+		frameRdy  = netPlayByteSwap(frameRdy);
+		frameRun  = netPlayByteSwap(frameRun);
+		opsFrame  = netPlayByteSwap(opsFrame);
+		opsChkSum = netPlayByteSwap(opsChkSum);
+		ramChkSum = netPlayByteSwap(ramChkSum);
 	}
 };
 

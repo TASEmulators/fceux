@@ -59,6 +59,7 @@
 #include "common/os_utils.h"
 #include "utils/StringBuilder.h"
 
+#include "Qt/NetPlay.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
@@ -1188,9 +1189,13 @@ void FCEUD_FlushTrace()
 }
 
 //----------------------------------------------------
-//todo: really speed this up
 void FCEUD_TraceInstruction(uint8 *opcode, int size)
 {
+	if (NetPlayActive())
+	{
+		NetPlayTraceInstruction(opcode, size);
+	}
+
 	if (!logging)
 		return;
 

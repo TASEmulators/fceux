@@ -24,6 +24,8 @@
 #include "../../fceu.h"
 #include "../../state.h"
 #include "../../movie.h"
+#include "../../debug.h"
+#include "utils/crc32.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/input.h"
@@ -33,6 +35,102 @@
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/NetPlayMsgDef.h"
 
+//-----------------------------------------------------------------------------
+//--- NetPlay State Monitoring Metrics
+//-----------------------------------------------------------------------------
+static uint32_t opsCrc32 = 0;
+
+struct NetPlayFrameData
+{
+	uint32_t frameNum = 0;
+	uint32_t opsCrc32 = 0;
+	uint32_t ramCrc32 = 0;
+
+	void reset()
+	{
+		frameNum = 0;
+		opsCrc32 = 0;
+		ramCrc32 = 0;
+	}
+};
+
+struct NetPlayFrameDataHist_t
+{
+	static constexpr int numFrames = 10;
+
+	void push( NetPlayFrameData& newData )
+	{
+
+		data[bufHead] = newData;
+
+		bufHead = (bufHead + 1) % numFrames;
+	}
+
+	int getLast( NetPlayFrameData& out )
+	{
+		int i;
+		if (bufHead == 0)
+		{
+			i = numFrames - 1;
+		}
+		else
+		{
+			i = bufHead - 1;
+		}
+		out = data[i];
+
+		return 0;
+	}
+
+	int find( uint32_t frame, NetPlayFrameData& out )
+	{
+		int i, retval = -1;
+
+		if (bufHead == 0)
+		{
+			i = numFrames - 1;
+		}
+		else
+		{
+			i = bufHead - 1;
+		}
+
+		while (i != bufHead)
+		{
+			if (data[i].frameNum == frame)
+			{
+				out = data[i];
+				retval = 0;
+				break;
+			}
+
+			if (i == 0)
+			{
+				i = numFrames - 1;
+			}
+			else
+			{
+				i = i - 1;
+			}
+		}
+		return retval;
+	}
+
+
+	void reset(void)
+	{
+		bufHead = 0;
+
+		for (int i=0; i<numFrames; i++)
+		{
+			data[i].reset();
+		}
+	}
+
+	NetPlayFrameData  data[numFrames];
+	int bufHead = 0;
+};
+static NetPlayFrameDataHist_t  netPlayFrameData;
 //-----------------------------------------------------------------------------
 //--- NetPlayServer
 //-----------------------------------------------------------------------------
@@ -108,6 +206,7 @@ void NetPlayServer::processPendingConnections(void)
 
 		netPlayAuthReq msg;
 
+		msg.toNetworkByteOrder();
 		sendMsg( client, &msg, sizeof(msg) );
 	}
 }
@@ -193,6 +292,7 @@ int NetPlayServer::sendRomLoadReq( NetPlayClient *client )
 	printf("Sending ROM Load Request: %s  %lu\n", filepath, fileSize );
 	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
 
+	msg.toNetworkByteOrder();
 	sendMsg( client, &msg, sizeof(netPlayLoadRomReq) );
 
 	while ( (bytesRead = fread( buf, 1, sizeof(buf), fp )) > 0 )
@@ -209,7 +309,7 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 {
 	EMUFILE_MEMORY em;
 	int compressionLevel = 1;
-	netPlayMsgHdr hdr(NETPLAY_SYNC_STATE);
+	netPlayMsgHdr hdr(NETPLAY_SYNC_STATE_RESP);
 
 	if ( GameInfo == nullptr )
 	{
@@ -222,8 +322,11 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 	printf("Sending ROM Sync Request\n");
 	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
 
+	hdr.toNetworkByteOrder();
 	sendMsg( client, &hdr, sizeof(netPlayMsgHdr) );
 	sendMsg( client, em.buf(), em.size() );
+
+	opsCrc32 = 0;
 
 	return 0;
 }
@@ -272,14 +375,17 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 {
 	netPlayMsgHdr *hdr = (netPlayMsgHdr*)msgBuf;
 
-	//printf("Server Received Message: ID: %i   Bytes:%zu\n", hdr->msgId, msgSize );
+	const uint32_t msgId = netPlayByteSwap(hdr->msgId);
 
-	switch (hdr->msgId)
+	//printf("Server Received Message: ID: %i   Bytes:%zu\n", msgId, msgSize );
+
+	switch (msgId)
 	{
 		case NETPLAY_AUTH_RESP:
 		{
 			bool authentication_passed = false;
 			netPlayAuthResp *msg = static_cast<netPlayAuthResp*>(msgBuf);
+			msg->toHostByteOrder();
 			printf("Authorize: Player: %i   Passwd: %s\n", msg->playerId, msg->pswd);
 
 			if (sessionPasswd.isEmpty())
@@ -295,6 +401,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 					netPlayErrorMsg<128>  errorMsg;
 					errorMsg.setDisconnectFlag();
 					errorMsg.printf("Invalid Password");
+					errorMsg.toNetworkByteOrder();
 					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize );
 					client->flushData();
 				}
@@ -315,6 +422,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 					netPlayErrorMsg<128>  errorMsg;
 					errorMsg.setDisconnectFlag();
 					errorMsg.printf("Player %i role is not available", msg->playerId+1);
+					errorMsg.toNetworkByteOrder();
 					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize );
 					client->flushData();
 				}
@@ -324,16 +432,55 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 		case NETPLAY_CLIENT_STATE:
 		{
 			netPlayClientState *msg = static_cast<netPlayClientState*>(msgBuf);
+			msg->toHostByteOrder();
 
 			client->currentFrame = msg->frameRun;
 			client->gpData[0] = msg->ctrlState[0];
 			client->gpData[1] = msg->ctrlState[1];
 			client->gpData[2] = msg->ctrlState[2];
 			client->gpData[3] = msg->ctrlState[3];
+
+			NetPlayFrameData data;
+			if ( (msg->opsFrame == 0) || netPlayFrameData.find( msg->opsFrame, data ) )
+			{
+				//printf("Error: Server Could not find data for frame: %u\n", msg->opsFrame );
+			}
+			else
+			{
+				bool opsSync   = (data.opsCrc32 == msg->opsChkSum);
+				bool ramSync   = (data.ramCrc32 == msg->ramChkSum);
+
+				client->syncOk = opsSync && ramSync;
+
+				if (!client->syncOk)
+				{
+					printf("Frame:%u  is NOT in Sync: OPS:%i  RAM:%i\n", msg->frameRun, opsSync, ramSync);
+					client->desyncCount++;
+
+					if (client->desyncCount > forceResyncCount)
+					{
+						sendStateSyncReq( client );
+
+						client->desyncCount = 0;
+					}
+
+				}
+				else
+				{
+					if (client->desyncCount > 0)
+					{
+						client->desyncCount--;
+					}
+					else
+					{
+						client->desyncCount = 0;
+					}
+				}
+			}
 		}
 		break;
 		default:
-
+			printf("Unknown Msg: %08X\n", msgId);
 		break;
 	}
 
@@ -437,6 +584,8 @@ void NetPlayServer::update(void)
 		runFrameReq.ctrlState[3] = inputFrame.ctrl[3];
 
 		pushBackInput( inputFrame );
+
+		runFrameReq.toNetworkByteOrder();
 
 		for (auto it = clientList.begin(); it != clientList.end(); it++)
 		{
@@ -642,15 +791,26 @@ void NetPlayClient::update(void)
 		uint32_t ctlrData = GetGamepadPressedImmediate();
 		uint32_t currFrame = static_cast<uint32_t>(currFrameCounter);
 
+		NetPlayFrameData lastFrameData;
+		netPlayFrameData.getLast( lastFrameData );
+
 		netPlayClientState  statusMsg;
-		statusMsg.flags    = 0;
-		statusMsg.frameRdy = inputFrameBack();
-		statusMsg.frameRun = currFrame;
+		statusMsg.flags     = 0;
+		if (FCEUI_EmulationPaused())
+		{
+			statusMsg.flags |= 0x0001;
+		}
+		statusMsg.frameRdy  = inputFrameBack();
+		statusMsg.frameRun  = currFrame;
+		statusMsg.opsFrame  = lastFrameData.frameNum;
+		statusMsg.opsChkSum = lastFrameData.opsCrc32;
+		statusMsg.ramChkSum = lastFrameData.ramCrc32;
 		statusMsg.ctrlState[0] = (ctlrData      ) & 0x000000ff;
 		statusMsg.ctrlState[1] = (ctlrData >>  8) & 0x000000ff;
 		statusMsg.ctrlState[2] = (ctlrData >> 16) & 0x000000ff;
 		statusMsg.ctrlState[3] = (ctlrData >> 24) & 0x000000ff;
 
+		statusMsg.toNetworkByteOrder();
 		sock->write( reinterpret_cast<const char*>(&statusMsg), sizeof(statusMsg) );
 	}
 }
@@ -702,18 +862,22 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 
 				hdr = (netPlayMsgHdr*)recvMsgBuf;
 
-				recvMsgId   = hdr->msgId;
-				recvMsgSize = hdr->msgSize - sizeof(netPlayMsgHdr);
+				recvMsgId   = netPlayByteSwap(hdr->msgId);
+				recvMsgSize = netPlayByteSwap(hdr->msgSize) - sizeof(netPlayMsgHdr);
 				recvMsgBytesLeft = recvMsgSize;
 
-				if (hdr->msgSize > recvMsgBufSize)
+				if (netPlayByteSwap(hdr->msgSize) > recvMsgBufSize)
 				{
-					printf("Error: Message size too large\n");
+					printf("Error: Message size too large: %08X\n", recvMsgId);
 				}
-				//printf("HDR: Id: %u   Size: %u\n", hdr->msgId, hdr->msgSize );
+				//printf("HDR: Id: %u   Size: %u\n", netPlayByteSwap(hdr->msgId), netPlayByteSwap(hdr->msgSize) );
 
 				recvMsgByteIndex = sizeof(netPlayMsgHdr);
 
+				if (recvMsgBytesLeft == 0)
+				{
+					msgCallback( userData, recvMsgBuf, recvMsgSize );
+				}
 				readReq = (sock->bytesAvailable() >= recvMsgSize);
 			}
 			else
@@ -730,11 +894,14 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 {
 	netPlayMsgHdr *hdr = (netPlayMsgHdr*)msgBuf;
 
-	switch (hdr->msgId)
+	const uint32_t msgId = netPlayByteSwap(hdr->msgId);
+
+	switch (msgId)
 	{
 		case NETPLAY_ERROR_MSG:
 		{
 			auto *msg = static_cast<netPlayErrorMsg<256>*>(msgBuf);
+			msg->toHostByteOrder();
 			printf("Error: 0x%X  %s\n", msg->code, msg->getBuffer());
 
 			if (msg->isDisconnectFlagSet())
@@ -751,6 +918,8 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			strncpy( msg.userName, userName.toLocal8Bit().constData(), sizeof(msg.userName));
 			strncpy( msg.pswd, password.toLocal8Bit().constData(), sizeof(msg.pswd) );
 
+			printf("Authentication Request Received\n");
+			msg.toNetworkByteOrder();
 			sock->write( (const char*)&msg, sizeof(netPlayAuthResp) );
 		}
 		break;
@@ -759,10 +928,13 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			FILE *fp;
 			std::string filepath = QDir::tempPath().toStdString(); 
 			netPlayLoadRomReq *msg = static_cast<netPlayLoadRomReq*>(msgBuf);
+			msg->toHostByteOrder();
 			const char *romData = &static_cast<const char*>(msgBuf)[ sizeof(netPlayLoadRomReq) ];
 
 			filepath.append( "/" );
 			filepath.append( msg->fileName );
+
+			printf("Load ROM Request Received: %s\n", filepath.c_str());
 
 			//printf("Dumping Temp Rom to: %s\n", filepath.c_str());
 			fp = ::fopen( filepath.c_str(), "w");
@@ -780,19 +952,27 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			FCEU_WRAPPER_UNLOCK();
 		}
 		break;
-		case NETPLAY_SYNC_STATE:
+		case NETPLAY_SYNC_STATE_RESP:
 		{
 			char *stateData = &static_cast<char*>(msgBuf)[ sizeof(netPlayMsgHdr) ];
 
+			printf("Sync state Request Received\n");
+
 			EMUFILE_MEMORY em( stateData, msgSize );
 
+			FCEU_WRAPPER_LOCK();
 			FCEUSS_LoadFP( &em, SSLOADPARAM_NOBACKUP );
+			FCEU_WRAPPER_UNLOCK();
+
+			opsCrc32 = 0;
+			netPlayFrameData.reset();
 		}
 		break;
 		case NETPLAY_RUN_FRAME_REQ:
 		{
 			NetPlayFrameInput  inputFrame;
 			netPlayRunFrameReq *msg = static_cast<netPlayRunFrameReq*>(msgBuf);
+			msg->toHostByteOrder();
 
 			inputFrame.frameCounter = msg->frameNum;
 			inputFrame.ctrl[0] = msg->ctrlState[0];
@@ -807,7 +987,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 		}
 		break;
 		default:
-
+			printf("Unknown Msg: %08X\n", msgId);
 		break;
 	}
 }
@@ -977,6 +1157,10 @@ NetPlayJoinDialog::NetPlayJoinDialog(QWidget *parent)
 
 	QString hostAddress = "localhost";
 	g_config->getOption("SDL.NetworkIP", &hostAddress);
+	if (hostAddress.isEmpty())
+	{
+		hostAddress = "localhost";
+	}
 	hostEntry = new QLineEdit();
 	hostEntry->setText(hostAddress);
 	grid->addWidget( hostEntry, 0, 1 );
@@ -1202,6 +1386,8 @@ void NetPlayReadInputFrame(uint8_t* joy)
 	joy[1] = netPlayInputFrame.ctrl[1];
 	joy[2] = netPlayInputFrame.ctrl[2];
 	joy[3] = netPlayInputFrame.ctrl[3];
+
+	NetPlayOnFrameBegin();
 }
 //----------------------------------------------------------------------------
 void NetPlayCloseSession(void)
@@ -1242,5 +1428,99 @@ void openNetPlayJoinDialog(QWidget* parent)
 		win->activateWindow();
 		win->raise();
 	}
+}
+//----------------------------------------------------------------------------
+//----  Network Byte Swap Utilities
+//----------------------------------------------------------------------------
+#ifdef __BIG_ENDIAN__
+
+	#define NETPLAY_HOST_BE  1
+	#define NETPLAY_HOST_LE  0
+
+#elif defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+
+	#define NETPLAY_HOST_BE  1
+	#define NETPLAY_HOST_LE  0
+
+#else
+
+	#define NETPLAY_HOST_BE  0
+	#define NETPLAY_HOST_LE  1
+#endif
+//----------------------------------------------------------------------------
+uint16_t netPlayByteSwap(uint16_t in)
+{
+	uint16_t out = in;
+#if  NETPLAY_HOST_LE
+	unsigned char *in8  = (unsigned char*)&in;
+	unsigned char *out8 = (unsigned char*)&out;
+	out8[0] = in8[1];
+	out8[1] = in8[0];
+#endif
+	return out;
+}
+//----------------------------------------------------------------------------
+uint32_t netPlayByteSwap(uint32_t in)
+{
+	uint32_t out = in;
+#if  NETPLAY_HOST_LE
+	unsigned char *in8  = (unsigned char*)&in;
+	unsigned char *out8 = (unsigned char*)&out;
+	out8[0] = in8[3];
+	out8[1] = in8[2];
+	out8[2] = in8[1];
+	out8[3] = in8[0];
+#endif
+	return out;
+}
+//----------------------------------------------------------------------------
+uint64_t netPlayByteSwap(uint64_t in)
+{
+	uint64_t out = in;
+#if  NETPLAY_HOST_LE
+	unsigned char *in8  = (unsigned char*)&in;
+	unsigned char *out8 = (unsigned char*)&out;
+	out8[0] = in8[7];
+	out8[1] = in8[6];
+	out8[2] = in8[5];
+	out8[3] = in8[4];
+	out8[4] = in8[3];
+	out8[5] = in8[2];
+	out8[6] = in8[1];
+	out8[7] = in8[0];
+#endif
+	return out;
+}
+//----------------------------------------------------------------------------
+uint32_t netPlayCalcRamChkSum()
+{
+	uint32_t crc = 0;
+	uint8_t ram[256];
+
+	for (int i=0; i<256; i++)
+	{
+		ram[i] = GetMem(i);
+	}
+	crc = CalcCRC32( crc, ram, sizeof(ram));
+
+	return crc;
+}
+//----------------------------------------------------------------------------
+void NetPlayTraceInstruction(uint8_t *opcode, int size)
+{
+	opsCrc32 = CalcCRC32( opsCrc32, opcode, size);
+}
+//----------------------------------------------------------------------------
+void NetPlayOnFrameBegin()
+{
+	NetPlayFrameData data;
+
+	data.frameNum = static_cast<uint32_t>(currFrameCounter);
+	data.opsCrc32 = opsCrc32;
+	data.ramCrc32 = netPlayCalcRamChkSum();
+
+	netPlayFrameData.push( data );
+
+	//printf("Frame: %u   Ops:%08X  \n", data.frameNum, data.opsCrc32 );
 }
 //----------------------------------------------------------------------------

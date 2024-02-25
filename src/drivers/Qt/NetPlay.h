@@ -134,6 +134,7 @@ class NetPlayServer : public QTcpServer
 		int role = -1;
 		int roleMask = 0;
 		NetPlayClient* clientPlayer[4] = { nullptr };
+		int forceResyncCount = 10;
 
 	public slots:
 		void newConnectionRdy(void);
@@ -211,6 +212,8 @@ class NetPlayClient : public QObject
 		QString password;
 		int     role = -1;
 		int     state = 0;
+		int     desyncCount = 0;
+		bool    syncOk = false;
 		unsigned int currentFrame = 0;
 		uint8_t gpData[4];
 
@@ -303,7 +306,9 @@ bool isNetPlayHost(void);
 void NetPlayPeriodicUpdate(void);
 bool NetPlaySkipWait(void);
 int NetPlayFrameWait(void);
+void NetPlayOnFrameBegin(void);
 void NetPlayReadInputFrame(uint8_t* joy);
 void NetPlayCloseSession(void);
+void NetPlayTraceInstruction(uint8_t *opcode, int size);
 void openNetPlayHostDialog(QWidget* parent = nullptr);
 void openNetPlayJoinDialog(QWidget* parent = nullptr);
