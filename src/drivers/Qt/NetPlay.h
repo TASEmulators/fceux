@@ -207,6 +207,8 @@ class NetPlayClient : public QObject
 		bool isAuthenticated();
 		bool isPlayerRole();
 		bool shouldDestroy(){ return needsDestroy; }
+		bool isPaused(){ return paused; }
+		void setPaused(bool value){ paused = value; }
 
 		QString userName;
 		QString password;
@@ -230,6 +232,7 @@ class NetPlayClient : public QObject
 		bool    disconnectPending = false;
 		bool    needsDestroy = false;
 		bool    _connected = false;
+		bool    paused = false;
 
 		std::list <NetPlayFrameInput> input;
 		FCEU::mutex inputMtx;

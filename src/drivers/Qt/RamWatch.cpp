@@ -41,6 +41,7 @@
 #include "../../fceu.h"
 #include "../../cheat.h"
 #include "../../debug.h"
+#include "utils/StringUtils.h"
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -375,7 +376,8 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 	int idx=0;
 	QTreeWidgetItem *item;
 	std::list < ramWatch_t * >::iterator it;
-	char addrStr[32], valStr1[16], valStr2[16];
+	FCEU::FixedString<32> addrStr;
+	FCEU::FixedString<16> valStr1, valStr2;
 	ramWatch_t *rw;
 
 	for (it = ramWatchList.ls.begin (); it != ramWatchList.ls.end (); it++)
@@ -397,17 +399,17 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		}
 		if ( rw->isSep || (rw->addr < 0) )
 		{
-			strcpy (addrStr, "--------");
+			addrStr = "--------";
 		}
 		else
 		{
 			if ( rw->size > 1 )
 			{
-				snprintf (addrStr, sizeof(addrStr), "$%04X-$%04X", rw->addr, rw->addr + rw->size - 1);
+				addrStr.sprintf("$%04X-$%04X", rw->addr, rw->addr + rw->size - 1);
 			}
 			else
 			{
-				snprintf (addrStr, sizeof(addrStr), "$%04X", rw->addr);
+				addrStr.sprintf("$%04X", rw->addr);
 			}
 		}
 
@@ -415,8 +417,7 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 
 		if ( rw->isSep || (rw->addr < 0) )
 		{
-			strcpy( valStr1, "--------");
-			strcpy( valStr2, "--------");
+			valStr1 = valStr2 = "--------";
 		}
 		else
 		{
@@ -424,37 +425,37 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		   {
 		   	if (rw->type == 's')
 		   	{
-		   		snprintf (valStr1, sizeof(valStr1), "%i", rw->val.i32);
+		   		valStr1.sprintf("%i", rw->val.i32);
 		   	}
 		   	else
 		   	{
-		   		snprintf (valStr1, sizeof(valStr1), "%u", rw->val.u32);
+		   		valStr1.sprintf("%u", rw->val.u32);
 		   	}
-		   	snprintf (valStr2, sizeof(valStr2), "0x%08X", rw->val.u32);
+		   	valStr2.sprintf("0x%08X", rw->val.u32);
 		   }
 		   else if (rw->size == 2)
 		   {
 		   	if (rw->type == 's')
 		   	{
-		   		snprintf (valStr1, sizeof(valStr1), "%6i", rw->val.i16);
+		   		valStr1.sprintf("%6i", rw->val.i16);
 		   	}
 		   	else
 		   	{
-		   		snprintf (valStr1, sizeof(valStr1), "%6u", rw->val.u16);
+		   		valStr1.sprintf("%6u", rw->val.u16);
 		   	}
-		   	snprintf (valStr2, sizeof(valStr2), "0x%04X", rw->val.u16);
+		   	valStr2.sprintf("0x%04X", rw->val.u16);
 		   }
 		   else
 		   {
 		   	if (rw->type == 's')
 		   	{
-		   		snprintf (valStr1, sizeof(valStr1), "%6i", rw->val.i8);
+		   		valStr1.sprintf("%6i", rw->val.i8);
 		   	}
 		   	else
 		   	{
-		   		snprintf (valStr1, sizeof(valStr1), "%6u", rw->val.u8);
+		   		valStr1.sprintf("%6u", rw->val.u8);
 		   	}
-		   	snprintf (valStr2, sizeof(valStr2), "0x%02X", rw->val.u8);
+		   	valStr2.sprintf("0x%02X", rw->val.u8);
 		   }
 		}
 
@@ -494,9 +495,9 @@ void RamWatchDialog_t::updateRamWatchDisplay(void)
 		else
 		{
 			item->setFirstColumnSpanned(false);
-			item->setText( 0, tr(addrStr) );
-			item->setText( 1, tr(valStr1) );
-			item->setText( 2, tr(valStr2) );
+			item->setText( 0, tr(addrStr.c_str()) );
+			item->setText( 1, tr(valStr1.c_str()) );
+			item->setText( 2, tr(valStr2.c_str()) );
 			item->setText( 3, tr(rw->name.c_str())  );
 		}
    

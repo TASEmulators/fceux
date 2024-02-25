@@ -26,6 +26,7 @@
 #include "../../movie.h"
 #include "../../debug.h"
 #include "utils/crc32.h"
+#include "utils/StringUtils.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/input.h"
@@ -287,7 +288,7 @@ int NetPlayServer::sendRomLoadReq( NetPlayClient *client )
 
 	msg.hdr.msgSize += fileSize;
 	msg.fileSize     = fileSize;
-	strncpy( msg.fileName, GameInfo->filename, sizeof(msg.fileName) );
+	Strlcpy( msg.fileName, GameInfo->filename, sizeof(msg.fileName) );
 
 	printf("Sending ROM Load Request: %s  %lu\n", filepath, fileSize );
 	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
@@ -440,6 +441,8 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			client->gpData[2] = msg->ctrlState[2];
 			client->gpData[3] = msg->ctrlState[3];
 
+			client->setPaused( (msg->flags & netPlayClientState::PAUSE_FLAG) ? true : false );
+
 			NetPlayFrameData data;
 			if ( (msg->opsFrame == 0) || netPlayFrameData.find( msg->opsFrame, data ) )
 			{
@@ -498,6 +501,7 @@ void NetPlayServer::update(void)
 	uint32_t lagFrame = 0;
 	uint8_t  localGP[4] = { 0 };
 	uint8_t  gpData[4] = { 0 };
+	int   numClientsPaused = 0;
 
 	if (currFrame > maxLead)
 	{
@@ -537,6 +541,11 @@ void NetPlayServer::update(void)
 			{
 				gpData[client->role] = client->gpData[client->role];
 			}
+
+			if (client->isPaused())
+			{
+				numClientsPaused++;
+			}
 		}
 
 
@@ -561,7 +570,7 @@ void NetPlayServer::update(void)
 	shouldRunFrame = (clientMinFrame != 0xFFFFFFFF) && 
 		(clientMinFrame >= lagFrame ) &&
 		(clientMaxFrame  < leadFrame) &&
-		(currFrame > lastFrame);
+		(currFrame > lastFrame) && (numClientsPaused == 0);
 
 	//printf("Client Frame: Min:%u  Max:%u\n", clientMinFrame, clientMaxFrame);
 
@@ -798,7 +807,7 @@ void NetPlayClient::update(void)
 		statusMsg.flags     = 0;
 		if (FCEUI_EmulationPaused())
 		{
-			statusMsg.flags |= 0x0001;
+			statusMsg.flags |= netPlayClientState::PAUSE_FLAG;
 		}
 		statusMsg.frameRdy  = inputFrameBack();
 		statusMsg.frameRun  = currFrame;
@@ -915,8 +924,8 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 		{
 			netPlayAuthResp msg;
 			msg.playerId = role;
-			strncpy( msg.userName, userName.toLocal8Bit().constData(), sizeof(msg.userName));
-			strncpy( msg.pswd, password.toLocal8Bit().constData(), sizeof(msg.pswd) );
+			Strlcpy( msg.userName, userName.toLocal8Bit().constData(), sizeof(msg.userName));
+			Strlcpy( msg.pswd, password.toLocal8Bit().constData(), sizeof(msg.pswd) );
 
 			printf("Authentication Request Received\n");
 			msg.toNetworkByteOrder();

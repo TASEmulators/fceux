@@ -237,6 +237,8 @@ struct netPlayClientState
 	uint32_t  ramChkSum;
 	uint8_t   ctrlState[4];
 
+	static constexpr uint32_t  PAUSE_FLAG = 0x0001;
+
 	netPlayClientState(void)
 		: hdr(NETPLAY_CLIENT_STATE, sizeof(netPlayClientState)), flags(0),
 		frameRdy(0), frameRun(0), opsChkSum(0), ramChkSum(0)
