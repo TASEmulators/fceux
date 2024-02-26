@@ -22,6 +22,8 @@ enum netPlayMsgType
 	NETPLAY_RUN_FRAME_REQ,
 	NETPLAY_CLIENT_STATE,
 	NETPLAY_ERROR_MSG,
+	NETPLAY_PING_REQ,
+	NETPLAY_PING_RESP,
 };
 
 enum netPlayerId
@@ -266,6 +268,54 @@ struct netPlayClientState
 		opsFrame  = netPlayByteSwap(opsFrame);
 		opsChkSum = netPlayByteSwap(opsChkSum);
 		ramChkSum = netPlayByteSwap(ramChkSum);
+	}
+};
+
+struct netPlayPingReq
+{
+	netPlayMsgHdr  hdr;
+
+	uint64_t  hostTimeStamp;
+
+	netPlayPingReq(void)
+		: hdr(NETPLAY_PING_REQ, sizeof(netPlayPingReq)), hostTimeStamp(0)
+	{
+	}
+
+	void toHostByteOrder()
+	{
+		hdr.toHostByteOrder();
+		hostTimeStamp = netPlayByteSwap(hostTimeStamp);
+	}
+
+	void toNetworkByteOrder()
+	{
+		hdr.toNetworkByteOrder();
+		hostTimeStamp = netPlayByteSwap(hostTimeStamp);
+	}
+};
+
+struct netPlayPingResp
+{
+	netPlayMsgHdr  hdr;
+
+	uint64_t  hostTimeStamp;
+
+	netPlayPingResp(void)
+		: hdr(NETPLAY_PING_RESP, sizeof(netPlayPingResp)), hostTimeStamp(0)
+	{
+	}
+
+	void toHostByteOrder()
+	{
+		hdr.toHostByteOrder();
+		hostTimeStamp = netPlayByteSwap(hostTimeStamp);
+	}
+
+	void toNetworkByteOrder()
+	{
+		hdr.toNetworkByteOrder();
+		hostTimeStamp = netPlayByteSwap(hostTimeStamp);
 	}
 };
 

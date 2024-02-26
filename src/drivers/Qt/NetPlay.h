@@ -119,6 +119,9 @@ class NetPlayServer : public QTcpServer
 		void setRole(int _role);
 		bool claimRole(NetPlayClient* client, int _role);
 
+		uint32_t getMaxLeadFrames(){ return maxLeadFrames; }
+		void setMaxLeadFrames(uint32_t value){ maxLeadFrames = value; }
+
 		void serverProcessMessage( NetPlayClient *client, void *msgBuf, size_t msgSize );
 
 		QString sessionName;
@@ -135,6 +138,8 @@ class NetPlayServer : public QTcpServer
 		int roleMask = 0;
 		NetPlayClient* clientPlayer[4] = { nullptr };
 		int forceResyncCount = 10;
+		uint32_t cycleCounter = 0;
+		uint32_t maxLeadFrames = 10u;
 
 	public slots:
 		void newConnectionRdy(void);
@@ -209,6 +214,9 @@ class NetPlayClient : public QObject
 		bool shouldDestroy(){ return needsDestroy; }
 		bool isPaused(){ return paused; }
 		void setPaused(bool value){ paused = value; }
+		void recordPingResult( uint64_t delay_ms );
+		void resetPingData(void);
+		double getAvgPingDelay();
 
 		QString userName;
 		QString password;
@@ -233,6 +241,10 @@ class NetPlayClient : public QObject
 		bool    needsDestroy = false;
 		bool    _connected = false;
 		bool    paused = false;
+
+		uint64_t  pingDelaySum = 0;
+		uint64_t  pingDelayLast = 0;
+		uint64_t  pingNumSamples = 0;
 
 		std::list <NetPlayFrameInput> input;
 		FCEU::mutex inputMtx;
