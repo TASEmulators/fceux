@@ -144,6 +144,9 @@ NetPlayServer::NetPlayServer(QObject *parent)
 	instance = this;
 
 	connect(this, SIGNAL(newConnection(void)), this, SLOT(newConnectionRdy(void)));
+
+	connect(consoleWindow, SIGNAL(romLoaded(void)), this, SLOT(onRomLoad(void)));
+	connect(consoleWindow, SIGNAL(nesResetOccurred(void)), this, SLOT(onNesReset(void)));
 }
 
 
@@ -329,6 +332,7 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 	sendMsg( client, em.buf(), em.size() );
 
 	opsCrc32 = 0;
+	inputClear();
 
 	return 0;
 }
@@ -364,6 +368,29 @@ bool NetPlayServer::claimRole(NetPlayClient* client, int _role)
 		}
 	}
 	return success;
+}
+//-----------------------------------------------------------------------------
+void NetPlayServer::onRomLoad()
+{
+	//printf("New ROM Loaded!\n");
+
+	// New ROM has been loaded by server, signal clients to load and sync
+	for (auto& client : clientList )
+	{
+		sendRomLoadReq( client );
+		sendStateSyncReq( client );
+	}
+}
+//-----------------------------------------------------------------------------
+void NetPlayServer::onNesReset()
+{
+	//printf("New ROM Loaded!\n");
+
+	// NES Reset has occurred on server, signal clients sync
+	for (auto& client : clientList )
+	{
+		sendStateSyncReq( client );
+	}
 }
 //-----------------------------------------------------------------------------
 static void serverMessageCallback( void *userData, void *msgBuf, size_t msgSize )
@@ -587,7 +614,8 @@ void NetPlayServer::update(void)
 	shouldRunFrame = (clientMinFrame != 0xFFFFFFFF) && 
 		(clientMinFrame >= lagFrame ) &&
 		(clientMaxFrame  < leadFrame) &&
-		(currFrame > lastFrame) && (numClientsPaused == 0);
+		( (currFrame > lastFrame) || (lastFrame == 0) ) &&
+		(numClientsPaused == 0);
 
 	//printf("Client Frame: Min:%u  Max:%u\n", clientMinFrame, clientMaxFrame);
 
@@ -613,10 +641,8 @@ void NetPlayServer::update(void)
 
 		runFrameReq.toNetworkByteOrder();
 
-		for (auto it = clientList.begin(); it != clientList.end(); it++)
+		for (auto& client : clientList )
 		{
-			NetPlayClient *client = *it;
-
 			if (client->state > 0)
 			{
 				sendMsg( client, &runFrameReq, sizeof(runFrameReq) );
@@ -635,10 +661,8 @@ void NetPlayServer::update(void)
 		ping.hostTimeStamp = ts.toMilliSeconds();
 		ping.toNetworkByteOrder();
 
-		for (auto it = clientList.begin(); it != clientList.end(); it++)
+		for (auto& client : clientList )
 		{
-			NetPlayClient *client = *it;
-
 			if (client->state > 0)
 			{
 				sendMsg( client, &ping, sizeof(ping) );
@@ -649,10 +673,8 @@ void NetPlayServer::update(void)
 	bool shouldFlushOutput = true;
 	if (shouldFlushOutput)
 	{
-		for (auto it = clientList.begin(); it != clientList.end(); it++)
+		for (auto& client : clientList )
 		{
-			NetPlayClient *client = *it;
-
 			client->flushData();
 		}
 	}
@@ -1051,6 +1073,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 
 			opsCrc32 = 0;
 			netPlayFrameData.reset();
+			inputClear();
 		}
 		break;
 		case NETPLAY_RUN_FRAME_REQ:

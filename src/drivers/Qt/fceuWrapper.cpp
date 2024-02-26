@@ -467,7 +467,11 @@ int LoadGame(const char *path, bool silent)
 	//}
 	isloaded = 1;
 
-	//FCEUD_NetworkConnect();
+	// Signal to listeners that a new ROM was loaded
+	if ( consoleWindow )
+	{
+		emit consoleWindow->romLoaded();
+	}
 	return 1;
 }
 
@@ -560,6 +564,11 @@ int  fceuWrapperSoftReset(void)
 	if ( isloaded )
 	{
 		ResetNES();
+
+		if (consoleWindow != nullptr)
+		{
+			emit consoleWindow->nesResetOccurred();
+		}
 	}
 	return 0;
 }

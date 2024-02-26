@@ -323,6 +323,11 @@ class  consoleWin_t : public QMainWindow
 
 		QString findHelpFile(void);
 
+	public:
+	signals:
+		void romLoaded(void);
+		void nesResetOccurred(void);
+
 	public slots:
 		void openDebugWindow(void);
 		void openHexEditor(void);

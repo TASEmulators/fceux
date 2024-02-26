@@ -113,6 +113,12 @@ class NetPlayServer : public QTcpServer
 			return frame;
 		}
 
+		void inputClear()
+		{
+			FCEU::autoScopedLock alock(inputMtx);
+			input.clear();
+		}
+
 		int  sendMsg( NetPlayClient *client, void *msg, size_t msgSize);
 		int  sendRomLoadReq( NetPlayClient *client );
 		int  sendStateSyncReq( NetPlayClient *client );
@@ -143,6 +149,8 @@ class NetPlayServer : public QTcpServer
 
 	public slots:
 		void newConnectionRdy(void);
+		void onRomLoad(void);
+		void onNesReset(void);
 };
 
 class NetPlayClient : public QObject
@@ -207,6 +215,12 @@ class NetPlayClient : public QObject
 				frame = in.frameCounter;
 			}
 			return frame;
+		}
+
+		void inputClear()
+		{
+			FCEU::autoScopedLock alock(inputMtx);
+			input.clear();
 		}
 
 		bool isAuthenticated();
