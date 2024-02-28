@@ -22,6 +22,9 @@
 #include <QFrame>
 #include <QGroupBox>
 #include <QCloseEvent>
+#include <QTreeView>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 #include <QTcpSocket>
 #include <QTcpServer>
@@ -73,6 +76,8 @@ class NetPlayServer : public QTcpServer
 		static int Create(QObject *parent = 0);
 		static int Destroy();
 
+		typedef std::list <NetPlayClient*>  ClientList_t;
+
 		int closeAllConnections(void);
 
 		void update(void);
@@ -123,12 +128,15 @@ class NetPlayServer : public QTcpServer
 		int  sendRomLoadReq( NetPlayClient *client );
 		int  sendStateSyncReq( NetPlayClient *client );
 		void setRole(int _role);
+		int  getRole(void){ return role; }
 		bool claimRole(NetPlayClient* client, int _role);
 
 		uint32_t getMaxLeadFrames(){ return maxLeadFrames; }
 		void setMaxLeadFrames(uint32_t value){ maxLeadFrames = value; }
 
 		void serverProcessMessage( NetPlayClient *client, void *msgBuf, size_t msgSize );
+
+		ClientList_t& getClientList(){ return clientList; }
 
 		QString sessionName;
 		QString sessionPasswd;
@@ -137,7 +145,7 @@ class NetPlayServer : public QTcpServer
 
 		void processPendingConnections(void);
 
-		std::list <NetPlayClient*> clientList;
+		ClientList_t clientList;
 		std::list <NetPlayFrameInput> input;
 		FCEU::mutex inputMtx;
 		int role = -1;
@@ -330,6 +338,42 @@ public slots:
 	void onSocketError(const QString& errorMsg);
 };
 
+class NetPlayClientTreeItem : public QTreeWidgetItem
+{
+	public:
+		NetPlayClientTreeItem()
+			: QTreeWidgetItem()
+		{
+
+		}
+
+		NetPlayClient* client = nullptr;
+		NetPlayServer* server = nullptr;
+	private:
+};
+
+class NetPlayHostStatusDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+	NetPlayHostStatusDialog(QWidget *parent = 0);
+	~NetPlayHostStatusDialog(void);
+
+	static NetPlayHostStatusDialog *GetInstance(void){ return instance; };
+
+protected:
+	void closeEvent(QCloseEvent *event);
+	void loadClientTree(void);
+
+	QTreeWidget *clientTree;
+
+	static NetPlayHostStatusDialog* instance;
+
+public slots:
+	void closeWindow(void);
+};
+
 bool NetPlayActive(void);
 bool isNetPlayHost(void);
 void NetPlayPeriodicUpdate(void);
@@ -341,3 +385,6 @@ void NetPlayCloseSession(void);
 void NetPlayTraceInstruction(uint8_t *opcode, int size);
 void openNetPlayHostDialog(QWidget* parent = nullptr);
 void openNetPlayJoinDialog(QWidget* parent = nullptr);
+void openNetPlayHostStatusDialog(QWidget* parent = nullptr);
+void openNetPlayClientStatusDialog(QWidget* parent = nullptr);
+const char* NetPlayPlayerRoleToString(int role);

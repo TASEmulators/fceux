@@ -134,6 +134,32 @@ struct NetPlayFrameDataHist_t
 };
 static NetPlayFrameDataHist_t  netPlayFrameData;
 //-----------------------------------------------------------------------------
+const char* NetPlayPlayerRoleToString(int role)
+{
+	const char* roleString = nullptr;
+
+	switch (role)
+	{
+		default:
+		case netPlayerId::NETPLAY_SPECTATOR:
+			roleString = "Spectator";
+			break;
+		case netPlayerId::NETPLAY_PLAYER1:
+			roleString = "Player 1";
+			break;
+		case netPlayerId::NETPLAY_PLAYER2:
+			roleString = "Player 2";
+			break;
+		case netPlayerId::NETPLAY_PLAYER3:
+			roleString = "Player 3";
+			break;
+		case netPlayerId::NETPLAY_PLAYER4:
+			roleString = "Player 4";
+			break;
+	}
+	return roleString;
+}
+//-----------------------------------------------------------------------------
 //--- NetPlayServer
 //-----------------------------------------------------------------------------
 NetPlayServer *NetPlayServer::instance = nullptr;
@@ -365,6 +391,7 @@ bool NetPlayServer::claimRole(NetPlayClient* client, int _role)
 			success = true;
 			roleMask |= mask;
 			clientPlayer[_role] = client;
+			client->role = _role;
 		}
 	}
 	return success;
@@ -1417,6 +1444,113 @@ void NetPlayJoinDialog::onSocketError(const QString& errorMsg)
 		client = nullptr;
 	}
 }
+//-----------------------------------------------------------------------------
+//--- NetPlayJoinDialog
+//-----------------------------------------------------------------------------
+NetPlayHostStatusDialog* NetPlayHostStatusDialog::instance = nullptr;
+//-----------------------------------------------------------------------------
+NetPlayHostStatusDialog::NetPlayHostStatusDialog(QWidget *parent)
+	: QDialog(parent)
+{
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	//QGridLayout *grid;
+	QPushButton *closeButton;
+	//QLabel *lbl;
+
+	instance = this;
+
+	setWindowTitle("NetPlay Status");
+
+	mainLayout = new QVBoxLayout();
+
+	clientTree = new QTreeWidget();
+	mainLayout->addWidget( clientTree );
+
+	clientTree->setColumnCount(3);
+
+	auto* item = new QTreeWidgetItem();
+	item->setText( 0, QString::fromStdString( "Player" ) );
+	item->setText( 1, QString::fromStdString( "Role" ) );
+	item->setText( 2, QString::fromStdString( "State" ) );
+	item->setTextAlignment( 0, Qt::AlignLeft);
+	item->setTextAlignment( 1, Qt::AlignLeft);
+	item->setTextAlignment( 2, Qt::AlignLeft);
+
+	//connect( clientTree, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+			   //this, SLOT(watchClicked( QTreeWidgetItem*, int)) );
+
+	clientTree->setHeaderItem( item );
+
+	closeButton = new QPushButton( tr("Close") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
+	hbox = new QHBoxLayout();
+	hbox->addStretch(5);
+	hbox->addWidget( closeButton, 1 );
+	mainLayout->addLayout( hbox );
+
+	setLayout(mainLayout);
+
+	loadClientTree();
+}
+//----------------------------------------------------------------------------
+NetPlayHostStatusDialog::~NetPlayHostStatusDialog(void)
+{
+	instance = nullptr;
+	//printf("Destroy NetPlay Status Window\n");
+}
+//----------------------------------------------------------------------------
+void NetPlayHostStatusDialog::closeEvent(QCloseEvent *event)
+{
+	//printf("NetPlay Host Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void NetPlayHostStatusDialog::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void NetPlayHostStatusDialog::loadClientTree()
+{
+	auto* server = NetPlayServer::GetInstance();
+
+	if (server == nullptr)
+	{
+		return;
+	}
+	const char *roleString = NetPlayPlayerRoleToString( server->getRole() );
+	auto* serverTopLvlItem = new NetPlayClientTreeItem();
+
+	serverTopLvlItem->server = server;
+	serverTopLvlItem->setText( 0, tr("Host") );
+	serverTopLvlItem->setText( 1, tr(roleString) );
+
+	clientTree->addTopLevelItem( serverTopLvlItem );
+
+	auto& clientList = server->getClientList();
+
+	for (auto& client : clientList)
+	{
+		roleString = NetPlayPlayerRoleToString( client->role );
+
+		auto* clientTopLvlItem = new NetPlayClientTreeItem();
+
+		clientTopLvlItem->client = client;
+
+		clientTopLvlItem->setText( 0, client->userName );
+		clientTopLvlItem->setText( 1, tr(roleString) );
+
+		clientTree->addTopLevelItem( clientTopLvlItem );
+	}
+
+}
 //----------------------------------------------------------------------------
 //---- Global Functions
 //----------------------------------------------------------------------------
@@ -1515,13 +1649,13 @@ void NetPlayCloseSession(void)
 	NetPlayServer::Destroy();
 }
 //----------------------------------------------------------------------------
-void openNetPlayHostDialog(QWidget* parent)
+template <typename T> void openSingletonDialog(QWidget* parent)
 {
-	NetPlayHostDialog* win = NetPlayHostDialog::GetInstance();
+	T* win = T::GetInstance();
 
 	if (win == nullptr)
 	{
-		win = new NetPlayHostDialog(parent);
+		win = new T(parent);
 
 		win->show();
 	}
@@ -1532,21 +1666,24 @@ void openNetPlayHostDialog(QWidget* parent)
 	}
 }
 //----------------------------------------------------------------------------
+void openNetPlayHostDialog(QWidget* parent)
+{
+	openSingletonDialog<NetPlayHostDialog>(parent);
+}
+//----------------------------------------------------------------------------
 void openNetPlayJoinDialog(QWidget* parent)
 {
-	NetPlayJoinDialog* win = NetPlayJoinDialog::GetInstance();
-
-	if (win == nullptr)
-	{
-		win = new NetPlayJoinDialog(parent);
-
-		win->show();
-	}
-	else
-	{
-		win->activateWindow();
-		win->raise();
-	}
+	openSingletonDialog<NetPlayJoinDialog>(parent);
+}
+//----------------------------------------------------------------------------
+void openNetPlayHostStatusDialog(QWidget* parent)
+{
+	openSingletonDialog<NetPlayHostStatusDialog>(parent);
+}
+//----------------------------------------------------------------------------
+void openNetPlayClientStatusDialog(QWidget* parent)
+{
+	//openSingletonDialog<NetPlayHostStatusDialog>(parent);
 }
 //----------------------------------------------------------------------------
 //----  Network Byte Swap Utilities

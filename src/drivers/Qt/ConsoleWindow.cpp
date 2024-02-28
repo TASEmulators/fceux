@@ -1695,6 +1695,25 @@ void consoleWin_t::createMainMenu(void)
 
 	netPlayMenu->addAction(act);
 
+	// NetPlay -> Client Status Dialog
+	act = new QAction(tr("Host &Status"), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Open Netplay Host Status Dialog"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openNetPlayStatusWindow(void)) );
+	netPlayHostStatAct = act;
+
+	netPlayMenu->addAction(act);
+
+	// NetPlay -> Client Status Dialog
+	act = new QAction(tr("Client &Status"), this);
+	//act->setShortcut( QKeySequence(tr("Shift+F7")));
+	act->setStatusTip(tr("Open Netplay Client Status Dialog"));
+	connect(act, SIGNAL(triggered()), this, SLOT(openNetPlayStatusWindow(void)) );
+	netPlayClientStatAct = act;
+
+	netPlayMenu->addAction(act);
+
+
 	//netPlayMenu->setEnabled(false);
 	//-----------------------------------------------------------------------
 	// Tools
@@ -3200,6 +3219,20 @@ void consoleWin_t::openNetPlayJoinWindow(void)
 	//printf("Open NetPlay Join Window\n");
 	
 	openNetPlayJoinDialog(this);
+}
+
+void consoleWin_t::openNetPlayStatusWindow(void)
+{
+	//printf("Open NetPlay Status Window\n");
+
+	if (isNetPlayHost())
+	{
+		openNetPlayHostStatusDialog(this);
+	}
+	else
+	{
+		openNetPlayClientStatusDialog(this);
+	}
 }
 
 void consoleWin_t::closeNetPlaySession(void)
@@ -4766,11 +4799,27 @@ void consoleWin_t::updatePeriodic(void)
 		stopWavAct->setEnabled( FCEUI_WaveRecordRunning() );
 		tasEditorAct->setEnabled( FCEU_IsValidUI(FCEUI_TASEDITOR) );
 
-		bool netPlayactv = NetPlayActive();
+		const bool netPlayactv = NetPlayActive();
 
 		netPlayHostAct->setEnabled( !netPlayactv );
 		netPlayJoinAct->setEnabled( !netPlayactv );
 		netPlayDiscAct->setEnabled(  netPlayactv );
+
+		if (netPlayactv)
+		{
+			const bool isHost = isNetPlayHost();
+			netPlayHostStatAct->setEnabled(isHost);
+			netPlayHostStatAct->setVisible(isHost);
+			netPlayClientStatAct->setEnabled(!isHost);
+			netPlayClientStatAct->setVisible(!isHost);
+		}
+		else
+		{
+			netPlayHostStatAct->setEnabled(false);
+			netPlayHostStatAct->setVisible(false);
+			netPlayClientStatAct->setEnabled(false);
+			netPlayClientStatAct->setVisible(false);
+		}
 	}
 
 	if ( errorMsgValid )

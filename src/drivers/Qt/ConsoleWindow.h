@@ -263,6 +263,8 @@ class  consoleWin_t : public QMainWindow
 		QAction *netPlayHostAct;
 		QAction *netPlayJoinAct;
 		QAction *netPlayDiscAct;
+		QAction *netPlayHostStatAct;
+		QAction *netPlayClientStatAct;
 		//QAction *aviHudAct;
 		//QAction *aviMsgAct;
 
@@ -362,6 +364,7 @@ class  consoleWin_t : public QMainWindow
 		void openPaletteEditorWin(void);
 		void openNetPlayHostWindow(void);
 		void openNetPlayJoinWindow(void);
+		void openNetPlayStatusWindow(void);
 		void closeNetPlaySession(void);
 		void openAviRiffViewer(void);
 		void openTimingStatWin(void);
