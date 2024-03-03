@@ -125,6 +125,7 @@ struct netPlayErrorMsg
 	netPlayErrorMsg(void)
 		: hdr(NETPLAY_ERROR_MSG, sizeof(netPlayErrorMsg)), code(0), flags(0)
 	{
+		hdr.msgSize = sizeof(*this) - N + 1;
 		memset(data, 0, N);
 	}
 
@@ -151,7 +152,7 @@ struct netPlayErrorMsg
 		retval = ::vsnprintf(data, sizeof(data), format, args);
 		va_end(args);
 
-		hdr.msgSize = sizeof(netPlayErrorMsg) - N + strlen(data) + 1;
+		hdr.msgSize = sizeof(*this) - N + strlen(data) + 1;
 
 		return retval;
 	}
@@ -239,7 +240,8 @@ struct netPlayClientState
 	uint32_t  ramChkSum;
 	uint8_t   ctrlState[4];
 
-	static constexpr uint32_t  PAUSE_FLAG = 0x0001;
+	static constexpr uint32_t  PAUSE_FLAG  = 0x0001;
+	static constexpr uint32_t  DESYNC_FLAG = 0x0002;
 
 	netPlayClientState(void)
 		: hdr(NETPLAY_CLIENT_STATE, sizeof(netPlayClientState)), flags(0),

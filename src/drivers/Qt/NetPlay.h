@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <list>
+#include <functional>
 
 #include <QWidget>
 #include <QDialog>
@@ -124,12 +125,16 @@ class NetPlayServer : public QTcpServer
 			input.clear();
 		}
 
-		int  sendMsg( NetPlayClient *client, void *msg, size_t msgSize);
+		void resyncClient( NetPlayClient *client );
+		void resyncAllClients();
+
+		int  sendMsg( NetPlayClient *client, void *msg, size_t msgSize, std::function<void(void)> netByteOrderConvertFunc = []{});
 		int  sendRomLoadReq( NetPlayClient *client );
 		int  sendStateSyncReq( NetPlayClient *client );
 		void setRole(int _role);
 		int  getRole(void){ return role; }
 		bool claimRole(NetPlayClient* client, int _role);
+		void releaseRole(NetPlayClient* client);
 
 		uint32_t getMaxLeadFrames(){ return maxLeadFrames; }
 		void setMaxLeadFrames(uint32_t value){ maxLeadFrames = value; }
@@ -154,6 +159,11 @@ class NetPlayServer : public QTcpServer
 		int forceResyncCount = 10;
 		uint32_t cycleCounter = 0;
 		uint32_t maxLeadFrames = 10u;
+
+	public:
+	signals:
+		void clientConnected(void);
+		void clientDisconnected(void);
 
 	public slots:
 		void newConnectionRdy(void);
@@ -236,6 +246,8 @@ class NetPlayClient : public QObject
 		bool shouldDestroy(){ return needsDestroy; }
 		bool isPaused(){ return paused; }
 		void setPaused(bool value){ paused = value; }
+		bool hasDesync(){ return desync; }
+		void setDesync(bool value){ desync = value; }
 		void recordPingResult( uint64_t delay_ms );
 		void resetPingData(void);
 		double getAvgPingDelay();
@@ -263,6 +275,7 @@ class NetPlayClient : public QObject
 		bool    needsDestroy = false;
 		bool    _connected = false;
 		bool    paused = false;
+		bool    desync = false;
 
 		uint64_t  pingDelaySum = 0;
 		uint64_t  pingDelayLast = 0;
@@ -349,6 +362,8 @@ class NetPlayClientTreeItem : public QTreeWidgetItem
 
 		NetPlayClient* client = nullptr;
 		NetPlayServer* server = nullptr;
+
+		void updateData();
 	private:
 };
 
@@ -364,14 +379,23 @@ public:
 
 protected:
 	void closeEvent(QCloseEvent *event);
-	void loadClientTree(void);
 
 	QTreeWidget *clientTree;
-
+	QPushButton *dropPlayerButton;
+	QPushButton *resyncPlayerButton;
+	QPushButton *resyncAllButton;
+	QTimer   *periodicTimer;
 	static NetPlayHostStatusDialog* instance;
 
 public slots:
 	void closeWindow(void);
+	void updatePeriodic(void);
+	void loadClientTree(void);
+	void onClientTreeContextMenu(const QPoint &pos);
+	void clientItemClicked(QTreeWidgetItem* item, int);
+	void dropPlayer(void);
+	void resyncPlayer(void);
+	void resyncAllPlayers(void);
 };
 
 bool NetPlayActive(void);
