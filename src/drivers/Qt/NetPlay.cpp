@@ -71,13 +71,14 @@ struct NetPlayFrameDataHist_t
 	int getLast( NetPlayFrameData& out )
 	{
 		int i;
-		if (bufHead == 0)
+		const int head = bufHead;
+		if (head == 0)
 		{
 			i = numFrames - 1;
 		}
 		else
 		{
-			i = bufHead - 1;
+			i = head - 1;
 		}
 		out = data[i];
 
@@ -87,17 +88,18 @@ struct NetPlayFrameDataHist_t
 	int find( uint32_t frame, NetPlayFrameData& out )
 	{
 		int i, retval = -1;
+		const int head = bufHead;
 
-		if (bufHead == 0)
+		if (head == 0)
 		{
 			i = numFrames - 1;
 		}
 		else
 		{
-			i = bufHead - 1;
+			i = head - 1;
 		}
 
-		while (i != bufHead)
+		while (i != head)
 		{
 			if (data[i].frameNum == frame)
 			{
@@ -173,6 +175,10 @@ NetPlayServer::NetPlayServer(QObject *parent)
 
 	connect(consoleWindow, SIGNAL(romLoaded(void)), this, SLOT(onRomLoad(void)));
 	connect(consoleWindow, SIGNAL(nesResetOccurred(void)), this, SLOT(onNesReset(void)));
+
+	FCEU_WRAPPER_LOCK();
+	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
+	FCEU_WRAPPER_UNLOCK();
 }
 
 
@@ -417,6 +423,10 @@ void NetPlayServer::onRomLoad()
 {
 	//printf("New ROM Loaded!\n");
 	FCEU_WRAPPER_LOCK();
+
+	inputClear();
+	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
+
 	// New ROM has been loaded by server, signal clients to load and sync
 	for (auto& client : clientList )
 	{
@@ -430,6 +440,10 @@ void NetPlayServer::onNesReset()
 {
 	//printf("New ROM Loaded!\n");
 	FCEU_WRAPPER_LOCK();
+
+	inputClear();
+	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
+
 	// NES Reset has occurred on server, signal clients sync
 	for (auto& client : clientList )
 	{
@@ -663,7 +677,7 @@ void NetPlayServer::update(void)
 	const uint32_t maxLead = maxLeadFrames;
 	const uint32_t currFrame = static_cast<uint32_t>(currFrameCounter);
 	const uint32_t leadFrame = currFrame + maxLead;
-	const uint32_t lastFrame = inputFrameBack();
+	//const uint32_t lastFrame = inputFrameBack();
 	uint32_t lagFrame = 0;
 	uint8_t  localGP[4] = { 0 };
 	uint8_t  gpData[4] = { 0 };
@@ -735,7 +749,7 @@ void NetPlayServer::update(void)
 		}
 	}
 
-	hostRdyFrame = ( (currFrame > lastFrame) || (lastFrame == 0) );
+	hostRdyFrame = (currFrame >= inputFrameCount);
 
 	shouldRunFrame = (clientMinFrame != 0xFFFFFFFF) && 
 		(clientMinFrame >= lagFrame ) &&
@@ -752,6 +766,7 @@ void NetPlayServer::update(void)
 		clientWaitCounter = 0;
 	}
 
+	//printf("Host Frame: Run:%u   Input:%u   Last:%u\n", currFrame, inputFrameCount, lastFrame);
 	//printf("Client Frame: Min:%u  Max:%u\n", clientMinFrame, clientMaxFrame);
 
 	if (shouldRunFrame)
@@ -760,7 +775,7 @@ void NetPlayServer::update(void)
 		NetPlayFrameInput  inputFrame;
 		netPlayRunFrameReq  runFrameReq;
 
-		inputFrame.frameCounter = static_cast<uint32_t>(currFrameCounter) + 1;
+		inputFrame.frameCounter = ++inputFrameCount;
 		inputFrame.ctrl[0] = gpData[0];
 		inputFrame.ctrl[1] = gpData[1];
 		inputFrame.ctrl[2] = gpData[2];
@@ -771,6 +786,13 @@ void NetPlayServer::update(void)
 		runFrameReq.ctrlState[1] = inputFrame.ctrl[1];
 		runFrameReq.ctrlState[2] = inputFrame.ctrl[2];
 		runFrameReq.ctrlState[3] = inputFrame.ctrl[3];
+
+		uint32_t  catchUpThreshold = maxLead;
+		if (catchUpThreshold < 3)
+		{
+			catchUpThreshold = 3;
+		}
+		runFrameReq.catchUpThreshold = catchUpThreshold;
 
 		pushBackInput( inputFrame );
 
@@ -1109,15 +1131,21 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 	{
 		bool readReq;
 		netPlayMsgHdr *hdr;
-		const int netPlayMsgHdrSize = sizeof(netPlayMsgHdr);
+		constexpr int netPlayMsgHdrSize = sizeof(netPlayMsgHdr);
+		FCEU::timeStampRecord ts;
 
-		readReq = sock->bytesAvailable() > 0;
+		ts.readNew();
+		int bytesAvailable = sock->bytesAvailable();
+		readReq = bytesAvailable > 0;
+
+		//printf("Read Bytes Available: %lu  %i\n", ts.toMilliSeconds(), bytesAvailable);
 
 		while (readReq)
 		{
 			if (recvMsgBytesLeft > 0)
 			{
-				readReq = (sock->bytesAvailable() >= recvMsgBytesLeft);
+				bytesAvailable = sock->bytesAvailable();
+				readReq = (bytesAvailable >= recvMsgBytesLeft);
 
 				if (readReq)
 				{
@@ -1135,16 +1163,18 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 
 					if (recvMsgBytesLeft > 0)
 					{
-						readReq = (sock->bytesAvailable() >= recvMsgBytesLeft);
+						bytesAvailable = sock->bytesAvailable();
+						readReq = (bytesAvailable >= recvMsgBytesLeft);
 					}
 					else
 					{
 						msgCallback( userData, recvMsgBuf, recvMsgSize );
-						readReq = (sock->bytesAvailable() > 0);
+						bytesAvailable = sock->bytesAvailable();
+						readReq = (bytesAvailable > 0);
 					}
 				}
 			}
-			else if (sock->bytesAvailable() >= netPlayMsgHdrSize)
+			else if (bytesAvailable >= netPlayMsgHdrSize)
 			{
 				sock->read( recvMsgBuf, netPlayMsgHdrSize );
 
@@ -1166,7 +1196,8 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 				{
 					msgCallback( userData, recvMsgBuf, recvMsgSize );
 				}
-				readReq = (sock->bytesAvailable() >= recvMsgSize);
+				bytesAvailable = sock->bytesAvailable();
+				readReq = (bytesAvailable >= recvMsgSize);
 			}
 			else
 			{
@@ -1269,10 +1300,20 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			inputFrame.ctrl[2] = msg->ctrlState[2];
 			inputFrame.ctrl[3] = msg->ctrlState[3];
 
-			if (inputFrame.frameCounter > inputFrameBack())
+			catchUpThreshold   = msg->catchUpThreshold;
+
+			uint32_t lastInputFrame = inputFrameBack();
+			uint32_t currFrame = static_cast<uint32_t>(currFrameCounter);
+
+			if (inputFrame.frameCounter > lastInputFrame)
 			{
 				pushBackInput( inputFrame );
 			}
+			else
+			{
+				printf("Drop Frame: LastRun:%u   LastInput:%u   NewInput:%u\n", currFrame, lastInputFrame, inputFrame.frameCounter);
+			}
+			//printf("Run Frame: LastRun:%u   LastInput:%u   NewInput:%u\n", currFrame, lastInputFrame, inputFrame.frameCounter);
 		}
 		break;
 		case NETPLAY_PING_REQ:
@@ -1302,6 +1343,8 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
 	QGridLayout *grid;
+	QGroupBox   *networkGroupBox;
+	QGroupBox   *settingsGroupBox;
 	QPushButton *cancelButton, *startButton;
 	QLabel *lbl;
 
@@ -1310,7 +1353,17 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	setWindowTitle("NetPlay Host Game");
 
 	mainLayout = new QVBoxLayout();
+	networkGroupBox = new QGroupBox(tr("Network Setup"));
+	settingsGroupBox = new QGroupBox(tr("Server Settings"));
+	hbox = new QHBoxLayout();
 	grid = new QGridLayout();
+
+	mainLayout->addLayout(hbox);
+	hbox->addWidget(networkGroupBox);
+	hbox->addWidget(settingsGroupBox);
+
+	// Network Settings 
+	networkGroupBox->setLayout(grid);
 
 	lbl = new QLabel( tr("Server Name:") );
 	grid->addWidget( lbl, 0, 0 );
@@ -1350,7 +1403,22 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	passwordEntry = new QLineEdit();
 	grid->addWidget( passwordEntry, 4, 1 );
 
-	mainLayout->addLayout(grid);
+	// Misc Settings 
+	grid = new QGridLayout();
+	settingsGroupBox->setLayout(grid);
+
+	lbl = new QLabel( tr("Max Frame Lead:") );
+	frameLeadSpinBox = new QSpinBox();
+	frameLeadSpinBox->setRange(5,60);
+	frameLeadSpinBox->setValue(30);
+	grid->addWidget( lbl, 0, 0, 1, 1 );
+	grid->addWidget( frameLeadSpinBox, 0, 1, 1, 1 );
+
+	allowClientRomReqCBox = new QCheckBox(tr("Allow Client ROM Load Requests"));
+	grid->addWidget( allowClientRomReqCBox, 1, 0, 1, 2 );
+
+	allowClientStateReqCBox = new QCheckBox(tr("Allow Client State Load Requests"));
+	grid->addWidget( allowClientStateReqCBox, 2, 0, 1, 2 );
 
 	startButton = new QPushButton( tr("Start") );
 	startButton->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
@@ -1406,6 +1474,9 @@ void NetPlayHostDialog::onStartClicked(void)
 	server->setRole( playerRoleBox->currentData().toInt() );
 	server->sessionName = sessionNameEntry->text();
 	server->sessionPasswd = passwordEntry->text();
+	server->setMaxLeadFrames( frameLeadSpinBox->value() );
+	server->setAllowClientRomLoadRequest( allowClientRomReqCBox->isChecked() );
+	server->setAllowClientStateLoadRequest( allowClientStateReqCBox->isChecked() );
 
 	bool listenSucceeded = server->listen( QHostAddress::Any, netPort );
 
@@ -1503,6 +1574,7 @@ NetPlayJoinDialog::NetPlayJoinDialog(QWidget *parent)
 
 	passwordEntry = new QLineEdit();
 	passwordEntry->setMaxLength(64);
+	passwordEntry->setEnabled(false);
 	grid->addWidget( passwordEntry, 4, 1 );
 
 	mainLayout->addLayout(grid);
@@ -1944,7 +2016,7 @@ bool NetPlaySkipWait(void)
 
 	if (client)
 	{
-		skip = client->inputAvailable() > 1;
+		skip = client->inputAvailableCount() > client->catchUpThreshold;
 	}
 	return skip;
 }

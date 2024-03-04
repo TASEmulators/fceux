@@ -139,6 +139,8 @@ class NetPlayServer : public QTcpServer
 
 		uint32_t getMaxLeadFrames(){ return maxLeadFrames; }
 		void setMaxLeadFrames(uint32_t value){ maxLeadFrames = value; }
+		void setAllowClientRomLoadRequest(bool value){ allowClientRomLoadReq = value; }
+		void setAllowClientStateLoadRequest(bool value){ allowClientStateLoadReq = value; }
 
 		void serverProcessMessage( NetPlayClient *client, void *msgBuf, size_t msgSize );
 
@@ -161,7 +163,9 @@ class NetPlayServer : public QTcpServer
 		uint32_t cycleCounter = 0;
 		uint32_t maxLeadFrames = 10u;
 		uint32_t clientWaitCounter = 0;
+		uint32_t inputFrameCount = 0;
 		bool     allowClientRomLoadReq = true;
+		bool     allowClientStateLoadReq = true;
 
 	public:
 	signals:
@@ -203,10 +207,16 @@ class NetPlayClient : public QObject
 		int  readMessages( void (*msgCallback)( void *userData, void *msgBuf, size_t msgSize ), void *userData );
 		void clientProcessMessage( void *msgBuf, size_t msgSize );
 
-		size_t inputAvailable(void)
+		bool inputAvailable(void)
 		{
 			FCEU::autoScopedLock alock(inputMtx);
 		       	return !input.empty();
+		};
+
+		size_t inputAvailableCount(void)
+		{
+			FCEU::autoScopedLock alock(inputMtx);
+		       	return input.size();
 		};
 
 		void pushBackInput( NetPlayFrameInput &in )
@@ -264,6 +274,8 @@ class NetPlayClient : public QObject
 		bool    syncOk = false;
 		unsigned int currentFrame = 0;
 		unsigned int readyFrame = 0;
+		unsigned int catchUpThreshold = 10;
+		unsigned int tailTarget = 3;
 		uint8_t gpData[4];
 
 	private:
@@ -319,6 +331,9 @@ protected:
 	QComboBox  *playerRoleBox;
 	QLineEdit  *passwordEntry;
 	QCheckBox  *passwordRequiredCBox;
+	QSpinBox   *frameLeadSpinBox;
+	QCheckBox  *allowClientRomReqCBox;
+	QCheckBox  *allowClientStateReqCBox;
 
 	static NetPlayHostDialog* instance;
 

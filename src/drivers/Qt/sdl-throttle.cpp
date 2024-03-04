@@ -65,6 +65,8 @@ bool useIntFrameRate = false;
 static double frmRateAdjRatio = 1.000000f; // Frame Rate Adjustment Ratio
 extern bool turbo;
 
+int NetPlayThrottleControl();
+
 double getHighPrecTimeStamp(void)
 {
 	double t;
@@ -373,6 +375,7 @@ SpeedThrottle(void)
 	// If Emulator is paused, don't waste CPU cycles spinning on nothing.
 	if ( !isEmuPaused && ((g_fpsScale >= 32) || turboActive) )
 	{
+		//printf("Skip Wait\n");
 		return 0; /* Done waiting */
 	}
 	FCEU::timeStampRecord cur_time, idleStart, time_left;
@@ -502,6 +505,8 @@ SpeedThrottle(void)
 			//printf("Frame Delta: %f us   min:%f   max:%f \n", frameDelta * 1e6, frameDeltaMin * 1e6, frameDeltaMax * 1e6 );
 			//printf("Frame Sleep Time: %f   Target Error: %f us\n", time_left * 1e6, (cur_time - Nexttime) * 1e6 );
 		}
+		NetPlayThrottleControl();
+
 		Lasttime = Nexttime;
 		Nexttime = Lasttime + DesiredFrameTime;
 		Latetime = Nexttime + HalfFrameTime;
@@ -512,6 +517,7 @@ SpeedThrottle(void)
 			Nexttime = Lasttime + DesiredFrameTime;
 			Latetime = Nexttime + HalfFrameTime;
 		}
+
 		return 0; /* Done waiting */
 	}
 
@@ -566,6 +572,64 @@ int CustomEmulationSpeed(int spdPercent)
 	RefreshThrottleFPS();
 
 	FCEU_DispMessage("Emulation speed %.1f%%",0, g_fpsScale*100.0);
+
+   return 0;
+}
+
+int NetPlayThrottleControl()
+{
+	NetPlayClient *client = NetPlayClient::GetInstance();
+
+	if (client)
+	{
+		uint32_t inputAvailCount = client->inputAvailableCount();
+		const uint32_t tailTarget = client->tailTarget;
+
+		double targetDelta = static_cast<double>( static_cast<intptr_t>(inputAvailCount) - static_cast<intptr_t>(tailTarget) );
+
+		// Simple linear FPS scaling adjustment based on target error.
+		constexpr double speedUpSlope = (0.05) / (10.0);
+		double newScale = 1.0 + (targetDelta * speedUpSlope);
+
+		if (newScale != g_fpsScale)
+		{
+			double hz;
+			int32_t fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
+			int32_t T;
+
+			g_fpsScale = newScale;
+
+			hz = ( ((double)fps) / 16777216.0 );
+
+			desired_frametime = 1.0 / ( hz * g_fpsScale );
+
+			if ( useIntFrameRate )
+			{
+				hz = (double)( (int)(hz) );
+
+				frmRateAdjRatio = (1.0 / ( hz * g_fpsScale )) / desired_frametime;
+
+				//printf("frameAdjRatio:%f \n", frmRateAdjRatio );
+			}
+			else
+			{
+				frmRateAdjRatio = 1.000000f;
+			}
+			desired_frametime = 1.0 / ( hz * g_fpsScale );
+			desired_frameRate = ( hz * g_fpsScale );
+			baseframeRate = hz;
+
+			T = (int32_t)( desired_frametime * 1000.0 );
+
+			if ( T < 0 ) T = 1;
+
+			DesiredFrameTime.fromSeconds( desired_frametime );
+			HalfFrameTime = DesiredFrameTime / 2;
+			QuarterFrameTime = DesiredFrameTime / 4;
+			DoubleFrameTime = DesiredFrameTime * 2;
+		}
+		//printf("NetPlayCPUThrottle: %f   %f    %f  Target:%u  InputAvail:%u\n", newScale, desired_frameRate, targetDelta, tailTarget, inputAvailCount);
+	}
 
    return 0;
 }

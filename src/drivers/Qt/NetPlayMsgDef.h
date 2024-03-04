@@ -252,9 +252,10 @@ struct netPlayRunFrameReq
 	uint32_t  flags;
 	uint32_t  frameNum;
 	uint8_t   ctrlState[4];
+	uint8_t   catchUpThreshold;
 
 	netPlayRunFrameReq(void)
-		: hdr(NETPLAY_RUN_FRAME_REQ, sizeof(netPlayRunFrameReq)), flags(0), frameNum(0) 
+		: hdr(NETPLAY_RUN_FRAME_REQ, sizeof(netPlayRunFrameReq)), flags(0), frameNum(0), catchUpThreshold(10)
 	{
 		memset( ctrlState, 0, sizeof(ctrlState) );
 	}
