@@ -1,3 +1,5 @@
+#pragma once
+#include <stdint.h>
 #include "common/args.h"
 #include "common/config.h"
 
@@ -9,10 +11,10 @@ extern ARGPSTRUCT DriverArgs[];
 void DoDriverArgs(void);
 
 int InitSound();
-void WriteSound(int32 *Buffer, int Count);
+void WriteSound(int32_t *Buffer, int Count);
 int KillSound(void);
-uint32 GetMaxSound(void);
-uint32 GetWriteSound(void);
+uint32_t GetMaxSound(void);
+uint32_t GetWriteSound(void);
 bool FCEUD_SoundIsMuted(void);
 void FCEUD_MuteSoundOutput(bool value);
 void FCEUD_MuteSoundWindow(bool value);
@@ -24,18 +26,19 @@ int KillJoysticks(void);
 int AddJoystick( int which );
 int RemoveJoystick( int which );
 int FindJoystickByInstanceID( int which );
-uint32 *GetJSOr(void);
+uint32_t *GetJSOr(void);
 
+struct FCEUGI;
 int InitVideo(FCEUGI *gi);
 int KillVideo(void);
 void CalcVideoDimensions(void);
-void BlitScreen(uint8 *XBuf);
+void BlitScreen(uint8_t *XBuf);
 void LockConsole(void);
 void UnlockConsole(void);
 void ToggleFS();		/* SDL */
 
-int LoadGame(const char *path, bool silent);
-//int CloseGame(void);
+int LoadGame(const char *path, bool silent = false, bool netPlayRequested = false);
+int CloseGame(void);
 
 void Giggles(int);
 void DoFun(void);

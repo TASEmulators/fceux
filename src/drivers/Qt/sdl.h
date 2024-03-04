@@ -24,8 +24,6 @@ extern int dendy;
 extern int pal_emulation;
 extern bool swapDuty;
 
-int LoadGame(const char *path, bool silent);
-int CloseGame(void);
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 uint64 FCEUD_GetTime();
 

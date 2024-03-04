@@ -135,6 +135,7 @@ class NetPlayServer : public QTcpServer
 		int  getRole(void){ return role; }
 		bool claimRole(NetPlayClient* client, int _role);
 		void releaseRole(NetPlayClient* client);
+		bool waitingOnClients(){ return clientWaitCounter > 3; }
 
 		uint32_t getMaxLeadFrames(){ return maxLeadFrames; }
 		void setMaxLeadFrames(uint32_t value){ maxLeadFrames = value; }
@@ -159,6 +160,8 @@ class NetPlayServer : public QTcpServer
 		int forceResyncCount = 10;
 		uint32_t cycleCounter = 0;
 		uint32_t maxLeadFrames = 10u;
+		uint32_t clientWaitCounter = 0;
+		bool     allowClientRomLoadReq = true;
 
 	public:
 	signals:
@@ -190,6 +193,7 @@ class NetPlayClient : public QObject
 		bool disconnectRequested(){ return disconnectPending; }
 		void forceDisconnect();
 		bool flushData();
+		int  requestRomLoad( const char *romPath );
 
 		QTcpSocket* createSocket(void);
 		void setSocket(QTcpSocket *s);
@@ -259,6 +263,7 @@ class NetPlayClient : public QObject
 		int     desyncCount = 0;
 		bool    syncOk = false;
 		unsigned int currentFrame = 0;
+		unsigned int readyFrame = 0;
 		uint8_t gpData[4];
 
 	private:

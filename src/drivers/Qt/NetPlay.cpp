@@ -416,38 +416,44 @@ void NetPlayServer::releaseRole(NetPlayClient* client)
 void NetPlayServer::onRomLoad()
 {
 	//printf("New ROM Loaded!\n");
-
+	FCEU_WRAPPER_LOCK();
 	// New ROM has been loaded by server, signal clients to load and sync
 	for (auto& client : clientList )
 	{
 		sendRomLoadReq( client );
 		sendStateSyncReq( client );
 	}
+	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::onNesReset()
 {
 	//printf("New ROM Loaded!\n");
-
+	FCEU_WRAPPER_LOCK();
 	// NES Reset has occurred on server, signal clients sync
 	for (auto& client : clientList )
 	{
 		sendStateSyncReq( client );
 	}
+	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::resyncClient( NetPlayClient *client )
 {
+	FCEU_WRAPPER_LOCK();
 	sendRomLoadReq( client );
 	sendStateSyncReq( client );
+	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::resyncAllClients()
 {
+	FCEU_WRAPPER_LOCK();
 	for (auto& client : clientList )
 	{
 		resyncClient( client );
 	}
+	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 static void serverMessageCallback( void *userData, void *msgBuf, size_t msgSize )
@@ -484,8 +490,8 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 
 				if (!authentication_passed)
 				{
-					netPlayErrorMsg<128>  errorMsg;
-					errorMsg.setDisconnectFlag();
+					netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
+					errorMsg.setFlag(netPlayTextMsgFlags::DISCONNECT);
 					errorMsg.printf("Invalid Password");
 					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 					client->flushData();
@@ -497,15 +503,17 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				if ( claimRole(client, msg->playerId) )
 				{
 					client->userName = msg->userName;
+					FCEU_WRAPPER_LOCK();
 					sendRomLoadReq( client );
 					sendStateSyncReq( client );
+					FCEU_WRAPPER_UNLOCK();
 					client->state = 1;
 					FCEU_DispMessage("%s Joined",0, client->userName.toLocal8Bit().constData());
 				}
 				else
 				{
-					netPlayErrorMsg<128>  errorMsg;
-					errorMsg.setDisconnectFlag();
+					netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
+					errorMsg.setFlag(netPlayTextMsgFlags::DISCONNECT);
 					errorMsg.printf("Player %i role is not available", msg->playerId+1);
 					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 					client->flushData();
@@ -519,6 +527,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			msg->toHostByteOrder();
 
 			client->currentFrame = msg->frameRun;
+			client->readyFrame   = msg->frameRdy;
 			client->gpData[0] = msg->ctrlState[0];
 			client->gpData[1] = msg->ctrlState[1];
 			client->gpData[2] = msg->ctrlState[2];
@@ -546,7 +555,9 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 
 					if (client->desyncCount > forceResyncCount)
 					{
+						FCEU_WRAPPER_LOCK();
 						sendStateSyncReq( client );
+						FCEU_WRAPPER_UNLOCK();
 
 						client->desyncCount = 0;
 					}
@@ -582,6 +593,60 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			//printf("Ping Latency ms: %llu    Avg:%f\n", static_cast<unsigned long long>(diff), client->getAvgPingDelay());
 		}
 		break;
+		case NETPLAY_LOAD_ROM_REQ:
+		{
+			netPlayLoadRomReq *msg = static_cast<netPlayLoadRomReq*>(msgBuf);
+			msg->toHostByteOrder();
+
+			bool acceptRomLoadReq = false;
+
+			if (allowClientRomLoadReq)
+			{
+				QString msgBoxTxt = tr("Client '") + client->userName + tr("' has requested to load this ROM:\n\n");
+	       			msgBoxTxt += tr(msg->fileName) + tr("\n\nDo you want to load it?");
+				int ans = QMessageBox::question( consoleWindow, tr("Client ROM Load Request"), msgBoxTxt, QMessageBox::Yes | QMessageBox::No );
+
+				if (ans == QMessageBox::Yes)
+				{
+					acceptRomLoadReq = true;
+				}
+			}
+
+			if (acceptRomLoadReq)
+			{
+				FILE *fp;
+				std::string filepath = QDir::tempPath().toLocal8Bit().constData(); 
+				const char *romData = &static_cast<const char*>(msgBuf)[ sizeof(netPlayLoadRomReq) ];
+
+				filepath.append( "/" );
+				filepath.append( msg->fileName );
+
+				printf("Load ROM Request Received: %s\n", filepath.c_str());
+
+				//printf("Dumping Temp Rom to: %s\n", filepath.c_str());
+				fp = ::fopen( filepath.c_str(), "w");
+
+				if (fp == nullptr)
+				{
+					return;
+				}
+				::fwrite( romData, 1, msgSize, fp );
+				::fclose(fp);
+
+				FCEU_WRAPPER_LOCK();
+				LoadGame( filepath.c_str(), true, true );
+				FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
+				FCEU_WRAPPER_UNLOCK();
+
+				resyncAllClients();
+			}
+			else
+			{
+				netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
+				errorMsg.printf("Host is rejected ROMs load request");
+				sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
+			}
+		}
 		default:
 			printf("Unknown Msg: %08X\n", msgId);
 		break;
@@ -591,6 +656,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 //-----------------------------------------------------------------------------
 void NetPlayServer::update(void)
 {
+	bool hostRdyFrame = false;
 	bool shouldRunFrame = false;
 	unsigned int clientMinFrame = 0xFFFFFFFF;
 	unsigned int clientMaxFrame = 0;
@@ -669,11 +735,22 @@ void NetPlayServer::update(void)
 		}
 	}
 
+	hostRdyFrame = ( (currFrame > lastFrame) || (lastFrame == 0) );
+
 	shouldRunFrame = (clientMinFrame != 0xFFFFFFFF) && 
 		(clientMinFrame >= lagFrame ) &&
 		(clientMaxFrame  < leadFrame) &&
-		( (currFrame > lastFrame) || (lastFrame == 0) ) &&
-		(numClientsPaused == 0);
+		(numClientsPaused == 0) &&
+		 hostRdyFrame;
+
+	if (hostRdyFrame && !shouldRunFrame)
+	{
+		clientWaitCounter++;
+	}
+	else
+	{
+		clientWaitCounter = 0;
+	}
 
 	//printf("Client Frame: Min:%u  Max:%u\n", clientMinFrame, clientMaxFrame);
 
@@ -914,6 +991,48 @@ void NetPlayClient::onSocketError(QAbstractSocket::SocketError error)
 	emit errorOccurred(errorMsg);
 }
 //-----------------------------------------------------------------------------
+int NetPlayClient::requestRomLoad( const char *romPath )
+{
+	constexpr size_t BufferSize = 64 * 1024;
+	char buf[BufferSize];
+	size_t bytesRead;
+	long fileSize = 0;
+	netPlayLoadRomReq msg;
+	QFileInfo fi( romPath );
+
+	printf("Prep ROM Load Request: %s \n", romPath );
+	FILE *fp = ::fopen( romPath, "r");
+
+	if (fp == nullptr)
+	{
+		return -1;
+	}
+	fseek( fp, 0, SEEK_END);
+
+	fileSize = ftell(fp);
+
+	rewind(fp);
+
+	msg.hdr.msgSize += fileSize;
+	msg.fileSize     = fileSize;
+	Strlcpy( msg.fileName, fi.fileName().toLocal8Bit().constData(), sizeof(msg.fileName) );
+
+	printf("Sending ROM Load Request: %s  %lu\n", romPath, fileSize );
+	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
+
+	msg.toNetworkByteOrder();
+	sock->write( reinterpret_cast<const char*>(&msg), sizeof(netPlayLoadRomReq) );
+
+	while ( (bytesRead = fread( buf, 1, sizeof(buf), fp )) > 0 )
+	{
+		sock->write( buf, bytesRead );
+	}
+
+	::fclose(fp);
+
+	return 0;
+}
+//-----------------------------------------------------------------------------
 void NetPlayClient::recordPingResult( uint64_t delay_ms )
 {
 	pingNumSamples++;
@@ -1069,15 +1188,15 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 	{
 		case NETPLAY_ERROR_MSG:
 		{
-			auto *msg = static_cast<netPlayErrorMsg<256>*>(msgBuf);
+			auto *msg = static_cast<netPlayTextMsg<256>*>(msgBuf);
 			msg->toHostByteOrder();
-			printf("Error: 0x%X  %s\n", msg->code, msg->getBuffer());
+			FCEU_printf("NetPlay Error: 0x%X  %s\n", msg->code, msg->getBuffer());
 
-			if (msg->isDisconnectFlagSet())
+			if (msg->isFlagSet(netPlayTextMsgFlags::DISCONNECT))
 			{
 				sock->disconnectFromHost();
 			}
-			FCEU_DispMessage("Host connect failed",0);
+			FCEU_DispMessage("NetPlay Errors... check message log",0);
 		}
 		break;
 		case NETPLAY_AUTH_REQ:
@@ -1087,7 +1206,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			Strlcpy( msg.userName, userName.toLocal8Bit().constData(), sizeof(msg.userName));
 			Strlcpy( msg.pswd, password.toLocal8Bit().constData(), sizeof(msg.pswd) );
 
-			printf("Authentication Request Received\n");
+			FCEU_printf("Authentication Request Received\n");
 			msg.toNetworkByteOrder();
 			sock->write( (const char*)&msg, sizeof(netPlayAuthResp) );
 		}
@@ -1095,7 +1214,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 		case NETPLAY_LOAD_ROM_REQ:
 		{
 			FILE *fp;
-			std::string filepath = QDir::tempPath().toStdString(); 
+			std::string filepath = QDir::tempPath().toLocal8Bit().constData(); 
 			netPlayLoadRomReq *msg = static_cast<netPlayLoadRomReq*>(msgBuf);
 			msg->toHostByteOrder();
 			const char *romData = &static_cast<const char*>(msgBuf)[ sizeof(netPlayLoadRomReq) ];
@@ -1103,7 +1222,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			filepath.append( "/" );
 			filepath.append( msg->fileName );
 
-			printf("Load ROM Request Received: %s\n", filepath.c_str());
+			FCEU_printf("Load ROM Request Received: %s\n", filepath.c_str());
 
 			//printf("Dumping Temp Rom to: %s\n", filepath.c_str());
 			fp = ::fopen( filepath.c_str(), "w");
@@ -1116,7 +1235,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			::fclose(fp);
 
 			FCEU_WRAPPER_LOCK();
-			LoadGame( filepath.c_str(), true );
+			LoadGame( filepath.c_str(), true, true );
 			FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
 			FCEU_WRAPPER_UNLOCK();
 		}
@@ -1125,7 +1244,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 		{
 			char *stateData = &static_cast<char*>(msgBuf)[ sizeof(netPlayMsgHdr) ];
 
-			printf("Sync state Request Received\n");
+			FCEU_printf("Sync state Request Received\n");
 
 			EMUFILE_MEMORY em( stateData, msgSize );
 
@@ -1528,8 +1647,8 @@ NetPlayHostStatusDialog::NetPlayHostStatusDialog(QWidget *parent)
 	auto* item = new QTreeWidgetItem();
 	item->setText( 0, QString::fromStdString( "Player" ) );
 	item->setText( 1, QString::fromStdString( "Role" ) );
-	item->setText( 2, QString::fromStdString( "Frame" ) );
-	item->setText( 3, QString::fromStdString( "State" ) );
+	item->setText( 2, QString::fromStdString( "State" ) );
+	item->setText( 3, QString::fromStdString( "Frame" ) );
 	item->setTextAlignment( 0, Qt::AlignLeft);
 	item->setTextAlignment( 1, Qt::AlignLeft);
 	item->setTextAlignment( 2, Qt::AlignLeft);
@@ -1665,37 +1784,54 @@ void NetPlayClientTreeItem::updateData()
 
 		if (FCEUI_EmulationPaused())
 		{
-			state += QObject::tr("Paused");
+			state = QObject::tr("Paused");
+		}
+		else if (server->waitingOnClients())
+		{
+			state = QObject::tr("Waiting");
+		}
+		else
+		{
+			state = QObject::tr("Running");
 		}
 
 		setText( 0, QObject::tr("Host") );
 		setText( 1, QObject::tr(roleString) );
-		setText( 2, QString::number(static_cast<uint32_t>(currFrameCounter)));
-		setText( 3, state);
+		setText( 2, state);
+		setText( 3, QString::number(static_cast<uint32_t>(currFrameCounter)));
 
 	}
 	else if (client != nullptr)
 	{
 		QString state;
+		uint32_t currFrame = currFrameCounter;
+
+		bool hasInput = (client->readyFrame > client->currentFrame) &&
+			        (client->readyFrame <= currFrame);
+
 		roleString = NetPlayPlayerRoleToString( client->role );
 
 		if (client->isPaused())
 		{
-			state += QObject::tr("Paused");
+			state = QObject::tr("Paused");
+		}
+		else if (!hasInput)
+		{
+			state = QObject::tr("Waiting");
+		}
+		else
+		{
+			state = QObject::tr("Running");
 		}
 		if (client->hasDesync())
 		{
-			if (!state.isEmpty())
-			{
-				state += QObject::tr(",");
-			}
-			state += QObject::tr("Desync");
+			state += QObject::tr(",Desync");
 		}
 
 		setText( 0, client->userName );
 		setText( 1, QObject::tr(roleString) );
-		setText( 2, QString::number(client->currentFrame) );
-		setText( 3, state);
+		setText( 2, state);
+		setText( 3, QString::number(client->currentFrame) );
 	}
 }
 //----------------------------------------------------------------------------

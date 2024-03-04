@@ -21,7 +21,9 @@ enum netPlayMsgType
 	NETPLAY_SYNC_STATE_RESP,
 	NETPLAY_RUN_FRAME_REQ,
 	NETPLAY_CLIENT_STATE,
+	NETPLAY_INFO_MSG,
 	NETPLAY_ERROR_MSG,
+	NETPLAY_CHAT_MSG,
 	NETPLAY_PING_REQ,
 	NETPLAY_PING_RESP,
 };
@@ -111,32 +113,37 @@ struct netPlayAuthResp
 	}
 };
 
+struct netPlayTextMsgFlags
+{
+	static const uint32_t DISCONNECT = 0x00000001;
+	static const uint32_t    WARNING = 0x00000002;
+	static const uint32_t       INFO = 0x00000004;
+};
+
 template <size_t N=8>
-struct netPlayErrorMsg
+struct netPlayTextMsg
 {
 	netPlayMsgHdr  hdr;
 
 	unsigned short code;
 	unsigned short flags;
-	char data[N];
+	unsigned short dataSize;
 
-	static const uint32_t DISCONNECT_FLAG = 0x00000001;
-
-	netPlayErrorMsg(void)
-		: hdr(NETPLAY_ERROR_MSG, sizeof(netPlayErrorMsg)), code(0), flags(0)
+	netPlayTextMsg(int type)
+		: hdr(type, sizeof(netPlayTextMsg)), code(0), flags(0), dataSize(0)
 	{
 		hdr.msgSize = sizeof(*this) - N + 1;
 		memset(data, 0, N);
 	}
 
-	void setDisconnectFlag()
+	void setFlag(uint32_t flag)
 	{
-		flags |= DISCONNECT_FLAG;
+		flags |= flag;
 	}
 
-	bool isDisconnectFlagSet()
+	bool isFlagSet(uint32_t flag)
 	{
-		return (flags & DISCONNECT_FLAG) ? true : false;
+		return (flags & flag) ? true : false;
 	}
 
 	const char *getBuffer()
@@ -149,12 +156,47 @@ struct netPlayErrorMsg
 		int retval;
 		va_list args;
 		va_start(args, format);
-		retval = ::vsnprintf(data, sizeof(data), format, args);
+		retval = ::vsnprintf(data, N, format, args);
 		va_end(args);
 
-		hdr.msgSize = sizeof(*this) - N + strlen(data) + 1;
+		if (retval > static_cast<int>(N-1))
+		{
+			retval = static_cast<int>(N-1);
+		}
+		dataSize = retval;
+
+		hdr.msgSize = sizeof(*this) - N + retval + 1;
 
 		return retval;
+	}
+
+	void assign(const char *msg)
+	{
+		int i=0;
+
+		while ( (i < (N-1)) && (msg[i] != 0) )
+		{
+			data[i] = msg[i]; i++;
+		}
+
+		data[i] = 0;
+		dataSize = i;
+
+		hdr.msgSize = sizeof(*this) - N + i + 1;
+	}
+
+	void append(const char *msg)
+	{
+		int i=dataSize, j=0;
+
+		while ( (i < (N-1)) && (msg[j] != 0) )
+		{
+			data[i] = msg[j]; i++; j++;
+		}
+		data[i] = 0;
+		dataSize = i;
+
+		hdr.msgSize = sizeof(*this) - N + i + 1;
 	}
 
 	void toHostByteOrder()
@@ -162,6 +204,7 @@ struct netPlayErrorMsg
 		hdr.toHostByteOrder();
 		code  = netPlayByteSwap(code);
 		flags = netPlayByteSwap(flags);
+		dataSize = netPlayByteSwap(dataSize);
 	}
 
 	void toNetworkByteOrder()
@@ -169,7 +212,10 @@ struct netPlayErrorMsg
 		hdr.toNetworkByteOrder();
 		code  = netPlayByteSwap(code);
 		flags = netPlayByteSwap(flags);
+		dataSize = netPlayByteSwap(dataSize);
 	}
+private:
+	char data[N];
 };
 
 struct netPlayLoadRomReq

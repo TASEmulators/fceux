@@ -308,10 +308,21 @@ int reloadLastGame(void)
  * provides data necessary for the driver code(number of scanlines to
  * render, what virtual input devices to use, etc.).
  */
-int LoadGame(const char *path, bool silent)
+int LoadGame(const char *path, bool silent, bool netPlayRequested)
 {
 	std::string fullpath;
 	int gg_enabled, autoLoadDebug, autoOpenDebugger, autoInputPreset;
+
+	// Check if this application instance has joined a net play session, 
+	// NetPlay clients can only load ROMs retrieved from the host server.
+	// However, clients can request that a host load their ROM for all players.
+	auto* netPlayClient = NetPlayClient::GetInstance();
+
+	if (!netPlayRequested && (netPlayClient != nullptr))
+	{
+		netPlayClient->requestRomLoad( path );
+		return 0;
+	}
 
 	if (isloaded){
 		CloseGame();

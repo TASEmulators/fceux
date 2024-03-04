@@ -1,6 +1,7 @@
 // fceuWrapper.h
 //
 #include "Qt/config.h"
+#include "Qt/dface.h"
 
 //*****************************************************************
 // Define Global Variables to be shared with FCEU Core
@@ -26,7 +27,7 @@ extern unsigned int emulatorCycleCount;
 // global configuration object
 extern Config *g_config;
 
-int LoadGame(const char *path, bool silent = false);
+//int LoadGame(const char *path, bool silent = false, bool netPlayRequested = false);
 int CloseGame(void);
 int reloadLastGame(void);
 int LoadGameFromLua( const char *path );
