@@ -9,7 +9,7 @@ class StringBuilder
 {
 public:
 	// Helper struct. Do not use directly.
-	template <unsigned Radix, typename T, typename Prefix = nullptr_t>
+	template <unsigned Radix, typename T, typename Prefix = std::nullptr_t>
 	struct IntInfo
 	{
 		T x;
@@ -111,7 +111,7 @@ public:
 	}
 
 protected:
-	inline StringBuilder &operator <<(nullptr_t)
+	inline StringBuilder &operator <<(std::nullptr_t)
 	{
 		return *this;
 	}
