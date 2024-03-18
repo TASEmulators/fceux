@@ -41,6 +41,7 @@
 //--- NetPlay State Monitoring Metrics
 //-----------------------------------------------------------------------------
 static uint32_t opsCrc32 = 0;
+static void *traceRegistrationHandle = nullptr;
 
 struct NetPlayFrameData
 {
@@ -202,6 +203,12 @@ int NetPlayServer::Create(QObject *parent)
 			printf("Error Creating Netplay Server!!!\n");
 		}
 	}
+	FCEU_WRAPPER_LOCK();
+	if (traceRegistrationHandle == nullptr)
+	{
+		traceRegistrationHandle = FCEUI_TraceInstructionRegister( NetPlayTraceInstruction );
+	}
+	FCEU_WRAPPER_UNLOCK();
 	return 0;
 }
 
@@ -213,6 +220,16 @@ int NetPlayServer::Destroy()
 		delete server;
 		server = nullptr;
 	}
+	FCEU_WRAPPER_LOCK();
+	if (traceRegistrationHandle != nullptr)
+	{
+		if ( !FCEUI_TraceInstructionUnregisterHandle( traceRegistrationHandle ) )
+		{
+			printf("Unregister Trace Callback Error\n");
+		}
+		traceRegistrationHandle = nullptr;
+	}
+	FCEU_WRAPPER_UNLOCK();
 	return 0;
 }
 
@@ -890,6 +907,12 @@ int NetPlayClient::Create(QObject *parent)
 			printf("Error Creating Netplay Client!!!\n");
 		}
 	}
+	FCEU_WRAPPER_LOCK();
+	if (traceRegistrationHandle == nullptr)
+	{
+		traceRegistrationHandle = FCEUI_TraceInstructionRegister( NetPlayTraceInstruction );
+	}
+	FCEU_WRAPPER_UNLOCK();
 	return 0;
 }
 
@@ -901,6 +924,16 @@ int NetPlayClient::Destroy()
 		delete client;
 		client = nullptr;
 	}
+	FCEU_WRAPPER_LOCK();
+	if (traceRegistrationHandle != nullptr)
+	{
+		if ( !FCEUI_TraceInstructionUnregisterHandle( traceRegistrationHandle ) )
+		{
+			printf("Unregister Trace Callback Error\n");
+		}
+		traceRegistrationHandle = nullptr;
+	}
+	FCEU_WRAPPER_UNLOCK();
 	return 0;
 }
 //-----------------------------------------------------------------------------
@@ -2181,6 +2214,6 @@ void NetPlayOnFrameBegin()
 
 	netPlayFrameData.push( data );
 
-	//printf("Frame: %u   Ops:%08X  \n", data.frameNum, data.opsCrc32 );
+	//printf("Frame: %u   Ops:%08X  Ram:%08X\n", data.frameNum, data.opsCrc32, data.ramCrc32 );
 }
 //----------------------------------------------------------------------------
