@@ -1516,6 +1516,7 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 
 	passwordEntry = new QLineEdit();
 	grid->addWidget( passwordEntry, 4, 1 );
+	passwordEntry->setEnabled( passwordRequiredCBox->isChecked() );
 
 	// Misc Settings 
 	grid = new QGridLayout();
@@ -1539,6 +1540,10 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	grid->addWidget( allowClientStateReqCBox, 2, 0, 1, 2 );
 	g_config->getOption("SDL.NetPlayHostAllowClientStateLoadReq", &stateLoadReqEna);
 	allowClientStateReqCBox->setChecked(stateLoadReqEna);
+
+	connect(passwordRequiredCBox, SIGNAL(stateChanged(int)), this, SLOT(passwordRequiredChanged(int)));
+	connect(allowClientRomReqCBox, SIGNAL(stateChanged(int)), this, SLOT(allowClientRomReqChanged(int)));
+	connect(allowClientStateReqCBox, SIGNAL(stateChanged(int)), this, SLOT(allowClientStateReqChanged(int)));
 
 	startButton = new QPushButton( tr("Start") );
 	startButton->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
@@ -1578,6 +1583,21 @@ void NetPlayHostDialog::closeWindow(void)
 	deleteLater();
 }
 //-----------------------------------------------------------------------------
+void NetPlayHostDialog::passwordRequiredChanged(int state)
+{
+	passwordEntry->setEnabled( state != Qt::Unchecked );
+}
+//-----------------------------------------------------------------------------
+void NetPlayHostDialog::allowClientRomReqChanged(int state)
+{
+	g_config->setOption("SDL.NetPlayHostAllowClientRomLoadReq", state != Qt::Unchecked);
+}
+//-----------------------------------------------------------------------------
+void NetPlayHostDialog::allowClientStateReqChanged(int state)
+{
+	g_config->setOption("SDL.NetPlayHostAllowClientStateLoadReq", state != Qt::Unchecked);
+}
+//-----------------------------------------------------------------------------
 void NetPlayHostDialog::onStartClicked(void)
 {
 	NetPlayServer *server = NetPlayServer::GetInstance();
@@ -1593,14 +1613,14 @@ void NetPlayHostDialog::onStartClicked(void)
 	server = NetPlayServer::GetInstance();
 	server->setRole( playerRoleBox->currentData().toInt() );
 	server->sessionName = sessionNameEntry->text();
-	server->sessionPasswd = passwordEntry->text();
 	server->setMaxLeadFrames( frameLeadSpinBox->value() );
 	server->setAllowClientRomLoadRequest( allowClientRomReqCBox->isChecked() );
 	server->setAllowClientStateLoadRequest( allowClientStateReqCBox->isChecked() );
 
-	g_config->setOption("SDL.NetPlayHostAllowClientRomLoadReq", allowClientRomReqCBox->isChecked() );
-	g_config->setOption("SDL.NetPlayHostAllowClientStateLoadReq", allowClientStateReqCBox->isChecked() );
-
+	if (passwordRequiredCBox->isChecked())
+	{
+		server->sessionPasswd = passwordEntry->text();
+	}
 	bool listenSucceeded = server->listen( QHostAddress::Any, netPort );
 
 	if (listenSucceeded)
