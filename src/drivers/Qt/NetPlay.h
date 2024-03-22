@@ -164,8 +164,8 @@ class NetPlayServer : public QTcpServer
 		uint32_t maxLeadFrames = 10u;
 		uint32_t clientWaitCounter = 0;
 		uint32_t inputFrameCount = 0;
-		bool     allowClientRomLoadReq = true;
-		bool     allowClientStateLoadReq = true;
+		bool     allowClientRomLoadReq = false;
+		bool     allowClientStateLoadReq = false;
 
 	public:
 	signals:
@@ -198,6 +198,7 @@ class NetPlayClient : public QObject
 		void forceDisconnect();
 		bool flushData();
 		int  requestRomLoad( const char *romPath );
+		int  requestStateLoad(EMUFILE* is);
 
 		QTcpSocket* createSocket(void);
 		void setSocket(QTcpSocket *s);
@@ -426,6 +427,7 @@ int NetPlayFrameWait(void);
 void NetPlayOnFrameBegin(void);
 void NetPlayReadInputFrame(uint8_t* joy);
 void NetPlayCloseSession(void);
+bool NetPlayStateLoadReq(EMUFILE* is);
 void NetPlayTraceInstruction(uint8_t *opcode, int size);
 void openNetPlayHostDialog(QWidget* parent = nullptr);
 void openNetPlayJoinDialog(QWidget* parent = nullptr);

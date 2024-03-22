@@ -633,6 +633,8 @@ InitConfig()
 	config->addOption('k', "netkey", "SDL.NetworkGameKey", "");
 	config->addOption("port", "SDL.NetworkPort", NetPlayServer::DefaultPort);
 	config->addOption("players", "SDL.NetworkPlayers", 1);
+	config->addOption("SDL.NetPlayHostAllowClientRomLoadReq", 0);
+	config->addOption("SDL.NetPlayHostAllowClientStateLoadReq", 0);
      
 	// input configuration options
 	config->addOption("input1", "SDL.Input.0", "GamePad.0");

@@ -42,6 +42,7 @@
 //-----------------------------------------------------------------------------
 static uint32_t opsCrc32 = 0;
 static void *traceRegistrationHandle = nullptr;
+static bool  serverRequestedStateLoad = false;
 
 struct NetPlayFrameData
 {
@@ -678,6 +679,46 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 			}
 		}
+		break;
+		case NETPLAY_SYNC_STATE_RESP:
+		{
+			bool acceptStateLoadReq = false;
+
+			FCEU_printf("Sync state request received from client '%s'\n", client->userName.toLocal8Bit().constData());
+
+			if (allowClientStateLoadReq)
+			{
+				QString msgBoxTxt = tr("Client '") + client->userName + tr("' has requested to load a new state:\n");
+				msgBoxTxt += tr("\nDo you want to load it?");
+				int ans = QMessageBox::question( consoleWindow, tr("Client State Load Request"), msgBoxTxt, QMessageBox::Yes | QMessageBox::No );
+
+				if (ans == QMessageBox::Yes)
+				{
+					acceptStateLoadReq = true;
+				}
+			}
+
+			if (acceptStateLoadReq)
+			{
+				char *stateData = &static_cast<char*>(msgBuf)[ sizeof(netPlayMsgHdr) ];
+
+				FCEU_printf("Sync state request accepted\n");
+
+				EMUFILE_MEMORY em( stateData, msgSize );
+
+				FCEU_WRAPPER_LOCK();
+				serverRequestedStateLoad = true;
+				FCEUSS_LoadFP( &em, SSLOADPARAM_NOBACKUP );
+				serverRequestedStateLoad = false;
+				FCEU_WRAPPER_UNLOCK();
+
+				opsCrc32 = 0;
+				netPlayFrameData.reset();
+				inputClear();
+				resyncAllClients();
+			}
+		}
+		break;
 		default:
 			printf("Unknown Msg: %08X\n", msgId);
 		break;
@@ -1088,6 +1129,44 @@ int NetPlayClient::requestRomLoad( const char *romPath )
 	return 0;
 }
 //-----------------------------------------------------------------------------
+int NetPlayClient::requestStateLoad(EMUFILE *is)
+{
+	size_t dataSize;
+	char *dataBuf;
+	netPlayMsgHdr hdr(NETPLAY_SYNC_STATE_RESP);
+
+	dataSize = is->size();
+	hdr.msgSize += dataSize;
+
+	if (dataSize == 0)
+	{
+		return -1;
+	}
+
+	dataBuf = static_cast<char*>(::malloc(dataSize));
+
+	if (dataBuf == nullptr)
+	{
+		return -1;
+	}
+	is->fseek( 0, SEEK_SET );
+	size_t readResult = is->fread( dataBuf, dataSize );
+
+	if (readResult != dataSize )
+	{
+		printf("Read Error\n");
+	}
+	printf("Sending Client ROM Sync Request\n");
+
+	hdr.toNetworkByteOrder();
+	sock->write( reinterpret_cast<const char*>(&hdr), sizeof(netPlayMsgHdr));
+	sock->write( reinterpret_cast<const char*>(dataBuf), dataSize );
+
+	::free(dataBuf);
+
+	return 0;
+}
+//-----------------------------------------------------------------------------
 void NetPlayClient::recordPingResult( uint64_t delay_ms )
 {
 	pingNumSamples++;
@@ -1313,7 +1392,9 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			EMUFILE_MEMORY em( stateData, msgSize );
 
 			FCEU_WRAPPER_LOCK();
+			serverRequestedStateLoad = true;
 			FCEUSS_LoadFP( &em, SSLOADPARAM_NOBACKUP );
+			serverRequestedStateLoad = false;
 			FCEU_WRAPPER_UNLOCK();
 
 			opsCrc32 = 0;
@@ -1447,11 +1528,17 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	grid->addWidget( lbl, 0, 0, 1, 1 );
 	grid->addWidget( frameLeadSpinBox, 0, 1, 1, 1 );
 
+	bool romLoadReqEna = false;
 	allowClientRomReqCBox = new QCheckBox(tr("Allow Client ROM Load Requests"));
 	grid->addWidget( allowClientRomReqCBox, 1, 0, 1, 2 );
+	g_config->getOption("SDL.NetPlayHostAllowClientRomLoadReq", &romLoadReqEna);
+	allowClientRomReqCBox->setChecked(romLoadReqEna);
 
+	bool stateLoadReqEna = false;
 	allowClientStateReqCBox = new QCheckBox(tr("Allow Client State Load Requests"));
 	grid->addWidget( allowClientStateReqCBox, 2, 0, 1, 2 );
+	g_config->getOption("SDL.NetPlayHostAllowClientStateLoadReq", &stateLoadReqEna);
+	allowClientStateReqCBox->setChecked(stateLoadReqEna);
 
 	startButton = new QPushButton( tr("Start") );
 	startButton->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
@@ -1510,6 +1597,9 @@ void NetPlayHostDialog::onStartClicked(void)
 	server->setMaxLeadFrames( frameLeadSpinBox->value() );
 	server->setAllowClientRomLoadRequest( allowClientRomReqCBox->isChecked() );
 	server->setAllowClientStateLoadRequest( allowClientStateReqCBox->isChecked() );
+
+	g_config->setOption("SDL.NetPlayHostAllowClientRomLoadReq", allowClientRomReqCBox->isChecked() );
+	g_config->setOption("SDL.NetPlayHostAllowClientStateLoadReq", allowClientStateReqCBox->isChecked() );
 
 	bool listenSucceeded = server->listen( QHostAddress::Any, netPort );
 
@@ -2215,5 +2305,20 @@ void NetPlayOnFrameBegin()
 	netPlayFrameData.push( data );
 
 	//printf("Frame: %u   Ops:%08X  Ram:%08X\n", data.frameNum, data.opsCrc32, data.ramCrc32 );
+}
+//----------------------------------------------------------------------------
+bool NetPlayStateLoadReq(EMUFILE* is)
+{
+	auto* client = NetPlayClient::GetInstance();
+
+	bool shouldLoad = (client == nullptr) || serverRequestedStateLoad;
+
+	printf("NetPlay Load State: %i\n", shouldLoad);
+
+	if ( (client != nullptr) && !serverRequestedStateLoad)
+	{  // Send state to host
+	   client->requestStateLoad(is);
+	}
+	return !shouldLoad;
 }
 //----------------------------------------------------------------------------
