@@ -443,6 +443,9 @@ void NetPlayServer::onRomLoad()
 	//printf("New ROM Loaded!\n");
 	FCEU_WRAPPER_LOCK();
 
+	opsCrc32 = 0;
+	netPlayFrameData.reset();
+
 	inputClear();
 	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
 
@@ -460,13 +463,16 @@ void NetPlayServer::onStateLoad()
 	//printf("New State Loaded!\n");
 	FCEU_WRAPPER_LOCK();
 
+	opsCrc32 = 0;
+	netPlayFrameData.reset();
+
 	inputClear();
 	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
 
 	// New State has been loaded by server, signal clients to load and sync
 	for (auto& client : clientList )
 	{
-		//sendRomLoadReq( client );
+		sendRomLoadReq( client );
 		sendStateSyncReq( client );
 	}
 	FCEU_WRAPPER_UNLOCK();
@@ -477,12 +483,16 @@ void NetPlayServer::onNesReset()
 	//printf("NES Reset Event!\n");
 	FCEU_WRAPPER_LOCK();
 
+	opsCrc32 = 0;
+	netPlayFrameData.reset();
+
 	inputClear();
 	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
 
 	// NES Reset has occurred on server, signal clients sync
 	for (auto& client : clientList )
 	{
+		sendRomLoadReq( client );
 		sendStateSyncReq( client );
 	}
 	FCEU_WRAPPER_UNLOCK();
@@ -530,7 +540,27 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			msg->toHostByteOrder();
 			printf("Authorize: Player: %i   Passwd: %s\n", msg->playerId, msg->pswd);
 
-			if (sessionPasswd.isEmpty())
+			bool version_chk_ok = true;
+
+			if (enforceAppVersionCheck)
+			{
+				version_chk_ok = (msg->appVersionMajor == FCEU_VERSION_MAJOR) &&
+			        	         (msg->appVersionMinor == FCEU_VERSION_MINOR) &&
+			                	 (msg->appVersionPatch == FCEU_VERSION_PATCH);
+			}
+
+			if (!version_chk_ok)
+			{
+				netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
+				errorMsg.setFlag(netPlayTextMsgFlags::DISCONNECT);
+				errorMsg.setFlag(netPlayTextMsgFlags::ERROR);
+				errorMsg.printf("Client/Host Version Mismatch:\nHost version is %i.%i.%i\nClient version is %i.%i.%i", 
+						FCEU_VERSION_MAJOR, FCEU_VERSION_MINOR, FCEU_VERSION_PATCH,
+						msg->appVersionMajor, msg->appVersionMinor, msg->appVersionPatch);
+				sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
+				client->flushData();
+			}
+			else if (sessionPasswd.isEmpty())
 			{
 				authentication_passed = true;
 			}
@@ -542,6 +572,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				{
 					netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
 					errorMsg.setFlag(netPlayTextMsgFlags::DISCONNECT);
+					errorMsg.setFlag(netPlayTextMsgFlags::ERROR);
 					errorMsg.printf("Invalid Password");
 					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 					client->flushData();
@@ -564,6 +595,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				{
 					netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
 					errorMsg.setFlag(netPlayTextMsgFlags::DISCONNECT);
+					errorMsg.setFlag(netPlayTextMsgFlags::ERROR);
 					errorMsg.printf("Player %i role is not available", msg->playerId+1);
 					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 					client->flushData();
@@ -693,6 +725,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			else
 			{
 				netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
+				errorMsg.setFlag(netPlayTextMsgFlags::WARNING);
 				errorMsg.printf("Host is rejected ROMs load request");
 				sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 			}
@@ -726,14 +759,10 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 
 				FCEU_WRAPPER_LOCK();
 				serverRequestedStateLoad = true;
+				// Clients will be resync'd during this load call.
 				FCEUSS_LoadFP( &em, SSLOADPARAM_NOBACKUP );
 				serverRequestedStateLoad = false;
 				FCEU_WRAPPER_UNLOCK();
-
-				opsCrc32 = 0;
-				netPlayFrameData.reset();
-				inputClear();
-				resyncAllClients();
 			}
 		}
 		break;
@@ -1347,11 +1376,28 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 
 	switch (msgId)
 	{
+		case NETPLAY_INFO_MSG:
+		{
+			auto *msg = static_cast<netPlayTextMsg<256>*>(msgBuf);
+			msg->toHostByteOrder();
+			FCEU_printf("NetPlay Info: %s\n", msg->getBuffer());
+
+			if (msg->isFlagSet(netPlayTextMsgFlags::DISCONNECT))
+			{
+				sock->disconnectFromHost();
+			}
+			FCEU_DispMessage("NetPlay Errors... check message log",0);
+		}
+		break;
 		case NETPLAY_ERROR_MSG:
 		{
 			auto *msg = static_cast<netPlayTextMsg<256>*>(msgBuf);
 			msg->toHostByteOrder();
-			FCEU_printf("NetPlay Error: 0x%X  %s\n", msg->code, msg->getBuffer());
+			FCEU_printf("NetPlay Error: %s\n", msg->getBuffer());
+
+			QString msgBoxTxt = tr("Host has replied with an error:\n\n");
+	       		msgBoxTxt += tr(msg->getBuffer());
+			QMessageBox::critical( consoleWindow, tr("NetPlay Error"), msgBoxTxt, QMessageBox::Ok );
 
 			if (msg->isFlagSet(netPlayTextMsgFlags::DISCONNECT))
 			{
@@ -1547,21 +1593,28 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	grid->addWidget( lbl, 0, 0, 1, 1 );
 	grid->addWidget( frameLeadSpinBox, 0, 1, 1, 1 );
 
+	bool enforceAppVersionChk = false;
+	enforceAppVersionChkCBox = new QCheckBox(tr("Enforce Client Versions Match"));
+	grid->addWidget( enforceAppVersionChkCBox, 1, 0, 1, 2 );
+	g_config->getOption("SDL.NetPlayHostEnforceAppVersionChk", &enforceAppVersionChk);
+	enforceAppVersionChkCBox->setChecked(enforceAppVersionChk);
+
 	bool romLoadReqEna = false;
 	allowClientRomReqCBox = new QCheckBox(tr("Allow Client ROM Load Requests"));
-	grid->addWidget( allowClientRomReqCBox, 1, 0, 1, 2 );
+	grid->addWidget( allowClientRomReqCBox, 2, 0, 1, 2 );
 	g_config->getOption("SDL.NetPlayHostAllowClientRomLoadReq", &romLoadReqEna);
 	allowClientRomReqCBox->setChecked(romLoadReqEna);
 
 	bool stateLoadReqEna = false;
 	allowClientStateReqCBox = new QCheckBox(tr("Allow Client State Load Requests"));
-	grid->addWidget( allowClientStateReqCBox, 2, 0, 1, 2 );
+	grid->addWidget( allowClientStateReqCBox, 3, 0, 1, 2 );
 	g_config->getOption("SDL.NetPlayHostAllowClientStateLoadReq", &stateLoadReqEna);
 	allowClientStateReqCBox->setChecked(stateLoadReqEna);
 
 	connect(passwordRequiredCBox, SIGNAL(stateChanged(int)), this, SLOT(passwordRequiredChanged(int)));
 	connect(allowClientRomReqCBox, SIGNAL(stateChanged(int)), this, SLOT(allowClientRomReqChanged(int)));
 	connect(allowClientStateReqCBox, SIGNAL(stateChanged(int)), this, SLOT(allowClientStateReqChanged(int)));
+	connect(enforceAppVersionChkCBox, SIGNAL(stateChanged(int)), this, SLOT(enforceAppVersionChkChanged(int)));
 
 	startButton = new QPushButton( tr("Start") );
 	startButton->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
@@ -1609,11 +1662,19 @@ void NetPlayHostDialog::passwordRequiredChanged(int state)
 void NetPlayHostDialog::allowClientRomReqChanged(int state)
 {
 	g_config->setOption("SDL.NetPlayHostAllowClientRomLoadReq", state != Qt::Unchecked);
+	g_config->save();
 }
 //-----------------------------------------------------------------------------
 void NetPlayHostDialog::allowClientStateReqChanged(int state)
 {
 	g_config->setOption("SDL.NetPlayHostAllowClientStateLoadReq", state != Qt::Unchecked);
+	g_config->save();
+}
+//-----------------------------------------------------------------------------
+void NetPlayHostDialog::enforceAppVersionChkChanged(int state)
+{
+	g_config->setOption("SDL.NetPlayHostEnforceAppVersionChk", state != Qt::Unchecked);
+	g_config->save();
 }
 //-----------------------------------------------------------------------------
 void NetPlayHostDialog::onStartClicked(void)
@@ -1632,6 +1693,7 @@ void NetPlayHostDialog::onStartClicked(void)
 	server->setRole( playerRoleBox->currentData().toInt() );
 	server->sessionName = sessionNameEntry->text();
 	server->setMaxLeadFrames( frameLeadSpinBox->value() );
+	server->setEnforceAppVersionCheck( enforceAppVersionChkCBox->isChecked() );
 	server->setAllowClientRomLoadRequest( allowClientRomReqCBox->isChecked() );
 	server->setAllowClientStateLoadRequest( allowClientStateReqCBox->isChecked() );
 

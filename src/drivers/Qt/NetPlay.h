@@ -139,6 +139,7 @@ class NetPlayServer : public QTcpServer
 
 		uint32_t getMaxLeadFrames(){ return maxLeadFrames; }
 		void setMaxLeadFrames(uint32_t value){ maxLeadFrames = value; }
+		void setEnforceAppVersionCheck(bool value){ enforceAppVersionCheck = value; }
 		void setAllowClientRomLoadRequest(bool value){ allowClientRomLoadReq = value; }
 		void setAllowClientStateLoadRequest(bool value){ allowClientStateLoadReq = value; }
 
@@ -164,6 +165,7 @@ class NetPlayServer : public QTcpServer
 		uint32_t maxLeadFrames = 10u;
 		uint32_t clientWaitCounter = 0;
 		uint32_t inputFrameCount = 0;
+		bool     enforceAppVersionCheck = true;
 		bool     allowClientRomLoadReq = false;
 		bool     allowClientStateLoadReq = false;
 
@@ -334,6 +336,7 @@ protected:
 	QLineEdit  *passwordEntry;
 	QCheckBox  *passwordRequiredCBox;
 	QSpinBox   *frameLeadSpinBox;
+	QCheckBox  *enforceAppVersionChkCBox;
 	QCheckBox  *allowClientRomReqCBox;
 	QCheckBox  *allowClientStateReqCBox;
 
@@ -345,6 +348,7 @@ public slots:
 	void passwordRequiredChanged(int state);
 	void allowClientRomReqChanged(int state);
 	void allowClientStateReqChanged(int state);
+	void enforceAppVersionChkChanged(int state);
 };
 
 class NetPlayJoinDialog : public QDialog

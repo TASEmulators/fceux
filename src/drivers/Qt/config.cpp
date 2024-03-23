@@ -635,6 +635,7 @@ InitConfig()
 	config->addOption("players", "SDL.NetworkPlayers", 1);
 	config->addOption("SDL.NetPlayHostAllowClientRomLoadReq", 0);
 	config->addOption("SDL.NetPlayHostAllowClientStateLoadReq", 0);
+	config->addOption("SDL.NetPlayHostEnforceAppVersionChk", 1);
      
 	// input configuration options
 	config->addOption("input1", "SDL.Input.0", "GamePad.0");

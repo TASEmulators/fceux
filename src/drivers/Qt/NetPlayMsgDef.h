@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <stdint.h>
+#include "version.h"
 
 // Network Byte Swap Functions
 uint16_t netPlayByteSwap(uint16_t);
@@ -92,12 +93,17 @@ struct netPlayAuthResp
 {
 	netPlayMsgHdr  hdr;
 
+	uint16_t  appVersionMajor;
+	uint16_t  appVersionMinor;
+	uint32_t  appVersionPatch;
 	char playerId;
 	char userName[64];
 	char pswd[72];
 
 	netPlayAuthResp(void)
-		: hdr(NETPLAY_AUTH_RESP, sizeof(netPlayAuthResp)), playerId(NETPLAY_SPECTATOR)
+		: hdr(NETPLAY_AUTH_RESP, sizeof(netPlayAuthResp)),
+		appVersionMajor(FCEU_VERSION_MAJOR), appVersionMinor(FCEU_VERSION_MINOR), appVersionPatch(FCEU_VERSION_PATCH),
+		playerId(NETPLAY_SPECTATOR)
 	{
 		memset(pswd, 0, sizeof(pswd));
 	}
@@ -105,19 +111,26 @@ struct netPlayAuthResp
 	void toHostByteOrder()
 	{
 		hdr.toHostByteOrder();
+		appVersionMajor = netPlayByteSwap(appVersionMajor);
+		appVersionMinor = netPlayByteSwap(appVersionMinor);
+		appVersionPatch = netPlayByteSwap(appVersionPatch);
 	}
 
 	void toNetworkByteOrder()
 	{
 		hdr.toNetworkByteOrder();
+		appVersionMajor = netPlayByteSwap(appVersionMajor);
+		appVersionMinor = netPlayByteSwap(appVersionMinor);
+		appVersionPatch = netPlayByteSwap(appVersionPatch);
 	}
 };
 
 struct netPlayTextMsgFlags
 {
 	static const uint32_t DISCONNECT = 0x00000001;
-	static const uint32_t    WARNING = 0x00000002;
-	static const uint32_t       INFO = 0x00000004;
+	static const uint32_t      ERROR = 0x00000002;
+	static const uint32_t    WARNING = 0x00000004;
+	static const uint32_t       INFO = 0x00000008;
 };
 
 template <size_t N=8>
@@ -125,12 +138,11 @@ struct netPlayTextMsg
 {
 	netPlayMsgHdr  hdr;
 
-	unsigned short code;
-	unsigned short flags;
-	unsigned short dataSize;
+	uint32_t flags;
+	uint16_t dataSize;
 
 	netPlayTextMsg(int type)
-		: hdr(type, sizeof(netPlayTextMsg)), code(0), flags(0), dataSize(0)
+		: hdr(type, sizeof(netPlayTextMsg)), flags(0), dataSize(0)
 	{
 		hdr.msgSize = sizeof(*this) - N + 1;
 		memset(data, 0, N);
@@ -202,7 +214,6 @@ struct netPlayTextMsg
 	void toHostByteOrder()
 	{
 		hdr.toHostByteOrder();
-		code  = netPlayByteSwap(code);
 		flags = netPlayByteSwap(flags);
 		dataSize = netPlayByteSwap(dataSize);
 	}
@@ -210,7 +221,6 @@ struct netPlayTextMsg
 	void toNetworkByteOrder()
 	{
 		hdr.toNetworkByteOrder();
-		code  = netPlayByteSwap(code);
 		flags = netPlayByteSwap(flags);
 		dataSize = netPlayByteSwap(dataSize);
 	}
