@@ -274,6 +274,17 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	aviDiskThread = new AviRecordDiskThread_t(this);
 
 	scrHandlerConnected = false;
+
+	// Register State Load Callback with Emulation Core
+	auto stateLoadCallback = []( bool loadSuccess )
+	{
+		//printf("State Loaded: %i \n", loadSuccess );
+		if (loadSuccess && (consoleWindow != nullptr) )
+		{
+			emit consoleWindow->stateLoaded();
+		}
+	};
+	FCEUSS_SetLoadCallback( stateLoadCallback );
 }
 
 consoleWin_t::~consoleWin_t(void)

@@ -63,6 +63,7 @@ using namespace std;
 
 static void (*SPreSave)(void) = NULL;
 static void (*SPostSave)(void) = NULL;
+static void (*SPostLoad)(bool) = NULL;
 
 static int SaveStateStatus[10];
 static int StateShow;
@@ -640,8 +641,8 @@ int FCEUSS_LoadFP_old(EMUFILE* is, ENUM_SSLOADPARAMS params)
 }
 
 #ifdef __QT_DRIVER__
-// Qt Driver NetPlay state load handler. This is to control state loading,
-// only hosts can load states and clients can request loads.
+// Qt Driver NetPlay state load handler. This is to control state loading
+// during netplay, only hosts can load states and clients can request loads.
 bool NetPlayStateLoadReq(EMUFILE* is);
 #endif
 
@@ -730,9 +731,18 @@ bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 		FCEUSS_LoadFP(&msBackupSavestate,SSLOADPARAM_NOBACKUP);
 	}
 
+	// Post state load callback that is used to notify driver code that a new state load occurred.
+	if (SPostLoad != NULL)
+	{
+		SPostLoad(x);
+	}
 	return x;
 }
 
+void FCEUSS_SetLoadCallback( void (*cb)(bool) )
+{
+	SPostLoad = cb;
+}
 
 bool FCEUSS_Load(const char *fname, bool display_message)
 {

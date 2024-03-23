@@ -328,6 +328,7 @@ class  consoleWin_t : public QMainWindow
 	public:
 	signals:
 		void romLoaded(void);
+		void stateLoaded(void);
 		void nesResetOccurred(void);
 
 	public slots:

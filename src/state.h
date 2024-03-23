@@ -28,6 +28,7 @@ enum ENUM_SSLOADPARAMS
 
 void FCEUSS_Save(const char *, bool display_message=true);
 bool FCEUSS_Load(const char *, bool display_message=true);
+void FCEUSS_SetLoadCallback( void (*cb)(bool) );
 
  //zlib values: 0 (none) through 9 (max) or -1 (default)
 bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel);

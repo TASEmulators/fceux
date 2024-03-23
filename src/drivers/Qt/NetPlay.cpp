@@ -176,6 +176,7 @@ NetPlayServer::NetPlayServer(QObject *parent)
 	connect(this, SIGNAL(newConnection(void)), this, SLOT(newConnectionRdy(void)));
 
 	connect(consoleWindow, SIGNAL(romLoaded(void)), this, SLOT(onRomLoad(void)));
+	connect(consoleWindow, SIGNAL(stateLoaded(void)), this, SLOT(onStateLoad(void)));
 	connect(consoleWindow, SIGNAL(nesResetOccurred(void)), this, SLOT(onNesReset(void)));
 
 	FCEU_WRAPPER_LOCK();
@@ -454,9 +455,26 @@ void NetPlayServer::onRomLoad()
 	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
+void NetPlayServer::onStateLoad()
+{
+	//printf("New State Loaded!\n");
+	FCEU_WRAPPER_LOCK();
+
+	inputClear();
+	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
+
+	// New State has been loaded by server, signal clients to load and sync
+	for (auto& client : clientList )
+	{
+		//sendRomLoadReq( client );
+		sendStateSyncReq( client );
+	}
+	FCEU_WRAPPER_UNLOCK();
+}
+//-----------------------------------------------------------------------------
 void NetPlayServer::onNesReset()
 {
-	//printf("New ROM Loaded!\n");
+	//printf("NES Reset Event!\n");
 	FCEU_WRAPPER_LOCK();
 
 	inputClear();

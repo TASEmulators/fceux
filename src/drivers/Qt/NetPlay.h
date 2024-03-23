@@ -175,6 +175,7 @@ class NetPlayServer : public QTcpServer
 	public slots:
 		void newConnectionRdy(void);
 		void onRomLoad(void);
+		void onStateLoad(void);
 		void onNesReset(void);
 };
 
