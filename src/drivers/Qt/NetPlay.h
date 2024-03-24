@@ -165,6 +165,7 @@ class NetPlayServer : public QTcpServer
 		uint32_t maxLeadFrames = 10u;
 		uint32_t clientWaitCounter = 0;
 		uint32_t inputFrameCount = 0;
+		uint32_t romCrc32 = 0;
 		bool     enforceAppVersionCheck = true;
 		bool     allowClientRomLoadReq = false;
 		bool     allowClientStateLoadReq = false;
@@ -276,6 +277,7 @@ class NetPlayClient : public QObject
 		int     state = 0;
 		int     desyncCount = 0;
 		bool    syncOk = false;
+		bool    romMatch = false;
 		unsigned int currentFrame = 0;
 		unsigned int readyFrame = 0;
 		unsigned int catchUpThreshold = 10;
@@ -301,6 +303,7 @@ class NetPlayClient : public QObject
 		uint64_t  pingDelaySum = 0;
 		uint64_t  pingDelayLast = 0;
 		uint64_t  pingNumSamples = 0;
+		uint32_t  romCrc32 = 0;
 
 		std::list <NetPlayFrameInput> input;
 		FCEU::mutex inputMtx;
@@ -315,6 +318,8 @@ class NetPlayClient : public QObject
 		void onConnect(void);
 		void onDisconnect(void);
 		void onSocketError(QAbstractSocket::SocketError);
+		void onRomLoad(void);
+		void onRomUnload(void);
 };
 
 

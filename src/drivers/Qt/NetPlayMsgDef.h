@@ -295,6 +295,7 @@ struct netPlayClientState
 	uint32_t  opsFrame; // Last frame for ops data
 	uint32_t  opsChkSum;
 	uint32_t  ramChkSum;
+	uint32_t  romCrc32;
 	uint8_t   ctrlState[4];
 
 	static constexpr uint32_t  PAUSE_FLAG  = 0x0001;
@@ -302,7 +303,7 @@ struct netPlayClientState
 
 	netPlayClientState(void)
 		: hdr(NETPLAY_CLIENT_STATE, sizeof(netPlayClientState)), flags(0),
-		frameRdy(0), frameRun(0), opsChkSum(0), ramChkSum(0)
+		frameRdy(0), frameRun(0), opsChkSum(0), ramChkSum(0), romCrc32(0)
 	{
 		memset( ctrlState, 0, sizeof(ctrlState) );
 	}
@@ -316,6 +317,7 @@ struct netPlayClientState
 		opsFrame  = netPlayByteSwap(opsFrame);
 		opsChkSum = netPlayByteSwap(opsChkSum);
 		ramChkSum = netPlayByteSwap(ramChkSum);
+		romCrc32  = netPlayByteSwap(romCrc32);
 	}
 
 	void toNetworkByteOrder()
@@ -327,6 +329,7 @@ struct netPlayClientState
 		opsFrame  = netPlayByteSwap(opsFrame);
 		opsChkSum = netPlayByteSwap(opsChkSum);
 		ramChkSum = netPlayByteSwap(ramChkSum);
+		romCrc32  = netPlayByteSwap(romCrc32);
 	}
 };
 

@@ -504,6 +504,12 @@ CloseGame(void)
 		return(0);
 	}
 
+	// Signal to listeners that current ROM is being unloaded
+	if ( consoleWindow )
+	{
+		emit consoleWindow->romUnload();
+	}
+
 	// If the emulation thread is stuck hanging at a breakpoint,
 	// disable breakpoint debugging and wait for the thread to 
 	// complete its frame. So that it is idle with a minimal call

@@ -22,6 +22,7 @@
 #include <QMessageBox>
 
 #include "../../fceu.h"
+#include "../../cart.h"
 #include "../../state.h"
 #include "../../movie.h"
 #include "../../debug.h"
@@ -181,6 +182,11 @@ NetPlayServer::NetPlayServer(QObject *parent)
 
 	FCEU_WRAPPER_LOCK();
 	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
+
+	if (currCartInfo != nullptr)
+	{
+		romCrc32 = currCartInfo->CRC32;
+	}
 	FCEU_WRAPPER_UNLOCK();
 }
 
@@ -443,6 +449,11 @@ void NetPlayServer::onRomLoad()
 	//printf("New ROM Loaded!\n");
 	FCEU_WRAPPER_LOCK();
 
+	if (currCartInfo != nullptr)
+	{
+		romCrc32 = currCartInfo->CRC32;
+	}
+
 	opsCrc32 = 0;
 	netPlayFrameData.reset();
 
@@ -618,6 +629,8 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			client->setPaused( (msg->flags & netPlayClientState::PAUSE_FLAG ) ? true : false );
 			client->setDesync( (msg->flags & netPlayClientState::DESYNC_FLAG) ? true : false );
 
+			client->romMatch = (romCrc32 == msg->romCrc32);
+
 			NetPlayFrameData data;
 			if ( (msg->opsFrame == 0) || netPlayFrameData.find( msg->opsFrame, data ) )
 			{
@@ -638,12 +651,11 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 					if (client->desyncCount > forceResyncCount)
 					{
 						FCEU_WRAPPER_LOCK();
-						sendStateSyncReq( client );
+						resyncClient( client );
 						FCEU_WRAPPER_UNLOCK();
 
 						client->desyncCount = 0;
 					}
-
 				}
 				else
 				{
@@ -962,6 +974,19 @@ NetPlayClient::NetPlayClient(QObject *parent, bool outGoing)
 	{
 		printf("Error: NetPlayClient failed to allocate recvMsgBuf\n");
 	}
+
+	if (outGoing)
+	{
+		connect(consoleWindow, SIGNAL(romLoaded(void)), this, SLOT(onRomLoad(void)));
+		connect(consoleWindow, SIGNAL(romUnload(void)), this, SLOT(onRomUnload(void)));
+
+		FCEU_WRAPPER_LOCK();
+		if (currCartInfo != nullptr)
+		{
+			romCrc32 = currCartInfo->CRC32;
+		}
+		FCEU_WRAPPER_UNLOCK();
+	}
 }
 
 
@@ -1023,6 +1048,25 @@ int NetPlayClient::Destroy()
 	}
 	FCEU_WRAPPER_UNLOCK();
 	return 0;
+}
+//-----------------------------------------------------------------------------
+void NetPlayClient::onRomLoad()
+{
+	FCEU_WRAPPER_LOCK();
+	if (currCartInfo != nullptr)
+	{
+		romCrc32 = currCartInfo->CRC32;
+	}
+	else
+	{
+		romCrc32 = 0;
+	}
+	FCEU_WRAPPER_UNLOCK();
+}
+//-----------------------------------------------------------------------------
+void NetPlayClient::onRomUnload()
+{
+	romCrc32 = 0;
 }
 //-----------------------------------------------------------------------------
 void NetPlayClient::forceDisconnect()
@@ -1272,6 +1316,7 @@ void NetPlayClient::update(void)
 		statusMsg.opsFrame  = lastFrameData.frameNum;
 		statusMsg.opsChkSum = lastFrameData.opsCrc32;
 		statusMsg.ramChkSum = lastFrameData.ramCrc32;
+		statusMsg.romCrc32  = romCrc32;
 		statusMsg.ctrlState[0] = (ctlrData      ) & 0x000000ff;
 		statusMsg.ctrlState[1] = (ctlrData >>  8) & 0x000000ff;
 		statusMsg.ctrlState[2] = (ctlrData >> 16) & 0x000000ff;
@@ -1342,6 +1387,12 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 				recvMsgId   = netPlayByteSwap(hdr->msgId);
 				recvMsgSize = netPlayByteSwap(hdr->msgSize) - sizeof(netPlayMsgHdr);
 				recvMsgBytesLeft = recvMsgSize;
+
+				if ( (netPlayByteSwap(hdr->magic[0]) != NETPLAY_MAGIC_NUMBER) || 
+				     (netPlayByteSwap(hdr->magic[1]) != NETPLAY_MAGIC_NUMBER) )
+				{
+					printf("Error: Message Header Validity Check Failed: %08X\n", recvMsgId);
+				}
 
 				if (netPlayByteSwap(hdr->msgSize) > recvMsgBufSize)
 				{
@@ -2121,6 +2172,10 @@ void NetPlayClientTreeItem::updateData()
 		if (client->hasDesync())
 		{
 			state += QObject::tr(",Desync");
+		}
+		if (!client->romMatch)
+		{
+			state += QObject::tr(",ROM Mismatch");
 		}
 
 		setText( 0, client->userName );
