@@ -127,10 +127,10 @@ struct netPlayAuthResp
 
 struct netPlayTextMsgFlags
 {
-	static const uint32_t DISCONNECT = 0x00000001;
-	static const uint32_t      ERROR = 0x00000002;
-	static const uint32_t    WARNING = 0x00000004;
-	static const uint32_t       INFO = 0x00000008;
+	static constexpr uint32_t Disconnect = 0x00000001;
+	static constexpr uint32_t      Error = 0x00000002;
+	static constexpr uint32_t    Warning = 0x00000004;
+	static constexpr uint32_t       Info = 0x00000008;
 };
 
 template <size_t N=8>

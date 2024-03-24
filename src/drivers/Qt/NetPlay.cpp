@@ -563,8 +563,8 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			if (!version_chk_ok)
 			{
 				netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
-				errorMsg.setFlag(netPlayTextMsgFlags::DISCONNECT);
-				errorMsg.setFlag(netPlayTextMsgFlags::ERROR);
+				errorMsg.setFlag(netPlayTextMsgFlags::Disconnect);
+				errorMsg.setFlag(netPlayTextMsgFlags::Error);
 				errorMsg.printf("Client/Host Version Mismatch:\nHost version is %i.%i.%i\nClient version is %i.%i.%i", 
 						FCEU_VERSION_MAJOR, FCEU_VERSION_MINOR, FCEU_VERSION_PATCH,
 						msg->appVersionMajor, msg->appVersionMinor, msg->appVersionPatch);
@@ -582,8 +582,8 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				if (!authentication_passed)
 				{
 					netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
-					errorMsg.setFlag(netPlayTextMsgFlags::DISCONNECT);
-					errorMsg.setFlag(netPlayTextMsgFlags::ERROR);
+					errorMsg.setFlag(netPlayTextMsgFlags::Disconnect);
+					errorMsg.setFlag(netPlayTextMsgFlags::Error);
 					errorMsg.printf("Invalid Password");
 					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 					client->flushData();
@@ -605,8 +605,8 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				else
 				{
 					netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
-					errorMsg.setFlag(netPlayTextMsgFlags::DISCONNECT);
-					errorMsg.setFlag(netPlayTextMsgFlags::ERROR);
+					errorMsg.setFlag(netPlayTextMsgFlags::Disconnect);
+					errorMsg.setFlag(netPlayTextMsgFlags::Error);
 					errorMsg.printf("Player %i role is not available", msg->playerId+1);
 					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 					client->flushData();
@@ -641,7 +641,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				bool opsSync   = (data.opsCrc32 == msg->opsChkSum);
 				bool ramSync   = (data.ramCrc32 == msg->ramChkSum);
 
-				client->syncOk = opsSync && ramSync;
+				client->syncOk = client->romMatch && opsSync && ramSync;
 
 				if (!client->syncOk)
 				{
@@ -737,7 +737,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			else
 			{
 				netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
-				errorMsg.setFlag(netPlayTextMsgFlags::WARNING);
+				errorMsg.setFlag(netPlayTextMsgFlags::Warning);
 				errorMsg.printf("Host is rejected ROMs load request");
 				sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 			}
@@ -1433,7 +1433,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			msg->toHostByteOrder();
 			FCEU_printf("NetPlay Info: %s\n", msg->getBuffer());
 
-			if (msg->isFlagSet(netPlayTextMsgFlags::DISCONNECT))
+			if (msg->isFlagSet(netPlayTextMsgFlags::Disconnect))
 			{
 				sock->disconnectFromHost();
 			}
@@ -1450,7 +1450,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 	       		msgBoxTxt += tr(msg->getBuffer());
 			QMessageBox::critical( consoleWindow, tr("NetPlay Error"), msgBoxTxt, QMessageBox::Ok );
 
-			if (msg->isFlagSet(netPlayTextMsgFlags::DISCONNECT))
+			if (msg->isFlagSet(netPlayTextMsgFlags::Disconnect))
 			{
 				sock->disconnectFromHost();
 			}
