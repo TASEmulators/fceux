@@ -315,7 +315,7 @@ int NetPlayServer::sendMsg( NetPlayClient *client, void *msg, size_t msgSize, st
 //-----------------------------------------------------------------------------
 int NetPlayServer::sendRomLoadReq( NetPlayClient *client )
 {
-	constexpr size_t BufferSize = 64 * 1024;
+	constexpr size_t BufferSize = 8 * 1024;
 	char buf[BufferSize];
 	size_t bytesRead;
 	long fileSize = 0;
@@ -1193,7 +1193,7 @@ void NetPlayClient::onSocketError(QAbstractSocket::SocketError error)
 //-----------------------------------------------------------------------------
 int NetPlayClient::requestRomLoad( const char *romPath )
 {
-	constexpr size_t BufferSize = 64 * 1024;
+	constexpr size_t BufferSize = 8 * 1024;
 	char buf[BufferSize];
 	size_t bytesRead;
 	long fileSize = 0;
@@ -1227,6 +1227,7 @@ int NetPlayClient::requestRomLoad( const char *romPath )
 	{
 		sock->write( buf, bytesRead );
 	}
+	sock->flush();
 
 	::fclose(fp);
 
@@ -1355,10 +1356,10 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 		int bytesAvailable = sock->bytesAvailable();
 		readReq = bytesAvailable > 0;
 
-		//printf("Read Bytes Available: %lu  %i  %i\n", ts.toMilliSeconds(), bytesAvailable, recvMsgBytesLeft);
-
 		while (readReq)
 		{
+			//printf("Read Bytes Available: %lu  %i  %i\n", ts.toMilliSeconds(), bytesAvailable, recvMsgBytesLeft);
+
 			if (recvMsgBytesLeft > 0)
 			{
 				bytesAvailable = sock->bytesAvailable();
