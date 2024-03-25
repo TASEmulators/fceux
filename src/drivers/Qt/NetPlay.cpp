@@ -1106,6 +1106,7 @@ void NetPlayClient::setSocket(QTcpSocket *s)
 
 	if (sock != nullptr)
 	{
+		sock->setSocketOption( QAbstractSocket::QAbstractSocket::LowDelayOption, 1);
 		sock->setSocketOption( QAbstractSocket::SendBufferSizeSocketOption, static_cast<int>(recvMsgBufSize) );
 		sock->setSocketOption( QAbstractSocket::ReceiveBufferSizeSocketOption, static_cast<int>(recvMsgBufSize) );
 
@@ -1120,6 +1121,7 @@ QTcpSocket* NetPlayClient::createSocket(void)
 	{
 		sock = new QTcpSocket(this);
 
+		sock->setSocketOption( QAbstractSocket::QAbstractSocket::LowDelayOption, 1);
 		sock->setSocketOption( QAbstractSocket::SendBufferSizeSocketOption, static_cast<int>(recvMsgBufSize) );
 		sock->setSocketOption( QAbstractSocket::ReceiveBufferSizeSocketOption, static_cast<int>(recvMsgBufSize) );
 
