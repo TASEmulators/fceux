@@ -262,6 +262,8 @@ void NetPlayServer::processPendingConnections(void)
 
 		clientList.push_back(client);
 
+		connect( newSock, SIGNAL(readyRead(void)), client, SLOT(serverReadyRead(void)) );
+
 		newSock = nextPendingConnection();
 
 		printf("Added Client: %p   %zu\n", client, clientList.size() );
@@ -1104,6 +1106,9 @@ void NetPlayClient::setSocket(QTcpSocket *s)
 
 	if (sock != nullptr)
 	{
+		sock->setSocketOption( QAbstractSocket::SendBufferSizeSocketOption, static_cast<int>(recvMsgBufSize) );
+		sock->setSocketOption( QAbstractSocket::ReceiveBufferSizeSocketOption, static_cast<int>(recvMsgBufSize) );
+
 		connect(sock, SIGNAL(connected(void))   , this, SLOT(onConnect(void)));
 		connect(sock, SIGNAL(disconnected(void)), this, SLOT(onDisconnect(void)));
 	}
@@ -1114,8 +1119,11 @@ QTcpSocket* NetPlayClient::createSocket(void)
 	if (sock == nullptr)
 	{
 		sock = new QTcpSocket(this);
-		//sock->setReadBufferSize( recvMsgBufSize );
 
+		sock->setSocketOption( QAbstractSocket::SendBufferSizeSocketOption, static_cast<int>(recvMsgBufSize) );
+		sock->setSocketOption( QAbstractSocket::ReceiveBufferSizeSocketOption, static_cast<int>(recvMsgBufSize) );
+
+		connect(sock, SIGNAL(readyRead(void))   , this, SLOT(clientReadyRead(void)) );
 		connect(sock, SIGNAL(connected(void))   , this, SLOT(onConnect(void)));
 		connect(sock, SIGNAL(disconnected(void)), this, SLOT(onDisconnect(void)));
 		connect(sock, SIGNAL(errorOccurred(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
@@ -1345,7 +1353,7 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 		int bytesAvailable = sock->bytesAvailable();
 		readReq = bytesAvailable > 0;
 
-		printf("Read Bytes Available: %lu  %i  %i\n", ts.toMilliSeconds(), bytesAvailable, recvMsgBytesLeft);
+		//printf("Read Bytes Available: %lu  %i  %i\n", ts.toMilliSeconds(), bytesAvailable, recvMsgBytesLeft);
 
 		while (readReq)
 		{
@@ -1366,7 +1374,7 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 						recvMsgBytesLeft -= dataRead;
 						recvMsgByteIndex += dataRead;
 					}
-					printf("   Data: Id: %u   Size: %zu  Read: %i\n", recvMsgId, readSize, dataRead );
+					//printf("   Data: Id: %u   Size: %zu  Read: %i\n", recvMsgId, readSize, dataRead );
 
 					if (recvMsgBytesLeft > 0)
 					{
@@ -1401,7 +1409,7 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 				{
 					printf("Error: Message size too large: %08X\n", recvMsgId);
 				}
-				printf("HDR: Id: %u   Size: %u\n", netPlayByteSwap(hdr->msgId), netPlayByteSwap(hdr->msgSize) );
+				//printf("HDR: Id: %u   Size: %u\n", netPlayByteSwap(hdr->msgId), netPlayByteSwap(hdr->msgSize) );
 
 				recvMsgByteIndex = sizeof(netPlayMsgHdr);
 
@@ -1563,6 +1571,18 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			printf("Unknown Msg: %08X\n", msgId);
 		break;
 	}
+}
+//-----------------------------------------------------------------------------
+void NetPlayClient::serverReadyRead()
+{
+	//printf("Server Ready Read\n");
+	readMessages( serverMessageCallback, this );
+}
+//-----------------------------------------------------------------------------
+void NetPlayClient::clientReadyRead()
+{
+	//printf("Client Ready Read\n");
+	readMessages( clientMessageCallback, this );
 }
 //-----------------------------------------------------------------------------
 //--- NetPlayHostDialog

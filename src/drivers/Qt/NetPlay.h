@@ -320,6 +320,8 @@ class NetPlayClient : public QObject
 		void onSocketError(QAbstractSocket::SocketError);
 		void onRomLoad(void);
 		void onRomUnload(void);
+		void serverReadyRead(void);
+		void clientReadyRead(void);
 };
 
 
