@@ -38,7 +38,7 @@ enum netPlayerId
 	NETPLAY_PLAYER4
 };
 
-static const uint32_t NETPLAY_MAGIC_NUMBER = 0xaa55aa55;
+static constexpr uint32_t NETPLAY_MAGIC_NUMBER = 0xaa55aa55;
 
 struct netPlayMsgHdr
 {

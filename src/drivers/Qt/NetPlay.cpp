@@ -366,6 +366,7 @@ int NetPlayServer::sendRomLoadReq( NetPlayClient *client )
 	{
 		sendMsg( client, buf, bytesRead );
 	}
+	client->flushData();
 
 	::fclose(fp);
 
@@ -392,6 +393,7 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 	sendMsg( client, &hdr, sizeof(netPlayMsgHdr), [&hdr]{ hdr.toNetworkByteOrder(); } );
 	sendMsg( client, em.buf(), em.size() );
 
+	client->flushData();
 	opsCrc32 = 0;
 	inputClear();
 
@@ -1112,6 +1114,7 @@ QTcpSocket* NetPlayClient::createSocket(void)
 	if (sock == nullptr)
 	{
 		sock = new QTcpSocket(this);
+		//sock->setReadBufferSize( recvMsgBufSize );
 
 		connect(sock, SIGNAL(connected(void))   , this, SLOT(onConnect(void)));
 		connect(sock, SIGNAL(disconnected(void)), this, SLOT(onDisconnect(void)));
@@ -1342,33 +1345,33 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 		int bytesAvailable = sock->bytesAvailable();
 		readReq = bytesAvailable > 0;
 
-		//printf("Read Bytes Available: %lu  %i\n", ts.toMilliSeconds(), bytesAvailable);
+		printf("Read Bytes Available: %lu  %i  %i\n", ts.toMilliSeconds(), bytesAvailable, recvMsgBytesLeft);
 
 		while (readReq)
 		{
 			if (recvMsgBytesLeft > 0)
 			{
 				bytesAvailable = sock->bytesAvailable();
-				readReq = (bytesAvailable >= recvMsgBytesLeft);
+				readReq = (bytesAvailable > 0);
 
 				if (readReq)
 				{
 					int dataRead;
-					//size_t readSize = recvMsgBytesLeft;
+					size_t readSize = recvMsgBytesLeft;
 
-					dataRead = sock->read( &recvMsgBuf[recvMsgByteIndex], recvMsgBytesLeft );
+					dataRead = sock->read( &recvMsgBuf[recvMsgByteIndex], readSize );
 
 					if (dataRead > 0)
 					{
 						recvMsgBytesLeft -= dataRead;
 						recvMsgByteIndex += dataRead;
 					}
-					//printf("   Data: Id: %u   Size: %zu  Read: %i\n", recvMsgId, readSize, dataRead );
+					printf("   Data: Id: %u   Size: %zu  Read: %i\n", recvMsgId, readSize, dataRead );
 
 					if (recvMsgBytesLeft > 0)
 					{
 						bytesAvailable = sock->bytesAvailable();
-						readReq = (bytesAvailable >= recvMsgBytesLeft);
+						readReq = (bytesAvailable > 0);
 					}
 					else
 					{
@@ -1398,7 +1401,7 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 				{
 					printf("Error: Message size too large: %08X\n", recvMsgId);
 				}
-				//printf("HDR: Id: %u   Size: %u\n", netPlayByteSwap(hdr->msgId), netPlayByteSwap(hdr->msgSize) );
+				printf("HDR: Id: %u   Size: %u\n", netPlayByteSwap(hdr->msgId), netPlayByteSwap(hdr->msgSize) );
 
 				recvMsgByteIndex = sizeof(netPlayMsgHdr);
 
@@ -1407,7 +1410,7 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 					msgCallback( userData, recvMsgBuf, recvMsgSize );
 				}
 				bytesAvailable = sock->bytesAvailable();
-				readReq = (bytesAvailable >= recvMsgSize);
+				readReq = (bytesAvailable > 0);
 			}
 			else
 			{
