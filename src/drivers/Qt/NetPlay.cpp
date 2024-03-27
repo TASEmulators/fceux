@@ -343,7 +343,7 @@ int NetPlayServer::sendRomLoadReq( NetPlayClient *client )
 		return -1;
 	}
 	printf("Prep ROM Load Request: %s \n", filepath );
-	FILE *fp = ::fopen( filepath, "r");
+	FILE *fp = ::fopen( filepath, "rb");
 
 	if (fp == nullptr)
 	{
@@ -722,7 +722,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				printf("Load ROM Request Received: %s\n", filepath.c_str());
 
 				//printf("Dumping Temp Rom to: %s\n", filepath.c_str());
-				fp = ::fopen( filepath.c_str(), "w");
+				fp = ::fopen( filepath.c_str(), "wb");
 
 				if (fp == nullptr)
 				{
@@ -1201,7 +1201,7 @@ int NetPlayClient::requestRomLoad( const char *romPath )
 	QFileInfo fi( romPath );
 
 	printf("Prep ROM Load Request: %s \n", romPath );
-	FILE *fp = ::fopen( romPath, "r");
+	FILE *fp = ::fopen( romPath, "rb");
 
 	if (fp == nullptr)
 	{
@@ -1497,7 +1497,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			FCEU_printf("Load ROM Request Received: %s\n", filepath.c_str());
 
 			//printf("Dumping Temp Rom to: %s\n", filepath.c_str());
-			fp = ::fopen( filepath.c_str(), "w");
+			fp = ::fopen( filepath.c_str(), "wb");
 
 			if (fp == nullptr)
 			{
