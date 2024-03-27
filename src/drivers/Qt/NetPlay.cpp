@@ -177,6 +177,7 @@ NetPlayServer::NetPlayServer(QObject *parent)
 	connect(this, SIGNAL(newConnection(void)), this, SLOT(newConnectionRdy(void)));
 
 	connect(consoleWindow, SIGNAL(romLoaded(void)), this, SLOT(onRomLoad(void)));
+	connect(consoleWindow, SIGNAL(romUnload(void)), this, SLOT(onRomUnload(void)));
 	connect(consoleWindow, SIGNAL(stateLoaded(void)), this, SLOT(onStateLoad(void)));
 	connect(consoleWindow, SIGNAL(nesResetOccurred(void)), this, SLOT(onNesReset(void)));
 
@@ -471,6 +472,21 @@ void NetPlayServer::onRomLoad()
 		sendStateSyncReq( client );
 	}
 	FCEU_WRAPPER_UNLOCK();
+}
+//-----------------------------------------------------------------------------
+void NetPlayServer::onRomUnload()
+{
+	netPlayMsgHdr unloadMsg(NETPLAY_UNLOAD_ROM_REQ);
+
+	romCrc32 = 0;
+
+	unloadMsg.toNetworkByteOrder();
+
+	// New ROM has been loaded by server, signal clients to load and sync
+	for (auto& client : clientList )
+	{
+		sendMsg( client, &unloadMsg, sizeof(unloadMsg) );
+	}
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::onStateLoad()
@@ -1512,6 +1528,13 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			FCEU_WRAPPER_UNLOCK();
 		}
 		break;
+		case NETPLAY_UNLOAD_ROM_REQ:
+		{
+			FCEU_WRAPPER_LOCK();
+			CloseGame();
+			FCEU_WRAPPER_UNLOCK();
+		}
+		break;
 		case NETPLAY_SYNC_STATE_RESP:
 		{
 			char *stateData = &static_cast<char*>(msgBuf)[ sizeof(netPlayMsgHdr) ];
@@ -2264,6 +2287,11 @@ bool NetPlayActive(void)
 bool isNetPlayHost(void)
 {
 	return (NetPlayServer::GetInstance() != nullptr);
+}
+//----------------------------------------------------------------------------
+bool isNetPlayClient(void)
+{
+	return (NetPlayClient::GetInstance() != nullptr);
 }
 //----------------------------------------------------------------------------
 void NetPlayPeriodicUpdate(void)

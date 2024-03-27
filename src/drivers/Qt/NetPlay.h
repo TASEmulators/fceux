@@ -178,6 +178,7 @@ class NetPlayServer : public QTcpServer
 	public slots:
 		void newConnectionRdy(void);
 		void onRomLoad(void);
+		void onRomUnload(void);
 		void onStateLoad(void);
 		void onNesReset(void);
 };
@@ -435,6 +436,7 @@ public slots:
 
 bool NetPlayActive(void);
 bool isNetPlayHost(void);
+bool isNetPlayClient(void);
 void NetPlayPeriodicUpdate(void);
 bool NetPlaySkipWait(void);
 int NetPlayFrameWait(void);

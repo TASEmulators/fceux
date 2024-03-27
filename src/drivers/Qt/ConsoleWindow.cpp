@@ -2643,6 +2643,18 @@ void consoleWin_t::loadRomRequestCB( QString s )
 
 void consoleWin_t::closeROMCB(void)
 {
+	if (isNetPlayClient())
+	{
+		QString msgBoxTxt = tr("Unloading ROM will cause a disconnect from the current netplay session.\n\nDo you want to continue with unloading and disconnection?");
+		int ans = QMessageBox::question( this, tr("NetPlay Client ROM Unload Warning"), msgBoxTxt, QMessageBox::Yes | QMessageBox::No );
+
+		if (ans == QMessageBox::No)
+		{
+			return;
+		}
+		NetPlayCloseSession();
+	}
+
 	FCEU_WRAPPER_LOCK();
 	CloseGame();
 	FCEU_WRAPPER_UNLOCK();
