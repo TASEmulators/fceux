@@ -646,8 +646,8 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			client->gpData[2] = msg->ctrlState[2];
 			client->gpData[3] = msg->ctrlState[3];
 
-			client->setPaused( (msg->flags & netPlayClientState::PAUSE_FLAG ) ? true : false );
-			client->setDesync( (msg->flags & netPlayClientState::DESYNC_FLAG) ? true : false );
+			client->setPaused( (msg->flags & netPlayClientState::PauseFlag ) ? true : false );
+			client->setDesync( (msg->flags & netPlayClientState::DesyncFlag) ? true : false );
 
 			client->romMatch = (romCrc32 == msg->romCrc32);
 
@@ -796,6 +796,13 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				serverRequestedStateLoad = false;
 				FCEU_WRAPPER_UNLOCK();
 			}
+		}
+		break;
+		case NETPLAY_CLIENT_SYNC_REQ:
+		{
+			FCEU_WRAPPER_LOCK();
+			resyncClient( client );
+			FCEU_WRAPPER_UNLOCK();
 		}
 		break;
 		default:
@@ -1288,6 +1295,15 @@ int NetPlayClient::requestStateLoad(EMUFILE *is)
 	return 0;
 }
 //-----------------------------------------------------------------------------
+int NetPlayClient::requestSync(void)
+{
+	netPlayMsgHdr hdr(NETPLAY_CLIENT_SYNC_REQ);
+
+	hdr.toNetworkByteOrder();
+	sock->write( reinterpret_cast<const char*>(&hdr), sizeof(netPlayMsgHdr));
+	return 0;
+}
+//-----------------------------------------------------------------------------
 void NetPlayClient::recordPingResult( uint64_t delay_ms )
 {
 	pingNumSamples++;
@@ -1335,11 +1351,11 @@ void NetPlayClient::update(void)
 		statusMsg.flags     = 0;
 		if (FCEUI_EmulationPaused())
 		{
-			statusMsg.flags |= netPlayClientState::PAUSE_FLAG;
+			statusMsg.flags |= netPlayClientState::PauseFlag;
 		}
 		if (desyncCount > 0)
 		{
-			statusMsg.flags |= netPlayClientState::DESYNC_FLAG;
+			statusMsg.flags |= netPlayClientState::DesyncFlag;
 		}
 		statusMsg.frameRdy  = inputFrameBack();
 		statusMsg.frameRun  = currFrame;
@@ -1994,7 +2010,116 @@ void NetPlayJoinDialog::onSocketError(const QString& errorMsg)
 	}
 }
 //-----------------------------------------------------------------------------
-//--- NetPlayJoinDialog
+//--- NetPlayClientStatusDialog
+//-----------------------------------------------------------------------------
+NetPlayClientStatusDialog* NetPlayClientStatusDialog::instance = nullptr;
+//-----------------------------------------------------------------------------
+NetPlayClientStatusDialog::NetPlayClientStatusDialog(QWidget *parent)
+	: QDialog(parent)
+{
+	QVBoxLayout *mainLayout;
+	QHBoxLayout *hbox;
+	QGridLayout *grid;
+	QGroupBox   *gbox;
+	QPushButton *closeButton;
+	//QLabel *lbl;
+
+	instance = this;
+	mainLayout = new QVBoxLayout();
+	grid       = new QGridLayout();
+	gbox       = new QGroupBox(tr("Connection"));
+
+	gbox->setLayout(grid);
+	mainLayout->addWidget(gbox);
+
+	hostStateLbl = new QLabel(tr("Unknown"));
+	grid->addWidget( new QLabel(tr("Host Frame:")), 0, 0 );
+	grid->addWidget( hostStateLbl, 0, 1 );
+
+	requestResyncButton = new QPushButton(tr("Resync State"));
+	grid->addWidget( requestResyncButton, 1, 0, 1, 2 );
+
+	hbox = new QHBoxLayout();
+	mainLayout->addLayout(hbox);
+
+	closeButton = new QPushButton( tr("Close") );
+	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
+
+	hbox->addStretch(3);
+	hbox->addWidget(closeButton);
+
+	setWindowTitle("NetPlay Status");
+	//resize( 512, 256 );
+
+	setLayout(mainLayout);
+
+	connect(requestResyncButton, SIGNAL(clicked(void)), this, SLOT(resyncButtonClicked(void)));
+
+	periodicTimer = new QTimer(this);
+	periodicTimer->start(200); // 5hz
+	connect(periodicTimer, &QTimer::timeout, this, &NetPlayClientStatusDialog::updatePeriodic);
+}
+//----------------------------------------------------------------------------
+NetPlayClientStatusDialog::~NetPlayClientStatusDialog(void)
+{
+	instance = nullptr;
+	periodicTimer->stop();
+	delete periodicTimer;
+	//printf("Destroy NetPlay Status Window\n");
+}
+//----------------------------------------------------------------------------
+void NetPlayClientStatusDialog::closeEvent(QCloseEvent *event)
+{
+	//printf("NetPlay Client Close Window Event\n");
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+void NetPlayClientStatusDialog::closeWindow(void)
+{
+	//printf("Close Window\n");
+	done(0);
+	deleteLater();
+}
+//----------------------------------------------------------------------------
+void NetPlayClientStatusDialog::updatePeriodic()
+{
+	updateStatusDisplay();
+}
+//----------------------------------------------------------------------------
+void NetPlayClientStatusDialog::updateStatusDisplay()
+{
+	NetPlayClient* client = NetPlayClient::GetInstance();
+
+	if (client == nullptr)
+	{
+		return;
+	}
+	char stmp[64];
+	uint32_t inputFrame = client->inputFrameBack();
+
+	if (inputFrame == 0)
+	{
+		inputFrame = static_cast<uint32_t>(currFrameCounter);
+	}
+	snprintf( stmp, sizeof(stmp), "%u", inputFrame);
+	hostStateLbl->setText(tr(stmp));
+}
+//----------------------------------------------------------------------------
+void NetPlayClientStatusDialog::resyncButtonClicked()
+{
+	NetPlayClient* client = NetPlayClient::GetInstance();
+
+	if (client == nullptr)
+	{
+		return;
+	}
+	client->requestSync();
+}
+//-----------------------------------------------------------------------------
+//--- NetPlayHostStatusDialog
 //-----------------------------------------------------------------------------
 NetPlayHostStatusDialog* NetPlayHostStatusDialog::instance = nullptr;
 //-----------------------------------------------------------------------------
@@ -2419,7 +2544,7 @@ void openNetPlayHostStatusDialog(QWidget* parent)
 //----------------------------------------------------------------------------
 void openNetPlayClientStatusDialog(QWidget* parent)
 {
-	//openSingletonDialog<NetPlayHostStatusDialog>(parent);
+	openSingletonDialog<NetPlayClientStatusDialog>(parent);
 }
 //----------------------------------------------------------------------------
 //----  Network Byte Swap Utilities

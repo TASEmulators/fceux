@@ -15,18 +15,19 @@ uint64_t netPlayByteSwap(uint64_t);
 
 enum netPlayMsgType
 {
-	NETPLAY_AUTH_REQ,
+	NETPLAY_AUTH_REQ = 0,
 	NETPLAY_AUTH_RESP,
-	NETPLAY_LOAD_ROM_REQ,
+	NETPLAY_LOAD_ROM_REQ = 100,
 	NETPLAY_UNLOAD_ROM_REQ,
-	NETPLAY_SYNC_STATE_REQ,
+	NETPLAY_SYNC_STATE_REQ = 200,
 	NETPLAY_SYNC_STATE_RESP,
-	NETPLAY_RUN_FRAME_REQ,
-	NETPLAY_CLIENT_STATE,
-	NETPLAY_INFO_MSG,
+	NETPLAY_RUN_FRAME_REQ = 300,
+	NETPLAY_CLIENT_STATE = 400,
+	NETPLAY_CLIENT_SYNC_REQ,
+	NETPLAY_INFO_MSG = 500,
 	NETPLAY_ERROR_MSG,
 	NETPLAY_CHAT_MSG,
-	NETPLAY_PING_REQ,
+	NETPLAY_PING_REQ = 1000,
 	NETPLAY_PING_RESP,
 };
 
@@ -299,8 +300,8 @@ struct netPlayClientState
 	uint32_t  romCrc32;
 	uint8_t   ctrlState[4];
 
-	static constexpr uint32_t  PAUSE_FLAG  = 0x0001;
-	static constexpr uint32_t  DESYNC_FLAG = 0x0002;
+	static constexpr uint32_t  PauseFlag  = 0x0001;
+	static constexpr uint32_t  DesyncFlag = 0x0002;
 
 	netPlayClientState(void)
 		: hdr(NETPLAY_CLIENT_STATE, sizeof(netPlayClientState)), flags(0),
