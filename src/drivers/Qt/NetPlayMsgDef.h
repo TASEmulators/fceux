@@ -17,17 +17,17 @@ enum netPlayMsgType
 {
 	NETPLAY_AUTH_REQ = 0,
 	NETPLAY_AUTH_RESP,
-	NETPLAY_LOAD_ROM_REQ = 100,
+	NETPLAY_LOAD_ROM_REQ = 10,
 	NETPLAY_UNLOAD_ROM_REQ,
-	NETPLAY_SYNC_STATE_REQ = 200,
+	NETPLAY_SYNC_STATE_REQ = 20,
 	NETPLAY_SYNC_STATE_RESP,
-	NETPLAY_RUN_FRAME_REQ = 300,
-	NETPLAY_CLIENT_STATE = 400,
+	NETPLAY_RUN_FRAME_REQ = 30,
+	NETPLAY_CLIENT_STATE = 40,
 	NETPLAY_CLIENT_SYNC_REQ,
-	NETPLAY_INFO_MSG = 500,
+	NETPLAY_INFO_MSG = 50,
 	NETPLAY_ERROR_MSG,
 	NETPLAY_CHAT_MSG,
-	NETPLAY_PING_REQ = 1000,
+	NETPLAY_PING_REQ = 100,
 	NETPLAY_PING_RESP,
 };
 
@@ -253,6 +253,44 @@ struct netPlayLoadRomReq
 	{
 		hdr.toNetworkByteOrder();
 		fileSize  = netPlayByteSwap(fileSize);
+	}
+};
+
+struct netPlayLoadStateResp
+{
+	netPlayMsgHdr  hdr;
+
+	uint32_t  stateSize;
+	uint32_t  opsCrc32;
+
+	netPlayLoadStateResp(void)
+		: hdr(NETPLAY_SYNC_STATE_RESP, sizeof(netPlayLoadStateResp)), stateSize(0), opsCrc32(0)
+	{
+	}
+
+	void toHostByteOrder()
+	{
+		hdr.toHostByteOrder();
+		stateSize  = netPlayByteSwap(stateSize);
+		opsCrc32   = netPlayByteSwap(opsCrc32);
+	}
+
+	void toNetworkByteOrder()
+	{
+		hdr.toNetworkByteOrder();
+		stateSize  = netPlayByteSwap(stateSize);
+		opsCrc32   = netPlayByteSwap(opsCrc32);
+	}
+
+	char* stateDataBuf()
+	{
+		uintptr_t buf = ((uintptr_t)this) + sizeof(netPlayLoadStateResp);
+		return (char*)buf;
+	}
+
+	const uint32_t stateDataSize()
+	{
+		return stateSize;
 	}
 };
 

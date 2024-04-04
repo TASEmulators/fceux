@@ -181,6 +181,8 @@ class NetPlayServer : public QTcpServer
 		void onRomUnload(void);
 		void onStateLoad(void);
 		void onNesReset(void);
+		void processClientRomLoadRequests(void);
+		void processClientStateLoadRequests(void);
 };
 
 class NetPlayClient : public QObject
@@ -286,6 +288,24 @@ class NetPlayClient : public QObject
 		unsigned int tailTarget = 3;
 		uint8_t gpData[4];
 
+		struct RomLoadReqData
+		{
+			char* buf = nullptr;
+			size_t size = 0;
+			QString fileName;
+
+			bool pending(){ return buf != nullptr; }
+
+		} romLoadData;
+
+		struct StateLoadReqData
+		{
+			char* buf = nullptr;
+			size_t size = 0;
+
+			bool pending(){ return buf != nullptr; }
+
+		} stateLoadData;
 	private:
 
 		static NetPlayClient *instance;
@@ -301,6 +321,7 @@ class NetPlayClient : public QObject
 		bool    _connected = false;
 		bool    paused = false;
 		bool    desync = false;
+		bool    readMessageProcessing = false;
 
 		uint64_t  pingDelaySum = 0;
 		uint64_t  pingDelayLast = 0;
