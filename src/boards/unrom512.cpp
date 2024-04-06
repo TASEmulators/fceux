@@ -55,9 +55,9 @@ static void UNROM512_Sync() {
 		chip = !flash_id_mode ? FLASH_CHIP : CFI_CHIP;
 	else
 		chip = ROM_CHIP;
-	setprg16r(chip, 0x8000, latche & 0b11111);
+	setprg16r(chip, 0x8000, latche);
 	setprg16r(chip, 0xc000, ~0);
-	setchr8((latche >> 5) & 0b11);
+	setchr8(latche >> 5);
 	setmirror(MI_0 + ((latche >> 7) & 1));
 }
 
