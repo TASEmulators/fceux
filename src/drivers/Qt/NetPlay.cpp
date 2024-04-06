@@ -811,11 +811,12 @@ void NetPlayServer::processClientRomLoadRequests(void)
 			{
 				FILE *fp;
 				QString filepath = QDir::tempPath();
+				QFileInfo rompath = QFileInfo(client->romLoadData.fileName);
 				const char *romData = client->romLoadData.buf;
 				const size_t romSize = client->romLoadData.size;
 
 				filepath.append( "/" );
-				filepath.append( client->romLoadData.fileName );
+				filepath.append( rompath.fileName() );
 
 				//printf("Load ROM Request Received: %s\n", filepath.c_str());
 				//printf("Dumping Temp Rom to: %s\n", filepath.c_str());
