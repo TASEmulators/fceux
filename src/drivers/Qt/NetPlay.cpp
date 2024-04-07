@@ -19,6 +19,7 @@
  */
 
 #include <QDir>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QTemporaryFile>
 
@@ -840,7 +841,7 @@ void NetPlayServer::processClientRomLoadRequests(void)
 			{
 				netPlayTextMsg<128>  errorMsg(NETPLAY_ERROR_MSG);
 				errorMsg.setFlag(netPlayTextMsgFlags::Warning);
-				errorMsg.printf("Host is rejected ROMs load request");
+				errorMsg.printf("Host has rejected ROM load request");
 				sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 			}
 
@@ -1126,6 +1127,11 @@ NetPlayClient::~NetPlayClient(void)
 	if (recvMsgBuf)
 	{
 		::free(recvMsgBuf); recvMsgBuf = nullptr;
+	}
+
+	if (numMsgBoxObjs != 0)
+	{
+		printf("Warning: Client has leaked message dialogs\n");
 	}
 	printf("NetPlayClient Destructor\n");
 }
@@ -1611,9 +1617,15 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			msg->toHostByteOrder();
 			FCEU_printf("NetPlay Error: %s\n", msg->getBuffer());
 
-			QString msgBoxTxt = tr("Host has replied with an error:\n\n");
+			numMsgBoxObjs++;
+			QString msgBoxTxt  = tr("Host has replied with an error:\n\n");
 	       		msgBoxTxt += tr(msg->getBuffer());
-			QMessageBox::critical( consoleWindow, tr("NetPlay Error"), msgBoxTxt, QMessageBox::Ok );
+
+			QMessageBox* msgBox = new QMessageBox( QMessageBox::Critical, tr("NetPlay Error"), msgBoxTxt, QMessageBox::Ok, consoleWindow );
+			connect( msgBox->button(QMessageBox::Ok), SIGNAL(clicked(void)), msgBox, SLOT(accept(void)));
+			connect( msgBox, &QMessageBox::finished, this, [this, msgBox](){ msgBox->deleteLater(); } );
+			connect( msgBox, SIGNAL(destroyed(QObject*)), this, SLOT(onMessageBoxDestroy(QObject*)));
+			msgBox->show();
 
 			if (msg->isFlagSet(netPlayTextMsgFlags::Disconnect))
 			{
@@ -1741,6 +1753,19 @@ void NetPlayClient::clientReadyRead()
 {
 	//printf("Client Ready Read\n");
 	readMessages( clientMessageCallback, this );
+}
+//-----------------------------------------------------------------------------
+void NetPlayClient::onMessageBoxDestroy(QObject* obj)
+{
+	//printf("MessageBox Destroyed: %p\n", obj);
+	if (numMsgBoxObjs > 0)
+	{
+		numMsgBoxObjs--;
+	}
+	else
+	{
+		printf("Warning: Unexpected MessageBox Destroy: %p\n", obj);
+	}
 }
 //-----------------------------------------------------------------------------
 //--- NetPlayHostDialog

@@ -327,6 +327,7 @@ class NetPlayClient : public QObject
 		uint64_t  pingDelayLast = 0;
 		uint64_t  pingNumSamples = 0;
 		uint32_t  romCrc32 = 0;
+		uint32_t  numMsgBoxObjs = 0;
 
 		std::list <NetPlayFrameInput> input;
 		FCEU::mutex inputMtx;
@@ -345,6 +346,7 @@ class NetPlayClient : public QObject
 		void onRomUnload(void);
 		void serverReadyRead(void);
 		void clientReadyRead(void);
+		void onMessageBoxDestroy(QObject* obj);
 };
 
 
