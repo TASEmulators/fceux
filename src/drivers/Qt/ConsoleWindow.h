@@ -340,6 +340,7 @@ class  consoleWin_t : public QMainWindow
 		void toggleMenuVis(void);
 		void recordMovie(void);
 		void winResizeIx(int iScale);
+		void onNetPlayChange(void);
 	private slots:
 		void closeApp(void);
 		void openROMFile(void);

@@ -220,6 +220,11 @@ int NetPlayServer::Create(QObject *parent)
 		traceRegistrationHandle = FCEUI_TraceInstructionRegister( NetPlayTraceInstruction );
 	}
 	FCEU_WRAPPER_UNLOCK();
+
+	if (consoleWindow != nullptr)
+	{
+		consoleWindow->onNetPlayChange();
+	}
 	return 0;
 }
 
@@ -241,6 +246,11 @@ int NetPlayServer::Destroy()
 		traceRegistrationHandle = nullptr;
 	}
 	FCEU_WRAPPER_UNLOCK();
+
+	if (consoleWindow != nullptr)
+	{
+		consoleWindow->onNetPlayChange();
+	}
 	return 0;
 }
 
@@ -1153,6 +1163,11 @@ int NetPlayClient::Create(QObject *parent)
 		traceRegistrationHandle = FCEUI_TraceInstructionRegister( NetPlayTraceInstruction );
 	}
 	FCEU_WRAPPER_UNLOCK();
+
+	if (consoleWindow != nullptr)
+	{
+		consoleWindow->onNetPlayChange();
+	}
 	return 0;
 }
 
@@ -1174,6 +1189,11 @@ int NetPlayClient::Destroy()
 		traceRegistrationHandle = nullptr;
 	}
 	FCEU_WRAPPER_UNLOCK();
+
+	if (consoleWindow != nullptr)
+	{
+		consoleWindow->onNetPlayChange();
+	}
 	return 0;
 }
 //-----------------------------------------------------------------------------
