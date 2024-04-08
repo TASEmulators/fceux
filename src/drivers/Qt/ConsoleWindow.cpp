@@ -3601,6 +3601,9 @@ void consoleWin_t::consolePause(void)
 	fceuWrapperTogglePause();
 	FCEU_WRAPPER_UNLOCK();
 
+	bool isPaused = FCEUI_EmulationPaused() ? true : false;
+	emit pauseToggled( isPaused );
+
 	mainMenuEmuPauseSet = false;
    return;
 }

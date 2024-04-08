@@ -182,6 +182,7 @@ NetPlayServer::NetPlayServer(QObject *parent)
 	connect(consoleWindow, SIGNAL(romUnload(void)), this, SLOT(onRomUnload(void)));
 	connect(consoleWindow, SIGNAL(stateLoaded(void)), this, SLOT(onStateLoad(void)));
 	connect(consoleWindow, SIGNAL(nesResetOccurred(void)), this, SLOT(onNesReset(void)));
+	connect(consoleWindow, SIGNAL(pauseToggled(bool)), this, SLOT(onPauseToggled(bool)));
 
 	FCEU_WRAPPER_LOCK();
 	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
@@ -373,7 +374,6 @@ int NetPlayServer::sendRomLoadReq( NetPlayClient *client )
 	Strlcpy( msg.fileName, GameInfo->filename, sizeof(msg.fileName) );
 
 	printf("Sending ROM Load Request: %s  %lu\n", filepath, fileSize );
-	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
 
 	sendMsg( client, &msg, sizeof(netPlayLoadRomReq), [&msg]{ msg.toNetworkByteOrder(); } );
 
@@ -431,7 +431,6 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 	}
 
 	printf("Sending ROM Sync Request: %zu\n", em.size());
-	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
 
 	sendMsg( client, &resp, sizeof(netPlayLoadStateResp), [&resp]{ resp.toNetworkByteOrder(); } );
 	sendMsg( client, em.buf(), em.size() );
@@ -439,6 +438,44 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 	client->flushData();
 
 	return 0;
+}
+//-----------------------------------------------------------------------------
+int NetPlayServer::sendPause( NetPlayClient *client )
+{
+	netPlayMsgHdr msg(NETPLAY_CLIENT_PAUSE_REQ);
+
+	sendMsg( client, &msg, sizeof(netPlayMsgHdr), [&msg]{ msg.toNetworkByteOrder(); } );
+
+	return 0;
+}
+//-----------------------------------------------------------------------------
+int NetPlayServer::sendUnpause( NetPlayClient *client )
+{
+	netPlayMsgHdr msg(NETPLAY_CLIENT_UNPAUSE_REQ);
+
+	sendMsg( client, &msg, sizeof(netPlayMsgHdr), [&msg]{ msg.toNetworkByteOrder(); } );
+
+	return 0;
+}
+//-----------------------------------------------------------------------------
+int NetPlayServer::sendPauseAll()
+{
+	int ret = 0;
+	for (auto& client : clientList )
+	{
+		ret |= sendPause( client );
+	}
+	return ret;
+}
+//-----------------------------------------------------------------------------
+int NetPlayServer::sendUnpauseAll()
+{
+	int ret = 0;
+	for (auto& client : clientList )
+	{
+		ret |= sendUnpause( client );
+	}
+	return ret;
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::setRole(int _role)
@@ -507,6 +544,8 @@ void NetPlayServer::onRomLoad()
 	inputClear();
 	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
 
+	sendPauseAll();
+
 	// New ROM has been loaded by server, signal clients to load and sync
 	for (auto& client : clientList )
 	{
@@ -523,6 +562,8 @@ void NetPlayServer::onRomUnload()
 	romCrc32 = 0;
 
 	unloadMsg.toNetworkByteOrder();
+
+	sendPauseAll();
 
 	// New ROM has been loaded by server, signal clients to load and sync
 	for (auto& client : clientList )
@@ -541,6 +582,8 @@ void NetPlayServer::onStateLoad()
 
 	inputClear();
 	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
+
+	sendPauseAll();
 
 	// New State has been loaded by server, signal clients to load and sync
 	for (auto& client : clientList )
@@ -562,6 +605,8 @@ void NetPlayServer::onNesReset()
 	inputClear();
 	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
 
+	sendPauseAll();
+
 	// NES Reset has occurred on server, signal clients sync
 	for (auto& client : clientList )
 	{
@@ -569,6 +614,18 @@ void NetPlayServer::onNesReset()
 		sendStateSyncReq( client );
 	}
 	FCEU_WRAPPER_UNLOCK();
+}
+//-----------------------------------------------------------------------------
+void NetPlayServer::onPauseToggled( bool isPaused )
+{
+	if (isPaused)
+	{
+		sendPauseAll();
+	}
+	else
+	{
+		sendUnpauseAll();
+	}
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::resyncClient( NetPlayClient *client )
@@ -667,6 +724,14 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 					FCEU_WRAPPER_LOCK();
 					resyncClient(client);
 					client->state = 1;
+					if (FCEUI_EmulationPaused())
+					{
+						sendPauseAll();
+					}
+					else
+					{
+						sendUnpauseAll();
+					}
 					FCEU_WRAPPER_UNLOCK();
 					FCEU_DispMessage("%s Joined",0, client->userName.toLocal8Bit().constData());
 				}
@@ -787,6 +852,13 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			}
 		}
 		break;
+		case NETPLAY_SYNC_STATE_REQ:
+		{
+			FCEU_WRAPPER_LOCK();
+			resyncClient( client );
+			FCEU_WRAPPER_UNLOCK();
+		}
+		break;
 		case NETPLAY_SYNC_STATE_RESP:
 		{
 			netPlayLoadStateResp* msg = static_cast<netPlayLoadStateResp*>(msgBuf);
@@ -815,13 +887,6 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 					QTimer::singleShot( 100, this, SLOT(processClientStateLoadRequests(void)) );
 				}
 			}
-		}
-		break;
-		case NETPLAY_CLIENT_SYNC_REQ:
-		{
-			FCEU_WRAPPER_LOCK();
-			resyncClient( client );
-			FCEU_WRAPPER_UNLOCK();
 		}
 		break;
 		default:
@@ -878,6 +943,7 @@ void NetPlayServer::processClientRomLoadRequests(void)
 				FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
 				FCEU_WRAPPER_UNLOCK();
 
+				sendPauseAll();
 				resyncAllClients();
 			}
 			else
@@ -1394,7 +1460,6 @@ int NetPlayClient::requestRomLoad( const char *romPath )
 	Strlcpy( msg.fileName, fi.fileName().toLocal8Bit().constData(), sizeof(msg.fileName) );
 
 	printf("Sending ROM Load Request: %s  %lu\n", romPath, fileSize );
-	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
 
 	msg.toNetworkByteOrder();
 	sock->write( reinterpret_cast<const char*>(&msg), sizeof(netPlayLoadRomReq) );
@@ -1467,7 +1532,7 @@ int NetPlayClient::requestStateLoad(EMUFILE *is)
 //-----------------------------------------------------------------------------
 int NetPlayClient::requestSync(void)
 {
-	netPlayMsgHdr hdr(NETPLAY_CLIENT_SYNC_REQ);
+	netPlayMsgHdr hdr(NETPLAY_SYNC_STATE_REQ);
 
 	hdr.toNetworkByteOrder();
 	sock->write( reinterpret_cast<const char*>(&hdr), sizeof(netPlayMsgHdr));
@@ -1717,7 +1782,6 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 
 			FCEU_WRAPPER_LOCK();
 			LoadGame( filepath.toLocal8Bit().constData(), true, true );
-			FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
 
 			opsCrc32 = 0;
 			netPlayFrameData.reset();
@@ -1815,6 +1879,22 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			pong.hostTimeStamp = ping->hostTimeStamp;
 			pong.toNetworkByteOrder();
 			sock->write( (const char*)&pong, sizeof(netPlayPingResp) );
+		}
+		break;
+		case NETPLAY_CLIENT_PAUSE_REQ:
+		{
+			if (!FCEUI_EmulationPaused())
+			{
+				FCEUI_ToggleEmulationPause();
+			}
+		}
+		break;
+		case NETPLAY_CLIENT_UNPAUSE_REQ:
+		{
+			if (FCEUI_EmulationPaused())
+			{
+				FCEUI_ToggleEmulationPause();
+			}
 		}
 		break;
 		default:
@@ -2480,6 +2560,7 @@ void NetPlayHostStatusDialog::resyncAllPlayers(void)
 
 	if (server != nullptr)
 	{
+		server->sendPauseAll();
 		server->resyncAllClients();
 	}
 }

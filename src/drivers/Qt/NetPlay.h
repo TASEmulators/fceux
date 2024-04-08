@@ -131,6 +131,10 @@ class NetPlayServer : public QTcpServer
 		int  sendMsg( NetPlayClient *client, void *msg, size_t msgSize, std::function<void(void)> netByteOrderConvertFunc = []{});
 		int  sendRomLoadReq( NetPlayClient *client );
 		int  sendStateSyncReq( NetPlayClient *client );
+		int  sendPause( NetPlayClient *client );
+		int  sendUnpause( NetPlayClient *client );
+		int  sendPauseAll(void);
+		int  sendUnpauseAll(void);
 		void setRole(int _role);
 		int  getRole(void){ return role; }
 		bool claimRole(NetPlayClient* client, int _role);
@@ -181,6 +185,7 @@ class NetPlayServer : public QTcpServer
 		void onRomUnload(void);
 		void onStateLoad(void);
 		void onNesReset(void);
+		void onPauseToggled(bool);
 		void processClientRomLoadRequests(void);
 		void processClientStateLoadRequests(void);
 };

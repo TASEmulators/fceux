@@ -331,6 +331,7 @@ class  consoleWin_t : public QMainWindow
 		void romUnload(void);
 		void stateLoaded(void);
 		void nesResetOccurred(void);
+		void pauseToggled(bool state);
 
 	public slots:
 		void openDebugWindow(void);
