@@ -9,6 +9,8 @@
 #include <list>
 #include <functional>
 
+#include <QFile>
+#include <QTemporaryFile>
 #include <QWidget>
 #include <QDialog>
 #include <QVBoxLayout>
@@ -128,7 +130,7 @@ class NetPlayServer : public QTcpServer
 		void resyncClient( NetPlayClient *client );
 		void resyncAllClients();
 
-		int  sendMsg( NetPlayClient *client, void *msg, size_t msgSize, std::function<void(void)> netByteOrderConvertFunc = []{});
+		int  sendMsg( NetPlayClient *client, const void *msg, size_t msgSize, std::function<void(void)> netByteOrderConvertFunc = []{});
 		int  sendRomLoadReq( NetPlayClient *client );
 		int  sendStateSyncReq( NetPlayClient *client );
 		int  sendPause( NetPlayClient *client );
@@ -146,6 +148,7 @@ class NetPlayServer : public QTcpServer
 		void setEnforceAppVersionCheck(bool value){ enforceAppVersionCheck = value; }
 		void setAllowClientRomLoadRequest(bool value){ allowClientRomLoadReq = value; }
 		void setAllowClientStateLoadRequest(bool value){ allowClientStateLoadReq = value; }
+		void setDebugMode(bool value){ debugMode = value; }
 
 		void serverProcessMessage( NetPlayClient *client, void *msgBuf, size_t msgSize );
 
@@ -173,6 +176,7 @@ class NetPlayServer : public QTcpServer
 		bool     enforceAppVersionCheck = true;
 		bool     allowClientRomLoadReq = false;
 		bool     allowClientStateLoadReq = false;
+		bool     debugMode = false;
 
 	public:
 	signals:
@@ -279,6 +283,7 @@ class NetPlayClient : public QObject
 		void recordPingResult( uint64_t delay_ms );
 		void resetPingData(void);
 		double getAvgPingDelay();
+		void setDebugLog(QFile* file){ debugLog = file; };
 
 		QString userName;
 		QString password;
@@ -334,8 +339,12 @@ class NetPlayClient : public QObject
 		uint32_t  romCrc32 = 0;
 		uint32_t  numMsgBoxObjs = 0;
 
+		long int  spawnTimeStampMs = 0;
+
 		std::list <NetPlayFrameInput> input;
 		FCEU::mutex inputMtx;
+
+		QFile*  debugLog = nullptr;
 
 		static constexpr size_t recvMsgBufSize = 2 * 1024 * 1024;
 
@@ -376,6 +385,7 @@ protected:
 	QCheckBox  *enforceAppVersionChkCBox;
 	QCheckBox  *allowClientRomReqCBox;
 	QCheckBox  *allowClientStateReqCBox;
+	QCheckBox  *debugModeCBox;
 
 	static NetPlayHostDialog* instance;
 

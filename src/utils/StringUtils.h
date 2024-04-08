@@ -154,21 +154,49 @@ namespace FCEU
 				va_start(args, format);
 				retval = ::vsnprintf( buf, bufSize, format, args);
 				va_end(args);
+
+				if (retval > 0)
+				{
+					if ( static_cast<size_t>(retval) < bufSize)
+					{
+						end = retval;
+					}
+					else
+					{
+						end = bufSize - 1;
+					}
+				}
 				return retval;
 			}
 
 			int append_sprintf( __FCEU_PRINTF_FORMAT const char *format, ...) __FCEU_PRINTF_ATTRIBUTE( 2, 3 )
 			{
 				int retval;
-				va_list args;
-				va_start(args, format);
 				size_t sizeAvail = 0;
 				if (bufSize > end)
 				{
-					sizeAvail = bufSize - end;
+					sizeAvail = bufSize - end - 1;
 				}
+				if (sizeAvail == 0)
+				{
+					return 0;
+				}
+				va_list args;
+				va_start(args, format);
 				retval = ::vsnprintf( &buf[end], sizeAvail, format, args);
 				va_end(args);
+
+				if (retval > 0)
+				{
+					if ( static_cast<size_t>(retval) < sizeAvail)
+					{
+						end += retval;
+					}
+					else
+					{
+						end = bufSize - 1;
+					}
+				}
 				return retval;
 			}
 

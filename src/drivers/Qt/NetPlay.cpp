@@ -272,6 +272,14 @@ void NetPlayServer::processPendingConnections(void)
 	{
 		NetPlayClient *client = new NetPlayClient(this);
 
+		if (debugMode)
+		{
+			// File is owned by the server
+			QTemporaryFile* debugFile = new QTemporaryFile( QDir::tempPath() + QString("/NetPlayServerConnection_XXXXXX.log"), this);
+			debugFile->open();
+			client->setDebugLog( debugFile );
+			printf("Client Debug File: %s\n", debugFile->fileName().toLocal8Bit().constData());
+		}
 		client->setSocket(newSock);
 
 		clientList.push_back(client);
@@ -314,7 +322,7 @@ int NetPlayServer::closeAllConnections(void)
 }
 
 //-----------------------------------------------------------------------------
-int NetPlayServer::sendMsg( NetPlayClient *client, void *msg, size_t msgSize, std::function<void(void)> netByteOrderConvertFunc)
+int NetPlayServer::sendMsg( NetPlayClient *client, const void *msg, size_t msgSize, std::function<void(void)> netByteOrderConvertFunc)
 {
 	QTcpSocket* sock;
 
@@ -329,7 +337,7 @@ int NetPlayServer::sendMsg( NetPlayClient *client, void *msg, size_t msgSize, st
 //-----------------------------------------------------------------------------
 int NetPlayServer::sendRomLoadReq( NetPlayClient *client )
 {
-	constexpr size_t BufferSize = 8 * 1024;
+	constexpr size_t BufferSize = 32 * 1024;
 	char buf[BufferSize];
 	size_t bytesRead;
 	long fileSize = 0;
@@ -392,6 +400,7 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 {
 	EMUFILE_MEMORY em;
 	int compressionLevel = 1;
+	static constexpr size_t maxBytesPerWrite = 32 * 1024;
 	netPlayLoadStateResp resp;
 
 	if ( GameInfo == nullptr )
@@ -433,7 +442,24 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 	printf("Sending ROM Sync Request: %zu\n", em.size());
 
 	sendMsg( client, &resp, sizeof(netPlayLoadStateResp), [&resp]{ resp.toNetworkByteOrder(); } );
-	sendMsg( client, em.buf(), em.size() );
+	//sendMsg( client, em.buf(), em.size() );
+
+	const unsigned char* bufPtr = em.buf();
+	size_t dataSize = em.size();
+
+	while (dataSize > 0)
+	{
+		size_t bytesToWrite = dataSize;
+
+		if (bytesToWrite > maxBytesPerWrite)
+		{
+			bytesToWrite = maxBytesPerWrite;
+		}
+		sendMsg( client, bufPtr, bytesToWrite );
+
+		bufPtr += bytesToWrite;
+		dataSize -= bytesToWrite;
+	}
 
 	client->flushData();
 
@@ -744,6 +770,11 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 					sendMsg( client, &errorMsg, errorMsg.hdr.msgSize, [&errorMsg]{ errorMsg.toNetworkByteOrder(); } );
 					client->flushData();
 				}
+			}
+			else
+			{
+				// If authentication failed, force disconnect client.
+				client->forceDisconnect();
 			}
 		}
 		break;
@@ -1179,6 +1210,10 @@ NetPlayClient::NetPlayClient(QObject *parent, bool outGoing)
 	: role(0), state(0), currentFrame(0), sock(nullptr), recvMsgId(-1), recvMsgSize(0),
 		recvMsgBytesLeft(0), recvMsgByteIndex(0), recvMsgBuf(nullptr)
 {
+	FCEU::timeStampRecord ts;
+	ts.readNew();
+	spawnTimeStampMs = ts.toMilliSeconds();
+
 	if (outGoing)
 	{
 		instance = this;
@@ -1241,6 +1276,11 @@ NetPlayClient::~NetPlayClient(void)
 	if (numMsgBoxObjs != 0)
 	{
 		printf("Warning: Client has leaked message dialogs\n");
+	}
+
+	if (debugLog != nullptr)
+	{
+		debugLog->close();
 	}
 	printf("NetPlayClient Destructor\n");
 }
@@ -1348,6 +1388,30 @@ void NetPlayClient::setSocket(QTcpSocket *s)
 
 	if (sock != nullptr)
 	{
+		if (debugLog != nullptr)
+		{
+			FCEU::FixedString<256> logMsg;
+
+
+			if (isNetPlayHost())
+			{
+				QHostAddress addr = sock->peerAddress();
+				int port = sock->peerPort();
+
+				logMsg.sprintf("Client Socket Connected: %s:%i\n", addr.toString().toLocal8Bit().constData(), port );
+			}
+			else
+			{
+				QHostAddress addr = sock->localAddress();
+				int port = sock->localPort();
+
+				logMsg.sprintf("Client Socket Connected: %s:%i\n", addr.toString().toLocal8Bit().constData(), port );
+			}
+
+			//printf("LogMsg: %zu : %s\n", logMsg.size(), logMsg.c_str());
+			debugLog->write( logMsg.c_str(), logMsg.size() );
+			debugLog->flush();
+		}
 		sock->setSocketOption( QAbstractSocket::QAbstractSocket::LowDelayOption, 1);
 		sock->setSocketOption( QAbstractSocket::SendBufferSizeSocketOption, static_cast<int>(recvMsgBufSize) );
 		sock->setSocketOption( QAbstractSocket::ReceiveBufferSizeSocketOption, static_cast<int>(recvMsgBufSize) );
@@ -1435,7 +1499,7 @@ void NetPlayClient::onSocketError(QAbstractSocket::SocketError error)
 //-----------------------------------------------------------------------------
 int NetPlayClient::requestRomLoad( const char *romPath )
 {
-	constexpr size_t BufferSize = 8 * 1024;
+	constexpr size_t BufferSize = 32 * 1024;
 	char buf[BufferSize];
 	size_t bytesRead;
 	long fileSize = 0;
@@ -1479,7 +1543,7 @@ int NetPlayClient::requestStateLoad(EMUFILE *is)
 {
 	size_t dataSize;
 	char *dataBuf;
-	static constexpr size_t maxBytesPerWrite = 16 * 1024;
+	static constexpr size_t maxBytesPerWrite = 32 * 1024;
 	netPlayLoadStateResp resp;
 
 	dataSize = is->size();
@@ -1612,6 +1676,8 @@ void NetPlayClient::update(void)
 //-----------------------------------------------------------------------------
 int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgBuf, size_t msgSize ), void *userData )
 {
+	FCEU::FixedString<256> logMsg;
+
 	if (readMessageProcessing)
 	{
 		printf("Read Message is Processing in callstack, don't allow re-entrantancy.\n");
@@ -1624,11 +1690,17 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 		bool readReq;
 		netPlayMsgHdr *hdr;
 		constexpr int netPlayMsgHdrSize = sizeof(netPlayMsgHdr);
-		FCEU::timeStampRecord ts;
+		long int ts = 0;
 
-		ts.readNew();
 		int bytesAvailable = sock->bytesAvailable();
 		readReq = bytesAvailable > 0;
+
+		if (debugLog != nullptr)
+		{
+			FCEU::timeStampRecord tsRec;
+			tsRec.readNew();
+			ts = tsRec.toMilliSeconds() - spawnTimeStampMs;
+		}
 
 		while (readReq)
 		{
@@ -1652,6 +1724,11 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 						recvMsgByteIndex += dataRead;
 					}
 					//printf("   Data: Id: %u   Size: %zu  Read: %i\n", recvMsgId, readSize, dataRead );
+					if (debugLog != nullptr)
+					{
+						logMsg.sprintf("%lu: Recv Chunk: Size:%i     Left:%i\n", ts, dataRead, recvMsgBytesLeft);
+						debugLog->write( logMsg.c_str(), logMsg.size() );
+					}
 
 					if (recvMsgBytesLeft > 0)
 					{
@@ -1660,6 +1737,11 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 					}
 					else
 					{
+						if (debugLog != nullptr)
+						{
+							logMsg.sprintf("%lu: Recv End: Size:%i   \n", ts, recvMsgSize);
+							debugLog->write( logMsg.c_str(), logMsg.size() );
+						}
 						msgCallback( userData, recvMsgBuf, recvMsgSize );
 						bytesAvailable = sock->bytesAvailable();
 						readReq = (bytesAvailable > 0);
@@ -1679,12 +1761,22 @@ int NetPlayClient::readMessages( void (*msgCallback)( void *userData, void *msgB
 				if ( (netPlayByteSwap(hdr->magic[0]) != NETPLAY_MAGIC_NUMBER) || 
 				     (netPlayByteSwap(hdr->magic[1]) != NETPLAY_MAGIC_NUMBER) )
 				{
-					printf("Error: Message Header Validity Check Failed: %08X\n", recvMsgId);
+					FCEU_printf("Netplay Error: Message Header Validity Check Failed: %08X\n", recvMsgId);
+					forceDisconnect();
+					return -1;
 				}
 
 				if (netPlayByteSwap(hdr->msgSize) > recvMsgBufSize)
 				{
-					printf("Error: Message size too large: %08X\n", recvMsgId);
+					FCEU_printf("Netplay Error: Message size too large: %08X\n", recvMsgId);
+					forceDisconnect();
+					return -1;
+				}
+
+				if (debugLog != nullptr)
+				{
+					logMsg.sprintf("%lu: Recv Start: HDR Info: Id:%u   ExpectedSize:%i\n", ts, netPlayByteSwap(hdr->msgId), recvMsgSize );
+					debugLog->write( logMsg.c_str(), logMsg.size() );
 				}
 				//printf("HDR: Id: %u   Size: %u\n", netPlayByteSwap(hdr->msgId), netPlayByteSwap(hdr->msgSize) );
 
@@ -1773,7 +1865,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 
 			FCEU_printf("Load ROM Request Received: %s\n", msg->fileName);
 
-			tmpFile.setFileTemplate(QString("tmpRomXXXXXX.nes"));
+			tmpFile.setFileTemplate(QDir::tempPath() + QString("/tmpRom_XXXXXX.nes"));
 			tmpFile.open();
 			QString filepath = tmpFile.fileName();
 			printf("Dumping Temp Rom to: %s\n", tmpFile.fileName().toLocal8Bit().constData());
@@ -2028,6 +2120,9 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	g_config->getOption("SDL.NetPlayHostAllowClientStateLoadReq", &stateLoadReqEna);
 	allowClientStateReqCBox->setChecked(stateLoadReqEna);
 
+	debugModeCBox = new QCheckBox(tr("Debug Network Messaging"));
+	grid->addWidget( debugModeCBox, 4, 0, 1, 2 );
+
 	connect(passwordRequiredCBox, SIGNAL(stateChanged(int)), this, SLOT(passwordRequiredChanged(int)));
 	connect(allowClientRomReqCBox, SIGNAL(stateChanged(int)), this, SLOT(allowClientRomReqChanged(int)));
 	connect(allowClientStateReqCBox, SIGNAL(stateChanged(int)), this, SLOT(allowClientStateReqChanged(int)));
@@ -2113,6 +2208,7 @@ void NetPlayHostDialog::onStartClicked(void)
 	server->setEnforceAppVersionCheck( enforceAppVersionChkCBox->isChecked() );
 	server->setAllowClientRomLoadRequest( allowClientRomReqCBox->isChecked() );
 	server->setAllowClientStateLoadRequest( allowClientStateReqCBox->isChecked() );
+	server->setDebugMode( debugModeCBox->isChecked() );
 
 	if (passwordRequiredCBox->isChecked())
 	{
