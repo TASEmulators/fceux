@@ -404,6 +404,32 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 	resp.stateSize    = em.size();
 	resp.opsCrc32     = opsCrc32;
 
+	NetPlayFrameData lastFrameData;
+	netPlayFrameData.getLast( lastFrameData );
+
+	resp.lastFrame.num      = lastFrameData.frameNum;
+	resp.lastFrame.opsCrc32 = lastFrameData.opsCrc32;
+	resp.lastFrame.ramCrc32 = lastFrameData.ramCrc32;
+	resp.numCtrlFrames = 0;
+
+	{
+		int i = 0;
+		FCEU::autoScopedLock alock(inputMtx);
+		for (auto& inputFrame : input)
+		{
+			if (i < netPlayLoadStateResp::MaxCtrlFrames)
+			{
+				resp.ctrlData[i].frameNum = inputFrame.frameCounter;
+				resp.ctrlData[i].ctrlState[0] = inputFrame.ctrl[0];
+				resp.ctrlData[i].ctrlState[1] = inputFrame.ctrl[1];
+				resp.ctrlData[i].ctrlState[2] = inputFrame.ctrl[2];
+				resp.ctrlData[i].ctrlState[3] = inputFrame.ctrl[3];
+				i++;
+			}
+		}
+		resp.numCtrlFrames = i;
+	}
+
 	printf("Sending ROM Sync Request: %zu\n", em.size());
 	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
 
@@ -556,6 +582,13 @@ void NetPlayServer::resyncClient( NetPlayClient *client )
 void NetPlayServer::resyncAllClients()
 {
 	FCEU_WRAPPER_LOCK();
+
+	opsCrc32 = 0;
+	netPlayFrameData.reset();
+
+	inputClear();
+	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
+
 	for (auto& client : clientList )
 	{
 		resyncClient( client );
@@ -632,10 +665,9 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				{
 					client->userName = msg->userName;
 					FCEU_WRAPPER_LOCK();
-					sendRomLoadReq( client );
-					sendStateSyncReq( client );
-					FCEU_WRAPPER_UNLOCK();
+					resyncClient(client);
 					client->state = 1;
+					FCEU_WRAPPER_UNLOCK();
 					FCEU_DispMessage("%s Joined",0, client->userName.toLocal8Bit().constData());
 				}
 				else
@@ -681,7 +713,8 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 
 				if (!client->syncOk)
 				{
-					printf("Frame:%u  is NOT in Sync: OPS:%i  RAM:%i\n", msg->frameRun, opsSync, ramSync);
+					printf("Client %s Frame:%u  is NOT in Sync: OPS:%i  RAM:%i\n",
+							client->userName.toLocal8Bit().constData(), msg->frameRun, opsSync, ramSync);
 					client->desyncCount++;
 
 					if (client->desyncCount > forceResyncCount)
@@ -1685,6 +1718,10 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			FCEU_WRAPPER_LOCK();
 			LoadGame( filepath.toLocal8Bit().constData(), true, true );
 			FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
+
+			opsCrc32 = 0;
+			netPlayFrameData.reset();
+			inputClear();
 			FCEU_WRAPPER_UNLOCK();
 		}
 		break;
@@ -1711,11 +1748,34 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			serverRequestedStateLoad = true;
 			FCEUSS_LoadFP( &em, SSLOADPARAM_NOBACKUP );
 			serverRequestedStateLoad = false;
-			FCEU_WRAPPER_UNLOCK();
 
 			opsCrc32 = msg->opsCrc32;
 			netPlayFrameData.reset();
+
+			NetPlayFrameData data;
+			data.frameNum = msg->lastFrame.num;
+			data.opsCrc32 = msg->lastFrame.opsCrc32;
+			data.ramCrc32 = msg->lastFrame.ramCrc32;
+
+			netPlayFrameData.push( data );
+
 			inputClear();
+
+			const int numInputFrames = msg->numCtrlFrames;
+			for (int i=0; i<numInputFrames; i++)
+			{
+				NetPlayFrameInput inputFrame;
+
+				inputFrame.frameCounter = msg->ctrlData[i].frameNum;
+				inputFrame.ctrl[0] = msg->ctrlData[i].ctrlState[0];
+				inputFrame.ctrl[1] = msg->ctrlData[i].ctrlState[1];
+				inputFrame.ctrl[2] = msg->ctrlData[i].ctrlState[2];
+				inputFrame.ctrl[3] = msg->ctrlData[i].ctrlState[3];
+
+				pushBackInput( inputFrame );
+			}
+			FCEU_WRAPPER_UNLOCK();
+
 		}
 		break;
 		case NETPLAY_RUN_FRAME_REQ:

@@ -263,23 +263,58 @@ struct netPlayLoadStateResp
 	uint32_t  stateSize;
 	uint32_t  opsCrc32;
 
+	struct {
+		uint32_t  num = 0;
+		uint32_t  opsCrc32 = 0;
+		uint32_t  ramCrc32 = 0;
+	} lastFrame;
+
+	uint32_t  numCtrlFrames;
+
+	static constexpr int MaxCtrlFrames = 10;
+
+	struct {
+		uint32_t  frameNum = 0;
+		uint8_t   ctrlState[4] = {0};
+
+	} ctrlData[MaxCtrlFrames];
+
 	netPlayLoadStateResp(void)
-		: hdr(NETPLAY_SYNC_STATE_RESP, sizeof(netPlayLoadStateResp)), stateSize(0), opsCrc32(0)
+		: hdr(NETPLAY_SYNC_STATE_RESP, sizeof(netPlayLoadStateResp)),
+			stateSize(0), opsCrc32(0), numCtrlFrames(0)
 	{
 	}
 
 	void toHostByteOrder()
 	{
 		hdr.toHostByteOrder();
-		stateSize  = netPlayByteSwap(stateSize);
-		opsCrc32   = netPlayByteSwap(opsCrc32);
+		stateSize          = netPlayByteSwap(stateSize);
+		opsCrc32           = netPlayByteSwap(opsCrc32);
+		lastFrame.num      = netPlayByteSwap(lastFrame.num);
+		lastFrame.opsCrc32 = netPlayByteSwap(lastFrame.opsCrc32);
+		lastFrame.ramCrc32 = netPlayByteSwap(lastFrame.ramCrc32);
+		numCtrlFrames      = netPlayByteSwap(numCtrlFrames);
+
+		for (int i=0; i<MaxCtrlFrames; i++)
+		{
+			ctrlData[i].frameNum = netPlayByteSwap(ctrlData[i].frameNum);
+		}
 	}
 
 	void toNetworkByteOrder()
 	{
 		hdr.toNetworkByteOrder();
-		stateSize  = netPlayByteSwap(stateSize);
-		opsCrc32   = netPlayByteSwap(opsCrc32);
+		stateSize          = netPlayByteSwap(stateSize);
+		opsCrc32           = netPlayByteSwap(opsCrc32);
+		lastFrame.num      = netPlayByteSwap(lastFrame.num);
+		lastFrame.opsCrc32 = netPlayByteSwap(lastFrame.opsCrc32);
+		lastFrame.ramCrc32 = netPlayByteSwap(lastFrame.ramCrc32);
+		numCtrlFrames      = netPlayByteSwap(numCtrlFrames);
+
+		for (int i=0; i<MaxCtrlFrames; i++)
+		{
+			ctrlData[i].frameNum = netPlayByteSwap(ctrlData[i].frameNum);
+		}
 	}
 
 	char* stateDataBuf()
