@@ -55,6 +55,7 @@
 #include "../../movie.h"
 #include "../../wave.h"
 #include "../../state.h"
+#include "../../cheat.h"
 #include "../../profiler.h"
 #include "../../version.h"
 #include "common/os_utils.h"
@@ -285,6 +286,19 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		}
 	};
 	FCEUSS_SetLoadCallback( stateLoadCallback );
+
+	// Register Cheat Change Callback
+	auto cheatChangeCallback = []( void* userData )
+	{
+		FCEU_UNUSED(userData);
+
+		//printf("Cheats Changed Event!\n");
+		if (consoleWindow != nullptr)
+		{
+			emit consoleWindow->cheatsChanged();
+		}
+	};
+	FCEU_SetCheatChangeEventCallback( cheatChangeCallback, this );
 }
 
 consoleWin_t::~consoleWin_t(void)

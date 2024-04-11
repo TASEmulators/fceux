@@ -25,6 +25,7 @@
 
 #include "../../fceu.h"
 #include "../../cart.h"
+#include "../../cheat.h"
 #include "../../state.h"
 #include "../../movie.h"
 #include "../../debug.h"
@@ -182,6 +183,7 @@ NetPlayServer::NetPlayServer(QObject *parent)
 	connect(consoleWindow, SIGNAL(romUnload(void)), this, SLOT(onRomUnload(void)));
 	connect(consoleWindow, SIGNAL(stateLoaded(void)), this, SLOT(onStateLoad(void)));
 	connect(consoleWindow, SIGNAL(nesResetOccurred(void)), this, SLOT(onNesReset(void)));
+	connect(consoleWindow, SIGNAL(cheatsChanged(void)), this, SLOT(onCheatsChanged(void)));
 	connect(consoleWindow, SIGNAL(pauseToggled(bool)), this, SLOT(onPauseToggled(bool)));
 
 	FCEU_WRAPPER_LOCK();
@@ -396,12 +398,43 @@ int NetPlayServer::sendRomLoadReq( NetPlayClient *client )
 	return 0;
 }
 //-----------------------------------------------------------------------------
+struct NetPlayServerCheatQuery
+{
+	int  numLoaded = 0;
+
+	netPlayLoadStateResp::CheatData data[netPlayLoadStateResp::MaxCheats];
+};
+
+static int serverActiveCheatListCB(const char *name, uint32 a, uint8 v, int c, int s, int type, void *data)
+{
+	NetPlayServerCheatQuery* query = static_cast<NetPlayServerCheatQuery*>(data);
+
+	const int i = query->numLoaded;
+
+	if (i < netPlayLoadStateResp::MaxCheats)
+	{
+		auto& cheat = query->data[i];
+		cheat.addr = a;
+		cheat.val  = v;
+		cheat.cmp  = c;
+		cheat.type = type;
+		cheat.stat = s;
+		Strlcpy( cheat.name, name, sizeof(cheat.name));
+
+		query->numLoaded++;
+	}
+
+	return 1;
+}
+//-----------------------------------------------------------------------------
 int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 {
 	EMUFILE_MEMORY em;
-	int compressionLevel = 1;
+	int numCtrlFrames = 0, numCheats = 0, compressionLevel = 1;
 	static constexpr size_t maxBytesPerWrite = 32 * 1024;
 	netPlayLoadStateResp resp;
+	netPlayLoadStateResp::CtrlData ctrlData[netPlayLoadStateResp::MaxCtrlFrames];
+	NetPlayServerCheatQuery cheatQuery;
 
 	if ( GameInfo == nullptr )
 	{
@@ -409,9 +442,9 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 	}
 	FCEUSS_SaveMS( &em, compressionLevel );
 
-	resp.hdr.msgSize += em.size();
 	resp.stateSize    = em.size();
 	resp.opsCrc32     = opsCrc32;
+	resp.romCrc32     = romCrc32;
 
 	NetPlayFrameData lastFrameData;
 	netPlayFrameData.getLast( lastFrameData );
@@ -428,20 +461,34 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 		{
 			if (i < netPlayLoadStateResp::MaxCtrlFrames)
 			{
-				resp.ctrlData[i].frameNum = inputFrame.frameCounter;
-				resp.ctrlData[i].ctrlState[0] = inputFrame.ctrl[0];
-				resp.ctrlData[i].ctrlState[1] = inputFrame.ctrl[1];
-				resp.ctrlData[i].ctrlState[2] = inputFrame.ctrl[2];
-				resp.ctrlData[i].ctrlState[3] = inputFrame.ctrl[3];
+				ctrlData[i].frameNum = netPlayByteSwap(inputFrame.frameCounter);
+				ctrlData[i].ctrlState[0] = inputFrame.ctrl[0];
+				ctrlData[i].ctrlState[1] = inputFrame.ctrl[1];
+				ctrlData[i].ctrlState[2] = inputFrame.ctrl[2];
+				ctrlData[i].ctrlState[3] = inputFrame.ctrl[3];
 				i++;
 			}
 		}
-		resp.numCtrlFrames = i;
+		resp.numCtrlFrames = numCtrlFrames = i;
 	}
+
+	FCEUI_ListCheats(::serverActiveCheatListCB, (void *)&cheatQuery);
+	resp.numCheats = numCheats = cheatQuery.numLoaded;
+
+	resp.calcTotalSize();
 
 	printf("Sending ROM Sync Request: %zu\n", em.size());
 
 	sendMsg( client, &resp, sizeof(netPlayLoadStateResp), [&resp]{ resp.toNetworkByteOrder(); } );
+
+	if (numCtrlFrames > 0)
+	{
+		sendMsg( client, ctrlData, numCtrlFrames * sizeof(netPlayLoadStateResp::CtrlData) );
+	}
+	if (numCheats > 0)
+	{
+		sendMsg( client, &cheatQuery.data, numCheats * sizeof(netPlayLoadStateResp::CheatData) );
+	}
 	//sendMsg( client, em.buf(), em.size() );
 
 	const unsigned char* bufPtr = em.buf();
@@ -583,6 +630,7 @@ void NetPlayServer::onRomLoad()
 //-----------------------------------------------------------------------------
 void NetPlayServer::onRomUnload()
 {
+	//printf("ROM UnLoaded!\n");
 	netPlayMsgHdr unloadMsg(NETPLAY_UNLOAD_ROM_REQ);
 
 	romCrc32 = 0;
@@ -637,6 +685,32 @@ void NetPlayServer::onNesReset()
 	for (auto& client : clientList )
 	{
 		sendRomLoadReq( client );
+		sendStateSyncReq( client );
+	}
+	FCEU_WRAPPER_UNLOCK();
+}
+//-----------------------------------------------------------------------------
+void NetPlayServer::onCheatsChanged()
+{
+	//printf("NES Cheats Event!\n");
+	if (romCrc32 == 0)
+	{
+		return;
+	}
+	FCEU_WRAPPER_LOCK();
+
+	opsCrc32 = 0;
+	netPlayFrameData.reset();
+
+	inputClear();
+	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
+
+	sendPauseAll();
+
+	// NES Reset has occurred on server, signal clients sync
+	for (auto& client : clientList )
+	{
+		//sendRomLoadReq( client );
 		sendStateSyncReq( client );
 	}
 	FCEU_WRAPPER_UNLOCK();
@@ -1568,6 +1642,11 @@ int NetPlayClient::requestStateLoad(EMUFILE *is)
 	{
 		printf("Read Error\n");
 	}
+
+	if (currCartInfo != nullptr)
+	{
+		resp.romCrc32 = romCrc32;
+	}
 	printf("Sending Client ROM Sync Request: %u\n", resp.stateSize);
 
 	resp.toNetworkByteOrder();
@@ -1893,6 +1972,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			netPlayLoadStateResp* msg = static_cast<netPlayLoadStateResp*>(msgBuf);
 			msg->toHostByteOrder();
 
+			const bool romMatch = (msg->romCrc32 = romCrc32);
 			char *stateData = msg->stateDataBuf();
 			const uint32_t stateDataSize = msg->stateDataSize();
 
@@ -1901,34 +1981,64 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 			EMUFILE_MEMORY em( stateData, stateDataSize );
 
 			FCEU_WRAPPER_LOCK();
-			serverRequestedStateLoad = true;
-			FCEUSS_LoadFP( &em, SSLOADPARAM_NOBACKUP );
-			serverRequestedStateLoad = false;
 
-			opsCrc32 = msg->opsCrc32;
-			netPlayFrameData.reset();
+			bool dataValid = romMatch;
 
-			NetPlayFrameData data;
-			data.frameNum = msg->lastFrame.num;
-			data.opsCrc32 = msg->lastFrame.opsCrc32;
-			data.ramCrc32 = msg->lastFrame.ramCrc32;
-
-			netPlayFrameData.push( data );
-
-			inputClear();
-
-			const int numInputFrames = msg->numCtrlFrames;
-			for (int i=0; i<numInputFrames; i++)
+			if (dataValid)
 			{
-				NetPlayFrameInput inputFrame;
+				serverRequestedStateLoad = true;
+				FCEUSS_LoadFP( &em, SSLOADPARAM_NOBACKUP );
+				serverRequestedStateLoad = false;
 
-				inputFrame.frameCounter = msg->ctrlData[i].frameNum;
-				inputFrame.ctrl[0] = msg->ctrlData[i].ctrlState[0];
-				inputFrame.ctrl[1] = msg->ctrlData[i].ctrlState[1];
-				inputFrame.ctrl[2] = msg->ctrlData[i].ctrlState[2];
-				inputFrame.ctrl[3] = msg->ctrlData[i].ctrlState[3];
+				opsCrc32 = msg->opsCrc32;
+				netPlayFrameData.reset();
 
-				pushBackInput( inputFrame );
+				NetPlayFrameData data;
+				data.frameNum = msg->lastFrame.num;
+				data.opsCrc32 = msg->lastFrame.opsCrc32;
+				data.ramCrc32 = msg->lastFrame.ramCrc32;
+
+				netPlayFrameData.push( data );
+
+				inputClear();
+
+				const int numInputFrames = msg->numCtrlFrames;
+				for (int i=0; i<numInputFrames; i++)
+				{
+					NetPlayFrameInput inputFrame;
+					auto ctrlData = msg->ctrlDataBuf();
+
+					ctrlData[i].toHostByteOrder();
+					inputFrame.frameCounter = ctrlData[i].frameNum;
+					inputFrame.ctrl[0] = ctrlData[i].ctrlState[0];
+					inputFrame.ctrl[1] = ctrlData[i].ctrlState[1];
+					inputFrame.ctrl[2] = ctrlData[i].ctrlState[2];
+					inputFrame.ctrl[3] = ctrlData[i].ctrlState[3];
+
+					pushBackInput( inputFrame );
+				}
+
+				const int numCheats = msg->numCheats;
+
+				if (numCheats > 0)
+				{
+					const int lastCheatIdx = numCheats - 1;
+
+					FCEU_FlushGameCheats(0, 1);
+					for (int i=0; i<numCheats; i++)
+					{
+						auto cheatBuf = msg->cheatDataBuf();
+						auto& cheatData = cheatBuf[i];
+						// Set cheat rebuild flag on last item.
+						bool lastItem = (i == lastCheatIdx);
+
+						FCEUI_AddCheat( cheatData.name, cheatData.addr, cheatData.val, cheatData.cmp, cheatData.type, cheatData.stat, lastItem );
+					}
+				}
+				else
+				{
+					FCEU_DeleteAllCheats();
+				}
 			}
 			FCEU_WRAPPER_UNLOCK();
 
@@ -3009,10 +3119,11 @@ uint64_t netPlayByteSwap(uint64_t in)
 //----------------------------------------------------------------------------
 uint32_t netPlayCalcRamChkSum()
 {
+	constexpr int ramSize = 0x800;
 	uint32_t crc = 0;
-	uint8_t ram[256];
+	uint8_t ram[ramSize];
 
-	for (int i=0; i<256; i++)
+	for (int i=0; i<ramSize; i++)
 	{
 		ram[i] = GetMem(i);
 	}

@@ -58,6 +58,15 @@ void FCEU_CheatAddRAM(int s, uint32 A, uint8 *p)
 		CheatRPtrs[AB+x]=p-A;
 }
 
+// Cheat change event callback. Called whenever cheat map is changed or recalculated.
+static void (*cheatsChangeEventCB)(void*) = nullptr;
+static void*  cheatsChangeEventUserData = nullptr;
+
+void FCEU_SetCheatChangeEventCallback( void (*func)(void*), void* userData )
+{
+	cheatsChangeEventCB = func;
+	cheatsChangeEventUserData = userData;
+}
 
 CHEATF_SUBFAST SubCheats[256];
 uint32 numsubcheats = 0;
@@ -132,6 +141,11 @@ void RebuildSubCheats(void)
 	}
 	FrozenAddressCount = numsubcheats;		//Update the frozen address list
 
+	// Notify the system of a change
+	if (cheatsChangeEventCB != nullptr)
+	{
+		cheatsChangeEventCB( cheatsChangeEventUserData );
+	}
 }
 
 void FCEU_PowerCheats()
@@ -368,12 +382,15 @@ void FCEU_FlushGameCheats(FILE *override, int nosave)
 }
 
 
-int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int type)
+int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int type, int status, bool rebuild)
 {
-	AddCheatEntry(name, addr, val, compare, 1, type);
+	AddCheatEntry(name, addr, val, compare, status, type);
 	savecheats = 1;
-	RebuildSubCheats();
 
+	if (rebuild)
+	{
+		RebuildSubCheats();
+	}
 	return 1;
 }
 

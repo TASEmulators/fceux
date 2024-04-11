@@ -262,7 +262,10 @@ struct netPlayLoadStateResp
 	netPlayMsgHdr  hdr;
 
 	uint32_t  stateSize;
+	uint32_t  numCtrlFrames;
+	uint32_t  numCheats;
 	uint32_t  opsCrc32;
+	uint32_t  romCrc32;
 
 	struct {
 		uint32_t  num = 0;
@@ -270,57 +273,107 @@ struct netPlayLoadStateResp
 		uint32_t  ramCrc32 = 0;
 	} lastFrame;
 
-	uint32_t  numCtrlFrames;
-
 	static constexpr int MaxCtrlFrames = 10;
+	static constexpr int MaxCheats = 64;
 
-	struct {
+	struct CtrlData 
+	{
 		uint32_t  frameNum = 0;
 		uint8_t   ctrlState[4] = {0};
 
-	} ctrlData[MaxCtrlFrames];
+		void toHostByteOrder()
+		{
+			frameNum = netPlayByteSwap(frameNum);
+		}
+
+		void toNetworkByteOrder()
+		{
+			frameNum = netPlayByteSwap(frameNum);
+		}
+	};
+
+	struct  CheatData
+	{
+		uint16_t  addr =  0;
+		uint8_t   val  =  0;
+		int8_t    cmp  = -1; /* -1 for no compare. */
+		int8_t   type  =  0; /* 0 for replace, 1 for substitute(GG). */
+		int8_t   stat  =  0;
+		char     name[64] = {0};
+
+		void toHostByteOrder()
+		{
+			addr = netPlayByteSwap(addr);
+		}
+
+		void toNetworkByteOrder()
+		{
+			addr = netPlayByteSwap(addr);
+		}
+	};
 
 	netPlayLoadStateResp(void)
 		: hdr(NETPLAY_SYNC_STATE_RESP, sizeof(netPlayLoadStateResp)),
-			stateSize(0), opsCrc32(0), numCtrlFrames(0)
+			stateSize(0), numCtrlFrames(0), numCheats(0), opsCrc32(0), romCrc32(0)
 	{
+	}
+
+	size_t calcTotalSize()
+	{
+		size_t size = sizeof(netPlayLoadStateResp) +
+				(numCtrlFrames * sizeof(CtrlData) ) +
+				(numCheats     * sizeof(CheatData)) +
+				 stateSize;
+
+		hdr.msgSize = size;
+
+		return size;
 	}
 
 	void toHostByteOrder()
 	{
 		hdr.toHostByteOrder();
 		stateSize          = netPlayByteSwap(stateSize);
+		numCtrlFrames      = netPlayByteSwap(numCtrlFrames);
+		numCheats          = netPlayByteSwap(numCheats);
 		opsCrc32           = netPlayByteSwap(opsCrc32);
+		romCrc32           = netPlayByteSwap(romCrc32);
 		lastFrame.num      = netPlayByteSwap(lastFrame.num);
 		lastFrame.opsCrc32 = netPlayByteSwap(lastFrame.opsCrc32);
 		lastFrame.ramCrc32 = netPlayByteSwap(lastFrame.ramCrc32);
-		numCtrlFrames      = netPlayByteSwap(numCtrlFrames);
-
-		for (int i=0; i<MaxCtrlFrames; i++)
-		{
-			ctrlData[i].frameNum = netPlayByteSwap(ctrlData[i].frameNum);
-		}
 	}
 
 	void toNetworkByteOrder()
 	{
 		hdr.toNetworkByteOrder();
 		stateSize          = netPlayByteSwap(stateSize);
+		numCtrlFrames      = netPlayByteSwap(numCtrlFrames);
+		numCheats          = netPlayByteSwap(numCheats);
 		opsCrc32           = netPlayByteSwap(opsCrc32);
+		romCrc32           = netPlayByteSwap(romCrc32);
 		lastFrame.num      = netPlayByteSwap(lastFrame.num);
 		lastFrame.opsCrc32 = netPlayByteSwap(lastFrame.opsCrc32);
 		lastFrame.ramCrc32 = netPlayByteSwap(lastFrame.ramCrc32);
-		numCtrlFrames      = netPlayByteSwap(numCtrlFrames);
+	}
 
-		for (int i=0; i<MaxCtrlFrames; i++)
-		{
-			ctrlData[i].frameNum = netPlayByteSwap(ctrlData[i].frameNum);
-		}
+	CtrlData* ctrlDataBuf()
+	{
+		uintptr_t buf = ((uintptr_t)this) + sizeof(netPlayLoadStateResp);
+
+		return (CtrlData*)buf;
+	}
+
+	CheatData* cheatDataBuf()
+	{
+		uintptr_t buf = ((uintptr_t)this) + sizeof(netPlayLoadStateResp) +
+						(numCtrlFrames * sizeof(CtrlData));
+		return (CheatData*)buf;
 	}
 
 	char* stateDataBuf()
 	{
-		uintptr_t buf = ((uintptr_t)this) + sizeof(netPlayLoadStateResp);
+		uintptr_t buf = ((uintptr_t)this) + sizeof(netPlayLoadStateResp) +
+					(numCtrlFrames * sizeof(CtrlData)) + (numCheats * sizeof(CheatData));
 		return (char*)buf;
 	}
 

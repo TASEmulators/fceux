@@ -33,6 +33,8 @@ extern int disableAutoLSCheats;
 int FCEU_DisableAllCheats(void);
 int FCEU_DeleteAllCheats(void);
 
+void FCEU_SetCheatChangeEventCallback( void (*func)(void*) = nullptr, void* userData = nullptr );
+
 struct CHEATF_SUBFAST
 {
 	uint16 addr;

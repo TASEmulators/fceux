@@ -197,7 +197,7 @@ void FCEU_DispMessage( __FCEU_PRINTF_FORMAT const char *format, int disppos, ...
 
 int FCEUI_DecodePAR(const char *code, int *a, int *v, int *c, int *type);
 int FCEUI_DecodeGG(const char *str, int *a, int *v, int *c);
-int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int type);
+int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int type, int status = 1, bool rebuild = true);
 int FCEUI_DelCheat(uint32 which);
 int FCEUI_ToggleCheat(uint32 which);
 int FCEUI_GlobalToggleCheat(int global_enable);

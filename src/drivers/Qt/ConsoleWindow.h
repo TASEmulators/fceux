@@ -332,6 +332,7 @@ class  consoleWin_t : public QMainWindow
 		void stateLoaded(void);
 		void nesResetOccurred(void);
 		void pauseToggled(bool state);
+		void cheatsChanged(void);
 
 	public slots:
 		void openDebugWindow(void);

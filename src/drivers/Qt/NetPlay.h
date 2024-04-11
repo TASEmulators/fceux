@@ -190,6 +190,7 @@ class NetPlayServer : public QTcpServer
 		void onStateLoad(void);
 		void onNesReset(void);
 		void onPauseToggled(bool);
+		void onCheatsChanged(void);
 		void processClientRomLoadRequests(void);
 		void processClientStateLoadRequests(void);
 };
