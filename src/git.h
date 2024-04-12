@@ -153,27 +153,28 @@ struct FCEUGI
 	FCEUGI();
 	~FCEUGI();
 
-	uint8 *name;	//Game name, UTF8 encoding
-	int mappernum;
+	uint8 *name = nullptr;	//Game name, UTF8 encoding
+	int mappernum = 0;
 
-	EGIT type;
-	EGIV vidsys;    //Current emulated video system;
-	ESI input[2];   //Desired input for emulated input ports 1 and 2; -1 for unknown desired input.
-	ESIFC inputfc;  //Desired Famicom expansion port device. -1 for unknown desired input.
-	ESIS cspecial;  //Special cart expansion: DIP switches, barcode reader, etc.
-	EGIPPU vs_ppu;	//PPU type for Vs. System
-	EGIVS vs_type;	//Vs. System type
-	uint8 vs_cswitch; // Switch first and second controllers for Vs. System
+	EGIT type = GIT_CART;
+	EGIV vidsys = GIV_USER;                //Current emulated video system;
+	ESI input[2] = { SI_UNSET, SI_UNSET }; //Desired input for emulated input ports 1 and 2; -1 for unknown desired input.
+	ESIFC inputfc = SIFC_UNSET;            //Desired Famicom expansion port device. -1 for unknown desired input.
+	ESIS cspecial = SIS_NONE;              //Special cart expansion: DIP switches, barcode reader, etc.
+	EGIPPU vs_ppu = GIPPU_USER;            //PPU type for Vs. System
+	EGIVS vs_type = EGIVS_NORMAL;          //Vs. System type
+	uint8 vs_cswitch = SIS_NONE;           // Switch first and second controllers for Vs. System
 
 	MD5DATA MD5;
 
 	//mbg 6/8/08 - ???
-	int soundrate;  //For Ogg Vorbis expansion sound wacky support.  0 for default.
-	int soundchan;  //Number of sound channels.
+	int soundrate = 0;  //For Ogg Vorbis expansion sound wacky support.  0 for default.
+	int soundchan = 0;  //Number of sound channels.
 
-	char* filename;
-	char* archiveFilename;
-	int archiveCount;
+	char* filename = nullptr;
+	char* archiveFilename = nullptr;
+	int archiveCount = 0;
+	bool loadedFromTmpFile = false; // Was loaded from temporary file, file most likely no longer exists
 };
 
 #endif

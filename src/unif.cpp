@@ -161,9 +161,9 @@ static int NAME(FCEUFILE *fp) {
 	namebuf[index] = 0;
 	FCEU_printf("%s\n", namebuf);
 
-	if (!GameInfo->name) {
-		GameInfo->name = (uint8*)malloc(strlen(namebuf) + 1); //mbg merge 7/17/06 added cast
-		strcpy((char*)GameInfo->name, namebuf); //mbg merge 7/17/06 added cast
+	if (GameInfo->name == nullptr)
+	{
+		GameInfo->name = (uint8*)strdup(namebuf);
 	}
 	return(1);
 }
