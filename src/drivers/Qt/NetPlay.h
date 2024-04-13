@@ -167,7 +167,7 @@ class NetPlayServer : public QTcpServer
 		int role = -1;
 		int roleMask = 0;
 		NetPlayClient* clientPlayer[4] = { nullptr };
-		int forceResyncCount = 10;
+		uint32_t forceResyncCount = 10;
 		uint32_t cycleCounter = 0;
 		uint32_t maxLeadFrames = 10u;
 		uint32_t clientWaitCounter = 0;
@@ -281,16 +281,21 @@ class NetPlayClient : public QObject
 		void setPaused(bool value){ paused = value; }
 		bool hasDesync(){ return desync; }
 		void setDesync(bool value){ desync = value; }
-		void recordPingResult( uint64_t delay_ms );
+		void recordPingResult( const uint64_t delay_ms );
 		void resetPingData(void);
 		double getAvgPingDelay();
+		unsigned long long getLastPingDelay(){ return pingDelayLast; };
+		unsigned long long getMinPingDelay(){ return pingDelayMin; };
+		unsigned long long getMaxPingDelay(){ return pingDelayMax; };
 		void setDebugLog(QFile* file){ debugLog = file; };
 
 		QString userName;
 		QString password;
 		int     role = -1;
 		int     state = 0;
-		int     desyncCount = 0;
+		unsigned int  desyncCount = 0;
+		unsigned int  desyncSinceReset = 0;
+		unsigned int  totalDesyncCount = 0;
 		bool    syncOk = false;
 		bool    romMatch = false;
 		unsigned int currentFrame = 0;
@@ -336,6 +341,8 @@ class NetPlayClient : public QObject
 
 		uint64_t  pingDelaySum = 0;
 		uint64_t  pingDelayLast = 0;
+		uint64_t  pingDelayMin = 1000;
+		uint64_t  pingDelayMax = 0;
 		uint64_t  pingNumSamples = 0;
 		uint32_t  romCrc32 = 0;
 		uint32_t  numMsgBoxObjs = 0;
@@ -436,6 +443,14 @@ class NetPlayClientTreeItem : public QTreeWidgetItem
 
 		}
 
+		enum Type
+		{
+			StatusInfo = 0,
+			PingInfo,
+			DesyncInfo
+		};
+
+		int type = StatusInfo;
 		NetPlayClient* client = nullptr;
 		NetPlayServer* server = nullptr;
 

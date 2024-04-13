@@ -865,7 +865,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 			client->gpData[3] = msg->ctrlState[3];
 
 			client->setPaused( (msg->flags & netPlayClientState::PauseFlag ) ? true : false );
-			client->setDesync( (msg->flags & netPlayClientState::DesyncFlag) ? true : false );
+			//client->setDesync( (msg->flags & netPlayClientState::DesyncFlag) ? true : false );
 
 			client->romMatch = (romCrc32 == msg->romCrc32);
 
@@ -885,7 +885,15 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				{
 					printf("Client %s Frame:%u  is NOT in Sync: OPS:%i  RAM:%i\n",
 							client->userName.toLocal8Bit().constData(), msg->frameRun, opsSync, ramSync);
+
+					if (0 == client->desyncCount)
+					{
+						client->desyncSinceReset++;
+						client->totalDesyncCount++;
+					}
 					client->desyncCount++;
+
+					client->setDesync(true);
 
 					if (client->desyncCount > forceResyncCount)
 					{
@@ -904,6 +912,7 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 					}
 					else
 					{
+						client->setDesync(false);
 						client->desyncCount = 0;
 					}
 				}
@@ -1682,11 +1691,21 @@ int NetPlayClient::requestSync(void)
 	return 0;
 }
 //-----------------------------------------------------------------------------
-void NetPlayClient::recordPingResult( uint64_t delay_ms )
+void NetPlayClient::recordPingResult( const uint64_t delay_ms )
 {
 	pingNumSamples++;
 	pingDelayLast = delay_ms;
 	pingDelaySum += delay_ms;
+
+	if (delay_ms < pingDelayMin)
+	{
+		pingDelayMin = delay_ms;
+	}
+
+	if (delay_ms > pingDelayMax)
+	{
+		pingDelayMax = delay_ms;
+	}
 }
 //-----------------------------------------------------------------------------
 void NetPlayClient::resetPingData()
@@ -1694,6 +1713,8 @@ void NetPlayClient::resetPingData()
 	pingNumSamples = 0;
 	pingDelayLast = 0;
 	pingDelaySum = 0;
+	pingDelayMax = 0;
+	pingDelayMin = 1000;
 }
 //-----------------------------------------------------------------------------
 double NetPlayClient::getAvgPingDelay()
@@ -2864,6 +2885,40 @@ void NetPlayClientTreeItem::updateData()
 		setText( 1, QObject::tr(roleString) );
 		setText( 2, state);
 		setText( 3, QString::number(client->currentFrame) );
+
+		if (isExpanded())
+		{
+			FCEU::FixedString<256> infoLine;
+			const int numChildren = childCount();
+
+			//printf("Calculating Expanded Item\n");
+
+			for (int i=0; i<numChildren; i++)
+			{
+				auto* item = static_cast<NetPlayClientTreeItem*>( child(i) );
+				switch (item->type)
+				{
+					case NetPlayClientTreeItem::PingInfo:
+					{
+						infoLine.sprintf("Ping ms:     Avg %.2f     Min: %llu     Max: %llu", 
+								client->getAvgPingDelay(), client->getMinPingDelay(), client->getMaxPingDelay() );
+						item->setFirstColumnSpanned(true);
+						item->setText( 0, QObject::tr(infoLine.c_str()) );
+					}
+					break;
+					case NetPlayClientTreeItem::DesyncInfo:
+					{
+						infoLine.sprintf("Desync Count:  Since Last Sync: %u    Total: %u",
+							     client->desyncSinceReset, client->totalDesyncCount );
+						item->setFirstColumnSpanned(true);
+						item->setText( 0, QObject::tr(infoLine.c_str()) );
+					}
+					break;
+					default:
+					break;
+				}
+			}
+		}
 	}
 }
 //----------------------------------------------------------------------------
@@ -2889,10 +2944,21 @@ void NetPlayHostStatusDialog::loadClientTree()
 	{
 		return;
 	}
+	QFont font;
+
+	font.setFamily("Courier New");
+	font.setStyle( QFont::StyleNormal );
+	font.setStyleHint( QFont::Monospace );
+
 	auto* serverTopLvlItem = new NetPlayClientTreeItem();
 
 	serverTopLvlItem->server = server;
 	serverTopLvlItem->updateData();
+
+	serverTopLvlItem->setFont( 0, font );
+	serverTopLvlItem->setFont( 1, font );
+	serverTopLvlItem->setFont( 2, font );
+	serverTopLvlItem->setFont( 3, font );
 
 	clientTree->addTopLevelItem( serverTopLvlItem );
 
@@ -2904,6 +2970,23 @@ void NetPlayHostStatusDialog::loadClientTree()
 
 		clientTopLvlItem->client = client;
 		clientTopLvlItem->updateData();
+
+		auto* clientPingInfo = new NetPlayClientTreeItem();
+		clientPingInfo->setFont( 0, font );
+		clientPingInfo->type = NetPlayClientTreeItem::PingInfo;
+		clientPingInfo->setFirstColumnSpanned(true);
+		clientTopLvlItem->addChild( clientPingInfo );
+
+		auto* clientDesyncInfo = new NetPlayClientTreeItem();
+		clientDesyncInfo->setFont( 0, font );
+		clientDesyncInfo->type = NetPlayClientTreeItem::DesyncInfo;
+		clientDesyncInfo->setFirstColumnSpanned(true);
+		clientTopLvlItem->addChild( clientDesyncInfo );
+
+		clientTopLvlItem->setFont( 0, font );
+		clientTopLvlItem->setFont( 1, font );
+		clientTopLvlItem->setFont( 2, font );
+		clientTopLvlItem->setFont( 3, font );
 
 		clientTree->addTopLevelItem( clientTopLvlItem );
 	}
