@@ -164,13 +164,11 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		case 0xE1: chr = "SBC"; goto _indirectx;
 		_indirectx:
 			indirectX(tmp);
-			indReg = 'X';
 
-		_indirect:
 			if ( symDebugEnable )
 				sym = replaceSymbols( flags, tmp, stmp );
 
-			sb << chr << " (" << sb_addr(opcode[1], 2) << ',' << indReg << ')';
+			sb << chr << " (" << sb_addr(opcode[1], 2) << ",X)";
 
 			if (showTrace)
 			{
@@ -315,9 +313,23 @@ int DisassembleWithDebug(int addr, uint8_t *opcode, int flags, char *str, debugS
 		case 0xF1: chr = "SBC"; goto _indirecty;
 		_indirecty:
 			indirectY(tmp);
-			indReg = 'Y';
 
-			goto _indirect;
+			if (symDebugEnable)
+				sym = replaceSymbols(flags, tmp, stmp);
+
+			sb << chr << " (" << sb_addr(opcode[1], 2) << "),Y";
+
+			if (showTrace)
+			{
+				sb << " @ ";
+				if (symDebugEnable)
+					sb << stmp;
+				else
+					sb << sb_addr(tmp);
+
+				sb << " = " << sb_lit(GetMem(tmp));
+			}
+			break;
 
 		//Zero Page,X
 		case 0x15: chr = "ORA"; goto _zeropagex;
