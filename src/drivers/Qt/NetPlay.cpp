@@ -1970,7 +1970,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 
 			QFile tmpFile( tempPath );
 			//tmpFile.setFileTemplate(QDir::tempPath() + QString("/tmpRom_XXXXXX.nes"));
-			tmpFile.open(QIODeviceBase::ReadWrite);
+			tmpFile.open(QIODevice::ReadWrite);
 			QString filepath = tmpFile.fileName();
 			printf("Dumping Temp Rom to: %s\n", tmpFile.fileName().toLocal8Bit().constData());
 			tmpFile.write( romData, msgSize );
