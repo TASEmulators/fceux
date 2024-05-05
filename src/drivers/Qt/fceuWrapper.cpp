@@ -65,6 +65,7 @@
 #include "common/os_utils.h"
 #include "common/configSys.h"
 #include "utils/timeStamp.h"
+#include "utils/StringUtils.h"
 #include "../../oldmovie.h"
 #include "../../types.h"
 
@@ -109,6 +110,7 @@ static int   mutexLocks = 0;
 static int   mutexPending = 0;
 static bool  emulatorHasMutex = 0;
 unsigned int emulatorCycleCount = 0;
+static int archiveFileLoadIndex = -1;
 
 extern double g_fpsScale;
 
@@ -341,16 +343,6 @@ int LoadGame(const char *path, bool silent, bool netPlayRequested)
 	{
 		fullpath.assign( path );
 	}
-//#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
-//
-//	// Resolve absolute path to file
-//	if ( realpath( path, fullpath ) == NULL )
-//	{
-//		strcpy( fullpath, path );
-//	}
-//#else
-//	strcpy( fullpath, path );
-//#endif
 
 	//printf("Fullpath: %zi '%s'\n", sizeof(fullpath), fullpath );
 
@@ -600,12 +592,13 @@ int  fceuWrapperHardReset(void)
 
 		if ( GameInfo->archiveFilename )
 		{
-			strcpy( romPath, GameInfo->archiveFilename );
+			Strlcpy( romPath, GameInfo->archiveFilename, sizeof(romPath) );
 		}
 		else if ( GameInfo->filename )
 		{
-			strcpy( romPath, GameInfo->filename );
+			Strlcpy( romPath, GameInfo->filename, sizeof(romPath) );
 		}
+		fceuWrapperSetArchiveFileLoadIndex( GameInfo->archiveIndex );
 
 		if ( romPath[0] != 0 )
 		{
@@ -613,6 +606,7 @@ int  fceuWrapperHardReset(void)
 			//printf("Loading: '%s'\n", romPath );
 			LoadGame ( romPath );
 		}
+		fceuWrapperClearArchiveFileLoadIndex();
 	}
 	return 0;
 }
@@ -1739,7 +1733,7 @@ static FCEUFILE* minizip_OpenArchive(ArchiveScanRecord& asr, std::string &fname,
 
 		//printf("Filename: %u '%s' \n", fi.uncompressed_size, filename );
 
-		if (searchFile)
+		if ( (searchFile != nullptr) && !searchFile->empty())
 		{
 			if ( strcmp( searchFile->c_str(), filename ) == 0 )
 			{
@@ -1858,7 +1852,8 @@ static FCEUFILE* libarchive_OpenArchive( ArchiveScanRecord& asr, std::string& fn
 		filename = archive_entry_pathname(entry);
 		fileSize = archive_entry_size(entry);
 
-		if (searchFile)
+		printf("ArchiveFile:%i  %s\n", idx, filename);
+		if ( (searchFile != nullptr) && !searchFile->empty())
 		{
 			if (strcmp( filename, searchFile->c_str() ) == 0)
 			{
@@ -1923,6 +1918,16 @@ static FCEUFILE* libarchive_OpenArchive( ArchiveScanRecord& asr, std::string& fn
 
 #endif
 
+void fceuWrapperSetArchiveFileLoadIndex(int idx)
+{
+	archiveFileLoadIndex = idx;
+}
+
+void fceuWrapperClearArchiveFileLoadIndex()
+{
+	archiveFileLoadIndex = -1;
+}
+
 FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int* userCancel)
 {
 	FCEUFILE* fp = nullptr;
@@ -1940,6 +1945,7 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 		{
 			char base[512], suffix[128];
 
+			//printf("File:%zi   %s\n", i, asr.files[i].name.c_str() );
 			getFileBaseName( asr.files[i].name.c_str(), base, suffix );
 
 			if ( (strcasecmp( suffix, ".nes" ) == 0) ||
@@ -1954,7 +1960,11 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 
 		if ( fileList.size() > 1 )
 		{
-			if ( consoleWindow != NULL )
+			if ( (archiveFileLoadIndex >= 0) && (static_cast<size_t>(archiveFileLoadIndex) < asr.files.size()))
+			{
+				searchFile.clear();
+			}
+			else if ( consoleWindow != NULL )
 			{
 				int sel = consoleWindow->showListSelectDialog( "Select ROM From Archive", fileList );
 
@@ -1973,16 +1983,18 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 		{
 			searchFile = fileList[0];
 		}
+		//printf("Archive Search File: %s\n", searchFile.c_str());
 	}
 
 #ifdef _USE_LIBARCHIVE
-	fp = libarchive_OpenArchive(asr, fname, &searchFile, -1 );
+	fp = libarchive_OpenArchive(asr, fname, &searchFile, archiveFileLoadIndex );
 #endif
 
 	if (fp == nullptr)
 	{
-		fp = minizip_OpenArchive(asr, fname, &searchFile, -1 );
+		fp = minizip_OpenArchive(asr, fname, &searchFile, archiveFileLoadIndex );
 	}
+	//printf("Archive File Index: %i\n", fp->archiveIndex);
 	return fp;
 }
 

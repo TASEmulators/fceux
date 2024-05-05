@@ -236,10 +236,11 @@ struct netPlayLoadRomReq
 	netPlayMsgHdr  hdr;
 
 	uint32_t  fileSize;
+	uint32_t  archiveIndex;
 	char fileName[256];
 
 	netPlayLoadRomReq(void)
-		: hdr(NETPLAY_LOAD_ROM_REQ, sizeof(netPlayLoadRomReq)), fileSize(0)
+		: hdr(NETPLAY_LOAD_ROM_REQ, sizeof(netPlayLoadRomReq)), fileSize(0), archiveIndex(0)
 	{
 		memset(fileName, 0, sizeof(fileName));
 	}
@@ -247,13 +248,15 @@ struct netPlayLoadRomReq
 	void toHostByteOrder()
 	{
 		hdr.toHostByteOrder();
-		fileSize  = netPlayByteSwap(fileSize);
+		fileSize     = netPlayByteSwap(fileSize);
+		archiveIndex = netPlayByteSwap(archiveIndex);
 	}
 
 	void toNetworkByteOrder()
 	{
 		hdr.toNetworkByteOrder();
-		fileSize  = netPlayByteSwap(fileSize);
+		fileSize     = netPlayByteSwap(fileSize);
+		archiveIndex = netPlayByteSwap(archiveIndex);
 	}
 };
 

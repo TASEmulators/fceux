@@ -173,7 +173,8 @@ struct FCEUGI
 
 	char* filename = nullptr;
 	char* archiveFilename = nullptr;
-	int archiveCount = 0;
+	int archiveCount = 0;  // the number of files that were in the archive
+	int archiveIndex = -1; // the index of the file within the archive
 	bool loadedFromTmpFile = false; // Was loaded from temporary file, file most likely no longer exists
 };
 

@@ -48,6 +48,8 @@ int  fceuWrapperHardReset(void);
 int  fceuWrapperTogglePause(void);
 bool fceuWrapperGameLoaded(void);
 void fceuWrapperRequestAppExit(void);
+void fceuWrapperClearArchiveFileLoadIndex(void);
+void fceuWrapperSetArchiveFileLoadIndex(int idx);
 
 class  fceuCriticalSection
 {
