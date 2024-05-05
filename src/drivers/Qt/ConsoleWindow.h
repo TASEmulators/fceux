@@ -23,6 +23,7 @@
 #include <QCursor>
 #include <QMutex>
 #include <QColor>
+#include <QTemporaryDir>
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 #include <QRecursiveMutex>
 #endif
@@ -184,6 +185,8 @@ class  consoleWin_t : public QMainWindow
 
 		QColor *getVideoBgColorPtr(void){ return &videoBgColor; }
 
+		QString getTempDir();
+
 	protected:
 		consoleMenuBar *menubar;
 
@@ -271,6 +274,7 @@ class  consoleWin_t : public QMainWindow
 		QTimer  *gameTimer;
 		QColor   videoBgColor;
 		ColorMenuItem *bgColorMenuItem;
+		QTemporaryDir *tempDir;
 
 		std::string errorMsg;
 		bool        errorMsgValid;

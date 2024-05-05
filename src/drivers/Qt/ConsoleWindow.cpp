@@ -47,6 +47,7 @@
 #include <QActionGroup>
 #include <QShortcut>
 #include <QUrl>
+#include <QDir>
 
 #include "../../fceu.h"
 #include "../../fds.h"
@@ -124,6 +125,12 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	//QString libpath = QLibraryInfo::location(QLibraryInfo::PluginsPath);
 	//printf("LibPath: '%s'\n", libpath.toLocal8Bit().constData() );
+
+	tempDir = new QTemporaryDir();
+	if (tempDir->isValid())
+	{
+		printf("Temp Folder: %s\n", tempDir->path().toLocal8Bit().constData());
+	}
 
 #ifdef __APPLE__
 	qt_set_sequence_auto_mnemonic(true);
@@ -385,6 +392,11 @@ consoleWin_t::~consoleWin_t(void)
 		consoleWindow = NULL;
 	}
 
+	if (tempDir != nullptr)
+	{
+		delete tempDir;
+		tempDir = nullptr;
+	}
 }
 
 int consoleWin_t::videoInit(void)
@@ -4727,6 +4739,20 @@ void consoleWin_t::loadMostRecentROM(void)
 	CloseGame ();
 	LoadGame ( (romList.back())->c_str() );
 	FCEU_WRAPPER_UNLOCK();
+}
+
+QString consoleWin_t::getTempDir()
+{
+	QString path;
+	if (tempDir->isValid())
+	{
+		path = tempDir->path();
+	}
+	else
+	{
+		path = QDir::tempPath();
+	}
+	return path;
 }
 
 int consoleWin_t::getPeriodicInterval(void)

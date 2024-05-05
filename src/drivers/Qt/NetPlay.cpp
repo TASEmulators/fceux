@@ -379,9 +379,11 @@ int NetPlayServer::sendRomLoadReq( NetPlayClient *client )
 
 	rewind(fp);
 
+	QFileInfo fileInfo(GameInfo->filename);
+
 	msg.hdr.msgSize += fileSize;
 	msg.fileSize     = fileSize;
-	Strlcpy( msg.fileName, GameInfo->filename, sizeof(msg.fileName) );
+	Strlcpy( msg.fileName, fileInfo.fileName().toLocal8Bit().constData(), sizeof(msg.fileName) );
 
 	printf("Sending ROM Load Request: %s  %lu\n", filepath, fileSize );
 
@@ -1958,15 +1960,17 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 		break;
 		case NETPLAY_LOAD_ROM_REQ:
 		{
-			QTemporaryFile tmpFile;
 			netPlayLoadRomReq *msg = static_cast<netPlayLoadRomReq*>(msgBuf);
 			msg->toHostByteOrder();
 			const char *romData = &static_cast<const char*>(msgBuf)[ sizeof(netPlayLoadRomReq) ];
 
-			FCEU_printf("Load ROM Request Received: %s\n", msg->fileName);
+			QFileInfo fileInfo = QFileInfo(msg->fileName);
+			QString tempPath = consoleWindow->getTempDir() + QString("/") + fileInfo.fileName();
+			FCEU_printf("Load ROM Request Received: %s\n", fileInfo.fileName().toLocal8Bit().constData());
 
-			tmpFile.setFileTemplate(QDir::tempPath() + QString("/tmpRom_XXXXXX.nes"));
-			tmpFile.open();
+			QFile tmpFile( tempPath );
+			//tmpFile.setFileTemplate(QDir::tempPath() + QString("/tmpRom_XXXXXX.nes"));
+			tmpFile.open(QIODeviceBase::ReadWrite);
 			QString filepath = tmpFile.fileName();
 			printf("Dumping Temp Rom to: %s\n", tmpFile.fileName().toLocal8Bit().constData());
 			tmpFile.write( romData, msgSize );
