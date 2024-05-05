@@ -1852,7 +1852,7 @@ static FCEUFILE* libarchive_OpenArchive( ArchiveScanRecord& asr, std::string& fn
 		filename = archive_entry_pathname(entry);
 		fileSize = archive_entry_size(entry);
 
-		printf("ArchiveFile:%i  %s\n", idx, filename);
+		//printf("ArchiveFile:%i  %s\n", idx, filename);
 		if ( (searchFile != nullptr) && !searchFile->empty())
 		{
 			if (strcmp( filename, searchFile->c_str() ) == 0)

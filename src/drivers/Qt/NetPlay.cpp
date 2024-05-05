@@ -1590,44 +1590,44 @@ void NetPlayClient::onSocketError(QAbstractSocket::SocketError error)
 	emit errorOccurred(errorMsg);
 }
 //-----------------------------------------------------------------------------
-int NetPlayClient::requestRomLoad( const char *romPath )
+int NetPlayClient::requestRomLoad( const char *romPathIn )
 {
 	constexpr size_t BufferSize = 32 * 1024;
 	char buf[BufferSize];
 	size_t bytesRead;
 	long fileSize = 0;
+	int userCancel = 0;
+	const int archiveIndex = -1;
+	std::string romPath(romPathIn);
 	netPlayLoadRomReq msg;
-	QFileInfo fi( romPath );
+	const char* romextensions[] = { "nes", "fds", "nsf", 0 };
 
-	printf("Prep ROM Load Request: %s \n", romPath );
-	FILE *fp = ::fopen( romPath, "rb");
+	printf("Prep ROM Load Request: %s \n", romPath.c_str() );
+	FCEUFILE* fp = FCEU_fopen( romPath.c_str(), nullptr, "rb", 0, archiveIndex, romextensions, &userCancel);
 
 	if (fp == nullptr)
 	{
 		return -1;
 	}
-	fseek( fp, 0, SEEK_END);
-
-	fileSize = ftell(fp);
-
-	rewind(fp);
+	QFileInfo fi( fp->filename.c_str() );
+	fileSize = fp->size;
 
 	msg.hdr.msgSize += fileSize;
 	msg.fileSize     = fileSize;
 	Strlcpy( msg.fileName, fi.fileName().toLocal8Bit().constData(), sizeof(msg.fileName) );
 
-	printf("Sending ROM Load Request: %s  %lu\n", romPath, fileSize );
+	printf("Sending ROM Load Request: %s  %lu\n", msg.fileName, fileSize );
 
 	msg.toNetworkByteOrder();
 	sock->write( reinterpret_cast<const char*>(&msg), sizeof(netPlayLoadRomReq) );
 
-	while ( (bytesRead = fread( buf, 1, sizeof(buf), fp )) > 0 )
+	while ( (bytesRead = FCEU_fread( buf, 1, sizeof(buf), fp )) > 0 )
 	{
 		sock->write( buf, bytesRead );
 	}
 	sock->flush();
 
-	::fclose(fp);
+	FCEU_fclose(fp);
 
 	return 0;
 }
