@@ -178,9 +178,12 @@ static void x24c02_write(uint8 data) {
 				x24c02_addr <<= 1;
 				x24c02_addr |= sda;
 			} else {
-				if (sda)					// READ COMMAND
+				if ((x24c02_addr & 0x78) != 0x50) {	// WRONG DEVICE ADDRESS
+					x24c02_out = 1;
+					x24c02_state = X24C0X_STANDBY;
+				} else if (sda)					// READ COMMAND
 					x24c02_state = X24C0X_READ;
-				else						// WRITE COMMAND
+				else							// WRITE COMMAND
 					x24c02_state = X24C0X_WORD;
 			}
 			x24c02_bitcount++;
