@@ -26,6 +26,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <string>
+#include <atomic>
 
 #ifdef WIN32
 #include <windows.h>
@@ -79,12 +80,12 @@ extern "C"
 static gwavi_t  *gwavi = NULL;
 static bool      recordEnable = false;
 static bool      recordAudio  = true;
-static int       vbufHead = 0;
-static int       vbufTail = 0;
-static int       vbufSize = 0;
-static int       abufHead = 0;
-static int       abufTail = 0;
-static int       abufSize = 0;
+static std::atomic<int> vbufHead = 0;
+static std::atomic<int> vbufTail = 0;
+static constexpr int    vbufSize = 1024 * 1024 * 64;
+static std::atomic<int> abufHead = 0;
+static std::atomic<int> abufTail = 0;
+static constexpr int    abufSize = 256 * 1024;
 static uint32_t *rawVideoBuf = NULL;
 static int16_t  *rawAudioBuf = NULL;
 static int       aviDriver = 0;
@@ -2326,10 +2327,8 @@ int aviRecordOpenFile( const char *filepath )
 		}
 	}
 
-	vbufSize    = 1024 * 1024 * 60;
 	rawVideoBuf = (uint32_t*)malloc( vbufSize * sizeof(uint32_t) );
 
-	abufSize    = 96000;
 	rawAudioBuf = (int16_t*)malloc( abufSize * sizeof(uint16_t) );
 
 	vbufHead = 0;
@@ -2348,10 +2347,6 @@ int aviRecordAddFrame( void )
 		return -1;
 	}
 
-	//if ( gwavi == NULL )
-	//{
-	//	return -1;
-	//}
 	if ( FCEUI_EmulationPaused() )
 	{
 		return 0;
@@ -2361,25 +2356,28 @@ int aviRecordAddFrame( void )
 
 	numPixels  = nes_shm->video.ncol * nes_shm->video.nrow;
 
-	availSize = (vbufTail - vbufHead);
-	if ( availSize <= 0 )
+	head = vbufHead;
+
+	auto calcAvailSize = [&]()
 	{
-		availSize += vbufSize;
-	}
+		availSize = (vbufTail - head);
+		if ( availSize <= 0 )
+		{
+			availSize += vbufSize;
+		}
+	};
+
+	calcAvailSize();
 
 	while ( numPixels > availSize )
 	{
 		//printf("Video Unavail %i \n", availSize );
 		msleep(1);
 
-		availSize = (vbufTail - vbufHead);
-		if ( availSize <= 0 )
-		{
-			availSize += vbufSize;
-		}
+		calcAvailSize();
 	}
 
-	i = 0; head = vbufHead;
+	i = 0;
 
 	while ( i < numPixels )
 	{
@@ -2408,12 +2406,17 @@ int aviRecordAddAudioFrame( int32_t *buf, int numSamples )
 		return -1;
 	}
 
+	// Get current buffer index values from atomic variables and store in stack variables
+	// Do loop processing with stack variables and then update atomics when finished
+	int head = abufHead;
+
 	for (int i=0; i<numSamples; i++)
 	{
-		rawAudioBuf[ abufHead ] = buf[i];
+		rawAudioBuf[ head ] = buf[i];
 
-		abufHead = (abufHead + 1) % abufSize;
+		head = (head + 1) % abufSize;
 	}
+	abufHead = head;
 
 	return 0;
 }
@@ -2437,8 +2440,10 @@ int aviRecordClose(void)
 	{
 		free(rawAudioBuf); rawAudioBuf = NULL;
 	}
-	vbufTail = abufTail = 0;
-	vbufSize = abufSize = 0;
+	vbufHead = 0;
+	abufHead = 0;
+	vbufTail = 0;
+	abufTail = 0;
 
 	return 0;
 }
@@ -2600,6 +2605,8 @@ void AviRecordDiskThread_t::run(void)
 	char localRecordAudio = 0;
 	int  avgAudioPerFrame, audioChunkSize, audioSamplesAvail=0;
 	int  localVideoFormat;
+	int audioHead = 0;
+	int audioTail = 0;
 
 	fprintf( avLogFp, "AVI Record Disk Thread Start\n");
 
@@ -2672,12 +2679,19 @@ void AviRecordDiskThread_t::run(void)
 	// Main Disk Record Loop
 	while ( !isInterruptionRequested() )
 	{
-		
-		while ( (numPixelsReady < numPixels) && (vbufTail != vbufHead) )
 		{
-			videoOut[ numPixelsReady ] = rawVideoBuf[ vbufTail ]; numPixelsReady++;
-			
-			vbufTail = (vbufTail + 1) % vbufSize;
+			// Get current buffer index values from atomic variables and store in stack variables
+			// Do loop processing with stack variables and then update atomics when finished
+			int vhead = vbufHead;
+			int vtail = vbufTail;
+
+			while ( (numPixelsReady < numPixels) && (vtail != vhead) )
+			{
+				videoOut[ numPixelsReady ] = rawVideoBuf[ vtail ]; numPixelsReady++;
+
+				vtail = (vtail + 1) % vbufSize;
+			}
+			vbufTail = vtail;
 		}
 
 		if ( numPixelsReady >= numPixels )
@@ -2731,7 +2745,11 @@ void AviRecordDiskThread_t::run(void)
 
 			numPixelsReady = 0;
 
-			audioSamplesAvail = abufHead - abufTail;
+			// Get current buffer index values from atomic variables and store in stack variables
+			// Do loop processing with stack variables and then update atomics when finished
+			audioHead = abufHead;
+			audioTail = abufTail;
+			audioSamplesAvail = audioHead - audioTail;
 
 			if ( audioSamplesAvail < 0 )
 			{
@@ -2743,17 +2761,18 @@ void AviRecordDiskThread_t::run(void)
 			{
 				numSamples = 0;
 
-				while ( abufHead != abufTail )
+				while ( audioHead != audioTail )
 				{
-					audioOut[ numSamples ] = rawAudioBuf[ abufTail ]; numSamples++;
+					audioOut[ numSamples ] = rawAudioBuf[ audioTail ]; numSamples++;
 
-					abufTail = (abufTail + 1) % abufSize;
+					audioTail = (audioTail + 1) % abufSize;
 
 					if ( numSamples >= audioChunkSize )
 					{
 						break;
 					}
 				}
+				abufTail = audioTail;
 
 				if ( numSamples > 0 )
 				{
@@ -2779,8 +2798,11 @@ void AviRecordDiskThread_t::run(void)
 		}
 	}
 
+	audioHead = abufHead;
+	audioTail = abufTail;
+
 	// Write Leftover Audio Samples
-	audioSamplesAvail = abufHead - abufTail;
+	audioSamplesAvail = audioHead - audioTail;
 
 	if ( audioSamplesAvail < 0 )
 	{
@@ -2793,12 +2815,13 @@ void AviRecordDiskThread_t::run(void)
 		//printf("Writing Last %i Audio Samples\n", audioSamplesAvail );
 		numSamples = 0;
 
-		while ( abufHead != abufTail )
+		while ( audioHead != audioTail )
 		{
-			audioOut[ numSamples ] = rawAudioBuf[ abufTail ]; numSamples++;
+			audioOut[ numSamples ] = rawAudioBuf[ audioTail ]; numSamples++;
 
-			abufTail = (abufTail + 1) % abufSize;
+			audioTail = (audioTail + 1) % abufSize;
 		}
+		abufTail = audioTail;
 
 		if ( numSamples > 0 )
 		{
