@@ -1420,6 +1420,9 @@ int NetPlayClient::Destroy()
 		}
 		traceRegistrationHandle = nullptr;
 	}
+	// Reset frame throttling to normal incase client was dynamically adjusting frame rate.
+	FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);
+
 	FCEU_WRAPPER_UNLOCK();
 
 	if (consoleWindow != nullptr)
