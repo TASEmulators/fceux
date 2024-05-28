@@ -363,8 +363,10 @@ static void M4Power(void) {
 void Mapper4_Init(CartInfo *info) {
 	int ws = 8;
 
-	if ((info->CRC32 == 0x93991433 || info->CRC32 == 0xaf65aa84)) {
-		FCEU_printf("Low-G-Man can not work normally in the iNES format.\nThis game has been recognized by its CRC32 value, and the appropriate changes will be made so it will run.\nIf you wish to hack this game, you should use the UNIF format for your hack.\n\n");
+	if (info->ines2) {
+		ws = (info->wram_size + info->battery_wram_size) / 1024;
+	} else if ((info->CRC32 == 0x93991433 || info->CRC32 == 0xaf65aa84)) {
+		FCEU_printf("Low-G-Man can not work normally in the iNES format.\nThis game has been recognized by its CRC32 value, and the appropriate changes will be made so it will run.\nIf you wish to hack this game, you should use the NES 2.0 format for your hack.\n\n");
 		ws = 0;
 	}
 	GenMMC3_Init(info, 512, 256, ws, info->battery);
