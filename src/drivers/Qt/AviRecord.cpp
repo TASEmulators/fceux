@@ -80,11 +80,11 @@ extern "C"
 static gwavi_t  *gwavi = NULL;
 static bool      recordEnable = false;
 static bool      recordAudio  = true;
-static std::atomic<int> vbufHead = 0;
-static std::atomic<int> vbufTail = 0;
+static std::atomic<int> vbufHead(0);
+static std::atomic<int> vbufTail(0);
 static constexpr int    vbufSize = 1024 * 1024 * 64;
-static std::atomic<int> abufHead = 0;
-static std::atomic<int> abufTail = 0;
+static std::atomic<int> abufHead(0);
+static std::atomic<int> abufTail(0);
 static constexpr int    abufSize = 256 * 1024;
 static uint32_t *rawVideoBuf = NULL;
 static int16_t  *rawAudioBuf = NULL;
