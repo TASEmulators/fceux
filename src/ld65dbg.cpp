@@ -6,6 +6,7 @@
 
 #include "types.h"
 #include "ld65dbg.h"
+#include "utils/StringUtils.h"
 
 
 namespace ld65
@@ -304,7 +305,7 @@ namespace ld65
 					}
 					else if ( strcmp( key, "name") == 0 )
 					{
-						strncpy( name, val, sizeof(name));
+						Strlcpy( name, val, sizeof(name));
 					}
 					else if ( strcmp( key, "size") == 0 )
 					{
@@ -332,7 +333,7 @@ namespace ld65
 					}
 					else if ( strcmp( key, "type") == 0 )
 					{
-						strncpy( type, val, sizeof(type));
+						Strlcpy( type, val, sizeof(type));
 					}
 				}
 
