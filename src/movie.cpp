@@ -247,7 +247,7 @@ void MovieRecord::dumpJoy(EMUFILE* os, uint8 joystate)
 
 void MovieRecord::parseJoy(EMUFILE* is, uint8& joystate)
 {
-	char buf[8];
+	char buf[8] = {0};
 	is->fread(buf,8);
 	joystate = 0;
 	for(int i=0;i<8;i++)
