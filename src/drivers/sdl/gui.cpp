@@ -1496,7 +1496,7 @@ const char *Authors[] = {
 		"rainwarrior", "feos",
 	"Pre 2.0 Guys:",
 	" Bero", " Xodnizel", " Aaron Oneal", " Joe Nahmias",
-	" Paul Kuliniewicz", " Quietust", " Ben Parnell",
+	" Paul Kuliniewicz", " Quietust",
 		" Parasyte &amp; bbitmaster",
 	" blip &amp; nitsuja",
 	"Included components:",
