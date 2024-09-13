@@ -554,7 +554,7 @@ void LogCDData(uint8 *opcode, uint16 A, int size)
 		case 4: memop = 0x20; break;
 	}
 
-	if ((j = GetPRGAddress(A)) != -1)
+	if (((j = GetPRGAddress(A)) != -1) && (opcode[0] != 0x4C) && (opcode[0] != 0x6C))
 	{
 		if (opwrite[opcode[0]] == 0)
 		{
