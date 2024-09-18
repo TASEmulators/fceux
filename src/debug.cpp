@@ -297,9 +297,9 @@ int getBank(int offs)
 	//NSF data is easy to overflow the return on.
 	//Anything over FFFFF will kill it.
 	if (GameInfo && GameInfo->type == GIT_NSF) {
-		int addr = GetNesFileAddress(offs) - NES_HEADER_SIZE;
+		int addr = GetNesFileAddress(offs);
 
-		return addr != -1 ? addr / 0x1000 : -1;
+		return addr != -1 ? (addr - NES_HEADER_SIZE) / 0x1000 : -1;
 	}
 
 	return ((offs >= 0x6000) && (offs <= 0xFFFF)) ? GetPRGBank(offs) : -1;
