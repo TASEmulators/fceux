@@ -903,14 +903,14 @@ static void GenMMC5Power(void) {
 
 	PRGBanks.fill(0xFF);
 	WRAMPage = 0;
-	CHRBanksA.fill(0xFF);
-	CHRBanksB.fill(0xFF);
+	CHRBanksA.fill(0);
+	CHRBanksB.fill(0);
 	WRAMMaskEnable.fill(0xFF);
 	mmc5ABMode = 0;
 	IRQScanline = 0;
 	IRQEnable = 0;
 	CHRMode = 0;
-	NTAMirroring = NTFill = ATFill = 0xFF;
+	NTAMirroring = NTFill = ATFill = 0;
 	MMC5IRQR = 0;
 	MMC5LineCounter = 0;
 	mmc5psize = mmc5vsize = 3;
