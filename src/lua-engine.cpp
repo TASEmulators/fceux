@@ -2386,9 +2386,21 @@ void TaseditorDisableManualFunctionIfNeeded()
 		// check if LUACALL_TASEDITOR_MANUAL function is not nil
 		lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
 		if (!lua_isfunction(L, -1))
-			taseditor_lua->disableRunFunction();
+		{
+			if (taseditor_lua != nullptr)
+			{
+				taseditor_lua->disableRunFunction();
+			}
+		}
 		lua_pop(L, 1);
-	} else taseditor_lua->disableRunFunction();
+	}
+	else
+	{
+		if (taseditor_lua != nullptr)
+		{
+			taseditor_lua->disableRunFunction();
+		}
+	}
 }
 #endif
 
@@ -5115,7 +5127,10 @@ static int taseditor_registermanual(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.enableRunFunction(caption);
 #elif defined __QT_DRIVER__
-	taseditor_lua->enableRunFunction(caption);
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->enableRunFunction(caption);
+	}
 #endif
     return 1;
 }
@@ -5126,7 +5141,14 @@ static int taseditor_engaged(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushboolean(L, taseditor_lua.engaged());
 #elif defined __QT_DRIVER__
-	lua_pushboolean(L, taseditor_lua->engaged());
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushboolean(L, taseditor_lua->engaged());
+	}
+	else
+	{
+		lua_pushboolean(L, false);
+	}
 #endif
 	return 1;
 }
@@ -5137,7 +5159,14 @@ static int taseditor_markedframe(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushboolean(L, taseditor_lua.markedframe(luaL_checkinteger(L, 1)));
 #elif defined __QT_DRIVER__
-	lua_pushboolean(L, taseditor_lua->markedframe(luaL_checkinteger(L, 1)));
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushboolean(L, taseditor_lua->markedframe(luaL_checkinteger(L, 1)));
+	}
+	else
+	{
+		lua_pushboolean(L, false);
+	}
 #endif
 	return 1;
 }
@@ -5148,7 +5177,14 @@ static int taseditor_getmarker(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getmarker(luaL_checkinteger(L, 1)));
 #elif defined __QT_DRIVER__
-	lua_pushinteger(L, taseditor_lua->getmarker(luaL_checkinteger(L, 1)));
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushinteger(L, taseditor_lua->getmarker(luaL_checkinteger(L, 1)));
+	}
+	else
+	{
+		lua_pushinteger(L, 0);
+	}
 #endif
 	return 1;
 }
@@ -5159,7 +5195,14 @@ static int taseditor_setmarker(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.setmarker(luaL_checkinteger(L, 1)));
 #elif defined __QT_DRIVER__
-	lua_pushinteger(L, taseditor_lua->setmarker(luaL_checkinteger(L, 1)));
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushinteger(L, taseditor_lua->setmarker(luaL_checkinteger(L, 1)));
+	}
+	else
+	{
+		lua_pushinteger(L, 0);
+	}
 #endif
 	return 1;
 }
@@ -5170,7 +5213,10 @@ static int taseditor_removemarker(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.removemarker(luaL_checkinteger(L, 1));
 #elif defined __QT_DRIVER__
-	taseditor_lua->removemarker(luaL_checkinteger(L, 1));
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->removemarker(luaL_checkinteger(L, 1));
+	}
 #endif
 	return 0;
 }
@@ -5181,7 +5227,14 @@ static int taseditor_getnote(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushstring(L, taseditor_lua.getnote(luaL_checkinteger(L, 1)));
 #elif defined __QT_DRIVER__
-	lua_pushstring(L, taseditor_lua->getnote(luaL_checkinteger(L, 1)));
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushstring(L, taseditor_lua->getnote(luaL_checkinteger(L, 1)));
+	}
+	else
+	{
+		lua_pushstring(L, "");
+	}
 #endif
 	return 1;
 }
@@ -5192,7 +5245,10 @@ static int taseditor_setnote(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.setnote(luaL_checkinteger(L, 1), luaL_checkstring(L, 2));
 #elif defined __QT_DRIVER__
-	taseditor_lua->setnote(luaL_checkinteger(L, 1), luaL_checkstring(L, 2));
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->setnote(luaL_checkinteger(L, 1), luaL_checkstring(L, 2));
+	}
 #endif
 	return 0;
 }
@@ -5203,7 +5259,14 @@ static int taseditor_getcurrentbranch(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getcurrentbranch());
 #elif defined __QT_DRIVER__
-	lua_pushinteger(L, taseditor_lua->getcurrentbranch());
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushinteger(L, taseditor_lua->getcurrentbranch());
+	}
+	else
+	{
+		lua_pushinteger(L, 0);
+	}
 #endif
 	return 1;
 }
@@ -5214,7 +5277,14 @@ static int taseditor_getrecordermode(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushstring(L, taseditor_lua.getrecordermode());
 #elif defined __QT_DRIVER__
-	lua_pushstring(L, taseditor_lua->getrecordermode());
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushstring(L, taseditor_lua->getrecordermode());
+	}
+	else
+	{
+		lua_pushstring(L, "");
+	}
 #endif
 	return 1;
 }
@@ -5225,7 +5295,14 @@ static int taseditor_getsuperimpose(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getsuperimpose());
 #elif defined __QT_DRIVER__
-	lua_pushinteger(L, taseditor_lua->getsuperimpose());
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushinteger(L, taseditor_lua->getsuperimpose());
+	}
+	else
+	{
+		lua_pushinteger(L, 0);
+	}
 #endif
 	return 1;
 }
@@ -5236,7 +5313,14 @@ static int taseditor_getlostplayback(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getlostplayback());
 #elif defined __QT_DRIVER__
-	lua_pushinteger(L, taseditor_lua->getlostplayback());
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushinteger(L, taseditor_lua->getlostplayback());
+	}
+	else
+	{
+		lua_pushinteger(L, 0);
+	}
 #endif
 	return 1;
 }
@@ -5247,7 +5331,14 @@ static int taseditor_getplaybacktarget(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getplaybacktarget());
 #elif defined __QT_DRIVER__
-	lua_pushinteger(L, taseditor_lua->getplaybacktarget());
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushinteger(L, taseditor_lua->getplaybacktarget());
+	}
+	else
+	{
+		lua_pushinteger(L, 0);
+	}
 #endif
 	return 1;
 }
@@ -5258,7 +5349,10 @@ static int taseditor_setplayback(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.setplayback(luaL_checkinteger(L, 1));
 #elif defined __QT_DRIVER__
-	taseditor_lua->setplayback(luaL_checkinteger(L, 1));
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->setplayback(luaL_checkinteger(L, 1));
+	}
 #endif
 	return 0;
 }
@@ -5269,7 +5363,10 @@ static int taseditor_stopseeking(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.stopseeking();
 #elif defined __QT_DRIVER__
-	taseditor_lua->stopseeking();
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->stopseeking();
+	}
 #endif
 	return 0;
 }
@@ -5282,7 +5379,10 @@ static int taseditor_getselection(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.getselection(cur_set);
 #elif defined __QT_DRIVER__
-	taseditor_lua->getselection(cur_set);
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->getselection(cur_set);
+	}
 #endif
 	int size = cur_set.size();
 	if (size)
@@ -5322,7 +5422,10 @@ static int taseditor_setselection(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.setselection(cur_set);
 #elif defined __QT_DRIVER__
-	taseditor_lua->setselection(cur_set);
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->setselection(cur_set);
+	}
 #endif
 	return 0;
 }
@@ -5333,7 +5436,14 @@ static int taseditor_getinput(lua_State *L)
 #ifdef __WIN_DRIVER__
 	lua_pushinteger(L, taseditor_lua.getinput(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2)));
 #elif defined __QT_DRIVER__
-	lua_pushinteger(L, taseditor_lua->getinput(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2)));
+	if (taseditor_lua != nullptr)
+	{
+		lua_pushinteger(L, taseditor_lua->getinput(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2)));
+	}
+	else
+	{
+		lua_pushinteger(L, 0);
+	}
 #endif
 	return 1;
 }
@@ -5344,7 +5454,10 @@ static int taseditor_submitinputchange(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.submitinputchange(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
 #elif defined __QT_DRIVER__
-	taseditor_lua->submitinputchange(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->submitinputchange(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
+	}
 #endif
 	return 0;
 }
@@ -5355,7 +5468,10 @@ static int taseditor_submitinsertframes(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.submitinsertframes(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
 #elif defined __QT_DRIVER__
-	taseditor_lua->submitinsertframes(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->submitinsertframes(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
+	}
 #endif
 	return 0;
 }
@@ -5366,7 +5482,10 @@ static int taseditor_submitdeleteframes(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.submitdeleteframes(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
 #elif defined __QT_DRIVER__
-	taseditor_lua->submitdeleteframes(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->submitdeleteframes(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
+	}
 #endif
 	return 0;
 }
@@ -5387,10 +5506,15 @@ static int taseditor_applyinputchanges(lua_State *L)
 			lua_pushinteger(L, taseditor_lua.applyinputchanges(""));
 	}
 #elif defined __QT_DRIVER__
-	if (lua_isnil(L, 1))
+	if (taseditor_lua == nullptr)
+	{
+		lua_pushinteger(L, 0);
+	}
+	else if (lua_isnil(L, 1))
 	{
 		lua_pushinteger(L, taseditor_lua->applyinputchanges(""));
-	} else
+	}
+	else
 	{
 		const char* name = lua_tostring(L, 1);
 		if (name)
@@ -5408,7 +5532,10 @@ static int taseditor_clearinputchanges(lua_State *L)
 #ifdef __WIN_DRIVER__
 	taseditor_lua.clearinputchanges();
 #elif defined __QT_DRIVER__
-	taseditor_lua->clearinputchanges();
+	if (taseditor_lua != nullptr)
+	{
+		taseditor_lua->clearinputchanges();
+	}
 #endif
 	return 0;
 }
