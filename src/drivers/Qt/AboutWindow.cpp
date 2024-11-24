@@ -74,7 +74,7 @@ static const char *Authors[] = {
 		"\t rainwarrior", "\t feos",
 	"Pre 2.0 Guys:",
 	"\t Bero", "\t Xodnizel", "\t Aaron Oneal", "\t Joe Nahmias",
-	"\t Paul Kuliniewicz", "\t Quietust", "\t Ben Parnell",
+	"\t Paul Kuliniewicz", "\t Quietust",
 		"\t Parasyte &amp; bbitmaster",
 	"\t blip & nitsuja",
 	"Included components:",
