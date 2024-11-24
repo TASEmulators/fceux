@@ -554,7 +554,7 @@ void LogCDData(uint8 *opcode, uint16 A, int size)
 		case 4: memop = 0x20; break;
 	}
 
-	if ((j = GetPRGAddress(A)) != -1)
+	if (((j = GetPRGAddress(A)) != -1) && (opcode[0] != 0x4C) && (opcode[0] != 0x6C))
 	{
 		if (opwrite[opcode[0]] == 0)
 		{
@@ -569,7 +569,12 @@ void LogCDData(uint8 *opcode, uint16 A, int size)
 				newDataHit = true;
 			}
 		}
-		else
+		// Unclear why the write destination's access types gets reset for FDS...
+		// See:
+		// - https://github.com/TASEmulators/fceux/commit/a4fa6225a04b5ab8d3dfca3fc9abd7190bceec85
+		// - https://github.com/TASEmulators/fceux/commit/b10b6254c3d5c9519a85cb4382cdb22846d2e394
+		// - https://github.com/TASEmulators/fceux/commit/67942accc72149ae028d58f36419b64ea8651db9?diff=unified&w=1
+		else if(GameInfo && GameInfo->type == GIT_FDS)
 		{
 			if (cdloggerdata[j] & 1)
 			{
