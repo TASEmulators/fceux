@@ -1123,6 +1123,12 @@
     <ClCompile Include="..\src\boards\413.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\boards\471.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\451.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\debugsymboltable.cpp" />
   </ItemGroup>
   <ItemGroup>
