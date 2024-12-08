@@ -461,8 +461,8 @@ static int encode_frame( unsigned char *inBuf, int width, int height )
 	pic->stride[1] = width/2;
 	pic->stride[2] = width/2;
 
-#ifdef MAX_SCALABLE_LAYERS
-	/* Handle API changes for scalable layers output in x265 4.0 */
+#if X265_BUILD >= 210 && X265_BUILD <= 213 && defined(MAX_SCALABLE_LAYERS)
+	/* Handle temporary API changes for scalable layers output in x265 4.0 */
 	x265_picture *pics[MAX_SCALABLE_LAYERS] = {NULL};
 	pics[0] = pic;
 	ret = x265_encoder_encode( hdl, &nal, &i_nal, pic, pics );
@@ -501,8 +501,8 @@ static int close(void)
 	/* Flush delayed frames */
 	while( hdl != NULL )
 	{
-#ifdef MAX_SCALABLE_LAYERS
-	    /* Handle API changes for scalable layers output in x265 4.0 */
+#if X265_BUILD >= 210 && X265_BUILD <= 213 && defined(MAX_SCALABLE_LAYERS)
+	    /* Handle temporary API changes for scalable layers output in x265 4.0 */
 	    x265_picture *pics[MAX_SCALABLE_LAYERS] = {NULL};
 	    pics[0] = pic;
 	    ret = x265_encoder_encode( hdl, &nal, &i_nal, pic, pics );
