@@ -26,7 +26,7 @@
 
 static uint64_t rdtsc()
 {
-#if defined(__arm64__) || defined(__arm__)
+#if defined(__aarch64__) || defined(__arm__)
     // SPDX-License-Identifier: GPL-2.0
     uint64_t val = 0;
 
