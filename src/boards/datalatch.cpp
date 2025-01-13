@@ -309,7 +309,8 @@ void Mapper78_Init(CartInfo *info) {
 }
 
 //------------------ Map 86 ---------------------------
-
+// Moero!! Pro Yakyuu has an ADPCM chip with internal ROM,
+// used for voice samples (not dumped, so emulation isn't possible)
 static void M86Sync(void) {
 	setprg32(0x8000, (latche >> 4) & 3);
 	setchr8((latche & 3) | ((latche >> 4) & 4));

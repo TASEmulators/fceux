@@ -16,6 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * The Moero!! Pro Yakyuu series have an ADPCM chip with internal ROM,
+ * used for voice samples (not dumped, so emulation isn't possible)
  */
 
 #include "mapinc.h"
