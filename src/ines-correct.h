@@ -129,9 +129,9 @@
 	{0xd4a76b07,	 79,		0},	/* F-15 City Wars*/
 	{0x1eb4a920,	 79,		1},	/* Double Strike */
 	{0x3e1271d5,	 79,		1},	/* Tiles of Fate */
+	{0x0da5e32e,	 87,		1},	/* Urusei Yatsura */
 	{0xd2699893,	 88,		0},	/*  Dragon Spirit */
 	{0xbb7c5f7a,	 89,		8},	/* Mito Koumon or something similar */
-	{0x0da5e32e,	101,	   -1},	/* new Uruusey Yatsura */
 	{0x8eab381c,	113,		1},	/* Death Bots */
 	{0x6a03d3f3,	114,	   -1},
 	{0x0d98db53,	114,	   -1},	/* Pocahontas */
