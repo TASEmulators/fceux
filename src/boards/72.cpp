@@ -17,13 +17,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Moero!! Pro Tennis have ADPCM codec on-board, PROM isn't dumped, emulation isn't
- * possible just now.
+ * Moero!! Pro Tennis and Moero!! Pro Yakyuu '88 Ketteiban have an ADPCM chip with
+ * internal ROM, used for voice samples (not dumped, so emulation isn't possible)
  */
 
 #include "mapinc.h"
 
 static uint8 preg, creg;
+static void (*Sync)(void);
 
 static SFORMAT StateRegs[] =
 {
@@ -32,13 +33,19 @@ static SFORMAT StateRegs[] =
 	{ 0 }
 };
 
-static void Sync(void) {
+static void M72Sync(void) {
 	setprg16(0x8000, preg);
 	setprg16(0xC000, ~0);
 	setchr8(creg);
 }
 
-static DECLFW(M72Write) {
+static void M92Sync(void) {
+	setprg16(0x8000, 0);
+	setprg16(0xC000, preg);
+	setchr8(creg);
+}
+
+static DECLFW(Write) {
 	if (V & 0x80)
 		preg = V & 0xF;
 	if (V & 0x40)
@@ -46,10 +53,10 @@ static DECLFW(M72Write) {
 	Sync();
 }
 
-static void M72Power(void) {
+static void Power(void) {
 	Sync();
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
-	SetWriteHandler(0x6000, 0xFFFF, M72Write);
+	SetWriteHandler(0x8000, 0xFFFF, Write);
 }
 
 static void StateRestore(int version) {
@@ -57,7 +64,16 @@ static void StateRestore(int version) {
 }
 
 void Mapper72_Init(CartInfo *info) {
-	info->Power = M72Power;
+	Sync = M72Sync;
+	info->Power = Power;
+	GameStateRestore = StateRestore;
+
+	AddExState(&StateRegs, ~0, 0, 0);
+}
+
+void Mapper92_Init(CartInfo *info) {
+	Sync = M92Sync;
+	info->Power = Power;
 	GameStateRestore = StateRestore;
 
 	AddExState(&StateRegs, ~0, 0, 0);
