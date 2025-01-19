@@ -370,31 +370,14 @@ void Mapper94_Init(CartInfo *info) {
 //------------------ Map 97 ---------------------------
 
 static void M97Sync(void) {
-	setchr8(0);
 	setprg16(0x8000, ~0);
 	setprg16(0xc000, latche & 15);
-	switch (latche >> 6) {
-	case 0: break;
-	case 1: setmirror(MI_H); break;
-	case 2: setmirror(MI_V); break;
-	case 3: break;
-	}
-	setchr8(((latche >> 1) & 1) | ((latche << 1) & 2));
+	setmirror((latche >> 7) & 1);
+	setchr8(0);
 }
 
 void Mapper97_Init(CartInfo *info) {
-	Latch_Init(info, M97Sync, ~0, 0x8000, 0xFFFF, 0, 0);
-}
-
-//------------------ Map 101 ---------------------------
-
-static void M101Sync(void) {
-	setprg32(0x8000, 0);
-	setchr8(latche);
-}
-
-void Mapper101_Init(CartInfo *info) {
-	Latch_Init(info, M101Sync, ~0, 0x6000, 0x7FFF, 0, 0);
+	Latch_Init(info, M97Sync, ~0, 0x8000, 0xBFFF, 0, 0);
 }
 
 //------------------ Map 107 ---------------------------

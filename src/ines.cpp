@@ -547,7 +547,7 @@ BMAPPINGLocal bmap[] = {
 	{"100-in-1",			 15, Mapper15_Init},
 	{"BANDAI 24C02",		 16, Mapper16_Init},
 	{"FFE Rev. B",			 17, Mapper17_Init},
-	{"JALECO SS880006",		 18, Mapper18_Init},	// JF-NNX (EB89018-30007) boards
+	{"JALECO SS88006",		 18, Mapper18_Init},	// JF-NNX (EB89018-30007) boards
 	{"Namcot 106",			 19, Mapper19_Init},
 //	{"",					 20, Mapper20_Init},
 	{"Konami VRC2/VRC4 A",	 21, Mapper21_Init},
@@ -557,7 +557,7 @@ BMAPPINGLocal bmap[] = {
 	{"Konami VRC2/VRC4 D",	 25, Mapper25_Init},
 	{"Konami VRC6 Rev. B",	 26, Mapper26_Init},
 	{"CC-21 MI HUN CHE",	 27, UNLCC21_Init},		// Former dupe for VRC2/VRC4 mapper, redefined with crc to mihunche boards
-	{"",					 28, Mapper28_Init},
+	{"ACTION 53",			 28, Mapper28_Init},
 	{"RET-CUFROM",			 29, Mapper29_Init},
 	{"UNROM 512",			 30, UNROM512_Init},
 	{"infiniteneslives-NSF", 31, Mapper31_Init},
@@ -630,7 +630,7 @@ BMAPPINGLocal bmap[] = {
 //	{"",					 98, Mapper98_Init},
 	{"VS Uni/Dual- system",	 99, Mapper99_Init},
 //	{"",					100, Mapper100_Init},
-	{"",					101, Mapper101_Init},
+//	{"",					101, Mapper101_Init},	// Deprecated, dupe
 //	{"",					102, Mapper102_Init},
 	{"FDS DOKIDOKI FULL",	103, Mapper103_Init},
 //	{"",					104, Mapper104_Init},
@@ -647,7 +647,7 @@ BMAPPINGLocal bmap[] = {
 	{"MMC3 PIRATE A",		115, Mapper115_Init},
 	{"MMC1/MMC3/VRC PIRATE",116, UNLSL12_Init},
 	{"FUTURE MEDIA BOARD",	117, Mapper117_Init},
-	{"TSKROM",				118, TKSROM_Init},
+	{"TKSROM",				118, TKSROM_Init},
 	{"NES-TQROM",			119, Mapper119_Init},
 	{"FDS TOBIDASE",		120, Mapper120_Init},
 	{"MMC3 PIRATE PROT. A",	121, Mapper121_Init},
@@ -680,11 +680,11 @@ BMAPPINGLocal bmap[] = {
 	{"SA0037",				148, SA0037_Init},
 	{"SA0036",				149, SA0036_Init},
 	{"S74LS374N",			150, S74LS374N_Init},
-	{"",					151, Mapper151_Init},
-	{"",					152, Mapper152_Init},
+//	{"",					151, Mapper151_Init},	// Deprecated, dupe
+	{"BA SARA DISCRETE",	152, Mapper152_Init},
 	{"BANDAI SRAM",			153, Mapper153_Init},	// Bandai board 16 with SRAM instead of EEPROM
 	{"",					154, Mapper154_Init},
-	{"",					155, Mapper155_Init},
+	{"MMC1A",				155, Mapper155_Init},	// No WRAM disable
 	{"",					156, Mapper156_Init},
 	{"BANDAI BARCODE",		157, Mapper157_Init},
 //	{"",					158, Mapper158_Init},
@@ -709,15 +709,15 @@ BMAPPINGLocal bmap[] = {
 	{"",					177, Mapper177_Init},
 	{"",					178, Mapper178_Init},
 //	{"",					179, Mapper179_Init},
-	{"",					180, Mapper180_Init},
+	{"UNROM+74HC08",		180, Mapper180_Init},	// Crazy Climber
 	{"",					181, Mapper181_Init},
 //	{"",					182, Mapper182_Init},	// Deprecated, dupe
 	{"",					183, Mapper183_Init},
-	{"",					184, Mapper184_Init},
-	{"",					185, Mapper185_Init},
-	{"",					186, Mapper186_Init},
+	{"SUNSOFT-K",			184, Mapper184_Init},	// Sunsoft-1 mapper
+	{"CNROM+SECURITY",		185, Mapper185_Init},
+	{"STUDY BOX",			186, Mapper186_Init},
 	{"",					187, Mapper187_Init},
-	{"",					188, Mapper188_Init},
+	{"KARAOKE STUDIO",		188, Mapper188_Init},
 	{"",					189, Mapper189_Init},
 	{"",					190, Mapper190_Init},
 	{"",					191, Mapper191_Init},
@@ -757,8 +757,8 @@ BMAPPINGLocal bmap[] = {
 	{"",					225, Mapper225_Init},
 	{"BMC 22+20-in-1",		226, Mapper226_Init},
 	{"",					227, Mapper227_Init},
-	{"",					228, Mapper228_Init},
-	{"",					229, Mapper229_Init},
+	{"ACTIVE ENTERPRISES",	228, Mapper228_Init},
+	{"BMC 31-in-1",			229, Mapper229_Init},
 	{"BMC Contra+22-in-1",	230, Mapper230_Init},
 	{"",					231, Mapper231_Init},
 	{"BMC QUATTRO",			232, Mapper232_Init},

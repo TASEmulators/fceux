@@ -400,7 +400,6 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\boards\121.cpp" />
     <ClCompile Include="..\src\boards\12in1.cpp" />
     <ClCompile Include="..\src\boards\15.cpp" />
-    <ClCompile Include="..\src\boards\151.cpp" />
     <ClCompile Include="..\src\boards\156.cpp" />
     <ClCompile Include="..\src\boards\158B.cpp" />
     <ClCompile Include="..\src\boards\164.cpp" />
