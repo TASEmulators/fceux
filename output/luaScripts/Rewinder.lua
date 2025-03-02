@@ -11,7 +11,8 @@
 
 --Which key you would like to function as the "rewind key"
 
-local rewindKey = 'select'
+local firstRewindKey = 'left'
+local secondRewindKey = 'start'
 
 
 --How much rewind power would you like? (The higher the number the further back in time you can go, but more computer memory is used up)
@@ -37,7 +38,7 @@ while (true) do
 		savePreventBuffer = 1;
 	end;
 	joyput	= joypad.read(1);
-	if joyput[rewindKey] then
+	if (joyput[firstRewindKey] and joyput[secondRewindKey]) then
 		savePreventBuffer = 5;
 		if rewindCount==0 then
 			--makes sure you can't go back too far could also include other things in here, left empty for now.	
@@ -51,7 +52,7 @@ while (true) do
 		end;
 	end;
 	if savePreventBuffer==1 then
-		gui.text(80,15,"");
+		--gui.text(80,15,"");
 		saveCount=saveCount+1;
 		if saveCount==saveMax then
 			saveCount = 1;
@@ -66,6 +67,6 @@ while (true) do
 	end;
 	local HUDMATH = (math.ceil((100/saveMax)*rewindCount));--Making the rewind time a percentage.
 	local HUDTEXT = "REWIND POWER: ".. HUDMATH .."%"; 
-	gui.text(80,5,HUDTEXT);--Displaying the time onscreen.
+	--gui.text(80,5,HUDTEXT);--Displaying the time onscreen.
 	FCEU.frameadvance();
 end;
