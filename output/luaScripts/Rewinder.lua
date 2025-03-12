@@ -65,8 +65,8 @@ while (true) do
 		savestate.save(save);
 		saveArray[saveCount] = save;
 	end;
-	local HUDMATH = (math.ceil((100/saveMax)*rewindCount));--Making the rewind time a percentage.
-	local HUDTEXT = "REWIND POWER: ".. HUDMATH .."%"; 
+	--local HUDMATH = (math.ceil((100/saveMax)*rewindCount));--Making the rewind time a percentage.
+	--local HUDTEXT = "REWIND POWER: ".. HUDMATH .."%"; 
 	--gui.text(80,5,HUDTEXT);--Displaying the time onscreen.
 	FCEU.frameadvance();
 end;
