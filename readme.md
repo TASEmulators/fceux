@@ -12,7 +12,7 @@ Interim builds:
 * MacOSX: [fceux-Darwin.dmg](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-Darwin.dmg)
 * Status: [Appveyor](https://ci.appveyor.com/project/zeromus/fceux/)
 
-But you might like mesen more: https://github.com/SourMesen/Mesen 
+But you might like Mesen more: https://github.com/SourMesen/Mesen2
 
 You should get releases from here: https://sourceforge.net/projects/fceultra/files/
 
