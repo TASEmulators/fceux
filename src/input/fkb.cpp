@@ -24,8 +24,9 @@
 #define AK(x)	FKB_ ## x
 
 static uint8 bufit[0x49];
-static uint8 ksmode;
-static uint8 ksindex;
+static uint8 ksrow;
+static uint8 kscol;
+static uint8 ksenable;
 
 static uint16 matrix[9][2][4] =
 {
@@ -50,30 +51,34 @@ static uint16 matrix[9][2][4] =
 };
 
 static void FKB_Write(uint8 v) {
-	v >>= 1;
-	if (v & 2) {
-		if ((ksmode & 1) && !(v & 1))
-			ksindex = (ksindex + 1) % 9;
+	uint8 col = (v & 2) >> 1;
+	ksenable = v & 4;
+	if (ksenable) {
+		if (v & 1) {
+			ksrow = 0;
+		} else if (kscol && !col) {
+			ksrow = (ksrow + 1) % 10;
+		}
+		kscol = col;
 	}
-	ksmode = v;
 }
 
 static uint8 FKB_Read(int w, uint8 ret) {
 	if (w) {
+		int state = 0;
 		int x;
 
 		ret &= ~0x1E;
+		if (ksrow == 9) return(ret);
 		for (x = 0; x < 4; x++)
-			if (bufit[ matrix[ksindex][ksmode & 1][x] & 0xFF ] || bufit[ matrix[ksindex][ksmode & 1][x] >> 8])
-				ret |= 1 << (x + 1);
-		ret ^= 0x1E;
+			if (bufit[ matrix[ksrow][kscol][x] & 0xFF ] || bufit[ matrix[ksrow][kscol][x] >> 8])
+				state |= 1 << (x + 1);
+		return(ret | ((ksenable ? (state ^ 0x1E) : 0)));
 	}
 	return(ret);
 }
 
 static void FKB_Strobe(void) {
-	ksmode = 0;
-	ksindex = 0;
 }
 
 static void FKB_Update(void *data, int arg) {
@@ -84,6 +89,6 @@ static INPUTCFC FKB = { FKB_Read, FKB_Write, FKB_Strobe, FKB_Update, 0, 0 };
 
 INPUTCFC *FCEU_InitFKB(void) {
 	memset(bufit, 0, sizeof(bufit));
-	ksmode = ksindex = 0;
+	ksenable = ksrow = kscol = 0;
 	return(&FKB);
 }
