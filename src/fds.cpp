@@ -259,7 +259,13 @@ static void FDSFix(int a) {
 
 static DECLFR(FDSRead4030) {
 	uint8 ret = 0;
-
+	
+	/* from hardware testing (#789):
+	4030(r) bit 3 = 4025(w) bit 3
+	(nametable arrangement/mirroring)
+	*/
+	ret |= (mapperFDS_control & 0x08);
+	
 	/* Cheap hack. */
 	if (X.IRQlow & FCEU_IQEXT) ret |= 1;
 	if (X.IRQlow & FCEU_IQEXT2) ret |= 2;
