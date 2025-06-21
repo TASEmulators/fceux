@@ -28,6 +28,7 @@ build
 /vc/userconfig/scmrev.h
 /vc/fceux.zip
 /vc/fceux64.zip
+/vcpkg/vcpkg_installed
 
 # macOS junk
 .DS_Store

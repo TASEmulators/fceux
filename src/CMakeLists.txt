@@ -129,23 +129,23 @@ if(WIN32)
      add_definitions( -D_USE_LIBARCHIVE )
      add_definitions( /wd4267 /wd4244 )
      #add_definitions( /wd4018 ) # Integer comparison sign mismatch warnings
-     include_directories( ${SDL_INSTALL_PREFIX}/SDL2/include )
-     include_directories( ${LIBARCHIVE_INSTALL_PREFIX}/libarchive/include )
+     include_directories( ${SDL_INSTALL_PREFIX}/include )
+     include_directories( ${LIBARCHIVE_INSTALL_PREFIX}/include )
      include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
      set( OPENGL_LDFLAGS  OpenGL::GL )
-     set( SDL2_LDFLAGS  ${SDL_INSTALL_PREFIX}/SDL2/lib/x64/SDL2.lib )
-     set( LIBARCHIVE_LDFLAGS  ${LIBARCHIVE_INSTALL_PREFIX}/libarchive/lib/archive.lib )
+     set( SDL2_LDFLAGS  ${SDL_INSTALL_PREFIX}/lib/x64/SDL2.lib )
+     set( LIBARCHIVE_LDFLAGS  ${LIBARCHIVE_INSTALL_PREFIX}/lib/archive.lib )
      set( SYS_LIBS  wsock32 ws2_32 vfw32 Htmlhelp )
      set(APP_ICON_RESOURCES_WINDOWS  ${CMAKE_SOURCE_DIR}/icons/fceux.rc )
 
      if ( ${USE_LIBAV} )
         add_definitions( -D_USE_LIBAV ${LIBAV_CFLAGS} )
-        include_directories( ${FFMPEG_INSTALL_PREFIX}/ffmpeg/include )
-        set( LIBAV_LDFLAGS  ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/avcodec.lib
-        	                 ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/avformat.lib
-                	         ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/avutil.lib
-                        	 ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/swscale.lib
-                        	 ${FFMPEG_INSTALL_PREFIX}/ffmpeg/lib/swresample.lib )
+        include_directories( ${FFMPEG_INSTALL_PREFIX}/include )
+        set( LIBAV_LDFLAGS  ${FFMPEG_INSTALL_PREFIX}/lib/avcodec.lib
+        	                 ${FFMPEG_INSTALL_PREFIX}/lib/avformat.lib
+                	         ${FFMPEG_INSTALL_PREFIX}/lib/avutil.lib
+                        	 ${FFMPEG_INSTALL_PREFIX}/lib/swscale.lib
+                        	 ${FFMPEG_INSTALL_PREFIX}/lib/swresample.lib )
      endif()
 
 else(WIN32)
