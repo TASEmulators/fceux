@@ -1,3 +1,5 @@
+extern char* RomFile;		//Contains the filename of the rom file in the command line arguments
+extern int RunInFullscreen;
 extern char* MovieToLoad;	//Contains the filename of the savestate specified in the command line arguments
 extern char* StateToLoad;	//Contains the filename of the movie file specified in the command line arguments
 extern char* ConfigToLoad;	//Contains the filename of the config file specified in the command line arguments

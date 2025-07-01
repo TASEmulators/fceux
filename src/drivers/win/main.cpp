@@ -847,15 +847,20 @@ int main(int argc,char *argv[])
 
 	InitSpeedThrottle();
 
-	if (t)
+	if (RomFile)
 	{
-		ALoad(t);
+		ALoad(RomFile);
 	} else
 	{
 		if (AutoResumePlay && romNameWhenClosingEmulator && romNameWhenClosingEmulator[0])
 			ALoad(romNameWhenClosingEmulator, 0, true);
 		if (eoptions & EO_FOAFTERSTART)
 			LoadNewGamey(hAppWnd, 0);
+	}
+
+	if (RunInFullscreen) {
+		extern void ToggleFullscreen();
+		ToggleFullscreen();
 	}
 
 	if (PAL && pal_setting_specified && !dendy_setting_specified)
@@ -897,6 +902,8 @@ int main(int argc,char *argv[])
 		FCEU_LoadLuaCode(LuaToLoad);
 		free(LuaToLoad);
 		LuaToLoad = NULL;
+		extern HWND LuaConsoleHWnd;
+		ShowWindow(LuaConsoleHWnd, SW_MINIMIZE);
 	}
 
 	//Initiates AVI capture mode, will set up proper settings, and close FCUEX once capturing is finished
