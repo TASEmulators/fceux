@@ -3746,7 +3746,6 @@ enum
  */
 static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
 	static uint8 index_lookup[1 << (3+3+3)];
-	int k;
 
 	if (!gui_saw_current_palette)
 	{
@@ -3754,15 +3753,17 @@ static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
 		gui_saw_current_palette = TRUE;
 	}
 
-	k = ((r & 0xE0) << 1) | ((g & 0xE0) >> 2) | ((b & 0xE0) >> 5);
+    // Cache based on upper 3 bits of r, g, and b
+	int k = ((r & 0xE0) << 1) | ((g & 0xE0) >> 2) | ((b & 0xE0) >> 5);
+    if (index_lookup[k] != GUI_COLOUR_CLEAR) return index_lookup[k];
 	uint16 test, best = GUI_COLOUR_CLEAR;
-	uint32 best_score = 0xffffffffu, test_score;
-	if (index_lookup[k] != GUI_COLOUR_CLEAR) return index_lookup[k];
+	uint32 test_score, best_score = 0xffffffffu;
 	for (test = 0; test < 0xff; test++)
 	{
 		uint8 tr, tg, tb;
 		if (test == GUI_COLOUR_CLEAR) continue;
 		FCEUD_GetPalette(test, &tr, &tg, &tb);
+        // Weights based on luminance formula?
 		test_score = abs(r - tr) *  66 +
 		             abs(g - tg) * 129 +
 		             abs(b - tb) *  25;
