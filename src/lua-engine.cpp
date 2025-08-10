@@ -3763,10 +3763,10 @@ static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
 		uint8 tr, tg, tb;
 		if (test == GUI_COLOUR_CLEAR) continue;
 		FCEUD_GetPalette(test, &tr, &tg, &tb);
-        // Weights based on luminance formula?
-		test_score = abs(r - tr) *  66 +
-		             abs(g - tg) * 129 +
-		             abs(b - tb) *  25;
+        // Basic distance squared
+		test_score = (r - tr) * (r - tr) +
+                     (g - tg) * (g - tg) +
+                     (b - tb) * (b - tb);
 		if (test_score < best_score) best_score = test_score, best = test;
 	}
 	index_lookup[k] = best;
