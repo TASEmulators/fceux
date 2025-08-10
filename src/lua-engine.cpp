@@ -3755,7 +3755,7 @@ static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
 
     // Cache based on upper 3 bits of r, g, and b
 	int k = ((r & 0xE0) << 1) | ((g & 0xE0) >> 2) | ((b & 0xE0) >> 5);
-    if (index_lookup[k] != GUI_COLOUR_CLEAR) return index_lookup[k];
+    // if (index_lookup[k] != GUI_COLOUR_CLEAR) return index_lookup[k];
 	uint16 test, best = GUI_COLOUR_CLEAR;
 	uint32 test_score, best_score = 0xffffffffu;
 	for (test = 0; test < 0xff; test++)
