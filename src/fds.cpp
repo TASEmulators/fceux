@@ -329,18 +329,16 @@ static DECLFR(FDSRead4033) {
 
 /* Begin FDS sound */
 
+/* 2025-09-12 - negativeExponent
+   Ported modulation/sweep logic from Mednafen NES
+ */
+
 #define FDSClock (1789772.7272727272727272 / 2)
 
 typedef struct {
 	int64 cycles;     // Cycles per PCM sample
 	int64 count;    // Cycle counter
 	int64 envcount;    // Envelope cycle counter
-	uint32 b19shiftreg60;
-	uint32 b24adder66;
-	uint32 b24latch68;
-	uint32 b17latch76;
-	int32 clockcount;  // Counter to divide frequency by 8.
-	uint8 b8shiftreg88;  // Modulation register.
 	uint8 amplitude[2];  // Current amplitudes.
 	uint8 speedo[2];
 	uint8 mwcount;
@@ -348,19 +346,35 @@ typedef struct {
 	uint8 mwave[0x20];      // Modulation waveform
 	uint8 cwave[0x40];      // Game-defined waveform(carrier)
 	uint8 SPSG[0xB];
+
+	uint32 cwave_freq;	/* $4082 and lower 4 bits of $4083 */
+	uint32 cwave_pos;
+
+	uint32 mod_freq;	/* $4086 and lower 4 bits of $4087 */
+	uint32 mod_pos;		/* Should be named "mwave_pos", but "mod_pos" distinguishes it more. */
+	uint8 mod_disabled;	/* Upper bit of $4087 */
+
+	uint32 sweep_bias;
+
+	int32 mod_out;		/* output from modulator */
+	uint32 sample_cache_out; /* Sample out cache, with volume, modulation, and others applied */
 } FDSSOUND;
 
 static FDSSOUND fdso;
+static const int bias_tab[8] = { 0, 1, 2, 4, 0, -4, -2, -1 };
 
 #define  SPSG  fdso.SPSG
-#define b19shiftreg60  fdso.b19shiftreg60
-#define b24adder66  fdso.b24adder66
-#define b24latch68  fdso.b24latch68
-#define b17latch76  fdso.b17latch76
-#define b8shiftreg88  fdso.b8shiftreg88
-#define clockcount  fdso.clockcount
 #define amplitude  fdso.amplitude
 #define speedo    fdso.speedo
+
+#define cwave_freq fdso.cwave_freq
+#define cwave_pos fdso.cwave_pos
+
+#define mod_freq fdso.mod_freq
+#define mod_pos fdso.mod_pos
+#define mod_disabled fdso.mod_disabled
+
+#define sweep_bias fdso.sweep_bias
 
 void FDSSoundStateAdd(void) {
 	AddExState(fdso.cwave, 64, 0, "WAVE");
@@ -368,13 +382,17 @@ void FDSSoundStateAdd(void) {
 	AddExState(amplitude, 2, 0, "AMPL");
 	AddExState(SPSG, 0xB, 0, "SPSG");
 
-	AddExState(&b8shiftreg88, 1, 0, "B88");
+	AddExState(&cwave_freq, 4, 1, "CFRQ");
+	AddExState(&cwave_pos, 4, 1, "CPOS");
 
-	AddExState(&clockcount, 4, 1, "CLOC");
-	AddExState(&b19shiftreg60, 4, 1, "B60");
-	AddExState(&b24adder66, 4, 1, "B66");
-	AddExState(&b24latch68, 4, 1, "B68");
-	AddExState(&b17latch76, 4, 1, "B76");
+	AddExState(&mod_freq, 4, 1, "MFRQ");
+	AddExState(&mod_pos, 4, 1, "MPOS");
+	AddExState(&mod_disabled, 1, 1, "MDIS");
+
+	AddExState(&sweep_bias, 4, 1, "BIAS");
+
+	AddExState(&fdso.mod_out, 4, 1, "MOUT");
+	AddExState(&fdso.sample_cache_out, 4, 1, "WOUT");
 }
 
 static DECLFR(FDSSRead) {
@@ -399,14 +417,47 @@ static DECLFW(FDSSWrite) {
 		if (V & 0x80)
 			amplitude[(A & 0xF) >> 2] = V & 0x3F;
 		break;
-	case 0x7:
-		b17latch76 = 0;
-		SPSG[0x5] = 0;
+	case 0x2:
+		cwave_freq &= 0xFF00;
+		cwave_freq |= V << 0;
 		break;
+
+	case 0x3:
+		if (!(V & 0x80) && (SPSG[0x3] & 0x80))
+			cwave_pos = 0;
+
+		cwave_freq &= 0x00FF;
+		cwave_freq |= (V & 0xF) << 8;
+		break;
+
+	case 0x5:
+		sweep_bias = (V & 0x7F) << 4;
+		mod_pos = 0;
+		break;
+
+	case 0x6:
+		mod_freq &= 0xFF00;
+		mod_freq |= V << 0;
+		break;
+
+	case 0x7:
+		mod_freq &= 0x00FF;
+		mod_freq |= (V & 0xF) << 8;
+		mod_disabled = (bool)(V & 0x80);
+		break;
+
 	case 0x8:
-		b17latch76 = 0;
-		fdso.mwave[SPSG[0x5] & 0x1F] = V & 0x7;
-		SPSG[0x5] = (SPSG[0x5] + 1) & 0x1F;
+		if(mod_disabled) {
+			int i;
+
+			for(i = 0; i < 31; i++)
+				fdso.mwave[i] = fdso.mwave[i + 1];
+
+			fdso.mwave[0x1F] = bias_tab[V & 0x7];
+
+			if((V & 0x7) == 0x4)
+				fdso.mwave[0x1F] = 0x10;
+		}
 		break;
 	}
 	SPSG[A] = V;
@@ -453,52 +504,73 @@ static DECLFW(FDSWaveWrite) {
 		fdso.cwave[A & 0x3f] = V & 0x3F;
 }
 
-static int ta;
-static INLINE void ClockRise(void) {
-	if (!clockcount) {
-		ta++;
 
-		b19shiftreg60 = (SPSG[0x2] | ((SPSG[0x3] & 0xF) << 8));
-		b17latch76 = (SPSG[0x6] | ((SPSG[0x07] & 0xF) << 8)) + b17latch76;
+static int32 sign_x_to_s32(int n, int32 v) {
+	return ((int32)((uint32)v << (32 - n)) >> (32 - n));
+}
 
-		if (!(SPSG[0x7] & 0x80)) {
-			int t = fdso.mwave[(b17latch76 >> 13) & 0x1F] & 7;
-			int t2 = amplitude[1];
-			int adj = 0;
+static void ClockMod(void) {
+	if (!mod_disabled) {
+		uint32 prev_mod_pos = mod_pos;
+		int32 temp;
 
-			if ((t & 3)) {
-				if ((t & 4))
-					adj -= (t2 * ((4 - (t & 3))));
-				else
-					adj += (t2 * ((t & 3)));
-			}
-			adj *= 2;
-			if (adj > 0x7F) adj = 0x7F;
-			if (adj < -0x80) adj = -0x80;
-			b8shiftreg88 = 0x80 + adj;
-		} else {
-			b8shiftreg88 = 0x80;
+		mod_pos += mod_freq;
+
+		if ((mod_pos & (0x3F << 11)) != (prev_mod_pos & (0x3F << 11))) {
+			const int32 mw = fdso.mwave[((mod_pos >> 16) & 0x1F)];
+
+			sweep_bias = (sweep_bias + mw) & 0x7FF;
+			if (mw == 0x10)
+				sweep_bias = 0;
 		}
-	} else {
-		b19shiftreg60 <<= 1;
-		b8shiftreg88 >>= 1;
+
+		temp = sign_x_to_s32(11, sweep_bias) * ((amplitude[1] > 0x20) ? 0x20 : amplitude[1]);
+
+		// >> 4 or / 16?  / 16 sounds better in Zelda...
+		if (temp & 0x0F0) {
+			temp /= 256;
+			if (sweep_bias & 0x400)
+				temp--;
+			else
+				temp += 2;
+		} else
+			temp /= 256;
+
+		if (temp >= 194) {
+			temp -= 258;
+		}
+		if (temp < -64) {
+			temp += 256;
+		}
+
+		fdso.mod_out = temp;
 	}
-	b24adder66 = (b24latch68 + b19shiftreg60) & 0x1FFFFFF;
 }
 
-static INLINE void ClockFall(void) {
-	if ((b8shiftreg88 & 1))
-		b24latch68 = b24adder66;
-	clockcount = (clockcount + 1) & 7;
+static void ClockCarrier(void) {
+	int32 cur_cwave_freq;
+
+	if (!mod_disabled) {
+		cur_cwave_freq = (int32)(cwave_freq << 6) + (int32)cwave_freq * fdso.mod_out;
+
+		if (cur_cwave_freq < 0)
+			cur_cwave_freq = 0;
+	} else
+		cur_cwave_freq = cwave_freq << 6;
+
+	cwave_pos += cur_cwave_freq;
 }
 
-static INLINE int32 FDSDoSound(void) {
+static int32 FDSDoSound(void) {
+	int32 prev_cwave_pos = cwave_pos;
 	fdso.count += fdso.cycles;
 	if (fdso.count >= ((int64)1 << 40)) {
  dogk:
 		fdso.count -= (int64)1 << 40;
-		ClockRise();
-		ClockFall();
+		ClockMod();
+		if (!(SPSG[0x3] & 0x80)) {
+			ClockCarrier();
+		}
 		fdso.envcount--;
 		if (fdso.envcount <= 0) {
 			fdso.envcount += SPSG[0xA] * 3;
@@ -507,12 +579,12 @@ static INLINE int32 FDSDoSound(void) {
 	}
 	if (fdso.count >= 32768) goto dogk;
 
-	// Might need to emulate applying the amplitude to the waveform a bit better...
-	{
+	if ((cwave_pos ^ prev_cwave_pos) & (1 << 21)) {
 		int k = amplitude[0];
 		if (k > 0x20) k = 0x20;
-		return (fdso.cwave[b24latch68 >> 19] * k) * 4 / ((SPSG[0x9] & 0x3) + 2);
+		fdso.sample_cache_out = (fdso.cwave[(cwave_pos >> 21) & 0x3F] * k) * 4 / ((SPSG[0x9] & 0x3) + 2);
 	}
+	return fdso.sample_cache_out;
 }
 
 static int32 FBC = 0;
