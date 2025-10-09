@@ -48,7 +48,7 @@ static void DoNamcoSound(int32 *Wave, int Count);
 static void DoNamcoSoundHQ(void);
 static void SyncHQ(int32 ts);
 
-static int is210;        /* Lesser mapper. */
+static enum NamcoType { N163, N175, N340 } type;
 
 static uint8 PRG[3];
 static uint8 CHR[8];
@@ -63,15 +63,13 @@ static SFORMAT N106_StateRegs[] = {
 	{ 0 }
 };
 
-static void SyncMirror()
-{
+static void N340SyncMirror() {
 	switch(gorko) {
 	case 0: setmirror(MI_0); break;
 	case 1: setmirror(MI_V); break;
-	case 2: setmirror(MI_H); break;
-	case 3: setmirror(MI_0); break;
+	case 2: setmirror(MI_1); break;
+	case 3: setmirror(MI_H); break;
 	}
-	
 }
 
 static void SyncPRG(void) {
@@ -129,9 +127,8 @@ static void FixNTAR(void) {
 
 static void DoCHRRAMROM(int x, uint8 V) {
 	CHR[x] = V;
-	if (!is210 && !((gorfus >> ((x >> 2) + 6)) & 1) && (V >= 0xE0)) {
-//		printf("BLAHAHA: %d, %02x\n",x,V);
-//		setchr1r(0x10,x<<10,V&7);
+	if (type == N163 && V >= 0xE0 && !(gorfus >> (x >> 2) & 1)) {
+		setchr1r(0x10, x << 10, V);
 	} else
 		setchr1(x << 10, V);
 }
@@ -197,16 +194,16 @@ static DECLFW(Mapper19_write) {
 			break;
 		case 0xE000:
 			PRG[0] = V & 0x3F;
-			if(is210) {
-				gorko = V>>6;
-				SyncMirror();
-			}
+			gorko = V >> 6;
+			if (type == N340)
+				N340SyncMirror();
 			SyncPRG();
 			break;
 		case 0xE800:
-			gorfus = V & 0xC0;
-			FixCRR();
 			PRG[1] = V & 0x3F;
+			gorfus = V >> 6;
+			if (type == N163)
+				FixCRR();
 			SyncPRG();
 			break;
 		case 0xF000:
@@ -351,7 +348,6 @@ static void DoNamcoSound(int32 *Wave, int Count) {
 
 static void Mapper19_StateRestore(int version) {
 	SyncPRG();
-	SyncMirror();
 	FixNTAR();
 	FixCRR();
 	int x;
@@ -384,8 +380,8 @@ static void N106_Power(void) {
 	int x;
 	SetReadHandler(0x8000, 0xFFFF, CartBR);
 	SetWriteHandler(0x8000, 0xffff, Mapper19_write);
-	SetWriteHandler(0x4020, 0x5fff, Mapper19_write);
-	if (!is210) {
+	SetWriteHandler(0x4800, 0x5fff, Mapper19_write);
+	if (type == N163) {
 		SetWriteHandler(0xc000, 0xdfff, Mapper19C0D8_write);
 		SetReadHandler(0x4800, 0x4fff, Namco_Read4800);
 		SetReadHandler(0x5000, 0x57ff, Namco_Read5000);
@@ -411,7 +407,7 @@ static void N106_Power(void) {
 }
 
 void Mapper19_Init(CartInfo *info) {
-	is210 = 0;
+	type = N163;
 	battery = info->battery;
 	info->Power = N106_Power;
 
@@ -419,11 +415,12 @@ void Mapper19_Init(CartInfo *info) {
 	GameStateRestore = Mapper19_StateRestore;
 	GameExpSound.RChange = M19SC;
 
+	// NTARAM can be mapped as CHR (does any game ever actually do this?)
+	SetupCartCHRMapping(0x10, NTARAM, 0x800, 1);
+
 	if (FSettings.SndRate)
 		Mapper19_ESI();
 
-	FCEU_MemoryRand(WRAM, sizeof(WRAM), true);
-	FCEU_MemoryRand(IRAM, sizeof(IRAM), true);
 	AddExState(WRAM, 8192, 0, "WRAM");
 	AddExState(IRAM, 128, 0, "IRAM");
 	AddExState(N106_StateRegs, ~0, 0, 0);
@@ -437,13 +434,36 @@ void Mapper19_Init(CartInfo *info) {
 static void Mapper210_StateRestore(int version) {
 	SyncPRG();
 	FixCRR();
+	if (type == N340)
+		N340SyncMirror();
+}
+
+static NamcoType Mapper210_DetectType(CartInfo *info) {
+	if (info->ines2 && info->submapper == 1)
+		return N175;
+	if (info->ines2 && info->submapper == 2)
+		return N340;
+	FCEU_printf("Submapper detected by CRC32. Use NES 2.0 if you hack the ROM image.\n");
+	switch (info->CRC32) {
+	case 0x0c47946d:	// Chibi Maruko Chan
+	case 0xbd523011:	// Dream Master
+	case 0xc247cc80:	// Family Circuit '91
+	case 0x808606f0:	// Famista '91
+	case 0x81b7f1a8:	// Heisei Tensai Bakabon
+		return N175;
+	default:
+		return N340;
+	}
 }
 
 void Mapper210_Init(CartInfo *info) {
-	is210 = 1;
+	type = Mapper210_DetectType(info);
+	battery = info->battery;
 	GameStateRestore = Mapper210_StateRestore;
 	info->Power = N106_Power;
-	FCEU_MemoryRand(WRAM, sizeof(WRAM), true);
 	AddExState(WRAM, 8192, 0, "WRAM");
 	AddExState(N106_StateRegs, ~0, 0, 0);
+
+	if (info->battery)
+		info->addSaveGameBuf( WRAM, 8192 );
 }
