@@ -3,7 +3,7 @@
 int FCEU_InitVirtualVideo(void);
 void FCEU_KillVirtualVideo(void);
 int SaveSnapshot(void);
-int SaveSnapshot(char[]);
+int SaveSnapshot(const char*);
 void ResetScreenshotsCounter();
 uint32 GetScreenPixel(int x, int y, bool usebackup);
 int GetScreenPixelPalette(int x, int y, bool usebackup);

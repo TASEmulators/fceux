@@ -618,7 +618,7 @@ PNGerr:
 }
 
 //overloaded SaveSnapshot for "Savesnapshot As" function
-int SaveSnapshot(char fileName[512])
+int SaveSnapshot(const char *fileName)
 {
 	int totallines=FSettings.LastSLine-FSettings.FirstSLine+1;
 	int x,y;
