@@ -548,7 +548,7 @@ BMAPPINGLocal bmap[] = {
 	{"BANDAI 24C02",		 16, Mapper16_Init},
 	{"FFE Rev. B",			 17, Mapper17_Init},
 	{"JALECO SS88006",		 18, Mapper18_Init},	// JF-NNX (EB89018-30007) boards
-	{"Namcot 106",			 19, Mapper19_Init},
+	{"NAMCOT 163",			 19, Mapper19_Init},
 //	{"",					 20, Mapper20_Init},
 	{"Konami VRC2/VRC4 A",	 21, Mapper21_Init},
 	{"Konami VRC2/VRC4 B",	 22, Mapper22_Init},
@@ -739,7 +739,7 @@ BMAPPINGLocal bmap[] = {
 	{"TAITO X1-005 Rev. B",	207, Mapper207_Init},
 	{"",					208, Mapper208_Init},
 	{"",					209, Mapper209_Init},
-	{"",					210, Mapper210_Init},
+	{"NAMCOT 175/340",		210, Mapper210_Init},
 	{"",					211, Mapper211_Init},
 	{"",					212, Mapper212_Init},
 	{"",					213, Mapper213_Init},
