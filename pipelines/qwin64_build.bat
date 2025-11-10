@@ -2,7 +2,7 @@
 set PROJECT_ROOT=%~dp0..
 set CWD=%CD%
 
-set QT_VERSION=6.9
+set QT_VERSION=6.5
 if "%QT_ENV_LOADED%" == "" (
    call "C:\Qt\%QT_VERSION%\msvc2019_64\bin\qtenv2.bat"
    set QT_ENV_LOADED=%QT_VERSION%
