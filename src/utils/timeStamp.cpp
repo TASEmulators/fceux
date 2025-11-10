@@ -40,6 +40,10 @@ static uint64_t rdtsc()
     asm volatile("mrs %0, cntvct_el0" : "=r" (val));
 
     return val;
+#elif defined(__riscv) && __riscv_xlen == 64
+	uint64_t current_time;
+	asm volatile ("rdtime %0" : "=r"(current_time));
+	return current_time;
 #else
 	return __rdtsc();
 #endif
