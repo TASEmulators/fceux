@@ -29,8 +29,11 @@
 #include "Qt/SplashScreen.h"
 #include "Qt/QtScriptManager.h"
 
-#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
+#if defined(WIN32) 
+#include <windows.h>
+#if (QT_VERSION_MAJOR < 6)
 #include <QtPlatformHeaders/QWindowsWindowFunctions>
+#endif
 #endif
 
 consoleWin_t *consoleWindow = NULL;

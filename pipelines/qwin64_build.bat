@@ -2,13 +2,14 @@
 set PROJECT_ROOT=%~dp0..
 set CWD=%CD%
 
-set QT_VERSION=6.5
+set QT_VERSION=6.9
 if "%QT_ENV_LOADED%" == "" (
-   call "C:\Qt\%QT_VERSION%\msvc2019_64\bin\qtenv2.bat"
+   call "C:\Qt\%QT_VERSION%\msvc2022_64\bin\qtenv2.bat"
    set QT_ENV_LOADED=%QT_VERSION%
 )
 if "%VCINSTALLDIR%" == "" (
-   call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+   REM call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+   call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 )
 
 cd /d %CWD%
@@ -74,7 +75,7 @@ IF DEFINED FCEU_RELEASE_VERSION (set PUBLIC_RELEASE=1)
 REM Build fceux
 REM cmake -h
 REM cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX%  ..
-cmake -DQT=6 -DPUBLIC_RELEASE=%PUBLIC_RELEASE% -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX% -DLIBARCHIVE_INSTALL_PREFIX=%LIBARCHIVE_INSTALL_PREFIX% -DUSE_LIBAV=1 -DFFMPEG_INSTALL_PREFIX=%FFMPEG_INSTALL_PREFIX% -G"Visual Studio 16" -T"v142" ..
+cmake -DQT=6 -DPUBLIC_RELEASE=%PUBLIC_RELEASE% -DSDL_INSTALL_PREFIX=%SDL_INSTALL_PREFIX% -DLIBARCHIVE_INSTALL_PREFIX=%LIBARCHIVE_INSTALL_PREFIX% -DUSE_LIBAV=1 -DFFMPEG_INSTALL_PREFIX=%FFMPEG_INSTALL_PREFIX% -G"Visual Studio 17" -T"v143" ..
 
 REM nmake
 msbuild /m fceux.sln /p:Configuration=Release
