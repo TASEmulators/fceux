@@ -45,6 +45,9 @@ for:
 
     build_script:
     - cmd: pipelines/WinAppveyorBuild.bat win64-QtSDL
+    cache:
+    - C:\Users\appveyor\AppData\Local\vcpkg -> vcpkg/vcpkg.json
+
 
   -
     matrix:
@@ -61,9 +64,6 @@ for:
 
     build_script:
     - sh: perl pipelines/build.pl macOS
-
-cache:
-  - C:\Users\appveyor\AppData\Local\vcpkg -> vcpkg/vcpkg.json
 
 deploy:
 
