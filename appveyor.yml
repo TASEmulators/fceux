@@ -63,7 +63,7 @@ for:
     - sh: perl pipelines/build.pl macOS
 
 cache:
-  - vcpkg/vcpkg_installed -> vcpkg/vcpkg.json
+  - C:\Users\appveyor\AppData\Local\vcpkg -> vcpkg/vcpkg.json
 
 deploy:
 
