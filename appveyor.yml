@@ -1,6 +1,8 @@
 version: 1.0.{build}
 
 environment:
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
+
   matrix:
 
   - job_name: Windows 32
@@ -59,6 +61,9 @@ for:
 
     build_script:
     - sh: perl pipelines/build.pl macOS
+
+cache:
+  - vcpkg/vcpkg_installed -> vcpkg/vcpkg.json
 
 deploy:
 
