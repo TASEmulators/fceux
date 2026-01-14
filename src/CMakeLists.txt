@@ -300,7 +300,7 @@ else ()
    # Use Internal LUA
         message( STATUS "Using Internal Lua" )
 
-   add_definitions( -D_S9XLUA_H  -I${CMAKE_CURRENT_SOURCE_DIR}/lua/src )
+   add_definitions( -D_S9XLUA_H  -I"${CMAKE_CURRENT_SOURCE_DIR}/lua/src" )
 
         set( LUA_ENGINE_SOURCE  
       ${CMAKE_CURRENT_SOURCE_DIR}/lua/src/lapi.c 
