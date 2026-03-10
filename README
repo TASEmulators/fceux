@@ -74,7 +74,7 @@ The recommended installation prefix is /usr (this is where the installed fceux.d
 
 You can choose to install the lua scripts (located in output/luaScripts) to a directory of your choosing:
 
-	cp -R output/luaScripts /usr/local/some/directory/that/i/will/find/later
+	cp -R output/luaScripts /usr/share/fceux/luaScripts
 
 If you would like to do a full clean build a 'make clean' like function, you can do either of following:
 
