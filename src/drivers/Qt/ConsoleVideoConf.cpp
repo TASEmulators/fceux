@@ -20,6 +20,7 @@
 // ConsoleVideoConf.cpp
 //
 #include <QCloseEvent>
+#include <QGuiApplication>
 #include <QMessageBox>
 
 #include "../../fceu.h"
@@ -33,6 +34,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleVideoConf.h"
+#include "Qt/ConsoleViewerInterface.h"
 #include "Qt/nes_shm.h"
 
 #if defined(WIN32) && (QT_VERSION_MAJOR < 6)
@@ -936,6 +938,34 @@ void ConsoleVideoConfDialog_t::driverChanged(int index)
 	//printf("Driver: %i : %i \n", index, driverSelect->itemData(index).toInt() );
 
 	driver = driverSelect->itemData(index).toInt();
+
+#if (defined(__linux__) || defined(__unix__)) && !defined(__APPLE__)
+	if (driver == ConsoleViewerBase::VIDEO_DRIVER_SDL &&
+	    QGuiApplication::platformName() == QLatin1String("wayland"))
+	{
+		QMessageBox::warning(
+			this,
+			tr("SDL video driver"),
+			tr("The SDL video driver cannot embed into the Qt window on Wayland "
+			   "(SDL uses X11 here, but this window is not an X11 window). "
+			   "FCEUX will use OpenGL instead.\n\n"
+			   "To use the SDL driver you can run FCEUX with the X11 Qt platform "
+			   "plugin, for example:\n"
+			   "QT_QPA_PLATFORM=xcb fceux"));
+
+		driver = ConsoleViewerBase::VIDEO_DRIVER_OPENGL;
+		driverSelect->blockSignals(true);
+		for (int i = 0; i < driverSelect->count(); i++)
+		{
+			if (driverSelect->itemData(i).toInt() == driver)
+			{
+				driverSelect->setCurrentIndex(i);
+				break;
+			}
+		}
+		driverSelect->blockSignals(false);
+	}
+#endif
 
 	g_config->setOption ("SDL.VideoDriver", driver);
 

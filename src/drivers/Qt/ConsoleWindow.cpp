@@ -44,6 +44,7 @@
 #include <QDesktopServices>
 #include <QStyleFactory>
 #include <QApplication>
+#include <QGuiApplication>
 #include <QActionGroup>
 #include <QShortcut>
 #include <QUrl>
@@ -2204,6 +2205,26 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 			}
 		}
 	}
+
+#if (defined(__linux__) || defined(__unix__)) && !defined(__APPLE__)
+	// Qt on Wayland gives QWidget::winId() that is not an X11 window. SDL2 is
+	// initialized with the X11 video driver before this and SDL_CreateWindowFrom
+	// then triggers XGetWindowProperty on that id; libX11's default error handler
+	// calls exit(1) (BadWindow). Fall back to OpenGL on Wayland.
+	if (driverId == ConsoleViewerBase::VIDEO_DRIVER_SDL &&
+	    QGuiApplication::platformName() == QLatin1String("wayland"))
+	{
+		fprintf(stderr,
+			"FCEUX: SDL video driver cannot embed into Qt on Wayland; using OpenGL instead.\n");
+		driverId = ConsoleViewerBase::VIDEO_DRIVER_OPENGL;
+		if (g_config)
+		{
+			g_config->setOption("SDL.VideoDriver",
+				(int)ConsoleViewerBase::VIDEO_DRIVER_OPENGL);
+			g_config->save();
+		}
+	}
+#endif
 
 	switch ( driverId )
 	{  
