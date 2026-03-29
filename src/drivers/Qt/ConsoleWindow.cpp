@@ -59,6 +59,7 @@
 #include "../../cheat.h"
 #include "../../profiler.h"
 #include "../../version.h"
+#include "../../video.h"
 #include "common/os_utils.h"
 #include "utils/timeStamp.h"
 
@@ -3131,11 +3132,32 @@ void consoleWin_t::takeScreenShot(void)
 		fclose(pp);
 	}
 
-	image.save( tr( FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str() ), "png" );
+	const std::string snapPath = FCEU_MakeFName(FCEUMKF_SNAP, u, "png");
+	const QString snapPathQ = QString::fromUtf8(snapPath.c_str());
+	bool saved = !image.isNull() && image.save(snapPathQ, "png");
+	int snapIndex = u;
+
+	// Window grab often fails on Wayland; fall back to core framebuffer PNG.
+	if (!saved)
+	{
+		const int coreResult = SaveSnapshot();
+		if (coreResult > 0)
+		{
+			saved = true;
+			snapIndex = coreResult - 1;
+		}
+	}
 
 	FCEU_WRAPPER_UNLOCK();
 
-	FCEU_DispMessage("Screen snapshot %d saved.",0,u);
+	if (saved)
+	{
+		FCEU_DispMessage("Screen snapshot %d saved.",0,snapIndex);
+	}
+	else
+	{
+		FCEU_DispMessage("Error saving screen snapshot.",0);
+	}
 }
 
 void consoleWin_t::loadLua(void)
