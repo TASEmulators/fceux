@@ -3112,6 +3112,25 @@ void consoleWin_t::prepareScreenShot(void)
 
 void consoleWin_t::takeScreenShot(void)
 {
+#if (defined(__linux__) || defined(__unix__)) && !defined(__APPLE__)
+	// On Wayland, window grab is unreliable; use core framebuffer PNG directly.
+	if (QGuiApplication::platformName() == QLatin1String("wayland"))
+	{
+		FCEU_WRAPPER_LOCK();
+		const int coreResult = SaveSnapshot();
+		FCEU_WRAPPER_UNLOCK();
+		if (coreResult > 0)
+		{
+			FCEU_DispMessage("Screen snapshot %d saved.",0, coreResult - 1);
+		}
+		else
+		{
+			FCEU_DispMessage("Error saving screen snapshot.",0);
+		}
+		return;
+	}
+#endif
+
 	int u=0;
 	QPixmap  image;
 	QScreen *screen = QGuiApplication::primaryScreen();
@@ -3158,7 +3177,6 @@ void consoleWin_t::takeScreenShot(void)
 	bool saved = !image.isNull() && image.save(snapPathQ, "png");
 	int snapIndex = u;
 
-	// Window grab often fails on Wayland; fall back to core framebuffer PNG.
 	if (!saved)
 	{
 		const int coreResult = SaveSnapshot();
