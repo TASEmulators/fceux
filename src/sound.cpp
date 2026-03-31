@@ -61,7 +61,7 @@ uint8 InitialRawDALatch=0; // used only for lua
 bool DMC_7bit = 0; // used to skip overclocking
 ENVUNIT EnvUnits[3];
 
-static const int RectDuties[4]={1,2,4,6};
+extern const uint8 RectDuties[4]={1,2,4,6};
 
 static int32 RectDutyCount[2];
 static uint8 sweepon[2];
@@ -85,7 +85,7 @@ static int32 sqacc[2];
 /* LQ variables segment ends. */
 
 /*static*/ int32 lengthcount[4];
-static const uint8 lengthtable[0x20]=
+extern const uint8 APULengthTable[0x20]=
 {
 	10,254, 20,  2, 40,  4, 80,  6, 160,  8, 60, 10, 14, 12, 26, 14,
 	12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30
@@ -209,7 +209,7 @@ void LogDPCM(int romaddress, int dpcmsize){
 static void SQReload(int x, uint8 V)
 {
 	if(EnabledChannels&(1<<x))
-		lengthcount[x]=lengthtable[(V>>3)&0x1f];
+		lengthcount[x]=APULengthTable[(V>>3)&0x1f];
 
 	/* use the low 8 bits data from pulse period
 	 * instead of from the sweep period */
@@ -272,7 +272,7 @@ static DECLFW(Write_PSG)
 	case 0xb:
 		DoTriangle();
 		if(EnabledChannels&0x4)
-			lengthcount[2]=lengthtable[(V>>3)&0x1f];
+			lengthcount[2]=APULengthTable[(V>>3)&0x1f];
 		TriMode=1;	// Load mode
 		break;
 	case 0xC:
@@ -286,7 +286,7 @@ static DECLFW(Write_PSG)
 	case 0xF:
 		DoNoise();
 		if(EnabledChannels&0x8)
-			lengthcount[3]=lengthtable[(V>>3)&0x1f];
+			lengthcount[3]=APULengthTable[(V>>3)&0x1f];
 		EnvUnits[2].reloaddec=1;
 		break;
 	case 0x10:
