@@ -47,8 +47,6 @@ if ( ${QT} EQUAL 6 )
 	find_package( Qt6 COMPONENTS Help QUIET)
 	find_package( Qt6 COMPONENTS Qml)
 	find_package( Qt6 COMPONENTS UiTools)
-	add_definitions( ${Qt6Widgets_DEFINITIONS} ${Qt6Qml_DEFINITIONS} ${Qt6Network_DEFINITIONS} ${Qt6Help_DEFINITIONS} ${Qt6OpenGLWidgets_DEFINITIONS} )
-	# add_definitions(${Qt6UiTools_DEFINITIONS}) # Leave ${Qt6UiTools_DEFINITIONS} out as this is causing a build error
 	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Qml_INCLUDE_DIRS} ${Qt6UiTools_INCLUDE_DIRS} ${Qt6Network_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
 
 	if (${Qt6Help_FOUND})
@@ -756,6 +754,11 @@ target_link_libraries( ${APP_NAME}
 	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS} ${LIBAV_LDFLAGS}
  	${SYS_LIBS}
 )
+
+if(NOT MSVC)
+	# Add minizip subdirectory so #include<unzip.h> works without the "minizip" subdirectory in the directive
+	target_include_directories(${APP_NAME} PRIVATE ${MINIZIP_INCLUDE_DIRS}/minizip)
+endif()
 
 if (WIN32)
 	#   target_link_libraries( ${APP_NAME} wsock32 ws2_32 )
