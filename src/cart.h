@@ -92,6 +92,7 @@ void ResetCartMapping(void);
 void SetupCartPRGMapping(int chip, uint8 *p, uint32 size, int ram);
 void SetupCartCHRMapping(int chip, uint8 *p, uint32 size, int ram);
 void SetupCartMirroring(int m, int hard, uint8 *extra);
+int GetPRGBank(uint16 address);
 
 DECLFR(CartBROB);
 DECLFR(CartBR);

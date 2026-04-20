@@ -388,8 +388,11 @@ INT_PTR CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					sprintf(str, "%04X", (unsigned int)lParam);
 					SetDlgItemText(hwndDlg,IDC_ADDBP_ADDR_START,str);
 					// also set the condition to only break at this Bank
-					sprintf(str, "K==#%02X", getBank(lParam));
-					SetDlgItemText(hwndDlg, IDC_ADDBP_CONDITION, str);
+					auto bank = getBank(lParam);
+					if (bank > -1) {
+						sprintf(str, "K==#%02X", bank);
+						SetDlgItemText(hwndDlg, IDC_ADDBP_CONDITION, str);
+					}
 				}
 			}
 			break;
