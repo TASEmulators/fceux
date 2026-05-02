@@ -400,6 +400,7 @@ static void UpdateSD(HWND hwndDlg)
 	CheckDlgButton(hwndDlg,CHECK_SOUND_MUTEFA,(soundoptions&SO_MUTEFA)?BST_CHECKED:BST_UNCHECKED);
 	CheckDlgButton(hwndDlg,CHECK_SOUND_MUTETURBO,(muteTurbo)?BST_CHECKED:BST_UNCHECKED);
 	CheckDlgButton(hwndDlg,CHECK_SOUND_SWAPDUTY,(swapDuty)?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndDlg,CHECK_SOUND_LINEARMIXER,(linearMixer)?BST_CHECKED:BST_UNCHECKED);
 	// The option formerly flagged by SO_OLDUP can no longer be enabled.
 	// CheckDlgButton(hwndDlg,131,(soundoptions&SO_OLDUP)?BST_CHECKED:BST_UNCHECKED);
 	SendDlgItemMessage(hwndDlg,COMBO_SOUND_QUALITY,CB_SETCURSEL,soundquality,(LPARAM)(LPSTR)0);
@@ -415,6 +416,7 @@ static void UpdateSD(HWND hwndDlg)
 
 	if (!soundo) 
 	{
+		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_LINEARMIXER),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_SWAPDUTY),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTETURBO),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTEFA),FALSE);
@@ -710,6 +712,9 @@ case WM_COMMAND:
 			break;
 		case CHECK_SOUND_SWAPDUTY:
 			swapDuty ^=1;
+			break;
+		case CHECK_SOUND_LINEARMIXER:
+			linearMixer ^= 1;
 			break;
 		case CHECK_SOUND_ENABLED:soundo=!soundo;
 			if(!soundo) TrashSound();

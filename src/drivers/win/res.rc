@@ -7,7 +7,8 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -501,8 +502,8 @@ BEGIN
     LTEXT           "Hz",65460,108,64,15,9
     LTEXT           "Depth:",65462,17,85,27,10
     COMBOBOX        COMBO_SOUND_8BIT,50,82,67,45,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Mute frame advance",CHECK_SOUND_MUTEFA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,110,87,11
-    CONTROL         "Mute Turbo",CHECK_SOUND_MUTETURBO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,111,53,10
+    CONTROL         "Mute Frame Advance",CHECK_SOUND_MUTEFA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,104,83,11
+    CONTROL         "Mute Turbo",CHECK_SOUND_MUTETURBO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,104,53,10
     GROUPBOX        "Triangle",131,70,142,44,93,WS_GROUP
     CONTROL         "",CTL_VOLUME_TRACKBAR_TRIANGLE,"msctls_trackbar32",TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,78,150,28,83
     GROUPBOX        "Square1",132,121,142,44,93,WS_GROUP
@@ -517,7 +518,8 @@ BEGIN
     PUSHBUTTON      "Restore defaults",IDC_SOUND_RESTOREDEFAULTVOL,19,238,56,11
     LTEXT           "",ID_SOUND_TRITOP,76,135,38,8
     LTEXT           "",ID_SOUND_QUALITYNOTIFY,170,133,144,8
-    CONTROL         "Swap Duty Cycles",CHECK_SOUND_SWAPDUTY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,239,110,74,10
+    CONTROL         "Swap Duty Cycles",CHECK_SOUND_SWAPDUTY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,239,104,74,10
+	CONTROL         "Linear Square Mixer",CHECK_SOUND_LINEARMIXER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,115,77,10
 END
 
 SUBORKBDIALOG DIALOGEX 13, 72, 478, 171
@@ -3316,7 +3318,8 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

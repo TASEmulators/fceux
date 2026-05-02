@@ -33,6 +33,7 @@
 #include <cstring>
 
 static uint32 wlookup1[32];
+static uint32 wlinear1;
 static uint32 wlookup2[203];
 
 int32 Wave[2048+512];
@@ -672,7 +673,7 @@ static void RDoSQLQ(void)
    int32 inie[2];
 
    int32 ttable[2][8];
-   int32 totalout;
+   int32 totalout[3];
 
    start=ChannelBC[0];
    end=(SOUNDTS<<16)/soundtsinc;
@@ -716,12 +717,20 @@ static void RDoSQLQ(void)
     freq[x]<<=17;
    }
 
-   totalout = wlookup1[ ttable[0][RectDutyCount[0]] + ttable[1][RectDutyCount[1]] ];
+   if(!linearMixer)
+   {
+	totalout[0]=wlookup1[ttable[0][RectDutyCount[0]]+ttable[1][RectDutyCount[1]]];
+   }
+   else
+   {
+	totalout[1]=(ttable[0][RectDutyCount[0]]*wlinear1)/15;
+	totalout[2]=(ttable[1][RectDutyCount[1]]*wlinear1)/15;
+   }
 
    if(!inie[0] && !inie[1])
    {
     for(V=start;V<end;V++)
-     Wave[V>>4]+=totalout;
+	 Wave[V>>4]+=!linearMixer?totalout[0]:totalout[1]+totalout[2];
    }
    else
    for(V=start;V<end;V++)
@@ -734,7 +743,7 @@ static void RDoSQLQ(void)
     //tmpamp=wlookup1[tmpamp];
     //tmpamp = wlookup1[ ttable[0][RectDutyCount[0]] + ttable[1][RectDutyCount[1]] ];
 
-    Wave[V>>4]+=totalout; //tmpamp;
+	Wave[V>>4]+=!linearMixer?totalout[0]:totalout[1]+totalout[2]; //tmpamp
 
     sqacc[0]-=inie[0];
     sqacc[1]-=inie[1];
@@ -745,7 +754,15 @@ static void RDoSQLQ(void)
      sqacc[0]+=freq[0];
      RectDutyCount[0]=(RectDutyCount[0]+1)&7;
      if(sqacc[0]<=0) goto rea;
-     totalout = wlookup1[ ttable[0][RectDutyCount[0]] + ttable[1][RectDutyCount[1]] ];
+     if(!linearMixer)
+	 {
+	  totalout[0]=wlookup1[ttable[0][RectDutyCount[0]]+ttable[1][RectDutyCount[1]]];
+	 }
+	 else
+	 {
+	  totalout[1]=(ttable[0][RectDutyCount[0]]*wlinear1)/15;
+	  totalout[2]=(ttable[1][RectDutyCount[1]]*wlinear1)/15;
+	 }
     }
 
     if(sqacc[1]<=0)
@@ -754,7 +771,15 @@ static void RDoSQLQ(void)
      sqacc[1]+=freq[1];
      RectDutyCount[1]=(RectDutyCount[1]+1)&7;
      if(sqacc[1]<=0) goto rea2;
-     totalout = wlookup1[ ttable[0][RectDutyCount[0]] + ttable[1][RectDutyCount[1]] ];
+     if(!linearMixer)
+	 {
+	  totalout[0]=wlookup1[ttable[0][RectDutyCount[0]]+ttable[1][RectDutyCount[1]]];
+	 }
+	 else
+	 {
+	  totalout[1]=(ttable[0][RectDutyCount[0]]*wlinear1)/15;
+	  totalout[2]=(ttable[1][RectDutyCount[1]]*wlinear1)/15;
+	 }
     }
    }
 }
@@ -1063,7 +1088,7 @@ int FlushEmulateSound(void)
    for(x=soundtimestamp;x;x--)
    {
     uint32 b=*tmpo;
-    *tmpo=(b&65535)+wlookup2[(b>>16)&255]+wlookup1[b>>24];
+    *tmpo=(b&65535)+wlookup2[(b>>16)&255]+(!linearMixer?wlookup1[b>>24]:(b>>24)*wlinear1/15);
     tmpo++;
    }
    end=NeoFilterSound(WaveHi,WaveFinal,SOUNDTS,&left);
@@ -1228,6 +1253,7 @@ void SetSoundVariables(void)
     wlookup1[x]=(double)16*16*16*4*95.52/((double)8128/(double)x+100);
     if(!FSettings.soundq) wlookup1[x]>>=4;
    }
+   wlinear1=wlookup1[15];
    wlookup2[0]=0;
    for(x=1;x<203;x++)
    {

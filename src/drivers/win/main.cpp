@@ -164,7 +164,8 @@ int pal_emulation = 0;
 int pal_setting_specified = 0;
 int dendy = 0;
 int dendy_setting_specified = 0;
-bool swapDuty = 0; // some Famicom and NES clones had duty cycle bits swapped
+bool swapDuty = 0; // Some Famicom and NES clones had duty cycle bits swapped
+bool linearMixer = 0; // Only need to affect distorted square channel mixing
 int ntsccol = 0, ntsctint, ntschue;
 std::string BaseDirectory;
 int PauseAfterLoad;

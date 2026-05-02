@@ -237,6 +237,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(soundPCMvol),
 	AC(muteTurbo),
 	AC(swapDuty),
+	AC(linearMixer),
 
 	AC(goptions),
 	NAC("eoptions",eoptions),
