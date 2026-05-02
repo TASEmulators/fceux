@@ -7,13 +7,12 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// 英语(美国) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -515,11 +514,13 @@ BEGIN
     GROUPBOX        "PCM",135,271,142,44,93,WS_GROUP
     CONTROL         "",CTL_VOLUME_TRACKBAR_PCM,"msctls_trackbar32",TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,279,150,28,83
     GROUPBOX        "Volume Control",IDC_VOLUMEGROUP,10,127,314,127
-    PUSHBUTTON      "Restore defaults",IDC_SOUND_RESTOREDEFAULTVOL,19,238,56,11
+    PUSHBUTTON      "Restore defaults",IDC_SOUND_RESTOREDEFAULTVOL,19,238,57,11
     LTEXT           "",ID_SOUND_TRITOP,76,135,38,8
     LTEXT           "",ID_SOUND_QUALITYNOTIFY,170,133,144,8
     CONTROL         "Swap Duty Cycles",CHECK_SOUND_SWAPDUTY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,239,104,74,10
-	CONTROL         "Linear Square Mixer",CHECK_SOUND_LINEARMIXER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,115,77,10
+    CONTROL         "Linear Square Mixer",CHECK_SOUND_LINEARMIXER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,115,78,10
+    CONTROL         "Not Reset Square Phase",CHECK_SOUND_NOTRESETPHASE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,115,89,10
 END
 
 SUBORKBDIALOG DIALOGEX 13, 72, 478, 171
@@ -3308,7 +3309,7 @@ IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 
-#endif    // English (United States) resources
+#endif    // 英语(美国) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -3318,8 +3319,7 @@ IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

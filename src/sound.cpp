@@ -216,7 +216,7 @@ static void SQReload(int x, uint8 V)
 	 * instead of from the sweep period */
 	/* https://forums.nesdev.com/viewtopic.php?t=219&p=1431 */
 	curfreq[x]=(curfreq[x] & 0xff)|((V&7)<<8);
-	RectDutyCount[x]=7;
+	if(!notResetPhase) RectDutyCount[x]=7;
 	EnvUnits[x].reloaddec=1;
 }
 
