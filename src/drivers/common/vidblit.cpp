@@ -197,12 +197,12 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 		
 		specbuf=(uint16*)FCEU_dmalloc(256*240*sizeof(uint16)); //mbg merge 7/17/06 added cast
 	}
-	else if (specfilt >= 6 && specfilt <= 8)
+	else if (specfilt >= 6 && specfilt <= 11)
 	{
-		int multi = specfilt - 4; // magic assuming prescales are specfilt >= 6
+		int multi = specfilt - (specfilt == 11 ? 3 : 4); // magic assuming prescales are specfilt >= 6
 		prescalebuf = (uint32 *)FCEU_dmalloc(256*240*multi*sizeof(uint32));
 	}
-	else if (specfilt == 9)
+	else if (specfilt == 12)
 	{
 		palrgb     = (uint32 *)FCEU_dmalloc((256+512)*PAL_PHASES*sizeof(uint32));
 		palrgb2    = (uint32 *)FCEU_dmalloc((256+512)*PAL_PHASES*sizeof(uint32));
@@ -504,6 +504,9 @@ u32 ModernDeemphColorMap(const u8* src, const u8* srcbuf, int scale)
 	else if(scale == 7) return _ModernDeemphColorMap<7>(src,srcbuf);
 	else if(scale == 8) return _ModernDeemphColorMap<8>(src,srcbuf);
 	else if(scale == 9) return _ModernDeemphColorMap<9>(src,srcbuf);
+	else if(scale == 10) return _ModernDeemphColorMap<10>(src, srcbuf);
+	else if(scale == 11) return _ModernDeemphColorMap<11>(src, srcbuf);
+	else if(scale == 12) return _ModernDeemphColorMap<12>(src, srcbuf);
 	else { FCEU_abort("unhandled ModernDeemphColorMap scale"); return 0; }
 }
 
@@ -522,6 +525,9 @@ static ModernDeemphColorMapFuncPtr getModernDeemphColorMapFunc(int scale)
 	else if(scale == 7) ptr = &_ModernDeemphColorMap<7>;
 	else if(scale == 8) ptr = &_ModernDeemphColorMap<8>;
 	else if(scale == 9) ptr = &_ModernDeemphColorMap<9>;
+	else if(scale == 10) ptr = &_ModernDeemphColorMap<10>;
+	else if(scale == 11) ptr = &_ModernDeemphColorMap<11>;
+	else if(scale == 12) ptr = &_ModernDeemphColorMap<12>;
 	else { FCEU_abort("unhandled ModernDeemphColorMap scale"); ptr = nullptr; }
 
 	return ptr;
