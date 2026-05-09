@@ -316,9 +316,9 @@ int SetVideoMode(int fs)
 			specmul = 2;
 		else if(winspecial >= 4 && winspecial <= 5)
 			specmul = 3;
-		else if(winspecial >= 6 && winspecial <= 11)
-			specmul = winspecial - (winspecial == 11 ? 3 : 4); // magic assuming prescales are winspecial >= 6
-		else if(winspecial == 12)
+		else if(winspecial >= 6 && winspecial <= 13)
+			specmul = winspecial - 4; // magic assuming prescales are winspecial >= 6
+		else if(winspecial == 14)
 			specmul = 3;
 		else
 			specmul = 1;
@@ -358,7 +358,7 @@ int SetVideoMode(int fs)
 		ddsdback.ddsCaps.dwCaps= DDSCAPS_OFFSCREENPLAIN;
 
 		ddsdback.dwWidth=xres*specmul;
-		ddsdback.dwHeight=FSettings.TotalScanlines() * ((winspecial == 12) ? 1 : specmul);
+		ddsdback.dwHeight=FSettings.TotalScanlines() * ((winspecial == 14) ? 1 : specmul);
 
 		if (directDrawModeWindowed == DIRECTDRAW_MODE_SURFACE_IN_RAM)
 			// create the buffer in system memory
@@ -424,9 +424,9 @@ int SetVideoMode(int fs)
 				specmul = 2;
 			else if(vmodes[0].special >= 4 && vmodes[0].special <= 5)
 				specmul = 3;
-			 else if(vmodes[0].special >= 6 && vmodes[0].special <= 11)
-				specmul = vmodes[0].special - (vmodes[0].special == 11 ? 3 : 4); // magic assuming prescales are vmodes[0].special >= 6
-			else if(vmodes[0].special == 12)
+			 else if(vmodes[0].special >= 6 && vmodes[0].special <= 13)
+				specmul = vmodes[0].special - 4; // magic assuming prescales are vmodes[0].special >= 6
+			else if(vmodes[0].special == 14)
 				specmul = 3;
 			else
 				specmul = 1;
@@ -459,7 +459,7 @@ int SetVideoMode(int fs)
 			ddsdback.ddsCaps.dwCaps= DDSCAPS_OFFSCREENPLAIN;
 
 			ddsdback.dwWidth=xres * specmul; //vmodes[vmod].srect.right;
-			ddsdback.dwHeight=FSettings.TotalScanlines() * ((vmodes[0].special == 12) ? 1 : specmul); //vmodes[vmod].srect.bottom;
+			ddsdback.dwHeight=FSettings.TotalScanlines() * ((vmodes[0].special == 14) ? 1 : specmul); //vmodes[vmod].srect.bottom;
 
 			if (directDrawModeFullscreen == DIRECTDRAW_MODE_SURFACE_IN_RAM)
 				// create the buffer in system memory
@@ -596,9 +596,9 @@ static void BlitScreenWindow(unsigned char *XBuf)
 		specialmul = 2;
 	else if(winspecial >= 4 && winspecial <= 5)
 		specialmul = 3;
-	else if(winspecial >= 6 && winspecial <= 11)
-		specialmul = winspecial - (winspecial == 11 ? 3 : 4); // magic assuming prescales are winspecial >= 6
-	else if(winspecial == 12)
+	else if(winspecial >= 6 && winspecial <= 13)
+		specialmul = winspecial - 4; // magic assuming prescales are winspecial >= 6
+	else if(winspecial == 14)
 		specialmul = 3;
 	else specialmul = 1;
 
@@ -607,7 +607,7 @@ static void BlitScreenWindow(unsigned char *XBuf)
 
 	srect.top=srect.left=0;
 	srect.right=VNSWID_NU(xres) * specialmul;
-	srect.bottom=FSettings.TotalScanlines() * ((winspecial == 12) ? 1 : specialmul);
+	srect.bottom=FSettings.TotalScanlines() * ((winspecial == 14) ? 1 : specialmul);
 
 	if(PaletteChanged==1)
 	{
@@ -746,9 +746,9 @@ static void BlitScreenFull(uint8 *XBuf)
 		specmul = 2;
 	else if(vmodes[0].special >= 4 && vmodes[0].special <= 5)
 		specmul = 3;
-	else if(vmodes[0].special >= 6 && vmodes[0].special <= 11)
-		specmul = vmodes[0].special - (vmodes[0].special == 11 ? 3 : 4); // magic assuming prescales are vmodes[0].special >= 6
-	else if(vmodes[0].special == 12)
+	else if(vmodes[0].special >= 6 && vmodes[0].special <= 13)
+		specmul = vmodes[0].special - 4; // magic assuming prescales are vmodes[0].special >= 6
+	else if(vmodes[0].special == 14)
 		specmul = 3;
 	else
 		specmul = 1;
@@ -795,7 +795,7 @@ static void BlitScreenFull(uint8 *XBuf)
 		srect.top=0;
 		srect.left=0;
 		srect.right=VNSWID_NU(xres) * specmul;
-		srect.bottom=FSettings.TotalScanlines() * ((vmodes[0].special == 12) ? 1 : specmul);
+		srect.bottom=FSettings.TotalScanlines() * ((vmodes[0].special == 14) ? 1 : specmul);
 
 		//if(vmodes[vmod].flags&VMDF_STRFS)
 		//{
@@ -1179,7 +1179,7 @@ INT_PTR CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		//CheckRadioButton(hwndDlg,IDC_RADIO_SCALE,IDC_RADIO_STRETCH,(vmodes[0].flags&VMDF_STRFS)?IDC_RADIO_STRETCH:IDC_RADIO_SCALE);
 
 		// -Video Modes Tag-
-		char *str[]={"<none>","HQ 2x","Scale 2x","NTSC 2x","HQ 3x","Scale 3x","Prescale 2x","Prescale 3x","Prescale 4x","Prescale 5x","Prescale 6x","Prescale 8x","PAL 3x"};
+		char *str[]={"<none>","HQ 2x","Scale 2x","NTSC 2x","HQ 3x","Scale 3x","Prescale 2x","Prescale 3x","Prescale 4x","Prescale 5x","Prescale 6x","Prescale 7x","Prescale 8x","Prescale 9x","PAL 3x"};
 		int x;
 		for(x=0;x<13;x++)
 		{
