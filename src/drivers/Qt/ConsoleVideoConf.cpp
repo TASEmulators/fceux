@@ -108,11 +108,11 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	scalerSelect = new QComboBox();
 
 	scalerSelect->addItem( tr("None"), 0 );
-	scalerSelect->addItem( tr("hq2x"), 1 );
-	scalerSelect->addItem( tr("scale2x"), 2 );
+	scalerSelect->addItem( tr("HQ 2x"), 1 );
+	scalerSelect->addItem( tr("Scale 2x"), 2 );
 	scalerSelect->addItem( tr("NTSC 2x"), 3 );
-	scalerSelect->addItem( tr("hq3x"), 4 );
-	scalerSelect->addItem( tr("scale3x"), 5 );
+	scalerSelect->addItem( tr("HQ 3x"), 4 );
+	scalerSelect->addItem( tr("Scale 3x"), 5 );
 	scalerSelect->addItem( tr("Prescale 2x"), 6 );
 	scalerSelect->addItem( tr("Prescale 3x"), 7 );
 	scalerSelect->addItem( tr("Prescale 4x"), 8 );
