@@ -89,6 +89,8 @@ int gametype = 0;
 int closeFinishedMovie = 0;
 int KillFCEUXonFrame = 0;
 
+bool linearMixer = 0;
+bool notResetPhase = 0;
 bool swapDuty = 0;
 bool turbo = false;
 bool pauseAfterPlayback = false;
@@ -455,6 +457,12 @@ int LoadGame(const char *path, bool silent, bool netPlayRequested)
 	{
 		consoleWindow->videoReset();
 	}
+
+	g_config->getOption("SDL.LinearMixer", &id);
+	linearMixer = id;
+	
+	g_config->getOption("SDL.NotResetPhase", &id);
+	notResetPhase = id;
 
 	g_config->getOption("SDL.SwapDuty", &id);
 	swapDuty = id;

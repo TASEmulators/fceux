@@ -33,6 +33,8 @@ protected:
 	QCheckBox *enaChkbox;
 	QCheckBox *muteChkbox;
 	QCheckBox *enaLowPass;
+	QCheckBox *linearMixerChkbox;
+	QCheckBox *notResetPhaseChkbox;
 	QCheckBox *swapDutyChkbox;
 	QCheckBox *useGlobalFocus;
 	QComboBox *qualitySelect;
@@ -71,6 +73,8 @@ private slots:
 	void enaSoundStateChange(int value);
 	void enaSpeakerMuteChange(int value);
 	void enaSoundLowPassChange(int value);
+	void linearMixerCallback(int value);
+	void notResetPhaseCallback(int value);
 	void swapDutyCallback(int value);
 	void useGlobalFocusChanged(int value);
 	void soundQualityChanged(int index);

@@ -548,6 +548,8 @@ InitConfig()
 	config->addOption("intFrameRate", "SDL.IntFrameRate", 0);
 	config->addOption("clipsides", "SDL.ClipSides", 0);
 	config->addOption("nospritelim", "SDL.DisableSpriteLimit", 0);
+	config->addOption("linearMixer", "SDL.LinearMixer", 0);
+	config->addOption("notResetPhase", "SDL.NotResetPhase", 0);
 	config->addOption("swapduty", "SDL.SwapDuty", 0);
 	config->addOption("ramInit", "SDL.RamInitMethod", 0);
 	config->addOption("SDL.FrameAdvanceDelay", 40);

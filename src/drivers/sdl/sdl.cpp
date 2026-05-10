@@ -78,6 +78,8 @@ static int noconfig;
 
 int pal_emulation;
 int dendy;
+bool linearMixer;
+bool notResetPhase;
 bool swapDuty;
 
 static bool luaScriptRunning = false;
@@ -231,6 +233,12 @@ int LoadGame(const char *path, bool silent)
 	int id;
 	g_config->getOption("SDL.PAL", &id);
 	FCEUI_SetRegion(id);
+
+	g_config->getOption("SDL.LinearMixer", &id);
+	linearMixer = id;
+	
+	g_config->getOption("SDL.NotResetPhase", &id);
+	notResetPhase = id;
 
 	g_config->getOption("SDL.SwapDuty", &id);
 	swapDuty = id;

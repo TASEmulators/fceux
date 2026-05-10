@@ -22,6 +22,8 @@ extern int isloaded;
 
 extern int dendy;
 extern int pal_emulation;
+extern bool linearMixer;
+extern bool notResetPhase;
 extern bool swapDuty;
 
 int LoadGame(const char *path, bool silent = false);

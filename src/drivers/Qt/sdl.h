@@ -22,6 +22,8 @@ extern int isloaded;
 
 extern int dendy;
 extern int pal_emulation;
+extern bool linearMixer;
+extern bool notResetPhase;
 extern bool swapDuty;
 
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);

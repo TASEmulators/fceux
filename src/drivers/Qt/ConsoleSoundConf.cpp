@@ -155,6 +155,22 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	connect(useGlobalFocus, SIGNAL(stateChanged(int)), this, SLOT(useGlobalFocusChanged(int)));
 
+	// Linear Square Mixer
+	linearMixerChkbox = new QCheckBox(tr("Linear Square Mixer"));
+	vbox1->addWidget(linearMixerChkbox);
+	
+	setCheckBoxFromProperty(linearMixerChkbox, "SDL.LinearMixer");
+
+	connect(linearMixerChkbox, SIGNAL(stateChanged(int)), this, SLOT(linearMixerCallback(int)));
+	
+	// Not Reset Square Phase
+	notResetPhaseChkbox = new QCheckBox(tr("Not Reset Square Phase"));
+	vbox1->addWidget(notResetPhaseChkbox);
+	
+	setCheckBoxFromProperty(notResetPhaseChkbox, "SDL.NotResetPhase");
+
+	connect(notResetPhaseChkbox, SIGNAL(stateChanged(int)), this, SLOT(notResetPhaseCallback(int)));
+
 	// Swap Duty Cycles
 	swapDutyChkbox = new QCheckBox(tr("Swap Duty Cycles"));
 	vbox1->addWidget(swapDutyChkbox);
@@ -584,6 +600,36 @@ void ConsoleSndConfDialog_t::useGlobalFocusChanged(int value)
 	{
 		consoleWindow->setSoundUseGlobalFocus(bval);
 	}
+}
+//----------------------------------------------------
+void ConsoleSndConfDialog_t::linearMixerCallback(int value)
+{
+	if (value)
+	{
+		g_config->setOption("SDL.LinearMixer", 1);
+		linearMixer = 1;
+	}
+	else
+	{
+		g_config->setOption("SDL.LinearMixer", 0);
+		linearMixer = 0;
+	}
+	g_config->save();
+}
+//----------------------------------------------------
+void ConsoleSndConfDialog_t::notResetPhaseCallback(int value)
+{
+	if (value)
+	{
+		g_config->setOption("SDL.NotResetPhase", 1);
+		notResetPhase = 1;
+	}
+	else
+	{
+		g_config->setOption("SDL.NotResetPhase", 0);
+		notResetPhase = 0;
+	}
+	g_config->save();
 }
 //----------------------------------------------------
 void ConsoleSndConfDialog_t::swapDutyCallback(int value)

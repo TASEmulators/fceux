@@ -185,6 +185,8 @@ InitConfig()
 	config->addOption("frameskip", "SDL.Frameskip", 0);
 	config->addOption("clipsides", "SDL.ClipSides", 0);
 	config->addOption("nospritelim", "SDL.DisableSpriteLimit", 1);
+	config->addOption("linearMixer", "SDL.LinearMixer", 0);
+	config->addOption("notResetPhase", "SDL.NotResetPhase", 0);
 	config->addOption("swapduty", "SDL.SwapDuty", 0);
 
 	// color control
