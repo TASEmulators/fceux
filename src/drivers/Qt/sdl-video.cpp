@@ -158,10 +158,15 @@ void CalcVideoDimensions(void)
 			nes_shm->video.yscale = 3;
 		break;
 		case 8: // Prescale4x
-			nes_shm->video.xscale = 4;
-			nes_shm->video.yscale = 4;
+		case 9: // Prescale5x
+		case 10: // Prescale6x
+		case 11: // Prescale7x
+		case 12: // Prescale8x
+		case 13: // Prescale9x
+			nes_shm->video.xscale = s_sponge - 4;
+			nes_shm->video.yscale = s_sponge - 4;
 		break;
-		case 9: // PAL
+		case 14: // PAL
 			nes_shm->video.xscale = 3;
 			nes_shm->video.yscale = 1;
 		break;
@@ -176,7 +181,7 @@ void CalcVideoDimensions(void)
 	{
 		nes_shm->video.ncol = iScale*NWIDTH;
 	}
-	if ( s_sponge == 9 )
+	if ( s_sponge == 14 )
 	{
 		nes_shm->video.nrow  = 1*s_tlines;
 		nes_shm->video.xyRatio = 3;
@@ -248,10 +253,15 @@ int InitVideo(FCEUGI *gi)
 			nes_shm->video.yscale = 3;
 		break;
 		case 8: // Prescale4x
-			nes_shm->video.xscale = 4;
-			nes_shm->video.yscale = 4;
+		case 9: // Prescale5x
+		case 10: // Prescale6x
+		case 11: // Prescale7x
+		case 12: // Prescale8x
+		case 13: // Prescale9x
+			nes_shm->video.xscale = s_sponge - 4;
+			nes_shm->video.yscale = s_sponge - 4;
 		break;
-		case 9: // PAL
+		case 14: // PAL
 			nes_shm->video.xscale = 3;
 			nes_shm->video.yscale = 1;
 		break;
@@ -272,7 +282,7 @@ int InitVideo(FCEUGI *gi)
 	{
 		nes_shm->video.ncol = iScale*NWIDTH;
 	}
-	if ( s_sponge == 9 )
+	if ( s_sponge == 14 )
 	{
 		nes_shm->video.nrow  = 1*s_tlines;
 		nes_shm->video.xyRatio = 3;
@@ -456,7 +466,7 @@ doBlitScreen(uint8_t *XBuf, uint8_t *dest)
 		w = ixScale*NWIDTH;
 		bw = NWIDTH;
 	}
-	if ( s_sponge == 9 )
+	if ( s_sponge == 14 )
 	{
 		h  = 1*s_tlines;
 	}
