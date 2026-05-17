@@ -3737,6 +3737,7 @@ enum
 	, GUI_COLOUR_RED,   GUI_COLOUR_GREEN, GUI_COLOUR_BLUE
 	*/
 };
+static int colorMatchFormula = 3;
 /**
  * Returns an index approximating an RGB colour.
  * TODO: This is easily improvable in terms of speed and probably
@@ -3763,10 +3764,33 @@ static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
 		uint8 tr, tg, tb;
 		if (test == GUI_COLOUR_CLEAR) continue;
 		FCEUD_GetPalette(test, &tr, &tg, &tb);
-        // Basic distance squared
-		test_score = (r - tr) * (r - tr) +
-                     (g - tg) * (g - tg) +
-                     (b - tb) * (b - tb);
+		switch (colorMatchFormula) {
+		  case 0:
+		    // Original formula - weights based on luminance?
+			test_score = abs(r - tr) * 66 +
+						 abs(g - tg) * 129 +
+						 abs(b - tb) * 25;
+			break;
+		  case 1:
+			// Original formula, but the deltas are squared.
+			test_score = abs(r - tr) * abs(r - tr) * 66 +
+						 abs(g - tg) * abs(g - tg) * 129 +
+						 abs(b - tb) * abs(b - tb) * 25;
+			break;
+		  case 2:
+            // Basic distance squared
+			test_score = (r - tr) * (r - tr) +
+						 (g - tg) * (g - tg) +
+						 (b - tb) * (b - tb);
+			break;
+		  case 3:
+			// Redmean
+			int red_mean = r / 2 + tr / 2, dr = tr - r, dg = tg - g, db = tb - b;
+			test_score = (2 + red_mean / 256) * dr * dr
+						 + 4 * dg * dg
+						 + (2 + (255 - red_mean) / 256) * db * db;
+			break;	
+		}
 		if (test_score < best_score) best_score = test_score, best = test;
 	}
 	return index_lookup[k] = best;
@@ -4144,6 +4168,12 @@ static int gui_parsecolor(lua_State *L)
 static int gui_clearcolorcache(lua_State *L)
 {
 	FCEU_LuaUpdatePalette();
+	return 0;
+}
+
+static int gui_setcolormatchformula(lua_State *L)
+{
+	colorMatchFormula = luaL_checkint(L, 1);
 	return 0;
 }
 
@@ -6396,6 +6426,7 @@ static const struct luaL_reg guilib[] = {
 
 	{"parsecolor", gui_parsecolor},
 	{"clearcolorcache", gui_clearcolorcache},
+	{"setcolormatchformula", gui_setcolormatchformula},
 
 	{"savescreenshot",   gui_savescreenshot},
 	{"savescreenshotas", gui_savescreenshotas},
