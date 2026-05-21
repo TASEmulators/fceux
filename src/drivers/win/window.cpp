@@ -75,6 +75,7 @@
 #include "mapinput.h"
 #include "movieoptions.h"
 #include "config.h" //adelikat: For SaveConfigFile()
+#include "luaconsole.h"
 
 #include <fstream>
 #include <sstream>
@@ -166,13 +167,6 @@ void SaveSnapshotAs();
 char *recent_files[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 const unsigned int MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*recent_files);
-
-//Lua Console --------------------------------------------
-//TODO: these need to be in a header file instead
-extern HWND LuaConsoleHWnd;
-extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-extern void UpdateLuaConsole(const char* fname);
-extern bool GetLuaArgs(char *args, int len);
 
 //Recent Lua Menu ----------------------------------------
 char *recent_lua[] = { 0, 0, 0, 0, 0 };
