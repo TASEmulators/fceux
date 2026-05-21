@@ -1678,7 +1678,22 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 		case LUA_TNONE: break;
 		case LUA_TNIL: APPENDPRINT "nil" END break;
 		case LUA_TBOOLEAN: APPENDPRINT lua_toboolean(L,i) ? "true" : "false" END break;
-		case LUA_TSTRING: APPENDPRINT "%s",lua_tostring(L,i) END break;
+		case LUA_TSTRING:
+		{
+#ifdef WIN32
+			// Convert line endings to "\r\n"
+			const char *str, *newline;
+			for (str = lua_tostring(L, i); newline = strchr(str, '\n'); str = newline + 1)
+				if (newline > str && newline[-1] == '\r')
+					APPENDPRINT "%.*s\n", newline - str, str END
+				else
+					APPENDPRINT "%.*s\r\n", newline - str, str END
+			APPENDPRINT "%s", str END
+#else
+			APPENDPRINT "%s",lua_tostring(L,i) END
+#endif
+			break;
+		}
 		case LUA_TNUMBER: APPENDPRINT "%.12g",lua_tonumber(L,i) END break;
 		case LUA_TFUNCTION:
 			/*if((L->base + i-1)->value.gc->cl.c.isC)
@@ -1818,7 +1833,7 @@ static char* rawToCString(lua_State* L, int idx)
 	{
 		toCStringConverter(L, i, ptr, remaining);
 		if(i != n)
-			APPENDPRINT " " END
+			APPENDPRINT "\t" END
 	}
 
 	if(remaining < 3)
