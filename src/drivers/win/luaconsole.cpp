@@ -8,6 +8,7 @@
 extern HWND hAppWnd;
 
 void UpdateLuaConsole(const char* fname);
+bool GetLuaArgs(char *args);
 
 HWND LuaConsoleHWnd = NULL;
 HFONT hFont = NULL;
@@ -330,4 +331,12 @@ void UpdateLuaConsole(const char* fname)
 	if (!LuaConsoleHWnd) return;
 
 	SetWindowText(GetDlgItem(LuaConsoleHWnd, IDC_EDIT_LUAPATH), fname);
+}
+
+bool GetLuaArgs(char *dst, int len)
+{
+	if (!LuaConsoleHWnd)
+		return dst[0] = NULL;
+
+	return GetDlgItemText(LuaConsoleHWnd, IDC_EDIT_LUAARGS, dst, len) || !GetLastError();
 }

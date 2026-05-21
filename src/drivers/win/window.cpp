@@ -172,6 +172,7 @@ const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*rec
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 extern void UpdateLuaConsole(const char* fname);
+extern bool GetLuaArgs(char *args, int len);
 
 //Recent Lua Menu ----------------------------------------
 char *recent_lua[] = { 0, 0, 0, 0, 0 };
@@ -1749,17 +1750,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				char*& fname = recent_lua[wParam - LUA_FIRST_RECENT_FILE];
 				if(fname)
 				{
+					char args[MAX_PATH];
 					UpdateLuaConsole(fname);
-					if (!FCEU_LoadLuaCode(fname))
-					{
-						//int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
-						//if (result == IDYES)
-						//{
-						//	RemoveRecentItem((wParam - LUA_FIRST_RECENT_FILE), recent_lua, MAX_NUMBER_OF_LUA_RECENT_FILES);
-						//	UpdateLuaRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
-						//}
-						//adelikat: Commenting this code out because it is annoying in context lua scripts since lua scripts will frequently give errors to those developing them.  It is frustrating for this to pop up every time.
-					}
+					GetLuaArgs(args, sizeof(args));
+					FCEU_LoadLuaCode(fname, args);
 				}
 			}
 			#endif
