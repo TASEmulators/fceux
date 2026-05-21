@@ -1647,8 +1647,7 @@ static inline bool isalphaorunderscore(char c)
 	return isalpha(c) || c == '_';
 }
 
-#define APPENDPRINT { int _n = snprintf(ptr, remaining,
-#define END ); if(_n >= 0) { ptr += _n; remaining -= _n; } else { remaining = 0; } }
+#define APPENDPRINT(...) { int _n = snprintf(ptr, remaining, __VA_ARGS__); if (_n >= 0) { ptr += _n; remaining -= _n; } else { remaining = 0; } }
 static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 {
 	if(remaining <= 0)
@@ -1676,8 +1675,8 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 	switch(lua_type(L, i))
 	{
 		case LUA_TNONE: break;
-		case LUA_TNIL: APPENDPRINT "nil" END break;
-		case LUA_TBOOLEAN: APPENDPRINT lua_toboolean(L,i) ? "true" : "false" END break;
+		case LUA_TNIL: APPENDPRINT("nil") break;
+		case LUA_TBOOLEAN: APPENDPRINT(lua_toboolean(L,i) ? "true" : "false") break;
 		case LUA_TSTRING:
 		{
 #ifdef WIN32
@@ -1685,16 +1684,16 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 			const char *str, *newline;
 			for (str = lua_tostring(L, i); newline = strchr(str, '\n'); str = newline + 1)
 				if (newline > str && newline[-1] == '\r')
-					APPENDPRINT "%.*s\n", newline - str, str END
+					APPENDPRINT("%.*s\n", newline - str, str)
 				else
-					APPENDPRINT "%.*s\r\n", newline - str, str END
-			APPENDPRINT "%s", str END
+					APPENDPRINT("%.*s\r\n", newline - str, str)
+			APPENDPRINT("%s", str)
 #else
-			APPENDPRINT "%s",lua_tostring(L,i) END
+			APPENDPRINT("%s",lua_tostring(L,i))
 #endif
 			break;
 		}
-		case LUA_TNUMBER: APPENDPRINT "%.12g",lua_tonumber(L,i) END break;
+		case LUA_TNUMBER: APPENDPRINT("%.12g",lua_tonumber(L,i)) break;
 		case LUA_TFUNCTION:
 			/*if((L->base + i-1)->value.gc->cl.c.isC)
 			{
@@ -1702,26 +1701,26 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 				//std::map<lua_CFunction, const char*>::iterator iter = s_cFuncInfoMap.find(func);
 				//if(iter == s_cFuncInfoMap.end())
 					goto defcase;
-				//APPENDPRINT "function(%s)", iter->second END
+				//APPENDPRINT("function(%s)", iter->second)
 			}
 			else
 			{
-				APPENDPRINT "function(" END
+				APPENDPRINT("function(")
 				Proto* p = (L->base + i-1)->value.gc->cl.l.p;
 				int numParams = p->numparams + (p->is_vararg?1:0);
 				for (int n=0; n<p->numparams; n++)
 				{
-					APPENDPRINT "%s", getstr(p->locvars[n].varname) END
+					APPENDPRINT("%s", getstr(p->locvars[n].varname))
 					if(n != numParams-1)
-						APPENDPRINT "," END
+						APPENDPRINT(",")
 				}
 				if(p->is_vararg)
-					APPENDPRINT "..." END
-				APPENDPRINT ")" END
+					APPENDPRINT("...")
+				APPENDPRINT(")")
 			}*/
 			goto defcase;
 			break;
-defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END break;
+defcase:default: APPENDPRINT("%s:%p",luaL_typename(L,i),lua_topointer(L,i)) break;
 		case LUA_TTABLE:
 		{
 			// first make sure there's enough stack space
@@ -1738,16 +1737,16 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 			{
 				int parentNum = s_tableAddressStack.end() - foundCycleIter;
 				if(parentNum > 1)
-					APPENDPRINT "%s:parent^%d",luaL_typename(L,i),parentNum END
+					APPENDPRINT("%s:parent^%d",luaL_typename(L,i),parentNum)
 				else
-					APPENDPRINT "%s:parent",luaL_typename(L,i) END
+					APPENDPRINT("%s:parent",luaL_typename(L,i))
 			}
 			else
 			{
 				s_tableAddressStack.push_back(lua_topointer(L,i));
 				struct Scope { ~Scope(){ s_tableAddressStack.pop_back(); } } scope;
 
-				APPENDPRINT "{" END
+				APPENDPRINT("{")
 
 				lua_pushnil(L); // first key
 				int keyIndex = lua_gettop(L);
@@ -1760,7 +1759,7 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 					if(first)
 						first = false;
 					else
-						APPENDPRINT ", " END
+						APPENDPRINT(", ")
 					if(skipKey)
 					{
 						arrayIndex += (lua_Number)1;
@@ -1773,29 +1772,29 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 						bool invalidLuaIdentifier = (!keyIsString || !isalphaorunderscore(*lua_tostring(L, keyIndex)));
 						if(invalidLuaIdentifier)
 							if(keyIsString)
-								APPENDPRINT "['" END
+								APPENDPRINT("['")
 							else
-								APPENDPRINT "[" END
+								APPENDPRINT("[")
 
 						toCStringConverter(L, keyIndex, ptr, remaining); // key
 
 						if(invalidLuaIdentifier)
 							if(keyIsString)
-								APPENDPRINT "']=" END
+								APPENDPRINT("']=")
 							else
-								APPENDPRINT "]=" END
+								APPENDPRINT("]=")
 						else
-							APPENDPRINT "=" END
+							APPENDPRINT("=")
 					}
 
 					bool valueIsString = (lua_type(L, valueIndex) == LUA_TSTRING);
 					if(valueIsString)
-						APPENDPRINT "'" END
+						APPENDPRINT("'")
 
 					toCStringConverter(L, valueIndex, ptr, remaining); // value
 
 					if(valueIsString)
-						APPENDPRINT "'" END
+						APPENDPRINT("'")
 
 					lua_pop(L, 1);
 
@@ -1805,7 +1804,7 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 						break;
 					}
 				}
-				APPENDPRINT "}" END
+				APPENDPRINT("}")
 			}
 		}	break;
 	}
@@ -1833,16 +1832,16 @@ static char* rawToCString(lua_State* L, int idx)
 	{
 		toCStringConverter(L, i, ptr, remaining);
 		if(i != n)
-			APPENDPRINT "\t" END
+			APPENDPRINT("\t")
 	}
 
 	if(remaining < 3)
 	{
 		while(remaining < 6)
 			remaining++, ptr--;
-		APPENDPRINT "..." END
+		APPENDPRINT("...")
 	}
-	APPENDPRINT "\r\n" END
+	APPENDPRINT("\r\n")
 	// the trailing newline is so print() can avoid having to do wasteful things to print its newline
 	// (string copying would be wasteful and calling info.print() twice can be extremely slow)
 	// at the cost of functions that don't want the newline needing to trim off the last two characters
