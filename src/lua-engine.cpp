@@ -6720,14 +6720,62 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 		lua_register(L, "SHIFT", bit_bshift_emulua);
 		lua_register(L, "BIT", bitbit);
 
-		if (arg)
-		{
-			luaL_Buffer b;
-			luaL_buffinit(L, &b);
-			luaL_addstring(&b, arg);
-			luaL_pushresult(&b);
+		static bool newArgMode = true;
 
+		if (newArgMode)
+		{
+			lua_newtable(L);
+			lua_pushstring(L, "FCEUX");
+			lua_rawseti(L, -2, -1);
+			lua_pushstring(L, filename);
+			lua_rawseti(L, -2, 0);
+			if (arg)
+			{
+				// Tokenize on space
+				// TODO: \"
+				int ti = 1, len = strlen(arg), start = 0, stop, bi = 0;
+				bool quoted = false;
+				char buf[MAX_PATH]; buf[0] = NULL;
+				for (int i = 0; i < len; i++)
+				{
+					if (arg[i] == '"')
+					{
+						quoted = !quoted;
+					}
+					else if (!quoted && arg[i] == ' ')
+					{
+						stop = i;
+						if (stop > start)
+						{
+							lua_pushstring(L, buf);
+							lua_rawseti(L, -2, ti++);
+							buf[bi = 0] = NULL;
+						}
+						start = i + 1;
+					}
+					else
+					{
+						buf[bi++] = arg[i]; buf[bi] = NULL;
+					}
+				}
+				if (*buf)
+				{
+					lua_pushstring(L, buf);
+					lua_rawseti(L, -2, ti++);
+				}
+			}
 			lua_setglobal(L, "arg");
+		}
+		else
+		{ // Compatibility mode
+			if (arg)
+			{
+				luaL_Buffer b;
+				luaL_buffinit(L, &b);
+				luaL_addstring(&b, arg);
+				luaL_pushresult(&b);
+				lua_setglobal(L, "arg");
+			}
 		}
 
 		luabitop_validate(L);
