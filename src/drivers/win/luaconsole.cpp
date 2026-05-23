@@ -8,7 +8,7 @@
 extern HWND hAppWnd;
 
 void UpdateLuaConsole(const char* fname);
-bool GetLuaArgs(char *args);
+bool GetLuaArgs(char *dst, int len);
 
 HWND LuaConsoleHWnd = NULL;
 HFONT hFont = NULL;
@@ -45,6 +45,7 @@ static const int numControlLayoutInfos = sizeof(controlLayoutInfos)/sizeof(*cont
 
 struct {
 	int width; int height;
+	int minTrackWidth; int minTrackHeight;
 	ControlLayoutState layoutState [numControlLayoutInfos];
 } windowInfo;
 
@@ -122,6 +123,9 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		GetClientRect(hDlg, &r3);
 		windowInfo.width = r3.right - r3.left;
 		windowInfo.height = r3.bottom - r3.top;
+		GetWindowRect(hDlg, &r3); // consider the initial size to be the minimum size
+		windowInfo.minTrackWidth = r3.right - r3.left;
+		windowInfo.minTrackHeight = r3.bottom - r3.top;
 		for(int i = 0; i < numControlLayoutInfos; i++) {
 			ControlLayoutState& layoutState = windowInfo.layoutState[i];
 			layoutState.valid = false;
@@ -132,7 +136,15 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 
 		SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &LuaConsoleLogFont, 0); // reset with an acceptable font
 		return true;
-	}	break;
+	}
+
+	case WM_GETMINMAXINFO:
+	{
+		auto info = (MINMAXINFO*)lParam;
+		info->ptMinTrackSize.x = windowInfo.minTrackWidth;
+		info->ptMinTrackSize.y = windowInfo.minTrackHeight;
+		return true;
+	}
 
 	case WM_SIZE:
 	{
@@ -188,7 +200,7 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 				default: break;
 			}
 
-			SetWindowPos(hCtrl, 0, x,y, width,height, 0);
+			SetWindowPos(hCtrl, HWND_TOP, x,y, width,height, SWP_NOREDRAW);
 
 			layoutState.x = x;
 			layoutState.y = y;
@@ -200,29 +212,33 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		windowInfo.width = dlgWidth;
 		windowInfo.height = dlgHeight;
 
-		RedrawWindow(hDlg, NULL, NULL, RDW_INVALIDATE);
-	}	break;
+		RedrawWindow(hDlg, NULL, NULL, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE);
+		return true;
+	}
 
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
-			case IDOK:
-			case IDCANCEL: {
-				EndDialog(hDlg, true); // goto case WM_CLOSE;
-			}	break;
+			case IDCANCEL:
+			{
+				goto close;
+			}
 
 			case IDC_BUTTON_LUARUN:
+			case IDOK:
 			{
 				char filename[MAX_PATH];
 				char args[MAX_PATH];
 				GetDlgItemText(hDlg, IDC_EDIT_LUAPATH, filename, MAX_PATH);
 				GetDlgItemText(hDlg, IDC_EDIT_LUAARGS, args, MAX_PATH);
 				FCEU_LoadLuaCode(filename, args);
-			}	break;
+				return true;
+			}
 
 			case IDC_BUTTON_LUASTOP:
 			{
 				FCEU_LuaStop();
-			}	break;
+				return true;
+			}
 
 			case IDC_BUTTON_LUAEDIT:
 			{
@@ -233,7 +249,8 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 				if((intptr_t)ShellExecute(NULL, "edit", Str_Tmp, NULL, NULL, SW_SHOWNORMAL) == SE_ERR_NOASSOC)
 					if((intptr_t)ShellExecute(NULL, "open", Str_Tmp, NULL, NULL, SW_SHOWNORMAL) == SE_ERR_NOASSOC)
 						ShellExecute(NULL, NULL, "notepad", Str_Tmp, NULL, SW_SHOWNORMAL);
-			}	break;
+				return true;
+			}
 
 			case IDC_BUTTON_LUABROWSE:
 			{
@@ -255,7 +272,7 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 					SetWindowText(GetDlgItem(hDlg, IDC_EDIT_LUAPATH), szFileName);
 				}
 				return true;
-			}	break;
+			}
 
 			case IDC_EDIT_LUAPATH:
 			{
@@ -265,7 +282,8 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 				EnableWindow(GetDlgItem(hDlg, IDOK), file != NULL);
 				if(file)
 					fclose(file);
-			}	break;
+				return true;
+			}
 
 			case IDC_LUACONSOLE_CHOOSEFONT:
 			{
@@ -285,15 +303,19 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 					if (hFont)
 						SendDlgItemMessage(hDlg, IDC_LUACONSOLE, WM_SETFONT, (WPARAM)hFont, 0);
 				}
-			}	break;
+				return true;
+			}
 
 			case IDC_LUACONSOLE_CLEAR:
 			{
 				SetWindowText(GetDlgItem(hDlg, IDC_LUACONSOLE), "");
-			}	break;
+				return true;
+			}
 		}
 		break;
 
+
+close:
 	case WM_CLOSE: {
 		FCEU_LuaStop();
 		DragAcceptFiles(hDlg, FALSE);
@@ -301,12 +323,13 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 			DeleteObject(hFont);
 			hFont = NULL;
 		}
+		EndDialog(hDlg, true);
 		LuaConsoleHWnd = NULL;
-	}	break;
+		return true;
+	}
 
 	case WM_DROPFILES: {
 		HDROP hDrop;
-		//UINT fileNo;
 		UINT fileCount;
 		char filename[MAX_PATH];
 
@@ -318,7 +341,7 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		}
 		DragFinish(hDrop);
 		return true;
-	}	break;
+	}
 
 	}
 
