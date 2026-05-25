@@ -50,9 +50,7 @@ struct {
 	ControlLayoutState layoutState [numControlLayoutInfos];
 } windowInfo;
 
-// TODO: I think this needs to be an extern bool in lua-engine.cpp.
-//   Or... can I make this extern and lua-console.cpp reads it?
-static bool argCompat = false;
+bool LuaArgCompat = false;
 
 void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
 {
@@ -142,7 +140,7 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &LuaConsoleLogFont, 0); // reset with an acceptable font
 
 		HMENU hmenu = GetMenu(hDlg);
-		CheckMenuItem(hmenu, IDC_LUACONSOLE_ARGCOMPAT, argCompat ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hmenu, IDC_LUACONSOLE_ARGCOMPAT, LuaArgCompat ? MF_CHECKED : MF_UNCHECKED);
 		return true;
 	}
 
@@ -323,7 +321,7 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 			case IDC_LUACONSOLE_ARGCOMPAT:
 			{
 				HMENU hmenu = GetMenu(hDlg);
-				CheckMenuItem(hmenu, IDC_LUACONSOLE_ARGCOMPAT, (argCompat = !argCompat) ? MF_CHECKED : MF_UNCHECKED);
+				CheckMenuItem(hmenu, IDC_LUACONSOLE_ARGCOMPAT, (LuaArgCompat = !LuaArgCompat) ? MF_CHECKED : MF_UNCHECKED);
 				return true;
 			}
 		}
