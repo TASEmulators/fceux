@@ -48,6 +48,7 @@ extern char FileBase[];
 #include "drivers/win/taseditor/snapshot.h"
 #include "drivers/win/taseditor/taseditor_lua.h"
 #include "drivers/win/cdlogger.h"
+#include "drivers/win/luaconsole.h"
 extern TASEDITOR_LUA taseditor_lua;
 #endif
 
@@ -214,8 +215,6 @@ static void(*info_onstart)(intptr_t uid);
 static void(*info_onstop)(intptr_t uid);
 static intptr_t info_uid;
 #ifdef __WIN_DRIVER__
-extern HWND LuaConsoleHWnd;
-extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void TaseditorDisableManualFunctionIfNeeded();
 
 #else
@@ -6723,9 +6722,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 		lua_register(L, "SHIFT", bit_bshift_emulua);
 		lua_register(L, "BIT", bitbit);
 
-		static bool newArgMode = true;
-
-		if (newArgMode)
+		if (!LuaArgCompat)
 		{
 			lua_newtable(L);
 			lua_pushstring(L, "FCEUX");
@@ -6750,8 +6747,12 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 				luaL_buffinit(L, &b);
 				luaL_addstring(&b, arg);
 				luaL_pushresult(&b);
-				lua_setglobal(L, "arg");
 			}
+			else
+			{
+				lua_pushstring(L, "");
+			}
+			lua_setglobal(L, "arg");
 		}
 
 		luabitop_validate(L);
