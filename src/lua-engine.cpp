@@ -237,9 +237,6 @@ int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw();
 #endif
 
 #endif
-extern void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str);
-extern void WinLuaOnStart(intptr_t hDlgAsInt);
-extern void WinLuaOnStop(intptr_t hDlgAsInt);
 
 static lua_State *L;
 
@@ -6881,7 +6878,6 @@ static void tokenizeString(const char *str, Callback consumeToken)
 void FCEU_ReloadLuaCode()
 {
 #ifdef __WIN_DRIVER__
-	extern bool GetLuaArgs(char *dst, int len);
 	char args[MAX_PATH];
 	GetLuaArgs(args, sizeof(args));
 	if (!luaScriptName)
@@ -6889,7 +6885,6 @@ void FCEU_ReloadLuaCode()
 		// no script currently running, then try loading the most recent
 		extern char *recent_lua[];
 		char*& fname = recent_lua[0];
-		extern void UpdateLuaConsole(const char* fname);
 		if (fname)
 		{
 			UpdateLuaConsole(fname);
