@@ -6875,12 +6875,16 @@ static void tokenizeString(const char *str, Callback consumeToken)
 
 /**
  * Equivalent to repeating the last FCEU_LoadLuaCode() call.
+ * Called by the EMUCMD_SCRIPT_RELOAD command.
  */
 void FCEU_ReloadLuaCode()
 {
+#ifdef __WIN_DRIVER__
+	extern bool GetLuaArgs(char *dst, int len);
+	char args[MAX_PATH];
+	GetLuaArgs(args, sizeof(args));
 	if (!luaScriptName)
 	{
-#ifdef __WIN_DRIVER__
 		// no script currently running, then try loading the most recent
 		extern char *recent_lua[];
 		char*& fname = recent_lua[0];
@@ -6888,18 +6892,24 @@ void FCEU_ReloadLuaCode()
 		if (fname)
 		{
 			UpdateLuaConsole(fname);
-			FCEU_LoadLuaCode(fname);
+			FCEU_LoadLuaCode(fname, args);
 		} else
 		{
 			FCEU_DispMessage("There's no script to reload.", 0);
 		}
+	} else
+	{
+		FCEU_LoadLuaCode(luaScriptName, args);
+	}
 #else
+	if (!luaScriptName)
+	{
 		FCEU_DispMessage("There's no script to reload.", 0);
-#endif
 	} else
 	{
 		FCEU_LoadLuaCode(luaScriptName);
 	}
+#endif
 }
 
 
