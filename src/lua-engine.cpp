@@ -6820,6 +6820,8 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 		LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hAppWnd, DlgLuaScriptDialog);
 	info_uid = (intptr_t)LuaConsoleHWnd;
 #else
+    // FIXME: sdl.h?
+	#include "drivers\Qt\LuaControl.h"
 	info_print = PrintToWindowConsole;
 	info_onstart = WinLuaOnStart;
 	info_onstop = WinLuaOnStop;
