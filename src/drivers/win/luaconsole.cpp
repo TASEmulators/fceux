@@ -40,6 +40,7 @@ static ControlLayoutInfo controlLayoutInfos [] = {
 	{IDC_EDIT_LUAARGS, ControlLayoutInfo::RESIZE_END, ControlLayoutInfo::NONE},
 	{IDC_BUTTON_LUARUN, ControlLayoutInfo::MOVE_START, ControlLayoutInfo::NONE},
 	{IDC_BUTTON_LUASTOP, ControlLayoutInfo::MOVE_START, ControlLayoutInfo::NONE},
+	{IDC_LUACONSOLE_CLEAR, ControlLayoutInfo::MOVE_START, ControlLayoutInfo::NONE},
 };
 static const int numControlLayoutInfos = sizeof(controlLayoutInfos)/sizeof(*controlLayoutInfos);
 
@@ -48,6 +49,10 @@ struct {
 	int minTrackWidth; int minTrackHeight;
 	ControlLayoutState layoutState [numControlLayoutInfos];
 } windowInfo;
+
+// TODO: I think this needs to be an extern bool in lua-engine.cpp.
+//   Or... can I make this extern and lua-console.cpp reads it?
+static bool argCompat = false;
 
 void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str)
 {
@@ -135,6 +140,9 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		SetDlgItemText(hDlg, IDC_EDIT_LUAPATH, FCEU_GetLuaScriptName());
 
 		SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &LuaConsoleLogFont, 0); // reset with an acceptable font
+
+		HMENU hmenu = GetMenu(hDlg);
+		CheckMenuItem(hmenu, IDC_LUACONSOLE_ARGCOMPAT, argCompat ? MF_CHECKED : MF_UNCHECKED);
 		return true;
 	}
 
@@ -309,6 +317,13 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 			case IDC_LUACONSOLE_CLEAR:
 			{
 				SetWindowText(GetDlgItem(hDlg, IDC_LUACONSOLE), "");
+				return true;
+			}
+
+			case IDC_LUACONSOLE_ARGCOMPAT:
+			{
+				HMENU hmenu = GetMenu(hDlg);
+				CheckMenuItem(hmenu, IDC_LUACONSOLE_ARGCOMPAT, (argCompat = !argCompat) ? MF_CHECKED : MF_UNCHECKED);
 				return true;
 			}
 		}
