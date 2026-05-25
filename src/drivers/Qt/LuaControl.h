@@ -55,6 +55,10 @@ private slots:
 	void openLuaDebugger(void);
 };
 
+void WinLuaOnStart(intptr_t hDlgAsInt);
+
+void WinLuaOnStop(intptr_t hDlgAsInt);
+
 // Formatted print
 int LuaPrintfToWindowConsole( __FCEU_PRINTF_FORMAT const char *format, ...) __FCEU_PRINTF_ATTRIBUTE( 1, 2 );
 
@@ -63,3 +67,9 @@ void PrintToWindowConsole(intptr_t hDlgAsInt, const char *str);
 void LuaYieldToGui(void);
 
 void LuaConsoleClear(void);
+
+int LuaKillMessageBox(void);
+
+bool GetLuaArgs(char *dst, int len);
+
+extern bool LuaArgCompat;

@@ -469,3 +469,8 @@ void LuaYieldToGui(void)
 	}
 }
 //----------------------------------------------------
+bool LuaArgCompat = false;
+
+// TODO: stub. scriptArgs->text().toLocal8Bit().constData() ?
+bool GetLuaArgs(char *dst, int len) { dst[0] = NULL; return true; }
+//----------------------------------------------------

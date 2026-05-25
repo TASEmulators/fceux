@@ -88,6 +88,11 @@ typedef uint32_t uint32;
  typedef long long int64;
  #define INLINE inline
  #define GINLINE inline
+ #ifndef PATH_MAX
+  #define MAX_PATH 260
+ #else
+  #define MAX_PATH PATH_MAX
+ #endif
 #elif MSVC
  typedef __int64 int64;
  typedef unsigned __int64 uint64;
