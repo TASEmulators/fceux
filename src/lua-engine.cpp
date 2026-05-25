@@ -6629,6 +6629,9 @@ void FCEU_LuaFrameBoundary()
 }
 
 
+template <typename Callback>
+void tokenizeString(const char *str, Callback readToken);
+
 /**
  * Loads and runs the given Lua script.
  * The emulator MUST be paused for this function to be
@@ -6731,38 +6734,11 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 			lua_rawseti(L, -2, 0);
 			if (arg)
 			{
-				// Tokenize on space
-				// TODO: \"
-				int ti = 1, len = strlen(arg), start = 0, stop, bi = 0;
-				bool quoted = false;
-				char buf[MAX_PATH]; buf[0] = NULL;
-				for (int i = 0; i < len; i++)
-				{
-					if (arg[i] == '"')
-					{
-						quoted = !quoted;
-					}
-					else if (!quoted && arg[i] == ' ')
-					{
-						stop = i;
-						if (stop > start)
-						{
-							lua_pushstring(L, buf);
-							lua_rawseti(L, -2, ti++);
-							buf[bi = 0] = NULL;
-						}
-						start = i + 1;
-					}
-					else
-					{
-						buf[bi++] = arg[i]; buf[bi] = NULL;
-					}
-				}
-				if (*buf)
-				{
-					lua_pushstring(L, buf);
+				int ti = 1;
+				tokenizeString(arg, [&](const char *tok) {
+					lua_pushstring(L, tok);
 					lua_rawseti(L, -2, ti++);
-				}
+				});
 			}
 			lua_setglobal(L, "arg");
 		}
@@ -6859,6 +6835,42 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 
 	// We're done.
 	return 1;
+}
+
+// This is very reusable, but just leaving it here for now.
+// The char* passed to the callback will always be the same fixed buffer on the stack. That means you don't have to free
+// it, but you do have to copy it if you want to use it later.
+template <typename Callback>
+static void tokenizeString(const char *str, Callback consumeToken)
+{
+	int len = strlen(str), start = 0, stop, bi = 0;
+	bool quoted = false;
+	char buf[MAX_PATH]; buf[0] = NULL; // TODO: MAX_PATH ain't gonna cut it if this is to be generally useful.
+	for (int i = 0; i < len; i++)
+	{
+		if (str[i] == '"')
+		{
+			quoted = !quoted;
+		}
+		else if (!quoted && str[i] == ' ')
+		{
+			stop = i;
+			if (stop > start)
+			{
+				consumeToken(buf); // TODO: pass length? I mean, we already know it.
+				buf[bi = 0] = NULL;
+			}
+			start = i + 1;
+		}
+		else
+		{
+			buf[bi++] = str[i]; buf[bi] = NULL;
+		}
+	}
+	if (*buf)
+	{
+		consumeToken(buf);
+	}
 }
 
 /**
