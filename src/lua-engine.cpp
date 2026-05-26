@@ -220,23 +220,23 @@ static intptr_t info_uid;
 void TaseditorDisableManualFunctionIfNeeded();
 
 #else
-int LuaKillMessageBox(void);
-#ifdef __linux__
+// int LuaKillMessageBox(void);
+// #ifdef __linux__
 
-#ifndef __THROWNL
-#define __THROWNL throw () // Build fix Alpine Linux libc
-#endif
-int LuaPrintfToWindowConsole(const char *__restrict format, ...) 
-                  __THROWNL __attribute__ ((__format__ (__printf__, 1, 2)));
-#else
+// #ifndef __THROWNL
+// #define __THROWNL throw () // Build fix Alpine Linux libc
+// #endif
+// int LuaPrintfToWindowConsole(const char *__restrict format, ...) 
+//                   __THROWNL __attribute__ ((__format__ (__printf__, 1, 2)));
+// #else
 
-#ifdef WIN32
-int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char * format, ...);
-#else
-int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw();
-#endif
+// #ifdef WIN32
+// int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char * format, ...);
+// #else
+// int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw();
+// #endif
 
-#endif
+// #endif
 
 #endif
 
