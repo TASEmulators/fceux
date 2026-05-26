@@ -64,7 +64,6 @@ void PrintToWindowConsole(intptr_t hDlgAsInt, const char *str);
 
 int LuaKillMessageBox(void);
 
-bool GetLuaArgs(char *dst, int len) { dst[0] = NULL; return true; } // TODO: stub. scriptArgs->text().toLocal8Bit().constData() ?
+bool GetLuaArgs(char *dst, int len);
 
-// extern bool LuaArgCompat;
-bool LuaArgCompat = false;
+extern bool LuaArgCompat;
