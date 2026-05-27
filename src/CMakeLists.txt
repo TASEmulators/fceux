@@ -707,7 +707,7 @@ set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
 # Note: with CMake >= 3.8.0, this will respect SOURCE_DATE_EPOCH. For more info,
 #       see <https://reproducible-builds.org/docs/source-date-epoch/>.
 string(TIMESTAMP BUILD_TS "%H:%M:%S  %b %d %Y" UTC)
-add_compile_definitions( FCEUX_BUILD_TIMESTAMP=${BUILD_TS} )
+add_compile_definitions( FCEUX_BUILD_TIMESTAMP="${BUILD_TS}" )
 
 if (WIN32)
 add_custom_command( 
