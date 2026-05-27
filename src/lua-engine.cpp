@@ -214,25 +214,6 @@ static void(*info_onstop)(intptr_t uid);
 static intptr_t info_uid;
 #ifdef __WIN_DRIVER__
 void TaseditorDisableManualFunctionIfNeeded();
-
-#else
-// #ifdef __linux__
-
-// #ifndef __THROWNL
-// #define __THROWNL throw () // Build fix Alpine Linux libc
-// #endif
-// int LuaPrintfToWindowConsole(const char *__restrict format, ...) 
-//                   __THROWNL __attribute__ ((__format__ (__printf__, 1, 2)));
-// #else
-
-// #ifdef WIN32
-// int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char * format, ...);
-// #else
-// int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw();
-// #endif
-
-// #endif
-
 #endif
 
 static lua_State *L;
@@ -7623,7 +7604,7 @@ static void tokenizeString(const char *str, Callback consumeToken)
 {
 	int len = strlen(str), start = 0, stop, bi = 0;
 	bool quoted = false;
-	char buf[MAX_PATH]; buf[0] = NULL; // TODO: MAX_PATH ain't gonna cut it if this is to be generally useful.
+	char buf[MAX_PATH]; buf[0] = 0; // TODO: MAX_PATH ain't gonna cut it if this is to be generally useful.
 	for (int i = 0; i < len; i++)
 	{
 		if (str[i] == '"')
@@ -7636,13 +7617,13 @@ static void tokenizeString(const char *str, Callback consumeToken)
 			if (stop > start)
 			{
 				consumeToken(buf); // TODO: pass length? I mean, we already know it.
-				buf[bi = 0] = NULL;
+				buf[bi = 0] = 0;
 			}
 			start = i + 1;
 		}
 		else
 		{
-			buf[bi++] = str[i]; buf[bi] = NULL;
+			buf[bi++] = str[i]; buf[bi] = 0;
 		}
 	}
 	if (*buf)
@@ -7654,14 +7635,15 @@ static void tokenizeString(const char *str, Callback consumeToken)
 /**
  * Equivalent to repeating the last FCEU_LoadLuaCode() call.
  * Called by the EMUCMD_SCRIPT_RELOAD command.
+ * TODO: The shift+L often gets inserted into the textbox.
  */
 void FCEU_ReloadLuaCode()
 {
-#ifdef __WIN_DRIVER__
 	char args[MAX_PATH];
 	GetLuaArgs(args, sizeof(args));
 	if (!luaScriptName)
 	{
+#ifdef __WIN_DRIVER__
 		// no script currently running, then try loading the most recent
 		extern char *recent_lua[];
 		char*& fname = recent_lua[0];
@@ -7673,19 +7655,13 @@ void FCEU_ReloadLuaCode()
 		{
 			FCEU_DispMessage("There's no script to reload.", 0);
 		}
+#else
+		FCEU_DispMessage("There's no script to reload.", 0);
+#endif
 	} else
 	{
 		FCEU_LoadLuaCode(luaScriptName, args);
 	}
-#else
-	if (!luaScriptName)
-	{
-		FCEU_DispMessage("There's no script to reload.", 0);
-	} else
-	{
-		FCEU_LoadLuaCode(luaScriptName);
-	}
-#endif
 }
 
 

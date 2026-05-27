@@ -123,6 +123,10 @@ typedef uint32_t uint32;
 					*/
 #endif
 
+#ifndef __THROWNL
+#define __THROWNL throw () // Build fix Alpine Linux libc
+#endif
+
 #if PSS_STYLE==2
 
 #define PSS "\\"

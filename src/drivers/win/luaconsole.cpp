@@ -372,7 +372,7 @@ void UpdateLuaConsole(const char* fname)
 bool GetLuaArgs(char *dst, int len)
 {
 	if (!LuaConsoleHWnd)
-		return dst[0] = NULL;
+		return dst[0] = 0;
 
 	return GetDlgItemText(LuaConsoleHWnd, IDC_EDIT_LUAARGS, dst, len) || !GetLastError();
 }
