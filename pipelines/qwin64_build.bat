@@ -2,6 +2,8 @@
 set PROJECT_ROOT=%~dp0..
 set CWD=%CD%
 
+exit 1
+
 set QT_VERSION=6.9
 if "%QT_ENV_LOADED%" == "" (
    call "C:\Qt\%QT_VERSION%\msvc2022_64\bin\qtenv2.bat"
