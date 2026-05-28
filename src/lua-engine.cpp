@@ -3737,7 +3737,8 @@ enum
 	, GUI_COLOUR_RED,   GUI_COLOUR_GREEN, GUI_COLOUR_BLUE
 	*/
 };
-static int colorMatchFormula = 3;
+static enum { COLORMATCH_OLD, COLORMATCH_OLD2, COLORMATCH_EUCLIDIAN, COLORMATCH_REDMEAN } colorMatchFormula = COLORMATCH_REDMEAN;
+
 /**
  * Returns an index approximating an RGB colour.
  * TODO: This is easily improvable in terms of speed and probably
@@ -3765,25 +3766,25 @@ static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
 		if (test == GUI_COLOUR_CLEAR) continue;
 		FCEUD_GetPalette(test, &tr, &tg, &tb);
 		switch (colorMatchFormula) {
-		  case 0:
+		case COLORMATCH_OLD:
 		    // Original formula - weights based on luminance?
 			test_score = abs(r - tr) * 66 +
 						 abs(g - tg) * 129 +
 						 abs(b - tb) * 25;
 			break;
-		  case 1:
+		case COLORMATCH_OLD2:
 			// Original formula, but the deltas are squared.
 			test_score = abs(r - tr) * abs(r - tr) * 66 +
 						 abs(g - tg) * abs(g - tg) * 129 +
 						 abs(b - tb) * abs(b - tb) * 25;
 			break;
-		  case 2:
-            // Basic distance squared
+		case COLORMATCH_EUCLIDIAN:
+			// Basic distance squared
 			test_score = (r - tr) * (r - tr) +
 						 (g - tg) * (g - tg) +
 						 (b - tb) * (b - tb);
 			break;
-		  case 3:
+		case COLORMATCH_REDMEAN:
 			// Redmean
 			int red_mean = r / 2 + tr / 2, dr = tr - r, dg = tg - g, db = tb - b;
 			test_score = (2 + red_mean / 256) * dr * dr
@@ -4171,9 +4172,30 @@ static int gui_clearcolorcache(lua_State *L)
 	return 0;
 }
 
+// gui.setcolormatchformula()
+//
+// Selects one of several formulas for matching colors to the limited Lua palette.
+// The default is "redmean", which seems to have the best results for alpha blending.
+// Choices:
+//   "old"       - Original formula that stood for years. Weights based on luminance?
+//   "old2"      - Original formula, but the deltas are squared. Gives better results.
+//   "euclidian" - Basic distance squared.
+//   "redmean"   - The "redmean" formula, which gives more weight to the red channel as the Euclidian mean gets redder.
 static int gui_setcolormatchformula(lua_State *L)
 {
-	colorMatchFormula = luaL_checkint(L, 1);
+	const char *formula = luaL_checkstring(L, 1);
+	if (strcmpi(formula, "old") == 0)
+		colorMatchFormula = COLORMATCH_OLD;
+	else if (strcmpi(formula, "old2") == 0)
+		colorMatchFormula = COLORMATCH_OLD2;
+	else if (strcmpi(formula, "euclidian") == 0)
+		colorMatchFormula = COLORMATCH_EUCLIDIAN;
+	else if (strcmpi(formula, "redmean") == 0)
+		colorMatchFormula = COLORMATCH_REDMEAN;
+	else
+		luaL_argerror(L, 1, "must be one of \"old\", \"old2\", \"euclidian\", or \"redmean\"");
+
+	FCEU_LuaUpdatePalette(); // Need to clear color cache, otherwise this might not have the desired effect.
 	return 0;
 }
 
