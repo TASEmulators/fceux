@@ -1946,7 +1946,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 
 			QMessageBox* msgBox = new QMessageBox( QMessageBox::Critical, tr("NetPlay Error"), msgBoxTxt, QMessageBox::Ok, consoleWindow );
 			connect( msgBox->button(QMessageBox::Ok), SIGNAL(clicked(void)), msgBox, SLOT(accept(void)));
-			connect( msgBox, &QMessageBox::finished, this, [this, msgBox](){ msgBox->deleteLater(); } );
+			connect( msgBox, &QMessageBox::finished, this, [msgBox](){ msgBox->deleteLater(); } );
 			connect( msgBox, SIGNAL(destroyed(QObject*)), this, SLOT(onMessageBoxDestroy(QObject*)));
 			msgBox->show();
 

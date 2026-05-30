@@ -818,7 +818,6 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	g_config->setOption ("SDL.FCMConvert", "");
 	if (!s.empty())
 	{
-		int okcount = 0;
 		std::string infname = s.c_str();
 		// produce output filename
 		std::string outname;
@@ -831,21 +830,20 @@ int  fceuWrapperInit( int argc, char *argv[] )
 		MovieData md;
 		EFCM_CONVERTRESULT result = convert_fcm (md, infname);
 
-		if (result == FCM_CONVERTRESULT_SUCCESS) {
-			okcount++;
-        // *outf = new EMUFILE;
-		EMUFILE_FILE* outf = FCEUD_UTF8_fstream (outname, "wb");
-		md.dump (outf,false);
-		delete outf;
-		FCEUD_Message ("Your file has been converted to FM2.\n");
-	}
-	else {
-		FCEUD_Message ("Something went wrong while converting your file...\n");
-	}
+		if (result == FCM_CONVERTRESULT_SUCCESS)
+		{
+			EMUFILE_FILE* outf = FCEUD_UTF8_fstream (outname, "wb");
+			md.dump (outf,false);
+			delete outf;
+			FCEUD_Message ("Your file has been converted to FM2.\n");
+		}
+		else {
+			FCEUD_Message ("Something went wrong while converting your file...\n");
+		}
 	  
 		DriverKill();
-	  SDL_Quit();
-	  return 0;
+		SDL_Quit();
+		return 0;
 	}
 	// If x/y res set to 0, store current display res in SDL.LastX/YRes
 	int yres, xres;

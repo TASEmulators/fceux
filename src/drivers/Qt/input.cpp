@@ -1808,13 +1808,12 @@ void InitInputInterface()
 {
 	void *InputDPtr;
 
-	int t;
 	int x;
 	int attrib;
 
 	memset(g_keyState, 0, sizeof(g_keyState));
 
-	for (t = 0, x = 0; x < 2; x++)
+	for (x = 0; x < 2; x++)
 	{
 		attrib = 0;
 		InputDPtr = 0;
@@ -1831,17 +1830,14 @@ void InitInputInterface()
 			break;
 		case SI_ARKANOID:
 			InputDPtr = MouseData;
-			t |= 1;
 			break;
 		case SI_ZAPPER:
 			InputDPtr = MouseData;
-			t |= 1;
 			attrib = 1;
 			break;
 		case SI_MOUSE:
 		case SI_SNES_MOUSE:
 			InputDPtr = MouseRelative;
-			t |= 1;
 			break;
 		}
 		FCEUI_SetInput(x, (ESI)CurInputType[x], InputDPtr, attrib);
@@ -1853,17 +1849,14 @@ void InitInputInterface()
 	{
 	case SIFC_SHADOW:
 		InputDPtr = MouseData;
-		t |= 1;
 		attrib = 1;
 		break;
 	case SIFC_OEKAKIDS:
 		InputDPtr = MouseData;
-		t |= 1;
 		attrib = 1;
 		break;
 	case SIFC_ARKANOID:
 		InputDPtr = MouseData;
-		t |= 1;
 		break;
 	case SIFC_FKB:
 		InputDPtr = fkbkeys;
