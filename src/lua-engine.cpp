@@ -4188,17 +4188,6 @@ static int gui_parsecolor(lua_State *L)
 	return 4;
 }
 
-// gui.clearcolorcache()
-//
-// The color cache can get stale and make things look a little funny, especially when transparency is involved.
-// This function queues up a reset of the cache (next time a color is requested) to hopefully mitigate that.
-// This shouldn't be as much of an issue with the new caching logic, but you never know.
-static int gui_clearcolorcache(lua_State *L)
-{
-	FCEU_LuaUpdatePalette();
-	return 0;
-}
-
 // gui.setcolorcachedepth()
 //
 // Set the number of upper bits used per color channel by the color caching logic.
@@ -6498,7 +6487,6 @@ static const struct luaL_reg guilib[] = {
 	{"text", gui_text},
 
 	{"parsecolor", gui_parsecolor},
-	{"clearcolorcache", gui_clearcolorcache},
 	{"setcolorcachedepth", gui_setcolorcachedepth},
 	{"setcolormatchformula", gui_setcolormatchformula},
 
