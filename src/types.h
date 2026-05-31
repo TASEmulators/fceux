@@ -88,6 +88,11 @@ typedef uint32_t uint32;
  typedef long long int64;
  #define INLINE inline
  #define GINLINE inline
+ #ifndef PATH_MAX
+  #define MAX_PATH 260
+ #else
+  #define MAX_PATH PATH_MAX
+ #endif
 #elif MSVC
  typedef __int64 int64;
  typedef unsigned __int64 uint64;
@@ -116,6 +121,10 @@ typedef uint32_t uint32;
  #define PSS_STYLE 2			/* Does MSVC compile for anything
 					   other than Windows/DOS targets?
 					*/
+#endif
+
+#ifndef __THROWNL
+#define __THROWNL throw () // Build fix Alpine Linux libc
 #endif
 
 #if PSS_STYLE==2

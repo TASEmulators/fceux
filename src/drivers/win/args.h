@@ -2,6 +2,7 @@ extern char* MovieToLoad;	//Contains the filename of the savestate specified in 
 extern char* StateToLoad;	//Contains the filename of the movie file specified in the command line arguments
 extern char* ConfigToLoad;	//Contains the filename of the config file specified in the command line arguments
 extern char* LuaToLoad;		//Contains the filename of the lua script specified in the command line arguments
+extern char* LuaArgs;       //Contains the argument string to be tokenized and passed to the lua script
 extern char* PaletteToLoad; //Contains the filename of the palette file specified in the command line arguments
 extern char* AviToLoad;		//Contains the filename of the Avi to be captured specified in the command line arguments
 extern char* DumpInput;
