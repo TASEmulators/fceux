@@ -3774,9 +3774,9 @@ static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
 			break;
 		case COLORMATCH_OLD2:
 			// Original formula, but the deltas are squared.
-			test_score = abs(r - tr) * abs(r - tr) * 66 +
-						 abs(g - tg) * abs(g - tg) * 129 +
-						 abs(b - tb) * abs(b - tb) * 25;
+			test_score = (r - tr) * (r - tr) * 66 +
+						 (g - tg) * (g - tg) * 129 +
+						 (b - tb) * (b - tb) * 25;
 			break;
 		case COLORMATCH_EUCLIDIAN:
 			// Basic distance squared
