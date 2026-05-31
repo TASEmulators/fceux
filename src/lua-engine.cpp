@@ -3739,6 +3739,16 @@ enum
 };
 static enum { COLORMATCH_OLD, COLORMATCH_OLD2, COLORMATCH_EUCLIDIAN, COLORMATCH_REDMEAN } colorMatchFormula = COLORMATCH_REDMEAN;
 
+static uint8 *palette_index_lookup = NULL;
+static int cacheDepth = 5;
+
+// Bits per color channel
+//   3 - 512 bytes
+//   4 - 4 KB
+//   5 - 32 KB
+//   6 - 256 KB
+#define CACHE_SIZE(bits) (1 << (3 * (bits)))
+
 /**
  * Returns an index approximating an RGB colour.
  * TODO: This is easily improvable in terms of speed and probably
@@ -3747,17 +3757,34 @@ static enum { COLORMATCH_OLD, COLORMATCH_OLD2, COLORMATCH_EUCLIDIAN, COLORMATCH_
  * ourselves.
  */
 static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
-	static uint8 index_lookup[1 << (5+5+5)];
-
 	if (!gui_saw_current_palette)
 	{
-		memset(index_lookup, GUI_COLOUR_CLEAR, sizeof(index_lookup));
+		memset(palette_index_lookup, GUI_COLOUR_CLEAR, CACHE_SIZE(cacheDepth));
 		gui_saw_current_palette = TRUE;
 	}
 
-    // Cache based on upper 5 bits of r, g, and b
-	int k = ((r & 0xF8) << 7) | ((g & 0xF8) << 2) | ((b & 0xF8) >> 3);
-    if (index_lookup[k] != GUI_COLOUR_CLEAR) return index_lookup[k];
+	int k; // Cache index, based on upper bits of r, g, and b
+	switch (cacheDepth)
+	{
+	case 3:
+		// Upper 3 bits
+		k = ((r & 0xE0) << 1) | ((g & 0xE0) >> 2) | ((b & 0xE0) >> 5);
+		break;
+	case 4:
+		// Upper 4 bits
+		k = ((r & 0xF0) << 4) | (g & 0xF0) | ((b & 0xF0) >> 4);
+		break;
+	case 5:
+		// Upper 5 bits
+		k = ((r & 0xF8) << 7) | ((g & 0xF8) << 2) | ((b & 0xF8) >> 3);
+		break;
+	case 6:
+		// Upper 6 bits
+		k = ((r & 0xFC) << 10) | ((g & 0xFC) << 4) | ((b & 0xFC) >> 2);
+		break;
+	}
+
+    if (palette_index_lookup[k] != GUI_COLOUR_CLEAR) return palette_index_lookup[k];
 	uint16 test, best = GUI_COLOUR_CLEAR;
 	uint32 test_score, best_score = 0xffffffffu;
 	for (test = 0; test < 0xff; test++)
@@ -3794,7 +3821,7 @@ static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
 		}
 		if (test_score < best_score) best_score = test_score, best = test;
 	}
-	return index_lookup[k] = best;
+	return palette_index_lookup[k] = best;
 }
 
 void FCEU_LuaUpdatePalette()
@@ -4168,6 +4195,29 @@ static int gui_parsecolor(lua_State *L)
 // This shouldn't be as much of an issue with the new caching logic, but you never know.
 static int gui_clearcolorcache(lua_State *L)
 {
+	FCEU_LuaUpdatePalette();
+	return 0;
+}
+
+// gui.setcolorcachedepth()
+//
+// Set the number of upper bits used per color channel by the color caching logic.
+// Higher values result in higher color accuracy, but more cache misses and higher memory usage.
+// This is only necessary because FCEUX uses an 8-bit palette for its screen buffer,
+// which even Lua script GUIs are beholden to.
+static int gui_setcolorcachedepth(lua_State *L)
+{
+	int depth = luaL_checkint(L, 1);
+	if (depth < 3 || depth > 6)
+		luaL_argerror(L, 1, "mode out of range");
+
+	cacheDepth = depth;
+
+	void *palette_index_lookup_tmp = realloc(palette_index_lookup, CACHE_SIZE(cacheDepth));
+	if (palette_index_lookup_tmp == NULL)
+		abort();
+	palette_index_lookup = (uint8*)palette_index_lookup_tmp;
+
 	FCEU_LuaUpdatePalette();
 	return 0;
 }
@@ -6448,6 +6498,7 @@ static const struct luaL_reg guilib[] = {
 
 	{"parsecolor", gui_parsecolor},
 	{"clearcolorcache", gui_clearcolorcache},
+	{"setcolorcachedepth", gui_setcolorcachedepth},
 	{"setcolormatchformula", gui_setcolormatchformula},
 
 	{"savescreenshot",   gui_savescreenshot},
@@ -6673,6 +6724,10 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 	luaexiterrorcount = 8;
 	luaCallbackErrorCounter = 0;
 
+	palette_index_lookup = (uint8*)malloc(CACHE_SIZE(cacheDepth));
+	if (palette_index_lookup == NULL)
+		abort();
+
 	if (!L) {
 
 		L = lua_open();
@@ -6897,6 +6952,8 @@ void FCEU_LuaStop() {
 
 	//lua_gc(L,LUA_GCCOLLECT,0);
 
+	free(palette_index_lookup);
+	palette_index_lookup = NULL;
 
 	lua_close(L); // this invokes our garbage collectors for us
 	L = NULL;
