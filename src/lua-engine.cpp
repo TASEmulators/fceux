@@ -3787,7 +3787,7 @@ static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
     if (palette_index_lookup[k] != GUI_COLOUR_CLEAR) return palette_index_lookup[k];
 	uint16 test, best = GUI_COLOUR_CLEAR;
 	uint32 test_score, best_score = 0xffffffffu;
-	for (test = 0; test < 0xff; test++)
+	for (test = 0; test < 0x100; test++)
 	{
 		uint8 tr, tg, tb;
 		if (test == GUI_COLOUR_CLEAR) continue;
