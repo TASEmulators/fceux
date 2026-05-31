@@ -4202,6 +4202,7 @@ static int gui_clearcolorcache(lua_State *L)
 // gui.setcolorcachedepth()
 //
 // Set the number of upper bits used per color channel by the color caching logic.
+// Valid values: 3-6
 // Higher values result in higher color accuracy, but more cache misses and higher memory usage.
 // This is only necessary because FCEUX uses an 8-bit palette for its screen buffer,
 // which even Lua script GUIs are beholden to.
@@ -4209,7 +4210,7 @@ static int gui_setcolorcachedepth(lua_State *L)
 {
 	int depth = luaL_checkint(L, 1);
 	if (depth < 3 || depth > 6)
-		luaL_argerror(L, 1, "mode out of range");
+		luaL_argerror(L, 1, "mode out of range (must be 3-6)");
 
 	cacheDepth = depth;
 
