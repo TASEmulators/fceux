@@ -169,7 +169,7 @@ static void MMC1CMReset(void) {
 	for (i = 0; i < 4; i++)
 		DRegs[i] = 0;
 	Buffer = BufferShift = 0;
-	DRegs[0] = 0x1F;
+	DRegs[0] = 0x0F;	// Populous (unreleased) doesn't initialize this and expects 8KB CHR mode
 
 	DRegs[1] = 0;
 	DRegs[2] = 0;	// Should this be something other than 0?
