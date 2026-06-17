@@ -78,7 +78,11 @@ uint32 genieaddr[3];
 
 CartInfo *currCartInfo;
 
-static INLINE void setpageptr(int s, uint32 A, uint8 *p, int ram) {
+// Reverse mapping of the address space back to bank numbers.
+// Split into 2 KiB pages, like `Page`.
+int PRGBankMapping[32];
+
+static INLINE void setpageptr(int s, uint32 A, uint8 *p, int ram, int bank) {
 	uint32 AB = A >> 11;
 	int x;
 
@@ -86,11 +90,13 @@ static INLINE void setpageptr(int s, uint32 A, uint8 *p, int ram) {
 		for (x = (s >> 1) - 1; x >= 0; x--) {
 			PRGIsRAM[AB + x] = ram;
 			Page[AB + x] = p - A;
+			PRGBankMapping[AB + x] = bank;
 		}
 	else
 		for (x = (s >> 1) - 1; x >= 0; x--) {
 			PRGIsRAM[AB + x] = 0;
 			Page[AB + x] = 0;
+			PRGBankMapping[AB + x] = bank;
 		}
 }
 
@@ -104,6 +110,7 @@ void ResetCartMapping(void) {
 		Page[x] = nothing - x * 2048;
 		PRGptr[x] = CHRptr[x] = 0;
 		PRGsize[x] = CHRsize[x] = 0;
+		PRGBankMapping[x] = -1;
 	}
 	for (x = 0; x < 8; x++) {
 		MMC5SPRVPage[x] = MMC5BGVPage[x] = VPageR[x] = nothing - 0x400 * x;
@@ -140,6 +147,12 @@ void SetupCartCHRMapping(int chip, uint8 *p, uint32 size, int ram) {
 	CHRram[chip] = ram;
 }
 
+// Get the mapper-specific bank number for the given CPU address.
+// Returns -1 when the page has not been mapped.
+int GetPRGBank(uint16 address) {
+	return PRGBankMapping[address >> 11];
+}
+
 DECLFR(CartBR) {
 	return Page[A >> 11][A];
 }
@@ -157,9 +170,20 @@ DECLFR(CartBROB) {
 		return Page[A >> 11][A];
 }
 
+// Get the cumulative size of PRG chips.
+// I.e. the ROM file offset (without iNES header).
+static uint32 PRGOffset(int chip) {
+	uint32 bank = 0;
+	for (int i = 0; i < chip; i ++) {
+		bank += PRGsize[i];
+	}
+	return bank;
+}
+
 void setprg2r(int r, uint32 A, uint32 V) {
 	V &= PRGmask2[r];
-	setpageptr(2, A, PRGptr[r] ? (&PRGptr[r][V << 11]) : 0, PRGram[r]);
+	int bank = PRGptr[r] ? (PRGOffset(r) / (1 << 11) + V) : -1;
+	setpageptr(2, A, PRGptr[r] ? (&PRGptr[r][V << 11]) : 0, PRGram[r], bank);
 }
 
 void setprg2(uint32 A, uint32 V) {
@@ -168,7 +192,8 @@ void setprg2(uint32 A, uint32 V) {
 
 void setprg4r(int r, uint32 A, uint32 V) {
 	V &= PRGmask4[r];
-	setpageptr(4, A, PRGptr[r] ? (&PRGptr[r][V << 12]) : 0, PRGram[r]);
+	int bank = PRGptr[r] ? (PRGOffset(r) / (1 << 12) + V) : -1;
+	setpageptr(4, A, PRGptr[r] ? (&PRGptr[r][V << 12]) : 0, PRGram[r], bank);
 }
 
 void setprg4(uint32 A, uint32 V) {
@@ -176,14 +201,15 @@ void setprg4(uint32 A, uint32 V) {
 }
 
 void setprg8r(int r, uint32 A, uint32 V) {
+	int bank = PRGptr[r] ? (PRGOffset(r) / (1 << 13) + (V & PRGmask8[r])) : -1;
 	if (PRGsize[r] >= 8192) {
 		V &= PRGmask8[r];
-		setpageptr(8, A, PRGptr[r] ? (&PRGptr[r][V << 13]) : 0, PRGram[r]);
+		setpageptr(8, A, PRGptr[r] ? (&PRGptr[r][V << 13]) : 0, PRGram[r], bank);
 	} else {
 		uint32 VA = V << 2;
 		int x;
 		for (x = 0; x < 4; x++)
-			setpageptr(2, A + (x << 11), PRGptr[r] ? (&PRGptr[r][((VA + x) & PRGmask2[r]) << 11]) : 0, PRGram[r]);
+			setpageptr(2, A + (x << 11), PRGptr[r] ? (&PRGptr[r][((VA + x) & PRGmask2[r]) << 11]) : 0, PRGram[r], bank);
 	}
 }
 
@@ -192,15 +218,16 @@ void setprg8(uint32 A, uint32 V) {
 }
 
 void setprg16r(int r, uint32 A, uint32 V) {
+	int bank = PRGptr[r] ? (PRGOffset(r) / (1 << 14) + (V & PRGmask16[r])) : -1;
 	if (PRGsize[r] >= 16384) {
 		V &= PRGmask16[r];
-		setpageptr(16, A, PRGptr[r] ? (&PRGptr[r][V << 14]) : 0, PRGram[r]);
+		setpageptr(16, A, PRGptr[r] ? (&PRGptr[r][V << 14]) : 0, PRGram[r], bank);
 	} else {
 		uint32 VA = V << 3;
 		int x;
 
 		for (x = 0; x < 8; x++)
-			setpageptr(2, A + (x << 11), PRGptr[r] ? (&PRGptr[r][((VA + x) & PRGmask2[r]) << 11]) : 0, PRGram[r]);
+			setpageptr(2, A + (x << 11), PRGptr[r] ? (&PRGptr[r][((VA + x) & PRGmask2[r]) << 11]) : 0, PRGram[r], bank);
 	}
 }
 
@@ -209,15 +236,16 @@ void setprg16(uint32 A, uint32 V) {
 }
 
 void setprg32r(int r, uint32 A, uint32 V) {
+	int bank = PRGptr[r] ? (PRGOffset(r) / (1 << 15) + (V & PRGmask32[r])) : -1;
 	if (PRGsize[r] >= 32768) {
 		V &= PRGmask32[r];
-		setpageptr(32, A, PRGptr[r] ? (&PRGptr[r][V << 15]) : 0, PRGram[r]);
+		setpageptr(32, A, PRGptr[r] ? (&PRGptr[r][V << 15]) : 0, PRGram[r], bank);
 	} else {
 		uint32 VA = V << 4;
 		int x;
 
 		for (x = 0; x < 16; x++)
-			setpageptr(2, A + (x << 11), PRGptr[r] ? (&PRGptr[r][((VA + x) & PRGmask2[r]) << 11]) : 0, PRGram[r]);
+			setpageptr(2, A + (x << 11), PRGptr[r] ? (&PRGptr[r][((VA + x) & PRGmask2[r]) << 11]) : 0, PRGram[r], bank);
 	}
 }
 
