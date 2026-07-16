@@ -30,6 +30,7 @@
 #include "movieoptions.h"
 #include "ramwatch.h"
 #include "debugger.h"
+#include "localization.h"
 #include "taseditor/taseditor_config.h"
 
 #include "../../state.h"	//adelikat: For bool backupSavestates
@@ -469,6 +470,7 @@ static CFGSTRUCT fceuconfig[] =
 	AC(SingleInstanceOnly),
 	AC(Show_FPS),
 	AC(movieRecordMode),
+	ACS(Win32UILanguageSetting),
 
 	ENDCFGSTRUCT
 };

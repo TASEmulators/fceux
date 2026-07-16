@@ -73,6 +73,7 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #include "args.h"
 #include "config.h"
 #include "sound.h"
+#include "localization.h"
 #include "wave.h"
 #include "video.h"
 #include "utils/xstring.h"
@@ -718,6 +719,7 @@ int main(int argc,char *argv[])
 	// load fceux.cfg
 	sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
 	LoadConfig(TempArray);
+	Win32Localization_Init();
 	//initDirectories();
 
 	// Parse the commandline arguments
@@ -741,6 +743,7 @@ int main(int argc,char *argv[])
 		// Load the config information
 		sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
 		LoadConfig(TempArray);
+		Win32Localization_Init();
 	}
 
 	//Bleh, need to find a better place for this.

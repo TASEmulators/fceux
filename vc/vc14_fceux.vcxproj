@@ -591,6 +591,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\drivers\win\input.cpp" />
     <ClCompile Include="..\src\drivers\win\joystick.cpp" />
     <ClCompile Include="..\src\drivers\win\keyboard.cpp" />
+    <ClCompile Include="..\src\drivers\win\localization.cpp" />
     <ClCompile Include="..\src\drivers\win\log.cpp" />
     <ClCompile Include="..\src\drivers\win\luaconsole.cpp" />
     <ClCompile Include="..\src\drivers\win\main.cpp" />

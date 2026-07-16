@@ -23,6 +23,7 @@
 #include "../common/vidblit.h" //mbg merge 7/17/06 added
 #include "../common/config.h"
 #include "resource.h" //mbg merge 7/18/06 added
+#include "localization.h"
 
 /* Message logging(non-netplay messages, usually) for all. */
 #include "log.h"

@@ -75,6 +75,7 @@
 #include "mapinput.h"
 #include "movieoptions.h"
 #include "config.h" //adelikat: For SaveConfigFile()
+#include "localization.h"
 
 #include <fstream>
 #include <sstream>
@@ -461,6 +462,20 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_INPUTDISPLAY_OLDSTYLEDISP, oldInputDisplay?MF_CHECKED:MF_UNCHECKED);
+
+	switch (Win32Localization_GetConfiguredLanguage())
+	{
+	case WIN32_UI_LANGUAGE_EN_US:
+		CheckMenuRadioItem(fceumenu, MENU_LANGUAGE_AUTO, MENU_LANGUAGE_ZH_CN, MENU_LANGUAGE_EN_US, MF_BYCOMMAND);
+		break;
+	case WIN32_UI_LANGUAGE_ZH_CN:
+		CheckMenuRadioItem(fceumenu, MENU_LANGUAGE_AUTO, MENU_LANGUAGE_ZH_CN, MENU_LANGUAGE_ZH_CN, MF_BYCOMMAND);
+		break;
+	case WIN32_UI_LANGUAGE_AUTO:
+	default:
+		CheckMenuRadioItem(fceumenu, MENU_LANGUAGE_AUTO, MENU_LANGUAGE_ZH_CN, MENU_LANGUAGE_AUTO, MF_BYCOMMAND);
+		break;
+	}
 
 	//Config - Region SubMenu
 	if (PAL)
@@ -2218,6 +2233,29 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_MOVIEOPTIONS:
 				OpenMovieOptions();
 				break;
+
+			case MENU_LANGUAGE_AUTO:
+			case MENU_LANGUAGE_EN_US:
+			case MENU_LANGUAGE_ZH_CN:
+				{
+					Win32UILanguage language = WIN32_UI_LANGUAGE_AUTO;
+					if (LOWORD(wParam) == MENU_LANGUAGE_EN_US)
+						language = WIN32_UI_LANGUAGE_EN_US;
+					else if (LOWORD(wParam) == MENU_LANGUAGE_ZH_CN)
+						language = WIN32_UI_LANGUAGE_ZH_CN;
+
+					Win32Localization_SetConfiguredLanguage(language);
+					UpdateCheckedMenuItems();
+
+					extern string cfgFile;
+					sprintf(TempArray, "%s/%s", BaseDirectory.c_str(), cfgFile.c_str());
+					SaveConfig(TempArray);
+					MessageBox(hWnd,
+						"The interface language will be applied the next time FCEUX starts.",
+						"Language change saved",
+						MB_OK | MB_ICONINFORMATION);
+					break;
+				}
 
 			case ID_CONFIG_SAVECONFIGFILE:
 				{
