@@ -82,6 +82,21 @@ Win32 前端 SHALL 提供 `Auto`、`English` 和 `简体中文` 三种界面语�
 - **WHEN** 用户在 100% 或项目支持的高 DPI 设置下打开主窗口、常用配置、调试器、内存工具、Movie 工具或 TAS Editor
 - **THEN** 关键标签、输入内容和操作按钮不重叠、不被裁掉且保持可操作
 
+### Requirement: Visual Studio 2022 v143 Win32 build compatibility
+本地化后的原生 Win32 前端 MUST 能够使用 Visual Studio 2022 MSBuild 和 `v143` 工具集构建 `Release|Win32`，且 MUST 不要求安装 `v140_xp` 或 `v142`。成功构建 SHALL 生成包含英文与简体中文资源的 x86 Windows GUI 应用及其所需运行文件。
+
+#### Scenario: Release Win32 builds with v143 override
+- **WHEN** 仅安装 `v143` C++ x86/x64 工具和受支持 Windows SDK 的环境使用 `/p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143` 构建 `vc/vc14_fceux.sln`
+- **THEN** MSBuild 以成功状态结束并生成 `output/fceux.exe`，其 PE 标头标识为 x86 Windows GUI
+
+#### Scenario: Localized resources are packaged
+- **WHEN** 检查 `v143` 构建生成的 Win32 应用并分别选择英文和简体中文
+- **THEN** 两种语言资源均可从同一构建产物加载，且输出目录包含应用启动所需的项目运行文件
+
+#### Scenario: Localization introduces no new build warnings
+- **WHEN** 将完成汉化后的 `v143 Release|Win32` 构建日志与变更前记录的同配置基线比较
+- **THEN** 日志不包含由本地化资源、编码、资源 ID 或宽/窄字符调用改动引入的新警告或错误
+
 ### Requirement: Localization validation
 项目 MUST 提供可重复执行的本地化校验，至少检查语言资源 ID/类型对齐、清单覆盖状态、动态字符串 ID、格式占位符及快捷键后缀一致性，并 SHALL 在 Win32 构建验证中执行该检查。
 
