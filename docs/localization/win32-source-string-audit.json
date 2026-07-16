@@ -1,0 +1,122 @@
+{
+  "change": "localize-win32-cpp-strings",
+  "scope": "Win32 C/C++ source strings passed to native UI sinks",
+  "rules": {
+    "translate": "Ordinary fixed UI copy is backed by IDS_LOC_* resources and loaded through the Win32 localization layer.",
+    "preserve": "Product, tool, file-format, hardware, emulator, TAS, and API tokens keep their original spelling and case.",
+    "exclude": "Runtime data, resource identifiers, configuration keys, addresses, register values, paths, file names, logs, disassembly text, and string-concatenation fragments are not translated directly."
+  },
+  "sinks": [
+    "MessageBox",
+    "SetWindowText",
+    "SetDlgItemText",
+    "dynamic menu text",
+    "status and tooltip text"
+  ],
+  "preservedTokens": [
+    "FCEUX",
+    "NES",
+    "TAS",
+    "ROM",
+    "RAM",
+    "CPU",
+    "PPU",
+    "APU",
+    "Lua",
+    "FM2",
+    "FM3",
+    "FDS",
+    "UNIF",
+    "NSF",
+    "iNES",
+    "PRG",
+    "CHR",
+    "NVRAM",
+    "Code/Data Logger",
+    "Trace Logger",
+    "TAS Editor",
+    "NES Header Editor",
+    "Game Genie",
+    "Inline Assembler",
+    "Hex Editor",
+    "Power-On",
+    "Soft-Reset",
+    "SaveRam",
+    "Savestate"
+  ],
+  "dynamicStringCoverage": {
+    "minimumResourceCount": 192,
+    "source": "src/drivers/win/localization.cpp dynamicStringMap",
+    "decision": "translate",
+    "reason": "Fixed English UI strings are mapped to paired en-US and zh-CN IDS_LOC resources. Runtime arguments remain outside the resource text."
+  },
+  "fileDialogDecision": {
+    "decision": "exclude",
+    "termKind": "file-dialog-boundary",
+    "reason": "OPENFILENAME titles, filters, and path buffers remain unchanged in this change to avoid altering file dialog encoding and file I/O behavior."
+  },
+  "knownSourceExceptions": [
+    {
+      "source": "src/drivers/win/archive.cpp",
+      "line": 486,
+      "text": "Could not locate ",
+      "decision": "exclude",
+      "termKind": "string-concatenation-fragment",
+      "reason": "The compiled UI string is concatenated with 7z.dll and is covered by IDS_LOC_7Z_DLL_NOT_FOUND."
+    },
+    {
+      "source": "src/drivers/win/archive.cpp",
+      "line": 587,
+      "text": "Could not locate ",
+      "decision": "exclude",
+      "termKind": "string-concatenation-fragment",
+      "reason": "The compiled UI string is concatenated with 7z.dll and is covered by IDS_LOC_7Z_DLL_NOT_FOUND."
+    },
+    {
+      "source": "src/drivers/win/archive.cpp",
+      "line": 595,
+      "text": " was invalid",
+      "decision": "exclude",
+      "termKind": "string-concatenation-fragment",
+      "reason": "The compiled UI string is concatenated with 7z.dll and is covered by IDS_LOC_7Z_DLL_INVALID."
+    },
+    {
+      "source": "src/drivers/win/main.cpp",
+      "line": 483,
+      "text": " Error",
+      "decision": "exclude",
+      "termKind": "string-concatenation-fragment",
+      "reason": "The compiled caption is FCEUX Error and is covered by IDS_LOC_FCEUX_ERROR_TITLE."
+    },
+    {
+      "source": "src/drivers/win/memview.cpp",
+      "line": 2677,
+      "text": "IMPORTBOOKMARKOPTIONDIALOG",
+      "decision": "exclude",
+      "termKind": "resource-identifier",
+      "reason": "Dialog template resource name passed to DialogBoxParam, not user-visible UI copy."
+    }
+  ],
+  "moduleDecisions": [
+    {
+      "module": "main-window-files-archive-state",
+      "decision": "translate",
+      "reason": "Message boxes and file dialog titles use ordinary UI actions while preserving FCEUX, ROM, FCM, FM2, and 7z.dll tokens."
+    },
+    {
+      "module": "input-sound-video-preferences",
+      "decision": "translate",
+      "reason": "Fixed prompts and button state labels are localized; key names, device names, paths, and numeric values remain runtime data."
+    },
+    {
+      "module": "debugger-memory-logger-cheats",
+      "decision": "translate",
+      "reason": "Fixed prompts are localized while addresses, registers, disassembly, log text, PRG/CHR/RAM/ROM tokens, and tool names are preserved."
+    },
+    {
+      "module": "movie-lua-tas-editor",
+      "decision": "translate",
+      "reason": "Movie and TAS Editor prompts are localized, while TAS Editor, FM2/FM3, Lua, SaveRam, Savestate, Power-On, and Soft-Reset are preserved."
+    }
+  ]
+}

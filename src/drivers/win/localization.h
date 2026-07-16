@@ -21,8 +21,13 @@ bool Win32Localization_IsChinese();
 
 std::wstring Win32Localization_LoadStringW(UINT id);
 std::wstring Win32Localization_LoadStringW(UINT id, const wchar_t* fallback);
+std::wstring Win32Localization_FormatStringW(UINT id, const wchar_t* fallback, ...);
+std::wstring Win32Localization_LoadFilterW(UINT id, const wchar_t* fallback);
 std::wstring Win32Localization_LocalizeText(const char* text);
 
+int FCEU_MessageBoxResource(HWND hwnd, UINT textId, UINT captionId, UINT type);
+BOOL FCEU_SetWindowTextResource(HWND hwnd, UINT textId);
+BOOL FCEU_SetDlgItemTextResource(HWND hwnd, int id, UINT textId);
 int FCEU_MessageBox(HWND hwnd, LPCSTR text, LPCSTR caption, UINT type);
 BOOL FCEU_SetWindowText(HWND hwnd, LPCSTR text);
 BOOL FCEU_SetDlgItemText(HWND hwnd, int id, LPCSTR text);

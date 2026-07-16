@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Complete Win32 source-string inventory
-系统 MUST 扫描 `src/drivers/win` 中 C/C++ 源码产生的用户可见字符串，并 MUST 为每个候选记录 `translate`、`preserve` 或 `exclude` 结论及可复核的理由。覆盖范围 SHALL 包括消息框、窗口和控件标题、状态文本、工具提示、动态菜单、文件对话框标题与筛选器，以及其他直接或间接传入 Win32 显示 API 的固定文案。
+系统 MUST 扫描 `src/drivers/win` 中 C/C++ 源码产生的用户可见字符串，并 MUST 为每个候选记录 `translate`、`preserve` 或 `exclude` 结论及可复核的理由。覆盖范围 SHALL 包括消息框、窗口和控件标题、状态文本、工具提示、动态菜单，以及其他直接或间接传入 Win32 显示 API 的固定文案。文件对话框标题与筛选器 SHALL 作为本变更的明确例外记录，保持现有实现。
 
 #### Scenario: A source literal reaches a Win32 UI sink
 - **WHEN** 固定字符串字面量或由固定片段拼接的字符串被传给已登记的 Win32 UI 显示入口
@@ -31,7 +31,7 @@
 
 #### Scenario: Chinese UI runs under a non-Chinese ANSI code page
 - **WHEN** 用户在非简体中文 ANSI code page 的 Windows 环境中选择 `zh-CN`
-- **THEN** 源码动态窗口标题、提示、状态文本和文件对话框文案正确显示简体中文且无乱码
+- **THEN** 源码动态窗口标题、提示和状态文本正确显示简体中文且无乱码；文件对话框保持既有显示和路径处理
 
 #### Scenario: An untouched Win32 interface is compiled
 - **WHEN** 项目使用本变更后的头文件和 Visual Studio 2022 `v143` 编译
@@ -48,16 +48,16 @@
 - **WHEN** 自动化检查比较一个英文和简体中文格式化资源
 - **THEN** 两个模板的格式参数数量、顺序和类型完全一致，否则检查失败
 
-### Requirement: Localized file-dialog metadata
-Win32 源码创建的文件对话框 SHALL 本地化其固定标题和筛选器说明，并 MUST 保持筛选模式、扩展名、条目顺序和双 NUL 终止结构不变。文件对话框文案 SHALL 通过宽字符结构和 API 显示。
+### Requirement: Existing file-dialog behavior preserved
+Win32 源码创建的文件对话框 SHALL 保持现有标题、筛选器、`OPENFILENAME` 结构和文件路径处理语义。本变更 SHALL NOT 将文件对话框标题或筛选器迁移到宽字符资源，也 SHALL NOT 改变筛选模式、扩展名、条目顺序、双 NUL 终止结构或文件 I/O 边界。
 
-#### Scenario: Chinese file dialog opens
+#### Scenario: Chinese UI opens a file dialog
 - **WHEN** 用户在 `zh-CN` 下打开源码配置的 ROM、Movie、Lua、金手指、输入预设或其他 Win32 文件对话框
-- **THEN** 标题和筛选器说明显示约定的简体中文，扩展名模式与英文版本完全相同
+- **THEN** 文件对话框使用与本变更前相同的标题、筛选器和路径处理行为
 
 #### Scenario: A Unicode path is selected
-- **WHEN** 本地化文件对话框返回包含非 ASCII 字符的文件路径
-- **THEN** 显示层保持路径字符完整，且本地化逻辑不改变既有文件操作的路径内容或语义
+- **WHEN** 文件对话框返回包含非 ASCII 字符的文件路径
+- **THEN** 本地化逻辑不介入或改变既有文件操作的路径内容或语义
 
 ### Requirement: Consistent emulator and TAS terminology
 简体中文源码动态文案 MUST 执行保守、可审计的术语规则。产品、项目、人物或组织名称，官方工具/模块名称，文件格式、协议、扩展名、品牌词、缩写及独有 TAS/NES 术语 MUST 默认保留原拼写和大小写。只有普通界面词或在简体中文模拟器/TAS 用户中具有单一、稳定、大众通行译法的概念 SHALL 翻译；采用译法时 MUST 在术语表记录类别和依据。无法确认、存在多种竞争译法或直译可能改变技术含义的术语 MUST 保留英文，不得逐字硬译或创造新的中文名称或缩写。
