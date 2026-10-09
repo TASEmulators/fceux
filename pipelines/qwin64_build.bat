@@ -64,8 +64,8 @@ set FFMPEG_INSTALL_PREFIX=%CD%\ffmpeg
 
 echo Installing libarchive
 cd %PROJECT_ROOT%\vcpkg
-%VCPKG_EXE% install
-set VCPKG_INSTALLDIR=%CD%\vcpkg_installed\x64-windows
+%VCPKG_EXE% install --triplet=x64-windows-rel --overlay-triplets=./custom-triplets
+set VCPKG_INSTALLDIR=%CD%\vcpkg_installed\x64-windows-rel
 set LIBARCHIVE_INSTALL_PREFIX=%VCPKG_INSTALLDIR%
 
 cd %BUILD_DIR%
