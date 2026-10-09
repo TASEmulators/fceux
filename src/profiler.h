@@ -89,10 +89,14 @@ namespace FCEU
 		~profileExecVector(void);
 
 		void update(void);
+		void setEnabled(bool enabled);
+		void setLogPath(const char *path);
+		void reset(void);
 
 		std::vector <funcProfileRecord> _vec;
 
 		FILE *logFp;
+		bool enabled;
 	};
 
 	class profilerFuncMap
@@ -158,10 +162,20 @@ namespace FCEU
 
 
 int FCEU_profiler_log_thread_activity(void);
+void FCEU_profiler_set_enabled(bool enabled);
+bool FCEU_profiler_enabled(void);
+void FCEU_profiler_set_log_path(const char *path);
+void FCEU_profiler_reset(void);
 
 #else  // __FCEU_PROFILER_ENABLE__ not defined
 
-#define  FCEU_PROFILE_FUNC(id, comment)   
+#define  FCEU_PROFILE_FUNC(id, comment)
+
+inline bool FCEU_profiler_enabled(void) { return false; }
+inline void FCEU_profiler_set_enabled(bool) {}
+inline void FCEU_profiler_set_log_path(const char *) {}
+inline void FCEU_profiler_reset(void) {}
+inline int FCEU_profiler_log_thread_activity(void) { return 0; }
 
 #endif // __FCEU_PROFILER_ENABLE__
 

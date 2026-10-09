@@ -4,6 +4,7 @@ set( APP_NAME fceux)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (${PUBLIC_RELEASE})
 	add_definitions( -DPUBLIC_RELEASE=1 )
@@ -33,6 +34,8 @@ if (NOT DEFINED QT)
 		set( QT 5 )
 	endif()
 endif()
+
+option(FCEU_PROFILER_ENABLE "Enable the built-in FCEU performance profiler" OFF)
 
 if ( ${FCEU_PROFILER_ENABLE} )
 	message( STATUS "FCEU Profiler Enabled")

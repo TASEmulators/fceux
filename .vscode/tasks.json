@@ -7,7 +7,9 @@
 			"label": "Build - Incremental",
 			"type": "shell",
 			"command": "${workspaceFolder}/scripts/unix_debug_build.sh",
-			"problemMatcher": [ "$gcc" ],
+			"problemMatcher": [
+				"$gcc"
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -17,12 +19,13 @@
 			"label": "Build - Full/Clean",
 			"type": "shell",
 			"command": "${workspaceFolder}/scripts/unix_debug_build.sh -B",
-			"problemMatcher": [ "$gcc" ],
+			"problemMatcher": [
+				"$gcc"
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": false
 			}
 		}
-
 	]
 }

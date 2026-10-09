@@ -22,6 +22,8 @@
 #ifdef __FCEU_PROFILER_ENABLE__
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef __QT_DRIVER__
 #include <QThread>
@@ -51,7 +53,7 @@ funcProfileRecord::funcProfileRecord(const char *fileNameStringLiteral,
 	: fileLineNum(fileLineNumber), fileName(fileNameStringLiteral),
 	  funcName(funcNameStringLiteral), comment(commentStringLiteral)
 {
-	min.fromSeconds(9);
+	min.fromSeconds(9u);
 	max.zero();
 	sum.zero();
 	numCalls = 0;
@@ -63,7 +65,7 @@ funcProfileRecord::funcProfileRecord(const char *fileNameStringLiteral,
 //-------------------------------------------------------------------------
 void funcProfileRecord::reset(void)
 {
-	min.fromSeconds(9);
+	min.fromSeconds(9u);
 	max.zero();
 	sum.zero();
 	numCalls = 0;
@@ -119,6 +121,7 @@ profileFuncScoped::~profileFuncScoped(void)
 //---- Profile Execution Vector
 //-------------------------------------------------------------------------
 profileExecVector::profileExecVector(void)
+	: logFp(nullptr), enabled(true)
 {
 	_vec.reserve( 10000 );
 
@@ -151,11 +154,52 @@ profileExecVector::~profileExecVector(void)
 	if (logFp)
 	{
 		::fclose(logFp);
+		logFp = nullptr;
 	}
+}
+//-------------------------------------------------------------------------
+void profileExecVector::reset(void)
+{
+	_vec.clear();
+}
+//-------------------------------------------------------------------------
+void profileExecVector::setEnabled(bool enabledIn)
+{
+	enabled = enabledIn;
+	if (!enabled && logFp)
+	{
+		fflush(logFp);
+	}
+}
+//-------------------------------------------------------------------------
+void profileExecVector::setLogPath(const char *path)
+{
+	if (!path || !path[0])
+	{
+		return;
+	}
+
+	FILE *newFp = ::fopen(path, "w");
+	if (!newFp)
+	{
+		printf("Error: Failed to create profiler logfile: %s\n", path);
+		return;
+	}
+
+	if (logFp)
+	{
+		::fclose(logFp);
+	}
+	logFp = newFp;
 }
 //-------------------------------------------------------------------------
 void profileExecVector::update(void)
 {
+	if (!enabled || !logFp)
+	{
+		return;
+	}
+
 	size_t n = _vec.size();
 
 	for (size_t i=0; i<n; i++)
@@ -165,6 +209,7 @@ void profileExecVector::update(void)
 		fprintf( logFp, "%s: %u  %f  %f  %f  %f\n", rec.funcName, rec.numCalls, rec.last.toSeconds(), rec.average(), rec.min.toSeconds(), rec.max.toSeconds());
 	}
 	_vec.clear();
+	fflush(logFp);
 }
 //-------------------------------------------------------------------------
 //---- Profile Function Record Map
@@ -363,5 +408,25 @@ int FCEU_profiler_log_thread_activity(void)
 {
 	FCEU::execList.update();
 	return 0;
+}
+
+void FCEU_profiler_set_enabled(bool enabled)
+{
+	FCEU::execList.setEnabled(enabled);
+}
+
+bool FCEU_profiler_enabled(void)
+{
+	return FCEU::execList.enabled;
+}
+
+void FCEU_profiler_set_log_path(const char *path)
+{
+	FCEU::execList.setLogPath(path);
+}
+
+void FCEU_profiler_reset(void)
+{
+	FCEU::execList.reset();
 }
 #endif //  __FCEU_PROFILER_ENABLE__
