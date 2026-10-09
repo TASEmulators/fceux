@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<link href="fceux.css" rel="stylesheet" type="text/css" />
+<title>Press Release 2.7.0</title>
+</head>
+
+<body>
+<div id="masthead">
+	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom/Dendy Emulator
+</div>
+<div id="top_nav">
+  <a href="home.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="documentation.html">Documentation</a>
+  <a href="version.html">Versions</a>
+  <a href="contact.html">Contact</a>
+  <a href="links.html">Links</a>
+</div>
+<div id="container">
+	<div id="left_col">
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	 		style="display:inline-block;width:180px;height:150px"
+	 		data-ad-client="ca-pub-0764229755985190"
+	 		data-ad-slot="7648866201"></ins>
+		<script>
+	     (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>	
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	    	 style="display:inline-block;width:180px;height:150px"
+	     	data-ad-client="ca-pub-0764229755985190"
+	     	data-ad-slot="7648866201"></ins>
+		<script>
+	    	 (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
+<div id="page_content">
+<h1>FCEUX 2.7.0 Feature Release</h1>
+<p>October 2026</p>
+<p>
+The 2.7.0 release introduces several new features and improvements focused on build system enhancements, media codec support, and developer tooling. Profiling and debugging capabilities have been significantly improved, with support for FFmpeg 9 and enhanced platform compatibility.
+</p>
+
+<h2>Common</h2>
+<h3>Build System</h3>
+Build system optimizations for faster compilation times.<br>
+Added Linux thread sanitizer build support for improved debugging and memory safety analysis.<br>
+Fixed build compatibility with older SDL2 versions that lack SDL_GetTicks64 function.<br>
+Implementation of vcpkg build cache to reduce build time for Windows builds.<br>
+
+<h2>Qt/SDL</h2>
+
+<h3>Media Support</h3>
+Added support for FFmpeg 9 for enhanced video encoding compatibility and codec support.<br>
+
+<h3>Developer Tools</h3>
+Integrated profiling tools for comprehensive performance analysis and optimization.<br>
+Added configurable flag to control whether profiling tools are enabled.<br>
+
+<h3>Platform Support</h3>
+Qt6 build improvements for better Linux support.<br>
+Fixed Qt Wayland screenshot functionality with improved stability.<br>
+Enhanced Qt/SDL screenshot handling with improved error reporting.<br>
+Fixed immediate exit issue when SDL video driver is used on Qt Wayland.<br>
+Updated Qt win64 auto build to use VS2022 and Qt 6.9.3.<br>
+Updated macOS auto build to use Sonoma OS version.<br>
+
+<h3>Features</h3>
+Basic netplay feature (experimental) - enabling multiplayer gaming over the network.<br>
+JavaScript/ECMAScript scripting engine for Qt GUI - allows users to create custom UI windows and scripts using Qt's built-in JavaScript engine.<br>
+
+<h3>Bug Fixes</h3>
+Fixed Qt FCEUD_GetTime function to use 64-bit SDL_GetTicks64.<br>
+Removed minor memory leak on application shutdown.<br>
+Fixed profiler disabled macro.<br>
+Cleaned up compiler warnings related to set but not used variables.<br>
+
+</div>
+
+<p>
+<hr>
+
+<div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
+</div>
+
+</body>
+
+</html>
