@@ -18,7 +18,7 @@ environment:
     appveyor_build_worker_image: Ubuntu2004
 
   - job_name: MacOS
-    appveyor_build_worker_image: macos-sonoma
+    appveyor_build_worker_image: macos
 
 for:
 
