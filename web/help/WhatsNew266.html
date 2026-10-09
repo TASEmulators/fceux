@@ -174,7 +174,7 @@
                         <li><a href="Intro.html">Introduction</a></li>
                     </ol>
                     <div class="nav-arrows">
-                        <div class="btn-group btn-group" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="FCEUltraVersionHistory.html" title="FCE Ultra Version History" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew265.html" title="What's New? 2.6.5 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                        <div class="btn-group btn-group" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew270.html" title="What's New? 2.7.0 (changelog)" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew265.html" title="What's New? 2.6.5 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
                     </div>
                 </div> 
             
@@ -188,63 +188,63 @@
 <p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.6.6</span></p>
 <p class="rvps2"><span class="rvts6">Released -- 26 August 2023</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts30">The 2.6.6 release is mainly a maintenance update for the mappers and emulation core with a few new features added in. Some of these new features apply only to the Qt/SDL version of the GUI.</span></p>
-<p class="rvps2"><span class="rvts29"><br/></span></p>
+<p class="rvps2"><span class="rvts31">The 2.6.6 release is mainly a maintenance update for the mappers and emulation core with a few new features added in. Some of these new features apply only to the Qt/SDL version of the GUI.</span></p>
+<p class="rvps2"><span class="rvts28"><br/></span></p>
 <p class="rvps2"><span class="rvts27">Common</span></p>
 <p class="rvps2"><span class="rvts27"><br/></span></p>
-<p class="rvps2"><span class="rvts28">Mappers</span></p>
+<p class="rvps2"><span class="rvts30">Mappers</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Minor refactor of the save game RAM code. Fixes UNROM-512 flash clearing bug during movie play.</span></li>
- <li class="rvps2"><span class="rvts29">Mapper 354: Add CHR-RAM protect.</span></li>
- <li class="rvps2"><span class="rvts29">Mapper 78: Add submapper support.</span></li>
- <li class="rvps2"><span class="rvts29">Added mapper 174 support.</span></li>
- <li class="rvps2"><span class="rvts29">Move mapper 205 to mapper 361/366, added proper mapper for 205.</span></li>
- <li class="rvps2"><span class="rvts29">Mapper 205: Fix for split-rom variant (UNIF)</span></li>
- <li class="rvps2"><span class="rvts29">Changed UNROM-512 to use 8kB of CHR-RAM memory by default.</span></li>
- <li class="rvps2"><span class="rvts29">Mapper 342 memory optimization.</span></li>
+ <li class="rvps2"><span class="rvts28">Minor refactor of the save game RAM code. Fixes UNROM-512 flash clearing bug during movie play.</span></li>
+ <li class="rvps2"><span class="rvts28">Mapper 354: Add CHR-RAM protect.</span></li>
+ <li class="rvps2"><span class="rvts28">Mapper 78: Add submapper support.</span></li>
+ <li class="rvps2"><span class="rvts28">Added mapper 174 support.</span></li>
+ <li class="rvps2"><span class="rvts28">Move mapper 205 to mapper 361/366, added proper mapper for 205.</span></li>
+ <li class="rvps2"><span class="rvts28">Mapper 205: Fix for split-rom variant (UNIF)</span></li>
+ <li class="rvps2"><span class="rvts28">Changed UNROM-512 to use 8kB of CHR-RAM memory by default.</span></li>
+ <li class="rvps2"><span class="rvts28">Mapper 342 memory optimization.</span></li>
+</ul>
+<p class="rvps2"><span class="rvts30"><br/></span></p>
+<p class="rvps2"><span class="rvts30">LUA</span></p>
+<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
+ <li class="rvps2"><span class="rvts28">Implemented LUA function memory.registerread.</span></li>
 </ul>
 <p class="rvps2"><span class="rvts28"><br/></span></p>
-<p class="rvps2"><span class="rvts28">LUA</span></p>
+<p class="rvps2"><span class="rvts30">Core</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Implemented LUA function memory.registerread.</span></li>
-</ul>
-<p class="rvps2"><span class="rvts29"><br/></span></p>
-<p class="rvps2"><span class="rvts28">Core</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Memory initialization settings are now also applied to nametable, palettes, and sprites.</span></li>
- <li class="rvps2"><span class="rvts29">Fixed bug were write instructions didn't always update the databus.</span></li>
+ <li class="rvps2"><span class="rvts28">Memory initialization settings are now also applied to nametable, palettes, and sprites.</span></li>
+ <li class="rvps2"><span class="rvts28">Fixed bug were write instructions didn't always update the databus.</span></li>
 </ul>
 <p class="rvps2"><span class="rvts27"><br/></span></p>
 <p class="rvps2"><span class="rvts27">Qt/SDL</span></p>
 <p class="rvps2"><span class="rvts27"><br/></span></p>
-<p class="rvps2"><span class="rvts28">Debugger</span></p>
+<p class="rvps2"><span class="rvts30">Debugger</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Added ld65 debug file symbol loader feature.</span></li>
- <li class="rvps2"><span class="rvts29">Added checkbox to Qt debugger menu to control trace logger auto start function on debugger open.</span></li>
- <li class="rvps2"><span class="rvts29">Added code to stop the trace logger on debugger close if it was the debugger who started it in the first place.</span></li>
- <li class="rvps2"><span class="rvts29">Added address validity checking to the breakpoint editor dialog entry fields.</span></li>
+ <li class="rvps2"><span class="rvts28">Added ld65 debug file symbol loader feature.</span></li>
+ <li class="rvps2"><span class="rvts28">Added checkbox to Qt debugger menu to control trace logger auto start function on debugger open.</span></li>
+ <li class="rvps2"><span class="rvts28">Added code to stop the trace logger on debugger close if it was the debugger who started it in the first place.</span></li>
+ <li class="rvps2"><span class="rvts28">Added address validity checking to the breakpoint editor dialog entry fields.</span></li>
 </ul>
-<p class="rvps2"><span class="rvts29"><br/></span></p>
-<p class="rvps2"><span class="rvts28">Video</span></p>
+<p class="rvps2"><span class="rvts28"><br/></span></p>
+<p class="rvps2"><span class="rvts30">Video</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Added a third video driver option that uses a QPainter object to render QImages to the viewport (uses a pure Qt API).</span></li>
- <li class="rvps2"><span class="rvts29">Fixed video transparency issue that has been seen on some platforms (Wayland) by forcing alpha bits to be set to full opaque.</span></li>
+ <li class="rvps2"><span class="rvts28">Added a third video driver option that uses a QPainter object to render QImages to the viewport (uses a pure Qt API).</span></li>
+ <li class="rvps2"><span class="rvts28">Fixed video transparency issue that has been seen on some platforms (Wayland) by forcing alpha bits to be set to full opaque.</span></li>
 </ul>
 <p class="rvps2"><span class="rvts27"><br/></span></p>
-<p class="rvps2"><span class="rvts28">GUI</span></p>
+<p class="rvps2"><span class="rvts30">GUI</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Added state recorder feature, periodically saves time history of game play states that can be recalled and played out from.</span></li>
- <li class="rvps2"><span class="rvts29">Fixed bug regarding force grayscale or use custom palette settings change not updating PAL 3x filter appropriately.</span></li>
- <li class="rvps2"><span class="rvts29">Added feature that allows loading of save state files via drag n drop file dialog operations.</span></li>
- <li class="rvps2"><span class="rvts29">Fixed redundant window focus bug that would occur when attempting to open a pre-existing window.</span></li>
- <li class="rvps2"><span class="rvts29">Added optional cross-platform libarchive interface to allow Qt GUI to open ROMs from 7zip archives.</span></li>
- <li class="rvps2"><span class="rvts29">Minor improvements to the ROM selection from archive dialog.</span></li>
- <li class="rvps2"><span class="rvts29">Improved frame scheduling timing precision.</span></li>
+ <li class="rvps2"><span class="rvts28">Added state recorder feature, periodically saves time history of game play states that can be recalled and played out from.</span></li>
+ <li class="rvps2"><span class="rvts28">Fixed bug regarding force grayscale or use custom palette settings change not updating PAL 3x filter appropriately.</span></li>
+ <li class="rvps2"><span class="rvts28">Added feature that allows loading of save state files via drag n drop file dialog operations.</span></li>
+ <li class="rvps2"><span class="rvts28">Fixed redundant window focus bug that would occur when attempting to open a pre-existing window.</span></li>
+ <li class="rvps2"><span class="rvts28">Added optional cross-platform libarchive interface to allow Qt GUI to open ROMs from 7zip archives.</span></li>
+ <li class="rvps2"><span class="rvts28">Minor improvements to the ROM selection from archive dialog.</span></li>
+ <li class="rvps2"><span class="rvts28">Improved frame scheduling timing precision.</span></li>
 </ul>
-<p class="rvps2"><span class="rvts29"><br/></span></p>
-<p class="rvps2"><span class="rvts28">Build</span></p>
+<p class="rvps2"><span class="rvts28"><br/></span></p>
+<p class="rvps2"><span class="rvts30">Build</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts29">Build fixes for GCC 13.</span><span class="rvts6"></span></li>
+ <li class="rvps2"><span class="rvts28">Build fixes for GCC 13.</span><span class="rvts6"></span></li>
 </ul>
 <p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/create-epub-ebooks">Produce electronic books easily</a></p>
 

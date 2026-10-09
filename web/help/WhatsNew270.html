@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="favicon.ico"/>
 
-  <title>What's New? 2.6.1 (changelog)</title>
+  <title>What's New? 2.7.0 (changelog)</title>
   <meta name="description" content="" /> 
   <meta name="keywords" content="">
 
@@ -21,11 +21,11 @@
 
   <!-- Twitter Card data -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="What's New? 2.6.1 (changelog)">
+  <meta name="twitter:title" content="What's New? 2.7.0 (changelog)">
   <meta name="twitter:description" content="">
 
   <!-- Open Graph data -->
-  <meta property="og:title" content="What's New? 2.6.1 (changelog)" />
+  <meta property="og:title" content="What's New? 2.7.0 (changelog)" />
   <meta property="og:type" content="article" />
   <meta property="og:description" content="" />
   <meta property="og:site_name" content="FCEUX Help" /> 
@@ -164,9 +164,9 @@
 
     <article>
         <div id="topic-content" class="container-fluid" 
-		  data-hnd-id="WhatsNew261"
-		  data-hnd-context="89"
-		  data-hnd-title="What's New? 2.6.1 (changelog)"
+		  data-hnd-id="WhatsNew270"
+		  data-hnd-context="95"
+		  data-hnd-title="What's New? 2.7.0 (changelog)"
 		>
             
                 <div class="navigation">
@@ -174,48 +174,37 @@
                         <li><a href="Intro.html">Introduction</a></li>
                     </ol>
                     <div class="nav-arrows">
-                        <div class="btn-group btn-group" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew262.html" title="What's New? 2.6.2 (changelog)" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew260.html" title="What's New? 2.6.0 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
+                        <div class="btn-group btn-group" role="group"><a class="btn btn-default" href="Intro.html" title="Introduction" role="button"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a><a class="btn btn-default" href="FCEUltraVersionHistory.html" title="FCE Ultra Version History" role="button"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span></a><a class="btn btn-default" href="WhatsNew266.html" title="What's New? 2.6.6 (changelog)" role="button"><span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></div>
                     </div>
                 </div> 
             
 
             <a id="main-content"></a>
 
-            <h2>What's New? 2.6.1 (changelog)</h2>
+            <h2>What's New? 2.7.0 (changelog)</h2>
 
             <div class="main-content">
                 
-<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.6.1</span></p>
-<p class="rvps2"><span class="rvts6">Released -- 17 January 2022</span></p>
+<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.7.0</span></p>
+<p class="rvps2"><span class="rvts6">Released -- 10 October 2026</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts6">The 2.6.1 release fixes a few bugs that were found shortly after the 2.6.0 release.</span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts28">The 2.7.0 release introduces several new features and improvements focused on build system enhancements, media codec support, and developer tooling. Profiling and debugging capabilities have been significantly improved, with support for FFmpeg 9 and enhanced platform compatibility.</span></p>
+<p class="rvps2"><span class="rvts28"><br/></span></p>
 <p class="rvps2"><span class="rvts27">Qt/SDL</span></p>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts30">GUI Improvements and Bug Fixes</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">Fixed Qt cursor override stack overflow issue. Code now properly calls QGuiApplication::restoreOverrideCursor following QGuiApplication::setOverrideCursor.</span></li>
- <li class="rvps2"><span class="rvts6">Fixed application crash when attempting to open/close the CDL window more than once.</span></li>
- <li class="rvps2"><span class="rvts6">Fixed inverted vertical scrollbar on Qt Trace logger. Added page up/down key shortcuts for Trace logger viewport.</span></li>
- <li class="rvps2"><span class="rvts6">Added an optional splash screen at startup. Splash screen defaults to off and can be enabled in GUI config dialog.</span></li>
-</ul>
-<p class="rvps2"><span class="rvts30"><br/></span></p>
-<p class="rvps2"><span class="rvts30">RAM Search Improvements and Bug Fixes</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">Changed Qt RAM search logic to skip over RAM mirrors. Changed GUI to allow for searching of RAM, SRAM, and ROM regions to be individually selectable.</span></li>
-</ul>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts30">Build Improvements</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">Applied cmake SOURCE_DATE_EPOCH patch for reproducible builds.</span></li>
-</ul>
-<p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts30">Windows Build Dependency Upgrades</span></p>
-<ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
- <li class="rvps2"><span class="rvts6">Upgraded to SDL version 2.0.20</span></li>
- <li class="rvps2"><span class="rvts6">Upgraded to ffmpeg version 5.0</span><span class="rvts6"></span></li>
-</ul>
-<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour">Full-featured Help generator</a></p>
+<h3 class="rvps5"><span class="rvts0"><span class="rvts29">Build System</span></span></h3>
+<p class="rvps2"><span class="rvts28">Build system optimizations for faster compilation times.</span><br/><span class="rvts28">Added Linux thread sanitizer build support for improved debugging and memory safety analysis.</span><br/><span class="rvts28">Fixed build compatibility with older SDL2 versions that lack SDL_GetTicks64 function.</span><br/><span class="rvts28">Implementation of vcpkg build cache to reduce build time for Windows builds.</span></p>
+<p class="rvps2"><span class="rvts28"><br/></span></p>
+<h3 class="rvps5"><span class="rvts0"><span class="rvts29">Media Support</span></span></h3>
+<p class="rvps2"><span class="rvts28">Added support for FFmpeg 9 for enhanced video encoding compatibility and codec support.</span></p>
+<h3 class="rvps5"><span class="rvts0"><span class="rvts29">Developer Tools</span></span></h3>
+<p class="rvps2"><span class="rvts28">Integrated profiling tools for comprehensive performance analysis and optimization.</span><br/><span class="rvts28">Added configurable flag to control whether profiling tools are enabled.</span></p>
+<h3 class="rvps5"><span class="rvts0"><span class="rvts29">Platform Support</span></span></h3>
+<p class="rvps2"><span class="rvts28">Qt6 build improvements for better Linux support.</span><br/><span class="rvts28">Fixed Qt Wayland screenshot functionality with improved stability.</span><br/><span class="rvts28">Enhanced Qt/SDL screenshot handling with improved error reporting.</span><br/><span class="rvts28">Fixed immediate exit issue when SDL video driver is used on Qt Wayland.</span><br/><span class="rvts28">Updated Qt win64 auto build to use VS2022 and Qt 6.9.3.</span><br/><span class="rvts28">Updated macOS auto build to use Sonoma OS version.</span></p>
+<h3 class="rvps5"><span class="rvts0"><span class="rvts29">Features</span></span></h3>
+<p class="rvps2"><span class="rvts28">Basic netplay feature (experimental) - enabling multiplayer gaming over the network.</span><br/><span class="rvts28">JavaScript/ECMAScript scripting engine for Qt GUI - allows users to create custom UI windows and scripts using Qt's built-in JavaScript engine.</span></p>
+<h3 class="rvps5"><span class="rvts0"><span class="rvts29">Bug Fixes</span></span></h3>
+<p class="rvps2"><span class="rvts28">Fixed Qt FCEUD_GetTime function to use 64-bit SDL_GetTicks64.</span><br/><span class="rvts28">Removed minor memory leak on application shutdown.</span><br/><span class="rvts28">Fixed profiler disabled macro.</span><br/><span class="rvts28">Cleaned up compiler warnings related to set but not used variables.</span><span class="rvts6"></span></p>
+<p class="rvps4" style="clear: both;"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="https://www.helpndoc.com/feature-tour/iphone-website-generation">iPhone web sites made easy</a></p>
 
             </div>
             
