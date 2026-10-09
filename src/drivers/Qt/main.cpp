@@ -196,6 +196,9 @@ int main( int argc, char *argv[] )
 
 	delete consoleWindow;
 
+	app.removeEventFilter(filter);
+	delete filter;
+
 	fceuWrapperMemoryCleanup();
 
 	return retval;
