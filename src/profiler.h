@@ -124,7 +124,7 @@ namespace FCEU
 
 #else  // __FCEU_PROFILER_ENABLE__ not defined
 
-#define  FCEU_PROFILE_FUNC(id, comment)
+#define  FCEU_PROFILE_FUNC(comment)
 
 #endif // __FCEU_PROFILER_ENABLE__
 
