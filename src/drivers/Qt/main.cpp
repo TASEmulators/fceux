@@ -28,6 +28,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/SplashScreen.h"
 #include "Qt/QtScriptManager.h"
+#include "profiler.h"
 
 #if defined(WIN32) 
 #include <windows.h>
@@ -101,6 +102,16 @@ static bool showSplashScreen(void)
 
 	return show;
 }
+class ProfilingFilter : public QObject 
+{
+    bool eventFilter(QObject *watched, QEvent *event) override 
+	{
+        // measure event timestamps here
+		FCEU_PROFILE_FUNC(watched->metaObject()->className());
+        return QObject::eventFilter(watched, event);
+    }
+};
+
 
 int main( int argc, char *argv[] )
 {
@@ -110,6 +121,8 @@ int main( int argc, char *argv[] )
 
 	qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
+	ProfilingFilter *filter = new ProfilingFilter();
+	app.installEventFilter(filter);
 
 	QCoreApplication::setOrganizationName("TasEmulators");
 	QCoreApplication::setOrganizationDomain("TasEmulators.org");

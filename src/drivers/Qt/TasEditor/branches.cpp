@@ -576,7 +576,7 @@ void BRANCHES::mouseDoubleClickEvent(QMouseEvent * event)
 
 void BRANCHES::mousePressEvent(QMouseEvent * event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
 
 	bookmarks->itemUnderMouse = item;
@@ -626,7 +626,7 @@ void BRANCHES::mousePressEvent(QMouseEvent * event)
 
 void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
 
 	bookmarks->itemUnderMouse = item;
@@ -648,7 +648,7 @@ void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
 
 void BRANCHES::showImage(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	
 	bool item_valid = (imageItem >= 0) && (imageItem < TOTAL_BOOKMARKS);
 
@@ -673,7 +673,7 @@ void BRANCHES::showImage(void)
 
 void BRANCHES::mouseMoveEvent(QMouseEvent * event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int item, item_valid;
 
 	item = findItemUnderMouse( event->pos().x(), event->pos().y() );
@@ -742,7 +742,7 @@ bool BRANCHES::event(QEvent *event)
 {
 	if (event->type() == QEvent::ToolTip)
 	{
-		FCEU_CRITICAL_SECTION( emuLock );
+		FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 		int item, item_valid;
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 
@@ -1496,7 +1496,7 @@ void BRANCHES::recalculateBranchesTree()
 			} else
 			{
 				// special case 0: if there's too many children on one level (more than canvas can show)
-				// then "current_pos" becomes special branch above current branch
+				// then "current_pos" becomes a special branch above current branch
 				gridX[ITEM_UNDER_MOUSE_FIREBALL] = gridX[currentBranch];
 				gridY[ITEM_UNDER_MOUSE_FIREBALL] = gridY[currentBranch] - 7;
 			}
@@ -1750,116 +1750,5 @@ void BRANCHES::recursiveSetYPos(int parent, int parentY)
 		}
 	}
 }
-
-// ----------------------------------------------------------------------------------------
-//LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-//{
-//	extern BRANCHES branches;
-//	switch(msg)
-//	{
-//		case WM_SETCURSOR:
-//		{
-//			taseditorWindow.mustUpdateMouseCursor = true;
-//			return true;
-//		}
-//		case WM_MOUSEMOVE:
-//		{
-//			if (!bookmarks.mouseOverBranchesBitmap)
-//			{
-//				bookmarks.mouseOverBranchesBitmap = true;
-//				bookmarks.tme.hwndTrack = hWnd;
-//				TrackMouseEvent(&bookmarks.tme);
-//			}
-//			bookmarks.handleMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-//			break;
-//		}
-//		case WM_MOUSELEAVE:
-//		{
-//			bookmarks.mouseOverBranchesBitmap = false;
-//			bookmarks.handleMouseMove(-1, -1);
-//			break;
-//		}
-//		case WM_PAINT:
-//		{
-//			PAINTSTRUCT ps;
-//			branches.paintBranchesBitmap(BeginPaint(hWnd, &ps));
-//			EndPaint(hWnd, &ps);
-//			return 0;
-//		}
-//		case WM_LBUTTONDOWN:
-//		{
-//			// single click on Branches Tree = send Playback to the Bookmark
-//			int branchUnderMouse = bookmarks.itemUnderMouse;
-//			if (branchUnderMouse == ITEM_UNDER_MOUSE_CLOUD)
-//			{
-//				playback->jump(0);
-//			} else if (branchUnderMouse >= 0 && branchUnderMouse < TOTAL_BOOKMARKS && bookmarks.bookmarksArray[branchUnderMouse].notEmpty)
-//			{
-//				bookmarks->command(COMMAND_JUMP, branchUnderMouse);
-//			} else if (branchUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
-//			{
-//				playback->jump(currMovieData.getNumRecords() - 1);
-//			}
-//			//if (GetFocus() != hWnd)
-//			//{
-//			//	SetFocus(hWnd);
-//			//}
-//			return 0;
-//		}
-//		case WM_LBUTTONDBLCLK:
-//		{
-//			// double click on Branches Tree = deploy the Branch
-//			int branchUnderMouse = bookmarks.itemUnderMouse;
-//			if (branchUnderMouse == ITEM_UNDER_MOUSE_CLOUD)
-//			{
-//				playback->jump(0);
-//			} else if (branchUnderMouse >= 0 && branchUnderMouse < TOTAL_BOOKMARKS && bookmarks.bookmarksArray[branchUnderMouse].notEmpty)
-//			{
-//				bookmarks->command(COMMAND_DEPLOY, branchUnderMouse);
-//			} else if (branchUnderMouse == ITEM_UNDER_MOUSE_FIREBALL)
-//			{
-//				playback->jump(currMovieData.getNumRecords() - 1);
-//			}
-//			if (GetFocus() != hWnd)
-//			{
-//				SetFocus(hWnd);
-//			}
-//			return 0;
-//		}
-//		case WM_RBUTTONDOWN:
-//		case WM_RBUTTONDBLCLK:
-//		{
-//			if (GetFocus() != hWnd)
-//				SetFocus(hWnd);
-//			branches.branchRightclicked = branches.findItemUnderMouse(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-//			if (branches.branchRightclicked >= 0 && branches.branchRightclicked < TOTAL_BOOKMARKS)
-//				SetCapture(hWnd);
-//			return 0;
-//		}
-//		case WM_RBUTTONUP:
-//		{
-//			if (branches.branchRightclicked >= 0 && branches.branchRightclicked < TOTAL_BOOKMARKS
-//				&& branches.branchRightclicked == branches.findItemUnderMouse(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)))
-//				bookmarks.command(COMMAND_SET, branches.branchRightclicked);
-//			ReleaseCapture();
-//			branches.branchRightclicked = ITEM_UNDER_MOUSE_NONE;
-//			return 0;
-//		}
-//		case WM_MBUTTONDOWN:
-//		case WM_MBUTTONDBLCLK:
-//		{
-//			if (GetFocus() != hWnd)
-//				SetFocus(hWnd);
-//			playback.handleMiddleButtonClick();
-//			return 0;
-//		}
-//		case WM_MOUSEWHEEL:
-//		{
-//			branches.branchRightclicked = ITEM_UNDER_MOUSE_NONE;	// ensure that accidental rightclick on BookmarksList won't set Bookmarks when user does rightbutton + wheel
-//			return SendMessage(pianoRoll.hwndList, msg, wParam, lParam);
-//		}
-//	}
-//	return CallWindowProc(hwndBranchesBitmap_oldWndProc, hWnd, msg, wParam, lParam);
-//}
 
 

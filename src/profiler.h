@@ -38,6 +38,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <atomic>
 
 
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
@@ -49,95 +50,52 @@
 
 namespace FCEU
 {
-	struct funcProfileRecord
+	struct profileMarker
+	{ 
+		int   fileLineNum = 0;
+		const char *fileName = nullptr;
+		const char *funcName = nullptr;
+		const char *comment = nullptr;
+		timeStampRecord   ts;
+		enum { MARKER_START, MARKER_END } type;
+	};
+
+	struct profileMarkerBuffer
 	{
-		const int   fileLineNum;
-		const char *fileName;
-		const char *funcName;
-		const char *comment;
+		static constexpr unsigned int maxBuffers = 4;
 
-		timeStampRecord min;
-		timeStampRecord max;
-		timeStampRecord sum;
-		timeStampRecord last;
-		unsigned int numCalls;
-		unsigned int recursionCount;
+		profileMarkerBuffer();
+		~profileMarkerBuffer();
 
-		funcProfileRecord(const char *fileNameStringLiteral,
-				  const int   fileLineNumber,
-				  const char *funcNameStringLiteral,
-				  const char *commentStringLiteral);
+		void pushMarker(const profileMarker &marker);
 
-		void reset(void);
-
-		double average(void);
+		std::vector<profileMarker> vec[maxBuffers];
+		std::atomic<unsigned int> activeBufferIndex{0};
 	};
 
 	struct profileFuncScoped
 	{
-		funcProfileRecord *rec;
-		timeStampRecord start;
-
-		profileFuncScoped( funcProfileRecord *recordIn );
+		profileFuncScoped( 
+			int fileLineNum,
+			const char *fileName,
+			const char *funcName,
+			const char *comment
+		);
 
 		~profileFuncScoped(void);
-	};
 
-	struct profileExecVector
-	{
-		profileExecVector(void);
-		~profileExecVector(void);
-
-		void update(void);
-		void setEnabled(bool enabled);
-		void setLogPath(const char *path);
-		void reset(void);
-
-		std::vector <funcProfileRecord> _vec;
-
-		FILE *logFp;
-		bool enabled;
-	};
-
-	class profilerFuncMap
-	{
-		public:
-			profilerFuncMap();
-			~profilerFuncMap();
-
-			int addRecord(const char *fileNameStringLiteral,
-				      const int   fileLineNumber,
-				      const char *funcNameStringLiteral,
-				      const char *commentStringLiteral,
-				      funcProfileRecord *rec );
-
-			funcProfileRecord *findRecord(const char *fileNameStringLiteral,
-						      const int   fileLineNumber,
-						      const char *funcNameStringLiteral,
-						      const char *commentStringLiteral,
-						      bool create = false);
-
-			funcProfileRecord *iterateBegin(void);
-			funcProfileRecord *iterateNext(void);
-
-			void pushStack(funcProfileRecord *rec);
-			void popStack(funcProfileRecord *rec);
 		private:
-			mutex  _mapMtx;
-			std::map<std::string, funcProfileRecord*> _map;
-			std::map<std::string, funcProfileRecord*>::iterator _map_it;
-
-			std::vector <funcProfileRecord*> stack;
+			profileMarker start;
 	};
-
 	class profilerManager
 	{
 		public:
 			profilerManager(void);
 			~profilerManager(void);
 	
-			int addThreadProfiler( profilerFuncMap *m );
-			int removeThreadProfiler( profilerFuncMap *m, bool shouldDestroy = false );
+			int addThreadProfileBuffer( profileMarkerBuffer *b );
+			int removeThreadProfileBuffer( profileMarkerBuffer *b );
+			int dumpProfileMarkers(FILE *pFile = nullptr);
 	
 			static FILE *pLog;
 
@@ -145,10 +103,10 @@ namespace FCEU
 		private:
 	
 			mutex  threadListMtx;
-			std::list <profilerFuncMap*> threadList;
+			std::list <profileMarkerBuffer*> bufferList;
 			static profilerManager *instance;
 	};
-}
+} // namespace FCEU
 
 #if  defined(__PRETTY_FUNCTION__)
 #define  __FCEU_PROFILE_FUNC_NAME__  __PRETTY_FUNCTION__
@@ -156,26 +114,17 @@ namespace FCEU
 #define  __FCEU_PROFILE_FUNC_NAME__  __func__
 #endif
 
-#define  FCEU_PROFILE_FUNC(id, comment)   \
-	static thread_local FCEU::funcProfileRecord  id( __FILE__, __LINE__, __FCEU_PROFILE_FUNC_NAME__, comment ); \
-	FCEU::profileFuncScoped id ## _unique_scope( &id )
+#define FCEU_CONCAT_IMPL(a, b) a##b
+#define FFCEU_UNIQUE_ID(a, b) CONCAT_IMPL(a, b)
 
+#define  FCEU_PROFILE_FUNC(comment)   \
+	FCEU::profileFuncScoped _##__LINE__( __LINE__, __FILE__, __FCEU_PROFILE_FUNC_NAME__, comment )
 
-int FCEU_profiler_log_thread_activity(void);
-void FCEU_profiler_set_enabled(bool enabled);
-bool FCEU_profiler_enabled(void);
-void FCEU_profiler_set_log_path(const char *path);
-void FCEU_profiler_reset(void);
+	void FCEU_profiler_log_thread_activity();
 
 #else  // __FCEU_PROFILER_ENABLE__ not defined
 
 #define  FCEU_PROFILE_FUNC(id, comment)
-
-inline bool FCEU_profiler_enabled(void) { return false; }
-inline void FCEU_profiler_set_enabled(bool) {}
-inline void FCEU_profiler_set_log_path(const char *) {}
-inline void FCEU_profiler_reset(void) {}
-inline int FCEU_profiler_log_thread_activity(void) { return 0; }
 
 #endif // __FCEU_PROFILER_ENABLE__
 

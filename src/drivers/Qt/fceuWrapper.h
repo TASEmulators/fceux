@@ -51,18 +51,16 @@ void fceuWrapperRequestAppExit(void);
 void fceuWrapperClearArchiveFileLoadIndex(void);
 void fceuWrapperSetArchiveFileLoadIndex(int idx);
 
-class  fceuCriticalSection
+class  fceuScopedLock
 {
 	public:
-		fceuCriticalSection( const char *filename, int lineNum, const char *func )
+		fceuScopedLock(const char *filename, int lineNum, const char *func)
 		{
-			//printf("Wrapper Lock\n");
 			fceuWrapperLock( filename, lineNum, func );
 		}
 
-		~fceuCriticalSection(void)
+		~fceuScopedLock(void)
 		{
-			//printf("Wrapper UnLock\n");
 			fceuWrapperUnLock();
 		}
 };
@@ -76,5 +74,5 @@ class  fceuCriticalSection
 #define  FCEU_WRAPPER_UNLOCK()   \
 	fceuWrapperUnLock()
 
-#define  FCEU_CRITICAL_SECTION(x)  \
-	fceuCriticalSection x(__FILE__, __LINE__, __func__)
+#define  FCEU_WRAPPER_SCOPED_LOCK(x)  \
+	fceuScopedLock x(__FILE__, __LINE__, __func__)

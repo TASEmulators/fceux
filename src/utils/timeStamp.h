@@ -13,10 +13,12 @@ namespace FCEU
 	{
 		public:
 		static constexpr uint64_t ONE_SEC_TO_MILLI = 1000;
+		static constexpr uint64_t ONE_SEC_TO_MICRO = 1000000;
 
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
 		static constexpr long int ONE_SEC_TO_NANO  = 1000000000;
 		static constexpr long int MILLI_TO_NANO    = 1000000;
+		static constexpr long int MICRO_TO_NANO    = 1000;
 
 		timeStampRecord(void)
 		{
@@ -207,6 +209,12 @@ namespace FCEU
 			return ms;
 		}
 
+		uint64_t toMicroSeconds(void)
+		{
+			uint64_t us = (ts.tv_sec * ONE_SEC_TO_MICRO) + (ts.tv_nsec / MICRO_TO_NANO );
+			return us;
+		}
+
 		uint64_t toCounts(void)
 		{
 			return (ts.tv_sec * ONE_SEC_TO_NANO) + ts.tv_nsec;
@@ -338,6 +346,12 @@ namespace FCEU
 		uint64_t toMilliSeconds(void)
 		{
 			uint64_t ms = (ts * ONE_SEC_TO_MILLI) / qpcFreq;
+			return ms;
+		}
+
+		uint64_t toMicroSeconds(void)
+		{
+			uint64_t ms = (ts * ONE_SEC_TO_MICRO) / qpcFreq;
 			return ms;
 		}
 

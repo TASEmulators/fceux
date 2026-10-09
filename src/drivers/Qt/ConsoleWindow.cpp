@@ -4734,7 +4734,7 @@ int consoleWin_t::getPeriodicInterval(void)
 
 void consoleWin_t::transferVideoBuffer(bool allowRedraw)
 {
-	FCEU_PROFILE_FUNC(prof, "VideoXfer");
+	FCEU_PROFILE_FUNC("VideoXfer");
 
 	{
 		FCEU::autoScopedLock lock(videoBufferMutex);
@@ -4791,7 +4791,7 @@ void consoleWin_t::emuFrameFinish(void)
 
 void consoleWin_t::updatePeriodic(void)
 {
-	FCEU_PROFILE_FUNC(prof, "updatePeriodic");
+	FCEU_PROFILE_FUNC("updatePeriodic");
 	static bool eventProcessingInProg = false;
 
 	//if ( eventProcessingInProg )
@@ -4873,7 +4873,7 @@ void consoleWin_t::updatePeriodic(void)
 	updateCounter++;
 
 #ifdef __FCEU_PROFILER_ENABLE__
-		FCEU_profiler_log_thread_activity();
+	FCEU_profiler_log_thread_activity();
 #endif
    return;
 }

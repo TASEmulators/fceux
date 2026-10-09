@@ -368,15 +368,13 @@ void TimingConfDialog_t::emuSchedPrioChange(int val)
 	{
 		return;
 	}
+	FCEU_WRAPPER_SCOPED_LOCK(lock);
 #ifdef WIN32
 	printf("Setting EMU Thread to %i\n", val);
-	FCEU_WRAPPER_LOCK();
 	consoleWindow->emulatorThread->setPriority((QThread::Priority)val);
-	FCEU_WRAPPER_UNLOCK();
 #else
 	int policy, prio;
 
-	FCEU_WRAPPER_LOCK();
 	consoleWindow->emulatorThread->getSchedParam(policy, prio);
 
 	if (consoleWindow->emulatorThread->setSchedParam(policy, val))
@@ -386,7 +384,6 @@ void TimingConfDialog_t::emuSchedPrioChange(int val)
 		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
 		updateSliderValues();
 	}
-	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------------------------------

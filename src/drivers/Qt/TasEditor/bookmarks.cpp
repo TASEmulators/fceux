@@ -522,7 +522,7 @@ void BOOKMARKS::resizeEvent(QResizeEvent *event)
 
 void BOOKMARKS::paintEvent(QPaintEvent *event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	QPainter painter(this);
 	int x, y, item, cell_y;
 	QColor white(255,255,255), /*black(0,0,0),*/ blkColor;
@@ -746,7 +746,7 @@ int  BOOKMARKS::calcColumn( int px )
 
 void BOOKMARKS::mousePressEvent(QMouseEvent * event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int item, row_under_mouse, item_valid;
 	QPoint c = convPixToCursor( event->pos() );
 
@@ -787,7 +787,7 @@ void BOOKMARKS::mousePressEvent(QMouseEvent * event)
 
 void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	//QPoint c = convPixToCursor( event->pos() );
 
 	//printf("Mouse Button Released: 0x%x (%i,%i)\n", event->button(), c.x(), c.y() );
@@ -813,7 +813,7 @@ void BOOKMARKS::mouseReleaseEvent(QMouseEvent * event)
 
 void BOOKMARKS::showImage(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock ); 
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock ); 
 
 	bool item_valid = (imageItem >= 0) && (imageItem < TOTAL_BOOKMARKS);
 
@@ -838,7 +838,7 @@ void BOOKMARKS::showImage(void)
 
 void BOOKMARKS::mouseMoveEvent(QMouseEvent * event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int item, row_under_mouse, item_valid, column;
 
 	QPoint c = convPixToCursor( event->pos() );
@@ -897,7 +897,7 @@ bool BOOKMARKS::event(QEvent *event)
 {
 	if (event->type() == QEvent::ToolTip)
 	{
-		FCEU_CRITICAL_SECTION( emuLock );
+		FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 		int item, row_under_mouse, item_valid, column;
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 

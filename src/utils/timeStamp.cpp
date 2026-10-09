@@ -58,6 +58,8 @@ uint64_t timeStampRecord::_tscFreq = 0;
 uint64_t timeStampRecord::qpcFreq = 0;
 #endif
 
+static thread_local timeStampRecord tscStart;
+
 void timeStampRecord::readNew(void)
 {
 	#ifdef __FCEU_X86_TSC_ENABLE
@@ -69,6 +71,16 @@ void timeStampRecord::readNew(void)
 	#else
 		QueryPerformanceCounter((LARGE_INTEGER*)&ts);
 	#endif
+
+	if (tscStart.isZero())
+	{
+		tscStart = *this;
+	}
+	else
+	{
+		*this = *this - tscStart;
+	}
+
 }
 #if defined(WIN32)
 void timeStampRecord::qpcCalibrate(void)

@@ -107,8 +107,6 @@ static int noconfig=0;
 static int frameskip=0;
 static int periodic_saves = 0;
 static int   mutexLocks = 0;
-static int   mutexPending = 0;
-static bool  emulatorHasMutex = 0;
 unsigned int emulatorCycleCount = 0;
 static int archiveFileLoadIndex = -1;
 
@@ -1192,6 +1190,7 @@ FCEUD_Update(uint8 *XBuf,
 	 int32 *Buffer,
 	 int Count)
 {
+	FCEU_PROFILE_FUNC("EMU Thread Audio/Video Update");
 	int blitDone = 0;
 	//extern int FCEUDnetplay;
 
@@ -1323,6 +1322,7 @@ FCEUD_Update(uint8 *XBuf,
 
 static void DoFun(int frameskip, int periodic_saves)
 {
+	FCEU_PROFILE_FUNC("EMU Thread DoFun");
 	uint8 *gfx = 0;
 	int32 *sound = 0;
 	int32 ssize = 0;
@@ -1396,12 +1396,10 @@ void fceuWrapperLock(const char *filename, int line, const char *func)
 
 void fceuWrapperLock(void)
 {
-	mutexPending++;
 	if ( consoleWindow != NULL )
 	{
 		consoleWindow->emulatorMutex.lock();
 	}
-	mutexPending--;
 	mutexLocks++;
 }
 
@@ -1426,12 +1424,10 @@ bool fceuWrapperTryLock(int timeout)
 {
 	bool lockAcq = false;
 
-	mutexPending++;
 	if ( consoleWindow != NULL )
 	{
 		lockAcq = consoleWindow->emulatorMutex.tryLock( timeout );
 	}
-	mutexPending--;
 
 	if ( lockAcq )
 	{
@@ -1464,34 +1460,14 @@ bool fceuWrapperIsLocked(void)
 
 int  fceuWrapperUpdate( void )
 {
-	bool lock_acq;
-	static bool mutexLockFail = false;
+	bool lock_acq = false;
 
-	// If a request is pending, 
-	// sleep to allow request to be serviced.
-	if ( mutexPending > 0 )
+	do
 	{
-		msleep( 16 );
-	}
+		FCEU_PROFILE_FUNC("EMU Thread Wrapper Lock");
+		lock_acq = fceuWrapperTryLock( __FILE__, __LINE__, __func__ );
 
-	lock_acq = fceuWrapperTryLock( __FILE__, __LINE__, __func__ );
-
-	if ( !lock_acq )
-	{
-		if ( GameInfo )
-		{
-			if ( !mutexLockFail )
-			{
-				printf("Warning: Emulator Thread Failed to Acquire Mutex - GUI has Lock\n");
-			}
-			mutexLockFail = true;
-		}
-		msleep( 16 );
-
-		return -1;
-	}
-	mutexLockFail = false;
-	emulatorHasMutex = 1;
+	} while (!lock_acq);
 
 	// For netplay, set pause if we do not have input ready for all players
 	if (NetPlayActive())
@@ -1536,16 +1512,11 @@ int  fceuWrapperUpdate( void )
 
 		fceuWrapperUnLock();
 
-		emulatorHasMutex = 0;
-
 		if ( consoleWindow )
 		{
 			consoleWindow->emulatorThread->signalFrameFinished();
 		}
 
-#ifdef __FCEU_PROFILER_ENABLE__
-		FCEU_profiler_log_thread_activity();
-#endif
 		while ( SpeedThrottle() )
 		{
 			// Input device processing is in main thread
@@ -1557,11 +1528,6 @@ int  fceuWrapperUpdate( void )
 	{
 		fceuWrapperUnLock();
 
-		emulatorHasMutex = 0;
-
-#ifdef __FCEU_PROFILER_ENABLE__
-		FCEU_profiler_log_thread_activity();
-#endif
 		msleep( 100 );
 	}
 	return 0;

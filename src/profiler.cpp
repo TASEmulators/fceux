@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 #ifdef __QT_DRIVER__
 #include <QThread>
@@ -35,302 +36,69 @@
 
 namespace FCEU
 {
-static thread_local profileExecVector execList;
-static thread_local profilerFuncMap threadProfileMap;
+static thread_local profileMarkerBuffer execList;
 
 FILE *profilerManager::pLog = nullptr;
 
 static profilerManager  pMgr;
 
 //-------------------------------------------------------------------------
-//---- Function Profile Record
-//-------------------------------------------------------------------------
-funcProfileRecord::funcProfileRecord(const char *fileNameStringLiteral,
-				     const int   fileLineNumber,
-				     const char *funcNameStringLiteral,
-				     const char *commentStringLiteral)
-
-	: fileLineNum(fileLineNumber), fileName(fileNameStringLiteral),
-	  funcName(funcNameStringLiteral), comment(commentStringLiteral)
-{
-	min.fromSeconds(9u);
-	max.zero();
-	sum.zero();
-	numCalls = 0;
-	recursionCount = 0;
-
-	threadProfileMap.addRecord( fileNameStringLiteral, fileLineNumber,
-					funcNameStringLiteral, commentStringLiteral, this);
-}
-//-------------------------------------------------------------------------
-void funcProfileRecord::reset(void)
-{
-	min.fromSeconds(9u);
-	max.zero();
-	sum.zero();
-	numCalls = 0;
-}
-//-------------------------------------------------------------------------
-double funcProfileRecord::average(void)
-{
-	double avg = 0.0;
-
-	if (numCalls)
-	{
-		avg = sum.toSeconds() / static_cast<double>(numCalls);
-	}
-	return avg;
-}
-//-------------------------------------------------------------------------
 //---- Profile Scoped Function Class
 //-------------------------------------------------------------------------
-profileFuncScoped::profileFuncScoped( funcProfileRecord *recordIn )
+profileFuncScoped::profileFuncScoped(
+	int fileLineNum,
+	const char *fileName,
+	const char *funcName,
+	const char *comment )
 {
-	rec = recordIn;
+	start.ts.readNew();
+	start.fileLineNum = fileLineNum;
+	start.fileName = fileName;
+	start.funcName = funcName;
+	start.comment = comment;
+	start.type = profileMarker::MARKER_START;
 
-	if (rec)
-	{
-		threadProfileMap.pushStack(rec);
-		start.readNew();
-		rec->numCalls++;
-		rec->recursionCount++;
-	}
+	execList.pushMarker(start);
 }
 //-------------------------------------------------------------------------
 profileFuncScoped::~profileFuncScoped(void)
 {
-	if (rec)
-	{
-		timeStampRecord ts, dt;
-		ts.readNew();
-		dt = ts - start;
+	timeStampRecord ts, dt;
+	ts.readNew();
+	dt = ts - start.ts;
 
-		rec->last = dt;
-		rec->sum += dt;
-		if (dt < rec->min) rec->min = dt;
-		if (dt > rec->max) rec->max = dt;
+	profileMarker marker = start;
+	marker.ts = ts;
+	marker.type = profileMarker::MARKER_END;
 
-		rec->recursionCount--;
-
-		execList._vec.push_back(*rec);
-
-		threadProfileMap.popStack(rec);
-	}
+	execList.pushMarker(marker);
 }
 //-------------------------------------------------------------------------
-//---- Profile Execution Vector
+//---- Profile Marker Vector
 //-------------------------------------------------------------------------
-profileExecVector::profileExecVector(void)
-	: logFp(nullptr), enabled(true)
-{
-	_vec.reserve( 10000 );
-
-	char threadName[128];
-	char fileName[256];
-
-	strcpy( threadName, "MainThread");
-
-#ifdef __QT_DRIVER__
-	QThread *thread = QThread::currentThread();
-
-	if (thread)
+	profileMarkerBuffer::profileMarkerBuffer()
 	{
-		//printf("Thread: %s\n", thread->objectName().toStdString().c_str());
-		strcpy( threadName, thread->objectName().toStdString().c_str());
-	}
-#endif
-	snprintf( fileName, sizeof(fileName), "fceux-profile-%s.log", threadName);
+		for (auto i=0u; i<maxBuffers; i++)
+		{
+			vec[i].reserve(1024);
+		}
+		activeBufferIndex = 0;
 
-	logFp = ::fopen(fileName, "w");
-
-	if (logFp == nullptr)
-	{
-		printf("Error: Failed to create profiler logfile: %s\n", fileName);
-	}
-}
-//-------------------------------------------------------------------------
-profileExecVector::~profileExecVector(void)
-{
-	if (logFp)
-	{
-		::fclose(logFp);
-		logFp = nullptr;
-	}
-}
-//-------------------------------------------------------------------------
-void profileExecVector::reset(void)
-{
-	_vec.clear();
-}
-//-------------------------------------------------------------------------
-void profileExecVector::setEnabled(bool enabledIn)
-{
-	enabled = enabledIn;
-	if (!enabled && logFp)
-	{
-		fflush(logFp);
-	}
-}
-//-------------------------------------------------------------------------
-void profileExecVector::setLogPath(const char *path)
-{
-	if (!path || !path[0])
-	{
-		return;
+		pMgr.addThreadProfileBuffer(this);
 	}
 
-	FILE *newFp = ::fopen(path, "w");
-	if (!newFp)
+	profileMarkerBuffer::~profileMarkerBuffer()
 	{
-		printf("Error: Failed to create profiler logfile: %s\n", path);
-		return;
+		pMgr.removeThreadProfileBuffer(this);
 	}
 
-	if (logFp)
+	void profileMarkerBuffer::pushMarker(const profileMarker &marker)
 	{
-		::fclose(logFp);
-	}
-	logFp = newFp;
-}
-//-------------------------------------------------------------------------
-void profileExecVector::update(void)
-{
-	if (!enabled || !logFp)
-	{
-		return;
+		unsigned int idx = activeBufferIndex.load(std::memory_order_relaxed);
+		idx = idx % maxBuffers;
+		vec[idx].push_back(marker);
 	}
 
-	size_t n = _vec.size();
-
-	for (size_t i=0; i<n; i++)
-	{
-		funcProfileRecord &rec = _vec[i];
-
-		fprintf( logFp, "%s: %u  %f  %f  %f  %f\n", rec.funcName, rec.numCalls, rec.last.toSeconds(), rec.average(), rec.min.toSeconds(), rec.max.toSeconds());
-	}
-	_vec.clear();
-	fflush(logFp);
-}
-//-------------------------------------------------------------------------
-//---- Profile Function Record Map
-//-------------------------------------------------------------------------
-profilerFuncMap::profilerFuncMap(void)
-{
-	//printf("profilerFuncMap Constructor: %p\n", this);
-	pMgr.addThreadProfiler(this);
-
-	_map_it = _map.begin();
-}
-//-------------------------------------------------------------------------
-profilerFuncMap::~profilerFuncMap(void)
-{
-	//printf("profilerFuncMap Destructor: %p\n", this);
-	pMgr.removeThreadProfiler(this);
-
-	//{
-	//	autoScopedLock aLock(_mapMtx);
-
-	//	for (auto it = _map.begin(); it != _map.end(); it++)
-	//	{
-	//		delete it->second;
-	//	}
-	//	_map.clear();
-	//}
-}
-//-------------------------------------------------------------------------
-void profilerFuncMap::pushStack(funcProfileRecord *rec)
-{
-	stack.push_back(rec);
-}
-//-------------------------------------------------------------------------
-void profilerFuncMap::popStack(funcProfileRecord *rec)
-{
-	stack.pop_back();
-}
-//-------------------------------------------------------------------------
-int profilerFuncMap::addRecord(const char *fileNameStringLiteral,
-			      const int   fileLineNumber,
-			      const char *funcNameStringLiteral,
-			      const char *commentStringLiteral,
-			      funcProfileRecord *rec )
-{
-	autoScopedLock aLock(_mapMtx);
-	char lineString[64];
-
-	snprintf( lineString, sizeof(lineString), ":%i", fileLineNumber);
-
-	std::string fname(fileNameStringLiteral);
-
-	fname.append( lineString );
-
-	_map[fname] = rec;
-
-	return 0;
-}
-//-------------------------------------------------------------------------
-funcProfileRecord *profilerFuncMap::findRecord(const char *fileNameStringLiteral,
-					       const int   fileLineNumber,
-					       const char *funcNameStringLiteral,
-					       const char *commentStringLiteral,
-					       bool create)
-{
-	autoScopedLock aLock(_mapMtx);
-	char lineString[64];
-	funcProfileRecord *rec = nullptr;
-
-	snprintf( lineString, sizeof(lineString), ":%i", fileLineNumber);
-
-	std::string fname(fileNameStringLiteral);
-
-	fname.append( lineString );
-
-	auto it = _map.find(fname);
-
-	if (it != _map.end())
-	{
-		rec = it->second;
-	}
-	else if (create)
-	{
-		fprintf( pMgr.pLog, "Creating Function Profile Record: %s  %s\n", fname.c_str(), funcNameStringLiteral);
-
-		rec = new funcProfileRecord( fileNameStringLiteral, fileLineNumber,
-						funcNameStringLiteral, commentStringLiteral);
-
-		_map[fname] = rec;
-	}
-	return rec;
-}
-//-------------------------------------------------------------------------
-funcProfileRecord *profilerFuncMap::iterateBegin(void)
-{
-	autoScopedLock aLock(_mapMtx);
-	funcProfileRecord *rec = nullptr;
-
-	_map_it = _map.begin();
-
-	if (_map_it != _map.end())
-	{
-		rec = _map_it->second;
-	}
-	return rec;
-}
-//-------------------------------------------------------------------------
-funcProfileRecord *profilerFuncMap::iterateNext(void)
-{
-	autoScopedLock aLock(_mapMtx);
-	funcProfileRecord *rec = nullptr;
-
-	if (_map_it != _map.end())
-	{
-		_map_it++;
-	}
-	if (_map_it != _map.end())
-	{
-		rec = _map_it->second;
-	}
-	return rec;
-}
 //-------------------------------------------------------------------------
 //-----  profilerManager class
 //-------------------------------------------------------------------------
@@ -360,7 +128,7 @@ profilerManager::~profilerManager(void)
 	//printf("profilerManager Destructor\n");
 	{
 		autoScopedLock aLock(threadListMtx);
-		threadList.clear();
+		bufferList.clear();
 	}
 
 	if (pLog && (pLog != stdout))
@@ -373,60 +141,82 @@ profilerManager::~profilerManager(void)
 	}
 }
 
-int profilerManager::addThreadProfiler( profilerFuncMap *m )
+int profilerManager::addThreadProfileBuffer( profileMarkerBuffer *b )
 {
 	autoScopedLock aLock(threadListMtx);
-	threadList.push_back(m);
+	bufferList.push_back(b);
 	return 0;
 }
 
-int profilerManager::removeThreadProfiler( profilerFuncMap *m, bool shouldDestroy )
+int profilerManager::removeThreadProfileBuffer( profileMarkerBuffer *b )
 {
 	int result = -1;
 	autoScopedLock aLock(threadListMtx);
 
-	for (auto it = threadList.begin(); it != threadList.end(); it++)
+	for (auto it = bufferList.begin(); it != bufferList.end(); it++)
 	{
-		if (*it == m )
+		if (*it == b )
 		{
-			threadList.erase(it);
-			if (shouldDestroy)
-			{
-				delete m;
-			}
+			bufferList.erase(it);
 			result = 0;
 			break;
 		}
 	}
 	return result;
 }
+
+int profilerManager::dumpProfileMarkers(FILE *pFile)
+{
+	int result = -1;
+	autoScopedLock aLock(threadListMtx);
+
+	if (pFile == nullptr)
+	{
+		pFile = stdout;
+	}
+
+	if (pFile)
+	{
+		fprintf(pFile, "--------------------\n");
+		fprintf(pFile, "Dumping Profile Markers\n");
+		fprintf(pFile, "--------------------\n");
+
+		for (auto it = bufferList.begin(); it != bufferList.end(); it++)
+		{
+			profileMarkerBuffer *b = *it;
+
+			unsigned int idx = b->activeBufferIndex++;
+			idx = (idx + 2) % profileMarkerBuffer::maxBuffers;
+
+			for (auto &marker : b->vec[idx])
+			{
+				const char *markerTypeStr = (marker.type == profileMarker::MARKER_START) ? "MARKER_START" : "MARKER_END";
+				fprintf(pFile, "%s  %s:%i  %s  %s  Time: %" PRIu64 "\n",
+					markerTypeStr,
+					marker.fileName,
+					marker.fileLineNum,
+					marker.funcName,
+					marker.comment,
+					marker.ts.toMicroSeconds());
+			}
+			b->vec[idx].clear();
+		}
+		result = 0;
+	}
+	return result;
+}
+
 //-------------------------------------------------------------------------
 } // namespace FCEU
 
+void FCEU_profiler_log_thread_activity()
+{
+	FCEU::profilerManager *mgr = FCEU::profilerManager::getInstance();
+
+	if (mgr)
+	{
+		mgr->dumpProfileMarkers(mgr->pLog);
+	}
+}
 //-------------------------------------------------------------------------
-int FCEU_profiler_log_thread_activity(void)
-{
-	FCEU::execList.update();
-	return 0;
-}
-
-void FCEU_profiler_set_enabled(bool enabled)
-{
-	FCEU::execList.setEnabled(enabled);
-}
-
-bool FCEU_profiler_enabled(void)
-{
-	return FCEU::execList.enabled;
-}
-
-void FCEU_profiler_set_log_path(const char *path)
-{
-	FCEU::execList.setLogPath(path);
-}
-
-void FCEU_profiler_reset(void)
-{
-	FCEU::execList.reset();
-}
 #endif //  __FCEU_PROFILER_ENABLE__

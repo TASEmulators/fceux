@@ -2572,7 +2572,7 @@ void TasEditorWindow::saveProjectCompactCb(void)
 {
 	int ret;
 	QDialog dialog(this);
-	FCEU_CRITICAL_SECTION(emuLock);
+	FCEU_WRAPPER_SCOPED_LOCK(emuLock);
 	QGroupBox *fileContentsBox, *greenZoneSaveBox;
 	QVBoxLayout *mainLayout, *vbox1, *vbox;
 	QHBoxLayout *hbox;
@@ -2714,7 +2714,7 @@ void TasEditorWindow::setCurrentPattern(int idx)
 //----------------------------------------------------------------------------
 void TasEditorWindow::recordingChanged(int newState)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int oldState = !movie_readonly ? Qt::Checked : Qt::Unchecked;
 
 	if ( newState != oldState )
@@ -2725,21 +2725,21 @@ void TasEditorWindow::recordingChanged(int newState)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editUndoCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	history.undo();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editRedoCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	history.redo();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editUndoSelCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	int dragMode = pianoRoll->getDragMode();
 
@@ -2752,7 +2752,7 @@ void TasEditorWindow::editUndoSelCB(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editRedoSelCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	int dragMode = pianoRoll->getDragMode();
 
@@ -2765,7 +2765,7 @@ void TasEditorWindow::editRedoSelCB(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editDeselectAll(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	int dragMode = pianoRoll->getDragMode();
 
@@ -2777,7 +2777,7 @@ void TasEditorWindow::editDeselectAll(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editSelectAll(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	int dragMode = pianoRoll->getDragMode();
 
@@ -2789,7 +2789,7 @@ void TasEditorWindow::editSelectAll(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editSelBtwMkrs(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	int dragMode = pianoRoll->getDragMode();
 
@@ -2801,7 +2801,7 @@ void TasEditorWindow::editSelBtwMkrs(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editReselectClipboard(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	int dragMode = pianoRoll->getDragMode();
 
@@ -2814,70 +2814,70 @@ void TasEditorWindow::editReselectClipboard(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::editCutCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	splicer.cutSelectedInputToClipboard();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editCopyCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	splicer.copySelectedInputToClipboard();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editPasteCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	splicer.pasteInputFromClipboard();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editPasteInsertCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	splicer.pasteInsertInputFromClipboard();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editClearCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	splicer.clearSelectedFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editDeleteCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	splicer.deleteSelectedFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editCloneCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	splicer.cloneSelectedFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editInsertCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	splicer.insertSelectedFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editInsertNumFramesCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	splicer.insertNumberOfFrames();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::editTruncateMovieCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	splicer.truncateMovie();
 }
@@ -3153,35 +3153,35 @@ void TasEditorWindow::changeBranchesFontCB(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::playbackPauseCB(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	playback.toggleEmulationPause();
 	pianoRoll->update();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::playbackFrameRewind(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	playback.handleRewindFrame();
 	pianoRoll->update();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::playbackFrameForward(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	playback.handleForwardFrame();
 	pianoRoll->update();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::playbackFrameRewindFull(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	playback.handleRewindFull();
 	pianoRoll->update();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::playbackFrameForwardFull(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	playback.handleForwardFull();
 	pianoRoll->update();
 }
@@ -3198,7 +3198,7 @@ void TasEditorWindow::playbackFollowCursorCb(bool val)
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::playbackTurboSeekCb(bool val)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	taseditorConfig.turboSeek = val;
 
@@ -3216,7 +3216,7 @@ void TasEditorWindow::playbackAutoRestoreCb(bool val)
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::scrollSelectionUpOne(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int dragMode = pianoRoll->getDragMode();
 
 	//printf("DragMode: %i\n", dragMode);
@@ -3235,7 +3235,7 @@ void TasEditorWindow::scrollSelectionUpOne(void)
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::scrollSelectionDnOne(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int dragMode = pianoRoll->getDragMode();
 
 	//printf("DragMode: %i\n", dragMode);
@@ -3260,13 +3260,13 @@ void TasEditorWindow::histTreeItemActivated(QTreeWidgetItem *item, int col)
 	{
 		return;
 	}
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	history.handleSingleClick(row);
 }
 // ----------------------------------------------------------------------------------------------
 void TasEditorWindow::tabViewChanged(int idx)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	taseditorConfig.displayBranchesTree = (idx == 1);
 	bookmarks.redrawBookmarksSectionCaption();
 }
@@ -3275,7 +3275,7 @@ void TasEditorWindow::openProjectSaveOptions(void)
 {
 	int ret;
 	QDialog dialog(this);
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	QGroupBox *settingsBox, *fileContentsBox, *greenZoneSaveBox;
 	QVBoxLayout *mainLayout, *vbox1, *vbox;
 	QHBoxLayout *hbox1, *hbox;
@@ -3428,7 +3428,7 @@ void TasEditorWindow::setGreenzoneCapacity(void)
 	int ret;
 	int newValue = taseditorConfig.greenzoneCapacity;
 	QInputDialog dialog(this);
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	dialog.setWindowTitle( tr("Greenzone Capacity") );
 	dialog.setInputMode( QInputDialog::IntInput );
@@ -3467,7 +3467,7 @@ void TasEditorWindow::setMaxUndoCapacity(void)
 	int ret;
 	int newValue = taseditorConfig.maxUndoLevels;
 	QInputDialog dialog(this);
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	dialog.setWindowTitle( tr("Max undo levels") );
 	dialog.setInputMode( QInputDialog::IntInput );
@@ -3765,7 +3765,7 @@ bool TasEditorWindow::handleInputColumnSet(int joy, int button)
 
 void TasEditorWindow::setMarkers(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	if (current_selection->size())
@@ -3793,7 +3793,7 @@ void TasEditorWindow::setMarkers(void)
 }
 void TasEditorWindow::removeMarkers(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	RowsSelection* current_selection = selection.getCopyOfCurrentRowsSelection();
 	if (current_selection->size())
@@ -3820,7 +3820,7 @@ void TasEditorWindow::removeMarkers(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::ungreenzoneSelectedFrames(void)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	greenzone.ungreenzoneSelectedFrames();
 }
@@ -4606,7 +4606,7 @@ void QPianoRoll::resizeEvent(QResizeEvent *event)
 //----------------------------------------------------------------------------
 void QPianoRoll::mouseDoubleClickEvent(QMouseEvent * event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int col, line, row_index, column_index, kbModifiers, alt_pressed;
 	bool headerClicked, row_valid;
 	QPoint c = convPixToCursor( event->pos() );
@@ -4749,7 +4749,7 @@ void QPianoRoll::contextMenuEvent(QContextMenuEvent *event)
 	int mkr;
 	QAction *act;
 	QMenu menu(this);
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 
 	mkr = markersManager->getMarkerAtFrame( rowUnderMouse );
 
@@ -4825,7 +4825,7 @@ void QPianoRoll::contextMenuEvent(QContextMenuEvent *event)
 //----------------------------------------------------------------------------
 void QPianoRoll::mousePressEvent(QMouseEvent * event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int col, line, row_index, column_index, kbModifiers, alt_pressed;
 	bool row_valid, headerClicked;
 	QPoint c = convPixToCursor( event->pos() );
@@ -5012,7 +5012,7 @@ void QPianoRoll::mousePressEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QPianoRoll::mouseReleaseEvent(QMouseEvent * event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int col, line;
 	QPoint c = convPixToCursor( event->pos() );
 
@@ -5050,7 +5050,7 @@ void QPianoRoll::mouseReleaseEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QPianoRoll::mouseMoveEvent(QMouseEvent * event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int col, line;
 	QPoint c = convPixToCursor( event->pos() );
 
@@ -5081,7 +5081,7 @@ void QPianoRoll::mouseMoveEvent(QMouseEvent * event)
 //----------------------------------------------------------------------------
 void QPianoRoll::wheelEvent(QWheelEvent *event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int ofs, kbModifiers, msButtons, zDelta = 0;
 
 	QPoint numPixels = event->pixelDelta();
@@ -6256,7 +6256,7 @@ void QPianoRoll::finishDrag(void)
 //----------------------------------------------------------------------------
 void QPianoRoll::paintEvent(QPaintEvent *event)
 {
-	FCEU_CRITICAL_SECTION( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
 	int x, y, row, nrow, lineNum;
 	QPainter painter(this);
 	QColor /*white(255,255,255),*/ black(0,0,0), blkColor, rowTextColor, hdrGridColor;
@@ -7021,7 +7021,7 @@ int bookmarkPreviewPopup::currentIndex(void)
 //----------------------------------------------------------------------------
 void bookmarkPreviewPopup::imageIndexChanged(int newIndex)
 {
-	FCEU_CRITICAL_SECTION(emuLock);
+	FCEU_WRAPPER_SCOPED_LOCK(emuLock);
 	//printf("newIndex:%i\n", newIndex );
 
 	if ( newIndex >= 0 )
