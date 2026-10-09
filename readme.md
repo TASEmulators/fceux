@@ -14,8 +14,4 @@ Interim builds:
 
 But you might like Mesen more: https://github.com/SourMesen/Mesen2
 
-You should get releases from here: https://sourceforge.net/projects/fceultra/files/
-
-That's because github forces us to use tags we don't have for releases.
-
-2.6.6 is the most recent release but most people are using the autobuilds.
+2.7.0 is the most recent release but most people are using the autobuilds.
