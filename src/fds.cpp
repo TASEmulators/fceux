@@ -201,6 +201,17 @@ void FCEU_FDSEject(void)
 InDisk=255;
 }
 */
+bool FCEU_FDSIsInserted(void)
+{
+	return InDisk != 255;
+}
+
+int FCEU_FDSGetSelectedSide(void)
+{
+	if (TotalSides == 0) return -1;
+	return SelectDisk;
+}
+
 void FCEU_FDSSelect(void)
 {
 	if (TotalSides == 0)

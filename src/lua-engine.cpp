@@ -35,6 +35,7 @@
 #include "utils/xstring.h"
 #include "utils/memory.h"
 #include "utils/crc32.h"
+#include "fds.h"
 #include "fceulua.h"
 
 extern char FileBase[];
@@ -503,6 +504,46 @@ static int emu_softreset(lua_State *L) {
 		FCEUI_ResetNES();
 
 	return 0;
+}
+
+// emu.fds_eject()
+//   Ensures the FDS disk is ejected. No-op if already ejected or not an FDS.
+static int emu_fds_eject(lua_State *L) {
+	if (FCEU_FDSGetSelectedSide() < 0) return 0;
+	if (FCEU_FDSIsInserted())
+		FCEU_FDSInsert(); // toggles -> ejects
+	return 0;
+}
+
+// emu.fds_insert()
+//   Ensures the FDS disk is inserted. No-op if already inserted or not an FDS.
+static int emu_fds_insert(lua_State *L) {
+	if (FCEU_FDSGetSelectedSide() < 0) return 0;
+	if (!FCEU_FDSIsInserted())
+		FCEU_FDSInsert(); // toggles -> inserts
+	return 0;
+}
+
+// emu.fds_select_side()
+//   Advances to the next FDS side. Requires the disk to be ejected (the BIOS
+//   shows a message and bails otherwise — same behavior as the hotkey).
+static int emu_fds_select_side(lua_State *L) {
+	FCEU_FDSSelect();
+	return 0;
+}
+
+// bool emu.fds_is_inserted()
+static int emu_fds_is_inserted(lua_State *L) {
+	lua_pushboolean(L, FCEU_FDSIsInserted());
+	return 1;
+}
+
+// int emu.fds_selected_side()
+//   Returns the currently-selected disk-side index (0=A, 1=B, ...), or -1 if
+//   no FDS image is loaded.
+static int emu_fds_selected_side(lua_State *L) {
+	lua_pushinteger(L, FCEU_FDSGetSelectedSide());
+	return 1;
 }
 
 // emu.frameadvance()
@@ -6220,6 +6261,11 @@ static const struct luaL_reg emulib [] = {
 	{"debuggerloop", emu_debuggerloop},
 	{"debuggerloopstep", emu_debuggerloopstep},
 	{"softreset", emu_softreset},
+	{"fds_eject", emu_fds_eject},
+	{"fds_insert", emu_fds_insert},
+	{"fds_select_side", emu_fds_select_side},
+	{"fds_is_inserted", emu_fds_is_inserted},
+	{"fds_selected_side", emu_fds_selected_side},
 	{"speedmode", emu_speedmode},
 	{"frameadvance", emu_frameadvance},
 	{"paused", emu_paused},

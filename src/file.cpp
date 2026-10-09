@@ -33,9 +33,9 @@
 #include "utils/memory.h"
 #include "utils/md5.h"
 #ifdef _SYSTEM_MINIZIP
-#ifdef __linux
+#if defined(__linux) || defined(__APPLE__)
 #include <minizip/unzip.h>
-#else // Apple Most Likely
+#else
 #include <unzip.h>
 #endif
 #else
