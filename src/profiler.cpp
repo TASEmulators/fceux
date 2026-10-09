@@ -168,6 +168,11 @@ int profilerManager::removeThreadProfileBuffer( profileMarkerBuffer *b )
 int profilerManager::dumpProfileMarkers(FILE *pFile)
 {
 	int result = -1;
+
+	if (!enabled)
+	{
+		return result;
+	}
 	autoScopedLock aLock(threadListMtx);
 
 	if (pFile == nullptr)

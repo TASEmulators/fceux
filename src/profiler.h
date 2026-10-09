@@ -93,6 +93,8 @@ namespace FCEU
 			profilerManager(void);
 			~profilerManager(void);
 	
+			void setEnabled(bool enable){ enabled = enable; };
+			bool isEnabled(void){ return enabled; };
 			int addThreadProfileBuffer( profileMarkerBuffer *b );
 			int removeThreadProfileBuffer( profileMarkerBuffer *b );
 			int dumpProfileMarkers(FILE *pFile = nullptr);
@@ -104,6 +106,7 @@ namespace FCEU
 	
 			mutex  threadListMtx;
 			std::list <profileMarkerBuffer*> bufferList;
+			bool enabled = false;
 			static profilerManager *instance;
 	};
 } // namespace FCEU
