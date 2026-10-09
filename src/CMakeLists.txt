@@ -201,6 +201,14 @@ else(WIN32)
 	message( STATUS "Address Sanitizer Disabled" )
   endif()
 
+  if ( ${TSAN_ENABLE} )
+	add_definitions( -fsanitize=thread )
+	set( TSAN_LDFLAGS  -ltsan)
+	message( STATUS "Thread Sanitizer Enabled" )
+  else()
+	message( STATUS "Thread Sanitizer Disabled" )
+  endif()
+
   # Check for libminizip
   pkg_check_modules( MINIZIP REQUIRED minizip)
 
@@ -743,7 +751,7 @@ add_executable(  ${APP_NAME}  ${SOURCES} ../resources.qrc
 endif()
 
 target_link_libraries( ${APP_NAME}
-   ${ASAN_LDFLAGS}  ${GPROF_LDFLAGS}
+   ${ASAN_LDFLAGS} ${TSAN_LDFLAGS} ${GPROF_LDFLAGS}
    ${${Qt}Widgets_LIBRARIES}
    ${${Qt}Help_LIBRARIES}
    ${${Qt}Qml_LIBRARIES}
