@@ -208,9 +208,7 @@ FCEUD_GetTime(void)
 	}
 	else
 	{
-		t = (double)SDL_GetTicks();
-
-		t = t * 1e-3;
+		t = SDL_GetTicks64();
 	}
 	return t;
 }
