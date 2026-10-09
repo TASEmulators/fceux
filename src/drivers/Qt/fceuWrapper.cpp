@@ -206,7 +206,11 @@ FCEUD_GetTime(void)
 	}
 	else
 	{
-		t = SDL_GetTicks64();
+		#if SDL_VERSION_ATLEAST(2,0,18)
+			t = SDL_GetTicks64();
+		#else
+			t = SDL_GetTicks();
+		#endif
 	}
 	return t;
 }
