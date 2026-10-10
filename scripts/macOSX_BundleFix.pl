@@ -48,6 +48,9 @@ for ($i=0; $i<=$#libList; $i++)
     fixLib($lib);
 }
 
+system('codesign', '--force', '--deep', '--sign', '-', $INSTALL_PREFIX) == 0
+   or die "Failed to re-sign app bundle: $INSTALL_PREFIX\n";
+
 sub fixLib
 {
    my $j;
@@ -85,10 +88,10 @@ sub fixLib
          {
             #print "Found Packaged $depName...\n";
 
-            $cmd = "install_name_tool  -change  $depPath  \@executable_path/../Frameworks/$depName  $lib";
             print "\tFIXING LIB LINK: '$depPath'\n";
-            #print("$cmd\n");
-            system($cmd);
+            system('install_name_tool', '-change', $depPath,
+                   "\@executable_path/../Frameworks/$depName", $lib) == 0
+               or die "Failed to fix library dependency: $depPath\n";
          }
       }
    }

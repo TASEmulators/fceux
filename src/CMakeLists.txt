@@ -804,10 +804,18 @@ find_package(Perl REQUIRED)
 
 install( CODE "
 	message(STATUS \"Deploying and fixing up dependencies in app: ${APP}\")
-	execute_process(COMMAND \"${MACDEPLOYQT}\" \"${APP}\" -verbose=1)
+	execute_process(COMMAND \"${MACDEPLOYQT}\" \"${APP}\" -verbose=1
+	                RESULT_VARIABLE MACDEPLOYQT_RESULT)
+	if(NOT \"\${MACDEPLOYQT_RESULT}\" STREQUAL \"0\")
+		message(FATAL_ERROR \"macdeployqt failed: \${MACDEPLOYQT_RESULT}\")
+	endif()
 	execute_process(COMMAND \"${PERL_EXECUTABLE}\"
 	                        \"${CMAKE_SOURCE_DIR}/scripts/macOSX_BundleFix.pl\"
-	                        \"${CMAKE_BINARY_DIR}/_CPack_Packages\")
+	                        \"${APP}\"
+	                RESULT_VARIABLE BUNDLE_FIX_RESULT)
+	if(NOT \"\${BUNDLE_FIX_RESULT}\" STREQUAL \"0\")
+		message(FATAL_ERROR \"macOS bundle fix failed: \${BUNDLE_FIX_RESULT}\")
+	endif()
 		"
 	COMPONENT Runtime
 	)
