@@ -802,10 +802,9 @@ endif()
 
 find_package(Perl REQUIRED)
 
-# FCEUX uses QtQml for JavaScript scripting, but not Qt Quick imports.
 install( CODE "
 	message(STATUS \"Deploying and fixing up dependencies in app: ${APP}\")
-	execute_process(COMMAND \"${MACDEPLOYQT}\" \"${APP}\" -verbose=1 -no-quick-import
+	execute_process(COMMAND \"${MACDEPLOYQT}\" \"${APP}\" -verbose=1
 	                RESULT_VARIABLE MACDEPLOYQT_RESULT)
 	if(NOT \"\${MACDEPLOYQT_RESULT}\" STREQUAL \"0\")
 		message(FATAL_ERROR \"macdeployqt failed: \${MACDEPLOYQT_RESULT}\")

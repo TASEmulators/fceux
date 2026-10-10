@@ -18,8 +18,8 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          brew install cmake ninja pkgconf sdl2 qt minizip libarchive x264 x265 ffmpeg
-          echo "$(brew --prefix qt)/bin" >> "$GITHUB_PATH"
+          brew install cmake ninja pkgconf sdl2 qtbase qtdeclarative qtsvg qttools minizip libarchive x264 x265 ffmpeg
+          echo "$(brew --prefix qttools)/bin" >> "$GITHUB_PATH"
 
       - name: Configure and build
         run: |
@@ -28,7 +28,7 @@ jobs:
 
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$(brew --prefix qt)" \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix qtbase);$(brew --prefix qtdeclarative);$(brew --prefix qtsvg);$(brew --prefix qttools)" \
             -DQT6=1 \
             -DCMAKE_PROJECT_VERSION_MAJOR="$VERSION_MAJOR" \
             -DCMAKE_PROJECT_VERSION_MINOR="$VERSION_MINOR" \
