@@ -18,8 +18,11 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          brew install cmake ninja pkgconf sdl2 qtbase qtdeclarative qtsvg qttools minizip libarchive x264 x265 ffmpeg
-          echo "$(brew --prefix qttools)/bin" >> "$GITHUB_PATH"
+          brew install cmake ninja pkgconf sdl2 qt6 minizip libarchive x264 x265 ffmpeg
+          echo "$(brew --prefix qt6)/bin" >> "$GITHUB_PATH"
+          LIBARCHIVE_PREFIX="$(brew --prefix libarchive)"
+          PKG_CONFIG_PATH="${PKG_CONFIG_PATH:+$PKG_CONFIG_PATH:}$(brew --prefix)/lib/pkgconfig:$LIBARCHIVE_PREFIX/lib/pkgconfig"
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
 
       - name: Configure and build
         run: |
@@ -28,7 +31,7 @@ jobs:
 
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$(brew --prefix qtbase);$(brew --prefix qtdeclarative);$(brew --prefix qtsvg);$(brew --prefix qttools)" \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix qt6)" \
             -DQT6=1 \
             -DCMAKE_PROJECT_VERSION_MAJOR="$VERSION_MAJOR" \
             -DCMAKE_PROJECT_VERSION_MINOR="$VERSION_MINOR" \
@@ -44,5 +47,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: fceux-macos
-          path: build/*.dmg
+          path: fceux-*.dmg
           if-no-files-found: error
