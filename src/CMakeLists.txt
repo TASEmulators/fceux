@@ -105,7 +105,7 @@ else()
 
 	if (${Qt5Network_FOUND})
 		message( STATUS "Qt5 Network Module Found")
-		add_definitions( -D__FCEU_NETWORK_ENABLE__ )
+		add_definitions( -D__FCEU_QNETWORK_ENABLE__ )
 	else()
 		message( STATUS "Qt5 Network Module Not Found")
 	endif()
