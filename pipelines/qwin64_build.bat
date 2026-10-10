@@ -29,6 +29,35 @@ cd    build
 mkdir bin
 set BUILD_DIR=%CD%
 
+set "VULKAN_SDK_VERSION=1.4.363.0"
+if defined VULKAN_SDK if exist "%VULKAN_SDK%\Include\vulkan\vulkan.h" if exist "%VULKAN_SDK%\Lib\vulkan-1.lib" goto vulkan_sdk_ready
+
+set "VULKAN_SDK=C:\VulkanSDK\%VULKAN_SDK_VERSION%"
+if exist "%VULKAN_SDK%\Include\vulkan\vulkan.h" if exist "%VULKAN_SDK%\Lib\vulkan-1.lib" goto vulkan_sdk_ready
+
+set "VULKAN_SDK=%LOCALAPPDATA%\VulkanSDK\%VULKAN_SDK_VERSION%"
+if exist "%VULKAN_SDK%\Include\vulkan\vulkan.h" if exist "%VULKAN_SDK%\Lib\vulkan-1.lib" goto vulkan_sdk_ready
+
+set "VULKAN_SDK_INSTALLER=%BUILD_DIR%\vulkansdk-windows-X64-%VULKAN_SDK_VERSION%.exe"
+echo Downloading Vulkan SDK %VULKAN_SDK_VERSION%
+curl -fL --retry 3 -o "%VULKAN_SDK_INSTALLER%" "https://sdk.lunarg.com/sdk/download/%VULKAN_SDK_VERSION%/windows/vulkansdk-windows-X64-%VULKAN_SDK_VERSION%.exe"
+if errorlevel 1 exit /b 1
+
+echo Installing Vulkan SDK to "%VULKAN_SDK%"
+"%VULKAN_SDK_INSTALLER%" --root "%VULKAN_SDK%" --accept-licenses --default-answer --confirm-command install copy_only=1
+if errorlevel 1 exit /b 1
+if not exist "%VULKAN_SDK%\Include\vulkan\vulkan.h" (
+   echo ERROR: Vulkan SDK installation did not provide the expected headers.
+   exit /b 1
+)
+if not exist "%VULKAN_SDK%\Lib\vulkan-1.lib" (
+   echo ERROR: Vulkan SDK installation did not provide the expected x64 import library.
+   exit /b 1
+)
+
+:vulkan_sdk_ready
+echo Using Vulkan SDK at "%VULKAN_SDK%"
+
 set SDL_VERSION=2.32.8
 set FFMPEG_VERSION=5.1.2
 set LIBARCHIVE_VERSION=3.6.2

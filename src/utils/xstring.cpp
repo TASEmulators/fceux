@@ -752,7 +752,7 @@ std::wstring mbstowcs(std::string str) // UTF8->UTF32
 {
 	try {
 		return UtfConverter::FromUtf8(str);
-	} catch(std::exception &e) {
+	} catch(std::exception &) {
 		return L"(failed UTF-8 conversion)";
 	}
 }
