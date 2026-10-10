@@ -16,6 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Show runner macOS version
+        run: |
+          sw_vers
+          uname -m
+          xcodebuild -version
+
       - name: Install build dependencies
         run: |
           brew install cmake ninja pkgconf sdl2 qt6 minizip libarchive x264 x265 ffmpeg
