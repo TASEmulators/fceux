@@ -9,7 +9,7 @@ void FCEU_Guid::newGuid()
 std::string FCEU_Guid::toString()
 {
 	char buf[37];
-	sprintf(buf,"%08X-%04X-%04X-%04X-%02X%02X%02X%02X%02X%02X",
+	snprintf(buf, sizeof(buf), "%08X-%04X-%04X-%04X-%02X%02X%02X%02X%02X%02X",
 		FCEU_de32lsb(data),FCEU_de16lsb(data+4),FCEU_de16lsb(data+6),FCEU_de16lsb(data+8),data[10],data[11],data[12],data[13],data[14],data[15]);
 	return std::string(buf);
 }

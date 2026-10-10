@@ -207,13 +207,13 @@ std::string BytesToString(const void* data, int len)
 {
 	char temp[16];
 	if(len==1) {
-		sprintf(temp,"%d",*(const unsigned char*)data);
+		snprintf(temp, sizeof(temp),"%d",*(const unsigned char*)data);
 		return temp;
 	} else if(len==2) {
-		sprintf(temp,"%d",*(const unsigned short*)data);
+		snprintf(temp, sizeof(temp),"%d",*(const unsigned short*)data);
 		return temp;
 	} else if(len==4) {
-		sprintf(temp,"%d",*(const unsigned int*)data);
+		snprintf(temp, sizeof(temp),"%d",*(const unsigned int*)data);
 		return temp;		
 	}
 	
@@ -552,7 +552,7 @@ char *U8ToHexStr(uint8 a)
 std::string stditoa(int n)
 {
 	char tempbuf[16];
-	sprintf(tempbuf, "%d", n);
+	snprintf(tempbuf, sizeof(tempbuf), "%d", n);
 	return tempbuf;
 }
 
