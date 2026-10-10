@@ -37,6 +37,8 @@ endif()
 
 option(FCEU_PROFILER_ENABLE "Enable the built-in FCEU performance profiler" OFF)
 
+find_package(Vulkan QUIET)
+
 if ( ${FCEU_PROFILER_ENABLE} )
 	message( STATUS "FCEU Profiler Enabled")
 	add_definitions( -D__FCEU_PROFILER_ENABLE__ )
@@ -711,6 +713,17 @@ set(SRC_DRIVERS_SDL
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
 
+include(CheckCXXSourceCompiles)
+if (Vulkan_FOUND)
+	set(CMAKE_REQUIRED_LIBRARIES ${Qt}::Gui Vulkan::Vulkan)
+	check_cxx_source_compiles("#include <QVulkanInstance>\nint main() { QVulkanInstance instance; return instance.isValid(); }" FCEUX_QT_HAS_VULKAN)
+	unset(CMAKE_REQUIRED_LIBRARIES)
+endif()
+
+if (Vulkan_FOUND AND FCEUX_QT_HAS_VULKAN)
+	list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerVulkan.cpp)
+endif()
+
 # Put build timestamp into BUILD_TS environment variable and from there into
 # the FCEUX_BUILD_TIMESTAMP preprocessor definition.
 # Note: with CMake >= 3.8.0, this will respect SOURCE_DATE_EPOCH. For more info,
@@ -765,6 +778,11 @@ target_link_libraries( ${APP_NAME}
 	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS} ${LIBAV_LDFLAGS}
  	${SYS_LIBS}
 )
+
+if (Vulkan_FOUND AND FCEUX_QT_HAS_VULKAN)
+	target_compile_definitions(${APP_NAME} PRIVATE FCEUX_HAS_QT_VULKAN)
+	target_link_libraries(${APP_NAME} Vulkan::Vulkan)
+endif()
 
 if(NOT MSVC)
 	# Add minizip subdirectory so #include<unzip.h> works without the "minizip" subdirectory in the directive

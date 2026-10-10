@@ -33,6 +33,9 @@
 #include "Qt/ConsoleViewerGL.h"
 #include "Qt/ConsoleViewerSDL.h"
 #include "Qt/ConsoleViewerQWidget.h"
+#ifdef FCEUX_HAS_QT_VULKAN
+#include "Qt/ConsoleViewerVulkan.h"
+#endif
 #include "Qt/GamePadConf.h"
 #include "Qt/AviRecord.h"
 
@@ -132,6 +135,9 @@ class  consoleWin_t : public QMainWindow
 		ConsoleViewGL_t       *viewport_GL;
 		ConsoleViewSDL_t      *viewport_SDL;
 		ConsoleViewQWidget_t  *viewport_QWidget;
+#ifdef FCEUX_HAS_QT_VULKAN
+		ConsoleViewVulkan_t   *viewport_Vulkan;
+#endif
 		ConsoleViewerBase     *viewport_Interface;
 
 		void setCyclePeriodms( int ms );

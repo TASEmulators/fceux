@@ -157,6 +157,9 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	viewport_GL      = NULL;
 	viewport_SDL     = NULL;
 	viewport_QWidget = NULL;
+#ifdef FCEUX_HAS_QT_VULKAN
+	viewport_Vulkan  = NULL;
+#endif
 	viewport_Interface = NULL;
 
 	contextMenuEnable      = false;
@@ -2145,6 +2148,22 @@ int consoleWin_t::unloadVideoDriver(void)
 
 		viewport_QWidget = NULL;
 	}
+#ifdef FCEUX_HAS_QT_VULKAN
+	if (viewport_Vulkan != NULL)
+	{
+		if (viewport_Vulkan == centralWidget())
+		{
+			takeCentralWidget();
+		}
+		else
+		{
+			printf("Error: Central Widget Failed!\n");
+		}
+		viewport_Vulkan->shutdown();
+		viewport_Vulkan->deleteLater();
+		viewport_Vulkan = NULL;
+	}
+#endif
 	return 0;
 }
 //---------------------------------------------------------------------------
@@ -2182,6 +2201,16 @@ void consoleWin_t::videoDriverDestroyed(QObject* obj)
 		}
 		viewport_QWidget = NULL;
 	}
+#ifdef FCEUX_HAS_QT_VULKAN
+	if (viewport_Vulkan == obj)
+	{
+		if (viewport_Interface == static_cast<ConsoleViewerBase*>(viewport_Vulkan))
+		{
+			viewport_Interface = NULL;
+		}
+		viewport_Vulkan = NULL;
+	}
+#endif
 	printf("Video Driver Destroyed: %p\n", obj);
 	//printf("viewport_GL: %p\n", viewport_GL);
 	//printf("viewport_SDL: %p\n", viewport_SDL);
@@ -2258,6 +2287,27 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 			connect( viewport_GL, SIGNAL(destroyed(QObject*)), this, SLOT(videoDriverDestroyed(QObject*)) );
 		}
 		break;
+#ifdef FCEUX_HAS_QT_VULKAN
+		case ConsoleViewerBase::VIDEO_DRIVER_VULKAN:
+		{
+			viewport_Vulkan = new ConsoleViewVulkan_t(this);
+			viewport_Interface = static_cast<ConsoleViewerBase*>(viewport_Vulkan);
+			setCentralWidget(viewport_Vulkan);
+			setViewportAspect();
+			connect(viewport_Vulkan, SIGNAL(destroyed(QObject*)), this, SLOT(videoDriverDestroyed(QObject*)));
+			if (viewport_Vulkan->init() != 0)
+			{
+				unloadVideoDriver();
+				if (g_config)
+				{
+					g_config->setOption("SDL.VideoDriver", (int)ConsoleViewerBase::VIDEO_DRIVER_QPAINTER);
+					g_config->save();
+				}
+				return loadVideoDriver(ConsoleViewerBase::VIDEO_DRIVER_QPAINTER);
+			}
+		}
+		break;
+#endif
 		default:
 		case ConsoleViewerBase::VIDEO_DRIVER_QPAINTER:
 		{

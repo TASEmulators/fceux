@@ -14,7 +14,8 @@ class ConsoleViewerBase
 		{
 			VIDEO_DRIVER_OPENGL = 0,
 			VIDEO_DRIVER_SDL,
-			VIDEO_DRIVER_QPAINTER
+			VIDEO_DRIVER_QPAINTER,
+			VIDEO_DRIVER_VULKAN
 		};
 		virtual int  init(void) = 0;
 		virtual void reset(void) = 0;

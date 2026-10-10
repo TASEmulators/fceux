@@ -94,6 +94,9 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	driverSelect->addItem( tr("OpenGL"), ConsoleViewerBase::VIDEO_DRIVER_OPENGL );
 	driverSelect->addItem( tr("SDL"), ConsoleViewerBase::VIDEO_DRIVER_SDL );
 	driverSelect->addItem( tr("QPainter"), ConsoleViewerBase::VIDEO_DRIVER_QPAINTER );
+#ifdef FCEUX_HAS_QT_VULKAN
+	driverSelect->addItem( tr("Vulkan"), ConsoleViewerBase::VIDEO_DRIVER_VULKAN );
+#endif
 	
 	hbox1 = new QHBoxLayout();
 

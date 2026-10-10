@@ -12,7 +12,16 @@
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",
-			"environment": [],
+			"environment": [
+				{
+					"name": "QT_QPA_PLATFORM",
+					"value": "xcb"
+				},
+				{
+					"name": "QT_QPA_PLATFORMTHEME",
+					"value": "gtk2"
+				}
+			],
 			"externalConsole": false,
 			"MIMode": "gdb",
 			"setupCommands": [
