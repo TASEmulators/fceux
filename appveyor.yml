@@ -63,7 +63,7 @@ for:
         - job_name: MacOS
 
     build_script:
-    - sh: perl pipelines/build.pl macOS
+    - sh: echo "Skipping macOS build until AppVeyor provides an ARM64 environment."
 
 deploy:
 
