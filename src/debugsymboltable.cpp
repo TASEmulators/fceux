@@ -47,7 +47,7 @@ int debugSymbol_t::updateName( const char *name, int arrayIndex )
 	{
 		char stmp[32];
 
-		sprintf( stmp, "[%i]", arrayIndex );
+		snprintf( stmp, sizeof(stmp), "[%i]", arrayIndex );
 
 		newName.append(stmp);
 	}
@@ -275,7 +275,7 @@ int debugSymbolPage_t::save(void)
 	{
 		char suffix[32];
 
-		sprintf( suffix, ".%X.nl", _pageNum );
+		snprintf( suffix, sizeof(suffix), ".%X.nl", _pageNum );
 
 		filename.append( suffix );
 	}
@@ -436,7 +436,7 @@ static int generateNLFilenameForBank(int bank, std::string &NLfilename)
 		if(bank == 0x0F)
 			bank = 0x1F;
 		#endif
-		sprintf( stmp, ".%X.nl", bank);
+		snprintf( stmp, sizeof(stmp), ".%X.nl", bank);
 		NLfilename.append( stmp );
 	}
 	return 0;
@@ -675,7 +675,7 @@ int debugSymbolTable_t::loadFileNL( int bank )
 					{
 						arraySym->ofs = sym->ofs + j;
 
-						sprintf( stmp, "[%i]", j );
+						snprintf( stmp, sizeof(stmp), "[%i]", j );
 						arraySym->_name.assign( sym->name() );
 						arraySym->_name.append( stmp );
 						arraySym->_comment.assign( sym->comment() );
