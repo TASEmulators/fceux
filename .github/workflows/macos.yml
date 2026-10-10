@@ -1,0 +1,48 @@
+name: macOS
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          brew install cmake ninja pkgconf sdl2 qt minizip libarchive x264 x265 ffmpeg
+          echo "$(brew --prefix qt)/bin" >> "$GITHUB_PATH"
+
+      - name: Configure and build
+        run: |
+          VERSION="$(perl scripts/fceuVersion.pl)"
+          IFS=. read -r VERSION_MAJOR VERSION_MINOR VERSION_PATCH <<< "$VERSION"
+
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix qt)" \
+            -DQT6=1 \
+            -DCMAKE_PROJECT_VERSION_MAJOR="$VERSION_MAJOR" \
+            -DCMAKE_PROJECT_VERSION_MINOR="$VERSION_MINOR" \
+            -DCMAKE_PROJECT_VERSION_PATCH="$VERSION_PATCH" \
+            -DCPACK_PACKAGE_VERSION_MAJOR="$VERSION_MAJOR" \
+            -DCPACK_PACKAGE_VERSION_MINOR="$VERSION_MINOR" \
+            -DCPACK_PACKAGE_VERSION_PATCH="$VERSION_PATCH"
+          cmake --build build --parallel
+
+      - name: Package DMG
+        run: cpack --config build/CPackConfig.cmake -G DragNDrop
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fceux-macos
+          path: build/*.dmg
+          if-no-files-found: error
