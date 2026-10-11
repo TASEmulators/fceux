@@ -3120,7 +3120,6 @@ void NetPlayReadInputFrame(uint8_t* joy)
 
 		if (server)
 		{
-			NetPlayFrameInput frameInput;
 			netPlayInputFrame = server->getNextInput();
 		}
 	}
