@@ -28,11 +28,12 @@
 #include <QTreeView>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
+#include <QWaitCondition>
+#include <QMutexLocker>
+#include <QMutex>
 
 #include <QTcpSocket>
 #include <QTcpServer>
-
-#include "utils/mutex.h"
 
 class NetPlayClient;
 
@@ -87,20 +88,32 @@ class NetPlayServer : public QTcpServer
 
 		size_t inputAvailable(void)
 		{
-			FCEU::autoScopedLock alock(inputMtx);
-		       	return input.size();
+			QMutexLocker lock(&inputMtx);
+			return input.size();
+		};
+
+		bool waitForInput(unsigned long timeout = ULONG_MAX)
+		{
+			bool inputRdy = true;
+			QMutexLocker lock(&inputMtx);
+			if (input.empty())
+			{
+				inputRdy = inputWaitCond.wait(&inputMtx, timeout);
+			}
+			return inputRdy;
 		};
 
 		void pushBackInput( NetPlayFrameInput &in )
 		{
-			FCEU::autoScopedLock alock(inputMtx);
+			QMutexLocker lock(&inputMtx);
 			input.push_back(in);
+			inputWaitCond.wakeAll();
 		};
 
 		NetPlayFrameInput getNextInput(void)
 		{
 			NetPlayFrameInput in;
-			FCEU::autoScopedLock alock(inputMtx);
+			QMutexLocker lock(&inputMtx);
 			if (!input.empty())
 			{
 				in = input.front();
@@ -112,7 +125,7 @@ class NetPlayServer : public QTcpServer
 		uint32_t inputFrameBack()
 		{
 			uint32_t frame = 0;
-			FCEU::autoScopedLock alock(inputMtx);
+			QMutexLocker lock(&inputMtx);
 			if (!input.empty())
 			{
 				NetPlayFrameInput &in = input.back();
@@ -123,7 +136,7 @@ class NetPlayServer : public QTcpServer
 
 		void inputClear()
 		{
-			FCEU::autoScopedLock alock(inputMtx);
+			QMutexLocker lock(&inputMtx);
 			input.clear();
 		}
 
@@ -163,7 +176,8 @@ class NetPlayServer : public QTcpServer
 
 		ClientList_t clientList;
 		std::list <NetPlayFrameInput> input;
-		FCEU::mutex inputMtx;
+		QMutex inputMtx;
+		QWaitCondition inputWaitCond;
 		int role = -1;
 		int roleMask = 0;
 		NetPlayClient* clientPlayer[4] = { nullptr };
@@ -228,26 +242,38 @@ class NetPlayClient : public QObject
 
 		bool inputAvailable(void)
 		{
-			FCEU::autoScopedLock alock(inputMtx);
+			QMutexLocker lock(&inputMtx);
 		       	return !input.empty();
 		};
 
 		size_t inputAvailableCount(void)
 		{
-			FCEU::autoScopedLock alock(inputMtx);
+			QMutexLocker lock(&inputMtx);
 		       	return input.size();
+		};
+
+		bool waitForInput(unsigned long timeout = ULONG_MAX)
+		{
+			bool inputRdy = true;
+			QMutexLocker lock(&inputMtx);
+			if (input.empty())
+			{
+				inputRdy = inputWaitCond.wait(&inputMtx, timeout);
+			}
+			return inputRdy;
 		};
 
 		void pushBackInput( NetPlayFrameInput &in )
 		{
-			FCEU::autoScopedLock alock(inputMtx);
+			QMutexLocker lock(&inputMtx);
 			input.push_back(in);
+			inputWaitCond.wakeAll();
 		};
 
 		NetPlayFrameInput getNextInput(void)
 		{
 			NetPlayFrameInput in;
-			FCEU::autoScopedLock alock(inputMtx);
+			QMutexLocker lock(&inputMtx);
 			if (!input.empty())
 			{
 				in = input.front();
@@ -259,7 +285,7 @@ class NetPlayClient : public QObject
 		uint32_t inputFrameBack()
 		{
 			uint32_t frame = 0;
-			FCEU::autoScopedLock alock(inputMtx);
+			QMutexLocker lock(&inputMtx);
 			if (!input.empty())
 			{
 				NetPlayFrameInput &in = input.back();
@@ -270,7 +296,7 @@ class NetPlayClient : public QObject
 
 		void inputClear()
 		{
-			FCEU::autoScopedLock alock(inputMtx);
+			QMutexLocker lock(&inputMtx);
 			input.clear();
 		}
 
@@ -350,7 +376,8 @@ class NetPlayClient : public QObject
 		long int  spawnTimeStampMs = 0;
 
 		std::list <NetPlayFrameInput> input;
-		FCEU::mutex inputMtx;
+		QMutex inputMtx;
+		QWaitCondition inputWaitCond;
 
 		QFile*  debugLog = nullptr;
 
@@ -520,6 +547,7 @@ bool isNetPlayClient(void);
 void NetPlayPeriodicUpdate(void);
 bool NetPlaySkipWait(void);
 int NetPlayFrameWait(void);
+bool NetPlayWaitForInput(unsigned long timeout = ULONG_MAX);
 void NetPlayOnFrameBegin(void);
 void NetPlayReadInputFrame(uint8_t* joy);
 void NetPlayCloseSession(void);

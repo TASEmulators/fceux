@@ -1464,8 +1464,19 @@ bool fceuWrapperIsLocked(void)
 
 int  fceuWrapperUpdate( void )
 {
-	bool lock_acq = false;
+	// For netplay, set pause if we do not have input ready for all players
+	if (NetPlayActive())
+	{
+		const bool inputRdy = NetPlayWaitForInput(100lu);
 
+		FCEUI_SetNetPlayPause(!inputRdy);
+	}
+	else
+	{
+		FCEUI_SetNetPlayPause(false);
+	}
+ 
+	bool lock_acq = false;
 	do
 	{
 		FCEU_PROFILE_FUNC("EMU Thread Wrapper Lock");
@@ -1473,23 +1484,6 @@ int  fceuWrapperUpdate( void )
 
 	} while (!lock_acq);
 
-	// For netplay, set pause if we do not have input ready for all players
-	if (NetPlayActive())
-	{
-		if (NetPlayFrameWait())
-		{
-			FCEUI_SetNetPlayPause(true);
-		}
-		else
-		{
-			FCEUI_SetNetPlayPause(false);
-		}
-	}
-	else
-	{
-		FCEUI_SetNetPlayPause(false);
-	}
- 
 	if ( GameInfo )
 	{
 #ifdef __FCEU_QSCRIPT_ENABLE__

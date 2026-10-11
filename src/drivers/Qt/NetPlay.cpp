@@ -466,7 +466,7 @@ int NetPlayServer::sendStateSyncReq( NetPlayClient *client )
 
 	{
 		int i = 0;
-		FCEU::autoScopedLock alock(inputMtx);
+		QMutexLocker lock(&inputMtx);
 		for (auto& inputFrame : input)
 		{
 			if (i < netPlayLoadStateResp::MaxCtrlFrames)
@@ -3071,6 +3071,26 @@ int NetPlayFrameWait(void)
 		}
 	}
 	return wait;
+}
+//----------------------------------------------------------------------------
+bool NetPlayWaitForInput(unsigned long timeoutMs)
+{
+	NetPlayClient *client = NetPlayClient::GetInstance();
+
+	if (client)
+	{
+		return client->waitForInput(timeoutMs);
+	}
+	else
+	{
+		NetPlayServer *server = NetPlayServer::GetInstance();
+
+		if (server)
+		{
+			return server->waitForInput(timeoutMs);
+		}
+	}
+	return false;
 }
 //----------------------------------------------------------------------------
 bool NetPlaySkipWait(void)
