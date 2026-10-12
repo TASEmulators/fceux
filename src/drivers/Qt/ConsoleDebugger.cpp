@@ -5906,8 +5906,10 @@ void QAsmView::mouseMoveEvent(QMouseEvent * event)
 		if (addr >= 0x8000)
 		{
 			int bank, romOfs;
+			FCEU_WRAPPER_LOCK();
 			bank   = getBank(addr);
 			romOfs = GetNesFileAddress(addr);
+			FCEU_WRAPPER_UNLOCK();
 
 			snprintf( txt, sizeof(txt), "CPU Address: %02X:%04X", bank, addr);
 

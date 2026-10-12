@@ -50,9 +50,11 @@
 
 #include <cstring>
 #include <cstdio>
+#include <atomic>
 
 /** GLOBALS **/
 int NoWaiting = 0;
+std::atomic<int> NoWaitingGui = 0;
 extern Config *g_config;
 extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
 unsigned int frameAdvHoldTimer = 0;
@@ -212,6 +214,7 @@ uint32 GetGamepadPressedImmediate(void)
 void emuThreadPollInputs()
 {
 	JSreturnEmu = JSreturnGui.load(std::memory_order_relaxed);
+	NoWaiting = NoWaitingGui.load(std::memory_order_relaxed);
 }
 
 #define keyonly(__a) _keyonly(MKK(__a))
@@ -1016,11 +1019,11 @@ static void KeyboardCommands(void)
 	// Toggle throttling
 	if (Hotkeys[HK_TURBO].getState())
 	{
-		NoWaiting |= 0x01;
+		NoWaitingGui.fetch_or(0x01);
 	}
 	else
 	{
-		NoWaiting &= 0x02;
+		NoWaitingGui.fetch_and(0x02);
 		//printf("NoWaiting: 0x%04x\n", NoWaiting );
 	}
 
