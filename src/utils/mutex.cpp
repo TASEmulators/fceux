@@ -73,7 +73,7 @@ bool mutex::tryLock()
 	return success;
 }
 
-static int msleep( int ms )
+int mutex::msleep( int ms )
 {
 	int ret = 0;
 	#ifdef WIN32

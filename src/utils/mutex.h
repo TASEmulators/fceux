@@ -30,6 +30,7 @@ namespace FCEU
 			void unlock(void);
 			bool tryLock(void);
 			bool tryLock(int timeout);
+			static int msleep(int ms);
 	
 		private:
 	#ifdef QT_USE_QMUTEX
