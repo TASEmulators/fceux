@@ -146,6 +146,7 @@ void UpdateInput(Config *config);
 const char* ButtonName(const ButtConfig* bc);
 
 void pollEventsSDL();
+void emuThreadPollInputs();
 uint32_t GetGamepadPressedImmediate(void);
 int getInputSelection( int port, int *cur, int *usr );
 int saveInputSettingsToFile( const char *fileBase = NULL );

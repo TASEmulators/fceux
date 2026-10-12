@@ -139,7 +139,8 @@ static void UpdateMahjong(void);
 static void UpdateFTrainer(void);
 static void UpdateTopRider(void);
 
-static uint32 JSreturn = 0;
+static std::atomic<uint32_t> JSreturnGui = 0;
+static uint32_t JSreturnEmu = 0;
 
 #include "keyscan.h"
 static uint8_t g_keyState[SDL_NUM_SCANCODES];
@@ -203,8 +204,14 @@ const uint8_t *QtSDL_getKeyboardState( int *bufSize )
 
 uint32 GetGamepadPressedImmediate(void)
 {
-	//printf("JSreturn: 0x%08X\n", JSreturn);
-	return JSreturn;
+	//printf("JSreturn: 0x%08X\n", JSreturnGui);
+	return JSreturnGui.load(std::memory_order_relaxed);
+}
+
+// Atomically retrieve inputs (must be called EMU thread)
+void emuThreadPollInputs()
+{
+	JSreturnEmu = JSreturnGui.load(std::memory_order_relaxed);
 }
 
 #define keyonly(__a) _keyonly(MKK(__a))
@@ -1610,7 +1617,7 @@ UpdateGamepad(void)
 	//   if((JS & (0x30<<x) ) == (0x30<<x) ) JS&=~(0x30<<x);
 	//  }
 
-	JSreturn = JS;
+	JSreturnGui.store(JS, std::memory_order_relaxed);
 }
 
 static ButtConfig powerpadsc[2][12] = {
@@ -1826,7 +1833,7 @@ void InitInputInterface()
 			break;
 		case SI_GAMEPAD:
 		case SI_SNES:
-			InputDPtr = &JSreturn;
+			InputDPtr = &JSreturnEmu;
 			break;
 		case SI_ARKANOID:
 			InputDPtr = MouseData;

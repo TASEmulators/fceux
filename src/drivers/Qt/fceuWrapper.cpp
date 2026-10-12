@@ -1486,6 +1486,8 @@ int  fceuWrapperUpdate( void )
 
 	if ( GameInfo )
 	{
+		emuThreadPollInputs();
+
 #ifdef __FCEU_QSCRIPT_ENABLE__
 		auto* qscriptMgr = QtScriptManager::getInstance();
 
