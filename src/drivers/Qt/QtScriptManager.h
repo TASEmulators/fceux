@@ -749,7 +749,7 @@ public:
 
 	static void logMessageQt(QtMsgType type, const QString &msg);
 
-	int  numScriptsLoaded(void){ return scriptList.size(); }
+	int  numScriptsLoaded(void);
 	void addScriptInstance(QtScriptInstance* script);
 	void removeScriptInstance(QtScriptInstance* script);
 private:

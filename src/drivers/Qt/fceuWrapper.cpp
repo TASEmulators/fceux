@@ -110,6 +110,9 @@ static int   mutexLocks = 0;
 unsigned int emulatorCycleCount = 0;
 static int archiveFileLoadIndex = -1;
 
+FCEU::mutex consoleWin_t::emulatorMutex;
+FCEU::mutex consoleWin_t::videoBufferMutex;
+
 extern double g_fpsScale;
 
 #ifdef CREATE_AVI
@@ -1400,10 +1403,7 @@ void fceuWrapperLock(const char *filename, int line, const char *func)
 
 void fceuWrapperLock(void)
 {
-	if ( consoleWindow != NULL )
-	{
-		consoleWindow->emulatorMutex.lock();
-	}
+	consoleWin_t::emulatorMutex.lock();
 	mutexLocks++;
 }
 
@@ -1426,12 +1426,7 @@ bool fceuWrapperTryLock(const char *filename, int line, const char *func, int ti
 
 bool fceuWrapperTryLock(int timeout)
 {
-	bool lockAcq = false;
-
-	if ( consoleWindow != NULL )
-	{
-		lockAcq = consoleWindow->emulatorMutex.tryLock( timeout );
-	}
+	const bool lockAcq = consoleWin_t::emulatorMutex.tryLock( timeout );
 
 	if ( lockAcq )
 	{
@@ -1445,10 +1440,7 @@ void fceuWrapperUnLock(void)
 	if ( mutexLocks > 0 )
 	{
 		mutexLocks--;
-		if ( consoleWindow != NULL )
-		{
-			consoleWindow->emulatorMutex.unlock();
-		}
+		consoleWin_t::emulatorMutex.unlock();
 	}
 	else
 	{

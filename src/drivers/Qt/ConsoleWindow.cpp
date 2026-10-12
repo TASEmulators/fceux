@@ -188,8 +188,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	emulatorThread = new emulatorThread_t(this);
 
 	connect(emulatorThread, &QThread::finished, emulatorThread, &QObject::deleteLater);
-	connect(emulatorThread, SIGNAL(frameFinished(void)), this, SLOT(emuFrameFinish(void)) );
-	connect(emulatorThread, SIGNAL(loadRomRequest(QString)), this, SLOT(loadRomRequestCB(QString)) );
+	connect(emulatorThread, SIGNAL(frameFinished(void)), this, SLOT(emuFrameFinish(void)), Qt::QueuedConnection);
+	connect(emulatorThread, SIGNAL(loadRomRequest(QString)), this, SLOT(loadRomRequestCB(QString)), Qt::QueuedConnection );
 
 	connect( gameTimer, &QTimer::timeout, this, &consoleWin_t::updatePeriodic );
 
@@ -3348,7 +3348,7 @@ void consoleWin_t::openTasEditor(void)
 		
 		win->show();
 
-		connect(emulatorThread, SIGNAL(frameFinished(void)), win, SLOT(frameUpdate(void)) );
+		connect(emulatorThread, SIGNAL(frameFinished(void)), win, SLOT(frameUpdate(void)), Qt::QueuedConnection);
 	}
 	FCEU_WRAPPER_UNLOCK();
 }

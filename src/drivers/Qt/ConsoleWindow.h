@@ -142,8 +142,8 @@ class  consoleWin_t : public QMainWindow
 
 		void setCyclePeriodms( int ms );
 
-		FCEU::mutex emulatorMutex;
-		FCEU::mutex videoBufferMutex;
+		static FCEU::mutex emulatorMutex;
+		static FCEU::mutex videoBufferMutex;
 
 		int  videoInit(void);
 		void videoReset(void);

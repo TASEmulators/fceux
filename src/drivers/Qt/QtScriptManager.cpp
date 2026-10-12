@@ -2629,6 +2629,12 @@ void QtScriptManager::logMessageQt(QtMsgType type, const QString &msg)
 	}
 }
 //----------------------------------------------------
+int QtScriptManager::numScriptsLoaded(void)
+{
+	FCEU::autoScopedLock autoLock(scriptListMutex);
+	return static_cast<int>(scriptList.size());
+}
+//----------------------------------------------------
 void QtScriptManager::addScriptInstance(QtScriptInstance* script)
 {
 	FCEU::autoScopedLock autoLock(scriptListMutex);
