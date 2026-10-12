@@ -2663,9 +2663,12 @@ void QtScriptManager::removeScriptInstance(QtScriptInstance* script)
 void QtScriptManager::frameBeginUpdate()
 {
 	FCEU_WRAPPER_LOCK();
-	for (auto script : scriptList)
 	{
-		script->onFrameBegin();
+		FCEU::autoScopedLock autoLock(scriptListMutex);
+		for (auto script : scriptList)
+		{
+			script->onFrameBegin();
+		}
 	}
 	FCEU_WRAPPER_UNLOCK();
 }
@@ -2673,9 +2676,12 @@ void QtScriptManager::frameBeginUpdate()
 void QtScriptManager::frameFinishedUpdate()
 {
 	FCEU_WRAPPER_LOCK();
-	for (auto script : scriptList)
 	{
-		script->onFrameFinish();
+		FCEU::autoScopedLock autoLock(scriptListMutex);
+		for (auto script : scriptList)
+		{
+			script->onFrameFinish();
+		}
 	}
 	FCEU_WRAPPER_UNLOCK();
 }
@@ -2683,9 +2689,12 @@ void QtScriptManager::frameFinishedUpdate()
 void QtScriptManager::guiUpdate()
 {
 	FCEU_WRAPPER_LOCK();
-	for (auto script : scriptList)
 	{
-		script->onGuiUpdate();
+		FCEU::autoScopedLock autoLock(scriptListMutex);
+		for (auto script : scriptList)
+		{
+			script->onGuiUpdate();
+		}
 	}
 	FCEU_WRAPPER_UNLOCK();
 

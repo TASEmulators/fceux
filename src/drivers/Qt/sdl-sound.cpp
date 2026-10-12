@@ -48,7 +48,7 @@ static unsigned int s_SampleRate = 44100;
 static double noiseGate = 0.0;
 static double noiseGateRate = 0.010;
 static bool   noiseGateActive = true;
-static bool   windowSoundMute = false;
+static std::atomic<bool>  windowSoundMute = false;
 static bool   fillInit = 1;
 static const unsigned int supportedSampleRates[] = { 11025, 22050, 44100, 48000, 96000, 0 };
 

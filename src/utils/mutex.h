@@ -1,11 +1,21 @@
 // mutex.h
 #pragma once
 
-#ifdef __QT_DRIVER__
+#if defined(__QT_DRIVER__) && !defined(__SANITIZE_THREAD__)
+#define QT_USE_QMUTEX
+#endif
+
+#ifdef QT_USE_QMUTEX
+
 #include <QMutex>
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 #include <QRecursiveMutex>
 #endif
+
+#else
+
+#include <mutex> // fallback to std::mutex
+
 #endif
 
 namespace FCEU
@@ -22,12 +32,14 @@ namespace FCEU
 			bool tryLock(int timeout);
 	
 		private:
-	#ifdef __QT_DRIVER__
+	#ifdef QT_USE_QMUTEX
 		#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 			QRecursiveMutex *mtx;
 		#else
 			QMutex *mtx;
 		#endif
+	#else
+			std::recursive_mutex mtx;
 	#endif
 	};
 

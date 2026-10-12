@@ -4994,7 +4994,8 @@ void emulatorThread_t::init(void)
 
 	if ( opt )
 	{
-		#ifndef WIN32
+		// Changing scheduling priority settings will crash thread sanitizer
+		#if !defined(WIN32) && !defined(__SANITIZE_THREAD__)
 		int policy, prio, nice;
 
 		g_config->getOption( "SDL.EmuSchedPolicy", &policy );
