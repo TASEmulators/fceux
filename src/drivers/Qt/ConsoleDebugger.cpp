@@ -7771,6 +7771,7 @@ void DebuggerTabBar::mouseMoveEvent( QMouseEvent *event)
 			//But he still seems to animate after the mouse is up, to be resolved
 			QMouseEvent *e=new QMouseEvent(QEvent::MouseButtonRelease,
 			                                  this->mapFromGlobal(QCursor::pos()),
+			                                   QCursor::pos(),
 			                                   Qt::LeftButton,
 			                                   Qt::LeftButton,
 			                                   Qt::NoModifier);
