@@ -1,8 +1,17 @@
 // mutex.cpp
 #include <cstdio>
 
+#if defined(WIN32)
+#include <windows.h>
+#include <direct.h>
+#include <io.h>
+#else
+#include <errno.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#endif
+
 #include "mutex.h"
-#include "common/os_utils.h"
 
 namespace FCEU
 {
@@ -62,6 +71,17 @@ bool mutex::tryLock()
 	success = mtx.try_lock();
 #endif
 	return success;
+}
+
+static int msleep( int ms )
+{
+	int ret = 0;
+	#ifdef WIN32
+	Sleep(ms);
+	#else
+	ret = usleep(ms*1000);
+	#endif
+	return ret;
 }
 
 bool mutex::tryLock(int timeout)
