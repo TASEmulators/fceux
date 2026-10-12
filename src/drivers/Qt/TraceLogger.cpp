@@ -22,6 +22,7 @@
 //
 #include <stdio.h>
 #include <math.h>
+#include <atomic>
 
 #ifdef WIN32
 #include <windows.h>
@@ -119,8 +120,8 @@ static int logBufMax = 3000000;
 // logBufHead and logBufTail are volatile because they are shared use by both the emulation and disk logger threads.
 // Ensure that the compiler doesn't do any thread caching optimizations on them so that changes to these
 // variables are immediately visible by the other thread.
-static volatile int logBufHead = 0;
-static volatile int logBufTail = 0;
+static std::atomic<unsigned int> logBufHead = 0;
+static std::atomic<unsigned int> logBufTail = 0;
 static bool overrunWarningArmed = true;
 static TraceLoggerDialog_t *traceLogWindow = NULL;
 static void pushMsgToLogBuffer(const char *msg);
@@ -1116,9 +1117,10 @@ static void pushToLogBuffer(traceRecord_t &rec)
 
 	if ( logBuf )
 	{
-		int nextHead, delayCount = 0;
-		logBuf[logBufHead] = rec;
-		nextHead = (logBufHead + 1) % logBufMax;
+		unsigned int delayCount = 0;
+		const unsigned int head = logBufHead;
+		const unsigned int nextHead = (head + 1) % logBufMax;
+		logBuf[head] = rec;
 
 		while (nextHead == logBufTail)
 		{
@@ -2493,8 +2495,9 @@ void TraceLogDiskThread_t::run(void)
 
 		while (logBufHead != logBufTail)
 		{
-			logBuf[logBufTail].convToText(line);
-			logBufTail = (logBufTail + 1) % logBufMax;
+			const unsigned int tail = logBufTail;
+			logBuf[tail].convToText(line);
+			logBufTail = (tail + 1) % logBufMax;
 
 			#ifdef WIN32
 			bool success = tracer.writeLine(line);
