@@ -31,18 +31,19 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <atomic>
 
 extern Config *g_config;
 extern bool turbo;
 
-static volatile int *s_Buffer = 0;
+static int *s_Buffer = 0;
 static unsigned int s_BufferSize;
 static unsigned int s_BufferSize25;
 static unsigned int s_BufferSize50;
 static unsigned int s_BufferSize75;
 static unsigned int s_BufferRead;
 static unsigned int s_BufferWrite;
-static volatile unsigned int s_BufferIn = 0;
+static std::atomic<unsigned int> s_BufferIn = 0;
 static unsigned int s_SampleRate = 44100;
 static double noiseGate = 0.0;
 static double noiseGateRate = 0.010;
