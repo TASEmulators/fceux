@@ -48,6 +48,7 @@ extern char FileBase[];
 #include "drivers/win/taseditor/snapshot.h"
 #include "drivers/win/taseditor/taseditor_lua.h"
 #include "drivers/win/cdlogger.h"
+#include "drivers/win/luaconsole.h"
 extern TASEDITOR_LUA taseditor_lua;
 #endif
 
@@ -63,11 +64,14 @@ extern TASEDITOR_LUA taseditor_lua;
 #include "drivers/Qt/TasEditor/markers.h"
 #include "drivers/Qt/TasEditor/snapshot.h"
 #include "drivers/Qt/TasEditor/taseditor_lua.h"
+#include "drivers/Qt/LuaControl.h"
 extern TASEDITOR_LUA *taseditor_lua;
 #else
 int LoadGame(const char *path, bool silent = false);
 int reloadLastGame(void);
 void fceuWrapperRequestAppExit(void);
+// Theoretically we need to redeclare more luaconsole.h prototypes here...
+// But is this branch even reachable anymore?
 #endif
 
 #endif
@@ -214,33 +218,8 @@ static void(*info_onstart)(intptr_t uid);
 static void(*info_onstop)(intptr_t uid);
 static intptr_t info_uid;
 #ifdef __WIN_DRIVER__
-extern HWND LuaConsoleHWnd;
-extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void TaseditorDisableManualFunctionIfNeeded();
-
-#else
-int LuaKillMessageBox(void);
-#ifdef __linux__
-
-#ifndef __THROWNL
-#define __THROWNL throw () // Build fix Alpine Linux libc
 #endif
-int LuaPrintfToWindowConsole(const char *__restrict format, ...) 
-                  __THROWNL __attribute__ ((__format__ (__printf__, 1, 2)));
-#else
-
-#ifdef WIN32
-int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char * format, ...);
-#else
-int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw();
-#endif
-
-#endif
-
-#endif
-extern void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str);
-extern void WinLuaOnStart(intptr_t hDlgAsInt);
-extern void WinLuaOnStop(intptr_t hDlgAsInt);
 
 static lua_State *L;
 
@@ -1647,8 +1626,7 @@ static inline bool isalphaorunderscore(char c)
 	return isalpha(c) || c == '_';
 }
 
-#define APPENDPRINT { int _n = snprintf(ptr, remaining,
-#define END ); if(_n >= 0) { ptr += _n; remaining -= _n; } else { remaining = 0; } }
+#define APPENDPRINT(...) { int _n = snprintf(ptr, remaining, __VA_ARGS__); if (_n >= 0) { ptr += _n; remaining -= _n; } else { remaining = 0; } }
 static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 {
 	if(remaining <= 0)
@@ -1676,10 +1654,25 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 	switch(lua_type(L, i))
 	{
 		case LUA_TNONE: break;
-		case LUA_TNIL: APPENDPRINT "nil" END break;
-		case LUA_TBOOLEAN: APPENDPRINT lua_toboolean(L,i) ? "true" : "false" END break;
-		case LUA_TSTRING: APPENDPRINT "%s",lua_tostring(L,i) END break;
-		case LUA_TNUMBER: APPENDPRINT "%.12g",lua_tonumber(L,i) END break;
+		case LUA_TNIL: APPENDPRINT("nil") break;
+		case LUA_TBOOLEAN: APPENDPRINT(lua_toboolean(L,i) ? "true" : "false") break;
+		case LUA_TSTRING:
+		{
+#ifdef WIN32
+			// Convert line endings to "\r\n"
+			const char *str, *newline;
+			for (str = lua_tostring(L, i); newline = strchr(str, '\n'); str = newline + 1)
+				if (newline > str && newline[-1] == '\r')
+					APPENDPRINT("%.*s\n", newline - str, str)
+				else
+					APPENDPRINT("%.*s\r\n", newline - str, str)
+			APPENDPRINT("%s", str)
+#else
+			APPENDPRINT("%s",lua_tostring(L,i))
+#endif
+			break;
+		}
+		case LUA_TNUMBER: APPENDPRINT("%.12g",lua_tonumber(L,i)) break;
 		case LUA_TFUNCTION:
 			/*if((L->base + i-1)->value.gc->cl.c.isC)
 			{
@@ -1687,26 +1680,26 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 				//std::map<lua_CFunction, const char*>::iterator iter = s_cFuncInfoMap.find(func);
 				//if(iter == s_cFuncInfoMap.end())
 					goto defcase;
-				//APPENDPRINT "function(%s)", iter->second END
+				//APPENDPRINT("function(%s)", iter->second)
 			}
 			else
 			{
-				APPENDPRINT "function(" END
+				APPENDPRINT("function(")
 				Proto* p = (L->base + i-1)->value.gc->cl.l.p;
 				int numParams = p->numparams + (p->is_vararg?1:0);
 				for (int n=0; n<p->numparams; n++)
 				{
-					APPENDPRINT "%s", getstr(p->locvars[n].varname) END
+					APPENDPRINT("%s", getstr(p->locvars[n].varname))
 					if(n != numParams-1)
-						APPENDPRINT "," END
+						APPENDPRINT(",")
 				}
 				if(p->is_vararg)
-					APPENDPRINT "..." END
-				APPENDPRINT ")" END
+					APPENDPRINT("...")
+				APPENDPRINT(")")
 			}*/
 			goto defcase;
 			break;
-defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END break;
+defcase:default: APPENDPRINT("%s:%p",luaL_typename(L,i),lua_topointer(L,i)) break;
 		case LUA_TTABLE:
 		{
 			// first make sure there's enough stack space
@@ -1723,16 +1716,16 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 			{
 				int parentNum = s_tableAddressStack.end() - foundCycleIter;
 				if(parentNum > 1)
-					APPENDPRINT "%s:parent^%d",luaL_typename(L,i),parentNum END
+					APPENDPRINT("%s:parent^%d",luaL_typename(L,i),parentNum)
 				else
-					APPENDPRINT "%s:parent",luaL_typename(L,i) END
+					APPENDPRINT("%s:parent",luaL_typename(L,i))
 			}
 			else
 			{
 				s_tableAddressStack.push_back(lua_topointer(L,i));
 				struct Scope { ~Scope(){ s_tableAddressStack.pop_back(); } } scope;
 
-				APPENDPRINT "{" END
+				APPENDPRINT("{")
 
 				lua_pushnil(L); // first key
 				int keyIndex = lua_gettop(L);
@@ -1745,7 +1738,7 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 					if(first)
 						first = false;
 					else
-						APPENDPRINT ", " END
+						APPENDPRINT(", ")
 					if(skipKey)
 					{
 						arrayIndex += (lua_Number)1;
@@ -1758,29 +1751,29 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 						bool invalidLuaIdentifier = (!keyIsString || !isalphaorunderscore(*lua_tostring(L, keyIndex)));
 						if(invalidLuaIdentifier)
 							if(keyIsString)
-								APPENDPRINT "['" END
+								APPENDPRINT("['")
 							else
-								APPENDPRINT "[" END
+								APPENDPRINT("[")
 
 						toCStringConverter(L, keyIndex, ptr, remaining); // key
 
 						if(invalidLuaIdentifier)
 							if(keyIsString)
-								APPENDPRINT "']=" END
+								APPENDPRINT("']=")
 							else
-								APPENDPRINT "]=" END
+								APPENDPRINT("]=")
 						else
-							APPENDPRINT "=" END
+							APPENDPRINT("=")
 					}
 
 					bool valueIsString = (lua_type(L, valueIndex) == LUA_TSTRING);
 					if(valueIsString)
-						APPENDPRINT "'" END
+						APPENDPRINT("'")
 
 					toCStringConverter(L, valueIndex, ptr, remaining); // value
 
 					if(valueIsString)
-						APPENDPRINT "'" END
+						APPENDPRINT("'")
 
 					lua_pop(L, 1);
 
@@ -1790,7 +1783,7 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 						break;
 					}
 				}
-				APPENDPRINT "}" END
+				APPENDPRINT("}")
 			}
 		}	break;
 	}
@@ -1818,16 +1811,16 @@ static char* rawToCString(lua_State* L, int idx)
 	{
 		toCStringConverter(L, i, ptr, remaining);
 		if(i != n)
-			APPENDPRINT " " END
+			APPENDPRINT("\t")
 	}
 
 	if(remaining < 3)
 	{
 		while(remaining < 6)
 			remaining++, ptr--;
-		APPENDPRINT "..." END
+		APPENDPRINT("...")
 	}
-	APPENDPRINT "\r\n" END
+	APPENDPRINT("\r\n")
 	// the trailing newline is so print() can avoid having to do wasteful things to print its newline
 	// (string copying would be wasteful and calling info.print() twice can be extremely slow)
 	// at the cost of functions that don't want the newline needing to trim off the last two characters
@@ -3737,6 +3730,7 @@ enum
 	, GUI_COLOUR_RED,   GUI_COLOUR_GREEN, GUI_COLOUR_BLUE
 	*/
 };
+static int colorMatchFormula = 3;
 /**
  * Returns an index approximating an RGB colour.
  * TODO: This is easily improvable in terms of speed and probably
@@ -3745,8 +3739,7 @@ enum
  * ourselves.
  */
 static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
-	static uint8 index_lookup[1 << (3+3+3)];
-	int k;
+	static uint8 index_lookup[1 << (5+5+5)];
 
 	if (!gui_saw_current_palette)
 	{
@@ -3754,22 +3747,46 @@ static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
 		gui_saw_current_palette = TRUE;
 	}
 
-	k = ((r & 0xE0) << 1) | ((g & 0xE0) >> 2) | ((b & 0xE0) >> 5);
+    // Cache based on upper 5 bits of r, g, and b
+	int k = ((r & 0xF8) << 7) | ((g & 0xF8) << 2) | ((b & 0xF8) >> 3);
+    if (index_lookup[k] != GUI_COLOUR_CLEAR) return index_lookup[k];
 	uint16 test, best = GUI_COLOUR_CLEAR;
-	uint32 best_score = 0xffffffffu, test_score;
-	if (index_lookup[k] != GUI_COLOUR_CLEAR) return index_lookup[k];
+	uint32 test_score, best_score = 0xffffffffu;
 	for (test = 0; test < 0xff; test++)
 	{
 		uint8 tr, tg, tb;
 		if (test == GUI_COLOUR_CLEAR) continue;
 		FCEUD_GetPalette(test, &tr, &tg, &tb);
-		test_score = abs(r - tr) *  66 +
-		             abs(g - tg) * 129 +
-		             abs(b - tb) *  25;
+		switch (colorMatchFormula) {
+		  case 0:
+		    // Original formula - weights based on luminance?
+			test_score = abs(r - tr) * 66 +
+						 abs(g - tg) * 129 +
+						 abs(b - tb) * 25;
+			break;
+		  case 1:
+			// Original formula, but the deltas are squared.
+			test_score = abs(r - tr) * abs(r - tr) * 66 +
+						 abs(g - tg) * abs(g - tg) * 129 +
+						 abs(b - tb) * abs(b - tb) * 25;
+			break;
+		  case 2:
+            // Basic distance squared
+			test_score = (r - tr) * (r - tr) +
+						 (g - tg) * (g - tg) +
+						 (b - tb) * (b - tb);
+			break;
+		  case 3:
+			// Redmean
+			int red_mean = r / 2 + tr / 2, dr = tr - r, dg = tg - g, db = tb - b;
+			test_score = (2 + red_mean / 256) * dr * dr
+						 + 4 * dg * dg
+						 + (2 + (255 - red_mean) / 256) * db * db;
+			break;	
+		}
 		if (test_score < best_score) best_score = test_score, best = test;
 	}
-	index_lookup[k] = best;
-	return best;
+	return index_lookup[k] = best;
 }
 
 void FCEU_LuaUpdatePalette()
@@ -4134,6 +4151,23 @@ static int gui_parsecolor(lua_State *L)
 	lua_pushinteger(L, b);
 	lua_pushinteger(L, a);
 	return 4;
+}
+
+// gui.clearcolorcache()
+//
+// The color cache can get stale and make things look a little funny, especially when transparency is involved.
+// This function queues up a reset of the cache (next time a color is requested) to hopefully mitigate that.
+// This shouldn't be as much of an issue with the new caching logic, but you never know.
+static int gui_clearcolorcache(lua_State *L)
+{
+	FCEU_LuaUpdatePalette();
+	return 0;
+}
+
+static int gui_setcolormatchformula(lua_State *L)
+{
+	colorMatchFormula = luaL_checkint(L, 1);
+	return 0;
 }
 
 
@@ -6384,6 +6418,8 @@ static const struct luaL_reg guilib[] = {
 	{"text", gui_text},
 
 	{"parsecolor", gui_parsecolor},
+	{"clearcolorcache", gui_clearcolorcache},
+	{"setcolormatchformula", gui_setcolormatchformula},
 
 	{"savescreenshot",   gui_savescreenshot},
 	{"savescreenshotas", gui_savescreenshotas},
@@ -6572,6 +6608,9 @@ void FCEU_LuaFrameBoundary()
 }
 
 
+template <typename Callback>
+void tokenizeString(const char *str, Callback readToken);
+
 /**
  * Loads and runs the given Lua script.
  * The emulator MUST be paused for this function to be
@@ -6663,13 +6702,36 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 		lua_register(L, "SHIFT", bit_bshift_emulua);
 		lua_register(L, "BIT", bitbit);
 
-		if (arg)
+		if (!LuaArgCompat)
 		{
-			luaL_Buffer b;
-			luaL_buffinit(L, &b);
-			luaL_addstring(&b, arg);
-			luaL_pushresult(&b);
-
+			lua_newtable(L);
+			lua_pushstring(L, "FCEUX");
+			lua_rawseti(L, -2, -1);
+			lua_pushstring(L, filename);
+			lua_rawseti(L, -2, 0);
+			if (arg)
+			{
+				int ti = 1;
+				tokenizeString(arg, [&](const char *tok) {
+					lua_pushstring(L, tok);
+					lua_rawseti(L, -2, ti++);
+				});
+			}
+			lua_setglobal(L, "arg");
+		}
+		else
+		{ // Compatibility mode
+			if (arg)
+			{
+				luaL_Buffer b;
+				luaL_buffinit(L, &b);
+				luaL_addstring(&b, arg);
+				luaL_pushresult(&b);
+			}
+			else
+			{
+				lua_pushstring(L, "");
+			}
 			lua_setglobal(L, "arg");
 		}
 
@@ -6756,22 +6818,61 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 	return 1;
 }
 
+// This is very reusable, but just leaving it here for now.
+// The char* passed to the callback will always be the same fixed buffer on the stack. That means you don't have to free
+// it, but you do have to copy it if you want to use it later.
+template <typename Callback>
+static void tokenizeString(const char *str, Callback consumeToken)
+{
+	int len = strlen(str), start = 0, stop, bi = 0;
+	bool quoted = false;
+	char buf[MAX_PATH]; buf[0] = 0; // TODO: MAX_PATH ain't gonna cut it if this is to be generally useful.
+	for (int i = 0; i < len; i++)
+	{
+		if (str[i] == '"')
+		{
+			quoted = !quoted;
+		}
+		else if (!quoted && str[i] == ' ')
+		{
+			stop = i;
+			if (stop > start)
+			{
+				consumeToken(buf); // TODO: pass length? I mean, we already know it.
+				buf[bi = 0] = 0;
+			}
+			start = i + 1;
+		}
+		else
+		{
+			buf[bi++] = str[i]; buf[bi] = 0;
+		}
+	}
+	if (*buf)
+	{
+		consumeToken(buf);
+	}
+}
+
 /**
  * Equivalent to repeating the last FCEU_LoadLuaCode() call.
+ * Called by the EMUCMD_SCRIPT_RELOAD command.
+ * TODO: The shift+L often gets inserted into the textbox.
  */
 void FCEU_ReloadLuaCode()
 {
+	char args[MAX_PATH];
+	GetLuaArgs(args, sizeof(args));
 	if (!luaScriptName)
 	{
 #ifdef __WIN_DRIVER__
 		// no script currently running, then try loading the most recent
 		extern char *recent_lua[];
 		char*& fname = recent_lua[0];
-		extern void UpdateLuaConsole(const char* fname);
 		if (fname)
 		{
 			UpdateLuaConsole(fname);
-			FCEU_LoadLuaCode(fname);
+			FCEU_LoadLuaCode(fname, args);
 		} else
 		{
 			FCEU_DispMessage("There's no script to reload.", 0);
@@ -6781,7 +6882,7 @@ void FCEU_ReloadLuaCode()
 #endif
 	} else
 	{
-		FCEU_LoadLuaCode(luaScriptName);
+		FCEU_LoadLuaCode(luaScriptName, args);
 	}
 }
 
