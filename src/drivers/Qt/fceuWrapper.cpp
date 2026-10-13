@@ -23,7 +23,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <limits.h>
+#if defined(_SYSTEM_MINIZIP) && (defined(__linux) || defined(__APPLE__))
+#include <minizip/unzip.h>
+#else
 #include <unzip.h>
+#endif
 
 #include <QFileInfo>
 #include <QStyleFactory>
