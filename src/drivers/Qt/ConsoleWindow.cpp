@@ -2519,6 +2519,17 @@ void consoleWin_t::toggleUseBgPaletteForVideo(bool checked)
 //---------------------------------------------------------------------------
 void consoleWin_t::closeApp(void)
 {
+	// Since closeAllWindows pumps the Qt event queue, it is possible for this
+	// function to be re-entered and cause crashes at application exit. Adding
+	// this simple static re-entry guard for this singleton window object should
+	// prevent this from happening.
+	static bool reentryGuard = false;
+	if (reentryGuard)
+	{
+		return;
+	}
+	reentryGuard = true;
+
 	nes_shm->runEmulator = 0;
 
 	gameTimer->stop();
@@ -2550,6 +2561,8 @@ void consoleWin_t::closeApp(void)
 
 	// Delay Application Quit to allow event processing to complete
 	QTimer::singleShot( 250, qApp, SLOT(quit(void)) );
+
+	reentryGuard = false;
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::videoBgColorChanged( QColor &c )
