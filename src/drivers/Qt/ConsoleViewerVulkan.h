@@ -70,4 +70,5 @@ private:
 	bool vsyncEnabled;
 	unsigned int mouseButtonMask;
 	std::atomic_bool drawQueued;
+	bool shuttingDown;
 };

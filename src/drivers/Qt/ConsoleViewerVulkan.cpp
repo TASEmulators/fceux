@@ -9,6 +9,7 @@
 #include <QExposeEvent>
 #include <QGuiApplication>
 #include <QMouseEvent>
+#include <QPlatformSurfaceEvent>
 #include <QResizeEvent>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -45,8 +46,8 @@ public:
 
 	void shutdown()
 	{
+		shuttingDown = true;
 		exposedCallback = {};
-		cleanup();
 	}
 
 	bool initialize(QString &error)
@@ -61,7 +62,8 @@ public:
 		if (surface == VK_NULL_HANDLE || !selectDevice(error) || !createDevice(error) ||
 		    !createCommandPool(error) || !createSync(error) || !recreateSwapchain(error))
 		{
-			cleanup();
+			shutdown();
+			destroyDeviceResources();
 			return false;
 		}
 		return true;
@@ -84,7 +86,7 @@ public:
 	void render(const uint32_t *pixels, int width, int height, const QColor &background,
 	            bool forceAspect, double aspectX, double aspectY, bool linearFilter)
 	{
-		if (!isExposed() || !device || !pixels || width <= 0 || height <= 0)
+		if (shuttingDown || !isExposed() || !device || !pixels || width <= 0 || height <= 0)
 			return;
 		if (swapchainDirty && !recreateSwapchain(lastError))
 			return;
@@ -245,12 +247,26 @@ protected:
 	void exposeEvent(QExposeEvent *event) override
 	{
 		QWindow::exposeEvent(event);
-		if (isExposed())
+		if (isExposed() && !shuttingDown)
 		{
 			swapchainDirty = true;
 			if (exposedCallback)
 				exposedCallback();
 		}
+	}
+
+	bool event(QEvent *event) override
+	{
+		if (event->type() == QEvent::PlatformSurface)
+		{
+			auto *surfaceEvent = static_cast<QPlatformSurfaceEvent *>(event);
+			if (surfaceEvent->surfaceEventType() == QPlatformSurfaceEvent::SurfaceAboutToBeDestroyed)
+			{
+				shutdown();
+				destroyDeviceResources();
+			}
+		}
+		return QWindow::event(event);
 	}
 
 	void resizeEvent(QResizeEvent *event) override
@@ -568,7 +584,7 @@ private:
 		stagingSize = 0;
 	}
 
-	void cleanup()
+	void destroyDeviceResources()
 	{
 		if (device)
 		{
@@ -582,13 +598,29 @@ private:
 			vkDestroyDevice(device, nullptr);
 		}
 		device = VK_NULL_HANDLE;
+		queue = VK_NULL_HANDLE;
+		commandPool = VK_NULL_HANDLE;
+		commandBuffer = VK_NULL_HANDLE;
+		imageAvailable = VK_NULL_HANDLE;
+		renderFinished = VK_NULL_HANDLE;
+		swapchain = VK_NULL_HANDLE;
+		swapchainImages.clear();
+		swapchainLayouts.clear();
+	}
+
+	void cleanup()
+	{
+		shutdown();
+		destroyDeviceResources();
 		if (instance.isValid())
 		{
 			QWindow::destroy();
+			setVulkanInstance(nullptr);
 			surface = VK_NULL_HANDLE;
 			instance.destroy();
 		}
 		surface = VK_NULL_HANDLE;
+		instanceReady = false;
 	}
 
 	QVulkanInstance instance;
@@ -619,6 +651,7 @@ private:
 	bool swapchainDirty = true;
 	bool vsyncEnabled = true;
 	bool linearFilter = false;
+	bool shuttingDown = false;
 	unsigned int mouseButtonMask = 0;
 	QColor background = Qt::black;
 	QString lastError;
@@ -629,7 +662,8 @@ ConsoleViewVulkan_t::ConsoleViewVulkan_t(QWidget *parent)
 	: QWidget(parent), vulkanWindow(new ConsoleVulkanWindow_t), windowContainer(nullptr),
 	  bgColor(nullptr), localBuf(nullptr), localBufSize(0), aspectRatio(1.0),
 	  aspectX(1.0), aspectY(1.0), xscale(2.0), yscale(2.0), sx(0), sy(0), rw(256), rh(224),
-	  forceAspect(true), autoScaleEna(true), linearFilter(false), vsyncEnabled(true), mouseButtonMask(0), drawQueued(false)
+	  forceAspect(true), autoScaleEna(true), linearFilter(false), vsyncEnabled(true), mouseButtonMask(0),
+	  drawQueued(false), shuttingDown(false)
 {
 	consoleWin_t *win = qobject_cast<consoleWin_t *>(parent);
 	if (win)
@@ -674,6 +708,7 @@ ConsoleViewVulkan_t::~ConsoleViewVulkan_t()
 
 void ConsoleViewVulkan_t::shutdown(void)
 {
+	shuttingDown = true;
 	if (vulkanWindow)
 		vulkanWindow->shutdown();
 }
@@ -697,11 +732,13 @@ void ConsoleViewVulkan_t::reset(void)
 
 void ConsoleViewVulkan_t::queueRedraw(void)
 {
+	if (shuttingDown)
+		return;
 	if (drawQueued.exchange(true))
 		return;
 	QTimer::singleShot(0, this, [this]() {
 		drawQueued.store(false);
-		if (!vulkanWindow || !localBuf)
+		if (shuttingDown || !vulkanWindow || !localBuf)
 			return;
 		int frameWidth = GL_NES_WIDTH;
 		int frameHeight = GL_NES_HEIGHT;
