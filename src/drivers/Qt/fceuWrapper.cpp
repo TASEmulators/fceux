@@ -106,7 +106,7 @@ static int inited = 0;
 static int noconfig=0;
 static int frameskip=0;
 static int periodic_saves = 0;
-static int   mutexLocks = 0;
+static std::atomic<int> mutexLocks = 0;
 unsigned int emulatorCycleCount = 0;
 static int archiveFileLoadIndex = -1;
 
@@ -1380,17 +1380,17 @@ static void DoFun(int frameskip, int periodic_saves)
 static std::string lockFile;
 static bool debugMutexLock = false;
 
-void fceuWrapperLock(const char *filename, int line, const char *func)
+int fceuWrapperLock(const char *filename, int line, const char *func)
 {
-	fceuWrapperLock();
+	const int mutexLockCount = fceuWrapperLock();
 
 	if ( debugMutexLock )
 	{
 		char txt[32];
 
-		if ( mutexLocks > 1 )
+		if ( mutexLockCount > 1 )
 		{
-			printf("Recursive Lock:%i\n", mutexLocks );
+			printf("Recursive Lock:%i\n", mutexLockCount );
 			printf("Already Locked By: %s\n", lockFile.c_str() );
 			printf("Requested By: %s:%i - %s\n", filename, line, func );
 		}
@@ -1399,12 +1399,14 @@ void fceuWrapperLock(const char *filename, int line, const char *func)
 		lockFile.append(txt);
 		lockFile.append(func);
 	}
+	return mutexLockCount;
 }
 
-void fceuWrapperLock(void)
+int fceuWrapperLock(void)
 {
+	const int mutexLockCount = ++mutexLocks;
 	consoleWin_t::emulatorMutex.lock();
-	mutexLocks++;
+	return mutexLockCount;
 }
 
 bool fceuWrapperTryLock(const char *filename, int line, const char *func, int timeout)
@@ -1437,12 +1439,10 @@ bool fceuWrapperTryLock(int timeout)
 
 void fceuWrapperUnLock(void)
 {
-	if ( mutexLocks > 0 )
-	{
-		mutexLocks--;
-		consoleWin_t::emulatorMutex.unlock();
-	}
-	else
+	const int mutexLockCount = --mutexLocks;
+	consoleWin_t::emulatorMutex.unlock();
+
+	if ( mutexLockCount < 0 )
 	{
 		printf("Error: Mutex is Already UnLocked\n");
 		//abort(); // Uncomment to catch a stack trace
