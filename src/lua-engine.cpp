@@ -3737,6 +3737,18 @@ enum
 	, GUI_COLOUR_RED,   GUI_COLOUR_GREEN, GUI_COLOUR_BLUE
 	*/
 };
+static enum { COLORMATCH_OLD, COLORMATCH_OLD2, COLORMATCH_EUCLIDIAN, COLORMATCH_REDMEAN } colorMatchFormula = COLORMATCH_REDMEAN;
+
+static uint8 *palette_index_lookup = NULL;
+static int cacheDepth = 5;
+
+// Bits per color channel
+//   3 - 512 bytes
+//   4 - 4 KB
+//   5 - 32 KB
+//   6 - 256 KB
+#define CACHE_SIZE(bits) (1 << (3 * (bits)))
+
 /**
  * Returns an index approximating an RGB colour.
  * TODO: This is easily improvable in terms of speed and probably
@@ -3745,31 +3757,71 @@ enum
  * ourselves.
  */
 static uint8 gui_colour_rgb(uint8 r, uint8 g, uint8 b) {
-	static uint8 index_lookup[1 << (3+3+3)];
-	int k;
-
 	if (!gui_saw_current_palette)
 	{
-		memset(index_lookup, GUI_COLOUR_CLEAR, sizeof(index_lookup));
+		memset(palette_index_lookup, GUI_COLOUR_CLEAR, CACHE_SIZE(cacheDepth));
 		gui_saw_current_palette = TRUE;
 	}
 
-	k = ((r & 0xE0) << 1) | ((g & 0xE0) >> 2) | ((b & 0xE0) >> 5);
+	int k; // Cache index, based on upper bits of r, g, and b
+	switch (cacheDepth)
+	{
+	case 3:
+		// Upper 3 bits
+		k = ((r & 0xE0) << 1) | ((g & 0xE0) >> 2) | ((b & 0xE0) >> 5);
+		break;
+	case 4:
+		// Upper 4 bits
+		k = ((r & 0xF0) << 4) | (g & 0xF0) | ((b & 0xF0) >> 4);
+		break;
+	case 5:
+		// Upper 5 bits
+		k = ((r & 0xF8) << 7) | ((g & 0xF8) << 2) | ((b & 0xF8) >> 3);
+		break;
+	case 6:
+		// Upper 6 bits
+		k = ((r & 0xFC) << 10) | ((g & 0xFC) << 4) | ((b & 0xFC) >> 2);
+		break;
+	}
+
+    if (palette_index_lookup[k] != GUI_COLOUR_CLEAR) return palette_index_lookup[k];
 	uint16 test, best = GUI_COLOUR_CLEAR;
-	uint32 best_score = 0xffffffffu, test_score;
-	if (index_lookup[k] != GUI_COLOUR_CLEAR) return index_lookup[k];
-	for (test = 0; test < 0xff; test++)
+	uint32 test_score, best_score = 0xffffffffu;
+	for (test = 0; test < 0x100; test++)
 	{
 		uint8 tr, tg, tb;
 		if (test == GUI_COLOUR_CLEAR) continue;
 		FCEUD_GetPalette(test, &tr, &tg, &tb);
-		test_score = abs(r - tr) *  66 +
-		             abs(g - tg) * 129 +
-		             abs(b - tb) *  25;
+		switch (colorMatchFormula) {
+		case COLORMATCH_OLD:
+		    // Original formula - weights based on luminance?
+			test_score = abs(r - tr) * 66 +
+						 abs(g - tg) * 129 +
+						 abs(b - tb) * 25;
+			break;
+		case COLORMATCH_OLD2:
+			// Original formula, but the deltas are squared.
+			test_score = (r - tr) * (r - tr) * 66 +
+						 (g - tg) * (g - tg) * 129 +
+						 (b - tb) * (b - tb) * 25;
+			break;
+		case COLORMATCH_EUCLIDIAN:
+			// Basic distance squared
+			test_score = (r - tr) * (r - tr) +
+						 (g - tg) * (g - tg) +
+						 (b - tb) * (b - tb);
+			break;
+		case COLORMATCH_REDMEAN:
+			// Redmean
+			int red_mean = r / 2 + tr / 2, dr = tr - r, dg = tg - g, db = tb - b;
+			test_score = (2 + red_mean / 256) * dr * dr
+						 + 4 * dg * dg
+						 + (2 + (255 - red_mean) / 256) * db * db;
+			break;	
+		}
 		if (test_score < best_score) best_score = test_score, best = test;
 	}
-	index_lookup[k] = best;
-	return best;
+	return palette_index_lookup[k] = best;
 }
 
 void FCEU_LuaUpdatePalette()
@@ -4134,6 +4186,57 @@ static int gui_parsecolor(lua_State *L)
 	lua_pushinteger(L, b);
 	lua_pushinteger(L, a);
 	return 4;
+}
+
+// gui.setcolorcachedepth()
+//
+// Set the number of upper bits used per color channel by the color caching logic.
+// Valid values: 3-6
+// Higher values result in higher color accuracy, but more cache misses and higher memory usage.
+// This is only necessary because FCEUX uses an 8-bit palette for its screen buffer,
+// which even Lua script GUIs are beholden to.
+static int gui_setcolorcachedepth(lua_State *L)
+{
+	int depth = luaL_checkint(L, 1);
+	if (depth < 3 || depth > 6)
+		luaL_argerror(L, 1, "mode out of range (must be 3-6)");
+
+	cacheDepth = depth;
+
+	void *palette_index_lookup_tmp = realloc(palette_index_lookup, CACHE_SIZE(cacheDepth));
+	if (palette_index_lookup_tmp == NULL)
+		abort();
+	palette_index_lookup = (uint8*)palette_index_lookup_tmp;
+
+	FCEU_LuaUpdatePalette();
+	return 0;
+}
+
+// gui.setcolormatchformula()
+//
+// Selects one of several formulas for matching colors to the limited Lua palette.
+// The default is "redmean", which seems to have the best results for alpha blending.
+// Choices:
+//   "old"       - Original formula that stood for years. Weights based on luminance?
+//   "old2"      - Original formula, but the deltas are squared. Gives better results.
+//   "euclidian" - Basic distance squared.
+//   "redmean"   - The "redmean" formula, which gives more weight to the red channel as the Euclidian mean gets redder.
+static int gui_setcolormatchformula(lua_State *L)
+{
+	const char *formula = luaL_checkstring(L, 1);
+	if (strcmpi(formula, "old") == 0)
+		colorMatchFormula = COLORMATCH_OLD;
+	else if (strcmpi(formula, "old2") == 0)
+		colorMatchFormula = COLORMATCH_OLD2;
+	else if (strcmpi(formula, "euclidian") == 0)
+		colorMatchFormula = COLORMATCH_EUCLIDIAN;
+	else if (strcmpi(formula, "redmean") == 0)
+		colorMatchFormula = COLORMATCH_REDMEAN;
+	else
+		luaL_argerror(L, 1, "must be one of \"old\", \"old2\", \"euclidian\", or \"redmean\"");
+
+	FCEU_LuaUpdatePalette(); // Need to clear color cache, otherwise this might not have the desired effect.
+	return 0;
 }
 
 
@@ -6384,6 +6487,8 @@ static const struct luaL_reg guilib[] = {
 	{"text", gui_text},
 
 	{"parsecolor", gui_parsecolor},
+	{"setcolorcachedepth", gui_setcolorcachedepth},
+	{"setcolormatchformula", gui_setcolormatchformula},
 
 	{"savescreenshot",   gui_savescreenshot},
 	{"savescreenshotas", gui_savescreenshotas},
@@ -6607,6 +6712,10 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 	//Reinit the error count
 	luaexiterrorcount = 8;
 	luaCallbackErrorCounter = 0;
+
+	palette_index_lookup = (uint8*)malloc(CACHE_SIZE(cacheDepth));
+	if (palette_index_lookup == NULL)
+		abort();
 
 	if (!L) {
 
@@ -6832,6 +6941,8 @@ void FCEU_LuaStop() {
 
 	//lua_gc(L,LUA_GCCOLLECT,0);
 
+	free(palette_index_lookup);
+	palette_index_lookup = NULL;
 
 	lua_close(L); // this invokes our garbage collectors for us
 	L = NULL;
