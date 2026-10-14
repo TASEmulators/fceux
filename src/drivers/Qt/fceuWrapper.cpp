@@ -1379,6 +1379,43 @@ static void DoFun(int frameskip, int periodic_saves)
 
 static std::string lockFile;
 static bool debugMutexLock = false;
+static std::atomic<int> reqEmuLock = 0;
+static thread_local int wrapperMutexLockDepth = 0;
+
+bool fceuOnEmulationThread()
+{
+	const bool isEmuThread = (consoleWindow != nullptr) &&
+		(QThread::currentThread() == consoleWindow->emulatorThread);
+	return isEmuThread;
+}
+
+static void emuThreadPreemptEntryLogic()
+{
+	const bool isEmuThread = fceuOnEmulationThread();
+
+	if (isEmuThread)
+	{
+		if (wrapperMutexLockDepth == 0)
+		{
+			while (reqEmuLock.load() > 0)
+			{
+				QThread::yieldCurrentThread();
+			}
+		}
+	}
+	else
+	{
+		++reqEmuLock;
+	}
+}
+
+static void emuThreadPreemptExitLogic()
+{
+	if (!fceuOnEmulationThread())
+	{
+		--reqEmuLock;
+	}
+}
 
 int fceuWrapperLock(const char *filename, int line, const char *func)
 {
@@ -1404,8 +1441,10 @@ int fceuWrapperLock(const char *filename, int line, const char *func)
 
 int fceuWrapperLock(void)
 {
+	emuThreadPreemptEntryLogic();
 	const int mutexLockCount = ++mutexLocks;
 	consoleWin_t::emulatorMutex.lock();
+	++wrapperMutexLockDepth;
 	return mutexLockCount;
 }
 
@@ -1428,18 +1467,26 @@ bool fceuWrapperTryLock(const char *filename, int line, const char *func, int ti
 
 bool fceuWrapperTryLock(int timeout)
 {
+	emuThreadPreemptEntryLogic();
 	const bool lockAcq = consoleWin_t::emulatorMutex.tryLock( timeout );
 
 	if ( lockAcq )
 	{
 		mutexLocks++;
+		++wrapperMutexLockDepth;
+	}
+	else
+	{
+		emuThreadPreemptExitLogic();
 	}
 	return lockAcq;
 }
 
 void fceuWrapperUnLock(void)
 {
+	emuThreadPreemptExitLogic();
 	const int mutexLockCount = --mutexLocks;
+	--wrapperMutexLockDepth;
 	consoleWin_t::emulatorMutex.unlock();
 
 	if ( mutexLockCount < 0 )
@@ -2010,4 +2057,3 @@ bool FCEUD_ShouldDrawInputAids(void)
 void FCEUD_TurboOn (void) { turbo = true; };
 void FCEUD_TurboOff   (void) { turbo = false; };
 void FCEUD_TurboToggle(void) { turbo = !turbo; };
-
