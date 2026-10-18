@@ -487,7 +487,7 @@ void Mapper218_Init(CartInfo *info)
 		0,0,0,0,0,0,0,0  //mirrorAs2Bits==3
 	};
 	for(int i=0;i<8;i++)
-		VPageR[i] = &NTARAM[mapping[info->mirrorAs2Bits*8+i]];
+		VPageR[i] = &NTARAM[mapping[info->mirrorAs2Bits*8+i] * 0x400] - i * 0x400;
 
 	PPUCHRRAM = 0xFF;
 }
