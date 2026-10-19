@@ -585,8 +585,6 @@ std::string  FCEU_GetPath(int type)
 
 std::string FCEU_MakePath(int type, const char* filebase)
 {
-	char ret[FILENAME_MAX];
-
 	switch(type)
 	{
 		case FCEUMKF_MOVIE:
@@ -602,7 +600,7 @@ std::string FCEU_MakePath(int type, const char* filebase)
 				return BaseDirectory + PSS + "fcs" + PSS + filebase;
 			break;
 	}
-	return ret;
+	return "";
 }
 
 std::string FCEU_MakeFName(int type, int id1, const char *cd1)

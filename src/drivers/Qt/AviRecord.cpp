@@ -1408,7 +1408,7 @@ static int select_audio_channel_layout(const OutputStream *ost, const AVCodec *c
 
 		if ( ost->chanLayout > 0 )
 		{
-			if (ost->chanLayout == p->u.mask)
+			if (static_cast<uint64_t>(ost->chanLayout) == p->u.mask)
 			{
 				best_ch_layout   = p;
 				best_nb_channels = nb_channels;
@@ -3296,7 +3296,7 @@ void LibavOptionsPage::initChannelLayoutSelect( const char *codec_name )
 
 		audioChanLayout->addItem( tr(layoutDesc), (unsigned long long)p->u.mask );
 
-		if ( LIBAV::audio_st.chanLayout == p->u.mask )
+		if ( static_cast<uint64_t>(LIBAV::audio_st.chanLayout) == p->u.mask )
 		{
 			audioChanLayout->setCurrentIndex( audioChanLayout->count() - 1 );
 			formatOk = true;

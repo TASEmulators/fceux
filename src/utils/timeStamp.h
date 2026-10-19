@@ -27,6 +27,8 @@ namespace FCEU
 			tsc = 0;
 		}
 
+		timeStampRecord(const timeStampRecord&) = default;
+
 		timeStampRecord& operator = (const timeStampRecord& in)
 		{
 			ts = in.ts;
@@ -236,6 +238,8 @@ namespace FCEU
 			ts = 0;
 			tsc = 0;
 		}
+
+		timeStampRecord(const timeStampRecord&) = default;
 
 		timeStampRecord& operator = (const timeStampRecord& in)
 		{

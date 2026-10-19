@@ -256,6 +256,8 @@ int nesGamePadMap_t::parseMapping(const char *map)
 	char id[32][64];
 	char val[32][64];
 
+	memset( id, 0, sizeof(id) );
+	memset( val, 0, sizeof(val) );
 	//clearMapping();
 
 	i = 0;
