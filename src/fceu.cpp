@@ -303,10 +303,9 @@ int AllocGenieRW(void) {
 }
 
 void FlushGenieRW(void) {
-	int32 x;
 
 	if (RWWrap) {
-		for (x = 0; x < 0x8000; x++) {
+		for (int32 x = 0; x < 0x8000; x++) {
 			ARead[x + 0x8000] = AReadG[x];
 			BWrite[x + 0x8000] = BWriteG[x];
 		}
