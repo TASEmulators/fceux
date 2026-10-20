@@ -23,7 +23,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#if defined(_SYSTEM_MINIZIP) && (defined(__linux) || defined(__APPLE__))
+#include <minizip/unzip.h>
+#else
 #include <unzip.h>
+#endif
 
 #ifdef _S9XLUA_H
 #include <lua.h>
