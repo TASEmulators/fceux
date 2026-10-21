@@ -7,8 +7,8 @@ body:
       label: GUI version
       description: Which FCEUX GUI are you using?
       options:
-        - Qt GUI
-        - Native Win32 GUI
+        - Windows GUI (Original/non-Qt)
+        - Qt GUI (Cross Platform)
     validations:
       required: true
 

@@ -7,8 +7,8 @@ assignees: ''
 ---
 
 **Which GUI are you using? (Required)**
-- [ ] Qt GUI
-- [ ] Native Win32 GUI
+- [ ] Qt GUI (Cross Platform)
+- [ ] Windows GUI (Original/non-Qt)
 
 **Describe the bug**
 A clear and concise description of what the bug is.
