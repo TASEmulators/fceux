@@ -1833,11 +1833,11 @@ void FCEUD_SetInput(bool fourscore, bool microphone, ESI port0, ESI port1,
 {
 	eoptions &= ~EO_FOURSCORE;
 	if (fourscore)
-	{ // Four Score emulation, only support gamepads, nothing else
+	{ // Four Score emulation uses gamepads on the standard ports.
 		eoptions |= EO_FOURSCORE;
 		CurInputType[0] = SI_GAMEPAD; // Controllers 1 and 3
 		CurInputType[1] = SI_GAMEPAD; // Controllers 2 and 4
-		CurInputType[2] = SIFC_NONE;  // No extension
+		CurInputType[2] = fcexp;
 	}
 	else
 	{
@@ -2523,6 +2523,9 @@ static const char *expPortInputEncode(int v)
 	case SIFC_SHADOW:
 		s = "SIFC_SHADOW";
 		break;
+	case SIFC_4PLAYER:
+		s = "SIFC_4PLAYER";
+		break;
 	case SIFC_HYPERSHOT:
 		s = "SIFC_HYPERSHOT";
 		break;
@@ -2573,6 +2576,10 @@ static int expPortInputDecode(const char *s)
 		else if (strcmp(s, "SIFC_SHADOW") == 0)
 		{
 			ret = SIFC_SHADOW;
+		}
+		else if (strcmp(s, "SIFC_4PLAYER") == 0)
+		{
+			ret = SIFC_4PLAYER;
 		}
 		else if (strcmp(s, "SIFC_HYPERSHOT") == 0)
 		{

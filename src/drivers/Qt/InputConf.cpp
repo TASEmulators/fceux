@@ -229,6 +229,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	expPortComboxBox->addItem(tr("<None>"), SIFC_NONE);
 	expPortComboxBox->addItem(tr("Arkanoid Paddle"), SIFC_ARKANOID);
 	expPortComboxBox->addItem(tr("Shadow"), SIFC_SHADOW);
+	expPortComboxBox->addItem(tr("4-Player Adapter"), SIFC_4PLAYER);
 	expPortComboxBox->addItem(tr("Hyper Shot Gun"), SIFC_HYPERSHOT);
 	expPortComboxBox->addItem(tr("Family Keyboard"), SIFC_FKB);
 	expPortComboxBox->addItem(tr("Mahjong"), SIFC_MAHJONG);
