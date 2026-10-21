@@ -39,6 +39,7 @@ void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
 int DWaitButton(const uint8_t *text, ButtConfig *bc, int *buttonConfigStatus = NULL);
 int ConfigureLCDCompZapper(int port);
+uint32 GetMouseButtonMask(void);
 
 class hotkey_t
 {

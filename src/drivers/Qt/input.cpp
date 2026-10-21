@@ -1239,32 +1239,47 @@ do {                                              \
 }
 
 /**
+ * Return a bitmask of pressed mouse buttons: left, right, and middle.
+ */
+uint32 GetMouseButtonMask(void)
+{
+	uint32 buttons = 0;
+
+	if (consoleWindow->viewport_Interface)
+	{
+		if (consoleWindow->viewport_Interface->getMouseButtonState(Qt::LeftButton))
+		{
+			buttons |= 0x01;
+		}
+		if (consoleWindow->viewport_Interface->getMouseButtonState(Qt::RightButton))
+		{
+			buttons |= 0x02;
+		}
+		if (consoleWindow->viewport_Interface->getMouseButtonState(Qt::MiddleButton))
+		{
+			buttons |= 0x04;
+		}
+	}
+
+	return buttons;
+}
+
+/**
  * Return the state of the mouse buttons.  Input 'd' is an array of 3
  * integers that store <x, y, button state>.
  */
 void GetMouseData(uint32 (&d)[3])
 {
-	uint32 t, b;
+	uint32 t;
 	double nx = 0.0, ny = 0.0;
-
-	b = 0; // map mouse buttons
 
 	if (consoleWindow->viewport_Interface)
 	{
 		consoleWindow->viewport_Interface->getNormalizedCursorPos(nx, ny);
-
-		if (consoleWindow->viewport_Interface->getMouseButtonState(Qt::LeftButton))
-		{
-			b |= 0x01;
-		}
-		if (consoleWindow->viewport_Interface->getMouseButtonState(Qt::RightButton))
-		{
-			b |= 0x02;
-		}
 	}
 
 	t = PtoV(nx, ny);
-	d[2] = b;
+	d[2] = GetMouseButtonMask() & 0x03;
 	d[0] = t & 0xFFFF;
 	d[1] = (t >> 16) & 0xFFFF;
 

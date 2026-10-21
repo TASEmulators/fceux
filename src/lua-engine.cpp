@@ -2775,6 +2775,25 @@ static int input_get(lua_State *L) {
 	lua_pushinteger(L, click);
 	lua_setfield(L, -2, "click");
 
+#ifdef __QT_DRIVER__
+	uint32 mouseButtons = GetMouseButtonMask();
+	if (mouseButtons & 0x01)
+	{
+		lua_pushboolean(L, true);
+		lua_setfield(L, -2, "leftclick");
+	}
+	if (mouseButtons & 0x02)
+	{
+		lua_pushboolean(L, true);
+		lua_setfield(L, -2, "rightclick");
+	}
+	if (mouseButtons & 0x04)
+	{
+		lua_pushboolean(L, true);
+		lua_setfield(L, -2, "middleclick");
+	}
+#endif
+
 	return 1;
 }
 
