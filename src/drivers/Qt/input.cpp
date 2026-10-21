@@ -22,6 +22,11 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QApplication>
+#include <QDialog>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
 
 #include "Qt/main.h"
 #include "Qt/dface.h"
@@ -131,6 +136,11 @@ static uint32 MahjongData = 0;
 static uint32 FTrainerData = 0;
 static uint8 TopRiderData = 0;
 static uint8 BWorldData[1 + 13 + 1];
+static uint32 lcdcompzapperbuf[2] = {0};
+static ButtConfig lcdcompzappersc[2][2] = {
+	{ { BUTTC_KEYBOARD, 0, 'z', 0 }, { BUTTC_KEYBOARD, 0, 'x', 0 } },
+	{ { BUTTC_KEYBOARD, 0, 'z', 0 }, { BUTTC_KEYBOARD, 0, 'x', 0 } }
+};
 
 static void UpdateFKB(void);
 static void UpdateGamepad(void);
@@ -1487,6 +1497,25 @@ DTestButton(ButtConfig *bc, bool isFKB)
 	return 0;
 }
 
+static uint32 UpdateLCDCompatibleZapperData(int port)
+{
+	if (FCEUMOV_Mode(MOVIEMODE_PLAY))
+	{
+		return 0;
+	}
+
+	uint32 data = 0;
+
+	for (int signal = 0; signal < 2; signal++)
+	{
+		if (DTestButton(&lcdcompzappersc[port][signal]))
+		{
+			data |= 1 << signal;
+		}
+	}
+	return data;
+}
+
 #define MK(x)                     \
 	{                             \
 		BUTTC_KEYBOARD, 0, (x), 0 \
@@ -1716,6 +1745,9 @@ void FCEUD_UpdateInput(void)
 		case SI_ZAPPER:
 			t |= 2;
 			break;
+		case SI_LCDCOMP_ZAPPER:
+			lcdcompzapperbuf[x] = UpdateLCDCompatibleZapperData(x);
+			break;
 		case SI_POWERPADA:
 		case SI_POWERPADB:
 			powerpadbuf[x] = UpdatePPadData(x);
@@ -1842,6 +1874,9 @@ void InitInputInterface()
 		case SI_ZAPPER:
 			InputDPtr = MouseData;
 			attrib = 1;
+			break;
+		case SI_LCDCOMP_ZAPPER:
+			InputDPtr = &lcdcompzapperbuf[x];
 			break;
 		case SI_MOUSE:
 		case SI_SNES_MOUSE:
@@ -2273,6 +2308,114 @@ int DWaitButton(const uint8_t *text, ButtConfig *bc, int *buttonConfigStatus)
 
 extern Config *g_config;
 
+class LCDCompZapperCaptureDialog : public QDialog
+{
+public:
+	LCDCompZapperCaptureDialog()
+	{
+		setWindowTitle(QObject::tr("Configure LCD Zapper"));
+		setModal(true);
+		setFocusPolicy(Qt::StrongFocus);
+
+		auto *layout = new QVBoxLayout(this);
+		instruction = new QLabel(this);
+		instruction->setWordWrap(true);
+		layout->addWidget(instruction);
+
+		auto *cancelButton = new QPushButton(QObject::tr("Cancel"), this);
+		cancelButton->setFocusPolicy(Qt::NoFocus);
+		layout->addWidget(cancelButton);
+		QObject::connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+	}
+
+	void setInstruction(const QString &text)
+	{
+		instruction->setText(text);
+	}
+
+protected:
+	void keyPressEvent(QKeyEvent *event) override
+	{
+		pushKeyEvent(event, 1);
+		event->accept();
+	}
+
+	void keyReleaseEvent(QKeyEvent *event) override
+	{
+		pushKeyEvent(event, 0);
+		event->accept();
+	}
+
+private:
+	QLabel *instruction;
+};
+
+int ConfigureLCDCompZapper(int port)
+{
+	if (port < 0 || port >= 2)
+	{
+		return 0;
+	}
+
+	ButtConfig bindings[2] = {
+		lcdcompzappersc[port][0],
+		lcdcompzappersc[port][1]
+	};
+	const char *signalNames[2] = {
+		"trigger",
+		"light-sense input"
+	};
+	LCDCompZapperCaptureDialog dialog;
+	int buttonConfigStatus = 2;
+	QObject::connect(&dialog, &QDialog::rejected, [&buttonConfigStatus]()
+	{
+		buttonConfigStatus = 0;
+	});
+
+	for (int signal = 0; signal < 2; signal++)
+	{
+		QString prompt = QObject::tr("Press a key or joystick control for the LCD Zapper %1.")
+				.arg(QObject::tr(signalNames[signal]));
+		dialog.setInstruction(prompt);
+		dialog.show();
+		dialog.raise();
+		dialog.activateWindow();
+		dialog.setFocus();
+
+		ButtonConfigBegin();
+		const bool captured = DWaitButton(nullptr, &bindings[signal],
+				&buttonConfigStatus) != 0;
+		ButtonConfigEnd();
+
+		if (!captured)
+		{
+			const bool cancelled = buttonConfigStatus == 0;
+			dialog.reject();
+			if (!cancelled)
+			{
+				QMessageBox::warning(nullptr, QObject::tr("Configure LCD Zapper"),
+						QObject::tr("No input was detected before the configuration timed out."));
+			}
+			return 0;
+		}
+	}
+	dialog.accept();
+
+	char buf[64];
+	snprintf(buf, sizeof(buf), "SDL.Input.LCDCompZapper.%d.", port);
+	const std::string prefix = buf;
+	for (int signal = 0; signal < 2; signal++)
+	{
+		const char *signalName = signal == 0 ? "Trigger" : "Light";
+		lcdcompzappersc[port][signal] = bindings[signal];
+		g_config->setOption(prefix + signalName + ".Type", bindings[signal].ButtType);
+		g_config->setOption(prefix + signalName + ".DeviceNum", bindings[signal].DeviceNum);
+		g_config->setOption(prefix + signalName + ".ButtonNum", bindings[signal].ButtonNum);
+	}
+	g_config->save();
+	return 1;
+}
+
 static const char *stdPortInputEncode(int v)
 {
 	const char *s;
@@ -2288,6 +2431,9 @@ static const char *stdPortInputEncode(int v)
 		break;
 	case SI_ZAPPER:
 		s = "SI_ZAPPER";
+		break;
+	case SI_LCDCOMP_ZAPPER:
+		s = "SI_LCDCOMP_ZAPPER";
 		break;
 	case SI_POWERPADA:
 		s = "SI_POWERPADA";
@@ -2324,6 +2470,10 @@ static int stdPortInputDecode(const char *s)
 		else if (strcmp(s, "SI_ZAPPER") == 0)
 		{
 			ret = SI_ZAPPER;
+		}
+		else if (strcmp(s, "SI_LCDCOMP_ZAPPER") == 0)
+		{
+			ret = SI_LCDCOMP_ZAPPER;
 		}
 		else if (strcmp(s, "SI_POWERPADA") == 0)
 		{
@@ -2776,6 +2926,22 @@ void UpdateInput(Config *config)
 			powerpadsc[i][j].ButtType = type;
 			powerpadsc[i][j].DeviceNum = devnum;
 			powerpadsc[i][j].ButtonNum = button;
+		}
+	}
+
+	for (unsigned int i = 0; i < 2; i++)
+	{
+		char buf[64];
+		snprintf(buf, sizeof(buf) - 1, "SDL.Input.LCDCompZapper.%u.", i);
+		prefix = buf;
+
+		for (unsigned int signal = 0; signal < 2; signal++)
+		{
+			const char *signalName = signal == 0 ? "Trigger" : "Light";
+			config->getOption(prefix + signalName + ".Type", &lcdcompzappersc[i][signal].ButtType);
+			config->getOption(prefix + signalName + ".DeviceNum", &lcdcompzappersc[i][signal].DeviceNum);
+			config->getOption(prefix + signalName + ".ButtonNum", &lcdcompzappersc[i][signal].ButtonNum);
+			lcdcompzappersc[i][signal].state = 0;
 		}
 	}
 

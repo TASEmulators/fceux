@@ -38,6 +38,7 @@ int ButtonConfigBegin();
 void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
 int DWaitButton(const uint8_t *text, ButtConfig *bc, int *buttonConfigStatus = NULL);
+int ConfigureLCDCompZapper(int port);
 
 class hotkey_t
 {
@@ -157,4 +158,3 @@ const uint8_t *getFamilyKeyboardState(void);
 const uint8_t *QtSDL_getKeyboardState( int *bufSize );
 
 #endif
-

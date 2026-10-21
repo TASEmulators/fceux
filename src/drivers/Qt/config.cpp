@@ -980,6 +980,21 @@ InitConfig()
 		}
 	}
 
+	// LCD-compatible Zapper trigger and light-sense bindings
+	for (unsigned int i = 0; i < 2; i++)
+	{
+		char buf[64];
+		snprintf(buf, sizeof(buf) - 1, "SDL.Input.LCDCompZapper.%u.", i);
+		prefix = buf;
+
+		config->addOption(prefix + "Trigger.Type", BUTTC_KEYBOARD);
+		config->addOption(prefix + "Trigger.DeviceNum", 0);
+		config->addOption(prefix + "Trigger.ButtonNum", 'z');
+		config->addOption(prefix + "Light.Type", BUTTC_KEYBOARD);
+		config->addOption(prefix + "Light.DeviceNum", 0);
+		config->addOption(prefix + "Light.ButtonNum", 'x');
+	}
+
 	// QuizKing
 	prefix = "SDL.Input.QuizKing.";
 	config->addOption(prefix + "DeviceType", DefaultQuizKingDevice);
@@ -1176,4 +1191,3 @@ UpdateEMUCore(Config *config)
 
 	FCEUI_SetRenderedLines(startNTSC, endNTSC, startPAL, endPAL);
 }
-
