@@ -29,6 +29,7 @@ build
 /vc/fceux.zip
 /vc/fceux64.zip
 /vcpkg/vcpkg_installed
+__pycache__/
 
 # macOS junk
 .DS_Store
