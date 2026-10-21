@@ -1,8 +1,5 @@
 name: Bug report (required fields)
 description: Report a problem with FCEUX
-title: ""
-labels: []
-assignees: []
 body:
   - type: dropdown
     id: gui
