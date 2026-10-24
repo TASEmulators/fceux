@@ -27,6 +27,7 @@ class ConsoleViewQWidget_t : public QWidget, public ConsoleViewerBase
 		int  driver(void){ return VIDEO_DRIVER_QPAINTER; };
 
 		void transfer2LocalBuffer(void);
+		QImage getFrameImage(void) override;
 
 		void setVsyncEnable( bool ena );
 		void setLinearFilterEnable( bool ena );
@@ -89,4 +90,3 @@ class ConsoleViewQWidget_t : public QWidget, public ConsoleViewerBase
 
 	private slots:
 };
-

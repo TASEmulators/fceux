@@ -404,6 +404,7 @@ class  consoleWin_t : public QMainWindow
 		void loadLua(void);
 		void loadJs(void);
 		void takeScreenShot(void);
+		void takeScreenShotLocalBuffer(void);
 		void prepareScreenShot(void);
 		void powerConsoleCB(void);
 		void consoleHardReset(void);

@@ -577,6 +577,7 @@ InitConfig()
 	config->addOption("SDL.VideoBgColor", "#000000");
 	config->addOption("SDL.UseBgPaletteForVideo", false);
 	config->addOption("SDL.VideoVsync", 1);
+	config->addOption("SDL.QtScreenshotUseLocalBuffer", false);
 
 	// set x/y res to 0 for automatic fullscreen resolution detection (no change)
 	config->addOption('x', "xres", "SDL.XResolution", 0);

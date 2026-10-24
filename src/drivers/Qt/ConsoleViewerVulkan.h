@@ -22,6 +22,7 @@ public:
 	void queueRedraw(void) override;
 	int driver(void) override { return VIDEO_DRIVER_VULKAN; }
 	void transfer2LocalBuffer(void) override;
+	QImage getFrameImage(void) override;
 	void setVsyncEnable(bool ena) override;
 	void setLinearFilterEnable(bool ena) override;
 	bool getForceAspectOpt(void) override { return forceAspect; }

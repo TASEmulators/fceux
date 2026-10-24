@@ -80,7 +80,7 @@ extern uint32 cur_input_display;
 
 bool oldInputDisplay = false;
 
-unsigned int lastu = 0;
+static unsigned int lastu = 0;
 
 std::string AsSnapshotName ="";			//adelikat:this will set the snapshot name when for s savesnapshot as function
 

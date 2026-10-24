@@ -777,6 +777,14 @@ void ConsoleViewVulkan_t::transfer2LocalBuffer(void)
 		copyPixels32(localBuf, source, copySize, alphaMask);
 }
 
+QImage ConsoleViewVulkan_t::getFrameImage(void)
+{
+	if (!nes_shm)
+		return QImage();
+	return copyLocalBufferToImage(localBuf, localBufSize,
+		nes_shm->video.ncol, nes_shm->video.nrow);
+}
+
 void ConsoleViewVulkan_t::setVsyncEnable(bool enabled)
 {
 	vsyncEnabled = enabled;

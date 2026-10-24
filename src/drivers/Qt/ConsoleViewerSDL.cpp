@@ -166,6 +166,14 @@ void ConsoleViewSDL_t::setVsyncEnable( bool ena )
 	}
 }
 
+QImage ConsoleViewSDL_t::getFrameImage(void)
+{
+	if (!nes_shm)
+		return QImage();
+	return copyLocalBufferToImage(localBuf, localBufSize,
+		nes_shm->video.ncol, nes_shm->video.nrow);
+}
+
 void ConsoleViewSDL_t::setLinearFilterEnable( bool ena )
 {
    if ( ena != linearFilter )

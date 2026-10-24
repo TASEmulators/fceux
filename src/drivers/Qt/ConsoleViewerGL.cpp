@@ -516,6 +516,14 @@ void ConsoleViewGL_t::transfer2LocalBuffer(void)
 	}
 }
 
+QImage ConsoleViewGL_t::getFrameImage(void)
+{
+	if (!nes_shm)
+		return QImage();
+	return copyLocalBufferToImage(localBuf, localBufSize,
+		nes_shm->video.ncol, nes_shm->video.nrow);
+}
+
 void ConsoleViewGL_t::mousePressEvent(QMouseEvent * event)
 {
 	//printf("Mouse Button Press: (%i,%i) %x  %x\n", 

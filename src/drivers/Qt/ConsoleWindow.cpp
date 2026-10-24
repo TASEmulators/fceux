@@ -1344,6 +1344,21 @@ void consoleWin_t::createMainMenu(void)
 
 	optMenu->addSeparator();
 
+	// Options -> Screenshot from Video Buffer
+	bool useLocalBufferScreenshot = false;
+	g_config->getOption("SDL.QtScreenshotUseLocalBuffer", &useLocalBufferScreenshot);
+	QAction *localBufferScreenshotAct = new QAction(tr("Screenshot use Raw Video Buffer"), this);
+	localBufferScreenshotAct->setCheckable(true);
+	localBufferScreenshotAct->setChecked(useLocalBufferScreenshot);
+	localBufferScreenshotAct->setStatusTip(
+		tr("Pulls screen shot from actual video buffer being rendered. Includes video scaling and overlays."));
+	localBufferScreenshotAct->setToolTip(
+		tr("Pulls screen shot from actual video buffer being rendered. Includes video scaling and overlays."));
+	connect(localBufferScreenshotAct, &QAction::toggled, this, [](bool checked) {
+		g_config->setOption("SDL.QtScreenshotUseLocalBuffer", checked);
+	});
+	optMenu->addAction(localBufferScreenshotAct);
+
 	// Options -> Video BG Color
 	fceuLoadConfigColor( "SDL.VideoBgColor", &videoBgColor );
 
@@ -3166,11 +3181,60 @@ void consoleWin_t::prepareScreenShot(void)
 	QTimer::singleShot( 100, Qt::CoarseTimer, this, SLOT(takeScreenShot(void)) );
 }
 
+void consoleWin_t::takeScreenShotLocalBuffer()
+{
+	QImage image;
+	if (viewport_Interface != nullptr)
+	{
+		FCEU::autoScopedLock lock(videoBufferMutex);
+		image = viewport_Interface->getFrameImage();
+	}
+
+	if (image.isNull())
+	{
+		QMessageBox::warning(this, tr("Screenshot"),
+			tr("The current video frame could not be captured."));
+		return;
+	}
+
+	int idx=0;
+	QFileInfo fi;
+	for (int i=0; i< 99999; i++)
+	{
+		fi.setFile( QString(FCEU_MakeFName(FCEUMKF_SNAP,i,"png").c_str()) );
+		if (!fi.exists())
+		{
+			idx = i;
+			break;
+		}
+	}
+
+	if (image.save(fi.absoluteFilePath(), "PNG"))
+	{
+		FCEU_DispMessage("Screen snapshot %i saved.", 0, idx);
+	}
+	else
+	{
+		QMessageBox::warning(this, tr("Screenshot"),
+			tr("The screenshot could not be saved."));
+	}
+	return;
+}
+
 void consoleWin_t::takeScreenShot(void)
 {
-	FCEU_WRAPPER_LOCK();
-	FCEUI_SaveSnapshot();
-	FCEU_WRAPPER_UNLOCK();
+	bool useLocalBufferScreenshot = false;
+	g_config->getOption("SDL.QtScreenshotUseLocalBuffer", &useLocalBufferScreenshot);
+	if (useLocalBufferScreenshot)
+	{
+		takeScreenShotLocalBuffer();
+	}
+	else
+	{
+		FCEU_WRAPPER_LOCK();
+		FCEUI_SaveSnapshot();
+		FCEU_WRAPPER_UNLOCK();
+	}
 }
 
 void consoleWin_t::loadLua(void)

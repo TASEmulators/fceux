@@ -26,6 +26,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public
 		int  driver(void){ return VIDEO_DRIVER_OPENGL; };
 
 		void transfer2LocalBuffer(void);
+		QImage getFrameImage(void) override;
 
 		void setVsyncEnable( bool ena );
 		void setLinearFilterEnable( bool ena );
@@ -100,4 +101,3 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public
 		void renderFinished(void);
 		void onDrawSignal();
 };
-

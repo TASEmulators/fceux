@@ -235,6 +235,14 @@ void ConsoleViewQWidget_t::transfer2LocalBuffer(void)
 	}
 }
 
+QImage ConsoleViewQWidget_t::getFrameImage(void)
+{
+	if (!nes_shm)
+		return QImage();
+	return copyLocalBufferToImage(localBuf, localBufSize,
+		nes_shm->video.ncol, nes_shm->video.nrow);
+}
+
 int ConsoleViewQWidget_t::init(void)
 {
 	return 0;

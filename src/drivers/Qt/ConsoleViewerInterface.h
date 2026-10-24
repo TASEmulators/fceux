@@ -1,10 +1,12 @@
 // ConsoleViewerInterface.h
 //
 #pragma once
+#include <cstddef>
 #include <stdint.h>
 
 #include <QColor>
 #include <QCursor>
+#include <QImage>
 #include <QSize>
 
 class ConsoleViewerBase
@@ -23,6 +25,7 @@ class ConsoleViewerBase
 		virtual int  driver(void) = 0;
 
 		virtual void transfer2LocalBuffer(void) = 0;
+		virtual QImage getFrameImage(void) = 0;
 
 		virtual void setVsyncEnable( bool ena ) = 0;
 		virtual void setLinearFilterEnable( bool ena ) = 0;
@@ -54,4 +57,6 @@ class ConsoleViewerBase
 
 		static constexpr uint32_t alphaMask = 0xff000000;
 	protected:
+		static QImage copyLocalBufferToImage(const uint32_t *buffer, size_t bufferSize,
+			int width, int height);
 };

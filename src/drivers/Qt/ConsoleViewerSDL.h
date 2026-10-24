@@ -28,6 +28,7 @@ class ConsoleViewSDL_t : public QWidget, public ConsoleViewerBase
 		int  driver(void){ return VIDEO_DRIVER_SDL; };
 
 		void transfer2LocalBuffer(void);
+		QImage getFrameImage(void) override;
 
 		void setVsyncEnable( bool ena );
 		void setLinearFilterEnable( bool ena );
@@ -98,4 +99,3 @@ class ConsoleViewSDL_t : public QWidget, public ConsoleViewerBase
 	private slots:
 		void onDrawSignal();
 };
-
