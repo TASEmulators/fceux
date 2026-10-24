@@ -2287,7 +2287,11 @@ int aviRecordOpenFile( const char *filepath )
 
 	avi_info.add_pair( "ILNG", QLocale::languageToString( locale.language() ).toLocal8Bit().constData() );
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 2, 0)
+	avi_info.add_pair( "IARL", QLocale::territoryToString( locale.territory() ).toLocal8Bit().constData() );
+#else
 	avi_info.add_pair( "IARL", QLocale::countryToString( locale.country() ).toLocal8Bit().constData() );
+#endif
 
 	avi_info.add_pair( "IMED", QSysInfo::prettyProductName().toLocal8Bit().constData() );
 
