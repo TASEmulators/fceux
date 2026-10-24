@@ -278,9 +278,12 @@ void NetPlayServer::processPendingConnections(void)
 		{
 			// File is owned by the server
 			QTemporaryFile* debugFile = new QTemporaryFile( QDir::tempPath() + QString("/NetPlayServerConnection_XXXXXX.log"), this);
-			debugFile->open();
-			client->setDebugLog( debugFile );
-			printf("Client Debug File: %s\n", debugFile->fileName().toLocal8Bit().constData());
+			const bool success = debugFile->open();
+			if (success)
+			{
+				client->setDebugLog( debugFile );
+				printf("Client Debug File: %s\n", debugFile->fileName().toLocal8Bit().constData());
+			}
 		}
 		client->setSocket(newSock);
 
@@ -1981,28 +1984,31 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 
 			QFile tmpFile( tempPath );
 			//tmpFile.setFileTemplate(QDir::tempPath() + QString("/tmpRom_XXXXXX.nes"));
-			tmpFile.open(QIODevice::ReadWrite);
-			QString filepath = tmpFile.fileName();
-			printf("Dumping Temp Rom to: %s\n", tmpFile.fileName().toLocal8Bit().constData());
-			tmpFile.write( romData, msgSize );
-			tmpFile.close();
+			const bool openSuccessful = tmpFile.open(QIODevice::ReadWrite);
+			if (openSuccessful)
+			{
+				QString filepath = tmpFile.fileName();
+				printf("Dumping Temp Rom to: %s\n", tmpFile.fileName().toLocal8Bit().constData());
+				tmpFile.write( romData, msgSize );
+				tmpFile.close();
 
-			FCEU_WRAPPER_LOCK();
-			fceuWrapperSetArchiveFileLoadIndex( msg->archiveIndex );
-			LoadGame( filepath.toLocal8Bit().constData(), true, true );
-			fceuWrapperClearArchiveFileLoadIndex();
+				{
+					FCEU_WRAPPER_SCOPED_LOCK();
+					fceuWrapperSetArchiveFileLoadIndex( msg->archiveIndex );
+					LoadGame( filepath.toLocal8Bit().constData(), true, true );
+					fceuWrapperClearArchiveFileLoadIndex();
 
-			opsCrc32 = 0;
-			netPlayFrameData.reset();
-			inputClear();
-			FCEU_WRAPPER_UNLOCK();
+					opsCrc32 = 0;
+					netPlayFrameData.reset();
+					inputClear();
+				}
+			}
 		}
 		break;
 		case NETPLAY_UNLOAD_ROM_REQ:
 		{
-			FCEU_WRAPPER_LOCK();
+			FCEU_WRAPPER_SCOPED_LOCK();
 			CloseGame();
-			FCEU_WRAPPER_UNLOCK();
 		}
 		break;
 		case NETPLAY_SYNC_STATE_RESP:

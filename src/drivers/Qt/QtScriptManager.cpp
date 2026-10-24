@@ -3472,10 +3472,13 @@ void QScriptDialog_t::resetLog()
 	logFile = new QTemporaryFile(this);
 	logFile->setAutoRemove(true);
 	logFile->setFileTemplate(QDir::tempPath() + QString("/fceux_js_XXXXXX.log"));
-	logFile->open();
-	QString link = QString("<a href=\"file://") + 
-		logFile->fileName() + QString("\">") + logFile->fileName() + QString("</a>");
-	logFilepath->setText( link );
+	const bool success = logFile->open();
+	if (success)
+	{
+		QString link = QString("<a href=\"file://") + 
+			logFile->fileName() + QString("\">") + logFile->fileName() + QString("</a>");
+		logFilepath->setText( link );
+	}
 }
 //----------------------------------------------------
 void QScriptDialog_t::startScript(void)

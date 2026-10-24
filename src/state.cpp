@@ -219,7 +219,7 @@ static bool ReadStateChunk(EMUFILE* is, SFORMAT *sf, int size)
 	while(is->ftell()<temp+size)
 	{
 		uint32 tsize;
-		char toa[4];
+		char toa[4]={0};
 		if(is->fread(toa,4)<4)
 			return false;
 
