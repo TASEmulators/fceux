@@ -501,6 +501,7 @@ class  consoleWin_t : public QMainWindow
 		void videoBgColorChanged( QColor &c );
 		void loadRomRequestCB( QString s );
 		void videoDriverDestroyed( QObject *obj );
+		void toggleMenuToolTips(bool);
 
 };
 

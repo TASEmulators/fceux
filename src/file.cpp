@@ -523,6 +523,14 @@ std::string  FCEU_GetPath(int type)
 				return BaseDirectory + PSS + "movies";
 			break;
 		}
+		case FCEUMKF_SNAP:
+		{
+			if(odirs[FCEUIOD_SNAPS])
+				return (odirs[FCEUIOD_SNAPS]);
+			else
+				return BaseDirectory + PSS + "snaps";
+			break;
+		}
 		case FCEUMKF_MEMW:
 		{
 			if(odirs[FCEUIOD_MEMW])

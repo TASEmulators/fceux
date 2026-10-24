@@ -990,7 +990,8 @@ void consoleWin_t::createMainMenu(void)
 	// File -> Open ROM
 	openROM = new QAction(tr("&Open ROM"), this);
 	//openROM->setShortcuts(QKeySequence::Open);
-	openROM->setStatusTip(tr("Open ROM File"));
+	openROM->setStatusTip(tr("Open ROM file via dialog. Loads ROM and initializes emulator."));
+	openROM->setToolTip( openROM->statusTip() );
 	//openROM->setIcon( QIcon(":icons/rom.png") );
 	//openROM->setIcon( style->standardIcon( QStyle::SP_FileIcon ) );
 	openROM->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
@@ -1004,7 +1005,8 @@ void consoleWin_t::createMainMenu(void)
 	// File -> Close ROM
 	closeROM = new QAction(tr("&Close ROM"), this);
 	//closeROM->setShortcut( QKeySequence(tr("Ctrl+C")));
-	closeROM->setStatusTip(tr("Close Loaded ROM"));
+	closeROM->setStatusTip(tr("Close loaded ROM. Deinitializes emulator."));
+	closeROM->setToolTip( closeROM->statusTip() );
 	closeROM->setIcon( style()->standardIcon( QStyle::SP_BrowserStop ) );
 	connect(closeROM, SIGNAL(triggered()), this, SLOT(closeROMCB(void)) );
 	
@@ -1033,7 +1035,8 @@ void consoleWin_t::createMainMenu(void)
 	// File -> Load State From
 	loadStateAct = new QAction(tr("Load State &From"), this);
 	//loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
-	loadStateAct->setStatusTip(tr("Load State From"));
+	loadStateAct->setStatusTip(tr("Load State From File"));
+	loadStateAct->setToolTip(tr("Load state from file selected via dialog"));
 	loadStateAct->setIcon( style()->standardIcon( QStyle::SP_FileDialogStart ) );
 	connect(loadStateAct, SIGNAL(triggered()), this, SLOT(loadStateFrom(void)) );
 	
@@ -1042,7 +1045,8 @@ void consoleWin_t::createMainMenu(void)
 	// File -> Save State As
 	saveStateAct = new QAction(tr("Save State &As"), this);
 	//loadStateAct->setShortcut( QKeySequence(tr("Ctrl+N")));
-	saveStateAct->setStatusTip(tr("Save State As"));
+	saveStateAct->setStatusTip(tr("Save state to a file via dialog"));
+	saveStateAct->setToolTip( saveStateAct->statusTip() );
 	saveStateAct->setIcon( style()->standardIcon( QStyle::SP_DialogSaveButton ) );
 	connect(saveStateAct, SIGNAL(triggered()), this, SLOT(saveStateAs(void)) );
 	
@@ -1051,7 +1055,8 @@ void consoleWin_t::createMainMenu(void)
 	// File -> Quick Load
 	quickLoadAct = new QAction(tr("Quick &Load"), this);
 	//quickLoadAct->setShortcut( QKeySequence(tr("Shift+I")));
-	quickLoadAct->setStatusTip(tr("Quick Load"));
+	quickLoadAct->setStatusTip(tr("Quick load state from current save/load slot"));
+	quickLoadAct->setToolTip( quickLoadAct->statusTip() );
 	connect(quickLoadAct, SIGNAL(triggered()), this, SLOT(quickLoad(void)) );
 	
 	fileMenu->addAction(quickLoadAct);
@@ -1062,7 +1067,8 @@ void consoleWin_t::createMainMenu(void)
 	// File -> Quick Save
 	quickSaveAct = new QAction(tr("Quick &Save"), this);
 	//quickSaveAct->setShortcut( QKeySequence(tr("F5")));
-	quickSaveAct->setStatusTip(tr("Quick Save"));
+	quickSaveAct->setStatusTip(tr("Quick save state to current save/load slot"));
+	quickSaveAct->setToolTip( quickSaveAct->statusTip() );
 	connect(quickSaveAct, SIGNAL(triggered()), this, SLOT(quickSave(void)) );
 	
 	fileMenu->addAction(quickSaveAct);
@@ -1132,7 +1138,8 @@ void consoleWin_t::createMainMenu(void)
 	// File -> Load Lua
 	loadLuaAct = new QAction(tr("Load &Lua Script"), this);
 	//loadLuaAct->setShortcut( QKeySequence(tr("F5")));
-	loadLuaAct->setStatusTip(tr("Load Lua Script"));
+	loadLuaAct->setStatusTip(tr("Load Lua script via file dialog"));
+	loadLuaAct->setToolTip( loadLuaAct->statusTip() );
 	//loadLuaAct->setIcon( QIcon(":icons/lua-logo.png") );
 	connect(loadLuaAct, SIGNAL(triggered()), this, SLOT(loadLua(void)) );
 	
@@ -1146,7 +1153,8 @@ void consoleWin_t::createMainMenu(void)
 #ifdef __FCEU_QSCRIPT_ENABLE__
 	// File -> Load JavaScript
 	loadJsAct = new QAction(tr("Load &JavaScript"), this);
-	loadJsAct->setStatusTip(tr("Load JavaScript"));
+	loadJsAct->setStatusTip(tr("Load JavaScript file via dialog"));
+	loadJsAct->setToolTip( loadJsAct->statusTip() );
 	connect(loadJsAct, SIGNAL(triggered()), this, SLOT(loadJs(void)) );
 	
 	fileMenu->addAction(loadJsAct);
@@ -1159,7 +1167,9 @@ void consoleWin_t::createMainMenu(void)
 	// File -> Screenshot
 	scrShotAct = new QAction(tr("Screens&hot"), this);
 	//scrShotAct->setShortcut( QKeySequence(tr("F12")));
-	scrShotAct->setStatusTip(tr("Screenshot"));
+	const QString scrShotPath = FCEU_GetPath(FCEUMKF_SNAP).c_str();
+	scrShotAct->setStatusTip(tr("Takes a screenshot and saves it to: ") + scrShotPath);
+	scrShotAct->setToolTip( scrShotAct->statusTip() );
 	scrShotAct->setIcon( QIcon(":icons/camera.png") );
 	connect(scrShotAct, SIGNAL(triggered()), this, SLOT(prepareScreenShot(void)));
 	
@@ -1171,7 +1181,8 @@ void consoleWin_t::createMainMenu(void)
 	// File -> Quit
 	quitAct = new QAction(tr("&Quit"), this);
 	//quitAct->setShortcut( QKeySequence(tr("Ctrl+Q")));
-	quitAct->setStatusTip(tr("Quit the Application"));
+	quitAct->setStatusTip(tr("Quit the application. Performs an orderly shutdown. Open ROM and windows are closed before application exits."));
+	quitAct->setToolTip( quitAct->statusTip() );
 	//quitAct->setIcon( style()->standardIcon( QStyle::SP_DialogCloseButton ) );
 	quitAct->setIcon( QIcon(":icons/application-exit.png") );
 	connect(quitAct, SIGNAL(triggered()), this, SLOT(closeApp()));
@@ -1190,7 +1201,8 @@ void consoleWin_t::createMainMenu(void)
 	// Options -> Input Config
 	inputConfig = new QAction(tr("&Input Config"), this);
 	//inputConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-	inputConfig->setStatusTip(tr("Input Configure"));
+	inputConfig->setStatusTip(tr("Opens input configuration dialog"));
+	inputConfig->setToolTip( inputConfig->statusTip() );
 	inputConfig->setIcon( QIcon(":icons/input-gaming.png") );
 	connect(inputConfig, SIGNAL(triggered()), this, SLOT(openInputConfWin(void)) );
 	
@@ -1199,7 +1211,8 @@ void consoleWin_t::createMainMenu(void)
 	// Options -> GamePad Config
 	gamePadConfig = new QAction(tr("&GamePad Config"), this);
 	//gamePadConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-	gamePadConfig->setStatusTip(tr("GamePad Configure"));
+	gamePadConfig->setStatusTip(tr("Opens GamePad configuration dialog"));
+	gamePadConfig->setToolTip( gamePadConfig->statusTip() );
 	gamePadConfig->setIcon( QIcon(":icons/input-gaming-symbolic.png") );
 	connect(gamePadConfig, SIGNAL(triggered()), this, SLOT(openGamePadConfWin(void)) );
 	
@@ -1208,7 +1221,8 @@ void consoleWin_t::createMainMenu(void)
 	// Options -> Sound Config
 	gameSoundConfig = new QAction(tr("&Sound Config"), this);
 	//gameSoundConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-	gameSoundConfig->setStatusTip(tr("Sound Configure"));
+	gameSoundConfig->setStatusTip(tr("Opens Sound/Audio Configuration Dialog"));
+	gameSoundConfig->setToolTip( gameSoundConfig->statusTip() );
 	gameSoundConfig->setIcon( style()->standardIcon( QStyle::SP_MediaVolume ) );
 	connect(gameSoundConfig, SIGNAL(triggered()), this, SLOT(openGameSndConfWin(void)) );
 	
@@ -1217,7 +1231,8 @@ void consoleWin_t::createMainMenu(void)
 	// Options -> Video Config
 	gameVideoConfig = new QAction(tr("&Video Config"), this);
 	//gameVideoConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-	gameVideoConfig->setStatusTip(tr("Video Preferences"));
+	gameVideoConfig->setStatusTip(tr("Opens Video Preferences Dialog"));
+	gameVideoConfig->setToolTip( gameVideoConfig->statusTip() );
 	gameVideoConfig->setIcon( style()->standardIcon( QStyle::SP_ComputerIcon ) );
 	connect(gameVideoConfig, SIGNAL(triggered()), this, SLOT(openGameVideoConfWin(void)) );
 	
@@ -1226,7 +1241,8 @@ void consoleWin_t::createMainMenu(void)
 	// Options -> HotKey Config
 	hotkeyConfig = new QAction(tr("Hot&Key Config"), this);
 	//hotkeyConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-	hotkeyConfig->setStatusTip(tr("Hotkey Configure"));
+	hotkeyConfig->setStatusTip(tr("Opens Hotkey Configuration Dialog"));
+	hotkeyConfig->setToolTip( hotkeyConfig->statusTip() );
 	hotkeyConfig->setIcon( QIcon(":icons/input-keyboard.png") );
 	connect(hotkeyConfig, SIGNAL(triggered()), this, SLOT(openHotkeyConfWin(void)) );
 	
@@ -1235,7 +1251,8 @@ void consoleWin_t::createMainMenu(void)
 	// Options -> Palette Config
 	paletteConfig = new QAction(tr("&Palette Config"), this);
 	//paletteConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-	paletteConfig->setStatusTip(tr("Palette Configure"));
+	paletteConfig->setStatusTip(tr("Opens Palette Configuration Dialog"));
+	paletteConfig->setToolTip( paletteConfig->statusTip() );
 	paletteConfig->setIcon( QIcon(":icons/graphics-palette.png") );
 	connect(paletteConfig, SIGNAL(triggered()), this, SLOT(openPaletteConfWin(void)) );
 	
@@ -1244,7 +1261,8 @@ void consoleWin_t::createMainMenu(void)
 	// Options -> GUI Config
 	guiConfig = new QAction(tr("G&UI Config"), this);
 	//guiConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-	guiConfig->setStatusTip(tr("GUI Configure"));
+	guiConfig->setStatusTip(tr("Opens GUI Configuration Dialog"));
+	guiConfig->setToolTip( guiConfig->statusTip() );
 	guiConfig->setIcon( style()->standardIcon( QStyle::SP_TitleBarNormalButton ) );
 	connect(guiConfig, SIGNAL(triggered()), this, SLOT(openGuiConfWin(void)) );
 	
@@ -1253,7 +1271,8 @@ void consoleWin_t::createMainMenu(void)
 	// Options -> Timing Config
 	timingConfig = new QAction(tr("&Timing Config"), this);
 	//timingConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-	timingConfig->setStatusTip(tr("Timing Configure"));
+	timingConfig->setStatusTip(tr("Opens Timing Configuration Dialog"));
+	timingConfig->setToolTip( timingConfig->statusTip() );
 	timingConfig->setIcon( QIcon(":icons/timer.png") );
 	connect(timingConfig, SIGNAL(triggered()), this, SLOT(openTimingConfWin(void)) );
 	
@@ -1262,7 +1281,8 @@ void consoleWin_t::createMainMenu(void)
 	// Options -> State Recorder Config
 	stateRecordConfig = new QAction(tr("&State Recorder Config"), this);
 	//stateRecordConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-	stateRecordConfig->setStatusTip(tr("State Recorder Configure"));
+	stateRecordConfig->setStatusTip(tr("Opens State Recorder Configuration Dialog"));
+	stateRecordConfig->setToolTip( stateRecordConfig->statusTip() );
 	stateRecordConfig->setIcon( QIcon(":icons/media-record.png") );
 	connect(stateRecordConfig, SIGNAL(triggered()), this, SLOT(openStateRecorderConfWin(void)) );
 	
@@ -1271,7 +1291,8 @@ void consoleWin_t::createMainMenu(void)
 	// Options -> Movie Options
 	movieConfig = new QAction(tr("&Movie Options"), this);
 	//movieConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
-	movieConfig->setStatusTip(tr("Movie Options"));
+	movieConfig->setStatusTip(tr("Open Movie Options Dialog"));
+	movieConfig->setToolTip( movieConfig->statusTip() );
 	movieConfig->setIcon( QIcon(":icons/movie.png") );
 	connect(movieConfig, SIGNAL(triggered()), this, SLOT(openMovieOptWin(void)) );
 	
@@ -1351,9 +1372,8 @@ void consoleWin_t::createMainMenu(void)
 	localBufferScreenshotAct->setCheckable(true);
 	localBufferScreenshotAct->setChecked(useLocalBufferScreenshot);
 	localBufferScreenshotAct->setStatusTip(
-		tr("Pulls screen shot from actual video buffer being rendered. Includes video scaling and overlays."));
-	localBufferScreenshotAct->setToolTip(
-		tr("Pulls screen shot from actual video buffer being rendered. Includes video scaling and overlays."));
+		tr("Pulls screen shot from actual video buffer being rendered. Includes video scaling and overlays in the captured image."));
+	localBufferScreenshotAct->setToolTip( localBufferScreenshotAct->statusTip() );
 	connect(localBufferScreenshotAct, &QAction::toggled, this, [](bool checked) {
 		g_config->setOption("SDL.QtScreenshotUseLocalBuffer", checked);
 	});
@@ -2097,7 +2117,8 @@ void consoleWin_t::createMainMenu(void)
 
 	// Help -> Documentation Online
 	act = new QAction(tr("&Online"), this);
-	act->setStatusTip(tr("Documentation"));
+	act->setStatusTip(tr("Opens a web browser to online documentation."));
+	act->setToolTip( act->statusTip() );
 	//act->setIcon( style()->standardIcon( QStyle::SP_DialogHelpButton ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(openOnlineDocs(void)) );
 	
@@ -2106,12 +2127,30 @@ void consoleWin_t::createMainMenu(void)
 #if  defined(WIN32) || defined(_USE_QHELP)
 	// Help -> Documentation Offline
 	act = new QAction(tr("&Local"), this);
-	act->setStatusTip(tr("Documentation"));
+	act->setStatusTip(tr("Opens local documentation. Not internet required."));
+	act->setToolTip( act->statusTip() );
 	//act->setIcon( style()->standardIcon( QStyle::SP_DialogHelpButton ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(openOfflineDocs(void)) );
 
 	subMenu->addAction(act);
 #endif
+
+	// Help -> Show Main Menu Tool Tips
+	bool showToolTips = false;
+	g_config->getOption( "SDL.ShowMenuToolTips", &showToolTips );
+
+	act = new QAction(tr("Show Main Menu Tool Tips"), this);
+	//act->setShortcut( QKeySequence(tr("Alt+/")));
+	act->setCheckable(true);
+	act->setChecked( showToolTips );
+	act->setStatusTip(tr("Enable/disable Main Menu Tool Tips"));
+	act->setToolTip( act->statusTip() );
+	//act->setIcon( style()->standardIcon( QStyle::SP_TitleBarMaxButton ) );
+	connect(act, SIGNAL(triggered(bool)), this, SLOT(toggleMenuToolTips(bool)) );
+
+	helpMenu->addAction(act);
+
+	toggleMenuToolTips( showToolTips );
 };
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
@@ -3172,6 +3211,18 @@ void consoleWin_t::mainMenuClose(void)
 		}
 		mainMenuEmuPauseSet = false;
 	}
+}
+
+void consoleWin_t::toggleMenuToolTips(bool checked)
+{
+	fileMenu->setToolTipsVisible(checked);
+	movieMenu->setToolTipsVisible(checked);
+	optMenu->setToolTipsVisible(checked);
+	emuMenu->setToolTipsVisible(checked);
+	toolsMenu->setToolTipsVisible(checked);
+	debugMenu->setToolTipsVisible(checked);
+	netPlayMenu->setToolTipsVisible(checked);
+	helpMenu->setToolTipsVisible(checked);
 }
 
 void consoleWin_t::prepareScreenShot(void)
