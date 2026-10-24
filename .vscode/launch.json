@@ -14,13 +14,17 @@
 			"cwd": "${workspaceFolder}",
 			"environment": [
 				{
-					"name": "QT_QPA_PLATFORM",
-					"value": "xcb"
-				},
+        		  "name": "GDK_BACKEND",
+         		  "value": "x11"
+        		},
 				{
-					"name": "QT_QPA_PLATFORMTHEME",
-					"value": "gtk2"
-				}
+        		  "name": "GTK_PATH",
+        		  "value": ""
+        		},
+        		{
+        		  "name": "GIO_MODULE_DIR",
+        		  "value": ""
+        		}
 			],
 			"externalConsole": false,
 			"MIMode": "gdb",

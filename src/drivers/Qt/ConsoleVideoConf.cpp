@@ -951,12 +951,12 @@ void ConsoleVideoConfDialog_t::driverChanged(int index)
 			tr("SDL video driver"),
 			tr("The SDL video driver cannot embed into the Qt window on Wayland "
 			   "(SDL uses X11 here, but this window is not an X11 window). "
-			   "FCEUX will use OpenGL instead.\n\n"
+			   "FCEUX will use QPainter instead.\n\n"
 			   "To use the SDL driver you can run FCEUX with the X11 Qt platform "
 			   "plugin, for example:\n"
 			   "QT_QPA_PLATFORM=xcb fceux"));
 
-		driver = ConsoleViewerBase::VIDEO_DRIVER_OPENGL;
+		driver = ConsoleViewerBase::VIDEO_DRIVER_QPAINTER;
 		driverSelect->blockSignals(true);
 		for (int i = 0; i < driverSelect->count(); i++)
 		{
