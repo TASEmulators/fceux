@@ -79,6 +79,7 @@ private:
 	void buildBlockIndex(void);
 	bool siteMatches(uint32_t site) const;
 	bool findStep(int dir, bool fromEnd);
+	bool findLongestFrom(int rank);
 	void selectBlock(int index);
 
 	std::shared_ptr<const ProfilerCaptureData> data;
@@ -110,6 +111,7 @@ private:
 	QString findFilter;
 	int  foundIndex = -1;
 	int  longestRank = -1;
+	int  longestMatchNumber = 0;
 	const ProfilerBlock *foundBlock = nullptr;
 
 	// Time measurement: a click sets the reference, the label follows the cursor

@@ -652,6 +652,7 @@ void ProfilerViewer_t::buildBlockIndex(void)
 void ProfilerViewer_t::setFindText(const QString &text)
 {
 	findFilter = text.trimmed();
+	longestRank = -1;
 	siteMatch.assign(data ? data->sites.size() : 0, false);
 
 	for (size_t i = 0; i < siteMatch.size(); i++)
@@ -725,7 +726,8 @@ bool ProfilerViewer_t::findLast(void){ return findStep(-1, true); }
 bool ProfilerViewer_t::findNext(void){ return findStep(1, false); }
 bool ProfilerViewer_t::findPrevious(void){ return findStep(-1, false); }
 //----------------------------------------------------------------------------
-bool ProfilerViewer_t::findLongest(void)
+// Selects the next matching block in longest-first order after the given rank
+bool ProfilerViewer_t::findLongestFrom(int rank)
 {
 	buildBlockIndex();
 	if (longestOrder.empty())
@@ -733,27 +735,42 @@ bool ProfilerViewer_t::findLongest(void)
 		emit findResult(tr("No capture loaded"));
 		return false;
 	}
-	longestRank = 0;
-	selectBlock(longestOrder[0]);
-	return true;
+	int matchNumber = 0;
+
+	for (int r = 0; r < static_cast<int>(longestOrder.size()); r++)
+	{
+		if (!siteMatches(allBlocks[longestOrder[r]].block->site))
+		{
+			continue;
+		}
+		matchNumber++;
+		if (r >= rank)
+		{
+			longestRank = r;
+			longestMatchNumber = matchNumber;
+			selectBlock(longestOrder[r]);
+			return true;
+		}
+	}
+	if (matchNumber > 0)
+	{
+		emit findResult(tr("No more markers"));
+	}
+	else
+	{
+		emit findResult(tr("No markers match \"%1\"").arg(findFilter));
+	}
+	return false;
+}
+//----------------------------------------------------------------------------
+bool ProfilerViewer_t::findLongest(void)
+{
+	return findLongestFrom(0);
 }
 //----------------------------------------------------------------------------
 bool ProfilerViewer_t::findNextLongest(void)
 {
-	buildBlockIndex();
-	if (longestOrder.empty())
-	{
-		emit findResult(tr("No capture loaded"));
-		return false;
-	}
-	if (longestRank + 1 >= static_cast<int>(longestOrder.size()))
-	{
-		emit findResult(tr("No more markers"));
-		return false;
-	}
-	longestRank++;
-	selectBlock(longestOrder[longestRank]);
-	return true;
+	return findLongestFrom(longestRank + 1);
 }
 //----------------------------------------------------------------------------
 void ProfilerViewer_t::selectBlock(int index)
@@ -808,7 +825,7 @@ void ProfilerViewer_t::selectBlock(int index)
 	QString text = blockSummary(*ref.block);
 	if (longestRank >= 0)
 	{
-		text += tr("  (longest #%1)").arg(longestRank + 1);
+		text += tr("  (longest #%1)").arg(longestMatchNumber);
 	}
 	emit findResult(text);
 }

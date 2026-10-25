@@ -52,7 +52,7 @@ namespace
 }
 //----------------------------------------------------------------------------
 ProfilerDialog_t::ProfilerDialog_t(QWidget *parent)
-	: QDialog(parent)
+	: QDialog(parent, Qt::Window)
 {
 	QVBoxLayout *mainLayout = new QVBoxLayout();
 	QVBoxLayout *vbox;
