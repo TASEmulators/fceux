@@ -1,6 +1,5 @@
 // ProfilerCaptureFile.cpp
 //
-#ifdef __FCEU_PROFILER_ENABLE__
 
 #include <string.h>
 #include <algorithm>
@@ -8,7 +7,7 @@
 
 #include <QFile>
 
-#include "Qt/ProfilerCapture.h"
+#include "Qt/ProfilerCaptureFormat.h"
 #include "Qt/ProfilerCaptureFile.h"
 
 namespace
@@ -288,4 +287,4 @@ void ProfilerLoadThread_t::run(void)
 	}
 }
 //----------------------------------------------------------------------------
-#endif // __FCEU_PROFILER_ENABLE__
+

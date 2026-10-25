@@ -1,6 +1,5 @@
 // ProfilerViewer.cpp
 //
-#ifdef __FCEU_PROFILER_ENABLE__
 
 #include <math.h>
 #include <algorithm>
@@ -1045,4 +1044,4 @@ void ProfilerViewer_t::paintEvent(QPaintEvent *)
 	drawMeasure(p);
 }
 //----------------------------------------------------------------------------
-#endif // __FCEU_PROFILER_ENABLE__
+

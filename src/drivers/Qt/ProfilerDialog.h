@@ -3,7 +3,6 @@
 
 #pragma once
 
-#ifdef __FCEU_PROFILER_ENABLE__
 
 #include <QDialog>
 #include <QLineEdit>
@@ -13,7 +12,9 @@
 #include <QComboBox>
 #include <QSpinBox>
 
+#ifdef __FCEU_PROFILER_ENABLE__
 #include "Qt/ProfilerCapture.h"
+#endif
 #include "Qt/ProfilerCaptureFile.h"
 #include "Qt/ProfilerViewer.h"
 
@@ -57,7 +58,9 @@ private:
 	QLineEdit   *findEdit;
 	QLabel      *findLabel;
 
+#ifdef __FCEU_PROFILER_ENABLE__
 	ProfilerCaptureThread_t *captureThread = nullptr;
+#endif
 	ProfilerLoadThread_t    *loadThread = nullptr;
 	QString loadName;
 
@@ -81,4 +84,4 @@ private slots:
 	void frameNextClicked(void);
 };
 
-#endif // __FCEU_PROFILER_ENABLE__
+

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#ifdef __FCEU_PROFILER_ENABLE__
 
 #include <stdint.h>
 #include <functional>
@@ -90,4 +89,4 @@ private:
 	std::shared_ptr<const ProfilerCaptureData> result;
 };
 
-#endif // __FCEU_PROFILER_ENABLE__
+

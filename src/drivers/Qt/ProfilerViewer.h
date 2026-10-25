@@ -5,7 +5,6 @@
 
 #pragma once
 
-#ifdef __FCEU_PROFILER_ENABLE__
 
 #include <memory>
 #include <utility>
@@ -141,4 +140,4 @@ private slots:
 	void vScrollChanged(int value);
 };
 
-#endif // __FCEU_PROFILER_ENABLE__
+

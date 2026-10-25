@@ -1,6 +1,5 @@
 // ProfilerDialog.cpp
 //
-#ifdef __FCEU_PROFILER_ENABLE__
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -14,6 +13,10 @@
 #include <QAction>
 #include <QKeySequence>
 #include <QFileInfo>
+#include <QStyle>
+#include <QIcon>
+#include <QPainter>
+#include <QPixmap>
 
 #include "driver.h"
 #include "Qt/main.h"
@@ -21,6 +24,29 @@
 
 namespace
 {
+	// Magnifying glass with a plus or minus inside the lens, drawn in the given color
+	QIcon makeZoomIcon(const QColor &color, bool zoomIn)
+	{
+		const int size = 64;
+		QPixmap pm(size, size);
+		pm.fill(Qt::transparent);
+
+		QPainter p(&pm);
+		p.setRenderHint(QPainter::Antialiasing);
+		p.setPen(QPen(color, 7, Qt::SolidLine, Qt::RoundCap));
+		p.drawEllipse(QPointF(27, 27), 20, 20);
+		p.setPen(QPen(color, 6, Qt::SolidLine, Qt::RoundCap));
+		p.drawLine(QPointF(43, 43), QPointF(58, 58));
+		p.setPen(QPen(color, 7, Qt::SolidLine, Qt::RoundCap));
+		p.drawLine(QPointF(17, 27), QPointF(37, 27));
+		if (zoomIn)
+		{
+			p.drawLine(QPointF(27, 17), QPointF(27, 37));
+		}
+		p.end();
+		return QIcon(pm);
+	}
+
 	// The marker the emulator places around each emulated frame (FCEUI_Emulate)
 	const char *emulatorFrameComment = "Emulate Single Frame";
 }
@@ -132,48 +158,93 @@ ProfilerDialog_t::ProfilerDialog_t(QWidget *parent)
 
 	setLayout(mainLayout);
 
+	// Prefer theme icons and fall back to the style's standard icons
+	auto icon = [this](const char *theme, QStyle::StandardPixmap fallback)
+	{
+		return QIcon::fromTheme(QString(theme), style()->standardIcon(fallback));
+	};
+	const QIcon zoomInIcon = makeZoomIcon(palette().color(QPalette::ButtonText), true);
+	const QIcon zoomOutIcon = makeZoomIcon(palette().color(QPalette::ButtonText), false);
+
 	QMenuBar *menuBar = new QMenuBar(this);
 	QMenu *menu = menuBar->addMenu(tr("&File"));
 	QAction *act;
 
 	act = menu->addAction(tr("&Open Capture..."), this, SLOT(openClicked(void)));
 	act->setShortcut(QKeySequence::Open);
+	act->setIcon(icon("document-open", QStyle::SP_DialogOpenButton));
 	menu->addSeparator();
 	act = menu->addAction(tr("&Close"), this, SLOT(closeWindow(void)));
 	act->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_W));
+	act->setIcon(icon("window-close", QStyle::SP_DialogCloseButton));
 
 	menu = menuBar->addMenu(tr("&View"));
 	act = menu->addAction(tr("Zoom &In"), viewer, SLOT(zoomIn(void)));
 	act->setShortcuts({QKeySequence(Qt::CTRL | Qt::Key_Plus), QKeySequence(Qt::CTRL | Qt::Key_Equal), QKeySequence(Qt::Key_Plus), QKeySequence(Qt::Key_Equal)});
+	act->setIcon(zoomInIcon);
 	act = menu->addAction(tr("Zoom &Out"), viewer, SLOT(zoomOut(void)));
 	act->setShortcuts({QKeySequence(Qt::CTRL | Qt::Key_Minus), QKeySequence(Qt::Key_Minus)});
+	act->setIcon(zoomOutIcon);
 	act = menu->addAction(tr("&Fit All"), viewer, SLOT(zoomFit(void)));
 	act->setShortcuts({QKeySequence(Qt::CTRL | Qt::Key_0), QKeySequence(Qt::Key_0)});
+	act->setIcon(icon("zoom-fit-best", QStyle::SP_FileDialogDetailedView));
 	menu->addSeparator();
 	act = menu->addAction(tr("&Previous Frame"), this, SLOT(framePrevClicked(void)));
 	act->setShortcuts({QKeySequence(Qt::Key_BracketLeft), QKeySequence(Qt::Key_Comma)});
+	act->setIcon(icon("go-previous", QStyle::SP_ArrowLeft));
 	act = menu->addAction(tr("&Next Frame"), this, SLOT(frameNextClicked(void)));
 	act->setShortcuts({QKeySequence(Qt::Key_BracketRight), QKeySequence(Qt::Key_Period)});
+	act->setIcon(icon("go-next", QStyle::SP_ArrowRight));
 
 	menu = menuBar->addMenu(tr("F&ind"));
 	act = menu->addAction(tr("&Find Marker..."), this, SLOT(focusFind(void)));
 	act->setShortcut(QKeySequence::Find);
+	act->setIcon(icon("edit-find", QStyle::SP_FileDialogContentsView));
 	menu->addSeparator();
 	act = menu->addAction(tr("&First Marker"), viewer, SLOT(findFirst(void)));
 	act->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Home));
+	act->setIcon(icon("go-first", QStyle::SP_MediaSkipBackward));
 	act = menu->addAction(tr("&Next Marker"), this, SLOT(findNextOrFirst(void)));
 	act->setShortcuts({QKeySequence(Qt::Key_F3), QKeySequence(Qt::CTRL | Qt::Key_G)});
+	act->setIcon(icon("go-next", QStyle::SP_MediaSeekForward));
 	act = menu->addAction(tr("&Previous Marker"), viewer, SLOT(findPrevious(void)));
 	act->setShortcuts({QKeySequence(Qt::SHIFT | Qt::Key_F3), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_G)});
+	act->setIcon(icon("go-previous", QStyle::SP_MediaSeekBackward));
 	act = menu->addAction(tr("&Last Marker"), viewer, SLOT(findLast(void)));
 	act->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_End));
+	act->setIcon(icon("go-last", QStyle::SP_MediaSkipForward));
 	menu->addSeparator();
 	act = menu->addAction(tr("L&ongest Marker"), viewer, SLOT(findLongest(void)));
 	act->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
+	act->setIcon(icon("go-top", QStyle::SP_ArrowUp));
 	act = menu->addAction(tr("Ne&xt Longest Marker"), viewer, SLOT(findNextLongest(void)));
 	act->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_L));
+	act->setIcon(icon("go-down", QStyle::SP_ArrowDown));
 
 	mainLayout->setMenuBar(menuBar);
+
+	// No button is the dialog default, so Enter in a text field never triggers one
+	for (QPushButton *btn : findChildren<QPushButton*>())
+	{
+		btn->setAutoDefault(false);
+		btn->setDefault(false);
+	}
+
+	browseBtn->setIcon(icon("document-open", QStyle::SP_DirOpenIcon));
+	startStopBtn->setIcon(icon("media-record", QStyle::SP_MediaPlay));
+	openBtn->setIcon(icon("document-open", QStyle::SP_DialogOpenButton));
+	zoomInBtn->setIcon(zoomInIcon);
+	zoomOutBtn->setIcon(zoomOutIcon);
+	zoomFitBtn->setIcon(icon("zoom-fit-best", QStyle::SP_FileDialogDetailedView));
+	framePrevBtn->setIcon(icon("go-previous", QStyle::SP_ArrowLeft));
+	frameNextBtn->setIcon(icon("go-next", QStyle::SP_ArrowRight));
+	findFirstBtn->setIcon(icon("go-first", QStyle::SP_MediaSkipBackward));
+	findPrevBtn->setIcon(icon("go-previous", QStyle::SP_MediaSeekBackward));
+	findNextBtn->setIcon(icon("go-next", QStyle::SP_MediaSeekForward));
+	findLastBtn->setIcon(icon("go-last", QStyle::SP_MediaSkipForward));
+	longestBtn->setIcon(icon("go-top", QStyle::SP_ArrowUp));
+	nextLongestBtn->setIcon(icon("go-down", QStyle::SP_ArrowDown));
+	closeBtn->setIcon(icon("window-close", QStyle::SP_DialogCloseButton));
 	updateFrameControls();
 
 	updateTimer = new QTimer(this);
@@ -206,11 +277,13 @@ ProfilerDialog_t::ProfilerDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 ProfilerDialog_t::~ProfilerDialog_t(void)
 {
+#ifdef __FCEU_PROFILER_ENABLE__
 	if (captureThread)
 	{
 		captureThread->stopCapture();
 		captureThread->wait();
 	}
+#endif
 	if (loadThread)
 	{
 		loadThread->requestInterruption();
@@ -265,6 +338,13 @@ void ProfilerDialog_t::browseClicked(void)
 //----------------------------------------------------------------------------
 void ProfilerDialog_t::startStopClicked(void)
 {
+#ifndef __FCEU_PROFILER_ENABLE__
+	QMessageBox::information(this, tr("Profiler"),
+		tr("Capturing profiler data is not available in this build.\n\n"
+		   "Rebuild FCEUX with the profiler capture tooling enabled "
+		   "(cmake -DFCEU_PROFILER_ENABLE=ON) to record captures. "
+		   "Existing capture files can still be opened and viewed."));
+#else
 	if (captureThread)
 	{
 		stopCapture();
@@ -273,8 +353,10 @@ void ProfilerDialog_t::startStopClicked(void)
 	{
 		startCapture();
 	}
+#endif
 }
 //----------------------------------------------------------------------------
+#ifdef __FCEU_PROFILER_ENABLE__
 void ProfilerDialog_t::startCapture(void)
 {
 	QSettings settings;
@@ -296,6 +378,7 @@ void ProfilerDialog_t::startCapture(void)
 	pathEdit->setEnabled(false);
 	browseBtn->setEnabled(false);
 	startStopBtn->setText(tr("Stop Capture"));
+	startStopBtn->setIcon(QIcon::fromTheme(QString("media-playback-stop"), style()->standardIcon(QStyle::SP_MediaStop)));
 
 	captureThread->start();
 	updateTimer->start();
@@ -327,6 +410,7 @@ void ProfilerDialog_t::captureFinished(void)
 	browseBtn->setEnabled(true);
 	startStopBtn->setEnabled(true);
 	startStopBtn->setText(tr("Start Capture"));
+	startStopBtn->setIcon(QIcon::fromTheme(QString("media-record"), style()->standardIcon(QStyle::SP_MediaPlay)));
 }
 //----------------------------------------------------------------------------
 void ProfilerDialog_t::captureError(const QString &msg)
@@ -342,6 +426,12 @@ void ProfilerDialog_t::updateStatus(void)
 			.arg(captureThread->getMarkerCount()).arg(captureThread->getBytesWritten()));
 	}
 }
+//----------------------------------------------------------------------------
+#else
+void ProfilerDialog_t::captureFinished(void){}
+void ProfilerDialog_t::captureError(const QString &){}
+void ProfilerDialog_t::updateStatus(void){}
+#endif
 //----------------------------------------------------------------------------
 void ProfilerDialog_t::updatePeriodic(void)
 {
@@ -530,4 +620,4 @@ void ProfilerDialog_t::frameNextClicked(void)
 	frameSpin->setValue(frameSpin->value() + 1);
 }
 //----------------------------------------------------------------------------
-#endif // __FCEU_PROFILER_ENABLE__
+
