@@ -30,6 +30,15 @@ extern unsigned int gui_draw_area_height;
 static const uint32_t MAX_FRAME_WIDTH = 4 * GL_NES_WIDTH;
 static const uint32_t MAX_FRAME_HEIGHT = 4 * GL_NES_HEIGHT;
 
+// Shared by every viewer instance and kept for the lifetime of the program,
+// so windows can be created and destroyed without recreating the instance.
+static QVulkanInstance *getVulkanInstance()
+{
+	static QVulkanInstance instance;
+	static bool created = instance.create();
+	return created ? &instance : nullptr;
+}
+
 // Owns a swapchain created with TRANSFER_DST usage so that the emulator
 // frame can be blitted straight into the presentable image. No pipelines,
 // render passes or shaders are needed for a 2D surface.
@@ -498,7 +507,7 @@ private:
 };
 
 ConsoleViewVulkan_t::ConsoleViewVulkan_t(QWidget *parent)
-	: QWidget(parent), vkInstance(new QVulkanInstance), vulkanWindow(nullptr), windowContainer(nullptr),
+	: QWidget(parent), vulkanWindow(nullptr), windowContainer(nullptr),
 	  bgColor(nullptr), localBuf(nullptr), localBufSize(0), aspectRatio(1.0),
 	  aspectX(1.0), aspectY(1.0), xscale(2.0), yscale(2.0), sx(0), sy(0), rw(256), rh(224),
 	  forceAspect(true), autoScaleEna(true), linearFilter(false), vsyncEnabled(true), mouseButtonMask(0),
@@ -533,9 +542,9 @@ ConsoleViewVulkan_t::ConsoleViewVulkan_t(QWidget *parent)
 	QVBoxLayout *layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
 
-	if (vkInstance->create())
+	if (QVulkanInstance *instance = getVulkanInstance())
 	{
-		vulkanWindow = new ConsoleVulkanWindow_t(vkInstance);
+		vulkanWindow = new ConsoleVulkanWindow_t(instance);
 		vulkanWindow->vsync = vsyncEnabled;
 		vulkanWindow->exposedCallback = [this]() { queueRedraw(); };
 		windowContainer = QWidget::createWindowContainer(vulkanWindow, this);
@@ -547,11 +556,12 @@ ConsoleViewVulkan_t::ConsoleViewVulkan_t(QWidget *parent)
 ConsoleViewVulkan_t::~ConsoleViewVulkan_t()
 {
 	shutdown();
-	// The window must be destroyed before the instance it uses
-	delete windowContainer;
+	if (windowContainer)
+	{
+		windowContainer->deleteLater();
+	}
 	windowContainer = nullptr;
 	vulkanWindow = nullptr;
-	delete vkInstance;
 	if (localBuf)
 		free(localBuf);
 }
@@ -559,6 +569,12 @@ ConsoleViewVulkan_t::~ConsoleViewVulkan_t()
 void ConsoleViewVulkan_t::shutdown(void)
 {
 	shuttingDown = true;
+	// Late expose events must not call back into this view or read localBuf
+	if (vulkanWindow)
+	{
+		vulkanWindow->exposedCallback = nullptr;
+		vulkanWindow->pixels = nullptr;
+	}
 }
 
 int ConsoleViewVulkan_t::init(void)
