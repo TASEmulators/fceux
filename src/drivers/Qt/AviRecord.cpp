@@ -45,6 +45,7 @@
 #include "fceu.h"
 #include "driver.h"
 #include "version.h"
+#include "profiler.h"
 #include "common/os_utils.h"
 
 #ifdef _USE_X264
@@ -2678,6 +2679,7 @@ void AviRecordDiskThread_t::run(void)
 	int audioHead = 0;
 	int audioTail = 0;
 
+	FCEU_PROFILER_SET_THREAD_NAME("AVI Record Disk");
 	fprintf( avLogFp, "AVI Record Disk Thread Start\n");
 
 	setPriority( QThread::HighestPriority );
@@ -2750,6 +2752,7 @@ void AviRecordDiskThread_t::run(void)
 	while ( !isInterruptionRequested() )
 	{
 		{
+			FCEU_PROFILE_FUNC("AVI VideoBuf Read");
 			// Get current buffer index values from atomic variables and store in stack variables
 			// Do loop processing with stack variables and then update atomics when finished
 			int vhead = vbufHead;
@@ -2766,6 +2769,7 @@ void AviRecordDiskThread_t::run(void)
 
 		if ( numPixelsReady >= numPixels )
 		{
+			FCEU_PROFILE_FUNC("AVI Encode Frame");
 			//printf("Adding Frame:%i\n", frameCount++);
 
 			writeAudio = 1;
