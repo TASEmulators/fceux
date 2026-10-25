@@ -647,7 +647,9 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TimingConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/FrameTimingStats.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ProfilerCapture.cpp  
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ProfilerDialog.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ProfilerDialog.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ProfilerCaptureFile.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ProfilerViewer.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/PaletteConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/PaletteEditor.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ColorMenu.cpp  

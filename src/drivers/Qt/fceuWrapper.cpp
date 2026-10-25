@@ -1397,9 +1397,13 @@ static void emuThreadPreemptEntryLogic()
 	{
 		if (wrapperMutexLockDepth == 0)
 		{
-			while (reqEmuLock.load() > 0)
+			if (reqEmuLock.load() > 0)
 			{
-				QThread::yieldCurrentThread();
+				FCEU_PROFILE_FUNC("CPU Yield - EMU Lock Contention");
+				do
+				{
+					QThread::yieldCurrentThread();
+				} while (reqEmuLock.load() > 0);
 			}
 		}
 	}
