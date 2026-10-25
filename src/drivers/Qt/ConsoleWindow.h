@@ -383,6 +383,9 @@ class  consoleWin_t : public QMainWindow
 		void closeNetPlaySession(void);
 		void openAviRiffViewer(void);
 		void openTimingStatWin(void);
+#ifdef __FCEU_PROFILER_ENABLE__
+		void openProfilerWin(void);
+#endif
 		void openMovieOptWin(void);
 		void openCodeDataLogger(void);
 		void openTraceLogger(void);

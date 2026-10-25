@@ -90,6 +90,7 @@
 #include "Qt/StateRecorderConf.h"
 #include "Qt/TimingConf.h"
 #include "Qt/FrameTimingStats.h"
+#include "Qt/ProfilerDialog.h"
 #include "Qt/LuaControl.h"
 #include "Qt/QtScriptManager.h"
 #include "Qt/CheatsConf.h"
@@ -124,6 +125,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	int opt, xWinPos = -1, yWinPos = -1, xWinSize = 256, yWinSize = 240;
 	int videoDriver = 0;
 	int setFullScreen = false;
+
+	FCEU_PROFILER_SET_THREAD_NAME("GUI");
 
 	//QString libpath = QLibraryInfo::location(QLibraryInfo::PluginsPath);
 	//printf("LibPath: '%s'\n", libpath.toLocal8Bit().constData() );
@@ -1913,6 +1916,16 @@ void consoleWin_t::createMainMenu(void)
 
 	toolsMenu->addAction(act);
 
+#ifdef __FCEU_PROFILER_ENABLE__
+	// Tools -> Profiler
+	act = new QAction(tr("&Profiler ..."), this);
+	act->setStatusTip(tr("Capture profiler markers from all threads to a file."));
+	act->setToolTip( act->statusTip() );
+	connect(act, SIGNAL(triggered()), this, SLOT(openProfilerWin(void)) );
+
+	toolsMenu->addAction(act);
+#endif
+
 	// Tools -> Palette Editor
 	act = new QAction(tr("&Palette Editor ..."), this);
 	//act->setShortcut( QKeySequence(tr("Shift+F7")));
@@ -3501,6 +3514,15 @@ void consoleWin_t::openTimingStatWin(void)
 	
    tmStatWin->show();
 }
+
+#ifdef __FCEU_PROFILER_ENABLE__
+void consoleWin_t::openProfilerWin(void)
+{
+	ProfilerDialog_t *win = new ProfilerDialog_t(this);
+
+	win->show();
+}
+#endif
 
 void consoleWin_t::openPaletteEditorWin(void)
 {
@@ -5380,6 +5402,7 @@ int emulatorThread_t::setSchedParam( int policy, int priority )
 void emulatorThread_t::run(void)
 {
 	printf("Emulator Start\n");
+	FCEU_PROFILER_SET_THREAD_NAME("Emulator");
 	nes_shm->runEmulator = 1;
 
 	init();

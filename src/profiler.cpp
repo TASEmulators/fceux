@@ -42,6 +42,8 @@ FILE *profilerManager::pLog = nullptr;
 
 static profilerManager  pMgr;
 
+profileMarkerBuffer *threadBuffer(void){ return &execList; }
+
 //-------------------------------------------------------------------------
 //---- Profile Scoped Function Class
 //-------------------------------------------------------------------------
@@ -51,6 +53,11 @@ profileFuncScoped::profileFuncScoped(
 	const char *funcName,
 	const char *comment )
 {
+	if (!pMgr.isEnabled())
+	{
+		return;
+	}
+	recorded = true;
 	start.ts.readNew();
 	start.fileLineNum = fileLineNum;
 	start.fileName = fileName;
@@ -63,9 +70,12 @@ profileFuncScoped::profileFuncScoped(
 //-------------------------------------------------------------------------
 profileFuncScoped::~profileFuncScoped(void)
 {
-	timeStampRecord ts, dt;
+	if (!recorded)
+	{
+		return;
+	}
+	timeStampRecord ts;
 	ts.readNew();
-	dt = ts - start.ts;
 
 	profileMarker marker = start;
 	marker.ts = ts;
@@ -144,6 +154,7 @@ profilerManager::~profilerManager(void)
 int profilerManager::addThreadProfileBuffer( profileMarkerBuffer *b )
 {
 	autoScopedLock aLock(threadListMtx);
+	b->threadId = nextThreadId++;
 	bufferList.push_back(b);
 	return 0;
 }
@@ -157,6 +168,23 @@ int profilerManager::removeThreadProfileBuffer( profileMarkerBuffer *b )
 	{
 		if (*it == b )
 		{
+			if (externalCollector)
+			{
+				// Keep the unread markers, oldest buffer first, for the next drain
+				retiredBuffer r;
+				r.threadId = b->threadId;
+				r.threadName = b->threadName;
+				const unsigned int active = b->activeBufferIndex.load();
+				for (unsigned int i = 1; i <= profileMarkerBuffer::maxBuffers; i++)
+				{
+					auto &v = b->vec[(active + i) % profileMarkerBuffer::maxBuffers];
+					r.markers.insert(r.markers.end(), v.begin(), v.end());
+				}
+				if (!r.markers.empty())
+				{
+					retiredList.push_back(std::move(r));
+				}
+			}
 			bufferList.erase(it);
 			result = 0;
 			break;
@@ -165,11 +193,49 @@ int profilerManager::removeThreadProfileBuffer( profileMarkerBuffer *b )
 	return result;
 }
 
+void profilerManager::setThreadName( profileMarkerBuffer *b, const char *name )
+{
+	autoScopedLock aLock(threadListMtx);
+	b->threadName = name ? name : "";
+}
+
+int profilerManager::drainMarkers(const drainCallback &cb, bool flushAll)
+{
+	autoScopedLock aLock(threadListMtx);
+
+	for (auto &r : retiredList)
+	{
+		cb(r.threadId, r.threadName, r.markers.data(), r.markers.size());
+	}
+	retiredList.clear();
+
+	const unsigned int passes = flushAll ? profileMarkerBuffer::maxBuffers : 1;
+
+	for (profileMarkerBuffer *b : bufferList)
+	{
+		for (unsigned int p = 0; p < passes; p++)
+		{
+			// Same rotation as dumpProfileMarkers: swap the producer to the next buffer
+			// and drain the one that was retired two swaps ago.
+			unsigned int idx = b->activeBufferIndex++;
+			idx = (idx + 2) % profileMarkerBuffer::maxBuffers;
+
+			auto &v = b->vec[idx];
+			if (!v.empty())
+			{
+				cb(b->threadId, b->threadName, v.data(), v.size());
+				v.clear();
+			}
+		}
+	}
+	return 0;
+}
+
 int profilerManager::dumpProfileMarkers(FILE *pFile)
 {
 	int result = -1;
 
-	if (!enabled)
+	if (!enabled || externalCollector)
 	{
 		return result;
 	}
@@ -213,6 +279,16 @@ int profilerManager::dumpProfileMarkers(FILE *pFile)
 
 //-------------------------------------------------------------------------
 } // namespace FCEU
+
+void FCEU_profiler_set_thread_name(const char *name)
+{
+	FCEU::profilerManager *mgr = FCEU::profilerManager::getInstance();
+
+	if (mgr)
+	{
+		mgr->setThreadName(FCEU::threadBuffer(), name);
+	}
+}
 
 void FCEU_profiler_log_thread_activity()
 {

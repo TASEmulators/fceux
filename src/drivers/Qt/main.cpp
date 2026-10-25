@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <QApplication>
+#include <QAbstractEventDispatcher>
 #include <QSplashScreen>
 #include <QSettings>
 //#include <QProxyStyle>
@@ -102,16 +103,47 @@ static bool showSplashScreen(void)
 
 	return show;
 }
-class ProfilingFilter : public QObject 
+#ifdef __FCEU_PROFILER_ENABLE__
+// Marks the time the GUI thread spends busy: from the event loop waking up until it
+// is about to block again, rather than one marker per widget event.
+class GuiBusyProfiler : public QObject
 {
-    bool eventFilter(QObject *watched, QEvent *event) override 
+public:
+	GuiBusyProfiler(QObject *parent = nullptr) : QObject(parent)
 	{
-        // measure event timestamps here
-		FCEU_PROFILE_FUNC(watched->metaObject()->className());
-        return QObject::eventFilter(watched, event);
-    }
-};
+		QAbstractEventDispatcher *disp = QAbstractEventDispatcher::instance();
 
+		connect(disp, &QAbstractEventDispatcher::awake, this, [this](){ beginBusy(); });
+		connect(disp, &QAbstractEventDispatcher::aboutToBlock, this, [this](){
+			delete busy;
+			busy = nullptr;
+		});
+	}
+	~GuiBusyProfiler(void)
+	{
+		delete busy;
+	}
+
+protected:
+	// Sees events (including timer events) before their handlers run, which can be
+	// earlier than the dispatcher's awake signal.
+	bool eventFilter(QObject *watched, QEvent *event) override
+	{
+		beginBusy();
+		return QObject::eventFilter(watched, event);
+	}
+
+private:
+	void beginBusy(void)
+	{
+		if (!busy)
+		{
+			busy = new FCEU::profileFuncScoped(__LINE__, __FILE__, "GuiBusyProfiler", "GUI Event Loop Busy");
+		}
+	}
+	FCEU::profileFuncScoped *busy = nullptr;
+};
+#endif
 
 int main( int argc, char *argv[] )
 {
@@ -121,8 +153,10 @@ int main( int argc, char *argv[] )
 
 	qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
-	ProfilingFilter *filter = new ProfilingFilter();
-	app.installEventFilter(filter);
+#ifdef __FCEU_PROFILER_ENABLE__
+	GuiBusyProfiler *guiBusyProfiler = new GuiBusyProfiler();
+	app.installEventFilter(guiBusyProfiler);
+#endif
 
 	QCoreApplication::setOrganizationName("TasEmulators");
 	QCoreApplication::setOrganizationDomain("TasEmulators.org");
@@ -196,8 +230,10 @@ int main( int argc, char *argv[] )
 
 	delete consoleWindow;
 
-	app.removeEventFilter(filter);
-	delete filter;
+#ifdef __FCEU_PROFILER_ENABLE__
+	app.removeEventFilter(guiBusyProfiler);
+	delete guiBusyProfiler;
+#endif
 
 	fceuWrapperMemoryCleanup();
 

@@ -39,6 +39,7 @@
 #include <list>
 #include <map>
 #include <atomic>
+#include <functional>
 
 
 #if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
@@ -71,6 +72,8 @@ namespace FCEU
 
 		std::vector<profileMarker> vec[maxBuffers];
 		std::atomic<unsigned int> activeBufferIndex{0};
+		uint32_t    threadId = 0;
+		std::string threadName;
 	};
 
 	struct profileFuncScoped
@@ -86,6 +89,7 @@ namespace FCEU
 
 		private:
 			profileMarker start;
+			bool recorded = false;
 	};
 	class profilerManager
 	{
@@ -93,8 +97,22 @@ namespace FCEU
 			profilerManager(void);
 			~profilerManager(void);
 	
+			// Called once per thread with the markers drained from that thread's buffer (in time order).
+			typedef std::function<void(uint32_t threadId, const std::string &threadName,
+				const profileMarker *markers, size_t count)> drainCallback;
+
 			void setEnabled(bool enable){ enabled = enable; };
 			bool isEnabled(void){ return enabled; };
+
+			// When an external collector is registered, the periodic text dump is suppressed
+			// so that the two consumers do not compete for the same marker buffers.
+			void setExternalCollector(bool active){ externalCollector = active; };
+
+			void setThreadName( profileMarkerBuffer *b, const char *name );
+
+			// Drains one buffer per thread, or all of them (flushAll) to empty the pipeline.
+			// The callback is invoked with the thread list locked.
+			int drainMarkers(const drainCallback &cb, bool flushAll = false);
 			int addThreadProfileBuffer( profileMarkerBuffer *b );
 			int removeThreadProfileBuffer( profileMarkerBuffer *b );
 			int dumpProfileMarkers(FILE *pFile = nullptr);
@@ -104,9 +122,20 @@ namespace FCEU
 			static profilerManager *getInstance();
 		private:
 	
+			// Markers left over from threads that exited before the collector drained them
+			struct retiredBuffer
+			{
+				uint32_t threadId;
+				std::string threadName;
+				std::vector<profileMarker> markers;
+			};
+			std::list <retiredBuffer> retiredList;
+
 			mutex  threadListMtx;
 			std::list <profileMarkerBuffer*> bufferList;
-			bool enabled = false;
+			std::atomic<bool> enabled{false};
+			std::atomic<bool> externalCollector{false};
+			std::atomic<uint32_t> nextThreadId{1};
 			static profilerManager *instance;
 	};
 } // namespace FCEU
@@ -124,10 +153,14 @@ namespace FCEU
 	FCEU::profileFuncScoped _##__LINE__( __LINE__, __FILE__, __FCEU_PROFILE_FUNC_NAME__, comment )
 
 	void FCEU_profiler_log_thread_activity();
+	void FCEU_profiler_set_thread_name(const char *name);
+
+#define  FCEU_PROFILER_SET_THREAD_NAME(name)  FCEU_profiler_set_thread_name(name)
 
 #else  // __FCEU_PROFILER_ENABLE__ not defined
 
 #define  FCEU_PROFILE_FUNC(comment)
+#define  FCEU_PROFILER_SET_THREAD_NAME(name)
 
 #endif // __FCEU_PROFILER_ENABLE__
 
