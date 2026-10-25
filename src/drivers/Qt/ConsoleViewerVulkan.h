@@ -2,11 +2,11 @@
 
 #include <QColor>
 #include <QWidget>
-#include <atomic>
 
 #include "Qt/ConsoleViewerInterface.h"
 
 class ConsoleVulkanWindow_t;
+class QVulkanInstance;
 
 class ConsoleViewVulkan_t : public QWidget, public ConsoleViewerBase
 {
@@ -51,6 +51,7 @@ protected:
 private:
 	void calculateViewport(int frameWidth, int frameHeight, int &x, int &y, int &w, int &h);
 
+	QVulkanInstance *vkInstance;
 	ConsoleVulkanWindow_t *vulkanWindow;
 	QWidget *windowContainer;
 	QColor *bgColor;
@@ -70,6 +71,5 @@ private:
 	bool linearFilter;
 	bool vsyncEnabled;
 	unsigned int mouseButtonMask;
-	std::atomic_bool drawQueued;
 	bool shuttingDown;
 };
