@@ -58,7 +58,8 @@ namespace FCEU
 		const char *funcName = nullptr;
 		const char *comment = nullptr;
 		timeStampRecord   ts;
-		enum { MARKER_START, MARKER_END } type;
+		enum MarkerType { MARKER_START, MARKER_END };
+		MarkerType type = MARKER_START;
 	};
 
 	struct profileMarkerBuffer
@@ -76,20 +77,53 @@ namespace FCEU
 		std::string threadName;
 	};
 
+	// Compile-time description of one profiled scope
+	struct profileSite
+	{
+		int         line;
+		const char *file;
+		const char *func;
+		const char *comment;
+	};
+
+	// Master switch, kept as a plain global so the disabled check is a single inlined load
+	extern std::atomic<bool> profilerEnabledFlag;
+
+#if defined(__GNUC__) || defined(__clang__)
+#define FCEU_PROFILER_UNLIKELY(x)  __builtin_expect(!!(x), 0)
+#else
+#define FCEU_PROFILER_UNLIKELY(x)  (x)
+#endif
+
 	struct profileFuncScoped
 	{
-		profileFuncScoped( 
-			int fileLineNum,
-			const char *fileName,
-			const char *funcName,
-			const char *comment
-		);
+		// When profiling is disabled this is one relaxed load and a branch, with no calls
+		explicit profileFuncScoped(const profileSite *s)
+		{
+			if (FCEU_PROFILER_UNLIKELY(profilerEnabledFlag.load(std::memory_order_relaxed)))
+			{
+				site = s;
+				beginSlow(s);
+			}
+		}
 
-		~profileFuncScoped(void);
+		~profileFuncScoped(void)
+		{
+			if (FCEU_PROFILER_UNLIKELY(site != nullptr))
+			{
+				endSlow(site);
+			}
+		}
+
+		profileFuncScoped(const profileFuncScoped&) = delete;
+		profileFuncScoped &operator=(const profileFuncScoped&) = delete;
 
 		private:
-			profileMarker start;
-			bool recorded = false;
+			static void beginSlow(const profileSite *s);
+			static void endSlow(const profileSite *s);
+
+			// Non-null only if the start marker was recorded, so that end markers always pair up
+			const profileSite *site = nullptr;
 	};
 	class profilerManager
 	{
@@ -101,8 +135,8 @@ namespace FCEU
 			typedef std::function<void(uint32_t threadId, const std::string &threadName,
 				const profileMarker *markers, size_t count)> drainCallback;
 
-			void setEnabled(bool enable){ enabled = enable; };
-			bool isEnabled(void){ return enabled; };
+			void setEnabled(bool enable){ profilerEnabledFlag.store(enable, std::memory_order_relaxed); };
+			bool isEnabled(void){ return profilerEnabledFlag.load(std::memory_order_relaxed); };
 
 			// When an external collector is registered, the periodic text dump is suppressed
 			// so that the two consumers do not compete for the same marker buffers.
@@ -133,7 +167,6 @@ namespace FCEU
 
 			mutex  threadListMtx;
 			std::list <profileMarkerBuffer*> bufferList;
-			std::atomic<bool> enabled{false};
 			std::atomic<bool> externalCollector{false};
 			std::atomic<uint32_t> nextThreadId{1};
 			static profilerManager *instance;
@@ -146,11 +179,13 @@ namespace FCEU
 #define  __FCEU_PROFILE_FUNC_NAME__  __func__
 #endif
 
-#define FCEU_CONCAT_IMPL(a, b) a##b
-#define FFCEU_UNIQUE_ID(a, b) CONCAT_IMPL(a, b)
+#define FCEU_PROFILE_CONCAT_IMPL(a, b) a##b
+#define FCEU_PROFILE_CONCAT(a, b) FCEU_PROFILE_CONCAT_IMPL(a, b)
 
 #define  FCEU_PROFILE_FUNC(comment)   \
-	FCEU::profileFuncScoped _##__LINE__( __LINE__, __FILE__, __FCEU_PROFILE_FUNC_NAME__, comment )
+	static constexpr FCEU::profileSite FCEU_PROFILE_CONCAT(_fceuProfSite, __LINE__) = \
+		{ __LINE__, __FILE__, __FCEU_PROFILE_FUNC_NAME__, comment }; \
+	FCEU::profileFuncScoped FCEU_PROFILE_CONCAT(_fceuProfScope, __LINE__)( &FCEU_PROFILE_CONCAT(_fceuProfSite, __LINE__) )
 
 	void FCEU_profiler_log_thread_activity();
 	void FCEU_profiler_set_thread_name(const char *name);

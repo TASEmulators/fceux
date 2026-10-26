@@ -38,6 +38,8 @@ namespace FCEU
 {
 static thread_local profileMarkerBuffer execList;
 
+std::atomic<bool> profilerEnabledFlag{false};
+
 FILE *profilerManager::pLog = nullptr;
 
 static profilerManager  pMgr;
@@ -47,41 +49,28 @@ profileMarkerBuffer *threadBuffer(void){ return &execList; }
 //-------------------------------------------------------------------------
 //---- Profile Scoped Function Class
 //-------------------------------------------------------------------------
-profileFuncScoped::profileFuncScoped(
-	int fileLineNum,
-	const char *fileName,
-	const char *funcName,
-	const char *comment )
+static void pushSiteMarker(const profileSite *site, profileMarker::MarkerType type)
 {
-	if (!pMgr.isEnabled())
-	{
-		return;
-	}
-	recorded = true;
-	start.ts.readNew();
-	start.fileLineNum = fileLineNum;
-	start.fileName = fileName;
-	start.funcName = funcName;
-	start.comment = comment;
-	start.type = profileMarker::MARKER_START;
+	profileMarker marker;
 
-	execList.pushMarker(start);
-}
-//-------------------------------------------------------------------------
-profileFuncScoped::~profileFuncScoped(void)
-{
-	if (!recorded)
-	{
-		return;
-	}
-	timeStampRecord ts;
-	ts.readNew();
-
-	profileMarker marker = start;
-	marker.ts = ts;
-	marker.type = profileMarker::MARKER_END;
+	marker.ts.readNew();
+	marker.fileLineNum = site->line;
+	marker.fileName = site->file;
+	marker.funcName = site->func;
+	marker.comment = site->comment;
+	marker.type = type;
 
 	execList.pushMarker(marker);
+}
+//-------------------------------------------------------------------------
+void profileFuncScoped::beginSlow(const profileSite *s)
+{
+	pushSiteMarker(s, profileMarker::MARKER_START);
+}
+//-------------------------------------------------------------------------
+void profileFuncScoped::endSlow(const profileSite *s)
+{
+	pushSiteMarker(s, profileMarker::MARKER_END);
 }
 //-------------------------------------------------------------------------
 //---- Profile Marker Vector
@@ -235,7 +224,7 @@ int profilerManager::dumpProfileMarkers(FILE *pFile)
 {
 	int result = -1;
 
-	if (!enabled || externalCollector)
+	if (!isEnabled() || externalCollector)
 	{
 		return result;
 	}

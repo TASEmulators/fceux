@@ -35,7 +35,7 @@ if (NOT DEFINED QT)
 	endif()
 endif()
 
-option(FCEU_PROFILER_ENABLE "Enable the built-in FCEU performance profiler" OFF)
+option(FCEU_PROFILER_ENABLE "Enable the built-in FCEU performance profiler (near-zero cost while not capturing)" ON)
 
 find_package(Vulkan QUIET)
 

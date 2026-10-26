@@ -1538,6 +1538,7 @@ int  fceuWrapperUpdate( void )
 
 		if (scriptsLoaded)
 		{
+			FCEU_PROFILE_FUNC("JS FrameBeginUpdate");
 			qscriptMgr->frameBeginUpdate();
 		}
 #endif
@@ -1547,6 +1548,7 @@ int  fceuWrapperUpdate( void )
 #ifdef __FCEU_QSCRIPT_ENABLE__
 		if (scriptsLoaded)
 		{
+			FCEU_PROFILE_FUNC("JS FrameEndUpdate");
 			qscriptMgr->frameFinishedUpdate();
 		}
 #endif

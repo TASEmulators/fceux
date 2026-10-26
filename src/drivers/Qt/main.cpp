@@ -138,7 +138,8 @@ private:
 	{
 		if (!busy)
 		{
-			busy = new FCEU::profileFuncScoped(__LINE__, __FILE__, "GuiBusyProfiler", "GUI Event Loop Busy");
+			static constexpr FCEU::profileSite site = { __LINE__, __FILE__, "GuiBusyProfiler", "GUI Event Loop Busy" };
+			busy = new FCEU::profileFuncScoped(&site);
 		}
 	}
 	FCEU::profileFuncScoped *busy = nullptr;
