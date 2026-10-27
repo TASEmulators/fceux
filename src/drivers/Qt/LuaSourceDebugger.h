@@ -28,6 +28,7 @@
 #include <QToolBar>
 #include <QTreeWidget>
 #include <QVBoxLayout>
+#include <QString>
 
 #include "../../types.h"
 #include "../../fceulua.h"
