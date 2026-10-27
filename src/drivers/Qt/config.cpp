@@ -36,6 +36,7 @@
 #include "Qt/AviRecord.h"
 #include "Qt/unix-netplay.h"
 #include "Qt/NetPlay.h"
+#include "Qt/ConsoleViewerInterface.h"
 #include "Qt/TasEditor/taseditor_config.h"
 
 #ifdef WIN32
@@ -573,7 +574,7 @@ InitConfig()
 
 	// video controls
 	config->addOption('f', "fullscreen", "SDL.Fullscreen", 0);
-	config->addOption("videoDriver", "SDL.VideoDriver", 0);
+	config->addOption("videoDriver", "SDL.VideoDriver", static_cast<int>(ConsoleViewerBase::VIDEO_DRIVER_QPAINTER));
 	config->addOption("SDL.VideoBgColor", "#000000");
 	config->addOption("SDL.UseBgPaletteForVideo", false);
 	config->addOption("SDL.VideoVsync", 1);

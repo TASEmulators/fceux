@@ -296,7 +296,7 @@ void ConsoleViewQWidget_t::resizeEvent(QResizeEvent *event)
 	s = event->size();
 	view_width  = s.width();
 	view_height = s.height();
-	printf("QWidget Resize: %i x %i \n", view_width, view_height);
+	//printf("QWidget Resize: %i x %i \n", view_width, view_height);
 
 	gui_draw_area_width = view_width;
 	gui_draw_area_height = view_height;
