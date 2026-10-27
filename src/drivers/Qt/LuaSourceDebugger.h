@@ -18,6 +18,8 @@
 #include <QRegularExpression>
 #include <QSet>
 #include <QSyntaxHighlighter>
+#include <QTabBar>
+#include <QTabWidget>
 #include <QTextCharFormat>
 #include <QSplitter>
 #include <QTimer>
@@ -81,7 +83,7 @@ public:
 	bool loadFile(const QString &path, const std::string &normalizedPath);
 	const std::string &file(void) const { return filePath; }
 
-	void setBreakpoints(const std::set<int> &bps);
+	void setBreakpoints(const std::set<int> &bps, const std::set<int> &disabled = std::set<int>());
 	void setExecLine(int line, bool topFrame);
 	void setDarkTheme(bool dark);
 	int  currentLine(void) const;
@@ -111,8 +113,61 @@ private:
 	LuaSyntaxTheme theme;
 	std::string filePath;
 	std::set<int> breakpoints;
+	std::set<int> disabledBreakpoints;
 	int execLine;
 	bool execTopFrame;
+};
+
+class LuaDbgTabWidget;
+
+// Tab bar that lets a tab be dragged out to be dropped on another tab widget
+class LuaDbgTabBar : public QTabBar
+{
+	Q_OBJECT
+
+public:
+	LuaDbgTabBar(QWidget *parent = nullptr);
+
+signals:
+	void beginDragOut(int index);
+
+protected:
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
+	void contextMenuEvent(QContextMenuEvent *event) override;
+
+private:
+	bool dragPress;
+	bool dragOut;
+};
+
+// A tab group in the debugger's panel grid at (column, row)
+class LuaDbgTabWidget : public QTabWidget
+{
+	Q_OBJECT
+
+public:
+	LuaDbgTabWidget(int column, int row, QWidget *parent = nullptr);
+
+	int column(void) const { return col; }
+	int row(void) const { return rw; }
+
+signals:
+	void tabDropped(QWidget *page, LuaDbgTabWidget *target);
+	void moveRequested(QWidget *page, int column, int row);
+
+protected:
+	void dragEnterEvent(QDragEnterEvent *event) override;
+	void dropEvent(QDropEvent *event) override;
+	void contextMenuEvent(QContextMenuEvent *event) override;
+
+private:
+	friend class LuaDbgTabBar;
+	void buildContextMenu(const QPoint &globalPos);
+
+	int col;
+	int rw;
 };
 
 class LuaSourceDebuggerDialog_t : public QDialog
@@ -136,7 +191,19 @@ private:
 	QMenuBar *buildMenuBar(void);
 	QToolBar *buildToolBar(void);
 	void buildStackView(void);
+	QTreeWidget *buildVarTree(void);
 	void buildVarView(void);
+	void buildBreakpointView(void);
+	void setPageTitle(QWidget *page, const QString &title);
+	LuaDbgTabWidget *tabWidgetOf(QWidget *page) const;
+	void addPage(LuaDbgTabWidget *tw, QWidget *page);
+	void moveTab(QWidget *page, int column, int row);
+	void setLayoutOption(int opt);
+	void updateTabVisibility(void);
+	void loadDisplayViews(void);
+	void saveDisplayViews(void);
+	void refreshBreakpointList(void);
+	void refreshWatches(void);
 
 	void updateActions(bool scriptRunning, bool paused);
 	void refreshPausedState(void);
@@ -165,6 +232,8 @@ private slots:
 	void runToCursorCB(void);
 	void runToLineCB(int line);
 	void toggleBreakpointCB(void);
+	void toggleBreakpointEnabledCB(void);
+	void bpItemChanged(QTreeWidgetItem *item, int column);
 	void gutterClickedCB(int line);
 	void clearBreakpointsCB(void);
 	void breakOnStartCB(bool checked);
@@ -177,11 +246,26 @@ private slots:
 	void varItemChanged(QTreeWidgetItem *item, int column);
 	void varItemDoubleClicked(QTreeWidgetItem *item, int column);
 	void varContextMenu(const QPoint &pos);
+	void bpItemActivated(QTreeWidgetItem *item, int column);
+	void bpContextMenu(const QPoint &pos);
+	void removeSelectedBreakpoints(void);
+	void applyBreakpointEnable(const std::string &path, int line, bool enable);
+	void syncSourceMarkers(void);
+	void setSelectedBreakpointsEnabled(bool enable);
+	void setAllBreakpointsEnabled(bool enable);
 
 private:
 	LuaSourceView *sourceView;
 	QTreeWidget *stackView;
 	QTreeWidget *varView;
+	QTreeWidget *watchView;
+	QTreeWidget *bpView;
+	QSplitter *hsplitter;
+	QSplitter *vsplitter[2];
+	LuaDbgTabWidget *tabView[2][3];
+	QWidget *pages[4];
+	QString pageTitles[4];
+	int layoutOpt;
 	QLabel *statusLabel;
 	QTimer *periodicTimer;
 
@@ -200,6 +284,8 @@ private:
 	QAction *darkThemeAct;
 
 	std::map< std::string, std::set<int> > breakpointMap;
+	std::map< std::string, std::set<int> > disabledMap;
+	bool bpRefreshing = false;
 	std::vector<LuaDbgFrame> frames;
 	std::vector<LuaDbgVar> varStore;
 	QSet<QString> expandedPaths;

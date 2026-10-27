@@ -16,7 +16,11 @@
 #include <QFontDatabase>
 #include <QHeaderView>
 #include <QInputDialog>
+#include <QDrag>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QMenu>
+#include <QMimeData>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
@@ -428,9 +432,18 @@ void LuaSourceView::gutterPaint(QPaintEvent *event)
 			if (breakpoints.count(line))
 			{
 				painter.setRenderHint(QPainter::Antialiasing, true);
-				painter.setPen(Qt::NoPen);
-				painter.setBrush(QColor(200, 30, 30));
-				painter.drawEllipse(marker);
+				if (disabledBreakpoints.count(line))
+				{
+					painter.setPen(QPen(QColor(200, 30, 30), 1.5));
+					painter.setBrush(Qt::NoBrush);
+					painter.drawEllipse(marker.adjusted(1, 1, -1, -1));
+				}
+				else
+				{
+					painter.setPen(Qt::NoPen);
+					painter.setBrush(QColor(200, 30, 30));
+					painter.drawEllipse(marker);
+				}
 			}
 			if (line == execLine)
 			{
@@ -539,9 +552,10 @@ void LuaSourceView::setDarkTheme(bool dark)
 	gutter->update();
 }
 
-void LuaSourceView::setBreakpoints(const std::set<int> &bps)
+void LuaSourceView::setBreakpoints(const std::set<int> &bps, const std::set<int> &disabled)
 {
 	breakpoints = bps;
+	disabledBreakpoints = disabled;
 	gutter->update();
 }
 
@@ -592,8 +606,6 @@ LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
 	QMenuBar *menuBar;
 	QToolBar *toolBar;
 	QVBoxLayout *mainLayout;
-	QSplitter *hsplitter;
-	QSplitter *vsplitter;
 
 	setWindowTitle(tr("Lua Source Debugger"));
 	resize(1024, 640);
@@ -605,21 +617,43 @@ LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
 	toolBar = buildToolBar();
 	buildStackView();
 	buildVarView();
+	buildBreakpointView();
+
+	stackView->setObjectName("luaDbgStack");
+	varView->setObjectName("luaDbgVariables");
+	watchView->setObjectName("luaDbgWatch");
+	bpView->setObjectName("luaDbgBreakpoints");
+
+	pages[0] = stackView;  pageTitles[0] = tr("Stack");
+	pages[1] = varView;    pageTitles[1] = tr("Variables");
+	pages[2] = watchView;  pageTitles[2] = tr("Watch");
+	pages[3] = bpView;     pageTitles[3] = tr("Breakpoints");
 
 	hsplitter = new QSplitter(Qt::Horizontal);
 	hsplitter->setOpaqueResize(true);
-	vsplitter = new QSplitter(Qt::Vertical);
-	vsplitter->setOpaqueResize(true);
-
-	vsplitter->addWidget(stackView);
-	vsplitter->addWidget(varView);
-	vsplitter->setStretchFactor(0, 1);
-	vsplitter->setStretchFactor(1, 3);
-
 	hsplitter->addWidget(sourceView);
-	hsplitter->addWidget(vsplitter);
+
+	for (int i = 0; i < 2; i++)
+	{
+		vsplitter[i] = new QSplitter(Qt::Vertical);
+		vsplitter[i]->setOpaqueResize(true);
+
+		for (int j = 0; j < 3; j++)
+		{
+			tabView[i][j] = new LuaDbgTabWidget(i, j);
+			tabView[i][j]->setObjectName(QStringLiteral("luaDbgTabView%1%2").arg(i + 1).arg(j + 1));
+			vsplitter[i]->addWidget(tabView[i][j]);
+
+			connect(tabView[i][j], &LuaDbgTabWidget::tabDropped, this, [this](QWidget *page, LuaDbgTabWidget *target) {
+				moveTab(page, target->column(), target->row());
+			});
+			connect(tabView[i][j], &LuaDbgTabWidget::moveRequested, this, &LuaSourceDebuggerDialog_t::moveTab);
+		}
+		hsplitter->addWidget(vsplitter[i]);
+	}
 	hsplitter->setStretchFactor(0, 3);
-	hsplitter->setStretchFactor(1, 2);
+	hsplitter->setStretchFactor(1, 1);
+	hsplitter->setStretchFactor(2, 1);
 
 	mainLayout = new QVBoxLayout();
 	mainLayout->setMenuBar(menuBar);
@@ -635,7 +669,7 @@ LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
 	connect(sourceView, &LuaSourceView::gutterClicked, this, &LuaSourceDebuggerDialog_t::gutterClickedCB);
 	connect(sourceView, &LuaSourceView::runToLineRequested, this, &LuaSourceDebuggerDialog_t::runToLineCB);
 
-	restoreGeometry(settings.value("luaDebugger/geometry").toByteArray());
+	loadDisplayViews();
 
 	debuggerWin = this;
 
@@ -656,13 +690,404 @@ LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
 	updatePeriodic();
 }
 //----------------------------------------------------------------------------
+// Relocatable tab panels
+//----------------------------------------------------------------------------
+LuaDbgTabBar::LuaDbgTabBar(QWidget *parent)
+	: QTabBar(parent), dragPress(false), dragOut(false)
+{
+	setMouseTracking(true);
+	setAcceptDrops(true);
+}
+
+void LuaDbgTabBar::mousePressEvent(QMouseEvent *event)
+{
+	QTabBar::mousePressEvent(event);
+
+	if (event->button() == Qt::LeftButton && currentIndex() >= 0)
+	{
+		dragPress = true;
+		dragOut = false;
+	}
+}
+
+void LuaDbgTabBar::mouseReleaseEvent(QMouseEvent *event)
+{
+	QTabBar::mouseReleaseEvent(event);
+	dragPress = false;
+	dragOut = false;
+}
+
+void LuaDbgTabBar::mouseMoveEvent(QMouseEvent *event)
+{
+	QTabBar::mouseMoveEvent(event);
+
+	if (dragPress && !dragOut && event->buttons() && !contentsRect().contains(event->pos()))
+	{
+		dragOut = true;
+		emit beginDragOut(currentIndex());
+
+		// QDrag::exec swallows the release event, so synthesize it.
+		QMouseEvent *e = new QMouseEvent(QEvent::MouseButtonRelease, mapFromGlobal(QCursor::pos()), QCursor::pos(),
+		                                 Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+		QApplication::postEvent(this, e);
+	}
+}
+
+void LuaDbgTabBar::contextMenuEvent(QContextMenuEvent *event)
+{
+	const int idx = tabAt(event->pos());
+
+	if (idx >= 0 && idx != currentIndex())
+	{
+		setCurrentIndex(idx);
+	}
+	LuaDbgTabWidget *p = qobject_cast<LuaDbgTabWidget *>(parent());
+
+	if (p)
+	{
+		p->buildContextMenu(event->globalPos());
+	}
+}
+//----------------------------------------------------------------------------
+LuaDbgTabWidget::LuaDbgTabWidget(int column, int row, QWidget *parent)
+	: QTabWidget(parent), col(column), rw(row)
+{
+	LuaDbgTabBar *bar = new LuaDbgTabBar(this);
+
+	setTabBar(bar);
+	bar->setAcceptDrops(true);
+	bar->setChangeCurrentOnDrag(true);
+	setMouseTracking(true);
+	setAcceptDrops(true);
+	setMovable(true);
+	setUsesScrollButtons(true);
+
+	connect(bar, &LuaDbgTabBar::beginDragOut, this, [this, bar](int index) {
+		QWidget *page = widget(index);
+
+		if (page == nullptr)
+		{
+			return;
+		}
+		QPixmap pixmap(bar->tabRect(index).size());
+		pixmap.fill(palette().color(QPalette::Window));
+
+		QPainter painter(&pixmap);
+		painter.drawText(pixmap.rect(), Qt::AlignCenter, tabText(index));
+		painter.drawRect(pixmap.rect().adjusted(0, 0, -1, -1));
+		painter.end();
+
+		QDrag *drag = new QDrag(bar);
+
+		drag->setMimeData(new QMimeData);
+		drag->setPixmap(pixmap);
+		drag->setHotSpot(QPoint(10, 0));
+		drag->exec(Qt::MoveAction);
+	});
+}
+
+void LuaDbgTabWidget::dragEnterEvent(QDragEnterEvent *event)
+{
+	if (qobject_cast<LuaDbgTabBar *>(event->source()) != nullptr)
+	{
+		event->acceptProposedAction();
+	}
+}
+
+void LuaDbgTabWidget::dropEvent(QDropEvent *event)
+{
+	LuaDbgTabBar *srcBar = qobject_cast<LuaDbgTabBar *>(event->source());
+
+	if (srcBar == nullptr)
+	{
+		return;
+	}
+	LuaDbgTabWidget *src = qobject_cast<LuaDbgTabWidget *>(srcBar->parent());
+
+	if (src != nullptr && src != this && srcBar->currentIndex() >= 0)
+	{
+		event->acceptProposedAction();
+		emit tabDropped(src->widget(srcBar->currentIndex()), this);
+	}
+}
+
+void LuaDbgTabWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+	buildContextMenu(event->globalPos());
+}
+
+void LuaDbgTabWidget::buildContextMenu(const QPoint &globalPos)
+{
+	QMenu menu(this);
+	QMenu *moveMenu = menu.addMenu(tr("Move Tab To..."));
+	QWidget *page = widget(currentIndex());
+	const char *rowNames[] = { "Upper", "Middle", "Lower" };
+	const char *colNames[] = { "Left", "Right" };
+
+	if (page == nullptr)
+	{
+		return;
+	}
+	for (int j = 0; j < 3; j++)
+	{
+		QMenu *sub = moveMenu->addMenu(tr(rowNames[j]));
+
+		for (int i = 0; i < 2; i++)
+		{
+			QAction *act = sub->addAction(tr(colNames[i]));
+
+			connect(act, &QAction::triggered, this, [this, page, i, j]() { emit moveRequested(page, i, j); });
+		}
+	}
+	menu.exec(globalPos);
+}
+//----------------------------------------------------------------------------
+LuaDbgTabWidget *LuaSourceDebuggerDialog_t::tabWidgetOf(QWidget *page) const
+{
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			if (tabView[i][j]->indexOf(page) >= 0)
+			{
+				return tabView[i][j];
+			}
+		}
+	}
+	return nullptr;
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::setPageTitle(QWidget *page, const QString &title)
+{
+	LuaDbgTabWidget *tw = tabWidgetOf(page);
+
+	for (int k = 0; k < 4; k++)
+	{
+		if (pages[k] == page)
+		{
+			pageTitles[k] = title;
+		}
+	}
+	if (tw)
+	{
+		tw->setTabText(tw->indexOf(page), title);
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::addPage(LuaDbgTabWidget *tw, QWidget *page)
+{
+	for (int k = 0; k < 4; k++)
+	{
+		if (pages[k] == page)
+		{
+			tw->addTab(page, pageTitles[k]);
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::moveTab(QWidget *page, int column, int row)
+{
+	LuaDbgTabWidget *src = tabWidgetOf(page);
+
+	if (src == nullptr || column < 0 || column > 1 || row < 0 || row > 2)
+	{
+		return;
+	}
+	if (src != tabView[column][row])
+	{
+		src->removeTab(src->indexOf(page));
+		addPage(tabView[column][row], page);
+		tabView[column][row]->setCurrentWidget(page);
+	}
+	updateTabVisibility();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::updateTabVisibility(void)
+{
+	for (int i = 0; i < 2; i++)
+	{
+		bool any = false;
+		const bool colHidden = !vsplitter[i]->isVisible();
+
+		for (int j = 0; j < 3; j++)
+		{
+			const bool has = (tabView[i][j]->count() > 0);
+
+			any = any || has;
+			tabView[i][j]->setVisible(has);
+		}
+		vsplitter[i]->setVisible(any);
+
+		if (any)
+		{
+			QList<int> s = vsplitter[i]->sizes();
+			int total = 0, visible = 0;
+
+			for (int j = 0; j < 3; j++)
+			{
+				total += s[j];
+				visible += (tabView[i][j]->count() > 0) ? 1 : 0;
+			}
+			for (int j = 0; j < 3; j++)
+			{
+				if (tabView[i][j]->count() > 0 && s[j] == 0)
+				{
+					// A group that was just revealed has no space yet; share evenly.
+					total = qMax(total, qMax(vsplitter[i]->height(), 300));
+
+					for (int k = 0; k < 3; k++)
+					{
+						s[k] = (tabView[i][k]->count() > 0) ? total / visible : 0;
+					}
+					vsplitter[i]->setSizes(s);
+					break;
+				}
+			}
+		}
+		if (any && colHidden)
+		{
+			QList<int> hs = hsplitter->sizes();
+
+			if (hs[i + 1] == 0)
+			{
+				hs[0] = qMax(1, hsplitter->width() * 3 / 5);
+				hs[1] = hs[2] = qMax(1, (hsplitter->width() - hs[0]) / 2);
+				hsplitter->setSizes(hs);
+			}
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::setLayoutOption(int opt)
+{
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			while (tabView[i][j]->count() > 0)
+			{
+				tabView[i][j]->removeTab(0);
+			}
+		}
+	}
+	layoutOpt = opt;
+
+	switch (opt)
+	{
+		default:
+		case 1: // Compact: one group
+			for (int k = 0; k < 4; k++) addPage(tabView[0][0], pages[k]);
+		break;
+		case 2: // Compact Split: one column, two groups
+			addPage(tabView[0][0], stackView);
+			addPage(tabView[0][0], bpView);
+			addPage(tabView[0][1], varView);
+			addPage(tabView[0][1], watchView);
+		break;
+		case 3: // Wide: two columns
+			addPage(tabView[0][0], stackView);
+			addPage(tabView[0][0], bpView);
+			addPage(tabView[1][0], varView);
+			addPage(tabView[1][0], watchView);
+		break;
+		case 4: // Wide Quad: two columns, two groups each
+			addPage(tabView[0][0], stackView);
+			addPage(tabView[0][1], bpView);
+			addPage(tabView[1][0], varView);
+			addPage(tabView[1][1], watchView);
+		break;
+	}
+
+	// Force an even re-share of space
+	for (int i = 0; i < 2; i++)
+	{
+		vsplitter[i]->setSizes(QList<int>() << 0 << 0 << 0);
+	}
+	updateTabVisibility();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::loadDisplayViews(void)
+{
+	QSettings settings;
+	const bool saved = settings.value("luaDebugger/prevStateSaved", false).toBool();
+
+	layoutOpt = settings.value("luaDebugger/layoutOpt", 2).toInt();
+
+	restoreGeometry(settings.value("luaDebugger/geometry").toByteArray());
+
+	if (!saved)
+	{
+		setLayoutOption(2);
+	}
+	else
+	{
+		for (int i = 0; i < 2; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				const QString val = settings.value(QStringLiteral("luaDebugger/tabView%1%2").arg(i + 1).arg(j + 1)).toString();
+
+				for (const QString &name : val.split(',', Qt::SkipEmptyParts))
+				{
+					for (int k = 0; k < 4; k++)
+					{
+						if (pages[k]->objectName() == name && tabWidgetOf(pages[k]) == nullptr)
+						{
+							addPage(tabView[i][j], pages[k]);
+						}
+					}
+				}
+			}
+		}
+		// Anything not restored goes to the first group
+		for (int k = 0; k < 4; k++)
+		{
+			if (tabWidgetOf(pages[k]) == nullptr)
+			{
+				addPage(tabView[0][0], pages[k]);
+			}
+		}
+		hsplitter->restoreState(settings.value("luaDebugger/hPanelState").toByteArray());
+
+		for (int i = 0; i < 2; i++)
+		{
+			vsplitter[i]->restoreState(settings.value(QStringLiteral("luaDebugger/vPanelState%1").arg(i + 1)).toByteArray());
+		}
+		updateTabVisibility();
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::saveDisplayViews(void)
+{
+	QSettings settings;
+
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			QString val;
+
+			for (int k = 0; k < tabView[i][j]->count(); k++)
+			{
+				val += tabView[i][j]->widget(k)->objectName() + ",";
+			}
+			settings.setValue(QStringLiteral("luaDebugger/tabView%1%2").arg(i + 1).arg(j + 1), val);
+		}
+		settings.setValue(QStringLiteral("luaDebugger/vPanelState%1").arg(i + 1), vsplitter[i]->saveState());
+	}
+	settings.setValue("luaDebugger/hPanelState", hsplitter->saveState());
+	settings.setValue("luaDebugger/geometry", saveGeometry());
+	settings.setValue("luaDebugger/layoutOpt", layoutOpt);
+	settings.setValue("luaDebugger/prevStateSaved", true);
+}
+//----------------------------------------------------------------------------
 LuaSourceDebuggerDialog_t::~LuaSourceDebuggerDialog_t(void)
 {
 	QSettings settings;
 
 	periodicTimer->stop();
 
-	settings.setValue("luaDebugger/geometry", saveGeometry());
+	saveDisplayViews();
 	settings.setValue("luaDebugger/watches", watches);
 
 	FCEU_WRAPPER_LOCK();
@@ -677,6 +1102,7 @@ LuaSourceDebuggerDialog_t::~LuaSourceDebuggerDialog_t(void)
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::closeEvent(QCloseEvent *event)
 {
+	saveDisplayViews();
 	done(0);
 	deleteLater();
 	event->accept();
@@ -774,6 +1200,20 @@ QMenuBar *LuaSourceDebuggerDialog_t::buildMenuBar(void)
 	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::toggleBreakpointCB);
 	menu->addAction(act);
 
+	act = new QAction(tr("&Enable/Disable Breakpoint"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+F9")));
+	act->setStatusTip(tr("Disable or re-enable the breakpoint on the current line"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::toggleBreakpointEnabledCB);
+	menu->addAction(act);
+
+	act = new QAction(tr("Enable All Breakpoints"), this);
+	connect(act, &QAction::triggered, this, [this]() { setAllBreakpointsEnabled(true); });
+	menu->addAction(act);
+
+	act = new QAction(tr("Disable All Breakpoints"), this);
+	connect(act, &QAction::triggered, this, [this]() { setAllBreakpointsEnabled(false); });
+	menu->addAction(act);
+
 	act = new QAction(tr("Clear &All Breakpoints"), this);
 	act->setStatusTip(tr("Remove all breakpoints"));
 	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::clearBreakpointsCB);
@@ -829,6 +1269,25 @@ QMenuBar *LuaSourceDebuggerDialog_t::buildMenuBar(void)
 		sourceView->setDarkTheme(dark);
 	}
 
+	menu->addSeparator();
+
+	{
+		QMenu *layoutMenu = menu->addMenu(tr("Layout &Presets"));
+		QActionGroup *group = new QActionGroup(this);
+		const char *names[] = { "&Compact", "Compact &Split", "&Wide", "Wide &Quad" };
+
+		group->setExclusive(true);
+
+		for (int i = 0; i < 4; i++)
+		{
+			act = new QAction(tr(names[i]), this);
+			act->setStatusTip(tr("Arrange the Stack, Variables, Watch and Breakpoints tabs"));
+			connect(act, &QAction::triggered, this, [this, i]() { setLayoutOption(i + 1); });
+			group->addAction(act);
+			layoutMenu->addAction(act);
+		}
+	}
+
 	return menuBar;
 }
 //----------------------------------------------------------------------------
@@ -865,22 +1324,239 @@ void LuaSourceDebuggerDialog_t::buildStackView(void)
 	connect(stackView, &QTreeWidget::currentItemChanged, this, [this](QTreeWidgetItem *, QTreeWidgetItem *) { frameChanged(); });
 }
 //----------------------------------------------------------------------------
+QTreeWidget *LuaSourceDebuggerDialog_t::buildVarTree(void)
+{
+	QTreeWidget *tree = new QTreeWidget();
+
+	tree->setColumnCount(3);
+	tree->setHeaderLabels(QStringList() << tr("Name") << tr("Value") << tr("Type"));
+	tree->setUniformRowHeights(true);
+	tree->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	tree->setContextMenuPolicy(Qt::CustomContextMenu);
+	tree->setColumnWidth(0, 160);
+	tree->setColumnWidth(1, 200);
+
+	connect(tree, &QTreeWidget::itemExpanded, this, &LuaSourceDebuggerDialog_t::varItemExpanded);
+	connect(tree, &QTreeWidget::itemCollapsed, this, &LuaSourceDebuggerDialog_t::varItemCollapsed);
+	connect(tree, &QTreeWidget::itemChanged, this, &LuaSourceDebuggerDialog_t::varItemChanged);
+	connect(tree, &QTreeWidget::itemDoubleClicked, this, &LuaSourceDebuggerDialog_t::varItemDoubleClicked);
+	connect(tree, &QWidget::customContextMenuRequested, this, &LuaSourceDebuggerDialog_t::varContextMenu);
+
+	return tree;
+}
+//----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::buildVarView(void)
 {
-	varView = new QTreeWidget();
-	varView->setColumnCount(3);
-	varView->setHeaderLabels(QStringList() << tr("Name") << tr("Value") << tr("Type"));
-	varView->setUniformRowHeights(true);
-	varView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	varView->setContextMenuPolicy(Qt::CustomContextMenu);
-	varView->setColumnWidth(0, 160);
-	varView->setColumnWidth(1, 200);
+	varView = buildVarTree();
+	watchView = buildVarTree();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::buildBreakpointView(void)
+{
+	bpView = new QTreeWidget();
+	bpView->setColumnCount(2);
+	bpView->setHeaderLabels(QStringList() << tr("File") << tr("Line"));
+	bpView->setRootIsDecorated(false);
+	bpView->setUniformRowHeights(true);
+	bpView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	bpView->setContextMenuPolicy(Qt::CustomContextMenu);
+	bpView->setColumnWidth(0, 220);
 
-	connect(varView, &QTreeWidget::itemExpanded, this, &LuaSourceDebuggerDialog_t::varItemExpanded);
-	connect(varView, &QTreeWidget::itemCollapsed, this, &LuaSourceDebuggerDialog_t::varItemCollapsed);
-	connect(varView, &QTreeWidget::itemChanged, this, &LuaSourceDebuggerDialog_t::varItemChanged);
-	connect(varView, &QTreeWidget::itemDoubleClicked, this, &LuaSourceDebuggerDialog_t::varItemDoubleClicked);
-	connect(varView, &QWidget::customContextMenuRequested, this, &LuaSourceDebuggerDialog_t::varContextMenu);
+	connect(bpView, &QTreeWidget::itemChanged, this, &LuaSourceDebuggerDialog_t::bpItemChanged);
+	connect(bpView, &QTreeWidget::itemActivated, this, &LuaSourceDebuggerDialog_t::bpItemActivated);
+	connect(bpView, &QWidget::customContextMenuRequested, this, &LuaSourceDebuggerDialog_t::bpContextMenu);
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::refreshBreakpointList(void)
+{
+	bpRefreshing = true;
+	bpView->clear();
+
+	for (const auto &entry : breakpointMap)
+	{
+		const QString path = QString::fromLocal8Bit(entry.first.c_str());
+
+		for (int line : entry.second)
+		{
+			QTreeWidgetItem *item = new QTreeWidgetItem();
+
+			const bool dis = disabledMap[entry.first].count(line) != 0;
+
+			item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+			item->setCheckState(0, dis ? Qt::Unchecked : Qt::Checked);
+			item->setText(0, QFileInfo(path).fileName());
+			item->setText(1, QString::number(line));
+			item->setToolTip(0, path);
+			item->setData(0, Qt::UserRole, path);
+			item->setData(1, Qt::UserRole, line);
+			bpView->addTopLevelItem(item);
+		}
+	}
+	bpRefreshing = false;
+	setPageTitle(bpView, bpView->topLevelItemCount() > 0 ? tr("Breakpoints (%1)").arg(bpView->topLevelItemCount()) : tr("Breakpoints"));
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::applyBreakpointEnable(const std::string &path, int line, bool enable)
+{
+	if (enable)
+	{
+		disabledMap[path].erase(line);
+	}
+	else
+	{
+		disabledMap[path].insert(line);
+	}
+	FCEU_LuaDbgSetBreakpoint(path, line, enable);
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::syncSourceMarkers(void)
+{
+	sourceView->setBreakpoints(breakpointMap[sourceView->file()], disabledMap[sourceView->file()]);
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::bpItemChanged(QTreeWidgetItem *item, int column)
+{
+	if (bpRefreshing || column != 0)
+	{
+		return;
+	}
+	const std::string path = item->data(0, Qt::UserRole).toString().toLocal8Bit().toStdString();
+	const int line = item->data(1, Qt::UserRole).toInt();
+
+	applyBreakpointEnable(path, line, item->checkState(0) == Qt::Checked);
+	syncSourceMarkers();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::setSelectedBreakpointsEnabled(bool enable)
+{
+	const QList<QTreeWidgetItem *> sel = bpView->selectedItems();
+
+	for (QTreeWidgetItem *item : sel)
+	{
+		applyBreakpointEnable(item->data(0, Qt::UserRole).toString().toLocal8Bit().toStdString(),
+		                      item->data(1, Qt::UserRole).toInt(), enable);
+	}
+	syncSourceMarkers();
+	refreshBreakpointList();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::setAllBreakpointsEnabled(bool enable)
+{
+	for (const auto &entry : breakpointMap)
+	{
+		for (int line : entry.second)
+		{
+			applyBreakpointEnable(entry.first, line, enable);
+		}
+	}
+	syncSourceMarkers();
+	refreshBreakpointList();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::toggleBreakpointEnabledCB(void)
+{
+	if (sourceView->file().empty())
+	{
+		return;
+	}
+	const int line = sourceView->currentLine();
+
+	if (breakpointMap[sourceView->file()].count(line) == 0)
+	{
+		return;
+	}
+	applyBreakpointEnable(sourceView->file(), line, disabledMap[sourceView->file()].count(line) != 0);
+	syncSourceMarkers();
+	refreshBreakpointList();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::bpItemActivated(QTreeWidgetItem *item, int)
+{
+	const QString path = item->data(0, Qt::UserRole).toString();
+	const int line = item->data(1, Qt::UserRole).toInt();
+
+	if (sourceView->file() != path.toLocal8Bit().toStdString() && !openScript(path))
+	{
+		return;
+	}
+	QTextCursor cursor(sourceView->document()->findBlockByNumber(line - 1));
+
+	sourceView->setTextCursor(cursor);
+	sourceView->centerCursor();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::removeSelectedBreakpoints(void)
+{
+	const QList<QTreeWidgetItem *> sel = bpView->selectedItems();
+
+	for (QTreeWidgetItem *item : sel)
+	{
+		const std::string path = item->data(0, Qt::UserRole).toString().toLocal8Bit().toStdString();
+		const int line = item->data(1, Qt::UserRole).toInt();
+
+		breakpointMap[path].erase(line);
+		disabledMap[path].erase(line);
+		FCEU_LuaDbgSetBreakpoint(path, line, false);
+	}
+	syncSourceMarkers();
+	refreshBreakpointList();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::bpContextMenu(const QPoint &pos)
+{
+	QMenu menu(this);
+	QAction *goAct = nullptr;
+	QAction *removeAct = nullptr;
+	QAction *enableAct = nullptr;
+	QAction *disableAct = nullptr;
+	QAction *clearAct;
+	QTreeWidgetItem *item = bpView->itemAt(pos);
+
+	if (item != nullptr)
+	{
+		goAct = menu.addAction(tr("Go to Source"));
+		enableAct = menu.addAction(tr("Enable Breakpoint"));
+		disableAct = menu.addAction(tr("Disable Breakpoint"));
+		removeAct = menu.addAction(tr("Remove Breakpoint"));
+	}
+	QAction *enableAllAct = menu.addAction(tr("Enable All Breakpoints"));
+	QAction *disableAllAct = menu.addAction(tr("Disable All Breakpoints"));
+	enableAllAct->setEnabled(bpView->topLevelItemCount() > 0);
+	disableAllAct->setEnabled(bpView->topLevelItemCount() > 0);
+	clearAct = menu.addAction(tr("Remove All Breakpoints"));
+	clearAct->setEnabled(bpView->topLevelItemCount() > 0);
+
+	QAction *sel = menu.exec(bpView->viewport()->mapToGlobal(pos));
+
+	if (sel == nullptr)
+	{
+		return;
+	}
+	if (sel == goAct)
+	{
+		bpItemActivated(item, 0);
+	}
+	else if (sel == enableAct || sel == disableAct)
+	{
+		if (!item->isSelected())
+		{
+			item->setSelected(true);
+		}
+		setSelectedBreakpointsEnabled(sel == enableAct);
+	}
+	else if (sel == enableAllAct || sel == disableAllAct)
+	{
+		setAllBreakpointsEnabled(sel == enableAllAct);
+	}
+	else if (sel == removeAct)
+	{
+		item->setSelected(true);
+		removeSelectedBreakpoints();
+	}
+	else if (sel == clearAct)
+	{
+		clearBreakpointsCB();
+	}
 }
 //----------------------------------------------------------------------------
 bool LuaSourceDebuggerDialog_t::openScript(const QString &path)
@@ -892,7 +1568,7 @@ bool LuaSourceDebuggerDialog_t::openScript(const QString &path)
 		QMessageBox::warning(this, tr("Open Script"), tr("Failed to open file:\n%1").arg(path));
 		return false;
 	}
-	sourceView->setBreakpoints(breakpointMap[norm]);
+	syncSourceMarkers();
 	setWindowTitle(tr("Lua Source Debugger - %1").arg(QFileInfo(path).fileName()));
 	return true;
 }
@@ -1017,6 +1693,7 @@ void LuaSourceDebuggerDialog_t::clearPausedState(void)
 {
 	stackView->clear();
 	varView->clear();
+	watchView->clear();
 	varStore.clear();
 	frames.clear();
 	sourceView->setExecLine(-1, true);
@@ -1068,6 +1745,10 @@ QString LuaSourceDebuggerDialog_t::itemPath(QTreeWidgetItem *item) const
 {
 	QStringList parts;
 
+	if (item != nullptr && item->treeWidget() == watchView)
+	{
+		parts.append(QStringLiteral("\x01Watch"));
+	}
 	while (item != nullptr)
 	{
 		parts.prepend(item->text(0));
@@ -1080,8 +1761,9 @@ QString LuaSourceDebuggerDialog_t::itemExpression(QTreeWidgetItem *item) const
 {
 	QStringList names;
 	QString expr;
+	const bool inWatch = (item != nullptr && item->treeWidget() == watchView);
 
-	while (item != nullptr && item->parent() != nullptr)
+	while (item != nullptr && (item->parent() != nullptr || inWatch))
 	{
 		names.prepend(item->text(0));
 		item = item->parent();
@@ -1092,7 +1774,7 @@ QString LuaSourceDebuggerDialog_t::itemExpression(QTreeWidgetItem *item) const
 
 		if (i == 0)
 		{
-			expr = n;
+			expr = inWatch ? QStringLiteral("(") + n + QStringLiteral(")") : n;
 		}
 		else if (n.startsWith(QChar('[')))
 		{
@@ -1138,8 +1820,11 @@ QTreeWidgetItem *LuaSourceDebuggerDialog_t::addVarItem(QTreeWidgetItem *parent, 
 		dummy->setData(0, ITEM_VAR_ROLE, -2);
 		item->addChild(dummy);
 	}
-	parent->addChild(item);
-	restoreExpansion(item);
+	if (parent != nullptr)
+	{
+		parent->addChild(item);
+		restoreExpansion(item);
+	}
 
 	return item;
 }
@@ -1158,18 +1843,7 @@ void LuaSourceDebuggerDialog_t::populateRoot(QTreeWidgetItem *root, int rootKind
 	const int level = cur ? cur->data(0, Qt::UserRole).toInt() : 0;
 	std::vector<LuaDbgVar> vars;
 
-	if (rootKind == ROOT_WATCH)
-	{
-		for (const QString &w : watches)
-		{
-			LuaDbgVar var;
-
-			FCEU_LuaDbgEvaluate(level, w.toLocal8Bit().constData(), var);
-			var.name = w.toLocal8Bit().constData();
-			addVarItem(root, var, false);
-		}
-	}
-	else if (rootKind == ROOT_LOCALS || rootKind == ROOT_UPVALUES)
+	if (rootKind == ROOT_LOCALS || rootKind == ROOT_UPVALUES)
 	{
 		FCEU_LuaDbgGetScope(level, rootKind == ROOT_LOCALS ? LUADBG_SCOPE_LOCAL : LUADBG_SCOPE_UPVALUE, vars);
 
@@ -1199,7 +1873,7 @@ void LuaSourceDebuggerDialog_t::refreshVariables(void)
 
 	if (FCEU_LuaDbgIsPaused())
 	{
-		for (int i = 0; i < 4; i++)
+		for (int i = ROOT_LOCALS; i <= ROOT_GLOBALS; i++)
 		{
 			QTreeWidgetItem *root = new QTreeWidgetItem();
 
@@ -1214,6 +1888,34 @@ void LuaSourceDebuggerDialog_t::refreshVariables(void)
 	}
 	updatingVars = false;
 	varView->setUpdatesEnabled(true);
+
+	refreshWatches();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::refreshWatches(void)
+{
+	QTreeWidgetItem *cur = stackView->currentItem();
+	const int level = cur ? cur->data(0, Qt::UserRole).toInt() : 0;
+
+	updatingVars = true;
+	watchView->clear();
+
+	if (FCEU_LuaDbgIsPaused())
+	{
+		for (const QString &w : watches)
+		{
+			LuaDbgVar var;
+
+			FCEU_LuaDbgEvaluate(level, w.toLocal8Bit().constData(), var);
+			var.name = w.toLocal8Bit().constData();
+
+			QTreeWidgetItem *item = addVarItem(nullptr, var, false);
+
+			watchView->addTopLevelItem(item);
+			restoreExpansion(item);
+		}
+	}
+	updatingVars = false;
 }
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::populateChildren(QTreeWidgetItem *item)
@@ -1269,7 +1971,7 @@ void LuaSourceDebuggerDialog_t::varItemDoubleClicked(QTreeWidgetItem *item, int 
 {
 	if (column == 1 && (item->flags() & Qt::ItemIsEditable))
 	{
-		varView->editItem(item, 1);
+		item->treeWidget()->editItem(item, 1);
 	}
 }
 //----------------------------------------------------------------------------
@@ -1297,36 +1999,34 @@ void LuaSourceDebuggerDialog_t::varItemChanged(QTreeWidgetItem *item, int column
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::varContextMenu(const QPoint &pos)
 {
-	QTreeWidgetItem *item = varView->itemAt(pos);
+	QTreeWidget *tree = qobject_cast<QTreeWidget *>(sender());
+
+	if (tree == nullptr)
+	{
+		return;
+	}
+	QTreeWidgetItem *item = tree->itemAt(pos);
 	QMenu menu(this);
-	QAction *addAct = nullptr;
+	QAction *addAct = menu.addAction(tr("Add Watch..."));
 	QAction *removeAct = nullptr;
 	QAction *watchVarAct = nullptr;
 
-	addAct = menu.addAction(tr("Add Watch..."));
-
-	if (item != nullptr && item->parent() != nullptr)
+	if (item != nullptr)
 	{
-		QTreeWidgetItem *top = item;
-
-		while (top->parent() != nullptr)
+		if (tree == watchView)
 		{
-			top = top->parent();
-		}
-		if (top->data(0, ITEM_ROOT_ROLE).toInt() == ROOT_WATCH)
-		{
-			if (item->parent() == top)
+			if (item->parent() == nullptr)
 			{
 				removeAct = menu.addAction(tr("Remove Watch"));
 			}
 		}
-		else
+		else if (item->parent() != nullptr)
 		{
 			watchVarAct = menu.addAction(tr("Add to Watch"));
 		}
 	}
 
-	QAction *sel = menu.exec(varView->viewport()->mapToGlobal(pos));
+	QAction *sel = menu.exec(tree->viewport()->mapToGlobal(pos));
 
 	if (sel == nullptr)
 	{
@@ -1340,7 +2040,7 @@ void LuaSourceDebuggerDialog_t::varContextMenu(const QPoint &pos)
 	{
 		watches.removeAll(item->text(0));
 		saveWatches();
-		refreshVariables();
+		refreshWatches();
 	}
 	else if (sel == watchVarAct)
 	{
@@ -1350,7 +2050,7 @@ void LuaSourceDebuggerDialog_t::varContextMenu(const QPoint &pos)
 		{
 			watches.append(expr);
 			saveWatches();
-			refreshVariables();
+			refreshWatches();
 		}
 	}
 }
@@ -1372,10 +2072,7 @@ void LuaSourceDebuggerDialog_t::addWatchCB(void)
 		watches.append(expr);
 		saveWatches();
 
-		if (FCEU_LuaDbgIsPaused())
-		{
-			refreshVariables();
-		}
+		refreshWatches();
 	}
 }
 //----------------------------------------------------------------------------
@@ -1384,10 +2081,7 @@ void LuaSourceDebuggerDialog_t::clearWatchesCB(void)
 	watches.clear();
 	saveWatches();
 
-	if (FCEU_LuaDbgIsPaused())
-	{
-		refreshVariables();
-	}
+	refreshWatches();
 }
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::runContinueCB(void)
@@ -1456,6 +2150,8 @@ void LuaSourceDebuggerDialog_t::gutterClickedCB(int line)
 	std::set<int> &bps = breakpointMap[sourceView->file()];
 	const bool enable = (bps.count(line) == 0);
 
+	disabledMap[sourceView->file()].erase(line);
+
 	if (enable)
 	{
 		bps.insert(line);
@@ -1465,7 +2161,8 @@ void LuaSourceDebuggerDialog_t::gutterClickedCB(int line)
 		bps.erase(line);
 	}
 	FCEU_LuaDbgSetBreakpoint(sourceView->file(), line, enable);
-	sourceView->setBreakpoints(bps);
+	syncSourceMarkers();
+	refreshBreakpointList();
 }
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::toggleBreakpointCB(void)
@@ -1476,8 +2173,10 @@ void LuaSourceDebuggerDialog_t::toggleBreakpointCB(void)
 void LuaSourceDebuggerDialog_t::clearBreakpointsCB(void)
 {
 	breakpointMap.clear();
+	disabledMap.clear();
 	FCEU_LuaDbgClearBreakpoints();
-	sourceView->setBreakpoints(std::set<int>());
+	sourceView->setBreakpoints(std::set<int>(), std::set<int>());
+	refreshBreakpointList();
 }
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::breakOnStartCB(bool checked)
