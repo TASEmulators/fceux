@@ -127,7 +127,7 @@ static void Sync(void) {
 static DECLFW(UNLOneBusWriteCPU410X) {
 //	FCEU_printf("CPU %04x:%04x\n",A,V);
 	switch (A & 0xf) {
-	case 0x1: IRQLatch = V & 0xfe; break;	// не по даташиту
+	case 0x1: IRQLatch = V & 0xfe; break;	// IRQ latch
 	case 0x2: IRQReload = 1; break;
 	case 0x3: X6502_IRQEnd(FCEU_IQEXT); IRQa = 0; break;
 	case 0x4: IRQa = 1; break;
