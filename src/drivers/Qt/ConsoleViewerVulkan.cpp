@@ -10,9 +10,11 @@
 #include <QExposeEvent>
 #include <QMouseEvent>
 #include <QPlatformSurfaceEvent>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <QVulkanDeviceFunctions>
 #include <QVulkanFunctions>
+#include <QTimer>
 #include <QVulkanInstance>
 #include <QWindow>
 
@@ -64,6 +66,7 @@ public:
 	double aspectY = 1.0;
 	bool linearFilter = false;
 	bool vsync = true;
+	bool acquireBusy = false;
 	unsigned int mouseButtonMask = 0;
 	std::function<void()> exposedCallback;
 
@@ -90,8 +93,18 @@ public:
 		if (swapchainDirty && !createSwapchain())
 			return;
 
+		FrameSlot &fs = frames[frameIndex];
+		// Only blocks if the GPU is more than FRAMES_IN_FLIGHT frames behind
+		df->vkWaitForFences(dev, 1, &fs.fence, VK_TRUE, UINT64_MAX);
+
+		acquireBusy = false;
 		uint32_t index = 0;
-		VkResult res = vkAcquireNextImageKHR(dev, swapchain, UINT64_MAX, imageAvailable, VK_NULL_HANDLE, &index);
+		VkResult res = vkAcquireNextImageKHR(dev, swapchain, 0, fs.imageAvailable, VK_NULL_HANDLE, &index);
+		if (res == VK_NOT_READY || res == VK_TIMEOUT)
+		{	// Every image is queued for display; don't stall the GUI thread until vsync
+			acquireBusy = true;
+			return;
+		}
 		if (res == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			swapchainDirty = true;
@@ -100,10 +113,10 @@ public:
 		if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR)
 			return;
 
-		memcpy(stagingMapped, pixels, (size_t)frameWidth * frameHeight * sizeof(uint32_t));
+		memcpy(fs.stagingMapped, pixels, (size_t)frameWidth * frameHeight * sizeof(uint32_t));
 
 		VkImage target = images[index];
-		VkCommandBuffer cb = cmdBuf;
+		VkCommandBuffer cb = fs.cmdBuf;
 		df->vkResetCommandBuffer(cb, 0);
 		VkCommandBufferBeginInfo begin{};
 		begin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -114,7 +127,7 @@ public:
 		VkBufferImageCopy copy{};
 		copy.imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
 		copy.imageExtent = { (uint32_t)frameWidth, (uint32_t)frameHeight, 1 };
-		df->vkCmdCopyBufferToImage(cb, stagingBuf, texture, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy);
+		df->vkCmdCopyBufferToImage(cb, fs.stagingBuf, texture, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy);
 		layout(cb, texture, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
 		layout(cb, target, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -150,24 +163,25 @@ public:
 		VkSubmitInfo submit{};
 		submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submit.waitSemaphoreCount = 1;
-		submit.pWaitSemaphores = &imageAvailable;
+		submit.pWaitSemaphores = &fs.imageAvailable;
 		submit.pWaitDstStageMask = &waitStage;
 		submit.commandBufferCount = 1;
 		submit.pCommandBuffers = &cb;
 		submit.signalSemaphoreCount = 1;
-		submit.pSignalSemaphores = &renderFinished;
-		if (df->vkQueueSubmit(queue, 1, &submit, VK_NULL_HANDLE) != VK_SUCCESS)
+		submit.pSignalSemaphores = &renderFinished[index];
+		df->vkResetFences(dev, 1, &fs.fence);
+		if (df->vkQueueSubmit(queue, 1, &submit, fs.fence) != VK_SUCCESS)
 			return;
+		frameIndex = (frameIndex + 1) % FRAMES_IN_FLIGHT;
 
 		VkPresentInfoKHR present{};
 		present.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		present.waitSemaphoreCount = 1;
-		present.pWaitSemaphores = &renderFinished;
+		present.pWaitSemaphores = &renderFinished[index];
 		present.swapchainCount = 1;
 		present.pSwapchains = &swapchain;
 		present.pImageIndices = &index;
 		res = vkQueuePresentKHR(queue, &present);
-		df->vkQueueWaitIdle(queue);
 
 		if (res == VK_SUCCESS || res == VK_SUBOPTIMAL_KHR)
 		{
@@ -315,10 +329,18 @@ private:
 		cba.commandBufferCount = 1;
 		VkSemaphoreCreateInfo sem{};
 		sem.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-		if (df->vkCreateCommandPool(dev, &pool, nullptr, &cmdPool) != VK_SUCCESS ||
-		    (cba.commandPool = cmdPool, df->vkAllocateCommandBuffers(dev, &cba, &cmdBuf) != VK_SUCCESS) ||
-		    df->vkCreateSemaphore(dev, &sem, nullptr, &imageAvailable) != VK_SUCCESS ||
-		    df->vkCreateSemaphore(dev, &sem, nullptr, &renderFinished) != VK_SUCCESS)
+		VkFenceCreateInfo fci{};
+		fci.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fci.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+		bool ok = df->vkCreateCommandPool(dev, &pool, nullptr, &cmdPool) == VK_SUCCESS;
+		cba.commandPool = cmdPool;
+		for (int i = 0; ok && i < FRAMES_IN_FLIGHT; i++)
+		{
+			ok = df->vkAllocateCommandBuffers(dev, &cba, &frames[i].cmdBuf) == VK_SUCCESS &&
+			     df->vkCreateSemaphore(dev, &sem, nullptr, &frames[i].imageAvailable) == VK_SUCCESS &&
+			     df->vkCreateFence(dev, &fci, nullptr, &frames[i].fence) == VK_SUCCESS;
+		}
+		if (!ok)
 		{
 			error = QStringLiteral("Could not create Vulkan command resources");
 			return false;
@@ -326,7 +348,7 @@ private:
 		return createFrameResources(error);
 	}
 
-	// Texture and staging buffer are sized for the largest frame, so they are created once
+	// Texture and staging buffers are sized for the largest frame, so they are created once
 	bool createFrameResources(QString &error)
 	{
 		VkImageCreateInfo ii{};
@@ -358,18 +380,20 @@ private:
 				df->vkAllocateMemory(dev, &alloc, nullptr, &textureMem) == VK_SUCCESS &&
 				df->vkBindImageMemory(dev, texture, textureMem, 0) == VK_SUCCESS;
 		}
-		if (ok)
-			ok = df->vkCreateBuffer(dev, &bi, nullptr, &stagingBuf) == VK_SUCCESS;
-		if (ok)
+		for (int i = 0; ok && i < FRAMES_IN_FLIGHT; i++)
 		{
-			df->vkGetBufferMemoryRequirements(dev, stagingBuf, &req);
+			FrameSlot &fs = frames[i];
+			ok = df->vkCreateBuffer(dev, &bi, nullptr, &fs.stagingBuf) == VK_SUCCESS;
+			if (!ok)
+				break;
+			df->vkGetBufferMemoryRequirements(dev, fs.stagingBuf, &req);
 			alloc.allocationSize = req.size;
 			alloc.memoryTypeIndex = memoryType(req.memoryTypeBits,
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			ok = alloc.memoryTypeIndex != UINT32_MAX &&
-				df->vkAllocateMemory(dev, &alloc, nullptr, &stagingMem) == VK_SUCCESS &&
-				df->vkBindBufferMemory(dev, stagingBuf, stagingMem, 0) == VK_SUCCESS &&
-				df->vkMapMemory(dev, stagingMem, 0, VK_WHOLE_SIZE, 0, (void **)&stagingMapped) == VK_SUCCESS;
+				df->vkAllocateMemory(dev, &alloc, nullptr, &fs.stagingMem) == VK_SUCCESS &&
+				df->vkBindBufferMemory(dev, fs.stagingBuf, fs.stagingMem, 0) == VK_SUCCESS &&
+				df->vkMapMemory(dev, fs.stagingMem, 0, VK_WHOLE_SIZE, 0, (void **)&fs.stagingMapped) == VK_SUCCESS;
 		}
 		if (!ok)
 			error = QStringLiteral("Could not allocate Vulkan frame resources");
@@ -436,6 +460,7 @@ private:
 			? VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR : VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
 		sc.presentMode = mode;
 		sc.clipped = VK_TRUE;
+		destroyRenderFinished();
 		if (swapchain)
 			vkDestroySwapchainKHR(dev, swapchain, nullptr);
 		swapchain = VK_NULL_HANDLE;
@@ -446,8 +471,24 @@ private:
 		vkGetSwapchainImagesKHR(dev, swapchain, &n, nullptr);
 		images.resize(n);
 		vkGetSwapchainImagesKHR(dev, swapchain, &n, images.data());
+		// One per swapchain image, since presentation may still hold the semaphore after the frame slot is reused
+		VkSemaphoreCreateInfo sem{};
+		sem.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+		renderFinished.assign(n, VK_NULL_HANDLE);
+		for (uint32_t i = 0; i < n; i++)
+			if (df->vkCreateSemaphore(dev, &sem, nullptr, &renderFinished[i]) != VK_SUCCESS)
+				return false;
 		swapchainDirty = false;
 		return true;
+	}
+
+	// Callers must have waited for the device to be idle
+	void destroyRenderFinished()
+	{
+		for (VkSemaphore s : renderFinished)
+			if (s)
+				df->vkDestroySemaphore(dev, s, nullptr);
+		renderFinished.clear();
 	}
 
 	// Must run before the surface it was created from goes away
@@ -456,6 +497,7 @@ private:
 		if (dev && swapchain)
 		{
 			df->vkDeviceWaitIdle(dev);
+			destroyRenderFinished();
 			vkDestroySwapchainKHR(dev, swapchain, nullptr);
 		}
 		swapchain = VK_NULL_HANDLE;
@@ -469,17 +511,21 @@ private:
 		if (!dev)
 			return;
 		destroySwapchain();
-		if (stagingMapped)
-			df->vkUnmapMemory(dev, stagingMem);
-		df->vkDestroyBuffer(dev, stagingBuf, nullptr);
-		df->vkFreeMemory(dev, stagingMem, nullptr);
+		df->vkDeviceWaitIdle(dev);
+		for (FrameSlot &fs : frames)
+		{
+			if (fs.stagingMapped)
+				df->vkUnmapMemory(dev, fs.stagingMem);
+			df->vkDestroyBuffer(dev, fs.stagingBuf, nullptr);
+			df->vkFreeMemory(dev, fs.stagingMem, nullptr);
+			df->vkDestroySemaphore(dev, fs.imageAvailable, nullptr);
+			df->vkDestroyFence(dev, fs.fence, nullptr);
+			fs = FrameSlot();
+		}
 		df->vkDestroyImage(dev, texture, nullptr);
 		df->vkFreeMemory(dev, textureMem, nullptr);
-		df->vkDestroySemaphore(dev, imageAvailable, nullptr);
-		df->vkDestroySemaphore(dev, renderFinished, nullptr);
 		df->vkDestroyCommandPool(dev, cmdPool, nullptr);
 		df->vkDestroyDevice(dev, nullptr);
-		stagingMapped = nullptr;
 		dev = VK_NULL_HANDLE;
 	}
 
@@ -492,17 +538,24 @@ private:
 	VkDevice dev = VK_NULL_HANDLE;
 	VkQueue queue = VK_NULL_HANDLE;
 	VkCommandPool cmdPool = VK_NULL_HANDLE;
-	VkCommandBuffer cmdBuf = VK_NULL_HANDLE;
-	VkSemaphore imageAvailable = VK_NULL_HANDLE;
-	VkSemaphore renderFinished = VK_NULL_HANDLE;
+	static constexpr int FRAMES_IN_FLIGHT = 2;
+	struct FrameSlot
+	{
+		VkCommandBuffer cmdBuf = VK_NULL_HANDLE;
+		VkSemaphore imageAvailable = VK_NULL_HANDLE;
+		VkFence fence = VK_NULL_HANDLE;
+		VkBuffer stagingBuf = VK_NULL_HANDLE;
+		VkDeviceMemory stagingMem = VK_NULL_HANDLE;
+		uint32_t *stagingMapped = nullptr;
+	};
+	FrameSlot frames[FRAMES_IN_FLIGHT];
+	int frameIndex = 0;
+	std::vector<VkSemaphore> renderFinished;
 	VkSwapchainKHR swapchain = VK_NULL_HANDLE;
 	VkExtent2D extent{};
 	std::vector<VkImage> images;
 	VkImage texture = VK_NULL_HANDLE;
 	VkDeviceMemory textureMem = VK_NULL_HANDLE;
-	VkBuffer stagingBuf = VK_NULL_HANDLE;
-	VkDeviceMemory stagingMem = VK_NULL_HANDLE;
-	uint32_t *stagingMapped = nullptr;
 	bool swapchainDirty = true;
 };
 
@@ -613,6 +666,11 @@ void ConsoleViewVulkan_t::queueRedraw(void)
 	vulkanWindow->aspectY = aspectY;
 	vulkanWindow->linearFilter = linearFilter;
 	vulkanWindow->render();
+	if (vulkanWindow->acquireBusy && !retryQueued)
+	{
+		retryQueued = true;
+		QTimer::singleShot(1, this, [this]() { retryQueued = false; queueRedraw(); });
+	}
 }
 
 void ConsoleViewVulkan_t::transfer2LocalBuffer(void)

@@ -70,4 +70,5 @@ private:
 	bool vsyncEnabled;
 	unsigned int mouseButtonMask;
 	bool shuttingDown;
+	bool retryQueued = false;
 };
