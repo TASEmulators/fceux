@@ -1971,20 +1971,20 @@ QHexEdit::QHexEdit(QWidget *parent)
 
 	g_config->getOption("SDL.HexEditBgColor", &colorString);
 #if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
-	bgColor.fromString( colorString.c_str() );
+	bgColor = QColor::fromString( colorString.c_str() );
 #else
 	bgColor.setNamedColor( colorString.c_str() );
 #endif
 	g_config->getOption("SDL.HexEditFgColor", &colorString);
 #if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
-	fgColor.fromString( colorString.c_str() );
+	fgColor = QColor::fromString( colorString.c_str() );
 #else
 	fgColor.setNamedColor( colorString.c_str() );
 #endif
 
 	g_config->getOption("SDL.HexEditCursorColorRC", &colorString);
 #if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
-	rowColHlgtColor.fromString( colorString.c_str() );
+	rowColHlgtColor = QColor::fromString( colorString.c_str() );
 #else
 	rowColHlgtColor.setNamedColor( colorString.c_str() );
 #endif
@@ -1992,7 +1992,7 @@ QHexEdit::QHexEdit(QWidget *parent)
 
 	g_config->getOption("SDL.HexEditAltColColor", &colorString);
 #if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
-	altColHlgtColor.fromString( colorString.c_str() );
+	altColHlgtColor = QColor::fromString( colorString.c_str() );
 #else
 	altColHlgtColor.setNamedColor( colorString.c_str() );
 #endif

@@ -313,7 +313,7 @@ int fceuLoadConfigColor( const char *confName, QColor *color )
 	if ( (color != NULL) && (colorString.size() > 0) )
 	{
 #if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
-		color->fromString( colorString.c_str() );
+		*color = QColor::fromString( colorString.c_str() );
 #else
 		color->setNamedColor( colorString.c_str() );
 #endif

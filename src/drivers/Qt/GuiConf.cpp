@@ -1021,7 +1021,7 @@ static int readQPaletteFromFile( const char *path, QPalette *pal )
 			colorTxt[j] = 0;
 
 			#if QT_VERSION >= QT_VERSION_CHECK( 6, 4, 0 )
-			color.fromString( colorTxt );
+			color = QColor::fromString( colorTxt );
 			#else
 			color.setNamedColor( colorTxt );
 			#endif
