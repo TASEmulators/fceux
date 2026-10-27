@@ -23,7 +23,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
+#include <inttypes.h>
 #include <vector>
 
 #ifdef __QT_DRIVER__
