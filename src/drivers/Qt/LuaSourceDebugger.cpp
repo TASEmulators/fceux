@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <QTextBlock>
 #include <QThread>
+#include <QToolTip>
 
 #include "Qt/LuaSourceDebugger.h"
 #include "Qt/LuaControl.h"
@@ -554,6 +555,66 @@ void LuaSourceView::setDarkTheme(bool dark)
 	gutter->update();
 }
 
+bool LuaSourceView::event(QEvent *e)
+{
+	if (e->type() == QEvent::ToolTip)
+	{
+		QHelpEvent *he = static_cast<QHelpEvent *>(e);
+		QString expr;
+
+		if (hoverProvider)
+		{
+			const QPoint vp = viewport()->mapFrom(this, he->pos());
+			QTextCursor sel = textCursor();
+			QTextCursor at = cursorForPosition(vp);
+
+			if (sel.hasSelection() && at.position() >= sel.selectionStart() && at.position() <= sel.selectionEnd())
+			{
+				expr = sel.selectedText().trimmed();
+			}
+			else
+			{
+				const QString text = at.block().text();
+				// cursorForPosition snaps to the nearest boundary; pick the character actually under the mouse
+				const int col = at.positionInBlock() - ((vp.x() < cursorRect(at).x()) ? 1 : 0);
+				int s = col, t = col;
+
+				auto isId = [&](int i) { return i >= 0 && i < text.length() && (text[i].isLetterOrNumber() || text[i] == '_'); };
+
+				while (isId(s - 1)) s--;
+				while (isId(t)) t++;
+
+				// Extend backwards over dotted/colon-free field chains such as a.b.c
+				while (s >= 2 && text[s - 1] == '.' && isId(s - 2))
+				{
+					s -= 1;
+					while (isId(s - 1)) s--;
+				}
+				expr = text.mid(s, t - s);
+			}
+			static const QRegularExpression safe(QStringLiteral("^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$"));
+
+			if (!safe.match(expr).hasMatch())
+			{
+				expr.clear();
+			}
+		}
+		const QString tip = expr.isEmpty() ? QString() : hoverProvider(expr);
+
+		if (tip.isEmpty())
+		{
+			QToolTip::hideText();
+			e->ignore();
+		}
+		else
+		{
+			QToolTip::showText(he->globalPos(), tip, this);
+		}
+		return true;
+	}
+	return QPlainTextEdit::event(e);
+}
+//----------------------------------------------------------------------------
 void LuaSourceView::setBreakpoints(const std::set<int> &bps, const std::set<int> &disabled)
 {
 	breakpoints = bps;
@@ -670,6 +731,31 @@ LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
 	watches = settings.value("luaDebugger/watches").toStringList();
 	expandedPaths.insert(QStringLiteral("Locals"));
 	expandedPaths.insert(QStringLiteral("Watch"));
+
+	sourceView->hoverProvider = [this](const QString &expr) -> QString {
+		static const QSet<QString> keywords = { "and", "break", "do", "else", "elseif", "end", "false", "for",
+			"function", "if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while" };
+
+		if (!FCEU_LuaDbgIsPaused() || keywords.contains(expr))
+		{
+			return QString();
+		}
+		QTreeWidgetItem *cur = stackView->currentItem();
+		const int level = cur ? cur->data(0, Qt::UserRole).toInt() : 0;
+		LuaDbgVar var;
+
+		if (!FCEU_LuaDbgEvaluate(level, expr.toLocal8Bit().constData(), var))
+		{
+			return QString();
+		}
+		QString val = QString::fromStdString(var.value);
+
+		if (val.length() > 300)
+		{
+			val = val.left(300) + QStringLiteral("...");
+		}
+		return QStringLiteral("%1 (%2) = %3").arg(expr.toHtmlEscaped(), QString::fromStdString(var.type).toHtmlEscaped(), val.toHtmlEscaped());
+	};
 
 	connect(sourceView, &LuaSourceView::gutterClicked, this, &LuaSourceDebuggerDialog_t::gutterClickedCB);
 	connect(sourceView, &LuaSourceView::runToLineRequested, this, &LuaSourceDebuggerDialog_t::runToLineCB);

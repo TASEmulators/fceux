@@ -4,6 +4,7 @@
 
 #ifdef _S9XLUA_H
 
+#include <functional>
 #include <map>
 #include <set>
 #include <string>
@@ -93,6 +94,9 @@ public:
 	void gutterPaint(QPaintEvent *event);
 	void gutterClick(int y);
 
+	// Returns tooltip text for an expression, or an empty string
+	std::function<QString(const QString &)> hoverProvider;
+
 signals:
 	void gutterClicked(int line);
 	void runToLineRequested(int line);
@@ -100,6 +104,7 @@ signals:
 protected:
 	void resizeEvent(QResizeEvent *event) override;
 	void contextMenuEvent(QContextMenuEvent *event) override;
+	bool event(QEvent *e) override;
 
 private slots:
 	void updateGutterWidth(void);
