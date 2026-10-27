@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <string>
 
 #include <QWidget>
 #include <QDialog>
@@ -61,3 +62,9 @@ int LuaPrintfToWindowConsole( __FCEU_PRINTF_FORMAT const char *format, ...) __FC
 void PrintToWindowConsole(intptr_t hDlgAsInt, const char *str);
 
 int LuaKillMessageBox(void);
+
+// Shared console buffer access, used by the Lua source debugger
+unsigned int LuaConsoleSerial(void);
+std::string LuaConsoleText(void);
+void LuaConsoleClear(void);
+void LuaConsolePollKillPrompt(QWidget *parent);

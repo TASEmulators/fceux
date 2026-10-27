@@ -11,6 +11,7 @@
 
 #include <QAction>
 #include <QDialog>
+#include <QLineEdit>
 #include <QLabel>
 #include <QMenuBar>
 #include <QPlainTextEdit>
@@ -194,6 +195,7 @@ private:
 	QTreeWidget *buildVarTree(void);
 	void buildVarView(void);
 	void buildBreakpointView(void);
+	void buildOutputView(void);
 	void setPageTitle(QWidget *page, const QString &title);
 	LuaDbgTabWidget *tabWidgetOf(QWidget *page) const;
 	void addPage(LuaDbgTabWidget *tw, QWidget *page);
@@ -224,6 +226,9 @@ private slots:
 	void openScriptDialog(void);
 	void reloadScript(void);
 	void runContinueCB(void);
+	void restartCB(void);
+	void refreshOutput(void);
+	void startScript(void);
 	void breakCB(void);
 	void stopCB(void);
 	void stepIntoCB(void);
@@ -263,8 +268,15 @@ private:
 	QSplitter *hsplitter;
 	QSplitter *vsplitter[2];
 	LuaDbgTabWidget *tabView[2][3];
-	QWidget *pages[4];
-	QString pageTitles[4];
+	QWidget *pages[5];
+	QString pageTitles[5];
+	QPlainTextEdit *outputView;
+	QLineEdit *argsEdit;
+	unsigned int outputSerial;
+	bool restartPending = false;
+	bool prevRunning = false;
+	std::string lastScriptName;
+	QAction *restartAct;
 	int layoutOpt;
 	QLabel *statusLabel;
 	QTimer *periodicTimer;

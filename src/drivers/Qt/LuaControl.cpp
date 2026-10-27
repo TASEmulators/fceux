@@ -78,9 +78,12 @@ struct luaConsoleOutputBuffer
 		}
 	}
 
+	unsigned int serial = 0;
+
 	void addLine(const char *l)
 	{
 		int i = 0;
+		serial++;
 		//printf("Adding Line %i: '%s'\n", head, l );
 		while (l[i] != 0)
 		{
@@ -98,6 +101,7 @@ struct luaConsoleOutputBuffer
 
 	void clear(void)
 	{
+		serial++;
 		tail = head = 0;
 	}
 };
@@ -254,22 +258,50 @@ void LuaControlDialog_t::updatePeriodic(void)
 		updateLuaDisplay = false;
 	}
 
-	if (openLuaKillMsgBox)
-	{
-		openLuaKillMessageBox();
-		openLuaKillMsgBox = false;
-	}
+	openLuaKillMessageBox();
 }
 //----------------------------------------------------
 void LuaControlDialog_t::openLuaKillMessageBox(void)
 {
+	LuaConsolePollKillPrompt(this);
+}
+//----------------------------------------------------
+unsigned int LuaConsoleSerial(void)
+{
+	return outBuf.serial;
+}
+//----------------------------------------------------
+std::string LuaConsoleText(void)
+{
+	std::string text;
+
+	for (int i = outBuf.tail; i != outBuf.head; i = (i + 1) % outBuf.size)
+	{
+		text.append(1, outBuf.buf[i]);
+	}
+	return text;
+}
+//----------------------------------------------------
+void LuaConsoleClear(void)
+{
+	outBuf.clear();
+	updateLuaDisplay = true;
+}
+//----------------------------------------------------
+void LuaConsolePollKillPrompt(QWidget *parent)
+{
 	int ret;
-	QMessageBox msgBox(this);
+
+	if (!openLuaKillMsgBox)
+	{
+		return;
+	}
+	QMessageBox msgBox(parent);
 
 	luaKillMsgBoxRetVal = 0;
 
 	msgBox.setIcon(QMessageBox::Warning);
-	msgBox.setText(tr("The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n"));
+	msgBox.setText(QObject::tr("The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n"));
 	msgBox.setStandardButtons(QMessageBox::Yes);
 	msgBox.addButton(QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::No);
@@ -280,6 +312,7 @@ void LuaControlDialog_t::openLuaKillMessageBox(void)
 	{
 		luaKillMsgBoxRetVal = 1;
 	}
+	openLuaKillMsgBox = false;
 }
 //----------------------------------------------------
 void LuaControlDialog_t::openLuaScriptFile(void)

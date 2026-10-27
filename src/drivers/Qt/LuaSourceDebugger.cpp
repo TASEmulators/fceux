@@ -25,11 +25,13 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QRegularExpression>
+#include <QScrollBar>
 #include <QSettings>
 #include <QTextBlock>
 #include <QThread>
 
 #include "Qt/LuaSourceDebugger.h"
+#include "Qt/LuaControl.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/nes_shm.h"
 
@@ -600,7 +602,7 @@ void LuaSourceView::updateHighlights(void)
 // LuaSourceDebuggerDialog_t
 //----------------------------------------------------------------------------
 LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
-	: QDialog(parent, Qt::Window), lastSerial(0), wasPaused(false), updatingVars(false)
+	: QDialog(parent, Qt::Window), outputSerial(0xFFFFFFFFu), lastSerial(0), wasPaused(false), updatingVars(false)
 {
 	QSettings settings;
 	QMenuBar *menuBar;
@@ -618,16 +620,19 @@ LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
 	buildStackView();
 	buildVarView();
 	buildBreakpointView();
+	buildOutputView();
 
 	stackView->setObjectName("luaDbgStack");
 	varView->setObjectName("luaDbgVariables");
 	watchView->setObjectName("luaDbgWatch");
 	bpView->setObjectName("luaDbgBreakpoints");
+	outputView->setObjectName("luaDbgOutput");
 
 	pages[0] = stackView;  pageTitles[0] = tr("Stack");
 	pages[1] = varView;    pageTitles[1] = tr("Variables");
 	pages[2] = watchView;  pageTitles[2] = tr("Watch");
 	pages[3] = bpView;     pageTitles[3] = tr("Breakpoints");
+	pages[4] = outputView; pageTitles[4] = tr("Output");
 
 	hsplitter = new QSplitter(Qt::Horizontal);
 	hsplitter->setOpaqueResize(true);
@@ -682,6 +687,12 @@ LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
 		FCEU_LuaDbgSetBreakOnStart(breakOnStartAct->isChecked());
 		FCEU_WRAPPER_UNLOCK();
 	}
+
+	// Only react to scripts started after the dialog opens
+	FCEU_WRAPPER_LOCK();
+	lastScriptName = FCEU_LuaDbgGetScriptName();
+	FCEU_WRAPPER_UNLOCK();
+	prevRunning = (luaRunning != 0);
 
 	periodicTimer = new QTimer(this);
 	connect(periodicTimer, &QTimer::timeout, this, &LuaSourceDebuggerDialog_t::updatePeriodic);
@@ -861,7 +872,7 @@ void LuaSourceDebuggerDialog_t::setPageTitle(QWidget *page, const QString &title
 {
 	LuaDbgTabWidget *tw = tabWidgetOf(page);
 
-	for (int k = 0; k < 4; k++)
+	for (int k = 0; k < 5; k++)
 	{
 		if (pages[k] == page)
 		{
@@ -876,7 +887,7 @@ void LuaSourceDebuggerDialog_t::setPageTitle(QWidget *page, const QString &title
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::addPage(LuaDbgTabWidget *tw, QWidget *page)
 {
-	for (int k = 0; k < 4; k++)
+	for (int k = 0; k < 5; k++)
 	{
 		if (pages[k] == page)
 		{
@@ -976,23 +987,26 @@ void LuaSourceDebuggerDialog_t::setLayoutOption(int opt)
 	{
 		default:
 		case 1: // Compact: one group
-			for (int k = 0; k < 4; k++) addPage(tabView[0][0], pages[k]);
+			for (int k = 0; k < 5; k++) addPage(tabView[0][0], pages[k]);
 		break;
 		case 2: // Compact Split: one column, two groups
 			addPage(tabView[0][0], stackView);
 			addPage(tabView[0][0], bpView);
 			addPage(tabView[0][1], varView);
 			addPage(tabView[0][1], watchView);
+			addPage(tabView[0][1], outputView);
 		break;
 		case 3: // Wide: two columns
 			addPage(tabView[0][0], stackView);
 			addPage(tabView[0][0], bpView);
 			addPage(tabView[1][0], varView);
 			addPage(tabView[1][0], watchView);
+			addPage(tabView[1][0], outputView);
 		break;
 		case 4: // Wide Quad: two columns, two groups each
 			addPage(tabView[0][0], stackView);
 			addPage(tabView[0][1], bpView);
+			addPage(tabView[0][1], outputView);
 			addPage(tabView[1][0], varView);
 			addPage(tabView[1][1], watchView);
 		break;
@@ -1029,7 +1043,7 @@ void LuaSourceDebuggerDialog_t::loadDisplayViews(void)
 
 				for (const QString &name : val.split(',', Qt::SkipEmptyParts))
 				{
-					for (int k = 0; k < 4; k++)
+					for (int k = 0; k < 5; k++)
 					{
 						if (pages[k]->objectName() == name && tabWidgetOf(pages[k]) == nullptr)
 						{
@@ -1040,7 +1054,7 @@ void LuaSourceDebuggerDialog_t::loadDisplayViews(void)
 			}
 		}
 		// Anything not restored goes to the first group
-		for (int k = 0; k < 4; k++)
+		for (int k = 0; k < 5; k++)
 		{
 			if (tabWidgetOf(pages[k]) == nullptr)
 			{
@@ -1185,6 +1199,13 @@ QMenuBar *LuaSourceDebuggerDialog_t::buildMenuBar(void)
 	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::stepOutCB);
 	menu->addAction(act);
 
+	restartAct = act = new QAction(tr("Re&start Script"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+Shift+F5")));
+	act->setStatusTip(tr("Stop the script if it is running and start it again"));
+	act->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::restartCB);
+	menu->addAction(act);
+
 	runToCursorAct = act = new QAction(tr("Run to &Cursor"), this);
 	act->setShortcut(QKeySequence(tr("Ctrl+F10")));
 	act->setStatusTip(tr("Run until the line at the cursor is reached"));
@@ -1281,7 +1302,7 @@ QMenuBar *LuaSourceDebuggerDialog_t::buildMenuBar(void)
 		for (int i = 0; i < 4; i++)
 		{
 			act = new QAction(tr(names[i]), this);
-			act->setStatusTip(tr("Arrange the Stack, Variables, Watch and Breakpoints tabs"));
+			act->setStatusTip(tr("Arrange the Stack, Variables, Watch, Breakpoints and Output tabs"));
 			connect(act, &QAction::triggered, this, [this, i]() { setLayoutOption(i + 1); });
 			group->addAction(act);
 			layoutMenu->addAction(act);
@@ -1305,8 +1326,53 @@ QToolBar *LuaSourceDebuggerDialog_t::buildToolBar(void)
 	toolBar->addAction(stepOverAct);
 	toolBar->addAction(stepOutAct);
 	toolBar->addAction(runToCursorAct);
+	toolBar->addSeparator();
+	toolBar->addAction(restartAct);
+	toolBar->addWidget(new QLabel(tr(" Args: ")));
+	argsEdit = new QLineEdit();
+	argsEdit->setClearButtonEnabled(true);
+	argsEdit->setMinimumWidth(160);
+	argsEdit->setMaximumWidth(320);
+	argsEdit->setText(QSettings().value("luaDebugger/scriptArgs").toString());
+	toolBar->addWidget(argsEdit);
 
 	return toolBar;
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::buildOutputView(void)
+{
+	outputView = new QPlainTextEdit();
+	outputView->setReadOnly(true);
+	outputView->setLineWrapMode(QPlainTextEdit::NoWrap);
+	outputView->setContextMenuPolicy(Qt::CustomContextMenu);
+	outputView->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+
+	connect(outputView, &QWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
+		QMenu *menu = outputView->createStandardContextMenu();
+		QAction *clr = menu->addAction(tr("Clear Output"));
+
+		connect(clr, &QAction::triggered, this, []() { LuaConsoleClear(); });
+		menu->exec(outputView->viewport()->mapToGlobal(pos));
+		delete menu;
+	});
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::refreshOutput(void)
+{
+	const unsigned int serial = LuaConsoleSerial();
+
+	if (serial == outputSerial)
+	{
+		return;
+	}
+	outputSerial = serial;
+
+	QScrollBar *sb = outputView->verticalScrollBar();
+	const bool atEnd = (sb->value() >= sb->maximum() - 2);
+	const int prev = sb->value();
+
+	outputView->setPlainText(QString::fromLocal8Bit(LuaConsoleText().c_str()));
+	sb->setValue(atEnd ? sb->maximum() : prev);
 }
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::buildStackView(void)
@@ -1627,6 +1693,34 @@ void LuaSourceDebuggerDialog_t::updateActions(bool scriptRunning, bool paused)
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::updatePeriodic(void)
 {
+	refreshOutput();
+	LuaConsolePollKillPrompt(this);
+
+	// Follow scripts started from elsewhere (e.g. the Lua Control window)
+	{
+		std::string name;
+
+		FCEU_WRAPPER_LOCK();
+		name = FCEU_LuaDbgGetScriptName();
+		FCEU_WRAPPER_UNLOCK();
+
+		const bool started = (luaRunning != 0) && !prevRunning;
+
+		prevRunning = (luaRunning != 0);
+
+		if (!name.empty() && (name != lastScriptName || started))
+		{
+			lastScriptName = name;
+			openScript(QString::fromLocal8Bit(name.c_str()));
+		}
+	}
+
+	if (restartPending && !luaRunning && !FCEU_LuaDbgIsPaused())
+	{
+		restartPending = false;
+		startScript();
+	}
+
 	const bool paused = FCEU_LuaDbgIsPaused();
 	const bool running = (luaRunning != 0);
 	const unsigned int serial = FCEU_LuaDbgPauseSerial();
@@ -1646,6 +1740,7 @@ void LuaSourceDebuggerDialog_t::updatePeriodic(void)
 	wasPaused = paused;
 
 	updateActions(running, paused);
+	restartAct->setEnabled(!sourceView->file().empty());
 
 	if (paused)
 	{
@@ -2092,13 +2187,38 @@ void LuaSourceDebuggerDialog_t::runContinueCB(void)
 	}
 	else if (!luaRunning && !sourceView->file().empty())
 	{
-		FCEU_WRAPPER_LOCK();
-		if (0 == FCEU_LoadLuaCode(sourceView->file().c_str()))
-		{
-			QMessageBox::warning(this, tr("Run Script"), tr("Could not load the Lua script:\n%1").arg(QString::fromStdString(sourceView->file())));
-		}
-		FCEU_WRAPPER_UNLOCK();
+		startScript();
 	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::startScript(void)
+{
+	const QByteArray args = argsEdit->text().toLocal8Bit();
+
+	QSettings().setValue("luaDebugger/scriptArgs", argsEdit->text());
+	LuaConsoleClear();
+
+	FCEU_WRAPPER_LOCK();
+	if (0 == FCEU_LoadLuaCode(sourceView->file().c_str(), args.isEmpty() ? nullptr : args.constData()))
+	{
+		QMessageBox::warning(this, tr("Run Script"), tr("Could not load the Lua script:\n%1").arg(QString::fromStdString(sourceView->file())));
+	}
+	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::restartCB(void)
+{
+	if (sourceView->file().empty())
+	{
+		return;
+	}
+	if (luaRunning || FCEU_LuaDbgIsPaused())
+	{
+		stopCB();
+		restartPending = true;
+		return;
+	}
+	startScript();
 }
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::breakCB(void)
