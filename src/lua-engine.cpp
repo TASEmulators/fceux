@@ -86,6 +86,10 @@ void fceuWrapperRequestAppExit(void);
 #include <string>
 #include <algorithm>
 #include <bitset>
+#include <atomic>
+#include <mutex>
+#include <set>
+#include <limits.h>
 
 #include "x6502abbrev.h"
 
@@ -6509,6 +6513,763 @@ void CallExitFunction()
 		HandleCallbackError(L, true);
 }
 
+//---------------------------------------------------------------------------
+// Lua source debugger support
+//---------------------------------------------------------------------------
+enum { LUADBG_STEP_NONE = 0, LUADBG_STEP_INTO, LUADBG_STEP_OVER, LUADBG_STEP_OUT };
+
+static LuaDbgCallbacks luaDbgCallbacks = { nullptr };
+static std::atomic<bool> luaDbgAttached(false);
+static std::atomic<bool> luaDbgPaused(false);
+static std::atomic<bool> luaDbgResumeReq(false);
+static std::atomic<bool> luaDbgAbortReq(false);
+static std::atomic<bool> luaDbgPauseReq(false);
+static std::atomic<bool> luaDbgBreakOnStart(false);
+static std::atomic<int>  luaDbgStepMode(LUADBG_STEP_NONE);
+static std::atomic<unsigned int> luaDbgSerial(0);
+static bool luaDbgKillIssued = false;
+
+static lua_State *luaDbgStepState = nullptr;
+static int luaDbgStepDepth = 0;
+static lua_State *luaDbgPausedState = nullptr;
+static std::vector<int> luaDbgRefs;
+
+static std::mutex luaDbgMutex;
+static std::set< std::pair<std::string,int> > luaDbgBreakpoints;
+static std::pair<std::string,int> luaDbgRunToLoc;
+static bool luaDbgRunToValid = false;
+static std::map<std::string,std::string> luaDbgPathCache;
+
+static const int LUADBG_MAX_CHILDREN = 2000;
+
+std::string FCEU_LuaDbgNormalizePath(const std::string &path)
+{
+#ifdef WIN32
+	char buf[_MAX_PATH];
+
+	if (_fullpath(buf, path.c_str(), sizeof(buf)))
+	{
+		std::string res(buf);
+		std::replace(res.begin(), res.end(), '\\', '/');
+		return res;
+	}
+#else
+	char buf[PATH_MAX];
+
+	if (realpath(path.c_str(), buf))
+	{
+		return std::string(buf);
+	}
+#endif
+	return path;
+}
+
+// Converts a chunk name ("@/path/script.lua") to a normalized path. Empty if not a file chunk.
+static std::string luaDbgChunkToPath(const char *source)
+{
+	if (source == nullptr || source[0] != '@')
+	{
+		return std::string();
+	}
+	std::lock_guard<std::mutex> lock(luaDbgMutex);
+
+	auto it = luaDbgPathCache.find(source);
+
+	if (it == luaDbgPathCache.end())
+	{
+		it = luaDbgPathCache.insert(std::make_pair(std::string(source), FCEU_LuaDbgNormalizePath(source + 1))).first;
+	}
+	return it->second;
+}
+
+static int luaDbgStackDepth(lua_State *Ls)
+{
+	lua_Debug ar;
+	int depth = 0;
+
+	while (lua_getstack(Ls, depth, &ar))
+	{
+		depth++;
+	}
+	return depth;
+}
+
+static void luaDbgReleaseRefs(void)
+{
+	if (L != nullptr)
+	{
+		for (int ref : luaDbgRefs)
+		{
+			luaL_unref(L, LUA_REGISTRYINDEX, ref);
+		}
+	}
+	luaDbgRefs.clear();
+}
+
+static bool luaDbgRefValid(int ref)
+{
+	return std::find(luaDbgRefs.begin(), luaDbgRefs.end(), ref) != luaDbgRefs.end();
+}
+
+static void luaDbgPauseHere(lua_State *Ls)
+{
+	luaDbgPausedState = Ls;
+	luaDbgStepMode = LUADBG_STEP_NONE;
+	luaDbgPauseReq = false;
+	{
+		std::lock_guard<std::mutex> lock(luaDbgMutex);
+		luaDbgRunToValid = false;
+	}
+	luaDbgResumeReq = false;
+	luaDbgPaused = true;
+	luaDbgSerial++;
+
+	if (luaDbgCallbacks.waitForResume)
+	{
+		luaDbgCallbacks.waitForResume();
+	}
+
+	luaDbgReleaseRefs();
+	luaDbgPausedState = nullptr;
+	luaDbgPaused = false;
+
+	if (luaDbgAbortReq)
+	{
+		luaDbgKillIssued = true;
+		luaL_error(Ls, "script stopped by debugger");
+	}
+}
+
+static void luaDbgHook(lua_State *Ls, lua_Debug *ar)
+{
+	if (ar->event != LUA_HOOKLINE || !luaDbgAttached || luaDbgPaused)
+	{
+		return;
+	}
+
+	if (luaDbgAbortReq)
+	{
+		luaDbgKillIssued = true;
+		luaL_error(Ls, "script stopped by debugger");
+		return;
+	}
+
+	bool brk = luaDbgPauseReq;
+	const int mode = luaDbgStepMode;
+
+	if (!brk)
+	{
+		if (mode == LUADBG_STEP_INTO)
+		{
+			brk = true;
+		}
+		else if ((mode == LUADBG_STEP_OVER || mode == LUADBG_STEP_OUT) && (Ls == luaDbgStepState))
+		{
+			const int depth = luaDbgStackDepth(Ls);
+
+			brk = (mode == LUADBG_STEP_OVER) ? (depth <= luaDbgStepDepth) : (depth < luaDbgStepDepth);
+		}
+	}
+
+	if (!brk)
+	{
+		bool haveBp;
+		{
+			std::lock_guard<std::mutex> lock(luaDbgMutex);
+			haveBp = !luaDbgBreakpoints.empty() || luaDbgRunToValid;
+		}
+		if (haveBp && lua_getinfo(Ls, "Sl", ar))
+		{
+			const std::string path = luaDbgChunkToPath(ar->source);
+
+			if (!path.empty())
+			{
+				std::lock_guard<std::mutex> lock(luaDbgMutex);
+				const std::pair<std::string,int> loc(path, ar->currentline);
+
+				brk = luaDbgBreakpoints.count(loc) || (luaDbgRunToValid && (luaDbgRunToLoc == loc));
+			}
+		}
+	}
+
+	if (brk)
+	{
+		luaDbgPauseHere(Ls);
+	}
+}
+
+static void luaDbgSetHooks(bool enable)
+{
+	if (L == nullptr)
+	{
+		return;
+	}
+	const int mask = enable ? LUA_MASKLINE : 0;
+
+	lua_sethook(L, enable ? luaDbgHook : nullptr, mask, 0);
+
+	lua_getfield(L, LUA_REGISTRYINDEX, frameAdvanceThread);
+	lua_State *thread = lua_tothread(L, -1);
+
+	if (thread != nullptr)
+	{
+		lua_sethook(thread, enable ? luaDbgHook : nullptr, mask, 0);
+	}
+	lua_pop(L, 1);
+}
+
+void FCEU_LuaDbgAttach(const LuaDbgCallbacks *cb)
+{
+	if (cb == nullptr)
+	{
+		return;
+	}
+	luaDbgCallbacks = *cb;
+	luaDbgAbortReq = false;
+	luaDbgAttached = true;
+	luaDbgSetHooks(true);
+}
+
+void FCEU_LuaDbgDetach(void)
+{
+	luaDbgAttached = false;
+	luaDbgResumeReq = true;
+	luaDbgSetHooks(false);
+
+	std::lock_guard<std::mutex> lock(luaDbgMutex);
+	luaDbgBreakpoints.clear();
+	luaDbgRunToValid = false;
+	luaDbgPauseReq = false;
+	luaDbgStepMode = LUADBG_STEP_NONE;
+}
+
+bool FCEU_LuaDbgIsAttached(void)
+{
+	return luaDbgAttached;
+}
+
+std::string FCEU_LuaDbgGetScriptName(void)
+{
+	return luaScriptName ? FCEU_LuaDbgNormalizePath(luaScriptName) : std::string();
+}
+
+void FCEU_LuaDbgSetBreakpoint(const std::string &file, int line, bool enable)
+{
+	std::lock_guard<std::mutex> lock(luaDbgMutex);
+	const std::pair<std::string,int> loc(FCEU_LuaDbgNormalizePath(file), line);
+
+	if (enable)
+	{
+		luaDbgBreakpoints.insert(loc);
+	}
+	else
+	{
+		luaDbgBreakpoints.erase(loc);
+	}
+}
+
+void FCEU_LuaDbgClearBreakpoints(void)
+{
+	std::lock_guard<std::mutex> lock(luaDbgMutex);
+	luaDbgBreakpoints.clear();
+}
+
+void FCEU_LuaDbgSetBreakOnStart(bool enable)
+{
+	luaDbgBreakOnStart = enable;
+}
+
+bool FCEU_LuaDbgIsPaused(void)
+{
+	return luaDbgPaused;
+}
+
+unsigned int FCEU_LuaDbgPauseSerial(void)
+{
+	return luaDbgSerial;
+}
+
+bool FCEU_LuaDbgResumeRequested(void)
+{
+	return luaDbgResumeReq;
+}
+
+void FCEU_LuaDbgRequestPause(void)
+{
+	if (luaDbgAttached)
+	{
+		luaDbgPauseReq = true;
+	}
+}
+
+static void luaDbgResume(int mode)
+{
+	if (!luaDbgPaused || luaDbgResumeReq)
+	{
+		return;
+	}
+	if (mode == LUADBG_STEP_OVER || mode == LUADBG_STEP_OUT)
+	{
+		luaDbgStepState = luaDbgPausedState;
+		luaDbgStepDepth = luaDbgStackDepth(luaDbgPausedState);
+	}
+	luaDbgStepMode = mode;
+	luaDbgResumeReq = true;
+}
+
+void FCEU_LuaDbgContinue(void)
+{
+	luaDbgResume(LUADBG_STEP_NONE);
+}
+
+void FCEU_LuaDbgStepInto(void)
+{
+	luaDbgResume(LUADBG_STEP_INTO);
+}
+
+void FCEU_LuaDbgStepOver(void)
+{
+	luaDbgResume(LUADBG_STEP_OVER);
+}
+
+void FCEU_LuaDbgStepOut(void)
+{
+	luaDbgResume(LUADBG_STEP_OUT);
+}
+
+void FCEU_LuaDbgRunToLine(const std::string &file, int line)
+{
+	if (!luaDbgPaused || luaDbgResumeReq)
+	{
+		return;
+	}
+	{
+		std::lock_guard<std::mutex> lock(luaDbgMutex);
+		luaDbgRunToLoc = std::make_pair(FCEU_LuaDbgNormalizePath(file), line);
+		luaDbgRunToValid = true;
+	}
+	luaDbgResume(LUADBG_STEP_NONE);
+}
+
+// Called when the paused script must be torn down.
+static void luaDbgRequestAbort(void)
+{
+	luaDbgAbortReq = true;
+	luaDbgResumeReq = true;
+}
+
+static std::string luaDbgFormatValue(lua_State *Ls, int idx, std::string &typeName)
+{
+	char buf[64];
+	const int type = lua_type(Ls, idx);
+
+	typeName = lua_typename(Ls, type);
+
+	switch (type)
+	{
+		case LUA_TNIL:
+			return "nil";
+		case LUA_TBOOLEAN:
+			return lua_toboolean(Ls, idx) ? "true" : "false";
+		case LUA_TNUMBER:
+			snprintf(buf, sizeof(buf), "%.14g", (double)lua_tonumber(Ls, idx));
+			return buf;
+		case LUA_TSTRING:
+		{
+			size_t len = 0;
+			const char *s = lua_tolstring(Ls, idx, &len);
+			std::string res = "\"";
+
+			for (size_t i = 0; i < len && i < 256; i++)
+			{
+				const unsigned char c = (unsigned char)s[i];
+
+				if (c == '\n') res += "\\n";
+				else if (c == '\r') res += "\\r";
+				else if (c == '\t') res += "\\t";
+				else if (c == '"' || c == '\\') { res += '\\'; res += (char)c; }
+				else if (c < 0x20) { snprintf(buf, sizeof(buf), "\\%03d", c); res += buf; }
+				else res += (char)c;
+			}
+			if (len > 256) res += "...";
+			res += "\"";
+			return res;
+		}
+		default:
+			snprintf(buf, sizeof(buf), "%s: %p", typeName.c_str(), lua_topointer(Ls, idx));
+			return buf;
+	}
+}
+
+// Fills 'var' from the value at stack index 'idx' (absolute or negative).
+static void luaDbgMakeVar(lua_State *Ls, int idx, LuaDbgVar &var)
+{
+	idx = (idx < 0) ? lua_gettop(Ls) + idx + 1 : idx;
+
+	var.value = luaDbgFormatValue(Ls, idx, var.type);
+	var.ref = 0;
+
+	if (lua_istable(Ls, idx))
+	{
+		lua_pushvalue(Ls, idx);
+		var.ref = luaL_ref(Ls, LUA_REGISTRYINDEX);
+		luaDbgRefs.push_back(var.ref);
+	}
+}
+
+static int luaDbgNewRef(lua_State *Ls, int idx)
+{
+	idx = (idx < 0) ? lua_gettop(Ls) + idx + 1 : idx;
+	lua_pushvalue(Ls, idx);
+	const int ref = luaL_ref(Ls, LUA_REGISTRYINDEX);
+	luaDbgRefs.push_back(ref);
+	return ref;
+}
+
+bool FCEU_LuaDbgGetStack(std::vector<LuaDbgFrame> &frames)
+{
+	frames.clear();
+
+	if (!luaDbgPaused || luaDbgPausedState == nullptr)
+	{
+		return false;
+	}
+	lua_State *Ls = luaDbgPausedState;
+	lua_Debug ar;
+
+	for (int level = 0; lua_getstack(Ls, level, &ar); level++)
+	{
+		if (!lua_getinfo(Ls, "nSl", &ar))
+		{
+			break;
+		}
+		LuaDbgFrame f;
+
+		f.level = level;
+		f.what = ar.what ? ar.what : "";
+		f.source = luaDbgChunkToPath(ar.source);
+		f.shortSource = ar.short_src;
+		f.currentLine = ar.currentline;
+		f.lineDefined = ar.linedefined;
+
+		if (ar.name)
+		{
+			f.name = ar.name;
+		}
+		else if (f.what == "main")
+		{
+			f.name = "<main chunk>";
+		}
+		else if (f.what == "C")
+		{
+			f.name = "<C function>";
+		}
+		else
+		{
+			f.name = "<anonymous>";
+		}
+		frames.push_back(f);
+	}
+	return true;
+}
+
+bool FCEU_LuaDbgGetChildren(int ref, std::vector<LuaDbgVar> &vars)
+{
+	vars.clear();
+
+	if (!luaDbgPaused || luaDbgPausedState == nullptr || !luaDbgRefValid(ref))
+	{
+		return false;
+	}
+	lua_State *Ls = luaDbgPausedState;
+	const int base = lua_gettop(Ls);
+
+	if (!lua_checkstack(Ls, 16))
+	{
+		return false;
+	}
+	lua_rawgeti(Ls, LUA_REGISTRYINDEX, ref);
+
+	if (!lua_istable(Ls, -1))
+	{
+		lua_settop(Ls, base);
+		return false;
+	}
+	const int tbl = lua_gettop(Ls);
+
+	lua_pushnil(Ls);
+
+	while (lua_next(Ls, tbl) != 0)
+	{
+		LuaDbgVar var;
+		std::string keyType;
+
+		if (lua_type(Ls, -2) == LUA_TSTRING)
+		{
+			var.name = lua_tostring(Ls, -2);
+		}
+		else
+		{
+			var.name = "[" + luaDbgFormatValue(Ls, -2, keyType) + "]";
+		}
+		luaDbgMakeVar(Ls, -1, var);
+		var.keyRef = luaDbgNewRef(Ls, -2);
+		var.parentRef = ref;
+		var.scope = LUADBG_SCOPE_FIELD;
+		vars.push_back(var);
+
+		lua_pop(Ls, 1);
+
+		if ((int)vars.size() >= LUADBG_MAX_CHILDREN)
+		{
+			lua_pop(Ls, 1);
+			break;
+		}
+	}
+	lua_settop(Ls, base);
+	return true;
+}
+
+bool FCEU_LuaDbgGetScope(int level, int scope, std::vector<LuaDbgVar> &vars)
+{
+	vars.clear();
+
+	if (!luaDbgPaused || luaDbgPausedState == nullptr)
+	{
+		return false;
+	}
+	lua_State *Ls = luaDbgPausedState;
+	const int base = lua_gettop(Ls);
+
+	if (!lua_checkstack(Ls, 16))
+	{
+		return false;
+	}
+
+	if (scope == LUADBG_SCOPE_GLOBAL)
+	{
+		lua_pushvalue(Ls, LUA_GLOBALSINDEX);
+		const int ref = luaDbgNewRef(Ls, -1);
+		lua_settop(Ls, base);
+		return FCEU_LuaDbgGetChildren(ref, vars);
+	}
+
+	lua_Debug ar;
+
+	if (!lua_getstack(Ls, level, &ar))
+	{
+		return false;
+	}
+
+	if (scope == LUADBG_SCOPE_LOCAL)
+	{
+		const char *name;
+
+		for (int i = 1; (name = lua_getlocal(Ls, &ar, i)) != nullptr; i++)
+		{
+			if (name[0] != '(')
+			{
+				LuaDbgVar var;
+
+				var.name = name;
+				var.scope = LUADBG_SCOPE_LOCAL;
+				var.level = level;
+				var.index = i;
+				luaDbgMakeVar(Ls, -1, var);
+				vars.push_back(var);
+			}
+			lua_pop(Ls, 1);
+		}
+	}
+	else if (scope == LUADBG_SCOPE_UPVALUE)
+	{
+		if (lua_getinfo(Ls, "f", &ar))
+		{
+			const int fidx = lua_gettop(Ls);
+			const char *name;
+
+			for (int i = 1; (name = lua_getupvalue(Ls, fidx, i)) != nullptr; i++)
+			{
+				LuaDbgVar var;
+
+				var.name = name;
+				var.scope = LUADBG_SCOPE_UPVALUE;
+				var.level = level;
+				var.index = i;
+				luaDbgMakeVar(Ls, -1, var);
+				vars.push_back(var);
+				lua_pop(Ls, 1);
+			}
+		}
+	}
+	lua_settop(Ls, base);
+	return true;
+}
+
+bool FCEU_LuaDbgEvaluate(int level, const std::string &expr, LuaDbgVar &result)
+{
+	result = LuaDbgVar();
+	result.name = expr;
+	result.scope = LUADBG_SCOPE_WATCH;
+	result.level = level;
+
+	if (!luaDbgPaused || luaDbgPausedState == nullptr)
+	{
+		return false;
+	}
+	lua_State *Ls = luaDbgPausedState;
+	const int base = lua_gettop(Ls);
+
+	if (!lua_checkstack(Ls, 16))
+	{
+		return false;
+	}
+
+	// Environment exposing the frame's upvalues and locals, falling back to globals.
+	lua_newtable(Ls);
+	const int env = lua_gettop(Ls);
+	lua_Debug ar;
+
+	if (lua_getstack(Ls, level, &ar))
+	{
+		if (lua_getinfo(Ls, "f", &ar))
+		{
+			const int fidx = lua_gettop(Ls);
+			const char *name;
+
+			for (int i = 1; (name = lua_getupvalue(Ls, fidx, i)) != nullptr; i++)
+			{
+				lua_setfield(Ls, env, name);
+			}
+			lua_pop(Ls, 1);
+		}
+		const char *name;
+
+		for (int i = 1; (name = lua_getlocal(Ls, &ar, i)) != nullptr; i++)
+		{
+			if (name[0] != '(')
+			{
+				lua_setfield(Ls, env, name);
+			}
+			else
+			{
+				lua_pop(Ls, 1);
+			}
+		}
+	}
+	lua_newtable(Ls);
+	lua_pushvalue(Ls, LUA_GLOBALSINDEX);
+	lua_setfield(Ls, -2, "__index");
+	lua_setmetatable(Ls, env);
+
+	const std::string code = "return " + expr;
+	bool ok = false;
+
+	if (luaL_loadstring(Ls, code.c_str()) == 0)
+	{
+		lua_pushvalue(Ls, env);
+		lua_setfenv(Ls, -2);
+
+		if (lua_pcall(Ls, 0, 1, 0) == 0)
+		{
+			luaDbgMakeVar(Ls, -1, result);
+			ok = true;
+		}
+	}
+	if (!ok)
+	{
+		const char *msg = lua_tostring(Ls, -1);
+		result.type = "error";
+		result.value = msg ? msg : "error";
+	}
+	lua_settop(Ls, base);
+	return ok;
+}
+
+bool FCEU_LuaDbgSetValue(const LuaDbgVar &var, const std::string &expr, std::string &errMsg)
+{
+	errMsg.clear();
+
+	if (!luaDbgPaused || luaDbgPausedState == nullptr)
+	{
+		errMsg = "Script is not paused";
+		return false;
+	}
+	lua_State *Ls = luaDbgPausedState;
+	const int base = lua_gettop(Ls);
+
+	if (!lua_checkstack(Ls, 16))
+	{
+		errMsg = "Lua stack overflow";
+		return false;
+	}
+
+	// Evaluate the expression in an empty environment so only literals are accepted.
+	const std::string code = "return " + expr;
+
+	if (luaL_loadstring(Ls, code.c_str()) != 0)
+	{
+		errMsg = lua_tostring(Ls, -1);
+		lua_settop(Ls, base);
+		return false;
+	}
+	lua_newtable(Ls);
+	lua_setfenv(Ls, -2);
+
+	if (lua_pcall(Ls, 0, 1, 0) != 0)
+	{
+		errMsg = lua_tostring(Ls, -1);
+		lua_settop(Ls, base);
+		return false;
+	}
+	const int valIdx = lua_gettop(Ls);
+	bool ok = false;
+
+	if (var.scope == LUADBG_SCOPE_LOCAL)
+	{
+		lua_Debug ar;
+
+		if (lua_getstack(Ls, var.level, &ar))
+		{
+			lua_pushvalue(Ls, valIdx);
+			ok = (lua_setlocal(Ls, &ar, var.index) != nullptr);
+		}
+	}
+	else if (var.scope == LUADBG_SCOPE_UPVALUE)
+	{
+		lua_Debug ar;
+
+		if (lua_getstack(Ls, var.level, &ar) && lua_getinfo(Ls, "f", &ar))
+		{
+			const int fidx = lua_gettop(Ls);
+
+			lua_pushvalue(Ls, valIdx);
+			ok = (lua_setupvalue(Ls, fidx, var.index) != nullptr);
+		}
+	}
+	else if (var.scope == LUADBG_SCOPE_FIELD)
+	{
+		if (luaDbgRefValid(var.parentRef) && luaDbgRefValid(var.keyRef))
+		{
+			lua_rawgeti(Ls, LUA_REGISTRYINDEX, var.parentRef);
+
+			if (lua_istable(Ls, -1))
+			{
+				lua_rawgeti(Ls, LUA_REGISTRYINDEX, var.keyRef);
+				lua_pushvalue(Ls, valIdx);
+				lua_rawset(Ls, -3);
+				ok = true;
+			}
+		}
+	}
+	if (!ok)
+	{
+		errMsg = "Unable to assign value";
+	}
+	lua_settop(Ls, base);
+	return ok;
+}
+
 void FCEU_LuaFrameBoundary()
 {
 	//printf("Lua Frame\n");
@@ -6577,6 +7338,13 @@ void FCEU_LuaFrameBoundary()
 		FCEU_LuaOnStop();
 	}
 
+	if (luaDbgKillIssued)
+	{
+		luaDbgKillIssued = false;
+		luaDbgAbortReq = false;
+		FCEU_LuaStop();
+	}
+
 #ifndef __WIN_DRIVER__
 	if (exitScheduled)
 	{  // This function does not exit immediately, 
@@ -6602,6 +7370,12 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 {
 	if (!DemandLua())
 	{
+		return 0;
+	}
+
+	if (luaDbgPaused)
+	{
+		FCEU_printf("Lua script is paused in the debugger; continue or stop it first.\n");
 		return 0;
 	}
 
@@ -6739,6 +7513,12 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 	lua_setfield(L, LUA_REGISTRYINDEX, frameAdvanceThread);
 
 
+	luaDbgAbortReq = false;
+	luaDbgKillIssued = false;
+	luaDbgStepMode = LUADBG_STEP_NONE;
+	luaDbgPauseReq = luaDbgAttached && luaDbgBreakOnStart;
+	luaDbgSetHooks(luaDbgAttached);
+
 	// Initialize settings
 	luaRunning = TRUE;
 	skipRerecords = FALSE;
@@ -6815,6 +7595,14 @@ void FCEU_LuaStop() {
 
 	if (!CheckLua())
 		return;
+
+	// The script is blocked inside the debugger hook, so it cannot be torn down
+	// from here. Ask it to unwind itself instead.
+	if (luaDbgPaused)
+	{
+		luaDbgRequestAbort();
+		return;
+	}
 
 	//already killed
 	if (!L) return;

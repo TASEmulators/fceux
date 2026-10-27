@@ -41,6 +41,7 @@ protected:
 	QPushButton *browseButton;
 	QPushButton *stopButton;
 	QPushButton *startButton;
+	QPushButton *debugButton;
 	QTextEdit *luaOutput;
 
 private:
@@ -51,6 +52,7 @@ private slots:
 	void openLuaScriptFile(void);
 	void startLuaScript(void);
 	void stopLuaScript(void);
+	void openLuaDebugger(void);
 };
 
 // Formatted print

@@ -41,6 +41,7 @@
 #include "common/os_utils.h"
 
 #include "Qt/LuaControl.h"
+#include "Qt/LuaSourceDebugger.h"
 #include "Qt/main.h"
 #include "Qt/input.h"
 #include "Qt/config.h"
@@ -160,6 +161,14 @@ LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
 	hbox->addWidget(browseButton);
 	hbox->addWidget(stopButton);
 	hbox->addWidget(startButton);
+
+	debugButton = new QPushButton(tr("Debugger..."));
+#ifdef _S9XLUA_H
+	connect(debugButton, SIGNAL(clicked()), this, SLOT(openLuaDebugger(void)));
+#else
+	debugButton->setEnabled(false);
+#endif
+	hbox->addWidget(debugButton);
 
 	mainLayout->addWidget(lbl);
 	mainLayout->addWidget(scriptPath);
@@ -436,6 +445,13 @@ void LuaControlDialog_t::stopLuaScript(void)
 	FCEU_WRAPPER_LOCK();
 	FCEU_LuaStop();
 	FCEU_WRAPPER_UNLOCK();
+#endif
+}
+//----------------------------------------------------
+void LuaControlDialog_t::openLuaDebugger(void)
+{
+#ifdef _S9XLUA_H
+	openLuaSourceDebugger(this->parentWidget(), scriptPath->text());
 #endif
 }
 //----------------------------------------------------

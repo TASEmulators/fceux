@@ -1,0 +1,1515 @@
+// LuaSourceDebugger.cpp
+//
+#ifdef _S9XLUA_H
+
+#include <stdio.h>
+#include <string.h>
+
+#include <QActionGroup>
+#include <QApplication>
+#include <QCloseEvent>
+#include <QCollator>
+#include <QContextMenuEvent>
+#include <QFile>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QFontDatabase>
+#include <QHeaderView>
+#include <QInputDialog>
+#include <QMenu>
+#include <QMessageBox>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QRegularExpression>
+#include <QSettings>
+#include <QTextBlock>
+#include <QThread>
+
+#include "Qt/LuaSourceDebugger.h"
+#include "Qt/fceuWrapper.h"
+#include "Qt/nes_shm.h"
+
+extern int luaRunning;
+
+static LuaSourceDebuggerDialog_t *debuggerWin = nullptr;
+
+//----------------------------------------------------------------------------
+// Blocks the thread that hit a breakpoint until the GUI requests a resume.
+//----------------------------------------------------------------------------
+static void luaDebuggerWaitForResume(void)
+{
+	if (QThread::currentThread() == QCoreApplication::instance()->thread())
+	{
+		// The script was started from the GUI thread (first frame of a freshly loaded script),
+		// so keep the GUI alive with a nested event loop.
+		while (!FCEU_LuaDbgResumeRequested())
+		{
+			QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+			QThread::msleep(5);
+		}
+	}
+	else
+	{
+		// Emulation thread: release the emulator lock so the GUI can operate.
+		FCEU_WRAPPER_UNLOCK();
+
+		while (!FCEU_LuaDbgResumeRequested() && nes_shm->runEmulator)
+		{
+			QThread::msleep(10);
+		}
+		FCEU_WRAPPER_LOCK();
+	}
+}
+//----------------------------------------------------------------------------
+// Syntax highlighting
+//----------------------------------------------------------------------------
+LuaSyntaxTheme LuaSyntaxTheme::light(void)
+{
+	LuaSyntaxTheme t;
+
+	t.background = QColor(255, 255, 255);
+	t.text       = QColor(0, 0, 0);
+	t.gutterBg   = QColor(240, 240, 240);
+	t.gutterText = QColor(130, 130, 130);
+	t.keyword    = QColor(0, 0, 200);
+	t.builtin    = QColor(0, 110, 130);
+	t.string     = QColor(163, 21, 21);
+	t.number     = QColor(9, 134, 88);
+	t.comment    = QColor(0, 128, 0);
+	t.constant   = QColor(150, 0, 150);
+	t.op         = QColor(90, 90, 90);
+	t.execTop    = QColor(255, 245, 160);
+	t.execOther  = QColor(190, 235, 190);
+	t.execText   = QColor(0, 0, 0);
+	return t;
+}
+
+LuaSyntaxTheme LuaSyntaxTheme::dark(void)
+{
+	LuaSyntaxTheme t;
+
+	t.background = QColor(30, 30, 30);
+	t.text       = QColor(212, 212, 212);
+	t.gutterBg   = QColor(37, 37, 38);
+	t.gutterText = QColor(133, 133, 133);
+	t.keyword    = QColor(86, 156, 214);
+	t.builtin    = QColor(78, 201, 176);
+	t.string     = QColor(206, 145, 120);
+	t.number     = QColor(181, 206, 168);
+	t.comment    = QColor(106, 153, 85);
+	t.constant   = QColor(197, 134, 192);
+	t.op         = QColor(170, 170, 170);
+	t.execTop    = QColor(90, 80, 20);
+	t.execOther  = QColor(35, 80, 45);
+	t.execText   = QColor(240, 240, 240);
+	return t;
+}
+
+LuaSyntaxHighlighter::LuaSyntaxHighlighter(QTextDocument *doc)
+	: QSyntaxHighlighter(doc), theme(LuaSyntaxTheme::light())
+{
+}
+
+void LuaSyntaxHighlighter::setTheme(const LuaSyntaxTheme &t)
+{
+	theme = t;
+	rehighlight();
+}
+
+// Block state: 0 = normal, otherwise 1 + 2 * level + (isComment ? 1 : 0) for an open long bracket.
+void LuaSyntaxHighlighter::highlightBlock(const QString &text)
+{
+	static const QSet<QString> keywords = {
+		"and", "break", "do", "else", "elseif", "end", "for", "function", "if", "in",
+		"local", "not", "or", "repeat", "return", "then", "until", "while" };
+	static const QSet<QString> constants = { "true", "false", "nil" };
+	static const QSet<QString> builtins = {
+		"assert", "collectgarbage", "dofile", "error", "getfenv", "getmetatable", "ipairs", "load",
+		"loadfile", "loadstring", "next", "pairs", "pcall", "print", "rawequal", "rawget", "rawset",
+		"require", "select", "setfenv", "setmetatable", "tonumber", "tostring", "type", "unpack",
+		"xpcall", "_G", "_VERSION", "string", "table", "math", "io", "os", "debug", "coroutine",
+		"package", "emu", "memory", "rom", "ppu", "gui", "input", "joypad", "savestate", "movie",
+		"sound", "zapper", "bit", "taseditor", "FCEU", "SNES", "AND", "OR", "XOR", "SHIFT", "BIT" };
+
+	auto fmt = [](const QColor &c, bool italic = false, bool bold = false) {
+		QTextCharFormat f;
+
+		f.setForeground(c);
+		f.setFontItalic(italic);
+		if (bold) f.setFontWeight(QFont::Bold);
+		return f;
+	};
+	const QTextCharFormat fText = fmt(theme.text), fKeyword = fmt(theme.keyword, false, true),
+	                      fBuiltin = fmt(theme.builtin), fString = fmt(theme.string),
+	                      fNumber = fmt(theme.number), fComment = fmt(theme.comment, true),
+	                      fConst = fmt(theme.constant, false, true), fOp = fmt(theme.op);
+
+	// Finds the end of a long bracket of the given level starting at 'from'; returns -1 if not on this line.
+	auto longEnd = [&text](int from, int level) {
+		const QString close = QStringLiteral("]") + QString(level, QChar('=')) + QStringLiteral("]");
+		const int p = text.indexOf(close, from);
+
+		return (p < 0) ? -1 : p + close.length();
+	};
+	// Detects "[" "="* "[" at position i; returns level or -1.
+	auto longOpen = [&text](int i, int &len) {
+		if (i >= text.length() || text[i] != QChar('['))
+		{
+			return -1;
+		}
+		int j = i + 1;
+
+		while (j < text.length() && text[j] == QChar('='))
+		{
+			j++;
+		}
+		if (j < text.length() && text[j] == QChar('['))
+		{
+			len = j - i + 1;
+			return j - i - 1;
+		}
+		return -1;
+	};
+
+	setFormat(0, text.length(), fText);
+
+	int i = 0;
+	const int prev = previousBlockState();
+
+	setCurrentBlockState(0);
+
+	if (prev > 0)
+	{
+		const int level = (prev - 1) / 2;
+		const bool isComment = ((prev - 1) % 2) == 1;
+		const int end = longEnd(0, level);
+
+		if (end < 0)
+		{
+			setFormat(0, text.length(), isComment ? fComment : fString);
+			setCurrentBlockState(prev);
+			return;
+		}
+		setFormat(0, end, isComment ? fComment : fString);
+		i = end;
+	}
+
+	while (i < text.length())
+	{
+		const QChar ch = text[i];
+		int len = 0;
+
+		if (ch == QChar('-') && i + 1 < text.length() && text[i + 1] == QChar('-'))
+		{
+			const int level = longOpen(i + 2, len);
+
+			if (level >= 0)
+			{
+				const int end = longEnd(i + 2 + len, level);
+
+				if (end < 0)
+				{
+					setFormat(i, text.length() - i, fComment);
+					setCurrentBlockState(1 + 2 * level + 1);
+					return;
+				}
+				setFormat(i, end - i, fComment);
+				i = end;
+				continue;
+			}
+			setFormat(i, text.length() - i, fComment);
+			return;
+		}
+		if (ch == QChar('"') || ch == QChar('\''))
+		{
+			int j = i + 1;
+
+			while (j < text.length() && text[j] != ch)
+			{
+				j += (text[j] == QChar('\\')) ? 2 : 1;
+			}
+			j = qMin(j + 1, (int)text.length());
+			setFormat(i, j - i, fString);
+			i = j;
+			continue;
+		}
+		const int level = longOpen(i, len);
+
+		if (level >= 0)
+		{
+			const int end = longEnd(i + len, level);
+
+			if (end < 0)
+			{
+				setFormat(i, text.length() - i, fString);
+				setCurrentBlockState(1 + 2 * level);
+				return;
+			}
+			setFormat(i, end - i, fString);
+			i = end;
+			continue;
+		}
+		if (ch.isDigit() || (ch == QChar('.') && i + 1 < text.length() && text[i + 1].isDigit()))
+		{
+			int j = i + 1;
+
+			if (ch == QChar('0') && j < text.length() && (text[j] == QChar('x') || text[j] == QChar('X')))
+			{
+				j++;
+				while (j < text.length() && (text[j].isDigit() || QString("abcdefABCDEF").contains(text[j])))
+				{
+					j++;
+				}
+			}
+			else
+			{
+				while (j < text.length())
+				{
+					if (text[j].isDigit() || text[j] == QChar('.'))
+					{
+						j++;
+					}
+					else if ((text[j] == QChar('e') || text[j] == QChar('E')) && j + 1 < text.length())
+					{
+						j++;
+						if (text[j] == QChar('+') || text[j] == QChar('-'))
+						{
+							j++;
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+			setFormat(i, j - i, fNumber);
+			i = j;
+			continue;
+		}
+		if (ch.isLetter() || ch == QChar('_'))
+		{
+			int j = i + 1;
+
+			while (j < text.length() && (text[j].isLetterOrNumber() || text[j] == QChar('_')))
+			{
+				j++;
+			}
+			const QString word = text.mid(i, j - i);
+			const bool afterDot = (i > 0 && text[i - 1] == QChar('.'));
+
+			if (!afterDot && keywords.contains(word)) setFormat(i, j - i, fKeyword);
+			else if (!afterDot && constants.contains(word)) setFormat(i, j - i, fConst);
+			else if (!afterDot && builtins.contains(word)) setFormat(i, j - i, fBuiltin);
+			i = j;
+			continue;
+		}
+		if (!ch.isSpace() && !ch.isLetterOrNumber())
+		{
+			setFormat(i, 1, fOp);
+		}
+		i++;
+	}
+}
+//----------------------------------------------------------------------------
+// LuaSourceGutter
+//----------------------------------------------------------------------------
+LuaSourceGutter::LuaSourceGutter(LuaSourceView *v)
+	: QWidget(v), view(v)
+{
+}
+
+QSize LuaSourceGutter::sizeHint(void) const
+{
+	return QSize(view->gutterWidth(), 0);
+}
+
+void LuaSourceGutter::paintEvent(QPaintEvent *event)
+{
+	view->gutterPaint(event);
+}
+
+void LuaSourceGutter::mousePressEvent(QMouseEvent *event)
+{
+	if (event->button() == Qt::LeftButton)
+	{
+		view->gutterClick(event->pos().y());
+	}
+}
+//----------------------------------------------------------------------------
+// LuaSourceView
+//----------------------------------------------------------------------------
+LuaSourceView::LuaSourceView(QWidget *parent)
+	: QPlainTextEdit(parent), execLine(-1), execTopFrame(true)
+{
+	QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+
+	setFont(font);
+	setReadOnly(true);
+	setLineWrapMode(QPlainTextEdit::NoWrap);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+	setTabStopDistance(4 * QFontMetrics(font).horizontalAdvance(' '));
+#endif
+
+	gutter = new LuaSourceGutter(this);
+	highlighter = new LuaSyntaxHighlighter(document());
+	setDarkTheme(false);
+
+	connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateGutterWidth(void)));
+	connect(this, SIGNAL(updateRequest(const QRect &, int)), this, SLOT(updateGutter(const QRect &, int)));
+
+	updateGutterWidth();
+}
+
+int LuaSourceView::gutterWidth(void) const
+{
+	int digits = 1;
+	int max = qMax(1, blockCount());
+
+	while (max >= 10)
+	{
+		max /= 10;
+		digits++;
+	}
+	return 20 + 6 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
+}
+
+void LuaSourceView::updateGutterWidth(void)
+{
+	setViewportMargins(gutterWidth(), 0, 0, 0);
+	gutter->updateGeometry();
+}
+
+void LuaSourceView::updateGutter(const QRect &rect, int dy)
+{
+	if (dy)
+	{
+		gutter->scroll(0, dy);
+	}
+	else
+	{
+		gutter->update(0, rect.y(), gutter->width(), rect.height());
+	}
+	if (rect.contains(viewport()->rect()))
+	{
+		updateGutterWidth();
+	}
+}
+
+void LuaSourceView::resizeEvent(QResizeEvent *event)
+{
+	QPlainTextEdit::resizeEvent(event);
+
+	const QRect cr = contentsRect();
+
+	gutter->setGeometry(QRect(cr.left(), cr.top(), gutterWidth(), cr.height()));
+}
+
+void LuaSourceView::gutterPaint(QPaintEvent *event)
+{
+	QPainter painter(gutter);
+
+	painter.fillRect(event->rect(), theme.gutterBg);
+
+	QTextBlock block = firstVisibleBlock();
+	int blockNumber = block.blockNumber();
+	int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
+	int bottom = top + qRound(blockBoundingRect(block).height());
+
+	while (block.isValid() && top <= event->rect().bottom())
+	{
+		if (block.isVisible() && bottom >= event->rect().top())
+		{
+			const int line = blockNumber + 1;
+			const int h = fontMetrics().height();
+			const QRect marker(3, top + (h - 12) / 2, 12, 12);
+
+			if (breakpoints.count(line))
+			{
+				painter.setRenderHint(QPainter::Antialiasing, true);
+				painter.setPen(Qt::NoPen);
+				painter.setBrush(QColor(200, 30, 30));
+				painter.drawEllipse(marker);
+			}
+			if (line == execLine)
+			{
+				QPolygon arrow;
+
+				arrow << QPoint(marker.left(), marker.top() + 2) << QPoint(marker.center().x(), marker.top() + 2)
+				      << QPoint(marker.right(), marker.center().y()) << QPoint(marker.center().x(), marker.bottom() - 2)
+				      << QPoint(marker.left(), marker.bottom() - 2);
+				painter.setRenderHint(QPainter::Antialiasing, true);
+				painter.setPen(Qt::black);
+				painter.setBrush(execTopFrame ? QColor(255, 220, 0) : QColor(60, 190, 60));
+				painter.drawPolygon(arrow);
+			}
+			painter.setRenderHint(QPainter::Antialiasing, false);
+			painter.setPen(theme.gutterText);
+			painter.drawText(0, top, gutter->width() - 4, h, Qt::AlignRight, QString::number(line));
+		}
+		block = block.next();
+		top = bottom;
+		bottom = top + qRound(blockBoundingRect(block).height());
+		blockNumber++;
+	}
+}
+
+int LuaSourceView::lineAtViewportY(int y) const
+{
+	QTextBlock block = firstVisibleBlock();
+	int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
+
+	while (block.isValid())
+	{
+		const int bottom = top + qRound(blockBoundingRect(block).height());
+
+		if (y >= top && y < bottom)
+		{
+			return block.blockNumber() + 1;
+		}
+		if (top > y)
+		{
+			break;
+		}
+		top = bottom;
+		block = block.next();
+	}
+	return -1;
+}
+
+void LuaSourceView::gutterClick(int y)
+{
+	const int line = lineAtViewportY(y);
+
+	if (line > 0 && !filePath.empty())
+	{
+		emit gutterClicked(line);
+	}
+}
+
+void LuaSourceView::contextMenuEvent(QContextMenuEvent *event)
+{
+	QMenu *menu = createStandardContextMenu();
+	const int line = lineAtViewportY(event->pos().y());
+
+	if (line > 0 && !filePath.empty())
+	{
+		QAction *first = menu->actions().isEmpty() ? nullptr : menu->actions().first();
+		QAction *bpAct = new QAction(tr("Toggle Breakpoint"), menu);
+		QAction *runToAct = new QAction(tr("Run to Line"), menu);
+
+		connect(bpAct, &QAction::triggered, this, [this, line]() { emit gutterClicked(line); });
+		connect(runToAct, &QAction::triggered, this, [this, line]() { emit runToLineRequested(line); });
+
+		menu->insertAction(first, bpAct);
+		menu->insertAction(first, runToAct);
+		menu->insertSeparator(first);
+	}
+	menu->exec(event->globalPos());
+	delete menu;
+}
+
+bool LuaSourceView::loadFile(const QString &path, const std::string &normalizedPath)
+{
+	QFile f(path);
+
+	if (!f.open(QIODevice::ReadOnly))
+	{
+		return false;
+	}
+	const QByteArray data = f.readAll();
+
+	filePath = normalizedPath;
+	execLine = -1;
+	setPlainText(QString::fromUtf8(data));
+	updateHighlights();
+	gutter->update();
+	return true;
+}
+
+void LuaSourceView::setDarkTheme(bool dark)
+{
+	theme = dark ? LuaSyntaxTheme::dark() : LuaSyntaxTheme::light();
+
+	setStyleSheet(QStringLiteral("QPlainTextEdit { background-color: %1; color: %2; }")
+	              .arg(theme.background.name(), theme.text.name()));
+	highlighter->setTheme(theme);
+	updateHighlights();
+	gutter->update();
+}
+
+void LuaSourceView::setBreakpoints(const std::set<int> &bps)
+{
+	breakpoints = bps;
+	gutter->update();
+}
+
+int LuaSourceView::currentLine(void) const
+{
+	return textCursor().blockNumber() + 1;
+}
+
+void LuaSourceView::setExecLine(int line, bool topFrame)
+{
+	execLine = line;
+	execTopFrame = topFrame;
+
+	if (line > 0)
+	{
+		QTextCursor cursor(document()->findBlockByNumber(line - 1));
+
+		setTextCursor(cursor);
+		centerCursor();
+	}
+	updateHighlights();
+	gutter->update();
+}
+
+void LuaSourceView::updateHighlights(void)
+{
+	QList<QTextEdit::ExtraSelection> selections;
+
+	if (execLine > 0)
+	{
+		QTextEdit::ExtraSelection sel;
+
+		sel.format.setBackground(execTopFrame ? theme.execTop : theme.execOther);
+		sel.format.setProperty(QTextFormat::FullWidthSelection, true);
+		sel.cursor = QTextCursor(document()->findBlockByNumber(execLine - 1));
+		sel.cursor.clearSelection();
+		selections.append(sel);
+	}
+	setExtraSelections(selections);
+}
+//----------------------------------------------------------------------------
+// LuaSourceDebuggerDialog_t
+//----------------------------------------------------------------------------
+LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
+	: QDialog(parent, Qt::Window), lastSerial(0), wasPaused(false), updatingVars(false)
+{
+	QSettings settings;
+	QMenuBar *menuBar;
+	QToolBar *toolBar;
+	QVBoxLayout *mainLayout;
+	QSplitter *hsplitter;
+	QSplitter *vsplitter;
+
+	setWindowTitle(tr("Lua Source Debugger"));
+	resize(1024, 640);
+
+	sourceView = new LuaSourceView();
+	statusLabel = new QLabel();
+
+	menuBar = buildMenuBar();
+	toolBar = buildToolBar();
+	buildStackView();
+	buildVarView();
+
+	hsplitter = new QSplitter(Qt::Horizontal);
+	hsplitter->setOpaqueResize(true);
+	vsplitter = new QSplitter(Qt::Vertical);
+	vsplitter->setOpaqueResize(true);
+
+	vsplitter->addWidget(stackView);
+	vsplitter->addWidget(varView);
+	vsplitter->setStretchFactor(0, 1);
+	vsplitter->setStretchFactor(1, 3);
+
+	hsplitter->addWidget(sourceView);
+	hsplitter->addWidget(vsplitter);
+	hsplitter->setStretchFactor(0, 3);
+	hsplitter->setStretchFactor(1, 2);
+
+	mainLayout = new QVBoxLayout();
+	mainLayout->setMenuBar(menuBar);
+	mainLayout->addWidget(toolBar);
+	mainLayout->addWidget(hsplitter, 1);
+	mainLayout->addWidget(statusLabel);
+	setLayout(mainLayout);
+
+	watches = settings.value("luaDebugger/watches").toStringList();
+	expandedPaths.insert(QStringLiteral("Locals"));
+	expandedPaths.insert(QStringLiteral("Watch"));
+
+	connect(sourceView, &LuaSourceView::gutterClicked, this, &LuaSourceDebuggerDialog_t::gutterClickedCB);
+	connect(sourceView, &LuaSourceView::runToLineRequested, this, &LuaSourceDebuggerDialog_t::runToLineCB);
+
+	restoreGeometry(settings.value("luaDebugger/geometry").toByteArray());
+
+	debuggerWin = this;
+
+	{
+		LuaDbgCallbacks cb;
+		cb.waitForResume = luaDebuggerWaitForResume;
+
+		FCEU_WRAPPER_LOCK();
+		FCEU_LuaDbgAttach(&cb);
+		FCEU_LuaDbgSetBreakOnStart(breakOnStartAct->isChecked());
+		FCEU_WRAPPER_UNLOCK();
+	}
+
+	periodicTimer = new QTimer(this);
+	connect(periodicTimer, &QTimer::timeout, this, &LuaSourceDebuggerDialog_t::updatePeriodic);
+	periodicTimer->start(100);
+
+	updatePeriodic();
+}
+//----------------------------------------------------------------------------
+LuaSourceDebuggerDialog_t::~LuaSourceDebuggerDialog_t(void)
+{
+	QSettings settings;
+
+	periodicTimer->stop();
+
+	settings.setValue("luaDebugger/geometry", saveGeometry());
+	settings.setValue("luaDebugger/watches", watches);
+
+	FCEU_WRAPPER_LOCK();
+	FCEU_LuaDbgDetach();
+	FCEU_WRAPPER_UNLOCK();
+
+	if (debuggerWin == this)
+	{
+		debuggerWin = nullptr;
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::closeEvent(QCloseEvent *event)
+{
+	done(0);
+	deleteLater();
+	event->accept();
+}
+//----------------------------------------------------------------------------
+QMenuBar *LuaSourceDebuggerDialog_t::buildMenuBar(void)
+{
+	QMenuBar *menuBar = new QMenuBar(this);
+	QMenu *menu;
+	QAction *act;
+
+	// File
+	menu = menuBar->addMenu(tr("&File"));
+
+	openAct = act = new QAction(tr("&Open Script..."), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+O")));
+	act->setStatusTip(tr("Open a Lua script in the source view"));
+	act->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::openScriptDialog);
+	menu->addAction(act);
+
+	reloadAct = act = new QAction(tr("&Reload Script File"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+R")));
+	act->setStatusTip(tr("Reload the source file from disk"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::reloadScript);
+	menu->addAction(act);
+
+	menu->addSeparator();
+
+	act = new QAction(tr("&Close"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+W")));
+	act->setStatusTip(tr("Close Window"));
+	connect(act, &QAction::triggered, this, &QWidget::close);
+	menu->addAction(act);
+
+	// Debug
+	menu = menuBar->addMenu(tr("&Debug"));
+
+	runAct = act = new QAction(tr("&Run / Continue"), this);
+	act->setShortcut(QKeySequence(tr("F5")));
+	act->setStatusTip(tr("Start the script, or continue execution when paused"));
+	act->setIcon(QIcon(":icons/debug-run.png"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::runContinueCB);
+	menu->addAction(act);
+
+	breakAct = act = new QAction(tr("&Break"), this);
+	act->setShortcut(QKeySequence(tr("F6")));
+	act->setStatusTip(tr("Pause the script at the next executed line"));
+	act->setIcon(QIcon(":icons/debug-pause.png"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::breakCB);
+	menu->addAction(act);
+
+	stopAct = act = new QAction(tr("&Stop Script"), this);
+	act->setShortcut(QKeySequence(tr("Shift+F5")));
+	act->setStatusTip(tr("Stop the running script"));
+	act->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::stopCB);
+	menu->addAction(act);
+
+	menu->addSeparator();
+
+	stepIntoAct = act = new QAction(tr("Step &Into"), this);
+	act->setShortcut(QKeySequence(tr("F11")));
+	act->setStatusTip(tr("Step Into"));
+	act->setIcon(QIcon(":icons/StepInto.png"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::stepIntoCB);
+	menu->addAction(act);
+
+	stepOverAct = act = new QAction(tr("Step &Over"), this);
+	act->setShortcut(QKeySequence(tr("F10")));
+	act->setStatusTip(tr("Step Over"));
+	act->setIcon(QIcon(":icons/StepOver.png"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::stepOverCB);
+	menu->addAction(act);
+
+	stepOutAct = act = new QAction(tr("Step Ou&t"), this);
+	act->setShortcut(QKeySequence(tr("Shift+F11")));
+	act->setStatusTip(tr("Step Out"));
+	act->setIcon(QIcon(":icons/StepOut.png"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::stepOutCB);
+	menu->addAction(act);
+
+	runToCursorAct = act = new QAction(tr("Run to &Cursor"), this);
+	act->setShortcut(QKeySequence(tr("Ctrl+F10")));
+	act->setStatusTip(tr("Run until the line at the cursor is reached"));
+	act->setIcon(QIcon(":icons/arrow-cursor.png"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::runToCursorCB);
+	menu->addAction(act);
+
+	menu->addSeparator();
+
+	toggleBpAct = act = new QAction(tr("Toggle Brea&kpoint"), this);
+	act->setShortcut(QKeySequence(tr("F9")));
+	act->setStatusTip(tr("Toggle a breakpoint on the current line"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::toggleBreakpointCB);
+	menu->addAction(act);
+
+	act = new QAction(tr("Clear &All Breakpoints"), this);
+	act->setStatusTip(tr("Remove all breakpoints"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::clearBreakpointsCB);
+	menu->addAction(act);
+
+	menu->addSeparator();
+
+	{
+		QSettings settings;
+
+		breakOnStartAct = act = new QAction(tr("Break on Script &Start"), this);
+		act->setCheckable(true);
+		act->setChecked(settings.value("luaDebugger/breakOnStart", false).toBool());
+		act->setStatusTip(tr("Pause on the first line executed when a script starts"));
+		connect(act, &QAction::toggled, this, &LuaSourceDebuggerDialog_t::breakOnStartCB);
+		menu->addAction(act);
+	}
+
+	// Watch
+	menu = menuBar->addMenu(tr("&Watch"));
+
+	act = new QAction(tr("&Add Watch..."), this);
+	act->setStatusTip(tr("Add a watch expression"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::addWatchCB);
+	menu->addAction(act);
+
+	act = new QAction(tr("&Clear All Watches"), this);
+	act->setStatusTip(tr("Remove all watch expressions"));
+	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::clearWatchesCB);
+	menu->addAction(act);
+
+	// View
+	menu = menuBar->addMenu(tr("&View"));
+
+	{
+		QSettings settings;
+		QActionGroup *group = new QActionGroup(this);
+		const bool dark = (settings.value("luaDebugger/theme", "light").toString() == "dark");
+
+		lightThemeAct = act = new QAction(tr("&Light Syntax Theme"), this);
+		act->setCheckable(true);
+		act->setChecked(!dark);
+		act->setActionGroup(group);
+		menu->addAction(act);
+
+		darkThemeAct = act = new QAction(tr("&Dark Syntax Theme"), this);
+		act->setCheckable(true);
+		act->setChecked(dark);
+		act->setActionGroup(group);
+		menu->addAction(act);
+
+		connect(darkThemeAct, &QAction::toggled, this, &LuaSourceDebuggerDialog_t::themeCB);
+		sourceView->setDarkTheme(dark);
+	}
+
+	return menuBar;
+}
+//----------------------------------------------------------------------------
+QToolBar *LuaSourceDebuggerDialog_t::buildToolBar(void)
+{
+	QToolBar *toolBar = new QToolBar(this);
+
+	toolBar->addAction(openAct);
+	toolBar->addSeparator();
+	toolBar->addAction(runAct);
+	toolBar->addAction(breakAct);
+	toolBar->addAction(stopAct);
+	toolBar->addSeparator();
+	toolBar->addAction(stepIntoAct);
+	toolBar->addAction(stepOverAct);
+	toolBar->addAction(stepOutAct);
+	toolBar->addAction(runToCursorAct);
+
+	return toolBar;
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::buildStackView(void)
+{
+	stackView = new QTreeWidget();
+	stackView->setColumnCount(3);
+	stackView->setHeaderLabels(QStringList() << tr("#") << tr("Function") << tr("Location"));
+	stackView->setRootIsDecorated(false);
+	stackView->setUniformRowHeights(true);
+	stackView->setSelectionMode(QAbstractItemView::SingleSelection);
+	stackView->header()->setStretchLastSection(true);
+	stackView->setColumnWidth(0, 40);
+	stackView->setColumnWidth(1, 140);
+
+	connect(stackView, &QTreeWidget::currentItemChanged, this, [this](QTreeWidgetItem *, QTreeWidgetItem *) { frameChanged(); });
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::buildVarView(void)
+{
+	varView = new QTreeWidget();
+	varView->setColumnCount(3);
+	varView->setHeaderLabels(QStringList() << tr("Name") << tr("Value") << tr("Type"));
+	varView->setUniformRowHeights(true);
+	varView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	varView->setContextMenuPolicy(Qt::CustomContextMenu);
+	varView->setColumnWidth(0, 160);
+	varView->setColumnWidth(1, 200);
+
+	connect(varView, &QTreeWidget::itemExpanded, this, &LuaSourceDebuggerDialog_t::varItemExpanded);
+	connect(varView, &QTreeWidget::itemCollapsed, this, &LuaSourceDebuggerDialog_t::varItemCollapsed);
+	connect(varView, &QTreeWidget::itemChanged, this, &LuaSourceDebuggerDialog_t::varItemChanged);
+	connect(varView, &QTreeWidget::itemDoubleClicked, this, &LuaSourceDebuggerDialog_t::varItemDoubleClicked);
+	connect(varView, &QWidget::customContextMenuRequested, this, &LuaSourceDebuggerDialog_t::varContextMenu);
+}
+//----------------------------------------------------------------------------
+bool LuaSourceDebuggerDialog_t::openScript(const QString &path)
+{
+	const std::string norm = FCEU_LuaDbgNormalizePath(path.toLocal8Bit().constData());
+
+	if (!sourceView->loadFile(path, norm))
+	{
+		QMessageBox::warning(this, tr("Open Script"), tr("Failed to open file:\n%1").arg(path));
+		return false;
+	}
+	sourceView->setBreakpoints(breakpointMap[norm]);
+	setWindowTitle(tr("Lua Source Debugger - %1").arg(QFileInfo(path).fileName()));
+	return true;
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::openScriptDialog(void)
+{
+	QString start;
+	QString path;
+
+	if (!sourceView->file().empty())
+	{
+		start = QFileInfo(QString::fromLocal8Bit(sourceView->file().c_str())).absolutePath();
+	}
+	path = QFileDialog::getOpenFileName(this, tr("Open Lua Script"), start,
+	                                    tr("Lua scripts (*.lua *.LUA);;Any files (*)"));
+
+	if (!path.isEmpty())
+	{
+		openScript(path);
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::reloadScript(void)
+{
+	if (!sourceView->file().empty())
+	{
+		const int line = sourceView->currentLine();
+
+		if (openScript(QString::fromLocal8Bit(sourceView->file().c_str())))
+		{
+			if (FCEU_LuaDbgIsPaused())
+			{
+				refreshPausedState();
+			}
+			else
+			{
+				sourceView->setExecLine(-1, true);
+			}
+			QTextCursor cursor(sourceView->document()->findBlockByNumber(line - 1));
+			sourceView->setTextCursor(cursor);
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::updateActions(bool scriptRunning, bool paused)
+{
+	runAct->setEnabled(paused || (!scriptRunning && !sourceView->file().empty()));
+	breakAct->setEnabled(scriptRunning && !paused);
+	stopAct->setEnabled(scriptRunning);
+	stepIntoAct->setEnabled(paused);
+	stepOverAct->setEnabled(paused);
+	stepOutAct->setEnabled(paused);
+	runToCursorAct->setEnabled(paused && !sourceView->file().empty());
+	toggleBpAct->setEnabled(!sourceView->file().empty());
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::updatePeriodic(void)
+{
+	const bool paused = FCEU_LuaDbgIsPaused();
+	const bool running = (luaRunning != 0);
+	const unsigned int serial = FCEU_LuaDbgPauseSerial();
+
+	if (paused)
+	{
+		if (!wasPaused || (serial != lastSerial))
+		{
+			lastSerial = serial;
+			refreshPausedState();
+		}
+	}
+	else if (wasPaused)
+	{
+		clearPausedState();
+	}
+	wasPaused = paused;
+
+	updateActions(running, paused);
+
+	if (paused)
+	{
+		if (!frames.empty())
+		{
+			statusLabel->setText(tr("Paused at %1:%2").arg(QString::fromStdString(frames[0].shortSource)).arg(frames[0].currentLine));
+		}
+	}
+	else
+	{
+		statusLabel->setText(running ? tr("Running") : tr("No script running"));
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::refreshPausedState(void)
+{
+	stackView->clear();
+	frames.clear();
+
+	if (!FCEU_LuaDbgGetStack(frames))
+	{
+		return;
+	}
+	for (const LuaDbgFrame &f : frames)
+	{
+		QTreeWidgetItem *item = new QTreeWidgetItem();
+		const QString loc = (f.currentLine > 0) ? QStringLiteral("%1:%2").arg(QString::fromStdString(f.shortSource)).arg(f.currentLine)
+		                                         : QString::fromStdString(f.shortSource);
+
+		item->setText(0, QString::number(f.level));
+		item->setText(1, QString::fromStdString(f.name));
+		item->setText(2, loc);
+		item->setData(0, Qt::UserRole, f.level);
+		stackView->addTopLevelItem(item);
+	}
+	if (stackView->topLevelItemCount() > 0)
+	{
+		stackView->setCurrentItem(stackView->topLevelItem(0));
+	}
+	activateWindow();
+	raise();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::clearPausedState(void)
+{
+	stackView->clear();
+	varView->clear();
+	varStore.clear();
+	frames.clear();
+	sourceView->setExecLine(-1, true);
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::frameChanged(void)
+{
+	QTreeWidgetItem *item = stackView->currentItem();
+
+	if (item == nullptr || !FCEU_LuaDbgIsPaused())
+	{
+		return;
+	}
+	showFrame(item->data(0, Qt::UserRole).toInt());
+	refreshVariables();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::showFrame(int level)
+{
+	if (level < 0 || level >= (int)frames.size())
+	{
+		return;
+	}
+	const LuaDbgFrame &f = frames[level];
+
+	if (f.source.empty())
+	{
+		sourceView->setExecLine(-1, true);
+		return;
+	}
+	if (sourceView->file() != f.source)
+	{
+		if (!openScript(QString::fromLocal8Bit(f.source.c_str())))
+		{
+			return;
+		}
+	}
+	sourceView->setExecLine(f.currentLine, level == 0);
+}
+//----------------------------------------------------------------------------
+static bool isIdentifier(const QString &s)
+{
+	static const QRegularExpression re("^[A-Za-z_][A-Za-z0-9_]*$");
+
+	return re.match(s).hasMatch();
+}
+//----------------------------------------------------------------------------
+QString LuaSourceDebuggerDialog_t::itemPath(QTreeWidgetItem *item) const
+{
+	QStringList parts;
+
+	while (item != nullptr)
+	{
+		parts.prepend(item->text(0));
+		item = item->parent();
+	}
+	return parts.join(QChar(0x1f));
+}
+//----------------------------------------------------------------------------
+QString LuaSourceDebuggerDialog_t::itemExpression(QTreeWidgetItem *item) const
+{
+	QStringList names;
+	QString expr;
+
+	while (item != nullptr && item->parent() != nullptr)
+	{
+		names.prepend(item->text(0));
+		item = item->parent();
+	}
+	for (int i = 0; i < names.size(); i++)
+	{
+		const QString &n = names[i];
+
+		if (i == 0)
+		{
+			expr = n;
+		}
+		else if (n.startsWith(QChar('[')))
+		{
+			expr += n;
+		}
+		else if (isIdentifier(n))
+		{
+			expr += QStringLiteral(".") + n;
+		}
+		else
+		{
+			QString esc = n;
+
+			esc.replace(QStringLiteral("\\"), QStringLiteral("\\\\"));
+			esc.replace(QStringLiteral("\""), QStringLiteral("\\\""));
+			expr += QStringLiteral("[\"") + esc + QStringLiteral("\"]");
+		}
+	}
+	return expr;
+}
+//----------------------------------------------------------------------------
+QTreeWidgetItem *LuaSourceDebuggerDialog_t::addVarItem(QTreeWidgetItem *parent, const LuaDbgVar &var, bool editable)
+{
+	QTreeWidgetItem *item = new QTreeWidgetItem();
+
+	varStore.push_back(var);
+
+	item->setText(0, QString::fromStdString(var.name));
+	item->setText(1, QString::fromStdString(var.value));
+	item->setText(2, QString::fromStdString(var.type));
+	item->setData(0, ITEM_VAR_ROLE, (int)varStore.size() - 1);
+	item->setData(0, ITEM_ROOT_ROLE, -1);
+
+	if (editable && var.ref == 0)
+	{
+		item->setFlags(item->flags() | Qt::ItemIsEditable);
+	}
+	if (var.ref != 0)
+	{
+		// Placeholder so the expansion arrow is shown; replaced when expanded.
+		QTreeWidgetItem *dummy = new QTreeWidgetItem();
+
+		dummy->setData(0, ITEM_VAR_ROLE, -2);
+		item->addChild(dummy);
+	}
+	parent->addChild(item);
+	restoreExpansion(item);
+
+	return item;
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::restoreExpansion(QTreeWidgetItem *item)
+{
+	if (item->childCount() > 0 && expandedPaths.contains(itemPath(item)))
+	{
+		item->setExpanded(true);
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::populateRoot(QTreeWidgetItem *root, int rootKind)
+{
+	QTreeWidgetItem *cur = stackView->currentItem();
+	const int level = cur ? cur->data(0, Qt::UserRole).toInt() : 0;
+	std::vector<LuaDbgVar> vars;
+
+	if (rootKind == ROOT_WATCH)
+	{
+		for (const QString &w : watches)
+		{
+			LuaDbgVar var;
+
+			FCEU_LuaDbgEvaluate(level, w.toLocal8Bit().constData(), var);
+			var.name = w.toLocal8Bit().constData();
+			addVarItem(root, var, false);
+		}
+	}
+	else if (rootKind == ROOT_LOCALS || rootKind == ROOT_UPVALUES)
+	{
+		FCEU_LuaDbgGetScope(level, rootKind == ROOT_LOCALS ? LUADBG_SCOPE_LOCAL : LUADBG_SCOPE_UPVALUE, vars);
+
+		for (const LuaDbgVar &var : vars)
+		{
+			addVarItem(root, var, true);
+		}
+	}
+	else
+	{
+		QTreeWidgetItem *dummy = new QTreeWidgetItem();
+
+		dummy->setData(0, ITEM_VAR_ROLE, -2);
+		root->addChild(dummy);
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::refreshVariables(void)
+{
+	static const char *rootNames[] = { "Watch", "Locals", "Upvalues", "Globals" };
+
+	varView->setUpdatesEnabled(false);
+	updatingVars = true;
+
+	varView->clear();
+	varStore.clear();
+
+	if (FCEU_LuaDbgIsPaused())
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			QTreeWidgetItem *root = new QTreeWidgetItem();
+
+			root->setText(0, tr(rootNames[i]));
+			root->setData(0, ITEM_VAR_ROLE, -1);
+			root->setData(0, ITEM_ROOT_ROLE, i);
+			varView->addTopLevelItem(root);
+
+			populateRoot(root, i);
+			restoreExpansion(root);
+		}
+	}
+	updatingVars = false;
+	varView->setUpdatesEnabled(true);
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::populateChildren(QTreeWidgetItem *item)
+{
+	if (item->childCount() != 1 || item->child(0)->data(0, ITEM_VAR_ROLE).toInt() != -2)
+	{
+		return;
+	}
+	std::vector<LuaDbgVar> vars;
+	const int rootKind = item->data(0, ITEM_ROOT_ROLE).toInt();
+	const int idx = item->data(0, ITEM_VAR_ROLE).toInt();
+
+	delete item->takeChild(0);
+
+	if (rootKind == ROOT_GLOBALS)
+	{
+		FCEU_LuaDbgGetScope(0, LUADBG_SCOPE_GLOBAL, vars);
+	}
+	else if (idx >= 0 && idx < (int)varStore.size())
+	{
+		FCEU_LuaDbgGetChildren(varStore[idx].ref, vars);
+	}
+
+	QCollator collator;
+	collator.setNumericMode(true);
+
+	std::sort(vars.begin(), vars.end(), [&collator](const LuaDbgVar &a, const LuaDbgVar &b) {
+		return collator.compare(QString::fromStdString(a.name), QString::fromStdString(b.name)) < 0;
+	});
+
+	const bool wasUpdating = updatingVars;
+	updatingVars = true;
+
+	for (const LuaDbgVar &var : vars)
+	{
+		addVarItem(item, var, true);
+	}
+	updatingVars = wasUpdating;
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::varItemExpanded(QTreeWidgetItem *item)
+{
+	expandedPaths.insert(itemPath(item));
+	populateChildren(item);
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::varItemCollapsed(QTreeWidgetItem *item)
+{
+	expandedPaths.remove(itemPath(item));
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::varItemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+	if (column == 1 && (item->flags() & Qt::ItemIsEditable))
+	{
+		varView->editItem(item, 1);
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::varItemChanged(QTreeWidgetItem *item, int column)
+{
+	if (updatingVars || column != 1 || !FCEU_LuaDbgIsPaused())
+	{
+		return;
+	}
+	const int idx = item->data(0, ITEM_VAR_ROLE).toInt();
+
+	if (idx < 0 || idx >= (int)varStore.size())
+	{
+		return;
+	}
+	std::string err;
+
+	if (!FCEU_LuaDbgSetValue(varStore[idx], item->text(1).toLocal8Bit().constData(), err))
+	{
+		QMessageBox::warning(this, tr("Set Value"), tr("Failed to set value: %1").arg(QString::fromLocal8Bit(err.c_str())));
+	}
+	// Rebuild after the editor closes; this item is being modified right now.
+	QTimer::singleShot(0, this, [this]() { refreshVariables(); });
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::varContextMenu(const QPoint &pos)
+{
+	QTreeWidgetItem *item = varView->itemAt(pos);
+	QMenu menu(this);
+	QAction *addAct = nullptr;
+	QAction *removeAct = nullptr;
+	QAction *watchVarAct = nullptr;
+
+	addAct = menu.addAction(tr("Add Watch..."));
+
+	if (item != nullptr && item->parent() != nullptr)
+	{
+		QTreeWidgetItem *top = item;
+
+		while (top->parent() != nullptr)
+		{
+			top = top->parent();
+		}
+		if (top->data(0, ITEM_ROOT_ROLE).toInt() == ROOT_WATCH)
+		{
+			if (item->parent() == top)
+			{
+				removeAct = menu.addAction(tr("Remove Watch"));
+			}
+		}
+		else
+		{
+			watchVarAct = menu.addAction(tr("Add to Watch"));
+		}
+	}
+
+	QAction *sel = menu.exec(varView->viewport()->mapToGlobal(pos));
+
+	if (sel == nullptr)
+	{
+		return;
+	}
+	if (sel == addAct)
+	{
+		addWatchCB();
+	}
+	else if (sel == removeAct)
+	{
+		watches.removeAll(item->text(0));
+		saveWatches();
+		refreshVariables();
+	}
+	else if (sel == watchVarAct)
+	{
+		const QString expr = itemExpression(item);
+
+		if (!expr.isEmpty() && !watches.contains(expr))
+		{
+			watches.append(expr);
+			saveWatches();
+			refreshVariables();
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::saveWatches(void)
+{
+	QSettings settings;
+
+	settings.setValue("luaDebugger/watches", watches);
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::addWatchCB(void)
+{
+	bool ok = false;
+	const QString expr = QInputDialog::getText(this, tr("Add Watch"), tr("Lua expression:"), QLineEdit::Normal, QString(), &ok).trimmed();
+
+	if (ok && !expr.isEmpty() && !watches.contains(expr))
+	{
+		watches.append(expr);
+		saveWatches();
+
+		if (FCEU_LuaDbgIsPaused())
+		{
+			refreshVariables();
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::clearWatchesCB(void)
+{
+	watches.clear();
+	saveWatches();
+
+	if (FCEU_LuaDbgIsPaused())
+	{
+		refreshVariables();
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::runContinueCB(void)
+{
+	if (FCEU_LuaDbgIsPaused())
+	{
+		FCEU_LuaDbgContinue();
+	}
+	else if (!luaRunning && !sourceView->file().empty())
+	{
+		FCEU_WRAPPER_LOCK();
+		if (0 == FCEU_LoadLuaCode(sourceView->file().c_str()))
+		{
+			QMessageBox::warning(this, tr("Run Script"), tr("Could not load the Lua script:\n%1").arg(QString::fromStdString(sourceView->file())));
+		}
+		FCEU_WRAPPER_UNLOCK();
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::breakCB(void)
+{
+	FCEU_LuaDbgRequestPause();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::stopCB(void)
+{
+	FCEU_WRAPPER_LOCK();
+	FCEU_LuaStop();
+	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::stepIntoCB(void)
+{
+	FCEU_LuaDbgStepInto();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::stepOverCB(void)
+{
+	FCEU_LuaDbgStepOver();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::stepOutCB(void)
+{
+	FCEU_LuaDbgStepOut();
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::runToCursorCB(void)
+{
+	runToLineCB(sourceView->currentLine());
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::runToLineCB(int line)
+{
+	if (!sourceView->file().empty())
+	{
+		FCEU_LuaDbgRunToLine(sourceView->file(), line);
+	}
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::gutterClickedCB(int line)
+{
+	if (sourceView->file().empty())
+	{
+		return;
+	}
+	std::set<int> &bps = breakpointMap[sourceView->file()];
+	const bool enable = (bps.count(line) == 0);
+
+	if (enable)
+	{
+		bps.insert(line);
+	}
+	else
+	{
+		bps.erase(line);
+	}
+	FCEU_LuaDbgSetBreakpoint(sourceView->file(), line, enable);
+	sourceView->setBreakpoints(bps);
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::toggleBreakpointCB(void)
+{
+	gutterClickedCB(sourceView->currentLine());
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::clearBreakpointsCB(void)
+{
+	breakpointMap.clear();
+	FCEU_LuaDbgClearBreakpoints();
+	sourceView->setBreakpoints(std::set<int>());
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::breakOnStartCB(bool checked)
+{
+	QSettings settings;
+
+	settings.setValue("luaDebugger/breakOnStart", checked);
+	FCEU_LuaDbgSetBreakOnStart(checked);
+}
+//----------------------------------------------------------------------------
+void LuaSourceDebuggerDialog_t::themeCB(bool dark)
+{
+	QSettings settings;
+
+	settings.setValue("luaDebugger/theme", dark ? "dark" : "light");
+	sourceView->setDarkTheme(dark);
+}
+//----------------------------------------------------------------------------
+void openLuaSourceDebugger(QWidget *parent, const QString &scriptPath)
+{
+	if (debuggerWin == nullptr)
+	{
+		debuggerWin = new LuaSourceDebuggerDialog_t(parent);
+	}
+	if (!scriptPath.isEmpty() && !FCEU_LuaDbgIsPaused())
+	{
+		debuggerWin->openScript(scriptPath);
+	}
+	debuggerWin->show();
+	debuggerWin->raise();
+	debuggerWin->activateWindow();
+}
+//----------------------------------------------------------------------------
+
+#endif
