@@ -3827,7 +3827,7 @@ void  QAsmView::updateAssemblyView(void)
 	int instruction_addr, asmFlags = 0;
 	std::string line;
 	char chr[64];
-	uint8 opcode[3];
+	uint8 opcode[4]={0};
 	char asmTxt[256];
 	dbg_asm_entry_t *a, *d;
 	char pc_found = 0;
