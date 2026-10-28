@@ -28,6 +28,7 @@
 #include <Windows.h>
 #endif
 
+#include <QtGlobal>
 #include <QUrl>
 #include <QFile>
 #include <QIODevice>

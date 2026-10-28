@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <QtGlobal>
 #include <QActionGroup>
 #include <QApplication>
 #include <QCloseEvent>
