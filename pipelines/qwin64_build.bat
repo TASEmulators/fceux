@@ -58,7 +58,7 @@ if not exist "%VULKAN_SDK%\Lib\vulkan-1.lib" (
 :vulkan_sdk_ready
 echo Using Vulkan SDK at "%VULKAN_SDK%"
 
-set SDL_VERSION=2.32.8
+set SDL_VERSION=2.32.10
 set FFMPEG_VERSION=5.1.2
 set LIBARCHIVE_VERSION=3.6.2
 

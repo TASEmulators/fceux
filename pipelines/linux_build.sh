@@ -11,7 +11,6 @@ SCRIPT_DIR=$( cd $(dirname $BASH_SOURCE[0]); pwd );
 #echo $SCRIPT_DIR;
 
 gcc --version
-#python2 --version
 #python3 --version
 
 INSTALL_PREFIX=/tmp/fceux
@@ -41,13 +40,7 @@ echo '****************************************'
 sudo apt-get --assume-yes  install lua5.1-dev
 pkg-config --cflags --libs  lua5.1
 
-# Install libSDL-1.2 and libSDL-2
-# libSDL-1.2 no long needed
-#echo '****************************************'
-#echo 'Install Dependency libsdl1.2-dev'
-#echo '****************************************'
-#sudo apt-get --assume-yes  install libsdl1.2-dev  
-#sdl-config --cflags --libs
+# Install libSDL-2
 echo '****************************************'
 echo 'Install Dependency libsdl2-dev'
 echo '****************************************'
@@ -68,26 +61,12 @@ echo '****************************************'
 sudo apt-get --assume-yes  install libarchive-dev
 pkg-config --cflags --libs  libarchive
 
-# GTK+-2 is no longer needed
-#sudo apt-get install libgtk2.0-dev
-
-# GTK3 was retired in favor of cross platform QT
-## Install GTK+-3 
-#echo '****************************************'
-#echo 'Install Dependency libgtk-3-dev'
-#echo '****************************************'
-#sudo apt-get --assume-yes  install libgtk-3-dev
-#pkg-config --cflags --libs  gtk+-3.0
-#
-## Install GTK+-3 Sourceview
-#sudo apt-get --assume-yes  install libgtksourceview-3.0-dev
-#pkg-config --cflags --libs  gtksourceview-3.0
-
 # Install QT5 
 echo '****************************************'
 echo 'Install Dependency Qt5'
 echo '****************************************'
-sudo apt-get --assume-yes  install qt5-default
+sudo apt-get --assume-yes  install qtbase5-dev
+sudo apt-get --assume-yes  install qt5-qmake
 sudo apt-get --assume-yes  install qttools5-dev  # For Qt Help
 
 # Install x264 
@@ -137,15 +116,6 @@ make -j `nproc`
 make  install  DESTDIR=$INSTALL_PREFIX
 
 cd ..;
-#mkdir buildGTK; cd buildGTK;
-#cmake  \
-#   -DGTK=1 \
-#   -DCMAKE_BUILD_TYPE=Release  \
-#   -DCMAKE_INSTALL_PREFIX=/usr \
-#   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-#	..
-#make -j `nproc`
-#make  install  DESTDIR=$INSTALL_PREFIX
 
 # Install Files
 #cd .. # cd out of build
@@ -178,16 +148,6 @@ else
    echo "Error: Executable Failed to build: $INSTALL_PREFIX/usr/bin/fceux";
    exit 1;
 fi
-
-#if [ -e $INSTALL_PREFIX/usr/bin/fceux-gtk ]; then
-#   echo '**************************************************************'
-#   echo 'Printing Shared Object Dependencies for fceux-gtk Executable'
-#   echo '**************************************************************'
-#   ldd  $INSTALL_PREFIX/usr/bin/fceux-gtk
-#else
-#   echo "Error: Executable Failed to build: $INSTALL_PREFIX/usr/bin/fceux-gtk";
-#   exit 1;
-#fi
 
 echo '**************************************************************'
 echo 'Printing To Be Packaged Files '
