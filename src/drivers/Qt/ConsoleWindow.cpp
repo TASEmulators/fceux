@@ -3073,7 +3073,7 @@ void consoleWin_t::loadStateFrom(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("FCS & SAV Files (*.sav *.SAV *.fc? *.FC? *.fc?? *.FC?? *.fc??? *.FC???) ;; All files (*)"));
+	dialog.setNameFilter(tr("FCS & SAV Files (*.sav *.SAV *.fc? *.FC? *.fc?? *.FC?? *.fc??? *.FC??\?) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
