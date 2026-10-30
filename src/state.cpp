@@ -65,8 +65,15 @@ static void (*SPreSave)(void) = NULL;
 static void (*SPostSave)(void) = NULL;
 static void (*SPostLoad)(bool) = NULL;
 
-static int SaveStateStatus[10];
-static int StateShow;
+#ifdef __QT_DRIVER__
+static constexpr bool enableStateBankRollover = true;
+#else
+static constexpr bool enableStateBankRollover = false;
+#endif
+static constexpr int MaxSaveStateBank = MAX_SAVE_STATE_SLOTS / 10;
+static int saveStateBank=0;
+static int saveStateStatus[10];
+static int stateShow=0;
 
 //tells the save system innards that we're loading the old format
 bool FCEU_state_loading_old_format = false;
@@ -475,6 +482,7 @@ void FCEUSS_Save(const char *fname, bool display_message)
 			FCEU_DispMessage("Cannot save FCS in GG screen.",0);
 		return;
 	}
+	const int saveId = (saveStateBank*10) + CurrentState;
 
 	if(fname)	//If filename is given use it.
 	{
@@ -484,7 +492,7 @@ void FCEUSS_Save(const char *fname, bool display_message)
 	else		//Else, generate one
 	{
 		//FCEU_PrintError("daCurrentState=%d",CurrentState);
-		fn = FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0);
+		fn = FCEU_MakeFName(FCEUMKF_STATE,saveId,0);
 
 		//backup existing savestate first
 		if (CheckFileExists(fn.c_str()) && backupSavestates)	//adelikat:  If the files exists and we are allowed to make backup savestates
@@ -502,7 +510,7 @@ void FCEUSS_Save(const char *fname, bool display_message)
 	if (st == NULL || st->get_fp() == NULL)
 	{
 		if (display_message)
-			FCEU_DispMessage("State %d save error.", 0, CurrentState);
+			FCEU_DispMessage("State %d save error.", 0, saveId);
 		return;
 	}
 
@@ -510,7 +518,7 @@ void FCEUSS_Save(const char *fname, bool display_message)
 	if (!internalSaveLoad)
 	{
 		LuaSaveData saveData;
-		CallRegisteredLuaSaveFunctions(CurrentState, saveData);
+		CallRegisteredLuaSaveFunctions(saveId, saveData);
 
 		std::string luaSaveFilename;
 		luaSaveFilename.assign(fn.c_str());
@@ -540,9 +548,9 @@ void FCEUSS_Save(const char *fname, bool display_message)
 
 	if(!fname)
 	{
-		SaveStateStatus[CurrentState] = 1;
+		saveStateStatus[CurrentState] = 1;
 		if (display_message)
-			FCEU_DispMessage("State %d saved.", 0, CurrentState);
+			FCEU_DispMessage("State %d saved.", 0, saveId);
 	}
 	redoSS = false;					//we have a new savestate so redo is not possible
 }
@@ -762,6 +770,8 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 			FCEU_DispMessage("Cannot load FCS in GG screen.",0);
 		return false;
 	}
+	const int stateId = (saveStateBank*10) + CurrentState;
+
 	if (fname)
 	{
 		st = FCEUD_UTF8_fstream(fname, "rb");
@@ -769,7 +779,7 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	}
 	else
 	{
-		fn = FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname);
+		fn = FCEU_MakeFName(FCEUMKF_STATE,stateId,fname);
 		st=FCEUD_UTF8_fstream(fn.c_str(),"rb");
         	lastLoadstateMade.assign(fn);
 	}
@@ -778,10 +788,10 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	{
 		if (display_message)
 		{
-			FCEU_DispMessage("State %d load error.", 0, CurrentState);
+			FCEU_DispMessage("State %d load error.", 0, stateId);
 			//FCEU_DispMessage("State %d load error. Filename: %s", 0, CurrentState, fn.c_str());
 		}
-		SaveStateStatus[CurrentState] = 0;
+		saveStateStatus[CurrentState] = 0;
 		return false;
 	}
 
@@ -804,10 +814,10 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 		{
 			if (display_message)
 			{
-				FCEU_DispMessage("State %d loaded.", 0, CurrentState);
+				FCEU_DispMessage("State %d loaded.", 0, stateId);
 				//FCEU_DispMessage("State %d loaded. Filename: %s", 0, CurrentState, fn.c_str());
 			}
-			SaveStateStatus[CurrentState] = 1;
+			saveStateStatus[CurrentState] = 1;
 		}
 
 		#ifdef _S9XLUA_H
@@ -825,7 +835,7 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 				fclose(luaSaveFile);
 			}
 
-			CallRegisteredLuaLoadFunctions(CurrentState, saveData);
+			CallRegisteredLuaLoadFunctions(stateId, saveData);
 		}
 		#endif
 
@@ -844,11 +854,11 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 	else
 	{
 		if(!fname)
-			SaveStateStatus[CurrentState] = 1;
+			saveStateStatus[CurrentState] = 1;
 
 		if (display_message)
 		{
-			FCEU_DispMessage("Error(s) reading state %d!", 0, CurrentState);
+			FCEU_DispMessage("Error(s) reading state %d!", 0, stateId);
 			//FCEU_DispMessage("Error(s) reading state %d! Filename: %s", 0, CurrentState, fn);
 		}
 		return 0;
@@ -858,22 +868,22 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 void FCEUSS_CheckStates(void)
 {
 	FILE *st=NULL;
-	int ssel;
 
-	for(ssel=0;ssel<10;ssel++)
+	for(int ssel=0;ssel<10;ssel++)
 	{
-		st=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_STATE,ssel,0),"rb");
+		const int saveId = (saveStateBank*10) + ssel;
+		st=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_STATE,saveId,0),"rb");
 		if(st)
 		{
-			SaveStateStatus[ssel]=1;
+			saveStateStatus[ssel]=1;
 			fclose(st);
 		}
 		else
-			SaveStateStatus[ssel]=0;
+			saveStateStatus[ssel]=0;
 	}
 
 	CurrentState=1;
-	StateShow=0;
+	stateShow=0;
 }
 
 void ResetExState(void (*PreSave)(void), void (*PostSave)(void))
@@ -946,24 +956,67 @@ void AddExState(void *v, uint32 s, int type, const char *desc)
 
 void FCEUI_SelectStateNext(int n)
 {
-	if(n>0)
+	bool willWrap = false;
+	const bool isIncr = (n > 0);
+	if(isIncr)
+	{
+		willWrap = CurrentState == 0;
 		CurrentState=(CurrentState+1)%10;
+	}
 	else
+	{
+		willWrap = CurrentState == 1;
 		CurrentState=(CurrentState+9)%10;
-	FCEUI_SelectState(CurrentState, 1);
+	}
+	if (willWrap && enableStateBankRollover)
+	{
+		const int bump = isIncr ? 1 : -1;
+		FCEUI_SetStateBank( saveStateBank + bump, true );
+	}
+	else
+	{
+		FCEUI_SelectState(CurrentState, 1);
+	}
+}
+
+int FCEUI_SetStateBank(int b, bool show)
+{
+	const int oldBank = saveStateBank;
+
+	if ( (b >= 0) && (b < MaxSaveStateBank) && (b != saveStateBank) )
+	{
+		const int oldState=CurrentState;
+		saveStateBank = b;
+		FCEUSS_CheckStates();
+		CurrentState=oldState;
+
+		if (show)
+		{
+			stateShow=180;
+			const int slot = (b*10) + CurrentState;
+			FCEU_DispMessage("-select state- %i",0, slot);
+		}
+	}
+	return oldBank;
+}
+
+int FCEUI_GetStateBank()
+{
+	return saveStateBank;
 }
 
 int FCEUI_SelectState(int w, int show)
 {
-	int oldstate=CurrentState;
+	const int oldstate=CurrentState;
 	FCEUSS_CheckStates();
-	if(w == -1) { StateShow = 0; return 0; } //mbg merge 7/17/06 had to make return a value
+	if(w == -1) { stateShow = 0; return 0; } //mbg merge 7/17/06 had to make return a value
 
 	CurrentState=w;
 	if(show)
 	{
-		StateShow=180;
-		FCEU_DispMessage("-select state-",0);
+		stateShow=180;
+		const int slot = (saveStateBank*10) + CurrentState;
+		FCEU_DispMessage("-select state- %i",0, slot);
 	}
 	return oldstate;
 }
@@ -972,7 +1025,7 @@ void FCEUI_SaveState(const char *fname, bool display_message)
 {
 	if(!FCEU_IsValidUI(FCEUI_SAVESTATE)) return;
 
-	StateShow = 0;
+	stateShow = 0;
 
 	FCEUSS_Save(fname, display_message);
 }
@@ -992,7 +1045,7 @@ void FCEUI_LoadState(const char *fname, bool display_message)
 {
 	if(!FCEU_IsValidUI(FCEUI_LOADSTATE)) return;
 
-	StateShow = 0;
+	stateShow = 0;
 	loadStateFailed = 0;
 
 	/* For network play, be load the state locally, and then save the state to a temporary file,
@@ -1052,10 +1105,10 @@ void FCEUI_LoadState(const char *fname, bool display_message)
 
 void FCEU_DrawSaveStates(uint8 *XBuf)
 {
-	if(!StateShow) return;
+	if(!stateShow) return;
 
-	FCEU_DrawNumberRow(XBuf,SaveStateStatus,CurrentState);
-	StateShow--;
+	FCEU_DrawNumberRow(XBuf,saveStateStatus,CurrentState);
+	stateShow--;
 }
 
 //*************************************************************************

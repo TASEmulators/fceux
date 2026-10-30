@@ -634,15 +634,18 @@ EmuStateScriptObject& EmuStateScriptObject::operator= (const EmuStateScriptObjec
 //----------------------------------------------------
 void EmuStateScriptObject::setSlot(int value)
 {
-	slot = value;
-
-	if (slot >= 0)
+	// Slot ids are 0 through 999 (bank * 10 + slot), anything else is no slot
+	if ( (value >= 0) && (value < MAX_SAVE_STATE_SLOTS) )
 	{
-		slot = slot % 10;
+		slot = value;
 
 		std::string fileString = FCEU_MakeFName(FCEUMKF_STATE, slot, 0);
 
 		filename = QString::fromStdString(fileString);
+	}
+	else
+	{
+		slot = -1;
 	}
 }
 //----------------------------------------------------

@@ -412,7 +412,7 @@ void FCEU_DispMessageOnMovie( __FCEU_PRINTF_FORMAT const char *format, ...)
 		guiMessage.howlong = 0;
 }
 
-void FCEU_DispMessage( __FCEU_PRINTF_FORMAT const char *format, int disppos=0, ...)
+void FCEU_DispMessage( __FCEU_PRINTF_FORMAT const char *format, int disppos, ...)
 {
 	va_list ap;
 

@@ -318,6 +318,12 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 		case HK_SELECT_STATE_PREV:
 			name = "SelectStatePrev"; keySeq = ""; title = "Select Previous State Slot"; group = "State";
 		break;
+		case HK_SELECT_STATE_BANK_NEXT:
+			name = "SelectStateBankNext"; keySeq = ""; title = "Select Next State Slot Bank"; group = "State";
+		break;
+		case HK_SELECT_STATE_BANK_PREV:
+			name = "SelectStateBankPrev"; keySeq = ""; title = "Select Previous State Slot Bank"; group = "State";
+		break;
 		case HK_LOAD_PREV_STATE:
 			name = "LoadPrevState"; keySeq = ""; title = "Load Previous Recorded State"; group = "State";
 		break;

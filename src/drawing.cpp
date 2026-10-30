@@ -354,40 +354,93 @@ void FCEU_DrawRecordingStatus(uint8* XBuf)
 
 void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur)
 {
-	uint8 *XBaf;
-	int z,x,y;
+	// --- Layout Constants ---
+	constexpr int SCREEN_STRIDE    = 256; // Width of the target screen buffer
+	constexpr int DIGIT_WIDTH      = 21;  // Width of a single digit graphic
+	constexpr int DIGIT_HEIGHT     = 13;  // Height of a single digit graphic
+	constexpr int FONT_MAX_HEIGHT  = 12;  // Vertical offset sizing factor inside sstat
+	constexpr int BORDER_COLOR_ID  = 4;   // Color index used for the selection box
+	constexpr int TRANSPARENT_KEY  = 0x83; // Color-key used for background skipping
 
-	XBaf=XBuf - 4 + (FSettings.LastSLine-34)*256;
-	if(XBaf>=XBuf)
-		for(z=1;z<11;z++)
+	// Derived structural metrics
+	constexpr int TOTAL_DIGIT_PIXELS = DIGIT_WIDTH * FONT_MAX_HEIGHT;
+
+	// Fast boundary check
+	uint8 *XBaf = XBuf - 4 + (FSettings.LastSLine - 34) * SCREEN_STRIDE;
+	if (XBaf < XBuf) return;
+
+	for (int z = 1; z < 11; ++z)
+	{
+		const int z_mod_10 = z % 10;
+
+		// Calculate the starting horizontal pixel offset for this specific digit
+		const int z_offset_x = (z) * DIGIT_WIDTH + (z);
+
+		uint8 *dest_row = XBaf + z_offset_x;
+
+		const int src_digit_idx = (z-1);
+		const uint8 *src_digit = sstat + (src_digit_idx * TOTAL_DIGIT_PIXELS);
+
+		if (nstatus[z_mod_10])
 		{
-			if(nstatus[z%10])
+			// Path A: Draw unconditionally (Opaque overwrite)
+			for (int y = 0; y < DIGIT_HEIGHT; ++y)
 			{
-				for(y=0;y<13;y++)
-					for(x=0;x<21;x++)
-						XBaf[y*256+x+z*21+z]=sstat[y*21+x+(z-1)*21*12]^0x80;
-			} else {
-				for(y=0;y<13;y++)
-					for(x=0;x<21;x++)
-						if(sstat[y*21+x+(z-1)*21*12]!=0x83)
-							XBaf[y*256+x+z*21+z]=sstat[y*21+x+(z-1)*21*12]^0x80;
-
-						else
-							XBaf[y*256+x+z*21+z]=(XBaf[y*256+x+z*21+z]&0xF)|0xC0;
-			}
-			if(cur==z%10)
-			{
-				for(x=0;x<21;x++)
-					XBaf[x+z*21+z*1]=4;
-				for(x=1;x<12;x++)
+				for (int x = 0; x < DIGIT_WIDTH; ++x)
 				{
-					XBaf[256*x+z*21+z*1]=
-						XBaf[256*x+z*21+z*1+20]=4;
+					dest_row[x] = src_digit[x] ^ 0x80;
 				}
-				for(x=0;x<21;x++)
-					XBaf[12*256+x+z*21+z*1]=4;
+				dest_row  += SCREEN_STRIDE;
+				src_digit += DIGIT_WIDTH;
 			}
 		}
+		else
+		{
+			// Path B: Draw with color-key transparency check
+			for (int y = 0; y < DIGIT_HEIGHT; ++y)
+			{
+				for (int x = 0; x < DIGIT_WIDTH; ++x)
+				{
+					uint8 src_val = src_digit[x];
+					if (src_val != TRANSPARENT_KEY)
+					{
+						dest_row[x] = src_val ^ 0x80;
+					}
+					else
+					{
+						dest_row[x] = (dest_row[x] & 0x0F) | 0xC0;
+					}
+				}
+				dest_row  += SCREEN_STRIDE;
+				src_digit += DIGIT_WIDTH;
+			}
+		}
+
+		// Highlight selection border box overlay if this column matches 'cur'
+		if (cur == z_mod_10)
+		{
+			uint8 *border_ptr = XBaf + z_offset_x;
+
+			// Top horizontal border line
+			for (int x = 0; x < DIGIT_WIDTH; ++x) {
+				border_ptr[x] = BORDER_COLOR_ID;
+			}
+
+			// Vertical side border paths (Rows 1 to DIGIT_HEIGHT-2)
+			uint8 *side_ptr = border_ptr + SCREEN_STRIDE;
+			for (int y = 1; y < (DIGIT_HEIGHT - 1); ++y)
+			{
+				side_ptr[0]                   = BORDER_COLOR_ID; // Left boundary edge
+				side_ptr[DIGIT_WIDTH - 1]     = BORDER_COLOR_ID; // Right boundary edge
+				side_ptr += SCREEN_STRIDE;
+			}
+
+			// Bottom horizontal border line
+			for (int x = 0; x < DIGIT_WIDTH; ++x) {
+				side_ptr[x] = BORDER_COLOR_ID;
+			}
+		}
+	}
 }
 
 static int FixJoedChar(uint8 ch)

@@ -402,6 +402,8 @@ class  consoleWin_t : public QMainWindow
 		void changeState9(void);
 		void incrementState(void);
 		void decrementState(void);
+		void incrementStateBank(void);
+		void decrementStateBank(void);
 		void loadLua(void);
 		void loadJs(void);
 		void takeScreenShot(void);

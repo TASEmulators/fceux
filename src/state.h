@@ -26,6 +26,9 @@ enum ENUM_SSLOADPARAMS
 	SSLOADPARAM_BACKUP,
 };
 
+// Save state slot ids are bank * 10 + slot, valid range 0 - 999
+static constexpr int MAX_SAVE_STATE_SLOTS = 1000;
+
 void FCEUSS_Save(const char *, bool display_message=true);
 bool FCEUSS_Load(const char *, bool display_message=true);
 void FCEUSS_SetLoadCallback( void (*cb)(bool) );

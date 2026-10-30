@@ -795,9 +795,18 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 		QFileInfo fi( filename );
 		QString suffix = fi.suffix();
 
-		bool isStateSaveFile = (suffix.size() == 3) && 
-						(suffix[0] == 'f') && (suffix[1] == 'c') &&
-							( (suffix[2] == 's') || suffix[2].isDigit() );
+		// .fcs, or .fc followed by 1 to 3 digits (slot ids 0 - 999)
+		bool isStateSaveFile = (suffix.size() >= 3) && (suffix.size() <= 5) &&
+						suffix.startsWith("fc");
+
+		if (isStateSaveFile)
+		{
+			const QString slotStr = suffix.mid(2);
+			bool isSlotNum = false;
+			slotStr.toInt(&isSlotNum);
+
+			isStateSaveFile = (slotStr == "s") || (isSlotNum && slotStr[0].isDigit());
+		}
 
 		//printf("DragNDrop Suffix: %s\n", suffix.toLocal8Bit().constData() );
 
@@ -1143,6 +1152,9 @@ void consoleWin_t::createMainMenu(void)
 	
 	connect( Hotkeys[ HK_SELECT_STATE_PREV ].getShortcut(), SIGNAL(activated()), this, SLOT(decrementState(void)) );
 	connect( Hotkeys[ HK_SELECT_STATE_NEXT ].getShortcut(), SIGNAL(activated()), this, SLOT(incrementState(void)) );
+
+	connect( Hotkeys[ HK_SELECT_STATE_BANK_PREV ].getShortcut(), SIGNAL(activated()), this, SLOT(decrementStateBank(void)) );
+	connect( Hotkeys[ HK_SELECT_STATE_BANK_NEXT ].getShortcut(), SIGNAL(activated()), this, SLOT(incrementStateBank(void)) );
 
 #ifdef _S9XLUA_H
 	// File -> Load Lua
@@ -3061,7 +3073,7 @@ void consoleWin_t::loadStateFrom(void)
 
 	dialog.setFileMode(QFileDialog::ExistingFile);
 
-	dialog.setNameFilter(tr("FCS & SAV Files (*.sav *.SAV *.fc? *.FC?) ;; All files (*)"));
+	dialog.setNameFilter(tr("FCS & SAV Files (*.sav *.SAV *.fc? *.FC? *.fc?? *.FC?? *.fc??? *.FC???) ;; All files (*)"));
 
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
@@ -3284,16 +3296,26 @@ void consoleWin_t::changeState9(void){ changeState(9); }
 
 void consoleWin_t::incrementState(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_SelectStateNext(1);
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::decrementState(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_SelectStateNext(-1);
-	FCEU_WRAPPER_UNLOCK();
+}
+
+void consoleWin_t::incrementStateBank(void)
+{
+	FCEU_WRAPPER_SCOPED_LOCK();
+	FCEUI_SetStateBank( FCEUI_GetStateBank()+1, true);
+}
+
+void consoleWin_t::decrementStateBank(void)
+{
+	FCEU_WRAPPER_SCOPED_LOCK();
+	FCEUI_SetStateBank( FCEUI_GetStateBank()-1, true);
 }
 
 void consoleWin_t::mainMenuOpen(void)

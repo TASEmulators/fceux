@@ -164,6 +164,8 @@ void FCEUI_SetSoundQuality(int quality);
 void FCEUD_SoundToggle(void);
 void FCEUD_SoundVolumeAdjust(int);
 
+int FCEUI_GetStateBank();
+int FCEUI_SetStateBank(int, bool);
 int FCEUI_SelectState(int, int);
 extern void FCEUI_SelectStateNext(int);
 
