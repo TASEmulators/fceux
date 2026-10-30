@@ -531,9 +531,7 @@ int SaveSnapshot(void)
 
 	for (u = lastu; u < 99999; ++u)
 	{
-		pp=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"rb");
-		if(pp==NULL) break;
-		fclose(pp);
+		if (!CheckFileExists(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str())) break;
 	}
 	lastu = u;
 

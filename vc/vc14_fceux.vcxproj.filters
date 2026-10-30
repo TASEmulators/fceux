@@ -304,6 +304,9 @@
     <ClCompile Include="..\src\drivers\common\hq3x.cpp">
       <Filter>drivers\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\common\os_utils.cpp">
+      <Filter>drivers\common</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\drivers\common\scale2x.cpp">
       <Filter>drivers\common</Filter>
     </ClCompile>
@@ -1142,6 +1145,9 @@
       <Filter>drivers\common</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\common\hq3x.h">
+      <Filter>drivers\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\common\os_utils.h">
       <Filter>drivers\common</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\common\scale2x.h">

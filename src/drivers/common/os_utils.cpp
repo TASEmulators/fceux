@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 #endif
 
-#include "common/os_utils.h"
+#include "os_utils.h"
 //************************************************************
 int fceu_mkdir( const char *path )
 {
@@ -68,24 +68,19 @@ int fceu_mkpath( const char *path )
 //************************************************************
 bool fceu_file_exists( const char *filepath )
 {
-#ifdef WIN32
-	FILE *fp;
-	fp = ::fopen( filepath, "r" );
-
-	if ( fp != NULL )
+	if ( (filepath == nullptr) || (filepath[0] == 0) )
 	{
-		::fclose(fp);
-		return true;
+		return false;
 	}
+#if defined(WIN32)
+	DWORD attr = GetFileAttributesA( filepath );
+
+	return (attr != INVALID_FILE_ATTRIBUTES) && !(attr & FILE_ATTRIBUTE_DIRECTORY);
 #else
 	struct stat sb;
 
-	if ( stat( filepath, &sb ) == 0 )
-	{
-		return true;
-	}
+	return (stat( filepath, &sb ) == 0) && !S_ISDIR(sb.st_mode);
 #endif
-	return false;
 }
 //************************************************************
 int msleep( int ms )

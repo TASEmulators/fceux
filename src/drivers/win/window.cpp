@@ -123,7 +123,6 @@ extern bool movie_readonly;
 extern bool AutoSS;			//flag for whether an auto-save has been made
 extern int newppu;
 extern INT_PTR CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
-extern bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 extern bool oldInputDisplay;
 extern int RAMInitOption;
 extern int movieRecordMode;

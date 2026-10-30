@@ -2,6 +2,7 @@
 #define _FCEUH
 
 #include "types.h"
+#include "drivers/common/os_utils.h"
 
 extern int fceuindbg;
 extern int newppu;
@@ -137,7 +138,10 @@ int FCEU_TextScanlineOffsetFromBottom(int y);
 
 extern FCEUS FSettings;
 
-bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
+inline bool CheckFileExists(const char* filename)	//Receives a filename (fullpath) and checks to see if that file exists
+{
+	return fceu_file_exists(filename);
+}
 
 void FCEU_PrintError( __FCEU_PRINTF_FORMAT const char *format, ...)  __FCEU_PRINTF_ATTRIBUTE( 1, 2 );
 void FCEU_printf( __FCEU_PRINTF_FORMAT const char *format, ...)  __FCEU_PRINTF_ATTRIBUTE( 1, 2 );

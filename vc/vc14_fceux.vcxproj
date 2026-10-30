@@ -570,6 +570,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\drivers\common\hq2x.cpp" />
     <ClCompile Include="..\src\drivers\common\hq3x.cpp" />
     <ClCompile Include="..\src\drivers\common\nes_ntsc.c" />
+    <ClCompile Include="..\src\drivers\common\os_utils.cpp" />
     <ClCompile Include="..\src\drivers\common\scale2x.cpp" />
     <ClCompile Include="..\src\drivers\common\scale3x.cpp" />
     <ClCompile Include="..\src\drivers\common\scalebit.cpp" />
@@ -1036,6 +1037,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\drivers\common\nes_ntsc.h" />
     <ClInclude Include="..\src\drivers\common\nes_ntsc_config.h" />
     <ClInclude Include="..\src\drivers\common\nes_ntsc_impl.h" />
+    <ClInclude Include="..\src\drivers\common\os_utils.h" />
     <ClInclude Include="..\src\drivers\common\scale2x.h" />
     <ClInclude Include="..\src\drivers\common\scale3x.h" />
     <ClInclude Include="..\src\drivers\common\scalebit.h" />

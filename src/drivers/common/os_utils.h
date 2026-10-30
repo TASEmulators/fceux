@@ -1,5 +1,6 @@
 // os_utils.h
 //
+#pragma once
 
 int fceu_mkdir( const char *path );
 

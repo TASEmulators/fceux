@@ -145,21 +145,6 @@ FCEUGI::~FCEUGI()
 	}
 }
 
-bool CheckFileExists(const char* filename) {
-	//This function simply checks to see if the given filename exists
-	if (!filename) return false;
-	fstream test;
-	test.open(filename, fstream::in);
-
-	if (test.fail()) {
-		test.close();
-		return false;
-	} else {
-		test.close();
-		return true;
-	}
-}
-
 void FCEU_TogglePPU(void) {
 	newppu ^= 1;
 	if (newppu) {

@@ -867,19 +867,10 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 
 void FCEUSS_CheckStates(void)
 {
-	FILE *st=NULL;
-
 	for(int ssel=0;ssel<10;ssel++)
 	{
 		const int saveId = (saveStateBank*10) + ssel;
-		st=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_STATE,saveId,0),"rb");
-		if(st)
-		{
-			saveStateStatus[ssel]=1;
-			fclose(st);
-		}
-		else
-			saveStateStatus[ssel]=0;
+		saveStateStatus[ssel] = CheckFileExists(FCEU_MakeFName(FCEUMKF_STATE,saveId,0).c_str()) ? 1 : 0;
 	}
 
 	CurrentState=1;
@@ -1032,15 +1023,6 @@ void FCEUI_SaveState(const char *fname, bool display_message)
 
 int loadStateFailed = 0; // hack, this function should return a value instead
 
-bool file_exists(const char * filename)
-{
-    if (FILE * file = fopen(filename, "r")) //I'm sure, you meant for READING =)
-    {
-        fclose(file);
-        return true;
-    }
-    return false;
-}
 void FCEUI_LoadState(const char *fname, bool display_message)
 {
 	if(!FCEU_IsValidUI(FCEUI_LOADSTATE)) return;
@@ -1060,7 +1042,7 @@ void FCEUI_LoadState(const char *fname, bool display_message)
 	{
 		FCEUI_MakeBackupMovie(false);	//Backup the movie before the contents get altered, but do not display messages
 	}
-	if (fname != NULL && !file_exists(fname))
+	if (fname != NULL && !CheckFileExists(fname))
 	{
 		loadStateFailed = 1;
 		return; // state doesn't exist; exit cleanly

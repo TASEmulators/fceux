@@ -953,12 +953,9 @@ void CDLoggerROMChanged(void)
 	std::string nameo;
 	getDefaultCDLFile(nameo);
 
-	FILE *FP;
-	FP = fopen(nameo.c_str(), "rb");
-	if (FP != NULL)
+	if (CheckFileExists(nameo.c_str()))
 	{
 		// .cdl file with this ROM name exists
-		fclose(FP);
 		//if (!hCDLogger)
 		//{
 		//	DoCDLogger();
