@@ -32,6 +32,12 @@
 #include "utils/endian.h"
 #include "utils/memory.h"
 #include "utils/md5.h"
+
+// Must precede unzip.h: minizip-ng would otherwise include zlib-ng.h, which conflicts with zlib.h
+#ifndef WIN32
+#include <zlib.h>
+#endif
+
 #ifdef _SYSTEM_MINIZIP
 #ifdef __linux
 #include <minizip/unzip.h>
@@ -48,10 +54,6 @@
 #include "movie.h"
 #include "driver.h"
 #include "utils/xstring.h"
-
-#ifndef WIN32
-#include <zlib.h>
-#endif
 
 using namespace std;
 
