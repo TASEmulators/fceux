@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH FCEUX 6 "June 24, 2012"
+.TH FCEUX 6 "October 30, 2026"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -27,6 +27,15 @@ is an emulator for the original (8-bit) Nintendo Entertainment System (NES).
 It has a robust color palette rendering engine that is fully customizable,
 along with excellent sound and joystick support, and even supports movie 
 recording and playback.
+.SH GUI CONFIGURATION
+On Linux, the GUI Config dialog provides a
+.B Use X11 (xcb) on Wayland (restart required)
+checkbox, disabled by default.
+When enabled, FCEUX selects Qt's xcb platform on Wayland sessions.
+Restart the application after changing this setting for it to take effect.
+An externally set
+.B QT_QPA_PLATFORM
+takes precedence, even if its value is empty.
 .SH OPTIONS
 .SS Misc. Options
 .TP

@@ -23,6 +23,7 @@
 #include <QAbstractEventDispatcher>
 #include <QSplashScreen>
 #include <QSettings>
+#include <QtGlobal>
 //#include <QProxyStyle>
 
 #include "Qt/ConsoleWindow.h"
@@ -146,10 +147,41 @@ private:
 };
 #endif
 
+#define orgName    QStringLiteral("TasEmulators")
+#define orgDomain  QStringLiteral("TasEmulators.org")
+#define appName    QStringLiteral("fceux")
+
+#if defined(Q_OS_LINUX)
+static void WaylandWindowFix()
+{
+	QSettings settings(orgName, appName);
+
+	const bool isWayland = qgetenv("XDG_SESSION_TYPE") == "wayland" ||
+	                      !qgetenv("WAYLAND_DISPLAY").isEmpty();
+
+	const bool waylandOverride = settings.value("Application/WaylandPlatformOverride", false).toBool();
+	if (isWayland && waylandOverride && !qEnvironmentVariableIsSet("QT_QPA_PLATFORM"))
+	{
+		if (!qputenv("QT_QPA_PLATFORM", "xcb"))
+		{
+			qWarning("Failed to set QT_QPA_PLATFORM=xcb for the Wayland platform override.");
+		}
+	}
+}
+#endif
+
+static void QtPreInit()
+{
+#if defined(Q_OS_LINUX)
+	WaylandWindowFix();
+#endif
+}
+
 int main( int argc, char *argv[] )
 {
 	int retval = 0;
 
+	QtPreInit();
 	fceuWrapperPreInit(argc, argv);
 
 	qInstallMessageHandler(MessageOutput);
@@ -159,9 +191,9 @@ int main( int argc, char *argv[] )
 	app.installEventFilter(guiBusyProfiler);
 #endif
 
-	QCoreApplication::setOrganizationName("TasEmulators");
-	QCoreApplication::setOrganizationDomain("TasEmulators.org");
-	QCoreApplication::setApplicationName("fceux");
+	QCoreApplication::setOrganizationName(orgName);
+	QCoreApplication::setOrganizationDomain(orgDomain);
+	QCoreApplication::setApplicationName(appName);
 
 	fceuSplashScreen *splash = NULL;
 	
@@ -240,4 +272,3 @@ int main( int argc, char *argv[] )
 
 	return retval;
 }
-

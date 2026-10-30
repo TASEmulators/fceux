@@ -143,6 +143,9 @@ protected:
 	QCheckBox *pauseOnMenuAccess;
 	QCheckBox *ctxMenuEnable;
 	QCheckBox *showSplashScreen;
+#if defined(Q_OS_LINUX)
+	QCheckBox *waylandPlatformOverride;
+#endif
 	QCheckBox *useCustomStyle;
 	QCheckBox *useCustomPalette;
 	QComboBox *styleComboBox;
@@ -158,6 +161,9 @@ private slots:
 	void pauseOnMenuAccessChanged(int v);
 	void contextMenuEnableChanged(int v);
 	void showSplashScreenChanged(int v);
+#if defined(Q_OS_LINUX)
+	void waylandPlatformOverrideChanged(int v);
+#endif
 	void useCustomQPaletteChanged(int v);
 	void useCustomStyleChanged(int v);
 	void styleChanged(int index);

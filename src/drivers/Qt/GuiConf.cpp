@@ -143,6 +143,14 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	connect(ctxMenuEnable      , SIGNAL(stateChanged(int)), this, SLOT(contextMenuEnableChanged(int)));
 	connect(showSplashScreen   , SIGNAL(stateChanged(int)), this, SLOT(showSplashScreenChanged(int)));
 
+#if defined(Q_OS_LINUX)
+	waylandPlatformOverride = new QCheckBox(tr("Use X11 (xcb) on Wayland (restart required)"));
+	waylandPlatformOverride->setToolTip(tr("Restart the application for changes to take effect. "
+		"An externally set QT_QPA_PLATFORM takes precedence over this option."));
+	waylandPlatformOverride->setChecked(settings.value("Application/WaylandPlatformOverride", false).toBool());
+	connect(waylandPlatformOverride, SIGNAL(stateChanged(int)), this, SLOT(waylandPlatformOverrideChanged(int)));
+#endif
+
 	styleComboBox = new QComboBox();
 
 	styleKeys = QStyleFactory::keys();
@@ -244,6 +252,9 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	vbox1->addWidget(pauseOnMenuAccess, 1);
 	vbox1->addWidget(ctxMenuEnable, 1);
 	vbox1->addWidget(showSplashScreen, 1);
+#if defined(Q_OS_LINUX)
+	vbox1->addWidget(waylandPlatformOverride, 1);
+#endif
 	vbox1->addStretch(10);
 
 	closeButton = new QPushButton( tr("Close") );
@@ -323,6 +334,15 @@ void GuiConfDialog_t::showSplashScreenChanged(int state)
 	settings.setValue("mainWindow/showSplashScreen", value );
 	settings.sync();
 }
+#if defined(Q_OS_LINUX)
+//----------------------------------------------------
+void GuiConfDialog_t::waylandPlatformOverrideChanged(int state)
+{
+	QSettings settings;
+	settings.setValue("Application/WaylandPlatformOverride", state != Qt::Unchecked);
+	settings.sync();
+}
+#endif
 //----------------------------------------------------
 void GuiConfDialog_t::useCustomStyleChanged(int state)
 {
