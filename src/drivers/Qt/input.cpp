@@ -541,6 +541,14 @@ void gamepad_function_key_t::sendKeyPressEvent(int idx)
 			emit s->activated();
 			hasShortcut = true;
 		}
+		else
+		{
+			// Bindings loaded from file only store the hot key index, and the
+			// hot key's keyboard mapping may have changed since binding, so
+			// always use its current key sequence.
+			keySeq[idx].key      = Hotkeys[ hk[idx] ].qkey.value;
+			keySeq[idx].modifier = Hotkeys[ hk[idx] ].qkey.modifier;
+		}
 	}
 
 	if ( !hasShortcut && (keySeq[idx].key > 0) )
