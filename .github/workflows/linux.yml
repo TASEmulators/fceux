@@ -26,10 +26,10 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install --assume-yes --no-install-recommends \
+          sudo apt-get install --assume-yes \
             cmake ninja-build pkg-config ccache \
             lua5.1-dev libsdl2-dev libminizip-dev libarchive-dev \
-            qtbase5-dev qt5-qmake qttools5-dev qttools5-dev-tools \
+            qtbase5-dev qt5-qmake qttools5-dev qttools5-dev-tools libqt5opengl5-dev \
             libx264-dev libx265-dev \
             libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
 
