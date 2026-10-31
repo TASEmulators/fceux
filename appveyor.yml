@@ -55,7 +55,7 @@ for:
         - job_name: Ubuntu
 
     build_script:
-    - sh: perl pipelines/build.pl linux
+    - sh: echo "Skipping Linux build on AppVeyor. Github actions build is faster."
 
   -
     matrix:
