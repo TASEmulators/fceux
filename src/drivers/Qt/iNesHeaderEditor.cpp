@@ -43,6 +43,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/iNesHeaderEditor.h"
+#include "Qt/WindowLayoutManager.h"
 #include "Qt/ConsoleUtilities.h"
 
 extern BMAPPINGLocal bmap[];
@@ -533,12 +534,22 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 
 	initOK = true;
 
-	restoreGeometry(settings.value("iNesHeaderWindow/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "NesHeaderEditor" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("iNesHeaderWindow/geometry").toByteArray());
+	}
 }
 //----------------------------------------------------------------------------
 iNesHeaderEditor_t::~iNesHeaderEditor_t(void)
 {
 	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
+
 	//printf("Destroy Header Editor Config Window\n");
 
 	if ( iNesHdr )

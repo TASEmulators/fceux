@@ -319,9 +319,24 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	// Register window types and the main window with the window layout manager
 	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
 
-	layoutMgr->registerType( "MainWindow", tr("Main Window"), true );
-	debuggerRegisterWindowLayoutType();
-	hexEditorRegisterWindowLayoutType();
+	layoutMgr->registerType( "MainWindow"     , tr("Main Window")             , true );
+	layoutMgr->registerType( "Debugger"       , tr("Debugger")                , true , [this]{ openDebugWindow(); } );
+	layoutMgr->registerType( "HexEditor"      , tr("Hex Editor")              , false, [this]{ openHexEditor(); } );
+	layoutMgr->registerType( "PPUViewer"      , tr("PPU Viewer")              , true , [this]{ openPPUViewer(); } );
+	layoutMgr->registerType( "SpriteViewer"   , tr("Sprite Viewer")           , true , [this]{ openOAMViewer(); } );
+	layoutMgr->registerType( "NameTableViewer", tr("Name Table Viewer")       , true , [this]{ openNTViewer(); } );
+	layoutMgr->registerType( "TraceLogger"    , tr("Trace Logger")            , true , [this]{ openTraceLogger(); } );
+	layoutMgr->registerType( "CodeDataLogger" , tr("Code/Data Logger")        , true , [this]{ openCodeDataLogger(); } );
+	layoutMgr->registerType( "GameGenie"      , tr("Game Genie Encode/Decode"), true , [this]{ openGGEncoder(); } );
+	layoutMgr->registerType( "NesHeaderEditor", tr("NES Header Editor")       , false, [this]
+	{
+		// Only restore for a loaded iNES cartridge, otherwise the editor would
+		// prompt for a file or show an error during the layout load.
+		if ( (GameInfo != nullptr) && (GameInfo->type == GIT_CART) )
+		{
+			openNesHeaderEditor();
+		}
+	});
 
 	layoutMgr->registerWindow( this, "MainWindow" );
 }
@@ -3736,13 +3751,9 @@ void consoleWin_t::openCodeDataLogger(void)
 
 void consoleWin_t::openGGEncoder(void)
 {
-	GameGenieDialog_t *win;
-
 	//printf("Open Game Genie Window\n");
-	
-	win = new GameGenieDialog_t(this);
-	
-	win->show();
+
+	openGameGenieWindow(this);
 }
 
 void consoleWin_t::openNesHeaderEditor(void)

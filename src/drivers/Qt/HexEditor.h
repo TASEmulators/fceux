@@ -369,4 +369,3 @@ void hexEditorUpdateMemoryValues(bool force = false);
 void hexEditorLoadBookmarks(void);
 void hexEditorSaveBookmarks(void);
 int hexEditorOpenFromDebugger( int mode, int addr );
-void hexEditorRegisterWindowLayoutType(void);

@@ -57,4 +57,6 @@ class GameGenieDialog_t : public QDialog
 
 };
 
+int openGameGenieWindow( QWidget *parent );
+
 void EncodeGG(char *str, int a, int v, int c);

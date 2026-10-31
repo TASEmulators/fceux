@@ -45,6 +45,7 @@
 #include "Qt/CheatsConf.h"
 #include "Qt/HexEditor.h"
 #include "Qt/GameGenie.h"
+#include "Qt/WindowLayoutManager.h"
 
 static const char *GameGenieLetters = "APZLGITYEOXUKSVN";
 
@@ -94,6 +95,23 @@ class fceuGGCodeValidtor : public QValidator
 
 	private:
 };
+//----------------------------------------------------------------------------
+static GameGenieDialog_t *gameGenieWin = nullptr;
+//----------------------------------------------------------------------------
+int openGameGenieWindow( QWidget *parent )
+{
+	if ( gameGenieWin != nullptr )
+	{
+		gameGenieWin->activateWindow();
+		gameGenieWin->raise();
+		return -1;
+	}
+	gameGenieWin = new GameGenieDialog_t(parent);
+
+	gameGenieWin->show();
+
+	return 0;
+}
 //----------------------------------------------------------------------------
 GameGenieDialog_t::GameGenieDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -232,12 +250,28 @@ GameGenieDialog_t::GameGenieDialog_t(QWidget *parent)
 
 	addCheatBtn->setEnabled( false );
 
-	restoreGeometry(settings.value("GameGenieWindow/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "GameGenie" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("GameGenieWindow/geometry").toByteArray());
+	}
+
+	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
 }
 //----------------------------------------------------------------------------
 GameGenieDialog_t::~GameGenieDialog_t(void)
 {
 	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
+
+	if ( gameGenieWin == this )
+	{
+		gameGenieWin = nullptr;
+	}
 	//printf("Destroy Game Genie Window\n");
 	settings.setValue("GameGenieWindow/geometry", saveGeometry());
 }

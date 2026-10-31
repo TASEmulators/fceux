@@ -51,6 +51,7 @@
 #include "Qt/config.h"
 #include "Qt/ppuViewer.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/WindowLayoutManager.h"
 
 static ppuNameTableViewerDialog_t *nameTableViewWindow = NULL;
 static uint8_t palcache[36]; //palette cache
@@ -568,7 +569,14 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	tileGridColorAct->connectColor( &ntView->tileGridColor );
 	attrGridColorAct->connectColor( &ntView->attrGridColor );
 
-	restoreGeometry(settings.value("ntViewer/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "NameTableViewer" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("ntViewer/geometry").toByteArray());
+	}
 
 	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
 }
@@ -576,6 +584,8 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 ppuNameTableViewerDialog_t::~ppuNameTableViewerDialog_t(void)
 {
 	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
 
 	updateTimer->stop();
 	nameTableViewWindow = NULL;
@@ -1124,7 +1134,7 @@ void ppuNameTableView_t::computeNameTableProperties( int NameTable, int TileX, i
 {
 	int TileID, PPUAddress, AttAddress, Attrib, ptable = 0;
 
-	if ( vnapage[0] == NULL )
+	if ( vnapage[0] == NULL || NameTable < 0 || NameTable > 3 )
 	{
 		return;
 	}
@@ -1556,8 +1566,15 @@ void ppuNameTableView_t::paintEvent(QPaintEvent *event)
 		}
 	}
 
-	xx = nameTable[ selTable ].tile[ selTile.y() ][ selTile.x() ].x;
-	yy = nameTable[ selTable ].tile[ selTile.y() ][ selTile.x() ].y;
+	if (selTable >= 0)
+	{
+		xx = nameTable[ selTable ].tile[ selTile.y() ][ selTile.x() ].x;
+		yy = nameTable[ selTable ].tile[ selTile.y() ][ selTile.x() ].y;
+	}
+	else
+	{
+		xx = yy = 0;
+	}
 
 	selTileLoc.setX( xx );
 	selTileLoc.setY( yy );
@@ -1856,7 +1873,7 @@ void ppuNameTableTileView_t::paintEvent(QPaintEvent *event)
 	int x,y,w,h,xx,yy;
 	QPainter painter(this);
 	QPen     pen;
-	ppuNameTableTile_t *tile;
+	ppuNameTableTile_t *tile = nullptr;
 
 	pen = painter.pen();
 
@@ -1878,57 +1895,32 @@ void ppuNameTableTileView_t::paintEvent(QPaintEvent *event)
 	}
 	
 	xx = 0;
+	yy = 0;
 
-	tile = &nameTable[ selTable ].tile[ tileY ][ tileX ];
-
-	// Draw Tile Pixels as rectangles
-	for (x=0; x < 8; x++)
+	if ( selTable >= 0 && selTable < 4 )
 	{
-		yy = 0;
-	
-		for (y=0; y < 8; y++)
-		{
-			painter.fillRect( xx, yy, w, h, tile->pixel[y][x].color );
-			yy += h;
-		}
-		xx += w;
+		tile = &nameTable[ selTable ].tile[ tileY ][ tileX ];
 	}
+
+	if (tile != nullptr)
+	{
+		// Draw Tile Pixels as rectangles
+		for (x=0; x < 8; x++)
+		{
+			yy = 0;
 	
-	//if ( drawTileGrid )
-	//{
-	//	pen.setWidth( 1 );
-	//	pen.setColor( QColor(128,128,128) );
-	//	painter.setPen( pen );
-
-	//	// Draw Tile Pixel grid lines
-	//	xx = 0; y = 8*h;
-	//	
-	//	for (x=0; x<9; x++)
-	//	{
-	//	           painter.drawLine( xx, 0 , xx, y ); xx += w;
-	//	}
-	//	yy = 0; x = 8*w;
-	//	
-	//	for (y=0; y<9; y++)
-	//	{
-	//	           painter.drawLine( 0, yy , x, yy ); yy += h;
-	//	}
-	//}
-
-	//x = selPix.x() * w;
-	//y = selPix.y() * h;
-
-	//pen.setWidth( 6 );
-	//pen.setColor( QColor(  0,  0,  0) );
-	//painter.setPen( pen );
-
-	//painter.drawRect( x, y, w, h );
-
-	//pen.setWidth( 2 );
-	//pen.setColor( QColor(255,  0,  0) );
-	//painter.setPen( pen );
-
-	//painter.drawRect( x, y, w, h );
+			for (y=0; y < 8; y++)
+			{
+				painter.fillRect( xx, yy, w, h, tile->pixel[y][x].color );
+				yy += h;
+			}
+			xx += w;
+		}
+	}
+	else
+	{
+		painter.fillRect( xx, yy, w*8, h*8, Qt::black );
+	}
 }
 //----------------------------------------------------
 //-- Name Table Tile Palette View
@@ -1990,10 +1982,10 @@ void ppuNameTablePaletteView_t::paintEvent(QPaintEvent *event)
 	QPainter painter(this);
 	QColor color( 0, 0, 0);
 	QColor  white(255,255,255), black(0,0,0);
-	ppuNameTableTile_t *tile;
+	ppuNameTableTile_t *tile = nullptr;
 	//QPen pen;
 	//char showSelector;
-	char c[4];
+	char c[4]={0};
 
 	//pen = painter.pen();
 
@@ -2015,9 +2007,17 @@ void ppuNameTablePaletteView_t::paintEvent(QPaintEvent *event)
 	i = w / 4;
 	j = h / 4;
 
-	tile = &nameTable[ selTable ].tile[ tileY ][ tileX ];
+	if (selTable >= 0 && selTable < 4)
+	{
+		tile = &nameTable[ selTable ].tile[ tileY ][ tileX ];
+		p2 = tile->pal * 4;
+	}
+	else
+	{
+		tile = nullptr;
+		p2 = 0;
+	}
 
-	p2 = tile->pal * 4;
 	yy = 0;
 	xx = 0;
 	for (x=0; x < 4; x++)

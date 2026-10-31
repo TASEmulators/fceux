@@ -57,6 +57,7 @@
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/PaletteEditor.h"
 #include "Qt/ColorMenu.h"
+#include "Qt/WindowLayoutManager.h"
 
 #define PATTERNWIDTH          128
 #define PATTERNHEIGHT         128
@@ -451,7 +452,14 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 
 	updateTimer->start( 33 ); // 30hz
 
-	restoreGeometry(settings.value("ppuViewer/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "PPUViewer" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("ppuViewer/geometry").toByteArray());
+	}
 
 	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
 }
@@ -460,6 +468,8 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 ppuViewerDialog_t::~ppuViewerDialog_t(void)
 {
 	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
 
 	updateTimer->stop();
 	ppuViewWindow = NULL;
@@ -1920,7 +1930,7 @@ void tilePaletteView_t::paintEvent(QPaintEvent *event)
 	QColor  white(255,255,255), black(0,0,0);
 	//QPen pen;
 	//char showSelector;
-	char c[4];
+	char c[4]={0};
 
 	//pen = painter.pen();
 
@@ -3125,7 +3135,14 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 
 	resize( minimumSizeHint() );
 
-	restoreGeometry(settings.value("spriteViewer/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "SpriteViewer" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("spriteViewer/geometry").toByteArray());
+	}
 
 	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
 
@@ -3135,6 +3152,8 @@ spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
 //----------------------------------------------------
 spriteViewerDialog_t::~spriteViewerDialog_t(void)
 {
+	WindowLayoutManager::instance()->unregisterWindow( this );
+
 	if ( this == spriteViewWindow )
 	{
 		spriteViewWindow = NULL;
@@ -3707,7 +3726,7 @@ void oamPaletteView_t::paintEvent(QPaintEvent *event)
 	QColor  white(255,255,255), black(0,0,0);
 	//QPen pen;
 	//char showSelector;
-	char c[4];
+	char c[4]={0};
 
 	//pen = painter.pen();
 

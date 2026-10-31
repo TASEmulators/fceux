@@ -77,7 +77,6 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/HexEditor.h"
 #include "Qt/ConsoleDebugger.h"
-#include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/TraceLogger.h"
 #include "Qt/ColorMenu.h"
@@ -4721,19 +4720,6 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	FCEU_WRAPPER_LOCK();
 
 	waitingAtBp = false;
-}
-//----------------------------------------------------------------------------
-void debuggerRegisterWindowLayoutType(void)
-{
-	WindowLayoutManager::instance()->registerType( "Debugger", QObject::tr("Debugger"), true,
-		[]() -> QWidget*
-		{
-			ConsoleDebugger *win = new ConsoleDebugger(consoleWindow);
-
-			win->show();
-
-			return win;
-		});
 }
 //----------------------------------------------------------------------------
 bool debuggerWindowIsOpen(void)

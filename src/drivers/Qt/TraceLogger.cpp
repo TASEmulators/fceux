@@ -71,6 +71,7 @@
 #include "Qt/config.h"
 #include "Qt/SymbolicDebug.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/WindowLayoutManager.h"
 
 #define LOG_REGISTERS 0x00000001
 #define LOG_PROCESSOR_STATUS 0x00000002
@@ -401,11 +402,20 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 
 	diskThread = new TraceLogDiskThread_t(this);
 
-	restoreGeometry(settings.value("traceLogger/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "TraceLogger" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("traceLogger/geometry").toByteArray());
+	}
 }
 //----------------------------------------------------
 TraceLoggerDialog_t::~TraceLoggerDialog_t(void)
 {
+	WindowLayoutManager::instance()->unregisterWindow( this );
+
 	updateTimer->stop();
 
 	//logging = 0;

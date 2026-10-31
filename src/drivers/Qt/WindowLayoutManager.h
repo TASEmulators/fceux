@@ -37,10 +37,10 @@ class WindowLayoutClient
 class WindowLayoutManager
 {
 	public:
-		// Factory used to create a new window of a type when a profile being
-		// loaded needs one that is not currently open. The created window must
-		// call registerWindow + restorePendingLayout during its construction.
-		typedef std::function<QWidget*(void)> CreateFunc;
+		// Opens a new window of a type when a profile being loaded needs one
+		// that is not currently open. The created window must call
+		// registerWindow + restorePendingLayout during its construction.
+		typedef std::function<void(void)> CreateFunc;
 
 		static WindowLayoutManager *instance(void);
 

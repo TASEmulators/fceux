@@ -4250,19 +4250,6 @@ int hexEditorNumWindows(void)
 	return winList.size();
 }
 //----------------------------------------------------------------------------
-void hexEditorRegisterWindowLayoutType(void)
-{
-	WindowLayoutManager::instance()->registerType( "HexEditor", QObject::tr("Hex Editor"), false,
-		[]() -> QWidget*
-		{
-			HexEditorDialog_t *win = new HexEditorDialog_t(consoleWindow);
-
-			win->show();
-
-			return win;
-		});
-}
-//----------------------------------------------------------------------------
 int hexEditorOpenFromDebugger( int mode, int addr )
 {
 	HexEditorDialog_t *win = NULL;

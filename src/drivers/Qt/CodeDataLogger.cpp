@@ -44,6 +44,7 @@
 #include "Qt/input.h"
 #include "Qt/config.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/WindowLayoutManager.h"
 
 static int autoSaveCDL = true;
 static int autoLoadCDL = true;
@@ -284,11 +285,20 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 		LoadCDLog(nameo.c_str());
 	}
 
-	restoreGeometry(settings.value("cdLogger/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "CodeDataLogger" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("cdLogger/geometry").toByteArray());
+	}
 }
 //----------------------------------------------------
 CodeDataLoggerDialog_t::~CodeDataLoggerDialog_t(void)
 {
+	WindowLayoutManager::instance()->unregisterWindow( this );
+
 	updateTimer->stop();
 
 	//printf("Code Data Logger Window Deleted\n");

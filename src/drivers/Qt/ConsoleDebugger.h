@@ -676,7 +676,6 @@ class ConsoleDebugger : public QDialog, public WindowLayoutClient
 
 bool debuggerWindowIsOpen(void);
 void debuggerWindowSetFocus(bool val = true);
-void debuggerRegisterWindowLayoutType(void);
 bool debuggerWaitingAtBreakpoint(void);
 void bpDebugSetEnable(bool val);
 void saveGameDebugBreakpoints( bool force = false );
