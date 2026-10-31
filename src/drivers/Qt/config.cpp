@@ -205,37 +205,37 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 			name = "Screenshot"; keySeq = "F12"; group = "Tools";
 		break;
 		case HK_DECREASE_SPEED:
-			name = "DecreaseSpeed"; keySeq = "-"; group = "Speed";
+			name = "DecreaseSpeed"; keySeq = "-"; title = "Decrease Speed"; group = "Speed";
 		break;
 		case HK_INCREASE_SPEED:
-			name = "IncreaseSpeed"; keySeq = "="; group = "Speed";
+			name = "IncreaseSpeed"; keySeq = "="; title = "Increase Speed"; group = "Speed";
 		break;
 		case HK_FRAME_ADVANCE:
-			name = "FrameAdvance"; keySeq = "\\"; group = "Speed";
+			name = "FrameAdvance"; keySeq = "\\"; title = "Frame Advance"; group = "Speed";
 		break;
 		case HK_TURBO:
-			name = "Turbo"; keySeq = "Tab"; group = "Speed";
+			name = "Turbo"; keySeq = "Tab"; title = "Turbo"; group = "Speed";
 		break;
 		case HK_SPEED_NORMAL:
-			name = "Normal Speed"; keySeq = ""; group = "Speed";
+			name = "SpeedNormal"; keySeq = ""; title = "Normal Speed"; group = "Speed";
 		break;
 		case HK_SPEED_QUARTER:
-			name = "1/4x Speed"; keySeq = ""; group = "Speed";
+			name = "SpeedQuarter"; keySeq = ""; title = "1/4x Speed"; group = "Speed";
 		break;
 		case HK_SPEED_HALF:
-			name = "1/2x Speed"; keySeq = ""; group = "Speed";
+			name = "SpeedHalf"; keySeq = ""; title = "1/2x Speed"; group = "Speed";
 		break;
 		case HK_SPEED_2X:
-			name = "2x Speed"; keySeq = ""; group = "Speed";
+			name = "Speed2x"; keySeq = ""; title = "2x Speed"; group = "Speed";
 		break;
 		case HK_SPEED_4X:
-			name = "4x Speed"; keySeq = ""; group = "Speed";
+			name = "Speed4x"; keySeq = ""; title = "4x Speed"; group = "Speed";
 		break;
 		case HK_SPEED_8X:
-			name = "8x Speed"; keySeq = ""; group = "Speed";
+			name = "Speed8x"; keySeq = ""; title = "8x Speed"; group = "Speed";
 		break;
 		case HK_SPEED_16X:
-			name = "16x Speed"; keySeq = ""; group = "Speed";
+			name = "Speed16x"; keySeq = ""; title = "16x Speed"; group = "Speed";
 		break;
 		case HK_TOGGLE_INPUT_DISPLAY:
 			name = "ToggleInputDisplay"; keySeq = ","; group = "Misc";
