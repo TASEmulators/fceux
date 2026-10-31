@@ -38,6 +38,7 @@
 #include "Qt/SymbolicDebug.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ColorMenu.h"
+#include "Qt/WindowLayoutManager.h"
 #include "../../debug.h"
 
 struct dbg_asm_entry_t
@@ -467,13 +468,16 @@ class DebuggerBreakpointEditor : public QDialog
 		void conditionTextChanged( const QString &text );
 };
 
-class ConsoleDebugger : public QDialog
+class ConsoleDebugger : public QDialog, public WindowLayoutClient
 {
    Q_OBJECT
 
 	public:
 		ConsoleDebugger(QWidget *parent = 0);
 		~ConsoleDebugger(void);
+
+		void saveLayoutState( const QString &profileName, QSettings &settings ) override;
+		void loadLayoutState( const QString &profileName, QSettings &settings ) override;
 
 		void updateWindowData(enum QAsmView::UpdateType type);
 		void updateRegisterView(void);
@@ -592,6 +596,10 @@ class ConsoleDebugger : public QDialog
 		void buildBmListDisplay(void);
 		void loadDisplayViews(void);
 		void saveDisplayViews(void);
+		void loadDisplayViews( QSettings &settings, const QString &prefix, bool restoreGeom );
+		void saveDisplayViews( QSettings &settings, const QString &prefix, bool saveGeom );
+		void clearDisplayTabs(void);
+		bool frameInDisplayTabs( QWidget *frame );
 
 		QMenuBar *buildMenuBar(void);
 		QToolBar *buildToolBar(void);
@@ -668,6 +676,7 @@ class ConsoleDebugger : public QDialog
 
 bool debuggerWindowIsOpen(void);
 void debuggerWindowSetFocus(bool val = true);
+void debuggerRegisterWindowLayoutType(void);
 bool debuggerWaitingAtBreakpoint(void);
 void bpDebugSetEnable(bool val);
 void saveGameDebugBreakpoints( bool force = false );

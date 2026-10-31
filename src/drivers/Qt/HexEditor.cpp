@@ -1485,7 +1485,14 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 
 	unloadTableAct->setEnabled( editor->charTable.customMapLoaded );
 
-	restoreGeometry(settings.value("hexEditor/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "HexEditor", this );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("hexEditor/geometry").toByteArray());
+	}
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::~HexEditorDialog_t(void)
@@ -1494,6 +1501,8 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 	  
 	//printf("Hex Editor Deleted\n");
 	periodicTimer->stop();
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
 
 	// Lock the emulation thread mutex to ensure
 	// that the emulator is not attempting to update memory values
@@ -1510,6 +1519,21 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 		}
 	}
 	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::saveLayoutState( const QString &profileName, QSettings &settings )
+{
+	settings.setValue( "viewMode", editor->getMode() );
+}
+//----------------------------------------------------------------------------
+void HexEditorDialog_t::loadLayoutState( const QString &profileName, QSettings &settings )
+{
+	int mode = settings.value( "viewMode", QHexEdit::MODE_NES_RAM ).toInt();
+
+	if ( (mode >= QHexEdit::MODE_NES_RAM) && (mode <= QHexEdit::MODE_NES_ROM) )
+	{
+		editor->setMode( mode );
+	}
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::setWindowTitle(void)
@@ -4224,6 +4248,19 @@ void hexEditorRequestUpdateAll(void)
 int hexEditorNumWindows(void)
 {
 	return winList.size();
+}
+//----------------------------------------------------------------------------
+void hexEditorRegisterWindowLayoutType(void)
+{
+	WindowLayoutManager::instance()->registerType( "HexEditor", QObject::tr("Hex Editor"), false,
+		[]() -> QWidget*
+		{
+			HexEditorDialog_t *win = new HexEditorDialog_t(consoleWindow);
+
+			win->show();
+
+			return win;
+		});
 }
 //----------------------------------------------------------------------------
 int hexEditorOpenFromDebugger( int mode, int addr )

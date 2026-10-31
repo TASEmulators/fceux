@@ -25,6 +25,8 @@
 #include <QPlainTextEdit>
 #include <QKeyEvent>
 
+#include "Qt/WindowLayoutManager.h"
+
 struct memByte_t
 {
 	unsigned char data;
@@ -284,13 +286,16 @@ class HexEditorFindDialog_t : public QDialog
 		void runSearch(void);
 };
 
-class HexEditorDialog_t : public QDialog
+class HexEditorDialog_t : public QDialog, public WindowLayoutClient
 {
    Q_OBJECT
 
 	public:
 		HexEditorDialog_t(QWidget *parent = 0);
 		~HexEditorDialog_t(void);
+
+		void saveLayoutState( const QString &profileName, QSettings &settings ) override;
+		void loadLayoutState( const QString &profileName, QSettings &settings ) override;
 
 		void gotoAddress(int newAddr);
 		void populateBookmarkMenu(void);
@@ -364,3 +369,4 @@ void hexEditorUpdateMemoryValues(bool force = false);
 void hexEditorLoadBookmarks(void);
 void hexEditorSaveBookmarks(void);
 int hexEditorOpenFromDebugger( int mode, int addr );
+void hexEditorRegisterWindowLayoutType(void);

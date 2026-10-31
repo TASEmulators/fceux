@@ -99,6 +99,7 @@
 #include "Qt/TraceLogger.h"
 #include "Qt/CodeDataLogger.h"
 #include "Qt/ConsoleDebugger.h"
+#include "Qt/WindowLayoutManager.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
@@ -314,12 +315,23 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		}
 	};
 	FCEU_SetCheatChangeEventCallback( cheatChangeCallback, this );
+
+	// Register window types and the main window with the window layout manager
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerType( "MainWindow", tr("Main Window"), true );
+	debuggerRegisterWindowLayoutType();
+	hexEditorRegisterWindowLayoutType();
+
+	layoutMgr->registerWindow( this, "MainWindow" );
 }
 
 consoleWin_t::~consoleWin_t(void)
 {
 	QSize w;
 	QClipboard *clipboard;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
 
 	// Save window size and image scaling parameters at app exit.
 	w = size();
@@ -1962,6 +1974,20 @@ void consoleWin_t::createMainMenu(void)
 	connect(act, SIGNAL(triggered()), this, SLOT(openTasEditor(void)) );
 
 	toolsMenu->addAction(act);
+
+	toolsMenu->addSeparator();
+
+	// Tools -> Window Layouts
+	subMenu = toolsMenu->addMenu( tr("&Window Layouts") );
+	{
+		QMenu *layoutMenu = subMenu;
+
+		connect( layoutMenu, &QMenu::aboutToShow, this, [this, layoutMenu]
+		{
+			WindowLayoutManager::instance()->populateMenu( layoutMenu, this );
+		});
+		WindowLayoutManager::instance()->populateMenu( layoutMenu, this );
+	}
 
 	 //-----------------------------------------------------------------------
 	 // Debug

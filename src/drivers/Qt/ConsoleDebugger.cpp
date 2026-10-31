@@ -77,6 +77,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/HexEditor.h"
 #include "Qt/ConsoleDebugger.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/TraceLogger.h"
 #include "Qt/ColorMenu.h"
@@ -170,7 +171,14 @@ ConsoleDebugger::ConsoleDebugger(QWidget *parent)
 
 	setLayout( mainLayoutv );
 
-	loadDisplayViews();
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "Debugger", this );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		loadDisplayViews();
+	}
 
 	windowUpdateReq   = QAsmView::UPDATE_ALL;
 
@@ -234,6 +242,8 @@ ConsoleDebugger::~ConsoleDebugger(void)
 	periodicTimer->stop();
 
 	saveDisplayViews();
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
 
 	if (startedTraceLogger && FCEUD_TraceLoggerRunning() )
 	{
@@ -1537,11 +1547,17 @@ void ConsoleDebugger::buildBmListDisplay(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::loadDisplayViews(void)
 {
-	char key[128];
 	QSettings  settings;
+
+	loadDisplayViews( settings, "debugger/", true );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::loadDisplayViews( QSettings &settings, const QString &prefix, bool restoreGeom )
+{
+	char key[128];
 	bool prevStateSaved;
 
-	prevStateSaved = settings.value("debugger/prevStateSaved", false).toBool();
+	prevStateSaved = settings.value(prefix + "prevStateSaved", false).toBool();
 
 	if ( !prevStateSaved )
 	{
@@ -1553,8 +1569,8 @@ void ConsoleDebugger::loadDisplayViews(void)
 		for (int j=0; j<4; j++)
 		{
 			QString tabListVal;
-			snprintf( key, sizeof(key), "debugger/tabView%i%i", i+1, j+1 );
-			tabListVal = settings.value(key).toString();
+			snprintf( key, sizeof(key), "tabView%i%i", i+1, j+1 );
+			tabListVal = settings.value(prefix + key).toString();
 
 			QStringList tabList = tabListVal.split(',');
 			for (int k=0; k<tabList.size(); k++)
@@ -1584,34 +1600,37 @@ void ConsoleDebugger::loadDisplayViews(void)
 		}
 	}
 
-	if ( cpuFrame->parent() == nullptr )
+	if ( !frameInDisplayTabs( cpuFrame ) )
 	{
 		tabView[0][0]->addTab( cpuFrame, tr("CPU") );
 	}
-	if ( ppuFrame->parent() == nullptr )
+	if ( !frameInDisplayTabs( ppuFrame ) )
 	{
 		tabView[0][0]->addTab( ppuFrame, tr("PPU") );
 	}
-	if ( bpFrame->parent() == nullptr )
+	if ( !frameInDisplayTabs( bpFrame ) )
 	{
 		tabView[0][0]->addTab( bpFrame, tr("Breakpoints") );
 	}
-	if ( bmFrame->parent() == nullptr )
+	if ( !frameInDisplayTabs( bmFrame ) )
 	{
 		tabView[0][0]->addTab( bmFrame, tr("Bookmarks") );
 	}
 
 	// Restore Window Geometry
-	restoreGeometry(settings.value("debugger/geometry").toByteArray());
+	if ( restoreGeom )
+	{
+		restoreGeometry(settings.value(prefix + "geometry").toByteArray());
+	}
 
 	// Restore Horizontal Panel State
-	mainLayouth->restoreState( settings.value("debugger/hPanelState").toByteArray() );
+	mainLayouth->restoreState( settings.value(prefix + "hPanelState").toByteArray() );
 
 	// Save Vertical Panel State
 	for (int i=0; i<2; i++)
 	{
-		snprintf( key, sizeof(key), "debugger/vPanelState%i", i+1);
-		vsplitter[i]->restoreState( settings.value(key).toByteArray() );
+		snprintf( key, sizeof(key), "vPanelState%i", i+1);
+		vsplitter[i]->restoreState( settings.value(prefix + key).toByteArray() );
 	}
 
 	updateTabVisibility();
@@ -1619,8 +1638,14 @@ void ConsoleDebugger::loadDisplayViews(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::saveDisplayViews(void)
 {
-	char key[128];
 	QSettings  settings;
+
+	saveDisplayViews( settings, "debugger/", true );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::saveDisplayViews( QSettings &settings, const QString &prefix, bool saveGeom )
+{
+	char key[128];
 
 	// Save Tab Placement
 	for (int i=0; i<2; i++)
@@ -1628,7 +1653,7 @@ void ConsoleDebugger::saveDisplayViews(void)
 		for (int j=0; j<4; j++)
 		{
 			QString tabListVal;
-			snprintf( key, sizeof(key), "debugger/tabView%i%i", i+1, j+1 );
+			snprintf( key, sizeof(key), "tabView%i%i", i+1, j+1 );
 
 			for (int k=0; k<tabView[i][j]->count(); k++)
 			{
@@ -1640,25 +1665,70 @@ void ConsoleDebugger::saveDisplayViews(void)
 			}
 
 			//printf("(%i,%i) %s\n", i, j, tabListVal.toLocal8Bit().constData() );
-			settings.setValue( key, tabListVal );
+			settings.setValue( prefix + key, tabListVal );
 		}
 	}
 
 	// Save Horizontal Panel State
-	settings.setValue("debugger/hPanelState", mainLayouth->saveState());
+	settings.setValue(prefix + "hPanelState", mainLayouth->saveState());
 
 	// Save Vertical Panel State
 	for (int i=0; i<2; i++)
 	{
-		snprintf( key, sizeof(key), "debugger/vPanelState%i", i+1);
-		settings.setValue( key, vsplitter[i]->saveState());
+		snprintf( key, sizeof(key), "vPanelState%i", i+1);
+		settings.setValue( prefix + key, vsplitter[i]->saveState());
 	}
 
 	// Save Window Geometry
-	settings.setValue("debugger/geometry", saveGeometry());
+	if ( saveGeom )
+	{
+		settings.setValue(prefix + "geometry", saveGeometry());
+	}
 
 	// Set Window 
-	settings.setValue("debugger/prevStateSaved", true);
+	settings.setValue(prefix + "prevStateSaved", true);
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::clearDisplayTabs(void)
+{
+	for (int i=0; i<2; i++)
+	{
+		for (int j=0; j<4; j++)
+		{
+			while ( tabView[i][j]->count() > 0 )
+			{
+				tabView[i][j]->removeTab(0);
+			}
+		}
+	}
+}
+//----------------------------------------------------------------------------
+bool ConsoleDebugger::frameInDisplayTabs( QWidget *frame )
+{
+	for (int i=0; i<2; i++)
+	{
+		for (int j=0; j<4; j++)
+		{
+			if ( tabView[i][j]->indexOf( frame ) >= 0 )
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::saveLayoutState( const QString &profileName, QSettings &settings )
+{
+	// Geometry is handled by the window layout manager.
+	saveDisplayViews( settings, QString(), false );
+}
+//----------------------------------------------------------------------------
+void ConsoleDebugger::loadLayoutState( const QString &profileName, QSettings &settings )
+{
+	clearDisplayTabs();
+
+	loadDisplayViews( settings, QString(), false );
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::updateTabVisibility(void)
@@ -4651,6 +4721,19 @@ void FCEUD_DebugBreakpoint( int bpNum )
 	FCEU_WRAPPER_LOCK();
 
 	waitingAtBp = false;
+}
+//----------------------------------------------------------------------------
+void debuggerRegisterWindowLayoutType(void)
+{
+	WindowLayoutManager::instance()->registerType( "Debugger", QObject::tr("Debugger"), true,
+		[]() -> QWidget*
+		{
+			ConsoleDebugger *win = new ConsoleDebugger(consoleWindow);
+
+			win->show();
+
+			return win;
+		});
 }
 //----------------------------------------------------------------------------
 bool debuggerWindowIsOpen(void)
