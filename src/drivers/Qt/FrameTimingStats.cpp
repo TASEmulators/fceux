@@ -37,7 +37,25 @@
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/FrameTimingStats.h"
+#include "Qt/WindowLayoutManager.h"
 
+//----------------------------------------------------------------------------
+static FrameTimingDialog_t *frameTimingWin = nullptr;
+//----------------------------------------------------------------------------
+int openFrameTimingWindow( QWidget *parent )
+{
+	if ( frameTimingWin != nullptr )
+	{
+		frameTimingWin->activateWindow();
+		frameTimingWin->raise();
+		return -1;
+	}
+	frameTimingWin = new FrameTimingDialog_t(parent);
+
+	frameTimingWin->show();
+
+	return 0;
+}
 //----------------------------------------------------------------------------
 FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	: QDialog(parent)
@@ -173,12 +191,28 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 
 	updateTimer->start(200); // 5hz
 
-	restoreGeometry(settings.value("frameTimingWindow/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "FrameTiming" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("frameTimingWindow/geometry").toByteArray());
+	}
+
+	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
 }
 //----------------------------------------------------------------------------
 FrameTimingDialog_t::~FrameTimingDialog_t(void)
 {
 	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
+
+	if ( frameTimingWin == this )
+	{
+		frameTimingWin = nullptr;
+	}
 
 	//printf("Destroy Frame Timing Window\n");
 	updateTimer->stop();

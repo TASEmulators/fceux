@@ -45,6 +45,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/WindowLayoutManager.h"
 
 static GuiCheatsDialog_t *win = NULL;
 //----------------------------------------------------------------------------
@@ -471,12 +472,23 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	showActiveCheatList(true);
 
-	restoreGeometry(settings.value("cheatsWindow/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "Cheats" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("cheatsWindow/geometry").toByteArray());
+	}
+
+	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
 }
 //----------------------------------------------------------------------------
 GuiCheatsDialog_t::~GuiCheatsDialog_t(void)
 {
 	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
 
 	if (EmulationPaused && wasPausedByCheats)
 	{

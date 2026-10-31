@@ -50,6 +50,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/PaletteEditor.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/WindowLayoutManager.h"
 
 struct colorChangeData_t
 {
@@ -60,6 +61,23 @@ struct colorChangeData_t
 
 static std::vector <colorChangeData_t>  undoColorHistory;  
 static std::vector <colorChangeData_t>  redoColorHistory;  
+//----------------------------------------------------------------------------
+static PaletteEditorDialog_t *paletteEditorWin = nullptr;
+//----------------------------------------------------------------------------
+int openPaletteEditorWindow( QWidget *parent )
+{
+	if ( paletteEditorWin != nullptr )
+	{
+		paletteEditorWin->activateWindow();
+		paletteEditorWin->raise();
+		return -1;
+	}
+	paletteEditorWin = new PaletteEditorDialog_t(parent);
+
+	paletteEditorWin->show();
+
+	return 0;
+}
 //----------------------------------------------------------------------------
 PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 	: QDialog( parent )
@@ -180,12 +198,28 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 
 	updateTimer->start(500); // 2hz
 
-	restoreGeometry(settings.value("paletteEditor/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "PaletteEditor" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("paletteEditor/geometry").toByteArray());
+	}
+
+	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
 }
 //----------------------------------------------------------------------------
 PaletteEditorDialog_t::~PaletteEditorDialog_t(void)
 {
 	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
+
+	if ( paletteEditorWin == this )
+	{
+		paletteEditorWin = nullptr;
+	}
 	//printf("Destroy Palette Editor Config Window\n");
 
 	updateTimer->stop();

@@ -52,6 +52,7 @@
 #include "Qt/RamWatch.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/WindowLayoutManager.h"
 
 ramWatchList_t ramWatchList;
 static RamWatchDialog_t *ramWatchMainWin = NULL;
@@ -307,12 +308,21 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	updateTimer->start( 100 ); // 10hz
 
-	restoreGeometry(settings.value("ramWatch/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "RamWatch" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("ramWatch/geometry").toByteArray());
+	}
 }
 //----------------------------------------------------------------------------
 RamWatchDialog_t::~RamWatchDialog_t(void)
 {
 	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
 
 	updateTimer->stop();
 

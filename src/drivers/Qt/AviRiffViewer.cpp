@@ -29,12 +29,14 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QSettings>
 
 #include "Qt/main.h"
 #include "Qt/config.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/AviRiffViewer.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/WindowLayoutManager.h"
 
 static bool showSizeHex = true;
 
@@ -144,10 +146,26 @@ AviRiffViewerDialog::AviRiffViewerDialog(QWidget *parent)
 	hbox->addWidget( closeButton, 1 );
 	mainLayout->addLayout( hbox );
 
+	QSettings settings;
+
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "AviRiffViewer" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("aviRiffViewer/geometry").toByteArray());
+	}
 }
 //----------------------------------------------------------------------------
 AviRiffViewerDialog::~AviRiffViewerDialog(void)
 {
+	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
+
+	settings.setValue("aviRiffViewer/geometry", saveGeometry());
+
 	//printf("Destroy AVI RIFF Viewer Window\n");
 
 	if ( avi )

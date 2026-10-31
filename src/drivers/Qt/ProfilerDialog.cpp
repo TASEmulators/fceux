@@ -21,6 +21,7 @@
 #include "driver.h"
 #include "Qt/main.h"
 #include "Qt/ProfilerDialog.h"
+#include "Qt/WindowLayoutManager.h"
 
 namespace
 {
@@ -273,10 +274,25 @@ ProfilerDialog_t::ProfilerDialog_t(QWidget *parent)
 	connect(viewer, SIGNAL(findResult(const QString &)), findLabel, SLOT(setText(const QString &)));
 	connect(framePrevBtn, SIGNAL(clicked(void)), this, SLOT(framePrevClicked(void)));
 	connect(frameNextBtn, SIGNAL(clicked(void)), this, SLOT(frameNextClicked(void)));
+
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "Profiler" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("profilerWindow/geometry").toByteArray());
+	}
 }
 //----------------------------------------------------------------------------
 ProfilerDialog_t::~ProfilerDialog_t(void)
 {
+	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
+
+	settings.setValue("profilerWindow/geometry", saveGeometry());
+
 #ifdef __FCEU_PROFILER_ENABLE__
 	if (captureThread)
 	{

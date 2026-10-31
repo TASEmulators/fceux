@@ -188,3 +188,5 @@ class nesPalettePickerDialog : public QDialog
 		void okButtonClicked(void);
 
 };
+
+int openPaletteEditorWindow( QWidget *parent );

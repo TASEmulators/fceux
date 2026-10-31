@@ -55,3 +55,5 @@ private slots:
 	void resetTimingClicked(void);
 	void timingEnableChanged(int state);
 };
+
+int openFrameTimingWindow( QWidget *parent );

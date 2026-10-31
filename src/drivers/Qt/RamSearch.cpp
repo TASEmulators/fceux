@@ -60,6 +60,7 @@
 #include "Qt/CheatsConf.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/WindowLayoutManager.h"
 
 static bool ShowRAM  = true;
 static bool ShowSRAM = false;
@@ -506,12 +507,23 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 
 	updateTimer->start(8); // ~120hz
 
-	restoreGeometry(settings.value("ramSearchWindow/geometry").toByteArray());
+	WindowLayoutManager *layoutMgr = WindowLayoutManager::instance();
+
+	layoutMgr->registerWindow( this, "RamSearch" );
+
+	if ( !layoutMgr->restorePendingLayout( this ) )
+	{
+		restoreGeometry(settings.value("ramSearchWindow/geometry").toByteArray());
+	}
+
+	connect( this, SIGNAL(rejected(void)), this, SLOT(deleteLater(void)));
 }
 //----------------------------------------------------------------------------
 RamSearchDialog_t::~RamSearchDialog_t(void)
 {
 	QSettings settings;
+
+	WindowLayoutManager::instance()->unregisterWindow( this );
 
 	updateTimer->stop();
 	//printf("Destroy RAM Search Window\n");

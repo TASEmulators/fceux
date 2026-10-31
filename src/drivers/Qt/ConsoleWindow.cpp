@@ -328,6 +328,13 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	layoutMgr->registerType( "TraceLogger"    , tr("Trace Logger")            , true , [this]{ openTraceLogger(); } );
 	layoutMgr->registerType( "CodeDataLogger" , tr("Code/Data Logger")        , true , [this]{ openCodeDataLogger(); } );
 	layoutMgr->registerType( "GameGenie"      , tr("Game Genie Encode/Decode"), true , [this]{ openGGEncoder(); } );
+	layoutMgr->registerType( "Cheats"         , tr("Cheats")                  , true , [this]{ openCheats(); } );
+	layoutMgr->registerType( "RamSearch"      , tr("RAM Search")              , true , [this]{ openRamSearch(); } );
+	layoutMgr->registerType( "RamWatch"       , tr("RAM Watch")               , false, [this]{ openRamWatch(); } );
+	layoutMgr->registerType( "FrameTiming"    , tr("Frame Timing")            , true , [this]{ openTimingStatWin(); } );
+	layoutMgr->registerType( "Profiler"       , tr("Profiler")                , false, [this]{ openProfilerWin(); } );
+	layoutMgr->registerType( "PaletteEditor"  , tr("Palette Editor")          , true , [this]{ openPaletteEditorWin(); } );
+	layoutMgr->registerType( "AviRiffViewer"  , tr("AVI RIFF Viewer")         , false, [this]{ openAviRiffViewer(); } );
 	layoutMgr->registerType( "NesHeaderEditor", tr("NES Header Editor")       , false, [this]
 	{
 		// Only restore for a loaded iNES cartridge, otherwise the editor would
@@ -3567,13 +3574,9 @@ void consoleWin_t::openTimingConfWin(void)
 
 void consoleWin_t::openTimingStatWin(void)
 {
-	FrameTimingDialog_t *tmStatWin;
-
 	//printf("Open Timing Statistics Window\n");
-	
-   tmStatWin = new FrameTimingDialog_t(this);
-	
-   tmStatWin->show();
+
+	openFrameTimingWindow(this);
 }
 
 void consoleWin_t::openProfilerWin(void)
@@ -3585,13 +3588,9 @@ void consoleWin_t::openProfilerWin(void)
 
 void consoleWin_t::openPaletteEditorWin(void)
 {
-	PaletteEditorDialog_t *win;
-
 	//printf("Open Palette Editor Window\n");
-	
-   win = new PaletteEditorDialog_t(this);
-	
-   win->show();
+
+	openPaletteEditorWindow(this);
 }
 
 void consoleWin_t::openNetPlayHostWindow(void)
