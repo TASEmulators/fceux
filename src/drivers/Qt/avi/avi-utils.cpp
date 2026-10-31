@@ -586,7 +586,7 @@ int gwavi_t::write_stream_std_indx(FILE *fp, struct gwavi_super_indx_t *indx)
 
 	std_indx_ofs = ftell(fp);
 
-	sprintf( fcc, "ix%02i", indx->streamId );
+	snprintf( fcc, sizeof(fcc), "ix%02i", indx->streamId );
 
 	if (write_chars_bin(fp, fcc, 4) == -1) // FCC
 	{
