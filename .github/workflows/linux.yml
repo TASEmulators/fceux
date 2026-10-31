@@ -1,0 +1,75 @@
+name: Linux
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show runner info
+        run: |
+          uname -a
+          cat /etc/os-release
+          gcc --version
+          nproc
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --assume-yes --no-install-recommends \
+            cmake ninja-build pkg-config ccache \
+            lua5.1-dev libsdl2-dev libminizip-dev libarchive-dev \
+            qtbase5-dev qt5-qmake qttools5-dev qttools5-dev-tools \
+            libx264-dev libx265-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ccache-linux-${{ github.sha }}
+          restore-keys: ccache-linux-
+
+      - name: Build help files
+        run: ./scripts/unix_make_docs.sh
+
+      - name: Configure and build
+        run: |
+          cmake -S . -B buildQT -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build buildQT --parallel
+          ccache --show-stats
+          DESTDIR=/tmp/fceux cmake --install buildQT
+
+      - name: Show shared object dependencies
+        run: |
+          test -x /tmp/fceux/usr/bin/fceux
+          ldd /tmp/fceux/usr/bin/fceux
+
+      - name: Create Debian package
+        run: ./pipelines/debpkg.pl
+
+      - name: Test package install
+        run: sudo apt-get install --assume-yes /tmp/fceux-*.deb
+
+      - name: Prepare artifact
+        run: cp /tmp/fceux-*.deb fceux-ubuntu-x64.deb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fceux-ubuntu-x64
+          path: fceux-ubuntu-x64.deb
+          if-no-files-found: error
