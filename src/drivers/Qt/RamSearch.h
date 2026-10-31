@@ -31,12 +31,12 @@ class QRamSearchView : public QWidget
 
 		int  getSelAddr(void){ return selAddr; }
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void keyPressEvent(QKeyEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
    	//void keyReleaseEvent(QKeyEvent *event);
-		void mousePressEvent(QMouseEvent * event);
-		void resizeEvent(QResizeEvent *event);
-		void wheelEvent(QWheelEvent *event);
+		void mousePressEvent(QMouseEvent * event) override;
+		void resizeEvent(QResizeEvent *event) override;
+		void wheelEvent(QWheelEvent *event) override;
 
 		int  convPixToLine( QPoint p );
 		void calcFontData(void);
@@ -73,7 +73,7 @@ class RamSearchDialog_t : public QDialog
 		~RamSearchDialog_t(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 		QRamSearchView *ramView;
 		QScrollBar  *vbar;

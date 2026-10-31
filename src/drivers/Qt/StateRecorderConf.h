@@ -31,7 +31,7 @@ public:
 	~StateRecorderDialog_t(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QSpinBox     *snapMinutes;
 	QSpinBox     *snapSeconds;

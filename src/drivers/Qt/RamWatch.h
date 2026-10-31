@@ -206,7 +206,7 @@ class RamWatchDialog_t : public QDialog
 		~RamWatchDialog_t(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 		void loadWatchFile (const char *filename, int append = 0);
 		void saveWatchFile (const char *filename, int append = 0);
 

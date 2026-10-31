@@ -20,7 +20,7 @@ class ColorMenuPickerDialog_t : public QDialog
 		~ColorMenuPickerDialog_t(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 	private:
 		QColorDialog *colorDialog;

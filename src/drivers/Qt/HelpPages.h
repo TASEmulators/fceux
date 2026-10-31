@@ -29,7 +29,7 @@ class HelpDialog : public QDialog
 		~HelpDialog(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 		QHelpEngine  *helpEngine;
 		QSplitter    *hsplitter;

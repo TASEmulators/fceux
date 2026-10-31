@@ -355,7 +355,7 @@ class TasFindNoteWindow : public QDialog
 		~TasFindNoteWindow(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 		QLineEdit     *searchPattern;
 		QCheckBox     *matchCase;
@@ -384,7 +384,7 @@ class TasEditorSplitter : public QSplitter
 		~TasEditorSplitter(void);
 
 	protected:
-		void resizeEvent(QResizeEvent *event);
+		void resizeEvent(QResizeEvent *event) override;
 
 		bool panelInitDone;
 };
@@ -432,7 +432,7 @@ class TasEditorWindow : public QDialog
 		QPoint getPreviewPopupCoordinates(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 		QMenuBar  *buildMenuBar(void);
 		void buildPianoRollDisplay(void);

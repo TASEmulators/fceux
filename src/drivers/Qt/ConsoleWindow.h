@@ -82,8 +82,8 @@ class  consoleMenuBar : public QMenuBar
 		~consoleMenuBar(void);
 
 	protected:
-		void keyPressEvent(QKeyEvent *event);
-		void keyReleaseEvent(QKeyEvent *event);
+		void keyPressEvent(QKeyEvent *event) override;
+		void keyReleaseEvent(QKeyEvent *event) override;
 };
 
 class  autoFireMenuAction : public QAction

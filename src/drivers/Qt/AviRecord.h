@@ -128,7 +128,7 @@ public:
 	~LibavEncOptInputWin(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	LibavEncOptItem *item;
 	QComboBox       *combo;
@@ -158,7 +158,7 @@ public:
 	~LibavEncOptWin(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 	void updateItems(void);
 	void sortItems(void);
 

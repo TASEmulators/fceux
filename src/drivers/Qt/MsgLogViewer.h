@@ -27,7 +27,7 @@ public:
 	~MsgLogViewDialog_t(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QTimer *updateTimer;
 	QPlainTextEdit *txtView;

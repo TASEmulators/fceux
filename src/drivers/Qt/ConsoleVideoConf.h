@@ -28,7 +28,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		~ConsoleVideoConfDialog_t(void);
 
 	protected:
-		void closeEvent(QCloseEvent *bar);
+		void closeEvent(QCloseEvent *bar) override;
 
 		QTimer      *updateTimer;
 		QComboBox   *driverSelect;

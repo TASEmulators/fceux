@@ -26,7 +26,7 @@ public:
 	~PaletteConfDialog_t(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QLineEdit *custom_palette_path;
 	QCheckBox *useCustom;

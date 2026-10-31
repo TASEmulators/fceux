@@ -27,7 +27,7 @@ public:
 	~ConsoleSndConfDialog_t(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	int  sndQuality;
 	QCheckBox *enaChkbox;

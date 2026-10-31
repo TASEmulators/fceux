@@ -44,9 +44,9 @@ public:
 	~HotKeyConfSetDialog_t(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
-	void keyPressEvent(QKeyEvent *event);
-	void keyReleaseEvent(QKeyEvent *event);
+	void closeEvent(QCloseEvent *event) override;
+	void keyPressEvent(QKeyEvent *event) override;
+	void keyReleaseEvent(QKeyEvent *event) override;
 	void assignHotkey(QKeyEvent *event);
 	void checkForConflicts(int hkIdx);
 
@@ -82,8 +82,8 @@ protected:
 	std::map <std::string, QTreeWidgetItem*>  groupMap;
 
 protected:
-	void keyPressEvent(QKeyEvent *event);
-	void keyReleaseEvent(QKeyEvent *event);
+	void keyPressEvent(QKeyEvent *event) override;
+	void keyReleaseEvent(QKeyEvent *event) override;
 };
 
 class HotKeyConfDialog_t : public QDialog
@@ -95,9 +95,9 @@ public:
 	~HotKeyConfDialog_t(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
-	void keyPressEvent(QKeyEvent *event);
-	void keyReleaseEvent(QKeyEvent *event);
+	void closeEvent(QCloseEvent *event) override;
+	void keyPressEvent(QKeyEvent *event) override;
+	void keyReleaseEvent(QKeyEvent *event) override;
 
 	HotKeyConfTree_t *tree;
 

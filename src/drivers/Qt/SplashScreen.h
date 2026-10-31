@@ -16,7 +16,7 @@ class fceuSplashScreen : public QSplashScreen
 		~fceuSplashScreen(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 	private:
 		QTimer  *updateTimer;

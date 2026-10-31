@@ -65,12 +65,12 @@ class ppuPatternView_t : public QWidget
 		QColor  selTileColor;
 		QColor  gridColor;
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void mousePressEvent(QMouseEvent * event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void mousePressEvent(QMouseEvent * event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 
 		int patternIndex;
 		int viewWidth;
@@ -110,10 +110,10 @@ class tilePaletteView_t : public QWidget
 
 		void setIndex( int val );
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 		int  heightForWidth(int w) const;
 		QSize  minimumSizeHint(void) const;
 		QSize  maximumSizeHint(void) const;
@@ -154,12 +154,12 @@ class ppuTileView_t : public QWidget
 		void moveSelBoxUpDown(int i);
 		void moveSelBoxLeftRight(int i);
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void mousePressEvent(QMouseEvent * event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void mousePressEvent(QMouseEvent * event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 
 		int patternIndex;
 		int paletteIndex;
@@ -204,10 +204,10 @@ class ppuTileEditColorPicker_t : public QWidget
 		static const int NUM_COLORS = 4;
 
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void mousePressEvent(QMouseEvent * event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void mousePressEvent(QMouseEvent * event) override;
 		int viewWidth;
 		int viewHeight;
 		int boxWidth;
@@ -238,8 +238,8 @@ class ppuTileEditor_t : public QDialog
 
 	protected:
 
-		void keyPressEvent(QKeyEvent *event);
-		void closeEvent(QCloseEvent *bar);
+		void keyPressEvent(QKeyEvent *event) override;
+		void closeEvent(QCloseEvent *bar) override;
 
 		QTimer     *updateTimer;
 	private:
@@ -268,7 +268,7 @@ class ppuViewerDialog_t : public QDialog
 		tilePaletteView_t *tilePalView[8];
 	protected:
 
-		void closeEvent(QCloseEvent *bar);
+		void closeEvent(QCloseEvent *bar) override;
 	private:
 
 		QGroupBox  *patternFrame[2];
@@ -349,12 +349,12 @@ class oamPatternView_t : public QWidget
 		QColor gridColor;
 		QColor selTileColor;
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void mousePressEvent(QMouseEvent * event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void mousePressEvent(QMouseEvent * event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 		int  heightForWidth(int w) const;
 		QSize  minimumSizeHint(void) const;
 		QSize  maximumSizeHint(void) const;
@@ -385,8 +385,8 @@ class oamTileView_t : public QWidget
 
 		void setIndex( int val );
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
 		int  heightForWidth(int w) const;
 		QSize  minimumSizeHint(void) const;
 		QSize  maximumSizeHint(void) const;
@@ -408,8 +408,8 @@ class oamPaletteView_t : public QWidget
 
 		void setIndex( int val );
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
 		int  heightForWidth(int w) const;
 		QSize  minimumSizeHint(void) const;
 		QSize  maximumSizeHint(void) const;
@@ -434,8 +434,8 @@ class oamPreview_t : public QWidget
 
 		QColor  boxColor;
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
 		int  heightForWidth(int w) const;
 		QSize  minimumSizeHint(void) const;
 		QSize  maximumSizeHint(void) const;
@@ -464,7 +464,7 @@ class spriteViewerDialog_t : public QDialog
 
 	protected:
 
-		void closeEvent(QCloseEvent *bar);
+		void closeEvent(QCloseEvent *bar) override;
 	private:
 		QTimer *updateTimer;
 		QRadioButton *useSprRam;

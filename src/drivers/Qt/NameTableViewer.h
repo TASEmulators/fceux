@@ -95,12 +95,12 @@ class ppuNameTableView_t : public QWidget
 		QColor tileGridColor;
 		QColor attrGridColor;
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void mousePressEvent(QMouseEvent * event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void mousePressEvent(QMouseEvent * event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 		void computeNameTableProperties( int NameTable, int TileX, int TileY );
 		int  convertXY2TableTile( int x, int y, int *tableIdxOut, int *tileXout, int *tileYout );
 		int  calcTableTileAddr( int table, int tileX, int tileY );
@@ -139,8 +139,8 @@ class ppuNameTableTileView_t : public QWidget
 		void setTile( int table, int x, int y );
 
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
 
 		int viewWidth;
 		int viewHeight;
@@ -159,8 +159,8 @@ class ppuNameTablePaletteView_t : public QWidget
 
 		void setTile( int table, int x, int y );
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
 		int  heightForWidth(int w) const;
 		QSize  minimumSizeHint(void) const;
 		QSize  maximumSizeHint(void) const;
@@ -185,7 +185,7 @@ class ppuNameTableViewerDialog_t : public QDialog
 		void setPropertyLabels( int TileID, int TileX, int TileY, int NameTable, int PPUAddress, int AttAddress, int Attrib, int palAddr );
 
 	protected:
-		void closeEvent(QCloseEvent *bar);
+		void closeEvent(QCloseEvent *bar) override;
 
 		void changeRate( int divider );
 

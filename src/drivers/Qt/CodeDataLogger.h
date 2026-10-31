@@ -38,7 +38,7 @@ protected:
 	QCheckBox *autoLoadCdlCbox;
 	QCheckBox *autoResumeLogCbox;
 	QPushButton *startPauseButton;
-	void closeEvent(QCloseEvent *bar);
+	void closeEvent(QCloseEvent *bar) override;
 
 	void SaveStrippedROM(int invert);
 

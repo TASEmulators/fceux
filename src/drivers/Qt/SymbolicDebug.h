@@ -38,7 +38,7 @@ class SymbolEditWindow : public QDialog
 		void setSym( debugSymbol_t *symIn );
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 		void updateArraySensitivity(void);
 		void setSymNameWithArray(int idx = 0);

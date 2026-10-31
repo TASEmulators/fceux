@@ -29,8 +29,8 @@ public:
 	GamePadConfigButton_t(int i);
 
 protected:
-	void keyPressEvent(QKeyEvent *event);
-	void keyReleaseEvent(QKeyEvent *event);
+	void keyPressEvent(QKeyEvent *event) override;
+	void keyReleaseEvent(QKeyEvent *event) override;
 
 	int idx;
 };
@@ -44,8 +44,8 @@ public:
 
 	void setKeyNameLbl( QLineEdit *lbl );
 protected:
-	void keyPressEvent(QKeyEvent *event);
-	void keyReleaseEvent(QKeyEvent *event);
+	void keyPressEvent(QKeyEvent *event) override;
+	void keyReleaseEvent(QKeyEvent *event) override;
 
 	int idx;
 	QLineEdit *keySeqLbl;
@@ -63,7 +63,7 @@ public:
 
 	int  getSelHotKey(void){ return hotKeyIdx; };
 protected:
-	void closeEvent(QCloseEvent *bar);
+	void closeEvent(QCloseEvent *bar) override;
 
 	QTreeWidget *tree;
 	QPushButton *okButton;
@@ -88,7 +88,7 @@ public:
 	~GamePadFuncConfigDialog(void);
 
 protected:
-	void closeEvent(QCloseEvent *bar);
+	void closeEvent(QCloseEvent *bar) override;
 
 	void changeButton(int x);
 
@@ -129,12 +129,12 @@ public:
 	void setPort(int port);
 
 protected:
-	void paintEvent(QPaintEvent *event);
-	void resizeEvent(QResizeEvent *event);
-	void keyPressEvent(QKeyEvent *event);
-	void keyReleaseEvent(QKeyEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void mousePressEvent(QMouseEvent *event);
+	void paintEvent(QPaintEvent *event) override;
+	void resizeEvent(QResizeEvent *event) override;
+	void keyPressEvent(QKeyEvent *event) override;
+	void keyReleaseEvent(QKeyEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
 	//void contextMenuEvent(QContextMenuEvent *event);
 
 	void setFontPixelSize(int px);
@@ -162,7 +162,7 @@ public:
 	~GamePadConfDialog_t(void);
 
 protected:
-	void resizeEvent(QResizeEvent *event);
+	void resizeEvent(QResizeEvent *event) override;
 
 	QWidget *mainWidget;
 	QTimer *inputTimer;
@@ -196,9 +196,9 @@ protected:
 
 	void changeButton(int port, int button);
 	void clearButton(int port, int button);
-	void keyPressEvent(QKeyEvent *event);
-	void keyReleaseEvent(QKeyEvent *event);
-	void closeEvent(QCloseEvent *bar);
+	void keyPressEvent(QKeyEvent *event) override;
+	void keyReleaseEvent(QKeyEvent *event) override;
+	void closeEvent(QCloseEvent *bar) override;
 
 	void refreshKeyBindTree( bool reset = false );
 

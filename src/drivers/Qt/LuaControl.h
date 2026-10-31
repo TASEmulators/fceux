@@ -33,7 +33,7 @@ public:
 	void refreshState(void);
 
 protected:
-	void closeEvent(QCloseEvent *bar);
+	void closeEvent(QCloseEvent *bar) override;
 	void openLuaKillMessageBox(void);
 
 	QTimer *periodicTimer;

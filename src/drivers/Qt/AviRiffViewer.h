@@ -69,7 +69,7 @@ public:
 	int riffWalkCallback( int type, long long int fpos, const char *fourcc, size_t size );
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QMenuBar *buildMenuBar(void);
 

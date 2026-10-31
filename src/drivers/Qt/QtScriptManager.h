@@ -814,7 +814,7 @@ public:
 
 protected:
 	void resetLog();
-	void closeEvent(QCloseEvent *bar);
+	void closeEvent(QCloseEvent *bar) override;
 	void openJSKillMessageBox(void);
 	void clearPropertyTree();
 	void loadPropertyTree(QJSValue& val, JsPropertyItem* parentItem = nullptr);

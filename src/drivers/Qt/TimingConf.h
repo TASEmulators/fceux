@@ -29,7 +29,7 @@ public:
 	~TimingConfDialog_t(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QCheckBox *emuPrioCtlEna;
 #ifdef WIN32

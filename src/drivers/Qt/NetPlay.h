@@ -409,7 +409,7 @@ public:
 
 	static NetPlayHostDialog *GetInstance(void){ return instance; };
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QLineEdit  *sessionNameEntry;
 	QSpinBox   *portEntry;
@@ -444,7 +444,7 @@ public:
 	static NetPlayJoinDialog *GetInstance(void){ return instance; };
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QLineEdit  *hostEntry;
 	QSpinBox   *portEntry;
@@ -496,7 +496,7 @@ public:
 	static NetPlayClientStatusDialog *GetInstance(void){ return instance; };
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 	void updateStatusDisplay(void);
 
 	QLabel   *hostStateLbl;
@@ -521,7 +521,7 @@ public:
 	static NetPlayHostStatusDialog *GetInstance(void){ return instance; };
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QTreeWidget *clientTree;
 	QPushButton *dropPlayerButton;

@@ -35,7 +35,7 @@ public:
 	void showActiveCheatList(bool redraw);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QGroupBox *actCheatFrame;
 	QGroupBox *cheatSearchFrame;

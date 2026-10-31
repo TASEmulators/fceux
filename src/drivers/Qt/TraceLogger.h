@@ -73,20 +73,20 @@ public:
 	void highlightClear(void);
 
 protected:
-	void paintEvent(QPaintEvent *event);
-	void resizeEvent(QResizeEvent *event);
-	void wheelEvent(QWheelEvent *event);
-	void mousePressEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void keyPressEvent(QKeyEvent *event);
+	void paintEvent(QPaintEvent *event) override;
+	void resizeEvent(QResizeEvent *event) override;
+	void wheelEvent(QWheelEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
+	void keyPressEvent(QKeyEvent *event) override;
 
 	void calcFontData(void);
 	QPoint convPixToCursor(QPoint p);
 	bool textIsHighlighted(void);
 	void setHighlightEndCoord(int x, int y);
 	void loadClipboard(const char *txt);
-	void contextMenuEvent(QContextMenuEvent *event);
+	void contextMenuEvent(QContextMenuEvent *event) override;
 	void drawText(QPainter *painter, int x, int y, const char *txt, int maxChars = 256);
 	void calcTextSel(int x, int y);
 	void openBpEditWindow(int editIdx, watchpointinfo *wp, traceRecord_t *recp);
@@ -195,7 +195,7 @@ protected:
 	int traceViewCounter;
 	int recbufHeadLp;
 
-	void closeEvent(QCloseEvent *bar);
+	void closeEvent(QCloseEvent *bar) override;
 
 private:
 public slots:

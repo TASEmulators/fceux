@@ -51,7 +51,7 @@ class guiStyleTestDialog : public QDialog
 		~guiStyleTestDialog(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 	public slots:
 		void closeWindow(void);
@@ -66,7 +66,7 @@ class guiColorPickerDialog_t : public QDialog
 		~guiColorPickerDialog_t(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 	private:
 		QColorDialog *colorDialog;
@@ -118,7 +118,7 @@ public:
 	~GuiPaletteEditDialog_t(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 public slots:
 	void closeWindow(void);
 	void paletteSaveAs(void);
@@ -134,7 +134,7 @@ public:
 	~GuiConfDialog_t(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	//void loadQss( const char *filepath );
 

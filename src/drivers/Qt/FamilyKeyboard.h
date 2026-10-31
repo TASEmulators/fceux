@@ -143,7 +143,7 @@ public:
 	void updateBindingList(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QMenuBar *buildMenuBar(void);
 

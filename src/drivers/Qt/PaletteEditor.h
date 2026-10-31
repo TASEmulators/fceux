@@ -29,7 +29,7 @@ class nesColorPickerDialog_t : public QDialog
 		~nesColorPickerDialog_t(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 	private:
 		QColorDialog *colorDialog;
@@ -68,12 +68,12 @@ class nesPaletteView : public QWidget
 		int   exportToFileACT( const char *filepath );
 
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void mousePressEvent(QMouseEvent * event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void mousePressEvent(QMouseEvent * event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 
 		QFont  font;
 		QPoint selCell;
@@ -100,7 +100,7 @@ class PaletteEditorDialog_t : public QDialog
 		nesPaletteView  *palView;
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 		QAction *undoAct;
 		QAction *redoAct;
@@ -140,12 +140,12 @@ class nesPalettePickerView : public QWidget
 		void    setPalAddr( int a );
 
 	protected:
-		void paintEvent(QPaintEvent *event);
-		void resizeEvent(QResizeEvent *event);
-		void keyPressEvent(QKeyEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void mousePressEvent(QMouseEvent * event);
-		void contextMenuEvent(QContextMenuEvent *event);
+		void paintEvent(QPaintEvent *event) override;
+		void resizeEvent(QResizeEvent *event) override;
+		void keyPressEvent(QKeyEvent *event) override;
+		void mouseMoveEvent(QMouseEvent *event) override;
+		void mousePressEvent(QMouseEvent * event) override;
+		void contextMenuEvent(QContextMenuEvent *event) override;
 
 		QFont  font;
 		QPoint selCell;
@@ -173,7 +173,7 @@ class nesPalettePickerDialog : public QDialog
 		nesPalettePickerView  *palView;
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 		int  palIdx;
 		int  palAddr;

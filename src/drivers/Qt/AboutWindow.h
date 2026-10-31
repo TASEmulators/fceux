@@ -28,7 +28,7 @@ class AboutWindow : public QDialog
 		~AboutWindow(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 	private:
 

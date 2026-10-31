@@ -28,7 +28,7 @@ public:
 	~MovieOptionsDialog_t(void);
 
 protected:
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 
 	QCheckBox *readOnlyReplay;
 	QCheckBox *pauseAfterPlay;

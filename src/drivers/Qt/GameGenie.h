@@ -29,7 +29,7 @@ class GameGenieDialog_t : public QDialog
 		~GameGenieDialog_t(void);
 
 	protected:
-		void closeEvent(QCloseEvent *event);
+		void closeEvent(QCloseEvent *event) override;
 
 		fceuHexIntValidtor *addrValidator;
 		fceuHexIntValidtor *cmpValidator;
