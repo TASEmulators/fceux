@@ -151,10 +151,10 @@ protected:
 	void mousePressEvent(QMouseEvent * event) override;
 	void mouseReleaseEvent(QMouseEvent * event) override;
 	void mouseMoveEvent(QMouseEvent * event) override;
-	void mouseDoubleClickEvent(QMouseEvent * event);
-	void focusOutEvent(QFocusEvent *event);
-	void leaveEvent(QEvent *event);
-	bool event(QEvent *event);
+	void mouseDoubleClickEvent(QMouseEvent * event) override;
+	void focusOutEvent(QFocusEvent *event) override;
+	void leaveEvent(QEvent *event) override;
+	bool event(QEvent *event) override;
 
 private:
 	void calcFontData(void);

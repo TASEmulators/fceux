@@ -114,10 +114,10 @@ class tilePaletteView_t : public QWidget
 		void resizeEvent(QResizeEvent *event) override;
 		void mouseMoveEvent(QMouseEvent *event) override;
 		void contextMenuEvent(QContextMenuEvent *event) override;
-		int  heightForWidth(int w) const;
-		QSize  minimumSizeHint(void) const;
+		int  heightForWidth(int w) const override;
+		QSize  minimumSizeHint(void) const override;
 		QSize  maximumSizeHint(void) const;
-		QSize  sizeHint(void) const;
+		QSize  sizeHint(void) const override;
 		QPoint convPixToCell( QPoint p );
 
 	private:
@@ -355,10 +355,10 @@ class oamPatternView_t : public QWidget
 		void mouseMoveEvent(QMouseEvent *event) override;
 		void mousePressEvent(QMouseEvent * event) override;
 		void contextMenuEvent(QContextMenuEvent *event) override;
-		int  heightForWidth(int w) const;
-		QSize  minimumSizeHint(void) const;
+		int  heightForWidth(int w) const override;
+		QSize  minimumSizeHint(void) const override;
 		QSize  maximumSizeHint(void) const;
-		QSize  sizeHint(void) const;
+		QSize  sizeHint(void) const override;
 
 		int  viewWidth;
 		int  viewHeight;
@@ -387,10 +387,10 @@ class oamTileView_t : public QWidget
 	protected:
 		void paintEvent(QPaintEvent *event) override;
 		void resizeEvent(QResizeEvent *event) override;
-		int  heightForWidth(int w) const;
-		QSize  minimumSizeHint(void) const;
+		int  heightForWidth(int w) const override;
+		QSize  minimumSizeHint(void) const override;
 		QSize  maximumSizeHint(void) const;
-		QSize  sizeHint(void) const;
+		QSize  sizeHint(void) const override;
 
 	private:
 		int  viewWidth;
@@ -410,10 +410,10 @@ class oamPaletteView_t : public QWidget
 	protected:
 		void paintEvent(QPaintEvent *event) override;
 		void resizeEvent(QResizeEvent *event) override;
-		int  heightForWidth(int w) const;
-		QSize  minimumSizeHint(void) const;
+		int  heightForWidth(int w) const override;
+		QSize  minimumSizeHint(void) const override;
 		QSize  maximumSizeHint(void) const;
-		QSize  sizeHint(void) const;
+		QSize  sizeHint(void) const override;
 
 	private:
 		int  viewWidth;
@@ -436,10 +436,10 @@ class oamPreview_t : public QWidget
 	protected:
 		void paintEvent(QPaintEvent *event) override;
 		void resizeEvent(QResizeEvent *event) override;
-		int  heightForWidth(int w) const;
-		QSize  minimumSizeHint(void) const;
+		int  heightForWidth(int w) const override;
+		QSize  minimumSizeHint(void) const override;
 		QSize  maximumSizeHint(void) const;
-		QSize sizeHint(void) const;
+		QSize sizeHint(void) const override;
 
 	private:
 		int  viewWidth;
@@ -495,4 +495,3 @@ class spriteViewerDialog_t : public QDialog
 int openPPUViewWindow( QWidget *parent );
 int openOAMViewWindow( QWidget *parent );
 void setPPUSelPatternTile( int table, int x, int y );
-

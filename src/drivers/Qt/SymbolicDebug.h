@@ -70,7 +70,7 @@ class SymbolEditWindow : public QDialog
 
 	public slots:
 		void closeWindow(void);
-		int  exec(void);
+		int  exec(void) override;
 
 	private slots:
 		void isArrayStateChanged( int state );

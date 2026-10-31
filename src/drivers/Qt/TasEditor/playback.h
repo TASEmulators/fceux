@@ -20,8 +20,8 @@ class UpperMarkerNoteEdit : public QLineEdit
 		~UpperMarkerNoteEdit(void);	
 
 	protected:
-		void focusInEvent(QFocusEvent *event);
-		void focusOutEvent(QFocusEvent *event);
+		void focusInEvent(QFocusEvent *event) override;
+		void focusOutEvent(QFocusEvent *event) override;
 		void keyPressEvent(QKeyEvent *event) override;
 		void mousePressEvent(QMouseEvent * event) override;
 };

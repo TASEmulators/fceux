@@ -349,9 +349,9 @@ static int clistcallb(const char *name, uint32 a, uint8 v, int compare, int s, i
  int ret;
 
  if(compare>=0)
-  sprintf(tmp,"%s   $%04x:%03u:%03d - %s",s?"*":" ",(unsigned int)a,(unsigned int)v,compare,name);
+  snprintf(tmp, sizeof(tmp), "%s   $%04x:%03u:%03d - %s",s?"*":" ",(unsigned int)a,(unsigned int)v,compare,name);
  else
-  sprintf(tmp,"%s   $%04x:%03u     - %s",s?"*":" ",(unsigned int)a,(unsigned int)v,name);
+  snprintf(tmp, sizeof(tmp), "%s   $%04x:%03u     - %s",s?"*":" ",(unsigned int)a,(unsigned int)v,name);
  if(type==1)
   tmp[2]='S';
  ret=AddToList(tmp,lid);

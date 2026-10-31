@@ -161,10 +161,10 @@ class ppuNameTablePaletteView_t : public QWidget
 	protected:
 		void paintEvent(QPaintEvent *event) override;
 		void resizeEvent(QResizeEvent *event) override;
-		int  heightForWidth(int w) const;
-		QSize  minimumSizeHint(void) const;
+		int  heightForWidth(int w) const override;
+		QSize  minimumSizeHint(void) const override;
 		QSize  maximumSizeHint(void) const;
-		QSize  sizeHint(void) const;
+		QSize  sizeHint(void) const override;
 
 	private:
 		int  viewWidth;
@@ -254,4 +254,3 @@ class ppuNameTableViewerDialog_t : public QDialog
 };
 
 int openNameTableViewWindow( QWidget *parent );
-

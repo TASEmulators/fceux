@@ -55,9 +55,9 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public
 		void    setMaximumSize(const QSize &s) override { return QOpenGLWidget::setMaximumSize(s); };
 
 	protected:
-	void initializeGL(void);
-	void resizeGL(int w, int h);
-	void paintGL(void);
+	void initializeGL(void) override;
+	void resizeGL(int w, int h) override;
+	void paintGL(void) override;
 	void mousePressEvent(QMouseEvent * event) override;
 	void mouseReleaseEvent(QMouseEvent * event) override;
 
