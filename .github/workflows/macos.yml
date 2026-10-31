@@ -55,3 +55,30 @@ jobs:
           name: fceux-macos
           path: fceux-*.dmg
           if-no-files-found: error
+
+  publish-interim:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    concurrency:
+      group: interim-build-macos
+      cancel-in-progress: true
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: fceux-macos
+
+      - name: Upload to interim-build release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          shopt -s nullglob
+          dmgs=(fceux-*.dmg)
+          if [ "${#dmgs[@]}" -ne 1 ]; then
+            echo "Expected exactly one DMG, found ${#dmgs[@]}: ${dmgs[*]}"
+            exit 1
+          fi
+          cp "${dmgs[0]}" fceux-Darwin.dmg
+          gh release upload interim-build fceux-Darwin.dmg --clobber --repo "$GITHUB_REPOSITORY"

@@ -8,8 +8,8 @@ Interim builds:
 * Win32: [fceux-win32.zip](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win32.zip)
 * Win64: [fceux-win64.zip](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win64.zip)
 * Win64 Qt/SDL: [fceux-win64-QtSDL.zip](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win64-QtSDL.zip)
-* Ubuntu (x64): [GitHub Actions builds](https://github.com/TASEmulators/fceux/actions/workflows/linux.yml) (download the .deb from a successful run)
-* macOS (Apple Silicon): [GitHub Actions builds](https://github.com/TASEmulators/fceux/actions/workflows/macos.yml) (download the DMG from a successful run)
+* Ubuntu: [fceux-ubuntu-x64.deb](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-ubuntu-x64.deb)
+* macOS (Apple Silicon): [fceux-Darwin.dmg](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-Darwin.dmg)
 * Status: [AppVeyor](https://ci.appveyor.com/project/zeromus/fceux/) · [macOS GitHub Actions](https://github.com/TASEmulators/fceux/actions/workflows/macos.yml) · [Linux GitHub Actions](https://github.com/TASEmulators/fceux/actions/workflows/linux.yml)
 
 But you might like Mesen more: https://github.com/SourMesen/Mesen2

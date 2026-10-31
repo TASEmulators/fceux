@@ -73,3 +73,22 @@ jobs:
           name: fceux-ubuntu-x64
           path: fceux-ubuntu-x64.deb
           if-no-files-found: error
+
+  publish-interim:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    concurrency:
+      group: interim-build-linux
+      cancel-in-progress: true
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: fceux-ubuntu-x64
+
+      - name: Upload to interim-build release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload interim-build fceux-ubuntu-x64.deb --clobber --repo "$GITHUB_REPOSITORY"
