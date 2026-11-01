@@ -9,8 +9,8 @@ struct ValueArray
 	T data[N];
 	T &operator[](int index) { return data[index]; }
 	static constexpr size_t size = N;
-	bool operator!=(ValueArray<T,N> &other) { return !operator==(other); }
-	bool operator==(ValueArray<T,N> &other)
+	bool operator!=(ValueArray<T,N> &other) const { return !operator==(other); }
+	bool operator==(ValueArray<T,N> &other) const
 	{
 		for(size_t i=0;i<size;i++)
 			if(data[i] != other[i])

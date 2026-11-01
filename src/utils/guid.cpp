@@ -1,4 +1,5 @@
 #include "guid.h"
+#include "../fceu.h"
 #include <stdlib.h>
 void FCEU_Guid::newGuid()
 {
@@ -36,6 +37,26 @@ uint8 FCEU_Guid::hexToByte(char** ptrptr)
 
 void FCEU_Guid::scan(std::string& str)
 {
+	bool valid = str.size() >= 36;
+	for(size_t i=0;valid && i<36;i++)
+	{
+		const char c = str[i];
+		if(i == 8 || i == 13 || i == 18 || i == 23)
+		{
+			valid = c == '-';
+		}
+		else
+		{
+			valid = (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
+		}
+	}
+	if(!valid)
+	{
+		memset(data,0,sizeof(data));
+		FCEU_PrintError("Invalid movie GUID; using a zero GUID.\n");
+		return;
+	}
+
 	char* endptr = (char*)str.c_str();
 	FCEU_en32lsb(data,strtoul(endptr,&endptr,16));
 	FCEU_en16lsb(data+4,strtoul(endptr+1,&endptr,16));
@@ -43,5 +64,7 @@ void FCEU_Guid::scan(std::string& str)
 	FCEU_en16lsb(data+8,strtoul(endptr+1,&endptr,16));
 	endptr++;
 	for(int i=0;i<6;i++)
+	{
 		data[10+i] = hexToByte(&endptr);
+	}
 }
