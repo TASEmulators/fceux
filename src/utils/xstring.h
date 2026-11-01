@@ -47,8 +47,8 @@ int str_replace(char *str, const char *search, const char *replace);
 
 int HexStringToBytesLength(const std::string& str);
 int Base64StringToBytesLength(const std::string& str);
-std::string BytesToString(const void* data, int len);
-bool StringToBytes(const std::string& str, void* data, int len);
+std::string BytesToString(const void* data, size_t len);
+bool StringToBytes(const std::string& str, void* data, size_t len);
 
 std::vector<std::string> tokenize_str(const std::string & str,const std::string & delims);
 void splitpath(const char* path, char* drv, char* dir, char* name, char* ext);

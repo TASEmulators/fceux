@@ -203,7 +203,7 @@ private:
 } Base64Table;
 
 ///Converts the provided data to a string in a standard, user-friendly, round-trippable format
-std::string BytesToString(const void* data, int len)
+std::string BytesToString(const void* data, size_t len)
 {
 	char temp[16];
 	if(len==1) {
@@ -222,7 +222,7 @@ std::string BytesToString(const void* data, int len)
 	{
 		const unsigned char* src = (const unsigned char*)data;
 		ret = "base64:";
-		for(int n; len > 0; len -= n)
+		for(size_t n=0; len > 0; len -= n)
 		{
 			unsigned char input[3] = {0,0,0};
 			for(n=0; n<3 && n<len; ++n)
@@ -242,7 +242,8 @@ std::string BytesToString(const void* data, int len)
 		ret.resize(len*2+2);
 		ret[0] = '0';
 		ret[1] = 'x';
-		for(int i=0;i<len;i++)
+		size_t outputIdx = 2;
+		for(size_t i=0;i<len;i++)
 		{
 			int a = (((const unsigned char*)data)[i]>>4);
 			int b = (((const unsigned char*)data)[i])&15;
@@ -250,8 +251,8 @@ std::string BytesToString(const void* data, int len)
 			else a += '0';
 			if(b>9) b += 'A'-10;
 			else b += '0';
-			ret[2+i*2] = a;
-			ret[2+i*2+1] = b;
+			ret[outputIdx++] = a;
+			ret[outputIdx++] = b;
 		}
 	}
 	return ret;
@@ -277,7 +278,7 @@ int Base64StringToBytesLength(const std::string& str)
 
 ///parses a string in the same format as BytesToString
 ///returns true if success.
-bool StringToBytes(const std::string& str, void* data, int len)
+bool StringToBytes(const std::string& str, void* data, size_t len)
 {
 	if(str.substr(0,7) == "base64:")
 	{
@@ -300,7 +301,7 @@ bool StringToBytes(const std::string& str, void* data, int len)
 				static_cast<unsigned char>((converted[1] << 4) | (converted[2] >> 2)),
 				static_cast<unsigned char>((converted[2] << 6) | (converted[3]))
 			};
-			int outlen = (input[2] == '=') ? 1 : (input[3] == '=' ? 2 : 3);
+			size_t outlen = (input[2] == '=') ? 1 : (input[3] == '=' ? 2 : 3);
 			if(outlen > len) outlen = len;
 			memcpy(tgt, outpacket, outlen);
 			tgt += outlen;
@@ -311,12 +312,10 @@ bool StringToBytes(const std::string& str, void* data, int len)
 	if(str.size()>2 && str[0] == '0' && toupper(str[1]) == 'X')
 	{
 		// hex
-		int amt = len;
-		int bytesAvailable = str.size()/2;
-		if(bytesAvailable < amt)
-			amt = bytesAvailable;
+		const size_t bytesAvailable = (str.size() - 2) / 2; // exclude the "0X" prefix
+		const size_t amt = (bytesAvailable < len) ? bytesAvailable : len;
 		const char* cstr = str.c_str()+2;
-		for(int i=0;i<amt;i++) {
+		for(size_t i=0;i<amt;i++) {
 			char a = toupper(cstr[i*2]);
 			char b = toupper(cstr[i*2+1]);
 			if(a>='A') a=a-'A'+10;
