@@ -1,0 +1,200 @@
+name: Win64 Qt
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'fceux-*.*.*'
+      - '*.*.*'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  QT_VERSION: '6.9.*'
+  VULKAN_SDK_VERSION: '1.4.363.0'
+  SDL_VERSION: '2.32.10'
+  FFMPEG_VERSION: '5.1.2'
+
+jobs:
+  build:
+    runs-on: windows-2022
+    outputs:
+      zip_filename: ${{ steps.version.outputs.zip_filename }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine build type
+        id: version
+        shell: pwsh
+        run: |
+          $zip = 'fceux-win64-QtSDL.zip'
+          $publicRelease = 0
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -match '(\d+\.\d+\.\d+)') {
+            $zip = "fceux-$($Matches[1])-win64-QtSDL.zip"
+            $publicRelease = 1
+          }
+          "zip_filename=$zip" >> $env:GITHUB_OUTPUT
+          "ZIP_FILENAME=$zip" >> $env:GITHUB_ENV
+          "PUBLIC_RELEASE=$publicRelease" >> $env:GITHUB_ENV
+          "image_version=$env:ImageVersion" >> $env:GITHUB_OUTPUT
+          Write-Host "Zip: $zip  PUBLIC_RELEASE=$publicRelease  Runner image: $env:ImageVersion"
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          cache: true
+
+      - name: Cache Vulkan SDK
+        id: vulkan-cache
+        uses: actions/cache@v4
+        with:
+          path: C:\VulkanSDK\${{ env.VULKAN_SDK_VERSION }}
+          key: vulkan-sdk-${{ env.VULKAN_SDK_VERSION }}-windows
+
+      - name: Install Vulkan SDK
+        if: steps.vulkan-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $installer = "$env:RUNNER_TEMP\vulkansdk.exe"
+          curl.exe -fL --retry 3 -o $installer "https://sdk.lunarg.com/sdk/download/$env:VULKAN_SDK_VERSION/windows/vulkansdk-windows-X64-$env:VULKAN_SDK_VERSION.exe"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          & $installer --root "C:\VulkanSDK\$env:VULKAN_SDK_VERSION" --accept-licenses --default-answer --confirm-command install copy_only=1
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Set Vulkan SDK environment
+        shell: pwsh
+        run: |
+          $sdk = "C:\VulkanSDK\$env:VULKAN_SDK_VERSION"
+          if (!(Test-Path "$sdk\Include\vulkan\vulkan.h") -or !(Test-Path "$sdk\Lib\vulkan-1.lib")) {
+            Write-Error "Vulkan SDK installation is incomplete at $sdk"
+            exit 1
+          }
+          "VULKAN_SDK=$sdk" >> $env:GITHUB_ENV
+
+      - name: Cache SDL2 and FFmpeg
+        id: deps-cache
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: deps-sdl-${{ env.SDL_VERSION }}-ffmpeg-${{ env.FFMPEG_VERSION }}-windows
+
+      - name: Download SDL2 and FFmpeg
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force deps | Out-Null
+          Set-Location deps
+          curl.exe -fsSL --retry 3 -o sdl2.zip "https://github.com/libsdl-org/SDL/releases/download/release-$env:SDL_VERSION/SDL2-devel-$env:SDL_VERSION-VC.zip"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          curl.exe -fsSL --retry 3 -o ffmpeg.zip "https://github.com/GyanD/codexffmpeg/releases/download/$env:FFMPEG_VERSION/ffmpeg-$env:FFMPEG_VERSION-full_build-shared.zip"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          7z x -y sdl2.zip | Out-Null
+          7z x -y ffmpeg.zip | Out-Null
+          Rename-Item "SDL2-$env:SDL_VERSION" SDL2
+          Rename-Item "ffmpeg-$env:FFMPEG_VERSION-full_build-shared" ffmpeg
+          Remove-Item sdl2.zip, ffmpeg.zip
+
+      - name: Cache vcpkg binaries
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}\vcpkg-binary-cache
+          key: vcpkg-${{ steps.version.outputs.image_version }}-${{ hashFiles('vcpkg/vcpkg.json', 'vcpkg/vcpkg-configuration.json', 'vcpkg/custom-triplets/**') }}
+
+      - name: Install libarchive (vcpkg)
+        shell: pwsh
+        working-directory: vcpkg
+        run: |
+          $cache = "$env:RUNNER_TEMP\vcpkg-binary-cache"
+          New-Item -ItemType Directory -Force $cache | Out-Null
+          $env:VCPKG_BINARY_SOURCES = "clear;files,$cache,readwrite"
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install --triplet=x64-windows-rel --overlay-triplets=./custom-triplets
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Set up sccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          variant: sccache
+          key: windows-qt-${{ steps.version.outputs.image_version }}
+          max-size: 1G
+
+      - name: Configure and build
+        shell: pwsh
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          cmake -S . -B build -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache `
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
+            -DQT=6 `
+            -DPUBLIC_RELEASE="$env:PUBLIC_RELEASE" `
+            -DSDL_INSTALL_PREFIX="$root\deps\SDL2" `
+            -DLIBARCHIVE_INSTALL_PREFIX="$root\vcpkg\vcpkg_installed\x64-windows-rel" `
+            -DUSE_LIBAV=1 `
+            -DFFMPEG_INSTALL_PREFIX="$root\deps\ffmpeg"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          cmake --build build --parallel
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          sccache --show-stats
+
+      - name: Package zip
+        shell: cmd
+        run: |
+          set PROJECT_ROOT=%GITHUB_WORKSPACE%
+          cd build
+          mkdir bin
+          copy src\fceux.exe bin\qfceux.exe || exit /b 1
+          copy %PROJECT_ROOT%\src\auxlib.lua bin\. || exit /b 1
+          copy %PROJECT_ROOT%\src\drivers\win\lua\x64\lua51.dll bin\. || exit /b 1
+          copy %PROJECT_ROOT%\src\drivers\win\lua\x64\lua5.1.dll bin\. || exit /b 1
+          copy %PROJECT_ROOT%\deps\SDL2\lib\x64\SDL2.dll bin\. || exit /b 1
+          copy %PROJECT_ROOT%\vcpkg\vcpkg_installed\x64-windows-rel\bin\*.dll bin\. || exit /b 1
+          copy %PROJECT_ROOT%\deps\ffmpeg\bin\*.dll bin\. || exit /b 1
+
+          windeployqt --no-compiler-runtime bin\qfceux.exe || exit /b 1
+          dir bin
+
+          %PROJECT_ROOT%\vc\zip -X -9 -r %PROJECT_ROOT%\%ZIP_FILENAME% bin || exit /b 1
+
+          cd %PROJECT_ROOT%\output
+          %PROJECT_ROOT%\vc\zip -X -9 -u -r %PROJECT_ROOT%\%ZIP_FILENAME% palettes luaScripts tools || exit /b 1
+
+          mkdir doc
+          copy *.chm doc\. || exit /b 1
+          %PROJECT_ROOT%\vc\zip -X -9 -u -r %PROJECT_ROOT%\%ZIP_FILENAME% doc || exit /b 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fceux-win64-QtSDL
+          path: ${{ steps.version.outputs.zip_filename }}
+          if-no-files-found: error
+
+  publish-interim:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    concurrency:
+      group: interim-build-win64-qt
+      cancel-in-progress: true
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: fceux-win64-QtSDL
+
+      - name: Upload to interim-build release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload interim-build fceux-win64-QtSDL.zip --clobber --repo "$GITHUB_REPOSITORY"

@@ -44,7 +44,7 @@ for:
         - job_name: Win64 Qt
 
     build_script:
-    - cmd: pipelines/WinAppveyorBuild.bat win64-QtSDL
+    - cmd: echo Skipping Win64 Qt build on AppVeyor. GitHub Actions build is faster.
     cache:
     - C:\Users\appveyor\AppData\Local\vcpkg -> vcpkg/vcpkg.json
 
