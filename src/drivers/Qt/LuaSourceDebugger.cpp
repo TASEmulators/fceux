@@ -1730,13 +1730,22 @@ void LuaSourceDebuggerDialog_t::openScriptDialog(void)
 {
 	QString start;
 	QString path;
+	int useNativeFileDialogVal = 0;
+	QFileDialog::Options options;
 
 	if (!sourceView->file().empty())
 	{
 		start = QFileInfo(QString::fromLocal8Bit(sourceView->file().c_str())).absolutePath();
 	}
+	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	if (!useNativeFileDialogVal)
+	{
+		options |= QFileDialog::DontUseNativeDialog;
+	}
 	path = QFileDialog::getOpenFileName(this, tr("Open Lua Script"), start,
-	                                    tr("Lua scripts (*.lua *.LUA);;Any files (*)"));
+	                                    tr("Lua scripts (*.lua *.LUA);;Any files (*)"),
+	                                    nullptr, options);
 
 	if (!path.isEmpty())
 	{

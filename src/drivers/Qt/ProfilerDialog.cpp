@@ -20,6 +20,7 @@
 
 #include "driver.h"
 #include "Qt/main.h"
+#include "Qt/fceuWrapper.h"
 #include "Qt/ProfilerDialog.h"
 #include "Qt/WindowLayoutManager.h"
 
@@ -341,10 +342,25 @@ void ProfilerDialog_t::findNextOrFirst(void)
 	viewer->findNext();
 }
 //----------------------------------------------------------------------------
+static QFileDialog::Options fileDialogOptions(void)
+{
+	int useNativeFileDialogVal = 0;
+	QFileDialog::Options options;
+
+	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+	if (!useNativeFileDialogVal)
+	{
+		options |= QFileDialog::DontUseNativeDialog;
+	}
+	return options;
+}
+//----------------------------------------------------------------------------
 void ProfilerDialog_t::browseClicked(void)
 {
 	QString path = QFileDialog::getSaveFileName(this, tr("Select Capture File"),
-		pathEdit->text(), tr("Profiler Captures (*.fcprof);;All Files (*)"));
+		pathEdit->text(), tr("Profiler Captures (*.fcprof);;All Files (*)"),
+		nullptr, fileDialogOptions());
 
 	if (!path.isEmpty())
 	{
@@ -457,7 +473,8 @@ void ProfilerDialog_t::updatePeriodic(void)
 void ProfilerDialog_t::openClicked(void)
 {
 	QString path = QFileDialog::getOpenFileName(this, tr("Open Capture File"),
-		pathEdit->text(), tr("Profiler Captures (*.fcprof);;All Files (*)"));
+		pathEdit->text(), tr("Profiler Captures (*.fcprof);;All Files (*)"),
+		nullptr, fileDialogOptions());
 
 	if (!path.isEmpty())
 	{
