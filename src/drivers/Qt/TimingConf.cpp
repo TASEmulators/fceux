@@ -368,7 +368,7 @@ void TimingConfDialog_t::emuSchedPrioChange(int val)
 	{
 		return;
 	}
-	FCEU_WRAPPER_SCOPED_LOCK(lock);
+	FCEU_WRAPPER_SCOPED_LOCK();
 #ifdef WIN32
 	printf("Setting EMU Thread to %i\n", val);
 	consoleWindow->emulatorThread->setPriority((QThread::Priority)val);

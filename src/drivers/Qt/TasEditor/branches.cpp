@@ -576,7 +576,7 @@ void BRANCHES::mouseDoubleClickEvent(QMouseEvent * event)
 
 void BRANCHES::mousePressEvent(QMouseEvent * event)
 {
-	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK();
 	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
 
 	bookmarks->itemUnderMouse = item;
@@ -626,7 +626,7 @@ void BRANCHES::mousePressEvent(QMouseEvent * event)
 
 void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
 {
-	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK();
 	int item = findItemUnderMouse( event->pos().x(), event->pos().y() );
 
 	bookmarks->itemUnderMouse = item;
@@ -648,7 +648,7 @@ void BRANCHES::mouseReleaseEvent(QMouseEvent * event)
 
 void BRANCHES::showImage(void)
 {
-	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK();
 	
 	bool item_valid = (imageItem >= 0) && (imageItem < TOTAL_BOOKMARKS);
 
@@ -673,7 +673,7 @@ void BRANCHES::showImage(void)
 
 void BRANCHES::mouseMoveEvent(QMouseEvent * event)
 {
-	FCEU_WRAPPER_SCOPED_LOCK( emuLock );
+	FCEU_WRAPPER_SCOPED_LOCK();
 	int item, item_valid;
 
 	item = findItemUnderMouse( event->pos().x(), event->pos().y() );
@@ -742,7 +742,7 @@ bool BRANCHES::event(QEvent *event)
 {
 	if (event->type() == QEvent::ToolTip)
 	{
-		FCEU_WRAPPER_SCOPED_LOCK( emuLock );
+		FCEU_WRAPPER_SCOPED_LOCK();
 		int item, item_valid;
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 

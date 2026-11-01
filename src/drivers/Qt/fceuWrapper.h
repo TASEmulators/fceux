@@ -74,5 +74,8 @@ class  fceuScopedLock
 #define  FCEU_WRAPPER_UNLOCK()   \
 	fceuWrapperUnLock()
 
-#define  FCEU_WRAPPER_SCOPED_LOCK(x)  \
-	fceuScopedLock x(__FILE__, __LINE__, __func__)
+#define  FCEU_WRAPPER_SCOPED_LOCK_CONCAT_INNER(a, b)  a ## b
+#define  FCEU_WRAPPER_SCOPED_LOCK_CONCAT(a, b)  FCEU_WRAPPER_SCOPED_LOCK_CONCAT_INNER(a, b)
+
+#define  FCEU_WRAPPER_SCOPED_LOCK()  \
+	fceuScopedLock FCEU_WRAPPER_SCOPED_LOCK_CONCAT(fceuScopedLock_, __LINE__)(__FILE__, __LINE__, __func__)
