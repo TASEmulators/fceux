@@ -626,7 +626,7 @@ void TimingConfDialog_t::emuTimingMechChange(int index)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	mode = timingDevSelBox->itemData(index).toInt();
 
@@ -635,8 +635,6 @@ void TimingConfDialog_t::emuTimingMechChange(int index)
 	RefreshThrottleFPS();
 
 	g_config->setOption("SDL.EmuTimingMech", mode);
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::updateTimingMech(void)
@@ -654,13 +652,12 @@ void TimingConfDialog_t::updateTimingMech(void)
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::overclockingToggled(bool on)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	if ( !newppu )
 	{
 		overclock_enabled = on;
 		g_config->setOption("SDL.OverClockEnable", overclock_enabled );
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::postRenderChanged(int value)

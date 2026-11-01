@@ -268,13 +268,11 @@ void MsgLogViewDialog_t::closeWindow(void)
 //----------------------------------------------------------------------------
 void MsgLogViewDialog_t::clearLog(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	msgLog.clear();
 
 	txtView->clear();
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void MsgLogViewDialog_t::updatePeriodic(void)

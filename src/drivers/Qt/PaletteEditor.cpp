@@ -649,9 +649,8 @@ void nesPaletteView::setActivePalette(void)
 		//printf("%i  %i,%i,%i \n", p, palo[p].r, palo[p].g, palo[p].b );
 	}
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_SetUserPalette( pal, NUM_COLORS );
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 int  nesPaletteView::loadFromFile( const char *filepath )
@@ -1423,11 +1422,10 @@ void nesPalettePickerDialog::closeWindow(void)
 //----------------------------------------------------------------------------
 void nesPalettePickerDialog::resetButtonClicked(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	palView->setSelBox( palOrigVal );
 	PalettePoke( palAddr, palOrigVal );
 	FCEUD_UpdatePPUView( -1, 1 );
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void nesPalettePickerDialog::cancelButtonClicked(void)

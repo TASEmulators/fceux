@@ -1518,7 +1518,7 @@ int TasEditorWindow::initModules(void)
 //----------------------------------------------------------------------------
 void TasEditorWindow::frameUpdate(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 #if SDL_VERSION_ATLEAST(2, 0, 18)
 	tasEditorTimeStamp = SDL_GetTicks64();
@@ -1562,8 +1562,6 @@ void TasEditorWindow::frameUpdate(void)
 		buildRecentProjectMenu();
 		recentProjectMenuReset = false;
 	}
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 bool TasEditorWindow::loadProject(const char* fullname)
@@ -1974,7 +1972,7 @@ void TasEditorWindow::createNewProject(void)
 	params.copyCurrentMarkers = copyMarkers->isChecked();
 	params.authorName = authorEdit->text().toStdWString();
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	if ( QDialog::Accepted == ret )
 	{
@@ -2016,7 +2014,6 @@ void TasEditorWindow::createNewProject(void)
 		updateCaption();
 		update();
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void TasEditorWindow::importMovieFile( const char *path )

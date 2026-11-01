@@ -311,10 +311,9 @@ void GameGenieDialog_t::addCheatClicked(void)
 		c = strtol( cmp->text().toLocal8Bit().constData(), NULL, 16 );
 	}
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_AddCheat( name.c_str(), a, v, c, 1 );
 	updateCheatDialog();
-	FCEU_WRAPPER_UNLOCK();
 
 }
 //----------------------------------------------------------------------------

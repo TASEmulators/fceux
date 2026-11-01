@@ -2286,7 +2286,7 @@ void DebuggerBreakpointEditor::loadBreakpoint(void)
 	int  start_addr = -1, end_addr = -1, type = 0, enable = 1, slot;
 	std::string s;
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	slot = (editIdx < 0) ? numWPs : editIdx;
 
@@ -2365,7 +2365,6 @@ void DebuggerBreakpointEditor::loadBreakpoint(void)
 			//bpListUpdate( false );
 		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 	       	//int editIndex, watchpointinfo *wp, bool forceAccept, 
@@ -2418,9 +2417,8 @@ void ConsoleDebugger::openDebugSymbolEditWindow( int addr )
 
 	if ( ret == QDialog::Accepted )
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		asmView->updateAssemblyView();
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -2696,7 +2694,7 @@ static void DeleteBreak(int sel)
 	if(sel<0) return;
 	if(sel>=numWPs) return;
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	if (watchpoint[sel].cond)
 	{
@@ -2730,8 +2728,6 @@ static void DeleteBreak(int sel)
 	watchpoint[numWPs].condText = 0;
 	watchpoint[numWPs].desc = 0;
 	numWPs--;
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void debuggerClearAllBookmarks(void)
@@ -2743,7 +2739,7 @@ void debuggerClearAllBreakpoints(void)
 {
 	int i;
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	for (i=0; i<numWPs; i++)
 	{
@@ -2768,8 +2764,6 @@ void debuggerClearAllBreakpoints(void)
 	   watchpoint[i].desc = 0;
 	}
 	numWPs = 0;
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::delete_BP_CB(void)
@@ -3007,18 +3001,16 @@ void ConsoleDebugger::changeCpuFontCB(void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::reloadSymbolsCB(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	debugSymbolTable.loadGameSymbols();
 
 	asmView->updateAssemblyView();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::saveSymbolsCB(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	debugSymbolTable.save();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::pcSetPlaceTop(void)
@@ -3164,13 +3156,12 @@ void ConsoleDebugger::debugStepBackCB(void)
 {
 	if (FCEUI_EmulationPaused()) 
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		FCEUD_TraceLoggerBackUpInstruction();
 		updateWindowData(QAsmView::UPDATE_ALL);
 		hexEditorUpdateMemoryValues(true);
 		hexEditorRequestUpdateAll();
 		lastBpIdx = BREAK_TYPE_STEP;
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -3485,12 +3476,11 @@ void ConsoleDebugger::resetCountersCB (void)
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuRunToCursor(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	watchpoint[64].address = asmView->getCtxMenuAddr();
 	watchpoint[64].flags   = WP_E|WP_X;
 
 	FCEUI_SetEmulationPaused(0);
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void ConsoleDebugger::asmViewCtxMenuGoTo(void)
@@ -3710,12 +3700,11 @@ void QAsmView::setBreakpointAtSelectedLine(void)
 
 	if ( addr >= 0 )
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		watchpoint[64].address = addr;
 		watchpoint[64].flags = WP_E|WP_X;
 		
 		FCEUI_SetEmulationPaused(0);
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -5471,9 +5460,8 @@ void QAsmView::setDisplayByteCodes( bool value )
 		calcLineOffsets();
 		calcMinimumWidth();
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		updateAssemblyView();
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -5483,9 +5471,8 @@ void QAsmView::setDisplayTraceData( bool value )
 	{
 		showTraceData = value;
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		updateAssemblyView();
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -5495,9 +5482,8 @@ void QAsmView::setDisplayROMoffsets( bool value )
 	{
 		displayROMoffsets = value;
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		updateAssemblyView();
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -5507,9 +5493,8 @@ void QAsmView::setSymbolDebugEnable( bool value )
 	{
 		symbolicDebugEnable = value;
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		updateAssemblyView();
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------
@@ -5519,9 +5504,8 @@ void QAsmView::setRegisterNameEnable( bool value )
 	{
 		registerNameEnable = value;
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		updateAssemblyView();
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------------------------------

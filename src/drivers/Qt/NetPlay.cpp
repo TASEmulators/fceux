@@ -186,14 +186,13 @@ NetPlayServer::NetPlayServer(QObject *parent)
 	connect(consoleWindow, SIGNAL(cheatsChanged(void)), this, SLOT(onCheatsChanged(void)));
 	connect(consoleWindow, SIGNAL(pauseToggled(bool)), this, SLOT(onPauseToggled(bool)));
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	inputFrameCount = static_cast<uint32_t>(currFrameCounter);
 
 	if (currCartInfo != nullptr)
 	{
 		romCrc32 = currCartInfo->CRC32;
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 
 
@@ -617,7 +616,7 @@ void NetPlayServer::releaseRole(NetPlayClient* client)
 void NetPlayServer::onRomLoad()
 {
 	//printf("New ROM Loaded!\n");
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	if (currCartInfo != nullptr)
 	{
@@ -638,7 +637,6 @@ void NetPlayServer::onRomLoad()
 		sendRomLoadReq( client );
 		sendStateSyncReq( client );
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::onRomUnload()
@@ -662,7 +660,7 @@ void NetPlayServer::onRomUnload()
 void NetPlayServer::onStateLoad()
 {
 	//printf("New State Loaded!\n");
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	opsCrc32 = 0;
 	netPlayFrameData.reset();
@@ -678,13 +676,12 @@ void NetPlayServer::onStateLoad()
 		sendRomLoadReq( client );
 		sendStateSyncReq( client );
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::onNesReset()
 {
 	//printf("NES Reset Event!\n");
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	opsCrc32 = 0;
 	netPlayFrameData.reset();
@@ -700,7 +697,6 @@ void NetPlayServer::onNesReset()
 		sendRomLoadReq( client );
 		sendStateSyncReq( client );
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::onCheatsChanged()
@@ -710,7 +706,7 @@ void NetPlayServer::onCheatsChanged()
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	opsCrc32 = 0;
 	netPlayFrameData.reset();
@@ -726,7 +722,6 @@ void NetPlayServer::onCheatsChanged()
 		//sendRomLoadReq( client );
 		sendStateSyncReq( client );
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::onPauseToggled( bool isPaused )
@@ -743,15 +738,14 @@ void NetPlayServer::onPauseToggled( bool isPaused )
 //-----------------------------------------------------------------------------
 void NetPlayServer::resyncClient( NetPlayClient *client )
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	sendRomLoadReq( client );
 	sendStateSyncReq( client );
-	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 void NetPlayServer::resyncAllClients()
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	opsCrc32 = 0;
 	netPlayFrameData.reset();
@@ -763,7 +757,6 @@ void NetPlayServer::resyncAllClients()
 	{
 		resyncClient( client );
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 static void serverMessageCallback( void *userData, void *msgBuf, size_t msgSize )
@@ -1113,12 +1106,11 @@ void NetPlayServer::processClientStateLoadRequests(void)
 
 			if (acceptStateLoadReq)
 			{
-				FCEU_WRAPPER_LOCK();
+				FCEU_WRAPPER_SCOPED_LOCK();
 				serverRequestedStateLoad = true;
 				// Clients will be resync'd during this load call.
 				FCEUSS_LoadFP( &em, SSLOADPARAM_NOBACKUP );
 				serverRequestedStateLoad = false;
-				FCEU_WRAPPER_UNLOCK();
 			}
 
 			::free(client->stateLoadData.buf);
@@ -1327,12 +1319,11 @@ NetPlayClient::NetPlayClient(QObject *parent, bool outGoing)
 		connect(consoleWindow, SIGNAL(romLoaded(void)), this, SLOT(onRomLoad(void)));
 		connect(consoleWindow, SIGNAL(romUnload(void)), this, SLOT(onRomUnload(void)));
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		if (currCartInfo != nullptr)
 		{
 			romCrc32 = currCartInfo->CRC32;
 		}
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 
@@ -1437,7 +1428,7 @@ int NetPlayClient::Destroy()
 //-----------------------------------------------------------------------------
 void NetPlayClient::onRomLoad()
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	if (currCartInfo != nullptr)
 	{
 		romCrc32 = currCartInfo->CRC32;
@@ -1446,7 +1437,6 @@ void NetPlayClient::onRomLoad()
 	{
 		romCrc32 = 0;
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 void NetPlayClient::onRomUnload()
@@ -2024,7 +2014,7 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 
 			EMUFILE_MEMORY em( stateData, stateDataSize );
 
-			FCEU_WRAPPER_LOCK();
+			FCEU_WRAPPER_SCOPED_LOCK();
 
 			bool dataValid = romMatch;
 
@@ -2084,7 +2074,6 @@ void NetPlayClient::clientProcessMessage( void *msgBuf, size_t msgSize )
 					FCEU_DeleteAllCheats();
 				}
 			}
-			FCEU_WRAPPER_UNLOCK();
 
 		}
 		break;

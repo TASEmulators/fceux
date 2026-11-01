@@ -2294,12 +2294,11 @@ void LuaSourceDebuggerDialog_t::startScript(void)
 	QSettings().setValue("luaDebugger/scriptArgs", argsEdit->text());
 	LuaConsoleClear();
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	if (0 == FCEU_LoadLuaCode(sourceView->file().c_str(), args.isEmpty() ? nullptr : args.constData()))
 	{
 		QMessageBox::warning(this, tr("Run Script"), tr("Could not load the Lua script:\n%1").arg(QString::fromStdString(sourceView->file())));
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::restartCB(void)
@@ -2324,9 +2323,8 @@ void LuaSourceDebuggerDialog_t::breakCB(void)
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::stopCB(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEU_LuaStop();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::stepIntoCB(void)

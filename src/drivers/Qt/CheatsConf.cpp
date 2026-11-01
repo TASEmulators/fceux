@@ -601,7 +601,7 @@ void GuiCheatsDialog_t::knownValueCallback(void)
 {
 	int value;
 	//printf("Cheat Search Known!\n");
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	//printf("'%s'\n", knownValEntry->displayText().toLocal8Bit().constData() );
 
@@ -610,20 +610,16 @@ void GuiCheatsDialog_t::knownValueCallback(void)
 	FCEUI_CheatSearchEnd(FCEU_SEARCH_NEWVAL_KNOWN, value, 0);
 
 	showCheatSearchResults();
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::equalValueCallback(void)
 {
 	//printf("Cheat Search Equal!\n");
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	FCEUI_CheatSearchEnd(FCEU_SEARCH_PUERLY_RELATIVE_CHANGE, 0, 0);
 
 	showCheatSearchResults();
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::notEqualValueCallback(void)
@@ -632,7 +628,7 @@ void GuiCheatsDialog_t::notEqualValueCallback(void)
 	int value;
 	int checked = useNeVal->checkState() != Qt::Unchecked;
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	if (checked)
 	{
@@ -646,8 +642,6 @@ void GuiCheatsDialog_t::notEqualValueCallback(void)
 	}
 
 	showCheatSearchResults();
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::greaterThanValueCallback(void)
@@ -656,7 +650,7 @@ void GuiCheatsDialog_t::greaterThanValueCallback(void)
 	int value;
 	int checked = useGrVal->checkState() != Qt::Unchecked;
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	if (checked)
 	{
@@ -670,8 +664,6 @@ void GuiCheatsDialog_t::greaterThanValueCallback(void)
 	}
 
 	showCheatSearchResults();
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::lessThanValueCallback(void)
@@ -680,7 +672,7 @@ void GuiCheatsDialog_t::lessThanValueCallback(void)
 	int value;
 	int checked = useLtVal->checkState() != Qt::Unchecked;
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	if (checked)
 	{
@@ -694,8 +686,6 @@ void GuiCheatsDialog_t::lessThanValueCallback(void)
 	}
 
 	showCheatSearchResults();
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 int GuiCheatsDialog_t::activeCheatListCB(const char *name, uint32 a, uint8 v, int c, int s, int type, void *data)
@@ -1065,9 +1055,8 @@ void GuiCheatsDialog_t::globalEnableCheats(int state)
 	g_config->setOption("SDL.CheatsDisabled", !val);
 	g_config->save();
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_GlobalToggleCheat(val);
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::autoLoadSaveCheats(int state)

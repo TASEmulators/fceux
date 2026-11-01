@@ -2982,10 +2982,9 @@ void consoleWin_t::openROMFile(void)
 void consoleWin_t::loadRomRequestCB( QString s )
 {
 	printf("Load ROM Req: '%s'\n", s.toLocal8Bit().constData() );
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	CloseGame ();
 	LoadGame ( s.toLocal8Bit().constData() );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::closeROMCB(void)
@@ -3002,9 +3001,8 @@ void consoleWin_t::closeROMCB(void)
 		NetPlayCloseSession();
 	}
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	CloseGame();
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::loadNSF(void)
@@ -3076,9 +3074,8 @@ void consoleWin_t::loadNSF(void)
 
 	g_config->setOption ("SDL.LastOpenNSF", filename.toLocal8Bit().constData() );
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	LoadGame( filename.toLocal8Bit().constData() );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::loadStateFrom(void)
@@ -3160,9 +3157,8 @@ void consoleWin_t::loadStateFrom(void)
 
 	g_config->setOption ("SDL.LastLoadStateFrom", filename.toLocal8Bit().constData() );
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_LoadState( filename.toLocal8Bit().constData() );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::saveStateAs(void)
@@ -3251,26 +3247,23 @@ void consoleWin_t::saveStateAs(void)
 
 	g_config->setOption ("SDL.LastSaveStateAs", filename.toLocal8Bit().constData() );
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_SaveState( filename.toLocal8Bit().constData() );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::quickLoad(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_LoadState( NULL );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::loadState(int slot)
 {
 	int prevState;
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	prevState = FCEUI_SelectState( slot, false );
 	FCEUI_LoadState( NULL, true );
 	FCEUI_SelectState( prevState, false );
-	FCEU_WRAPPER_UNLOCK();
 }
 void consoleWin_t::loadState0(void){ loadState(0); }
 void consoleWin_t::loadState1(void){ loadState(1); }
@@ -3285,33 +3278,28 @@ void consoleWin_t::loadState9(void){ loadState(9); }
 
 void consoleWin_t::loadPrevState(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEU_StateRecorderLoadPrevState();
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::loadNextState(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEU_StateRecorderLoadNextState();
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::quickSave(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_SaveState( NULL );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::saveState(int slot)
 {
-	int prevState;
-	FCEU_WRAPPER_LOCK();
-	prevState = FCEUI_SelectState( slot, false );
+	FCEU_WRAPPER_SCOPED_LOCK();
+	const int prevState = FCEUI_SelectState( slot, false );
 	FCEUI_SaveState( NULL, true );
 	FCEUI_SelectState( prevState, false );
-	FCEU_WRAPPER_UNLOCK();
 }
 void consoleWin_t::saveState0(void){ saveState(0); }
 void consoleWin_t::saveState1(void){ saveState(1); }
@@ -3326,9 +3314,10 @@ void consoleWin_t::saveState9(void){ saveState(9); }
 
 void consoleWin_t::changeState(int slot)
 {
-	FCEU_WRAPPER_LOCK();
+	{
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_SelectState( slot, true );
-	FCEU_WRAPPER_UNLOCK();
+	}
 	state[slot]->setChecked(true);
 }
 void consoleWin_t::changeState0(void){ changeState(0); }
@@ -3460,9 +3449,8 @@ void consoleWin_t::takeScreenShot(void)
 	}
 	else
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		FCEUI_SaveSnapshot();
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 
@@ -3639,7 +3627,7 @@ void consoleWin_t::openAviRiffViewer(void)
 
 void consoleWin_t::openTasEditor(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	if ( tasWindowIsOpen() )
 	{
@@ -3655,7 +3643,6 @@ void consoleWin_t::openTasEditor(void)
 
 		connect(emulatorThread, SIGNAL(frameFinished(void)), win, SLOT(frameUpdate(void)), Qt::QueuedConnection);
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::openMovieOptWin(void)
@@ -3968,9 +3955,8 @@ void consoleWin_t::setRegion(int region)
 
 	if ( currentRegion != region )
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		FCEUI_SetRegion (region, true);
-		FCEU_WRAPPER_UNLOCK();
 	}
 	return;
 }
@@ -4376,62 +4362,55 @@ void consoleWin_t::setCustomAutoFire(void)
 
 void consoleWin_t::muteSoundVolume(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUD_SoundToggle();
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::incrSoundVolume(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUD_SoundVolumeAdjust( 1);
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::decrSoundVolume(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUD_SoundVolumeAdjust(-1);
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::toggleLagCounterDisplay(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	lagCounterDisplay = !lagCounterDisplay;
 	g_config->setOption("SDL.ShowLagCount", lagCounterDisplay);
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::toggleFrameAdvLagSkip(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	frameAdvanceLagSkip = !frameAdvanceLagSkip;
 	FCEUI_DispMessage ("Skipping lag in Frame Advance %sabled.", 0, frameAdvanceLagSkip ? "en" : "dis");
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::toggleMovieBindSaveState(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	bindSavestate = !bindSavestate;
 	g_config->setOption("SDL.MovieBindSavestate", bindSavestate);
 	FCEUI_DispMessage ("Savestate binding to movie %sabled.", 0, bindSavestate ? "en" : "dis");
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::toggleMovieFrameDisplay(void)
 {
 	extern int frame_display;
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_MovieToggleFrameDisplay();
 	g_config->setOption("SDL.ShowFrameCount", frame_display );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::toggleMovieReadWrite(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	//FCEUI_SetMovieToggleReadOnly (!FCEUI_GetMovieToggleReadOnly ());
 	FCEUI_MovieToggleReadOnly();
 
@@ -4439,33 +4418,29 @@ void consoleWin_t::toggleMovieReadWrite(void)
 	{
 		tasWin->updateRecordStatus();
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::toggleInputDisplay(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_ToggleInputDisplay();
 	g_config->setOption ("SDL.InputDisplay", input_display);
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::toggleBackground(void)
 {
 	bool fgOn, bgOn;
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_GetRenderPlanes( fgOn,  bgOn );
 	FCEUI_SetRenderPlanes( fgOn, !bgOn );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::toggleForeground(void)
 {
 	bool fgOn, bgOn;
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_GetRenderPlanes(  fgOn, bgOn );
 	FCEUI_SetRenderPlanes( !fgOn, bgOn );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::toggleTurboMode(void)
@@ -4493,9 +4468,8 @@ void consoleWin_t::openMovie(void)
 
 void consoleWin_t::playMovieFromBeginning(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_MoviePlayFromBeginning();
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::stopMovie(void)
@@ -4522,12 +4496,11 @@ void consoleWin_t::aviRecordStart(void)
 {
 	if ( !aviRecordRunning() )
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		if ( aviRecordOpenFile(NULL) == 0 )
 		{
 			aviDiskThread->start();
 		}
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 
@@ -4630,12 +4603,11 @@ void consoleWin_t::aviRecordAsStart(void)
 		g_config->setOption ("SDL.AviFilePath", lastPath);
 	}
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	if ( aviRecordOpenFile( filename.toLocal8Bit().constData() ) == 0 )
 	{
 		aviDiskThread->start();
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::aviRecordStop(void)
@@ -4719,9 +4691,8 @@ void consoleWin_t::wavRecordStart(void)
 		{
 			return;
 		}
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		FCEUI_BeginWaveRecord( fileName.c_str() );
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 
@@ -4822,18 +4793,16 @@ void consoleWin_t::wavRecordAsStart(void)
 		g_config->setOption ("SDL.WavFilePath", lastPath);
 	}
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_BeginWaveRecord( filename.toLocal8Bit().constData() );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 void consoleWin_t::wavRecordStop(void)
 {
 	if ( FCEUI_WaveRecordRunning() )
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		FCEUI_EndWaveRecord();
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 
@@ -5058,10 +5027,9 @@ void consoleWin_t::loadMostRecentROM(void)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	CloseGame ();
 	LoadGame ( (romList.back())->c_str() );
-	FCEU_WRAPPER_UNLOCK();
 }
 
 QString consoleWin_t::getTempDir()
@@ -5207,10 +5175,9 @@ void consoleWin_t::updatePeriodic(void)
 
 	if ( recentRomMenuReset )
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		buildRecentRomMenu();
 		recentRomMenuReset = false;
-		FCEU_WRAPPER_UNLOCK();
 	}
 
 	if ( closeRequested )
@@ -5543,10 +5510,9 @@ void consoleRecentRomAction::activateCB(void)
 {
 	printf("Activate Recent ROM: %s \n", path.c_str() );
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	CloseGame ();
 	LoadGame ( path.c_str() );
-	FCEU_WRAPPER_UNLOCK();
 }
 //-----------------------------------------------------------------------------
 autoFireMenuAction::autoFireMenuAction(int on, int off, QString name, QWidget *parent)

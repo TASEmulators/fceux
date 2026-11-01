@@ -1336,13 +1336,11 @@ void RamSearchDialog_t::addCheatClicked(void)
 	}
 	strcpy(desc, "Quick Cheat Add");
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	FCEUI_AddCheat(desc, addr, GetMem(addr), -1, 1);
 
 	updateCheatDialog();
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void RamSearchDialog_t::addRamWatchClicked(void)

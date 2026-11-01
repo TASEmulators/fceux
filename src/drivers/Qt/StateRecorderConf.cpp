@@ -451,7 +451,7 @@ void StateRecorderDialog_t::applyChanges(void)
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::startStopClicked(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	bool isRunning = FCEU_StateRecorderRunning();
 
 	if (isRunning)
@@ -463,8 +463,6 @@ void StateRecorderDialog_t::startStopClicked(void)
 		FCEU_StateRecorderStart();
 	}
 	updateStatusDisplay();
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::snapFrameModeClicked(void)
@@ -542,9 +540,8 @@ void StateRecorderDialog_t::updateStatusDisplay(void)
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::updatePeriodic(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	updateStatusDisplay();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void StateRecorderDialog_t::enableChanged(int val)
@@ -617,7 +614,7 @@ void StateRecorderDialog_t::recalcMemoryUsage(void)
 		constexpr int numIterations = 10;
 		double ts_start, ts_end;
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 
 		EMUFILE_MEMORY em;
 		int compressionLevel = cmprLvlCbox->currentData().toInt();
@@ -636,8 +633,6 @@ void StateRecorderDialog_t::recalcMemoryUsage(void)
 		saveTimeMs = (ts_end - ts_start) * 1000.0 / static_cast<double>(numIterations);
 
 		fsnapSize = static_cast<float>( em.size() );
-
-		FCEU_WRAPPER_UNLOCK();
 	}
 
 	if (fsnapSize >= oneKiloByte)

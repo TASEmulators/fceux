@@ -488,10 +488,9 @@ void CodeDataLoggerDialog_t::saveCdlFileAs(void)
 	}
 	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	strcpy(loadedcdfile, filename.toLocal8Bit().constData());
 	SaveCDLogFile();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void CodeDataLoggerDialog_t::loadCdlFile(void)
@@ -769,7 +768,7 @@ static int getDefaultCDLFile(std::string &filepath)
 //----------------------------------------------------
 void FreeCDLog(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	if (cdloggerdata)
 	{
 		free(cdloggerdata);
@@ -782,14 +781,13 @@ void FreeCDLog(void)
 		cdloggervdata = NULL;
 		cdloggerVideoDataSize = 0;
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void InitCDLog(void)
 {
 	int rom_sel = 0;
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	if (GameInfo->type == GIT_FDS)
 	{
 		rom_sel = 1;
@@ -816,7 +814,6 @@ void InitCDLog(void)
 			cdloggervdata = (unsigned char *)malloc(8192);
 		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ResetCDLog(void)
@@ -825,7 +822,7 @@ void ResetCDLog(void)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	codecount = datacount = rendercount = vromreadcount = 0;
 	undefinedcount = cdloggerdataSize;
@@ -854,7 +851,6 @@ void ResetCDLog(void)
 			}
 		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 bool LoadCDLog(const char *nameo)
@@ -907,12 +903,11 @@ bool LoadCDLog(const char *nameo)
 //----------------------------------------------------
 void StartCDLogging(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_SetLoggingCD(1);
 	//EnableTracerMenuItems();
 	//SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
 	autoSaveArmedCDL = true;
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 bool PauseCDLogging(void)

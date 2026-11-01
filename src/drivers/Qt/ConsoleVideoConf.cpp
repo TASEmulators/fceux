@@ -591,10 +591,9 @@ void ConsoleVideoConfDialog_t::closeWindow(void)
 //----------------------------------------------------
 void  ConsoleVideoConfDialog_t::resetVideo(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	KillVideo ();
 	InitVideo (GameInfo);
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::updateReadouts(void)
@@ -803,7 +802,7 @@ void ConsoleVideoConfDialog_t::use_new_PPU_changed( bool value )
 	}
 
 	//printf("NEW PPU Value:%i \n", reqNewPPU );
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	newppu = reqNewPPU;
 
@@ -817,7 +816,6 @@ void ConsoleVideoConfDialog_t::use_new_PPU_changed( bool value )
 	g_config->save ();
 
 	UpdateEMUCore (g_config);
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::frameskip_changed( int value )
@@ -826,9 +824,8 @@ void ConsoleVideoConfDialog_t::frameskip_changed( int value )
 	g_config->setOption("SDL.Frameskip", (value == Qt::Checked) );
 	g_config->save ();
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	UpdateEMUCore (g_config);
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::vsync_changed( int value )
@@ -860,11 +857,10 @@ void ConsoleVideoConfDialog_t::intFrameRate_changed( int value )
 	g_config->setOption("SDL.IntFrameRate", useIntFrameRate );
 	g_config->save ();
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	RefreshThrottleFPS();
 	KillSound();
 	InitSound();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::useSpriteLimitChanged( int value )
@@ -873,9 +869,8 @@ void ConsoleVideoConfDialog_t::useSpriteLimitChanged( int value )
 	g_config->setOption("SDL.DisableSpriteLimit", (value == Qt::Checked) );
 	g_config->save ();
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	UpdateEMUCore (g_config);
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::clipSidesChanged( int value )
@@ -884,9 +879,8 @@ void ConsoleVideoConfDialog_t::clipSidesChanged( int value )
 	g_config->setOption("SDL.ClipSides", (value == Qt::Checked) );
 	g_config->save ();
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	UpdateEMUCore (g_config);
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showFPSChanged( int value )
@@ -895,9 +889,8 @@ void ConsoleVideoConfDialog_t::showFPSChanged( int value )
 	g_config->setOption("SDL.ShowFPS", (value == Qt::Checked) );
 	g_config->save ();
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_SetShowFPS( (value == Qt::Checked) );
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showGuiMsgsChanged( int value )
@@ -1008,9 +1001,8 @@ void ConsoleVideoConfDialog_t::regionChanged(int index)
 	// reset sound subsystem for changes to take effect
 	if ( actRegion != region )
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		FCEUI_SetRegion (region, true);
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -1079,9 +1071,8 @@ void ConsoleVideoConfDialog_t::drawInputAidsChanged( int value )
 	g_config->setOption("SDL.DrawInputAids", draw );
 	g_config->save ();
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	drawInputAidsEnable = draw;
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showFrameCountChanged( int value )

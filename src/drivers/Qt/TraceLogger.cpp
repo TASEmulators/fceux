@@ -1183,13 +1183,12 @@ int FCEUD_TraceLoggerStart(void)
 		{
 			initTraceLogBuffer(1000000);
 		}
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		if (traceRegistrationHandle == nullptr)
 		{
 			traceRegistrationHandle = FCEUI_TraceInstructionRegister( FCEUD_TraceInstruction );
 		}
 		logging = 1;
-		FCEU_WRAPPER_UNLOCK();
 	}
 	return logging;
 }

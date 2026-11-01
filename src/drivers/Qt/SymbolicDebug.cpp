@@ -775,7 +775,7 @@ int SymbolEditWindow::exec(void)
 
 	if ( ret == QDialog::Accepted )
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		if ( isArrayBox->isChecked() )
 		{
 			size = atoi( arraySize->text().toLocal8Bit().constData() );
@@ -875,7 +875,6 @@ int SymbolEditWindow::exec(void)
 			}
 		}
 		debugSymbolTable.save(); // Save table to disk immediately after an add, edit, or delete
-		FCEU_WRAPPER_UNLOCK();
 	}
 	return ret;
 }

@@ -675,13 +675,12 @@ bool EmuStateScriptObject::load()
 	bool loaded = false;
 	if (data != nullptr)
 	{
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		if (FCEUSS_LoadFP( data, SSLOADPARAM_NOBACKUP))
 		{
 			data->fseek(0,SEEK_SET);
 			loaded = true;
 		}
-		FCEU_WRAPPER_UNLOCK();
 	}
 	return loaded;
 }
@@ -1979,13 +1978,11 @@ QtScriptInstance::QtScriptInstance(QObject* parent)
 		dialog = win;
 	}
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	initEngine();
 
 	QtScriptManager::getInstance()->addScriptInstance(this);
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 QtScriptInstance::~QtScriptInstance()
@@ -2402,7 +2399,7 @@ int  QtScriptInstance::call(const QString& funcName, const QJSValueList& args)
 //----------------------------------------------------
 void QtScriptInstance::stopRunning()
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	if (running)
 	{
 		if (onScriptStopCallback != nullptr && onScriptStopCallback->isCallable())
@@ -2413,7 +2410,6 @@ void QtScriptInstance::stopRunning()
 
 		mem->reset();
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QtScriptInstance::onFrameBegin()
@@ -2672,7 +2668,7 @@ void QtScriptManager::removeScriptInstance(QtScriptInstance* script)
 //----------------------------------------------------
 void QtScriptManager::frameBeginUpdate()
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	{
 		FCEU::autoScopedLock autoLock(scriptListMutex);
 		for (auto script : scriptList)
@@ -2680,12 +2676,11 @@ void QtScriptManager::frameBeginUpdate()
 			script->onFrameBegin();
 		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QtScriptManager::frameFinishedUpdate()
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	{
 		FCEU::autoScopedLock autoLock(scriptListMutex);
 		for (auto script : scriptList)
@@ -2693,7 +2688,6 @@ void QtScriptManager::frameFinishedUpdate()
 			script->onFrameFinish();
 		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QtScriptManager::guiUpdate()
@@ -3025,7 +3019,7 @@ void QScriptDialog_t::saveLog(bool openFileBrowser)
 			QFile::remove(logSavePath);
 		}
 		//printf("Saving Log File: %s\n", logSavePath.toLocal8Bit().constData());
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		{
 			char buffer[4096];
 			flushLog();
@@ -3042,7 +3036,6 @@ void QScriptDialog_t::saveLog(bool openFileBrowser)
 				}
 			}
 		}
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -3283,7 +3276,7 @@ void QScriptDialog_t::reloadGlobalTree(void)
 void QScriptDialog_t::updatePeriodic(void)
 {
 	//printf("Update JS\n");
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	if (!emuThreadText.isEmpty())
 	{
 		auto* vbar = jsOutput->verticalScrollBar();
@@ -3305,7 +3298,6 @@ void QScriptDialog_t::updatePeriodic(void)
 	}
 
 	refreshState();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QScriptDialog_t::openJSKillMessageBox(void)
@@ -3521,10 +3513,9 @@ void QScriptDialog_t::startScript(void)
 //----------------------------------------------------
 void QScriptDialog_t::stopScript(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	scriptInstance->stopRunning();
 	refreshState();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QScriptDialog_t::refreshState(void)

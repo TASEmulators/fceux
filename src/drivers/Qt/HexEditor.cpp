@@ -1097,9 +1097,8 @@ void HexEditorFindDialog_t::runSearch(void)
 			i++;
 		}
 	}
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	parent->editor->findPattern( varray, upBtn->isChecked() );
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
@@ -1507,7 +1506,7 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 	// Lock the emulation thread mutex to ensure
 	// that the emulator is not attempting to update memory values
 	// for window while we are destroying it or editing the window list.
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	for (it = winList.begin(); it != winList.end(); it++)
 	{
@@ -1518,7 +1517,6 @@ HexEditorDialog_t::~HexEditorDialog_t(void)
 			break;
 		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void HexEditorDialog_t::saveLayoutState( const QString &profileName, QSettings &settings )
@@ -2381,7 +2379,7 @@ void QHexEdit::pasteFromClipboard(void)
 	const char *c;
 	unsigned char *buf;
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	//printf("Paste: '%s'\n", s.c_str() );
 
@@ -2441,8 +2439,6 @@ void QHexEdit::pasteFromClipboard(void)
 		}
 	}
 	free(buf);
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::loadHighlightToClipboard(void)
@@ -3395,7 +3391,7 @@ void QHexEdit::frzRamSet(void)
 		return;
 	}
 
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_ListCheats( RamFreezeCB, this);
 
 	if ( (frzRamAddr >= 0) && (FrozenAddressCount < 256) )
@@ -3403,7 +3399,6 @@ void QHexEdit::frzRamSet(void)
 		FCEUI_AddCheat("", frzRamAddr, GetMem(frzRamAddr), -1, 1);
 	}
 	updateCheatDialog();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::frzRamUnset(void)
@@ -3416,10 +3411,9 @@ void QHexEdit::frzRamUnset(void)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_ListCheats( RamFreezeCB, this);
 	updateCheatDialog();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::frzRamUnsetAll(void)
@@ -3432,10 +3426,9 @@ void QHexEdit::frzRamUnsetAll(void)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEU_DeleteAllCheats();
 	updateCheatDialog();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::frzRamToggle(void)
@@ -3448,7 +3441,7 @@ void QHexEdit::frzRamToggle(void)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	FCEUI_ListCheats( RamFreezeCB, this);
 
 	if ( (frzRamAddr >= 0) && (FrozenAddressCount < 256) )
@@ -3456,7 +3449,6 @@ void QHexEdit::frzRamToggle(void)
 		FCEUI_AddCheat("", frzRamAddr, GetMem(frzRamAddr), -1, 1);
 	}
 	updateCheatDialog();
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------------------------------
 void QHexEdit::addDebugSym(void)
