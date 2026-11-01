@@ -65,6 +65,32 @@ class  fceuScopedLock
 		}
 };
 
+// Temporarily releases one lock level already owned by the current thread.
+class  fceuScopedUnlock
+{
+	public:
+		fceuScopedUnlock(const char *filename, int lineNum, const char *func)
+			: filename(filename), lineNum(lineNum), func(func)
+		{
+			fceuWrapperUnLock();
+		}
+
+		~fceuScopedUnlock(void)
+		{
+			fceuWrapperLock( filename, lineNum, func );
+		}
+
+		fceuScopedUnlock(const fceuScopedUnlock&) = delete;
+		fceuScopedUnlock& operator=(const fceuScopedUnlock&) = delete;
+		fceuScopedUnlock(fceuScopedUnlock&&) = delete;
+		fceuScopedUnlock& operator=(fceuScopedUnlock&&) = delete;
+
+	private:
+		const char *filename;
+		int lineNum;
+		const char *func;
+};
+
 #define  FCEU_WRAPPER_LOCK()   \
 	fceuWrapperLock( __FILE__, __LINE__, __func__ )
 
@@ -79,3 +105,6 @@ class  fceuScopedLock
 
 #define  FCEU_WRAPPER_SCOPED_LOCK()  \
 	fceuScopedLock FCEU_WRAPPER_SCOPED_LOCK_CONCAT(fceuScopedLock_, __LINE__)(__FILE__, __LINE__, __func__)
+
+#define  FCEU_WRAPPER_SCOPED_UNLOCK()  \
+	fceuScopedUnlock FCEU_WRAPPER_SCOPED_LOCK_CONCAT(fceuScopedUnlock_, __LINE__)(__FILE__, __LINE__, __func__)

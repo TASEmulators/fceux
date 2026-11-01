@@ -59,13 +59,12 @@ static void luaDebuggerWaitForResume(void)
 	else
 	{
 		// Emulation thread: release the emulator lock so the GUI can operate.
-		FCEU_WRAPPER_UNLOCK();
+		FCEU_WRAPPER_SCOPED_UNLOCK();
 
 		while (!FCEU_LuaDbgResumeRequested() && nes_shm->runEmulator)
 		{
 			QThread::msleep(10);
 		}
-		FCEU_WRAPPER_LOCK();
 	}
 }
 //----------------------------------------------------------------------------

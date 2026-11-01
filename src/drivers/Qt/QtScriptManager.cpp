@@ -2179,11 +2179,13 @@ int QtScriptInstance::loadScriptFile( QString filepath )
 
 	srcFile = filepath;
 
-	FCEU_WRAPPER_LOCK();
-	engine->acquireThreadContext();
-	QJSValue evalResult = engine->evaluate(fileText, filepath);
-	engine->releaseThreadContext();
-	FCEU_WRAPPER_UNLOCK();
+	QJSValue evalResult;
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		engine->acquireThreadContext();
+		evalResult = engine->evaluate(fileText, filepath);
+		engine->releaseThreadContext();
+	}
 
 	if (evalResult.isError())
 	{
@@ -3478,7 +3480,7 @@ void QScriptDialog_t::resetLog()
 //----------------------------------------------------
 void QScriptDialog_t::startScript(void)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	resetLog();
 	jsOutput->clear();
 	clearPropertyTree();
@@ -3486,7 +3488,6 @@ void QScriptDialog_t::startScript(void)
 	if (scriptInstance->loadScriptFile(scriptPath->text()))
 	{
 		// Script parsing error
-		FCEU_WRAPPER_UNLOCK();
 		return;
 	}
 	// Pass command line arguments to script main.
@@ -3506,8 +3507,6 @@ void QScriptDialog_t::startScript(void)
 	QJSValue globals = scriptInstance->getEngine()->globalObject();
 
 	loadPropertyTree(globals);
-
-	FCEU_WRAPPER_UNLOCK();
 }
 //----------------------------------------------------
 void QScriptDialog_t::stopScript(void)

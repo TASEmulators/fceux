@@ -4681,32 +4681,32 @@ void FCEUD_DebugBreakpoint( int bpNum )
 
 	printf("Breakpoint Hit: %i \n", bpNum );
 
-	FCEU_WRAPPER_UNLOCK();
-
-	while ( nes_shm->runEmulator && bpDebugEnable &&
-			FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 	{
-		// HACK: break when Frame Advance is pressed
-		extern bool frameAdvanceRequested;
-		extern int frameAdvance_Delay_count, frameAdvance_Delay;
+		FCEU_WRAPPER_SCOPED_UNLOCK();
 
-		if (frameAdvanceRequested)
+		while ( nes_shm->runEmulator && bpDebugEnable &&
+				FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 		{
-			if ( (frameAdvance_Delay_count == 0) || (frameAdvance_Delay_count >= frameAdvance_Delay) )
-			{
-				FCEUI_SetEmulationPaused(EMULATIONPAUSED_FA);
-			}
-			if (frameAdvance_Delay_count < frameAdvance_Delay)
-			{
-				frameAdvance_Delay_count++;
-			}
-		}
-		msleep(16);
-	}
-	// since we unfreezed emulation, reset delta_cycles counter
-	ResetDebugStatisticsDeltaCounters();
+			// HACK: break when Frame Advance is pressed
+			extern bool frameAdvanceRequested;
+			extern int frameAdvance_Delay_count, frameAdvance_Delay;
 
-	FCEU_WRAPPER_LOCK();
+			if (frameAdvanceRequested)
+			{
+				if ( (frameAdvance_Delay_count == 0) || (frameAdvance_Delay_count >= frameAdvance_Delay) )
+				{
+					FCEUI_SetEmulationPaused(EMULATIONPAUSED_FA);
+				}
+				if (frameAdvance_Delay_count < frameAdvance_Delay)
+				{
+					frameAdvance_Delay_count++;
+				}
+			}
+			msleep(16);
+		}
+		// since we unfreezed emulation, reset delta_cycles counter
+		ResetDebugStatisticsDeltaCounters();
+	}
 
 	waitingAtBp = false;
 }
