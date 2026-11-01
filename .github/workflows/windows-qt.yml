@@ -9,6 +9,11 @@ on:
       - '*.*.*'
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Existing release tag to build and publish (e.g. fceux-2.7.1). Leave empty for a normal build.'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -24,20 +29,38 @@ jobs:
     runs-on: windows-2022
     outputs:
       zip_filename: ${{ steps.version.outputs.zip_filename }}
+      release_tag: ${{ steps.version.outputs.release_tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag != '' && format('refs/tags/{0}', inputs.release_tag) || '' }}
 
       - name: Determine build type
         id: version
         shell: pwsh
+        env:
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
+          $tag = ''
+          if ($env:INPUT_RELEASE_TAG) {
+            $tag = $env:INPUT_RELEASE_TAG
+          } elseif ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $tag = $env:GITHUB_REF_NAME
+          }
+
           $zip = 'fceux-win64-QtSDL.zip'
           $publicRelease = 0
-          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -match '(\d+\.\d+\.\d+)') {
+          $releaseTag = ''
+          if ($tag -match '(\d+\.\d+\.\d+)') {
             $zip = "fceux-$($Matches[1])-win64-QtSDL.zip"
             $publicRelease = 1
+            $releaseTag = $tag
+          } elseif ($env:INPUT_RELEASE_TAG) {
+            Write-Error "release_tag '$tag' does not contain an X.Y.Z version"
+            exit 1
           }
           "zip_filename=$zip" >> $env:GITHUB_OUTPUT
+          "release_tag=$releaseTag" >> $env:GITHUB_OUTPUT
           "ZIP_FILENAME=$zip" >> $env:GITHUB_ENV
           "PUBLIC_RELEASE=$publicRelease" >> $env:GITHUB_ENV
           "image_version=$env:ImageVersion" >> $env:GITHUB_OUTPUT
@@ -198,3 +221,30 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload interim-build fceux-win64-QtSDL.zip --clobber --repo "$GITHUB_REPOSITORY"
+
+  publish-release:
+    needs: build
+    if: needs.build.outputs.release_tag != ''
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: fceux-win64-QtSDL
+
+      - name: Upload to tagged release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.build.outputs.release_tag }}
+          ZIP: ${{ needs.build.outputs.zip_filename }}
+        run: |
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $TAG not found; creating it."
+            # AppVeyor may create the release at the same time, so only fail if it still doesn't exist.
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$TAG" \
+              --notes "Release Builds - commit: $(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)" \
+              || gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null
+          fi
+          # No --clobber: never replace an asset already published on a release.
+          gh release upload "$TAG" "$ZIP" --repo "$GITHUB_REPOSITORY"
