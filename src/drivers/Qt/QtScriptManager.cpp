@@ -658,10 +658,11 @@ bool EmuStateScriptObject::save()
 	}
 	data = new EMUFILE_MEMORY();
 
-	FCEU_WRAPPER_LOCK();
-	FCEUSS_SaveMS( data, compression);
-	data->fseek(0,SEEK_SET);
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEUSS_SaveMS( data, compression);
+		data->fseek(0,SEEK_SET);
+	}
 
 	if (persist)
 	{
@@ -1987,13 +1988,12 @@ QtScriptInstance::QtScriptInstance(QObject* parent)
 //----------------------------------------------------
 QtScriptInstance::~QtScriptInstance()
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 
 	QtScriptManager::getInstance()->removeScriptInstance(this);
 
 	shutdownEngine();
 
-	FCEU_WRAPPER_UNLOCK();
 
 	//printf("QtScriptInstance Destroyed\n");
 }
@@ -2692,7 +2692,7 @@ void QtScriptManager::frameFinishedUpdate()
 //----------------------------------------------------
 void QtScriptManager::guiUpdate()
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	{
 		FCEU::autoScopedLock autoLock(scriptListMutex);
 		for (auto script : scriptList)
@@ -2700,7 +2700,6 @@ void QtScriptManager::guiUpdate()
 			script->onGuiUpdate();
 		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 
 	//for (auto script : scriptList)
 	//{

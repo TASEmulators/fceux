@@ -573,13 +573,14 @@ void GuiCheatsDialog_t::showCheatSearchResults(void)
 //----------------------------------------------------------------------------
 void GuiCheatsDialog_t::resetSearchCallback(void)
 {
-	FCEU_WRAPPER_LOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
 
-	FCEUI_CheatSearchBegin();
+		FCEUI_CheatSearchBegin();
 
-	showCheatSearchResults();
+		showCheatSearchResults();
 
-	FCEU_WRAPPER_UNLOCK();
+	}
 
 	knownValBtn->setEnabled(true);
 	eqValBtn->setEnabled(true);
@@ -795,16 +796,17 @@ void GuiCheatsDialog_t::openCheatFile(void)
 
 	g_config->setOption("SDL.LastOpenFile", filename.toLocal8Bit().constData());
 
-	FCEU_WRAPPER_LOCK();
-
-	fp = fopen(filename.toLocal8Bit().constData(), "r");
-
-	if (fp != NULL)
 	{
-		FCEU_LoadGameCheats(fp, 0);
-		fclose(fp);
+		FCEU_WRAPPER_SCOPED_LOCK();
+
+		fp = fopen(filename.toLocal8Bit().constData(), "r");
+
+		if (fp != NULL)
+		{
+			FCEU_LoadGameCheats(fp, 0);
+			fclose(fp);
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 
 	showActiveCheatList(true);
 
@@ -866,16 +868,17 @@ void GuiCheatsDialog_t::saveCheatFile(void)
 
 	//g_config->setOption ("SDL.LastOpenFile", filename.toLocal8Bit().constData() );
 
-	FCEU_WRAPPER_LOCK();
-
-	fp = FCEUD_UTF8fopen(filename.toLocal8Bit().constData(), "wb");
-
-	if (fp != NULL)
 	{
-		FCEU_SaveGameCheats(fp);
-		fclose(fp);
+		FCEU_WRAPPER_SCOPED_LOCK();
+
+		fp = FCEUD_UTF8fopen(filename.toLocal8Bit().constData(), "wb");
+
+		if (fp != NULL)
+		{
+			FCEU_SaveGameCheats(fp);
+			fclose(fp);
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 
 	showActiveCheatList(true);
 
@@ -909,9 +912,10 @@ void GuiCheatsDialog_t::addActvCheat(void)
 
 	t = typeEntry->currentData().toInt();
 
-	FCEU_WRAPPER_LOCK();
-	FCEUI_AddCheat(name.c_str(), a, v, c, t);
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEUI_AddCheat(name.c_str(), a, v, c, t);
+	}
 
 	showActiveCheatList(true);
 }
@@ -930,9 +934,10 @@ void GuiCheatsDialog_t::deleteActvCheat(void)
 
 	int row = actvCheatList->indexOfTopLevelItem(item);
 
-	FCEU_WRAPPER_LOCK();
-	FCEUI_DelCheat(row);
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEUI_DelCheat(row);
+	}
 
 	showActiveCheatList(true);
 
@@ -991,11 +996,12 @@ void GuiCheatsDialog_t::updateCheatParameters(void)
 
 	type = typeEntry->currentData().toInt();
 
-	FCEU_WRAPPER_LOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
 
-	FCEUI_SetCheat(row, &name, a, v, c, s, type);
+		FCEUI_SetCheat(row, &name, a, v, c, s, type);
 
-	FCEU_WRAPPER_UNLOCK();
+	}
 
 	showActiveCheatList(false);
 }

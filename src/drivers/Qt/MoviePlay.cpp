@@ -474,13 +474,14 @@ void MoviePlayDialog_t::playMovie(void)
 		pauseframe = strtol(pauseAtFrameEntry->text().toLocal8Bit().constData(), NULL, 0);
 	}
 
-	FCEU_WRAPPER_LOCK();
-	if (FCEUI_LoadMovie(path.c_str(),
-						replayReadOnlySetting, pauseframe ? pauseframe : false) == false)
 	{
-		movieLoadError = true;
+		FCEU_WRAPPER_SCOPED_LOCK();
+		if (FCEUI_LoadMovie(path.c_str(),
+							replayReadOnlySetting, pauseframe ? pauseframe : false) == false)
+		{
+			movieLoadError = true;
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 
 	if (movieLoadError)
 	{

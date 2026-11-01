@@ -517,9 +517,10 @@ void InputConfDialog_t::openLoadPresetFile(void)
 	}
 	qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	FCEU_WRAPPER_LOCK();
-	loadInputSettingsFromFile(filename.toLocal8Bit().constData());
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		loadInputSettingsFromFile(filename.toLocal8Bit().constData());
+	}
 
 	updatePortLabels();
 	updatePortComboBoxes();

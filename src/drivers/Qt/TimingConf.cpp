@@ -350,15 +350,16 @@ void TimingConfDialog_t::emuSchedNiceChange(int val)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
-	if (consoleWindow->emulatorThread->setNicePriority(-val))
 	{
-		QString msg = getSchedPrioErrorMsg("setPriority", errno);
-		printf("%s\n", msg.toLocal8Bit().constData());
-		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
-		updateSliderValues();
+		FCEU_WRAPPER_SCOPED_LOCK();
+		if (consoleWindow->emulatorThread->setNicePriority(-val))
+		{
+			QString msg = getSchedPrioErrorMsg("setPriority", errno);
+			printf("%s\n", msg.toLocal8Bit().constData());
+			consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
+			updateSliderValues();
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------------------------------
@@ -396,22 +397,23 @@ void TimingConfDialog_t::emuSchedPolicyChange(int index)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
-	consoleWindow->emulatorThread->getSchedParam(policy, prio);
-
-	policy = emuSchedPolicyBox->itemData(index).toInt();
-
-	if (consoleWindow->emulatorThread->setSchedParam(policy, prio))
 	{
-		QString msg = getSchedPrioErrorMsg("pthread_setschedparam", errno);
-		printf("%s\n", msg.toLocal8Bit().constData());
-		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
-	}
+		FCEU_WRAPPER_SCOPED_LOCK();
+		consoleWindow->emulatorThread->getSchedParam(policy, prio);
 
-	updatePolicyBox();
-	updateSliderLimits();
-	updateSliderValues();
-	FCEU_WRAPPER_UNLOCK();
+		policy = emuSchedPolicyBox->itemData(index).toInt();
+
+		if (consoleWindow->emulatorThread->setSchedParam(policy, prio))
+		{
+			QString msg = getSchedPrioErrorMsg("pthread_setschedparam", errno);
+			printf("%s\n", msg.toLocal8Bit().constData());
+			consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
+		}
+
+		updatePolicyBox();
+		updateSliderLimits();
+		updateSliderValues();
+	}
 #endif
 }
 //----------------------------------------------------------------------------
@@ -422,15 +424,16 @@ void TimingConfDialog_t::guiSchedNiceChange(int val)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
-	if (consoleWindow->setNicePriority(-val))
 	{
-		QString msg = getSchedPrioErrorMsg("setPriority", errno);
-		printf("%s\n", msg.toLocal8Bit().constData());
-		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
-		updateSliderValues();
+		FCEU_WRAPPER_SCOPED_LOCK();
+		if (consoleWindow->setNicePriority(-val))
+		{
+			QString msg = getSchedPrioErrorMsg("setPriority", errno);
+			printf("%s\n", msg.toLocal8Bit().constData());
+			consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
+			updateSliderValues();
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------------------------------
@@ -446,17 +449,18 @@ void TimingConfDialog_t::guiSchedPrioChange(int val)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
-	consoleWindow->getSchedParam(policy, prio);
-
-	if (consoleWindow->setSchedParam(policy, val))
 	{
-		QString msg = getSchedPrioErrorMsg("pthread_setschedparam", errno);
-		printf("%s\n", msg.toLocal8Bit().constData());
-		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
-		updateSliderValues();
+		FCEU_WRAPPER_SCOPED_LOCK();
+		consoleWindow->getSchedParam(policy, prio);
+
+		if (consoleWindow->setSchedParam(policy, val))
+		{
+			QString msg = getSchedPrioErrorMsg("pthread_setschedparam", errno);
+			printf("%s\n", msg.toLocal8Bit().constData());
+			consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
+			updateSliderValues();
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 #endif
 }
 //----------------------------------------------------------------------------
@@ -469,22 +473,23 @@ void TimingConfDialog_t::guiSchedPolicyChange(int index)
 	{
 		return;
 	}
-	FCEU_WRAPPER_LOCK();
-	consoleWindow->getSchedParam(policy, prio);
-
-	policy = guiSchedPolicyBox->itemData(index).toInt();
-
-	if (consoleWindow->setSchedParam(policy, prio))
 	{
-		QString msg = getSchedPrioErrorMsg("pthread_setschedparam", errno);
-		printf("%s\n", msg.toLocal8Bit().constData());
-		consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
-	}
+		FCEU_WRAPPER_SCOPED_LOCK();
+		consoleWindow->getSchedParam(policy, prio);
 
-	updatePolicyBox();
-	updateSliderLimits();
-	updateSliderValues();
-	FCEU_WRAPPER_UNLOCK();
+		policy = guiSchedPolicyBox->itemData(index).toInt();
+
+		if (consoleWindow->setSchedParam(policy, prio))
+		{
+			QString msg = getSchedPrioErrorMsg("pthread_setschedparam", errno);
+			printf("%s\n", msg.toLocal8Bit().constData());
+			consoleWindow->QueueErrorMsgWindow(msg.toLocal8Bit().constData());
+		}
+
+		updatePolicyBox();
+		updateSliderLimits();
+		updateSliderValues();
+	}
 #endif
 }
 //----------------------------------------------------------------------------
@@ -662,28 +667,25 @@ void TimingConfDialog_t::overclockingToggled(bool on)
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::postRenderChanged(int value)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	postrenderscanlines = value;
 	g_config->setOption("SDL.PostRenderScanlines", postrenderscanlines );
-	FCEU_WRAPPER_UNLOCK();
 	//printf("Post Render %i\n", postrenderscanlines );
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::vblankScanlinesChanged(int value)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	vblankscanlines = value;
 	g_config->setOption("SDL.VBlankScanlines", vblankscanlines );
-	FCEU_WRAPPER_UNLOCK();
 	//printf("Vblank Scanlines %i\n", vblankscanlines );
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::no7bitChanged(int value)
 {
-	FCEU_WRAPPER_LOCK();
+	FCEU_WRAPPER_SCOPED_LOCK();
 	skip_7bit_overclocking = (value != Qt::Unchecked);
 	g_config->setOption("SDL.Skip7bitOverClocking", skip_7bit_overclocking );
-	FCEU_WRAPPER_UNLOCK();
 	//printf("Skip 7-bit: %i\n", skip_7bit_overclocking );
 }
 //----------------------------------------------------------------------------

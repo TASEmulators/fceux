@@ -415,27 +415,28 @@ void StateRecorderDialog_t::applyChanges(void)
 
 	packConfig( config );
 
-	FCEU_WRAPPER_LOCK();
-	FCEU_StateRecorderSetEnabled( recorderEnable->isChecked() );
-	FCEU_StateRecorderSetConfigData( config );
-	if (FCEU_StateRecorderRunning())
 	{
-		QMessageBox msgBox(QMessageBox::Question, tr("State Recorder"),
-				tr("New settings will not take effect until state recorder is restarted. Do you wish to restart?"),
-				QMessageBox::No | QMessageBox::Yes, this);
-
-		msgBox.setDefaultButton( QMessageBox::Yes );
-
-		int ret = msgBox.exec();
-
-		if ( ret == QMessageBox::Yes )
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEU_StateRecorderSetEnabled( recorderEnable->isChecked() );
+		FCEU_StateRecorderSetConfigData( config );
+		if (FCEU_StateRecorderRunning())
 		{
-			FCEU_StateRecorderStop();
-			FCEU_StateRecorderStart();
-			updateStatusDisplay();
+			QMessageBox msgBox(QMessageBox::Question, tr("State Recorder"),
+					tr("New settings will not take effect until state recorder is restarted. Do you wish to restart?"),
+					QMessageBox::No | QMessageBox::Yes, this);
+
+			msgBox.setDefaultButton( QMessageBox::Yes );
+
+			int ret = msgBox.exec();
+
+			if ( ret == QMessageBox::Yes )
+			{
+				FCEU_StateRecorderStop();
+				FCEU_StateRecorderStart();
+				updateStatusDisplay();
+			}
 		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 
 	g_config->setOption("SDL.StateRecorderHistoryDurationMin", historyDuration->value() );
 	g_config->setOption("SDL.StateRecorderTimingMode", snapTimeSelBtn->isChecked() ? 1 : 0);
@@ -548,9 +549,10 @@ void StateRecorderDialog_t::enableChanged(int val)
 {
 	bool ena = val ? true : false;
 
-	FCEU_WRAPPER_LOCK();
-	FCEU_StateRecorderSetEnabled( ena );
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEU_StateRecorderSetEnabled( ena );
+	}
 
 	g_config->setOption("SDL.StateRecorderEnable", ena );
 	g_config->save();

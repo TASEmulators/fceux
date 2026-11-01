@@ -528,21 +528,19 @@ void ConsoleSndConfDialog_t::enaSoundStateChange(int value)
 		g_config->getOption("SDL.Sound", &last_soundopt);
 		g_config->setOption("SDL.Sound", 1);
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 
 		if (GameInfo && !last_soundopt)
 		{
 			InitSound();
 		}
-		FCEU_WRAPPER_UNLOCK();
 	}
 	else
 	{
 		g_config->setOption("SDL.Sound", 0);
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		KillSound();
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -557,17 +555,15 @@ void ConsoleSndConfDialog_t::enaSoundLowPassChange(int value)
 	{
 		g_config->setOption("SDL.Sound.LowPass", 1);
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		FCEUI_SetLowPass(1);
-		FCEU_WRAPPER_UNLOCK();
 	}
 	else
 	{
 		g_config->setOption("SDL.Sound.LowPass", 0);
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		FCEUI_SetLowPass(0);
-		FCEU_WRAPPER_UNLOCK();
 	}
 	g_config->save();
 }

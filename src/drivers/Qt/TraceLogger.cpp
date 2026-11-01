@@ -536,16 +536,17 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 		diskThread->quit();
 		diskThread->wait(1000);
 
-		FCEU_WRAPPER_LOCK();
-		if (traceRegistrationHandle != nullptr)
 		{
-			if ( !FCEUI_TraceInstructionUnregisterHandle( traceRegistrationHandle ) )
+			FCEU_WRAPPER_SCOPED_LOCK();
+			if (traceRegistrationHandle != nullptr)
 			{
-				printf("Unregister Trace Callback Error\n");
+				if ( !FCEUI_TraceInstructionUnregisterHandle( traceRegistrationHandle ) )
+				{
+					printf("Unregister Trace Callback Error\n");
+				}
+				traceRegistrationHandle = nullptr;
 			}
-			traceRegistrationHandle = nullptr;
 		}
-		FCEU_WRAPPER_UNLOCK();
 		traceView->update();
 	}
 	else
@@ -563,13 +564,12 @@ void TraceLoggerDialog_t::toggleLoggingOnOff(void)
 		startStopButton->setText(tr("Stop Logging"));
 		startStopButton->setIcon( style()->standardIcon( QStyle::SP_MediaStop ) );
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		if (traceRegistrationHandle == nullptr)
 		{
 			traceRegistrationHandle = FCEUI_TraceInstructionRegister( FCEUD_TraceInstruction );
 		}
 		logging = 1;
-		FCEU_WRAPPER_UNLOCK();
 	}
 }
 //----------------------------------------------------
@@ -1209,17 +1209,18 @@ int FCEUD_TraceLoggerStop(void)
 		msleep(1);
 		pushMsgToLogBuffer("Logging Finished");
 	}
-	FCEU_WRAPPER_LOCK();
-	if (traceRegistrationHandle != nullptr)
 	{
-		if ( !FCEUI_TraceInstructionUnregisterHandle( traceRegistrationHandle ) )
+		FCEU_WRAPPER_SCOPED_LOCK();
+		if (traceRegistrationHandle != nullptr)
 		{
-			printf("Unregister Trace Callback Error\n");
-		}
-		traceRegistrationHandle = nullptr;
+			if ( !FCEUI_TraceInstructionUnregisterHandle( traceRegistrationHandle ) )
+			{
+				printf("Unregister Trace Callback Error\n");
+			}
+			traceRegistrationHandle = nullptr;
 
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 	return logging;
 }
 //----------------------------------------------------

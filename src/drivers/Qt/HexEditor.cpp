@@ -1474,9 +1474,10 @@ HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
 	// Lock the mutex before adding a new window to the list,
 	// we want to be sure that the emulator is not iterating the list
 	// when we change it.
-	FCEU_WRAPPER_LOCK();
-	winList.push_back(this);
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		winList.push_back(this);
+	}
 
 	populateBookmarkMenu();
 
@@ -2447,18 +2448,19 @@ void QHexEdit::loadHighlightToClipboard(void)
 	std::string s;
 	char c[8];
 
-	FCEU_WRAPPER_LOCK();
-
-	startAddr = (txtHlgtStartLine*16) + txtHlgtStartChar;
-	endAddr   = (txtHlgtEndLine  *16) + txtHlgtEndChar;
-
-	for (a=startAddr; a<=endAddr; a++)
 	{
-		snprintf( c, sizeof(c), "%02X ", memAccessFunc(a) );
+		FCEU_WRAPPER_SCOPED_LOCK();
 
-		s.append(c);
+		startAddr = (txtHlgtStartLine*16) + txtHlgtStartChar;
+		endAddr   = (txtHlgtEndLine  *16) + txtHlgtEndChar;
+
+		for (a=startAddr; a<=endAddr; a++)
+		{
+			snprintf( c, sizeof(c), "%02X ", memAccessFunc(a) );
+
+			s.append(c);
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 
 	loadClipboard( s.c_str() );
 }
@@ -2833,13 +2835,14 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 
 					int offs = (cursorPosX-32);
 					int addr = 16*(lineOffset+cursorPosY) + offs;
-					FCEU_WRAPPER_LOCK();
-					if ( viewMode == QHexEdit::MODE_NES_ROM )
 					{
-						romEditList.applyPatch( addr, key );
+						FCEU_WRAPPER_SCOPED_LOCK();
+						if ( viewMode == QHexEdit::MODE_NES_ROM )
+						{
+							romEditList.applyPatch( addr, key );
+						}
+						writeMem( viewMode, addr, key );
 					}
-					writeMem( viewMode, addr, key );
-					FCEU_WRAPPER_UNLOCK();
 				
 					cursorPosX++;
 		
@@ -2890,13 +2893,14 @@ void QHexEdit::keyPressEvent(QKeyEvent *event)
 			{
 				nibbleValue = editValue | nibbleValue;
 				
-				FCEU_WRAPPER_LOCK();
-				if ( viewMode == QHexEdit::MODE_NES_ROM )
 				{
-					romEditList.applyPatch( editAddr, nibbleValue );
+					FCEU_WRAPPER_SCOPED_LOCK();
+					if ( viewMode == QHexEdit::MODE_NES_ROM )
+					{
+						romEditList.applyPatch( editAddr, nibbleValue );
+					}
+					writeMem( viewMode, editAddr, nibbleValue );
 				}
-				writeMem( viewMode, editAddr, nibbleValue );
-				FCEU_WRAPPER_UNLOCK();
 				
 				editAddr  = -1;
 				editValue =  0;

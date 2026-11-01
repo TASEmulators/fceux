@@ -542,9 +542,10 @@ void CodeDataLoggerDialog_t::loadCdlFile(void)
 	}
 	//qDebug() << "selected file path : " << filename.toLocal8Bit();
 
-	FCEU_WRAPPER_LOCK();
-	LoadCDLog(filename.toLocal8Bit().constData());
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		LoadCDLog(filename.toLocal8Bit().constData());
+	}
 
 	return;
 }
@@ -918,11 +919,12 @@ bool PauseCDLogging(void)
 	//	MessageBox(hCDLogger, "The Trace Logger is currently using this for some of its features.\nPlease turn the Trace Logger off and try again.","Unable to Pause Code/Data Logger", MB_OK);
 	//	return false;
 	//}
-	FCEU_WRAPPER_LOCK();
-	FCEUI_SetLoggingCD(0);
-	//EnableTracerMenuItems();
-	//SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Start");
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEUI_SetLoggingCD(0);
+		//EnableTracerMenuItems();
+		//SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Start");
+	}
 	return true;
 }
 //----------------------------------------------------

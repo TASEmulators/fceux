@@ -216,12 +216,13 @@ int NetPlayServer::Create(QObject *parent)
 			printf("Error Creating Netplay Server!!!\n");
 		}
 	}
-	FCEU_WRAPPER_LOCK();
-	if (traceRegistrationHandle == nullptr)
 	{
-		traceRegistrationHandle = FCEUI_TraceInstructionRegister( NetPlayTraceInstruction );
+		FCEU_WRAPPER_SCOPED_LOCK();
+		if (traceRegistrationHandle == nullptr)
+		{
+			traceRegistrationHandle = FCEUI_TraceInstructionRegister( NetPlayTraceInstruction );
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 
 	if (consoleWindow != nullptr)
 	{
@@ -238,16 +239,17 @@ int NetPlayServer::Destroy()
 		delete server;
 		server = nullptr;
 	}
-	FCEU_WRAPPER_LOCK();
-	if (traceRegistrationHandle != nullptr)
 	{
-		if ( !FCEUI_TraceInstructionUnregisterHandle( traceRegistrationHandle ) )
+		FCEU_WRAPPER_SCOPED_LOCK();
+		if (traceRegistrationHandle != nullptr)
 		{
-			printf("Unregister Trace Callback Error\n");
+			if ( !FCEUI_TraceInstructionUnregisterHandle( traceRegistrationHandle ) )
+			{
+				printf("Unregister Trace Callback Error\n");
+			}
+			traceRegistrationHandle = nullptr;
 		}
-		traceRegistrationHandle = nullptr;
 	}
-	FCEU_WRAPPER_UNLOCK();
 
 	if (consoleWindow != nullptr)
 	{
@@ -827,18 +829,19 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 				if ( claimRole(client, msg->playerId) )
 				{
 					client->userName = msg->userName;
-					FCEU_WRAPPER_LOCK();
-					resyncClient(client);
-					client->state = 1;
-					if (FCEUI_EmulationPaused())
 					{
-						sendPauseAll();
+						FCEU_WRAPPER_SCOPED_LOCK();
+						resyncClient(client);
+						client->state = 1;
+						if (FCEUI_EmulationPaused())
+						{
+							sendPauseAll();
+						}
+						else
+						{
+							sendUnpauseAll();
+						}
 					}
-					else
-					{
-						sendUnpauseAll();
-					}
-					FCEU_WRAPPER_UNLOCK();
 					FCEU_DispMessage("%s Joined",0, client->userName.toLocal8Bit().constData());
 				}
 				else
@@ -903,9 +906,10 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 
 					if (client->desyncCount > forceResyncCount)
 					{
-						FCEU_WRAPPER_LOCK();
-						resyncClient( client );
-						FCEU_WRAPPER_UNLOCK();
+						{
+							FCEU_WRAPPER_SCOPED_LOCK();
+							resyncClient( client );
+						}
 
 						client->desyncCount = 0;
 					}
@@ -974,9 +978,8 @@ void NetPlayServer::serverProcessMessage( NetPlayClient *client, void *msgBuf, s
 		break;
 		case NETPLAY_SYNC_STATE_REQ:
 		{
-			FCEU_WRAPPER_LOCK();
+			FCEU_WRAPPER_SCOPED_LOCK();
 			resyncClient( client );
-			FCEU_WRAPPER_UNLOCK();
 		}
 		break;
 		case NETPLAY_SYNC_STATE_RESP:
@@ -1058,10 +1061,11 @@ void NetPlayServer::processClientRomLoadRequests(void)
 				::fwrite( romData, 1, romSize, fp );
 				::fclose(fp);
 
-				FCEU_WRAPPER_LOCK();
-				LoadGame( filepath.toLocal8Bit().constData(), true, true );
-				FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
-				FCEU_WRAPPER_UNLOCK();
+				{
+					FCEU_WRAPPER_SCOPED_LOCK();
+					LoadGame( filepath.toLocal8Bit().constData(), true, true );
+					FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
+				}
 
 				sendPauseAll();
 				resyncAllClients();
@@ -1383,12 +1387,13 @@ int NetPlayClient::Create(QObject *parent)
 			printf("Error Creating Netplay Client!!!\n");
 		}
 	}
-	FCEU_WRAPPER_LOCK();
-	if (traceRegistrationHandle == nullptr)
 	{
-		traceRegistrationHandle = FCEUI_TraceInstructionRegister( NetPlayTraceInstruction );
+		FCEU_WRAPPER_SCOPED_LOCK();
+		if (traceRegistrationHandle == nullptr)
+		{
+			traceRegistrationHandle = FCEUI_TraceInstructionRegister( NetPlayTraceInstruction );
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 
 	if (consoleWindow != nullptr)
 	{
@@ -1405,19 +1410,20 @@ int NetPlayClient::Destroy()
 		delete client;
 		client = nullptr;
 	}
-	FCEU_WRAPPER_LOCK();
-	if (traceRegistrationHandle != nullptr)
 	{
-		if ( !FCEUI_TraceInstructionUnregisterHandle( traceRegistrationHandle ) )
+		FCEU_WRAPPER_SCOPED_LOCK();
+		if (traceRegistrationHandle != nullptr)
 		{
-			printf("Unregister Trace Callback Error\n");
+			if ( !FCEUI_TraceInstructionUnregisterHandle( traceRegistrationHandle ) )
+			{
+				printf("Unregister Trace Callback Error\n");
+			}
+			traceRegistrationHandle = nullptr;
 		}
-		traceRegistrationHandle = nullptr;
-	}
-	// Reset frame throttling to normal incase client was dynamically adjusting frame rate.
-	FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);
+		// Reset frame throttling to normal incase client was dynamically adjusting frame rate.
+		FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);
 
-	FCEU_WRAPPER_UNLOCK();
+	}
 
 	if (consoleWindow != nullptr)
 	{

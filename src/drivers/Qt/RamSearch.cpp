@@ -561,9 +561,10 @@ void RamSearchDialog_t::periodicUpdate(void)
 
 	if (currFrameCounter != frameCounterLastPass)
 	{
-		FCEU_WRAPPER_LOCK();
-		copyRamToLocalBuffer();
-		FCEU_WRAPPER_UNLOCK();
+		{
+			FCEU_WRAPPER_SCOPED_LOCK();
+			copyRamToLocalBuffer();
+		}
 
 		//if ( currFrameCounter != (frameCounterLastPass+1) )
 		//{
@@ -1159,9 +1160,10 @@ void RamSearchDialog_t::resetSearch(void)
 {
 	memset(lclMemBuf, 0, sizeof(lclMemBuf));
 
-	FCEU_WRAPPER_LOCK();
-	copyRamToLocalBuffer();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		copyRamToLocalBuffer();
+	}
 
 	actvSrchList.clear();
 	deactvSrchList.clear();

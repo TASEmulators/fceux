@@ -762,12 +762,13 @@ void consoleWin_t::showErrorMsgWindow()
 {
 	QMessageBox msgBox(this);
 
-	FCEU_WRAPPER_LOCK();
-	msgBox.resize( this->size() );
-	msgBox.setIcon( QMessageBox::Critical );
-	msgBox.setText( tr(errorMsg.c_str()) );
-	errorMsg.clear();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		msgBox.resize( this->size() );
+		msgBox.setIcon( QMessageBox::Critical );
+		msgBox.setText( tr(errorMsg.c_str()) );
+		errorMsg.clear();
+	}
 	//msgBox.show();
 	msgBox.exec();
 }
@@ -846,9 +847,10 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 
 		if (isStateSaveFile)
 		{
-			FCEU_WRAPPER_LOCK();
-			FCEUI_LoadState( filename.toLocal8Bit().constData() );
-			FCEU_WRAPPER_UNLOCK();
+			{
+				FCEU_WRAPPER_SCOPED_LOCK();
+				FCEUI_LoadState( filename.toLocal8Bit().constData() );
+			}
 
 			event->accept();
 		}
@@ -856,9 +858,10 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 		{
 			int luaLoadSuccess;
 
-			FCEU_WRAPPER_LOCK();
-			luaLoadSuccess = FCEU_LoadLuaCode( filename.toLocal8Bit().constData() );
-			FCEU_WRAPPER_UNLOCK();
+			{
+				FCEU_WRAPPER_SCOPED_LOCK();
+				luaLoadSuccess = FCEU_LoadLuaCode( filename.toLocal8Bit().constData() );
+			}
 
 			if (luaLoadSuccess)
 			{
@@ -870,9 +873,10 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 		{
 			int romLoadSuccess;
 
-			FCEU_WRAPPER_LOCK();
-			romLoadSuccess = LoadGame( filename.toLocal8Bit().constData() );
-			FCEU_WRAPPER_UNLOCK();
+			{
+				FCEU_WRAPPER_SCOPED_LOCK();
+				romLoadSuccess = LoadGame( filename.toLocal8Bit().constData() );
+			}
 
 			if (!romLoadSuccess)
 			{
@@ -2774,9 +2778,10 @@ void consoleWin_t::closeApp(void)
 		tasWin->requestWindowClose();
 	}
 
-	FCEU_WRAPPER_LOCK();
-	fceuWrapperClose();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		fceuWrapperClose();
+	}
 
 	// LoadGame() checks for an IP and if it finds one begins a network session
 	// clear the NetworkIP field so this doesn't happen unintentionally
@@ -2971,10 +2976,11 @@ void consoleWin_t::openROMFile(void)
 
 	g_config->setOption ("SDL.LastOpenFile", filename.toLocal8Bit().constData() );
 
-	FCEU_WRAPPER_LOCK();
-	CloseGame ();
-	LoadGame ( filename.toLocal8Bit().constData() );
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		CloseGame ();
+		LoadGame ( filename.toLocal8Bit().constData() );
+	}
 
    return;
 }
@@ -3862,9 +3868,10 @@ extern int globalCheatDisabled;
 
 void consoleWin_t::toggleGlobalCheatEnable(void)
 {
-	FCEU_WRAPPER_LOCK();
-	FCEUI_GlobalToggleCheat(globalCheatDisabled);
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEUI_GlobalToggleCheat(globalCheatDisabled);
+	}
 
 	g_config->setOption("SDL.CheatsDisabled", globalCheatDisabled);
 	g_config->save();
@@ -3909,33 +3916,37 @@ void consoleWin_t::warnAmbiguousShortcut( QShortcut *shortcut)
 
 void consoleWin_t::powerConsoleCB(void)
 {
-	FCEU_WRAPPER_LOCK();
-	FCEUI_PowerNES();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEUI_PowerNES();
+	}
    return;
 }
 
 void consoleWin_t::consoleHardReset(void)
 {
-	FCEU_WRAPPER_LOCK();
-	fceuWrapperHardReset();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		fceuWrapperHardReset();
+	}
    return;
 }
 
 void consoleWin_t::consoleSoftReset(void)
 {
-	FCEU_WRAPPER_LOCK();
-	fceuWrapperSoftReset();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		fceuWrapperSoftReset();
+	}
    return;
 }
 
 void consoleWin_t::consolePause(void)
 {
-	FCEU_WRAPPER_LOCK();
-	fceuWrapperTogglePause();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		fceuWrapperTogglePause();
+	}
 
 	bool isPaused = FCEUI_EmulationPaused() ? true : false;
 	emit pauseToggled( isPaused );
@@ -4015,12 +4026,13 @@ void consoleWin_t::toggleGameGenie(bool checked)
 {
 	int gg_enabled;
 
-	FCEU_WRAPPER_LOCK();
-	g_config->getOption ("SDL.GameGenie", &gg_enabled);
-	g_config->setOption ("SDL.GameGenie", !gg_enabled);
-	g_config->save ();
-	FCEUI_SetGameGenie (gg_enabled);
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		g_config->getOption ("SDL.GameGenie", &gg_enabled);
+		g_config->setOption ("SDL.GameGenie", !gg_enabled);
+		g_config->save ();
+		FCEUI_SetGameGenie (gg_enabled);
+	}
    return;
 }
 
@@ -4097,25 +4109,28 @@ void consoleWin_t::openFamilyKeyboard(void)
 
 void consoleWin_t::insertCoin(void)
 {
-	FCEU_WRAPPER_LOCK();
-	FCEUI_VSUniCoin();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEUI_VSUniCoin();
+	}
    return;
 }
 
 void consoleWin_t::fdsSwitchDisk(void)
 {
-	FCEU_WRAPPER_LOCK();
-	FCEU_FDSSelect();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEU_FDSSelect();
+	}
    return;
 }
 
 void consoleWin_t::fdsEjectDisk(void)
 {
-	FCEU_WRAPPER_LOCK();
-	FCEU_FDSInsert();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEU_FDSInsert();
+	}
    return;
 }
 
@@ -4474,21 +4489,23 @@ void consoleWin_t::playMovieFromBeginning(void)
 
 void consoleWin_t::stopMovie(void)
 {
-	FCEU_WRAPPER_LOCK();
-	FCEUI_StopMovie();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEUI_StopMovie();
+	}
    return;
 }
 
 void consoleWin_t::recordMovie(void)
 {
-	FCEU_WRAPPER_LOCK();
-	if (fceuWrapperGameLoaded())
 	{
-		MovieRecordDialog_t dialog(this);
-		dialog.exec();
+		FCEU_WRAPPER_SCOPED_LOCK();
+		if (fceuWrapperGameLoaded())
+		{
+			MovieRecordDialog_t dialog(this);
+			dialog.exec();
+		}
 	}
-	FCEU_WRAPPER_UNLOCK();
 	return;
 }
 
@@ -4615,11 +4632,12 @@ void consoleWin_t::aviRecordStop(void)
 	if ( aviRecordRunning() )
 	{
 		QGuiApplication::setOverrideCursor( QCursor(Qt::BusyCursor) );
-		FCEU_WRAPPER_LOCK();
-		aviDiskThread->requestInterruption();
-		aviDiskThread->quit();
-		aviDiskThread->wait(10000);
-		FCEU_WRAPPER_UNLOCK();
+		{
+			FCEU_WRAPPER_SCOPED_LOCK();
+			aviDiskThread->requestInterruption();
+			aviDiskThread->quit();
+			aviDiskThread->wait(10000);
+		}
 		QGuiApplication::restoreOverrideCursor();
 	}
 }

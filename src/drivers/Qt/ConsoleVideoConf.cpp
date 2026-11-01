@@ -1009,9 +1009,10 @@ void ConsoleVideoConfDialog_t::regionChanged(int index)
 void ConsoleVideoConfDialog_t::inputDisplayChanged(int index)
 {
 	//printf("Scaler: %i : %i \n", index, scalerSelect->itemData(index).toInt() );
-	FCEU_WRAPPER_LOCK();
-	input_display = inputDisplaySel->itemData(index).toInt();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		input_display = inputDisplaySel->itemData(index).toInt();
+	}
 
 	g_config->setOption ("SDL.InputDisplay", input_display);
 	g_config->save ();
@@ -1077,9 +1078,10 @@ void ConsoleVideoConfDialog_t::drawInputAidsChanged( int value )
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showFrameCountChanged( int value )
 {
-	FCEU_WRAPPER_LOCK();
-	frame_display = (value != Qt::Unchecked);
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		frame_display = (value != Qt::Unchecked);
+	}
 
 	//printf("Value:%i \n", value );
 	g_config->setOption("SDL.ShowFrameCount", frame_display );
@@ -1089,9 +1091,10 @@ void ConsoleVideoConfDialog_t::showFrameCountChanged( int value )
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showLagCountChanged( int value )
 {
-	FCEU_WRAPPER_LOCK();
-	lagCounterDisplay = (value != Qt::Unchecked);
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		lagCounterDisplay = (value != Qt::Unchecked);
+	}
 
 	//printf("Value:%i \n", value );
 	g_config->setOption("SDL.ShowLagCount", lagCounterDisplay );
@@ -1101,9 +1104,10 @@ void ConsoleVideoConfDialog_t::showLagCountChanged( int value )
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showRerecordCountChanged( int value )
 {
-	FCEU_WRAPPER_LOCK();
-	rerecord_display = (value != Qt::Unchecked);
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		rerecord_display = (value != Qt::Unchecked);
+	}
 
 	//printf("Value:%i \n", value );
 	g_config->setOption("SDL.ShowRerecordCount", rerecord_display );

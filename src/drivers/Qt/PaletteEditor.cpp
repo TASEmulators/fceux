@@ -1158,10 +1158,11 @@ void nesPalettePickerView::setSelBox( int val )
 	if ( val != selBox )
 	{
 
-		FCEU_WRAPPER_LOCK();
-		PalettePoke( palAddr, val );
-		FCEUD_UpdatePPUView( -1, 1 );
-		FCEU_WRAPPER_UNLOCK();
+		{
+			FCEU_WRAPPER_SCOPED_LOCK();
+			PalettePoke( palAddr, val );
+			FCEUD_UpdatePPUView( -1, 1 );
+		}
 
 		this->update();
 	}
@@ -1430,10 +1431,11 @@ void nesPalettePickerDialog::resetButtonClicked(void)
 //----------------------------------------------------------------------------
 void nesPalettePickerDialog::cancelButtonClicked(void)
 {	
-	FCEU_WRAPPER_LOCK();
-	PalettePoke( palAddr, palOrigVal );
-	FCEUD_UpdatePPUView( -1, 1 );
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		PalettePoke( palAddr, palOrigVal );
+		FCEUD_UpdatePPUView( -1, 1 );
+	}
 
 	//printf("Close Window\n");
 	done(0);
@@ -1442,10 +1444,11 @@ void nesPalettePickerDialog::cancelButtonClicked(void)
 //----------------------------------------------------------------------------
 void nesPalettePickerDialog::okButtonClicked(void)
 {
-	FCEU_WRAPPER_LOCK();
-	PalettePoke( palAddr, palView->getSelBox() );
-	FCEUD_UpdatePPUView( -1, 1 );
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		PalettePoke( palAddr, palView->getSelBox() );
+		FCEUD_UpdatePPUView( -1, 1 );
+	}
 
 	//printf("Close Window\n");
 	done(0);

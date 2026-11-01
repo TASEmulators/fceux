@@ -230,13 +230,14 @@ MsgLogViewDialog_t::MsgLogViewDialog_t(QWidget *parent)
 
 	updateTimer->start(500); // 2hz
 
-	FCEU_WRAPPER_LOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
 
-	msgLog.loadTextViewer(txtView);
+		msgLog.loadTextViewer(txtView);
 
-	totalLines = msgLog.getTotalLineCount();
+		totalLines = msgLog.getTotalLineCount();
 
-	FCEU_WRAPPER_UNLOCK();
+	}
 
 	txtView->moveCursor(QTextCursor::End);
 
@@ -279,13 +280,14 @@ void MsgLogViewDialog_t::updatePeriodic(void)
 {
 	if (msgLog.getTotalLineCount() != totalLines)
 	{
-		FCEU_WRAPPER_LOCK();
+		{
+			FCEU_WRAPPER_SCOPED_LOCK();
 
-		msgLog.loadTextViewer(txtView);
+			msgLog.loadTextViewer(txtView);
 
-		totalLines = msgLog.getTotalLineCount();
+			totalLines = msgLog.getTotalLineCount();
 
-		FCEU_WRAPPER_UNLOCK();
+		}
 
 		txtView->moveCursor(QTextCursor::End);
 	}

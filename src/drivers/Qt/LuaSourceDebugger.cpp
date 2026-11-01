@@ -769,16 +769,16 @@ LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
 		LuaDbgCallbacks cb;
 		cb.waitForResume = luaDebuggerWaitForResume;
 
-		FCEU_WRAPPER_LOCK();
+		FCEU_WRAPPER_SCOPED_LOCK();
 		FCEU_LuaDbgAttach(&cb);
 		FCEU_LuaDbgSetBreakOnStart(breakOnStartAct->isChecked());
-		FCEU_WRAPPER_UNLOCK();
 	}
 
 	// Only react to scripts started after the dialog opens
-	FCEU_WRAPPER_LOCK();
-	lastScriptName = FCEU_LuaDbgGetScriptName();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		lastScriptName = FCEU_LuaDbgGetScriptName();
+	}
 	prevRunning = (luaRunning != 0);
 
 	periodicTimer = new QTimer(this);
@@ -1191,9 +1191,10 @@ LuaSourceDebuggerDialog_t::~LuaSourceDebuggerDialog_t(void)
 	saveDisplayViews();
 	settings.setValue("luaDebugger/watches", watches);
 
-	FCEU_WRAPPER_LOCK();
-	FCEU_LuaDbgDetach();
-	FCEU_WRAPPER_UNLOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEU_LuaDbgDetach();
+	}
 
 	if (debuggerWin == this)
 	{
@@ -1796,9 +1797,10 @@ void LuaSourceDebuggerDialog_t::updatePeriodic(void)
 	{
 		std::string name;
 
-		FCEU_WRAPPER_LOCK();
-		name = FCEU_LuaDbgGetScriptName();
-		FCEU_WRAPPER_UNLOCK();
+		{
+			FCEU_WRAPPER_SCOPED_LOCK();
+			name = FCEU_LuaDbgGetScriptName();
+		}
 
 		const bool started = (luaRunning != 0) && !prevRunning;
 

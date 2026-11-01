@@ -241,51 +241,52 @@ TasEditorWindow::~TasEditorWindow(void)
 
 	printf("Destroy Tas Editor Window\n");
 
-	FCEU_WRAPPER_LOCK();
-	//if (!askToSaveProject()) return false;
-
-	// destroy window
-	taseditorConfig.save();
-	//taseditorWindow.exit();
-	//disableGeneralKeyboardInput();
-	// release memory
-	//editor.free();
-	//pianoRoll.free();
-	markersManager.free();
-	greenzone.free();
-	bookmarks.free();
-	branches.free();
-	//popupDisplay.free();
-	history.free();
-	playback.stopSeeking();
-	selection.free();
-
-	// switch off TAS Editor mode
-	movieMode = MOVIEMODE_INACTIVE;
-	FCEU_DispMessage("TAS Editor disengaged", 0);
-	FCEUMOV_CreateCleanMovie();
-
-	if ( tasWin == this )
 	{
-		tasWin = NULL;
+		FCEU_WRAPPER_SCOPED_LOCK();
+		//if (!askToSaveProject()) return false;
+
+		// destroy window
+		taseditorConfig.save();
+		//taseditorWindow.exit();
+		//disableGeneralKeyboardInput();
+		// release memory
+		//editor.free();
+		//pianoRoll.free();
+		markersManager.free();
+		greenzone.free();
+		bookmarks.free();
+		branches.free();
+		//popupDisplay.free();
+		history.free();
+		playback.stopSeeking();
+		selection.free();
+
+		// switch off TAS Editor mode
+		movieMode = MOVIEMODE_INACTIVE;
+		FCEU_DispMessage("TAS Editor disengaged", 0);
+		FCEUMOV_CreateCleanMovie();
+
+		if ( tasWin == this )
+		{
+			tasWin = NULL;
+		}
+
+		::project         = NULL;
+		::taseditorConfig = NULL;
+		::taseditor_lua   = NULL;
+		::markersManager  = NULL;
+		::selection       = NULL;
+		::greenzone       = NULL;
+		::bookmarks       = NULL;
+		::playback        = NULL;
+		::recorder        = NULL;
+		::history         = NULL;
+		::branches        = NULL;
+		::splicer         = NULL;
+
+		clearProjectList();
+
 	}
-
-	::project         = NULL;
-	::taseditorConfig = NULL;
-	::taseditor_lua   = NULL;
-	::markersManager  = NULL;
-	::selection       = NULL;
-	::greenzone       = NULL;
-	::bookmarks       = NULL;
-	::playback        = NULL;
-	::recorder        = NULL;
-	::history         = NULL;
-	::branches        = NULL;
-	::splicer         = NULL;
-
-	clearProjectList();
-
-	FCEU_WRAPPER_UNLOCK();
 
 	// Save Horizontal Panel State
 	settings.setValue("tasEditor/hPanelState", mainHBox->saveState());
@@ -1568,26 +1569,27 @@ bool TasEditorWindow::loadProject(const char* fullname)
 {
 	bool success = false;
 
-	FCEU_WRAPPER_LOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
 
-	// try to load project
-	if (project.load(fullname))
-	{
-		// loaded successfully
-		applyMovieInputConfig();
-		// add new file to Recent menu
-		addRecentProject( fullname );
-		updateCaption();
-		update();
-		success = true;
+		// try to load project
+		if (project.load(fullname))
+		{
+			// loaded successfully
+			applyMovieInputConfig();
+			// add new file to Recent menu
+			addRecentProject( fullname );
+			updateCaption();
+			update();
+			success = true;
+		}
+		else
+		{
+			// failed to load
+			updateCaption();
+			update();
+		}
 	}
-	else
-	{
-		// failed to load
-		updateCaption();
-		update();
-	}
-	FCEU_WRAPPER_UNLOCK();
 
 	return success;
 }
@@ -1595,26 +1597,27 @@ bool TasEditorWindow::saveProject(bool save_compact)
 {
 	bool ret = true;
 
-	FCEU_WRAPPER_LOCK();
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
 
-	if (project.getProjectFile().empty())
-	{
-		ret = saveProjectAs(save_compact);
-	}
-	else
-	{
-		if (save_compact)
+		if (project.getProjectFile().empty())
 		{
-			project.save(0, taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
+			ret = saveProjectAs(save_compact);
 		}
 		else
 		{
-			project.save(0, taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
+			if (save_compact)
+			{
+				project.save(0, taseditorConfig.saveCompact_SaveInBinary, taseditorConfig.saveCompact_SaveMarkers, taseditorConfig.saveCompact_SaveBookmarks, taseditorConfig.saveCompact_GreenzoneSavingMode, taseditorConfig.saveCompact_SaveHistory, taseditorConfig.saveCompact_SavePianoRoll, taseditorConfig.saveCompact_SaveSelection);
+			}
+			else
+			{
+				project.save(0, taseditorConfig.projectSavingOptions_SaveInBinary, taseditorConfig.projectSavingOptions_SaveMarkers, taseditorConfig.projectSavingOptions_SaveBookmarks, taseditorConfig.projectSavingOptions_GreenzoneSavingMode, taseditorConfig.projectSavingOptions_SaveHistory, taseditorConfig.projectSavingOptions_SavePianoRoll, taseditorConfig.projectSavingOptions_SaveSelection);
+			}
+			updateCaption();
 		}
-		updateCaption();
-	}
 
-	FCEU_WRAPPER_UNLOCK();
+	}
 
 	return ret;
 }
@@ -5283,16 +5286,18 @@ void QPianoRoll::dropEvent(QDropEvent *event)
 
 		if ( fi.suffix().compare("fm3") == 0 )
 		{
-			FCEU_WRAPPER_LOCK();
-			tasWin->loadProject( fi.filePath().toLocal8Bit().constData() );
-			FCEU_WRAPPER_UNLOCK();
+			{
+				FCEU_WRAPPER_SCOPED_LOCK();
+				tasWin->loadProject( fi.filePath().toLocal8Bit().constData() );
+			}
 			event->accept();
 		}
 		else if ( fi.suffix().compare("fm2") == 0 )
 		{
-			FCEU_WRAPPER_LOCK();
-			tasWin->importMovieFile( fi.filePath().toLocal8Bit().constData() );
-			FCEU_WRAPPER_UNLOCK();
+			{
+				FCEU_WRAPPER_SCOPED_LOCK();
+				tasWin->importMovieFile( fi.filePath().toLocal8Bit().constData() );
+			}
 			event->accept();
 		}
 	}
