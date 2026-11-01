@@ -485,7 +485,12 @@ void MovieData::installValue(std::string& key, std::string& val)
 	}
 	else if (key == "length")
 	{
-		installInt(val, loadFrameCount);
+		int frameCount = -1;
+		installInt(val, frameCount);
+		if (frameCount >= 0)
+		{
+			loadFrameCount = frameCount;
+		}
 	}
 }
 
@@ -632,8 +637,14 @@ static void LoadFM2_binarychunk(MovieData& movieData, EMUFILE* fp, int size)
 	int todo = std::min<int>(size, flen);
 
 	int numRecords = todo/recordsize;
-	if (movieData.loadFrameCount!=-1 && movieData.loadFrameCount<numRecords)
+	if (movieData.loadFrameCount >= 0 && movieData.loadFrameCount < numRecords)
+	{
 		numRecords=movieData.loadFrameCount;
+	}
+	if (numRecords < 0)
+	{
+		numRecords = 0;
+	}
 
 	movieData.records.resize(numRecords);
 	for(int i=0;i<numRecords;i++)
@@ -2107,4 +2118,3 @@ void FCEUI_MakeBackupMovie(bool dispMessage)
 			FCEUI_DispMessage("%s created",0,backupFn.c_str()); //Inform user of backup filename
 	}
 }
-
