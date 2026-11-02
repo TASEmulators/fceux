@@ -47,6 +47,8 @@
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/LuaConsoleOutput.h"
+#include "Qt/LuaControl.h"
 #include "Qt/TasEditor/TasEditorWindow.h"
 #include "Qt/fceux_git_info.h"
 
@@ -766,6 +768,12 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	std::string s;
 
 	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
+
+	// Create the Lua output service on the GUI thread, before any script runs.
+	LuaConsoleOutput::instance();
+#ifdef _S9XLUA_H
+	FCEU_LuaSetYieldHandler(LuaYieldToGui);
+#endif
 
 	/* SDL_INIT_VIDEO Needed for (joystick config) event processing? */
 	if (SDL_Init(SDL_INIT_VIDEO)) 
@@ -1497,6 +1505,25 @@ void fceuWrapperUnLock(void)
 	{
 		printf("Error: Mutex is Already UnLocked\n");
 		//abort(); // Uncomment to catch a stack trace
+	}
+}
+
+// Fully releases the emulator lock held by this thread and takes it back,
+// letting any GUI thread waiting for the lock go first.
+void fceuWrapperYieldLock(void)
+{
+	const int depth = wrapperMutexLockDepth;
+
+	for (int i = 0; i < depth; i++)
+	{
+		fceuWrapperUnLock();
+	}
+	QThread::yieldCurrentThread();
+
+	// On the emulation thread, the first relock waits for pending GUI requests.
+	for (int i = 0; i < depth; i++)
+	{
+		fceuWrapperLock();
 	}
 }
 

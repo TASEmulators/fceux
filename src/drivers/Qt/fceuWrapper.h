@@ -43,6 +43,7 @@ bool fceuWrapperTryLock(int timeout = 1000);
 bool fceuWrapperTryLock(const char *filename, int line, const char *func, int timeout = 1000);
 bool fceuWrapperIsLocked(void);
 void fceuWrapperUnLock(void);
+void fceuWrapperYieldLock(void);
 int  fceuWrapperSoftReset(void);
 int  fceuWrapperHardReset(void);
 int  fceuWrapperTogglePause(void);

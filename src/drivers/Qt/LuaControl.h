@@ -34,7 +34,6 @@ public:
 
 protected:
 	void closeEvent(QCloseEvent *bar) override;
-	void openLuaKillMessageBox(void);
 
 	QTimer *periodicTimer;
 	QLineEdit *scriptPath;
@@ -61,7 +60,6 @@ int LuaPrintfToWindowConsole( __FCEU_PRINTF_FORMAT const char *format, ...) __FC
 
 void PrintToWindowConsole(intptr_t hDlgAsInt, const char *str);
 
-int LuaKillMessageBox(void);
+void LuaYieldToGui(void);
 
 void LuaConsoleClear(void);
-void LuaConsolePollKillPrompt(QWidget *parent);

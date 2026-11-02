@@ -31,6 +31,9 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
+#include <QCoreApplication>
+#include <QEventLoop>
+#include <QThread>
 
 #include "../../fceu.h"
 
@@ -52,8 +55,6 @@
 
 static bool luaScriptRunning = false;
 static bool updateLuaDisplay = false;
-static bool openLuaKillMsgBox = false;
-static int luaKillMsgBoxRetVal = 0;
 
 static std::list<LuaControlDialog_t *> winList;
 
@@ -205,45 +206,11 @@ void LuaControlDialog_t::updatePeriodic(void)
 		updateLuaWindows();
 		updateLuaDisplay = false;
 	}
-
-	openLuaKillMessageBox();
-}
-//----------------------------------------------------
-void LuaControlDialog_t::openLuaKillMessageBox(void)
-{
-	LuaConsolePollKillPrompt(this);
 }
 //----------------------------------------------------
 void LuaConsoleClear(void)
 {
 	LuaConsoleOutput::instance().clear();
-}
-//----------------------------------------------------
-void LuaConsolePollKillPrompt(QWidget *parent)
-{
-	int ret;
-
-	if (!openLuaKillMsgBox)
-	{
-		return;
-	}
-	QMessageBox msgBox(parent);
-
-	luaKillMsgBoxRetVal = 0;
-
-	msgBox.setIcon(QMessageBox::Warning);
-	msgBox.setText(QObject::tr("The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n"));
-	msgBox.setStandardButtons(QMessageBox::Yes);
-	msgBox.addButton(QMessageBox::No);
-	msgBox.setDefaultButton(QMessageBox::No);
-
-	ret = msgBox.exec();
-
-	if (ret == QMessageBox::Yes)
-	{
-		luaKillMsgBoxRetVal = 1;
-	}
-	openLuaKillMsgBox = false;
 }
 //----------------------------------------------------
 void LuaControlDialog_t::openLuaScriptFile(void)
@@ -486,18 +453,19 @@ int LuaPrintfToWindowConsole( __FCEU_PRINTF_FORMAT const char * format, ...)
 	return (retval);
 };
 //----------------------------------------------------
-int LuaKillMessageBox(void)
+// Called from the Lua hook while a script runs a long time without returning
+// to the emulator, so the GUI stays responsive (e.g. the Stop button works).
+void LuaYieldToGui(void)
 {
-	//printf("Kill Lua Prompted\n");
-	luaKillMsgBoxRetVal = 0;
-
-	openLuaKillMsgBox = true;
-
-	while (openLuaKillMsgBox)
+	if (QThread::currentThread() == QCoreApplication::instance()->thread())
 	{
-		msleep(100);
+		// The script was started from the GUI thread (before its first
+		// emu.frameadvance), so run the GUI's pending events here.
+		QCoreApplication::processEvents(QEventLoop::AllEvents, 5);
 	}
-
-	return luaKillMsgBoxRetVal;
+	else
+	{
+		fceuWrapperYieldLock();
+	}
 }
 //----------------------------------------------------

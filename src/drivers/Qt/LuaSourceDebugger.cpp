@@ -1773,8 +1773,6 @@ void LuaSourceDebuggerDialog_t::updateActions(bool scriptRunning, bool paused)
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::updatePeriodic(void)
 {
-	LuaConsolePollKillPrompt(this);
-
 	// Follow scripts started from elsewhere (e.g. the Lua Control window)
 	{
 		std::string name;

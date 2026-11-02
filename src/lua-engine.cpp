@@ -87,6 +87,7 @@ void fceuWrapperRequestAppExit(void);
 #include <algorithm>
 #include <bitset>
 #include <atomic>
+#include <chrono>
 #include <mutex>
 #include <set>
 #include <limits.h>
@@ -223,7 +224,6 @@ extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, L
 void TaseditorDisableManualFunctionIfNeeded();
 
 #else
-int LuaKillMessageBox(void);
 #ifdef __linux__
 
 #ifndef __THROWNL
@@ -295,10 +295,14 @@ static enum { GUI_USED_SINCE_LAST_DISPLAY, GUI_USED_SINCE_LAST_FRAME, GUI_CLEAR 
 static uint8 *gui_data = NULL;
 static int gui_saw_current_palette = FALSE;
 
-// Protects Lua calls from going nuts.
-// We set this to a big number like 1000 and decrement it
-// over time. The script gets knifed once this reaches zero.
-static int numTries;
+// Keeps the GUI responsive while a script runs a long time without returning
+// to the emulator. Every luaYieldCheckInterval instructions the hook checks
+// whether the script has run for luaYieldSlice, and if so lets the GUI run.
+static constexpr int luaYieldCheckInterval = 10000;
+static constexpr auto luaYieldSlice = std::chrono::milliseconds(16);
+static std::chrono::steady_clock::time_point luaSliceStart;
+static void (*luaYieldHandler)(void) = nullptr;
+static std::atomic<bool> luaYieldingToGui(false); // the GUI is running inside the hook
 
 // number of registered memory functions (1 per hooked byte)
 static unsigned int numMemHooks;
@@ -1403,7 +1407,7 @@ void LuaSaveData::ClearRecords()
 void CallRegisteredLuaSaveFunctions(int savestateNumber, LuaSaveData& saveData)
 {
 	//lua_State* L = FCEU_GetLuaState();
-	if(L)
+	if(L && !luaYieldingToGui)
 	{
 		lua_settop(L, 0);
 		lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_BEFORESAVE]);
@@ -1436,7 +1440,7 @@ void CallRegisteredLuaSaveFunctions(int savestateNumber, LuaSaveData& saveData)
 void CallRegisteredLuaLoadFunctions(int savestateNumber, const LuaSaveData& saveData)
 {
 	//lua_State* L = FCEU_GetLuaState();
-	if(L)
+	if(L && !luaYieldingToGui)
 	{
 		lua_settop(L, 0);
 		lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_AFTERLOAD]);
@@ -2271,7 +2275,7 @@ static void CallRegisteredLuaMemHook_LuaMatch(unsigned int address, int size, un
 		if(/*info.*/ numMemHooks)
 		{
 //			lua_State* L = info.L;
-			if( (L != nullptr) && (luaCallbackErrorCounter == 0) )
+			if( (L != nullptr) && (luaCallbackErrorCounter == 0) && !luaYieldingToGui )
 			{
 #ifdef USE_INFO_STACK
 				infoStack.insert(infoStack.begin(), &info);
@@ -2334,7 +2338,7 @@ void CallRegisteredLuaFunctions(LuaCallID calltype)
 	assert((unsigned int)calltype < (unsigned int)LUACALL_COUNT);
 	const char* idstring = luaCallIDStrings[calltype];
 
-	if (!L)
+	if (!L || luaYieldingToGui)
 		return;
 
 	lua_settop(L, 0);
@@ -3184,9 +3188,6 @@ static int savestate_save(lua_State *L) {
 
 //	printf("saving %s\n", filename);
 
-	// Save states are very expensive. They take time.
-	numTries--;
-
 	FCEUSS_SaveMS(ss->data,Z_NO_COMPRESSION);
 	ss->data->fseek(0,SEEK_SET);
 	return 0;
@@ -3212,8 +3213,6 @@ static int savestate_load(lua_State *L) {
 		luaL_error(L, "Invalid savestate.load object");
 		return 0;
 	}
-
-	numTries--;
 
 	/*if (!ss->data) {
 		luaL_error(L, "Invalid savestate.load data");
@@ -6118,55 +6117,6 @@ static int bitbit(lua_State *L)
 	BRET(rv);
 }
 
-// The function called periodically to ensure Lua doesn't run amok.
-FCEU_MAYBE_UNUSED
-static void FCEU_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
-
-	if (numTries-- == 0) {
-
-		int kill = 0;
-
-#ifdef __WIN_DRIVER__
-		// Uh oh
-				//StopSound(); //mbg merge 7/23/08
-		int ret = MessageBox(hAppWnd, "The Lua script running has been running a long time. It may have gone crazy. Kill it?\n\n(No = don't check anymore either)", "Lua Script Gone Nuts?", MB_YESNO);
-
-		if (ret == IDYES) {
-			kill = 1;
-		}
-
-#else
-		if ( LuaKillMessageBox() )
-		{
-			kill = 1;
-		}
-		//fprintf(stderr, "The Lua script running has been running a long time.\nIt may have gone crazy. Kill it? (I won't ask again if you say No)\n");
-		//char buffer[64];
-		//while (TRUE) {
-		//	fprintf(stderr, "(y/n): ");
-		//	fgets(buffer, sizeof(buffer), stdin);
-		//	if (buffer[0] == 'y' || buffer[0] == 'Y') {
-		//		kill = 1;
-		//		break;
-		//	}
-
-		//	if (buffer[0] == 'n' || buffer[0] == 'N')
-		//		break;
-		//}
-#endif
-
-		if (kill) {
-			luaL_error(L, "Killed by user request.");
-			FCEU_LuaOnStop();
-		}
-
-		// else, kill the debug hook.
-		lua_sethook(L, NULL, 0, 0);
-	}
-
-
-}
-
 static void emu_exec_count_hook(lua_State *L, lua_Debug *dbg) {
 	luaL_error(L, "exec_count timeout");
 }
@@ -6174,9 +6124,13 @@ static void emu_exec_count_hook(lua_State *L, lua_Debug *dbg) {
 static int emu_exec_count(lua_State *L) {
 	int count = (int)luaL_checkinteger(L,1);
 	lua_pushvalue(L, 2);
+	// Restore the GUI yield/debugger hook afterwards instead of clearing it.
+	lua_Hook oldHook = lua_gethook(L);
+	const int oldMask = lua_gethookmask(L);
+	const int oldCount = lua_gethookcount(L);
 	lua_sethook(L, emu_exec_count_hook, LUA_MASKCOUNT, count);
 	int ret = lua_pcall(L, 0, 0, 0);
-	lua_sethook(L, NULL, 0, 0);
+	lua_sethook(L, oldHook, oldMask, oldCount);
 	lua_settop(L,0);
 	lua_pushinteger(L, ret);
 	return 1;
@@ -6606,6 +6560,20 @@ static void luaDbgReleaseRefs(void)
 	luaDbgRefs.clear();
 }
 
+static void luaHook(lua_State *Ls, lua_Debug *ar);
+
+// Ends the running script. The hook is switched to fire on every instruction,
+// so the error is raised again right after any pcall in the script catches it.
+// The script is torn down at the next frame boundary, also when this happens
+// in a callback rather than the main coroutine.
+static void luaAbortScript(lua_State *Ls, const char *msg)
+{
+	luaDbgKillIssued = true;
+	luaCallbackErrorCounter++;
+	lua_sethook(Ls, luaHook, LUA_MASKCOUNT, 1);
+	luaL_error(Ls, "%s", msg);
+}
+
 static bool luaDbgRefValid(int ref)
 {
 	return std::find(luaDbgRefs.begin(), luaDbgRefs.end(), ref) != luaDbgRefs.end();
@@ -6635,22 +6603,20 @@ static void luaDbgPauseHere(lua_State *Ls)
 
 	if (luaDbgAbortReq)
 	{
-		luaDbgKillIssued = true;
-		luaL_error(Ls, "script stopped by debugger");
+		luaAbortScript(Ls, "script stopped by debugger");
 	}
 }
 
 static void luaDbgHook(lua_State *Ls, lua_Debug *ar)
 {
-	if (ar->event != LUA_HOOKLINE || !luaDbgAttached || luaDbgPaused)
+	if (!luaDbgAttached)
 	{
 		return;
 	}
 
 	if (luaDbgAbortReq)
 	{
-		luaDbgKillIssued = true;
-		luaL_error(Ls, "script stopped by debugger");
+		luaAbortScript(Ls, "script stopped by debugger");
 		return;
 	}
 
@@ -6698,24 +6664,78 @@ static void luaDbgHook(lua_State *Ls, lua_Debug *ar)
 	}
 }
 
-static void luaDbgSetHooks(bool enable)
+static void luaYieldToGui(lua_State *Ls)
+{
+	luaYieldingToGui = true;
+	luaYieldHandler();
+	luaYieldingToGui = false;
+	luaSliceStart = std::chrono::steady_clock::now();
+
+	if (luaDbgAbortReq)
+	{
+		luaAbortScript(Ls, "script stopped");
+	}
+}
+
+static void luaHook(lua_State *Ls, lua_Debug *ar)
+{
+	if (luaDbgPaused || luaYieldingToGui)
+	{
+		return;
+	}
+
+	if (luaDbgKillIssued)
+	{
+		// Keep failing so a pcall in the script cannot swallow the stop.
+		luaL_error(Ls, "script stopped");
+	}
+
+	if (ar->event == LUA_HOOKCOUNT)
+	{
+		if (std::chrono::steady_clock::now() - luaSliceStart >= luaYieldSlice)
+		{
+			luaYieldToGui(Ls);
+		}
+	}
+	else if (ar->event == LUA_HOOKLINE)
+	{
+		luaDbgHook(Ls, ar);
+	}
+}
+
+// Installs the GUI yield hook (when the driver provides a yield handler), plus
+// the debugger's line hook while it is attached, on the main state and the
+// script's thread. Lua allows one hook per state.
+static void luaSetHooks(void)
 {
 	if (L == nullptr)
 	{
 		return;
 	}
-	const int mask = enable ? LUA_MASKLINE : 0;
+	int mask = luaDbgAttached ? LUA_MASKLINE : 0;
 
-	lua_sethook(L, enable ? luaDbgHook : nullptr, mask, 0);
+	if (luaYieldHandler != nullptr)
+	{
+		mask |= LUA_MASKCOUNT;
+	}
+	lua_Hook hook = mask ? luaHook : nullptr;
+
+	lua_sethook(L, hook, mask, luaYieldCheckInterval);
 
 	lua_getfield(L, LUA_REGISTRYINDEX, frameAdvanceThread);
 	lua_State *thread = lua_tothread(L, -1);
 
 	if (thread != nullptr)
 	{
-		lua_sethook(thread, enable ? luaDbgHook : nullptr, mask, 0);
+		lua_sethook(thread, hook, mask, luaYieldCheckInterval);
 	}
 	lua_pop(L, 1);
+}
+
+void FCEU_LuaSetYieldHandler(void (*handler)(void))
+{
+	luaYieldHandler = handler;
+	luaSetHooks();
 }
 
 void FCEU_LuaDbgAttach(const LuaDbgCallbacks *cb)
@@ -6727,14 +6747,14 @@ void FCEU_LuaDbgAttach(const LuaDbgCallbacks *cb)
 	luaDbgCallbacks = *cb;
 	luaDbgAbortReq = false;
 	luaDbgAttached = true;
-	luaDbgSetHooks(true);
+	luaSetHooks();
 }
 
 void FCEU_LuaDbgDetach(void)
 {
 	luaDbgAttached = false;
 	luaDbgResumeReq = true;
-	luaDbgSetHooks(false);
+	luaSetHooks();
 
 	std::lock_guard<std::mutex> lock(luaDbgMutex);
 	luaDbgBreakpoints.clear();
@@ -7279,8 +7299,16 @@ void FCEU_LuaFrameBoundary()
 	{
 		return;
 	}
+	if (luaYieldingToGui)
+	{
+		return;
+	}
+	luaSliceStart = std::chrono::steady_clock::now();
+
 	if (luaCallbackErrorCounter > 0)
 	{
+		luaDbgKillIssued = false;
+		luaDbgAbortReq = false;
 		FCEU_LuaStop();
 		return;
 	}
@@ -7298,7 +7326,6 @@ void FCEU_LuaFrameBoundary()
 	frameBoundary = TRUE;
 	frameAdvanceWaiting = FALSE;
 
-	numTries = 1000;
 	int result = lua_resume(thread, 0);
 
 	if (result == LUA_YIELD) {
@@ -7373,9 +7400,9 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 		return 0;
 	}
 
-	if (luaDbgPaused)
+	if (luaDbgPaused || luaYieldingToGui)
 	{
-		FCEU_printf("Lua script is paused in the debugger; continue or stop it first.\n");
+		FCEU_printf("Lua script is busy or paused; stop it first.\n");
 		return 0;
 	}
 
@@ -7517,7 +7544,8 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 	luaDbgKillIssued = false;
 	luaDbgStepMode = LUADBG_STEP_NONE;
 	luaDbgPauseReq = luaDbgAttached && luaDbgBreakOnStart;
-	luaDbgSetHooks(luaDbgAttached);
+	luaSliceStart = std::chrono::steady_clock::now();
+	luaSetHooks();
 
 	// Initialize settings
 	luaRunning = TRUE;
@@ -7528,9 +7556,6 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 	//wasPaused = FCEUI_EmulationPaused();
 	//if (wasPaused) FCEUI_ToggleEmulationPause();
 
-
-	// Set up our protection hook to be executed once every 10,000 bytecode instructions.
-	//lua_sethook(thread, FCEU_LuaHookFunction, LUA_MASKCOUNT, 10000);
 
 #ifdef __WIN_DRIVER__
 	info_print = PrintToWindowConsole;
@@ -7596,9 +7621,9 @@ void FCEU_LuaStop() {
 	if (!CheckLua())
 		return;
 
-	// The script is blocked inside the debugger hook, so it cannot be torn down
-	// from here. Ask it to unwind itself instead.
-	if (luaDbgPaused)
+	// The script is blocked inside the debugger or GUI yield hook, so it cannot
+	// be torn down from here. Ask it to unwind itself instead.
+	if (luaDbgPaused || luaYieldingToGui)
 	{
 		luaDbgRequestAbort();
 		return;
@@ -7715,7 +7740,7 @@ bool FCEU_LuaRerecordCountSkip() {
  */
 void FCEU_LuaGui(uint8 *XBuf)
 {
-	if (!L/* || !luaRunning*/)
+	if (!L/* || !luaRunning*/ || luaYieldingToGui)
 		return;
 
 	// First, check if we're being called by anybody
@@ -7723,7 +7748,7 @@ void FCEU_LuaGui(uint8 *XBuf)
 
 	if (lua_isfunction(L, -1)) {
 		// We call it now
-		numTries = 1000;
+		luaSliceStart = std::chrono::steady_clock::now();
 		int ret = lua_pcall(L, 0, 0, 0);
 		if (ret != 0) {
 #ifdef __WIN_DRIVER__

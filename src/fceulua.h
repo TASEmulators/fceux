@@ -89,6 +89,11 @@ char *FCEU_GetFreezeFilename(int slot);
 #include <string>
 #include <vector>
 
+// Called from the Lua hook when a script has run for a while without returning
+// to the emulator. The handler should let the GUI run, e.g. by briefly
+// releasing the emulator lock. No hook is installed while it is null.
+void FCEU_LuaSetYieldHandler(void (*handler)(void));
+
 struct LuaDbgCallbacks
 {
 	// Called from the thread that hit a break. Must return once
