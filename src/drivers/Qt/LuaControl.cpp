@@ -27,7 +27,7 @@
 #include <Windows.h>
 #endif
 
-#include <QTextEdit>
+#include <QPlainTextEdit>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
@@ -41,6 +41,7 @@
 #include "common/os_utils.h"
 
 #include "Qt/LuaControl.h"
+#include "Qt/LuaConsoleOutput.h"
 #include "Qt/LuaSourceDebugger.h"
 #include "Qt/main.h"
 #include "Qt/input.h"
@@ -53,60 +54,6 @@ static bool luaScriptRunning = false;
 static bool updateLuaDisplay = false;
 static bool openLuaKillMsgBox = false;
 static int luaKillMsgBoxRetVal = 0;
-
-struct luaConsoleOutputBuffer
-{
-	int head;
-	int tail;
-	int size;
-	char *buf;
-
-	luaConsoleOutputBuffer(void)
-	{
-		tail = head = 0;
-		size = 4096;
-
-		buf = (char *)malloc(size);
-	}
-
-	~luaConsoleOutputBuffer(void)
-	{
-		if (buf)
-		{
-			free(buf);
-			buf = NULL;
-		}
-	}
-
-	unsigned int serial = 0;
-
-	void addLine(const char *l)
-	{
-		int i = 0;
-		serial++;
-		//printf("Adding Line %i: '%s'\n", head, l );
-		while (l[i] != 0)
-		{
-			buf[head] = l[i];
-			i++;
-
-			head = (head + 1) % size;
-
-			if (head == tail)
-			{
-				tail = (tail + 1) % size;
-			}
-		}
-	}
-
-	void clear(void)
-	{
-		serial++;
-		tail = head = 0;
-	}
-};
-
-static luaConsoleOutputBuffer outBuf;
 
 static std::list<LuaControlDialog_t *> winList;
 
@@ -139,8 +86,9 @@ LuaControlDialog_t::LuaControlDialog_t(QWidget *parent)
 	scriptPath->setClearButtonEnabled(true);
 	scriptArgs->setClearButtonEnabled(true);
 
-	luaOutput = new QTextEdit();
+	luaOutput = new QPlainTextEdit();
 	luaOutput->setReadOnly(true);
+	LuaConsoleAttachView(luaOutput);
 
 	hbox = new QHBoxLayout();
 
@@ -266,26 +214,9 @@ void LuaControlDialog_t::openLuaKillMessageBox(void)
 	LuaConsolePollKillPrompt(this);
 }
 //----------------------------------------------------
-unsigned int LuaConsoleSerial(void)
-{
-	return outBuf.serial;
-}
-//----------------------------------------------------
-std::string LuaConsoleText(void)
-{
-	std::string text;
-
-	for (int i = outBuf.tail; i != outBuf.head; i = (i + 1) % outBuf.size)
-	{
-		text.append(1, outBuf.buf[i]);
-	}
-	return text;
-}
-//----------------------------------------------------
 void LuaConsoleClear(void)
 {
-	outBuf.clear();
-	updateLuaDisplay = true;
+	LuaConsoleOutput::instance().clear();
 }
 //----------------------------------------------------
 void LuaConsolePollKillPrompt(QWidget *parent)
@@ -460,7 +391,7 @@ void LuaControlDialog_t::openLuaScriptFile(void)
 void LuaControlDialog_t::startLuaScript(void)
 {
 #ifdef _S9XLUA_H
-	outBuf.clear();
+	LuaConsoleClear();
 	{
 		FCEU_WRAPPER_SCOPED_LOCK();
 		if (0 == FCEU_LoadLuaCode(scriptPath->text().toLocal8Bit().constData(), scriptArgs->text().toLocal8Bit().constData()))
@@ -492,9 +423,6 @@ void LuaControlDialog_t::openLuaDebugger(void)
 //----------------------------------------------------
 void LuaControlDialog_t::refreshState(void)
 {
-	int i;
-	std::string luaOutputText;
-
 	if (luaScriptRunning)
 	{
 		stopButton->setEnabled(true);
@@ -505,19 +433,6 @@ void LuaControlDialog_t::refreshState(void)
 		stopButton->setEnabled(false);
 		startButton->setText(tr("Start"));
 	}
-
-	i = outBuf.tail;
-
-	while (i != outBuf.head)
-	{
-		luaOutputText.append(1, outBuf.buf[i]);
-
-		i = (i + 1) % outBuf.size;
-	}
-
-	luaOutput->setText(luaOutputText.c_str());
-
-	luaOutput->moveCursor(QTextCursor::End);
 }
 //----------------------------------------------------
 static void updateLuaWindows(void)
@@ -552,9 +467,7 @@ void PrintToWindowConsole(intptr_t hDlgAsInt, const char *str)
 {
 	//printf("%s\n", str );
 
-	outBuf.addLine(str);
-
-	updateLuaDisplay = true;
+	LuaConsoleOutput::instance().append(str);
 }
 //----------------------------------------------------
 int LuaPrintfToWindowConsole( __FCEU_PRINTF_FORMAT const char * format, ...)
@@ -568,9 +481,7 @@ int LuaPrintfToWindowConsole( __FCEU_PRINTF_FORMAT const char * format, ...)
 
 	msg[sizeof(msg) - 1] = 0;
 
-	outBuf.addLine(msg);
-
-	updateLuaDisplay = true;
+	LuaConsoleOutput::instance().append(msg);
 
 	return (retval);
 };

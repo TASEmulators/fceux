@@ -233,7 +233,6 @@ private slots:
 	void reloadScript(void);
 	void runContinueCB(void);
 	void restartCB(void);
-	void refreshOutput(void);
 	void startScript(void);
 	void breakCB(void);
 	void stopCB(void);
@@ -278,7 +277,6 @@ private:
 	QString pageTitles[5];
 	QPlainTextEdit *outputView;
 	QLineEdit *argsEdit;
-	unsigned int outputSerial;
 	bool restartPending = false;
 	bool prevRunning = false;
 	std::string lastScriptName;

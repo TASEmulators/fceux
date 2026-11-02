@@ -18,7 +18,7 @@
 #include <QFrame>
 #include <QGroupBox>
 #include <QLineEdit>
-#include <QTextEdit>
+#include <QPlainTextEdit>
 
 #include "Qt/main.h"
 
@@ -43,7 +43,7 @@ protected:
 	QPushButton *stopButton;
 	QPushButton *startButton;
 	QPushButton *debugButton;
-	QTextEdit *luaOutput;
+	QPlainTextEdit *luaOutput;
 
 private:
 public slots:
@@ -63,8 +63,5 @@ void PrintToWindowConsole(intptr_t hDlgAsInt, const char *str);
 
 int LuaKillMessageBox(void);
 
-// Shared console buffer access, used by the Lua source debugger
-unsigned int LuaConsoleSerial(void);
-std::string LuaConsoleText(void);
 void LuaConsoleClear(void);
 void LuaConsolePollKillPrompt(QWidget *parent);

@@ -27,6 +27,7 @@
 //#include <QProxyStyle>
 
 #include "Qt/ConsoleWindow.h"
+#include "Qt/LuaConsoleOutput.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/SplashScreen.h"
 #include "Qt/QtScriptManager.h"
@@ -186,6 +187,7 @@ int main( int argc, char *argv[] )
 
 	qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
+	LuaConsoleOutput::instance();
 #ifdef __FCEU_PROFILER_ENABLE__
 	GuiBusyProfiler *guiBusyProfiler = new GuiBusyProfiler();
 	app.installEventFilter(guiBusyProfiler);

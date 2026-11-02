@@ -34,6 +34,7 @@
 
 #include "Qt/LuaSourceDebugger.h"
 #include "Qt/LuaControl.h"
+#include "Qt/LuaConsoleOutput.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/nes_shm.h"
 
@@ -663,7 +664,7 @@ void LuaSourceView::updateHighlights(void)
 // LuaSourceDebuggerDialog_t
 //----------------------------------------------------------------------------
 LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
-	: QDialog(parent, Qt::Window), outputSerial(0xFFFFFFFFu), lastSerial(0), wasPaused(false), updatingVars(false)
+	: QDialog(parent, Qt::Window), lastSerial(0), wasPaused(false), updatingVars(false)
 {
 	QSettings settings;
 	QMenuBar *menuBar;
@@ -1433,6 +1434,7 @@ void LuaSourceDebuggerDialog_t::buildOutputView(void)
 	outputView->setLineWrapMode(QPlainTextEdit::NoWrap);
 	outputView->setContextMenuPolicy(Qt::CustomContextMenu);
 	outputView->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+	LuaConsoleAttachView(outputView);
 
 	connect(outputView, &QWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
 		QMenu *menu = outputView->createStandardContextMenu();
@@ -1442,24 +1444,6 @@ void LuaSourceDebuggerDialog_t::buildOutputView(void)
 		menu->exec(outputView->viewport()->mapToGlobal(pos));
 		delete menu;
 	});
-}
-//----------------------------------------------------------------------------
-void LuaSourceDebuggerDialog_t::refreshOutput(void)
-{
-	const unsigned int serial = LuaConsoleSerial();
-
-	if (serial == outputSerial)
-	{
-		return;
-	}
-	outputSerial = serial;
-
-	QScrollBar *sb = outputView->verticalScrollBar();
-	const bool atEnd = (sb->value() >= sb->maximum() - 2);
-	const int prev = sb->value();
-
-	outputView->setPlainText(QString::fromLocal8Bit(LuaConsoleText().c_str()));
-	sb->setValue(atEnd ? sb->maximum() : prev);
 }
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::buildStackView(void)
@@ -1789,7 +1773,6 @@ void LuaSourceDebuggerDialog_t::updateActions(bool scriptRunning, bool paused)
 //----------------------------------------------------------------------------
 void LuaSourceDebuggerDialog_t::updatePeriodic(void)
 {
-	refreshOutput();
 	LuaConsolePollKillPrompt(this);
 
 	// Follow scripts started from elsewhere (e.g. the Lua Control window)
