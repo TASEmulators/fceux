@@ -92,6 +92,7 @@
 #include "Qt/FrameTimingStats.h"
 #include "Qt/ProfilerDialog.h"
 #include "Qt/LuaControl.h"
+#include "Qt/LuaSourceDebugger.h"
 #include "Qt/QtScriptManager.h"
 #include "Qt/CheatsConf.h"
 #include "Qt/GameGenie.h"
@@ -2084,6 +2085,18 @@ void consoleWin_t::createMainMenu(void)
 	
 	debugMenu->addAction(codeDataLogAct);
 
+#ifdef _S9XLUA_H
+	// Debug -> Lua Debugger
+	luaDebuggerAct = new QAction(tr("&Lua Debugger..."), this);
+	luaDebuggerAct->setStatusTip(tr("Step through Lua scripts, set breakpoints, and inspect variables."));
+	luaDebuggerAct->setToolTip( luaDebuggerAct->statusTip() );
+	connect(luaDebuggerAct, SIGNAL(triggered()), this, SLOT(openLuaDebugger(void)) );
+
+	debugMenu->addAction(luaDebuggerAct);
+#else
+	luaDebuggerAct = nullptr;
+#endif
+
 	// Debug -> Game Genie Encode/Decode Viewer
 	ggEncodeAct = new QAction(tr("&Game Genie Encode/Decode"), this);
 	//ggEncodeAct->setShortcut( QKeySequence(tr("Shift+F7")));
@@ -3739,6 +3752,13 @@ void consoleWin_t::openNTViewer(void)
 void consoleWin_t::openCodeDataLogger(void)
 {
 	openCDLWindow(this);
+}
+
+void consoleWin_t::openLuaDebugger(void)
+{
+#ifdef _S9XLUA_H
+	openLuaSourceDebugger(this);
+#endif
 }
 
 void consoleWin_t::openGGEncoder(void)

@@ -249,6 +249,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *ramSearchAct;
 		QAction *debuggerAct;
 		QAction *codeDataLogAct;
+		QAction *luaDebuggerAct;
 		QAction *traceLogAct;
 		QAction *hexEditAct;
 		QAction *ppuViewAct;
@@ -386,6 +387,7 @@ class  consoleWin_t : public QMainWindow
 		void openProfilerWin(void);
 		void openMovieOptWin(void);
 		void openCodeDataLogger(void);
+		void openLuaDebugger(void);
 		void openTraceLogger(void);
 		void openFamilyKeyboard(void);
 		void toggleAutoResume(void);
