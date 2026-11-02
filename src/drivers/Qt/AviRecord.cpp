@@ -2402,10 +2402,10 @@ int aviRecordOpenFile( const char *filepath )
 
 	rawAudioBuf = (int16_t*)malloc( abufSize * sizeof(uint16_t) );
 
-	vbufHead = 0;
-	vbufTail = 0;
-	abufHead = 0;
-	abufTail = 0;
+	vbufHead.store(0, std::memory_order_relaxed);
+	vbufTail.store(0, std::memory_order_relaxed);
+	abufHead.store(0, std::memory_order_relaxed);
+	abufTail.store(0, std::memory_order_relaxed);
 
 	recordEnable = true;
 	return 0;
@@ -2427,11 +2427,11 @@ int aviRecordAddFrame( void )
 
 	numPixels  = nes_shm->video.ncol * nes_shm->video.nrow;
 
-	head = vbufHead;
+	head = vbufHead.load(std::memory_order_relaxed);
 
 	auto calcAvailSize = [&]()
 	{
-		availSize = (vbufTail - head);
+		availSize = (vbufTail.load(std::memory_order_acquire) - head);
 		if ( availSize <= 0 )
 		{
 			availSize += vbufSize;
@@ -2456,7 +2456,7 @@ int aviRecordAddFrame( void )
 
 		head = (head + 1) % vbufSize;
 	}
-	vbufHead = head;
+	vbufHead.store(head, std::memory_order_release);
 
 	return 0;
 }
@@ -2479,7 +2479,7 @@ int aviRecordAddAudioFrame( int32_t *buf, int numSamples )
 
 	// Get current buffer index values from atomic variables and store in stack variables
 	// Do loop processing with stack variables and then update atomics when finished
-	int head = abufHead;
+	int head = abufHead.load(std::memory_order_relaxed);
 
 	for (int i=0; i<numSamples; i++)
 	{
@@ -2487,7 +2487,7 @@ int aviRecordAddAudioFrame( int32_t *buf, int numSamples )
 
 		head = (head + 1) % abufSize;
 	}
-	abufHead = head;
+	abufHead.store(head, std::memory_order_release);
 
 	return 0;
 }
@@ -2511,10 +2511,10 @@ int aviRecordClose(void)
 	{
 		free(rawAudioBuf); rawAudioBuf = NULL;
 	}
-	vbufHead = 0;
-	abufHead = 0;
-	vbufTail = 0;
-	abufTail = 0;
+	vbufHead.store(0, std::memory_order_relaxed);
+	abufHead.store(0, std::memory_order_relaxed);
+	vbufTail.store(0, std::memory_order_relaxed);
+	abufTail.store(0, std::memory_order_relaxed);
 
 	return 0;
 }
@@ -2755,8 +2755,8 @@ void AviRecordDiskThread_t::run(void)
 			FCEU_PROFILE_FUNC("AVI VideoBuf Read");
 			// Get current buffer index values from atomic variables and store in stack variables
 			// Do loop processing with stack variables and then update atomics when finished
-			int vhead = vbufHead;
-			int vtail = vbufTail;
+			int vhead = vbufHead.load(std::memory_order_acquire);
+			int vtail = vbufTail.load(std::memory_order_relaxed);
 
 			while ( (numPixelsReady < numPixels) && (vtail != vhead) )
 			{
@@ -2764,7 +2764,7 @@ void AviRecordDiskThread_t::run(void)
 
 				vtail = (vtail + 1) % vbufSize;
 			}
-			vbufTail = vtail;
+			vbufTail.store(vtail, std::memory_order_release);
 		}
 
 		if ( numPixelsReady >= numPixels )
@@ -2821,8 +2821,8 @@ void AviRecordDiskThread_t::run(void)
 
 			// Get current buffer index values from atomic variables and store in stack variables
 			// Do loop processing with stack variables and then update atomics when finished
-			audioHead = abufHead;
-			audioTail = abufTail;
+			audioHead = abufHead.load(std::memory_order_acquire);
+			audioTail = abufTail.load(std::memory_order_relaxed);
 			audioSamplesAvail = audioHead - audioTail;
 
 			if ( audioSamplesAvail < 0 )
@@ -2846,7 +2846,7 @@ void AviRecordDiskThread_t::run(void)
 						break;
 					}
 				}
-				abufTail = audioTail;
+				abufTail.store(audioTail, std::memory_order_release);
 
 				if ( numSamples > 0 )
 				{
@@ -2872,8 +2872,8 @@ void AviRecordDiskThread_t::run(void)
 		}
 	}
 
-	audioHead = abufHead;
-	audioTail = abufTail;
+	audioHead = abufHead.load(std::memory_order_acquire);
+	audioTail = abufTail.load(std::memory_order_relaxed);
 
 	// Write Leftover Audio Samples
 	audioSamplesAvail = audioHead - audioTail;
@@ -2895,7 +2895,7 @@ void AviRecordDiskThread_t::run(void)
 
 			audioTail = (audioTail + 1) % abufSize;
 		}
-		abufTail = audioTail;
+		abufTail.store(audioTail, std::memory_order_release);
 
 		if ( numSamples > 0 )
 		{

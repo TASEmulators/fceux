@@ -56,6 +56,7 @@
 #include "../../ines.h"
 #include "../../nsf.h"
 #include "../../movie.h"
+#include "../../profiler.h"
 
 #include "common/os_utils.h"
 #include "utils/StringBuilder.h"
@@ -118,7 +119,7 @@ static int recBufHead = 0;
 static int recBufNum = 0;
 static traceRecord_t *logBuf = NULL;
 static int logBufMax = 3000000;
-// logBufHead and logBufTail are volatile because they are shared use by both the emulation and disk logger threads.
+// logBufHead and logBufTail are atomic because they are shared use by both the emulation and disk logger threads.
 // Ensure that the compiler doesn't do any thread caching optimizations on them so that changes to these
 // variables are immediately visible by the other thread.
 static std::atomic<unsigned int> logBufHead = 0;
@@ -1127,12 +1128,13 @@ static void pushToLogBuffer(traceRecord_t &rec)
 
 	if ( logBuf )
 	{
+		bool overrun = false;
 		unsigned int delayCount = 0;
-		const unsigned int head = logBufHead;
+		const unsigned int head = logBufHead.load(std::memory_order_relaxed);
 		const unsigned int nextHead = (head + 1) % logBufMax;
 		logBuf[head] = rec;
 
-		while (nextHead == logBufTail)
+		while (nextHead == logBufTail.load(std::memory_order_acquire))
 		{
 			SDL_Delay(1);
 
@@ -1140,13 +1142,12 @@ static void pushToLogBuffer(traceRecord_t &rec)
 
 			if ( delayCount > 10000 )
 			{
+				overrun = true;
 				break;
 			}
 		}
 
-		bool overrun = nextHead == logBufTail;
-
-		logBufHead = nextHead;
+		logBufHead.store(nextHead, std::memory_order_release);
 
 		if ( overrunWarningArmed )
 		{	// Don't spam with buffer overrun warning messages,
@@ -2459,6 +2460,7 @@ void TraceLogDiskThread_t::run(void)
 	bool isPaused = false;
 
 	//printf("Trace Log Disk Start\n");
+	FCEU_PROFILER_SET_THREAD_NAME("TraceLogDiskWriter");
 
 	setPriority( QThread::HighestPriority );
 
@@ -2494,75 +2496,87 @@ void TraceLogDiskThread_t::run(void)
 
 		size = logBufMax * sizeof(traceRecord_t);
 
-		logBufHead = logBufTail = 0;
+		logBufHead.store(0, std::memory_order_relaxed);
+		logBufTail.store(0, std::memory_order_relaxed);
 
 		logBuf = (traceRecord_t *)malloc(size);
 	}
 
 	while ( !isInterruptionRequested() )
 	{
-		isPaused = FCEUI_EmulationPaused() ? true : false;
-
-		while (logBufHead != logBufTail)
 		{
-			const unsigned int tail = logBufTail;
-			logBuf[tail].convToText(line);
-			logBufTail = (tail + 1) % logBufMax;
+			FCEU_PROFILE_FUNC("Update");
+			isPaused = FCEUI_EmulationPaused() ? true : false;
+
+			unsigned int head = logBufHead.load(std::memory_order_acquire);
+			unsigned int tail = logBufTail.load(std::memory_order_relaxed);
+			while (head != tail)
+			{
+				logBuf[tail].convToText(line);
+				const unsigned int nextTail = (tail + 1) % logBufMax;
+				logBufTail.store(nextTail, std::memory_order_release);
+
+				#ifdef WIN32
+				bool success = tracer.writeLine(line);
+
+				/// TODO: Do something on error
+				#else
+				i=0;
+				while ( line[i] != 0 )
+				{
+					buf[idx] = line[i]; i++; idx++;
+				}
+				buf[idx] = '\n'; idx++;
+
+				if ( idx >= flushSize )
+				{
+					FCEU_PROFILE_FUNC("Write");
+					if ( write( logFile, buf, idx ) < 0 )
+					{
+						// HANDLE ERROR TODO
+					}
+					idx = 0;
+					dataNeedsFlush = true;
+				}
+				#endif
+
+				head = logBufHead.load(std::memory_order_acquire);
+				tail = logBufTail.load(std::memory_order_relaxed);
+			}
 
 			#ifdef WIN32
-			bool success = tracer.writeLine(line);
+			bool success = tracer.setPause(isPaused);
 
 			/// TODO: Do something on error
 			#else
-			i=0;
-			while ( line[i] != 0 )
+			if (isPaused)
 			{
-				buf[idx] = line[i]; i++; idx++;
-			}
-			buf[idx] = '\n'; idx++;
-
-			if ( idx >= flushSize )
-			{
-				if ( write( logFile, buf, idx ) < 0 )
+				// If paused, the user might be at a breakpoint or doing some
+				// debugging. So make sure all data is flushed to disk for viewing.
+				// Only flush data when paused, to keep write efficiency up.
+				if ( idx > 0 )
 				{
-					// HANDLE ERROR TODO
+					FCEU_PROFILE_FUNC("Write");
+					if ( write( logFile, buf, idx ) < 0 )
+					{
+						// HANDLE ERROR TODO
+					}
+					idx = 0;
+					dataNeedsFlush = true;
 				}
-				idx = 0;
-				dataNeedsFlush = true;
+				if (dataNeedsFlush)
+				{
+					FCEU_PROFILE_FUNC("Flush");
+					//printf("Flushing Trace Log Disk Buffers\n");
+					if ( fsync( logFile ) )
+					{
+						printf("Trace Log fsync error\n");
+					}
+					dataNeedsFlush = false;
+				}
 			}
 			#endif
 		}
-
-		#ifdef WIN32
-		bool success = tracer.setPause(isPaused);
-
-		/// TODO: Do something on error
-		#else
-		if (isPaused)
-		{
-			// If paused, the user might be at a breakpoint or doing some
-			// debugging. So make sure all data is flushed to disk for viewing.
-			// Only flush data when paused, to keep write efficiency up.
-			if ( idx > 0 )
-			{
-				if ( write( logFile, buf, idx ) < 0 )
-				{
-					// HANDLE ERROR TODO
-				}
-				idx = 0;
-				dataNeedsFlush = true;
-			}
-			if (dataNeedsFlush)
-			{
-				//printf("Flushing Trace Log Disk Buffers\n");
-				if ( fsync( logFile ) )
-				{
-					printf("Trace Log fsync error\n");
-				}
-				dataNeedsFlush = false;
-			}
-		}
-		#endif
 
 		SDL_Delay(1);
 	}
