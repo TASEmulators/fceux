@@ -90,6 +90,7 @@ bool internalSaveLoad = false;
 
 bool backupSavestates = true;
 bool compressSavestates = true;  //By default FCEUX compresses savestates when a movie is inactive.
+bool zeroBasedStateSlots = false;
 
 // a temp memory stream. We'll be dumping some data here and then compress
 static EMUFILE_MEMORY memory_savestate;
@@ -873,7 +874,7 @@ void FCEUSS_CheckStates(void)
 		saveStateStatus[ssel] = CheckFileExists(FCEU_MakeFName(FCEUMKF_STATE,saveId,0).c_str()) ? 1 : 0;
 	}
 
-	CurrentState=1;
+	CurrentState = zeroBasedStateSlots ? 0 : 1;
 	stateShow=0;
 }
 
@@ -949,14 +950,17 @@ void FCEUI_SelectStateNext(int n)
 {
 	bool willWrap = false;
 	const bool isIncr = (n > 0);
+	// First and last slot in selection order
+	const int firstSlot = zeroBasedStateSlots ? 0 : 1;
+	const int lastSlot  = zeroBasedStateSlots ? 9 : 0;
 	if(isIncr)
 	{
-		willWrap = CurrentState == 0;
+		willWrap = CurrentState == lastSlot;
 		CurrentState=(CurrentState+1)%10;
 	}
 	else
 	{
-		willWrap = CurrentState == 1;
+		willWrap = CurrentState == firstSlot;
 		CurrentState=(CurrentState+9)%10;
 	}
 	if (willWrap && enableStateBankRollover)

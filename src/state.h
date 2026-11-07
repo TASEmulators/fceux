@@ -84,6 +84,9 @@ bool CheckBackupSaveStateExist();	 //Checks if backupsavestate exists
 
 extern bool compressSavestates;		//Whether or not to compress non-movie savestates (by default, yes)
 
+//Slot selection order, false steps through 1,2,...,9,0 (keyboard row order), true steps through 0,1,...,9
+extern bool zeroBasedStateSlots;
+
 struct StateRecorderConfigData
 {
 	float historyDurationMinutes;

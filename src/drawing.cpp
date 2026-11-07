@@ -352,6 +352,8 @@ void FCEU_DrawRecordingStatus(uint8* XBuf)
 }
 
 
+extern bool zeroBasedStateSlots;
+
 void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur)
 {
 	// --- Layout Constants ---
@@ -371,17 +373,19 @@ void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur)
 
 	for (int z = 1; z < 11; ++z)
 	{
-		const int z_mod_10 = z % 10;
+		// Column z shows slot z (1,2,...,9,0) or slot z-1 (0,1,...,9) when zero based
+		const int slot_num = zeroBasedStateSlots ? (z - 1) : (z % 10);
 
 		// Calculate the starting horizontal pixel offset for this specific digit
 		const int z_offset_x = (z) * DIGIT_WIDTH + (z);
 
 		uint8 *dest_row = XBaf + z_offset_x;
 
-		const int src_digit_idx = (z-1);
+		// The digit graphics are stored in 1,2,...,9,0 order
+		const int src_digit_idx = zeroBasedStateSlots ? ((slot_num + 9) % 10) : (z-1);
 		const uint8 *src_digit = sstat + (src_digit_idx * TOTAL_DIGIT_PIXELS);
 
-		if (nstatus[z_mod_10])
+		if (nstatus[slot_num])
 		{
 			// Path A: Draw unconditionally (Opaque overwrite)
 			for (int y = 0; y < DIGIT_HEIGHT; ++y)
@@ -417,7 +421,7 @@ void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur)
 		}
 
 		// Highlight selection border box overlay if this column matches 'cur'
-		if (cur == z_mod_10)
+		if (cur == slot_num)
 		{
 			uint8 *border_ptr = XBaf + z_offset_x;
 

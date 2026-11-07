@@ -124,6 +124,8 @@ class  consoleRecentRomAction : public QAction
 
 };
 
+class StateSlotDock_t;
+
 class  consoleWin_t : public QMainWindow
 {
 	Q_OBJECT
@@ -234,6 +236,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *aboutActQt;
 		QAction *msgLogAct;
 		QAction *state[10];
+		StateSlotDock_t *stateSlotDock;
 		QAction *powerAct;
 		QAction *resetAct;
 		QAction *sresetAct;

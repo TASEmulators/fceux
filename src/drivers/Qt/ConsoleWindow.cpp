@@ -101,6 +101,7 @@
 #include "Qt/CodeDataLogger.h"
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/WindowLayoutManager.h"
+#include "Qt/StateSlotViewer.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
@@ -184,6 +185,17 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	g_config->getOption ("SDL.VideoDriver", &videoDriver);
 
 	loadVideoDriver( videoDriver );
+
+	{
+		// Restore the dock widget visibility and placement
+		std::string dockState;
+		g_config->getOption( "SDL.MainWindowDockState", &dockState );
+
+		if ( dockState.size() > 0 )
+		{
+			restoreState( QByteArray::fromBase64( QByteArray( dockState.c_str() ) ) );
+		}
+	}
 
 	setWindowTitle( tr(FCEU_NAME_AND_VERSION) );
 	setWindowIcon(QIcon(":fceux1.png"));
@@ -358,6 +370,8 @@ consoleWin_t::~consoleWin_t(void)
 
 	// Save window size and image scaling parameters at app exit.
 	w = size();
+
+	g_config->setOption( "SDL.MainWindowDockState", QMainWindow::saveState().toBase64().constData() );
 
 	// Only Save window size if not fullscreen and not maximized
 	if ( !isFullScreen() && !isMaximized() )
@@ -1154,6 +1168,29 @@ void consoleWin_t::createMainMenu(void)
 	}
 	state[0]->setChecked(true);
 
+	subMenu->addSeparator();
+
+	{
+		int zeroBased = 0;
+		g_config->getOption( "SDL.StateSlotZeroBased", &zeroBased );
+		zeroBasedStateSlots = (zeroBased != 0);
+
+		act = new QAction(tr("&Zero Based Slot Order"), this);
+		act->setCheckable(true);
+		act->setChecked(zeroBasedStateSlots);
+		act->setStatusTip(tr("Step through slots in the order 0,1,...,9 instead of 1,2,...,9,0 when selecting the next or previous slot."));
+		act->setToolTip( act->statusTip() );
+		connect( act, &QAction::triggered, this, [](bool checked)
+		{
+			{
+				FCEU_WRAPPER_SCOPED_LOCK();
+				zeroBasedStateSlots = checked;
+			}
+			g_config->setOption( "SDL.StateSlotZeroBased", checked ? 1 : 0 );
+		});
+		subMenu->addAction(act);
+	}
+
 	connect(state[0], SIGNAL(triggered()), this, SLOT(changeState0(void)) );
 	connect(state[1], SIGNAL(triggered()), this, SLOT(changeState1(void)) );
 	connect(state[2], SIGNAL(triggered()), this, SLOT(changeState2(void)) );
@@ -1194,6 +1231,54 @@ void consoleWin_t::createMainMenu(void)
 
 	connect( Hotkeys[ HK_SELECT_STATE_BANK_PREV ].getShortcut(), SIGNAL(activated()), this, SLOT(decrementStateBank(void)) );
 	connect( Hotkeys[ HK_SELECT_STATE_BANK_NEXT ].getShortcut(), SIGNAL(activated()), this, SLOT(incrementStateBank(void)) );
+
+	// File -> State Slot Viewer
+	stateSlotDock = new StateSlotDock_t(this);
+	addDockWidget( Qt::BottomDockWidgetArea, stateSlotDock );
+	stateSlotDock->hide();
+
+	// The dock reports absolute slot ids (bank * 10 + slot), which can be in a neighboring bank
+	connect( stateSlotDock, &StateSlotDock_t::selectRequested, this, [this](int slotId)
+	{
+		{
+			FCEU_WRAPPER_SCOPED_LOCK();
+			FCEUI_SetStateBank( slotId / 10, false );
+		}
+		changeState( slotId % 10 );
+	});
+	connect( stateSlotDock, &StateSlotDock_t::loadRequested, this, [this](int slotId)
+	{
+		int prevBank;
+		{
+			FCEU_WRAPPER_SCOPED_LOCK();
+			prevBank = FCEUI_SetStateBank( slotId / 10, false );
+		}
+		loadState( slotId % 10 );
+		{
+			FCEU_WRAPPER_SCOPED_LOCK();
+			FCEUI_SetStateBank( prevBank, false );
+		}
+	});
+	connect( stateSlotDock, &StateSlotDock_t::saveRequested, this, [this](int slotId)
+	{
+		int prevBank;
+		{
+			FCEU_WRAPPER_SCOPED_LOCK();
+			prevBank = FCEUI_SetStateBank( slotId / 10, false );
+		}
+		saveState( slotId % 10 );
+		{
+			FCEU_WRAPPER_SCOPED_LOCK();
+			FCEUI_SetStateBank( prevBank, false );
+		}
+	});
+
+	act = stateSlotDock->toggleViewAction();
+	act->setText( tr("State Slot &Viewer") );
+	act->setStatusTip( tr("Show a dockable view of the selected save state slot and its neighbors with a screenshot of each saved state.") );
+	act->setToolTip( act->statusTip() );
+
+	fileMenu->addAction(act);
 
 #ifdef _S9XLUA_H
 	// File -> Load Lua

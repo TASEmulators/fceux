@@ -818,6 +818,8 @@ InitConfig()
 	config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", savPath );
 	config->addOption("_lastopennsf", "SDL.LastOpenNSF", dir);
 	config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", savPath );
+	config->addOption("SDL.MainWindowDockState", "");
+	config->addOption("SDL.StateSlotZeroBased", 1);
 	config->addOption("_lastopenmovie", "SDL.LastOpenMovie", movPath);
 	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
 	config->addOption("_lastloadjs", "SDL.LastLoadJs", "");
