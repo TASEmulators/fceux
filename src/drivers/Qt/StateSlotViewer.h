@@ -12,6 +12,7 @@
 #include <QWidget>
 #include <QImage>
 #include <QString>
+#include <QColor>
 #include <QBoxLayout>
 #include <QTimer>
 
@@ -32,6 +33,9 @@ public:
 	bool exists = false;
 	bool hasImage = false;
 	QImage image;
+
+	// Background of the cell, follows the video viewport background
+	QColor bgColor = Qt::black;
 
 	// Identity of the file the image was loaded from, used to detect changes
 	std::string path;
@@ -75,10 +79,13 @@ private:
 	bool loadThumbImage(StateSlotThumb_t *thumb, const std::string &path);
 
 	void updateVisibleCount(void);
+	void applyBgColor(const QColor &c);
 
 	std::vector<StateSlotThumb_t*> thumbs;
 	int visibleCount = 3;
 	QBoxLayout *thumbLayout;
+	QWidget    *container;
+	QColor      bgColor = Qt::black;
 	QTimer     *pollTimer;
 
 private slots:

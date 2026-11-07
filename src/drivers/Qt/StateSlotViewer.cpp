@@ -8,6 +8,8 @@
 #include <zlib.h>
 
 #include <QPainter>
+#include <QColor>
+#include <QPalette>
 #include <QPaintEvent>
 #include <QMouseEvent>
 #include <QContextMenuEvent>
@@ -24,6 +26,7 @@
 #include "../../driver.h"
 
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleWindow.h"
 #include "Qt/StateSlotViewer.h"
 
 static constexpr int THUMB_MARGIN = 6;
@@ -143,7 +146,16 @@ void StateSlotThumb_t::paintEvent(QPaintEvent *event)
 	const QFontMetrics fm(font());
 	const int captionH = fm.height() + 4;
 
-	painter.fillRect(rect(), palette().window());
+	painter.fillRect(rect(), bgColor);
+
+	// Text and outlines are drawn in a color that contrasts with the background
+	const QColor fg = (bgColor.lightness() < 128) ? QColor(Qt::white) : QColor(Qt::black);
+	auto fgMix = [&](double t)
+	{
+		return QColor::fromRgbF(bgColor.redF() + (fg.redF() - bgColor.redF()) * t,
+		                        bgColor.greenF() + (fg.greenF() - bgColor.greenF()) * t,
+		                        bgColor.blueF() + (fg.blueF() - bgColor.blueF()) * t);
+	};
 
 	if (selected)
 	{
@@ -170,16 +182,16 @@ void StateSlotThumb_t::paintEvent(QPaintEvent *event)
 	}
 	else
 	{
-		painter.setPen(QPen(palette().mid().color(), 1, Qt::DashLine));
+		painter.setPen(QPen(fgMix(0.35), 1, Qt::DashLine));
 		painter.drawRect(area.adjusted(0, 0, -1, -1));
-		painter.setPen(palette().color(QPalette::Disabled, QPalette::WindowText));
+		painter.setPen(fgMix(0.5));
 		painter.drawText(area, Qt::AlignCenter, exists ? tr("No Preview") : tr("Empty"));
 	}
 
 	QFont f = font();
 	f.setBold(selected);
 	painter.setFont(f);
-	painter.setPen(palette().color(selected ? QPalette::Active : QPalette::Disabled, QPalette::WindowText));
+	painter.setPen(selected ? fg : fgMix(0.6));
 	painter.drawText(captionRect, Qt::AlignCenter, tr("Slot %1").arg(slotId));
 }
 //----------------------------------------------------------------------------
@@ -237,7 +249,8 @@ StateSlotDock_t::StateSlotDock_t(QWidget *parent)
 	setObjectName("StateSlotDock");
 	setAllowedAreas(Qt::AllDockWidgetAreas);
 
-	QWidget *container = new QWidget(this);
+	container = new QWidget(this);
+	container->setAutoFillBackground(true);
 
 	thumbLayout = new QBoxLayout(QBoxLayout::LeftToRight, container);
 	thumbLayout->setContentsMargins(2, 2, 2, 2);
@@ -256,6 +269,7 @@ StateSlotDock_t::StateSlotDock_t(QWidget *parent)
 		thumbs.push_back(thumb);
 	}
 	setWidget(container);
+	applyBgColor(bgColor);
 
 	connect(this, &QDockWidget::dockLocationChanged, this, &StateSlotDock_t::dockAreaChanged);
 
@@ -291,6 +305,21 @@ void StateSlotDock_t::dockAreaChanged(Qt::DockWidgetArea area)
 		thumbLayout->setDirection(QBoxLayout::LeftToRight);
 	}
 	updateVisibleCount();
+}
+//----------------------------------------------------------------------------
+void StateSlotDock_t::applyBgColor(const QColor &c)
+{
+	bgColor = c;
+
+	QPalette pal = container->palette();
+	pal.setColor(QPalette::Window, c);
+	container->setPalette(pal);
+
+	for (StateSlotThumb_t *thumb : thumbs)
+	{
+		thumb->bgColor = c;
+		thumb->update();
+	}
 }
 //----------------------------------------------------------------------------
 void StateSlotDock_t::updateVisibleCount(void)
@@ -412,10 +441,15 @@ void StateSlotDock_t::refresh(void)
 	std::string paths[MAX_THUMBS];
 	int slotIds[MAX_THUMBS];
 	const int count = visibleCount;
+	QColor videoBg = bgColor;
 
 	{
 		FCEU_WRAPPER_SCOPED_LOCK();
 
+		if (consoleWindow != nullptr)
+		{
+			videoBg = *consoleWindow->getVideoBgColorPtr();
+		}
 		gameLoaded = (GameInfo != nullptr);
 		bank       = FCEUI_GetStateBank();
 		current    = CurrentState;
@@ -438,6 +472,11 @@ void StateSlotDock_t::refresh(void)
 			slotIds[i] = ((p / 10) * 10) + (((p % 10) + (zeroBasedStateSlots ? 0 : 1)) % 10);
 			paths[i] = FCEU_MakeFName(FCEUMKF_STATE, slotIds[i], 0);
 		}
+	}
+
+	if (videoBg != bgColor)
+	{
+		applyBgColor(videoBg);
 	}
 
 	for (int i = 0; i < count; i++)
