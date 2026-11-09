@@ -102,6 +102,7 @@
 #include "Qt/ConsoleDebugger.h"
 #include "Qt/WindowLayoutManager.h"
 #include "Qt/StateSlotViewer.h"
+#include "Qt/StateRecorderTimeline.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
@@ -750,6 +751,7 @@ Qt::CursorShape consoleWin_t::getViewerCursor(void)
 
 void consoleWin_t::resizeEvent(QResizeEvent *event)
 {
+	FCEU_PROFILE_FUNC("MainWindow resizeEvent");
 	if ( firstResize )
 	{
 		// We are assuming that window has been exposed and all sizing of menu is finished
@@ -1232,7 +1234,7 @@ void consoleWin_t::createMainMenu(void)
 	connect( Hotkeys[ HK_SELECT_STATE_BANK_PREV ].getShortcut(), SIGNAL(activated()), this, SLOT(decrementStateBank(void)) );
 	connect( Hotkeys[ HK_SELECT_STATE_BANK_NEXT ].getShortcut(), SIGNAL(activated()), this, SLOT(incrementStateBank(void)) );
 
-	// File -> State Slot Viewer
+	// Tools -> Dockable Widgets -> State Slot Viewer
 	stateSlotDock = new StateSlotDock_t(this);
 	addDockWidget( Qt::BottomDockWidgetArea, stateSlotDock );
 	stateSlotDock->hide();
@@ -1273,12 +1275,26 @@ void consoleWin_t::createMainMenu(void)
 		}
 	});
 
+	dockMenu = new QMenu( tr("&Dockable Widgets"), this );
+
 	act = stateSlotDock->toggleViewAction();
 	act->setText( tr("State Slot &Viewer") );
 	act->setStatusTip( tr("Show a dockable view of the selected save state slot and its neighbors with a screenshot of each saved state.") );
 	act->setToolTip( act->statusTip() );
 
-	fileMenu->addAction(act);
+	dockMenu->addAction(act);
+
+	// Tools -> Dockable Widgets -> State Recorder Timeline
+	stateTimelineDock = new StateRecorderTimelineDock_t(this);
+	addDockWidget( Qt::BottomDockWidgetArea, stateTimelineDock );
+	stateTimelineDock->hide();
+
+	act = stateTimelineDock->toggleViewAction();
+	act->setText( tr("State Recorder &Timeline") );
+	act->setStatusTip( tr("Show a timeline of the state recorder history with rewind, fast forward, play and pause controls. Can be docked at the top or bottom of the window.") );
+	act->setToolTip( act->statusTip() );
+
+	dockMenu->addAction(act);
 
 #ifdef _S9XLUA_H
 	// File -> Load Lua
@@ -2089,6 +2105,11 @@ void consoleWin_t::createMainMenu(void)
 
 	toolsMenu->addSeparator();
 
+	// Tools -> Dockable Widgets (menu populated where each dock is created)
+	toolsMenu->addMenu( dockMenu );
+
+	toolsMenu->addSeparator();
+
 	// Tools -> Window Layouts
 	subMenu = toolsMenu->addMenu( tr("&Window Layouts") );
 	{
@@ -2843,6 +2864,11 @@ void consoleWin_t::toggleUseBgPaletteForVideo(bool checked)
 		fceuLoadConfigColor( "SDL.VideoBgColor", &videoBgColor );
 	}
 	bgColorMenuItem->setEnabled( !usePaletteForVideoBg );
+
+	if ( stateTimelineDock )
+	{
+		stateTimelineDock->requestRefresh();
+	}
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::closeApp(void)
@@ -2902,6 +2928,10 @@ void consoleWin_t::videoBgColorChanged( QColor &c )
 	{
 		viewport_Interface->setBgColor(c);
 		viewport_Interface->queueRedraw();
+	}
+	if ( stateTimelineDock )
+	{
+		stateTimelineDock->requestRefresh();
 	}
 }
 //---------------------------------------------------------------------------

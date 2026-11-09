@@ -291,6 +291,7 @@ void ConsoleViewQWidget_t::showEvent(QShowEvent *event)
 
 void ConsoleViewQWidget_t::resizeEvent(QResizeEvent *event)
 {
+	FCEU_PROFILE_FUNC("Viewer QWidget resizeEvent");
 	QSize s;
 
 	s = event->size();
@@ -398,6 +399,7 @@ void  ConsoleViewQWidget_t::getNormalizedCursorPos( double &x, double &y )
 
 void ConsoleViewQWidget_t::paintEvent(QPaintEvent *event)
 {
+	FCEU_PROFILE_FUNC("Viewer QWidget paintEvent");
 	QPainter painter(this);
 	int nesWidth  = GL_NES_WIDTH;
 	int nesHeight = GL_NES_HEIGHT;

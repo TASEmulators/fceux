@@ -28,6 +28,8 @@
 #include "Qt/nes_shm.h"
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
+#include "../../profiler.h"
+
 #include "Qt/ConsoleViewerSDL.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleWindow.h"
@@ -495,6 +497,7 @@ void ConsoleViewSDL_t::showEvent(QShowEvent *event)
 
 void ConsoleViewSDL_t::resizeEvent(QResizeEvent *event)
 {
+	FCEU_PROFILE_FUNC("Viewer SDL resizeEvent");
 	QSize s;
 
 	s = event->size();
@@ -615,6 +618,7 @@ void ConsoleViewSDL_t::onDrawSignal(void)
 
 void ConsoleViewSDL_t::render(void)
 {
+	FCEU_PROFILE_FUNC("Viewer SDL render");
 	int nesWidth  = GL_NES_WIDTH;
 	int nesHeight = GL_NES_HEIGHT;
 	float ixScale = 1.0;

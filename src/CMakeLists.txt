@@ -674,6 +674,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleSoundConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/StateRecorderConf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/StateSlotViewer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/StateRecorderTimeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/iNesHeaderEditor.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/QtScriptManager.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/SplashScreen.cpp  

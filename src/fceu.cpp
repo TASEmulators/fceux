@@ -734,6 +734,8 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	JustFrameAdvanced = false;
 
+	FCEU_StateRecorderPollPauseState();
+
 	if (frameAdvanceRequested)
 	{
 #ifdef __QT_DRIVER__

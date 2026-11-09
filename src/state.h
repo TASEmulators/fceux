@@ -19,6 +19,7 @@
  */
 #pragma once
 #include <string>
+#include <vector>
 
 enum ENUM_SSLOADPARAMS
 {
@@ -125,6 +126,29 @@ struct StateRecorderConfigData
 	}
 };
 
+// Snapshot positions run from 0 (oldest) to snapFrames.size()-1 (newest).
+// Snapshots that come after currentSnap are discarded as soon as emulation resumes.
+struct StateRecorderTimelineData
+{
+	std::vector<int> snapFrames;	// Frame number of each stored snapshot
+	int currentSnap;				// Position of the snapshot last loaded or saved, -1 if none
+	int currentFrame;				// Current emulation frame
+	int maxSnaps;					// Ring buffer capacity
+
+	StateRecorderTimelineData(void)
+	{
+		currentSnap = -1;
+		currentFrame = 0;
+		maxSnaps = 0;
+	}
+};
+
+// Called whenever the recorded history, the recorder state or the pause state changes.
+// May be called from the emulation thread, so it must not block.
+typedef void (*StateRecorderChangeCallback)(void);
+void FCEU_StateRecorderSetChangeCallback(StateRecorderChangeCallback callback);
+void FCEU_StateRecorderPollPauseState(void);	// Call once per emulation iteration, even while paused
+
 int FCEU_StateRecorderStart(void);
 int FCEU_StateRecorderStop(void);
 int FCEU_StateRecorderUpdate(void);
@@ -135,6 +159,8 @@ int FCEU_StateRecorderGetMaxSnaps(void);
 int FCEU_StateRecorderGetNumSnapsSaved(void);
 int FCEU_StateRecorderGetStateIndex(void);
 int FCEU_StateRecorderLoadState(int snapIndex);
+int FCEU_StateRecorderLoadPosition(int pos);	// Does not apply the pause-on-load setting
+int FCEU_StateRecorderGetTimeline(StateRecorderTimelineData &data);
 int FCEU_StateRecorderLoadPrevState(void);
 int FCEU_StateRecorderLoadNextState(void);
 int FCEU_StateRecorderSetConfigData(const StateRecorderConfigData &newConfig);

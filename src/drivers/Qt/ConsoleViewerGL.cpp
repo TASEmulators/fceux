@@ -37,6 +37,8 @@
 #include <GL/gl.h>
 #endif
 
+#include "../../profiler.h"
+
 #include "Qt/nes_shm.h"
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
@@ -391,6 +393,7 @@ void ConsoleViewGL_t::cleanupGL(void)
 
 void ConsoleViewGL_t::resizeGL(int w, int h)
 {
+	FCEU_PROFILE_FUNC("Viewer GL resizeGL");
 	w = (int)( devPixRatio * w );
 	h = (int)( devPixRatio * h );
 	//printf("GL Resize: %i x %i \n", w, h );
@@ -602,6 +605,7 @@ void ConsoleViewGL_t::onDrawSignal(void)
 
 void ConsoleViewGL_t::paintGL(void)
 {
+	FCEU_PROFILE_FUNC("Viewer GL paintGL");
 	int texture_width  = nes_shm->video.ncol;
 	int texture_height = nes_shm->video.nrow;
 	int l=0, r=texture_width;

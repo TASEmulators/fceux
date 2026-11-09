@@ -38,6 +38,7 @@
 #include "input.h"
 #include "zlib.h"
 #include "driver.h"
+#include "profiler.h"
 #ifdef _S9XLUA_H
 #include "fceulua.h"
 #endif
@@ -57,6 +58,7 @@
 //#include <unistd.h> //mbg merge 7/17/06 removed
 
 #include <vector>
+#include <atomic>
 #include <fstream>
 
 using namespace std;
@@ -1250,6 +1252,19 @@ void RedoLoadState()
 //-----------------------------------------------------------------------------------------------------
 static StateRecorderConfigData stateRecorderConfig;
 
+static std::atomic<StateRecorderChangeCallback> stateRecorderChangeCallback{nullptr};
+
+// Called from whichever thread changed the history, so the callback must be thread safe
+static void notifyStateRecorderChanged(void)
+{
+	StateRecorderChangeCallback cb = stateRecorderChangeCallback.load();
+
+	if (cb != nullptr)
+	{
+		cb();
+	}
+}
+
 class StateRecorder
 {
 	public:
@@ -1262,6 +1277,7 @@ class StateRecorder
 				EMUFILE_MEMORY *em = new EMUFILE_MEMORY( 0x1000 );
 
 				ringBuf.push_back(em);
+				snapFrames.push_back(0);
 			}
 			ringStart = ringHead = ringTail = 0;
 			frameCounter = 0;
@@ -1332,17 +1348,26 @@ class StateRecorder
 
 		void update(void)
 		{
+			FCEU_PROFILE_FUNC("StateRecorder update");
+
 			bool isPaused = EmulationPaused ? true : false;
 
 			unsigned int curFrame = static_cast<unsigned int>(currFrameCounter);
 
 			if (!isPaused && loadIndexReset)
 			{
+				const int prevHead = ringHead;
+
 				ringHead = (lastState + 1) % ringBufSize;
 
 				frameCounter = curFrame;
 
 				loadIndexReset = false;
+
+				if (ringHead != prevHead)
+				{	// Snapshots ahead of the loaded one were discarded
+					notifyStateRecorderChanged();
+				}
 			}
 
 			if (!isPaused && (curFrame > frameCounter) )
@@ -1355,9 +1380,14 @@ class StateRecorder
 
 					em->set_len(0);
 
-					FCEUSS_SaveMS( em, compressionLevel );
+					{
+						FCEU_PROFILE_FUNC("StateRecorder snapshot save");
+						FCEUSS_SaveMS( em, compressionLevel );
+					}
 
 					//printf("Frame:%u  Save:%i  Size:%zu  Total:%zukB \n", frameCounter, ringHead, em->size(), dataSize() / 1024 );
+
+					snapFrames[ ringHead ] = static_cast<int>(frameCounter);
 
 					lastState = ringHead;
 
@@ -1367,6 +1397,7 @@ class StateRecorder
 					{
 						ringStart = (ringHead + 1) % ringBufSize;
 					}
+					notifyStateRecorderChanged();
 				}
 			}
 		}
@@ -1386,8 +1417,10 @@ class StateRecorder
 			return 0;
 		}
 
-		int loadStateByIndex( int snapIdx )
+		int loadStateByIndex( int snapIdx, bool applyPause = true )
 		{
+			FCEU_PROFILE_FUNC("StateRecorder load snapshot");
+
 			if (snapIdx < 0)
 			{
 				snapIdx = snapIdx + ringBufSize;
@@ -1405,6 +1438,12 @@ class StateRecorder
 			lastState = snapIdx;
 			loadIndexReset = true;
 
+			notifyStateRecorderChanged();
+
+			if (!applyPause)
+			{
+				return 0;
+			}
 			if (pauseOnLoad == StateRecorderConfigData::TEMPORARY_PAUSE)
 			{
 				if (loadPauseTime > 0)
@@ -1454,6 +1493,50 @@ class StateRecorder
 			return loadStateByIndex( snapIdx );
 		}
 
+		// Position 0 is the oldest snapshot that is still available
+		int loadStateByPosition( int pos )
+		{
+			const int numSnaps = numSnapsSaved();
+
+			if ( (pos < 0) || (pos >= numSnaps) )
+			{
+				return -1;
+			}
+			return loadStateByIndex( (ringStart + pos) % ringBufSize, false );
+		}
+
+		void getTimeline( StateRecorderTimelineData &data )
+		{
+			FCEU_PROFILE_FUNC("StateRecorder getTimeline");
+
+			const int numSnaps = numSnapsSaved();
+
+			data.snapFrames.clear();
+			data.snapFrames.reserve( numSnaps );
+
+			for (int i=0; i<numSnaps; i++)
+			{
+				data.snapFrames.push_back( snapFrames[ (ringStart + i) % ringBufSize ] );
+			}
+			data.currentSnap = -1;
+
+			if (numSnaps > 0)
+			{
+				int pos = lastState - ringStart;
+
+				if (pos < 0)
+				{
+					pos += ringBufSize;
+				}
+				if (pos < numSnaps)
+				{
+					data.currentSnap = pos;
+				}
+			}
+			data.maxSnaps = static_cast<int>( ringBuf.size() );
+			data.currentFrame = currFrameCounter;
+		}
+
 		int getHeadIndex(void)
 		{
 			return ringHead;
@@ -1494,6 +1577,7 @@ class StateRecorder
 		}
 
 		std::vector <EMUFILE_MEMORY*> ringBuf;
+		std::vector <int> snapFrames;
 		int  ringHead;
 		int  ringTail;
 		int  ringStart;
@@ -1517,6 +1601,7 @@ int FCEU_StateRecorderStart(void)
 	if (stateRecorder == nullptr)
 	{
 		stateRecorder = new StateRecorder();
+		notifyStateRecorderChanged();
 	}
 	return stateRecorder == nullptr;
 }
@@ -1526,6 +1611,7 @@ int FCEU_StateRecorderStop(void)
 	if (stateRecorder != nullptr)
 	{
 		delete stateRecorder; stateRecorder = nullptr;
+		notifyStateRecorderChanged();
 	}
 	return stateRecorder != nullptr;
 }
@@ -1587,6 +1673,28 @@ int FCEU_StateRecorderLoadState(int snapIndex)
 	return ret;
 }
 
+int FCEU_StateRecorderLoadPosition(int pos)
+{
+	int ret = -1;
+
+	if (stateRecorder != nullptr)
+	{
+		ret = stateRecorder->loadStateByPosition(pos);
+	}
+	return ret;
+}
+
+int FCEU_StateRecorderGetTimeline(StateRecorderTimelineData &data)
+{
+	if (stateRecorder == nullptr)
+	{
+		data = StateRecorderTimelineData();
+		return -1;
+	}
+	stateRecorder->getTimeline(data);
+	return 0;
+}
+
 int FCEU_StateRecorderGetStateIndex(void)
 {
 	return StateRecorder::lastState;
@@ -1625,6 +1733,25 @@ int FCEU_StateRecorderSetConfigData(const StateRecorderConfigData &newConfig)
 	if (stateRecorder != nullptr)
 	{
 		stateRecorder->loadConfig( stateRecorderConfig );
+		notifyStateRecorderChanged();
 	}
 	return 0;
+}
+
+void FCEU_StateRecorderSetChangeCallback(StateRecorderChangeCallback callback)
+{
+	stateRecorderChangeCallback.store(callback);
+}
+
+void FCEU_StateRecorderPollPauseState(void)
+{
+	static int lastPauseState = -1;
+
+	const int pauseState = EmulationPaused & (EMULATIONPAUSED_PAUSED | EMULATIONPAUSED_TIMER);
+
+	if (pauseState != lastPauseState)
+	{
+		lastPauseState = pauseState;
+		notifyStateRecorderChanged();
+	}
 }

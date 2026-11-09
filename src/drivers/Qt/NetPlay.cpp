@@ -260,7 +260,7 @@ int NetPlayServer::Destroy()
 
 void NetPlayServer::newConnectionRdy(void)
 {
-	printf("New Connection Ready!\n");
+	//printf("New Connection Ready!\n");
 
 	processPendingConnections();
 }
@@ -283,7 +283,7 @@ void NetPlayServer::processPendingConnections(void)
 			if (success)
 			{
 				client->setDebugLog( debugFile );
-				printf("Client Debug File: %s\n", debugFile->fileName().toLocal8Bit().constData());
+				//printf("Client Debug File: %s\n", debugFile->fileName().toLocal8Bit().constData());
 			}
 		}
 		client->setSocket(newSock);
@@ -294,7 +294,7 @@ void NetPlayServer::processPendingConnections(void)
 
 		newSock = nextPendingConnection();
 
-		printf("Added Client: %p   %zu\n", client, clientList.size() );
+		//printf("Added Client: %p   %zu\n", client, clientList.size() );
 
 		netPlayAuthReq msg;
 
@@ -3276,7 +3276,7 @@ bool NetPlayStateLoadReq(EMUFILE* is)
 
 	bool shouldLoad = (client == nullptr) || serverRequestedStateLoad;
 
-	printf("NetPlay Load State: %i\n", shouldLoad);
+	//printf("NetPlay Load State: %i\n", shouldLoad);
 
 	if ( (client != nullptr) && !serverRequestedStateLoad)
 	{  // Send state to host

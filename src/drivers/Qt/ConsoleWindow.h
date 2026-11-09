@@ -125,6 +125,7 @@ class  consoleRecentRomAction : public QAction
 };
 
 class StateSlotDock_t;
+class StateRecorderTimelineDock_t;
 
 class  consoleWin_t : public QMainWindow
 {
@@ -202,6 +203,7 @@ class  consoleWin_t : public QMainWindow
 		QMenu *optMenu;
 		QMenu *emuMenu;
 		QMenu *toolsMenu;
+		QMenu *dockMenu;
 		QMenu *debugMenu;
 		QMenu *movieMenu;
 		QMenu *netPlayMenu;
@@ -237,6 +239,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *msgLogAct;
 		QAction *state[10];
 		StateSlotDock_t *stateSlotDock;
+		StateRecorderTimelineDock_t *stateTimelineDock;
 		QAction *powerAct;
 		QAction *resetAct;
 		QAction *sresetAct;

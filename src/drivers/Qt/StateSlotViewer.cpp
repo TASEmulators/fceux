@@ -24,6 +24,7 @@
 #include "../../file.h"
 #include "../../state.h"
 #include "../../driver.h"
+#include "../../profiler.h"
 
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
@@ -435,6 +436,8 @@ void StateSlotDock_t::refresh(void)
 	{
 		return;
 	}
+
+	FCEU_PROFILE_FUNC("State slot dock refresh");
 
 	int bank = 0, current = 0;
 	bool gameLoaded = false;

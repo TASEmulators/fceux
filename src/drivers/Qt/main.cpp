@@ -21,6 +21,12 @@
 #include <stdlib.h>
 #include <QApplication>
 #include <QAbstractEventDispatcher>
+#include <QElapsedTimer>
+#include <QEvent>
+#include <QMetaObject>
+#include <map>
+#include <vector>
+#include <algorithm>
 #include <QSplashScreen>
 #include <QSettings>
 #include <QtGlobal>
@@ -131,10 +137,48 @@ protected:
 	bool eventFilter(QObject *watched, QEvent *event) override
 	{
 		beginBusy();
+		if (tallyEnabled)
+		{
+			tallyEvent(watched, event);
+		}
 		return QObject::eventFilter(watched, event);
 	}
 
 private:
+	// Diagnostic: with FCEU_EVENT_TALLY set in the environment, the number of events
+	// delivered to each receiver class by event type is printed to stderr every 5 seconds.
+	void tallyEvent(QObject *watched, QEvent *event)
+	{
+		if (!tallyTimer.isValid())
+		{
+			tallyTimer.start();
+		}
+		tally[ std::make_pair( std::string(watched->metaObject()->className()), static_cast<int>(event->type()) ) ]++;
+
+		if (tallyTimer.elapsed() >= 5000)
+		{
+			std::vector< std::pair<unsigned int, std::pair<std::string,int> > > sorted;
+
+			for (const auto &kv : tally)
+			{
+				sorted.push_back( std::make_pair( kv.second, kv.first ) );
+			}
+			std::sort( sorted.begin(), sorted.end(), [](const auto &a, const auto &b){ return a.first > b.first; } );
+
+			fprintf( stderr, "EVENT TALLY (%.1fs)  total=%zu\n", tallyTimer.elapsed() / 1000.0, tally.size() );
+
+			for (size_t i = 0; (i < sorted.size()) && (i < 15); i++)
+			{
+				fprintf( stderr, "  %6u  %-28s type=%d\n", sorted[i].first, sorted[i].second.first.c_str(), sorted[i].second.second );
+			}
+			tally.clear();
+			tallyTimer.restart();
+		}
+	}
+	bool tallyEnabled = qEnvironmentVariableIsSet("FCEU_EVENT_TALLY");
+	QElapsedTimer tallyTimer;
+	std::map< std::pair<std::string,int>, unsigned int > tally;
+
 	void beginBusy(void)
 	{
 		if (!busy)
