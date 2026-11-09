@@ -126,13 +126,29 @@ StateSlotThumb_t::StateSlotThumb_t(QWidget *parent)
 //----------------------------------------------------------------------------
 QSize StateSlotThumb_t::sizeHint(void) const
 {
-	return QSize(144, 140);
+	return QSize(96, 100);
 }
 //----------------------------------------------------------------------------
 QSize StateSlotThumb_t::minimumSizeHint(void) const
 {
-	return QSize(72, 80);
+	return QSize(56, 64);
 }
+//----------------------------------------------------------------------------
+// Holds the thumbnails. The number of thumbnails shown adapts to the space that
+// is given, so the preferred size is a fixed modest value instead of one derived
+// from the thumbnails, which would make the dock claim more room than needed.
+class StateSlotContainer_t : public QWidget
+{
+public:
+	StateSlotContainer_t(QWidget *parent = 0) : QWidget(parent) {}
+
+	QSize sizeHint(void) const override
+	{
+		return horizontal ? QSize(360, 124) : QSize(124, 360);
+	}
+
+	bool horizontal = true;
+};
 //----------------------------------------------------------------------------
 void StateSlotThumb_t::paintEvent(QPaintEvent *event)
 {
@@ -250,7 +266,7 @@ StateSlotDock_t::StateSlotDock_t(QWidget *parent)
 	setObjectName("StateSlotDock");
 	setAllowedAreas(Qt::AllDockWidgetAreas);
 
-	container = new QWidget(this);
+	container = new StateSlotContainer_t(this);
 	container->setAutoFillBackground(true);
 
 	thumbLayout = new QBoxLayout(QBoxLayout::LeftToRight, container);
@@ -300,11 +316,14 @@ void StateSlotDock_t::dockAreaChanged(Qt::DockWidgetArea area)
 	if ((area == Qt::LeftDockWidgetArea) || (area == Qt::RightDockWidgetArea))
 	{
 		thumbLayout->setDirection(QBoxLayout::TopToBottom);
+		container->horizontal = false;
 	}
 	else if (area != Qt::NoDockWidgetArea)
 	{
 		thumbLayout->setDirection(QBoxLayout::LeftToRight);
+		container->horizontal = true;
 	}
+	container->updateGeometry();
 	updateVisibleCount();
 }
 //----------------------------------------------------------------------------

@@ -16,6 +16,8 @@
 #include <QBoxLayout>
 #include <QTimer>
 
+class StateSlotContainer_t;
+
 class StateSlotThumb_t : public QWidget
 {
 	Q_OBJECT
@@ -84,7 +86,7 @@ private:
 	std::vector<StateSlotThumb_t*> thumbs;
 	int visibleCount = 3;
 	QBoxLayout *thumbLayout;
-	QWidget    *container;
+	StateSlotContainer_t *container;
 	QColor      bgColor = Qt::black;
 	QTimer     *pollTimer;
 
