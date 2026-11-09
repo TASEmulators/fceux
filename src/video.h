@@ -52,6 +52,12 @@ extern GUIMESSAGE subtitleMessage;
 
 extern bool vidGuiMsgEna;
 
+// Optional driver hook for emulator messages. Called (possibly from the emulator
+// thread) with each message. Return true if the driver displays the message itself,
+// which suppresses the overlay on the video.
+typedef bool (*GuiMessageHandler_t)(const char *msg, bool isMovieMsg);
+void FCEU_SetGuiMessageHandler(GuiMessageHandler_t handler);
+
 void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur);
 
 std::string FCEUI_GetSnapshotAsName();

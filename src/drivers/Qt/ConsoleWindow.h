@@ -13,6 +13,7 @@
 #include <QPushButton>
 #include <QMenu>
 #include <QMenuBar>
+#include <atomic>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -186,6 +187,10 @@ class  consoleWin_t : public QMainWindow
 
 		void setMenuAccessPauseEnable(bool enable);
 		void setContextMenuEnable(bool enable);
+
+		void setStatusBarVisible(bool visible);
+		bool isStatusBarVisible(void);
+		void postStatusMessage( const char *msg );
 		void setSoundUseGlobalFocus(bool enable);
 
 		void OpenHelpWindow(QString subpage = QString());
@@ -233,6 +238,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *movieConfig;
 		QAction *autoResume;
 		QAction *winSizeAct[4];
+		QAction *statusBarAct;
 		QAction *fullscreen;
 		QAction *aboutAct;
 		QAction *aboutActQt;
@@ -302,6 +308,7 @@ class  consoleWin_t : public QMainWindow
 		bool        soundUseGlobalFocus;
 		bool        autoHideMenuFullscreen;
 		bool        redrawVideoRequest;
+		std::atomic<bool> statusBarMsgRouted;
 
 		std::list <std::string*> romList;
 		std::vector <autoFireMenuAction*> afActList;
@@ -350,6 +357,7 @@ class  consoleWin_t : public QMainWindow
 		void nesResetOccurred(void);
 		void pauseToggled(bool state);
 		void cheatsChanged(void);
+		void statusMessageRequest(QString msg);
 
 	public slots:
 		void openDebugWindow(void);
@@ -357,6 +365,8 @@ class  consoleWin_t : public QMainWindow
 		void openGamePadConfWin(void);
 		void toggleFullscreen(void);
 		void toggleMenuVis(void);
+		void toggleStatusBar(bool checked);
+		void showStatusMessage(QString msg);
 		void recordMovie(void);
 		void winResizeIx(int iScale);
 		void onNetPlayChange(void);

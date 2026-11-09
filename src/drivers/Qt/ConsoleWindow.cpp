@@ -49,6 +49,7 @@
 #include <QShortcut>
 #include <QUrl>
 #include <QDir>
+#include <QStatusBar>
 
 #include "../../fceu.h"
 #include "../../fds.h"
@@ -123,6 +124,21 @@
 void qt_set_sequence_auto_mnemonic(bool enable);
 #endif
 
+// Called by the emulator core for each message. Returns true when the
+// message is displayed in the status bar rather than on the video.
+static bool guiMessageToStatusBar(const char *msg, bool isMovieMsg)
+{
+	(void)isMovieMsg;
+	consoleWin_t *win = consoleWindow;
+
+	if ( (win == nullptr) || !win->isStatusBarVisible() )
+	{
+		return false;
+	}
+	win->postStatusMessage( msg );
+	return true;
+}
+
 consoleWin_t::consoleWin_t(QWidget *parent)
 	: QMainWindow( parent )
 {
@@ -178,6 +194,20 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	redrawVideoRequest     = false;
 
 	createMainMenu();
+
+	{
+		// Emulator messages are shown here instead of on the video when visible
+		int showStatusBar = 0;
+		g_config->getOption( "SDL.ShowStatusBar", &showStatusBar );
+
+		statusBar()->setVisible( showStatusBar != 0 );
+		statusBarMsgRouted = (showStatusBar != 0);
+		statusBarAct->setChecked( showStatusBar != 0 );
+
+		connect( this, &consoleWin_t::statusMessageRequest, this, &consoleWin_t::showStatusMessage, Qt::QueuedConnection );
+
+		FCEU_SetGuiMessageHandler( guiMessageToStatusBar );
+	}
 
 	g_config->getOption( "SDL.PauseOnMainMenuAccess", &mainMenuPauseWhenActv );
 	g_config->getOption( "SDL.AutoHideMenuFullsreen", &autoHideMenuFullscreen );
@@ -368,6 +398,8 @@ consoleWin_t::~consoleWin_t(void)
 	QClipboard *clipboard;
 
 	WindowLayoutManager::instance()->unregisterWindow( this );
+
+	FCEU_SetGuiMessageHandler( NULL );
 
 	// Save window size and image scaling parameters at app exit.
 	w = size();
@@ -1532,6 +1564,15 @@ void consoleWin_t::createMainMenu(void)
 	connect(act, SIGNAL(triggered(bool)), this, SLOT(toggleMenuAutoHide(bool)) );
 
 	optMenu->addAction(act);
+
+	// Options -> Show Status Bar
+	statusBarAct = new QAction(tr("Show &Status Bar"), this);
+	statusBarAct->setCheckable(true);
+	statusBarAct->setStatusTip(tr("Show the status bar and route emulator messages to it instead of the video overlay."));
+	statusBarAct->setToolTip( statusBarAct->statusTip() );
+	connect(statusBarAct, SIGNAL(triggered(bool)), this, SLOT(toggleStatusBar(bool)) );
+
+	optMenu->addAction(statusBarAct);
 
 	optMenu->addSeparator();
 
@@ -2842,6 +2883,47 @@ void consoleWin_t::toggleMenuVis(void)
 	{
 		menubar->setVisible( true );
 	}
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::toggleStatusBar(bool checked)
+{
+	setStatusBarVisible( checked );
+
+	g_config->setOption( "SDL.ShowStatusBar", checked ? 1 : 0 );
+	g_config->save();
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::setStatusBarVisible(bool visible)
+{
+	statusBarMsgRouted = visible;
+
+	statusBar()->setVisible( visible );
+
+	if ( !visible )
+	{
+		statusBar()->clearMessage();
+	}
+	if ( statusBarAct->isChecked() != visible )
+	{
+		statusBarAct->setChecked( visible );
+	}
+}
+//---------------------------------------------------------------------------
+bool consoleWin_t::isStatusBarVisible(void)
+{
+	return statusBarMsgRouted;
+}
+//---------------------------------------------------------------------------
+// May be called from the emulator thread
+void consoleWin_t::postStatusMessage( const char *msg )
+{
+	emit statusMessageRequest( QString::fromUtf8( msg ) );
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::showStatusMessage(QString msg)
+{
+	// Matches the 180 frame (3 second) lifetime of the video overlay message
+	statusBar()->showMessage( msg, 3000 );
 }
 //---------------------------------------------------------------------------
 void consoleWin_t::toggleMenuAutoHide(bool checked)

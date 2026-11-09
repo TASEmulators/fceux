@@ -74,6 +74,25 @@ GUIMESSAGE subtitleMessage;
 
 bool vidGuiMsgEna = true;
 
+static GuiMessageHandler_t guiMessageHandler = NULL;
+
+void FCEU_SetGuiMessageHandler(GuiMessageHandler_t handler)
+{
+	guiMessageHandler = handler;
+}
+
+// Offer the current message to the driver. If the driver displays it
+// somewhere else, the video overlay is suppressed.
+static void routeGuiMessage(bool isMovieMsg)
+{
+	GuiMessageHandler_t handler = guiMessageHandler;
+
+	if ( handler && handler( guiMessage.errmsg, isMovieMsg ) )
+	{
+		guiMessage.howlong = 0;
+	}
+}
+
 //for input display
 extern int input_display;
 extern uint32 cur_input_display;
@@ -410,6 +429,8 @@ void FCEU_DispMessageOnMovie( __FCEU_PRINTF_FORMAT const char *format, ...)
 
 	if (FCEUI_AviIsRecording() && FCEUI_AviDisableMovieMessages())
 		guiMessage.howlong = 0;
+
+	routeGuiMessage(true);
 }
 
 void FCEU_DispMessage( __FCEU_PRINTF_FORMAT const char *format, int disppos, ...)
@@ -446,6 +467,8 @@ void FCEU_DispMessage( __FCEU_PRINTF_FORMAT const char *format, int disppos, ...
 			guiMessage.howlong = 0;
 	}
 	#endif
+
+	routeGuiMessage(false);
 }
 
 void FCEU_ResetMessages()
