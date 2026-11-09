@@ -560,8 +560,10 @@ void  ConsoleViewGL_t::getNormalizedCursorPos( double &x, double &y )
 
 	//printf("Window Cursor (%i,%i) \n", cursor.x(), cursor.y() );
 
-	x = (double)(cursor.x() - sx) / (double)rw;
-	y = (double)(cursor.y() - sy) / (double)rh;
+	// The cursor is in device independent pixels, but the render rectangle
+	// (sx, sy, rw, rh) is in device pixels, so they differ when display scaling is used.
+	x = ((double)cursor.x() * devPixRatio - (double)sx) / (double)rw;
+	y = ((double)cursor.y() * devPixRatio - (double)sy) / (double)rh;
 
 	if ( x < 0.0 )
 	{
