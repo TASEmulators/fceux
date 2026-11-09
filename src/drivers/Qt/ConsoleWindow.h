@@ -127,6 +127,7 @@ class  consoleRecentRomAction : public QAction
 
 class StateSlotDock_t;
 class StateRecorderTimelineDock_t;
+class TextOverlayDisplay_t;
 
 class  consoleWin_t : public QMainWindow
 {
@@ -293,6 +294,7 @@ class  consoleWin_t : public QMainWindow
 		QTimer  *gameTimer;
 		QColor   videoBgColor;
 		ColorMenuItem *bgColorMenuItem;
+		TextOverlayDisplay_t *textOverlayDisplay = nullptr;
 		QTemporaryDir *tempDir;
 
 		std::string errorMsg;

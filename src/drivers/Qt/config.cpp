@@ -617,6 +617,14 @@ InitConfig()
 	config->addOption("SDL.ShowRerecordCount", 0);
 	config->addOption("SDL.ShowGuiMessages", 1);
 
+	// Text overlay displays (shared text overlay drawn by the video driver)
+	config->addOption("SDL.TextOverlay.ShowFrame", 0);
+	config->addOption("SDL.TextOverlay.ShowMovie", 1);
+	config->addOption("SDL.TextOverlay.ShowFPS", 0);
+	config->addOption("SDL.TextOverlay.ShowLag", 0);
+	config->addOption("SDL.TextOverlay.ShowRerecord", 0);
+	config->addOption("SDL.TextOverlay.UpdateRate", 10);
+
 	// OpenGL options
 	config->addOption("opengl", "SDL.OpenGL", 1);
 	config->addOption("openglip", "SDL.OpenGLip", 0);

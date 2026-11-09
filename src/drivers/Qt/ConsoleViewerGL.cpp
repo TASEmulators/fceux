@@ -43,6 +43,7 @@
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleViewerGL.h"
+#include "Qt/ConsoleTextOverlay.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleWindow.h"
 
@@ -57,6 +58,9 @@ ConsoleViewGL_t::ConsoleViewGL_t(QWidget *parent)
 	view_width  = 256;
 	view_height = 224;
 	gltexture   = 0;
+	overlayTexture = 0;
+	overlayTexW = 0;
+	overlayTexH = 0;
 	devPixRatio = 1.0f;
 	aspectRatio = 1.0f;
 	aspectX     = 1.0f;
@@ -387,6 +391,7 @@ void ConsoleViewGL_t::cleanupGL(void)
 	 	glDeleteTextures(1, &gltexture);
 	 	gltexture=0;
 	 }
+	 destroyOverlayTexture();
 
 	 doneCurrent();
 }
@@ -605,6 +610,110 @@ void ConsoleViewGL_t::onDrawSignal(void)
 	update();
 }
 
+void ConsoleViewGL_t::destroyOverlayTexture(void)
+{
+	if ( overlayTexture )
+	{
+		glDeleteTextures(1, &overlayTexture);
+		overlayTexture = 0;
+	}
+	overlayTexW = 0;
+	overlayTexH = 0;
+	ConsoleTextOverlay::instance()->invalidate();
+}
+
+// Draws the shared text overlay over the whole surface, including the area outside
+// of the emulator image.
+void ConsoleViewGL_t::drawTextOverlay(void)
+{
+	FCEU_PROFILE_FUNC("Viewer GL text overlay");
+
+	const ConsoleTextOverlay::Layer &layer = ConsoleTextOverlay::instance()->render(
+		QSize(view_width, view_height), devPixRatio, QRect(sx, view_height - sy - rh, rw, rh));
+
+	if ( (layer.pixels == nullptr) || (layer.width <= 0) || (layer.height <= 0) )
+	{
+		return;
+	}
+	bool fullUpload = false;
+
+	auto texSize = [this](int v) -> int
+	{
+		int p = 1;
+		while ( reqPwr2 && (p < v) ) p <<= 1;
+		return reqPwr2 ? p : v;
+	};
+
+	if ( (overlayTexture == 0) || (texSize(layer.width) != overlayTexW) || (texSize(layer.height) != overlayTexH) )
+	{
+		if ( overlayTexture )
+		{
+			glDeleteTextures(1, &overlayTexture);
+			overlayTexture = 0;
+		}
+		overlayTexW = texSize( layer.width  );
+		overlayTexH = texSize( layer.height );
+
+		glGenTextures(1, &overlayTexture);
+		glBindTexture( GL_TEXTURE_2D, overlayTexture);
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, overlayTexW, overlayTexH, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0 );
+		fullUpload = true;
+	}
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture( GL_TEXTURE_2D, overlayTexture);
+
+	// Only the text rectangles are ever sampled, so only those need to be uploaded
+	if ( fullUpload || layer.changed )
+	{
+		FCEU_PROFILE_FUNC("Viewer GL text overlay upload");
+
+		glPixelStorei( GL_UNPACK_ROW_LENGTH, layer.width );
+
+		for ( const QRect &r : layer.textRects )
+		{
+			glTexSubImage2D( GL_TEXTURE_2D, 0, r.x(), r.y(), r.width(), r.height(),
+				GL_BGRA, GL_UNSIGNED_BYTE, layer.pixels + ((size_t)r.y() * layer.width) + r.x() );
+		}
+		glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
+	}
+
+	if ( !layer.textRects.empty() )
+	{
+		glViewport(0, 0, view_width, view_height);
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho( 0.0, view_width, view_height, 0.0, -1.0, 1.0);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+		glBegin(GL_QUADS);
+		for ( const QRect &r : layer.textRects )
+		{
+			const float x1 = (float)r.left();
+			const float y1 = (float)r.top();
+			const float x2 = (float)(r.right() + 1);
+			const float y2 = (float)(r.bottom() + 1);
+
+			glTexCoord2f( x1 / overlayTexW, y1 / overlayTexH ); glVertex2f( x1, y1 );
+			glTexCoord2f( x2 / overlayTexW, y1 / overlayTexH ); glVertex2f( x2, y1 );
+			glTexCoord2f( x2 / overlayTexW, y2 / overlayTexH ); glVertex2f( x2, y2 );
+			glTexCoord2f( x1 / overlayTexW, y2 / overlayTexH ); glVertex2f( x1, y2 );
+		}
+		glEnd();
+
+		glPopMatrix();
+	}
+	glDisable(GL_TEXTURE_2D);
+}
+
 void ConsoleViewGL_t::paintGL(void)
 {
 	FCEU_PROFILE_FUNC("Viewer GL paintGL");
@@ -772,6 +881,8 @@ void ConsoleViewGL_t::paintGL(void)
 	}
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_TEXTURE_RECTANGLE);
+
+	drawTextOverlay();
 
 	nes_shm->render_count++;
 	 //printf("Paint GL!\n");

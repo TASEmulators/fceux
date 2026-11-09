@@ -30,6 +30,7 @@
 #include "Qt/throttle.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleViewerQWidget.h"
+#include "Qt/ConsoleTextOverlay.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleWindow.h"
 
@@ -46,7 +47,9 @@ ConsoleViewQWidget_t::ConsoleViewQWidget_t(QWidget *parent)
 	QPalette pal = palette();
 
 	pal.setColor(QPalette::Window, Qt::black);
-	setAutoFillBackground(true);
+	// The paint event covers every pixel of the region it is given, so there is no need for
+	// Qt to fill the background first.
+	setAttribute(Qt::WA_OpaquePaintEvent);
 	setPalette(pal);
 
 	bgColor = nullptr;
@@ -135,6 +138,7 @@ void ConsoleViewQWidget_t::setBgColor( QColor &c )
 	{
 		*bgColor = c;
 	}
+	fullRepaint = true;
 }
 
 void ConsoleViewQWidget_t::setVsyncEnable( bool ena )
@@ -302,6 +306,8 @@ void ConsoleViewQWidget_t::resizeEvent(QResizeEvent *event)
 	gui_draw_area_width = view_width;
 	gui_draw_area_height = view_height;
 
+	fullRepaint = true;
+
 	reset();
 }
 
@@ -397,12 +403,10 @@ void  ConsoleViewQWidget_t::getNormalizedCursorPos( double &x, double &y )
 	//printf("Normalized Cursor (%f,%f) \n", x, y );
 }
 
-void ConsoleViewQWidget_t::paintEvent(QPaintEvent *event)
+void ConsoleViewQWidget_t::calcViewport(int &nesWidth, int &nesHeight)
 {
-	FCEU_PROFILE_FUNC("Viewer QWidget paintEvent");
-	QPainter painter(this);
-	int nesWidth  = GL_NES_WIDTH;
-	int nesHeight = GL_NES_HEIGHT;
+	nesWidth  = GL_NES_WIDTH;
+	nesHeight = GL_NES_HEIGHT;
 	float ixScale = 1.0;
 	float iyScale = 1.0;
 
@@ -489,14 +493,48 @@ void ConsoleViewQWidget_t::paintEvent(QPaintEvent *event)
 
 	sx=(view_width-rw)/2;   
 	sy=(view_height-rh)/2;
+}
 
-	if ( bgColor )
+void ConsoleViewQWidget_t::queueRedraw(void)
+{
+	int nesWidth, nesHeight;
+
+	calcViewport(nesWidth, nesHeight);
+
+	const QRect imageRect( sx, sy, rw, rh );
+
+	// A frame only changes the image. The area around it is repainted only when the
+	// geometry, the background color or the text overlay changed.
+	if ( fullRepaint || (imageRect != lastPaintRect) || (bgColor && (*bgColor != lastBgColor)) ||
+		(ConsoleTextOverlay::instance()->revision() != lastOverlayRevision) )
 	{
-		painter.fillRect( 0, 0, view_width, view_height, *bgColor );
+		update();
 	}
 	else
 	{
-		painter.fillRect( 0, 0, view_width, view_height, Qt::black );
+		update( imageRect );
+	}
+}
+
+void ConsoleViewQWidget_t::paintEvent(QPaintEvent *event)
+{
+	FCEU_PROFILE_FUNC("Viewer QWidget paintEvent");
+	QPainter painter(this);
+	int nesWidth, nesHeight;
+
+	calcViewport(nesWidth, nesHeight);
+
+	const QColor bg = bgColor ? *bgColor : QColor(Qt::black);
+
+	// Only the area around the image needs the background color. The image covers the rest.
+	{
+		const int right  = sx + rw;
+		const int bottom = sy + rh;
+
+		painter.fillRect( 0, 0, sx, view_height, bg );
+		painter.fillRect( right, 0, view_width - right, view_height, bg );
+		painter.fillRect( sx, 0, rw, sy, bg );
+		painter.fillRect( sx, bottom, rw, view_height - bottom, bg );
 	}
 	painter.setRenderHint( QPainter::SmoothPixmapTransform, linearFilter );
 
@@ -508,6 +546,42 @@ void ConsoleViewQWidget_t::paintEvent(QPaintEvent *event)
 	QRect dest( sx, sy, rw, rh );
 
 	painter.drawImage( dest, tmpImage );
+
+	// Text overlay is laid out in device pixels and drawn over the whole widget
+	uint64_t overlayRevision = lastOverlayRevision;
+	{
+		FCEU_PROFILE_FUNC("Viewer QWidget text overlay");
+
+		const double dpr = devicePixelRatioF();
+		const ConsoleTextOverlay::Layer &layer = ConsoleTextOverlay::instance()->render(
+			QSize(qRound(view_width * dpr), qRound(view_height * dpr)), dpr,
+			QRect(qRound(sx * dpr), qRound(sy * dpr), qRound(rw * dpr), qRound(rh * dpr)));
+
+		if ( layer.pixels && !layer.textRects.empty() )
+		{
+			const QImage overlayImage( (const uchar*)layer.pixels, layer.width, layer.height,
+				layer.width * (int)sizeof(uint32_t), QImage::Format_ARGB32);
+
+			painter.setRenderHint( QPainter::SmoothPixmapTransform, false );
+
+			for ( const QRect &r : layer.textRects )
+			{
+				painter.drawImage( QRectF(r.x() / dpr, r.y() / dpr, r.width() / dpr, r.height() / dpr), overlayImage, QRectF(r) );
+			}
+		}
+		overlayRevision = layer.revision;
+	}
+
+	lastPaintRect = dest;
+
+	// A partial repaint leaves the area around the image as it was, so these are only up to
+	// date once a paint covered the whole widget.
+	if ( event->rect().contains( rect() ) )
+	{
+		lastOverlayRevision = overlayRevision;
+		lastBgColor = bg;
+		fullRepaint = false;
+	}
 
 	videoBufferSwapMark();
 

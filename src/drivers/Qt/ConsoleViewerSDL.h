@@ -93,6 +93,9 @@ class ConsoleViewSDL_t : public QWidget, public ConsoleViewerBase
  	SDL_Window   *sdlWindow;
 	SDL_Renderer *sdlRenderer;
 	SDL_Texture  *sdlTexture;
+	SDL_Texture  *overlayTexture;
+	int           overlayTexW;
+	int           overlayTexH;
 	SDL_Cursor   *sdlCursor;
 	//SDL_Rect      sdlViewport;
 

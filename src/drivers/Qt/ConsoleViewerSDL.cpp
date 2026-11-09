@@ -31,6 +31,7 @@
 #include "../../profiler.h"
 
 #include "Qt/ConsoleViewerSDL.h"
+#include "Qt/ConsoleTextOverlay.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleWindow.h"
 
@@ -80,6 +81,9 @@ ConsoleViewSDL_t::ConsoleViewSDL_t(QWidget *parent)
 	sdlWindow   = NULL;
 	sdlRenderer = NULL;
 	sdlTexture  = NULL;
+	overlayTexture = NULL;
+	overlayTexW = 0;
+	overlayTexH = 0;
 	sdlCursor   = NULL;
 
 	vsyncEnabled = false;
@@ -354,6 +358,14 @@ int ConsoleViewSDL_t::init(void)
 
 void ConsoleViewSDL_t::cleanup(void)
 {
+	if (overlayTexture)
+	{
+		SDL_DestroyTexture(overlayTexture);
+		overlayTexture = NULL;
+		overlayTexW = 0;
+		overlayTexH = 0;
+		ConsoleTextOverlay::instance()->invalidate();
+	}
 	if (sdlTexture) 
 	{
 		SDL_DestroyTexture(sdlTexture);
@@ -734,6 +746,59 @@ void ConsoleViewSDL_t::render(void)
 	SDL_Rect source = {0, 0, nesWidth, nesHeight };
 	SDL_Rect dest = { sx, sy, rw, rh };
 	SDL_RenderCopy(sdlRenderer, sdlTexture, &source, &dest);
+
+	// Text overlay is laid out over the whole surface, including outside of the image
+	{
+		FCEU_PROFILE_FUNC("Viewer SDL text overlay");
+
+		const ConsoleTextOverlay::Layer &layer = ConsoleTextOverlay::instance()->render(
+			QSize(view_width, view_height), 1.0, QRect(sx, sy, rw, rh));
+
+		if ( layer.pixels && (layer.width > 0) && (layer.height > 0) )
+		{
+			bool fullUpload = false;
+
+			if ( !overlayTexture || (overlayTexW != layer.width) || (overlayTexH != layer.height) )
+			{
+				if ( overlayTexture )
+				{
+					SDL_DestroyTexture(overlayTexture);
+				}
+				overlayTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_ARGB8888,
+					SDL_TEXTUREACCESS_STATIC, layer.width, layer.height);
+				overlayTexW = layer.width;
+				overlayTexH = layer.height;
+
+				if ( overlayTexture )
+				{
+					SDL_SetTextureBlendMode(overlayTexture, SDL_BLENDMODE_BLEND);
+				}
+				fullUpload = true;
+			}
+
+			// Only the text rectangles are ever drawn, so only those need to be uploaded
+			if ( overlayTexture && (fullUpload || layer.changed) )
+			{
+				for ( const QRect &r : layer.textRects )
+				{
+					const SDL_Rect sr = { r.x(), r.y(), r.width(), r.height() };
+
+					SDL_UpdateTexture(overlayTexture, &sr,
+						layer.pixels + ((size_t)r.y() * layer.width) + r.x(), layer.width * (int)sizeof(uint32_t));
+				}
+			}
+
+			if ( overlayTexture )
+			{
+				for ( const QRect &r : layer.textRects )
+				{
+					const SDL_Rect sr = { r.x(), r.y(), r.width(), r.height() };
+
+					SDL_RenderCopy(sdlRenderer, overlayTexture, &sr, &sr);
+				}
+			}
+		}
+	}
 
 	SDL_RenderPresent(sdlRenderer);
 

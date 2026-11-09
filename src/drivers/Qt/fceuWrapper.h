@@ -23,6 +23,7 @@ extern bool usePaletteForVideoBg;
 extern unsigned int gui_draw_area_width;
 extern unsigned int gui_draw_area_height;
 extern unsigned int emulatorCycleCount;
+extern double emulatorMeasuredFps;
 
 // global configuration object
 extern Config *g_config;

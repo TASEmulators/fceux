@@ -105,6 +105,8 @@
 #include "Qt/StateSlotViewer.h"
 #include "Qt/StateRecorderTimeline.h"
 #include "Qt/ConsoleUtilities.h"
+#include "Qt/ConsoleTextOverlay.h"
+#include "Qt/TextOverlayDisplay.h"
 #include "Qt/ConsoleSoundConf.h"
 #include "Qt/ConsoleVideoConf.h"
 #include "Qt/MsgLogViewer.h"
@@ -207,6 +209,47 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		connect( this, &consoleWin_t::statusMessageRequest, this, &consoleWin_t::showStatusMessage, Qt::QueuedConnection );
 
 		FCEU_SetGuiMessageHandler( guiMessageToStatusBar );
+	}
+
+	// Text overlay items can be changed from any thread, so redraws are requested on this one
+	ConsoleTextOverlay::instance()->setChangedCallback( [this]()
+	{
+		QMetaObject::invokeMethod( this, [this]()
+		{
+			if ( viewport_Interface )
+			{
+				viewport_Interface->queueRedraw();
+			}
+		}, Qt::QueuedConnection );
+	});
+
+	// Set FCEUX_TEXT_OVERLAY_DEMO=1 to show a few test items on the video
+	if ( qEnvironmentVariableIntValue( "FCEUX_TEXT_OVERLAY_DEMO" ) != 0 )
+	{
+		typedef ConsoleTextOverlay T;
+		T *overlay = T::instance();
+
+		T::Handle title = overlay->createItem();
+		overlay->setText( title, "FCEUX TEXT OVERLAY DEMO" );
+		overlay->setColor( title, QColor( 255, 255, 0 ) );
+		overlay->setPlacement( title, { T::REGION_TOP_BAR, T::REGION_LEFT_BAR }, T::ANCHOR_TOP_LEFT );
+
+		T::Handle bar = overlay->createItem();
+		overlay->setText( bar, "Dead space item (bottom bar, else image)" );
+		overlay->setColor( bar, QColor( 80, 255, 80 ) );
+		overlay->setPlacement( bar, { T::REGION_BOTTOM_BAR, T::REGION_RIGHT_BAR }, T::ANCHOR_BOTTOM_RIGHT );
+
+		T::Handle tick = overlay->createItem();
+		overlay->setColor( tick, QColor( 255, 255, 255 ) );
+		overlay->setPlacement( tick, { T::REGION_TOP_BAR, T::REGION_LEFT_BAR }, T::ANCHOR_TOP_LEFT );
+
+		QTimer *demoTimer = new QTimer( this );
+		connect( demoTimer, &QTimer::timeout, this, [tick]()
+		{
+			static int count = 0;
+			ConsoleTextOverlay::instance()->setText( tick, QString("Updates: %1").arg( ++count ) );
+		});
+		demoTimer->start( 1000 );
 	}
 
 	g_config->getOption( "SDL.PauseOnMainMenuAccess", &mainMenuPauseWhenActv );
@@ -400,6 +443,7 @@ consoleWin_t::~consoleWin_t(void)
 	WindowLayoutManager::instance()->unregisterWindow( this );
 
 	FCEU_SetGuiMessageHandler( NULL );
+	ConsoleTextOverlay::instance()->setChangedCallback( nullptr );
 
 	// Save window size and image scaling parameters at app exit.
 	w = size();
@@ -1617,6 +1661,13 @@ void consoleWin_t::createMainMenu(void)
 	optMenu->addAction(act);
 
 	bgColorMenuItem->setEnabled( !usePaletteForVideoBg );
+
+	// Options -> Text Overlay
+	optMenu->addSeparator();
+
+	textOverlayDisplay = new TextOverlayDisplay_t( this );
+	optMenu->addMenu( textOverlayDisplay->createMenu( optMenu ) );
+
 	//-----------------------------------------------------------------------
 	// Emulation
 

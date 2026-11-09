@@ -62,6 +62,8 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public
 	void mouseReleaseEvent(QMouseEvent * event) override;
 
 	void buildTextures(void);
+	void drawTextOverlay(void);
+	void destroyOverlayTexture(void);
 	void calcPixRemap(void);
 	void doRemap(void);
 	void chkExtnsGL(void);
@@ -82,6 +84,9 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public
 	int  txtWidth;
 	int  txtHeight;
 	GLuint gltexture;
+	GLuint overlayTexture;
+	int    overlayTexW;
+	int    overlayTexH;
 	bool   linearFilter;
 	bool   forceAspect;
 	bool   autoScaleEna;

@@ -23,7 +23,7 @@ class ConsoleViewQWidget_t : public QWidget, public ConsoleViewerBase
 		int  init(void) override;
 		void reset(void) override;
 		void cleanup(void);
-		void queueRedraw(void) override { update(); };
+		void queueRedraw(void) override;
 		int  driver(void) override { return VIDEO_DRIVER_QPAINTER; };
 
 		void transfer2LocalBuffer(void) override;
@@ -33,9 +33,9 @@ class ConsoleViewQWidget_t : public QWidget, public ConsoleViewerBase
 		void setLinearFilterEnable( bool ena ) override;
 
 		bool   getForceAspectOpt(void) override { return forceAspect; };
-		void   setForceAspectOpt( bool val ) override { forceAspect = val; return; };
+		void   setForceAspectOpt( bool val ) override { forceAspect = val; fullRepaint = true; return; };
 		bool   getAutoScaleOpt(void) override { return autoScaleEna; };
-		void   setAutoScaleOpt( bool val ) override { autoScaleEna = val; return; };
+		void   setAutoScaleOpt( bool val ) override { autoScaleEna = val; fullRepaint = true; return; };
 		double getScaleX(void) override { return xscale; };
 		double getScaleY(void) override { return yscale; };
 		void   setScaleXY( double xs, double ys ) override;
@@ -62,6 +62,9 @@ class ConsoleViewQWidget_t : public QWidget, public ConsoleViewerBase
 	void mousePressEvent(QMouseEvent * event) override;
 	void mouseReleaseEvent(QMouseEvent * event) override;
 
+	// Works out where the emulator image goes, sets sx, sy, rw and rh
+	void calcViewport(int &nesWidth, int &nesHeight);
+
 	int  view_width;
 	int  view_height;
 
@@ -86,6 +89,13 @@ class ConsoleViewQWidget_t : public QWidget, public ConsoleViewerBase
 
 	uint32_t  *localBuf;
 	uint32_t   localBufSize;
+
+	// Frames normally only repaint the image rectangle. Anything that can change the area
+	// outside of it needs the whole widget repainted.
+	QRect     lastPaintRect;
+	QColor    lastBgColor;
+	uint64_t  lastOverlayRevision = 0;
+	bool      fullRepaint = true;
 	unsigned int mouseButtonMask;
 
 	private slots:

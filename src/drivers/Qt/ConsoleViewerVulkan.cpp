@@ -18,7 +18,10 @@
 #include <QVulkanInstance>
 #include <QWindow>
 
+#include "../../profiler.h"
+
 #include "Qt/ConsoleViewerVulkan.h"
+#include "Qt/ConsoleTextOverlay.h"
 #include "Qt/ConsoleUtilities.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceuWrapper.h"
@@ -31,6 +34,11 @@ extern unsigned int gui_draw_area_height;
 // Largest frame the emulator can produce (see localBuf allocation)
 static const uint32_t MAX_FRAME_WIDTH = 4 * GL_NES_WIDTH;
 static const uint32_t MAX_FRAME_HEIGHT = 4 * GL_NES_HEIGHT;
+
+// The text overlay is drawn from solid color pixels kept after the frame data in each
+// staging buffer. This is the most overlay pixels that can be drawn in one frame.
+static const VkDeviceSize FRAME_STAGING_BYTES = (VkDeviceSize)MAX_FRAME_WIDTH * MAX_FRAME_HEIGHT * sizeof(uint32_t);
+static const size_t OVERLAY_STAGING_PIXELS = 1u << 20;
 
 // Shared by every viewer instance and kept for the lifetime of the program,
 // so windows can be created and destroyed without recreating the instance.
@@ -156,6 +164,7 @@ public:
 		df->vkCmdBlitImage(cb, texture, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, target,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit,
 			linearFilter ? VK_FILTER_LINEAR : VK_FILTER_NEAREST);
+		recordTextOverlay(fs, cb, target, QRect(x, y, w, h));
 		layout(cb, target, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		df->vkEndCommandBuffer(cb);
 
@@ -239,6 +248,61 @@ protected:
 	}
 
 private:
+	struct FrameSlot;
+
+	// Transfer commands cannot blend, so the overlay's solid rectangles are copied straight
+	// into the presentable image, each from a run of identically colored pixels.
+	void recordTextOverlay(FrameSlot &fs, VkCommandBuffer cb, VkImage target, const QRect &image)
+	{
+		FCEU_PROFILE_FUNC("Viewer Vulkan text overlay");
+
+		const ConsoleTextOverlay::Layer &layer = ConsoleTextOverlay::instance()->render(
+			QSize((int)extent.width, (int)extent.height), devicePixelRatio(), image);
+
+		if (!layer.pixels || layer.solidRects.empty() || !fs.stagingMapped)
+			return;
+
+		const QRect surface(0, 0, layer.width, layer.height);
+		uint32_t *pixelStore = reinterpret_cast<uint32_t *>(
+			reinterpret_cast<uint8_t *>(fs.stagingMapped) + FRAME_STAGING_BYTES);
+		size_t used = 0;
+		std::vector<VkBufferImageCopy> regions;
+		regions.reserve(layer.solidRects.size());
+
+		for (const QRect &rect : layer.solidRects)
+		{
+			const QRect c = rect.intersected(surface);
+			if (c.isEmpty())
+				continue;
+			const size_t count = (size_t)c.width() * c.height();
+			if (used + count > OVERLAY_STAGING_PIXELS)
+				break;
+
+			std::fill_n(pixelStore + used, count, layer.pixels[(size_t)c.top() * layer.width + c.left()]);
+
+			VkBufferImageCopy copy{};
+			copy.bufferOffset = FRAME_STAGING_BYTES + (VkDeviceSize)used * sizeof(uint32_t);
+			copy.imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+			copy.imageOffset = { c.x(), c.y(), 0 };
+			copy.imageExtent = { (uint32_t)c.width(), (uint32_t)c.height(), 1 };
+			regions.push_back(copy);
+			used += count;
+		}
+		if (regions.empty())
+			return;
+
+		// The frame blit and the copies both write the presentable image
+		VkMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		df->vkCmdPipelineBarrier(cb, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+			0, 1, &barrier, 0, nullptr, 0, nullptr);
+
+		df->vkCmdCopyBufferToImage(cb, fs.stagingBuf, target, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			(uint32_t)regions.size(), regions.data());
+	}
+
 	void layout(VkCommandBuffer cb, VkImage image, VkImageLayout from, VkImageLayout to)
 	{
 		VkImageMemoryBarrier b{};
@@ -363,7 +427,7 @@ private:
 		ii.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		VkBufferCreateInfo bi{};
 		bi.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bi.size = (VkDeviceSize)MAX_FRAME_WIDTH * MAX_FRAME_HEIGHT * sizeof(uint32_t);
+		bi.size = FRAME_STAGING_BYTES + (VkDeviceSize)OVERLAY_STAGING_PIXELS * sizeof(uint32_t);
 		bi.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		bi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 

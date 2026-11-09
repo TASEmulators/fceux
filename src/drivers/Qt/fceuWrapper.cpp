@@ -110,6 +110,7 @@ static int frameskip=0;
 static int periodic_saves = 0;
 static std::atomic<int> mutexLocks = 0;
 unsigned int emulatorCycleCount = 0;
+double emulatorMeasuredFps = 0.0;
 static int archiveFileLoadIndex = -1;
 
 FCEU::mutex consoleWin_t::emulatorMutex;
@@ -1383,6 +1384,28 @@ static void DoFun(int frameskip, int periodic_saves)
 	//}
 	
 	emulatorCycleCount++;
+
+	// Measured once per emulated frame on this thread over one second windows, the same
+	// way the video overlay measures its FPS, for the text overlay display.
+	{
+		static uint64 fpsWindowStart = 0;
+		static unsigned int fpsFrameCount = 0;
+		const uint64 ts = FCEUD_GetTime();
+
+		if (fpsWindowStart == 0)
+		{
+			fpsWindowStart = ts;
+		}
+		const uint64 da = ts - fpsWindowStart;
+
+		if (da > FCEUD_GetTimeFreq())
+		{
+			emulatorMeasuredFps = (double)fpsFrameCount / ((double)da / FCEUD_GetTimeFreq());
+			fpsFrameCount = 0;
+			fpsWindowStart = ts;
+		}
+		fpsFrameCount++;
+	}
 }
 
 static std::string lockFile;
