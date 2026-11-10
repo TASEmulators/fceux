@@ -145,6 +145,15 @@ class  consoleWin_t : public QMainWindow
 #endif
 		ConsoleViewerBase     *viewport_Interface;
 
+	private:
+		// Persistent central widget that hosts the active viewport. Swapping the
+		// viewport inside it avoids replacing the QMainWindow central widget, which
+		// resets the sizes of the dockable widgets.
+		QWidget               *viewportContainer;
+		QVBoxLayout           *viewportLayout;
+
+	public:
+
 		void setCyclePeriodms( int ms );
 
 		static FCEU::mutex emulatorMutex;
@@ -180,6 +189,8 @@ class  consoleWin_t : public QMainWindow
 		QSize  calcRequiredSize(void);
 
 		void setViewportAspect(void);
+		void setViewportWidget(QWidget *w);
+		void removeViewportWidget(QWidget *w);
 
 		void loadCursor(void);
 		void setViewerCursor( QCursor s );

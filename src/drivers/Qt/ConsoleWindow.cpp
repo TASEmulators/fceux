@@ -187,6 +187,12 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 #endif
 	viewport_Interface = NULL;
 
+	viewportContainer = new QWidget(this);
+	viewportLayout = new QVBoxLayout(viewportContainer);
+	viewportLayout->setContentsMargins(0, 0, 0, 0);
+	viewportLayout->setSpacing(0);
+	setCentralWidget(viewportContainer);
+
 	contextMenuEnable      = false;
 	soundUseGlobalFocus    = false;
 	mainMenuEmuPauseSet    = false;
@@ -2537,20 +2543,34 @@ void consoleWin_t::createMainMenu(void)
 };
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
+void consoleWin_t::setViewportWidget(QWidget *w)
+{
+	// Retire any previous viewport still in the container
+	while ( QLayoutItem *item = viewportLayout->takeAt(0) )
+	{
+		if ( QWidget *old = item->widget() )
+		{
+			old->hide();
+			old->deleteLater();
+		}
+		delete item;
+	}
+	viewportLayout->addWidget(w);
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::removeViewportWidget(QWidget *w)
+{
+	viewportLayout->removeWidget(w);
+	w->setParent(NULL);
+}
+//---------------------------------------------------------------------------
 int consoleWin_t::unloadVideoDriver(void)
 {
 	viewport_Interface = NULL;
 
 	if (viewport_GL != NULL)
 	{
-		if ( viewport_GL == centralWidget() )
-		{
-			takeCentralWidget();
-		}
-		else
-		{
-			printf("Error: Central Widget Failed!\n");
-		}
+		removeViewportWidget(viewport_GL);
 		viewport_GL->deleteLater();
 
 		viewport_GL = NULL;
@@ -2558,14 +2578,7 @@ int consoleWin_t::unloadVideoDriver(void)
 
 	if (viewport_SDL != NULL)
 	{
-		if ( viewport_SDL == centralWidget() )
-		{
-			takeCentralWidget();
-		}
-		else
-		{
-			printf("Error: Central Widget Failed!\n");
-		}
+		removeViewportWidget(viewport_SDL);
 		viewport_SDL->deleteLater();
 
 		viewport_SDL = NULL;
@@ -2573,14 +2586,7 @@ int consoleWin_t::unloadVideoDriver(void)
 
 	if (viewport_QWidget != NULL)
 	{
-		if ( viewport_QWidget == centralWidget() )
-		{
-			takeCentralWidget();
-		}
-		else
-		{
-			printf("Error: Central Widget Failed!\n");
-		}
+		removeViewportWidget(viewport_QWidget);
 		viewport_QWidget->deleteLater();
 
 		viewport_QWidget = NULL;
@@ -2588,14 +2594,7 @@ int consoleWin_t::unloadVideoDriver(void)
 #ifdef FCEUX_HAS_QT_VULKAN
 	if (viewport_Vulkan != NULL)
 	{
-		if (viewport_Vulkan == centralWidget())
-		{
-			takeCentralWidget();
-		}
-		else
-		{
-			printf("Error: Central Widget Failed!\n");
-		}
+		removeViewportWidget(viewport_Vulkan);
 		viewport_Vulkan->shutdown();
 		viewport_Vulkan->deleteLater();
 		viewport_Vulkan = NULL;
@@ -2700,7 +2699,7 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 
 			viewport_Interface = static_cast<ConsoleViewerBase*>(viewport_SDL);
 
-			setCentralWidget(viewport_SDL);
+			setViewportWidget(viewport_SDL);
 
 			setViewportAspect();
 
@@ -2715,7 +2714,7 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 
 			viewport_Interface = static_cast<ConsoleViewerBase*>(viewport_GL);
 
-			setCentralWidget(viewport_GL);
+			setViewportWidget(viewport_GL);
 
 			setViewportAspect();
 
@@ -2729,7 +2728,7 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 		{
 			viewport_Vulkan = new ConsoleViewVulkan_t(this);
 			viewport_Interface = static_cast<ConsoleViewerBase*>(viewport_Vulkan);
-			setCentralWidget(viewport_Vulkan);
+			setViewportWidget(viewport_Vulkan);
 			setViewportAspect();
 			connect(viewport_Vulkan, SIGNAL(destroyed(QObject*)), this, SLOT(videoDriverDestroyed(QObject*)));
 			if (viewport_Vulkan->init() != 0)
@@ -2752,7 +2751,7 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 
 			viewport_Interface = static_cast<ConsoleViewerBase*>(viewport_QWidget);
 
-			setCentralWidget(viewport_QWidget);
+			setViewportWidget(viewport_QWidget);
 
 			setViewportAspect();
 
