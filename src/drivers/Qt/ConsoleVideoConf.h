@@ -19,6 +19,8 @@
 #include <QGroupBox>
 #include <QDoubleSpinBox>
 
+#include "Qt/TextOverlayDisplay.h"
+
 class ConsoleVideoConfDialog_t : public QDialog
 {
    Q_OBJECT
@@ -55,6 +57,8 @@ class ConsoleVideoConfDialog_t : public QDialog
 		QCheckBox   *showFrameCount_cbx;
 		QCheckBox   *showLagCount_cbx;
 		QCheckBox   *showRerecordCount_cbx;
+		QCheckBox   *textOverlayCbx[TextOverlayDisplay_t::ITEM_COUNT];
+		QComboBox   *textOverlayRateSel;
 		#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
 		QCheckBox   *winFullScreenBorderCbx;
 		#endif
@@ -76,6 +80,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  setComboBoxFromValue( QComboBox *cbx, int pval );
 		//void  setSliderFromProperty( QSlider *slider, QLabel *lbl, const char *property );
 
+		void  setupToolTips(void);
 		void  resetVideo(void);
 		void  updateReadouts(void);
 		QSize calcNewScreenSize(void);
@@ -108,6 +113,9 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  showFrameCountChanged(int value);
 		void  showLagCountChanged( int value );
 		void  showRerecordCountChanged( int value );
+		void  textOverlayItemChanged( int item, bool checked );
+		void  textOverlayRateChanged( int index );
+		void  updateTextOverlayControls(void);
 		void  inputDisplayChanged(int index);
 		void  applyChanges( void );
 		void  ntscStartScanLineChanged(int value);

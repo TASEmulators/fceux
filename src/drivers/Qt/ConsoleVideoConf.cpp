@@ -22,6 +22,7 @@
 #include <QCloseEvent>
 #include <QGuiApplication>
 #include <QMessageBox>
+#include <QSignalBlocker>
 
 #include "../../fceu.h"
 #include "../../input.h"
@@ -59,6 +60,25 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	int opt, fontCharWidth;
 	char stmp[128];
 
+	// One short line of explanation under a group title that is always visible
+	auto descriptionLabel = [](const QString &text, const QString &tip) -> QLabel *
+	{
+		QLabel *l = new QLabel( text );
+		QFont f = l->font();
+		f.setItalic( true );
+		l->setFont( f );
+		l->setToolTip( tip );
+		return l;
+	};
+
+	// Label with a tooltip, so hovering the text beside a control explains it too
+	auto tipLabel = [](const QString &text, const QString &tip) -> QLabel *
+	{
+		QLabel *l = new QLabel( text );
+		l->setToolTip( tip );
+		return l;
+	};
+
 	font.setFamily("Courier New");
 	font.setStyle( QFont::StyleNormal );
 	font.setStyleHint( QFont::Monospace );
@@ -87,7 +107,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	main_hbox->addLayout( vbox1 );
 
 	// Video Driver Select
-	lbl = new QLabel( tr("Driver:") );
+	lbl = tipLabel( tr("Driver:"), tr("The renderer that draws the game image.") );
 
 	driverSelect = new QComboBox();
 
@@ -105,8 +125,8 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	vbox1->addLayout( hbox1 );
 
-	// Video Driver Select
-	lbl = new QLabel( tr("Scaler:") );
+	// Scaler Select
+	lbl = tipLabel( tr("Scaler:"), tr("The filter applied to the game image before it is scaled to the window.") );
 
 	scalerSelect = new QComboBox();
 
@@ -150,7 +170,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 #endif
 
 	// Region Select
-	lbl = new QLabel( tr("Region:") );
+	lbl = tipLabel( tr("Region:"), tr("The video system the emulator runs as. This sets the timing of the game.") );
 
 	regionSelect = new QComboBox();
 
@@ -199,19 +219,43 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	showGuiMsgs_cbx->setChecked( vidGuiMsgEna );
 
 	// Show FPS Checkbox
-	showFPS_cbx  = new QCheckBox( tr("Frames Per Second") );
+	showFPS_cbx  = new QCheckBox( tr("FPS") );
 
 	// Show Frame Count Checkbox
-	showFrameCount_cbx  = new QCheckBox( tr("Frame Count") );
+	showFrameCount_cbx  = new QCheckBox( tr("Frame Counter") );
 	showFrameCount_cbx->setChecked( frame_display );
 
 	// Show Lag Count Checkbox
-	showLagCount_cbx  = new QCheckBox( tr("Lag Count") );
+	showLagCount_cbx  = new QCheckBox( tr("Lag Counter") );
 	showLagCount_cbx->setChecked( lagCounterDisplay );
 
 	// Show Re-Record Count Checkbox
-	showRerecordCount_cbx  = new QCheckBox( tr("Re-Record Count") );
+	showRerecordCount_cbx  = new QCheckBox( tr("Rerecord Count") );
 	showRerecordCount_cbx->setChecked( rerecord_display );
+
+	// Text overlay items and update rate, independent of the video overlay checkboxes
+	for (int i = 0; i < TextOverlayDisplay_t::ITEM_COUNT; i++)
+	{
+		const TextOverlayDisplay_t::ItemInfo &info = TextOverlayDisplay_t::itemInfo( static_cast<TextOverlayDisplay_t::Item>(i) );
+
+		textOverlayCbx[i] = new QCheckBox( tr(info.text) );
+
+		QString tip = tr(info.tip);
+
+		// Movie State has no counterpart in the legacy overlay
+		if ( i != TextOverlayDisplay_t::ITEM_MOVIE )
+		{
+			tip += tr("\nThe same value is available in Video Overlay (Legacy). Turning it on in both shows it twice.");
+		}
+		textOverlayCbx[i]->setToolTip( tip );
+	}
+	textOverlayRateSel = new QComboBox();
+	textOverlayRateSel->setToolTip( tr("How often the text overlay values are refreshed. Lower rates use less CPU.") );
+
+	for (int hz : TextOverlayDisplay_t::UPDATE_RATES_HZ)
+	{
+		textOverlayRateSel->addItem( tr("%1 Hz").arg(hz), hz );
+	}
 
 	// Auto Scale on Resize
 	autoScaleCbx  = new QCheckBox( tr("Auto Scale on Resize") );
@@ -279,6 +323,19 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	connect(showRerecordCount_cbx, SIGNAL(stateChanged(int)), this, SLOT(showRerecordCountChanged(int)));
 
 	connect(inputDisplaySel, SIGNAL(currentIndexChanged(int)), this, SLOT(inputDisplayChanged(int)) );
+
+	for (int i = 0; i < TextOverlayDisplay_t::ITEM_COUNT; i++)
+	{
+		connect(textOverlayCbx[i], &QCheckBox::toggled, this, [this, i](bool checked){ textOverlayItemChanged(i, checked); });
+	}
+	connect(textOverlayRateSel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ConsoleVideoConfDialog_t::textOverlayRateChanged);
+
+	if ( consoleWindow && consoleWindow->getTextOverlayDisplay() )
+	{
+		// The Options menu and the text overlay can change these while the dialog is open
+		connect(consoleWindow->getTextOverlayDisplay(), &TextOverlayDisplay_t::changed, this, &ConsoleVideoConfDialog_t::updateTextOverlayControls);
+	}
+	updateTextOverlayControls();
 
 	vbox1->addWidget( autoRegion  );
 	vbox1->addWidget( new_PPU_ena );
@@ -374,34 +431,60 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	main_vbox->addLayout( hbox1 );
 
-	gbox  = new QGroupBox( tr("Overlay Options") );
+	gbox  = new QGroupBox( tr("Video Overlay (Legacy)") );
+	gbox->setToolTip( tr("Overlays drawn by the emulator core into the game image. They scale and blur with the picture, and are affected by the scaler and the linear filter.\n"
+		"The hotkeys for the frame counter, lag counter and controller display control these items.\n"
+		"The Window Text Overlay below shows the same values as sharp text over the whole window.") );
 	vbox3 = new QVBoxLayout();
 	vbox4 = new QVBoxLayout();
 	vbox5 = new QVBoxLayout();
 	vbox  = new QVBoxLayout();
 
 	vbox3->addWidget( gbox, 1 );
+
+	{
+		QGroupBox *textGbox = new QGroupBox( tr("Window Text Overlay") );
+		textGbox->setToolTip( tr("Status text drawn by the video driver over the whole window, not into the game image. It stays sharp at any window size, "
+			"and it can use the empty bars beside or above the image. It is drawn inside the image when there is no room outside.\n"
+			"The frame counter and lag counter hotkeys do not change these items, only the ones in Video Overlay (Legacy).\n"
+			"If the same value is turned on in both overlays it is shown twice.") );
+		QVBoxLayout *textVbox = new QVBoxLayout();
+		QHBoxLayout *rateBox = new QHBoxLayout();
+
+		textGbox->setLayout( textVbox );
+
+		textVbox->addWidget( descriptionLabel( tr("Over the whole window."), textGbox->toolTip() ) );
+
+		for (int i = 0; i < TextOverlayDisplay_t::ITEM_COUNT; i++)
+		{
+			textVbox->addWidget( textOverlayCbx[i] );
+		}
+		rateBox->addWidget( tipLabel( tr("Update Rate:"), tr("How often the text overlay values are refreshed. Lower rates use less CPU.") ) );
+		rateBox->addWidget( textOverlayRateSel );
+		rateBox->addStretch( 1 );
+		textVbox->addLayout( rateBox );
+
+		vbox3->addWidget( textGbox );
+	}
 	vbox3->addStretch(5);
 	 gbox->setLayout( vbox );
 
+	vbox->addWidget( descriptionLabel( tr("Inside the game image."), gbox->toolTip() ) );
 	vbox->addWidget( showGuiMsgs_cbx );
 	vbox->addWidget( drawInputAidsCbx );
-	vbox->addWidget( showFPS_cbx );
 	vbox->addWidget( showFrameCount_cbx );
 	vbox->addWidget( showLagCount_cbx );
 	vbox->addWidget( showRerecordCount_cbx );
+	vbox->addWidget( showFPS_cbx );
 
 	gbox  = new QGroupBox( tr("Show Controllers:") );
+	gbox->setToolTip( tr("Draw the buttons pressed on the game controllers near the bottom of the game image.") );
 	gbox->setLayout( vbox4 );
 	vbox->addWidget( gbox  );
 	vbox4->addWidget( inputDisplaySel );
 
-	gbox  = new QGroupBox( tr("Test Pattern:") );
-	gbox->setLayout( vbox5 );
-	vbox->addWidget( gbox  );
-	vbox5->addWidget( videoTest );
-
 	gbox  = new QGroupBox( tr("Drawing Area") );
+	gbox->setToolTip( tr("Which part of the NES picture is shown.") );
 	vbox2 = new QVBoxLayout();
 	grid  = new QGridLayout();
 
@@ -457,10 +540,10 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	connect( pal_start , SIGNAL(valueChanged(int)), this, SLOT(palStartScanLineChanged(int)));
 	connect( pal_end   , SIGNAL(valueChanged(int)), this, SLOT(palEndScanLineChanged(int)));
 
-	grid->addWidget( new QLabel( tr("NTSC") )      , 0, 1, Qt::AlignLeft);
-	grid->addWidget( new QLabel( tr("PAL/Dendy") ) , 0, 2, Qt::AlignLeft);
-	grid->addWidget( new QLabel( tr("First Line:") ), 1, 0, Qt::AlignLeft);
-	grid->addWidget( new QLabel( tr("Last Line:")  ), 2, 0, Qt::AlignLeft);
+	grid->addWidget( tipLabel( tr("NTSC")      , tr("Scanline range used while the region is NTSC.") )                   , 0, 1, Qt::AlignLeft);
+	grid->addWidget( tipLabel( tr("PAL/Dendy") , tr("Scanline range used while the region is PAL or Dendy.") )           , 0, 2, Qt::AlignLeft);
+	grid->addWidget( tipLabel( tr("First Line:"), tr("The first scanline of the picture that is shown. Lines above it are cut off.") ), 1, 0, Qt::AlignLeft);
+	grid->addWidget( tipLabel( tr("Last Line:") , tr("The last scanline of the picture that is shown. Lines below it are cut off.") ), 2, 0, Qt::AlignLeft);
 	grid->addWidget( ntsc_start, 1, 1, Qt::AlignLeft);
 	grid->addWidget( pal_start , 1, 2, Qt::AlignLeft);
 	grid->addWidget( ntsc_end  , 2, 1, Qt::AlignLeft);
@@ -468,6 +551,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	grid->addWidget( clipSidesCbx, 3, 0, 1, 3);
 
 	gbox  = new QGroupBox( tr("Current Dimensions") );
+	gbox->setToolTip( tr("The current size of the window and of the game area. Read only.") );
 	grid  = new QGridLayout();
 
 	vbox2->addWidget( gbox, 1 );
@@ -483,12 +567,13 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	vpSizeReadout->setReadOnly(true);
 	vpSizeReadout->setAlignment(Qt::AlignCenter);
 
-	grid->addWidget( new QLabel( tr("Window:") ), 0, 0, Qt::AlignLeft);
-	grid->addWidget( new QLabel( tr("Viewport:") ), 1, 0, Qt::AlignLeft);
+	grid->addWidget( tipLabel( tr("Window:")  , tr("Size of the whole main window, including the menu and any docked widgets, in pixels.") ), 0, 0, Qt::AlignLeft);
+	grid->addWidget( tipLabel( tr("Viewport:"), tr("Size of the area that shows the game, in pixels.") ), 1, 0, Qt::AlignLeft);
 	grid->addWidget( winSizeReadout, 0, 1, Qt::AlignLeft);
 	grid->addWidget( vpSizeReadout, 1, 1, Qt::AlignLeft);
 
 	gbox  = new QGroupBox( tr("Viewport Cursor") );
+	gbox->setToolTip( tr("How the mouse cursor looks over the game area. Useful for light gun games.") );
 	grid  = new QGridLayout();
 	cursorSelect = new QComboBox();
 
@@ -505,7 +590,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	vbox2->addWidget( gbox, 1 );
 	gbox->setLayout(grid);
 
-	grid->addWidget( new QLabel( tr("Shape:") ), 0, 0, Qt::AlignLeft);
+	grid->addWidget( tipLabel( tr("Shape:"), tr("The shape of the mouse cursor while it is over the game.") ), 0, 0, Qt::AlignLeft);
 	grid->addWidget( cursorSelect, 0, 1, Qt::AlignLeft);
 
 	cursorVisCbx = new QCheckBox( tr("Visible") );
@@ -517,6 +602,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	vbox  = new QVBoxLayout();
 	hbox  = new QHBoxLayout();
 	gbox  = new QGroupBox( tr("Screen") );
+	gbox->setToolTip( tr("Information about the screen that the window is on.") );
 	gbox->setLayout( vbox );
 
 	scrRateReadout = new QLineEdit();
@@ -526,14 +612,24 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	snprintf( stmp, sizeof(stmp), "%.3f", consoleWindow->getRefreshRate() );
 	scrRateReadout->setText( tr(stmp) );
 
-	hbox->addWidget( new QLabel( tr("Refresh Rate (Hz):") ) );
+	hbox->addWidget( tipLabel( tr("Refresh Rate (Hz):"), tr("The refresh rate of the screen that the window is on.") ) );
 	hbox->addWidget( scrRateReadout );
 	vbox->addLayout( hbox );
 
 	vbox2->addWidget( gbox );
+
+	// Test Pattern
+	gbox  = new QGroupBox( tr("Test Pattern:") );
+	gbox->setToolTip( tr("Replace the game image with a pattern for checking the video output.") );
+	gbox->setLayout( vbox5 );
+	vbox5->addWidget( videoTest );
+	vbox2->addWidget( gbox );
+
 	vbox2->addStretch( 5 );
 
 	setLayout( main_vbox );
+
+	setupToolTips();
 
 	updateReadouts();
 
@@ -549,6 +645,114 @@ ConsoleVideoConfDialog_t::~ConsoleVideoConfDialog_t(void)
 	//printf("Destroy Video Config Window\n");
 
 	updateTimer->stop();
+}
+//----------------------------------------------------------------------------
+void ConsoleVideoConfDialog_t::setupToolTips(void)
+{
+	driverSelect->setToolTip( tr("The renderer that draws the game image.\n"
+		"OpenGL and Vulkan draw on the graphics card, SDL uses the SDL renderer and QPainter draws in software.\n"
+		"SDL cannot be used on Wayland. A change takes effect right away.") );
+
+	scalerSelect->setToolTip( tr("The filter applied to the game image before it is scaled to the window.\n"
+		"hq2x, hq3x, Scale2x and Scale3x smooth the pixel art, NTSC 2x imitates composite video, "
+		"Prescale 2x, 3x and 4x enlarge the image by whole numbers, and PAL 3x uses 3 times the horizontal "
+		"resolution with the original vertical resolution.\n"
+		"Takes effect when you press Apply.") );
+
+	gl_LF_chkBox->setToolTip( tr("Smooth the image with a linear filter when it is scaled to the window, instead of keeping sharp pixel edges.") );
+
+	regionSelect->setToolTip( tr("The video system the emulator runs as.\n"
+		"NTSC runs at about 60 Hz, PAL at about 50 Hz, and Dendy is a PAL timed clone of the NES. "
+		"Applies right away.") );
+
+	autoRegion->setToolTip( tr("Choose NTSC or PAL from the game when it is loaded, instead of always using the selected Region.\n"
+		"With Dendy selected, PAL games still run as PAL and NTSC games run as Dendy.") );
+
+	new_PPU_ena->setToolTip( tr("Use the newer and more accurate PPU emulation. It is slower and is needed by a few games.\n"
+		"The new PPU does not support overclocking, so overclocking is turned off when this is enabled.") );
+
+	frmskipcbx->setToolTip( tr("Skip drawing some frames to keep up on a slow computer.\n"
+		"Note: frame skipping is not compiled into this build, so this option currently has no effect.") );
+
+	vsync_ena->setToolTip( tr("Wait for the screen refresh before showing each frame, which prevents tearing. "
+		"It can add a little input delay. The OpenGL driver restarts when this changes.") );
+
+	intFrameRateCbx->setToolTip( tr("Run at the nearest whole frame rate, for example 60 Hz instead of 60.0988 Hz. "
+		"This can match a 60 Hz screen more smoothly with vertical sync. The sound is restarted when this changes.") );
+
+	sprtLimCbx->setToolTip( tr("Remove the hardware limit of 8 sprites per scanline. This reduces sprite flicker, "
+		"but a few games depend on the limit and may look different.") );
+
+	autoScaleCbx->setToolTip( tr("Stretch the image to fill the window when the window is resized.\n"
+		"When off, the image stays at the X and Y Scale below and the rest of the window shows the background color.") );
+
+	aspectCbx->setToolTip( tr("Keep the aspect ratio of the image when it is scaled, adding bars at the sides or the top and bottom instead of stretching.\n"
+		"The Aspect list picks the pixel shape, and one Scale is used for both directions.") );
+
+	aspectSelect->setToolTip( tr("The shape of the image when Force Aspect Ratio is on.\n"
+		"Square Pixels is 1:1, NTSC is 8:7 and PAL is 11:8, Standard is 4:3 and Widescreen is 16:9.") );
+	aspectSelectLabel->setToolTip( aspectSelect->toolTip() );
+
+	xScaleBox->setToolTip( tr("The size of the image as a multiple of the original NES resolution. "
+		"With Force Aspect Ratio on, this one value is used for both directions.\n"
+		"Takes effect when you press Apply, and also resizes the window.") );
+	yScaleBox->setToolTip( tr("The vertical size of the image as a multiple of the original NES resolution. "
+		"Only used when Force Aspect Ratio is off.\n"
+		"Takes effect when you press Apply, and also resizes the window.") );
+	xScaleLabel->setToolTip( xScaleBox->toolTip() );
+	yScaleLabel->setToolTip( yScaleBox->toolTip() );
+
+	// Legacy overlay: drawn into the game image by the emulator core
+	showGuiMsgs_cbx->setToolTip( tr("Show emulator messages, such as saving or loading a state, over the game image. "
+		"The messages go to the status bar instead when it is visible.") );
+
+	drawInputAidsCbx->setToolTip( tr("Draw aids for light guns and other pointer devices, such as a crosshair where the cursor is.") );
+
+	showFPS_cbx->setToolTip( tr("Draw the emulation speed in frames per second in the upper right of the game image.\n"
+		"The same value is available in Window Text Overlay. Turning it on in both shows it twice.") );
+
+	showFrameCount_cbx->setToolTip( tr("Draw the frame counter near the bottom of the game image. "
+		"During a movie it also shows the movie length, the record mode and the read only state.\n"
+		"The same value is available in Window Text Overlay. Turning it on in both shows it twice.") );
+
+	showLagCount_cbx->setToolTip( tr("Draw the number of lag frames near the bottom of the game image. It is red while the game is lagging.\n"
+		"The same value is available in Window Text Overlay. Turning it on in both shows it twice.") );
+
+	showRerecordCount_cbx->setToolTip( tr("Draw the movie rerecord count near the bottom of the game image while a movie is loaded.\n"
+		"The same value is available in Window Text Overlay. Turning it on in both shows it twice.") );
+
+	inputDisplaySel->setToolTip( tr("Which controllers to show the pressed buttons of, drawn near the bottom of the game image.") );
+
+	videoTest->setToolTip( tr("Vertical Sync shows a pattern for checking whether the screen tears. None shows the game.") );
+
+	// Drawing area
+	ntsc_start->setToolTip( tr("The first scanline of the picture that is shown for NTSC. The picture has 240 lines, numbered 0 to 239.") );
+	ntsc_end->setToolTip( tr("The last scanline of the picture that is shown for NTSC. The picture has 240 lines, numbered 0 to 239.") );
+	pal_start->setToolTip( tr("The first scanline of the picture that is shown for PAL and Dendy. The picture has 240 lines, numbered 0 to 239.") );
+	pal_end->setToolTip( tr("The last scanline of the picture that is shown for PAL and Dendy. The picture has 240 lines, numbered 0 to 239.") );
+
+	clipSidesCbx->setToolTip( tr("Hide the leftmost and the rightmost 8 pixels of the picture. "
+		"Many games draw scrolling glitches there, and a real TV would have cut them off.") );
+
+	winSizeReadout->setToolTip( tr("The size of the whole main window, in pixels.") );
+	vpSizeReadout->setToolTip( tr("The size of the area that shows the game, in pixels.") );
+
+	cursorSelect->setToolTip( tr("The shape of the mouse cursor over the game area. The reticles are useful for light gun games.") );
+	cursorVisCbx->setToolTip( tr("Show the mouse cursor while it is over the game area.") );
+
+	scrRateReadout->setToolTip( tr("The refresh rate of the screen that the window is on, in Hz.") );
+
+	for ( QPushButton *btn : findChildren<QPushButton*>() )
+	{
+		if ( btn->text() == tr("Apply") )
+		{
+			btn->setToolTip( tr("Rebuild the video with the current settings, apply the scaler and the scale values, and resize the window.") );
+		}
+		else if ( btn->text() == tr("Close") )
+		{
+			btn->setToolTip( tr("Close this window. Options that are not marked as needing Apply are already in effect.") );
+		}
+	}
 }
 //----------------------------------------------------------------------------
 void ConsoleVideoConfDialog_t::closeEvent(QCloseEvent *event)
@@ -1087,6 +1291,37 @@ void ConsoleVideoConfDialog_t::showFrameCountChanged( int value )
 	g_config->setOption("SDL.ShowFrameCount", frame_display );
 	g_config->save ();
 
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::textOverlayItemChanged( int item, bool checked )
+{
+	if ( consoleWindow && consoleWindow->getTextOverlayDisplay() )
+	{
+		consoleWindow->getTextOverlayDisplay()->setEnabled( static_cast<TextOverlayDisplay_t::Item>(item), checked );
+	}
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::textOverlayRateChanged( int index )
+{
+	if ( consoleWindow && consoleWindow->getTextOverlayDisplay() && (index >= 0) )
+	{
+		consoleWindow->getTextOverlayDisplay()->setUpdateRate( textOverlayRateSel->itemData(index).toInt() );
+	}
+}
+//----------------------------------------------------
+void ConsoleVideoConfDialog_t::updateTextOverlayControls(void)
+{
+	TextOverlayDisplay_t *display = consoleWindow ? consoleWindow->getTextOverlayDisplay() : nullptr;
+
+	for (int i = 0; i < TextOverlayDisplay_t::ITEM_COUNT; i++)
+	{
+		QSignalBlocker blocker( textOverlayCbx[i] );
+		textOverlayCbx[i]->setChecked( display && display->isEnabled( static_cast<TextOverlayDisplay_t::Item>(i) ) );
+		textOverlayCbx[i]->setEnabled( display != nullptr );
+	}
+	QSignalBlocker blocker( textOverlayRateSel );
+	setComboBoxFromValue( textOverlayRateSel, display ? display->getUpdateRate() : TextOverlayDisplay_t::DEFAULT_UPDATE_RATE_HZ );
+	textOverlayRateSel->setEnabled( display != nullptr );
 }
 //----------------------------------------------------
 void ConsoleVideoConfDialog_t::showLagCountChanged( int value )

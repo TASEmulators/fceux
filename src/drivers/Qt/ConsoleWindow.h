@@ -199,6 +199,7 @@ class  consoleWin_t : public QMainWindow
 		int  getPeriodicInterval(void);
 
 		QColor *getVideoBgColorPtr(void){ return &videoBgColor; }
+		TextOverlayDisplay_t *getTextOverlayDisplay(void){ return textOverlayDisplay; }
 
 		QString getTempDir();
 

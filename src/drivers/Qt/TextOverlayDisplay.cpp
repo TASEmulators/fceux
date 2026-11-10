@@ -1,6 +1,8 @@
 // TextOverlayDisplay.cpp
 //
 #include <QActionGroup>
+#include <QSignalBlocker>
+#include <vector>
 
 #include "../../fceu.h"
 #include "../../profiler.h"
@@ -104,41 +106,99 @@ void TextOverlayDisplay_t::applyOptions(void)
 	}
 }
 //----------------------------------------------------------------------------
+const TextOverlayDisplay_t::ItemInfo &TextOverlayDisplay_t::itemInfo(Item item)
+{
+	static const ItemInfo info[ITEM_COUNT] =
+	{
+		{ QT_TR_NOOP("Frame Counter"), QT_TR_NOOP("Show the frame counter, with the movie length while a movie is loaded.") },
+		{ QT_TR_NOOP("Movie State"), QT_TR_NOOP("Show the movie mode (play, record or finished), record mode and read only state while a movie is loaded.") },
+		{ QT_TR_NOOP("Lag Counter"), QT_TR_NOOP("Show the lag frame count, in red while the game is lagging.") },
+		{ QT_TR_NOOP("Rerecord Count"), QT_TR_NOOP("Show the movie rerecord count while a movie is loaded.") },
+		{ QT_TR_NOOP("FPS"), QT_TR_NOOP("Show the emulation speed in frames per second.") },
+	};
+	return info[item];
+}
+//----------------------------------------------------------------------------
+int *TextOverlayDisplay_t::flagFor(Item item)
+{
+	switch (item)
+	{
+		case ITEM_FRAME:    return &showFrame;
+		case ITEM_MOVIE:    return &showMovie;
+		case ITEM_FPS:      return &showFps;
+		case ITEM_LAG:      return &showLag;
+		default:            return &showRerecord;
+	}
+}
+//----------------------------------------------------------------------------
+const char *TextOverlayDisplay_t::optionFor(Item item)
+{
+	switch (item)
+	{
+		case ITEM_FRAME:    return "SDL.TextOverlay.ShowFrame";
+		case ITEM_MOVIE:    return "SDL.TextOverlay.ShowMovie";
+		case ITEM_FPS:      return "SDL.TextOverlay.ShowFPS";
+		case ITEM_LAG:      return "SDL.TextOverlay.ShowLag";
+		default:            return "SDL.TextOverlay.ShowRerecord";
+	}
+}
+//----------------------------------------------------------------------------
+bool TextOverlayDisplay_t::isEnabled(Item item)
+{
+	return *flagFor(item) != 0;
+}
+//----------------------------------------------------------------------------
+void TextOverlayDisplay_t::setEnabled(Item item, bool enabled)
+{
+	int *flag = flagFor(item);
+
+	if ((*flag != 0) == enabled)
+	{
+		return;
+	}
+	*flag = enabled ? 1 : 0;
+	saveOption(optionFor(item), *flag);
+	applyOptions();
+	emit changed();
+}
+//----------------------------------------------------------------------------
+void TextOverlayDisplay_t::setUpdateRate(int hz)
+{
+	if ((hz == updateRate) || ((hz != 5) && (hz != 10) && (hz != 20) && (hz != 30)))
+	{
+		return;
+	}
+	updateRate = hz;
+	saveOption("SDL.TextOverlay.UpdateRate", updateRate);
+	applyOptions();
+	emit changed();
+}
+//----------------------------------------------------------------------------
 QMenu *TextOverlayDisplay_t::createMenu(QWidget *parent)
 {
-	QMenu *menu = new QMenu(tr("Text Over&lay"), parent);
+	QMenu *menu = new QMenu(tr("Window Text Over&lay"), parent);
 	menu->menuAction()->setStatusTip(tr("Show emulator status text over the video, drawn by the video driver at the window resolution, including outside of the game image."));
 	menu->menuAction()->setToolTip(menu->menuAction()->statusTip());
 
-	struct Entry { const char *text; const char *tip; int *flag; const char *option; };
+	std::vector<QAction *> itemActs;
 
-	const Entry entries[] =
+	for (int i = 0; i < ITEM_COUNT; i++)
 	{
-		{ QT_TR_NOOP("&Frame Counter"), QT_TR_NOOP("Show the frame counter, with the movie length while a movie is loaded."), &showFrame, "SDL.TextOverlay.ShowFrame" },
-		{ QT_TR_NOOP("&Movie State"), QT_TR_NOOP("Show the movie mode (play, record or finished), record mode and read only state while a movie is loaded."), &showMovie, "SDL.TextOverlay.ShowMovie" },
-		{ QT_TR_NOOP("F&PS"), QT_TR_NOOP("Show the emulation speed in frames per second."), &showFps, "SDL.TextOverlay.ShowFPS" },
-		{ QT_TR_NOOP("&Lag Counter"), QT_TR_NOOP("Show the lag frame count, in red while the game is lagging."), &showLag, "SDL.TextOverlay.ShowLag" },
-		{ QT_TR_NOOP("&Rerecord Count"), QT_TR_NOOP("Show the movie rerecord count while a movie is loaded."), &showRerecord, "SDL.TextOverlay.ShowRerecord" },
-	};
+		const Item item = static_cast<Item>(i);
+		const ItemInfo &info = itemInfo(item);
 
-	for (const Entry &e : entries)
-	{
-		QAction *act = new QAction(tr(e.text), menu);
+		QAction *act = new QAction(tr(info.text), menu);
 		act->setCheckable(true);
-		act->setChecked(*e.flag != 0);
-		act->setStatusTip(tr(e.tip));
+		act->setChecked(isEnabled(item));
+		act->setStatusTip(tr(info.tip));
 		act->setToolTip(act->statusTip());
 
-		int *flag = e.flag;
-		const char *option = e.option;
-
-		connect(act, &QAction::toggled, this, [this, flag, option](bool checked)
+		connect(act, &QAction::toggled, this, [this, item](bool checked)
 		{
-			*flag = checked ? 1 : 0;
-			saveOption(option, *flag);
-			applyOptions();
+			setEnabled(item, checked);
 		});
 		menu->addAction(act);
+		itemActs.push_back(act);
 	}
 	menu->addSeparator();
 
@@ -149,21 +209,37 @@ QMenu *TextOverlayDisplay_t::createMenu(QWidget *parent)
 	QActionGroup *group = new QActionGroup(rateMenu);
 	group->setExclusive(true);
 
-	for (int hz : { 5, 10, 20, 30 })
+	std::vector<QAction *> rateActs;
+
+	for (int hz : UPDATE_RATES_HZ)
 	{
 		QAction *act = new QAction(tr("%1 Hz").arg(hz), rateMenu);
 		act->setCheckable(true);
 		act->setChecked(updateRate == hz);
 		group->addAction(act);
 		rateMenu->addAction(act);
+		rateActs.push_back(act);
 
 		connect(act, &QAction::triggered, this, [this, hz]()
 		{
-			updateRate = hz;
-			saveOption("SDL.TextOverlay.UpdateRate", updateRate);
-			applyOptions();
+			setUpdateRate(hz);
 		});
 	}
+
+	// Keep the menu in step with changes made from the Video Config window
+	connect(this, &TextOverlayDisplay_t::changed, menu, [this, itemActs, rateActs]()
+	{
+		for (int i = 0; i < ITEM_COUNT; i++)
+		{
+			QSignalBlocker blocker(itemActs[i]);
+			itemActs[i]->setChecked(isEnabled(static_cast<Item>(i)));
+		}
+		for (size_t i = 0; i < rateActs.size(); i++)
+		{
+			QSignalBlocker blocker(rateActs[i]);
+			rateActs[i]->setChecked(UPDATE_RATES_HZ[i] == updateRate);
+		}
+	});
 	return menu;
 }
 //----------------------------------------------------------------------------
