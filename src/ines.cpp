@@ -1216,9 +1216,12 @@ static int iNES_Init(int num) {
 				}
 				if (CHRRAMSize > 0)
 				{
-					int mCHRRAMSize = (CHRRAMSize < 1024) ? 1024 : CHRRAMSize; // VPage has a resolution of 1k banks, ensure minimum allocation to prevent malicious access from NES software
+					// setchr8() maps a full 8k window from the start of the chip even when the chip is smaller,
+					// so anything under 8k has to be padded or PPU accesses walk off the end of the buffer
+					int mCHRRAMSize = (CHRRAMSize < 8192) ? 8192 : CHRRAMSize;
 					if ((UNIFchrrama = VROM = (uint8*)FCEU_dmalloc(mCHRRAMSize)) == NULL) return 2;
 					FCEU_MemoryRand(VROM, CHRRAMSize);
+					memset(VROM + CHRRAMSize, 0, mCHRRAMSize - CHRRAMSize); // padding, keep MemoryRand's RNG use unchanged
 					SetupCartCHRMapping(0, VROM, CHRRAMSize, 1);
 					AddExState(VROM, CHRRAMSize, 0, "CHRR");
 				}
