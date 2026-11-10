@@ -670,6 +670,7 @@ static const char *DriverUsage =
 "--soundrate    x       Set sound playback rate to x Hz.\n"
 "--soundq      {0|1|2}  Set sound quality. (0 = Low 1 = High 2 = Very High)\n"
 "--soundbufsize x       Set sound buffer size to x ms.\n"
+"--audioDriver {0|1}    Set audio driver. (0 = SDL 1 = Qt)\n"
 "--volume      {0-256}  Set volume to x.\n"
 "--soundrecord  f       Record sound to file f.\n"
 "--playmov      f       Play back a recorded FCM/FM2/FM3 movie from filename f.\n"

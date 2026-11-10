@@ -547,6 +547,8 @@ InitConfig()
 	config->addOption("soundbufsize", "SDL.Sound.BufSize", 128);
 	config->addOption("lowpass", "SDL.Sound.LowPass", 0);
 	config->addOption("SDL.Sound.UseGlobalFocus", 1);
+	// 0 = SDL, 1 = Qt Multimedia
+	config->addOption("audioDriver", "SDL.AudioDriver", 0);
     
 	config->addOption('g', "gamegenie", "SDL.GameGenie", 0);
 	config->addOption("pal", "SDL.PAL", 0);

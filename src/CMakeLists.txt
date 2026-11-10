@@ -52,6 +52,7 @@ if ( ${QT} EQUAL 6 )
 	find_package( Qt6 COMPONENTS Help QUIET)
 	find_package( Qt6 COMPONENTS Qml)
 	find_package( Qt6 COMPONENTS UiTools)
+	find_package( Qt6 COMPONENTS Multimedia QUIET)
 	include_directories( ${Qt6Widgets_INCLUDE_DIRS} ${Qt6Qml_INCLUDE_DIRS} ${Qt6UiTools_INCLUDE_DIRS} ${Qt6Network_INCLUDE_DIRS} ${Qt6Help_INCLUDE_DIRS} ${Qt6OpenGLWidgets_INCLUDE_DIRS} )
 
 	if (${Qt6Help_FOUND})
@@ -91,6 +92,7 @@ else()
 	find_package( Qt5 COMPONENTS Network)
 	find_package( Qt5 COMPONENTS Qml)
 	find_package( Qt5 COMPONENTS UiTools)
+	find_package( Qt5 COMPONENTS Multimedia QUIET)
 	add_definitions( ${Qt5Widgets_DEFINITIONS} ${Qt5Qml_DEFINITIONS} ${Qt5UiTools_DEFINITIONS} ${Qt5Network_DEFINITIONS} ${Qt5Help_DEFINITIONS} )
 	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Qml_INCLUDE_DIRS} ${Qt5UiTools_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS} ${Qt5Help_INCLUDE_DIRS} )
 
@@ -691,7 +693,9 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/input.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/nes_shm.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/keyscan.cpp  
-  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-sound.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AudioDriverInterface.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AudioDriverManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AudioDriverSDL.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-video.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-joystick.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-throttle.cpp  
@@ -741,6 +745,13 @@ endif()
 
 if (Vulkan_FOUND AND FCEUX_QT_HAS_VULKAN)
 	list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/ConsoleViewerVulkan.cpp)
+endif()
+
+if (${Qt}Multimedia_FOUND)
+	message( STATUS "${Qt} Multimedia Module Found; enabling Qt audio driver")
+	list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/AudioDriverQt.cpp)
+else()
+	message( STATUS "${Qt} Multimedia Module Not Found; disabling Qt audio driver")
 endif()
 
 # Put build timestamp into BUILD_TS environment variable and from there into
@@ -801,6 +812,11 @@ target_link_libraries( ${APP_NAME}
 if (Vulkan_FOUND AND FCEUX_QT_HAS_VULKAN)
 	target_compile_definitions(${APP_NAME} PRIVATE FCEUX_HAS_QT_VULKAN)
 	target_link_libraries(${APP_NAME} Vulkan::Vulkan)
+endif()
+
+if (${Qt}Multimedia_FOUND)
+	target_compile_definitions(${APP_NAME} PRIVATE FCEUX_HAS_QT_AUDIO)
+	target_link_libraries(${APP_NAME} ${Qt}::Multimedia)
 endif()
 
 if(NOT MSVC)

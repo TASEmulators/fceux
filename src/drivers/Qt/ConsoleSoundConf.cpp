@@ -25,6 +25,7 @@
 #include "../../driver.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/ConsoleSoundConf.h"
+#include "Qt/AudioDriverInterface.h"
 #include "Qt/main.h"
 #include "Qt/dface.h"
 #include "Qt/config.h"
@@ -70,6 +71,29 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	vbox1->addWidget(enaChkbox);
 	vbox1->addWidget(muteChkbox);
 	vbox1->addWidget(enaLowPass);
+
+	// Audio Driver Select
+	hbox2 = new QHBoxLayout();
+
+	lbl = new QLabel(tr("Driver:"));
+
+	driverSelect = new QComboBox();
+
+	driverSelect->addItem(tr("SDL"), AudioDriverBase::AUDIO_DRIVER_SDL);
+	if (AudioDriverBase::isDriverAvailable(AudioDriverBase::AUDIO_DRIVER_QT))
+	{
+		driverSelect->addItem(tr("Qt"), AudioDriverBase::AUDIO_DRIVER_QT);
+	}
+	driverSelect->setToolTip( tr("The audio API used to play sound.") );
+
+	setComboBoxFromProperty(driverSelect, "SDL.AudioDriver");
+
+	connect(driverSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(audioDriverChanged(int)));
+
+	hbox2->addWidget(lbl);
+	hbox2->addWidget(driverSelect);
+
+	vbox1->addLayout(hbox2);
 
 	// Audio Quality Select
 	hbox2 = new QHBoxLayout();
@@ -328,7 +352,7 @@ void ConsoleSndConfDialog_t::periodicUpdate(void)
 	c = GetWriteSound();
 	m = GetMaxSound();
 
-	percBufUse = 100.0f - (100.0f * (double)c / (double)m );
+	percBufUse = (m > 0) ? (100.0f - (100.0f * (double)c / (double)m )) : 0.0;
 
 	bufUsage->setValue( (int)(percBufUse) );
 
@@ -593,6 +617,20 @@ void ConsoleSndConfDialog_t::swapDutyCallback(int value)
 	{
 		g_config->setOption("SDL.SwapDuty", 0);
 		swapDuty = 0;
+	}
+	g_config->save();
+}
+//----------------------------------------------------
+void ConsoleSndConfDialog_t::audioDriverChanged(int index)
+{
+	g_config->setOption("SDL.AudioDriver", driverSelect->itemData(index).toInt());
+
+	// reset sound subsystem for changes to take effect
+	if (FCEU_WRAPPER_TRYLOCK(1000))
+	{
+		KillSound();
+		InitSound();
+		FCEU_WRAPPER_UNLOCK();
 	}
 	g_config->save();
 }

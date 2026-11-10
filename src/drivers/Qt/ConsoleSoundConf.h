@@ -35,6 +35,7 @@ protected:
 	QCheckBox *enaLowPass;
 	QCheckBox *swapDutyChkbox;
 	QCheckBox *useGlobalFocus;
+	QComboBox *driverSelect;
 	QComboBox *qualitySelect;
 	QComboBox *rateSelect;
 	QSlider *bufSizeSlider;
@@ -73,6 +74,7 @@ private slots:
 	void enaSoundLowPassChange(int value);
 	void swapDutyCallback(int value);
 	void useGlobalFocusChanged(int value);
+	void audioDriverChanged(int index);
 	void soundQualityChanged(int index);
 	void soundRateChanged(int index);
 };
