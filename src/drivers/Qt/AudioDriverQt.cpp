@@ -170,7 +170,7 @@ bool AudioDriverQt::openDevice(unsigned int sampleRate, int periodSamples)
 
 	QAudioFormat format;
 	format.setSampleRate(static_cast<int>(sampleRate));
-	format.setChannelCount(1);
+	format.setChannelCount(2);
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 	format.setSampleFormat(QAudioFormat::Int16);
 #else
@@ -181,16 +181,16 @@ bool AudioDriverQt::openDevice(unsigned int sampleRate, int periodSamples)
 			QAudioFormat::BigEndian : QAudioFormat::LittleEndian);
 #endif
 
-	// The emulator produces mono samples, spread them over two channels
-	// if the device refuses to take mono.
+	// The emulator produces mono samples. Prefer a stereo stream with the
+	// samples duplicated, fall back to a mono stream if the device refuses.
 	if (!device.isFormatSupported(format))
 	{
-		QAudioFormat stereo(format);
-		stereo.setChannelCount(2);
+		QAudioFormat mono(format);
+		mono.setChannelCount(1);
 
-		if (device.isFormatSupported(stereo))
+		if (device.isFormatSupported(mono))
 		{
-			format = stereo;
+			format = mono;
 		}
 		else
 		{
@@ -258,7 +258,8 @@ bool AudioDriverQt::openDevice(unsigned int sampleRate, int periodSamples)
 		return false;
 	}
 
-	fprintf(stderr, "Loading Qt sound with %s device...\n", impl->description.c_str());
+	fprintf(stderr, "Loading Qt sound with %s device (%s)...\n", impl->description.c_str(),
+			(channels == 1) ? "mono" : "stereo");
 	return true;
 }
 //----------------------------------------------------------
