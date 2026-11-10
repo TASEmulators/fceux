@@ -252,6 +252,11 @@ int ConsoleViewQWidget_t::init(void)
 	return 0;
 }
 
+QString ConsoleViewQWidget_t::driverInfo(void)
+{
+	return QStringLiteral("QPainter (Qt %1)").arg( QString::fromLatin1( qVersion() ) );
+}
+
 void ConsoleViewQWidget_t::cleanup(void)
 {
 

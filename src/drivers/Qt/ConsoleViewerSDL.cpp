@@ -356,6 +356,26 @@ int ConsoleViewSDL_t::init(void)
 	return 0;
 }
 
+QString ConsoleViewSDL_t::driverInfo(void)
+{
+	SDL_version ver;
+	SDL_GetVersion( &ver );
+
+	QString info = QStringLiteral("SDL %1.%2.%3").arg( ver.major ).arg( ver.minor ).arg( ver.patch );
+
+	SDL_RendererInfo rinfo;
+	if ( sdlRenderer && (SDL_GetRendererInfo( sdlRenderer, &rinfo ) == 0) )
+	{
+		info += QStringLiteral(", %1 renderer").arg( QString::fromUtf8( rinfo.name ) );
+	}
+	const char *videoDriver = SDL_GetCurrentVideoDriver();
+	if ( videoDriver )
+	{
+		info += QStringLiteral(", %1 video").arg( QString::fromUtf8( videoDriver ) );
+	}
+	return info;
+}
+
 void ConsoleViewSDL_t::cleanup(void)
 {
 	if (overlayTexture)

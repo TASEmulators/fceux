@@ -311,6 +311,14 @@ void ConsoleViewGL_t::chkExtnsGL(void)
 	if ( c != NULL )
 	{
 		printf("GL Version: %s \n", c );
+		glInfo = QStringLiteral("OpenGL ") + QString::fromLatin1( reinterpret_cast<const char*>(c) );
+	}
+
+	c = glGetString( GL_RENDERER );
+
+	if ( (c != NULL) && !glInfo.isEmpty() )
+	{
+		glInfo += QStringLiteral(" (%1)").arg( QString::fromLatin1( reinterpret_cast<const char*>(c) ) );
 	}
 
   	c = glGetString( GL_EXTENSIONS );
@@ -370,6 +378,12 @@ void ConsoleViewGL_t::initializeGL(void)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	chkExtnsGL();
+
+	// The GL version is only known once the context has been created
+	if ( consoleWindow && !glInfo.isEmpty() )
+	{
+		consoleWindow->showStatusMessage( tr("Video driver: %1").arg( glInfo ) );
+	}
 	 //printf("GL Init!\n");
 
 	 buildTextures();

@@ -2765,6 +2765,17 @@ int consoleWin_t::loadVideoDriver( int driverId, bool force )
 	// Reload Viewport Cursor Type and Visibility
 	loadCursor();
 
+	if ( viewport_Interface )
+	{
+		// Drivers that can't tell yet (OpenGL) report from their own init
+		const QString info = viewport_Interface->driverInfo();
+
+		if ( !info.isEmpty() )
+		{
+			showStatusMessage( tr("Video driver: %1").arg( info ) );
+		}
+	}
+
 	return 0;
 }
 //---------------------------------------------------------------------------

@@ -8,6 +8,7 @@
 #include <QCursor>
 #include <QImage>
 #include <QSize>
+#include <QString>
 
 class ConsoleViewerBase
 {
@@ -23,6 +24,8 @@ class ConsoleViewerBase
 		virtual void reset(void) = 0;
 		virtual void queueRedraw(void) = 0;
 		virtual int  driver(void) = 0;
+		// Human readable driver name and version info, empty if not yet known
+		virtual QString driverInfo(void) { return QString(); }
 
 		virtual void transfer2LocalBuffer(void) = 0;
 		virtual QImage getFrameImage(void) = 0;

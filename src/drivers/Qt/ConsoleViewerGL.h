@@ -21,6 +21,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public
 		~ConsoleViewGL_t(void);
 
 		int  init(void) override;
+		QString driverInfo(void) override { return glInfo; }
 		void reset(void) override;
 		void queueRedraw(void) override;
 		int  driver(void) override { return VIDEO_DRIVER_OPENGL; };
@@ -91,6 +92,7 @@ class ConsoleViewGL_t : public QOpenGLWidget, protected QOpenGLFunctions, public
 	bool   forceAspect;
 	bool   autoScaleEna;
 	bool   reqPwr2;
+	QString glInfo;
 	bool   vsyncEnabled;
 
 	unsigned int  textureType;

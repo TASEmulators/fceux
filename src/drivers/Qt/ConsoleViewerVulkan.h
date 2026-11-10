@@ -17,6 +17,7 @@ public:
 	void shutdown(void);
 
 	int init(void) override;
+	QString driverInfo(void) override;
 	void reset(void) override;
 	void queueRedraw(void) override;
 	int driver(void) override { return VIDEO_DRIVER_VULKAN; }

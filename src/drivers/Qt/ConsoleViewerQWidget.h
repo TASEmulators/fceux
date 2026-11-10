@@ -21,6 +21,7 @@ class ConsoleViewQWidget_t : public QWidget, public ConsoleViewerBase
 		~ConsoleViewQWidget_t(void);
 
 		int  init(void) override;
+		QString driverInfo(void) override;
 		void reset(void) override;
 		void cleanup(void);
 		void queueRedraw(void) override;

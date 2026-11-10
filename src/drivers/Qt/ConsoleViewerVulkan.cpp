@@ -78,6 +78,19 @@ public:
 	unsigned int mouseButtonMask = 0;
 	std::function<void()> exposedCallback;
 
+	QString deviceInfo(void) const
+	{
+		if (!phys)
+			return QString();
+		VkPhysicalDeviceProperties props;
+		vkFuncs->vkGetPhysicalDeviceProperties(phys, &props);
+		return QStringLiteral("Vulkan %1.%2.%3 (%4)")
+			.arg(VK_VERSION_MAJOR(props.apiVersion))
+			.arg(VK_VERSION_MINOR(props.apiVersion))
+			.arg(VK_VERSION_PATCH(props.apiVersion))
+			.arg(QString::fromUtf8(props.deviceName));
+	}
+
 	bool initialize(QString &error)
 	{
 		create();
@@ -692,6 +705,11 @@ void ConsoleViewVulkan_t::shutdown(void)
 		vulkanWindow->exposedCallback = nullptr;
 		vulkanWindow->pixels = nullptr;
 	}
+}
+
+QString ConsoleViewVulkan_t::driverInfo(void)
+{
+	return vulkanWindow ? vulkanWindow->deviceInfo() : QString();
 }
 
 int ConsoleViewVulkan_t::init(void)
