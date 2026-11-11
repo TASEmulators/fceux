@@ -81,7 +81,6 @@ struct RaLeaderboardEntry
 };
 
 Q_DECLARE_METATYPE(RaLeaderboardEntry)
-Q_DECLARE_METATYPE(QList<RaLeaderboardEntry>)
 
 class RetroAchievements : public QObject
 {

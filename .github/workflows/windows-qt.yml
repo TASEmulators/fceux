@@ -23,6 +23,7 @@ env:
   VULKAN_SDK_VERSION: '1.4.363.0'
   SDL_VERSION: '2.32.10'
   FFMPEG_VERSION: '5.1.2'
+  RCHEEVOS_VERSION: 'v12.5.0'
 
 jobs:
   build:
@@ -152,6 +153,18 @@ jobs:
           key: windows-qt-${{ steps.version.outputs.image_version }}
           max-size: 1G
 
+      - name: Fetch rcheevos (RetroAchievements)
+        shell: pwsh
+        run: |
+          $dir = "$env:RUNNER_TEMP\rcheevos"
+          git clone --depth 1 --branch $env:RCHEEVOS_VERSION https://github.com/RetroAchievements/rcheevos.git $dir
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          if (!(Test-Path "$dir\include\rc_client.h")) {
+            Write-Error "rcheevos checkout is incomplete at $dir"
+            exit 1
+          }
+          "RCHEEVOS_DIR=$($dir -replace '\\','/')" >> $env:GITHUB_ENV
+
       - name: Configure and build
         shell: pwsh
         run: |
@@ -165,7 +178,9 @@ jobs:
             -DSDL_INSTALL_PREFIX="$root\deps\SDL2" `
             -DLIBARCHIVE_INSTALL_PREFIX="$root\vcpkg\vcpkg_installed\x64-windows-rel" `
             -DUSE_LIBAV=1 `
-            -DFFMPEG_INSTALL_PREFIX="$root\deps\ffmpeg"
+            -DFFMPEG_INSTALL_PREFIX="$root\deps\ffmpeg" `
+            -DRETRO_ACHIEVEMENTS=ON `
+            -DRCHEEVOS_DIR="$env:RCHEEVOS_DIR"
           if ($LASTEXITCODE -ne 0) { exit 1 }
           cmake --build build --parallel
           if ($LASTEXITCODE -ne 0) { exit 1 }
