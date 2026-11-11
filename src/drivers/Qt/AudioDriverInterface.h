@@ -1,6 +1,7 @@
 // AudioDriverInterface.h
 //
 #pragma once
+#include <stddef.h>
 #include <stdint.h>
 
 #include <atomic>
@@ -61,6 +62,11 @@ class AudioDriverBase
 		static void setMuted(bool value);
 		static void setWindowMuted(bool value);
 
+		// Request a short notification chime, mixed into the output of the
+		// active driver. Safe to call from any thread. Does nothing if no
+		// driver is running or the output is muted.
+		static void playChime(void);
+
 		static bool isDriverAvailable(int driverId);
 		// Creates the driver for driverId, nullptr if it is not available.
 		static AudioDriverBase *create(int driverId);
@@ -90,6 +96,8 @@ class AudioDriverBase
 
 	private:
 		bool waitForSpace(int &waitCount);
+		void fillStream(int16_t *out, int count);
+		void mixChime(int16_t *out, int count);
 
 		int *buffer;
 		unsigned int bufferSize;
@@ -105,4 +113,8 @@ class AudioDriverBase
 		bool noiseGateActive;
 		double noiseGate;
 		double noiseGateRate;
+		// Notification chime rendered at the device sample rate. Only the
+		// device thread touches chimePos after init().
+		std::vector<int16_t> chimeSamples;
+		size_t chimePos;
 };

@@ -2,16 +2,12 @@
 //
 #ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
 
-#include <cmath>
-#include <vector>
-
-#include <SDL.h>
-
 #include <QFontMetrics>
 #include <QPainter>
 #include <QPropertyAnimation>
 #include <QTimer>
 
+#include "Qt/AudioDriverInterface.h"
 #include "Qt/config.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/RetroAchievements/RetroAchievements.h"
@@ -26,114 +22,6 @@ static const int toastFadeInMs = 200;
 static const int toastFadeOutMs = 400;
 static const int toastMaxQueued = 8;
 
-//----------------------------------------------------------------------------
-// Short rising chime, synthesized so no sound asset has to be shipped.
-//----------------------------------------------------------------------------
-class RaChime
-{
-	public:
-		RaChime(void) : device(0), failed(false), audioInit(false) {}
-
-		~RaChime(void)
-		{
-			if (device != 0)
-			{
-				SDL_CloseAudioDevice(device);
-			}
-			if (audioInit)
-			{
-				SDL_QuitSubSystem(SDL_INIT_AUDIO);
-			}
-		}
-
-		void play(void)
-		{
-			if (failed)
-			{
-				return;
-			}
-			if (device == 0 && !open())
-			{
-				failed = true;
-				return;
-			}
-			SDL_ClearQueuedAudio(device);
-			SDL_QueueAudio(device, samples.data(), static_cast<Uint32>(samples.size() * sizeof(int16_t)));
-		}
-
-	private:
-		static const int sampleRate = 44100;
-
-		bool open(void)
-		{
-			SDL_AudioSpec spec;
-
-			if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
-			{
-				return false;
-			}
-			audioInit = true;
-
-			SDL_zero(spec);
-			spec.freq = sampleRate;
-			spec.format = AUDIO_S16SYS;
-			spec.channels = 1;
-			spec.samples = 1024;
-
-			device = SDL_OpenAudioDevice(nullptr, 0, &spec, nullptr, 0);
-
-			if (device == 0)
-			{
-				return false;
-			}
-			synthesize();
-
-			SDL_PauseAudioDevice(device, 0);
-			return true;
-		}
-
-		void synthesize(void)
-		{
-			const double notes[] = { 1046.5, 1318.5, 1568.0, 2093.0 };
-			const double noteStart = 0.09;
-			const double noteLength = 0.35;
-			const double pi = 3.14159265358979323846;
-			const size_t total = static_cast<size_t>(sampleRate * (noteStart * 3 + noteLength));
-			std::vector<double> mix(total, 0.0);
-
-			for (int n = 0; n < 4; n++)
-			{
-				const size_t first = static_cast<size_t>(sampleRate * noteStart * n);
-				const size_t count = static_cast<size_t>(sampleRate * noteLength);
-
-				for (size_t i = 0; i < count && (first + i) < total; i++)
-				{
-					const double t = static_cast<double>(i) / sampleRate;
-					const double attack = (t < 0.003) ? (t / 0.003) : 1.0;
-					const double env = attack * std::exp(-t * 9.0);
-					const double tone = std::sin(2.0 * pi * notes[n] * t) + 0.3 * std::sin(4.0 * pi * notes[n] * t);
-
-					mix[first + i] += env * tone;
-				}
-			}
-			samples.resize(total);
-
-			for (size_t i = 0; i < total; i++)
-			{
-				double v = mix[i] * 0.2;
-
-				if (v > 1.0) { v = 1.0; }
-				if (v < -1.0) { v = -1.0; }
-
-				samples[i] = static_cast<int16_t>(v * 32767.0);
-			}
-		}
-
-		SDL_AudioDeviceID device;
-		bool failed;
-		bool audioInit;
-		std::vector<int16_t> samples;
-};
 //----------------------------------------------------------------------------
 // RaToastWidget
 //----------------------------------------------------------------------------
@@ -196,7 +84,6 @@ void RaToastWidget::paintEvent(QPaintEvent *)
 RaToastManager::RaToastManager(QWidget *mainWindow)
 	: QObject(mainWindow)
 	, window(mainWindow)
-	, chime(new RaChime())
 {
 	RetroAchievements *ra = RetroAchievements::instance();
 
@@ -214,7 +101,6 @@ RaToastManager::RaToastManager(QWidget *mainWindow)
 //----------------------------------------------------------------------------
 RaToastManager::~RaToastManager(void)
 {
-	delete chime;
 }
 //----------------------------------------------------------------------------
 void RaToastManager::achievementUnlocked(const QString &title, const QString &description,
@@ -234,7 +120,7 @@ void RaToastManager::achievementUnlocked(const QString &title, const QString &de
 
 	if (playSound)
 	{
-		chime->play();
+		AudioDriverBase::playChime();
 	}
 }
 //----------------------------------------------------------------------------

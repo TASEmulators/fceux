@@ -10,6 +10,7 @@
 #include <QPointer>
 #include <QVBoxLayout>
 
+#include "Qt/AudioDriverInterface.h"
 #include "Qt/config.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/RetroAchievements/RetroAchievements.h"
@@ -151,6 +152,12 @@ void RetroAchievementsDialog_t::soundToggled(bool checked)
 {
 	g_config->setOption("SDL.RetroAchSound", checked ? 1 : 0);
 	g_config->save();
+
+	// Preview the sound when it is turned on
+	if (checked)
+	{
+		AudioDriverBase::playChime();
+	}
 }
 //----------------------------------------------------------------------------
 void RetroAchievementsDialog_t::loginClicked(void)

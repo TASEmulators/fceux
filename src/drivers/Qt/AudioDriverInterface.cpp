@@ -17,6 +17,7 @@
 #include "Qt/throttle.h"
 
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <thread>
@@ -28,14 +29,55 @@ extern double g_fpsScale;
 
 static std::atomic<bool> s_mute(false);
 static std::atomic<bool> s_windowMute(false);
+static std::atomic<bool> s_chimeRequest(false);
 
 static const unsigned int supportedSampleRates[] = { 11025, 22050, 44100, 48000, 96000, 0 };
+
+// Short rising arpeggio (C6 E6 G6 C7), synthesized so no sound asset has to be shipped.
+static std::vector<int16_t> synthesizeChime(unsigned int sampleRate)
+{
+	const double notes[] = { 1046.5, 1318.5, 1568.0, 2093.0 };
+	const double noteStart = 0.09;
+	const double noteLength = 0.35;
+	const double pi = 3.14159265358979323846;
+	const size_t total = static_cast<size_t>(sampleRate * (noteStart * 3 + noteLength));
+	std::vector<double> mix(total, 0.0);
+	std::vector<int16_t> samples(total);
+
+	for (int n = 0; n < 4; n++)
+	{
+		const size_t first = static_cast<size_t>(sampleRate * noteStart * n);
+		const size_t count = static_cast<size_t>(sampleRate * noteLength);
+
+		for (size_t i = 0; i < count && (first + i) < total; i++)
+		{
+			const double t = static_cast<double>(i) / sampleRate;
+			const double attack = (t < 0.003) ? (t / 0.003) : 1.0;
+			const double env = attack * std::exp(-t * 9.0);
+			const double tone = std::sin(2.0 * pi * notes[n] * t) + 0.3 * std::sin(4.0 * pi * notes[n] * t);
+
+			mix[first + i] += env * tone;
+		}
+	}
+
+	for (size_t i = 0; i < total; i++)
+	{
+		double v = mix[i] * 0.2;
+
+		if (v > 1.0) { v = 1.0; }
+		if (v < -1.0) { v = -1.0; }
+
+		samples[i] = static_cast<int16_t>(v * 32767.0);
+	}
+	return samples;
+}
 
 //----------------------------------------------------------
 AudioDriverBase::AudioDriverBase(void)
 	: buffer(nullptr), bufferSize(0), bufferSize25(0), bufferSize50(0), bufferSize75(0),
 	  bufferRead(0), bufferWrite(0), bufferIn(0), lastSample(0), skipCounter(0),
-	  fillInit(true), noiseGateActive(true), noiseGate(0.0), noiseGateRate(0.010)
+	  fillInit(true), noiseGateActive(true), noiseGate(0.0), noiseGateRate(0.010),
+	  chimePos(0)
 {
 }
 //----------------------------------------------------------
@@ -63,6 +105,11 @@ void AudioDriverBase::setMuted(bool value)
 void AudioDriverBase::setWindowMuted(bool value)
 {
 	s_windowMute = value;
+}
+//----------------------------------------------------------
+void AudioDriverBase::playChime(void)
+{
+	s_chimeRequest = true;
 }
 //----------------------------------------------------------
 bool AudioDriverBase::isDriverAvailable(int driverId)
@@ -222,6 +269,11 @@ int AudioDriverBase::init(void)
 	bufferRead = bufferWrite = 0;
 	bufferIn = 0;
 
+	// Must be ready before the device thread starts calling fillAudio()
+	chimeSamples = synthesizeChime(static_cast<unsigned int>(soundrate));
+	chimePos = chimeSamples.size();
+	s_chimeRequest = false;
+
 	if (!openDevice(static_cast<unsigned int>(soundrate), periodSamples, deviceId))
 	{
 		kill();
@@ -255,6 +307,44 @@ int AudioDriverBase::kill(void)
 }
 //----------------------------------------------------------
 void AudioDriverBase::fillAudio(int16_t *out, int len)
+{
+	fillStream(out, len);
+	mixChime(out, len);
+}
+//----------------------------------------------------------
+// Adds the notification chime on top of the emulator output. This happens
+// after the FIFO is drained so the chime is not part of the emulated sound
+// stream (e.g. what is sent to nes_shm) and it is not delayed by the FIFO.
+void AudioDriverBase::mixChime(int16_t *out, int len)
+{
+	if ( s_chimeRequest.exchange(false) )
+	{
+		chimePos = 0;
+	}
+
+	if ( chimePos >= chimeSamples.size() )
+	{
+		return;
+	}
+
+	if ( s_windowMute || s_mute )
+	{
+		chimePos = chimeSamples.size();
+		return;
+	}
+
+	for (int i = 0; i < len && chimePos < chimeSamples.size(); i++, chimePos++)
+	{
+		int v = out[i] + chimeSamples[chimePos];
+
+		if (v > 32767) { v = 32767; }
+		if (v < -32768) { v = -32768; }
+
+		out[i] = static_cast<int16_t>(v);
+	}
+}
+//----------------------------------------------------------
+void AudioDriverBase::fillStream(int16_t *out, int len)
 {
 	int16_t *tmps = out;
 	bool mute;

@@ -13,8 +13,6 @@
 #include <QString>
 #include <QWidget>
 
-class RaChime;
-
 // One popup. A frameless, translucent tool window that never takes focus or input.
 class RaToastWidget : public QWidget
 {
@@ -67,7 +65,6 @@ class RaToastManager : public QObject
 		QPointer<RaToastWidget> current;
 		QString currentImageUrl;
 		QQueue<Toast> queue;
-		RaChime *chime;
 };
 
 #endif // FCEUX_HAS_RETRO_ACHIEVEMENTS
