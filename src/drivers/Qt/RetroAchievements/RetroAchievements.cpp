@@ -31,6 +31,11 @@
 
 static RetroAchievements *raInstance = nullptr;
 
+// Declared in rcheevos' internal rc_version.h, whose location differs between rcheevos releases.
+RC_BEGIN_C_DECLS
+RC_EXPORT const char* rc_version_string(void);
+RC_END_C_DECLS
+
 static const char *cfgEnable = "SDL.RetroAchEnable";
 static const char *cfgUser   = "SDL.RetroAchUser";
 static const char *cfgToken  = "SDL.RetroAchToken";
@@ -62,7 +67,7 @@ RetroAchievements::RetroAchievements(void)
 	shutdownTimer.setSingleShot(true);
 	connect(&shutdownTimer, &QTimer::timeout, this, &RetroAchievements::finishShutdown);
 
-	idleTimer.setInterval(500);
+	idleTimer.setInterval(250);
 
 	g_config->getOption(cfgEnable, &enable);
 	g_config->getOption(cfgDebug, &debugLog);
@@ -100,6 +105,11 @@ void RetroAchievements::destroy(void)
 RetroAchievements *RetroAchievements::instance(void)
 {
 	return raInstance;
+}
+//----------------------------------------------------------------------------
+const char *RetroAchievements::libraryVersion(void)
+{
+	return rc_version_string();
 }
 //----------------------------------------------------------------------------
 void RetroAchievements::initClient(void)

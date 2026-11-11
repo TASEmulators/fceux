@@ -101,6 +101,9 @@ class RetroAchievements : public QObject
 		static void destroy(void);
 		static RetroAchievements *instance(void);
 
+		// Version of the rcheevos library this build contains, for the About window.
+		static const char *libraryVersion(void);
+
 		// False while the client is only waiting for its last requests to finish before it is destroyed.
 		bool isEnabled(void) const { return (client != nullptr) && !shuttingDown; }
 		LoginState getLoginState(void) const { return loginState; }

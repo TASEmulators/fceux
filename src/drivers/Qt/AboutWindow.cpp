@@ -58,6 +58,9 @@ extern "C"
 #include <QDesktopServices>
 #include "Qt/sdl.h"
 #include "Qt/AboutWindow.h"
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+#include "Qt/RetroAchievements/RetroAchievements.h"
+#endif
 #include "Qt/fceux_git_info.h"
 #include "../../version.h"
 #include "../../fceu.h"
@@ -246,6 +249,11 @@ AboutWindow::AboutWindow(QWidget *parent)
 
 #ifdef _USE_X264
 	snprintf( stmp, sizeof(stmp), "	Compiled with x264 version %s\n", X264_POINTVER );
+	credits->insertPlainText( stmp );
+#endif
+
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	snprintf( stmp, sizeof(stmp), "	Compiled with rcheevos version %s\n", RetroAchievements::libraryVersion() );
 	credits->insertPlainText( stmp );
 #endif
 
