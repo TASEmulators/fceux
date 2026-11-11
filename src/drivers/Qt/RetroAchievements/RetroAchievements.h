@@ -129,6 +129,11 @@ class RetroAchievements : public QObject
 		bool isHardcore(void) const { return hardcoreActive; }
 		// The user's choice, kept in the config even while RetroAchievements is disabled.
 		bool getHardcoreSetting(void) const { return hardcoreSetting; }
+		// Lets achievements that are already unlocked be earned again. rc_client only looks at it when a game is
+		// loaded, so changing it with a game running identifies and loads that game again.
+		bool getEncoreSetting(void) const { return encoreSetting; }
+		// GUI thread only. Takes the emulator lock.
+		void setEncore(bool enable);
 		// GUI thread only. Takes the emulator lock. Turning hardcore on resets the loaded game.
 		void setHardcore(bool enable);
 
@@ -238,6 +243,7 @@ class RetroAchievements : public QObject
 		bool gameUnknown;
 		bool debugLog;
 		bool hardcoreSetting;
+		bool encoreSetting;
 		std::atomic<bool> hardcoreActive;
 		std::atomic<bool> configSavePending;
 

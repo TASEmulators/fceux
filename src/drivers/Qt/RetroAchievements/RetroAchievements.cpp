@@ -42,6 +42,7 @@ static const char *cfgUser   = "SDL.RetroAchUser";
 static const char *cfgToken  = "SDL.RetroAchToken";
 static const char *cfgDebug  = "SDL.RetroAchDebug";
 static const char *cfgHardcore = "SDL.RetroAchHardcore";
+static const char *cfgEncore = "SDL.RetroAchEncore";
 static const char *cfgResultsGroup = "retroAchievementsLeaderboardResults";
 
 //----------------------------------------------------------------------------
@@ -56,6 +57,7 @@ RetroAchievements::RetroAchievements(void)
 	, gameUnknown(false)
 	, debugLog(false)
 	, hardcoreSetting(true)
+	, encoreSetting(false)
 	, hardcoreActive(false)
 	, configSavePending(false)
 	, generation(0)
@@ -78,6 +80,7 @@ RetroAchievements::RetroAchievements(void)
 	g_config->getOption(cfgEnable, &enable);
 	g_config->getOption(cfgDebug, &debugLog);
 	g_config->getOption(cfgHardcore, &hardcoreSetting);
+	g_config->getOption(cfgEncore, &encoreSetting);
 
 	{
 		QSettings settings;
@@ -147,6 +150,7 @@ void RetroAchievements::initClient(void)
 
 	// rc_client needs the mode before a game is loaded. When a game is already running (RetroAchievements
 	// was just enabled), this resets it.
+	rc_client_set_encore_mode_enabled(client, encoreSetting ? 1 : 0);
 	refreshHardcore();
 
 	clause[0] = 0;
@@ -323,14 +327,46 @@ void RetroAchievements::announceMode(void)
 	{
 		return;
 	}
+	const QString encore = encoreSetting ? tr(" Encore mode is on.") : QString();
+
 	if (hardcoreActive)
 	{
 		emit notification(tr("Hardcore Mode"),
-			tr("Cheats, rewind, slow motion, frame advance, save state loads, scripts and the debugging tools are disabled."), QString());
+			tr("Cheats, rewind, slow motion, frame advance, save state loads, scripts and the debugging tools are disabled.") + encore,
+			QString());
 	}
 	else
 	{
-		emit notification(tr("Casual Mode"), tr("Hardcore mode is off."), QString());
+		emit notification(tr("Casual Mode"), tr("Hardcore mode is off.") + encore, QString());
+	}
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::setEncore(bool enable)
+{
+	FCEU_WRAPPER_SCOPED_LOCK();
+
+	g_config->setOption(cfgEncore, enable ? 1 : 0);
+	saveConfigLater();
+
+	encoreSetting = enable;
+
+	if (client == nullptr)
+	{
+		return;
+	}
+	rc_client_set_encore_mode_enabled(client, enable ? 1 : 0);
+
+	// Only evaluated when a game is loaded, so the game's achievements have to be loaded again.
+	if (gameActive || gameUnknown)
+	{
+		gameActive = false;
+		gameUnknown = false;
+
+		if (indicators)
+		{
+			indicators->clear();
+		}
+		identifyGame();
 	}
 }
 //----------------------------------------------------------------------------

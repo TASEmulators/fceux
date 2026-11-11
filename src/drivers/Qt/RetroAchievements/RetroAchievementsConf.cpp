@@ -53,8 +53,11 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 
 	enableCbox = new QCheckBox(tr("Enable RetroAchievements"));
 	hardcoreCbox = new QCheckBox(tr("Hardcore mode"));
-	hardcoreCbox->setToolTip(tr(	"Disables cheats, rewind, slow motion, frame advance, loading save states, movie playback, scripting, "
-	"the debugger and the memory tools while RetroAchievements is enabled. Turning it on resets the game."));
+	hardcoreCbox->setToolTip(tr("Disables cheats, rewind, slow motion, frame advance, loading save states, movie playback, scripting, "
+		"the debugger and the memory tools while RetroAchievements is enabled. Turning it on resets the game."));
+	encoreCbox = new QCheckBox(tr("Encore mode"));
+	encoreCbox->setToolTip(tr("Lets achievements you have already unlocked be earned again. "
+		"Changing it reloads the achievements of the running game."));
 	soundCbox = new QCheckBox(tr("Play a sound when an achievement is unlocked"));
 	userEdit = new QLineEdit();
 	passwordEdit = new QLineEdit();
@@ -100,6 +103,7 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 	mainLayout->addWidget(logoLabel);
 	mainLayout->addWidget(enableCbox);
 	mainLayout->addWidget(hardcoreCbox);
+	mainLayout->addWidget(encoreCbox);
 	mainLayout->addWidget(accountBox);
 	mainLayout->addWidget(soundCbox);
 	mainLayout->addLayout(buttonBox);
@@ -107,6 +111,7 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 
 	connect(enableCbox, &QCheckBox::toggled, this, &RetroAchievementsDialog_t::enableToggled);
 	connect(hardcoreCbox, &QCheckBox::clicked, this, &RetroAchievementsDialog_t::hardcoreToggled);
+	connect(encoreCbox, &QCheckBox::clicked, this, &RetroAchievementsDialog_t::encoreToggled);
 	connect(soundCbox, &QCheckBox::toggled, this, &RetroAchievementsDialog_t::soundToggled);
 	connect(loginButton, &QPushButton::clicked, this, &RetroAchievementsDialog_t::loginClicked);
 	connect(passwordEdit, &QLineEdit::returnPressed, this, &RetroAchievementsDialog_t::loginClicked);
@@ -142,6 +147,8 @@ void RetroAchievementsDialog_t::updateControls(void)
 	logoutButton->setEnabled(enabled && (state == RetroAchievements::LOGGED_IN));
 	hardcoreCbox->setEnabled(enabled);
 	hardcoreCbox->setChecked(ra->getHardcoreSetting());
+	encoreCbox->setEnabled(enabled);
+	encoreCbox->setChecked(ra->getEncoreSetting());
 
 	if (!enabled)
 	{
@@ -206,6 +213,11 @@ void RetroAchievementsDialog_t::hardcoreToggled(bool checked)
 		}
 	}
 	ra->setHardcore(checked);
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsDialog_t::encoreToggled(bool checked)
+{
+	RetroAchievements::instance()->setEncore(checked);
 }
 //----------------------------------------------------------------------------
 void RetroAchievementsDialog_t::hardcoreChanged(bool)
