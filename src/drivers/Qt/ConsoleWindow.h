@@ -351,6 +351,8 @@ class  consoleWin_t : public QMainWindow
 		void initHotKeys(void);
 		void initScreenHandler(void);
 		void createMainMenu(void);
+		// True (and tells the user) when a tool is requested that hardcore mode does not allow.
+		bool hardcoreBlocked(void);
 		void buildRecentRomMenu(void);
 		void saveRecentRomMenu(void);
 		void clearRomList(void);
@@ -385,6 +387,7 @@ class  consoleWin_t : public QMainWindow
 		void winResizeIx(int iScale);
 		void onNetPlayChange(void);
 	private slots:
+		void onHardcoreChanged(bool active);
 		void closeApp(void);
 		void openROMFile(void);
 		void loadNSF(void);

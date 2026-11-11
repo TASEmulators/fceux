@@ -1437,8 +1437,20 @@ int FCEU_TextScanlineOffsetFromBottom(int y) {
 }
 
 bool FCEU_IsValidUI(EFCEUI ui) {
-	if (FCEU_HardcoreActive() && (ui == FCEUI_LOADSTATE || ui == FCEUI_QUICKLOAD))
-		return false;
+	if (FCEU_HardcoreActive())
+	{
+		switch (ui) {
+		case FCEUI_LOADSTATE:
+		case FCEUI_QUICKLOAD:
+		// Playback of recorded input and the TAS editor are not allowed either.
+		case FCEUI_PLAYMOVIE:
+		case FCEUI_PLAYFROMBEGINNING:
+		case FCEUI_TASEDITOR:
+			return false;
+		default:
+			break;
+		}
+	}
 
 	switch (ui) {
 	case FCEUI_OPENGAME:
@@ -1522,6 +1534,10 @@ void FCEU_HardcoreModeChanged(void)
 
 		// The history of the state recorder is only good for rewinding.
 		FCEU_StateRecorderStop();
+
+#ifdef _S9XLUA_H
+		FCEU_LuaStop();
+#endif
 
 		// A running movie or the Game Genie would still influence the game after the reset.
 		if (FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_RECORD | MOVIEMODE_FINISHED))

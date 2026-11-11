@@ -11,6 +11,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QSet>
 #include <QPointer>
 #include <QWidget>
 #include <QDialog>
@@ -54,6 +55,12 @@ class WindowLayoutManager
 
 		// Windows call this at destruction.
 		void unregisterWindow( QWidget *window );
+
+		// Blocked types cannot be open: the live windows of them are closed now, and
+		// any window of one of these types that gets created later is closed again
+		// right away (so no code path can bring one back).
+		void setTypesBlocked( const QStringList &typeIds, bool blocked );
+		bool isTypeBlocked( const QString &typeId ) const;
 
 		// Returns true if a profile load is in progress and has a layout entry
 		// for this window. The window should then skip restoring its own
@@ -118,6 +125,7 @@ class WindowLayoutManager
 		PendingLayout           pending;
 		QString                 curProfile;
 		bool                    loadActive;
+		QSet <QString>          blockedTypes;
 
 		const TypeInfo *findType( const QString &typeId ) const;
 		WindowEntry *findWindow( QWidget *window );

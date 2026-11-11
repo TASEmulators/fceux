@@ -7395,6 +7395,12 @@ void FCEU_LuaFrameBoundary()
  */
 int FCEU_LoadLuaCode(const char *filename, const char *arg) 
 {
+	if (FCEU_HardcoreActive())
+	{
+		FCEU_printf("Lua scripts are disabled in Hardcore mode.\n");
+		return 0;
+	}
+
 	if (!DemandLua())
 	{
 		return 0;

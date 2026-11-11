@@ -149,6 +149,58 @@ void WindowLayoutManager::registerWindow( QWidget *window, const QString &typeId
 	{
 		pending.window = window;
 	}
+
+	if ( blockedTypes.contains(typeId) )
+	{
+		// Still under construction, so close it from the event loop.
+		QPointer<QWidget> guard(window);
+
+		QMetaObject::invokeMethod( window, [guard]()
+		{
+			if ( !guard.isNull() )
+			{
+				guard->close();
+			}
+		}, Qt::QueuedConnection );
+	}
+}
+//----------------------------------------------------------------------------
+void WindowLayoutManager::setTypesBlocked( const QStringList &typeIds, bool blocked )
+{
+	std::list <QPointer<QWidget> > toClose;
+
+	for ( const QString &typeId : typeIds )
+	{
+		if ( blocked )
+		{
+			blockedTypes.insert(typeId);
+
+			for ( const WindowEntry &entry : windowList )
+			{
+				if ( !entry.window.isNull() && (entry.typeId == typeId) )
+				{
+					toClose.push_back(entry.window);
+				}
+			}
+		}
+		else
+		{
+			blockedTypes.remove(typeId);
+		}
+	}
+	// Closing a window unregisters it, so the list is not walked while closing.
+	for ( const QPointer<QWidget> &window : toClose )
+	{
+		if ( !window.isNull() )
+		{
+			window->close();
+		}
+	}
+}
+//----------------------------------------------------------------------------
+bool WindowLayoutManager::isTypeBlocked( const QString &typeId ) const
+{
+	return blockedTypes.contains(typeId);
 }
 //----------------------------------------------------------------------------
 void WindowLayoutManager::unregisterWindow( QWidget *window )

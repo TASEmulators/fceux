@@ -1039,6 +1039,8 @@ void MovieData::dumpSaveramTo(std::vector<uint8>* buf, int compressionLevel)
 //begin playing an existing movie
 bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 {
+	if(FCEU_HardcoreActive())
+		FCEU_DispMessage("Movie playback is disabled in Hardcore mode.", 0);
 	if(!FCEU_IsValidUI(FCEUI_PLAYMOVIE))
 		return true;	//adelikat: file did not fail to load, so let's return true here, just do nothing
 

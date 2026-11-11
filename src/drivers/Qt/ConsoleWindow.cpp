@@ -90,6 +90,7 @@
 #include "Qt/MovieOptions.h"
 #include "Qt/StateRecorderConf.h"
 #ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+#include "Qt/RetroAchievements/RetroAchievements.h"
 #include "Qt/RetroAchievements/RetroAchievementsConf.h"
 #include "Qt/RetroAchievements/RetroAchievementsList.h"
 #include "Qt/RetroAchievements/RetroAchievementsToast.h"
@@ -2570,7 +2571,85 @@ void consoleWin_t::createMainMenu(void)
 	helpMenu->addAction(act);
 
 	toggleMenuToolTips( showToolTips );
+
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	if ( RetroAchievements::instance() != nullptr )
+	{
+		connect( RetroAchievements::instance(), &RetroAchievements::hardcoreChanged,
+			this, &consoleWin_t::onHardcoreChanged );
+	}
+#endif
+	onHardcoreChanged( FCEU_HardcoreActive() );
 };
+//---------------------------------------------------------------------------
+bool consoleWin_t::hardcoreBlocked(void)
+{
+	if ( !FCEU_HardcoreActive() )
+	{
+		return false;
+	}
+	FCEU_WRAPPER_SCOPED_LOCK();
+	FCEU_DispMessage("Not available in Hardcore mode.", 0);
+
+	return true;
+}
+//---------------------------------------------------------------------------
+void consoleWin_t::onHardcoreChanged(bool active)
+{
+	// Everything that can read or change the emulated memory, influence the game or play recorded input.
+	static const QStringList toolTypes =
+	{
+		"Debugger", "HexEditor", "TraceLogger", "CodeDataLogger", "GameGenie", "Cheats",
+		"RamSearch", "RamWatch", "PPUViewer", "SpriteViewer", "NameTableViewer"
+	};
+	QAction *toolActions[] =
+	{
+		cheatsAct, ramSearchAct, ramWatchAct, debuggerAct, hexEditAct, ppuViewAct, oamViewAct, ntViewAct,
+		traceLogAct, codeDataLogAct, luaDebuggerAct, ggEncodeAct, loadLuaAct, loadJsAct, gameGenieAct, loadGgROMAct
+	};
+
+	// Runs before the game is reset, so nothing is left open that could touch it.
+	WindowLayoutManager::instance()->setTypesBlocked( toolTypes, active );
+
+	if ( active )
+	{
+		const QList<QWidget*> windows = QApplication::topLevelWidgets();
+
+		for ( QWidget *win : windows )
+		{
+#ifdef _S9XLUA_H
+			if ( dynamic_cast<LuaControlDialog_t*>(win) || dynamic_cast<LuaSourceDebuggerDialog_t*>(win) )
+			{
+				win->close();
+			}
+#endif
+#ifdef __FCEU_QSCRIPT_ENABLE__
+			if ( dynamic_cast<QScriptDialog_t*>(win) )
+			{
+				win->close();
+			}
+#endif
+		}
+		if ( tasWindowIsOpen() )
+		{
+			tasWin->requestWindowClose();
+		}
+	}
+
+	for ( QAction *act : toolActions )
+	{
+		if ( act != nullptr )
+		{
+			act->setEnabled( !active );
+		}
+	}
+	// These follow the state of the emulator, which the periodic update keeps in sync.
+	openMovAct->setEnabled( FCEU_IsValidUI( FCEUI_PLAYMOVIE ) );
+	playMovBeginAct->setEnabled( FCEU_IsValidUI( FCEUI_PLAYFROMBEGINNING ) );
+	loadStateAct->setEnabled( FCEU_IsValidUI( FCEUI_LOADSTATE ) );
+	quickLoadAct->setEnabled( FCEU_IsValidUI( FCEUI_QUICKLOAD ) );
+	tasEditorAct->setEnabled( FCEU_IsValidUI( FCEUI_TASEDITOR ) );
+}
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 void consoleWin_t::setViewportWidget(QWidget *w)
@@ -3763,6 +3842,10 @@ void consoleWin_t::takeScreenShot(void)
 
 void consoleWin_t::loadLua(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 #ifdef _S9XLUA_H
 	LuaControlDialog_t *luaCtrlWin;
 
@@ -3776,6 +3859,10 @@ void consoleWin_t::loadLua(void)
 
 void consoleWin_t::loadJs(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 #ifdef __FCEU_QSCRIPT_ENABLE__
 	QScriptDialog_t *jsCtrlWin;
 
@@ -3934,6 +4021,10 @@ void consoleWin_t::openAviRiffViewer(void)
 
 void consoleWin_t::openTasEditor(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	FCEU_WRAPPER_SCOPED_LOCK();
 
 	if ( tasWindowIsOpen() )
@@ -3965,6 +4056,10 @@ void consoleWin_t::openMovieOptWin(void)
 
 void consoleWin_t::openCheats(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	//printf("Open GUI Cheat Window\n");
 	
    openCheatDialog(this);
@@ -3972,6 +4067,10 @@ void consoleWin_t::openCheats(void)
 
 void consoleWin_t::openRamWatch(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	RamWatchDialog_t *ramWatchWin;
 
 	//printf("Open GUI RAM Watch Window\n");
@@ -3983,12 +4082,20 @@ void consoleWin_t::openRamWatch(void)
 
 void consoleWin_t::openRamSearch(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	//printf("Open GUI RAM Search Window\n");
 	openRamSearchWindow(this);
 }
 
 void consoleWin_t::openDebugWindow(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	//printf("Open GUI 6502 Debugger Window\n");
 	
 	if ( debuggerWindowIsOpen() )
@@ -4007,6 +4114,10 @@ void consoleWin_t::openDebugWindow(void)
 
 void consoleWin_t::openHexEditor(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	HexEditorDialog_t *hexEditWin;
 
 	//printf("Open GUI Hex Editor Window\n");
@@ -4018,6 +4129,10 @@ void consoleWin_t::openHexEditor(void)
 
 void consoleWin_t::openPPUViewer(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	//printf("Open GUI PPU Viewer Window\n");
 	
 	openPPUViewWindow(this);
@@ -4025,6 +4140,10 @@ void consoleWin_t::openPPUViewer(void)
 
 void consoleWin_t::openOAMViewer(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	//printf("Open GUI OAM Viewer Window\n");
 	
 	openOAMViewWindow(this);
@@ -4032,6 +4151,10 @@ void consoleWin_t::openOAMViewer(void)
 
 void consoleWin_t::openNTViewer(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	//printf("Open GUI Name Table Viewer Window\n");
 	
 	openNameTableViewWindow(this);
@@ -4039,11 +4162,19 @@ void consoleWin_t::openNTViewer(void)
 
 void consoleWin_t::openCodeDataLogger(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	openCDLWindow(this);
 }
 
 void consoleWin_t::openLuaDebugger(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 #ifdef _S9XLUA_H
 	openLuaSourceDebugger(this);
 #endif
@@ -4051,6 +4182,10 @@ void consoleWin_t::openLuaDebugger(void)
 
 void consoleWin_t::openGGEncoder(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	//printf("Open Game Genie Window\n");
 
 	openGameGenieWindow(this);
@@ -4076,6 +4211,10 @@ void consoleWin_t::openNesHeaderEditor(void)
 
 void consoleWin_t::openTraceLogger(void)
 {
+	if (hardcoreBlocked())
+	{
+		return;
+	}
 	openTraceLoggerWindow(this);
 }
 

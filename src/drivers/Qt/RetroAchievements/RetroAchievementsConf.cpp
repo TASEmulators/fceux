@@ -53,8 +53,8 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 
 	enableCbox = new QCheckBox(tr("Enable RetroAchievements"));
 	hardcoreCbox = new QCheckBox(tr("Hardcore mode"));
-	hardcoreCbox->setToolTip(tr("Disables cheats, rewind, slow motion, frame advance and loading save states "
-		"while RetroAchievements is enabled. Turning it on resets the game."));
+	hardcoreCbox->setToolTip(tr(	"Disables cheats, rewind, slow motion, frame advance, loading save states, movie playback, scripting, "
+	"the debugger and the memory tools while RetroAchievements is enabled. Turning it on resets the game."));
 	soundCbox = new QCheckBox(tr("Play a sound when an achievement is unlocked"));
 	userEdit = new QLineEdit();
 	passwordEdit = new QLineEdit();
@@ -196,7 +196,7 @@ void RetroAchievementsDialog_t::hardcoreToggled(bool checked)
 	if (checked && ra->isEnabled() && (GameInfo != nullptr))
 	{
 		const QMessageBox::StandardButton answer = QMessageBox::question(this, tr("Hardcore mode"),
-			tr("Turning on hardcore mode resets the running game. Continue?"),
+			tr("Turning on hardcore mode closes the debugging tools and scripts, and resets the running game. Continue?"),
 			QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
 		if (answer != QMessageBox::Yes)

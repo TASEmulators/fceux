@@ -291,6 +291,9 @@ void RetroAchievements::refreshHardcore(void)
 	{
 		rc_client_set_hardcore_enabled(client, active ? 1 : 0);
 	}
+	// Listeners (the main window closes the tools) run before the core resets the game.
+	emit hardcoreChanged(active);
+
 	FCEU_HardcoreModeChanged();
 
 	FCEU_printf("RetroAchievements: hardcore mode %s.\n", active ? "enabled" : "disabled");
@@ -299,7 +302,6 @@ void RetroAchievements::refreshHardcore(void)
 	{
 		announceMode();
 	}
-	emit hardcoreChanged(active);
 }
 //----------------------------------------------------------------------------
 void RetroAchievements::announceMode(void)
@@ -311,7 +313,7 @@ void RetroAchievements::announceMode(void)
 	if (hardcoreActive)
 	{
 		emit notification(tr("Hardcore Mode"),
-			tr("Cheats, rewind, slow motion, frame advance and loading save states are disabled."), QString());
+			tr("Cheats, rewind, slow motion, frame advance, save state loads, scripts and the debugging tools are disabled."), QString());
 	}
 	else
 	{
