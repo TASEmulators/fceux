@@ -295,6 +295,8 @@ class  consoleWin_t : public QMainWindow
 		QAction *recAsWavAct;
 		QAction *stopWavAct;
 		QAction *tasEditorAct;
+		// Speed menu entries other than Normal.
+		QList<QAction*> speedActs;
 		QAction *netPlayHostAct;
 		QAction *netPlayJoinAct;
 		QAction *netPlayDiscAct;

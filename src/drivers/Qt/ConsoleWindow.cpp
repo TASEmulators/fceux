@@ -1948,6 +1948,7 @@ void consoleWin_t::createMainMenu(void)
 	act->setToolTip( act->statusTip() );
 	act->setIcon( style()->standardIcon( QStyle::SP_MediaSeekForward ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuSpeedUp(void)) );
+	speedActs.push_back(act);
 	
 	Hotkeys[ HK_INCREASE_SPEED ].setAction( act );
 	connect( Hotkeys[ HK_INCREASE_SPEED ].getShortcut(), SIGNAL(activated()), this, SLOT(emuSpeedUp(void)) );
@@ -1961,6 +1962,7 @@ void consoleWin_t::createMainMenu(void)
 	act->setToolTip( act->statusTip() );
 	act->setIcon( style()->standardIcon( QStyle::SP_MediaSeekBackward ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuSlowDown(void)) );
+	speedActs.push_back(act);
 	
 	Hotkeys[ HK_DECREASE_SPEED ].setAction( act );
 	connect( Hotkeys[ HK_DECREASE_SPEED ].getShortcut(), SIGNAL(activated()), this, SLOT(emuSlowDown(void)) );
@@ -1976,6 +1978,7 @@ void consoleWin_t::createMainMenu(void)
 	act->setToolTip( act->statusTip() );
 	act->setIcon( style()->standardIcon( QStyle::SP_MediaSkipBackward ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuSlowestSpd(void)) );
+	speedActs.push_back(act);
 	
 	subMenu->addAction(act);
 
@@ -1996,6 +1999,7 @@ void consoleWin_t::createMainMenu(void)
 	act->setToolTip( act->statusTip() );
 	act->setIcon( style()->standardIcon( QStyle::SP_MediaSkipForward ) );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuFastestSpd(void)) );
+	speedActs.push_back(act);
 	
 	subMenu->addAction(act);
 	
@@ -2005,6 +2009,7 @@ void consoleWin_t::createMainMenu(void)
 	act->setStatusTip(tr("Set a custom emulation speed."));
 	act->setToolTip( act->statusTip() );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuCustomSpd(void)) );
+	speedActs.push_back(act);
 	
 	subMenu->addAction(act);
 	
@@ -2016,6 +2021,7 @@ void consoleWin_t::createMainMenu(void)
 	act->setStatusTip(tr("Set the delay used when advancing one frame at a time."));
 	act->setToolTip( act->statusTip() );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuSetFrameAdvDelay(void)) );
+	speedActs.push_back(act);
 	
 	subMenu->addAction(act);
 
@@ -2643,6 +2649,17 @@ void consoleWin_t::onHardcoreChanged(bool active)
 			act->setEnabled( !active );
 		}
 	}
+	for ( QAction *act : speedActs )
+	{
+		act->setEnabled( !active );
+	}
+	if ( active && (GameInfo != nullptr) )
+	{
+		// Back to normal speed, which is the only one allowed.
+		FCEU_WRAPPER_SCOPED_LOCK();
+		FCEUD_SetEmulationSpeed( EMUSPEED_NORMAL );
+	}
+
 	// These follow the state of the emulator, which the periodic update keeps in sync.
 	openMovAct->setEnabled( FCEU_IsValidUI( FCEUI_PLAYMOVIE ) );
 	playMovBeginAct->setEnabled( FCEU_IsValidUI( FCEUI_PLAYFROMBEGINNING ) );

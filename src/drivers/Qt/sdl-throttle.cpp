@@ -289,10 +289,11 @@ RefreshThrottleFPS(void)
 	int32_t fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
 	int32_t T;
 
-	// No slow motion in hardcore mode.
-	if ( FCEU_HardcoreActive() && (g_fpsScale < Normal) )
+	// Hardcore mode only allows normal speed.
+	if ( FCEU_HardcoreActive() )
 	{
 		g_fpsScale = Normal;
+		MaxSpeed = false;
 	}
 
 	hz = ( ((double)fps) / 16777216.0 );
