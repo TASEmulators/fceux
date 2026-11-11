@@ -37,6 +37,27 @@ endif()
 
 option(FCEU_PROFILER_ENABLE "Enable the built-in FCEU performance profiler (near-zero cost while not capturing)" ON)
 
+# RetroAchievements support (rcheevos rc_client). The rcheevos sources are not
+# part of this repository; point RCHEEVOS_DIR at a checkout (tested with v12.5.0).
+option(RETRO_ACHIEVEMENTS "Enable RetroAchievements support (requires the rcheevos sources in RCHEEVOS_DIR)" OFF)
+set(RCHEEVOS_DIR "${CMAKE_SOURCE_DIR}/src/rcheevos" CACHE PATH "Path to the rcheevos source tree")
+
+set(RCHEEVOS_SOURCE "")
+if (RETRO_ACHIEVEMENTS)
+	if (EXISTS "${RCHEEVOS_DIR}/include/rc_client.h" AND IS_DIRECTORY "${RCHEEVOS_DIR}/src")
+		# Everything under src/ except the libretro glue, so both the v12.x release layout
+		# (src/rapi, src/rcheevos, src/rhash) and the newer develop layout are handled.
+		file(GLOB_RECURSE RCHEEVOS_SOURCE CONFIGURE_DEPENDS "${RCHEEVOS_DIR}/src/*.c")
+		list(FILTER RCHEEVOS_SOURCE EXCLUDE REGEX "/libretro/|/rc_libretro\\.c$")
+		message( STATUS "RetroAchievements: enabled (rcheevos from ${RCHEEVOS_DIR})")
+	else()
+		message( WARNING "RetroAchievements: rcheevos sources not found in RCHEEVOS_DIR='${RCHEEVOS_DIR}'; disabling RETRO_ACHIEVEMENTS")
+		set(RETRO_ACHIEVEMENTS OFF)
+	endif()
+else()
+	message( STATUS "RetroAchievements: disabled (use -DRETRO_ACHIEVEMENTS=ON -DRCHEEVOS_DIR=<path> to enable)")
+endif()
+
 find_package(Vulkan QUIET)
 
 if ( ${FCEU_PROFILER_ENABLE} )
@@ -754,6 +775,16 @@ else()
 	message( STATUS "${Qt} Multimedia Module Not Found; disabling Qt audio driver")
 endif()
 
+if (RETRO_ACHIEVEMENTS)
+	list(APPEND SOURCES ${RCHEEVOS_SOURCE}
+		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievements.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievementsConf.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievementsImages.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievementsList.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievementsOverlay.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievementsToast.cpp)
+endif()
+
 # Put build timestamp into BUILD_TS environment variable and from there into
 # the FCEUX_BUILD_TIMESTAMP preprocessor definition.
 # Note: with CMake >= 3.8.0, this will respect SOURCE_DATE_EPOCH. For more info,
@@ -817,6 +848,11 @@ endif()
 if (${Qt}Multimedia_FOUND)
 	target_compile_definitions(${APP_NAME} PRIVATE FCEUX_HAS_QT_AUDIO)
 	target_link_libraries(${APP_NAME} ${Qt}::Multimedia)
+endif()
+
+if (RETRO_ACHIEVEMENTS)
+	target_compile_definitions(${APP_NAME} PRIVATE FCEUX_HAS_RETRO_ACHIEVEMENTS=1 RC_CLIENT_SUPPORTS_HASH=1)
+	target_include_directories(${APP_NAME} PRIVATE ${RCHEEVOS_DIR}/include)
 endif()
 
 if(NOT MSVC)

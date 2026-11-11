@@ -50,3 +50,6 @@ fceux-net-server
 
 # typical CMake build directory
 /build
+
+# optional rcheevos sources for -DRETRO_ACHIEVEMENTS=ON (not part of this repository)
+/src/rcheevos

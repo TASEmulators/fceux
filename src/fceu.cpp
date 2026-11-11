@@ -165,6 +165,10 @@ static void FCEU_CloseGame(void)
 {
 	if (GameInfo)
 	{
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+		FCEUD_RetroAchievementsGameClosed();
+#endif
+
 		if (AutoResumePlay)
 		{
 			// save "-resume" savestate
@@ -587,6 +591,20 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 		GameInfo = 0;
 	}
 
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	if (GameInfo)
+	{
+		std::vector<uint8> image(fp->stream->size());
+
+		fp->stream->fseek(0, SEEK_SET);
+
+		if (!image.empty() && (fp->stream->fread(image.data(), image.size()) == image.size()))
+		{
+			FCEUD_RetroAchievementsGameLoaded(fp->filename.c_str(), image.data(), image.size());
+		}
+	}
+#endif
+
 	FCEU_fclose(fp);
 
 	if ( FCEU_StateRecorderIsEnabled() )
@@ -830,6 +848,10 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	if (geniestage != 1) FCEU_ApplyPeriodicCheats();
 	r = FCEUPPU_Loop(skip);
 
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	FCEUD_RetroAchievementsFrame();
+#endif
+
 	if (skip != 2) ssize = FlushEmulateSound();  //If skip = 2 we are skipping sound processing
 
 	//flush tracer once a frame, since we're likely to end up back at a user interaction loop after this with emulation paused
@@ -905,6 +927,9 @@ void FCEUI_CloseGame(void) {
 void ResetNES(void) {
 	FCEUMOV_AddCommand(FCEUNPCMD_RESET);
 	if (!GameInfo) return;
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	FCEUD_RetroAchievementsReset();
+#endif
 	GameInterface(GI_RESETM2);
 	FCEUSND_Reset();
 	FCEUPPU_Reset();
@@ -1002,6 +1027,9 @@ void hand(X6502 *X, int type, uint32 A) {
 void PowerNES(void) {
 	FCEUMOV_AddCommand(FCEUNPCMD_POWER);
 	if (!GameInfo) return;
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	FCEUD_RetroAchievementsReset();
+#endif
 
 	//reseed random, unless we're in a movie
 	extern int disableBatteryLoading;

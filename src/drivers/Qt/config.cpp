@@ -820,6 +820,16 @@ InitConfig()
 	config->addOption("SDL.StateRecorderPauseOnLoad", 1);
 	config->addOption("SDL.StateRecorderPauseDuration", 3);
 
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	// RetroAchievements: only the user name and the login token are stored, never the password.
+	config->addOption("SDL.RetroAchEnable", 0);
+	config->addOption("SDL.RetroAchUser", "");
+	config->addOption("SDL.RetroAchToken", "");
+	config->addOption("SDL.RetroAchSound", 1);
+	// Logs savestate progress save/load in the message log. Off by default as the state recorder saves often.
+	config->addOption("SDL.RetroAchDebug", 0);
+#endif
+
 	//TODO implement this
 	config->addOption("periodicsaves", "SDL.PeriodicSaves", 0);
 

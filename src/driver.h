@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iosfwd>
+#include <vector>
 
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode);
 inline FILE *FCEUD_UTF8fopen(const std::string &n, const char *mode) { return FCEUD_UTF8fopen(n.c_str(),mode); }
@@ -366,6 +367,19 @@ enum EFCEUI
 
 //checks whether an EFCEUI is valid right now
 bool FCEU_IsValidUI(EFCEUI ui);
+
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+// RetroAchievements hooks, implemented by the driver. All of them are called on
+// the emulator thread (or the thread loading the game) with the emulator lock held.
+void FCEUD_RetroAchievementsGameLoaded(const char *filename, const uint8 *data, size_t size);
+void FCEUD_RetroAchievementsGameClosed(void);
+void FCEUD_RetroAchievementsFrame(void);
+void FCEUD_RetroAchievementsReset(void);
+// Progress data stored in savestates. Serialize returns false when there is nothing to store.
+// Deserialize with null data restarts tracking.
+bool FCEUD_RetroAchievementsSerialize(std::vector<uint8> &data);
+void FCEUD_RetroAchievementsDeserialize(const uint8 *data, size_t size);
+#endif
 
 #ifdef __cplusplus
 extern "C"

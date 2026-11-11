@@ -32,6 +32,9 @@
 #include "Qt/config.h"
 #include "Qt/dface.h"
 #include "Qt/fceuWrapper.h"
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+#include "Qt/RetroAchievements/RetroAchievements.h"
+#endif
 #include "Qt/input.h"
 #include "Qt/sdl.h"
 #include "Qt/sdl-video.h"
@@ -826,6 +829,11 @@ int  fceuWrapperInit( int argc, char *argv[] )
 	// update the input devices
 	UpdateInput(g_config);
 
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	// Needs the parsed config, and has to exist before any game is loaded.
+	RetroAchievements::create();
+#endif
+
 	// check for a .fcm file to convert to .fm2
 	g_config->getOption ("SDL.FCMConvert", &s);
 	g_config->setOption ("SDL.FCMConvert", "");
@@ -1176,6 +1184,10 @@ int  fceuWrapperInit( int argc, char *argv[] )
 int  fceuWrapperClose( void )
 {
 	CloseGame();
+
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	RetroAchievements::destroy();
+#endif
 
 	// exit the infrastructure
 	FCEUI_Kill();

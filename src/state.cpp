@@ -263,6 +263,9 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 	uint32 size;
 	bool ret=true;
 	bool warned=false;
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	bool retroAchProgressRead=false;
+#endif
 
 	read_sfcpuc=0;
 	read_snd=0;
@@ -351,6 +354,27 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 				else
 					read_sfcpuc=1;
 			}  break;
+		case 0x52:
+			// RetroAchievements progress. Always recognised so builds without the
+			// feature can still load states made by builds that have it.
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+			{
+				std::vector<uint8> progress(size);
+
+				if(size > 0 && is->fread((char*)progress.data(),size) == size)
+				{
+					FCEUD_RetroAchievementsDeserialize(progress.data(), size);
+					retroAchProgressRead = true;
+				}
+				else
+				{
+					ret=false;
+				}
+			}
+#else
+			is->fseek(size,SEEK_CUR);
+#endif
+			break;
 		default:
 			// for somebody's sanity's sake, at least warn about it:
 			if(!warned)
@@ -365,6 +389,14 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 		}
 	}
 	//endo:
+
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	// A state without progress data (old state, or made without RetroAchievements): start tracking over.
+	if(!retroAchProgressRead)
+	{
+		FCEUD_RetroAchievementsDeserialize(nullptr, 0);
+	}
+#endif
 
 	//mbg 6/16/08 - wtf
 	// if(X.mooPI==0xFF && !scan_chunks)
@@ -432,6 +464,22 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 		os->fwrite((char*)XBackBuf,size);
 		totalsize += 5 + size;
 	}
+
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	// Not saved in TAS Editor states, which are taken constantly and would only grow in size.
+	if(!FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+	{
+		std::vector<uint8> progress;
+
+		if(FCEUD_RetroAchievementsSerialize(progress))
+		{
+			os->fputc(0x52);
+			write32le((uint32)progress.size(), os);
+			os->fwrite((char*)progress.data(), progress.size());
+			totalsize += 5 + progress.size();
+		}
+	}
+#endif
 
 	if(SPreSave) SPreSave();
 	totalsize+=WriteStateChunk(os,0x10,SFMDATA);

@@ -89,6 +89,11 @@
 #include "Qt/MovieRecord.h"
 #include "Qt/MovieOptions.h"
 #include "Qt/StateRecorderConf.h"
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+#include "Qt/RetroAchievements/RetroAchievementsConf.h"
+#include "Qt/RetroAchievements/RetroAchievementsList.h"
+#include "Qt/RetroAchievements/RetroAchievementsToast.h"
+#endif
 #include "Qt/TimingConf.h"
 #include "Qt/FrameTimingStats.h"
 #include "Qt/ProfilerDialog.h"
@@ -1532,6 +1537,19 @@ void consoleWin_t::createMainMenu(void)
 	
 	optMenu->addAction(stateRecordConfig);
 
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	// Options -> RetroAchievements
+	QAction *retroAchConfig = new QAction(tr("&RetroAchievements..."), this);
+	retroAchConfig->setStatusTip(tr("Enable RetroAchievements and log in to your account."));
+	retroAchConfig->setToolTip( retroAchConfig->statusTip() );
+	connect(retroAchConfig, &QAction::triggered, this, [this]() { RetroAchievementsDialog_t::open(this); });
+
+	optMenu->addAction(retroAchConfig);
+
+	// Popup notifications for the main window
+	new RaToastManager(this);
+#endif
+
 	// Options -> Movie Options
 	movieConfig = new QAction(tr("&Movie Options"), this);
 	//movieConfig->setShortcut( QKeySequence(tr("Ctrl+C")));
@@ -2156,6 +2174,16 @@ void consoleWin_t::createMainMenu(void)
 	connect(ramWatchAct, SIGNAL(triggered()), this, SLOT(openRamWatch(void)) );
 	
 	toolsMenu->addAction(ramWatchAct);
+
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	// Tools -> Achievements
+	act = new QAction(tr("&Achievements ..."), this);
+	act->setStatusTip(tr("View the RetroAchievements achievements and leaderboards of the loaded game."));
+	act->setToolTip( act->statusTip() );
+	connect(act, &QAction::triggered, this, [this]() { RetroAchievementsListDialog_t::open(this); });
+
+	toolsMenu->addAction(act);
+#endif
 
 	// Tools -> Frame Timing
 	act = new QAction(tr("&Frame Timing ..."), this);
