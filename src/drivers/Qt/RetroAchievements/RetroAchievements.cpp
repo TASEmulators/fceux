@@ -12,6 +12,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QSettings>
 #include <QSysInfo>
 #include <QUrl>
 
@@ -41,6 +42,7 @@ static const char *cfgUser   = "SDL.RetroAchUser";
 static const char *cfgToken  = "SDL.RetroAchToken";
 static const char *cfgDebug  = "SDL.RetroAchDebug";
 static const char *cfgHardcore = "SDL.RetroAchHardcore";
+static const char *cfgResultsGroup = "retroAchievementsLeaderboardResults";
 
 //----------------------------------------------------------------------------
 RetroAchievements::RetroAchievements(void)
@@ -76,6 +78,17 @@ RetroAchievements::RetroAchievements(void)
 	g_config->getOption(cfgEnable, &enable);
 	g_config->getOption(cfgDebug, &debugLog);
 	g_config->getOption(cfgHardcore, &hardcoreSetting);
+
+	{
+		QSettings settings;
+
+		settings.beginGroup(cfgResultsGroup);
+
+		for (const QString &key : settings.childKeys())
+		{
+			lastResults.insert(key.toUInt(), settings.value(key).toString());
+		}
+	}
 
 	if (enable)
 	{
@@ -921,7 +934,8 @@ QList<RaLeaderboardInfo> RetroAchievements::getLeaderboards(void)
 			info.title = QString::fromUtf8(src->title ? src->title : "");
 			info.description = QString::fromUtf8(src->description ? src->description : "");
 			info.lowerIsBetter = (src->lower_is_better != 0);
-			info.tracking = (src->state == RC_CLIENT_LEADERBOARD_STATE_TRACKING);
+			info.state = src->state;
+			info.lastResult = lastResults.value(src->id);
 
 			result.append(info);
 		}
@@ -964,27 +978,35 @@ void RC_CCONV RetroAchievements::leaderboardEntriesCallback(int result, const ch
 	}
 	fetch->service->leaderboardFetches.erase(fetch);
 
-	emit fetch->service->leaderboardEntriesReady(fetch->id, entries);
+	emit fetch->service->leaderboardEntriesReady(fetch->id, fetch->aroundUser, entries);
 
 	delete fetch;
 }
 //----------------------------------------------------------------------------
-void RetroAchievements::fetchLeaderboardEntries(uint32_t leaderboardId)
+void RetroAchievements::fetchLeaderboardEntries(uint32_t leaderboardId, bool aroundUser)
 {
 	FCEU_WRAPPER_SCOPED_LOCK();
 
 	if ((client == nullptr) || !gameActive)
 	{
-		emit leaderboardEntriesReady(leaderboardId, QList<RaLeaderboardEntry>());
+		emit leaderboardEntriesReady(leaderboardId, aroundUser, QList<RaLeaderboardEntry>());
 		return;
 	}
-	LeaderboardFetch *fetch = new LeaderboardFetch{ this, leaderboardId };
+	LeaderboardFetch *fetch = new LeaderboardFetch{ this, leaderboardId, aroundUser };
 
 	// Registered first, because rc_client can call back before the function returns.
 	leaderboardFetches.insert(fetch);
 
-	rc_client_begin_fetch_leaderboard_entries(client, leaderboardId, 1, 10,
-		&RetroAchievements::leaderboardEntriesCallback, fetch);
+	if (aroundUser)
+	{
+		rc_client_begin_fetch_leaderboard_entries_around_user(client, leaderboardId, 10,
+			&RetroAchievements::leaderboardEntriesCallback, fetch);
+	}
+	else
+	{
+		rc_client_begin_fetch_leaderboard_entries(client, leaderboardId, 1, 10,
+			&RetroAchievements::leaderboardEntriesCallback, fetch);
+	}
 }
 //----------------------------------------------------------------------------
 void RC_CCONV RetroAchievements::eventHandler(const rc_client_event_t *event, rc_client_t *client)
@@ -1039,14 +1061,28 @@ void RC_CCONV RetroAchievements::eventHandler(const rc_client_event_t *event, rc
 			FCEU_printf("RetroAchievements: leaderboard attempt started: %s\n", event->leaderboard->title);
 
 			emit self->notification(tr("Leaderboard Attempt Started"), QString::fromUtf8(event->leaderboard->title), QString());
+			emit self->leaderboardStateChanged();
 		break;
 		case RC_CLIENT_EVENT_LEADERBOARD_FAILED:
 			FCEU_printf("RetroAchievements: leaderboard attempt failed: %s\n", event->leaderboard->title);
 
 			emit self->notification(tr("Leaderboard Attempt Failed"), QString::fromUtf8(event->leaderboard->title), QString());
+			emit self->leaderboardStateChanged();
 		break;
 		case RC_CLIENT_EVENT_LEADERBOARD_SUBMITTED:
 			FCEU_printf("RetroAchievements: leaderboard score submitted: %s\n", event->leaderboard->title);
+
+			{
+				// Remembered locally, so the result can be shown even if the server does not list it.
+				const QString result = QString::fromUtf8(event->leaderboard->tracker_value);
+				QSettings settings;
+
+				self->lastResults.insert(event->leaderboard->id, result);
+
+				settings.beginGroup(cfgResultsGroup);
+				settings.setValue(QString::number(event->leaderboard->id), result);
+			}
+			emit self->leaderboardStateChanged();
 		break;
 		case RC_CLIENT_EVENT_LEADERBOARD_SCOREBOARD:
 		{
@@ -1058,6 +1094,8 @@ void RC_CCONV RetroAchievements::eventHandler(const rc_client_event_t *event, rc
 					.arg(info ? QString::fromUtf8(info->title) : QString())
 					.arg(QString::fromUtf8(board->submitted_score)).arg(board->new_rank).arg(board->num_entries),
 				QString());
+
+			emit self->leaderboardSubmitted(board->leaderboard_id);
 		}
 		break;
 		case RC_CLIENT_EVENT_SERVER_ERROR:

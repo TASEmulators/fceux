@@ -5,6 +5,7 @@
 
 #ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
 
+#include <QComboBox>
 #include <QDialog>
 #include <QHash>
 #include <QLabel>
@@ -37,6 +38,7 @@ class RetroAchievementsListDialog_t : public QDialog
 		QTreeWidget *achTree;
 		QTreeWidget *boardTree;
 		QTreeWidget *entryTree;
+		QComboBox *entryMode;
 		QSplitter *splitter;
 		QLabel *entryStatus;
 		QTimer refreshTimer;
@@ -52,7 +54,10 @@ class RetroAchievementsListDialog_t : public QDialog
 		void updatePresence(void);
 		void imageReady(const QString &url);
 		void boardSelected(void);
-		void entriesReady(unsigned int boardId, const QList<RaLeaderboardEntry> &entries);
+		void fetchEntries(void);
+		void updateBoardStates(void);
+		void boardSubmitted(unsigned int boardId);
+		void entriesReady(unsigned int boardId, bool aroundUser, const QList<RaLeaderboardEntry> &entries);
 };
 
 #endif // FCEUX_HAS_RETRO_ACHIEVEMENTS

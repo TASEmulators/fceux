@@ -13,6 +13,9 @@
 #include <QTabWidget>
 #include <QVBoxLayout>
 
+#include "../../../fceu.h"
+#include "Qt/config.h"
+#include "Qt/fceuWrapper.h"
 #include "Qt/RetroAchievements/RetroAchievementsImages.h"
 #include "Qt/RetroAchievements/RetroAchievementsList.h"
 
@@ -20,6 +23,29 @@ static QPointer<RetroAchievementsListDialog_t> openDialog;
 
 static const int badgeSize = 48;
 static const int avatarSize = 32;
+
+static QString boardStateText(const RaLeaderboardInfo &board)
+{
+	QString text;
+
+	switch (board.state)
+	{
+		case RC_CLIENT_LEADERBOARD_STATE_TRACKING:
+			text = QObject::tr("Tracking");
+		break;
+		case RC_CLIENT_LEADERBOARD_STATE_ACTIVE:
+			text = QObject::tr("Ready");
+		break;
+		default:
+			text = QObject::tr("Inactive");
+		break;
+	}
+	if (!board.lastResult.isEmpty())
+	{
+		text += QObject::tr(" (last: %1)").arg(board.lastResult);
+	}
+	return text;
+}
 
 //----------------------------------------------------------------------------
 void RetroAchievementsListDialog_t::open(QWidget *parent)
@@ -92,6 +118,8 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	boardTree->setColumnCount(3);
 	boardTree->setHeaderLabels({ tr("Leaderboard"), tr("Description"), tr("State") });
 	boardTree->setRootIsDecorated(false);
+	// Without this the last column (State) is stretched as well and shares the spare width with Description.
+	boardTree->header()->setStretchLastSection(false);
 	boardTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 	boardTree->header()->setSectionResizeMode(1, QHeaderView::Stretch);
 	boardTree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
@@ -108,7 +136,12 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	entryTree->header()->setSectionResizeMode(2, QHeaderView::Stretch);
 	entryTree->header()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
 
+	entryMode = new QComboBox();
+	entryMode->addItem(tr("Top scores"));
+	entryMode->addItem(tr("Around my score"));
+
 	entryLayout->setContentsMargins(0, 0, 0, 0);
+	entryLayout->addWidget(entryMode);
 	entryLayout->addWidget(entryStatus);
 	entryLayout->addWidget(entryTree);
 	entryPane->setLayout(entryLayout);
@@ -144,8 +177,11 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 
 	connect(&refreshTimer, &QTimer::timeout, this, &RetroAchievementsListDialog_t::refresh);
 	connect(&presenceTimer, &QTimer::timeout, this, &RetroAchievementsListDialog_t::updatePresence);
+	// Also polled, so the states are right even when no leaderboard event arrived.
+	connect(&presenceTimer, &QTimer::timeout, this, &RetroAchievementsListDialog_t::updateBoardStates);
 	connect(closeButton, &QPushButton::clicked, this, &QDialog::close);
 	connect(boardTree, &QTreeWidget::currentItemChanged, this, &RetroAchievementsListDialog_t::boardSelected);
+	connect(entryMode, qOverload<int>(&QComboBox::currentIndexChanged), this, &RetroAchievementsListDialog_t::fetchEntries);
 
 	// Queued so the window is never updated while the GUI thread holds the emulator lock.
 	connect(ra, &RetroAchievements::achievementUnlocked, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
@@ -153,6 +189,10 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	connect(ra, &RetroAchievements::gameUnrecognized, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::gameUnloaded, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::loginStateChanged, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
+	connect(ra, &RetroAchievements::leaderboardStateChanged, this, &RetroAchievementsListDialog_t::updateBoardStates,
+		Qt::QueuedConnection);
+	connect(ra, &RetroAchievements::leaderboardSubmitted, this, &RetroAchievementsListDialog_t::boardSubmitted,
+		Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::leaderboardEntriesReady, this, &RetroAchievementsListDialog_t::entriesReady,
 		Qt::QueuedConnection);
 	connect(ra->images(), &RaImageCache::imageReady, this, &RetroAchievementsListDialog_t::imageReady);
@@ -262,7 +302,8 @@ void RetroAchievementsListDialog_t::refresh(void)
 
 		item->setText(0, board.title);
 		item->setText(1, board.description);
-		item->setText(2, board.tracking ? tr("Tracking") : QString());
+		item->setToolTip(1, board.description);
+		item->setText(2, boardStateText(board));
 		item->setData(0, Qt::UserRole, board.id);
 	}
 	entryTree->clear();
@@ -318,19 +359,83 @@ void RetroAchievementsListDialog_t::boardSelected(void)
 	}
 	selectedBoard = item->data(0, Qt::UserRole).toUInt();
 
+	fetchEntries();
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsListDialog_t::fetchEntries(void)
+{
+	RetroAchievements *ra = RetroAchievements::instance();
+
+	if ((selectedBoard == 0) || (ra == nullptr))
+	{
+		return;
+	}
 	entryTree->clear();
 	avatarItems.clear();
 	entryStatus->setText(tr("Loading..."));
 
-	ra->fetchLeaderboardEntries(selectedBoard);
+	ra->fetchLeaderboardEntries(selectedBoard, entryMode->currentIndex() == 1);
 }
 //----------------------------------------------------------------------------
-void RetroAchievementsListDialog_t::entriesReady(unsigned int boardId, const QList<RaLeaderboardEntry> &entries)
+void RetroAchievementsListDialog_t::updateBoardStates(void)
 {
-	if (boardId != selectedBoard)
+	RetroAchievements *ra = RetroAchievements::instance();
+
+	if (ra == nullptr)
 	{
 		return;
 	}
+	const QList<RaLeaderboardInfo> boards = ra->getLeaderboards();
+
+	// Only the state column is touched, so the selected leaderboard and its scores stay as they are.
+	for (int i = 0; i < boardTree->topLevelItemCount(); i++)
+	{
+		QTreeWidgetItem *item = boardTree->topLevelItem(i);
+		const unsigned int id = item->data(0, Qt::UserRole).toUInt();
+
+		for (const RaLeaderboardInfo &board : boards)
+		{
+			if (board.id == id)
+			{
+				const QString text = boardStateText(board);
+
+				if (item->text(2) != text)
+				{
+					bool debugLog = false;
+
+					g_config->getOption("SDL.RetroAchDebug", &debugLog);
+
+					if (debugLog)
+					{
+						FCEU_printf("RetroAchievements: leaderboard %u '%s' state: %s\n", id,
+							item->text(0).toUtf8().constData(), text.toUtf8().constData());
+					}
+					item->setText(2, text);
+				}
+				break;
+			}
+		}
+	}
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsListDialog_t::boardSubmitted(unsigned int boardId)
+{
+	// The new score is on the server now.
+	if (boardId == selectedBoard)
+	{
+		fetchEntries();
+	}
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsListDialog_t::entriesReady(unsigned int boardId, bool aroundUser, const QList<RaLeaderboardEntry> &entries)
+{
+	if ((boardId != selectedBoard) || (aroundUser != (entryMode->currentIndex() == 1)))
+	{
+		return;
+	}
+	RetroAchievements *ra = RetroAchievements::instance();
+	const QString myName = (ra != nullptr) ? ra->getUserName() : QString();
+
 	entryTree->clear();
 	avatarItems.clear();
 	entryStatus->setText(entries.isEmpty() ? tr("No entries, or they could not be loaded.") : QString());
@@ -344,6 +449,18 @@ void RetroAchievementsListDialog_t::entriesReady(unsigned int boardId, const QLi
 		item->setText(2, entry.user);
 		item->setText(3, entry.submitted.toLocalTime().toString(Qt::TextDate));
 
+		// Make the logged in user's own score stand out.
+		if (!myName.isEmpty() && (entry.user.compare(myName, Qt::CaseInsensitive) == 0))
+		{
+			QFont bold = item->font(0);
+
+			bold.setBold(true);
+
+			for (int col = 0; col < entryTree->columnCount(); col++)
+			{
+				item->setFont(col, bold);
+			}
+		}
 		if (!entry.avatarUrl.isEmpty())
 		{
 			avatarItems[entry.avatarUrl].append(item);

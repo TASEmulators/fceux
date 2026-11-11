@@ -22,6 +22,7 @@
 
 #include <QByteArray>
 #include <QDateTime>
+#include <QHash>
 #include <QList>
 #include <QMetaType>
 #include <QObject>
@@ -73,7 +74,10 @@ struct RaLeaderboardInfo
 	QString title;
 	QString description;
 	bool lowerIsBetter = false;
-	bool tracking = false;
+	// RC_CLIENT_LEADERBOARD_STATE_*
+	int state = RC_CLIENT_LEADERBOARD_STATE_INACTIVE;
+	// The score of the last attempt of this user that was submitted, kept locally.
+	QString lastResult;
 };
 
 struct RaLeaderboardEntry
@@ -146,8 +150,8 @@ class RetroAchievements : public QObject
 		RaGameSummary getGameSummary(void);
 		QList<RaAchievementBucket> getAchievements(void);
 		QList<RaLeaderboardInfo> getLeaderboards(void);
-		// Result arrives through leaderboardEntriesReady.
-		void fetchLeaderboardEntries(uint32_t leaderboardId);
+		// Result arrives through leaderboardEntriesReady. Either the top scores, or the ones around the user's own.
+		void fetchLeaderboardEntries(uint32_t leaderboardId, bool aroundUser = false);
 
 		RaImageCache *images(void) { return imageCache; }
 
@@ -164,7 +168,11 @@ class RetroAchievements : public QObject
 		// Emitted when the last request that rc_client started has been answered.
 		void requestsDrained(void);
 		void gameUnloaded(void);
-		void leaderboardEntriesReady(unsigned int leaderboardId, const QList<RaLeaderboardEntry> &entries);
+		void leaderboardEntriesReady(unsigned int leaderboardId, bool aroundUser, const QList<RaLeaderboardEntry> &entries);
+		// A leaderboard attempt started, failed or was submitted, so the states in getLeaderboards() changed.
+		void leaderboardStateChanged(void);
+		// The score of an attempt was accepted by the server, which can change the scores of that leaderboard.
+		void leaderboardSubmitted(unsigned int leaderboardId);
 		// Short messages for the user, such as leaderboard and connection events.
 		void notification(const QString &title, const QString &text, const QString &imageUrl);
 
@@ -178,6 +186,7 @@ class RetroAchievements : public QObject
 		{
 			RetroAchievements *service;
 			uint32_t id;
+			bool aroundUser;
 		};
 
 		void initClient(void);
@@ -241,6 +250,9 @@ class RetroAchievements : public QObject
 		bool shuttingDown;
 		QTimer shutdownTimer;
 		std::set<LeaderboardFetch*> leaderboardFetches;
+
+		// Last submitted score of every leaderboard, by leaderboard id. Changed with the emulator lock held.
+		QHash<uint32_t, QString> lastResults;
 
 		// ROM image of the game being identified. rc_client keeps using it until the load callback, and it is
 		// released right after, so nothing is held while a game is just being played.
