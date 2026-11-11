@@ -10,6 +10,9 @@ on:
 permissions:
   contents: read
 
+env:
+  RCHEEVOS_VERSION: 'v12.5.0'
+
 jobs:
   build:
     runs-on: macos-latest
@@ -30,6 +33,16 @@ jobs:
           PKG_CONFIG_PATH="${PKG_CONFIG_PATH:+$PKG_CONFIG_PATH:}$(brew --prefix)/lib/pkgconfig:$LIBARCHIVE_PREFIX/lib/pkgconfig"
           echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
 
+      - name: Fetch rcheevos (RetroAchievements)
+        run: |
+          RCHEEVOS_DIR="$RUNNER_TEMP/rcheevos"
+          git clone --depth 1 --branch "$RCHEEVOS_VERSION" https://github.com/RetroAchievements/rcheevos.git "$RCHEEVOS_DIR"
+          if [ ! -f "$RCHEEVOS_DIR/include/rc_client.h" ]; then
+            echo "rcheevos checkout is incomplete at $RCHEEVOS_DIR"
+            exit 1
+          fi
+          echo "RCHEEVOS_DIR=$RCHEEVOS_DIR" >> "$GITHUB_ENV"
+
       - name: Configure and build
         run: |
           VERSION="$(perl scripts/fceuVersion.pl)"
@@ -39,6 +52,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$(brew --prefix qt6)" \
             -DQT6=1 \
+            -DRETRO_ACHIEVEMENTS=ON \
+            -DRCHEEVOS_DIR="$RCHEEVOS_DIR" \
             -DCMAKE_PROJECT_VERSION_MAJOR="$VERSION_MAJOR" \
             -DCMAKE_PROJECT_VERSION_MINOR="$VERSION_MINOR" \
             -DCMAKE_PROJECT_VERSION_PATCH="$VERSION_PATCH" \
