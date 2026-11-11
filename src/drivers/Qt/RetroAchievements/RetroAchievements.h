@@ -119,6 +119,14 @@ class RetroAchievements : public QObject
 		// GUI thread only. Enabling creates the rc_client and logs in with the stored token.
 		void setEnabled(bool enable);
 
+		// True while hardcore mode is in force: RetroAchievements is enabled, the user did not turn
+		// hardcore off, and the client is not being shut down. Safe to call from any thread.
+		bool isHardcore(void) const { return hardcoreActive; }
+		// The user's choice, kept in the config even while RetroAchievements is disabled.
+		bool getHardcoreSetting(void) const { return hardcoreSetting; }
+		// GUI thread only. Takes the emulator lock. Turning hardcore on resets the loaded game.
+		void setHardcore(bool enable);
+
 		// GUI thread only. On success the user name and token (never the password) are stored in the config.
 		void loginWithPassword(const QString &user, const QString &password);
 		void logout(void);
@@ -145,6 +153,8 @@ class RetroAchievements : public QObject
 	signals:
 		void loginStateChanged(int state, const QString &userName);
 		void loginFailed(const QString &message);
+		// Emitted when hardcore mode starts or stops being in force.
+		void hardcoreChanged(bool active);
 		void gameIdentified(unsigned int gameId, const QString &title);
 		void gameUnrecognized(void);
 		void achievementUnlocked(const QString &title, const QString &description,
@@ -183,6 +193,9 @@ class RetroAchievements : public QObject
 		void identifyGame(void);
 		void releaseRomImage(void);
 		void setLoginState(LoginState state);
+		// Brings the client and the emulator core in line with isHardcore(). Caller must hold the emulator lock.
+		void refreshHardcore(void);
+		void announceMode(void);
 		void idle(void);
 		// Writes the config file once the emulator lock has been released, because the disk write would
 		// otherwise stall emulation.
@@ -214,6 +227,8 @@ class RetroAchievements : public QObject
 		bool gameActive;
 		bool gameUnknown;
 		bool debugLog;
+		bool hardcoreSetting;
+		std::atomic<bool> hardcoreActive;
 		std::atomic<bool> configSavePending;
 
 		// Bumped when the client is destroyed, so queued requests of the old client are dropped.

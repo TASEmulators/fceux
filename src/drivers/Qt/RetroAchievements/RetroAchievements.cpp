@@ -40,6 +40,7 @@ static const char *cfgEnable = "SDL.RetroAchEnable";
 static const char *cfgUser   = "SDL.RetroAchUser";
 static const char *cfgToken  = "SDL.RetroAchToken";
 static const char *cfgDebug  = "SDL.RetroAchDebug";
+static const char *cfgHardcore = "SDL.RetroAchHardcore";
 
 //----------------------------------------------------------------------------
 RetroAchievements::RetroAchievements(void)
@@ -52,6 +53,8 @@ RetroAchievements::RetroAchievements(void)
 	, gameActive(false)
 	, gameUnknown(false)
 	, debugLog(false)
+	, hardcoreSetting(true)
+	, hardcoreActive(false)
 	, configSavePending(false)
 	, generation(0)
 	, inFlight(0)
@@ -72,6 +75,7 @@ RetroAchievements::RetroAchievements(void)
 
 	g_config->getOption(cfgEnable, &enable);
 	g_config->getOption(cfgDebug, &debugLog);
+	g_config->getOption(cfgHardcore, &hardcoreSetting);
 
 	if (enable)
 	{
@@ -128,8 +132,9 @@ void RetroAchievements::initClient(void)
 	rc_client_enable_logging(client, RC_CLIENT_LOG_LEVEL_INFO, &RetroAchievements::logMessage);
 	rc_client_set_event_handler(client, &RetroAchievements::eventHandler);
 
-	// Hardcore stays off until the features it forbids are blocked while it is active.
-	rc_client_set_hardcore_enabled(client, 0);
+	// rc_client needs the mode before a game is loaded. When a game is already running (RetroAchievements
+	// was just enabled), this resets it.
+	refreshHardcore();
 
 	clause[0] = 0;
 	rc_client_get_user_agent_clause(client, clause, sizeof(clause));
@@ -190,6 +195,7 @@ void RetroAchievements::beginShutdown(void)
 	shuttingDown = true;
 	gameActive = false;
 	idleTimer.stop();
+	refreshHardcore();
 
 	if (indicators)
 	{
@@ -264,7 +270,65 @@ void RetroAchievements::finishShutdown(void)
 	gameActive = false;
 	releaseRomImage();
 
+	refreshHardcore();
 	setLoginState(LOGGED_OUT);
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::refreshHardcore(void)
+{
+	const bool active = hardcoreSetting && (client != nullptr) && !shuttingDown;
+
+	if (active == hardcoreActive)
+	{
+		return;
+	}
+	// Set first, so the core already enforces the rules when it resets the game below.
+	hardcoreActive = active;
+
+	// With a game loaded this raises RC_CLIENT_EVENT_RESET, which needs no handler: the reset it asks for
+	// is done by FCEU_HardcoreModeChanged below (and also covers a game rc_client has not identified yet).
+	if (client != nullptr)
+	{
+		rc_client_set_hardcore_enabled(client, active ? 1 : 0);
+	}
+	FCEU_HardcoreModeChanged();
+
+	FCEU_printf("RetroAchievements: hardcore mode %s.\n", active ? "enabled" : "disabled");
+
+	if (GameInfo != nullptr)
+	{
+		announceMode();
+	}
+	emit hardcoreChanged(active);
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::announceMode(void)
+{
+	if ((client == nullptr) || shuttingDown)
+	{
+		return;
+	}
+	if (hardcoreActive)
+	{
+		emit notification(tr("Hardcore Mode"),
+			tr("Cheats, rewind, slow motion, frame advance and loading save states are disabled."), QString());
+	}
+	else
+	{
+		emit notification(tr("Casual Mode"), tr("Hardcore mode is off."), QString());
+	}
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::setHardcore(bool enable)
+{
+	FCEU_WRAPPER_SCOPED_LOCK();
+
+	g_config->setOption(cfgHardcore, enable ? 1 : 0);
+	saveConfigLater();
+
+	hardcoreSetting = enable;
+
+	refreshHardcore();
 }
 //----------------------------------------------------------------------------
 void RetroAchievements::requestAnswered(void)
@@ -471,6 +535,8 @@ void RC_CCONV RetroAchievements::loadGameCallback(int result, const char *errorM
 		{
 			self->gameUnknown = true;
 			emit self->gameUnrecognized();
+			// Nothing is tracked, but the hardcore restrictions still apply.
+			self->announceMode();
 		}
 		return;
 	}
@@ -486,6 +552,8 @@ void RC_CCONV RetroAchievements::loadGameCallback(int result, const char *errorM
 		summary.points_unlocked, summary.points_core);
 
 	emit self->gameIdentified(game->id, QString::fromUtf8(game->title));
+
+	self->announceMode();
 }
 //----------------------------------------------------------------------------
 void RetroAchievements::gameLoaded(void)
@@ -1009,6 +1077,13 @@ void RC_CCONV RetroAchievements::eventHandler(const rc_client_event_t *event, rc
 }
 //----------------------------------------------------------------------------
 // Entry points used by the emulator core. See driver.h.
+//----------------------------------------------------------------------------
+bool FCEUD_RetroAchievementsIsHardcore(void)
+{
+	const RetroAchievements *ra = RetroAchievements::instance();
+
+	return (ra != nullptr) && ra->isHardcore();
+}
 //----------------------------------------------------------------------------
 void FCEUD_RetroAchievementsGameLoaded(void)
 {

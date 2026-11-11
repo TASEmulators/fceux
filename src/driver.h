@@ -368,9 +368,17 @@ enum EFCEUI
 //checks whether an EFCEUI is valid right now
 bool FCEU_IsValidUI(EFCEUI ui);
 
+// RetroAchievements hardcore mode. Always false in builds without RetroAchievements. While it is
+// active the core refuses save state loads, rewind, slow motion, frame advance and cheats.
+bool FCEU_HardcoreActive(void);
+// To be called by the driver (emulator lock held) after FCEU_HardcoreActive() has changed. Becoming
+// active resets the game, leaving it brings the cheats back.
+void FCEU_HardcoreModeChanged(void);
+
 #ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
 // RetroAchievements hooks, implemented by the driver. All of them are called on
 // the emulator thread (or the thread loading the game) with the emulator lock held.
+bool FCEUD_RetroAchievementsIsHardcore(void);
 void FCEUD_RetroAchievementsGameLoaded(void);
 // Re-opens the loaded game from the paths in GameInfo (archive and IPS patch included) and reads it
 // into image, so the driver does not have to keep a copy of the ROM around.

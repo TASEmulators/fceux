@@ -710,6 +710,13 @@ bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 {
 	if(!is) return false;
 
+	// Every state load funnels through here (user states, rewind, scripts, netplay, movies).
+	if(FCEU_HardcoreActive())
+	{
+		FCEU_DispMessage("Loading states is disabled in Hardcore mode.", 0);
+		return false;
+	}
+
 	//maybe make a backup savestate
 	bool backup = (params == SSLOADPARAM_BACKUP);
 	EMUFILE_MEMORY msBackupSavestate;
@@ -1080,6 +1087,13 @@ int loadStateFailed = 0; // hack, this function should return a value instead
 
 void FCEUI_LoadState(const char *fname, bool display_message)
 {
+	if(FCEU_HardcoreActive())
+	{
+		loadStateFailed = 1;
+		if(display_message)
+			FCEU_DispMessage("Loading states is disabled in Hardcore mode.", 0);
+		return;
+	}
 	if(!FCEU_IsValidUI(FCEUI_LOADSTATE)) return;
 
 	stateShow = 0;
@@ -1470,6 +1484,12 @@ class StateRecorder
 		{
 			FCEU_PROFILE_FUNC("StateRecorder load snapshot");
 
+			if (FCEU_HardcoreActive())
+			{
+				FCEU_DispMessage("Rewind is disabled in Hardcore mode.", 0);
+				return -1;
+			}
+
 			if (snapIdx < 0)
 			{
 				snapIdx = snapIdx + ringBufSize;
@@ -1647,6 +1667,11 @@ int StateRecorder::lastState = 0;
 
 int FCEU_StateRecorderStart(void)
 {
+	// The recorded history can only be used for rewinding, which hardcore mode does not allow.
+	if (FCEU_HardcoreActive())
+	{
+		return 1;
+	}
 	if (stateRecorder == nullptr)
 	{
 		stateRecorder = new StateRecorder();

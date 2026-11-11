@@ -826,6 +826,8 @@ InitConfig()
 	config->addOption("SDL.RetroAchUser", "");
 	config->addOption("SDL.RetroAchToken", "");
 	config->addOption("SDL.RetroAchSound", 1);
+	// Hardcore is on unless the user turned it off. It only takes effect while RetroAchievements is enabled.
+	config->addOption("SDL.RetroAchHardcore", 1);
 	// Logs savestate progress save/load in the message log. Off by default as the state recorder saves often.
 	config->addOption("SDL.RetroAchDebug", 0);
 #endif

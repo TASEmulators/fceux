@@ -25,6 +25,7 @@ class RetroAchievementsDialog_t : public QDialog
 		~RetroAchievementsDialog_t(void);
 
 		QCheckBox   *enableCbox;
+		QCheckBox   *hardcoreCbox;
 		QCheckBox   *soundCbox;
 		QLineEdit   *userEdit;
 		QLineEdit   *passwordEdit;
@@ -38,6 +39,8 @@ class RetroAchievementsDialog_t : public QDialog
 
 	private slots:
 		void enableToggled(bool checked);
+		void hardcoreToggled(bool checked);
+		void hardcoreChanged(bool active);
 		void soundToggled(bool checked);
 		void loginClicked(void);
 		void logoutClicked(void);

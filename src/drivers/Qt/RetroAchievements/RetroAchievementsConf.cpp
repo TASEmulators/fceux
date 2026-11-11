@@ -7,9 +7,11 @@
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QMessageBox>
 #include <QPointer>
 #include <QVBoxLayout>
 
+#include "../../../fceu.h"
 #include "Qt/AudioDriverInterface.h"
 #include "Qt/config.h"
 #include "Qt/fceuWrapper.h"
@@ -50,6 +52,9 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 	bool playSound = true;
 
 	enableCbox = new QCheckBox(tr("Enable RetroAchievements"));
+	hardcoreCbox = new QCheckBox(tr("Hardcore mode"));
+	hardcoreCbox->setToolTip(tr("Disables cheats, rewind, slow motion, frame advance and loading save states "
+		"while RetroAchievements is enabled. Turning it on resets the game."));
 	soundCbox = new QCheckBox(tr("Play a sound when an achievement is unlocked"));
 	userEdit = new QLineEdit();
 	passwordEdit = new QLineEdit();
@@ -94,12 +99,14 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 
 	mainLayout->addWidget(logoLabel);
 	mainLayout->addWidget(enableCbox);
+	mainLayout->addWidget(hardcoreCbox);
 	mainLayout->addWidget(accountBox);
 	mainLayout->addWidget(soundCbox);
 	mainLayout->addLayout(buttonBox);
 	setLayout(mainLayout);
 
 	connect(enableCbox, &QCheckBox::toggled, this, &RetroAchievementsDialog_t::enableToggled);
+	connect(hardcoreCbox, &QCheckBox::clicked, this, &RetroAchievementsDialog_t::hardcoreToggled);
 	connect(soundCbox, &QCheckBox::toggled, this, &RetroAchievementsDialog_t::soundToggled);
 	connect(loginButton, &QPushButton::clicked, this, &RetroAchievementsDialog_t::loginClicked);
 	connect(passwordEdit, &QLineEdit::returnPressed, this, &RetroAchievementsDialog_t::loginClicked);
@@ -110,6 +117,7 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 
 	connect(ra, &RetroAchievements::loginStateChanged, this, &RetroAchievementsDialog_t::loginStateChanged);
 	connect(ra, &RetroAchievements::loginFailed, this, &RetroAchievementsDialog_t::loginFailed);
+	connect(ra, &RetroAchievements::hardcoreChanged, this, &RetroAchievementsDialog_t::hardcoreChanged);
 	connect(ra->images(), &RaImageCache::imageReady, this, &RetroAchievementsDialog_t::imageReady);
 
 	enableCbox->setChecked(ra->isEnabled());
@@ -132,6 +140,8 @@ void RetroAchievementsDialog_t::updateControls(void)
 	passwordEdit->setEnabled(enabled && loggedOut);
 	loginButton->setEnabled(enabled && loggedOut);
 	logoutButton->setEnabled(enabled && (state == RetroAchievements::LOGGED_IN));
+	hardcoreCbox->setEnabled(enabled);
+	hardcoreCbox->setChecked(ra->getHardcoreSetting());
 
 	if (!enabled)
 	{
@@ -175,6 +185,31 @@ void RetroAchievementsDialog_t::enableToggled(bool checked)
 {
 	RetroAchievements::instance()->setEnabled(checked);
 
+	updateControls();
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsDialog_t::hardcoreToggled(bool checked)
+{
+	RetroAchievements *ra = RetroAchievements::instance();
+
+	// Hardcore resets a running game, so ask before throwing its progress away.
+	if (checked && ra->isEnabled() && (GameInfo != nullptr))
+	{
+		const QMessageBox::StandardButton answer = QMessageBox::question(this, tr("Hardcore mode"),
+			tr("Turning on hardcore mode resets the running game. Continue?"),
+			QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+		if (answer != QMessageBox::Yes)
+		{
+			hardcoreCbox->setChecked(false);
+			return;
+		}
+	}
+	ra->setHardcore(checked);
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsDialog_t::hardcoreChanged(bool)
+{
 	updateControls();
 }
 //----------------------------------------------------------------------------

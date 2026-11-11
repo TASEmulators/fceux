@@ -9,6 +9,7 @@ void FCEU_SaveGameCheats(FILE *fp, int release = 0);
 int FCEUI_GlobalToggleCheat(int global_enabled);
 void FCEU_ApplyPeriodicCheats(void);
 void FCEU_PowerCheats(void);
+void RebuildSubCheats(void);
 int FCEU_CalcCheatAffectedBytes(uint32 address, uint32 size);
 
 // Trying to find a more efficient way for determining if an address has a cheat

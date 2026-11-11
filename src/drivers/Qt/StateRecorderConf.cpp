@@ -487,6 +487,10 @@ void StateRecorderDialog_t::snapTimeModeClicked(void)
 void StateRecorderDialog_t::updateStartStopBuffon(void)
 {
 	bool isRunning = FCEU_StateRecorderRunning();
+	const bool hardcore = FCEU_HardcoreActive();
+
+	startStopButton->setEnabled(!hardcore);
+	startStopButton->setToolTip(hardcore ? tr("The state recorder is not available in RetroAchievements hardcore mode.") : QString());
 
 	if (isRunning)
 	{
@@ -525,6 +529,10 @@ void StateRecorderDialog_t::updateRecorderStatusLabel(void)
 	if (isRunning)
 	{
 		recStatusLbl->setText( tr("Recording") );
+	}
+	else if (FCEU_HardcoreActive())
+	{
+		recStatusLbl->setText( tr("Off (hardcore mode)") );
 	}
 	else
 	{

@@ -289,6 +289,12 @@ RefreshThrottleFPS(void)
 	int32_t fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
 	int32_t T;
 
+	// No slow motion in hardcore mode.
+	if ( FCEU_HardcoreActive() && (g_fpsScale < Normal) )
+	{
+		g_fpsScale = Normal;
+	}
+
 	hz = ( ((double)fps) / 16777216.0 );
 
 	desired_frametime = 1.0 / ( hz * g_fpsScale );

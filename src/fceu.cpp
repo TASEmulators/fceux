@@ -518,6 +518,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 
 		if (GameInfo->type != GIT_NSF && 
 			FSettings.GameGenie && 
+			!FCEU_HardcoreActive() &&
 			FCEU_OpenGenie())
 		{
 			FCEUI_SetGameGenie(false);
@@ -551,7 +552,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 		if (GameInfo->type != GIT_NSF && !disableAutoLSCheats)
 			FCEU_LoadGameCheats(0);
 
-		if (AutoResumePlay)
+		if (AutoResumePlay && !FCEU_HardcoreActive())
 		{
 			// load "-resume" savestate
 			if (FCEUSS_Load(FCEU_MakeFName(FCEUMKF_RESUMESTATE, 0, 0).c_str(), false))
@@ -790,7 +791,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	FCEU_StateRecorderPollPauseState();
 
-	if (frameAdvanceRequested)
+	if (frameAdvanceRequested && !FCEU_HardcoreActive())
 	{
 #ifdef __QT_DRIVER__
 		uint32_t frameAdvanceDelayScaled = frameAdvance_Delay * (PAL ? 20 : 16);
@@ -1318,6 +1319,8 @@ void FCEUI_ClearEmulationFrameStepped()
 //mbg merge 7/18/06 added
 //ideally maybe we shouldnt be using this, but i need it for quick merging
 void FCEUI_SetEmulationPaused(int val) {
+	if (FCEU_HardcoreActive())
+		val &= ~EMULATIONPAUSED_FA;
 	EmulationPaused = val;
 	if(EmulationPaused)
 		FCEUD_FlushTrace();
@@ -1336,6 +1339,8 @@ void FCEUI_FrameAdvanceEnd(void) {
 }
 
 void FCEUI_FrameAdvance(void) {
+	if (FCEU_HardcoreActive())
+		return;
 	frameAdvance_Delay_count = 0;
 	frameAdvanceRequested = true;
 }
@@ -1432,6 +1437,9 @@ int FCEU_TextScanlineOffsetFromBottom(int y) {
 }
 
 bool FCEU_IsValidUI(EFCEUI ui) {
+	if (FCEU_HardcoreActive() && (ui == FCEUI_LOADSTATE || ui == FCEUI_QUICKLOAD))
+		return false;
+
 	switch (ui) {
 	case FCEUI_OPENGAME:
 	case FCEUI_CLOSEGAME:
@@ -1491,6 +1499,49 @@ bool FCEU_IsValidUI(EFCEUI ui) {
 	}
 
 	return true;
+}
+
+bool FCEU_HardcoreActive(void)
+{
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+	return FCEUD_RetroAchievementsIsHardcore();
+#else
+	return false;
+#endif
+}
+
+void FCEU_HardcoreModeChanged(void)
+{
+	if (!GameInfo)
+		return;
+
+	if (FCEU_HardcoreActive())
+	{
+		frameAdvanceRequested = false;
+		EmulationPaused &= ~EMULATIONPAUSED_FA;
+
+		// The history of the state recorder is only good for rewinding.
+		FCEU_StateRecorderStop();
+
+		// A running movie or the Game Genie would still influence the game after the reset.
+		if (FCEUMOV_Mode(MOVIEMODE_PLAY | MOVIEMODE_RECORD | MOVIEMODE_FINISHED))
+			FCEUI_StopMovie();
+
+		if (geniestage)
+			FCEU_CloseGenie();
+
+		// Switching to hardcore mid-session must start the game over. This also drops the
+		// cheats that are applied to the memory.
+		PowerNES();
+	}
+	else
+	{
+		RebuildSubCheats();
+
+		// Back to what the user configured.
+		if (FCEU_StateRecorderIsEnabled())
+			FCEU_StateRecorderStart();
+	}
 }
 
 //---------------------

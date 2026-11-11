@@ -670,7 +670,7 @@ void StateRecorderTimelineDock_t::refresh(void)
 
 	if (!running)
 	{
-		infoLabel->setText(tr("State recorder\nis not running"));
+		infoLabel->setText(FCEU_HardcoreActive() ? tr("State recorder\nis off (hardcore)") : tr("State recorder\nis not running"));
 	}
 	else if (noticeTimer.isValid() && !noticeTimer.hasExpired(NOTICE_DURATION_MS))
 	{

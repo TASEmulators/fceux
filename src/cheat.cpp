@@ -121,7 +121,7 @@ void RebuildSubCheats(void)
 
 	numsubcheats = 0;
 
-	if (!globalCheatDisabled)
+	if (!globalCheatDisabled && !FCEU_HardcoreActive())
 	{
 		while(c)
 		{
@@ -442,6 +442,7 @@ void FCEU_ApplyPeriodicCheats(void)
 {
 	struct CHEATF *cur=cheats;
 	if(!cur) return;
+	if(FCEU_HardcoreActive()) return;
 
 	for(;;)
 	{
