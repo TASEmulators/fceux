@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstring>
 
+#include <QEventLoop>
 #include <QMetaObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -47,6 +48,8 @@ RetroAchievements::RetroAchievements(void)
 	, debugLog(false)
 	, configSavePending(false)
 	, generation(0)
+	, inFlight(0)
+	, shuttingDown(false)
 {
 	bool enable = false;
 
@@ -54,6 +57,10 @@ RetroAchievements::RetroAchievements(void)
 	qRegisterMetaType<QList<RaLeaderboardEntry> >();
 
 	connect(&idleTimer, &QTimer::timeout, this, &RetroAchievements::idle);
+
+	// Last resort when a request does not finish in time.
+	shutdownTimer.setSingleShot(true);
+	connect(&shutdownTimer, &QTimer::timeout, this, &RetroAchievements::finishShutdown);
 
 	idleTimer.setInterval(500);
 
@@ -68,7 +75,7 @@ RetroAchievements::RetroAchievements(void)
 //----------------------------------------------------------------------------
 RetroAchievements::~RetroAchievements(void)
 {
-	shutdownClient();
+	finishShutdown();
 }
 //----------------------------------------------------------------------------
 void RetroAchievements::create(void)
@@ -81,6 +88,11 @@ void RetroAchievements::create(void)
 //----------------------------------------------------------------------------
 void RetroAchievements::destroy(void)
 {
+	if (raInstance != nullptr)
+	{
+		// Gives an unlock that was just submitted the time to reach the server.
+		raInstance->drainBlocking(3000);
+	}
 	delete raInstance;
 	raInstance = nullptr;
 }
@@ -135,12 +147,66 @@ void RetroAchievements::initClient(void)
 	}
 }
 //----------------------------------------------------------------------------
-void RetroAchievements::shutdownClient(void)
+void RetroAchievements::beginShutdown(void)
 {
-	if (client == nullptr)
+	if ((client == nullptr) || shuttingDown)
 	{
 		return;
 	}
+	if (inFlight == 0)
+	{
+		finishShutdown();
+		return;
+	}
+	FCEU_printf("RetroAchievements: waiting for %i pending request(s) to finish.\n", inFlight);
+
+	// Frames are no longer evaluated, and nothing new is scheduled, but the requests in flight
+	// (and what they trigger) are still answered.
+	shuttingDown = true;
+	gameActive = false;
+	idleTimer.stop();
+
+	if (indicators)
+	{
+		indicators->clear();
+	}
+	shutdownTimer.start(3000);
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::drainBlocking(int timeoutMs)
+{
+	if ((client == nullptr) || (inFlight == 0))
+	{
+		return;
+	}
+	QEventLoop loop;
+	QTimer timeout;
+
+	FCEU_printf("RetroAchievements: waiting for %i pending request(s) to finish.\n", inFlight);
+
+	gameActive = false;
+	idleTimer.stop();
+
+	timeout.setSingleShot(true);
+	connect(&timeout, &QTimer::timeout, &loop, &QEventLoop::quit);
+	connect(this, &RetroAchievements::requestsDrained, &loop, &QEventLoop::quit);
+
+	timeout.start(timeoutMs);
+
+	// The replies are processed here with the emulator lock already held by this thread.
+	loop.exec(QEventLoop::ExcludeUserInputEvents);
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::finishShutdown(void)
+{
+	FCEU_WRAPPER_SCOPED_LOCK();
+
+	if (client == nullptr)
+	{
+		shuttingDown = false;
+		return;
+	}
+	shutdownTimer.stop();
 	idleTimer.stop();
 
 	// Drop requests that are still in flight so none of them calls back into the destroyed client.
@@ -158,11 +224,38 @@ void RetroAchievements::shutdownClient(void)
 	rc_client_destroy(client);
 	client = nullptr;
 
+	// rc_client does not call back for these once it is destroyed.
+	for (LeaderboardFetch *fetch : leaderboardFetches)
+	{
+		delete fetch;
+	}
+	leaderboardFetches.clear();
+
+	inFlight = 0;
+	shuttingDown = false;
 	indicators.reset();
 	gameActive = false;
 	releaseRomImage();
 
 	setLoginState(LOGGED_OUT);
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::requestAnswered(void)
+{
+	if (inFlight > 0)
+	{
+		--inFlight;
+	}
+	if (inFlight == 0)
+	{
+		emit requestsDrained();
+
+		if (shuttingDown)
+		{
+			// Not from inside the reply handler.
+			QMetaObject::invokeMethod(this, &RetroAchievements::finishShutdown, Qt::QueuedConnection);
+		}
+	}
 }
 //----------------------------------------------------------------------------
 void RetroAchievements::setEnabled(bool enable)
@@ -174,11 +267,15 @@ void RetroAchievements::setEnabled(bool enable)
 
 	if (enable)
 	{
+		if (shuttingDown)
+		{
+			finishShutdown();
+		}
 		initClient();
 	}
 	else
 	{
-		shutdownClient();
+		beginShutdown();
 	}
 }
 //----------------------------------------------------------------------------
@@ -287,7 +384,7 @@ void RetroAchievements::identifyGame(void)
 {
 	std::vector<uint8_t> image;
 
-	if ((client == nullptr) || (loginState != LOGGED_IN) || (GameInfo == nullptr))
+	if ((client == nullptr) || shuttingDown || (loginState != LOGGED_IN) || (GameInfo == nullptr))
 	{
 		return;
 	}
@@ -474,6 +571,8 @@ void RC_CCONV RetroAchievements::serverCall(const rc_api_request_t *request,
 	const QByteArray contentType = request->content_type ? QByteArray(request->content_type) : QByteArray();
 	const unsigned int gen       = self->generation;
 
+	++self->inFlight;
+
 	QMetaObject::invokeMethod(self, [=]()
 	{
 		if (gen == self->generation)
@@ -533,6 +632,8 @@ void RetroAchievements::startRequest(const QByteArray &url, const QByteArray &po
 		FCEU_WRAPPER_SCOPED_LOCK();
 
 		callback(&response, callbackData);
+
+		requestAnswered();
 	});
 }
 //----------------------------------------------------------------------------
@@ -712,15 +813,6 @@ QList<RaLeaderboardInfo> RetroAchievements::getLeaderboards(void)
 	return result;
 }
 //----------------------------------------------------------------------------
-namespace
-{
-	struct LeaderboardFetch
-	{
-		RetroAchievements *service;
-		uint32_t id;
-	};
-}
-
 void RC_CCONV RetroAchievements::leaderboardEntriesCallback(int result, const char *, rc_client_leaderboard_entry_list_t *list,
 	rc_client_t *, void *userdata)
 {
@@ -746,6 +838,8 @@ void RC_CCONV RetroAchievements::leaderboardEntriesCallback(int result, const ch
 	{
 		rc_client_destroy_leaderboard_entry_list(list);
 	}
+	fetch->service->leaderboardFetches.erase(fetch);
+
 	emit fetch->service->leaderboardEntriesReady(fetch->id, entries);
 
 	delete fetch;
@@ -761,6 +855,9 @@ void RetroAchievements::fetchLeaderboardEntries(uint32_t leaderboardId)
 		return;
 	}
 	LeaderboardFetch *fetch = new LeaderboardFetch{ this, leaderboardId };
+
+	// Registered first, because rc_client can call back before the function returns.
+	leaderboardFetches.insert(fetch);
 
 	rc_client_begin_fetch_leaderboard_entries(client, leaderboardId, 1, 10,
 		&RetroAchievements::leaderboardEntriesCallback, fetch);

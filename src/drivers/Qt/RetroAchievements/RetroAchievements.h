@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <memory>
+#include <set>
 
 #include <QByteArray>
 #include <QDateTime>
@@ -100,7 +101,8 @@ class RetroAchievements : public QObject
 		static void destroy(void);
 		static RetroAchievements *instance(void);
 
-		bool isEnabled(void) const { return client != nullptr; }
+		// False while the client is only waiting for its last requests to finish before it is destroyed.
+		bool isEnabled(void) const { return (client != nullptr) && !shuttingDown; }
 		LoginState getLoginState(void) const { return loginState; }
 		QString getUserName(void) const { return loggedInUser; }
 
@@ -137,6 +139,8 @@ class RetroAchievements : public QObject
 		void achievementUnlocked(const QString &title, const QString &description,
 			unsigned int points, const QString &badgeUrl);
 		void gameCompleted(const QString &title);
+		// Emitted when the last request that rc_client started has been answered.
+		void requestsDrained(void);
 		void gameUnloaded(void);
 		void leaderboardEntriesReady(unsigned int leaderboardId, const QList<RaLeaderboardEntry> &entries);
 		// Short messages for the user, such as leaderboard and connection events.
@@ -146,8 +150,23 @@ class RetroAchievements : public QObject
 		RetroAchievements(void);
 		~RetroAchievements(void);
 
+		// Context of a leaderboard entries request. Owned by the service, because rc_client never calls
+		// back for a request that is still pending when it is destroyed.
+		struct LeaderboardFetch
+		{
+			RetroAchievements *service;
+			uint32_t id;
+		};
+
 		void initClient(void);
-		void shutdownClient(void);
+		// Stops the evaluation of achievements and destroys the client once its requests have been answered,
+		// or after a timeout. A request in flight can be an unlock being submitted, so it is not just dropped.
+		void beginShutdown(void);
+		// Waits (nested event loop) for the requests in flight. For use when the application closes.
+		void drainBlocking(int timeoutMs);
+		// Destroys the client now, abandoning whatever is still in flight.
+		void finishShutdown(void);
+		void requestAnswered(void);
 		void loginWithToken(const std::string &user, const std::string &token);
 		// Reads the loaded game again from disk and starts identifying it. Needs a login.
 		void identifyGame(void);
@@ -186,6 +205,13 @@ class RetroAchievements : public QObject
 
 		// Bumped when the client is destroyed, so queued requests of the old client are dropped.
 		unsigned int generation;
+
+		// Requests that rc_client handed to serverCall and that have not been answered yet.
+		// Changed with the emulator lock held.
+		int inFlight;
+		bool shuttingDown;
+		QTimer shutdownTimer;
+		std::set<LeaderboardFetch*> leaderboardFetches;
 
 		// ROM image of the game being identified. rc_client keeps using it until the load callback, and it is
 		// released right after, so nothing is held while a game is just being played.
