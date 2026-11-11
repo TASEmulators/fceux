@@ -34,7 +34,13 @@ RaToastWidget::RaToastWidget(QWidget *parent, const QString &titleText, const QS
 	setAttribute(Qt::WA_ShowWithoutActivating);
 	setAttribute(Qt::WA_TranslucentBackground);
 	setAttribute(Qt::WA_TransparentForMouseEvents);
-	setFixedSize(toastWidth, toastHeight);
+
+	// Grow for long messages, so the text is never cut off.
+	const int textWidth = toastWidth - (12 + 64 + 12) - 12;
+	const QRect needed = QFontMetrics(font()).boundingRect(QRect(0, 0, textWidth, 10000),
+		Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap, text);
+
+	setFixedSize(toastWidth, qMax(toastHeight, 36 + needed.height() + 10));
 }
 //----------------------------------------------------------------------------
 void RaToastWidget::setImage(const QPixmap &pixmap)
@@ -47,7 +53,7 @@ void RaToastWidget::paintEvent(QPaintEvent *)
 {
 	QPainter p(this);
 	const QRect box = rect().adjusted(1, 1, -1, -1);
-	const QRect imageRect(12, (toastHeight - 64) / 2, 64, 64);
+	const QRect imageRect(12, (height() - 64) / 2, 64, 64);
 	const int textLeft = imageRect.right() + 12;
 	QFont titleFont = font();
 	QFont textFont = font();
@@ -67,7 +73,7 @@ void RaToastWidget::paintEvent(QPaintEvent *)
 	titleFont.setPointSizeF(titleFont.pointSizeF() + 1.0);
 
 	const QRect titleRect(textLeft, 10, toastWidth - textLeft - 12, 24);
-	const QRect textRect(textLeft, 36, toastWidth - textLeft - 12, toastHeight - 36 - 10);
+	const QRect textRect(textLeft, 36, toastWidth - textLeft - 12, height() - 36 - 10);
 
 	p.setFont(titleFont);
 	p.setPen(Qt::white);

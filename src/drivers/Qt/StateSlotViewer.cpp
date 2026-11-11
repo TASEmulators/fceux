@@ -124,6 +124,16 @@ StateSlotThumb_t::StateSlotThumb_t(QWidget *parent)
 	setToolTip(tr("Click to select this slot, double click to load it."));
 }
 //----------------------------------------------------------------------------
+bool StateSlotThumb_t::event(QEvent *event)
+{
+	if (event->type() == QEvent::ToolTip)
+	{
+		setToolTip(FCEU_HardcoreActive() ? tr("Click to select this slot. Loading states is disabled in Hardcore mode.")
+			: tr("Click to select this slot, double click to load it."));
+	}
+	return QWidget::event(event);
+}
+//----------------------------------------------------------------------------
 QSize StateSlotThumb_t::sizeHint(void) const
 {
 	return QSize(96, 100);
@@ -223,7 +233,7 @@ void StateSlotThumb_t::mousePressEvent(QMouseEvent *event)
 //----------------------------------------------------------------------------
 void StateSlotThumb_t::mouseDoubleClickEvent(QMouseEvent *event)
 {
-	if (valid && exists && (event->button() == Qt::LeftButton))
+	if (valid && exists && !FCEU_HardcoreActive() && (event->button() == Qt::LeftButton))
 	{
 		emit loadRequested(slotId);
 	}
@@ -241,7 +251,7 @@ void StateSlotThumb_t::contextMenuEvent(QContextMenuEvent *event)
 	QAction *loadAct = menu.addAction(tr("&Load State"));
 	QAction *saveAct = menu.addAction(tr("S&ave State"));
 
-	loadAct->setEnabled(exists);
+	loadAct->setEnabled(exists && !FCEU_HardcoreActive());
 
 	QAction *act = menu.exec(event->globalPos());
 

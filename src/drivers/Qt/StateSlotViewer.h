@@ -50,6 +50,7 @@ signals:
 	void saveRequested(int slotId);
 
 protected:
+	bool event(QEvent *event) override;
 	void paintEvent(QPaintEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
 	void mouseDoubleClickEvent(QMouseEvent *event) override;
