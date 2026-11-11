@@ -133,11 +133,25 @@ void RetroAchievements::initClient(void)
 	clause[0] = 0;
 	rc_client_get_user_agent_clause(client, clause, sizeof(clause));
 
+#if defined(Q_OS_WIN)
+	const QString OS_STRING = "Windows";
+#elif defined(Q_OS_MACOS) || defined(Q_OS_MAC)
+	const QString OS_STRING = "macOS";
+#elif defined(Q_OS_LINUX)
+	const QString OS_STRING = "Linux";
+#elif defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+	const QString OS_STRING = "BSD";
+#else
+	const QString OS_STRING = "Unknown-OS";
+#endif
+
 	// The server needs a numeric version here, so FCEU_VERSION_STRING with its suffixes is not used.
-	userAgent = QString("fceux/%1.%2.%3 (%4 %5) %6")
+	userAgent = QString("FCEUX-Qt/%1.%2.%3 (%4) %5")
 		.arg(FCEU_VERSION_MAJOR).arg(FCEU_VERSION_MINOR).arg(FCEU_VERSION_PATCH)
-		.arg(QSysInfo::kernelType()).arg(QSysInfo::kernelVersion())
+		.arg(OS_STRING)
 		.arg(QString::fromLatin1(clause)).toUtf8();
+
+	FCEU_printf("RetroAchievements: user agent: %s\n", userAgent.constData());
 
 	imageCache->setUserAgent(userAgent);
 	indicators.reset(new RaOverlayIndicators());
