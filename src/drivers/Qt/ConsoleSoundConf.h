@@ -36,6 +36,7 @@ protected:
 	QCheckBox *swapDutyChkbox;
 	QCheckBox *useGlobalFocus;
 	QComboBox *driverSelect;
+	QComboBox *deviceSelect;
 	QComboBox *qualitySelect;
 	QComboBox *rateSelect;
 	QSlider *bufSizeSlider;
@@ -57,6 +58,7 @@ protected:
 	void setComboBoxFromProperty(QComboBox *cbx, const char *property);
 	void setSliderFromProperty(QSlider *slider, QLabel *lbl, const char *property);
 	void setSliderEnables(void);
+	void populateDeviceSelect(void);
 
 private slots:
 	void closeWindow(void);
@@ -75,6 +77,7 @@ private slots:
 	void swapDutyCallback(int value);
 	void useGlobalFocusChanged(int value);
 	void audioDriverChanged(int index);
+	void audioDeviceChanged(int index);
 	void soundQualityChanged(int index);
 	void soundRateChanged(int index);
 };

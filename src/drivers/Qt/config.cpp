@@ -549,6 +549,9 @@ InitConfig()
 	config->addOption("SDL.Sound.UseGlobalFocus", 1);
 	// 0 = SDL, 1 = Qt Multimedia
 	config->addOption("audioDriver", "SDL.AudioDriver", 0);
+	// Selected output device per audio driver, empty selects the system default
+	config->addOption("SDL.AudioDevice.SDL", "");
+	config->addOption("SDL.AudioDevice.Qt", "");
     
 	config->addOption('g', "gamegenie", "SDL.GameGenie", 0);
 	config->addOption("pal", "SDL.PAL", 0);

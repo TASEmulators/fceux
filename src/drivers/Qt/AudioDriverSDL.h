@@ -14,8 +14,12 @@ class AudioDriverSDL : public AudioDriverBase
 		std::string driverInfo(void) const override;
 		void silence(int pause) override;
 
+		// Output devices SDL can open with the current SDL audio driver
+		static std::vector<AudioDeviceInfo> enumerateDevices(void);
+
 	protected:
-		bool openDevice(unsigned int sampleRate, int periodSamples) override;
+		bool openDevice(unsigned int sampleRate, int periodSamples,
+				const std::string &deviceId) override;
 		void closeDevice(void) override;
 		void lockBuffer(void) override;
 		void unlockBuffer(void) override;
@@ -23,6 +27,7 @@ class AudioDriverSDL : public AudioDriverBase
 	private:
 		static void sdlCallback(void *udata, uint8_t *stream, int len);
 
-		bool deviceOpen;
+		// SDL_AudioDeviceID, 0 when no device is open
+		uint32_t sdlDevice;
 		bool subsystemInit;
 };

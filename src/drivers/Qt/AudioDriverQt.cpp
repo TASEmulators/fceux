@@ -5,6 +5,7 @@
 #include <QtGlobal>
 #include <QCoreApplication>
 #include <QIODevice>
+#include <QList>
 #include <QMetaObject>
 #include <QObject>
 #include <QString>
@@ -34,6 +35,36 @@ typedef QAudioDeviceInfo QtAudioDeviceType;
 
 namespace
 {
+
+QList<QtAudioDeviceType> audioOutputDevices(void)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	return QMediaDevices::audioOutputs();
+#else
+	return QtAudioDeviceType::availableDevices(QAudio::AudioOutput);
+#endif
+}
+
+// Identifier saved in the config file. Qt 5 has no separate id, the device
+// name is what identifies a device there.
+std::string audioDeviceId(const QtAudioDeviceType &device)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	const QByteArray id = device.id();
+	return std::string(id.constData(), static_cast<size_t>(id.size()));
+#else
+	return device.deviceName().toStdString();
+#endif
+}
+
+std::string audioDeviceName(const QtAudioDeviceType &device)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	return device.description().toStdString();
+#else
+	return device.deviceName().toStdString();
+#endif
+}
 
 // Pull mode source for the Qt sink. readData() is invoked from the audio
 // thread, whenever the sink needs more samples.
@@ -148,7 +179,33 @@ std::string AudioDriverQt::driverInfo(void) const
 	return info;
 }
 //----------------------------------------------------------
-bool AudioDriverQt::openDevice(unsigned int sampleRate, int periodSamples)
+std::vector<AudioDeviceInfo> AudioDriverQt::enumerateDevices(void)
+{
+	std::vector<AudioDeviceInfo> devices;
+	const QList<QtAudioDeviceType> outputs = audioOutputDevices();
+
+	for (const QtAudioDeviceType &d : outputs)
+	{
+		AudioDeviceInfo info;
+		info.id = audioDeviceId(d);
+		info.name = audioDeviceName(d);
+
+		// An empty id is indistinguishable from the system default entry
+		if (d.isNull() || info.id.empty())
+		{
+			continue;
+		}
+		if (info.name.empty())
+		{
+			info.name = info.id;
+		}
+		devices.push_back(info);
+	}
+	return devices;
+}
+//----------------------------------------------------------
+bool AudioDriverQt::openDevice(unsigned int sampleRate, int periodSamples,
+		const std::string &deviceId)
 {
 	if (QCoreApplication::instance() == nullptr)
 	{
@@ -156,11 +213,36 @@ bool AudioDriverQt::openDevice(unsigned int sampleRate, int periodSamples)
 		return false;
 	}
 
+	QtAudioDeviceType device;
+	bool deviceFound = false;
+
+	if (!deviceId.empty())
+	{
+		const QList<QtAudioDeviceType> outputs = audioOutputDevices();
+
+		for (const QtAudioDeviceType &d : outputs)
+		{
+			if (audioDeviceId(d) == deviceId)
+			{
+				device = d;
+				deviceFound = true;
+				break;
+			}
+		}
+		if (!deviceFound)
+		{
+			fprintf(stderr, "Warning: Qt audio device '%s' was not found, using the default device.\n", deviceId.c_str());
+		}
+	}
+
+	if (!deviceFound)
+	{
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-	QtAudioDeviceType device = QMediaDevices::defaultAudioOutput();
+		device = QMediaDevices::defaultAudioOutput();
 #else
-	QtAudioDeviceType device = QtAudioDeviceType::defaultOutputDevice();
+		device = QtAudioDeviceType::defaultOutputDevice();
 #endif
+	}
 
 	if (device.isNull())
 	{
@@ -202,11 +284,7 @@ bool AudioDriverQt::openDevice(unsigned int sampleRate, int periodSamples)
 	// the configured latency.
 	const int sinkBufferBytes = periodSamples * 2 * channels * static_cast<int>(sizeof(int16_t));
 
-#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-	impl->description = device.description().toStdString();
-#else
-	impl->description = device.deviceName().toStdString();
-#endif
+	impl->description = audioDeviceName(device);
 
 	impl->thread = new QThread();
 	impl->thread->setObjectName("FceuxAudio");

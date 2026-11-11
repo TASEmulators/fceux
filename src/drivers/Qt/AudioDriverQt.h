@@ -15,8 +15,12 @@ class AudioDriverQt : public AudioDriverBase
 		std::string driverInfo(void) const override;
 		void silence(int pause) override;
 
+		// Output devices Qt Multimedia reports
+		static std::vector<AudioDeviceInfo> enumerateDevices(void);
+
 	protected:
-		bool openDevice(unsigned int sampleRate, int periodSamples) override;
+		bool openDevice(unsigned int sampleRate, int periodSamples,
+				const std::string &deviceId) override;
 		void closeDevice(void) override;
 		void lockBuffer(void) override;
 		void unlockBuffer(void) override;

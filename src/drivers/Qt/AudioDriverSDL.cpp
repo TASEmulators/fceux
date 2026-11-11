@@ -34,7 +34,7 @@
 
 //----------------------------------------------------------
 AudioDriverSDL::AudioDriverSDL(void)
-	: deviceOpen(false), subsystemInit(false)
+	: sdlDevice(0), subsystemInit(false)
 {
 }
 //----------------------------------------------------------
@@ -45,7 +45,7 @@ AudioDriverSDL::~AudioDriverSDL(void)
 //----------------------------------------------------------
 std::string AudioDriverSDL::driverInfo(void) const
 {
-	const char *name = deviceOpen ? SDL_GetCurrentAudioDriver() : nullptr;
+	const char *name = (sdlDevice != 0) ? SDL_GetCurrentAudioDriver() : nullptr;
 
 	if (name == nullptr)
 	{
@@ -65,7 +65,37 @@ void AudioDriverSDL::sdlCallback(void *udata, uint8_t *stream, int len)
 	self->fillAudio(reinterpret_cast<int16_t*>(stream), len >> 1);
 }
 //----------------------------------------------------------
-bool AudioDriverSDL::openDevice(unsigned int sampleRate, int periodSamples)
+std::vector<AudioDeviceInfo> AudioDriverSDL::enumerateDevices(void)
+{
+	std::vector<AudioDeviceInfo> devices;
+
+	// Reference counted, safe to do while a device is open
+	if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
+	{
+		puts(SDL_GetError());
+		return devices;
+	}
+	const int count = SDL_GetNumAudioDevices(0);
+
+	for (int i=0; i<count; i++)
+	{
+		const char *name = SDL_GetAudioDeviceName(i, 0);
+
+		if (name != nullptr)
+		{
+			AudioDeviceInfo info;
+			info.id = name;
+			info.name = name;
+			devices.push_back(info);
+		}
+	}
+	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+
+	return devices;
+}
+//----------------------------------------------------------
+bool AudioDriverSDL::openDevice(unsigned int sampleRate, int periodSamples,
+		const std::string &deviceId)
 {
 	SDL_AudioSpec spec;
 	const char *driverName;
@@ -86,14 +116,27 @@ bool AudioDriverSDL::openDevice(unsigned int sampleRate, int periodSamples)
 	spec.callback = sdlCallback;
 	spec.userdata = this;
 
-	if (SDL_OpenAudio(&spec, 0) < 0)
+	if (!deviceId.empty())
+	{
+		sdlDevice = SDL_OpenAudioDevice(deviceId.c_str(), 0, &spec, nullptr, 0);
+
+		if (sdlDevice == 0)
+		{
+			fprintf(stderr, "Warning: SDL could not open audio device '%s' (%s), using the default device.\n",
+					deviceId.c_str(), SDL_GetError());
+		}
+	}
+	if (sdlDevice == 0)
+	{
+		sdlDevice = SDL_OpenAudioDevice(nullptr, 0, &spec, nullptr, 0);
+	}
+	if (sdlDevice == 0)
 	{
 		puts(SDL_GetError());
 		return false;
 	}
-	deviceOpen = true;
 
-	SDL_PauseAudio(0);
+	SDL_PauseAudioDevice(sdlDevice, 0);
 
 	driverName = SDL_GetCurrentAudioDriver();
 
@@ -106,10 +149,10 @@ bool AudioDriverSDL::openDevice(unsigned int sampleRate, int periodSamples)
 //----------------------------------------------------------
 void AudioDriverSDL::closeDevice(void)
 {
-	if (deviceOpen)
+	if (sdlDevice != 0)
 	{
-		SDL_CloseAudio();
-		deviceOpen = false;
+		SDL_CloseAudioDevice(sdlDevice);
+		sdlDevice = 0;
 	}
 	if (subsystemInit)
 	{
@@ -120,16 +163,16 @@ void AudioDriverSDL::closeDevice(void)
 //----------------------------------------------------------
 void AudioDriverSDL::lockBuffer(void)
 {
-	SDL_LockAudio();
+	SDL_LockAudioDevice(sdlDevice);
 }
 //----------------------------------------------------------
 void AudioDriverSDL::unlockBuffer(void)
 {
-	SDL_UnlockAudio();
+	SDL_UnlockAudioDevice(sdlDevice);
 }
 //----------------------------------------------------------
 void AudioDriverSDL::silence(int pause)
 {
-	SDL_PauseAudio(pause);
+	SDL_PauseAudioDevice(sdlDevice, pause);
 }
 //----------------------------------------------------------

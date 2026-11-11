@@ -97,6 +97,36 @@ AudioDriverBase *AudioDriverBase::create(int driverId)
 	return nullptr;
 }
 //----------------------------------------------------------
+std::vector<AudioDeviceInfo> AudioDriverBase::listDevices(int driverId)
+{
+	switch (driverId)
+	{
+		case AUDIO_DRIVER_SDL:
+			return AudioDriverSDL::enumerateDevices();
+#ifdef FCEUX_HAS_QT_AUDIO
+		case AUDIO_DRIVER_QT:
+			return AudioDriverQt::enumerateDevices();
+#endif
+		default:
+			break;
+	}
+	return std::vector<AudioDeviceInfo>();
+}
+//----------------------------------------------------------
+// SDL and Qt name the same device differently, so each keeps its own selection
+const char *AudioDriverBase::deviceConfigKey(int driverId)
+{
+	switch (driverId)
+	{
+		case AUDIO_DRIVER_QT:
+			return "SDL.AudioDevice.Qt";
+		case AUDIO_DRIVER_SDL:
+		default:
+			break;
+	}
+	return "SDL.AudioDevice.SDL";
+}
+//----------------------------------------------------------
 uint32_t AudioDriverBase::getMaxSound(void) const
 {
 	return bufferSize;
@@ -114,6 +144,7 @@ int AudioDriverBase::init(void)
 	int frmRateSampleAdj = 0;
 	int samplesPerFrame;
 	int periodSamples;
+	std::string deviceId;
 	bool sampleRateIsSupported = false;
 
 	// load configuration variables
@@ -127,6 +158,7 @@ int AudioDriverBase::init(void)
 	g_config->getOption("SDL.Sound.Square2Volume", &soundsquare2volume);
 	g_config->getOption("SDL.Sound.NoiseVolume", &soundnoisevolume);
 	g_config->getOption("SDL.Sound.PCMVolume", &soundpcmvolume);
+	g_config->getOption(deviceConfigKey(driver()), &deviceId);
 
 	s_mute = mute;
 
@@ -190,7 +222,7 @@ int AudioDriverBase::init(void)
 	bufferRead = bufferWrite = 0;
 	bufferIn = 0;
 
-	if (!openDevice(static_cast<unsigned int>(soundrate), periodSamples))
+	if (!openDevice(static_cast<unsigned int>(soundrate), periodSamples, deviceId))
 	{
 		kill();
 		return 0;

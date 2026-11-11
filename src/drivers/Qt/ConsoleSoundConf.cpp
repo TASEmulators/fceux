@@ -95,6 +95,25 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	vbox1->addLayout(hbox2);
 
+	// Audio Device Select
+	hbox2 = new QHBoxLayout();
+
+	lbl = new QLabel(tr("Device:"));
+
+	deviceSelect = new QComboBox();
+	deviceSelect->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+	deviceSelect->setMinimumContentsLength(20);
+	deviceSelect->setToolTip( tr("The output device sound is played on.") );
+
+	populateDeviceSelect();
+
+	connect(deviceSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(audioDeviceChanged(int)));
+
+	hbox2->addWidget(lbl);
+	hbox2->addWidget(deviceSelect);
+
+	vbox1->addLayout(hbox2);
+
 	// Audio Quality Select
 	hbox2 = new QHBoxLayout();
 
@@ -621,9 +640,62 @@ void ConsoleSndConfDialog_t::swapDutyCallback(int value)
 	g_config->save();
 }
 //----------------------------------------------------
+void ConsoleSndConfDialog_t::populateDeviceSelect(void)
+{
+	int driverId = AudioDriverBase::AUDIO_DRIVER_SDL;
+	std::string saved;
+
+	g_config->getOption("SDL.AudioDriver", &driverId);
+	g_config->getOption(AudioDriverBase::deviceConfigKey(driverId), &saved);
+
+	const QString savedId = QString::fromStdString(saved);
+	const std::vector<AudioDeviceInfo> devices = AudioDriverBase::listDevices(driverId);
+
+	deviceSelect->blockSignals(true);
+	deviceSelect->clear();
+
+	deviceSelect->addItem(tr("System Default"), QString());
+
+	for (size_t i=0; i<devices.size(); i++)
+	{
+		deviceSelect->addItem(QString::fromStdString(devices[i].name), QString::fromStdString(devices[i].id));
+	}
+
+	int index = deviceSelect->findData(savedId);
+
+	if ( (index < 0) && !savedId.isEmpty() )
+	{
+		// Keep showing what is configured, the driver falls back to the default
+		deviceSelect->addItem(tr("%1 (not available)").arg(savedId), savedId);
+		index = deviceSelect->count() - 1;
+	}
+	deviceSelect->setCurrentIndex( (index >= 0) ? index : 0 );
+	deviceSelect->blockSignals(false);
+}
+//----------------------------------------------------
 void ConsoleSndConfDialog_t::audioDriverChanged(int index)
 {
 	g_config->setOption("SDL.AudioDriver", driverSelect->itemData(index).toInt());
+
+	populateDeviceSelect();
+
+	// reset sound subsystem for changes to take effect
+	if (FCEU_WRAPPER_TRYLOCK(1000))
+	{
+		KillSound();
+		InitSound();
+		FCEU_WRAPPER_UNLOCK();
+	}
+	g_config->save();
+}
+//----------------------------------------------------
+void ConsoleSndConfDialog_t::audioDeviceChanged(int index)
+{
+	int driverId = AudioDriverBase::AUDIO_DRIVER_SDL;
+
+	g_config->getOption("SDL.AudioDriver", &driverId);
+	g_config->setOption(AudioDriverBase::deviceConfigKey(driverId),
+			deviceSelect->itemData(index).toString().toStdString());
 
 	// reset sound subsystem for changes to take effect
 	if (FCEU_WRAPPER_TRYLOCK(1000))
