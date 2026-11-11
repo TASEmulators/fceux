@@ -10,6 +10,9 @@ on:
 permissions:
   contents: read
 
+env:
+  RCHEEVOS_VERSION: 'v12.5.0'
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -43,11 +46,23 @@ jobs:
       - name: Build help files
         run: ./scripts/unix_make_docs.sh
 
+      - name: Fetch rcheevos (RetroAchievements)
+        run: |
+          RCHEEVOS_DIR="$RUNNER_TEMP/rcheevos"
+          git clone --depth 1 --branch "$RCHEEVOS_VERSION" https://github.com/RetroAchievements/rcheevos.git "$RCHEEVOS_DIR"
+          if [ ! -f "$RCHEEVOS_DIR/include/rc_client.h" ]; then
+            echo "rcheevos checkout is incomplete at $RCHEEVOS_DIR"
+            exit 1
+          fi
+          echo "RCHEEVOS_DIR=$RCHEEVOS_DIR" >> "$GITHUB_ENV"
+
       - name: Configure and build
         run: |
           cmake -S . -B buildQT -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=/usr \
+            -DRETRO_ACHIEVEMENTS=ON \
+            -DRCHEEVOS_DIR="$RCHEEVOS_DIR" \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build buildQT --parallel
