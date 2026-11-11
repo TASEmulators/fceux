@@ -31,8 +31,10 @@ class RetroAchievementsDialog_t : public QDialog
 		QPushButton *loginButton;
 		QPushButton *logoutButton;
 		QLabel      *statusLabel;
+		QLabel      *avatarLabel;
 
 		void updateControls(void);
+		void updateAvatar(void);
 
 	private slots:
 		void enableToggled(bool checked);
@@ -41,6 +43,7 @@ class RetroAchievementsDialog_t : public QDialog
 		void logoutClicked(void);
 		void loginStateChanged(int state, const QString &userName);
 		void loginFailed(const QString &message);
+		void imageReady(const QString &url);
 };
 
 #endif // FCEUX_HAS_RETRO_ACHIEVEMENTS

@@ -25,6 +25,7 @@
 #include <QList>
 #include <QMetaType>
 #include <QObject>
+#include <QPixmap>
 #include <QString>
 #include <QTimer>
 
@@ -109,6 +110,11 @@ class RetroAchievements : public QObject
 		bool isEnabled(void) const { return (client != nullptr) && !shuttingDown; }
 		LoginState getLoginState(void) const { return loginState; }
 		QString getUserName(void) const { return loggedInUser; }
+		// Empty unless logged in. The image is downloaded on every login and kept in the image cache.
+		QString getAvatarUrl(void) const { return avatarUrl; }
+		// GUI thread only. Null while logged out or until the avatar has been downloaded; imageReady
+		// of images() signals its arrival.
+		QPixmap getAvatar(void);
 
 		// GUI thread only. Enabling creates the rc_client and logs in with the stored token.
 		void setEnabled(bool enable);
@@ -204,6 +210,7 @@ class RetroAchievements : public QObject
 		QByteArray userAgent;
 		LoginState loginState;
 		QString loggedInUser;
+		QString avatarUrl;
 		bool gameActive;
 		bool gameUnknown;
 		bool debugLog;

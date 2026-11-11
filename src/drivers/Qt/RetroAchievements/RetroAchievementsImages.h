@@ -28,11 +28,16 @@ class RaImageCache : public QObject
 		// and emits imageReady once it has been downloaded.
 		QPixmap get(const QString &url);
 
+		// GUI thread only. Downloads the image again even when a copy is cached, because the picture
+		// behind the URL can change. The cached copy stays in use until the new one has arrived.
+		void refresh(const QString &url);
+
 	signals:
 		void imageReady(const QString &url);
 
 	private:
 		QString cachePath(const QString &url) const;
+		void download(const QString &url);
 
 		QNetworkAccessManager *netMgr;
 		QByteArray userAgent;

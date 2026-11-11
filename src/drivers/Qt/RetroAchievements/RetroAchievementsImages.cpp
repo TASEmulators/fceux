@@ -47,9 +47,29 @@ QPixmap RaImageCache::get(const QString &url)
 		memory.insert(url, pixmap);
 		return pixmap;
 	}
-	if (pending.contains(url) || failed.contains(url))
+	if (!failed.contains(url))
 	{
-		return QPixmap();
+		download(url);
+	}
+	return QPixmap();
+}
+//----------------------------------------------------------------------------
+void RaImageCache::refresh(const QString &url)
+{
+	if (url.isEmpty())
+	{
+		return;
+	}
+	failed.remove(url);
+
+	download(url);
+}
+//----------------------------------------------------------------------------
+void RaImageCache::download(const QString &url)
+{
+	if (pending.contains(url))
+	{
+		return;
 	}
 	pending.insert(url);
 
@@ -89,8 +109,6 @@ QPixmap RaImageCache::get(const QString &url)
 
 		emit imageReady(url);
 	});
-
-	return QPixmap();
 }
 //----------------------------------------------------------------------------
 

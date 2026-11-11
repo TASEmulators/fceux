@@ -15,6 +15,9 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/RetroAchievements/RetroAchievements.h"
 #include "Qt/RetroAchievements/RetroAchievementsConf.h"
+#include "Qt/RetroAchievements/RetroAchievementsImages.h"
+
+static const int avatarSize = 64;
 
 static QPointer<RetroAchievementsDialog_t> openDialog;
 
@@ -53,6 +56,11 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 	loginButton = new QPushButton(tr("Log In"));
 	logoutButton = new QPushButton(tr("Log Out"));
 	statusLabel = new QLabel();
+	avatarLabel = new QLabel();
+
+	avatarLabel->setFixedSize(avatarSize, avatarSize);
+	avatarLabel->setAlignment(Qt::AlignCenter);
+	avatarLabel->hide();
 
 	passwordEdit->setEchoMode(QLineEdit::Password);
 	userEdit->setMinimumWidth(240);
@@ -70,7 +78,8 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 	grid->addWidget(userEdit, 0, 1);
 	grid->addWidget(new QLabel(tr("Password:")), 1, 0);
 	grid->addWidget(passwordEdit, 1, 1);
-	grid->addWidget(statusLabel, 2, 0, 1, 2);
+	grid->addWidget(avatarLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+	grid->addWidget(statusLabel, 2, 1);
 	accountBox->setLayout(grid);
 
 	buttonBox->addWidget(loginButton);
@@ -101,6 +110,7 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 
 	connect(ra, &RetroAchievements::loginStateChanged, this, &RetroAchievementsDialog_t::loginStateChanged);
 	connect(ra, &RetroAchievements::loginFailed, this, &RetroAchievementsDialog_t::loginFailed);
+	connect(ra->images(), &RaImageCache::imageReady, this, &RetroAchievementsDialog_t::imageReady);
 
 	enableCbox->setChecked(ra->isEnabled());
 
@@ -139,6 +149,26 @@ void RetroAchievementsDialog_t::updateControls(void)
 	{
 		statusLabel->setText(tr("Not logged in."));
 	}
+	updateAvatar();
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsDialog_t::updateAvatar(void)
+{
+	RetroAchievements *ra = RetroAchievements::instance();
+	QPixmap avatar;
+
+	if (ra->isEnabled() && (ra->getLoginState() == RetroAchievements::LOGGED_IN))
+	{
+		avatar = ra->getAvatar();
+	}
+	if (avatar.isNull())
+	{
+		avatarLabel->clear();
+		avatarLabel->hide();
+		return;
+	}
+	avatarLabel->setPixmap(avatar.scaled(avatarSize, avatarSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	avatarLabel->show();
 }
 //----------------------------------------------------------------------------
 void RetroAchievementsDialog_t::enableToggled(bool checked)
@@ -189,6 +219,14 @@ void RetroAchievementsDialog_t::loginStateChanged(int, const QString &)
 void RetroAchievementsDialog_t::loginFailed(const QString &message)
 {
 	statusLabel->setText(tr("Login failed: %1").arg(message));
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsDialog_t::imageReady(const QString &url)
+{
+	if (url == RetroAchievements::instance()->getAvatarUrl())
+	{
+		updateAvatar();
+	}
 }
 //----------------------------------------------------------------------------
 

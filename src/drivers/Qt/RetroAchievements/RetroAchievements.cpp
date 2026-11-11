@@ -309,6 +309,7 @@ void RetroAchievements::setEnabled(bool enable)
 void RetroAchievements::setLoginState(LoginState state)
 {
 	QString userName;
+	QString avatar;
 
 	loginState = state;
 
@@ -319,11 +320,18 @@ void RetroAchievements::setLoginState(LoginState state)
 		if ((state == LOGGED_IN) && (user != nullptr))
 		{
 			userName = QString::fromUtf8(user->display_name);
+			avatar = QString::fromUtf8(user->avatar_url ? user->avatar_url : "");
 		}
 	}
 	loggedInUser = userName;
+	avatarUrl = avatar;
 
 	emit loginStateChanged(static_cast<int>(state), userName);
+}
+//----------------------------------------------------------------------------
+QPixmap RetroAchievements::getAvatar(void)
+{
+	return imageCache->get(avatarUrl);
 }
 //----------------------------------------------------------------------------
 void RetroAchievements::loginWithToken(const std::string &user, const std::string &token)
@@ -403,6 +411,9 @@ void RC_CCONV RetroAchievements::loginCallback(int result, const char *errorMess
 		self->saveConfigLater();
 	}
 	self->setLoginState(LOGGED_IN);
+
+	// Always fetched again, so a changed avatar is picked up on the next login.
+	self->imageCache->refresh(self->avatarUrl);
 
 	// A game may have been loaded while the login was still in progress.
 	self->identifyGame();
