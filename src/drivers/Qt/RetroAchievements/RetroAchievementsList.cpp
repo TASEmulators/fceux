@@ -52,6 +52,7 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	QFont titleFont;
 
 	setWindowTitle(tr("RetroAchievements"));
+	setWindowIcon(QIcon(":/retroachievements/ra-icon.png"));
 	setAttribute(Qt::WA_DeleteOnClose);
 	resize(760, 620);
 

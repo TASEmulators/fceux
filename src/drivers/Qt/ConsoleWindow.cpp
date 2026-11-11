@@ -1542,6 +1542,7 @@ void consoleWin_t::createMainMenu(void)
 	QAction *retroAchConfig = new QAction(tr("&RetroAchievements..."), this);
 	retroAchConfig->setStatusTip(tr("Enable RetroAchievements and log in to your account."));
 	retroAchConfig->setToolTip( retroAchConfig->statusTip() );
+	retroAchConfig->setIcon( QIcon(":/retroachievements/ra-icon.png") );
 	connect(retroAchConfig, &QAction::triggered, this, [this]() { RetroAchievementsDialog_t::open(this); });
 
 	optMenu->addAction(retroAchConfig);
@@ -2180,6 +2181,7 @@ void consoleWin_t::createMainMenu(void)
 	act = new QAction(tr("&Achievements ..."), this);
 	act->setStatusTip(tr("View the RetroAchievements achievements and leaderboards of the loaded game."));
 	act->setToolTip( act->statusTip() );
+	act->setIcon( QIcon(":/retroachievements/ra-icon.png") );
 	connect(act, &QAction::triggered, this, [this]() { RetroAchievementsListDialog_t::open(this); });
 
 	toolsMenu->addAction(act);

@@ -285,7 +285,9 @@ void RaToastManager::showNext(void)
 
 	if (ra != nullptr)
 	{
-		widget->setImage(ra->images()->get(toast.imageUrl));
+		// Messages without a badge of their own get the RetroAchievements icon.
+		widget->setImage(toast.imageUrl.isEmpty() ? QPixmap(":/retroachievements/ra-icon.png")
+			: ra->images()->get(toast.imageUrl));
 	}
 	widget->move(window->mapToGlobal(QPoint(window->width() - toastWidth - toastMargin, 40)));
 	widget->setWindowOpacity(0.0);

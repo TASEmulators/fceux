@@ -40,6 +40,7 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 	std::string user;
 
 	setWindowTitle(tr("RetroAchievements"));
+	setWindowIcon(QIcon(":/retroachievements/ra-icon.png"));
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	bool playSound = true;
@@ -76,6 +77,12 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 	buttonBox->addStretch();
 	buttonBox->addWidget(closeButton);
 
+	QLabel *logoLabel = new QLabel();
+
+	logoLabel->setPixmap(QPixmap(":/retroachievements/ra-logo.png"));
+	logoLabel->setAlignment(Qt::AlignCenter);
+
+	mainLayout->addWidget(logoLabel);
 	mainLayout->addWidget(enableCbox);
 	mainLayout->addWidget(accountBox);
 	mainLayout->addWidget(soundCbox);

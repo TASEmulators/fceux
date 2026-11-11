@@ -782,7 +782,8 @@ if (RETRO_ACHIEVEMENTS)
 		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievementsImages.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievementsList.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievementsOverlay.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievementsToast.cpp)
+		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/RetroAchievementsToast.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/retroachievements.qrc)
 endif()
 
 # Put build timestamp into BUILD_TS environment variable and from there into
