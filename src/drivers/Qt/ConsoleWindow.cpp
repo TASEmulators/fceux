@@ -2653,6 +2653,27 @@ void consoleWin_t::onHardcoreChanged(bool active)
 	{
 		act->setEnabled( !active );
 	}
+
+	netPlayMenu->setEnabled( !active );
+	onNetPlayChange();
+
+	if ( active )
+	{
+		// Not from inside this call, which runs with the emulator lock held: a session is torn down with it released.
+		QMetaObject::invokeMethod( this, [this]()
+		{
+			if ( !FCEU_HardcoreActive() )
+			{
+				return;
+			}
+			NetPlayCloseSession();
+
+			if ( NetPlayHostDialog::GetInstance() )         NetPlayHostDialog::GetInstance()->close();
+			if ( NetPlayJoinDialog::GetInstance() )         NetPlayJoinDialog::GetInstance()->close();
+			if ( NetPlayHostStatusDialog::GetInstance() )   NetPlayHostStatusDialog::GetInstance()->close();
+			if ( NetPlayClientStatusDialog::GetInstance() ) NetPlayClientStatusDialog::GetInstance()->close();
+		}, Qt::QueuedConnection );
+	}
 	if ( active && (GameInfo != nullptr) )
 	{
 		// Back to normal speed, which is the only one allowed.
@@ -5681,9 +5702,10 @@ void consoleWin_t::updatePeriodic(void)
 void consoleWin_t::onNetPlayChange(void)
 {
 	const bool netPlayactv = NetPlayActive();
+	const bool hardcore = FCEU_HardcoreActive();
 
-	netPlayHostAct->setEnabled( !netPlayactv );
-	netPlayJoinAct->setEnabled( !netPlayactv );
+	netPlayHostAct->setEnabled( !netPlayactv && !hardcore );
+	netPlayJoinAct->setEnabled( !netPlayactv && !hardcore );
 	netPlayDiscAct->setEnabled(  netPlayactv );
 
 	if (netPlayactv)

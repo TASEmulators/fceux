@@ -3157,11 +3157,21 @@ template <typename T> void openSingletonDialog(QWidget* parent)
 //----------------------------------------------------------------------------
 void openNetPlayHostDialog(QWidget* parent)
 {
+	if (FCEU_HardcoreActive())
+	{
+		FCEU_DispMessage("NetPlay is disabled in Hardcore mode.", 0);
+		return;
+	}
 	openSingletonDialog<NetPlayHostDialog>(parent);
 }
 //----------------------------------------------------------------------------
 void openNetPlayJoinDialog(QWidget* parent)
 {
+	if (FCEU_HardcoreActive())
+	{
+		FCEU_DispMessage("NetPlay is disabled in Hardcore mode.", 0);
+		return;
+	}
 	openSingletonDialog<NetPlayJoinDialog>(parent);
 }
 //----------------------------------------------------------------------------
