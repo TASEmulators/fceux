@@ -80,6 +80,7 @@ struct RaLeaderboardEntry
 {
 	uint32_t rank = 0;
 	QString user;
+	QString avatarUrl;
 	QString score;
 	QDateTime submitted;
 };

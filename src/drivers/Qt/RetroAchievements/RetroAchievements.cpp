@@ -943,9 +943,15 @@ void RC_CCONV RetroAchievements::leaderboardEntriesCallback(int result, const ch
 		{
 			const rc_client_leaderboard_entry_t &src = list->entries[i];
 			RaLeaderboardEntry entry;
+			char avatarUrl[256];
 
 			entry.rank = src.rank;
 			entry.user = QString::fromUtf8(src.user ? src.user : "");
+
+			if (rc_client_leaderboard_entry_get_user_image_url(&src, avatarUrl, sizeof(avatarUrl)) == RC_OK)
+			{
+				entry.avatarUrl = QString::fromUtf8(avatarUrl);
+			}
 			entry.score = QString::fromUtf8(src.display);
 			entry.submitted = QDateTime::fromSecsSinceEpoch(static_cast<qint64>(src.submitted));
 

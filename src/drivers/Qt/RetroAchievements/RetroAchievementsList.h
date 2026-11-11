@@ -9,6 +9,7 @@
 #include <QHash>
 #include <QLabel>
 #include <QList>
+#include <QSplitter>
 #include <QTimer>
 #include <QTreeWidget>
 
@@ -27,6 +28,7 @@ class RetroAchievementsListDialog_t : public QDialog
 		~RetroAchievementsListDialog_t(void);
 
 		void setItemImage(QTreeWidgetItem *item, const QString &url);
+		void setAvatar(QTreeWidgetItem *item, const QString &url);
 
 		QLabel *badgeLabel;
 		QLabel *titleLabel;
@@ -35,10 +37,13 @@ class RetroAchievementsListDialog_t : public QDialog
 		QTreeWidget *achTree;
 		QTreeWidget *boardTree;
 		QTreeWidget *entryTree;
+		QSplitter *splitter;
 		QLabel *entryStatus;
 		QTimer refreshTimer;
 		QTimer presenceTimer;
 		QHash<QString, QList<QTreeWidgetItem*> > imageItems;
+		// Leaderboard rows waiting for (or showing) the avatar of their user.
+		QHash<QString, QList<QTreeWidgetItem*> > avatarItems;
 		QString gameBadgeUrl;
 		unsigned int selectedBoard;
 

@@ -8,6 +8,7 @@
 #include <QPixmap>
 #include <QPointer>
 #include <QPushButton>
+#include <QSettings>
 #include <QSplitter>
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -18,6 +19,7 @@
 static QPointer<RetroAchievementsListDialog_t> openDialog;
 
 static const int badgeSize = 48;
+static const int avatarSize = 32;
 
 //----------------------------------------------------------------------------
 void RetroAchievementsListDialog_t::open(QWidget *parent)
@@ -44,7 +46,6 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	QHBoxLayout *header = new QHBoxLayout();
 	QVBoxLayout *headerText = new QVBoxLayout();
 	QTabWidget *tabs = new QTabWidget();
-	QSplitter *splitter = new QSplitter(Qt::Horizontal);
 	QWidget *entryPane = new QWidget();
 	QVBoxLayout *entryLayout = new QVBoxLayout();
 	QHBoxLayout *buttons = new QHBoxLayout();
@@ -97,15 +98,22 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 
 	entryTree = new QTreeWidget();
 	entryTree->setColumnCount(4);
-	entryTree->setHeaderLabels({ tr("Rank"), tr("User"), tr("Score"), tr("Submitted") });
+	entryTree->setHeaderLabels({ tr("Rank"), tr("Score"), tr("User"), tr("Submitted") });
 	entryTree->setRootIsDecorated(false);
 	entryTree->setAlternatingRowColors(true);
+	entryTree->setIconSize(QSize(avatarSize, avatarSize));
+	entryTree->header()->setStretchLastSection(false);
+	entryTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+	entryTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+	entryTree->header()->setSectionResizeMode(2, QHeaderView::Stretch);
+	entryTree->header()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
 
 	entryLayout->setContentsMargins(0, 0, 0, 0);
 	entryLayout->addWidget(entryStatus);
 	entryLayout->addWidget(entryTree);
 	entryPane->setLayout(entryLayout);
 
+	splitter = new QSplitter(Qt::Horizontal);
 	splitter->addWidget(boardTree);
 	splitter->addWidget(entryPane);
 	splitter->setStretchFactor(0, 3);
@@ -121,6 +129,13 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	mainLayout->addWidget(tabs, 1);
 	mainLayout->addLayout(buttons);
 	setLayout(mainLayout);
+
+	{
+		QSettings settings;
+
+		restoreGeometry(settings.value("retroAchievementsListWindow/geometry").toByteArray());
+		splitter->restoreState(settings.value("retroAchievementsListWindow/splitter").toByteArray());
+	}
 
 	// Several events can arrive together, so refreshing is deferred and merged.
 	refreshTimer.setSingleShot(true);
@@ -148,6 +163,10 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 //----------------------------------------------------------------------------
 RetroAchievementsListDialog_t::~RetroAchievementsListDialog_t(void)
 {
+	QSettings settings;
+
+	settings.setValue("retroAchievementsListWindow/geometry", saveGeometry());
+	settings.setValue("retroAchievementsListWindow/splitter", splitter->saveState());
 }
 //----------------------------------------------------------------------------
 void RetroAchievementsListDialog_t::setItemImage(QTreeWidgetItem *item, const QString &url)
@@ -247,6 +266,7 @@ void RetroAchievementsListDialog_t::refresh(void)
 		item->setData(0, Qt::UserRole, board.id);
 	}
 	entryTree->clear();
+	avatarItems.clear();
 	entryStatus->setText(boards.isEmpty() ? tr("This game has no leaderboards.") : tr("Select a leaderboard to see the top scores."));
 	selectedBoard = 0;
 }
@@ -279,6 +299,12 @@ void RetroAchievementsListDialog_t::imageReady(const QString &url)
 	{
 		setItemImage(item, url);
 	}
+	const QList<QTreeWidgetItem*> avatarRows = avatarItems.value(url);
+
+	for (QTreeWidgetItem *item : avatarRows)
+	{
+		setAvatar(item, url);
+	}
 }
 //----------------------------------------------------------------------------
 void RetroAchievementsListDialog_t::boardSelected(void)
@@ -293,6 +319,7 @@ void RetroAchievementsListDialog_t::boardSelected(void)
 	selectedBoard = item->data(0, Qt::UserRole).toUInt();
 
 	entryTree->clear();
+	avatarItems.clear();
 	entryStatus->setText(tr("Loading..."));
 
 	ra->fetchLeaderboardEntries(selectedBoard);
@@ -305,6 +332,7 @@ void RetroAchievementsListDialog_t::entriesReady(unsigned int boardId, const QLi
 		return;
 	}
 	entryTree->clear();
+	avatarItems.clear();
 	entryStatus->setText(entries.isEmpty() ? tr("No entries, or they could not be loaded.") : QString());
 
 	for (const RaLeaderboardEntry &entry : entries)
@@ -312,10 +340,34 @@ void RetroAchievementsListDialog_t::entriesReady(unsigned int boardId, const QLi
 		QTreeWidgetItem *item = new QTreeWidgetItem(entryTree);
 
 		item->setText(0, QString::number(entry.rank));
-		item->setText(1, entry.user);
-		item->setText(2, entry.score);
+		item->setText(1, entry.score);
+		item->setText(2, entry.user);
 		item->setText(3, entry.submitted.toLocalTime().toString(Qt::TextDate));
+
+		if (!entry.avatarUrl.isEmpty())
+		{
+			avatarItems[entry.avatarUrl].append(item);
+			setAvatar(item, entry.avatarUrl);
+		}
 	}
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsListDialog_t::setAvatar(QTreeWidgetItem *item, const QString &url)
+{
+	RetroAchievements *ra = RetroAchievements::instance();
+	QPixmap pixmap;
+
+	if (ra != nullptr)
+	{
+		pixmap = ra->images()->get(url);
+	}
+	if (pixmap.isNull())
+	{
+		// Keeps the row height and the text position the same until the image has arrived.
+		pixmap = QPixmap(avatarSize, avatarSize);
+		pixmap.fill(Qt::transparent);
+	}
+	item->setIcon(2, QIcon(pixmap.scaled(avatarSize, avatarSize, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
 }
 //----------------------------------------------------------------------------
 
