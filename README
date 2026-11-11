@@ -7,7 +7,7 @@ Updated By mjbudd77
 
 https://fceux.com
 
-Last Modified: April 30, 2023
+Last Modified: November 11, 2026
 
 Table of Contents
 -----------------
@@ -23,20 +23,62 @@ Table of Contents
 1 - Requirements
 ----------------
 * sdl2  - Version >= 2.0  (sdl2 >= 2.32 recommended)
-* cmake - Required to build fceux. (cmake >= 3.8 recommended)
+* cmake - Required to build fceux. (cmake >= 3.16 is required)
+	- Qt itself can need a newer cmake than that. For example Qt 6.10 refuses to be used with
+	  cmake older than 3.22, and cmake will say so when it configures the project.
 * qt5 OR qt6  - (qt version >= 5.15 required)
-	- Required Qt Modules: Widgets and OpenGL
-	- Optional Qt Modules: Help
+	- Required Qt Modules: Widgets, OpenGL and Network
+	  (Qt6 also needs OpenGLWidgets, which is part of Qt Base)
+	- Optional Qt Modules: Multimedia, Qml, UiTools and Help. Each one turns on a feature of
+	  fceux when it is found at build time. See "Qt modules" below.
 * liblua5.1 (optional) - Will statically link internally if the system cannot provide this.
 * libx264 (optional) - H.264 video encoder for avi recording (recommended)
 * libx265 (optional) - H.265 video encoder for avi recording (recommended)
 * ffmpeg libraries (optional) - for avi recording (recommended)
 *	- ffmpeg libraries used: libavcodec  libavformat  libavutil  libswresample  libswscale
 * libarchive (optional) - for 7zip archive support (test with version 3.4.0)
+* rcheevos (optional) - for RetroAchievements support. Not part of this repository, see section 3.
 * minizip  
 * zlib  
 * openGL
 * c++ compiler -- you may use g++ from gcc or clang++ from llvm or msvc 2019
+
+Qt modules
+----------
+Qt is split into modules, and which of them are installed decides which features the build has.
+The Qt module section of the cmake output shows what was found, for example:
+
+	-- Qt6 Qml Module Found
+	-- Qt6 UiTools Module Not Found
+
+A missing optional module does NOT stop the build. The matching feature is quietly left out, so
+packagers should check these lines (and the Vulkan lines mentioned below) to be sure a package has
+every feature.
+
+   Module        Needed    Used for                                       Debian/Ubuntu packages
+                                                                          Qt5                   Qt6
+   -----------   --------  ---------------------------------------------  --------------------  --------------------
+   Widgets       required  The GUI                                        qtbase5-dev           qt6-base-dev
+   OpenGL        required  OpenGL video output (Qt6: OpenGL and           libqt5opengl5-dev     qt6-base-dev
+                           OpenGLWidgets)
+   Network       required  NetPlay, and RetroAchievements (HTTPS)         qtbase5-dev           qt6-base-dev
+   Multimedia    optional  The Qt audio driver, including audio output    qtmultimedia5-dev     qt6-multimedia-dev
+                           device selection. Without it only the SDL
+                           audio driver is available.
+   Qml           optional  JavaScript scripting                           qtdeclarative5-dev    qt6-declarative-dev
+   UiTools       optional  Lets JavaScript scripts load user interface    qttools5-dev          qt6-tools-dev
+                           (.ui) files at run time
+   Help          optional  Offline help pages. Also needs -DQHELP=1,      qttools5-dev          qt6-tools-dev
+                           see section 4.
+
+Network is checked as optional for Qt5 by cmake, but NetPlay cannot be compiled without it, so
+treat it as required for both. The package names above were checked on a current Ubuntu. Other
+distributions and macOS (Homebrew) name and split the Qt packages differently, so use the cmake
+output to confirm what was found.
+
+Vulkan is a separate optional dependency, not a Qt module. The Vulkan video renderer is built when
+cmake finds the Vulkan headers (libvulkan-dev on Debian/Ubuntu) and Qt itself has Vulkan support.
+cmake prints "Vulkan SDK found" and "Qt Vulkan support found" when it is enabled.
 
 2 - Installation
 ----------------
@@ -88,6 +130,56 @@ OR:
 ------------------------
 You can enable and disable certain features of fceux at build time. 
 Look in the src/CMakeList.txt file to tweak options.
+
+RetroAchievements (optional, off by default)
+--------------------------------------------
+FCEUX can connect to RetroAchievements (https://retroachievements.org) using the rcheevos
+library. The rcheevos source code is NOT part of the fceux repository, and the build never
+downloads anything. A package that should include RetroAchievements support has to supply the
+rcheevos source itself. rcheevos is MIT licensed (see its LICENSE file, which should be included
+with the package notices) and is compiled statically into the fceux binary, so there is no
+additional run-time library to depend on.
+
+To build with it:
+
+1. Get the rcheevos source. FCEUX is tested with release v12.5.0:
+
+	git clone --depth 1 --branch v12.5.0 https://github.com/RetroAchievements/rcheevos.git
+
+   A distribution build that has to work offline should add an rcheevos release tarball to the
+   package sources instead of cloning it.
+
+2. Turn the option on and tell cmake where the rcheevos source is:
+
+	cmake  -DCMAKE_INSTALL_PREFIX=/usr  -DCMAKE_BUILD_TYPE=Release  \
+	       -DRETRO_ACHIEVEMENTS=ON  -DRCHEEVOS_DIR=/path/to/rcheevos  ..
+
+   Without -DRCHEEVOS_DIR the source is expected in src/rcheevos inside the fceux source tree
+   (git ignores that folder). On macOS, add the two options to the usual arguments, for example:
+
+	cmake  -S . -B build  -G Ninja  -DCMAKE_BUILD_TYPE=Release  -DQT6=1  \
+	       -DCMAKE_PREFIX_PATH="$(brew --prefix qt6)"  \
+	       -DRETRO_ACHIEVEMENTS=ON  -DRCHEEVOS_DIR=/path/to/rcheevos
+
+3. Check that it took effect. If the rcheevos folder is missing or incomplete, cmake only prints a
+   warning and builds WITHOUT RetroAchievements; it does not fail. Look for this line in the cmake output:
+
+	-- RetroAchievements: enabled (rcheevos from /path/to/rcheevos)
+
+   In the finished program, the About window lists "Compiled with rcheevos version ..." under
+   Open Source Dependencies, and the Options menu has a RetroAchievements entry.
+
+Other notes for packagers:
+* Other rcheevos releases should work, but only v12.5.0 has been tested. All of the .c files under
+  the rcheevos src folder are compiled, except for its libretro glue.
+* RetroAchievements only talks HTTPS (retroachievements.org and media.retroachievements.org). The
+  Qt Network module needs a working TLS backend at run time, which is normally OpenSSL on Linux. The
+  package dependencies should make sure that is installed.
+* The unlock sound is played through SDL2, which fceux already requires.
+* Hardcore mode is not implemented yet. Achievements are earned in softcore mode.
+* Only the user name and a login token are kept in fceux.cfg. The password is never stored.
+* The cmake option is RETRO_ACHIEVEMENTS and the compiler macro that it defines for the code
+  is FCEUX_HAS_RETRO_ACHIEVEMENTS.
 
 4 - GUI
 -------
