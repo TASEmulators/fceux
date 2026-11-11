@@ -135,6 +135,7 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	// Queued so the window is never updated while the GUI thread holds the emulator lock.
 	connect(ra, &RetroAchievements::achievementUnlocked, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::gameIdentified, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
+	connect(ra, &RetroAchievements::gameUnrecognized, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::gameUnloaded, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::loginStateChanged, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::leaderboardEntriesReady, this, &RetroAchievementsListDialog_t::entriesReady,
@@ -183,7 +184,18 @@ void RetroAchievementsListDialog_t::refresh(void)
 
 	if (!game.loaded)
 	{
-		titleLabel->setText(ra->isEnabled() ? tr("No game loaded") : tr("RetroAchievements is disabled"));
+		if (!ra->isEnabled())
+		{
+			titleLabel->setText(tr("RetroAchievements is disabled"));
+		}
+		else if (game.unrecognized)
+		{
+			titleLabel->setText(tr("Unrecognized game (not found on RetroAchievements)"));
+		}
+		else
+		{
+			titleLabel->setText(tr("No game loaded"));
+		}
 		summaryLabel->setText(QString());
 		badgeLabel->clear();
 		gameBadgeUrl.clear();

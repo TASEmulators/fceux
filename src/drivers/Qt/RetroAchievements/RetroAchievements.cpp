@@ -50,6 +50,7 @@ RetroAchievements::RetroAchievements(void)
 	, idleTimer(this)
 	, loginState(LOGGED_OUT)
 	, gameActive(false)
+	, gameUnknown(false)
 	, debugLog(false)
 	, configSavePending(false)
 	, generation(0)
@@ -361,6 +362,7 @@ void RetroAchievements::logout(void)
 	{
 		rc_client_logout(client);
 		gameActive = false;
+		gameUnknown = false;
 		releaseRomImage();
 		setLoginState(LOGGED_OUT);
 	}
@@ -453,6 +455,12 @@ void RC_CCONV RetroAchievements::loadGameCallback(int result, const char *errorM
 	{
 		self->gameActive = false;
 		FCEU_printf("RetroAchievements: game not loaded: %s\n", errorMessage ? errorMessage : "unknown error");
+
+		if (result == RC_NO_GAME_LOADED)
+		{
+			self->gameUnknown = true;
+			emit self->gameUnrecognized();
+		}
 		return;
 	}
 	const rc_client_game_t *game = rc_client_get_game_info(client);
@@ -473,6 +481,7 @@ void RetroAchievements::gameLoaded(void)
 {
 	// Identified now when logged in, otherwise by the login callback.
 	gameActive = false;
+	gameUnknown = false;
 
 	identifyGame();
 }
@@ -490,6 +499,7 @@ void RetroAchievements::gameClosed(void)
 	indicators->clear();
 
 	gameActive = false;
+	gameUnknown = false;
 
 	emit gameUnloaded();
 }
@@ -718,6 +728,7 @@ RaGameSummary RetroAchievements::getGameSummary(void)
 
 	if ((client == nullptr) || !gameActive)
 	{
+		summary.unrecognized = (client != nullptr) && gameUnknown;
 		return summary;
 	}
 	const rc_client_game_t *game = rc_client_get_game_info(client);

@@ -38,6 +38,7 @@ class RaOverlayIndicators;
 struct RaGameSummary
 {
 	bool loaded = false;
+	bool unrecognized = false;   // a ROM is loaded, but the server does not know it
 	uint32_t gameId = 0;
 	QString title;
 	QString badgeUrl;
@@ -139,6 +140,7 @@ class RetroAchievements : public QObject
 		void loginStateChanged(int state, const QString &userName);
 		void loginFailed(const QString &message);
 		void gameIdentified(unsigned int gameId, const QString &title);
+		void gameUnrecognized(void);
 		void achievementUnlocked(const QString &title, const QString &description,
 			unsigned int points, const QString &badgeUrl);
 		void gameCompleted(const QString &title);
@@ -203,6 +205,7 @@ class RetroAchievements : public QObject
 		LoginState loginState;
 		QString loggedInUser;
 		bool gameActive;
+		bool gameUnknown;
 		bool debugLog;
 		std::atomic<bool> configSavePending;
 
