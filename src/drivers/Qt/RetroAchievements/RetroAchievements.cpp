@@ -184,6 +184,8 @@ void RetroAchievements::drainBlocking(int timeoutMs)
 
 	FCEU_printf("RetroAchievements: waiting for %i pending request(s) to finish.\n", inFlight);
 
+	// Same as beginShutdown: no frames, nothing new scheduled, and no game identification after a login.
+	shuttingDown = true;
 	gameActive = false;
 	idleTimer.stop();
 
