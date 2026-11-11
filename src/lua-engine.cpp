@@ -7370,8 +7370,7 @@ void FCEU_LuaFrameBoundary()
 }
 
 
-template <typename Callback>
-void tokenizeString(const char *str, Callback readToken);
+static std::vector<std::string> tokenizeString(const char *str);
 
 /**
  * Loads and runs the given Lua script.
@@ -7486,10 +7485,11 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 			if (arg)
 			{
 				int ti = 1;
-				tokenizeString(arg, [&](const char *tok) {
-					lua_pushstring(L, tok);
+				for (std::string tok : tokenizeString(arg))
+				{
+					lua_pushstring(L, tok.c_str());
 					lua_rawseti(L, -2, ti++);
-				});
+				}
 			}
 			lua_setglobal(L, "arg");
 		}
@@ -7596,40 +7596,43 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 	return 1;
 }
 
-// This is very reusable, but just leaving it here for now.
-// The char* passed to the callback will always be the same fixed buffer on the stack. That means you don't have to free
-// it, but you do have to copy it if you want to use it later.
-template <typename Callback>
-static void tokenizeString(const char *str, Callback consumeToken)
+// Splits on whitespace; double quotes group text (and are removed). No size limit.
+static std::vector<std::string> tokenizeString(const char *str)
 {
-	int len = strlen(str), start = 0, stop, bi = 0;
-	bool quoted = false;
-	char buf[MAX_PATH]; buf[0] = 0; // TODO: MAX_PATH ain't gonna cut it if this is to be generally useful.
-	for (int i = 0; i < len; i++)
-	{
-		if (str[i] == '"')
-		{
-			quoted = !quoted;
-		}
-		else if (!quoted && str[i] == ' ')
-		{
-			stop = i;
-			if (stop > start)
-			{
-				consumeToken(buf); // TODO: pass length? I mean, we already know it.
-				buf[bi = 0] = 0;
-			}
-			start = i + 1;
-		}
-		else
-		{
-			buf[bi++] = str[i]; buf[bi] = 0;
-		}
-	}
-	if (*buf)
-	{
-		consumeToken(buf);
-	}
+    std::vector<std::string> tokens;
+    if (!str)
+        return tokens;
+
+    std::string cur;
+    bool inToken = false; // distinguishes an empty quoted token ("") from no token
+    bool quoted = false;
+
+    for (const char *p = str; *p; ++p)
+    {
+        if (*p == '"')
+        {
+            quoted = !quoted;
+            inToken = true;
+        }
+        else if (!quoted && isspace((unsigned char)*p))
+        {
+            if (inToken)
+            {
+                tokens.push_back(std::move(cur));
+                cur.clear();
+                inToken = false;
+            }
+        }
+        else
+        {
+            cur += *p;
+            inToken = true;
+        }
+    }
+    if (inToken)
+        tokens.push_back(std::move(cur));
+
+    return tokens;
 }
 
 /**
