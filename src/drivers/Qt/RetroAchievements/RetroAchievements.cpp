@@ -45,6 +45,7 @@ RetroAchievements::RetroAchievements(void)
 	, loginState(LOGGED_OUT)
 	, gameActive(false)
 	, debugLog(false)
+	, configSavePending(false)
 	, generation(0)
 {
 	bool enable = false;
@@ -159,6 +160,7 @@ void RetroAchievements::shutdownClient(void)
 
 	indicators.reset();
 	gameActive = false;
+	releaseRomImage();
 
 	setLoginState(LOGGED_OUT);
 }
@@ -168,7 +170,7 @@ void RetroAchievements::setEnabled(bool enable)
 	FCEU_WRAPPER_SCOPED_LOCK();
 
 	g_config->setOption(cfgEnable, enable ? 1 : 0);
-	g_config->save();
+	saveConfigLater();
 
 	if (enable)
 	{
@@ -230,12 +232,13 @@ void RetroAchievements::logout(void)
 	FCEU_WRAPPER_SCOPED_LOCK();
 
 	g_config->setOption(cfgToken, "");
-	g_config->save();
+	saveConfigLater();
 
 	if (client != nullptr)
 	{
 		rc_client_logout(client);
 		gameActive = false;
+		releaseRomImage();
 		setLoginState(LOGGED_OUT);
 	}
 }
@@ -252,7 +255,7 @@ void RC_CCONV RetroAchievements::loginCallback(int result, const char *errorMess
 		{
 			// The stored token was rejected; forget it so it is not retried on every start.
 			g_config->setOption(cfgToken, "");
-			g_config->save();
+			self->saveConfigLater();
 		}
 		self->setLoginState(LOGGED_OUT);
 
@@ -272,7 +275,7 @@ void RC_CCONV RetroAchievements::loginCallback(int result, const char *errorMess
 	{
 		g_config->setOption(cfgUser, user->username);
 		g_config->setOption(cfgToken, user->token);
-		g_config->save();
+		self->saveConfigLater();
 	}
 	self->setLoginState(LOGGED_IN);
 
@@ -282,12 +285,34 @@ void RC_CCONV RetroAchievements::loginCallback(int result, const char *errorMess
 //----------------------------------------------------------------------------
 void RetroAchievements::identifyGame(void)
 {
-	if ((client == nullptr) || (loginState != LOGGED_IN) || romImage.empty())
+	std::vector<uint8_t> image;
+
+	if ((client == nullptr) || (loginState != LOGGED_IN) || (GameInfo == nullptr))
 	{
 		return;
 	}
+	if (!FCEU_ReadLoadedRomImage(image))
+	{
+		FCEU_printf("RetroAchievements: could not read the game file again to identify it.\n");
+		return;
+	}
+	// A load that is still running is aborted inside the call below. Keeping its buffer alive until
+	// the call returns (swapping a vector does not move the data) means nothing can see it freed.
+	std::vector<uint8_t> previous;
+
+	previous.swap(romImage);
+	romImage.swap(image);
+	romName = GameInfo->filename ? GameInfo->filename : "";
+
 	rc_client_begin_identify_and_load_game(client, RC_CONSOLE_UNKNOWN, romName.c_str(),
 		romImage.data(), romImage.size(), &RetroAchievements::loadGameCallback, this);
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::releaseRomImage(void)
+{
+	romImage.clear();
+	romImage.shrink_to_fit();
+	romName.clear();
 }
 //----------------------------------------------------------------------------
 void RC_CCONV RetroAchievements::loadGameCallback(int result, const char *errorMessage, rc_client_t *client, void *userdata)
@@ -298,6 +323,9 @@ void RC_CCONV RetroAchievements::loadGameCallback(int result, const char *errorM
 	{
 		return;
 	}
+	// Identification is over, rc_client no longer reads the ROM.
+	self->releaseRomImage();
+
 	if (result != RC_OK)
 	{
 		self->gameActive = false;
@@ -318,21 +346,17 @@ void RC_CCONV RetroAchievements::loadGameCallback(int result, const char *errorM
 	emit self->gameIdentified(game->id, QString::fromUtf8(game->title));
 }
 //----------------------------------------------------------------------------
-void RetroAchievements::gameLoaded(const char *filename, const uint8_t *data, size_t size)
+void RetroAchievements::gameLoaded(void)
 {
-	// The image is kept even while disabled or logged out, so the game can be identified once that changes.
+	// Identified now when logged in, otherwise by the login callback.
 	gameActive = false;
-	romName.assign(filename);
-	romImage.assign(data, data + size);
 
 	identifyGame();
 }
 //----------------------------------------------------------------------------
 void RetroAchievements::gameClosed(void)
 {
-	romImage.clear();
-	romImage.shrink_to_fit();
-	romName.clear();
+	releaseRomImage();
 
 	if (client == nullptr)
 	{
@@ -412,12 +436,30 @@ void RetroAchievements::deserializeProgress(const uint8_t *data, size_t size)
 //----------------------------------------------------------------------------
 void RetroAchievements::idle(void)
 {
-	FCEU_WRAPPER_SCOPED_LOCK();
-
+	// rc_client_do_frame already runs this work while frames are emulated, so it only matters while
+	// paused. Do not make the emulator wait for it, and just try again at the next tick when it is busy.
+	if (!FCEU_WRAPPER_TRYLOCK(2))
+	{
+		return;
+	}
 	if (client != nullptr)
 	{
 		rc_client_idle(client);
 	}
+	FCEU_WRAPPER_UNLOCK();
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::saveConfigLater(void)
+{
+	if (configSavePending.exchange(true))
+	{
+		return;
+	}
+	QMetaObject::invokeMethod(this, [this]()
+	{
+		configSavePending = false;
+		g_config->save();
+	}, Qt::QueuedConnection);
 }
 //----------------------------------------------------------------------------
 void RC_CCONV RetroAchievements::serverCall(const rc_api_request_t *request,
@@ -823,13 +865,13 @@ void RC_CCONV RetroAchievements::eventHandler(const rc_client_event_t *event, rc
 //----------------------------------------------------------------------------
 // Entry points used by the emulator core. See driver.h.
 //----------------------------------------------------------------------------
-void FCEUD_RetroAchievementsGameLoaded(const char *filename, const uint8 *data, size_t size)
+void FCEUD_RetroAchievementsGameLoaded(void)
 {
 	RetroAchievements *ra = RetroAchievements::instance();
 
 	if (ra != nullptr)
 	{
-		ra->gameLoaded(filename, data, size);
+		ra->gameLoaded();
 	}
 }
 //----------------------------------------------------------------------------

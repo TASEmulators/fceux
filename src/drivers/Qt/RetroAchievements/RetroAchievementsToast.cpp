@@ -204,9 +204,11 @@ RaToastManager::RaToastManager(QWidget *mainWindow)
 	{
 		return;
 	}
-	connect(ra, &RetroAchievements::achievementUnlocked, this, &RaToastManager::achievementUnlocked);
-	connect(ra, &RetroAchievements::gameCompleted, this, &RaToastManager::gameCompleted);
-	connect(ra, &RetroAchievements::notification, this, &RaToastManager::notification);
+	// Always queued: these can be emitted from the GUI thread while it holds the emulator lock,
+	// and creating windows there would stall emulation.
+	connect(ra, &RetroAchievements::achievementUnlocked, this, &RaToastManager::achievementUnlocked, Qt::QueuedConnection);
+	connect(ra, &RetroAchievements::gameCompleted, this, &RaToastManager::gameCompleted, Qt::QueuedConnection);
+	connect(ra, &RetroAchievements::notification, this, &RaToastManager::notification, Qt::QueuedConnection);
 	connect(ra->images(), &RaImageCache::imageReady, this, &RaToastManager::imageReady);
 }
 //----------------------------------------------------------------------------

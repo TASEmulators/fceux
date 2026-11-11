@@ -591,21 +591,14 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode, bool silen
 		GameInfo = 0;
 	}
 
+	FCEU_fclose(fp);
+
 #ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
 	if (GameInfo)
 	{
-		std::vector<uint8> image(fp->stream->size());
-
-		fp->stream->fseek(0, SEEK_SET);
-
-		if (!image.empty() && (fp->stream->fread(image.data(), image.size()) == image.size()))
-		{
-			FCEUD_RetroAchievementsGameLoaded(fp->filename.c_str(), image.data(), image.size());
-		}
+		FCEUD_RetroAchievementsGameLoaded();
 	}
 #endif
-
-	FCEU_fclose(fp);
 
 	if ( FCEU_StateRecorderIsEnabled() )
 	{
@@ -619,6 +612,49 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode, bool silent)
 {
 	return FCEUI_LoadGameVirtual(name, OverwriteVidMode, silent);
 }
+
+#ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
+bool FCEU_ReadLoadedRomImage(std::vector<uint8> &image)
+{
+	image.clear();
+
+	if (!GameInfo || !GameInfo->filename || GameInfo->loadedFromTmpFile)
+	{
+		return false;
+	}
+	// Same path form the loader reports for a file inside an archive.
+	std::string path;
+
+	if (GameInfo->archiveFilename)
+	{
+		path = GameInfo->archiveFilename;
+		path += "|";
+	}
+	path += GameInfo->filename;
+
+	const char* romextensions[] = { "nes", "fds", "nsf", 0 };
+	int userCancel = 0;
+	FCEUFILE *fp = FCEU_fopen(path.c_str(), LoadedRomFNamePatchToUse[0] ? LoadedRomFNamePatchToUse : nullptr,
+		"rb", 0, -1, romextensions, &userCancel);
+
+	if (!fp)
+	{
+		return false;
+	}
+	image.resize(fp->stream->size());
+	fp->stream->fseek(0, SEEK_SET);
+
+	const bool ok = !image.empty() && (fp->stream->fread(image.data(), image.size()) == image.size());
+
+	FCEU_fclose(fp);
+
+	if (!ok)
+	{
+		image.clear();
+	}
+	return ok;
+}
+#endif
 
 
 //Return: Flag that indicates whether the function was succesful or not.

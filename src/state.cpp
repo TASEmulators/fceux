@@ -392,7 +392,8 @@ static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 
 #ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
 	// A state without progress data (old state, or made without RetroAchievements): start tracking over.
-	if(!retroAchProgressRead)
+	// Not for TAS Editor states, which never carry it and are loaded constantly while seeking.
+	if(!retroAchProgressRead && !FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 		FCEUD_RetroAchievementsDeserialize(nullptr, 0);
 	}

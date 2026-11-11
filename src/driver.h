@@ -371,7 +371,10 @@ bool FCEU_IsValidUI(EFCEUI ui);
 #ifdef FCEUX_HAS_RETRO_ACHIEVEMENTS
 // RetroAchievements hooks, implemented by the driver. All of them are called on
 // the emulator thread (or the thread loading the game) with the emulator lock held.
-void FCEUD_RetroAchievementsGameLoaded(const char *filename, const uint8 *data, size_t size);
+void FCEUD_RetroAchievementsGameLoaded(void);
+// Re-opens the loaded game from the paths in GameInfo (archive and IPS patch included) and reads it
+// into image, so the driver does not have to keep a copy of the ROM around.
+bool FCEU_ReadLoadedRomImage(std::vector<uint8> &image);
 void FCEUD_RetroAchievementsGameClosed(void);
 void FCEUD_RetroAchievementsFrame(void);
 void FCEUD_RetroAchievementsReset(void);

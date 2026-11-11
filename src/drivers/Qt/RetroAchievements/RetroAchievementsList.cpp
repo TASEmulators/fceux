@@ -132,11 +132,13 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	connect(closeButton, &QPushButton::clicked, this, &QDialog::close);
 	connect(boardTree, &QTreeWidget::currentItemChanged, this, &RetroAchievementsListDialog_t::boardSelected);
 
-	connect(ra, &RetroAchievements::achievementUnlocked, &refreshTimer, qOverload<>(&QTimer::start));
-	connect(ra, &RetroAchievements::gameIdentified, &refreshTimer, qOverload<>(&QTimer::start));
-	connect(ra, &RetroAchievements::gameUnloaded, &refreshTimer, qOverload<>(&QTimer::start));
-	connect(ra, &RetroAchievements::loginStateChanged, &refreshTimer, qOverload<>(&QTimer::start));
-	connect(ra, &RetroAchievements::leaderboardEntriesReady, this, &RetroAchievementsListDialog_t::entriesReady);
+	// Queued so the window is never updated while the GUI thread holds the emulator lock.
+	connect(ra, &RetroAchievements::achievementUnlocked, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
+	connect(ra, &RetroAchievements::gameIdentified, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
+	connect(ra, &RetroAchievements::gameUnloaded, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
+	connect(ra, &RetroAchievements::loginStateChanged, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
+	connect(ra, &RetroAchievements::leaderboardEntriesReady, this, &RetroAchievementsListDialog_t::entriesReady,
+		Qt::QueuedConnection);
 	connect(ra->images(), &RaImageCache::imageReady, this, &RetroAchievementsListDialog_t::imageReady);
 
 	refresh();

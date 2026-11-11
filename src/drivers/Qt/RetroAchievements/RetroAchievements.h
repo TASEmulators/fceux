@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 
+#include <atomic>
 #include <memory>
 
 #include <QByteArray>
@@ -111,7 +112,7 @@ class RetroAchievements : public QObject
 		void logout(void);
 
 		// Emulator hooks. Caller must hold the emulator lock.
-		void gameLoaded(const char *filename, const uint8_t *data, size_t size);
+		void gameLoaded(void);
 		void gameClosed(void);
 		void frame(void);
 		void reset(void);
@@ -148,9 +149,14 @@ class RetroAchievements : public QObject
 		void initClient(void);
 		void shutdownClient(void);
 		void loginWithToken(const std::string &user, const std::string &token);
+		// Reads the loaded game again from disk and starts identifying it. Needs a login.
 		void identifyGame(void);
+		void releaseRomImage(void);
 		void setLoginState(LoginState state);
 		void idle(void);
+		// Writes the config file once the emulator lock has been released, because the disk write would
+		// otherwise stall emulation.
+		void saveConfigLater(void);
 
 		// HTTP
 		void startRequest(const QByteArray &url, const QByteArray &postData, const QByteArray &contentType,
@@ -176,11 +182,13 @@ class RetroAchievements : public QObject
 		QString loggedInUser;
 		bool gameActive;
 		bool debugLog;
+		std::atomic<bool> configSavePending;
 
 		// Bumped when the client is destroyed, so queued requests of the old client are dropped.
 		unsigned int generation;
 
-		// ROM image of the current game. rc_client keeps referencing it while it identifies the game.
+		// ROM image of the game being identified. rc_client keeps using it until the load callback, and it is
+		// released right after, so nothing is held while a game is just being played.
 		std::string romName;
 		std::vector<uint8_t> romImage;
 };
