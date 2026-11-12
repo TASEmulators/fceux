@@ -24,8 +24,6 @@ exclude:
   - NEWS
   - NewPPUtests.txt
   - README
-  - STYLE-GUIDELINES-SDL
-  - TODO-SDL
   - _config.yml
   - appveyor.yml
   - autogen.sh

@@ -51,8 +51,6 @@ extern char FileBase[];
 extern TASEDITOR_LUA taseditor_lua;
 #endif
 
-#ifdef __SDL__
-
 #ifdef __QT_DRIVER__
 #include "drivers/Qt/sdl.h"
 #include "drivers/Qt/main.h"
@@ -64,12 +62,6 @@ extern TASEDITOR_LUA taseditor_lua;
 #include "drivers/Qt/TasEditor/snapshot.h"
 #include "drivers/Qt/TasEditor/taseditor_lua.h"
 extern TASEDITOR_LUA *taseditor_lua;
-#else
-int LoadGame(const char *path, bool silent = false);
-int reloadLastGame(void);
-void fceuWrapperRequestAppExit(void);
-#endif
-
 #endif
 
 #include <cstdio>

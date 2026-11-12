@@ -78,8 +78,6 @@ extern void RefreshThrottleFPS();
 #else
 #ifdef __QT_DRIVER__
 #include "drivers/Qt/sdl.h"
-#else
-#include "drivers/sdl/sdl.h"
 #endif
 #endif
 

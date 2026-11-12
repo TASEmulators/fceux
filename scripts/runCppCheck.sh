@@ -10,7 +10,6 @@ cd $SRC_DIR;
 cppcheck --version
 
 IGNORE_DIRS=" -i ./attic "
-IGNORE_DIRS+="-i ./drivers/sdl "
 #IGNORE_DIRS+="-i ./drivers/win "
 
 cppcheck --force $IGNORE_DIRS .
