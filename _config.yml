@@ -7,11 +7,7 @@
 # - index.html
 
 exclude:
-  - attic
   - fceux-server
-  - getSDLKey
-  - gfceu
-  - m4
   - output
   - pipelines
   - src
