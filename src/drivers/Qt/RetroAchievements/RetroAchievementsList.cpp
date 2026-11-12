@@ -5,6 +5,7 @@
 #include <QFont>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QPair>
 #include <QPixmap>
 #include <QPointer>
 #include <QPushButton>
@@ -23,6 +24,8 @@ static QPointer<RetroAchievementsListDialog_t> openDialog;
 
 static const int badgeSize = 48;
 static const int avatarSize = 32;
+// Number of leaderboard entries fetched until the user picks another one.
+static const int defaultEntryCount = 50;
 
 static QString boardStateText(const RaLeaderboardInfo &board)
 {
@@ -146,8 +149,21 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	entryMode->addItem(tr("Top scores"));
 	entryMode->addItem(tr("Around my score"));
 
+	entryCountBox = new QComboBox();
+
+	for (const int count : { 20, 50, 100, 200, 500 })
+	{
+		entryCountBox->addItem(tr("%1 entries").arg(count), count);
+	}
+	entryCountBox->setCurrentIndex(entryCountBox->findData(defaultEntryCount));
+
+	QHBoxLayout *entryOptions = new QHBoxLayout();
+
+	entryOptions->addWidget(entryMode, 1);
+	entryOptions->addWidget(entryCountBox);
+
 	entryLayout->setContentsMargins(0, 0, 0, 0);
-	entryLayout->addWidget(entryMode);
+	entryLayout->addLayout(entryOptions);
 	entryLayout->addWidget(entryStatus);
 	entryLayout->addWidget(entryTree);
 	entryPane->setLayout(entryLayout);
@@ -174,6 +190,13 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 
 		restoreGeometry(settings.value("retroAchievementsListWindow/geometry").toByteArray());
 		splitter->restoreState(settings.value("retroAchievementsListWindow/splitter").toByteArray());
+
+		const int countIndex = entryCountBox->findData(settings.value("retroAchievementsListWindow/entryCount", defaultEntryCount).toInt());
+
+		if (countIndex >= 0)
+		{
+			entryCountBox->setCurrentIndex(countIndex);
+		}
 	}
 
 	// Several events can arrive together, so refreshing is deferred and merged.
@@ -188,6 +211,7 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	connect(closeButton, &QPushButton::clicked, this, &QDialog::close);
 	connect(boardTree, &QTreeWidget::currentItemChanged, this, &RetroAchievementsListDialog_t::boardSelected);
 	connect(entryMode, qOverload<int>(&QComboBox::currentIndexChanged), this, &RetroAchievementsListDialog_t::fetchEntries);
+	connect(entryCountBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &RetroAchievementsListDialog_t::fetchEntries);
 
 	// Queued so the window is never updated while the GUI thread holds the emulator lock.
 	connect(ra, &RetroAchievements::achievementUnlocked, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
@@ -213,6 +237,7 @@ RetroAchievementsListDialog_t::~RetroAchievementsListDialog_t(void)
 
 	settings.setValue("retroAchievementsListWindow/geometry", saveGeometry());
 	settings.setValue("retroAchievementsListWindow/splitter", splitter->saveState());
+	settings.setValue("retroAchievementsListWindow/entryCount", entryCountBox->currentData().toInt());
 }
 //----------------------------------------------------------------------------
 void RetroAchievementsListDialog_t::setItemImage(QTreeWidgetItem *item, const QString &url)
@@ -380,7 +405,7 @@ void RetroAchievementsListDialog_t::fetchEntries(void)
 	avatarItems.clear();
 	entryStatus->setText(tr("Loading..."));
 
-	ra->fetchLeaderboardEntries(selectedBoard, entryMode->currentIndex() == 1);
+	ra->fetchLeaderboardEntries(selectedBoard, entryMode->currentIndex() == 1, entryCount());
 }
 //----------------------------------------------------------------------------
 void RetroAchievementsListDialog_t::updateBoardStates(void)
@@ -433,18 +458,61 @@ void RetroAchievementsListDialog_t::boardSubmitted(unsigned int boardId)
 	}
 }
 //----------------------------------------------------------------------------
-void RetroAchievementsListDialog_t::entriesReady(unsigned int boardId, bool aroundUser, const QList<RaLeaderboardEntry> &entries)
+static bool containsUser(const QList<RaLeaderboardEntry> &entries, const QString &name)
 {
-	if ((boardId != selectedBoard) || (aroundUser != (entryMode->currentIndex() == 1)))
+	for (const RaLeaderboardEntry &entry : entries)
 	{
-		return;
+		if (!name.isEmpty() && (entry.user.compare(name, Qt::CaseInsensitive) == 0))
+		{
+			return true;
+		}
 	}
+	return false;
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsListDialog_t::showLocalResults(const QString &userName)
+{
 	RetroAchievements *ra = RetroAchievements::instance();
-	const QString myName = (ra != nullptr) ? ra->getUserName() : QString();
+	const QList<RaLeaderboardInfo> boards = (ra != nullptr) ? ra->getLeaderboards() : QList<RaLeaderboardInfo>();
 
 	entryTree->clear();
 	avatarItems.clear();
-	entryStatus->setText(entries.isEmpty() ? tr("No entries, or they could not be loaded.") : QString());
+
+	for (const RaLeaderboardInfo &board : boards)
+	{
+		if (board.id != selectedBoard)
+		{
+			continue;
+		}
+		const QPair<QString, QString> rows[] = { { tr("Best"), board.bestResult }, { tr("Last"), board.lastResult } };
+
+		for (const QPair<QString, QString> &row : rows)
+		{
+			if (!row.second.isEmpty())
+			{
+				QTreeWidgetItem *item = new QTreeWidgetItem(entryTree);
+
+				item->setText(0, row.first);
+				item->setText(1, row.second);
+				item->setText(2, userName);
+				item->setText(3, tr("Saved locally"));
+			}
+		}
+	}
+	entryStatus->setText(entryTree->topLevelItemCount() > 0
+		? tr("You have no ranked score on this leaderboard. Showing the scores saved locally.")
+		: tr("You have no score on this leaderboard."));
+}
+//----------------------------------------------------------------------------
+unsigned int RetroAchievementsListDialog_t::entryCount(void) const
+{
+	return entryCountBox->currentData().toUInt();
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsListDialog_t::fillEntries(const QList<RaLeaderboardEntry> &entries, const QString &userName)
+{
+	entryTree->clear();
+	avatarItems.clear();
 
 	for (const RaLeaderboardEntry &entry : entries)
 	{
@@ -453,10 +521,10 @@ void RetroAchievementsListDialog_t::entriesReady(unsigned int boardId, bool arou
 		item->setText(0, QString::number(entry.rank));
 		item->setText(1, entry.score);
 		item->setText(2, entry.user);
-		item->setText(3, entry.submitted.toLocalTime().toString(Qt::TextDate));
+		item->setText(3, entry.local ? tr("Saved locally") : entry.submitted.toLocalTime().toString(Qt::TextDate));
 
 		// Make the logged in user's own score stand out.
-		if (!myName.isEmpty() && (entry.user.compare(myName, Qt::CaseInsensitive) == 0))
+		if (entry.local || (!userName.isEmpty() && (entry.user.compare(userName, Qt::CaseInsensitive) == 0)))
 		{
 			QFont bold = item->font(0);
 
@@ -473,6 +541,87 @@ void RetroAchievementsListDialog_t::entriesReady(unsigned int boardId, bool arou
 			setAvatar(item, entry.avatarUrl);
 		}
 	}
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsListDialog_t::showProjection(const QList<RaLeaderboardEntry> &entries, const QString &userName)
+{
+	RetroAchievements *ra = RetroAchievements::instance();
+	const QList<RaLeaderboardInfo> boards = (ra != nullptr) ? ra->getLeaderboards() : QList<RaLeaderboardInfo>();
+
+	for (const RaLeaderboardInfo &board : boards)
+	{
+		int position = 0;
+		unsigned int rank = 0;
+
+		if ((board.id != selectedBoard) || board.bestResult.isEmpty())
+		{
+			continue;
+		}
+		rank = RetroAchievements::projectRank(entries, board.bestResult, board.lowerIsBetter, position);
+
+		// Not in the list that was loaded, so the rank is unknown.
+		if ((rank == 0) || ((position >= entries.size()) && (entries.size() >= static_cast<int>(entryCount()))))
+		{
+			continue;
+		}
+		RaLeaderboardEntry mine;
+		QList<RaLeaderboardEntry> shown = entries;
+
+		mine.rank = rank;
+		mine.user = tr("%1 (local best)").arg(userName);
+		mine.score = board.bestResult;
+		mine.local = true;
+		shown.insert(position, mine);
+
+		fillEntries(shown, userName);
+
+		entryStatus->setText(tr("You have no ranked score on this leaderboard. Your best saved score would rank %1.").arg(rank));
+		entryTree->setCurrentItem(entryTree->topLevelItem(position));
+		entryTree->scrollToItem(entryTree->topLevelItem(position), QAbstractItemView::PositionAtCenter);
+		return;
+	}
+	showLocalResults(userName);
+}
+//----------------------------------------------------------------------------
+void RetroAchievementsListDialog_t::entriesReady(unsigned int boardId, bool aroundUser, unsigned int count,
+	const QList<RaLeaderboardEntry> &entries)
+{
+	const bool aroundMode = (entryMode->currentIndex() == 1);
+	RetroAchievements *ra = RetroAchievements::instance();
+	const QString myName = (ra != nullptr) ? ra->getUserName() : QString();
+
+	if (boardId != selectedBoard)
+	{
+		return;
+	}
+	if (count != entryCount())
+	{
+		return;
+	}
+	// In this mode the top scores are only asked for to find where the local score would rank.
+	if (aroundMode && !aroundUser)
+	{
+		showProjection(entries, myName);
+		return;
+	}
+	if (aroundUser != aroundMode)
+	{
+		return;
+	}
+	// The server lists the top scores instead when it has no entry of the user, for example when the
+	// emulator is not approved and nothing was ranked. Where the local score would rank is looked up then.
+	if (aroundUser && (ra != nullptr) && !containsUser(entries, myName))
+	{
+		entryTree->clear();
+		avatarItems.clear();
+		entryStatus->setText(tr("Loading..."));
+
+		ra->fetchLeaderboardEntries(selectedBoard, false, entryCount());
+		return;
+	}
+	entryStatus->setText(entries.isEmpty() ? tr("No entries, or they could not be loaded.") : QString());
+
+	fillEntries(entries, myName);
 }
 //----------------------------------------------------------------------------
 void RetroAchievementsListDialog_t::setAvatar(QTreeWidgetItem *item, const QString &url)

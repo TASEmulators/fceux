@@ -39,6 +39,8 @@ class RetroAchievementsListDialog_t : public QDialog
 		QTreeWidget *boardTree;
 		QTreeWidget *entryTree;
 		QComboBox *entryMode;
+		// How many entries are asked for.
+		QComboBox *entryCountBox;
 		QSplitter *splitter;
 		QLabel *entryStatus;
 		QTimer refreshTimer;
@@ -49,6 +51,13 @@ class RetroAchievementsListDialog_t : public QDialog
 		QString gameBadgeUrl;
 		unsigned int selectedBoard;
 
+		unsigned int entryCount(void) const;
+		void fillEntries(const QList<RaLeaderboardEntry> &entries, const QString &userName);
+		// Fills the score list with the results saved locally for the selected leaderboard.
+		void showLocalResults(const QString &userName);
+		// The top scores arrived, to find where the local best score would rank among them.
+		void showProjection(const QList<RaLeaderboardEntry> &entries, const QString &userName);
+
 	private slots:
 		void refresh(void);
 		void updatePresence(void);
@@ -57,7 +66,7 @@ class RetroAchievementsListDialog_t : public QDialog
 		void fetchEntries(void);
 		void updateBoardStates(void);
 		void boardSubmitted(unsigned int boardId);
-		void entriesReady(unsigned int boardId, bool aroundUser, const QList<RaLeaderboardEntry> &entries);
+		void entriesReady(unsigned int boardId, bool aroundUser, unsigned int count, const QList<RaLeaderboardEntry> &entries);
 };
 
 #endif // FCEUX_HAS_RETRO_ACHIEVEMENTS

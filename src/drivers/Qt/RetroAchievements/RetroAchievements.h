@@ -89,6 +89,8 @@ struct RaLeaderboardEntry
 	QString avatarUrl;
 	QString score;
 	QDateTime submitted;
+	// Not from the server: the locally saved score of the user, put in the place it would have been ranked.
+	bool local = false;
 };
 
 Q_DECLARE_METATYPE(RaLeaderboardEntry)
@@ -158,7 +160,12 @@ class RetroAchievements : public QObject
 		QList<RaAchievementBucket> getAchievements(void);
 		QList<RaLeaderboardInfo> getLeaderboards(void);
 		// Result arrives through leaderboardEntriesReady. Either the top scores, or the ones around the user's own.
-		void fetchLeaderboardEntries(uint32_t leaderboardId, bool aroundUser = false);
+		void fetchLeaderboardEntries(uint32_t leaderboardId, bool aroundUser = false, uint32_t count = 10);
+		// Where a score would rank among the entries of a leaderboard, which are expected to start at rank 1 and
+		// to be sorted. Returns the rank and sets position to the index the score would have in the list, or
+		// returns 0 when the scores cannot be compared.
+		static unsigned int projectRank(const QList<RaLeaderboardEntry> &entries, const QString &score,
+			bool lowerIsBetter, int &position);
 
 		RaImageCache *images(void) { return imageCache; }
 
@@ -175,7 +182,8 @@ class RetroAchievements : public QObject
 		// Emitted when the last request that rc_client started has been answered.
 		void requestsDrained(void);
 		void gameUnloaded(void);
-		void leaderboardEntriesReady(unsigned int leaderboardId, bool aroundUser, const QList<RaLeaderboardEntry> &entries);
+		void leaderboardEntriesReady(unsigned int leaderboardId, bool aroundUser, unsigned int count,
+			const QList<RaLeaderboardEntry> &entries);
 		// A leaderboard attempt started, failed or was submitted, so the states in getLeaderboards() changed.
 		void leaderboardStateChanged(void);
 		// The score of an attempt was accepted by the server, which can change the scores of that leaderboard.
@@ -194,6 +202,7 @@ class RetroAchievements : public QObject
 			RetroAchievements *service;
 			uint32_t id;
 			bool aroundUser;
+			uint32_t count;
 		};
 
 		void initClient(void);

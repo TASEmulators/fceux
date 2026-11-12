@@ -1084,33 +1084,67 @@ void RC_CCONV RetroAchievements::leaderboardEntriesCallback(int result, const ch
 	}
 	fetch->service->leaderboardFetches.erase(fetch);
 
-	emit fetch->service->leaderboardEntriesReady(fetch->id, fetch->aroundUser, entries);
+	emit fetch->service->leaderboardEntriesReady(fetch->id, fetch->aroundUser, fetch->count, entries);
 
 	delete fetch;
 }
 //----------------------------------------------------------------------------
-void RetroAchievements::fetchLeaderboardEntries(uint32_t leaderboardId, bool aroundUser)
+unsigned int RetroAchievements::projectRank(const QList<RaLeaderboardEntry> &entries, const QString &score,
+	bool lowerIsBetter, int &position)
+{
+	double value = 0.0;
+	unsigned int better = 0;
+
+	position = 0;
+
+	if (!parseBoardValue(score, value))
+	{
+		return 0;
+	}
+	for (const RaLeaderboardEntry &entry : entries)
+	{
+		double other = 0.0;
+
+		if (!parseBoardValue(entry.score, other))
+		{
+			return 0;
+		}
+		// A tie ranks the same, but the earlier submission is listed first.
+		if (lowerIsBetter ? (other <= value) : (other >= value))
+		{
+			position++;
+
+			if (other != value)
+			{
+				better++;
+			}
+		}
+	}
+	return better + 1;
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::fetchLeaderboardEntries(uint32_t leaderboardId, bool aroundUser, uint32_t count)
 {
 	FCEU_WRAPPER_SCOPED_LOCK();
 
 	if ((client == nullptr) || !gameActive)
 	{
-		emit leaderboardEntriesReady(leaderboardId, aroundUser, QList<RaLeaderboardEntry>());
+		emit leaderboardEntriesReady(leaderboardId, aroundUser, count, QList<RaLeaderboardEntry>());
 		return;
 	}
-	LeaderboardFetch *fetch = new LeaderboardFetch{ this, leaderboardId, aroundUser };
+	LeaderboardFetch *fetch = new LeaderboardFetch{ this, leaderboardId, aroundUser, count };
 
 	// Registered first, because rc_client can call back before the function returns.
 	leaderboardFetches.insert(fetch);
 
 	if (aroundUser)
 	{
-		rc_client_begin_fetch_leaderboard_entries_around_user(client, leaderboardId, 10,
+		rc_client_begin_fetch_leaderboard_entries_around_user(client, leaderboardId, count,
 			&RetroAchievements::leaderboardEntriesCallback, fetch);
 	}
 	else
 	{
-		rc_client_begin_fetch_leaderboard_entries(client, leaderboardId, 1, 10,
+		rc_client_begin_fetch_leaderboard_entries(client, leaderboardId, 1, count,
 			&RetroAchievements::leaderboardEntriesCallback, fetch);
 	}
 }
