@@ -6,12 +6,15 @@
 
 #include <cstdio>
 #include <cstring>
+#include <memory>
 
+#include <QCoreApplication>
 #include <QEventLoop>
 #include <QMetaObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QSysInfo>
 #include <QUrl>
@@ -43,7 +46,60 @@ static const char *cfgToken  = "SDL.RetroAchToken";
 static const char *cfgDebug  = "SDL.RetroAchDebug";
 static const char *cfgHardcore = "SDL.RetroAchHardcore";
 static const char *cfgEncore = "SDL.RetroAchEncore";
-static const char *cfgResultsGroup = "retroAchievementsLeaderboardResults";
+static const char *resultsFileName = "retroachievements_leaderboards";
+static const QString gameGroupPrefix = QStringLiteral("Game_");
+
+// Leaderboard results live in their own ini file, next to the other settings of the application.
+static std::unique_ptr<QSettings> openResultsSettings(void)
+{
+	return std::unique_ptr<QSettings>(new QSettings(QSettings::IniFormat, QSettings::UserScope,
+		QCoreApplication::organizationName(), resultsFileName));
+}
+
+// Parses a displayed leaderboard value, such as "1,234", "00123" or "1:23.45", into a number.
+static bool parseBoardValue(const QString &text, double &value)
+{
+	static const QRegularExpression re(QStringLiteral("^\\s*(-?)(\\d+(?::\\d+)*)(?:\\.(\\d+))?"));
+	QString clean = text;
+	const QRegularExpressionMatch m = re.match(clean.remove(','));
+
+	if (!m.hasMatch())
+	{
+		return false;
+	}
+	value = 0.0;
+
+	for (const QString &part : m.captured(2).split(':'))
+	{
+		value = value * 60.0 + part.toDouble();
+	}
+	if (!m.captured(3).isEmpty())
+	{
+		value += QString("0.%1").arg(m.captured(3)).toDouble();
+	}
+	if (!m.captured(1).isEmpty())
+	{
+		value = -value;
+	}
+	return true;
+}
+
+// Whether a newly submitted value beats the saved best one. Unreadable values never replace a saved best.
+static bool isNewBest(const QString &saved, const QString &submitted, bool lowerIsBetter)
+{
+	double savedValue = 0.0;
+	double submittedValue = 0.0;
+
+	if (saved.isEmpty())
+	{
+		return true;
+	}
+	if (!parseBoardValue(saved, savedValue) || !parseBoardValue(submitted, submittedValue))
+	{
+		return false;
+	}
+	return lowerIsBetter ? (submittedValue < savedValue) : (submittedValue > savedValue);
+}
 
 //----------------------------------------------------------------------------
 RetroAchievements::RetroAchievements(void)
@@ -82,20 +138,33 @@ RetroAchievements::RetroAchievements(void)
 	g_config->getOption(cfgHardcore, &hardcoreSetting);
 	g_config->getOption(cfgEncore, &encoreSetting);
 
-	{
-		QSettings settings;
-
-		settings.beginGroup(cfgResultsGroup);
-
-		for (const QString &key : settings.childKeys())
-		{
-			lastResults.insert(key.toUInt(), settings.value(key).toString());
-		}
-	}
+	loadResults();
 
 	if (enable)
 	{
 		initClient();
+	}
+}
+//----------------------------------------------------------------------------
+void RetroAchievements::loadResults(void)
+{
+	std::unique_ptr<QSettings> results = openResultsSettings();
+
+	// One section per game, so a game is easy to find in the file by its id.
+	for (const QString &game : results->childGroups())
+	{
+		if (!game.startsWith(gameGroupPrefix))
+		{
+			continue;
+		}
+		results->beginGroup(game);
+
+		for (const QString &key : results->childGroups())
+		{
+			lastResults.insert(key.toUInt(), results->value(key + "/last").toString());
+			bestResults.insert(key.toUInt(), results->value(key + "/best").toString());
+		}
+		results->endGroup();
 	}
 }
 //----------------------------------------------------------------------------
@@ -972,6 +1041,7 @@ QList<RaLeaderboardInfo> RetroAchievements::getLeaderboards(void)
 			info.lowerIsBetter = (src->lower_is_better != 0);
 			info.state = src->state;
 			info.lastResult = lastResults.value(src->id);
+			info.bestResult = bestResults.value(src->id);
 
 			result.append(info);
 		}
@@ -1110,13 +1180,23 @@ void RC_CCONV RetroAchievements::eventHandler(const rc_client_event_t *event, rc
 
 			{
 				// Remembered locally, so the result can be shown even if the server does not list it.
+				const uint32_t id = event->leaderboard->id;
 				const QString result = QString::fromUtf8(event->leaderboard->tracker_value);
-				QSettings settings;
+				const rc_client_game_t *game = rc_client_get_game_info(client);
+				std::unique_ptr<QSettings> results = openResultsSettings();
 
-				self->lastResults.insert(event->leaderboard->id, result);
+				results->beginGroup(gameGroupPrefix + QString::number(game ? game->id : 0));
+				results->setValue("name", QString::fromUtf8(game && game->title ? game->title : ""));
 
-				settings.beginGroup(cfgResultsGroup);
-				settings.setValue(QString::number(event->leaderboard->id), result);
+				self->lastResults.insert(id, result);
+				results->setValue(QString("%1/name").arg(id), QString::fromUtf8(event->leaderboard->title));
+				results->setValue(QString("%1/last").arg(id), result);
+
+				if (isNewBest(self->bestResults.value(id), result, event->leaderboard->lower_is_better != 0))
+				{
+					self->bestResults.insert(id, result);
+					results->setValue(QString("%1/best").arg(id), result);
+				}
 			}
 			emit self->leaderboardStateChanged();
 		break;

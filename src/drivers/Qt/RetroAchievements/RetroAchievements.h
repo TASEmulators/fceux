@@ -78,6 +78,8 @@ struct RaLeaderboardInfo
 	int state = RC_CLIENT_LEADERBOARD_STATE_INACTIVE;
 	// The score of the last attempt of this user that was submitted, kept locally.
 	QString lastResult;
+	// The best score of this user that was submitted, kept locally.
+	QString bestResult;
 };
 
 struct RaLeaderboardEntry
@@ -259,6 +261,11 @@ class RetroAchievements : public QObject
 
 		// Last submitted score of every leaderboard, by leaderboard id. Changed with the emulator lock held.
 		QHash<uint32_t, QString> lastResults;
+		// Best submitted score of every leaderboard, by leaderboard id. Changed with the emulator lock held.
+		QHash<uint32_t, QString> bestResults;
+
+		// Reads the saved results from their own ini file.
+		void loadResults(void);
 
 		// ROM image of the game being identified. rc_client keeps using it until the load callback, and it is
 		// released right after, so nothing is held while a game is just being played.

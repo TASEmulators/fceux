@@ -42,7 +42,13 @@ static QString boardStateText(const RaLeaderboardInfo &board)
 	}
 	if (!board.lastResult.isEmpty())
 	{
-		text += QObject::tr(" (last: %1)").arg(board.lastResult);
+		text += QObject::tr(" (last: %1").arg(board.lastResult);
+
+		if (!board.bestResult.isEmpty())
+		{
+			text += QObject::tr(", best: %1").arg(board.bestResult);
+		}
+		text += ')';
 	}
 	return text;
 }
