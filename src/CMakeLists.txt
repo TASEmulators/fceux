@@ -865,6 +865,10 @@ if (WIN32)
 	#   target_link_libraries( ${APP_NAME} wsock32 ws2_32 )
 
    set_target_properties(${APP_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+   option(FCEUX_QT_DEVELOPER_SETUP "Deploy Windows Qt dependencies for local Visual Studio development" OFF)
+   if(FCEUX_QT_DEVELOPER_SETUP)
+      include("${CMAKE_SOURCE_DIR}/scripts/WindowsQtDeveloper.cmake")
+   endif()
 endif()
 
 if (APPLE)
