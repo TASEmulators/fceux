@@ -9,6 +9,7 @@
 #include <memory>
 
 #include <QCoreApplication>
+#include <QDir>
 #include <QEventLoop>
 #include <QMetaObject>
 #include <QNetworkAccessManager>
@@ -149,6 +150,9 @@ RetroAchievements::RetroAchievements(void)
 void RetroAchievements::loadResults(void)
 {
 	std::unique_ptr<QSettings> results = openResultsSettings();
+
+	FCEUD_Message(QString("RetroAchievements results settings: %1\n")
+		.arg(QDir::toNativeSeparators(results->fileName())).toUtf8().constData());
 
 	// One section per game, so a game is easy to find in the file by its id.
 	for (const QString &game : results->childGroups())

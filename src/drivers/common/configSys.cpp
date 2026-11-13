@@ -11,6 +11,15 @@
 #include "../../types.h"
 #include "configSys.h"
 
+#ifdef __QT_DRIVER__
+#include <QFile>
+#include <QDir>
+#include <QFileInfo>
+#include <QSaveFile>
+#include <sstream>
+#include "../../driver.h"
+#endif
+
 std::string cfgFile = "fceux.cfg";
 /**
  * Add a given option.  The option is specified as a short command
@@ -693,9 +702,11 @@ int
 Config::_load()
 {
 	std::string configFile = _dir + "/" + cfgFile;
-	bool success = Config::_loadFile(configFile.c_str())!=0;
-
-	return success;
+#ifdef __QT_DRIVER__
+	return Config::_loadFile(configFile.c_str());
+#else
+	return Config::_loadFile(configFile.c_str()) != 0;
+#endif
 }	
 
 // load and parse a given configuration file
@@ -703,7 +714,11 @@ int
 Config::_loadFile(const char* fname)
 {
 	size_t pos=0, eqPos=0;
+#ifdef __QT_DRIVER__
+	std::stringstream config;
+#else
 	std::fstream config;
+#endif
 	std::map<std::string, int>::iterator int_i;
 	std::map<std::string, double>::iterator dbl_i;
 	std::map<std::string, std::string>::iterator str_i;
@@ -723,12 +738,32 @@ Config::_loadFile(const char* fname)
 	config.exceptions(std::fstream::badbit);
 
 	try {
+#ifdef __QT_DRIVER__
+		QFile file(QString::fromUtf8(configFile.c_str()));
+		if (!file.exists())
+			return 0;
+		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			std::cerr << "Cannot read configuration " << configFile << ": "
+			          << file.errorString().toStdString() << std::endl;
+			return -1;
+		}
+		const QByteArray data = file.readAll();
+		if (file.error() != QFileDevice::NoError) {
+			std::cerr << "Cannot read configuration " << configFile << ": "
+			          << file.errorString().toStdString() << std::endl;
+			return -1;
+		}
+		config.str(std::string(data.constData(), data.size()));
+		FCEUD_Message(QString("Loading configuration file: %1\n")
+			.arg(QDir::toNativeSeparators(QFileInfo(file).absoluteFilePath())).toUtf8().constData());
+#else
 		// open the file for reading (create if it doesn't exist)
 		config.open(configFile.c_str(), std::ios::in | std::ios::out);
 		if(!config.is_open()) {
 			// XXX file couldn't be opened?
 			return 0;
 			}
+#endif
 
 		while(!config.eof()) {
 			// read a line
@@ -764,7 +799,9 @@ Config::_loadFile(const char* fname)
 		}
 
 		// close the file
+#ifndef __QT_DRIVER__
 		config.close();
+#endif
 	} catch(std::fstream::failure &e) {
 		std::cerr << e.what() << std::endl;
 		return -1;
@@ -779,7 +816,11 @@ Config::_loadFile(const char* fname)
 int
 Config::save()
 {
+#ifdef __QT_DRIVER__
+	std::ostringstream config;
+#else
 	std::fstream config;
+#endif
 	std::map<std::string, int>::iterator int_i;
 	std::map<std::string, double>::iterator dbl_i;
 	std::map<std::string, std::string>::iterator str_i;
@@ -791,8 +832,10 @@ Config::save()
 
 	try
 	{
+#ifndef __QT_DRIVER__
 		// open the file, truncate and for write
 		config.open(configFile.c_str(), std::ios::out | std::ios::trunc);
+#endif
 
 		// write a warning
 		strcpy(buf, "# Auto-generated\n# SDL keysyms defined in /usr/include/SDL/SDL_keysym.h\n# getSDLKey can be found \
@@ -819,8 +862,20 @@ Config::save()
 			config.write(buf, strlen(buf));
 		}
 
+#ifdef __QT_DRIVER__
+		const std::string data = config.str();
+		QSaveFile file(QString::fromUtf8(configFile.c_str()));
+		if (!file.open(QIODevice::WriteOnly | QIODevice::Text) ||
+		    file.write(data.data(), static_cast<qint64>(data.size())) != static_cast<qint64>(data.size()) ||
+		    !file.commit()) {
+			std::cerr << "Cannot save configuration " << configFile << ": "
+			          << file.errorString().toStdString() << std::endl;
+			return -1;
+		}
+#else
 		// close the file
 		config.close();
+#endif
 	} catch(std::fstream::failure &e)
 	{
 		std::cerr << e.what() << std::endl;

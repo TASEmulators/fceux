@@ -18,6 +18,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <QDir>
+#include <QCoreApplication>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFile>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QLabel>
+#include <QMessageBox>
+#include <QRadioButton>
+#include <QSettings>
+#include <QStandardPaths>
+#include <QTemporaryFile>
+#include <QVBoxLayout>
 
 #include "Qt/main.h"
 #include "Qt/throttle.h"
@@ -428,96 +441,193 @@ LoadCPalette(const std::string &file)
 	return 1;
 }
 
-/**
- * Creates the subdirectories used for saving snapshots, movies, game
- * saves, etc.  Hopefully obsolete with new configuration system.
- */
-static void
-CreateDirs(const std::string &dir)
+static bool CreateDirs(const QString &dir, QString &error)
 {
 	const char *subs[]={"fcs","snaps","gameinfo","sav","cheats","avi","wav","movies","input", NULL };
-	std::string subdir;
-	int x=0;
-
-#if defined(WIN32) || defined(NEED_MINGW_HACKS)
-	mkdir(dir.c_str());
-	chmod(dir.c_str(), 755);
-	while ( subs[x] != NULL )
+	for (int x = 0; subs[x] != NULL; x++)
 	{
-		subdir = dir + PSS + subs[x];
-		mkdir(subdir.c_str());
-		x++;
-	}
-#else
-	mkdir(dir.c_str(), S_IRWXU);
-	while ( subs[x] != NULL )
-	{
-		subdir = dir + PSS + subs[x];
-		mkdir(subdir.c_str(), S_IRWXU);
-		x++;
-	}
-#endif
-}
-
-/**
- * Attempts to locate FCEU's application directory.  This will
- * hopefully become obsolete once the new configuration system is in
- * place.
- */
-static void
-GetBaseDirectory(std::string &dir)
-{
-	const char *home = getenv("FCEUX_HOME");
-	const char *conf = getenv("FCEUX_CONFIG_DIR");
-
-#ifdef WIN32
-	// Windows users want base directory to be where executable resides.
-	// Only way to override this behavior is to set an FCEUX_HOME 
-	// environment variable prior to starting the application.
-	//if ( home == NULL )
-	//{
-	//	home = getenv("USERPROFILE");
-	//}
-	//if ( home == NULL )
-	//{
-	//	home = getenv("HOMEPATH");
-	//}
-#else
-	if ( home == NULL )
-	{
-		home = getenv("HOME");
-	}
-#endif
-
-	if (conf)
-	{
-		dir = std::string(conf);
-	}
-	else if (home) 
-	{
-		dir = std::string(home) + "/.fceux";
-	}
-	else
-	{
-#ifdef WIN32
-		char *exePath = new char[MAX_PATH + 1];
-		GetModuleFileNameA(NULL, exePath, MAX_PATH + 1);
-
-		char *lastBS = strrchr(exePath,'\\');
-		if(lastBS) {
-			*lastBS = 0;
+		const QString subdir = QDir(dir).filePath(QString::fromLatin1(subs[x]));
+		if (!QDir().mkpath(subdir))
+		{
+			error = QObject::tr("Could not create data directory:\n%1").arg(QDir::toNativeSeparators(subdir));
+			return false;
 		}
-
-		dir = std::string(exePath);
-		delete[] exePath;
-#else
-		dir = "";
-#endif
 	}
+	return true;
 }
 
-// returns a config structure with default options
-// also creates config base directory (ie: /home/user/.fceux as well as subdirs
+static QString configDirectory;
+
+static bool CheckConfigDirectory(const QString &dir, QString &error)
+{
+	if (!QDir().mkpath(dir))
+	{
+		error = QObject::tr("Could not create storage directory:\n%1").arg(QDir::toNativeSeparators(dir));
+		return false;
+	}
+	QTemporaryFile probe(QDir(dir).filePath(QStringLiteral(".fceux-write-XXXXXX")));
+	if (!probe.open())
+	{
+		error = QObject::tr("Cannot write to storage directory:\n%1\n\n%2")
+			.arg(QDir::toNativeSeparators(dir), probe.errorString());
+		return false;
+	}
+	QFile config(QDir(dir).filePath(QStringLiteral("fceux.cfg")));
+	if (config.exists() && !config.open(QIODevice::ReadWrite))
+	{
+		error = QObject::tr("Cannot read and write configuration file:\n%1\n\n%2")
+			.arg(QDir::toNativeSeparators(config.fileName()), config.errorString());
+		return false;
+	}
+	return CreateDirs(dir, error);
+}
+
+static QString PortableConfigRelativePath(const QDir &executableDir)
+{
+#ifdef Q_OS_MAC
+	QDir bundleDir(executableDir);
+	if (bundleDir.dirName() == QStringLiteral("MacOS") &&
+		bundleDir.cdUp() && bundleDir.dirName() == QStringLiteral("Contents") &&
+		bundleDir.cdUp() && bundleDir.dirName().endsWith(QStringLiteral(".app"), Qt::CaseInsensitive))
+	{
+		return QStringLiteral("../../../config");
+	}
+#else
+	Q_UNUSED(executableDir);
+#endif
+	return QStringLiteral("../config");
+}
+
+bool InitConfigLocation(bool forceSelection, const QString &directoryOverride)
+{
+	configDirectory.clear();
+	QSettings settings;
+	QString dir;
+	bool explicitLocation = false;
+	if (!directoryOverride.isEmpty())
+	{
+		dir = directoryOverride;
+		explicitLocation = true;
+	}
+	else if (!forceSelection && qEnvironmentVariableIsSet("FCEUX_CONFIG_DIR"))
+	{
+		dir = qEnvironmentVariable("FCEUX_CONFIG_DIR");
+		explicitLocation = true;
+	}
+	else if (!forceSelection && qEnvironmentVariableIsSet("FCEUX_HOME"))
+	{
+		dir = QDir(qEnvironmentVariable("FCEUX_HOME")).filePath(QStringLiteral(".fceux"));
+		explicitLocation = true;
+	}
+
+	const QString userDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+	const QDir executableDir(QCoreApplication::applicationDirPath());
+	const QString portableRelativeDir = PortableConfigRelativePath(executableDir);
+	const QString portableDir = QDir::cleanPath(executableDir.absoluteFilePath(portableRelativeDir));
+	const QString legacyDir = QDir::home().filePath(QStringLiteral(".fceux"));
+	if (!forceSelection && !explicitLocation)
+	{
+		QStringList candidates;
+		const QString rememberedDir = settings.value("Application/StorageDirectory").toString();
+		if (!rememberedDir.isEmpty())
+		{
+			candidates << QDir::cleanPath(executableDir.absoluteFilePath(rememberedDir));
+		}
+#ifdef WIN32
+		candidates << portableDir << legacyDir;
+#else
+		candidates << legacyDir << portableDir;
+#endif
+		candidates << userDir << QStandardPaths::standardLocations(QStandardPaths::AppConfigLocation);
+		candidates.removeDuplicates();
+		for (const QString &candidate : candidates)
+		{
+			if (!candidate.isEmpty() && QFileInfo(QDir(candidate).filePath(QStringLiteral("fceux.cfg"))).isFile())
+			{
+				dir = candidate;
+				break;
+			}
+		}
+	}
+
+	if (!dir.isEmpty())
+	{
+		QString error;
+		dir = QDir(dir).absolutePath();
+		if (!CheckConfigDirectory(dir, error))
+		{
+			QMessageBox::critical(nullptr, QObject::tr("Configuration storage"), error);
+			return false;
+		}
+		configDirectory = dir;
+		return true;
+	}
+	if (explicitLocation)
+	{
+		QMessageBox::critical(nullptr, QObject::tr("Configuration storage"),
+			QObject::tr("FCEUX_CONFIG_DIR must specify a non-empty storage directory."));
+		return false;
+	}
+
+	QDialog dialog;
+	dialog.setWindowTitle(QObject::tr("Choose FCEUX storage location"));
+	QVBoxLayout *layout = new QVBoxLayout(&dialog);
+	QLabel *description = new QLabel((forceSelection ? QString() : QObject::tr("No existing fceux.cfg was found.\n")) + QObject::tr(
+		"Choose where FCEUX will store its configuration\n"
+		"and default data folders (saves, save states, movies, cheats, and screenshots).\n"
+		"This choice will be remembered for future launches.\n"
+		"Existing files will not be moved; the destination's configuration will be used."), &dialog);
+	description->setWordWrap(true);
+	layout->addWidget(description);
+	QRadioButton *user = new QRadioButton(QObject::tr("Per-user folder (recommended):\n%1")
+		.arg(QDir::toNativeSeparators(userDir)), &dialog);
+	user->setEnabled(!userDir.isEmpty());
+	user->setChecked(!userDir.isEmpty());
+	layout->addWidget(user);
+	QRadioButton *portable = new QRadioButton(QObject::tr("Portable - %1 relative to the executable directory:\n%2")
+		.arg(portableRelativeDir, QDir::toNativeSeparators(portableDir)), &dialog);
+	portable->setChecked(userDir.isEmpty());
+	layout->addWidget(portable);
+	QRadioButton *custom = new QRadioButton(QObject::tr("Custom folder..."), &dialog);
+	layout->addWidget(custom);
+	QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+	layout->addWidget(buttons);
+	QObject::connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+	QObject::connect(buttons, &QDialogButtonBox::accepted, &dialog, [&]() {
+		QString selected = user->isChecked() ? userDir : portableDir;
+		if (custom->isChecked())
+		{
+			selected = QFileDialog::getExistingDirectory(&dialog, QObject::tr("Choose FCEUX storage folder"), QDir::homePath());
+			if (selected.isEmpty())
+			{
+				return;
+			}
+		}
+		selected = QDir(selected).absolutePath();
+		QString error;
+		if (!CheckConfigDirectory(selected, error))
+		{
+			QMessageBox::critical(&dialog, QObject::tr("Configuration storage"), error);
+			return;
+		}
+		settings.setValue("Application/StorageDirectory",
+			portable->isChecked() ? portableRelativeDir : selected);
+		settings.sync();
+		if (settings.status() != QSettings::NoError)
+		{
+			settings.remove("Application/StorageDirectory");
+			QMessageBox::critical(&dialog, QObject::tr("Configuration storage"),
+				QObject::tr("Could not remember the storage location in the per-user Qt settings."));
+			return;
+		}
+		configDirectory = selected;
+		dialog.accept();
+	});
+
+	return dialog.exec() == QDialog::Accepted;
+}
+
+// Returns a config structure with default options in the selected storage directory.
 Config *
 InitConfig()
 {
@@ -525,10 +635,23 @@ InitConfig()
 	std::string dir, prefix, savPath, movPath;
 	Config *config;
 
-	GetBaseDirectory(dir);
+	if (configDirectory.isEmpty())
+	{
+		FCEUD_PrintError("Configuration storage has not been initialized.");
+		return nullptr;
+	}
+	dir = configDirectory.toUtf8().constData();
+
+	FCEUD_Message(QString("Storage directory: %1\n")
+		.arg(QDir::toNativeSeparators(configDirectory)).toUtf8().constData());
+	const QString configFile = QDir(configDirectory).filePath(QStringLiteral("fceux.cfg"));
+	if (!QFileInfo::exists(configFile))
+	{
+		FCEUD_Message(QString("Configuration file (new): %1\n")
+			.arg(QDir::toNativeSeparators(configFile)).toUtf8().constData());
+	}
 
 	FCEUI_SetBaseDirectory(dir.c_str());
-	CreateDirs(dir);
 
 	config = new Config(dir);
 

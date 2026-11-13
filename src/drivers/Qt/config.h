@@ -3,6 +3,7 @@
 
 #include "common/configSys.h"
 
+bool InitConfigLocation(bool forceSelection = false, const QString &directoryOverride = QString());
 Config *InitConfig(void);
 void UpdateEMUCore(Config *);
 int LoadCPalette(const std::string &file);
@@ -70,4 +71,3 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 int getHotKeyIndexByName( const char *name );
 
 #endif
-

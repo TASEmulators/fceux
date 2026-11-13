@@ -16,6 +16,12 @@ Interim builds:
 
 But you might like Mesen more: https://github.com/SourMesen/Mesen2
 
+## Qt frontend documentation
+
+See the [Qt README](src/drivers/Qt/readme.md) for Qt-specific documentation,
+including [configuration and storage](src/drivers/Qt/readme.md#configuration-and-storage).
+Future Qt-specific documentation belongs there; workspace setup remains below.
+
 ## Windows Qt development (Visual Studio 2022)
 
 Install **Visual Studio 2022** with **Desktop development with C++**, including

@@ -26,6 +26,7 @@
 #include <unzip.h>
 
 #include <QFileInfo>
+#include <QMessageBox>
 #include <QStyleFactory>
 #include "Qt/main.h"
 #include "Qt/throttle.h"
@@ -706,6 +707,11 @@ static void ShowUsage(const char *prog)
 	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
 	puts(DriverUsage);
+	puts ("--choose-config-location  Always open the storage location selector (no value required).\n"
+	      "                          Ignores FCEUX_CONFIG_DIR/FCEUX_HOME for this launch.");
+	puts ("--config-dir folder       Use this storage directory for this launch only; not remembered.\n"
+	      "                          Overrides FCEUX_CONFIG_DIR/FCEUX_HOME. Cannot be combined\n"
+	      "                          with --choose-config-location.");
 #ifdef _S9XLUA_H
 	puts ("--loadlua      f       Loads lua script from filename f.");
 #endif
@@ -823,7 +829,13 @@ int  fceuWrapperInit( int argc, char *argv[] )
 
 	if (!noconfig)
 	{
-		g_config->save();
+		if (g_config->save() != 0)
+		{
+			QMessageBox::critical(nullptr, QObject::tr("Configuration storage"),
+				QObject::tr("Could not save fceux.cfg in the selected storage directory. "
+					"Check the directory permissions and available disk space."));
+			exit(-1);
+		}
 	}
 
 	// update the input devices

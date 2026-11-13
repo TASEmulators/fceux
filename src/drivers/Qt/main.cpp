@@ -19,6 +19,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstring>
 #include <QApplication>
 #include <QAbstractEventDispatcher>
 #include <QElapsedTimer>
@@ -29,11 +30,13 @@
 #include <algorithm>
 #include <QSplashScreen>
 #include <QSettings>
+#include <QDir>
 #include <QtGlobal>
 //#include <QProxyStyle>
 
 #include "Qt/ConsoleWindow.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/config.h"
 #include "Qt/SplashScreen.h"
 #include "Qt/QtScriptManager.h"
 #include "profiler.h"
@@ -195,10 +198,50 @@ private:
 #define orgDomain  QStringLiteral("TasEmulators.org")
 #define appName    QStringLiteral("fceux")
 
+static bool InitQtSettings()
+{
+	QCoreApplication::setOrganizationName(orgName);
+	QCoreApplication::setOrganizationDomain(orgDomain);
+	QCoreApplication::setApplicationName(appName);
+
+	QSettings legacy;
+	legacy.setFallbacksEnabled(false);
+	QSettings::setDefaultFormat(QSettings::IniFormat);
+	QSettings settings;
+	settings.setFallbacksEnabled(false);
+	const QString migrationKey = QStringLiteral("Application/NativeSettingsMigrated");
+	if (!settings.value(migrationKey, false).toBool())
+	{
+		const QStringList keys = legacy.allKeys();
+		if (legacy.status() != QSettings::NoError)
+		{
+			fprintf(stderr, "Could not read legacy Qt settings: %s\n",
+				legacy.fileName().toUtf8().constData());
+			return false;
+		}
+		for (const QString &key : keys)
+		{
+			if (!settings.contains(key))
+			{
+				settings.setValue(key, legacy.value(key));
+			}
+		}
+		settings.setValue(migrationKey, true);
+	}
+	settings.sync();
+	if (settings.status() != QSettings::NoError)
+	{
+		fprintf(stderr, "Could not read or write Qt settings INI file: %s\n",
+			QDir::toNativeSeparators(settings.fileName()).toUtf8().constData());
+		return false;
+	}
+	return true;
+}
+
 #if defined(Q_OS_LINUX)
 static void WaylandWindowFix()
 {
-	QSettings settings(orgName, appName);
+	QSettings settings(QSettings::IniFormat, QSettings::UserScope, orgName, appName);
 
 	const bool isWayland = qgetenv("XDG_SESSION_TYPE") == "wayland" ||
 	                      !qgetenv("WAYLAND_DISPLAY").isEmpty();
@@ -225,8 +268,61 @@ int main( int argc, char *argv[] )
 {
 	int retval = 0;
 
-	QtPreInit();
+	#ifdef WIN32
+	if (AttachConsole(ATTACH_PARENT_PROCESS))
+	{
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
+	#endif
+
 	fceuWrapperPreInit(argc, argv);
+	bool forceConfigSelection = false;
+	QString configDirectoryOverride;
+	for (int i = 1; i < argc; )
+	{
+		int removeCount = 0;
+		if (strcmp(argv[i], "--choose-config-location") == 0)
+		{
+			forceConfigSelection = true;
+			removeCount = 1;
+		}
+		else if (strcmp(argv[i], "--config-dir") == 0)
+		{
+			if (i + 1 >= argc || argv[i + 1][0] == '\0' || strncmp(argv[i + 1], "--", 2) == 0)
+			{
+				fprintf(stderr, "Error: --config-dir requires a non-empty folder path.\n");
+				return 1;
+			}
+			if (!configDirectoryOverride.isEmpty())
+			{
+				fprintf(stderr, "Error: --config-dir may only be specified once.\n");
+				return 1;
+			}
+			configDirectoryOverride = QString::fromLocal8Bit(argv[i + 1]);
+			removeCount = 2;
+		}
+		if (removeCount == 0)
+		{
+			i++;
+			continue;
+		}
+		for (int j = i; j <= argc - removeCount; j++)
+		{
+			argv[j] = argv[j + removeCount];
+		}
+		argc -= removeCount;
+	}
+	if (forceConfigSelection && !configDirectoryOverride.isEmpty())
+	{
+		fprintf(stderr, "Error: --config-dir cannot be combined with --choose-config-location.\n");
+		return 1;
+	}
+	if (!InitQtSettings())
+	{
+		return 1;
+	}
+	QtPreInit();
 
 	qInstallMessageHandler(MessageOutput);
 	QApplication app(argc, argv);
@@ -235,9 +331,14 @@ int main( int argc, char *argv[] )
 	app.installEventFilter(guiBusyProfiler);
 #endif
 
-	QCoreApplication::setOrganizationName(orgName);
-	QCoreApplication::setOrganizationDomain(orgDomain);
-	QCoreApplication::setApplicationName(appName);
+	QSettings settings;
+	QString settingsLocation = QDir::toNativeSeparators(settings.fileName());
+	FCEUD_Message(QString("Qt settings: %1\n").arg(settingsLocation).toUtf8().constData());
+
+	if (!InitConfigLocation(forceConfigSelection, configDirectoryOverride))
+	{
+		return 1;
+	}
 
 	fceuSplashScreen *splash = NULL;
 	
@@ -248,13 +349,6 @@ int main( int argc, char *argv[] )
 		app.processEvents();
 	}
 
-	#ifdef WIN32
-	if (AttachConsole(ATTACH_PARENT_PROCESS))
-	{
-		freopen("CONOUT$", "w", stdout);
-		freopen("CONOUT$", "w", stderr);
-	}
-	#endif
 	//app.setStyle( new MenuStyle() );
 
 	//styleSheetEnv = ::getenv("FCEUX_QT_STYLESHEET");
