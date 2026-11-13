@@ -1,0 +1,66 @@
+# VS Code Dark 2026-inspired Qt palette.
+# Load in GUI Config with Use Custom QPalette enabled; use the Fusion base style.
+# Optionally load Dark2026.qss as a custom stylesheet for visible unchecked boxes.
+
+Active::Window = #191a1b
+Active::WindowText = #bfbfbf
+Active::Base = #121314
+Active::AlternateBase = #242526
+Active::ToolTipBase = #202122
+Active::ToolTipText = #bfbfbf
+Active::PlaceholderText = #555555
+Active::Text = #bbbebf
+Active::Button = #313233
+Active::ButtonText = #bfbfbf
+Active::BrightText = #ffffff
+Active::Light = #707070
+Active::Midlight = #333536
+Active::Mid = #2a2b2c
+Active::Dark = #121314
+Active::Shadow = #121314
+Active::Highlight = #276782
+Active::HighlightedText = #ededed
+Active::Link = #48a0c7
+Active::LinkVisited = #53a5ca
+
+Disabled::Window = #191a1b
+Disabled::WindowText = #555555
+Disabled::Base = #121314
+Disabled::AlternateBase = #242526
+Disabled::ToolTipBase = #202122
+Disabled::ToolTipText = #bfbfbf
+Disabled::PlaceholderText = #555555
+Disabled::Text = #555555
+Disabled::Button = #313233
+Disabled::ButtonText = #555555
+Disabled::BrightText = #ffffff
+Disabled::Light = #707070
+Disabled::Midlight = #333536
+Disabled::Mid = #2a2b2c
+Disabled::Dark = #121314
+Disabled::Shadow = #121314
+Disabled::Highlight = #2c2d2e
+Disabled::HighlightedText = #8c8c8c
+Disabled::Link = #48a0c7
+Disabled::LinkVisited = #53a5ca
+
+Inactive::Window = #191a1b
+Inactive::WindowText = #bfbfbf
+Inactive::Base = #121314
+Inactive::AlternateBase = #242526
+Inactive::ToolTipBase = #202122
+Inactive::ToolTipText = #bfbfbf
+Inactive::PlaceholderText = #555555
+Inactive::Text = #bbbebf
+Inactive::Button = #313233
+Inactive::ButtonText = #bfbfbf
+Inactive::BrightText = #ffffff
+Inactive::Light = #707070
+Inactive::Midlight = #333536
+Inactive::Mid = #2a2b2c
+Inactive::Dark = #121314
+Inactive::Shadow = #121314
+Inactive::Highlight = #2c2d2e
+Inactive::HighlightedText = #ededed
+Inactive::Link = #48a0c7
+Inactive::LinkVisited = #53a5ca

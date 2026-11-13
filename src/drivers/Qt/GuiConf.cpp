@@ -30,6 +30,9 @@
 #include <QSpinBox>
 #include <QSlider>
 #include <QDial>
+#include <QSettings>
+#include <QPainter>
+#include <QStyleOption>
 
 #include "Qt/GuiConf.h"
 #include "Qt/main.h"
@@ -44,6 +47,17 @@ static int writeQPaletteToFile( const char *path, QPalette *pal );
 static int readQPaletteFromFile( const char *path, QPalette *pal );
 
 static GuiPaletteEditDialog_t *editDialog = nullptr;
+
+static QString stylePreset()
+{
+	const QString preset = QSettings().value("Application/StylePreset", "custom").toString();
+	if (preset == "default" || preset == "dark2026" || preset == "custom")
+	{
+		return preset;
+	}
+	qWarning("Unknown style preset '%s'; using Custom.", qPrintable(preset));
+	return QStringLiteral("custom");
+}
 //----------------------------------------------------
 GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	: QDialog(parent)
@@ -60,7 +74,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	QLabel      *lbl;
 	QStringList  styleKeys;
 	QString      selStyle;
-	QGroupBox   *frame, *qssFrame;
+	QGroupBox   *frame;
 	QFrame      *hline;
 	std::string  qssFile, qpalFile;
 	QSettings    settings;
@@ -69,6 +83,17 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	//printf("Style: %s \n", style()->objectName().toLocal8Bit().constData() );
 
 	selStyle = style()->objectName();
+	const QString preset = stylePreset();
+	QString configuredStyle;
+	g_config->getOption("SDL.GuiStyle", &configuredStyle);
+	if (!configuredStyle.isEmpty())
+	{
+		selStyle = configuredStyle;
+	}
+	else if (selStyle.isEmpty())
+	{
+		selStyle = QStringLiteral("fusion");
+	}
 
 	// sync with config
 	g_config->getOption("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -152,6 +177,8 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 #endif
 
 	styleComboBox = new QComboBox();
+	styleComboBox->setEnabled(preset != "dark2026");
+	styleComboBox->setToolTip(tr("Dark 2026 uses Fusion. Other presets use the selected base style."));
 
 	styleKeys = QStyleFactory::keys();
 
@@ -173,6 +200,19 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	hbox  = new QHBoxLayout();
 
 	frame->setLayout( vbox1 );
+
+	presetComboBox = new QComboBox();
+	presetComboBox->setObjectName(QStringLiteral("stylePresetComboBox"));
+	presetComboBox->addItem(tr("Default"), QStringLiteral("default"));
+	presetComboBox->addItem(tr("Dark 2026"), QStringLiteral("dark2026"));
+	presetComboBox->addItem(tr("Custom"), QStringLiteral("custom"));
+	presetComboBox->setCurrentIndex(presetComboBox->findData(preset));
+	QHBoxLayout *presetLayout = new QHBoxLayout();
+	presetLayout->addWidget(new QLabel(tr("Preset:")), 1);
+	presetLayout->addWidget(presetComboBox, 10);
+	vbox1->addLayout(presetLayout);
+	connect(presetComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(presetChanged(int)));
+
 	vbox1->addLayout( hbox );
 
 	lbl  = new QLabel( tr("Base:") );
@@ -180,9 +220,10 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	hbox->addWidget( lbl, 1 );
 	hbox->addWidget( styleComboBox, 10 );
 
-	qssFrame = new QGroupBox( tr("QSS") );
-	qssFrame->setLayout( vbox2 );
-	vbox1->addWidget( qssFrame );
+	customStyleGroup = new QGroupBox( tr("Custom Palette and Stylesheet") );
+	customStyleGroup->setLayout( vbox2 );
+	customStyleGroup->setEnabled(preset == "custom");
+	vbox1->addWidget( customStyleGroup );
 
 	useCustomPalette = new QCheckBox( tr("Use Custom QPalette") );
 	useCustomPalette->setChecked(useCustomQPalVal);
@@ -372,6 +413,27 @@ void GuiConfDialog_t::styleChanged(int index)
 	g_config->save();
 
 	QApplication::setStyle( new fceuStyle() );
+}
+//----------------------------------------------------
+void GuiConfDialog_t::presetChanged(int index)
+{
+	const QString preset = presetComboBox->itemData(index).toString();
+	// End the palette editor's live preview before replacing the theme.
+	if (editDialog != nullptr)
+	{
+		editDialog->closeWindow();
+		editDialog = nullptr;
+	}
+	QSettings settings;
+	settings.setValue("Application/StylePreset", preset);
+	settings.sync();
+	if (settings.status() != QSettings::NoError)
+	{
+		qWarning("Could not save style preset to '%s'.", qPrintable(settings.fileName()));
+	}
+	styleComboBox->setEnabled(preset != "dark2026");
+	customStyleGroup->setEnabled(preset == "custom");
+	QApplication::setStyle(new fceuStyle());
 }
 //----------------------------------------------------
 void GuiConfDialog_t::clearQss(void)
@@ -634,6 +696,29 @@ fceuStyle::~fceuStyle(void)
 	}
 }
 
+void fceuStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *option,
+	QPainter *painter, const QWidget *widget) const
+{
+	QProxyStyle::drawPrimitive(element, option, painter, widget);
+
+	if ((element != PE_IndicatorCheckBox && element != PE_IndicatorItemViewItemCheck)
+		|| !(option->state & (State_On | State_NoChange))
+		|| option->palette.color(QPalette::Window).lightness()
+			>= option->palette.color(QPalette::WindowText).lightness())
+	{
+		return;
+	}
+
+	// Preserve the native checkmark while making its outline visible on dark surfaces.
+	const qreal width = option->fontMetrics.height() * 0.08;
+	const qreal inset = width / 2;
+	painter->save();
+	painter->setPen(QPen(option->palette.color(QPalette::Light), width));
+	painter->setBrush(Qt::NoBrush);
+	painter->drawRect(QRectF(option->rect).adjusted(inset, inset, -inset, -inset));
+	painter->restore();
+}
+
 QStyle *fceuStyle::styleBase(QStyle *style) const
 {
 	static QStyle *base = nullptr;
@@ -647,6 +732,10 @@ QStyle *fceuStyle::styleBase(QStyle *style) const
 	if ( g_config != nullptr )
 	{
 		g_config->getOption("SDL.GuiStyle", &styleName );
+	}
+	if (stylePreset() == "dark2026")
+	{
+		styleName = QStringLiteral("fusion");
 	}
 
 	{
@@ -700,6 +789,17 @@ void fceuStyle::polish(QPalette &palette)
 
 	palette = standardPalette();
 
+	const QString preset = stylePreset();
+	if (preset == "dark2026")
+	{
+		readQPaletteFromFile(":/qss/Dark2026.qpal", &palette);
+		return;
+	}
+	if (preset == "default")
+	{
+		return;
+	}
+
 	if ( !useCustom )
 	{
 		return;
@@ -713,30 +813,6 @@ void fceuStyle::polish(QPalette &palette)
 		readQPaletteFromFile( qPalFilePath.c_str(), &palette );
 	}
 
-  // modify palette to dark
-  //palette.setColor(QPalette::Window, QColor(53, 53, 53));
-  //palette.setColor(QPalette::WindowText, Qt::white);
-  //palette.setColor(QPalette::Disabled, QPalette::WindowText,
-  //                 QColor(127, 127, 127));
-  //palette.setColor(QPalette::Base, QColor(42, 42, 42));
-  //palette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
-  //palette.setColor(QPalette::ToolTipBase, Qt::white);
-  //palette.setColor(QPalette::ToolTipText, QColor(53, 53, 53));
-  //palette.setColor(QPalette::Text, Qt::white);
-  //palette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
-  //palette.setColor(QPalette::Dark, QColor(35, 35, 35));
-  //palette.setColor(QPalette::Shadow, QColor(20, 20, 20));
-  //palette.setColor(QPalette::Button, QColor(53, 53, 53));
-  //palette.setColor(QPalette::ButtonText, Qt::white);
-  //palette.setColor(QPalette::Disabled, QPalette::ButtonText,
-  //                 QColor(127, 127, 127));
-  //palette.setColor(QPalette::BrightText, Qt::red);
-  //palette.setColor(QPalette::Link, QColor(42, 130, 218));
-  //palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-  //palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
-  //palette.setColor(QPalette::HighlightedText, Qt::white);
-  //palette.setColor(QPalette::Disabled, QPalette::HighlightedText,
-  //                 QColor(127, 127, 127));
 }
 
 void fceuStyle::polish(QApplication *app) 
@@ -756,6 +832,16 @@ void fceuStyle::polish(QApplication *app)
 
 	g_config->getOption("SDL.UseCustomQss", &useCustom);
 	g_config->getOption("SDL.QtStyleSheet", &s);
+	const QString preset = stylePreset();
+	if (preset == "dark2026")
+	{
+		useCustom = 1;
+		s = ":/qss/Dark2026.qss";
+	}
+	else if (preset == "default")
+	{
+		useCustom = 0;
+	}
 
 	if ( useCustom && (s.size() > 0) )
 	{
@@ -769,8 +855,13 @@ void fceuStyle::polish(QApplication *app)
 			app->setStyleSheet(qsStylesheet);
 			file.close();
 		}
+		else
+		{
+			qWarning("Could not load stylesheet '%s': %s", s.c_str(), qPrintable(file.errorString()));
+			app->setStyleSheet(QString());
+		}
 
-		if ( rccFilePath.size() == 0 )
+		if ( preset == "custom" && rccFilePath.size() == 0 )
 		{
 			std::string dir, rccBase, tmpFile;
 
@@ -935,8 +1026,7 @@ static int writeQPaletteToFile( const char *path, QPalette *pal )
 //----------------------------------------------------
 static int readQPaletteFromFile( const char *path, QPalette *pal )
 {
-	FILE *fp;
-	char line[512];
+	QFile file(QString::fromUtf8(path));
 	char gTxt[128], rTxt[256];
 	char colorTxt[128];
 	const char *rTxtMatch;
@@ -945,15 +1035,20 @@ static int readQPaletteFromFile( const char *path, QPalette *pal )
 	QPalette::ColorGroup g;
 	QPalette::ColorRole  r;
 
-	fp = fopen( path, "r");
-
-	if ( fp == nullptr )
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
-		printf("Error: Failed to Open File for writing: '%s'\n", path );
+		qWarning("Could not load palette '%s': %s", path, qPrintable(file.errorString()));
 		return -1;
 	}
-	while ( fgets( line, sizeof(line), fp ) != 0 )
+	while (!file.atEnd())
 	{
+		QByteArray data = file.readLine(512);
+		if (data.isEmpty() && file.error() != QFileDevice::NoError)
+		{
+			qWarning("Could not read palette '%s': %s", path, qPrintable(file.errorString()));
+			return -1;
+		}
+		const char *line = data.constData();
 		//printf("%s", line );
 
 		i=0;
@@ -1051,8 +1146,6 @@ static int readQPaletteFromFile( const char *path, QPalette *pal )
 		pal->setColor( g, r, color );
 	}
 
-
-	fclose(fp);
 
 	return 0;
 }

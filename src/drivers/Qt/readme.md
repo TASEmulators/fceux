@@ -4,6 +4,28 @@ This README is the home for Qt-specific documentation for Windows, macOS,
 and Linux. Workspace setup information remains in the
 [main README](../../../readme.md#windows-qt-development-visual-studio-2022).
 
+## Style presets
+
+In **GUI Config**, select a **Preset** under **Style**:
+
+- **Default** uses the selected base style without a custom palette or stylesheet.
+- **Dark 2026** uses Fusion with the embedded
+  [palette](../../../qss/Dark2026.qpal) and
+  [stylesheet](../../../qss/Dark2026.qss). Both files are compiled into the
+  executable; no external theme files are needed. The checkbox contrast fix
+  uses font-relative sizing, not fixed pixel sizes. Checked and mixed-state
+  boxes retain their native marks with a palette-colored border drawn by the
+  style wrapper on dark palettes.
+- **Custom** enables the existing palette and stylesheet file selectors.
+
+Changes apply immediately and the selection is saved in per-user QSettings as
+`Application/StylePreset` (`default`, `dark2026`, or `custom`). Existing
+installations without this setting use Custom to preserve their current
+appearance. Switching presets preserves custom file paths, enable flags, and
+the selected base style, and closes any palette editor live preview.
+The native title bar remains controlled by the OS.
+Presets support Qt 5.15 and Qt 6.
+
 ## Configuration and storage
 
 On Windows, macOS, and Linux, the Qt frontend checks for `fceux.cfg` before

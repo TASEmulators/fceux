@@ -1,5 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
     <qresource>
+        <file>qss/Dark2026.qpal</file>
+        <file>qss/Dark2026.qss</file>
         <file>fceux.png</file>
         <file>fceux1.png</file>
         <file>icons/power.png</file>

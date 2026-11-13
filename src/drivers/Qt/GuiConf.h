@@ -35,6 +35,8 @@ public:
 
 	void polish(QPalette &palette) override;
 	void polish(QApplication *app) override;
+	void drawPrimitive(PrimitiveElement element, const QStyleOption *option,
+		QPainter *painter, const QWidget *widget = nullptr) const override;
 
 private:
 	QStyle *styleBase(QStyle *style = Q_NULLPTR) const;
@@ -149,6 +151,8 @@ protected:
 	QCheckBox *useCustomStyle;
 	QCheckBox *useCustomPalette;
 	QComboBox *styleComboBox;
+	QComboBox *presetComboBox;
+	QGroupBox *customStyleGroup;
 	QLineEdit *custom_qss_path;
 	QLineEdit *custom_qpal_path;
 
@@ -167,6 +171,7 @@ private slots:
 	void useCustomQPaletteChanged(bool v);
 	void useCustomStyleChanged(bool v);
 	void styleChanged(int index);
+	void presetChanged(int index);
 	void openQss(void);
 	void clearQss(void);
 	void openQPal(void);

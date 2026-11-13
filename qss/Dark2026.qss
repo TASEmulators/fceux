@@ -1,0 +1,24 @@
+/* Optional checkbox contrast fix for Dark2026.qpal with the Fusion style.
+   Keep native checked/mixed indicators and Qt's default indicator dimensions.
+   The application's style wrapper adds their dark-palette outlines. */
+QCheckBox::indicator:unchecked,
+QGroupBox::indicator:unchecked,
+QAbstractItemView::indicator:unchecked {
+    border: 0.08em solid palette(light);
+    background-color: palette(base);
+}
+
+QCheckBox::indicator:unchecked:hover,
+QCheckBox::indicator:unchecked:focus,
+QGroupBox::indicator:unchecked:hover,
+QGroupBox::indicator:unchecked:focus,
+QAbstractItemView::indicator:unchecked:hover,
+QAbstractItemView::indicator:unchecked:focus {
+    border-color: palette(link);
+}
+
+QCheckBox::indicator:unchecked:disabled,
+QGroupBox::indicator:unchecked:disabled,
+QAbstractItemView::indicator:unchecked:disabled {
+    border-color: palette(light);
+}
