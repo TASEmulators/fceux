@@ -16,10 +16,30 @@ In **GUI Config**, select a **Preset** under **Style**:
   uses font-relative sizing, not fixed pixel sizes. Checked and mixed-state
   boxes retain their native marks with a palette-colored border drawn by the
   style wrapper on dark palettes.
+- **Darkeum** uses Fusion with its embedded
+  [palette](../../../qss/Darkeum.qpal) and
+  [stylesheet](../../../qss/Darkeum.qss): near-black surfaces, white text,
+  and blue accents. The adapted stylesheet uses font-relative dimensions,
+  dark text editors, and embedded SVG arrows and checked/mixed indicators.
+  Qt's SVG image plugin must be included when deploying this preset.
+- **Integrid** uses its embedded [palette](../../../qss/Integrid.qpal) and
+  [stylesheet](../../../qss/Integrid.qss) for light gray surfaces, black text,
+  and blue accents.
+- **Combinear** uses its embedded [palette](../../../qss/Combinear.qpal) and
+  [stylesheet](../../../qss/Combinear.qss) for charcoal surfaces and gold accents.
+- **Adaptic** uses its embedded [palette](../../../qss/Adaptic.qpal) and
+  [stylesheet](../../../qss/Adaptic.qss) for blue-gray gradients, red buttons,
+  and green input text.
 - **Custom** enables the existing palette and stylesheet file selectors.
 
+Integrid, Combinear, and Adaptic also use Fusion, font-relative dimensions,
+and embedded vector arrows and checked/mixed indicators. These presets require
+Qt's SVG image plugin as well. Integrid includes dark arrows for light controls;
+the other themes reuse Darkeum's light vector indicators.
+
 Changes apply immediately and the selection is saved in per-user QSettings as
-`Application/StylePreset` (`default`, `dark2026`, or `custom`). Existing
+`Application/StylePreset` (`default`, `dark2026`, `darkeum`, `integrid`,
+`combinear`, `adaptic`, or `custom`). Existing
 installations without this setting use Custom to preserve their current
 appearance. Switching presets preserves custom file paths, enable flags, and
 the selected base style, and closes any palette editor live preview.

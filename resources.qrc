@@ -2,6 +2,24 @@
     <qresource>
         <file>qss/Dark2026.qpal</file>
         <file>qss/Dark2026.qss</file>
+        <file>qss/Darkeum.qpal</file>
+        <file>qss/Darkeum.qss</file>
+        <file>qss/Integrid.qpal</file>
+        <file>qss/Integrid.qss</file>
+        <file>qss/Combinear.qpal</file>
+        <file>qss/Combinear.qss</file>
+        <file>qss/Adaptic.qpal</file>
+        <file>qss/Adaptic.qss</file>
+        <file>qss/integrid/arrow-down.svg</file>
+        <file>qss/integrid/arrow-up.svg</file>
+        <file>qss/integrid/arrow-left.svg</file>
+        <file>qss/integrid/arrow-right.svg</file>
+        <file>qss/darkeum/arrow-down.svg</file>
+        <file>qss/darkeum/arrow-up.svg</file>
+        <file>qss/darkeum/arrow-left.svg</file>
+        <file>qss/darkeum/arrow-right.svg</file>
+        <file>qss/darkeum/checkbox.svg</file>
+        <file>qss/darkeum/checkbox-mixed.svg</file>
         <file>fceux.png</file>
         <file>fceux1.png</file>
         <file>icons/power.png</file>

@@ -51,12 +51,38 @@ static GuiPaletteEditDialog_t *editDialog = nullptr;
 static QString stylePreset()
 {
 	const QString preset = QSettings().value("Application/StylePreset", "custom").toString();
-	if (preset == "default" || preset == "dark2026" || preset == "custom")
+	if (preset == "default" || preset == "dark2026" || preset == "darkeum"
+		|| preset == "integrid" || preset == "combinear" || preset == "adaptic" || preset == "custom")
 	{
 		return preset;
 	}
 	qWarning("Unknown style preset '%s'; using Custom.", qPrintable(preset));
 	return QStringLiteral("custom");
+}
+
+static QString presetResourceBase(const QString &preset)
+{
+	if (preset == "dark2026")
+	{
+		return QStringLiteral(":/qss/Dark2026");
+	}
+	if (preset == "darkeum")
+	{
+		return QStringLiteral(":/qss/Darkeum");
+	}
+	if (preset == "integrid")
+	{
+		return QStringLiteral(":/qss/Integrid");
+	}
+	if (preset == "combinear")
+	{
+		return QStringLiteral(":/qss/Combinear");
+	}
+	if (preset == "adaptic")
+	{
+		return QStringLiteral(":/qss/Adaptic");
+	}
+	return QString();
 }
 //----------------------------------------------------
 GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
@@ -177,8 +203,8 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 #endif
 
 	styleComboBox = new QComboBox();
-	styleComboBox->setEnabled(preset != "dark2026");
-	styleComboBox->setToolTip(tr("Dark 2026 uses Fusion. Other presets use the selected base style."));
+	styleComboBox->setEnabled(presetResourceBase(preset).isEmpty());
+	styleComboBox->setToolTip(tr("Built-in color presets use Fusion. Default and Custom use the selected base style."));
 
 	styleKeys = QStyleFactory::keys();
 
@@ -205,6 +231,10 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	presetComboBox->setObjectName(QStringLiteral("stylePresetComboBox"));
 	presetComboBox->addItem(tr("Default"), QStringLiteral("default"));
 	presetComboBox->addItem(tr("Dark 2026"), QStringLiteral("dark2026"));
+	presetComboBox->addItem(tr("Darkeum"), QStringLiteral("darkeum"));
+	presetComboBox->addItem(tr("Integrid"), QStringLiteral("integrid"));
+	presetComboBox->addItem(tr("Combinear"), QStringLiteral("combinear"));
+	presetComboBox->addItem(tr("Adaptic"), QStringLiteral("adaptic"));
 	presetComboBox->addItem(tr("Custom"), QStringLiteral("custom"));
 	presetComboBox->setCurrentIndex(presetComboBox->findData(preset));
 	QHBoxLayout *presetLayout = new QHBoxLayout();
@@ -431,7 +461,7 @@ void GuiConfDialog_t::presetChanged(int index)
 	{
 		qWarning("Could not save style preset to '%s'.", qPrintable(settings.fileName()));
 	}
-	styleComboBox->setEnabled(preset != "dark2026");
+	styleComboBox->setEnabled(presetResourceBase(preset).isEmpty());
 	customStyleGroup->setEnabled(preset == "custom");
 	QApplication::setStyle(new fceuStyle());
 }
@@ -733,7 +763,7 @@ QStyle *fceuStyle::styleBase(QStyle *style) const
 	{
 		g_config->getOption("SDL.GuiStyle", &styleName );
 	}
-	if (stylePreset() == "dark2026")
+	if (!presetResourceBase(stylePreset()).isEmpty())
 	{
 		styleName = QStringLiteral("fusion");
 	}
@@ -790,9 +820,10 @@ void fceuStyle::polish(QPalette &palette)
 	palette = standardPalette();
 
 	const QString preset = stylePreset();
-	if (preset == "dark2026")
+	const QString resourceBase = presetResourceBase(preset);
+	if (!resourceBase.isEmpty())
 	{
-		readQPaletteFromFile(":/qss/Dark2026.qpal", &palette);
+		readQPaletteFromFile(qPrintable(resourceBase + ".qpal"), &palette);
 		return;
 	}
 	if (preset == "default")
@@ -833,10 +864,11 @@ void fceuStyle::polish(QApplication *app)
 	g_config->getOption("SDL.UseCustomQss", &useCustom);
 	g_config->getOption("SDL.QtStyleSheet", &s);
 	const QString preset = stylePreset();
-	if (preset == "dark2026")
+	const QString resourceBase = presetResourceBase(preset);
+	if (!resourceBase.isEmpty())
 	{
 		useCustom = 1;
-		s = ":/qss/Dark2026.qss";
+		s = (resourceBase + ".qss").toStdString();
 	}
 	else if (preset == "default")
 	{
