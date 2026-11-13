@@ -4,11 +4,16 @@
 
 #include <string>
 
+#include <QAction>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QMessageBox>
+#include <QPainter>
+#include <QPainterPath>
 #include <QPointer>
+#include <QPixmap>
 #include <QVBoxLayout>
 
 #include "../../../fceu.h"
@@ -22,6 +27,33 @@
 static const int avatarSize = 64;
 
 static QPointer<RetroAchievementsDialog_t> openDialog;
+
+static QIcon passwordVisibilityIcon(bool visible, const QColor &color)
+{
+	QPixmap pixmap(20, 20);
+	pixmap.fill(Qt::transparent);
+
+	QPainter painter(&pixmap);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setPen(QPen(color, 1.6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+
+	QPainterPath eye;
+	eye.moveTo(2, 10);
+	eye.cubicTo(4, 6.8, 7, 5, 10, 5);
+	eye.cubicTo(13, 5, 16, 6.8, 18, 10);
+	eye.cubicTo(16, 13.2, 13, 15, 10, 15);
+	eye.cubicTo(7, 15, 4, 13.2, 2, 10);
+	painter.drawPath(eye);
+	painter.drawEllipse(QPointF(10, 10), 2.3, 2.3);
+
+	if (!visible)
+	{
+		painter.drawLine(QPointF(3, 17), QPointF(17, 3));
+	}
+
+	painter.end();
+	return QIcon(pixmap);
+}
 
 //----------------------------------------------------------------------------
 void RetroAchievementsDialog_t::open(QWidget *parent)
@@ -61,6 +93,11 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 	soundCbox = new QCheckBox(tr("Play a sound when an achievement is unlocked"));
 	userEdit = new QLineEdit();
 	passwordEdit = new QLineEdit();
+	QAction *showPasswordAction = passwordEdit->addAction(
+		passwordVisibilityIcon(true, passwordEdit->palette().color(QPalette::Text)), QLineEdit::TrailingPosition);
+	showPasswordAction->setCheckable(true);
+	showPasswordAction->setText(tr("Show password"));
+	showPasswordAction->setToolTip(tr("Show password"));
 	loginButton = new QPushButton(tr("Log In"));
 	logoutButton = new QPushButton(tr("Log Out"));
 	statusLabel = new QLabel();
@@ -113,6 +150,13 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 	connect(hardcoreCbox, &QCheckBox::clicked, this, &RetroAchievementsDialog_t::hardcoreToggled);
 	connect(encoreCbox, &QCheckBox::clicked, this, &RetroAchievementsDialog_t::encoreToggled);
 	connect(soundCbox, &QCheckBox::toggled, this, &RetroAchievementsDialog_t::soundToggled);
+	connect(showPasswordAction, &QAction::toggled, this, [this, showPasswordAction](bool show)
+	{
+		passwordEdit->setEchoMode(show ? QLineEdit::Normal : QLineEdit::Password);
+		showPasswordAction->setIcon(passwordVisibilityIcon(!show, passwordEdit->palette().color(QPalette::Text)));
+		showPasswordAction->setText(show ? tr("Hide password") : tr("Show password"));
+		showPasswordAction->setToolTip(show ? tr("Hide password") : tr("Show password"));
+	});
 	connect(loginButton, &QPushButton::clicked, this, &RetroAchievementsDialog_t::loginClicked);
 	connect(passwordEdit, &QLineEdit::returnPressed, this, &RetroAchievementsDialog_t::loginClicked);
 	connect(logoutButton, &QPushButton::clicked, this, &RetroAchievementsDialog_t::logoutClicked);
