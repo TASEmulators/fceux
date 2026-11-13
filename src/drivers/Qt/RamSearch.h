@@ -150,10 +150,10 @@ class RamSearchDialog_t : public QDialog
 		void periodicUpdate(void);
 		void hbarChanged(int val);
 		void vbarChanged(int val);
-		void searchRAMChanged(int state);
-		void searchSRAMChanged(int state);
-		void searchROMChanged(int state);
-		void misalignedChanged(int state);
+		void searchRAMChanged(bool state);
+		void searchSRAMChanged(bool state);
+		void searchROMChanged(bool state);
+		void misalignedChanged(bool state);
 		void ds1Clicked(void);
 		void ds2Clicked(void);
 		void ds4Clicked(void);

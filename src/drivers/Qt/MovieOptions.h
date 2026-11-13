@@ -48,16 +48,16 @@ private:
 public slots:
 	void closeWindow(void);
 private slots:
-	void readOnlyReplayChanged(int state);
-	void pauseAfterPlayChanged(int state);
-	void closeAfterPlayChanged(int state);
-	void bindSaveStatesChanged(int state);
-	void dpySubTitlesChanged(int state);
-	void putSubTitlesAviChanged(int state);
-	void setAviHudEnable(int state);
-	void setAviMsgEnable(int state);
-	void setAviAudioEnable(int state);
-	void autoBackUpChanged(int state);
-	void loadFullStatesChanged(int state);
+	void readOnlyReplayChanged(bool state);
+	void pauseAfterPlayChanged(bool state);
+	void closeAfterPlayChanged(bool state);
+	void bindSaveStatesChanged(bool state);
+	void dpySubTitlesChanged(bool state);
+	void putSubTitlesAviChanged(bool state);
+	void setAviHudEnable(bool state);
+	void setAviMsgEnable(bool state);
+	void setAviAudioEnable(bool state);
+	void autoBackUpChanged(bool state);
+	void loadFullStatesChanged(bool state);
 	void aviBackendChanged(int idx);
 };

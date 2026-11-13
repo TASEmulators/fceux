@@ -251,9 +251,9 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 		}
 	}
 
-	connect(fourScoreEna, SIGNAL(stateChanged(int)), this, SLOT(fourScoreChanged(int)));
-	connect(port2Mic, SIGNAL(stateChanged(int)), this, SLOT(port2MicChanged(int)));
-	connect(autoPreset, SIGNAL(stateChanged(int)), this, SLOT(autoPresetChanged(int)));
+	connect(fourScoreEna, SIGNAL(toggled(bool)), this, SLOT(fourScoreChanged(bool)));
+	connect(port2Mic, SIGNAL(toggled(bool)), this, SLOT(port2MicChanged(bool)));
+	connect(autoPreset, SIGNAL(toggled(bool)), this, SLOT(autoPresetChanged(bool)));
 
 	connect(newDeviceOptionBox , SIGNAL(activated(int)), this, SLOT(newDeviceSettingsChange(int)));
 	connect(nesPortComboxBox[0], SIGNAL(activated(int)), this, SLOT(port1Select(int)));
@@ -406,9 +406,9 @@ void InputConfDialog_t::expSelect(int index)
 	updatePortLabels();
 }
 //----------------------------------------------------------------------------
-void InputConfDialog_t::fourScoreChanged(int state)
+void InputConfDialog_t::fourScoreChanged(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 	//printf("Set 'SDL.FourScore' = %i\n", value);
 	g_config->setOption("SDL.FourScore", value);
 
@@ -416,15 +416,15 @@ void InputConfDialog_t::fourScoreChanged(int state)
 	updatePortLabels();
 }
 //----------------------------------------------------------------------------
-void InputConfDialog_t::port2MicChanged(int state)
+void InputConfDialog_t::port2MicChanged(bool state)
 {
 	setInputs();
 	updatePortLabels();
 }
 //----------------------------------------------------------------------------
-void InputConfDialog_t::autoPresetChanged(int state)
+void InputConfDialog_t::autoPresetChanged(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 	//printf("Set 'SDL.AutoInputPreset' = %i\n", value);
 	g_config->setOption("SDL.AutoInputPreset", value);
 }

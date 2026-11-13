@@ -355,7 +355,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	trainerCBox = new QCheckBox( tr("Trainer") );
 	iNesUnOfBox = new QCheckBox( tr("iNES 1.0 Unofficial Properties") );
 
-	connect( iNesUnOfBox, SIGNAL(stateChanged(int)), this, SLOT(unofficialStateChange(int)) );
+	connect( iNesUnOfBox, SIGNAL(toggled(bool)), this, SLOT(unofficialStateChange(bool)) );
 
 	box = new QGroupBox( tr("Mirroring:") );
 	box->setLayout( vbox );
@@ -389,8 +389,8 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	iNesBusCfltBox = new QCheckBox( tr("Bus Conflict") );
 	iNesPrgRamBox  = new QCheckBox( tr("PRG RAM Exists") );
 
-	connect( iNesPrgRamBox , SIGNAL(stateChanged(int)), this, SLOT(unofficialPrgRamStateChange(int)) );
-	connect( iNesDualRegBox, SIGNAL(stateChanged(int)), this, SLOT(unofficialDualRegionStateChange(int)) );
+	connect( iNesPrgRamBox , SIGNAL(toggled(bool)), this, SLOT(unofficialPrgRamStateChange(bool)) );
+	connect( iNesDualRegBox, SIGNAL(toggled(bool)), this, SLOT(unofficialDualRegionStateChange(bool)) );
 
 	iNesUnOfGroupBox = new QGroupBox( tr("iNES 1.0 Unofficial Properties:") );
 	vbox = new QVBoxLayout();
@@ -626,19 +626,19 @@ void iNesHeaderEditor_t::extSysClicked(bool checked)
 	ToggleExtendSystemList(true);
 }
 //----------------------------------------------------------------------------
-void iNesHeaderEditor_t::unofficialStateChange(int state)
+void iNesHeaderEditor_t::unofficialStateChange(bool state)
 {
-	ToggleUnofficialPropertiesEnabled( iNes2Btn->isChecked(), state != Qt::Unchecked );
+	ToggleUnofficialPropertiesEnabled( iNes2Btn->isChecked(), state );
 }
 //----------------------------------------------------------------------------
-void iNesHeaderEditor_t::unofficialPrgRamStateChange(int state)
+void iNesHeaderEditor_t::unofficialPrgRamStateChange(bool state)
 {
-	ToggleUnofficialPrgRamPresent( false, true, state != Qt::Unchecked );
+	ToggleUnofficialPrgRamPresent( false, true, state );
 }
 //----------------------------------------------------------------------------
-void iNesHeaderEditor_t::unofficialDualRegionStateChange(int state)
+void iNesHeaderEditor_t::unofficialDualRegionStateChange(bool state)
 {
-	ToggleUnofficialExtraRegionCode( false, true, state != Qt::Unchecked );
+	ToggleUnofficialExtraRegionCode( false, true, state );
 }
 //----------------------------------------------------------------------------
 void iNesHeaderEditor_t::showErrorMsgWindow(const char *str)

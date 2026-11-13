@@ -463,9 +463,9 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	connect(modCheatBtn, SIGNAL(clicked(void)), this, SLOT(updateCheatParameters(void)));
 	connect(closeButton, SIGNAL(clicked(void)), this, SLOT(closeWindow(void)));
 
-	connect(enaCheats, SIGNAL(stateChanged(int)), this, SLOT(globalEnableCheats(int)));
-	connect(autoSave, SIGNAL(stateChanged(int)), this, SLOT(autoLoadSaveCheats(int)));
-	connect(pauseBox, SIGNAL(stateChanged(int)), this, SLOT(pauseWindowState(int)));
+	connect(enaCheats, SIGNAL(toggled(bool)), this, SLOT(globalEnableCheats(bool)));
+	connect(autoSave, SIGNAL(toggled(bool)), this, SLOT(autoLoadSaveCheats(bool)));
+	connect(pauseBox, SIGNAL(toggled(bool)), this, SLOT(pauseWindowState(bool)));
 
 	connect(importCheatFileBtn, SIGNAL(clicked(void)), this, SLOT(openCheatFile(void)));
 	connect(exportCheatFileBtn, SIGNAL(clicked(void)), this, SLOT(saveCheatFile(void)));
@@ -1054,9 +1054,9 @@ void GuiCheatsDialog_t::actvCheatItemClicked(QTreeWidgetItem *item, int column)
 	typeEntry->setCurrentIndex(type);
 }
 //----------------------------------------------------------------------------
-void GuiCheatsDialog_t::globalEnableCheats(int state)
+void GuiCheatsDialog_t::globalEnableCheats(bool state)
 {
-	int val = state != Qt::Unchecked;
+	int val = state;
 
 	g_config->setOption("SDL.CheatsDisabled", !val);
 	g_config->save();
@@ -1065,9 +1065,9 @@ void GuiCheatsDialog_t::globalEnableCheats(int state)
 	FCEUI_GlobalToggleCheat(val);
 }
 //----------------------------------------------------------------------------
-void GuiCheatsDialog_t::autoLoadSaveCheats(int state)
+void GuiCheatsDialog_t::autoLoadSaveCheats(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		int ret;
 		const char *msg = "If this option is unchecked, you must manually save the cheats by yourself, or all the changes you made to the cheat list would be discarded silently without any asking once you close the game!\nDo you really want to do it in this way?";
@@ -1092,9 +1092,9 @@ void GuiCheatsDialog_t::autoLoadSaveCheats(int state)
 	g_config->save();
 }
 //----------------------------------------------------------------------------
-void GuiCheatsDialog_t::pauseWindowState(int state)
+void GuiCheatsDialog_t::pauseWindowState(bool state)
 {
-	pauseWhileActive = (state != Qt::Unchecked);
+	pauseWhileActive = (state);
 
 	g_config->setOption("SDL.CheatsWindowPause", pauseWhileActive);
 	g_config->save();

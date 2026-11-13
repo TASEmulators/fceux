@@ -53,7 +53,7 @@ public slots:
 private slots:
 	void updatePeriodic(void);
 	void resetTimingClicked(void);
-	void timingEnableChanged(int state);
+	void timingEnableChanged(bool state);
 };
 
 int openFrameTimingWindow( QWidget *parent );

@@ -267,11 +267,11 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 
 	g_config->getOption("SDL.TraceLogSaveToFile", &opt );
 	logFileCbox->setChecked( opt );
-	connect(logFileCbox, SIGNAL(stateChanged(int)), this, SLOT(logToFileStateChanged(int)));
+	connect(logFileCbox, SIGNAL(toggled(bool)), this, SLOT(logToFileStateChanged(bool)));
 
 	g_config->getOption("SDL.TraceLogPeriodicWindowUpdate", &opt );
 	autoUpdateCbox->setChecked( opt );
-	connect(autoUpdateCbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateStateChanged(int)));
+	connect(autoUpdateCbox, SIGNAL(toggled(bool)), this, SLOT(autoUpdateStateChanged(bool)));
 
 	if (logging)
 	{
@@ -346,17 +346,17 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	logInstrCountCbox->setChecked((logging_options & LOG_INSTRUCTIONS_COUNT) ? true : false);
 	logBankNumCbox->setChecked((logging_options & LOG_BANK_NUMBER) ? true : false);
 
-	connect(logRegCbox, SIGNAL(stateChanged(int)), this, SLOT(logRegStateChanged(int)));
-	connect(logFrameCbox, SIGNAL(stateChanged(int)), this, SLOT(logFrameStateChanged(int)));
-	connect(logEmuMsgCbox, SIGNAL(stateChanged(int)), this, SLOT(logEmuMsgStateChanged(int)));
-	connect(symTraceEnaCbox, SIGNAL(stateChanged(int)), this, SLOT(symTraceEnaStateChanged(int)));
-	connect(logProcStatFlagCbox, SIGNAL(stateChanged(int)), this, SLOT(logProcStatFlagStateChanged(int)));
-	connect(logCyclesCountCbox, SIGNAL(stateChanged(int)), this, SLOT(logCyclesCountStateChanged(int)));
-	connect(logBreakpointCbox, SIGNAL(stateChanged(int)), this, SLOT(logBreakpointStateChanged(int)));
-	connect(useStackPointerCbox, SIGNAL(stateChanged(int)), this, SLOT(useStackPointerStateChanged(int)));
-	connect(toLeftDisassemblyCbox, SIGNAL(stateChanged(int)), this, SLOT(toLeftDisassemblyStateChanged(int)));
-	connect(logInstrCountCbox, SIGNAL(stateChanged(int)), this, SLOT(logInstrCountStateChanged(int)));
-	connect(logBankNumCbox, SIGNAL(stateChanged(int)), this, SLOT(logBankNumStateChanged(int)));
+	connect(logRegCbox, SIGNAL(toggled(bool)), this, SLOT(logRegStateChanged(bool)));
+	connect(logFrameCbox, SIGNAL(toggled(bool)), this, SLOT(logFrameStateChanged(bool)));
+	connect(logEmuMsgCbox, SIGNAL(toggled(bool)), this, SLOT(logEmuMsgStateChanged(bool)));
+	connect(symTraceEnaCbox, SIGNAL(toggled(bool)), this, SLOT(symTraceEnaStateChanged(bool)));
+	connect(logProcStatFlagCbox, SIGNAL(toggled(bool)), this, SLOT(logProcStatFlagStateChanged(bool)));
+	connect(logCyclesCountCbox, SIGNAL(toggled(bool)), this, SLOT(logCyclesCountStateChanged(bool)));
+	connect(logBreakpointCbox, SIGNAL(toggled(bool)), this, SLOT(logBreakpointStateChanged(bool)));
+	connect(useStackPointerCbox, SIGNAL(toggled(bool)), this, SLOT(useStackPointerStateChanged(bool)));
+	connect(toLeftDisassemblyCbox, SIGNAL(toggled(bool)), this, SLOT(toLeftDisassemblyStateChanged(bool)));
+	connect(logInstrCountCbox, SIGNAL(toggled(bool)), this, SLOT(logInstrCountStateChanged(bool)));
+	connect(logBankNumCbox, SIGNAL(toggled(bool)), this, SLOT(logBankNumStateChanged(bool)));
 
 	grid->addWidget(logRegCbox, 0, 0, Qt::AlignLeft);
 	grid->addWidget(logFrameCbox, 1, 0, Qt::AlignLeft);
@@ -382,8 +382,8 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	logNewMapCodeCbox->setChecked((logging_options & LOG_NEW_INSTRUCTIONS) ? true : false);
 	logNewMapDataCbox->setChecked((logging_options & LOG_NEW_DATA) ? true : false);
 
-	connect(logNewMapCodeCbox, SIGNAL(stateChanged(int)), this, SLOT(logNewMapCodeChanged(int)));
-	connect(logNewMapDataCbox, SIGNAL(stateChanged(int)), this, SLOT(logNewMapDataChanged(int)));
+	connect(logNewMapCodeCbox, SIGNAL(toggled(bool)), this, SLOT(logNewMapCodeChanged(bool)));
+	connect(logNewMapDataCbox, SIGNAL(toggled(bool)), this, SLOT(logNewMapDataChanged(bool)));
 
 	grid->addWidget(logNewMapCodeCbox, 0, 0, Qt::AlignLeft);
 	grid->addWidget(logNewMapDataCbox, 0, 1, Qt::AlignLeft);
@@ -740,19 +740,19 @@ void TraceLoggerDialog_t::pageDnActivated(void)
 	vbar->setSliderPosition(val);
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logToFileStateChanged(int state)
+void TraceLoggerDialog_t::logToFileStateChanged(bool state)
 {
-	g_config->setOption("SDL.TraceLogSaveToFile", state != Qt::Unchecked );
+	g_config->setOption("SDL.TraceLogSaveToFile", state );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::autoUpdateStateChanged(int state)
+void TraceLoggerDialog_t::autoUpdateStateChanged(bool state)
 {
-	g_config->setOption("SDL.TraceLogPeriodicWindowUpdate", state != Qt::Unchecked );
+	g_config->setOption("SDL.TraceLogPeriodicWindowUpdate", state );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logRegStateChanged(int state)
+void TraceLoggerDialog_t::logRegStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_REGISTERS;
 	}
@@ -763,9 +763,9 @@ void TraceLoggerDialog_t::logRegStateChanged(int state)
 	g_config->setOption("SDL.TraceLogRegisterState", (logging_options & LOG_REGISTERS) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logFrameStateChanged(int state)
+void TraceLoggerDialog_t::logFrameStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_FRAMES_COUNT;
 	}
@@ -776,9 +776,9 @@ void TraceLoggerDialog_t::logFrameStateChanged(int state)
 	g_config->setOption("SDL.TraceLogFrameCount", (logging_options & LOG_FRAMES_COUNT) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logEmuMsgStateChanged(int state)
+void TraceLoggerDialog_t::logEmuMsgStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_MESSAGES;
 	}
@@ -789,9 +789,9 @@ void TraceLoggerDialog_t::logEmuMsgStateChanged(int state)
 	g_config->setOption("SDL.TraceLogMessages", (logging_options & LOG_MESSAGES) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::symTraceEnaStateChanged(int state)
+void TraceLoggerDialog_t::symTraceEnaStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_SYMBOLIC;
 	}
@@ -802,9 +802,9 @@ void TraceLoggerDialog_t::symTraceEnaStateChanged(int state)
 	g_config->setOption("SDL.TraceLogSymbolic", (logging_options & LOG_SYMBOLIC) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logProcStatFlagStateChanged(int state)
+void TraceLoggerDialog_t::logProcStatFlagStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_PROCESSOR_STATUS;
 	}
@@ -815,9 +815,9 @@ void TraceLoggerDialog_t::logProcStatFlagStateChanged(int state)
 	g_config->setOption("SDL.TraceLogProcessorState", (logging_options & LOG_PROCESSOR_STATUS) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logCyclesCountStateChanged(int state)
+void TraceLoggerDialog_t::logCyclesCountStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_CYCLES_COUNT;
 	}
@@ -828,9 +828,9 @@ void TraceLoggerDialog_t::logCyclesCountStateChanged(int state)
 	g_config->setOption("SDL.TraceLogCycleCount", (logging_options & LOG_CYCLES_COUNT) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logBreakpointStateChanged(int state)
+void TraceLoggerDialog_t::logBreakpointStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_BREAKPOINTS;
 	}
@@ -841,9 +841,9 @@ void TraceLoggerDialog_t::logBreakpointStateChanged(int state)
 	g_config->setOption("SDL.TraceLogBreakpointHits", (logging_options & LOG_BREAKPOINTS) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::useStackPointerStateChanged(int state)
+void TraceLoggerDialog_t::useStackPointerStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_CODE_TABBING;
 	}
@@ -854,9 +854,9 @@ void TraceLoggerDialog_t::useStackPointerStateChanged(int state)
 	g_config->setOption("SDL.TraceLogStackTabbing", (logging_options & LOG_CODE_TABBING) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::toLeftDisassemblyStateChanged(int state)
+void TraceLoggerDialog_t::toLeftDisassemblyStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_TO_THE_LEFT;
 	}
@@ -867,9 +867,9 @@ void TraceLoggerDialog_t::toLeftDisassemblyStateChanged(int state)
 	g_config->setOption("SDL.TraceLogLeftDisassembly", (logging_options & LOG_TO_THE_LEFT) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logInstrCountStateChanged(int state)
+void TraceLoggerDialog_t::logInstrCountStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_INSTRUCTIONS_COUNT;
 	}
@@ -880,9 +880,9 @@ void TraceLoggerDialog_t::logInstrCountStateChanged(int state)
 	g_config->setOption("SDL.TraceLogInstructionCount", (logging_options & LOG_INSTRUCTIONS_COUNT) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logBankNumStateChanged(int state)
+void TraceLoggerDialog_t::logBankNumStateChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_BANK_NUMBER;
 	}
@@ -893,9 +893,9 @@ void TraceLoggerDialog_t::logBankNumStateChanged(int state)
 	g_config->setOption("SDL.TraceLogBankNumber", (logging_options & LOG_BANK_NUMBER) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logNewMapCodeChanged(int state)
+void TraceLoggerDialog_t::logNewMapCodeChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_NEW_INSTRUCTIONS;
 	}
@@ -906,9 +906,9 @@ void TraceLoggerDialog_t::logNewMapCodeChanged(int state)
 	g_config->setOption("SDL.TraceLogNewInstructions", (logging_options & LOG_NEW_INSTRUCTIONS) ? 1 : 0 );
 }
 //----------------------------------------------------
-void TraceLoggerDialog_t::logNewMapDataChanged(int state)
+void TraceLoggerDialog_t::logNewMapDataChanged(bool state)
 {
-	if (state == Qt::Unchecked)
+	if (!state)
 	{
 		logging_options &= ~LOG_NEW_DATA;
 	}

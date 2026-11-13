@@ -64,7 +64,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 
 	recorderEnable->setChecked( FCEU_StateRecorderIsEnabled() );
 
-	connect( recorderEnable, SIGNAL(stateChanged(int)), this, SLOT(enableChanged(int)) );
+	connect( recorderEnable, SIGNAL(toggled(bool)), this, SLOT(enableChanged(bool)) );
 
 	snapFrames->setMinimum(1);
 	snapFrames->setMaximum(10000);
@@ -553,7 +553,7 @@ void StateRecorderDialog_t::updatePeriodic(void)
 	updateStatusDisplay();
 }
 //----------------------------------------------------------------------------
-void StateRecorderDialog_t::enableChanged(int val)
+void StateRecorderDialog_t::enableChanged(bool val)
 {
 	bool ena = val ? true : false;
 

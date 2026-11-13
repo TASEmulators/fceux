@@ -64,9 +64,9 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	setCheckBoxFromProperty(muteChkbox, "SDL.Sound.Mute");
 	setCheckBoxFromProperty(enaLowPass, "SDL.Sound.LowPass");
 
-	connect(enaChkbox, SIGNAL(stateChanged(int)), this, SLOT(enaSoundStateChange(int)));
-	connect(muteChkbox, SIGNAL(stateChanged(int)), this, SLOT(enaSpeakerMuteChange(int)));
-	connect(enaLowPass, SIGNAL(stateChanged(int)), this, SLOT(enaSoundLowPassChange(int)));
+	connect(enaChkbox, SIGNAL(toggled(bool)), this, SLOT(enaSoundStateChange(bool)));
+	connect(muteChkbox, SIGNAL(toggled(bool)), this, SLOT(enaSpeakerMuteChange(bool)));
+	connect(enaLowPass, SIGNAL(toggled(bool)), this, SLOT(enaSoundLowPassChange(bool)));
 
 	vbox1->addWidget(enaChkbox);
 	vbox1->addWidget(muteChkbox);
@@ -196,7 +196,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	setCheckBoxFromProperty(useGlobalFocus, "SDL.Sound.UseGlobalFocus");
 
-	connect(useGlobalFocus, SIGNAL(stateChanged(int)), this, SLOT(useGlobalFocusChanged(int)));
+	connect(useGlobalFocus, SIGNAL(toggled(bool)), this, SLOT(useGlobalFocusChanged(bool)));
 
 	// Swap Duty Cycles
 	swapDutyChkbox = new QCheckBox(tr("Swap Duty Cycles"));
@@ -204,7 +204,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	setCheckBoxFromProperty(swapDutyChkbox, "SDL.SwapDuty");
 
-	connect(swapDutyChkbox, SIGNAL(stateChanged(int)), this, SLOT(swapDutyCallback(int)));
+	connect(swapDutyChkbox, SIGNAL(toggled(bool)), this, SLOT(swapDutyCallback(bool)));
 
 	hbox1->addLayout(vbox1);
 
@@ -563,7 +563,7 @@ void ConsoleSndConfDialog_t::pcmChanged(int value)
 	}
 }
 //----------------------------------------------------
-void ConsoleSndConfDialog_t::enaSoundStateChange(int value)
+void ConsoleSndConfDialog_t::enaSoundStateChange(bool value)
 {
 	if (value)
 	{
@@ -587,12 +587,12 @@ void ConsoleSndConfDialog_t::enaSoundStateChange(int value)
 	}
 }
 //----------------------------------------------------
-void ConsoleSndConfDialog_t::enaSpeakerMuteChange(int value)
+void ConsoleSndConfDialog_t::enaSpeakerMuteChange(bool value)
 {
 	FCEUD_MuteSoundOutput( value ? true : false );
 }
 //----------------------------------------------------
-void ConsoleSndConfDialog_t::enaSoundLowPassChange(int value)
+void ConsoleSndConfDialog_t::enaSoundLowPassChange(bool value)
 {
 	if (value)
 	{
@@ -611,9 +611,9 @@ void ConsoleSndConfDialog_t::enaSoundLowPassChange(int value)
 	g_config->save();
 }
 //----------------------------------------------------
-void ConsoleSndConfDialog_t::useGlobalFocusChanged(int value)
+void ConsoleSndConfDialog_t::useGlobalFocusChanged(bool value)
 {
-	bool bval = value != Qt::Unchecked;
+	bool bval = value;
 
 	//printf("SDL.Sound.UseGlobalFocus = %i\n", bval);
 	g_config->setOption("SDL.Sound.UseGlobalFocus", bval);
@@ -625,7 +625,7 @@ void ConsoleSndConfDialog_t::useGlobalFocusChanged(int value)
 	}
 }
 //----------------------------------------------------
-void ConsoleSndConfDialog_t::swapDutyCallback(int value)
+void ConsoleSndConfDialog_t::swapDutyCallback(bool value)
 {
 	if (value)
 	{

@@ -64,9 +64,9 @@ private slots:
 	void port2Select(int index);
 	void expSelect(int index);
 	void newDeviceSettingsChange(int index);
-	void fourScoreChanged(int state);
-	void port2MicChanged(int state);
-	void autoPresetChanged(int state);
+	void fourScoreChanged(bool state);
+	void port2MicChanged(bool state);
+	void autoPresetChanged(bool state);
 	void openLoadPresetFile(void);
 	void openSavePresetFile(void);
 	void updatePeriodic(void);

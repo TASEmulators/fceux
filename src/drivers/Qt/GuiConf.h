@@ -156,16 +156,16 @@ private:
 public slots:
 	void closeWindow(void);
 private slots:
-	void useNativeFileDialogChanged(int v);
-	void useNativeMenuBarChanged(int v);
-	void pauseOnMenuAccessChanged(int v);
-	void contextMenuEnableChanged(int v);
-	void showSplashScreenChanged(int v);
+	void useNativeFileDialogChanged(bool v);
+	void useNativeMenuBarChanged(bool v);
+	void pauseOnMenuAccessChanged(bool v);
+	void contextMenuEnableChanged(bool v);
+	void showSplashScreenChanged(bool v);
 #if defined(Q_OS_LINUX)
-	void waylandPlatformOverrideChanged(int v);
+	void waylandPlatformOverrideChanged(bool v);
 #endif
-	void useCustomQPaletteChanged(int v);
-	void useCustomStyleChanged(int v);
+	void useCustomQPaletteChanged(bool v);
+	void useCustomStyleChanged(bool v);
 	void styleChanged(int index);
 	void openQss(void);
 	void clearQss(void);

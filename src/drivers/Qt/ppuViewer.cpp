@@ -275,10 +275,10 @@ ppuViewerDialog_t::ppuViewerDialog_t(QWidget *parent)
 	maskUnusedCbox->setChecked( PPUView_maskUnusedGraphics );
 	invertMaskCbox->setChecked( PPUView_invertTheMask );
 
-	connect( maskUnusedCbox   , SIGNAL(stateChanged(int)), this, SLOT(maskUnusedGraphicsChanged(int)));
-	connect( invertMaskCbox   , SIGNAL(stateChanged(int)), this, SLOT(invertMaskChanged(int)));
-	connect( sprite8x16Cbox[0], SIGNAL(stateChanged(int)), this, SLOT(sprite8x16Changed0(int)));
-	connect( sprite8x16Cbox[1], SIGNAL(stateChanged(int)), this, SLOT(sprite8x16Changed1(int)));
+	connect( maskUnusedCbox   , SIGNAL(toggled(bool)), this, SLOT(maskUnusedGraphicsChanged(bool)));
+	connect( invertMaskCbox   , SIGNAL(toggled(bool)), this, SLOT(invertMaskChanged(bool)));
+	connect( sprite8x16Cbox[0], SIGNAL(toggled(bool)), this, SLOT(sprite8x16Changed0(bool)));
+	connect( sprite8x16Cbox[1], SIGNAL(toggled(bool)), this, SLOT(sprite8x16Changed1(bool)));
 
 	hbox           = new QHBoxLayout();
 	refreshSlider  = new QSlider( Qt::Horizontal );
@@ -522,30 +522,30 @@ void ppuViewerDialog_t::scanLineChanged(int value)
 	g_config->setOption("SDL.PPU_ViewScanLine", PPUViewScanline);
 }
 //----------------------------------------------------
-void ppuViewerDialog_t::invertMaskChanged(int state)
+void ppuViewerDialog_t::invertMaskChanged(bool state)
 {
-	PPUView_invertTheMask = (state == Qt::Unchecked) ? 0 : 1;
+	PPUView_invertTheMask = (!state) ? 0 : 1;
 
 	g_config->setOption("SDL.PPU_InvertMask", PPUView_invertTheMask);
 }
 //----------------------------------------------------
-void ppuViewerDialog_t::maskUnusedGraphicsChanged(int state)
+void ppuViewerDialog_t::maskUnusedGraphicsChanged(bool state)
 {
-	PPUView_maskUnusedGraphics = (state == Qt::Unchecked) ? 0 : 1;
+	PPUView_maskUnusedGraphics = (!state) ? 0 : 1;
 
 	g_config->setOption("SDL.PPU_MaskUnused", PPUView_maskUnusedGraphics);
 }
 //----------------------------------------------------
-void ppuViewerDialog_t::sprite8x16Changed0(int state)
+void ppuViewerDialog_t::sprite8x16Changed0(bool state)
 {
-	PPUView_sprite16Mode[0] = (state == Qt::Unchecked) ? 0 : 1;
+	PPUView_sprite16Mode[0] = (!state) ? 0 : 1;
 
 	g_config->setOption("SDL.PPU_View1_8x16", PPUView_sprite16Mode[0]);
 }
 //----------------------------------------------------
-void ppuViewerDialog_t::sprite8x16Changed1(int state)
+void ppuViewerDialog_t::sprite8x16Changed1(bool state)
 {
-	PPUView_sprite16Mode[1] = (state == Qt::Unchecked) ? 0 : 1;
+	PPUView_sprite16Mode[1] = (!state) ? 0 : 1;
 
 	g_config->setOption("SDL.PPU_View2_8x16", PPUView_sprite16Mode[1]);
 }

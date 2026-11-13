@@ -52,9 +52,9 @@ private slots:
 	void updatePeriodic(void);
 	void ResetCDLogClicked(void);
 	void StartPauseCDLogClicked(void);
-	void autoSaveCdlStateChange(int state);
-	void autoLoadCdlStateChange(int state);
-	void autoResumeCdlStateChange(int state);
+	void autoSaveCdlStateChange(bool state);
+	void autoLoadCdlStateChange(bool state);
+	void autoResumeCdlStateChange(bool state);
 	void SaveStrippedROMClicked(void);
 	void SaveUnusedROMClicked(void);
 };

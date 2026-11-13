@@ -73,8 +73,8 @@ class SymbolEditWindow : public QDialog
 		int  exec(void) override;
 
 	private slots:
-		void isArrayStateChanged( int state );
-		void arrayCommentHeadOnlyChanged( int state );
+		void isArrayStateChanged( bool state );
+		void arrayCommentHeadOnlyChanged( bool state );
 
 };
 

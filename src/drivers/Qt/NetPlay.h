@@ -427,10 +427,10 @@ protected:
 public slots:
 	void closeWindow(void);
 	void onStartClicked(void);
-	void passwordRequiredChanged(int state);
-	void allowClientRomReqChanged(int state);
-	void allowClientStateReqChanged(int state);
-	void enforceAppVersionChkChanged(int state);
+	void passwordRequiredChanged(bool state);
+	void allowClientRomReqChanged(bool state);
+	void allowClientStateReqChanged(bool state);
+	void enforceAppVersionChkChanged(bool state);
 };
 
 class NetPlayJoinDialog : public QDialog

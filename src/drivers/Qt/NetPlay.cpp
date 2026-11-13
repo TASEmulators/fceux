@@ -2272,10 +2272,10 @@ NetPlayHostDialog::NetPlayHostDialog(QWidget *parent)
 	debugModeCBox = new QCheckBox(tr("Debug Network Messaging"));
 	grid->addWidget( debugModeCBox, 4, 0, 1, 2 );
 
-	connect(passwordRequiredCBox, SIGNAL(stateChanged(int)), this, SLOT(passwordRequiredChanged(int)));
-	connect(allowClientRomReqCBox, SIGNAL(stateChanged(int)), this, SLOT(allowClientRomReqChanged(int)));
-	connect(allowClientStateReqCBox, SIGNAL(stateChanged(int)), this, SLOT(allowClientStateReqChanged(int)));
-	connect(enforceAppVersionChkCBox, SIGNAL(stateChanged(int)), this, SLOT(enforceAppVersionChkChanged(int)));
+	connect(passwordRequiredCBox, SIGNAL(toggled(bool)), this, SLOT(passwordRequiredChanged(bool)));
+	connect(allowClientRomReqCBox, SIGNAL(toggled(bool)), this, SLOT(allowClientRomReqChanged(bool)));
+	connect(allowClientStateReqCBox, SIGNAL(toggled(bool)), this, SLOT(allowClientStateReqChanged(bool)));
+	connect(enforceAppVersionChkCBox, SIGNAL(toggled(bool)), this, SLOT(enforceAppVersionChkChanged(bool)));
 
 	startButton = new QPushButton( tr("Start") );
 	startButton->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
@@ -2315,26 +2315,26 @@ void NetPlayHostDialog::closeWindow(void)
 	deleteLater();
 }
 //-----------------------------------------------------------------------------
-void NetPlayHostDialog::passwordRequiredChanged(int state)
+void NetPlayHostDialog::passwordRequiredChanged(bool state)
 {
-	passwordEntry->setEnabled( state != Qt::Unchecked );
+	passwordEntry->setEnabled( state );
 }
 //-----------------------------------------------------------------------------
-void NetPlayHostDialog::allowClientRomReqChanged(int state)
+void NetPlayHostDialog::allowClientRomReqChanged(bool state)
 {
-	g_config->setOption("SDL.NetPlayHostAllowClientRomLoadReq", state != Qt::Unchecked);
+	g_config->setOption("SDL.NetPlayHostAllowClientRomLoadReq", state);
 	g_config->save();
 }
 //-----------------------------------------------------------------------------
-void NetPlayHostDialog::allowClientStateReqChanged(int state)
+void NetPlayHostDialog::allowClientStateReqChanged(bool state)
 {
-	g_config->setOption("SDL.NetPlayHostAllowClientStateLoadReq", state != Qt::Unchecked);
+	g_config->setOption("SDL.NetPlayHostAllowClientStateLoadReq", state);
 	g_config->save();
 }
 //-----------------------------------------------------------------------------
-void NetPlayHostDialog::enforceAppVersionChkChanged(int state)
+void NetPlayHostDialog::enforceAppVersionChkChanged(bool state)
 {
-	g_config->setOption("SDL.NetPlayHostEnforceAppVersionChk", state != Qt::Unchecked);
+	g_config->setOption("SDL.NetPlayHostEnforceAppVersionChk", state);
 	g_config->save();
 }
 //-----------------------------------------------------------------------------

@@ -69,7 +69,7 @@ public slots:
 	void closeWindow(void);
 private slots:
 	void periodicUpdate(void);
-	void emuSchedCtlChange(int state);
+	void emuSchedCtlChange(bool state);
 	void emuSchedNiceChange(int val);
 	void emuSchedPrioChange(int val);
 	void emuSchedPolicyChange(int index);
@@ -80,5 +80,5 @@ private slots:
 	void overclockingToggled(bool on);
 	void postRenderChanged(int value);
 	void vblankScanlinesChanged(int value);
-	void no7bitChanged(int value);
+	void no7bitChanged(bool value);
 };

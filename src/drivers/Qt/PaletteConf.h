@@ -63,9 +63,9 @@ private slots:
 	void clearPalette(void);
 	void ntscResetClicked(void);
 	void use_NTSC_Changed(bool v);
-	void use_Custom_Changed(int v);
-	void force_GrayScale_Changed(int v);
-	void deemphswap_Changed(int v);
+	void use_Custom_Changed(bool v);
+	void force_GrayScale_Changed(bool v);
+	void deemphswap_Changed(bool v);
 	void palResetClicked(void);
 	void palNotchChanged(int value);
 	void palSaturationChanged(int value);

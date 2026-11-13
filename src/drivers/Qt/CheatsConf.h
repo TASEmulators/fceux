@@ -92,9 +92,9 @@ private slots:
 	void addActvCheat(void);
 	void deleteActvCheat(void);
 	void updateCheatParameters(void);
-	void autoLoadSaveCheats(int state);
-	void globalEnableCheats(int state);
-	void pauseWindowState(int state);
+	void autoLoadSaveCheats(bool state);
+	void globalEnableCheats(bool state);
+	void pauseWindowState(bool state);
 	void actvCheatItemClicked(QTreeWidgetItem *item, int column);
 };
 

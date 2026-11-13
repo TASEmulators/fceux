@@ -641,8 +641,8 @@ SymbolEditWindow::SymbolEditWindow(QWidget *parent)
 
 	updateArraySensitivity();
 
-	connect( isArrayBox     , SIGNAL(stateChanged(int)), this, SLOT(isArrayStateChanged(int)) );
-	connect( commentHeadOnly, SIGNAL(stateChanged(int)), this, SLOT(arrayCommentHeadOnlyChanged(int)) );
+	connect( isArrayBox     , SIGNAL(toggled(bool)), this, SLOT(isArrayStateChanged(bool)) );
+	connect( commentHeadOnly, SIGNAL(toggled(bool)), this, SLOT(arrayCommentHeadOnlyChanged(bool)) );
 }
 //--------------------------------------------------------------
 SymbolEditWindow::~SymbolEditWindow(void)
@@ -693,12 +693,12 @@ void SymbolEditWindow::updateArraySensitivity(void)
 
 }
 //--------------------------------------------------------------
-void SymbolEditWindow::isArrayStateChanged( int state )
+void SymbolEditWindow::isArrayStateChanged( bool state )
 {
 	updateArraySensitivity();
 }
 //--------------------------------------------------------------
-void SymbolEditWindow::arrayCommentHeadOnlyChanged( int state )
+void SymbolEditWindow::arrayCommentHeadOnlyChanged( bool state )
 {
 	updateArraySensitivity();
 }

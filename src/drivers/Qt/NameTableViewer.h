@@ -226,11 +226,11 @@ class ppuNameTableViewerDialog_t : public QDialog
 	private slots:
 		void periodicUpdate(void);
 		void updateMirrorText(void);
-		void showAttrbChanged(int state);
-		void ignorePaletteChanged(int state);
-		void showTileGridChanged(int state);
-		void showAttrGridChanged(int state);
-		void showScrollLinesChanged(int state);
+		void showAttrbChanged(bool state);
+		void ignorePaletteChanged(bool state);
+		void showTileGridChanged(bool state);
+		void showAttrGridChanged(bool state);
+		void showScrollLinesChanged(bool state);
 		void scanLineChanged(int value);
 		void menuScrollLinesChanged( bool checked ); 
 		void menuTileGridLinesChanged( bool checked ); 

@@ -77,7 +77,7 @@ private slots:
 	void snapTimeModeClicked(void);
 	void snapFrameModeClicked(void);
 	void spinBoxValueChanged(int newValue);
-	void enableChanged(int);
+	void enableChanged(bool);
 	void compressionLevelChanged(int newValue);
 	void pauseOnLoadChanged(int index);
 };

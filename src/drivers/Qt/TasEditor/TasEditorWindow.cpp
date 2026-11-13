@@ -1239,13 +1239,17 @@ void TasEditorWindow::buildSideControlPanel(void)
 	controlPanelContainerWidget->setLayout( ctlPanelMainVbox );
 
 	recRecordingCbox->setChecked( !movie_readonly );
-	connect( recRecordingCbox, SIGNAL(stateChanged(int)), this, SLOT(recordingChanged(int)) );
+	connect( recRecordingCbox, SIGNAL(toggled(bool)), this, SLOT(recordingChanged(bool)) );
 
 	recUsePatternCbox->setChecked( taseditorConfig.recordingUsePattern );
-	connect( recUsePatternCbox, SIGNAL(stateChanged(int)), this, SLOT(usePatternChanged(int)) );
+	connect( recUsePatternCbox, SIGNAL(toggled(bool)), this, SLOT(usePatternChanged(bool)) );
 
 	recSuperImposeCbox->setTristate(true);
-	connect( recSuperImposeCbox, SIGNAL(stateChanged(int)), this, SLOT(superImposedChanged(int)) );
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+	connect(recSuperImposeCbox, &QCheckBox::checkStateChanged, this, &TasEditorWindow::superImposedChanged);
+#else
+	connect(recSuperImposeCbox, &QCheckBox::stateChanged, this, &TasEditorWindow::superImposedChanged);
+#endif
 
 	connect( recAllBtn, &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_ALL ); } );
 	connect( rec1PBtn , &QRadioButton::clicked, [ this ] { recordInputChanged( MULTITRACK_RECORDING_1P  ); } );
@@ -2712,10 +2716,10 @@ void TasEditorWindow::setCurrentPattern(int idx)
 	taseditorConfig.currentPattern = idx;
 }
 //----------------------------------------------------------------------------
-void TasEditorWindow::recordingChanged(int newState)
+void TasEditorWindow::recordingChanged(bool newState)
 {
 	FCEU_WRAPPER_SCOPED_LOCK();
-	int oldState = !movie_readonly ? Qt::Checked : Qt::Unchecked;
+	bool oldState = !movie_readonly;
 
 	if ( newState != oldState )
 	{
@@ -2882,7 +2886,7 @@ void TasEditorWindow::editTruncateMovieCB(void)
 	splicer.truncateMovie();
 }
 //----------------------------------------------------------------------------
-void TasEditorWindow::superImposedChanged(int state)
+void TasEditorWindow::superImposedChanged(TasCheckState state)
 {
 	if ( state == Qt::Checked )
 	{
@@ -2898,7 +2902,7 @@ void TasEditorWindow::superImposedChanged(int state)
 	}
 }
 //----------------------------------------------------------------------------
-void TasEditorWindow::usePatternChanged(int state)
+void TasEditorWindow::usePatternChanged(bool state)
 {
 	taseditorConfig.recordingUsePattern ^= 1;
 	recorder.patternOffset = 0;

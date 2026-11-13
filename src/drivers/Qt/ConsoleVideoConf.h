@@ -90,29 +90,29 @@ class ConsoleVideoConfDialog_t : public QDialog
 
 	private slots:
 		void  periodicUpdate(void);
-		void  autoRegionChanged( int value );
-		void  openGL_linearFilterChanged( int value );
-		void  autoScaleChanged( int value );
-		void  aspectEnableChanged( int value );
+		void  autoRegionChanged( bool value );
+		void  openGL_linearFilterChanged( bool value );
+		void  autoScaleChanged( bool value );
+		void  aspectEnableChanged( bool value );
 		void  use_new_PPU_changed( bool value );
-		void  frameskip_changed( int value );
-		void  vsync_changed( int value );
-		void  intFrameRate_changed( int value );
-		void  useSpriteLimitChanged( int value );
-		void  clipSidesChanged( int value );
-		void  showGuiMsgsChanged( int value );
-		void  showFPSChanged( int value );
+		void  frameskip_changed( bool value );
+		void  vsync_changed( bool value );
+		void  intFrameRate_changed( bool value );
+		void  useSpriteLimitChanged( bool value );
+		void  clipSidesChanged( bool value );
+		void  showGuiMsgsChanged( bool value );
+		void  showFPSChanged( bool value );
 		void  aspectChanged(int index);
 		void  regionChanged(int index);
 		void  driverChanged(int index);
 		void  scalerChanged(int index);
 		void  testPatternChanged(int index);
 		void  cursorShapeChanged(int index);
-		void  cursorVisChanged(int value);
-		void  drawInputAidsChanged(int value);
-		void  showFrameCountChanged(int value);
-		void  showLagCountChanged( int value );
-		void  showRerecordCountChanged( int value );
+		void  cursorVisChanged(bool value);
+		void  drawInputAidsChanged(bool value);
+		void  showFrameCountChanged(bool value);
+		void  showLagCountChanged( bool value );
+		void  showRerecordCountChanged( bool value );
 		void  textOverlayItemChanged( int item, bool checked );
 		void  textOverlayRateChanged( int index );
 		void  updateTextOverlayControls(void);
@@ -123,7 +123,7 @@ class ConsoleVideoConfDialog_t : public QDialog
 		void  palStartScanLineChanged(int value);
 		void  palEndScanLineChanged(int value);
 		#if defined(WIN32) && (QT_VERSION_MAJOR < 6)
-		void  winFullScreenBorderChanged(int value);
+		void  winFullScreenBorderChanged(bool value);
 		#endif
 
 };

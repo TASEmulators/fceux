@@ -235,8 +235,8 @@ private slots:
 	void clearButton9(void);
 	void clearAllCallback(void);
 	void btnConfigChanged(int index);
-	void ena4score(int state);
-	void oppDirEna(int state);
+	void ena4score(bool state);
+	void oppDirEna(bool state);
 	void portSelect(int index);
 	void deviceSelect(int index);
 	void newProfileCallback(void);

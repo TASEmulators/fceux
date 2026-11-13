@@ -166,7 +166,7 @@ FrameTimingDialog_t::FrameTimingDialog_t(QWidget *parent)
 	hbox->addWidget(timingEnable);
 	hbox->addWidget(resetBtn);
 
-	connect(timingEnable, SIGNAL(stateChanged(int)), this, SLOT(timingEnableChanged(int)));
+	connect(timingEnable, SIGNAL(toggled(bool)), this, SLOT(timingEnableChanged(bool)));
 	connect(resetBtn, SIGNAL(clicked(void)), this, SLOT(resetTimingClicked(void)));
 
 	mainLayout->addLayout(hbox);
@@ -361,9 +361,9 @@ void FrameTimingDialog_t::updatePeriodic(void)
 	updateTimingStats();
 }
 //----------------------------------------------------------------------------
-void FrameTimingDialog_t::timingEnableChanged(int state)
+void FrameTimingDialog_t::timingEnableChanged(bool state)
 {
-	setFrameTimingEnable(state != Qt::Unchecked);
+	setFrameTimingEnable(state);
 }
 //----------------------------------------------------------------------------
 void FrameTimingDialog_t::resetTimingClicked(void)

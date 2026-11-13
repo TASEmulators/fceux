@@ -154,17 +154,17 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	}
 	setLayout(mainLayout);
 
-	connect(readOnlyReplay, SIGNAL(stateChanged(int)), this, SLOT(readOnlyReplayChanged(int)));
-	connect(pauseAfterPlay, SIGNAL(stateChanged(int)), this, SLOT(pauseAfterPlayChanged(int)));
-	connect(closeAfterPlay, SIGNAL(stateChanged(int)), this, SLOT(closeAfterPlayChanged(int)));
-	connect(bindSaveStates, SIGNAL(stateChanged(int)), this, SLOT(bindSaveStatesChanged(int)));
-	connect(dpySubTitles  , SIGNAL(stateChanged(int)), this, SLOT(dpySubTitlesChanged(int)));
-	connect(putSubTitlesAvi, SIGNAL(stateChanged(int)), this, SLOT(putSubTitlesAviChanged(int)));
-	connect(autoBackUp, SIGNAL(stateChanged(int)), this, SLOT(autoBackUpChanged(int)));
-	connect(loadFullStates, SIGNAL(stateChanged(int)), this, SLOT(loadFullStatesChanged(int)));
-	connect(aviEnableHUD  , SIGNAL(stateChanged(int)), this, SLOT(setAviHudEnable(int)));
-	connect(aviEnableMsg  , SIGNAL(stateChanged(int)), this, SLOT(setAviMsgEnable(int)));
-	connect(aviEnableAudio, SIGNAL(stateChanged(int)), this, SLOT(setAviAudioEnable(int)));
+	connect(readOnlyReplay, SIGNAL(toggled(bool)), this, SLOT(readOnlyReplayChanged(bool)));
+	connect(pauseAfterPlay, SIGNAL(toggled(bool)), this, SLOT(pauseAfterPlayChanged(bool)));
+	connect(closeAfterPlay, SIGNAL(toggled(bool)), this, SLOT(closeAfterPlayChanged(bool)));
+	connect(bindSaveStates, SIGNAL(toggled(bool)), this, SLOT(bindSaveStatesChanged(bool)));
+	connect(dpySubTitles  , SIGNAL(toggled(bool)), this, SLOT(dpySubTitlesChanged(bool)));
+	connect(putSubTitlesAvi, SIGNAL(toggled(bool)), this, SLOT(putSubTitlesAviChanged(bool)));
+	connect(autoBackUp, SIGNAL(toggled(bool)), this, SLOT(autoBackUpChanged(bool)));
+	connect(loadFullStates, SIGNAL(toggled(bool)), this, SLOT(loadFullStatesChanged(bool)));
+	connect(aviEnableHUD  , SIGNAL(toggled(bool)), this, SLOT(setAviHudEnable(bool)));
+	connect(aviEnableMsg  , SIGNAL(toggled(bool)), this, SLOT(setAviMsgEnable(bool)));
+	connect(aviEnableAudio, SIGNAL(toggled(bool)), this, SLOT(setAviAudioEnable(bool)));
 
 	connect(aviBackend, SIGNAL(currentIndexChanged(int)), this, SLOT(aviBackendChanged(int)));
 
@@ -190,83 +190,83 @@ void MovieOptionsDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::readOnlyReplayChanged(int state)
+void MovieOptionsDialog_t::readOnlyReplayChanged(bool state)
 {
-	suggestReadOnlyReplay = (state != Qt::Unchecked);
+	suggestReadOnlyReplay = (state);
 
 	g_config->setOption("SDL.SuggestReadOnlyReplay"  , suggestReadOnlyReplay);
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::pauseAfterPlayChanged(int state)
+void MovieOptionsDialog_t::pauseAfterPlayChanged(bool state)
 {
-	pauseAfterPlayback = (state != Qt::Unchecked);
+	pauseAfterPlayback = (state);
 
 	g_config->setOption("SDL.PauseAfterMoviePlayback", pauseAfterPlayback);
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::closeAfterPlayChanged(int state)
+void MovieOptionsDialog_t::closeAfterPlayChanged(bool state)
 {
-	closeFinishedMovie = (state != Qt::Unchecked);
+	closeFinishedMovie = (state);
 
 	g_config->setOption("SDL.CloseFinishedMovie", closeFinishedMovie);
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::bindSaveStatesChanged(int state)
+void MovieOptionsDialog_t::bindSaveStatesChanged(bool state)
 {
-	bindSavestate = (state != Qt::Unchecked);
+	bindSavestate = (state);
 
 	g_config->setOption("SDL.MovieBindSavestate", bindSavestate);
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::dpySubTitlesChanged(int state)
+void MovieOptionsDialog_t::dpySubTitlesChanged(bool state)
 {
-	movieSubtitles = (state != Qt::Unchecked);
+	movieSubtitles = (state);
 
 	g_config->setOption("SDL.SubtitleDisplay", movieSubtitles);
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::putSubTitlesAviChanged(int state)
+void MovieOptionsDialog_t::putSubTitlesAviChanged(bool state)
 {
-	subtitlesOnAVI = (state != Qt::Unchecked);
+	subtitlesOnAVI = (state);
 
 	g_config->setOption("SDL.SubtitlesOnAVI", subtitlesOnAVI);
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::setAviHudEnable(int state)
+void MovieOptionsDialog_t::setAviHudEnable(bool state)
 {
-	bool checked = (state != Qt::Unchecked);
+	bool checked = (state);
 
 	FCEUI_SetAviEnableHUDrecording( checked );
 
 	g_config->setOption("SDL.RecordHUD", checked );
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::setAviMsgEnable(int state)
+void MovieOptionsDialog_t::setAviMsgEnable(bool state)
 {
-	bool checked = (state != Qt::Unchecked);
+	bool checked = (state);
 
 	FCEUI_SetAviDisableMovieMessages( !checked );
 
 	g_config->setOption("SDL.MovieMsg", checked );
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::setAviAudioEnable(int state)
+void MovieOptionsDialog_t::setAviAudioEnable(bool state)
 {
-	bool checked = (state != Qt::Unchecked);
+	bool checked = (state);
 
 	aviSetAudioEnable( checked );
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::autoBackUpChanged(int state)
+void MovieOptionsDialog_t::autoBackUpChanged(bool state)
 {
-	autoMovieBackup = (state != Qt::Unchecked);
+	autoMovieBackup = (state);
 
 	g_config->setOption("SDL.AutoMovieBackup", autoMovieBackup);
 }
 //----------------------------------------------------------------------------
-void MovieOptionsDialog_t::loadFullStatesChanged(int state)
+void MovieOptionsDialog_t::loadFullStatesChanged(bool state)
 {
-	fullSaveStateLoads = (state != Qt::Unchecked);
+	fullSaveStateLoads = (state);
 
 	g_config->setOption("SDL.MovieFullSaveStateLoads", fullSaveStateLoads);
 }

@@ -92,9 +92,9 @@ PaletteConfDialog_t::PaletteConfDialog_t(QWidget *parent)
 	GrayScale->setChecked(force_grayscale);
 	deemphSwap->setChecked(paldeemphswap);
 
-	connect(useCustom, SIGNAL(stateChanged(int)), this, SLOT(use_Custom_Changed(int)));
-	connect(GrayScale, SIGNAL(stateChanged(int)), this, SLOT(force_GrayScale_Changed(int)));
-	connect(deemphSwap, SIGNAL(stateChanged(int)), this, SLOT(deemphswap_Changed(int)));
+	connect(useCustom, SIGNAL(toggled(bool)), this, SLOT(use_Custom_Changed(bool)));
+	connect(GrayScale, SIGNAL(toggled(bool)), this, SLOT(force_GrayScale_Changed(bool)));
+	connect(deemphSwap, SIGNAL(toggled(bool)), this, SLOT(deemphswap_Changed(bool)));
 
 	button = new QPushButton(tr("Load"));
 	button->setIcon(style->standardIcon(QStyle::SP_FileDialogStart));
@@ -398,9 +398,9 @@ void PaletteConfDialog_t::tintChanged(int v)
 	}
 }
 //----------------------------------------------------
-void PaletteConfDialog_t::use_Custom_Changed(int state)
+void PaletteConfDialog_t::use_Custom_Changed(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 	std::string filename;
 
 	//printf("Use Custom:%i \n", state );
@@ -422,9 +422,9 @@ void PaletteConfDialog_t::use_Custom_Changed(int state)
 	}
 }
 //----------------------------------------------------
-void PaletteConfDialog_t::force_GrayScale_Changed(int state)
+void PaletteConfDialog_t::force_GrayScale_Changed(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 
 	if (fceuWrapperTryLock())
 	{
@@ -441,9 +441,9 @@ void PaletteConfDialog_t::force_GrayScale_Changed(int state)
 	}
 }
 //----------------------------------------------------
-void PaletteConfDialog_t::deemphswap_Changed(int state)
+void PaletteConfDialog_t::deemphswap_Changed(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 
 	if (fceuWrapperTryLock())
 	{

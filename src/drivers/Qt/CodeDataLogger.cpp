@@ -181,9 +181,9 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 	autoLoadCdlCbox->setChecked(autoLoadCDL);
 	autoResumeLogCbox->setChecked(autoResumeCDL);
 
-	connect(autoSaveCdlCbox, SIGNAL(stateChanged(int)), this, SLOT(autoSaveCdlStateChange(int)));
-	connect(autoLoadCdlCbox, SIGNAL(stateChanged(int)), this, SLOT(autoLoadCdlStateChange(int)));
-	connect(autoResumeLogCbox, SIGNAL(stateChanged(int)), this, SLOT(autoResumeCdlStateChange(int)));
+	connect(autoSaveCdlCbox, SIGNAL(toggled(bool)), this, SLOT(autoSaveCdlStateChange(bool)));
+	connect(autoLoadCdlCbox, SIGNAL(toggled(bool)), this, SLOT(autoLoadCdlStateChange(bool)));
+	connect(autoResumeLogCbox, SIGNAL(toggled(bool)), this, SLOT(autoResumeCdlStateChange(bool)));
 
 	subframe = new QGroupBox(tr("PRG Logged as Code"));
 	vbox = new QVBoxLayout();
@@ -326,23 +326,23 @@ void CodeDataLoggerDialog_t::closeWindow(void)
 	cdlWin = NULL;
 }
 //----------------------------------------------------
-void CodeDataLoggerDialog_t::autoSaveCdlStateChange(int state)
+void CodeDataLoggerDialog_t::autoSaveCdlStateChange(bool state)
 {
-	autoSaveCDL = state != Qt::Unchecked;
+	autoSaveCDL = state;
 
 	g_config->setOption("SDL.AutoSaveCDL", autoSaveCDL);
 }
 //----------------------------------------------------
-void CodeDataLoggerDialog_t::autoLoadCdlStateChange(int state)
+void CodeDataLoggerDialog_t::autoLoadCdlStateChange(bool state)
 {
-	autoLoadCDL = state != Qt::Unchecked;
+	autoLoadCDL = state;
 
 	g_config->setOption("SDL.AutoLoadCDL", autoLoadCDL);
 }
 //----------------------------------------------------
-void CodeDataLoggerDialog_t::autoResumeCdlStateChange(int state)
+void CodeDataLoggerDialog_t::autoResumeCdlStateChange(bool state)
 {
-	autoResumeCDL = state != Qt::Unchecked;
+	autoResumeCDL = state;
 
 	g_config->setOption("SDL.AutoResumeCDL", autoResumeCDL);
 }

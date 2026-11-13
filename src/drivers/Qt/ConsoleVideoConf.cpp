@@ -153,7 +153,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	setCheckBoxFromProperty( gl_LF_chkBox  , "SDL.OpenGLip");
 
-	connect(gl_LF_chkBox , SIGNAL(stateChanged(int)), this, SLOT(openGL_linearFilterChanged(int)) );
+	connect(gl_LF_chkBox , SIGNAL(toggled(bool)), this, SLOT(openGL_linearFilterChanged(bool)) );
 
 	vbox1->addWidget( gl_LF_chkBox );
 
@@ -164,7 +164,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	setCheckBoxFromProperty( winFullScreenBorderCbx  , "SDL.winFullScreenBorder");
 
-	connect(winFullScreenBorderCbx, SIGNAL(stateChanged(int)), this, SLOT(winFullScreenBorderChanged(int)) );
+	connect(winFullScreenBorderCbx, SIGNAL(toggled(bool)), this, SLOT(winFullScreenBorderChanged(bool)) );
 
 	vbox1->addWidget(winFullScreenBorderCbx);
 #endif
@@ -306,21 +306,21 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	}
 
 	connect(new_PPU_ena     , SIGNAL(clicked(bool))    , this, SLOT(use_new_PPU_changed(bool)) );
-	connect(autoRegion      , SIGNAL(stateChanged(int)), this, SLOT(autoRegionChanged(int)) );
-	connect(frmskipcbx      , SIGNAL(stateChanged(int)), this, SLOT(frameskip_changed(int)) );
-	connect(vsync_ena       , SIGNAL(stateChanged(int)), this, SLOT(vsync_changed(int)) );
-	connect(intFrameRateCbx , SIGNAL(stateChanged(int)), this, SLOT(intFrameRate_changed(int)) );
-	connect(sprtLimCbx      , SIGNAL(stateChanged(int)), this, SLOT(useSpriteLimitChanged(int)) );
-	connect(clipSidesCbx    , SIGNAL(stateChanged(int)), this, SLOT(clipSidesChanged(int)) );
-	connect(showFPS_cbx     , SIGNAL(stateChanged(int)), this, SLOT(showFPSChanged(int)) );
-	connect(showGuiMsgs_cbx , SIGNAL(stateChanged(int)), this, SLOT(showGuiMsgsChanged(int)) );
-	connect(aspectCbx       , SIGNAL(stateChanged(int)), this, SLOT(aspectEnableChanged(int)) );
-	connect(autoScaleCbx    , SIGNAL(stateChanged(int)), this, SLOT(autoScaleChanged(int)) );
-	connect(drawInputAidsCbx, SIGNAL(stateChanged(int)), this, SLOT(drawInputAidsChanged(int)) );
+	connect(autoRegion      , SIGNAL(toggled(bool)), this, SLOT(autoRegionChanged(bool)) );
+	connect(frmskipcbx      , SIGNAL(toggled(bool)), this, SLOT(frameskip_changed(bool)) );
+	connect(vsync_ena       , SIGNAL(toggled(bool)), this, SLOT(vsync_changed(bool)) );
+	connect(intFrameRateCbx , SIGNAL(toggled(bool)), this, SLOT(intFrameRate_changed(bool)) );
+	connect(sprtLimCbx      , SIGNAL(toggled(bool)), this, SLOT(useSpriteLimitChanged(bool)) );
+	connect(clipSidesCbx    , SIGNAL(toggled(bool)), this, SLOT(clipSidesChanged(bool)) );
+	connect(showFPS_cbx     , SIGNAL(toggled(bool)), this, SLOT(showFPSChanged(bool)) );
+	connect(showGuiMsgs_cbx , SIGNAL(toggled(bool)), this, SLOT(showGuiMsgsChanged(bool)) );
+	connect(aspectCbx       , SIGNAL(toggled(bool)), this, SLOT(aspectEnableChanged(bool)) );
+	connect(autoScaleCbx    , SIGNAL(toggled(bool)), this, SLOT(autoScaleChanged(bool)) );
+	connect(drawInputAidsCbx, SIGNAL(toggled(bool)), this, SLOT(drawInputAidsChanged(bool)) );
 
-	connect(   showFrameCount_cbx, SIGNAL(stateChanged(int)), this, SLOT(showFrameCountChanged(int))   );
-	connect(     showLagCount_cbx, SIGNAL(stateChanged(int)), this, SLOT(showLagCountChanged(int))     );
-	connect(showRerecordCount_cbx, SIGNAL(stateChanged(int)), this, SLOT(showRerecordCountChanged(int)));
+	connect(   showFrameCount_cbx, SIGNAL(toggled(bool)), this, SLOT(showFrameCountChanged(bool))   );
+	connect(     showLagCount_cbx, SIGNAL(toggled(bool)), this, SLOT(showLagCountChanged(bool))     );
+	connect(showRerecordCount_cbx, SIGNAL(toggled(bool)), this, SLOT(showRerecordCountChanged(bool)));
 
 	connect(inputDisplaySel, SIGNAL(currentIndexChanged(int)), this, SLOT(inputDisplayChanged(int)) );
 
@@ -597,7 +597,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	setCheckBoxFromProperty( cursorVisCbx, "SDL.CursorVis" );
 	grid->addWidget( cursorVisCbx, 1, 0, 2, 1, Qt::AlignLeft);
 
-	connect(cursorVisCbx    , SIGNAL(stateChanged(int)), this, SLOT(cursorVisChanged(int)) );
+	connect(cursorVisCbx    , SIGNAL(toggled(bool)), this, SLOT(cursorVisChanged(bool)) );
 
 	vbox  = new QVBoxLayout();
 	hbox  = new QHBoxLayout();
@@ -929,9 +929,9 @@ void  ConsoleVideoConfDialog_t::setComboBoxFromValue( QComboBox *cbx, int pval )
 	}
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::openGL_linearFilterChanged( int value )
+void ConsoleVideoConfDialog_t::openGL_linearFilterChanged( bool value )
 {
-   bool opt =  (value != Qt::Unchecked);
+   bool opt =  (value);
    g_config->setOption("SDL.OpenGLip", opt );
    g_config->save();
 
@@ -945,9 +945,9 @@ void ConsoleVideoConfDialog_t::openGL_linearFilterChanged( int value )
 }
 //----------------------------------------------------
 #if defined(WIN32) && (QT_VERSION_MAJOR < 6)
-void ConsoleVideoConfDialog_t::winFullScreenBorderChanged(int value)
+void ConsoleVideoConfDialog_t::winFullScreenBorderChanged(bool value)
 {
-	bool opt = (value != Qt::Unchecked);
+	bool opt = (value);
 	// This function is needed to fix the issue referenced below. It adds a 1-pixel border
 	// around the fullscreen window due to some limitation in windows.
 	// https://doc.qt.io/qt-5/windows-issues.html#fullscreen-opengl-based-windows
@@ -958,9 +958,9 @@ void ConsoleVideoConfDialog_t::winFullScreenBorderChanged(int value)
 }
 #endif
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::autoScaleChanged( int value )
+void ConsoleVideoConfDialog_t::autoScaleChanged( bool value )
 {
-   bool opt =  (value != Qt::Unchecked);
+   bool opt =  (value);
    g_config->setOption("SDL.AutoScale", opt );
    g_config->save ();
 
@@ -974,10 +974,10 @@ void ConsoleVideoConfDialog_t::autoScaleChanged( int value )
 }
 
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::autoRegionChanged( int value )
+void ConsoleVideoConfDialog_t::autoRegionChanged( bool value )
 {
 	//printf("Value:%i \n", value );
-	g_config->setOption("SDL.AutoDetectPAL", (value == Qt::Checked) );
+	g_config->setOption("SDL.AutoDetectPAL", (value) );
 	g_config->save ();
 }
 //----------------------------------------------------
@@ -1022,20 +1022,20 @@ void ConsoleVideoConfDialog_t::use_new_PPU_changed( bool value )
 	UpdateEMUCore (g_config);
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::frameskip_changed( int value )
+void ConsoleVideoConfDialog_t::frameskip_changed( bool value )
 {
 	//printf("Value:%i \n", value );
-	g_config->setOption("SDL.Frameskip", (value == Qt::Checked) );
+	g_config->setOption("SDL.Frameskip", (value) );
 	g_config->save ();
 
 	FCEU_WRAPPER_SCOPED_LOCK();
 	UpdateEMUCore (g_config);
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::vsync_changed( int value )
+void ConsoleVideoConfDialog_t::vsync_changed( bool value )
 {
 	//printf("Value:%i \n", value );
-	bool opt =  (value != Qt::Unchecked);
+	bool opt =  (value);
 	g_config->setOption("SDL.VideoVsync", opt );
 	g_config->save ();
 
@@ -1054,10 +1054,10 @@ void ConsoleVideoConfDialog_t::vsync_changed( int value )
 	}
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::intFrameRate_changed( int value )
+void ConsoleVideoConfDialog_t::intFrameRate_changed( bool value )
 {
 	//printf("Value:%i \n", value );
-	useIntFrameRate = (value != Qt::Unchecked);
+	useIntFrameRate = (value);
 	g_config->setOption("SDL.IntFrameRate", useIntFrameRate );
 	g_config->save ();
 
@@ -1067,48 +1067,48 @@ void ConsoleVideoConfDialog_t::intFrameRate_changed( int value )
 	InitSound();
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::useSpriteLimitChanged( int value )
+void ConsoleVideoConfDialog_t::useSpriteLimitChanged( bool value )
 {
 	//printf("Value:%i \n", value );
-	g_config->setOption("SDL.DisableSpriteLimit", (value == Qt::Checked) );
+	g_config->setOption("SDL.DisableSpriteLimit", (value) );
 	g_config->save ();
 
 	FCEU_WRAPPER_SCOPED_LOCK();
 	UpdateEMUCore (g_config);
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::clipSidesChanged( int value )
+void ConsoleVideoConfDialog_t::clipSidesChanged( bool value )
 {
 	//printf("Value:%i \n", value );
-	g_config->setOption("SDL.ClipSides", (value == Qt::Checked) );
+	g_config->setOption("SDL.ClipSides", (value) );
 	g_config->save ();
 
 	FCEU_WRAPPER_SCOPED_LOCK();
 	UpdateEMUCore (g_config);
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::showFPSChanged( int value )
+void ConsoleVideoConfDialog_t::showFPSChanged( bool value )
 {
 	//printf("Value:%i \n", value );
-	g_config->setOption("SDL.ShowFPS", (value == Qt::Checked) );
+	g_config->setOption("SDL.ShowFPS", (value) );
 	g_config->save ();
 
 	FCEU_WRAPPER_SCOPED_LOCK();
-	FCEUI_SetShowFPS( (value == Qt::Checked) );
+	FCEUI_SetShowFPS( (value) );
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::showGuiMsgsChanged( int value )
+void ConsoleVideoConfDialog_t::showGuiMsgsChanged( bool value )
 {
 	//printf("Value:%i \n", value );
-	vidGuiMsgEna = (value == Qt::Checked);
+	vidGuiMsgEna = (value);
 	g_config->setOption("SDL.ShowGuiMessages", vidGuiMsgEna );
 	g_config->save ();
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::aspectEnableChanged( int value )
+void ConsoleVideoConfDialog_t::aspectEnableChanged( bool value )
 {
 	//printf("Value:%i \n", value );
-	int forceAspect = (value != Qt::Unchecked);
+	int forceAspect = (value);
 
 	if ( forceAspect )
 	{
@@ -1253,11 +1253,11 @@ void ConsoleVideoConfDialog_t::cursorShapeChanged(int index)
 	consoleWindow->loadCursor();
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::cursorVisChanged( int value )
+void ConsoleVideoConfDialog_t::cursorVisChanged( bool value )
 {
 	int vis;
 
-	vis = (value != Qt::Unchecked);
+	vis = (value);
 
 	//printf("Value:%i \n", value );
 	g_config->setOption("SDL.CursorVis", vis );
@@ -1266,11 +1266,11 @@ void ConsoleVideoConfDialog_t::cursorVisChanged( int value )
 	consoleWindow->loadCursor();
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::drawInputAidsChanged( int value )
+void ConsoleVideoConfDialog_t::drawInputAidsChanged( bool value )
 {
 	int draw;
 
-	draw = (value != Qt::Unchecked);
+	draw = (value);
 
 	//printf("Value:%i \n", value );
 	g_config->setOption("SDL.DrawInputAids", draw );
@@ -1280,11 +1280,11 @@ void ConsoleVideoConfDialog_t::drawInputAidsChanged( int value )
 	drawInputAidsEnable = draw;
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::showFrameCountChanged( int value )
+void ConsoleVideoConfDialog_t::showFrameCountChanged( bool value )
 {
 	{
 		FCEU_WRAPPER_SCOPED_LOCK();
-		frame_display = (value != Qt::Unchecked);
+		frame_display = (value);
 	}
 
 	//printf("Value:%i \n", value );
@@ -1324,11 +1324,11 @@ void ConsoleVideoConfDialog_t::updateTextOverlayControls(void)
 	textOverlayRateSel->setEnabled( display != nullptr );
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::showLagCountChanged( int value )
+void ConsoleVideoConfDialog_t::showLagCountChanged( bool value )
 {
 	{
 		FCEU_WRAPPER_SCOPED_LOCK();
-		lagCounterDisplay = (value != Qt::Unchecked);
+		lagCounterDisplay = (value);
 	}
 
 	//printf("Value:%i \n", value );
@@ -1337,11 +1337,11 @@ void ConsoleVideoConfDialog_t::showLagCountChanged( int value )
 
 }
 //----------------------------------------------------
-void ConsoleVideoConfDialog_t::showRerecordCountChanged( int value )
+void ConsoleVideoConfDialog_t::showRerecordCountChanged( bool value )
 {
 	{
 		FCEU_WRAPPER_SCOPED_LOCK();
-		rerecord_display = (value != Qt::Unchecked);
+		rerecord_display = (value);
 	}
 
 	//printf("Value:%i \n", value );

@@ -64,5 +64,5 @@ private slots:
 	void openMovie(void);
 	void playMovie(void);
 	void movieSelect(int index);
-	void pauseAtFrameChange(int state);
+	void pauseAtFrameChange(bool state);
 };

@@ -153,7 +153,7 @@ MoviePlayDialog_t::MoviePlayDialog_t(QWidget *parent)
 	connect(movBrowseBtn, SIGNAL(clicked(void)), this, SLOT(openMovie(void)));
 	connect(movSelBox, SIGNAL(activated(int)), this, SLOT(movieSelect(int)));
 
-	connect(pauseAtFrame, SIGNAL(stateChanged(int)), this, SLOT(pauseAtFrameChange(int)));
+	connect(pauseAtFrame, SIGNAL(toggled(bool)), this, SLOT(pauseAtFrameChange(bool)));
 
 	if (suggestReadOnlyReplay)
 	{
@@ -196,9 +196,9 @@ void MoviePlayDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------------------------------
-//void  MoviePlayDialog_t::readOnlyReplayChanged( int state )
+//void  MoviePlayDialog_t::readOnlyReplayChanged( bool state )
 //{
-//	suggestReadOnlyReplay = (state != Qt::Unchecked);
+//	suggestReadOnlyReplay = (state);
 //}
 //----------------------------------------------------------------------------
 void MoviePlayDialog_t::movieSelect(int index)
@@ -206,9 +206,9 @@ void MoviePlayDialog_t::movieSelect(int index)
 	updateMovieText();
 }
 //----------------------------------------------------------------------------
-void MoviePlayDialog_t::pauseAtFrameChange(int state)
+void MoviePlayDialog_t::pauseAtFrameChange(bool state)
 {
-	pauseAtFrameEntry->setEnabled(state != Qt::Unchecked);
+	pauseAtFrameEntry->setEnabled(state);
 }
 //----------------------------------------------------------------------------
 void MoviePlayDialog_t::clearMovieText(void)

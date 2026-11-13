@@ -299,19 +299,19 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	vbox3->addWidget(searchRAMCbox);
 	searchRAMCbox->setChecked(ShowRAM);
 	searchRAMCbox->setToolTip( tr("Search RAM Address Range: 0x0000 - 0x07FF") );
-	connect(searchRAMCbox, SIGNAL(stateChanged(int)), this, SLOT(searchRAMChanged(int)));
+	connect(searchRAMCbox, SIGNAL(toggled(bool)), this, SLOT(searchRAMChanged(bool)));
 
 	searchSRAMCbox = new QCheckBox(tr("SRAM"));
 	vbox3->addWidget(searchSRAMCbox);
 	searchSRAMCbox->setChecked(ShowSRAM);
 	searchSRAMCbox->setToolTip( tr("Search SRAM Address Range: 0x6000 - 0x7FFF") );
-	connect(searchSRAMCbox, SIGNAL(stateChanged(int)), this, SLOT(searchSRAMChanged(int)));
+	connect(searchSRAMCbox, SIGNAL(toggled(bool)), this, SLOT(searchSRAMChanged(bool)));
 
 	searchROMCbox = new QCheckBox(tr("ROM"));
 	vbox3->addWidget(searchROMCbox);
 	searchROMCbox->setChecked(ShowROM);
 	searchROMCbox->setToolTip( tr("Search ROM Address Range: 0x8000 - 0xFFFF") );
-	connect(searchROMCbox, SIGNAL(stateChanged(int)), this, SLOT(searchROMChanged(int)));
+	connect(searchROMCbox, SIGNAL(toggled(bool)), this, SLOT(searchROMChanged(bool)));
 
 	elimButton = new QPushButton(tr("Eliminate"));
 	vbox->addWidget(elimButton);
@@ -452,7 +452,7 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	misalignedCbox = new QCheckBox(tr("Check Misaligned"));
 	misalignedCbox->setEnabled(dpySize != 'b');
 	misalignedCbox->setChecked(chkMisAligned);
-	connect(misalignedCbox, SIGNAL(stateChanged(int)), this, SLOT(misalignedChanged(int)));
+	connect(misalignedCbox, SIGNAL(toggled(bool)), this, SLOT(misalignedChanged(bool)));
 
 	ds1_btn->setChecked(dpySize == 'b');
 	ds2_btn->setChecked(dpySize == 'w');
@@ -615,24 +615,24 @@ void RamSearchDialog_t::vbarChanged(int val)
 	ramView->update();
 }
 //----------------------------------------------------
-void RamSearchDialog_t::searchRAMChanged(int state)
+void RamSearchDialog_t::searchRAMChanged(bool state)
 {
-	ShowRAM = (state != Qt::Unchecked);
+	ShowRAM = (state);
 }
 //----------------------------------------------------
-void RamSearchDialog_t::searchSRAMChanged(int state)
+void RamSearchDialog_t::searchSRAMChanged(bool state)
 {
-	ShowSRAM = (state != Qt::Unchecked);
+	ShowSRAM = (state);
 }
 //----------------------------------------------------
-void RamSearchDialog_t::searchROMChanged(int state)
+void RamSearchDialog_t::searchROMChanged(bool state)
 {
-	ShowROM = (state != Qt::Unchecked);
+	ShowROM = (state);
 }
 //----------------------------------------------------
-void RamSearchDialog_t::misalignedChanged(int state)
+void RamSearchDialog_t::misalignedChanged(bool state)
 {
-	chkMisAligned = (state != Qt::Unchecked);
+	chkMisAligned = (state);
 
 	calcRamList();
 }

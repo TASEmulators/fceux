@@ -395,8 +395,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	connect(portSel, SIGNAL(activated(int)), this, SLOT(portSelect(int)));
 	connect(devSel, SIGNAL(activated(int)), this, SLOT(deviceSelect(int)));
-	connect(efs_chkbox, SIGNAL(stateChanged(int)), this, SLOT(ena4score(int)));
-	connect(udlr_chkbox, SIGNAL(stateChanged(int)), this, SLOT(oppDirEna(int)));
+	connect(efs_chkbox, SIGNAL(toggled(bool)), this, SLOT(ena4score(bool)));
+	connect(udlr_chkbox, SIGNAL(toggled(bool)), this, SLOT(oppDirEna(bool)));
 
 	mainLayoutH = new QHBoxLayout();
 	mainLayoutV = new QVBoxLayout();
@@ -810,16 +810,16 @@ void GamePadConfDialog_t::deviceSelect(int index)
 	updateCntrlrDpy();
 }
 //----------------------------------------------------
-void GamePadConfDialog_t::ena4score(int state)
+void GamePadConfDialog_t::ena4score(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 	//printf("Set 'SDL.FourScore' = %i\n", value);
 	g_config->setOption("SDL.FourScore", value);
 }
 //----------------------------------------------------
-void GamePadConfDialog_t::oppDirEna(int state)
+void GamePadConfDialog_t::oppDirEna(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 	//printf("Set 'SDL.Input.EnableOppositeDirectionals' = %i\n", value);
 	g_config->setOption("SDL.Input.EnableOppositeDirectionals", value);
 }

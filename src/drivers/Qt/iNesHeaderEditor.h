@@ -111,8 +111,8 @@ class iNesHeaderEditor_t : public QDialog
 		void vsSysClicked(bool checked);
 		void plySysClicked(bool checked);
 		void extSysClicked(bool checked);
-		void unofficialStateChange(int state);
-		void unofficialPrgRamStateChange(int state);
-		void unofficialDualRegionStateChange(int state);
+		void unofficialStateChange(bool state);
+		void unofficialPrgRamStateChange(bool state);
+		void unofficialDualRegionStateChange(bool state);
 
 };

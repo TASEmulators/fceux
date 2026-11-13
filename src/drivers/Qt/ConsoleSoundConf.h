@@ -71,11 +71,11 @@ private slots:
 	void square2Changed(int value);
 	void noiseChanged(int value);
 	void pcmChanged(int value);
-	void enaSoundStateChange(int value);
-	void enaSpeakerMuteChange(int value);
-	void enaSoundLowPassChange(int value);
-	void swapDutyCallback(int value);
-	void useGlobalFocusChanged(int value);
+	void enaSoundStateChange(bool value);
+	void enaSpeakerMuteChange(bool value);
+	void enaSoundLowPassChange(bool value);
+	void swapDutyCallback(bool value);
+	void useGlobalFocusChanged(bool value);
 	void audioDriverChanged(int index);
 	void audioDeviceChanged(int index);
 	void soundQualityChanged(int index);

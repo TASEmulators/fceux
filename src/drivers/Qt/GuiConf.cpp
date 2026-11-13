@@ -137,18 +137,18 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	ctxMenuEnable->setChecked(contextMenuEnable);
 	showSplashScreen->setChecked( settings.value("mainWindow/showSplashScreen", false).toBool() );
 
-	connect(useNativeFileDialog, SIGNAL(stateChanged(int)), this, SLOT(useNativeFileDialogChanged(int)));
-	connect(useNativeMenuBar   , SIGNAL(stateChanged(int)), this, SLOT(useNativeMenuBarChanged(int)));
-	connect(pauseOnMenuAccess  , SIGNAL(stateChanged(int)), this, SLOT(pauseOnMenuAccessChanged(int)));
-	connect(ctxMenuEnable      , SIGNAL(stateChanged(int)), this, SLOT(contextMenuEnableChanged(int)));
-	connect(showSplashScreen   , SIGNAL(stateChanged(int)), this, SLOT(showSplashScreenChanged(int)));
+	connect(useNativeFileDialog, SIGNAL(toggled(bool)), this, SLOT(useNativeFileDialogChanged(bool)));
+	connect(useNativeMenuBar   , SIGNAL(toggled(bool)), this, SLOT(useNativeMenuBarChanged(bool)));
+	connect(pauseOnMenuAccess  , SIGNAL(toggled(bool)), this, SLOT(pauseOnMenuAccessChanged(bool)));
+	connect(ctxMenuEnable      , SIGNAL(toggled(bool)), this, SLOT(contextMenuEnableChanged(bool)));
+	connect(showSplashScreen   , SIGNAL(toggled(bool)), this, SLOT(showSplashScreenChanged(bool)));
 
 #if defined(Q_OS_LINUX)
 	waylandPlatformOverride = new QCheckBox(tr("Use X11 (xcb) on Wayland (restart required)"));
 	waylandPlatformOverride->setToolTip(tr("Restart the application for changes to take effect. "
 		"An externally set QT_QPA_PLATFORM takes precedence over this option."));
 	waylandPlatformOverride->setChecked(settings.value("Application/WaylandPlatformOverride", false).toBool());
-	connect(waylandPlatformOverride, SIGNAL(stateChanged(int)), this, SLOT(waylandPlatformOverrideChanged(int)));
+	connect(waylandPlatformOverride, SIGNAL(toggled(bool)), this, SLOT(waylandPlatformOverrideChanged(bool)));
 #endif
 
 	styleComboBox = new QComboBox();
@@ -186,7 +186,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 
 	useCustomPalette = new QCheckBox( tr("Use Custom QPalette") );
 	useCustomPalette->setChecked(useCustomQPalVal);
-	connect(useCustomPalette, SIGNAL(stateChanged(int)), this, SLOT(useCustomQPaletteChanged(int)));
+	connect(useCustomPalette, SIGNAL(toggled(bool)), this, SLOT(useCustomQPaletteChanged(bool)));
 
 	vbox2->addWidget( useCustomPalette );
 
@@ -217,7 +217,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 
 	useCustomStyle = new QCheckBox( tr("Use Custom Stylesheet") );
 	useCustomStyle->setChecked(useCustomQssVal);
-	connect(useCustomStyle, SIGNAL(stateChanged(int)), this, SLOT(useCustomStyleChanged(int)));
+	connect(useCustomStyle, SIGNAL(toggled(bool)), this, SLOT(useCustomStyleChanged(bool)));
 
 	vbox2->addWidget( useCustomStyle );
 
@@ -292,70 +292,70 @@ void GuiConfDialog_t::closeWindow(void)
 	deleteLater();
 }
 //----------------------------------------------------
-void GuiConfDialog_t::useNativeFileDialogChanged(int state)
+void GuiConfDialog_t::useNativeFileDialogChanged(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 
 	g_config->setOption("SDL.UseNativeFileDialog", value);
 }
 //----------------------------------------------------
-void GuiConfDialog_t::useNativeMenuBarChanged(int state)
+void GuiConfDialog_t::useNativeMenuBarChanged(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 
 	g_config->setOption("SDL.UseNativeMenuBar", value);
 
 	consoleWindow->menuBar()->setNativeMenuBar(value);
 }
 //----------------------------------------------------
-void GuiConfDialog_t::pauseOnMenuAccessChanged(int state)
+void GuiConfDialog_t::pauseOnMenuAccessChanged(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 
 	g_config->setOption("SDL.PauseOnMainMenuAccess", value);
 
 	consoleWindow->setMenuAccessPauseEnable( value );
 }
 //----------------------------------------------------
-void GuiConfDialog_t::contextMenuEnableChanged(int state)
+void GuiConfDialog_t::contextMenuEnableChanged(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 
 	g_config->setOption("SDL.ContextMenuEnable", value);
 
 	consoleWindow->setContextMenuEnable( value );
 }
 //----------------------------------------------------
-void GuiConfDialog_t::showSplashScreenChanged(int state)
+void GuiConfDialog_t::showSplashScreenChanged(bool state)
 {
 	QSettings settings;
-	bool value = (state == Qt::Unchecked) ? 0 : 1;
+	bool value = state;
 
 	settings.setValue("mainWindow/showSplashScreen", value );
 	settings.sync();
 }
 #if defined(Q_OS_LINUX)
 //----------------------------------------------------
-void GuiConfDialog_t::waylandPlatformOverrideChanged(int state)
+void GuiConfDialog_t::waylandPlatformOverrideChanged(bool state)
 {
 	QSettings settings;
-	settings.setValue("Application/WaylandPlatformOverride", state != Qt::Unchecked);
+	settings.setValue("Application/WaylandPlatformOverride", state);
 	settings.sync();
 }
 #endif
 //----------------------------------------------------
-void GuiConfDialog_t::useCustomStyleChanged(int state)
+void GuiConfDialog_t::useCustomStyleChanged(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 
 	g_config->setOption("SDL.UseCustomQss", value);
 
 	QApplication::setStyle( new fceuStyle() );
 }
 //----------------------------------------------------
-void GuiConfDialog_t::useCustomQPaletteChanged(int state)
+void GuiConfDialog_t::useCustomQPaletteChanged(bool state)
 {
-	int value = (state == Qt::Unchecked) ? 0 : 1;
+	int value = (!state) ? 0 : 1;
 
 	g_config->setOption("SDL.UseCustomQPal", value);
 

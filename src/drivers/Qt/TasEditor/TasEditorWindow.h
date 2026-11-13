@@ -10,6 +10,7 @@
 #include <map>
 
 #include <QWidget>
+#include <QtGlobal>
 #include <QDialog>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -38,6 +39,12 @@
 #include <QProgressBar>
 #include <QStackedWidget>
 #include <QClipboard>
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+typedef Qt::CheckState TasCheckState;
+#else
+typedef int TasCheckState;
+#endif
 
 #include "Qt/config.h"
 #include "Qt/ConsoleUtilities.h"
@@ -552,10 +559,10 @@ class TasEditorWindow : public QDialog
 		void importMovieFile(void);
 		void exportMovieFile(void);
 		void openOnlineDocs(void);
-		void recordingChanged(int);
+		void recordingChanged(bool);
 		void recordInputChanged(int);
-		void superImposedChanged(int);
-		void usePatternChanged(int);
+		void superImposedChanged(TasCheckState);
+		void usePatternChanged(bool);
 		void playbackPauseCB(void);
 		void playbackFrameRewind(void);
 		void playbackFrameForward(void);

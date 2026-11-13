@@ -248,13 +248,13 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	connect(guiSchedNiceSlider, SIGNAL(valueChanged(int)), this, SLOT(guiSchedNiceChange(int)));
 	connect(guiSchedPrioSlider, SIGNAL(valueChanged(int)), this, SLOT(guiSchedPrioChange(int)));
 #endif
-	connect(emuPrioCtlEna, SIGNAL(stateChanged(int)), this, SLOT(emuSchedCtlChange(int)));
+	connect(emuPrioCtlEna, SIGNAL(toggled(bool)), this, SLOT(emuSchedCtlChange(bool)));
 	connect(timingDevSelBox, SIGNAL(activated(int)), this, SLOT(emuTimingMechChange(int)));
 
 	connect( ppuOverClockBox   , SIGNAL(toggled(bool))    , this, SLOT(overclockingToggled(bool)));
 	connect( postRenderBox     , SIGNAL(valueChanged(int)), this, SLOT(postRenderChanged(int)));
 	connect( vblankScanlinesBox, SIGNAL(valueChanged(int)), this, SLOT(vblankScanlinesChanged(int)));
-	connect( no7bitSamples     , SIGNAL(stateChanged(int)), this, SLOT(no7bitChanged(int)));
+	connect( no7bitSamples     , SIGNAL(toggled(bool)), this, SLOT(no7bitChanged(bool)));
 
 	updateTimer  = new QTimer( this );
 
@@ -291,9 +291,9 @@ void TimingConfDialog_t::periodicUpdate(void)
 
 }
 //----------------------------------------------------------------------------
-void TimingConfDialog_t::emuSchedCtlChange(int state)
+void TimingConfDialog_t::emuSchedCtlChange(bool state)
 {
-	g_config->setOption("SDL.SetSchedParam", (state != Qt::Unchecked));
+	g_config->setOption("SDL.SetSchedParam", (state));
 }
 //----------------------------------------------------------------------------
 void TimingConfDialog_t::saveValues(void)
@@ -681,10 +681,10 @@ void TimingConfDialog_t::vblankScanlinesChanged(int value)
 	//printf("Vblank Scanlines %i\n", vblankscanlines );
 }
 //----------------------------------------------------------------------------
-void TimingConfDialog_t::no7bitChanged(int value)
+void TimingConfDialog_t::no7bitChanged(bool value)
 {
 	FCEU_WRAPPER_SCOPED_LOCK();
-	skip_7bit_overclocking = (value != Qt::Unchecked);
+	skip_7bit_overclocking = (value);
 	g_config->setOption("SDL.Skip7bitOverClocking", skip_7bit_overclocking );
 	//printf("Skip 7-bit: %i\n", skip_7bit_overclocking );
 }

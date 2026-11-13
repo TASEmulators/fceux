@@ -522,11 +522,11 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 	vbox2->addWidget( showAttrbCbox      );
 	vbox2->addWidget( ignorePaletteCbox  );
 
-	connect( showScrollLineCbox, SIGNAL(stateChanged(int)), this, SLOT(showScrollLinesChanged(int)));
-	connect( showTileGridCbox  , SIGNAL(stateChanged(int)), this, SLOT(showTileGridChanged(int)));
-	connect( showAttrGridCbox  , SIGNAL(stateChanged(int)), this, SLOT(showAttrGridChanged(int)));
-	connect( showAttrbCbox     , SIGNAL(stateChanged(int)), this, SLOT(showAttrbChanged(int)));
-	connect( ignorePaletteCbox , SIGNAL(stateChanged(int)), this, SLOT(ignorePaletteChanged(int)));
+	connect( showScrollLineCbox, SIGNAL(toggled(bool)), this, SLOT(showScrollLinesChanged(bool)));
+	connect( showTileGridCbox  , SIGNAL(toggled(bool)), this, SLOT(showTileGridChanged(bool)));
+	connect( showAttrGridCbox  , SIGNAL(toggled(bool)), this, SLOT(showAttrGridChanged(bool)));
+	connect( showAttrbCbox     , SIGNAL(toggled(bool)), this, SLOT(showAttrbChanged(bool)));
+	connect( ignorePaletteCbox , SIGNAL(toggled(bool)), this, SLOT(ignorePaletteChanged(bool)));
 
 	hbox1     = new QHBoxLayout();
 	hbox      = new QHBoxLayout();
@@ -892,18 +892,18 @@ void ppuNameTableViewerDialog_t::menuIgnPalChanged(bool checked)
 	g_config->setOption("SDL.NT_IgnoreHidePal", hidepal);
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::showScrollLinesChanged(int state)
+void ppuNameTableViewerDialog_t::showScrollLinesChanged(bool state)
 {
-	drawScrollLines = (state != Qt::Unchecked);
+	drawScrollLines = (state);
 
 	showScrollLineAct->setChecked( drawScrollLines );
 
 	g_config->setOption("SDL.NT_DrawScrollLines", drawScrollLines);
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::showTileGridChanged(int state)
+void ppuNameTableViewerDialog_t::showTileGridChanged(bool state)
 {
-	drawTileGridLines = (state != Qt::Unchecked);
+	drawTileGridLines = (state);
 
 	showTileGridAct->setChecked( drawTileGridLines );
 
@@ -912,9 +912,9 @@ void ppuNameTableViewerDialog_t::showTileGridChanged(int state)
 	redrawtables = true;
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::showAttrGridChanged(int state)
+void ppuNameTableViewerDialog_t::showAttrGridChanged(bool state)
 {
-	drawAttrGridLines = (state != Qt::Unchecked);
+	drawAttrGridLines = (state);
 
 	showAttrGridAct->setChecked( drawAttrGridLines );
 
@@ -923,18 +923,18 @@ void ppuNameTableViewerDialog_t::showAttrGridChanged(int state)
 	redrawtables = true;
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::showAttrbChanged(int state)
+void ppuNameTableViewerDialog_t::showAttrbChanged(bool state)
 {
-	attview = (state != Qt::Unchecked);
+	attview = (state);
 
 	showAttributesAct->setChecked( attview );
 
 	g_config->setOption("SDL.NT_DrawAttrbView", attview);
 }
 //----------------------------------------------------
-void ppuNameTableViewerDialog_t::ignorePaletteChanged(int state)
+void ppuNameTableViewerDialog_t::ignorePaletteChanged(bool state)
 {
-	hidepal = (state != Qt::Unchecked);
+	hidepal = (state);
 
 	ignPalAct->setChecked( hidepal );
 
