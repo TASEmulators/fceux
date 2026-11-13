@@ -58,12 +58,13 @@
 		},
         {
             "name": "(Windows) Launch",
+            "preLaunchTask": "Build Qt Debug (Windows)",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/src/Debug/fceux.exe",
+            "program": "${workspaceFolder}/build/qt-vs2022/bin/Debug/fceux.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}\\build\\qt-vs2022\\bin\\Debug",
             "environment": [],
             "console": "externalTerminal"
         },
