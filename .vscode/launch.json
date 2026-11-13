@@ -58,7 +58,7 @@
 		},
         {
             "name": "(Windows) Launch",
-            "preLaunchTask": "Build Qt Debug (Windows)",
+            "preLaunchTask": "Build - Incremental",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/qt-vs2022/bin/Debug/fceux.exe",
