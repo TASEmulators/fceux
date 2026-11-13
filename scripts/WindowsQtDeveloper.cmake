@@ -29,8 +29,6 @@ if(NOT _archive_dlls)
 endif()
 set(_runtime_files
 	"${SDL_INSTALL_PREFIX}/lib/x64/SDL2.dll"
-	"${CMAKE_SOURCE_DIR}/src/drivers/win/lua/x64/lua51.dll"
-	"${CMAKE_SOURCE_DIR}/src/drivers/win/lua/x64/lua5.1.dll"
 	"${CMAKE_SOURCE_DIR}/src/auxlib.lua"
 	${_archive_dlls})
 if(USE_LIBAV)
