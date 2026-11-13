@@ -68,8 +68,6 @@ void LuaYieldToGui(void);
 
 void LuaConsoleClear(void);
 
-int LuaKillMessageBox(void);
-
 bool GetLuaArgs(char *dst, int len);
 
 extern bool LuaArgCompat;
