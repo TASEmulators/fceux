@@ -277,6 +277,7 @@ StateSlotDock_t::StateSlotDock_t(QWidget *parent)
 	setAllowedAreas(Qt::AllDockWidgetAreas);
 
 	container = new StateSlotContainer_t(this);
+	container->setObjectName("stateSlotContents");
 	container->setAutoFillBackground(true);
 
 	thumbLayout = new QBoxLayout(QBoxLayout::LeftToRight, container);
@@ -344,6 +345,8 @@ void StateSlotDock_t::applyBgColor(const QColor &c)
 	QPalette pal = container->palette();
 	pal.setColor(QPalette::Window, c);
 	container->setPalette(pal);
+	// A local background rule takes precedence over application-wide QWidget rules.
+	container->setStyleSheet(QString("QWidget#stateSlotContents { background: %1; }").arg(c.name()));
 
 	for (StateSlotThumb_t *thumb : thumbs)
 	{

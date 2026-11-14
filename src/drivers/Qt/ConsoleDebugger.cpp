@@ -6729,7 +6729,7 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	
 	vlineOffset = -pxLineSpacing + (pxLineSpacing - pxCharHeight)/2;
 
-	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Window) );
+	painter.fillRect( 0, 0, viewWidth, viewHeight, this->palette().color(QPalette::Base) );
 	painter.fillRect( 0, 0, cd_boundary, viewHeight, this->palette().color(QPalette::Mid) );
 
 	if ( showByteCodes )

@@ -321,6 +321,7 @@ QTabBar::tab:!selected:hover
 /*-----QComboBox-----*/
 QComboBox
 {
+    combobox-popup: 0;
     background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(184, 184, 184, 255),stop:1 rgba(159, 159, 159, 255));
     border: 0.08em solid #000;
     padding-left: 0.48em;
@@ -354,10 +355,23 @@ QComboBox QAbstractItemView
     color: #ffffff;
     border: 0.08em solid black;
     selection-background-color: #46a2da;
+    selection-color: #ffffff;
     outline: 0;
 
 }
 
+
+QComboBox QAbstractItemView::item
+{
+    background-color: #383838;
+    color: #ffffff;
+}
+
+QComboBox QAbstractItemView::item:selected
+{
+    background-color: #46a2da;
+    color: #ffffff;
+}
 
 QComboBox::drop-down
 {

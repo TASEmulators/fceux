@@ -460,6 +460,7 @@ StateRecorderTimelineDock_t::StateRecorderTimelineDock_t(QWidget *parent)
 	setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
 
 	container = new QWidget(this);
+	container->setObjectName("stateTimelineContents");
 	container->setAutoFillBackground(true);
 	QHBoxLayout *layout = new QHBoxLayout(container);
 	layout->setContentsMargins(4, 2, 4, 2);
@@ -535,6 +536,10 @@ void StateRecorderTimelineDock_t::applyBgColor(const QColor &c)
 	pal.setColor(QPalette::ButtonText, fg);
 	pal.setColor(QPalette::Text, fg);
 	container->setPalette(pal);
+	// Keep video colors even when a preset styles all widgets and labels.
+	container->setStyleSheet(QString(
+		"QWidget#stateTimelineContents { background: %1; }"
+		"QLabel { background: transparent; color: %2; }").arg(c.name(), fg.name()));
 
 	bar->setBgColor(c);
 
