@@ -48,6 +48,7 @@ extern char FileBase[];
 #include "drivers/win/taseditor/snapshot.h"
 #include "drivers/win/taseditor/taseditor_lua.h"
 #include "drivers/win/cdlogger.h"
+#include "drivers/win/luaconsole.h"
 extern TASEDITOR_LUA taseditor_lua;
 #endif
 
@@ -61,6 +62,7 @@ extern TASEDITOR_LUA taseditor_lua;
 #include "drivers/Qt/TasEditor/markers.h"
 #include "drivers/Qt/TasEditor/snapshot.h"
 #include "drivers/Qt/TasEditor/taseditor_lua.h"
+#include "drivers/Qt/LuaControl.h"
 extern TASEDITOR_LUA *taseditor_lua;
 #endif
 
@@ -211,32 +213,8 @@ static void(*info_onstart)(intptr_t uid);
 static void(*info_onstop)(intptr_t uid);
 static intptr_t info_uid;
 #ifdef __WIN_DRIVER__
-extern HWND LuaConsoleHWnd;
-extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 void TaseditorDisableManualFunctionIfNeeded();
-
-#else
-#ifdef __linux__
-
-#ifndef __THROWNL
-#define __THROWNL throw () // Build fix Alpine Linux libc
 #endif
-int LuaPrintfToWindowConsole(const char *__restrict format, ...) 
-                  __THROWNL __attribute__ ((__format__ (__printf__, 1, 2)));
-#else
-
-#ifdef WIN32
-int LuaPrintfToWindowConsole(_In_z_ _Printf_format_string_ const char * format, ...);
-#else
-int LuaPrintfToWindowConsole(const char *__restrict format, ...) throw();
-#endif
-
-#endif
-
-#endif
-extern void PrintToWindowConsole(intptr_t hDlgAsInt, const char* str);
-extern void WinLuaOnStart(intptr_t hDlgAsInt);
-extern void WinLuaOnStop(intptr_t hDlgAsInt);
 
 static lua_State *L;
 
@@ -1647,8 +1625,7 @@ static inline bool isalphaorunderscore(char c)
 	return isalpha(c) || c == '_';
 }
 
-#define APPENDPRINT { int _n = snprintf(ptr, remaining,
-#define END ); if(_n >= 0) { ptr += _n; remaining -= _n; } else { remaining = 0; } }
+#define APPENDPRINT(...) { int _n = snprintf(ptr, remaining, __VA_ARGS__); if (_n >= 0) { ptr += _n; remaining -= _n; } else { remaining = 0; } }
 static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 {
 	if(remaining <= 0)
@@ -1676,10 +1653,25 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 	switch(lua_type(L, i))
 	{
 		case LUA_TNONE: break;
-		case LUA_TNIL: APPENDPRINT "nil" END break;
-		case LUA_TBOOLEAN: APPENDPRINT lua_toboolean(L,i) ? "true" : "false" END break;
-		case LUA_TSTRING: APPENDPRINT "%s",lua_tostring(L,i) END break;
-		case LUA_TNUMBER: APPENDPRINT "%.12g",lua_tonumber(L,i) END break;
+		case LUA_TNIL: APPENDPRINT("nil") break;
+		case LUA_TBOOLEAN: APPENDPRINT(lua_toboolean(L,i) ? "true" : "false") break;
+		case LUA_TSTRING:
+		{
+#ifdef WIN32
+			// Convert line endings to "\r\n"
+			const char *str, *newline;
+			for (str = lua_tostring(L, i); newline = strchr(str, '\n'); str = newline + 1)
+				if (newline > str && newline[-1] == '\r')
+					APPENDPRINT("%.*s\n", newline - str, str)
+				else
+					APPENDPRINT("%.*s\r\n", newline - str, str)
+			APPENDPRINT("%s", str)
+#else
+			APPENDPRINT("%s",lua_tostring(L,i))
+#endif
+			break;
+		}
+		case LUA_TNUMBER: APPENDPRINT("%.12g",lua_tonumber(L,i)) break;
 		case LUA_TFUNCTION:
 			/*if((L->base + i-1)->value.gc->cl.c.isC)
 			{
@@ -1687,26 +1679,26 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 				//std::map<lua_CFunction, const char*>::iterator iter = s_cFuncInfoMap.find(func);
 				//if(iter == s_cFuncInfoMap.end())
 					goto defcase;
-				//APPENDPRINT "function(%s)", iter->second END
+				//APPENDPRINT("function(%s)", iter->second)
 			}
 			else
 			{
-				APPENDPRINT "function(" END
+				APPENDPRINT("function(")
 				Proto* p = (L->base + i-1)->value.gc->cl.l.p;
 				int numParams = p->numparams + (p->is_vararg?1:0);
 				for (int n=0; n<p->numparams; n++)
 				{
-					APPENDPRINT "%s", getstr(p->locvars[n].varname) END
+					APPENDPRINT("%s", getstr(p->locvars[n].varname))
 					if(n != numParams-1)
-						APPENDPRINT "," END
+						APPENDPRINT(",")
 				}
 				if(p->is_vararg)
-					APPENDPRINT "..." END
-				APPENDPRINT ")" END
+					APPENDPRINT("...")
+				APPENDPRINT(")")
 			}*/
 			goto defcase;
 			break;
-defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END break;
+defcase:default: APPENDPRINT("%s:%p",luaL_typename(L,i),lua_topointer(L,i)) break;
 		case LUA_TTABLE:
 		{
 			// first make sure there's enough stack space
@@ -1723,16 +1715,16 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 			{
 				int parentNum = s_tableAddressStack.end() - foundCycleIter;
 				if(parentNum > 1)
-					APPENDPRINT "%s:parent^%d",luaL_typename(L,i),parentNum END
+					APPENDPRINT("%s:parent^%d",luaL_typename(L,i),parentNum)
 				else
-					APPENDPRINT "%s:parent",luaL_typename(L,i) END
+					APPENDPRINT("%s:parent",luaL_typename(L,i))
 			}
 			else
 			{
 				s_tableAddressStack.push_back(lua_topointer(L,i));
 				struct Scope { ~Scope(){ s_tableAddressStack.pop_back(); } } scope;
 
-				APPENDPRINT "{" END
+				APPENDPRINT("{")
 
 				lua_pushnil(L); // first key
 				int keyIndex = lua_gettop(L);
@@ -1745,7 +1737,7 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 					if(first)
 						first = false;
 					else
-						APPENDPRINT ", " END
+						APPENDPRINT(", ")
 					if(skipKey)
 					{
 						arrayIndex += (lua_Number)1;
@@ -1758,29 +1750,29 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 						bool invalidLuaIdentifier = (!keyIsString || !isalphaorunderscore(*lua_tostring(L, keyIndex)));
 						if(invalidLuaIdentifier)
 							if(keyIsString)
-								APPENDPRINT "['" END
+								APPENDPRINT("['")
 							else
-								APPENDPRINT "[" END
+								APPENDPRINT("[")
 
 						toCStringConverter(L, keyIndex, ptr, remaining); // key
 
 						if(invalidLuaIdentifier)
 							if(keyIsString)
-								APPENDPRINT "']=" END
+								APPENDPRINT("']=")
 							else
-								APPENDPRINT "]=" END
+								APPENDPRINT("]=")
 						else
-							APPENDPRINT "=" END
+							APPENDPRINT("=")
 					}
 
 					bool valueIsString = (lua_type(L, valueIndex) == LUA_TSTRING);
 					if(valueIsString)
-						APPENDPRINT "'" END
+						APPENDPRINT("'")
 
 					toCStringConverter(L, valueIndex, ptr, remaining); // value
 
 					if(valueIsString)
-						APPENDPRINT "'" END
+						APPENDPRINT("'")
 
 					lua_pop(L, 1);
 
@@ -1790,7 +1782,7 @@ defcase:default: APPENDPRINT "%s:%p",luaL_typename(L,i),lua_topointer(L,i) END b
 						break;
 					}
 				}
-				APPENDPRINT "}" END
+				APPENDPRINT("}")
 			}
 		}	break;
 	}
@@ -1818,16 +1810,16 @@ static char* rawToCString(lua_State* L, int idx)
 	{
 		toCStringConverter(L, i, ptr, remaining);
 		if(i != n)
-			APPENDPRINT " " END
+			APPENDPRINT("\t")
 	}
 
 	if(remaining < 3)
 	{
 		while(remaining < 6)
 			remaining++, ptr--;
-		APPENDPRINT "..." END
+		APPENDPRINT("...")
 	}
-	APPENDPRINT "\r\n" END
+	APPENDPRINT("\r\n")
 	// the trailing newline is so print() can avoid having to do wasteful things to print its newline
 	// (string copying would be wasteful and calling info.print() twice can be extremely slow)
 	// at the cost of functions that don't want the newline needing to trim off the last two characters
@@ -7378,6 +7370,8 @@ void FCEU_LuaFrameBoundary()
 }
 
 
+static std::vector<std::string> tokenizeString(const char *str);
+
 /**
  * Loads and runs the given Lua script.
  * The emulator MUST be paused for this function to be
@@ -7481,13 +7475,37 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 		lua_register(L, "SHIFT", bit_bshift_emulua);
 		lua_register(L, "BIT", bitbit);
 
-		if (arg)
+		if (!LuaArgCompat)
 		{
-			luaL_Buffer b;
-			luaL_buffinit(L, &b);
-			luaL_addstring(&b, arg);
-			luaL_pushresult(&b);
-
+			lua_newtable(L);
+			lua_pushstring(L, "FCEUX");
+			lua_rawseti(L, -2, -1);
+			lua_pushstring(L, filename);
+			lua_rawseti(L, -2, 0);
+			if (arg)
+			{
+				int ti = 1;
+				for (std::string tok : tokenizeString(arg))
+				{
+					lua_pushstring(L, tok.c_str());
+					lua_rawseti(L, -2, ti++);
+				}
+			}
+			lua_setglobal(L, "arg");
+		}
+		else
+		{ // Compatibility mode
+			if (arg)
+			{
+				luaL_Buffer b;
+				luaL_buffinit(L, &b);
+				luaL_addstring(&b, arg);
+				luaL_pushresult(&b);
+			}
+			else
+			{
+				lua_pushstring(L, "");
+			}
 			lua_setglobal(L, "arg");
 		}
 
@@ -7578,22 +7596,64 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 	return 1;
 }
 
+// Splits on whitespace; double quotes group text (and are removed). No size limit.
+static std::vector<std::string> tokenizeString(const char *str)
+{
+    std::vector<std::string> tokens;
+    if (!str)
+        return tokens;
+
+    std::string cur;
+    bool inToken = false; // distinguishes an empty quoted token ("") from no token
+    bool quoted = false;
+
+    for (const char *p = str; *p; ++p)
+    {
+        if (*p == '"')
+        {
+            quoted = !quoted;
+            inToken = true;
+        }
+        else if (!quoted && isspace((unsigned char)*p))
+        {
+            if (inToken)
+            {
+                tokens.push_back(std::move(cur));
+                cur.clear();
+                inToken = false;
+            }
+        }
+        else
+        {
+            cur += *p;
+            inToken = true;
+        }
+    }
+    if (inToken)
+        tokens.push_back(std::move(cur));
+
+    return tokens;
+}
+
 /**
  * Equivalent to repeating the last FCEU_LoadLuaCode() call.
+ * Called by the EMUCMD_SCRIPT_RELOAD command.
+ * TODO: The shift+L often gets inserted into the textbox.
  */
 void FCEU_ReloadLuaCode()
 {
+	char args[MAX_PATH];
+	GetLuaArgs(args, sizeof(args));
 	if (!luaScriptName)
 	{
 #ifdef __WIN_DRIVER__
 		// no script currently running, then try loading the most recent
 		extern char *recent_lua[];
 		char*& fname = recent_lua[0];
-		extern void UpdateLuaConsole(const char* fname);
 		if (fname)
 		{
 			UpdateLuaConsole(fname);
-			FCEU_LoadLuaCode(fname);
+			FCEU_LoadLuaCode(fname, args);
 		} else
 		{
 			FCEU_DispMessage("There's no script to reload.", 0);
@@ -7603,7 +7663,7 @@ void FCEU_ReloadLuaCode()
 #endif
 	} else
 	{
-		FCEU_LoadLuaCode(luaScriptName);
+		FCEU_LoadLuaCode(luaScriptName, args);
 	}
 }
 
