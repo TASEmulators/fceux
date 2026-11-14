@@ -698,10 +698,14 @@ void MMC5_StateRestore(int version) {
 typedef struct {
 	uint16 wl[2];
 	uint8 env[2];
+	uint8 lengthcount[2];
+	uint8 decvolume[2];
+	uint8 deccount[2];
+	uint8 reloaddec;
 	uint8 enable;
-	uint8 running;
 	uint8 raw;
 	uint8 rawcontrol;
+	int32 fcount;
 	int32 dcount[2];
 	int32 BC[3];
 	int32 vcount[2];
@@ -709,6 +713,12 @@ typedef struct {
 
 static MMC5APU MMC5Sound;
 
+/* frame counter period assumed to be same as NTSC APU */
+static constexpr int FHINC = 14915;
+
+/* from sound.cpp */
+extern const uint8 RectDuties[4];
+extern const uint8 APULengthTable[0x20];
 
 static void Do5PCM() {
 	int32 V;
@@ -732,8 +742,9 @@ static void Do5PCMHQ() {
 	MMC5Sound.BC[2] = SOUNDTS;
 }
 
-
 static DECLFW(Mapper5_SW) {
+	int P;
+
 	A &= 0x1F;
 
 	GameExpSound.Fill = MMC5RunSound;
@@ -745,34 +756,76 @@ static DECLFW(Mapper5_SW) {
 
 	case 0x0:
 	case 0x4:
-		if (sfun) sfun(A >> 2);
-		MMC5Sound.env[A >> 2] = V;
+		P = A >> 2;
+		if (sfun) sfun(P);
+		MMC5Sound.env[P] = V;
 		break;
 	case 0x2:
 	case 0x6:
-		if (sfun) sfun(A >> 2);
-		MMC5Sound.wl[A >> 2] &= ~0x00FF;
-		MMC5Sound.wl[A >> 2] |= V & 0xFF;
+		P = A >> 2;
+		if (sfun) sfun(P);
+		MMC5Sound.wl[P] &= 0xFF00;
+		MMC5Sound.wl[P] |= V;
 		break;
 	case 0x3:
 	case 0x7:
-		MMC5Sound.wl[A >> 2] &= ~0x0700;
-		MMC5Sound.wl[A >> 2] |= (V & 0x07) << 8;
-		MMC5Sound.running |= 1 << (A >> 2);
+		P = A >> 2;
+		if (sfun) sfun(P);
+		if (MMC5Sound.enable & (1 << P))
+			MMC5Sound.lengthcount[P] = APULengthTable[(V >> 3) & 0x1f];
+		MMC5Sound.wl[P] &= 0xFF;
+		MMC5Sound.wl[P] |= (V & 0x07) << 8;
+		MMC5Sound.dcount[P] = 7;
+		MMC5Sound.reloaddec |= 1 << P;
 		break;
 	case 0x15:
 		if (sfun) {
 			sfun(0);
 			sfun(1);
 		}
-		MMC5Sound.running &= V;
 		MMC5Sound.enable = V;
+		if (!(V & 1)) MMC5Sound.lengthcount[0] = 0;
+		if (!(V & 2)) MMC5Sound.lengthcount[1] = 0;
 		break;
 	}
 }
 
+static DECLFR(Mapper5_SR) {
+	return (!!MMC5Sound.lengthcount[1]) << 1 | (!!MMC5Sound.lengthcount[0]);
+}
+
+static void MMC5SoundCPUHook(int a) {
+	MMC5Sound.fcount -= a * 2;
+	if (MMC5Sound.fcount > 0) return;
+
+	MMC5Sound.fcount += FHINC;
+
+	if (sfun) {
+		sfun(0);
+		sfun(1);
+	}
+
+	for (int P = 0; P < 2; P++) {
+		bool loopmode = MMC5Sound.env[P] & 0x20;
+		/* length counter */
+		if (!loopmode && MMC5Sound.lengthcount[P])
+			MMC5Sound.lengthcount[P]--;
+		/* envelope */
+		if (MMC5Sound.reloaddec & (1 << P)) {
+			MMC5Sound.deccount[P] = MMC5Sound.env[P] & 0xF;
+			MMC5Sound.decvolume[P] = 0xF;
+		} else if (MMC5Sound.deccount[P] == 0) {
+			MMC5Sound.deccount[P] = MMC5Sound.env[P] & 0xF;
+			if (loopmode || MMC5Sound.decvolume[P])
+				MMC5Sound.decvolume[P] = (MMC5Sound.decvolume[P] - 1) & 0xF;
+		} else {
+			MMC5Sound.deccount[P]--;
+		}
+	}
+	MMC5Sound.reloaddec = 0;
+}
+
 static void Do5SQ(int P) {
-	static int tal[4] = { 1, 2, 4, 6 };
 	int32 V, amp, rthresh, wl;
 	int32 start, end;
 
@@ -782,10 +835,10 @@ static void Do5SQ(int P) {
 	MMC5Sound.BC[P] = end;
 
 	wl = MMC5Sound.wl[P] + 1;
-	amp = (MMC5Sound.env[P] & 0xF) << 4;
-	rthresh = tal[(MMC5Sound.env[P] & 0xC0) >> 6];
+	amp = (MMC5Sound.env[P] & 0x10 ? MMC5Sound.env[P] & 0xF : MMC5Sound.decvolume[P]) << 3;
+	rthresh = RectDuties[(MMC5Sound.env[P] & 0xC0) >> 6];
 
-	if (wl >= 8 && (MMC5Sound.running & (P + 1))) {
+	if (MMC5Sound.lengthcount[P]) {
 		int dc, vc;
 
 		wl <<= 18;
@@ -807,15 +860,14 @@ static void Do5SQ(int P) {
 }
 
 static void Do5SQHQ(int P) {
-	static int tal[4] = { 1, 2, 4, 6 };
 	uint32 V;
 	int32 amp, rthresh, wl;
 
 	wl = MMC5Sound.wl[P] + 1;
-	amp = ((MMC5Sound.env[P] & 0xF) << 8);
-	rthresh = tal[(MMC5Sound.env[P] & 0xC0) >> 6];
+	amp = (MMC5Sound.env[P] & 0x10 ? MMC5Sound.env[P] & 0xF : MMC5Sound.decvolume[P]) << 7;
+	rthresh = RectDuties[(MMC5Sound.env[P] & 0xC0) >> 6];
 
-	if (wl >= 8 && (MMC5Sound.running & (P + 1))) {
+	if (MMC5Sound.lengthcount[P]) {
 		int dc, vc;
 
 		wl <<= 1;
@@ -879,6 +931,7 @@ void Mapper5_ESI(void) {
 
 void NSFMMC5_Init(void) {
 	memset(&MMC5Sound, 0, sizeof(MMC5Sound));
+	MMC5Sound.fcount = FHINC;
 	mul[0] = mul[1] = 0;
 	ExRAM = (uint8*)FCEU_gmalloc(1024);
 	Mapper5_ESI();
@@ -887,6 +940,7 @@ void NSFMMC5_Init(void) {
 	MMC5HackCHRMode = 2;
 	SetWriteHandler(0x5000, 0x5015, Mapper5_SW);
 	SetWriteHandler(0x5205, 0x5206, Mapper5_write);
+	SetReadHandler(0x5015, 0x5015, Mapper5_SR);
 	SetReadHandler(0x5205, 0x5206, MMC5_read);
 }
 
@@ -900,6 +954,8 @@ void NSFMMC5_Close(void) {
 }
 
 static void GenMMC5Power(void) {
+	memset(&MMC5Sound, 0, sizeof(MMC5Sound));
+	MMC5Sound.fcount = FHINC;
 
 	PRGBanks.fill(0xFF);
 	WRAMPage = 0;
@@ -943,7 +999,7 @@ static void GenMMC5Power(void) {
 	SetReadHandler(0x6000, 0xFFFF, MMC5_ReadROMRAM);
 
 	SetWriteHandler(0x5000, 0x5015, Mapper5_SW);
-	SetWriteHandler(0x5205, 0x5206, Mapper5_write);
+	SetReadHandler(0x5015, 0x5015, Mapper5_SR);
 	SetReadHandler(0x5205, 0x5206, MMC5_read);
 
 //	GameHBIRQHook=MMC5_hb;
@@ -977,10 +1033,14 @@ static SFORMAT MMC5_StateRegs[] = {
 	{ &MMC5Sound.wl[0], 2 | FCEUSTATE_RLSB, "SDW0" },
 	{ &MMC5Sound.wl[1], 2 | FCEUSTATE_RLSB, "SDW1" },
 	{ MMC5Sound.env, 2, "SDEV" },
+	{ MMC5Sound.lengthcount, 2, "SDLC" },
+	{ MMC5Sound.decvolume, 2, "SDDV" },
+	{ MMC5Sound.deccount, 2, "SDDC" },
+	{ &MMC5Sound.reloaddec, 1, "SDRL" },
 	{ &MMC5Sound.enable, 1, "SDEN" },
-	{ &MMC5Sound.running, 1, "SDRU" },
 	{ &MMC5Sound.raw, 1, "SDRW" },
 	{ &MMC5Sound.rawcontrol, 1, "SDRC" },
+	{ &MMC5Sound.fcount, 4 | FCEUSTATE_RLSB, "SDFC" },
 
 	//zero 17-apr-2013 - added
 	{ &MMC5Sound.dcount[0], 4 | FCEUSTATE_RLSB, "DCT0" },
@@ -1018,6 +1078,7 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery) {
 	BuildWRAMSizeTable();
 	GameStateRestore = MMC5_StateRestore;
 	info->Power = GenMMC5Power;
+	MapIRQHook = MMC5SoundCPUHook;
 
 	MMC5battery = battery;
 	if (battery) {
