@@ -21,6 +21,8 @@ your choice is remembered. Switching presets preserves your custom theme
 settings and selected base style.
 
 The window title bar's appearance is controlled by your operating system.
+State Slots and State Recorder Timeline contents follow the video background
+color, regardless of the selected preset.
 
 ## Configuration and storage
 
