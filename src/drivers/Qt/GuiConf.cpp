@@ -419,18 +419,18 @@ void GuiConfDialog_t::useCustomStyleChanged(bool state)
 {
 	int value = (!state) ? 0 : 1;
 
-	g_config->setOption("SDL.UseCustomQss", value);
-
 	QApplication::setStyle( new fceuStyle() );
+
+	g_config->setOption("SDL.UseCustomQss", value);
 }
 //----------------------------------------------------
 void GuiConfDialog_t::useCustomQPaletteChanged(bool state)
 {
 	int value = (!state) ? 0 : 1;
 
-	g_config->setOption("SDL.UseCustomQPal", value);
-
 	QApplication::setStyle( new fceuStyle() );
+
+	g_config->setOption("SDL.UseCustomQPal", value);
 }
 //----------------------------------------------------
 void GuiConfDialog_t::styleChanged(int index)
@@ -439,10 +439,9 @@ void GuiConfDialog_t::styleChanged(int index)
 
 	s = styleComboBox->currentText();
 
-	g_config->setOption("SDL.GuiStyle", s.toLocal8Bit().constData() );
-	g_config->save();
-
 	QApplication::setStyle( new fceuStyle() );
+
+	g_config->setOption("SDL.GuiStyle", s.toLocal8Bit().constData() );
 }
 //----------------------------------------------------
 void GuiConfDialog_t::presetChanged(int index)
