@@ -9,42 +9,18 @@ and Linux. Workspace setup information remains in the
 In **GUI Config**, select a **Preset** under **Style**:
 
 - **Default** uses the selected base style without a custom palette or stylesheet.
-- **Dark 2026** uses Fusion with the embedded
-  [palette](../../../qss/Dark2026.qpal) and
-  [stylesheet](../../../qss/Dark2026.qss). Both files are compiled into the
-  executable; no external theme files are needed. The checkbox contrast fix
-  uses font-relative sizing, not fixed pixel sizes. Checked and mixed-state
-  boxes retain their native marks with a palette-colored border drawn by the
-  style wrapper on dark palettes.
-- **Darkeum** uses Fusion with its embedded
-  [palette](../../../qss/Darkeum.qpal) and
-  [stylesheet](../../../qss/Darkeum.qss): near-black surfaces, white text,
-  and blue accents. The adapted stylesheet uses font-relative dimensions,
-  dark text editors, and embedded SVG arrows and checked/mixed indicators.
-  Qt's SVG image plugin must be included when deploying this preset.
-- **Integrid** uses its embedded [palette](../../../qss/Integrid.qpal) and
-  [stylesheet](../../../qss/Integrid.qss) for light gray surfaces, black text,
-  and blue accents.
-- **Combinear** uses its embedded [palette](../../../qss/Combinear.qpal) and
-  [stylesheet](../../../qss/Combinear.qss) for charcoal surfaces and gold accents.
-- **Adaptic** uses its embedded [palette](../../../qss/Adaptic.qpal) and
-  [stylesheet](../../../qss/Adaptic.qss) for blue-gray gradients, red buttons,
-  and green input text.
-- **Custom** enables the existing palette and stylesheet file selectors.
+- **Dark 2026** provides a VS Code-inspired dark theme.
+- **Darkeum** has near-black surfaces, white text, and blue accents.
+- **Integrid** has light gray surfaces, black text, and blue accents.
+- **Combinear** has charcoal surfaces and gold accents.
+- **Adaptic** has blue-gray gradients, red buttons, and green input text.
+- **Custom** lets you load your own palette (`.qpal`) and stylesheet (`.qss`) files.
 
-Integrid, Combinear, and Adaptic also use Fusion, font-relative dimensions,
-and embedded vector arrows and checked/mixed indicators. These presets require
-Qt's SVG image plugin as well. Integrid includes dark arrows for light controls;
-the other themes reuse Darkeum's light vector indicators.
+Built-in presets need no external theme files. Changes apply immediately and
+your choice is remembered. Switching presets preserves your custom theme
+settings and selected base style.
 
-Changes apply immediately and the selection is saved in per-user QSettings as
-`Application/StylePreset` (`default`, `dark2026`, `darkeum`, `integrid`,
-`combinear`, `adaptic`, or `custom`). Existing
-installations without this setting use Custom to preserve their current
-appearance. Switching presets preserves custom file paths, enable flags, and
-the selected base style, and closes any palette editor live preview.
-The native title bar remains controlled by the OS.
-Presets support Qt 5.15 and Qt 6.
+The window title bar's appearance is controlled by your operating system.
 
 ## Configuration and storage
 

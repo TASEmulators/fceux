@@ -24,6 +24,7 @@
 #include <string.h>
 #include <string>
 #include <list>
+#include <algorithm>
 
 #include <SDL.h>
 #include <QMenu>
@@ -51,6 +52,8 @@
 #include <QScreen>
 #include <QMimeData>
 #include <QDrag>
+#include <QStyleOptionFrame>
+#include <cmath>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -87,6 +90,60 @@ extern int vblankPixel;
 
 debuggerBookmarkManager_t dbgBmMgr;
 static ConsoleDebugger* dbgWin = NULL;
+
+DebuggerStatusEdit::DebuggerStatusEdit(int minimumCharacters, int maximumCharacters, QWidget *parent)
+	: QLineEdit(parent), minimumCharacters(minimumCharacters), maximumCharacters(maximumCharacters)
+{
+	updateWidth();
+}
+
+void DebuggerStatusEdit::updateWidth()
+{
+	QStyleOptionFrame option;
+	initStyleOption(&option);
+	const QMargins margins = textMargins();
+	auto widthForCharacters = [&](int characters) {
+		const QSize contents(fontMetrics().horizontalAdvance(QString(characters, QLatin1Char('M')))
+			+ margins.left() + margins.right(), fontMetrics().height());
+		return style()->sizeFromContents(QStyle::CT_LineEdit, &option, contents, this).width();
+	};
+	setMinimumWidth(widthForCharacters(minimumCharacters));
+	setMaximumWidth(widthForCharacters(maximumCharacters));
+}
+
+bool DebuggerStatusEdit::event(QEvent *event)
+{
+	const bool result = QLineEdit::event(event);
+	if (event->type() == QEvent::FontChange || event->type() == QEvent::StyleChange
+		|| event->type() == QEvent::Polish)
+	{
+		updateWidth();
+	}
+	return result;
+}
+
+static QColor highlightedTextColor(const QColor &foreground, const QColor *background)
+{
+	if (background == nullptr)
+	{
+		return foreground;
+	}
+	auto luminance = [](const QColor &color) {
+		auto channel = [](double value) {
+			return value <= 0.04045 ? value / 12.92 : std::pow((value + 0.055) / 1.055, 2.4);
+		};
+		return 0.2126 * channel(color.redF()) + 0.7152 * channel(color.greenF())
+			+ 0.0722 * channel(color.blueF());
+	};
+	const double bg = luminance(*background);
+	const double fg = luminance(foreground);
+	const double contrast = (std::max(bg, fg) + 0.05) / (std::min(bg, fg) + 0.05);
+	if (contrast >= 4.5)
+	{
+		return foreground;
+	}
+	return (bg + 0.05) / 0.05 >= 1.05 / (bg + 0.05) ? QColor(Qt::black) : QColor(Qt::white);
+}
 
 static void DeleteBreak(int sel);
 static bool waitingAtBp = false;
@@ -1131,13 +1188,11 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("PC:") );
 	lbl->setToolTip( tr("Program Counter Register") );
-	pcEntry = new QLineEdit();
+	pcEntry = new DebuggerStatusEdit(6, 6);
 	pcEntry->setFont( cpuFont );
 	pcEntry->setMaxLength( 4 );
 	pcEntry->setInputMask( ">HHHH;0" );
 	pcEntry->setAlignment(Qt::AlignCenter);
-	pcEntry->setMinimumWidth( 6 * fontCharWidth );
-	pcEntry->setMaximumWidth( 6 * fontCharWidth );
 	pcEntry->setToolTip( tr("Program Counter Register Hex Value") );
 	hbox->addWidget( lbl );
 	hbox->addWidget( pcEntry, 1, Qt::AlignLeft );
@@ -1150,13 +1205,11 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("A:") );
 	lbl->setToolTip( tr("Accumulator Register") );
-	regAEntry = new QLineEdit();
+	regAEntry = new DebuggerStatusEdit(4, 4);
 	regAEntry->setFont( cpuFont );
 	regAEntry->setMaxLength( 2 );
 	regAEntry->setInputMask( ">HH;0" );
 	regAEntry->setAlignment(Qt::AlignCenter);
-	regAEntry->setMinimumWidth( 4 * fontCharWidth );
-	regAEntry->setMaximumWidth( 4 * fontCharWidth );
 	regAEntry->setToolTip( tr("Accumulator Register Hex Value") );
 	hbox->addWidget( lbl );
 	hbox->addWidget( regAEntry, 1, Qt::AlignLeft );
@@ -1165,13 +1218,11 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("X:") );
 	lbl->setToolTip( tr("X Index Register") );
-	regXEntry = new QLineEdit();
+	regXEntry = new DebuggerStatusEdit(4, 4);
 	regXEntry->setFont( cpuFont );
 	regXEntry->setMaxLength( 2 );
 	regXEntry->setInputMask( ">HH;0" );
 	regXEntry->setAlignment(Qt::AlignCenter);
-	regXEntry->setMinimumWidth( 4 * fontCharWidth );
-	regXEntry->setMaximumWidth( 4 * fontCharWidth );
 	regXEntry->setToolTip( tr("X Index Register Hex Value") );
 	hbox->addWidget( lbl );
 	hbox->addWidget( regXEntry, 1, Qt::AlignLeft );
@@ -1180,13 +1231,11 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	hbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("Y:") );
 	lbl->setToolTip( tr("Y Index Register") );
-	regYEntry = new QLineEdit();
+	regYEntry = new DebuggerStatusEdit(4, 4);
 	regYEntry->setFont( cpuFont );
 	regYEntry->setMaxLength( 2 );
 	regYEntry->setInputMask( ">HH;0" );
 	regYEntry->setAlignment(Qt::AlignCenter);
-	regYEntry->setMinimumWidth( 4 * fontCharWidth );
-	regYEntry->setMaximumWidth( 4 * fontCharWidth );
 	regYEntry->setToolTip( tr("Y Index Register Hex Value") );
 	hbox->addWidget( lbl );
 	hbox->addWidget( regYEntry, 1, Qt::AlignLeft );
@@ -1195,13 +1244,11 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	QHBoxLayout *regPHbox = new QHBoxLayout();
 	lbl  = new QLabel( tr("P:") );
 	lbl->setToolTip( tr("Status Register") );
-	regPEntry = new QLineEdit();
+	regPEntry = new DebuggerStatusEdit(4, 4);
 	regPEntry->setFont( cpuFont );
 	regPEntry->setMaxLength( 2 );
 	regPEntry->setInputMask( ">HH;0" );
 	regPEntry->setAlignment(Qt::AlignCenter);
-	regPEntry->setMinimumWidth( 4 * fontCharWidth );
-	regPEntry->setMaximumWidth( 4 * fontCharWidth );
 	regPEntry->setToolTip( tr("Status Register Hex Value") );
 	regPHbox->addWidget( lbl );
 	regPHbox->addWidget( regPEntry, 1, Qt::AlignLeft );
@@ -1329,12 +1376,12 @@ void ConsoleDebugger::buildPpuListDisplay(void)
 	ppuCtrlReg     = new ppuCtrlRegDpy();
 	ppuMaskReg     = new ppuCtrlRegDpy();
 	ppuStatReg     = new ppuCtrlRegDpy();
-	ppuAddrDsp     = new QLineEdit();
-	oamAddrDsp     = new QLineEdit();
-	ppuScanLineDsp = new QLineEdit();
-	ppuPixelDsp    = new QLineEdit();
-	ppuScrollX     = new QLineEdit();
-	ppuScrollY     = new QLineEdit();
+	ppuAddrDsp     = new DebuggerStatusEdit(7, 7);
+	oamAddrDsp     = new DebuggerStatusEdit(4, 4);
+	ppuScanLineDsp = new DebuggerStatusEdit(4, 4);
+	ppuPixelDsp    = new DebuggerStatusEdit(4, 4);
+	ppuScrollX     = new DebuggerStatusEdit(4, 8);
+	ppuScrollY     = new DebuggerStatusEdit(4, 8);
 
 	ppuAddrDsp->setReadOnly(true);
 	oamAddrDsp->setReadOnly(true);
@@ -1353,25 +1400,7 @@ void ConsoleDebugger::buildPpuListDisplay(void)
 	ppuScrollX->setFont( cpuFont );
 	ppuScrollY->setFont( cpuFont );
 
-	ppuCtrlReg->setMinimumWidth( 4 * fontCharWidth );
-	ppuMaskReg->setMinimumWidth( 4 * fontCharWidth );
-	ppuStatReg->setMinimumWidth( 4 * fontCharWidth );
-	ppuAddrDsp->setMinimumWidth( 7 * fontCharWidth );
-	oamAddrDsp->setMinimumWidth( 4 * fontCharWidth );
-	ppuScanLineDsp->setMinimumWidth( 4 * fontCharWidth );
-	ppuPixelDsp->setMinimumWidth( 4 * fontCharWidth );
-	ppuScrollX->setMinimumWidth( 4 * fontCharWidth );
-	ppuScrollY->setMinimumWidth( 4 * fontCharWidth );
 
-	ppuCtrlReg->setMaximumWidth( 4 * fontCharWidth );
-	ppuMaskReg->setMaximumWidth( 4 * fontCharWidth );
-	ppuStatReg->setMaximumWidth( 4 * fontCharWidth );
-	ppuAddrDsp->setMaximumWidth( 7 * fontCharWidth );
-	oamAddrDsp->setMaximumWidth( 4 * fontCharWidth );
-	ppuScanLineDsp->setMaximumWidth( 4 * fontCharWidth );
-	ppuPixelDsp->setMaximumWidth( 4 * fontCharWidth );
-	ppuScrollX->setMaximumWidth( 8 * fontCharWidth );
-	ppuScrollY->setMaximumWidth( 8 * fontCharWidth );
 
 	grid->setColumnMinimumWidth(1, 8 * fontCharWidth);
 	grid->setColumnMinimumWidth(3, 8 * fontCharWidth);
@@ -1793,24 +1822,14 @@ void ConsoleDebugger::setCpuStatusFont( const QFont &font )
 	fontCharWidth = fm.averageCharWidth();
 
 	pcEntry->setFont( font );
-	pcEntry->setMinimumWidth( 6 * fontCharWidth );
-	pcEntry->setMaximumWidth( 6 * fontCharWidth );
 
 	regAEntry->setFont( font );
-	regAEntry->setMinimumWidth( 4 * fontCharWidth );
-	regAEntry->setMaximumWidth( 4 * fontCharWidth );
 
 	regXEntry->setFont( font );
-	regXEntry->setMinimumWidth( 4 * fontCharWidth );
-	regXEntry->setMaximumWidth( 4 * fontCharWidth );
 
 	regYEntry->setFont( font );
-	regYEntry->setMinimumWidth( 4 * fontCharWidth );
-	regYEntry->setMaximumWidth( 4 * fontCharWidth );
 
 	regPEntry->setFont( font );
-	regPEntry->setMinimumWidth( 4 * fontCharWidth );
-	regPEntry->setMaximumWidth( 4 * fontCharWidth );
 
 	cpuCyclesVal->setFont(font);
 	cpuCyclesVal->setMinimumWidth( 24 * fontCharWidth );
@@ -1835,25 +1854,7 @@ void ConsoleDebugger::setPpuStatusFont( const QFont &font )
 	ppuScrollX->setFont( font );
 	ppuScrollY->setFont( font );
 
-	ppuCtrlReg->setMinimumWidth( 4 * fontCharWidth );
-	ppuMaskReg->setMinimumWidth( 4 * fontCharWidth );
-	ppuStatReg->setMinimumWidth( 4 * fontCharWidth );
-	ppuAddrDsp->setMinimumWidth( 7 * fontCharWidth );
-	oamAddrDsp->setMinimumWidth( 4 * fontCharWidth );
-	ppuScanLineDsp->setMinimumWidth( 4 * fontCharWidth );
-	ppuPixelDsp->setMinimumWidth( 4 * fontCharWidth );
-	ppuScrollX->setMinimumWidth( 4 * fontCharWidth );
-	ppuScrollY->setMinimumWidth( 4 * fontCharWidth );
 
-	ppuCtrlReg->setMaximumWidth( 4 * fontCharWidth );
-	ppuMaskReg->setMaximumWidth( 4 * fontCharWidth );
-	ppuStatReg->setMaximumWidth( 4 * fontCharWidth );
-	ppuAddrDsp->setMaximumWidth( 7 * fontCharWidth );
-	oamAddrDsp->setMaximumWidth( 4 * fontCharWidth );
-	ppuScanLineDsp->setMaximumWidth( 4 * fontCharWidth );
-	ppuPixelDsp->setMaximumWidth( 4 * fontCharWidth );
-	ppuScrollX->setMaximumWidth( 8 * fontCharWidth );
-	ppuScrollY->setMaximumWidth( 8 * fontCharWidth );
 
 	ppuDataGrid->setColumnMinimumWidth(1, 8 * fontCharWidth);
 	ppuDataGrid->setColumnMinimumWidth(3, 8 * fontCharWidth);
@@ -6524,7 +6525,7 @@ void QAsmView::drawText( QPainter *painter, int x, int y, const char *txt )
 	}
 }
 //----------------------------------------------------------------------------
-void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
+void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt, const QColor *background )
 {
 	int i=0;
 	char c[2];
@@ -6542,7 +6543,7 @@ void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
 	}
 
 	// Address Area
-	painter->setPen( this->palette().color(QPalette::WindowText));
+	painter->setPen( highlightedTextColor(this->palette().color(QPalette::WindowText), background));
 
 	while ( (i<byteCodeLinePos) && (txt[i] != 0) )
 	{
@@ -6552,7 +6553,7 @@ void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
 	}
 
 	// Byte Code Area
-	painter->setPen( this->palette().color(QPalette::WindowText));
+	painter->setPen( highlightedTextColor(this->palette().color(QPalette::WindowText), background));
 
 	while ( (i<opcodeLinePos) && (txt[i] != 0) )
 	{
@@ -6562,7 +6563,7 @@ void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
 	}
 
 	// Opcode Area
-	painter->setPen( opcodeColor );
+	painter->setPen( highlightedTextColor(opcodeColor, background) );
 
 	if ( txt[i] != ' ' ) // Skip over undefined opcodes
 	{
@@ -6575,13 +6576,13 @@ void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
 	}
 
 	// Operand Area
-	painter->setPen( this->palette().color(QPalette::WindowText));
+	painter->setPen( highlightedTextColor(this->palette().color(QPalette::WindowText), background));
 
 	while ( (txt[i] != 0) )
 	{
 		if ( (txt[i] == '$') && isxdigit( txt[i+1] ) )
 		{
-			painter->setPen( addressColor );
+			painter->setPen( highlightedTextColor(addressColor, background) );
 
 			c[0] = txt[i];
 			painter->drawText( x, y, tr(c) );
@@ -6596,7 +6597,7 @@ void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
 		}
 		else if ( (txt[i] == '#') && (txt[i+1] == '$') && isxdigit( txt[i+2] ) )
 		{
-			painter->setPen( immediateColor );
+			painter->setPen( highlightedTextColor(immediateColor, background) );
 
 			c[0] = txt[i];
 			painter->drawText( x, y, tr(c) );
@@ -6615,7 +6616,7 @@ void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
 		}
 		else
 		{
-			painter->setPen( this->palette().color(QPalette::WindowText));
+			painter->setPen( highlightedTextColor(this->palette().color(QPalette::WindowText), background));
 			c[0] = txt[i];
 			painter->drawText( x, y, tr(c) );
 			i++; x += pxCharWidth;
@@ -6623,7 +6624,7 @@ void QAsmView::drawAsmLine( QPainter *painter, int x, int y, const char *txt )
 	}
 }
 //----------------------------------------------------------------------------
-void QAsmView::drawLabelLine( QPainter *painter, int x, int y, const char *txt )
+void QAsmView::drawLabelLine( QPainter *painter, int x, int y, const char *txt, const QColor *background )
 {
 	int i=0;
 	char c[2];
@@ -6631,17 +6632,17 @@ void QAsmView::drawLabelLine( QPainter *painter, int x, int y, const char *txt )
 	c[0] = 0; c[1] = 0;
 
 	// Label Text
-	painter->setPen( this->palette().color(QPalette::WindowText));
+	painter->setPen( highlightedTextColor(this->palette().color(QPalette::WindowText), background));
 
 	while ( (txt[i] != 0) )
 	{
 		if ( isalnum(txt[i]) || (txt[i] == '_') )
 		{
-			painter->setPen( labelColor );
+			painter->setPen( highlightedTextColor(labelColor, background) );
 		}
 		else
 		{
-			painter->setPen( this->palette().color(QPalette::WindowText));
+			painter->setPen( highlightedTextColor(this->palette().color(QPalette::WindowText), background));
 		}
 		c[0] = txt[i];
 		painter->drawText( x, y, tr(c) );
@@ -6649,7 +6650,7 @@ void QAsmView::drawLabelLine( QPainter *painter, int x, int y, const char *txt )
 	}
 }
 //----------------------------------------------------------------------------
-void QAsmView::drawCommentLine( QPainter *painter, int x, int y, const char *txt )
+void QAsmView::drawCommentLine( QPainter *painter, int x, int y, const char *txt, const QColor *background )
 {
 	int i=0;
 	char c[2];
@@ -6657,7 +6658,7 @@ void QAsmView::drawCommentLine( QPainter *painter, int x, int y, const char *txt
 	c[0] = 0; c[1] = 0;
 
 	// Comment Text
-	painter->setPen( commentColor );
+	painter->setPen( highlightedTextColor(commentColor, background) );
 
 	while ( (txt[i] != 0) )
 	{
@@ -6675,7 +6676,6 @@ void QAsmView::paintEvent(QPaintEvent *event)
 	QPainter painter(this);
 	QColor white("white"), black("black"), blue("blue");
 	QColor hlgtFG("white"), hlgtBG("blue");
-	bool forceDarkColor = false;
 	bool txtHlgtSet = false;
 	bool lineIsPC = false;
 	QPen pen;
@@ -6746,14 +6746,11 @@ void QAsmView::paintEvent(QPaintEvent *event)
 		x = -pxLineXScroll;
 		l = lineOffset + row;
 
-		forceDarkColor = false;
-
 		if ( asmPC != NULL )
 		{
 			if ( l == asmPC->line )
 			{
 				painter.fillRect( cd_boundary, y + vlineOffset, viewWidth, pxLineSpacing, pcBgColor );
-				forceDarkColor = true;
 				lineIsPC = true;
 			}
 			else
@@ -6768,31 +6765,18 @@ void QAsmView::paintEvent(QPaintEvent *event)
 
 		if ( static_cast<size_t>(l) < asmEntry.size() )
 		{
-			//if ( asmEntry[l]->type != dbg_asm_entry_t::ASM_TEXT )
-			//{
-			//	painter.fillRect( cd_boundary, y - pxLineSpacing + pxLineLead, viewWidth, pxLineSpacing, QColor("light blue") );
-			//	forceDarkColor = true;
-			//}
-
-			if ( forceDarkColor )
-			{
-				painter.setPen( black );
-			}
-			else
-			{
-				painter.setPen( this->palette().color(QPalette::WindowText));
-			}
+			const QColor *background = lineIsPC ? &pcBgColor : nullptr;
 			if ( asmEntry[l]->type == dbg_asm_entry_t::ASM_TEXT )
 			{
-				drawAsmLine( &painter, x, y, asmEntry[l]->text.c_str() );
+				drawAsmLine( &painter, x, y, asmEntry[l]->text.c_str(), background );
 			}
 			else if ( asmEntry[l]->type == dbg_asm_entry_t::SYMBOL_NAME )
 			{
-				drawLabelLine( &painter, x, y, asmEntry[l]->text.c_str() );
+				drawLabelLine( &painter, x, y, asmEntry[l]->text.c_str(), background );
 			}
 			else
 			{
-				drawCommentLine( &painter, x, y, asmEntry[l]->text.c_str() );
+				drawCommentLine( &painter, x, y, asmEntry[l]->text.c_str(), background );
 			}
 
 			if ( (selAddrLine == l) )
@@ -7281,7 +7265,7 @@ void DebuggerStackDisplay::updateText(void)
 //--  PPU Control Register Widget
 //----------------------------------------------------------------------------
 ppuCtrlRegDpy::ppuCtrlRegDpy( QWidget *parent )
-	: QLineEdit( parent )
+	: DebuggerStatusEdit(4, 4, parent)
 {
 	popup = NULL;
 	setReadOnly(true);
@@ -7310,7 +7294,7 @@ bool ppuCtrlRegDpy::event(QEvent *event)
 		event->ignore();
 		return true;
 	}
-	return QWidget::event(event);
+	return DebuggerStatusEdit::event(event);
 }
 //----------------------------------------------------------------------------
 //--  PPU Register Tool Tip Popup

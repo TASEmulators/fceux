@@ -193,9 +193,9 @@ class QAsmView : public QWidget
 		void setHighlightEndCoord( int x, int y );
 		void loadClipboard( const char *txt );
 		void drawText( QPainter *painter, int x, int y, const char *txt );
-		void drawAsmLine( QPainter *painter, int x, int y, const char *txt );
-		void drawLabelLine( QPainter *painter, int x, int y, const char *txt );
-		void drawCommentLine( QPainter *painter, int x, int y, const char *txt );
+		void drawAsmLine( QPainter *painter, int x, int y, const char *txt, const QColor *background = nullptr );
+		void drawLabelLine( QPainter *painter, int x, int y, const char *txt, const QColor *background = nullptr );
+		void drawCommentLine( QPainter *painter, int x, int y, const char *txt, const QColor *background = nullptr );
 		void drawPointerPC( QPainter *painter, int xl, int yl );
 
 	private:
@@ -317,7 +317,21 @@ class ppuRegPopup : public fceuCustomToolTip
 	private:
 };
 
-class ppuCtrlRegDpy : public QLineEdit
+class DebuggerStatusEdit : public QLineEdit
+{
+public:
+	DebuggerStatusEdit(int minimumCharacters, int maximumCharacters, QWidget *parent = nullptr);
+
+protected:
+	bool event(QEvent *event) override;
+
+private:
+	void updateWidth();
+	int minimumCharacters;
+	int maximumCharacters;
+};
+
+class ppuCtrlRegDpy : public DebuggerStatusEdit
 {
    Q_OBJECT
 

@@ -255,6 +255,7 @@ QToolButton:pressed
 /*-----QComboBox-----*/
 QComboBox
 {
+    combobox-popup: 0;
     background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(118, 118, 118, 255),stop:1 rgba(70, 70, 70, 255));
     border: 0.08em solid #333333;
     border-radius: 0.24em;
@@ -300,6 +301,15 @@ QComboBox QAbstractItemView
     selection-color: #ffffff;
     outline: 0;
 
+}
+
+QComboBox QAbstractItemView::item {
+    color: #000000;
+}
+
+QComboBox QAbstractItemView::item:selected {
+    color: #ffffff;
+    background-color: #363942;
 }
 
 
