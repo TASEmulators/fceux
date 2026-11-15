@@ -239,14 +239,14 @@ TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
 	logLastLbl = new QLabel(tr("Log Last"));
 	logMaxLinesComboBox = new QComboBox();
 
-	logMaxLinesComboBox->addItem(tr("3,000,000"), 3000000);
-	logMaxLinesComboBox->addItem(tr("1,000,000"), 1000000);
-	logMaxLinesComboBox->addItem(tr("300,000"), 300000);
-	logMaxLinesComboBox->addItem(tr("100,000"), 100000);
-	logMaxLinesComboBox->addItem(tr("30,000"), 30000);
-	logMaxLinesComboBox->addItem(tr("10,000"), 10000);
-	logMaxLinesComboBox->addItem(tr("3,000"), 3000);
-	logMaxLinesComboBox->addItem(tr("1,000"), 1000);
+	logMaxLinesComboBox->addItem(QStringLiteral("3,000,000"), 3000000);
+	logMaxLinesComboBox->addItem(QStringLiteral("1,000,000"), 1000000);
+	logMaxLinesComboBox->addItem(QStringLiteral("300,000"), 300000);
+	logMaxLinesComboBox->addItem(QStringLiteral("100,000"), 100000);
+	logMaxLinesComboBox->addItem(QStringLiteral("30,000"), 30000);
+	logMaxLinesComboBox->addItem(QStringLiteral("10,000"), 10000);
+	logMaxLinesComboBox->addItem(QStringLiteral("3,000"), 3000);
+	logMaxLinesComboBox->addItem(QStringLiteral("1,000"), 1000);
 
 	for (int i = 0; i < logMaxLinesComboBox->count(); i++)
 	{
@@ -605,7 +605,7 @@ void TraceLoggerDialog_t::openLogFile(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter(QDir::AllEntries | QDir::AllDirs | QDir::Hidden);
 	dialog.setLabelText(QFileDialog::Accept, tr("Open"));
-	dialog.setDefaultSuffix(tr(".log"));
+	dialog.setDefaultSuffix(QStringLiteral(".log"));
 
 	romFile = getRomFile();
 
@@ -1883,7 +1883,7 @@ void QTraceLogView::openBpEditWindow(int editIdx, watchpointinfo *wp, traceRecor
 	hbox->addWidget(lbl);
 	hbox->addWidget(addr1);
 
-	lbl = new QLabel(tr("-"));
+	lbl = new QLabel(QStringLiteral("-"));
 	addr2 = new QLineEdit();
 	hbox->addWidget(lbl);
 	hbox->addWidget(addr2);
@@ -2208,12 +2208,12 @@ void QTraceLogView::contextMenuEvent(QContextMenuEvent *event)
 		{
 			act = new QAction(tr("Add Symbolic Debug Marker"), &menu);
 			menu.addAction(act);
-			act->setShortcut(QKeySequence(tr("S")));
+			act->setShortcut(QKeySequence(QStringLiteral("S")));
 			connect(act, SIGNAL(triggered(void)), this, SLOT(ctxMenuAddSym(void)));
 
 			act = new QAction(tr("Add Breakpoint"), &menu);
 			menu.addAction(act);
-			act->setShortcut(QKeySequence(tr("B")));
+			act->setShortcut(QKeySequence(QStringLiteral("B")));
 			connect(act, SIGNAL(triggered(void)), this, SLOT(ctxMenuAddBP(void)));
 
 			menu.exec(event->globalPos());

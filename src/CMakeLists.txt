@@ -786,6 +786,43 @@ if (RETRO_ACHIEVEMENTS)
 		${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/RetroAchievements/retroachievements.qrc)
 endif()
 
+# Translations: every src/translations/fceux_<locale>.ts is compiled to a .qm file
+# and embedded into the executable under the ":/i18n" resource prefix.
+# See scripts/updateTranslations.sh for creating and updating the .ts files.
+file(GLOB FCEUX_TS_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/translations/fceux_*.ts)
+
+if (FCEUX_TS_FILES)
+	find_package( ${Qt} COMPONENTS LinguistTools QUIET)
+
+	if (${${Qt}LinguistTools_FOUND})
+		message( STATUS "${Qt} LinguistTools Found; embedding translations")
+		if (${QT} EQUAL 6)
+			qt6_add_translation( FCEUX_QM_FILES ${FCEUX_TS_FILES} )
+		else()
+			qt5_add_translation( FCEUX_QM_FILES ${FCEUX_TS_FILES} )
+		endif()
+
+		set(FCEUX_QM_QRC ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
+		set(FCEUX_QM_QRC_CONTENT "<RCC>\n  <qresource prefix=\"/i18n\">\n")
+		foreach(qm_file ${FCEUX_QM_FILES})
+			get_filename_component(qm_name ${qm_file} NAME)
+			string(APPEND FCEUX_QM_QRC_CONTENT "    <file alias=\"${qm_name}\">${qm_file}</file>\n")
+		endforeach()
+		string(APPEND FCEUX_QM_QRC_CONTENT "  </qresource>\n</RCC>\n")
+		file(WRITE ${FCEUX_QM_QRC} "${FCEUX_QM_QRC_CONTENT}")
+		# AUTORCC can't be used here because the .qm files are build outputs
+		set_source_files_properties(${FCEUX_QM_QRC} PROPERTIES SKIP_AUTORCC ON)
+		if (${QT} EQUAL 6)
+			qt6_add_resources( FCEUX_QM_RCC_SOURCES ${FCEUX_QM_QRC} )
+		else()
+			qt5_add_resources( FCEUX_QM_RCC_SOURCES ${FCEUX_QM_QRC} )
+		endif()
+		list(APPEND SOURCES ${FCEUX_QM_RCC_SOURCES})
+	else()
+		message( STATUS "${Qt} LinguistTools Not Found; translations disabled")
+	endif()
+endif()
+
 # Put build timestamp into BUILD_TS environment variable and from there into
 # the FCEUX_BUILD_TIMESTAMP preprocessor definition.
 # Note: with CMake >= 3.8.0, this will respect SOURCE_DATE_EPOCH. For more info,

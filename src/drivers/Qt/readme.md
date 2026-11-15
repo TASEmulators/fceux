@@ -82,6 +82,19 @@ against the startup working directory. The per-user Qt UI settings INI stays
 in its usual location. A missing or empty path, repeated `--config-dir`, or
 combining it with `--choose-config-location` is an error.
 
+## Language
+
+English is built in. Other languages are translations (`src/translations/fceux_<locale>.ts`)
+that the build compiles and embeds in the executable. When at least one translation is
+available and no language has been chosen yet, a language selector is shown at startup.
+The choice is stored as `Language` under `[Application]` in the Qt settings `fceux.ini`
+(for example `Language=de`) and the selector is not shown again. Closing the selector
+without choosing uses the system language for that launch and asks again next time.
+
+Use `fceux --choose-language` to open the selector again. This flag takes no value and
+can be combined with a ROM filename and other emulator options. Use
+`scripts/updateTranslations.sh <locale>` to create or update a translation file.
+
 Startup messages report the Qt settings location, selected storage directory,
 each configuration file loaded, and the new config path on first run. These
 messages are also available in the Qt message log. The main Qt UI settings are

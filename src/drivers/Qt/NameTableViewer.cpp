@@ -325,7 +325,7 @@ ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
 
 	// View -> Refresh
 	act = new QAction(tr("&Refresh"), this);
-	act->setShortcut( QKeySequence(tr("F5") ) );
+	act->setShortcut( QKeySequence(QStringLiteral("F5") ) );
 	act->setStatusTip(tr("Refresh"));
 	connect(act, SIGNAL(triggered()), this, SLOT(forceRefresh()) );
 
@@ -1353,25 +1353,25 @@ void ppuNameTableView_t::contextMenuEvent(QContextMenuEvent *event)
 
 	snprintf( stmp, sizeof(stmp), "Open Tile $%04X in PPU &Viewer", tileAddr );
 	act = new QAction(tr(stmp), &menu);
-	//act->setShortcut( QKeySequence(tr("V")));
+	//act->setShortcut( QKeySequence(QStringLiteral("V")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTilePpuViewer(void)) );
 	menu.addAction( act );
 
 	snprintf( stmp, sizeof(stmp), "Open &Tile Addr $%04X in Hex Editor", tileAddr );
 	act = new QAction(tr(stmp), &menu);
-	//act->setShortcut( QKeySequence(tr("H")));
+	//act->setShortcut( QKeySequence(QStringLiteral("H")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTileAddrHexEdit(void)) );
 	menu.addAction( act );
 
 	snprintf( stmp, sizeof(stmp), "Open &Attr Addr $%04X in Hex Editor", atrbAddr );
 	act = new QAction(tr(stmp), &menu);
-	//act->setShortcut( QKeySequence(tr("H")));
+	//act->setShortcut( QKeySequence(QStringLiteral("H")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openAtrbAddrHexEdit(void)) );
 	menu.addAction( act );
 
 	snprintf( stmp, sizeof(stmp), "Open &PPU Addr $%04X in Hex Editor", ppuAddr );
 	act = new QAction(tr(stmp), &menu);
-	//act->setShortcut( QKeySequence(tr("H")));
+	//act->setShortcut( QKeySequence(QStringLiteral("H")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openPpuAddrHexEdit(void)) );
 	menu.addAction( act );
 

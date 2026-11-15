@@ -79,7 +79,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	driverSelect = new QComboBox();
 
-	driverSelect->addItem(tr("SDL"), AudioDriverBase::AUDIO_DRIVER_SDL);
+	driverSelect->addItem(QStringLiteral("SDL"), AudioDriverBase::AUDIO_DRIVER_SDL);
 	if (AudioDriverBase::isDriverAvailable(AudioDriverBase::AUDIO_DRIVER_QT))
 	{
 		driverSelect->addItem(tr("Qt"), AudioDriverBase::AUDIO_DRIVER_QT);
@@ -142,11 +142,11 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	rateSelect = new QComboBox();
 
-	rateSelect->addItem(tr("11025"), 11025);
-	rateSelect->addItem(tr("22050"), 22050);
-	rateSelect->addItem(tr("44100"), 44100);
-	rateSelect->addItem(tr("48000"), 48000);
-	rateSelect->addItem(tr("96000"), 96000);
+	rateSelect->addItem(QStringLiteral("11025"), 11025);
+	rateSelect->addItem(QStringLiteral("22050"), 22050);
+	rateSelect->addItem(QStringLiteral("44100"), 44100);
+	rateSelect->addItem(QStringLiteral("48000"), 48000);
+	rateSelect->addItem(QStringLiteral("96000"), 96000);
 
 	setComboBoxFromProperty(rateSelect, "SDL.Sound.Rate");
 
@@ -290,7 +290,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	connect(nseSlider, SIGNAL(valueChanged(int)), this, SLOT(noiseChanged(int)));
 
-	frame = new QGroupBox(tr("PCM"));
+	frame = new QGroupBox(QStringLiteral("PCM"));
 	vbox2 = new QVBoxLayout();
 	pcmLbl = new QLabel("256");
 	pcmSlider = new QSlider(Qt::Vertical);

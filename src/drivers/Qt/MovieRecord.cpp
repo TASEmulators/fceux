@@ -69,7 +69,7 @@ MovieRecordDialog_t::MovieRecordDialog_t(QWidget *parent)
 	dirEdit      = new QLineEdit();
 	fileEdit     = new QLineEdit();
 	authorEdit   = new QLineEdit();
-	fileBrowse   = new QPushButton( tr("...") );
+	fileBrowse   = new QPushButton( QStringLiteral("...") );
 	stateSel     = new QComboBox();
 	okButton     = new QPushButton( tr("OK") );
 	cancelButton = new QPushButton( tr("Cancel") );
@@ -326,7 +326,7 @@ void MovieRecordDialog_t::browseFiles(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save To") );
-	dialog.setDefaultSuffix( tr(".fm2") );
+	dialog.setDefaultSuffix( QStringLiteral(".fm2") );
 
 	g_config->getOption ("SDL.LastOpenMovie", &last );
 

@@ -226,7 +226,7 @@ QString StateTimelineBar_t::formatFrame(int frame) const
 {
 	const int totalSec = static_cast<int>(std::max(0, frame) / hz);
 
-	return tr("%1 (%2:%3)").arg(frame).arg(totalSec / 60).arg(totalSec % 60, 2, 10, QChar('0'));
+	return QStringLiteral("%1 (%2:%3)").arg(frame).arg(totalSec / 60).arg(totalSec % 60, 2, 10, QChar('0'));
 }
 //----------------------------------------------------------------------------
 void StateTimelineBar_t::seekToX(double x)
@@ -685,7 +685,7 @@ void StateRecorderTimelineDock_t::refresh(void)
 	{
 		const int pos = (data.currentSnap >= 0) ? (data.currentSnap + 1) : numSnaps;
 		const int totalSec = static_cast<int>(std::max(0, data.currentFrame) / (hz > 1.0 ? hz : 60.0));
-		const QString time = tr("%1:%2").arg(totalSec / 60).arg(totalSec % 60, 2, 10, QChar('0'));
+		const QString time = QStringLiteral("%1:%2").arg(totalSec / 60).arg(totalSec % 60, 2, 10, QChar('0'));
 
 		// The exact frame changes every frame while running, and every label change
 		// costs a repaint, so it is only shown when stopped or rewound.

@@ -119,14 +119,14 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 
 	cmprLvlCbox = new QComboBox();
 	cmprLvlCbox->addItem( tr("0 - None"), 0 );
-	cmprLvlCbox->addItem( tr("1"), 1 );
-	cmprLvlCbox->addItem( tr("2"), 2 );
-	cmprLvlCbox->addItem( tr("3"), 3 );
-	cmprLvlCbox->addItem( tr("4"), 4 );
-	cmprLvlCbox->addItem( tr("5"), 5 );
-	cmprLvlCbox->addItem( tr("6"), 6 );
-	cmprLvlCbox->addItem( tr("7"), 7 );
-	cmprLvlCbox->addItem( tr("8"), 8 );
+	cmprLvlCbox->addItem( QStringLiteral("1"), 1 );
+	cmprLvlCbox->addItem( QStringLiteral("2"), 2 );
+	cmprLvlCbox->addItem( QStringLiteral("3"), 3 );
+	cmprLvlCbox->addItem( QStringLiteral("4"), 4 );
+	cmprLvlCbox->addItem( QStringLiteral("5"), 5 );
+	cmprLvlCbox->addItem( QStringLiteral("6"), 6 );
+	cmprLvlCbox->addItem( QStringLiteral("7"), 7 );
+	cmprLvlCbox->addItem( QStringLiteral("8"), 8 );
 	cmprLvlCbox->addItem( tr("9 - Max"), 9 );
 
 	opt = 0;

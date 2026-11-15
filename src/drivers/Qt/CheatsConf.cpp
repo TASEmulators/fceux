@@ -304,7 +304,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	hbox1 = new QHBoxLayout();
 	vbox->addLayout(hbox1);
 
-	lbl = new QLabel(tr("0x"));
+	lbl = new QLabel(QStringLiteral("0x"));
 	lbl->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	knownValEntry = new QLineEdit();
 	knownValEntry->setMaxLength(2);
@@ -941,10 +941,10 @@ void GuiCheatsDialog_t::deleteActvCheat(void)
 
 	showActiveCheatList(true);
 
-	cheatNameEntry->setText(tr(""));
-	cheatAddrEntry->setText(tr(""));
-	cheatValEntry->setText(tr(""));
-	cheatCmpEntry->setText(tr(""));
+	cheatNameEntry->setText(QStringLiteral(""));
+	cheatAddrEntry->setText(QStringLiteral(""));
+	cheatValEntry->setText(QStringLiteral(""));
+	cheatCmpEntry->setText(QStringLiteral(""));
 	typeEntry->setCurrentIndex(0);
 }
 //----------------------------------------------------------------------------
@@ -1046,7 +1046,7 @@ void GuiCheatsDialog_t::actvCheatItemClicked(QTreeWidgetItem *item, int column)
 	}
 	else
 	{
-		cheatCmpEntry->setText(tr(""));
+		cheatCmpEntry->setText(QStringLiteral(""));
 	}
 
 	cheatNameEntry->setText(tr(name.c_str()));

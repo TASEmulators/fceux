@@ -165,7 +165,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	// Watch -> New Watch
 	menuAct = new QAction(tr("&New Watch"), this);
-	menuAct->setShortcut( QKeySequence(tr("N")) );
+	menuAct->setShortcut( QKeySequence(QStringLiteral("N")) );
 	menuAct->setStatusTip(tr("New Watch"));
 	connect(menuAct, SIGNAL(triggered()), this, SLOT(newWatchClicked(void)) );
 	
@@ -173,7 +173,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	// Watch -> Edit Watch
 	menuAct = new QAction(tr("&Edit Watch"), this);
-	menuAct->setShortcut( QKeySequence(tr("E")) );
+	menuAct->setShortcut( QKeySequence(QStringLiteral("E")) );
 	menuAct->setStatusTip(tr("Edit Watch"));
 	connect(menuAct, SIGNAL(triggered()), this, SLOT(editWatchClicked(void)) );
 	
@@ -181,7 +181,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	// Watch -> Remove Watch
 	menuAct = new QAction(tr("&Remove Watch"), this);
-	menuAct->setShortcut( QKeySequence(tr("R")) );
+	menuAct->setShortcut( QKeySequence(QStringLiteral("R")) );
 	menuAct->setStatusTip(tr("Remove Watch"));
 	connect(menuAct, SIGNAL(triggered()), this, SLOT(removeWatchClicked(void)) );
 	
@@ -189,7 +189,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	// Watch -> Duplicate Watch
 	menuAct = new QAction(tr("Duplic&ate Watch"), this);
-	menuAct->setShortcut( QKeySequence(tr("A")) );
+	menuAct->setShortcut( QKeySequence(QStringLiteral("A")) );
 	menuAct->setStatusTip(tr("Duplicate Watch"));
 	connect(menuAct, SIGNAL(triggered()), this, SLOT(dupWatchClicked(void)) );
 	
@@ -197,7 +197,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	// Watch -> Add Separator
 	menuAct = new QAction(tr("Add &Separator"), this);
-	menuAct->setShortcut( QKeySequence(tr("S")) );
+	menuAct->setShortcut( QKeySequence(QStringLiteral("S")) );
 	menuAct->setStatusTip(tr("Add Separator"));
 	//connect(menuAct, SIGNAL(triggered()), this, SLOT(newListCB(void)) );
 	
@@ -207,7 +207,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	// Watch -> Move Up
 	menuAct = new QAction(tr("Move &Up"), this);
-	menuAct->setShortcut( QKeySequence(tr("U")) );
+	menuAct->setShortcut( QKeySequence(QStringLiteral("U")) );
 	menuAct->setStatusTip(tr("Move Up"));
 	connect(menuAct, SIGNAL(triggered()), this, SLOT(moveWatchUpClicked(void)) );
 	
@@ -215,7 +215,7 @@ RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
 
 	// Watch -> Move Down
 	menuAct = new QAction(tr("Move &Down"), this);
-	menuAct->setShortcut( QKeySequence(tr("D")) );
+	menuAct->setShortcut( QKeySequence(QStringLiteral("D")) );
 	menuAct->setStatusTip(tr("Move Down"));
 	connect(menuAct, SIGNAL(triggered()), this, SLOT(moveWatchDownClicked(void)) );
 	
@@ -609,7 +609,7 @@ void RamWatchDialog_t::appendListCB(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
-	dialog.setDefaultSuffix( tr(".wch") );
+	dialog.setDefaultSuffix( QStringLiteral(".wch") );
 
 	romFile = getRomFile();
 
@@ -688,7 +688,7 @@ void RamWatchDialog_t::saveListAs(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
-	dialog.setDefaultSuffix( tr(".wch") );
+	dialog.setDefaultSuffix( QStringLiteral(".wch") );
 
 	romFile = getRomFile();
 

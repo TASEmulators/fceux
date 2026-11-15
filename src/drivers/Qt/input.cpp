@@ -717,7 +717,7 @@ void FCEUD_MovieRecordTo(void)
 	//	return;													// no filename selected, quit the whole thing
 	//}
 	//std::string s = QInputDialog::getText( consoleWindow, QObject::tr("Movie Recording"), 
-	//			QObject::tr("Enter Author Name"), QLineEdit::Normal, QObject::tr(""), &ok ).toLocal8Bit().constData();
+	//			QObject::tr("Enter Author Name"), QLineEdit::Normal, QStringLiteral(""), &ok ).toLocal8Bit().constData();
 
 	//std::wstring author (s.begin (), s.end ());
 

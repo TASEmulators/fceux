@@ -318,14 +318,14 @@ void FamilyKeyboardWidget::contextMenuEvent(QContextMenuEvent *event)
 	QMenu menu(this);
 
 	act = new QAction(tr("Map Key Binding..."), &menu);
-	//act->setShortcut( QKeySequence(tr("E")));
+	//act->setShortcut( QKeySequence(QStringLiteral("E")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(ctxMapPhysicalKey(void)) );
 	menu.addAction( act );
 
 	act = new QAction(tr("Toggle State on Press"), &menu);
 	act->setCheckable(true);
 	act->setChecked( key[ ctxMenuKey ].toggleOnPress );
-	//act->setShortcut( QKeySequence(tr("E")));
+	//act->setShortcut( QKeySequence(QStringLiteral("E")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(ctxChangeToggleOnPress(void)) );
 	menu.addAction( act );
 
@@ -1397,7 +1397,7 @@ void FKBConfigDialog::mappingSaveAs(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
-	dialog.setDefaultSuffix( tr(".txt") );
+	dialog.setDefaultSuffix( QStringLiteral(".txt") );
 
 	if ( last.size() == 0 )
 	{

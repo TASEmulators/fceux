@@ -558,7 +558,7 @@ SymbolEditWindow::SymbolEditWindow(QWidget *parent)
 	arraySizeLbl[0] = new QLabel( tr("Size: 0x") );
 	arraySize = new QLineEdit();
 	arraySize->setFont( font );
-	arraySize->setText( tr("01") );
+	arraySize->setText( QStringLiteral("01") );
 	arraySize->setAlignment(Qt::AlignCenter);
 	arraySize->setMaximumWidth( charWidth * 4 );
 	arraySize->setValidator( validator );
@@ -573,7 +573,7 @@ SymbolEditWindow::SymbolEditWindow(QWidget *parent)
 	arrayInitLbl = new QLabel( tr("Init: 0x") );
 	arrayInit = new QLineEdit();
 	arrayInit->setFont( font );
-	arrayInit->setText( tr("00") );
+	arrayInit->setText( QStringLiteral("00") );
 	arrayInit->setAlignment(Qt::AlignCenter);
 	arrayInit->setMaximumWidth( charWidth * 4 );
 	arrayInit->setValidator( validator );
@@ -762,7 +762,7 @@ void SymbolEditWindow::setSym( debugSymbol_t *symIn )
 		commentEntry->clear();
 		deleteBox->setEnabled( false );
 
-		arrayInit->setText( tr("00") );
+		arrayInit->setText( QStringLiteral("00") );
 	}
 }
 //--------------------------------------------------------------

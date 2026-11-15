@@ -281,7 +281,7 @@ void AviRiffViewerDialog::openAviFileDialog(void)
 
 		dialog.setDirectory( d.absolutePath() );
 	}
-	dialog.setDefaultSuffix( tr(".avi") );
+	dialog.setDefaultSuffix( QStringLiteral(".avi") );
 
 	g_config->getOption ("SDL.AviFilePath", &lastPath);
 	if ( lastPath.size() > 0 )

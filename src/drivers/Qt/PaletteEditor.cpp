@@ -167,7 +167,7 @@ PaletteEditorDialog_t::PaletteEditorDialog_t(QWidget *parent)
 
 	// Emulator -> Write To
 	act = new QAction(tr("&Write To"), this);
-	act->setShortcut( QKeySequence(tr("F5")));
+	act->setShortcut( QKeySequence(QStringLiteral("F5")));
 	act->setStatusTip(tr("Write to Active Color Palette"));
 	connect(act, SIGNAL(triggered()), this, SLOT(setActivePalette(void)) );
 	
@@ -484,7 +484,7 @@ void PaletteEditorDialog_t::savePaletteFileDialog(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
-	dialog.setDefaultSuffix( tr(".pal") );
+	dialog.setDefaultSuffix( QStringLiteral(".pal") );
 
 	home = ::getenv("HOME");
 
@@ -534,7 +534,7 @@ void PaletteEditorDialog_t::exportPaletteFileDialog(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Export") );
-	dialog.setDefaultSuffix( tr(".act") );
+	dialog.setDefaultSuffix( QStringLiteral(".act") );
 
 	home = ::getenv("HOME");
 
@@ -833,7 +833,7 @@ void nesPaletteView::contextMenuEvent(QContextMenuEvent *event)
 
 	snprintf( stmp, sizeof(stmp), "Edit Color %X%X", selCell.y(), selCell.x() );
 	act = new QAction(tr(stmp), &menu);
-	act->setShortcut( QKeySequence(tr("E")));
+	act->setShortcut( QKeySequence(QStringLiteral("E")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(editSelColor(void)) );
 	menu.addAction( act );
 
@@ -1256,7 +1256,7 @@ void nesPalettePickerView::contextMenuEvent(QContextMenuEvent *event)
 //
 //	snprintf( stmp, sizeof(stmp), "Edit Color %X%X", selCell.y(), selCell.x() );
 //	act = new QAction(tr(stmp), &menu);
-//	act->setShortcut( QKeySequence(tr("E")));
+//	act->setShortcut( QKeySequence(QStringLiteral("E")));
 //	connect( act, SIGNAL(triggered(void)), this, SLOT(editSelColor(void)) );
 //	menu.addAction( act );
 //

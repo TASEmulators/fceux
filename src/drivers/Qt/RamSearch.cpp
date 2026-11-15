@@ -295,19 +295,19 @@ RamSearchDialog_t::RamSearchDialog_t(QWidget *parent)
 	frame->setLayout(vbox3);
 	vbox->addWidget(frame);
 
-	searchRAMCbox = new QCheckBox(tr("RAM"));
+	searchRAMCbox = new QCheckBox(QStringLiteral("RAM"));
 	vbox3->addWidget(searchRAMCbox);
 	searchRAMCbox->setChecked(ShowRAM);
 	searchRAMCbox->setToolTip( tr("Search RAM Address Range: 0x0000 - 0x07FF") );
 	connect(searchRAMCbox, SIGNAL(toggled(bool)), this, SLOT(searchRAMChanged(bool)));
 
-	searchSRAMCbox = new QCheckBox(tr("SRAM"));
+	searchSRAMCbox = new QCheckBox(QStringLiteral("SRAM"));
 	vbox3->addWidget(searchSRAMCbox);
 	searchSRAMCbox->setChecked(ShowSRAM);
 	searchSRAMCbox->setToolTip( tr("Search SRAM Address Range: 0x6000 - 0x7FFF") );
 	connect(searchSRAMCbox, SIGNAL(toggled(bool)), this, SLOT(searchSRAMChanged(bool)));
 
-	searchROMCbox = new QCheckBox(tr("ROM"));
+	searchROMCbox = new QCheckBox(QStringLiteral("ROM"));
 	vbox3->addWidget(searchROMCbox);
 	searchROMCbox->setChecked(ShowROM);
 	searchROMCbox->setToolTip( tr("Search ROM Address Range: 0x8000 - 0xFFFF") );

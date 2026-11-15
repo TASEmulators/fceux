@@ -483,7 +483,7 @@ void HotKeyConfSetDialog_t::cleanButtonCB(void)
 
 	if ( item )
 	{
-		item->setText(1, tr(""));
+		item->setText(1, QStringLiteral(""));
 	}
 
 	done(0);

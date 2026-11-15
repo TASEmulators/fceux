@@ -1116,10 +1116,10 @@ void TasEditorWindow::buildSideControlPanel(void)
 	recSuperImposeCbox = new QCheckBox( tr("Superimpose") );
 	recUsePatternCbox  = new QCheckBox( tr("Use Pattern") );
 	recAllBtn          = new QRadioButton( tr("All") );
-	rec1PBtn           = new QRadioButton( tr("1P") );
-	rec2PBtn           = new QRadioButton( tr("2P") );
-	rec3PBtn           = new QRadioButton( tr("3P") );
-	rec4PBtn           = new QRadioButton( tr("4P") );
+	rec1PBtn           = new QRadioButton( QStringLiteral("1P") );
+	rec2PBtn           = new QRadioButton( QStringLiteral("2P") );
+	rec3PBtn           = new QRadioButton( QStringLiteral("3P") );
+	rec4PBtn           = new QRadioButton( QStringLiteral("4P") );
 
 	selectionLbl = new QLabel( tr("Empty") );
 	clipboardLbl = new QLabel( tr("Empty") );
@@ -1666,7 +1666,7 @@ bool TasEditorWindow::saveProjectAs(bool save_compact)
 
 		dialog.setDirectory( d.absolutePath() );
 	}
-	dialog.setDefaultSuffix( tr(".fm3") );
+	dialog.setDefaultSuffix( QStringLiteral(".fm3") );
 
 	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
 	if ( lastPath.size() > 0 )
@@ -1813,7 +1813,7 @@ void TasEditorWindow::openProject(void)
 
 		dialog.setDirectory( d.absolutePath() );
 	}
-	dialog.setDefaultSuffix( tr(".fm3") );
+	dialog.setDefaultSuffix( QStringLiteral(".fm3") );
 
 	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
 	if ( lastPath.size() > 0 )
@@ -2095,7 +2095,7 @@ void TasEditorWindow::importMovieFile(void)
 
 		dialog.setDirectory( d.absolutePath() );
 	}
-	dialog.setDefaultSuffix( tr(".fm2") );
+	dialog.setDefaultSuffix( QStringLiteral(".fm2") );
 
 	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
 	if ( lastPath.size() > 0 )
@@ -2215,7 +2215,7 @@ void TasEditorWindow::exportMovieFile(void)
 
 		dialog.setDirectory( d.absolutePath() );
 	}
-	dialog.setDefaultSuffix( tr(".fm2") );
+	dialog.setDefaultSuffix( QStringLiteral(".fm2") );
 
 	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
 	if ( lastPath.size() > 0 )
@@ -2483,7 +2483,7 @@ bool TasEditorWindow::saveCompactGetFilename( QString &outputFilePath )
 
 		dialog.setDirectory( d.absolutePath() );
 	}
-	dialog.setDefaultSuffix( tr(".fm3") );
+	dialog.setDefaultSuffix( QStringLiteral(".fm3") );
 
 	g_config->getOption ("SDL.TasProjectFilePath", &lastPath);
 	if ( lastPath.size() > 0 )
@@ -3073,37 +3073,37 @@ void TasEditorWindow::updateToolTips(void)
 	}
 	else
 	{
-		upperMarkerLabel->setToolTip( tr("") );
-		lowerMarkerLabel->setToolTip( tr("") );
-		upperMarkerNote->setToolTip( tr("") );
-		lowerMarkerNote->setToolTip( tr("") );
+		upperMarkerLabel->setToolTip( QStringLiteral("") );
+		lowerMarkerLabel->setToolTip( QStringLiteral("") );
+		upperMarkerNote->setToolTip( QStringLiteral("") );
+		lowerMarkerNote->setToolTip( QStringLiteral("") );
 
-		recRecordingCbox->setToolTip( tr("") );
-		recSuperImposeCbox->setToolTip( tr("") );
-		recUsePatternCbox->setToolTip( tr("") );
-		recAllBtn->setToolTip( tr("") );
-		rec1PBtn->setToolTip( tr("") );
-		rec2PBtn->setToolTip( tr("") );
-		rec3PBtn->setToolTip( tr("") );
-		rec4PBtn->setToolTip( tr("") );
+		recRecordingCbox->setToolTip( QStringLiteral("") );
+		recSuperImposeCbox->setToolTip( QStringLiteral("") );
+		recUsePatternCbox->setToolTip( QStringLiteral("") );
+		recAllBtn->setToolTip( QStringLiteral("") );
+		rec1PBtn->setToolTip( QStringLiteral("") );
+		rec2PBtn->setToolTip( QStringLiteral("") );
+		rec3PBtn->setToolTip( QStringLiteral("") );
+		rec4PBtn->setToolTip( QStringLiteral("") );
 
-		rewindMkrBtn->setToolTip( tr("") );
-		rewindFrmBtn->setToolTip( tr("") );
-		playPauseBtn->setToolTip( tr("") );
-		   advFrmBtn->setToolTip( tr("") );
-		   advMkrBtn->setToolTip( tr("") );
+		rewindMkrBtn->setToolTip( QStringLiteral("") );
+		rewindFrmBtn->setToolTip( QStringLiteral("") );
+		playPauseBtn->setToolTip( QStringLiteral("") );
+		   advFrmBtn->setToolTip( QStringLiteral("") );
+		   advMkrBtn->setToolTip( QStringLiteral("") );
 
-		followCursorCbox->setToolTip( tr("") );
-		   turboSeekCbox->setToolTip( tr("") );
-		 autoRestoreCbox->setToolTip( tr("") );
+		followCursorCbox->setToolTip( QStringLiteral("") );
+		   turboSeekCbox->setToolTip( QStringLiteral("") );
+		 autoRestoreCbox->setToolTip( QStringLiteral("") );
 
-		 selectionLbl->setToolTip( tr("") );
-		 clipboardLbl->setToolTip( tr("") );
+		 selectionLbl->setToolTip( QStringLiteral("") );
+		 clipboardLbl->setToolTip( QStringLiteral("") );
 
-		 prevMkrBtn->setToolTip( tr("") );
-		 nextMkrBtn->setToolTip( tr("") );
-		 similarBtn->setToolTip( tr("") );
-		    moreBtn->setToolTip( tr("") );
+		 prevMkrBtn->setToolTip( QStringLiteral("") );
+		 nextMkrBtn->setToolTip( QStringLiteral("") );
+		 similarBtn->setToolTip( QStringLiteral("") );
+		    moreBtn->setToolTip( QStringLiteral("") );
 	}
 }
 //----------------------------------------------------------------------------
@@ -4321,7 +4321,7 @@ void QPianoRoll::calcFontData(void)
 	pxWidthBtnCol   =  3 * pxCharWidth;
 	pxWidthCtlCol   =  8 * pxWidthBtnCol;
 
-	rect = metrics.boundingRect( tr("000000000") );
+	rect = metrics.boundingRect( QStringLiteral("000000000") );
 
 	//printf("FrameWidth:  %i   %i\n", pxWidthFrameCol, rect.width() );
 	if ( pxWidthFrameCol < rect.width() )
@@ -4773,7 +4773,7 @@ void QPianoRoll::contextMenuEvent(QContextMenuEvent *event)
 
 	act = new QAction(tr("Deselect"), &menu);
 	menu.addAction(act);
-	//act->setShortcut(QKeySequence(tr("D")));
+	//act->setShortcut(QKeySequence(QStringLiteral("D")));
 	connect(act, SIGNAL(triggered(void)), tasWin, SLOT(editDeselectAll(void)));
 
 	act = new QAction(tr("Select between markers"), &menu);
@@ -6637,9 +6637,9 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 				}
 				else if ( hotChangeVal > 0 )
 				{
-					painter.drawText( x + pxCharWidth, y+pxLineTextOfs, tr("-") );
-					//painter.drawText( rect, Qt::AlignCenter, tr("-") );
-					//painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, tr("-") );
+					painter.drawText( x + pxCharWidth, y+pxLineTextOfs, QStringLiteral("-") );
+					//painter.drawText( rect, Qt::AlignCenter, QStringLiteral("-") );
+					//painter.drawText( rect, Qt::AlignHCenter | Qt::AlignBottom, QStringLiteral("-") );
 				}
 				x += pxWidthBtnCol;
 			}

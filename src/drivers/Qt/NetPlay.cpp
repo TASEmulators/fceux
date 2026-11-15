@@ -2828,12 +2828,12 @@ void NetPlayHostStatusDialog::onClientTreeContextMenu(const QPoint &pos)
 	printf("Custom Menu (%i,%i)\n", pos.x(), pos.y());
 
 	act = new QAction(tr("Resync Client"), &menu);
-	//act->setShortcut( QKeySequence(tr("R")));
+	//act->setShortcut( QKeySequence(QStringLiteral("R")));
 	//connect( act, SIGNAL(triggered(void)), this, SLOT(openTileEditor(void)) );
 	menu.addAction( act );
 
 	act = new QAction(tr("Drop Client"), &menu);
-	//act->setShortcut( QKeySequence(tr("D")));
+	//act->setShortcut( QKeySequence(QStringLiteral("D")));
 	//connect( act, SIGNAL(triggered(void)), this, SLOT(openTileEditor(void)) );
 	menu.addAction( act );
 

@@ -4457,10 +4457,10 @@ void LibgwaviOptionsPage::initCodecLists(void)
 	videoEncSel->addItem( tr("RGB24 (Uncompressed)"), AVI_RGB24 );
 	videoEncSel->addItem( tr("I420  (YUV 4:2:0)")   , AVI_I420  );
 	#ifdef _USE_X264
-	videoEncSel->addItem( tr("X264  (H.264)")   , AVI_X264  );
+	videoEncSel->addItem( QStringLiteral("X264  (H.264)")   , AVI_X264  );
 	#endif
 	#ifdef _USE_X265
-	videoEncSel->addItem( tr("X265  (H.265)")   , AVI_X265  );
+	videoEncSel->addItem( QStringLiteral("X265  (H.265)")   , AVI_X265  );
 	#endif
 	#ifdef WIN32
 	videoEncSel->addItem( tr("VfW (Video for Windows)"), AVI_VFW);
@@ -4492,23 +4492,23 @@ void LibgwaviOptionsPage::initPixelFormatSelect( int encoder )
 	{
 		default:
 		case AVI_I420:
-			videoPixfmt->addItem( tr("YUV 420"), AVI_I420 );
+			videoPixfmt->addItem( QStringLiteral("YUV 420"), AVI_I420 );
 		break;
 #ifdef _USE_X264
 		case AVI_X264:
-			videoPixfmt->addItem( tr("YUV 420"), AVI_I420 );
+			videoPixfmt->addItem( QStringLiteral("YUV 420"), AVI_I420 );
 		break;
 #endif
 #ifdef _USE_X265
 		case AVI_X265:
-			videoPixfmt->addItem( tr("YUV 420"), AVI_I420 );
+			videoPixfmt->addItem( QStringLiteral("YUV 420"), AVI_I420 );
 		break;
 #endif
 #ifdef WIN32
 		case AVI_VFW:
 #endif
 		case AVI_RGB24:
-			videoPixfmt->addItem( tr("RGB24"), AVI_RGB24 );
+			videoPixfmt->addItem( QStringLiteral("RGB24"), AVI_RGB24 );
 		break;
 	}
 }

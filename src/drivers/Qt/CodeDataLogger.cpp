@@ -163,12 +163,12 @@ CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
 	frame = new QGroupBox(tr("Code/Data Log Status"));
 	frame->setLayout(vbox1);
 
-	prgLoggedCodeLabel = new QLabel(tr("0x000000 0.00%"));
-	prgLoggedDataLabel = new QLabel(tr("0x000000 0.00%"));
-	prgUnloggedLabel = new QLabel(tr("0x000000 0.00%"));
-	chrLoggedCodeLabel = new QLabel(tr("0x000000 0.00%"));
-	chrLoggedDataLabel = new QLabel(tr("0x000000 0.00%"));
-	chrUnloggedLabel = new QLabel(tr("0x000000 0.00%"));
+	prgLoggedCodeLabel = new QLabel(QStringLiteral("0x000000 0.00%"));
+	prgLoggedDataLabel = new QLabel(QStringLiteral("0x000000 0.00%"));
+	prgUnloggedLabel = new QLabel(QStringLiteral("0x000000 0.00%"));
+	chrLoggedCodeLabel = new QLabel(QStringLiteral("0x000000 0.00%"));
+	chrLoggedDataLabel = new QLabel(QStringLiteral("0x000000 0.00%"));
+	chrUnloggedLabel = new QLabel(QStringLiteral("0x000000 0.00%"));
 	autoSaveCdlCbox = new QCheckBox(tr("Auto-save .CDL when closing ROMs"));
 	autoLoadCdlCbox = new QCheckBox(tr("Auto-load .CDL when opening this window"));
 	autoResumeLogCbox = new QCheckBox(tr("Auto-resume logging when loading ROMs"));
@@ -394,12 +394,12 @@ void CodeDataLoggerDialog_t::updatePeriodic(void)
 	}
 	else
 	{
-		prgLoggedCodeLabel->setText(tr("------"));
-		prgLoggedDataLabel->setText(tr("------"));
-		prgUnloggedLabel->setText(tr("------"));
-		chrLoggedCodeLabel->setText(tr("------"));
-		chrLoggedDataLabel->setText(tr("------"));
-		chrUnloggedLabel->setText(tr("------"));
+		prgLoggedCodeLabel->setText(QStringLiteral("------"));
+		prgLoggedDataLabel->setText(QStringLiteral("------"));
+		prgUnloggedLabel->setText(QStringLiteral("------"));
+		chrLoggedCodeLabel->setText(QStringLiteral("------"));
+		chrLoggedDataLabel->setText(QStringLiteral("------"));
+		chrUnloggedLabel->setText(QStringLiteral("------"));
 	}
 
 	snprintf(str, sizeof(str), "CDL File: %s", loadedcdfile);
@@ -447,7 +447,7 @@ void CodeDataLoggerDialog_t::saveCdlFileAs(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter(QDir::AllEntries | QDir::AllDirs | QDir::Hidden);
 	dialog.setLabelText(QFileDialog::Accept, tr("Save"));
-	dialog.setDefaultSuffix(tr(".cdl"));
+	dialog.setDefaultSuffix(QStringLiteral(".cdl"));
 
 	romFile = getRomFile();
 
@@ -581,12 +581,12 @@ void CodeDataLoggerDialog_t::SaveStrippedROM(int invert)
 	if (GameInfo->type == GIT_NSF)
 	{
 		dialog.setNameFilter(tr("NSF Files (*.nsf *.NSF) ;; All files (*)"));
-		dialog.setDefaultSuffix(tr(".nsf"));
+		dialog.setDefaultSuffix(QStringLiteral(".nsf"));
 	}
 	else
 	{
 		dialog.setNameFilter(tr("NES Files (*.nes *.NES) ;; All files (*)"));
-		dialog.setDefaultSuffix(tr(".nes"));
+		dialog.setDefaultSuffix(QStringLiteral(".nes"));
 	}
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter(QDir::AllEntries | QDir::AllDirs | QDir::Hidden);

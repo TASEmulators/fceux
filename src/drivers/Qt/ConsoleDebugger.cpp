@@ -575,7 +575,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Options -> Font Selection -> Assembly View
 	act = new QAction(tr("&Assembly View"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Set Assembly View Font"));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(changeAsmFontCB(void)) );
 
@@ -583,7 +583,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// View -> Font Selection -> Stack View
 	act = new QAction(tr("&Stack View"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Set Stack View Font"));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(changeStackFontCB(void)) );
 
@@ -591,7 +591,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// View -> Font Selection -> CPU Data View
 	act = new QAction(tr("&CPU Data View"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Set CPU View Font"));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(changeCpuFontCB(void)) );
 
@@ -700,7 +700,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption( "SDL.AsmShowByteCodes", &opt );
 
 	act = new QAction(tr("Show &Byte Codes"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Show &Byte Codes"));
 	act->setCheckable(true);
 	act->setChecked(opt);
@@ -712,7 +712,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption( "SDL.AsmShowTraceData", &opt );
 
 	act = new QAction(tr("Show &Trace Data"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Show &Trace Data"));
 	act->setCheckable(true);
 	act->setChecked(opt);
@@ -724,7 +724,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption( "SDL.AsmShowRomOffsets", &opt );
 
 	act = new QAction(tr("Show ROM &Offsets"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Show ROM &Offsets"));
 	act->setCheckable(true);
 	act->setChecked(opt);
@@ -737,7 +737,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Run
 	dbgRunAct[0] = act = new QAction(tr("&Run"), this);
-	act->setShortcut(QKeySequence( tr("F5") ) );
+	act->setShortcut(QKeySequence( QStringLiteral("F5") ) );
 	act->setStatusTip(tr("Run"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
 	act->setIcon( QIcon(":icons/debug-run.png") );
@@ -747,7 +747,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Pause
 	dbgPauseAct[0] = act = new QAction(tr("&Pause"), this);
-	act->setShortcut(QKeySequence( tr("F6") ) );
+	act->setShortcut(QKeySequence( QStringLiteral("F6") ) );
 	act->setStatusTip(tr("Pause"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPause ) );
 	act->setIcon( QIcon(":icons/debug-pause.png") );
@@ -757,7 +757,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Step Into
 	act = new QAction(tr("Step &Into"), this);
-	act->setShortcut(QKeySequence( tr("F11") ) );
+	act->setShortcut(QKeySequence( QStringLiteral("F11") ) );
 	act->setStatusTip(tr("Step Into"));
 	act->setIcon( QIcon(":icons/StepInto.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
@@ -775,7 +775,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Step Over
 	act = new QAction(tr("Step &Over"), this);
-	act->setShortcut(QKeySequence( tr("F10") ) );
+	act->setShortcut(QKeySequence( QStringLiteral("F10") ) );
 	act->setStatusTip(tr("Step Over"));
 	act->setIcon( QIcon(":icons/StepOver.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
@@ -784,7 +784,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Step Back
 	stepBackMenuAct = act = new QAction(tr("Step &Back"), this);
-	act->setShortcut(QKeySequence( tr("F9") ) );
+	act->setShortcut(QKeySequence( QStringLiteral("F9") ) );
 	act->setStatusTip(tr("Step Back"));
 	act->setIcon( QIcon(":icons/StepBack.png") );
 	act->setEnabled(false);
@@ -794,7 +794,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Run to Selected Line
 	act = new QAction(tr("Run to S&elected Line"), this);
-	act->setShortcut(QKeySequence( tr("F1") ) );
+	act->setShortcut(QKeySequence( QStringLiteral("F1") ) );
 	act->setStatusTip(tr("Run to Selected Line"));
 	act->setIcon( QIcon(":icons/arrow-cursor.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunToCursorCB(void)) );
@@ -803,7 +803,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Run Line
 	act = new QAction(tr("Run &Line"), this);
-	act->setShortcut(QKeySequence( tr("F7") ) );
+	act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Run Line"));
 	act->setIcon( QIcon(":icons/RunPpuScanline.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
@@ -812,7 +812,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Run 128 Lines
 	act = new QAction(tr("Run &128 Lines"), this);
-	act->setShortcut(QKeySequence( tr("F8") ) );
+	act->setShortcut(QKeySequence( QStringLiteral("F8") ) );
 	act->setStatusTip(tr("Run 128 Lines"));
 	act->setIcon( QIcon(":icons/RunPpuHalfFrame.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
@@ -827,7 +827,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption("SDL.DebuggerBreakOnBadOpcodes", &FCEUI_Debugger().badopbreak );
 
 	act = new QAction(tr("Bad &Opcodes"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Bad Opcodes"));
 	act->setCheckable(true);
 	act->setChecked( FCEUI_Debugger().badopbreak );
@@ -839,7 +839,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption("SDL.DebuggerBreakOnUnloggedCode", &break_on_unlogged_code );
 
 	act = new QAction(tr("Unlogged &Code"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Unlogged Code"));
 	act->setCheckable(true);
 	act->setChecked( break_on_unlogged_code );
@@ -851,7 +851,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption("SDL.DebuggerBreakOnUnloggedData", &break_on_unlogged_data );
 
 	act = new QAction(tr("Unlogged &Data"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Unlogged Data"));
 	act->setCheckable(true);
 	act->setChecked( break_on_unlogged_data );
@@ -861,7 +861,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Break on -> Cycle Count Exceeded
 	brkOnCycleExcAct = act = new QAction(tr("C&ycle Count Exceeded"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("CPU Cycle Count Exceeded"));
 	act->setCheckable(true);
 	act->setChecked( break_on_cycles );
@@ -871,7 +871,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Break on -> Instruction Count Exceeded
 	brkOnInstrExcAct = act = new QAction(tr("&Instruction Count Exceeded"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("CPU Instruction Count Exceeded"));
 	act->setCheckable(true);
 	act->setChecked( break_on_instructions );
@@ -883,7 +883,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Debug -> Reset Counters
 	act = new QAction(tr("Reset &Counters"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Reset Counters"));
 	act->setCheckable(false);
 	act->setIcon( style()->standardIcon( QStyle::SP_BrowserReload ) );
@@ -898,7 +898,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption( "SDL.AutoOpenDebugger", &opt );
 
 	act = new QAction(tr("&Open Debugger on ROM Load"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("&Reload"));
 	act->setCheckable(true);
 	act->setChecked( opt ? true : false );
@@ -910,7 +910,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption( "SDL.AutoLoadDebugFiles", &opt );
 
 	act = new QAction(tr("&Load .FDB on ROM Load"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("&Load .FDB on ROM Load"));
 	act->setCheckable(true);
 	act->setChecked( opt ? true : false );
@@ -922,7 +922,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption( "SDL.DebugAutoStartTraceLogger", &opt );
 
 	act = new QAction(tr("Auto Start &Trace Logger on Debugger Open"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Auto Start &Trace Logger on Debugger Open"));
 	act->setCheckable(true);
 	act->setChecked( opt ? true : false );
@@ -937,7 +937,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Symbols -> Reload
 	act = new QAction(tr("&Reload"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("&Reload"));
 	//act->setCheckable(true);
 	//act->setChecked( break_on_unlogged_data );
@@ -947,7 +947,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 
 	// Symbols -> Save
 	act = new QAction(tr("&Save"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("&Save"));
 	//act->setCheckable(true);
 	//act->setChecked( break_on_unlogged_data );
@@ -961,7 +961,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption( "SDL.DebuggerShowSymNames", &opt );
 
 	act = new QAction(tr("&Symbolic Debug"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("&Symbolic Debug"));
 	act->setCheckable(true);
 	act->setChecked(opt);
@@ -973,7 +973,7 @@ QMenuBar *ConsoleDebugger::buildMenuBar(void)
 	g_config->getOption( "SDL.DebuggerShowRegNames", &opt );
 
 	act = new QAction(tr("&Register Names"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("&Register Names"));
 	act->setCheckable(true);
 	act->setChecked(opt);
@@ -1012,7 +1012,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 
 	// Debug -> Run
 	dbgRunAct[1] = act = new QAction(tr("&Run (F5)"), this);
-	//act->setShortcut(QKeySequence( tr("F5") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F5") ) );
 	act->setStatusTip(tr("Run"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
 	act->setIcon( QIcon(":icons/debug-run.png") );
@@ -1022,7 +1022,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 
 	// Debug -> Pause
 	dbgPauseAct[1] = act = new QAction(tr("&Pause (F6)"), this);
-	//act->setShortcut(QKeySequence( tr("F6") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F6") ) );
 	act->setStatusTip(tr("Pause"));
 	//act->setIcon( style()->standardIcon( QStyle::SP_MediaPause ) );
 	act->setIcon( QIcon(":icons/debug-pause.png") );
@@ -1032,7 +1032,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 
 	// Debug -> Step Back
 	stepBackToolAct = act = new QAction(tr("Step &Back (F9)"), this);
-	//act->setShortcut(QKeySequence( tr("F9") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F9") ) );
 	act->setStatusTip(tr("Step Back"));
 	act->setIcon( QIcon(":icons/StepBack.png") );
 	act->setEnabled(false);
@@ -1042,7 +1042,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 
 	// Debug -> Step Into
 	act = new QAction(tr("Step &Into (F11)"), this);
-	//act->setShortcut(QKeySequence( tr("F11") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F11") ) );
 	act->setStatusTip(tr("Step Into"));
 	act->setIcon( QIcon(":icons/StepInto.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepIntoCB(void)) );
@@ -1060,7 +1060,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 
 	// Debug -> Step Over
 	act = new QAction(tr("Step &Over (F10)"), this);
-	//act->setShortcut(QKeySequence( tr("F10") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F10") ) );
 	act->setStatusTip(tr("Step Over"));
 	act->setIcon( QIcon(":icons/StepOver.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugStepOverCB(void)) );
@@ -1071,7 +1071,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 
 	// Debug -> Run Line
 	act = new QAction(tr("Run &Line (F7)"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Run Line"));
 	act->setIcon( QIcon(":icons/RunPpuScanline.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLineCB(void)) );
@@ -1080,7 +1080,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 
 	// Debug -> Run 128 Lines
 	act = new QAction(tr("Run &128 Lines (F8)"), this);
-	//act->setShortcut(QKeySequence( tr("F8") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F8") ) );
 	act->setStatusTip(tr("Run 128 Lines"));
 	act->setIcon( QIcon(":icons/RunPpuHalfFrame.png") );
 	connect( act, SIGNAL(triggered()), this, SLOT(debugRunLine128CB(void)) );
@@ -1091,7 +1091,7 @@ QToolBar *ConsoleDebugger::buildToolBar(void)
 
 	// Debug -> Reset Counters
 	act = new QAction(tr("Reset &Counters"), this);
-	//act->setShortcut(QKeySequence( tr("F7") ) );
+	//act->setShortcut(QKeySequence( QStringLiteral("F7") ) );
 	act->setStatusTip(tr("Reset Counters"));
 	act->setIcon( style()->standardIcon( QStyle::SP_BrowserReload ) );
 	connect( act, SIGNAL(triggered(void)), this, SLOT(resetCountersCB(void)) );
@@ -1203,7 +1203,7 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	//connect( button, SIGNAL(clicked(void)), this, SLOT(seekPCCB(void)) );
 
 	hbox = new QHBoxLayout();
-	lbl  = new QLabel( tr("A:") );
+	lbl  = new QLabel( QStringLiteral("A:") );
 	lbl->setToolTip( tr("Accumulator Register") );
 	regAEntry = new DebuggerStatusEdit(4, 4);
 	regAEntry->setFont( cpuFont );
@@ -1216,7 +1216,7 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	grid->addLayout( hbox, 0, 1 );
 
 	hbox = new QHBoxLayout();
-	lbl  = new QLabel( tr("X:") );
+	lbl  = new QLabel( QStringLiteral("X:") );
 	lbl->setToolTip( tr("X Index Register") );
 	regXEntry = new DebuggerStatusEdit(4, 4);
 	regXEntry->setFont( cpuFont );
@@ -1229,7 +1229,7 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	grid->addLayout( hbox, 0, 2 );
 
 	hbox = new QHBoxLayout();
-	lbl  = new QLabel( tr("Y:") );
+	lbl  = new QLabel( QStringLiteral("Y:") );
 	lbl->setToolTip( tr("Y Index Register") );
 	regYEntry = new DebuggerStatusEdit(4, 4);
 	regYEntry->setFont( cpuFont );
@@ -1242,7 +1242,7 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	grid->addLayout( hbox, 0, 3 );
 
 	QHBoxLayout *regPHbox = new QHBoxLayout();
-	lbl  = new QLabel( tr("P:") );
+	lbl  = new QLabel( QStringLiteral("P:") );
 	lbl->setToolTip( tr("Status Register") );
 	regPEntry = new DebuggerStatusEdit(4, 4);
 	regPEntry->setFont( cpuFont );
@@ -1255,15 +1255,15 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	//grid->addLayout( regPHbox, 0, 4 );
 
 	cpuCyclesLbl1 = new QLabel( tr("CPU Cycles:") );
-	//cpuCyclesLbl2 = new QLabel( tr("(+0):") );
-	cpuCyclesVal  = new QLineEdit( tr("(+0):") );
+	//cpuCyclesLbl2 = new QLabel( QStringLiteral("(+0):") );
+	cpuCyclesVal  = new QLineEdit( QStringLiteral("(+0):") );
 	cpuInstrsLbl1 = new QLabel( tr("Instructions:") );
-	//cpuInstrsLbl2 = new QLabel( tr("(+0):") );
-	cpuInstrsVal  = new QLineEdit( tr("(+0):") );
+	//cpuInstrsLbl2 = new QLabel( QStringLiteral("(+0):") );
+	cpuInstrsVal  = new QLineEdit( QStringLiteral("(+0):") );
 	//brkCpuCycExd  = new QCheckBox( tr("Break when Exceed") );
 	//brkInstrsExd  = new QCheckBox( tr("Break when Exceed") );
-	//cpuCycExdVal  = new QLineEdit( tr("0") );
-	//instrExdVal   = new QLineEdit( tr("0") );
+	//cpuCycExdVal  = new QLineEdit( QStringLiteral("0") );
+	//instrExdVal   = new QLineEdit( QStringLiteral("0") );
 
 	cpuCyclesVal->setFont(cpuFont);
 	cpuCyclesVal->setReadOnly(true);
@@ -1305,14 +1305,14 @@ void ConsoleDebugger::buildCpuListDisplay(void)
 	sfFrame->setLayout( grid );
 	sfFrame->setSizePolicy( QSizePolicy::Maximum, QSizePolicy::Maximum );
 
-	N_chkbox = new QCheckBox( tr("N") );
-	V_chkbox = new QCheckBox( tr("V") );
-	U_chkbox = new QCheckBox( tr("U") );
-	B_chkbox = new QCheckBox( tr("B") );
-	D_chkbox = new QCheckBox( tr("D") );
-	I_chkbox = new QCheckBox( tr("I") );
-	Z_chkbox = new QCheckBox( tr("Z") );
-	C_chkbox = new QCheckBox( tr("C") );
+	N_chkbox = new QCheckBox( QStringLiteral("N") );
+	V_chkbox = new QCheckBox( QStringLiteral("V") );
+	U_chkbox = new QCheckBox( QStringLiteral("U") );
+	B_chkbox = new QCheckBox( QStringLiteral("B") );
+	D_chkbox = new QCheckBox( QStringLiteral("D") );
+	I_chkbox = new QCheckBox( QStringLiteral("I") );
+	Z_chkbox = new QCheckBox( QStringLiteral("Z") );
+	C_chkbox = new QCheckBox( QStringLiteral("C") );
 
 	N_chkbox->setToolTip( tr("Negative" ) );
 	V_chkbox->setToolTip( tr("Overflow" ) );
@@ -1609,11 +1609,11 @@ void ConsoleDebugger::loadDisplayViews( QSettings &settings, const QString &pref
 
 					if ( tabList[k].compare( cpuFrame->objectName() ) == 0 )
 					{
-						tabView[i][j]->addTab( cpuFrame, tr("CPU") );
+						tabView[i][j]->addTab( cpuFrame, QStringLiteral("CPU") );
 					}
 					else if ( tabList[k].compare( ppuFrame->objectName() ) == 0 )
 					{
-						tabView[i][j]->addTab( ppuFrame, tr("PPU") );
+						tabView[i][j]->addTab( ppuFrame, QStringLiteral("PPU") );
 					}
 					else if ( tabList[k].compare( bpFrame->objectName() ) == 0 )
 					{
@@ -1630,11 +1630,11 @@ void ConsoleDebugger::loadDisplayViews( QSettings &settings, const QString &pref
 
 	if ( !frameInDisplayTabs( cpuFrame ) )
 	{
-		tabView[0][0]->addTab( cpuFrame, tr("CPU") );
+		tabView[0][0]->addTab( cpuFrame, QStringLiteral("CPU") );
 	}
 	if ( !frameInDisplayTabs( ppuFrame ) )
 	{
-		tabView[0][0]->addTab( ppuFrame, tr("PPU") );
+		tabView[0][0]->addTab( ppuFrame, QStringLiteral("PPU") );
 	}
 	if ( !frameInDisplayTabs( bpFrame ) )
 	{
@@ -1947,7 +1947,7 @@ DebuggerBreakpointEditor::DebuggerBreakpointEditor(int editIndex, watchpointinfo
 	hbox->addWidget( lbl );
 	hbox->addWidget( addr1 );
 
-	lbl   = new QLabel( tr("-") );
+	lbl   = new QLabel( QStringLiteral("-") );
 	addr2 = new QLineEdit();
 	hbox->addWidget( lbl );
 	hbox->addWidget( addr2 );
@@ -1981,10 +1981,10 @@ DebuggerBreakpointEditor::DebuggerBreakpointEditor(int editIndex, watchpointinfo
 	hbox->addWidget( ebp );
 	
 	hbox         = new QHBoxLayout();
-	cpu_radio    = new QRadioButton( tr("CPU") );
-	ppu_radio    = new QRadioButton( tr("PPU") );
-	oam_radio    = new QRadioButton( tr("OAM") );
-	rom_radio    = new QRadioButton( tr("ROM") );
+	cpu_radio    = new QRadioButton( QStringLiteral("CPU") );
+	ppu_radio    = new QRadioButton( QStringLiteral("PPU") );
+	oam_radio    = new QRadioButton( QStringLiteral("OAM") );
+	rom_radio    = new QRadioButton( QStringLiteral("ROM") );
 	cpu_radio->setChecked(true);
 
 	connect( cpu_radio, SIGNAL(toggled(bool)), this, SLOT(typeChanged(bool)));
@@ -3254,8 +3254,8 @@ void ConsoleDebugger::setLayoutOption( int opt )
 		default:
 		case 1:
 		{
-			tabView[0][0]->addTab( cpuFrame, tr("CPU") );
-			tabView[0][0]->addTab( ppuFrame, tr("PPU") );
+			tabView[0][0]->addTab( cpuFrame, QStringLiteral("CPU") );
+			tabView[0][0]->addTab( ppuFrame, QStringLiteral("PPU") );
 			tabView[0][0]->addTab(  bpFrame, tr("Breakpoints") );
 			tabView[0][0]->addTab(  bmFrame, tr("BookMarks") );
 			tabView[0][0]->setVisible(true);
@@ -3263,8 +3263,8 @@ void ConsoleDebugger::setLayoutOption( int opt )
 		break;
 		case 2:
 		{
-			tabView[0][0]->addTab( cpuFrame, tr("CPU") );
-			tabView[0][0]->addTab( ppuFrame, tr("PPU") );
+			tabView[0][0]->addTab( cpuFrame, QStringLiteral("CPU") );
+			tabView[0][0]->addTab( ppuFrame, QStringLiteral("PPU") );
 			tabView[0][1]->addTab(  bpFrame, tr("Breakpoints") );
 			tabView[0][1]->addTab(  bmFrame, tr("BookMarks") );
 
@@ -3283,8 +3283,8 @@ void ConsoleDebugger::setLayoutOption( int opt )
 		break;
 		case 3:
 		{
-			tabView[0][0]->addTab( cpuFrame, tr("CPU") );
-			tabView[0][1]->addTab( ppuFrame, tr("PPU") );
+			tabView[0][0]->addTab( cpuFrame, QStringLiteral("CPU") );
+			tabView[0][1]->addTab( ppuFrame, QStringLiteral("PPU") );
 			tabView[1][0]->addTab(  bpFrame, tr("Breakpoints") );
 			tabView[1][0]->addTab(  bmFrame, tr("BookMarks") );
 
@@ -3312,8 +3312,8 @@ void ConsoleDebugger::setLayoutOption( int opt )
 		break;
 		case 4:
 		{
-			tabView[0][0]->addTab( cpuFrame, tr("CPU") );
-			tabView[0][1]->addTab( ppuFrame, tr("PPU") );
+			tabView[0][0]->addTab( cpuFrame, QStringLiteral("CPU") );
+			tabView[0][1]->addTab( ppuFrame, QStringLiteral("PPU") );
 			tabView[1][0]->addTab(  bpFrame, tr("Breakpoints") );
 			tabView[1][1]->addTab(  bmFrame, tr("BookMarks") );
 
@@ -6430,7 +6430,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 			act = new QAction(tr("Add &Breakpoint"), &menu);
 		}
 		menu.addAction(act);
-		act->setShortcut( QKeySequence(tr("B")));
+		act->setShortcut( QKeySequence(QStringLiteral("B")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBP(void)) );
 
 		int cpuAddr = getAsmAddrFromLine( getCtxMenuLine() );
@@ -6447,7 +6447,7 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 			act = new QAction(tr("Add &Symbolic Debug Marker"), &menu);
 		}
 	 	menu.addAction(act);
-		act->setShortcut( QKeySequence(tr("S")));
+		act->setShortcut( QKeySequence(QStringLiteral("S")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddSym(void)) );
 
 		if ( dbgBmMgr.getAddr( cpuAddr ) )
@@ -6459,12 +6459,12 @@ void QAsmView::contextMenuEvent(QContextMenuEvent *event)
 			act = new QAction(tr("Add Book&mark"), &menu);
 		}
 	 	menu.addAction(act);
-		act->setShortcut( QKeySequence(tr("M")));
+		act->setShortcut( QKeySequence(QStringLiteral("M")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuAddBM(void)) );
 		
 		act = new QAction(tr("Open &Hex Editor"), &menu);
 	 	menu.addAction(act);
-		act->setShortcut( QKeySequence(tr("H")));
+		act->setShortcut( QKeySequence(QStringLiteral("H")));
 		connect( act, SIGNAL(triggered(void)), parent, SLOT(asmViewCtxMenuOpenHexEdit(void)) );
 		
 		menu.exec(event->globalPos());
@@ -7365,7 +7365,7 @@ asmLookAheadPopup::asmLookAheadPopup( int addr, QWidget *parent )
 			hbox->addWidget( lbl, 1 );
 			hbox->addWidget( cpuAddr, 1 );
 
-			lbl = new QLabel( tr(" = ") );
+			lbl = new QLabel( QStringLiteral(" = ") );
 			lbl->setFont(font);
 			hbox->addWidget( lbl, 1 );
 			hbox->addWidget( cpuVal, 1 );
@@ -7394,7 +7394,7 @@ asmLookAheadPopup::asmLookAheadPopup( int addr, QWidget *parent )
 			hbox->addWidget( lbl, 1 );
 			hbox->addWidget( cpuAddr, 1 );
 
-			lbl = new QLabel( tr(" = ") );
+			lbl = new QLabel( QStringLiteral(" = ") );
 			lbl->setFont(font);
 			hbox->addWidget( lbl, 1 );
 			hbox->addWidget( cpuVal, 1 );
@@ -8037,11 +8037,11 @@ DebugBreakOnDialog::DebugBreakOnDialog(int type, QWidget *parent )
 	grid->addWidget( btn, 3, 4, 1, 2 );
 	connect( btn, SIGNAL(clicked(void)), this, SLOT(syncToCurrent(void)) );
 
-	btn = new QPushButton( tr("-1g") );
+	btn = new QPushButton( QStringLiteral("-1g") );
 	grid->addWidget( btn, 3, 0, 1, 1 );
 	connect( btn, &QPushButton::clicked, [ this ] { incrThreshold( -1e9 ); } );
 
-	btn = new QPushButton( tr("+1g") );
+	btn = new QPushButton( QStringLiteral("+1g") );
 	grid->addWidget( btn, 3, 1, 1, 1 );
 	connect( btn, &QPushButton::clicked, [ this ] { incrThreshold(  1e9 ); } );
 

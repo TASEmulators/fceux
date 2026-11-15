@@ -953,7 +953,7 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 	char stmp[64];
 
 	act = new QAction(tr("Open Tile &Editor"), &menu);
-	act->setShortcut( QKeySequence(tr("E")));
+	act->setShortcut( QKeySequence(QStringLiteral("E")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTileEditor(void)) );
 	menu.addAction( act );
 
@@ -962,7 +962,7 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 		snprintf( stmp, sizeof(stmp), "Exit Tile &View: %X%X", selTile.y(), selTile.x() );
 		
 		act = new QAction(tr(stmp), &menu);
-		act->setShortcut( QKeySequence(tr("Z")));
+		act->setShortcut( QKeySequence(QStringLiteral("Z")));
 		connect( act, SIGNAL(triggered(void)), this, SLOT(exitTileMode(void)) );
 		menu.addAction( act );
 	}
@@ -971,7 +971,7 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 		snprintf( stmp, sizeof(stmp), "&View Tile: %X%X", selTile.y(), selTile.x() );
 		
 		act = new QAction(tr(stmp), &menu);
-		act->setShortcut( QKeySequence(tr("Z")));
+		act->setShortcut( QKeySequence(QStringLiteral("Z")));
 		connect( act, SIGNAL(triggered(void)), this, SLOT(showTileMode(void)) );
 		menu.addAction( act );
 	}
@@ -979,12 +979,12 @@ void ppuPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 	act = new QAction(tr("Draw Tile &Grid Lines"), &menu);
 	act->setCheckable(true);
 	act->setChecked(drawTileGrid);
-	act->setShortcut( QKeySequence(tr("G")));
+	act->setShortcut( QKeySequence(QStringLiteral("G")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(toggleTileGridLines(void)) );
 	menu.addAction( act );
 
 	act = new QAction(tr("Next &Palette"), &menu);
-	act->setShortcut( QKeySequence(tr("P")));
+	act->setShortcut( QKeySequence(QStringLiteral("P")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(cycleNextPalette(void)) );
 	menu.addAction( act );
 
@@ -1780,12 +1780,12 @@ void tilePaletteView_t::contextMenuEvent(QContextMenuEvent *event)
 	act = new QAction(tr("Change Color"), &menu);
 	//act->setCheckable(true);
 	//act->setChecked(drawTileGrid);
-	//act->setShortcut( QKeySequence(tr("G")));
+	//act->setShortcut( QKeySequence(QStringLiteral("G")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openColorPicker(void)) );
 	menu.addAction( act );
 
 	act = new QAction(tr("Export ACT"), &menu);
-	//act->setShortcut( QKeySequence(tr("G")));
+	//act->setShortcut( QKeySequence(QStringLiteral("G")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(exportPaletteFileDialog(void)) );
 	menu.addAction( act );
 
@@ -1799,13 +1799,13 @@ void tilePaletteView_t::contextMenuEvent(QContextMenuEvent *event)
 
 		snprintf( stmp, sizeof(stmp), "Hex #%02X%02X%02X", palo[i].r, palo[i].g, palo[i].b );
 		act = new QAction(tr(stmp), &menu);
-		//act->setShortcut( QKeySequence(tr("G")));
+		//act->setShortcut( QKeySequence(QStringLiteral("G")));
 		connect( act, SIGNAL(triggered(void)), this, SLOT(copyColor2ClipBoardHex(void)) );
 		subMenu->addAction( act );
 
 		snprintf( stmp, sizeof(stmp), "rgb(%3i,%3i,%3i)", palo[i].r, palo[i].g, palo[i].b );
 		act = new QAction(tr(stmp), &menu);
-		//act->setShortcut( QKeySequence(tr("G")));
+		//act->setShortcut( QKeySequence(QStringLiteral("G")));
 		connect( act, SIGNAL(triggered(void)), this, SLOT(copyColor2ClipBoardRGB(void)) );
 		subMenu->addAction( act );
 	}
@@ -1871,7 +1871,7 @@ void tilePaletteView_t::exportPaletteFileDialog(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Export") );
-	dialog.setDefaultSuffix( tr(".act") );
+	dialog.setDefaultSuffix( QStringLiteral(".act") );
 
 	home = ::getenv("HOME");
 
@@ -2503,14 +2503,14 @@ void ppuTileView_t::contextMenuEvent(QContextMenuEvent *event)
 //      snprintf( stmp, sizeof(stmp), "Exit Tile View: %X%X", selTile.y(), selTile.x() );
 //
 //      act = new QAction(tr(stmp), &menu);
-//      act->setShortcut( QKeySequence(tr("Z")));
+//      act->setShortcut( QKeySequence(QStringLiteral("Z")));
 //	   connect( act, SIGNAL(triggered(void)), this, SLOT(exitTileMode(void)) );
 //      menu.addAction( act );
 //
 //      act = new QAction(tr("Draw Tile Grid Lines"), &menu);
 //      act->setCheckable(true);
 //      act->setChecked(drawTileGrid);
-//      act->setShortcut( QKeySequence(tr("G")));
+//      act->setShortcut( QKeySequence(QStringLiteral("G")));
 //	   connect( act, SIGNAL(triggered(void)), this, SLOT(toggleTileGridLines(void)) );
 //      menu.addAction( act );
 //   }
@@ -2519,18 +2519,18 @@ void ppuTileView_t::contextMenuEvent(QContextMenuEvent *event)
 //      snprintf( stmp, sizeof(stmp), "View Tile: %X%X", selTile.y(), selTile.x() );
 //
 //      act = new QAction(tr(stmp), &menu);
-//      act->setShortcut( QKeySequence(tr("Z")));
+//      act->setShortcut( QKeySequence(QStringLiteral("Z")));
 //	   connect( act, SIGNAL(triggered(void)), this, SLOT(showTileMode(void)) );
 //      menu.addAction( act );
 //   }
 //
 //	act = new QAction(tr("Open Tile Editor"), &menu);
-//   act->setShortcut( QKeySequence(tr("O")));
+//   act->setShortcut( QKeySequence(QStringLiteral("O")));
 //	connect( act, SIGNAL(triggered(void)), this, SLOT(openTileEditor(void)) );
 //   menu.addAction( act );
 //
 //   act = new QAction(tr("Next Palette"), &menu);
-//   act->setShortcut( QKeySequence(tr("P")));
+//   act->setShortcut( QKeySequence(QStringLiteral("P")));
 //	connect( act, SIGNAL(triggered(void)), this, SLOT(cycleNextPalette(void)) );
 //   menu.addAction( act );
 //
@@ -3474,7 +3474,7 @@ void oamPatternView_t::contextMenuEvent(QContextMenuEvent *event)
 	//char stmp[64];
 
 	act = new QAction(tr("Open PPU CHR &Viewer"), &menu);
-	//act->setShortcut( QKeySequence(tr("E")));
+	//act->setShortcut( QKeySequence(QStringLiteral("E")));
 	connect( act, SIGNAL(triggered(void)), this, SLOT(openTilePpuViewer(void)) );
 	menu.addAction( act );
 

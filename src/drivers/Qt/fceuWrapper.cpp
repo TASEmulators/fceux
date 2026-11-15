@@ -709,6 +709,8 @@ static void ShowUsage(const char *prog)
 	puts(DriverUsage);
 	puts ("--choose-config-location  Always open the storage location selector (no value required).\n"
 	      "                          Ignores FCEUX_CONFIG_DIR/FCEUX_HOME for this launch.");
+	puts ("--choose-language         Always open the language selector (no value required).\n"
+	      "                          Only has an effect when translations are available.");
 	puts ("--config-dir folder       Use this storage directory for this launch only; not remembered.\n"
 	      "                          Overrides FCEUX_CONFIG_DIR/FCEUX_HOME. Cannot be combined\n"
 	      "                          with --choose-config-location.");

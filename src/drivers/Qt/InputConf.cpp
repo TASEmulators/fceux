@@ -549,7 +549,7 @@ void InputConfDialog_t::openSavePresetFile(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter(QDir::AllEntries | QDir::AllDirs | QDir::Hidden);
 	dialog.setLabelText(QFileDialog::Accept, tr("Save"));
-	dialog.setDefaultSuffix(tr(".pre"));
+	dialog.setDefaultSuffix(QStringLiteral(".pre"));
 
 	romFile = getRomFile();
 

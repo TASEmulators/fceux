@@ -112,7 +112,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	driverSelect = new QComboBox();
 
 	driverSelect->addItem( tr("OpenGL"), ConsoleViewerBase::VIDEO_DRIVER_OPENGL );
-	driverSelect->addItem( tr("SDL"), ConsoleViewerBase::VIDEO_DRIVER_SDL );
+	driverSelect->addItem( QStringLiteral("SDL"), ConsoleViewerBase::VIDEO_DRIVER_SDL );
 	driverSelect->addItem( tr("QPainter"), ConsoleViewerBase::VIDEO_DRIVER_QPAINTER );
 #ifdef FCEUX_HAS_QT_VULKAN
 	driverSelect->addItem( tr("Vulkan"), ConsoleViewerBase::VIDEO_DRIVER_VULKAN );
@@ -174,8 +174,8 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 
 	regionSelect = new QComboBox();
 
-	regionSelect->addItem( tr("NTSC") , 0 );
-	regionSelect->addItem( tr("PAL")  , 1 );
+	regionSelect->addItem( QStringLiteral("NTSC") , 0 );
+	regionSelect->addItem( QStringLiteral("PAL")  , 1 );
 	regionSelect->addItem( tr("Dendy"), 2 );
 
 	setComboBoxFromProperty( regionSelect, "SDL.PAL");
@@ -219,7 +219,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	showGuiMsgs_cbx->setChecked( vidGuiMsgEna );
 
 	// Show FPS Checkbox
-	showFPS_cbx  = new QCheckBox( tr("FPS") );
+	showFPS_cbx  = new QCheckBox( QStringLiteral("FPS") );
 
 	// Show Frame Count Checkbox
 	showFrameCount_cbx  = new QCheckBox( tr("Frame Counter") );
@@ -270,9 +270,9 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	inputDisplaySel = new QComboBox();
 
 	inputDisplaySel->addItem( tr("None"), 0 );
-	inputDisplaySel->addItem( tr("1"), 1 );
-	inputDisplaySel->addItem( tr("1 & 2"), 2 );
-	inputDisplaySel->addItem( tr("1, 2, 3 & 4"), 4 );
+	inputDisplaySel->addItem( QStringLiteral("1"), 1 );
+	inputDisplaySel->addItem( QStringLiteral("1 & 2"), 2 );
+	inputDisplaySel->addItem( QStringLiteral("1, 2, 3 & 4"), 4 );
 
 	setComboBoxFromProperty( inputDisplaySel , "SDL.InputDisplay");
 
@@ -540,7 +540,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	connect( pal_start , SIGNAL(valueChanged(int)), this, SLOT(palStartScanLineChanged(int)));
 	connect( pal_end   , SIGNAL(valueChanged(int)), this, SLOT(palEndScanLineChanged(int)));
 
-	grid->addWidget( tipLabel( tr("NTSC")      , tr("Scanline range used while the region is NTSC.") )                   , 0, 1, Qt::AlignLeft);
+	grid->addWidget( tipLabel( QStringLiteral("NTSC")      , tr("Scanline range used while the region is NTSC.") )                   , 0, 1, Qt::AlignLeft);
 	grid->addWidget( tipLabel( tr("PAL/Dendy") , tr("Scanline range used while the region is PAL or Dendy.") )           , 0, 2, Qt::AlignLeft);
 	grid->addWidget( tipLabel( tr("First Line:"), tr("The first scanline of the picture that is shown. Lines above it are cut off.") ), 1, 0, Qt::AlignLeft);
 	grid->addWidget( tipLabel( tr("Last Line:") , tr("The last scanline of the picture that is shown. Lines below it are cut off.") ), 2, 0, Qt::AlignLeft);

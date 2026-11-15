@@ -1666,7 +1666,7 @@ void HexEditorDialog_t::saveRomFileAs(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
-	dialog.setDefaultSuffix( tr(".nes") );
+	dialog.setDefaultSuffix( QStringLiteral(".nes") );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
@@ -1708,7 +1708,7 @@ void HexEditorDialog_t::loadTableFromFile(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Load") );
-	dialog.setDefaultSuffix( tr(".tbl") );
+	dialog.setDefaultSuffix( QStringLiteral(".tbl") );
 
 	// Check config option to use native file dialog or not
 	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);

@@ -245,7 +245,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	}
 	hdrLayout->addLayout( hbox1 );
 
-	box   = new QGroupBox( tr("PRG") );
+	box   = new QGroupBox( QStringLiteral("PRG") );
 	grid  = new QGridLayout();
 
 	box->setLayout( grid );
@@ -270,7 +270,7 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	hbox->addWidget( prgNvRamBox, 0, Qt::AlignLeft );
 	hbox->addWidget( battNvRamBox, 0, Qt::AlignRight );
 
-	box   = new QGroupBox( tr("CHR") );
+	box   = new QGroupBox( QStringLiteral("CHR") );
 	grid  = new QGridLayout();
 
 	box->setLayout( grid );
@@ -375,8 +375,8 @@ iNesHeaderEditor_t::iNesHeaderEditor_t(QWidget *parent)
 	box->setLayout( vbox );
 	vbox2->addWidget( box );
 
-	ntscRegionBtn  = new QRadioButton( tr("NTSC") );
-	palRegionBtn   = new QRadioButton( tr("PAL") );
+	ntscRegionBtn  = new QRadioButton( QStringLiteral("NTSC") );
+	palRegionBtn   = new QRadioButton( QStringLiteral("PAL") );
 	dendyRegionBtn = new QRadioButton( tr("Dendy") );
 	dualRegionBtn  = new QRadioButton( tr("Dual") );
 
@@ -860,7 +860,7 @@ void iNesHeaderEditor_t::saveFileAs(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
-	dialog.setDefaultSuffix( tr(".nes") );
+	dialog.setDefaultSuffix( QStringLiteral(".nes") );
 
 	getDirFromFile( LoadedRomFName, dir );
 

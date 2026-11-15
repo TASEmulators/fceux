@@ -1224,7 +1224,7 @@ void consoleWin_t::createMainMenu(void)
 	
 	// File -> Quick Save
 	quickSaveAct = new QAction(tr("Quick &Save"), this);
-	//quickSaveAct->setShortcut( QKeySequence(tr("F5")));
+	//quickSaveAct->setShortcut( QKeySequence(QStringLiteral("F5")));
 	quickSaveAct->setStatusTip(tr("Quick save state to current save/load slot"));
 	quickSaveAct->setToolTip( quickSaveAct->statusTip() );
 	connect(quickSaveAct, SIGNAL(triggered()), this, SLOT(quickSave(void)) );
@@ -1387,7 +1387,7 @@ void consoleWin_t::createMainMenu(void)
 #ifdef _S9XLUA_H
 	// File -> Load Lua
 	loadLuaAct = new QAction(tr("Load &Lua Script"), this);
-	//loadLuaAct->setShortcut( QKeySequence(tr("F5")));
+	//loadLuaAct->setShortcut( QKeySequence(QStringLiteral("F5")));
 	loadLuaAct->setStatusTip(tr("Load Lua script via file dialog"));
 	loadLuaAct->setToolTip( loadLuaAct->statusTip() );
 	//loadLuaAct->setIcon( QIcon(":icons/lua-logo.png") );
@@ -1416,7 +1416,7 @@ void consoleWin_t::createMainMenu(void)
 
 	// File -> Screenshot
 	scrShotAct = new QAction(tr("Screens&hot"), this);
-	//scrShotAct->setShortcut( QKeySequence(tr("F12")));
+	//scrShotAct->setShortcut( QKeySequence(QStringLiteral("F12")));
 	const QString scrShotPath = FCEU_GetPath(FCEUMKF_SNAP).c_str();
 	scrShotAct->setStatusTip(tr("Takes a screenshot and saves it to: ") + scrShotPath);
 	scrShotAct->setToolTip( scrShotAct->statusTip() );
@@ -1943,7 +1943,7 @@ void consoleWin_t::createMainMenu(void)
 
 	// Emulation -> Speed -> Speed Up
 	act = new QAction(tr("Speed &Up"), this);
-	//act->setShortcut( QKeySequence(tr("=")));
+	//act->setShortcut( QKeySequence(QStringLiteral("=")));
 	act->setStatusTip(tr("Increase emulation speed."));
 	act->setToolTip( act->statusTip() );
 	act->setIcon( style()->standardIcon( QStyle::SP_MediaSeekForward ) );
@@ -1957,7 +1957,7 @@ void consoleWin_t::createMainMenu(void)
 
 	// Emulation -> Speed -> Slow Down
 	act = new QAction(tr("Slow &Down"), this);
-	//act->setShortcut( QKeySequence(tr("-")));
+	//act->setShortcut( QKeySequence(QStringLiteral("-")));
 	act->setStatusTip(tr("Decrease emulation speed."));
 	act->setToolTip( act->statusTip() );
 	act->setIcon( style()->standardIcon( QStyle::SP_MediaSeekBackward ) );
@@ -1973,7 +1973,7 @@ void consoleWin_t::createMainMenu(void)
 
 	// Emulation -> Speed -> Slowest Speed
 	act = new QAction(tr("&Slowest"), this);
-	//act->setShortcut( QKeySequence(tr("-")));
+	//act->setShortcut( QKeySequence(QStringLiteral("-")));
 	act->setStatusTip(tr("Run emulation at the slowest speed."));
 	act->setToolTip( act->statusTip() );
 	act->setIcon( style()->standardIcon( QStyle::SP_MediaSkipBackward ) );
@@ -1984,7 +1984,7 @@ void consoleWin_t::createMainMenu(void)
 
 	// Emulation -> Speed -> Normal Speed
 	act = new QAction(tr("&Normal"), this);
-	//act->setShortcut( QKeySequence(tr("-")));
+	//act->setShortcut( QKeySequence(QStringLiteral("-")));
 	act->setStatusTip(tr("Run emulation at normal speed."));
 	act->setToolTip( act->statusTip() );
 	act->setIcon( style()->standardIcon( QStyle::SP_MediaPlay ) );
@@ -1994,7 +1994,7 @@ void consoleWin_t::createMainMenu(void)
 	
 	// Emulation -> Speed -> Fastest Speed
 	act = new QAction(tr("&Turbo"), this);
-	//act->setShortcut( QKeySequence(tr("-")));
+	//act->setShortcut( QKeySequence(QStringLiteral("-")));
 	act->setStatusTip(tr("Run emulation at the fastest speed."));
 	act->setToolTip( act->statusTip() );
 	act->setIcon( style()->standardIcon( QStyle::SP_MediaSkipForward ) );
@@ -2005,7 +2005,7 @@ void consoleWin_t::createMainMenu(void)
 	
 	// Emulation -> Speed -> Custom Speed
 	act = new QAction(tr("&Custom"), this);
-	//act->setShortcut( QKeySequence(tr("-")));
+	//act->setShortcut( QKeySequence(QStringLiteral("-")));
 	act->setStatusTip(tr("Set a custom emulation speed."));
 	act->setToolTip( act->statusTip() );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuCustomSpd(void)) );
@@ -2017,7 +2017,7 @@ void consoleWin_t::createMainMenu(void)
 	
 	// Emulation -> Speed -> Set Frame Advance Delay
 	act = new QAction(tr("Set Frame &Advance Delay"), this);
-	//act->setShortcut( QKeySequence(tr("-")));
+	//act->setShortcut( QKeySequence(QStringLiteral("-")));
 	act->setStatusTip(tr("Set the delay used when advancing one frame at a time."));
 	act->setToolTip( act->statusTip() );
 	connect(act, SIGNAL(triggered()), this, SLOT(emuSetFrameAdvDelay(void)) );
@@ -2130,7 +2130,7 @@ void consoleWin_t::createMainMenu(void)
 	netPlayMenu->addAction(act);
 
 	netPlayMenu->addSeparator();
-	act = new QAction(tr(""), this);
+	act = new QAction(QStringLiteral(""), this);
 	act->setEnabled(false);
 	netPlayMenu->addAction(act);
 
@@ -3629,7 +3629,7 @@ void consoleWin_t::saveStateAs(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
 	dialog.setLabelText( QFileDialog::Accept, tr("Save") );
-	dialog.setDefaultSuffix( tr(".sav") );
+	dialog.setDefaultSuffix( QStringLiteral(".sav") );
 
 	g_config->getOption ("SDL.LastSaveStateAs", &last );
 
@@ -5050,7 +5050,7 @@ void consoleWin_t::aviRecordAsStart(void)
 
 		dialog.setDirectory( d.absolutePath() );
 	}
-	dialog.setDefaultSuffix( tr(".avi") );
+	dialog.setDefaultSuffix( QStringLiteral(".avi") );
 
 	g_config->getOption ("SDL.AviFilePath", &lastPath);
 	if ( lastPath.size() > 0 )
@@ -5241,7 +5241,7 @@ void consoleWin_t::wavRecordAsStart(void)
 
 		dialog.setDirectory( d.absolutePath() );
 	}
-	dialog.setDefaultSuffix( tr(".wav") );
+	dialog.setDefaultSuffix( QStringLiteral(".wav") );
 
 	g_config->getOption ("SDL.WavFilePath", &lastPath);
 	if ( lastPath.size() > 0 )

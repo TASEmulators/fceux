@@ -195,10 +195,10 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	grid1->addWidget(label, 0, 0);
 	grid1->addWidget(portSel, 0, 1);
 
-	portSel->addItem(tr("1"), 0);
-	portSel->addItem(tr("2"), 1);
-	portSel->addItem(tr("3"), 2);
-	portSel->addItem(tr("4"), 3);
+	portSel->addItem(QStringLiteral("1"), 0);
+	portSel->addItem(QStringLiteral("2"), 1);
+	portSel->addItem(QStringLiteral("3"), 2);
+	portSel->addItem(QStringLiteral("4"), 3);
 
 	label = new QLabel(tr("Device:"));
 	devSel = new QComboBox();
@@ -336,7 +336,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 		buttonName = new QLabel(tr(text));
 		keyName[i] = new QLabel();
-		//keyState[i]    = new QLabel( tr("F") );
+		//keyState[i]    = new QLabel( QStringLiteral("F") );
 		//label          = new QLabel( tr("State:") );
 		button[i] = new GamePadConfigButton_t(i);
 		clearButton[i] = new QPushButton(tr("Clear"));
@@ -910,7 +910,7 @@ void GamePadConfDialog_t::clearButton(int padNo, int x)
 {
 	GamePad[padNo].bmap[configIndex][x].ButtonNum = -1;
 
-	//keyName[x]->setText( tr("") );
+	//keyName[x]->setText( QStringLiteral("") );
 	keyName[x]->clear();
 
 	lcl[padNo].btn[x].needsSave = 1;

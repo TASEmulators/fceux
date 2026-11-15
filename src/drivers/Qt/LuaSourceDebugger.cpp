@@ -1244,14 +1244,14 @@ QMenuBar *LuaSourceDebuggerDialog_t::buildMenuBar(void)
 	menu = menuBar->addMenu(tr("&Debug"));
 
 	runAct = act = new QAction(tr("&Run / Continue"), this);
-	act->setShortcut(QKeySequence(tr("F5")));
+	act->setShortcut(QKeySequence(QStringLiteral("F5")));
 	act->setStatusTip(tr("Start the script, or continue execution when paused"));
 	act->setIcon(QIcon(":icons/debug-run.png"));
 	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::runContinueCB);
 	menu->addAction(act);
 
 	breakAct = act = new QAction(tr("&Break"), this);
-	act->setShortcut(QKeySequence(tr("F6")));
+	act->setShortcut(QKeySequence(QStringLiteral("F6")));
 	act->setStatusTip(tr("Pause the script at the next executed line"));
 	act->setIcon(QIcon(":icons/debug-pause.png"));
 	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::breakCB);
@@ -1267,14 +1267,14 @@ QMenuBar *LuaSourceDebuggerDialog_t::buildMenuBar(void)
 	menu->addSeparator();
 
 	stepIntoAct = act = new QAction(tr("Step &Into"), this);
-	act->setShortcut(QKeySequence(tr("F11")));
+	act->setShortcut(QKeySequence(QStringLiteral("F11")));
 	act->setStatusTip(tr("Step Into"));
 	act->setIcon(QIcon(":icons/StepInto.png"));
 	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::stepIntoCB);
 	menu->addAction(act);
 
 	stepOverAct = act = new QAction(tr("Step &Over"), this);
-	act->setShortcut(QKeySequence(tr("F10")));
+	act->setShortcut(QKeySequence(QStringLiteral("F10")));
 	act->setStatusTip(tr("Step Over"));
 	act->setIcon(QIcon(":icons/StepOver.png"));
 	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::stepOverCB);
@@ -1304,7 +1304,7 @@ QMenuBar *LuaSourceDebuggerDialog_t::buildMenuBar(void)
 	menu->addSeparator();
 
 	toggleBpAct = act = new QAction(tr("Toggle Brea&kpoint"), this);
-	act->setShortcut(QKeySequence(tr("F9")));
+	act->setShortcut(QKeySequence(QStringLiteral("F9")));
 	act->setStatusTip(tr("Toggle a breakpoint on the current line"));
 	connect(act, &QAction::triggered, this, &LuaSourceDebuggerDialog_t::toggleBreakpointCB);
 	menu->addAction(act);
@@ -1450,7 +1450,7 @@ void LuaSourceDebuggerDialog_t::buildStackView(void)
 {
 	stackView = new QTreeWidget();
 	stackView->setColumnCount(3);
-	stackView->setHeaderLabels(QStringList() << tr("#") << tr("Function") << tr("Location"));
+	stackView->setHeaderLabels(QStringList() << QStringLiteral("#") << tr("Function") << tr("Location"));
 	stackView->setRootIsDecorated(false);
 	stackView->setUniformRowHeights(true);
 	stackView->setSelectionMode(QAbstractItemView::SingleSelection);

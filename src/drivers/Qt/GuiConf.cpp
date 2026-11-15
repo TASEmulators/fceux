@@ -1370,7 +1370,7 @@ void GuiPaletteEditDialog_t::paletteSaveAs(void)
 	dialog.setViewMode(QFileDialog::List);
 	dialog.setFilter(QDir::AllEntries | QDir::AllDirs | QDir::Hidden);
 	dialog.setLabelText(QFileDialog::Accept, tr("Save"));
-	dialog.setDefaultSuffix( tr(".qpal") );
+	dialog.setDefaultSuffix( QStringLiteral(".qpal") );
 
 	g_config->getOption("SDL.QPaletteFile", &last);
 
@@ -1875,16 +1875,16 @@ guiStyleTestDialog::guiStyleTestDialog(QWidget *parent)
 
 	vbox1->addWidget( gbox );
 	comboBox = new QComboBox();
-	comboBox->addItem( tr("AAA"), 0 );
-	comboBox->addItem( tr("BBB"), 1 );
-	comboBox->addItem( tr("CCC"), 2 );
+	comboBox->addItem( QStringLiteral("AAA"), 0 );
+	comboBox->addItem( QStringLiteral("BBB"), 1 );
+	comboBox->addItem( QStringLiteral("CCC"), 2 );
 	comboBox->setEnabled(true);
 	hbox2->addWidget( comboBox );
 
 	comboBox = new QComboBox();
-	comboBox->addItem( tr("AAA"), 0 );
-	comboBox->addItem( tr("BBB"), 1 );
-	comboBox->addItem( tr("CCC"), 2 );
+	comboBox->addItem( QStringLiteral("AAA"), 0 );
+	comboBox->addItem( QStringLiteral("BBB"), 1 );
+	comboBox->addItem( QStringLiteral("CCC"), 2 );
 	comboBox->setEnabled(false);
 	hbox2->addWidget( comboBox );
 

@@ -348,7 +348,7 @@ void FrameTimingDialog_t::updateTimingStats(void)
 
 	// Late Count
 	snprintf(stmp, sizeof(stmp), "%u", stats.lateCount);
-	frameLateCount->setText(1, tr("0"));
+	frameLateCount->setText(1, QStringLiteral("0"));
 	frameLateCount->setText(2, tr(stmp));
 
 	statFrame->setEnabled(stats.enabled);

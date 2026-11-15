@@ -31,6 +31,10 @@
 #include <QSplashScreen>
 #include <QSettings>
 #include <QDir>
+#include <QInputDialog>
+#include <QLibraryInfo>
+#include <QLocale>
+#include <QTranslator>
 #include <QtGlobal>
 //#include <QProxyStyle>
 
@@ -238,6 +242,154 @@ static bool InitQtSettings()
 	return true;
 }
 
+// Locale names (such as "de" or "pt_BR") of the translations embedded in the executable.
+static QStringList AvailableTranslations()
+{
+	QStringList codes;
+	const QStringList files = QDir(QStringLiteral(":/i18n")).entryList(
+		QStringList() << QStringLiteral("fceux_*.qm"), QDir::Files, QDir::Name);
+
+	for (const QString &file : files)
+	{
+		codes << file.mid(6, file.length() - 6 - 3); // strip "fceux_" and ".qm"
+	}
+	return codes;
+}
+
+static QString LanguageDisplayName(const QString &code)
+{
+	const QLocale locale(code);
+	QString name = locale.nativeLanguageName();
+
+	if (name.isEmpty())
+	{
+		return code;
+	}
+	name[0] = name[0].toUpper();
+
+	if (code.contains('_'))
+	{
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 2, 0))
+		const QString territory = locale.nativeTerritoryName();
+#else
+		const QString territory = locale.nativeCountryName();
+#endif
+		if (!territory.isEmpty())
+		{
+			name += QStringLiteral(" (") + territory + QStringLiteral(")");
+		}
+	}
+	return name;
+}
+
+// Best entry in choices for the system's preferred UI languages; falls back to English.
+static QString SystemLanguageChoice(const QStringList &choices)
+{
+	const QStringList uiLanguages = QLocale::system().uiLanguages();
+
+	for (QString ui : uiLanguages)
+	{
+		ui.replace('-', '_');
+		if (choices.contains(ui))
+		{
+			return ui;
+		}
+		const QString base = ui.section('_', 0, 0);
+		if (choices.contains(base))
+		{
+			return base;
+		}
+	}
+	return QStringLiteral("en");
+}
+
+// The language is stored in the Qt settings under "Application/Language" as a locale
+// name such as "en", "de" or "pt_BR". English is built in; any other language needs a
+// translation embedded in the executable. If translations are available and no valid
+// language has been stored (or forcePrompt is set), the user is asked to choose one.
+static void InstallTranslators(QApplication &app, bool forcePrompt)
+{
+	const QStringList translations = AvailableTranslations();
+	if (translations.isEmpty())
+	{
+		return;
+	}
+
+	QStringList choices;
+	choices << QStringLiteral("en") << translations;
+
+	QSettings settings;
+	QString language = settings.value("Application/Language", QString()).toString().trimmed();
+	const bool validLanguage = choices.contains(language);
+
+	if (forcePrompt || !validLanguage)
+	{
+		const QString current = validLanguage ? language : SystemLanguageChoice(choices);
+
+		QStringList names;
+		for (const QString &code : choices)
+		{
+			QString name = LanguageDisplayName(code);
+			if (names.contains(name))
+			{
+				name += QStringLiteral(" [") + code + QStringLiteral("]");
+			}
+			names << name;
+		}
+
+		bool accepted = false;
+		const QString picked = QInputDialog::getItem(nullptr, QStringLiteral("Language"),
+			QStringLiteral("Select language:"), names, choices.indexOf(current), false, &accepted);
+
+		if (accepted)
+		{
+			language = choices.at(names.indexOf(picked));
+			settings.setValue("Application/Language", language);
+			settings.sync();
+		}
+		else
+		{
+			// Not stored, so the question is asked again on the next launch.
+			language = current;
+		}
+	}
+
+	if (language == QStringLiteral("en"))
+	{
+		return;
+	}
+
+	const QLocale locale(language);
+	QLocale::setDefault(locale);
+
+#if (QT_VERSION_MAJOR < 6)
+	const QString qtTranslationsPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+#else
+	const QString qtTranslationsPath = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+#endif
+
+	QTranslator *qtTranslator = new QTranslator(&app);
+	if (qtTranslator->load(locale, QStringLiteral("qtbase"), QStringLiteral("_"), qtTranslationsPath))
+	{
+		app.installTranslator(qtTranslator);
+	}
+	else
+	{
+		delete qtTranslator;
+	}
+
+	QTranslator *appTranslator = new QTranslator(&app);
+	if (appTranslator->load(locale, QStringLiteral("fceux"), QStringLiteral("_"), QStringLiteral(":/i18n")))
+	{
+		app.installTranslator(appTranslator);
+		fprintf(stderr, "%s", QString("Loaded translation: %1\n").arg(appTranslator->language()).toUtf8().constData());
+	}
+	else
+	{
+		delete appTranslator;
+	}
+}
+
 #if defined(Q_OS_LINUX)
 static void WaylandWindowFix()
 {
@@ -278,6 +430,7 @@ int main( int argc, char *argv[] )
 
 	fceuWrapperPreInit(argc, argv);
 	bool forceConfigSelection = false;
+	bool forceLanguageSelection = false;
 	QString configDirectoryOverride;
 	for (int i = 1; i < argc; )
 	{
@@ -285,6 +438,11 @@ int main( int argc, char *argv[] )
 		if (strcmp(argv[i], "--choose-config-location") == 0)
 		{
 			forceConfigSelection = true;
+			removeCount = 1;
+		}
+		else if (strcmp(argv[i], "--choose-language") == 0)
+		{
+			forceLanguageSelection = true;
 			removeCount = 1;
 		}
 		else if (strcmp(argv[i], "--config-dir") == 0)
@@ -334,6 +492,8 @@ int main( int argc, char *argv[] )
 	QSettings settings;
 	QString settingsLocation = QDir::toNativeSeparators(settings.fileName());
 	FCEUD_Message(QString("Qt settings: %1\n").arg(settingsLocation).toUtf8().constData());
+
+	InstallTranslators(app, forceLanguageSelection);
 
 	if (!InitConfigLocation(forceConfigSelection, configDirectoryOverride))
 	{
