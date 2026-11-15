@@ -7597,6 +7597,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 }
 
 // Splits on whitespace; double quotes group text (and are removed). No size limit.
+// This is very reusable, but just leaving it here for now.
 static std::vector<std::string> tokenizeString(const char *str)
 {
     std::vector<std::string> tokens;
