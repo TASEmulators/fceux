@@ -24,6 +24,7 @@
 #include <QApplication>
 #include <QDialog>
 #include <QKeyEvent>
+#include <QTimer>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -42,6 +43,7 @@
 #include "Qt/sdl.h"
 #include "Qt/sdl-video.h"
 #include "Qt/sdl-joystick.h"
+#include "Qt/GamePadEvents.h"
 
 #include "common/cheat.h"
 #include "../../movie.h"
@@ -529,6 +531,16 @@ gamepad_function_key_t::~gamepad_function_key_t(void)
 void gamepad_function_key_t::sendKeyPressEvent(int idx)
 {
 	bool hasShortcut = false;
+
+	if ( (hk[idx] == HK_OPEN_ROM) && consoleWindow )
+	{
+		// Opening a ROM reloads the gamepad bindings, which frees this object
+		// and the list currently being iterated, so defer until the input
+		// update has returned to the event loop.
+		consoleWin_t *cw = consoleWindow;
+		QTimer::singleShot(0, cw, [cw]() { cw->openROMFile(true); });
+		return;
+	}
 
 	// If the hot key has a shortcut associated with it, 
 	// activate shortcut directly instead of attempting to send key sequence events.
@@ -1478,7 +1490,17 @@ pollEventsSDL()
 			}
 			break;
 		case SDL_JOYDEVICEREMOVED:
+			GamePadEventHub::instance()->resetDevice(FindJoystickByInstanceID(event.jdevice.which));
 			RemoveJoystick(event.jdevice.which);
+			break;
+		case SDL_JOYBUTTONDOWN:
+		case SDL_JOYBUTTONUP:
+		case SDL_JOYHATMOTION:
+		case SDL_JOYAXISMOTION:
+		case SDL_CONTROLLERBUTTONDOWN:
+		case SDL_CONTROLLERBUTTONUP:
+		case SDL_CONTROLLERAXISMOTION:
+			GamePadEventHub::instance()->processEvent(event);
 			break;
 		default:
 			break;

@@ -77,6 +77,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/InputConf.h"
 #include "Qt/GamePadConf.h"
+#include "Qt/GamePadFileBrowser.h"
 #include "Qt/FamilyKeyboard.h"
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
@@ -3318,7 +3319,7 @@ int  consoleWin_t::showListSelectDialog( const char *title, std::vector <std::st
 }
 //---------------------------------------------------------------------------
 
-void consoleWin_t::openROMFile(void)
+void consoleWin_t::openROMFile(bool openedByGamepad)
 {
 	int ret, useNativeFileDialogVal;
 	QString filename;
@@ -3356,36 +3357,58 @@ void consoleWin_t::openROMFile(void)
 		}
 	}
 
-	dialog.setFileMode(QFileDialog::ExistingFile);
-
-	dialog.setNameFilters( filters );
-
-	dialog.setViewMode(QFileDialog::List);
-	dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
-	dialog.setLabelText( QFileDialog::Accept, tr("Open") );
-
 	g_config->getOption ("SDL.LastOpenFile", &last );
 
-	getDirFromFile( last.c_str(), dir);
-
-	dialog.setDirectory( tr(dir.c_str()) );
-
-	// Check config option to use native file dialog or not
-	g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
-
-	dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
-	dialog.setSidebarUrls(urls);
-
-	ret = dialog.exec();
-
-	if ( ret )
+	if ( openedByGamepad )
 	{
-		QStringList fileList;
-		fileList = dialog.selectedFiles();
+		// The Qt and native file dialogs can not be operated with a gamepad
+		GamePadFileBrowser browser(this, tr("Open ROM File") );
+		QStringList places;
 
-		if ( fileList.size() > 0 )
+		for ( const QUrl &url : urls )
 		{
-			filename = fileList[0];
+			places << url.toLocalFile();
+		}
+		browser.setNameFilters( filters );
+		browser.setPlaces( places );
+		browser.selectFile( QString::fromStdString(last) );
+
+		if ( browser.exec() )
+		{
+			filename = browser.selectedFile();
+		}
+	}
+	else
+	{
+		dialog.setFileMode(QFileDialog::ExistingFile);
+
+		dialog.setNameFilters( filters );
+
+		dialog.setViewMode(QFileDialog::List);
+		dialog.setFilter( QDir::AllEntries | QDir::AllDirs | QDir::Hidden );
+		dialog.setLabelText( QFileDialog::Accept, tr("Open") );
+
+		getDirFromFile( last.c_str(), dir);
+
+		dialog.setDirectory( tr(dir.c_str()) );
+
+		// Check config option to use native file dialog or not
+		g_config->getOption ("SDL.UseNativeFileDialog", &useNativeFileDialogVal);
+
+		dialog.setOption(QFileDialog::DontUseNativeDialog, !useNativeFileDialogVal);
+		dialog.setSidebarUrls(urls);
+
+		ret = dialog.exec();
+
+		if ( ret )
+		{
+			QStringList fileList;
+			fileList = dialog.selectedFiles();
+
+			if ( fileList.size() > 0 )
+			{
+				filename = fileList[0];
+			}
 		}
 	}
 

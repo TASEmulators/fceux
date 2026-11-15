@@ -384,6 +384,7 @@ class  consoleWin_t : public QMainWindow
 		void toggleFullscreen(void);
 		void toggleMenuVis(void);
 		void toggleStatusBar(bool checked);
+		void openROMFile(bool openedByGamepad = false);
 		void showStatusMessage(QString msg);
 		void recordMovie(void);
 		void winResizeIx(int iScale);
@@ -391,7 +392,6 @@ class  consoleWin_t : public QMainWindow
 	private slots:
 		void onHardcoreChanged(bool active);
 		void closeApp(void);
-		void openROMFile(void);
 		void loadNSF(void);
 		void loadStateFrom(void);
 		void saveStateAs(void);
