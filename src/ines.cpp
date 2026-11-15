@@ -55,6 +55,11 @@ iNES_HEADER head;
 
 static CartInfo iNESCart;
 
+// Sizes of the PRG and CHR data carried by the loaded image. The ROM and VROM
+// buffers are larger when these are not powers of 2.
+static uint32 iNESPRGBytes = 0;
+static uint32 iNESCHRBytes = 0;
+
 uint8 Mirroring = 0;
 uint8 MirroringAs2bits = 0;
 uint32 ROM_size = 0;
@@ -119,6 +124,11 @@ void iNESGI(GI h) { //bbit edited: removed static keyword
 			FCEU_free(VROM);
 			VROM = NULL;
 		}
+		if (MiscROM) {
+			free(MiscROM);
+			MiscROM = NULL;
+		}
+		MiscROM_size = 0;
 		if (trainerpoo) {
 			free(trainerpoo);
 			trainerpoo = NULL;
@@ -883,6 +893,8 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	// section; the padding comes from the 0xFF fill of the buffers instead.
 	// A header with ROM_size == 0 (iNES 1) means 256 banks.
 	const int prg_bytes_to_read = (!head.ROM_size && !iNES2) ? rom_size_bytes : not_round_size;
+	iNESPRGBytes = prg_bytes_to_read;
+	iNESCHRBytes = vrom_not_round_size;
 
 	ROM_size = rom_size_bytes >> 14;
 	VROM_size = vrom_size_bytes >> 13;
@@ -1065,10 +1077,13 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 init_error:
 	if (ROM) free(ROM);
 	if (VROM) free(VROM);
+	if (MiscROM) free(MiscROM);
 	if (trainerpoo) free(trainerpoo);
 	if (ExtraNTARAM) free(ExtraNTARAM);
 	ROM = NULL;
 	VROM = NULL;
+	MiscROM = NULL;
+	MiscROM_size = 0;
 	trainerpoo = NULL;
 	ExtraNTARAM = NULL;
 	return LOADER_HANDLED_ERROR;
@@ -1146,10 +1161,15 @@ int iNesSaveAs(const char* name)
 		fwrite(trainerpoo, 512, 1, fp);
 	}
 
-	fwrite(ROM, 0x4000, ROM_size, fp);
+	// Write the sizes the header declares, not the power of 2 buffer sizes
+	fwrite(ROM, 1, iNESPRGBytes, fp);
 
-	if (head.VROM_size)
-		fwrite(VROM, 0x2000, head.VROM_size, fp);
+	// VROM is released when the correction table marks the cart as CHR-RAM
+	if (VROM && iNESCHRBytes)
+		fwrite(VROM, 1, iNESCHRBytes, fp);
+
+	if (MiscROM && MiscROM_size && (head.misc_roms & 0x03) && !(head.ROM_type & 4))
+		fwrite(MiscROM, 1, MiscROM_size, fp);
 
 	fclose(fp);
 	return 1;
