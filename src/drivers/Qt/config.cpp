@@ -901,6 +901,7 @@ InitConfig()
 
 	config->addOption("autoresume", "SDL.AutoResume", 0);
 	config->addOption("SDL.FamilyKeyboardFont"  , "");
+	config->addOption("fkbenable", "SDL.FamilyKeyboardAutoEnable", 0);
     
 	// video playback
 	config->addOption("playmov", "SDL.Movie", "");

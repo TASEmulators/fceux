@@ -413,6 +413,7 @@ int LoadGame(const char *path, bool silent, bool netPlayRequested)
 	}
 
 	ParseGIInput(GameInfo);
+	updateFamilyKeyboardOnRomLoad();
 	RefreshThrottleFPS();
 
 	if(!DriverInitialize(GameInfo)) {
@@ -683,6 +684,7 @@ static const char *DriverUsage =
 "--ripsubs      f       Convert movie's subtitles to srt\n"
 "--subtitles    {0|1}   Enable subtitle display\n"
 "--fourscore    {0|1}   Enable fourscore emulation\n"
+"--fkbenable    {0|1}   Auto-enable the Family Keyboard when a loaded game uses it\n"
 "--no-config    {0|1}   Use default config file and do not save\n"
 "--net          s       Connect to server 's' for TCP/IP network play.\n"
 "--port         x       Use TCP/IP port x for network play.\n"

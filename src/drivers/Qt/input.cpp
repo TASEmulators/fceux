@@ -764,7 +764,7 @@ unsigned int *GetKeyboard(void)
 	return (unsigned int *)(keystate);
 }
 
-static void FKB_CheckShortcutConflicts(void)
+void updateFamilyKeyboardShortcuts(void)
 {
 	bool fkbActv;
 	QShortcut *shortcut;
@@ -781,6 +781,12 @@ static void FKB_CheckShortcutConflicts(void)
 			{
 				shortcut->setEnabled(true);
 			}
+			continue;
+		}
+
+		// These shortcuts are always disabled, their state is polled directly
+		if ((i == HK_FRAME_ADVANCE) || (i == HK_TURBO))
+		{
 			continue;
 		}
 
@@ -805,12 +811,33 @@ void toggleFamilyKeyboardFunc(void)
 		FCEUI_DispMessage("Family Keyboard Not Active", 0);
 		g_fkbEnabled = false;
 	}
-	FKB_CheckShortcutConflicts();
+	updateFamilyKeyboardShortcuts();
 }
 
 bool isFamilyKeyboardActv(void)
 {
 	return ((CurInputType[2] == SIFC_FKB) && g_fkbEnabled);
+}
+
+// Called after a ROM load has selected the input devices. The keyboard only
+// starts enabled when the user opted in and the game actually uses it.
+void updateFamilyKeyboardOnRomLoad(void)
+{
+	if (CurInputType[2] != SIFC_FKB)
+	{
+		g_fkbEnabled = false;
+	}
+	else
+	{
+		int autoEnable = 0;
+		g_config->getOption("SDL.FamilyKeyboardAutoEnable", &autoEnable);
+
+		if (autoEnable)
+		{
+			g_fkbEnabled = true;
+		}
+	}
+	updateFamilyKeyboardShortcuts();
 }
 
 /**

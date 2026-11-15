@@ -174,6 +174,7 @@ private slots:
 	void mappingSave(void);
 	void mappingSaveAs(void);
 	void toggleTreeView(bool);
+	void toggleAutoEnable(bool);
 	void SaveCurrentMapping(void);
 	void resetDefaultMapping(void);
 	void toggleFamilyKeyboardEnable(void);

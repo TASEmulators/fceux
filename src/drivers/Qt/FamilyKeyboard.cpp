@@ -408,6 +408,8 @@ void FamilyKeyboardWidget::drawButton( QPainter &painter, int idx, int x, int y,
 		j++;
 	}
 
+	// Key backgrounds are fixed light colors, so don't use the palette text color
+	painter.setPen( QColor( Qt::black ) );
 	painter.fillRect( key[i].rect, bgColor );
 	painter.drawText( key[i].rect, Qt::AlignCenter, tr(keyNames[j]) );
 	painter.drawRect( key[i].rect );
@@ -809,6 +811,20 @@ QMenuBar *FKBConfigDialog::buildMenuBar(void)
 
 	confMenu->addAction(act);
 
+	// Config -> Auto-Enable on ROM Load
+	{
+		int autoEnable = 0;
+		g_config->getOption("SDL.FamilyKeyboardAutoEnable", &autoEnable);
+
+		act = new QAction(tr("Auto-Enable on ROM Load"), this);
+		act->setCheckable(true);
+		act->setChecked(autoEnable != 0);
+		act->setStatusTip(tr("Enable the Family Keyboard automatically when a loaded game uses it"));
+		connect(act, SIGNAL(triggered(bool)), this, SLOT(toggleAutoEnable(bool)) );
+
+		confMenu->addAction(act);
+	}
+
 	confMenu->addSeparator();
 
 	// Config -> Reset to Defaults
@@ -864,6 +880,11 @@ void FKBConfigDialog::openFontDialog(void)
 
 		QTimer::singleShot( 100, this, SLOT(keyTreeResizeDone(void)) );
 	}
+}
+//----------------------------------------------------------------------------
+void FKBConfigDialog::toggleAutoEnable(bool state)
+{
+	g_config->setOption("SDL.FamilyKeyboardAutoEnable", state ? 1 : 0);
 }
 //----------------------------------------------------------------------------
 void FKBConfigDialog::toggleTreeView(bool state)
