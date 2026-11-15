@@ -423,13 +423,13 @@ INLINE static uint32 calc_eg_dphase(OPLL_SLOT * slot) {
 	 ((S)->tll = tllTable[((S)->fnum) >> 5][(S)->block][(S)->patch.TL][(S)->patch.KL]) : \
 	 ((S)->tll = tllTable[((S)->fnum) >> 5][(S)->block][(S)->volume][(S)->patch.KL]))
 #define UPDATE_RKS(S) (S)->rks = rksTable[((S)->fnum) >> 8][(S)->block][(S)->patch.KR]
-#define UPDATE_WF(S)  (S)->sintbl = waveform[(S)->patch.WF]
+/* Wavetable of a slot; selected by index so that no pointer is kept in the (saved) OPLL state. */
+#define SINTBL(S)     waveform[(S)->patch.WF & 1]
 #define UPDATE_EG(S)  (S)->eg_dphase = calc_eg_dphase(S)
 #define UPDATE_ALL(S) \
 	UPDATE_PG(S); \
 	UPDATE_TLL(S); \
 	UPDATE_RKS(S); \
-	UPDATE_WF(S); \
 	UPDATE_EG(S)                /* EG should be updated last. */
 
 
@@ -511,7 +511,6 @@ INLINE static void update_key_status(OPLL * opll) { 	int ch;
 
 static void OPLL_SLOT_reset(OPLL_SLOT * slot, int type) {
 	slot->type = type;
-	slot->sintbl = waveform[0];
 	slot->phase = 0;
 	slot->dphase = 0;
 	slot->output[0] = 0;
@@ -620,7 +619,6 @@ void OPLL_forceRefresh(OPLL * opll) {
 		UPDATE_PG(&opll->slot[i]);
 		UPDATE_RKS(&opll->slot[i]);
 		UPDATE_TLL(&opll->slot[i]);
-		UPDATE_WF(&opll->slot[i]);
 		UPDATE_EG(&opll->slot[i]);
 	}
 }
@@ -775,7 +773,7 @@ INLINE static int32 calc_slot_car(OPLL_SLOT * slot, int32 fm) {
 	if (slot->egout >= (DB_MUTE - 1)) {
 		slot->output[0] = 0;
 	} else {
-		slot->output[0] = DB2LIN_TABLE[slot->sintbl[(slot->pgout + wave2_8pi(fm)) & (PG_WIDTH - 1)] + slot->egout];
+		slot->output[0] = DB2LIN_TABLE[SINTBL(slot)[(slot->pgout + wave2_8pi(fm)) & (PG_WIDTH - 1)] + slot->egout];
 	}
 
 	return (slot->output[1] + slot->output[0]) >> 1;
@@ -791,9 +789,9 @@ INLINE static int32 calc_slot_mod(OPLL_SLOT * slot) {
 		slot->output[0] = 0;
 	} else if (slot->patch.FB != 0) {
 		fm = wave2_4pi(slot->feedback) >> (7 - slot->patch.FB);
-		slot->output[0] = DB2LIN_TABLE[slot->sintbl[(slot->pgout + fm) & (PG_WIDTH - 1)] + slot->egout];
+		slot->output[0] = DB2LIN_TABLE[SINTBL(slot)[(slot->pgout + fm) & (PG_WIDTH - 1)] + slot->egout];
 	} else {
-		slot->output[0] = DB2LIN_TABLE[slot->sintbl[slot->pgout] + slot->egout];
+		slot->output[0] = DB2LIN_TABLE[SINTBL(slot)[slot->pgout] + slot->egout];
 	}
 
 	slot->feedback = (slot->output[1] + slot->output[0]) >> 1;
@@ -969,8 +967,6 @@ void OPLL_writeReg(OPLL * opll, uint32 reg, uint32 data) {
 		for (i = 0; i < 6; i++) {
 			if (opll->patch_number[i] == 0) {
 				setInstrument(opll, i, 0);
-				UPDATE_WF(MOD(opll, i));
-				UPDATE_WF(CAR(opll, i));
 			}
 		}
 		break;
