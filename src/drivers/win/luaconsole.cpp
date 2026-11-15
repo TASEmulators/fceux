@@ -336,7 +336,7 @@ close:
 			DeleteObject(hFont);
 			hFont = NULL;
 		}
-		EndDialog(hDlg, true);
+		DestroyWindow(hDlg);
 		LuaConsoleHWnd = NULL;
 		return true;
 	}
