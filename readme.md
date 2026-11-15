@@ -7,11 +7,11 @@ An open source NES Emulator for Windows and Unix that features solid emulation a
 2.7.0 is the most recent release but most people are using the autobuilds.
 
 Interim builds:
-* Win32: [fceux-win32.zip](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win32.zip)
-* Win64: [fceux-win64.zip](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win64.zip)
-* Win64 Qt/SDL: [fceux-win64-QtSDL.zip](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win64-QtSDL.zip)
-* Ubuntu: [fceux-ubuntu-x64.deb](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-ubuntu-x64.deb)
-* macOS (Apple Silicon): [fceux-Darwin.dmg](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-Darwin.dmg)
+* Win32 (original Windows GUI): [fceux-win32.zip](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win32.zip)
+* Win64 (original Windows GUI): [fceux-win64.zip](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win64.zip)
+* Win64 (newer, modern Qt GUI): [fceux-win64-QtSDL.zip](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win64-QtSDL.zip)
+* Ubuntu (Qt GUI): [fceux-ubuntu-x64.deb](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-ubuntu-x64.deb)
+* macOS (Qt GUI, Apple Silicon): [fceux-Darwin.dmg](https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-Darwin.dmg)
 * Status: [AppVeyor](https://ci.appveyor.com/project/zeromus/fceux/) · [macOS GitHub Actions](https://github.com/TASEmulators/fceux/actions/workflows/macos.yml) · [Linux GitHub Actions](https://github.com/TASEmulators/fceux/actions/workflows/linux.yml) · [Win64 Qt GitHub Actions](https://github.com/TASEmulators/fceux/actions/workflows/windows-qt.yml)
 
 But you might like Mesen more: https://github.com/SourMesen/Mesen2
