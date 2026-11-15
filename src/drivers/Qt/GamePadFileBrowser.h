@@ -2,7 +2,7 @@
 //
 // Simple file browser dialog designed to be operated with a gamepad.
 // Gamepad button changes reported by GamePadEventHub are translated into
-// keyboard events that are delivered to the file list. The file list is the
+// keyboard events (see GamePadNavigator) that are delivered to the file list. The file list is the
 // only widget that accepts keyboard focus, so navigation can not get lost
 // in other controls.
 
@@ -11,7 +11,6 @@
 #include <QDialog>
 #include <QDir>
 #include <QStringList>
-#include <QTimer>
 
 #include "Qt/GamePadEvents.h"
 
@@ -20,6 +19,7 @@ class QListWidget;
 class QListWidgetItem;
 class QPushButton;
 class QFileIconProvider;
+class GamePadNavigator;
 
 class GamePadFileBrowser : public QDialog
 {
@@ -48,8 +48,7 @@ class GamePadFileBrowser : public QDialog
 		void hideEvent(QHideEvent *event) override;
 
 	private slots:
-		void onGamePadButton(int devIdx, GamePadEventHub::Button button, bool pressed);
-		void onRepeatTimeout(void);
+		void onNavigatorButton(GamePadEventHub::Button button);
 		void onItemActivated(QListWidgetItem *item);
 		void onOpenClicked(void);
 
@@ -62,7 +61,6 @@ class GamePadFileBrowser : public QDialog
 		void cycleFilter(int delta);
 		void updateFilterLabel(void);
 		void addEntry(const QString &text, EntryType type, const QString &path);
-		void sendKey(int key);
 
 		QLabel *pathLabel;
 		QLabel *filterLabel;
@@ -79,10 +77,5 @@ class GamePadFileBrowser : public QDialog
 		int filterIdx;
 		QString chosenFile;
 
-		// Pumps SDL while visible. The main update timer can be blocked when
-		// the dialog is opened from inside its own event processing.
-		QTimer pumpTimer;
-		QTimer repeatTimer;
-		GamePadEventHub::Button repeatButton;
-		int repeatKey;
+		GamePadNavigator *navigator;
 };

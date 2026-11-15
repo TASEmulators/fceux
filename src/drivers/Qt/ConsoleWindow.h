@@ -317,6 +317,7 @@ class  consoleWin_t : public QMainWindow
 		bool        recentRomMenuReset;
 		bool        firstResize;
 		bool        mainMenuEmuPauseSet;
+		bool        gamePadMenuActive;
 		bool        mainMenuEmuWasPaused;
 		bool        mainMenuPauseWhenActv;
 		bool        scrHandlerConnected;
@@ -385,6 +386,7 @@ class  consoleWin_t : public QMainWindow
 		void toggleMenuVis(void);
 		void toggleStatusBar(bool checked);
 		void openROMFile(bool openedByGamepad = false);
+		void openGamePadMenu(void);
 		void showStatusMessage(QString msg);
 		void recordMovie(void);
 		void winResizeIx(int iScale);

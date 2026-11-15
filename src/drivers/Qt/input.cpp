@@ -44,6 +44,7 @@
 #include "Qt/sdl-video.h"
 #include "Qt/sdl-joystick.h"
 #include "Qt/GamePadEvents.h"
+#include "Qt/GamePadNavigator.h"
 
 #include "common/cheat.h"
 #include "../../movie.h"
@@ -532,13 +533,21 @@ void gamepad_function_key_t::sendKeyPressEvent(int idx)
 {
 	bool hasShortcut = false;
 
-	if ( (hk[idx] == HK_OPEN_ROM) && consoleWindow )
+	if ( consoleWindow && ((hk[idx] == HK_OPEN_ROM) || (hk[idx] == HK_GAMEPAD_MENU)) )
 	{
-		// Opening a ROM reloads the gamepad bindings, which frees this object
-		// and the list currently being iterated, so defer until the input
-		// update has returned to the event loop.
+		// Opening a ROM, or a menu action that does so, reloads the gamepad
+		// bindings, which frees this object and the list currently being
+		// iterated, so defer until the input update has returned to the event loop.
 		consoleWin_t *cw = consoleWindow;
-		QTimer::singleShot(0, cw, [cw]() { cw->openROMFile(true); });
+
+		if ( hk[idx] == HK_OPEN_ROM )
+		{
+			QTimer::singleShot(0, cw, [cw]() { cw->openROMFile(true); });
+		}
+		else
+		{
+			QTimer::singleShot(0, cw, [cw]() { cw->openGamePadMenu(); });
+		}
 		return;
 	}
 
@@ -1630,6 +1639,13 @@ UpdateGamepad(void)
 		return;
 	}
 
+	// The pad is operating a menu or dialog, not the game
+	if (GamePadNavigator::isActive())
+	{
+		JSreturnGui.store(0, std::memory_order_relaxed);
+		return;
+	}
+
 	uint32 JS = 0;
 	int x,c;
 	int wg;
@@ -1785,6 +1801,11 @@ static void updateGamePadKeyMappings(void)
 	}
 }
 
+void clearGamePadInput(void)
+{
+	JSreturnGui.store(0, std::memory_order_relaxed);
+}
+
 /**
  * Update all of the input devices required for the active game.
  */
@@ -1798,7 +1819,10 @@ void FCEUD_UpdateInput(void)
 		return;
 	}
 
-	updateGamePadKeyMappings();
+	if (!GamePadNavigator::isActive())
+	{
+		updateGamePadKeyMappings();
+	}
 
 	pollEventsSDL();
 	KeyboardCommands();

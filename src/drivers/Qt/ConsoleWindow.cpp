@@ -78,6 +78,7 @@
 #include "Qt/InputConf.h"
 #include "Qt/GamePadConf.h"
 #include "Qt/GamePadFileBrowser.h"
+#include "Qt/GamePadMenuBrowser.h"
 #include "Qt/FamilyKeyboard.h"
 #include "Qt/HotKeyConf.h"
 #include "Qt/PaletteConf.h"
@@ -203,6 +204,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 	contextMenuEnable      = false;
 	soundUseGlobalFocus    = false;
 	mainMenuEmuPauseSet    = false;
+	gamePadMenuActive      = false;
 	mainMenuEmuWasPaused   = false;
 	mainMenuPauseWhenActv  = false;
 	autoHideMenuFullscreen = false;
@@ -1084,6 +1086,7 @@ void consoleWin_t::initHotKeys(void)
 	connect( Hotkeys[ HK_TOGGLE_BG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleBackground(void))        );
 	connect( Hotkeys[ HK_TOGGLE_FG            ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleForeground(void))        );
 	connect( Hotkeys[ HK_FKB_ENABLE           ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleFamKeyBrdEnable(void))   );
+	connect( Hotkeys[ HK_GAMEPAD_MENU         ].getShortcut(), SIGNAL(activated()), this, SLOT(openGamePadMenu(void))         );
 	connect( Hotkeys[ HK_TOGGLE_ALL_CHEATS    ].getShortcut(), SIGNAL(activated()), this, SLOT(toggleGlobalCheatEnable(void)) );
 
 	connect( Hotkeys[ HK_SAVE_STATE_0         ].getShortcut(), SIGNAL(activated()), this, SLOT(saveState0(void))        );
@@ -3429,6 +3432,41 @@ void consoleWin_t::openROMFile(bool openedByGamepad)
    return;
 }
 
+void consoleWin_t::openGamePadMenu(void)
+{
+	QPointer<QAction> action;
+
+	if ( gamePadMenuActive )
+	{
+		return;
+	}
+
+	// Pause the same way as when a regular menu is opened, if configured.
+	// The menus' own aboutToShow handlers are ignored while the gamepad menu is active.
+	mainMenuOpen();
+	gamePadMenuActive = true;
+	{
+		GamePadMenuBrowser browser( this, menuBar() );
+
+		if ( browser.exec() )
+		{
+			action = browser.selectedAction();
+		}
+	}
+	gamePadMenuActive = false;
+	mainMenuClose();
+
+	if ( action == openROM )
+	{
+		// The regular file dialog can not be operated with the gamepad
+		openROMFile(true);
+	}
+	else if ( action )
+	{
+		action->trigger();
+	}
+}
+
 void consoleWin_t::loadRomRequestCB( QString s )
 {
 	printf("Load ROM Req: '%s'\n", s.toLocal8Bit().constData() );
@@ -3809,6 +3847,12 @@ void consoleWin_t::mainMenuOpen(void)
 {
 	//printf("Main Menu Open\n");
 
+	// The gamepad menu pauses once for its whole duration
+	if ( gamePadMenuActive )
+	{
+		return;
+	}
+
 	mainMenuEmuWasPaused = FCEUI_EmulationPaused() ? true : false;
 
 	if ( mainMenuPauseWhenActv && !mainMenuEmuPauseSet && !mainMenuEmuWasPaused )
@@ -3821,6 +3865,11 @@ void consoleWin_t::mainMenuOpen(void)
 void consoleWin_t::mainMenuClose(void)
 {
 	//printf("Main Menu Close\n");
+
+	if ( gamePadMenuActive )
+	{
+		return;
+	}
 
 	if ( mainMenuEmuPauseSet )
 	{

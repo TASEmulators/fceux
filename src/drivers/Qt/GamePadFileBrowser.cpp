@@ -12,38 +12,12 @@
 #include <QVBoxLayout>
 
 #include "Qt/GamePadFileBrowser.h"
+#include "Qt/GamePadNavigator.h"
 
 namespace
 {
-	constexpr int REPEAT_DELAY_MS    = 400;
-	constexpr int REPEAT_INTERVAL_MS = 80;
-	constexpr int PUMP_INTERVAL_MS   = 10;
-
 	constexpr int ROLE_TYPE = Qt::UserRole;
 	constexpr int ROLE_PATH = Qt::UserRole + 1;
-
-	// Returns the key a button is translated into, or 0 if the button
-	// is unmapped or handled by the dialog directly
-	int buttonToKey(GamePadEventHub::Button button)
-	{
-		switch (button)
-		{
-			case GamePadEventHub::Up:    return Qt::Key_Up;
-			case GamePadEventHub::Down:  return Qt::Key_Down;
-			case GamePadEventHub::A:
-			case GamePadEventHub::Start: return Qt::Key_Return;
-			case GamePadEventHub::B:     return Qt::Key_Escape;
-			case GamePadEventHub::L2:    return Qt::Key_PageUp;
-			case GamePadEventHub::R2:    return Qt::Key_PageDown;
-			default:                     return 0;
-		}
-	}
-
-	bool isRepeatable(GamePadEventHub::Button button)
-	{
-		return (button == GamePadEventHub::Up)   || (button == GamePadEventHub::Down) ||
-		       (button == GamePadEventHub::L2)   || (button == GamePadEventHub::R2);
-	}
 }
 
 GamePadFileBrowser::GamePadFileBrowser(QWidget *parent, const QString &caption)
@@ -51,9 +25,7 @@ GamePadFileBrowser::GamePadFileBrowser(QWidget *parent, const QString &caption)
 	  iconProvider(new QFileIconProvider()),
 	  currentDir(QDir::home()),
 	  placesMode(false),
-	  filterIdx(0),
-	  repeatButton(GamePadEventHub::NumButtons),
-	  repeatKey(0)
+	  filterIdx(0)
 {
 	setWindowTitle(caption);
 	resize(640, 480);
@@ -92,19 +64,12 @@ GamePadFileBrowser::GamePadFileBrowser(QWidget *parent, const QString &caption)
 
 	setFocusProxy(list);
 
-	pumpTimer.setInterval(PUMP_INTERVAL_MS);
-	pumpTimer.setTimerType(Qt::PreciseTimer);
+	navigator = new GamePadNavigator(this, list);
 
-	connect(&pumpTimer, &QTimer::timeout, GamePadEventHub::instance(), &GamePadEventHub::pump);
-
-	repeatTimer.setSingleShot(false);
-
-	connect(&repeatTimer, &QTimer::timeout, this, &GamePadFileBrowser::onRepeatTimeout);
+	connect(navigator, &GamePadNavigator::buttonPressed, this, &GamePadFileBrowser::onNavigatorButton);
 	connect(list, &QListWidget::itemActivated, this, &GamePadFileBrowser::onItemActivated);
 	connect(openButton, &QPushButton::clicked, this, &GamePadFileBrowser::onOpenClicked);
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
-	connect(GamePadEventHub::instance(), &GamePadEventHub::buttonChanged,
-		this, &GamePadFileBrowser::onGamePadButton);
 
 	populate();
 }
@@ -372,7 +337,7 @@ void GamePadFileBrowser::showEvent(QShowEvent *event)
 {
 	QDialog::showEvent(event);
 
-	pumpTimer.start();
+	navigator->start();
 
 	list->setFocus();
 
@@ -384,78 +349,25 @@ void GamePadFileBrowser::showEvent(QShowEvent *event)
 
 void GamePadFileBrowser::hideEvent(QHideEvent *event)
 {
-	pumpTimer.stop();
-	repeatTimer.stop();
-	repeatButton = GamePadEventHub::NumButtons;
+	navigator->stop();
 
 	QDialog::hideEvent(event);
 }
 
-void GamePadFileBrowser::sendKey(int key)
+void GamePadFileBrowser::onNavigatorButton(GamePadEventHub::Button button)
 {
-	QCoreApplication::postEvent(list, new QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier));
-	QCoreApplication::postEvent(list, new QKeyEvent(QEvent::KeyRelease, key, Qt::NoModifier));
-}
-
-void GamePadFileBrowser::onGamePadButton(int devIdx, GamePadEventHub::Button button, bool pressed)
-{
-	(void)devIdx;
-
-	if (!pressed)
-	{
-		if (button == repeatButton)
-		{
-			repeatTimer.stop();
-			repeatButton = GamePadEventHub::NumButtons;
-		}
-		return;
-	}
-
-	// Pad input is also reported while another window has focus
-	if (!isVisible() || !isActiveWindow())
-	{
-		return;
-	}
-
 	switch (button)
 	{
 		case GamePadEventHub::X:
 			goToParent();
-			return;
+			break;
 		case GamePadEventHub::L1:
 			cycleFilter(-1);
-			return;
+			break;
 		case GamePadEventHub::R1:
 			cycleFilter(1);
-			return;
+			break;
 		default:
 			break;
 	}
-
-	const int key = buttonToKey(button);
-
-	if (key == 0)
-	{
-		return;
-	}
-	sendKey(key);
-
-	if (isRepeatable(button))
-	{
-		repeatButton = button;
-		repeatKey = key;
-		repeatTimer.start(REPEAT_DELAY_MS);
-	}
-}
-
-void GamePadFileBrowser::onRepeatTimeout(void)
-{
-	if (!isVisible() || (repeatButton == GamePadEventHub::NumButtons))
-	{
-		repeatTimer.stop();
-		return;
-	}
-	repeatTimer.setInterval(REPEAT_INTERVAL_MS);
-
-	sendKey(repeatKey);
 }

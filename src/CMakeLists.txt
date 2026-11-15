@@ -721,6 +721,8 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-joystick.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadEvents.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadFileBrowser.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadMenuBrowser.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadNavigator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/sdl-throttle.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/unix-netplay.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/NetPlay.cpp

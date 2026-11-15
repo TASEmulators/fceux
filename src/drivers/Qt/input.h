@@ -143,6 +143,9 @@ int DTestButtonJoy(ButtConfig *bc);
 
 void FCEUD_UpdateInput(void);
 
+// Releases all NES controller buttons held through the host gamepads
+void clearGamePadInput(void);
+
 void UpdateInput(Config *config);
 
 const char* ButtonName(const ButtConfig* bc);

@@ -361,6 +361,9 @@ int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const 
 		case HK_MAIN_MENU_HIDE:
 			name = "MainMenuHide"; keySeq = "Alt+/"; title = "Toggle Main Menu Visibility";
 		break;
+		case HK_GAMEPAD_MENU:
+			name = "GamePadMenu"; keySeq = ""; title = "Open Gamepad Menu";
+		break;
 		default:
 		case HK_MAX:
 			name = ""; keySeq = "";

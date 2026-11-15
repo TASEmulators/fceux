@@ -64,6 +64,7 @@ enum HOTKEY {
 	HK_FA_LAG_SKIP,
 	HK_VOLUME_MUTE, HK_VOLUME_DOWN, HK_VOLUME_UP,
 	HK_FKB_ENABLE,
+	HK_GAMEPAD_MENU,
 	HK_MAX};
 
 int getHotKeyConfig( int i, const char **nameOut, const char **keySeqOut, const char **titleOut = NULL, const char **groupOut = NULL );
