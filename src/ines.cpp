@@ -510,24 +510,6 @@ typedef struct {
 	void (*init)(CartInfo *);
 } NewMI;
 
-//this is for games that is not the a power of 2
-//mapper based for now...
-//not really accurate but this works since games
-//that are not in the power of 2 tends to come
-//in obscure mappers themselves which supports such
-//size
-//Cah4e3 25.10.19: iNES 2.0 attempts to cover all
-// boards including UNIF boards with non power 2 
-// total rom size (a lot of them with a couple of 
-// roms different sizes (may vary a lot)
-// so we need either add here ALL ines 2.0 mappers 
-// with not power2 roms or change logic here
-// to something more unified for ines 2.0 specific
-static int not_power2[] =
-{
-	53, 198, 228, 547
-};
-
 BMAPPINGLocal bmap[] = {
 	{"NROM",				  0, NROM_Init},
 	{"MMC1",				  1, Mapper1_Init},
@@ -860,6 +842,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	int not_round_size = 0;
 	int rom_size_bytes = 0;
 	int vrom_size_bytes = 0;
+	int vrom_not_round_size = 0;
 
 	if (!iNES2)	{
 		not_round_size = head.ROM_size << 14;
@@ -879,28 +862,27 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 		rom_size_bytes = uppow2(not_round_size);
 
 	if (!iNES2)	{
-		vrom_size_bytes = uppow2(head.VROM_size << 13);
+		vrom_not_round_size = head.VROM_size << 13;
+		vrom_size_bytes = uppow2(vrom_not_round_size);
 	}
 	else {
-		if ((head.Upper_ROM_VROM_size & 0xF0) != 0xF0)
+		if ((head.Upper_ROM_VROM_size & 0xF0) != 0xF0) {
 			// simple notation
-			vrom_size_bytes = uppow2((head.VROM_size | ((head.Upper_ROM_VROM_size & 0xF0) << 4)) << 13);
-		else
-			vrom_size_bytes = ((1 << (head.VROM_size >> 2)) * ((head.VROM_size & 0b11) * 2 + 1));
-	}
-
-	int round = true;
-	for (int i = 0; i != sizeof(not_power2) / sizeof(not_power2[0]); ++i) {
-		//for games not to the power of 2, so we just read enough
-		//prg rom from it, but we have to keep ROM_size to the power of 2
-		//since PRGCartMapping wants ROM_size to be to the power of 2
-		//so instead if not to power of 2, we just use head.ROM_size when
-		//we use FCEU_read
-		if (not_power2[i] == MapperNo) {
-			round = false;
-			break;
+			vrom_not_round_size = (head.VROM_size | ((head.Upper_ROM_VROM_size & 0xF0) << 4)) << 13;
+			vrom_size_bytes = uppow2(vrom_not_round_size);
+		}
+		else {
+			// exponent-multiplier notation
+			vrom_not_round_size = vrom_size_bytes = ((1 << (head.VROM_size >> 2)) * ((head.VROM_size & 0b11) * 2 + 1));
 		}
 	}
+
+	// The buffers are allocated with power of 2 sizes (the cart mapping
+	// requires it), but the image only carries the unrounded amount of data.
+	// Reading the rounded size would consume the start of the following
+	// section; the padding comes from the 0xFF fill of the buffers instead.
+	// A header with ROM_size == 0 (iNES 1) means 256 banks.
+	const int prg_bytes_to_read = (!head.ROM_size && !iNES2) ? rom_size_bytes : not_round_size;
 
 	ROM_size = rom_size_bytes >> 14;
 	VROM_size = vrom_size_bytes >> 13;
@@ -974,14 +956,15 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	SetupCartPRGMapping(0, ROM, rom_size_bytes, 0);
 
-	FCEU_fread(ROM, 1, (round) ? rom_size_bytes : not_round_size, fp);
+	FCEU_fread(ROM, 1, prg_bytes_to_read, fp);
 
 	if (vrom_size_bytes)
-		FCEU_fread(VROM, 1, vrom_size_bytes, fp);
+		FCEU_fread(VROM, 1, vrom_not_round_size, fp);
 	
 	// Misc ROMS
 	if ((head.misc_roms & 0x03) && !(head.ROM_type & 4)) {
-		MiscROM_size = filesize - rom_size_bytes - vrom_size_bytes;
+		const size_t image_data_size = (size_t)prg_bytes_to_read + (size_t)vrom_not_round_size;
+		MiscROM_size = (filesize > image_data_size) ? (uint32)(filesize - image_data_size) : 0;
 		MiscROM = (uint8 *)FCEU_malloc(MiscROM_size);
 		memset(MiscROM, 0xFF, MiscROM_size);
 		FCEU_fread(MiscROM, 1, MiscROM_size, fp);
@@ -1004,7 +987,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	iNESCart.CRC32 = iNESGameCRC32;
 
-	FCEU_printf(" PRG ROM: %d x 16KiB = %d KiB\n", (round ? rom_size_bytes : not_round_size) >> 14, ((round ? rom_size_bytes : not_round_size) >> 14) * 16);
+	FCEU_printf(" PRG ROM: %d x 16KiB = %d KiB\n", prg_bytes_to_read >> 14, (prg_bytes_to_read >> 14) * 16);
 	FCEU_printf(" CHR ROM: %d x  8KiB = %d KiB\n", (vrom_size_bytes >> 13), (vrom_size_bytes >> 13) * 8);
 	FCEU_printf(" ROM CRC32: 0x%08x\n", iNESGameCRC32);
 	{
