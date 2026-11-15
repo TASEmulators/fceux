@@ -7475,40 +7475,6 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 		lua_register(L, "SHIFT", bit_bshift_emulua);
 		lua_register(L, "BIT", bitbit);
 
-		if (!LuaArgCompat)
-		{
-			lua_newtable(L);
-			lua_pushstring(L, "FCEUX");
-			lua_rawseti(L, -2, -1);
-			lua_pushstring(L, filename);
-			lua_rawseti(L, -2, 0);
-			if (arg)
-			{
-				int ti = 1;
-				for (std::string tok : tokenizeString(arg))
-				{
-					lua_pushstring(L, tok.c_str());
-					lua_rawseti(L, -2, ti++);
-				}
-			}
-			lua_setglobal(L, "arg");
-		}
-		else
-		{ // Compatibility mode
-			if (arg)
-			{
-				luaL_Buffer b;
-				luaL_buffinit(L, &b);
-				luaL_addstring(&b, arg);
-				luaL_pushresult(&b);
-			}
-			else
-			{
-				lua_pushstring(L, "");
-			}
-			lua_setglobal(L, "arg");
-		}
-
 		luabitop_validate(L);
 
 		// push arrays for storing hook functions in
@@ -7522,6 +7488,40 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg)
 		X6502_MemHook::Add( X6502_MemHook::Write, luaWriteMemHook, nullptr );
 		X6502_MemHook::Add( X6502_MemHook::Exec , luaExecMemHook , nullptr );
 	}
+
+	if (!LuaArgCompat)
+	{   // Fixed arg parsing: tokenize arg and put it into a table.
+		lua_newtable(L);
+		lua_pushstring(L, "FCEUX");
+		lua_rawseti(L, -2, -1);
+		lua_pushstring(L, filename);
+		lua_rawseti(L, -2, 0);
+		if (arg)
+		{
+			int ti = 1;
+			for (std::string tok : tokenizeString(arg))
+			{
+				lua_pushstring(L, tok.c_str());
+				lua_rawseti(L, -2, ti++);
+			}
+		}
+	}
+	else
+	{   // Compatibility mode: pass arg directly to Lua. This is the old behavior some scripts may rely on.
+		if (arg)
+		{
+			luaL_Buffer b;
+			luaL_buffinit(L, &b);
+			luaL_addstring(&b, arg);
+			luaL_pushresult(&b);
+		}
+		else
+		{
+			lua_pushstring(L, "");
+		}
+		
+	}
+	lua_setglobal(L, "arg");
 
 	// We make our thread NOW because we want it at the bottom of the stack.
 	// If all goes wrong, we let the garbage collector remove it.
