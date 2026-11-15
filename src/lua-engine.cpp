@@ -7637,11 +7637,16 @@ static std::vector<std::string> tokenizeString(const char *str)
 
 /**
  * Equivalent to repeating the last FCEU_LoadLuaCode() call.
- * Called by the EMUCMD_SCRIPT_RELOAD command.
- * TODO: The shift+L often gets inserted into the textbox.
+ * Called by the EMUCMD_SCRIPT_RELOAD command (Shift+L by default).
  */
 void FCEU_ReloadLuaCode()
 {
+#ifdef __WIN_DRIVER__
+	// Clear all keyboard events from the message queue.
+	// This prevents a spurious input from appearing in the Lua console textbox.
+	while (PeekMessage(NULL, NULL, WM_KEYFIRST, WM_KEYLAST, PM_REMOVE));
+#endif
+
 	char args[MAX_PATH];
 	GetLuaArgs(args, sizeof(args));
 	if (!luaScriptName)
