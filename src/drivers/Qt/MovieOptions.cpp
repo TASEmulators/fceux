@@ -37,11 +37,12 @@
 #include "Qt/keyscan.h"
 #include "Qt/AviRecord.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/MovieOptions.h"
 
 //----------------------------------------------------------------------------
 MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
-	: QDialog(parent, Qt::Window)
+	: QDialog(fceuToolWindowParent(parent), Qt::Window)
 {
 	QLabel *lbl;
 	QGroupBox   *gbox;

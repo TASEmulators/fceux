@@ -158,7 +158,7 @@ static unsigned long long int  breakOnCycleRelVal = 0;
 static unsigned long long int  breakOnInstrRelVal = 0;
 //----------------------------------------------------------------------------
 ConsoleDebugger::ConsoleDebugger(QWidget *parent)
-	: QDialog( parent, Qt::Window )
+	: QDialog( fceuToolWindowParent(parent), Qt::Window )
 {
 	QMenuBar    *menuBar;
 	QSettings settings;

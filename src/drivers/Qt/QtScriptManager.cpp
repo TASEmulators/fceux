@@ -2737,7 +2737,7 @@ void ScriptMonitorThread_t::run()
 //---- Qt Script Dialog Window
 //----------------------------------------------------
 QScriptDialog_t::QScriptDialog_t(QWidget *parent)
-	: QDialog(parent, Qt::Window)
+	: QDialog(fceuToolWindowParent(parent), Qt::Window)
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;

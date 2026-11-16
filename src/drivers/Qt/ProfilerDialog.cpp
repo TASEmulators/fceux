@@ -21,6 +21,7 @@
 #include "driver.h"
 #include "Qt/main.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/ProfilerDialog.h"
 #include "Qt/WindowLayoutManager.h"
 
@@ -54,7 +55,7 @@ namespace
 }
 //----------------------------------------------------------------------------
 ProfilerDialog_t::ProfilerDialog_t(QWidget *parent)
-	: QDialog(parent, Qt::Window)
+	: QDialog(fceuToolWindowParent(parent), Qt::Window)
 {
 	QVBoxLayout *mainLayout = new QVBoxLayout();
 	QVBoxLayout *vbox;

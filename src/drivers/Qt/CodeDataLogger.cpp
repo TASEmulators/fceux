@@ -75,7 +75,7 @@ int openCDLWindow( QWidget *parent )
 }
 //----------------------------------------------------
 CodeDataLoggerDialog_t::CodeDataLoggerDialog_t(QWidget *parent)
-	: QDialog(parent, Qt::Window)
+	: QDialog(fceuToolWindowParent(parent), Qt::Window)
 {
 	QSettings    settings;
 	QVBoxLayout *mainLayout, *vbox1, *vbox;

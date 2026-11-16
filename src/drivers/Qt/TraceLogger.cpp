@@ -153,7 +153,7 @@ static void initLogOption( const char *name, int bitmask )
 }
 //----------------------------------------------------
 TraceLoggerDialog_t::TraceLoggerDialog_t(QWidget *parent)
-	: QDialog(parent, Qt::Window)
+	: QDialog(fceuToolWindowParent(parent), Qt::Window)
 {
 	QSettings    settings;
 	QVBoxLayout *mainLayout;

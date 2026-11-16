@@ -1387,6 +1387,15 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size )
 	return QString::fromStdString( text );
 }
 //----------------------------------------------------
+QWidget *fceuToolWindowParent( QWidget *parent )
+{
+	int  separate = 0;
+	g_config->getOption ("SDL.ToolWindowTaskbarEntry", &separate);
+
+	// A top level window without a parent gets its own taskbar entry
+	return separate ? nullptr : parent;
+}
+//----------------------------------------------------
 void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property )
 {
 	int  pval;

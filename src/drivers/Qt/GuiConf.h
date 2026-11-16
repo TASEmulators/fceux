@@ -143,6 +143,7 @@ protected:
 	QCheckBox *useNativeFileDialog;
 	QCheckBox *useNativeMenuBar;
 	QCheckBox *pauseOnMenuAccess;
+	QCheckBox *toolWindowTaskbar;
 	QCheckBox *ctxMenuEnable;
 	QCheckBox *showSplashScreen;
 #if defined(Q_OS_LINUX)
@@ -163,6 +164,7 @@ private slots:
 	void useNativeFileDialogChanged(bool v);
 	void useNativeMenuBarChanged(bool v);
 	void pauseOnMenuAccessChanged(bool v);
+	void toolWindowTaskbarChanged(bool v);
 	void contextMenuEnableChanged(bool v);
 	void showSplashScreenChanged(bool v);
 #if defined(Q_OS_LINUX)

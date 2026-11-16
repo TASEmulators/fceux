@@ -168,7 +168,7 @@ void applyMovieInputConfig(void)
 }
 //----------------------------------------------------------------------------
 TasEditorWindow::TasEditorWindow(QWidget *parent)
-	: QDialog( parent, Qt::Window ), bookmarks(this), branches(this)
+	: QDialog( fceuToolWindowParent(parent), Qt::Window ), bookmarks(this), branches(this)
 {
 	QSettings  settings;
 	QVBoxLayout *mainLayout;

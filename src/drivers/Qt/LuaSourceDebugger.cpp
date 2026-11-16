@@ -35,6 +35,7 @@
 #include "Qt/LuaSourceDebugger.h"
 #include "Qt/LuaControl.h"
 #include "Qt/LuaConsoleOutput.h"
+#include "Qt/ConsoleUtilities.h"
 #include "Qt/fceuWrapper.h"
 #include "Qt/nes_shm.h"
 
@@ -664,7 +665,7 @@ void LuaSourceView::updateHighlights(void)
 // LuaSourceDebuggerDialog_t
 //----------------------------------------------------------------------------
 LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
-	: QDialog(parent, Qt::Window), lastSerial(0), wasPaused(false), updatingVars(false)
+	: QDialog(fceuToolWindowParent(parent), Qt::Window), lastSerial(0), wasPaused(false), updatingVars(false)
 {
 	QSettings settings;
 	QMenuBar *menuBar;

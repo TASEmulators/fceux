@@ -96,6 +96,10 @@ QString fceuGetOpcodeToolTip( uint8_t *opcode, int size );
 QDialog *fceuCustomToolTipShow( const QPoint &globalPos, QDialog *popup );
 
 //----------------------------------------------------
+// Returns the parent to use for a top level tool window. Returns nullptr when the
+// user has enabled separate taskbar entries for tool windows.
+QWidget *fceuToolWindowParent( QWidget *parent );
+//----------------------------------------------------
 void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
 void  setComboBoxFromProperty( QComboBox *cbx, const char *property );
 void  setComboBoxFromValue( QComboBox *cbx, int pval );

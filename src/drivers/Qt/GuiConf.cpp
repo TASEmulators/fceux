@@ -89,7 +89,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	: QDialog(parent)
 {
 	int useNativeFileDialogVal;
-	int useNativeMenuBarVal, pauseOnMenuAccessVal;
+	int useNativeMenuBarVal, pauseOnMenuAccessVal, toolWindowTaskbarVal;
 	int useCustomQssVal, useCustomQPalVal, contextMenuEnable;
 	QVBoxLayout *mainLayout, *vbox1, *vbox2;
 	QHBoxLayout *hbox, *hbox1;
@@ -127,6 +127,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	g_config->getOption("SDL.UseCustomQss", &useCustomQssVal);
 	g_config->getOption("SDL.UseCustomQPal", &useCustomQPalVal);
 	g_config->getOption("SDL.PauseOnMainMenuAccess", &pauseOnMenuAccessVal);
+	g_config->getOption("SDL.ToolWindowTaskbarEntry", &toolWindowTaskbarVal);
 	g_config->getOption("SDL.ContextMenuEnable", &contextMenuEnable);
 
 	setWindowTitle(tr("GUI Config"));
@@ -179,18 +180,22 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	useNativeFileDialog = new QCheckBox(tr("Use Native OS File Dialog"));
 	useNativeMenuBar    = new QCheckBox(tr("Use Native OS Menu Bar"));
 	pauseOnMenuAccess   = new QCheckBox(tr("Pause On Main Menu Access"));
+	toolWindowTaskbar   = new QCheckBox(tr("Separate Taskbar Entry for Tool Windows"));
+	toolWindowTaskbar->setToolTip(tr("Applies to tool windows opened after the change."));
 	ctxMenuEnable       = new QCheckBox(tr("Context Menu Enable"));
 	showSplashScreen    = new QCheckBox(tr("Show Splash Screen at Startup"));
 
 	useNativeFileDialog->setChecked(useNativeFileDialogVal);
 	useNativeMenuBar->setChecked(useNativeMenuBarVal);
 	pauseOnMenuAccess->setChecked(pauseOnMenuAccessVal);
+	toolWindowTaskbar->setChecked(toolWindowTaskbarVal);
 	ctxMenuEnable->setChecked(contextMenuEnable);
 	showSplashScreen->setChecked( settings.value("mainWindow/showSplashScreen", false).toBool() );
 
 	connect(useNativeFileDialog, SIGNAL(toggled(bool)), this, SLOT(useNativeFileDialogChanged(bool)));
 	connect(useNativeMenuBar   , SIGNAL(toggled(bool)), this, SLOT(useNativeMenuBarChanged(bool)));
 	connect(pauseOnMenuAccess  , SIGNAL(toggled(bool)), this, SLOT(pauseOnMenuAccessChanged(bool)));
+	connect(toolWindowTaskbar  , SIGNAL(toggled(bool)), this, SLOT(toolWindowTaskbarChanged(bool)));
 	connect(ctxMenuEnable      , SIGNAL(toggled(bool)), this, SLOT(contextMenuEnableChanged(bool)));
 	connect(showSplashScreen   , SIGNAL(toggled(bool)), this, SLOT(showSplashScreenChanged(bool)));
 
@@ -321,6 +326,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	vbox1->addWidget(useNativeFileDialog, 1);
 	vbox1->addWidget(useNativeMenuBar, 1);
 	vbox1->addWidget(pauseOnMenuAccess, 1);
+	vbox1->addWidget(toolWindowTaskbar, 1);
 	vbox1->addWidget(ctxMenuEnable, 1);
 	vbox1->addWidget(showSplashScreen, 1);
 #if defined(Q_OS_LINUX)
@@ -386,6 +392,11 @@ void GuiConfDialog_t::pauseOnMenuAccessChanged(bool state)
 	g_config->setOption("SDL.PauseOnMainMenuAccess", value);
 
 	consoleWindow->setMenuAccessPauseEnable( value );
+}
+//----------------------------------------------------
+void GuiConfDialog_t::toolWindowTaskbarChanged(bool state)
+{
+	g_config->setOption("SDL.ToolWindowTaskbarEntry", state ? 1 : 0);
 }
 //----------------------------------------------------
 void GuiConfDialog_t::contextMenuEnableChanged(bool state)

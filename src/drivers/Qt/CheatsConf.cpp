@@ -72,7 +72,7 @@ void updateCheatDialog(void)
 }
 //----------------------------------------------------------------------------
 GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
-	: QDialog(parent, Qt::Window)
+	: QDialog(fceuToolWindowParent(parent), Qt::Window)
 {
 	QSettings    settings;
 	QHBoxLayout *mainLayout, *hbox, *hbox1;

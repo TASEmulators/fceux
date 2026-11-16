@@ -135,7 +135,7 @@ static int conv2hex( int i )
 }
 //----------------------------------------------------
 ppuNameTableViewerDialog_t::ppuNameTableViewerDialog_t(QWidget *parent)
-	: QDialog( parent, Qt::Window )
+	: QDialog( fceuToolWindowParent(parent), Qt::Window )
 {
 	QSettings    settings;
 	QHBoxLayout *mainLayout;

@@ -2008,7 +2008,7 @@ void tilePaletteView_t::paintEvent(QPaintEvent *event)
 //----------------------------------------------------
 //----------------------------------------------------
 ppuTileEditor_t::ppuTileEditor_t(int patternIndex, QWidget *parent)
-	: QDialog( parent, Qt::Window )
+	: QDialog( fceuToolWindowParent(parent), Qt::Window )
 {
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
@@ -2841,7 +2841,7 @@ void ppuTileEditColorPicker_t::paintEvent(QPaintEvent *event)
 //----------------------------------------------------
 //----------------------------------------------------
 spriteViewerDialog_t::spriteViewerDialog_t(QWidget *parent)
-	: QDialog(parent, Qt::Window)
+	: QDialog(fceuToolWindowParent(parent), Qt::Window)
 {
 	QSettings    settings;
 	QMenuBar    *menuBar;

@@ -1102,7 +1102,7 @@ void HexEditorFindDialog_t::runSearch(void)
 }
 //----------------------------------------------------------------------------
 HexEditorDialog_t::HexEditorDialog_t(QWidget *parent)
-	: QDialog( parent, Qt::Window )
+	: QDialog( fceuToolWindowParent(parent), Qt::Window )
 {
 	//QVBoxLayout *mainLayout;
 	QGridLayout *grid;

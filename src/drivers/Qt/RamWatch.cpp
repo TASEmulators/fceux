@@ -69,7 +69,7 @@ void openRamWatchWindow( QWidget *parent, int force )
 }
 //----------------------------------------------------------------------------
 RamWatchDialog_t::RamWatchDialog_t(QWidget *parent)
-	: QDialog( parent, Qt::Window )
+	: QDialog( fceuToolWindowParent(parent), Qt::Window )
 {
 	QSettings settings;
 	QMenuBar *menuBar;
