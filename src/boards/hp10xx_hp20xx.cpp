@@ -29,7 +29,7 @@
 #include "../ines.h"
 
 static uint8 unromchr, lock;
-static uint32 dipswitch;
+static uint8 dipswitch;
 
 static void BMCHPxxCW(uint32 A, uint8 V)
 {
@@ -173,5 +173,6 @@ void BMCHPxx_Init(CartInfo *info)
 	AddExState(EXPREGS, 8, 0, "EXPR");
 	AddExState(&unromchr, 1, 0, "UCHR");
 	AddExState(&dipswitch, 1, 0, "DPSW");
+	FCEU_BoardRegisterDipSwitchBits(&dipswitch, 4, "DIP");
 	AddExState(&lock, 1, 0, "LOCK");
 }

@@ -114,6 +114,7 @@ void BMCD1038_Init(CartInfo *info) {
 	Latch_Init(info, BMCD1038Sync, BMCD1038Read, 0x0000, 0x8000, 0xFFFF, 0);
 	info->Reset = BMCD1038Reset;
 	AddExState(&dipswitch, 1, 0, "DIPSW");
+	FCEU_BoardRegisterDipSwitchBits(&dipswitch, 2, "DIP");
 }
 
 //------------------ UNL43272 ---------------------------

@@ -24,7 +24,7 @@
 
 static bool is_BMCFK23CA;
 static uint8 unromchr;
-static uint32 dipswitch;
+static uint8 dipswitch;
 static uint8 *CHRRAM=NULL;
 static uint32 CHRRAMSize;
 
@@ -254,6 +254,7 @@ void BMCFK23C_Init(CartInfo *info)
 	AddExState(EXPREGS, 8, 0, "EXPR");
 	AddExState(&unromchr, 1, 0, "UCHR");
 	AddExState(&dipswitch, 1, 0, "DPSW");
+	FCEU_BoardRegisterDipSwitchBits(&dipswitch, 3, "DIP");
 
 	prg_bonus = 1;
 	if(MasterRomInfoParams.find("bonus") != MasterRomInfoParams.end())
@@ -281,6 +282,7 @@ void BMCFK23CA_Init(CartInfo *info)
 	AddExState(EXPREGS, 8, 0, "EXPR");
 	AddExState(&unromchr, 1, 0, "UCHR");
 	AddExState(&dipswitch, 1, 0, "DPSW");
+	FCEU_BoardRegisterDipSwitchBits(&dipswitch, 3, "DIP");
 
 	prg_bonus = 1;
 	if(MasterRomInfoParams.find("bonus") != MasterRomInfoParams.end())

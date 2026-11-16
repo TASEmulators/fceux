@@ -28,6 +28,7 @@
 #include "driver.h"
 #include "cart.h"
 #include "ines.h"
+#include "boardctl.h"
 
 #include <cstring>
 #include <cstdio>
@@ -146,9 +147,17 @@ void FCEU_VSUniSwap(uint8 *j0, uint8 *j1) {
 	}
 }
 
+static void RegisterVSUniDips(void) {
+	for (int i = 0; i < 8; i++) {
+		FCEU_BoardRegisterDipSwitch(&vsdip, i, ("DIP " + std::to_string(i)).c_str(),
+			[i](bool on) { FCEUI_VSUniSetDIP(i, on); });
+	}
+}
+
 void FCEU_VSUniPower(void) {
 	coinon = coinon2 = service = 0;
 	VSindex = 0;
+	RegisterVSUniDips();
 
 	if (secptr)
 		SetReadHandler(0x5e00, 0x5e01, VSSecRead);
@@ -407,32 +416,28 @@ void FCEU_VSUniCheck(uint64 md5partial, int *MapperNo, uint8 *Mirroring) {
 }
 
 void FCEU_VSUniDraw(uint8 *XBuf) {
-	uint32 *dest;
 	int y, x;
 
 	if (DIPS_howlong-- <= 0) return;
 
-	dest = (uint32*)(XBuf + 256 * 12 + 164);
-	for (y = 24; y; y--, dest += (256 - 72) >> 2) {
-		for (x = 72 >> 2; x; x--, dest++)
-			*dest = 0;
-	}
+	// Byte writes: the switch cells start at a 2 byte aligned offset, so uint32 stores would be misaligned.
+	uint8 *row = XBuf + 256 * 12 + 164;
+	for (y = 24; y; y--, row += 256)
+		memset(row, 0, 72);
 
-	dest = (uint32*)(XBuf + 256 * (12 + 4) + 164 + 6);
-	for (y = 16; y; y--, dest += (256 >> 2) - 16)
-		for (x = 8; x; x--) {
-			*dest = 0x01010101;
-			dest += 2;
-		}
+	uint8 *cells = XBuf + 256 * (12 + 4) + 164 + 6;
+	for (y = 16; y; y--, cells += 256)
+		for (x = 0; x < 8; x++)
+			memset(cells + x * 8, 1, 4);
 
-	dest = (uint32*)(XBuf + 256 * (12 + 4) + 164 + 6);
-	for (x = 0; x < 8; x++, dest += 2) {
-		uint32 *da = dest + (256 >> 2);
+	cells = XBuf + 256 * (12 + 4) + 164 + 6;
+	for (x = 0; x < 8; x++) {
+		uint8 *da = cells + x * 8 + 256;
 
 		if (!((vsdip >> x) & 1))
-			da += (256 >> 2) * 10;
-		for (y = 4; y; y--, da += 256 >> 2)
-			*da = 0;
+			da += 256 * 10;
+		for (y = 4; y; y--, da += 256)
+			memset(da, 0, 4);
 	}
 }
 

@@ -679,6 +679,7 @@
     </ClCompile>
     <ClCompile Include="..\src\video.cpp" />
     <ClCompile Include="..\src\vsuni.cpp" />
+    <ClCompile Include="..\src\boardctl.cpp" />
     <ClCompile Include="..\src\wave.cpp" />
     <ClCompile Include="..\src\x6502.cpp" />
     <ClCompile Include="..\src\emufile.cpp" />
@@ -1622,6 +1623,9 @@
       <Filter>include files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\vsuni.h">
+      <Filter>include files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\boardctl.h">
       <Filter>include files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\wave.h">

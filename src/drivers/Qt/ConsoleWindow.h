@@ -295,6 +295,7 @@ class  consoleWin_t : public QMainWindow
 		QAction *recAsWavAct;
 		QAction *stopWavAct;
 		QAction *tasEditorAct;
+		QAction *boardControlAct;
 		// Speed menu entries other than Normal.
 		QList<QAction*> speedActs;
 		QAction *netPlayHostAct;
@@ -382,6 +383,7 @@ class  consoleWin_t : public QMainWindow
 		void openDebugWindow(void);
 		void openHexEditor(void);
 		void openGamePadConfWin(void);
+		void openBoardControlWin(void);
 		void toggleFullscreen(void);
 		void toggleMenuVis(void);
 		void toggleStatusBar(bool checked);

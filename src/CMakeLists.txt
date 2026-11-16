@@ -431,6 +431,7 @@ set(SRC_CORE
   	${CMAKE_CURRENT_SOURCE_DIR}/unif.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/video.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/vsuni.cpp
+  	${CMAKE_CURRENT_SOURCE_DIR}/boardctl.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/wave.cpp
   	${CMAKE_CURRENT_SOURCE_DIR}/x6502.cpp
 	${LUA_ENGINE_SOURCE}
@@ -667,6 +668,7 @@ set(SRC_DRIVERS_SDL
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TextOverlayDisplay.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/InputConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/GamePadConf.cpp  
+  ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/BoardControl.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/FamilyKeyboard.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/HotKeyConf.cpp  
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TimingConf.cpp  

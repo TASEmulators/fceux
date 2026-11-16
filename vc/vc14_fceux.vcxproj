@@ -1017,6 +1017,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\unif.cpp" />
     <ClCompile Include="..\src\video.cpp" />
     <ClCompile Include="..\src\vsuni.cpp" />
+    <ClCompile Include="..\src\boardctl.cpp" />
     <ClCompile Include="..\src\wave.cpp" />
     <ClCompile Include="..\src\x6502.cpp" />
   </ItemGroup>
@@ -1353,6 +1354,7 @@ xcopy /y /d "$(ProjectDir)\..\src\drivers\win\7z_64.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\version.h" />
     <ClInclude Include="..\src\video.h" />
     <ClInclude Include="..\src\vsuni.h" />
+    <ClInclude Include="..\src\boardctl.h" />
     <ClInclude Include="..\src\wave.h" />
     <ClInclude Include="..\src\x6502.h" />
     <ClInclude Include="..\src\x6502abbrev.h" />

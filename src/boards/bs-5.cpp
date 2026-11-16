@@ -81,4 +81,5 @@ void BMCBS5_Init(CartInfo *info) {
 	info->Reset = MBS5Reset;
 	GameStateRestore = StateRestore;
 	AddExState(&StateRegs, ~0, 0, 0);
+	FCEU_BoardRegisterDipSwitchBits(&dip_switch, 2, "DIP");
 }

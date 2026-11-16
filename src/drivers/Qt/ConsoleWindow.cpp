@@ -77,6 +77,7 @@
 #include "Qt/ConsoleWindow.h"
 #include "Qt/InputConf.h"
 #include "Qt/GamePadConf.h"
+#include "Qt/BoardControl.h"
 #include "Qt/GamePadFileBrowser.h"
 #include "Qt/GamePadMenuBrowser.h"
 #include "Qt/FamilyKeyboard.h"
@@ -2245,6 +2246,14 @@ void consoleWin_t::createMainMenu(void)
 
 	toolsMenu->addAction(act);
 
+	// Tools -> Board Control
+	boardControlAct = act = new QAction(tr("&Board Control ..."), this);
+	act->setStatusTip(tr("View and change the state of the loaded cartridge board, such as DIP switches."));
+	act->setToolTip( act->statusTip() );
+	connect(act, SIGNAL(triggered()), this, SLOT(openBoardControlWin(void)) );
+
+	toolsMenu->addAction(act);
+
 	toolsMenu->addSeparator();
 
 	// Tools -> Dockable Widgets (menu populated where each dock is created)
@@ -2618,7 +2627,8 @@ void consoleWin_t::onHardcoreChanged(bool active)
 	QAction *toolActions[] =
 	{
 		cheatsAct, ramSearchAct, ramWatchAct, debuggerAct, hexEditAct, ppuViewAct, oamViewAct, ntViewAct,
-		traceLogAct, codeDataLogAct, luaDebuggerAct, ggEncodeAct, loadLuaAct, loadJsAct, gameGenieAct, loadGgROMAct
+		traceLogAct, codeDataLogAct, luaDebuggerAct, ggEncodeAct, loadLuaAct, loadJsAct, gameGenieAct, loadGgROMAct,
+		boardControlAct
 	};
 
 	// Runs before the game is reset, so nothing is left open that could touch it.
@@ -2647,6 +2657,7 @@ void consoleWin_t::onHardcoreChanged(bool active)
 		{
 			tasWin->requestWindowClose();
 		}
+		closeBoardControlWindow();
 	}
 
 	for ( QAction *act : toolActions )
@@ -4072,6 +4083,15 @@ void consoleWin_t::openTimingStatWin(void)
 	//printf("Open Timing Statistics Window\n");
 
 	openFrameTimingWindow(this);
+}
+
+void consoleWin_t::openBoardControlWin(void)
+{
+	if (hardcoreBlocked())
+	{
+		return;
+	}
+	openBoardControlWindow(this);
 }
 
 void consoleWin_t::openProfilerWin(void)

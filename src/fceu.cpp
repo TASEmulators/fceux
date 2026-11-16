@@ -43,6 +43,7 @@
 #include "input.h"
 #include "file.h"
 #include "vsuni.h"
+#include "boardctl.h"
 #include "ines.h"
 #ifdef __WIN_DRIVER__
 #include "drivers/win/pref.h"
@@ -200,6 +201,8 @@ static void FCEU_CloseGame(void)
 		}
 
 		GameInterface(GI_CLOSE);
+
+		FCEU_BoardClearControls();
 
 		FCEU_StateRecorderStop();
 
@@ -390,6 +393,7 @@ static DECLFR(ARAMH) {
 
 void ResetGameLoaded(void) {
 	if (GameInfo) FCEU_CloseGame();
+	FCEU_BoardClearControls();
 	EmulationPaused = 0; //mbg 5/8/08 - loading games while paused was bad news. maybe this fixes it
 	GameStateRestore = 0;
 	PPU_hook = nullptr;
