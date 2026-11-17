@@ -230,87 +230,81 @@ static void convertRgb_32_to_24( const unsigned char *src, unsigned char *dest, 
 //#define RV ((int)( 0.50000 * (1 << RGB2YUV_SHIFT) + 0.5))
 //#define RU ((int)(-0.16874 * (1 << RGB2YUV_SHIFT) + 0.5))
 
-#define BY ( (int)(0.114 * 219 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
-#define BV (-(int)(0.081 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
-#define BU ( (int)(0.500 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
-#define GY ( (int)(0.587 * 219 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
-#define GV (-(int)(0.419 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
-#define GU (-(int)(0.331 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
-#define RY ( (int)(0.299 * 219 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
-#define RV ( (int)(0.500 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
-#define RU (-(int)(0.169 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5))
+static constexpr int BY = ( (int)(0.114 * 219 / 255 * (1 << RGB2YUV_SHIFT) + 0.5));
+static constexpr int BV = (-(int)(0.081 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5));
+static constexpr int BU = ( (int)(0.500 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5));
+static constexpr int GY = ( (int)(0.587 * 219 / 255 * (1 << RGB2YUV_SHIFT) + 0.5));
+static constexpr int GV = (-(int)(0.419 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5));
+static constexpr int GU = (-(int)(0.331 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5));
+static constexpr int RY = ( (int)(0.299 * 219 / 255 * (1 << RGB2YUV_SHIFT) + 0.5));
+static constexpr int RV = ( (int)(0.500 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5));
+static constexpr int RU = (-(int)(0.169 * 224 / 255 * (1 << RGB2YUV_SHIFT) + 0.5));
 
-static const int Y_ADD = 16;
-static const int U_ADD = 128;
-static const int V_ADD = 128;
+static constexpr int Y_ADD = 16;
+static constexpr int U_ADD = 128;
+static constexpr int V_ADD = 128;
 
-template<int PixStride>
-void Convert_4byte_To_I420Frame(const void* data, unsigned char* dest, unsigned npixels, unsigned width)
+static inline unsigned char Convert_BGRA_To_Y(uint32_t pixel)
 {
-    const unsigned char* src = (const unsigned char*) data;
-    unsigned height = npixels / width;
-    
-    unsigned pos = 0;
-    unsigned ypos = 0;
+    return Y_ADD + ((RY * static_cast<int>((pixel >> 16) & 0xFF)
+                   + GY * static_cast<int>((pixel >> 8) & 0xFF)
+                   + BY * static_cast<int>(pixel & 0xFF)
+                   + (1 << (RGB2YUV_SHIFT - 1))) >> RGB2YUV_SHIFT);
+}
+
+static void Convert_4byte_To_I420Frame(const uint32_t* __restrict src,
+                                       unsigned char* __restrict dest,
+                                       unsigned npixels, unsigned width)
+{
+    const unsigned height = npixels / width;
+    const unsigned chromaWidth = width / 2;
     // The input is BGRA; I420 stores the U plane before the V plane.
-    unsigned upos = npixels;
-    unsigned vpos = upos + npixels / 4;
-    unsigned stride = width*PixStride;
-    int Y, U, V;
+    unsigned char* uPlane = dest + npixels;
+    unsigned char* vPlane = uPlane + npixels / 4;
 
-    /*fprintf(stderr, "npixels=%u, width=%u, height=%u, ypos=%u,upos=%u,vpos=%u",
-        npixels,width,height, ypos,upos,vpos);*/
-
-    /* This function is based on code from x264 svn version 711 */
-    /* TODO: Apply MMX optimization for 24-bit pixels */
-    
-    for(unsigned y=0; y<height; y += 2)
+    for (unsigned y = 0; y < height; ++y)
     {
-        for(unsigned x=0; x<width; x += 2)
+        const uint32_t* srcRow = src + y * width;
+        unsigned char* destRow = dest + y * width;
+        for (unsigned x = 0; x < width; ++x)
         {
-          {
-            int c[3], bgr[3][4];
-            
-            /* luma */
-            for(int n=0; n<3; ++n) c[n]  = bgr[n][0] = src[pos + n];
-            for(int n=0; n<3; ++n) c[n] += bgr[n][1] = src[pos + n + stride];
-            pos += PixStride;
-            
-            for(int n=0; n<3; ++n) c[n] += bgr[n][2] = src[pos + n];
-            for(int n=0; n<3; ++n) c[n] += bgr[n][3] = src[pos + n + stride];
-            pos += PixStride;
-
-            unsigned destpos[4] = { ypos, ypos+width, ypos+1, ypos+width+1 };
-            for(int n=0; n<4; ++n)
-            {
-                 Y = Y_ADD + ((RY * bgr[2][n]
-                              + GY * bgr[1][n]
-                              + BY * bgr[0][n]
-                              + (1 << (RGB2YUV_SHIFT - 1))
-                               ) >> RGB2YUV_SHIFT);  // y
-
-		 dest[destpos[n]] = Y;
-            }
-            
-            U = U_ADD + ((RU * c[2] + GU * c[1] + BU * c[0]
-                         + (1 << (RGB2YUV_SHIFT + 1))) >> (RGB2YUV_SHIFT + 2));
-            V = V_ADD + ((RV * c[2] + GV * c[1] + BV * c[0]
-                         + (1 << (RGB2YUV_SHIFT + 1))) >> (RGB2YUV_SHIFT + 2));
-
-	    //printf("%i,%i = rgb( %i, %i, %i ) = yuv( %i, %i, %i )\n", x,y,
-	    //    	    bgr[2][3], bgr[1][3], bgr[0][3], Y, U, V );
-            dest[upos++] = U;
-            dest[vpos++] = V;
-          }
-            
-            ypos += 2;
+            destRow[x] = Convert_BGRA_To_Y(srcRow[x]);
         }
-        pos += stride;
-        ypos += width;
     }
-    
-    /*fprintf(stderr, ",yr=%u,ur=%u,vr=%u\n",
-        ypos,upos,vpos);*/
+
+    for (unsigned y = 0; y < height; y += 2)
+    {
+        const uint32_t* srcRow0 = src + y * width;
+        const uint32_t* srcRow1 = srcRow0 + width;
+        unsigned char* uRow = uPlane + (y / 2) * chromaWidth;
+        unsigned char* vRow = vPlane + (y / 2) * chromaWidth;
+
+        for (unsigned x = 0; x < width; x += 2)
+        {
+            const uint32_t p0 = srcRow0[x];
+            const uint32_t p1 = srcRow0[x + 1];
+            const uint32_t p2 = srcRow1[x];
+            const uint32_t p3 = srcRow1[x + 1];
+            const int r = static_cast<int>((p0 >> 16) & 0xFF)
+                        + static_cast<int>((p1 >> 16) & 0xFF)
+                        + static_cast<int>((p2 >> 16) & 0xFF)
+                        + static_cast<int>((p3 >> 16) & 0xFF);
+            const int g = static_cast<int>((p0 >> 8) & 0xFF)
+                        + static_cast<int>((p1 >> 8) & 0xFF)
+                        + static_cast<int>((p2 >> 8) & 0xFF)
+                        + static_cast<int>((p3 >> 8) & 0xFF);
+            const int b = static_cast<int>(p0 & 0xFF) + static_cast<int>(p1 & 0xFF)
+                        + static_cast<int>(p2 & 0xFF) + static_cast<int>(p3 & 0xFF);
+            const unsigned chromaX = x / 2;
+
+            uRow[chromaX] = U_ADD + ((RU * r + GU * g + BU * b
+                                     + (1 << (RGB2YUV_SHIFT + 1)))
+                                    >> (RGB2YUV_SHIFT + 2));
+            vRow[chromaX] = V_ADD + ((RV * r + GV * g + BV * b
+                                     + (1 << (RGB2YUV_SHIFT + 1)))
+                                    >> (RGB2YUV_SHIFT + 2));
+        }
+    }
 }
 //**************************************************************************************
 #ifdef _USE_X264
@@ -2780,20 +2774,20 @@ void AviRecordDiskThread_t::run(void)
 
 			if ( localVideoFormat == AVI_I420)
 			{
-				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
+				Convert_4byte_To_I420Frame(videoOut,rgb24,numPixels,width);
 				gwavi->add_frame( rgb24, (numPixels*3)/2 );
 			}
 			#ifdef _USE_X264
 			else if ( localVideoFormat == AVI_X264)
 			{
-				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
+				Convert_4byte_To_I420Frame(videoOut,rgb24,numPixels,width);
 				X264::encode_frame( rgb24, width, height );
 			}
 			#endif
 			#ifdef _USE_X265
 			else if ( localVideoFormat == AVI_X265)
 			{
-				Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
+				Convert_4byte_To_I420Frame(videoOut,rgb24,numPixels,width);
 				X265::encode_frame( rgb24, width, height );
 			}
 			#endif
@@ -2808,7 +2802,7 @@ void AviRecordDiskThread_t::run(void)
 			#ifdef _USE_LIBAV
 			else if ( localVideoFormat == AVI_LIBAV)
 			{
-				//Convert_4byte_To_I420Frame<4>(videoOut,rgb24,numPixels,width);
+				//Convert_4byte_To_I420Frame(videoOut,rgb24,numPixels,width);
 				//convertRgb_32_to_24( (const unsigned char*)videoOut, rgb24,
 				//		width, height, numPixels, true );
 				LIBAV::encode_video_frame( (unsigned char*)videoOut );
