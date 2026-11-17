@@ -25,15 +25,17 @@
 
 uint32 uppow2(uint32 n)
 {
- int x;
+	if (n == 0)
+		return 0;
 
- for(x=31;x>=0;x--)
-  if(n&(1u<<x))
-  {
-   if((1u<<x)!=n)
-    return(1u<<(x+1));
-   break;
-  }
- return n;
+	// Spread the highest set bit downward, then add one to reach the next power
+	// of two. If that power is 2^32, unsigned wraparound returns 0.
+	--n;
+	n |= n >> 1;
+	n |= n >> 2;
+	n |= n >> 4;
+	n |= n >> 8;
+	n |= n >> 16;
+	return n + 1;
 }
 

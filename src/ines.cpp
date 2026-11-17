@@ -854,37 +854,65 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 	int vrom_size_bytes = 0;
 	int vrom_not_round_size = 0;
 
-	if (!iNES2)	{
-		not_round_size = head.ROM_size << 14;
-	}
-	else {
-		if ((head.Upper_ROM_VROM_size & 0x0F) != 0x0F)
-			// simple notation
-			not_round_size = (head.ROM_size | ((head.Upper_ROM_VROM_size & 0x0F) << 8)) << 14;
-		else
-			// exponent-multiplier notation
-			not_round_size = ((1 << (head.ROM_size >> 2)) * ((head.ROM_size & 0b11) * 2 + 1));
-	}
-	
-	if (!head.ROM_size && !iNES2)
-		rom_size_bytes = 256 << 14;
-	else
-		rom_size_bytes = uppow2(not_round_size);
+	// Sizes are computed in 64 bits and bounded before any allocation, since
+	// the exponent-multiplier notation can describe sizes beyond 32 bits.
+	const uint64 max_rom_image_bytes = 256ull << 20;
+	uint64 prg_size64 = 0;
+	uint64 chr_size64 = 0;
 
 	if (!iNES2)	{
-		vrom_not_round_size = head.VROM_size << 13;
-		vrom_size_bytes = uppow2(vrom_not_round_size);
+		prg_size64 = (uint64)head.ROM_size << 14;
+		chr_size64 = (uint64)head.VROM_size << 13;
 	}
-	else {
-		if ((head.Upper_ROM_VROM_size & 0xF0) != 0xF0) {
+	else
+	{
+		if ((head.Upper_ROM_VROM_size & 0x0F) != 0x0F)
+		{
 			// simple notation
-			vrom_not_round_size = (head.VROM_size | ((head.Upper_ROM_VROM_size & 0xF0) << 4)) << 13;
-			vrom_size_bytes = uppow2(vrom_not_round_size);
+			prg_size64 = (uint64)(head.ROM_size | ((head.Upper_ROM_VROM_size & 0x0F) << 8)) << 14;
 		}
-		else {
+		else
+		{
+			// exponent-multiplier notation (exponent is 6 bits, 1 << 63 still fits in uint64)
+			prg_size64 = (1ull << (head.ROM_size >> 2)) * ((head.ROM_size & 0b11) * 2 + 1);
+		}
+
+		if ((head.Upper_ROM_VROM_size & 0xF0) != 0xF0)
+		{
+			// simple notation
+			chr_size64 = (uint64)(head.VROM_size | ((head.Upper_ROM_VROM_size & 0xF0) << 4)) << 13;
+		}
+		else
+		{
 			// exponent-multiplier notation
-			vrom_not_round_size = vrom_size_bytes = ((1 << (head.VROM_size >> 2)) * ((head.VROM_size & 0b11) * 2 + 1));
+			chr_size64 = (1ull << (head.VROM_size >> 2)) * ((head.VROM_size & 0b11) * 2 + 1);
 		}
+	}
+
+	if ((iNES2 && prg_size64 == 0) || prg_size64 > max_rom_image_bytes || chr_size64 > max_rom_image_bytes) {
+		FCEU_PrintError("Invalid or unsupported PRG/CHR ROM size in iNES header.");
+		return LOADER_HANDLED_ERROR;
+	}
+
+	not_round_size = (int)prg_size64;
+	vrom_not_round_size = (int)chr_size64;
+
+	if (!head.ROM_size && !iNES2)
+	{
+		rom_size_bytes = 256 << 14;
+	}
+	else
+	{
+		rom_size_bytes = uppow2(not_round_size);
+	}
+
+	if (iNES2 && (head.Upper_ROM_VROM_size & 0xF0) == 0xF0)
+	{
+		vrom_size_bytes = vrom_not_round_size;
+	}
+	else
+	{
+		vrom_size_bytes = uppow2(vrom_not_round_size);
 	}
 
 	// The buffers are allocated with power of 2 sizes (the cart mapping
