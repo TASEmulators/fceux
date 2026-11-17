@@ -149,7 +149,7 @@ void FCEU_VSUniSwap(uint8 *j0, uint8 *j1) {
 
 static void RegisterVSUniDips(void) {
 	for (int i = 0; i < 8; i++) {
-		FCEU_BoardRegisterDipSwitch(&vsdip, i, ("DIP " + std::to_string(i)).c_str(),
+		FCEU_BoardRegisterDipSwitch(&vsdip, i, ("DIP " + std::to_string(i + 1)).c_str(),
 			[i](bool on) { FCEUI_VSUniSetDIP(i, on); });
 	}
 }

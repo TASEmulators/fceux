@@ -39,7 +39,7 @@ struct BoardDipSwitch
 void FCEU_BoardRegisterDipSwitch(uint8_t *addr, uint8_t bit, const char *name,
                                  std::function<void(bool)> setter = nullptr);
 
-// Registers bits 0..numBits-1 of *addr, named "<prefix> <bit index>".
+// Registers bits 0..numBits-1 of *addr, named "<prefix> <switch number>" (1-based).
 void FCEU_BoardRegisterDipSwitchBits(uint8_t *addr, uint8_t numBits, const char *prefix);
 
 // Removes all registered controls. Called on ROM close and before ROM load.

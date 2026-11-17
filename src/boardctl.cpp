@@ -25,7 +25,7 @@ void FCEU_BoardRegisterDipSwitchBits(uint8_t *addr, uint8_t numBits, const char 
 {
 	for (uint8_t i = 0; i < numBits && i < 8; i++)
 	{
-		FCEU_BoardRegisterDipSwitch(addr, i, (std::string(prefix) + " " + std::to_string(i)).c_str());
+		FCEU_BoardRegisterDipSwitch(addr, i, (std::string(prefix) + " " + std::to_string(i + 1)).c_str());
 	}
 }
 
