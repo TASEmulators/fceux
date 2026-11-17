@@ -38,6 +38,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 
 typedef struct {
 	char ID[4];
@@ -278,13 +279,26 @@ static int LoadPRG(FCEUFILE *fp) {
 }
 
 static int SetBoardName(FCEUFILE *fp) {
-	if (!(boardname = (uint8*)FCEU_malloc(uchead.info + 1)))
+	const size_t info = uchead.info;
+	constexpr size_t maxSize = std::numeric_limits<size_t>::max() - 1;
+	if (info > maxSize)
+	{
 		return(0);
-	FCEU_fread(boardname, 1, uchead.info, fp);
-	boardname[uchead.info] = 0;
+	}
+	boardname = (uint8*)FCEU_malloc(static_cast<size_t>(info) + 1);
+	if (boardname == nullptr)
+	{
+		return(0);
+	}
+	if (FCEU_fread(boardname, 1, info, fp) != info)
+	{
+		return(0);
+	}
+	boardname[info] = 0;
 	FCEU_printf(" Board name: %s\n", boardname);
 	sboardname = boardname;
-	if (!memcmp(boardname, "NES-", 4) || !memcmp(boardname, "UNL-", 4) || !memcmp(boardname, "HVC-", 4) || !memcmp(boardname, "BTL-", 4) || !memcmp(boardname, "BMC-", 4))
+	if (info >= 4 &&
+		(!memcmp(boardname, "NES-", 4) || !memcmp(boardname, "UNL-", 4) || !memcmp(boardname, "HVC-", 4) || !memcmp(boardname, "BTL-", 4) || !memcmp(boardname, "BMC-", 4)))
 		sboardname += 4;
 	return(1);
 }
@@ -506,6 +520,14 @@ int LoadUNIFChunks(FCEUFILE *fp) {
 		}
 		if (!(FCEU_read32le(&uchead.info, fp)))
 			return 0;
+		const uint64 position = FCEU_ftell(fp);
+		const uint64 size = FCEU_fgetsize(fp);
+		if (position > size || uchead.info > size - position)
+		{
+			FCEU_printf("Invalid UNIF chunk %.4s: data extends beyond end of file.\n",
+				uchead.ID);
+			return 0;
+		}
 		t = 0;
 		x = 0;
 		while (bfunc[x].name) {
