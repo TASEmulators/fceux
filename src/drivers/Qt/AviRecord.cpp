@@ -342,10 +342,12 @@ static int init( int width, int height )
 	    goto x264_init_fail;
 	}
 	
-	if( x264_picture_alloc( &pic, param.i_csp, param.i_width, param.i_height ) < 0 )
-	{
-	    goto x264_init_fail;
-	}
+	x264_picture_init( &pic );
+	pic.img.i_csp = X264_CSP_I420;
+	pic.img.i_plane = 3;
+	pic.img.i_stride[0] = width;
+	pic.img.i_stride[1] = width / 2;
+	pic.img.i_stride[2] = width / 2;
 
 	hdl = x264_encoder_open( &param );
 	if ( hdl == NULL )
@@ -365,13 +367,11 @@ static int encode_frame( unsigned char *inBuf, int width, int height )
 	int luma_size = width * height;
 	int chroma_size = luma_size / 4;
 	int i_frame_size = 0;
-	int ofs;
 	unsigned int flags = 0;
 
-	ofs = 0;
-	memcpy( pic.img.plane[0], &inBuf[ofs], luma_size   ); ofs += luma_size;
-	memcpy( pic.img.plane[1], &inBuf[ofs], chroma_size ); ofs += chroma_size;
-	memcpy( pic.img.plane[2], &inBuf[ofs], chroma_size ); ofs += chroma_size;
+	pic.img.plane[0] = inBuf;
+	pic.img.plane[1] = inBuf + luma_size;
+	pic.img.plane[2] = inBuf + luma_size + chroma_size;
 
 	pic.i_pts = i_frame++;
 
@@ -419,7 +419,6 @@ static int close(void)
 	}
 	
 	x264_encoder_close( hdl );
-	x264_picture_clean( &pic );
 
 	return 0;
 }
