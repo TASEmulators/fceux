@@ -252,8 +252,9 @@ void Convert_4byte_To_I420Frame(const void* data, unsigned char* dest, unsigned 
     
     unsigned pos = 0;
     unsigned ypos = 0;
-    unsigned vpos = npixels;
-    unsigned upos = vpos + npixels / 4;
+    // The input is BGRA; I420 stores the U plane before the V plane.
+    unsigned upos = npixels;
+    unsigned vpos = upos + npixels / 4;
     unsigned stride = width*PixStride;
     int Y, U, V;
 
@@ -268,33 +269,36 @@ void Convert_4byte_To_I420Frame(const void* data, unsigned char* dest, unsigned 
         for(unsigned x=0; x<width; x += 2)
         {
           {
-            int c[3], rgb[3][4];
+            int c[3], bgr[3][4];
             
             /* luma */
-            for(int n=0; n<3; ++n) c[n]  = rgb[n][0] = src[pos + n];
-            for(int n=0; n<3; ++n) c[n] += rgb[n][1] = src[pos + n + stride];
+            for(int n=0; n<3; ++n) c[n]  = bgr[n][0] = src[pos + n];
+            for(int n=0; n<3; ++n) c[n] += bgr[n][1] = src[pos + n + stride];
             pos += PixStride;
             
-            for(int n=0; n<3; ++n) c[n] += rgb[n][2] = src[pos + n];
-            for(int n=0; n<3; ++n) c[n] += rgb[n][3] = src[pos + n + stride];
+            for(int n=0; n<3; ++n) c[n] += bgr[n][2] = src[pos + n];
+            for(int n=0; n<3; ++n) c[n] += bgr[n][3] = src[pos + n + stride];
             pos += PixStride;
 
             unsigned destpos[4] = { ypos, ypos+width, ypos+1, ypos+width+1 };
             for(int n=0; n<4; ++n)
             {
-                 Y = Y_ADD + ((RY * rgb[0][n]
-                              + GY * rgb[1][n]
-                              + BY * rgb[2][n]
+                 Y = Y_ADD + ((RY * bgr[2][n]
+                              + GY * bgr[1][n]
+                              + BY * bgr[0][n]
+                              + (1 << (RGB2YUV_SHIFT - 1))
                                ) >> RGB2YUV_SHIFT);  // y
 
 		 dest[destpos[n]] = Y;
             }
             
-            U = (U_ADD + ((RU * c[0] + GU * c[1] + BU * c[2]) >> (RGB2YUV_SHIFT+2)) );
-            V = (V_ADD + ((RV * c[0] + GV * c[1] + BV * c[2]) >> (RGB2YUV_SHIFT+2)) ); 
+            U = U_ADD + ((RU * c[2] + GU * c[1] + BU * c[0]
+                         + (1 << (RGB2YUV_SHIFT + 1))) >> (RGB2YUV_SHIFT + 2));
+            V = V_ADD + ((RV * c[2] + GV * c[1] + BV * c[0]
+                         + (1 << (RGB2YUV_SHIFT + 1))) >> (RGB2YUV_SHIFT + 2));
 
 	    //printf("%i,%i = rgb( %i, %i, %i ) = yuv( %i, %i, %i )\n", x,y,
-	    //    	    rgb[0][3], rgb[1][3], rgb[2][3], Y, U, V );
+	    //    	    bgr[2][3], bgr[1][3], bgr[0][3], Y, U, V );
             dest[upos++] = U;
             dest[vpos++] = V;
           }
