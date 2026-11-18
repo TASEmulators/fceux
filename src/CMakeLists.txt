@@ -150,6 +150,10 @@ endif()
 
 if(WIN32)
      find_package(OpenGL REQUIRED)
+     if (LIBARCHIVE_INSTALL_PREFIX)
+        set(ZLIB_ROOT "${LIBARCHIVE_INSTALL_PREFIX}")
+     endif()
+     find_package(ZLIB REQUIRED)
      #find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
      #add_definitions( ${Qt5Widgets_DEFINITIONS}  )
      #include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
@@ -161,7 +165,6 @@ if(WIN32)
      #add_definitions( /wd4018 ) # Integer comparison sign mismatch warnings
      include_directories( ${SDL_INSTALL_PREFIX}/include )
      include_directories( ${LIBARCHIVE_INSTALL_PREFIX}/include )
-     include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
      set( OPENGL_LDFLAGS  OpenGL::GL )
      set( SDL2_LDFLAGS  ${SDL_INSTALL_PREFIX}/lib/x64/SDL2.lib )
      set( LIBARCHIVE_LDFLAGS  ${LIBARCHIVE_INSTALL_PREFIX}/lib/archive.lib )
@@ -374,11 +377,12 @@ endif()
 if ( ${ZLIB_FOUND} )
 
   message( STATUS "Using System zlib ${ZLIB_VERSION_STRING}" )
-  #add_definitions( ${ZLIB_CFLAGS} )
   include_directories( ${ZLIB_INCLUDE_DIRS} )
 else()
 
    message( STATUS "Using Internal zlib" )
+
+   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib )
 
    set( ZLIB_SOURCE 
        ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/adler32.c 
@@ -394,7 +398,6 @@ else()
        ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/infutil.c 
        ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/trees.c 
        ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/uncompr.c 
-       ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/unzip.c 
        ${CMAKE_CURRENT_SOURCE_DIR}/drivers/win/zlib/zutil.c 
    	)
 endif()
@@ -642,6 +645,13 @@ set(SRC_CORE
 	${CMAKE_CURRENT_SOURCE_DIR}/utils/timeStamp.cpp
 )
 
+
+if (NOT MINIZIP_FOUND)
+	list(APPEND SRC_CORE
+		${CMAKE_CURRENT_SOURCE_DIR}/utils/unzip.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/utils/ioapi.cpp
+	)
+endif()
 
 set(SRC_DRIVERS_COMMON
   ${CMAKE_CURRENT_SOURCE_DIR}/drivers/common/args.cpp

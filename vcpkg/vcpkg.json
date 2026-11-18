@@ -1,5 +1,6 @@
 {
   "dependencies": [
-    "libarchive"
+    "libarchive",
+    "zlib"
   ]
 }

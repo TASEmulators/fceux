@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
-#include <unzip.h>
 
 #ifdef _S9XLUA_H
 #include <lua.h>

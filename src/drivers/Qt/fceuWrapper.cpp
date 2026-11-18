@@ -23,7 +23,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <limits.h>
+#ifdef _SYSTEM_MINIZIP
 #include <unzip.h>
+#else
+#include "utils/unzip.h"
+#endif
 
 #include <QFileInfo>
 #include <QMessageBox>
