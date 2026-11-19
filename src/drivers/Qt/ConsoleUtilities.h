@@ -12,6 +12,8 @@
 #include <QComboBox>
 #include <QCheckBox>
 
+class QBoxLayout;
+
 int  getDirFromFile( const char *path, std::string &dir );
 
 const char *getRomFile( void );
@@ -103,3 +105,4 @@ QWidget *fceuToolWindowParent( QWidget *parent );
 void  setCheckBoxFromProperty( QCheckBox *cbx, const char *property );
 void  setComboBoxFromProperty( QComboBox *cbx, const char *property );
 void  setComboBoxFromValue( QComboBox *cbx, int pval );
+void  addWhatsThisButton( QBoxLayout *layout, QWidget *parent );

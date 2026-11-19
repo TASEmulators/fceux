@@ -46,6 +46,7 @@
 #include "Qt/fceuWrapper.h"
 #include "Qt/ConsoleWindow.h"
 #include "Qt/TimingConf.h"
+#include "Qt/ConsoleUtilities.h"
 
 //----------------------------------------------------------------------------
 static bool hasNicePermissions(int val)
@@ -97,6 +98,8 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	mainLayout = new QVBoxLayout();
 
 	emuPrioCtlEna = new QCheckBox(tr("Set Scheduling Parameters at Startup"));
+	emuPrioCtlEna->setToolTip(tr("Apply the saved thread scheduling settings at startup. Changes made below affect the running threads immediately and may require privileges."));
+	emuPrioCtlEna->setWhatsThis(tr("These options change scheduling priority for the emulation and GUI threads. Real-time policies can make other applications unresponsive if set too aggressively, and the operating system may reject the request."));
 
 	emuPrioBox = new QGroupBox(tr("EMU Thread Scheduling Parameters"));
 	guiPrioBox = new QGroupBox(tr("GUI Thread Scheduling Parameters"));
@@ -110,6 +113,8 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 #ifdef WIN32
 	emuSchedPrioBox = new QComboBox();
 	guiSchedPrioBox = new QComboBox();
+	emuSchedPrioBox->setToolTip(tr("Set the Windows priority for the emulation thread."));
+	guiSchedPrioBox->setToolTip(tr("Set the Windows priority for the GUI thread."));
 
 	grid->addWidget(emuSchedPrioBox, 0, 0);
 
@@ -161,6 +166,14 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	guiSchedNiceSlider = new QSlider(Qt::Horizontal);
 	guiSchedPrioLabel = new QLabel(tr("Priority (RT)"));
 	guiSchedNiceLabel = new QLabel(tr("Priority (Nice)"));
+	emuSchedPolicyBox->setToolTip(tr("Select the Unix scheduling policy for the emulation thread. SCHED_FIFO and SCHED_RR are real-time policies."));
+	guiSchedPolicyBox->setToolTip(tr("Select the Unix scheduling policy for the GUI thread. SCHED_FIFO and SCHED_RR are real-time policies."));
+	emuSchedPrioSlider->setToolTip(tr("Real-time priority for the emulation thread; used only with SCHED_FIFO or SCHED_RR."));
+	guiSchedPrioSlider->setToolTip(tr("Real-time priority for the GUI thread; used only with SCHED_FIFO or SCHED_RR."));
+	emuSchedNiceSlider->setToolTip(tr("Nice priority for the emulation thread under normal scheduling. Higher slider values request more CPU priority."));
+	guiSchedNiceSlider->setToolTip(tr("Nice priority for the GUI thread under normal scheduling. Higher slider values request more CPU priority."));
+	emuSchedPolicyBox->setWhatsThis(tr("SCHED_OTHER is normal time-sharing. SCHED_FIFO and SCHED_RR are real-time policies and may require elevated privileges; misconfiguration can prevent other processes from receiving CPU time."));
+	guiSchedPolicyBox->setWhatsThis(emuSchedPolicyBox->whatsThis());
 
 	guiSchedPolicyBox->addItem(tr("SCHED_OTHER"), SCHED_OTHER);
 	guiSchedPolicyBox->addItem(tr("SCHED_FIFO"), SCHED_FIFO);
@@ -176,6 +189,8 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 
 	hbox = new QHBoxLayout();
 	timingDevSelBox = new QComboBox();
+	timingDevSelBox->setToolTip(tr("Select how the emulator waits between frame timing deadlines. Timer FD is available only on Linux."));
+	timingDevSelBox->setWhatsThis(tr("This selects the timer mechanism used to wait between frames. Available choices depend on the operating system; Timer FD is Linux-specific."));
 #ifdef WIN32
 	timingDevSelBox->addItem(tr("SDL_Delay"), 0);
 #else
@@ -192,6 +207,8 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	vbox = new QVBoxLayout();
 	grid = new QGridLayout();
 	ppuOverClockBox = new QGroupBox( tr("Overclocking (Old PPU Only)") );
+	ppuOverClockBox->setToolTip(tr("Add scanlines to reduce slowdown in some games. Available only when the New PPU is disabled."));
+	ppuOverClockBox->setWhatsThis(tr("These scanline settings apply only to the old PPU implementation. They change frame timing and can give games more CPU time per frame."));
 	ppuOverClockBox->setCheckable(true);
 	ppuOverClockBox->setChecked(overclock_enabled);
 	ppuOverClockBox->setEnabled(!newppu);
@@ -201,6 +218,11 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 	postRenderBox      = new QSpinBox();
 	vblankScanlinesBox = new QSpinBox();
 	no7bitSamples      = new QCheckBox( tr("Don't Overclock 7-bit Samples") );
+	postRenderBox->setToolTip(tr("Add 0 to 999 scanlines after visible rendering."));
+	postRenderBox->setWhatsThis(tr("Post-render scanlines are added after visible picture rendering and before vertical blank. Adding scanlines changes frame timing and may reduce slowdown in some games."));
+	vblankScanlinesBox->setToolTip(tr("Add 0 to 999 scanlines during vertical blank."));
+	vblankScanlinesBox->setWhatsThis(tr("These extra scanlines extend vertical blank, giving the game additional CPU time. Changing this value affects game timing."));
+	no7bitSamples->setToolTip(tr("Do not apply old-PPU overclocking while playing 7-bit DMC samples."));
 
 	postRenderBox->setRange(0, 999);
 	vblankScanlinesBox->setRange(0, 999);
@@ -222,6 +244,7 @@ TimingConfDialog_t::TimingConfDialog_t(QWidget *parent)
 
 	hbox = new QHBoxLayout();
 	hbox->addStretch(5);
+	addWhatsThisButton(hbox, this);
 	hbox->addWidget( closeButton, 1 );
 	mainLayout->addLayout( hbox );
 

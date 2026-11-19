@@ -31,6 +31,7 @@
 #include "Qt/config.h"
 #include "Qt/nes_shm.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleUtilities.h"
 
 //----------------------------------------------------
 ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
@@ -59,6 +60,10 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	muteChkbox = new QCheckBox(tr("Mute Speaker Output"));
 	// Enable Low Pass Filter Select
 	enaLowPass = new QCheckBox(tr("Enable Low Pass Filter"));
+	enaChkbox->setToolTip(tr("Enable or disable emulated sound output."));
+	muteChkbox->setToolTip(tr("Mute audio output without disabling sound emulation."));
+	enaLowPass->setToolTip(tr("Attenuate high frequencies in the emulated audio."));
+	enaLowPass->setWhatsThis(tr("A low-pass filter reduces high-frequency content in the emulated audio. It can soften the sound of the NES pulse channels."));
 
 	setCheckBoxFromProperty(enaChkbox, "SDL.Sound");
 	setCheckBoxFromProperty(muteChkbox, "SDL.Sound.Mute");
@@ -84,7 +89,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	{
 		driverSelect->addItem(tr("Qt"), AudioDriverBase::AUDIO_DRIVER_QT);
 	}
-	driverSelect->setToolTip( tr("The audio API used to play sound.") );
+	driverSelect->setToolTip(tr("Select the audio API used to play sound. Changing it restarts the audio output."));
 
 	setComboBoxFromProperty(driverSelect, "SDL.AudioDriver");
 
@@ -103,7 +108,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	deviceSelect = new QComboBox();
 	deviceSelect->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 	deviceSelect->setMinimumContentsLength(20);
-	deviceSelect->setToolTip( tr("The output device sound is played on.") );
+	deviceSelect->setToolTip(tr("Select the audio output device. Changing it restarts the audio output."));
 
 	populateDeviceSelect();
 
@@ -120,6 +125,8 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	lbl = new QLabel(tr("Quality:"));
 
 	qualitySelect = new QComboBox();
+	qualitySelect->setToolTip(tr("Select the audio resampling quality. Higher quality may use more CPU."));
+	qualitySelect->setWhatsThis(tr("This selects the quality level used when converting the emulator's audio to the output sample rate. Choose a lower level if audio processing uses too much CPU."));
 
 	qualitySelect->addItem(tr("Low"), 0);
 	qualitySelect->addItem(tr("High"), 1);
@@ -141,6 +148,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	lbl = new QLabel("Rate:");
 
 	rateSelect = new QComboBox();
+	rateSelect->setToolTip(tr("Select the audio output sample rate in samples per second."));
 
 	rateSelect->addItem(QStringLiteral("11025"), 11025);
 	rateSelect->addItem(QStringLiteral("22050"), 22050);
@@ -170,6 +178,8 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	bufSizeSlider->setMinimum(15);
 	bufSizeSlider->setMaximum(200);
+	bufSizeSlider->setToolTip(tr("Set the audio FIFO buffer duration from 15 to 200 ms. Larger buffers can reduce crackling but add playback latency."));
+	bufSizeSlider->setWhatsThis(tr("The audio FIFO buffers samples between the emulation and audio threads. A larger buffer tolerates longer scheduling delays but increases the delay between emulation and playback."));
 	//bufSizeSlider->setSliderPosition(128);
 	setSliderFromProperty(bufSizeSlider, bufSizeLabel, "SDL.Sound.BufSize");
 
@@ -191,7 +201,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	// Use Global Focus
 	useGlobalFocus = new QCheckBox(tr("Use Global Focus"));
-	useGlobalFocus->setToolTip( tr("Mute sound when window is not in focus") );
+	useGlobalFocus->setToolTip(tr("Keep audio playing when the main window loses focus. When disabled, audio is muted while the window is inactive."));
 	vbox1->addWidget(useGlobalFocus);
 
 	setCheckBoxFromProperty(useGlobalFocus, "SDL.Sound.UseGlobalFocus");
@@ -200,6 +210,8 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	// Swap Duty Cycles
 	swapDutyChkbox = new QCheckBox(tr("Swap Duty Cycles"));
+	swapDutyChkbox->setToolTip(tr("Swap the NES pulse channels' 25% and 50% duty-cycle settings."));
+	swapDutyChkbox->setWhatsThis(tr("The NES has two pulse (square-wave) channels with selectable duty cycles. This option swaps the 25% and 50% duty bits used by some games and Famiclone software."));
 	vbox1->addWidget(swapDutyChkbox);
 
 	setCheckBoxFromProperty(swapDutyChkbox, "SDL.SwapDuty");
@@ -216,11 +228,13 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	hbox1->addWidget(frame);
 
 	frame = new QGroupBox(tr("Volume"));
+	frame->setToolTip(tr("Master sound level, from 0 to 255."));
 	vbox2 = new QVBoxLayout();
 	volLbl = new QLabel("150");
 	vslider = new QSlider(Qt::Vertical);
 	vslider->setMinimum(0);
 	vslider->setMaximum(255);
+	vslider->setToolTip(frame->toolTip());
 	setSliderFromProperty(vslider, volLbl, "SDL.Sound.Volume");
 
 	vbox2->addWidget(volLbl);
@@ -231,11 +245,15 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	connect(vslider, SIGNAL(valueChanged(int)), this, SLOT(volumeChanged(int)));
 
 	frame = new QGroupBox(tr("Triangle"));
+	frame->setToolTip(tr("NES triangle-channel level, from 0 to 256."));
+	frame->setWhatsThis(tr("The triangle channel is one of the NES audio hardware's sound generators, commonly used for bass notes. This slider scales it independently of the master volume."));
 	vbox2 = new QVBoxLayout();
 	triLbl = new QLabel("256");
 	vslider = new QSlider(Qt::Vertical);
 	vslider->setMinimum(0);
 	vslider->setMaximum(256);
+	vslider->setToolTip(frame->toolTip());
+	vslider->setWhatsThis(frame->whatsThis());
 	setSliderFromProperty(vslider, triLbl, "SDL.Sound.TriangleVolume");
 
 	vbox2->addWidget(triLbl);
@@ -246,11 +264,15 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	connect(vslider, SIGNAL(valueChanged(int)), this, SLOT(triangleChanged(int)));
 
 	frame = new QGroupBox(tr("Square1"));
+	frame->setToolTip(tr("First NES pulse (square-wave) channel level, from 0 to 256."));
+	frame->setWhatsThis(tr("Square 1 is the first of the NES audio hardware's two pulse channels. This slider scales it independently of the master volume."));
 	vbox2 = new QVBoxLayout();
 	sqr1Lbl = new QLabel("256");
 	vslider = new QSlider(Qt::Vertical);
 	vslider->setMinimum(0);
 	vslider->setMaximum(256);
+	vslider->setToolTip(frame->toolTip());
+	vslider->setWhatsThis(frame->whatsThis());
 	setSliderFromProperty(vslider, sqr1Lbl, "SDL.Sound.Square1Volume");
 
 	vbox2->addWidget(sqr1Lbl);
@@ -261,11 +283,15 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	connect(vslider, SIGNAL(valueChanged(int)), this, SLOT(square1Changed(int)));
 
 	frame = new QGroupBox(tr("Square2"));
+	frame->setToolTip(tr("Second NES pulse (square-wave) channel level, from 0 to 256."));
+	frame->setWhatsThis(tr("Square 2 is the second of the NES audio hardware's two pulse channels. This slider scales it independently of the master volume."));
 	vbox2 = new QVBoxLayout();
 	sqr2Lbl = new QLabel("256");
 	sqr2Slider = new QSlider(Qt::Vertical);
 	sqr2Slider->setMinimum(0);
 	sqr2Slider->setMaximum(256);
+	sqr2Slider->setToolTip(frame->toolTip());
+	sqr2Slider->setWhatsThis(frame->whatsThis());
 	setSliderFromProperty(sqr2Slider, sqr2Lbl, "SDL.Sound.Square2Volume");
 
 	vbox2->addWidget(sqr2Lbl);
@@ -276,11 +302,15 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	connect(sqr2Slider, SIGNAL(valueChanged(int)), this, SLOT(square2Changed(int)));
 
 	frame = new QGroupBox(tr("Noise"));
+	frame->setToolTip(tr("NES noise-channel level, from 0 to 256."));
+	frame->setWhatsThis(tr("The noise channel is one of the NES audio hardware's sound generators, often used for percussion effects. This slider scales it independently of the master volume."));
 	vbox2 = new QVBoxLayout();
 	nseLbl = new QLabel("256");
 	nseSlider = new QSlider(Qt::Vertical);
 	nseSlider->setMinimum(0);
 	nseSlider->setMaximum(256);
+	nseSlider->setToolTip(frame->toolTip());
+	nseSlider->setWhatsThis(frame->whatsThis());
 	setSliderFromProperty(nseSlider, nseLbl, "SDL.Sound.NoiseVolume");
 
 	vbox2->addWidget(nseLbl);
@@ -290,12 +320,16 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 
 	connect(nseSlider, SIGNAL(valueChanged(int)), this, SLOT(noiseChanged(int)));
 
-	frame = new QGroupBox(QStringLiteral("PCM"));
+	frame = new QGroupBox(QStringLiteral("DMC (PCM)"));
+	frame->setToolTip(tr("DMC sample-playback channel level, from 0 to 256."));
+	frame->setWhatsThis(tr("PCM refers to the sample audio played by the NES DMC unit. This slider scales that output independently of the master volume."));
 	vbox2 = new QVBoxLayout();
 	pcmLbl = new QLabel("256");
 	pcmSlider = new QSlider(Qt::Vertical);
 	pcmSlider->setMinimum(0);
 	pcmSlider->setMaximum(256);
+	pcmSlider->setToolTip(frame->toolTip());
+	pcmSlider->setWhatsThis(frame->whatsThis());
 	setSliderFromProperty(pcmSlider, pcmLbl, "SDL.Sound.PCMVolume");
 
 	vbox2->addWidget(pcmLbl);
@@ -319,6 +353,7 @@ ConsoleSndConfDialog_t::ConsoleSndConfDialog_t(QWidget *parent)
 	hbox->addWidget(resetCountBtn, 1);
 	hbox->addWidget(starveLbl,1);
 	hbox->addStretch(5);
+	addWhatsThisButton(hbox, this);
 	hbox->addWidget( closeButton, 1 );
 
 	mainLayout->addLayout(hbox1);

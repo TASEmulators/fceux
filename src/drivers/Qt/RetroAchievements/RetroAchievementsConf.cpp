@@ -84,21 +84,25 @@ RetroAchievementsDialog_t::RetroAchievementsDialog_t(QWidget *parent)
 	bool playSound = true;
 
 	enableCbox = new QCheckBox(tr("Enable RetroAchievements"));
+	enableCbox->setToolTip(tr("Connect to RetroAchievements and track achievements for the loaded game."));
 	hardcoreCbox = new QCheckBox(tr("Hardcore mode"));
 	hardcoreCbox->setToolTip(tr("Disables cheats, rewind, slow motion, frame advance, loading save states, movie playback, scripting, "
-		"the debugger and the memory tools while RetroAchievements is enabled. Turning it on resets the game."));
+		"the debugger and the memory tools while RetroAchievements is enabled. Turning it on resets the game after confirmation."));
 	encoreCbox = new QCheckBox(tr("Encore mode"));
 	encoreCbox->setToolTip(tr("Lets achievements you have already unlocked be earned again. "
 		"Changing it reloads the achievements of the running game."));
 	soundCbox = new QCheckBox(tr("Play a sound when an achievement is unlocked"));
 	userEdit = new QLineEdit();
 	passwordEdit = new QLineEdit();
+	userEdit->setToolTip(tr("RetroAchievements account username."));
+	passwordEdit->setToolTip(tr("RetroAchievements account password. The password is not saved; a login token is stored after signing in."));
 	QAction *showPasswordAction = passwordEdit->addAction(
 		passwordVisibilityIcon(true, passwordEdit->palette().color(QPalette::Text)), QLineEdit::TrailingPosition);
 	showPasswordAction->setCheckable(true);
 	showPasswordAction->setText(tr("Show password"));
 	showPasswordAction->setToolTip(tr("Show password"));
 	loginButton = new QPushButton(tr("Log In"));
+	loginButton->setToolTip(tr("Sign in to RetroAchievements with the account details above."));
 	logoutButton = new QPushButton(tr("Log Out"));
 	statusLabel = new QLabel();
 	avatarLabel = new QLabel();

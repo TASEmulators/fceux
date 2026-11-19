@@ -68,12 +68,23 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	dpySubTitles = new QCheckBox(tr("Display Movie Subtitles"));
 	putSubTitlesAvi = new QCheckBox(tr("Put Movie Subtitles in AVI"));
 	autoBackUp = new QCheckBox(tr("Automatically Backup Movies"));
-	loadFullStates = new QCheckBox(tr("Load Full Save-State Movies:"));
-	aviEnableHUD = new QCheckBox(tr("AVI Enable HUD Recording"));
-	aviEnableMsg = new QCheckBox(tr("AVI Enable Msg Recording"));
+	loadFullStates = new QCheckBox(tr("Restore Full Movie from Save State"));
+	aviEnableHUD = new QCheckBox(tr("Record Overlay (HUD) in AVI"));
+	aviEnableMsg = new QCheckBox(tr("Record On-Screen Messages in AVI"));
 	aviEnableAudio = new QCheckBox(tr("AVI Enable Audio Recording"));
+	readOnlyReplay->setToolTip(tr("Preselect Read-Only mode in the Play Movie dialog."));
+	pauseAfterPlay->setToolTip(tr("Pause emulation when movie playback ends."));
+	closeAfterPlay->setToolTip(tr("Stop movie playback when it reaches the end."));
+	bindSaveStates->setToolTip(tr("Include the movie name in save-state filenames so states are associated with that movie."));
+	dpySubTitles->setToolTip(tr("Display subtitles stored in the movie."));
+	putSubTitlesAvi->setToolTip(tr("Include movie subtitles in AVI video recordings."));
+	autoBackUp->setToolTip(tr("Create a backup before overwriting a movie file."));
+	loadFullStates->setToolTip(tr("In read/write mode, restore all movie input stored in the save state instead of truncating it at the saved frame."));
+	aviEnableHUD->setToolTip(tr("Include the on-screen overlay in AVI video recordings."));
+	aviEnableMsg->setToolTip(tr("Include emulator messages in AVI video recordings."));
+	aviEnableAudio->setToolTip(tr("Include sound output in AVI recordings."));
 
-	lbl = new QLabel(tr("Loading states in record mode will not immediately truncate movie, next frame input will. (VBA-rr and SNES9x style)"));
+	lbl = new QLabel(tr("With full movie loading enabled, recording the next frame may truncate future input, depending on the recording mode."));
 	lbl->setWordWrap(true);
 
 	vbox1->addWidget(readOnlyReplay);
@@ -107,6 +118,7 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 
 	hbox = new QHBoxLayout();
 	hbox->addStretch(5);
+	addWhatsThisButton(hbox, this);
 	hbox->addWidget( closeButton, 1 );
 	vbox1->addLayout( hbox );
 
@@ -119,6 +131,8 @@ MovieOptionsDialog_t::MovieOptionsDialog_t(QWidget *parent)
 	aviBackend = new QComboBox();
 	aviPageStack = new QStackedWidget();
 	lbl = new QLabel(tr("AVI Backend Driver:"));
+	aviBackend->setToolTip(tr("Select the library used to encode AVI recordings. Codec options for the selected backend appear below."));
+	aviBackend->setWhatsThis(tr("The AVI backend supplies the encoders used to write video and audio. Available encoders and their options depend on the selected backend and how FCEUX was built."));
 	hbox->addWidget( lbl );
 	hbox->addWidget( aviBackend );
 	vbox2->addLayout( hbox );

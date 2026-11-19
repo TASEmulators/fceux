@@ -61,6 +61,9 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	historyDuration = new QSpinBox();
 	snapFrameSelBtn = new QRadioButton( tr("By Frames") );
 	snapTimeSelBtn  = new QRadioButton( tr("By Time") );
+	recorderEnable->setToolTip(tr("Start recording state history automatically when a ROM is loaded."));
+	snapFrameSelBtn->setToolTip(tr("Take a snapshot after the selected number of emulated frames."));
+	snapTimeSelBtn->setToolTip(tr("Take a snapshot after the selected time interval."));
 
 	recorderEnable->setChecked( FCEU_StateRecorderIsEnabled() );
 
@@ -74,6 +77,10 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	snapMinutes->setMaximum(60);
 	historyDuration->setMinimum(1);
 	historyDuration->setMaximum(180);
+	snapFrames->setToolTip(tr("Frames between snapshots, from 1 to 10000."));
+	snapMinutes->setToolTip(tr("Whole minutes between snapshots, from 0 to 60. The total interval must be greater than zero."));
+	snapSeconds->setToolTip(tr("Additional seconds between snapshots, from 0 to 59. The total interval must be greater than zero."));
+	historyDuration->setToolTip(tr("Retain snapshots from the most recent 1 to 180 minutes; longer history uses more memory."));
 
 	opt = 10;
 	g_config->getOption("SDL.StateRecorderFramesBetweenSnaps", &opt);
@@ -118,6 +125,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	hbox  = new QHBoxLayout();
 
 	cmprLvlCbox = new QComboBox();
+	cmprLvlCbox->setToolTip(tr("Select snapshot compression: 0 disables compression; higher levels use more CPU to reduce storage."));
 	cmprLvlCbox->addItem( tr("0 - None"), 0 );
 	cmprLvlCbox->addItem( QStringLiteral("1"), 1 );
 	cmprLvlCbox->addItem( QStringLiteral("2"), 2 );
@@ -151,6 +159,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	hbox1->addWidget( snapTimeSelBtn  );
 
 	snapFramesGroup = new QGroupBox(tr("Frames Between Snapshots:"));
+	snapFramesGroup->setToolTip(tr("Frame-based snapshot interval; available when By Frames is selected."));
 	hbox1  = new QHBoxLayout();
 	snapFramesGroup->setLayout(hbox1);
 	snapFramesGroup->setEnabled(snapFrameSelBtn->isChecked());
@@ -160,6 +169,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	hbox1->addWidget( new QLabel( tr("Range (1 - 10000)") ) );
 
 	snapTimeGroup = new QGroupBox(tr("Time Between Snapshots:"));
+	snapTimeGroup->setToolTip(tr("Time-based snapshot interval; available when By Time is selected."));
 	hbox1  = new QHBoxLayout();
 	snapTimeGroup->setLayout(hbox1);
 	snapTimeGroup->setEnabled(snapTimeSelBtn->isChecked());
@@ -190,6 +200,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	g_config->getOption("SDL.StateRecorderPauseOnLoad", &opt);
 
 	pauseOnLoadCbox = new QComboBox();
+	pauseOnLoadCbox->setToolTip(tr("Choose whether loading a state continues, pauses temporarily, or stays paused until resumed."));
 	pauseOnLoadCbox->addItem( tr("No"), StateRecorderConfigData::NO_PAUSE );
 	pauseOnLoadCbox->addItem( tr("Temporary"), StateRecorderConfigData::TEMPORARY_PAUSE );
 	pauseOnLoadCbox->addItem( tr("Full"), StateRecorderConfigData::FULL_PAUSE );
@@ -204,6 +215,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	pauseDuration->setMinimum(0);
 	pauseDuration->setMaximum(60);
 	pauseDuration->setValue(opt);
+	pauseDuration->setToolTip(tr("Temporary pause duration after loading a state, from 0 to 60 seconds."));
 
 	vbox1->addWidget(pauseOnLoadCbox);
 
@@ -225,6 +237,10 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	snapMemSizeLbl   = new QLineEdit();
 	totalMemUsageLbl = new QLineEdit();
 	saveTimeLbl      = new QLineEdit();
+	numSnapsLbl->setToolTip(tr("Estimated number of snapshots retained for the selected interval and history duration."));
+	snapMemSizeLbl->setToolTip(tr("Estimated storage used by one snapshot."));
+	totalMemUsageLbl->setToolTip(tr("Estimated storage for the retained snapshot history."));
+	saveTimeLbl->setToolTip(tr("Estimated time to save one snapshot; actual time depends on the system and game state."));
 
 	     numSnapsLbl->setReadOnly(true);
 	  snapMemSizeLbl->setReadOnly(true);
@@ -295,7 +311,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	frame->setLayout(hbox);
 
 	bufUsage = new QProgressBar();
-	bufUsage->setToolTip( tr("% use of history record buffer.") );
+	bufUsage->setToolTip(tr("Percentage of the state-history buffer currently in use."));
 	bufUsage->setOrientation( Qt::Horizontal );
 	bufUsage->setMinimum(   0 );
 	bufUsage->setMaximum( 100 );
@@ -312,6 +328,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 
 	closeButton = new QPushButton( tr("Close") );
 	applyButton = new QPushButton( tr("Apply") );
+	applyButton->setToolTip(tr("Apply and save the selected recorder settings. A running recorder must be restarted for changes to take effect."));
 
 	closeButton->setIcon( style()->standardIcon( QStyle::SP_DialogCloseButton ) );
 	applyButton->setIcon( style()->standardIcon( QStyle::SP_DialogApplyButton ) );
@@ -490,7 +507,9 @@ void StateRecorderDialog_t::updateStartStopBuffon(void)
 	const bool hardcore = FCEU_HardcoreActive();
 
 	startStopButton->setEnabled(!hardcore);
-	startStopButton->setToolTip(hardcore ? tr("The state recorder is not available in RetroAchievements hardcore mode.") : QString());
+	startStopButton->setToolTip(hardcore
+		? tr("The state recorder is not available in RetroAchievements hardcore mode.")
+		: (isRunning ? tr("Stop recording state history.") : tr("Start recording state history.")));
 
 	if (isRunning)
 	{

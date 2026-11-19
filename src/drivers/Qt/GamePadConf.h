@@ -18,7 +18,7 @@
 #include <QPainter>
 #include <QTreeView>
 #include <QTreeWidget>
-#include <QPropertyAnimation>
+#include <QStackedWidget>
 
 #include "Qt/main.h"
 #include "Qt/input.h"
@@ -172,7 +172,7 @@ protected:
 	QComboBox *profSel;
 	QCheckBox *efs_chkbox;
 	QGroupBox *advOptLayout;
-	QPropertyAnimation *advOptWidthAnimation;
+	QStackedWidget *confStack;
 	QLabel *guidLbl;
 	QLabel *mapMsg;
 	QLabel *keyName[GAMEPAD_NUM_BUTTONS];
@@ -180,6 +180,8 @@ protected:
 	GamePadConfigButton_t *button[GAMEPAD_NUM_BUTTONS];
 	GamePadView_t *gpView;
 	QTabBar *confTabBar;
+	QPushButton *clearAllBtn;
+	QPushButton *changeSeqBtn;
 
 	QPushButton *newKeyBindBtn;
 	QPushButton *editKeyBindBtn;
@@ -248,9 +250,6 @@ private slots:
 	void newKeyBindingCallback(void);
 	void editKeyBindingCallback(void);
 	void delKeyBindingCallback(void);
-	void advBindingViewChanged(bool state);
-	void advOptResizeDone(void);
-	void advOptWidthChange(const QVariant &value);
 	void saveAll(void);
 };
 

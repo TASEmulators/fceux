@@ -67,6 +67,7 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 	item->setTextAlignment(1, Qt::AlignCenter);
 
 	tree->setHeaderItem(item);
+	tree->setToolTip(tr("Select a hotkey command and press Enter or double-click to assign a key. The Key column shows its current binding."));
 
 	tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
@@ -86,6 +87,7 @@ HotKeyConfDialog_t::HotKeyConfDialog_t(QWidget *parent)
 	mainLayout->addWidget(tree);
 
 	resetDefaults = new QPushButton( tr("Restore Defaults") );
+	resetDefaults->setToolTip(tr("Restore the default key bindings for all hotkey commands."));
 	resetDefaults->setIcon(style()->standardIcon(QStyle::SP_DialogResetButton));
 	connect(resetDefaults, SIGNAL(clicked(void)), this, SLOT(resetDefaultsCB(void)));
 
@@ -326,16 +328,18 @@ HotKeyConfSetDialog_t::HotKeyConfSetDialog_t( int discardNum, HotKeyConfTreeItem
 	keySeqText = new QLineEdit();
 	keySeqText->setReadOnly(true);
 	keySeqText->setText( tr("Press a Key") );
+	keySeqText->setToolTip(tr("Press the key or key combination to assign. Modifier keys alone are not accepted."));
 
 	mainLayout->addWidget(keySeqText);
 
 	mainLayout->addLayout( hbox );
 
 	clearButton = new QPushButton( tr("Clear") );
-	   okButton = new QPushButton( tr("Ok") );
+	clearButton->setToolTip(tr("Remove the current key binding."));
+	   okButton = new QPushButton( tr("Close") );
 
 	clearButton->setIcon(style()->standardIcon(QStyle::SP_DialogResetButton));
-	   okButton->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
+	   okButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
 
 	hbox->addWidget( clearButton );
 	hbox->addWidget( okButton    );

@@ -81,9 +81,13 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	nesInputFrame = new QGroupBox(tr("NES-Style Input Ports"));
 	vbox1 = new QVBoxLayout();
 	newDeviceOptionBox = new QComboBox();
-	fourScoreEna = new QCheckBox(tr("Attach 4-Score (Implies four gamepads)"));
+	fourScoreEna = new QCheckBox(tr("Attach Four Score Adapter"));
 	port2Mic = new QCheckBox(tr("Replace Port 2 Start with Microphone"));
 	autoPreset = new QCheckBox(tr("Auto Load/Save Presets at ROM Open/Close"));
+	newDeviceOptionBox->setToolTip(tr("Choose whether to ignore, ask about, or automatically configure a newly connected gamepad."));
+	fourScoreEna->setToolTip(tr("Connect a Four Score adapter so supported games can use up to four gamepads."));
+	port2Mic->setToolTip(tr("Use the Port 2 Start input as the Famicom microphone signal."));
+	autoPreset->setToolTip(tr("Load the ROM-specific input preset when a game opens and save it when the game closes."));
 
 	hbox = new QHBoxLayout();
 	hbox->addWidget( new QLabel(tr("On New Gamepad Device Detection:")), 1);
@@ -120,6 +124,9 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	nesPortComboxBox[0] = new QComboBox();
 	nesPortComboxBox[1] = new QComboBox();
 	expPortComboxBox = new QComboBox();
+	nesPortComboxBox[0]->setToolTip(tr("Select the device connected to NES controller Port 1."));
+	nesPortComboxBox[1]->setToolTip(tr("Select the device connected to NES controller Port 2."));
+	expPortComboxBox->setToolTip(tr("Select the accessory connected to the Famicom expansion port."));
 
 	vbox = new QVBoxLayout();
 	hbox = new QHBoxLayout();
@@ -127,6 +134,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	vbox->addLayout(hbox);
 	hbox->addWidget(nesPortLabel[0] = new QLabel(tr("<None>")));
 	hbox->addWidget(nesPortConfButton[0] = new QPushButton(tr("Configure")));
+	nesPortConfButton[0]->setToolTip(tr("Configure bindings for the selected Port 1 device. Available for gamepads and LCD Zappers."));
 	vbox->addWidget(nesPortComboxBox[0]);
 
 	port1Frame->setLayout(vbox);
@@ -137,6 +145,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	vbox->addLayout(hbox);
 	hbox->addWidget(nesPortLabel[1] = new QLabel(tr("<None>")));
 	hbox->addWidget(nesPortConfButton[1] = new QPushButton(tr("Configure")));
+	nesPortConfButton[1]->setToolTip(tr("Configure bindings for the selected Port 2 device. Available for gamepads and LCD Zappers."));
 	vbox->addWidget(nesPortComboxBox[1]);
 
 	port2Frame->setLayout(vbox);
@@ -165,6 +174,8 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	vbox->addLayout(hbox);
 	hbox->addWidget(loadConfigButton = new QPushButton(tr("Load")));
 	hbox->addWidget(saveConfigButton = new QPushButton(tr("Save")));
+	loadConfigButton->setToolTip(tr("Load input settings from a .pre preset file."));
+	saveConfigButton->setToolTip(tr("Save input settings to a .pre preset file."));
 
 	presetFrame->setLayout(vbox);
 
@@ -174,6 +185,7 @@ InputConfDialog_t::InputConfDialog_t(QWidget *parent)
 	vbox->addLayout(hbox);
 	hbox->addWidget(expPortLabel = new QLabel(tr("<None>")));
 	hbox->addWidget(expPortConfButton = new QPushButton(tr("Configure")));
+	expPortConfButton->setToolTip(tr("Open the configuration dialog for the selected expansion port device. Disabled when the device has no configurable options."));
 	vbox->addWidget(expPortComboxBox);
 
 	expPortConfButton->setEnabled(false);

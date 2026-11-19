@@ -27,7 +27,11 @@
 #include <QScreen>
 #include <QToolTip>
 #include <QFileInfo>
+#include <QAction>
 #include <QApplication>
+#include <QBoxLayout>
+#include <QPushButton>
+#include <QWhatsThis>
 
 #if WIN32
 #include <Windows.h>
@@ -49,6 +53,20 @@
 #include "Qt/ConsoleUtilities.h"
 
 static std::string fceuExecPath;
+//---------------------------------------------------------------------------
+void addWhatsThisButton(QBoxLayout *layout, QWidget *parent)
+{
+	QAction *action = QWhatsThis::createAction(parent);
+	QPushButton *button = new QPushButton(parent);
+
+	action->setText(QCoreApplication::translate("DialogHelp", "What's This?"));
+	action->setToolTip(QCoreApplication::translate("DialogHelp", "Click, then select a control for more information. You can also press Shift+F1."));
+	button->setText(action->text());
+	button->setToolTip(action->toolTip());
+	QObject::connect(button, &QPushButton::clicked, action, &QAction::trigger);
+	layout->addWidget(button);
+	parent->addAction(action);
+}
 //---------------------------------------------------------------------------
 int  getDirFromFile( const char *path, std::string &dir )
 {

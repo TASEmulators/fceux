@@ -160,7 +160,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 #if defined(WIN32) && (QT_VERSION_MAJOR < 6)
 	// 1px full screen border - hack fix for QOpenGLWidget fullscreen issues
 	winFullScreenBorderCbx  = new QCheckBox( tr("Fullscreen Border (1px)") );
-	winFullScreenBorderCbx->setToolTip(tr("Hack fix for QOpenGLWidget fullscreen issue. May not be needed."));
+	winFullScreenBorderCbx->setToolTip(tr("Add a one-pixel fullscreen border to work around a Qt OpenGL issue on Windows. Try this if fullscreen rendering is incorrect."));
 
 	setCheckBoxFromProperty( winFullScreenBorderCbx  , "SDL.winFullScreenBorder");
 
@@ -250,7 +250,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 		textOverlayCbx[i]->setToolTip( tip );
 	}
 	textOverlayRateSel = new QComboBox();
-	textOverlayRateSel->setToolTip( tr("How often the text overlay values are refreshed. Lower rates use less CPU.") );
+	textOverlayRateSel->setToolTip(tr("Set how often window text overlays refresh, in Hz. The default is 10 Hz; lower rates use less CPU."));
 
 	for (int hz : TextOverlayDisplay_t::UPDATE_RATES_HZ)
 	{
@@ -280,7 +280,7 @@ ConsoleVideoConfDialog_t::ConsoleVideoConfDialog_t(QWidget *parent)
 	videoTest = new QComboBox();
 
 	videoTest->addItem( tr("None")         , 0 );
-	videoTest->addItem( tr("Vertical Sync"), 1 );
+	videoTest->addItem( tr("Tearing Test"), 1 );
 
 	videoTest->setCurrentIndex( nes_shm->video.test );
 
@@ -723,7 +723,7 @@ void ConsoleVideoConfDialog_t::setupToolTips(void)
 
 	inputDisplaySel->setToolTip( tr("Which controllers to show the pressed buttons of, drawn near the bottom of the game image.") );
 
-	videoTest->setToolTip( tr("Vertical Sync shows a pattern for checking whether the screen tears. None shows the game.") );
+	videoTest->setToolTip(tr("Show the game or a test pattern for checking screen tearing. This does not enable or disable vertical sync."));
 
 	// Drawing area
 	ntsc_start->setToolTip( tr("The first scanline of the picture that is shown for NTSC. The picture has 240 lines, numbered 0 to 239.") );
@@ -734,7 +734,7 @@ void ConsoleVideoConfDialog_t::setupToolTips(void)
 	clipSidesCbx->setToolTip( tr("Hide the leftmost and the rightmost 8 pixels of the picture. "
 		"Many games draw scrolling glitches there, and a real TV would have cut them off.") );
 
-	winSizeReadout->setToolTip( tr("The size of the whole main window, in pixels.") );
+	winSizeReadout->setToolTip(tr("Read-only size of the main window, including menus and docked widgets, in pixels."));
 	vpSizeReadout->setToolTip( tr("The size of the area that shows the game, in pixels.") );
 
 	cursorSelect->setToolTip( tr("The shape of the mouse cursor over the game area. The reticles are useful for light gun games.") );

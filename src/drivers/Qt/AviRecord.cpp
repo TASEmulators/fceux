@@ -2990,6 +2990,17 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	audioSamplefmt  = new QComboBox();
 	audioSampleRate = new QComboBox();
 	audioChanLayout = new QComboBox();
+	videoGbox->setToolTip(tr("Select video encoding settings for the next AVI recording."));
+	audioGbox->setToolTip(tr("Enable AVI audio recording in Movie Options to use these settings."));
+	videoEncSel->setToolTip(tr("Select the video encoder. Available encoders depend on the FFmpeg build."));
+	videoPixfmt->setToolTip(tr("Select the pixel format passed to the video encoder."));
+	audioEncSel->setToolTip(tr("Select the audio encoder. Available encoders depend on the FFmpeg build; AVI audio recording must be enabled."));
+	audioSamplefmt->setToolTip(tr("Select the audio sample representation used by the encoder. AVI audio recording must be enabled."));
+	audioSampleRate->setToolTip(tr("Select the audio sample rate in samples per second. AVI audio recording must be enabled."));
+	audioChanLayout->setToolTip(tr("Select the audio channel arrangement, such as mono or stereo. AVI audio recording must be enabled."));
+	videoEncSel->setWhatsThis(tr("FFmpeg provides multiple video encoders with different compression, compatibility, and performance characteristics. The available list depends on the FFmpeg build."));
+	videoPixfmt->setWhatsThis(tr("Pixel format controls the color representation passed to the video encoder. Some encoders accept only a subset of formats; Auto lets the encoder choose."));
+	audioSamplefmt->setWhatsThis(tr("Sample format specifies how audio samples are represented (for example integer or floating point, planar or packed). Supported formats depend on the selected audio encoder."));
 
 	vbox1->addWidget( videoGbox );
 	vbox1->addWidget( audioGbox );
@@ -3006,6 +3017,7 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	grid->addWidget( lbl, 1, 0);
 	grid->addWidget( videoPixfmt, 1, 1);
 	videoConfBtn = new QPushButton( tr("Options...") );
+	videoConfBtn->setToolTip(tr("Edit advanced options for the selected video encoder."));
 	grid->addWidget( videoConfBtn, 2, 1);
 
 	vbox = new QVBoxLayout();
@@ -3026,6 +3038,7 @@ LibavOptionsPage::LibavOptionsPage(QWidget *parent)
 	grid->addWidget( lbl, 3, 0);
 	grid->addWidget( audioChanLayout, 3, 1);
 	audioConfBtn = new QPushButton( tr("Options...") );
+	audioConfBtn->setToolTip(tr("Edit advanced options for the selected audio encoder. AVI audio recording must be enabled."));
 	grid->addWidget( audioConfBtn, 4, 1);
 
 	initCodecLists();
@@ -4065,7 +4078,7 @@ LibavEncOptInputWin::LibavEncOptInputWin( LibavEncOptItem *itemIn, QWidget *pare
 
 			grid->addWidget( new QLabel( tr("Value:")   ), 3, 0 );
 
-			c = new QCheckBox( tr("Checked=true") );
+			c = new QCheckBox(tr("Enabled"));
 
 			c->setChecked( val != 0 );
 
@@ -4375,6 +4388,14 @@ LibgwaviOptionsPage::LibgwaviOptionsPage(QWidget *parent)
 	audioSamplefmt  = new QComboBox();
 	audioSampleRate = new QComboBox();
 	audioChanLayout = new QComboBox();
+	videoGbox->setToolTip(tr("Select video encoding settings for the next AVI recording."));
+	audioGbox->setToolTip(tr("Enable AVI audio recording in Movie Options to use these settings."));
+	videoEncSel->setToolTip(tr("Select the video encoder. Available encoders depend on this AVI backend."));
+	videoPixfmt->setToolTip(tr("Select the pixel format passed to the video encoder."));
+	audioEncSel->setToolTip(tr("Select the audio encoder. AVI audio recording must be enabled."));
+	audioSamplefmt->setToolTip(tr("Select the audio sample representation used by the encoder. AVI audio recording must be enabled."));
+	audioSampleRate->setToolTip(tr("Select the audio sample rate in samples per second. AVI audio recording must be enabled."));
+	audioChanLayout->setToolTip(tr("Select the audio channel arrangement, such as mono or stereo. AVI audio recording must be enabled."));
 
 	vbox1->addWidget( videoGbox );
 	vbox1->addWidget( audioGbox );
@@ -4391,6 +4412,7 @@ LibgwaviOptionsPage::LibgwaviOptionsPage(QWidget *parent)
 	grid->addWidget( lbl, 1, 0);
 	grid->addWidget( videoPixfmt, 1, 1);
 	videoConfBtn = new QPushButton( tr("Options...") );
+	videoConfBtn->setToolTip(tr("This AVI backend does not provide video encoder options."));
 	grid->addWidget( videoConfBtn, 2, 1);
 	videoConfBtn->setEnabled(false);
 
@@ -4412,6 +4434,7 @@ LibgwaviOptionsPage::LibgwaviOptionsPage(QWidget *parent)
 	grid->addWidget( lbl, 3, 0);
 	grid->addWidget( audioChanLayout, 3, 1);
 	audioConfBtn = new QPushButton( tr("Options...") );
+	audioConfBtn->setToolTip(tr("This AVI backend does not provide audio encoder options."));
 	grid->addWidget( audioConfBtn, 4, 1);
 	audioConfBtn->setEnabled(false);
 

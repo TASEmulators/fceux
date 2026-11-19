@@ -38,6 +38,7 @@
 #include "Qt/keyscan.h"
 #include "Qt/sdl-joystick.h"
 #include "Qt/fceuWrapper.h"
+#include "Qt/ConsoleUtilities.h"
 
 struct GamePadConfigLocalData_t
 {
@@ -118,7 +119,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	bool useScroll = false;
 	int useNativeMenuBar;
 	QMenuBar *menuBar;
-	QMenu *fileMenu, *extMenu;
+	QMenu *fileMenu;
 	QAction *act;
 	QTreeWidgetItem *item;
 	const char *guid;
@@ -158,26 +159,15 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// File
 	fileMenu = menuBar->addMenu(tr("&File"));
+	fileMenu->setToolTipsVisible(true);
 
 	// File -> Close
 	act = new QAction(tr("&Close"), this);
 	act->setShortcut(QKeySequence::Close);
-	act->setStatusTip(tr("Close Window"));
+	act->setToolTip(tr("Close Gamepad Configuration."));
 	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 	
 	fileMenu->addAction(act);
-
-	// Extensions
-	extMenu = menuBar->addMenu(tr("&Extensions"));
-
-	// Extensions -> Show Adv Bindings
-	act = new QAction(tr("&Show Adv Bindings"), this);
-	//act->setShortcut(QKeySequence::Close);
-	act->setStatusTip(tr("Show Adv Bindings"));
-	act->setCheckable(true);
-	connect(act, SIGNAL(triggered(bool)), this, SLOT(advBindingViewChanged(bool)) );
-	
-	extMenu->addAction(act);
 
 	//-----------------------------------------------------------------------
 	// Menu End
@@ -192,16 +182,18 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	label = new QLabel(tr("Console Port:"));
 	portSel = new QComboBox();
+	portSel->setToolTip(tr("Select the emulated controller port whose mapping is shown."));
 	grid1->addWidget(label, 0, 0);
 	grid1->addWidget(portSel, 0, 1);
 
-	portSel->addItem(QStringLiteral("1"), 0);
-	portSel->addItem(QStringLiteral("2"), 1);
-	portSel->addItem(QStringLiteral("3"), 2);
-	portSel->addItem(QStringLiteral("4"), 3);
+	for (int i = 0; i < 4; i++)
+	{
+		portSel->addItem(tr("Player %1").arg(i + 1), i);
+	}
 
 	label = new QLabel(tr("Device:"));
 	devSel = new QComboBox();
+	devSel->setToolTip(tr("Select the keyboard or connected joystick used for this port."));
 	grid1->addWidget(label, 1, 0);
 	grid1->addWidget(devSel, 1, 1);
 
@@ -230,6 +222,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	label = new QLabel(tr("GUID:"));
 	guidLbl = new QLabel();
+	guidLbl->setToolTip(tr("Unique identifier for the selected joystick; profiles are associated with this device."));
 
 	grid1->addWidget(label, 2, 0);
 	grid1->addWidget(guidLbl, 2, 1);
@@ -253,22 +246,22 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	mapSel = new QComboBox();
 	hbox->addWidget(mapSel);
 
-	mapSel->setToolTip(tr("Selected button mapping profile for use with Load/Save/Delete operations"));
-	mapSel->setWhatsThis(tr("Combo box for selection of a saved button mapping profile for the selected device"));
+	mapSel->setToolTip(tr("Select a saved mapping profile for this device. Selecting it does not change the active mapping; press Load to apply it."));
+	mapSel->setWhatsThis(tr("A profile stores a set of button bindings for the selected device. Selecting a profile only chooses which saved profile the Load, Save, and Delete buttons operate on. Press Load to copy it into the active mapping."));
 	mapSel->addItem(tr("default"), 0);
 
 	hbox = new QHBoxLayout();
 	vbox->addLayout(hbox);
 
 	applyProfileButton = new QPushButton(tr("Load"));
-	applyProfileButton->setWhatsThis(tr("Sets Current Active Map to the Selected Profile"));
-	applyProfileButton->setToolTip( tr("Load selected configuration profile into current active mapping") );
+	applyProfileButton->setWhatsThis(tr("Load copies the selected saved profile into the active mapping for the chosen port and device. This replaces the active bindings."));
+	applyProfileButton->setToolTip(tr("Copy the selected saved profile into the active mapping."));
 	applyProfileButton->setIcon(style->standardIcon(QStyle::SP_DialogApplyButton));
 	hbox->addWidget(applyProfileButton);
 
 	saveProfileButton = new QPushButton(tr("Save"));
-	saveProfileButton->setWhatsThis(tr("Stores Current Active Map to the Selected Profile"));
-	saveProfileButton->setToolTip( tr("Save current active mapping to selected configuration profile") );
+	saveProfileButton->setWhatsThis(tr("Save copies the active mapping into the selected profile, replacing its previous bindings."));
+	saveProfileButton->setToolTip(tr("Save the active mapping to the selected profile, replacing its saved bindings."));
 	saveProfileButton->setIcon(style->standardIcon(QStyle::SP_DialogSaveButton));
 	hbox->addWidget(saveProfileButton);
 
@@ -276,14 +269,14 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	vbox->addLayout(hbox);
 
 	newProfileButton = new QPushButton(tr("New"));
-	newProfileButton->setWhatsThis(tr("Create a New Map Profile"));
-	newProfileButton->setToolTip( tr("Create a new named configuration profile") );
+	newProfileButton->setWhatsThis(tr("Create a named profile initialized from the current active mapping."));
+	newProfileButton->setToolTip(tr("Create a profile from the current active mapping."));
 	newProfileButton->setIcon(style->standardIcon(QStyle::SP_FileIcon));
 	hbox->addWidget(newProfileButton);
 
 	removeProfileButton = new QPushButton(tr("Delete"));
-	removeProfileButton->setWhatsThis(tr("Deletes the Selected Map Profile"));
-	removeProfileButton->setToolTip( tr("Delete selected configuration profile") );
+	removeProfileButton->setWhatsThis(tr("Delete removes the selected saved profile. It does not change the active mapping."));
+	removeProfileButton->setToolTip(tr("Delete the selected saved profile. The active mapping is unchanged."));
 	removeProfileButton->setIcon(style->standardIcon(QStyle::SP_TrashIcon));
 	hbox->addWidget(removeProfileButton);
 
@@ -292,6 +285,9 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	efs_chkbox = new QCheckBox(tr("Enable Four Score"));
 	udlr_chkbox = new QCheckBox(tr("Allow Up+Down/Left+Right"));
+	efs_chkbox->setToolTip(tr("Enable the Four Score adapter so supported games can use up to four gamepads."));
+	udlr_chkbox->setToolTip(tr("Allow Up and Down or Left and Right to be pressed together; some games may respond unpredictably."));
+	udlr_chkbox->setWhatsThis(tr("Normally, pressing one direction clears its opposite. Enable this to allow opposite directions simultaneously. Some games do not handle these input combinations correctly."));
 
 	int fourScore;
 	g_config->getOption("SDL.FourScore", &fourScore);
@@ -303,17 +299,22 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	confTabBar = new QTabBar();
 	frame2 = new QGroupBox(tr("Current Active Button Mappings:"));
+	frame2->setToolTip(tr("Changes affect the active mapping. Save the profile to keep changes after restarting FCEUX."));
+	frame2->setWhatsThis(tr("Each NES button can have a primary binding and up to three alternate bindings. Any of them can activate the button. Changes affect the active mapping and must be saved to a profile to persist after restarting."));
+	confTabBar->setWhatsThis(frame2->whatsThis());
 	grid = new QGridLayout();
 
-	confTabBar->addTab( tr("Pri") );
-	confTabBar->addTab( tr("Alt 1") );
-	confTabBar->addTab( tr("Alt 2") );
-	confTabBar->addTab( tr("Alt 3") );
+	confTabBar->addTab( tr("Primary") );
+	confTabBar->addTab( tr("Alternate 1") );
+	confTabBar->addTab( tr("Alternate 2") );
+	confTabBar->addTab( tr("Alternate 3") );
+	confTabBar->addTab( tr("Hotkey Bindings") );
 
-	confTabBar->setTabToolTip( 0, tr("Primary Button Map") );
-	confTabBar->setTabToolTip( 1, tr("Alternate Button Map #1") );
-	confTabBar->setTabToolTip( 2, tr("Alternate Button Map #2") );
-	confTabBar->setTabToolTip( 3, tr("Alternate Button Map #3") );
+	confTabBar->setTabToolTip(0, tr("Primary binding for each NES button."));
+	confTabBar->setTabToolTip(1, tr("First alternate binding for each NES button."));
+	confTabBar->setTabToolTip(2, tr("Second alternate binding for each NES button."));
+	confTabBar->setTabToolTip(3, tr("Third alternate binding for each NES button."));
+	confTabBar->setTabToolTip(GamePad_t::NUM_CONFIG, tr("Map gamepad buttons or button combinations to emulator hotkey commands."));
 
 	confTabBar->setCurrentIndex(0);
 
@@ -340,6 +341,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 		//label          = new QLabel( tr("State:") );
 		button[i] = new GamePadConfigButton_t(i);
 		clearButton[i] = new QPushButton(tr("Clear"));
+		button[i]->setToolTip(tr("Press to assign a keyboard key or joystick input to this NES button."));
+		clearButton[i]->setToolTip(tr("Remove this binding from the active mapping."));
 
 		grid->addWidget(buttonName, i, 0, Qt::AlignCenter);
 		grid->addWidget(keyName[i], i, 1, Qt::AlignCenter);
@@ -353,6 +356,10 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	clearAllButton = new QPushButton(tr("Clear All"));
 	closebutton = new QPushButton(tr("Close"));
 	changeSeqButton = new QPushButton(tr("Change Sequentially"));
+	clearAllButton->setToolTip(tr("Remove every binding in the selected mapping tab."));
+	changeSeqButton->setToolTip(tr("Assign inputs to each NES button in sequence, one prompt at a time."));
+	clearAllBtn  = clearAllButton;
+	changeSeqBtn = changeSeqButton;
 
 	clearAllButton->setIcon(style->standardIcon(QStyle::SP_LineEditClearButton));
 	closebutton->setIcon(style->standardIcon(QStyle::SP_DialogCloseButton));
@@ -360,6 +367,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 
 	hbox1->addWidget(clearAllButton);
 	hbox1->addWidget(changeSeqButton);
+	addWhatsThisButton(hbox1, this);
 	hbox1->addWidget(closebutton);
 
 	connect(button[0], SIGNAL(clicked()), this, SLOT(changeButton0(void)));
@@ -412,30 +420,29 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	vbox1->addWidget(frame1);
 	vbox1->addLayout(hbox2);
 
+	confStack = new QStackedWidget();
+
 	vbox2->addWidget(confTabBar);
-	vbox2->addWidget(frame2);
+	vbox2->addWidget(confStack);
 	vbox2->addLayout(hbox1);
 
 	gpView = new GamePadView_t(this);
 
-	advOptLayout = new QGroupBox( tr("Advanced Key Bindings") );
-	advOptLayout->setMaximumWidth(0);
+	advOptLayout = new QGroupBox( tr("Gamepad Hotkey Bindings:") );
+	advOptLayout->setToolTip(tr("Run emulator hotkey commands from gamepad buttons. Bindings apply to the selected port and are saved with the profile."));
+	advOptLayout->setWhatsThis(tr("Hotkey bindings let a gamepad trigger emulator hotkey commands, such as save state or frame advance, in addition to its normal NES button mapping.\n\n"
+		"Each binding has a Primary Button and an optional Modifier Button. With a modifier, the command runs only while both buttons are held. "
+		"The On Press command runs when the button or combination becomes active; the On Release command runs when it is released.\n\n"
+		"The buttons still send their normal NES input. Bindings belong to the selected port and are stored in its mapping profile; press Save to keep them."));
 
-	advOptWidthAnimation = new QPropertyAnimation( advOptLayout, "maximumWidth", this);
-	advOptWidthAnimation->setDuration(500);
-	advOptWidthAnimation->setStartValue(0);
-	advOptWidthAnimation->setEndValue(512);
-	advOptWidthAnimation->setEasingCurve( QEasingCurve::InOutCirc );
-
-	connect( advOptWidthAnimation, SIGNAL(valueChanged(const QVariant &)), this, SLOT(advOptWidthChange(const QVariant &)));
-	connect( advOptWidthAnimation, SIGNAL(finished(void)), this, SLOT(advOptResizeDone(void)) );
+	confStack->addWidget(frame2);
+	confStack->addWidget(advOptLayout);
 
 	mainLayoutV->addLayout(vbox1);
 	mainLayoutV->addWidget(gpView);
 
 	mainLayoutH->addLayout(mainLayoutV);
 	mainLayoutH->addLayout(vbox2);
-	mainLayoutH->addWidget(advOptLayout);
 	mainLayoutH->setMenuBar( menuBar );
 
 	mainWidget->setLayout(mainLayoutH);
@@ -451,6 +458,9 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	newKeyBindBtn  = new QPushButton( tr("New") );
 	editKeyBindBtn = new QPushButton( tr("Edit") );
 	delKeyBindBtn  = new QPushButton( tr("Delete") );
+	newKeyBindBtn->setToolTip(tr("Add a binding that maps a gamepad button or button combination to hotkey commands."));
+	editKeyBindBtn->setToolTip(tr("Change the buttons or commands of the selected binding."));
+	delKeyBindBtn->setToolTip(tr("Remove the selected binding. Save the profile to make the removal permanent."));
 
 	hbox->addWidget( newKeyBindBtn  );
 	hbox->addWidget( editKeyBindBtn );
@@ -461,14 +471,16 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	keyBindTree->setColumnCount(3);
 
 	item = new QTreeWidgetItem();
-	item->setText(0, QString::fromStdString("GP Button"));
-	item->setText(1, QString::fromStdString("Press Func"));
-	item->setText(2, QString::fromStdString("Release Func"));
+	item->setText(0, tr("Gamepad Buttons"));
+	item->setText(1, tr("On Press"));
+	item->setText(2, tr("On Release"));
 	item->setTextAlignment(0, Qt::AlignLeft);
 	item->setTextAlignment(1, Qt::AlignLeft);
 	item->setTextAlignment(2, Qt::AlignLeft);
 
 	keyBindTree->setHeaderItem(item);
+	keyBindTree->setToolTip(tr("Gamepad Buttons lists the modifier and primary button (Modifier + Primary). On Press and On Release list the hotkey command run when the buttons are pressed or released."));
+	keyBindTree->setWhatsThis(advOptLayout->whatsThis());
 
 	keyBindTree->header()->setSectionResizeMode(QHeaderView::Interactive);
 	keyBindTree->setMinimumWidth( 256 );
@@ -627,32 +639,6 @@ void GamePadConfDialog_t::loadMapList(void)
 		}
 		n++;
 	}
-}
-//----------------------------------------------------
-void GamePadConfDialog_t::advBindingViewChanged(bool state)
-{
-	if ( state )
-	{
-		advOptWidthAnimation->setStartValue(0);
-		advOptWidthAnimation->setEndValue(512);
-		advOptWidthAnimation->start();
-	}
-	else
-	{
-		advOptWidthAnimation->setStartValue( advOptLayout->width() );
-		advOptWidthAnimation->setEndValue(0);
-		advOptWidthAnimation->start();
-	}
-}
-//----------------------------------------------------
-void GamePadConfDialog_t::advOptWidthChange(const QVariant &value)
-{
-	resize( minimumSizeHint() );
-}
-//----------------------------------------------------
-void GamePadConfDialog_t::advOptResizeDone(void)
-{
-	resize( minimumSizeHint() );
 }
 //----------------------------------------------------
 void GamePadConfDialog_t::refreshKeyBindTree( bool reset )
@@ -1075,6 +1061,18 @@ void GamePadConfDialog_t::clearAllCallback(void)
 //----------------------------------------------------
 void GamePadConfDialog_t::btnConfigChanged(int idx)
 {
+	bool advanced = (idx >= GamePad_t::NUM_CONFIG);
+
+	confStack->setCurrentIndex( advanced ? 1 : 0 );
+
+	// Clear All and Change Sequentially act on the button mapping tabs only.
+	clearAllBtn->setVisible(!advanced);
+	changeSeqBtn->setVisible(!advanced);
+
+	if (advanced)
+	{
+		return;
+	}
 	configIndex = idx;
 
 	updateCntrlrDpy();
@@ -1915,11 +1913,25 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( int portNumIn, gamepad_functio
 	clearButton[2] = new QPushButton( tr("Clear") );
 	clearButton[3] = new QPushButton( tr("Clear") );
 
+	b[0]->setToolTip(tr("Press, then press the gamepad button that must be held together with the primary button. Optional."));
+	b[1]->setToolTip(tr("Press, then press the gamepad button that triggers this binding. Required; bindings without a primary button are not saved."));
+	btnLbl[0]->setToolTip(tr("Optional modifier button. When set, the binding triggers only while both buttons are held."));
+	btnLbl[1]->setToolTip(tr("Button that triggers this binding."));
+	clearButton[0]->setToolTip(tr("Remove the modifier button so the primary button triggers the binding alone."));
+	clearButton[1]->setToolTip(tr("Remove the primary button."));
+	hk[0]->setToolTip(tr("Choose the hotkey command to run when the button or combination is pressed."));
+	hk[1]->setToolTip(tr("Choose the hotkey command to run when the button or combination is released."));
+	keySeqLbl[0]->setToolTip(tr("Hotkey command run when the buttons are pressed. Leave empty for no action."));
+	keySeqLbl[1]->setToolTip(tr("Hotkey command run when the buttons are released. Leave empty for no action."));
+	clearButton[2]->setToolTip(tr("Remove the On Press command."));
+	clearButton[3]->setToolTip(tr("Remove the On Release command."));
 	mainLayout = new QVBoxLayout();
 
 	setLayout(mainLayout);
 
 	frame = new QGroupBox( tr("Game Pad Button Sequence:") );
+	frame->setWhatsThis(tr("Select the gamepad button that triggers this binding. Optionally add a modifier button; the binding then triggers only while both buttons are held, which lets one button serve several commands. "
+		"The buttons continue to send their normal NES input."));
 	mainLayout->addWidget( frame );
 
 	grid = new QGridLayout();
@@ -1938,6 +1950,8 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( int portNumIn, gamepad_functio
 	grid->addWidget( clearButton[1], 1, 3 );
 
 	frame = new QGroupBox( tr("Maps to Key Sequence:") );
+	frame->setWhatsThis(tr("Select the emulator hotkey commands to run. On Press runs when the button sequence becomes active; On Release runs when it is released. "
+		"Either may be left empty. Commands use the current Hotkey Config settings."));
 	mainLayout->addWidget( frame );
 
 	grid = new QGridLayout();
@@ -1963,6 +1977,7 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( int portNumIn, gamepad_functio
 	mainLayout->addLayout( hbox );
 	hbox->addWidget( cancelButton, 1 );
 	hbox->addStretch( 5 );
+	addWhatsThisButton(hbox, this);
 	hbox->addWidget(     okButton, 1 );
 
 	connect(     okButton, SIGNAL(clicked(void)), this, SLOT(acceptCB(void)) );
@@ -2287,6 +2302,7 @@ HotKeySelectDialog_t::HotKeySelectDialog_t( QWidget *parent )
 	item->setTextAlignment(1, Qt::AlignCenter);
 
 	tree->setHeaderItem(item);
+	tree->setToolTip(tr("Select the hotkey command to run. Key shows the keyboard shortcut currently assigned to each command."));
 
 	tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 

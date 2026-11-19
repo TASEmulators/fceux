@@ -141,11 +141,12 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// File
 	fileMenu = menuBar->addMenu(tr("&File"));
+	fileMenu->setToolTipsVisible(true);
 
 	// File -> Test Style
-	act = new QAction(tr("&Test"), this);
+	act = new QAction(tr("&Style Preview..."), this);
 	//act->setShortcut(QKeySequence::Close);
-	act->setStatusTip(tr("Test"));
+	act->setToolTip(tr("Preview widgets using the current interface style."));
 	connect(act, SIGNAL(triggered()), this, SLOT(openTestWindow(void)) );
 	
 	fileMenu->addAction(act);
@@ -153,18 +154,19 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	// File -> Close
 	act = new QAction(tr("&Close"), this);
 	act->setShortcut(QKeySequence::Close);
-	act->setStatusTip(tr("Close Window"));
+	act->setToolTip(tr("Close GUI Configuration."));
 	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 	
 	fileMenu->addAction(act);
 
 	// Color
 	colorMenu = menuBar->addMenu(tr("&Color"));
+	colorMenu->setToolTipsVisible(true);
 
 	// Color -> View QPalette
-	act = new QAction(tr("&View QPalette"), this);
+	act = new QAction(tr("&Edit Interface Colors..."), this);
 	//act->setShortcut(QKeySequence::Close);
-	act->setStatusTip(tr("&View QPalette"));
+	act->setToolTip(tr("Edit interface colors; these do not change the NES game palette."));
 	connect(act, SIGNAL(triggered()), this, SLOT(openQPalette(void)) );
 	
 	colorMenu->addAction(act);
@@ -182,8 +184,13 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	pauseOnMenuAccess   = new QCheckBox(tr("Pause On Main Menu Access"));
 	toolWindowTaskbar   = new QCheckBox(tr("Separate Taskbar Entry for Tool Windows"));
 	toolWindowTaskbar->setToolTip(tr("Applies to tool windows opened after the change."));
-	ctxMenuEnable       = new QCheckBox(tr("Context Menu Enable"));
+	ctxMenuEnable       = new QCheckBox(tr("Enable Right-Click Context Menu"));
 	showSplashScreen    = new QCheckBox(tr("Show Splash Screen at Startup"));
+	useNativeFileDialog->setToolTip(tr("Use the operating system's file picker instead of Qt's dialogs."));
+	useNativeMenuBar->setToolTip(tr("Use the desktop's native menu bar when supported by the platform."));
+	pauseOnMenuAccess->setToolTip(tr("Pause emulation while a menu on the main window is open."));
+	ctxMenuEnable->setToolTip(tr("Show the game-view context menu when you right-click the game."));
+	showSplashScreen->setToolTip(tr("Show the startup splash screen the next time FCEUX launches."));
 
 	useNativeFileDialog->setChecked(useNativeFileDialogVal);
 	useNativeMenuBar->setChecked(useNativeMenuBarVal);
@@ -242,6 +249,8 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	presetComboBox->addItem(tr("Adaptic"), QStringLiteral("adaptic"));
 	presetComboBox->addItem(tr("Custom"), QStringLiteral("custom"));
 	presetComboBox->setCurrentIndex(presetComboBox->findData(preset));
+	presetComboBox->setToolTip(tr("Select a built-in interface theme or Custom to configure the base style, palette, and stylesheet."));
+	presetComboBox->setWhatsThis(tr("Presets change the colors and styles used by FCEUX's Qt interface. They do not affect the palette used to render NES games. Choose Custom to configure a Qt base style, a QPalette file, or a Qt stylesheet."));
 	QHBoxLayout *presetLayout = new QHBoxLayout();
 	presetLayout->addWidget(new QLabel(tr("Preset:")), 1);
 	presetLayout->addWidget(presetComboBox, 10);
@@ -260,19 +269,23 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 	customStyleGroup->setEnabled(preset == "custom");
 	vbox1->addWidget( customStyleGroup );
 
-	useCustomPalette = new QCheckBox( tr("Use Custom QPalette") );
+	useCustomPalette = new QCheckBox(tr("Use Custom Interface Colors (QPalette)"));
 	useCustomPalette->setChecked(useCustomQPalVal);
+	useCustomPalette->setToolTip(tr("Use colors loaded from the selected .qpal file for the application interface, not for NES games."));
+	useCustomPalette->setWhatsThis(tr("QPalette is Qt's set of interface colors, such as window backgrounds and text. It is separate from the NES color palette selected in Palette Config."));
 	connect(useCustomPalette, SIGNAL(toggled(bool)), this, SLOT(useCustomQPaletteChanged(bool)));
 
 	vbox2->addWidget( useCustomPalette );
 
 	hbox   = new QHBoxLayout();
 	button = new QPushButton(tr("Open"));
+	button->setToolTip(tr("Load a .qpal file containing Qt interface colors."));
 	button->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart));
 	connect(button, SIGNAL(clicked(void)), this, SLOT(openQPal(void)));
 	hbox->addWidget(button);
 
 	button = new QPushButton(tr("Clear"));
+	button->setToolTip(tr("Stop using the selected custom interface palette file."));
 	button->setIcon(style()->standardIcon(QStyle::SP_LineEditClearButton));
 	connect(button, SIGNAL(clicked(void)), this, SLOT(clearQPal(void)));
 	hbox->addWidget(button);
@@ -293,17 +306,21 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 
 	useCustomStyle = new QCheckBox( tr("Use Custom Stylesheet") );
 	useCustomStyle->setChecked(useCustomQssVal);
+	useCustomStyle->setToolTip(tr("Apply the selected Qt stylesheet (.qss) to the application interface."));
+	useCustomStyle->setWhatsThis(tr("Qt stylesheets use a CSS-like syntax to change widget appearance. A stylesheet can override colors and layout details from the selected theme; an invalid stylesheet may make controls difficult to read."));
 	connect(useCustomStyle, SIGNAL(toggled(bool)), this, SLOT(useCustomStyleChanged(bool)));
 
 	vbox2->addWidget( useCustomStyle );
 
 	hbox   = new QHBoxLayout();
 	button = new QPushButton(tr("Open"));
+	button->setToolTip(tr("Load a Qt stylesheet (.qss) for the application interface."));
 	button->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart));
 	connect(button, SIGNAL(clicked(void)), this, SLOT(openQss(void)));
 	hbox->addWidget(button);
 
 	button = new QPushButton(tr("Clear"));
+	button->setToolTip(tr("Stop using the selected custom stylesheet."));
 	button->setIcon(style()->standardIcon(QStyle::SP_LineEditClearButton));
 	connect(button, SIGNAL(clicked(void)), this, SLOT(clearQss(void)));
 	hbox->addWidget(button);
@@ -341,6 +358,7 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 
 	hbox = new QHBoxLayout();
 	hbox->addStretch(3);
+	addWhatsThisButton(hbox, this);
 	hbox->addWidget( closeButton, 3 );
 	hbox->addStretch(3);
 	mainLayout->addLayout( hbox );
@@ -1222,11 +1240,12 @@ GuiPaletteEditDialog_t::GuiPaletteEditDialog_t(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// File
 	fileMenu = menuBar->addMenu(tr("&File"));
+	fileMenu->setToolTipsVisible(true);
 
 	// File -> Save As
 	act = new QAction(tr("Save &As"), this);
 	act->setShortcut(QKeySequence::SaveAs);
-	act->setStatusTip(tr("Save As"));
+	act->setToolTip(tr("Save the current interface palette to a file."));
 	connect(act, SIGNAL(triggered()), this, SLOT(paletteSaveAs(void)) );
 	
 	fileMenu->addAction(act);
@@ -1234,7 +1253,7 @@ GuiPaletteEditDialog_t::GuiPaletteEditDialog_t(QWidget *parent)
 	// File -> Close
 	act = new QAction(tr("&Close"), this);
 	act->setShortcut(QKeySequence::Close);
-	act->setStatusTip(tr("Close Window"));
+	act->setToolTip(tr("Close the palette editor."));
 	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 	
 	fileMenu->addAction(act);
@@ -1707,11 +1726,12 @@ guiStyleTestDialog::guiStyleTestDialog(QWidget *parent)
 	//-----------------------------------------------------------------------
 	// File
 	fileMenu = menuBar->addMenu(tr("&File"));
+	fileMenu->setToolTipsVisible(true);
 
 	// File -> Close
 	act = new QAction(tr("&Close"), this);
 	act->setShortcut(QKeySequence::Close);
-	act->setStatusTip(tr("Close Window"));
+	act->setToolTip(tr("Close the style preview."));
 	connect(act, SIGNAL(triggered()), this, SLOT(closeWindow(void)) );
 	
 	fileMenu->addAction(act);

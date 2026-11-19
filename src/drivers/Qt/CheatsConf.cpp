@@ -138,6 +138,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	enaCheats = new QCheckBox(tr("Enable Cheats"));
 	autoSave = new QCheckBox(tr("Auto Load / Save with Game"));
+	enaCheats->setToolTip(tr("Enable or disable every cheat currently in the list."));
+	autoSave->setToolTip(tr("Load the game's cheat file when it opens and save it when it closes."));
 
 	enaCheats->setChecked(!globalCheatDisabled);
 	autoSave->setChecked(!disableAutoLSCheats);
@@ -154,6 +156,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	lbl = new QLabel(tr("Name:"));
 	cheatNameEntry = new QLineEdit();
 	cheatNameEntry->setFont(font);
+	cheatNameEntry->setToolTip(tr("Optional name to identify this cheat in the list."));
 	//cheatNameEntry->setMaxLength(64);
 
 	hbox->addWidget(lbl);
@@ -171,6 +174,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatAddrEntry->setCursorPosition(0);
 	cheatAddrEntry->setAlignment(Qt::AlignCenter);
 	cheatAddrEntry->setMaximumWidth(5 * fontCharWidth);
+	cheatAddrEntry->setToolTip(tr("CPU memory address in hexadecimal, from 0000 to FFFF."));
 
 	hbox->addWidget(lbl);
 	hbox->addWidget(cheatAddrEntry);
@@ -183,6 +187,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatValEntry->setCursorPosition(0);
 	cheatValEntry->setAlignment(Qt::AlignCenter);
 	cheatValEntry->setMaximumWidth(3 * fontCharWidth);
+	cheatValEntry->setToolTip(tr("Byte value in hexadecimal, from 00 to FF."));
 
 	hbox->addWidget(lbl);
 	hbox->addWidget(cheatValEntry);
@@ -195,6 +200,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatCmpEntry->setCursorPosition(0);
 	cheatCmpEntry->setAlignment(Qt::AlignCenter);
 	cheatCmpEntry->setMaximumWidth(3 * fontCharWidth);
+	cheatCmpEntry->setToolTip(tr("Optional hexadecimal compare byte for Substitute/Freeze cheats. Reads are replaced only when the original value matches; Periodic Set ignores this field."));
 
 	hbox->addWidget(lbl);
 	hbox->addWidget(cheatCmpEntry);
@@ -207,6 +213,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	typeEntry->addItem(tr("0: Periodic Set (Every Frame)"), 0 );
 	typeEntry->addItem(tr("1: Substitute/Freeze"), 1 );
 	typeEntry->setCurrentIndex(1);
+	typeEntry->setToolTip(tr("Periodic Set writes the value every frame; Substitute/Freeze replaces reads of the address with the value."));
 
 	hbox->addWidget(lbl,1);
 	hbox->addWidget(typeEntry,10);
@@ -218,6 +225,9 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	addCheatBtn = new QPushButton(tr("Add"));
 	delCheatBtn = new QPushButton(tr("Delete"));
 	modCheatBtn = new QPushButton(tr("Update"));
+	addCheatBtn->setToolTip(tr("Add a new cheat using the fields above."));
+	delCheatBtn->setToolTip(tr("Delete the selected cheat."));
+	modCheatBtn->setToolTip(tr("Update the selected cheat with the fields above."));
 
 	hbox->addWidget(addCheatBtn);
 	hbox->addWidget(delCheatBtn);
@@ -229,6 +239,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 
 	importCheatFileBtn = new QPushButton(tr("Import"));
 	exportCheatFileBtn = new QPushButton(tr("Export"));
+	importCheatFileBtn->setToolTip(tr("Load cheats from a file and add them to the list."));
+	exportCheatFileBtn->setToolTip(tr("Save the current cheat list to a file."));
 	importCheatFileBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	exportCheatFileBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
@@ -257,6 +269,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	item->setTextAlignment(2, Qt::AlignCenter);
 
 	srchResults->setHeaderItem(item);
+	srchResults->setToolTip(tr("Addr is the memory address; Pre is the value captured at Reset and Cur is the current value."));
 
 	//srchResults->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
 	srchResults->header()->setSectionResizeMode(QHeaderView::Interactive);
@@ -283,6 +296,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	cheatSearchFrame->setLayout(hbox1);
 
 	srchResetBtn = new QPushButton(tr("Reset"));
+	srchResetBtn->setToolTip(tr("Start a new search with all eligible RAM addresses."));
 	srchResetBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	vbox2->addWidget(srchResetBtn);
@@ -296,6 +310,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	frame->setLayout(vbox);
 
 	knownValBtn = new QPushButton(tr("Known Value:"));
+	knownValBtn->setToolTip(tr("Keep addresses whose current value equals the hexadecimal byte entered below."));
 	knownValBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	knownValBtn->setEnabled(false);
 
@@ -314,6 +329,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	knownValEntry->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	knownValEntry->setMaximumWidth(3 * fontCharWidth);
 	knownValEntry->setAlignment(Qt::AlignCenter);
+	knownValEntry->setToolTip(tr("Enter a byte value in hexadecimal, from 00 to FF."));
 	knownValEntry->setEnabled(false);
 	hbox1->addWidget(lbl, 0, Qt::AlignRight);
 	hbox1->addWidget(knownValEntry, 0, Qt::AlignLeft);
@@ -331,6 +347,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	vbox = new QVBoxLayout();
 
 	eqValBtn = new QPushButton(tr("Equal"));
+	eqValBtn->setToolTip(tr("Keep addresses whose current value matches the value captured at Reset."));
 	eqValBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	eqValBtn->setEnabled(false);
 	vbox->addWidget(eqValBtn);
@@ -344,11 +361,12 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	vbox = new QVBoxLayout();
 
 	neValBtn = new QPushButton(tr("Not Equal"));
+	neValBtn->setToolTip(tr("Keep addresses whose current value differs from the value captured at Reset."));
 	neValBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	neValBtn->setEnabled(false);
 
 	hbox = new QHBoxLayout();
-	useNeVal = new QCheckBox(tr("By:"));
+	useNeVal = new QCheckBox(tr("By exactly:"));
 	useNeVal->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	useNeVal->setEnabled(false);
 	neValEntry = new QLineEdit();
@@ -359,6 +377,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	neValEntry->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	neValEntry->setMaximumWidth(3 * fontCharWidth);
 	neValEntry->setAlignment(Qt::AlignCenter);
+	useNeVal->setToolTip(tr("When checked, keep addresses whose absolute change since Reset equals the entered hexadecimal amount."));
+	neValEntry->setToolTip(tr("Exact change amount in hexadecimal, from 00 to FF."));
 	neValEntry->setEnabled(false);
 
 	hbox->addWidget(useNeVal, 0, Qt::AlignRight);
@@ -375,11 +395,12 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	vbox = new QVBoxLayout();
 
 	grValBtn = new QPushButton(tr("Greater Than"));
+	grValBtn->setToolTip(tr("Keep addresses whose current value is greater than the value captured at Reset."));
 	grValBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	grValBtn->setEnabled(false);
 
 	hbox = new QHBoxLayout();
-	useGrVal = new QCheckBox(tr("By:"));
+	useGrVal = new QCheckBox(tr("By exactly:"));
 	useGrVal->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	useGrVal->setEnabled(false);
 	grValEntry = new QLineEdit();
@@ -390,6 +411,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	grValEntry->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	grValEntry->setMaximumWidth(3 * fontCharWidth);
 	grValEntry->setAlignment(Qt::AlignCenter);
+	useGrVal->setToolTip(tr("When checked, require the increase since Reset to equal the entered hexadecimal amount."));
+	grValEntry->setToolTip(tr("Exact increase amount in hexadecimal, from 00 to FF."));
 	grValEntry->setEnabled(false);
 
 	hbox->addWidget(useGrVal, 0, Qt::AlignRight);
@@ -406,11 +429,12 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	vbox = new QVBoxLayout();
 
 	ltValBtn = new QPushButton(tr("Less Than"));
+	ltValBtn->setToolTip(tr("Keep addresses whose current value is less than the value captured at Reset."));
 	ltValBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	ltValBtn->setEnabled(false);
 
 	hbox = new QHBoxLayout();
-	useLtVal = new QCheckBox(tr("By:"));
+	useLtVal = new QCheckBox(tr("By exactly:"));
 	useLtVal->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	useLtVal->setEnabled(false);
 	ltValEntry = new QLineEdit();
@@ -421,6 +445,8 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	ltValEntry->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	ltValEntry->setMaximumWidth(3 * fontCharWidth);
 	ltValEntry->setAlignment(Qt::AlignCenter);
+	useLtVal->setToolTip(tr("When checked, require the decrease since Reset to equal the entered hexadecimal amount."));
+	ltValEntry->setToolTip(tr("Exact decrease amount in hexadecimal, from 00 to FF."));
 	ltValEntry->setEnabled(false);
 
 	hbox->addWidget(useLtVal, 0, Qt::AlignRight);
@@ -436,6 +462,7 @@ GuiCheatsDialog_t::GuiCheatsDialog_t(QWidget *parent)
 	hbox = new QHBoxLayout();
 
 	pauseBox = new QCheckBox(tr("Pause emulation when this window is active"));
+	pauseBox->setToolTip(tr("Pause emulation until this window is closed or the option is turned off."));
 	pauseBox->setChecked(pauseWhileActive);
 	closeButton = new QPushButton( tr("Close") );
 	closeButton->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
