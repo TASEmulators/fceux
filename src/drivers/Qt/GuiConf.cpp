@@ -1444,12 +1444,10 @@ GuiPaletteColorSelect::GuiPaletteColorSelect( QPalette::ColorGroup group, QPalet
 	editBox = new QPushButton( tr("Edit") );
 
 	lbl = new QLabel();
-	cb  = new QCheckBox();
 
 	lbl->setAlignment( Qt::AlignCenter );
 
 	hbox->addWidget(editBox, 1);
-	hbox->addWidget( cb,  1);
 	hbox->addWidget(lbl, 10);
 
 	this->group = group;

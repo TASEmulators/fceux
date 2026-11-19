@@ -69,7 +69,7 @@ StateRecorderDialog_t::StateRecorderDialog_t(QWidget *parent)
 	snapFrames->setMinimum(1);
 	snapFrames->setMaximum(10000);
 	snapSeconds->setMinimum(0);
-	snapSeconds->setMaximum(60);
+	snapSeconds->setMaximum(59);
 	snapMinutes->setMinimum(0);
 	snapMinutes->setMaximum(60);
 	historyDuration->setMinimum(1);

@@ -97,7 +97,6 @@ public:
 
 private:
 	QColor     color;
-	QCheckBox *cb;
 	QLabel    *lbl;
 	QPalette::ColorGroup group;
 	QPalette::ColorRole  role;
