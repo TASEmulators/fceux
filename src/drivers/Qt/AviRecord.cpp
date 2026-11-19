@@ -3779,6 +3779,11 @@ LibavEncOptWin::~LibavEncOptWin(void)
 	//printf("Destroy Encoder Options Config Window\n");
 
 	LIBAV::saveCodecConfig(type, codec_name, ctx);
+
+	if ( ctx != NULL )
+	{
+		avcodec_free_context(&ctx);
+	}
 }
 //----------------------------------------------------------------------------
 void LibavEncOptWin::closeEvent(QCloseEvent *event)
