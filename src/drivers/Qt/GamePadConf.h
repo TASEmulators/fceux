@@ -195,6 +195,7 @@ protected:
 						 //    0 - we can start new change process
 						 // 1-10 - changing in progress
 						 //   -1 - changing is aborted
+	bool keyBindColumnsInitialized;
 
 	void changeButton(int port, int button);
 	void clearButton(int port, int button);

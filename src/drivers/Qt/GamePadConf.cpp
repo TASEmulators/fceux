@@ -29,6 +29,8 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QHeaderView>
+#include <QCoreApplication>
+#include <QFontMetrics>
 
 #include "Qt/GamePadConf.h"
 #include "Qt/main.h"
@@ -69,6 +71,18 @@ static GamePadConfigLocalData_t lcl[GAMEPAD_NUM_DEVICES];
 static GamePadConfDialog_t *gamePadConfWin = NULL;
 static bool updateRemapTree = false;
 
+static QString gamepadHotkeyText(int hotkeyIndex, const std::string &keyName)
+{
+	if (hotkeyIndex < 0 || hotkeyIndex >= HK_MAX)
+	{
+		return QString::fromStdString(keyName);
+	}
+
+	const char *title;
+	getHotKeyConfig(hotkeyIndex, nullptr, nullptr, &title);
+	return QCoreApplication::translate("HotKeyConfTree_t", title);
+}
+
 //----------------------------------------------------
 int openGamePadConfWindow(QWidget *parent)
 {
@@ -93,7 +107,7 @@ int closeGamePadConfWindow(void)
 }
 //----------------------------------------------------
 GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
-	: QDialog(parent), changeSeqStatus(0)
+	: QDialog(parent), changeSeqStatus(0), keyBindColumnsInitialized(false)
 {
 	//QWidget *mainWidget;
 	QVBoxLayout *mainLayoutV;
@@ -429,7 +443,7 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	gpView = new GamePadView_t(this);
 
 	advOptLayout = new QGroupBox( tr("Gamepad Hotkey Bindings:") );
-	advOptLayout->setToolTip(tr("Run emulator hotkey commands from gamepad buttons. Bindings apply to the selected port and are saved with the profile."));
+	advOptLayout->setToolTip(tr("Run emulator hotkey commands from gamepad buttons."));
 	advOptLayout->setWhatsThis(tr("Hotkey bindings let a gamepad trigger emulator hotkey commands, such as save state or frame advance, in addition to its normal NES button mapping.\n\n"
 		"Each binding has a Primary Button and an optional Modifier Button. With a modifier, the command runs only while both buttons are held. "
 		"The On Press command runs when the button or combination becomes active; the On Release command runs when it is released.\n\n"
@@ -469,6 +483,8 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	keyBindTree = new QTreeWidget();
 
 	keyBindTree->setColumnCount(3);
+	keyBindTree->setRootIsDecorated(false);
+	keyBindTree->setAlternatingRowColors(true);
 
 	item = new QTreeWidgetItem();
 	item->setText(0, tr("Gamepad Buttons"));
@@ -479,9 +495,16 @@ GamePadConfDialog_t::GamePadConfDialog_t(QWidget *parent)
 	item->setTextAlignment(2, Qt::AlignLeft);
 
 	keyBindTree->setHeaderItem(item);
-	keyBindTree->setToolTip(tr("Gamepad Buttons lists the modifier and primary button (Modifier + Primary). On Press and On Release list the hotkey command run when the buttons are pressed or released."));
-	keyBindTree->setWhatsThis(advOptLayout->whatsThis());
+	keyBindTree->setToolTip(tr("Select a gamepad hotkey binding to edit or delete."));
+	keyBindTree->setWhatsThis(advOptLayout->whatsThis() + tr("\n\n"
+		"Gamepad Buttons lists the modifier and primary button as Modifier + Primary. "
+		"On Press and On Release show the commands triggered when the combination becomes active or inactive. "
+		"With a modifier, releasing either button triggers On Release."));
+	item->setToolTip(0, tr("Modifier + Primary, or Primary alone when no modifier is assigned."));
+	item->setToolTip(1, tr("Command triggered when the button or combination becomes active."));
+	item->setToolTip(2, tr("Command triggered when the button or combination is released."));
 
+	keyBindTree->header()->setStretchLastSection(false);
 	keyBindTree->header()->setSectionResizeMode(QHeaderView::Interactive);
 	keyBindTree->setMinimumWidth( 256 );
 
@@ -695,8 +718,8 @@ void GamePadConfDialog_t::refreshKeyBindTree( bool reset )
 		}
 
 		item->setText(0, tr(btnSeq));
-		item->setText(1, QString::fromStdString(binding->keySeq[0].name));
-		item->setText(2, QString::fromStdString(binding->keySeq[1].name));
+		item->setText(1, gamepadHotkeyText(binding->hk[0], binding->keySeq[0].name));
+		item->setText(2, gamepadHotkeyText(binding->hk[1], binding->keySeq[1].name));
 
 		item->setTextAlignment(0, Qt::AlignLeft);
 		item->setTextAlignment(1, Qt::AlignLeft);
@@ -1071,6 +1094,25 @@ void GamePadConfDialog_t::btnConfigChanged(int idx)
 
 	if (advanced)
 	{
+		if (!keyBindColumnsInitialized)
+		{
+			// Wait for the newly visible tab to be laid out before measuring it.
+			QTimer::singleShot(0, this, [this]() {
+				if (keyBindColumnsInitialized || !keyBindTree->isVisible())
+				{
+					return;
+				}
+
+				const int width = keyBindTree->viewport()->width();
+				const int columns = keyBindTree->columnCount();
+				for (int column = 0; column < columns; column++)
+				{
+					keyBindTree->setColumnWidth(column,
+						width * (column + 1) / columns - width * column / columns);
+				}
+				keyBindColumnsInitialized = true;
+			});
+		}
 		return;
 	}
 	configIndex = idx;
@@ -1935,6 +1977,7 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( int portNumIn, gamepad_functio
 	mainLayout->addWidget( frame );
 
 	grid = new QGridLayout();
+	grid->setColumnStretch(1, 1);
 	frame->setLayout( grid );
 
 	//grid->setColumnMinimumWidth( 1, 20 );
@@ -1955,6 +1998,7 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( int portNumIn, gamepad_functio
 	mainLayout->addWidget( frame );
 
 	grid = new QGridLayout();
+	grid->setColumnStretch(1, 1);
 	frame->setLayout( grid );
 
 	grid->addWidget( new QLabel( tr("On Press:") ), 0, 0 );
@@ -2009,8 +2053,27 @@ GamePadFuncConfigDialog::GamePadFuncConfigDialog( int portNumIn, gamepad_functio
 
 	btnLbl[1]->setText( tr(keyNameStr) );
 
-	keySeqLbl[0]->setText( QString::fromStdString(k->keySeq[0].name) );
-	keySeqLbl[1]->setText( QString::fromStdString(k->keySeq[1].name) );
+	keySeqLbl[0]->setText( gamepadHotkeyText(k->hk[0], k->keySeq[0].name) );
+	keySeqLbl[1]->setText( gamepadHotkeyText(k->hk[1], k->keySeq[1].name) );
+
+	const QFontMetrics metrics(keySeqLbl[0]->font());
+	int textWidth = 0;
+	for (int i = 0; i < HK_MAX; i++)
+	{
+		textWidth = qMax(textWidth, metrics.boundingRect(gamepadHotkeyText(i, Hotkeys[i].getConfigName())).width());
+	}
+	for (int i = 0; i < 2; i++)
+	{
+		textWidth = qMax(textWidth, metrics.boundingRect(btnLbl[i]->text()).width());
+		textWidth = qMax(textWidth, metrics.boundingRect(keySeqLbl[i]->text()).width());
+	}
+
+	const int fieldWidth = textWidth + 2 * metrics.height();
+	for (int i = 0; i < 2; i++)
+	{
+		btnLbl[i]->setMinimumWidth(fieldWidth);
+		keySeqLbl[i]->setMinimumWidth(fieldWidth);
+	}
 }
 //----------------------------------------------------
 GamePadFuncConfigDialog::~GamePadFuncConfigDialog(void)
@@ -2134,7 +2197,7 @@ void GamePadFuncConfigDialog::changeKeySeq0(void)
 
 		if ( keySeqLbl[0] )
 		{
-			keySeqLbl[0]->setText( tr(hkp->getConfigName()) );
+			keySeqLbl[0]->setText( gamepadHotkeyText(k->hk[0], k->keySeq[0].name) );
 		}
 	}
 	//else
@@ -2171,7 +2234,7 @@ void GamePadFuncConfigDialog::changeKeySeq1(void)
 
 		if ( keySeqLbl[1] )
 		{
-			keySeqLbl[1]->setText( tr(hkp->getConfigName()) );
+			keySeqLbl[1]->setText( gamepadHotkeyText(k->hk[1], k->keySeq[1].name) );
 		}
 	}
 	//else
@@ -2280,49 +2343,47 @@ HotKeySelectDialog_t::HotKeySelectDialog_t( QWidget *parent )
 	QVBoxLayout *mainLayout;
 	QHBoxLayout *hbox;
 	QTreeWidgetItem *item;
-	std::string prefix = "SDL.Hotkeys.";
-
 	hotKeyIdx = -1;
 
-	setWindowTitle("Hotkey Select");
+	setWindowTitle(tr("Select Gamepad Hotkey Command"));
 
 	resize(512, 512);
 
 	mainLayout = new QVBoxLayout();
 
+	QLabel *description = new QLabel(tr("Choose the emulator command for this gamepad binding. "
+		"The Keyboard Shortcut column shows its current keyboard binding; selecting a command does not change that shortcut."));
+	description->setWordWrap(true);
+	mainLayout->addWidget(description);
+
 	tree = new QTreeWidget(this);
 
 	tree->setColumnCount(2);
 	tree->setSelectionMode( QAbstractItemView::SingleSelection );
+	tree->setRootIsDecorated(false);
+	tree->setAlternatingRowColors(true);
 
 	item = new QTreeWidgetItem();
-	item->setText(0, QString::fromStdString("Command"));
-	item->setText(1, QString::fromStdString("Key"));
+	item->setText(0, tr("Command"));
+	item->setText(1, tr("Keyboard Shortcut"));
 	item->setTextAlignment(0, Qt::AlignLeft);
 	item->setTextAlignment(1, Qt::AlignCenter);
 
 	tree->setHeaderItem(item);
-	tree->setToolTip(tr("Select the hotkey command to run. Key shows the keyboard shortcut currently assigned to each command."));
+	tree->setToolTip(tr("Select the emulator command for this gamepad binding."));
+	tree->setWhatsThis(description->text());
 
+	tree->header()->setStretchLastSection(false);
 	tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
 	for (int i = 0; i < HK_MAX; i++)
 	{
-		char keyName[128];
-		std::string optionName = prefix + Hotkeys[i].getConfigName();
-
-		//g_config->getOption (optionName.c_str (), &keycode);
-		Hotkeys[i].getString(keyName);
-
 		item = new QTreeWidgetItem();
 
 		tree->addTopLevelItem(item);
 
-		//item->setFlags( Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemNeverHasChildren );
-		//item->setCheckState( 0, Qt::Checked );
-
-		item->setText(0, QString::fromStdString(optionName));
-		item->setText(1, QString::fromStdString(keyName));
+		item->setText(0, gamepadHotkeyText(i, Hotkeys[i].getConfigName()));
+		item->setText(1, Hotkeys[i].getKeySeq().toString());
 
 		item->setTextAlignment(0, Qt::AlignLeft);
 		item->setTextAlignment(1, Qt::AlignCenter);
@@ -2346,6 +2407,7 @@ HotKeySelectDialog_t::HotKeySelectDialog_t( QWidget *parent )
 	hbox = new QHBoxLayout();
 	hbox->addWidget( cancelButton, 1 );
 	hbox->addStretch(5);
+	addWhatsThisButton(hbox, this);
 	hbox->addWidget( okButton, 1 );
 	mainLayout->addLayout( hbox );
 
