@@ -185,14 +185,14 @@
 
             <div class="main-content">
                 
-<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts26">2.6.6</span></p>
+<p class="rvps2"><span class="rvts22">What's New? </span><span class="rvts30">2.6.6</span></p>
 <p class="rvps2"><span class="rvts6">Released -- 26 August 2023</span></p>
 <p class="rvps2"><span class="rvts6"><br/></span></p>
-<p class="rvps2"><span class="rvts31">The 2.6.6 release is mainly a maintenance update for the mappers and emulation core with a few new features added in. Some of these new features apply only to the Qt/SDL version of the GUI.</span></p>
+<p class="rvps2"><span class="rvts33">The 2.6.6 release is mainly a maintenance update for the mappers and emulation core with a few new features added in. Some of these new features apply only to the Qt/SDL version of the GUI.</span></p>
 <p class="rvps2"><span class="rvts28"><br/></span></p>
-<p class="rvps2"><span class="rvts27">Common</span></p>
-<p class="rvps2"><span class="rvts27"><br/></span></p>
-<p class="rvps2"><span class="rvts30">Mappers</span></p>
+<p class="rvps2"><span class="rvts31">Common</span></p>
+<p class="rvps2"><span class="rvts31"><br/></span></p>
+<p class="rvps2"><span class="rvts32">Mappers</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
  <li class="rvps2"><span class="rvts28">Minor refactor of the save game RAM code. Fixes UNROM-512 flash clearing bug during movie play.</span></li>
  <li class="rvps2"><span class="rvts28">Mapper 354: Add CHR-RAM protect.</span></li>
@@ -203,21 +203,21 @@
  <li class="rvps2"><span class="rvts28">Changed UNROM-512 to use 8kB of CHR-RAM memory by default.</span></li>
  <li class="rvps2"><span class="rvts28">Mapper 342 memory optimization.</span></li>
 </ul>
-<p class="rvps2"><span class="rvts30"><br/></span></p>
-<p class="rvps2"><span class="rvts30">LUA</span></p>
+<p class="rvps2"><span class="rvts32"><br/></span></p>
+<p class="rvps2"><span class="rvts32">LUA</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
  <li class="rvps2"><span class="rvts28">Implemented LUA function memory.registerread.</span></li>
 </ul>
 <p class="rvps2"><span class="rvts28"><br/></span></p>
-<p class="rvps2"><span class="rvts30">Core</span></p>
+<p class="rvps2"><span class="rvts32">Core</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
  <li class="rvps2"><span class="rvts28">Memory initialization settings are now also applied to nametable, palettes, and sprites.</span></li>
  <li class="rvps2"><span class="rvts28">Fixed bug were write instructions didn't always update the databus.</span></li>
 </ul>
-<p class="rvps2"><span class="rvts27"><br/></span></p>
-<p class="rvps2"><span class="rvts27">Qt/SDL</span></p>
-<p class="rvps2"><span class="rvts27"><br/></span></p>
-<p class="rvps2"><span class="rvts30">Debugger</span></p>
+<p class="rvps2"><span class="rvts31"><br/></span></p>
+<p class="rvps2"><span class="rvts31">Qt/SDL</span></p>
+<p class="rvps2"><span class="rvts31"><br/></span></p>
+<p class="rvps2"><span class="rvts32">Debugger</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
  <li class="rvps2"><span class="rvts28">Added ld65 debug file symbol loader feature.</span></li>
  <li class="rvps2"><span class="rvts28">Added checkbox to Qt debugger menu to control trace logger auto start function on debugger open.</span></li>
@@ -225,13 +225,13 @@
  <li class="rvps2"><span class="rvts28">Added address validity checking to the breakpoint editor dialog entry fields.</span></li>
 </ul>
 <p class="rvps2"><span class="rvts28"><br/></span></p>
-<p class="rvps2"><span class="rvts30">Video</span></p>
+<p class="rvps2"><span class="rvts32">Video</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
  <li class="rvps2"><span class="rvts28">Added a third video driver option that uses a QPainter object to render QImages to the viewport (uses a pure Qt API).</span></li>
  <li class="rvps2"><span class="rvts28">Fixed video transparency issue that has been seen on some platforms (Wayland) by forcing alpha bits to be set to full opaque.</span></li>
 </ul>
-<p class="rvps2"><span class="rvts27"><br/></span></p>
-<p class="rvps2"><span class="rvts30">GUI</span></p>
+<p class="rvps2"><span class="rvts31"><br/></span></p>
+<p class="rvps2"><span class="rvts32">GUI</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
  <li class="rvps2"><span class="rvts28">Added state recorder feature, periodically saves time history of game play states that can be recalled and played out from.</span></li>
  <li class="rvps2"><span class="rvts28">Fixed bug regarding force grayscale or use custom palette settings change not updating PAL 3x filter appropriately.</span></li>
@@ -242,7 +242,7 @@
  <li class="rvps2"><span class="rvts28">Improved frame scheduling timing precision.</span></li>
 </ul>
 <p class="rvps2"><span class="rvts28"><br/></span></p>
-<p class="rvps2"><span class="rvts30">Build</span></p>
+<p class="rvps2"><span class="rvts32">Build</span></p>
 <ul style="text-indent: 0px; padding: 0; margin: 0 0 0 24px; list-style-position: outside; list-style-type: disc;">
  <li class="rvps2"><span class="rvts28">Build fixes for GCC 13.</span><span class="rvts6"></span></li>
 </ul>

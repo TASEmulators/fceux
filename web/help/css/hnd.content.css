@@ -148,89 +148,87 @@ span.rvts25
 span.rvts26
 {
  font-size: 18pt;
- text-decoration: underline;
+ font-family: 'Times New Roman', 'Times', serif;
+ font-weight: bold;
+ color: #000000;
 }
 span.rvts27
 {
- font-size: 20pt;
+ font-size: 14pt;
+ font-family: 'Times New Roman', 'Times', serif;
  font-weight: bold;
+ color: #000000;
 }
 span.rvts28
-{
- font-size: 16pt;
- font-weight: bold;
-}
-span.rvts29
 {
  font-size: 12pt;
  font-family: 'Times New Roman', 'Times', serif;
  color: #000000;
  background-color: #ffffff;
 }
+span.rvts29
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000000;
+ background-color: #ffffff;
+}
 span.rvts30
 {
- font-size: 12pt;
- font-family: 'Times New Roman', 'Times', serif;
- color: #000000;
+ font-size: 18pt;
+ text-decoration: underline;
 }
 span.rvts31
 {
- font-size: 12pt;
- font-family: 'Times New Roman', 'Times', serif;
+ font-size: 20pt;
+ font-weight: bold;
 }
 span.rvts32
 {
- color: #000000;
+ font-size: 16pt;
+ font-weight: bold;
 }
 span.rvts33
 {
- font-size: 16pt;
+ font-size: 12pt;
+ font-family: 'Times New Roman', 'Times', serif;
  color: #000000;
 }
 span.rvts34
 {
+ font-size: 12pt;
+ font-family: 'Times New Roman', 'Times', serif;
+}
+span.rvts35
+{
+ color: #000000;
+}
+span.rvts36
+{
+ font-size: 16pt;
+ color: #000000;
+}
+span.rvts37
+{
  font-size: 14pt;
  color: #000000;
 }
-span.rvts35
+span.rvts38
 {
  font-size: 12pt;
  color: #000000;
 }
-span.rvts36
+span.rvts39
 {
  font-size: 12pt;
  font-family: 'Times New Roman', 'Times', serif;
  color: #000000;
 }
-span.rvts37
+span.rvts40
 {
 }
-span.rvts38
+span.rvts41
 {
  font-size: 14pt;
-}
-span.rvts39
-{
- font-size: 16pt;
-}
-a.rvts40, span.rvts40
-{
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts40:hover
-{
- color: #0000ff;
-}
-a.rvts41, span.rvts41
-{
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts41:hover
-{
- color: #0000ff;
 }
 span.rvts42
 {
@@ -245,13 +243,18 @@ a.rvts43:hover
 {
  color: #0000ff;
 }
-span.rvts44
+a.rvts44, span.rvts44
 {
- font-family: 'Lucida Console', 'Monaco', monospace;
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts44:hover
+{
+ color: #0000ff;
 }
 span.rvts45
 {
- font-style: italic;
+ font-size: 16pt;
 }
 a.rvts46, span.rvts46
 {
@@ -264,12 +267,11 @@ a.rvts46:hover
 }
 span.rvts47
 {
- font-family: 'Times New Roman', 'Times', serif;
+ font-family: 'Lucida Console', 'Monaco', monospace;
 }
 span.rvts48
 {
- font-size: 11pt;
- font-family: 'Courier New', 'Courier', monospace;
+ font-style: italic;
 }
 a.rvts49, span.rvts49
 {
@@ -282,16 +284,12 @@ a.rvts49:hover
 }
 span.rvts50
 {
- font-weight: bold;
+ font-family: 'Times New Roman', 'Times', serif;
 }
-a.rvts51, span.rvts51
+span.rvts51
 {
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts51:hover
-{
- color: #0000ff;
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
 }
 a.rvts52, span.rvts52
 {
@@ -304,8 +302,7 @@ a.rvts52:hover
 }
 span.rvts53
 {
- font-size: 16pt;
- text-decoration: underline;
+ font-weight: bold;
 }
 a.rvts54, span.rvts54
 {
@@ -316,57 +313,58 @@ a.rvts54:hover
 {
  color: #0000ff;
 }
-span.rvts55
-{
- font-size: 24pt;
-}
-a.rvts56, span.rvts56
+a.rvts55, span.rvts55
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts56:hover
+a.rvts55:hover
 {
  color: #0000ff;
 }
-span.rvts57
+span.rvts56
 {
- font-size: 14pt;
+ font-size: 16pt;
  text-decoration: underline;
+}
+a.rvts57, span.rvts57
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts57:hover
+{
+ color: #0000ff;
 }
 span.rvts58
 {
- font-family: 'Courier New', 'Courier', monospace;
+ font-size: 24pt;
 }
-span.rvts59
+a.rvts59, span.rvts59
 {
- font-size: 9pt;
-}
-a.rvts60, span.rvts60
-{
- font-size: 9pt;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts60:hover
+a.rvts59:hover
 {
  color: #0000ff;
+}
+span.rvts60
+{
+ font-size: 14pt;
+ text-decoration: underline;
 }
 span.rvts61
 {
  font-family: 'Courier New', 'Courier', monospace;
 }
-a.rvts62, span.rvts62
+span.rvts62
 {
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts62:hover
-{
- color: #0000ff;
+ font-size: 9pt;
 }
 a.rvts63, span.rvts63
 {
+ font-size: 9pt;
  color: #0000ff;
  text-decoration: underline;
 }
@@ -374,19 +372,18 @@ a.rvts63:hover
 {
  color: #0000ff;
 }
-a.rvts64, span.rvts64
+span.rvts64
+{
+ font-family: 'Courier New', 'Courier', monospace;
+}
+a.rvts65, span.rvts65
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts64:hover
+a.rvts65:hover
 {
  color: #0000ff;
-}
-span.rvts65
-{
- font-size: 12pt;
- font-weight: bold;
 }
 a.rvts66, span.rvts66
 {
@@ -406,14 +403,10 @@ a.rvts67:hover
 {
  color: #0000ff;
 }
-a.rvts68, span.rvts68
+span.rvts68
 {
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts68:hover
-{
- color: #0000ff;
+ font-size: 12pt;
+ font-weight: bold;
 }
 a.rvts69, span.rvts69
 {
@@ -428,6 +421,10 @@ a.rvts70, span.rvts70
 {
  color: #0000ff;
  text-decoration: underline;
+}
+a.rvts70:hover
+{
+ color: #0000ff;
 }
 a.rvts71, span.rvts71
 {
@@ -452,15 +449,14 @@ a.rvts73, span.rvts73
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts73:hover
+a.rvts74, span.rvts74
 {
  color: #0000ff;
-}
-span.rvts74
-{
- font-size: 12pt;
- font-weight: bold;
  text-decoration: underline;
+}
+a.rvts74:hover
+{
+ color: #0000ff;
 }
 a.rvts75, span.rvts75
 {
@@ -480,239 +476,247 @@ a.rvts76:hover
 {
  color: #0000ff;
 }
-a.rvts77, span.rvts77
+span.rvts77
+{
+ font-size: 12pt;
+ font-weight: bold;
+ text-decoration: underline;
+}
+a.rvts78, span.rvts78
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts77:hover
+a.rvts78:hover
 {
  color: #0000ff;
 }
-span.rvts78
+a.rvts79, span.rvts79
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts79:hover
+{
+ color: #0000ff;
+}
+a.rvts80, span.rvts80
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts80:hover
+{
+ color: #0000ff;
+}
+span.rvts81
 {
  font-size: 11pt;
  font-weight: bold;
 }
-span.rvts79
+span.rvts82
 {
  font-size: 8pt;
 }
-span.rvts80
+span.rvts83
 {
  color: #000000;
 }
-a.rvts81, span.rvts81
+a.rvts84, span.rvts84
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts81:hover
+a.rvts84:hover
 {
  color: #0000ff;
 }
-a.rvts82, span.rvts82
+a.rvts85, span.rvts85
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts82:hover
+a.rvts85:hover
 {
  color: #0000ff;
-}
-span.rvts83
-{
- color: #0000ff;
-}
-span.rvts84
-{
- color: #00cc00;
-}
-span.rvts85
-{
- color: #ff0000;
 }
 span.rvts86
 {
- color: #00be00;
+ color: #0000ff;
 }
 span.rvts87
 {
- color: #a08c00;
+ color: #00cc00;
 }
 span.rvts88
 {
- color: #0000c3;
+ color: #ff0000;
 }
 span.rvts89
 {
- color: #0082a0;
+ color: #00be00;
 }
 span.rvts90
 {
- color: #d2be00;
+ color: #a08c00;
 }
 span.rvts91
 {
- color: #0a0aff;
+ color: #0000c3;
 }
 span.rvts92
 {
- color: #05ff05;
+ color: #0082a0;
 }
 span.rvts93
+{
+ color: #d2be00;
+}
+span.rvts94
+{
+ color: #0a0aff;
+}
+span.rvts95
+{
+ color: #05ff05;
+}
+span.rvts96
 {
  font-size: 22pt;
  text-decoration: underline;
 }
-a.rvts94, span.rvts94
+a.rvts97, span.rvts97
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts94:hover
+a.rvts97:hover
 {
  color: #0000ff;
 }
-a.rvts95, span.rvts95
-{
- color: #0000ff;
- text-decoration: underline;
-}
-a.rvts95:hover
-{
- color: #0000ff;
-}
-a.rvts96, span.rvts96
+a.rvts98, span.rvts98
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts96:hover
+a.rvts98:hover
 {
  color: #0000ff;
 }
-span.rvts97
+a.rvts99, span.rvts99
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts99:hover
+{
+ color: #0000ff;
+}
+span.rvts100
 {
  font-weight: bold;
  color: #ff0000;
 }
-span.rvts98
+span.rvts101
 {
  font-weight: bold;
  color: #ff0000;
  background-color: #ffffff;
 }
-span.rvts99
+span.rvts102
 {
  font-size: 18pt;
  font-weight: bold;
 }
-a.rvts100, span.rvts100
+a.rvts103, span.rvts103
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts100:hover
+a.rvts103:hover
 {
  color: #0000ff;
 }
-a.rvts101, span.rvts101
+a.rvts104, span.rvts104
 {
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts101:hover
+a.rvts104:hover
 {
  color: #0000ff;
-}
-span.rvts102
-{
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
-}
-span.rvts103
-{
- font-size: 14pt;
- font-weight: bold;
-}
-span.rvts104
-{
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- color: #000080;
 }
 span.rvts105
 {
  font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
- color: #333399;
+ font-weight: bold;
 }
 span.rvts106
+{
+ font-size: 14pt;
+ font-weight: bold;
+}
+span.rvts107
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #000080;
+}
+span.rvts108
+{
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
+ color: #333399;
+}
+span.rvts109
 {
  font-family: 'Courier New', 'Courier', monospace;
  color: #000080;
 }
-span.rvts107
+span.rvts110
 {
  font-size: 16pt;
  font-family: 'Courier New', 'Courier', monospace;
  font-weight: bold;
 }
-span.rvts108
+span.rvts111
 {
  font-size: 11pt;
  font-family: 'Courier New', 'Courier', monospace;
  font-weight: bold;
 }
-span.rvts109
+span.rvts112
 {
  font-family: 'Courier New', 'Courier', monospace;
  font-weight: bold;
 }
-span.rvts110
+span.rvts113
 {
  font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
  color: #000080;
 }
-a.rvts111, span.rvts111
+a.rvts114, span.rvts114
 {
  font-family: 'Courier New', 'Courier', monospace;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts111:hover
+a.rvts114:hover
 {
  color: #0000ff;
-}
-span.rvts112
-{
- font-size: 14pt;
- font-weight: bold;
-}
-span.rvts113
-{
- font-family: 'Courier New', 'Courier', monospace;
- font-weight: bold;
- text-decoration: underline;
-}
-span.rvts114
-{
- font-size: 12pt;
- font-family: 'Courier New', 'Courier', monospace;
- color: #00007f;
 }
 span.rvts115
 {
  font-size: 14pt;
- font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
 }
 span.rvts116
 {
- font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
+ font-weight: bold;
+ text-decoration: underline;
 }
 span.rvts117
 {
@@ -722,39 +726,49 @@ span.rvts117
 }
 span.rvts118
 {
+ font-size: 14pt;
  font-family: 'Courier New', 'Courier', monospace;
- color: ;
 }
 span.rvts119
 {
- color: ;
+ font-size: 12pt;
+ font-family: 'Courier New', 'Courier', monospace;
 }
 span.rvts120
 {
+ font-size: 12pt;
  font-family: 'Courier New', 'Courier', monospace;
- color: #000000;
- background-color: #ffffff;
+ color: #00007f;
 }
 span.rvts121
+{
+ font-family: 'Courier New', 'Courier', monospace;
+ color: ;
+}
+span.rvts122
+{
+ color: ;
+}
+span.rvts123
 {
  font-family: 'Lucida Console', 'Monaco', monospace;
  text-decoration: underline;
 }
-span.rvts122
+span.rvts124
 {
  font-weight: bold;
  text-decoration: underline;
 }
-span.rvts123
+span.rvts125
 {
  font-size: 11pt;
  text-decoration: underline;
 }
-span.rvts124
+span.rvts126
 {
  font-size: 5pt;
 }
-span.rvts125
+span.rvts127
 {
  font-size: 5pt;
  font-weight: bold;
@@ -791,13 +805,40 @@ p,ul,ol /* Paragraph Style */
 }
 .rvps5
 {
- background: #ffffff;
+ background: #e9e9e9;
+ margin: 7px 0px 7px 0px;
 }
 .rvps6
 {
- text-indent: 48px;
+ text-align: left;
+ text-indent: 0px;
+ border-color: #000000;
+ border-style: solid;
+ border-width: 1px;
+ background: #b4b4b4;
+ padding: 3px 0px 0px 0px;
+ margin: 20px 80px 13px 0px;
 }
 .rvps7
+{
+ text-align: left;
+ text-indent: 0px;
+ border-color: #999999;
+ border-style: solid;
+ border-width: 1px;
+ background: #e1e1e1;
+ padding: 0px 0px 0px 0px;
+ margin: 13px 80px 13px 0px;
+}
+.rvps8
+{
+ background: #ffffff;
+}
+.rvps9
+{
+ text-indent: 48px;
+}
+.rvps10
 {
  text-indent: 48px;
  margin: 0px 0px 0px 48px;
