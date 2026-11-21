@@ -40,67 +40,107 @@
 	</div>
 	<div id="page_content">
 	<h1>Downloads</h1>
-	<p>The FCEUX team maintains two ports: Qt/SDL and Win32.<br><br>
-	The Win32 port offers the classic extensive set of native gui amenities and tools.<br><br>
-	The newer Qt/SDL port supports all of the features of the Win32 build (debug tools, Lua scripting, movie recording, TAS Editor).
-	Many of the tools in the Qt/SDL port have 
-	taken on a new look and feel. There are also a few new tools exclusive to the Qt/SDL port such as the sprite viewer,
-	NES Palette Editor, AVI RIFF Tree viewer, and frame timing tool.
-	The Qt/SDL port is 100% cross platform and should run on any UNIX-like OS (Linux/Solaris/BSD/OSX) as well as Windows.
-	</p>
-		
-		<p>Network play in both the Win32 and SDL ports is not presently functional. There are no plans to fix it at this time.</p>
-		
-		<h4>Win32</h4>
-		<ul>
-			<li>Be sure to check out the fceux.chm file (Under Help -> Help... in the emulator main menu). We work pretty hard on keeping that up to date!
-				<ul><li>We also keep an up to date <a href="help/fceux.html">online version</a></li></ul>
-			</li>
-		</ul>
-		
-		<h4>SDL</h4>
-		<ul>
-			<li><a href="https://cmake.org/">Cmake is required to build from source.</a></li>
-			<li>Cross platform Qt GUI replaces deprecated GTK GUI</li>
-			<li>Requires Qt5, SDL2, minizip, zlib, and OpenGL</li>
-			<li>ffmpeg libraries (libavutil, libavformat, libavcodec, libswscale, libswresample) are recommended optional dependencies that provide many encoding features for AVI recording</li>
-			<li>libx264 is an optional dependency that provides H.264 video encoding for AVI recording</li>
-			<li>Lua 5.1 is optional, if the system cannot provide this, an internal version of Lua will be statically linked</li>
-			<li>The Qt GUI is required and will automatically be part of the build.</li>
-			<li>For installation instructions on Linux systems, see the README at the root level of the source tree</li>
-			<li>For build examples, see the script files in the pipelines directory of the project</li>
-		</ul>
-		
-		<h3>Download</h3>
-		<ul>
-			<li><a href="https://github.com/TASEmulators/fceux/releases/download/fceux-2.7.0/fceux-2.7.0-win32.zip">FCEUX 2.7.0 win32 Binary (original Windows GUI)</a></li>
-			<li><a href="https://github.com/TASEmulators/fceux/releases/download/fceux-2.7.0/fceux-2.7.0-win64.zip">FCEUX 2.7.0 win64 Binary (original Windows GUI)</a></li>
-			<li><a href="https://github.com/TASEmulators/fceux/releases/download/fceux-2.7.0/fceux-2.7.0-win64-QtSDL.zip">FCEUX 2.7.0 win64 Binary (newer, modern Qt GUI)</a></li>
-			<li><a href="https://github.com/TASEmulators/fceux/releases/download/fceux-2.7.0/fceux-2.7.0-macos-arm64.dmg">FCEUX 2.7.0 MacOSX (arm64) Binary (Qt GUI)</a></li>
-			<li><a href="https://github.com/TASEmulators/fceux/archive/refs/tags/fceux-2.7.0.tar.gz">FCEUX 2.7.0 src (tgz)</a></li>
-			<li><a href="https://github.com/TASEmulators/fceux/archive/refs/tags/fceux-2.7.0.zip">FCEUX 2.7.0 src (zip)</a></li>
-		</ul>
 
-		<p>If you would like to test the current in-development version of FCEUX, interim builds are available here:</p>
-		<ul>
-			<li><a href="https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win32.zip">Windows 32-bit (original Windows GUI)</a></li>
-			<li><a href="https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win64.zip">Windows 64-bit (original Windows GUI)</a></li>
-			<li><a href="https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win64-QtSDL.zip">Windows 64-bit (newer, modern Qt GUI)</a></li>
-			<li><a href="https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-ubuntu-x64.deb">Ubuntu Linux (Qt GUI)</a></li>
-			<li><a href="https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-Darwin.dmg">Mac OS X (Qt GUI)</a></li>
-		</ul>
-		
+	<p class="dl_intro"><b>Download FCEUX 2.8.0.</b> The Qt GUI is recommended for most users. It runs on Windows, macOS, and Linux,
+	and includes the debugging, Lua scripting, movie recording, and TAS Editor tools, along with features found only in the Qt GUI.
+	<a href="pressrelease-2.8.0.html">Release notes</a></p>
+
+	<div class="dl_cards">
+		<div class="dl_card">
+			<h4>Windows</h4>
+			<a class="dl_button" href="https://github.com/TASEmulators/fceux/releases/download/v2.8.0/fceux-2.8.0-win64-QtSDL.zip">Download for Windows</a>
+			<p>64-bit &middot; Qt GUI &middot; Recommended<br/><a href="#windows_quickstart">Quick start</a></p>
+		</div>
+		<div class="dl_card">
+			<h4>macOS</h4>
+			<a class="dl_button" href="https://github.com/TASEmulators/fceux/releases/download/v2.8.0/fceux-2.8.0-Darwin.dmg">Download for macOS</a>
+			<p>Apple Silicon (arm64) &middot; Qt GUI</p>
+		</div>
+		<div class="dl_card">
+			<h4>Linux</h4>
+			<a class="dl_button" href="#linux">Linux installation</a>
+			<p>Distribution packages or build from source &middot; Qt GUI</p>
+		</div>
+	</div>
+
+	<h3 id="windows_quickstart">Windows Quick Start (Qt GUI)</h3>
+	<ol>
+		<li>Extract the entire zip file to a folder of your choice. Do not run the program from inside the zip file.</li>
+		<li>Open the <b>bin</b> folder and run <b>qfceux.exe</b>. The executable is no longer in the top-level folder; the bin folder
+		contains it together with its bundled application and Qt DLLs. You can create a desktop or Start menu shortcut to qfceux.exe for convenience.</li>
+		<li>If Windows reports a missing MSVCP140.dll or VCRUNTIME140.dll, install the Microsoft Visual C++ Redistributable (x64).</li>
+		<li>If no Qt configuration is found, the first launch asks where to store settings and data such as saves, save states,
+		movies, cheats, and screenshots. Choose a per-user folder (recommended), portable storage (a <b>config</b> folder next to
+		<b>bin</b>), or a custom folder. The choice is remembered; to change it later, run
+		<code>qfceux.exe --choose-config-location</code>.</li>
+	</ol>
+	<p>The original Windows GUI stores its settings in <b>fceux.cfg</b> beside its executable. The Qt GUI uses a separate configuration
+	format and does not import those settings or move existing files. See the
+	<a href="https://github.com/TASEmulators/fceux/blob/master/src/drivers/Qt/readme.md#configuration-and-storage">Qt configuration and storage documentation</a>
+	for details.</p>
+	<p>The top-level folder also contains <b>palettes</b>, <b>luaScripts</b>, <b>tools</b>, and <b>doc</b> folders.
+	Keep the folder structure intact when moving the installation.</p>
+
+	<h3>Why the Qt GUI?</h3>
+	<p>The Qt GUI is where FCEUX development is focused. It includes everything the original Windows GUI offers, and it has
+	gained a large set of features over several releases that are not available in the original Windows GUI.</p>
+	<ul>
+		<li><b>One emulator on every platform</b>: the same interface, tools, and configuration on Windows, macOS, Linux, and BSD.</li>
+		<li><b>Modern, customizable interface</b>: dark mode, Qt styles and stylesheets, dockable tool windows, saved window layouts,
+		and gamepad-operated menus for playing from the couch.</li>
+		<li><b>More ways to play</b>: RetroAchievements, a state recorder for rewinding gameplay, a save state viewer with screenshots,
+		a virtual Family Keyboard, and multiple gamepad binding profiles.</li>
+		<li><b>Video and recording</b>: a choice of video drivers (OpenGL, QPainter, SDL, and Vulkan where supported), aspect ratio
+		correction, screenshots that include scaler effects, and AVI recording through FFmpeg with modern codecs such as H.264 and H.265.</li>
+		<li><b>The complete toolset, and more</b>: the debugger, hex editor, PPU and name table viewers, trace logger, code/data logger,
+		RAM search, cheats, Lua scripting, movie recording, and TAS Editor are all included. Tools found only in the Qt GUI include
+		a sprite viewer, an NES palette editor, a Lua source debugger, JavaScript scripting, a frame timing tool, an AVI RIFF tree viewer,
+		and a performance profiler.</li>
+	</ul>
+
+	<h3>Original Windows GUI</h3>
+	<p>The original Windows interface remains available for users who prefer its established native tools and workflow.
+	It is also the only option for 32-bit Windows. It does not include RetroAchievements or the other Qt-only features listed above.</p>
+	<ul>
+		<li><a href="https://github.com/TASEmulators/fceux/releases/download/v2.8.0/fceux-2.8.0-win64.zip">FCEUX 2.8.0 Windows 64-bit (original Windows GUI)</a></li>
+		<li><a href="https://github.com/TASEmulators/fceux/releases/download/v2.8.0/fceux-2.8.0-win32.zip">FCEUX 2.8.0 Windows 32-bit (original Windows GUI)</a></li>
+	</ul>
+	<p>The fceux.chm help file is available under Help -&gt; Help... in the emulator main menu, and an <a href="help/fceux.html">online version</a> is also maintained.</p>
+
+	<h3 id="linux">Linux</h3>
+	<p>Linux binaries are not published with releases. Install FCEUX from your distribution's package manager,
+	or build it from source using the instructions in the
+	<a href="https://github.com/TASEmulators/fceux/blob/master/README">README</a> at the root of the source tree.
+	The Qt GUI also runs on other UNIX-like systems such as BSD and Solaris.</p>
+
+	<h3>Development Builds</h3>
+	<p>Interim builds of the current in-development version are available for testing:</p>
+	<ul>
+		<li><a href="https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win64-QtSDL.zip">Windows 64-bit (Qt GUI)</a></li>
+		<li><a href="https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-Darwin.dmg">macOS (Qt GUI)</a></li>
+		<li><a href="https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-ubuntu-x64.deb">Ubuntu Linux (Qt GUI)</a></li>
+		<li><a href="https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win64.zip">Windows 64-bit (original Windows GUI)</a></li>
+		<li><a href="https://github.com/TASEmulators/fceux/releases/download/interim-build/fceux-win32.zip">Windows 32-bit (original Windows GUI)</a></li>
+	</ul>
+
+	<p>Experimental network play is available in the Qt GUI. It is not available in the original Windows GUI.</p>
+
 		<h3>Source Code</h3>
 		<ul>
 		<li><a href="https://github.com/TASEmulators/fceux">Git repository</a></li>
+		<li><a href="https://github.com/TASEmulators/fceux/archive/refs/tags/v2.8.0.tar.gz">FCEUX 2.8.0 src (tgz)</a></li>
+		<li><a href="https://github.com/TASEmulators/fceux/archive/refs/tags/v2.8.0.zip">FCEUX 2.8.0 src (zip)</a></li>
 		</ul>
-		<p>FCEUX development is done commited to a Git repository hosted at Github.  The last version of the source can be found there.</p>
+		<p>FCEUX development is commited to a Git repository hosted at GitHub. The latest version of the source can be found there.</p>
 		<h4>Compiling</h4>
 		<ul>
-			<li>Win32 uses MS Visual Studio 2010. Newer versions of visual studio should be able to build it, with a little trouble.</li>
-			<li>The Qt/SDL build uses Cmake</li>
-			<li>Everything needed to compile the win32 version is included in SVN</li>
-			<li>The Qt/SDL port requires development packages for Qt5, SDL2, minizip, zlib, and OpenGL</li>
+			<li>The Qt GUI build uses <a href="https://cmake.org/">CMake</a> 3.16 or newer.</li>
+			<li>The Qt GUI build requires development packages for Qt 5.15 or newer (Qt 6 supported), SDL2, minizip, zlib, and OpenGL.</li>
+			<li>ffmpeg libraries (libavutil, libavformat, libavcodec, libswscale, libswresample) are recommended optional dependencies that provide many encoding features for AVI recording.</li>
+			<li>libx264 is an optional dependency that provides H.264 video encoding for AVI recording.</li>
+			<li>Lua 5.1 is optional. If the system cannot provide it, an internal version of Lua is statically linked.</li>
+			<li>For build examples, see the workflow files in the .github/workflows directory and the scripts in the pipelines directory of the project.</li>
+			<li>The original Windows GUI build uses MS Visual Studio. Everything needed to compile it is included in the repository.</li>
 		</ul>
 		<h3>Old Versions</h3>
 		

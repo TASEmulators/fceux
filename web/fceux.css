@@ -115,3 +115,51 @@ li {
 	font-weight:bold;
 	font-size:xx-large;
 }
+
+.dl_intro {
+	font-size: larger;
+	margin-right: 80px;
+}
+
+.dl_cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-right: 80px;
+	margin-bottom: 16px;
+}
+
+.dl_card {
+	flex: 1 1 180px;
+	text-align: center;
+	background-color: #F4F4F4;
+	border: 2px solid #333;
+	border-radius: 8px;
+	padding: 8px 12px;
+}
+
+.dl_card h4 {
+	margin: 4px 0 12px 0;
+	font-size: x-large;
+}
+
+.dl_card p {
+	font-size: small;
+	margin: 10px 0 4px 0;
+}
+
+.dl_button {
+	display: inline-block;
+	font-size: large;
+	font-weight: bold;
+	text-decoration: none;
+	color: white;
+	background-color: #2E6DB4;
+	border: 2px solid #1D4A7C;
+	border-radius: 8px;
+	padding: 8px 20px;
+}
+
+.dl_button:hover {
+	background-color: #1D4A7C;
+}

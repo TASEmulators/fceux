@@ -1,5 +1,5 @@
-FCEUX SDL 2.6.4 SDL README
-==========================
+FCEUX 2.8.0 Qt/SDL README
+=========================
 Originally By Lukas Sabota (sf: punkrockguy318)
 Updated By mjbudd77
 
@@ -7,7 +7,7 @@ Updated By mjbudd77
 
 https://fceux.com
 
-Last Modified: November 11, 2026
+Last Modified: November 21, 2026
 
 Table of Contents
 -----------------
@@ -17,8 +17,8 @@ Table of Contents
 3.  Compile-time options
 4.  GUI
 5.  LUA Scripting
-5.  FAQ
-6.  Contact
+6.  FAQ
+7.  Contact
 
 1 - Requirements
 ----------------
@@ -82,6 +82,33 @@ cmake prints "Vulkan SDK found" and "Qt Vulkan support found" when it is enabled
 
 2 - Installation
 ----------------
+Linux binaries are not published with FCEUX releases. The simplest way to install FCEUX on Linux
+is through your distribution's package manager. For example, on Debian/Ubuntu:
+
+	sudo apt install fceux
+
+Distribution packages can lag behind the latest FCEUX release. To get the latest version, build
+from source as described below. Windows and macOS binaries are available from https://fceux.com.
+
+Installing build dependencies
+-----------------------------
+On Debian/Ubuntu, the following installs everything needed for a full featured Qt6 build:
+
+	sudo apt install build-essential cmake pkg-config \
+		qt6-base-dev qt6-multimedia-dev qt6-declarative-dev qt6-tools-dev \
+		libsdl2-dev libminizip-dev zlib1g-dev libgl-dev libarchive-dev lua5.1-dev \
+		libx264-dev libx265-dev libvulkan-dev \
+		libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
+
+For a Qt5 build, replace the qt6-* packages with:
+
+	qtbase5-dev libqt5opengl5-dev qtmultimedia5-dev qtdeclarative5-dev qttools5-dev
+
+Other distributions use different package names. See section 1 for the list of dependencies.
+The .github/workflows/linux.yml file contains the dependency list used for the Ubuntu CI build.
+
+Building
+--------
 The old scons build system is no longer supported.
 Fceux can be compiled and built using the cmake build system.  To compile, run:
 
@@ -96,9 +123,9 @@ For those who must have GTK/Gnome style, there is a GTK style plugin for Qt that
 can be installed to the OS and selected for use via the GUI.
 The previous GTK version of the GUI is now retired and has been removed from the build.
 
-The Qt version GUI by far exceeds the old GTK gui in capability and performance.
-The Qt GUI can build/link against both Qt5 and Qt6. To enable building against Qt6, use -DQT6=1 argument:
-   cmake  -DCMAKE_INSTALL_PREFIX=/usr  -DQT6=1  -DCMAKE_BUILD_TYPE=Debug    ..    
+The Qt GUI can build/link against both Qt5 and Qt6. cmake uses Qt6 when it is found, and falls
+back to Qt5 otherwise. To select the Qt version explicitly, use -DQT=6 or -DQT=5:
+   cmake  -DCMAKE_INSTALL_PREFIX=/usr  -DQT=5  -DCMAKE_BUILD_TYPE=Release  ..
 
 To do the actual compiling:
    make
@@ -158,7 +185,8 @@ Other notes for packagers:
   Qt Network module needs a working TLS backend at run time, which is normally OpenSSL on Linux. The
   package dependencies should make sure that is installed.
 * The unlock sound is played through SDL2, which fceux already requires.
-* Hardcore mode is not implemented yet. Achievements are earned in softcore mode.
+* Softcore and hardcore modes are supported. Hardcore mode restricts speed control, netplay, and
+  the debug and tool windows, as required by RetroAchievements rules.
 * Only the user name and a login token are kept in fceux.cfg. The password is never stored.
 * The cmake option is RETRO_ACHIEVEMENTS and the compiler macro that it defines for the code
   is FCEUX_HAS_RETRO_ACHIEVEMENTS.
@@ -166,8 +194,8 @@ Other notes for packagers:
 4 - GUI
 -------
 The Qt GUI is required and automatically builds as part of the build. The Qt GUI is the default.
-When invoking cmake, Qt6 can be used (instead of Qt5) by specifying a -DQT6=1 on the command line.
-See above build instructions.
+Qt6 is used when found, otherwise Qt5. Use -DQT=6 or -DQT=5 on the cmake command line to select
+the version explicitly. See above build instructions.
 OpenGL options:
 For Linux builds, the OpenGL library preference can be either GLVND or LEGACY (default). 
 To use GLVND OpenGL, add a -DGLVND=1 on the cmake command line.
@@ -230,4 +258,4 @@ Running fceux through esddsp is known to fix some audio issues with pulseaudio o
 	
 7 - Contact
 -----------
-If you have an issue with fceux, report it in the github bug tracker (see fceux at github.com).  If you would like to contact the author of this readme personally, e-mail LTsmooth42 <at> gmail <dot> com.  You can also check us out at #fceu on irc.freenode.net.
+If you have an issue with fceux, report it in the github bug tracker (see fceux at github.com).  If you would like to contact the author of this readme personally, e-mail LTsmooth42 <at> gmail <dot> com.  You can also check us out at #fceu on Libera.Chat (irc.libera.chat).
