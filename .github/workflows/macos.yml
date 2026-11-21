@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'fceux-*.*.*'
+      - '*.*.*'
   pull_request:
   workflow_dispatch:
 
@@ -13,8 +16,23 @@ permissions:
 jobs:
   build:
     runs-on: macos-latest
+    outputs:
+      release_tag: ${{ steps.version.outputs.release_tag }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Determine build type
+        id: version
+        run: |
+          PUBLIC_RELEASE=0
+          RELEASE_TAG=''
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [[ "$GITHUB_REF_NAME" =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            PUBLIC_RELEASE=1
+            RELEASE_TAG="$GITHUB_REF_NAME"
+          fi
+          echo "PUBLIC_RELEASE=$PUBLIC_RELEASE" >> "$GITHUB_ENV"
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "PUBLIC_RELEASE=$PUBLIC_RELEASE release_tag=$RELEASE_TAG"
 
       - name: Show runner macOS version
         run: |
@@ -40,6 +58,7 @@ jobs:
             -DCMAKE_PREFIX_PATH="$(brew --prefix qt6)" \
             -DQT6=1 \
             -DRETRO_ACHIEVEMENTS=ON \
+            -DPUBLIC_RELEASE="$PUBLIC_RELEASE" \
             -DCMAKE_PROJECT_VERSION_MAJOR="$VERSION_MAJOR" \
             -DCMAKE_PROJECT_VERSION_MINOR="$VERSION_MINOR" \
             -DCMAKE_PROJECT_VERSION_PATCH="$VERSION_PATCH" \
@@ -83,3 +102,34 @@ jobs:
           fi
           cp "${dmgs[0]}" fceux-Darwin.dmg
           gh release upload interim-build fceux-Darwin.dmg --clobber --repo "$GITHUB_REPOSITORY"
+
+  publish-release:
+    needs: build
+    if: needs.build.outputs.release_tag != ''
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: fceux-macos
+
+      - name: Upload to tagged release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.build.outputs.release_tag }}
+        run: |
+          shopt -s nullglob
+          dmgs=(fceux-*.dmg)
+          if [ "${#dmgs[@]}" -ne 1 ]; then
+            echo "Expected exactly one DMG, found ${#dmgs[@]}: ${dmgs[*]}"
+            exit 1
+          fi
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $TAG not found; creating it."
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$TAG" \
+              --notes "Release Builds - commit: $(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)" \
+              || gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null
+          fi
+          # No --clobber: never replace an asset already published on a release.
+          gh release upload "$TAG" "${dmgs[0]}" --repo "$GITHUB_REPOSITORY"

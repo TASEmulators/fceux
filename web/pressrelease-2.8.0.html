@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<link href="fceux.css" rel="stylesheet" type="text/css" />
+<title>Press Release 2.8.0</title>
+</head>
+
+<body>
+<div id="masthead">
+	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom/Dendy Emulator
+</div>
+<div id="top_nav">
+  <a href="home.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="documentation.html">Documentation</a>
+  <a href="version.html">Versions</a>
+  <a href="contact.html">Contact</a>
+  <a href="links.html">Links</a>
+</div>
+<div id="container">
+	<div id="left_col">
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	 		style="display:inline-block;width:180px;height:150px"
+	 		data-ad-client="ca-pub-0764229755985190"
+	 		data-ad-slot="7648866201"></ins>
+		<script>
+	     (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>	
+		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<ins class="adsbygoogle"
+	    	 style="display:inline-block;width:180px;height:150px"
+	     	data-ad-client="ca-pub-0764229755985190"
+	     	data-ad-slot="7648866201"></ins>
+		<script>
+	    	 (adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
+<div id="page_content">
+<h1>FCEUX 2.8.0 Feature Release</h1>
+<p>November 2026</p>
+<p>
+The 2.8.0 release adds RetroAchievements support, a Lua source debugger, a built-in performance profiler, a gamepad-operated user interface, and a large set of Qt GUI improvements including dark mode, dockable tool widgets, and saved window layouts. It also fixes several memory safety issues in ROM, movie, and file parsing.
+</p>
+
+<h2>Common</h2>
+
+<h3>Bug Fixes</h3>
+Fixed heap overflows when loading malformed iNES ROM sizes, UNIF MAPR chunks, and CHR-RAM smaller than 8k.<br>
+Fixed out-of-bounds reads in the GUID parser (#856) and in hex string decoding (#857).<br>
+Fixed an abort when loading a movie with a negative length header (#858).<br>
+Fixed segfaults on mapper 218 (#851).<br>
+Fixed save states for VRC7 (#821).<br>
+iNES files are now loaded and saved using the raw PRG/CHR sizes from the header instead of power-of-two rounded sizes.<br>
+
+<h2>Qt/SDL</h2>
+
+<h3>RetroAchievements</h3>
+Added RetroAchievements support with softcore and hardcore modes. Hardcore mode enforces the RetroAchievements rules by restricting speed control, netplay, and the debug and tool windows.<br>
+Added local leaderboards, Encore mode, user avatar display, and an unlock sound played through the active audio driver.<br>
+Available in the Linux, macOS, and Win64 builds.<br>
+
+<h3>Lua Source Debugger</h3>
+Added a source-level Lua debugger, integrated with the Lua console window and accessible from the main menu.<br>
+The GUI now stays responsive while a Lua script runs for a long time without yielding.<br>
+
+<h3>Gamepad Operated Interface</h3>
+Added a gamepad-operated main menu and a gamepad-navigable file browser for opening ROMs (#847).<br>
+
+<h3>Board Control</h3>
+Added a Board Control dialog with interactive DIP switch banks for boards that provide them.<br>
+
+<h3>User Interface</h3>
+Added a built-in dark mode and a set of built-in GUI styles.<br>
+Added a dockable State Slot Viewer with savestate screenshots and a dockable State Recorder Timeline.<br>
+Added saving and recalling of window layouts for the main window and all debug and tool windows.<br>
+Added save state banks, providing state slots 0 to 999.<br>
+Added an optional status bar for emulator messages. It is enabled by default.<br>
+Added a text overlay shared by all video drivers.<br>
+Added an option to take screenshots from the video driver buffer, including scaler effects and overlays.<br>
+Added translation loading and a language selector.<br>
+Added a Linux option to use X11 on Wayland.<br>
+
+<h3>Audio and Video</h3>
+Added a Qt Multimedia audio driver, with audio output device selection, as an alternative to the SDL audio driver.<br>
+QPainter is now the default video driver.<br>
+The Vulkan video driver no longer blocks while waiting for vsync.<br>
+Faster AVI recording and x264 encoding.<br>
+
+<h3>Input</h3>
+Added an option to automatically enable the Family Keyboard when a ROM is loaded (#797).<br>
+Added the 4-Player Adapter to the input settings (#803).<br>
+Added LCD zapper support. This has not been tested with real hardware.<br>
+
+<h3>Developer Tools</h3>
+Added a profiler dialog window. It records timing markers from the application's threads to a capture file and displays them in a per-thread timeline viewer with zoom, per-frame browsing, and marker search.<br>
+Profiler instrumentation is built in by default (the <code>FCEU_PROFILER_ENABLE</code> CMake option) and adds negligible overhead while not capturing. Builds with the option disabled keep the viewer but cannot record captures.<br>
+
+<h3>Bug Fixes</h3>
+Fixed gamepad hotkey bindings to Turbo not persisting after restart (#667).<br>
+Fixed invalid speed configuration parameter names (#752).<br>
+Fixed Lua mouse button feedback (#822).<br>
+Fixed mouse cursor scaling with the OpenGL video driver on high DPI displays.<br>
+ROM open and close, and drag and drop of ROMs and states, are now blocked while the TAS Editor is active.<br>
+
+<h3>Build System</h3>
+The minimum supported Qt version is now 5.15 and the minimum CMake version is 3.16.<br>
+Linux, macOS, and Win64 Qt builds are now produced by GitHub Actions.<br>
+
+</div>
+
+<p>
+<hr>
+
+<div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
+</div>
+
+</body>
+
+</html>
