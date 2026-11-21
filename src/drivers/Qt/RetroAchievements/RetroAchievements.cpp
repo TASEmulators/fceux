@@ -224,6 +224,8 @@ void RetroAchievements::initClient(void)
 	// rc_client needs the mode before a game is loaded. When a game is already running (RetroAchievements
 	// was just enabled), this resets it.
 	rc_client_set_encore_mode_enabled(client, encoreSetting ? 1 : 0);
+	// Sync the client even if refreshHardcore sees no emulator-side change.
+	rc_client_set_hardcore_enabled(client, hardcoreSetting ? 1 : 0);
 	refreshHardcore();
 
 	clause[0] = 0;
