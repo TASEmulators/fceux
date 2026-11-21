@@ -260,6 +260,7 @@ class QPianoRoll : public QWidget
 		QScrollBar *hbar;
 		QScrollBar *vbar;
 		QColor      windowColor;
+		QColor      headerTextColor;
 		QColor      headerLightsColors[11];
 		QColor      hotChangesColors[16];
 

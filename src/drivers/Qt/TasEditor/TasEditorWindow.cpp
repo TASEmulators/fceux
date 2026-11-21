@@ -4045,6 +4045,9 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	}
 	//printf("WindowText: R:%i  G:%i  B:%i \n", c.red(), c.green(), c.blue() );
 
+	// The title bar keeps the system window color, so its text must use the system text color
+	headerTextColor = useDarkTheme ? c : QColor(0x00, 0x00, 0x00);
+
 	if ( useDarkTheme )
 	{
 		pal.setColor(QPalette::Base      , fg );
@@ -4092,7 +4095,7 @@ QPianoRoll::QPianoRoll(QWidget *parent)
 	scroll_x = scroll_y = 0;
 	memset( headerColors, 0, sizeof(headerColors) );
 
-	headerLightsColors[ 0] = QColor( 0x00, 0x00, 0x00 );
+	headerLightsColors[ 0] = headerTextColor;
 	headerLightsColors[ 1] = QColor( 0x13, 0x73, 0x00 );
 	headerLightsColors[ 2] = QColor( 0x00, 0x91, 0x00 );
 	headerLightsColors[ 3] = QColor( 0x00, 0xAF, 0x1D );
@@ -6265,7 +6268,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	FCEU_WRAPPER_SCOPED_LOCK();
 	int x, y, row, nrow, lineNum;
 	QPainter painter(this);
-	QColor /*white(255,255,255),*/ black(0,0,0), blkColor, rowTextColor, hdrGridColor;
+	QColor /*white(255,255,255),*/ blkColor, rowTextColor, hdrGridColor;
 	static const char *buttonNames[] = { "A", "B", "S", "T", "U", "D", "L", "R", NULL };
 	char stmp[32];
 	char rowIsSel=0;
@@ -6349,7 +6352,7 @@ void QPianoRoll::paintEvent(QPaintEvent *event)
 	// Draw Title Bar
 	x = -pxLineXScroll; y = 0;
 	painter.fillRect( 0, 0, viewWidth, pxLineSpacing, windowColor );
-	painter.setPen( black );
+	painter.setPen( headerTextColor );
 
 	//font.setBold(true);
 	//painter.setFont(font);

@@ -536,6 +536,9 @@ void BOOKMARKS::paintEvent(QPaintEvent *event)
 	// Draw Background
 	painter.fillRect( 0, 0, viewWidth, viewHeight, white );
 
+	// All cell backgrounds are light colors, so text and grid must be black regardless of theme
+	painter.setPen( QColor(0,0,0) );
+
 	// Draw text
 	y = 0;
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
