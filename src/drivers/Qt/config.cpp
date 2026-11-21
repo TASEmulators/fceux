@@ -1055,7 +1055,7 @@ InitConfig()
 	config->addOption("SDL.PauseOnMainMenuAccess", false);
 	config->addOption("SDL.ToolWindowTaskbarEntry", false);
 	config->addOption("SDL.AutoHideMenuFullsreen", false);
-	config->addOption("SDL.ShowStatusBar", false);
+	config->addOption("SDL.ShowStatusBar", true);
 	config->addOption("SDL.ContextMenuEnable", true);
 	config->addOption("SDL.ShowMenuToolTips", false);
 	config->addOption("SDL.GuiStyle", "");
