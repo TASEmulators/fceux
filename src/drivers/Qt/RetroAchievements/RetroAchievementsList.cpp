@@ -219,6 +219,8 @@ RetroAchievementsListDialog_t::RetroAchievementsListDialog_t(QWidget *parent)
 	connect(ra, &RetroAchievements::gameUnrecognized, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::gameUnloaded, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::loginStateChanged, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
+	// rc_client switches between the hardcore and softcore unlock sets with the mode.
+	connect(ra, &RetroAchievements::hardcoreChanged, &refreshTimer, qOverload<>(&QTimer::start), Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::leaderboardStateChanged, this, &RetroAchievementsListDialog_t::updateBoardStates,
 		Qt::QueuedConnection);
 	connect(ra, &RetroAchievements::leaderboardSubmitted, this, &RetroAchievementsListDialog_t::boardSubmitted,
