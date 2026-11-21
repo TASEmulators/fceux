@@ -3344,6 +3344,12 @@ void consoleWin_t::openROMFile(bool openedByGamepad)
 	QList<QUrl> urls;
 	QDir d;
 
+	// Hotkeys and the gamepad menu bypass the disabled menu action
+	if ( !FCEU_IsValidUI( FCEUI_OPENGAME ) )
+	{
+		return;
+	}
+
 	const QStringList filters(
 			{ "All Useable files (*.nes *.NES *.nsf *.NSF *.fds *.FDS *.unf *.UNF *.unif *.UNIF *.zip *.ZIP, *.7z *.7zip)",
            "NES files (*.nes *.NES)",
@@ -3488,6 +3494,12 @@ void consoleWin_t::loadRomRequestCB( QString s )
 
 void consoleWin_t::closeROMCB(void)
 {
+	// The close hotkey bypasses the disabled menu action
+	if ( !FCEU_IsValidUI( FCEUI_CLOSEGAME ) )
+	{
+		return;
+	}
+
 	if (isNetPlayClient())
 	{
 		QString msgBoxTxt = tr("Unloading ROM will cause a disconnect from the current netplay session.\n\nDo you want to continue with unloading and disconnection?");
@@ -5749,7 +5761,10 @@ void consoleWin_t::updatePeriodic(void)
 		fdsSwitchAct->setEnabled( FCEU_IsValidUI( FCEUI_SWITCH_DISK ) );
 		fdsEjectAct->setEnabled( FCEU_IsValidUI( FCEUI_EJECT_DISK ) );
 		stopMovAct->setEnabled( FCEU_IsValidUI( FCEUI_STOPMOVIE ) );
-		recentRomMenu->setEnabled( !recentRomMenu->isEmpty() );
+		recentRomMenu->setEnabled( !recentRomMenu->isEmpty() && FCEU_IsValidUI( FCEUI_OPENGAME ) );
+		openROM->setEnabled( FCEU_IsValidUI( FCEUI_OPENGAME ) );
+		closeROM->setEnabled( FCEU_IsValidUI( FCEUI_CLOSEGAME ) );
+		playNSF->setEnabled( FCEU_IsValidUI( FCEUI_OPENGAME ) );
 		quickLoadAct->setEnabled( FCEU_IsValidUI( FCEUI_QUICKLOAD ) );
 		quickSaveAct->setEnabled( FCEU_IsValidUI( FCEUI_QUICKSAVE ) );
 		loadStateAct->setEnabled( FCEU_IsValidUI( FCEUI_LOADSTATE ) );
