@@ -179,7 +179,6 @@ QPushButton
 {
 	background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(184, 184, 184, 255),stop:1 rgba(159, 159, 159, 255));
 	color: #000;
-	min-width: 6.4em;
 	border-style: solid;
 	border-width: 0.08em;
 	border-color: #051a39;
@@ -1018,7 +1017,5 @@ QProgressBar
 QProgressBar::chunk
 {
     background-color: #46a2da;
-    width: 0.4em;
-    margin: 0.0.4em;
 
 }

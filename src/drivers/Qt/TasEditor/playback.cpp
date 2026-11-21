@@ -591,6 +591,11 @@ void PLAYBACK::setProgressbar(int a, int b)
 {
 	if ( tasWin )
 	{
+		// A zero range puts QProgressBar in busy (marquee) mode, avoid that
+		if ( b <= 0 )
+		{
+			b = 1;
+		}
 		tasWin->progBar->setRange(0,b);
 		tasWin->progBar->setValue(a);
 	}
