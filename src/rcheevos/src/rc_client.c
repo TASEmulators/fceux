@@ -4676,6 +4676,8 @@ static void rc_client_award_achievement_callback(const rc_api_server_response_t*
       /* first retry is immediate */
       RC_CLIENT_LOG_ERR_FORMATTED(ach_data->client, "Error awarding achievement %u: %s, retrying immediately", ach_data->id, error_message);
       rc_client_award_achievement_server_call(ach_data);
+
+      rc_api_destroy_award_achievement_response(&award_achievement_response);
       return;
     }
     else {
@@ -4689,6 +4691,7 @@ static void rc_client_award_achievement_callback(const rc_api_server_response_t*
         if (!ach_data->scheduled_callback_data) {
           RC_CLIENT_LOG_ERR_FORMATTED(ach_data->client, "Failed to allocate scheduled callback data for reattempt to unlock achievement %u", ach_data->id);
           rc_client_raise_server_error_event(ach_data->client, "award_achievement", ach_data->id, RC_OUT_OF_MEMORY, rc_error_str(RC_OUT_OF_MEMORY));
+          rc_api_destroy_award_achievement_response(&award_achievement_response);
           return;
         }
         ach_data->scheduled_callback_data->callback = rc_client_award_achievement_retry;
@@ -4702,6 +4705,8 @@ static void rc_client_award_achievement_callback(const rc_api_server_response_t*
       rc_client_schedule_callback(ach_data->client, ach_data->scheduled_callback_data);
 
       rc_client_update_disconnect_state(ach_data->client);
+
+      rc_api_destroy_award_achievement_response(&award_achievement_response);
       return;
     }
   }
@@ -4756,6 +4761,8 @@ static void rc_client_award_achievement_callback(const rc_api_server_response_t*
   if (ach_data->scheduled_callback_data)
     free(ach_data->scheduled_callback_data);
   free(ach_data);
+
+  rc_api_destroy_award_achievement_response(&award_achievement_response);
 }
 
 static void rc_client_award_achievement_server_call(rc_client_award_achievement_callback_data_t* ach_data)
@@ -5378,6 +5385,8 @@ static void rc_client_submit_leaderboard_entry_callback(const rc_api_server_resp
       /* first retry is immediate */
       RC_CLIENT_LOG_ERR_FORMATTED(lboard_data->client, "Error submitting leaderboard entry %u: %s, retrying immediately", lboard_data->id, error_message);
       rc_client_submit_leaderboard_entry_server_call(lboard_data);
+
+      rc_api_destroy_submit_lboard_entry_response(&submit_lboard_entry_response);
       return;
     }
     else {
@@ -5391,6 +5400,7 @@ static void rc_client_submit_leaderboard_entry_callback(const rc_api_server_resp
         if (!lboard_data->scheduled_callback_data) {
           RC_CLIENT_LOG_ERR_FORMATTED(lboard_data->client, "Failed to allocate scheduled callback data for reattempt to submit entry for leaderboard %u", lboard_data->id);
           rc_client_raise_server_error_event(lboard_data->client, "submit_lboard_entry", lboard_data->id, RC_OUT_OF_MEMORY, rc_error_str(RC_OUT_OF_MEMORY));
+          rc_api_destroy_submit_lboard_entry_response(&submit_lboard_entry_response);
           return;
         }
         lboard_data->scheduled_callback_data->callback = rc_client_submit_leaderboard_entry_retry;
@@ -5404,6 +5414,8 @@ static void rc_client_submit_leaderboard_entry_callback(const rc_api_server_resp
       rc_client_schedule_callback(lboard_data->client, lboard_data->scheduled_callback_data);
 
       rc_client_update_disconnect_state(lboard_data->client);
+
+      rc_api_destroy_submit_lboard_entry_response(&submit_lboard_entry_response);
       return;
     }
   }
@@ -5426,6 +5438,8 @@ static void rc_client_submit_leaderboard_entry_callback(const rc_api_server_resp
   if (lboard_data->scheduled_callback_data)
     free(lboard_data->scheduled_callback_data);
   free(lboard_data);
+
+  rc_api_destroy_submit_lboard_entry_response(&submit_lboard_entry_response);
 }
 
 static void rc_client_submit_leaderboard_entry_server_call(rc_client_submit_leaderboard_entry_callback_data_t* lboard_data)
