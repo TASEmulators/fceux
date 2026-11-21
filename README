@@ -37,7 +37,7 @@ Table of Contents
 * ffmpeg libraries (optional) - for avi recording (recommended)
 *	- ffmpeg libraries used: libavcodec  libavformat  libavutil  libswresample  libswscale
 * libarchive (optional) - for 7zip archive support (test with version 3.4.0)
-* rcheevos (optional) - for RetroAchievements support. Not part of this repository, see section 3.
+* rcheevos (optional) - bundled for RetroAchievements support, see section 3.
 * minizip  
 * zlib  
 * openGL
@@ -131,47 +131,29 @@ OR:
 You can enable and disable certain features of fceux at build time. 
 Look in the src/CMakeList.txt file to tweak options.
 
-RetroAchievements (optional, off by default)
+RetroAchievements (on by default)
 --------------------------------------------
-FCEUX can connect to RetroAchievements (https://retroachievements.org) using the rcheevos
-library. The rcheevos source code is NOT part of the fceux repository, and the build never
-downloads anything. A package that should include RetroAchievements support has to supply the
-rcheevos source itself. rcheevos is MIT licensed (see its LICENSE file, which should be included
-with the package notices) and is compiled statically into the fceux binary, so there is no
-additional run-time library to depend on.
+FCEUX can connect to RetroAchievements (https://retroachievements.org) using the bundled
+rcheevos library. The source in src/rcheevos is from rcheevos v12.5.0
+(https://github.com/RetroAchievements/rcheevos, commit 1433173220a7eaede6a9ed7a18e94117be1821e0).
+The build does not download rcheevos, and compiles it into the fceux binary, so there is no
+additional run-time library to depend on. rcheevos is MIT licensed; include
+src/rcheevos/LICENSE with binary package notices.
 
-To build with it:
+To disable it, configure with:
 
-1. Get the rcheevos source. FCEUX is tested with release v12.5.0:
+	-DRETRO_ACHIEVEMENTS=OFF
 
-	git clone --depth 1 --branch v12.5.0 https://github.com/RetroAchievements/rcheevos.git
+When enabled, CMake requires the bundled rcheevos sources. Look for this line in the
+configuration output:
 
-   A distribution build that has to work offline should add an rcheevos release tarball to the
-   package sources instead of cloning it.
-
-2. Turn the option on and tell cmake where the rcheevos source is:
-
-	cmake  -DCMAKE_INSTALL_PREFIX=/usr  -DCMAKE_BUILD_TYPE=Release  \
-	       -DRETRO_ACHIEVEMENTS=ON  -DRCHEEVOS_DIR=/path/to/rcheevos  ..
-
-   Without -DRCHEEVOS_DIR the source is expected in src/rcheevos inside the fceux source tree
-   (git ignores that folder). On macOS, add the two options to the usual arguments, for example:
-
-	cmake  -S . -B build  -G Ninja  -DCMAKE_BUILD_TYPE=Release  -DQT6=1  \
-	       -DCMAKE_PREFIX_PATH="$(brew --prefix qt6)"  \
-	       -DRETRO_ACHIEVEMENTS=ON  -DRCHEEVOS_DIR=/path/to/rcheevos
-
-3. Check that it took effect. If the rcheevos folder is missing or incomplete, cmake only prints a
-   warning and builds WITHOUT RetroAchievements; it does not fail. Look for this line in the cmake output:
-
-	-- RetroAchievements: enabled (rcheevos from /path/to/rcheevos)
+	-- RetroAchievements: enabled (bundled rcheevos from .../src/rcheevos)
 
    In the finished program, the About window lists "Compiled with rcheevos version ..." under
    Open Source Dependencies, and the Options menu has a RetroAchievements entry.
 
 Other notes for packagers:
-* Other rcheevos releases should work, but only v12.5.0 has been tested. All of the .c files under
-  the rcheevos src folder are compiled, except for its libretro glue.
+* All of the .c files under the bundled rcheevos src folder are compiled, except for its libretro glue.
 * RetroAchievements only talks HTTPS (retroachievements.org and media.retroachievements.org). The
   Qt Network module needs a working TLS backend at run time, which is normally OpenSSL on Linux. The
   package dependencies should make sure that is installed.

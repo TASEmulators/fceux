@@ -37,25 +37,21 @@ endif()
 
 option(FCEU_PROFILER_ENABLE "Enable the built-in FCEU performance profiler (near-zero cost while not capturing)" ON)
 
-# RetroAchievements support (rcheevos rc_client). The rcheevos sources are not
-# part of this repository; point RCHEEVOS_DIR at a checkout (tested with v12.5.0).
-option(RETRO_ACHIEVEMENTS "Enable RetroAchievements support (requires the rcheevos sources in RCHEEVOS_DIR)" OFF)
-set(RCHEEVOS_DIR "${CMAKE_SOURCE_DIR}/src/rcheevos" CACHE PATH "Path to the rcheevos source tree")
+# RetroAchievements support uses the bundled rcheevos rc_client sources.
+option(RETRO_ACHIEVEMENTS "Enable RetroAchievements support" ON)
+set(RCHEEVOS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/rcheevos")
 
 set(RCHEEVOS_SOURCE "")
 if (RETRO_ACHIEVEMENTS)
-	if (EXISTS "${RCHEEVOS_DIR}/include/rc_client.h" AND IS_DIRECTORY "${RCHEEVOS_DIR}/src")
-		# Everything under src/ except the libretro glue, so both the v12.x release layout
-		# (src/rapi, src/rcheevos, src/rhash) and the newer develop layout are handled.
+	if (EXISTS "${RCHEEVOS_DIR}/include/rc_client.h" AND EXISTS "${RCHEEVOS_DIR}/src/rc_client.c" AND EXISTS "${RCHEEVOS_DIR}/LICENSE")
 		file(GLOB_RECURSE RCHEEVOS_SOURCE CONFIGURE_DEPENDS "${RCHEEVOS_DIR}/src/*.c")
 		list(FILTER RCHEEVOS_SOURCE EXCLUDE REGEX "/libretro/|/rc_libretro\\.c$")
-		message( STATUS "RetroAchievements: enabled (rcheevos from ${RCHEEVOS_DIR})")
+		message( STATUS "RetroAchievements: enabled (bundled rcheevos from ${RCHEEVOS_DIR})")
 	else()
-		message( WARNING "RetroAchievements: rcheevos sources not found in RCHEEVOS_DIR='${RCHEEVOS_DIR}'; disabling RETRO_ACHIEVEMENTS")
-		set(RETRO_ACHIEVEMENTS OFF)
+		message( FATAL_ERROR "RetroAchievements: bundled rcheevos sources are missing or incomplete in '${RCHEEVOS_DIR}'")
 	endif()
 else()
-	message( STATUS "RetroAchievements: disabled (use -DRETRO_ACHIEVEMENTS=ON -DRCHEEVOS_DIR=<path> to enable)")
+	message( STATUS "RetroAchievements: disabled")
 endif()
 
 find_package(Vulkan QUIET)
@@ -936,6 +932,12 @@ set(APP \${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app)
 install( DIRECTORY ${CMAKE_SOURCE_DIR}/output/.
 	DESTINATION ${APP_NAME}.app/Contents/Resources COMPONENT Extra )
 
+if (RETRO_ACHIEVEMENTS)
+	install( FILES ${RCHEEVOS_DIR}/LICENSE
+		DESTINATION ${APP_NAME}.app/Contents/Resources/licenses
+		RENAME rcheevos-LICENSE COMPONENT Runtime )
+endif()
+
 set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/fceux.icns )
 set(CPACK_GENERATOR "DragNDrop")
 include(CPACK)
@@ -978,5 +980,11 @@ install( FILES     ${CMAKE_SOURCE_DIR}/fceux1.png                        DESTINA
 install( FILES     ${CMAKE_SOURCE_DIR}/fceux.desktop                     DESTINATION share/applications  )
 install( FILES     ${CMAKE_SOURCE_DIR}/documentation/fceux.6             DESTINATION ${CMAKE_INSTALL_MANDIR}/man6  )
 install( FILES     ${CMAKE_SOURCE_DIR}/documentation/fceux-net-server.6  DESTINATION ${CMAKE_INSTALL_MANDIR}/man6  )
+
+if (RETRO_ACHIEVEMENTS)
+	install( FILES ${RCHEEVOS_DIR}/LICENSE
+		DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/fceux
+		RENAME rcheevos-LICENSE )
+endif()
 
 endif(APPLE)

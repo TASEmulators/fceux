@@ -152,7 +152,7 @@ else {
     Write-Host "  Vulkan SDK $vulkanVersion`: $DependencyDirectory\VulkanSDK\$vulkanVersion"
 }
 if ($EnableRetroAchievements) {
-    Write-Host "  rcheevos v12.5.0 (RetroAchievements): $DependencyDirectory\rcheevos-v12.5.0"
+    Write-Host "  Bundled rcheevos v12.5.0 (RetroAchievements): $source\src\rcheevos"
 }
 else {
     Write-Host '  RetroAchievements: disabled'
@@ -294,15 +294,6 @@ if (!$SkipVulkan) {
     $configure += @("-DVulkan_INCLUDE_DIR:PATH=$VulkanSdk\Include",
         "-DVulkan_LIBRARY:FILEPATH=$VulkanSdk\Lib\vulkan-1.lib")
 }
-if ($EnableRetroAchievements) {
-    $rcheevos = Join-Path $DependencyDirectory 'rcheevos-v12.5.0'
-    if (!(Test-Path -LiteralPath "$rcheevos\.git")) {
-        Invoke-Checked $git.Source @('clone', '--depth', '1', '--branch', 'v12.5.0',
-            'https://github.com/RetroAchievements/rcheevos.git', $rcheevos)
-    }
-    Assert-Files $rcheevos @('include\rc_client.h')
-    $configure += "-DRCHEEVOS_DIR:PATH=$rcheevos"
-}
 Invoke-Checked $cmake $configure
 Assert-Files $BuildDirectory @('fceux.sln')
 Write-Host "`nVS2022 Qt workspace setup SUCCEEDED in $($setupTimer.Elapsed.ToString('hh\:mm\:ss'))." -ForegroundColor Green
@@ -321,7 +312,7 @@ else {
     Write-Host '  Vulkan: disabled'
 }
 if ($EnableRetroAchievements) {
-    Write-Host "  RetroAchievements: enabled ($rcheevos)"
+    Write-Host "  RetroAchievements: enabled (bundled rcheevos)"
 }
 else {
     Write-Host '  RetroAchievements: disabled'
