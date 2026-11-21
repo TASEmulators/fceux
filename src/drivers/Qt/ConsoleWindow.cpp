@@ -924,6 +924,18 @@ void consoleWin_t::dragEnterEvent(QDragEnterEvent *event)
 {
 	if (event->mimeData()->hasUrls() )
 	{
+		// While the TAS editor is active, ROM and state loads are refused,
+		// so only accept Lua script drops for the visual drag feedback.
+		if ( !FCEU_IsValidUI( FCEUI_OPENGAME ) )
+		{
+			const QList<QUrl> urls = event->mimeData()->urls();
+			const QString suffix = QFileInfo( urls[0].toString( QUrl::PreferLocalFile ) ).suffix();
+
+			if ( suffix.compare("lua", Qt::CaseInsensitive) != 0 )
+			{
+				return;
+			}
+		}
 		event->acceptProposedAction();
 	}
 }
@@ -978,7 +990,7 @@ void consoleWin_t::dropEvent(QDropEvent *event)
 			}
 			event->accept();
 		}
-		else
+		else if ( FCEU_IsValidUI( FCEUI_OPENGAME ) )
 		{
 			int romLoadSuccess;
 

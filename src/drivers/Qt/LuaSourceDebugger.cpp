@@ -775,12 +775,17 @@ LuaSourceDebuggerDialog_t::LuaSourceDebuggerDialog_t(QWidget *parent)
 		FCEU_LuaDbgSetBreakOnStart(breakOnStartAct->isChecked());
 	}
 
-	// Only react to scripts started after the dialog opens
+	// Show the script that is already loaded, then only react to scripts started after the dialog opens
 	{
 		FCEU_WRAPPER_SCOPED_LOCK();
 		lastScriptName = FCEU_LuaDbgGetScriptName();
 	}
 	prevRunning = (luaRunning != 0);
+
+	if (!lastScriptName.empty())
+	{
+		openScript(QString::fromLocal8Bit(lastScriptName.c_str()));
+	}
 
 	periodicTimer = new QTimer(this);
 	connect(periodicTimer, &QTimer::timeout, this, &LuaSourceDebuggerDialog_t::updatePeriodic);
