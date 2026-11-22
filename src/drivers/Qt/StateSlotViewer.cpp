@@ -253,7 +253,11 @@ void StateSlotThumb_t::contextMenuEvent(QContextMenuEvent *event)
 
 	loadAct->setEnabled(exists && !FCEU_HardcoreActive());
 
-	QAction *act = menu.exec(event->globalPos());
+	QAction *act;
+	{
+		fceuScopedPause pause(consoleWindow != nullptr && consoleWindow->getMenuAccessPauseEnable());
+		act = menu.exec(event->globalPos());
+	}
 
 	if (act == selAct)
 	{

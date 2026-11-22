@@ -204,10 +204,8 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 
 	contextMenuEnable      = false;
 	soundUseGlobalFocus    = false;
-	mainMenuEmuPauseSet    = false;
 	gamePadMenuActive      = false;
-	mainMenuEmuWasPaused   = false;
-	mainMenuPauseWhenActv  = false;
+	menuAccessPauseEnabled = false;
 	autoHideMenuFullscreen = false;
 	redrawVideoRequest     = false;
 
@@ -268,7 +266,7 @@ consoleWin_t::consoleWin_t(QWidget *parent)
 		demoTimer->start( 1000 );
 	}
 
-	g_config->getOption( "SDL.PauseOnMainMenuAccess", &mainMenuPauseWhenActv );
+	g_config->getOption( "SDL.PauseOnMainMenuAccess", &menuAccessPauseEnabled );
 	g_config->getOption( "SDL.AutoHideMenuFullsreen", &autoHideMenuFullscreen );
 	g_config->getOption( "SDL.ContextMenuEnable", &contextMenuEnable );
 	g_config->getOption( "SDL.Sound.UseGlobalFocus", &soundUseGlobalFocus );
@@ -752,7 +750,7 @@ void consoleWin_t::setViewportAspect(void)
 
 void consoleWin_t::setMenuAccessPauseEnable( bool enable )
 {
-	mainMenuPauseWhenActv = enable;
+	menuAccessPauseEnabled = enable;
 }
 
 void consoleWin_t::setContextMenuEnable( bool enable )
@@ -1016,7 +1014,6 @@ void consoleWin_t::showEvent(QShowEvent *event)
 
 void consoleWin_t::contextMenuEvent(QContextMenuEvent *event)
 {
-	QAction *act;
 	QMenu menu(this);
 
 	if ( !contextMenuEnable )
@@ -1024,34 +1021,42 @@ void consoleWin_t::contextMenuEvent(QContextMenuEvent *event)
 		return;
 	}
 
-	act = new QAction(tr("Open ROM"), &menu);
-	connect( act, SIGNAL(triggered(void)), this, SLOT(openROMFile(void)) );
-
-	menu.addAction( act );
-
-	act = new QAction(tr("Last ROM Used"), &menu);
-	act->setEnabled( romList.size() > 0 );
-	connect( act, SIGNAL(triggered(void)), this, SLOT(loadMostRecentROM(void)) );
-
-	menu.addAction( act );
+	QAction *openAct = menu.addAction(tr("Open ROM"));
+	QAction *recentAct = menu.addAction(tr("Last ROM Used"));
+	recentAct->setEnabled( romList.size() > 0 );
 
 	menu.addSeparator();
 
-	act = new QAction(tr("Online Help"), &menu);
-	connect( act, SIGNAL(triggered(void)), this, SLOT(openOnlineDocs(void)) );
-
-	menu.addAction( act );
+	QAction *helpAct = menu.addAction(tr("Online Help"));
 
 	menu.addSeparator();
 
-	act = new QAction(tr("Disable Context Menu via Options -> GUI Config"), &menu);
-	connect( act, SIGNAL(triggered(void)), this, SLOT(openGuiConfWin(void)) );
-
-	menu.addAction( act );
+	QAction *configAct = menu.addAction(tr("Disable Context Menu via Options -> GUI Config"));
 
 	menu.addSeparator();
 
-	menu.exec(event->globalPos());
+	QAction *selected;
+	{
+		fceuScopedPause pause(menuAccessPauseEnabled);
+		selected = menu.exec(event->globalPos());
+	}
+
+	if ( selected == openAct )
+	{
+		openROMFile();
+	}
+	else if ( selected == recentAct )
+	{
+		loadMostRecentROM();
+	}
+	else if ( selected == helpAct )
+	{
+		openOnlineDocs();
+	}
+	else if ( selected == configAct )
+	{
+		openGuiConfWin();
+	}
 
 	event->accept();
 }
@@ -3393,6 +3398,7 @@ void consoleWin_t::openROMFile(bool openedByGamepad)
 
 	if ( openedByGamepad )
 	{
+		fceuScopedPause pause(menuAccessPauseEnabled);
 		// The Qt and native file dialogs can not be operated with a gamepad
 		GamePadFileBrowser browser(this, tr("Open ROM File") );
 		QStringList places;
@@ -3412,6 +3418,7 @@ void consoleWin_t::openROMFile(bool openedByGamepad)
 	}
 	else
 	{
+		fceuScopedPause pause(menuAccessPauseEnabled);
 		dialog.setFileMode(QFileDialog::ExistingFile);
 
 		dialog.setNameFilters( filters );
@@ -3470,11 +3477,9 @@ void consoleWin_t::openGamePadMenu(void)
 		return;
 	}
 
-	// Pause the same way as when a regular menu is opened, if configured.
-	// The menus' own aboutToShow handlers are ignored while the gamepad menu is active.
-	mainMenuOpen();
 	gamePadMenuActive = true;
 	{
+		fceuScopedPause pause(menuAccessPauseEnabled);
 		GamePadMenuBrowser browser( this, menuBar() );
 
 		if ( browser.exec() )
@@ -3483,7 +3488,6 @@ void consoleWin_t::openGamePadMenu(void)
 		}
 	}
 	gamePadMenuActive = false;
-	mainMenuClose();
 
 	if ( action == openROM )
 	{
@@ -3880,42 +3884,37 @@ void consoleWin_t::decrementStateBank(void)
 
 void consoleWin_t::mainMenuOpen(void)
 {
-	//printf("Main Menu Open\n");
-
-	// The gamepad menu pauses once for its whole duration
-	if ( gamePadMenuActive )
+	// The gamepad browser emits aboutToShow to populate menus without showing them.
+	if ( gamePadMenuActive || !menuAccessPauseEnabled )
 	{
 		return;
 	}
 
-	mainMenuEmuWasPaused = FCEUI_EmulationPaused() ? true : false;
+	QMenu *menu = qobject_cast<QMenu *>(sender());
 
-	if ( mainMenuPauseWhenActv && !mainMenuEmuPauseSet && !mainMenuEmuWasPaused )
+	if ( menu == nullptr )
 	{
-		FCEUI_ToggleEmulationPause();
-		mainMenuEmuPauseSet  = true;
+		qWarning("Main menu pause requested without a menu sender");
+		return;
+	}
+
+	if ( mainMenuPauses.find(menu) == mainMenuPauses.end() )
+	{
+		mainMenuPauses.emplace(menu, std::unique_ptr<fceuScopedPause>(new fceuScopedPause()));
 	}
 }
 
 void consoleWin_t::mainMenuClose(void)
 {
-	//printf("Main Menu Close\n");
+	QMenu *menu = qobject_cast<QMenu *>(sender());
 
-	if ( gamePadMenuActive )
+	if ( menu == nullptr )
 	{
+		qWarning("Main menu pause released without a menu sender");
 		return;
 	}
 
-	if ( mainMenuEmuPauseSet )
-	{
-		bool isPaused = FCEUI_EmulationPaused() ? true : false;
-
-		if ( isPaused != mainMenuEmuWasPaused )
-		{
-			FCEUI_ToggleEmulationPause();
-		}
-		mainMenuEmuPauseSet = false;
-	}
+	mainMenuPauses.erase(menu);
 }
 
 void consoleWin_t::toggleMenuToolTips(bool checked)
@@ -4555,7 +4554,6 @@ void consoleWin_t::consolePause(void)
 	bool isPaused = FCEUI_EmulationPaused() ? true : false;
 	emit pauseToggled( isPaused );
 
-	mainMenuEmuPauseSet = false;
    return;
 }
 

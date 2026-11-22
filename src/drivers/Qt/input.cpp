@@ -643,7 +643,7 @@ void gamepad_function_key_t::updateStatus(void)
   * */
 void TogglePause(void)
 {
-	FCEUI_ToggleEmulationPause();
+	fceuWrapperTogglePause();
 
 	int no_cursor;
 	g_config->getOption("SDL.NoFullscreenCursor", &no_cursor);

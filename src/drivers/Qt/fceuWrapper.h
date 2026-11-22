@@ -67,6 +67,23 @@ class  fceuScopedLock
 		}
 };
 
+// Nested scopes temporarily pause a loaded game. An explicit wrapper pause
+// toggle takes ownership of the pause state.
+class  fceuScopedPause
+{
+	public:
+		explicit fceuScopedPause(bool enabled = true);
+		~fceuScopedPause(void);
+
+		fceuScopedPause(const fceuScopedPause&) = delete;
+		fceuScopedPause& operator=(const fceuScopedPause&) = delete;
+		fceuScopedPause(fceuScopedPause&&) = delete;
+		fceuScopedPause& operator=(fceuScopedPause&&) = delete;
+
+	private:
+		const bool enabled;
+};
+
 // Temporarily releases one lock level already owned by the current thread.
 class  fceuScopedUnlock
 {

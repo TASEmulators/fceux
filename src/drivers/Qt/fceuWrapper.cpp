@@ -117,6 +117,8 @@ static int noconfig=0;
 static int frameskip=0;
 static int periodic_saves = 0;
 static std::atomic<int> mutexLocks = 0;
+static unsigned int scopedPauseDepth = 0;
+static bool scopedPauseOwned = false;
 unsigned int emulatorCycleCount = 0;
 double emulatorMeasuredFps = 0.0;
 static int archiveFileLoadIndex = -1;
@@ -318,6 +320,18 @@ int reloadLastGame(void)
 	return LoadGame(lastRom.c_str(), false);
 }
 
+// Called with the emulator lock held.
+static void acquireScopedPause(void)
+{
+	scopedPauseOwned = isloaded && !FCEUI_EmulationPaused();
+
+	if ( scopedPauseOwned )
+	{
+		FCEUI_SetEmulationPaused((EmulationPaused & ~EMULATIONPAUSED_FA) |
+			EMULATIONPAUSED_PAUSED);
+	}
+}
+
 /**
  * Loads a game, given a full path/filename.  The driver code must be
  * initialized after the game is loaded, because the emulator code
@@ -483,7 +497,14 @@ int LoadGame(const char *path, bool silent, bool netPlayRequested)
 	//		g_config->setOption("SDL.Sound.RecordFile", "");
 	//	}
 	//}
-	isloaded = 1;
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		isloaded = 1;
+		if ( scopedPauseDepth > 0 )
+		{
+			acquireScopedPause();
+		}
+	}
 
 	// Signal to listeners that a new ROM was loaded
 	if ( consoleWindow )
@@ -571,7 +592,11 @@ CloseGame(void)
 	FCEUI_CloseGame();
 
 	DriverKill();
-	isloaded = 0;
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		scopedPauseOwned = false;
+		isloaded = 0;
+	}
 	GameInfo = 0;
 
 	g_config->getOption("SDL.Sound.RecordFile", &filename);
@@ -628,11 +653,49 @@ int  fceuWrapperHardReset(void)
 
 int  fceuWrapperTogglePause(void)
 {
+	FCEU_WRAPPER_SCOPED_LOCK();
+
 	if ( isloaded )
 	{
+		scopedPauseOwned = false;
 		FCEUI_ToggleEmulationPause();
 	}
 	return 0;
+}
+
+fceuScopedPause::fceuScopedPause(bool enabled)
+	: enabled(enabled)
+{
+	if ( !enabled )
+	{
+		return;
+	}
+
+	FCEU_WRAPPER_SCOPED_LOCK();
+
+	if ( scopedPauseDepth++ == 0 )
+	{
+		acquireScopedPause();
+	}
+}
+
+fceuScopedPause::~fceuScopedPause(void)
+{
+	if ( !enabled )
+	{
+		return;
+	}
+
+	FCEU_WRAPPER_SCOPED_LOCK();
+
+	if ( --scopedPauseDepth == 0 )
+	{
+		if ( scopedPauseOwned && isloaded && FCEUI_EmulationPaused() )
+		{
+			FCEUI_SetEmulationPaused(EmulationPaused & ~EMULATIONPAUSED_PAUSED);
+		}
+		scopedPauseOwned = false;
+	}
 }
 
 bool fceuWrapperGameLoaded(void)
@@ -1591,16 +1654,7 @@ bool fceuWrapperIsLocked(void)
 int  fceuWrapperUpdate( void )
 {
 	// For netplay, set pause if we do not have input ready for all players
-	if (NetPlayActive())
-	{
-		const bool inputRdy = NetPlayWaitForInput(100lu);
-
-		FCEUI_SetNetPlayPause(!inputRdy);
-	}
-	else
-	{
-		FCEUI_SetNetPlayPause(false);
-	}
+	const bool netPlayPaused = NetPlayActive() && !NetPlayWaitForInput(100lu);
  
 	bool lock_acq = false;
 	do
@@ -1609,6 +1663,8 @@ int  fceuWrapperUpdate( void )
 		lock_acq = fceuWrapperTryLock( __FILE__, __LINE__, __func__ );
 
 	} while (!lock_acq);
+
+	FCEUI_SetNetPlayPause(netPlayPaused);
 
 	if ( GameInfo )
 	{

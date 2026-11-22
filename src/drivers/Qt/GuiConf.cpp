@@ -181,14 +181,14 @@ GuiConfDialog_t::GuiConfDialog_t(QWidget *parent)
 
 	useNativeFileDialog = new QCheckBox(tr("Use Native OS File Dialog"));
 	useNativeMenuBar    = new QCheckBox(tr("Use Native OS Menu Bar"));
-	pauseOnMenuAccess   = new QCheckBox(tr("Pause On Main Menu Access"));
+	pauseOnMenuAccess   = new QCheckBox(tr("Pause On Menu Access"));
 	toolWindowTaskbar   = new QCheckBox(tr("Separate Taskbar Entry for Tool Windows"));
 	toolWindowTaskbar->setToolTip(tr("Applies to tool windows opened after the change."));
 	ctxMenuEnable       = new QCheckBox(tr("Enable Right-Click Context Menu"));
 	showSplashScreen    = new QCheckBox(tr("Show Splash Screen at Startup"));
 	useNativeFileDialog->setToolTip(tr("Use the operating system's file picker instead of Qt's dialogs."));
 	useNativeMenuBar->setToolTip(tr("Use the desktop's native menu bar when supported by the platform."));
-	pauseOnMenuAccess->setToolTip(tr("Pause emulation while a menu on the main window is open."));
+	pauseOnMenuAccess->setToolTip(tr("Pause emulation while a main-window menu, gamepad menu, state-slot context menu, or ROM file browser is open."));
 	ctxMenuEnable->setToolTip(tr("Show the game-view context menu when you right-click the game."));
 	showSplashScreen->setToolTip(tr("Show the startup splash screen the next time FCEUX launches."));
 

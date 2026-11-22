@@ -4,6 +4,16 @@ This README is the home for Qt-specific documentation for Windows, macOS,
 and Linux. Workspace setup information remains in the
 [main README](../../../readme.md#windows-qt-development-visual-studio-2022).
 
+## Pause on menu access
+
+**Options > GUI Config > Pause On Menu Access** pauses a running game while a
+main-window menu, the gamepad menu, a state-slot context menu, or a ROM file
+browser is open. This includes both the standard Open ROM dialog and the
+gamepad-controlled file browser. The option is on by default; existing saved
+settings are preserved. Closing the last menu or browser resumes a game that
+the scopes paused, but leaves an already-paused game paused. A manual pause or
+resume overrides the temporary pause. Other tool-window menus are not included.
+
 ## Style presets
 
 In **GUI Config**, select a **Preset** under **Style**:

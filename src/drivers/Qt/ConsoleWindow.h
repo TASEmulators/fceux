@@ -6,6 +6,8 @@
 
 #include <vector>
 #include <string>
+#include <map>
+#include <memory>
 
 #include <QApplication>
 #include <QMainWindow>
@@ -128,6 +130,7 @@ class  consoleRecentRomAction : public QAction
 class StateSlotDock_t;
 class StateRecorderTimelineDock_t;
 class TextOverlayDisplay_t;
+class fceuScopedPause;
 
 class  consoleWin_t : public QMainWindow
 {
@@ -198,6 +201,7 @@ class  consoleWin_t : public QMainWindow
 		Qt::CursorShape getViewerCursor(void);
 
 		void setMenuAccessPauseEnable(bool enable);
+		bool getMenuAccessPauseEnable(void) const { return menuAccessPauseEnabled; }
 		void setContextMenuEnable(bool enable);
 
 		void setStatusBarVisible(bool visible);
@@ -317,10 +321,9 @@ class  consoleWin_t : public QMainWindow
 		bool        closeRequested;
 		bool        recentRomMenuReset;
 		bool        firstResize;
-		bool        mainMenuEmuPauseSet;
+		std::map<QMenu *, std::unique_ptr<fceuScopedPause>> mainMenuPauses;
 		bool        gamePadMenuActive;
-		bool        mainMenuEmuWasPaused;
-		bool        mainMenuPauseWhenActv;
+		bool        menuAccessPauseEnabled;
 		bool        scrHandlerConnected;
 		bool        contextMenuEnable;
 		bool        soundUseGlobalFocus;

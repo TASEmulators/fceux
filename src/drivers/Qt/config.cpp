@@ -1052,7 +1052,7 @@ InitConfig()
 
 	config->addOption("_useNativeFileDialog", "SDL.UseNativeFileDialog", false);
 	config->addOption("_useNativeMenuBar"   , "SDL.UseNativeMenuBar", false);
-	config->addOption("SDL.PauseOnMainMenuAccess", false);
+	config->addOption("SDL.PauseOnMainMenuAccess", true);
 	config->addOption("SDL.ToolWindowTaskbarEntry", false);
 	config->addOption("SDL.AutoHideMenuFullsreen", false);
 	config->addOption("SDL.ShowStatusBar", true);
