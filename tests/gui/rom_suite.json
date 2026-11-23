@@ -203,8 +203,8 @@
       "rom": "ppu_read_buffer/test_ppu_read_buffer.nes",
       "sha256": "230a52fc557c098eba163801d1b6bbf9f57fe8c5ff79a3f968c804dedb1290ba",
       "known_failure": {
-        "outcome": "load failed",
-        "reason": "FCEUX rejects this ROM image; cause not yet investigated"
+        "outcome": "status 0x43",
+        "reason": "OAM DMA from the PPU I/O bus fails the sprite 0 hit test"
       }
     },
     {

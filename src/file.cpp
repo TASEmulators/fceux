@@ -274,13 +274,32 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, cha
 	std::string archive,fname,fileToOpen;
 	FCEU_SplitArchiveFilename(path,archive,fname,fileToOpen);
 
+	bool rawRom = false;
+	if (read && archive.empty())
+	{
+		FILE *fp = FCEUD_UTF8fopen(fileToOpen.c_str(), "rb");
+		if (fp)
+		{
+			uint8 header[16] = {};
+			size_t bytesRead = fread(header, 1, sizeof(header), fp);
+			fclose(fp);
+
+			rawRom = (bytesRead >= 4 &&
+				(!memcmp(header, "NES\x1a", 4) ||
+				 !memcmp(header, "FDS\x1a", 4) ||
+				 !memcmp(header, "UNIF", 4))) ||
+				(bytesRead >= 5 && !memcmp(header, "NESM\x1a", 5)) ||
+				(bytesRead >= 15 && !memcmp(header + 1, "*NINTENDO-HVC*", 14));
+		}
+	}
 
 	//try to setup the ips file
 	if(ipsfn && read)
 		ipsfile=FCEUD_UTF8fopen(ipsfn,"rb");
 	if(read)
 	{
-		ArchiveScanRecord asr = FCEUD_ScanArchive(fileToOpen);
+		// ROM data can contain an archive signature in its payload; trust its file header first.
+		ArchiveScanRecord asr = rawRom ? ArchiveScanRecord() : FCEUD_ScanArchive(fileToOpen);
 		if (asr.numFilesInArchive < 0)
 		{
 			// error occurred, return
@@ -304,6 +323,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, cha
 
 
 			//try to read a zip file
+			if (!rawRom)
 			{
 				fceufp = TryUnzip(fileToOpen);
 				if(fceufp) {
