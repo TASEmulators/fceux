@@ -182,7 +182,7 @@ void jsDev_t::init(int idx)
 
 			if (fp != NULL)
 			{
-				const char *defaultMap;
+				char *defaultMap;
 
 				defaultMap = SDL_GameControllerMapping(gc);
 
@@ -190,6 +190,7 @@ void jsDev_t::init(int idx)
 				{
 					//printf("GameController Mapping: %s\n", defaultMap );
 					fprintf(fp, "%s", defaultMap);
+					SDL_free(defaultMap);
 				}
 				::fclose(fp);
 			}
@@ -219,7 +220,10 @@ void jsDev_t::print(void)
 	if (gc)
 	{
 		printf("GameController Name: '%s'\n", SDL_GameControllerName(gc));
-		printf("GameController Mapping: %s\n", SDL_GameControllerMapping(gc));
+		char *mapping = SDL_GameControllerMapping(gc);
+
+		printf("GameController Mapping: %s\n", mapping ? mapping : "(none)");
+		SDL_free(mapping);
 	}
 }
 
