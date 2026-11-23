@@ -52,6 +52,12 @@ bool fceuWrapperGameLoaded(void);
 void fceuWrapperRequestAppExit(void);
 void fceuWrapperClearArchiveFileLoadIndex(void);
 void fceuWrapperSetArchiveFileLoadIndex(int idx);
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+void fceuWrapperTestModeEnable(void);
+void fceuWrapperTestModeDisable(void);
+void fceuWrapperTestPause(void);
+int fceuWrapperTestFrameAdvance(int frames, int timeoutMs);
+#endif
 
 class  fceuScopedLock
 {

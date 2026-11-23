@@ -36,6 +36,15 @@ if (NOT DEFINED QT)
 endif()
 
 option(FCEU_PROFILER_ENABLE "Enable the built-in FCEU performance profiler (near-zero cost while not capturing)" ON)
+option(FCEU_TEST_SERVER "Enable the opt-in Qt GUI test server" OFF)
+set(FCEUX_TEST_ROM_DIR "" CACHE PATH "Directory containing external FCEUX test ROMs")
+
+if (FCEU_TEST_SERVER)
+	if (PUBLIC_RELEASE)
+		message(FATAL_ERROR "FCEU_TEST_SERVER cannot be enabled for PUBLIC_RELEASE builds")
+	endif()
+	add_definitions(-D__FCEU_TEST_SERVER_ENABLE__)
+endif()
 
 # RetroAchievements support uses the bundled rcheevos rc_client sources.
 option(RETRO_ACHIEVEMENTS "Enable RetroAchievements support" ON)
@@ -760,6 +769,9 @@ set(SRC_DRIVERS_SDL
 )
 
 set(SOURCES ${SRC_CORE} ${SRC_DRIVERS_COMMON} ${SRC_DRIVERS_SDL})
+if (FCEU_TEST_SERVER)
+	list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/drivers/Qt/TestServer.cpp)
+endif()
 
 include(CheckCXXSourceCompiles)
 if (Vulkan_FOUND)
@@ -889,6 +901,40 @@ target_link_libraries( ${APP_NAME}
 	${LUA_LDFLAGS} ${X264_LDFLAGS} ${X265_LDFLAGS} ${LIBAV_LDFLAGS}
  	${SYS_LIBS}
 )
+
+if (FCEU_TEST_SERVER)
+	if (BUILD_TESTING)
+		find_package(Python3 REQUIRED COMPONENTS Interpreter)
+		add_test(
+			NAME gui_blargg_instr_test_v5
+			COMMAND ${Python3_EXECUTABLE}
+				${CMAKE_SOURCE_DIR}/tests/gui/run_scenario.py
+				--fceux $<TARGET_FILE:${APP_NAME}>
+				--scenario ${CMAKE_SOURCE_DIR}/tests/gui/scenarios/instr_test_v5.json
+		)
+		set(_fceux_gui_test_environment "QT_QPA_PLATFORM=offscreen")
+		if (FCEUX_TEST_ROM_DIR)
+			list(APPEND _fceux_gui_test_environment "FCEUX_TEST_ROM_DIR=${FCEUX_TEST_ROM_DIR}")
+		endif()
+		set_tests_properties(gui_blargg_instr_test_v5 PROPERTIES
+			SKIP_RETURN_CODE 77
+			TIMEOUT 300
+			ENVIRONMENT "${_fceux_gui_test_environment}"
+		)
+		add_test(
+			NAME gui_blargg_rom_suite
+			COMMAND ${Python3_EXECUTABLE}
+				${CMAKE_SOURCE_DIR}/tests/gui/run_rom_suite.py
+				--fceux $<TARGET_FILE:${APP_NAME}>
+				--manifest ${CMAKE_SOURCE_DIR}/tests/gui/rom_suite.json
+		)
+		set_tests_properties(gui_blargg_rom_suite PROPERTIES
+			SKIP_RETURN_CODE 77
+			TIMEOUT 1800
+			ENVIRONMENT "${_fceux_gui_test_environment}"
+		)
+	endif()
+endif()
 
 if (Vulkan_FOUND AND FCEUX_QT_HAS_VULKAN)
 	target_compile_definitions(${APP_NAME} PRIVATE FCEUX_HAS_QT_VULKAN)

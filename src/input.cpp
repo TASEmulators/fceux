@@ -36,6 +36,10 @@
 #include "fds.h"
 #include "driver.h"
 
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+#include <atomic>
+#endif
+
 #ifdef WIN32
 #include "drivers/win/main.h"
 #include "drivers/win/memwatch.h"
@@ -94,6 +98,10 @@ extern bool movieSubtitles;
 static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 uint16 snesjoy[4]={0,0,0,0}; //HACK - should be static but movie needs it
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+static std::atomic<bool> testInputOverrideEnabled{false};
+static std::atomic<uint8> testPadState[2] = {0, 0};
+#endif
 static uint8 LastStrobe;
 uint8 RawReg4016 = 0; // Joystick strobe (W)
 
@@ -467,11 +475,36 @@ void FCEU_UpdateInput(void)
 
 	FCEUMOV_AddInputState();
 
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+	if (testInputOverrideEnabled.load())
+	{
+		joy[0] = testPadState[0].load();
+		joy[1] = testPadState[1].load();
+		joy[2] = 0;
+		joy[3] = 0;
+	}
+#endif
+
 	//TODO - should this apply to the movie data? should this be displayed in the input hud?
 	if(GameInfo->type==GIT_VSUNI){
 		FCEU_VSUniSwap(&joy[0],&joy[1]);
 	}
 }
+
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+void FCEUI_SetTestInputOverride(bool enabled)
+{
+	testInputOverrideEnabled.store(enabled);
+}
+
+void FCEUI_SetTestPadState(int port, uint8 buttons)
+{
+	if (port >= 0 && port < 2)
+	{
+		testPadState[port].store(buttons);
+	}
+}
+#endif
 
 static DECLFR(VSUNIRead0)
 {

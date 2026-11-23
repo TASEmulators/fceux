@@ -43,6 +43,9 @@
 #include "Qt/config.h"
 #include "Qt/SplashScreen.h"
 #include "Qt/QtScriptManager.h"
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+#include "Qt/TestServer.h"
+#endif
 #include "profiler.h"
 
 #if defined(WIN32) 
@@ -432,6 +435,9 @@ int main( int argc, char *argv[] )
 	bool forceConfigSelection = false;
 	bool forceLanguageSelection = false;
 	QString configDirectoryOverride;
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+	int testServerPort = -1;
+#endif
 	for (int i = 1; i < argc; )
 	{
 		int removeCount = 0;
@@ -460,6 +466,26 @@ int main( int argc, char *argv[] )
 			configDirectoryOverride = QString::fromLocal8Bit(argv[i + 1]);
 			removeCount = 2;
 		}
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+		else if (strcmp(argv[i], "--test-server-port") == 0)
+		{
+			if (i + 1 >= argc || argv[i + 1][0] == '\0' ||
+				strncmp(argv[i + 1], "--", 2) == 0)
+			{
+				fprintf(stderr, "Error: --test-server-port requires a port from 0 to 65535.\n");
+				return 1;
+			}
+			bool validPort = false;
+			const int requestedPort = QString::fromLocal8Bit(argv[i + 1]).toInt(&validPort);
+			if (!validPort || requestedPort < 0 || requestedPort > 65535 || testServerPort >= 0)
+			{
+				fprintf(stderr, "Error: --test-server-port must be specified once with a port from 0 to 65535.\n");
+				return 1;
+			}
+			testServerPort = requestedPort;
+			removeCount = 2;
+		}
+#endif
 		if (removeCount == 0)
 		{
 			i++;
@@ -533,6 +559,13 @@ int main( int argc, char *argv[] )
 
 	fceuWrapperInit( argc, argv );
 
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+	if (testServerPort >= 0)
+	{
+		fceuWrapperTestModeEnable();
+	}
+#endif
+
 	consoleWindow = new consoleWin_t();
 
 	consoleWindow->show();
@@ -555,7 +588,34 @@ int main( int argc, char *argv[] )
 		//delete splash; this is handled by Qt event loop
 	}
 
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+	if (testServerPort >= 0)
+	{
+		TestServer *testServer = new TestServer(&app);
+		QString listenError;
+		if (!testServer->listen(static_cast<quint16>(testServerPort), &listenError))
+		{
+			fprintf(stderr, "Error: Could not start Qt test server: %s\n",
+				listenError.toLocal8Bit().constData());
+			retval = 1;
+		}
+		else
+		{
+			fprintf(stderr, "FCEUX_TEST_SERVER_READY {\"port\":%u,\"token\":\"%s\"}\n",
+				static_cast<unsigned int>(testServer->serverPort()),
+				testServer->authenticationToken().toLocal8Bit().constData());
+			retval = app.exec();
+		}
+		delete testServer;
+		fceuWrapperTestModeDisable();
+	}
+	else
+	{
+		retval = app.exec();
+	}
+#else
 	retval = app.exec();
+#endif
 
 	//printf("App Return: %i \n", retval );
 

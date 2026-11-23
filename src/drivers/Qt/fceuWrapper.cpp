@@ -23,6 +23,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <limits.h>
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+#endif
 #ifdef _SYSTEM_MINIZIP
 #include <unzip.h>
 #else
@@ -78,6 +84,15 @@
 #include "utils/StringUtils.h"
 #include "../../oldmovie.h"
 #include "../../types.h"
+
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+static std::atomic<bool> testModeEnabled{false};
+static std::atomic<uint64_t> testFramesRequested{0};
+static std::atomic<uint64_t> testFramesCompleted{0};
+static std::mutex testFrameMutex;
+static std::condition_variable testFrameCondition;
+static bool originalFrameAdvanceLagSkip = false;
+#endif
 
 #ifdef CREATE_AVI
 #include "../videolog/nesvideos-piece.h"
@@ -662,6 +677,80 @@ int  fceuWrapperTogglePause(void)
 	}
 	return 0;
 }
+
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+void fceuWrapperTestModeEnable(void)
+{
+	FCEU_WRAPPER_SCOPED_LOCK();
+
+	if (!testModeEnabled.exchange(true))
+	{
+		originalFrameAdvanceLagSkip = frameAdvanceLagSkip;
+	}
+	frameAdvanceLagSkip = false;
+	testFramesRequested.store(0);
+	testFramesCompleted.store(0);
+	FCEUI_SetTestPadState(0, 0);
+	FCEUI_SetTestPadState(1, 0);
+	FCEUI_SetTestInputOverride(true);
+	if (isloaded)
+	{
+		FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
+	}
+}
+
+void fceuWrapperTestModeDisable(void)
+{
+	FCEU_WRAPPER_SCOPED_LOCK();
+
+	if (testModeEnabled.exchange(false))
+	{
+		frameAdvanceLagSkip = originalFrameAdvanceLagSkip;
+	}
+	FCEUI_SetTestInputOverride(false);
+	testFramesRequested.store(testFramesCompleted.load());
+	testFrameCondition.notify_all();
+}
+
+void fceuWrapperTestPause(void)
+{
+	FCEU_WRAPPER_SCOPED_LOCK();
+	if (isloaded)
+	{
+		FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED);
+	}
+}
+
+int fceuWrapperTestFrameAdvance(int frames, int timeoutMs)
+{
+	if (!testModeEnabled.load() || frames < 1 || timeoutMs < 1)
+	{
+		return 0;
+	}
+	{
+		FCEU_WRAPPER_SCOPED_LOCK();
+		if (!isloaded)
+		{
+			return -1;
+		}
+	}
+
+	const uint64_t target = testFramesRequested.fetch_add(static_cast<uint64_t>(frames)) + frames;
+	{
+		std::unique_lock<std::mutex> waitLock(testFrameMutex);
+		if (testFrameCondition.wait_for(waitLock, std::chrono::milliseconds(timeoutMs),
+			[target]() { return testFramesCompleted.load() >= target; }))
+		{
+			return 1;
+		}
+	}
+
+	// Cancel frames still waiting in the queue after a timeout.
+	FCEU_WRAPPER_SCOPED_LOCK();
+	testFramesRequested.store(testFramesCompleted.load());
+	return 0;
+}
+#endif
 
 fceuScopedPause::fceuScopedPause(bool enabled)
 	: enabled(enabled)
@@ -1666,8 +1755,21 @@ int  fceuWrapperUpdate( void )
 
 	FCEUI_SetNetPlayPause(netPlayPaused);
 
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+	const bool testMode = testModeEnabled.load();
+	const bool testFramePending = testFramesRequested.load() > testFramesCompleted.load();
+
+	if ( GameInfo && (!testMode || testFramePending) )
+#else
 	if ( GameInfo )
+#endif
 	{
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+		if (testMode)
+		{
+			FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED | EMULATIONPAUSED_FA);
+		}
+#endif
 		emuThreadPollInputs();
 
 #ifdef __FCEU_QSCRIPT_ENABLE__
@@ -1682,7 +1784,21 @@ int  fceuWrapperUpdate( void )
 		}
 #endif
 
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+		const unsigned int cycleCountBefore = emulatorCycleCount;
+#endif
 		DoFun(frameskip, periodic_saves);
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+		// DoFun increments emulatorCycleCount only when it emulates a frame.
+		if (testMode && emulatorCycleCount != cycleCountBefore)
+		{
+			{
+				std::lock_guard<std::mutex> frameLock(testFrameMutex);
+				testFramesCompleted.fetch_add(1);
+			}
+			testFrameCondition.notify_all();
+		}
+#endif
 	
 #ifdef __FCEU_QSCRIPT_ENABLE__
 		if (scriptsLoaded)
@@ -1701,7 +1817,11 @@ int  fceuWrapperUpdate( void )
 			consoleWindow->emulatorThread->signalFrameFinished();
 		}
 
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+		while ( !testMode && SpeedThrottle() )
+#else
 		while ( SpeedThrottle() )
+#endif
 		{
 			// Input device processing is in main thread
 			// because to MAC OS X SDL2 requires it.
@@ -1712,7 +1832,11 @@ int  fceuWrapperUpdate( void )
 	{
 		fceuWrapperUnLock();
 
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+		msleep( GameInfo && testMode ? 1 : 100 );
+#else
 		msleep( 100 );
+#endif
 	}
 	return 0;
 }

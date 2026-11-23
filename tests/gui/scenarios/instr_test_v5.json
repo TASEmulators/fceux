@@ -1,0 +1,10 @@
+{
+  "name": "instr_test_v5_official",
+  "rom": "instr_test-v5/official_only.nes",
+  "sha256": "589b8835deb5cbc69618dac193a3dbd675540f7f2794e2d2a92e97beb8abc3cb",
+  "expected_status": 0,
+  "frame_batch": 120,
+  "max_frames": 12000,
+  "frame_timeout_ms": 30000,
+  "frame_sha256": "b82abe98f98ae2ea3c046689a2fcd4b06877b51a654ae89d7e06d3a11801d3ab"
+}

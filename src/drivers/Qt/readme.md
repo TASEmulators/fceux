@@ -126,3 +126,115 @@ Builds with RetroAchievements also report the separate per-user
 `retroachievements_leaderboards.ini` results store. On non-Windows platforms,
 additional configuration fragments can be loaded from the selected directory's
 `cfg.d` subfolder.
+
+## Optional GUI test server
+
+The Qt GUI can be built with a local JSON command server for automated tests.
+The feature is off by default and cannot be enabled in `PUBLIC_RELEASE` builds.
+It listens only on `127.0.0.1`; each process prints a one-time authentication
+token and the selected port to standard error when the server is ready.
+
+Configure and build with:
+
+```sh
+cmake -S . -B build-gui-tests \
+  -DFCEU_TEST_SERVER=ON \
+  -DFCEUX_TEST_ROM_DIR=/path/to/nes-test-roms
+cmake --build build-gui-tests --target fceux
+ctest --test-dir build-gui-tests --output-on-failure
+```
+
+`FCEUX_TEST_ROM_DIR` may instead be set in the environment when running CTest.
+ROM files are read in place and must not be copied into this repository. If the
+directory is unset, the CTest scenarios are skipped. The manifest checks each
+ROM's SHA-256 so a different external ROM revision is not tested accidentally.
+`gui_blargg_rom_suite` runs 27 deterministic CPU, PPU, APU, and mapper tests
+that report through Blargg's `$DE $B0 $61` memory protocol. Interactive,
+audible-only, visual-only, and documented timing-sensitive tests are excluded
+rather than given guessed pass criteria. A missing ROM or checksum mismatch
+fails the suite with the affected path.
+
+Run just the ROM suite with:
+
+```sh
+ctest --test-dir build-gui-tests --verbose -R '^gui_blargg_rom_suite$'
+```
+
+Use `--verbose` (`-V`) with CTest to see output while tests run; otherwise CTest
+captures it until completion. The runner flushes each test's start, periodic
+frame/status progress, pass/fail result, and running totals immediately. ROM
+diagnostics and a list of failed cases are printed on failure. A failed ROM
+does not stop the remaining cases from running.
+
+### Known-failure baseline
+
+Cases that current FCEUX is known to fail carry a `known_failure` entry in
+`tests/gui/rom_suite.json`:
+
+```json
+"known_failure": {
+  "outcome": "status 0x02",
+  "reason": "Power/reset does not apply the implied $4017 write"
+}
+```
+
+`outcome` is one of `load failed`, `no signature`, `timeout`, or
+`status 0xNN` (the Blargg result code). A case that fails with exactly the
+recorded outcome is reported as `KNOWN` and does not fail the suite. The suite
+fails on any unexpected failure, on a known failure whose outcome changes, and
+on a known failure that starts passing. After an emulator fix, remove or update
+the matching `known_failure` entry in the same change so the baseline tracks
+the improvement.
+
+### Continuous integration
+
+The `gui-tests` job in `.github/workflows/linux.yml` checks out
+`christopherpow/nes-test-roms` at a pinned commit next to the FCEUX sources,
+builds with `FCEU_TEST_SERVER=ON`, runs the runner unit tests in `tests/gui`,
+and then runs the `gui_` CTest cases offscreen with the dummy SDL audio driver.
+The ROMs are fetched at job time only and are never stored in this repository.
+When updating the pinned commit, refresh the SHA-256 values in the manifests.
+When `GITHUB_STEP_SUMMARY` is set, both runners append their results to the
+GitHub Actions job summary: the scenario result and a table of every ROM case,
+with unexpected failures and cases that did not run listed first.
+
+To watch one test in the normal Qt window, run the Python runner directly:
+
+```sh
+FCEUX_TEST_ROM_DIR=/path/to/nes-test-roms \
+python3 tests/gui/run_rom_suite.py \
+  --fceux build-gui-tests/src/fceux \
+  --manifest tests/gui/rom_suite.json \
+  --case instr_test_v5_official --gui --realtime
+```
+
+Omit `--case` to watch the whole suite, or repeat it to select several cases.
+`--gui` is also available on `run_scenario.py`. It requires a working desktop
+display, uses isolated test settings, and closes the window when the run
+finishes. Add `--realtime` to pace frames at the NTSC rate (about 60 fps)
+so the run can be watched; without it, frames run as fast as possible.
+Pacing happens between frames, so ROM results are the same in both modes.
+Without `--gui`, the runners remain offscreen, including when run by CTest.
+
+To start the server manually, pass `--test-server-port 0` to choose an
+available port. The initial command set is `rom.load`, `emu.frameAdvance`,
+`mem.read`, and `frame.hash`. Frame advancement runs in test mode without
+real-time throttling; memory reads are CPU-bus reads, and frame hashes cover
+the raw 256x240 palette-index buffer rather than renderer output. Requests are
+newline-delimited JSON objects with `id`, `token`, `method`, and `params`.
+
+The test server also supports `pad.set`, `pad.press`, and `pad.release` for
+gamepad ports 1 and 2. Button names are `A`, `B`, `Select`, `Start`, `Up`,
+`Down`, `Left`, and `Right`. Those states override physical input at frame
+boundaries while test mode is active. `frame.screenshot` returns a base64 PNG
+at 256x240, colorized with the active FCEUX palette.
+`emu.reset` performs a soft reset of the loaded ROM; the suite uses it for test
+ROMs that request a delayed reset between subtests.
+`app.quit` replies `{"quitting": true}` and then shuts FCEUX down through the
+same path as File > Quit. The runners use it at the end of every run and only
+fall back to SIGTERM/SIGKILL if FCEUX has not exited within 10 seconds.
+
+The GUI scenario stores its expected raw-frame SHA-256 alongside the ROM
+checksum. To intentionally refresh that golden after validating an emulator
+change, run the scenario runner with `--update-golden`. Use `--screenshot-dir`
+to save the captured PNG outside the repository.

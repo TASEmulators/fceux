@@ -75,6 +75,75 @@ jobs:
           path: fceux-ubuntu-x64.deb
           if-no-files-found: error
 
+  gui-tests:
+    runs-on: ubuntu-24.04
+    env:
+      QT_QPA_PLATFORM: offscreen
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+
+      # External test ROMs are fetched at job time only; they must never be
+      # committed to this repository. Update the manifest SHA-256 values when
+      # changing this ref.
+      - name: Fetch NES test ROMs
+        uses: actions/checkout@v4
+        with:
+          repository: christopherpow/nes-test-roms
+          ref: 95d8f621ae55cee0d09b91519a8989ae0e64753b
+          path: nes-test-roms
+          persist-credentials: false
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --assume-yes \
+            cmake ninja-build pkg-config ccache python3 \
+            lua5.1-dev libsdl2-dev libminizip-dev libarchive-dev \
+            qtbase5-dev qt5-qmake qttools5-dev qttools5-dev-tools libqt5opengl5-dev qtmultimedia5-dev qtdeclarative5-dev \
+            libx264-dev libx265-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ccache-linux-gui-tests-${{ github.sha }}
+          restore-keys: ccache-linux-gui-tests-
+
+      - name: Configure and build
+        run: |
+          cmake -S . -B build-gui-tests -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DFCEU_TEST_SERVER=ON \
+            -DFCEUX_TEST_ROM_DIR="$GITHUB_WORKSPACE/nes-test-roms" \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build build-gui-tests --target fceux --parallel
+          ccache --show-stats
+
+      - name: Runner unit tests
+        working-directory: tests/gui
+        run: python3 -m unittest -v test_runners
+
+      - name: GUI tests
+        run: |
+          set -o pipefail
+          ctest --test-dir build-gui-tests --verbose --no-tests=error -R '^gui_' \
+            | tee gui-tests.log
+          # CTest treats skipped tests as passing; skips here mean the ROMs were not found.
+          if grep -qE '\*\*\*(Skipped|Not Run)' gui-tests.log; then
+            echo "GUI tests were skipped; check FCEUX_TEST_ROM_DIR" >&2
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gui-tests-log
+          path: gui-tests.log
+          if-no-files-found: ignore
+
   publish-interim:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'

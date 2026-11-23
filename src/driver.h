@@ -82,6 +82,10 @@ void FCEUI_SetInputFourscore(bool attachFourscore);
 bool FCEUI_GetInputFourscore();
 //tells whether the microphone is used
 bool FCEUI_GetInputMicrophone();
+#ifdef __FCEU_TEST_SERVER_ENABLE__
+void FCEUI_SetTestInputOverride(bool enabled);
+void FCEUI_SetTestPadState(int port, uint8 buttons);
+#endif
 
 void FCEUI_UseInputPreset(int preset);
 

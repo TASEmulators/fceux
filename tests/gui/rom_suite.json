@@ -1,0 +1,220 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "name": "apu_reset_4015_cleared",
+      "rom": "apu_reset/4015_cleared.nes",
+      "sha256": "ef83bc2831f0ddb9e563ac5cbcfa21b129f092911ef42adabae7d47b3e990d95"
+    },
+    {
+      "name": "apu_reset_4017_timing",
+      "rom": "apu_reset/4017_timing.nes",
+      "sha256": "0e6072c6dcee98fb73dc7f3af2e48face78be300e8510515ed48dc75d15c1f13",
+      "known_failure": {
+        "outcome": "status 0x02",
+        "reason": "Frame counter phase after power/reset is wrong; FCEUSND_Reset starts on the IRQ step"
+      }
+    },
+    {
+      "name": "apu_reset_4017_written",
+      "rom": "apu_reset/4017_written.nes",
+      "sha256": "022bd3b45a733179d9a0a9bf0311d09ca81419d7e7434e6f559e42650b39616b",
+      "known_failure": {
+        "outcome": "status 0x02",
+        "reason": "Power/reset does not apply the implied $4017 write"
+      }
+    },
+    {
+      "name": "apu_reset_irq_flag_cleared",
+      "rom": "apu_reset/irq_flag_cleared.nes",
+      "sha256": "e2435b213bf21065b7c9c645359500c1c860a7395d12d051232ab14dad1b0bb5"
+    },
+    {
+      "name": "apu_reset_len_ctrs_enabled",
+      "rom": "apu_reset/len_ctrs_enabled.nes",
+      "sha256": "e05546cbfaa1414d9193b0212084b324ea6b13130af5f171a34c9e574f5ac373",
+      "known_failure": {
+        "outcome": "status 0x03",
+        "reason": "Length counters are not left enabled across reset"
+      }
+    },
+    {
+      "name": "apu_reset_works_immediately",
+      "rom": "apu_reset/works_immediately.nes",
+      "sha256": "c750113762ee375319b1bfbf65c457875dbb194649d7e7b3594fba38eb8eefa1"
+    },
+    {
+      "name": "apu_test",
+      "rom": "apu_test/apu_test.nes",
+      "sha256": "00d4722bae1c82a14528dd3220462d3fb9ce4b14b8cec996619dea23e07fef0a",
+      "known_failure": {
+        "outcome": "status 0x01",
+        "reason": "Writing $00 or $80 to $4017 clears the frame IRQ flag"
+      }
+    },
+    {
+      "name": "cpu_dummy_writes_oam",
+      "rom": "cpu_dummy_writes/cpu_dummy_writes_oam.nes",
+      "sha256": "7c1d71a38b2e873d0874add8b823ff39b99151bb29f50096d8021787020c566c",
+      "known_failure": {
+        "outcome": "status 0x02",
+        "reason": "CPU dummy writes to $2004 are not emulated"
+      }
+    },
+    {
+      "name": "cpu_dummy_writes_ppumem",
+      "rom": "cpu_dummy_writes/cpu_dummy_writes_ppumem.nes",
+      "sha256": "f59ac329f4872277ccbeff9dd595b901d861af8d53e8a43dcca93bb86752a6b3"
+    },
+    {
+      "name": "cpu_exec_space_apu",
+      "rom": "cpu_exec_space/test_cpu_exec_space_apu.nes",
+      "sha256": "9036b3d64b7f4e0ac7d44ed85eafb4b2f93ffd2ca2ddecc19f1e0d2bec3574fe"
+    },
+    {
+      "name": "cpu_exec_space_ppuio",
+      "rom": "cpu_exec_space/test_cpu_exec_space_ppuio.nes",
+      "sha256": "9f7f24d420033e032f5da0e1eb721cce1d843e032b31973acddb0255ef479251",
+      "known_failure": {
+        "outcome": "status 0x05",
+        "reason": "Executing code from PPU I/O space is not emulated"
+      }
+    },
+    {
+      "name": "cpu_interrupts_v2",
+      "rom": "cpu_interrupts_v2/cpu_interrupts.nes",
+      "sha256": "ccbac4e824eb96ecfe8b82d331a083be186eb6776aa57e25c52251eaf7df9c4f",
+      "known_failure": {
+        "outcome": "no signature",
+        "reason": "Multi-test ROM does not start; TASVideos matrix lists it as not loading"
+      }
+    },
+    {
+      "name": "cpu_reset_registers",
+      "rom": "cpu_reset/registers.nes",
+      "sha256": "a30f33fb6c9f56012fba38dc85ddc3dccc06bfc0b25fef7711b63f8207279715",
+      "known_failure": {
+        "outcome": "status 0x03",
+        "reason": "CPU register state after reset differs from hardware"
+      }
+    },
+    {
+      "name": "instr_misc",
+      "rom": "instr_misc/instr_misc.nes",
+      "sha256": "b6762e20a285216304dfd2b5e1f192459354b23a5e48b2f5f9fb7cb0dac51243",
+      "known_failure": {
+        "outcome": "status 0x01",
+        "reason": "Dummy reads for LDA abs,X are not emulated"
+      }
+    },
+    {
+      "name": "instr_test_v5_official",
+      "rom": "instr_test-v5/official_only.nes",
+      "sha256": "589b8835deb5cbc69618dac193a3dbd675540f7f2794e2d2a92e97beb8abc3cb"
+    },
+    {
+      "name": "instr_test_v5_all",
+      "rom": "instr_test-v5/all_instrs.nes",
+      "sha256": "353870c157242e3d428ef7387109deaee0d2e158bdb432ab9aae4e657072c785"
+    },
+    {
+      "name": "instr_timing",
+      "rom": "instr_timing/instr_timing.nes",
+      "sha256": "3d1bca14266f1e25b75a34ddd29c9df1ce9c6d990c8663a218f72e7861660fb0",
+      "known_failure": {
+        "outcome": "status 0x01",
+        "reason": "Instruction timing test fails"
+      }
+    },
+    {
+      "name": "mmc3_test_2_clocking",
+      "rom": "mmc3_test_2/rom_singles/1-clocking.nes",
+      "sha256": "b06d8a97f0ca672be92c841d6af7d1e650696e86e9cc0cf6eeb90d67a6ab499b",
+      "known_failure": {
+        "outcome": "status 0x03",
+        "reason": "MMC3 IRQ counter is not clocked by A12 toggled via PPUADDR"
+      }
+    },
+    {
+      "name": "mmc3_test_2_details",
+      "rom": "mmc3_test_2/rom_singles/2-details.nes",
+      "sha256": "e7af16c764b119e60effb7b1cfeec3dd8e2e657041283693cdbbeedb4081f1e3",
+      "known_failure": {
+        "outcome": "status 0x02",
+        "reason": "MMC3 IRQ counter reload with 255 is not emulated"
+      }
+    },
+    {
+      "name": "mmc3_test_2_a12_clocking",
+      "rom": "mmc3_test_2/rom_singles/3-A12_clocking.nes",
+      "sha256": "b375f15b9f9d372c8084b9c50928be9e41a3ac48be831ce82d203c18891433ad",
+      "known_failure": {
+        "outcome": "status 0x04",
+        "reason": "MMC3 IRQ counter is not clocked by A12 rising via PPUADDR"
+      }
+    },
+    {
+      "name": "mmc3_test_2_scanline_timing",
+      "rom": "mmc3_test_2/rom_singles/4-scanline_timing.nes",
+      "sha256": "14a220b9d1272acc7a820ab38e9762a7cdf2d54c65e753be87f23dfcaf1bb845",
+      "known_failure": {
+        "outcome": "status 0x02",
+        "reason": "MMC3 scanline 0 IRQ timing with $2000=$08"
+      }
+    },
+    {
+      "name": "mmc3_test_2_mmc3",
+      "rom": "mmc3_test_2/rom_singles/5-MMC3.nes",
+      "sha256": "e0824123d60b83868dac1189b28250f8e10376a01be468a5a74aa59937cb32ca",
+      "known_failure": {
+        "outcome": "status 0x02",
+        "reason": "MMC3 reload-to-0 IRQ behaviour"
+      }
+    },
+    {
+      "name": "mmc3_test_2_mmc6",
+      "rom": "mmc3_test_2/rom_singles/6-MMC3_alt.nes",
+      "sha256": "56698b6918453d161a8d4e51f66e363d6966b054939c8176c53c401a6b55269b",
+      "known_failure": {
+        "outcome": "status 0x02",
+        "reason": "MMC6 reload-to-0 IRQ behaviour"
+      }
+    },
+    {
+      "name": "oam_read",
+      "rom": "oam_read/oam_read.nes",
+      "sha256": "f298973dabeb61ca35007445f7a615f77e87703c958c870986af83b1aabde926",
+      "known_failure": {
+        "outcome": "status 0x01",
+        "reason": "OAM reads through $2004 are not emulated by the old PPU"
+      }
+    },
+    {
+      "name": "ppu_open_bus",
+      "rom": "ppu_open_bus/ppu_open_bus.nes",
+      "sha256": "d4208a3ff6340532dd0fced7f9d408d5b6585853a0ddc9c1f64ee1722ef08e67",
+      "known_failure": {
+        "outcome": "status 0x03",
+        "reason": "PPU open bus decay is not emulated"
+      }
+    },
+    {
+      "name": "ppu_read_buffer",
+      "rom": "ppu_read_buffer/test_ppu_read_buffer.nes",
+      "sha256": "230a52fc557c098eba163801d1b6bbf9f57fe8c5ff79a3f968c804dedb1290ba",
+      "known_failure": {
+        "outcome": "load failed",
+        "reason": "FCEUX rejects this ROM image; cause not yet investigated"
+      }
+    },
+    {
+      "name": "ppu_vbl_nmi",
+      "rom": "ppu_vbl_nmi/ppu_vbl_nmi.nes",
+      "sha256": "8dbab1be785585c399cf055ef02147b788ab75fd80e81cf9568a2feafc03fb7d",
+      "known_failure": {
+        "outcome": "status 0x01",
+        "reason": "Old PPU VBL period is too short with BG off"
+      }
+    }
+  ]
+}
