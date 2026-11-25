@@ -117,11 +117,13 @@ void ApplyIPS(FILE *ips, FCEUFILE* fp)
 			}
 			b=fgetc(ips);
 			start=buf+offset;
-			do
+			// A run length of 0 underflows the uint16 size counter in a
+			// do/while(--size) loop and writes 65536 bytes out of bounds.
+			while(size--)
 			{
 				*start=b;
 				start++;
-			} while(--size);
+			}
 		}
 		else		/* Normal patch */
 		{
