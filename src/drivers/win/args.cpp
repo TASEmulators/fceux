@@ -24,6 +24,8 @@
 #include "common.h"
 #include "../common/args.h"
 
+char* RomFile = 0;			//Loads a rom file (loads before any other commandline options
+int RunInFullscreen = 0;
 char* MovieToLoad = 0;		//Loads a movie file on startup
 char* StateToLoad = 0;		//Loads a savestate on startup (after a movie is loaded, if any)
 char* ConfigToLoad = 0;		//Loads a specific .cfg file (loads before any other commandline options
@@ -43,7 +45,9 @@ extern bool turbo;
 char *ParseArgies(int argc, char *argv[])
 {         
 	static ARGPSTRUCT FCEUArgs[]={
-		{"-pal",         &pal_setting_specified,  &PAL,                  0},
+		{"-rom",         0,                       &RomFile,               0x4001},
+		{"-fullscreen",  0,                       &RunInFullscreen,       0},
+		{"-pal",         &pal_setting_specified,  &PAL,                   0},
 	    {"-dendy",       &dendy_setting_specified,&dendy,                 0},
         {"-noicon",      0,                       &status_icon,           0},
         {"-gg",          0,                       &genie,                 0},
